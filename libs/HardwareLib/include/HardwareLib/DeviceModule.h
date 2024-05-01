@@ -31,7 +31,8 @@ namespace Hardware
 			MPS = 0x5100,
 			BVK4 = 0x5300,	// obsolete, for compatibility
 			BP336 = 0x5500,	// obsolete, for compatibility
-			BVB = 0x5600
+			BVB = 0x5600,
+			VDU = 0x7100
 		};
 		Q_ENUM(FamilyType)
 
@@ -42,7 +43,7 @@ namespace Hardware
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message, bool saveTree) const override;
+		virtual bool SaveData(Proto::Envelope* message, bool saveTree, const std::function<bool(const DeviceObject&)>& predicate) const override;
 		virtual bool LoadData(const Proto::Envelope& message) override;
 
 		// Public Methods
@@ -77,6 +78,7 @@ namespace Hardware
 		[[nodiscard]] bool isFSCConfigurationModule() const;
 		[[nodiscard]] bool isOptoModule() const;
 		[[nodiscard]] bool isBvb() const;
+		[[nodiscard]] bool isVdu() const;
 
 		// Data
 		//

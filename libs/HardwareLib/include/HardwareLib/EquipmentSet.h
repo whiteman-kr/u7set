@@ -30,7 +30,7 @@ namespace Hardware
 		void dump(bool dumpProps, QDebug d) const;
 
 	private:
-		void addDeviceChildrenToHashTable(std::shared_ptr<DeviceObject> parent);
+		void addDeviceChildrenToHashTable(const std::shared_ptr<DeviceObject>& parent);
 
 	private:
 		std::shared_ptr<DeviceRoot> m_root;

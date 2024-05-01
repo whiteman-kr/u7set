@@ -1,7 +1,7 @@
-#include "../../AppSignalLib/TuningSignalManager.h"
-#include "../../ClientLib/IRecentAppSignals.h"
-#include "../../ClientLib/ITuningLog.h"
-#include "../../ClientLib/TuningConnection.h"
+#include <ClientLib/TuningSignalManager.h>
+#include <ClientLib/IRecentAppSignals.h>
+#include <ClientLib/ITuningLog.h>
+#include <ClientLib/TuningConnection.h>
 #include "ConnectionPorts.h"
 
 using ::testing::_;
@@ -246,7 +246,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 	ILogFileStub logFile;
 	TuningAuthorizationStub tuningAuthorization;
 
-	TuningSignalManager signalManager{s_safeSoftwareInfoA.equipmentID(), &logFile};
+	ClientLib::TuningSignalManager signalManager{s_safeSoftwareInfoA.equipmentID(), &logFile};
 
 	ClientLib::TuningLogStub tuningLog;
 
@@ -430,8 +430,8 @@ TEST_F(TuningConnectionTests, activeClientInfo)
 {
 	ILogFileStub logFile;
 
-	TuningSignalManager signalManagerA{s_safeSoftwareInfoA.equipmentID(), &logFile};
-	TuningSignalManager signalManagerB{s_safeSoftwareInfoB.equipmentID(), &logFile};
+	ClientLib::TuningSignalManager signalManagerA{s_safeSoftwareInfoA.equipmentID(), &logFile};
+	ClientLib::TuningSignalManager signalManagerB{s_safeSoftwareInfoB.equipmentID(), &logFile};
 
 	ClientLib::TuningLogStub tuningLog;
 	TuningAuthorizationStub tuningAuthorization;
@@ -564,7 +564,7 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 {
 	ILogFileStub logFile;
 
-	TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
+	ClientLib::TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
 
 	bool ok = signalManager.load(protoSignalSet);
 
@@ -703,7 +703,7 @@ TEST_F(TuningConnectionTests, applyAnalogSignals)
 {
 	ILogFileStub logFile;
 
-	TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
+	ClientLib::TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
 
 	bool ok = signalManager.load(protoSignalSet);
 
@@ -806,7 +806,7 @@ TEST_F(TuningConnectionTests, writeDiscreteSignals)
 {
 	ILogFileStub logFile;
 
-	TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
+	ClientLib::TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
 
 	bool ok = signalManager.load(protoSignalSet);
 
@@ -910,7 +910,7 @@ TEST_F(TuningConnectionTests, applyDiscreteSignals)
 {
 	ILogFileStub logFile;
 
-	TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
+	ClientLib::TuningSignalManager signalManager{s_softwareInfo.equipmentID(), &logFile};
 
 	bool ok = signalManager.load(protoSignalSet);
 

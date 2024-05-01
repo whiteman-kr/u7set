@@ -4,11 +4,11 @@
 #include <QRegularExpression>
 
 #include "ArchFile.h"
+#include "ArchRequest.h"
 #include "ArchWriterThread.h"
 #include "BinSearch.h"
-#include "ArchRequest.h"
+#include <ArchSignal.pb.h>
 
-#include "../Proto/ArchSignal.pb.h"
 
 // -----------------------------------------------------------------------------------------------------------------------
 //

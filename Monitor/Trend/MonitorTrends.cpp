@@ -1,10 +1,10 @@
 #include "MonitorTrends.h"
 
-#include "../ClientLib/RtTrendTcpClient.h"
-#include "../TrendView/DialogChooseTrendSignals.h"
-#include "../TrendView/TrendSignalState.h"
-#include "../TrendView/TrendWidget.h"
 #include "../lib/ISignalHasTag.h"
+
+#include <TrendView/DialogChooseTrendSignals.h>
+#include <TrendView/TrendSignalSet.h>
+
 
 std::list<MonitorTrendsWidget*> MonitorTrends::s_trendsList;
 
@@ -160,11 +160,11 @@ MonitorTrendsWidget::MonitorTrendsWidget(const ClientLib::AppSignalManager& sign
 
 	// --
 	//
-	connect(m_trendWidget, &TrendLib::TrendWidget::trendModeChanged, this, &MonitorTrendsWidget::slot_trendModeChanged);
+	connect(this, &TrendLib::TrendMainWindow::trendModeChanged, this, &MonitorTrendsWidget::slot_trendModeChanged);
 
 	// Archive connection
 	//
-	connect(&m_trendWidget->signalSet(), &TrendLib::TrendSignalSet::requestData, this, &MonitorTrendsWidget::slot_requestData);
+	connect(&signalSet(), &TrendLib::TrendSignalSet::requestData, this, &MonitorTrendsWidget::slot_requestData);
 	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::dataReady, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveDataReceived);
 	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::requestError, &signalSet(), &TrendLib::TrendSignalSet::slot_archiveRequestError);
 	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::dataReady, this, &MonitorTrendsWidget::slot_archiveDataReceived); // For updating widget
@@ -227,7 +227,7 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 
 		// --
 		//
-		ClientLib::RtTrendTcpClient::Stat stat = m_realtimeDataProvider.statistics();
+		auto stat = m_realtimeDataProvider.statistics();
 
 		m_statusBarTextLabel->setText(stat.text);
 		m_statusBarQueueSizeLabel->setText("             ");
@@ -435,7 +435,7 @@ void MonitorTrendsWidget::createRealtimeConnection()
 void MonitorTrendsWidget::setRealtimeParams()
 {
 	E::RtTrendsSamplePeriod samplePeriod = E::RtTrendsSamplePeriod::sp_100ms;
-	qint64 duration = m_trendWidget->duration();
+	qint64 duration = this->duration();
 
 	if (duration <= 2_sec)
 	{
@@ -502,7 +502,7 @@ void MonitorTrendsWidget::setRealtimeParams()
 		}
 	}
 
-	QStringList trendSignals = trend().signalSet().trendSignalIds();
+	QStringList trendSignals = signalSet().trendSignalIds();
 
 	m_realtimeDataProvider.setData(samplePeriod, trendSignals);
 
@@ -517,21 +517,18 @@ void MonitorTrendsWidget::slot_requestData(TrendLib::TrendSignalPlusServerId sig
 
 void MonitorTrendsWidget::slot_archiveDataReceived(TrendLib::TrendSignalPlusServerId /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
 {
-	Q_ASSERT(m_trendWidget);
-	Q_ASSERT(m_trendSlider);
-
 	TimeStamp plus1hour(requestedHour.timeStamp + 1_hour);
 	TimeStamp minus1hour(requestedHour.timeStamp - 1_hour);
 
-	if (timeType != m_trendWidget->timeType() ||
-		(m_trendSlider->isTimeInRange(requestedHour) == false &&
-		 m_trendSlider->isTimeInRange(plus1hour) == false &&
-		 m_trendSlider->isTimeInRange(minus1hour) == false))
+	if (timeType != this->timeType() ||
+		(isTimeInRange(requestedHour) == false &&
+		 isTimeInRange(plus1hour) == false &&
+		 isTimeInRange(minus1hour) == false))
 	{
 		return;
 	}
 
-	m_trendWidget->updateWidget();
+	updateWidget();
 	return;
 }
 
@@ -540,8 +537,6 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*
 													TrendLib::TrendStateItem minRecState,
 													TrendLib::TrendStateItem maxRecState)
 {
-	Q_ASSERT(m_trendWidget);
-	Q_ASSERT(m_trendSlider);
 	Q_ASSERT(data);
 
 	if (data->signalData.empty() == true)
@@ -577,7 +572,7 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*
 		m_trendWidget->updateWidget();
 	}
 #else
-	auto timeType = m_trendWidget->timeType();
+	auto timeType = this->timeType();
 	TrendLib::TrendStateItem maxState{};
 
 	for (const auto trendSignals = signalSet().trendSignalsHashes();
@@ -600,8 +595,8 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*
 
 	// Update widget if received data somewhere in the current view.
 	//
-	TimeStamp minTime = minRecState.getTime(m_trendWidget->timeType());
-	TimeStamp maxTime = maxRecState.getTime(m_trendWidget->timeType());
+	TimeStamp minTime = minRecState.getTime(this->timeType());
+	TimeStamp maxTime = maxRecState.getTime(this->timeType());
 
 	if (m_realtimeUpdateTimer.isValid() == false)
 	{
@@ -614,10 +609,10 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*
 	bool updateByTimer = m_realtimeUpdateTimer.elapsed() > 500;
 
 	if (updateByTimer == true ||
-		(minTime >= TimeStamp{m_trendWidget->startTime().timeStamp - m_trendWidget->duration() / 10} &&
-		 maxTime <= TimeStamp{m_trendWidget->finishTime().timeStamp + m_trendWidget->duration() / 10}))
+		(minTime >= TimeStamp{this->startTime().timeStamp - this->duration() / 10} &&
+		 maxTime <= TimeStamp{this->finishTime().timeStamp + this->duration() / 10}))
 	{
-		m_trendWidget->updateWidget();
+		updateWidget();
 		m_realtimeUpdateTimer.restart();
 	}
 #endif

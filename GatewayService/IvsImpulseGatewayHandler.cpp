@@ -37,7 +37,7 @@ namespace Gateway
 												m_appDataService1,
 												m_appDataService2,
 												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-												*this, m_log);
+												this, m_log);
 		m_appDataServiceClientThread->start();
 
 		m_ivsImpulseCommThread = new IvsImpulseCommThread(*this);
@@ -61,6 +61,103 @@ namespace Gateway
 			m_appDataServiceClientThread->quitAndWait();
 			delete m_appDataServiceClientThread;
 			m_appDataServiceClientThread = nullptr;
+		}
+	}
+
+	void IvsImpulseHandler::getRequiredSignalsHashes(std::set<Hash>* hashes) const
+	{
+		TEST_PTR_RETURN(hashes);
+
+		hashes->clear();
+
+		for(const AppSignalState state : m_states)
+		{
+			hashes->emplace(state.hash());
+		}
+	}
+
+	void IvsImpulseHandler::getEventSignalsHashes(std::set<Hash>* hashes) const
+	{
+		TEST_PTR_RETURN(hashes);
+
+		hashes->clear();
+
+		for(const AppSignalState& st : m_states)
+		{
+			if (st.isWorkable() == true && st.requestEvents() == true)
+			{
+				hashes->emplace(st.hash());
+			}
+		}
+	}
+
+	void IvsImpulseHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+	{
+		int replyStatesSize = getStatesReply.appsignalstates_size();
+
+		if (replyStatesSize != TO_INT(m_states.size()))
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		for(int i = 0; i < replyStatesSize; i++)
+		{
+			m_states[i].updateState(getStatesReply.appsignalstates(i));
+		}
+
+		m_signalStatesUpdated = true;
+	}
+
+	void IvsImpulseHandler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
+	{
+		int statesCount = getStateChangesReply.appsignalstates_size();
+
+		if (statesCount == 0)
+		{
+			return;
+		}
+
+		for(auto& list : m_lists)
+		{
+			list->stateChangesToWrite.clear();
+		}
+
+		GatewayAppSignalState state;
+
+		for(int i = 0; i < statesCount; i++)
+		{
+			const ::Network::GatewayAppSignalState& protoState = getStateChangesReply.appsignalstates(i);
+
+			state.loadFromProto(protoState);
+
+			Q_ASSERT(state.prevState.hash == state.curState.hash);
+
+			auto it = m_hashToLists.find(state.prevState.hash);
+
+			if (it == m_hashToLists.end())
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			const std::set<IvsImpulseListInfoShared>& lists = it->second;
+
+			for(const IvsImpulseListInfoShared& list : lists)
+			{
+				list->stateChangesToWrite.push_back(state);
+			}
+		}
+
+		QThread* thread = QThread::currentThread();
+
+		for(IvsImpulseListInfoShared& list : m_lists)
+		{
+			list->stateChangesMutex.lock(thread);
+
+			list->stateChangesToWrite.swap(list->stateChangesToRead);
+
+			list->stateChangesMutex.unlock(thread);
 		}
 	}
 

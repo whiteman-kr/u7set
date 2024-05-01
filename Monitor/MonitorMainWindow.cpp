@@ -1783,12 +1783,12 @@ ClientLib::TuningUserManager& MonitorMainWindow::userManager()
 	return m_tuningUserManager;
 }
 
-TuningSignalManager& MonitorMainWindow::tuningSignalManager()
+ClientLib::TuningSignalManager& MonitorMainWindow::tuningSignalManager()
 {
 	return m_tuningSignalManager;
 }
 
-const TuningSignalManager& MonitorMainWindow::tuningSignalManager() const
+const ClientLib::TuningSignalManager& MonitorMainWindow::tuningSignalManager() const
 {
 	return m_tuningSignalManager;
 }

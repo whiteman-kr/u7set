@@ -1054,7 +1054,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 			(parentObject->deviceType() != Hardware::DeviceType::Workstation && parentObject->deviceType() != Hardware::DeviceType::Software))
 		{
 			Q_ASSERT(false);
-			return QModelIndex();
+			return {};
 		}
 
 		if (parentObject->deviceType() == object->deviceType())
@@ -1068,7 +1068,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 		}
 
 		if (parentObject->deviceType() > object->deviceType() ||
-			(object->deviceType() == Hardware::DeviceType::Workstation && parentObject->deviceType() > Hardware::DeviceType::Chassis))
+			(object->deviceType() == Hardware::DeviceType::Workstation && parentObject->deviceType() > Hardware::DeviceType::Module))
 		{
 			Q_ASSERT(parentObject->deviceType() <= object->deviceType());
 			return QModelIndex();
@@ -1102,7 +1102,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 
 	if (result == false)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	// Add new device to the model and select it
@@ -2393,7 +2393,7 @@ void EquipmentView::undoChangesSelectedDevices()
 void EquipmentView::undoChangesRecursively()
 {
 	QModelIndexList selected = selectionModel()->selectedRows();
-	if (selected.empty())
+	if (selected.size() != 1)
 	{
 		return;
 	}
@@ -2404,7 +2404,7 @@ void EquipmentView::undoChangesRecursively()
 
 	// Perform undo
 	//
-	equipmentModel()->undoChangesDeviceObject(selected);
+	equipmentModel()->undoChangesRecursively(selected.front());
 
 	// blocker will enable undoChangesDeviceObject::selectionChanged
 	//

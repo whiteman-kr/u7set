@@ -100,11 +100,13 @@ public:
 
 	void changeApp(const QString& appEquipmentID, int appInstance);
 
-	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString* errorStr);
-	bool getFile(QString pathFileName, QByteArray* fileData);
+	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
+	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr);
 
-	bool getFileBlockedByID(QString fileID, QByteArray* fileData, QString* errorStr);
-	bool getFileByID(QString fileID, QByteArray* fileData);
+	// When file downloaded signal_fileReady will emitted
+	//
+	bool getFileAsync(const QString& pathFileName);
+	bool getFileAsyncByID(const QString& fileID);
 
 	bool hasFileID(QString fileID) const;
 
@@ -140,16 +142,17 @@ signals:
 								   const BuildFileInfoArray buildFileInfoArray,
 								   SessionParams sessionParams,
 								   std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
-	void signal_getFile(const QString& fileName, QByteArray* fileData);
-	void signal_fileReady();					// emit only for manual requests
+	void signal_getFile(QString fileName, std::shared_ptr<QByteArray> fileData, bool asyncCall);
 	void signal_configurationChanged();
 
-	void signal_onEndFileDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
-	void signal_onEndFileDownloadError(const QString& fileName, Tcp::FileTransferResult errorCode);
+	// Emits only for ASYNC file requests getFileAsync and getFileAsyncByID
+	// Only if errorCode == Tcp::FileTransferResult::Ok fileData will be a valid pointer, otherwise fileData will be Nullptr
+	//
+	void signal_fileReady(QString fileName, Tcp::FileTransferResult errorCode, std::shared_ptr<QByteArray> fileData);
 
 private slots:
 	void slot_enableDownloadConfiguration();
-	void slot_getFile(QString fileName, QByteArray *fileData);
+	void slot_getFile(QString fileName, std::shared_ptr<QByteArray> fileData, bool asyncCall);
 	void slot_onTimer();
 
 protected:
@@ -177,9 +180,10 @@ private:
 
 	void configurationChanged();
 
-	void emitFileReady();
+	void emitFileReady(const QString& fileName, Tcp::FileTransferResult errorCode,
+					   std::shared_ptr<QByteArray> fileData, bool asyncCall);
 
-	QString getFilePathNameByID(QString fileID) const;
+	QString getFilePathNameByID(const QString& fileID) const;
 
 private:
 	struct CfgFileInfo : public OnlineLib::BuildFileInfo
@@ -198,11 +202,11 @@ private:
 
 		bool isAutoRequest = false;
 		bool isTestCfgRequest = false;						// does matter only for Configuration.xml file request
-		QByteArray* fileData = nullptr;						// sets for manual requests only
-		Tcp::FileTransferResult* errorCode = nullptr;		// sets for manual requests only
+
+		bool isAsyncCall = false;							// sets for manual requests only
+		std::shared_ptr<QByteArray> fileData = nullptr;		// sets for manual requests only
 
 		void clear();
-		void setErrorCode(Tcp::FileTransferResult result);
 	};
 
 	//
@@ -226,9 +230,7 @@ private:
 	QString m_configurationXmlPathFileName;
 	QString m_configurationXmlMd5;
 
-	QByteArray m_localFileData;
-
-	QList<FileDownloadRequest> m_downloadQueue;
+	std::list<FileDownloadRequest> m_downloadQueue;
 	FileDownloadRequest m_currentDownloadRequest;
 
 	QTimer m_timer;
@@ -247,7 +249,7 @@ private:
 
 	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
 
-	QMap<QString, QString> m_fileIDPathMap;
+	std::map<QString, QString> m_fileIDPathMap;		// fileID => filePathName
 };
 
 template<typename T>
@@ -298,10 +300,12 @@ public:
 	void enableDownloadConfiguration();
 
 	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
-	bool getFile(const QString& pathFileName, QByteArray* fileData);
-
 	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr);
-	bool getFileByID(const QString& fileID, QByteArray* fileData);
+
+	// When file downloaded signal_fileReady will emitted
+	//
+	bool getFileAsync(const QString& pathFileName);
+	bool getFileAsyncByID(const QString& fileID);
 
 	bool hasFileID(QString fileID) const;
 
@@ -332,8 +336,10 @@ signals:
 	void signal_unknownClientID(QString errMsg);
 	void signal_wrongClientHostname(QString errMsg);
 
-	void signal_onEndFileDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
-	void signal_onEndFileDownloadError(const QString& fileName, Tcp::FileTransferResult errorCode);
+	// Emits only for ASYNC file requests getFileAsync and getFileAsyncByID
+	// Only if errorCode == Tcp::FileTransferResult::Ok fileData will be a valid pointer, otherwise fileData will be Nullptr
+	//
+	void signal_fileReady(QString fileName, Tcp::FileTransferResult errorCode, std::shared_ptr<QByteArray> fileData);
 
 private:
 	void initThread();

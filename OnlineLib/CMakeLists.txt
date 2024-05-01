@@ -127,21 +127,14 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/PropertyObject.h"
 	"../CommonLib/HostAddressPort.h"
 	
-	"../Proto/ProtoSerialization.h"
-	"../Proto/Network.pb.h"	
-	
-	#"../AppSignalLib/AppSignal.h"
-	#"../AppSignalLib/AppSignalParam.h"
-	#"../AppSignalLib/AppSignalState.h"
+	<ProtoSerialization.h>
+	<Network.pb.h>
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
-target_include_directories(${TARGET} PRIVATE ./../asio/include)
-target_compile_definitions(${TARGET} PRIVATE ASIO_STANDALONE=1)
-
 target_link_libraries(${TARGET} PRIVATE Qt6::Network Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib HardwareLib)
+target_link_libraries(${TARGET} PUBLIC asio CommonLib Protobuf UtilsLib HardwareLib)
 
 target_compile_definitions(${TARGET} PRIVATE ONLINE_LIB_DOMAIN)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

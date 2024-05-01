@@ -4,6 +4,7 @@
 
 #include "AppSignalParam.h"
 #include "AppSignal.h"
+#include "AppSignalSpecPropValues.h"
 
 const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSignalParamSet
 
@@ -13,6 +14,17 @@ const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// D
 // AppSignalParam class implementation
 //
 // -------------------------------------------------------------------------------------------------
+
+AppSignalParam::PrivateData::PrivateData() = default;
+AppSignalParam::PrivateData::~PrivateData() = default;
+
+AppSignalParam::AppSignalParam() = default;
+
+AppSignalParam::AppSignalParam(const AppSignalParam&) = default;
+AppSignalParam::AppSignalParam(AppSignalParam&&) noexcept = default;
+
+AppSignalParam& AppSignalParam::operator=(const AppSignalParam&) = default;
+AppSignalParam& AppSignalParam::operator=(AppSignalParam&&) noexcept = default;
 
 AppSignalParam::AppSignalParam(const AppSignal& signal)
 {
@@ -331,7 +343,7 @@ void AppSignalParam::setPrecision(int value)
 	m_data->m_precision = value;
 }
 
-double AppSignalParam::fineAaperture() const
+double AppSignalParam::fineAperture() const
 {
 	return m_data->m_fineAperture;
 }
@@ -342,7 +354,7 @@ void AppSignalParam::setFineAperture(double value)
 	m_data->m_fineAperture = value;
 }
 
-double AppSignalParam::coarseAaperture() const
+double AppSignalParam::coarseAperture() const
 {
 	return m_data->m_coarseAperture;
 }
@@ -406,6 +418,17 @@ void AppSignalParam::setInverted(bool value)
 {
 	detach();
 	m_data->m_inverted = value;
+}
+
+bool AppSignalParam::isReserved() const
+{
+	return m_data->m_reserved;
+}
+
+void AppSignalParam::setReserved(bool value)
+{
+	detach();
+	m_data->m_reserved = value;
 }
 
 TuningValue AppSignalParam::tuningDefaultValue() const
@@ -480,9 +503,43 @@ void AppSignalParam::setTags(std::set<QString> tags)
 	m_data->m_tags = std::move(tags);
 }
 
+const QString& AppSignalParam::specificPropertyStruct() const
+{
+	return m_data->m_specPropStruct;
+}
+
+const QByteArray& AppSignalParam::protoSpecificPropertyValues() const
+{
+	return m_data->m_specPropValues;
+}
+
+const AppSignalSpecPropValues& AppSignalParam::specificPropertyValues() const
+{
+	if (m_data->m_specificPropertyValues == nullptr)
+	{
+		m_data->m_specificPropertyValues = std::make_unique<AppSignalSpecPropValues>();
+		m_data->m_specificPropertyValues->create(*this);
+	}
+
+	return *m_data->m_specificPropertyValues;
+}
+
 bool AppSignalParam::hasTag(const QString& tag) const
 {
 	return m_data->m_tags.contains(tag);
+}
+
+QVariant AppSignalParam::specificPropertyValue(const QString& propertyName) const
+{
+	QVariant result;
+	specificPropertyValues().getValue(propertyName, &result);
+
+	return result;
+}
+
+bool AppSignalParam::specificPropertyExists(const QString& propertyName) const
+{
+	return specificPropertyValues().isExists(propertyName);
 }
 
 void AppSignalParam::detach()
@@ -549,9 +606,11 @@ void AppSignalParam::PrivateData::load(const AppSignal& s)
 	m_fineAperture = s.fineAperture();
 	m_filteringTime = s.filteringTime();
 	m_spreadTolerance = s.spreadTolerance();
+	
 	m_enableTuning = s.enableTuning();
 	m_endpoint = s.isEndpoint();
 	m_inverted = s.invertSignal();
+	m_reserved = s.reserved();
 
 	m_tuningDefaultValue = s.tuningDefaultValue();
 	m_tuningLowBound = s.tuningLowBound();
@@ -599,6 +658,7 @@ void AppSignalParam::PrivateData::save(::Proto::AppSignal* message) const
 	message->set_specpropvalues(m_specPropValues.constData(), m_specPropValues.size());
 
 	message->set_invertsignal(m_inverted);
+	message->set_reserved(m_reserved);
 
 	// Signal properties calculated in compile-time
 

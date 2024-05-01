@@ -6,7 +6,7 @@
 #include "ScmTcpAppDataClient.h"
 #include <QHBoxLayout>
 #include <QSplitter>
-#include "../lib/WidgetUtils.h"
+#include "../UtilsLib/Ui/WidgetUtils.h"
 
 struct staticPropertyFieldDefinition
 {
@@ -17,10 +17,10 @@ struct staticPropertyFieldDefinition
 struct dynamicPropertyFieldDefinition
 {
 	QString fieldName;
-	std::function<QVariant (const DataSourceOnline& source)> fieldValueGetter;
+	std::function<QVariant (const Network::AppDataSourceState& state)> fieldValueGetter;
 };
 
-static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList
+static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldList
 {
 	{
 		QStringLiteral("Module EquipmentID"),
@@ -181,61 +181,61 @@ static const QList<staticPropertyFieldDefinition> staticPropertiesFieldList
 	},
 };
 
-static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList
+static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList
 {
 	{
 		QStringLiteral("State"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.stateStr();
+			return state.receivesdata() ?  "Receive data" : "No data";
 		}
 	},
 
 	{
 		QStringLiteral("Uptime"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return formatUptime(source.uptime());
+			return formatUptime(state.uptime());
 		}
 	},
 
 	{
 		QStringLiteral("Date receiving speed, bytes/sec"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.dataReceivingSpeed();
+			return state.datareceivingspeed();
 		}
 	},
 
 	{
 		QStringLiteral("Received data size, bytes"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.receivedDataSize();
+			return static_cast<qint64>(state.receiveddatasize());
 		}
 	},
 
 	{
 		QStringLiteral("Received frames count"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.receivedFramesCount();
+			return static_cast<qint64>(state.receivedframescount());
 		}
 	},
 
 	{
 		QStringLiteral("Received packets count"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.receivedPacketCount();
+			return static_cast<qint64>(state.receivedpacketcount());
 		}
 	},
 
 	{
 		QStringLiteral("Received AppDataUID"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			quint32 dataID = source.receivedDataID();
+			quint32 dataID = state.receiveddataid();
 			return "0x" + QString("%1").arg(dataID, sizeof(dataID) * 2,
 											16, QChar('0')).toUpper();
 		}
@@ -243,89 +243,89 @@ static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList
 
 	{
 		QStringLiteral("RUP frame numerator"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.rupFrameNumerator();
+			return state.rupframenumerator();
 		}
 	},
 
 	{
 		QStringLiteral("RUP frame plant time"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return DataSourceOnline::getTimeStr(source.rupFramePlantTime());
+		 return DataSourceOnline::getTimeStr(state.lmtime());
 		}
 	},
 
 	{
 		QStringLiteral("Lost packet count"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.lostPacketCount();
+			return static_cast<qint64>(state.lostpacketcount());
 		}
 	},
 
 	{
 		QStringLiteral("Error protocol version"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.errorProtocolVersion();
+			return static_cast<qint64>(state.errorprotocolversion());
 		}
 	},
 
 	{
 		QStringLiteral("Error frames quantity"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.errorFramesQuantity();
+			return static_cast<qint64>(state.errorframesquantity());
 		}
 	},
 
 	{
 		QStringLiteral("Error frame number"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.errorFrameNo();
+			return static_cast<qint64>(state.errorframeno());
 		}
 	},
 
 	{
 		QStringLiteral("Error frame CRC"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.errorFrameCRC();
+			return static_cast<qint64>(state.errorframecrc());
 		}
 	},
 
 	{
 		QStringLiteral("Error AppDataUID"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.errorDataID();
+			return static_cast<qint64>(state.errordataid());
 		}
 	},
 
 	{
 		QStringLiteral("Error plant time format"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.errorPlantTimeFormat();
+			return static_cast<qint64>(state.errorplanttimeformat());
 		}
 	},
 
 	{
 		QStringLiteral("Error duplicate plant time"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.errorDuplicatePlantTime();
+			return static_cast<qint64>(state.errorduplicateplanttime());
 		}
 	},
 
 	{
 		QStringLiteral("Error non monotonic plant time"),
-		[](const DataSourceOnline& source)
+		[](const Network::AppDataSourceState& state)
 		{
-			return source.errorNonmonotonicPlantTime();
+			return static_cast<qint64>(state.errornonmonotonicplanttime());
 		}
 	},
 };
@@ -346,13 +346,13 @@ AppDataSourceWidget::AppDataSourceWidget(quint64 id, QString equipmentId, QWidge
 	// Source info
 	//
 	m_infoTable = new QTableView(this);
-	m_infoModel = new QStandardItemModel(static_cast<int>(staticPropertiesFieldList.count()), 2, this);
+	m_infoModel = new QStandardItemModel(static_cast<int>(staticPropertiesFieldList.size()), 2, this);
 
-	for (int i = 0; i < staticPropertiesFieldList.count(); i++)
+	int i = 0;
+	for (const auto& field : staticPropertiesFieldList)
 	{
-		auto& field = staticPropertiesFieldList[i];
-
 		m_infoModel->setData(m_infoModel->index(i, 0), field.fieldName);
+		i++;
 	}
 
 	initTable(m_infoTable, m_infoModel);
@@ -360,13 +360,13 @@ AppDataSourceWidget::AppDataSourceWidget(quint64 id, QString equipmentId, QWidge
 	// Source state
 	//
 	m_stateTable = new QTableView(this);
-	m_stateModel = new QStandardItemModel(static_cast<int>(dynamicPropertiesFieldList.count()), 2, this);
+	m_stateModel = new QStandardItemModel(static_cast<int>(dynamicPropertiesFieldList.size()), 2, this);
 
-	for (int i = 0; i < dynamicPropertiesFieldList.count(); i++)
+	i = 0;
+	for (const auto& field : dynamicPropertiesFieldList)
 	{
-		auto& field = dynamicPropertiesFieldList[i];
-
 		m_stateModel->setData(m_stateModel->index(i, 0), field.fieldName);
+		i++;
 	}
 
 	initTable(m_stateTable, m_stateModel);
@@ -391,29 +391,21 @@ void AppDataSourceWidget::updateStateFields()
 {
 	TEST_PTR_RETURN(m_tcpClientSocket);
 
-	const DataSourceOnline* pSource = nullptr;
+	Network::AppDataSourceState state;
 
-	for (AppDataSource* source : m_tcpClientSocket->dataSources())
-	{
-		if (source->moduleUniqueID() == m_id && source->moduleEquipmentID() == m_equipmentId)
-		{
-			pSource = dynamic_cast<DataSourceOnline*>(source);
-		}
-	}
+	bool res = m_tcpClientSocket->getDataSourceState(m_equipmentId, &state);
 
-	if (pSource == nullptr)
+	if (res == false)
 	{
-		// Lost widgets AppDataSource ?
 		close();
-		deleteLater();
 		return;
 	}
 
-	for (int i = 0; i < dynamicPropertiesFieldList.count(); i++)
+	int i = 0;
+	for (const auto& field : dynamicPropertiesFieldList)
 	{
-		auto& field = dynamicPropertiesFieldList[i];
-
-		m_stateModel->setData(m_stateModel->index(i, 1), field.fieldValueGetter(*pSource));
+		m_stateModel->setData(m_stateModel->index(i, 1), field.fieldValueGetter(state));
+		i++;
 	}
 }
 
@@ -425,29 +417,21 @@ void AppDataSourceWidget::setClientSocket(TcpAppDataClient *tcpClientSocket)
 
 	connect(tcpClientSocket, &TcpAppDataClient::dataSoursesStateUpdated, this, &AppDataSourceWidget::updateStateFields);
 
-	const DataSource* pSource = nullptr;
+	DataSource ds;
 
-	for (AppDataSource* source : m_tcpClientSocket->dataSources())
-	{
-		if (source->moduleUniqueID() == m_id && source->moduleEquipmentID() == m_equipmentId)
-		{
-			pSource = dynamic_cast<DataSource*>(source);
-		}
-	}
+	bool res = m_tcpClientSocket->getDataSource(m_equipmentId, &ds);
 
-	if (pSource == nullptr)
+	if (res == false)
 	{
-		// Lost widgets AppDataSource ?
 		close();
-		deleteLater();
 		return;
 	}
 
-	for (int i = 0; i < staticPropertiesFieldList.count(); i++)
+	int i = 0;
+	for (const auto& field : staticPropertiesFieldList)
 	{
-		auto& field = staticPropertiesFieldList[i];
-
-		m_infoModel->setData(m_infoModel->index(i, 1), field.fieldValueGetter(*pSource));
+		m_infoModel->setData(m_infoModel->index(i, 1), field.fieldValueGetter(ds));
+		i++;
 	}
 }
 

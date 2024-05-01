@@ -1,9 +1,7 @@
-#include <QXmlStreamReader>
-#include <QMetaProperty>
-
 #include "ConfigurationService.h"
-#include "CfgChecker.h"
 #include "../lib/ConstStrings.h"
+#include "CfgChecker.h"
+#include "CfgControlServer.h"
 
 // ------------------------------------------------------------------------------------
 //

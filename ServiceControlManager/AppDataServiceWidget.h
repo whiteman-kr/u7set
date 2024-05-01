@@ -27,9 +27,11 @@ public:
 	void updateData(int firstRow, int lastRow, int firstColumn, int lastColumn);
 	void updateData(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
-	void setClient(TcpAppDataClient* clientSocket) { m_clientSocket = clientSocket; }
+	void setClient(TcpAppDataClient* clientSocket);
 
-	const AppDataSource* getDataSource(int row) const;
+	const DataSource& getDataSource(int row) const;
+
+	void updateStates();
 
 public slots:
 	void invalidateData();
@@ -37,7 +39,7 @@ public slots:
 
 private:
 	TcpAppDataClient* m_clientSocket;
-	QList<AppDataSource*> m_dataSource;
+	std::vector<std::pair<DataSource, Network::AppDataSourceState>> m_dataSources;
 };
 
 class SignalStateModel : public QAbstractTableModel

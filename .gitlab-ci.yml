@@ -11,7 +11,7 @@ variables:
   # Build and test data
   #
   QT_VERSION: "6.5.3"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v413"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v416"
   SIMULATOR_PROJECT_NAME: "test_simulator_v413"
   PGPASSWORD: "P2ssw0rd"
 
@@ -251,7 +251,7 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/Simulator/Scripts/SimProjectTests.js\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/libs/Simulator/Scripts/SimProjectTests.js\""
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
@@ -319,7 +319,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin/release/SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -script=\"$CI_PROJECT_DIR/Simulator/Scripts/SimProjectTests.js\""
+    - "$CI_PROJECT_DIR/bin/release/SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -script=\"$CI_PROJECT_DIR/libs/Simulator/Scripts/SimProjectTests.js\""
 
 #Run unit tests
     - "# ----------------------------------------------"

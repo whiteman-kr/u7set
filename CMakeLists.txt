@@ -110,21 +110,16 @@ message("-----------------------------------------")
 
 # Add projects.
 #
-add_subdirectory(Protobuf)
 add_subdirectory(CommonLib)
 add_subdirectory(UtilsLib)
 add_subdirectory(AppSignalLib)
 add_subdirectory(OnlineLib)
-add_subdirectory(ServiceLib)
-add_subdirectory(ClientLib)
 add_subdirectory(ReportLib)
 
 add_subdirectory(libs)
 
-add_subdirectory(TrendView)
 add_subdirectory(VFrame30)
 
-add_subdirectory(Simulator)
 add_subdirectory(SimulatorConsole)
 
 add_subdirectory(Builder)
@@ -150,9 +145,6 @@ if(NOT CODE_COVERAGE)
 
 	add_subdirectory(Metrology)
 	add_subdirectory(mconf)	
-
-	add_subdirectory(./Tools/PacketSource)
-	add_subdirectory(./Tools/PacketViewer)	
 endif()
 
 add_subdirectory(TestSuiteLib)
@@ -160,7 +152,6 @@ add_subdirectory(TestSuite)
 add_subdirectory(TestSuiteConsole)
 
 add_subdirectory(./Test/googletest)
-#add_subdirectory(./Test/UalTester)
 add_subdirectory(./Test/ClientTests)
 add_subdirectory(./Test/SimulatorTests)
 add_subdirectory(./Test/u7databaseTests)

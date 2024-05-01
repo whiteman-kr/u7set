@@ -1,6 +1,6 @@
-#include "./include/HardwareLib/DiagSignal.h"
-#include "./include/HardwareLib/DiagSignalType.h"
-#include "./include/HardwareLib/PropertyNames.h"
+#include <HardwareLib/DiagSignal.h>
+#include <HardwareLib/DiagSignalType.h>
+#include <HardwareLib/PropertyNames.h>
 
 
 namespace Hardware
@@ -94,9 +94,9 @@ namespace Hardware
 		return;
 	}
 
-	bool DiagSignal::SaveData(Proto::Envelope* message, bool saveTree) const
+	bool DiagSignal::SaveData(Proto::Envelope* message, bool saveTree, const std::function<bool(const DeviceObject&)>& predicate) const
 	{
-		bool result = DeviceObject::SaveData(message, saveTree);
+		bool result = DeviceObject::SaveData(message, saveTree, predicate);
 		
 		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{

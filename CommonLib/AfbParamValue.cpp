@@ -93,7 +93,7 @@ namespace Afb
 	{
 		// Check if string is reference
 		//
-		QRegularExpression rx("^\\$\\(([A-Za-z_]+[A-Za-z\\d_]*\\.)*[A-Za-z_]+[A-Za-z\\d_]*\\)$");	// $(A_2A.BB_.CC3)
+		thread_local const QRegularExpression rx("^\\$\\(([A-Za-z_]+[A-Za-z\\d_]*\\.)*[A-Za-z_]+[A-Za-z\\d_]*\\)$");	// $(A_2A.BB_.CC3)
 		if (rx.match(str).hasMatch() == true)
 		{
 			m_reference = str;

@@ -1,7 +1,9 @@
 #include "DialogChooseArchiveSignals.h"
 #include "ui_DialogChooseArchiveSignals.h"
-#include "../ClientLib/AppSignalManager.h"
+
 #include "../OnlineLib/SocketIO.h"
+
+#include <ClientLib/AppSignalManager.h>
 
 //
 //

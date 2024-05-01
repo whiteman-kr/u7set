@@ -1,6 +1,7 @@
 #pragma once
 #include "Indicator.h"
-#include "../../TrendView/Trend.h"
+#include <TrendView/Trend.h>
+#include <TrendView/TrendSignal.h>
 
 namespace VFrame30
 {

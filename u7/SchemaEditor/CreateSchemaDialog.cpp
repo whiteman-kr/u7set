@@ -12,10 +12,10 @@
 #include "ui_CreateSchemaDialog.h"
 
 
-//1. если меняются юниты то надо поменять введенные размеры
-//2. при приняитии разных инитор менять и
+//1. пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+//2. пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ
 //	setGridSize(Settings::defaultGridSize(unit()));
-//	setPinGridStep(4); и это же надо сохранить в файл????? и прочитать
+//	setPinGridStep(4); пїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ????? пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 
 
@@ -132,6 +132,16 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 			units.push_back(mmUnits);
 			units.push_back(pxUnits);
 		}
+	}
+
+	if (isVduSchema() == true)
+	{
+		idLabel = "VduSchemaID";
+
+		tempateParentFileId = db->systemFileId(DbDir::VduSchemasDir);
+		templateFileExtension = Db::File::VduTemplExtension;
+
+		units.push_back(pxUnits);
 	}
 
 	assert(tempateParentFileId != -1);
@@ -620,6 +630,11 @@ bool CreateSchemaDialog::isTuningSchema() const
 bool CreateSchemaDialog::isDiagSchema() const
 {
 	return m_schema->isDiagSchema();
+}
+
+bool CreateSchemaDialog::isVduSchema() const
+{
+	return m_schema->isVduSchema();
 }
 
 std::shared_ptr<VFrame30::LogicSchema> CreateSchemaDialog::logicSchema()

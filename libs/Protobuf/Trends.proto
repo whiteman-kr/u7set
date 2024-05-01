@@ -1,0 +1,108 @@
+syntax = "proto2";
+
+package Proto;
+
+message TrendStateRecord
+{
+    optional bytes states_raw_buffer_v1 = 4;	// Version 1
+	optional bytes states_raw_buffer_v2 = 3;	// Version 2
+}
+
+message TrendArchiveHour				//  Reflected to c++ struct OneHourData
+{
+    optional fixed64 time_stamp = 2;
+	optional int32 state = 3;			// enum OneHourData::State
+	repeated TrendStateRecord records = 4;
+}
+
+message TrendArchive
+{
+    optional string app_signal_id = 2;
+	optional string archive_server_id = 3;
+	repeated TrendArchiveHour hours = 10;
+}
+
+message TrendViewLimit
+{
+	optional int32 type = 1;  		// enum TrendLib::TrendScaleType
+	optional double high_limit = 2;
+	optional double low_limit = 3;
+}
+
+message TrendSignalParam
+{
+	optional string signal_id = 2;
+	optional string app_signal_id = 3;
+	optional string caption = 4;
+	optional string equipment_id = 5;
+
+    optional string archive_service_id = 6;
+	optional string archive_service_short_id = 7;
+	optional string data_service_id = 8;
+
+	optional int32 type = 10;				// enum E::SignalType
+	optional string unit = 11;
+	repeated string tags = 13;
+	optional int32 precision = 12;
+
+	optional double line_weight = 19 [default = 0];
+
+	optional double high_limit = 20;
+	optional double low_limit = 21;
+
+	optional double view_high_limit = 31;	// Left for compatibility
+	optional double view_low_limit = 32;    // Left for compatibility
+
+	repeated TrendViewLimit view_limits = 33;	// Replaces 31 and 32
+
+	optional uint32 color = 40;
+	optional string analog_format = 41;			// [default = "g_9_or_9e"];
+}
+
+message TrendSignalSet
+{
+    repeated TrendSignalParam signal_params = 2;
+
+    repeated TrendArchive archive_local_time= 10;
+	repeated TrendArchive archive_system_time= 11;
+	repeated TrendArchive archive_plant_time= 12;
+}
+
+message TrendRuler
+{
+    optional fixed64 time_stamp = 2;
+	optional bool show = 3 [default = true];
+	optional bool show_signal_values = 4 [default = true];
+}
+
+message TrendRulerSet
+{
+    repeated TrendRuler rulers = 2;
+}
+
+message Trend
+{
+    optional TrendSignalSet signal_set = 2;
+	optional TrendRulerSet ruler_set = 3;
+}
+
+message TrendParam
+{
+    optional int32 view_mode = 2 [default = 0];		// enum TrendViewMode::Separated, TrendViewMode::Overlapped
+	optional int32 time_type = 3 [default = 2];		// enum TimeType::Plant, TimeType::System, TimeType::Local
+	optional int32 lane_count = 4 [default = 1];
+
+    optional fixed64 start_time = 50;
+	optional int64 duration = 51;
+
+    optional uint32 back_color_1st = 70;
+	optional uint32 back_color_2nd = 71;
+
+    optional int32 scale_type = 5 [default = 0];		// enum TrendScaleType::Generic, TrendScaleType::Logarithmic, TrendScaleType::Exponential 
+}
+
+message TrendWidget
+{
+    optional Trend trend = 2;
+	optional TrendParam trend_param = 3;
+}

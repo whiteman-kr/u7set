@@ -1,0 +1,74 @@
+// This is a Comment
+// 
+// [Gateway], [SignalList], etc - sections
+//
+// Type = V, ID = N, etc - settings
+//
+// Sections names, settings names are case insensitive
+//
+// Settings values are case sensitive
+//
+// * - required settings
+
+[Gateway]   
+
+GatewayType = ModbusTcpSlave            	// * gateway type
+GatewayID = KAES_5SUZR1						// * gateway identifier
+GatewayDescription = KAES block 5 SUZR 1	//   free style gateway description	
+
+// ModbusTcpSlave gateway specifis settings
+
+LocalGatewayIP1 = 192.168.101.100:55002		// * IP and port of Modbus TCP server. Default port is 502.
+						// IP 0.0.0.0 - means that server receives connections on any local IP
+						
+//LocalGatewayIP2 = 127.0.0.1			// optional second channel IP
+
+ModbusDeviceID = 20				
+
+[SignalList]
+
+// Known signal formats:
+//		DiscreteBit
+//		AnalogFloat16
+//		AnalogFloat32
+//		AnalogSInt16
+//		AnalogSInt32
+//
+// Byte order:
+//		LE - Little Endian
+//		BE - Big Endian
+//
+
+SignalsFormat = AnalogFloat32 LE
+
+// ModbusRegisterAddr <- AppSignalID
+
+1 <- #OUT_FLOAT1		
+3 <- #SYSTEMID_RACKID_CH01_MD00_PI_BUILDNUMBER	
+5 <- #OUT_SINT32_1
+
+[SignalList]
+
+SignalsFormat = AnalogSInt32 LE
+
+11 <- #OUT_SINT1
+13 <- #OUT_SINT2
+
+[SignalList]
+
+SignalsFormat = AnalogSInt32 BE
+
+21 <- #OUT_SINT1
+23 <- #OUT_SINT2
+
+
+[SignalList]
+
+SignalsFormat = DiscreteBit LE		
+
+// ModbusRegisterAddr, bitNo <- AppSignalID  or
+// ModbusRegisterAddr, (bitMask) <- AppSignalID 
+                                                	
+1010, 0 <- #OUT_BLINK1		
+1010, 3 <- #SYSTEMID_RACKID_CH01_MD00_PI_BLINK
+1010, (0x8000) <- #SYSTEMID_RACKID_CH01_MD00_PI_SORISSET

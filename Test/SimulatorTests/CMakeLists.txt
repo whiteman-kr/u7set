@@ -30,14 +30,46 @@ add_executable(${TARGET}
 
 
 target_precompile_headers(${TARGET} PRIVATE
+	<algorithm>
+	<array>
+	<bit>
+	<cassert>
+	<cfenv>
+	<chrono>
+	<cmath>
+	<concepts>
+	<cstddef>
+	<cstring>
+	<deque>
+	<filesystem>
+	<functional>
+	<limits>
+	<map>
+	<memory>
+	<optional>
+	<queue>
+	<ranges>
+	<type_traits>
+	<unordered_map>
+	<variant>
+	<vector>
+
+	<QFuture>
+	<QJSEngine>
+	<QJSValue>
+	<QMutex>
+	<QObject>
+	<QReadWriteLock>
+	<QUdpSocket>
+
 	"../../CommonLib/Types.h"
 	"../../CommonLib/Hash.h"
 	"../../CommonLib/PropertyObject.h"
 	"../../CommonLib/AfbParamValue.h"
 	
-	"../../Proto/ProtoSerialization.h"
-	#"../../Proto/Network.pb.h"	
-	#"../../Proto/AppSignal.pb.h"
+	<ProtoSerialization.h>
+	#<Network.pb.h>
+	#<AppSignal.pb.>
 	
 	"../../AppSignalLib/AppSignal.h"
 	"../../AppSignalLib/AppSignalParam.h"

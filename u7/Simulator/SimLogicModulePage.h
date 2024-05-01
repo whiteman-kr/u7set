@@ -2,8 +2,8 @@
 
 #include "SimBasePage.h"
 
-#include "../../Simulator/SimLogicModule.h"
-#include "../../Simulator/SimControl.h"
+#include <Simulator/SimLogicModule.h>
+#include <Simulator/SimControlStatus.h>
 #include "../../VFrame30/AppSignalController.h"
 
 class SimLogicModulePage : public SimBasePage
@@ -56,8 +56,8 @@ public:
 	QString equipmentId() const;
 
 private:
-	std::shared_ptr<Sim::LogicModule> logicModule();
-	std::shared_ptr<Sim::LogicModule> logicModule() const;
+	std::optional<Sim::LogicModule> logicModule();
+	std::optional<Sim::LogicModule> logicModule() const;
 
 private:
 	QSplitter* m_splitter = new QSplitter;

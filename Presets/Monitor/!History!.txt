@@ -2,4 +2,5 @@ Monitor
 	22.02.2023	Version: 2	Monitor_v2.u7devp		RPCT-3444: Added single property AppDataServiceIDs instead of two AppDataServiceID1(2).
 	26.04.2023	Version: 3	Monitor_v3.u7devp		RPCT-3461: Set default value of property StartSchemaID to empty.
 	16.08.2023	Version: 4	Monitor_v4.u7devp		RPCT-3631: Property OnConfigurationArrived removed, now it is a part of the GlobalScript.
-
+	08.01.2024	Version: 5	Monitor_v5.u7devp		RPCT-3786, MATS User Security implementation, TuningUserAccounts property has special editor
+	27.03.2024	Version: 6	Monitor_v6.u7devp		RPCT-3856: Set Monitor preset default value property SchemaTags to 'AppLogic Monitor'

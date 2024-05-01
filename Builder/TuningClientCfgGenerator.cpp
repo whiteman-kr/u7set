@@ -97,7 +97,7 @@ namespace Builder
 
 		{
 			ILogFileStub logFileStub;
-			TuningSignalManager tuningSignalManager({}, &logFileStub);
+			ClientLib::TuningSignalManager tuningSignalManager({}, &logFileStub);
 			tuningSignalManager.load(m_tuningSet);
 
 			// --
@@ -254,7 +254,7 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningClientCfgGenerator::createObjectFilters(const TuningSignalManager& tuningSignalManager,
+	bool TuningClientCfgGenerator::createObjectFilters(const ClientLib::TuningSignalManager& tuningSignalManager,
 													   const QStringList& equipmentList)
 	{
 		bool ok = true;
@@ -327,7 +327,7 @@ namespace Builder
 
 
 	bool TuningClientCfgGenerator::createEquipmentAndSchemaFilters(const QStringList& equipmentList,
-														  const TuningSignalManager& tuningSignalManager)
+														  const ClientLib::TuningSignalManager& tuningSignalManager)
 	{
 		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
 

@@ -306,7 +306,7 @@ namespace TestSuite
 			QReadLocker l(&m_itemsLock);
 			if (m_items.empty() == true)
 			{
-				return false;
+				return true;
 			}
 		}
 

@@ -1,7 +1,7 @@
 #ifndef TUNINGPAGE_H
 #define TUNINGPAGE_H
 
-#include "../AppSignalLib/TuningSignalManager.h"
+#include <ClientLib/TuningSignalManager.h>
 #include "../lib/Tuning/TuningModel.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningConfigController.h"
@@ -27,7 +27,7 @@ class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningModelClient(TuningSignalManager& tuningSignalManager, const ClientLib::TuningUserManager& userManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
+	TuningModelClient(ClientLib::TuningSignalManager& tuningSignalManager, const ClientLib::TuningUserManager& userManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
 
 	void blink();
 
@@ -101,7 +101,7 @@ class TuningPage : public QWidget
 	Q_OBJECT
 public:
 	explicit TuningPage(TuningConfigController& configController,
-						TuningSignalManager& tuningSignalManager,
+						ClientLib::TuningSignalManager& tuningSignalManager,
 						TuningClientFilterStorage& tuningFilterStorage,
 						ClientLib::TuningUserManager& userManager,
 						ClientLib::TuningConnection& tuningConnection,
@@ -181,7 +181,7 @@ private:
 
 	// Signals processing
 
-	void invertValue();
+	void invertValue(int channel);	// channel is value column number, if it is set to -1 - all columns are inverted
 	void addSelectedSignalsToFilter(TuningFilter* filter);
 	void restoreSignalsFromFilter(TuningFilter* filter);
 	void setToDefaults(const std::vector<Hash>& hashes);
@@ -198,7 +198,7 @@ private slots:
 
 private:
 	TuningConfigController& m_configController;
-	TuningSignalManager& m_tuningSignalManager;
+	ClientLib::TuningSignalManager& m_tuningSignalManager;
     TuningClientFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
 

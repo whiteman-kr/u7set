@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LogicModule Name="VDU1" DescriptionNumber="1" ConfigurationScriptFile="VDU1_Conf.js" Version="1.0">
+	<FlashMemory>
+	    <AppLogicFrameCount>0</AppLogicFrameCount>
+		<AppLogicFramePayload>0</AppLogicFramePayload>
+		<AppLogicFrameSize>0</AppLogicFrameSize>
+		<AppLogicUartID>0</AppLogicUartID>
+		<AppLogicWriteBitstream>false</AppLogicWriteBitstream>
+		<ConfigFrameCount>2</ConfigFrameCount>
+		<ConfigFramePayload>1016</ConfigFramePayload>
+		<ConfigFrameSize>1016</ConfigFrameSize>
+		<ConfigUartID>0</ConfigUartID>
+		<ConfigWriteBitstream>true</ConfigWriteBitstream>
+		<TuningFrameCount>0</TuningFrameCount>
+		<TuningFramePayload>0</TuningFramePayload>
+		<TuningFrameSize>0</TuningFrameSize>
+		<TuningUartID>0</TuningUartID>
+		<TuningWriteBitstream>false</TuningWriteBitstream>
+		<MaxConfigurationCount>1</MaxConfigurationCount>
+	</FlashMemory>
+	<Memory>
+		<CodeMemorySize>0</CodeMemorySize>
+		<AppMemorySize>0</AppMemorySize>
+		<AppDataOffset>0</AppDataOffset>
+		<AppDataSize>0</AppDataSize>
+		<AppLogicBitDataOffset>0</AppLogicBitDataOffset>
+		<AppLogicBitDataSize>0</AppLogicBitDataSize>
+		<AppLogicWordDataOffset>0</AppLogicWordDataOffset>
+		<AppLogicWordDataSize>0</AppLogicWordDataSize>
+		<ModuleDataOffset>0</ModuleDataOffset>
+		<ModuleDataSize>0</ModuleDataSize>
+		<ModuleCount>0</ModuleCount>
+		<TuningDataOffset>0</TuningDataOffset>
+		<TuningDataSize>0</TuningDataSize>		<!--TuningDataFrameCount * TuningDataFramePayload-->
+		<TuningDataFrameCount>0</TuningDataFrameCount>
+		<TuningDataFramePayload>0</TuningDataFramePayload>
+		<TuningDataFrameSize>0</TuningDataFrameSize>
+		<TxDiagDataOffset>0</TxDiagDataOffset>
+		<TxDiagDataSize>0</TxDiagDataSize>
+	</Memory>
+	<LogicUnit>
+		<ClockFrequency>96000000</ClockFrequency>
+		<CycleDuration>5000</CycleDuration>
+		<IDRPhaseTime>1000</IDRPhaseTime>
+		<ALPPhaseTime>2500</ALPPhaseTime>
+	</LogicUnit>
+	<OptoInterface>
+		<OptoPortCount>8</OptoPortCount>
+		<OptoPortAppDataOffset>0</OptoPortAppDataOffset>
+		<OptoPortAppDataSize>2560</OptoPortAppDataSize>		
+		<OptoInterfaceDataOffset>35840</OptoInterfaceDataOffset>
+		<OptoPortDataSize>2560</OptoPortDataSize>
+		<SharedBuffer>false</SharedBuffer>
+	</OptoInterface>
+	<Lan RupVersion="5" FotipVersion="2">
+		<LanController>
+			<Type>AppAndDiagData</Type>
+			<Place>1</Place>
+		</LanController>
+		<LanController>
+			<Type>AppAndDiagData</Type>
+			<Place>2</Place>
+		</LanController>
+	</Lan>
+	<Other>
+	    <OcmTxDataSizeLimit>0</OcmTxDataSizeLimit>
+		<OcmRxDataSizeLimit>0</OcmRxDataSizeLimit>
+	</Other>
+
+    <LogicUnitCommnads Version="1">
+	</LogicUnitCommnads>
+	
+    <AFBImplementation CheckAfbVersions="false" CheckAfbVersionsOffset="0">
+	</AFBImplementation>
+
+	<AFBL>
+	</AFBL>
+</LogicModule>

@@ -6,8 +6,9 @@
 #include "TuningSignalInfo.h"
 #include "TuningSourcesHelper.h"
 
-#include "../ClientLib/TuningConnection.h"
-#include "../ClientLib/TuningUserManager.h"
+#include <ClientLib/TuningConnection.h>
+#include <ClientLib/TuningUserManager.h>
+
 #include "../VFrame30/DrawParam.h"
 #include "../lib/Ui/DialogWriteValues.h"
 
@@ -101,7 +102,7 @@ void SelectionControlDelegate::initStyleOption(QStyleOptionViewItem* option, con
 //
 // TuningItemModelMain
 //
-TuningModelClient::TuningModelClient(TuningSignalManager& tuningSignalManager, const ClientLib::TuningUserManager& userManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
+TuningModelClient::TuningModelClient(ClientLib::TuningSignalManager& tuningSignalManager, const ClientLib::TuningUserManager& userManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
 	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent),
 	m_userManager(userManager),
 	m_helper(m_userManager),
@@ -877,7 +878,7 @@ void TuningPageColumnsWidth::setWidth(TuningModelColumns column, int width)
 int TuningPage::m_instanceCounter = 0;
 
 TuningPage::TuningPage(TuningConfigController& configController,
-					   TuningSignalManager& tuningSignalManager,
+					   ClientLib::TuningSignalManager& tuningSignalManager,
 					   TuningClientFilterStorage& tuningFilterStorage,
 					   ClientLib::TuningUserManager& userManager,
 					   ClientLib::TuningConnection& tuningConnection,
@@ -2350,7 +2351,7 @@ void TuningPage::slot_tableCheckboxClicked(const QModelIndex& index)
 
 	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
-		invertValue();
+		invertValue(columnType - static_cast<int>(TuningModelColumns::ValueFirst));
 	}
 }
 
@@ -2407,7 +2408,7 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 
 		if(pKeyEvent->key() == Qt::Key_Space)
 		{
-			invertValue();
+			invertValue(-1);
 			return true;
 		}
 	}
@@ -2415,8 +2416,14 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 	return QWidget::eventFilter(object, event);
 }
 
-void TuningPage::invertValue()
+void TuningPage::invertValue(int channel)
 {
+	if (channel != -1 && (channel < 0 || channel >= m_model->valueColumnsCount()))
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
 	QModelIndexList selection = m_objectList->selectionModel()->selectedRows();
 
 	std::vector<int> selectedRows;
@@ -2439,6 +2446,11 @@ void TuningPage::invertValue()
 
 		for (int c = 0; c < m_model->valueColumnsCount(); c++)
 		{
+			if (channel != -1 && channel != c) 
+			{
+				continue;
+			}
+
 			Hash hash = hashSet.hash[c];
 
 			if (hash == UNDEFINED_HASH)

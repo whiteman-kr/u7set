@@ -1,5 +1,4 @@
 #include "SimRamTests.h"
-#include <algorithm>
 #include <QtTest>
 
 void SimRamTests::initTestCase()

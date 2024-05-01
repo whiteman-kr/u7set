@@ -1,5 +1,5 @@
 #include "../lib/PropertyEditor.h"
-#include "../lib/WidgetUtils.h"
+#include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
 #include "SignalPropertiesDialog.h"
 #include "Settings.h"
@@ -293,8 +293,6 @@ bool SignalPropertiesDialog::checkAndSaveSignal()
 
 	RETURN_IF_FALSE(res);
 
-//	connect(this, &SignalPropertiesDialog::signalChanged, AppSignalSetProvider::getInstance(), &AppSignalSetProvider::loadSignal, Qt::QueuedConnection);
-
 	Q_ASSERT(m_signalsToEdit.size() == m_signalsProps.size());
 
 	// Save changes from propertyObjects array to m_signalsToEdit array
@@ -310,8 +308,6 @@ bool SignalPropertiesDialog::checkAndSaveSignal()
 		AppSignal& editedSignal = signalProps->signal();
 
 		bool edited = false;
-
-//		signal.setTags(editedSignal.tagsSet());
 
 		// here: editedSignal.appSignalID() is NOT empty and is NOT "#" only
 

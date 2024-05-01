@@ -1,6 +1,6 @@
 #pragma once
-#include "../../Simulator/Simulator.h"
-#include "../../Simulator/SimOverrideSignals.h"
+#include <Simulator/Simulator.h>
+#include <Simulator/SimOverrideSignals.h>
 #include "../../lib/QDoublevalidatorEx.h"
 #include "../lib/CodeEditor.h"
 

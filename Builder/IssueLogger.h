@@ -490,7 +490,7 @@ namespace Builder
 		void errALC5198(QString appSignalID1, QString appSignalID2, quint64 h);			// Signals %1 and %2 have equal hash (%3) of AppSignalIDs.
 		void errALC5199(QString afbCaption, QUuid itemUuid, QString schemaID);			// AFB '%1' parameters calculation result out of Int32 range (Schema %2).
 		void errALC5200(QString afbCaption, QUuid itemUuid, QString schemaID);			// AFB '%1' parameters calculation result out of Float32 range (Schema %2).
-		void errALC5201(QString appSignalID, QUuid itemUuid, QString schemaID);			// Reserved signal %1 used on schema %2.
+		void wrnALC5201(QString appSignalID, QUuid itemUuid, QString schemaID);			// Reserved signal %1 used on schema %2.
 		void errALC5202(QString appSignalID);											// Signal %1 inversion can't be used in safety project.
 		void wrnALC5203(QString packedOrID, QString item1, QUuid item1Uuid, QString schema1,
 						QString item2, QUuid item2Uuid, QString schema2);				// Permanent const 1 on output of packed_or %1 (item %2, schema %3) due to const 1 on input (item %4, schema %5).
@@ -587,6 +587,10 @@ namespace Builder
 		void errEQP6301(QString equipmentId, QString property, int lineNumber, QString message);                                  // Script property evaluation error.
 		void errEQP6302(QString schemaId, QString property, int lineNumber, QString message);                                     // Schema script property evaluation error.
 		void errEQP6303(QString schemaId, QString schemaItem, QUuid itemUuid, QString property, int lineNumber, QString message); // SchemaItem script property evaluation error.
+
+		// VDU related issues
+		//
+		void errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid);
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids);

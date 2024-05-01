@@ -207,6 +207,12 @@ namespace Builder
 		return -1;
 	}
 
+	int SubsystemStorage::ssKeyForVdu(QString subsysId) 
+	{
+		Hash hash = ::calcHash(subsysId);
+		return hash & 0xffff;
+	}
+
 	int SubsystemStorage::subsystemKey(const QString& subsystemID)
 	{
 		return ssKey(subsystemID);

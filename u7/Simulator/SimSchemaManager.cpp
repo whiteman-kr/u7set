@@ -26,11 +26,14 @@ std::shared_ptr<VFrame30::Schema> SimSchemaManager::loadSchema(const QString& sc
 	// Load schema from one of folowing folder.
 	// Unfortunatelly, schema folder cannot be get from SchemaID, so just try every possible folder.
 	//
-	std::array folders = {Db::File::AlFileExtension,
-						  Db::File::MvsFileExtension,
-						  Db::File::TvsFileExtension,
-						  Db::File::UfbFileExtension,
-						  Db::File::DvsFileExtension};
+	std::array folders = {
+		Db::File::AlFileExtension,
+		Db::File::MvsFileExtension,
+		Db::File::TvsFileExtension,
+		Db::File::UfbFileExtension,
+		Db::File::DvsFileExtension,
+		Db::File::VduFileExtension,
+	};
 
 	for (auto ext : folders)
 	{

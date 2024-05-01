@@ -7,10 +7,10 @@
 
 #include <DbLib/DbController.h>
 #include <HardwareLib/Connection.h>
+#include <Simulator/SimProfiles.h>
 
 #include "../AppSignalLib/Bus.h"
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../Simulator/SimProfiles.h"
 #include "../VFrame30/LogicSchema.h"
 #include "../lib/TuningDataStorage.h"
 #include "DiagSignalTypesStorage.h"
@@ -23,6 +23,7 @@
 #include "SignalSet.h"
 #include "SubsystemStorage.h"
 #include "DbMatsUsers.h"
+#include "Vdu/VduFontProvider.h"
 
 namespace Builder
 {
@@ -50,6 +51,7 @@ namespace Builder
 		Context& operator=(Context&&) = delete;
 
 		bool generateAppSignalsXml() const;
+		bool generateAppSignalsExtXml() const;
 		bool generateExtraDebugInfo() const;
 
 	public:
@@ -78,7 +80,11 @@ namespace Builder
 		std::shared_ptr<LmDescriptionSet> m_lmDescriptions;
 
 		std::vector<Hardware::DeviceModule*> m_lmModules;
-		std::vector<Hardware::DeviceModule*> m_fscModules; // includes LM and BVB modules
+
+		std::vector<Hardware::DeviceModule*> m_fscModules;		// includes LM and BVB modules
+		std::vector<Hardware::DeviceModule*> m_vduModules;		// includes VDU modules
+
+		std::map<QString, std::map<Hash, int>> m_vduSignals;	// VDU EquipmentID => (Hash(appSignalID) => VDU signal index)
 
 		Sim::Profiles m_simProfiles;
 
@@ -102,6 +108,8 @@ namespace Builder
 		DbMatsUserStorage m_matsUsers;
 
 		std::shared_ptr<DiagSignalTypesStorage> m_diagSignalTypes;
+
+		VduFontProvider m_vduFontProvider;
 	};
 
 } // namespace Builder

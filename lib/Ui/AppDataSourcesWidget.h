@@ -2,7 +2,8 @@
 #define DialogAppDataSources_H
 
 #include "DialogSourceInfo.h"
-#include "../ClientLib/AdsSourceStateConnection.h"
+
+#include <ClientLib/AdsSourceStateConnection.h>
 
 class QTreeWidgetItem;
 class TcpAppSourcesState;

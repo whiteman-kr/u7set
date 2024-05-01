@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "../ClientLib/TuningSourceState.h"
+#include <ClientLib/TuningSourceState.h>
 
 class QWidget;
 

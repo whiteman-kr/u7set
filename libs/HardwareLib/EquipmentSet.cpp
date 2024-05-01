@@ -1,4 +1,4 @@
-#include "./include/HardwareLib/EquipmentSet.h"
+#include <HardwareLib/EquipmentSet.h>
 
 namespace Hardware
 {
@@ -120,7 +120,7 @@ namespace Hardware
 		return;
 	}
 
-	void EquipmentSet::addDeviceChildrenToHashTable(std::shared_ptr<DeviceObject> parent)
+	void EquipmentSet::addDeviceChildrenToHashTable(const std::shared_ptr<DeviceObject>& parent)
 	{
 		for (int i = 0; i < parent->childrenCount(); i++)
 		{

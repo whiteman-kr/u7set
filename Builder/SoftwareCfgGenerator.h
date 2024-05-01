@@ -12,6 +12,12 @@
 #include "SignalSet.h"
 #include "Context.h"
 
+namespace VFrame30
+{
+	class Schema;
+	class VduSchema;
+}
+
 namespace Builder
 {
 
@@ -60,6 +66,8 @@ namespace Builder
 
 		static bool generalSoftwareCfgGeneration(Context* context);
 		static bool loadAllSchemas(Context* context);
+		static bool generateVduFonts(Context& context);
+		static bool generateVduSchemas(const std::vector<VFrame30::VduSchema*>& schemas, Context& context);
 		static void clearStaticData();
 
 		static bool writeSchemaScriptProperties(VFrame30::Schema* schema, QString dir, BuildResultWriter* buildResultWriter);

@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "Settings.h"
-#include "../ClientLib/ClientTranslator.h"
+#include <ClientLib/ClientTranslator.h>
 
 namespace Ui {
 	class DialogSettings;

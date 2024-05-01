@@ -1,7 +1,7 @@
 #include "SimTrends.h"
 #include "../SimIdeSimulator.h"
-#include "../../../TrendView/DialogChooseTrendSignals.h"
-#include "../../../TrendView/TrendWidget.h"
+#include <TrendView/DialogChooseTrendSignals.h>
+#include <TrendView/TrendSignalSet.h>
 
 
 std::list<SimTrendsWidget*> SimTrends::s_trendsList;
@@ -93,12 +93,12 @@ static int no = 1;
 
 	// Set ruler step to 5ms, as in simulator cycle always multiple to 5
 	//
-	trend().rulerSet().setRulerStep(5);
+	setRulerStep(5);
 
 	// Set default lane duration (5m), it differs from default value (1h)
 	//
 	m_timeCombo->setCurrentIndex(5);	// 5 is index in combo box
-	m_trendWidget->setLaneDuration(5_min);
+	setLaneDuration(5_min);
 
 	// Hide Refresh button as it is not required for simulator, no archive here just "realtime" data
 	//
@@ -109,7 +109,7 @@ static int no = 1;
 
 	// TimeType, assume we have only simulated PlantTime
 	//
-	m_trendWidget->setTimeType(E::TimeType::Plant);
+	setTimeType(E::TimeType::Plant);
 	m_timeTypeCombo->setCurrentIndex(m_timeTypeCombo->findData(QVariant::fromValue(E::TimeType::Plant)));
 	m_timeTypeCombo->setEnabled(false);
 
@@ -168,7 +168,7 @@ void SimTrendsWidget::clear()
 void SimTrendsWidget::timerEvent(QTimerEvent*)
 {
 	m_timerCounter ++;
-	quint64 durationSec = m_trendWidget->duration() / 1000;
+	quint64 durationSec = duration() / 1000;
 
 	if (durationSec <= 30)
 	{
@@ -386,8 +386,6 @@ void SimTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
 												TrendLib::TrendStateItem minState,
 												TrendLib::TrendStateItem maxState)
 {
-	Q_ASSERT(m_trendWidget);
-	Q_ASSERT(m_trendSlider);
 	Q_ASSERT(data);
 
 	if (data->signalData.empty() == true)
@@ -395,8 +393,8 @@ void SimTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
 		return;
 	}
 
-	TimeStamp minTime = minState.getTime(m_trendWidget->timeType());
-	TimeStamp maxTime = maxState.getTime(m_trendWidget->timeType());
+	TimeStamp minTime = minState.getTime(timeType());
+	TimeStamp maxTime = maxState.getTime(timeType());
 
 	if (maxTime == 0 || maxTime == 0)
 	{
@@ -412,10 +410,10 @@ void SimTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
 
 	// Update widget if received data somewhere in view
 	//
-	if (minTime >= TimeStamp{m_trendWidget->startTime().timeStamp - m_trendWidget->duration() / 10} &&
-	    maxTime <= TimeStamp{m_trendWidget->finishTime().timeStamp + m_trendWidget->duration() / 10})
+	if (minTime >= TimeStamp{startTime().timeStamp - duration() / 10} &&
+	    maxTime <= TimeStamp{finishTime().timeStamp + duration() / 10})
 	{
-		m_trendWidget->updateWidget();
+		updateWidget();
 	}
 
 	return;

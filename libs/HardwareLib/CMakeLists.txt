@@ -33,6 +33,7 @@ qt_add_library(${TARGET} STATIC
 	./include/HardwareLib/ModuleFirmware.h
 	./include/HardwareLib/PropertyNames.h
 	./include/HardwareLib/ScriptDeviceObject.h
+	./include/HardwareLib/ScriptEquipment.h
 	./include/HardwareLib/Software.h
 	./include/HardwareLib/Subsystem.h
 	./include/HardwareLib/Workstation.h
@@ -60,6 +61,7 @@ qt_add_library(${TARGET} STATIC
 	ModuleFirmware.cpp
 	PropertyNames.cpp
 	ScriptDeviceObject.cpp
+	ScriptEquipment.cpp
 	Software.cpp
 	Subsystem.cpp
 	Workstation.cpp
@@ -127,9 +129,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../CommonLib/PropertyObject.h"
 	#"../CommonLib/AfbParamValue.h"
 	
-	"../../Proto/ProtoSerialization.h"
-	"../../Proto/Network.pb.h"
-	"../../Proto/Hardware.pb.h"	
+	<ProtoSerialization.h>
+	<Hardware.pb.h>
+	<Network.pb.h>
 )
 
 target_compile_definitions(${TARGET} PRIVATE HARDWARE_LIB_DOMAIN)

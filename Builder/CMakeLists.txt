@@ -23,6 +23,10 @@ qt_add_library(${TARGET} STATIC
 	../GatewayService/GatewayDescription.h
 	../GatewayService/GatewayDescriptionParser.cpp
 	../GatewayService/GatewayDescriptionParser.h
+	../GatewayService/IvsImpulseGateway.cpp
+	../GatewayService/IvsImpulseGateway.h
+	../GatewayService/ModbusTcpSlaveGateway.cpp
+	../GatewayService/ModbusTcpSlaveGateway.h
 	../lib/ConstStrings.h
 	../lib/DataSource.cpp
 	../lib/DataSource.h
@@ -42,6 +46,17 @@ qt_add_library(${TARGET} STATIC
 	../Metrology/UnitsConverterTable.h
 	../TuningService/TuningSource.cpp
 	../TuningService/TuningSource.h
+	./Vdu/VduOptoConnectionsInfoFile.h
+	./Vdu/VduOptoConnectionsInfoGenerator.cpp
+	./Vdu/VduOptoConnectionsInfoGenerator.h
+	./Vdu/VduSchemaFile.h
+	./Vdu/VduSchemaGenerator.cpp
+	./Vdu/VduSchemaGenerator.h
+	./Vdu/VduFontGenerator.cpp
+	./Vdu/VduFontGenerator.h
+	./Vdu/VduFontProvider.cpp
+	./Vdu/VduFontProvider.h
+	./Vdu/VduTypes.h
 	AppDataServiceCfgGenerator.cpp
 	AppDataServiceCfgGenerator.h
 	AppLogicCode.cpp
@@ -78,6 +93,8 @@ qt_add_library(${TARGET} STATIC
 	ConnectionStorage.h
 	Context.cpp
 	Context.h
+	DbMatsUsers.cpp
+	DbMatsUsers.h
 	DbMetrologyConnection.cpp
 	DbMetrologyConnection.h
 	DeviceHelper.cpp
@@ -103,8 +120,6 @@ qt_add_library(${TARGET} STATIC
 	LogicModulesInfoWriter.h
 	Loopbacks.cpp
 	Loopbacks.h
-	DbMatsUsers.cpp
-	DbMatsUsers.h
 	MemWriteMap.cpp
 	MemWriteMap.h
 	MetrologyCfgGenerator.cpp
@@ -183,12 +198,13 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/PropertyObject.h"
 	"../CommonLib/AfbParamValue.h"
 
-	"../Proto/ProtoSerialization.h"
-	"../Proto/ProtoCommonHelper.h"
-	"../Proto/Network.pb.h"
-	"../Proto/AppSignal.pb.h"
-	"../Proto/Bus.pb.h"
-
+	<ProtoSerialization.h>
+	<ProtoCommonHelper.h>
+	<AppSignal.pb.h>
+	<Bus.pb.h>
+	<Hardware.pb.h>
+	<Network.pb.h>
+	
 	"../AppSignalLib/AppSignal.h"
 	"../AppSignalLib/AppSignalParam.h"
 	"../AppSignalLib/AppSignalState.h"

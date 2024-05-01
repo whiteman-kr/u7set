@@ -3,10 +3,10 @@
 #endif
 
 #include "../UtilsLib/DomXmlHelper.h"
-#include "./include/HardwareLib/LmDescription.h"
-#include "./include/HardwareLib/DataProtocols.h"
-#include "./include/HardwareLib/DeviceModule.h"
-#include "./include/HardwareLib/PropertyNames.h"
+#include <HardwareLib/LmDescription.h>
+#include <HardwareLib/DataProtocols.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/PropertyNames.h>
 
 
 bool LmCommand::loadFromXml(const QDomElement& element, QString* errorMessage)
@@ -666,10 +666,11 @@ bool LmDescription::loadAfbs(const QDomElement& element, QString* errorMessage)
 QString LmDescription::lmDescriptionFile(const Hardware::DeviceModule* logicModule)
 {
 	if (logicModule == nullptr ||
-		logicModule->isFSCConfigurationModule() == false)
+		(logicModule->isFSCConfigurationModule() == false && logicModule->isVdu() == false))
 	{
 		assert(logicModule);
-		assert(logicModule->isFSCConfigurationModule());
+		assert(logicModule->isFSCConfigurationModule() || logicModule->isVdu());
+
 		return QString();
 	}
 

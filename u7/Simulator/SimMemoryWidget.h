@@ -1,7 +1,4 @@
 #pragma once
-//#include "../Simulator/SimRam.h"
-//#include "../Simulator/Simulator.h"
-
 
 //class MemoryView;
 //class MemoryHexView;

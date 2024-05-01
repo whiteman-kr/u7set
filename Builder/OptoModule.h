@@ -21,6 +21,7 @@ namespace Builder
 	class BuildResultWriter;
 	class UalSignal;
 	class Context;
+	class SignalSet;
 }
 
 namespace Hardware
@@ -236,7 +237,7 @@ namespace Hardware
 		int txBusSignalsSizeW() const { return m_txBusSignalsSizeW; }
 		int txDiscreteSignalsSizeW() const { return m_txDiscreteSignalsSizeW; }
 
-		int txSignalsCount() const { return static_cast<int>(m_txSignals.count());}
+		int txSignalsCount() const { return static_cast<int>(m_txSignals.size());}
 
 		int portNo() const { return m_portNo; }
 
@@ -389,6 +390,7 @@ namespace Hardware
 		bool isLmOrBvb() const;
 		bool isOcm() const;
 		bool isBvb() const;
+		bool isVdu() const;
 
 		QString equipmentID() const;
 		const DeviceModule* deviceModule() const;
@@ -414,7 +416,7 @@ namespace Hardware
 		const DeviceModule* lmDeviceModule() const;
 
 		void getOptoPorts(QList<OptoPortShared>& optoPortsList) const;
-		const HashedVector<QString, OptoPortShared>& ports() const;
+		const std::map<QString, OptoPortShared>& ports() const;
 
 		bool calculateTxBufAddresses();
 		bool checkPortsAddressesOverlapping() const;
@@ -431,6 +433,8 @@ namespace Hardware
 
 		OptoModuleStorage& storage();
 		const OptoModuleStorage& storage() const;
+
+		bool writeVduConnectionsInfoFile(Builder::BuildResultWriter& resultWriter) const;
 
 	private:
 		void sortPortsByEquipmentIDAscending(QVector<OptoPort*>& getPorts);
@@ -467,7 +471,7 @@ namespace Hardware
 
 		const DeviceModule* m_lm = nullptr;
 
-		HashedVector<QString, OptoPortShared> m_ports;
+		std::map<QString, OptoPortShared> m_ports;		// port EquipmentID => OptoPortShared
 		Builder::IssueLogger* m_log = nullptr;
 
 		bool m_valid = false;
@@ -544,6 +548,9 @@ namespace Hardware
 								   const QString& receiverLM,
 								   QUuid receiverUuid,
 								   SignalAddress16* addr);
+
+		bool writeVduConnectionsInfoFile(const QString& vduEquipmentID,
+										 Builder::Context* context) const;
 
 		std::shared_ptr<Connection> getConnection(const QString& connectionID) const;
 

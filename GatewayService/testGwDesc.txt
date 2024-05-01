@@ -6,7 +6,7 @@
 //
 // Sections names, settings names are case insensitive
 //
-// Settings values are case sensetive
+// Settings values are case sensitive
 //
 // * - required settings
 

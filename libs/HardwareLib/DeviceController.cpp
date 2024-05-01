@@ -1,5 +1,5 @@
-#include "./include/HardwareLib/DeviceController.h"
-#include "./include/HardwareLib/PropertyNames.h"
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/PropertyNames.h>
 
 namespace Hardware
 {
@@ -17,9 +17,9 @@ namespace Hardware
 		return;
 	}
 
-	bool DeviceController::SaveData(Proto::Envelope* message, bool saveTree) const
+	bool DeviceController::SaveData(Proto::Envelope* message, bool saveTree, const std::function<bool(const DeviceObject&)>& predicate) const
 	{
-		bool result = DeviceObject::SaveData(message, saveTree);
+		bool result = DeviceObject::SaveData(message, saveTree, predicate);
 		if (result == false || message->HasExtension(::Proto::deviceobject) == false)
 		{
 			Q_ASSERT(result);

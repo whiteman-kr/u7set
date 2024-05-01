@@ -13,9 +13,9 @@
 #include <QStandardItemModel>
 #include <QAbstractItemModelTester>
 
-#include "../lib/WidgetUtils.h"
 #include "../lib/ConstStrings.h"
 #include "../lib/StandardColors.h"
+#include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 
@@ -356,11 +356,11 @@ void SignalsTabPage::projectOpened()
 
 void SignalsTabPage::projectClosed()
 {
+	m_signalsColumnVisibilityController->saveAllHeaderGeomery();
+
 	m_signalsModel->prepareForReset();
 	m_signalSetProvider->onProjectClosed();
 	m_signalsModel->finishReset();
-
-	m_signalsColumnVisibilityController->saveAllHeaderGeomery();
 
 	this->setEnabled(false);
 

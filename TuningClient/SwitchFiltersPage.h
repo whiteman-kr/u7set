@@ -2,10 +2,11 @@
 #define SWITCHPRESETSPAGE_H
 
 #include "../AppSignalLib/TuningSignalState.h"
-#include "../AppSignalLib/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 
-#include "../ClientLib/TuningUserManager.h"
+#include <ClientLib/TuningSignalManager.h>
+#include <ClientLib/TuningUserManager.h>
+
 #include "TuningClientFilterStorage.h"
 #include "TuningConfigController.h"
 
@@ -124,7 +125,7 @@ class SwitchFiltersPage : public QWidget
 	Q_OBJECT
 public:
 	explicit SwitchFiltersPage(TuningConfigController& configController,
-							   TuningSignalManager& tuningSignalManager,
+							   ClientLib::TuningSignalManager& tuningSignalManager,
 							   TuningClientFilterStorage& tuningFilterStorage,
 							   ClientLib::TuningUserManager& userManager,
 							   ClientLib::TuningConnection& tuningConnection,
@@ -172,7 +173,7 @@ private:
 	std::vector<std::shared_ptr<TuningFilter>> m_listFilters;
 
 	TuningConfigController& m_configController;
-	TuningSignalManager& m_tuningSignalManager;
+	ClientLib::TuningSignalManager& m_tuningSignalManager;
 	TuningFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
 

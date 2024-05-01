@@ -903,6 +903,7 @@ namespace Builder
 												   const QString& userPassword,
 												   std::vector<DbFileInfo> files,
 												   const QString& filePath,
+												   bool generateToOutputData,
 												   const SchemasReportOptions& options,
 												   const std::vector<SchemaTypesParams>& schemaTypesParams) :
 		m_schemaView(schemaView),
@@ -913,6 +914,7 @@ namespace Builder
 		m_appSignalController(m_appSignalProvider, nullptr),
 		m_inputFiles(files),
 		m_filePath(filePath),
+		m_generateToOutputData(generateToOutputData),
 		m_serverIp(serverIp),
 		m_serverPort(serverPort),
 		m_serverUserName(serverUserName),
@@ -994,6 +996,14 @@ namespace Builder
 									  QPageLayout::Unit::Millimeter),
 						  layoutNames});
 
+		result.push_back({db->systemFileId(DbDir::VduSchemasDir),
+						  QObject::tr("VDU Schemas"),
+						  true,
+						  QPageLayout(QPageSize(QPageSize::A3),
+									  QPageLayout::Orientation::Landscape,
+									  QMarginsF(30, 20, 15, 20),
+									  QPageLayout::Unit::Millimeter),
+						  layoutNames});
 
 		result.push_back({-1,
 						  QObject::tr("Single-File Report"),
@@ -1256,16 +1266,16 @@ namespace Builder
 						fi->fileName().endsWith("." + QString(Db::File::UfbFileExtension)) == false &&
 						fi->fileName().endsWith("." + QString(Db::File::MvsFileExtension)) == false &&
 						fi->fileName().endsWith("." + QString(Db::File::TvsFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(Db::File::DvsFileExtension)) == false)
+						fi->fileName().endsWith("." + QString(Db::File::DvsFileExtension)) == false &&
+						fi->fileName().endsWith("." + QString(Db::File::VduFileExtension)) == false)
 					{
 						continue;
 					}
 
-					// Filter files by schema tags
+					// Filter files by schema tags if tags exist
 					//
 					VFrame30::SchemaDetails details;
-					ok = details.parseDetails(fi->details());
-					if (ok == true)
+					if (m_options.schemaTags().empty() == false && details.parseDetails(fi->details()) == true)
 					{
 						bool schemaTagFound = false;
 						for (const auto& [tag, tagEnabled] : m_options.schemaTags())
@@ -1716,8 +1726,9 @@ namespace Builder
 			m_statistics.m_schemasCount = static_cast<int>(schemas.size());
 		}
 
-		std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName,
-																  tr("%1/%2_%3.pdf").arg(filePath()).arg(m_projectName).arg(groupName));
+
+		std::shared_ptr<Report> report = std::make_shared<Report>(m_projectName, 
+			filePath().isEmpty() ? QString() : tr("%1/%2_%3.pdf").arg(filePath()).arg(m_projectName).arg(groupName));
 
 		// Set report options and variables
 		//
@@ -1811,18 +1822,7 @@ namespace Builder
 
 		// Print report
 		//
-		if (report->path().isEmpty() == false)
-		{
-			// Print to file PDF
-			//
-			bool ok = m_printer.print(*report, report->path(), m_stop);
-			if (ok == false)
-			{
-				throw(tr("Error writing report to file %1!").arg(QDir::toNativeSeparators(report->path())));
-				return false;
-			}
-		}
-		else
+		if (m_generateToOutputData == true) 
 		{
 			// Print to buffer
 			//
@@ -1831,6 +1831,17 @@ namespace Builder
 			if (ok == false)
 			{
 				throw(tr("Error writing report to memory!"));
+				return false;
+			}
+		}
+		else
+		{
+			// Print to file PDF
+			//
+			bool ok = m_printer.print(*report, report->path(), m_stop);
+			if (ok == false)
+			{
+				throw(tr("Error writing report to file %1!").arg(QDir::toNativeSeparators(report->path())));
 				return false;
 			}
 		}

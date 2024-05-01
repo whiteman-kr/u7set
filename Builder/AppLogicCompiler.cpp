@@ -1,7 +1,7 @@
 #include "../lib/DataSource.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../Proto/Comparator.pb.h"
 
+#include <Comparator.pb.h>
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>
 
@@ -74,6 +74,7 @@ namespace Builder
 			&ApplicationLogicCompiler::writeCommonAppSignalsExtXmlFile,
 			&ApplicationLogicCompiler::writeComparatorSetFile,
 			&ApplicationLogicCompiler::writeSubsystemsXml,
+			&ApplicationLogicCompiler::writeAppSignalsListCsv,
 		};
 
 		bool result = true;
@@ -328,11 +329,31 @@ namespace Builder
 			}
 		}
 
+		RETURN_IF_FALSE(result);
+
 		for(ModuleLogicCompiler* mc : m_moduleCompilers)
 		{
 			TEST_PTR_CONTINUE(mc);
 
 			mc->setModuleCompilersRef(&m_moduleCompilers);
+		}
+
+		if (m_context->m_vduModules.empty() == false)
+		{
+			LOG_MESSAGE(log(), QString(tr("VDUs processing pass #1...")));
+
+			for(const Hardware::DeviceModule* vduModule : m_context->m_vduModules)
+			{
+				TEST_PTR_CONTINUE(vduModule);
+
+				result &= vduProcessingPass1(vduModule);
+
+				if (isBuildCancelled() == true)
+				{
+					result = false;
+					break;
+				}
+			}
 		}
 
 		return result;
@@ -364,6 +385,106 @@ namespace Builder
 				break;
 			}
 		}
+
+		RETURN_IF_FALSE(result);
+
+		if (m_context->m_vduModules.empty() == false)
+		{
+			LOG_MESSAGE(log(), QString(tr("VDUs processing pass #2...")));
+
+			for(const Hardware::DeviceModule* vduModule : m_context->m_vduModules)
+			{
+				TEST_PTR_CONTINUE(vduModule);
+
+				result &= vduProcessingPass2(vduModule);
+
+				if (isBuildCancelled() == true)
+				{
+					result = false;
+					break;
+				}
+			}
+		}
+
+		return result;
+	}
+
+	bool ApplicationLogicCompiler::vduProcessingPass1(const Hardware::DeviceModule* vduModule)
+	{
+		TEST_PTR_RETURN_FALSE(vduModule);
+
+		std::shared_ptr<Hardware::OptoModuleStorage> optoStorage = m_context->m_opticModuleStorage;
+
+		TEST_PTR_RETURN_FALSE(optoStorage);
+
+		QString vduEquipmentID = vduModule->equipmentIdTemplate();
+
+		bool result = false;
+
+		//
+		// Copied from bool ModuleLogicCompiler::processTxSignals()!
+		//
+
+		do
+		{
+			// add Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
+			// check that added regular Tx signals exists in current LM
+			//
+			//if (processTransmitters() == false) break;
+
+				   // find raw tx signals and set it addresses
+				   //
+			//if (m_optoModuleStorage->initRawTxSignals(lmID) == false) break;
+
+				   // sort Tx signals lists of LM's associated opto ports
+				   //
+			//if (m_optoModuleStorage->sortTxSignals(lmID) == false) break;
+
+				   // calculate relative Tx signals addresses in tx buffers
+				   //
+			if (optoStorage->calculateTxSignalsAddresses(vduEquipmentID) == false) break;
+
+				   // calculate txDataID
+				   //
+			if (optoStorage->calculateTxDataIDs(vduEquipmentID) == false) break;
+
+				   // calculate tx buffers absolute addresses
+				   //
+			if (optoStorage->calculateTxBufAddresses(vduEquipmentID) == false) break;
+
+			result = true;
+		}
+		while(false);
+
+		return result;
+
+	}
+
+	bool ApplicationLogicCompiler::vduProcessingPass2(const Hardware::DeviceModule* vduModule)
+	{
+		TEST_PTR_RETURN_FALSE(vduModule);
+		TEST_PTR_RETURN_FALSE(m_context->m_buildResultWriter);
+
+		std::shared_ptr<Hardware::OptoModuleStorage> optoStorage = m_context->m_opticModuleStorage;
+
+		TEST_PTR_RETURN_FALSE(optoStorage);
+
+		//
+		// Copied from bool ModuleLogicCompiler::finalizeOptoConnectionsProcessing()
+		//
+		bool result = true;
+
+		QString vduEquipmentID = vduModule->equipmentIdTemplate();
+
+		// copying optical ports txSignals lists to connected ports rxSignals lists
+		//
+		result &= optoStorage->copyOpticalPortsTxInRxSignals(vduEquipmentID);
+
+		// calculate absoulute addresses of receving buffers
+		//
+		result &= optoStorage->calculateRxBufAddresses(vduEquipmentID);
+
+		result &= optoStorage->writeVduConnectionsInfoFile(vduEquipmentID, m_context);
 
 		return result;
 	}
@@ -1168,6 +1289,11 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::writeCommonAppSignalsExtXmlFile()
 	{
+		if (m_context->generateAppSignalsExtXml() == false)
+		{
+			return true;
+		}
+
 		SignalSet* sgSet = signalSet();
 
 		if (sgSet == nullptr)
@@ -1356,6 +1482,162 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ApplicationLogicCompiler::writeAppSignalsListCsv()
+	{
+		TEST_PTR_RETURN_FALSE(m_context);
+
+		if (m_context->m_projectProperties.generateExtraDebugInfo() == false)
+		{
+			return true;
+		}
+
+		BuildResultWriter* brWriter = buildResultWriter();
+
+		TEST_PTR_RETURN_FALSE(brWriter);
+
+		SignalSet* sset = signalSet();
+
+		TEST_PTR_RETURN_FALSE(sset);
+
+		QString file;
+
+		static const QStringList fields(
+		{
+			AppSignalPropNames::APP_SIGNAL_ID,
+			AppSignalPropNames::CUSTOM_APP_SIGNAL_ID,
+			AppSignalPropNames::CAPTION,
+			AppSignalPropNames::EQUIPMENT_ID,
+			AppSignalPropNames::TYPE,
+			AppSignalPropNames::IN_OUT_TYPE,
+			AppSignalPropNames::ANALOG_SIGNAL_FORMAT,
+			AppSignalPropNames::BUS_TYPE_ID,
+			AppSignalPropNames::UNIT,
+			AppSignalPropNames::ACQUIRE,
+			AppSignalPropNames::ARCHIVE,
+			AppSignalPropNames::ENABLE_TUNING,
+			AppSignalPropNames::TUNING_DEFAULT_VALUE,
+			AppSignalPropNames::TUNING_LOW_BOUND,
+			AppSignalPropNames::TUNING_HIGH_BOUND,
+			AppSignalPropNames::TAGS,
+		});
+
+		file.append(Separator::DOUBLE_QUOTES + fields.join(QStringLiteral("\";\"")) + Separator::DOUBLE_QUOTES);
+
+		QString str;
+
+		auto appendStr = [&str](const QString& s, bool last = false)
+		{
+			str += Separator::DOUBLE_QUOTES;
+			str += s;
+			str += Separator::DOUBLE_QUOTES;
+			if (last == false)
+			{
+				str += Separator::SEMICOLON;
+			}
+		};
+
+		auto appendValue = [&str](const QString& s, bool last = false)
+		{
+			str += s;
+			if (last == false)
+			{
+				str += Separator::SEMICOLON;
+			}
+		};
+
+		auto appendEmptyStr = [&str](bool last = false)
+		{
+			str += QStringLiteral("\"\"");
+			if (last == false)
+			{
+				str += Separator::SEMICOLON;
+			}
+		};
+
+		auto appendEmptyValue = [&str](bool last = false)
+		{
+			if (last == false)
+			{
+				str += Separator::SEMICOLON;
+			}
+		};
+
+		for(const AppSignal* s : *sset)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->excludeFromBuild() == true)
+			{
+				continue;
+			}
+
+			if (file.isEmpty() == false)
+			{
+				file.append(Separator::CR_LF);
+			}
+
+			str.clear();
+
+			appendStr(s->appSignalID());
+			appendStr(s->customAppSignalID());
+			appendStr(s->caption());
+			appendStr(s->equipmentID());
+			appendStr(E::valueToString(s->signalType()));
+			appendStr(E::valueToString(s->inOutType()));
+
+			if (s->signalType() == E::SignalType::Analog)
+			{
+				appendStr(E::valueToString(s->analogSignalFormat()));
+			}
+			else
+			{
+				appendEmptyStr();
+			}
+
+			if (s->signalType() == E::SignalType::Bus)
+			{
+				appendStr(s->busTypeID());
+			}
+			else
+			{
+				appendEmptyStr();
+			}
+
+			appendStr(s->unit());
+
+			appendStr(s->acquire() ? QStringLiteral("Acquire") : QStringLiteral("NotAcquire"));
+			appendStr(s->archive() ? QStringLiteral("Archive") : QStringLiteral("NotArchive"));
+
+			appendStr(s->enableTuning() ? QStringLiteral("Enable") : QStringLiteral("Disable"));
+
+			if (s->enableTuning())
+			{
+				appendValue(s->tuningDefaultValue().toTypedString());
+				appendValue(s->tuningLowBound().toTypedString());
+				appendValue(s->tuningHighBound().toTypedString());
+			}
+			else
+			{
+				appendEmptyValue();
+				appendEmptyValue();
+				appendEmptyValue();
+			}
+
+			appendStr(s->tags().join(Separator::SEMICOLON), true);
+
+			file.append(str);
+		}
+
+		QByteArray fileData;
+
+		fileData.append(BOM::UTF8);
+		fileData.append(file.toUtf8());
+
+		BuildFile* bf = brWriter->addFile(Directory::COMMON, File::APP_SIGNALS_LIST_CSV, "", "", fileData, false);
+
+		return (bf != nullptr);
 	}
 
 	void ApplicationLogicCompiler::clear()

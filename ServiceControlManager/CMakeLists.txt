@@ -15,16 +15,8 @@ qt_standard_project_setup()
 set(TARGET scm)
 
 add_executable(${TARGET} WIN32
-	../AppDataService/AppDataSource.cpp
-	../AppDataService/AppDataSource.h
-	../AppDataService/DynamicAppSignalState.cpp
-	../AppDataService/DynamicAppSignalState.h
-	../AppDataService/RtTrendsServer.cpp
-	../AppDataService/RtTrendsServer.h
 	../lib/DataSource.cpp
 	../lib/DataSource.h
-	../lib/WidgetUtils.cpp
-	../lib/WidgetUtils.h
 	AppDataServiceWidget.cpp
 	AppDataServiceWidget.h
 	AppDataSourceWidget.cpp
@@ -79,6 +71,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	# Qt Includes
 	#
 	<QAbstractSocket>
+	<QAction>
 	<QApplication>
 	<QCommandLineParser>
 	<QCoreApplication>
@@ -89,21 +82,31 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QFile>
 	<QFileInfo>
 	<QHash>
+	<QHeaderView>
 	<QHostAddress>
+	<QHBoxLayout>
 	<QMap>
+	<QMessageBox>
 	<QMetaClassInfo>
 	<QMetaEnum>
 	<QMetaObject>
 	<QMutex>
 	<QMutexLocker>
+	<QLabel>
 	<QObject>
 	<QQueue>
 	<QSettings>
+	<QSortFilterProxyModel>
+	<QSplitter>
+	<QStandardItemModel>
+	<QStatusBar>
 	<QString>
 	<QStringList>
+	<QTableView>
 	<QTextStream>
 	<QThread>
 	<QTimer>
+	<QToolBar>
 	<QtGlobal>
 	<QtNetwork/QHostAddress>
 	<QUdpSocket>
@@ -115,8 +118,10 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	"../CommonLib/Types.h"
 	"../CommonLib/Hash.h"
+
+	"../UtilsLib/Ui/WidgetUtils.h"
 	
-	"../Proto/Network.pb.h"	
+	<Network.pb.h>
 
 	"../AppSignalLib/AppSignal.h"
 )

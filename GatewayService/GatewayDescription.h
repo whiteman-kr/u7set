@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QRegularExpression>
-#include "../CommonLib/HostAddressPort.h"
-
 class XmlWriteHelper;
 class XmlReadHelper;
 
@@ -17,6 +14,7 @@ namespace Gateway
 		{
 			Unknown,
 			IVS_Impulse,
+			ModbusTcpSlave
 		};
 		Q_ENUM(GatewayType)
 
@@ -52,7 +50,12 @@ namespace Gateway
 			ListNo,
 			DataType,
 			SendEvents,
-			IncludeAppSignalID
+			IncludeAppSignalID,
+
+			// ModbusTcpSlave specific settings
+
+			ModbusDeviceID,
+			SignalsFormat,
 		};
 		Q_ENUM(Setting)
 
@@ -78,6 +81,25 @@ namespace Gateway
 			Discrete_D			// Discrete parameters, format 'D'
 		};
 		Q_ENUM(SignalListDataType)
+
+		enum class ModbusSignalFormat
+		{
+			Unknown,
+			DiscreteBit,
+			AnalogFloat16,
+			AnalogFloat32,
+			AnalogSInt16,
+			AnalogSInt32,
+		};
+		Q_ENUM(ModbusSignalFormat)
+
+		enum class ModbusByteOrder
+		{
+			Unknown,
+			BE,
+			LE,
+		};
+		Q_ENUM(ModbusByteOrder)
 	};
 
 	class ParserLog;
@@ -87,6 +109,8 @@ namespace Gateway
 		int lineNo = 0;
 		E::Setting setting = E::Setting::Unknown;
 		QVariant value;
+
+		QString settingName() const { return ::E::valueToString<E::Setting>(setting); }
 	};
 
 	class SettingsValues
@@ -129,11 +153,19 @@ namespace Gateway
 	class SignalList
 	{
 	public:
-		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value);
+		SignalList();
+
+		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
 		bool settingIsSet(E::Setting st) const;
 
 		virtual bool isKnownSetting(E::Setting st) const;
-		virtual bool checkAndApplySettings(int lineNo, ParserLog& log);
+		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
+
+		virtual bool appendSignalID(const QString& appSignalID, QString* errMsg);
+		virtual bool appendAddressSignalID(const QString& addressStr, const QString& appSignalID, QString* errMsg);
+
+		std::optional<::E::SignalType> signalType() const;
+		void setSignalType(::E::SignalType st);
 
 		SettingValue getSettingValue(E::Setting st) const;
 
@@ -154,7 +186,9 @@ namespace Gateway
 
 	protected:
 		SettingsValues m_settingsValues;
-		std::vector<QString> m_signalIDs;
+
+		std::vector<QString> m_signalIDs;			// AppSignalIDs
+		std::optional<::E::SignalType> m_signalType;
 
 		friend class Parser;
 	};
@@ -207,8 +241,8 @@ namespace Gateway
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml);
 
-		void writeSignalListsToXml(XmlWriteHelper& xml) const;
-		bool readSignalListsFromXml(XmlReadHelper& xml);
+		virtual void writeSignalListsToXml(XmlWriteHelper& xml) const;
+		virtual bool readSignalListsFromXml(XmlReadHelper& xml);
 
 		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
 
@@ -256,104 +290,4 @@ namespace Gateway
 	};
 
 	using GatewaysShared = std::shared_ptr<Gateways>;
-
-	// IVS_Impulse gateway structs
-
-	class IvsImpulseSignalList : public SignalList
-	{
-	private:
-		static const std::set<E::Setting> m_requiredSettings;
-
-	public:
-		IvsImpulseSignalList();
-
-		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
-
-		int listNo() const;
-		E::SignalListDataType dataType() const;
-		char dataTypeLetter() const;
-		bool sendEvents() const;
-		bool includeAppSignalID() const;
-
-	private:
-		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
-		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
-
-	private:
-		int m_listNo;
-		E::SignalListDataType m_dataType;
-		bool m_sendEvents;
-		bool m_includeAppSignalID;
-	};
-
-	using IvsImpulseSignalListShared = std::shared_ptr<IvsImpulseSignalList>;
-
-	class IvsImpulseGateway : public Gateway
-	{
-	public:
-		static const std::set<E::Setting> m_requiredSettings;
-		static const std::set<E::Setting> m_optionalSettings;
-
-	public:
-
-		struct DataType_ListID
-		{
-			E::SignalListDataType dataType = E::SignalListDataType::Unknown;
-			int listID = 0;
-		};
-
-	public:
-		IvsImpulseGateway();
-		IvsImpulseGateway(const QString& gwID, const QString& gwDesc);
-
-		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
-
-		virtual void appendSignalList() override;
-
-		//
-
-		int systemID() const;
-		HostAddressPort localGatewayIP1() const;
-		HostAddressPort remoteGatewayIP1() const;
-		HostAddressPort localGatewayIP2() const;
-		HostAddressPort remoteGatewayIP2() const;
-		int listsVersion() const;
-		::E::TimeType timeType() const;
-		int period() const;
-
-	private:
-		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
-		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
-
-	private:
-		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log) override;
-
-		bool checkSignalListsSettings(ParserLog& log);
-		bool generateSignalListsFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
-
-		bool generateSignalListFile(const IvsImpulseSignalList& signalList,
-									File& file,
-									const SignalSetAdapter& signalSetAdapter,
-									ParserLog& log);
-
-	private:
-		int m_systemID = 0;
-
-		HostAddressPort m_localGatewayIP1;
-		HostAddressPort m_remoteGatewayIP1;
-
-		HostAddressPort m_localGatewayIP2;
-		HostAddressPort m_remoteGatewayIP2;
-
-		int m_listsVersion = 0;
-		::E::TimeType m_timeType = ::E::TimeType::Plant;
-		int m_period = 1000;
-	};
-
-	bool operator < (const IvsImpulseGateway::DataType_ListID& s1,
-					 const IvsImpulseGateway::DataType_ListID& s2);
-
-	using IvsImpulseGatewayShared = std::shared_ptr<IvsImpulseGateway>;
 }

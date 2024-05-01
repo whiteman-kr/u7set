@@ -32,8 +32,18 @@ add_executable(${TARGET}
 	IvsImpulseCommThread.cpp
 	IvsImpulseCommThread.h
 	IvsImpulseDataProtocol.h
+	IvsImpulseGateway.cpp
+	IvsImpulseGateway.h
 	IvsImpulseGatewayHandler.cpp
 	IvsImpulseGatewayHandler.h
+	ModbusProtocol.cpp
+	ModbusProtocol.h
+	ModbusTcpSlaveGateway.cpp
+	ModbusTcpSlaveGateway.h
+	ModbusTcpSlaveGatewayHandler.cpp
+	ModbusTcpSlaveGatewayHandler.h
+	ModbusTcpSlaveThread.cpp
+	ModbusTcpSlaveThread.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -46,6 +56,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	#
 	<algorithm>
 	<atomic>
+	<chrono>
 	<functional>
 	<iostream>
 	<limits>
@@ -54,6 +65,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<memory>
 	<vector>
 	<set>
+	<thread>
 	<type_traits>
 
 	# Qt includes
@@ -62,8 +74,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QApplication>
 	<QCommandLineParser>
 	<QCoreApplication>
-	<QDebug>
 	<QDateTime>
+	<QDebug>
 	<QElapsedTimer>
 	<QEventLoop>
 	<QFile>
@@ -79,35 +91,37 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QMutexLocker>
 	<QObject>
 	<QQueue>
+	<QRegularExpression>
 	<QSettings>
 	<QString>
 	<QStringList>
 	<QTextStream>
 	<QThread>
 	<QTimer>
-	<QtGlobal>
-	<QtNetwork/QHostAddress>
 	<QUdpSocket>
 	<QUuid>
 	<QVariant>
 	<QVector>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
+	<QtGlobal>
+	<QtNetwork/QHostAddress>
 
 	# Project includes
 	#
 	"../CommonLib/Types.h"
 	"../CommonLib/Hash.h"
+	"../CommonLib/HostAddressPort.h"
 
-	"../Proto/Network.pb.h"	
+	<Network.pb.h>
 
 	"../AppSignalLib/AppSignal.h"
+
+	"../UtilsLib/WUtils.h"
+	"../UtilsLib/XmlHelper.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
-
-target_include_directories(${TARGET} PRIVATE ./../asio/include)
-target_compile_definitions(${TARGET} PRIVATE ASIO_STANDALONE=1)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib)

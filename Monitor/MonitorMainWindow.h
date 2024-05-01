@@ -3,19 +3,20 @@
 #include "MonitorConfigController.h"
 #include "MonitorSchemaManager.h"
 
-#include "../AppSignalLib/TuningSignalManager.h"
-#include "../ClientLib/AdsConnection.h"
-#include "../ClientLib/AppSignalManager.h"
-#include "../ClientLib/ClientTranslator.h"
-#include "../ClientLib/TuningConnection.h"
-#include "../ClientLib/TuningLog.h"
-#include "../ClientLib/TuningUserManager.h"
+#include <ClientLib/TuningSignalManager.h>
+#include <ClientLib/AdsConnection.h>
+#include <ClientLib/AppSignalManager.h>
+#include <ClientLib/ClientTranslator.h>
+#include <ClientLib/TuningConnection.h>
+#include <ClientLib/TuningLog.h>
+#include <ClientLib/TuningUserManager.h>
+#include <SchemaClientLib/SchemaDrawStatistics.h>
+
 #include "../UtilsLib/InstanceResolver.h"
 #include "../UtilsLib/LogFile.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../lib/Ui/DialogAlert.h"
 
-#include <SchemaClientLib/SchemaDrawStatistics.h>
 
 namespace VFrame30
 {
@@ -148,8 +149,8 @@ public:
 	ClientLib::TuningUserManager& userManager();
 	const ClientLib::TuningUserManager& userManager() const;
 
-	TuningSignalManager& tuningSignalManager();
-	const TuningSignalManager& tuningSignalManager() const;
+	ClientLib::TuningSignalManager& tuningSignalManager();
+	const ClientLib::TuningSignalManager& tuningSignalManager() const;
 
 	ClientLib::TuningConnection& tuningConnection();
 	const ClientLib::TuningConnection& tuningConnection() const;
@@ -168,7 +169,7 @@ private:
 
 	MonitorConfigController m_configController;
 	ClientLib::AppSignalManager m_signalManager;
-	TuningSignalManager m_tuningSignalManager;
+	ClientLib::TuningSignalManager m_tuningSignalManager;
 
 	MonitorSchemaManager m_schemaManager;
 

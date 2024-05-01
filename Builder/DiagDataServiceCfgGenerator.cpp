@@ -314,6 +314,8 @@ namespace Builder
 
 		for (const auto& p : chassisModules)
 		{
+			//int place = p.first;
+
 			std::shared_ptr<Hardware::DeviceModule> module = p.second;
 
 //			Hash hash = calcHash(module->equipmentIdTemplate());

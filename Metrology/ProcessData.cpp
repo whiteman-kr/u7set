@@ -760,7 +760,7 @@ bool ExportData::saveCsvFile(const QString &fileName)
 		return false;
 	}
 
-	file.write(BOM::UTF8.toUtf8());
+	file.write(BOM::UTF8);
 
 	int columnCount = m_pView->model()->columnCount();
 	for(int column = 0; column < columnCount; column++)

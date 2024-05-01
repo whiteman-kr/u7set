@@ -1,2 +1,3 @@
 BUMPG-4
 	05.02.2024	Version: 1	BUMPG-4_v1.u7devp		RPCT-3826:  Added preset
+	22.03.2024	Version: 2	BUMPG-4_v2.u7devp		RPCT-3826:  Fixed misprints

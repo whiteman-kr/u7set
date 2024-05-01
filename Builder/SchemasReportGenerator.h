@@ -262,6 +262,7 @@ namespace Builder
 							   const QString& userPassword,
 							   std::vector<DbFileInfo> files,
 							   const QString& filePath,
+							   bool generateToOutputData,
 							   const SchemasReportOptions& options,
 							   const std::vector<SchemaTypesParams>& schemaTypesParams);
 
@@ -382,6 +383,10 @@ namespace Builder
 		// Output file path
 		//
 		QString m_filePath;
+
+		// Generate to buffer (m_outputData)
+		//
+		bool m_generateToOutputData = false;
 
 		// Output Data
 		//

@@ -2,8 +2,8 @@
 #error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
-#include "./include/HardwareLib/Connection.h"
-#include "../Proto/ProtoCommonHelper.h"
+#include <HardwareLib/Connection.h>
+#include <ProtoCommonHelper.h>
 
 
 namespace Hardware

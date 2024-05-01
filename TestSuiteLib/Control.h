@@ -9,7 +9,7 @@
 #include "IOutputController.h"
 #include "ControlState.h"
 #include "ScriptRunner.h"
-#include "../ClientLib/AppSignalManager.h"
+#include <ClientLib/AppSignalManager.h>
 
 namespace TestSuite
 {

@@ -85,7 +85,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/Types.h"
 	"../CommonLib/Hash.h"
 	
-	"../Proto/Network.pb.h"	
+	<Network.pb.h>
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

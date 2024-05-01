@@ -1,10 +1,7 @@
-#include <QXmlStreamReader>
-#include <QMetaProperty>
+#include "GatewayService.h"
 
 #include "../OnlineLib/CfgServerLoader.h"
 #include "GatewayDescriptionParser.h"
-
-#include "GatewayService.h"
 
 // -------------------------------------------------------------------------------
 //

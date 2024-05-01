@@ -156,20 +156,20 @@ namespace Builder
 		// Sort signals by offset
 
 		std::sort(busSignals.begin(), busSignals.end(),
-			[](const QVariant& s1, const QVariant& s2)
+				  [](const QVariant& s1, const QVariant& s2)
+		{
+			const JsBusSignal* v1 = s1.value<Builder::JsBusSignal*>();
+			const JsBusSignal* v2 = s2.value<Builder::JsBusSignal*>();
+
+			if (v1 == nullptr || v2 == nullptr)
 			{
-				const JsBusSignal* v1 = s1.value<Builder::JsBusSignal*>();
-				const JsBusSignal* v2 = s2.value<Builder::JsBusSignal*>();
+				Q_ASSERT(v1);
+				Q_ASSERT(v2);
+				return false;
+			}
 
-				if (v1 == nullptr || v2 == nullptr)
-				{
-					Q_ASSERT(v1);
-					Q_ASSERT(v2);
-					return false;
-				}
-
-				return v1->offsetW() < v2->offsetW();
-			});
+			return v1->offsetW() < v2->offsetW();
+		});
 
 		return busSignals;
 	}
@@ -198,6 +198,8 @@ namespace Builder
 			case E::SignalType::Analog:
 			case E::SignalType::Discrete:
 				{
+					// JsBusSignal has a parent QObject, so it will be deleted automatically
+					//
 					JsBusSignal* bsResult = new JsBusSignal(this, &bs, offset + bs.inbusAddr.offset(), busShared->busTypeID());
 					busSignals.push_back(QVariant::fromValue<JsBusSignal*>(bsResult));
 				}
@@ -223,6 +225,7 @@ namespace Builder
 		m_db(&context->m_db),
 		m_deviceRoot(context->m_equipmentSet->root().get()),
 		m_fscModules(context->m_fscModules),
+		m_vduModules(context->m_vduModules),
 		m_lmDescriptions(context->m_lmDescriptions.get()),
 		m_signalSet(context->m_signalSet.get()),
 		m_subsystems(context->m_subsystems.get()),
@@ -253,6 +256,58 @@ namespace Builder
 	}
 
 	bool ConfigurationBuilder::build()
+	{
+		bool ok = true;
+		ok &= buildVDUConfiguration();
+		ok &= buildFSCConfiguration();
+		return ok;
+	}
+
+	bool ConfigurationBuilder::writeDataFiles()
+	{
+		TEST_PTR_RETURN_FALSE(m_buildResultWriter);
+
+		QStringList subsystemsList = m_buildResultWriter->firmwareWriter()->subsystems();
+
+		// Save confCollection items to binary files
+		//
+		for (const auto& ss : subsystemsList)
+		{
+			const QByteArray& log = m_buildResultWriter->firmwareWriter()->scriptLog(ss);
+
+			if (log.isEmpty() == false)
+			{
+				if (m_buildResultWriter->addFile(m_buildResultWriter->subsystemDirectory(ss),
+												 ss.toLower() + ".mct", log) == nullptr)
+				{
+					return false;
+				}
+			}
+		}
+
+		if (m_generateExtraDebugInfo == true)
+		{
+			if (writeExtraDataFiles() == false)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool ConfigurationBuilder::jsIsInterruptRequested()
+	{
+		if(m_buildWorkerThread == nullptr)
+		{
+			assert(m_buildWorkerThread);
+			return false;
+		}
+
+		return m_buildWorkerThread->isInterruptRequested();
+	}
+
+	bool ConfigurationBuilder::buildFSCConfiguration()
 	{
 		if (db() == nullptr || log() == nullptr)
 		{
@@ -411,7 +466,12 @@ namespace Builder
 			{
 				if (logicModuleDescription->flashMemory().m_configWriteBitstream == true)
 				{
-					if (runConfigurationScriptFile(subsystemModules, logicModuleDescription) == false)
+					QString subsystemStrId = subsystemModules[0]->propertyValue("SubsystemID").toString();
+					if (runConfigurationScriptFile(subsystemStrId,
+												   m_subsystems->ssKey(subsystemStrId),
+												   subsystemModules,
+												   logicModuleDescription,
+												   m_buildResultWriter->firmwareWriter()) == false)
 					{
 						return false;
 					}
@@ -482,7 +542,7 @@ namespace Builder
 			const int MODULE_LM11_VERSION = 0x90;
 
 			if (m->moduleFamily() == static_cast<int>(Hardware::DeviceModule::FamilyType::LM) &&
-				m->moduleVersion() == MODULE_LM11_VERSION)
+					m->moduleVersion() == MODULE_LM11_VERSION)
 			{
 				// LM-11 has rotary switches, so check if subsystem key and channel number have range 0..f and print their positions
 				//
@@ -533,48 +593,235 @@ namespace Builder
 		return true;
 	}
 
-	bool ConfigurationBuilder::writeDataFiles()
+	bool ConfigurationBuilder::buildVDUConfiguration()
 	{
-		TEST_PTR_RETURN_FALSE(m_buildResultWriter);
-
-		QStringList subsystemsList = m_buildResultWriter->firmwareWriter()->subsystems();
-
-		// Save confCollection items to binary files
-		//
-		for (auto ss : subsystemsList)
+		if (db() == nullptr || log() == nullptr)
 		{
-			const QByteArray& log = m_buildResultWriter->firmwareWriter()->scriptLog(ss);
+			assert(db());
+			assert(log());
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("%1: Fatal error, input parameter is nullptr!").arg(__FUNCTION__));
+			return false;
+		}
 
-			if (log.isEmpty() == false)
+		if (m_vduModules.empty() == true)
+		{
+			// No VDU modules exist
+			return true;
+		}
+
+		std::set<quint16> ssKeyValues;
+
+		//
+		// Generate Module Configuration Binary File for VDU
+		//
+		LOG_MESSAGE(m_log, "");
+		LOG_MESSAGE(m_log, tr("Generating VDU configurations"));
+
+		QString lmDescriptionFile;
+		LmDescription* description = nullptr;
+
+		for (auto it = m_vduModules.begin(); it != m_vduModules.end(); it++)
+		{
+			Hardware::ModuleFirmwareWriter writer;
+
+			Hardware::DeviceModule* vdu = *it;
+			if (vdu == nullptr)
 			{
-				if (m_buildResultWriter->addFile(m_buildResultWriter->subsystemDirectory(ss),
-												 ss.toLower() + ".mct", log) == nullptr)
+				assert(vdu);
+				return false;
+			}
+
+			if (vdu->propertyExists("LmDescriptionFile") == false)
+			{
+				m_log->errCFG3000("LmDescriptionFile", vdu->equipmentId());
+				return false;
+			}
+
+			if (lmDescriptionFile.isEmpty() == true)
+			{
+				// Load descruiption only for first VDU
+
+				lmDescriptionFile = vdu->propertyValue("LmDescriptionFile").toString();
+
+				description = m_lmDescriptions->get(vdu).get();
+
+				if (description == nullptr)
+				{
+					m_log->errEQP6004(vdu->equipmentIdTemplate(), LogicModuleSet::lmDescriptionFile(vdu), vdu->uuid());
+					return false;
+				}
+			}
+			else
+			{
+				// Check if VDU description is the same
+				if (lmDescriptionFile != vdu->propertyValue("LmDescriptionFile").toString())
+				{
+					m_log->errEQP6007("VDU");
+					return false;
+				}
+			}
+
+			quint16 ssKey = m_subsystems->ssKeyForVdu(vdu->equipmentId());
+			if (ssKeyValues.contains(ssKey) == true) 
+			{
+				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("%1: Fatal error, Subsystem key for VDU %2 is not unique!").arg(__FUNCTION__).arg(vdu->equipmentId()));
+				return false;
+			}
+			ssKeyValues.insert(ssKey);
+
+			// Run VDU configuration script for every module
+
+			std::vector<Hardware::DeviceModule*> vduModule;
+			vduModule.push_back(vdu);
+
+			if (description->flashMemory().m_configWriteBitstream == true)
+			{
+				if (runConfigurationScriptFile(vdu->equipmentId(), 0, vduModule, description, &writer) == false)
+				{
+					return false;
+				}
+
+
+				const int configFrame = 1;
+				
+				// Write UniqueId
+				//
+				{
+					Hash uniqueId = ::calcHash(vdu->equipmentId());
+
+					const int uniqueIdOffset = 4;
+
+					writer.setData64(configFrame, uniqueIdOffset, uniqueId);
+					writer.jsAddDescription(vdu->place(),
+											tr("%1;%2;%3;0;64;%4;0x%5")
+												.arg(vdu->equipmentId())
+												.arg(configFrame)
+												.arg(uniqueIdOffset)
+												.arg("UniqueId")
+												.arg(QString::number(uniqueId, 16)));
+
+
+					writer.writeLog(tr("    [%1:%2] UniqueId = 0x%3\r\n")
+										.arg(configFrame)
+										.arg(uniqueIdOffset)
+										.arg(QString::number(uniqueId, 16)));
+
+					writer.jsSetUniqueID(vdu->place(), ::calcHash(vdu->equipmentId()));
+				}
+
+				// CRC
+				{
+					const int crcOffset = 172 * 2;
+
+					QString result = writer.storeCrc64(configFrame, 0, crcOffset, crcOffset);
+					if (result.isEmpty() == true) 
+					{
+						m_log->errINT1001(tr("%1: Fatal error, CRC64 for VDU %2 has invalid address (frame %3, offset %3)!")
+											  .arg(__FUNCTION__)
+											  .arg(vdu->equipmentId())
+											  .arg(configFrame)
+											  .arg(crcOffset));
+					}
+
+					writer.jsAddDescription(vdu->place(),
+											tr("%1;%2;%3;0;64;%4;0x%5")
+												.arg(vdu->equipmentId())
+												.arg(configFrame)
+												.arg(crcOffset)
+												.arg("CRC64")
+												.arg(result));
+
+
+					writer.writeLog(tr("    [%1:%2] crc64 = 0x%3\r\n").arg(configFrame).arg(crcOffset).arg(result));
+				}
+			}
+
+			// Save .bts file for VDU
+
+			QByteArray fileData;
+			if (writer.save(fileData, m_log) == true)
+			{
+				BuildFile* buildFile = m_buildResultWriter->addFile(QString("%1/%2").arg(Directory::VDUs).arg(vdu->equipmentId()),
+																	QString("%1.bts").arg(vdu->equipmentId().toLower()), fileData);
+
+				if (buildFile == nullptr)
 				{
 					return false;
 				}
 			}
-		}
 
-		if (m_generateExtraDebugInfo == true)
-		{
-			if (writeExtraDataFiles() == false)
+			// Save .mct file for VDU
+
+			const QByteArray& log = writer.scriptLog(vdu->equipmentId());
+
+			if (log.isEmpty() == false)
 			{
-				return false;
+				if (m_buildResultWriter->addFile(QString("%1/%2").arg(Directory::VDUs).arg(vdu->equipmentId()),
+												 vdu->equipmentId().toLower() + ".mct", log) == nullptr)
+				{
+					return false;
+				}
 			}
+
 		}
 
-		return true;
-	}
+				// Find all LM modules and save ssKey and channel information
+		//
 
-	bool ConfigurationBuilder::jsIsInterruptRequested()
-	{
-		if(m_buildWorkerThread == nullptr)
+		std::sort(m_vduModules.begin(), m_vduModules.end(),
+				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
 		{
-			assert(m_buildWorkerThread);
+			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
+		});
+
+		QStringList report;
+		report << "Jumpers configuration for VDU modules";
+
+		for (Hardware::DeviceModule* m : m_vduModules)
+		{
+			quint16 ssKey = m_subsystems->ssKeyForVdu(m->equipmentId());
+
+			report << "\r\n";
+			report << "Equipment ID: " + m->equipmentIdTemplate();
+			report << "Caption: " + m->caption();
+			report << "Place: " + QString::number(m->place());
+			report << "Subsystem Code: " + QString::number(ssKey);
+
+			quint16 jumpers = ssKey;
+
+			quint16 crc4 = Crc::crc4(jumpers);
+			jumpers |= (crc4 << 12);
+
+			QString jumpersHex = QString::number(jumpers, 2).rightJustified(16, '0');
+			jumpersHex.insert(4, ' ');
+			jumpersHex.insert(9, ' ');
+			jumpersHex.insert(14, ' ');
+
+			// All other LMs use jumpers
+			//
+			if ((ssKey < 0) || (ssKey > std::numeric_limits<quint16>::max()))
+			{
+				m_log->errCFG3060(m->equipmentIdTemplate(), ssKey, 0, std::numeric_limits<quint16>::max());
+			}
+
+			report << "Jumpers Configuration (HEX): 0x" + QString::number(jumpers, 16);
+			report << "Jumpers Configuration (BIN): " + jumpersHex;
+		}
+
+		QByteArray reportData;
+		for (const QString& s : report)
+		{
+			reportData.append(s.toUtf8());
+			reportData.append(QChar::LineFeed);
+		}
+
+		if (m_buildResultWriter->addFile("Reports", "VduJumpers.txt", reportData) == nullptr)
+		{
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save VduJumpers.txt file!"));
 			return false;
 		}
 
-		return m_buildWorkerThread->isInterruptRequested();
+		return true;
 	}
 
 	DbController* ConfigurationBuilder::db()
@@ -587,7 +834,11 @@ namespace Builder
 		return m_log;
 	}
 
-	bool ConfigurationBuilder::runConfigurationScriptFile(const std::vector<Hardware::DeviceModule*>& subsystemModules, LmDescription* lmDescription)
+	bool ConfigurationBuilder::runConfigurationScriptFile(const QString& subsystemID,
+														  int subsystemKey,
+														  const std::vector<Hardware::DeviceModule*>& subsystemModules,
+														  LmDescription* lmDescription,
+														  Hardware::ModuleFirmwareWriter* writer)
 	{
 
 		if (subsystemModules.empty() == true || lmDescription == nullptr)
@@ -650,24 +901,21 @@ namespace Builder
 		int frameSize = lmDescription->flashMemory().m_configFramePayload;
 		int frameCount = lmDescription->flashMemory().m_configFrameCount;
 
-		QString subsysStrID = subsystemModules[0]->propertyValue("SubsystemID").toString();
-		int subsysID = m_subsystems->ssKey(subsysStrID);
-
 		int configUartId = lmDescription->flashMemory().m_configUartId;
 
-		m_buildResultWriter->firmwareWriter()->createFirmware(subsysStrID,
-															  subsysID,
-															  configUartId,
-															  "Configuration",
-															  frameSize,
-															  frameCount,
-															  lmDescription->lmDescriptionFile(subsystemModules[0]),
+		writer->createFirmware(subsystemID,
+							   subsystemKey,
+							   configUartId,
+							   "Configuration",
+							   frameSize,
+							   frameCount,
+							   lmDescription->lmDescriptionFile(subsystemModules[0]),
 				lmDescription->descriptionNumber());
 
-		m_buildResultWriter->firmwareWriter()->setScriptFirmware(subsysStrID, configUartId);
+		writer->setScriptFirmware(subsystemID, configUartId);
 
-		QJSValue jsFirmware = jsEngine->newQObject(m_buildResultWriter->firmwareWriter());
-		QJSEngine::setObjectOwnership(m_buildResultWriter->firmwareWriter(), QJSEngine::CppOwnership);
+		QJSValue jsFirmware = jsEngine->newQObject(writer);
+		QJSEngine::setObjectOwnership(writer, QJSEngine::CppOwnership);
 
 		QJSValue jsLog = jsEngine->newQObject(m_log);
 		QJSEngine::setObjectOwnership(m_log, QJSEngine::CppOwnership);
@@ -722,10 +970,10 @@ namespace Builder
 		if (jsResult.isError() == true)
 		{
 			QString errorMessage = tr("Uncaught exception while generating module configuration '%1': %2, lineNumber: %3, Stack: %4, ")
-								   .arg(lmDescription->configurationStringFile())
-								   .arg(jsResult.toString())
-								   .arg(jsResult.property("lineNumber").toInt())
-								   .arg(jsResult.property("stack").toString());
+					.arg(lmDescription->configurationStringFile())
+					.arg(jsResult.toString())
+					.arg(jsResult.property("lineNumber").toInt())
+					.arg(jsResult.property("stack").toString());
 
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, errorMessage);
 			return false;
@@ -788,9 +1036,9 @@ namespace Builder
 			}
 
 			if (p->caption() == QLatin1String("ConfigurationScript") ||
-				p->caption() == QLatin1String("SpecificProperties") ||
-				p->caption() == QLatin1String("SignalSpecificProperties") ||
-				p->caption() == QLatin1String("EquipmentIDTemplate"))
+					p->caption() == QLatin1String("SpecificProperties") ||
+					p->caption() == QLatin1String("SignalSpecificProperties") ||
+					p->caption() == QLatin1String("EquipmentIDTemplate"))
 			{
 				continue;
 			}

@@ -281,6 +281,11 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::writeAppSignalsExtXml()
 	{
+		if (m_context->generateAppSignalsExtXml() == false)
+		{
+			return true;
+		}
+
 		return writeAppSignalsExtXml(dynamic_cast<AppSignalSet*>(m_signalSet),
 									&m_acquiredAppSignals,
 									m_buildResultWriter,

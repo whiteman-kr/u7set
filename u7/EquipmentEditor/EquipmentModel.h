@@ -49,9 +49,9 @@ private:
 
 public:
 	void checkInDeviceObject(QModelIndexList& rowList);
-
 	void checkOutDeviceObject(QModelIndexList& rowList);
 	void undoChangesDeviceObject(QModelIndexList& undoRowList);
+	void undoChangesRecursively(QModelIndex undoRow);
 
 	void refreshDeviceObject(QModelIndexList& rowList);
 	void updateDeviceObject(QModelIndexList& rowList);

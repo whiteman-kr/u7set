@@ -2,8 +2,9 @@
 #define CLIENTFILTERSTORAGE_H
 
 #include "../lib/Tuning/TuningFilter.h"
-#include "../ClientLib/TuningSourceState.h"
 #include "../OnlineLib/SoftwareSettings.h"
+
+#include <ClientLib/TuningSourceState.h>
 
 namespace ClientLib
 {
@@ -22,7 +23,7 @@ public:
 									 std::vector<std::pair<QString, QString>> &notFoundSignalsAndFilters,
 									 QWidget* parentWidget);
 
-	void updateCounters(const TuningSignalManager& tunigSignals,
+	void updateCounters(const ClientLib::TuningSignalManager& tunigSignals,
 						const ClientLib::TuningConnection& tuningConnection,
 						const std::vector<ClientLib::TuningSource>& sourceStates,
 						TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,

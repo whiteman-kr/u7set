@@ -134,6 +134,7 @@ private:
 	//----------------------------------
 	QAction* m_checkOutAction = nullptr;
 	QAction* m_checkInAction = nullptr;
+	QAction* m_undoChangesRecursivelyAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
 	QAction* m_historyAction = nullptr;
 	QAction* m_compareAction = nullptr;

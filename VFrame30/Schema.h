@@ -4,7 +4,6 @@
 #include "../CommonLib/DebugInstCounter.h"
 #include "../CommonLib/Factory.h"
 #include "../UtilsLib/ILogFile.h"
-//#include "../Proto/ProtoSerialization.h"
 
 
 namespace Afb
@@ -255,6 +254,7 @@ namespace VFrame30
 		[[nodiscard]] bool isMonitorSchema() const;
 		[[nodiscard]] bool isTuningSchema() const;
 		[[nodiscard]] bool isDiagSchema() const;
+		[[nodiscard]] bool isVduSchema() const;
 
 		[[nodiscard]] LogicSchema* toLogicSchema();
 		[[nodiscard]] const LogicSchema* toLogicSchema() const;
