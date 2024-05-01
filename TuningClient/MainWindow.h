@@ -12,7 +12,7 @@
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningUserManager.h>
 #include <ClientLib/TuningLog.h>
-#include "../lib/Ui/DialogTcpStatistics.h"
+#include <SchemaClientLib/DialogTcpStatistics.h>
 #include "../UtilsLib/LogFile.h"
 
 class DialogAlert;
@@ -114,7 +114,7 @@ private:
 	std::vector<SchemasWorkspace*> m_schemasWorkspaces;
 
 	DialogTuningSources* m_dialogTuningSources = nullptr;
-	DialogTcpStatistics* m_dialogStatistics = nullptr;
+	SchemaClientLib::DialogTcpStatistics* m_dialogStatistics = nullptr;
 	DialogAlert* m_dialogAlert = nullptr;
 
 	// User interface

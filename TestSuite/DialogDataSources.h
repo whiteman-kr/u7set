@@ -1,14 +1,21 @@
 #pragma once
 
-#include "../lib/Ui/AppDataSourcesWidget.h"
-#include "../lib/Ui/TuningSourcesWidget.h"
-#include "../TestSuiteLib/TestSuiteConfigController.h"
 #include "../lib/Tuning/ITuningAuthorization.h"
 
 #include <ClientLib/TuningSignalManager.h>
 #include <ClientLib/AdsSourceStateConnection.h>
 #include <ClientLib/TuningConnection.h>
-#include <ClientLib/IRecentAppSignals.h>
+
+namespace TestSuite
+{
+	class TestSuiteConfigController;
+}
+
+namespace SchemaClientLib
+{
+	class AppDataSourcesWidget;
+	class TuningSourcesWidget;
+}
 
 class DialogDataSources : public QDialog
 {
@@ -32,10 +39,10 @@ private slots:
 private:
 	static inline DialogDataSources* s_dialogDataSources = nullptr;
 
-	AppDataSourcesWidget* m_appDataSourcesWidget = nullptr;
+	SchemaClientLib::AppDataSourcesWidget* m_appDataSourcesWidget = nullptr;
 
 	QLabel* m_tuningSourcesLabel = nullptr;
-	TuningSourcesWidget* m_tuningSourcesWidget = nullptr;
+	SchemaClientLib::TuningSourcesWidget* m_tuningSourcesWidget = nullptr;
 
 	QVBoxLayout* m_mainLayout = nullptr;
 

@@ -77,6 +77,7 @@ public:
 	ClientLib::ConfigurationInfo configInfo() const;
 
 	QString configurationStartSchemaId() const;
+	bool configurationTuningEnabled() const;
 
 	const ComparatorSet& setpoints() const;
 

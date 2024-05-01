@@ -7,6 +7,7 @@
 //#include "SelectSchemaWidget.h"
 #include "../UtilsLib/InstanceResolver.h"
 #include <SchemaClientLib/SchemaDrawStatistics.h>
+#include <SchemaClientLib/DialogTcpStatistics.h>
 //#include "../VFrame30/ClientSchemaView.h"
 #include <ClientLib/ClientTranslator.h>
 #include <ClientLib/AdsConnection.h>
@@ -14,7 +15,6 @@
 #include "../VFrame30/LogController.h"
 #include "../UtilsLib/LogFile.h"
 #include "../lib/Ui/DialogAlert.h"
-#include "../lib/Ui/DialogTcpStatistics.h"
 
 #include "../OnlineLib/SoftwareInfo.h"
 
@@ -246,7 +246,7 @@ private:
 
 	// --
 	//
-	DialogTcpStatistics* m_dialogStatistics = nullptr;
+	SchemaClientLib::DialogTcpStatistics* m_dialogStatistics = nullptr;
 };
 
 

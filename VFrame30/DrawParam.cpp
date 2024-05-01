@@ -164,7 +164,7 @@ namespace VFrame30
 		return const_cast<ClientSchemaView*>(ptr);
 	}
 
-	ITimeStats* CDrawParam::timeStats()
+	VFrame30::ITimeStats* CDrawParam::timeStats()
 	{
 		if (drawMode() == DrawMode::Editor)
 		{
@@ -175,7 +175,7 @@ namespace VFrame30
 		return c ? c->timeStats() : nullptr;
 	}
 
-	ITimeStats* CDrawParam::timeStats() const
+	VFrame30::ITimeStats* CDrawParam::timeStats() const
 	{
 		if (drawMode() == DrawMode::Editor)
 		{

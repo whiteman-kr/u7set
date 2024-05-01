@@ -8,7 +8,7 @@ ClientTuningSourcesWidget::ClientTuningSourcesWidget(ClientLib::TuningConnection
 													 ClientLib::TuningUserManager& userManager,
 													 bool hasActivationControls,
 													 QWidget* parent):
-	TuningSourcesWidget(connection, hasActivationControls, parent),
+	SchemaClientLib::TuningSourcesWidget(connection, hasActivationControls, parent),
 	m_userManager(userManager)
 {
 
@@ -16,7 +16,6 @@ ClientTuningSourcesWidget::ClientTuningSourcesWidget(ClientLib::TuningConnection
 
 ClientTuningSourcesWidget::~ClientTuningSourcesWidget()
 {
-
 }
 
 bool ClientTuningSourcesWidget::login()
@@ -49,12 +48,12 @@ DialogTuningSources::DialogTuningSources(ClientLib::TuningConnection& tuningConn
 	{
 		m_btnEnableControl = new QPushButton(tr("Activate Control..."));
 		m_btnEnableControl->setEnabled(false);
-		connect(m_btnEnableControl, &QPushButton::clicked, m_tuningSourcesWidget, &TuningSourcesWidget::enableControlClicked);
+		connect(m_btnEnableControl, &QPushButton::clicked, m_tuningSourcesWidget, &SchemaClientLib::TuningSourcesWidget::enableControlClicked);
 		bottomLayout->addWidget(m_btnEnableControl);
 
 		m_btnDisableControl = new QPushButton(tr("Deactivate Control..."));
 		m_btnDisableControl->setEnabled(false);
-		connect(m_btnDisableControl, &QPushButton::clicked, m_tuningSourcesWidget, &TuningSourcesWidget::disableControlClicked);
+		connect(m_btnDisableControl, &QPushButton::clicked, m_tuningSourcesWidget, &SchemaClientLib::TuningSourcesWidget::disableControlClicked);
 		bottomLayout->addWidget(m_btnDisableControl);
 
 		connect(m_tuningSourcesWidget, &ClientTuningSourcesWidget::activationControlsAccessChanged,

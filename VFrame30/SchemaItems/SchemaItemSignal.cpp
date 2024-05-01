@@ -265,26 +265,38 @@ namespace VFrame30
 
 	void SchemaItemSignal::drawHighlight(CDrawParam* drawParam) const
 	{
+		bool highlight = drawParam->highlightIds().contains(label());
+
 		// Draw highlights for m_appSignalIds, m_impactAppSignalIds
 		//
-		for (const QString& appSignalId : m_appSignalIds)
+		if (highlight == false)
 		{
-			if (drawParam->highlightIds().contains(appSignalId) == true)
+			for (const QString& appSignalId : m_appSignalIds)
 			{
-				QRectF highlightRect = itemRectPinIndent(drawParam);
-				drawHighlightRect(drawParam, highlightRect);
-				break;
+				if (drawParam->highlightIds().contains(appSignalId) == true)
+				{
+					highlight = true;
+					break;
+				}
 			}
 		}
 
-		for (const QString& appSignalId : m_impactAppSignalIds)
+		if (highlight == false)
 		{
-			if (drawParam->highlightIds().contains(appSignalId) == true)
+			for (const QString& appSignalId : m_impactAppSignalIds)
 			{
-				QRectF highlightRect = itemRectPinIndent(drawParam);
-				drawHighlightRect(drawParam, highlightRect);
-				break;
+				if (drawParam->highlightIds().contains(appSignalId) == true)
+				{
+					highlight = true;
+					break;
+				}
 			}
+		}
+
+		if (highlight == true)
+		{
+			QRectF highlightRect = itemRectPinIndent(drawParam);
+			drawHighlightRect(drawParam, highlightRect);
 		}
 
 		return;

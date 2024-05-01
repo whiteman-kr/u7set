@@ -118,7 +118,7 @@ namespace Hardware
 		QString propertyString(const QString& caption) const;
 		quint32 propertyIP(const QString& caption) const;
 
-	private:
+	public:
 		QString equipmentId() const;
 		QString caption() const;
 		QUuid uuid() const;

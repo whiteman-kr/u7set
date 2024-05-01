@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../lib/ITimeStats.h"
 #include "./SchemaItems/SchemaItem.h"
 #include "DiagStateController.h"
 #include "ISchemaViewHistory.h"
+#include "ITimeStats.h"
 #include "IViewVariables.h"
 #include "LogController.h"
 #include "SchemaManager.h"
@@ -342,8 +342,8 @@ namespace VFrame30
 
 	public:
 		explicit ClientSchemaView(VFrame30::SchemaManager* schemaManager,
-								  ISchemaViewHistory* schemaViewHistory,
-								  ITimeStats* timeStats,
+								  VFrame30::ISchemaViewHistory* schemaViewHistory,
+								  VFrame30::ITimeStats* timeStats,
 								  QWidget* parent = nullptr);
 		virtual ~ClientSchemaView();
 
@@ -383,7 +383,7 @@ namespace VFrame30
 		void setInfoMode(bool value);
 
 		const QStringList& highlightIds() const;
-		void setHighlightIds(const QStringList& value);
+		void setHighlightIds(QStringList value);
 
 		// TuningController
 		//
@@ -416,6 +416,7 @@ namespace VFrame30
 
 		// User must provide GlobalScript
 		//
+		QString globalScript() const;
 		void setGlobalScript(QString value);
 
 		// --
@@ -452,18 +453,23 @@ namespace VFrame30
 
 		// IViewVariables implementation
 		//
-		bool variableExists(const QString& name) const override;
+		QStringList viewVariables() const override;
+		bool viewVariableExists(const QString& name) const override;
 
-		QVariant variable(const QString& name) const override;
-		void setVariable(const QString& name, const QVariant& value) override;
+		QVariant viewVariable(const QString& name) const override;
+		void setViewVariable(const QString& name, const QVariant& value) override;
 
 		const QVariantHash& variables() const;
 		void setVariables(const QVariantHash& values);
 
+		// Required for DevTools
+		//
+		std::vector<std::pair<QString, QVariant>> scriptVariables() const;
+
 		// TimeStats
 		//
-		ITimeStats* timeStats();
-		ITimeStats* timeStats() const;
+		VFrame30::ITimeStats* timeStats();
+		VFrame30::ITimeStats* timeStats() const;
 
 		// ClientBehavior
 		//

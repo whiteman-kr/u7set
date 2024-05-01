@@ -197,6 +197,36 @@ namespace VFrame30
 	// Draw Functions
 	//
 
+	void PosConnectionImpl::drawHighlight(CDrawParam* drawParam) const
+	{
+		if (drawParam->highlightIds().contains(label()) == true)
+		{
+			QPainter* p = drawParam->painter();
+
+			QPen pen{drawParam->blinkPhase() ? SchemaItem::highlightColor1 : SchemaItem::highlightColor2};
+
+			double lineWeight = drawParam->controlBarSize() / 3.0f;
+			pen.setWidthF(lineWeight);
+
+			p->setBrush(Qt::NoBrush);
+			p->setPen(pen);
+
+			// Draw the main part
+			//
+			QPolygonF polyline(static_cast<int>(points.size()));
+			int index = 0;
+
+			for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
+			{
+				polyline[index++] = QPointF(pt->X, pt->Y);
+			}
+
+			p->drawPolyline(polyline);
+		}
+
+		return;
+	}
+
 	// Рисование элемента при его создании изменении
 	//
 	void PosConnectionImpl::drawOutline(CDrawParam* drawParam) const
