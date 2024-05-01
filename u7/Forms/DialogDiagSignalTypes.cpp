@@ -856,7 +856,7 @@ void DialogDiagSignalTypes::onImport()
 			continue;
 		}
 
-		QString newSignalTypeId = tr("%1 (Import)").arg(dst->signalTypeId());
+		QString newSignalTypeId = dst->signalTypeId();
 		int copyNumber = 1;
 		while (m_diagSignalTypes.hasSignalTypeId(newSignalTypeId) == true)
 		{
