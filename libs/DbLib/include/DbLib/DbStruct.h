@@ -26,6 +26,7 @@ enum class DbDir
 	ModuleConfigurationDir,		// $root$/MC
 	ConnectionsDir,				// $root$/CONNECTIONS
 	BusTypesDir,				// $root$/BUSTYPES
+	AppSignalListsDir,			// $root$/AppSignalLists
 	EtcDir,						// $root$/ETC
 	TestsDir,					// $root$/Tests
 	SimTestsDir,				// $root$/Tests/SimTests
@@ -76,6 +77,7 @@ namespace Db
 				{DbDir::ModuleConfigurationDir, QStringLiteral("$root$/MC")},					// Module Configuration
 				{DbDir::ConnectionsDir, QStringLiteral("$root$/CONNECTIONS")},					// Connections
 				{DbDir::BusTypesDir, QStringLiteral("$root$/BUSTYPES")},						// Bus Types
+				{DbDir::AppSignalListsDir, QStringLiteral("$root$/AppSignalLists")},			// AppSignalLists
 				{DbDir::EtcDir, QStringLiteral("$root$/ETC")},									// ETC
 				{DbDir::TestsDir, QStringLiteral("$root$/Tests")},								// Tests
 				{DbDir::SimTestsDir, QStringLiteral("$root$/Tests/SimTests")},					// Simulator based tests
@@ -113,6 +115,8 @@ namespace Db
 
 		constexpr static const char* AppSignalFileExtension = "asg";				// Application signal file extention (::Proto::AppSignal message)
 		constexpr static const char* AppSignalSetFileExtension = "asgs";			// Application signals set file extention (::Proto::AppSignalSet message)
+
+		constexpr static const char* AppSignalListFileExtension = "aslist";			// Application signals list file extention
 
 		constexpr static const char* JavaScriptFileExtension = "js";				// JavaScript file extension
 

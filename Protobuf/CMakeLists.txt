@@ -43,6 +43,8 @@ qt_add_library(${TARGET} STATIC
 	../Proto/Afb.pb.h
 	../Proto/AppSignal.pb.cc
 	../Proto/AppSignal.pb.h
+	../Proto/AppSignalList.pb.cc
+	../Proto/AppSignalList.pb.h
 	../Proto/ArchSignal.pb.cc
 	../Proto/ArchSignal.pb.h
 	../Proto/BuildInfo.pb.cc

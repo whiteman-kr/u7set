@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 add_subdirectory(asio)
 
+add_subdirectory(AppSignalLists)
 add_subdirectory(Behavior)
 add_subdirectory(ClientLib)
 add_subdirectory(DbLib)

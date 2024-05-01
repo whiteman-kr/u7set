@@ -34,6 +34,7 @@
 #include "TestsTabPage.h"
 #include "UploadTabPage.h"
 #include "UserManagementDialog.h"
+#include "DialogAppSignalLists.h"
 
 MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	QMainWindow{parent},
@@ -391,6 +392,11 @@ void MainWindow::createActions()
 	m_diagSignalTypesEditorAction->setEnabled(false);
 	connect(m_diagSignalTypesEditorAction, &QAction::triggered, this, &MainWindow::runDiagSignalTypesEditor);
 
+	m_appSignalListsEditorAction = new QAction(tr("Application Signal Lists..."), this);
+	m_appSignalListsEditorAction->setStatusTip(tr("Run Application Signal Lists Editor"));
+	m_appSignalListsEditorAction->setEnabled(false);
+	connect(m_appSignalListsEditorAction, &QAction::triggered, this, &MainWindow::runAppSignalListsEditor);
+
 	m_busEditorAction = new QAction(tr("Bus Types Editor..."), this);
 	m_busEditorAction->setStatusTip(tr("Run Bus Types Editor"));
 	m_busEditorAction->setEnabled(false);
@@ -555,6 +561,7 @@ void MainWindow::createMenus()
 	pToolsMenu->addAction(m_subsystemListEditorAction);
 	pToolsMenu->addAction(m_connectionsEditorAction);
 	pToolsMenu->addAction(m_diagSignalTypesEditorAction);
+	pToolsMenu->addAction(m_appSignalListsEditorAction);
 	pToolsMenu->addSeparator();
 
 	pToolsMenu->addAction(m_busEditorAction);
@@ -835,6 +842,18 @@ void MainWindow::runDiagSignalTypesEditor()
 	}
 
 	DialogDiagSignalTypes::showDialog(dbController(), this);
+
+	return;
+}
+
+void MainWindow::runAppSignalListsEditor()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	DialogAppSignalLists::showDialog(dbController(), this);
 
 	return;
 }
@@ -1377,6 +1396,7 @@ void MainWindow::projectOpened(DbProject project)
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
 	m_diagSignalTypesEditorAction->setEnabled(true);
+	m_appSignalListsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
 	m_tagsEditorAction->setEnabled(true);
 	m_matsUsersEditorAction->setEnabled(true);
@@ -1416,6 +1436,7 @@ void MainWindow::projectClosed()
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);
 	m_diagSignalTypesEditorAction->setEnabled(false);
+	m_appSignalListsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
 	m_tagsEditorAction->setEnabled(false);
 	m_matsUsersEditorAction->setEnabled(false);

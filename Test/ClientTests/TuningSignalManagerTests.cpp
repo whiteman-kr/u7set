@@ -256,7 +256,7 @@ TEST_F(TuningSignalManagerTests, appSignalParam)
 	EXPECT_EQ(found, true);
 	EXPECT_EQ(asp.appSignalId(), as1.appSignalID());
 
-	found = tsm.signalParam(as2.appSignalID(), &asp);
+	asp = tsm.signalParam(as2.appSignalID(), &found);
 	EXPECT_EQ(found, true);
 	EXPECT_EQ(asp.appSignalId(), as2.appSignalID());
 

@@ -282,11 +282,12 @@ void ChooseTuningSignalsWidget::fillBaseSignalsList()
 	std::vector<Hash> filteredHashes;
 	filteredHashes.reserve(hashes.size());
 
-	AppSignalParam asp;
 
 	for (Hash hash : hashes)
 	{
-		if (m_signalManager.signalParam(hash, &asp) == false)
+		bool found = false;
+		AppSignalParam asp = m_signalManager.signalParam(hash, &found);
+		if (found == false)
 		{
 			assert(false);
 			continue;
@@ -600,8 +601,9 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 			continue;
 		}
 
-		AppSignalParam asp;
-		if (m_signalManager.signalParam(hash, &asp) == false)
+		bool found = false;
+		AppSignalParam asp = m_signalManager.signalParam(hash, &found);
+		if (found == false)
 		{
 			assert(false);
 			return;
@@ -670,8 +672,9 @@ void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 
 		Hash hash = selectedItem->data(static_cast<int>(Columns::AppSignalID), Qt::UserRole).value<Hash>();
 
-		AppSignalParam asp;
-		if (m_signalManager.signalParam(hash, &asp) == false)
+		bool found = false;
+		AppSignalParam asp = m_signalManager.signalParam(hash, &found);
+		if (found == false)
 		{
 			Q_ASSERT(false);
 			return;
@@ -718,8 +721,9 @@ void ChooseTuningSignalsWidget::on_m_setCurrent_clicked()
 			return;
 		}
 
-		AppSignalParam asp;
-		if (m_signalManager.signalParam(hash, &asp) == false)
+		bool found = false;
+		AppSignalParam asp = m_signalManager.signalParam(hash, &found);
+		if (found == false)
 		{
 			Q_ASSERT(false);
 			return;
@@ -1082,8 +1086,9 @@ void ChooseTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, co
 		return;
 	}
 
-	AppSignalParam asp;
-	if (m_signalManager.signalParam(value.appSignalHash(), &asp) == false)
+	bool found = false;
+	AppSignalParam asp = m_signalManager.signalParam(value.appSignalHash(), &found);
+	if (found == false)
 	{
 		assert(false);
 		return;

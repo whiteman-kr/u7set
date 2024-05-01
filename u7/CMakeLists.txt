@@ -74,6 +74,8 @@ set (U7_SOURCES
 	AppSignalPropertyManager.h
 	AppSignalSetProvider.cpp
 	AppSignalSetProvider.h
+	AppSignalListStorage.cpp
+	AppSignalListStorage.h
 	BuildTabPage.cpp
 	BuildTabPage.h
 	BusStorage.cpp
@@ -94,6 +96,8 @@ set (U7_SOURCES
 	DbTagsEditor.h
 	DialogAfbLibraryCheck.cpp
 	DialogAfbLibraryCheck.h
+	DialogAppSignalLists.cpp
+	DialogAppSignalLists.h
 	DialogBusEditor.cpp
 	DialogBusEditor.h
 	DialogClientBehavior.cpp
@@ -474,6 +478,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../Proto/ProtoSerialization.h"
 	"../Proto/Hardware.pb.h"
 	"../Proto/AppSignal.pb.h"
+	"../Proto/AppSignalList.pb.h"
 	"../Proto/Bus.pb.h"
 
 	"../AppSignalLib/AppSignal.h"
@@ -489,7 +494,7 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql
 	Qt6::SerialPort Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
-	TrendView Simulator qt6keychain Builder VFrame30 ReportLib)
+	TrendView Simulator qt6keychain Builder VFrame30 ReportLib AppSignalLists)
 
 # Link Visaul Leak Detector
 #

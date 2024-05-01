@@ -21,6 +21,14 @@ int EditSchemaAppSignalProvider::signalsCount() const
 	return 0;
 }
 
+std::vector<Hash> EditSchemaAppSignalProvider::signalHashes() const
+{
+	// Unlikely this function required for schema editing
+	//
+	Q_ASSERT(false);
+	return {};
+}
+
 std::vector<AppSignalParam> EditSchemaAppSignalProvider::signalList() const
 {
 	// Unlikely this function required for schema editing
@@ -306,35 +314,27 @@ AppSignalParam EditSchemaTuningSignalProvider::signalParam(const QString& appSig
 	return result;
 }
 
-bool EditSchemaTuningSignalProvider::signalParam(Hash hash, AppSignalParam* result) const
+int EditSchemaTuningSignalProvider::signalsCount() const
 {
 	// Unlikely this function required for schema editing
 	//
-	Q_UNUSED(hash);
-	Q_UNUSED(result);
-	Q_ASSERT(false);
+	return 0;
+}
+
+std::vector<Hash> EditSchemaTuningSignalProvider::signalHashes() const
+{
+	// Unlikely this function required for schema editing
+	//
 	return {};
 }
 
-bool EditSchemaTuningSignalProvider::signalParam(const QString& appSignalId, AppSignalParam* result) const
+std::vector<AppSignalParam> EditSchemaTuningSignalProvider::signalList() const
 {
-	if (result == nullptr)
-	{
-		Q_ASSERT(result);
-		return false;
-	}
-
-	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
-
-	if (s != nullptr)
-	{
-		(*result).load(*s);
-		return true;
-	}
-
-	return false;
+	// Unlikely this function required for schema editing
+	//
+	return {};
 }
-
+	
 TuningSignalState EditSchemaTuningSignalProvider::state(Hash hash, bool* found) const
 {
 	// Unlikely this function required for schema editing

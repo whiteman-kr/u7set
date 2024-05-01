@@ -339,9 +339,8 @@ namespace ClientLib
 
 	bool TuningConnectionPrivate::writeTuningSignal(const QString& appSignalId, QVariant value)
 	{
-		AppSignalParam appSignal;
-
-		bool ok = m_tuningSignalManager.signalParam(appSignalId, &appSignal);
+		bool ok = false;
+		AppSignalParam appSignal = m_tuningSignalManager.signalParam(appSignalId, &ok);
 		if (ok == false)
 		{
 			return false;

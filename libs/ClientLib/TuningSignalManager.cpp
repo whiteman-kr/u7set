@@ -107,6 +107,21 @@ namespace ClientLib
 		return static_cast<int>(m_signals.size());
 	}
 
+	std::vector<Hash> TuningSignalManager::signalHashes() const
+	{
+		std::vector<Hash> result;
+		result.reserve(m_signals.size());
+
+		QReadLocker rl(&m_signalsLock);
+
+		for (const auto& p : m_signals)
+		{
+			result.push_back(p.first);
+		}
+
+		return result;
+	}
+
 	std::vector<AppSignalParam> TuningSignalManager::signalList() const
 	{
 		std::vector<AppSignalParam> result;
@@ -170,34 +185,6 @@ namespace ClientLib
 	{
 		Hash signalHash = ::calcHash(appSignalId);
 		return signalParam(signalHash, found);
-	}
-
-
-	bool TuningSignalManager::signalParam(Hash hash, AppSignalParam* result) const
-	{
-		if (result == nullptr)
-		{
-			assert(result);
-			return false;
-		}
-
-		QReadLocker rl(&m_signalsLock);
-
-		auto it = m_signals.find(hash);
-		if (it == m_signals.end())
-		{
-			return false;
-		}
-
-		*result = it->second;
-
-		return true;
-	}
-
-	bool TuningSignalManager::signalParam(const QString& appSignalId, AppSignalParam* result) const
-	{
-		Hash signalHash = ::calcHash(appSignalId);
-		return signalParam(signalHash, result);
 	}
 
 	TuningSignalState TuningSignalManager::state(Hash hash, bool* found) const
@@ -405,21 +392,6 @@ namespace ClientLib
 		}
 
 		return;
-	}
-
-	std::vector<Hash> TuningSignalManager::signalHashes() const
-	{
-		std::vector<Hash> result;
-		result.reserve(m_signals.size());
-
-		QReadLocker rl(&m_signalsLock);
-
-		for (const auto& p : m_signals)
-		{
-			result.push_back(p.first);
-		}
-
-		return result;
 	}
 
 	std::vector<Hash> TuningSignalManager::signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const

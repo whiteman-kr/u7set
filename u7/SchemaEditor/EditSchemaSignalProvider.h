@@ -19,6 +19,7 @@ public:
 	//
 public:
 	virtual int signalsCount() const override;
+	virtual std::vector<Hash> signalHashes() const override;
 	virtual std::vector<AppSignalParam> signalList() const override;
 
 	virtual bool signalExists(Hash hash) const override;
@@ -85,8 +86,9 @@ public:
 	virtual AppSignalParam signalParam(Hash hash, bool* found) const override;
 	virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
 
-	virtual bool signalParam(Hash hash, AppSignalParam* result) const override;
-	virtual bool signalParam(const QString& appSignalId, AppSignalParam* result) const override;
+	virtual int signalsCount() const override;
+	virtual std::vector<Hash> signalHashes() const override;
+	virtual std::vector<AppSignalParam> signalList() const  override;
 
 	virtual TuningSignalState state(Hash hash, bool* found) const override;
 	virtual TuningSignalState state(const QString& appSignalId, bool* found) const override;
