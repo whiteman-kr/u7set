@@ -1,4 +1,5 @@
 #include "./include/AppSignalLists/SignalList.h"
+#include "TextResource.h"
 
 namespace AppSignalLists
 {
@@ -28,6 +29,7 @@ namespace AppSignalLists
 
 	TuningValue AppSignalListItem::value() const
 	{
+		Q_ASSERT(m_value.has_value());
 		return m_value.value_or(TuningValue());
 	}
 
@@ -49,44 +51,49 @@ namespace AppSignalLists
 	//
 	// AppSignalList
 	//
-
 	AppSignalList::AppSignalList()
 	{
 		QUuid uuid = QUuid::createUuid();
 		setUuid(uuid);
 
 		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Caption, true, AppSignalList::caption, AppSignalList::setCaption);
-		ADD_PROPERTY_GETTER_SETTER(SignalType, AppSignalLists::prop_SignalType, true, AppSignalList::signalType, AppSignalList::setSignalType);
+		ADD_PROPERTY_GETTER_SETTER(SignalType,
+								   AppSignalLists::prop_SignalType,
+								   true,
+								   AppSignalList::signalType,
+								   AppSignalList::setSignalType);
 		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_ID, true, AppSignalList::id, AppSignalList::setId);
 		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Tags, true, AppSignalList::tags, AppSignalList::setTags);
 
-		auto propMask = ADD_PROPERTY_GETTER_SETTER(QString,
-			AppSignalLists::prop_CustomAppSignalMasks,
-			true,
-			AppSignalList::customAppSignalIDMask,
-			AppSignalList::setCustomAppSignalIDMask);
-		propMask->setCategory("Masks");
+		ADD_PROPERTY_GETTER_SETTER(QString,
+								   AppSignalLists::prop_CustomAppSignalMasks,
+								   true,
+								   AppSignalList::customAppSignalIDMask,
+								   AppSignalList::setCustomAppSignalIDMask)
+			->setCategory("Masks");
 
-		propMask = ADD_PROPERTY_GETTER_SETTER(QString,
-			AppSignalLists::prop_AppSignalMasks,
-			true,
-			AppSignalList::appSignalIDMask,
-			AppSignalList::setAppSignalIDMask);
-		propMask->setCategory("Masks");
+		ADD_PROPERTY_GETTER_SETTER(QString,
+								   AppSignalLists::prop_AppSignalMasks,
+								   true,
+								   AppSignalList::appSignalIDMask,
+								   AppSignalList::setAppSignalIDMask)
+			->setCategory("Masks");
 
-		propMask = ADD_PROPERTY_GETTER_SETTER(QString,
-			AppSignalLists::prop_EquipmentIDMasks,
-			true,
-			AppSignalList::equipmentIDMask,
-			AppSignalList::setEquipmentIDMask);
-		propMask->setCategory("Masks");
+		ADD_PROPERTY_GETTER_SETTER(QString,
+								   AppSignalLists::prop_EquipmentIDMasks,
+								   true,
+								   AppSignalList::equipmentIDMask,
+								   AppSignalList::setEquipmentIDMask)
+			->setCategory("Masks");
 
-		propMask = ADD_PROPERTY_GETTER_SETTER(QString,
-			AppSignalLists::prop_AppSignalTags,
-			true,
-			AppSignalList::appSignalTags,
-			AppSignalList::setAppSignalTags);
-		propMask->setCategory("Masks");
+		ADD_PROPERTY_GETTER_SETTER(QString,
+								   AppSignalLists::prop_AppSignalTags,
+								   true,
+								   AppSignalList::appSignalTags,
+								   AppSignalList::setAppSignalTags)
+			->setCategory("Masks");
+
+		return;
 	}
 	
 	void AppSignalList::SaveData(Proto::Envelope* message) const
@@ -428,7 +435,7 @@ namespace AppSignalLists
 			return false;
 		}
 
-		if (signalType() == AppSignalList::SignalType::Discrete && param.isAnalog() == true)
+		if (signalType() == AppSignalList::SignalType::Discrete && param.isDiscrete() == false)
 		{
 			return false;
 		}
@@ -486,6 +493,8 @@ namespace AppSignalLists
 
 		for (QString m : masks)
 		{
+			m = m.trimmed();
+
 			if (m.isEmpty() == true)
 			{
 				continue;
@@ -494,7 +503,14 @@ namespace AppSignalLists
 			bool invertMask = m.contains('!');
 			m.remove('!');
 
-			QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m.trimmed()));
+			thread_local std::map<QString, QRegularExpression> cache;
+
+			if (cache.find(m) == cache.end())
+			{
+				cache[m] = QRegularExpression(QRegularExpression::wildcardToRegularExpression(m));
+			}
+
+			const QRegularExpression& rx = cache[m];
 
 			if (invertMask == false)
 			{
@@ -506,9 +522,10 @@ namespace AppSignalLists
 					directMatch++;
 				}
 			}
-
-			if (invertMask == true)
+			else
 			{
+				// invertMask == true
+				//
 				invertedCount++;
 
 				auto matchResult = rx.match(s);

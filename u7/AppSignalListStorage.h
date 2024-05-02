@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../libs/AppSignalLists/include/AppSignalLists/SignalListEditor.h"
+#include <AppSignalLists/SignalList.h>
 #include <DbLib/DbObjectStorage.h>
 
 class AppSignalListStorage : public DbObjectStorage<std::shared_ptr<AppSignalLists::AppSignalList>>

@@ -1,15 +1,19 @@
 #include "DialogAppSignalLists.h"
-#include "Settings.h"
+#include "AppSignalListStorage.h"
 #include "AppSignalSetProvider.h"
+#include "Settings.h"
 
-#include "../lib/StandardColors.h"
-#include "../UtilsLib/Ui/UiTools.h"
 #include "../Proto/AppSignalList.pb.h"
+#include "../UtilsLib/Ui/UiTools.h"
+#include "../lib/PropertyEditor.h"
+#include "../lib/StandardColors.h"
+
+#include <AppSignalLists/SignalListEditor.h>
 
 
 //
 //
-// AppSignalListsProvider - this calss is used to provide app signals for editing signal lists
+// AppSignalListsProvider - this class is used to provide app signals for editing signal lists
 //
 //
 
@@ -65,9 +69,12 @@ bool AppSignalListsProvider::signalExists(const QString& appSignalId) const
 
 bool AppSignalListsProvider::signalsExist(const QStringList& signalIds) const
 {
-	return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
-		return m_signalSetProvider->signalExists(appSignalId);
-	});
+	return std::all_of(signalIds.begin(),
+					   signalIds.end(),
+					   [this](const QString& appSignalId)
+					   {
+						   return m_signalSetProvider->signalExists(appSignalId);
+					   });
 }
 
 AppSignalParam AppSignalListsProvider::signalParam(Hash signalHash, bool* found) const
@@ -87,8 +94,6 @@ AppSignalParam AppSignalListsProvider::signalParam(Hash signalHash, bool* found)
 	}
 
 	return result;
-
-
 }
 
 AppSignalParam AppSignalListsProvider::signalParam(const QString& appSignalId, bool* found) const
@@ -129,11 +134,11 @@ void DialogAppSignalLists::showDialog(DbController* db, QWidget* parent)
 	return;
 }
 
-DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent)
-	: QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
+DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent) :
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
 	m_db(db),
-	m_lists(db),
-	m_signalProvider(AppSignalSetProvider::getInstance())
+	m_signalProvider(std::make_unique<AppSignalListsProvider>(AppSignalSetProvider::getInstance())),
+	m_lists(std::make_unique<AppSignalListStorage>(db))
 {
 	assert(m_db);
 
@@ -150,14 +155,16 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent)
 	m_mask->setClearButtonEnabled(true);
 
 	connect(m_mask, &QLineEdit::returnPressed, this, &DialogAppSignalLists::onMaskReturn);
-	connect(m_mask, &QLineEdit::textChanged, this, [this](const QString& text) 
-		{
-			if (text.isEmpty() == true) 
+	connect(m_mask,
+			&QLineEdit::textChanged,
+			this,
+			[this](const QString& text)
 			{
-				onMaskApply();
-			}
-		}
-	);
+				if (text.isEmpty() == true)
+				{
+					onMaskApply();
+				}
+			});
 
 	m_maskApply = new QPushButton(tr("Filter"));
 	connect(m_maskApply, &QPushButton::clicked, this, &DialogAppSignalLists::onMaskApply);
@@ -188,7 +195,7 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent)
 	m_listPropertyEditor = new ExtWidgets::PropertyEditor(this);
 	connect(m_listPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogAppSignalLists::onPropertiesChanged);
 
-	m_signalListWidget = new AppSignalLists::AppSignalListWidget(m_signalProvider, false, this);
+	m_signalListWidget = new AppSignalLists::AppSignalListWidget(*m_signalProvider, false, this);
 	connect(m_signalListWidget, &AppSignalLists::AppSignalListWidget::signalsChanged, this, &DialogAppSignalLists::onSignalsChanged);
 
 	maskLayout->addWidget(m_mask);
@@ -224,13 +231,13 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent)
 	buttonsLayout->addStretch();
 	buttonsLayout->addWidget(m_btnClose);
 
-	connect (m_btnAdd, &QPushButton::clicked, this, &DialogAppSignalLists::onAdd);
-	connect (m_btnRemove, &QPushButton::clicked, this, &DialogAppSignalLists::onRemove);
-	connect (m_btnCheckOut, &QPushButton::clicked, this, &DialogAppSignalLists::onCheckOut);
-	connect (m_btnCheckIn, &QPushButton::clicked, this, &DialogAppSignalLists::onCheckIn);
-	connect (m_btnUndo, &QPushButton::clicked, this, &DialogAppSignalLists::onUndo);
-	connect (m_btnRefresh, &QPushButton::clicked, this, &DialogAppSignalLists::onRefresh);
-	connect (m_btnClose, &QPushButton::clicked, this, &DialogAppSignalLists::close);
+	connect(m_btnAdd, &QPushButton::clicked, this, &DialogAppSignalLists::onAdd);
+	connect(m_btnRemove, &QPushButton::clicked, this, &DialogAppSignalLists::onRemove);
+	connect(m_btnCheckOut, &QPushButton::clicked, this, &DialogAppSignalLists::onCheckOut);
+	connect(m_btnCheckIn, &QPushButton::clicked, this, &DialogAppSignalLists::onCheckIn);
+	connect(m_btnUndo, &QPushButton::clicked, this, &DialogAppSignalLists::onUndo);
+	connect(m_btnRefresh, &QPushButton::clicked, this, &DialogAppSignalLists::onRefresh);
+	connect(m_btnClose, &QPushButton::clicked, this, &DialogAppSignalLists::close);
 
 	mainLayout->addLayout(maskLayout);
 	mainLayout->addWidget(m_splitter);
@@ -258,8 +265,13 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent)
 	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
 	m_mask->setCompleter(m_completer);
 
-    connect(m_mask, &QLineEdit::textEdited, [this](){m_completer->complete();});
-	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_mask, &QLineEdit::setText);
+	connect(m_mask,
+			&QLineEdit::textEdited,
+			[this]()
+			{
+				m_completer->complete();
+			});
+	connect(m_completer, static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_mask, &QLineEdit::setText);
 
 	// Popup menu
 	//
@@ -306,7 +318,7 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent)
 	//
 	QString errorMessage;
 
-	bool ok = m_lists.load(&errorMessage);
+	bool ok = m_lists->load(&errorMessage);
 	if (ok == false)
 	{
 		QMessageBox::critical(parent, qAppName(), errorMessage);
@@ -327,7 +339,8 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent)
 
 	if (xmlConnections.count() > 0)
 	{
-		QMessageBox::warning(parent, tr("Connections Editor"), tr("%1 connections have been imported from deprecated file Connections.xml.").arg(xmlConnections.count()));
+		QMessageBox::warning(parent, tr("Connections Editor"), tr("%1 connections have been imported from deprecated file
+	Connections.xml.").arg(xmlConnections.count()));
 
 		for (int i = 0; i < xmlConnections.count(); i++)
 		{
@@ -357,10 +370,9 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent)
 		m_listsTree->resizeColumnToContents(i);
 	}
 
-	
 
-	m_listsTree->sortByColumn(QSettings().value("DialogAppSignalLists/sortColumn", 0).toInt(), 
-		static_cast<Qt::SortOrder>(QSettings().value("DialogAppSignalLists/sortOrder", Qt::AscendingOrder).toInt()));
+	m_listsTree->sortByColumn(QSettings().value("DialogAppSignalLists/sortColumn", 0).toInt(),
+							  static_cast<Qt::SortOrder>(QSettings().value("DialogAppSignalLists/sortOrder", Qt::AscendingOrder).toInt()));
 
 	connect(m_listsTree->header(), &QHeaderView::sortIndicatorChanged, this, &DialogAppSignalLists::onSortIndicatorChanged);
 
@@ -425,7 +437,7 @@ void DialogAppSignalLists::onMaskApply()
 		{
 			mask = mask.trimmed();
 		}
-		
+
 		QStringList masksHistory = QSettings().value("DialogAppSignalLists/masks").toString().split('\n');
 		bool masksHistoryUpdate = false;
 
@@ -474,9 +486,9 @@ bool DialogAppSignalLists::addList(std::shared_ptr<AppSignalLists::AppSignalList
 	//
 	QString errorMessage;
 
-	m_lists.add(list->uuid(), list);
+	m_lists->add(list->uuid(), list);
 
-	bool ok = m_lists.save(list->uuid(), &errorMessage);
+	bool ok = m_lists->save(list->uuid(), &errorMessage);
 	if (ok == false)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Failed to save list %1: %2").arg(list->id()).arg(errorMessage));
@@ -510,9 +522,9 @@ bool DialogAppSignalLists::pasteList(std::shared_ptr<AppSignalLists::AppSignalLi
 	//
 	QString errorMessage;
 
-	m_lists.add(list->uuid(), list);
+	m_lists->add(list->uuid(), list);
 
-	bool ok = m_lists.save(list->uuid(), &errorMessage);
+	bool ok = m_lists->save(list->uuid(), &errorMessage);
 	if (ok == false)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Failed to save list %1: %2").arg(list->id()).arg(errorMessage));
@@ -530,17 +542,16 @@ bool DialogAppSignalLists::pasteList(std::shared_ptr<AppSignalLists::AppSignalLi
 	item->setSelected(true);
 
 	return true;
-
 }
 
 void DialogAppSignalLists::fillAppSignalLists()
 {
 	m_listsTree->clear();
 
-	int count = m_lists.count();
+	int count = m_lists->count();
 	for (int i = 0; i < count; i++)
 	{
-		std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists.get(i);
+		std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists->get(i);
 		if (list == nullptr)
 		{
 			assert(list);
@@ -602,14 +613,14 @@ void DialogAppSignalLists::setPropertyEditorObjects()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists.get(uuid);
+		std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists->get(uuid);
 		if (list == nullptr)
 		{
 			assert(list);
 			return;
 		}
 
-		if (m_lists.fileInfo(list->uuid()).state() != E::VcsState::CheckedOut)
+		if (m_lists->fileInfo(list->uuid()).state() != E::VcsState::CheckedOut)
 		{
 			readOnly = true;
 		}
@@ -634,9 +645,9 @@ void DialogAppSignalLists::setPropertyEditorObjects()
 	{
 		m_signalListWidget->setList(nullptr);
 	}
-	
+
 	m_signalListWidget->setReadOnly(objects.size() > 1 || readOnly == true || firstList == nullptr);
-		
+
 	return;
 }
 
@@ -645,13 +656,13 @@ bool DialogAppSignalLists::continueWithDuplicateIds()
 	bool duplicated = false;
 	QString duplicatedId;
 
-	for (int i = 0; i < m_lists.count(); i++)
+	for (int i = 0; i < m_lists->count(); i++)
 	{
-		AppSignalLists::AppSignalList* c = m_lists.get(i).get();
+		AppSignalLists::AppSignalList* c = m_lists->get(i).get();
 
-		for (int j = 0; j < m_lists.count(); j++)
+		for (int j = 0; j < m_lists->count(); j++)
 		{
-			AppSignalLists::AppSignalList* e = m_lists.get(j).get();
+			AppSignalLists::AppSignalList* e = m_lists->get(j).get();
 			assert(e);
 
 			if (i == j)
@@ -717,7 +728,7 @@ void DialogAppSignalLists::onPropertiesChanged(QList<std::shared_ptr<PropertyObj
 		}
 
 		QString errorMessage;
-		bool ok = m_lists.save(c->uuid(), &errorMessage);
+		bool ok = m_lists->save(c->uuid(), &errorMessage);
 
 		if (ok == false)
 		{
@@ -747,7 +758,7 @@ void DialogAppSignalLists::onSignalsChanged()
 	}
 
 	QString errorMessage;
-	bool ok = m_lists.save(l->uuid(), &errorMessage);
+	bool ok = m_lists->save(l->uuid(), &errorMessage);
 
 	if (ok == false)
 	{
@@ -772,7 +783,8 @@ void DialogAppSignalLists::onRemove()
 		return;
 	}
 
-	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected lists?"), QMessageBox::Yes, QMessageBox::No);
+	auto mbResult =
+		QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected lists?"), QMessageBox::Yes, QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;
@@ -786,7 +798,7 @@ void DialogAppSignalLists::onRemove()
 
 		bool fileRemoved = false;
 
-		bool ok = m_lists.removeFile(uuid, &fileRemoved, &errorMessage);
+		bool ok = m_lists->removeFile(uuid, &fileRemoved, &errorMessage);
 		if (ok == false)
 		{
 			QMessageBox::critical(this, qAppName(), errorMessage);
@@ -797,7 +809,7 @@ void DialogAppSignalLists::onRemove()
 		{
 			// File was removed, delete the list from the list and from the storage
 			//
-			m_lists.remove(uuid);
+			m_lists->remove(uuid);
 
 			int index = m_listsTree->indexOfTopLevelItem(item);
 			if (index == -1)
@@ -831,7 +843,6 @@ void DialogAppSignalLists::onRemove()
 
 void DialogAppSignalLists::onCopy()
 {
-	
 	QList<QTreeWidgetItem*> selectedItems = m_listsTree->selectedItems();
 	if (selectedItems.isEmpty() == true)
 	{
@@ -844,7 +855,7 @@ void DialogAppSignalLists::onCopy()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists.get(uuid);
+		std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists->get(uuid);
 		if (list == nullptr)
 		{
 			assert(list);
@@ -874,7 +885,7 @@ void DialogAppSignalLists::onCopy()
 		clipboard->clear();
 		clipboard->setMimeData(mime);
 	}
-	
+
 	return;
 }
 
@@ -883,7 +894,7 @@ void DialogAppSignalLists::onPaste()
 {
 	QClipboard* clipboard = QApplication::clipboard();
 
-	const QMimeData *mimeData = clipboard->mimeData();
+	const QMimeData* mimeData = clipboard->mimeData();
 	if (mimeData->hasFormat(AppSignalLists::AppSignalList::mimeType) == false)
 	{
 		return;
@@ -935,9 +946,8 @@ void DialogAppSignalLists::onPaste()
 	updateButtonsEnableState();
 
 	setPropertyEditorObjects();
-	
-	return;
 
+	return;
 }
 
 void DialogAppSignalLists::onCheckOut()
@@ -955,7 +965,7 @@ void DialogAppSignalLists::onCheckOut()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		bool ok = m_lists.checkOut(uuid, &errorMessage);
+		bool ok = m_lists->checkOut(uuid, &errorMessage);
 		if (ok == false)
 		{
 			QMessageBox::critical(this, qAppName(), errorMessage);
@@ -981,9 +991,8 @@ void DialogAppSignalLists::onCheckIn()
 	}
 
 	bool ok = false;
-	QString comment = QInputDialog::getText(this, tr("AppSignalLists Editor"),
-											tr("Please enter the comment:"), QLineEdit::Normal,
-											tr("comment"), &ok);
+	QString comment =
+		QInputDialog::getText(this, tr("AppSignalLists Editor"), tr("Please enter the comment:"), QLineEdit::Normal, tr("comment"), &ok);
 
 	if (ok == false)
 	{
@@ -1003,7 +1012,7 @@ void DialogAppSignalLists::onCheckIn()
 		bool fileWasRemoved = false;
 		QString errorMessage;
 
-		ok = m_lists.checkIn(uuid, comment, &fileWasRemoved, &errorMessage);
+		ok = m_lists->checkIn(uuid, comment, &fileWasRemoved, &errorMessage);
 		if (ok == false)
 		{
 			QMessageBox::critical(this, qAppName(), errorMessage);
@@ -1014,7 +1023,7 @@ void DialogAppSignalLists::onCheckIn()
 		{
 			// File was removed, delete the list from the list and from the storage
 			//
-			m_lists.remove(uuid);
+			m_lists->remove(uuid);
 
 			int index = m_listsTree->indexOfTopLevelItem(item);
 			if (index == -1)
@@ -1046,14 +1055,18 @@ void DialogAppSignalLists::onCheckIn()
 
 void DialogAppSignalLists::onUndo()
 {
-	QList <QTreeWidgetItem*> selectedItems = m_listsTree->selectedItems();
+	QList<QTreeWidgetItem*> selectedItems = m_listsTree->selectedItems();
 
 	if (selectedItems.isEmpty() == true)
 	{
 		return;
 	}
 
-	auto mbResult = QMessageBox::warning(this, tr("AppSignalLists Editor"), tr("Are you sure you want to undo changes on selected lists?"), QMessageBox::Yes, QMessageBox::No);
+	auto mbResult = QMessageBox::warning(this,
+										 tr("AppSignalLists Editor"),
+										 tr("Are you sure you want to undo changes on selected lists?"),
+										 QMessageBox::Yes,
+										 QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;
@@ -1066,7 +1079,7 @@ void DialogAppSignalLists::onUndo()
 		bool fileRemoved = false;
 		QString errorMessage;
 
-		bool ok = m_lists.undo(uuid, &fileRemoved, &errorMessage);
+		bool ok = m_lists->undo(uuid, &fileRemoved, &errorMessage);
 		if (ok == false)
 		{
 			QMessageBox::critical(this, qAppName(), errorMessage);
@@ -1077,7 +1090,7 @@ void DialogAppSignalLists::onUndo()
 		{
 			// File was removed, delete the list from the list and from the storage
 			//
-			m_lists.remove(uuid);
+			m_lists->remove(uuid);
 
 			int index = m_listsTree->indexOfTopLevelItem(item);
 			if (index == -1)
@@ -1101,7 +1114,7 @@ void DialogAppSignalLists::onUndo()
 
 			std::shared_ptr<DbFile> file = nullptr;
 
-			DbFileInfo fi = m_lists.fileInfo(uuid);
+			DbFileInfo fi = m_lists->fileInfo(uuid);
 
 			ok = m_db->getLatestVersion(fi, &file, this);
 			if (ok == true && file != nullptr)
@@ -1109,7 +1122,7 @@ void DialogAppSignalLists::onUndo()
 				QByteArray data;
 				file->swapData(data);
 
-				std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists.get(uuid);
+				std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists->get(uuid);
 				if (list != nullptr)
 				{
 					Proto::Envelope envelope;
@@ -1138,11 +1151,11 @@ void DialogAppSignalLists::onUndo()
 
 void DialogAppSignalLists::onRefresh()
 {
-	m_lists.clear();
+	m_lists->clear();
 
 	QString errorMessage;
 
-	bool ok = m_lists.load(&errorMessage);
+	bool ok = m_lists->load(&errorMessage);
 	if (ok == false)
 	{
 		QMessageBox::critical(this, qAppName(), errorMessage);
@@ -1205,7 +1218,7 @@ void DialogAppSignalLists::onRemoveShortcut()
 	onRemove();
 }
 
-void DialogAppSignalLists::onCustomContextMenuRequested(const QPoint &pos)
+void DialogAppSignalLists::onCustomContextMenuRequested(const QPoint& pos)
 {
 	Q_UNUSED(pos);
 
@@ -1223,7 +1236,7 @@ void DialogAppSignalLists::updateTreeItemText(QTreeWidgetItem* item)
 
 	QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-	std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists.get(uuid);
+	std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists->get(uuid);
 	if (list == nullptr)
 	{
 		assert(list);
@@ -1233,7 +1246,7 @@ void DialogAppSignalLists::updateTreeItemText(QTreeWidgetItem* item)
 	int c = 0;
 	item->setText(c++, list->id());
 
-	DbFileInfo fi = m_lists.fileInfo(list->uuid());
+	DbFileInfo fi = m_lists->fileInfo(list->uuid());
 
 	QBrush b(StandardColors::VcsCheckedIn);
 
@@ -1285,14 +1298,14 @@ void DialogAppSignalLists::updateButtonsEnableState()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists.get(uuid);
+		std::shared_ptr<AppSignalLists::AppSignalList> list = m_lists->get(uuid);
 		if (list == nullptr)
 		{
 			assert(list);
 			return;
 		}
 
-		if (m_lists.fileInfo(list->uuid()).state() == E::VcsState::CheckedOut)
+		if (m_lists->fileInfo(list->uuid()).state() == E::VcsState::CheckedOut)
 		{
 			checkedOutCount++;
 		}

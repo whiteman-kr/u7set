@@ -17,58 +17,46 @@ qt_add_library(${TARGET} STATIC
 	./include/AppSignalLists/SignalListEditor.h
 	SignalList.cpp
 	SignalListEditor.cpp
+	SignalListEditorPrivate.cpp
+	SignalListEditorPrivate.h
+	TextResource.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<cassert>
-	<chrono>
 	<cstdint>
-	<functional>
 	<list>
 	<map>
 	<memory>
-	<mutex>
-	<queue>
 	<ranges>
 	<set>
-	<unordered_map>
-	<unordered_set>
 	<vector>
 
 	<QApplication>
+	<QCheckBox>
 	<QComboBox>
 	<QCoreApplication>
 	<QDateTime>
 	<QDialog>
-	<QDomDocument>
+	<QDialogButtonBox>
+	<QFile>
+	<QFileDialog>
+	<QFileInfo>
 	<QHBoxLayout>
-	<QJSEngine>
+	<QHeaderView>
 	<QLabel>
 	<QLineEdit>
-	<QLocale>
+	<QMenu>
 	<QMessageBox>
-	<QThread>
 	<QPushButton>
 	<QReadWriteLock>
-	<QSharedMemory>
-	<QThread>
-	<QTimeZone>
-	<QTranslator>
-	<QVBoxLayout>
-	<QXmlStreamReader>
-	<QXmlStreamWriter>
-	<QTreeWidget>
-	<QTableView>
-	<QSplitter>
-	<QCheckBox>
-	<QHeaderView>
-	<QMenu>
-	<QFile>
-	<QFileInfo>
-	<QFileDialog>
-	<QDialogButtonBox>
 	<QSettings>
+	<QSplitter>
+	<QTableView>
+	<QTranslator>
+	<QTreeWidget>
+	<QVBoxLayout>
 
 	"../../CommonLib/Types.h"
 	"../../CommonLib/Hash.h"
@@ -90,8 +78,8 @@ target_compile_definitions(${TARGET} PRIVATE APPSIGNALLISTS_LIB_DOMAIN)
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib TrendView)
+target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Widgets)
+target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib)
 
 #if (MSVC)
 	#target_link_libraries(${TARGET} PUBLIC Advapi32)
