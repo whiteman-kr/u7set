@@ -17,7 +17,6 @@ extend Envelope
 message AppSignalListSignal
 {
     optional string appSignalId = 1;
-    optional bool hasValue = 2;
     optional TuningValue value = 3;
 }
 

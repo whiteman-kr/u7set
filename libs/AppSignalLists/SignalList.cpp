@@ -4,15 +4,21 @@ namespace AppSignalLists
 {
 	const char* AppSignalList::mimeType = "application/x-radiyappsignallist";
 
-	QString AppSignalListItem::appSignalId() const
+	AppSignalListItem::AppSignalListItem(const QString& appSignalId):
+		m_appSignalId(appSignalId),
+		m_appSignalHash(::calcHash(appSignalId))
+	{
+	}
+
+	const QString& AppSignalListItem::appSignalId() const
 	{
 		return m_appSignalId;
 	}
 
-	void AppSignalListItem::setAppSignalId(const QString& value)
+	void AppSignalListItem::setAppSignalId(const QString& appSignalId)
 	{
-		m_appSignalId = value;
-		m_appSignalHash = ::calcHash(m_appSignalId);
+		m_appSignalId = appSignalId;
+		m_appSignalHash = ::calcHash(appSignalId);
 	}
 
 	Hash AppSignalListItem::appSignalHash() const
@@ -83,7 +89,7 @@ namespace AppSignalLists
 		propMask->setCategory("Masks");
 	}
 	
-	bool AppSignalList::SaveData(Proto::Envelope* message) const
+	void AppSignalList::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = ::ClassNameHashCode(className);
@@ -107,7 +113,6 @@ namespace AppSignalLists
 			::Proto::AppSignalListSignal* lsi = appSignalList->add_listsignals();
 
 			lsi->set_appsignalid(signal.appSignalId().toUtf8());
-			lsi->set_hasvalue(signal.hasValue());
 			if (signal.hasValue() == true)
 			{
 				::Proto::TuningValue* tv = lsi->mutable_value();
@@ -115,7 +120,7 @@ namespace AppSignalLists
 			}
 		}
 
-		return true;
+		return;
 	}
 
 	bool AppSignalList::LoadData(const Proto::Envelope& message)
@@ -136,18 +141,16 @@ namespace AppSignalLists
 
 		setCustomAppSignalIDMask(QString::fromStdString(appSignalList.customappsignalidmasks()));
 		setEquipmentIDMask(QString::fromStdString(appSignalList.equipmentidmasks()));
-		m_appSignalIDMasks = QString::fromStdString(appSignalList.appsignalidmasks());
-		m_appSignalTags = QString::fromStdString(appSignalList.appsignaltags());
+		setAppSignalIDMask(QString::fromStdString(appSignalList.appsignalidmasks()));
+		setAppSignalTags(QString::fromStdString(appSignalList.appsignaltags()));
 
 		int count = appSignalList.listsignals_size();
 		for (int i = 0; i < count; i++)
 		{
 			const ::Proto::AppSignalListSignal& signal = appSignalList.listsignals(i);
 
-			AppSignalListItem item;
-			item.setAppSignalId(QString::fromStdString(signal.appsignalid()));
-
-			if (signal.hasvalue() == true)
+			AppSignalListItem item(QString::fromStdString(signal.appsignalid()));
+			if (signal.has_value() == true)
 			{
 				const Proto::TuningValue& tv = signal.value();
 				TuningValue v(tv);
@@ -415,17 +418,9 @@ namespace AppSignalLists
 
 	bool AppSignalList::match(const AppSignalParam& param) const
 	{
-		// List of appSignalId
-		//
-		if (count() != 0)
+		if (itemExists(param.hash()) == true)
 		{
-			if (std::find_if(m_items.begin(), m_items.end(), [param](const auto& item)
-				{
-					return param.hash() == item.appSignalHash();
-				}) == m_items.end())
-			{
-				return false;
-			}
+			return true;
 		}
 
 		if (signalType() == AppSignalList::SignalType::Analog && param.isAnalog() == false)

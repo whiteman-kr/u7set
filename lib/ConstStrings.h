@@ -182,6 +182,8 @@ namespace EquipmentPropNames
 	inline const QString START_SCHEMA_ID("StartSchemaID");
 	inline const QString SCHEMA_TAGS("SchemaTags");
 
+	inline const QString APP_SIGNAL_LISTS("AppSignalLists");
+
 	inline const QString FONTS("Fonts");
 
 	// DeviceAppSigal properties
@@ -456,6 +458,7 @@ namespace CfgFileId
 	inline const QString MONITOR_EQUIPMENT("MONITOR_EQUIPMENT");
 	inline const QString MATSUSERS("MATSUSERS_XML");
 	inline const QString LOGO("LOGO");
+	inline const QString APPSIGNALLISTS("APPSIGNALLISTS");
 
 	inline const QString METROLOGY_ITEMS("METROLOGY_ITEMS");
 	inline const QString METROLOGY_SIGNAL_SET("METROLOGY_SIGNAL_SET");

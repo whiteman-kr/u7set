@@ -49,17 +49,19 @@ namespace Builder
 
 		bool result = true;
 
+		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
+
+		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
+
 		result &= saveScriptProperties("GlobalScript", File::GLOBAL_SCRIPT);
 		result &= initSchemaTags();
 		result &= initTuningSources();
 
+		result &= writeAppSignalLists(settings->appSignalLists);
+
 		// Add links to schema files (previously written) via m_cfgXml->addLinkToFile(...)
 		//
 		result &= writeSchemasByTags();
-
-		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
-
-		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
 		if (settings->tuningEnabled == true)
 		{
@@ -81,7 +83,7 @@ namespace Builder
 			if (settings->tuningLogin == true)
 			{
 				result &= writeMatsUsers(EquipmentPropNames::TUNING_USER_ACCOUNTS,
-										 settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
+					settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
 			}
 		}
 
@@ -133,7 +135,7 @@ namespace Builder
 		//
 		bool result = true;
 		for (QStringList profiles = m_settingsSet.getSettingsProfiles();
-			 const QString& profile : profiles)
+			const QString & profile : profiles)
 		{
 			std::shared_ptr<const MonitorSettings> profileSettings = m_settingsSet.getSettingsProfile<MonitorSettings>(profile);
 			TEST_PTR_LOG_RETURN_FALSE(profileSettings, m_log);
@@ -407,8 +409,8 @@ namespace Builder
 		//
 		Behavior::ClientBehaviorStorage monitorBehaviorStorage;
 
-		for (auto behaviors = allBehaviorStorage.monitorBehaviors(); 
-			 auto b : behaviors)
+		for (auto behaviors = allBehaviorStorage.monitorBehaviors();
+			auto b : behaviors)
 		{
 			if (b->behaviorId() == behaviorId)
 			{

@@ -96,12 +96,7 @@ bool AppSignalListStorage::save(const QUuid& uuid, QString* errorMessage)
 	}
 
 	Proto::Envelope message;
-	bool ok = list->SaveData(&message);
-	if (ok == false)
-	{
-		*errorMessage = QString("Error saving list %1.").arg(list->id());
-		return false;
-	}
+	list->SaveData(&message);
 
 	QByteArray data;
 	data.resize(static_cast<int>(message.ByteSizeLong()));
@@ -130,8 +125,7 @@ bool AppSignalListStorage::save(const QUuid& uuid, QString* errorMessage)
 		file->setFileName(fileName);
 		file->swapData(data);
 
-		ok = m_db->addFile(file, DbDir::AppSignalListsDir, nullptr);
-
+		bool ok = m_db->addFile(file, DbDir::AppSignalListsDir, nullptr);
 		if (ok == false)
 		{
 			*errorMessage = m_db->lastError();
@@ -146,7 +140,7 @@ bool AppSignalListStorage::save(const QUuid& uuid, QString* errorMessage)
 
 		// Save to existing file
 		//
-		ok = m_db->getLatestVersion(fi, &file, nullptr);
+		bool ok = m_db->getLatestVersion(fi, &file, nullptr);
 		if (ok == false || file == nullptr)
 		{
 			*errorMessage = m_db->lastError();

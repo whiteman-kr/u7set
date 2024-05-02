@@ -209,7 +209,6 @@ class AppSignalListSignal PROTOBUF_FINAL :
   enum : int {
     kAppSignalIdFieldNumber = 1,
     kValueFieldNumber = 3,
-    kHasValueFieldNumber = 2,
   };
   // optional string appSignalId = 1;
   bool has_appsignalid() const;
@@ -249,19 +248,6 @@ class AppSignalListSignal PROTOBUF_FINAL :
       ::Proto::TuningValue* value);
   ::Proto::TuningValue* unsafe_arena_release_value();
 
-  // optional bool hasValue = 2;
-  bool has_hasvalue() const;
-  private:
-  bool _internal_has_hasvalue() const;
-  public:
-  void clear_hasvalue();
-  bool hasvalue() const;
-  void set_hasvalue(bool value);
-  private:
-  bool _internal_hasvalue() const;
-  void _internal_set_hasvalue(bool value);
-  public:
-
   // @@protoc_insertion_point(class_scope:Proto.AppSignalListSignal)
  private:
   class _Internal;
@@ -273,7 +259,6 @@ class AppSignalListSignal PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr appsignalid_;
   ::Proto::TuningValue* value_;
-  bool hasvalue_;
   friend struct ::TableStruct_AppSignalList_2eproto;
 };
 // -------------------------------------------------------------------
@@ -705,34 +690,6 @@ inline void AppSignalListSignal::set_allocated_appsignalid(std::string* appsigna
   appsignalid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), appsignalid,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Proto.AppSignalListSignal.appSignalId)
-}
-
-// optional bool hasValue = 2;
-inline bool AppSignalListSignal::_internal_has_hasvalue() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
-  return value;
-}
-inline bool AppSignalListSignal::has_hasvalue() const {
-  return _internal_has_hasvalue();
-}
-inline void AppSignalListSignal::clear_hasvalue() {
-  hasvalue_ = false;
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline bool AppSignalListSignal::_internal_hasvalue() const {
-  return hasvalue_;
-}
-inline bool AppSignalListSignal::hasvalue() const {
-  // @@protoc_insertion_point(field_get:Proto.AppSignalListSignal.hasValue)
-  return _internal_hasvalue();
-}
-inline void AppSignalListSignal::_internal_set_hasvalue(bool value) {
-  _has_bits_[0] |= 0x00000004u;
-  hasvalue_ = value;
-}
-inline void AppSignalListSignal::set_hasvalue(bool value) {
-  _internal_set_hasvalue(value);
-  // @@protoc_insertion_point(field_set:Proto.AppSignalListSignal.hasValue)
 }
 
 // optional .Proto.TuningValue value = 3;

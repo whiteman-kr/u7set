@@ -74,6 +74,8 @@ namespace Builder
 			return result;
 		}
 
+		result &= writeAppSignalLists(settings->appSignalLists);
+
 		// Generate tuning signals
 		//
 		result &= createTuningSignals(equipmentList, m_signalSet, &m_tuningSet);
@@ -295,7 +297,7 @@ namespace Builder
 		{
 			for (const std::pair<QString, QString>& p: notFoundSignalsAndFilters)
 			{
-				m_log->errEQP6108(p.first, p.second, m_software->equipmentId());
+				m_log->errEQP6108(p.first, p.second);
 			}
 
 			return false;

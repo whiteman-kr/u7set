@@ -1880,8 +1880,7 @@ namespace AppSignalLists
 
 			// Create value
 			*/
-			AppSignalListItem item;
-			item.setAppSignalId(p.appSignalId());
+			AppSignalListItem item(p.appSignalId());
 			/*if (s.valid() == true)
 			{
 				ofv.setValue(s.value());
@@ -2268,8 +2267,7 @@ namespace AppSignalLists
 			bool signalExists = m_appSignallist->itemExists(hash);
 			if (signalExists == false)
 			{
-				AppSignalListItem item;
-				item.setAppSignalId(asp.appSignalId());
+				AppSignalListItem item(asp.appSignalId());
 				if (tv.has_value() == true)
 				{
 					item.setValue(tv.value());
@@ -2280,7 +2278,6 @@ namespace AppSignalLists
 			else
 			{
 				AppSignalListItem& item = (*m_appSignallist)[hash];
-				Q_ASSERT(item.appSignalId() == asp.appSignalId());
 				if (tv.has_value() == true)
 				{
 					item.setValue(tv.value());

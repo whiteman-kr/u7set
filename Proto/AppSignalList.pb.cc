@@ -34,8 +34,7 @@ namespace Proto {
 constexpr AppSignalListSignal::AppSignalListSignal(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : appsignalid_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , value_(nullptr)
-  , hasvalue_(false){}
+  , value_(nullptr){}
 struct AppSignalListSignalDefaultTypeInternal {
   constexpr AppSignalListSignalDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -78,10 +77,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_AppSignalList_2eproto::offsets
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignalListSignal, appsignalid_),
-  PROTOBUF_FIELD_OFFSET(::Proto::AppSignalListSignal, hasvalue_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignalListSignal, value_),
   0,
-  2,
   1,
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignalList, _has_bits_),
   PROTOBUF_FIELD_OFFSET(::Proto::AppSignalList, _internal_metadata_),
@@ -110,8 +107,8 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_AppSignalList_2eproto::offsets
   ~0u,
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 8, sizeof(::Proto::AppSignalListSignal)},
-  { 11, 26, sizeof(::Proto::AppSignalList)},
+  { 0, 7, sizeof(::Proto::AppSignalListSignal)},
+  { 9, 24, sizeof(::Proto::AppSignalList)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -121,18 +118,18 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 
 const char descriptor_table_protodef_AppSignalList_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
   "\n\023AppSignalList.proto\022\005Proto\032\014Common.pro"
-  "to\032\016Envelope.proto\032\017AppSignal.proto\"_\n\023A"
+  "to\032\016Envelope.proto\032\017AppSignal.proto\"M\n\023A"
   "ppSignalListSignal\022\023\n\013appSignalId\030\001 \001(\t\022"
-  "\020\n\010hasValue\030\002 \001(\010\022!\n\005value\030\003 \001(\0132\022.Proto"
-  ".TuningValue\"\205\002\n\rAppSignalList\022\031\n\004uuid\030\001"
-  " \001(\0132\013.Proto.Uuid\022\n\n\002id\030\002 \001(\t\022\017\n\007caption"
-  "\030\003 \001(\t\022\022\n\nsignalType\030\004 \001(\005\022\014\n\004tags\030\005 \001(\t"
-  "\022\036\n\026customAppSignalIDMasks\030\006 \001(\t\022\030\n\020equi"
-  "pmentIDMasks\030\007 \001(\t\022\030\n\020appSignalIDMasks\030\010"
-  " \001(\t\022\025\n\rappSignalTags\030\t \001(\t\022/\n\013listSigna"
-  "ls\030\n \003(\0132\032.Proto.AppSignalListSignal:=\n\r"
-  "appSignalList\022\017.Proto.Envelope\030\334\001 \001(\0132\024."
-  "Proto.AppSignalList"
+  "!\n\005value\030\003 \001(\0132\022.Proto.TuningValue\"\205\002\n\rA"
+  "ppSignalList\022\031\n\004uuid\030\001 \001(\0132\013.Proto.Uuid\022"
+  "\n\n\002id\030\002 \001(\t\022\017\n\007caption\030\003 \001(\t\022\022\n\nsignalTy"
+  "pe\030\004 \001(\005\022\014\n\004tags\030\005 \001(\t\022\036\n\026customAppSigna"
+  "lIDMasks\030\006 \001(\t\022\030\n\020equipmentIDMasks\030\007 \001(\t"
+  "\022\030\n\020appSignalIDMasks\030\010 \001(\t\022\025\n\rappSignalT"
+  "ags\030\t \001(\t\022/\n\013listSignals\030\n \003(\0132\032.Proto.A"
+  "ppSignalListSignal:=\n\rappSignalList\022\017.Pr"
+  "oto.Envelope\030\334\001 \001(\0132\024.Proto.AppSignalLis"
+  "t"
   ;
 static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor_table_AppSignalList_2eproto_deps[3] = {
   &::descriptor_table_AppSignal_2eproto,
@@ -141,7 +138,7 @@ static const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable*const descriptor
 };
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_AppSignalList_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_AppSignalList_2eproto = {
-  false, false, 499, descriptor_table_protodef_AppSignalList_2eproto, "AppSignalList.proto", 
+  false, false, 481, descriptor_table_protodef_AppSignalList_2eproto, "AppSignalList.proto", 
   &descriptor_table_AppSignalList_2eproto_once, descriptor_table_AppSignalList_2eproto_deps, 3, 2,
   schemas, file_default_instances, TableStruct_AppSignalList_2eproto::offsets,
   file_level_metadata_AppSignalList_2eproto, file_level_enum_descriptors_AppSignalList_2eproto, file_level_service_descriptors_AppSignalList_2eproto,
@@ -163,9 +160,6 @@ class AppSignalListSignal::_Internal {
   using HasBits = decltype(std::declval<AppSignalListSignal>()._has_bits_);
   static void set_has_appsignalid(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
-  }
-  static void set_has_hasvalue(HasBits* has_bits) {
-    (*has_bits)[0] |= 4u;
   }
   static const ::Proto::TuningValue& value(const AppSignalListSignal* msg);
   static void set_has_value(HasBits* has_bits) {
@@ -201,16 +195,12 @@ AppSignalListSignal::AppSignalListSignal(const AppSignalListSignal& from)
   } else {
     value_ = nullptr;
   }
-  hasvalue_ = from.hasvalue_;
   // @@protoc_insertion_point(copy_constructor:Proto.AppSignalListSignal)
 }
 
 void AppSignalListSignal::SharedCtor() {
 appsignalid_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
-    reinterpret_cast<char*>(&value_) - reinterpret_cast<char*>(this)),
-    0, static_cast<size_t>(reinterpret_cast<char*>(&hasvalue_) -
-    reinterpret_cast<char*>(&value_)) + sizeof(hasvalue_));
+value_ = nullptr;
 }
 
 AppSignalListSignal::~AppSignalListSignal() {
@@ -251,7 +241,6 @@ void AppSignalListSignal::Clear() {
       value_->Clear();
     }
   }
-  hasvalue_ = false;
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
 }
@@ -272,14 +261,6 @@ const char* AppSignalListSignal::_InternalParse(const char* ptr, ::PROTOBUF_NAME
           #ifndef NDEBUG
           ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Proto.AppSignalListSignal.appSignalId");
           #endif  // !NDEBUG
-          CHK_(ptr);
-        } else goto handle_unusual;
-        continue;
-      // optional bool hasValue = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 16)) {
-          _Internal::set_has_hasvalue(&has_bits);
-          hasvalue_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -330,12 +311,6 @@ failure:
         1, this->_internal_appsignalid(), target);
   }
 
-  // optional bool hasValue = 2;
-  if (cached_has_bits & 0x00000004u) {
-    target = stream->EnsureSpace(target);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteBoolToArray(2, this->_internal_hasvalue(), target);
-  }
-
   // optional .Proto.TuningValue value = 3;
   if (cached_has_bits & 0x00000002u) {
     target = stream->EnsureSpace(target);
@@ -361,7 +336,7 @@ size_t AppSignalListSignal::ByteSizeLong() const {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x00000007u) {
+  if (cached_has_bits & 0x00000003u) {
     // optional string appSignalId = 1;
     if (cached_has_bits & 0x00000001u) {
       total_size += 1 +
@@ -374,11 +349,6 @@ size_t AppSignalListSignal::ByteSizeLong() const {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
           *value_);
-    }
-
-    // optional bool hasValue = 2;
-    if (cached_has_bits & 0x00000004u) {
-      total_size += 1 + 1;
     }
 
   }
@@ -414,17 +384,13 @@ void AppSignalListSignal::MergeFrom(const AppSignalListSignal& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x00000007u) {
+  if (cached_has_bits & 0x00000003u) {
     if (cached_has_bits & 0x00000001u) {
       _internal_set_appsignalid(from._internal_appsignalid());
     }
     if (cached_has_bits & 0x00000002u) {
       _internal_mutable_value()->::Proto::TuningValue::MergeFrom(from._internal_value());
     }
-    if (cached_has_bits & 0x00000004u) {
-      hasvalue_ = from.hasvalue_;
-    }
-    _has_bits_[0] |= cached_has_bits;
   }
 }
 
@@ -451,12 +417,7 @@ void AppSignalListSignal::InternalSwap(AppSignalListSignal* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   appsignalid_.Swap(&other->appsignalid_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(AppSignalListSignal, hasvalue_)
-      + sizeof(AppSignalListSignal::hasvalue_)
-      - PROTOBUF_FIELD_OFFSET(AppSignalListSignal, value_)>(
-          reinterpret_cast<char*>(&value_),
-          reinterpret_cast<char*>(&other->value_));
+  swap(value_, other->value_);
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata AppSignalListSignal::GetMetadata() const {

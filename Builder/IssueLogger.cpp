@@ -8553,23 +8553,22 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
+	/// Title: Signal %1 specified in application signals list %2 does not exist.
 	///
 	/// Parameters:
 	///		%1 Schema ID
-	///		%2 TuningClient Equipment ID
+	///		%2 Clisnt Equipment ID
 	///
 	/// Description:
-	///		Signal that is specified in Filter of the Tuning Client does not exist.
+	///		Signal that is specified in application signals list does not exist.
 	///
-	void IssueLogger::errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId)
+	void IssueLogger::errEQP6108(QString appSignalId, QString listId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6108,
-				  tr("Signal %1 specified in filter %2 in Tuning Client %3 does not exist.")
+				  tr("Signal %1 specified in application signals list %2 does not exist.")
 				  .arg(appSignalId)
-				  .arg(filter)
-				  .arg(tuningClientEquipmentId)
+				  .arg(listId)
 				  );
 	}
 

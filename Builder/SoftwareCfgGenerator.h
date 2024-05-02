@@ -100,6 +100,7 @@ namespace Builder
 		QString softwareCfgSubdir() const { return m_software->equipmentIdTemplate(); }
 
 		bool writeMatsUsers(const QString& propertyName, const QStringList& tuningUserAccounts);
+		bool writeAppSignalLists(const QString& appSignalLists);
 
 		template <typename TYPE>
 		TYPE getObjectProperty(QString strId, QString property, bool* ok)

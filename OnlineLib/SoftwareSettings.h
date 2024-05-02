@@ -481,6 +481,8 @@ public:
 	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
 	std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
 
+	QString appSignalLists;
+
 	QString startSchemaId;
 	QString schemaTags;
 
@@ -570,6 +572,8 @@ public:
 
 	QString startSchemaID;
 	QString schemaTags;
+
+	QString appSignalLists;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only

@@ -33,9 +33,10 @@ namespace AppSignalLists
 	{
 	public:
 		AppSignalListItem() = default;
+		explicit AppSignalListItem(const QString& appSignalId);
 
-		QString appSignalId() const;
-		void setAppSignalId(const QString& value);
+		const QString& appSignalId() const;
+		void setAppSignalId(const QString& appSignalId);
 
 		Hash appSignalHash() const;
 
@@ -44,9 +45,6 @@ namespace AppSignalLists
 
 		bool hasValue() const;
 		void removeValue();
-
-		//bool load(QXmlStreamReader& reader);
-		//bool save(QXmlStreamWriter& writer) const;
 
 	private:
 		QString m_appSignalId;
@@ -72,7 +70,7 @@ namespace AppSignalLists
 	public:
 		AppSignalList();
 
-		bool SaveData(Proto::Envelope* message) const;
+		void SaveData(Proto::Envelope* message) const;
 		bool LoadData(const Proto::Envelope& message);
 
 	public:
@@ -135,8 +133,6 @@ namespace AppSignalLists
 		//
 
 		bool match(const AppSignalParam& param) const;
-
-		//std::shared_ptr<AppSignalList> findListById(const QString& id) const; // Recursive search
 
 	private:
 		static bool processMaskList(const QString& s, const QStringList& masks);

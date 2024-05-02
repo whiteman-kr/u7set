@@ -7,6 +7,7 @@
 #include "LanControllerInfoHelper.h"
 #include "ScriptChecker.h"
 
+#include "../libs/AppSignalLists//include/AppSignalLists/SignalList.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/PropertyNames.h"
@@ -1498,6 +1499,163 @@ namespace Builder
 		bool ok = m_cfgXml->addLinkToFile(buildFile);
 		return ok;
 	}
+
+	bool SoftwareCfgGenerator::writeAppSignalLists(const QString& appSignalLists)
+	{
+		QStringList appSignalListsFilter = appSignalLists.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+
+		DbController& db = m_context->m_db;
+		IssueLogger* log = m_context->m_log;
+
+		if (log == nullptr)
+		{
+			Q_ASSERT(log);
+			return false;
+		}
+
+		// --
+		//
+		DbFileTree filesTree;
+		int listsFileId = db.systemFileId(DbDir::AppSignalListsDir);
+
+		if (bool ok = db.getFileListTree(&filesTree, listsFileId, "%", true, nullptr);
+			ok == false)
+		{
+			log->errPDB2001(listsFileId, "%", db.lastError());
+			return false;
+		}
+
+		// Remove all marked as deleted files
+		//
+		filesTree.removeIf([](const DbFileInfo& f)
+			{
+				return f.action() == E::VcsItemAction::Deleted;
+			});
+
+		// Remove all unsupported files and marked for deleting
+		//
+		std::vector<DbFileInfo> files = filesTree.toVectorIf([](const DbFileInfo& f)
+			{
+				return  (f.action() != E::VcsItemAction::Deleted) &&
+					(f.isFolder() == false) &&
+					(f.fileName().endsWith(QLatin1String(".") + Db::File::AppSignalListFileExtension, Qt::CaseInsensitive));
+			});
+
+		bool returnResult = true;
+
+		for (const DbFileInfo& f : files)
+		{
+			// Check for cancel
+			//
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			// --
+			//
+			LOG_MESSAGE(log, tr("Loading %1").arg(f.fileName()));
+
+			// --
+			//
+			std::shared_ptr<DbFile> file;
+
+			if (bool ok = db.getLatestVersion(f, &file, nullptr);
+				ok == false || file.get() == nullptr)
+			{
+				log->errPDB2002(f.fileId(), f.fileName(), db.lastError());
+				returnResult = false;
+				continue;
+			}
+
+
+			// Load list contents from the file
+			//
+			Proto::Envelope envelope;
+			if (envelope.ParseFromArray(file->data().constData(), static_cast<int>(file->data().size())) == false)
+			{
+				m_log->errINT1001(tr("Error parsing AppSignalLists file %1.").arg(file->fileName()));
+				returnResult = false;
+			}
+
+			AppSignalLists::AppSignalList list;
+			if (list.LoadData(envelope) == false)
+			{
+				m_log->errINT1001(tr("Error loading list from AppSignalLists file %1.").arg(file->fileName()));
+				returnResult = false;
+			}
+
+			// Filter list by property filter
+			//
+			if (std::find_if(appSignalListsFilter.begin(), appSignalListsFilter.end(), [list](const QString& filter)
+				{
+					QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(filter));
+					auto matchResult = rx.match(list.id());
+					return matchResult.hasMatch() == true;
+				}) == appSignalListsFilter.end())
+			{
+				continue;
+			}
+
+			// Check if list signals exist in project signal set
+			//
+			{
+				int count = list.count();
+				for (int i = 0; i < count; i++)
+				{
+					const AppSignalLists::AppSignalListItem& item = list[i];
+					if (m_context->m_signalSet->isSignalExists(item.appSignalId()) == false)
+					{
+						m_log->errEQP6108(item.appSignalId(), list.id());
+					}
+				}
+			}
+
+			// Add filtered signals to the list
+			//
+			for (const AppSignal* asp : *m_context->m_signalSet)
+			{
+				if (list.itemExists(asp->hash()) == true)
+				{
+					continue;
+				}
+
+				if (list.match(*asp) == true)
+				{
+					AppSignalLists::AppSignalListItem item(asp->appSignalID());
+					list.add(item);
+				}
+			}
+
+			// Save list to the build
+			//
+			list.SaveData(&envelope);
+
+			QByteArray data;
+			data.resize(static_cast<int>(envelope.ByteSizeLong()));
+
+			bool result = envelope.SerializeToArray(data.data(), static_cast<int>(envelope.ByteSizeLong()));
+			if (result == false)
+			{
+				Q_ASSERT(result);
+				return false;
+			}
+
+			// Write file
+			//
+			BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), file->fileName(), file->data());
+			if (buildFile == nullptr)
+			{
+				Q_ASSERT(buildFile);
+				return false;
+			}
+
+			returnResult &= m_cfgXml->addLinkToFile(buildFile);
+		}
+
+		return returnResult;
+	}
+
 
 	bool SoftwareCfgGenerator::saveScriptProperties(QString scriptProperty, QString fileName)
 	{

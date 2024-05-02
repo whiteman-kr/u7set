@@ -1356,6 +1356,8 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 	//
 	xml.writeStringElement(EquipmentPropNames::START_SCHEMA_ID, startSchemaId);
 	xml.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
+		
+	xml.writeStringElement(EquipmentPropNames::APP_SIGNAL_LISTS, appSignalLists);
 
 	// AppDataServices
 	//
@@ -1481,6 +1483,12 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 		if (xml.name() == EquipmentPropNames::SCHEMA_TAGS)
 		{
 			schemaTags = xml.elementText();
+			continue;
+		}
+
+		if (xml.name() == EquipmentPropNames::APP_SIGNAL_LISTS)
+		{
+			appSignalLists = xml.elementText();
 			continue;
 		}
 
@@ -1866,6 +1874,7 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, tuningSessionTimeout);
 	xml.writeBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, loginPerOperation);
 
+	xml.writeStringAttribute(EquipmentPropNames::APP_SIGNAL_LISTS, appSignalLists);
 	xml.writeBoolAttribute(EquipmentPropNames::FILTER_BY_EQUIPMENT, filterByEquipment);
 	xml.writeBoolAttribute(EquipmentPropNames::FILTER_BY_SCHEMA, filterBySchema);
 
@@ -1976,6 +1985,7 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout);
 	result &= xml.readBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, &loginPerOperation);
 
+	result &= xml.readStringAttribute(EquipmentPropNames::APP_SIGNAL_LISTS, &appSignalLists);
 	result &= xml.readBoolAttribute(EquipmentPropNames::FILTER_BY_EQUIPMENT, &filterByEquipment);
 	result &= xml.readBoolAttribute(EquipmentPropNames::FILTER_BY_SCHEMA, &filterBySchema);
 
