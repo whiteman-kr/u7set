@@ -7,7 +7,7 @@
 
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/IMatsSchemaItemAssociations.h"
-#include "../lib/ITimeStats.h"
+#include "../VFrame30/ITimeStats.h"
 
 #include <ClientLib/AppSignalManager.h>
 
@@ -202,7 +202,7 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 										 MonitorSchemaManager* schemaManager,
 										 VFrame30::AppSignalController* appSignalController,
 										 VFrame30::LogController* logController,
-										 ITimeStats* timeStats,
+										 VFrame30::ITimeStats* timeStats,
 										 QWidget* parent) :
 	VFrame30::ClientSchemaWidget(new MonitorSchemaView(schemaManager, this, appSignalController, logController, timeStats),
 								 schema,
@@ -566,7 +566,7 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 								  theApp.mainWindow()->tuningConnection(),
 								  theApp.mainWindow()->tuningAuthorization(),
 								  &theApp.mainWindow()->configController(),
-								  theApp.mainWindow()->monitorCentralWidget());
+								  &theApp.mainWindow()->monitorCentralWidget());
 	return;
 }
 

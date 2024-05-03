@@ -3,7 +3,7 @@
 #include "DiagnosticsSchemaManager.h"
 #include "../VFrame30/ClientSchemaWidget.h"
 #include "../VFrame30/AppSignalController.h"
-#include "../lib/ITimeStats.h"
+#include "../VFrame30/ITimeStats.h"
 
 
 class DiagSchemaView;
@@ -21,10 +21,10 @@ class DiagSchemaWidget : public VFrame30::ClientSchemaWidget
 public:
 	DiagSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 					 DiagnosticsSchemaManager* schemaManager,
-						VFrame30::AppSignalController* appSignalController,
-						VFrame30::LogController* logController,
-						ITimeStats* timeStats,
-						QWidget* parent);
+					 VFrame30::AppSignalController* appSignalController,
+					 VFrame30::LogController* logController,
+					 VFrame30::ITimeStats* timeStats,
+					 QWidget* parent);
 	virtual ~DiagSchemaWidget();
 
 protected:
@@ -71,6 +71,6 @@ private:
 	// Data access
 	//
 	VFrame30::LogController* m_logController = nullptr;
-	ITimeStats* m_timeStats = nullptr;
+	VFrame30::ITimeStats* m_timeStats = nullptr;
 };
 

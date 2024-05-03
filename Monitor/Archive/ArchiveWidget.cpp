@@ -688,7 +688,7 @@ void ArchiveWidget::showSignalInfo(QString appSignalId)
 								  theApp.mainWindow()->tuningConnection(),
 								  theApp.mainWindow()->tuningAuthorization(),
 								  &theApp.mainWindow()->configController(),
-								  theApp.mainWindow()->monitorCentralWidget());
+								  &theApp.mainWindow()->monitorCentralWidget());
 }
 
 void ArchiveWidget::removeSignal(QString appSignalId, QString archiveServiceId)

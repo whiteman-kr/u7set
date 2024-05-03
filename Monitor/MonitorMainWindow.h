@@ -1,14 +1,21 @@
 #pragma once
 
+#include "./DevTools/DevToolsGlobalScript.h"
+#include "./DevTools/DevToolsScriptVariables.h"
+#include "./DevTools/DevToolsSettings.h"
+#include "./DevTools/DevToolsViewVariables.h"
+#include "./DevTools/DevToolsSchemaStats.h"
+
+#include "MonitorCentralWidget.h"
 #include "MonitorConfigController.h"
 #include "MonitorSchemaManager.h"
 
-#include <ClientLib/TuningSignalManager.h>
 #include <ClientLib/AdsConnection.h>
 #include <ClientLib/AppSignalManager.h>
 #include <ClientLib/ClientTranslator.h>
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningLog.h>
+#include <ClientLib/TuningSignalManager.h>
 #include <ClientLib/TuningUserManager.h>
 #include <SchemaClientLib/SchemaDrawStatistics.h>
 
@@ -23,12 +30,16 @@ namespace VFrame30
 	class LogController;
 }
 
+namespace SchemaClientLib
+{
+	class DialogTcpStatistics;
+}
+
 class MonitorCentralWidget;
 class MonitorToolBar;
 class QLabel;
 class QComboBox;
 class SelectSchemaWidget;
-class DialogTcpStatistics;
 
 
 class MonitorMainWindow : public QMainWindow
@@ -36,7 +47,7 @@ class MonitorMainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	MonitorMainWindow(InstanceResolver& instanceResolver,  const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
+	MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
 	~MonitorMainWindow();
 
 	// Events
@@ -72,13 +83,12 @@ private:
 	void createStatusBar();
 
 public:
-	MonitorCentralWidget* monitorCentralWidget();
+	MonitorCentralWidget& monitorCentralWidget();
+	const MonitorCentralWidget& monitorCentralWidget() const;
 
 private:
 	void updateStatusBar();
-	void showSoftwareConnection(const QString& caption,
-								const std::vector<Tcp::ConnectionState>& connectionStates,
-								QLabel* label);
+	void showSoftwareConnection(const QString& caption, const std::vector<Tcp::ConnectionState>& connectionStates, QLabel* label);
 	// Commands
 	//
 protected slots:
@@ -87,10 +97,8 @@ protected slots:
 	void schemaTreeListToggled(bool checked);
 
 	void showLog();
-    void showTuningLog();
-	void showDataSources();
+	void showTuningLog();
 	void showSettings();
-	void showStatistics();
 
 	void showAboutQt();
 	void showAbout();
@@ -159,11 +167,10 @@ public:
 	const ITuningAuthorization& tuningAuthorization() const;
 
 protected:
-
 	// Data
 	//
 private:
-	Log::LogFile m_LogFile;						// Must be initialized first
+	Log::LogFile m_LogFile; // Must be initialized first
 	ClientLib::TuningLog m_tuningLogFile;
 	InstanceResolver& m_instanceResolver;
 
@@ -177,11 +184,14 @@ private:
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
 	ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_LogFile};
-	ClientLib::TuningConnection m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, m_tuningUserManager, &m_LogFile, &m_tuningLogFile};
+	ClientLib::TuningConnection m_tuningConnection{m_tuningSignalManager,
+												   m_tuningSignalManager,
+												   m_tuningSignalManager,
+												   m_tuningUserManager,
+												   &m_LogFile,
+												   &m_tuningLogFile};
 
 	DialogAlert m_dialogAlert;
-
-	SchemaClientLib::SchemaDrawStatistics m_schemaStats;
 
 	// File menu
 	//
@@ -190,8 +200,6 @@ private:
 
 	// Tools menu
 	//
-	QAction* m_pDataSourcesAction = nullptr;
-	QAction* m_pStatisticsAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 
 	// ? menu
@@ -199,7 +207,7 @@ private:
 	QAction* m_pDevToolsAction = nullptr;
 	QAction* m_pDebugAction = nullptr;
 	QAction* m_pLogAction = nullptr;
-    QAction* m_pTuningLogAction = nullptr;
+	QAction* m_pTuningLogAction = nullptr;
 	QAction* m_pAboutQtAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
 	QAction* m_manualMatsAction = nullptr;
@@ -245,7 +253,7 @@ private:
 	//
 	QLabel* m_statusBarInfo = nullptr;
 
-	QLabel* m_statusBarConfigConnection	= nullptr;
+	QLabel* m_statusBarConfigConnection = nullptr;
 	QLabel* m_statusBarAppDataConnection = nullptr;
 	QLabel* m_statusBarTuningConnection = nullptr;
 
@@ -263,9 +271,33 @@ private:
 
 	// --
 	//
-	DialogTcpStatistics* m_dialogStatistics = nullptr;
+	SchemaClientLib::DialogTcpStatistics* m_dialogStatistics = nullptr;
 
 	ClientLib::TuningUserManager m_tuningUserManager;
+
+	// Central widget.
+	//
+	SchemaClientLib::SchemaDrawStatistics m_schemaStats;
+
+	MonitorCentralWidget::CreateSchemaWidgetFunc createSchemaWidgetFunc =
+		[this](std::shared_ptr<VFrame30::Schema> schema, QWidget* parentWidget)
+	{
+		return new MonitorSchemaWidget(schema,
+									   &m_schemaManager,
+									   m_appSignalController.get(),
+									   m_logController.get(),
+									   &m_schemaStats,
+									   parentWidget);
+	};
+	MonitorCentralWidget m_monitorCentralWidget{&m_schemaManager, createSchemaWidgetFunc, this};
+
+	// DevTools interfaces.
+	//
+	Monitor::DevToolsSettings m_devToolsSettings;
+	Monitor::DevToolsViewVariables m_devToolsViewVariables{&m_monitorCentralWidget};
+	Monitor::DevToolsScriptVariables m_devToolsScriptVariables{&m_monitorCentralWidget};
+	Monitor::DevToolsGlobalScript m_devToolsGlobalScript{&m_monitorCentralWidget};
+	Monitor::DevToolsSchemaStats m_devToolsSchemaStats{m_schemaStats, &m_monitorCentralWidget};
 };
 
 
@@ -280,8 +312,6 @@ public:
 	void addAction(QAction* action);
 
 protected:
-	virtual void dragEnterEvent(QDragEnterEvent *event) override;
+	virtual void dragEnterEvent(QDragEnterEvent* event) override;
 	virtual void dropEvent(QDropEvent* event) override;
 };
-
-

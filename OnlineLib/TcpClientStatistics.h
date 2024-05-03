@@ -1,6 +1,7 @@
 #pragma once
 #include <set>
 #include <vector>
+#include <QMutex>
 #include "../OnlineLib/TcpConnectionState.h"
 
 

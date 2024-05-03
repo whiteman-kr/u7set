@@ -5,10 +5,10 @@
 #include "../TestSuiteLib/TestSuite.h"
 #include "../TestSuiteLib/TestSuiteConfigController.h"
 #include "../TestSuiteLib/TestScriptsStorage.h"
-#include "../lib/Ui/DialogTcpStatistics.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include <ClientLib/ClientTranslator.h>
+#include <SchemaClientLib/DialogTcpStatistics.h>
 
 #include "AppLogOutputWidget.h"
 #include "TestListWidget.h"
@@ -148,7 +148,7 @@ private:
 
 	// Status bar and statistics
 	//
-	DialogTcpStatistics* m_dialogStatistics = nullptr;
+	SchemaClientLib::DialogTcpStatistics* m_dialogStatistics = nullptr;
 
 	QLabel* m_statusBarProjectInfo = nullptr;
 	QLabel* m_statusBarConfigConnection = nullptr;

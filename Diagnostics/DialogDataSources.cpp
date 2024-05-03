@@ -59,7 +59,7 @@ DialogDataSources::DialogDataSources(const MonitorConfigController& configContro
 	m_tuningSourcesWidget = new TuningSourcesWidget(m_tuningConnection, false/*hasActivationControls*/, this);
 	m_mainLayout->addWidget(m_tuningSourcesWidget);
 
-	if (m_configController.configuration().tuningEnabled == false)
+	if (m_configController.configurationTuningEnabled() == false)
 	{
 		m_tuningSourcesLabel->setVisible(false);
 		m_tuningSourcesWidget->setVisible(false);
@@ -86,7 +86,7 @@ DialogDataSources::DialogDataSources(const MonitorConfigController& configContro
 	//
 	setLayout(m_mainLayout);
 
-	if (m_configController.configuration().tuningEnabled == true)
+	if (m_configController.configurationTuningEnabled() == true)
 	{
 		setMinimumSize(1150, 500);
 	}

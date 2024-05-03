@@ -533,6 +533,10 @@ namespace VFrame30
 	{
 	}
 
+	void SchemaItem::drawHighlight(CDrawParam*) const
+	{
+	}
+
 	// Рисование элемента при его создании изменении
 	//
 	void SchemaItem::drawOutline(CDrawParam* ) const

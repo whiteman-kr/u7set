@@ -1,7 +1,7 @@
 #ifndef DIALOGTUNINGSOURCES_H
 #define DIALOGTUNINGSOURCES_H
 
-#include "../lib/Ui/TuningSourcesWidget.h"
+#include <SchemaClientLib/TuningSourcesWidget.h>
 
 
 namespace ClientLib
@@ -10,7 +10,7 @@ namespace ClientLib
 	class TuningUserManager;
 }
 
-class ClientTuningSourcesWidget : public TuningSourcesWidget
+class ClientTuningSourcesWidget : public SchemaClientLib::TuningSourcesWidget
 {
 	Q_OBJECT
 public:
@@ -51,9 +51,6 @@ private:
 	QPushButton* m_btnDisableControl = nullptr;
 
 	ClientLib::TuningConnection& m_tuningConnection;
-
-
-
 };
 
 

@@ -1,5 +1,10 @@
 #include "DialogDataSources.h"
+
 #include "../UtilsLib/Ui/UiTools.h"
+#include "../TestSuiteLib/TestSuiteConfigController.h"
+
+#include <SchemaClientLib/TuningSourcesWidget.h>
+#include <SchemaClientLib/AppDataSourcesWidget.h>
 
 
 void DialogDataSources::create(const TestSuite::TestSuiteConfigController& configController,
@@ -45,7 +50,7 @@ DialogDataSources::DialogDataSources(const TestSuite::TestSuiteConfigController&
 
 	// AppDataSourcesWidget
 	//
-	m_appDataSourcesWidget = new AppDataSourcesWidget(m_tcpSignalClientCtrl, this);
+	m_appDataSourcesWidget = new SchemaClientLib::AppDataSourcesWidget(m_tcpSignalClientCtrl, this);
 	m_mainLayout->addWidget(m_appDataSourcesWidget);
 
 	// TuningSourcesWidget
@@ -53,10 +58,10 @@ DialogDataSources::DialogDataSources(const TestSuite::TestSuiteConfigController&
 	m_tuningSourcesLabel = new QLabel(tr("Tuning Data Sources"));
 	m_mainLayout->addWidget(m_tuningSourcesLabel);
 
-	m_tuningSourcesWidget = new TuningSourcesWidget(m_tcpTuningCtrl, false/*hasActivationControls*/, this);
+	m_tuningSourcesWidget = new SchemaClientLib::TuningSourcesWidget(m_tcpTuningCtrl, false/*hasActivationControls*/, this);
 	m_mainLayout->addWidget(m_tuningSourcesWidget);
 
-	if (m_configController.configuration().tuningEnabled == false)
+	if (m_configController.configurationTuningEnabled() == false)
 	{
 		m_tuningSourcesLabel->setVisible(false);
 		m_tuningSourcesWidget->setVisible(false);
@@ -83,7 +88,7 @@ DialogDataSources::DialogDataSources(const TestSuite::TestSuiteConfigController&
 	//
 	setLayout(m_mainLayout);
 
-	if (m_configController.configuration().tuningEnabled == true)
+	if (m_configController.configurationTuningEnabled() == true)
 	{
 		setMinimumSize(1150, 500);
 	}
@@ -121,10 +126,10 @@ void DialogDataSources::slot_configurationArrived()
 									  true,
 									  TuningClientSettings::LmStatusFlagMode::None);
 
-	m_tuningSourcesLabel->setVisible(m_configController.configuration().tuningEnabled);
-	m_tuningSourcesWidget->setVisible(m_configController.configuration().tuningEnabled);
+	m_tuningSourcesLabel->setVisible(m_configController.configurationTuningEnabled());
+	m_tuningSourcesWidget->setVisible(m_configController.configurationTuningEnabled());
 
-	if (m_configController.configuration().tuningEnabled == true)
+	if (m_configController.configurationTuningEnabled() == true)
 	{
 		setMinimumSize(1100, 500);
 	}

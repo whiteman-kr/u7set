@@ -326,6 +326,12 @@ QString MonitorConfigController::configurationStartSchemaId() const
 	return m_configuration.startSchemaId;
 }
 
+bool MonitorConfigController::configurationTuningEnabled() const
+{
+	QReadLocker locker(&m_configurationLock);
+	return m_configuration.tuningEnabled;
+}
+
 const ComparatorSet& MonitorConfigController::setpoints() const
 {
 	return m_setpoints;
