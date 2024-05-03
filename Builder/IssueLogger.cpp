@@ -9293,6 +9293,29 @@ namespace Builder
 	}
 
 	// --
+
+	/// IssueCode: DGN7000
+	///
+	/// IssueType: Error
+	///
+	/// Title: DiagSignal %1 has unknown diag signal type ID = %2
+	///
+	/// Parameters:
+	///		%1 DiagSignalID
+	///		%2 DiagSignalTypeID
+	///
+	/// Description:
+	///		Specified DiagSignal has unknown diag signal typeID. Check diag signal properties.
+	///
+	void IssueLogger::errDGN7000(QString diagSignalEquipmentID, QString unknownDiagSignalTypeID)
+	{
+		LOG_ERROR(IssueType::Diagnostics,
+				  7000,
+				  tr("DiagSignal %1 has unknown diag signal type ID = %2").
+						arg(diagSignalEquipmentID).arg(unknownDiagSignalTypeID));
+	}
+
+	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids)
 	{
@@ -9402,6 +9425,8 @@ namespace Builder
 				return "ALC";
 			case IssueType::Equipment:
 				return "EQP";
+			case IssueType::Diagnostics:
+				return "DGN";
 			default:
 				assert(false);
 				return "NDF";

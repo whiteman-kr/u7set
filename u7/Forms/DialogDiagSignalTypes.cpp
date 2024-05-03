@@ -26,7 +26,7 @@ DialogDiagSignalTypes::DialogDiagSignalTypes(DbController* db, QWidget* parent) 
 	m_diagSignalTypesTree = new QTreeWidget();
 
 	QStringList l;
-	l << tr("DiagSignalID");
+	l << tr("DiagSignalTypeID");
 	l << tr("State");
 	l << tr("User");
 

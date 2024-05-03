@@ -33,7 +33,8 @@ namespace Builder
 		FscConfiguration,
 		AlParsing,
 		AlCompiler,
-		Equipment
+		Equipment,
+		Diagnostics
 	};
 
 	class BuildIssues
@@ -591,6 +592,11 @@ namespace Builder
 		// VDU related issues
 		//
 		void errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid);
+
+		// Diagnostics compiler errors
+		//
+
+		void errDGN7000(QString diagSignalEquipmentID, QString unknownDiagSignalTypeID);	// DiagSignal %1 has unknown diag signal type ID = %2
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids);
