@@ -26,8 +26,6 @@ set (MONITOR_SOURCES
 	../lib/ExportPrint.cpp
 	../lib/ExportPrint.h
 	../lib/ISignalDataServer.h
-	../lib/Ui/AppDataSourcesWidget.cpp
-	../lib/Ui/AppDataSourcesWidget.h
 	../lib/Ui/ChooseTagsWidget.cpp
 	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/DialogAbout.cpp
@@ -40,10 +38,6 @@ set (MONITOR_SOURCES
 	../lib/Ui/DialogSignalSearch.h
 	../lib/Ui/DialogSignalSnapshot.cpp
 	../lib/Ui/DialogSignalSnapshot.h
-	../lib/Ui/DialogSourceInfo.cpp
-	../lib/Ui/DialogSourceInfo.h
-	../lib/Ui/DialogTcpStatistics.cpp
-	../lib/Ui/DialogTcpStatistics.h
 	../lib/Ui/DialogWriteValues.cpp
 	../lib/Ui/DialogWriteValues.h
 	../lib/Ui/DragDropHelper.cpp
@@ -52,8 +46,6 @@ set (MONITOR_SOURCES
 	../lib/Ui/SchemaListWidget.h
 	../lib/Ui/TagSelectorWidget.cpp
 	../lib/Ui/TagSelectorWidget.h
-	../lib/Ui/TuningSourcesWidget.cpp
-	../lib/Ui/TuningSourcesWidget.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h
 	Archive/ArchiveData.cpp
@@ -68,10 +60,20 @@ set (MONITOR_SOURCES
 	Archive/DialogChooseArchiveSignals.h
 	Archive/MonitorArchive.cpp
 	Archive/MonitorArchive.h
+	DataSourcesWidget.cpp
+	DataSourcesWidget.h
+	DevTools/DevToolsGlobalScript.cpp
+	DevTools/DevToolsGlobalScript.h
+	DevTools/DevToolsSchemaStats.cpp
+	DevTools/DevToolsSchemaStats.h
+	DevTools/DevToolsScriptVariables.cpp
+	DevTools/DevToolsScriptVariables.h
+	DevTools/DevToolsSettings.cpp
+	DevTools/DevToolsSettings.h	
+	DevTools/DevToolsViewVariables.cpp
+	DevTools/DevToolsViewVariables.h
 	DialogColumns.cpp
 	DialogColumns.h
-	DialogDataSources.cpp
-	DialogDataSources.h
 	DialogSettings.cpp
 	DialogSettings.h
 	Globals.cpp

@@ -223,6 +223,12 @@ namespace TestSuite
 		return m_configuration.configInfo;
 	}
 
+	bool TestSuiteConfigController::configurationTuningEnabled() const
+	{
+		QReadLocker locker(&m_confugurationLock);
+		return m_configuration.tuningEnabled;
+	}
+
 	ConfigData TestSuiteConfigController::configData() const
 	{
 		QReadLocker locker(&m_confugurationLock);

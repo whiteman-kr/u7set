@@ -4,16 +4,16 @@
 #include "../VFrame30/Schema.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/Ui/DialogSignalSearch.h"
-#include "../lib/Ui/DialogTcpStatistics.h"
 #include "../lib/Ui/SchemaListWidget.h"
 #include "./Archive/MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
-#include "DialogDataSources.h"
 #include "DialogSettings.h"
-#include "MonitorCentralWidget.h"
 #include "MonitorSchemaWidget.h"
 #include "MonitorSignalSnapshot.h"
 #include "SelectSchemaWidget.h"
+#include "DataSourcesWidget.h"
+
+#include <SchemaClientLib/DevToolsWindow.h>
 
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
@@ -25,7 +25,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	m_signalManager{&m_LogFile},
 	m_tuningSignalManager{softwareInfo.equipmentID(), &m_LogFile},
 	m_schemaManager{m_configController, m_signalManager},
-	m_dialogAlert(this)
+	m_dialogAlert{this}
 {
 	// Init translator
 	//
@@ -78,19 +78,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// --
 	//
-	auto createSchemaWidgetFunc = [this](std::shared_ptr<VFrame30::Schema> schema, QWidget* parentWidget)
-	{
-		return new MonitorSchemaWidget(schema,
-									   &m_schemaManager,
-									   m_appSignalController.get(),
-									   m_logController.get(),
-									   &m_schemaStats,
-									   parentWidget);
-	};
-
-	auto monitorCentralWidget = new MonitorCentralWidget(&m_schemaManager, std::move(createSchemaWidgetFunc), this);
-	
-	setCentralWidget(monitorCentralWidget);
+	setCentralWidget(&m_monitorCentralWidget);
 
 	// Create Menus, ToolBars, StatusBar
 	//
@@ -109,22 +97,22 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// --
 	//
-	connect(monitorCentralWidget, &MonitorCentralWidget::signal_actionCloseTabUpdated, this,
+	connect(&m_monitorCentralWidget, &MonitorCentralWidget::signal_actionCloseTabUpdated, this,
 			[this](bool allowed)
 	{
 		Q_ASSERT(m_closeTabAction);
 		m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && allowed);
 	});
 
-	connect(monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
-	connect(monitorCentralWidget, &MonitorCentralWidget::signal_tabPageChanged, this, &MonitorMainWindow::slot_updateActions);
+	connect(&m_monitorCentralWidget, &MonitorCentralWidget::signal_historyChanged, this, &MonitorMainWindow::slot_historyChanged);
+	connect(&m_monitorCentralWidget, &MonitorCentralWidget::signal_tabPageChanged, this, &MonitorMainWindow::slot_updateActions);
 
-	connect(m_selectSchemaWidget, &SelectSchemaWidget::selectionChanged, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+	connect(m_selectSchemaWidget, &SelectSchemaWidget::selectionChanged, &m_monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
 	// --
 	//
-	monitorCentralWidget->setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
-	monitorCentralWidget->setZoomMode(MonitorAppSettings::instance().zoomMode());
+	m_monitorCentralWidget.setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
+	m_monitorCentralWidget.setZoomMode(MonitorAppSettings::instance().zoomMode());
 
 	centralWidget()->show();
 
@@ -157,7 +145,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// SchemaListWidget
 	//
-	connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+	connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, &m_monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
 	connect(&m_configController, &MonitorConfigController::configurationUpdated,
 			[this, schemaListWidget]()
@@ -419,7 +407,7 @@ void MonitorMainWindow::createActions()
 	m_pExportAction->setEnabled(true);
 	m_pExportAction->setShortcuts(QList<QKeySequence>{}
 									 <<  QKeySequence{Qt::CTRL | Qt::Key_S});
-	connect(m_pExportAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_export);
+	connect(m_pExportAction, &QAction::triggered, &monitorCentralWidget(), &MonitorCentralWidget::slot_export);
 
 	m_pExitAction = new QAction(tr("Exit"), this);
 	m_pExitAction->setStatusTip(tr("Quit the application"));
@@ -428,18 +416,6 @@ void MonitorMainWindow::createActions()
 	m_pExitAction->setShortcutContext(Qt::ApplicationShortcut);
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MonitorMainWindow::exit);
-
-	m_pStatisticsAction = new QAction(tr("Connection Statistics..."), this);
-	m_pStatisticsAction->setStatusTip(tr("View Connection Statistics"));
-	m_pStatisticsAction->setIcon(QIcon(":/Images/Images/NetworkConnections.svg"));
-	m_pStatisticsAction->setEnabled(true);
-	connect(m_pStatisticsAction, &QAction::triggered, this, &MonitorMainWindow::showStatistics);
-
-	m_pDataSourcesAction = new QAction(tr("Data Sources..."), this);
-	m_pDataSourcesAction->setStatusTip(tr("View Data Sources"));
-	m_pDataSourcesAction->setIcon(QIcon(":/Images/Images/AppDataSources.svg"));
-	m_pDataSourcesAction->setEnabled(true);
-	connect(m_pDataSourcesAction, &QAction::triggered, this, &MonitorMainWindow::showDataSources);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
@@ -501,56 +477,56 @@ void MonitorMainWindow::createActions()
 	newTabShortcuts << QKeySequence::AddTab;
 	newTabShortcuts << QKeySequence::New;
 	m_newTabAction->setShortcuts(newTabShortcuts);
-	connect(m_newTabAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_newTab);
+	connect(m_newTabAction, &QAction::triggered, &m_monitorCentralWidget, &MonitorCentralWidget::slot_newTab);
 
 	m_closeTabAction = new QAction(tr("Close Tab"), this);
 	m_closeTabAction->setStatusTip(tr("Close current tab page"));
 	m_closeTabAction->setIcon(QIcon(":/Images/Images/Close.svg"));
-	m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && monitorCentralWidget()->count() > 1);
+	m_closeTabAction->setEnabled(MonitorAppSettings::instance().showSchemasTabBar() && m_monitorCentralWidget.count() > 1);
 	m_closeTabAction->setVisible(MonitorAppSettings::instance().showSchemasTabBar());
 	m_closeTabAction->setShortcuts(QKeySequence::Close);
-	connect(m_closeTabAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_closeCurrentTab);
+	connect(m_closeTabAction, &QAction::triggered, &m_monitorCentralWidget, &MonitorCentralWidget::slot_closeCurrentTab);
 
 	m_zoomInAction = new QAction(tr("Zoom In"), this);
 	m_zoomInAction->setStatusTip(tr("Zoom in schema view"));
 	m_zoomInAction->setIcon(QIcon(":/Images/Images/ZoomIn.svg"));
 	m_zoomInAction->setEnabled(true);
 	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
-	connect(m_zoomInAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoomIn);
+	connect(m_zoomInAction, &QAction::triggered, &m_monitorCentralWidget, &MonitorCentralWidget::slot_zoomIn);
 
 	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
 	m_zoomOutAction->setStatusTip(tr("Zoom out schema view"));
 	m_zoomOutAction->setIcon(QIcon(":/Images/Images/ZoomOut.svg"));
 	m_zoomOutAction->setEnabled(true);
 	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
-	connect(m_zoomOutAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoomOut);
+	connect(m_zoomOutAction, &QAction::triggered, &m_monitorCentralWidget, &MonitorCentralWidget::slot_zoomOut);
 
 	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
 	m_zoom100Action->setStatusTip(tr("Set zoom to 100%"));
 	m_zoom100Action->setEnabled(true);
 	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Asterisk));
-	connect(m_zoom100Action, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoom100);
+	connect(m_zoom100Action, &QAction::triggered, &m_monitorCentralWidget, &MonitorCentralWidget::slot_zoom100);
 
 	m_zoomToFitAction = new QAction(tr("Fit to Screen"), this);
 	m_zoomToFitAction->setStatusTip(tr("Set zoom to fit screen"));
 	m_zoomToFitAction->setIcon(QIcon(":/Images/Images/ZoomFitToScreen.svg"));
 	m_zoomToFitAction->setEnabled(true);
 	m_zoomToFitAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Slash));
-	connect(m_zoomToFitAction, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_zoomToFit);
+	connect(m_zoomToFitAction, &QAction::triggered, &m_monitorCentralWidget, &MonitorCentralWidget::slot_zoomToFit);
 
 	m_historyBack = new QAction(tr("Go Back"), this);
 	m_historyBack->setStatusTip(tr("Click to go back"));
 	m_historyBack->setIcon(QIcon(":/Images/Images/Backward.svg"));
 	m_historyBack->setEnabled(false);
 	m_historyBack->setShortcut(QKeySequence::Back);
-	connect(m_historyBack, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyBack);
+	connect(m_historyBack, &QAction::triggered, &m_monitorCentralWidget, &MonitorCentralWidget::slot_historyBack);
 
 	m_historyForward = new QAction(tr("Go Forward"), this);
 	m_historyForward->setStatusTip(tr("Click to go forward"));
 	m_historyForward->setIcon(QIcon(":/Images/Images/Forward.svg"));
 	m_historyForward->setEnabled(false);
 	m_historyForward->setShortcut(QKeySequence::Forward);
-	connect(m_historyForward, &QAction::triggered, monitorCentralWidget(), &MonitorCentralWidget::slot_historyForward);
+	connect(m_historyForward, &QAction::triggered, &m_monitorCentralWidget, &MonitorCentralWidget::slot_historyForward);
 
 	m_archiveAction = new QAction(tr("Archive"), this);
 	m_archiveAction->setIcon(QIcon(":/Images/Images/Archive.svg"));
@@ -641,9 +617,6 @@ void MonitorMainWindow::createMenus()
 	menuBar()->addSeparator();
 	QMenu* helpMenu = menuBar()->addMenu(tr("&?"));
 
-	helpMenu->addAction(m_pDataSourcesAction);
-	helpMenu->addAction(m_pStatisticsAction);
-
 	helpMenu->addSeparator();
 	helpMenu->addAction(m_pLogAction);
     helpMenu->addAction(m_pTuningLogAction);
@@ -678,7 +651,7 @@ void MonitorMainWindow::createToolBars()
 	m_toolBar->addAction(m_zoomToFitAction);
 
 	m_toolBar->addSeparator();
-	m_selectSchemaWidget = new SelectSchemaWidget(&m_configController, monitorCentralWidget());
+	m_selectSchemaWidget = new SelectSchemaWidget(&m_configController, &m_monitorCentralWidget);
 	m_selectSchemaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	m_selectSchemaWidget->setMaximumWidth(1280);
 	m_toolBar->addWidget(m_selectSchemaWidget);
@@ -765,12 +738,14 @@ void MonitorMainWindow::createStatusBar()
 	return;
 }
 
-MonitorCentralWidget* MonitorMainWindow::monitorCentralWidget()
+MonitorCentralWidget& MonitorMainWindow::monitorCentralWidget()
 {
-	MonitorCentralWidget* centralWidget = dynamic_cast<MonitorCentralWidget*>(QMainWindow::centralWidget());
-	Q_ASSERT(centralWidget != nullptr);
+	return m_monitorCentralWidget;
+}
 
-	return centralWidget;
+const MonitorCentralWidget& MonitorMainWindow::monitorCentralWidget() const
+{
+	return m_monitorCentralWidget;
 }
 
 void MonitorMainWindow::updateStatusBar()
@@ -942,15 +917,6 @@ void MonitorMainWindow::showTuningLog()
 	m_tuningLogFile.viewTuningLog(this);
 }
 
-void MonitorMainWindow::showDataSources()
-{
-	DialogDataSources::create(m_configController,
-							  m_tuningConnection,
-							  &m_LogFile,
-							  this);
-}
-
-
 void MonitorMainWindow::showSettings()
 {
 	DialogSettings d(m_translator, this);
@@ -991,7 +957,7 @@ void MonitorMainWindow::showSettings()
 		showLogo();
 		showZoomControls();
 		setVisibleTabBar(MonitorAppSettings::instance().showSchemasTabBar());
-		monitorCentralWidget()->setZoomMode(MonitorAppSettings::instance().zoomMode());
+		m_monitorCentralWidget.setZoomMode(MonitorAppSettings::instance().zoomMode());
 
 		// Reconnect
 		//
@@ -1021,28 +987,6 @@ void MonitorMainWindow::showSettings()
 	return;
 }
 
-void MonitorMainWindow::showStatistics()
-{
-	if (m_dialogStatistics == nullptr)
-	{
-		m_dialogStatistics = new DialogTcpStatistics(this);
-		m_dialogStatistics->show();
-
-		auto f = [this]() -> void
-		{
-			m_dialogStatistics = nullptr;
-		};
-
-		connect(m_dialogStatistics, &DialogTcpStatistics::dialogClosed, this, f);
-	}
-	else
-	{
-		m_dialogStatistics->activateWindow();
-	}
-
-	UiTools::adjustDialogPlacement(m_dialogStatistics);
-}
-
 void MonitorMainWindow::showAboutQt()
 {
 	QMessageBox::aboutQt(this, qAppName());
@@ -1064,6 +1008,7 @@ void MonitorMainWindow::showMatsUserManual()
 
 void MonitorMainWindow::devTools()
 {
+#if 0
 	QDialog statsDialog{this};
 
 	QVBoxLayout* layout = new QVBoxLayout{};
@@ -1099,54 +1044,26 @@ void MonitorMainWindow::devTools()
 	//
 	statsDialog.setLayout(layout);
 	statsDialog.exec();
+#else
+	std::list<std::pair<QString, QWidget*>> additionalTabs;
+
+	auto dataSourcesWidget = new DataSourcesWidget{m_configController, m_tuningConnection, &m_LogFile, this};
+	additionalTabs.push_back(std::make_pair(tr("Data Sources"), dataSourcesWidget));
+
+	SchemaClientLib::DevToolsWindow::show(m_devToolsSettings,
+										  m_devToolsViewVariables,
+										  m_devToolsSchemaStats,
+										  m_devToolsScriptVariables,
+										  m_devToolsGlobalScript,
+										  additionalTabs,
+										  this);
+#endif
 
 	return;
 }
 
 void MonitorMainWindow::debug()
 {
-//#ifdef QT_DEBUG
-//	std::vector<AppSignalParam> appSignals;
-
-//	appSignals.push_back(m_signalManager.signalParam("#TEST1_000035", nullptr));
-//	appSignals.push_back(m_signalManager.signalParam("#SYSTEMID_SRT3_CH01_MD00_CTRLIN_INH02A", nullptr));
-
-//	QDateTime start = QDateTime{QDate{2023, 2, 1}, QTime{0, 0, 0, 0}};
-//	QDateTime now = QDateTime::currentDateTime();
-
-//	MonitorArchive::requestArchiveWithNewWidget(&m_signalManager, &m_configController, appSignals, start, now, E::TimeType::Local, this);
-
-	// --
-	//
-//	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-//													"./",
-//													tr("Monitor schemas (*.mvs);; All files (*.*)"));
-
-//	if (fileName.isNull() == true)
-//	{
-//		return;
-//	}
-
-//	QFileInfo fileInfo(fileName);
-
-//	// Load schema
-//	//
-//	std::shared_ptr<VFrame30::Schema> schema = std::shared_ptr<VFrame30::Schema>(VFrame30::Schema::Create(fileName.toStdWString().c_str()));
-
-//	if (schema == nullptr)
-//	{
-//		QMessageBox::critical(this, "Monitor", "Cannot load file");
-//		return;
-//	}
-
-	// Create tab
-	//
-	//	QTabWidget* tabWidget = monitorCentralWidget();
-
-	//	MonitorSchemaWidget* schemaWidget = new MonitorSchemaWidget(schema);
-	//	tabWidget->addTab(schemaWidget, "Debug tab: " + fileInfo.fileName());
-
-//#endif	// QT_DEBUG
 }
 
 void MonitorMainWindow::slot_archive()
@@ -1290,7 +1207,7 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 
 	if (startTime > endTime)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Archive request Start Time (%1) shoud be earlier than End Time (%2).")
+		QMessageBox::critical(this, qAppName(), tr("Archive request Start Time (%1) should be earlier than End Time (%2).")
 							  .arg(startTime.toString("dd/MM/yyyy hh:mm:ss"))
 							  .arg(endTime.toString("dd/MM/yyyy hh:mm:ss")));
 		return;
@@ -1379,7 +1296,7 @@ void MonitorMainWindow::slot_signalSnapshot()
 {
 	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(&m_configController,
 																			   &m_signalManager,
-																			   monitorCentralWidget());
+																			   &m_monitorCentralWidget);
 	d->show();
 
 	return;
@@ -1390,7 +1307,7 @@ void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(
 										 &configController(),
 										 &m_signalManager,
-										 monitorCentralWidget());
+										 &m_monitorCentralWidget);
 
 	std::vector<AppSignalParam> specialSignals;
 
@@ -1454,7 +1371,7 @@ void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
 {
 	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
 													   &m_signalManager,
-													   monitorCentralWidget());
+													   &m_monitorCentralWidget);
 
 	d->resetSignalsType();
 	d->setSignalsMask(masks);
@@ -1467,7 +1384,7 @@ void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
 {
 	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
 													   &m_signalManager,
-													   monitorCentralWidget());
+													   &m_monitorCentralWidget);
 
 	d->resetSignalsType();
 	d->setSignalsMask({});
@@ -1478,19 +1395,12 @@ void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
 
 void MonitorMainWindow::slot_findSignal()
 {
-	MonitorCentralWidget* cw = monitorCentralWidget();
-	if (cw == nullptr)
-	{
-		Q_ASSERT(cw);
-		return;
-	}
-
 	DialogSignalSearch* dsi = new DialogSignalSearch(this, &m_signalManager);
 
 	connect(&m_signalManager, &ClientLib::AppSignalManager::signalParamsUpdated, dsi, &DialogSignalSearch::signalsUpdated);
 
-	connect(dsi, &DialogSignalSearch::signalContextMenu, cw, &MonitorCentralWidget::slot_signalContextMenu);
-	connect(dsi, &DialogSignalSearch::signalInfo, cw, &MonitorCentralWidget::slot_signalInfo);
+	connect(dsi, &DialogSignalSearch::signalContextMenu, &m_monitorCentralWidget, &MonitorCentralWidget::slot_signalContextMenu);
+	connect(dsi, &DialogSignalSearch::signalInfo, &m_monitorCentralWidget, &MonitorCentralWidget::slot_signalInfo);
 
 	dsi->show();
 
@@ -1530,7 +1440,7 @@ void MonitorMainWindow::slot_updateActions(bool schemaWidgetSelected)
 
 void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configuration)
 {
-	monitorCentralWidget()->setStartSchemaId(configuration.startSchemaId);
+	m_monitorCentralWidget.setStartSchemaId(configuration.startSchemaId);
 
 	// Update AppSignalManager with specific data
 	//
@@ -1641,11 +1551,7 @@ void MonitorMainWindow::setVisibleSchemaTree(bool visible)
 
 void MonitorMainWindow::setVisibleTabBar(bool visible)
 {
-	if (MonitorCentralWidget* m = monitorCentralWidget();
-		m != nullptr)
-	{
-		m->setVisibleTabBar(visible);
-	}
+	m_monitorCentralWidget.setVisibleTabBar(visible);
 
 	m_newTabAction->setVisible(visible);
 	m_newTabAction->setEnabled(visible);
@@ -1920,7 +1826,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		trendActionWidget->geometry().contains(event->position().toPoint()) &&
 		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
 	{
-		// Lets assume parent isMaonitorMainWindow
+		// Lets assume parent isMonitorMainWindow
 		//
 		MonitorMainWindow* m = dynamic_cast<MonitorMainWindow*>(this->parent());
 		if (m == nullptr)

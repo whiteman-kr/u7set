@@ -15,10 +15,17 @@ namespace VFrame30
 	public:
 		virtual ~IViewVariables() = default;
 
-		[[nodiscard]] virtual bool variableExists(const QString& name) const = 0;
+		/// @brief Get the list of view variables.
+		[[nodiscard]] virtual QStringList viewVariables() const = 0;
 
-		[[nodiscard]] virtual QVariant variable(const QString& name) const = 0;
-		virtual void setVariable(const QString& name, const QVariant& value) = 0;
+		/// @brief Check if a view variable exists.
+		[[nodiscard]] virtual bool viewVariableExists(const QString& name) const = 0;
+
+		/// @brief Get the value of a view variable.
+		[[nodiscard]] virtual QVariant viewVariable(const QString& name) const = 0;
+
+		/// @brief Set the value of a view variable.
+		virtual void setViewVariable(const QString& name, const QVariant& value) = 0;
 	};
 
 } // namespace VFrame30

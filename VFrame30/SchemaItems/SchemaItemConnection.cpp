@@ -591,16 +591,23 @@ namespace VFrame30
 
 	void SchemaItemReceiver::drawHighlight(CDrawParam* drawParam) const
 	{
+		bool highligh = drawParam->highlightIds().contains(label());
+
 		// Draw highlights for m_appSignalIds
 		//
 		for (const QString& appSignalId : m_appSignalIds)
 		{
 			if (drawParam->highlightIds().contains(appSignalId) == true)
 			{
-				QRectF highlightRect = boundingRectInDocPt(drawParam);
-				drawHighlightRect(drawParam, highlightRect);
+				highligh = true;
 				break;
 			}
+		}
+
+		if (highligh == true)
+		{
+			QRectF highlightRect = boundingRectInDocPt(drawParam);
+			drawHighlightRect(drawParam, highlightRect);
 		}
 
 		return;

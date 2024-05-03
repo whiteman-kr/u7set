@@ -81,6 +81,8 @@ namespace TestSuite
 		ConfigSettings configuration() const;
 		ClientLib::ConfigurationInfo configInfo() const;
 
+		bool configurationTuningEnabled() const;
+
 		ConfigData configData() const;
 
 		// Data section

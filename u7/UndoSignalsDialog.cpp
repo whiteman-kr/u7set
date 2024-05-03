@@ -1,5 +1,4 @@
-#include "../lib/WidgetUtils.h"
-
+#include "../UtilsLib/Ui/WidgetUtils.h"
 #include "UndoSignalsDialog.h"
 #include "SignalsTabPage.h"
 #include "AppSignalSetProvider.h"

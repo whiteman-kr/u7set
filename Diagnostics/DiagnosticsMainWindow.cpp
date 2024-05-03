@@ -943,7 +943,7 @@ void DiagnosticsMainWindow::showStatistics()
 {
 	if (m_dialogStatistics == nullptr)
 	{
-		m_dialogStatistics = new DialogTcpStatistics(this);
+		m_dialogStatistics = new SchemaClientLib::DialogTcpStatistics(this);
 		m_dialogStatistics->show();
 
 		auto f = [this]() -> void
@@ -951,7 +951,7 @@ void DiagnosticsMainWindow::showStatistics()
 			m_dialogStatistics = nullptr;
 		};
 
-		connect(m_dialogStatistics, &DialogTcpStatistics::dialogClosed, this, f);
+		connect(m_dialogStatistics, &SchemaClientLib::DialogTcpStatistics::dialogClosed, this, f);
 	}
 	else
 	{

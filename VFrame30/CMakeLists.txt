@@ -19,7 +19,6 @@ endif (MSVC)
 set(TARGET VFrame30)
 
 qt_add_library(${TARGET} STATIC
-	../lib/ITimeStats.h
 	../lib/Tuning/ITuningConnection.h
 
 	./SchemaItems/FblItem.cpp
@@ -121,6 +120,7 @@ qt_add_library(${TARGET} STATIC
 	HorzVertLinks.h
 	IMatsSchemaItemAssociations.h
 	ISchemaViewHistory.h
+	ITimeStats.h
 	IViewVariables.h
 	LogController.cpp
 	LogController.h

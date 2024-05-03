@@ -453,10 +453,12 @@ namespace VFrame30
 
 		// Start stats
 		//
-		if (drawParam->timeStats() != nullptr)
+		ITimeStats* timeStats = drawParam->timeStats();
+		if (timeStats != nullptr)
 		{
-			drawParam->timeStats()->clear("Schema", schemaId());
+			timeStats->clear();
 		}
+
 		auto startTime = std::chrono::system_clock::now();
 
 		// --
@@ -485,12 +487,12 @@ namespace VFrame30
 
 			// Collect stats
 			//
-			if (drawParam->timeStats() != nullptr)
+			if (timeStats != nullptr)
 			{
 				using namespace std::chrono;
 				auto now = system_clock::now();
 				auto elapsed = duration_cast<microseconds>(now - startTimePreDraw);
-				drawParam->timeStats()->addRecord("Schema", schemaId(), "preDrawEvent", elapsed);
+				timeStats->addRecord("Schema", schemaId(), "preDrawEvent", elapsed);
 			}
 		}
 
@@ -566,9 +568,9 @@ namespace VFrame30
 
 				// Start stats
 				//
-				if (drawParam->timeStats() != nullptr)
+				if (timeStats != nullptr)
 				{
-					drawParam->timeStats()->clear(schemaId(), item->label());
+					timeStats->clear(schemaId(), item->label());
 				}
 
 				if (isClientMode == true && item->visible() == false)
@@ -603,12 +605,12 @@ namespace VFrame30
 
 					// Collect stats
 					//
-					if (drawParam->timeStats() != nullptr)
+					if (timeStats != nullptr)
 					{
 						using namespace std::chrono;
 						auto now = system_clock::now();
 						auto elapsed = duration_cast<microseconds>(now - startTimePreDraw);
-						drawParam->timeStats()->addRecord(schemaId(), item->label(), "preDrawEvent", elapsed);
+						timeStats->addRecord(schemaId(), item->label(), "preDrawEvent", elapsed);
 					}
 				}
 
@@ -641,12 +643,12 @@ namespace VFrame30
 
 					// Collect stats
 					//
-					if (drawParam->timeStats() != nullptr)
+					if (timeStats != nullptr)
 					{
 						using namespace std::chrono;
 						auto now = system_clock::now();
 						auto elapsed = duration_cast<microseconds>(now - startTimeDraw);
-						drawParam->timeStats()->addRecord(schemaId(), item->label(), "draw", elapsed);
+						timeStats->addRecord(schemaId(), item->label(), "draw", elapsed);
 					}
 				}
 			}
@@ -657,14 +659,14 @@ namespace VFrame30
 			{
 				Q_ASSERT(item);
 
-				if (item->isType<PosRectImpl>() == false || (isClientMode == true && item->visible() == false))
+				if (isClientMode == true && item->visible() == false)
 				{
 					continue;
 				}
 
 				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
-					item->toType<PosRectImpl>()->drawHighlight(drawParam);
+					item->drawHighlight(drawParam);
 				}
 			}
 		}
@@ -676,14 +678,14 @@ namespace VFrame30
 
 		// Collect stats
 		//
-		if (drawParam->timeStats() != nullptr)
+		if (timeStats != nullptr)
 		{
 			using namespace std::chrono;
 
 			auto now = system_clock::now();
 			auto elapsed = duration_cast<microseconds>(now - startTime);
 
-			drawParam->timeStats()->addRecord("Schema", schemaId(), "Draw", elapsed);
+			timeStats->addRecord("Schema", schemaId(), "Draw", elapsed);
 		}
 
 #if 0

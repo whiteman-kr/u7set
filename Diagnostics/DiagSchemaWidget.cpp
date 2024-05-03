@@ -196,11 +196,11 @@ namespace
 //
 //
 DiagSchemaWidget::DiagSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
-										 DiagnosticsSchemaManager* schemaManager,
-										 VFrame30::AppSignalController* appSignalController,
-										 VFrame30::LogController* logController,
-										 ITimeStats* timeStats,
-										 QWidget* parent) :
+								   DiagnosticsSchemaManager* schemaManager,
+								   VFrame30::AppSignalController* appSignalController,
+								   VFrame30::LogController* logController,
+								   VFrame30::ITimeStats* timeStats,
+								   QWidget* parent) :
 	VFrame30::ClientSchemaWidget(new DiagSchemaView(schemaManager, this, appSignalController, logController, timeStats),
 								 schema,
 								 schemaManager,

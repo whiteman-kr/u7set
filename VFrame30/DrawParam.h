@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/ITimeStats.h"
+#include "ITimeStats.h"
 #include "FontParam.h"
 #include "Session.h"
 #include "VFrame30Types.h"
@@ -49,8 +49,8 @@ namespace VFrame30
 		const ClientSchemaView* clientSchemaView() const;	// Can be used only in Client mode (Monitor/Tuning/...)
 		ClientSchemaView* clientSchemaView();
 
-		ITimeStats* timeStats();
-		ITimeStats* timeStats() const;
+		VFrame30::ITimeStats* timeStats();
+		VFrame30::ITimeStats* timeStats() const;
 
 		// Params for drawing
 		//

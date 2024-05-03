@@ -1,8 +1,8 @@
-#ifndef BASESERVICESTATEWIDGET_H
-#define BASESERVICESTATEWIDGET_H
+#pragma once
 
 #include <QMainWindow>
 #include "../OnlineLib/UdpSocket.h"
+#include "../OnlineLib/SoftwareInfo.h"
 #include "ServiceTableModel.h"
 
 class QAction;
@@ -83,4 +83,3 @@ private:
 	QStandardItemModel* m_clientsTabModel = nullptr;
 };
 
-#endif // BASESERVICESTATEWIDGET_H

@@ -6,7 +6,7 @@
 #include "ScmTcpAppDataClient.h"
 #include <QHBoxLayout>
 #include <QSplitter>
-#include "../lib/WidgetUtils.h"
+#include "../UtilsLib/Ui/WidgetUtils.h"
 
 struct staticPropertyFieldDefinition
 {

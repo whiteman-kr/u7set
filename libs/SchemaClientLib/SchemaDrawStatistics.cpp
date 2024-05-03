@@ -2,6 +2,11 @@
 
 namespace SchemaClientLib
 {
+	void SchemaDrawStatistics::clear()
+	{
+		m_modules.clear();
+	}
+
 	void SchemaDrawStatistics::clear(const QString& module)
 	{
 		m_modules[module].clear();
@@ -56,9 +61,9 @@ namespace SchemaClientLib
 		return result;
 	}
 
-	std::vector<TimeStatsRecord> SchemaDrawStatistics::itemRecords(const QString& module, const QString& item) const
+	std::vector<VFrame30::TimeStatsRecord> SchemaDrawStatistics::itemRecords(const QString& module, const QString& item) const
 	{
-		std::vector<TimeStatsRecord> result;
+		std::vector<VFrame30::TimeStatsRecord> result;
 
 		auto mit = m_modules.find(module);
 		if (mit == m_modules.end())
@@ -73,7 +78,7 @@ namespace SchemaClientLib
 			return result;
 		}
 
-		const std::vector<TimeStatsRecord>& itemDatata = iit->second;
+		const std::vector<VFrame30::TimeStatsRecord>& itemDatata = iit->second;
 		result = itemDatata;
 
 		return result;

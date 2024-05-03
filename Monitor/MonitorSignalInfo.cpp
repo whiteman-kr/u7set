@@ -48,7 +48,7 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 
 		if (ok == true)
 		{
-			bool tuningEnabled = configController->configuration().tuningEnabled == true;
+			bool tuningEnabled = configController->configurationTuningEnabled();
 
 			MonitorSignalInfo* msi = new MonitorSignalInfo(signal,
 														   configController,
@@ -113,10 +113,10 @@ MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 
 void MonitorSignalInfo::onSignalParamAndUnitsArrived()
 {
-	setTuningEnabled(m_configController->configuration().tuningEnabled);
+	setTuningEnabled(m_configController->configurationTuningEnabled());
 
-	// Refresh signal param inself
-
+	// Refresh signal param itself
+	//
 	bool ok = false;
 
 	AppSignalParam newSignal = signalManager()->signalParam(signal().hash(), &ok);

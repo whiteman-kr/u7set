@@ -151,7 +151,7 @@ namespace VFrame30
 				//
 				if (viewVariables != nullptr)
 				{
-					QVariant var = viewVariables->variable(macro);
+					QVariant var = viewVariables->viewVariable(macro);
 
 					if (var.isValid() == true)
 					{
