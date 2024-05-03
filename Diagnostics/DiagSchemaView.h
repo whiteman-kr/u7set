@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../VFrame30/ClientSchemaView.h"
-#include "../lib/ITimeStats.h"
+#include "../VFrame30/ITimeStats.h"
 #include "ScriptDiagnosticsApplication.h"
 #include "DiagConfigController.h"
 #include "../VFrame30/AppSignalController.h"
@@ -24,7 +24,7 @@ public:
 							VFrame30::ISchemaViewHistory* schemaViewHistory,
 							VFrame30::AppSignalController* appSignalController,
 							VFrame30::LogController* logController,
-							ITimeStats* timeStats,
+							VFrame30::ITimeStats* timeStats,
 							QWidget* parent = nullptr);
 	virtual ~DiagSchemaView() = default;
 

@@ -1,13 +1,13 @@
 #pragma once
 
-class QTableView;
+#include <QDialog>
+#include "HashedVector.h"
+
 class QStandardItem;
 class QListView;
-class QHeaderView;
 class QStandardItemModel;
 class QAbstractItemModel;
-
-#include <QDialog>
+class QHeaderView;
 
 void saveWindowPosition(QWidget* window, QString widgetKey);
 void setWindowPosition(QWidget* window, QString widgetKey);
@@ -22,29 +22,70 @@ public:
 								  bool showAllDefaultColumns = false);
 	virtual ~TableDataVisibilityController();
 
-	void editColumnsVisibilityAndOrder();
-
 	void saveColumnVisibility(int index, bool visible);
 	void saveColumnPosition(int index, int position);
+	void saveColumnWidth(int index, int width);
 
-	bool getColumnVisibility(int index) const;
 	int getColumnPosition(int index) const;
+	bool getColumnVisibility(int index) const;
 	int getColumnWidth(int index) const;
 
 	void showColumn(int index, bool visible = true);
 	void relocateAllColumns();
 
 public slots:
-	void saveColumnWidth(int index);
+	void onColumnResized(int index, int oldSize, int newSize);
+	void onColumnMoved(int index, int oldVisualIndex, int newVisualIndex);
+
+	void editColumnsVisibilityAndOrder();
+
 	void saveAllHeaderGeomery();
 	void checkNewColumns();
 
 private:
-	QString escape(const QString& colName) const;
+	class ColumnInfo
+	{
+	public:
+		QString columnName() const;
+		void setColumnName(const QString& colName);
+
+		QString settingName() const;
+
+		int position() const;
+		void setPosition(int pos);
+
+		bool visible() const;
+		void setVisible(bool visible);
+
+		int width() const;
+		void setWidth(int width);
+
+		QString saveParamsToString() const;
+		void readParamsFromString(const QString& str);
+
+	private:
+		QString m_columnName;
+		QString m_settingName;		// ==  escape(m_columnName)
+
+		// params
+
+		int m_position = -1;
+		bool m_visible = false;
+		int m_width = 0;
+
+		static const QString VISIBLE;
+		static const QString HIDDEN;
+	};
+
+private:
+	void saveColumnInfo(const ColumnInfo& ci) const;
+	void loadColumnInfo(const QString& columnName, ColumnInfo* ci) const;
+	bool isValidColumnIndex(int index) const;
 
 private:
 	QTableView* m_tableView = nullptr;
-	QStringList m_columnNameList;
+	mutable QSettings m_settings;
+	HashedVector<QString, ColumnInfo> m_columnsInfo;			// ColumnName => ColumnInfo
 	QString m_settingBranchName;
 	QVector<int> m_defaultVisibleColumnSet;
 	bool m_showAllDefaultColumns;

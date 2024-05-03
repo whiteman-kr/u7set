@@ -77,12 +77,25 @@ namespace ReportLib
 	//
 	// ReportVariables
 	//
-	bool ReportVariables::variableExists(const QString& name) const
+	QStringList ReportVariables::viewVariables() const
+	{
+		QStringList result;
+		result.reserve(m_variables.size());
+
+		for (const auto& [name, value] : m_variables)
+		{
+			result.push_back(name);
+		}
+
+		return result;
+	}
+
+	bool ReportVariables::viewVariableExists(const QString& name) const
 	{
 		return m_variables.find(name) != m_variables.end();
 	}
 	
-	QVariant ReportVariables::variable(const QString& name) const
+	QVariant ReportVariables::viewVariable(const QString& name) const
 	{
 		auto it = m_variables.find(name);
 		if (it == m_variables.end())
@@ -92,7 +105,7 @@ namespace ReportLib
 		return it->second;
 	}
 	
-	void ReportVariables::setVariable(const QString& name, const QVariant& value)
+	void ReportVariables::setViewVariable(const QString& name, const QVariant& value)
 	{
 		m_variables[name] = value.toString();
 	}

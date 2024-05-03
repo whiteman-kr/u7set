@@ -2,7 +2,6 @@
 
 #include "../VFrame30/ClientSchemaWidget.h"
 
-class ITimeStats;
 class MonitorSchemaView;
 class MonitorSchemaManager;
 struct SchemaHistoryItem;
@@ -15,6 +14,7 @@ namespace ClientLib
 namespace VFrame30
 {
 	class AppSignalController;
+	class ITimeStats;
 }
 
 
@@ -35,7 +35,7 @@ public:
 						MonitorSchemaManager* schemaManager,
 						VFrame30::AppSignalController* appSignalController,
 						VFrame30::LogController* logController,
-						ITimeStats* timeStats,
+						VFrame30::ITimeStats* timeStats,
 						QWidget* parent);
 	virtual ~MonitorSchemaWidget();
 
@@ -82,7 +82,7 @@ private:
 
 	// Data access
 	VFrame30::LogController* m_logController = nullptr;
-	ITimeStats* m_timeStats = nullptr;
+	VFrame30::ITimeStats* m_timeStats = nullptr;
 
 };
 

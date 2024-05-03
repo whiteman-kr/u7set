@@ -168,8 +168,16 @@ namespace VFrame30
 		return 0;
 	}
 
-	void PosRectImpl::drawHighlight(CDrawParam* /*drawParam*/) const
+	void PosRectImpl::drawHighlight(CDrawParam* drawParam) const
 	{
+		bool highlight = drawParam->highlightIds().contains(label());
+		
+		if (highlight == true)
+		{
+			QRectF highlightRect = boundingRectInDocPt(drawParam);
+			drawHighlightRect(drawParam, highlightRect);
+		}
+
 		return;
 	}
 

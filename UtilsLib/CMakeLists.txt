@@ -37,6 +37,8 @@ qt_add_library(${TARGET} STATIC
 	SimpleThread.h
 	Ui/UiTools.cpp
 	Ui/UiTools.h
+	Ui/WidgetUtils.cpp
+	Ui/WidgetUtils.h
 	WUtils.h
 	XmlHelper.cpp
 	XmlHelper.h
@@ -73,17 +75,21 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QHostAddress>
 	<QKeyEvent>
 	<QLineEdit>
+	<QListView>
 	<QMessageBox>
 	<QMetaMethod>
 	<QMutex>
 	<QObject>
 	<QOperatingSystemVersion>
 	<QProcess>
+	<QPushButton>
 	<QRegularExpression>
 	<QScreen>
 	<QScrollBar>
 	<QSettings>
 	<QShortcut>
+	<QStandardItem>
+	<QStandardItemModel>
 	<QStandardPaths>
 	<QString>
 	<QTableView>

@@ -4,11 +4,9 @@
 #include "ScriptMonitorApplication.h"
 #include "../VFrame30/ClientSchemaView.h"
 
-
-class ITimeStats;
-
 namespace VFrame30
 {
+	class ITimeStats;
 	class AppSignalController;
 	class TuningController;
 }
@@ -23,7 +21,7 @@ public:
 							   VFrame30::ISchemaViewHistory* schemaViewHistory,
 							   VFrame30::AppSignalController* appSignalController,
 							   VFrame30::LogController* logController,
-							   ITimeStats* timeStats,
+							   VFrame30::ITimeStats* timeStats,
 							   QWidget* parent = nullptr);
 	virtual ~MonitorSchemaView() = default;
 

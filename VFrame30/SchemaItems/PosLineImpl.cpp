@@ -181,6 +181,36 @@ namespace VFrame30
 		}		
 	}
 
+	void PosLineImpl::drawHighlight(CDrawParam* drawParam) const
+	{
+		if (drawParam->highlightIds().contains(label()) == true)
+		{
+			QPainter* p = drawParam->painter();
+
+			QPen pen{drawParam->blinkPhase() ? SchemaItem::highlightColor1 : SchemaItem::highlightColor2};
+
+			double lineWeight = drawParam->controlBarSize() / 3.0f;
+			pen.setWidthF(lineWeight);
+
+			p->setBrush(Qt::NoBrush);
+			p->setPen(pen);
+
+			QPointF p1(startXDocPt(), startYDocPt());
+			QPointF p2(endXDocPt(), endYDocPt());
+
+			if (std::abs(p1.x() - p2.x()) < 0.000001 && std::abs(p1.y() - p2.y()) < 0.000001)
+			{
+				// Пустая линия, рисуется очень большой
+				//
+				return;
+			}
+
+			p->drawLine(p1, p2);
+		}
+
+		return;
+	}
+
 	// Рисование элемента при его создании изменении
 	//
 	void PosLineImpl::drawOutline(CDrawParam* drawParam) const

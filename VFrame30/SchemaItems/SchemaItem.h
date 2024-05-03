@@ -187,7 +187,7 @@ namespace VFrame30
 		//
 
 		// Drawing item is in 100% scale
-		// Graphcis must have sceen coordinate system (0, 0 - left up corner, down and right - positive coordinate values)
+		// Graphics must have screen coordinate system (0, 0 - left up corner, down and right - positive coordinate values)
 		//
 		virtual void draw(CDrawParam* drawParam) const;
 
@@ -195,6 +195,10 @@ namespace VFrame30
 		// Draw item's label
 		//
 		virtual void drawLabel(CDrawParam* drawParam) const;
+
+		// Draw highlight
+		//
+		virtual void drawHighlight(CDrawParam* drawParam) const;
 
 		// Draw item outline, while creation or changing
 		//

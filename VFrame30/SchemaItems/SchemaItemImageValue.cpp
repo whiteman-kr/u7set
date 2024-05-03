@@ -215,16 +215,23 @@ namespace VFrame30
 
 	void SchemaItemImageValue::drawHighlightPrivate(CDrawParam* drawParam) const
 	{
+		bool highlight = drawParam->highlightIds().contains(label());
+
 		// Draw highlights by signals
 		//
 		for (const QString& appSignalId : m_signalIds)
 		{
 			if (drawParam->highlightIds().contains(appSignalId) == true)
 			{
-				QRectF highlightRect = boundingRectInDocPt(drawParam);
-				drawHighlightRect(drawParam, highlightRect);
+				highlight = true;
 				break;
 			}
+		}
+
+		if (highlight == true)
+		{
+			QRectF highlightRect = boundingRectInDocPt(drawParam);
+			drawHighlightRect(drawParam, highlightRect);
 		}
 
 		return;
