@@ -1764,7 +1764,7 @@ void DialogSignalSnapshot::initFiltersView()
 
 void DialogSignalSnapshot::initSignalsView()
 {
-	// crete models
+	// create models
 	//
 	m_model = new SignalSnapshotModel(m_appSignalManager, m_signalDataServer, this);
 
@@ -1806,7 +1806,7 @@ void DialogSignalSnapshot::initSignalsView()
 
 	if (m_settings.horzHeader.isEmpty() == true || m_settings.horzHeaderCount != static_cast<int>(SnapshotColumns::ColumnCount))
 	{
-		// First time? Set what is should be hidden by deafult
+		// First time? Set what is should be hidden by default
 		//
 		m_tableView->hideColumn(static_cast<int>(SnapshotColumns::EquipmentID));
 		m_tableView->hideColumn(static_cast<int>(SnapshotColumns::LmEquipmentID));
@@ -2125,7 +2125,7 @@ void DialogSignalSnapshot::buttonExportClicked()
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save File"),
 													path + QDir::separator() + "untitled.pdf",
-													tr("Portable Documnet Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+													tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
 
 	if (fileName.isEmpty() == true)
 	{

@@ -23,8 +23,6 @@ qt_standard_project_setup()
 
 set (MONITOR_SOURCES
 	../lib/ConstStrings.h
-	../lib/ExportPrint.cpp
-	../lib/ExportPrint.h
 	../lib/ISignalDataServer.h
 	../lib/Ui/ChooseTagsWidget.cpp
 	../lib/Ui/ChooseTagsWidget.h
@@ -197,7 +195,8 @@ target_precompile_headers(${TARGET} PRIVATE
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
-target_link_libraries(${TARGET} PRIVATE CommonLib Behavior Protobuf UtilsLib AppSignalLib OnlineLib TrendView VFrame30 ClientLib SchemaClientLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib Behavior Protobuf UtilsLib AppSignalLib OnlineLib TrendView VFrame30 ClientLib 
+	SchemaClientLib	UiLib)
 
 # Link Visaul Leak Detector
 #

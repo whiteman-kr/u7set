@@ -1,23 +1,26 @@
 #pragma once
 
-#include "../lib/ExportPrint.h"
+#include "DragDropHelper.h"
+
+#include <UiLib/ExportPrint.h>
+
 #include "../lib/ISignalDataServer.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../VFrame30/SchemaDetails.h"
-#include "DragDropHelper.h"
 #include "../AppSignalLib/IAppSignalManager.h"
 
 class SignalSnapshotModel;
 
-class SnapshotExportPrint : public ExportPrint
+class SnapshotExportPrint : public UiLib::ExportPrint
 {
 public:
 
 	SnapshotExportPrint(QString projectName, QString softwareEquipmentId, QWidget* parent);
 
-private:
+protected:
 	virtual void generateHeader(QTextCursor& cursor) override;
 
+private:
 	QString m_projectName;
 	QString m_softwareEquipmentId;
 };

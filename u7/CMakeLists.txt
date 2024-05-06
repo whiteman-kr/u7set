@@ -25,8 +25,6 @@ set (U7_SOURCES
 	../lib/Configurator.h
 	../lib/ConstStrings.h
 	../lib/diff_match_patch.h
-	../lib/ExportPrint.cpp
-	../lib/ExportPrint.h
 	../lib/PropertyEditor.cpp
 	../lib/PropertyEditor.h
 	../lib/PropertyEditorDialog.cpp
