@@ -16,8 +16,6 @@ set(TARGET AppDataSrv)
 
 add_executable(${TARGET}
 	../lib/ConstStrings.h
-	../lib/DataSource.cpp
-	../lib/DataSource.h
 	AppDataReceiver.cpp
 	AppDataReceiver.h
 	AppDataService.cpp

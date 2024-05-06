@@ -3,10 +3,13 @@
 !include ./CommonLib.puml
 !include ./UtilsLib.puml
 !include ./Protobuf.puml
+!include ./HardwareLib.puml
 
 [OnlineLib]
+OnlineLib -up-> asio
 OnlineLib -up-> CommonLib
 OnlineLib -up-> Protobuf
 OnlineLib -up-> UtilsLib
+OnlineLib -up-> HardwareLib
 
 @enduml

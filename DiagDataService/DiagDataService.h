@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ServiceLib/Service.h>
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/OnlineDataSources.h"
@@ -63,7 +63,7 @@ private:
 
 	std::shared_ptr<const DiagDataServiceSettings> m_serviceSettings;
 
-	std::vector<DataSource> m_dataSources;
+	std::vector<OnlineLib::DataSource> m_dataSources;
 	OnlineDataSources<DiagDataSource, SimpleDiagSignalState>* m_onlineSources = nullptr;
 
 	Hardware::DiagSignalTypes m_diagSignalTypes;

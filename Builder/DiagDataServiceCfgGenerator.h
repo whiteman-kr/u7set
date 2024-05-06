@@ -26,7 +26,7 @@ namespace Builder
 		bool writeDiagDataSourcesXml();
 		bool writeAcquiredDiagSignalsFile();
 
-		bool appendAquiredDiagSignalsToDataSource(const Hardware::DeviceModule* lm, DataSource* ds);
+		bool appendAquiredDiagSignalsToDataSource(const Hardware::DeviceModule* lm, OnlineLib::DataSource* ds);
 		bool findAcquiredDiagSignals(const Hardware::DeviceModule* lm);
 		bool findAcquiredParentObjects();
 

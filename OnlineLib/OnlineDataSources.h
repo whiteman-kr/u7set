@@ -111,7 +111,7 @@ public:
 					  E::SoftwareRunMode swRunMode,
 					  int parsingThreadsCount,
 					  CircularLoggerShared log);
-	bool init(const std::vector<DataSource>& dataSourcesFromCfg);
+	bool init(const std::vector<OnlineLib::DataSource>& dataSourcesFromCfg);
 };
 
 template <typename DATA_SOURCE, typename SIGNAL_STATE>
@@ -124,11 +124,11 @@ OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::OnlineDataSources(const HostAddres
 }
 
 template <typename DATA_SOURCE, typename SIGNAL_STATE>
-bool OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::init(const std::vector<DataSource>& dataSourcesFromCfg)
+bool OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::init(const std::vector<OnlineLib::DataSource>& dataSourcesFromCfg)
 {
 	bool result = true;
 
-	for(const DataSource& ds : dataSourcesFromCfg)
+	for(const OnlineLib::DataSource& ds : dataSourcesFromCfg)
 	{
 		DATA_SOURCE* dataSource = new DATA_SOURCE(ds);
 

@@ -1,7 +1,7 @@
 #include "SignalTableModel.h"
 #include "PacketBufferTableModel.h"
 
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 
 #include <HardwareLib/DataProtocols.h>
 

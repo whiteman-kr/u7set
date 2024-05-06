@@ -29,7 +29,7 @@ public:
 
 	void setClient(TcpAppDataClient* clientSocket);
 
-	const DataSource& getDataSource(int row) const;
+	const OnlineLib::DataSource& getDataSource(int row) const;
 
 	void updateStates();
 
@@ -39,7 +39,7 @@ public slots:
 
 private:
 	TcpAppDataClient* m_clientSocket;
-	std::vector<std::pair<DataSource, Network::AppDataSourceState>> m_dataSources;
+	std::vector<std::pair<OnlineLib::DataSource, Network::AppDataSourceState>> m_dataSources;
 };
 
 class SignalStateModel : public QAbstractTableModel

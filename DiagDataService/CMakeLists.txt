@@ -16,8 +16,6 @@ qt_standard_project_setup()
 set(TARGET DiagDataSrv)
 
 add_executable(${TARGET}
-	../lib/DataSource.cpp
-	../lib/DataSource.h
 	DiagDataService.cpp
 	DiagDataService.h
 	DiagDataServiceMain.cpp

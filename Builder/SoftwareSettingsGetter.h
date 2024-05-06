@@ -10,7 +10,10 @@
 #include "DeviceHelper.h"
 
 
-class DataSource;
+namespace OnlineLib
+{
+	class DataSource;
+}
 
 // -------------------------------------------------------------------------------------------
 
@@ -58,9 +61,9 @@ public:
 										Builder::IssueLogger* log);
 
 	static bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
-											E::LanControllerType lanControllerType,
-											const Builder::Context* context,
-											DataSource* ds);
+										  E::LanControllerType lanControllerType,
+										  const Builder::Context* context,
+										  OnlineLib::DataSource* ds);
 
 	bool readSoftwareSettings(const Builder::Context* context,
 							  const Hardware::Software* software);

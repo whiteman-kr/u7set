@@ -19,6 +19,8 @@ qt_add_library(${TARGET} STATIC
 	CfgServerLoader.h
 	CircularLogger.cpp
 	CircularLogger.h
+	DataSource.cpp
+	DataSource.h
 	MatsUsers.cpp
 	MatsUsers.h
 	OnlineDataSource.cpp

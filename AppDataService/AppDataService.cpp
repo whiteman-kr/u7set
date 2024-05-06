@@ -390,9 +390,9 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 bool AppDataServiceWorker::readAppDataSources(const QByteArray& fileData, const QString& profile)
 {
-	QVector<DataSource> dataSources;
+	QVector<OnlineLib::DataSource> dataSources;
 
-	bool result = DataSourcesXML<DataSource>::readFromXml(fileData, &dataSources);
+	bool result = OnlineLib::DataSourcesXML<OnlineLib::DataSource>::readFromXml(fileData, &dataSources);
 
 	if (result == false)
 	{

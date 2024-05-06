@@ -3,7 +3,7 @@
 
 #include <qglobal.h>
 #include "../../lib/Tcp.h"
-#include "../../lib/DataSource.h"
+#include "../../OnlineLib/DataSource.h"
 
 class AppDataServiceClient
 {
