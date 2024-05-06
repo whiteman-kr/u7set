@@ -1,7 +1,11 @@
 #pragma once
 
 #include "../lib/PropertyEditor.h"
-#include "../lib/CodeEditor.h"
+
+namespace UiLib
+{
+	class CodeEditor;
+}
 
 class ReportPropertyEditor : public ExtWidgets::PropertyTextEditor
 {
@@ -31,7 +35,7 @@ private slots:
 
 
 private:
-    CodeEditor* m_textEdit = nullptr;
+    UiLib::CodeEditor* m_textEdit = nullptr;
     QTreeWidget* m_treeWidget = nullptr;
 
     QSplitter* m_topSplitter = nullptr;

@@ -1,5 +1,6 @@
 #include "ReportPropertyEditor.h"
 #include "../ReportLib/ReportTemplate.h"
+#include <UiLib/CodeEditor.h>
 
 ReportPropertyEditor::ReportPropertyEditor(QWidget* parent):
     PropertyTextEditor(parent),
@@ -13,7 +14,7 @@ ReportPropertyEditor::ReportPropertyEditor(QWidget* parent):
 
     // TextEditor
     //
-    m_textEdit = new CodeEditor(this);
+    m_textEdit = new UiLib::CodeEditor(this);
 
 #if defined(Q_OS_WIN)
         QFont f = QFont("Consolas", 11);
@@ -23,9 +24,9 @@ ReportPropertyEditor::ReportPropertyEditor(QWidget* parent):
 
     m_textEdit->setFont(f);
 
-    XmlHighlighter::createXmlHighlighter(m_textEdit);
+    UiLib::XmlHighlighter::createXmlHighlighter(m_textEdit);
 
-    connect(m_textEdit, &CodeEditor::textChanged, this, &ReportPropertyEditor::onTextChanged);
+    connect(m_textEdit, &UiLib::CodeEditor::textChanged, this, &ReportPropertyEditor::onTextChanged);
 
     // TreeWidget
     m_treeWidget = new QTreeWidget();

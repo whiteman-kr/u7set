@@ -27,11 +27,11 @@
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/UfbSchema.h"
-#include "../lib/CodeEditor.h"
 #include "../lib/QDoublevalidatorEx.h"
 #include "../lib/Ui/TextEditCompleter.h"
 
 #include <HardwareLib/LmDescription.h>
+#include <UiLib/CodeEditor.h>
 
 #include "./EditEngine/EditEngine.h"
 #include "./Forms/ChooseAfbDialog.h"
@@ -6326,8 +6326,8 @@ void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 	//
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
-    CodeEditor* preDrawScriptEdit = new CodeEditor(&d);
-	JsHighlighter::createJsHighlighter(preDrawScriptEdit);
+    auto preDrawScriptEdit = new UiLib::CodeEditor(&d);
+	UiLib::JsHighlighter::createJsHighlighter(preDrawScriptEdit);
 
     preDrawScriptEdit->setText(preDrawScript);
 
@@ -6487,8 +6487,8 @@ void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 	//
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
-    CodeEditor* preDrawScriptEdit = new CodeEditor(&d);
-	JsHighlighter::createJsHighlighter(preDrawScriptEdit);
+    auto preDrawScriptEdit = new UiLib::CodeEditor(&d);
+	UiLib::JsHighlighter::createJsHighlighter(preDrawScriptEdit);
 
     preDrawScriptEdit->setText(preDrawScript);
 

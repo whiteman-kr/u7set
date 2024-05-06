@@ -1,8 +1,12 @@
 #ifndef TESTVIEWTABPAGE_H
 #define TESTVIEWTABPAGE_H
 
-#include "../lib/CodeEditor.h"
 #include "../TestSuiteLib/TestScriptsStorage.h"
+
+namespace UiLib
+{
+	class CodeEditor;
+}
 
 class TestViewTabPage : public QWidget
 {
@@ -17,7 +21,7 @@ public:
 
 
 private:
-	CodeEditor* m_codeEditor = nullptr;
+	UiLib::CodeEditor* m_codeEditor = nullptr;
 
 	TestSuite::TestScript m_script;
 };

@@ -411,7 +411,7 @@ void DialogFindReplace::saveCompleters()
 //
 
 IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
-    CodeEditor(parent),
+    UiLib::CodeEditor(parent),
     m_parent(parent),
     m_codeType(codeType)
 {
@@ -435,12 +435,12 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
 
     if (m_codeType == CodeType::JavaScript)
     {
-		JsHighlighter::createJsHighlighter(this);
+        UiLib::JsHighlighter::createJsHighlighter(this);
     }
 
     if (m_codeType == CodeType::Xml)
     {
-		XmlHighlighter::createXmlHighlighter(this);
+        UiLib::XmlHighlighter::createXmlHighlighter(this);
     }
 
     // Set up margins

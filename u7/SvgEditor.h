@@ -2,7 +2,11 @@
 #define SVGEDITOR_H
 
 #include "../lib/PropertyEditor.h"
-#include "../lib/CodeEditor.h"
+
+namespace UiLib
+{
+	class CodeEditor;
+}
 
 class SvgWidget : public QWidget
 {
@@ -53,9 +57,8 @@ private slots:
 
 	void onStretchCheckClicked(bool checked);
 
-
 private:
-    CodeEditor* m_textEdit = nullptr;
+	UiLib::CodeEditor* m_textEdit = nullptr;
 
 	QSplitter* m_topSplitter = nullptr;
 	SvgWidget m_svgWidget;

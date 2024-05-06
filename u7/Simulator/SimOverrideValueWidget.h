@@ -2,8 +2,11 @@
 #include <Simulator/Simulator.h>
 #include <Simulator/SimOverrideSignals.h>
 #include "../../lib/QDoublevalidatorEx.h"
-#include "../lib/CodeEditor.h"
 
+namespace UiLib
+{
+	class CodeEditor;
+}
 
 namespace SimOverrideUI
 {
@@ -133,7 +136,7 @@ namespace SimOverrideUI
 		QPushButton* m_saveScriptButton = nullptr;
 
 		QLabel* m_scriptLabel = nullptr;
-        CodeEditor* m_scriptEdit = nullptr;
+		UiLib::CodeEditor* m_scriptEdit = nullptr;
 
 		QDialogButtonBox* m_buttonBox = nullptr;
 

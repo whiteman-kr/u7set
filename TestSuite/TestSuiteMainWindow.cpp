@@ -1,5 +1,6 @@
 #include <QStandardPaths>
 #include <QFileDialog>
+#include <QCloseEvent>
 #include <ClientLib/ClientTranslator.h>
 #include <ClientLib/TuningUserManager.h>
 #include "../OnlineLib/TcpClientStatistics.h"

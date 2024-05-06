@@ -1,4 +1,5 @@
 #include "TestViewTabPage.h"
+#include <UiLib/CodeEditor.h>
 
 TestViewTabPage::TestViewTabPage(const TestSuite::TestScript& script, QWidget* parent):
 	QWidget(parent),
@@ -6,7 +7,7 @@ TestViewTabPage::TestViewTabPage(const TestSuite::TestScript& script, QWidget* p
 {
 	// Create code editor
 	//
-	m_codeEditor = new CodeEditor(this);
+	m_codeEditor = new UiLib::CodeEditor(this);
 	m_codeEditor->setText(m_script.script());
 	m_codeEditor->setReadOnly(true);
 	m_codeEditor->setCaretLineVisible(true);
@@ -23,7 +24,7 @@ TestViewTabPage::TestViewTabPage(const TestSuite::TestScript& script, QWidget* p
 
 	// Set up lexer
 	//
-	JsHighlighter::createJsHighlighter(m_codeEditor);
+	UiLib::JsHighlighter::createJsHighlighter(m_codeEditor);
 
 	// Set up margins
 	//
