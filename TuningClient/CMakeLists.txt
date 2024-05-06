@@ -36,12 +36,6 @@ set (TC_SOURCES
 	../lib/Ui/DialogAbout.h
 	../lib/Ui/DialogAlert.cpp
 	../lib/Ui/DialogAlert.h
-	../lib/Ui/DialogSourceInfo.cpp
-	../lib/Ui/DialogSourceInfo.h
-	../lib/Ui/DialogTcpStatistics.cpp
-	../lib/Ui/DialogTcpStatistics.h
-	../lib/Ui/TuningSourcesWidget.cpp
-	../lib/Ui/TuningSourcesWidget.h
 	../lib/Ui/DialogWriteValues.cpp
 	../lib/Ui/DialogWriteValues.h
 	DialogChooseFilter.cpp
@@ -178,9 +172,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/PropertyObject.h"
 	#"../CommonLib/AfbParamValue.h"
 	
-	"../Proto/ProtoSerialization.h"
-	"../Proto/Network.pb.h"	
-	#"../Proto/AppSignal.pb.h"
+	<ProtoSerialization.h>
+	<Network.pb.h>
+	#<AppSignal.pb.h>
 	
 	#"../AppSignalLib/AppSignal.h"
 	"../AppSignalLib/AppSignalParam.h"

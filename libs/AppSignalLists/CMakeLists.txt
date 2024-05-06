@@ -62,9 +62,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../CommonLib/Hash.h"
 	"../../CommonLib/PropertyObject.h"
 
-	"../../Proto/ProtoSerialization.h"
-	"../../Proto/ProtoCommonHelper.h"
-	"../../Proto/AppSignalList.pb.h"
+	<ProtoSerialization.h>
+	<AppSignalList.pb.h>
+	<Hardware.pb.h>
+	<Network.pb.h>
 
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"

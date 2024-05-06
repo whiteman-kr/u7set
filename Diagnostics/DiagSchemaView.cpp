@@ -14,7 +14,7 @@ DiagSchemaView::DiagSchemaView(DiagnosticsSchemaManager* schemaManager,
 							   VFrame30::ISchemaViewHistory* schemaViewHistory,
 							   VFrame30::AppSignalController* appSignalController,
 							   VFrame30::LogController* logController,
-							   ITimeStats* timeStats,
+							   VFrame30::ITimeStats* timeStats,
 							   QWidget* parent) :
 	VFrame30::ClientSchemaView(schemaManager, schemaViewHistory, timeStats, parent)
 {

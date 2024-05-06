@@ -1,4 +1,4 @@
-#include "../lib/WidgetUtils.h"
+#include "../UtilsLib/Ui/WidgetUtils.h"
 
 #include "FindSignalDialog.h"
 #include "SignalsTabPage.h"

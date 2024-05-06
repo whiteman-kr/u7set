@@ -19,7 +19,6 @@ endif (MSVC)
 set(TARGET VFrame30)
 
 qt_add_library(${TARGET} STATIC
-	../lib/ITimeStats.h
 	../lib/Tuning/ITuningConnection.h
 
 	./SchemaItems/FblItem.cpp
@@ -121,6 +120,7 @@ qt_add_library(${TARGET} STATIC
 	HorzVertLinks.h
 	IMatsSchemaItemAssociations.h
 	ISchemaViewHistory.h
+	ITimeStats.h
 	IViewVariables.h
 	LogController.cpp
 	LogController.h
@@ -230,9 +230,9 @@ target_precompile_headers(${TARGET} PRIVATE
 		"../CommonLib/PropertyObject.h"
 		"../CommonLib/AfbParamValue.h"
 
-		"../Proto/ProtoSerialization.h"
-		"../Proto/ProtoCommonHelper.h"
-		"../Proto/VFrame30.pb.h"
+		<ProtoSerialization.h>
+		<ProtoCommonHelper.h>
+		<VFrame30.pb.h>
 
 		"../AppSignalLib/AppSignalParam.h"
 		"../AppSignalLib/AppSignalState.h"

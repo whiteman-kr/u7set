@@ -85,9 +85,10 @@ namespace ReportLib
 	public:
 		// IViewVariables implementation
 		//
-		[[nodiscard]] bool variableExists(const QString& name) const override;
-		[[nodiscard]] QVariant variable(const QString& name) const override;
-		void setVariable(const QString& name, const QVariant& value) override;
+		[[nodiscard]] QStringList viewVariables() const override;
+		[[nodiscard]] bool viewVariableExists(const QString& name) const override;
+		[[nodiscard]] QVariant viewVariable(const QString& name) const override;
+		void setViewVariable(const QString& name, const QVariant& value) override;
 
 		//
 		void setVariables(const std::map<QString, QString>& variables);

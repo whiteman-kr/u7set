@@ -2,8 +2,8 @@
 #error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "./include/ClientLib/TuningSignalManager.h"
-#include "../Proto/AppSignal.pb.h"
+#include <ClientLib/TuningSignalManager.h>
+#include <AppSignal.pb.h>
 
 #define ANY_HASH UNDEFINED_HASH
 

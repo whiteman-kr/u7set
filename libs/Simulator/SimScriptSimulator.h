@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./include/Simulator/SimScriptItem.h"
+#include <Simulator/SimScriptItem.h>
 
 #include "SimScriptConnection.h"
 #include "SimScriptDevUtils.h"

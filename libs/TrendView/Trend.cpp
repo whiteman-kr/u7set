@@ -1,4 +1,4 @@
-#include "./include/TrendView/Trend.h"
+#include <TrendView/Trend.h>
 #include "TrendImpl.h"
 
 namespace TrendLib

@@ -26,8 +26,6 @@ set (DIAGNOSTICS_SOURCES
 #	../lib/ExportPrint.cpp
 #	../lib/ExportPrint.h
 #	../lib/ISignalDataServer.h
-#	../lib/Ui/AppDataSourcesWidget.cpp
-#	../lib/Ui/AppDataSourcesWidget.h
 	../lib/Ui/DialogAbout.cpp
 	../lib/Ui/DialogAbout.h
 	../lib/Ui/DialogAlert.cpp
@@ -40,10 +38,8 @@ set (DIAGNOSTICS_SOURCES
 #	../lib/Ui/DialogSignalSearch.h
 #	../lib/Ui/DialogSignalSnapshot.cpp
 #	../lib/Ui/DialogSignalSnapshot.h
-#	../lib/Ui/DialogSourceInfo.cpp
-#	../lib/Ui/DialogSourceInfo.h
-	../lib/Ui/DialogTcpStatistics.cpp
-	../lib/Ui/DialogTcpStatistics.h
+#	../lib/Ui/DialogTcpStatistics.cpp
+#	../lib/Ui/DialogTcpStatistics.h
 #	../lib/Ui/DragDropHelper.cpp
 #	../lib/Ui/DragDropHelper.h
 #	../lib/Ui/SchemaListWidget.cpp
@@ -174,9 +170,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/PropertyObject.h"
 	#"../CommonLib/AfbParamValue.h"
 	
-	"../Proto/ProtoSerialization.h"
-	"../Proto/Network.pb.h"	
-	#"../Proto/AppSignal.pb.h"
+	<ProtoSerialization.h>
+	<Network.pb.h>
 	
 	#"../AppSignalLib/AppSignal.h"
 	"../AppSignalLib/AppSignalParam.h"

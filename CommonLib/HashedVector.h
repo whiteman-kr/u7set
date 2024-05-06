@@ -42,6 +42,8 @@ public:
 	qsizetype size() const { return m_vector.size(); }
 	qsizetype count() const { return m_vector.size(); }
 
+	void reserve(qsizetype size) { m_vector.reserve(size); }
+
 private:
 	std::vector<VALUE> m_vector;
 	std::map<KEY, qsizetype> m_map;		// key => index in m_vector

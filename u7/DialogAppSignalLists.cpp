@@ -3,7 +3,6 @@
 #include "AppSignalSetProvider.h"
 #include "Settings.h"
 
-#include "../Proto/AppSignalList.pb.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/StandardColors.h"

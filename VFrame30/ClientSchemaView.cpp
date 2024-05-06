@@ -4,8 +4,11 @@
 #include "DrawParam.h"
 #include "PropertyNames.h"
 
+
 #include <HardwareLib/ScriptEquipment.h>
 #include <HardwareLib/DeviceRoot.h>
+
+#include <QJSValueIterator>
 
 
 namespace VFrame30
@@ -296,17 +299,17 @@ namespace VFrame30
 
 	bool ScriptSchemaView::variableExists(QString name) const
 	{
-		return m_clientSchemaView->variableExists(name);
+		return m_clientSchemaView->viewVariableExists(name);
 	}
 
 	QVariant ScriptSchemaView::variable(QString name)
 	{
-		return m_clientSchemaView->variable(name);
+		return m_clientSchemaView->viewVariable(name);
 	}
 
 	void ScriptSchemaView::setVariable(QString name, const QVariant& value)
 	{
-		m_clientSchemaView->setVariable(name, value);
+		m_clientSchemaView->setViewVariable(name, value);
 	}
 
 	QObject* ScriptSchemaView::schemaByIndex(int schemaIndex)
@@ -379,8 +382,8 @@ namespace VFrame30
 	// ClientSchemaView
 	//
 	ClientSchemaView::ClientSchemaView(VFrame30::SchemaManager* schemaManager,
-									   ISchemaViewHistory* schemaViewHistory,
-									   ITimeStats* timeStats,
+									   VFrame30::ISchemaViewHistory* schemaViewHistory,
+									   VFrame30::ITimeStats* timeStats,
 									   QWidget* parent) :
 		VFrame30::SchemaViewWidget(parent),
 		m_schemaManager(schemaManager),
@@ -897,9 +900,9 @@ namespace VFrame30
 		return m_highlightIds;
 	}
 
-	void ClientSchemaView::setHighlightIds(const QStringList& value)
+	void ClientSchemaView::setHighlightIds(QStringList value)
 	{
-		m_highlightIds = value;
+		m_highlightIds = std::move(value);
 	}
 
 	TuningController* ClientSchemaView::tuningController()
@@ -998,6 +1001,11 @@ namespace VFrame30
 	{
 		m_logController = value;
 		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again
+	}
+
+	QString ClientSchemaView::globalScript() const
+	{
+		return m_globalScript;
 	}
 
 	void ClientSchemaView::setGlobalScript(QString value)
@@ -1307,17 +1315,22 @@ namespace VFrame30
 		return;
 	}
 
-	bool ClientSchemaView::variableExists(const QString& name) const
+	QStringList ClientSchemaView::viewVariables() const
+	{
+		return m_variables.keys();
+	}
+
+	bool ClientSchemaView::viewVariableExists(const QString& name) const
 	{
 		return m_variables.contains(name);
 	}
 
-	QVariant ClientSchemaView::variable(const QString& name) const
+	QVariant ClientSchemaView::viewVariable(const QString& name) const
 	{
 		return m_variables.value(name);
 	}
 
-	void ClientSchemaView::setVariable(const QString& name, const QVariant& value)
+	void ClientSchemaView::setViewVariable(const QString& name, const QVariant& value)
 	{
 		m_variables[name] = value;
 	}
@@ -1332,12 +1345,35 @@ namespace VFrame30
 		m_variables = values;
 	}
 
-	ITimeStats* ClientSchemaView::timeStats()
+	std::vector<std::pair<QString, QVariant>> ClientSchemaView::scriptVariables() const
+	{
+		// Get variables from QJSEngine m_jsEngine
+		//
+		std::vector<std::pair<QString, QVariant>> vars;
+		vars.reserve(256);
+
+		QJSValue globalObject = m_jsEngine.globalObject();
+		QJSValueIterator it{globalObject};
+
+		while (it.hasNext())
+		{
+			it.next();
+
+			if (it.value().isError() == false)
+			{
+				vars.push_back({it.name(), it.value().toVariant()});
+			}
+		}
+
+		return vars;
+	}
+
+	VFrame30::ITimeStats* ClientSchemaView::timeStats()
 	{
 		return m_timeStats;
 	}
 
-	ITimeStats* ClientSchemaView::timeStats() const
+	VFrame30::ITimeStats* ClientSchemaView::timeStats() const
 	{
 		return m_timeStats;
 	}

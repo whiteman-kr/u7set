@@ -4,7 +4,8 @@
 #include "SimScriptSignal.h"
 #include "SimScriptDevUtils.h"
 #include "SimScopedLog.h"
-#include "./include/Simulator/SimDeviceState.h"
+
+#include <Simulator/SimDeviceState.h>
 
 #include <HardwareLib/ModuleFirmware.h>
 #include <HardwareLib/LogicModulesInfo.h>

@@ -1,4 +1,4 @@
-#include "./include/Simulator/SimAppSignalManager.h"
+#include <Simulator/SimAppSignalManager.h>
 #include "SimAppSignalManagerImpl.h"
 
 namespace Sim

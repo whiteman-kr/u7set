@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Proto/Network.pb.h"
+#include <Network.pb.h>
 
 namespace ClientLib
 {

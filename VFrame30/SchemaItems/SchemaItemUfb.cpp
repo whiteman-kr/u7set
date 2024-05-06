@@ -216,29 +216,36 @@ namespace VFrame30
 
 	void SchemaItemUfb::drawHighlight(CDrawParam* drawParam) const
 	{
-		auto props = PropertyObject::specificProperties();
+		bool highlight = drawParam->highlightIds().contains(label());
 
-		for (const auto& prop : props)
+		if (highlight == false)
 		{
-			bool breakLoop = false;
-			QString v = prop->value().toString();
-			QStringList valueAsList = v.split(QChar::LineFeed, Qt::SkipEmptyParts);
-
-			for (const QString& s : valueAsList)
+			auto props = PropertyObject::specificProperties();
+			for (const auto& prop : props)
 			{
-				if (s.startsWith(QChar('#')) == true && drawParam->highlightIds().contains(s))
+				QString v = prop->value().toString();
+				QStringList valueAsList = v.split(QChar::LineFeed, Qt::SkipEmptyParts);
+
+				for (const QString& s : valueAsList)
 				{
-					QRectF highlightRect = boundingRectInDocPt(drawParam);
-					drawHighlightRect(drawParam, highlightRect);
-					breakLoop = true;
+					if (s.startsWith(QChar('#')) == true && drawParam->highlightIds().contains(s))
+					{
+						highlight = true;
+						break;
+					}
+				}
+
+				if (highlight == true)
+				{
 					break;
 				}
 			}
+		}
 
-			if (breakLoop == true)
-			{
-				break;
-			}
+		if (highlight == true)
+		{
+			QRectF highlightRect = boundingRectInDocPt(drawParam);
+			drawHighlightRect(drawParam, highlightRect);
 		}
 
 		return;

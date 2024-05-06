@@ -1,4 +1,4 @@
-#include "./include/Simulator/SimRam.h"
+#include <Simulator/SimRam.h>
 
 namespace Sim
 {

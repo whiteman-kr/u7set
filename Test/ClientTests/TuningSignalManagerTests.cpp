@@ -1,5 +1,5 @@
 #include "../../OnlineLib/SoftwareInfo.h"
-#include "../Proto/AppSignal.pb.h"
+#include <AppSignal.pb.h>
 
 #include <ClientLib/TuningSignalManager.h>
 

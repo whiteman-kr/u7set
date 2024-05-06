@@ -1812,12 +1812,12 @@ namespace Builder
 
 				// Create variable with section name and its start page
 				//
-				report->reportVariables().setVariable("REPORT_PAGE_" + rs.section()->caption(), rs.section()->startPage());
+				report->reportVariables().setViewVariable("REPORT_PAGE_" + rs.section()->caption(), rs.section()->startPage());
 			}
 
 			// Create variable with total pages count
 			//
-			report->reportVariables().setVariable("REPORT_PAGE_COUNT", page - 1);
+			report->reportVariables().setViewVariable("REPORT_PAGE_COUNT", page - 1);
 		}
 
 		// Print report

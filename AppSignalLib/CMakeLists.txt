@@ -81,13 +81,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../CommonLib/Hash.h"
 	"../CommonLib/PropertyObject.h"
 
-	"../Proto/ProtoSerialization.h"
-	"../Proto/AppSignal.pb.h"
-	"../Proto/Network.pb.h"
-
-#	"AppSignal.h"
-#	"AppSignalParam.h"
-#	"AppSignalState.h"
+	<ProtoSerialization.h>
+	<Hardware.pb.h>
+	<Network.pb.h>
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Network)

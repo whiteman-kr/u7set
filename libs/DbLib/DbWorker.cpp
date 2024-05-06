@@ -22,7 +22,7 @@
 #include <HardwareLib/DeviceAppSignal.h>
 #include "../AppSignalLib/AppSignalSpecPropValues.h"
 #include "../UtilsLib/WUtils.h"
-#include "../Proto/AppSignal.pb.h"
+#include <AppSignal.pb.h>
 
 // Upgrade database
 //

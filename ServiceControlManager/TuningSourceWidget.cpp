@@ -1,13 +1,12 @@
 #include "TuningSourceWidget.h"
-#include <functional>
-#include <QTableView>
-#include <QStandardItemModel>
-#include <QHeaderView>
 #include "TcpTuningServiceClient.h"
+#include "../UtilsLib/Ui/WidgetUtils.h"
+
 #include <QHBoxLayout>
 #include <QSplitter>
-#include "../lib/WidgetUtils.h"
-#include <QSettings>
+#include <QTableView>
+#include <QHeaderView>
+#include <QStandardItemModel>
 
 struct staticPropertyFieldDefinition
 {

@@ -1,5 +1,6 @@
 #include "./include/AppSignalLists/SignalList.h"
 #include "TextResource.h"
+#include <ProtoCommonHelper.h>
 
 namespace AppSignalLists
 {
