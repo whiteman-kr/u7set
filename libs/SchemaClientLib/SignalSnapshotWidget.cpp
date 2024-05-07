@@ -118,8 +118,6 @@ namespace SchemaClientLib
 	{
 		QSettings s;
 
-		pos = s.value("SignalSnapshotWidget/pos", QPoint(-1, -1)).toPoint();
-		geometry = s.value("SignalSnapshotWidget/geometry").toByteArray();
 		horzHeader = s.value("SignalSnapshotWidget/horzHeader").toByteArray();
 		horzHeaderCount = s.value("SignalSnapshotWidget/horzHeaderCount").toInt();
 
@@ -133,8 +131,6 @@ namespace SchemaClientLib
 	{
 		QSettings s;
 
-		s.setValue("SignalSnapshotWidget/pos", pos);
-		s.setValue("SignalSnapshotWidget/geometry", geometry);
 		s.setValue("SignalSnapshotWidget/horzHeader", horzHeader);
 		s.setValue("SignalSnapshotWidget/horzHeaderCount", horzHeaderCount);
 
@@ -187,26 +183,15 @@ namespace SchemaClientLib
 		m_settings.restore();
 
 		setAttribute(Qt::WA_DeleteOnClose);
+		setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
 
 		setWindowTitle(tr("Signals Snapshot"));
 
-		setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
-
 		createControls();
-
 		createMenus();
 
 		initFiltersView();
-
 		initSignalsView();
-
-		// Restore window pos
-		//
-		if (m_settings.pos.x() != -1 && m_settings.pos.y() != -1)
-		{
-			move(m_settings.pos);
-			restoreGeometry(m_settings.geometry);
-		}
 
 		m_updateStateTimerId = startTimer(500);
 
@@ -356,11 +341,6 @@ namespace SchemaClientLib
 		{
 			m_storedMaskType = static_cast<SnapshotMaskType>(m_maskTypeCombo->currentIndex());
 		}
-
-		// Save window position
-		//
-		m_settings.pos = pos();
-		m_settings.geometry = saveGeometry();
 
 		m_settings.horzHeader = m_tableView->horizontalHeader()->saveState();
 		m_settings.horzHeaderCount = static_cast<int>(SnapshotColumns::ColumnCount);

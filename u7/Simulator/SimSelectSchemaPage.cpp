@@ -5,8 +5,8 @@ SimSelectSchemaPage::SimSelectSchemaPage(SimIdeSimulator* simulator, QWidget* pa
 {
 	assert(m_simulator);
 
-	m_schemaListWidget = new SchemaListWidget{
-						 {SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption, SchemaListTreeColumns::Tags, SchemaListTreeColumns::Modules},
+	m_schemaListWidget = new SchemaClientLib::SchemaListWidget{
+						 {SchemaClientLib::SchemaListTreeColumns::SchemaID, SchemaClientLib::SchemaListTreeColumns::Caption, SchemaClientLib::SchemaListTreeColumns::Tags, SchemaClientLib::SchemaListTreeColumns::Modules},
 						 true,
 						 parent};
 
@@ -15,7 +15,7 @@ SimSelectSchemaPage::SimSelectSchemaPage(SimIdeSimulator* simulator, QWidget* pa
 	setLayout(layout);
 
 	connect(m_simulator, &SimIdeSimulator::projectUpdated, this, &SimSelectSchemaPage::updateSchemaList);
-	connect(m_schemaListWidget, &SchemaListWidget::openSchemaRequest, this, &SimSelectSchemaPage::openSchemaTabPage);
+	connect(m_schemaListWidget, &SchemaClientLib::SchemaListWidget::openSchemaRequest, this, &SimSelectSchemaPage::openSchemaTabPage);
 
 	updateSchemaList();
 

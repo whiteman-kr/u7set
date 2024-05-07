@@ -36,8 +36,6 @@ set (DIAGNOSTICS_SOURCES
 #	../lib/Ui/DialogSignalSearch.h
 #	../lib/Ui/DialogTcpStatistics.cpp
 #	../lib/Ui/DialogTcpStatistics.h
-#	../lib/Ui/SchemaListWidget.cpp
-#	../lib/Ui/SchemaListWidget.h
 #	../lib/Ui/TuningSourcesWidget.cpp
 #	../lib/Ui/TuningSourcesWidget.h
 #	../lib/Ui/DialogWriteValues.cpp

@@ -47,8 +47,6 @@ set (U7_SOURCES
 	../lib/Ui/DialogWriteValues.h
 	../lib/Ui/FilesTreeView.cpp
 	../lib/Ui/FilesTreeView.h
-	../lib/Ui/SchemaListWidget.cpp
-	../lib/Ui/SchemaListWidget.h
 	./Ui/PropertyTable.cpp
 	./Ui/PropertyTable.h
 	./Ui/TextEditCompleter.cpp

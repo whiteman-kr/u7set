@@ -34,8 +34,6 @@ set (MONITOR_SOURCES
 	../lib/Ui/DialogSignalSearch.h
 	../lib/Ui/DialogWriteValues.cpp
 	../lib/Ui/DialogWriteValues.h
-	../lib/Ui/SchemaListWidget.cpp
-	../lib/Ui/SchemaListWidget.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h
 	Archive/ArchiveData.cpp

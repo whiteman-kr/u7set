@@ -38,9 +38,38 @@ namespace SchemaClientLib
 											   QWidget* parent) :
 		DialogSignalSnapshot{appSignalManager, nullptr, {}, projectName, equipmentId, parent}
 	{
+		return;
 	}
 
 	DialogSignalSnapshot::~DialogSignalSnapshot() = default;
+
+	void DialogSignalSnapshot::showEvent(QShowEvent* event)
+	{
+		QDialog::showEvent(event);
+
+		QSettings settings;
+
+		auto mainWindowPos = settings.value("DialogSignalSnapshot/pos", QPoint(200, 200)).toPoint();
+		auto mainWindowGeometry = settings.value("DialogSignalSnapshot/geometry").toByteArray();
+
+		move(mainWindowPos);
+		restoreGeometry(mainWindowGeometry);
+
+		return;
+	}
+
+	void DialogSignalSnapshot::closeEvent(QCloseEvent* event)
+	{
+		QDialog::closeEvent(event);
+
+		// Save the window size and position
+		//
+		QSettings settings;
+		settings.setValue("DialogSignalSnapshot/pos", pos());
+		settings.setValue("DialogSignalSnapshot/geometry", saveGeometry());
+
+		return;
+	}
 
 	QString DialogSignalSnapshot::projectName() const
 	{

@@ -23,6 +23,7 @@ qt_add_library(${TARGET} STATIC
 	./include/SchemaClientLib/IDevTools.h
 	./include/SchemaClientLib/SchemaClientConfigController.h
 	./include/SchemaClientLib/SchemaDrawStatistics.h
+	./include/SchemaClientLib/SchemaListWidget.h
 	./include/SchemaClientLib/SchemaTabWidget.h
 	./include/SchemaClientLib/TuningSourcesWidget.h
 	AppDataSourcesWidget.cpp
@@ -50,6 +51,9 @@ qt_add_library(${TARGET} STATIC
 	DragDropHelper.cpp
 	SchemaClientConfigController.cpp
 	SchemaDrawStatistics.cpp
+	SchemaListWidget.cpp
+	SchemaListWidgetPrivate.cpp
+	SchemaListWidgetPrivate.h
 	SchemaTabWidget.cpp
 	SignalSnapshotModel.cpp
 	SignalSnapshotModel.h

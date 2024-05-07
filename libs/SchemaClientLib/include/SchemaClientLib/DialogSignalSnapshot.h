@@ -48,6 +48,10 @@ namespace SchemaClientLib
 
 		virtual ~DialogSignalSnapshot();
 
+	protected:
+		void showEvent(QShowEvent* event) override;
+		void closeEvent(QCloseEvent* event) override;
+
 	public:
 		QString projectName() const;
 		void setProjectName(const QString& projectName);

@@ -4,7 +4,6 @@
 #include "../VFrame30/Schema.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../lib/Ui/DialogSignalSearch.h"
-#include "../lib/Ui/SchemaListWidget.h"
 #include "./Archive/MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "DialogSettings.h"
@@ -14,6 +13,7 @@
 #include "DataSourcesWidget.h"
 
 #include <SchemaClientLib/DevToolsWindow.h>
+#include <SchemaClientLib/SchemaListWidget.h>
 
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
@@ -129,10 +129,10 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
 	m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
-	SchemaListWidget* schemaListWidget = new SchemaListWidget(
-											 std::vector{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption},
-											 false,
-											 m_schemaListDock);
+	auto schemaListWidget = new SchemaClientLib::SchemaListWidget(
+		std::vector{SchemaClientLib::SchemaListTreeColumns::SchemaID, SchemaClientLib::SchemaListTreeColumns::Caption},
+		false,
+		m_schemaListDock);
 	m_schemaListDock->setWidget(schemaListWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, m_schemaListDock);
@@ -145,7 +145,10 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// SchemaListWidget
 	//
-	connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, &m_monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+	connect(schemaListWidget,
+			&SchemaClientLib::SchemaListWidget::openSchemaRequest,
+			&m_monitorCentralWidget,
+			&MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
 	connect(&m_configController, &MonitorConfigController::configurationUpdated,
 			[this, schemaListWidget]()

@@ -17,9 +17,6 @@ namespace SchemaClientLib
 {
 	struct DialogSignalSnapshotSettings
 	{
-		QPoint pos;
-		QByteArray geometry;
-
 		QByteArray horzHeader;
 		int horzHeaderCount = 0; // Stores SnapshotColumns::ColumnCount constant to restore default settings if columns set changes
 
