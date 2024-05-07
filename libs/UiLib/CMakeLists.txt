@@ -14,20 +14,27 @@ set(TARGET UiLib)
 
 qt_add_library(${TARGET} STATIC
 	./include/UiLib/CodeEditor.h
+	./include/UiLib/ClickableLabel.h
 	./include/UiLib/ExportPrint.h
 	./include/UiLib/TabWidgetEx.h
+	./include/UiLib/TagSelectorWidget.h
 	CodeEditor.cpp
 	ExportPrint.cpp
 	TabWidgetEx.cpp
+	TagSelectorWidget.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
+	<map>
+	<set>
 	<vector>
 
 	<QAbstractItemModel>
 	<QApplication>
+	<QClipboard>
 	<QFile>
+	<QMenu>
 	<QMessageBox>
 	<QMouseEvent>
 	<QPageSetupDialog>

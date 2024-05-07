@@ -12,8 +12,8 @@
 //
 SchemasTabPage::SchemasTabPage(DbController* dbc,
 							   AppSignalSetProvider* signalSetProvider,
-							   ClickableLabel* statusBarLayerLabel,
-							   ClickableLabel* statusBarZoomLabel,
+							   UiLib::ClickableLabel* statusBarLayerLabel,
+							   UiLib::ClickableLabel* statusBarZoomLabel,
 							   QWidget* parent) :
 	MainTabPage{dbc, parent},
 	m_statusBarLayerLabel{statusBarLayerLabel},
@@ -98,8 +98,8 @@ SchemasTabPage::SchemasTabPage(DbController* dbc,
 	//
 	startTimer(150);
 
-	connect(m_statusBarLayerLabel, &ClickableLabel::clicked, this, &SchemasTabPage::statusBarLayerClicked);
-	connect(m_statusBarZoomLabel, &ClickableLabel::clicked, this, &SchemasTabPage::statusBarZoomClicked);
+	connect(m_statusBarLayerLabel, &UiLib::ClickableLabel::clicked, this, &SchemasTabPage::statusBarLayerClicked);
+	connect(m_statusBarZoomLabel, &UiLib::ClickableLabel::clicked, this, &SchemasTabPage::statusBarZoomClicked);
 
 	return;
 }

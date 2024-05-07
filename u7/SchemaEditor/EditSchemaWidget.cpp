@@ -28,7 +28,7 @@
 #include "../VFrame30/Session.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../lib/QDoublevalidatorEx.h"
-#include "../lib/Ui/TextEditCompleter.h"
+#include "./Ui/TextEditCompleter.h"
 
 #include <HardwareLib/LmDescription.h>
 #include <UiLib/CodeEditor.h>

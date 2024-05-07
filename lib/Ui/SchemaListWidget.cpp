@@ -1,5 +1,5 @@
 #include "./SchemaListWidget.h"
-#include "./TagSelectorWidget.h"
+#include <UiLib/TagSelectorWidget.h>
 #include <QApplication>
 #include <QCompleter>
 #include <QFont>
@@ -532,9 +532,9 @@ SchemaListWidget::SchemaListWidget(std::vector<SchemaListTreeColumns> columns, b
 
 	if (showTags == true)
 	{
-		m_tagSelector = new TagSelectorWidget{this};
+		m_tagSelector = new UiLib::TagSelectorWidget{this};
 		m_tagSelector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::MinimumExpanding);
-		connect(m_tagSelector, &TagSelectorWidget::changed, this, &SchemaListWidget::tagSelectorHasChanges);
+		connect(m_tagSelector, &UiLib::TagSelectorWidget::changed, this, &SchemaListWidget::tagSelectorHasChanges);
 	}
 
 	// --

@@ -3,8 +3,10 @@
 #include <QTreeWidget>
 #include "../../VFrame30/SchemaDetails.h"
 
-
-class TagSelectorWidget;
+namespace UiLib
+{
+	class TagSelectorWidget;
+}
 
 enum class SchemaListTreeColumns
 {
@@ -96,6 +98,6 @@ private:
 	QPushButton* m_filterButton = nullptr;
 	QPushButton* m_resetFilterButton = nullptr;
 
-	TagSelectorWidget* m_tagSelector = nullptr;
+	UiLib::TagSelectorWidget* m_tagSelector = nullptr;
 };
 

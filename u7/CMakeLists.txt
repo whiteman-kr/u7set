@@ -35,7 +35,6 @@ set (U7_SOURCES
 	../lib/Tuning/TuningFilterEditor.h
 	../lib/Tuning/TuningModel.cpp
 	../lib/Tuning/TuningModel.h
-	../lib/Ui/ClickableLabel.h
 	../lib/Ui/DialogAbout.cpp
 	../lib/Ui/DialogAbout.h
 	../lib/Ui/DialogProgress.cpp
@@ -50,12 +49,10 @@ set (U7_SOURCES
 	../lib/Ui/FilesTreeView.h
 	../lib/Ui/SchemaListWidget.cpp
 	../lib/Ui/SchemaListWidget.h
-	../lib/Ui/TagSelectorWidget.cpp
-	../lib/Ui/TagSelectorWidget.h
-	../lib/Ui/TextEditCompleter.cpp
-	../lib/Ui/TextEditCompleter.h
 	./Ui/PropertyTable.cpp
 	./Ui/PropertyTable.h
+	./Ui/TextEditCompleter.cpp
+	./Ui/TextEditCompleter.h
 	AppSignalPropertyManager.cpp
 	AppSignalPropertyManager.h
 	AppSignalSetProvider.cpp

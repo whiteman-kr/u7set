@@ -626,13 +626,13 @@ void MainWindow::createStatusBar()
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
 
-	m_statusBarSchemaLayerLabel = new ClickableLabel("Layer: ");
+	m_statusBarSchemaLayerLabel = new UiLib::ClickableLabel("Layer: ");
 	m_statusBarSchemaLayerLabel->setAlignment(Qt::AlignHCenter);
 	m_statusBarSchemaLayerLabel->setMinimumWidth(100);
 	m_statusBarSchemaLayerLabel->setVisible(false);
 	m_statusBarSchemaLayerLabel->setCursor(Qt::PointingHandCursor);
 
-	m_statusBarSchemaZoomLabel = new ClickableLabel("Zoom: ");
+	m_statusBarSchemaZoomLabel = new UiLib::ClickableLabel("Zoom: ");
 	m_statusBarSchemaZoomLabel->setAlignment(Qt::AlignHCenter);
 	m_statusBarSchemaZoomLabel->setMinimumWidth(80);
 	m_statusBarSchemaZoomLabel->setVisible(false);

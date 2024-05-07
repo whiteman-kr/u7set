@@ -31,9 +31,12 @@ namespace SchemaClientLib
 
 		ColumnCount
 	};
+} // namespace SchemaClientLib
 
-	Q_DECLARE_METATYPE(SnapshotColumns);
+Q_DECLARE_METATYPE(SchemaClientLib::SnapshotColumns);
 
+namespace SchemaClientLib
+{
 	enum class SnapshotSignalType
 	{
 		Any = 0,

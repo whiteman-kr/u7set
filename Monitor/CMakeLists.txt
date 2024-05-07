@@ -36,8 +36,6 @@ set (MONITOR_SOURCES
 	../lib/Ui/DialogWriteValues.h
 	../lib/Ui/SchemaListWidget.cpp
 	../lib/Ui/SchemaListWidget.h
-	../lib/Ui/TagSelectorWidget.cpp
-	../lib/Ui/TagSelectorWidget.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h
 	Archive/ArchiveData.cpp
