@@ -9,7 +9,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui ${CMAKE_CURRENT_SOURCE_DIR}/../libs/SchemaClientLib)
 
 if (MSVC)
   # MSVC warning suppressions
@@ -30,16 +30,14 @@ set (DIAGNOSTICS_SOURCES
 	../lib/Ui/DialogAlert.h
 #	../lib/Ui/DialogChooseTags.cpp
 #	../lib/Ui/DialogChooseTags.h
-#	../lib/Ui/DialogSignalInfo.cpp
-#	../lib/Ui/DialogSignalInfo.h
 #	../lib/Ui/DialogSignalSearch.cpp
 #	../lib/Ui/DialogSignalSearch.h
 #	../lib/Ui/DialogTcpStatistics.cpp
 #	../lib/Ui/DialogTcpStatistics.h
 #	../lib/Ui/TuningSourcesWidget.cpp
 #	../lib/Ui/TuningSourcesWidget.h
-#	../lib/Ui/DialogWriteValues.cpp
-#	../lib/Ui/DialogWriteValues.h
+	../lib/Ui/DialogWriteValues.cpp  # MUST BE REMOVED, dependency in DialogSignalInfo, 
+	../lib/Ui/DialogWriteValues.h	 #
 #	Archive/ArchiveConnection.cpp
 #	Archive/ArchiveConnection.h
 #	Archive/ArchiveData.cpp
@@ -106,7 +104,6 @@ if (MSVC)
 endif (MSVC)
 
 set (DIAGNOSTICS_FORMS
-	${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui/DialogSignalInfo.ui
 #	./Archive/DialogChooseArchiveSignals.ui
 	DialogSettings.ui
 #	DialogColumns.ui

@@ -13,10 +13,12 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets LinguistTools Qml)
 set(TARGET SchemaClientLib)
 
 qt_add_library(${TARGET} STATIC
+	DialogSignalInfo.ui
 	./include/SchemaClientLib/AppDataSourcesWidget.h
 	./include/SchemaClientLib/ChooseTagsWidget.h
 	./include/SchemaClientLib/ClientSchemaManager.h
 	./include/SchemaClientLib/DevToolsWindow.h
+	./include/SchemaClientLib/DialogSignalInfo.h
 	./include/SchemaClientLib/DialogSignalSnapshot.h
 	./include/SchemaClientLib/DialogTcpStatistics.h
 	./include/SchemaClientLib/DragDropHelper.h
@@ -44,6 +46,7 @@ qt_add_library(${TARGET} STATIC
 	DevToolsWidget.cpp
 	DevToolsWidget.h
 	DevToolsWindow.cpp
+	DialogSignalInfo.cpp
 	DialogSignalSnapshot.cpp
 	DialogSourceInfo.cpp
 	DialogSourceInfo.h
@@ -83,7 +86,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<vector>
 
 	<QAction>
+	<QActionGroup>
 	<QApplication>
+	<QClipboard>
 	<QComboBox>
 	<QCompleter>
 	<QCoreApplication>
@@ -103,6 +108,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QMessageBox>
 	<QMimeData>
 	<QMouseEvent>
+	<QPainter>
 	<QPushButton>
 	<QReadWriteLock>
 	<QSettings>
@@ -114,6 +120,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTimer>
 	<QTimeZone>
 	<QToolButton>
+	<QToolTip>
 	<QTranslator>
 	<QTreeWidget>
 	<QTreeWidgetItem>
@@ -129,6 +136,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<AppSignal.pb.h>
 	<Network.pb.h>
 
+	"../../AppSignalLib/AppSignal.h"
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"
 )

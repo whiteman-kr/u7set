@@ -1,13 +1,14 @@
 #pragma once
 
-#include <optional>
-#include "../VFrame30/TuningController.h"
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareEndpoint.h"
+#include "../VFrame30/TuningController.h"
 #include "../lib/ISignalDataServer.h"
 #include <SchemaClientLib/DragDropHelper.h>
+#include <optional>
 
-namespace Ui {
+namespace Ui
+{
 	class DialogSignalInfo;
 }
 
@@ -22,7 +23,6 @@ private:
 	std::shared_ptr<Comparator> m_comparator;
 
 	IAppSignalManager* m_appSignalManager = nullptr;
-
 };
 
 
@@ -32,8 +32,8 @@ public:
 	SignalFlagsWidget(QWidget* parent = nullptr);
 
 protected:
-	void paintEvent(QPaintEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
+	void paintEvent(QPaintEvent* event);
+	void mouseMoveEvent(QMouseEvent* event);
 
 	virtual bool flagState(int flagNo, bool* const flagValid, bool* const flagValue, bool* const flagAlert) const = 0;
 
@@ -50,12 +50,12 @@ private:
 	const int m_rowCount = 2;
 
 	int m_lastFlagAbove = -1;
-
 };
 
 class AppSignalFlagsWidget : public SignalFlagsWidget
 {
 	Q_OBJECT
+
 public:
 	enum class AppSignalFlagsFields
 	{
@@ -119,8 +119,8 @@ protected:
 
 	DialogSignalInfo(const AppSignalParam& signal,
 					 IAppSignalManager* appSignalManager,
-					 ISignalDataServer* signalDataServer,			// Can be empty, e.g. in Simulator
-					 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,	// Can be empty, e.g. in Simulator
+					 ISignalDataServer* signalDataServer,                                  // Can be empty, e.g. in Simulator
+					 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices, // Can be empty, e.g. in Simulator
 					 ITuningSignalManager& tuningSignalManager,
 					 ITuningConnection& tuningConnection,
 					 ITuningAuthorization& tuningAuthorization,
@@ -156,10 +156,10 @@ private:
 
 	enum class SetpointsColumns
 	{
-		Type,			// Contains user data index
-		CompareTo,		// Contains user data paramCompareTo(AppSignalParam)
+		Type,      // Contains user data index
+		CompareTo, // Contains user data paramCompareTo(AppSignalParam)
 		CompareToValue,
-		Output,			// Contains user data paramOutput(AppSignalParam)
+		Output,    // Contains user data paramOutput(AppSignalParam)
 		OutputValue,
 		SchemaId
 	};
@@ -170,8 +170,8 @@ private slots:
 	void prepareSchemaContextMenu(const QPoint& pos);
 	void prepareSetpointsContextMenu(const QPoint& pos);
 
-	void on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, int column);
-	void on_treeSetpoints_itemDoubleClicked(QTreeWidgetItem *item, int column);
+	void on_treeSchemas_itemDoubleClicked(QTreeWidgetItem* item, int column);
+	void on_treeSetpoints_itemDoubleClicked(QTreeWidgetItem* item, int column);
 
 	void on_pushButtonSetZero_clicked();
 	void on_pushButtonSetOne_clicked();
@@ -221,14 +221,14 @@ private:
 	QString tuningSignalStateText(const AppSignalParam& param, const TuningSignalState& state, E::ValueViewType viewType, int precision);
 
 private:
-	Ui::DialogSignalInfo *ui;
+	Ui::DialogSignalInfo* ui;
 	DialogSignalInfo::DialogType m_dialogType;
 
 	static std::map<QString, DialogSignalInfo*> m_dialogSignalInfoMap;
 
 	AppSignalParam m_signal;
-	QStringList m_dataServiceIds;	// Specifies signal data service IDs
-	QString m_dataServiceId;	// Specifies server to take data. If empty - take latest
+	QStringList m_dataServiceIds; // Specifies signal data service IDs
+	QString m_dataServiceId;      // Specifies server to take data. If empty - take latest
 
 	IAppSignalManager* m_appSignalManager = nullptr;
 	ISignalDataServer* m_signalDataServer = nullptr;
@@ -251,7 +251,6 @@ private:
 
 	bool m_firstShow = true;
 };
-
 
 class QLabelAppSignalDragAndDrop : public QLabel
 {

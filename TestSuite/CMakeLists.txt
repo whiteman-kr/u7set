@@ -48,6 +48,8 @@ add_executable(${TARGET} WIN32
 	TestSuiteLog.cpp
 	TestSuiteMainWindow.cpp
 	TestViewTabPage.cpp
+	../lib/Ui/DialogWriteValues.h   # MUST BE REMOVED or moved to some lib, Dependent on SchemaClientLib::DialogSignalInfo, 
+	../lib/Ui/DialogWriteValues.cpp
 	
 	Resources.qrc
 	../Etc/Logo/RadiyLogo.qrc

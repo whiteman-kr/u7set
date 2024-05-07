@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui ${CMAKE_CURRENT_SOURCE_DIR}/../libs/SchemaClientLib)
 
 if (MSVC)
   # MSVC warning suppressions
@@ -39,8 +39,6 @@ set (U7_SOURCES
 	../lib/Ui/DialogAbout.h
 	../lib/Ui/DialogProgress.cpp
 	../lib/Ui/DialogProgress.h
-	../lib/Ui/DialogSignalInfo.cpp
-	../lib/Ui/DialogSignalInfo.h
 	../lib/Ui/DialogSignalSearch.cpp
 	../lib/Ui/DialogSignalSearch.h
 	../lib/Ui/DialogWriteValues.cpp
@@ -315,7 +313,6 @@ set (U7_RESOURCES
 )
 
 set (U7_FORMS
-	${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui/DialogSignalInfo.ui
 	CreateProjectDialog.ui
 	CreateUserDialogDialog.ui
 	DialogSettings.ui
