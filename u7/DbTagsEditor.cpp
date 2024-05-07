@@ -56,10 +56,10 @@ DbTagsEditor::DbTagsEditor(DbController* dbController, bool showTags, bool showU
 		}
 	}
 
-    m_tagsWidget = new ChooseTagsWidget(tags, users, ' ', this);
+    m_tagsWidget = new SchemaClientLib::ChooseTagsWidget(tags, users, ' ', this);
 
-    connect(m_tagsWidget, &ChooseTagsWidget::okPressed, this, &DbTagsEditor::okButtonPressed);
-    connect(m_tagsWidget, &ChooseTagsWidget::cancelPressed, this, &DbTagsEditor::cancelButtonPressed);
+    connect(m_tagsWidget, &SchemaClientLib::ChooseTagsWidget::okPressed, this, &DbTagsEditor::okButtonPressed);
+    connect(m_tagsWidget, &SchemaClientLib::ChooseTagsWidget::cancelPressed, this, &DbTagsEditor::cancelButtonPressed);
 
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
     mainLayout->addWidget(m_tagsWidget);

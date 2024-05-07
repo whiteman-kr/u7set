@@ -5,7 +5,7 @@
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../lib/ISignalDataServer.h"
-#include "../lib/Ui/DragDropHelper.h"
+#include <SchemaClientLib/DragDropHelper.h>
 
 namespace Ui {
 	class DialogSignalInfo;
@@ -267,5 +267,5 @@ protected:
 
 private:
 	AppSignalParam m_appSignalParam;
-	DragDropHelper m_dragDrop;
+	SchemaClientLib::DragDropHelper m_dragDrop;
 };

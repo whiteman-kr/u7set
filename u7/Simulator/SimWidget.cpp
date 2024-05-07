@@ -9,7 +9,7 @@
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "SimTrend/SimTrends.h"
-#include "../../lib/Ui/TabWidgetEx.h"
+#include <UiLib/TabWidgetEx.h>
 #include "../../lib/Ui/DialogSignalSearch.h"
 #include "SimSignalSnapshot.h"
 #include "SimSignalInfo.h"
@@ -37,7 +37,7 @@ SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
 	setWindowFlags(windowType);
 	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
 
-	m_tabWidget = new TabWidgetEx{this};
+	m_tabWidget = new UiLib::TabWidgetEx{this};
 	m_tabWidget->setDocumentMode(false);
 	m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
 

@@ -3,7 +3,7 @@
 #include "../VFrame30/ClientSchemaWidget.h"
 #include "../VFrame30/Context.h"
 #include "../VFrame30/MonitorSchema.h"
-#include "../lib/Ui/TabWidgetEx.h"
+#include <UiLib/TabWidgetEx.h>
 #include "ClientSchemaManager.h"
 #include <QFileDialog>
 
@@ -13,7 +13,7 @@ namespace SchemaClientLib
 	//
 	// Signal/slot implementation for SchemaTabWidget template class.
 	//
-	class SchemaTabWidgetSignalSlot : public TabWidgetEx
+	class SchemaTabWidgetSignalSlot : public UiLib::TabWidgetEx
 	{
 		Q_OBJECT
 

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../lib/Ui/TabWidgetEx.h"
+#include <UiLib/TabWidgetEx.h>
 
 class MainTabPage;
 
 
-class CentralWidget : public TabWidgetEx
+class CentralWidget : public UiLib::TabWidgetEx
 {
 	Q_OBJECT
 

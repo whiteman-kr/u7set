@@ -1,5 +1,5 @@
 #include "DialogMatsUsersEditor.h"
-#include "../lib/Ui/ChooseTagsWidget.h"
+#include <SchemaClientLib/ChooseTagsWidget.h>
 
 
 //
@@ -448,11 +448,11 @@ void DialogMatsUsersEditor::onListItemDoubleClicked(QTreeWidgetItem* item, int c
 	
 	QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
-	ChooseTagsWidget te{tags, {}, ' ', this};
+	SchemaClientLib::ChooseTagsWidget te{tags, {}, ' ', this};
 	te.setText(item->text(static_cast<int>(DialogMatsUsersEditor::Columns::TuningTags)));
 
-	connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
-	connect(&te, &ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+	connect(&te, &SchemaClientLib::ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
+	connect(&te, &SchemaClientLib::ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
 
 	QHBoxLayout l;
 	l.addWidget(&te);

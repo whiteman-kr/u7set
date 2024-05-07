@@ -15,8 +15,12 @@
 
 #include "TestSuiteLog.h"
 
-class TabWidgetEx;
 class TestLogTabPage;
+
+namespace UiLib
+{
+	class TabWidgetEx;
+}
 
 class TestSuiteMainWindow : public QMainWindow
 {
@@ -123,7 +127,7 @@ private:
 	QMenu* m_multipleReportsMenu = nullptr;		// Multiple reports submenu
     std::vector<QAction*> m_multipleReportActions;
 
-	TabWidgetEx* m_tabWidget = nullptr;
+	UiLib::TabWidgetEx* m_tabWidget = nullptr;
 
 	QToolBar* m_toolBar = nullptr;
 	QLabel* m_statusIndicator = nullptr;

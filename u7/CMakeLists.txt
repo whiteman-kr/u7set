@@ -29,16 +29,12 @@ set (U7_SOURCES
 	../lib/PropertyEditor.h
 	../lib/PropertyEditorDialog.cpp
 	../lib/PropertyEditorDialog.h
-	../lib/PropertyTable.cpp
-	../lib/PropertyTable.h
 	../lib/QDoublevalidatorEx.h
 	../lib/StandardColors.h
 	../lib/Tuning/TuningFilterEditor.cpp
 	../lib/Tuning/TuningFilterEditor.h
 	../lib/Tuning/TuningModel.cpp
 	../lib/Tuning/TuningModel.h
-	../lib/Ui/ChooseTagsWidget.cpp
-	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/ClickableLabel.h
 	../lib/Ui/DialogAbout.cpp
 	../lib/Ui/DialogAbout.h
@@ -48,22 +44,18 @@ set (U7_SOURCES
 	../lib/Ui/DialogSignalInfo.h
 	../lib/Ui/DialogSignalSearch.cpp
 	../lib/Ui/DialogSignalSearch.h
-	../lib/Ui/DialogSignalSnapshot.cpp
-	../lib/Ui/DialogSignalSnapshot.h
 	../lib/Ui/DialogWriteValues.cpp
 	../lib/Ui/DialogWriteValues.h
-	../lib/Ui/DragDropHelper.cpp
-	../lib/Ui/DragDropHelper.h
 	../lib/Ui/FilesTreeView.cpp
 	../lib/Ui/FilesTreeView.h
 	../lib/Ui/SchemaListWidget.cpp
 	../lib/Ui/SchemaListWidget.h
-	../lib/Ui/TabWidgetEx.cpp
-	../lib/Ui/TabWidgetEx.h
 	../lib/Ui/TagSelectorWidget.cpp
 	../lib/Ui/TagSelectorWidget.h
 	../lib/Ui/TextEditCompleter.cpp
 	../lib/Ui/TextEditCompleter.h
+	./Ui/PropertyTable.cpp
+	./Ui/PropertyTable.h
 	AppSignalPropertyManager.cpp
 	AppSignalPropertyManager.h
 	AppSignalSetProvider.cpp
@@ -497,7 +489,7 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql
 	Qt6::SerialPort Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
-	TrendView Simulator qt6keychain Builder VFrame30 ReportLib UiLib)
+	TrendView Simulator qt6keychain Builder VFrame30 ReportLib SchemaClientLib UiLib)
 
 # Link Visaul Leak Detector
 #

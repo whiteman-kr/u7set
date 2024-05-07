@@ -2,7 +2,7 @@
 #define DBTAGSEDITOR_H
 
 #include "../lib/PropertyEditor.h"
-#include "../lib/Ui/ChooseTagsWidget.h"
+#include <SchemaClientLib/ChooseTagsWidget.h>
 
 class DbTagsEditor : public ExtWidgets::PropertyTextEditor
 {
@@ -31,7 +31,7 @@ private:
 	bool isModified() const override;
 
 private:
-     ChooseTagsWidget* m_tagsWidget = nullptr;
+    SchemaClientLib::ChooseTagsWidget* m_tagsWidget = nullptr;
 };
 
 

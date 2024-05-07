@@ -23,8 +23,8 @@ MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorCo
 																	   configController->configInfo().softwareEquipmentId,
 																	   centralWidget);
 
-	connect(dss, &DialogSignalSnapshot::signalContextMenu, centralWidget, &MonitorCentralWidget::slot_signalContextMenu);
-	connect(dss, &DialogSignalSnapshot::signalInfo, centralWidget, &MonitorCentralWidget::slot_signalInfo);
+	connect(dss, &SchemaClientLib::DialogSignalSnapshot::signalContextMenu, centralWidget, &MonitorCentralWidget::slot_signalContextMenu);
+	connect(dss, &SchemaClientLib::DialogSignalSnapshot::signalInfo, centralWidget, &MonitorCentralWidget::slot_signalInfo);
 
 	connect(monitorAppSignalManager, &ClientLib::AppSignalManager::signalParamsUpdated, dss, &MonitorDialogSignalSnapshot::signalsUpdated);
 	connect(configController, &MonitorConfigController::configurationUpdated, dss, &MonitorDialogSignalSnapshot::schemasUpdated);
@@ -39,7 +39,7 @@ MonitorDialogSignalSnapshot::MonitorDialogSignalSnapshot(MonitorConfigController
 														 const QString& projectName,
 														 const QString& equipmentId,
 														 QWidget *parent) :
-	DialogSignalSnapshot(appSignalManager,
+	SchemaClientLib::DialogSignalSnapshot(appSignalManager,
 						 signalDataServer,
 						 configController->configuration().appDataServices,
 						 projectName,

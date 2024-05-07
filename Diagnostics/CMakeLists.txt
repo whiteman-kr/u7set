@@ -34,12 +34,8 @@ set (DIAGNOSTICS_SOURCES
 #	../lib/Ui/DialogSignalInfo.h
 #	../lib/Ui/DialogSignalSearch.cpp
 #	../lib/Ui/DialogSignalSearch.h
-#	../lib/Ui/DialogSignalSnapshot.cpp
-#	../lib/Ui/DialogSignalSnapshot.h
 #	../lib/Ui/DialogTcpStatistics.cpp
 #	../lib/Ui/DialogTcpStatistics.h
-#	../lib/Ui/DragDropHelper.cpp
-#	../lib/Ui/DragDropHelper.h
 #	../lib/Ui/SchemaListWidget.cpp
 #	../lib/Ui/SchemaListWidget.h
 #	../lib/Ui/TagSelectorWidget.cpp

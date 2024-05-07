@@ -2,8 +2,8 @@
 
 #include <UiLib/CodeEditor.h>
 #include "../lib/PropertyEditor.h"
-#include "../lib/PropertyTable.h"
 #include "../lib/Tuning/TuningFilterEditor.h"
+#include "./Ui/PropertyTable.h"
 
 
 //

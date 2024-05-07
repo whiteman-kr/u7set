@@ -1,7 +1,7 @@
 #include "PropertyTable.h"
 #include "../AppSignalLib/TuningValue.h"
 #include "../lib/PropertyEditor.h"
-#include "../lib/Ui/ChooseTagsWidget.h"
+#include <SchemaClientLib/ChooseTagsWidget.h>
 #include <QAbstractItemModel>
 #include <QClipboard>
 #include <QInputDialog>
@@ -17,7 +17,7 @@ namespace ExtWidgets
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
 		m_what(what),
 		m_toTheBegin(toTheBegin)
-	{
+	{ 
 		QGridLayout* gl = new QGridLayout();
 
 		QLabel* l = new QLabel(tr("Append what:"));
@@ -1386,11 +1386,11 @@ namespace ExtWidgets
 	{
 		QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
-		ChooseTagsWidget te{m_commonProperties, ';', this};
+		SchemaClientLib::ChooseTagsWidget te{m_commonProperties, ';', this};
 		te.setText(propertyFilter());
 
-		connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
-		connect(&te, &ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+		connect(&te, &SchemaClientLib::ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
+		connect(&te, &SchemaClientLib::ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
 
 		QHBoxLayout l;
 		l.addWidget(&te);

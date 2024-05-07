@@ -24,8 +24,6 @@ qt_standard_project_setup()
 set (MONITOR_SOURCES
 	../lib/ConstStrings.h
 	../lib/ISignalDataServer.h
-	../lib/Ui/ChooseTagsWidget.cpp
-	../lib/Ui/ChooseTagsWidget.h
 	../lib/Ui/DialogAbout.cpp
 	../lib/Ui/DialogAbout.h
 	../lib/Ui/DialogAlert.cpp
@@ -34,12 +32,8 @@ set (MONITOR_SOURCES
 	../lib/Ui/DialogSignalInfo.h
 	../lib/Ui/DialogSignalSearch.cpp
 	../lib/Ui/DialogSignalSearch.h
-	../lib/Ui/DialogSignalSnapshot.cpp
-	../lib/Ui/DialogSignalSnapshot.h
 	../lib/Ui/DialogWriteValues.cpp
 	../lib/Ui/DialogWriteValues.h
-	../lib/Ui/DragDropHelper.cpp
-	../lib/Ui/DragDropHelper.h
 	../lib/Ui/SchemaListWidget.cpp
 	../lib/Ui/SchemaListWidget.h
 	../lib/Ui/TagSelectorWidget.cpp

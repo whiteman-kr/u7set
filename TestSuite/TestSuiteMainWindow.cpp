@@ -3,10 +3,10 @@
 #include <QCloseEvent>
 #include <ClientLib/ClientTranslator.h>
 #include <ClientLib/TuningUserManager.h>
+#include <UiLib/TabWidgetEx.h>
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Ui/DialogAbout.h"
-#include "../lib/Ui/TabWidgetEx.h"
 #include "AppConfigSettings.h"
 #include "DialogDataSources.h"
 #include "DialogReport.h"
@@ -55,10 +55,10 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	}
 	//
 
-	m_tabWidget = new TabWidgetEx{this};
+	m_tabWidget = new UiLib::TabWidgetEx{this};
 	m_tabWidget->setDocumentMode(false);
 	m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_tabWidget, &TabWidgetEx::tabCloseRequested, this, &TestSuiteMainWindow::onTabCloseRequested);
+	connect(m_tabWidget, &UiLib::TabWidgetEx::tabCloseRequested, this, &TestSuiteMainWindow::onTabCloseRequested);
 
 	setCentralWidget(m_tabWidget);
 	centralWidget()->setAutoFillBackground(true);

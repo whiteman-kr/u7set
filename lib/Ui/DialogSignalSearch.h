@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "DragDropHelper.h"
+#include <SchemaClientLib/DragDropHelper.h>
 
 class SignalSearchSorter	// later move this class to some library file, it can be used in other cases
 {
@@ -111,7 +111,7 @@ private:
 	AppSignalParam m_appSignalParam;
 	QPoint m_dragStartPosition;
 
-	DragDropHelper m_dragDropHelper;
+	SchemaClientLib::DragDropHelper m_dragDropHelper;
 };
 
 class DialogSignalSearch : public QDialog

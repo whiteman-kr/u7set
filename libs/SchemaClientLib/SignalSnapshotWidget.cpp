@@ -1,0 +1,1382 @@
+#include "SignalSnapshotWidget.h"
+#include "../AppSignalLib/IAppSignalManager.h"
+#include "../lib/ISignalDataServer.h"
+#include <SchemaClientLib/ChooseTagsWidget.h>
+#include <SchemaClientLib/DialogSignalSnapshot.h>
+#include <UiLib/ExportPrint.h>
+
+
+//
+// SnapshotExportPrint
+//
+namespace
+{
+	class SnapshotExportPrint : public UiLib::ExportPrint
+	{
+	public:
+		SnapshotExportPrint(QString projectName, QString softwareEquipmentId, QWidget* parent);
+
+	protected:
+		virtual void generateHeader(QTextCursor& cursor) override;
+
+	private:
+		QString m_projectName;
+		QString m_softwareEquipmentId;
+	};
+
+	//
+	// SnapshotExportPrint
+	//
+	SnapshotExportPrint::SnapshotExportPrint(QString projectName, QString softwareEquipmentId, QWidget* parent) :
+		ExportPrint(parent),
+		m_projectName(projectName),
+		m_softwareEquipmentId(softwareEquipmentId)
+	{
+	}
+
+	void SnapshotExportPrint::generateHeader(QTextCursor& cursor)
+	{
+		QTextBlockFormat headerCenterFormat = cursor.blockFormat();
+		headerCenterFormat.setAlignment(Qt::AlignHCenter);
+
+		QTextBlockFormat regularFormat = cursor.blockFormat();
+		regularFormat.setAlignment(Qt::AlignLeft);
+
+		QTextCharFormat headerCharFormat = cursor.charFormat();
+		headerCharFormat.setFontWeight(static_cast<int>(QFont::Bold));
+		headerCharFormat.setFontPointSize(12.0);
+
+		QTextCharFormat regularCharFormat = cursor.charFormat();
+		headerCharFormat.setFontPointSize(10.0);
+
+		cursor.setBlockFormat(headerCenterFormat);
+		cursor.setCharFormat(headerCharFormat);
+		cursor.insertText(QObject::tr("Snapshot - %1\n").arg(m_projectName));
+		cursor.insertText("\n");
+
+		cursor.setBlockFormat(regularFormat);
+		cursor.setCharFormat(regularCharFormat);
+		cursor.insertText(QObject::tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
+		cursor.insertText(QObject::tr("%1: %2\n").arg(qAppName()).arg(m_softwareEquipmentId));
+		cursor.insertText("\n");
+
+		cursor.insertText("\n");
+	}
+} // namespace
+
+//
+// SnapshotTableView
+//
+namespace SchemaClientLib
+{
+	void SnapshotTableView::mousePressEvent(QMouseEvent* event)
+	{
+		QTableView::mousePressEvent(event);
+
+		SignalSnapshotModel* snapshotModel = dynamic_cast<SignalSnapshotModel*>(model());
+		if (snapshotModel == nullptr)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		QList<AppSignalParam> appSignalParams;
+
+		QModelIndexList rows = selectionModel()->selectedRows();
+
+		for (QModelIndex& index : rows)
+		{
+			bool found = false;
+
+			AppSignalParam appSignalParam = snapshotModel->signalParam(index.row(), &found);
+
+			if (found == true)
+			{
+				appSignalParams.push_back(appSignalParam);
+			}
+		}
+
+		m_dragDropHelper.onMousePress(event, appSignalParams);
+
+		return;
+	}
+
+	void SnapshotTableView::mouseMoveEvent(QMouseEvent* event)
+	{
+		m_dragDropHelper.onMouseMove(event, this);
+
+		return;
+	}
+} // namespace SchemaClientLib
+
+//
+// DialogSignalSnapshotSettings
+//
+namespace SchemaClientLib
+{
+	void DialogSignalSnapshotSettings::restore()
+	{
+		QSettings s;
+
+		pos = s.value("SignalSnapshotWidget/pos", QPoint(-1, -1)).toPoint();
+		geometry = s.value("SignalSnapshotWidget/geometry").toByteArray();
+		horzHeader = s.value("SignalSnapshotWidget/horzHeader").toByteArray();
+		horzHeaderCount = s.value("SignalSnapshotWidget/horzHeaderCount").toInt();
+
+		maskList = s.value("SignalSnapshotWidget/mask").toStringList();
+
+		sortColumn = s.value("SignalSnapshotWidget/sortColumn", sortColumn).toInt();
+		sortOrder = static_cast<Qt::SortOrder>(s.value("SignalSnapshotWidget/sortOrder", sortOrder).toInt());
+	}
+
+	void DialogSignalSnapshotSettings::store()
+	{
+		QSettings s;
+
+		s.setValue("SignalSnapshotWidget/pos", pos);
+		s.setValue("SignalSnapshotWidget/geometry", geometry);
+		s.setValue("SignalSnapshotWidget/horzHeader", horzHeader);
+		s.setValue("SignalSnapshotWidget/horzHeaderCount", horzHeaderCount);
+
+		s.setValue("SignalSnapshotWidget/sortColumn", sortColumn);
+		s.setValue("SignalSnapshotWidget/sortOrder", static_cast<int>(sortOrder));
+	}
+} // namespace SchemaClientLib
+
+//
+// SignalSnapshotWidget
+//
+namespace SchemaClientLib
+{
+	SignalSnapshotWidget::SignalSnapshotWidget(SchemaClientLib::ISignalSnapshotWidget& signalSnapshotVirtFuncDispatcher,
+											   IAppSignalManager* appSignalManager,
+											   ISignalDataServer* signalDataServer,
+											   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
+											   const QString& projectName,
+											   const QString& equipmentId,
+											   QWidget* parent) :
+		QWidget(parent),
+		m_signalSnapshotVirtFuncDispatcher(signalSnapshotVirtFuncDispatcher),
+		m_appSignalManager(appSignalManager),
+		m_signalDataServer(signalDataServer),
+		m_appDataServices(appDataServices),
+		m_projectName(projectName),
+		m_equipmentId(equipmentId)
+	{
+		if (m_appSignalManager == nullptr)
+		{
+			Q_ASSERT(m_appSignalManager);
+			return;
+		}
+
+		m_maskHelp = tr("A mask contains '*' and '?' symbols.\n\
+	'*' symbol means any set of symbols on its place, '?' symbol means one symbol on its place.\n\
+	Several masks can be separated by semicolon or space.\n\n\
+	Examples:\n\n\
+	#SF001P014* (mask for AppSignalID),\n\
+	T?30T01? (mask for CustomAppSignalID),\n\
+	#SYSTEMID_RACK01_CH01_MD?? (mask for Equipment ID).\n\n\
+	To apply the filter, enter the mask and press Enter.");
+		m_maskHelp.remove('\t');
+
+		m_tagsHelp = tr("Tags for filtering signals.\n\n\
+	Several tags can be separated by semicolon or space: \"tag1; tag2\" or \"tag1 tag2\".\n\n\
+	To apply the filter, enter tags and press Enter.");
+		m_tagsHelp.remove('\t');
+
+		m_settings.restore();
+
+		setAttribute(Qt::WA_DeleteOnClose);
+
+		setWindowTitle(tr("Signals Snapshot"));
+
+		setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
+
+		createControls();
+
+		createMenus();
+
+		initFiltersView();
+
+		initSignalsView();
+
+		// Restore window pos
+		//
+		if (m_settings.pos.x() != -1 && m_settings.pos.y() != -1)
+		{
+			move(m_settings.pos);
+			restoreGeometry(m_settings.geometry);
+		}
+
+		m_updateStateTimerId = startTimer(500);
+
+		return;
+	}
+
+	SignalSnapshotWidget::SignalSnapshotWidget(SchemaClientLib::ISignalSnapshotWidget& signalSnapshotVirtFuncDispatcher,
+											   IAppSignalManager* appSignalManager,
+											   const QString& projectName,
+											   const QString& equipmentId,
+											   QWidget* parent) :
+		SignalSnapshotWidget(signalSnapshotVirtFuncDispatcher, appSignalManager, nullptr, {}, projectName, equipmentId, parent)
+	{
+	}
+
+	QString SignalSnapshotWidget::projectName() const
+	{
+		return m_projectName;
+	}
+
+	void SignalSnapshotWidget::setProjectName(const QString& projectName)
+	{
+		m_projectName = projectName;
+	}
+
+	const std::vector<AppSignalParam>& SignalSnapshotWidget::specificSignals() const
+	{
+		return m_specificSignals;
+	}
+
+	void SignalSnapshotWidget::setSpecificSignals(const std::vector<AppSignalParam>& specificSignals)
+	{
+		m_specificSignals = specificSignals;
+
+		signalsUpdated();
+
+		return;
+	}
+
+	void SignalSnapshotWidget::setLmEquipmentId(const QString& lmEquipmentId)
+	{
+		if (m_editMask == nullptr || m_maskTypeCombo == nullptr)
+		{
+			Q_ASSERT(m_editMask);
+			Q_ASSERT(m_maskTypeCombo);
+			return;
+		}
+
+		// Set Mask(s)
+		//
+		m_editMask->setText(lmEquipmentId);
+
+		maskChanged(false /*addToCompleter*/);
+
+		// Set Mask Type combo to All and prevent saving it in settings
+		//
+		m_storeMaskData = false;
+
+		m_maskTypeCombo->blockSignals(true); // Block to prevent signals from updating automatically
+		m_maskTypeCombo->setCurrentIndex(static_cast<int>(SnapshotMaskType::LmEquipmentId));
+		m_maskTypeCombo->blockSignals(false);
+
+		return;
+	}
+
+	void SignalSnapshotWidget::setSignalsMask(const QStringList& masks)
+	{
+		if (m_editMask == nullptr || m_maskTypeCombo == nullptr)
+		{
+			Q_ASSERT(m_editMask);
+			Q_ASSERT(m_maskTypeCombo);
+			return;
+		}
+
+		// Set Mask(s)
+		//
+		m_editMask->setText(masks.join(';'));
+
+		maskChanged(false /*addToCompleter*/);
+
+		// Set Mask Type combo to All and prevent saving it in settings
+		//
+		m_storeMaskData = false;
+
+		m_maskTypeCombo->blockSignals(true); // Block to prevent signals from updating automatically
+		m_maskTypeCombo->setCurrentIndex(static_cast<int>(SnapshotMaskType::All));
+		m_maskTypeCombo->blockSignals(false);
+
+		return;
+	}
+
+	void SignalSnapshotWidget::setSignalsTags(const QStringList& tags)
+	{
+		if (m_editTags == nullptr)
+		{
+			Q_ASSERT(m_editTags);
+			return;
+		}
+
+		m_editTags->setText(tags.join(' '));
+
+		m_storeTags = false;
+
+		tagsChanged();
+	}
+
+	void SignalSnapshotWidget::resetSignalsType()
+	{
+		// Set Type is set automatically
+		//
+		m_storeType = false;
+		m_storeRole = false;
+		m_model->setSignalType(SnapshotSignalType::Any);
+		m_model->setSignalRole(SnapshotSignalRole::Any);
+
+		m_typeCombo->blockSignals(true);
+		m_typeCombo->setCurrentIndex(static_cast<int>(SnapshotSignalType::Any));
+		m_typeCombo->blockSignals(false);
+
+		m_roleCombo->blockSignals(true);
+		m_roleCombo->setCurrentIndex(static_cast<int>(SnapshotSignalRole::Any));
+		m_roleCombo->blockSignals(false);
+	}
+
+	std::vector<VFrame30::SchemaDetails> SignalSnapshotWidget::schemasDetails()
+	{
+		return m_signalSnapshotVirtFuncDispatcher.schemasDetails();
+	}
+
+	std::set<QString> SignalSnapshotWidget::schemaAppSignals(const QString& schemaStrId)
+	{
+		return m_signalSnapshotVirtFuncDispatcher.schemaAppSignals(schemaStrId);
+	}
+
+
+	void SignalSnapshotWidget::closeEvent([[maybe_unused]] QCloseEvent* event)
+	{
+		if (m_storeType == true)
+		{
+			m_storedType = static_cast<SnapshotSignalType>(m_typeCombo->currentIndex());
+		}
+		if (m_storeRole == true)
+		{
+			m_storedRole = static_cast<SnapshotSignalRole>(m_roleCombo->currentIndex());
+		}
+		if (m_storeMaskData == true)
+		{
+			m_storedMaskType = static_cast<SnapshotMaskType>(m_maskTypeCombo->currentIndex());
+		}
+
+		// Save window position
+		//
+		m_settings.pos = pos();
+		m_settings.geometry = saveGeometry();
+
+		m_settings.horzHeader = m_tableView->horizontalHeader()->saveState();
+		m_settings.horzHeaderCount = static_cast<int>(SnapshotColumns::ColumnCount);
+
+		m_settings.store();
+	}
+
+	void SignalSnapshotWidget::showEvent([[maybe_unused]] QShowEvent* event)
+	{
+		if (m_firstShow == false)
+		{
+			return;
+		}
+
+		m_firstShow = false;
+
+		fillSchemas();
+
+		fillSignals();
+
+		return;
+	}
+
+	void SignalSnapshotWidget::keyPressEvent(QKeyEvent* event)
+	{
+		int key = event->key();
+
+		if (key == Qt::Key_Return || key == Qt::Key_Enter || key == Qt::Key_Escape)
+		{
+			event->ignore();
+		}
+		else
+		{
+			QWidget::keyPressEvent(event);
+		}
+
+		return;
+	}
+
+	void SignalSnapshotWidget::timerEvent(QTimerEvent* event)
+	{
+		if (event->timerId() == m_updateStateTimerId)
+		{
+			if (m_buttonFixate->isChecked() == false && m_model->rowCount() > 0)
+			{
+				updateTableItems();
+			}
+		}
+	}
+
+	void SignalSnapshotWidget::schemasUpdated()
+	{
+		// Refresh schemas combo
+		//
+		fillSchemas();
+
+		// Refresh filtered signals list
+		//
+		schemaComboCurrentIndexChanged(0);
+
+		return;
+	}
+
+	void SignalSnapshotWidget::signalsUpdated()
+	{
+		bool emptyModel = m_model->rowCount() == 0;
+
+		// Set new signals to the model
+		//
+		if (specificSignals().empty() == true)
+		{
+			std::vector<AppSignalParam> allSignals = m_appSignalManager->signalList();
+			m_model->setSignals(allSignals);
+		}
+		else
+		{
+			std::vector<AppSignalParam> specSignals = specificSignals();
+			m_model->setSignals(specSignals);
+		}
+
+		// Refresh signals list
+		//
+
+		fillSignals();
+
+		if (emptyModel == true && m_model->rowCount() > 0)
+		{
+			m_tableView->resizeColumnsToContents();
+		}
+
+		return;
+	}
+
+	void SignalSnapshotWidget::headerColumnContextMenuRequested(const QPoint& pos)
+	{
+		QMenu menu(this);
+
+		QList<QAction*> actions;
+
+		std::vector<std::pair<SnapshotColumns, QString>> actionsData;
+		actionsData.reserve(static_cast<int>(SnapshotColumns::ColumnCount));
+
+		SignalSnapshotModel* model = dynamic_cast<SignalSnapshotModel*>(m_tableView->model());
+		if (model == nullptr)
+		{
+			Q_ASSERT(model);
+			return;
+		}
+
+		QStringList columns = model->columnsNames();
+
+		for (int i = 0; i < columns.size(); i++)
+		{
+			actionsData.emplace_back(static_cast<SnapshotColumns>(i), columns[i]);
+		}
+
+		for (std::pair<SnapshotColumns, QString> ad : actionsData)
+		{
+			QAction* action = new QAction(ad.second, this);
+			action->setData(QVariant::fromValue(ad.first));
+			action->setCheckable(true);
+			action->setChecked(!m_tableView->horizontalHeader()->isSectionHidden(static_cast<int>(ad.first)));
+
+			if (m_tableView->horizontalHeader()->count() - m_tableView->horizontalHeader()->hiddenSectionCount() == 1 &&
+				action->isChecked() == true)
+			{
+				action->setEnabled(false); // Impossible to uncheck the last column
+			}
+
+			connect(action, &QAction::toggled, this, &SignalSnapshotWidget::headerColumnToggled);
+
+			actions << action;
+		}
+
+		menu.exec(actions, mapToGlobal(pos), 0, this);
+		return;
+	}
+
+	void SignalSnapshotWidget::headerColumnToggled(bool checked)
+	{
+		QAction* action = dynamic_cast<QAction*>(sender());
+
+		if (action == nullptr)
+		{
+			Q_ASSERT(action);
+			return;
+		}
+
+		int column = action->data().value<int>();
+
+		if (column >= static_cast<int>(SnapshotColumns::ColumnCount))
+		{
+			Q_ASSERT(column < static_cast<int>(SnapshotColumns::ColumnCount));
+			return;
+		}
+
+		if (checked == true)
+		{
+			m_tableView->showColumn(column);
+		}
+		else
+		{
+			m_tableView->hideColumn(column);
+		}
+
+		return;
+	}
+
+	void SignalSnapshotWidget::contextMenuRequested(const QPoint& pos)
+	{
+		Q_UNUSED(pos);
+
+		int row = m_tableView->currentIndex().row();
+		if (row == -1)
+		{
+			return;
+		}
+
+		int rowIndex = m_tableView->currentIndex().row();
+
+		bool found = false;
+
+		const AppSignalParam& s = m_model->signalParam(rowIndex, &found);
+
+		if (found == false)
+		{
+			return;
+		}
+
+		QStringList list;
+		list << s.appSignalId();
+
+		// Check analog format options
+
+		m_formatAutoSelect->setChecked(m_model->analogFormat() == E::AnalogFormat::g_9_or_9e ||
+									   m_model->analogFormat() == E::AnalogFormat::G_9_or_9E);
+		m_formatDecimal->setChecked(m_model->analogFormat() == E::AnalogFormat::f_9);
+		m_formatExponential->setChecked(m_model->analogFormat() == E::AnalogFormat::e_9e ||
+										m_model->analogFormat() == E::AnalogFormat::E_9E);
+
+		m_precisionDefault->setChecked(m_model->analogPrecision() == -1);
+
+		for (int i = 0; i < static_cast<int>(m_precisionActions.size()); i++)
+		{
+			m_precisionActions[i]->setChecked(m_model->analogPrecision() == i);
+		}
+
+		//
+
+		emit signalContextMenu(list, QList<QMenu*>() << &m_formatMenu);
+	}
+
+	void SignalSnapshotWidget::tableViewdoubleClicked(const QModelIndex& index)
+	{
+		Q_UNUSED(index);
+
+		int row = m_tableView->currentIndex().row();
+		if (row == -1)
+		{
+			return;
+		}
+
+		int rowIndex = m_tableView->currentIndex().row();
+
+		bool found = false;
+
+		const AppSignalParam& s = m_model->signalParam(rowIndex, &found);
+
+		if (found == false)
+		{
+			return;
+		}
+
+		QTimer::singleShot(10,
+						   [this, s]
+						   {
+							   emit signalInfo(s.appSignalId());
+						   });
+	}
+
+	void SignalSnapshotWidget::sortIndicatorChanged(int column, Qt::SortOrder order)
+	{
+		m_settings.sortColumn = column;
+		m_settings.sortOrder = order;
+	}
+
+	void SignalSnapshotWidget::typeComboCurrentIndexChanged(int index)
+	{
+		m_storeType = true;
+		m_model->setSignalType(static_cast<SnapshotSignalType>(index));
+
+		fillSignals();
+	}
+
+	void SignalSnapshotWidget::roleComboCurrentIndexChanged(int index)
+	{
+		m_storeRole = true;
+		m_model->setSignalRole(static_cast<SnapshotSignalRole>(index));
+
+		fillSignals();
+	}
+
+	void SignalSnapshotWidget::editMaskReturnPressed()
+	{
+		m_storeMaskData = true;
+		maskChanged(true /*addToCompleter*/);
+
+		fillSignals();
+	}
+
+	void SignalSnapshotWidget::editTagsReturnPressed()
+	{
+		m_storeTags = true;
+
+		tagsChanged();
+
+		fillSignals();
+	}
+
+	void SignalSnapshotWidget::schemaComboCurrentIndexChanged(int /*index)*/)
+	{
+		// Get current schema's App Signals
+		//
+
+		QString currentSchemaStrId;
+		QVariant data = m_schemaCombo->currentData();
+		if (data.isValid() == true)
+		{
+			currentSchemaStrId = data.toString();
+		}
+
+		std::set<QString> appSignals = schemaAppSignals(currentSchemaStrId);
+
+		m_model->setSchemaAppSignals(appSignals);
+
+		fillSignals();
+	}
+
+	void SignalSnapshotWidget::maskTypeComboCurrentIndexChanged(int index)
+	{
+		m_storeMaskData = true;
+
+		m_model->setMaskType(static_cast<SnapshotMaskType>(index));
+
+		QString mask = m_editMask->text();
+		if (mask.isEmpty() == true)
+		{
+			return;
+		}
+
+		fillSignals();
+	}
+
+	void SignalSnapshotWidget::serverComboIndexChanged(int /*index*/)
+	{
+		m_model->setDataServiceId(m_serverCombo->currentData().toString());
+		fillSignals();
+	}
+
+	void SignalSnapshotWidget::buttonExportClicked()
+	{
+		Q_ASSERT(m_model);
+		if (m_model->rowCount() == 0)
+		{
+			QMessageBox::warning(this, qAppName(), tr("Nothing to export."));
+			return;
+		}
+
+		static QString path{"."};
+		QString fileName = QFileDialog::getSaveFileName(
+			this,
+			tr("Save File"),
+			path + QDir::separator() + "untitled.pdf",
+			tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+
+		if (fileName.isEmpty() == true)
+		{
+			return;
+		}
+		path = QFileInfo(fileName).path(); // store path for next time
+
+		QFileInfo fileInfo(fileName);
+		QString extension = fileInfo.completeSuffix();
+
+		if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
+		{
+			SnapshotExportPrint ep(m_projectName, m_equipmentId, this);
+			ep.exportTable(m_tableView, fileName, extension);
+
+			return;
+		}
+
+		QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
+		return;
+	}
+
+	void SignalSnapshotWidget::buttonPrintClicked()
+	{
+		SnapshotExportPrint ep(m_projectName, m_equipmentId, this);
+		ep.printTable(m_tableView);
+	}
+
+	void SignalSnapshotWidget::buttonChooseTagsClicked()
+	{
+		QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
+
+		int width = QSettings().value("SignalSnapshotWidget/tagsSelectorDialog/width", 340).toInt();
+		int height = QSettings().value("SignalSnapshotWidget/tagsSelectorDialog/height", 400).toInt();
+		tagsSelectorDialog.resize(width, height);
+
+		ChooseTagsWidget te{m_appSignalManager->tags(), ' ', this};
+		te.setText(m_editTags->text());
+
+		connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
+		connect(&te, &ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+
+		QHBoxLayout l;
+		l.addWidget(&te);
+		tagsSelectorDialog.setLayout(&l);
+
+		if (tagsSelectorDialog.exec() == QDialog::Accepted)
+		{
+			m_editTags->setText(te.text());
+
+			m_storeTags = true;
+
+			tagsChanged();
+
+			fillSignals();
+		}
+
+		QSettings().setValue("SignalSnapshotWidget/tagsSelectorDialog/width", tagsSelectorDialog.width());
+		QSettings().setValue("SignalSnapshotWidget/tagsSelectorDialog/height", tagsSelectorDialog.height());
+	}
+
+	void SignalSnapshotWidget::buttonClearFilterClicked()
+	{
+		// Type
+		//
+		m_typeCombo->blockSignals(true);
+		m_typeCombo->setCurrentIndex(static_cast<int>(SnapshotSignalType::Any));
+		m_typeCombo->blockSignals(false);
+		m_model->setSignalType(SnapshotSignalType::Any);
+
+		// Role
+		//
+		m_roleCombo->blockSignals(true);
+		m_roleCombo->setCurrentIndex(static_cast<int>(SnapshotSignalRole::Any));
+		m_roleCombo->blockSignals(false);
+		m_model->setSignalRole(SnapshotSignalRole::Any);
+
+		// Mask
+		//
+		m_editMask->blockSignals(true);
+		m_editMask->clear();
+		m_editMask->blockSignals(false);
+
+		m_maskTypeCombo->blockSignals(true); // Block to prevent signals from updating automatically
+		m_maskTypeCombo->setCurrentIndex(static_cast<int>(SnapshotMaskType::All));
+		m_maskTypeCombo->blockSignals(false);
+
+		m_model->setMasks({});
+
+		// Server
+		//
+		m_serverCombo->blockSignals(true);
+		m_serverCombo->setCurrentIndex(0);
+		m_serverCombo->blockSignals(false);
+		m_model->setDataServiceId({});
+
+		// Schema
+		//
+		m_schemaCombo->blockSignals(true);
+		m_schemaCombo->setCurrentIndex(0);
+		m_schemaCombo->blockSignals(false);
+		m_model->setSchemaAppSignals({});
+
+		// Tags
+		//
+		m_editTags->blockSignals(true);
+		m_editTags->clear();
+		m_editTags->blockSignals(false);
+
+		m_model->setTags({});
+
+		//
+		fillSignals();
+	}
+
+	void SignalSnapshotWidget::createControls()
+	{
+		// Filter layout
+
+		QGridLayout* filterLayout = new QGridLayout();
+
+		int row = 0;
+		int col = 0;
+
+		filterLayout->addWidget(new QLabel(tr("Type")), row, col++);
+
+		{
+			QHBoxLayout* typeRoleLayout = new QHBoxLayout();
+			typeRoleLayout->setContentsMargins(0, 0, 0, 0);
+
+			m_typeCombo = new QComboBox();
+			connect(m_typeCombo,
+					static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+					this,
+					&SignalSnapshotWidget::typeComboCurrentIndexChanged);
+			typeRoleLayout->addWidget(m_typeCombo);
+			m_typeCombo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+			typeRoleLayout->addWidget(new QLabel(tr("Role")));
+
+			m_roleCombo = new QComboBox();
+			connect(m_roleCombo,
+					static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+					this,
+					&SignalSnapshotWidget::roleComboCurrentIndexChanged);
+			typeRoleLayout->addWidget(m_roleCombo);
+			m_roleCombo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+			filterLayout->addLayout(typeRoleLayout, row, col++);
+		}
+
+		// Mask
+		//
+		filterLayout->addWidget(new QLabel(tr("Mask")), row, col++);
+
+		// Mask field and type combo
+		{
+			QHBoxLayout* maskLayout = new QHBoxLayout();
+			maskLayout->setContentsMargins(0, 0, 0, 0);
+
+			m_editMask = new QLineEdit();
+			connect(m_editMask, &QLineEdit::returnPressed, this, &SignalSnapshotWidget::editMaskReturnPressed);
+			maskLayout->addWidget(m_editMask);
+			m_editMask->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+
+			m_maskTypeCombo = new QComboBox();
+			connect(m_maskTypeCombo,
+					static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+					this,
+					&SignalSnapshotWidget::maskTypeComboCurrentIndexChanged);
+			maskLayout->addWidget(m_maskTypeCombo);
+
+			filterLayout->addLayout(maskLayout, row, col++);
+		}
+
+		// Server
+		//
+		filterLayout->addWidget(new QLabel(tr("Server")), row, col++);
+
+		// Server Combo
+		//
+		m_serverCombo = new QComboBox();
+		connect(m_serverCombo,
+				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+				this,
+				&SignalSnapshotWidget::serverComboIndexChanged);
+		filterLayout->addWidget(m_serverCombo, row, col++);
+		m_serverCombo->setMinimumContentsLength(20);
+
+		row++;
+		col = 0;
+
+		// Schema
+		//
+		filterLayout->addWidget(new QLabel(tr("Schema")), row, col++);
+
+		// Schema Combo
+		//
+		m_schemaCombo = new QComboBox();
+		connect(m_schemaCombo,
+				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+				this,
+				&SignalSnapshotWidget::schemaComboCurrentIndexChanged);
+		filterLayout->addWidget(m_schemaCombo, row, col++);
+		m_schemaCombo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+		m_schemaCombo->setMaximumWidth(QFontMetrics(m_schemaCombo->font()).horizontalAdvance(QString(60, '0')));
+
+		// Tags
+		//
+		filterLayout->addWidget(new QLabel(tr("Tags")), row, col++);
+
+		// Tags field and button
+		//
+		{
+			QHBoxLayout* tagsLayout = new QHBoxLayout();
+			tagsLayout->setSpacing(0);
+			tagsLayout->setContentsMargins(0, 0, 0, 0);
+
+			m_editTags = new QLineEdit();
+			connect(m_editTags, &QLineEdit::returnPressed, this, &SignalSnapshotWidget::editTagsReturnPressed);
+			tagsLayout->addWidget(m_editTags);
+			m_editTags->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+
+			m_buttonChooseTags = new QToolButton();
+			connect(m_buttonChooseTags, &QToolButton::clicked, this, &SignalSnapshotWidget::buttonChooseTagsClicked);
+			m_buttonChooseTags->setText("...");
+			tagsLayout->addWidget(m_buttonChooseTags);
+
+			filterLayout->addLayout(tagsLayout, row, col++);
+		}
+
+		col++;
+
+		{
+			m_clearFilterButton = new QPushButton(tr("Clear Filter"));
+			m_clearFilterButton->setAutoDefault(false);
+			filterLayout->addWidget(m_clearFilterButton, row, col++);
+			connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalSnapshotWidget::buttonClearFilterClicked);
+		}
+
+		filterLayout->setSpacing(4);
+
+		filterLayout->setColumnStretch(0, 0);
+		filterLayout->setColumnStretch(1, 0);
+		filterLayout->setColumnStretch(2, 0);
+		filterLayout->setColumnStretch(3, 2);
+		filterLayout->setColumnStretch(4, 0);
+		filterLayout->setColumnStretch(5, 0);
+
+		// Export/Print/Fixate
+
+		QHBoxLayout* exPrintLayout = new QHBoxLayout();
+
+		QPushButton* b = new QPushButton(tr("Export..."));
+		b->setAutoDefault(false);
+		connect(b, &QPushButton::clicked, this, &SignalSnapshotWidget::buttonExportClicked);
+		exPrintLayout->addWidget(b);
+
+		b = new QPushButton(tr("Print..."));
+		b->setAutoDefault(false);
+		connect(b, &QPushButton::clicked, this, &SignalSnapshotWidget::buttonPrintClicked);
+		exPrintLayout->addWidget(b);
+
+		exPrintLayout->addStretch();
+
+		m_buttonFixate = new QPushButton(tr("Fixate"));
+		m_buttonFixate->setAutoDefault(false);
+		m_buttonFixate->setCheckable(true);
+		exPrintLayout->addWidget(m_buttonFixate);
+
+		// Table
+
+		m_tableView = new SnapshotTableView();
+		connect(m_tableView, &QTableView::doubleClicked, this, &SignalSnapshotWidget::tableViewdoubleClicked);
+
+		// Main layout
+
+		QVBoxLayout* mainLayout = new QVBoxLayout();
+
+		mainLayout->addLayout(filterLayout);
+		mainLayout->addLayout(exPrintLayout);
+		mainLayout->addWidget(m_tableView);
+
+		setLayout(mainLayout);
+
+		return;
+	}
+
+	void SignalSnapshotWidget::createMenus()
+	{
+		// Analog Format and precision
+
+		QMenu* menuFormat = m_formatMenu.addMenu(tr("Format"));
+
+		m_formatAutoSelect = new QAction(tr("Auto-select"), this);
+		m_formatAutoSelect->setCheckable(true);
+		connect(m_formatAutoSelect,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					m_model->setAnalogFormat(E::AnalogFormat::g_9_or_9e);
+					updateTableItems();
+				});
+		menuFormat->addAction(m_formatAutoSelect);
+
+		m_formatDecimal = new QAction(tr("Decimal (as [-]9.9)"), this);
+		m_formatDecimal->setCheckable(true);
+		connect(m_formatDecimal,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					m_model->setAnalogFormat(E::AnalogFormat::f_9);
+					updateTableItems();
+				});
+		menuFormat->addAction(m_formatDecimal);
+
+		m_formatExponential = new QAction(tr("Exponential (as [-]9.9e[+|-]999)"), this);
+		m_formatExponential->setCheckable(true);
+		connect(m_formatExponential,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					m_model->setAnalogFormat(E::AnalogFormat::e_9e);
+					updateTableItems();
+				});
+		menuFormat->addAction(m_formatExponential);
+
+		menuFormat->addSeparator();
+
+		m_precisionDefault = new QAction(tr("Default"), this);
+		m_precisionDefault->setCheckable(true);
+		connect(m_precisionDefault,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					m_model->setAnalogPrecision(-1);
+					updateTableItems();
+				});
+		menuFormat->addAction(m_precisionDefault);
+
+		for (int i = 0; i < 10; i++)
+		{
+			QAction* a = new QAction(tr(".%1").arg(QString().fill('0', i)), this);
+			a->setCheckable(true);
+			connect(a,
+					&QAction::triggered,
+					this,
+					[this, i]()
+					{
+						m_model->setAnalogPrecision(i);
+						updateTableItems();
+					});
+			m_precisionActions << a;
+			menuFormat->addAction(a);
+		}
+
+		return;
+	}
+
+	void SignalSnapshotWidget::initFiltersView()
+	{
+		// Type combo setup
+		//
+		m_typeCombo->blockSignals(true);
+		m_typeCombo->addItem(tr("Any"), static_cast<int>(SnapshotSignalType::Any));
+		m_typeCombo->addItem(tr("Analog"), static_cast<int>(SnapshotSignalType::Analog));
+		m_typeCombo->addItem(tr("Discrete"), static_cast<int>(SnapshotSignalType::Discrete));
+		m_typeCombo->setCurrentIndex(static_cast<int>(m_storedType));
+		m_typeCombo->blockSignals(false);
+
+		// Role combo setup
+		//
+		m_roleCombo->blockSignals(true);
+		m_roleCombo->addItem(tr("Any"), static_cast<int>(SnapshotSignalRole::Any));
+		m_roleCombo->addItem(tr("Input"), static_cast<int>(SnapshotSignalRole::Input));
+		m_roleCombo->addItem(tr("Output"), static_cast<int>(SnapshotSignalRole::Output));
+		m_roleCombo->addItem(tr("Internal"), static_cast<int>(SnapshotSignalRole::Internal));
+		m_roleCombo->addItem(tr("Tunable"), static_cast<int>(SnapshotSignalRole::Tunable));
+		m_roleCombo->setCurrentIndex(static_cast<int>(m_storedRole));
+		m_roleCombo->blockSignals(false);
+
+		// Masks setup
+		//
+		m_maskCompleter = new QCompleter(m_settings.maskList, this);
+		m_maskCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+
+		m_editMask->setCompleter(m_maskCompleter);
+		m_editMask->setToolTip(m_maskHelp);
+
+		m_maskTypeCombo->blockSignals(true);
+		m_maskTypeCombo->addItem(tr("All"));
+		m_maskTypeCombo->addItem(tr("AppSignalID"));
+		m_maskTypeCombo->addItem(tr("CustomAppSignalID"));
+		m_maskTypeCombo->addItem(tr("EquipmentID"));
+		m_maskTypeCombo->addItem(tr("LmEquipmentID"));
+		m_maskTypeCombo->setCurrentIndex(static_cast<int>(m_storedMaskType));
+		m_maskTypeCombo->blockSignals(false);
+
+		connect(m_editMask,
+				&QLineEdit::textEdited,
+				[this]()
+				{
+					m_maskCompleter->complete();
+				});
+		connect(m_maskCompleter,
+				static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::highlighted),
+				m_editMask,
+				&QLineEdit::setText);
+
+		// Servers setup
+		//
+		m_serverCombo->blockSignals(true);
+		m_serverCombo->addItem(tr("All Servers"), QString());
+		for (const auto& ads : m_appDataServices)
+		{
+			m_serverCombo->addItem(ads.shortenId, ads.equipmentId);
+		}
+		if (m_appDataServices.empty() == true)
+		{
+			m_serverCombo->setEnabled(false);
+		}
+		m_serverCombo->blockSignals(false);
+
+		// Tags setup
+		//
+		m_tagsCompleter = new QCompleter(m_storedTags, this);
+		m_tagsCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+
+		m_editTags->setCompleter(m_tagsCompleter);
+		m_editTags->setToolTip(m_tagsHelp);
+
+		connect(m_editTags,
+				&QLineEdit::textEdited,
+				[this]()
+				{
+					m_tagsCompleter->complete();
+				});
+		connect(m_tagsCompleter,
+				static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::highlighted),
+				m_editTags,
+				&QLineEdit::setText);
+	}
+
+	void SignalSnapshotWidget::initSignalsView()
+	{
+		// create models
+		//
+		m_model = new SignalSnapshotModel(m_appSignalManager, m_signalDataServer, this);
+
+		std::vector<AppSignalParam> allSignals = m_appSignalManager->signalList();
+		m_model->setSignals(allSignals);
+
+		m_model->setSignalType(static_cast<SnapshotSignalType>(m_storedType));
+		m_model->setSignalRole(static_cast<SnapshotSignalRole>(m_storedRole));
+		m_model->setMaskType(static_cast<SnapshotMaskType>(m_storedMaskType));
+
+		// Table view setup
+		//
+
+		m_tableView->setModel(m_model);
+		m_tableView->verticalHeader()->hide();
+		m_tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+		m_tableView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
+		m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+		m_tableView->horizontalHeader()->setStretchLastSection(false);
+		m_tableView->setGridStyle(Qt::PenStyle::NoPen);
+		m_tableView->setSortingEnabled(true);
+		m_tableView->setWordWrap(false);
+
+		int fontHeight = fontMetrics().height() + 4;
+
+		QHeaderView* verticalHeader = m_tableView->verticalHeader();
+		verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
+		verticalHeader->setDefaultSectionSize(fontHeight);
+
+		connect(m_tableView->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &SignalSnapshotWidget::sortIndicatorChanged);
+
+		m_tableView->horizontalHeader()->setHighlightSections(false);
+		m_tableView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+
+		connect(m_tableView->horizontalHeader(),
+				&QWidget::customContextMenuRequested,
+				this,
+				&SignalSnapshotWidget::headerColumnContextMenuRequested);
+
+		m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(m_tableView, &QTreeWidget::customContextMenuRequested, this, &SignalSnapshotWidget::contextMenuRequested);
+
+		if (m_settings.horzHeader.isEmpty() == true || m_settings.horzHeaderCount != static_cast<int>(SnapshotColumns::ColumnCount))
+		{
+			// First time? Set what is should be hidden by default
+			//
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::EquipmentID));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::LmEquipmentID));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::AppSignalID));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Type));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Tags));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::SystemTime));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::LocalTime));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::PlantTime));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Valid));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::StateAvailable));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Simulated));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Blocked));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Mismatch));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::OutOfLimits));
+		}
+		else
+		{
+			m_tableView->horizontalHeader()->restoreState(m_settings.horzHeader);
+		}
+	}
+
+	void SignalSnapshotWidget::fillSchemas()
+	{
+		m_schemaCombo->blockSignals(true);
+
+		// Fill schemas
+		//
+		QString currentStrId;
+
+		QVariant data = m_schemaCombo->currentData();
+		if (data.isValid() == true)
+		{
+			currentStrId = data.toString();
+		}
+
+		m_schemaCombo->clear();
+
+		m_schemaCombo->addItem(tr("All Schemas"), "");
+
+		int selectedIndex = -1;
+
+		std::vector<VFrame30::SchemaDetails> details = schemasDetails();
+
+		for (const VFrame30::SchemaDetails& schema : details)
+		{
+			m_schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, schema.m_schemaId);
+
+			if (currentStrId == schema.m_schemaId)
+			{
+				selectedIndex = m_schemaCombo->count() - 1;
+			}
+		}
+
+		if (selectedIndex != -1)
+		{
+			m_schemaCombo->setCurrentIndex(selectedIndex);
+		}
+
+		m_schemaCombo->blockSignals(false);
+	}
+
+	void SignalSnapshotWidget::fillSignals()
+	{
+		bool modelWasEmpty = m_model->rowCount() == 0;
+
+		m_model->fillSignals();
+
+		m_tableView->sortByColumn(m_settings.sortColumn, m_settings.sortOrder);
+
+		if (modelWasEmpty == true && m_model->rowCount() > 0)
+		{
+			m_tableView->resizeColumnsToContents();
+		}
+	}
+
+	void SignalSnapshotWidget::updateTableItems()
+	{
+		// Update only visible dynamic items
+		//
+		int from = m_tableView->rowAt(0);
+
+		int to = m_tableView->rowAt(m_tableView->height() - m_tableView->horizontalHeader()->height());
+
+		if (from == -1)
+		{
+			from = 0;
+		}
+
+		if (to == -1)
+		{
+			to = m_model->rowCount() - 1;
+		}
+
+		// Update signal states
+		//
+		m_model->updateStates(from, to);
+
+		// Redraw visible table items
+		//
+		for (int col = 0; col < m_model->columnCount(); col++)
+		{
+			if (col >= static_cast<int>(SnapshotColumns::SystemTime))
+			{
+				for (int row = from; row <= to; row++)
+				{
+					m_tableView->update(m_model->index(row, col));
+				}
+			}
+		}
+
+		return;
+	}
+
+	void SignalSnapshotWidget::maskChanged(bool addToCompleter)
+	{
+		QString maskText = m_editMask->text().trimmed();
+
+		maskText.replace(' ', ';');
+
+		QStringList masks;
+
+		if (maskText.isEmpty() == false)
+		{
+			masks = maskText.split(';', Qt::SkipEmptyParts);
+
+			if (addToCompleter == true)
+			{
+				for (const QString& mask : masks)
+				{
+					// Save filter history
+					//
+					if (m_settings.maskList.contains(mask) == false)
+					{
+						m_settings.maskList.append(mask);
+
+						QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_maskCompleter->model());
+						if (completerModel == nullptr)
+						{
+							Q_ASSERT(completerModel);
+							return;
+						}
+
+						completerModel->setStringList(m_settings.maskList);
+					}
+				}
+			}
+		}
+
+		m_model->setMasks(masks);
+	}
+
+	void SignalSnapshotWidget::tagsChanged()
+	{
+		QString tagsText = m_editTags->text().trimmed();
+		tagsText.replace(' ', ';');
+
+		QStringList tags;
+
+		if (m_storeTags = true && tagsText.isEmpty() == false)
+		{
+			tags = tagsText.split(';', Qt::SkipEmptyParts);
+
+			for (const QString& tag : tags)
+			{
+				// Save filter history
+				//
+				if (m_storedTags.contains(tag) == false)
+				{
+					m_storedTags.append(tag);
+
+					QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_tagsCompleter->model());
+					if (completerModel == nullptr)
+					{
+						Q_ASSERT(completerModel);
+						return;
+					}
+
+					completerModel->setStringList(m_storedTags);
+				}
+			}
+		}
+
+		m_model->setTags(tags);
+	}
+} // namespace SchemaClientLib

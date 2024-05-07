@@ -6,6 +6,7 @@
 
 class QWidget;
 class QTableView;
+class QTextCursor;
 
 namespace UiLib
 {

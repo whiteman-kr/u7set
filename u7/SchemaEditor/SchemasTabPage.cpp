@@ -2,7 +2,7 @@
 #include "GlobalMessanger.h"
 #include "SchemaControlTabPage.h"
 #include "EditSchemaTabPage.h"
-#include "../lib/Ui/TabWidgetEx.h"
+#include <UiLib/TabWidgetEx.h>
 
 
 //
@@ -24,7 +24,7 @@ SchemasTabPage::SchemasTabPage(DbController* dbc,
 	Q_ASSERT(m_statusBarLayerLabel);
 	Q_ASSERT(m_statusBarZoomLabel);
 
-	m_tabWidget = new TabWidgetEx{this};
+	m_tabWidget = new UiLib::TabWidgetEx{this};
 
 	// --
 	//

@@ -15,8 +15,10 @@ set(TARGET UiLib)
 qt_add_library(${TARGET} STATIC
 	./include/UiLib/CodeEditor.h
 	./include/UiLib/ExportPrint.h
+	./include/UiLib/TabWidgetEx.h
 	CodeEditor.cpp
 	ExportPrint.cpp
+	TabWidgetEx.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -27,15 +29,16 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QApplication>
 	<QFile>
 	<QMessageBox>
-	<QObject>
+	<QMouseEvent>
 	<QPageSetupDialog>
 	<QPainter>
 	<QPrintDialog>
 	<QPrinter>
 	<QProgressDialog>
-	<QRegularExpression>
 	<QTableView>
+	<QTabWidget>
 	<QTextCursor>
+	<QTextDocument>
 	<QTextDocumentFragment>
 	<QTextDocumentWriter>
 	<QTimer>

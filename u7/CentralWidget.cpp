@@ -3,12 +3,12 @@
 #include "UploadTabPage.h"
 
 CentralWidget::CentralWidget(QWidget* parent) :
-	TabWidgetEx(parent)
+	UiLib::TabWidgetEx(parent)
 {
 	QSize sz = fontMetrics().size(Qt::TextSingleLine, "APPLICATION LOGIC");
 	tabBar()->setStyleSheet(QString("QTabBar::tab{ min-width: %1px;}").arg(sz.width()));
 
-	tabBarEx()->setTopStyle(TabBarEx::Style::TopLineRoundedAlways);
+	tabBarEx()->setTopStyle(UiLib::TabBarEx::Style::TopLineRoundedAlways);
 
 	setTabsClosable(false);
 	setMovable(false);
