@@ -72,8 +72,6 @@ set (U7_SOURCES
 	AppSignalPropertyManager.h
 	AppSignalSetProvider.cpp
 	AppSignalSetProvider.h
-	AppSignalListStorage.cpp
-	AppSignalListStorage.h
 	BuildTabPage.cpp
 	BuildTabPage.h
 	BusStorage.cpp

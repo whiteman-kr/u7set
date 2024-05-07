@@ -57,7 +57,7 @@ namespace Builder
 		result &= initSchemaTags();
 		result &= initTuningSources();
 
-		result &= writeAppSignalLists(settings->appSignalLists);
+		result &= writeAppSignalLists(settings->appSignalListIds, settings->appSignalListMasks, settings->appSignalListTags);
 
 		// Add links to schema files (previously written) via m_cfgXml->addLinkToFile(...)
 		//

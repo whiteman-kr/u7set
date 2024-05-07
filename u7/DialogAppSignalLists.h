@@ -1,43 +1,20 @@
 #pragma once
 
-#include "../AppSignalLib/ISignalManager.h"
-
 namespace AppSignalLists
 {
 	class AppSignalList;
 	class AppSignalListWidget;
 } // namespace AppSignalLists
 
-namespace ExtWidgets
+class IdePropertyEditor;
+
+namespace Builder
 {
-	class PropertyEditor;
+	class AppSignalListsProvider;
+	class AppSignalListStorage;
 }
 
-class AppSignalListStorage;
-class AppSignalSetProvider;
 class DbController;
-
-
-class AppSignalListsProvider : public ISignalManager
-{
-public:
-	AppSignalListsProvider() = delete;
-	AppSignalListsProvider(AppSignalSetProvider* signalSetProvider);
-
-	virtual int signalsCount() const override;
-	virtual std::vector<Hash> signalHashes() const override;
-	virtual std::vector<AppSignalParam> signalList() const override;
-
-	virtual bool signalExists(Hash hash) const override;
-	virtual bool signalExists(const QString& appSignalId) const override;
-	virtual bool signalsExist(const QStringList& signalIds) const override;
-
-	virtual AppSignalParam signalParam(Hash signalHash, bool* found) const override;
-	virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
-
-private:
-	AppSignalSetProvider* m_signalSetProvider = nullptr;
-};
 
 class DialogAppSignalLists : public QDialog
 {
@@ -103,7 +80,7 @@ private:
 
 	QTreeWidget* m_listsTree = nullptr;
 
-	ExtWidgets::PropertyEditor* m_listPropertyEditor = nullptr;
+	IdePropertyEditor* m_listPropertyEditor = nullptr;
 	AppSignalLists::AppSignalListWidget* m_signalListWidget = nullptr;
 
 	QSplitter* m_splitter = nullptr;
@@ -114,8 +91,8 @@ private:
 
 	DbController* m_db = nullptr;
 
-	std::unique_ptr<AppSignalListsProvider> m_signalProvider;
-	std::unique_ptr<AppSignalListStorage> m_lists;
+	std::unique_ptr<Builder::AppSignalListsProvider> m_signalProvider;
+	std::unique_ptr<Builder::AppSignalListStorage> m_lists;
 
 	QMenu* m_popupMenu = nullptr;
 	QAction* m_addAction = nullptr;

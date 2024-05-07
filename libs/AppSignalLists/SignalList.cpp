@@ -6,7 +6,7 @@ namespace AppSignalLists
 {
 	const char* AppSignalList::mimeType = "application/x-radiyappsignallist";
 
-	AppSignalListItem::AppSignalListItem(const QString& appSignalId):
+	AppSignalListItem::AppSignalListItem(const QString& appSignalId) :
 		m_appSignalId(appSignalId),
 		m_appSignalHash(::calcHash(appSignalId))
 	{
@@ -64,7 +64,8 @@ namespace AppSignalLists
 								   AppSignalList::signalType,
 								   AppSignalList::setSignalType);
 		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_ID, true, AppSignalList::id, AppSignalList::setId);
-		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Tags, true, AppSignalList::tags, AppSignalList::setTags);
+		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Tags, true, AppSignalList::tags, AppSignalList::setTags)
+			->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 		ADD_PROPERTY_GETTER_SETTER(QString,
 								   AppSignalLists::prop_CustomAppSignalMasks,
@@ -87,16 +88,18 @@ namespace AppSignalLists
 								   AppSignalList::setEquipmentIDMask)
 			->setCategory("Masks");
 
-		ADD_PROPERTY_GETTER_SETTER(QString,
-								   AppSignalLists::prop_AppSignalTags,
-								   true,
-								   AppSignalList::appSignalTags,
-								   AppSignalList::setAppSignalTags)
-			->setCategory("Masks");
+		auto tagsProperty = ADD_PROPERTY_GETTER_SETTER(QString,
+													   AppSignalLists::prop_AppSignalTags,
+													   true,
+													   AppSignalList::appSignalTags,
+													   AppSignalList::setAppSignalTags);
+		tagsProperty->setCategory("Masks");
+		tagsProperty->setSpecificEditor(E::PropertySpecificEditor::Tags);
+
 
 		return;
 	}
-	
+
 	void AppSignalList::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
@@ -105,7 +108,7 @@ namespace AppSignalLists
 
 		::Proto::AppSignalList* appSignalList = message->MutableExtension(::Proto::appSignalList);
 
-        Proto::Write(appSignalList->mutable_uuid(), uuid());
+		Proto::Write(appSignalList->mutable_uuid(), uuid());
 		appSignalList->set_id(id().toUtf8());
 		appSignalList->set_caption(caption().toUtf8());
 		appSignalList->set_signaltype(static_cast<int>(signalType()));
@@ -116,7 +119,7 @@ namespace AppSignalLists
 		appSignalList->set_appsignalidmasks(appSignalIDMask().toUtf8());
 		appSignalList->set_appsignaltags(appSignalTags().toUtf8());
 
-		for (const AppSignalListItem& signal: m_items)
+		for (const AppSignalListItem& signal : m_items)
 		{
 			::Proto::AppSignalListSignal* lsi = appSignalList->add_listsignals();
 
@@ -141,7 +144,7 @@ namespace AppSignalLists
 
 		const ::Proto::AppSignalList& appSignalList = message.GetExtension(::Proto::appSignalList);
 
-        setUuid(Proto::Read(appSignalList.uuid()));
+		setUuid(Proto::Read(appSignalList.uuid()));
 		setId(QString::fromStdString(appSignalList.id()));
 		setCaption(QString::fromStdString(appSignalList.caption()));
 		setSignalType(static_cast<SignalType>(appSignalList.signaltype()));
@@ -358,7 +361,12 @@ namespace AppSignalLists
 	const AppSignalListItem& AppSignalList::operator[](Hash hash) const
 	{
 		static AppSignalListItem err;
-		auto it = std::find_if(m_items.begin(), m_items.end(), [hash](const auto& item) {return item.appSignalHash() == hash; });
+		auto it = std::find_if(m_items.begin(),
+							   m_items.end(),
+							   [hash](const auto& item)
+							   {
+								   return item.appSignalHash() == hash;
+							   });
 		if (it == m_items.end())
 		{
 			Q_ASSERT(false);
@@ -370,7 +378,12 @@ namespace AppSignalLists
 	AppSignalListItem& AppSignalList::operator[](Hash hash)
 	{
 		static AppSignalListItem err;
-		auto it = std::find_if(m_items.begin(), m_items.end(), [hash](const auto& item) {return item.appSignalHash() == hash; });
+		auto it = std::find_if(m_items.begin(),
+							   m_items.end(),
+							   [hash](const auto& item)
+							   {
+								   return item.appSignalHash() == hash;
+							   });
 		if (it == m_items.end())
 		{
 			Q_ASSERT(false);
@@ -381,13 +394,23 @@ namespace AppSignalLists
 
 	bool AppSignalList::itemExists(Hash hash) const
 	{
-		auto it = std::find_if(m_items.begin(), m_items.end(), [hash](const auto& item) {return item.appSignalHash() == hash; });
+		auto it = std::find_if(m_items.begin(),
+							   m_items.end(),
+							   [hash](const auto& item)
+							   {
+								   return item.appSignalHash() == hash;
+							   });
 		return it != m_items.end();
 	}
 
 	int AppSignalList::itemIndex(Hash hash) const
 	{
-		auto it = std::find_if(m_items.begin(), m_items.end(), [hash](const auto& item) {return item.appSignalHash() == hash; });
+		auto it = std::find_if(m_items.begin(),
+							   m_items.end(),
+							   [hash](const auto& item)
+							   {
+								   return item.appSignalHash() == hash;
+							   });
 		if (it == m_items.end())
 		{
 			Q_ASSERT(false);
@@ -414,7 +437,12 @@ namespace AppSignalLists
 
 	bool AppSignalList::remove(Hash hash)
 	{
-		auto it = std::find_if(m_items.begin(), m_items.end(), [hash](const auto& item) {return item.appSignalHash() == hash; });
+		auto it = std::find_if(m_items.begin(),
+							   m_items.end(),
+							   [hash](const auto& item)
+							   {
+								   return item.appSignalHash() == hash;
+							   });
 		if (it == m_items.end())
 		{
 			Q_ASSERT(false);
@@ -424,34 +452,34 @@ namespace AppSignalLists
 		return true;
 	}
 
-	bool AppSignalList::match(const AppSignalParam& param) const
+	bool AppSignalList::appSignalMatch(const AppSignalParam& asp) const
 	{
-		if (itemExists(param.hash()) == true)
+		if (itemExists(asp.hash()) == true)
 		{
 			return true;
 		}
 
-		if (signalType() == AppSignalList::SignalType::Analog && param.isAnalog() == false)
+		if (signalType() == AppSignalList::SignalType::Analog && asp.isAnalog() == false)
 		{
 			return false;
 		}
 
-		if (signalType() == AppSignalList::SignalType::Discrete && param.isDiscrete() == false)
+		if (signalType() == AppSignalList::SignalType::Discrete && asp.isDiscrete() == false)
 		{
 			return false;
 		}
 
-		if (processMaskList(param.lmEquipmentId(), m_cachedEquipmentIDMasks) == false)
+		if (processMaskList(asp.lmEquipmentId(), m_cachedEquipmentIDMasks) == false)
 		{
 			return false;
 		}
 
-		if (processMaskList(param.appSignalId(), m_cachedAppSignalIDMasks) == false)
+		if (processMaskList(asp.appSignalId(), m_cachedAppSignalIDMasks) == false)
 		{
 			return false;
 		}
 
-		if (processMaskList(param.customSignalId(), m_cachedCustomAppSignalIDMasks) == false)
+		if (processMaskList(asp.customSignalId(), m_cachedCustomAppSignalIDMasks) == false)
 		{
 			return false;
 		}
@@ -460,11 +488,11 @@ namespace AppSignalLists
 		{
 			bool tagsFound = false;
 
-			auto objectTags = param.tags();
+			const auto& objectTagsSet = asp.tags();
 
 			for (const QString& tag : m_cachedAppSignalTags)
 			{
-				if (objectTags.find(tag) != objectTags.end())
+				if (objectTagsSet.find(tag) != objectTagsSet.end())
 				{
 					tagsFound = true;
 					break;
@@ -479,6 +507,39 @@ namespace AppSignalLists
 
 		return true;
 	}
+
+	bool AppSignalList::listMatch(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags) 
+	{
+		if (std::find(appSignalListIds.begin(), appSignalListIds.end(), id()) != appSignalListIds.end())
+		{
+			// Filter by lists
+			//
+			return true;
+		}
+
+		// Filter by masks
+		//
+		if (std::find_if(appSignalListMasks.begin(),
+						 appSignalListMasks.end(),
+						 [this](const QString& mask)
+						 {
+							 QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(mask));
+							 auto matchResult = rx.match(id());
+							 return matchResult.hasMatch() == true;
+						 }) != appSignalListMasks.end())
+		{
+			return true;
+		}
+
+		// Filter by tags
+		//
+		if (hasAnyTag(appSignalListTags) == true)
+		{
+			return true;
+		}
+
+		return false;
+	}	
 
 	bool AppSignalList::processMaskList(const QString& s, const QStringList& masks)
 	{
@@ -551,4 +612,4 @@ namespace AppSignalLists
 
 		return result;
 	}
-}
+} // namespace AppSignalLists

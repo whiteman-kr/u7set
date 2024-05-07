@@ -65,6 +65,8 @@ qt_add_library(${TARGET} STATIC
 	AppLogicCompiler.h
 	AppSignalProperties.cpp
 	AppSignalProperties.h
+	AppSignalListStorage.cpp
+	AppSignalListStorage.h
 	ArchivingServiceCfgGenerator.cpp
 	ArchivingServiceCfgGenerator.h
 	BdfFile.cpp

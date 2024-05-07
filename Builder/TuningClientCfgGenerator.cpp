@@ -74,7 +74,7 @@ namespace Builder
 			return result;
 		}
 
-		result &= writeAppSignalLists(settings->appSignalLists);
+		result &= writeAppSignalLists(settings->appSignalListIds, settings->appSignalListMasks, settings->appSignalListTags);
 
 		// Generate tuning signals
 		//

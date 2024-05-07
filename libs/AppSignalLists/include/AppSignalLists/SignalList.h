@@ -119,7 +119,13 @@ namespace AppSignalLists
 
 		//
 
-		bool match(const AppSignalParam& param) const;
+		// Returns true if application signal matches to this list (mask or items list)
+		//
+		bool appSignalMatch(const AppSignalParam& asp) const;
+
+		// Returns true if list matches to set of IDs, masks or tags
+		//
+		bool listMatch(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);
 
 	private:
 		static bool processMaskList(const QString& s, const QStringList& masks);

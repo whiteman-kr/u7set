@@ -182,7 +182,9 @@ namespace EquipmentPropNames
 	inline const QString START_SCHEMA_ID("StartSchemaID");
 	inline const QString SCHEMA_TAGS("SchemaTags");
 
-	inline const QString APP_SIGNAL_LISTS("AppSignalLists");
+	inline const QString APP_SIGNAL_LIST_IDS("AppSignalListIds");
+	inline const QString APP_SIGNAL_LIST_MASKS("AppSignalListMasks");
+	inline const QString APP_SIGNAL_LIST_TAGS("AppSignalListTags");
 
 	inline const QString FONTS("Fonts");
 
@@ -554,6 +556,7 @@ namespace Directory
 	inline const QString SUBSYSTEMS("Subsystems");
 	inline const QString TESTS("Tests");
 	inline const QString VDUs("VDUs");
+	inline const QString APP_SIGNAL_LISTS("AppSignalLists");
 }
 
 namespace File

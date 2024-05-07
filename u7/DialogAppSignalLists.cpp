@@ -1,119 +1,13 @@
 #include "DialogAppSignalLists.h"
-#include "AppSignalListStorage.h"
-#include "AppSignalSetProvider.h"
+#include "../Builder/AppSignalListStorage.h"
 #include "Settings.h"
 
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../lib/PropertyEditor.h"
+#include "IdePropertyEditor.h"
 #include "../lib/StandardColors.h"
 
 #include <AppSignalLists/SignalListEditor.h>
-
-
-//
-//
-// AppSignalListsProvider - this class is used to provide app signals for editing signal lists
-//
-//
-
-AppSignalListsProvider::AppSignalListsProvider(AppSignalSetProvider* signalSetProvider) :
-	m_signalSetProvider(signalSetProvider)
-{
-	Q_ASSERT(signalSetProvider);
-}
-
-int AppSignalListsProvider::signalsCount() const
-{
-	return m_signalSetProvider->signalCount();
-}
-
-std::vector<Hash> AppSignalListsProvider::signalHashes() const
-{
-	const std::vector<AppSignal*>& sv = m_signalSetProvider->signalsVector();
-
-	std::vector<Hash> result;
-	result.reserve(sv.size());
-
-	for (const auto& v : sv)
-	{
-		result.push_back(::calcHash(v->appSignalID()));
-	}
-	return result;
-}
-
-std::vector<AppSignalParam> AppSignalListsProvider::signalList() const
-{
-	const std::vector<AppSignal*>& sv = m_signalSetProvider->signalsVector();
-
-	std::vector<AppSignalParam> result;
-	result.reserve(sv.size());
-
-	for (const auto& v : sv)
-	{
-		result.push_back({*v});
-	}
-
-	return result;
-}
-
-bool AppSignalListsProvider::signalExists(Hash hash) const
-{
-	return m_signalSetProvider->signalSet().getSignalByHash(hash) != nullptr;
-}
-
-bool AppSignalListsProvider::signalExists(const QString& appSignalId) const
-{
-	return m_signalSetProvider->signalExists(appSignalId);
-}
-
-bool AppSignalListsProvider::signalsExist(const QStringList& signalIds) const
-{
-	return std::all_of(signalIds.begin(),
-					   signalIds.end(),
-					   [this](const QString& appSignalId)
-					   {
-						   return m_signalSetProvider->signalExists(appSignalId);
-					   });
-}
-
-AppSignalParam AppSignalListsProvider::signalParam(Hash signalHash, bool* found) const
-{
-	AppSignalParam result;
-
-	const AppSignal* s = m_signalSetProvider->signalSet().getSignalByHash(signalHash);
-
-	if (found != nullptr)
-	{
-		*found = s != nullptr;
-	}
-
-	if (s != nullptr)
-	{
-		result.load(*s);
-	}
-
-	return result;
-}
-
-AppSignalParam AppSignalListsProvider::signalParam(const QString& appSignalId, bool* found) const
-{
-	AppSignalParam result;
-
-	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
-
-	if (found != nullptr)
-	{
-		*found = s != nullptr;
-	}
-
-	if (s != nullptr)
-	{
-		result.load(*s);
-	}
-
-	return result;
-}
-
+#include "AppSignalSetProvider.h"
 
 void DialogAppSignalLists::showDialog(DbController* db, QWidget* parent)
 {
@@ -136,8 +30,8 @@ void DialogAppSignalLists::showDialog(DbController* db, QWidget* parent)
 DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
 	m_db(db),
-	m_signalProvider(std::make_unique<AppSignalListsProvider>(AppSignalSetProvider::getInstance())),
-	m_lists(std::make_unique<AppSignalListStorage>(db))
+	m_signalProvider(std::make_unique<Builder::AppSignalListsProvider>(&AppSignalSetProvider::getInstance()->signalSet())),
+	m_lists(std::make_unique<Builder::AppSignalListStorage>(db))
 {
 	assert(m_db);
 
@@ -191,7 +85,7 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent) :
 	connect(m_listsTree, &QTreeWidget::itemSelectionChanged, this, &DialogAppSignalLists::onItemSelectionChanged);
 	connect(m_listsTree, &QWidget::customContextMenuRequested, this, &DialogAppSignalLists::onCustomContextMenuRequested);
 
-	m_listPropertyEditor = new ExtWidgets::PropertyEditor(this);
+	m_listPropertyEditor = new IdePropertyEditor(this, m_db);
 	connect(m_listPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogAppSignalLists::onPropertiesChanged);
 
 	m_signalListWidget = new AppSignalLists::AppSignalListWidget(*m_signalProvider, false, this);

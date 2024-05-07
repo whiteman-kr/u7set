@@ -18,6 +18,11 @@ namespace VFrame30
 	class VduSchema;
 }
 
+namespace AppSignalLists
+{
+	class AppSignalList;
+}
+
 namespace Builder
 {
 
@@ -66,6 +71,7 @@ namespace Builder
 
 		static bool generalSoftwareCfgGeneration(Context* context);
 		static bool loadAllSchemas(Context* context);
+		static bool loadAppSignalLists(Context* context);
 		static bool generateVduFonts(Context& context);
 		static bool generateVduSchemas(const std::vector<VFrame30::VduSchema*>& schemas, Context& context);
 		static void clearStaticData();
@@ -100,7 +106,7 @@ namespace Builder
 		QString softwareCfgSubdir() const { return m_software->equipmentIdTemplate(); }
 
 		bool writeMatsUsers(const QString& propertyName, const QStringList& tuningUserAccounts);
-		bool writeAppSignalLists(const QString& appSignalLists);
+		bool writeAppSignalLists(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);
 
 		template <typename TYPE>
 		TYPE getObjectProperty(QString strId, QString property, bool* ok)
@@ -184,6 +190,7 @@ namespace Builder
 		SoftwareSettingsSet m_settingsSet;
 
 		static std::multimap<QString, std::shared_ptr<SchemaFile>> m_schemaTagToFile;
+		static std::map<QString, std::shared_ptr<AppSignalLists::AppSignalList>> m_appSignalsListIdToList;
 
 		// Profile_STR(TuningService.TuningSimIP:Port) => TuningService.EquipmentID
 		//

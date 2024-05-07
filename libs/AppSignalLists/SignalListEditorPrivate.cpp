@@ -574,6 +574,11 @@ namespace AppSignalLists
 					return "Discrete";
 				}
 
+				if (asp.isBus() == true)
+				{
+					return "Bus";
+				}
+
 				Q_ASSERT(false);
 				return "Other";
 			}
@@ -885,10 +890,19 @@ namespace AppSignalLists
 				{
 					return "Analog";
 				}
-				else
+
+				if (asp.isDiscrete() == true)
 				{
 					return "Discrete";
 				}
+
+				if (asp.isBus() == true)
+				{
+					return "Bus";
+				}
+
+				Q_ASSERT(false);
+				return "Other";
 			}
 
 			if (columnType == static_cast<int>(Columns::Value))
@@ -901,10 +915,14 @@ namespace AppSignalLists
 						{
 							return item.value().toString(E::AnalogFormat::g_9_or_9e, asp.precision());
 						}
-						else
+						
+
+						if (asp.isDiscrete())
 						{
 							return item.value().toString();
 						}
+
+						Q_ASSERT(false);
 					}
 				}
 				else
