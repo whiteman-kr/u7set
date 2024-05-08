@@ -30,8 +30,6 @@ set (DIAGNOSTICS_SOURCES
 	../lib/Ui/DialogAlert.h
 #	../lib/Ui/DialogChooseTags.cpp
 #	../lib/Ui/DialogChooseTags.h
-#	../lib/Ui/DialogSignalSearch.cpp
-#	../lib/Ui/DialogSignalSearch.h
 #	../lib/Ui/DialogTcpStatistics.cpp
 #	../lib/Ui/DialogTcpStatistics.h
 #	../lib/Ui/TuningSourcesWidget.cpp

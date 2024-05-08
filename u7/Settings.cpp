@@ -1,6 +1,4 @@
 #include "../u7/Settings.h"
-#include "Simulator/SimSignalSnapshot.h"
-#include "../lib/Ui/DialogSignalSearch.h"
 #include "../Tools/qtkeychain/keychain.h"
 
 #include <QStandardPaths>

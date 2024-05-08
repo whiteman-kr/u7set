@@ -20,12 +20,14 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/TagSelectorWidget.h
 	./include/UiLib/PropertyEditor.h
 	./include/UiLib/PropertyEditorDialog.h
+	./include/UiLib/DialogProgress.h
 	CodeEditor.cpp
 	ExportPrint.cpp
 	TabWidgetEx.cpp
 	TagSelectorWidget.cpp
 	PropertyEditor.cpp
 	PropertyEditorDialog.cpp
+	DialogProgress.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -61,6 +63,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTextBrowser>
 	<QHeaderView>
 	<QComboBox>
+	<QLabel>
 	<QLineEdit>
 	<QToolButton>
 	<QColorDialog>

@@ -3,7 +3,6 @@
 #include "../VFrame30/LogController.h"
 #include "../VFrame30/Schema.h"
 #include "../lib/Ui/DialogAbout.h"
-#include "../lib/Ui/DialogSignalSearch.h"
 #include "./Archive/MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "DialogSettings.h"
@@ -12,6 +11,7 @@
 #include "SelectSchemaWidget.h"
 #include "DataSourcesWidget.h"
 
+#include <SchemaClientLib/DialogSignalSearch.h>
 #include <SchemaClientLib/DevToolsWindow.h>
 #include <SchemaClientLib/SchemaListWidget.h>
 
@@ -1398,12 +1398,12 @@ void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
 
 void MonitorMainWindow::slot_findSignal()
 {
-	DialogSignalSearch* dsi = new DialogSignalSearch(this, &m_signalManager);
+	auto dsi = new SchemaClientLib::DialogSignalSearch(this, &m_signalManager);
 
-	connect(&m_signalManager, &ClientLib::AppSignalManager::signalParamsUpdated, dsi, &DialogSignalSearch::signalsUpdated);
+	connect(&m_signalManager, &ClientLib::AppSignalManager::signalParamsUpdated, dsi, &SchemaClientLib::DialogSignalSearch::signalsUpdated);
 
-	connect(dsi, &DialogSignalSearch::signalContextMenu, &m_monitorCentralWidget, &MonitorCentralWidget::slot_signalContextMenu);
-	connect(dsi, &DialogSignalSearch::signalInfo, &m_monitorCentralWidget, &MonitorCentralWidget::slot_signalInfo);
+	connect(dsi, &SchemaClientLib::DialogSignalSearch::signalContextMenu, &m_monitorCentralWidget, &MonitorCentralWidget::slot_signalContextMenu);
+	connect(dsi, &SchemaClientLib::DialogSignalSearch::signalInfo, &m_monitorCentralWidget, &MonitorCentralWidget::slot_signalInfo);
 
 	dsi->show();
 

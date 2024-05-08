@@ -18,6 +18,7 @@ qt_add_library(${TARGET} STATIC
 	./include/SchemaClientLib/ClientSchemaManager.h
 	./include/SchemaClientLib/DevToolsWindow.h
 	./include/SchemaClientLib/DialogSignalInfo.h
+	./include/SchemaClientLib/DialogSignalSearch.h
 	./include/SchemaClientLib/DialogSignalSnapshot.h
 	./include/SchemaClientLib/DialogTcpStatistics.h
 	./include/SchemaClientLib/DialogWriteTuningValues.h
@@ -48,6 +49,7 @@ qt_add_library(${TARGET} STATIC
 	DevToolsWindow.cpp
 	DialogSignalInfo.cpp
 	DialogSignalInfo.ui
+	DialogSignalSearch.cpp
 	DialogSignalSnapshot.cpp
 	DialogSourceInfo.cpp
 	DialogSourceInfo.h

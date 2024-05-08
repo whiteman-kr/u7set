@@ -33,10 +33,6 @@ set (U7_SOURCES
 	../lib/Tuning/TuningModel.h
 	../lib/Ui/DialogAbout.cpp
 	../lib/Ui/DialogAbout.h
-	../lib/Ui/DialogProgress.cpp
-	../lib/Ui/DialogProgress.h
-	../lib/Ui/DialogSignalSearch.cpp
-	../lib/Ui/DialogSignalSearch.h
 	./Ui/FilesTreeView.cpp
 	./Ui/FilesTreeView.h
 	./Ui/PropertyTable.cpp
