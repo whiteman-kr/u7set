@@ -1,7 +1,7 @@
 #pragma once
 #include <Simulator/Simulator.h>
 #include <Simulator/SimOverrideSignals.h>
-#include "../../lib/QDoublevalidatorEx.h"
+#include <UiLib/DoubleValidatorEx.h>
 
 namespace UiLib
 {

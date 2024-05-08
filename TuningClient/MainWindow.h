@@ -15,7 +15,10 @@
 #include <SchemaClientLib/DialogTcpStatistics.h>
 #include "../UtilsLib/LogFile.h"
 
-class DialogAlert;
+namespace UiLib
+{
+	class DialogAlert;
+}
 
 namespace Ui {
 	class MainWindow;
@@ -115,7 +118,7 @@ private:
 
 	DialogTuningSources* m_dialogTuningSources = nullptr;
 	SchemaClientLib::DialogTcpStatistics* m_dialogStatistics = nullptr;
-	DialogAlert* m_dialogAlert = nullptr;
+	UiLib::DialogAlert* m_dialogAlert = nullptr;
 
 	// User interface
 	//

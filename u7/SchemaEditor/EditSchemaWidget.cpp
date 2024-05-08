@@ -27,10 +27,10 @@
 #include "../VFrame30/SchemaLayer.h"
 #include "../VFrame30/Session.h"
 #include "../VFrame30/UfbSchema.h"
-#include "../lib/QDoublevalidatorEx.h"
 #include "./Ui/TextEditCompleter.h"
 
 #include <HardwareLib/LmDescription.h>
+#include <UiLib/DoubleValidatorEx.h>
 #include <UiLib/CodeEditor.h>
 
 #include "./EditEngine/EditEngine.h"

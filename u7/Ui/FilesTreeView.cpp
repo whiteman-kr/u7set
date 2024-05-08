@@ -1,7 +1,9 @@
 #include "FilesTreeView.h"
+
 #include <DbLib/DbController.h>
 #include <DbLib/DbControllerTools.h>
-#include "../lib/StandardColors.h"
+#include <UiLib/StandardColors.h>
+
 #include "CheckInDialog.h"
 #include "DialogFileEditor.h"
 #include "Forms/CompareDialog.h"

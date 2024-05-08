@@ -16,15 +16,19 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/ClickableLabel.h
 	./include/UiLib/CodeEditor.h
 	./include/UiLib/DialogAbout.h
+	./include/UiLib/DialogAlert.h
 	./include/UiLib/DialogProgress.h
+	./include/UiLib/DoubleValidatorEx.h
 	./include/UiLib/ExportPrint.h
 	./include/UiLib/PropertyEditor.h
 	./include/UiLib/PropertyEditorDialog.h
+	./include/UiLib/StandardColors.h
 	./include/UiLib/TabWidgetEx.h
 	./include/UiLib/TagSelectorWidget.h
 	./include/UiLib/DialogProgress.h
 	CodeEditor.cpp
 	DialogAbout.cpp
+	DialogAlert.cpp
 	DialogProgress.cpp
 	ExportPrint.cpp
 	PropertyEditor.cpp

@@ -1,8 +1,8 @@
 #include "EquipmentModel.h"
-#include "../../lib/StandardColors.h"
 #include "../CheckInDialog.h"
 
 #include <HardwareLib/DeviceRoot.h>
+#include <UiLib/StandardColors.h>
 
 
 //

@@ -26,8 +26,6 @@ set (TC_FORMS
 )
 
 add_executable(${TARGET} WIN32
-	../lib/Ui/DialogAlert.cpp
-	../lib/Ui/DialogAlert.h
 	AppConfigSettings.cpp
 	AppConfigSettings.h
 	AppLogOutputWidget.cpp

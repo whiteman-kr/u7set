@@ -1,7 +1,7 @@
 #pragma once
 #include <QDoubleValidator>
 
-// Validate for double values which aacepts both . and ,
+// Validate for double values which accepts both . and ,
 //
 class QDoubleValidatorEx : public QDoubleValidator
 {
@@ -38,7 +38,7 @@ private:
 	bool m_allowReferences = false;		// Allow $(abc.efg)
 };
 
-// Validate for double values which aacepts both . and ,
+// Validate for double values which accepts both . and ,
 //
 class QIntValidatorEx : public QIntValidator
 {

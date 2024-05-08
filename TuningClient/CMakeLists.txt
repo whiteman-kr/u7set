@@ -28,8 +28,6 @@ set (TC_SOURCES
 	../lib/Tuning/TuningFilterEditor.h
 	../lib/Tuning/TuningModel.cpp
 	../lib/Tuning/TuningModel.h
-	../lib/Ui/DialogAlert.cpp
-	../lib/Ui/DialogAlert.h
 	DialogChooseFilter.cpp
 	DialogChooseFilter.h
 	DialogFilterEditor.cpp

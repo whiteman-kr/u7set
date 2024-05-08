@@ -24,8 +24,6 @@ qt_standard_project_setup()
 set (DIAGNOSTICS_SOURCES
 	../lib/ConstStrings.h
 #	../lib/ISignalDataServer.h
-	../lib/Ui/DialogAlert.cpp
-	../lib/Ui/DialogAlert.h
 #	../lib/Ui/DialogChooseTags.cpp
 #	../lib/Ui/DialogChooseTags.h
 #	../lib/Ui/DialogTcpStatistics.cpp

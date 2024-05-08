@@ -25,8 +25,6 @@ set (U7_SOURCES
 	../lib/Configurator.h
 	../lib/ConstStrings.h
 	../lib/diff_match_patch.h
-	../lib/QDoublevalidatorEx.h
-	../lib/StandardColors.h
 	../lib/Tuning/TuningFilterEditor.cpp
 	../lib/Tuning/TuningFilterEditor.h
 	../lib/Tuning/TuningModel.cpp

@@ -24,8 +24,6 @@ qt_standard_project_setup()
 set (MONITOR_SOURCES
 	../lib/ConstStrings.h
 	../lib/ISignalDataServer.h
-	../lib/Ui/DialogAlert.cpp
-	../lib/Ui/DialogAlert.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h
 	Archive/ArchiveData.cpp

@@ -5,8 +5,9 @@
 #include "../TestSuiteLib/TestSuite.h"
 #include "../TestSuiteLib/TestSuiteConfigController.h"
 #include "../TestSuiteLib/TestScriptsStorage.h"
-#include "../lib/Ui/DialogAlert.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+
+#include <UiLib/DialogAlert.h>
 #include <ClientLib/ClientTranslator.h>
 #include <SchemaClientLib/DialogTcpStatistics.h>
 
@@ -99,7 +100,7 @@ private:
 	ClientLib::ClientTranslator m_translator;
 
 
-	DialogAlert m_dialogAlert;
+	UiLib::DialogAlert m_dialogAlert;
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;

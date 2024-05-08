@@ -9,7 +9,8 @@
 #include "../VFrame30/TuningSchema.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/VduSchema.h"
-#include "../lib/StandardColors.h"
+
+#include <UiLib/StandardColors.h>
 #include <UiLib/TagSelectorWidget.h>
 
 #include "CheckInDialog.h"
