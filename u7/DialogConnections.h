@@ -1,9 +1,12 @@
 #ifndef DIALOGCONNECTIONS_H
 #define DIALOGCONNECTIONS_H
 
-#include "../lib/PropertyEditor.h"
-#include "../lib/PropertyEditorDialog.h"
 #include "../Builder/ConnectionStorage.h"
+
+namespace ExtWidgets
+{
+	class PropertyEditor;
+} // namespace ExtWidgets
 
 class DialogConnections : public QDialog
 {

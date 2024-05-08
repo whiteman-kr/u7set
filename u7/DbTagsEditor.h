@@ -1,7 +1,7 @@
 #ifndef DBTAGSEDITOR_H
 #define DBTAGSEDITOR_H
 
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 #include <SchemaClientLib/ChooseTagsWidget.h>
 
 class DbTagsEditor : public ExtWidgets::PropertyTextEditor

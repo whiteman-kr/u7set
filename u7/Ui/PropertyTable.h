@@ -1,12 +1,9 @@
 #ifndef PROPERTYTABLE_H
 #define PROPERTYTABLE_H
 
-#include <QSortFilterProxyModel>
-#include "../lib/PropertyEditor.h"
-
+#include <UiLib/PropertyEditor.h>
 
 class QAbstractItemModel;
-
 
 namespace ExtWidgets
 {

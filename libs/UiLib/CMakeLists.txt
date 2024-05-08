@@ -18,10 +18,14 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/ExportPrint.h
 	./include/UiLib/TabWidgetEx.h
 	./include/UiLib/TagSelectorWidget.h
+	./include/UiLib/PropertyEditor.h
+	./include/UiLib/PropertyEditorDialog.h
 	CodeEditor.cpp
 	ExportPrint.cpp
 	TabWidgetEx.cpp
 	TagSelectorWidget.cpp
+	PropertyEditor.cpp
+	PropertyEditorDialog.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -49,9 +53,25 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTextDocumentFragment>
 	<QTextDocumentWriter>
 	<QTimer>
+	<QPlainTextEdit>
+	<QSettings>
+	<QVBoxLayout>
+	<QPushButton>
+	<QSplitter>
+	<QTextBrowser>
+	<QHeaderView>
+	<QComboBox>
+	<QLineEdit>
+	<QToolButton>
+	<QColorDialog>
+	<QFileDialog>
+	<QFontDialog>
+	<QDialogButtonBox>
 )
 
 target_precompile_headers(${TARGET} PRIVATE
+	
+	"../../CommonLib/PropertyObject.h"
 	"../../CommonLib/Types.h"
 	"../../CommonLib/Hash.h"
 )
@@ -59,7 +79,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_compile_definitions(${TARGET} PRIVATE UI_LIB_DOMAIN)
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib Protobuf AppSignalLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

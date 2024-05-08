@@ -8,9 +8,9 @@
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaItems/SchemaItem.h"
 #include "../VFrame30/SchemaLayer.h"
-#include "../lib/PropertyEditor.h"
 #include "../lib/Ui/DialogProgress.h"
 
+#include <UiLib/PropertyEditor.h>
 #include <DbLib/DbControllerTools.h>
 #include <HardwareLib/Connection.h>
 #include <HardwareLib/DiagSignalType.h>

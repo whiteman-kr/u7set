@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 
 namespace UiLib
 {

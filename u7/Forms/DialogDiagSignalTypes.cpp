@@ -2,6 +2,7 @@
 #include "Settings.h"
 #include "../lib/StandardColors.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/PropertyEditor.h>
 
 //
 // DialogDiagSignalTypes

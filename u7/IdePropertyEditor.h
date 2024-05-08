@@ -1,7 +1,7 @@
 #pragma once
 
 #include <UiLib/CodeEditor.h>
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 #include "../lib/Tuning/TuningFilterEditor.h"
 #include "./Ui/PropertyTable.h"
 

@@ -25,10 +25,6 @@ set (U7_SOURCES
 	../lib/Configurator.h
 	../lib/ConstStrings.h
 	../lib/diff_match_patch.h
-	../lib/PropertyEditor.cpp
-	../lib/PropertyEditor.h
-	../lib/PropertyEditorDialog.cpp
-	../lib/PropertyEditorDialog.h
 	../lib/QDoublevalidatorEx.h
 	../lib/StandardColors.h
 	../lib/Tuning/TuningFilterEditor.cpp
@@ -41,10 +37,8 @@ set (U7_SOURCES
 	../lib/Ui/DialogProgress.h
 	../lib/Ui/DialogSignalSearch.cpp
 	../lib/Ui/DialogSignalSearch.h
-	../lib/Ui/DialogWriteValues.cpp
-	../lib/Ui/DialogWriteValues.h
-	../lib/Ui/FilesTreeView.cpp
-	../lib/Ui/FilesTreeView.h
+	./Ui/FilesTreeView.cpp
+	./Ui/FilesTreeView.h
 	./Ui/PropertyTable.cpp
 	./Ui/PropertyTable.h
 	./Ui/TextEditCompleter.cpp
@@ -377,18 +371,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<vector>
 	<ranges>
 
-	#include <QHBoxLayout>
-	#include <QHeaderView>
-	#include <QListView>
-	#include <QPushButton>
-	#include <QScreen>
-	#include <QSettings>
-	#include <QStandardItemModel>
-	#include <QTableView>
-
-
-
-
 	<QAction>
 	<QActionGroup>
 	<QApplication>
@@ -409,12 +391,14 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QHeaderView>
 	<QHostInfo>
 	<QInputDialog>
+	<QItemDelegate>
 	<QJSEngine>
 	<QJsonArray>
 	<QJsonDocument>
 	<QJsonObject>
 	<QJsonValue>
 	<QLabel>
+	<QListView>
 	<QListWidget>
 	<QListWidgetItem>
 	<QMainWindow>
@@ -431,6 +415,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QProgressDialog>
 	<QPushButton>
 	<QRadioButton>
+	<QScreen>
 	<QScrollBar>
 	<QSettings>
 	<QShortcut>

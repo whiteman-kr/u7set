@@ -1,28 +1,7 @@
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../AppSignalLib/TuningValue.h"
 
-#include <QToolButton>
-#include <QFileDialog>
-#include <QFontDialog>
-#include <QColorDialog>
-#include <QTextBrowser>
-#include <QScrollBar>
-#include <QTimer>
-#include <QSplitter>
-#include <QSettings>
-#include <QHeaderView>
-
-#include <algorithm>
-
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable : 4244)
-#endif
-#include <QPlainTextEdit>
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
 
 namespace ExtWidgets
 {

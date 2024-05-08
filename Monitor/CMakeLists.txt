@@ -30,8 +30,6 @@ set (MONITOR_SOURCES
 	../lib/Ui/DialogAlert.h
 	../lib/Ui/DialogSignalSearch.cpp
 	../lib/Ui/DialogSignalSearch.h
-	../lib/Ui/DialogWriteValues.cpp
-	../lib/Ui/DialogWriteValues.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h
 	Archive/ArchiveData.cpp

@@ -13,7 +13,6 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets LinguistTools Qml)
 set(TARGET SchemaClientLib)
 
 qt_add_library(${TARGET} STATIC
-	DialogSignalInfo.ui
 	./include/SchemaClientLib/AppDataSourcesWidget.h
 	./include/SchemaClientLib/ChooseTagsWidget.h
 	./include/SchemaClientLib/ClientSchemaManager.h
@@ -21,6 +20,7 @@ qt_add_library(${TARGET} STATIC
 	./include/SchemaClientLib/DialogSignalInfo.h
 	./include/SchemaClientLib/DialogSignalSnapshot.h
 	./include/SchemaClientLib/DialogTcpStatistics.h
+	./include/SchemaClientLib/DialogWriteTuningValues.h
 	./include/SchemaClientLib/DragDropHelper.h
 	./include/SchemaClientLib/IDevTools.h
 	./include/SchemaClientLib/SchemaClientConfigController.h
@@ -47,10 +47,12 @@ qt_add_library(${TARGET} STATIC
 	DevToolsWidget.h
 	DevToolsWindow.cpp
 	DialogSignalInfo.cpp
+	DialogSignalInfo.ui
 	DialogSignalSnapshot.cpp
 	DialogSourceInfo.cpp
 	DialogSourceInfo.h
 	DialogTcpStatistics.cpp
+	DialogWriteTuningValues.cpp
 	DragDropHelper.cpp
 	SchemaClientConfigController.cpp
 	SchemaDrawStatistics.cpp

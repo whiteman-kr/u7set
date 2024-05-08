@@ -1,18 +1,14 @@
 #include "PropertyTable.h"
 #include "../AppSignalLib/TuningValue.h"
-#include "../lib/PropertyEditor.h"
 #include <SchemaClientLib/ChooseTagsWidget.h>
-#include <QAbstractItemModel>
-#include <QClipboard>
-#include <QInputDialog>
-#include <QMimeData>
+#include <UiLib/PropertyEditor.h>
+
 
 namespace ExtWidgets
 {
 	//
 	// DialogAppend
 	//
-
 	DialogAppend::DialogAppend(const QString& what, bool toTheBegin, QWidget* parent):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
 		m_what(what),

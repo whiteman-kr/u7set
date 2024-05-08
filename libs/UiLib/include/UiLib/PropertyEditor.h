@@ -1,44 +1,50 @@
 #pragma once
 
-#include <QItemDelegate>
+#include <map>
+#include <memory>
+#include <vector>
 
-class QSettings;
+#include <QCheckBox>
+#include <QItemDelegate>
+#include <QTreeWidget>
+#include <QVariant>
 
 inline int qVariantTypeId(const QVariant& v)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))									// for Qt6
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)) // for Qt6
 	return v.typeId();
-#else																			// for Qt5
+#else                                         // for Qt5
 	return v.userType();
 #endif
 }
+
 /*
+	PropertyEditor class can edit following types of properties contained in PropertyObject classes:
 
-PropertyEditor class can edit following types of properties contained in PropertyObject classes:
-
-PropertyVector
-PropertyList
-Enum
-TuningValue
-Afb::AfbParamValue
-<QVector<QColor>>
-QMetaType::QFont
-QMetaType::QDateTime
-QMetaType::Int
-QMetaType::UInt
-QMetaType::Float
-QMetaType::Double
-QMetaType::Bool
-QMetaType::QString
-QMetaType::QStringList
-QMetaType::QColor
-QMetaType::QUuid
-QMetaType::QByteArray
-QMetaType::QImage
-
+	PropertyVector
+	PropertyList
+	Enum
+	TuningValue
+	Afb::AfbParamValue
+	<QVector<QColor>>
+	QMetaType::QFont
+	QMetaType::QDateTime
+	QMetaType::Int
+	QMetaType::UInt
+	QMetaType::Float
+	QMetaType::Double
+	QMetaType::Bool
+	QMetaType::QString
+	QMetaType::QStringList
+	QMetaType::QColor
+	QMetaType::QUuid
+	QMetaType::QByteArray
+	QMetaType::QImage
 */
 
 class QPlainTextEdit;
+class QSplitter;
+class QSettings;
 
 namespace ExtWidgets
 {
@@ -75,8 +81,7 @@ namespace ExtWidgets
 		static QString propertyVectorText(QVariant& value);
 		static QString stringListText(const QVariant& value);
 		static QString colorVectorText(QVariant& value);
-		static QString propertyValueText(Property* p, int row, int maxDecimalPlaces, bool noNewLine);	// row is used for StringList
-
+		static QString propertyValueText(Property* p, int row, int maxDecimalPlaces, bool noNewLine); // row is used for StringList
 	};
 
 	//
@@ -93,8 +98,10 @@ namespace ExtWidgets
 		virtual PropertyEditor* createChildPropertyEditor(QWidget* parent);
 		virtual PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent);
 
-		virtual bool restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog);	// return true if custom size is set
-		virtual bool storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr, QDialog* dialog);	// return true if custom size is set
+		virtual bool restorePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr,
+												   QDialog* dialog); // return true if custom size is set
+		virtual bool storePropertyTextEditorSize(std::shared_ptr<Property> propertyPtr,
+												 QDialog* dialog);   // return true if custom size is set
 
 		[[nodiscard]] bool expertMode() const;
 		void setExpertMode(bool expertMode);
@@ -102,7 +109,7 @@ namespace ExtWidgets
 		[[nodiscard]] bool isReadOnly() const;
 		void setReadOnly(bool readOnly);
 
-		[[nodiscard]] int maxDecimaplPlaces() const;		// If decimal places is less or equal then 'f' format is used, otherwise 'g' is used
+		[[nodiscard]] int maxDecimaplPlaces() const; // If decimal places is less or equal then 'f' format is used, otherwise 'g' is used
 		void setMaxDecimaplPlaces(int value);
 
 		[[nodiscard]] QString defaultSpecificPropertyCategory() const;
@@ -116,11 +123,15 @@ namespace ExtWidgets
 
 		static QIcon drawCheckBox(int state, bool enabled);
 		static QIcon drawImage(const QImage& image);
-                static QIcon drawFont(const QFont& font);
+		static QIcon drawFont(const QFont& font);
 		static QIcon propertyIcon(Property* p, bool sameValue, bool enabled);
 
 		PropertyEditCellWidget* createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent);
-		PropertyEditCellWidget* createCellRowEditor(std::shared_ptr<Property> propertyPtr, int row, bool sameValue, bool readOnly, QWidget* parent);
+		PropertyEditCellWidget* createCellRowEditor(std::shared_ptr<Property> propertyPtr,
+													int row,
+													bool sameValue,
+													bool readOnly,
+													QWidget* parent);
 
 		// Help description functions
 
@@ -134,7 +145,7 @@ namespace ExtWidgets
 			Array,
 			Enum,
 			CheckBox,
-                        Color
+			Color
 		};
 
 		bool m_expertMode = false;
@@ -146,7 +157,7 @@ namespace ExtWidgets
 		QByteArray m_scriptHelpWindowGeometry;
 
 	public:
-		static QString s_commonCategoryName;	// = "Common"
+		static QString s_commonCategoryName; // = "Common"
 
 		// Default category for newly created specific properties on SpecificPropertiesEditor
 		//
@@ -165,7 +176,10 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		PropertyArrayEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString& propertyName, const QVariant& value);
+		PropertyArrayEditorDialog(PropertyEditorBase* propertyEditorBase,
+								  QWidget* parent,
+								  const QString& propertyName,
+								  const QVariant& value);
 		~PropertyArrayEditorDialog();
 
 		QVariant value();
@@ -217,7 +231,7 @@ namespace ExtWidgets
 		void onMoveDown();
 		void onAdd();
 		void onRemove();
-		void itemChanged(QTreeWidgetItem *item, int column);
+		void itemChanged(QTreeWidgetItem* item, int column);
 
 	private:
 		void updateVectorData();
@@ -227,7 +241,6 @@ namespace ExtWidgets
 		bool isValueColorVector() const;
 
 	private:
-
 		int m_valueType = 0;
 
 		QStringList m_strings;
@@ -245,9 +258,8 @@ namespace ExtWidgets
 	class PropertyEditorHelpDialog : public QDialog
 	{
 	public:
-		explicit PropertyEditorHelpDialog(const QString &caption, const QString& text, QWidget* parent);
+		explicit PropertyEditorHelpDialog(const QString& caption, const QString& text, QWidget* parent);
 		~PropertyEditorHelpDialog();
-
 	};
 
 	//
@@ -276,8 +288,8 @@ namespace ExtWidgets
 		virtual bool isModified() const = 0;
 
 	signals:
-        void escapePressed();
-        void okPressed();
+		void escapePressed();
+		void okPressed();
 		void cancelPressed();
 
 	protected:
@@ -286,7 +298,6 @@ namespace ExtWidgets
 
 	protected:
 		QRegularExpressionValidator* m_regExpValidator = nullptr;
-
 	};
 
 	//
@@ -307,8 +318,8 @@ namespace ExtWidgets
 
 		bool externalOkCancelButtons() const override;
 
-    protected:
-        bool eventFilter(QObject* obj, QEvent* event) override;
+	protected:
+		bool eventFilter(QObject* obj, QEvent* event) override;
 
 	private slots:
 		void onPlainTextContentsChange(int position, int charsRemoved, int charsAdded);
@@ -343,7 +354,6 @@ namespace ExtWidgets
 
 	signals:
 		void valueChanged(QVariant value);
-
 	};
 
 	//
@@ -387,10 +397,9 @@ namespace ExtWidgets
 
 	private:
 		QLineEdit* m_lineEdit = nullptr;
-        QToolButton* m_button = nullptr;
+		QToolButton* m_button = nullptr;
 		bool m_escape = false;
 		QColor m_oldColor;
-
 	};
 
 	//
@@ -401,7 +410,11 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString& text, std::shared_ptr<Property> p, bool readOnly);
+		MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase,
+							  QWidget* parent,
+							  const QString& text,
+							  std::shared_ptr<Property> p,
+							  bool readOnly);
 		QString text();
 
 	private slots:
@@ -421,7 +434,6 @@ namespace ExtWidgets
 		PropertyEditorHelpDialog* m_propertyEditorHelp = nullptr;
 
 		std::shared_ptr<Property> m_property;
-
 	};
 
 	//
@@ -430,17 +442,15 @@ namespace ExtWidgets
 	class PropertyEditorCheckBox : public QCheckBox
 	{
 	public:
-		PropertyEditorCheckBox(QWidget* parent) : QCheckBox(parent)
+		PropertyEditorCheckBox(QWidget* parent) :
+			QCheckBox(parent)
 		{
 		}
 
-		bool hitOnButton(const QPoint& pos)
-		{
-			return hitButton(pos);
-		}
+		bool hitOnButton(const QPoint& pos) { return hitButton(pos); }
 
 	private:
-		virtual void paintEvent(QPaintEvent *e) override;
+		virtual void paintEvent(QPaintEvent* e) override;
 	};
 
 
@@ -468,7 +478,6 @@ namespace ExtWidgets
 
 		std::shared_ptr<Property> m_property;
 		int m_userType = 0;
-
 	};
 
 	//
@@ -483,14 +492,18 @@ namespace ExtWidgets
 
 		// Row parameter is used for QStringList property type. In this case, valueChanged signal returns QString type, NOT QStringList!
 		//
-		explicit MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent);
+		explicit MultiTextEdit(PropertyEditorBase* propertyEditorBase,
+							   std::shared_ptr<Property> p,
+							   int row,
+							   bool readOnly,
+							   QWidget* parent);
 
 		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 		void setInitialText(const QString& text) override;
 
 	public slots:
-		void onTextEdited(const QString &text);
+		void onTextEdited(const QString& text);
 		void onEditingFinished();
 
 	private slots:
@@ -501,7 +514,7 @@ namespace ExtWidgets
 
 	private:
 		QLineEdit* m_lineEdit = nullptr;
-        QToolButton* m_button = nullptr;
+		QToolButton* m_button = nullptr;
 
 		bool m_escape = false;
 		QVariant m_oldValue;
@@ -562,10 +575,7 @@ namespace ExtWidgets
 			this->readOnly = readOnly;
 		}
 
-		void setTreeWidgetItem(QTreeWidgetItem* item)
-		{
-			this->item = item;
-		}
+		void setTreeWidgetItem(QTreeWidgetItem* item) { this->item = item; }
 
 		std::shared_ptr<Property> property;
 		bool sameValue = true;
@@ -585,14 +595,14 @@ namespace ExtWidgets
 		explicit PropertyEditorDelegate(PropertyTreeWidget* treeWidget, PropertyEditor* propretyEditor);
 
 	private:
-		QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-		void destroyEditor(QWidget *editor, const QModelIndex &index) const override;
-		void setEditorData(QWidget *editor, const QModelIndex &index) const override;
-		void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
-		void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+		QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+		void destroyEditor(QWidget* editor, const QModelIndex& index) const override;
+		void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+		void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+		void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
-		QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override;
-		void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+		QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+		void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 	private slots:
 		void onValueChanged(QVariant value);
@@ -601,7 +611,7 @@ namespace ExtWidgets
 		void valueChanged(QVariant value);
 
 	private:
-		mutable PropertyEditCellWidget *m_cellEditor = nullptr;
+		mutable PropertyEditCellWidget* m_cellEditor = nullptr;
 		PropertyEditor* m_propertyEditor = nullptr;
 		PropertyTreeWidget* m_treeWidget = nullptr;
 		mutable QModelIndex m_editIndex;
@@ -621,9 +631,9 @@ namespace ExtWidgets
 		bool itemIsEditable(const QModelIndex& mi) const;
 
 	protected:
-		virtual void mousePressEvent(QMouseEvent *event) override;
-		virtual void keyPressEvent(QKeyEvent *event) override;
-		virtual void drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+		virtual void mousePressEvent(QMouseEvent* event) override;
+		virtual void keyPressEvent(QKeyEvent* event) override;
+		virtual void drawRow(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
 	signals:
 		void mousePressed();
@@ -684,8 +694,8 @@ namespace ExtWidgets
 	private slots:
 		void onCellEditKeyPressed();
 		void onCellToggleKeyPressed();
-		void onCellEditorClosed(QWidget *editor, QAbstractItemDelegate::EndEditHint hint);
-		void onShowErrorMessage (QString message);
+		void onCellEditorClosed(QWidget* editor, QAbstractItemDelegate::EndEditHint hint);
+		void onShowErrorMessage(QString message);
 		void onValueChanged(QVariant value);
 
 	signals:
@@ -697,7 +707,7 @@ namespace ExtWidgets
 		void createProperty(const PropertyEditorObject& poe);
 		std::shared_ptr<Property> propertyFromIndex(QModelIndex index) const;
 		bool propertySameValueFromIndex(QModelIndex index) const;
-		int getSelectionType();	// returns -1 if no type is selected or they are different
+		int getSelectionType(); // returns -1 if no type is selected or they are different
 		void startEditing();
 		void toggleSelected();
 		void saveExpandedGroups();
@@ -726,9 +736,7 @@ namespace ExtWidgets
 	};
 
 	extern PropertyEditorSettings thePropertyEditorSettings;
-}
-
+} // namespace ExtWidgets
 
 Q_DECLARE_METATYPE(std::shared_ptr<Property>)
 Q_DECLARE_METATYPE(QVector<QColor>)
-

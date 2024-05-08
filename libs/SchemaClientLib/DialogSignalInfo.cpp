@@ -1,10 +1,9 @@
-#include <SchemaClientLib/DialogSignalInfo.h>
-
 #include "../AppSignalLib/AppSignalSpecPropValues.h"
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../lib/Ui/DialogWriteValues.h"
 #include "ui_DialogSignalInfo.h"
+#include <SchemaClientLib/DialogSignalInfo.h>
+#include <SchemaClientLib/DialogWriteTuningValues.h>
 
 //
 //
@@ -927,11 +926,13 @@ void DialogSignalInfo::on_pushButtonSetZero_clicked()
 		return;
 	}
 
-	if (DialogWriteValues::askConfirmation(m_signal,
-										   m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
-										   TuningValue(m_signal.tuningType(), 0),
-										   E::AnalogFormat::f_9,
-										   this) != QDialog::Accepted)
+	auto result =
+		SchemaClientLib::DialogWriteTuningValues::askConfirmation(m_signal,
+																  m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
+																  TuningValue(m_signal.tuningType(), 0),
+																  E::AnalogFormat::f_9,
+																  this);
+	if (result != QDialog::Accepted)
 	{
 		return;
 	}
@@ -947,11 +948,14 @@ void DialogSignalInfo::on_pushButtonSetOne_clicked()
 		return;
 	}
 
-	if (DialogWriteValues::askConfirmation(m_signal,
-										   m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
-										   TuningValue(m_signal.tuningType(), 1),
-										   E::AnalogFormat::f_9,
-										   this) != QDialog::Accepted)
+	auto result =
+		SchemaClientLib::DialogWriteTuningValues::askConfirmation(m_signal,
+																  m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
+																  TuningValue(m_signal.tuningType(), 1),
+																  E::AnalogFormat::f_9,
+																  this);
+
+	if (result != QDialog::Accepted)
 	{
 		return;
 	}
@@ -993,11 +997,14 @@ void DialogSignalInfo::on_pushButtonSetValue_clicked()
 		return;
 	}
 
-	if (DialogWriteValues::askConfirmation(m_signal,
-										   m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
-										   TuningValue(m_signal.tuningType(), value),
-										   E::AnalogFormat::f_9,
-										   this) != QDialog::Accepted)
+	auto result =
+		SchemaClientLib::DialogWriteTuningValues::askConfirmation(m_signal,
+																  m_tuningController.signalState(m_signal.appSignalId(), nullptr).value(),
+																  TuningValue(m_signal.tuningType(), value),
+																  E::AnalogFormat::f_9,
+																  this);
+
+	if (result != QDialog::Accepted)
 	{
 		return;
 	}

@@ -16,7 +16,7 @@
 #include <QMessageBox>
 
 
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 
 #include "MetrologySignal.h"
 #include "DialogList.h"

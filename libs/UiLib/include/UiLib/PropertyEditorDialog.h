@@ -1,9 +1,20 @@
-#ifndef PROPERTYEDITORDIALOG_H
-#define PROPERTYEDITORDIALOG_H
+#pragma once
+
+// #include "../CommonLib/PropertyObject.h" - must be included via precompiled header
+
+#include <memory>
 
 #include <QDialog>
-#include "../lib/PropertyEditor.h"
+#include <QList>
 
+class PropertyObject;
+class QDialogButtonBox;
+class QWidget;
+
+namespace ExtWidgets
+{
+	class PropertyEditor;
+}
 
 class PropertyEditorDialog : public QDialog
 {
@@ -32,7 +43,4 @@ private:
 
 	QDialogButtonBox* m_buttonBox = nullptr;
     ExtWidgets::PropertyEditor* pe = nullptr;
-
 };
-
-#endif // PROPERTYEDITORDIALOG_H

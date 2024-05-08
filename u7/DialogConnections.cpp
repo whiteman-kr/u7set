@@ -1,6 +1,7 @@
 #include "DialogConnections.h"
- #include "../lib/StandardColors.h"
+#include "../lib/StandardColors.h"
 #include "Settings.h"
+#include <UiLib/PropertyEditor.h>
 
 
 DialogConnections* theDialogConnections = nullptr;

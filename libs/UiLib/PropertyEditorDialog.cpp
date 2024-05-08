@@ -1,7 +1,6 @@
-#include <QDialogButtonBox>
-#include <QVBoxLayout>
-#include "../lib/PropertyEditor.h"
-#include "../lib/PropertyEditorDialog.h"
+#include <UiLib/PropertyEditorDialog.h>
+#include <UiLib/PropertyEditor.h>
+
 
 PropertyEditorDialog::PropertyEditorDialog(QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
@@ -21,9 +20,7 @@ PropertyEditorDialog::PropertyEditorDialog(QWidget* parent) :
 	return;
 }
 
-PropertyEditorDialog::~PropertyEditorDialog()
-{
-}
+PropertyEditorDialog::~PropertyEditorDialog() = default;
 
 void PropertyEditorDialog::setObjects(QList<std::shared_ptr<PropertyObject>> objects)
 {

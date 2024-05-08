@@ -36,8 +36,6 @@ set (DIAGNOSTICS_SOURCES
 #	../lib/Ui/DialogTcpStatistics.h
 #	../lib/Ui/TuningSourcesWidget.cpp
 #	../lib/Ui/TuningSourcesWidget.h
-	../lib/Ui/DialogWriteValues.cpp  # MUST BE REMOVED, dependency in DialogSignalInfo, 
-	../lib/Ui/DialogWriteValues.h	 #
 #	Archive/ArchiveConnection.cpp
 #	Archive/ArchiveConnection.h
 #	Archive/ArchiveData.cpp

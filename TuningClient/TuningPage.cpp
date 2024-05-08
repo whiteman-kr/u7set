@@ -8,9 +8,9 @@
 
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningUserManager.h>
+#include <SchemaClientLib/DialogWriteTuningValues.h>
 
 #include "../VFrame30/DrawParam.h"
-#include "../lib/Ui/DialogWriteValues.h"
 
 #include <QKeyEvent>
 #include <QPushButton>
@@ -1647,8 +1647,10 @@ bool TuningPage::write()
 		newValues.push_back(m_tuningSignalManager.unappliedValue(hash));
 	}
 
-	if (DialogWriteValues::askConfirmation(writeSignalParams, oldValues, newValues,
-										   m_model->analogFormat(), this) != QDialog::Accepted)
+	auto confirmation =
+		SchemaClientLib::DialogWriteTuningValues::askConfirmation(writeSignalParams, oldValues, newValues, m_model->analogFormat(), this);
+
+	if (confirmation != QDialog::Accepted)
 	{
 		return false;
 	}

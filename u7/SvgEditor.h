@@ -1,7 +1,7 @@
 #ifndef SVGEDITOR_H
 #define SVGEDITOR_H
 
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 
 namespace UiLib
 {
