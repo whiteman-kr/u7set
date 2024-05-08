@@ -18,6 +18,7 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/DialogAbout.h
 	./include/UiLib/DialogAlert.h
 	./include/UiLib/DialogProgress.h
+	./include/UiLib/DialogProgress.h
 	./include/UiLib/DoubleValidatorEx.h
 	./include/UiLib/ExportPrint.h
 	./include/UiLib/PropertyEditor.h
@@ -25,17 +26,16 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/StandardColors.h
 	./include/UiLib/TabWidgetEx.h
 	./include/UiLib/TagSelectorWidget.h
-	./include/UiLib/DialogProgress.h
 	CodeEditor.cpp
 	DialogAbout.cpp
 	DialogAlert.cpp
+	DialogProgress.cpp
 	DialogProgress.cpp
 	ExportPrint.cpp
 	PropertyEditor.cpp
 	PropertyEditorDialog.cpp
 	TabWidgetEx.cpp
 	TagSelectorWidget.cpp
-	DialogProgress.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -80,10 +80,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTimer>
 	<QToolButton>
 	<QVBoxLayout>
-)
 
-target_precompile_headers(${TARGET} PRIVATE
-	
 	"../../CommonLib/PropertyObject.h"
 	"../../CommonLib/Types.h"
 	"../../CommonLib/Hash.h"
