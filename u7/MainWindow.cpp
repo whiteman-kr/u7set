@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/LogicModuleSet.h"
-#include "../lib/Ui/DialogAbout.h"
+#include <UiLib/DialogAbout.h>
 #include "./EquipmentEditor/EquipmentTabPage.h"
 #include "./Forms/DialogDiagSignalTypes.h"
 #include "./Forms/FileHistoryDialog.h"
@@ -1231,7 +1231,7 @@ void MainWindow::showAbout()
 	QString text = "Supported project database version: " + QString::number(DbController::databaseVersion()) + "<br><br>";
 	text += qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and MATS software configuration.<br>";
 
-	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 
 	return;
 }

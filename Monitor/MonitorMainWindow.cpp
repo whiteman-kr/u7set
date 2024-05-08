@@ -2,7 +2,6 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../VFrame30/LogController.h"
 #include "../VFrame30/Schema.h"
-#include "../lib/Ui/DialogAbout.h"
 #include "./Archive/MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "DialogSettings.h"
@@ -11,6 +10,7 @@
 #include "SelectSchemaWidget.h"
 #include "DataSourcesWidget.h"
 
+#include <UiLib/DialogAbout.h>
 #include <SchemaClientLib/DialogSignalSearch.h>
 #include <SchemaClientLib/DevToolsWindow.h>
 #include <SchemaClientLib/SchemaListWidget.h>
@@ -1000,7 +1000,7 @@ void MonitorMainWindow::showAboutQt()
 void MonitorMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to view schemas and trends.<br>");
-	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 	return;
 }
 

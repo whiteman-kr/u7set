@@ -1,12 +1,14 @@
 #include <QStandardPaths>
 #include <QFileDialog>
 #include <QCloseEvent>
+
 #include <ClientLib/ClientTranslator.h>
 #include <ClientLib/TuningUserManager.h>
+#include <UiLib/DialogAbout.h>
 #include <UiLib/TabWidgetEx.h>
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../lib/Ui/DialogAbout.h"
+
 #include "AppConfigSettings.h"
 #include "DialogDataSources.h"
 #include "DialogReport.h"
@@ -1158,7 +1160,7 @@ void TestSuiteMainWindow::showAboutQt()
 void TestSuiteMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to run application logic tests.");
-	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 }
 
 void TestSuiteMainWindow::onTestsScriptsReload()

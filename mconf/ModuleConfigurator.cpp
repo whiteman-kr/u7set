@@ -1,6 +1,6 @@
 #include "ModuleConfigurator.h"
 #include "../lib/Configurator.h"
-#include "../lib/Ui/DialogAbout.h"
+#include <UiLib/DialogAbout.h>
 #include "ApplicationTabPage.h"
 #include "DiagTabPage.h"
 #include "Globals.h"
@@ -594,7 +594,7 @@ void ModuleConfigurator::aboutQtClicked()
 void ModuleConfigurator::aboutClicked()
 {
 	QString text = qApp->applicationName() + tr(" allows user to upload firmware to flash memory of logic modules.<br>");
-	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 
 	return;
 }

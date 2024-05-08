@@ -13,20 +13,24 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools PrintSupport)
 set(TARGET UiLib)
 
 qt_add_library(${TARGET} STATIC
-	./include/UiLib/CodeEditor.h
 	./include/UiLib/ClickableLabel.h
+	./include/UiLib/CodeEditor.h
+	./include/UiLib/DialogAbout.h
+	./include/UiLib/DialogProgress.h
 	./include/UiLib/ExportPrint.h
-	./include/UiLib/TabWidgetEx.h
-	./include/UiLib/TagSelectorWidget.h
 	./include/UiLib/PropertyEditor.h
 	./include/UiLib/PropertyEditorDialog.h
+	./include/UiLib/TabWidgetEx.h
+	./include/UiLib/TagSelectorWidget.h
 	./include/UiLib/DialogProgress.h
 	CodeEditor.cpp
+	DialogAbout.cpp
+	DialogProgress.cpp
 	ExportPrint.cpp
-	TabWidgetEx.cpp
-	TagSelectorWidget.cpp
 	PropertyEditor.cpp
 	PropertyEditorDialog.cpp
+	TabWidgetEx.cpp
+	TagSelectorWidget.cpp
 	DialogProgress.cpp
 )
 
@@ -39,37 +43,39 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QAbstractItemModel>
 	<QApplication>
 	<QClipboard>
+	<QColorDialog>
+	<QComboBox>
+	<QDialog>
+	<QDialogButtonBox>
 	<QFile>
+	<QFileDialog>
+	<QFontDialog>
+	<QHBoxLayout>
+	<QHeaderView>
+	<QLabel>
+	<QLineEdit>
 	<QMenu>
 	<QMessageBox>
 	<QMouseEvent>
 	<QPageSetupDialog>
 	<QPainter>
+	<QPlainTextEdit>
 	<QPrintDialog>
 	<QPrinter>
 	<QProgressDialog>
+	<QPushButton>
+	<QSettings>
+	<QSplitter>
 	<QTableView>
 	<QTabWidget>
+	<QTextBrowser>
 	<QTextCursor>
 	<QTextDocument>
 	<QTextDocumentFragment>
 	<QTextDocumentWriter>
 	<QTimer>
-	<QPlainTextEdit>
-	<QSettings>
-	<QVBoxLayout>
-	<QPushButton>
-	<QSplitter>
-	<QTextBrowser>
-	<QHeaderView>
-	<QComboBox>
-	<QLabel>
-	<QLineEdit>
 	<QToolButton>
-	<QColorDialog>
-	<QFileDialog>
-	<QFontDialog>
-	<QDialogButtonBox>
+	<QVBoxLayout>
 )
 
 target_precompile_headers(${TARGET} PRIVATE

@@ -26,8 +26,6 @@ endif (MSVC)
 qt_standard_project_setup()
 
 set (METROLOGY_SOURCES
-	../lib/Ui/DialogAbout.cpp
-	../lib/Ui/DialogAbout.h
 	Calibrator.cpp
 	Calibrator.h
 	CalibratorBase.cpp

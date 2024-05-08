@@ -31,8 +31,6 @@ set (U7_SOURCES
 	../lib/Tuning/TuningFilterEditor.h
 	../lib/Tuning/TuningModel.cpp
 	../lib/Tuning/TuningModel.h
-	../lib/Ui/DialogAbout.cpp
-	../lib/Ui/DialogAbout.h
 	./Ui/FilesTreeView.cpp
 	./Ui/FilesTreeView.h
 	./Ui/PropertyTable.cpp

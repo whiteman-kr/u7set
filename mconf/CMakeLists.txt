@@ -22,8 +22,6 @@ endif (MSVC)
 add_executable(${TARGET} WIN32
 	../lib/Configurator.cpp
 	../lib/Configurator.h
-	../lib/Ui/DialogAbout.cpp
-	../lib/Ui/DialogAbout.h
 	ApplicationTabPage.cpp
 	ApplicationTabPage.h
 	DiagTabPage.cpp
@@ -91,7 +89,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Sql Qt6::Network Qt6::Xml Qt6::Widgets Qt6::Gui Qt6::SerialPort Qt6::Qml)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib HardwareLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib HardwareLib UiLib)
 
 if(MSVC)
 	add_library(ftdi STATIC IMPORTED)

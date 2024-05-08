@@ -10,8 +10,8 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "../lib/Ui/DialogAlert.h"
-#include "../lib/Ui/DialogAbout.h"
 
+#include <UiLib/DialogAbout.h>
 #include <ClientLib/TuningLog.h>
 
 #include "Settings.h"
@@ -1281,7 +1281,7 @@ void MainWindow::showAboutQt()
 void MainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to modify tuning values.");
-	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 }
 
 void MainWindow::showTuningUserManual()
