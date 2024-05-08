@@ -69,13 +69,26 @@ qt_add_library(${TARGET} STATIC
 	TuningSourcesWidget.cpp
 )
 
+# These precompiled headers are reusend in client projects e.g. Monitor, Diagonstics, TuningClient, TestSuite etc.
 target_precompile_headers(${TARGET} PRIVATE
+	# C includes, must be before c++ includes
+	#
+	<cassert>
+	<cstdint>
+
+	# C++ includes
+	#
 	<algorithm>
+	<array>
+	<atomic>
 	<cassert>
 	<chrono>
 	<concepts>
 	<cstdint>
+	<deque>
 	<functional>
+	<iostream>
+	<limits>
 	<list>
 	<map>
 	<memory>
@@ -83,50 +96,119 @@ target_precompile_headers(${TARGET} PRIVATE
 	<queue>
 	<ranges>
 	<set>
+	<stdexcept>
+	<type_traits>
 	<unordered_map>
 	<unordered_set>
 	<vector>
 
+	<QAbstractItemModel>
+	<QAbstractSocket>
+	<QAbstractTableModel>
 	<QAction>
 	<QActionGroup>
 	<QApplication>
+	<QButtonGroup>
+	<QCheckBox>
 	<QClipboard>
+	<QCloseEvent>
+	<QColorDialog>
 	<QComboBox>
+	<QCommandLineParser>
 	<QCompleter>
 	<QCoreApplication>
+	<QCryptographicHash>
 	<QDateTime>
+	<QDebug>
 	<QDialog>
+	<QDialogButtonBox>
+	<QDir>
+	<QDockWidget>
 	<QDomDocument>
 	<QDrag>
+	<QElapsedTimer>
+	<QErrorMessage>
+	<QEventLoop>
+	<QFile>
 	<QFileDialog>
+	<QFileInfo>
+	<QGroupBox>
+	<QHash>
 	<QHBoxLayout>
 	<QHeaderView>
+	<QHostAddress>
+	<QInputDialog>
 	<QJSEngine>
+	<QJsonArray>
+	<QJsonDocument>
+	<QJsonObject>
 	<QKeyEvent>
 	<QLabel>
 	<QLineEdit>
+	<QList>
+	<QListView>
+	<QListWidget>
 	<QLocale>
+	<QMainWindow>
+	<QMap>
 	<QMenu>
+	<QMenuBar>
 	<QMessageBox>
+	<QMetaClassInfo>
+	<QMetaEnum>
+	<QMetaObject>
 	<QMimeData>
 	<QMouseEvent>
+	<QMutex>
+	<QMutexLocker>
+	<QObject>
 	<QPainter>
+	<QProgressBar>
+	<QProgressDialog>
 	<QPushButton>
+	<QQueue>
 	<QReadWriteLock>
+	<QRegularExpression>
+	<QRegularExpressionValidator>
+	<QScreen>
+	<QScrollArea>
+	<QScrollBar>
 	<QSettings>
 	<QSharedMemory>
+	<QSortFilterProxyModel>
+	<QSplitter>
+	<QStandardPaths>
+	<QStatusBar>
+	<QString>
+	<QStringList>
 	<QStringListModel>
 	<QTableView>
+	<QTableWidget>
 	<QTabWidget>
+	<QtConcurrent>
+	<QTextBrowser>
 	<QTextEdit>
+	<QTextStream>
+	<QThread>
+	<QTimer>
 	<QTimer>
 	<QTimeZone>
+	<QtNetwork/QHostAddress>
+	<QToolBar>
 	<QToolButton>
 	<QToolTip>
+	<QtPrintSupport>
 	<QTranslator>
+	<QTreeView>
 	<QTreeWidget>
 	<QTreeWidgetItem>
+	<QUdpSocket>
+	<QUuid>
+	<QVariant>
 	<QVBoxLayout>
+	<QVector>
+	<QXmlStreamReader>
+	<QXmlStreamWriter>
 
 	# Project headers
 	#
@@ -141,9 +223,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../AppSignalLib/AppSignal.h"
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"
+	"../../AppSignalLib/TuningValue.h"
 )
-
-target_compile_definitions(${TARGET} PRIVATE SCHEMACLIENT_LIB_DOMAIN)
 
 #Add translations
 #

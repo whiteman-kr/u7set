@@ -52,54 +52,9 @@ add_executable(${TARGET} WIN32
 	${TC_FORMS}
 )
 
-target_precompile_headers(${TARGET} PRIVATE
-	<algorithm>
-	<cassert>
-	<cstdint>
-	<functional>
-	<memory>
-	<vector>
-
-	<QAction>
-	<QApplication>
-	<QComboBox>
-	<QCompleter>
-	<QDockWidget>
-	<QHBoxLayout>
-	<QLabel>
-	<QLineEdit>
-	<QList>
-	<QMenu>
-	<QMenuBar>
-	<QMessageBox>
-	<QMutex>
-	<QPushButton>
-	<QRegularExpression>
-	<QSettings>
-	<QStatusBar>
-	<QTextBrowser>
-	<QTextEdit>
-	<QTime>
-	<QTimer>
-	<QToolBar>
-	<QTreeWidget>
-	<QTreeWidgetItem>
-	<QVBoxLayout>
-
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
-	
-	#<ProtoSerialization.h>
-	<Network.pb.h>
-	#<AppSignal.pb.h>
-	
-	#"../AppSignalLib/AppSignal.h"
-	"../AppSignalLib/AppSignalParam.h"
-	"../AppSignalLib/AppSignalState.h"
-	#"../AppSignalLib/TuningValue.h"
-)
+# Reuse precompiled headers from SchemaClientLib
+#
+target_precompile_headers(${TARGET} REUSE_FROM SchemaClientLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 

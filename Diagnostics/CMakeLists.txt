@@ -113,50 +113,9 @@ add_executable(${TARGET} WIN32
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_precompile_headers(${TARGET} PRIVATE
-	# C includes, must be before c++ includes
-	#
-	<cassert>
-	<cstdint>
-
-	# C++ includes
-	#
-	<algorithm>
-	<array>
-	<atomic>
-	<chrono>
-	<concepts>
-	<deque>
-	<functional>
-	<limits>
-	<list>
-	<map>
-	<memory>
-	<queue>
-	<ranges>
-	<set>
-	<type_traits>
-	<vector>
-
-	# Qt includes
-	#
-	<QtPrintSupport>
-
-	# Project includes
-	#
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
-	
-	<ProtoSerialization.h>
-	<Network.pb.h>
-	
-	#"../AppSignalLib/AppSignal.h"
-	"../AppSignalLib/AppSignalParam.h"
-	"../AppSignalLib/AppSignalState.h"
-	#"../AppSignalLib/TuningValue.h"
-)
+# Reuse precompiled headers from SchemaClientLib
+#
+target_precompile_headers(${TARGET} REUSE_FROM SchemaClientLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 

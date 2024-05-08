@@ -141,112 +141,13 @@ add_executable(${TARGET} WIN32
 	languages/Metrology_ru.ts
 )
 
-target_precompile_headers(${TARGET} PRIVATE
-	<cassert>	
-	<algorithm>
-	<atomic>
-	<functional>
-	<iostream>
-	<limits>
-	<list>
-	<map>
-	<memory>
-	<vector>
-	<set>
-	<type_traits>
-	<stdexcept>
-
-	<QAbstractItemModel>
-	<QAbstractSocket>
-	<QAbstractTableModel>
-	<QAction>
-	<QApplication>
-	<QCheckBox>
-	<QCloseEvent>
-	<QColorDialog>
-	<QComboBox>
-	<QCommandLineParser>
-	<QCompleter>
-	<QCoreApplication>
-	<QCoreApplication>
-	<QDateTime>
-	<QDebug>
-	<QElapsedTimer>
-	<QErrorMessage>
-	<QEventLoop>
-	<QFile>
-	<QFileDialog>
-	<QFileInfo>
-	<QGroupBox>
-	<QHash>
-	<QHBoxLayout>
-	<QHeaderView>
-	<QHostAddress>
-	<QInputDialog>
-	<QLabel>
-	<QListView>
-	<QListWidget>
-	<QMainWindow>
-	<QMap>
-	<QMenu>
-	<QMenuBar>
-	<QMessageBox>
-	<QMetaClassInfo>
-	<QMetaEnum>
-	<QMetaObject>
-	<QMutex>
-	<QMutexLocker>
-	<QObject>
-	<QPainter>
-	<QProgressBar>
-	<QProgressDialog>
-	<QPushButton>
-	<QQueue>
-	<QRegularExpression>
-	<QRegularExpressionValidator>
-	<QScreen>
-	<QScrollArea>
-	<QScrollBar>
-	<QSettings>
-	<QSplitter>
-	<QStatusBar>
-	<QString>
-	<QStringList>
-	<QTableWidget>
-	<QTabWidget>
-	<QtConcurrent>
-	<QTextEdit>
-	<QTextStream>
-	<QThread>
-	<QTimer>
-	<QtNetwork/QHostAddress>
-	<QTranslator>
-	<QTreeWidget>
-	<QUdpSocket>
-	<QUuid>
-	<QVariant>
-	<QVBoxLayout>
-	<QVector>
-	<QXmlStreamReader>
-	<QXmlStreamWriter>
-
-	# Project includes
-	#
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-
-	<ProtoSerialization.h>
-	<Network.pb.h>
-	<AppSignal.pb.h>
-
-	"../AppSignalLib/AppSignal.h"
-	"../AppSignalLib/AppSignalState.h"
-)
+# Reuse precompiled headers from SchemaClientLib
+#
+target_precompile_headers(${TARGET} REUSE_FROM SchemaClientLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
-target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent Qt6::SerialPort Qt6::Network Qt6::Sql Qt6::Qml Qt6::Xml Qt6::Charts)
+target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent Qt6::SerialPort Qt6::Network Qt6::Svg Qt6::Sql Qt6::Qml Qt6::Xml Qt6::Charts)
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf AppSignalLib HardwareLib UtilsLib OnlineLib UiLib)
 
 # Interface for calibrator Rigol DG1062Z
