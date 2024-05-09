@@ -293,7 +293,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 	}
 
-	const DataSource& source = m_dataSources[row].first;
+	const OnlineLib::DataSource& source = m_dataSources[row].first;
 	const Network::AppDataSourceState& state = m_dataSources[row].second;
 
 	switch (role)
@@ -403,7 +403,7 @@ void DataSourcesStateModel::setClient(TcpAppDataClient* clientSocket)
 	m_clientSocket = clientSocket;
 }
 
-const DataSource& DataSourcesStateModel::getDataSource(int row) const
+const OnlineLib::DataSource& DataSourcesStateModel::getDataSource(int row) const
 {
 	return m_dataSources[row].first;
 }
@@ -429,12 +429,12 @@ void DataSourcesStateModel::reloadList()
 
 	if (m_clientSocket != nullptr)
 	{
-		std::vector<DataSource> dss = m_clientSocket->getDataSources();
+		std::vector<OnlineLib::DataSource> dss = m_clientSocket->getDataSources();
 
 		m_dataSources.clear();
 		m_dataSources.reserve(dss.size());
 
-		for(const DataSource& ds : dss)
+		for(const OnlineLib::DataSource& ds : dss)
 		{
 			m_dataSources.emplace_back(ds, Network::AppDataSourceState());
 		}
@@ -740,7 +740,7 @@ void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index
 	TEST_PTR_RETURN(m_tcpClientSocket);
 
 	int row = index.row();
-	const DataSource& ads = m_dataSourcesStateModel->getDataSource(row);
+	const OnlineLib::DataSource& ads = m_dataSourcesStateModel->getDataSource(row);
 
 	for (auto& sourceWidget : m_appDataSourceWidgetList)
 	{

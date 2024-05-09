@@ -8,12 +8,12 @@
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaItems/SchemaItem.h"
 #include "../VFrame30/SchemaLayer.h"
-#include "../lib/PropertyEditor.h"
-#include "../lib/Ui/DialogProgress.h"
 
 #include <DbLib/DbControllerTools.h>
 #include <HardwareLib/Connection.h>
 #include <HardwareLib/DiagSignalType.h>
+#include <UiLib/DialogProgress.h>
+#include <UiLib/PropertyEditor.h>
 
 #include "Settings.h"
 
@@ -298,7 +298,7 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 
 	// Create Progress Dialog
 
-	DialogProgress dialogProgress(QObject::tr("Creating Project Differences Report"), 3, parent);
+	UiLib::DialogProgress dialogProgress(QObject::tr("Creating Project Differences Report"), 3, parent);
 
 	// Create thread
 
@@ -309,10 +309,10 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 	QObject::connect(thread, &QThread::started, worker, &ProjectDiffGenerator::process);
 	QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
 
-	QObject::connect(&dialogProgress, &DialogProgress::getProgress, worker, &ProjectDiffGenerator::progressRequested, Qt::DirectConnection);
-	QObject::connect(&dialogProgress, &DialogProgress::cancelClicked, worker, &ProjectDiffGenerator::stop, Qt::DirectConnection);
+	QObject::connect(&dialogProgress, &UiLib::DialogProgress::getProgress, worker, &ProjectDiffGenerator::progressRequested, Qt::DirectConnection);
+	QObject::connect(&dialogProgress, &UiLib::DialogProgress::cancelClicked, worker, &ProjectDiffGenerator::stop, Qt::DirectConnection);
 
-	QObject::connect(worker, &ProjectDiffGenerator::progressChanged, &dialogProgress, &DialogProgress::setProgressMultiple);
+	QObject::connect(worker, &ProjectDiffGenerator::progressChanged, &dialogProgress, &UiLib::DialogProgress::setProgressMultiple);
 
 	//  Schedule objects deleting
 

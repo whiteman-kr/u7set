@@ -1,4 +1,5 @@
 #include "SimOverrideValueWidget.h"
+#include <UiLib/CodeEditor.h>
 
 
 namespace SimOverrideUI
@@ -415,7 +416,7 @@ namespace SimOverrideUI
 
 		m_scriptLabel = new QLabel(tr("Override Value Script:"));
 
-        m_scriptEdit = new CodeEditor(this);
+        m_scriptEdit = new UiLib::CodeEditor(this);
 #if defined(Q_OS_WIN)
 		QFont f = QFont("Consolas");
 #else
@@ -423,7 +424,7 @@ namespace SimOverrideUI
 #endif
 		m_scriptEdit->setFont(f);
 
-		JsHighlighter::createJsHighlighter(m_scriptEdit);
+		UiLib::JsHighlighter::createJsHighlighter(m_scriptEdit);
 
 		QString lastScript;
 		if (db()->isProjectOpened() == true)

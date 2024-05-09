@@ -1,6 +1,6 @@
 #pragma once
 #include <DbLib/DbStruct.h>
-#include "../lib/Ui/ClickableLabel.h"
+#include <UiLib/ClickableLabel.h>
 #include "./Locator/EquipmentLocatorProvider.h"
 #include "./Locator/ConnectionLocatorProvider.h"
 #include "./Locator/SchemaLocatorProvider.h"
@@ -173,8 +173,8 @@ private:
 	Locator::LocatorEditControl* m_locatorEditControl = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
-	ClickableLabel* m_statusBarSchemaLayerLabel = nullptr;		// Specific information for schemas tab
-	ClickableLabel* m_statusBarSchemaZoomLabel = nullptr;		// Specific information for schemas tab
+	UiLib::ClickableLabel* m_statusBarSchemaLayerLabel = nullptr;		// Specific information for schemas tab
+	UiLib::ClickableLabel* m_statusBarSchemaZoomLabel = nullptr;		// Specific information for schemas tab
 	QLabel* m_statusBarConnectionState = nullptr;
 
 	ProjectsTabPage* m_projectsTab = nullptr;

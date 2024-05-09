@@ -1,7 +1,9 @@
 #include "DialogBusEditor.h"
 #include "Settings.h"
-#include "../lib/PropertyEditorDialog.h"
-#include "../lib/StandardColors.h"
+
+#include <UiLib/PropertyEditor.h>
+#include <UiLib/PropertyEditorDialog.h>
+#include <UiLib/StandardColors.h>
 
 //
 // DialogBusEditor

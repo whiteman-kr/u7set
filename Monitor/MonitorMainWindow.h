@@ -18,11 +18,11 @@
 #include <ClientLib/TuningSignalManager.h>
 #include <ClientLib/TuningUserManager.h>
 #include <SchemaClientLib/SchemaDrawStatistics.h>
+#include <UiLib/DialogAlert.h>
 
 #include "../UtilsLib/InstanceResolver.h"
 #include "../UtilsLib/LogFile.h"
 #include "../VFrame30/AppSignalController.h"
-#include "../lib/Ui/DialogAlert.h"
 
 
 namespace VFrame30
@@ -191,7 +191,7 @@ private:
 												   &m_LogFile,
 												   &m_tuningLogFile};
 
-	DialogAlert m_dialogAlert;
+	UiLib::DialogAlert m_dialogAlert;
 
 	// File menu
 	//

@@ -4,7 +4,7 @@
 #include <HardwareLib/DeviceController.h>
 #include <HardwareLib/Workstation.h>
 
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 #include "../TuningService/TuningSource.h"
 
 #include "LanControllerInfoHelper.h"
@@ -259,10 +259,10 @@ bool SoftwareSettingsGetter::getCfgServiceConnection(const Hardware::EquipmentSe
 								   log);
 }
 
-bool SoftwareSettingsGetter::getLmPropertiesFromDevice(	const Hardware::DeviceModule* lm,
-														E::LanControllerType lanControllerType,
-														const Builder::Context* context,
-														DataSource* ds)
+bool SoftwareSettingsGetter::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
+													   E::LanControllerType lanControllerType,
+													   const Builder::Context* context,
+													   OnlineLib::DataSource* ds)
 {
 	TEST_PTR_RETURN_FALSE(context);
 

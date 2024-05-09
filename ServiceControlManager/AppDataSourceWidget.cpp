@@ -11,7 +11,7 @@
 struct staticPropertyFieldDefinition
 {
 	QString fieldName;
-	std::function<QVariant (const DataSource& source)> fieldValueGetter;
+	std::function<QVariant (const OnlineLib::DataSource& source)> fieldValueGetter;
 };
 
 struct dynamicPropertyFieldDefinition
@@ -24,7 +24,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 {
 	{
 		QStringLiteral("Module EquipmentID"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.moduleEquipmentID();
 		}
@@ -32,7 +32,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("Module caption"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.moduleCaption();
 		}
@@ -40,7 +40,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("Module type"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return "0x" + QString("%1").arg(source.moduleType(), 4, 16, Latin1Char::ZERO).toUpper();
 		}
@@ -48,7 +48,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("Module preset name"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.modulePresetName();
 		}
@@ -56,7 +56,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("Module workcycle, mcs"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.moduleWorkcycle_mcs();
 		}
@@ -64,7 +64,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("RUP protocol version"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.rupVersion();
 		}
@@ -72,7 +72,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("Subsystem ID"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.subsystemID();
 		}
@@ -80,7 +80,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("Subsystem key"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.subsystemKey();
 		}
@@ -88,7 +88,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("LM number"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.lmNumber();
 		}
@@ -96,7 +96,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("Subsystem channel"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.subsystemChannel();
 		}
@@ -104,7 +104,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("Lan controller ID"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			const auto& lanControllersInfo = source.lanControllersInfo()();
 			QString str;
@@ -130,7 +130,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("IP"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			const auto& lanControllersInfo = source.lanControllersInfo()();
 			QString str;
@@ -156,7 +156,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("Expected AppDataUID"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			quint32 dataID = source.rupAppDataUID();
 			return "0x" + QString("%1").arg(dataID, sizeof(dataID) * 2,
@@ -166,7 +166,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("App data frames quantity"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.appDataFramesQuantity();
 		}
@@ -174,7 +174,7 @@ static const std::vector<staticPropertyFieldDefinition> staticPropertiesFieldLis
 
 	{
 		QStringLiteral("App data size, bytes"),
-		[](const DataSource& source)
+		[](const OnlineLib::DataSource& source)
 		{
 			return source.appDataSizeBytes();
 		}
@@ -253,7 +253,7 @@ static const std::vector<dynamicPropertyFieldDefinition> dynamicPropertiesFieldL
 		QStringLiteral("RUP frame plant time"),
 		[](const Network::AppDataSourceState& state)
 		{
-		 return DataSourceOnline::getTimeStr(state.lmtime());
+		 return OnlineLib::DataSourceOnline::getTimeStr(state.lmtime());
 		}
 	},
 
@@ -417,7 +417,7 @@ void AppDataSourceWidget::setClientSocket(TcpAppDataClient *tcpClientSocket)
 
 	connect(tcpClientSocket, &TcpAppDataClient::dataSoursesStateUpdated, this, &AppDataSourceWidget::updateStateFields);
 
-	DataSource ds;
+	OnlineLib::DataSource ds;
 
 	bool res = m_tcpClientSocket->getDataSource(m_equipmentId, &ds);
 

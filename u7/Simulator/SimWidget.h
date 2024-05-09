@@ -13,8 +13,11 @@ class SimProjectWidget;
 class SimOutputWidget;
 class SimMemoryWidget;
 class SimToolBar;
-class TabWidgetEx;
 
+namespace UiLib
+{
+	class TabWidgetEx;
+}
 
 class SimWidget : public QMainWindow, HasDbController
 {
@@ -92,7 +95,7 @@ public:
 private:
 	bool m_slaveWindow = false;				// Cannot have output pane, do not stores its state
 	bool m_showEventFired = false;			// Save of widget state possible only after showEvent, otherwise stae will be starge, even can hide all child widgets.
-	TabWidgetEx* m_tabWidget = nullptr;
+	UiLib::TabWidgetEx* m_tabWidget = nullptr;
 
 	SimToolBar* m_toolBar = nullptr;
 	QLabel* m_timeIndicator = nullptr;	// Widget on toolbar to show current simulation time

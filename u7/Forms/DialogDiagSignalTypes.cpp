@@ -1,7 +1,9 @@
 #include "DialogDiagSignalTypes.h"
-#include "Settings.h"
-#include "../lib/StandardColors.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "Settings.h"
+
+#include <UiLib/PropertyEditor.h>
+#include <UiLib/StandardColors.h>
 
 //
 // DialogDiagSignalTypes

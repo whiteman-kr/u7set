@@ -1,13 +1,13 @@
 #ifndef SIMSIGNALSNAPSHOT_H
 #define SIMSIGNALSNAPSHOT_H
 
-#include "../../lib/Ui/DialogSignalSnapshot.h"
+#include <SchemaClientLib/DialogSignalSnapshot.h>
 #include "../../VFrame30/AppSignalController.h"
 
 class SimWidget;
 class SimIdeSimulator;
 
-class SimDialogSignalSnapshot : public DialogSignalSnapshot
+class SimDialogSignalSnapshot : public SchemaClientLib::DialogSignalSnapshot
 {
 	Q_OBJECT
 public:

@@ -1,13 +1,12 @@
 #include "SimSignalSnapshot.h"
-#include "SimWidget.h"
 #include "SimIdeSimulator.h"
+#include "SimWidget.h"
 
 bool SimDialogSignalSnapshot::showDialog(SimIdeSimulator* simuator,
 										 VFrame30::AppSignalController* appSignalController,
 										 QString lmEquipmentId,
 										 SimWidget* simWidget)
 {
-
 	SimDialogSignalSnapshot* dss = new SimDialogSignalSnapshot(simuator,
 															   &appSignalController->appSignalManager(),
 															   simuator->projectName(),
@@ -34,9 +33,9 @@ SimDialogSignalSnapshot::SimDialogSignalSnapshot(SimIdeSimulator* simuator,
 												 QString projectName,
 												 QString softwareEquipmentId,
 												 QString lmEquipmentId,
-												 QWidget *parent)
-	:DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, parent),
-	  m_simuator(simuator)
+												 QWidget* parent) :
+	DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, parent),
+	m_simuator(simuator)
 {
 	if (m_simuator == nullptr)
 	{
@@ -58,7 +57,6 @@ SimDialogSignalSnapshot::SimDialogSignalSnapshot(SimIdeSimulator* simuator,
 	}
 
 	return;
-
 }
 
 void SimDialogSignalSnapshot::projectUpdated()
@@ -89,4 +87,3 @@ std::set<QString> SimDialogSignalSnapshot::schemaAppSignals(const QString& schem
 
 	return std::set<QString>();
 }
-

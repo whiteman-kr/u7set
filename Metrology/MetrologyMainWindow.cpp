@@ -1,6 +1,6 @@
 #include "MetrologyMainWindow.h"
 
-#include "../lib/Ui/DialogAbout.h"
+#include <UiLib/DialogAbout.h>
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Ui/UiTools.h"
 
@@ -2045,7 +2045,7 @@ void MainWindow::aboutConnection()
 
 void MainWindow::aboutApp()
 {
-	DialogAbout::show(this, QString(), ":/Logo/RadiyLogo.png");
+	UiLib::DialogAbout::show(this, QString(), ":/Logo/RadiyLogo.png");
 }
 
 // -------------------------------------------------------------------------------------------------------------------

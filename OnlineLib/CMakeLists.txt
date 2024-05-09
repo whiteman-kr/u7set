@@ -19,6 +19,8 @@ qt_add_library(${TARGET} STATIC
 	CfgServerLoader.h
 	CircularLogger.cpp
 	CircularLogger.h
+	DataSource.cpp
+	DataSource.h
 	MatsUsers.cpp
 	MatsUsers.h
 	OnlineDataSource.cpp
@@ -31,6 +33,7 @@ qt_add_library(${TARGET} STATIC
 	SignalStatesDistributor.h
 	SignalStatesProcessor.cpp
 	SignalStatesProcessor.h
+	SoftwareEndpoint.h
 	SocketIO.cpp
 	SocketIO.h
 	SoftwareInfo.cpp

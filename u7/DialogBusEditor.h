@@ -1,10 +1,15 @@
 #ifndef DIALOGBUSEDITOR_H
 #define DIALOGBUSEDITOR_H
 
-#include "../lib/PropertyEditor.h"
-#include "../lib/PropertyEditorDialog.h"
-
 #include "BusStorage.h"
+
+
+class PropertyEditorDialog;
+
+namespace ExtWidgets
+{
+	class PropertyEditor;
+}
 
 class DialogBusEditor : public QDialog
 {

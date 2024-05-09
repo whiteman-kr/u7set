@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui ${CMAKE_CURRENT_SOURCE_DIR}/../libs/SchemaClientLib)
 
 if (MSVC)
   # MSVC warning suppressions
@@ -21,53 +21,20 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Svg Serial
 qt_standard_project_setup()
 
 set (U7_SOURCES
-	../lib/CodeEditor.cpp
-	../lib/CodeEditor.h
 	../lib/Configurator.cpp
 	../lib/Configurator.h
 	../lib/ConstStrings.h
 	../lib/diff_match_patch.h
-	../lib/ExportPrint.cpp
-	../lib/ExportPrint.h
-	../lib/PropertyEditor.cpp
-	../lib/PropertyEditor.h
-	../lib/PropertyEditorDialog.cpp
-	../lib/PropertyEditorDialog.h
-	../lib/PropertyTable.cpp
-	../lib/PropertyTable.h
-	../lib/QDoublevalidatorEx.h
-	../lib/StandardColors.h
 	../lib/Tuning/TuningFilterEditor.cpp
 	../lib/Tuning/TuningFilterEditor.h
 	../lib/Tuning/TuningModel.cpp
 	../lib/Tuning/TuningModel.h
-	../lib/Ui/ChooseTagsWidget.cpp
-	../lib/Ui/ChooseTagsWidget.h
-	../lib/Ui/ClickableLabel.h
-	../lib/Ui/DialogAbout.cpp
-	../lib/Ui/DialogAbout.h
-	../lib/Ui/DialogProgress.cpp
-	../lib/Ui/DialogProgress.h
-	../lib/Ui/DialogSignalInfo.cpp
-	../lib/Ui/DialogSignalInfo.h
-	../lib/Ui/DialogSignalSearch.cpp
-	../lib/Ui/DialogSignalSearch.h
-	../lib/Ui/DialogSignalSnapshot.cpp
-	../lib/Ui/DialogSignalSnapshot.h
-	../lib/Ui/DialogWriteValues.cpp
-	../lib/Ui/DialogWriteValues.h
-	../lib/Ui/DragDropHelper.cpp
-	../lib/Ui/DragDropHelper.h
-	../lib/Ui/FilesTreeView.cpp
-	../lib/Ui/FilesTreeView.h
-	../lib/Ui/SchemaListWidget.cpp
-	../lib/Ui/SchemaListWidget.h
-	../lib/Ui/TabWidgetEx.cpp
-	../lib/Ui/TabWidgetEx.h
-	../lib/Ui/TagSelectorWidget.cpp
-	../lib/Ui/TagSelectorWidget.h
-	../lib/Ui/TextEditCompleter.cpp
-	../lib/Ui/TextEditCompleter.h
+	./Ui/FilesTreeView.cpp
+	./Ui/FilesTreeView.h
+	./Ui/PropertyTable.cpp
+	./Ui/PropertyTable.h
+	./Ui/TextEditCompleter.cpp
+	./Ui/TextEditCompleter.h
 	AppSignalPropertyManager.cpp
 	AppSignalPropertyManager.h
 	AppSignalSetProvider.cpp
@@ -88,8 +55,8 @@ set (U7_SOURCES
 	CreateSignalsDialog.h
 	CreateUserDialogDialog.cpp
 	CreateUserDialogDialog.h
-	DbTagsEditor.cpp
-	DbTagsEditor.h
+	DbChooseItemsDialog.cpp
+	DbChooseItemsDialog.h
 	DialogAfbLibraryCheck.cpp
 	DialogAfbLibraryCheck.h
 	DialogAppSignalLists.cpp
@@ -334,7 +301,6 @@ set (U7_RESOURCES
 )
 
 set (U7_FORMS
-	${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui/DialogSignalInfo.ui
 	CreateProjectDialog.ui
 	CreateUserDialogDialog.ui
 	DialogSettings.ui
@@ -399,18 +365,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<vector>
 	<ranges>
 
-	#include <QHBoxLayout>
-	#include <QHeaderView>
-	#include <QListView>
-	#include <QPushButton>
-	#include <QScreen>
-	#include <QSettings>
-	#include <QStandardItemModel>
-	#include <QTableView>
-
-
-
-
 	<QAction>
 	<QActionGroup>
 	<QApplication>
@@ -431,12 +385,14 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QHeaderView>
 	<QHostInfo>
 	<QInputDialog>
+	<QItemDelegate>
 	<QJSEngine>
 	<QJsonArray>
 	<QJsonDocument>
 	<QJsonObject>
 	<QJsonValue>
 	<QLabel>
+	<QListView>
 	<QListWidget>
 	<QListWidgetItem>
 	<QMainWindow>
@@ -453,6 +409,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QProgressDialog>
 	<QPushButton>
 	<QRadioButton>
+	<QScreen>
 	<QScrollBar>
 	<QSettings>
 	<QShortcut>
@@ -504,7 +461,7 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql
 	Qt6::SerialPort Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
-	TrendView Simulator qt6keychain Builder VFrame30 ReportLib AppSignalLists)
+	TrendView Simulator qt6keychain Builder VFrame30 ReportLib AppSignalLists SchemaClientLib UiLib)
 
 # Link Visaul Leak Detector
 #

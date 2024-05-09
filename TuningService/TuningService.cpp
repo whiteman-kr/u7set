@@ -527,7 +527,7 @@ namespace Tuning
 
 		QVector<TuningSource> sources;
 
-		bool result = DataSourcesXML<TuningSource>::readFromXml(fileData, &sources);
+		bool result = OnlineLib::DataSourcesXML<TuningSource>::readFromXml(fileData, &sources);
 
 		RETURN_IF_FALSE(result);
 

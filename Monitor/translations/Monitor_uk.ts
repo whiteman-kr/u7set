@@ -631,28 +631,28 @@ Server: %14</source>
     </message>
 </context>
 <context>
-    <name>ChooseTagsWidget</name>
+    <name>ChooseItemsWidget</name>
     <message>
         <source>Tag</source>
         <translation type="vanished">Тег</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/ChooseTagsWidget.cpp" line="146"/>
+        <location filename="../../lib/Ui/ChooseItemsWidget.cpp" line="146"/>
         <source>Description</source>
         <translation>Опис</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/ChooseTagsWidget.cpp" line="162"/>
+        <location filename="../../lib/Ui/ChooseItemsWidget.cpp" line="162"/>
         <source>Filter</source>
         <translation>Фільтр</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/ChooseTagsWidget.cpp" line="163"/>
+        <location filename="../../lib/Ui/ChooseItemsWidget.cpp" line="163"/>
         <source>Start typing to filter %1</source>
         <translation>Введіть фільтр: %1</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/ChooseTagsWidget.cpp" line="184"/>
+        <location filename="../../lib/Ui/ChooseItemsWidget.cpp" line="184"/>
         <source>Predefined %1:</source>
         <translation>Передвстановлені %1:</translation>
     </message>
@@ -661,12 +661,12 @@ Server: %14</source>
         <translation type="vanished">Введіть тег</translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/ChooseTagsWidget.cpp" line="170"/>
+        <location filename="../../lib/Ui/ChooseItemsWidget.cpp" line="170"/>
         <source>OK</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Ui/ChooseTagsWidget.cpp" line="175"/>
+        <location filename="../../lib/Ui/ChooseItemsWidget.cpp" line="175"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>

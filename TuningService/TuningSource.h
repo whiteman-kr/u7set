@@ -2,12 +2,12 @@
 
 #include <optional>
 
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 #include "../lib/TuningDataStorage.h"
 
 namespace Tuning
 {
-	class TuningSource : public DataSource
+	class TuningSource : public OnlineLib::DataSource
 	{
 	public:
 		TuningSource();

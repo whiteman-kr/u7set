@@ -1,9 +1,11 @@
 #pragma once
 
 #include "../../Builder/DiagSignalTypesStorage.h"
-#include "../lib/PropertyEditor.h"
-#include "../lib/PropertyEditorDialog.h"
 
+namespace ExtWidgets
+{
+	class PropertyEditor;
+}
 
 class DialogDiagSignalTypes : public QDialog
 {

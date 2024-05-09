@@ -28,8 +28,6 @@ qt_add_library(${TARGET} STATIC
 	../GatewayService/ModbusTcpSlaveGateway.cpp
 	../GatewayService/ModbusTcpSlaveGateway.h
 	../lib/ConstStrings.h
-	../lib/DataSource.cpp
-	../lib/DataSource.h
 	../lib/LogicModuleSet.cpp
 	../lib/LogicModuleSet.h
 	../lib/Tuning/TuningFilter.cpp

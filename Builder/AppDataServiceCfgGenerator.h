@@ -27,7 +27,7 @@ namespace Builder
 
 		bool writeRunScriptFile(const QString& profile, const AppDataServiceSettings& settings, E::OS os);
 
-		bool findAppDataSourceAcquiredSignals(DataSource& appDataSource);
+		bool findAppDataSourceAcquiredSignals(OnlineLib::DataSource& appDataSource);
 
 	private:
 		std::set<Hash> m_acquiredAppSignals;		// set of calcHash(signal.appSignalID)

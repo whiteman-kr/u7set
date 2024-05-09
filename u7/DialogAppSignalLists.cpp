@@ -4,7 +4,7 @@
 
 #include "../UtilsLib/Ui/UiTools.h"
 #include "IdePropertyEditor.h"
-#include "../lib/StandardColors.h"
+#include "../libs/UiLib/include/UiLib/StandardColors.h"
 
 #include <AppSignalLists/SignalListEditor.h>
 #include "AppSignalSetProvider.h"

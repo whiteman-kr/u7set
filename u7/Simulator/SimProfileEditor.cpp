@@ -1,12 +1,15 @@
 #include "SimProfileEditor.h"
-#include "../../UtilsLib/Ui/UiTools.h"
 #include "GlobalMessanger.h"
+
+#include "../../UtilsLib/Ui/UiTools.h"
+#include <Simulator/SimProfiles.h>
+#include <UiLib/CodeEditor.h>
 
 
 SimProfileEditor* SimProfileEditor::m_simProfileEditor = nullptr;
 
 const QString SimProfileEditor::m_exampleText =
-R"(// Syntaxis:
+	R"(// Syntaxis:
 //
 // [Profile1]: Define profile "Profile1"
 //
@@ -19,7 +22,7 @@ R"(// Syntaxis:
 //
 [Local]
 
-// Overwrites real AppDataService.AppDataReceivingIP address to loacalhost IP address
+// Overwrites real AppDataService.AppDataReceivingIP address to localhost IP address
 //
 USER_APP_DATA_SERVICE_ID.AppDataReceivingIP = "127.0.0.1";
 
@@ -28,7 +31,7 @@ USER_APP_DATA_SERVICE_ID.AppDataReceivingIP = "127.0.0.1";
 //
 USER_APP_DATA_SERVICE_ID.AppDataReceivingNetmask = "0.0.0.0";
 
-// Overwrites real TuningService.TuningDataIP address to loacalhost IP address
+// Overwrites real TuningService.TuningDataIP address to localhost IP address
 //
 USER_TUNING_SERVICE_ID.TuningDataIP = "127.0.0.1";
 
@@ -47,12 +50,12 @@ USER_TUNING_SERVICE_ID.TuningSimIP = "127.0.0.1";
 // 1) In cmd line of CfgService specify parameters: -mode=simulation -profile=Local.
 // 2) Run CfgService, AppDataService, TuningService, TuningClient, Monitor.
 // 3) Load last successful build in Simulator.
-// 4) Press 'Allow LogicModules' Application data transmittion to AppDataSrv' button on Simulator toolbar.
+// 4) Press 'Allow LogicModules' Application data transmitting to AppDataSrv' button on Simulator toolbar.
 // 5) Press 'Run simulation for complete project' button on Simulator toolbar.
 //	  After that states of AppData signals will be displayed in Monitor.
 // 6) Enable Tuning mode by pressing 'Arming key' and 'Tuning key' buttons on control tab of required LM
 // 7) Activate Control of required LM in TuningClient. After that TuningClient should indicate
-//	  successfull communication with selected LM and display valid values of tunable signals.
+//	  successful communication with selected LM and display valid values of tunable signals.
 )";
 
 void SimProfileEditor::run(DbController* dbController, QWidget* parent)
@@ -69,7 +72,7 @@ void SimProfileEditor::run(DbController* dbController, QWidget* parent)
 	}
 }
 
-SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	:
+SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
 	m_db(dbController)
 {
@@ -88,21 +91,21 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 	// Create Text Editor
 	//
 
-    m_textEdit = new CodeEditor(this);
+	m_textEdit = new UiLib::CodeEditor(this);
 
 #if defined(Q_OS_WIN)
-		QFont f = QFont("Consolas");
+	QFont f = QFont("Consolas");
 #else
-		QFont f = QFont("Courier");
+	QFont f = QFont("Courier");
 #endif
 
 	m_textEdit->setFont(f);
 
-	JsHighlighter::createJsHighlighter(m_textEdit);
+	UiLib::JsHighlighter::createJsHighlighter(m_textEdit);
 
-    connect(m_textEdit, &CodeEditor::textChanged, this, &SimProfileEditor::textChanged);
+	connect(m_textEdit, &UiLib::CodeEditor::textChanged, this, &SimProfileEditor::textChanged);
 
-    // Buttons
+	// Buttons
 	//
 	QPushButton* buttonCheck = new QPushButton(tr("Check"));
 	QPushButton* buttonExample = new QPushButton(tr("Example"));
@@ -136,7 +139,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 
 	// Load file from database
 	//
-    std::vector<DbFileInfo> fileList;
+	std::vector<DbFileInfo> fileList;
 
 	bool ok = m_db->getFileList(&fileList, DbDir::EtcDir, Db::File::SimProfilesFileName, true, this);
 
@@ -148,11 +151,11 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 		{
 			QString text(file->data());
 
-            m_textEdit->setText(text);
+			m_textEdit->setText(text);
 
 			m_startText = text;
 		}
-    }
+	}
 
 	// Resize dialog
 	//
@@ -170,10 +173,9 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent)	
 	{
 		QRect screen = parentWidget()->screen()->availableGeometry();
 
-		resize(static_cast<int>(screen.width() * 0.35),
-			   static_cast<int>(screen.height() * 0.35));
+		resize(static_cast<int>(screen.width() * 0.35), static_cast<int>(screen.height() * 0.35));
 		move(screen.center() - rect().center());
-    }
+	}
 
 	return;
 }
@@ -214,7 +216,10 @@ bool SimProfileEditor::askForSaveChanged()
 		return true;
 	}
 
-	QMessageBox::StandardButton result = QMessageBox::warning(this, qAppName(), "Do you want to save your changes?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+	QMessageBox::StandardButton result = QMessageBox::warning(this,
+															  qAppName(),
+															  "Do you want to save your changes?",
+															  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
 	if (result == QMessageBox::Yes)
 	{
@@ -246,7 +251,8 @@ bool SimProfileEditor::saveChanges()
 		int mbResult = QMessageBox::warning(this,
 											qAppName(),
 											tr("There are errors in the document. Are you sure you want to save it anyway?"),
-											QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+											QMessageBox::Yes | QMessageBox::No,
+											QMessageBox::No);
 
 		if (mbResult == QMessageBox::No)
 		{
@@ -258,9 +264,7 @@ bool SimProfileEditor::saveChanges()
 	//
 	bool ok = false;
 
-	QString comment = QInputDialog::getText(this, qAppName(),
-											tr("Please enter comment:"), QLineEdit::Normal,
-											tr("comment"), &ok);
+	QString comment = QInputDialog::getText(this, qAppName(), tr("Please enter comment:"), QLineEdit::Normal, tr("comment"), &ok);
 
 	if (ok == false)
 	{
@@ -342,9 +346,9 @@ void SimProfileEditor::checkProfiles()
 
 	if (profiles.parse(m_textEdit->text(), &errorMsg) == true)
 	{
-		//QString dump = profiles.dump();
+		// QString dump = profiles.dump();
 
-		QMessageBox::information(this, qAppName(), tr("Profiles loaded successfully.")/* + dump*/);
+		QMessageBox::information(this, qAppName(), tr("Profiles loaded successfully.") /* + dump*/);
 	}
 	else
 	{
@@ -362,7 +366,7 @@ void SimProfileEditor::example()
 	}
 
 	m_textEdit->setText(m_textEdit->text() + m_exampleText);
-	//textChanged();
+	// textChanged();
 
 	return;
 }

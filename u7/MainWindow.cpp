@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/LogicModuleSet.h"
-#include "../lib/Ui/DialogAbout.h"
+#include <UiLib/DialogAbout.h>
 #include "./EquipmentEditor/EquipmentTabPage.h"
 #include "./Forms/DialogDiagSignalTypes.h"
 #include "./Forms/FileHistoryDialog.h"
@@ -633,13 +633,13 @@ void MainWindow::createStatusBar()
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
 
-	m_statusBarSchemaLayerLabel = new ClickableLabel("Layer: ");
+	m_statusBarSchemaLayerLabel = new UiLib::ClickableLabel("Layer: ");
 	m_statusBarSchemaLayerLabel->setAlignment(Qt::AlignHCenter);
 	m_statusBarSchemaLayerLabel->setMinimumWidth(100);
 	m_statusBarSchemaLayerLabel->setVisible(false);
 	m_statusBarSchemaLayerLabel->setCursor(Qt::PointingHandCursor);
 
-	m_statusBarSchemaZoomLabel = new ClickableLabel("Zoom: ");
+	m_statusBarSchemaZoomLabel = new UiLib::ClickableLabel("Zoom: ");
 	m_statusBarSchemaZoomLabel->setAlignment(Qt::AlignHCenter);
 	m_statusBarSchemaZoomLabel->setMinimumWidth(80);
 	m_statusBarSchemaZoomLabel->setVisible(false);
@@ -1250,7 +1250,7 @@ void MainWindow::showAbout()
 	QString text = "Supported project database version: " + QString::number(DbController::databaseVersion()) + "<br><br>";
 	text += qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and MATS software configuration.<br>";
 
-	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 
 	return;
 }

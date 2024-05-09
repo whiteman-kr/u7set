@@ -3,7 +3,8 @@
 
 #include "../../VFrame30/AppSignalController.h"
 #include "../TuningConnectionStub.h"
-#include "../lib/Ui/DialogSignalInfo.h"
+
+#include <SchemaClientLib/DialogSignalInfo.h>
 #include <Simulator/SimAppSignalManager.h>
 
 class SimWidget;

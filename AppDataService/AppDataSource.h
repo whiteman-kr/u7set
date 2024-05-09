@@ -2,16 +2,16 @@
 
 #include<queue>
 
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "DynamicAppSignalState.h"
 
 class AppDataReceiver;
 
-class AppDataSource : public DataSourceOnline
+class AppDataSource : public OnlineLib::DataSourceOnline
 {
 public:
-	AppDataSource(const DataSource& dataSource);
+	AppDataSource(const OnlineLib::DataSource& dataSource);
 	AppDataSource(const Network::DataSourceInfo& proto);
 	virtual ~AppDataSource();
 
@@ -99,7 +99,7 @@ public:
 	~AppDataSources();
 
 	bool init(const QString& profile,
-			  const QVector<DataSource>& dataSources,
+			  const QVector<OnlineLib::DataSource>& dataSources,
 			  CircularLoggerShared logger);
 	void clear();
 

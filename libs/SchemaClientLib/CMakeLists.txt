@@ -16,10 +16,16 @@ qt_add_library(${TARGET} STATIC
 	./include/SchemaClientLib/AppDataSourcesWidget.h
 	./include/SchemaClientLib/ClientSchemaManager.h
 	./include/SchemaClientLib/DevToolsWindow.h
+	./include/SchemaClientLib/DialogSignalInfo.h
+	./include/SchemaClientLib/DialogSignalSearch.h
+	./include/SchemaClientLib/DialogSignalSnapshot.h
 	./include/SchemaClientLib/DialogTcpStatistics.h
+	./include/SchemaClientLib/DialogWriteTuningValues.h
+	./include/SchemaClientLib/DragDropHelper.h
 	./include/SchemaClientLib/IDevTools.h
 	./include/SchemaClientLib/SchemaClientConfigController.h
 	./include/SchemaClientLib/SchemaDrawStatistics.h
+	./include/SchemaClientLib/SchemaListWidget.h
 	./include/SchemaClientLib/SchemaTabWidget.h
 	./include/SchemaClientLib/TuningSourcesWidget.h
 	AppDataSourcesWidget.cpp
@@ -39,18 +45,28 @@ qt_add_library(${TARGET} STATIC
 	DevToolsWidget.cpp
 	DevToolsWidget.h
 	DevToolsWindow.cpp
+	DialogSignalInfo.cpp
+	DialogSignalInfo.ui
+	DialogSignalSearch.cpp
+	DialogSignalSnapshot.cpp
 	DialogSourceInfo.cpp
 	DialogSourceInfo.h
 	DialogTcpStatistics.cpp
+	DialogWriteTuningValues.cpp
+	DragDropHelper.cpp
 	SchemaClientConfigController.cpp
 	SchemaDrawStatistics.cpp
+	SchemaListWidget.cpp
+	SchemaListWidgetPrivate.cpp
+	SchemaListWidgetPrivate.h
 	SchemaTabWidget.cpp
+	SignalSnapshotModel.cpp
+	SignalSnapshotModel.h
+	SignalSnapshotWidget.cpp
+	SignalSnapshotWidget.h
 	TcpStatisticsWidget.cpp
 	TcpStatisticsWidget.h
 	TuningSourcesWidget.cpp
-
-	../../lib/Ui/TabWidgetEx.cpp  # !!! Note that is used in other projects without this library !!!
-	../../lib/Ui/TabWidgetEx.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -72,28 +88,44 @@ target_precompile_headers(${TARGET} PRIVATE
 	<vector>
 
 	<QAction>
+	<QActionGroup>
 	<QApplication>
+	<QClipboard>
 	<QComboBox>
+	<QCompleter>
 	<QCoreApplication>
 	<QDateTime>
 	<QDialog>
 	<QDomDocument>
+	<QDrag>
+	<QFileDialog>
 	<QHBoxLayout>
+	<QHeaderView>
 	<QJSEngine>
+	<QKeyEvent>
 	<QLabel>
 	<QLineEdit>
 	<QLocale>
 	<QMenu>
 	<QMessageBox>
+	<QMimeData>
+	<QMouseEvent>
+	<QPainter>
 	<QPushButton>
 	<QReadWriteLock>
+	<QSettings>
 	<QSharedMemory>
+	<QStringListModel>
+	<QTableView>
 	<QTabWidget>
 	<QTextEdit>
 	<QTimer>
 	<QTimeZone>
+	<QToolButton>
+	<QToolTip>
 	<QTranslator>
 	<QTreeWidget>
+	<QTreeWidgetItem>
 	<QVBoxLayout>
 
 	# Project headers
@@ -103,8 +135,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../CommonLib/PropertyObject.h"
 
 	<ProtoSerialization.h>
+	<AppSignal.pb.h>
 	<Network.pb.h>
 
+	"../../AppSignalLib/AppSignal.h"
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"
 )
@@ -116,7 +150,7 @@ target_compile_definitions(${TARGET} PRIVATE SCHEMACLIENT_LIB_DOMAIN)
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib OnlineLib ClientLib VFrame30)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib Protobuf OnlineLib AppSignalLib ClientLib VFrame30 UiLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

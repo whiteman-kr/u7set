@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../CommonLib/Hash.h"
-#include "../lib/DataSource.h"
+#include "DataSource.h"
 
-class BaseOnlineDataSource : public DataSource
+class BaseOnlineDataSource : public OnlineLib::DataSource
 {
 private:
 	static const int APP_DATA_SOURCE_TIMEOUT = 500;

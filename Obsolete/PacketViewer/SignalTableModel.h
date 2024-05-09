@@ -2,7 +2,7 @@
 #define SIGNALTABLEMODEL_H
 
 #include <QAbstractTableModel>
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 
 class AppSignalSet;
 class DataSource;

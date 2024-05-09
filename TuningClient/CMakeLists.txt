@@ -22,22 +22,12 @@ qt_standard_project_setup()
 
 set (TC_SOURCES
 	../lib/ConstStrings.h
-	../lib/PropertyEditor.cpp
-	../lib/PropertyEditor.h
-	../lib/PropertyEditorDialog.cpp
-	../lib/PropertyEditorDialog.h
 	../lib/Tuning/TuningFilter.cpp
 	../lib/Tuning/TuningFilter.h
 	../lib/Tuning/TuningFilterEditor.cpp
 	../lib/Tuning/TuningFilterEditor.h
 	../lib/Tuning/TuningModel.cpp
 	../lib/Tuning/TuningModel.h
-	../lib/Ui/DialogAbout.cpp
-	../lib/Ui/DialogAbout.h
-	../lib/Ui/DialogAlert.cpp
-	../lib/Ui/DialogAlert.h
-	../lib/Ui/DialogWriteValues.cpp
-	../lib/Ui/DialogWriteValues.h
 	DialogChooseFilter.cpp
 	DialogChooseFilter.h
 	DialogFilterEditor.cpp

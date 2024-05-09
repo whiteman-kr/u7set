@@ -5,14 +5,14 @@
 #include "MonitorConfigController.h"
 #include "MonitorSignalInfo.h"
 #include "DialogChooseArchiveSignals.h"
-#include "../lib/ExportPrint.h"
+#include <UiLib/ExportPrint.h>
 
 //
 // MonitorExportPrint
 //
 namespace
 {
-	class MonitorExportPrint : public ExportPrint
+	class MonitorExportPrint : public UiLib::ExportPrint
 	{
 	public:
 		MonitorExportPrint(ArchiveSource* source,
@@ -34,7 +34,7 @@ namespace
 										   QString projectName,
 										   QString softwareId,
 										   QWidget* parent)	:
-		ExportPrint(parent),
+		UiLib::ExportPrint(parent),
 		m_source(source),
 		m_projectName(projectName),
 		m_softwareId(softwareId)

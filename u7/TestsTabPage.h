@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Simulator/Simulator.h>
-#include "../lib/Ui/FilesTreeView.h"
+#include "./Ui/FilesTreeView.h"
 
 #include "GlobalMessanger.h"
 #include "IdePropertyEditor.h"
