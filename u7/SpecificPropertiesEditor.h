@@ -1,7 +1,7 @@
 #ifndef SPECIFICPROPERTIESEDITOR_H
 #define SPECIFICPROPERTIESEDITOR_H
 
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 
 enum class SpecificPropertyEditorColumns
 {

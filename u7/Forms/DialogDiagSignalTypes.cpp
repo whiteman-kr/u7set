@@ -1,7 +1,9 @@
 #include "DialogDiagSignalTypes.h"
-#include "Settings.h"
-#include "../lib/StandardColors.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include "Settings.h"
+
+#include <UiLib/PropertyEditor.h>
+#include <UiLib/StandardColors.h>
 
 //
 // DialogDiagSignalTypes
@@ -26,7 +28,7 @@ DialogDiagSignalTypes::DialogDiagSignalTypes(DbController* db, QWidget* parent) 
 	m_diagSignalTypesTree = new QTreeWidget();
 
 	QStringList l;
-	l << tr("DiagSignalID");
+	l << tr("DiagSignalTypeID");
 	l << tr("State");
 	l << tr("User");
 
@@ -856,7 +858,7 @@ void DialogDiagSignalTypes::onImport()
 			continue;
 		}
 
-		QString newSignalTypeId = tr("%1 (Import)").arg(dst->signalTypeId());
+		QString newSignalTypeId = dst->signalTypeId();
 		int copyNumber = 1;
 		while (m_diagSignalTypes.hasSignalTypeId(newSignalTypeId) == true)
 		{

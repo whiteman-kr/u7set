@@ -1,8 +1,6 @@
 #include "DiagDataServiceCfgGenerator.h"
 #include "SoftwareSettingsGetter.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../lib/DataSource.h"
-
 #include <HardwareLib/DeviceChassis.h>
 #include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/DeviceController.h>
@@ -117,7 +115,7 @@ namespace Builder
 
 		m_lmAcquiredDiagSignals.clear();
 
-		QVector<DataSource> dataSources;
+		QVector<OnlineLib::DataSource> dataSources;
 
 		QStringList profiles = m_settingsSet.getSettingsProfiles();
 
@@ -141,7 +139,7 @@ namespace Builder
 					continue;
 				}
 
-				DataSource ds;
+				OnlineLib::DataSource ds;
 
 				ds.setProfile(profile);
 
@@ -191,6 +189,8 @@ namespace Builder
 			}
 		}
 
+		RETURN_IF_FALSE(result)
+
 		result &= findAcquiredParentObjects();
 
 		RETURN_IF_FALSE(result)
@@ -198,7 +198,7 @@ namespace Builder
 		//
 
 		QByteArray fileData;
-		result &= DataSourcesXML<DataSource>::writeToXml(dataSources, &fileData);
+		result &= OnlineLib::DataSourcesXML<OnlineLib::DataSource>::writeToXml(dataSources, &fileData);
 
 		RETURN_IF_FALSE(result)
 
@@ -234,7 +234,7 @@ namespace Builder
 		return m_cfgXml->addLinkToFile(buildFile);
 	}
 
-	bool DiagDataServiceCfgGenerator::appendAquiredDiagSignalsToDataSource(const Hardware::DeviceModule* lm, DataSource* ds)
+	bool DiagDataServiceCfgGenerator::appendAquiredDiagSignalsToDataSource(const Hardware::DeviceModule* lm, OnlineLib::DataSource* ds)
 	{
 		TEST_PTR_RETURN_FALSE(lm);
 		TEST_PTR_RETURN_FALSE(ds);
@@ -286,12 +286,20 @@ namespace Builder
 		//
 		DeviceHelper::getChildDiagSignals(chassis, &acquiredDiagSignals);
 
-		qDebug() << C_STR(QString("LM %1 diag signals:").arg(lm->equipmentIdTemplate()));
+//		qDebug() << C_STR(QString("LM %1 diag signals:").arg(lm->equipmentIdTemplate()));
 
-		for(auto& ds : acquiredDiagSignals)
+		for(DiagSignalConstShared& ds : acquiredDiagSignals)
 		{
-			qDebug() << C_STR(ds->equipmentIdTemplate());
+			if (m_context->m_diagSignalTypes->isKnownDiagSignalTypeId(ds->signalTypeId()) == false)
+			{
+				// DiagSignal %1 has unknown diag signal type ID = %2
+				//
+				m_log->errDGN7000(ds->equipmentIdTemplate(), ds->signalTypeId());
+				result = false;
+			}
 		}
+
+		RETURN_IF_FALSE(result);
 
 		// --------------------------------------------------------------------------------------------
 

@@ -394,7 +394,8 @@ public:
 	T* beginPop(const QThread* thread);
 	void completePop(const QThread* thread);
 
-	bool copyToBuffer(T* buffer, int bufferSizeInItems, int* copiedItemsCount, const QThread* thread);
+	bool pushFromBuffer(T* buffer, int itemsInBuffer, const QThread* thread);
+	bool popToBuffer(T* buffer, int bufferSizeInItems, int* copiedItemsCount, const QThread* thread);
 	void nonDestructiveResize(int newQueueSize, const QThread* thread);
 
 	void getSizes(int* curSize, int* curMaxSize, int* queueSize, const QThread* thread);
@@ -678,7 +679,62 @@ void FastThreadSafeQueue<T>::completePop(const QThread* thread)
 }
 
 template <typename T>
-bool FastThreadSafeQueue<T>::copyToBuffer(T* buffer, int bufferSizeInItems, int* copiedItemsCount, const QThread* thread)
+bool FastThreadSafeQueue<T>::pushFromBuffer(T* buffer, int itemsInBuffer, const QThread* thread)
+{
+	if (buffer == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	Q_ASSERT(itemsInBuffer >= 0);
+	Q_ASSERT(itemsInBuffer <= m_queueSize);
+
+	if (itemsInBuffer == 0)
+	{
+		return true;
+	}
+
+	SimpleMutexLocker locker(&m_mutex, thread);
+
+	Q_UNUSED(locker);
+
+	assert(m_pushIsBegan == false);
+	assert(m_popIsBegan == false);
+
+	int queueCapacity = m_queueSize - m_size;
+
+	if (m_writeIndex() + itemsInBuffer < m_queueSize)
+	{
+		memcpy(m_buffer + m_writeIndex(), buffer, itemsInBuffer * sizeof(T));
+	}
+	else
+	{
+		int firstPartSize = m_queueSize - m_writeIndex();
+
+		memcpy(m_buffer + m_writeIndex(), buffer, firstPartSize * sizeof(T));
+
+		int secondPartSize = itemsInBuffer - firstPartSize;
+
+		if (secondPartSize > 0)
+		{
+			memcpy(m_buffer, buffer + firstPartSize, secondPartSize * sizeof(T));
+		}
+	}
+
+	m_writeIndex += itemsInBuffer;
+	m_size += itemsInBuffer;
+
+	if (queueCapacity < itemsInBuffer)
+	{
+		m_readIndex = m_writeIndex;				// queue items lost
+	}
+
+	return true;
+}
+
+template <typename T>
+bool FastThreadSafeQueue<T>::popToBuffer(T* buffer, int bufferSizeInItems, int* copiedItemsCount, const QThread* thread)
 {
 	if (buffer == nullptr || copiedItemsCount == nullptr)
 	{

@@ -14,7 +14,7 @@
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/LogController.h"
 #include "../UtilsLib/LogFile.h"
-#include "../lib/Ui/DialogAlert.h"
+#include <UiLib/DialogAlert.h>
 
 #include "../OnlineLib/SoftwareInfo.h"
 
@@ -162,7 +162,7 @@ private:
 
 	//ClientLib::AdsConnection m_adsConnection{m_appSignalManager, &m_appSignalManager, &m_LogFile};
 
-	DialogAlert m_dialogAlert;
+	UiLib::DialogAlert m_dialogAlert;
 
 	SchemaClientLib::SchemaDrawStatistics m_schemaStats;
 

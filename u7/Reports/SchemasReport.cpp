@@ -1,9 +1,11 @@
 #include "SchemasReport.h"
-#include "../../lib/Ui/DialogProgress.h"
-#include "../UtilsLib/Ui/UiTools.h"
-#include "../VFrame30/SchemaDetails.h"
 #include "DialogSchemasReport.h"
 #include "Settings.h"
+
+#include "../UtilsLib/Ui/UiTools.h"
+#include "../VFrame30/SchemaDetails.h"
+#include <UiLib/DialogProgress.h>
+
 #include <QDesktopServices>
 
 using namespace ReportLib;
@@ -177,7 +179,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 
 	// Create Progress Dialog
 
-	DialogProgress dialogProgress(QObject::tr("Exporting Schemas to PDF"), 1, m_parent);
+	UiLib::DialogProgress dialogProgress(QObject::tr("Exporting Schemas to PDF"), 1, m_parent);
 
 	// Create thread
 
@@ -207,10 +209,10 @@ void SchemasReportGeneratorThread::run(TaskType task,
 
 	QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
 
-	QObject::connect(&dialogProgress, &DialogProgress::getProgress, worker, &SchemasReportGenerator::progressRequested, Qt::DirectConnection);
-	QObject::connect(&dialogProgress, &DialogProgress::cancelClicked, worker, &SchemasReportGenerator::stop, Qt::DirectConnection);
+	QObject::connect(&dialogProgress, &UiLib::DialogProgress::getProgress, worker, &SchemasReportGenerator::progressRequested, Qt::DirectConnection);
+	QObject::connect(&dialogProgress, &UiLib::DialogProgress::cancelClicked, worker, &SchemasReportGenerator::stop, Qt::DirectConnection);
 
-	QObject::connect(worker, &SchemasReportGenerator::progressChanged, &dialogProgress, &DialogProgress::setProgressSingle);
+	QObject::connect(worker, &SchemasReportGenerator::progressChanged, &dialogProgress, &UiLib::DialogProgress::setProgressSingle);
 
 	//  Schedule objects deleting
 

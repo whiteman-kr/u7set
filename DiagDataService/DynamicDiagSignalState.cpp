@@ -541,10 +541,6 @@ Hash DynamicDiagSignalState::hash() const
 //	return m_signal->appSignalID();
 //}
 
-void DynamicDiagSignalState::setAutoArchivingGroup(int archivingGroup)
-{
-	m_autoArchivingGroup = archivingGroup;
-}
 
 void DynamicDiagSignalState::setGatewayQueueMask(quint32 mask)
 {
@@ -678,7 +674,7 @@ void DynamicDiagSignalState::resetGatewayQueueMask(quint32 mask)
 
 bool DynamicDiagSignalState::getValue(const char* rupData, int rupDataSize, double& value)
 {
-	Q_UNUSED(rupDataSize);
+/*	Q_UNUSED(rupDataSize);
 
 	// get double signal value from rupData buffer using parseInfo
 	//
@@ -759,7 +755,7 @@ bool DynamicDiagSignalState::getValue(const char* rupData, int rupDataSize, doub
 		assert(false);				// unknown m_signalType
 		return false;
 	}
-
+*/
 	return true;
 }
 

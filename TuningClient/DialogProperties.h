@@ -1,9 +1,7 @@
 #ifndef DIALOGPROPERTIES_H
 #define DIALOGPROPERTIES_H
 
-#include <QDialog>
-
-#include "../lib/PropertyEditorDialog.h"
+#include <UiLib/PropertyEditorDialog.h>
 
 
 class DialogProperties : public PropertyEditorDialog
@@ -18,8 +16,6 @@ private:
 	virtual void done(int r);
 
 	void saveSettings();
-
-
 };
 
 #endif // DIALOGPROPERTIES_H

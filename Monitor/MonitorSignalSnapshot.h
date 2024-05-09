@@ -1,18 +1,16 @@
 #pragma once
 
-#include "../lib/Ui/DialogSignalSnapshot.h"
-#include "MonitorCentralWidget.h"
+#include <SchemaClientLib/DialogSignalSnapshot.h>
 
-
+class MonitorCentralWidget;
 class MonitorConfigController;
-
 
 namespace ClientLib
 {
 	class AppSignalManager;
 }
 
-class MonitorDialogSignalSnapshot : public DialogSignalSnapshot
+class MonitorDialogSignalSnapshot : public SchemaClientLib::DialogSignalSnapshot
 {
 	Q_OBJECT
 

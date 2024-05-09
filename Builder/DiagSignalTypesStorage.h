@@ -21,5 +21,13 @@ public:
 	//
 	bool load(QString* errorMessage) override;
 	bool save(const QUuid& uuid, QString* errorMessage) override;
+
+	// use in build time only!
+	//
+	void buildDiagSignalTypesMap();
+	bool isKnownDiagSignalTypeId(const QString& diagSignalTypeId);
+
+private:
+	std::map<QString, int> m_typesMap;
 };
 

@@ -176,9 +176,9 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 	}
 }
 
-std::vector<DataSource> TcpAppDataClient::getDataSources()
+std::vector<OnlineLib::DataSource> TcpAppDataClient::getDataSources()
 {
-	std::vector<DataSource> dataSources;
+	std::vector<OnlineLib::DataSource> dataSources;
 
 	m_appDataSourcesMutex.lock();
 
@@ -186,7 +186,7 @@ std::vector<DataSource> TcpAppDataClient::getDataSources()
 
 	for(const auto& [id, pair] : m_appDataSources)
 	{
-		const DataSource& ds = pair.first;
+		const OnlineLib::DataSource& ds = pair.first;
 		dataSources.push_back(ds);
 	}
 
@@ -195,7 +195,7 @@ std::vector<DataSource> TcpAppDataClient::getDataSources()
 	return dataSources;
 }
 
-bool TcpAppDataClient::getDataSource(const QString& equipmentID, DataSource* ds)
+bool TcpAppDataClient::getDataSource(const QString& equipmentID, OnlineLib::DataSource* ds)
 {
 	TEST_PTR_RETURN_FALSE(ds);
 
@@ -205,7 +205,7 @@ bool TcpAppDataClient::getDataSource(const QString& equipmentID, DataSource* ds)
 
 	for(const auto& [id, pair] : m_appDataSources)
 	{
-		const DataSource& dataSource = pair.first;
+		const OnlineLib::DataSource& dataSource = pair.first;
 
 		if (dataSource.moduleEquipmentID() == equipmentID)
 		{
@@ -230,7 +230,7 @@ bool TcpAppDataClient::getDataSourceState(const QString& equipmentID, Network::A
 
 	for(const auto& [id, pair] : m_appDataSources)
 	{
-		const DataSource& dataSource = pair.first;
+		const OnlineLib::DataSource& dataSource = pair.first;
 
 		if (dataSource.moduleEquipmentID() == equipmentID)
 		{
@@ -303,9 +303,9 @@ void TcpAppDataClient::onGetAppDataSourcesInfoReply(const char* replyData, quint
 			continue;
 		}
 
-		auto [newIt, b] = m_appDataSources.emplace(dsi.id(), std::pair<DataSource, Network::AppDataSourceState>
-																	{DataSource(), Network::AppDataSourceState()});
-		DataSource& ds = newIt->second.first;
+		auto [newIt, b] = m_appDataSources.emplace(dsi.id(), std::pair<OnlineLib::DataSource, Network::AppDataSourceState>
+																	{OnlineLib::DataSource(), Network::AppDataSourceState()});
+		OnlineLib::DataSource& ds = newIt->second.first;
 
 		ds.loadFromProto(dsi);
 	}

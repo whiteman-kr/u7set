@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../lib/Ui/ClickableLabel.h"
+#include <UiLib/ClickableLabel.h>
 #include "../AppSignalSetProvider.h"
 #include "MainTabPage.h"
 
@@ -18,8 +18,8 @@ class SchemasTabPage : public MainTabPage
 public:
 	explicit SchemasTabPage(DbController* dbc,
 							AppSignalSetProvider* signalSetProvider,
-							ClickableLabel* statusBarLayerLabel,
-							ClickableLabel* statusBarZoomLabel,
+							UiLib::ClickableLabel* statusBarLayerLabel,
+							UiLib::ClickableLabel* statusBarZoomLabel,
 							QWidget* parent);
 	virtual ~SchemasTabPage();
 
@@ -51,8 +51,8 @@ protected slots:
 	// Data
 	//
 protected:
-	ClickableLabel* m_statusBarLayerLabel = nullptr;
-	ClickableLabel* m_statusBarZoomLabel = nullptr;
+	UiLib::ClickableLabel* m_statusBarLayerLabel = nullptr;
+	UiLib::ClickableLabel* m_statusBarZoomLabel = nullptr;
 
 	QTabWidget* m_tabWidget = nullptr;
 	SchemaControlTabPage* m_controlTabPage = nullptr;

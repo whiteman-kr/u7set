@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../CommonLib/Hash.h"
-#include "../lib/DataSource.h"
+#include "DataSource.h"
 
-class BaseOnlineDataSource : public DataSource
+class BaseOnlineDataSource : public OnlineLib::DataSource
 {
 private:
 	static const int APP_DATA_SOURCE_TIMEOUT = 500;
@@ -206,6 +206,16 @@ protected:
 	void pushSignalState(const SIGNAL_STATE& state, const QThread* thread)
 	{
 		m_states.push(state, thread);
+	}
+
+public:
+	int popStates(SIGNAL_STATE* signalStatesBuffer, int bufferSize, const QThread* thread)
+	{
+		Q_UNUSED(signalStatesBuffer);
+		Q_UNUSED(bufferSize);
+		Q_UNUSED(thread);
+		Q_ASSERT(false);			// to do
+		return 0;
 	}
 
 private:

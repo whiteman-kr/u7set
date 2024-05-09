@@ -1088,6 +1088,8 @@ namespace Builder
 			return false;
 		}
 
+		storage->buildDiagSignalTypesMap();
+
 		if (storage->count() > 0)
 		{
 			LOG_MESSAGE(m_log, tr("Loaded %1 DiagSignalTypes").arg(m_context->m_matsUsers.count()));

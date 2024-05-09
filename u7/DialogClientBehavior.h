@@ -1,7 +1,10 @@
 #ifndef DIALOGCLIENTBEHAVIOR_H
 #define DIALOGCLIENTBEHAVIOR_H
 
-#include "../lib/PropertyEditor.h"
+namespace ExtWidgets
+{
+	class PropertyEditor;
+} // namespace ExtWidgets
 
 namespace Behavior
 {

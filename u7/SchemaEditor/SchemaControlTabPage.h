@@ -4,9 +4,12 @@
 #include "GlobalMessanger.h"
 
 class EditSchemaTabPage;
-class TagSelectorWidget;
 class AppSignalSetProvider;
 
+namespace UiLib
+{
+	class TagSelectorWidget;
+}
 
 //
 //
@@ -375,7 +378,7 @@ private:
 	QPushButton* m_filterButton = nullptr;
 	QPushButton* m_resetFilterButton = nullptr;
 
-	TagSelectorWidget* m_tagSelector = nullptr;
+	UiLib::TagSelectorWidget* m_tagSelector = nullptr;
 
 	std::list<EditSchemaTabPage*> m_openedFiles;		// Opened files (for edit and view)
 

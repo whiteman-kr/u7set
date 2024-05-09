@@ -2,7 +2,7 @@
 
 #include <QObject>
 #include "../../lib/SoftwareSettings.h"
-#include "../../lib/DataSource.h"
+#include "../../OnlineLib/DataSource.h"
 
 class AppDataServiceClient;
 class QUdpSocket;

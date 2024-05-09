@@ -5,7 +5,7 @@
 
 #include "../VFrame30/SchemaDetails.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"

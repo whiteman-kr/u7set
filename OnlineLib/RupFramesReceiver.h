@@ -128,5 +128,3 @@ private:
 };
 
 #pragma warning(pop)
-
-

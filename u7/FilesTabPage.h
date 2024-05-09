@@ -3,9 +3,7 @@
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
 #include <DbLib/DbStruct.h>
-#include "../lib/Ui/FilesTreeView.h"
-
-
+#include "./Ui/FilesTreeView.h"
 
 
 class FilesTabPage : public MainTabPage

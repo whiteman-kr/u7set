@@ -15,8 +15,6 @@ qt_standard_project_setup()
 set(TARGET scm)
 
 add_executable(${TARGET} WIN32
-	../lib/DataSource.cpp
-	../lib/DataSource.h
 	AppDataServiceWidget.cpp
 	AppDataServiceWidget.h
 	AppDataSourceWidget.cpp

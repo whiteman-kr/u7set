@@ -2,7 +2,7 @@
 
 #include "TuningFilter.h"
 #include "TuningModel.h"
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 
 class ChooseTuningSignalsWidget : public QWidget
 {

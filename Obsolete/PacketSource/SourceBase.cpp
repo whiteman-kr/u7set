@@ -4,7 +4,7 @@
 #include <QFile>
 
 #include "../../UtilsLib/XmlHelper.h"
-#include "../../lib/DataSource.h"
+#include "../../OnlineLib/DataSource.h"
 #include "../../lib/ConstStrings.h"
 
 #ifndef Q_CONSOLE_APP

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../lib/QDoublevalidatorEx.h"
-#include "../lib/StandardColors.h"
+#include <UiLib/DoubleValidatorEx.h>
+#include <UiLib/StandardColors.h>
 
 #include <QStyledItemDelegate>
 

@@ -1,11 +1,14 @@
 #include <QStandardPaths>
 #include <QFileDialog>
+#include <QCloseEvent>
+
 #include <ClientLib/ClientTranslator.h>
 #include <ClientLib/TuningUserManager.h>
+#include <UiLib/DialogAbout.h>
+#include <UiLib/TabWidgetEx.h>
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../lib/Ui/DialogAbout.h"
-#include "../lib/Ui/TabWidgetEx.h"
+
 #include "AppConfigSettings.h"
 #include "DialogDataSources.h"
 #include "DialogReport.h"
@@ -54,10 +57,10 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	}
 	//
 
-	m_tabWidget = new TabWidgetEx{this};
+	m_tabWidget = new UiLib::TabWidgetEx{this};
 	m_tabWidget->setDocumentMode(false);
 	m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_tabWidget, &TabWidgetEx::tabCloseRequested, this, &TestSuiteMainWindow::onTabCloseRequested);
+	connect(m_tabWidget, &UiLib::TabWidgetEx::tabCloseRequested, this, &TestSuiteMainWindow::onTabCloseRequested);
 
 	setCentralWidget(m_tabWidget);
 	centralWidget()->setAutoFillBackground(true);
@@ -95,8 +98,8 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 
 	// Logs
 	//
-	connect(&m_appLog, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
-	connect(&m_appLog, &Log::LogFile::writeFailure, &m_dialogAlert, &DialogAlert::onAlertArrived);
+	connect(&m_appLog, &Log::LogFile::alertArrived, &m_dialogAlert, &UiLib::DialogAlert::onAlertArrived);
+	connect(&m_appLog, &Log::LogFile::writeFailure, &m_dialogAlert, &UiLib::DialogAlert::onAlertArrived);
 
 	// MainWindow options
 	//
@@ -1157,7 +1160,7 @@ void TestSuiteMainWindow::showAboutQt()
 void TestSuiteMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to run application logic tests.");
-	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 }
 
 void TestSuiteMainWindow::onTestsScriptsReload()

@@ -2,7 +2,7 @@
 #include "IdePropertyEditor.h"
 #include "SpecificPropertiesEditor.h"
 #include "SvgEditor.h"
-#include "DbTagsEditor.h"
+#include "DbChooseItemsDialog.h"
 #include "Reports/ReportPropertyEditor.h"
 
 
@@ -59,7 +59,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 			return new ExtWidgets::PropertyPlainTextEditor(parent);
 		}
 
-		DbTagsEditor* editor = DbTagsEditor::tagsEditor(dbController, parent);
+		DbChooseItemsDialog* editor = DbChooseItemsDialog::tagsEditor(dbController, parent);
 		return editor;
 	}
 
@@ -73,7 +73,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 			return new ExtWidgets::PropertyPlainTextEditor(parent);
 		}
 
-		DbTagsEditor* editor = DbTagsEditor::matsUsersEditor(dbController, parent);
+		DbChooseItemsDialog* editor = DbChooseItemsDialog::matsUsersEditor(dbController, parent);
 		return editor;
 	}
 
@@ -411,7 +411,7 @@ void DialogFindReplace::saveCompleters()
 //
 
 IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
-    CodeEditor(parent),
+    UiLib::CodeEditor(parent),
     m_parent(parent),
     m_codeType(codeType)
 {
@@ -435,12 +435,12 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
 
     if (m_codeType == CodeType::JavaScript)
     {
-		JsHighlighter::createJsHighlighter(this);
+        UiLib::JsHighlighter::createJsHighlighter(this);
     }
 
     if (m_codeType == CodeType::Xml)
     {
-		XmlHighlighter::createXmlHighlighter(this);
+        UiLib::XmlHighlighter::createXmlHighlighter(this);
     }
 
     // Set up margins

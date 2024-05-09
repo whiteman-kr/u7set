@@ -1,4 +1,4 @@
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 #include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
 #include "SignalPropertiesDialog.h"

@@ -4,8 +4,6 @@
 #include <QSortFilterProxyModel>
 
 #include <DbLib/DbController.h>
-#include "../lib/QDoublevalidatorEx.h"
-#include "../lib/StandardColors.h"
 
 #include "../Builder/AppSignalProperties.h"
 #include "MainTabPage.h"

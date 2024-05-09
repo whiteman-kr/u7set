@@ -1,14 +1,17 @@
 #pragma once
 
-#include <Simulator/SimProfiles.h>
 
-#include "../lib/CodeEditor.h"
+namespace UiLib
+{
+	class CodeEditor;
+}
 
 class SimProfileEditor : public QDialog
 {
 	Q_OBJECT
+
 public:
-static void run(DbController* dbController, QWidget* parent);
+	static void run(DbController* dbController, QWidget* parent);
 
 private:
 	SimProfileEditor(DbController* dbController, QWidget* parent);
@@ -40,7 +43,7 @@ private:
 
 	DbController* m_db = nullptr;
 
-    CodeEditor* m_textEdit = nullptr;
+    UiLib::CodeEditor* m_textEdit = nullptr;
 
 	static SimProfileEditor* m_simProfileEditor;
 	static const QString m_exampleText;

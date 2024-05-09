@@ -2,9 +2,6 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../VFrame30/LogController.h"
 #include "../VFrame30/Schema.h"
-#include "../lib/Ui/DialogAbout.h"
-#include "../lib/Ui/DialogSignalSearch.h"
-#include "../lib/Ui/SchemaListWidget.h"
 #include "./Archive/MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "DialogSettings.h"
@@ -13,7 +10,10 @@
 #include "SelectSchemaWidget.h"
 #include "DataSourcesWidget.h"
 
+#include <UiLib/DialogAbout.h>
+#include <SchemaClientLib/DialogSignalSearch.h>
 #include <SchemaClientLib/DevToolsWindow.h>
+#include <SchemaClientLib/SchemaListWidget.h>
 
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
@@ -68,8 +68,8 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// DialogAlert
 	//
-	connect(&m_LogFile, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
-	connect(&m_LogFile, &Log::LogFile::writeFailure, &m_dialogAlert, &DialogAlert::onAlertArrived);
+	connect(&m_LogFile, &Log::LogFile::alertArrived, &m_dialogAlert, &UiLib::DialogAlert::onAlertArrived);
+	connect(&m_LogFile, &Log::LogFile::writeFailure, &m_dialogAlert, &UiLib::DialogAlert::onAlertArrived);
 
 	// Creating signals controllers for VFrame30
 	//
@@ -129,10 +129,10 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
 	m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
-	SchemaListWidget* schemaListWidget = new SchemaListWidget(
-											 std::vector{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption},
-											 false,
-											 m_schemaListDock);
+	auto schemaListWidget = new SchemaClientLib::SchemaListWidget(
+		std::vector{SchemaClientLib::SchemaListTreeColumns::SchemaID, SchemaClientLib::SchemaListTreeColumns::Caption},
+		false,
+		m_schemaListDock);
 	m_schemaListDock->setWidget(schemaListWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, m_schemaListDock);
@@ -145,7 +145,10 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	// SchemaListWidget
 	//
-	connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, &m_monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+	connect(schemaListWidget,
+			&SchemaClientLib::SchemaListWidget::openSchemaRequest,
+			&m_monitorCentralWidget,
+			&MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
 	connect(&m_configController, &MonitorConfigController::configurationUpdated,
 			[this, schemaListWidget]()
@@ -997,7 +1000,7 @@ void MonitorMainWindow::showAboutQt()
 void MonitorMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to view schemas and trends.<br>");
-	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 	return;
 }
 
@@ -1395,12 +1398,12 @@ void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
 
 void MonitorMainWindow::slot_findSignal()
 {
-	DialogSignalSearch* dsi = new DialogSignalSearch(this, &m_signalManager);
+	auto dsi = new SchemaClientLib::DialogSignalSearch(this, &m_signalManager);
 
-	connect(&m_signalManager, &ClientLib::AppSignalManager::signalParamsUpdated, dsi, &DialogSignalSearch::signalsUpdated);
+	connect(&m_signalManager, &ClientLib::AppSignalManager::signalParamsUpdated, dsi, &SchemaClientLib::DialogSignalSearch::signalsUpdated);
 
-	connect(dsi, &DialogSignalSearch::signalContextMenu, &m_monitorCentralWidget, &MonitorCentralWidget::slot_signalContextMenu);
-	connect(dsi, &DialogSignalSearch::signalInfo, &m_monitorCentralWidget, &MonitorCentralWidget::slot_signalInfo);
+	connect(dsi, &SchemaClientLib::DialogSignalSearch::signalContextMenu, &m_monitorCentralWidget, &MonitorCentralWidget::slot_signalContextMenu);
+	connect(dsi, &SchemaClientLib::DialogSignalSearch::signalInfo, &m_monitorCentralWidget, &MonitorCentralWidget::slot_signalInfo);
 
 	dsi->show();
 

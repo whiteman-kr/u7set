@@ -5,8 +5,9 @@
 #include "../TestSuiteLib/TestSuite.h"
 #include "../TestSuiteLib/TestSuiteConfigController.h"
 #include "../TestSuiteLib/TestScriptsStorage.h"
-#include "../lib/Ui/DialogAlert.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+
+#include <UiLib/DialogAlert.h>
 #include <ClientLib/ClientTranslator.h>
 #include <SchemaClientLib/DialogTcpStatistics.h>
 
@@ -15,8 +16,12 @@
 
 #include "TestSuiteLog.h"
 
-class TabWidgetEx;
 class TestLogTabPage;
+
+namespace UiLib
+{
+	class TabWidgetEx;
+}
 
 class TestSuiteMainWindow : public QMainWindow
 {
@@ -95,7 +100,7 @@ private:
 	ClientLib::ClientTranslator m_translator;
 
 
-	DialogAlert m_dialogAlert;
+	UiLib::DialogAlert m_dialogAlert;
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
@@ -123,7 +128,7 @@ private:
 	QMenu* m_multipleReportsMenu = nullptr;		// Multiple reports submenu
     std::vector<QAction*> m_multipleReportActions;
 
-	TabWidgetEx* m_tabWidget = nullptr;
+	UiLib::TabWidgetEx* m_tabWidget = nullptr;
 
 	QToolBar* m_toolBar = nullptr;
 	QLabel* m_statusIndicator = nullptr;

@@ -4,6 +4,7 @@
 #include <Behavior/ClientBehaviorStorage.h>
 #include <Behavior/MonitorBehavior.h>
 #include <Behavior/TuningClientBehavior.h>
+#include <UiLib/PropertyEditor.h>
 
 #include "Settings.h"
 
