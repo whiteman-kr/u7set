@@ -1,7 +1,7 @@
 #include "SignalSnapshotWidget.h"
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../lib/ISignalDataServer.h"
-#include <SchemaClientLib/ChooseTagsWidget.h>
+#include <UiLib/ChooseItemsWidget.h>
 #include <SchemaClientLib/DialogSignalSnapshot.h>
 #include <UiLib/ExportPrint.h>
 
@@ -715,11 +715,11 @@ namespace SchemaClientLib
 		int height = QSettings().value("SignalSnapshotWidget/tagsSelectorDialog/height", 400).toInt();
 		tagsSelectorDialog.resize(width, height);
 
-		ChooseTagsWidget te{m_appSignalManager->tags(), ' ', this};
+		UiLib::ChooseItemsWidget te{m_appSignalManager->tags(), this};
 		te.setText(m_editTags->text());
 
-		connect(&te, &ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
-		connect(&te, &ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+		connect(&te, &UiLib::ChooseItemsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
+		connect(&te, &UiLib::ChooseItemsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
 
 		QHBoxLayout l;
 		l.addWidget(&te);

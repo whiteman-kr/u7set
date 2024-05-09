@@ -2,7 +2,7 @@
 #include "IdePropertyEditor.h"
 #include "SpecificPropertiesEditor.h"
 #include "SvgEditor.h"
-#include "DbTagsEditor.h"
+#include "DbChooseItemsDialog.h"
 #include "Reports/ReportPropertyEditor.h"
 
 
@@ -59,7 +59,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 			return new ExtWidgets::PropertyPlainTextEditor(parent);
 		}
 
-		DbTagsEditor* editor = DbTagsEditor::tagsEditor(dbController, parent);
+		DbChooseItemsDialog* editor = DbChooseItemsDialog::tagsEditor(dbController, parent);
 		return editor;
 	}
 
@@ -73,7 +73,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 			return new ExtWidgets::PropertyPlainTextEditor(parent);
 		}
 
-		DbTagsEditor* editor = DbTagsEditor::matsUsersEditor(dbController, parent);
+		DbChooseItemsDialog* editor = DbChooseItemsDialog::matsUsersEditor(dbController, parent);
 		return editor;
 	}
 

@@ -13,6 +13,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools PrintSupport)
 set(TARGET UiLib)
 
 qt_add_library(${TARGET} STATIC
+	./include/UiLib/ChooseItemsWidget.h
 	./include/UiLib/ClickableLabel.h
 	./include/UiLib/CodeEditor.h
 	./include/UiLib/DialogAbout.h
@@ -26,6 +27,7 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/StandardColors.h
 	./include/UiLib/TabWidgetEx.h
 	./include/UiLib/TagSelectorWidget.h
+	ChooseItemsWidget.cpp
 	CodeEditor.cpp
 	DialogAbout.cpp
 	DialogAlert.cpp
@@ -79,6 +81,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTextDocumentWriter>
 	<QTimer>
 	<QToolButton>
+	<QTreeWidget>
+	<QTreeWidgetItem>
 	<QVBoxLayout>
 
 	"../../CommonLib/PropertyObject.h"

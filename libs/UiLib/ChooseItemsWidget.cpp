@@ -1,62 +1,62 @@
-#include <SchemaClientLib/ChooseTagsWidget.h>
+#include <UiLib/ChooseItemsWidget.h>
 
 //
-// ChooseTagsWidget
+// ChooseItemsWidget
 //
-namespace SchemaClientLib
+namespace UiLib
 {
-	QString ChooseTagsWidget::m_filterText = QString();
+	QString ChooseItemsWidget::m_filterText = QString();
 
-	ChooseTagsWidget::ChooseTagsWidget(const QStringList& tags, QChar separator, QWidget* parent) :
-		m_separator(separator),
+
+	ChooseItemsWidget::ChooseItemsWidget(const QStringList& tags, QWidget* parent) :
 		QWidget(parent)
 	{
 		for (const QString& s : tags)
 		{
-			m_tags.push_back({s, QString()});
+			m_tagsWithDescriptions.push_back({s, QString()});
 		}
 
-		setupUi(false /*hasDescriptions*/);
+		setupUi();
 
 		fillTags();
 
 		return;
 	}
 
-	ChooseTagsWidget::ChooseTagsWidget(const std::vector<std::pair<QString, QString>>& tags,
-									   const std::vector<OnlineLib::MatsUser>& users,
-									   QChar separator,
-									   QWidget* parent) :
+	ChooseItemsWidget::ChooseItemsWidget(const std::vector<std::pair<QString, QString>>& tagsWithDescriptions, QWidget* parent) :
 		QWidget(parent),
-		m_tags(tags),
-		m_users(users),
-		m_separator(separator)
+		m_tagsWithDescriptions(tagsWithDescriptions)
 	{
-		if (m_tags.empty() == true && m_users.empty() == false)
-		{
-			m_objectName = "User";
-			m_objectNames = "users";
-		}
-
-		setupUi(true /*hasDescriptions*/);
+		setupUi();
 
 		fillTags();
 
 		return;
 	}
 
-	ChooseTagsWidget::~ChooseTagsWidget()
+	ChooseItemsWidget::~ChooseItemsWidget()
 	{
 		m_filterText = m_filterEdit->text();
 	}
 
-	QString ChooseTagsWidget::text() const
+	QString ChooseItemsWidget::text() const
 	{
 		return m_textEdit->text();
 	}
 
-	void ChooseTagsWidget::setText(const QString& text)
+	void ChooseItemsWidget::setText(const QString& text)
 	{
+		static const auto re = QRegularExpression("\\W+");
+		QStringList separators = re.match(text).capturedTexts();
+		if (separators.contains(';') == true) 
+		{
+			m_separator = ';';
+		}
+		else 
+		{
+			m_separator = QChar::Space;
+		}
+
 		m_textEdit->blockSignals(true);
 		m_textEdit->setText(text);
 		m_textEdit->blockSignals(false);
@@ -66,25 +66,25 @@ namespace SchemaClientLib
 		return;
 	}
 
-	bool ChooseTagsWidget::readOnly() const
+	bool ChooseItemsWidget::readOnly() const
 	{
 		return m_textEdit->isReadOnly();
 	}
 
-	void ChooseTagsWidget::setReadOnly(bool value)
+	void ChooseItemsWidget::setReadOnly(bool value)
 	{
 		m_textEdit->setReadOnly(value);
 		m_okButton->setEnabled(value == false);
 	}
 
-	void ChooseTagsWidget::tagsTextChanged(const QString& text)
+	void ChooseItemsWidget::tagsTextChanged(const QString& text)
 	{
 		updateChecks(text);
 
 		return;
 	}
 
-	void ChooseTagsWidget::tagsListItemChanged(QTreeWidgetItem* item, int column)
+	void ChooseItemsWidget::tagsListItemChanged(QTreeWidgetItem* item, int column)
 	{
 		Q_UNUSED(item);
 		Q_UNUSED(column);
@@ -94,7 +94,7 @@ namespace SchemaClientLib
 		return;
 	}
 
-	void ChooseTagsWidget::tagsListItemPressed(QTreeWidgetItem* item, int column)
+	void ChooseItemsWidget::tagsListItemPressed(QTreeWidgetItem* item, int column)
 	{
 		Q_UNUSED(column);
 
@@ -116,7 +116,7 @@ namespace SchemaClientLib
 		return;
 	}
 
-	void ChooseTagsWidget::filterTextChanged(const QString& text)
+	void ChooseItemsWidget::filterTextChanged(const QString& text)
 	{
 		Q_UNUSED(text);
 
@@ -125,12 +125,12 @@ namespace SchemaClientLib
 		return;
 	}
 
-	void ChooseTagsWidget::setupUi(bool hasDescriptions)
+	void ChooseItemsWidget::setupUi()
 	{
 		// TextEditor
 		//
 		m_textEdit = new QLineEdit();
-		connect(m_textEdit, &QLineEdit::textChanged, this, &ChooseTagsWidget::tagsTextChanged);
+		connect(m_textEdit, &QLineEdit::textChanged, this, &ChooseItemsWidget::tagsTextChanged);
 
 		// Tags list
 		//
@@ -138,16 +138,26 @@ namespace SchemaClientLib
 		m_list->setRootIsDecorated(false);
 
 		QStringList l;
-		l << m_objectName;
+		l << tr("Item");
 		l << tr("Description");
 		m_list->setHeaderLabels(l);
 		m_list->setColumnCount(static_cast<int>(l.size()));
 
+		bool hasDescriptions = false;
+		for (const auto& t : m_tagsWithDescriptions)
+		{
+			if (t.second.isEmpty() == false)
+			{
+				hasDescriptions = true;
+				break;
+			}
+		}
+
 		m_list->setHeaderHidden(hasDescriptions == false);
 		m_list->setColumnHidden(1, hasDescriptions == false);
 
-		connect(m_list, &QTreeWidget::itemChanged, this, &ChooseTagsWidget::tagsListItemChanged);
-		connect(m_list, &QTreeWidget::itemPressed, this, &ChooseTagsWidget::tagsListItemPressed);
+		connect(m_list, &QTreeWidget::itemChanged, this, &ChooseItemsWidget::tagsListItemChanged);
+		connect(m_list, &QTreeWidget::itemPressed, this, &ChooseItemsWidget::tagsListItemPressed);
 
 		// Buttons and Filter Layout
 		//
@@ -156,9 +166,9 @@ namespace SchemaClientLib
 		m_filterEdit = new QLineEdit();
 		m_filterEdit->setClearButtonEnabled(true);
 		m_filterEdit->setPlaceholderText(tr("Filter"));
-		m_filterEdit->setToolTip(tr("Start typing to filter %1").arg(m_objectNames));
+		m_filterEdit->setToolTip(tr("Start typing to filter items"));
 		m_filterEdit->setText(m_filterText);
-		connect(m_filterEdit, &QLineEdit::textEdited, this, &ChooseTagsWidget::filterTextChanged);
+		connect(m_filterEdit, &QLineEdit::textEdited, this, &ChooseItemsWidget::filterTextChanged);
 		buttonsLayout->addWidget(m_filterEdit);
 
 		buttonsLayout->addStretch();
@@ -185,7 +195,7 @@ namespace SchemaClientLib
 		//
 		QVBoxLayout* mainLayout = new QVBoxLayout(this);
 		mainLayout->addWidget(m_textEdit);
-		mainLayout->addWidget(new QLabel(tr("Predefined %1:").arg(m_objectNames)));
+		mainLayout->addWidget(new QLabel(tr("Predefined items:")));
 		mainLayout->addWidget(m_list);
 		mainLayout->addLayout(buttonsLayout);
 		mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -193,13 +203,13 @@ namespace SchemaClientLib
 		return;
 	}
 
-	void ChooseTagsWidget::fillTags()
+	void ChooseItemsWidget::fillTags()
 	{
 		QString filterText = m_filterEdit->text();
 
 		m_list->clear();
 
-		for (const std::pair<QString, QString>& tagPair : m_tags)
+		for (const std::pair<QString, QString>& tagPair : m_tagsWithDescriptions)
 		{
 			if (filterText.isEmpty() == false)
 			{
@@ -218,25 +228,6 @@ namespace SchemaClientLib
 			m_list->addTopLevelItem(item);
 		}
 
-		for (const OnlineLib::MatsUser& user : m_users)
-		{
-			if (filterText.isEmpty() == false)
-			{
-				if (user.login().contains(filterText, Qt::CaseInsensitive) == false)
-				{
-					continue;
-				}
-			}
-
-			QTreeWidgetItem* item = new QTreeWidgetItem();
-			item->setText(0, user.login());
-			item->setText(1, user.description());
-			item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-			item->setCheckState(0, Qt::Unchecked);
-
-			m_list->addTopLevelItem(item);
-		}
-
 		m_list->resizeColumnToContents(0);
 
 		updateChecks(m_textEdit->text());
@@ -244,11 +235,11 @@ namespace SchemaClientLib
 		return;
 	}
 
-	void ChooseTagsWidget::updateChecks(const QString& text)
+	void ChooseItemsWidget::updateChecks(const QString& text)
 	{
 		// Get exitsing tags
-
-		QStringList textTags = text.split(m_separator, Qt::SkipEmptyParts);
+		static const auto re = QRegularExpression("\\W+");
+		QStringList textTags = text.split(re, Qt::SkipEmptyParts);
 		for (QString& t : textTags)
 		{
 			t = t.trimmed();
@@ -278,13 +269,14 @@ namespace SchemaClientLib
 		return;
 	}
 
-	void ChooseTagsWidget::updateTags()
+	void ChooseItemsWidget::updateTags()
 	{
 		const QString& text = m_textEdit->text();
 
 		// Get exitsing tags
 
-		QStringList tags = text.split(m_separator, Qt::SkipEmptyParts);
+		static const auto re = QRegularExpression("\\W+");
+		QStringList tags = text.split(re, Qt::SkipEmptyParts);
 		for (QString& t : tags)
 		{
 			t = t.trimmed();

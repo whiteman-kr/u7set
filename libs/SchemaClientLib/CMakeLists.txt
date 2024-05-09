@@ -14,7 +14,6 @@ set(TARGET SchemaClientLib)
 
 qt_add_library(${TARGET} STATIC
 	./include/SchemaClientLib/AppDataSourcesWidget.h
-	./include/SchemaClientLib/ChooseTagsWidget.h
 	./include/SchemaClientLib/ClientSchemaManager.h
 	./include/SchemaClientLib/DevToolsWindow.h
 	./include/SchemaClientLib/DialogSignalInfo.h
@@ -30,7 +29,6 @@ qt_add_library(${TARGET} STATIC
 	./include/SchemaClientLib/SchemaTabWidget.h
 	./include/SchemaClientLib/TuningSourcesWidget.h
 	AppDataSourcesWidget.cpp
-	ChooseTagsWidget.cpp
 	ClientSchemaManager.cpp
 	DevToolsAppSettings.cpp
 	DevToolsAppSettings.h

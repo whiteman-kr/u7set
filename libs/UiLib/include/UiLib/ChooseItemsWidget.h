@@ -1,5 +1,4 @@
 #pragma once
-#include "../OnlineLib/MatsUsers.h"
 #include <QWidget>
 
 class QLineEdit;
@@ -7,21 +6,17 @@ class QTreeWidget;
 class QPushButton;
 class QTreeWidgetItem;
 
-namespace SchemaClientLib
+namespace UiLib
 {
-	class ChooseTagsWidget : public QWidget
+	class ChooseItemsWidget : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		ChooseTagsWidget(const QStringList& tags, QChar separator, QWidget* parent);
+		ChooseItemsWidget(const QStringList& tags, QWidget* parent);
+		ChooseItemsWidget(const std::vector<std::pair<QString, QString>>& tagsWithDescriptions, QWidget* parent);
 
-		ChooseTagsWidget(const std::vector<std::pair<QString, QString>>& tags,
-						 const std::vector<OnlineLib::MatsUser>& users,
-						 QChar separator,
-						 QWidget* parent);
-
-		virtual ~ChooseTagsWidget();
+		virtual ~ChooseItemsWidget();
 
 		QString text() const;
 		void setText(const QString& text);
@@ -35,12 +30,12 @@ namespace SchemaClientLib
 
 	private slots:
 		void tagsTextChanged(const QString& text);
-		void tagsListItemChanged(QTreeWidgetItem* item, int column);
-		void tagsListItemPressed(QTreeWidgetItem* item, int column);
+		void tagsListItemChanged(QTreeWidgetItem * item, int column);
+		void tagsListItemPressed(QTreeWidgetItem * item, int column);
 		void filterTextChanged(const QString& text);
 
 	private:
-		void setupUi(bool hasDescriptions);
+		void setupUi();
 
 		void fillTags();
 		void updateChecks(const QString& text);
@@ -57,11 +52,9 @@ namespace SchemaClientLib
 
 		static QString m_filterText;
 
-		std::vector<std::pair<QString, QString>> m_tags;
-		std::vector<OnlineLib::MatsUser> m_users;
+		QChar m_separator = QChar::Space;
 
-		QChar m_separator;
-		QString m_objectName = "Tag";
-		QString m_objectNames = "tags";
+		std::vector<std::pair<QString, QString>>
+			m_tagsWithDescriptions; // First element is tag name, second element name is tag description
 	};
 } // namespace SchemaClientLib

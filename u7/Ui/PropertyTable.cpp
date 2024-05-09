@@ -1,6 +1,6 @@
 #include "PropertyTable.h"
 #include "../AppSignalLib/TuningValue.h"
-#include <SchemaClientLib/ChooseTagsWidget.h>
+#include <UiLib/ChooseItemsWidget.h>
 #include <UiLib/PropertyEditor.h>
 
 
@@ -928,8 +928,9 @@ namespace ExtWidgets
 		m_editPropertyFilter->blockSignals(true);
 		m_editPropertyFilter->setText(propertyFilter);
 		m_editPropertyFilter->blockSignals(false);
-
-		m_propertyFilters = propertyFilter.split(';', Qt::SkipEmptyParts);
+		
+		static const auto re = QRegularExpression("\\W+");
+		m_propertyFilters = propertyFilter.split(re, Qt::SkipEmptyParts);
 
 		fillProperties();
 	}
@@ -1373,7 +1374,8 @@ namespace ExtWidgets
 	{
 		QString str = m_editPropertyFilter->text().trimmed();
 
-		m_propertyFilters = str.split(';', Qt::SkipEmptyParts);
+		static const auto re = QRegularExpression("\\W+");
+		m_propertyFilters = str.split(re, Qt::SkipEmptyParts);
 
 		fillProperties();
 	}
@@ -1382,11 +1384,11 @@ namespace ExtWidgets
 	{
 		QDialog tagsSelectorDialog{this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
-		SchemaClientLib::ChooseTagsWidget te{m_commonProperties, ';', this};
+		UiLib::ChooseItemsWidget te{m_commonProperties, this};
 		te.setText(propertyFilter());
 
-		connect(&te, &SchemaClientLib::ChooseTagsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
-		connect(&te, &SchemaClientLib::ChooseTagsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+		connect(&te, &UiLib::ChooseItemsWidget::okPressed, &tagsSelectorDialog, &QDialog::accept);
+		connect(&te, &UiLib::ChooseItemsWidget::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
 
 		QHBoxLayout l;
 		l.addWidget(&te);

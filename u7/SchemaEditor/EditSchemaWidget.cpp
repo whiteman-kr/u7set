@@ -38,7 +38,7 @@
 #include "./Forms/ChooseUfbDialog.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 
-#include "DbTagsEditor.h"
+#include "DbChooseItemsDialog.h"
 #include "GlobalMessanger.h"
 #include "SchemaItemPropertiesDialog.h"
 #include "SchemaLayersDialog.h"
@@ -6139,11 +6139,11 @@ void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 	{
 		ResizedDialog tagsSelectorDialog{tr("Tags"), &d, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint};
 
-		std::unique_ptr<DbTagsEditor> te(DbTagsEditor::tagsEditor(this->db(), &d));
+		std::unique_ptr<DbChooseItemsDialog> te(DbChooseItemsDialog::tagsEditor(this->db(), &d));
 		te->setText(tagsEdit->text());
 
-		connect(te.get(), &DbTagsEditor::okPressed, &tagsSelectorDialog, &QDialog::accept);
-		connect(te.get(), &DbTagsEditor::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
+		connect(te.get(), &DbChooseItemsDialog::okPressed, &tagsSelectorDialog, &QDialog::accept);
+		connect(te.get(), &DbChooseItemsDialog::cancelPressed, &tagsSelectorDialog, &QDialog::reject);
 
 		QHBoxLayout l;
 		l.addWidget(te.get());

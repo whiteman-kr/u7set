@@ -55,8 +55,8 @@ set (U7_SOURCES
 	CreateSignalsDialog.h
 	CreateUserDialogDialog.cpp
 	CreateUserDialogDialog.h
-	DbTagsEditor.cpp
-	DbTagsEditor.h
+	DbChooseItemsDialog.cpp
+	DbChooseItemsDialog.h
 	DialogAfbLibraryCheck.cpp
 	DialogAfbLibraryCheck.h
 	DialogBusEditor.cpp
