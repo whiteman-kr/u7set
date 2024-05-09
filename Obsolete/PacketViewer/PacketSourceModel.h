@@ -7,7 +7,7 @@
 #include <HardwareLib/DataProtocols.h>
 #include <HardwareLib/DeviceObject.h>
 
-#include "../../lib/DataSource.h"
+#include "../../OnlineLib/DataSource.h"
 
 class QUdpSocket;
 class DataSource;

@@ -1,5 +1,4 @@
 #include "TuningFilterEditor.h"
-#include "../lib/PropertyEditorDialog.h"
 
 #include <QApplication>
 #include <QComboBox>

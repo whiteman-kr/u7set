@@ -2,8 +2,14 @@
 
 #include <vector>
 
-class Comparator;
+// #include "AppSignalParam.h" -- Commented out to speed up compilation
+// #include "AppSignalState.h" -- Commented out to speed up compilation
+// These files MUST BE included in the precompiled header of the project:
+// 	"../AppSignalLib/AppSignalParam.h"
+//  "../AppSignalLib/AppSignalState.h"
+//
 
+class Comparator;
 
 class IAppSignalManager
 {

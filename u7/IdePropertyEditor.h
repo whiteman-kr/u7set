@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../lib/CodeEditor.h"
-#include "../lib/PropertyEditor.h"
-#include "../lib/PropertyTable.h"
+#include <UiLib/CodeEditor.h>
+#include <UiLib/PropertyEditor.h>
 #include "../lib/Tuning/TuningFilterEditor.h"
+#include "./Ui/PropertyTable.h"
 
 
 //
@@ -118,9 +118,10 @@ enum class CodeType
     Unknown
 };
 
-class IdeCodeEditor : public CodeEditor
+class IdeCodeEditor : public UiLib::CodeEditor
 {
     Q_OBJECT
+
 public:
     IdeCodeEditor(CodeType codeType, QWidget* parent);
     ~IdeCodeEditor();

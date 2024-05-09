@@ -20,10 +20,6 @@ if (MSVC)
 endif (MSVC)
 
 add_executable(${TARGET} WIN32
-	../../lib/DataSource.cpp
-	../../lib/DataSource.h
-	../../lib/Ui/DialogAbout.cpp
-	../../lib/Ui/DialogAbout.h
 	BuildOption.cpp
 	BuildOption.h
 	CmdLineParam.h

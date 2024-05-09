@@ -2,7 +2,7 @@
 #include "GlobalMessanger.h"
 #include "SchemaControlTabPage.h"
 #include "EditSchemaTabPage.h"
-#include "../lib/Ui/TabWidgetEx.h"
+#include <UiLib/TabWidgetEx.h>
 
 
 //
@@ -12,8 +12,8 @@
 //
 SchemasTabPage::SchemasTabPage(DbController* dbc,
 							   AppSignalSetProvider* signalSetProvider,
-							   ClickableLabel* statusBarLayerLabel,
-							   ClickableLabel* statusBarZoomLabel,
+							   UiLib::ClickableLabel* statusBarLayerLabel,
+							   UiLib::ClickableLabel* statusBarZoomLabel,
 							   QWidget* parent) :
 	MainTabPage{dbc, parent},
 	m_statusBarLayerLabel{statusBarLayerLabel},
@@ -24,7 +24,7 @@ SchemasTabPage::SchemasTabPage(DbController* dbc,
 	Q_ASSERT(m_statusBarLayerLabel);
 	Q_ASSERT(m_statusBarZoomLabel);
 
-	m_tabWidget = new TabWidgetEx{this};
+	m_tabWidget = new UiLib::TabWidgetEx{this};
 
 	// --
 	//
@@ -98,8 +98,8 @@ SchemasTabPage::SchemasTabPage(DbController* dbc,
 	//
 	startTimer(150);
 
-	connect(m_statusBarLayerLabel, &ClickableLabel::clicked, this, &SchemasTabPage::statusBarLayerClicked);
-	connect(m_statusBarZoomLabel, &ClickableLabel::clicked, this, &SchemasTabPage::statusBarZoomClicked);
+	connect(m_statusBarLayerLabel, &UiLib::ClickableLabel::clicked, this, &SchemasTabPage::statusBarLayerClicked);
+	connect(m_statusBarZoomLabel, &UiLib::ClickableLabel::clicked, this, &SchemasTabPage::statusBarZoomClicked);
 
 	return;
 }

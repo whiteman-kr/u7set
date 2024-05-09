@@ -164,7 +164,7 @@ namespace hash_h
 	struct hasher
 	{
 		// Calc hasher for unordered_map
-		// No need to calc hash on hash for std::unourdered_map, in this way it is significantly faster
+		// No need to calc hash on hash for std::unordered_map, in this way it is significantly faster
 		// Usage: std::unordered_map<Hash, AppSignalState, HashHasher> m_states;
 		//
 		std::size_t operator()(Type u) const noexcept

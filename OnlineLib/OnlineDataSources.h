@@ -109,12 +109,11 @@ template <typename DATA_SOURCE, typename SIGNAL_STATE>
 class OnlineDataSources : public BaseOnlineDataSources
 {
 public:
-	OnlineDataSources(const std::vector<DataSource>& dataSourcesFromCfg,
+	OnlineDataSources(const std::vector<OnlineLib::DataSource>& dataSourcesFromCfg,
 					  const HostAddressPort& dataReceivingIP,
 					  E::SoftwareRunMode swRunMode,
 					  int parsingThreadsCount,
 					  CircularLoggerShared log);
-
 public:
 	int count() const;
 	DATA_SOURCE* getDataSource(int index);
@@ -124,8 +123,8 @@ private:
 
 	void statesDistribution();
 
-	void registerSignalStatesQueue(	std::shared_ptr<StatesQueue<SIGNAL_STATE>> queue);
-	void unregisterSignalStatesQueue(std::shared_ptr<StatesQueue<SIGNAL_STATE>> queue);
+	void registerSignalStatesQueue(	std::shared_ptr<FastThreadSafeQueue<SIGNAL_STATE>> queue);
+	void unregisterSignalStatesQueue(std::shared_ptr<FastThreadSafeQueue<SIGNAL_STATE>> queue);
 
 private:
 	std::mutex m_distributionRequiredMutex;
@@ -133,11 +132,11 @@ private:
 	std::queue<OnlineDataSource<SIGNAL_STATE>*> m_distributionRequiredSources;	//	queue of sources requires states queue processing
 
 	SimpleMutex m_statesQueuesMutex;
-	std::set<std::shared_ptr<StatesQueue<SIGNAL_STATE>>> m_stateQueues;		// pairs <queue, description>
+	std::set<std::shared_ptr<FastThreadSafeQueue<SIGNAL_STATE>>> m_stateQueues;		// pairs <queue, description>
 };
 
 template <typename DATA_SOURCE, typename SIGNAL_STATE>
-OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::OnlineDataSources(const std::vector<DataSource>& dataSourcesFromCfg,
+OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::OnlineDataSources(const std::vector<OnlineLib::DataSource>& dataSourcesFromCfg,
 																const HostAddressPort& dataReceivingIP,
 																E::SoftwareRunMode swRunMode,
 																int parsingThreadsCount,
@@ -148,7 +147,7 @@ OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::OnlineDataSources(const std::vecto
 
 	int acquiredSignalsCount = 0;
 
-	for(const DataSource& ds : dataSourcesFromCfg)
+	for(const OnlineLib::DataSource& ds : dataSourcesFromCfg)
 	{
 		DATA_SOURCE* dataSource = new DATA_SOURCE(ds);
 
@@ -266,7 +265,7 @@ void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::statesDistribution()
 }
 
 template <typename DATA_SOURCE, typename SIGNAL_STATE>
-void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::registerSignalStatesQueue(std::shared_ptr<StatesQueue<SIGNAL_STATE>> queue)
+void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::registerSignalStatesQueue(std::shared_ptr<FastThreadSafeQueue<SIGNAL_STATE>> queue)
 {
 	m_statesQueuesMutex.lock();
 	auto [it, b] = m_stateQueues.insert(queue);
@@ -275,7 +274,7 @@ void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::registerSignalStatesQueue(std
 }
 
 template <typename DATA_SOURCE, typename SIGNAL_STATE>
-void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::unregisterSignalStatesQueue(std::shared_ptr<StatesQueue<SIGNAL_STATE>> queue)
+void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::unregisterSignalStatesQueue(std::shared_ptr<FastThreadSafeQueue<SIGNAL_STATE>> queue)
 {
 	m_statesQueuesMutex.lock();
 	int erasedCount = m_stateQueues.erase(queue);

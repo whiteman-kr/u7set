@@ -9,8 +9,9 @@
 #include "../VFrame30/TuningSchema.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/VduSchema.h"
-#include "../lib/StandardColors.h"
-#include "../lib/Ui/TagSelectorWidget.h"
+
+#include <UiLib/StandardColors.h>
+#include <UiLib/TagSelectorWidget.h>
 
 #include "CheckInDialog.h"
 #include "CreateSchemaDialog.h"
@@ -2466,9 +2467,9 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 	m_resetFilterButton = new QPushButton(tr("Reset Filter"));
 	m_resetFilterButton->setDisabled(true);
 
-	m_tagSelector = new TagSelectorWidget(this);
+	m_tagSelector = new UiLib::TagSelectorWidget(this);
 	m_tagSelector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-	connect(m_tagSelector, &TagSelectorWidget::changed, this, &SchemaControlTabPage::tagSelectorHasChanges);
+	connect(m_tagSelector, &UiLib::TagSelectorWidget::changed, this, &SchemaControlTabPage::tagSelectorHasChanges);
 
 	// --
 	//

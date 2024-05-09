@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ServiceLib/Service.h>
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/OnlineDataSources.h"
@@ -64,12 +64,10 @@ private:
 	std::shared_ptr<const DiagDataServiceSettings> m_serviceSettings;
 
 	std::map<Hash, Hardware::DiagSignalType> m_diagSignalTypes;		// calcHash(DiagSignalTypeID) => DiagSignalType
-	std::vector<DataSource> m_dataSources;
+	std::vector<OnlineLib::DataSource> m_dataSources;
 	::Network::AcquiredDiagSignalsAndObjects m_diagSignalsAndObjects;
 
 	OnlineDataSources<DiagDataSource, SimpleDiagSignalState>* m_onlineSources = nullptr;
-
-
 
 	int m_diagDataProcessingThreadCount = 0;
 	QString m_strCmdLineDiagDataReceivingIP;

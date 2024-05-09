@@ -9,13 +9,13 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataSource::AppDataSource(const DataSource& dataSource) :
+AppDataSource::AppDataSource(const OnlineLib::DataSource& dataSource) :
 	m_signalStatesQueue(3),
 	m_gatewaySignalStatesQueue(3)
 {
 	// copy DataSource properties to THIS object
 	//
-	*static_cast<DataSource*>(this) = dataSource;
+	*static_cast<OnlineLib::DataSource*>(this) = dataSource;
 
 	m_cachedAppDataUID = rupAppDataUID();
 
@@ -418,7 +418,7 @@ AppDataSources::~AppDataSources()
 }
 
 bool AppDataSources::init(const QString& profile,
-						  const QVector<DataSource>& dataSources,
+						  const QVector<OnlineLib::DataSource>& dataSources,
 						  CircularLoggerShared logger)
 {
 	clear();
@@ -427,7 +427,7 @@ bool AppDataSources::init(const QString& profile,
 
 	m_sources.reserve(dataSources.size());
 
-	for(const DataSource& dataSource : dataSources)
+	for(const OnlineLib::DataSource& dataSource : dataSources)
 	{
 		if (dataSource.profile() != profile)
 		{

@@ -204,7 +204,9 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 
 	m_dataSources.clear();
 
-	bool result = DataSourcesXML<DataSource>::readFromXml(fileData, &m_dataSources);
+	QVector<OnlineLib::DataSource> dataSources;
+
+	bool result = OnlineLib::DataSourcesXML<OnlineLib::DataSource>::readFromXml(fileData, &dataSources);
 
 	if (result == false)
 	{
@@ -220,6 +222,10 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 	{
 		DEBUG_LOG_ERR(logger(), QString("DiagDataSources loading error!"));
 	}
+
+	std::vector<OnlineLib::DataSource> ds(dataSources.begin(), dataSources.end());
+
+	m_dataSources.swap(ds);
 
 	return result;
 }

@@ -1,6 +1,6 @@
 #include "../Forms/ProjectPropertiesForm.h"
-#include "../../lib/PropertyEditorDialog.h"
 #include "../ProjectDefaults.h"
+#include <UiLib/PropertyEditorDialog.h>
 
 //
 // ProjectPropertiesForm

@@ -13,7 +13,7 @@ namespace SchemaClientLib
 	// SchemaTabWidgetSignalSlot
 	//
 	SchemaTabWidgetSignalSlot::SchemaTabWidgetSignalSlot(QWidget* parent) :
-		TabWidgetEx{parent}
+		UiLib::TabWidgetEx{parent}
 	{
 		return;
 	}

@@ -1,0 +1,321 @@
+#ifndef PROPERTYTABLE_H
+#define PROPERTYTABLE_H
+
+#include <UiLib/PropertyEditor.h>
+
+class QAbstractItemModel;
+
+namespace ExtWidgets
+{
+	class DialogAppend : public QDialog
+	{
+		Q_OBJECT
+
+	public:
+		DialogAppend(const QString& what, bool toTheBegin, QWidget* parent);
+
+		const QString& what() const;
+		bool toTheBegin() const;
+
+	protected:
+		virtual void accept() override;
+
+	private:
+
+		QLineEdit* m_editWhat = nullptr;
+
+		QCheckBox* m_checkToTheBegin = nullptr;
+
+		QString m_what;
+		bool m_toTheBegin = false;
+
+	};
+
+	class DialogReplace : public QDialog
+	{
+		Q_OBJECT
+
+	public:
+		DialogReplace(const QString& what, const QString& to, bool caseSensitive, QWidget* parent);
+
+		const QString& what() const;
+		const QString& to() const;
+		bool caseSensitive() const;
+
+	protected:
+		virtual void accept() override;
+
+	private:
+
+		QLineEdit* m_editWhat = nullptr;
+		QLineEdit* m_editTo = nullptr;
+
+		QCheckBox* m_checkCase = nullptr;
+
+		QString m_what;
+		QString m_to;
+		bool m_caseSensitive = false;
+
+	};
+
+	typedef QMultiMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> ModifiedObjectsData;
+
+	struct PropertyTableObject
+	{
+		std::shared_ptr<PropertyObject> propertyObject;
+
+		int rowCount = 1;
+
+		std::vector<std::shared_ptr<Property>> properties;
+	};
+
+	class IStringModifier
+	{
+	public:
+		virtual void operator()(QString& s) const = 0;
+	};
+
+	class StringAppender: public IStringModifier
+	{
+	public:
+		StringAppender(const QString& text, bool toTheBegin):
+			m_text(text),
+			m_toTheBegin(toTheBegin)
+		{
+		}
+
+		void operator()(QString& s) const override 
+		{ 
+			s = m_toTheBegin ? m_text + s : s + m_text;
+		}
+	private:
+		QString m_text;
+		bool m_toTheBegin;
+	};
+
+	class StringReplacer: public IStringModifier
+	{
+	public:
+		StringReplacer(const QString& what, const QString& to, bool caseSensitive) :
+			m_what(what),
+			m_to(to),
+			m_caseSensitive(caseSensitive)
+		{
+		}
+		void operator()(QString& s) const override 
+		{
+			s = s.replace(m_what, m_to, m_caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+		}
+	private:
+		QString m_what;
+		QString m_to;
+		bool m_caseSensitive;
+	};
+
+	class PropertyTable;
+	class PropertyTableModel;
+	class PropertyTableProxyModel;
+
+	class PropertyTableItemDelegate : public QItemDelegate
+	{
+		Q_OBJECT
+	public:
+		explicit PropertyTableItemDelegate(PropertyTable* propertyTable, PropertyTableProxyModel* proxyModel);
+
+		virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+		virtual void setEditorData(QWidget *editor, const QModelIndex &index) const override;
+		virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
+		virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+		void setInitText(const QString& text);
+
+	private slots:
+		void onValueChanged(QVariant value);
+
+	signals:
+		void valueChanged(QVariant value);
+
+	private:
+		PropertyTable* m_propertyTable = nullptr;
+		PropertyTableProxyModel* m_proxyModel = nullptr;
+
+		mutable PropertyEditCellWidget *m_cellEditor = nullptr;
+
+		mutable QString m_initText;
+	};
+
+	class PropertyTableProxyModel : public QSortFilterProxyModel
+	{
+		Q_OBJECT
+
+	public:
+		PropertyTableProxyModel(QObject *parent = 0);
+
+		std::shared_ptr<PropertyObject> propertyObjectByIndex(const QModelIndex& mi) const;
+		std::shared_ptr<Property> propertyByIndex(const QModelIndex& mi, int* propertyRow) const;
+
+	protected:
+		bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+	};
+
+	class PropertyTableModel : public QAbstractTableModel
+	{
+	public:
+		PropertyTableModel(PropertyTable* propertyTable);
+		~PropertyTableModel();
+
+		void clear();
+		void setTableObjects(std::vector<PropertyTableObject>& tableObjects, bool showCategory);
+
+		std::shared_ptr<PropertyObject> propertyObjectByIndex(const QModelIndex& mi) const;
+		std::shared_ptr<Property> propertyByIndex(const QModelIndex& mi, int* propertyRow) const;
+
+		void recalculateRowCount(std::shared_ptr<PropertyObject> object);
+
+		bool hasMultiRows() const;
+
+	private:
+		int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+		int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+		QVariant data(const QModelIndex &index, int role) const override;
+		QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+
+		Qt::ItemFlags flags(const QModelIndex &index) const override;
+
+	private:
+		PropertyTable* m_propertyTable = nullptr;
+
+		std::vector<PropertyTableObject> m_tableObjects;
+		QStringList m_propertyNames;
+
+	};
+
+	class PropertyTableView : public QTableView
+	{
+		Q_OBJECT
+
+	public:
+		void closeCurrentEditorIfOpen();
+
+	protected:
+		virtual void mousePressEvent(QMouseEvent *event) override;
+		virtual void keyPressEvent(QKeyEvent *event) override;
+
+	signals:
+		void mousePressed();
+		void editKeyPressed();
+		void symbolKeyPressed(QString key);
+		void copyKeyPressed();
+		void pasteKeyPressed();
+		void spaceKeyPressed();
+	};
+
+	class PropertyTable : public PropertyEditorBase
+	{
+		Q_OBJECT
+	public:
+		explicit PropertyTable(QWidget *parent = nullptr);
+
+		void clear();
+
+		const QList<std::shared_ptr<PropertyObject>>& objects() const;
+		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
+		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
+
+		QString propertyFilter() const;
+		void setPropertyFilter(const QString& propertyFilter);
+
+		// Settings to store
+		//
+		bool expandValuesToAllRows() const;
+		void setExpandValuesToAllRows(bool value);
+
+		const QMap<QString, int>& getColumnsWidth();
+		void setColumnsWidth(const QMap<QString, int>& columnsWidth);
+
+		bool groupByCategory() const;
+		void setGroupByCategory(bool value);
+
+	protected:
+		virtual void valueChanged(const ModifiedObjectsData& modifiedObjectsData);
+		virtual void hideEvent(QHideEvent* event) override;
+
+	protected slots:
+		void updatePropertiesList();
+		void updatePropertiesValues();
+
+	private slots:
+		void onCellClicked();
+		void onCellSymbolKeyPressed(QString key);
+		void onCellToggleKeyPressed();
+		void onCellCopyKeyPressed();
+		void onCellPasteKeyPressed();
+		void onShowErrorMessage (QString message);
+		void onPropertyFilterChanged();
+		void onPropertyFilterChooseTags();
+		void onTableContextMenuRequested(const QPoint &pos);
+		void onGroupByCategoryToggled(bool value);
+
+		// Context menu slots
+
+		void onInsertStringBefore();
+		void onInsertStringAfter();
+		void onRemoveString();
+		void onUniqueRowValuesChanged();
+
+		void onAppend();
+		void onReplace();
+
+	public slots:
+		void onValueChanged(QVariant value);
+		void onCellEditorClosed(QWidget *editor, QAbstractItemDelegate::EndEditHint hint);
+
+	signals:
+		void showErrorMessage(QString message);
+		void propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
+
+	private:
+		void fillProperties();
+
+		int getSelectionType();	// returns -1 if no type is selected or they are different
+		bool isSelectionReadOnly();
+
+		void startEditing();
+		void toggleSelected();
+
+		void doModifyStrings(const IStringModifier& modifier);
+		void addString(bool after);
+		void removeString();
+
+		void saveColumnsWidth();
+		void restoreColumnsWidth();
+
+	private:
+
+		PropertyTableView* m_tableView = nullptr;
+
+		QLineEdit* m_editPropertyFilter = nullptr;
+
+		QPushButton* m_buttonGroupByCategory = nullptr;
+
+		PropertyTableProxyModel m_proxyModel;
+
+		PropertyTableModel m_tableModel;
+
+		QMap<QString, int> m_columnsWidth;
+
+		PropertyTableItemDelegate* m_itemDelegate = nullptr;
+
+		QList<std::shared_ptr<PropertyObject>> m_objects;
+
+		QStringList m_commonProperties;
+
+		QStringList m_propertyFilters;
+
+		bool m_expandValuesToAllRows = true;
+
+	};
+
+}
+
+#endif // PROPERTYTABLE_H

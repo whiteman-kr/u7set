@@ -33,7 +33,7 @@ bool DiagDataSource::parseRupData(	const Times& time,
 	Q_ASSERT(false);		// to do
 	SimpleDiagSignalState newState;
 
-	pushState(newState, thread);
+	pushSignalState(newState, thread);
 
 	return true;
 }

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "../CommonLib/Hash.h"
-#include "../lib/DataSource.h"
+#include "DataSource.h"
 
-class BaseOnlineDataSource : public DataSource
+class BaseOnlineDataSource : public OnlineLib::DataSource
 {
 private:
 	static const int APP_DATA_SOURCE_TIMEOUT = 500;
@@ -190,54 +190,36 @@ protected:
 };
 
 template <typename SIGNAL_STATE>
-class StatesQueue : public FastThreadSafeQueue<SIGNAL_STATE>
-{
-public:
-	StatesQueue(int queueSize) :
-		FastThreadSafeQueue<SIGNAL_STATE>(queueSize)
-	{
-	}
-};
-
-template <typename SIGNAL_STATE>
 class OnlineDataSource : public BaseOnlineDataSource
 {
-public:
+protected:
 	OnlineDataSource(const DataSource& dataSource, E::LanControllerType srcType) :
 		BaseOnlineDataSource(dataSource, srcType),
 		m_states(3)
 	{
-		m_states.resize(std::max(acquiredSignalsCount() * 3 , 200));
+		if (acquiredSignalsCount() > 0)
+		{
+			m_states.resize(acquiredSignalsCount() * 3);
+		}
 	}
 
-	void pushState(const SIGNAL_STATE& state, const QThread* thread)
+	void pushSignalState(const SIGNAL_STATE& state, const QThread* thread)
 	{
 		m_states.push(state, thread);
 	}
 
-	int popStates(SIGNAL_STATE* statesBuffer, int bufferSize, QThread* thread)
+public:
+	int popStates(SIGNAL_STATE* signalStatesBuffer, int bufferSize, const QThread* thread)
 	{
-		int statesCount = 0;
-
-		m_states.popToBuffer(statesBuffer, bufferSize, &statesCount, thread);
-
-		return statesCount;
-	}
-
-	void pushStates(SIGNAL_STATE* statesBuffer, int statesCount, QThread* thread)
-	{
-		m_states.beginPush(thread);
-
-		for(int i = 0; i < statesCount; i++)
-		{
-			m_states.push(statesBuffer[i]);
-		}
-
-		m_states.completePush(thread);
+		Q_UNUSED(signalStatesBuffer);
+		Q_UNUSED(bufferSize);
+		Q_UNUSED(thread);
+		Q_ASSERT(false);			// to do
+		return 0;
 	}
 
 private:
-	StatesQueue<SIGNAL_STATE> m_states;
+	FastThreadSafeQueue<SIGNAL_STATE> m_states;
 };
 
 

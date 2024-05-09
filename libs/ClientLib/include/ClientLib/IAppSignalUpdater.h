@@ -14,7 +14,7 @@ namespace ClientLib
 		virtual void reset() = 0;
 
 		// This function must notify (emit signal?) that signal params where updated.
-		// This signal is out of scope of this interface, it is up to implemenation which signal to emit and how to use it.
+		// This signal is out of scope of this interface, it is up to implementation which signal to emit and how to use it.
 		//
 		virtual void notifySignalParamsUpdated() = 0;
 
@@ -23,7 +23,7 @@ namespace ClientLib
 		virtual void addSignal(const AppSignalParam& appSignal, const QString& appDataServiceId) = 0;
 		virtual void addSignals(const std::vector<AppSignalParam>& appSignals, const QString& appDataServiceId) = 0;
 
-		// Invalidate all signal statess by source sourceThreadId.
+		// Invalidate all signal states by source sourceThreadId.
 		//
 		virtual void invalidateSignalStates(Qt::HANDLE sourceThreadId) = 0;
 

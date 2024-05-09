@@ -5,7 +5,7 @@
 #include <QTimer>
 
 #include "../../OnlineLib/SoftwareSettings.h"
-#include "../../lib/DataSource.h"
+#include "../../OnlineLib/DataSource.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 

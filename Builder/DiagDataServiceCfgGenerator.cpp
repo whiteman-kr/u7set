@@ -1,8 +1,6 @@
 #include "DiagDataServiceCfgGenerator.h"
 #include "SoftwareSettingsGetter.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../lib/DataSource.h"
-
 #include <HardwareLib/DeviceChassis.h>
 #include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/DeviceController.h>
@@ -117,7 +115,7 @@ namespace Builder
 
 		m_lmAcquiredDiagSignals.clear();
 
-		QVector<DataSource> dataSources;
+		QVector<OnlineLib::DataSource> dataSources;
 
 		QStringList profiles = m_settingsSet.getSettingsProfiles();
 
@@ -141,7 +139,7 @@ namespace Builder
 					continue;
 				}
 
-				DataSource ds;
+				OnlineLib::DataSource ds;
 
 				ds.setProfile(profile);
 
@@ -200,7 +198,7 @@ namespace Builder
 		//
 
 		QByteArray fileData;
-		result &= DataSourcesXML<DataSource>::writeToXml(dataSources, &fileData);
+		result &= OnlineLib::DataSourcesXML<OnlineLib::DataSource>::writeToXml(dataSources, &fileData);
 
 		RETURN_IF_FALSE(result)
 
@@ -236,7 +234,7 @@ namespace Builder
 		return m_cfgXml->addLinkToFile(buildFile);
 	}
 
-	bool DiagDataServiceCfgGenerator::appendAquiredDiagSignalsToDataSource(const Hardware::DeviceModule* lm, DataSource* ds)
+	bool DiagDataServiceCfgGenerator::appendAquiredDiagSignalsToDataSource(const Hardware::DeviceModule* lm, OnlineLib::DataSource* ds)
 	{
 		TEST_PTR_RETURN_FALSE(lm);
 		TEST_PTR_RETURN_FALSE(ds);

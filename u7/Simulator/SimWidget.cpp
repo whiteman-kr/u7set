@@ -9,10 +9,11 @@
 #include "SimSchemaPage.h"
 #include "SimCodePage.h"
 #include "SimTrend/SimTrends.h"
-#include "../../lib/Ui/TabWidgetEx.h"
-#include "../../lib/Ui/DialogSignalSearch.h"
 #include "SimSignalSnapshot.h"
 #include "SimSignalInfo.h"
+
+#include <UiLib/TabWidgetEx.h>
+#include <SchemaClientLib/DialogSignalSearch.h>
 
 
 SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
@@ -37,7 +38,7 @@ SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
 	setWindowFlags(windowType);
 	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
 
-	m_tabWidget = new TabWidgetEx{this};
+	m_tabWidget = new UiLib::TabWidgetEx{this};
 	m_tabWidget->setDocumentMode(false);
 	m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -987,12 +988,12 @@ void SimWidget::showFindSignal()
 	// 3. You can pass and store 'this->m_appSignalController' and 'this->m_simulator.get()'  to your function
 	//    it is guarantee will not be deleted
 	//
-	DialogSignalSearch* dsi = new DialogSignalSearch(this, &m_appSignalController->appSignalManager());
+	auto dsi = new SchemaClientLib::DialogSignalSearch(this, &m_appSignalController->appSignalManager());
 
-	connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, dsi, &DialogSignalSearch::signalsUpdated);
+	connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, dsi, &SchemaClientLib::DialogSignalSearch::signalsUpdated);
 
-	connect(dsi, &DialogSignalSearch::signalContextMenu, this, &SimWidget::signalContextMenu);
-	connect(dsi, &DialogSignalSearch::signalInfo, this, &SimWidget::signalInfo);
+	connect(dsi, &SchemaClientLib::DialogSignalSearch::signalContextMenu, this, &SimWidget::signalContextMenu);
+	connect(dsi, &SchemaClientLib::DialogSignalSearch::signalInfo, this, &SimWidget::signalInfo);
 
 	connect(this, &SimWidget::needCloseChildWindows, dsi, &QDialog::accept);
 

@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 
-#include "../../lib/Ui/DialogAbout.h"
+#include <UiLib/DialogAbout.h>
 #include "../../UtilsLib/XmlHelper.h"
 
 #include "OptionsDialog.h"

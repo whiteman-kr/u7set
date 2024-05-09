@@ -9,7 +9,7 @@
 #include <QLabel>
 #include <QLineEdit>
 
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 
 #include "Options.h"
 

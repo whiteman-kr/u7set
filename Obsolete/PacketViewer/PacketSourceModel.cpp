@@ -15,7 +15,7 @@
 #include <HardwareLib/DeviceRoot.h>
 #include <HardwareLib/DeviceModule.h>
 
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 #include <QTimer>
 
 PacketSourceModel::PacketSourceModel(QObject* parent) :

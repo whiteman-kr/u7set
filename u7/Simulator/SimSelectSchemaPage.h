@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QWidget>
-#include "../../lib/Ui/SchemaListWidget.h"
+#include <SchemaClientLib/SchemaListWidget.h>
 #include "SimIdeSimulator.h"
 #include "SimBasePage.h"
 
@@ -19,5 +19,5 @@ signals:
 	void openSchemaTabPage(QString schemaId, QStringList highlightIds);
 
 private:
-	SchemaListWidget* m_schemaListWidget = nullptr;
+	SchemaClientLib::SchemaListWidget* m_schemaListWidget = nullptr;
 };

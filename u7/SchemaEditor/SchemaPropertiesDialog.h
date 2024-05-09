@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../VFrame30/Schema.h"
-#include "../lib/PropertyEditor.h"
+#include <UiLib/PropertyEditor.h>
 
 
 namespace Ui {

@@ -3,11 +3,10 @@
 
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 
 #include <HardwareLib/DeviceModule.h>
 
-class DataSource;
 
 namespace Builder
 {
@@ -130,7 +129,7 @@ namespace Builder
 
 		m_acquiredAppSignals.clear();
 
-		QVector<DataSource> dataSources;
+		QVector<OnlineLib::DataSource> dataSources;
 
 		QStringList profiles = m_settingsSet.getSettingsProfiles();
 
@@ -154,7 +153,7 @@ namespace Builder
 					continue;
 				}
 
-				DataSource ds;
+				OnlineLib::DataSource ds;
 
 				ds.setProfile(profile);
 
@@ -207,7 +206,7 @@ namespace Builder
 		//
 
 		QByteArray fileData;
-		result &= DataSourcesXML<DataSource>::writeToXml(dataSources, &fileData);
+		result &= OnlineLib::DataSourcesXML<OnlineLib::DataSource>::writeToXml(dataSources, &fileData);
 
 		RETURN_IF_FALSE(result)
 
@@ -354,7 +353,7 @@ namespace Builder
 		return true;
 	}
 
-	bool AppDataServiceCfgGenerator::findAppDataSourceAcquiredSignals(DataSource& appDataSource)
+	bool AppDataServiceCfgGenerator::findAppDataSourceAcquiredSignals(OnlineLib::DataSource& appDataSource)
 	{
 		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.moduleEquipmentID()).get();
 

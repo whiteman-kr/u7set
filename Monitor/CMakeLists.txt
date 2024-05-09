@@ -9,7 +9,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui ${CMAKE_CURRENT_SOURCE_DIR}/../libs/SchemaClientLib)
 
 if (MSVC)
   # MSVC warning suppressions
@@ -23,29 +23,7 @@ qt_standard_project_setup()
 
 set (MONITOR_SOURCES
 	../lib/ConstStrings.h
-	../lib/ExportPrint.cpp
-	../lib/ExportPrint.h
 	../lib/ISignalDataServer.h
-	../lib/Ui/ChooseTagsWidget.cpp
-	../lib/Ui/ChooseTagsWidget.h
-	../lib/Ui/DialogAbout.cpp
-	../lib/Ui/DialogAbout.h
-	../lib/Ui/DialogAlert.cpp
-	../lib/Ui/DialogAlert.h
-	../lib/Ui/DialogSignalInfo.cpp
-	../lib/Ui/DialogSignalInfo.h
-	../lib/Ui/DialogSignalSearch.cpp
-	../lib/Ui/DialogSignalSearch.h
-	../lib/Ui/DialogSignalSnapshot.cpp
-	../lib/Ui/DialogSignalSnapshot.h
-	../lib/Ui/DialogWriteValues.cpp
-	../lib/Ui/DialogWriteValues.h
-	../lib/Ui/DragDropHelper.cpp
-	../lib/Ui/DragDropHelper.h
-	../lib/Ui/SchemaListWidget.cpp
-	../lib/Ui/SchemaListWidget.h
-	../lib/Ui/TagSelectorWidget.cpp
-	../lib/Ui/TagSelectorWidget.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h
 	Archive/ArchiveData.cpp
@@ -122,7 +100,6 @@ if (MSVC)
 endif (MSVC)
 
 set (MONITOR_FORMS
-	${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui/DialogSignalInfo.ui
 	./Archive/DialogChooseArchiveSignals.ui
 	DialogSettings.ui
 	DialogColumns.ui
@@ -197,7 +174,8 @@ target_precompile_headers(${TARGET} PRIVATE
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
-target_link_libraries(${TARGET} PRIVATE CommonLib Behavior Protobuf UtilsLib AppSignalLib OnlineLib TrendView VFrame30 ClientLib SchemaClientLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib Behavior Protobuf UtilsLib AppSignalLib OnlineLib TrendView VFrame30 ClientLib 
+	SchemaClientLib	UiLib)
 
 # Link Visaul Leak Detector
 #

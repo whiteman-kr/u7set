@@ -5,7 +5,7 @@
 #include <DiagStateLib/SimpleDiagSignalState.h>
 
 #include "../OnlineLib/OnlineDataSource.h"
-#include "../lib/DataSource.h"
+#include "../OnlineLib/DataSource.h"
 #include "../OnlineLib/CircularLogger.h"
 #include <HardwareLib/DiagSignalType.h>
 #include "DynamicDiagSignalState.h"

@@ -12,7 +12,7 @@
 //#include "../VFrame30/Schema.h"
 //#include "../lib/Ui/DialogSignalSearch.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../lib/Ui/DialogAbout.h"
+#include <UiLib/DialogAbout.h>
 //#include "../lib/Ui/SchemaListWidget.h"
 
 DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
@@ -64,8 +64,8 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 
 	// DialogAlert
 	//
-	connect(&m_LogFile, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
-	connect(&m_LogFile, &Log::LogFile::writeFailure, &m_dialogAlert, &DialogAlert::onAlertArrived);
+	connect(&m_LogFile, &Log::LogFile::alertArrived, &m_dialogAlert, &UiLib::DialogAlert::onAlertArrived);
+	connect(&m_LogFile, &Log::LogFile::writeFailure, &m_dialogAlert, &UiLib::DialogAlert::onAlertArrived);
 
 	// Creating signals controllers for VFrame30
 	//
@@ -971,7 +971,7 @@ void DiagnosticsMainWindow::showAboutQt()
 void DiagnosticsMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to view schemas and trends.<br>");
-	DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
 	return;
 }
 
