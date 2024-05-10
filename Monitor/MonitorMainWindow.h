@@ -96,6 +96,8 @@ protected slots:
 
 	void schemaTreeListToggled(bool checked);
 
+	void showAppSignalListEditor();
+
 	void showLog();
 	void showTuningLog();
 	void showSettings();
@@ -202,6 +204,7 @@ private:
 
 	// Tools menu
 	//
+	QAction* m_pAppSignalListsAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 
 	// ? menu

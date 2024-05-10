@@ -685,7 +685,7 @@ namespace Builder
 
 			// Add tag "created by ide" to the list
 			//
-			list.tagsList().push_back(AppSignalLists::AppSignalList::tagIde);
+			list.systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
 
 			// Save list to the data buffer
 			//

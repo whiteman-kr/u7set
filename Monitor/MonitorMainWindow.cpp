@@ -11,6 +11,7 @@
 #include "DataSourcesWidget.h"
 
 #include <UiLib/DialogAbout.h>
+#include <AppSignalLists/DialogSignalListEditor.h>
 #include <SchemaClientLib/DialogSignalSearch.h>
 #include <SchemaClientLib/DevToolsWindow.h>
 #include <SchemaClientLib/SchemaListWidget.h>
@@ -420,6 +421,11 @@ void MonitorMainWindow::createActions()
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MonitorMainWindow::exit);
 
+	m_pAppSignalListsAction = new QAction(tr("Application Signal Lists..."), this);
+	m_pAppSignalListsAction->setStatusTip(tr("Edit application Signal Lists"));
+	m_pAppSignalListsAction->setEnabled(true);
+	connect(m_pAppSignalListsAction, &QAction::triggered, this, &MonitorMainWindow::showAppSignalListEditor);
+
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
 	m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
@@ -613,6 +619,7 @@ void MonitorMainWindow::createMenus()
 	toolsMenu->addAction(m_findSignalAction);
 
 	toolsMenu->addSeparator();
+	toolsMenu->addAction(m_pAppSignalListsAction);
 	toolsMenu->addAction(m_pSettingsAction);
 
 	// Help
@@ -908,6 +915,11 @@ void MonitorMainWindow::schemaTreeListToggled(bool checked)
 	QSettings().setValue("m_schemaListAction.checked", checked);
 
 	return;
+}
+
+void MonitorMainWindow::showAppSignalListEditor()
+{
+	AppSignalLists::DialogSignalListEditor::showDialog(m_appSignalListSet, m_signalManager, this);
 }
 
 void MonitorMainWindow::showLog()

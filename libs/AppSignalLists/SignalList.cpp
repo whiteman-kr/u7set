@@ -64,7 +64,7 @@ namespace AppSignalLists
 								   AppSignalList::signalType,
 								   AppSignalList::setSignalType);
 		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_ID, true, AppSignalList::id, AppSignalList::setId);
-		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Tags, true, AppSignalList::tags, AppSignalList::setTags)
+		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Tags, true, AppSignalList::userTags, AppSignalList::setUserTags)
 			->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 		ADD_PROPERTY_GETTER_SETTER(QString,
@@ -112,7 +112,8 @@ namespace AppSignalLists
 		appSignalList->set_id(id().toUtf8());
 		appSignalList->set_caption(caption().toUtf8());
 		appSignalList->set_signaltype(static_cast<int>(signalType()));
-		appSignalList->set_tags(tags().toUtf8());
+		appSignalList->set_systemtags(systemTags().toUtf8());
+		appSignalList->set_usertags(userTags().toUtf8());
 
 		appSignalList->set_customappsignalidmasks(customAppSignalIDMask().toUtf8());
 		appSignalList->set_equipmentidmasks(equipmentIDMask().toUtf8());
@@ -148,7 +149,8 @@ namespace AppSignalLists
 		setId(QString::fromStdString(appSignalList.id()));
 		setCaption(QString::fromStdString(appSignalList.caption()));
 		setSignalType(static_cast<SignalType>(appSignalList.signaltype()));
-		setTags(QString::fromStdString(appSignalList.tags()));
+		setSystemTags(QString::fromStdString(appSignalList.systemtags()));
+		setUserTags(QString::fromStdString(appSignalList.usertags()));
 
 		setCustomAppSignalIDMask(QString::fromStdString(appSignalList.customappsignalidmasks()));
 		setEquipmentIDMask(QString::fromStdString(appSignalList.equipmentidmasks()));
@@ -212,46 +214,66 @@ namespace AppSignalLists
 	{
 		m_signalType = value;
 	}
-
-	QString AppSignalList::tags() const
+		
+	QString AppSignalList::systemTags() const
 	{
-		QString result;
-		for (const auto& s : m_tags)
-		{
-			result += s + ';';
-		}
-		result.remove(result.length() - 1, 1);
-
-		return result;
+		return m_systemTags.join(';');
 	}
 
-	void AppSignalList::setTags(const QString& value)
+	void AppSignalList::setSystemTags(const QString& value)
 	{
 		if (value.isEmpty() == true)
 		{
-			m_tags.clear();
+			m_systemTags.clear();
 		}
 		else
 		{
-			m_tags = value.split(';', Qt::SkipEmptyParts);
+			m_systemTags = value.split(';', Qt::SkipEmptyParts);
 		}
 	}
 
-	const QStringList& AppSignalList::tagsList() const
+	const QStringList& AppSignalList::systemTagsList() const
 	{
-		return m_tags;
+		return m_systemTags;
 	}
 
-	QStringList& AppSignalList::tagsList()
+	QStringList& AppSignalList::systemTagsList()
 	{
-		return m_tags;
+		return m_systemTags;
 	}
 
-	bool AppSignalList::hasAnyTag(const QStringList& tags) const
+	QString AppSignalList::userTags() const
+	{
+		return m_userTags.join(';');
+	}
+
+	void AppSignalList::setUserTags(const QString& value)
+	{
+		if (value.isEmpty() == true)
+		{
+			m_userTags.clear();
+		}
+		else
+		{
+			m_userTags = value.split(';', Qt::SkipEmptyParts);
+		}
+	}
+
+	const QStringList& AppSignalList::userTagsList() const
+	{
+		return m_userTags;
+	}
+
+	QStringList& AppSignalList::userTagsList()
+	{
+		return m_userTags;
+	}
+
+	bool AppSignalList::hasAnyUserTag(const QStringList& tags) const
 	{
 		for (const auto& tag : tags)
 		{
-			if (m_tags.contains(tag) == true)
+			if (m_userTags.contains(tag) == true)
 			{
 				return true;
 			}
@@ -538,7 +560,7 @@ namespace AppSignalLists
 
 		// Filter by tags
 		//
-		if (hasAnyTag(appSignalListTags) == true)
+		if (hasAnyUserTag(appSignalListTags) == true)
 		{
 			return true;
 		}
@@ -649,26 +671,81 @@ namespace AppSignalLists
 			return false;
 		}
 
-		m_lists[list->uuid()] = list;
+		m_lists.push_back(list);
 
+		return true;
+	}
+
+	bool AppSignalListSet::add(std::shared_ptr<AppSignalList> list)
+	{
+		m_lists.push_back(list);
 		return true;
 	}
 
 	bool AppSignalListSet::add(const AppSignalListSet& appSignalListSet) 
 	{
-		for (const auto& [uuid, list]:appSignalListSet.m_lists) 
+		for (const auto& list : appSignalListSet.m_lists) 
 		{
-			m_lists[list->uuid()] = list;
+			add(list);
 		}
 		return true;
 	}
 
-	void AppSignalListSet::remove(const QString& tag) 
+	std::shared_ptr<AppSignalList> AppSignalListSet::get(int index) 
+	{
+		if (index < 0 || index >= count()) 
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+		return m_lists[index];
+	}
+
+	std::shared_ptr<AppSignalList> AppSignalListSet::get(const QString& id) 
+	{
+		auto it = std::find_if(m_lists.begin(),
+							   m_lists.end(),
+							   [id](const auto& list)
+							   {
+								   return list->id() == id;
+							   });
+		if (it == m_lists.end()) 
+		{
+			return nullptr;
+		}
+		return *it;
+	}
+
+	std::shared_ptr<AppSignalList> AppSignalListSet::get(const QUuid& uuid) 
+	{
+		auto it = std::find_if(m_lists.begin(),
+							   m_lists.end(),
+							   [uuid](const auto& list)
+							   {
+								   return list->uuid() == uuid;
+							   });
+		if (it == m_lists.end()) 
+		{
+			return nullptr;
+		}
+		return *it;
+	}
+
+	void AppSignalListSet::remove(const QUuid& uuid) 
 	{
 		std::erase_if(m_lists,
-					  [tag](const auto& it)
+					  [uuid](const auto& it)
 					  {
-						  return it.second->tags().contains(tag) == true;
+						  return it->uuid() == uuid;
+					  });
+	}
+
+	void AppSignalListSet::remove(const QString& systemTag) 
+	{
+		std::erase_if(m_lists,
+					  [systemTag](const auto& it)
+					  {
+						  return it->systemTagsList().contains(systemTag) == true;
 					  });
 	}
 } // namespace AppSignalLists

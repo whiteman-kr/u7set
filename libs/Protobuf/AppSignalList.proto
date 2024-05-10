@@ -26,10 +26,11 @@ message AppSignalList
     optional string id = 2;
     optional string caption = 3;
     optional int32 signalType = 4;
-    optional string tags = 5;
+    optional string systemTags = 5;
     optional string customAppSignalIDMasks = 6;
     optional string equipmentIDMasks = 7;
     optional string appSignalIDMasks = 8;
     optional string appSignalTags = 9;
     repeated AppSignalListSignal listSignals = 10;
+    optional string userTags = 11;
 }

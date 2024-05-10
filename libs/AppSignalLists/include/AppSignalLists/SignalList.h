@@ -75,13 +75,23 @@ namespace AppSignalLists
 		SignalType signalType() const;
 		void setSignalType(SignalType value);
 
-		QString tags() const;
-		void setTags(const QString& value);
+		// Syste, Tags operations
 
-		const QStringList& tagsList() const;
-		QStringList& tagsList();
+		QString systemTags() const;
+		void setSystemTags(const QString& value);
 
-		bool hasAnyTag(const QStringList& tags) const;
+		const QStringList& systemTagsList() const;
+		QStringList& systemTagsList();
+
+		// User Tags operations
+
+		QString userTags() const;
+		void setUserTags(const QString& value);
+
+		const QStringList& userTagsList() const;
+		QStringList& userTagsList();
+
+		bool hasAnyUserTag(const QStringList& tags) const;
 
 		// Masks opreations
 
@@ -130,9 +140,35 @@ namespace AppSignalLists
 		bool listMatch(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);
 
 	public:
-		static inline const QString tagIde = "~ide~";
-		static inline const QString tagEquipment = "~eqp~";
-		static inline const QString tagSchema = "~schema~";
+		AppSignalList& operator=(const AppSignalList& That) 
+		{
+			m_id = That.m_id;
+			m_caption = That.m_caption;
+
+			m_signalType = That.m_signalType;
+
+			m_systemTags = That.m_systemTags;
+			m_userTags = That.m_userTags;
+
+			m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
+			m_equipmentIDMasks = That.m_equipmentIDMasks;
+			m_appSignalIDMasks = That.m_appSignalIDMasks;
+			m_appSignalTags = That.m_appSignalTags;
+
+			m_cachedCustomAppSignalIDMasks = That.m_cachedCustomAppSignalIDMasks;
+			m_cachedEquipmentIDMasks = That.m_cachedEquipmentIDMasks;
+			m_cachedAppSignalIDMasks = That.m_cachedAppSignalIDMasks;
+			m_cachedAppSignalTags = That.m_cachedAppSignalTags;
+
+			m_items = That.m_items;
+
+			return *this;
+		}
+
+	public:
+		static inline const QString tagIde = "ide";
+		static inline const QString tagEquipment = "eqp";
+		static inline const QString tagSchema = "schema";
 
 	private:
 		static bool processMaskList(const QString& s, const QStringList& masks);
@@ -147,7 +183,8 @@ namespace AppSignalLists
 
 		SignalType m_signalType = SignalType::All;
 
-		QStringList m_tags;
+		QStringList m_systemTags;
+		QStringList m_userTags;
 
 		// Filters
 		//
@@ -178,12 +215,34 @@ namespace AppSignalLists
 		[[nodiscard]] int count();
 		
 		bool add(const QByteArray& ba);
+		bool add(std::shared_ptr<AppSignalList> list);
 		bool add(const AppSignalListSet& appSignalListSet);
 
-		void remove(const QString& tag);
+		[[nodiscard]] std::shared_ptr<AppSignalList> get(int index);
+		[[nodiscard]] std::shared_ptr<AppSignalList> get(const QString& id);
+		[[nodiscard]] std::shared_ptr<AppSignalList> get(const QUuid& uuid);
+
+		void remove(const QUuid& uuid);
+		void remove(const QString& systemTag);
+		
+		AppSignalListSet& operator = (const AppSignalListSet& That) 
+		{
+			// Perform a deep copy of all lists
+			//
+			clear();
+
+			for (const auto& l : That.m_lists) 
+			{
+				std::shared_ptr<AppSignalList> list = std::make_shared<AppSignalList>();
+				*list = *l;
+				add(list);
+			}
+
+			return *this;
+		}
 
 	private:
-		std::map<QUuid, std::shared_ptr<AppSignalList>> m_lists;
+		std::vector<std::shared_ptr<AppSignalList>> m_lists;
 
 	};
 }

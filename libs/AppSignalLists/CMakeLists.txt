@@ -13,8 +13,10 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets LinguistTools Qml)
 set(TARGET AppSignalLists)
 
 qt_add_library(${TARGET} STATIC
+	./include/AppSignalLists/DialogSignalListEditor.h
 	./include/AppSignalLists/SignalList.h
 	./include/AppSignalLists/SignalListEditor.h
+	DialogSignalListEditor.cpp
 	SignalList.cpp
 	SignalListEditor.cpp
 	SignalListEditorPrivate.cpp
@@ -35,7 +37,10 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	<QApplication>
 	<QCheckBox>
+	<QClipboard>
+	<QCloseEvent>
 	<QComboBox>
+	<QCompleter>
 	<QCoreApplication>
 	<QDateTime>
 	<QDialog>
@@ -49,10 +54,13 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QLineEdit>
 	<QMenu>
 	<QMessageBox>
+	<QMimeData>
 	<QPushButton>
 	<QReadWriteLock>
 	<QSettings>
+	<QShortcut>
 	<QSplitter>
+	<QStringListModel>
 	<QTableView>
 	<QTranslator>
 	<QTreeWidget>
