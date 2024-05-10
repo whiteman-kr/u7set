@@ -97,6 +97,16 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 		}
 	}
 
+	// Get appSignalLists
+	//
+	{
+		bool ok = getAppSignalLists(files);
+		if (ok == false)
+		{
+			m_logFile.writeError("Loading/Parsing Application Signal Lists error.");
+		}
+	}
+
 	// Update Configuration
 	{
 		QWriteLocker locker(&m_lock);

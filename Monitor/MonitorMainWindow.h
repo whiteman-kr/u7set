@@ -193,6 +193,8 @@ private:
 
 	UiLib::DialogAlert m_dialogAlert;
 
+	AppSignalLists::AppSignalListSet m_appSignalListSet;
+
 	// File menu
 	//
 	QAction* m_pExportAction = nullptr;

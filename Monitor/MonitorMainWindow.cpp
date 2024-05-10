@@ -1471,6 +1471,11 @@ void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configur
 										 configuration.tuningSessionTimeout,
 										 m_configController.configuration().matsUsers.users());
 
+	// Update AppSignalLists: remove all lists with Ide tag and add loaded ones
+	//
+	m_appSignalListSet.remove(AppSignalLists::AppSignalList::tagIde);
+	m_appSignalListSet.add(m_configController.appSignalListSet());
+
 	showTuningLoginControls();
 
     m_pTuningLogAction->setVisible(configuration.tuningEnabled == true);

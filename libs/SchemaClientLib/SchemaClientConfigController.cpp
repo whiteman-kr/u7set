@@ -35,6 +35,29 @@ namespace SchemaClientLib
 		return ok;
 	}
 
+	bool SchemaClientConfigController::getAppSignalLists(const std::vector<OnlineLib::BuildFileInfo>& files)
+	{
+		QWriteLocker locker(&m_appSignalListSetLock);
+		m_appSignalListSet.clear();
+
+		bool ok = true;
+
+		QByteArray ba;
+		for (const auto& fi : files)
+		{
+			if (fi.tag == CfgFileTag::APPSIGNALLISTS)
+			{
+				bool fileOk = getFileBlocked(fi.pathFileName, &ba, nullptr);
+				if (fileOk == true)
+				{
+					fileOk &= m_appSignalListSet.add(ba);
+				}
+				ok &= fileOk;
+			}
+		}
+		return ok;
+	}
+
 	VFrame30::SchemaDetailsSet SchemaClientConfigController::schemasDetailsSet() const
 	{
 		QReadLocker l(&m_schemaDetailsLock);
@@ -122,6 +145,12 @@ namespace SchemaClientLib
 	{
 		QReadLocker l(&m_schemaDetailsLock);
 		return m_schemaDetailsSet.trendIndicators();
+	}
+
+	AppSignalLists::AppSignalListSet SchemaClientConfigController::appSignalListSet() const 
+	{
+		QReadLocker l(&m_appSignalListSetLock);
+		return m_appSignalListSet;
 	}
 
 } // namespace ClientLib

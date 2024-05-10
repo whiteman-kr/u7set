@@ -175,7 +175,7 @@ target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generate
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
 target_link_libraries(${TARGET} PRIVATE CommonLib Behavior Protobuf UtilsLib AppSignalLib OnlineLib TrendView VFrame30 ClientLib 
-	SchemaClientLib	UiLib)
+	SchemaClientLib	UiLib AppSignalLists)
 
 # Link Visaul Leak Detector
 #

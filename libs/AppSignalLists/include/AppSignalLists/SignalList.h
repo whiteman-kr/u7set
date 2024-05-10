@@ -79,6 +79,8 @@ namespace AppSignalLists
 		void setTags(const QString& value);
 
 		const QStringList& tagsList() const;
+		QStringList& tagsList();
+
 		bool hasAnyTag(const QStringList& tags) const;
 
 		// Masks opreations
@@ -127,6 +129,11 @@ namespace AppSignalLists
 		//
 		bool listMatch(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);
 
+	public:
+		static inline const QString tagIde = "~ide~";
+		static inline const QString tagEquipment = "~eqp~";
+		static inline const QString tagSchema = "~schema~";
+
 	private:
 		static bool processMaskList(const QString& s, const QStringList& masks);
 
@@ -162,5 +169,21 @@ namespace AppSignalLists
 
 	public:
 		static const char* mimeType; // = "application/x-radiyappsignallist";
+	};
+
+	class AppSignalListSet
+	{
+	public:
+		void clear();
+		[[nodiscard]] int count();
+		
+		bool add(const QByteArray& ba);
+		bool add(const AppSignalListSet& appSignalListSet);
+
+		void remove(const QString& tag);
+
+	private:
+		std::map<QUuid, std::shared_ptr<AppSignalList>> m_lists;
+
 	};
 }

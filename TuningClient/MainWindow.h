@@ -111,6 +111,10 @@ private:
 	//
 	ClientLib::TuningConnection m_tuningConnection;
 
+	// AppSignalLists
+	//
+	AppSignalLists::AppSignalListSet m_appSignalListSet;
+
 	// Workspace items
 	//
 	TuningWorkspace* m_tuningWorkspace = nullptr;

@@ -460,7 +460,6 @@ namespace CfgFileId
 	inline const QString MONITOR_EQUIPMENT("MONITOR_EQUIPMENT");
 	inline const QString MATSUSERS("MATSUSERS_XML");
 	inline const QString LOGO("LOGO");
-	inline const QString APPSIGNALLISTS("APPSIGNALLISTS");
 
 	inline const QString METROLOGY_ITEMS("METROLOGY_ITEMS");
 	inline const QString METROLOGY_SIGNAL_SET("METROLOGY_SIGNAL_SET");
@@ -469,6 +468,11 @@ namespace CfgFileId
 	inline const QString TESTSUITE_REPORTTEMPLATES("TESTSUITE_REPORTTEMPLATES");
 
 	inline const QString GATEWAY_DESCRIPTION("GATEWAY_DESCRIPTION");
+}
+
+namespace CfgFileTag
+{
+	inline const QString APPSIGNALLISTS("APPSIGNALLISTS");
 }
 
 namespace  SettingsProfile

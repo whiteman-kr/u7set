@@ -683,6 +683,10 @@ namespace Builder
 				}
 			}
 
+			// Add tag "created by ide" to the list
+			//
+			list.tagsList().push_back(AppSignalLists::AppSignalList::tagIde);
+
 			// Save list to the data buffer
 			//
 			Proto::Envelope envelope;
@@ -702,7 +706,7 @@ namespace Builder
 			//
 			QString fileName = tr("%1.%2").arg(list.id()).arg(Db::File::AppSignalListFileExtension);
 
-			BuildFile* listsFile = context->m_buildResultWriter->addFile(Directory::APP_SIGNAL_LISTS, fileName, fileName, {}, data);
+			BuildFile* listsFile = context->m_buildResultWriter->addFile(Directory::APP_SIGNAL_LISTS, fileName, fileName, {CfgFileTag::APPSIGNALLISTS}, data);
 			if (listsFile == nullptr)
 			{
 				Q_ASSERT(listsFile);

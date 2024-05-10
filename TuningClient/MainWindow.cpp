@@ -1066,6 +1066,12 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 										 configuration.clientSettings.autoApply,
 										 configuration.clientSettings.statusFlagFunction);
 
+	// Update AppSignalLists: remove all lists with Ide tag and add loaded ones
+	//
+	m_appSignalListSet.remove(AppSignalLists::AppSignalList::tagIde);
+	m_appSignalListSet.add(m_configController.appSignalListSet());
+
+
 	createWorkspace();
 
 	m_statusBarSor->setToolTip(configuration.lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::SOR ? m_sorTooltipText : QString());

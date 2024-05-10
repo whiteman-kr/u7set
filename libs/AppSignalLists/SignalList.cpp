@@ -242,6 +242,11 @@ namespace AppSignalLists
 		return m_tags;
 	}
 
+	QStringList& AppSignalList::tagsList()
+	{
+		return m_tags;
+	}
+
 	bool AppSignalList::hasAnyTag(const QStringList& tags) const
 	{
 		for (const auto& tag : tags)
@@ -611,5 +616,59 @@ namespace AppSignalLists
 		}
 
 		return result;
+	}
+
+
+
+
+	void AppSignalListSet::clear() 
+	{
+		m_lists.clear();
+	}
+
+	int AppSignalListSet::count() 
+	{
+		return static_cast<int>(m_lists.size());
+	}
+
+	bool AppSignalListSet::add(const QByteArray& ba) 
+	{
+		std::shared_ptr<AppSignalLists::AppSignalList> list = std::make_shared<AppSignalLists::AppSignalList>();
+
+		Proto::Envelope envelope;
+		if (envelope.ParseFromArray(ba.constData(), static_cast<int>(ba.size())) == false)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		bool ok = list->LoadData(envelope);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		m_lists[list->uuid()] = list;
+
+		return true;
+	}
+
+	bool AppSignalListSet::add(const AppSignalListSet& appSignalListSet) 
+	{
+		for (const auto& [uuid, list]:appSignalListSet.m_lists) 
+		{
+			m_lists[list->uuid()] = list;
+		}
+		return true;
+	}
+
+	void AppSignalListSet::remove(const QString& tag) 
+	{
+		std::erase_if(m_lists,
+					  [tag](const auto& it)
+					  {
+						  return it.second->tags().contains(tag) == true;
+					  });
 	}
 } // namespace AppSignalLists

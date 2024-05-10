@@ -5,6 +5,7 @@
 
 #include <Behavior/MonitorBehavior.h>
 #include <SchemaClientLib/SchemaClientConfigController.h>
+#include <AppSignalLists/SignalList.h>
 
 namespace Hardware
 {
@@ -27,6 +28,8 @@ struct MonitorConfigSettings
 	QString globalScript;
 	QPixmap logoImage;
 	Behavior::MonitorBehavior monitorBehavior;
+	
+	std::vector<AppSignalLists::AppSignalList> appSignalLists;
 
 	// Tuning settings
 	//
