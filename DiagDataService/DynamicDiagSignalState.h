@@ -2,6 +2,7 @@
 
 #include "../CommonLib/Times.h"
 #include "../UtilsLib/Address16.h"
+#include <DiagStateLib/SimpleDiagSignalState.h>
 
 namespace RtTrends
 {
@@ -71,8 +72,8 @@ public:
 
 //	const SimpleAppSignalState& current() const { return m_current[m_curStateIndex.load()]; }
 
-	int autoArchivingGroup() const { return m_autoArchivingGroup; }
-	void setAutoArchivingGroup(int archivingGroup);
+//	int autoArchivingGroup() const { return m_autoArchivingGroup; }
+//	void setAutoArchivingGroup(int archivingGroup);
 
 	void setGatewayQueueMask(quint32 mask);
 	void resetGatewayQueueMask(quint32 mask);
@@ -146,7 +147,7 @@ private:
 	Address16 m_valueAddr;
 	Address16 m_validityAddr;
 
-	E::SignalType m_signalType = E::SignalType::Discrete;
+	E::DiagSignalType m_signalType = E::DiagSignalType::Discrete;
 	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 	int m_dataSize = 1;
@@ -178,10 +179,8 @@ private:
 
 	//
 
-//	SimpleAppSignalState m_current[2];
+	SimpleDiagSignalState m_state[2];
 	std::atomic<int> m_curStateIndex = {0};
-
-	int m_autoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 
 	// Real time trends support
 

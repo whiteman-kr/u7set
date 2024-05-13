@@ -189,6 +189,8 @@ namespace Builder
 			}
 		}
 
+		RETURN_IF_FALSE(result)
+
 		result &= findAcquiredParentObjects();
 
 		RETURN_IF_FALSE(result)
@@ -284,12 +286,20 @@ namespace Builder
 		//
 		DeviceHelper::getChildDiagSignals(chassis, &acquiredDiagSignals);
 
-		qDebug() << C_STR(QString("LM %1 diag signals:").arg(lm->equipmentIdTemplate()));
+//		qDebug() << C_STR(QString("LM %1 diag signals:").arg(lm->equipmentIdTemplate()));
 
-		for(auto& ds : acquiredDiagSignals)
+		for(DiagSignalConstShared& ds : acquiredDiagSignals)
 		{
-			qDebug() << C_STR(ds->equipmentIdTemplate());
+			if (m_context->m_diagSignalTypes->isKnownDiagSignalTypeId(ds->signalTypeId()) == false)
+			{
+				// DiagSignal %1 has unknown diag signal type ID = %2
+				//
+				m_log->errDGN7000(ds->equipmentIdTemplate(), ds->signalTypeId());
+				result = false;
+			}
 		}
+
+		RETURN_IF_FALSE(result);
 
 		// --------------------------------------------------------------------------------------------
 

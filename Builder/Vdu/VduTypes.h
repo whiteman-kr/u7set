@@ -12,4 +12,6 @@
 typedef uint32_t vdu_string_ref;
 typedef uint32_t vdu_file_ref;
 
+inline const vdu_string_ref StringRefStub = 0x52525453; // "STRR" - for debug, easy to find in hex editor.
+
 inline const int VDU_OPTO_PORTS_COUNT = 8;

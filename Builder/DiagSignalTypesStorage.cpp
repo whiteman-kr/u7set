@@ -208,3 +208,29 @@ bool DiagSignalTypesStorage::save(const QUuid& uuid, QString* errorMessage)
 
 	return true;
 }
+
+void DiagSignalTypesStorage::buildDiagSignalTypesMap()
+{
+	m_typesMap.clear();
+
+	int index = 0;
+
+	for (const std::shared_ptr<Hardware::DiagSignalTypeObject>& dst : m_objectsVector)
+	{
+		if (dst != nullptr)
+		{
+			m_typesMap.emplace(dst->signalTypeId(), index);
+		}
+		else
+		{
+			Q_ASSERT(dst);
+		}
+
+		index++;
+	}
+}
+
+bool DiagSignalTypesStorage::isKnownDiagSignalTypeId(const QString& diagSignalTypeId)
+{
+	return m_typesMap.contains(diagSignalTypeId);
+}

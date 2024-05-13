@@ -9,6 +9,7 @@ namespace VFrame30
 
 namespace Builder
 {
+	class Context;
 	class IssueLogger;
 
 	class VduSchemaGenerator
@@ -17,11 +18,13 @@ namespace Builder
 		VduSchemaGenerator() = delete;
 
 	public:
+		static bool generateVduSchemas(const std::vector<VFrame30::VduSchema*>& schemas, Context& context);
+
 		static bool generateVduSchema(QString vduEquipmentId,
 									  const VFrame30::VduSchema& schema,
 									  const std::map<Hash, int>& appSignalHashToSignalIndex,
 									  QByteArray& out,
-									  IssueLogger& log);
+									  Context& context);
 
 		static bool generateVduBackgroundBitmap(std::shared_ptr<VFrame30::Schema> schema, QImage& out);
 
@@ -31,6 +34,6 @@ namespace Builder
 									const std::map<Hash, int>& appSignalHashToSignalIndex,
 									QByteArray& out,
 									std::list<std::pair<QString, size_t>>& addedStringReferences,
-									IssueLogger& log);
+									Context& context);
 	};
 } // namespace Builder

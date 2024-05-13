@@ -1,4 +1,6 @@
 #include "Context.h"
+#include "../VFrame30/LogicSchema.h"
+#include "../VFrame30/VduSchema.h"
 
 namespace Builder
 {
@@ -9,6 +11,8 @@ namespace Builder
 	{
 		assert(log);
 	}
+
+	Context::~Context() = default;
 
 	bool Context::generateAppSignalsXml() const
 	{

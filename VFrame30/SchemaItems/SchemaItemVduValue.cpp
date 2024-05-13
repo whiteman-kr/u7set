@@ -55,18 +55,54 @@ namespace VFrame30
 								 SchemaItemVduValue::setTextColor);
 
 		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::fontName,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemVduValue::fontName,
-								 SchemaItemVduValue::setFontName);
-
-		ADD_PROPERTY_GET_SET_CAT(QString,
 								 PropertyNames::appSignalId,
 								 PropertyNames::textCategory,
 								 true,
 								 SchemaItemVduValue::appSignalId,
 								 SchemaItemVduValue::setAppSignalId);
+
+		ADD_PROPERTY_GET_SET_CAT(int,
+								 PropertyNames::precision,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduValue::precision,
+								 SchemaItemVduValue::setPrecision);
+
+		// Font
+		//
+		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::fontName,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduValue::getFontName,
+								 SchemaItemVduValue::setFontName);
+
+		ADD_PROPERTY_GET_SET_CAT(double,
+								 PropertyNames::fontSize,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduValue::getFontSize,
+								 SchemaItemVduValue::setFontSize)->
+			setPrecision(0);
+
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::fontBold,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduValue::getFontBold,
+								 SchemaItemVduValue::setFontBold);
+
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::fontItalic,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduValue::getFontItalic,
+								 SchemaItemVduValue::setFontItalic);
+
+		m_font.setName(QStringLiteral("Arial"));
+		Q_ASSERT(units == SchemaUnit::Display);
+
+		m_font.setSize(12.0, units);
 
 		// --
 		//
@@ -99,8 +135,10 @@ namespace VFrame30
 		valueMessage->set_fillcolor(m_fillColor.rgba());
 		valueMessage->set_textcolor(m_textColor.rgba());
 
-		valueMessage->set_fontname(m_fontName.toUtf8());
 		valueMessage->set_appsignalid(m_appSignalId.toUtf8());
+		m_font.SaveData(valueMessage->mutable_font());
+
+		valueMessage->set_precision(m_precision);
 
 		return true;
 	}
@@ -140,8 +178,10 @@ namespace VFrame30
 		m_fillColor = QColor::fromRgba(valueMessage.fillcolor());
 		m_textColor = QColor::fromRgba(valueMessage.textcolor());
 
-		m_fontName = QString::fromUtf8(valueMessage.fontname().c_str());
 		m_appSignalId = QString::fromUtf8(valueMessage.appsignalid().c_str());
+		m_font.LoadData(valueMessage.font());
+
+		m_precision = valueMessage.precision();
 
 		return true;
 	}
@@ -172,37 +212,15 @@ namespace VFrame30
 
 		// Drawing Text
 		//
-		QFont font{m_fontName};
-
-		// Assume that font is "Arial_12", then we get 12 from it and use it as a font size.
-		//
-		{
-			int fontSize = 0;
-
-			auto splittedFontName = m_fontName.split(QChar('_'), Qt::SkipEmptyParts);
-
-			if (splittedFontName.isEmpty() == false)
-			{
-				bool convertOk = false;
-				fontSize = splittedFontName.last().toInt(&convertOk);
-				if (convertOk == false)
-				{
-					fontSize = 12;
-				}
-			}
-
-			font.setPixelSize(fontSize);
-		}
+		QFont font = m_font.qfont(itemUnit(), 0); // Dpi does not matter for SchemaUnit::Display.
+		font.setStyleStrategy(QFont::PreferAntialias);
 
 		painter->setFont(font);
 		painter->setPen(m_textColor);
 
-		DrawHelper::drawText(painter,
-							 itemUnit(),
-							 "?",
-							 boundingRect,
-							 static_cast<int>(Qt::AlignHCenter) | static_cast<int>(Qt::AlignVCenter),
-							 nullptr);
+		QString text{"?"};
+
+		painter->drawText(boundingRect, static_cast<int>(Qt::AlignHCenter) | static_cast<int>(Qt::AlignVCenter), text, nullptr);
 
 		return;
 	}
@@ -267,16 +285,6 @@ namespace VFrame30
 		m_textColor = color;
 	}
 
-	const QString& SchemaItemVduValue::fontName() const
-	{
-		return m_fontName;
-	}
-
-	void SchemaItemVduValue::setFontName(const QString& value)
-	{
-		m_fontName = value;
-	}
-
 	const QString& SchemaItemVduValue::appSignalId() const
 	{
 		return m_appSignalId;
@@ -286,5 +294,17 @@ namespace VFrame30
 	{
 		m_appSignalId = value;
 	}
+
+	int SchemaItemVduValue::precision() const
+	{
+		return m_precision;
+	}
+
+	void SchemaItemVduValue::setPrecision(int value)
+	{
+		m_precision = std::clamp(value, 0, 32);
+	}
+
+	IMPLEMENT_FONT_PROPERTIES(SchemaItemVduValue, Font, m_font);
 
 } // namespace VFrame30

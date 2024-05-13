@@ -1,7 +1,7 @@
 #pragma once
 
+#include "../FontParam.h"
 #include "PosRectImpl.h"
-
 
 namespace VFrame30
 {
@@ -47,11 +47,13 @@ namespace VFrame30
 		QColor textColor() const;
 		void setTextColor(QColor color);
 
-		const QString& fontName() const;
-		void setFontName(const QString& value);
-
 		const QString& appSignalId() const;
 		void setAppSignalId(const QString& value);
+
+		int precision() const;
+		void setPrecision(int value);
+
+		DECLARE_FONT_PROPERTIES(Font)
 
 	private:
 		int m_weight = 0;                             // Line weight, in pixels
@@ -61,8 +63,10 @@ namespace VFrame30
 		QColor m_fillColor = qRgb(0x00, 0x00, 0xC0);
 		QColor m_textColor = qRgb(0xFF, 0xFF, 0xFF);
 
-		QString m_fontName = QStringLiteral("Arial"); // FontName, should be something like "Arial_16"
-
 		QString m_appSignalId;
+
+		int m_precision	= 0;                          // Number of digits after the decimal point
+
+		FontParam m_font;
 	};
 } // namespace VFrame30

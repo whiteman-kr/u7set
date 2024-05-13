@@ -18,6 +18,12 @@ namespace VFrame30
 	class VduSchema;
 }
 
+namespace Hardware
+{
+	class Software;
+	class EquipmentSet;
+}
+
 namespace AppSignalLists
 {
 	class AppSignalList;
@@ -25,7 +31,6 @@ namespace AppSignalLists
 
 namespace Builder
 {
-
 	class SoftwareCfgGenerator : public QObject
 	{
 		Q_OBJECT

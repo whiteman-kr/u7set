@@ -208,6 +208,16 @@ protected:
 		m_states.push(state, thread);
 	}
 
+public:
+	int popStates(SIGNAL_STATE* signalStatesBuffer, int bufferSize, const QThread* thread)
+	{
+		Q_UNUSED(signalStatesBuffer);
+		Q_UNUSED(bufferSize);
+		Q_UNUSED(thread);
+		Q_ASSERT(false);			// to do
+		return 0;
+	}
+
 private:
 	FastThreadSafeQueue<SIGNAL_STATE> m_states;
 };

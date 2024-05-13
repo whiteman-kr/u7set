@@ -1,7 +1,8 @@
 #include "VduTypes.h"
 
 // 29 Mar 2024 - Version 1.0 -  The first version of the file format.
-// 
+// 10 Apr 2024 - Version 1.1 -  Added VduSchemaFileSchemaItem1::isStatic, VduSchemaFileSchemaItemValue1::decimalPlaces.
+//
 
 // SVDU schema file, extension *.vbs
 // Data stored in little-endian format.
@@ -37,8 +38,8 @@ struct VduSchemaFile
 {
 	// 1. Header and schema properties
 	//
-	char magic[4];        // "VDU\0"
-	uint16_t fileVersion; // 1
+	char magic[4];            // "VDU\0"
+	uint16_t fileVersion;     // 1
 	uint16_t reserve1;
 
 	struct VduSchemaFileProperties1 schemaProperties;
@@ -73,15 +74,18 @@ const uint16_t VduFileSchemaItemValueId = 0x4C56; // VL
 
 struct VduSchemaFileSchemaItem1
 {
-	uint16_t version;       // 1
-	uint16_t size;          // sizeof(VduSchemaFileSchemaItem1)
-	uint16_t itemType;      // VduFileSchemaItemLineId, VduFileSchemaItemRectId, ...
+	uint16_t version;                             // 1
+	uint16_t size;                                // sizeof(VduSchemaFileSchemaItem1)
+	uint16_t itemType;                            // VduFileSchemaItemLineId, VduFileSchemaItemRectId, ...
 	uint16_t reserve0;
 	uint16_t totalItemSize; // sizeof(VduSchemaFileSchemaItem1) + sizeof(VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...)
-	uint16_t reserve1;      // sizeof(VduSchemaFileSchemaItem1) + sizeof(VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...)
+
+	bool isStatic;          // If true, the item is static and can be cached.
+	bool reserveBool0;
+
 	uint32_t reserve2;
 	uint32_t reserve3;
-	// This struct is followed by the data of the specific schema item like VduSchemaFileSchemaItemLine1, VduSchemaFileSchemaItemRect1, 
+	// This struct is followed by the data of the specific schema item like VduSchemaFileSchemaItemLine1, VduSchemaFileSchemaItemRect1,
 	// VduSchemaFileSchemaItemValue1, ...
 };
 
@@ -91,11 +95,13 @@ struct VduSchemaFileSchemaItemLine1
 	uint16_t itemType; // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
 	uint32_t reserve0;
 
-	int16_t x1;
-	int16_t y1;
-	int16_t x2;
-	int16_t y2;
-	uint32_t reserve1;
+	uint16_t x1;
+	uint16_t y1;
+	uint16_t x2;
+	uint16_t y2;
+
+	uint16_t weight;
+	uint16_t reserve1;
 
 	uint32_t color;
 	uint32_t reserve2;
@@ -151,17 +157,18 @@ struct VduSchemaFileSchemaItemValue1
 	uint32_t fillColor;
 	uint32_t textColor;
 
-	uint32_t reserve3[8]; // Reserved for different colors
+	uint32_t reserve3[8];   // Reserved for different colors
 
-	uint16_t fontIndex;   // Fonts are generated on build, each font is a folder with name as index, this folder contains font files.
+	uint16_t fontIndex;     // Fonts are generated on build, each font is a folder with name as index, this folder contains font files.
 	uint16_t reserve4;
 
-	uint32_t reserve5;
+	uint16_t decimalPlaces; // Number of decimal places for floating point values.
+	uint16_t reserve5;
+
 	uint32_t reserve6;
 	uint32_t reserve7;
 
 	uint32_t appSignalIndex;
 };
-
 
 #pragma pack(pop)

@@ -9291,6 +9291,57 @@ namespace Builder
 				  .arg(schemaItemLabel));
 	}
 
+	/// IssueCode: EQP6401
+	///
+	/// IssueType: Error
+	///
+	/// Title: Font %1 is not found in VDU %2, Schema %3, SchemaItem %4. Add font to the VDU's font properties (Fonts).
+	///
+	/// Parameters:
+	///		%1 Font parameters
+	///		%2 VDU EquipmentID
+	///		%3 SchemaID
+	///		%4 Schema item label
+	///
+	/// Description:
+	///		The specified font was not found in the VDU's fonts. Please add the font to the VDU's font properties (Fonts).
+	///
+	void IssueLogger::errEQP6401(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, QString font)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 6401, itemUuid, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6401,
+				  tr("Font %1 is not found in VDU %2, Schema %3, SchemaItem %4. Add font to the VDU's font properties (Fonts).")
+				  .arg(font)
+				  .arg(vduEquipmentId)
+				  .arg(schemaId)
+				  .arg(itemLabel));
+	}
+
+	// --
+
+	/// IssueCode: DGN7000
+	///
+	/// IssueType: Error
+	///
+	/// Title: DiagSignal %1 has unknown diag signal type ID = %2
+	///
+	/// Parameters:
+	///		%1 DiagSignalID
+	///		%2 DiagSignalTypeID
+	///
+	/// Description:
+	///		Specified DiagSignal has unknown diag signal typeID. Check diag signal properties.
+	///
+	void IssueLogger::errDGN7000(QString diagSignalEquipmentID, QString unknownDiagSignalTypeID)
+	{
+		LOG_ERROR(IssueType::Diagnostics,
+				  7000,
+				  tr("DiagSignal %1 has unknown diag signal type ID = %2").
+						arg(diagSignalEquipmentID).arg(unknownDiagSignalTypeID));
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids)
@@ -9401,6 +9452,8 @@ namespace Builder
 				return "ALC";
 			case IssueType::Equipment:
 				return "EQP";
+			case IssueType::Diagnostics:
+				return "DGN";
 			default:
 				assert(false);
 				return "NDF";

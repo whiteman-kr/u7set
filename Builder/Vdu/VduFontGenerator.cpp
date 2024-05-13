@@ -1,5 +1,8 @@
 #include "VduFontGenerator.h"
 #include "../Context.h"
+#include "../IssueLogger.h"
+
+#include <HardwareLib/DeviceModule.h>
 
 #include <QImage>
 #include <QPainter>
@@ -94,6 +97,103 @@ namespace Builder
 	// ----------------------------------------------------------------------------------------
 	//									VduFontGenerator
 	// ----------------------------------------------------------------------------------------
+
+	bool VduFontGenerator::generationVduFonts(Context& context)
+	{
+		IssueLogger* log = context.m_log;
+		Q_ASSERT(log);
+
+		bool result = true;
+
+		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
+		{
+			Q_ASSERT(vdu);
+
+			LOG_MESSAGE(log, QString("Generating fonts for VDU %1.").arg(vdu->equipmentId()));
+
+			auto fontsProperty = vdu->propertyByCaption(EquipmentPropNames::FONTS);
+			if (fontsProperty == nullptr)
+			{
+				// Property '%1.%2' is not found.
+				//
+				log->errCFG3020(vdu->equipmentId(), EquipmentPropNames::FONTS);
+				result = false;
+				continue;
+			}
+
+			// Parse fonts info from Fonts property
+			//
+			auto fontsValue = fontsProperty->value().toString();
+			if (fontsValue.isEmpty() == true)
+			{
+				continue;
+			}
+			std::vector<VduFontInfo> fontsInfo;
+
+			QXmlStreamReader reader(fontsValue);
+
+			if (reader.readNextStartElement() == false)
+			{
+				reader.raiseError(QObject::tr("Internal error: Failed to load root element in Fonts property in VDU %1.").arg(vdu->equipmentId()));
+				log->errINT1000(reader.errorString());
+				continue;
+			}
+
+			if (reader.name() != QLatin1String("VduFonts"))
+			{
+				reader.raiseError(QObject::tr("Internal error: Error loading fonts for VDU %1: unknown tag %2.")
+								  .arg(vdu->equipmentId())
+								  .arg(reader.name()));
+				log->errINT1000(reader.errorString());
+				continue;
+			}
+
+			// Read signals
+			//
+			while (reader.readNextStartElement())
+			{
+				if (reader.name() == QLatin1String("VduFont"))
+				{
+					QString errorMessage;
+					VduFontInfo fi;
+					if (fi.load(reader, &errorMessage) == true)
+					{
+						fontsInfo.push_back(fi);
+					}
+					else
+					{
+						reader.raiseError(QObject::tr("Internal error: Error loading font for VDU %1: %2.").arg(vdu->equipmentId()).arg(errorMessage));
+						log->errINT1000(reader.errorString());
+					}
+				}
+				else
+				{
+					reader.raiseError(QObject::tr("Internal error: Error loading fonts for VDU %1: unknown tag %2.")
+									  .arg(vdu->equipmentId())
+									  .arg(reader.name()));
+					log->errINT1000(reader.errorString());
+				}
+				reader.skipCurrentElement();
+			}
+
+			result &= (reader.hasError() == false);
+
+			// Add parsed fonts info to VduFontProvider
+			//
+			context.m_vduFontProvider.setFontsInfo(vdu->equipmentId(), fontsInfo);
+
+			// Generate font files for loaded fonts
+			//
+			int fontIndex = 0;
+			for (const VduFontInfo& fi : fontsInfo)
+			{
+				QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + QString("/Fonts/%1/").arg(fontIndex++);
+				result &= Builder::VduFontGenerator::generateVduFont(fi, vduDir, context.generateExtraDebugInfo(), context);
+			}
+		}
+
+		return result;
+	}
 
 	bool VduFontGenerator::generateVduFont(const VduFontInfo& fontInfo, const QString& dir, bool generateDebugFiles, Context& context)
 	{

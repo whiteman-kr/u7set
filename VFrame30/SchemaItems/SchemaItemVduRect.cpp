@@ -33,7 +33,41 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemVduRect::horzAlign, SchemaItemVduRect::setHorzAlign);
 		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemVduRect::vertAlign, SchemaItemVduRect::setVertAlign);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::textCategory, true, SchemaItemVduRect::fontName, SchemaItemVduRect::setFontName);
+		// Font
+		//
+		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::fontName,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduRect::getFontName,
+								 SchemaItemVduRect::setFontName);
+
+		ADD_PROPERTY_GET_SET_CAT(double,
+								 PropertyNames::fontSize,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduRect::getFontSize,
+								 SchemaItemVduRect::setFontSize)->
+			setPrecision(0);
+
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::fontBold,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduRect::getFontBold,
+								 SchemaItemVduRect::setFontBold);
+
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::fontItalic,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduRect::getFontItalic,
+								 SchemaItemVduRect::setFontItalic);
+
+		m_font.setName(QStringLiteral("Arial"));
+		Q_ASSERT(units == SchemaUnit::Display);
+
+		m_font.setSize(12.0, units);
 
 		// --
 		//
@@ -67,8 +101,8 @@ namespace VFrame30
 		rectMessage->set_fillcolor(m_fillColor.rgba());
 		rectMessage->set_textcolor(m_textColor.rgba());
 
-		rectMessage->set_fontname(m_fontName.toUtf8());
 		rectMessage->set_text(m_text.toUtf8());
+		m_font.SaveData(rectMessage->mutable_font());
 
 		rectMessage->set_horzalign(static_cast<int32_t>(m_horzAlign));
 		rectMessage->set_vertalign(static_cast<int32_t>(m_vertAlign));
@@ -112,8 +146,8 @@ namespace VFrame30
 		m_fillColor = QColor::fromRgba(rectMessage.fillcolor());
 		m_textColor = QColor::fromRgba(rectMessage.textcolor());
 
-		m_fontName = QString::fromUtf8(rectMessage.fontname().c_str());
 		m_text = QString::fromUtf8(rectMessage.text().c_str());
+		m_font.LoadData(rectMessage.font());
 
 		m_horzAlign = static_cast<E::HorzAlign>(rectMessage.horzalign());
 		m_vertAlign = static_cast<E::VertAlign>(rectMessage.vertalign());
@@ -147,32 +181,13 @@ namespace VFrame30
 
 		// Drawing Text
 		//
-		QFont font{m_fontName};
-
-		// Assume that font is "Arial_12", then we get 12 from it and use it as a font size.
-		//  
-		{
-			int fontSize = 0;
-
-			auto splittedFontName = m_fontName.split(QChar('_'), Qt::SkipEmptyParts);
-			
-			if (splittedFontName.isEmpty() == false)
-			{
-				bool convertOk = false;
-				fontSize = splittedFontName.last().toInt(&convertOk);
-				if (convertOk == false)
-				{
-					fontSize = 12;
-				}
-			}
-
-			font.setPixelSize(fontSize);
-		}
+		QFont font = m_font.qfont(itemUnit(), 0); // Dpi does not matter for SchemaUnit::Display.
+		font.setStyleStrategy(QFont::PreferAntialias);
 
 		painter->setFont(font);
 		painter->setPen(m_textColor);
 
-		DrawHelper::drawText(painter, itemUnit(), m_text, boundingRect, static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign), nullptr);
+		painter->drawText(boundingRect, static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign), m_text, nullptr);
 
 		return;
 	}
@@ -266,15 +281,7 @@ namespace VFrame30
 		m_textColor = color;
 	}
 
-	const QString& SchemaItemVduRect::fontName() const
-	{
-		return m_fontName;
-	}
-
-	void SchemaItemVduRect::setFontName(const QString& value)
-	{
-		m_fontName = value;
-	}
+	IMPLEMENT_FONT_PROPERTIES(SchemaItemVduRect, Font, m_font);
 
 	const QString& SchemaItemVduRect::text() const
 	{

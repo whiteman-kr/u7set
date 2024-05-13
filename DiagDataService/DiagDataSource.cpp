@@ -44,3 +44,42 @@ bool DiagDataSource::invalidateAllSignals(const QThread* thread)
 	return true;
 }
 
+bool DiagDataSource::init(const std::map<Hash, Hardware::DiagSignalType>& diagSignalTypes,
+						  const ::Network::AcquiredDiagSignalsAndObjects& diagSignalsAndObjects)
+{
+	bool result = true;
+
+	int lmCount = diagSignalsAndObjects.lmdiagsignals().size();
+
+	std::string dsEquipmentID = moduleEquipmentID().toStdString();
+
+	const ::Network::LmDiagSignals* lmDiagSignals = nullptr;
+
+	for(int i = 0; i < lmCount; i++)
+	{
+		if (diagSignalsAndObjects.lmdiagsignals()[i].lmequipmentid() == dsEquipmentID)
+		{
+			lmDiagSignals = &diagSignalsAndObjects.lmdiagsignals()[i];
+			break;
+		}
+	}
+
+	if (lmDiagSignals == nullptr)
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	int signalsCount = lmDiagSignals->diagsignals().size();
+
+	for(int i = 0; i < signalsCount; i++)
+	{
+		const Network::AcquiredDiagSignal& ds = lmDiagSignals->diagsignals()[i];
+
+		// create dynamic signal state
+	}
+
+	return result;
+}
+
+

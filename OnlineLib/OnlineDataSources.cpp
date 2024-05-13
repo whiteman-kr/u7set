@@ -52,6 +52,7 @@ void BaseOnlineDataSources::clear()
 void BaseOnlineDataSources::run()
 {
 	startProcessingThreads();
+	startStatesDistribution();
 	startRupFramesReceiver();
 }
 
@@ -60,9 +61,54 @@ void BaseOnlineDataSources::stop()
 	m_stopSource.request_stop();
 }
 
+bool BaseOnlineDataSources::isWorkable() const
+{
+	return m_isWorkable;
+}
+
 CircularLoggerShared BaseOnlineDataSources::log()
 {
 	return m_log;
+}
+
+void BaseOnlineDataSources::updateDataSourcesStatistics500ms(bool oneSecond)
+{
+	for(BaseOnlineDataSource* source : m_sources)
+	{
+		TEST_PTR_CONTINUE(source);
+
+		bool invalidateSignals = source->updateStatistics_500ms(oneSecond);
+
+		if (invalidateSignals == true)
+		{
+			processingRequired(source, false);
+		}
+	}
+}
+
+bool BaseOnlineDataSources::pushRupFrame(quint32 sourceIP,
+									 qint64 serverTime,
+									 bool isSimFrame,
+									 Rup::Frame& rupFrame,
+									 const QThread* thread)
+{
+	auto it = m_ipToSource.find(sourceIP);
+
+	if (it == m_ipToSource.end())
+	{
+		return false;
+	}
+
+	BaseOnlineDataSource* source = it->second;
+
+	bool readyToParsing = source->pushRupFrame(sourceIP, serverTime, isSimFrame, rupFrame, thread);
+
+	if (readyToParsing == true)
+	{
+		processingRequired(source, true);
+	}
+
+	return true;
 }
 
 //void RupFramesReceiver::wakeupAllProcessingThreads()
@@ -125,46 +171,6 @@ bool BaseOnlineDataSources::append(BaseOnlineDataSource* onlineSource,
 	}
 
 	return result;
-}
-
-bool BaseOnlineDataSources::pushRupFrame(quint32 sourceIP,
-									 qint64 serverTime,
-									 bool isSimFrame,
-									 Rup::Frame& rupFrame,
-									 const QThread* thread)
-{
-	auto it = m_ipToSource.find(sourceIP);
-
-	if (it == m_ipToSource.end())
-	{
-		return false;
-	}
-
-	BaseOnlineDataSource* source = it->second;
-
-	bool readyToParsing = source->pushRupFrame(sourceIP, serverTime, isSimFrame, rupFrame, thread);
-
-	if (readyToParsing == true)
-	{
-		processingRequired(source, true);
-	}
-
-	return true;
-}
-
-void BaseOnlineDataSources::updateDataSourcesStatistics500ms(bool oneSecond)
-{
-	for(BaseOnlineDataSource* source : m_sources)
-	{
-		TEST_PTR_CONTINUE(source);
-
-		bool invalidateSignals = source->updateStatistics_500ms(oneSecond);
-
-		if (invalidateSignals == true)
-		{
-			processingRequired(source, false);
-		}
-	}
 }
 
 BaseOnlineDataSource* BaseOnlineDataSources::getSourceByIP(quint32 ip)

@@ -326,7 +326,6 @@ namespace OnlineLib
 		static bool readFromXml(const QByteArray& fileData, QVector<TYPE>* dataSources);
 	};
 
-
 	// -----------------------------------------------------------------------------
 	//
 	// DataSourcesXML class implementation
