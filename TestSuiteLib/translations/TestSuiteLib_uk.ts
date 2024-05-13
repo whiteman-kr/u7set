@@ -32,34 +32,34 @@
         <translation>Помилка читання даних з рядку %1 файлу %2.</translation>
     </message>
     <message>
-        <location filename="../TestReport.cpp" line="73"/>
+        <location filename="../TestReport.cpp" line="95"/>
         <source>Save File</source>
         <translation>Зберегти файл</translation>
     </message>
     <message>
-        <location filename="../TestReport.cpp" line="74"/>
+        <location filename="../TestReport.cpp" line="96"/>
         <source>%1.pdf</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestReport.cpp" line="75"/>
+        <location filename="../TestReport.cpp" line="97"/>
         <source>PDF Files (*.pdf);;All Files (*.*)</source>
         <translation>Файли PDF (*.pdf);;Всі файли (*.*)</translation>
     </message>
     <message>
-        <location filename="../TestReport.cpp" line="96"/>
-        <location filename="../TestReport.cpp" line="153"/>
+        <location filename="../TestReport.cpp" line="118"/>
+        <location filename="../TestReport.cpp" line="175"/>
         <source>Report &apos;%1&apos; generation error!</source>
         <translation>Помилка створення звіту &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../TestReport.cpp" line="103"/>
-        <location filename="../TestReport.cpp" line="162"/>
+        <location filename="../TestReport.cpp" line="125"/>
+        <location filename="../TestReport.cpp" line="184"/>
         <source>Report file &apos;%1&apos; saving error!</source>
         <translation>Помилка запису файлу звіту&apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../TestReport.cpp" line="107"/>
+        <location filename="../TestReport.cpp" line="129"/>
         <source>Report generating has been finished.
 
 Do you with to open it?</source>
@@ -68,12 +68,12 @@ Do you with to open it?</source>
 Ви бажаєте відкрити його?</translation>
     </message>
     <message>
-        <location filename="../TestReport.cpp" line="123"/>
+        <location filename="../TestReport.cpp" line="145"/>
         <source>Report path &apos;%1&apos; creating error!</source>
         <translation>Помилка створення шляху звіту &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../TestReport.cpp" line="166"/>
+        <location filename="../TestReport.cpp" line="188"/>
         <source>Report file &apos;%1&apos; saved successfully.</source>
         <translation>Файл звіту &apos;%1&apos; збережено успішно.</translation>
     </message>
@@ -103,22 +103,22 @@ Do you with to open it?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="66"/>
+        <location filename="../ScriptRunner.cpp" line="73"/>
         <source>%1 ms</source>
         <translation>%1 мс</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="73"/>
+        <location filename="../ScriptRunner.cpp" line="80"/>
         <source>%1 s %2 ms</source>
         <translation>%1 с %2 мс</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="80"/>
+        <location filename="../ScriptRunner.cpp" line="87"/>
         <source>%1m %2s %3ms</source>
         <translation>%1хв %2с %3мс</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="83"/>
+        <location filename="../ScriptRunner.cpp" line="90"/>
         <source>%1h %2m %3s %3ms</source>
         <translation>%1г %2хв %3с %3мс</translation>
     </message>
@@ -126,27 +126,27 @@ Do you with to open it?</source>
 <context>
     <name>TestSuite::ConstStrings</name>
     <message>
-        <location filename="../TestLog.h" line="13"/>
+        <location filename="../TestLog.h" line="14"/>
         <source>PASSED</source>
         <translation>ВИКОНАНО</translation>
     </message>
     <message>
-        <location filename="../TestLog.h" line="17"/>
+        <location filename="../TestLog.h" line="18"/>
         <source>FAILED</source>
         <translation>ПОМИЛКА</translation>
     </message>
     <message>
-        <location filename="../TestLog.h" line="21"/>
+        <location filename="../TestLog.h" line="22"/>
         <source>RUNNING</source>
         <translation>ВИКОНАННЯ</translation>
     </message>
     <message>
-        <location filename="../TestLog.h" line="25"/>
+        <location filename="../TestLog.h" line="26"/>
         <source>Allowed</source>
         <translation>Дозволено</translation>
     </message>
     <message>
-        <location filename="../TestLog.h" line="29"/>
+        <location filename="../TestLog.h" line="30"/>
         <source>Denied</source>
         <translation>Заборонено</translation>
     </message>
@@ -154,17 +154,17 @@ Do you with to open it?</source>
 <context>
     <name>TestSuite::ControlThread</name>
     <message>
-        <location filename="../Control.cpp" line="59"/>
+        <location filename="../Control.cpp" line="61"/>
         <source>Test execution was interrupted by user.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../Control.cpp" line="123"/>
+        <location filename="../Control.cpp" line="125"/>
         <source>Cannot connect to CfgService, address1 %1, address2 %2, InstanceID %3</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../Control.cpp" line="145"/>
+        <location filename="../Control.cpp" line="147"/>
         <source>Load script file error, path %1, error message: %2</source>
         <translation></translation>
     </message>
@@ -172,12 +172,12 @@ Do you with to open it?</source>
 <context>
     <name>TestSuite::RunControlThread</name>
     <message>
-        <location filename="../RunControl.cpp" line="161"/>
+        <location filename="../RunControl.cpp" line="160"/>
         <source>Finished, exit code %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../RunControl.cpp" line="235"/>
+        <location filename="../RunControl.cpp" line="234"/>
         <source>Script %1 execution timeout (%2 ms).</source>
         <translation></translation>
     </message>
@@ -185,7 +185,7 @@ Do you with to open it?</source>
 <context>
     <name>TestSuite::ScriptRunner</name>
     <message>
-        <location filename="../ScriptRunner.cpp" line="206"/>
+        <location filename="../ScriptRunner.cpp" line="213"/>
         <source>********** Start test script %1 **********</source>
         <translation>********** Запуск сценарію %1 **********</translation>
     </message>
@@ -198,17 +198,17 @@ Do you with to open it?</source>
         <translation type="vanished">%1: НЕ ПРОЙШОВ</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="342"/>
+        <location filename="../ScriptRunner.cpp" line="349"/>
         <source>%1: cleanup() failed, test terminated.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="347"/>
+        <location filename="../ScriptRunner.cpp" line="354"/>
         <source>%1: init() failed, test terminated.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="359"/>
+        <location filename="../ScriptRunner.cpp" line="366"/>
         <source>⠀%1;%2;%3</source>
         <translation></translation>
     </message>
@@ -221,18 +221,18 @@ Do you with to open it?</source>
         <translation type="vanished">НЕ ПРОЙШОВ</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="389"/>
-        <location filename="../ScriptRunner.cpp" line="393"/>
+        <location filename="../ScriptRunner.cpp" line="396"/>
+        <location filename="../ScriptRunner.cpp" line="400"/>
         <source>Totals: %1 tests, %2 failed, %3ms</source>
         <translation>Результат: %1 тест(ів), %2 з помилкою, %3мс</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="396"/>
+        <location filename="../ScriptRunner.cpp" line="403"/>
         <source>********** Finished test script %1 **********</source>
         <translation>********** Завершення сценарію %1 **********</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="401"/>
+        <location filename="../ScriptRunner.cpp" line="408"/>
         <source>%1;%2;%3</source>
         <translation></translation>
     </message>
@@ -241,23 +241,23 @@ Do you with to open it?</source>
         <translation type="vanished">%1 НЕ ПРОЙШОВ</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="328"/>
-        <location filename="../ScriptRunner.cpp" line="334"/>
+        <location filename="../ScriptRunner.cpp" line="335"/>
+        <location filename="../ScriptRunner.cpp" line="341"/>
         <source>%1: %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="403"/>
+        <location filename="../ScriptRunner.cpp" line="410"/>
         <source>%1 %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="428"/>
+        <location filename="../ScriptRunner.cpp" line="435"/>
         <source>allow%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="436"/>
+        <location filename="../ScriptRunner.cpp" line="443"/>
         <source>Script %1 evaluate error at line %2
 	Class: %3
 	Stack: %4
@@ -268,24 +268,24 @@ Do you with to open it?</source>
 	Помилка: %5</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="544"/>
+        <location filename="../ScriptRunner.cpp" line="550"/>
         <source>%1 is callable function</source>
         <translation>%1 не є функцією</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="592"/>
+        <location filename="../ScriptRunner.cpp" line="598"/>
         <source>Unexpected exception occured in %1.</source>
         <translation>Виникло виключення в %1.</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="611"/>
+        <location filename="../ScriptRunner.cpp" line="617"/>
         <source>Error, stack trace: %1
 	Message: %2</source>
         <translation>Помилка, трасування: %1
 	Помилка: %2</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="617"/>
+        <location filename="../ScriptRunner.cpp" line="623"/>
         <source>Error at line %1
 	Stack: %2
 	Message: %3</source>
@@ -297,27 +297,27 @@ Do you with to open it?</source>
 <context>
     <name>TestSuite::TestControlThread</name>
     <message>
-        <location filename="../TestControl.cpp" line="64"/>
+        <location filename="../TestControl.cpp" line="65"/>
         <source>Finished, exit code %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestControl.cpp" line="76"/>
+        <location filename="../TestControl.cpp" line="77"/>
         <source>Tests execution failed: no user name is supplied! Please check the configuration.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestControl.cpp" line="82"/>
+        <location filename="../TestControl.cpp" line="83"/>
         <source>Tests execution failed: authorization failed!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestControl.cpp" line="167"/>
+        <location filename="../TestControl.cpp" line="178"/>
         <source>Script %1 execution timeout (%2 ms).</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestControl.cpp" line="190"/>
+        <location filename="../TestControl.cpp" line="201"/>
         <source>Run test script: %1</source>
         <translation></translation>
     </message>
