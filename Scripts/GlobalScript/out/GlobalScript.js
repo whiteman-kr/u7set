@@ -106,6 +106,7 @@ var E;
 //declare var app: App.ScriptMonitorApplication;		// For Monitor script
 //declare var equipment: Hardware.ScriptEquipment;		// For Monitor script
 //declare var app: App.ScriptTuningClientApplication;	// For TuningClient script
+//declare var app: App.ScriptTestSuiteApplication;	// For TestSuite script
 // Global functions
 function showSignalValue(schemaItem, signalId) {
     schemaItem.alignHorz = E.HorzAlign.AlignHCenter;

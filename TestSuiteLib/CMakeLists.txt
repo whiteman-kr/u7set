@@ -27,6 +27,8 @@ qt_add_library(${TARGET} STATIC
 	ScriptRunner.h
 	ScriptTestLog.cpp
 	ScriptTestLog.h
+	ScriptTestSuiteApplication.cpp
+	ScriptTestSuiteApplication.h
 	TestController.cpp
 	TestController.h
 	TestLog.cpp
