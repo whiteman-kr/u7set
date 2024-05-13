@@ -6,6 +6,7 @@ namespace TestSuite
 		m_configuration(configuration),
 		m_testController(testController),
 		m_scriptTestLog(scriptTestLog),
+		m_app(m_configuration.configInfo.softwareEquipmentId),
 		m_status(status),
 		m_statusMutex(statusMutex),
 		m_scriptInfo(script.fileName())
@@ -22,9 +23,15 @@ namespace TestSuite
 		m_jsLog = m_jsEngine.newQObject(&m_scriptTestLog);
 		QJSEngine::setObjectOwnership(&m_scriptTestLog, QJSEngine::CppOwnership);
 
+		// theApp
+		//
+		m_jsApp = m_jsEngine.newQObject(&m_app);
+		QJSEngine::setObjectOwnership(&m_app, QJSEngine::CppOwnership);
+
 		m_jsEngine.globalObject().setProperty("log", m_jsLog);
 		m_jsEngine.globalObject().setProperty("isSimulator", QJSValue{false});
 		m_jsEngine.globalObject().setProperty("isTestSuite", QJSValue{true});
+		m_jsEngine.globalObject().setProperty("app", m_jsApp);
 
 		// Evaluate scripts
 		//

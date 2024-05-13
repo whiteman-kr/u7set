@@ -32,4 +32,11 @@ module App {
 		//
 		equipmentID: string;
 	}
+
+	export interface ScriptTestSuiteApplication {
+
+		// Properties
+		//
+		equipmentID: string;
+	}
 }
