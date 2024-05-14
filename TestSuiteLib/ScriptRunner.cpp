@@ -243,17 +243,17 @@ namespace TestSuite
 		bool allowLocal = true;
 		if (queryPermission(allowGlobal, allowLocal) == false)
 		{
-			m_scriptTestLog.writeError(m_scriptInfo.fileName + ": queryPermission() failed, test terminated.");
+			m_scriptTestLog.writeError(m_scriptInfo.fileName + tr(": queryPermission() failed, test terminated."));
 			throw 1;
 		}
 		if (allowGlobal == false)
 		{
-			m_scriptTestLog.writeError(m_scriptInfo.fileName + ": no global permission: script is not allowed to run.");
+			m_scriptTestLog.writeError(m_scriptInfo.fileName + tr(": no global permission: script is not allowed to run."));
 			throw 1;
 		}
 		if (allowLocal == false)
 		{
-			m_scriptTestLog.writeError(m_scriptInfo.fileName + ": no local permission: script is not allowed to run.");
+			m_scriptTestLog.writeError(m_scriptInfo.fileName + tr(": no local permission: script is not allowed to run."));
 			throw 1;
 		}
 
@@ -267,7 +267,7 @@ namespace TestSuite
 		if (bool initTestCaseResult = runScriptFunction("initTestCase");
 			initTestCaseResult == false)
 		{
-			m_scriptTestLog.writeError(m_scriptInfo.fileName + ": initTestCase() failed, test terminated.");
+			m_scriptTestLog.writeError(m_scriptInfo.fileName + tr(": initTestCase() failed, test terminated."));
 			return false;
 		}
 
@@ -286,17 +286,17 @@ namespace TestSuite
 			allowLocal = true;
 			if (queryPermission(allowGlobal, allowLocal) == false)
 			{
-				m_scriptTestLog.writeError(m_scriptInfo.fileName + ": queryPermission() failed, test terminated.");
+				m_scriptTestLog.writeError(m_scriptInfo.fileName + tr(": queryPermission() failed, test terminated."));
 				throw 1;
 			}
 			if (allowGlobal == false)
 			{
-				m_scriptTestLog.writeError(m_scriptInfo.fileName + ": no global permission: script is not allowed to run.");
+				m_scriptTestLog.writeError(m_scriptInfo.fileName + tr(": no global permission: script is not allowed to run."));
 				throw 1;
 			}
 			if (allowLocal == false)
 			{
-				m_scriptTestLog.writeError(m_scriptInfo.fileName + ": no local permission: script is not allowed to run.");
+				m_scriptTestLog.writeError(m_scriptInfo.fileName + tr(": no local permission: script is not allowed to run."));
 				throw 1;
 			}
 
@@ -386,7 +386,7 @@ namespace TestSuite
 		if (bool cleanupTestCaseResult = runScriptFunction("cleanupTestCase");
 			cleanupTestCaseResult == false)
 		{
-			m_scriptTestLog.writeError(m_scriptInfo.fileName, + ": cleanupTestCase() failed, test terminated.");
+			m_scriptTestLog.writeError(m_scriptInfo.fileName + tr(": cleanupTestCase() failed, test terminated."));
 		}
 
 		qint64 elapsedMsTotal = timer.elapsed();
@@ -610,22 +610,28 @@ namespace TestSuite
 		//
 		if (callResult.isError() == true)
 		{
-			if (callResult.errorType() == QJSValue::ErrorType::GenericError)
+			QString stack = callResult.property("stack").toString();
+			if (stack.isEmpty() == true)
 			{
-				// Assume that JS code must report about the error
-				//
-				m_scriptTestLog.writeError(tr("Error, stack trace: %1\n\tMessage: %2")
-										   .arg(callResult.property("stack").toString())
-										   .arg(callResult.toString()));
+				m_scriptTestLog.writeError(tr("%1").arg(callResult.toString()));
 			}
 			else
 			{
-				m_scriptTestLog.writeError(tr("Error at line %1\n"
-											  "\tStack: %2\n"
-											  "\tMessage: %3")
-										   .arg(callResult.property("lineNumber").toInt())
-										   .arg(callResult.property("stack").toString())
-										   .arg(callResult.toString()));
+				if (callResult.errorType() == QJSValue::ErrorType::GenericError)
+				{
+					// Assume that JS code must report about the error
+					//
+					m_scriptTestLog.writeError(tr("Error, stack trace: %1\n%2").arg(stack).arg(callResult.toString()));
+				}
+				else
+				{
+					m_scriptTestLog.writeError(tr("Error at line %1\n"
+												  "\tStack trace: %2\n"
+												  "\t%3")
+												   .arg(callResult.property("lineNumber").toInt())
+												   .arg(stack)
+												   .arg(callResult.toString()));
+				}
 			}
 
 			return false;
