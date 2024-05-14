@@ -200,12 +200,12 @@ Do you with to open it?</source>
     <message>
         <location filename="../ScriptRunner.cpp" line="349"/>
         <source>%1: cleanup() failed, test terminated.</source>
-        <translation></translation>
+        <translation>%1: помилка cleanup(), тестування зупинено.</translation>
     </message>
     <message>
         <location filename="../ScriptRunner.cpp" line="354"/>
         <source>%1: init() failed, test terminated.</source>
-        <translation></translation>
+        <translation>%1: помилка init(), тестування зупинено.</translation>
     </message>
     <message>
         <location filename="../ScriptRunner.cpp" line="366"/>
@@ -241,10 +241,38 @@ Do you with to open it?</source>
         <translation type="vanished">%1 НЕ ПРОЙШОВ</translation>
     </message>
     <message>
+        <location filename="../ScriptRunner.cpp" line="246"/>
+        <location filename="../ScriptRunner.cpp" line="289"/>
+        <source>: queryPermission() failed, test terminated.</source>
+        <translation>: помилка queryPermission(), тестування зупинено.</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="251"/>
+        <location filename="../ScriptRunner.cpp" line="294"/>
+        <source>: no global permission: script is not allowed to run.</source>
+        <translation>: відсутній глобальний дозвіл, тестування зупинено.</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="256"/>
+        <location filename="../ScriptRunner.cpp" line="299"/>
+        <source>: no local permission: script is not allowed to run.</source>
+        <translation>: відсутній локальний дозвіл, тестування зупинено.</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="270"/>
+        <source>: initTestCase() failed, test terminated.</source>
+        <translation>: помилка initTestCase(), тестування зупинено.</translation>
+    </message>
+    <message>
         <location filename="../ScriptRunner.cpp" line="335"/>
         <location filename="../ScriptRunner.cpp" line="341"/>
         <source>%1: %2</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="389"/>
+        <source>: cleanupTestCase() failed, test terminated.</source>
+        <translation>: помилка cleanupTestCase(), тестування зупинено.</translation>
     </message>
     <message>
         <location filename="../ScriptRunner.cpp" line="410"/>
@@ -278,18 +306,37 @@ Do you with to open it?</source>
         <translation>Виникло виключення в %1.</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="617"/>
+        <location filename="../ScriptRunner.cpp" line="616"/>
+        <source>%1</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="624"/>
+        <source>Error, stack trace: %1
+%2</source>
+        <translation>Помилка, стек виклику: %1
+%2</translation>
+    </message>
+    <message>
+        <location filename="../ScriptRunner.cpp" line="628"/>
+        <source>Error at line %1
+	Stack trace: %2
+	%3</source>
+        <translation>Помилка в рядку %1
+	Стек виклику: %2
+	%3</translation>
+    </message>
+    <message>
         <source>Error, stack trace: %1
 	Message: %2</source>
-        <translation>Помилка, трасування: %1
+        <translation type="vanished">Помилка, трасування: %1
 	Помилка: %2</translation>
     </message>
     <message>
-        <location filename="../ScriptRunner.cpp" line="623"/>
         <source>Error at line %1
 	Stack: %2
 	Message: %3</source>
-        <translation>Помилка в рядку %1
+        <translation type="vanished">Помилка в рядку %1
 	Стек: %2
 	Помилка: %3</translation>
     </message>

@@ -651,73 +651,73 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>TestSuiteMainWindow</name>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="76"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="78"/>
         <source>Test Log</source>
         <translation>Журнал тестування</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="143"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="147"/>
         <source>TestListWidget</source>
         <translation>Список тестів</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="168"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="172"/>
         <source>Output</source>
         <translation>Вікно журналу</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="182"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="186"/>
         <source>ToolBar</source>
         <translation>Панель інструментів</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="225"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="229"/>
         <source>Load Test Log...</source>
         <translation>Завантажити журнал...</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="226"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="230"/>
         <source>Load Test Log from file</source>
         <translation>Завантажити журнал з файлу</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="231"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="235"/>
         <source>Save Test Log...</source>
         <translation>Зберегти журнал...</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="232"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="236"/>
         <source>Save Test Log to file</source>
         <translation>Зберегти журнал до файлу</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="237"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="238"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="241"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="242"/>
         <source>Clear Test Log</source>
         <translation>Очистити журнал</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="243"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="247"/>
         <source>Exit</source>
         <translation>Вихід</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="244"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="248"/>
         <source>Quit the application</source>
         <translation>Вихід з програми</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="251"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="255"/>
         <source>Reload Tests Scripts</source>
         <translation>Перезавантажити сценарцї</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="257"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="261"/>
         <source>Run tests</source>
         <translation>Запуск тестів</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="266"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="270"/>
         <source>Stop tests</source>
         <translation>Зупинка тестів</translation>
     </message>
@@ -726,260 +726,276 @@ Data will not be available at the time of reconnection.</source>
         <translation type="vanished">Створити звіт</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="275"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="279"/>
         <source>Report...</source>
         <translation>Звіт...</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="276"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="280"/>
         <source>Generate the report</source>
         <translation>Створення звіту</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="279"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="283"/>
         <source>Settings...</source>
         <translation>Налаштування...</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="280"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="284"/>
         <source>Change application settings</source>
         <translation>Зміна налаштувань</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="285"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="289"/>
         <source>Data Sources...</source>
         <translation>Джерела даних...</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="286"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="290"/>
         <source>View Data Sources</source>
         <translation>Перегляд джерел даних</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="290"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="294"/>
         <source>Connection Statistics...</source>
         <translation>Статистика з&apos;єднань...</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="291"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="295"/>
         <source>View Connection Statistics</source>
         <translation>Перегляд статистики з&apos;єднань</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="295"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="299"/>
         <source>Application Log...</source>
         <translation>Журнал програми...</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="296"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="300"/>
         <source>Show application log</source>
         <translation>Перегляд журналу програми</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="299"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="303"/>
         <source>About Qt...</source>
         <translation>Про Qt...</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="300"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="304"/>
         <source>Show Qt information</source>
         <translation>Перегляд інформації про Qt</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="303"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="307"/>
         <source>About TestSuite...</source>
         <translation>Про TestSuite...</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="304"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="308"/>
         <source>Show application information</source>
         <translation>Перегляд інформації про програму</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="310"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="314"/>
         <source>View GlobalScript</source>
         <translation>Перегляд глобального сценарію</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="311"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="315"/>
         <source>View GlobalScript Code</source>
         <translation>Перегляд глобального сценарію</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="324"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="328"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="329"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="333"/>
         <source>&amp;Tests</source>
         <translation>&amp;Тестування</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="335"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="339"/>
         <source>&amp;Reports</source>
         <translation>&amp;Звіти</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="272"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="342"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="276"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="346"/>
         <source>Report</source>
         <translation>Звіт</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="351"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="33"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1117"/>
+        <source>%1 - %2</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../TestSuiteMainWindow.cpp" line="355"/>
         <source>&amp;Tools</source>
         <translation>&amp;Сервіс</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="356"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="360"/>
         <source>&amp;?</source>
         <translation>&amp;?</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="403"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="407"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation>Помилки та повіодмлення (натисніть для перегляду)</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="433"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="437"/>
         <source> ConfigService: </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="437"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="441"/>
         <source> no connection</source>
         <translation> нема</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="441"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="445"/>
         <source>%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="451"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="455"/>
         <source>Address: %1</source>
         <translation>Адреса: %1</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="522"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="526"/>
         <source>%1:
 </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="526"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="530"/>
         <source>Not configured</source>
         <translation>Немає конфігурації</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="553"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="566"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="557"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="570"/>
         <source>ok</source>
         <translation>з&apos;єднано</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="553"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="566"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="557"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="570"/>
         <source>down</source>
         <translation>не з&apos;єднано</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="564"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="568"/>
         <source>%1: %2 (Replies: %3)</source>
         <translation>%1: %2 (Відповідей: %3)</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="571"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="575"/>
         <source>%1: %2/%3 (Replies: %4)</source>
         <translation>%1: %2/%3 (Відповідей: %4)</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="609"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="613"/>
         <source>Error loading scripts from path %1: %2.</source>
         <translation>Помилка завантаження сценаріїв з папки %1: %2.</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="649"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="653"/>
         <source>Generate report: %1</source>
         <translation>Генерація звіту: %1</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="733"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="737"/>
         <source>Load Test Log</source>
         <translation>Завантажити журнал</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="735"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="773"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="739"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="777"/>
         <source>TestSuite Log File (*.tsl);;CSV Files, semicolon separated (*.csv)</source>
         <translation>Журнали TestSuite (*.tsl);;CSV-файли (*.csv)</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="764"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="768"/>
         <source>Test log is empty. No information could be saved.</source>
         <translation>Журнал тестування порожній. Збереження інформації недоступне.</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="771"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="775"/>
         <source>Save Test Log</source>
         <translation>Зберегти журнал</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="799"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="803"/>
         <source>No permission to start testing.
 </source>
         <translation>Немає дозволу на початок тестування.
 </translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="810"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="814"/>
         <source>Tests are not running.
 </source>
         <translation>Тестування не виконується.
 </translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="815"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="819"/>
         <source>Requesting test configuration...
 </source>
         <translation>Запит конфігурації...
 </translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="820"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="824"/>
         <source>Initializing input controller...
 </source>
         <translation>Ініціалізація вхідного контролера...
 </translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="825"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="829"/>
         <source>Initializing output controller...
 </source>
         <translation>Ініціалізація вихідного контролера...
 </translation>
     </message>
     <message>
+        <location filename="../TestSuiteMainWindow.cpp" line="1321"/>
+        <source>: no global permission: script terminated.</source>
+        <translation>: відсутній глобальний дозвіл, тестування зупинено.</translation>
+    </message>
+    <message>
+        <location filename="../TestSuiteMainWindow.cpp" line="1336"/>
+        <source>: no local permission: script terminated.</source>
+        <translation>: відсутній локальний дозвіл, тестування зупинено.</translation>
+    </message>
+    <message>
         <source>Initializing output controller...</source>
         <translation type="vanished">Ініціалізація вихідного контролера...</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="830"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="834"/>
         <source>Running script file: %1 (%2 of %3)
 Test function: %4 (%5 of %6)</source>
         <translation>Файл сценарію: %1 (%2 з %3)
 Функція тестування: %4 (%5 з %6)</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="841"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="845"/>
         <source>Creating reports...
 </source>
         <translation>Створення звіту...
 </translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="885"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="889"/>
         <source>Please stop testing before closing the application.</source>
         <translation>Зупиніть тестування перед виходом з програми.</translation>
     </message>
@@ -988,29 +1004,29 @@ Test function: %4 (%5 of %6)</source>
         <translation type="vanished">Невірний пароль! Спробуйте ще раз.</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="933"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="937"/>
         <source>Tests execution failed: authorization failed!</source>
         <translation>Тестування не виконано: помилка авторизації!</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="946"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="950"/>
         <source>Please choose at least one test to run.</source>
         <translation>Оберіть хоча б один тест для запуску.</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="990"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="1246"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="994"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1252"/>
         <source>Test log is empty. Do you want to load test log from file?</source>
         <translation>Журнал тестування порожній. Ви бажаєте завантажити журнал з файлу?</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="999"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="1255"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1003"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1261"/>
         <source>No data exist for the report!</source>
         <translation>Звіт не містить даних!</translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="1162"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1168"/>
         <source> allows user to run application logic tests.</source>
         <translation> дозволяє користувачеві запускати тести логіки застосування.</translation>
     </message>
