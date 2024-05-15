@@ -1,8 +1,9 @@
-#include <QAbstractItemModelTester>
 #include "LocatorListWidget.h"
 #include "SignalPropertiesDialog.h"
 #include "../GlobalMessanger.h"
 #include "../DialogConnections.h"
+
+#include <QAbstractItemModelTester>
 
 namespace Locator
 {

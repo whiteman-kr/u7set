@@ -1,7 +1,12 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
-#include "../OnlineLib/SoftwareSettings.h"
+
+namespace OnlineLib
+{
+	class AppDataServiceSettings;
+	class DataSource;
+}
 
 namespace Builder
 {

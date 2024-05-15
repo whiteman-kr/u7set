@@ -2,9 +2,7 @@
 #define SCHEMASWORKSPACE_H
 
 #include "TuningSchemaManager.h"
-#include "../lib/Tuning/TuningModel.h"
-#include "../AppSignalLib/TuningSignalState.h"
-#include "../VFrame30/LogController.h"
+#include <VFrame30/LogController.h>
 #include "TuningSchemaWidget.h"
 
 class SchemasWorkspace : public QWidget

@@ -1,12 +1,4 @@
 #include "TextEditCompleter.h"
-#include <QCompleter>
-#include <QKeyEvent>
-#include <QAbstractItemView>
-#include <QtDebug>
-#include <QApplication>
-#include <QModelIndex>
-#include <QAbstractItemModel>
-#include <QScrollBar>
 
 QTextEditCompleter::QTextEditCompleter(QWidget *parent)
 	: QTextEdit(parent)

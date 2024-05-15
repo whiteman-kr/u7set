@@ -1,10 +1,11 @@
 #pragma once
 
-#include "../VFrame30/ClientSchemaView.h"
-#include "../VFrame30/ITimeStats.h"
-#include "ScriptDiagnosticsApplication.h"
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/ClientSchemaView.h>
+#include <VFrame30/ITimeStats.h>
+
 #include "DiagConfigController.h"
-#include "../VFrame30/AppSignalController.h"
+#include "ScriptDiagnosticsApplication.h"
 
 
 namespace VFrame30

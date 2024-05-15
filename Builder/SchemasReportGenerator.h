@@ -1,13 +1,13 @@
 #pragma once
 
-#include <DbLib/DbController.h>
-
 #include "../ReportLib/Report.h"
 #include "../ReportLib/ReportAppSignalProvider.h"
 #include "../ReportLib/ReportDiagStateProvider.h"
 #include "../ReportLib/ReportPrinter.h"
-#include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/DiagStateController.h"
+
+#include <DbLib/DbController.h>
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/DiagStateController.h>
 
 
 namespace VFrame30

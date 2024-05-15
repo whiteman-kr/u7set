@@ -2,10 +2,9 @@
 
 #include <DbLib/DbController.h>
 #include <HardwareLib/Software.h>
+#include <VFrame30/SchemaDetails.h>
 
-#include "../VFrame30/SchemaDetails.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../OnlineLib/DataSource.h"
 
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"

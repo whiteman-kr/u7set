@@ -4,7 +4,7 @@
 
 #include <Simulator/SimLogicModule.h>
 #include <Simulator/SimControlStatus.h>
-#include "../../VFrame30/AppSignalController.h"
+#include <VFrame30/AppSignalController.h>
 
 class SimLogicModulePage : public SimBasePage
 {

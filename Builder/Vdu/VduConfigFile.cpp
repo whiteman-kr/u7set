@@ -2,9 +2,10 @@
 #include "../Context.h"
 
 #include "../../UtilsLib/Crc.h"
-#include "../../VFrame30/Schema.h"
 #include "../../lib/ConstStrings.h"
+
 #include <HardwareLib/DeviceModule.h>
+#include <VFrame30/Schema.h>
 
 namespace
 {

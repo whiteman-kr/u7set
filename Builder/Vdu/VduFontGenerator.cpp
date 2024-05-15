@@ -4,9 +4,6 @@
 
 #include <HardwareLib/DeviceModule.h>
 
-#include <QImage>
-#include <QPainter>
-
 namespace Builder
 {
 	VduSymbol::VduSymbol(quint16 width, quint16 height, char c, const QFontMetrics& fm, const QFont& font) :

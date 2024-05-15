@@ -1,10 +1,14 @@
 #pragma once
-#include "IssueLogger.h"
 
-#include "../VFrame30/Schema.h"
+namespace VFrame30
+{
+	class Schema;
+}
 
 namespace Builder
 {
+	class IssueLogger;
+
 	struct ScriptChecker
 	{
 		static bool checkFile(const QString& script, const QString& fileName, IssueLogger& log);

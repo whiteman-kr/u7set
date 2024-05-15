@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/UfbSchema.h"
+#include <VFrame30/UfbSchema.h>
 
 namespace Ui {
 class ChooseUfbDialog;

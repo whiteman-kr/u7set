@@ -1,5 +1,4 @@
 #include "ReportTemplate.h"
-#include <QXmlStreamReader>
 
 namespace ReportLib
 {

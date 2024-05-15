@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/SchemaView.h"
+#include <VFrame30/SchemaView.h>
 
 namespace ReportLib
 {

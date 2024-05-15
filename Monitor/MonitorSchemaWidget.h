@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/ClientSchemaWidget.h"
+#include <VFrame30/ClientSchemaWidget.h>
 
 class MonitorSchemaView;
 class MonitorSchemaManager;

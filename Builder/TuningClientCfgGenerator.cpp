@@ -3,8 +3,8 @@
 #include "SoftwareSettingsGetter.h"
 
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../VFrame30/LogicSchema.h"
 
+#include <VFrame30/LogicSchema.h>
 #include <Behavior/ClientBehaviorStorage.h>
 #include <Behavior/TuningClientBehavior.h>
 

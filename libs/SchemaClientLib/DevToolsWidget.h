@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../../VFrame30/IViewVariables.h" // Ugly, but it will change soon, when VFrame30 is moved to ./libs
+#include <VFrame30/IViewVariables.h>
 #include <SchemaClientLib/IDevTools.h>
 
 namespace SchemaClientLib

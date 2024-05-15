@@ -1,7 +1,6 @@
 #ifndef TUNINGSIGNALINFO_H
 #define TUNINGSIGNALINFO_H
 
-#include <QDialog>
 #include "../OnlineLib/SoftwareSettings.h"
 #include "TuningConfigController.h"
 

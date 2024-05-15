@@ -2,11 +2,11 @@
 #include "../CommonLib/Times.h"
 #include "../Protobuf/google/protobuf/message.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
-#include "../VFrame30/VFrame30Library.h"
 #include "../version.h"
 
 #include <HardwareLib/HardwareLibrary.h>
 #include <HardwareLib/ModuleFirmware.h>
+#include <VFrame30/VFrame30Library.h>
 
 #include "GlobalMessanger.h"
 #include "MainWindow.h"

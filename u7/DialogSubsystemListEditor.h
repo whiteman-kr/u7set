@@ -2,7 +2,6 @@
 #define DIALOGSUBSYSTEMLISTEDITOR_H
 
 #include "../Builder/SubsystemStorage.h"
-#include <QItemDelegate>
 
 namespace Ui {
 class DialogSubsystemListEditor;

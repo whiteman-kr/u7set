@@ -185,13 +185,28 @@ target_precompile_headers(${TARGET} PRIVATE
 	<unordered_set>
 	<vector>
 
+	<QCryptographicHash>
+	<QDebug>
+	<QDir>
 	<QDomDocument>
 	<QFile>
+	<QFileInfo>
+	<QHostAddress>
 	<QHostInfo>
+	<QImage>
+	<QJSEngine>
+	<QJsonArray>
+	<QJsonDocument>
+	<QJsonObject>
+	<QJSValueIterator>
+	<QPageSize>
+	<QPainter>
+	<QQmlEngine>
+	<QStandardPaths>
 	<QtConcurrent>
+	<QtEndian>
 	<QVector>
 	<QWidget>
-	<QJSEngine>
 
 	"../CommonLib/Types.h"
 	"../CommonLib/Hash.h"

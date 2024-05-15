@@ -2,7 +2,7 @@
 #define SIMSIGNALSNAPSHOT_H
 
 #include <SchemaClientLib/DialogSignalSnapshot.h>
-#include "../../VFrame30/AppSignalController.h"
+#include <VFrame30/AppSignalController.h>
 
 class SimWidget;
 class SimIdeSimulator;

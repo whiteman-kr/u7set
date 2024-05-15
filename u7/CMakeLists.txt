@@ -360,9 +360,14 @@ target_precompile_headers(${TARGET} PRIVATE
 	<set>
 	<type_traits>
 	<utility>
+	<variant>
 	<vector>
 	<ranges>
+	<queue>
 
+	<QAbstractItemModel>
+	<QAbstractItemModelTester>
+	<QAbstractItemView>
 	<QAction>
 	<QActionGroup>
 	<QApplication>
@@ -372,10 +377,12 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QClipboard>
 	<QComboBox>
 	<QCompleter>
+	<QDesktopServices>
 	<QDialog>
 	<QDialogButtonBox>
 	<QDir>
 	<QDockWidget>
+	<QDrag>
 	<QFileDialog>
 	<QFormLayout>
 	<QGroupBox>
@@ -389,7 +396,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QJsonDocument>
 	<QJsonObject>
 	<QJsonValue>
+	<QKeyEvent>
 	<QLabel>
+	<QLineEdit>
 	<QListView>
 	<QListWidget>
 	<QListWidgetItem>
@@ -398,17 +407,22 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QMenuBar>
 	<QMessageBox>
 	<QMimeData>
+	<QModelIndex>
+	<QPageSetupDialog>
 	<QPainter>
 	<QPainterPath>
 	<QPdfWriter>
 	<QPlainTextEdit>
 	<QPrinter>
+	<QProcess>
 	<QProgressBar>
 	<QProgressDialog>
+	<QProxyStyle>
 	<QPushButton>
 	<QRadioButton>
 	<QScreen>
 	<QScrollBar>
+	<QSerialPortInfo>
 	<QSettings>
 	<QShortcut>
 	<QSortFilterProxyModel>
@@ -416,13 +430,20 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QSplitter>
 	<QStandardItem>
 	<QStandardItemModel>
+	<QStandardPaths>
 	<QStatusBar>
 	<QStringListModel>
+	<QStyledItemDelegate>
+	<QStylePainter>
 	<QSvgRenderer>
 	<QTableView>
 	<QTableWidget>
+	<QtConcurrent>
+	<QtDebug>
+	<QTemporaryFile>
 	<QTextBrowser>
 	<QTextDocumentWriter>
+	<QTextEdit>
 	<QThread>
 	<QTimer>
 	<QToolBar>
@@ -432,6 +453,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTreeWidget>
 	<QTreeWidgetItem>
 	<QVBoxLayout>
+	<QWhatsThis>
+	<QWindow>
 
 	"../CommonLib/Types.h"
 	"../CommonLib/Hash.h"

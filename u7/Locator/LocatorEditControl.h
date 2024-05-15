@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QLineEdit>
 #include "Locator.h"
 #include "LocatorListWidget.h"
 

@@ -2,21 +2,21 @@
 
 #include "DiagConfigController.h"
 #include "DiagnosticsSchemaManager.h"
-#include <ClientLib/AppSignalManager.h>
-#include <DiagClientLib/DiagStateManager.h>
-//#include "SelectSchemaWidget.h"
-#include "../UtilsLib/InstanceResolver.h"
-#include <SchemaClientLib/SchemaDrawStatistics.h>
-#include <SchemaClientLib/DialogTcpStatistics.h>
-//#include "../VFrame30/ClientSchemaView.h"
-#include <ClientLib/ClientTranslator.h>
+
 #include <ClientLib/AdsConnection.h>
-#include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/LogController.h"
-#include "../UtilsLib/LogFile.h"
+#include <ClientLib/AppSignalManager.h>
+#include <ClientLib/ClientTranslator.h>
+#include <DiagClientLib/DiagStateManager.h>
+#include <SchemaClientLib/DialogTcpStatistics.h>
+#include <SchemaClientLib/SchemaDrawStatistics.h>
+
 #include <UiLib/DialogAlert.h>
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/LogController.h>
 
 #include "../OnlineLib/SoftwareInfo.h"
+#include "../UtilsLib/InstanceResolver.h"
+#include "../UtilsLib/LogFile.h"
 
 class DiagnosticsToolBar;
 class DiagnosticsCentralWidget;

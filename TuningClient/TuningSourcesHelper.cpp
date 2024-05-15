@@ -1,5 +1,3 @@
-#include <QCoreApplication>
-#include <QMessageBox>
 #include "TuningSourcesHelper.h"
 #include <ClientLib/TuningConnection.h>
 

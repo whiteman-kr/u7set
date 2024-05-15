@@ -1,0 +1,389 @@
+#include <VFrame30/SchemaItemLoopback.h>
+#include <VFrame30/SchemaLayer.h>
+#include <VFrame30/PropertyNames.h>
+#include <VFrame30/DrawParam.h>
+
+namespace VFrame30
+{
+
+	SchemaItemLoopback::SchemaItemLoopback() :
+		SchemaItemLoopback(SchemaUnit::Inch)
+	{
+		// This constructor can be called while serialization
+		//
+	}
+
+	SchemaItemLoopback::SchemaItemLoopback(SchemaUnit unit) :
+		FblItemRect(unit)
+	{
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::loopbackId, PropertyNames::functionalCategory, true, SchemaItemLoopback::loopbackId, SchemaItemLoopback::setLoopbackId);
+	}
+
+	SchemaItemLoopback::~SchemaItemLoopback()
+	{
+	}
+
+	bool SchemaItemLoopback::SaveData(Proto::Envelope* message) const
+	{
+		bool result = FblItemRect::SaveData(message);
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
+		{
+			assert(result);
+			assert(message->HasExtension(Proto::schemaitem));
+			return false;
+		}
+
+		auto schemaItemMessage = message->MutableExtension(Proto::schemaitem);
+		if (schemaItemMessage->has_fblitemrect() == false)
+		{
+			assert(schemaItemMessage->has_fblitemrect());
+		}
+
+		// --
+		//
+		Proto::SchemaItemLoopback* loopbackMessage = schemaItemMessage->mutable_loopbackitem();
+
+		loopbackMessage->set_loopbackid(m_loobackId.toStdString());
+
+		return result;
+	}
+
+	bool SchemaItemLoopback::LoadData(const Proto::Envelope& message)
+	{
+		bool result = FblItemRect::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.GetExtension(Proto::schemaitem).has_loopbackitem() == false)
+		{
+			assert(message.GetExtension(Proto::schemaitem).has_loopbackitem() == true);
+			return false;
+		}
+
+		const Proto::SchemaItemLoopback& loopbackMessage = message.GetExtension(Proto::schemaitem).loopbackitem();
+
+		m_loobackId = QString::fromStdString(loopbackMessage.loopbackid());
+
+		return true;
+	}
+
+	void SchemaItemLoopback::draw(CDrawParam* drawParam) const
+	{
+		FblItemRect::draw(drawParam);
+		return;
+	}
+
+	// IMatsSchemaItemAssociations implementation.
+//
+	QStringList SchemaItemLoopback::associatedAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemLoopback::associatedSchemaItemLabels() const
+	{
+		return {};
+	}
+
+	QString SchemaItemLoopback::loopbackId() const
+	{
+		return m_loobackId;
+	}
+
+	void SchemaItemLoopback::setLoopbackId(QString value)
+	{
+		m_loobackId = value.trimmed();
+	}
+
+	//
+	//
+	//			SchemaItemLoopbackSource
+	//
+	//
+	SchemaItemLoopbackSource::SchemaItemLoopbackSource() :
+		SchemaItemLoopbackSource(SchemaUnit::Inch)
+	{
+		// This constructor can be called while serialization
+		//
+	}
+
+	SchemaItemLoopbackSource::SchemaItemLoopbackSource(SchemaUnit unit) :
+		SchemaItemLoopback(unit)
+	{
+		addInput();
+	}
+
+	SchemaItemLoopbackSource::~SchemaItemLoopbackSource()
+	{
+	}
+
+	bool SchemaItemLoopbackSource::SaveData(Proto::Envelope* message) const
+	{
+		bool result = SchemaItemLoopback::SaveData(message);
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
+		{
+			assert(result);
+			assert(message->HasExtension(Proto::schemaitem));
+			return false;
+		}
+
+		auto schemaItemMessage = message->MutableExtension(Proto::schemaitem);
+		if (schemaItemMessage->has_loopbackitem() == false)
+		{
+			assert(schemaItemMessage->has_loopbackitem() == true);
+		}
+
+		// --
+		//
+		[[maybe_unused]] Proto::SchemaItemLoopbackSource* source = schemaItemMessage->mutable_loopbacksource();
+
+		return true;
+	}
+
+	bool SchemaItemLoopbackSource::LoadData(const Proto::Envelope& message)
+	{
+		bool result = SchemaItemLoopback::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.GetExtension(Proto::schemaitem).has_loopbacksource() == false)
+		{
+			assert(message.GetExtension(Proto::schemaitem).has_loopbacksource() == true);
+			return false;
+		}
+
+		const Proto::SchemaItemLoopbackSource& source = message.GetExtension(Proto::schemaitem).loopbacksource();
+		Q_UNUSED(source);
+
+		return true;
+	}
+
+	void SchemaItemLoopbackSource::draw(CDrawParam* drawParam) const
+	{
+		SchemaItemLoopback::draw(drawParam);
+
+		QPainter* painter = drawParam->painter();
+		QRectF r = itemRectPinIndent(drawParam);
+
+		// Draw loopback logo
+		//
+		double pinVertGap =	VFrame30::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
+
+		QRectF logoRect = {r.right() - pinVertGap * 2.0, r.top(), pinVertGap * 2.0, r.height()};
+		logoRect.setTopRight(drawParam->gridToDpi(logoRect.topRight()));
+		logoRect.setBottomLeft(drawParam->gridToDpi(logoRect.bottomLeft()));
+
+		QPen pen(lineColor());
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
+		painter->setPen(pen);
+
+		painter->drawLine(logoRect.topLeft(), logoRect.bottomLeft());
+
+		DrawHelper::drawText(painter, m_font, itemUnit(), QLatin1String("LB"), logoRect, Qt::AlignHCenter | Qt::AlignVCenter);
+
+		// Draw LoopbackID
+		//
+		QRectF textRect = {r.left(), r.top(), r.width() - logoRect.width(), r.height()};
+
+		textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
+		textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
+
+		painter->setPen(textColor());
+
+		DrawHelper::drawText(painter, m_font, itemUnit(), loopbackId(), textRect, Qt::AlignHCenter | Qt::AlignVCenter);
+
+		return;
+	}
+
+	void SchemaItemLoopbackSource::drawHighlight(CDrawParam* drawParam) const
+	{
+		if (drawParam->highlightIds().contains(label()) == true || drawParam->highlightIds().contains(loopbackId()) == true)
+		{
+			QRectF highlightRect = boundingRectInDocPt(drawParam);
+			drawHighlightRect(drawParam, highlightRect);
+		}
+
+		return;
+	}
+
+	QString SchemaItemLoopbackSource::buildName() const
+	{
+		return QString("LoopbackSource %1").arg(loopbackId());
+	}
+
+	QString SchemaItemLoopbackSource::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
+
+		QString str = QString("Loopback Source: "
+							  "\n\tLoopbackID: %1"
+							  "\n"
+							  "\nHint: Press F2 to edit LoopbackID")
+						.arg(loopbackId());
+
+		return str;
+	}
+
+	//
+	//
+	//			SchemaItemLoopbackTarget
+	//
+	//
+	SchemaItemLoopbackTarget::SchemaItemLoopbackTarget() :
+		SchemaItemLoopbackTarget(SchemaUnit::Inch)
+	{
+		// This constructor can be called while serialization
+		//
+	}
+
+	SchemaItemLoopbackTarget::SchemaItemLoopbackTarget(SchemaUnit unit) :
+		SchemaItemLoopback(unit)
+	{
+		addOutput();
+	}
+
+	SchemaItemLoopbackTarget::~SchemaItemLoopbackTarget()
+	{
+	}
+
+	bool SchemaItemLoopbackTarget::SaveData(Proto::Envelope* message) const
+	{
+		bool result = SchemaItemLoopback::SaveData(message);
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
+		{
+			assert(result);
+			assert(message->HasExtension(Proto::schemaitem));
+			
+			return false;
+		}
+
+		auto schemaItemMessage = message->MutableExtension(Proto::schemaitem);
+		if (schemaItemMessage->has_loopbackitem() == false)
+		{
+			assert(schemaItemMessage->has_loopbackitem());
+		}
+
+		// --
+		//
+		[[maybe_unused]] Proto::SchemaItemLoopbackTarget* target = schemaItemMessage->mutable_loopbacktarget();
+
+		return true;
+	}
+
+	bool SchemaItemLoopbackTarget::LoadData(const Proto::Envelope& message)
+	{
+		bool result = SchemaItemLoopback::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.GetExtension(Proto::schemaitem).has_loopbacktarget() == false)
+		{
+			assert(message.GetExtension(Proto::schemaitem).has_loopbacktarget() == true);
+			return false;
+		}
+
+		const Proto::SchemaItemLoopbackTarget& target = message.GetExtension(Proto::schemaitem).loopbacktarget();
+		Q_UNUSED(target);
+
+		return true;
+	}
+
+	void SchemaItemLoopbackTarget::draw(CDrawParam* drawParam) const
+	{
+		SchemaItemLoopback::draw(drawParam);
+
+		QPainter* painter = drawParam->painter();
+		QRectF r = itemRectPinIndent(drawParam);
+
+		// Draw loopback logo
+		//
+		double pinVertGap =	VFrame30::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
+
+		QRectF logoRect = {r.left(), r.top(), pinVertGap * 2.0, r.height()};
+		logoRect.setTopRight(drawParam->gridToDpi(logoRect.topRight()));
+		logoRect.setBottomLeft(drawParam->gridToDpi(logoRect.bottomLeft()));
+
+		QPen pen(lineColor());
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
+		painter->setPen(pen);
+
+		painter->drawLine(logoRect.topRight(), logoRect.bottomRight());
+
+		DrawHelper::drawText(painter, m_font, itemUnit(), QLatin1String("LB"), logoRect, Qt::AlignHCenter | Qt::AlignVCenter);
+
+		// Draw LoopbackID
+		//
+		QRectF textRect = {logoRect.right(), r.top(), r.width() - logoRect.width(), r.height()};
+
+		textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
+		textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
+
+		painter->setPen(textColor());
+
+		DrawHelper::drawText(painter, m_font, itemUnit(), loopbackId(), textRect, Qt::AlignHCenter | Qt::AlignVCenter);
+
+		return;
+	}
+
+	void SchemaItemLoopbackTarget::drawHighlight(CDrawParam* drawParam) const
+	{
+		// Draw highlights
+		//
+		if (drawParam->highlightIds().contains(label()) == true || drawParam->highlightIds().contains(loopbackId()) == true)
+		{
+			QRectF highlightRect = boundingRectInDocPt(drawParam);
+			drawHighlightRect(drawParam, highlightRect);
+		}
+
+		return;
+	}
+
+	QString SchemaItemLoopbackTarget::buildName() const
+	{
+		return QString("LoopbackTarget %1").arg(loopbackId());
+	}
+
+	QString SchemaItemLoopbackTarget::toolTipText(double dpiX, double dpiY, double devicePixelRatio) const
+	{
+		Q_UNUSED(dpiX);
+		Q_UNUSED(dpiY);
+		Q_UNUSED(devicePixelRatio);
+
+		QString str = QString("Loopback Target: "
+							  "\n\tLoopbackID: %1"
+							  "\n"
+							  "\nHint: Press F2 to edit LoopbackID")
+						.arg(loopbackId());
+
+		return str;
+	}
+}

@@ -1,13 +1,13 @@
 #include "MonitorSchemaView.h"
-#include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/PropertyNames.h"
-#include "../VFrame30/ITimeStats.h"
 #include "Globals.h"
 #include "MonitorAppSettings.h"
 #include "MonitorMainWindow.h"
 #include "MonitorSchemaManager.h"
 
 #include <HardwareLib/ScriptEquipment.h>
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/ITimeStats.h>
+#include <VFrame30/PropertyNames.h>
 
 
 //

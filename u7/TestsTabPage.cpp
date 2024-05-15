@@ -4,17 +4,13 @@
 #include "Simulator/SimSelectBuildDialog.h"
 #include "../lib/ConstStrings.h"
 
-#include <QProxyStyle>
-#include <QStylePainter>
-
-
 #ifdef QT_DEBUG
 	#include <QAbstractItemModelTester>
 #endif
+
 //
 // TestsFileTreeModel
 //
-
 TestsFileTreeModel::TestsFileTreeModel(DbController* dbcontroller, QString rootFilePath, QObject* parent):
 	FileTreeModel(dbcontroller, rootFilePath, parent)
 {

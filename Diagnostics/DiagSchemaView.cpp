@@ -1,10 +1,12 @@
 #include "DiagSchemaView.h"
-#include "../VFrame30/DrawParam.h"
-#include "../VFrame30/PropertyNames.h"
+
+#include <VFrame30/DrawParam.h>
+#include <VFrame30/PropertyNames.h>
+#include <VFrame30/AppSignalController.h>
+
 #include "DiagnosticsAppSettings.h"
 #include "DiagnosticsSchemaManager.h"
 #include "Globals.h"
-#include "../VFrame30/AppSignalController.h"
 #include "DiagnosticsMainWindow.h"
 
 //

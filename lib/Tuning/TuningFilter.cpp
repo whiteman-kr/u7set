@@ -1,5 +1,7 @@
 #include "TuningFilter.h"
 
+#include <VFrame30/SchemaDetails.h>
+
 #include <QApplication>
 #include <QClipboard>
 #include <QXmlStreamReader>

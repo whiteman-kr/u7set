@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/ClientSchemaView.h"
+#include <VFrame30/ClientSchemaView.h>
 #include "SimSchemaManager.h"
 
 class SimIdeSimulator;

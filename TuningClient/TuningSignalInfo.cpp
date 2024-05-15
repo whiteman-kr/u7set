@@ -5,7 +5,6 @@
 #include <ClientLib/TuningSignalManager.h>
 #include <ClientLib/TuningConnection.h>
 #include "Settings.h"
-#include <QActionGroup>
 
 TuningSignalInfo::TuningSignalInfo(TuningConfigController& configController,
 								   const ClientLib::TuningSignalManager& signalManager,

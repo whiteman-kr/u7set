@@ -1,17 +1,15 @@
 #include "SchemaControlTabPage.h"
 
 #include <HardwareLib/PropertyNames.h>
-
-#include "../VFrame30/DiagSchema.h"
-#include "../VFrame30/LogicSchema.h"
-#include "../VFrame30/MonitorSchema.h"
-#include "../VFrame30/SchemaItems/SchemaItem.h"
-#include "../VFrame30/TuningSchema.h"
-#include "../VFrame30/UfbSchema.h"
-#include "../VFrame30/VduSchema.h"
-
 #include <UiLib/StandardColors.h>
 #include <UiLib/TagSelectorWidget.h>
+#include <VFrame30/DiagSchema.h>
+#include <VFrame30/LogicSchema.h>
+#include <VFrame30/MonitorSchema.h>
+#include <VFrame30/SchemaItem.h>
+#include <VFrame30/TuningSchema.h>
+#include <VFrame30/UfbSchema.h>
+#include <VFrame30/VduSchema.h>
 
 #include "CheckInDialog.h"
 #include "CreateSchemaDialog.h"
@@ -28,11 +26,8 @@
 #include "Settings.h"
 
 #ifdef _DEBUG
-#include <QAbstractItemModelTester>
+	#include <QAbstractItemModelTester>
 #endif
-
-#include <QtConcurrent>
-#include <queue>
 
 //
 //

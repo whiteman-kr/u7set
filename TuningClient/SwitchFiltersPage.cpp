@@ -1,13 +1,5 @@
 #include "SwitchFiltersPage.h"
 
-#include <QGridLayout>
-#include <QHBoxLayout>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QSplitter>
-#include <QTableWidget>
-#include <QVBoxLayout>
-
 #include <ClientLib/TuningConnection.h>
 
 #include "Main.h"

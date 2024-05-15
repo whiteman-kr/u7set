@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../VFrame30/IViewVariables.h"
+#include <VFrame30/IViewVariables.h>
 
 #include "IDevTools.h"
 #include <QMainWindow>

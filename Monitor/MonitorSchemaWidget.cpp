@@ -5,11 +5,10 @@
 #include "MonitorSchemaView.h"
 #include "MonitorSignalInfo.h"
 
-#include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/IMatsSchemaItemAssociations.h"
-#include "../VFrame30/ITimeStats.h"
-
 #include <ClientLib/AppSignalManager.h>
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/IMatsSchemaItemAssociations.h>
+#include <VFrame30/ITimeStats.h>
 
 
 namespace

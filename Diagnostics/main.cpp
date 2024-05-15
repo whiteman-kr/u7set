@@ -5,7 +5,7 @@
 
 #include <HardwareLib/HardwareLibrary.h>
 
-#include "../VFrame30/VFrame30Library.h"
+#include <VFrame30/VFrame30Library.h>
 #include "../lib/ConstStrings.h"
 
 

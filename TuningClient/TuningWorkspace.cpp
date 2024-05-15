@@ -5,10 +5,6 @@
 
 #include <ClientLib/TuningConnection.h>
 
-#include <QButtonGroup>
-#include <QTreeWidget>
-#include <QTreeWidgetItem>
-
 //
 // FilterButton
 //

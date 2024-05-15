@@ -10,16 +10,10 @@
 #include "TuningClientFilterStorage.h"
 #include "TuningConfigController.h"
 
-#include <QTableWidget>
-#include <QTableWidgetItem>
-#include <QCheckBox>
-
-
 namespace ClientLib
 {
 	class TuningConnection;
 }
-
 
 //
 // FilterPushButton

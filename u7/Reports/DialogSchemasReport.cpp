@@ -1,8 +1,6 @@
 #include "DialogSchemasReport.h"
 #include "DialogReportPageSetup.h"
 
-#include <QPrinter>
-
 using namespace Builder;
 using namespace ReportLib;
 

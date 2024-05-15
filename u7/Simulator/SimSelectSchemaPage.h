@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QWidget>
 #include <SchemaClientLib/SchemaListWidget.h>
 #include "SimIdeSimulator.h"
 #include "SimBasePage.h"

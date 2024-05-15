@@ -3,8 +3,6 @@
 #include <UiLib/DoubleValidatorEx.h>
 #include <UiLib/StandardColors.h>
 
-#include <QStyledItemDelegate>
-
 class AppSignalSetProvider;
 class AppSignalPropertyManager;
 class SignalsProxyModel;

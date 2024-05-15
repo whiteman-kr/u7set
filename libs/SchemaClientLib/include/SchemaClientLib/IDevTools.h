@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VFrame30/ITimeStats.h"
+#include <VFrame30/ITimeStats.h>
 
 namespace SchemaClientLib
 {

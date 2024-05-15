@@ -10,8 +10,6 @@
 #include "../UtilsLib/WUtils.h"
 #include "../lib/ConstStrings.h"
 
-#include <QHostAddress>
-
 bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger *log)
 {
 	if (device == nullptr ||

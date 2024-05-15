@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../VFrame30/BaseSchemaWidget.h"
-#include "../VFrame30/LogicSchema.h"
-#include "../VFrame30/SchemaItems/SchemaItem.h"
-#include "../VFrame30/SchemaItems/SchemaItemBus.h"
-#include "../VFrame30/SchemaItems/SchemaItemConnection.h"
-#include "../VFrame30/UfbSchema.h"
+#include <VFrame30/BaseSchemaWidget.h>
+#include <VFrame30/LogicSchema.h>
+#include <VFrame30/SchemaItem.h>
+#include <VFrame30/SchemaItemBus.h>
+#include <VFrame30/SchemaItemConnection.h>
+#include <VFrame30/UfbSchema.h>
+
 #include "./EditEngine/EditEngine.h"
 #include "CreateSignalDialog.h"
 #include "EditConnectionLine.h"

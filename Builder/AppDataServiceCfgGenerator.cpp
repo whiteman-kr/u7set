@@ -4,6 +4,7 @@
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/DataSource.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 #include <HardwareLib/DeviceModule.h>
 

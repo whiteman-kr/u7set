@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../OnlineLib/SoftwareEndpoint.h"
-#include "../VFrame30/SchemaDetails.h"
+#include <VFrame30/SchemaDetails.h>
 #include <SchemaClientLib/DragDropHelper.h>
 #include "SignalSnapshotModel.h"
 

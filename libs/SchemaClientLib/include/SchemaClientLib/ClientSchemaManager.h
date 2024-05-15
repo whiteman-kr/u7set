@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/SchemaManager.h"
+#include <VFrame30/SchemaManager.h>
 
 
 namespace SchemaClientLib

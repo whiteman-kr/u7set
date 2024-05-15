@@ -1,0 +1,182 @@
+#include <VFrame30/SchemaItemLink.h>
+#include <VFrame30/SchemaLayer.h>
+#include <VFrame30/SchemaView.h>
+#include <VFrame30/DrawParam.h>
+
+namespace VFrame30
+{
+	SchemaItemLink::SchemaItemLink(void)
+	{
+		// Вызов этого конструктора возможен при сериализации объектов такого типа.
+		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
+		//
+	}
+
+	SchemaItemLink::SchemaItemLink(SchemaUnit unit) :
+		FblItemLine(unit)
+	{
+		return;
+	}
+
+
+	SchemaItemLink::~SchemaItemLink(void)
+	{
+	}
+
+	// Serialization
+	//
+	bool SchemaItemLink::SaveData(Proto::Envelope* message) const
+	{
+		bool result = FblItemLine::SaveData(message);
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
+		{
+			assert(result);
+			assert(message->HasExtension(Proto::schemaitem));
+			return false;
+		}
+		
+		// --
+		//
+		/*Proto::SchemaItemLink* linkMessage = */message->MutableExtension(Proto::schemaitem)->mutable_link();
+
+//		linkMessage->set_weight(m_weight);
+//		linkMessage->set_linecolor(m_lineColor.rgba());
+
+		return true;
+	}
+
+	bool SchemaItemLink::LoadData(const Proto::Envelope& message)
+	{
+		if (message.HasExtension(Proto::schemaitem) == false)
+		{
+			assert(message.HasExtension(Proto::schemaitem));
+			return false;
+		}
+
+		// --
+		//
+		bool result = FblItemLine::LoadData(message);
+		if (result == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		if (message.GetExtension(Proto::schemaitem).has_link() == false)
+		{
+			assert(message.GetExtension(Proto::schemaitem).has_link());
+		}
+
+//		const Proto::SchemaItemLink& linkMessage = message.GetExtension(Proto::schemaitem).link();
+
+//		m_weight = linkMessage.weight();
+//		m_lineColor = QColor::fromRgba(linkMessage.linecolor());
+
+		return true;
+	}
+
+	// Drawing Functions
+	//
+
+	// Рисование элемента, выполняется в 100% масштабе.
+	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
+	//
+	void SchemaItemLink::draw(CDrawParam* drawParam) const
+	{
+		if (drawParam == nullptr)
+		{
+			assert(drawParam);
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		const double dpiX = drawParam->realDpiX();
+
+		// Draw the main part
+		//
+		const std::list<SchemaPoint>& poinlist = GetPointList();
+		if (poinlist.size() < 2)
+		{
+			assert(poinlist.size() >= 2);
+			return;
+		}
+
+		QPolygonF polyline(poinlist.size());
+		int index = 0;
+
+		for (auto pt = poinlist.cbegin(); pt != poinlist.cend(); ++pt)
+		{
+			polyline[index] = drawParam->gridToDpi(*pt);
+			index++;
+		}
+
+		QPen pen(lineColor());
+		pen.setStyle(static_cast<Qt::PenStyle>(m_lineStyle));
+
+		if (m_weight == 0.0 && drawParam->cosmeticPenWidth() == 0)
+		{
+			pen.setCosmetic(true);
+		}
+		else
+		{
+			pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
+		}
+
+		p->setPen(pen);
+		p->drawPolyline(polyline);
+
+		// Pins - ins/outs
+		//
+		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+
+		QPen redPen(QColor(0xE0D00000));
+		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
+
+		auto layer = parentLayer();
+
+		// in/out - red cross
+		//
+		auto drawPin = [&](SchemaPoint pt)
+			{
+				int connectionCount = layer->GetPinPosConnectinCount(pt);
+
+				if (connectionCount > 1)
+				{
+					p->setBrush(pen.color());
+					p->setPen(pen);
+					DrawPinJoint(p, pt.X, pt.Y, pinWidth);
+					p->setBrush(Qt::NoBrush);
+				}
+				else
+				{
+					// Red cross
+					//
+					p->setPen(redPen);
+					DrawPinCross(p, pt.X, pt.Y, pinWidth);
+				}
+			};
+
+		drawPin(poinlist.front());
+		drawPin(poinlist.back());
+
+		return;
+	}
+
+	// Вычислить координаты точки
+	//
+	void SchemaItemLink::SetConnectionsPos(double /*gridSize*/, int /*pinGridStep*/)
+	{
+		return;
+	}
+
+	bool SchemaItemLink::GetConnectionPointPos(const QUuid&, SchemaPoint*, double, int) const
+	{
+		return false;
+	}
+
+
+	// Properties and Data
+	//
+}
