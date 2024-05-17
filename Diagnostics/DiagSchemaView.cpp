@@ -29,10 +29,6 @@ DiagSchemaView::DiagSchemaView(DiagnosticsSchemaManager* schemaManager,
 
 	connect(&schemaManager->configController(), &DiagConfigController::configurationArrived, this, &DiagSchemaView::configurationArrived);
 
-	// Updates scripts
-	//
-	configurationArrived(schemaManager->configController().configuration());
-
 	return;
 }
 

@@ -18,10 +18,6 @@ TuningSchemaView::TuningSchemaView(TuningConfigController& configController, Tun
 
 	connect(&m_configController, &TuningConfigController::configurationArrived, this, &TuningSchemaView::configurationArrived);
 
-	// Updates scripts
-	//
-	configurationArrived(m_configController.configuration());
-
 	return;
 }
 
