@@ -15,6 +15,8 @@ namespace SchemaClientLib
 											   QWidget* parent) :
 		QDialog{parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint}
 	{
+		setAttribute(Qt::WA_DeleteOnClose, true);
+
 		m_widget = new SchemaClientLib::SignalSnapshotWidget{*this,
 															 appSignalManager,
 															 signalDataServer,
