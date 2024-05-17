@@ -51,7 +51,7 @@ namespace AppSignalLists
 		void setPropertyEditorObjects();
 		bool continueWithDuplicateIds();
 		void updateTreeItemText(QTreeWidgetItem* item);
-		void updateButtonsEnableState();
+		void updateListEditorEnableState();
 
 		void saveChanges();
 

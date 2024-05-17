@@ -7,6 +7,7 @@
 
 #include <Behavior/ClientBehaviorStorage.h>
 #include <Behavior/TuningClientBehavior.h>
+#include "AppSignalListStorage.h"
 
 namespace Builder
 {
@@ -68,56 +69,35 @@ namespace Builder
 			return false;
 		}
 
-		QStringList equipmentList;
-
-		result &= createEquipmentList(&equipmentList);
-		if (result == false)
-		{
-			return result;
-		}
-
-		result &= writeAppSignalLists(settings->appSignalListIds, settings->appSignalListMasks, settings->appSignalListTags);
+		QStringList tuningSources;
+		result &= createTuningEquipmentList(&tuningSources);
 
 		// Generate tuning signals
 		//
-		result &= createTuningSignals(equipmentList, m_signalSet, &m_tuningSet);
-		if (result == false)
-		{
-			return result;
-		}
+		std::vector<AppSignal*> tuningSignals;
+		createTuningSignals(tuningSources, m_signalSet, tuningSignals);
 
-		result &= writeTuningSchemas();
-		if (result == false)
-		{
-			return result;
-		}
+		// Write tuning signals
+		//
+		result &= writeTuningSignals(tuningSignals);
 
-
-		result &= writeTuningSignals();
-		if (result == false)
-		{
-			return result;
-		}
-
+		// Write Tuning Signal Lists
+		//
 		{
 			ILogFileStub logFileStub;
-			ClientLib::TuningSignalManager tuningSignalManager({}, &logFileStub);
-			tuningSignalManager.load(m_tuningSet);
+			Builder::AppSignalListsProvider tuningSignalProvider(tuningSignals);
 
 			// --
 			//
-			result &= createObjectFilters(tuningSignalManager, equipmentList);
-			if (result == false)
-			{
-				return result;
-			}
-
+			result &= createObjectFilters(tuningSignalProvider, tuningSources);
 			result &= writeObjectFilters();
-			if (result == false)
-			{
-				return result;
-			}
+
+			// Write AppSignalLists
+			//
+			result &= writeAppSignalLists(tuningSignalProvider, settings->appSignalListIds, settings->appSignalListMasks, settings->appSignalListTags);
 		}
+
+		result &= writeTuningSchemas();
 
 		result &= writeGlobalScript();
 
@@ -132,68 +112,7 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningClientCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, Proto::AppSignalSet* tuningSet)
-	{
-		if (tuningSet == nullptr ||
-				signalSet == nullptr)
-		{
-			assert(tuningSet);
-			assert(signalSet);
-			return false;
-		}
-
-		if (equipmentList.empty() == true)
-		{
-			return true;
-		}
-
-		// Create signals
-		//
-		tuningSet->Clear();
-
-		for (const AppSignal* s : *signalSet)
-		{
-			if (s->enableTuning() == false)
-			{
-				continue;
-			}
-
-			// Check EquipmentIdMasks
-			//
-			bool result = false;
-
-			for (QString m : equipmentList)
-			{
-				m = m.trimmed();
-
-				if (m.isEmpty() == true)
-				{
-					continue;
-				}
-
-				QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m));
-				//rx.setPatternSyntax(QRegExp::Wildcard);
-
-				if (rx.match(s->lmEquipmentID()).hasMatch() == true)		// exactMatch
-				{
-					result = true;
-					break;
-				}
-			}
-
-			if (result == false)
-			{
-				continue;
-			}
-
-			::Proto::AppSignal* aspMessage = tuningSet->add_appsignal();
-			s->saveToProto(aspMessage);
-		}
-
-		return true;
-	}
-
-	bool TuningClientCfgGenerator::createEquipmentList(QStringList* equipmentList)
+	bool TuningClientCfgGenerator::createTuningEquipmentList(QStringList* equipmentList)
 	{
 		if (equipmentList == nullptr)
 		{
@@ -258,7 +177,7 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningClientCfgGenerator::createObjectFilters(const ClientLib::TuningSignalManager& tuningSignalManager,
+	bool TuningClientCfgGenerator::createObjectFilters(const ISignalManager& tuningSignalManager,
 													   const QStringList& equipmentList)
 	{
 		bool ok = true;
@@ -299,7 +218,7 @@ namespace Builder
 		{
 			for (const std::pair<QString, QString>& p: notFoundSignalsAndFilters)
 			{
-				m_log->errEQP6108(p.first, p.second);
+				m_log->errEQP6220(p.first, p.second);
 			}
 
 			return false;
@@ -331,7 +250,7 @@ namespace Builder
 
 
 	bool TuningClientCfgGenerator::createEquipmentAndSchemaFilters(const QStringList& equipmentList,
-														  const ClientLib::TuningSignalManager& tuningSignalManager)
+														  const ISignalManager& tuningSignalManager)
 	{
 		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
 
@@ -461,30 +380,6 @@ namespace Builder
 				}
 			}
 		}
-	}
-
-	bool TuningClientCfgGenerator::writeTuningSignals()
-	{
-		// Write number of signals
-		//
-		QByteArray data;
-		data.resize(static_cast<int>(m_tuningSet.ByteSizeLong()));
-
-		m_tuningSet.SerializeToArray(data.data(), static_cast<int>(m_tuningSet.ByteSizeLong()));
-
-		// Write file
-		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CfgFileId::TUNING_SIGNALS, "", data);
-
-		if (buildFile == nullptr)
-		{
-			m_log->errCMN0012("TuningSignals.dat");
-			return false;
-		}
-
-		m_cfgXml->addLinkToFile(buildFile);
-
-		return true;
 	}
 
 	bool TuningClientCfgGenerator::writeObjectFilters()

@@ -7,6 +7,7 @@
 
 #include <Behavior/ClientBehaviorStorage.h>
 #include <Behavior/MonitorBehavior.h>
+#include "AppSignalListStorage.h"
 
 
 namespace Builder
@@ -55,13 +56,21 @@ namespace Builder
 
 		result &= saveScriptProperties("GlobalScript", File::GLOBAL_SCRIPT);
 		result &= initSchemaTags();
-		result &= initTuningSources();
-
-		result &= writeAppSignalLists(settings->appSignalListIds, settings->appSignalListMasks, settings->appSignalListTags);
-
-		// Add links to schema files (previously written) via m_cfgXml->addLinkToFile(...)
+		
+		// Write AppSignalLists
 		//
-		result &= writeSchemasByTags();
+		{
+			QStringList appDataSources;
+			result &= createAppEquipmentList(&appDataSources);
+
+			std::vector<AppSignal*> monitorSignals;
+			createAppSignals(appDataSources, m_signalSet, monitorSignals);
+
+			ILogFileStub logFileStub;
+			Builder::AppSignalListsProvider signalProvider(monitorSignals);
+
+			result &= writeAppSignalLists(signalProvider, settings->appSignalListIds, settings->appSignalListMasks, settings->appSignalListTags);
+		}
 
 		if (settings->tuningEnabled == true)
 		{
@@ -74,9 +83,15 @@ namespace Builder
 				return false;
 			}
 
+			QStringList tuningSources;
+			result &= createTuningEquipmentList(&tuningSources);
+
+			std::vector<AppSignal*> tuningSignals;
+			createTuningSignals(tuningSources, m_signalSet, tuningSignals);
+
 			// Generate tuning signals file
 			//
-			result &= writeTuningSignals();
+			result &= writeTuningSignals(tuningSignals);
 
 			// Write MATS users
 			//
@@ -86,6 +101,10 @@ namespace Builder
 					settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts));
 			}
 		}
+
+		// Add links to schema files (previously written) via m_cfgXml->addLinkToFile(...)
+		//
+		result &= writeSchemasByTags();
 
 		// Generate behavior
 		//
@@ -175,8 +194,104 @@ namespace Builder
 		return true;
 	}
 
-	bool MonitorCfgGenerator::initTuningSources()
+	bool MonitorCfgGenerator::createAppEquipmentList(QStringList* equipmentList)
 	{
+		if (equipmentList == nullptr)
+		{
+			assert(equipmentList);
+			return false;
+		}
+		
+		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
+
+		bool result = true;
+
+		equipmentList->clear();
+
+		for (const auto& ads : settings->appDataServices)
+		{
+			std::shared_ptr<Hardware::DeviceObject> appDataServiceObject = m_equipment->deviceObject(ads.equipmentId);
+			if (appDataServiceObject == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::APP_DATA_SERVICE_IDS, ads.equipmentId);
+				result = false;
+				continue;
+			}
+			std::shared_ptr<Hardware::Software> appDataServiceSoftware = appDataServiceObject->toSoftware();
+			if (appDataServiceSoftware == nullptr)
+			{
+				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::APP_DATA_SERVICE_IDS, ads.equipmentId);
+				result = false;
+				continue;
+			}
+
+			AppDataServiceSettingsGetter asg;
+
+			if (asg.readSoftwareSettings(m_context, appDataServiceSoftware.get()) == false)
+			{
+				result = false;
+				continue;
+			}
+
+			// Find which LMs are send data to this AppDataService
+			//
+			quint32 receivingNetmask = asg.appDataReceivingNetmask.toIPv4Address();
+			quint32 receivingSubnet = asg.appDataReceivingIP.address32() & receivingNetmask;
+
+			for(Hardware::DeviceModule* lm : m_context->m_fscModules)
+			{
+				if (lm == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					continue;
+				}
+
+				OnlineLib::DataSource ds;
+				result &= SoftwareSettingsGetter::getLmPropertiesFromDevice(lm, E::LanControllerType::AppData,
+																			m_context, &ds);
+
+				ds.lanControllersInfo().filterLansByAppDataServiceID(appDataServiceObject->equipmentIdTemplate());
+
+				int connectedAdaptersCount = 0;
+
+				for(const LanControllerInfo& lan : ds.lanControllersInfo()())
+				{
+					if (lan.appDataEnable == false || lan.appDataServiceID != appDataServiceObject->equipmentIdTemplate())
+					{
+						continue;
+					}
+
+					if (connectedAdaptersCount > 0)
+					{
+						result = false;
+						continue;
+					}
+
+					if ((QHostAddress(lan.appDataIP).toIPv4Address() & receivingNetmask) != receivingSubnet)
+					{
+						result = false;
+						continue;
+					}
+
+					connectedAdaptersCount++;
+
+					equipmentList->push_back(ds.moduleEquipmentID());
+				}
+			}
+		}
+
+		return result;
+	}
+
+	bool MonitorCfgGenerator::createTuningEquipmentList(QStringList* equipmentList)
+	{
+		if (equipmentList == nullptr)
+		{
+			assert(equipmentList);
+			return false;
+		}
+		
 		std::shared_ptr<const MonitorSettings> settings = m_settingsSet.getSettingsDefaultProfile<MonitorSettings>();
 
 		if (settings->tuningEnabled == false)
@@ -194,7 +309,7 @@ namespace Builder
 
 		bool result = true;
 
-		m_tuningSources.clear();
+		equipmentList->clear();
 
 		for (const auto& tsc : settings->tuningServices)
 		{
@@ -229,9 +344,9 @@ namespace Builder
 
 				for (const QString& ce : clientEquipmentList)
 				{
-					if (m_tuningSources.contains(ce) == false)
+					if (equipmentList->contains(ce) == false)
 					{
-						m_tuningSources.append(ce);
+						equipmentList->append(ce);
 					}
 				}
 			}
@@ -331,38 +446,6 @@ namespace Builder
 		}
 
 		return result;
-	}
-
-	bool MonitorCfgGenerator::writeTuningSignals()
-	{
-		::Proto::AppSignalSet tuningSet;
-
-		bool ok = TuningClientCfgGenerator::createTuningSignals(m_tuningSources, m_signalSet, &tuningSet);
-		if (ok == false)
-		{
-			m_log->errINT1000("Generate tuning signal set error: MonitorCfgGenerator::writeTuningSignals, call for TuningClientCfgGenerator::createTuningSignals");
-			return false;
-		}
-
-		// Write number of signals
-		//
-		QByteArray data;
-		data.resize(static_cast<int>(tuningSet.ByteSizeLong()));
-
-		tuningSet.SerializeToArray(data.data(), static_cast<int>(tuningSet.ByteSizeLong()));
-
-		// Write file
-		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CfgFileId::TUNING_SIGNALS, "", data);
-
-		if (buildFile == nullptr)
-		{
-			m_log->errCMN0012("TuningSignals.dat");
-			return false;
-		}
-
-		ok = m_cfgXml->addLinkToFile(buildFile);
-		return ok;
 	}
 
 	bool MonitorCfgGenerator::writeMonitorBehavior()

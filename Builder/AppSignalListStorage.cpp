@@ -175,12 +175,9 @@ namespace Builder
 	//
 	//
 
-	AppSignalListsProvider::AppSignalListsProvider(const AppSignalSet* signalSet)
+	AppSignalListsProvider::AppSignalListsProvider(const std::vector<AppSignal*>& signalsVector)
 	{
-		Q_ASSERT(signalSet);
-
-		const std::vector<AppSignal*>& sv = signalSet->signalsVector();
-		for (const AppSignal* s : sv)
+		for (const AppSignal* s : signalsVector)
 		{
 			// Remove bus and non-analog/discrete signals
 			//
@@ -189,7 +186,10 @@ namespace Builder
 				continue;
 			}
 
-			m_params[::calcHash(s->appSignalID())] = *s;
+			Hash hash = ::calcHash(s->appSignalID());
+
+			m_params[hash] = *s;
+			m_params[hash].setHash(hash);
 		}
 	}
 

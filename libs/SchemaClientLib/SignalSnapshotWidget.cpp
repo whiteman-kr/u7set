@@ -3,6 +3,7 @@
 #include "../lib/ISignalDataServer.h"
 #include <UiLib/ChooseItemsWidget.h>
 #include <SchemaClientLib/DialogSignalSnapshot.h>
+#include <../libs/AppSignalLists/include/AppSignalLists/SignalList.h>
 #include <UiLib/ExportPrint.h>
 
 
@@ -147,6 +148,7 @@ namespace SchemaClientLib
 	SignalSnapshotWidget::SignalSnapshotWidget(SchemaClientLib::ISignalSnapshotWidget& signalSnapshotVirtFuncDispatcher,
 											   IAppSignalManager* appSignalManager,
 											   ISignalDataServer* signalDataServer,
+											   AppSignalLists::AppSignalListSet* appSignalListSet,
 											   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 											   const QString& projectName,
 											   const QString& equipmentId,
@@ -155,6 +157,7 @@ namespace SchemaClientLib
 		m_signalSnapshotVirtFuncDispatcher(signalSnapshotVirtFuncDispatcher),
 		m_appSignalManager(appSignalManager),
 		m_signalDataServer(signalDataServer),
+		m_appSignalListSet(appSignalListSet),
 		m_appDataServices(appDataServices),
 		m_projectName(projectName),
 		m_equipmentId(equipmentId)
@@ -203,7 +206,7 @@ namespace SchemaClientLib
 											   const QString& projectName,
 											   const QString& equipmentId,
 											   QWidget* parent) :
-		SignalSnapshotWidget(signalSnapshotVirtFuncDispatcher, appSignalManager, nullptr, {}, projectName, equipmentId, parent)
+		SignalSnapshotWidget(signalSnapshotVirtFuncDispatcher, appSignalManager, nullptr, nullptr, {}, projectName, equipmentId, parent)
 	{
 	}
 
@@ -660,6 +663,12 @@ namespace SchemaClientLib
 		fillSignals();
 	}
 
+	void SignalSnapshotWidget::signalListComboIndexChanged(int /*index*/) 
+	{
+		m_model->setAppSignalList(m_signalListCombo->currentData().toString());
+		fillSignals();
+	}
+
 	void SignalSnapshotWidget::buttonExportClicked()
 	{
 		Q_ASSERT(m_model);
@@ -910,14 +919,19 @@ namespace SchemaClientLib
 			filterLayout->addLayout(tagsLayout, row, col++);
 		}
 
-		col++;
+		// Signal List
+		//
+		filterLayout->addWidget(new QLabel(tr("Signal List")), row, col++);
 
-		{
-			m_clearFilterButton = new QPushButton(tr("Clear Filter"));
-			m_clearFilterButton->setAutoDefault(false);
-			filterLayout->addWidget(m_clearFilterButton, row, col++);
-			connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalSnapshotWidget::buttonClearFilterClicked);
-		}
+		// Signal List Combo
+		//
+		m_signalListCombo = new QComboBox();
+		connect(m_signalListCombo,
+				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+				this,
+				&SignalSnapshotWidget::signalListComboIndexChanged);
+		filterLayout->addWidget(m_signalListCombo, row, col++);
+		m_signalListCombo->setMinimumContentsLength(20);
 
 		filterLayout->setSpacing(4);
 
@@ -943,6 +957,11 @@ namespace SchemaClientLib
 		exPrintLayout->addWidget(b);
 
 		exPrintLayout->addStretch();
+
+		m_clearFilterButton = new QPushButton(tr("Clear Filter"));
+		m_clearFilterButton->setAutoDefault(false);
+		exPrintLayout->addWidget(m_clearFilterButton);
+		connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalSnapshotWidget::buttonClearFilterClicked);
 
 		m_buttonFixate = new QPushButton(tr("Fixate"));
 		m_buttonFixate->setAutoDefault(false);
@@ -1106,6 +1125,25 @@ namespace SchemaClientLib
 		}
 		m_serverCombo->blockSignals(false);
 
+		// Signal Lists setup
+		//
+		m_signalListCombo->blockSignals(true);
+		m_signalListCombo->addItem(tr("All Signals"), QString());
+		if (m_appSignalListSet != nullptr) 
+		{
+			const auto lists = m_appSignalListSet->lists();
+
+			for (const auto& list : lists)
+			{
+				m_signalListCombo->addItem(tr("[%1] %2").arg(list->id()).arg(list->caption()), list->id());
+			}
+			if (lists.empty() == true)
+			{
+				m_signalListCombo->setEnabled(false);
+			}
+		}
+		m_signalListCombo->blockSignals(false);
+
 		// Tags setup
 		//
 		m_tagsCompleter = new QCompleter(m_storedTags, this);
@@ -1130,7 +1168,7 @@ namespace SchemaClientLib
 	{
 		// create models
 		//
-		m_model = new SignalSnapshotModel(m_appSignalManager, m_signalDataServer, this);
+		m_model = new SignalSnapshotModel(m_appSignalManager, m_signalDataServer, m_appSignalListSet, this);
 
 		std::vector<AppSignalParam> allSignals = m_appSignalManager->signalList();
 		m_model->setSignals(allSignals);

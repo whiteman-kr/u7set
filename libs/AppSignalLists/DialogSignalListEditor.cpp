@@ -176,7 +176,7 @@ namespace AppSignalLists
 		//
 		fillAppSignalLists();
 
-		updateButtonsEnableState();
+		updateListEditorEnableState();
 
 		// sort items
 		//
@@ -311,7 +311,6 @@ namespace AppSignalLists
 		m_listsTree->addTopLevelItem(item);
 
 		updateTreeItemText(item);
-		updateButtonsEnableState();
 
 		m_listsTree->clearSelection();
 		item->setSelected(true);
@@ -401,7 +400,7 @@ namespace AppSignalLists
 			m_listPropertyEditor->clear();
 			m_signalListWidget->setList(nullptr);
 
-			updateButtonsEnableState();
+			updateListEditorEnableState();
 
 			return;
 		}
@@ -510,7 +509,7 @@ namespace AppSignalLists
 
 	void DialogSignalListEditor::onItemSelectionChanged()
 	{
-		updateButtonsEnableState();
+		updateListEditorEnableState();
 		setPropertyEditorObjects();
 
 		return;
@@ -600,7 +599,6 @@ namespace AppSignalLists
 			delete deleteItem;
 		}
 
-		updateButtonsEnableState();
 		setPropertyEditorObjects();
 
 		m_modified = true;
@@ -710,7 +708,7 @@ namespace AppSignalLists
 
 		m_listsTree->blockSignals(false);
 
-		updateButtonsEnableState();
+		updateListEditorEnableState();
 
 		setPropertyEditorObjects();
 
@@ -720,6 +718,49 @@ namespace AppSignalLists
 	void DialogSignalListEditor::saveChanges() 
 	{
 		m_appLists = m_editLists;
+
+		// Create lists array edited by user
+		//
+		std::vector<AppSignalList*> userLists;
+		
+		std::vector<AppSignalList*> lists = m_appLists.lists();
+		for (AppSignalList* list : lists) 
+		{
+			if (list->systemTagsList().contains(AppSignalList::tagIde) == true) 
+			{
+				continue;
+			}
+			auto& cache = list->listHashesCache();
+			cache.clear();
+			userLists.push_back(list);
+		}
+
+		// Count cached hashes for all user lists
+		//
+		std::vector<Hash> allHashes = m_signalManager.signalHashes();
+
+		for (Hash hash : allHashes)
+		{
+			bool found = false;
+			const AppSignalParam& asp = m_signalManager.signalParam(hash, &found);
+
+			for (AppSignalList* list : userLists)
+			{
+				// Add filtered signals to the list
+				//
+				auto& cache = list->listHashesCache();
+				if (list->appSignalMatch(asp) == true)
+				{
+					cache.push_back(hash);
+				}
+			}
+		}
+
+		QString errorMessage;
+		if (m_appLists.save(&errorMessage) == false) 
+		{
+			QMessageBox::critical(this, qAppName(), errorMessage);
+		}
 	}
 
 	void DialogSignalListEditor::closeEvent(QCloseEvent* e)
@@ -851,13 +892,16 @@ namespace AppSignalLists
 		return;
 	}
 
-	void DialogSignalListEditor::updateButtonsEnableState()
+	void DialogSignalListEditor::updateListEditorEnableState()
 	{
 		qsizetype selectedCount = 0;
 
 		QList<QTreeWidgetItem*> selectedItems = m_listsTree->selectedItems();
-
 		selectedCount = selectedItems.size();
+
+		m_listPropertyEditor->setEnabled(selectedCount > 0);
+		m_signalListWidget->setEnabled(selectedCount > 0);
+
 
 		m_btnRemove->setEnabled(selectedCount > 0);
 		m_removeAction->setEnabled(selectedCount > 0);

@@ -29,6 +29,8 @@ namespace AppSignalLists
 	class AppSignalList;
 }
 
+class ISignalManager;
+
 namespace Builder
 {
 	class SoftwareCfgGenerator : public QObject
@@ -110,8 +112,12 @@ namespace Builder
 
 		QString softwareCfgSubdir() const { return m_software->equipmentIdTemplate(); }
 
+		static void createAppSignals(const QStringList& equipmentList, const SignalSet* signalSet, std::vector<AppSignal*>& appSignals);
+		static void createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, std::vector<AppSignal*>& tuningSignals);
+
+		bool writeTuningSignals(const std::vector<AppSignal*>& tuningSignals);
+		bool writeAppSignalLists(const ISignalManager& signalManager, const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);
 		bool writeMatsUsers(const QString& propertyName, const QStringList& tuningUserAccounts);
-		bool writeAppSignalLists(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);
 
 		template <typename TYPE>
 		TYPE getObjectProperty(QString strId, QString property, bool* ok)

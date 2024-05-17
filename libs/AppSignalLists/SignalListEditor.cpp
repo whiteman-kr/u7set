@@ -485,7 +485,7 @@ namespace AppSignalLists
 		{
 			Hash hash = m_itemsModel->itemHash(index.row());
 
-			const AppSignalListItem& item = (*m_appSignalList)[hash];
+			const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 
 			bool ok = false;
 			AppSignalParam asp = m_signalManager.signalParam(item.appSignalHash(), &ok);
@@ -819,11 +819,7 @@ namespace AppSignalLists
 
 			// Delete item from list
 			//
-			if (m_appSignalList->remove(hash) == false)
-			{
-				Q_ASSERT(false);
-				return;
-			}
+			m_appSignalList->remove(hash);
 		}
 
 		emit signalsChanged();
@@ -860,7 +856,7 @@ namespace AppSignalLists
 				continue;
 			}
 
-			const AppSignalListItem& item = (*m_appSignalList)[hash];
+			const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 
 			bool ok = false;
 			AppSignalParam asp = m_signalManager.signalParam(item.appSignalHash(), &ok);
@@ -933,7 +929,7 @@ namespace AppSignalLists
 				continue;
 			}
 
-			AppSignalListItem& item = (*m_appSignalList)[hash];
+			AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 
 			item.setValue(d.value());
 
@@ -996,7 +992,7 @@ namespace AppSignalLists
 		int rowCount = m_itemsModel->rowCount();
 
 		static QString path{"."};
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"), path + QDir::separator(), tr("CSV (*.csv)"));
+		QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"), path + QDir::separator() + m_appSignalList->id() + ".csv", tr("CSV (*.csv)"));
 
 		if (fileName.isEmpty() == true)
 		{
@@ -1048,7 +1044,6 @@ namespace AppSignalLists
 
 		static QString path{"."};
 		QString fileName = QFileDialog::getOpenFileName(this, tr("Import from CSV"), path, tr("CSV (*.csv)"));
-
 		if (fileName.isEmpty() == true)
 		{
 			return;
@@ -1137,12 +1132,12 @@ namespace AppSignalLists
 			// Read value
 
 			std::optional<TuningValue> tv;
-			if (valueStr.isEmpty() == false && valueStr != "-")
+			if (valueStr.isEmpty() == false)
 			{
 				TuningValue v(asp.tuningType());
-
 				bool valueOk = false;
 				v.fromString(valueStr, &valueOk);
+
 				if (valueOk == true)
 				{
 					tv = v;
@@ -1164,7 +1159,7 @@ namespace AppSignalLists
 			}
 			else
 			{
-				AppSignalListItem& item = (*m_appSignalList)[hash];
+				AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 				if (tv.has_value() == true)
 				{
 					item.setValue(tv.value());
@@ -1184,7 +1179,7 @@ namespace AppSignalLists
 			QMessageBox::information(
 				this,
 				qAppName(),
-				tr("Import complete.\n\nAdded: %1 signals\nUpdated: %2 signals").arg(signalsAdded).arg(signalsUpdated));
+				tr("Import complete.\n\nAdded: %1 signal(s)\nUpdated: %2 signal(s)").arg(signalsAdded).arg(signalsUpdated));
 		}
 		else
 		{
@@ -1198,7 +1193,7 @@ namespace AppSignalLists
 				notFoundSignals.removeLast();
 			}
 
-			QString message = tr("Import complete.\n\nAdded: %1 signals\nUpdated: %2 signals\n\n%3 signals were not found:\n%4")
+			QString message = tr("Import complete.\n\nAdded: %1 signal(s)\nUpdated: %2 signal(s)\n\n%3 signal(s) were not found:\n%4")
 								  .arg(signalsAdded)
 								  .arg(signalsUpdated)
 								  .arg(notFoundCount)

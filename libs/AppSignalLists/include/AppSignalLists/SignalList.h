@@ -110,19 +110,18 @@ namespace AppSignalLists
 		// Items operations
 
 		[[nodiscard]] int count() const;
+		[[nodiscard]] std::vector<Hash> itemsHashes() const;
 
-		const AppSignalListItem& operator[](int index) const;
-		AppSignalListItem& operator[](int index);
-
-		const AppSignalListItem& operator[](Hash hash) const;
-		AppSignalListItem& operator[](Hash hash);
+		[[nodiscard]] const AppSignalListItem& itemByHash(Hash hash) const;
+		[[nodiscard]] AppSignalListItem& itemByHash(Hash hash);
 
 		[[nodiscard]] bool itemExists(Hash hash) const;
-		[[nodiscard]] int itemIndex(Hash hash) const;
 
 		void add(const AppSignalListItem& item);
-		[[nodiscard]] bool remove(int index);
-		[[nodiscard]] bool remove(Hash hash);
+		void remove(Hash hash);
+
+		[[nodiscard]] const std::vector<Hash>& listHashesCache() const;
+		[[nodiscard]] std::vector<Hash>& listHashesCache();
 
 		/*
 		void checkSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters);
@@ -161,6 +160,8 @@ namespace AppSignalLists
 			m_cachedAppSignalTags = That.m_cachedAppSignalTags;
 
 			m_items = That.m_items;
+			m_listHashesCache = That.m_listHashesCache;
+
 
 			return *this;
 		}
@@ -202,7 +203,8 @@ namespace AppSignalLists
 
 		// Items
 		//
-		std::vector<AppSignalListItem> m_items;
+		std::map<Hash, AppSignalListItem> m_items;	// Signals added by user are stored here
+		std::vector<Hash> m_listHashesCache;		// All signals hashes that match this filter are stored here. They are filled on build and after local lists editing
 
 	public:
 		static const char* mimeType; // = "application/x-radiyappsignallist";
@@ -224,7 +226,12 @@ namespace AppSignalLists
 
 		void remove(const QUuid& uuid);
 		void remove(const QString& systemTag);
-		
+
+		std::vector<AppSignalList*> lists() const;
+
+		virtual bool load(QString* errorMessage);
+		virtual bool save(QString* errorMessage) const;
+
 		AppSignalListSet& operator = (const AppSignalListSet& That) 
 		{
 			// Perform a deep copy of all lists
@@ -241,7 +248,7 @@ namespace AppSignalLists
 			return *this;
 		}
 
-	private:
+	protected:
 		std::vector<std::shared_ptr<AppSignalList>> m_lists;
 
 	};

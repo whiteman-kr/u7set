@@ -18,16 +18,12 @@ public:
 	virtual bool generateConfigurationStep1() override;
 
 protected:
-	bool initTuningSources();
+	bool createTuningEquipmentList(QStringList* equipmentList);
 
-	bool writeTuningSignals();
 	bool writeTestScripts();
 	bool writeReportTemplates();
 
 	bool checkScriptFileTags(std::shared_ptr<DbFile>& file, const QStringList& scriptTags);
-
-private:
-	QStringList m_tuningSources;
 };
 
 }

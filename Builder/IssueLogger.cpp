@@ -8548,30 +8548,6 @@ namespace Builder
 				  );
 	}
 
-
-	/// IssueCode: EQP6108
-	///
-	/// IssueType: Error
-	///
-	/// Title: Signal %1 specified in application signals list %2 does not exist.
-	///
-	/// Parameters:
-	///		%1 Schema ID
-	///		%2 Clisnt Equipment ID
-	///
-	/// Description:
-	///		Signal that is specified in application signals list does not exist.
-	///
-	void IssueLogger::errEQP6108(QString appSignalId, QString listId)
-	{
-		LOG_ERROR(IssueType::Equipment,
-				  6108,
-				  tr("Signal %1 specified in application signals list %2 does not exist.")
-				  .arg(appSignalId)
-				  .arg(listId)
-				  );
-	}
-
 	/// IssueCode: EQP6109
 	///
 	/// IssueType: Error
@@ -9153,6 +9129,54 @@ namespace Builder
 					.arg(softwareEquipmentId));
 	}
 	
+	/// IssueCode: EQP6220
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 specified in application signals list %2 does not exist.
+	///
+	/// Parameters:
+	///		%1 AppSignalId ID
+	///		%2 Signals list ID
+	///
+	/// Description:
+	///		Signal that is specified in application signals list does not exist.
+	///
+	void IssueLogger::errEQP6220(QString appSignalId, QString listId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6220,
+				  tr("Signal %1 specified in application signals list %2 does not exist.")
+				  .arg(appSignalId)
+				  .arg(listId)
+				  );
+	}
+
+	/// IssueCode: EQP6221
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 specified in application signals list %2 is not processed by software %3.
+	///
+	/// Parameters:
+	///		%1 AppSignalId ID
+	///		%2 Signals list ID
+	///		%3 Software EquipmentID
+	///
+	/// Description:
+	///		Signal that is specified in application signals list is not processed by software.
+	///
+	void IssueLogger::errEQP6221(QString appSignalId, QString listId, QString softwareEquipmentId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6221,
+				  tr("Signal %1 specified in Application signals list %2 is not processed by software %3.")
+				  .arg(appSignalId)
+				  .arg(listId)
+				  .arg(softwareEquipmentId)
+				  );
+	}
+
 	/// IssueCode: EQP6300
 	///
 	/// IssueType: Error

@@ -157,6 +157,15 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 				schemaListWidget->setDetails(m_configController.schemasDetailsSet());
 			});
 
+	
+	// Load local appSignalLists
+	//
+	QString errorMessage;
+	if (m_appSignalListSet.load(&errorMessage) == false)
+	{
+		QMessageBox::critical(this, qAppName(), errorMessage);
+	}
+
 	return;
 }
 
@@ -1309,9 +1318,8 @@ void MonitorMainWindow::slot_trends()
 
 void MonitorMainWindow::slot_signalSnapshot()
 {
-	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(&m_configController,
-																			   &m_signalManager,
-																			   &m_monitorCentralWidget);
+	MonitorDialogSignalSnapshot* d =
+		MonitorDialogSignalSnapshot::createDialog(&m_configController, &m_signalManager, &m_appSignalListSet, &m_monitorCentralWidget);
 	d->show();
 
 	return;
@@ -1319,10 +1327,8 @@ void MonitorMainWindow::slot_signalSnapshot()
 
 void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 {
-	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(
-										 &configController(),
-										 &m_signalManager,
-										 &m_monitorCentralWidget);
+	MonitorDialogSignalSnapshot* d =
+		MonitorDialogSignalSnapshot::createDialog(&configController(), &m_signalManager, &m_appSignalListSet, &m_monitorCentralWidget);
 
 	std::vector<AppSignalParam> specialSignals;
 
@@ -1384,9 +1390,7 @@ void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 
 void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
 {
-	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
-													   &m_signalManager,
-													   &m_monitorCentralWidget);
+	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(), &m_signalManager, &m_appSignalListSet, &m_monitorCentralWidget);
 
 	d->resetSignalsType();
 	d->setSignalsMask(masks);
@@ -1397,9 +1401,7 @@ void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
 
 void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
 {
-	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
-													   &m_signalManager,
-													   &m_monitorCentralWidget);
+	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(), &m_signalManager, &m_appSignalListSet, &m_monitorCentralWidget);
 
 	d->resetSignalsType();
 	d->setSignalsMask({});

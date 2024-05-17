@@ -9,6 +9,7 @@ namespace SchemaClientLib
 {
 	DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
 											   ISignalDataServer* signalDataServer,
+											   AppSignalLists::AppSignalListSet* appSignalListSet,
 											   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 											   const QString& projectName,
 											   const QString& equipmentId,
@@ -18,12 +19,14 @@ namespace SchemaClientLib
 		m_widget = new SchemaClientLib::SignalSnapshotWidget{*this,
 															 appSignalManager,
 															 signalDataServer,
+															 appSignalListSet,
 															 appDataServices,
 															 projectName,
 															 equipmentId,
 															 this};
 
 		auto layout = new QVBoxLayout{this};
+		layout->setContentsMargins(0, 0, 0, 0);
 		layout->addWidget(m_widget);
 		setLayout(layout);
 
@@ -36,7 +39,7 @@ namespace SchemaClientLib
 											   const QString& projectName,
 											   const QString& equipmentId,
 											   QWidget* parent) :
-		DialogSignalSnapshot{appSignalManager, nullptr, {}, projectName, equipmentId, parent}
+		DialogSignalSnapshot{appSignalManager, nullptr, nullptr, {}, projectName, equipmentId, parent}
 	{
 		return;
 	}

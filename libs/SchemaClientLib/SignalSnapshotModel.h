@@ -33,6 +33,11 @@ namespace SchemaClientLib
 	};
 } // namespace SchemaClientLib
 
+namespace AppSignalLists
+{
+	class AppSignalListSet;
+}
+
 Q_DECLARE_METATYPE(SchemaClientLib::SnapshotColumns);
 
 namespace SchemaClientLib
@@ -96,7 +101,7 @@ namespace SchemaClientLib
 	public:
 
 	public:
-		SignalSnapshotModel(IAppSignalManager* appSignalManager, ISignalDataServer* signalDataServer, QObject* parent);
+		SignalSnapshotModel(IAppSignalManager* appSignalManager, ISignalDataServer* signalDataServer, AppSignalLists::AppSignalListSet* appSignalListSet, QObject* parent);
 
 		void setSignals(std::vector<AppSignalParam>& signalList);
 
@@ -127,6 +132,8 @@ namespace SchemaClientLib
 
 		void setSchemaAppSignals(std::set<QString> schemaAppSignals);
 
+		void setAppSignalList(const QString& listId);
+
 		void fillSignals();
 
 		void updateStates(int from, int to);
@@ -150,6 +157,7 @@ namespace SchemaClientLib
 	private:
 		IAppSignalManager* m_appSignalManager = nullptr;
 		ISignalDataServer* m_signalDataServer = nullptr;
+		AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 
 		QStringList m_columnsNames;
 
@@ -167,6 +175,7 @@ namespace SchemaClientLib
 		QStringList m_masks;
 		QStringList m_tags;
 		QString m_dataServiceId;
+		QString m_listId;
 		std::set<QString> m_schemaAppSignals;
 
 		// View params

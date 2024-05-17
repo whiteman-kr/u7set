@@ -120,7 +120,7 @@ namespace AppSignalLists
 		appSignalList->set_appsignalidmasks(appSignalIDMask().toUtf8());
 		appSignalList->set_appsignaltags(appSignalTags().toUtf8());
 
-		for (const AppSignalListItem& signal : m_items)
+		for (const auto& [hash, signal] : m_items)
 		{
 			::Proto::AppSignalListSignal* lsi = appSignalList->add_listsignals();
 
@@ -130,6 +130,11 @@ namespace AppSignalLists
 				::Proto::TuningValue* tv = lsi->mutable_value();
 				signal.value().save(tv);
 			}
+		}
+
+		for (Hash hash: m_listHashesCache) 
+		{
+			appSignalList->add_listhashescache(hash);
 		}
 
 		return;
@@ -169,7 +174,15 @@ namespace AppSignalLists
 				TuningValue v(tv);
 				item.setValue(v);
 			}
-			m_items.push_back(item);
+			m_items[item.appSignalHash()] = item;
+		}
+
+		count = appSignalList.listhashescache_size();
+		m_listHashesCache.clear();
+		m_listHashesCache.reserve(count);
+		for (int i = 0; i < count; i++) 
+		{
+			m_listHashesCache.push_back(appSignalList.listhashescache(i));
 		}
 
 		return true;
@@ -363,74 +376,47 @@ namespace AppSignalLists
 		return static_cast<int>(m_items.size());
 	}
 
-	const AppSignalListItem& AppSignalList::operator[](int index) const
+	std::vector<Hash> AppSignalList::itemsHashes() const 
 	{
-		static AppSignalListItem err;
-		if (index < 0 || index >= m_items.size())
+		std::vector<Hash> result;
+		result.reserve(m_items.size());
+		for (auto& [hash, item]: m_items) 
 		{
-			Q_ASSERT(false);
-			return err;
+			result.push_back(hash);
 		}
-		return m_items[index];
+		return result;
 	}
 
-	AppSignalListItem& AppSignalList::operator[](int index)
+	const AppSignalListItem& AppSignalList::itemByHash(Hash hash) const
 	{
-		static AppSignalListItem err;
-		if (index < 0 || index >= m_items.size())
-		{
-			Q_ASSERT(false);
-			return err;
-		}
-		return m_items[index];
-	}
-
-	const AppSignalListItem& AppSignalList::operator[](Hash hash) const
-	{
-		static AppSignalListItem err;
-		auto it = std::find_if(m_items.begin(),
-							   m_items.end(),
-							   [hash](const auto& item)
-							   {
-								   return item.appSignalHash() == hash;
-							   });
+		auto it = m_items.find(hash);
 		if (it == m_items.end())
 		{
+			static AppSignalListItem err;
 			Q_ASSERT(false);
 			return err;
 		}
-		return *it;
+		return it->second;
 	}
 
-	AppSignalListItem& AppSignalList::operator[](Hash hash)
+	AppSignalListItem& AppSignalList::itemByHash(Hash hash)
 	{
-		static AppSignalListItem err;
-		auto it = std::find_if(m_items.begin(),
-							   m_items.end(),
-							   [hash](const auto& item)
-							   {
-								   return item.appSignalHash() == hash;
-							   });
+		auto it = m_items.find(hash);
 		if (it == m_items.end())
 		{
+			static AppSignalListItem err;
 			Q_ASSERT(false);
 			return err;
 		}
-		return *it;
+		return it->second;
 	}
 
 	bool AppSignalList::itemExists(Hash hash) const
 	{
-		auto it = std::find_if(m_items.begin(),
-							   m_items.end(),
-							   [hash](const auto& item)
-							   {
-								   return item.appSignalHash() == hash;
-							   });
-		return it != m_items.end();
+		return m_items.find(hash) != m_items.end();
 	}
 
-	int AppSignalList::itemIndex(Hash hash) const
+	/*int AppSignalList::itemIndex(Hash hash) const
 	{
 		auto it = std::find_if(m_items.begin(),
 							   m_items.end(),
@@ -444,14 +430,14 @@ namespace AppSignalLists
 			return -1;
 		}
 		return std::distance(m_items.begin(), it);
-	}
+	}*/
 
 	void AppSignalList::add(const AppSignalListItem& item)
 	{
-		m_items.push_back(item);
+		m_items[item.appSignalHash()] = item;
 	}
 
-	bool AppSignalList::remove(int index)
+	/*bool AppSignalList::remove(int index)
 	{
 		if (index >= m_items.size())
 		{
@@ -460,23 +446,21 @@ namespace AppSignalLists
 		}
 		m_items.erase(m_items.begin() + index);
 		return true;
+	}*/
+
+	void AppSignalList::remove(Hash hash)
+	{
+		m_items.erase(hash);
 	}
 
-	bool AppSignalList::remove(Hash hash)
+	const std::vector<Hash>& AppSignalList::listHashesCache() const 
 	{
-		auto it = std::find_if(m_items.begin(),
-							   m_items.end(),
-							   [hash](const auto& item)
-							   {
-								   return item.appSignalHash() == hash;
-							   });
-		if (it == m_items.end())
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-		m_items.erase(it);
-		return true;
+		return m_listHashesCache;
+	}
+	
+	std::vector<Hash>& AppSignalList::listHashesCache() 
+	{
+		return m_listHashesCache;
 	}
 
 	bool AppSignalList::appSignalMatch(const AppSignalParam& asp) const
@@ -496,19 +480,19 @@ namespace AppSignalLists
 			return false;
 		}
 
-		if (processMaskList(asp.lmEquipmentId(), m_cachedEquipmentIDMasks) == false)
+		if (m_cachedEquipmentIDMasks.isEmpty() == false && processMaskList(asp.lmEquipmentId(), m_cachedEquipmentIDMasks) == true)
 		{
-			return false;
+			return true;
 		}
 
-		if (processMaskList(asp.appSignalId(), m_cachedAppSignalIDMasks) == false)
+		if (m_cachedAppSignalIDMasks.isEmpty() == false && processMaskList(asp.appSignalId(), m_cachedAppSignalIDMasks) == true)
 		{
-			return false;
+			return true;
 		}
 
-		if (processMaskList(asp.customSignalId(), m_cachedCustomAppSignalIDMasks) == false)
+		if (m_cachedCustomAppSignalIDMasks.isEmpty() == false && processMaskList(asp.customSignalId(), m_cachedCustomAppSignalIDMasks) == true)
 		{
-			return false;
+			return true;
 		}
 
 		if (m_cachedAppSignalTags.isEmpty() == false)
@@ -532,7 +516,7 @@ namespace AppSignalLists
 			}
 		}
 
-		return true;
+		return false;
 	}
 
 	bool AppSignalList::listMatch(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags) 
@@ -748,4 +732,30 @@ namespace AppSignalLists
 						  return it->systemTagsList().contains(systemTag) == true;
 					  });
 	}
+
+	std::vector<AppSignalList*> AppSignalListSet::lists() const 
+	{
+		std::vector<AppSignalList*> result;
+		
+		result.reserve(m_lists.size());
+		for (const auto& list: m_lists) 
+		{
+			result.push_back(list.get());
+		}
+
+		return result;
+	}
+
+	bool AppSignalListSet::load(QString* errorMessage) 
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	bool AppSignalListSet::save(QString* errorMessage) const 
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
 } // namespace AppSignalLists

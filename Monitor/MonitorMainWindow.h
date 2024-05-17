@@ -6,6 +6,7 @@
 #include "./DevTools/DevToolsViewVariables.h"
 #include "./DevTools/DevToolsSchemaStats.h"
 
+#include "MonitorAppSignalListSet.h"
 #include "MonitorCentralWidget.h"
 #include "MonitorConfigController.h"
 #include "MonitorSchemaManager.h"
@@ -195,7 +196,7 @@ private:
 
 	UiLib::DialogAlert m_dialogAlert;
 
-	AppSignalLists::AppSignalListSet m_appSignalListSet;
+	MonitorAppSignalListSet m_appSignalListSet;
 
 	// File menu
 	//

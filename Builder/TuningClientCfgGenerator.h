@@ -19,24 +19,20 @@ namespace Builder
 		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfigurationStep1() override;
 
-		static bool createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, ::Proto::AppSignalSet* tuningSet);
-
 	private:
 		SubsystemStorage* m_subsystems = nullptr;
 
-		bool createEquipmentList(QStringList* equipmentList);
-		bool createObjectFilters(const ClientLib::TuningSignalManager& tuningSignalManager, const QStringList& equipmentList);
-		bool createEquipmentAndSchemaFilters(const QStringList& equipmentList,const ClientLib::TuningSignalManager& tuningSignalManager);
+		bool createTuningEquipmentList(QStringList* equipmentList);
+		
+		bool createObjectFilters(const ISignalManager& tuningSignalManager, const QStringList& equipmentList);
+		bool createEquipmentAndSchemaFilters(const QStringList& equipmentList,const ISignalManager& tuningSignalManager);
 		void createCounterFiltersFromTemplates();
 
-		bool writeTuningSignals();
+		
 		bool writeObjectFilters();
 		bool writeTuningSchemas();
 		bool writeGlobalScript();
 		bool writeTuningClientBehavior();
-
-	private:
-		::Proto::AppSignalSet m_tuningSet;
 
 		TuningFilterStorage m_tuningFilterStorage;
 	};

@@ -59,6 +59,8 @@ set (MONITOR_SOURCES
 	main.cpp
 	MonitorAppSettings.cpp
 	MonitorAppSettings.h
+	MonitorAppSignalListSet.cpp
+	MonitorAppSignalListSet.h
 	MonitorCentralWidget.h
 	MonitorConfigController.cpp
 	MonitorConfigController.h

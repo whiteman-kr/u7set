@@ -20,7 +20,7 @@ namespace Builder
 class AppSignalListsProvider : public ISignalManager
 	{
 	public:
-		AppSignalListsProvider(const AppSignalSet* signalSet);
+		AppSignalListsProvider(const std::vector<AppSignal*>& signalsVector);
 
 		virtual int signalsCount() const override;
 		virtual std::vector<Hash> signalHashes() const override;

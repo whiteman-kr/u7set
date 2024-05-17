@@ -625,7 +625,7 @@ namespace Builder
 
 		bool returnResult = true;
 
-		AppSignalListsProvider provider(context->m_signalSet->appSignalSet());
+		AppSignalListsProvider provider(context->m_signalSet->appSignalSet()->signalsVector());
 
 		for (auto lit = lists.begin(); lit != lists.end(); lit++)
 		{
@@ -645,30 +645,27 @@ namespace Builder
 			// Check if list signals exist in project signal set
 			//
 			{
-				int count = list.count();
-				for (int i = 0; i < count; i++)
+				auto listHashes = list.itemsHashes();
+				for (Hash hash: listHashes)
 				{
-					const AppSignalLists::AppSignalListItem& item = list[i];
-					if (provider.signalExists(item.appSignalId()) == false)
+					if (provider.signalExists(hash) == false)
 					{
-						log->errEQP6108(item.appSignalId(), list.id());
+						const AppSignalLists::AppSignalListItem& item = list.itemByHash(hash);
+						log->errEQP6220(item.appSignalId(), list.id());
 					}
 				}
 			}
 
 			// Add filtered signals to the list
 			//
+			auto& cache = list.listHashesCache();
+
 			for (auto sit = provider.begin(); sit != provider.end(); sit++)
 			{
 				const AppSignalParam& asp = sit->second;
-
-				if (list.itemExists(asp.hash()) == false)
+				if (list.appSignalMatch(asp) == true)
 				{
-					if (list.appSignalMatch(asp) == true)
-					{
-						AppSignalLists::AppSignalListItem item(asp.appSignalId());
-						list.add(item);
-					}
+					cache.push_back(::calcHash(asp.appSignalId()));
 				}
 			}
 
@@ -1351,6 +1348,234 @@ namespace Builder
 		return profile + "_" + m_software->equipmentIdTemplate().toLower() + "." + extention;
 	}
 
+	void SoftwareCfgGenerator::createAppSignals(const QStringList& equipmentList,
+												   const SignalSet* signalSet,
+												   std::vector<AppSignal*>& appSignals)
+	{
+		if (signalSet == nullptr)
+		{
+			assert(signalSet);
+			return;
+		}
+
+		if (equipmentList.empty() == true)
+		{
+			return;
+		}
+
+		// Create signals
+		//
+		appSignals.clear();
+
+		for (AppSignal* s : *signalSet)
+		{
+			// Check EquipmentIdMasks
+			//
+			bool result = false;
+
+			for (QString m : equipmentList)
+			{
+				m = m.trimmed();
+
+				if (m.isEmpty() == true)
+				{
+					continue;
+				}
+
+				QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m));
+				if (rx.match(s->lmEquipmentID()).hasMatch() == true) // exactMatch
+				{
+					result = true;
+					break;
+				}
+			}
+
+			if (result == false)
+			{
+				continue;
+			}
+
+			appSignals.push_back(s);
+		}
+
+		return;
+	}
+
+	void SoftwareCfgGenerator::createTuningSignals(const QStringList& equipmentList,
+												   const SignalSet* signalSet,
+												   std::vector<AppSignal*>& tuningSignals)
+	{
+		if (signalSet == nullptr)
+		{
+			assert(signalSet);
+			return;
+		}
+
+		if (equipmentList.empty() == true)
+		{
+			return;
+		}
+
+		// Create signals
+		//
+		tuningSignals.clear();
+
+		for (AppSignal* s : *signalSet)
+		{
+			if (s->enableTuning() == false)
+			{
+				continue;
+			}
+
+			// Check EquipmentIdMasks
+			//
+			bool result = false;
+
+			for (QString m : equipmentList)
+			{
+				m = m.trimmed();
+
+				if (m.isEmpty() == true)
+				{
+					continue;
+				}
+
+				QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m));
+				if (rx.match(s->lmEquipmentID()).hasMatch() == true) // exactMatch
+				{
+					result = true;
+					break;
+				}
+			}
+
+			if (result == false)
+			{
+				continue;
+			}
+
+			tuningSignals.push_back(s);
+		}
+
+		return;
+	}
+
+		bool SoftwareCfgGenerator::writeTuningSignals(const std::vector<AppSignal*>& tuningSignals)
+	{
+		// Write number of signals
+		//
+		::Proto::AppSignalSet tuningSignalSet;
+
+		for (const auto& s : tuningSignals) 
+		{
+			::Proto::AppSignal* aspMessage = tuningSignalSet.add_appsignal();
+			s->saveToProto(aspMessage);
+		}
+
+		QByteArray data;
+		data.resize(static_cast<int>(tuningSignalSet.ByteSizeLong()));
+
+		tuningSignalSet.SerializeToArray(data.data(), static_cast<int>(tuningSignalSet.ByteSizeLong()));
+
+		// Write file
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CfgFileId::TUNING_SIGNALS, "", data);
+
+		if (buildFile == nullptr)
+		{
+			m_log->errCMN0012("TuningSignals.dat");
+			return false;
+		}
+
+		m_cfgXml->addLinkToFile(buildFile);
+
+		return true;
+	}
+
+	bool SoftwareCfgGenerator::writeAppSignalLists(const ISignalManager& signalManager, const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags)
+	{
+		DbController& db = m_context->m_db;
+		IssueLogger* log = m_context->m_log;
+
+		if (log == nullptr)
+		{
+			Q_ASSERT(log);
+			return false;
+		}
+
+		AppSignalListStorage lists(&db);
+
+		QString errorMsg;
+		if (lists.load(&errorMsg) == false)
+		{
+			m_log->errINT1001(tr("Error parsing AppSignalLists: %1").arg(errorMsg));
+			return false;
+		}
+
+		// Create software hashes set
+		//
+		auto softwareSignalHashes = signalManager.signalHashes();
+		std::set<Hash> softwareSignalHashesSet;
+		for (Hash hash : softwareSignalHashes)
+		{
+			softwareSignalHashesSet.insert(hash);
+		}
+
+		bool returnResult = true;
+
+		for (const auto& [id, list] : m_appSignalsListIdToList)
+		{
+			// Check for cancel
+			//
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			// Check if this list is for this software
+			//
+			if (list->listMatch(appSignalListIds, appSignalListMasks, appSignalListTags) == false) 
+			{
+				continue;
+			}
+
+			// Check if this list does not contain signals that are not processed with this software
+			//
+			auto listItemsHashes = list->itemsHashes();
+
+			bool allHashesExists = true;
+			for (Hash hash : listItemsHashes)
+			{
+				if (softwareSignalHashesSet.find(hash) == softwareSignalHashesSet.end())
+				{
+					m_log->errEQP6221(list->itemByHash(hash).appSignalId(), list->id(), m_software->equipmentIdTemplate());
+					allHashesExists = false;
+				}
+			}
+
+			if (allHashesExists == false)
+			{
+				m_log->errINT1001(m_software->equipmentIdTemplate() + " lists failed");
+				returnResult = false;
+				continue;
+			}
+
+			// Add link to the list for the software
+			//
+			QString fileName = tr("%1.%2").arg(list->id()).arg(Db::File::AppSignalListFileExtension);
+
+			BuildFile* listsFile = m_buildResultWriter->getBuildFileByID(Directory::APP_SIGNAL_LISTS, fileName);
+			if (listsFile == nullptr)
+			{
+				Q_ASSERT(listsFile);
+				return false;
+			}
+
+			returnResult &= m_cfgXml->addLinkToFile(listsFile);
+		}
+
+		return returnResult;
+	}
+
 	bool SoftwareCfgGenerator::writeMatsUsers(const QString& propertyName, const QStringList& tuningUserAccounts)
 	{
 		Builder::DbMatsUserStorage storage;
@@ -1393,56 +1618,6 @@ namespace Builder
 		bool ok = m_cfgXml->addLinkToFile(buildFile);
 		return ok;
 	}
-
-	bool SoftwareCfgGenerator::writeAppSignalLists(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags)
-	{
-		DbController& db = m_context->m_db;
-		IssueLogger* log = m_context->m_log;
-
-		if (log == nullptr)
-		{
-			Q_ASSERT(log);
-			return false;
-		}
-
-		AppSignalListStorage lists(&db);
-
-		QString errorMsg;
-		if (lists.load(&errorMsg) == false)
-		{
-			m_log->errINT1001(tr("Error parsing AppSignalLists: %1").arg(errorMsg));
-			return false;
-		}
-
-		bool returnResult = true;
-
-		for (const auto& [id, list] : m_appSignalsListIdToList)
-		{
-			// Check for cancel
-			//
-			if (QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				return false;
-			}
-
-			if (list->listMatch(appSignalListIds, appSignalListMasks, appSignalListTags) == true) 
-			{
-				QString fileName = tr("%1.%2").arg(list->id()).arg(Db::File::AppSignalListFileExtension);
-
-				BuildFile* listsFile = m_buildResultWriter->getBuildFileByID(Directory::APP_SIGNAL_LISTS, fileName);
-				if (listsFile == nullptr) 
-				{
-					Q_ASSERT(listsFile);
-					return false;
-				}
-
-				returnResult &= m_cfgXml->addLinkToFile(listsFile);
-			}
-		}
-
-		return returnResult;
-	}
-
 
 	bool SoftwareCfgGenerator::saveScriptProperties(QString scriptProperty, QString fileName)
 	{

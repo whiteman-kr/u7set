@@ -30,7 +30,7 @@ void DialogAppSignalLists::showDialog(DbController* db, QWidget* parent)
 DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
 	m_db(db),
-	m_signalProvider(std::make_unique<Builder::AppSignalListsProvider>(&AppSignalSetProvider::getInstance()->signalSet())),
+	m_signalProvider(std::make_unique<Builder::AppSignalListsProvider>(AppSignalSetProvider::getInstance()->signalSet().signalsVector())),
 	m_lists(std::make_unique<Builder::AppSignalListStorage>(db))
 {
 	assert(m_db);

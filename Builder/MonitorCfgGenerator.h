@@ -19,19 +19,18 @@ namespace Builder
 
 	protected:
 		bool initSchemaTags();
-		bool initTuningSources();
+		
+		bool createAppEquipmentList(QStringList* equipmentList);
+		bool createTuningEquipmentList(QStringList* equipmentList);
 
 		bool writeSchemasByTags();
 
 		// Generate tuning signals file
 		//
-		bool writeTuningSignals();
 		bool writeMonitorBehavior();
 		bool writeMonitorLogo();
 
 	private:
-		QStringList m_tuningSources;
-
 		VFrame30::SchemaDetailsSet m_detailsSet;
 		QStringList m_schemaTagList;		// Generated in writeMonitorSettings
 	};

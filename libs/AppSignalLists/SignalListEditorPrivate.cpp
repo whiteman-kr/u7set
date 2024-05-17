@@ -214,8 +214,8 @@ namespace
 		AppSignalParam asp1 = m_signalManager.signalParam(hash1, &ok1);
 		AppSignalParam asp2 = m_signalManager.signalParam(hash2, &ok2);
 
-		const AppSignalListItem& item1 = (*m_appSignalList)[hash1];
-		const AppSignalListItem& item2 = (*m_appSignalList)[hash2];
+		const AppSignalListItem& item1 = m_appSignalList->itemByHash(hash1);
+		const AppSignalListItem& item2 = m_appSignalList->itemByHash(hash2);
 
 		//
 
@@ -682,14 +682,7 @@ namespace AppSignalLists
 			}
 
 			m_appSignalList = list;
-
-			int count = m_appSignalList->count();
-			m_allHashes.reserve(count);
-
-			for (int i = 0; i < count; i++)
-			{
-				m_allHashes.push_back((*m_appSignalList)[i].appSignalHash());
-			}
+			m_allHashes = m_appSignalList->itemsHashes();
 
 			if (list->count() > 0)
 			{
@@ -831,13 +824,26 @@ namespace AppSignalLists
 
 			Hash hash = m_allHashes[row];
 
-			const AppSignalListItem& item = (*m_appSignalList)[hash];
-
-			bool ok = false;
-
-			const AppSignalParam asp = m_signalManager.signalParam(hash, &ok);
+			bool found = false;
+			const AppSignalParam asp = m_signalManager.signalParam(hash, &found);
 
 			int columnType = col;
+
+			if (columnType == static_cast<int>(Columns::AppSignalID))
+			{
+				if (found == false) 
+				{
+					const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
+					return item.appSignalId();
+				}
+			
+				return asp.appSignalId();
+			}
+
+			if (found == false)
+			{
+				return "?";
+			}
 
 			if (columnType == static_cast<int>(Columns::CustomAppSignalID))
 			{
@@ -847,11 +853,6 @@ namespace AppSignalLists
 			if (columnType == static_cast<int>(Columns::EquipmentID))
 			{
 				return asp.equipmentId();
-			}
-
-			if (columnType == static_cast<int>(Columns::AppSignalID))
-			{
-				return asp.appSignalId();
 			}
 
 			if (columnType == static_cast<int>(Columns::Caption))
@@ -909,13 +910,13 @@ namespace AppSignalLists
 			{
 				if (asp.enableTuning() == true)
 				{
+					const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 					if (item.hasValue() == true)
 					{
 						if (asp.isAnalog() == true)
 						{
 							return item.value().toString(E::AnalogFormat::g_9_or_9e, asp.precision());
 						}
-						
 
 						if (asp.isDiscrete())
 						{
