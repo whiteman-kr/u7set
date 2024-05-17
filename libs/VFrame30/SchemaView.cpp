@@ -346,15 +346,7 @@ namespace VFrame30
 		// --
 		//
 		QPainter* p = drawParam.painter();
-
-		// Calc size
-		//
-		// int widthInPixel = schema()->GetDocumentWidth(drawParam.realDpiX(), zoom());
-		// int heightInPixel = schema()->GetDocumentHeight(drawParam.realDpiY(), zoom());
-
-		// Clear device
-		//
-		// p->fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
+		p->fillRect(rect(), schema()->backgroundColor());
 
 		// Adjust QPainter.
 		//

@@ -249,7 +249,7 @@ namespace VFrame30
 			return;
 		}
 
-		// Keepn in mind, autoscale == false does not work for SVG
+		// Keep in mind, auto-scale == false does not work for SVG
 		//
 		QRectF imageRect = rect;
 

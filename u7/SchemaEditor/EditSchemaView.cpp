@@ -152,7 +152,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	//
 	drawBuildIssues(&drawParam, clipRect);
 
-	// Draw run order - Update: run order dows not work after UFB became more complex and now they can have signals inside
+	// Draw run order - Update: run order does not work after UFB became more complex and now they can have signals inside
 	//
 	//if (theSettings.isDebugMode() == true)
 	//{

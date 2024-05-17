@@ -648,7 +648,7 @@ thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000};			// 50Mb of ima
 	{
 		// Add some extra space for drawing, to avoid artifacts in the edges of the image.
 		//
-		const int extraSizePx = 20;
+		const int extraSizePx = 10;
 
 		const double zoomFactor = zoom / 100.0;
 		const double devicePixelRatioF = painter.device()->devicePixelRatioF();
@@ -669,7 +669,7 @@ thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000};			// 50Mb of ima
 		Hash cacheItemHash = DrawSvgCacheItem::getHash(unit, svg, imageSize, dpiX, dpiY, zoom);
 		bool newCacheItem = false;
 
-thread_local QCache<Hash, DrawSvgCacheItem> cache{60'000'000};			// 60Mb of images.
+thread_local QCache<Hash, DrawSvgCacheItem> cache{100'000'000};			// 100Mb of images.
 
 		DrawSvgCacheItem* cacheItem = cache.object(cacheItemHash);
 		if (cacheItem == nullptr)
@@ -710,14 +710,20 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{60'000'000};			// 60Mb of imag
 							  painter.device()->physicalDpiY(),
 							  devicePixelRatioF,
 							  unit,
-							  extraSizePx / 2.0 + (-0.5) / devicePixelRatioF,
-							  extraSizePx / 2.0 + (-0.5) / devicePixelRatioF,
+							  0, 
+							  0,
 							  zoom);
 
-			// The painter already adjusted to pint in pixels or inches.
+			// The painter already adjusted to paint in pixels or inches.
 			//
+			double dpiXHere = unit == SchemaUnit::Inch ? dpiX : 1.0;
+			double dpiYHere = unit == SchemaUnit::Inch ? dpiY : 1.0;
+
+			const double extendedInX = extraSizePx / dpiXHere / zoomFactor;
+			const double extendedInY = extraSizePx / dpiYHere / zoomFactor;
+
 			QRectF imageRect = rect;
-			imageRect.moveTo(0, 0);
+			imageRect.moveTo(extendedInX / 2.0, extendedInY / 2.0);
 
 			// Render svg.
 			//
@@ -745,8 +751,7 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{60'000'000};			// 60Mb of imag
 			const double extendedInX = extraSizePx / dpiX / zoomFactor;
 			const double extendedInY = extraSizePx / dpiY / zoomFactor;
 
-			extendedDstRect.translate(-extendedInX / 2.0 * devicePixelRatioF,
-									  -extendedInY / 2.0 * devicePixelRatioF);
+			extendedDstRect.translate(-extendedInX / 2.0, -extendedInY / 2.0);
 
 			extendedDstRect.setWidth(rect.width() + extendedInX);
 			extendedDstRect.setHeight(rect.height() + extendedInY);
@@ -756,8 +761,7 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{60'000'000};			// 60Mb of imag
 			const double extendedPxX = extraSizePx / zoomFactor;
 			const double extendedPxY = extraSizePx / zoomFactor;
 
-			extendedDstRect.translate(-extendedPxX / 2.0 * devicePixelRatioF,
-									  -extendedPxY / 2.0 * devicePixelRatioF);
+			extendedDstRect.translate(-extendedPxX / 2.0, -extendedPxY / 2.0);
 
 			extendedDstRect.setWidth(rect.width() + extendedPxX);
 			extendedDstRect.setHeight(rect.height() + extendedPxY);
@@ -773,6 +777,20 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{60'000'000};			// 60Mb of imag
 		{
 			cache.insert(cacheItemHash, cacheItem, cacheItem->image.sizeInBytes());
 		}
+
+#if 0
+		painter.setBrush(Qt::NoBrush);
+
+		QPen red{Qt::red};
+		red.setCosmetic(true);
+		painter.setPen(red);
+		painter.drawRect(extendedDstRect);
+
+		QPen green{Qt::green};
+		green.setCosmetic(true);
+		painter.setPen(green);
+		painter.drawRect(rect);
+#endif
 
 		return true;
 	}
