@@ -91,7 +91,9 @@ private slots:
 	//
 	void onConfigurationArrived();
 	void onTestingFinished(int result);
+	
 	void onGlobalPermissionChanged(bool result);
+	void onScriptPermissionChanged(QString scriptFileName, bool permission);
 
 private:
 	// Ui

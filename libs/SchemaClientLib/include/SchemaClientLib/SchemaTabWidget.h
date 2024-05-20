@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../VFrame30/ClientSchemaWidget.h"
-#include "../VFrame30/Context.h"
-#include "../VFrame30/MonitorSchema.h"
+#include <VFrame30/ClientSchemaWidget.h>
+#include <VFrame30/Context.h>
+#include <VFrame30/MonitorSchema.h>
 #include <UiLib/TabWidgetEx.h>
 #include "ClientSchemaManager.h"
 #include <QFileDialog>

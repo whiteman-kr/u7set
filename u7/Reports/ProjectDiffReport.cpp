@@ -4,20 +4,18 @@
 #include "../Builder/AppSignalProperties.h"
 #include "../ReportLib/ReportPrinter.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../VFrame30/Context.h"
-#include "../VFrame30/Schema.h"
-#include "../VFrame30/SchemaItems/SchemaItem.h"
-#include "../VFrame30/SchemaLayer.h"
 
 #include <DbLib/DbControllerTools.h>
 #include <HardwareLib/Connection.h>
 #include <HardwareLib/DiagSignalType.h>
 #include <UiLib/DialogProgress.h>
 #include <UiLib/PropertyEditor.h>
+#include <VFrame30/Context.h>
+#include <VFrame30/Schema.h>
+#include <VFrame30/SchemaItem.h>
+#include <VFrame30/SchemaLayer.h>
 
 #include "Settings.h"
-
-#include <QDesktopServices>
 
 using namespace Builder;
 using namespace ReportLib;

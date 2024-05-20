@@ -2,6 +2,7 @@
 
 #include "TestController.h"
 #include "ScriptTestLog.h"
+#include "ScriptTestSuiteApplication.h"
 #include "TestScriptsStorage.h"
 #include "../UtilsLib/ILogFile.h"
 #include "ControlState.h"
@@ -88,7 +89,13 @@ namespace TestSuite
 		Q_OBJECT
 
 	public:
-		ScriptRunner(const TestScript& script, const TestScript* globalScript, ConfigSettings& configuration, TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex);
+		ScriptRunner(const TestScript& script, 
+			const TestScript* globalScript, 
+			ConfigSettings& configuration, 
+			TestController& testController, 
+			ILogFile& scriptTestLog, 
+			ControlStatus& status, 
+			QMutex& statusMutex);
 		virtual ~ScriptRunner();
 
 	public:
@@ -110,12 +117,14 @@ namespace TestSuite
 		ConfigSettings& m_configuration;
 		TestController& m_testController;
 		ScriptTestLog m_scriptTestLog;
+		ScriptTestSuiteApplication m_app;
 
 		ScriptInfo m_scriptInfo;
 
 		QJSEngine m_jsEngine;
 		QJSValue m_jsTestController;
 		QJSValue m_jsLog;
+		QJSValue m_jsApp;
 
 		ControlStatus& m_status;
 		QMutex& m_statusMutex;

@@ -9,7 +9,7 @@
 		<ConfigFrameCount>2</ConfigFrameCount>
 		<ConfigFramePayload>1016</ConfigFramePayload>
 		<ConfigFrameSize>1016</ConfigFrameSize>
-		<ConfigUartID>0</ConfigUartID>
+		<ConfigUartID>9218</ConfigUartID>
 		<ConfigWriteBitstream>true</ConfigWriteBitstream>
 		<TuningFrameCount>0</TuningFrameCount>
 		<TuningFramePayload>0</TuningFramePayload>

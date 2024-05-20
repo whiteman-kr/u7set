@@ -2,6 +2,7 @@
 #include "SoftwareSettingsGetter.h"
 
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../UtilsLib/XmlHelper.h"
 
 namespace Builder
 {

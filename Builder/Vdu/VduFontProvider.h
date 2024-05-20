@@ -21,7 +21,9 @@ namespace Builder
 
 	public:
 		void setFontsInfo(const QString& equipmentId, std::vector<VduFontInfo>& info);
-		int getFontIndex(QString vduEquipmnentId, QString fontName, int pixelSize, bool bold, bool italic, bool underlined) const; 
+		int getFontIndex(QString vduEquipmentId, QString fontName, int pixelSize, bool bold, bool italic, bool underlined) const; 
+
+		int getFontCount(QString vduEquipmentId) const;
 
 	private:
 		std::map<QString, std::vector<VduFontInfo>> m_fontsInfo;

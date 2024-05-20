@@ -2,9 +2,6 @@
 #define FILESTREEMODEL_H
 
 #include <DbLib/DbStruct.h>
-#include <QSortFilterProxyModel>
-#include <QAbstractItemModel>
-
 
 class DbController;
 class FileTreeView;

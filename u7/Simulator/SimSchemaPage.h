@@ -2,9 +2,9 @@
 
 #include <Simulator/SimLogicModule.h>
 #include <Simulator/SimControlStatus.h>
-#include "../../VFrame30/Schema.h"
-#include "../../VFrame30/AppSignalController.h"
-#include "../../VFrame30/TuningController.h"
+#include <VFrame30/Schema.h>
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/TuningController.h>
 #include "SimBasePage.h"
 #include "SimSchemaWidget.h"
 

@@ -44,16 +44,18 @@ qt_add_library(${TARGET} STATIC
 	../Metrology/UnitsConverterTable.h
 	../TuningService/TuningSource.cpp
 	../TuningService/TuningSource.h
+	./Vdu/VduConfigFile.cpp
+	./Vdu/VduConfigFile.h
+	./Vdu/VduFontGenerator.cpp
+	./Vdu/VduFontGenerator.h
+	./Vdu/VduFontProvider.cpp
+	./Vdu/VduFontProvider.h
 	./Vdu/VduOptoConnectionsInfoFile.h
 	./Vdu/VduOptoConnectionsInfoGenerator.cpp
 	./Vdu/VduOptoConnectionsInfoGenerator.h
 	./Vdu/VduSchemaFile.h
 	./Vdu/VduSchemaGenerator.cpp
 	./Vdu/VduSchemaGenerator.h
-	./Vdu/VduFontGenerator.cpp
-	./Vdu/VduFontGenerator.h
-	./Vdu/VduFontProvider.cpp
-	./Vdu/VduFontProvider.h
 	./Vdu/VduTypes.h
 	AppDataServiceCfgGenerator.cpp
 	AppDataServiceCfgGenerator.h
@@ -183,13 +185,28 @@ target_precompile_headers(${TARGET} PRIVATE
 	<unordered_set>
 	<vector>
 
+	<QCryptographicHash>
+	<QDebug>
+	<QDir>
 	<QDomDocument>
 	<QFile>
+	<QFileInfo>
+	<QHostAddress>
 	<QHostInfo>
+	<QImage>
+	<QJSEngine>
+	<QJsonArray>
+	<QJsonDocument>
+	<QJsonObject>
+	<QJSValueIterator>
+	<QPageSize>
+	<QPainter>
+	<QQmlEngine>
+	<QStandardPaths>
 	<QtConcurrent>
+	<QtEndian>
 	<QVector>
 	<QWidget>
-	<QJSEngine>
 
 	"../CommonLib/Types.h"
 	"../CommonLib/Hash.h"

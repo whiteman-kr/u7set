@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QDialog>
-
 class AppSignal;
 class AppSignalSetProvider;
 class AppSignalPropertyManager;

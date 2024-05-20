@@ -5,10 +5,10 @@
 #include "../ReportLib/ReportAppSignalProvider.h"
 #include "../ReportLib/ReportDiagStateProvider.h"
 #include "../ReportLib/ReportPrinter.h"
-#include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/DiagStateController.h"
 
 #include <HardwareLib/DeviceObject.h>
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/DiagStateController.h>
 
 #include "GlobalMessanger.h"
 

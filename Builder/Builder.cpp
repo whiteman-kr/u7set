@@ -1,6 +1,5 @@
 #include "Builder.h"
 #include "BuildWorkerThread.h"
-#include <qqml.h>
 
 namespace Builder
 {

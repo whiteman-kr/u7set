@@ -4,7 +4,7 @@
 #include "version.h"
 
 #include <HardwareLib/HardwareLibrary.h>
-#include "../VFrame30/VFrame30Library.h"
+#include <VFrame30/VFrame30Library.h>
 
 
 int main(int argc, char* argv[])

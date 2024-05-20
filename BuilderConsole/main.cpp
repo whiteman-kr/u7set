@@ -6,12 +6,12 @@
 
 #include "../Builder/Builder.h"
 #include "../Protobuf/google/protobuf/message.h"
-#include "../VFrame30/VFrame30Library.h"
 #include "../version.h"
 #include "BuildTask.h"
 
 #include <DbLib/DbController.h>
 #include <HardwareLib/HardwareLibrary.h>
+#include <VFrame30/VFrame30Library.h>
 
 static QtMessageHandler originalMessageHandler = 0;
 

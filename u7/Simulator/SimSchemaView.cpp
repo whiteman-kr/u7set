@@ -6,8 +6,7 @@
 #include <Simulator/SimOverrideSignals.h>
 #include <Simulator/SimSoftware.h>
 #include <HardwareLib/ScriptEquipment.h>
-
-#include "../VFrame30/PropertyNames.h"
+#include <VFrame30/PropertyNames.h>
 
 
 // MonitorView

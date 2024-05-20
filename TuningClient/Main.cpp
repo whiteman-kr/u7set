@@ -1,12 +1,12 @@
 #include "Main.h"
+
 #include <ClientLib/TuningUserManager.h>
-#include "../VFrame30/VFrame30Library.h"
+#include <VFrame30/VFrame30Library.h>
+
 #include "MainWindow.h"
 #include "ScriptTuningClientApplication.h"
 #include "Settings.h"
 #include "version.h"
-#include <QApplication>
-#include <QCommandLineParser>
 
 //// ---------------- Minidump generating functions -------------------
 ////

@@ -1,7 +1,6 @@
 #ifndef DIALOGSETTINGS_H
 #define DIALOGSETTINGS_H
 
-#include <QDialog>
 #include "Settings.h"
 #include <ClientLib/ClientTranslator.h>
 

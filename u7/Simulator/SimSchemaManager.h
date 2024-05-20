@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../VFrame30/Schema.h"
-#include "../VFrame30/SchemaManager.h"
+#include <VFrame30/Schema.h>
+#include <VFrame30/SchemaManager.h>
 
 class SimIdeSimulator;
 

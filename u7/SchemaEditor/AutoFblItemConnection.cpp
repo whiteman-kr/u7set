@@ -1,5 +1,5 @@
 #include "AutoFblItemConnection.h"
-#include "../VFrame30/Schema.h"
+#include <VFrame30/Schema.h>
 
 
 void AutoFblItemConnection::setItems(const std::vector<SchemaItemPtr>& items)

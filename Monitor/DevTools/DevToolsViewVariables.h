@@ -1,5 +1,6 @@
 #pragma once
-#include "../../VFrame30/IViewVariables.h"
+
+#include <VFrame30/IViewVariables.h>
 
 namespace Monitor
 {

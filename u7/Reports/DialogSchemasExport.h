@@ -1,7 +1,6 @@
 #ifndef DIALOGSCHEMASEXPORT_H
 #define DIALOGSCHEMASEXPORT_H
 
-#include <QDialog>
 #include "SchemasReport.h"
 #include "../Builder/SchemasReportGenerator.h"
 

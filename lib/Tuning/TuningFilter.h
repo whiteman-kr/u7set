@@ -1,6 +1,6 @@
 #pragma once
 #include <ClientLib/TuningSignalManager.h>
-#include "../VFrame30/SchemaDetails.h"
+#include <VFrame30/SchemaDetails.h>
 #include <QColor>
 
 class QXmlStreamReader;

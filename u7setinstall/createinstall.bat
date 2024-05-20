@@ -30,6 +30,7 @@ xcopy ..\bin\release\qt*.qm packages\u7set\data /sy
 xcopy ..\bin\release\ClientLib*.qm packages\u7set\data /sy
 xcopy ..\bin\release\TrendView*.qm packages\u7set\data /sy
 xcopy ..\bin\release\UtilsLib*.qm packages\u7set\data /sy
+xcopy ..\bin\release\SchemaClientLib*.qm packages\u7set\data /sy
 
 xcopy ..\bin\release\*.dll packages\u7set\data /sy
 copy ..\bin\release\vc_redist.x64.exe packages\u7set\data

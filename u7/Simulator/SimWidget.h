@@ -1,13 +1,12 @@
 #pragma once
 
 #include <Simulator/SimConsoleLogFile.h>
-#include <Simulator/SimControl.h>
+#include <Simulator/SimControlStatus.h>
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/TuningController.h>
 
 #include "SimIdeSimulator.h"
 #include "SimSchemaManager.h"
-#include "../../VFrame30/AppSignalController.h"
-#include "../../VFrame30/TuningController.h"
-
 
 class SimProjectWidget;
 class SimOutputWidget;

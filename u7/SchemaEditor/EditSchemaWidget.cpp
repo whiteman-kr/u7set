@@ -3,36 +3,38 @@
 #include "../AppSignalSetProvider.h"
 #include "../Builder/ConnectionStorage.h"
 #include "../ProjectDefaults.h"
-#include "../VFrame30/SchemaItems/SchemaItemAfb.h"
-#include "../VFrame30/SchemaItems/SchemaItemConst.h"
-#include "../VFrame30/SchemaItems/SchemaItemDiagValue.h"
-#include "../VFrame30/SchemaItems/SchemaItemImage.h"
-#include "../VFrame30/SchemaItems/SchemaItemImageValue.h"
-#include "../VFrame30/SchemaItems/SchemaItemIndicator.h"
-#include "../VFrame30/SchemaItems/SchemaItemLine.h"
-#include "../VFrame30/SchemaItems/SchemaItemLineEdit.h"
-#include "../VFrame30/SchemaItems/SchemaItemLink.h"
-#include "../VFrame30/SchemaItems/SchemaItemLoopback.h"
-#include "../VFrame30/SchemaItems/SchemaItemPath.h"
-#include "../VFrame30/SchemaItems/SchemaItemPushButton.h"
-#include "../VFrame30/SchemaItems/SchemaItemRect.h"
-#include "../VFrame30/SchemaItems/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItems/SchemaItemSlider.h"
-#include "../VFrame30/SchemaItems/SchemaItemTerminator.h"
-#include "../VFrame30/SchemaItems/SchemaItemUfb.h"
-#include "../VFrame30/SchemaItems/SchemaItemValue.h"
-#include "../VFrame30/SchemaItems/SchemaItemVduLine.h"
-#include "../VFrame30/SchemaItems/SchemaItemVduRect.h"
-#include "../VFrame30/SchemaItems/SchemaItemVduValue.h"
-#include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/Session.h"
-#include "../VFrame30/UfbSchema.h"
-#include "./Ui/TextEditCompleter.h"
+
+#include <VFrame30/SchemaItemAfb.h>
+#include <VFrame30/SchemaItemConst.h>
+#include <VFrame30/SchemaItemDiagValue.h>
+#include <VFrame30/SchemaItemImage.h>
+#include <VFrame30/SchemaItemImageValue.h>
+#include <VFrame30/SchemaItemIndicator.h>
+#include <VFrame30/SchemaItemLine.h>
+#include <VFrame30/SchemaItemLineEdit.h>
+#include <VFrame30/SchemaItemLink.h>
+#include <VFrame30/SchemaItemLoopback.h>
+#include <VFrame30/SchemaItemPath.h>
+#include <VFrame30/SchemaItemPushButton.h>
+#include <VFrame30/SchemaItemRect.h>
+#include <VFrame30/SchemaItemSignal.h>
+#include <VFrame30/SchemaItemSlider.h>
+#include <VFrame30/SchemaItemTerminator.h>
+#include <VFrame30/SchemaItemUfb.h>
+#include <VFrame30/SchemaItemValue.h>
+#include <VFrame30/SchemaItemVduLine.h>
+#include <VFrame30/SchemaItemVduRect.h>
+#include <VFrame30/SchemaItemVduValue.h>
+#include <VFrame30/SchemaLayer.h>
+#include <VFrame30/Session.h>
+#include <VFrame30/UfbSchema.h>
+
 
 #include <HardwareLib/LmDescription.h>
 #include <UiLib/DoubleValidatorEx.h>
 #include <UiLib/CodeEditor.h>
 
+#include "./Ui/TextEditCompleter.h"
 #include "./EditEngine/EditEngine.h"
 #include "./Forms/ChooseAfbDialog.h"
 #include "./Forms/ChooseUfbDialog.h"
@@ -45,8 +47,6 @@
 #include "SchemaPropertiesDialog.h"
 #include "Settings.h"
 #include "SignalPropertiesDialog.h"
-
-#include <QWindow>
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =

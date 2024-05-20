@@ -1,13 +1,14 @@
 #include "EditSchemaView.h"
 
-#include "../../VFrame30/Context.h"
-#include "../../VFrame30/DrawParam.h"
-#include "../../VFrame30/LogicSchema.h"
-#include "../../VFrame30/SchemaItems/PosConnectionImpl.h"
-#include "../../VFrame30/SchemaItems/PosLineImpl.h"
-#include "../../VFrame30/SchemaItems/PosRectImpl.h"
-#include "../../VFrame30/SchemaItems/PosRectRotatable.h"
-#include "../../VFrame30/SchemaLayer.h"
+#include <VFrame30/Context.h>
+#include <VFrame30/DrawParam.h>
+#include <VFrame30/LogicSchema.h>
+#include <VFrame30/PosConnectionImpl.h>
+#include <VFrame30/PosLineImpl.h>
+#include <VFrame30/PosRectImpl.h>
+#include <VFrame30/PosRectRotatable.h>
+#include <VFrame30/SchemaLayer.h>
+
 #include "../GlobalMessanger.h"
 #include "../Settings.h"
 
@@ -151,7 +152,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	//
 	drawBuildIssues(&drawParam, clipRect);
 
-	// Draw run order - Update: run order dows not work after UFB became more complex and now they can have signals inside
+	// Draw run order - Update: run order does not work after UFB became more complex and now they can have signals inside
 	//
 	//if (theSettings.isDebugMode() == true)
 	//{

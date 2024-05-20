@@ -1,13 +1,13 @@
 #include "MonitorSchemaView.h"
-#include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/PropertyNames.h"
-#include "../VFrame30/ITimeStats.h"
 #include "Globals.h"
 #include "MonitorAppSettings.h"
 #include "MonitorMainWindow.h"
 #include "MonitorSchemaManager.h"
 
 #include <HardwareLib/ScriptEquipment.h>
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/ITimeStats.h>
+#include <VFrame30/PropertyNames.h>
 
 
 //
@@ -32,10 +32,6 @@ MonitorSchemaView::MonitorSchemaView(MonitorSchemaManager* schemaManager,
 	Q_ASSERT(schemaManager);
 
 	connect(&schemaManager->configController(), &MonitorConfigController::configurationArrived, this, &MonitorSchemaView::configurationArrived);
-
-	// Updates scripts
-	//
-	configurationArrived(monitorSchemaManager()->configController().configuration());
 
 	return;
 }

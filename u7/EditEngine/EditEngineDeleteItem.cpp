@@ -1,6 +1,6 @@
 #include "EditEngineDeleteItem.h"
 #include "SchemaEditor/EditSchemaView.h"
-#include "../../VFrame30/SchemaLayer.h"
+#include <VFrame30/SchemaLayer.h>
 
 namespace EditEngine
 {

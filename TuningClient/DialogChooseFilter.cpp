@@ -1,7 +1,5 @@
 #include "DialogChooseFilter.h"
 
-#include <QListWidget>
-
 Q_DECLARE_METATYPE (TuningFilter*)
 
 DialogChooseFilter::DialogChooseFilter(QWidget* parent, TuningFilter* parentFilter, TuningFilter::InterfaceType interfaceType, TuningFilter::Source source)

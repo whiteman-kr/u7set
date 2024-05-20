@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../OnlineLib/SoftwareEndpoint.h"
-#include "../VFrame30/SchemaDetails.h"
+#include <VFrame30/SchemaDetails.h>
 #include <SchemaClientLib/DragDropHelper.h>
 #include "SignalSnapshotModel.h"
 
@@ -67,6 +67,8 @@ namespace SchemaClientLib
 							 const QString& equipmentId,
 							 QWidget* parent);
 
+		virtual ~SignalSnapshotWidget();
+
 	public:
 		QString projectName() const;
 		void setProjectName(const QString& projectName);
@@ -84,7 +86,6 @@ namespace SchemaClientLib
 		virtual std::set<QString> schemaAppSignals(const QString& schemaStrId);
 
 	protected:
-		void closeEvent(QCloseEvent* event) override;
 		void showEvent(QShowEvent* event) override;
 		void keyPressEvent(QKeyEvent* event) override;
 		void timerEvent(QTimerEvent* event) override;

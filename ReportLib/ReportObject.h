@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../VFrame30/IViewVariables.h"
 #include "ReportSchemaView.h"
+
+#include <VFrame30/IViewVariables.h>
+
 #include <QFont>
 #include <QUuid>
 

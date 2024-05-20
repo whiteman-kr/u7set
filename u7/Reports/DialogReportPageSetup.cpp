@@ -1,5 +1,4 @@
 #include "DialogReportPageSetup.h"
-#include <QPageSetupDialog>
 
 using namespace Builder;
 

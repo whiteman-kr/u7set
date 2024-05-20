@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QMainWindow>
-#include <QTranslator>
-
 #include "TuningWorkspace.h"
 #include "SchemasWorkspace.h"
 #include "TuningConfigController.h"

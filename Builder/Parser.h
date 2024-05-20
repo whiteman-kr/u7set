@@ -2,9 +2,15 @@
 
 #include "RunOrder.h"
 
-#include "../VFrame30/SchemaItems/SchemaItemAfb.h"
+#include <VFrame30/FblItem.h>
 
 class DbController;
+
+namespace Afb
+{
+	class AfbComponent;
+	class AfbElement;
+}
 
 namespace AppSignalLib
 {
@@ -23,6 +29,17 @@ namespace VFrame30
 	class UfbSchema;
 	class LogicSchema;
 	class SchemaItemAfb;
+	class FblItemRect;
+	class Schema;
+	
+	class SchemaItemTerminator;
+	class SchemaItemSignal;
+	class SchemaItemConst;
+	class SchemaItemTransmitter;
+	class SchemaItemReceiver;
+	class SchemaItemLoopback;
+	class SchemaItemBus;
+	class SchemaLayer;
 } // namespace VFrame30
 
 namespace Builder

@@ -3,7 +3,6 @@
 #include "Context.h"
 #include "SoftwareSettingsGetter.h"
 #include "TuningClientCfgGenerator.h"
-#include <QJSValueIterator>
 
 namespace Builder
 {

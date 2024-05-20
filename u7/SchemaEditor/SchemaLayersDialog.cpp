@@ -1,5 +1,5 @@
 #include "EditSchemaView.h"
-#include "../VFrame30/SchemaLayer.h"
+#include <VFrame30/SchemaLayer.h>
 #include "SchemaLayersDialog.h"
 #include "ui_SchemaLayersDialog.h"
 

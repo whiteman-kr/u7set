@@ -1,7 +1,6 @@
 #ifndef DIALOGPROJECTDIFF_H
 #define DIALOGPROJECTDIFF_H
 
-#include <QDialog>
 #include "GlobalMessanger.h"
 #include "Reports/ProjectDiffReport.h"
 

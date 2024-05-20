@@ -19,10 +19,10 @@
 #include <ClientLib/TuningUserManager.h>
 #include <SchemaClientLib/SchemaDrawStatistics.h>
 #include <UiLib/DialogAlert.h>
+#include <VFrame30/AppSignalController.h>
 
 #include "../UtilsLib/InstanceResolver.h"
 #include "../UtilsLib/LogFile.h"
-#include "../VFrame30/AppSignalController.h"
 
 
 namespace VFrame30

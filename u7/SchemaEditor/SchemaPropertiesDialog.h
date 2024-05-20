@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../VFrame30/Schema.h"
 #include <UiLib/PropertyEditor.h>
-
+#include <VFrame30/Schema.h>
 
 namespace Ui {
 	class SchemaPropertiesDialog;

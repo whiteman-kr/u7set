@@ -1,5 +1,5 @@
 #include "DevToolsScriptVariables.h"
-#include "../../../VFrame30/SchemaItems/SchemaItem.h"
+#include <VFrame30/SchemaItem.h>
 #include <HardwareLib/ScriptDeviceObject.h>
 #include <QDialogButtonBox>
 

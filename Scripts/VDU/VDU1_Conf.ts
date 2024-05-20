@@ -3,7 +3,7 @@
 
 "use strict";
 
-let FamilyVDUID: number = 0x7100;
+let FamilyVDUID: number = 0x1C00;
 
 let UartID: number = 0;
 

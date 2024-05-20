@@ -1,8 +1,9 @@
 #pragma once
 
-#include <ClientLib/ConfigController.h>
 #include "../UtilsLib/ILogFile.h"
-#include "../VFrame30/SchemaDetails.h"
+#include <ClientLib/ConfigController.h>
+#include <VFrame30/SchemaDetails.h>
+
 #include <QReadWriteLock>
 
 class HostAddressPort;

@@ -2,9 +2,12 @@
 
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/AcquiredDiagSignal.h"
-#include "../UtilsLib/XmlHelper.h"
 #include "SoftwareCfgGenerator.h"
-#include "DeviceHelper.h"
+
+namespace OnlineLib
+{
+	class DataSource;
+}
 
 namespace Builder
 {

@@ -9,15 +9,7 @@
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningUserManager.h>
 #include <SchemaClientLib/DialogWriteTuningValues.h>
-
-#include "../VFrame30/DrawParam.h"
-
-#include <QKeyEvent>
-#include <QPushButton>
-#include <QTableView>
-#include <QInputDialog>
-#include <QFileDialog>
-
+#include <VFrame30/DrawParam.h>
 
 TuningPageHelper::TuningPageHelper(const ClientLib::TuningUserManager& userManager):
 	m_userManager(userManager)

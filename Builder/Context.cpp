@@ -10,6 +10,8 @@ namespace Builder
 		assert(log);
 	}
 
+	Context::~Context() = default;
+
 	bool Context::generateAppSignalsXml() const
 	{
 		return m_projectProperties.generateAppSignalsXml();

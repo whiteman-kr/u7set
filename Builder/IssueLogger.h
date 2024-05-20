@@ -592,6 +592,7 @@ namespace Builder
 		// VDU related issues
 		//
 		void errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid);
+		void errEQP6401(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, QString font);
 
 		// Diagnostics compiler errors
 		//

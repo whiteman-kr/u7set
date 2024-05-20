@@ -3,9 +3,6 @@
 
 #include "DialogFilterEditor.h"
 
-#include <QApplication>
-#include <QProcess>
-
 #include "../UtilsLib/LogFile.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Tuning/TuningFilter.h"

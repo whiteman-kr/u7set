@@ -1,28 +1,161 @@
 #include "VduSchemaGenerator.h"
-#include "../../VFrame30/DrawParam.h"
-#include "../../VFrame30/SchemaItems/SchemaItemVduLine.h"
-#include "../../VFrame30/SchemaItems/SchemaItemVduRect.h"
-#include "../../VFrame30/SchemaItems/SchemaItemVduValue.h"
-#include "../../VFrame30/SchemaView.h"
-#include "../../VFrame30/VduSchema.h"
-#include "../Context.h"
-#include "VduSchemaFile.h"
 
-#include <QPageSize>
-#include <QPainter>
+#include "VduSchemaFile.h"
+#include "../Context.h"
+
+#include "../../UtilsLib/Crc.h"
+
+#include <HardwareLib/DeviceModule.h>
+#include <VFrame30/DrawParam.h>
+#include <VFrame30/SchemaItemVduLine.h>
+#include <VFrame30/SchemaItemVduRect.h>
+#include <VFrame30/SchemaItemVduValue.h>
+#include <VFrame30/SchemaView.h>
+#include <VFrame30/VduSchema.h>
 
 // #define VDU_DEBUG
 
 namespace Builder
 {
-	static const vdu_string_ref StringRefStub = 0x52525453; // "STRR" - for debug, easy to find in hex editor.
+	bool VduSchemaGenerator::generateVduSchemas(const std::vector<VFrame30::VduSchema*>& schemas, Context& context)
+	{
+		IssueLogger* log = context.m_log;
+		Q_ASSERT(log);
 
-	bool VduSchemaGenerator::generateVduSchema(QString vduEquipmentId, 
+		context.m_vduSchemas.clear();
+
+		bool result = true;
+
+		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
+		{
+			Q_ASSERT(vdu);
+
+			LOG_MESSAGE(log, QString("Generating schemas for VDU %1.").arg(vdu->equipmentId()));
+
+			auto schemaTagsProperty = vdu->propertyByCaption(EquipmentPropNames::SCHEMA_TAGS);
+			if (schemaTagsProperty == nullptr)
+			{
+				// Property '%1.%2' is not found.
+				//
+				log->errCFG3020(vdu->equipmentId(), EquipmentPropNames::SCHEMA_TAGS);
+				result = false;
+				continue;
+			}
+
+			auto vduSignalsIt = context.m_vduSignals.find(vdu->equipmentId());
+			if (vduSignalsIt == context.m_vduSignals.end())
+			{
+				// Signals for VDU %1 are not found.
+				//
+				log->errINT1000(QString("Internal error: VduSignals structure is not found for VDU %1").arg(vdu->equipmentId()));
+				result = false;
+				continue;
+			}
+			const auto& vduSignals = vduSignalsIt->second;
+
+			auto vduSchemaTagList = schemaTagsProperty->value().toString().split(QRegularExpression("\\W+"), Qt::SkipEmptyParts);
+
+			for (auto schema : schemas)
+			{
+				Q_ASSERT(schema);
+
+				// If schemaTags is empty, then all schemas are for this VDU
+				//
+				bool schemaHasTag = vduSchemaTagList.isEmpty();
+				schemaHasTag |= std::ranges::any_of(vduSchemaTagList,
+													[&schema](QString& tag)
+													{
+														return schema->tagsAsList().contains(tag.toLower());
+													});
+
+				if (schemaHasTag == false)
+				{
+					continue;
+				}
+
+				// Generate VDU schema.
+				//
+				LOG_MESSAGE(log, QString("Converting schema %1 to VDU format.").arg(schema->schemaId()));
+
+				QStringList errorMessages;
+				QByteArray nativeVduData;
+
+				bool genSchemaOk =
+					Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(), *schema, vduSignals, nativeVduData, context);
+
+				if (genSchemaOk == false)
+				{
+					result = false;
+					continue;
+				}
+
+				// Save result.
+				//
+				QString nativeVduSchemaFileName = QString("%1.%2").arg(schema->schemaId()).arg(Db::File::VduNativeFileExtension);
+
+				QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + "/Schemas";
+
+				context.m_buildResultWriter->addFile(vduDir, nativeVduSchemaFileName, nativeVduData);
+
+#if 1
+				// Generate background bitmap from the static data.
+				//
+				{
+					QByteArray backgroundImageData;
+					QString backgroundBitmapFileName = QString("%1.bmp").arg(schema->schemaId());
+
+					QImage backgroundImage;
+
+					bool genBitmapOk =
+						Builder::VduSchemaGenerator::generateVduBackgroundBitmap(schema->shared_from_this(), backgroundImage);
+					if (genBitmapOk == false)
+					{
+						log->errINT1001(
+							QString("vdu::VduSchemaGenerator::generateVduBackgroundBitmap internal error, schema:").arg(schema->schemaId()));
+						result = false;
+						continue;
+					}
+
+					QBuffer buffer(&backgroundImageData);
+					buffer.open(QIODevice::WriteOnly);
+					backgroundImage.save(&buffer, "BMP");
+
+					context.m_buildResultWriter->addFile(vduDir, backgroundBitmapFileName, backgroundImageData);
+				}
+#endif
+				// Add schema to the global build context.
+				//
+				{
+					// Crc64 is the 8 last bytes from nativeVduData.
+					//
+					uint64_t crc64 = 0;
+
+					if (nativeVduData.size() >= 8)
+					{
+						crc64 = *reinterpret_cast<const uint64_t*>(nativeVduData.constData() + nativeVduData.size() - 8);
+					}
+					else
+					{
+						Q_ASSERT(nativeVduData.size() >= 8);
+					}
+
+					Context::GeneratedVduSchema generatedSchema{.schema = schema->shared_from_this(), .crc64 = crc64};
+					context.m_vduSchemas[vdu->equipmentId()].push_back(generatedSchema);
+				}
+			}
+		}
+
+		return result;
+	}
+
+	bool VduSchemaGenerator::generateVduSchema(QString vduEquipmentId,
 											   const VFrame30::VduSchema& schema,
 											   const std::map<Hash, int>& appSignalHashToSignalIndex,
 											   QByteArray& out,
-											   IssueLogger& log)
+											   Context& context)
 	{
+		IssueLogger& log = *context.m_log;
+
 		bool result = true;
 
 		std::multimap<QString, size_t> strings; // string -> referenceOffset
@@ -93,7 +226,7 @@ namespace Builder
 					QByteArray outSchemaItem{};
 					std::list<std::pair<QString, size_t>> addedStringReferences;
 
-					saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedStringReferences, log);
+					saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedStringReferences, context);
 
 					// Add added string references to the main string ref container.
 					//
@@ -148,17 +281,26 @@ namespace Builder
 			}
 		}
 
-		// TODO: Calculate and write CRC64
-		// Temporary just write "TODO:CRC"
-		// Before wring CRC, align out buffer to 8 bytes.
+		// Calculate CRC64 for the whole file.
+		// Align to 8 bytes the end of string area.
 		//
 		for (size_t ps = 0, rest = 8 - (out.size() % 8); ps < rest; ps++)
 		{
 			out.push_back(char{0});
 		}
 
-		const char crc[] = "TODO:CRC";
-		out.append(crc, sizeof(crc) - 1);
+		quint64 crc = qToBigEndian(Crc::crc64(out.constData(), out.size()));
+		out.append(reinterpret_cast<const char*>(&crc), sizeof(crc));
+
+		// Check crc, crc on data with crc field must be 0.
+		//
+		quint64 checkCrc = Crc::crc64(out.constData(), out.size());
+		if (checkCrc != 0)
+		{
+			Q_ASSERT(checkCrc == 0);
+			log.errINT1000("Internal error: VduSchemaGenerator::generateVduSchema(...) CRC64 check failed!");
+			return false;
+		}
 
 		return result;
 	}
@@ -241,8 +383,10 @@ namespace Builder
 											 const std::map<Hash, int>& appSignalHashToSignalIndex,
 											 QByteArray& out,
 											 std::list<std::pair<QString, size_t>>& addedStringReferences,
-											 IssueLogger& log)
+											 Context& context)
 	{
+		IssueLogger& log = *context.m_log;
+
 		// Get item type id and size of the specific item structure.
 		//
 		using ItemTypeId = decltype(VduSchemaFileSchemaItem1::itemType);
@@ -285,6 +429,7 @@ namespace Builder
 		fileSchemaItem.size = sizeof(fileSchemaItem);
 		fileSchemaItem.itemType = itemType;
 		fileSchemaItem.totalItemSize = static_cast<TotalItemSizeType>(sizeof(VduSchemaFileSchemaItem1) + specificItemSize);
+		fileSchemaItem.isStatic = schemaItem.IsStatic();
 
 		// Save specific item, depending on itemType.
 		//
@@ -306,6 +451,8 @@ namespace Builder
 				structLine.x2 = static_cast<decltype(structLine.x2)>(schemaItemVduLine.endXDocPt());
 				structLine.y2 = static_cast<decltype(structLine.y2)>(schemaItemVduLine.endYDocPt());
 
+				structLine.weight = static_cast<decltype(structLine.weight)>(schemaItemVduLine.weight());
+
 				structLine.color = schemaItemVduLine.lineColor().rgba();
 
 				specificData.append(reinterpret_cast<const char*>(&structLine), sizeof(structLine));
@@ -321,11 +468,12 @@ namespace Builder
 				structRect.itemType = itemType;
 
 				using PosType = decltype(VduSchemaFileSchemaItemRect1::left);
+				using SizeType = decltype(VduSchemaFileSchemaItemRect1::width);
 
 				structRect.left = static_cast<PosType>(schemaItemVduRect.leftDocPt());
 				structRect.top = static_cast<PosType>(schemaItemVduRect.topDocPt());
-				structRect.width = static_cast<PosType>(schemaItemVduRect.widthDocPt());
-				structRect.height = static_cast<PosType>(schemaItemVduRect.heightDocPt());
+				structRect.width = static_cast<SizeType>(schemaItemVduRect.widthDocPt());
+				structRect.height = static_cast<SizeType>(schemaItemVduRect.heightDocPt());
 
 				structRect.weight = static_cast<decltype(structRect.weight)>(schemaItemVduRect.weight());
 				structRect.fill = schemaItemVduRect.fill();
@@ -335,9 +483,36 @@ namespace Builder
 				structRect.fillColor = schemaItemVduRect.fillColor().rgba();
 				structRect.textColor = schemaItemVduRect.textColor().rgba();
 
-				// TODO: Set font index.
+				// Set font index.
 				//
-				structRect.fontIndex = 0;
+				int fontIndex = context.m_vduFontProvider
+					.getFontIndex(vduEquipmentId,
+								  schemaItemVduRect.getFontName(),
+								  schemaItemVduRect.getFontSize(),
+								  schemaItemVduRect.getFontBold(),
+								  schemaItemVduRect.getFontItalic(),
+								  false);
+
+				if (fontIndex == -1)
+				{
+					// Font not found.
+					//
+					QString font = QString{"'%1, %2%3%4'"}
+						.arg(schemaItemVduRect.getFontName())
+						.arg(schemaItemVduRect.getFontSize())
+						.arg(schemaItemVduRect.getFontBold() ? ", bold" : "")
+						.arg(schemaItemVduRect.getFontItalic() ? ", italic" : "");
+
+					log.errEQP6401(vduEquipmentId,
+								   schemaItem.parentSchema()->schemaId(),
+								   schemaItem.label(),
+								   schemaItem.guid(),
+								   font);
+
+					return false;
+				}
+
+				structRect.fontIndex = fontIndex;
 
 				addedStringReferences.emplace_back(schemaItemVduRect.text(),
 												   sizeof(fileSchemaItem) + offsetof(VduSchemaFileSchemaItemRect1, text));
@@ -356,10 +531,13 @@ namespace Builder
 				structValue.version = 1;
 				structValue.itemType = itemType;
 
-				structValue.left = static_cast<decltype(structValue.left)>(schemaItemVduValue.leftDocPt());
-				structValue.top = static_cast<decltype(structValue.top)>(schemaItemVduValue.topDocPt());
-				structValue.width = static_cast<decltype(structValue.width)>(schemaItemVduValue.widthDocPt());
-				structValue.height = static_cast<decltype(structValue.height)>(schemaItemVduValue.heightDocPt());
+				using PosType = decltype(structValue.left);
+				using SizeType = decltype(structValue.width);
+
+				structValue.left = static_cast<PosType>(schemaItemVduValue.leftDocPt());
+				structValue.top = static_cast<PosType>(schemaItemVduValue.topDocPt());
+				structValue.width = static_cast<SizeType>(schemaItemVduValue.widthDocPt());
+				structValue.height = static_cast<SizeType>(schemaItemVduValue.heightDocPt());
 
 				structValue.weight = static_cast<decltype(structValue.weight)>(schemaItemVduValue.weight());
 				structValue.drawRect = schemaItemVduValue.drawRect();
@@ -370,9 +548,38 @@ namespace Builder
 
 				// TODO: Set font index.
 				//
-				structValue.fontIndex = 0;
+				int fontIndex = context.m_vduFontProvider
+									.getFontIndex(vduEquipmentId,
+												  schemaItemVduValue.getFontName(),
+												  schemaItemVduValue.getFontSize(),
+												  schemaItemVduValue.getFontBold(),
+												  schemaItemVduValue.getFontItalic(),
+												  false);
 
-				// TODO: Set app signal index.
+				if (fontIndex == -1)
+				{
+					// Font not found.
+					//
+					QString font = QString{"'%1, %2%3%4'"}
+						.arg(schemaItemVduValue.getFontName())
+						.arg(schemaItemVduValue.getFontSize())
+						.arg(schemaItemVduValue.getFontBold() ? ", bold" : "")
+						.arg(schemaItemVduValue.getFontItalic() ? ", italic" : "");
+
+					log.errEQP6401(vduEquipmentId,
+								   schemaItem.parentSchema()->schemaId(),
+								   schemaItem.label(),
+								   schemaItem.guid(),
+								   font);
+
+					return false;
+				}
+
+				structValue.fontIndex = fontIndex;
+
+				structValue.decimalPlaces = schemaItemVduValue.precision();
+
+				// Set app signal index.
 				//
 				{
 					QString appSignalId = schemaItemVduValue.appSignalId();
@@ -382,10 +589,14 @@ namespace Builder
 					{
 						// Signal not found.
 						//
-						log.errEQP6400(vduEquipmentId, appSignalId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid());
+						log.errEQP6400(vduEquipmentId,
+									   appSignalId,
+									   schemaItem.parentSchema()->schemaId(),
+									   schemaItem.label(),
+									   schemaItem.guid());
 						return false;
 					}
-					
+
 					structValue.appSignalIndex = sit->second;
 				}
 

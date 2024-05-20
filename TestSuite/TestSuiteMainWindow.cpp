@@ -30,6 +30,8 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	setWindowFlags(Qt::Widget);
 	setDockOptions(AnimatedDocks | AllowTabbedDocks | GroupedDragging);
 
+	setWindowTitle(tr("%1 - %2").arg(qAppName()).arg(AppConfigSettings().instance().librarySettings().instanceStrId()));
+
 	// Init translator
 	//
 	m_translator.addLanguage("en", "English");
@@ -92,6 +94,8 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	connect(&m_testSuite, &TestSuite::TestSuite::testFinished, m_testListWidget, &TestListWidget::onTestFinished);
 	connect(&m_testSuite, &TestSuite::TestSuite::finished, this, &TestSuiteMainWindow::onTestingFinished);
 	connect(&m_testSuite, &TestSuite::TestSuite::globalPermissionChanged, this, &TestSuiteMainWindow::onGlobalPermissionChanged);
+	connect(&m_testSuite, &TestSuite::TestSuite::scriptPermissionChanged, this, &TestSuiteMainWindow::onScriptPermissionChanged);
+
 	connect(&m_testSuite, &TestSuite::TestSuite::scriptPermissionChanged, m_testListWidget, &TestListWidget::onScriptPermissionChanged);
 	connect(&m_testSuite, &TestSuite::TestSuite::noPermissionsExist, m_testListWidget, &TestListWidget::onNoPermissionsExist);
 
@@ -1110,6 +1114,8 @@ void TestSuiteMainWindow::onSettings()
 
 		m_reloadTestsScriptsAction->setVisible(newSettings.useLocalScriptsPath() == true);
 
+		setWindowTitle(tr("%1 - %2").arg(qAppName()).arg(newSettings.librarySettings().instanceStrId()));
+
 		return;
 	}
 
@@ -1306,8 +1312,32 @@ void TestSuiteMainWindow::onTestingFinished(int /*result*/)
 	updateActionsState();
 }
 
-void TestSuiteMainWindow::onGlobalPermissionChanged(bool /*result*/)
+void TestSuiteMainWindow::onGlobalPermissionChanged(bool result)
 {
+	if (result == false && m_testSuite.isRunning() == true)
+	{
+		TestSuite::ControlStatus testStatus = m_testSuite.testStatus();
+
+		m_testSuite.testLog().writeError(testStatus.m_scriptFile + tr(": no global permission: script terminated."), QString());
+
+		m_testSuite.stop();
+	}
+
+	updateActionsState();
+}
+
+void TestSuiteMainWindow::onScriptPermissionChanged(QString scriptFileName, bool permission) 
+{
+	TestSuite::ControlStatus testStatus = m_testSuite.testStatus();
+
+	if (permission == false && m_testSuite.isRunning() == true && testStatus.m_state == TestSuite::ControlState::RunningTests &&
+		scriptFileName == testStatus.m_scriptFile)
+	{
+		m_testSuite.testLog().writeError(testStatus.m_scriptFile + tr(": no local permission: script terminated."), QString());
+
+		m_testSuite.stop();
+	}
+
 	updateActionsState();
 }
 

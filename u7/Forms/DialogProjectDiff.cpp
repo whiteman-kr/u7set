@@ -4,8 +4,7 @@
 #include "Reports/DialogSchemasReport.h"
 #include "Reports/DialogReportPageSetup.h"
 
-#include <QPageSetupDialog>
-#include <QPrinter>
+
 
 //
 // DialogProjectDiff

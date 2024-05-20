@@ -2,10 +2,6 @@
 #include "SimOverrideValueWidget.h"
 #include <Simulator/SimOverrideSignals.h>
 
-#include <QDrag>
-#include <QStandardPaths>
-#include <QStyledItemDelegate>
-
 SimOverridePane::SimOverridePane(Sim::Simulator* simulator, DbController* dbc, QWidget* parent) :
 	QWidget(parent),
     HasDbController(dbc),

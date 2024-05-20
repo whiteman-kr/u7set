@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QTextEdit>
-
 class QCompleter;
 
 class QTextEditCompleter : public QTextEdit

@@ -118,8 +118,6 @@ add_subdirectory(ReportLib)
 
 add_subdirectory(libs)
 
-add_subdirectory(VFrame30)
-
 add_subdirectory(SimulatorConsole)
 
 add_subdirectory(Builder)

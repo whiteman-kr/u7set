@@ -703,7 +703,7 @@ var ConfigLib;
     }
     ConfigLib.generate_txRxIoConfig = generate_txRxIoConfig;
 })(ConfigLib || (ConfigLib = {}));
-let FamilyVDUID = 0x7100;
+let FamilyVDUID = 0x1C00;
 let UartID = 0;
 let LMNumberCount = 0;
 let configScriptVersion = 1;

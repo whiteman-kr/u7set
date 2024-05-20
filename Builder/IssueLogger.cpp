@@ -9292,6 +9292,34 @@ namespace Builder
 				  .arg(schemaItemLabel));
 	}
 
+	/// IssueCode: EQP6401
+	///
+	/// IssueType: Error
+	///
+	/// Title: Font %1 is not found in VDU %2, Schema %3, SchemaItem %4. Add font to the VDU's font properties (Fonts).
+	///
+	/// Parameters:
+	///		%1 Font parameters
+	///		%2 VDU EquipmentID
+	///		%3 SchemaID
+	///		%4 Schema item label
+	///
+	/// Description:
+	///		The specified font was not found in the VDU's fonts. Please add the font to the VDU's font properties (Fonts).
+	///
+	void IssueLogger::errEQP6401(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, QString font)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 6401, itemUuid, schemaId);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6401,
+				  tr("Font %1 is not found in VDU %2, Schema %3, SchemaItem %4. Add font to the VDU's font properties (Fonts).")
+				  .arg(font)
+				  .arg(vduEquipmentId)
+				  .arg(schemaId)
+				  .arg(itemLabel));
+	}
+
 	// --
 
 	/// IssueCode: DGN7000

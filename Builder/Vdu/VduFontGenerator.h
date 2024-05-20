@@ -43,6 +43,7 @@ namespace Builder
 		VduFontGenerator() = delete;
 
 	public:
+		static bool generationVduFonts(Context& context);
 		static bool generateVduFont(const VduFontInfo& fontInfo, const QString& dir, bool generateDebugFiles, Context& context);
 	};
 

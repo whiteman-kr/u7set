@@ -3,7 +3,7 @@
 
 namespace Builder
 {
-	bool VduFontInfo::load(QXmlStreamReader& reader, QString* errorMessage) 
+	bool VduFontInfo::load(QXmlStreamReader& reader, QString* errorMessage)
 	{
 		static const QString attrFamily = "Family";
 		static const QString attrPixelSize = "PixelSize";
@@ -15,7 +15,7 @@ namespace Builder
 		{
 			family = reader.attributes().value(attrFamily).toString();
 		}
-		else 
+		else
 		{
 			*errorMessage = QObject::tr("VduFontInfo: %1 attribute is missing.").arg(attrFamily);
 			return false;
@@ -25,7 +25,7 @@ namespace Builder
 		{
 			pixelSize = reader.attributes().value(attrPixelSize).toInt();
 		}
-		else 
+		else
 		{
 			*errorMessage = QObject::tr("VduFontInfo: %1 attribute is missing.").arg(attrPixelSize);
 			return false;
@@ -35,7 +35,7 @@ namespace Builder
 		{
 			bold = reader.attributes().value(attrBold).toString().compare("true", Qt::CaseInsensitive) == 0;
 		}
-		else 
+		else
 		{
 			*errorMessage = QObject::tr("VduFontInfo: %1 attribute is missing.").arg(attrBold);
 			return false;
@@ -45,7 +45,7 @@ namespace Builder
 		{
 			italic = reader.attributes().value(attrItalic).toString().compare("true", Qt::CaseInsensitive) == 0;
 		}
-		else 
+		else
 		{
 			*errorMessage = QObject::tr("VduFontInfo: %1 attribute is missing.").arg(attrItalic);
 			return false;
@@ -55,7 +55,7 @@ namespace Builder
 		{
 			underlined = reader.attributes().value(attrUnderlined).toString().compare("true", Qt::CaseInsensitive) == 0;
 		}
-		else 
+		else
 		{
 			*errorMessage = QObject::tr("VduFontInfo: %1 attribute is missing.").arg(attrUnderlined);
 			return false;
@@ -63,15 +63,15 @@ namespace Builder
 		return true;
 	}
 
-	void VduFontProvider::setFontsInfo(const QString& equipmentId, std::vector<VduFontInfo>& info) 
+	void VduFontProvider::setFontsInfo(const QString& equipmentId, std::vector<VduFontInfo>& info)
 	{
 		m_fontsInfo[equipmentId] = info;
 	}
 
-	int VduFontProvider::getFontIndex(QString vduEquipmnentId, QString fontName, int pixelSize, bool bold, bool italic, bool underlined) const 
+	int VduFontProvider::getFontIndex(QString vduEquipmentId, QString fontName, int pixelSize, bool bold, bool italic, bool underlined) const
 	{
-		auto it = m_fontsInfo.find(vduEquipmnentId);
-		if (it == m_fontsInfo.end()) 
+		auto it = m_fontsInfo.find(vduEquipmentId);
+		if (it == m_fontsInfo.end())
 		{
 			return -1;
 		}
@@ -83,7 +83,7 @@ namespace Builder
 									[fontName, pixelSize, bold, italic, underlined](const VduFontInfo& fi)
 									{
 										return fi.family == fontName && fi.pixelSize == pixelSize && fi.bold == bold &&
-												   fi.italic == italic && fi.underlined == underlined;
+											   fi.italic == italic && fi.underlined == underlined;
 									});
 
 		if (foundIt == info.end())
@@ -93,5 +93,18 @@ namespace Builder
 
 		return std::distance(info.begin(), foundIt);
 	}
-	
+
+	int VduFontProvider::getFontCount(QString vduEquipmentId) const
+	{
+		int fontCount = 0;
+
+		auto it = m_fontsInfo.find(vduEquipmentId);
+		if (it != m_fontsInfo.end())
+		{
+			fontCount = static_cast<int>(it->second.size());
+		}
+
+		return fontCount;
+	}
+
 } // namespace Builder

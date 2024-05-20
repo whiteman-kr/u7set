@@ -63,7 +63,9 @@ namespace Builder
 		bool taskProcessTuningParameters();			// Tuning Parameters
 		bool taskGenerationModulesConfiguration();	// Generate Modules Configuration
 		bool taskGenerationBitstreamFile();			// Generate Bitstream File
+		bool taskGenerationVduFonts();				// Generate fonts for VDUs
 		bool taskGenerationSoftwareConfiguration();	// Generate Software Configuration
+		bool taskGenerationVduConfiguration();		// Generate configuration for VDUs
 		bool taskSaveTestScripts();					// Save Test Scripts
 		bool createSchemasAlbums();
 		bool taskRunSimTests();						// Run Simulator-based tests
@@ -187,8 +189,18 @@ namespace Builder
 					.breakOnFailed = false
 				},
 				{
+					.func = &BuildWorkerThread::taskGenerationVduFonts,
+					.name = "VDU Fonts Generation",
+					.breakOnFailed = true
+				},				
+				{
 					.func = &BuildWorkerThread::taskGenerationSoftwareConfiguration,
 					.name = "Software Configuration Generation",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskGenerationVduConfiguration,
+					.name = "VDU Configuration Generation",
 					.breakOnFailed = true
 				},
 				{

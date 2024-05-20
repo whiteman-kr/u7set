@@ -1,8 +1,6 @@
 #ifndef SWITCHPRESETSPAGEOPTIONS_H
 #define SWITCHPRESETSPAGEOPTIONS_H
 
-#include <QDialog>
-
 namespace Ui {
 	class SwitchPresetsPageOptions;
 }
