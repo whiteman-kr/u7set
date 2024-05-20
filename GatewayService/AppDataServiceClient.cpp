@@ -119,10 +119,7 @@ namespace Gateway
 
 		m_handler->updateSignalStates(m_getStatesReply);
 
-		if (m_getStatesReply.gatewaystatechangesqueuesize() > 0)
-		{
-			sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, m_gwGetStateChangesRequest);
-		}
+		sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, m_gwGetStateChangesRequest);
 	}
 
 	void AppDataServiceClient::onGatewayGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize)

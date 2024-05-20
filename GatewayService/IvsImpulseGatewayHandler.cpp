@@ -70,7 +70,7 @@ namespace Gateway
 
 		hashes->clear();
 
-		for(const AppSignalState state : m_states)
+		for(const AppSignalState& state : m_states)
 		{
 			hashes->emplace(state.hash());
 		}
@@ -95,15 +95,26 @@ namespace Gateway
 	{
 		int replyStatesSize = getStatesReply.appsignalstates_size();
 
-		if (replyStatesSize != TO_INT(m_states.size()))
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
 		for(int i = 0; i < replyStatesSize; i++)
 		{
-			m_states[i].updateState(getStatesReply.appsignalstates(i));
+			const Proto::AppSignalState& appSignalState = getStatesReply.appsignalstates(i);
+
+			auto it = m_hashToStatesIndexes.find(appSignalState.hash());
+
+			if (it == m_hashToStatesIndexes.end())
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			const std::vector<int>& statesIndexes = it->second;
+
+			int statesCount = TO_INT(statesIndexes.size());
+
+			for(int si = 0; si < statesCount; si++)
+			{
+				m_states[statesIndexes[si]].updateState(appSignalState);
+			}
 		}
 
 		m_signalStatesUpdated = true;
@@ -201,7 +212,26 @@ namespace Gateway
 				{
 					Hash h = calcHash(id);
 
+					//
+
+					int stateIndex = TO_INT(m_states.size());
+
+					auto map_it = m_hashToStatesIndexes.find(h);
+
+					if (map_it == m_hashToStatesIndexes.end())
+					{
+						auto [new_it, b] = m_hashToStatesIndexes.emplace(h, std::vector<int>{});
+						map_it = new_it;
+					}
+
+					std::vector<int>& statesIndexes = map_it->second;
+
+					statesIndexes.push_back(stateIndex);
+
+					//
+
 					AppSignalState& newState = m_states.emplace_back(h, ivsList->sendEvents());
+
 					newState.setListIndex(listIndex);
 
 					auto it = li->hashToListIndexes.find(h);

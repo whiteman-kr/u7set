@@ -67,6 +67,7 @@ namespace Gateway
 		const AppSignals& m_appSignals;
 
 		AppSignalStates m_states;
+		std::map<Hash, std::vector<int>> m_hashToStatesIndexes;
 		std::atomic_bool m_signalStatesUpdated = { false };
 
 		std::vector<IvsImpulseListInfoShared> m_lists;
