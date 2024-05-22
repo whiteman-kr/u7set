@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareEndpoint.h"
+#include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/TcpConnectionState.h"
 #include "../UtilsLib/ILogFile.h"
-#include "../UtilsLib/SimpleThread.h"
 #include <ClientLib/IAppSignalUpdater.h>
 #include <ClientLib/IRecentAppSignals.h>
 
@@ -51,9 +51,10 @@ namespace ClientLib
 		};
 
 	public:
-		explicit AdsConnectionPrivate(IAppSignalUpdater& signalUpdater,
-							   IRecentAppSignals* recentAppSignals,		// Can be nullptr, then recent state comm thread will not be created.
-							   ILogFile* logFile);
+		explicit AdsConnectionPrivate(
+			IAppSignalUpdater& signalUpdater,
+			IRecentAppSignals* recentAppSignals, // Can be nullptr, then recent state comm thread will not be created.
+			ILogFile* logFile);
 		virtual ~AdsConnectionPrivate();
 
 	public:
@@ -71,9 +72,10 @@ namespace ClientLib
 		//
 	private:
 		IAppSignalUpdater& m_signalUpdater;
-		IRecentAppSignals* m_recentAppSignals = nullptr;	// If nullptr then recent connections are not used
+		IRecentAppSignals* m_recentAppSignals = nullptr; // If nullptr then recent connections are not used
 		HasLogFile m_logFile;
 
+		mutable QReadWriteLock m_connsMutex;
 		std::list<Connection> m_conns;
 	};
-}
+} // namespace ClientLib

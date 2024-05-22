@@ -25,7 +25,10 @@ namespace ClientLib
 		setObjectName("TcpSignalRecents " + adsInfo.shortenId);
 
 		Q_ASSERT(this->logFile());
-		qDebug() << "TcpSignalRecents::TcpSignalRecents(...)";
+		writeMessage("TcpSignalRecents::TcpSignalRecents(...)");
+
+		auto logger = std::make_shared<CircularLogger>(logFile, QString("TSR %1").arg(adsInfo.shortenId));
+		setLogger(logger);
 
 		connect(this, &Tcp::Client::signal_wrongServerID,
 			[this](const QString& errorMessage)
@@ -38,21 +41,17 @@ namespace ClientLib
 
 	TcpSignalRecents::~TcpSignalRecents()
 	{
-		qDebug() << "TcpSignalRecents::~TcpSignalRecents()";
+		writeMessage("TcpSignalRecents::~TcpSignalRecents()");
 	}
-
 
 	void TcpSignalRecents::onClientThreadStarted()
 	{
-		qDebug() << "TcpSignalRecents::onClientThreadStarted()";
 		writeMessage("TcpSignalRecents::onClientThreadStarted()");
-
 		return;
 	}
 
 	void TcpSignalRecents::onClientThreadFinished()
 	{
-		qDebug() << "TcpSignalRecents::onClientThreadFinished()";
 		writeMessage("TcpSignalRecents::onClientThreadFinished()");
 
 		//theSignals.reset();	!signal reset moved to AdsConnection::configurationArrived
@@ -60,29 +59,24 @@ namespace ClientLib
 
 	void TcpSignalRecents::onConnection()
 	{
-		qDebug() << "TcpSignalRecents::onConnection()";
 		writeMessage("TcpSignalRecents::onConnection()");
 
 		Q_ASSERT(isClearToSendRequest() == true);
 
 		requestSignalState();
-
 		return;
 	}
 
 	void TcpSignalRecents::onDisconnection()
 	{
-		qDebug() << "TcpSignalRecents::onDisconnection";
 		writeMessage("TcpSignalRecents::onDisconnection()");
 
 		m_signalUpdater.invalidateSignalStates(QThread::currentThreadId());
-
 		return;
 	}
 
 	void TcpSignalRecents::onReplyTimeout()
 	{
-		qDebug() << "TcpSignalRecents::onReplyTimeout()";
 		writeWarning("TcpSignalRecents::onReplyTimeout()");
 	}
 
@@ -106,7 +100,6 @@ namespace ClientLib
 		default:
 			Q_ASSERT(false);
 
-			qDebug() << "Wrong requestID in TcpSignalRecents::processReply()";
 			writeError(QString("Wrong requestID in TcpSignalRecents::processReply(), requestId %1").arg(requestID));
 
 			requestSignalState();
@@ -164,7 +157,6 @@ namespace ClientLib
 
 		if (s_getSignalStateReply.error() != 0)
 		{
-			qDebug() << "TcpSignalRecents::processSignalState, error received: " << s_getSignalStateReply.error();
 			writeError(QString("processSignalState, error received %1").arg(s_getSignalStateReply.error()));
 
 			Q_ASSERT(s_getSignalStateReply.error() != 0);
@@ -189,8 +181,6 @@ namespace ClientLib
 		}
 
 		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
-
-		//qDebug() << "Priority updates state count  "  << states.size();
 
 		requestSignalState();
 		return;

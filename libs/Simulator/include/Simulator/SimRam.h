@@ -1,14 +1,15 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <memory_resource>
 #include <vector>
-#include <memory>
 
 #include <QByteArray>
+#include <QtEndian>
 
 #include "SimOverrideRamRecord.h"
-	
+
 class SimRamTests;
 
 namespace Sim

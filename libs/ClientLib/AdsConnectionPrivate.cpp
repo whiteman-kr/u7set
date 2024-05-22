@@ -1,11 +1,11 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "AdsConnectionPrivate.h"
+#include "../UtilsLib/SimpleThread.h"
 #include "TcpSignalClient.h"
 #include "TcpSignalRecents.h"
-#include "../UtilsLib/SimpleThread.h"
 
 
 namespace ClientLib
@@ -78,9 +78,7 @@ namespace ClientLib
 		return tcpSignalClient->signalStatesLoaded();
 	}
 
-	AdsConnectionPrivate::AdsConnectionPrivate(IAppSignalUpdater& signalUpdater, 
-											   IRecentAppSignals* recentAppSignals, 
-											   ILogFile* logFile) :
+	AdsConnectionPrivate::AdsConnectionPrivate(IAppSignalUpdater& signalUpdater, IRecentAppSignals* recentAppSignals, ILogFile* logFile) :
 		m_signalUpdater{signalUpdater},
 		m_recentAppSignals{recentAppSignals},
 		m_logFile{logFile, "AdsConnectionPrivate"}
@@ -90,20 +88,24 @@ namespace ClientLib
 
 	AdsConnectionPrivate::~AdsConnectionPrivate()
 	{
-		qDebug() << "~AdsConnectionPrivate()";
 		m_logFile.writeMessage("~AdsConnectionPrivate()");
 	}
 
-	void AdsConnectionPrivate::updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
+	void AdsConnectionPrivate::updateConnections(const SoftwareInfo& softwareInfo,
+												 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
 	{
 		m_logFile.writeMessage("updateConnections()");
 
-		m_conns.clear();	// it will stop all connection threads and destroy them
+		QWriteLocker locker{&m_connsMutex};
+
+		m_conns.clear(); // it will stop all connection threads and destroy them
 		m_signalUpdater.reset();
 
 		for (const auto& ads : appDataServices)
 		{
-			auto it = std::find_if(m_conns.begin(), m_conns.end(), [&ads](const Connection& c)
+			auto it = std::find_if(m_conns.begin(),
+								   m_conns.end(),
+								   [&ads](const Connection& c)
 								   {
 									   return c.address() == ads.address;
 								   });
@@ -123,6 +125,8 @@ namespace ClientLib
 
 	std::vector<Tcp::ConnectionState> AdsConnectionPrivate::tcpSignalConnStates() const
 	{
+		QReadLocker locker{&m_connsMutex};
+
 		std::vector<Tcp::ConnectionState> states;
 		states.reserve(m_conns.size());
 
@@ -144,6 +148,8 @@ namespace ClientLib
 			return states;
 		}
 
+		QReadLocker locker{&m_connsMutex};
+
 		states.reserve(m_conns.size());
 
 		for (const Connection& c : m_conns)
@@ -157,12 +163,24 @@ namespace ClientLib
 
 	bool AdsConnectionPrivate::signalParamsLoaded() const
 	{
-		return std::all_of(m_conns.begin(), m_conns.end(), [](const Connection& c) { return c.signalParamsLoaded(); });
+		QReadLocker locker{&m_connsMutex};
+		return std::all_of(m_conns.begin(),
+						   m_conns.end(),
+						   [](const Connection& c)
+						   {
+							   return c.signalParamsLoaded();
+						   });
 	}
 
 	bool AdsConnectionPrivate::signalStatesLoaded() const
 	{
-		return std::all_of(m_conns.begin(), m_conns.end(), [](const Connection& c) { return c.signalStatesLoaded(); });
+		QReadLocker locker{&m_connsMutex};
+		return std::all_of(m_conns.begin(),
+						   m_conns.end(),
+						   [](const Connection& c)
+						   {
+							   return c.signalStatesLoaded();
+						   });
 	}
 
-}	// namespace
+} // namespace ClientLib

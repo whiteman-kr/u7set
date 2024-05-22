@@ -1,0 +1,189 @@
+#ifndef ADSB_ADS_BRIDGE_H
+#define ADSB_ADS_BRIDGE_H
+
+#include "Common.h"
+#include "SelfTest.h"
+
+// MSVC NOTE: Use lib.exe to create import library for dll:
+//		lib.exe /DEF:AdsBridge.def /OUT:AdsBridge.lib /MACHINE:X64
+//
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+	/**
+	 * \brief Sets the log handler for the AdsBridge library.
+	 *
+	 * This function sets the log handler that will be used by the AdsBridge library to handle log messages. The log handler should be
+	 * thread-safe. This function can be called before AdsInit().
+	 *
+	 * \param handler The log handler function pointer.
+	 */
+	void AdsSetLogHandler(MatsLogHandler handler);
+
+
+	/**
+	 * \brief Sets the log level for the AdsBridge library.
+	 *
+	 * This function sets the log level that will be used by the AdsBridge library to filter log messages. The log level determines the
+	 * severity of the log messages that will be logged. The available log levels are defined in the MatsLogLevel enum. By default, the log
+	 * level is set to LOG_LEVEL_WARNING. This function can be called before AdsInit().
+	 *
+	 * \param level The log level to set.
+	 */
+	void AdsSetLogLevel(enum MatsLogLevel level);
+
+	void AdsTestLogHandler(enum MatsLogLevel level, const char* message);
+
+	bool AdsInitPrivate(int argc, char** argv, const char* equipmentId, bool isQtApplication);
+
+	/**
+	 * \brief Initializes the AdsBridge library.
+	 *
+	 * This function initializes the AdsBridge library and starts the message loop if the application is not Qt-based.
+	 *
+	 * \param argc The number of command line arguments (used only if isQtApplication is false).
+	 * \param argv The command line arguments (used only if isQtApplication is false).
+	 * \param equipmentId The ID of the equipment instance.
+	 * \param isQtApplication True if the application is Qt-based, false otherwise.
+	 */
+	static inline bool AdsInit(int argc, char** argv, const char* equipmentId, bool isQtApplication)
+	{
+		// Test structure size, fields and alignment.
+		//
+		return AdsSelfTest() && AdsInitPrivate(argc, argv, equipmentId, isQtApplication);
+	}
+
+	/**
+	 * \brief Shuts down the AdsBridge library.
+	 *
+	 * This function shuts down the AdsBridge library and stops the message loop if the application is not Qt-based.
+	 */
+	void AdsShutdown();
+
+	/**
+	 * \brief Adds a connection to the AppDataService.
+	 *
+	 * This function adds a connection to the AppDataService. The connection is identified by the EquipmentID, and the IPv4 address/port of
+	 * the service. The connection is not established until AdsConnect() is called.
+	 *
+	 * \param adsEquipmentId The equipment ID of the AppDataService.
+	 * \param address The IPv4 address of the server.
+	 * \param port The port number of the server.
+	 */
+	void AdsAddConnection(const char* adsEquipmentId, const char* address, int port);
+
+	/**
+	 * \brief Connects to the AppDataService.
+	 *
+	 * This function connects to the AppDataService(s) using the connections that have been added with AdsAddConnection(). The connection
+	 * status can be checked with AdsGetConnectionStatuses().
+	 */
+	void AdsConnect();
+
+	/**
+	 * \brief Closes all connections to the AppDataServices.
+	 *
+	 * This function closes the connection to the AppDataService(s).
+	 */
+	void AdsClose();
+
+	/**
+	 * \brief Checks if the connections to the AppDataService(s) are established.
+	 *
+	 * This function returns the number of connections that are established.
+	 *
+	 * \return The number of established connections.
+	 */
+	size_t AdsGetConnectionCount();
+
+	/**
+	 * \brief Gets the statuses of connection to AppDataService(s).
+	 *
+	 * This function returns the connection statuses of the AppDataService(s).
+	 *
+	 * \param out The array of connection statuses to fill, must be allocated by caller.
+	 * \param count The number of connection statuses to get.
+	 * \return True if the connection statuses were successfully retrieved, false otherwise.
+	 */
+	bool AdsGetConnectionStatuses(struct AdsConnectionStatus* out, size_t count);
+
+	/**
+	 * \brief Checks if the signal parameters are loaded.
+	 *
+	 * This function checks if the signal parameters are loaded.
+	 *
+	 * \return True if the <b>all</b> signal parameters are loaded, false otherwise.
+	 */
+	bool AdsSignalParamsLoaded();
+
+	/**
+	 * \brief Checks if the signal states are loaded.
+	 *
+	 * This function checks if the signal states are loaded.
+	 *
+	 * \return True if the all signal states are loaded, false otherwise.
+	 */
+	bool AdsSignalStatesLoaded();
+
+	/**
+	 * \brief Gets the number of signals.
+	 *
+	 * This function returns the number of signals that are available.
+	 *
+	 * \return The number of signals.
+	 */
+	size_t AdsGetSignalCount();
+
+	/**
+	 * \brief Gets the list of signals.
+	 *
+	 * This function returns the list of signals that are available.
+	 *
+	 * \param out The array of signal hashes to fill, must be allocated by caller.
+	 * \param count The number of signal hashes to get, returned by AdsGetSignalCount().
+	 * \return True if the signal hashes were successfully retrieved, false otherwise.
+	 */
+	bool AdsGetSignalList(MatsSignalHash* out, size_t count);
+
+	/**
+	 * \brief Gets the parameters of the specified signals.
+	 *
+	 * This function returns the parameters of the specified signals.
+	 *
+	 * \param signalHashes The array of signal hashes to get the parameters for.
+	 * \param out The array of signal parameters to fill, must be allocated by caller.
+	 * \param count The number of signal parameters to get.
+	 * \return True if all signal parameters were successfully retrieved, false otherwise.
+	 */
+	bool AdsGetSignalParams(const MatsSignalHash* signalHashes, struct MatsAppSignalParam* out, size_t count);
+
+	/**
+	 * \brief Gets the states of the specified signals.
+	 *
+	 * This function returns the states of the specified signals.
+	 *
+	 * \param signalHashes The array of signal hashes to get the states for.
+	 * \param out The array of signal states to fill, must be allocated by caller.
+	 * \param count The number of signal states to get.
+	 * \return True if all signal states were successfully retrieved, false otherwise.
+	 */
+	bool AdsGetSignalStates(const MatsSignalHash* signalHashes, struct MatsAppSignalState* out, size_t count);
+
+	/**
+	 * \brief Calculates the hash value of the specified string.
+	 *
+	 * This function calculates the hash value of the specified string.
+	 *
+	 * \param string The string to calculate the hash value for.
+	 * \return The hash value of the string.
+	 */
+	MatsSignalHash AdsCalcHash(const char* string);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // ADSB_ADS_BRIDGE_H
