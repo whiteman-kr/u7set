@@ -1027,7 +1027,15 @@ namespace Builder
 		std::vector<AppSignal*> m_ioSignals;					// input/output signals of current chassis
 		std::map<Hash, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, calcHash(signal EquipmentID) => AppSignal*
 		std::map<Hash, UalSignal*> m_optoPortValiditySignal;	// calcHash(OptoPort EquipmentID) => OptoPort validity signal
-		std::map<Address16, std::vector<const AppSignal*>> m_bvbRegSignals;	// BVB chassis signal regValueAddr => vector(AppSignal)
+
+		struct BuimAppSignal
+		{
+			int buimPlace = -1;
+			QString buimCaption;
+			const AppSignal* appSignal = nullptr;
+		};
+
+		std::map<Address16, std::vector<BuimAppSignal>> m_bvbRegSignals;	// BVB chassis signal regValueAddr => vector(AppSignal)
 
 		std::map<Hash, std::set<QUuid>> m_ualItemsSignals;		// Hash(appSignalID) => set of UalItem.guid (type Signal) with this appSignalID
 
