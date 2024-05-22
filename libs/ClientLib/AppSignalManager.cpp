@@ -65,7 +65,7 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::addSignals(const std::vector<AppSignalParam>& appSignals, const QString& appDataServiceId)
+	void AppSignalManager::addSignals(std::span<const AppSignalParam> appSignals, const QString& appDataServiceId)
 	{
 		QWriteLocker wl(&m_paramsLocker);
 
@@ -120,7 +120,7 @@ namespace ClientLib
 		m_recentUsed.add(hash);
 	}
 
-	void AppSignalManager::addRecentAppSignals(const std::vector<Hash>& hashes)
+	void AppSignalManager::addRecentAppSignals(std::span<const Hash> hashes)
 	{
 		QMutexLocker locker(&m_recentUsedMutex);
 		m_recentUsed.add(hashes);
@@ -197,7 +197,7 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::setState(const std::vector<AppSignalState>& states, Hash dataServerHash, Qt::HANDLE sourceThreadId)
+	void AppSignalManager::setState(std::span<const AppSignalState> states, Hash dataServerHash, Qt::HANDLE sourceThreadId)
 	{
 		QWriteLocker wl(&m_statesLocker);
 
@@ -355,17 +355,17 @@ namespace ClientLib
 
 	// Ok
 	//
-	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManager::signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const
 	{
 		return signalState(appSignalHashes, {}, result, found);
 	}
 
-	void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManager::signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const
 	{
 		return signalState(appSignalIds, {}, result, found);
 	}
 
-	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManager::signalState(std::span<const Hash> appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const
 	{
 		if (result == nullptr)
 		{
@@ -420,7 +420,7 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManager::signalState(std::span<const QString> appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const
 	{
 		std::vector<Hash> appSignalHashes;
 		appSignalHashes.reserve(appSignalIds.size());

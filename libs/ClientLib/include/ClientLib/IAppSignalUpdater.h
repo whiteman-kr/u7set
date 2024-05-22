@@ -1,5 +1,5 @@
 #pragma once
-#include <vector>
+#include <span>
 
 namespace ClientLib
 {
@@ -21,7 +21,7 @@ namespace ClientLib
 		// Set signal params.
 		//
 		virtual void addSignal(const AppSignalParam& appSignal, const QString& appDataServiceId) = 0;
-		virtual void addSignals(const std::vector<AppSignalParam>& appSignals, const QString& appDataServiceId) = 0;
+		virtual void addSignals(std::span<const AppSignalParam> appSignals, const QString& appDataServiceId) = 0;
 
 		// Invalidate all signal states by source sourceThreadId.
 		//
@@ -31,7 +31,7 @@ namespace ClientLib
 		//
 		virtual void setState(const QString& appSignalId, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) = 0;
 		virtual void setState(Hash signalHash, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) = 0;
-		virtual void setState(const std::vector<AppSignalState>& states, Hash dataServerHash, Qt::HANDLE sourceThreadId) = 0;
+		virtual void setState(std::span<const AppSignalState> states, Hash dataServerHash, Qt::HANDLE sourceThreadId) = 0;
 	};
 
 }

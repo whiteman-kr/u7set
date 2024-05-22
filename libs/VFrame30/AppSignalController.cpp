@@ -48,12 +48,12 @@ namespace VFrame30
 		return m_appSignalManager.signalState(appSignalId, found);
 	}
 
-	void AppSignalController::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalController::signalState(const std::span<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
 	{
 		return m_appSignalManager.signalState(appSignalHashes, result, found);
 	}
 
-	void AppSignalController::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalController::signalState(const std::span<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
 	{
 		return m_appSignalManager.signalState(appSignalIds, result, found);
 	}

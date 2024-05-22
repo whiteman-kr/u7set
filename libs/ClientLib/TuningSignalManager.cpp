@@ -276,7 +276,7 @@ namespace ClientLib
 		return state(signalHash, tuningServiceHash, found);
 	}
 
-	void TuningSignalManager::state(const std::vector<Hash>& appSignalHashes, std::vector<TuningSignalState>* result, int* found) const
+	void TuningSignalManager::state(std::span<const Hash> appSignalHashes, std::vector<TuningSignalState>* result, int* found) const
 	{
 		if (result == nullptr)
 		{
@@ -322,7 +322,7 @@ namespace ClientLib
 		return;
 	}
 
-	void TuningSignalManager::state(const std::vector<QString>& appSignalIds, std::vector<TuningSignalState>* result, int* found) const
+	void TuningSignalManager::state(std::span<const QString> appSignalIds, std::vector<TuningSignalState>* result, int* found) const
 	{
 		std::vector<Hash> appSignalHashes;
 		appSignalHashes.reserve(appSignalIds.size());
@@ -588,7 +588,7 @@ namespace ClientLib
 		m_recentEnabled = true;
 	}
 
-	void TuningSignalManager::addRecentAppSignals(const std::vector<Hash>& hashes)
+	void TuningSignalManager::addRecentAppSignals(std::span<const Hash> hashes)
 	{
 		if (m_recentEnabled == true)
 		{

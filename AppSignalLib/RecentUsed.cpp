@@ -64,7 +64,7 @@ namespace AppSignalLib
 		return;
 	}
 
-	void RecentUsed::add(const std::vector<Hash>& hashes)
+	void RecentUsed::add(std::span<const Hash> hashes)
 	{
 		if (m_lastTimeDataFetched.hasExpired(ExpiredTimeMs) == true)
 		{
@@ -112,7 +112,7 @@ namespace AppSignalLib
 		return true;
 	}
 
-	bool RecentUsed::remove(const std::vector<Hash>& hashes)
+	bool RecentUsed::remove(std::span<const Hash> hashes)
 	{
 		bool ok = true;
 		for (Hash hash : hashes)
@@ -130,7 +130,7 @@ namespace AppSignalLib
 		std::vector<Hash> hashesToRemove;
 		hashesToRemove.reserve(m_signalToTime.size());
 
-		for (const auto&[hash, lastAccessTime] : m_signalToTime)
+		for (const auto& [hash, lastAccessTime] : m_signalToTime)
 		{
 			if (now - lastAccessTime > ExpiredTimeMs)
 			{
@@ -157,4 +157,4 @@ namespace AppSignalLib
 
 		return result;
 	}
-}
+} // namespace AppSignalLib

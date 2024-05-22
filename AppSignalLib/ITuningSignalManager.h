@@ -1,7 +1,10 @@
 #pragma once
 
-#include "TuningSignalState.h"
+#include <span>
+#include <vector>
+
 #include "AppSignalParam.h"
+#include "TuningSignalState.h"
 
 class ITuningSignalManager
 {
@@ -22,9 +25,8 @@ public:
 	virtual TuningSignalState state(Hash hash, Hash tuningServiceHash, bool* found) const = 0;
 	virtual TuningSignalState state(const QString& appSignalId, Hash tuningServiceHash, bool* found) const = 0;
 
-	virtual void state(const std::vector<Hash>& appSignalHashes, std::vector<TuningSignalState>* result, int* found) const = 0;
-	virtual void state(const std::vector<QString>& appSignalIds, std::vector<TuningSignalState>* result, int* found) const = 0;
+	virtual void state(std::span<const Hash> appSignalHashes, std::vector<TuningSignalState>* result, int* found) const = 0;
+	virtual void state(std::span<const QString> appSignalIds, std::vector<TuningSignalState>* result, int* found) const = 0;
 
 	virtual QStringList signalIdsByTag(const QString& tag) const = 0;
 };
-

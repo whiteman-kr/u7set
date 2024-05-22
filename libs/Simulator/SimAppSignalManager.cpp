@@ -122,17 +122,17 @@ namespace Sim
 		return m_impl.signalState(appSignalId, dataServerId, found);
 	}
 
-	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManager::signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const
 	{
 		m_impl.signalState(appSignalHashes, result, found);
 	}
 
-	void AppSignalManager::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManager::signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const
 	{
 		m_impl.signalState(appSignalIds, result, found);
 	}
 
-	void AppSignalManager::signalState(const std::vector<Hash>& appSignalHashes,
+	void AppSignalManager::signalState(std::span<const Hash> appSignalHashes,
 									   Hash dataServerHash,
 									   std::vector<AppSignalState>* result,
 									   int* found) const
@@ -140,7 +140,7 @@ namespace Sim
 		m_impl.signalState(appSignalHashes, dataServerHash, result, found);
 	}
 
-	void AppSignalManager::signalState(const std::vector<QString>& appSignalIds,
+	void AppSignalManager::signalState(std::span<const QString> appSignalIds,
 									   const QString& dataServerId,
 									   std::vector<AppSignalState>* result,
 									   int* found) const

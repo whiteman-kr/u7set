@@ -3,7 +3,6 @@
 #include "../AppSignalLib/IAppSignalManager.h"
 #include <TrendView/TrendSignalState.h>
 
-
 namespace Sim
 {
 	class AppSignalManagerImpl;
@@ -59,13 +58,13 @@ namespace Sim
 		virtual AppSignalState signalState(Hash signalHash, Hash dataServerHash, bool* found) const override;
 		virtual AppSignalState signalState(const QString& appSignalId, const QString& dataServerId, bool* found) const override;
 
-		virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const override;
-		virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const override;
-		virtual void signalState(const std::vector<Hash>& appSignalHashes,
+		virtual void signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const override;
+		virtual void signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const override;
+		virtual void signalState(std::span<const Hash> appSignalHashes,
 								 Hash dataServerHash,
 								 std::vector<AppSignalState>* result,
 								 int* found) const override;
-		virtual void signalState(const std::vector<QString>& appSignalIds,
+		virtual void signalState(std::span<const QString> appSignalIds,
 								 const QString& dataServerId,
 								 std::vector<AppSignalState>* result,
 								 int* found) const override;

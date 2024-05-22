@@ -135,8 +135,8 @@ public:
 	MOCK_METHOD(TuningSignalState, state, (Hash hash, Hash tuningServiceHash, bool* found), (const override));
 	MOCK_METHOD(TuningSignalState, state, (const QString& appSignalId, Hash tuningServiceHash, bool* found), (const override));
 
-	MOCK_METHOD(void, state, (const std::vector<Hash>& appSignalHashes, std::vector<TuningSignalState>* result, int* found), (const override));
-	MOCK_METHOD(void, state, (const std::vector<QString>& appSignalIds, std::vector<TuningSignalState>* result, int* found), (const override));
+	MOCK_METHOD(void, state, (std::span<const Hash> appSignalHashes, std::vector<TuningSignalState>* result, int* found), (const override));
+	MOCK_METHOD(void, state, (std::span<const QString> appSignalIds, std::vector<TuningSignalState>* result, int* found), (const override));
 
 	MOCK_METHOD(QStringList, signalIdsByTag, (const QString& tag), (const override));
 };
@@ -167,7 +167,7 @@ public:
 	virtual void addRecentAppSignal(Hash /*h*/) override
 	{
 	}
-	virtual void addRecentAppSignals(const std::vector<Hash>& /*hashes*/) override
+	virtual void addRecentAppSignals(std::span<const Hash> /*hashes*/) override
 	{
 	}
 	virtual std::vector<Hash> recentlyUsedAppSignals(const QString& /*appDataServivceId*/) override	

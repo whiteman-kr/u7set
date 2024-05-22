@@ -41,13 +41,13 @@ namespace ClientLib
 		virtual void notifySignalParamsUpdated() override;
 
 		virtual void addSignal(const AppSignalParam& appSignal, const QString& appDataServiceId) override;
-		virtual void addSignals(const std::vector<AppSignalParam>& appSignals, const QString& appDataServiceId) override;
+		virtual void addSignals(std::span<const AppSignalParam> appSignals, const QString& appDataServiceId) override;
 
 		virtual void invalidateSignalStates(Qt::HANDLE sourceThreadId) override;
 
 		virtual void setState(const QString& appSignalId, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
 		virtual void setState(Hash signalHash, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
-		virtual void setState(const std::vector<AppSignalState>& states, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
+		virtual void setState(std::span<const AppSignalState> states, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
 
 	private:
 		void addSignalPrivate(const AppSignalParam& appSignal, const QString& appDataServiceId);
@@ -58,7 +58,7 @@ namespace ClientLib
 		//
 	public:
 		virtual void addRecentAppSignal(Hash hash) override;
-		virtual void addRecentAppSignals(const std::vector<Hash>& hashes) override;
+		virtual void addRecentAppSignals(std::span<const Hash> hashes) override;
 
 		virtual std::vector<Hash> recentlyUsedAppSignals(const QString& appDataServivceId) override;
 		virtual bool hasRecentlyUsedAppSignals() override;
@@ -74,7 +74,7 @@ namespace ClientLib
 		void setSetpoints(ComparatorSet&& setpoints);
 		void setSetpoints(const ComparatorSet& setpoints);
 
-		// IAppSignalManager implememntation - AppSignals
+		// IAppSignalManager implementation - AppSignals
 		//
 		virtual int signalsCount() const override final;
 		virtual std::vector<AppSignalParam> signalList() const override final;
@@ -91,10 +91,10 @@ namespace ClientLib
 		virtual AppSignalState signalState(Hash signalHash, Hash dataServerHash, bool* found) const override final;
 		virtual AppSignalState signalState(const QString& appSignalId, const QString& dataServerId, bool* found) const override final;
 
-		virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const override final;
-		virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const override final;
-		virtual void signalState(const std::vector<Hash>& appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const override final;
-		virtual void signalState(const std::vector<QString>& appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const override final;
+		virtual void signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const override final;
+		virtual void signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const override final;
+		virtual void signalState(std::span<const Hash> appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const override final;
+		virtual void signalState(std::span<const QString> appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const override final;
 
 		virtual QStringList signalTags(Hash signalHash) const override final;
 		virtual QStringList signalTags(const QString& appSignalId) const override final;
