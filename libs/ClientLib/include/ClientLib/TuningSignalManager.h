@@ -1,8 +1,10 @@
 #ifndef TUNINGSIGNALMANAGER_H
 #define TUNINGSIGNALMANAGER_H
 
-#include <unordered_map>
 #include <condition_variable>
+#include <span>
+#include <unordered_map>
+
 #include <QMutex>
 #include <QReadWriteLock>
 
@@ -63,8 +65,8 @@ namespace ClientLib
 		virtual TuningSignalState state(Hash hash, Hash tuningServiceHash, bool* found) const override;
 		virtual TuningSignalState state(const QString& appSignalId, Hash tuningServiceHash, bool* found) const override;
 
-		virtual void state(const std::vector<Hash>& appSignalHashes, std::vector<TuningSignalState>* result, int* found) const override final;
-		virtual void state(const std::vector<QString>& appSignalIds, std::vector<TuningSignalState>* result, int* found) const override final;
+		virtual void state(std::span<const Hash> appSignalHashes, std::vector<TuningSignalState>* result, int* found) const override final;
+		virtual void state(std::span<const QString> appSignalIds, std::vector<TuningSignalState>* result, int* found) const override final;
 
 		// Queued state requesting functions (hashes are not placed to Recent storage)
 		//
@@ -103,7 +105,7 @@ namespace ClientLib
 		// Implementation IRecentAppSignals - State manipulation
 		//
 		void addRecentAppSignal(Hash h) override;
-		void addRecentAppSignals(const std::vector<Hash>& hashes) override;
+		void addRecentAppSignals(std::span<const Hash> hashes) override;
 
 		std::vector<Hash> recentlyUsedAppSignals(const QString& dataServiceId) override;
 		bool hasRecentlyUsedAppSignals() override;

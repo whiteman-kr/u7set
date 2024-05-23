@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../AppSignalLib/IAppSignalManager.h"
+
 #include <QObject>
 #include <QJSValue>
 
@@ -31,8 +32,8 @@ namespace VFrame30
 		[[nodiscard]] AppSignalState signalState(Hash signalHash, bool* found) const;
 		[[nodiscard]] AppSignalState signalState(const QString& appSignalId, bool* found) const;
 
-		void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const;
-		void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const;
+		void signalState(const std::span<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const;
+		void signalState(const std::span<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const;
 
 		[[nodiscard]] QStringList signalTags(Hash signalHash) const;
 		[[nodiscard]] QStringList signalTags(const QString& appSignalId) const;
