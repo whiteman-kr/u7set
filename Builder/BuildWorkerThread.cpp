@@ -675,10 +675,11 @@ namespace Builder
 		TEST_PTR_RETURN_FALSE(m_context->m_log);
 		TEST_PTR_RETURN_FALSE(m_context->m_equipmentSet);
 
-		std::map<QString, Hardware::DeviceObject*> actuators;
+		m_context->m_actuators.clear();
+
 		bool checkResult = true;
 
-		std::function<void (Hardware::DeviceObject*)> checkActuatorID = [this, &actuators, &checkResult](Hardware::DeviceObject* device)
+		std::function<void (Hardware::DeviceObject*)> checkActuatorID = [this, &checkResult](Hardware::DeviceObject* device)
 		{
 			TEST_PTR_RETURN(device);
 
@@ -686,6 +687,8 @@ namespace Builder
 			{
 				return;
 			}
+
+			const Hardware::DeviceModule* devModule = device->toModule().get();
 
 			if (DeviceHelper::isPropertyExists(device, EquipmentPropNames::ACTUATOR_ID) == false)
 			{
@@ -711,11 +714,11 @@ namespace Builder
 				return;
 			}
 
-			auto it = actuators.find(actuatorID);
+			auto it = m_context->m_actuators.find(actuatorID);
 
-			if (it != actuators.end())
+			if (it != m_context->m_actuators.end())
 			{
-				Hardware::DeviceObject* dev1 = it->second;
+				const Hardware::DeviceModule* dev1 = it->second;
 
 				m_context->m_log->errEQP6022(actuatorID,
 											 dev1->equipmentIdTemplate(), dev1->uuid(),
@@ -725,7 +728,7 @@ namespace Builder
 				return;
 			}
 
-			actuators.emplace(actuatorID, device);
+			m_context->m_actuators.emplace(actuatorID, devModule);
 		};
 
 		Hardware::equipmentWalker(m_context->m_equipmentSet->root().get(), checkActuatorID);

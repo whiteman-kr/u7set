@@ -114,6 +114,8 @@ namespace Builder
 
 		VduFontProvider m_vduFontProvider;
 
+		std::map<QString, const Hardware::DeviceModule*> m_actuators;
+
 		// Generated VDU schemas
 		//
 		struct GeneratedVduSchema

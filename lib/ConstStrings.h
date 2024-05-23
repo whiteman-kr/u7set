@@ -79,6 +79,7 @@ namespace EquipmentPropNames
 	inline const QString LM_PLATFORM_INTERFACE_CONTROLLER_SUFFIX = "_PI";
 
 	inline const QString ACTUATOR_ID("ActuatorID");
+	inline const QString ACTUATOR_DESCRIPTION("ActuatorDescription");
 
 	// I/O Modules properties
 	//
@@ -279,6 +280,9 @@ namespace XmlElement
 	inline const QString SIGNALS("Signals");
 	inline const QString SIGNAL_ELEM("Signal");
 
+	inline const QString ACTUATORS("Actuators");
+	inline const QString ACTUATOR("Actuator");
+
 	inline const QString GATEWAYS("Gateways");
 	inline const QString GATEWAY("Gateway");
 	inline const QString SIGNAL_LISTS("SignalLists");
@@ -421,6 +425,8 @@ namespace XmlAttribute
 	inline const QString REG_ADDR("RegAddr");
 	inline const QString REG_BIT("RegBit");
 	inline const QString FORMAT("Format");
+
+	inline const QString MODULE_CAPTION("ModuleCaption");
 }
 
 namespace Latin1Char
