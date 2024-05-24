@@ -456,9 +456,6 @@ private:
 	QString specPropNotExistErr(const QString &propName) const;
 
 private:
-	bool m_loaded = false;										// == false - only m_ID and m_appSignalID fields is initialized from database
-																	// == true - all Signal fields is initialized from database
-
 	// Signal identificators
 	//
 	QString m_appSignalID;
@@ -469,10 +466,7 @@ private:
 	QString m_busTypeID;											// only for: m_signalType == E::SignalType::Bus
 
 	E::Channel m_channel = E::Channel::A;
-	bool m_excludeFromBuild = false;
-
-	bool m_isAutoSignal = false;
-
+	
 	// Signal type
 	//
 	E::SignalType m_signalType = E::SignalType::Analog;
@@ -489,6 +483,26 @@ private:
 							E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
 	QString m_unit;
 
+	//
+
+	bool m_excludeFromBuild = false;
+	bool m_isAutoSignal = false;
+
+	bool m_acquire = true;
+	bool m_archive = true;
+	bool m_invertSignal = false;
+	bool m_reserved = false;
+
+	bool m_loaded = false; // == false - only m_ID and m_appSignalID fields is initialized from database
+						   // == true - all Signal fields is initialized from database
+
+	bool m_deleted = false;
+	bool m_checkedOut = false;
+
+	bool m_isConst = false;
+	bool m_isEndpoint = false;
+	bool m_needConversion = false;
+
 	// Tuning signal properties
 	//
 	bool m_enableTuning = false;
@@ -498,14 +512,10 @@ private:
 
 	// Signal properties for MATS
 	//
-	bool m_acquire = true;
-	bool m_archive = true;
 	int m_decimalPlaces = 2;
+	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
 	double m_coarseAperture = 1;
 	double m_fineAperture = 0.5;
-	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
-	bool m_invertSignal = false;
-	bool m_reserved  = false;
 
 	// Signal specific properties
 	//
@@ -523,14 +533,13 @@ private:
 	int m_signalGroupID = 0;
 	int m_signalInstanceID = 0;
 	int m_changesetID = 0;
-	bool m_checkedOut = false;
 	int m_userID = 0;
-	bool m_deleted = false;
+
+	E::VcsItemAction m_instanceAction = E::VcsItemAction::Added;
 
 	qint64 m_createdMcs = 0;				// in microseconds, as in database
 	qint64 m_instanceCreatedMcs = 0;		// in microseconds, as in database
 
-	E::VcsItemAction m_instanceAction = E::VcsItemAction::Added;
 
 	// Signal properties calculated in compile-time
 	//
@@ -556,16 +565,9 @@ private:
 
 	E::LogicModuleRamAccess m_lmRamAccess = E::LogicModuleRamAccess::Undefined;
 
-	bool m_isConst = false;
 	double m_constValue = 0;
 
-	bool m_isEndpoint = false;
-
 	AppSignalStateFlagsMap m_stateFlagsSignals;
-
-	//
-
-	bool m_needConversion = false;
 };
 
 class AppSignalSet
