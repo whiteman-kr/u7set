@@ -358,11 +358,11 @@ namespace Tcp
 
 		virtual void incomingConnection(qintptr socketDescriptor) override final
 		{
-			emit newConnection(socketDescriptor);
+			emit newIncomingConnection(socketDescriptor);
 		}
 
 	signals:
-		void newConnection(qintptr socketDescriptor);
+		void newIncomingConnection(qintptr socketDescriptor);
 	};
 
 	// -------------------------------------------------------------------------------------
@@ -408,7 +408,7 @@ namespace Tcp
 
 		Server* m_serverInstance = nullptr;
 
-		QHash<const SocketWorker*, SimpleThread*> m_runningServers;
+		std::map<const SocketWorker*, SimpleThread*> m_runningServers;
 
 		friend class TcpServer;
 	};
