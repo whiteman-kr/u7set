@@ -1,0 +1,3 @@
+MPS-17
+	22.11.2021	Version: 0	MPS-17_v0.u7devp		Preset added
+	27.05.2024	Version: 1	MPS-17_v1.u7devp		Added sensor type V_0_5
