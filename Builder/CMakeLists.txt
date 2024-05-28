@@ -130,6 +130,8 @@ qt_add_library(${TARGET} STATIC
 	ModuleLogicCompiler.h
 	ModulesRawData.cpp
 	ModulesRawData.h
+	ModulesReportGenerator.cpp
+	ModulesReportGenerator.h
 	MonitorCfgGenerator.cpp
 	MonitorCfgGenerator.h
 	OptoModule.cpp

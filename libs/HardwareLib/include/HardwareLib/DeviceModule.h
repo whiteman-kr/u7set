@@ -32,6 +32,7 @@ namespace Hardware
 			BVK4 = 0x5300,	// obsolete, for compatibility
 			BP336 = 0x5500,	// obsolete, for compatibility
 			BVB = 0x5600,
+			BUIM = 0x5700,
 			VDU = 0x1C00
 		};
 		Q_ENUM(FamilyType)
