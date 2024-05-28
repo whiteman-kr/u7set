@@ -7,6 +7,12 @@ EXPORTS
 	AdsInitPrivate
 	AdsShutdown
 
+	AdsGetSoftwareId
+
+	AdsLoadConfiguration
+	AdsSetConfiguration
+	AdsSetConfigurationProfile
+
 	AdsAddConnection
 	AdsConnect
 	AdsClose

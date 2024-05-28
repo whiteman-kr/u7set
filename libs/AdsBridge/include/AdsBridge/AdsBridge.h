@@ -63,6 +63,12 @@ extern "C"
 	 */
 	void AdsShutdown();
 
+	const char* AdsGetSoftwareId();
+
+	bool AdsLoadConfiguration(const char* fileName);
+	bool AdsSetConfiguration(const char* configurationXml, size_t size);
+	bool AdsSetConfigurationProfile(const char* profile); // Possible to use only after AdsLoadConfiguration() or AdsSetConfiguration()
+
 	/**
 	 * \brief Adds a connection to the AppDataService.
 	 *

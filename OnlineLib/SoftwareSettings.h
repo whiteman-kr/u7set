@@ -468,6 +468,24 @@ public:
 	void clear();
 };
 
+class AdsBridgeSettings : virtual public SoftwareSettings
+{
+public:
+	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
+
+private:
+	friend class SoftwareSettingsSet;
+
+	// these methods should be call by SoftwareSettingsSet only
+	//
+	bool writeToXml(XmlWriteHelper& xml) const override;
+	bool readFromXml(XmlReadHelper& xml) override;
+
+public:
+	bool readFromXml(const QByteArray& xml);
+
+	void clear();
+};
 
 class DiagnosticsSettings : virtual public SoftwareSettings
 {

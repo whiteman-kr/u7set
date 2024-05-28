@@ -1876,6 +1876,126 @@ bool MonitorSettingsGetter::readTuningServiceSettings(const Builder::Context* co
 
 // -------------------------------------------------------------------------------------
 //
+// AdsBridgeSettingsGetter class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool AdsBridgeSettingsGetter::readSettings(const Builder::Context* context, const Hardware::Software* software)
+{
+	clear();
+
+	TEST_PTR_RETURN_FALSE(context);
+
+	Builder::IssueLogger* log = context->m_log;
+	TEST_PTR_RETURN_FALSE(log);
+	TEST_PTR_LOG_RETURN_FALSE(software, log);
+
+	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+	TEST_PTR_LOG_RETURN_FALSE(equipment, log);
+
+	bool result = true;
+
+	// --
+	//
+	result = readAppDataServiceSettings(context, software);
+	RETURN_IF_FALSE(result);
+
+	return result;
+}
+
+bool AdsBridgeSettingsGetter::readAppDataServiceSettings(const Builder::Context* context, const Hardware::Software* software)
+{
+	Builder::IssueLogger* log = context->m_log;
+	const Hardware::EquipmentSet* equipment = context->m_equipmentSet.get();
+
+	bool result = true;
+
+	// AppDataService settings reading
+	//
+	QStringList appDataServiceIds;
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_DATA_SERVICE_IDS, &appDataServiceIds, log);
+
+	if (appDataServiceIds.isEmpty() == true)
+	{
+		log->errCFG3022(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS);
+		return false;
+	}
+
+	// Get all AppDataServices
+	//
+	std::map<QString, const Hardware::Software*> appDataServices;
+
+	for (const QString& appDataServiceId : appDataServiceIds)
+	{
+		// ADS->ClientRequestIP, ClientRequestPort
+		//
+		const Hardware::Software* appDataService = nullptr;
+
+		if (auto appDataServiceDevice = equipment->deviceObject(appDataServiceId); appDataServiceDevice == nullptr)
+		{
+			// Property %1.%2 is linked to undefined software ID %3.
+			//
+			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+			result = false;
+		}
+		else
+		{
+			if (appDataService = appDataServiceDevice->toSoftware().get(); appDataService == nullptr)
+			{
+				// Property %1.%2 is linked to undefined software ID %3.
+				//
+				log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+				result = false;
+			}
+			else
+			{
+				if (appDataService->softwareType() != E::SoftwareType::AppDataService)
+				{
+					// Property %1.%2 is linked to not compatible software %3.
+					//
+					log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+					result = false;
+				}
+				else
+				{
+					appDataServices[appDataServiceId] = appDataService;
+				}
+			}
+		}
+	}
+
+	if (result == false || appDataServices.empty() == true)
+	{
+		return false;
+	}
+
+	// Reading AppDataService Settings
+	//
+	for (const auto& [appDataServiceId, appDataService] : appDataServices)
+	{
+		// Get AppDataService connection settings
+		//
+		AppDataServiceSettingsGetter adsSettings;
+		result &= adsSettings.readSoftwareSettings(context, appDataService);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		SoftwareEndpoint::AppDataService ads;
+		ads.equipmentId = appDataServiceId;
+		ads.address = adsSettings.clientRequestIP;
+		ads.realtimeAddress = adsSettings.rtTrendsRequestIP;
+
+		this->appDataServices.push_back(ads);
+	}
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------
+//
 // DiagnosticsSettingsGetter class implementation
 //
 // -------------------------------------------------------------------------------------

@@ -1,8 +1,9 @@
-#include <HardwareLib/Subsystem.h>
 #include <HardwareLib/PropertyNames.h>
+#include <HardwareLib/Subsystem.h>
 
 #include <Simulator/Simulator.h>
 
+#include "AdsBridgeCfgGenerator.h"
 #include "AppDataServiceCfgGenerator.h"
 #include "AppLogicCompiler.h"
 #include "ArchivingServiceCfgGenerator.h"
@@ -10,11 +11,11 @@
 #include "ConfigurationBuilder.h"
 #include "ConfigurationServiceCfgGenerator.h"
 #include "DiagDataServiceCfgGenerator.h"
+#include "DiagnosticsCfgGenerator.h"
 #include "GatewayServiceCfgGenerator.h"
 #include "LogicModulesInfoWriter.h"
 #include "MetrologyCfgGenerator.h"
 #include "MonitorCfgGenerator.h"
-#include "DiagnosticsCfgGenerator.h"
 #include "Parser.h"
 #include "SchemasReportGenerator.h"
 #include "ScriptChecker.h"
@@ -25,8 +26,8 @@
 #include "TuningServiceCfgGenerator.h"
 #include "ModulesReportGenerator.h"
 
-#include "./Vdu/VduFontGenerator.h"
 #include "./Vdu/VduConfigFile.h"
+#include "./Vdu/VduFontGenerator.h"
 
 namespace
 {
@@ -2306,6 +2307,10 @@ namespace Builder
 
 			case E::SoftwareType::Diagnostics:
 				swCfgGen = std::make_shared<DiagnosticsCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::AdsBridge:
+				swCfgGen = std::make_shared<AdsBridgeCfgGenerator>(context, software);
 				break;
 
 			default:

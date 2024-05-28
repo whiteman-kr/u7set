@@ -16,10 +16,6 @@ namespace Builder
 	{
 	}
 
-	MonitorCfgGenerator::~MonitorCfgGenerator()
-	{
-	}
-
 	bool MonitorCfgGenerator::createSettingsProfile(const QString& profile)
 	{
 		MonitorSettingsGetter settingsGetter;

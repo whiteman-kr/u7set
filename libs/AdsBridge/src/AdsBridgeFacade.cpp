@@ -2,6 +2,8 @@
 #include "AdsBridgeLogFile.h"
 
 #include "../../OnlineLib/TcpClientStatistics.h"
+#include "../../OnlineLib/SoftwareSettings.h"
+#include "../../UtilsLib/XmlHelper.h"
 
 #include <ClientLib/AdsConnection.h>
 #include <ClientLib/AppSignalManager.h>
@@ -21,6 +23,84 @@ namespace AdsBridge
 	AdsBridgeFacade::~AdsBridgeFacade()
 	{
 		m_log->writeMessage("AdsBridgeFacade::~AdsBridgeFacade()");
+	}
+
+	bool AdsBridgeFacade::setConfiguration(const QByteArray& data, QString profile /*= SettingsProfile::DEFAULT*/)
+	{
+		bool result = true;
+
+		// Read Xml data and get software info.
+		//
+		XmlReadHelper xmlReader{data};
+		xmlReader.findElement(XmlElement::SOFTWARE);
+
+		if (xmlReader.checkElement(XmlElement::SOFTWARE) == false)
+		{
+			m_log->writeError(QString{"AdsBridgeFacade::setConfiguration(), Invalid XML data %1."}.arg(XmlElement::SOFTWARE));
+			return false;
+		}
+
+		int typeInt = 0;
+		QString caption;
+		QString equipmentId;
+		QString controllersIds;
+		QStringList softwareControllersIds;
+
+		result &= xmlReader.readStringAttribute(XmlAttribute::CAPTION, &caption);
+		result &= xmlReader.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &equipmentId);
+		result &= xmlReader.readIntAttribute(XmlAttribute::TYPE, &typeInt);
+
+		result &= xmlReader.readStringAttribute(XmlAttribute::SOFTWARE_CONTROLLERS, &controllersIds);
+		softwareControllersIds = controllersIds.split(Separator::COMMA, Qt::SkipEmptyParts);
+
+		if (result == false)
+		{
+			m_log->writeError("AdsBridgeFacade::setConfiguration(), Failed to read software XML.");
+			return false;
+		}
+
+		if (static_cast<E::SoftwareType>(typeInt) != E::SoftwareType::AdsBridge)
+		{
+			m_log->writeError("AdsBridgeFacade::setConfiguration(), Wrong software type, AdsBridge is expected.");
+			return false;
+		}
+
+		// Read settings from XML.
+		//
+		SoftwareSettingsSet settingsSet;
+		settingsSet.setSoftwareType(E::SoftwareType::AdsBridge);
+
+		result = settingsSet.readFromXml(data);
+		if (result == false)
+		{
+			m_log->writeError("AdsBridgeFacade::setConfiguration(), Failed to read configuration XML.");
+			return false;
+		}
+
+		result = settingsSet.settingsProfileIsExists(profile);
+		if (result == false)
+		{
+			m_log->writeError(QString{"AdsBridgeFacade::setConfiguration(), Profile %1 not found."}.arg(profile));
+			return false;
+		}
+
+		auto settings = settingsSet.getSettingsProfile<AdsBridgeSettings>(profile);
+		if (settings == nullptr)
+		{
+			Q_ASSERT(settings);
+			m_log->writeError(QString{"AdsBridgeFacade::setConfiguration(), Profile %1 not found."}.arg(profile));
+			return false;
+		}
+
+		// Parse XML for getting the equipment ID ().
+		//
+		setEquipmentId(equipmentId);
+
+		// Add connections.
+		//
+		m_appDataServices.assign(begin(settings->appDataServices), end(settings->appDataServices));
+
+		return result;
 	}
 
 	void AdsBridgeFacade::addAppDataService(const QString& adsEquipmentId, const QString& address, int port)

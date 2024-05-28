@@ -3,6 +3,7 @@
 #include <AdsBridge/AdsBridge.h>
 
 #include <QCoreApplication>
+#include <QFile>
 #include <QTimer>
 
 #include <latch>
@@ -17,6 +18,8 @@ namespace
 													// optimize the code and the value is always up to date.
 	AdsBridge::LogFile g_log;
 	AdsBridge::AdsBridgeFacade g_adsBridge{&g_log};
+
+	QByteArray g_lastLoadedConfiguration;
 } // namespace
 
 void AdsSetLogHandler(MatsLogHandler handler)
@@ -94,6 +97,43 @@ bool AdsInitPrivate(int argc, char** argv, const char* equipmentId, bool isQtApp
 
 	g_adsBridge.setEquipmentId(equipmentId);
 	return true;
+}
+
+const char* AdsGetSoftwareId()
+{
+	return g_adsBridge.getStringConstPointer(g_adsBridge.equipmentId());
+}
+
+bool AdsLoadConfiguration(const char* fileName)
+{
+	g_lastLoadedConfiguration.clear();
+
+	QFile file{fileName};
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+	{
+		g_log.writeError(QString("AdsLoadConfiguration(): Cannot open file: %1, error: %2").arg(fileName).arg(file.errorString()));
+		return false;
+	}
+
+	g_lastLoadedConfiguration = file.readAll();
+	return g_adsBridge.setConfiguration(g_lastLoadedConfiguration, SettingsProfile::DEFAULT);
+}
+
+bool AdsSetConfiguration(const char* configurationXml, size_t size)
+{
+	g_lastLoadedConfiguration = QByteArray{configurationXml, static_cast<qsizetype>(size)};
+	return g_adsBridge.setConfiguration(g_lastLoadedConfiguration, SettingsProfile::DEFAULT);
+}
+
+bool AdsSetConfigurationProfile(const char* profile)
+{
+	if (g_lastLoadedConfiguration.isEmpty() == true)
+	{
+		g_log.writeError("AdsSetConfigurationProfile(): No configuration loaded.");
+		return false;
+	}
+
+	return g_adsBridge.setConfiguration(g_lastLoadedConfiguration, profile);
 }
 
 void AdsShutdown()

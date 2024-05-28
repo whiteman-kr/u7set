@@ -17,6 +17,7 @@ public:
 	std::shared_ptr<const TestClientSettings> testClientSettings(const QString& profile) const;
 	std::shared_ptr<const MetrologySettings> metrologySettings(const QString& profile) const;
 	std::shared_ptr<const MonitorSettings> monitorSettings(const QString& profile) const;
+	std::shared_ptr<const AdsBridgeSettings> adsBridgeSettings(const QString& profile) const;
 	std::shared_ptr<const TuningClientSettings> tuningClientSettings(const QString& profile) const;
 
 	template<typename T>

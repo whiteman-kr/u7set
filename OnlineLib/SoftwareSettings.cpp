@@ -356,6 +356,9 @@ std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings
 	case E::SoftwareType::Diagnostics:
 		return std::make_shared<DiagnosticsSettings>();
 
+	case E::SoftwareType::AdsBridge:
+		return std::make_shared<AdsBridgeSettings>();
+
 	case E::SoftwareType::ServiceControlManager:
 	case E::SoftwareType::Unknown:
 	case E::SoftwareType::BaseService:
@@ -1680,6 +1683,99 @@ QStringList MonitorSettings::getUsersAccounts() const
 void MonitorSettings::clear()
 {
 	*this = MonitorSettings{};
+}
+
+// -------------------------------------------------------------------------------------
+//
+// AdsBridgeSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool AdsBridgeSettings::writeToXml(XmlWriteHelper& xml) const
+{
+	writeStartSettings(xml);
+
+	// AppDataServices
+	//
+	for (const SoftwareEndpoint::AppDataService& ads : appDataServices)
+	{
+		xml.writeStartElement(XmlElement::APP_DATA_SERVICE);
+
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ads.equipmentId);
+
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, ads.address.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address.port());
+
+		xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, ads.realtimeAddress.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress.port());
+
+		xml.writeEndElement(); // </AppDataService>
+	}
+
+	// --
+	//
+	writeEndSettings(xml); // </Settings>
+
+	return true;
+}
+
+bool AdsBridgeSettings::readFromXml(XmlReadHelper& xml)
+{
+	clear();
+
+	bool result = true;
+
+	result = startSettingsReading(xml);
+
+	RETURN_IF_FALSE(result);
+
+	while (xml.readNextStartElement() == true)
+	{
+		if (xml.name() == XmlElement::APP_DATA_SERVICE)
+		{
+			SoftwareEndpoint::AppDataService ads;
+			QString clientIp;
+			int clientPort = 0;
+			QString rtIp;
+			int rtPort = 0;
+
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &ads.equipmentId);
+			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientPort);
+			result &= xml.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &rtIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtPort);
+
+			ads.address.setAddressPort(clientIp, clientPort);
+			ads.realtimeAddress.setAddressPort(rtIp, rtPort);
+
+			appDataServices.push_back(ads);
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		// Unknown element
+		//
+		qDebug() << "AdsBridgeSettings::readFromXml UnknownElement " << xml.name();
+		xml.skipCurrentElement();
+	}
+
+	SoftwareSettings::setShortId<SoftwareEndpoint::AppDataService>(&appDataServices);
+
+	result &= (appDataServices.empty() == false);
+
+	return result;
+}
+
+bool AdsBridgeSettings::readFromXml(const QByteArray& xml)
+{
+	XmlReadHelper helper{xml};
+	return readFromXml(helper);
+}
+
+void AdsBridgeSettings::clear()
+{
+	*this = AdsBridgeSettings{};
 }
 
 // -------------------------------------------------------------------------------------

@@ -48,6 +48,11 @@ std::shared_ptr<const MonitorSettings> SoftwareXmlInfo::monitorSettings(const QS
 	return m_settingsSet.getSettingsProfile<MonitorSettings>(profile);
 }
 
+std::shared_ptr<const AdsBridgeSettings> SoftwareXmlInfo::adsBridgeSettings(const QString& profile) const
+{
+	return m_settingsSet.getSettingsProfile<AdsBridgeSettings>(profile);
+}
+
 std::shared_ptr<const TuningClientSettings> SoftwareXmlInfo::tuningClientSettings(const QString& profile) const
 {
 	return m_settingsSet.getSettingsProfile<TuningClientSettings>(profile);

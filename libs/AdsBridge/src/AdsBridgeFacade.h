@@ -3,6 +3,7 @@
 #include <AdsBridge/Common.h>
 
 #include "../../OnlineLib/SoftwareEndpoint.h"
+#include "../../lib/ConstStrings.h"
 
 #include <memory>
 #include <set>
@@ -33,6 +34,7 @@ namespace AdsBridge
 		AdsBridgeFacade& operator=(AdsBridgeFacade&&) = delete;
 
 	public:
+		bool setConfiguration(const QByteArray& data, QString profile = SettingsProfile::DEFAULT);
 		void addAppDataService(const QString& adsEquipmentId, const QString& address, int port);
 
 		void connect();
@@ -62,9 +64,10 @@ namespace AdsBridge
 		QString m_equipmentId;
 		std::vector<SoftwareEndpoint::AppDataService> m_appDataServices;
 
-	private:
+	public:
 		const char* getStringConstPointer(const QString& string) const;
 
+	private:
 		mutable std::shared_mutex m_stringTableMutex;
 		mutable std::set<std::string> m_stringTable;
 	};

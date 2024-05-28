@@ -26,8 +26,7 @@ const std::string g_equipmentId = "TP_MCRWS00_ADSBRIDGE";
 const bool g_isQtApplication = false;
 
 // The list of AppDataServices to connect to.
-const std::array g_appDataServices = {AppDataService{"TP_WS00_ADS", "127.0.0.1", 13321}, 
-									  AppDataService{"TP_WS01_ADS", "127.0.0.2", 13322}};
+const std::array g_appDataServices = {AppDataService{"TP_WS00_ADS", "127.0.0.1", 13321}, AppDataService{"TP_WS01_ADS", "127.0.0.2", 13322}};
 #else
 const std::string g_equipmentId = "AZPZ_WS1_ADSBRIDGE";
 const bool g_isQtApplication = false;
@@ -190,6 +189,10 @@ int main(int argc, char* argv[])
 	AdsSetLogHandler(log_handler);
 	AdsSetLogLevel(LOG_LEVEL_DEBUG);
 
+#if 1
+	// Set configuration manually
+	//
+
 	// Initialize, create QCoreApplication, start Qt message loop if g_isQtApplication is false!
 	//
 	bool initOk = AdsInit(argc, argv, g_equipmentId.c_str(), g_isQtApplication);
@@ -205,6 +208,30 @@ int main(int argc, char* argv[])
 	{
 		AdsAddConnection(ads.equipmentId.c_str(), ads.address.c_str(), ads.port);
 	}
+#else
+	// Load configuration from file.
+	//
+	bool loadOk = AdsLoadConfiguration("Configuration.xml");
+	if (loadOk == false)
+	{
+		std::cerr << "Failed to load configuration.\n";
+		return 1;
+	}
+
+	bool setProfileOk = AdsSetConfigurationProfile("Local");
+	if (setProfileOk == false)
+	{
+		std::cerr << "Failed to set configuration profile.\n";
+		return 1;
+	}
+
+	bool initOk = AdsInit(argc, argv, AdsGetSoftwareId(), g_isQtApplication);
+	if (initOk == false)
+	{
+		std::cerr << "Failed to initialize AdsBridge.\n";
+		return 1;
+	}
+#endif
 
 	// Connects to all added services.
 	//
