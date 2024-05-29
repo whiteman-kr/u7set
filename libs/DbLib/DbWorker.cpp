@@ -444,6 +444,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0414.sql", "Upgrade to version 414, Added function api.undo_changes_recursively"},
 	{":/DatabaseUpgrade/Upgrade0415.sql", "Upgrade to version 415, TestSuite preset update, add FontBold and Section layout to report template"},
 	{":/DatabaseUpgrade/Upgrade0416.sql", "Upgrade to version 416, Updated preset Monitor to version 6, set default value property SchemaTags to: AppLogic Monitor"},
+	{":/DatabaseUpgrade/Upgrade0417.sql", "Upgrade to version 417, Added Request Controllers to AppDataService preset"},
 };
 
 int DbWorker::counter = 0;
