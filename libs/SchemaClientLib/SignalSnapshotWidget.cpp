@@ -210,6 +210,35 @@ namespace SchemaClientLib
 	{
 	}
 
+	SignalSnapshotWidget::~SignalSnapshotWidget()
+	{
+		killTimer(m_updateStateTimerId);
+		
+		// Save state
+		// 
+		if (m_storeType == true)
+		{
+			m_storedType = static_cast<SnapshotSignalType>(m_typeCombo->currentIndex());
+		}
+
+		if (m_storeRole == true)
+		{
+			m_storedRole = static_cast<SnapshotSignalRole>(m_roleCombo->currentIndex());
+		}
+
+		if (m_storeMaskData == true)
+		{
+			m_storedMaskType = static_cast<SnapshotMaskType>(m_maskTypeCombo->currentIndex());
+		}
+
+		m_settings.horzHeader = m_tableView->horizontalHeader()->saveState();
+		m_settings.horzHeaderCount = static_cast<int>(SnapshotColumns::ColumnCount);
+
+		m_settings.store();
+
+		return;
+	}
+
 	QString SignalSnapshotWidget::projectName() const
 	{
 		return m_projectName;
@@ -327,28 +356,6 @@ namespace SchemaClientLib
 	std::set<QString> SignalSnapshotWidget::schemaAppSignals(const QString& schemaStrId)
 	{
 		return m_signalSnapshotVirtFuncDispatcher.schemaAppSignals(schemaStrId);
-	}
-
-
-	void SignalSnapshotWidget::closeEvent([[maybe_unused]] QCloseEvent* event)
-	{
-		if (m_storeType == true)
-		{
-			m_storedType = static_cast<SnapshotSignalType>(m_typeCombo->currentIndex());
-		}
-		if (m_storeRole == true)
-		{
-			m_storedRole = static_cast<SnapshotSignalRole>(m_roleCombo->currentIndex());
-		}
-		if (m_storeMaskData == true)
-		{
-			m_storedMaskType = static_cast<SnapshotMaskType>(m_maskTypeCombo->currentIndex());
-		}
-
-		m_settings.horzHeader = m_tableView->horizontalHeader()->saveState();
-		m_settings.horzHeaderCount = static_cast<int>(SnapshotColumns::ColumnCount);
-
-		m_settings.store();
 	}
 
 	void SignalSnapshotWidget::showEvent([[maybe_unused]] QShowEvent* event)

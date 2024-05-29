@@ -1,5 +1,6 @@
 #pragma once
 
+#include <span>
 #include <vector>
 #include "ISignalManager.h"
 
@@ -22,10 +23,16 @@ public:
 	[[nodiscard]] virtual AppSignalState signalState(Hash signalHash, Hash dataServerHash, bool* found) const = 0;
 	[[nodiscard]] virtual AppSignalState signalState(const QString& appSignalId, const QString& dataServerId, bool* found) const = 0;
 
-	virtual void signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const = 0;
-	virtual void signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const = 0;
-	virtual void signalState(const std::vector<Hash>& appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const = 0;
-	virtual void signalState(const std::vector<QString>& appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const = 0;
+	virtual void signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const = 0;
+	virtual void signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const = 0;
+	virtual void signalState(std::span<const Hash> appSignalHashes,
+							 Hash dataServerHash,
+							 std::vector<AppSignalState>* result,
+							 int* found) const = 0;
+	virtual void signalState(std::span<const QString> appSignalIds,
+							 const QString& dataServerId,
+							 std::vector<AppSignalState>* result,
+							 int* found) const = 0;
 
 	[[nodiscard]] virtual QStringList signalTags(Hash signalHash) const = 0;
 	[[nodiscard]] virtual QStringList signalTags(const QString& appSignalId) const = 0;
@@ -48,4 +55,3 @@ public:
 	//
 	[[nodiscard]] virtual QStringList tags() const = 0;
 };
-

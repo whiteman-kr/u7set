@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../VFrame30/SchemaDetails.h"
+#include <VFrame30/SchemaDetails.h>
 #include "GlobalMessanger.h"
 
 class EditSchemaTabPage;

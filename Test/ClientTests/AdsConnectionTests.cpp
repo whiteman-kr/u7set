@@ -15,18 +15,18 @@ namespace
 		MOCK_METHOD(void, reset, (), (override));
 		MOCK_METHOD(void, notifySignalParamsUpdated, (), (override));
 		MOCK_METHOD(void, addSignal, (const AppSignalParam& appSignal, const QString& appDataServiceId), (override));
-		MOCK_METHOD(void, addSignals, (const std::vector<AppSignalParam>& appSignals, const QString& appDataServiceId), (override));
+		MOCK_METHOD(void, addSignals, (std::span<const AppSignalParam> appSignals, const QString& appDataServiceId), (override));
 		MOCK_METHOD(void, invalidateSignalStates, (Qt::HANDLE sourceThreadId), (override));
 		MOCK_METHOD(void, setState, (const QString& appSignalId, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId), (override));
 		MOCK_METHOD(void, setState, (Hash signalHash, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId), (override));
-		MOCK_METHOD(void, setState, (const std::vector<AppSignalState>& states, Hash dataServerHash, Qt::HANDLE sourceThreadId), (override));
+		MOCK_METHOD(void, setState, (std::span<const AppSignalState> states, Hash dataServerHash, Qt::HANDLE sourceThreadId), (override));
 	};
 
 	class MockRecentAppSignals : public ClientLib::IRecentAppSignals
 	{
 	public:
 		MOCK_METHOD(void, addRecentAppSignal, (Hash h), (override));
-		MOCK_METHOD(void, addRecentAppSignals, (const std::vector<Hash>& hashes), (override));
+		MOCK_METHOD(void, addRecentAppSignals, (std::span<const Hash> hashes), (override));
 		MOCK_METHOD(std::vector<Hash>, recentlyUsedAppSignals, (const QString& appDataServivceId), (override));
 		MOCK_METHOD(bool, hasRecentlyUsedAppSignals, (), (override));
 	};
@@ -96,10 +96,10 @@ TEST_F(AdsConnectionTests, connectToAds)
 	EXPECT_CALL(signalUpdater, addSignals(_, ads2))
 			.Times(AtLeast(1));
 
-	EXPECT_CALL(signalUpdater, setState(An<const std::vector<AppSignalState>&>(), dataServerHash1, _))
+	EXPECT_CALL(signalUpdater, setState(An<std::span<const AppSignalState>>(), dataServerHash1, _))
 			.Times(AtLeast(1));
 
-	EXPECT_CALL(signalUpdater, setState(An<const std::vector<AppSignalState>&>(), dataServerHash2, _))
+	EXPECT_CALL(signalUpdater, setState(An<std::span<const AppSignalState>>(), dataServerHash2, _))
 			.Times(AtLeast(1));
 
 	// MockRecentAppSignals

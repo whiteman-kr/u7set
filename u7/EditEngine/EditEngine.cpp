@@ -12,7 +12,7 @@
 #include "EditEngineSetSchemaProperty.h"
 #include "SchemaEditor/EditSchemaView.h"
 
-#include "../../VFrame30/SchemaLayer.h"
+#include <VFrame30/SchemaLayer.h>
 #include "../ProjectDefaults.h"
 
 namespace EditEngine

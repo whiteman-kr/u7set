@@ -4,12 +4,6 @@
 #include "../u7/Settings.h"
 #include "IssueLogger.h"
 #include <DbLib/DbController.h>
-#include <QCryptographicHash>
-#include <QDir>
-#include <QFileInfo>
-#include <QHostInfo>
-#include <QStandardPaths>
-
 
 namespace Builder
 {

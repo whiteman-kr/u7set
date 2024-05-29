@@ -817,6 +817,9 @@ namespace Builder
 		int appRegDataOffset = 0;
 		int diagRegDataOffset = 0;
 
+		int prevBuimModulePlace = 0;
+		const int BUIM_REG_INFO_SIZE_W = 14;
+
 		// read modules properties
 		//
 		for(auto& [place, module] : m_modules)
@@ -838,12 +841,29 @@ namespace Builder
 			}
 			const Hardware::DeviceModule* deviceModule = module.device.get();
 
+			TEST_PTR_CONTINUE(deviceModule);
+
 			if (isBvbChassis == true)
 			{
+				if (prevBuimModulePlace + 1 != module.place)
+				{
+					// in BVB registration packet empty space reserved for not installed modules
+					//
+					appRegDataOffset = (module.place - prevBuimModulePlace - 1) * BUIM_REG_INFO_SIZE_W;
+				}
+
 				// chassis with BVB
 
 				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_APP_DATA_SIZE, &module.txAppDataSize, m_log);
 				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DIAG_DATA_SIZE, &module.txDiagDataSize, m_log);
+
+				if (module.txAppDataSize != BUIM_REG_INFO_SIZE_W)
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("BUIM %1 reg info size is not equal %2 words!").
+											arg(deviceModule->equipmentIdTemplate()).
+											arg(BUIM_REG_INFO_SIZE_W));
+					result = false;
+				}
 
 				module.txAppDataOffset = 0;
 				module.txDiagDataOffset = 0;
@@ -6835,6 +6855,7 @@ namespace Builder
 			}
 
 			TEST_PTR_CONTINUE(deviceSignal);
+			TEST_PTR_CONTINUE(module.device);
 
 			Address16 regValueAddr(deviceSignal->valueOffset(), deviceSignal->valueBit());
 
@@ -6913,11 +6934,13 @@ namespace Builder
 
 			if (it == m_bvbRegSignals.end())
 			{
-				auto [newIt, b] = m_bvbRegSignals.emplace(ioSignal->regValueAddr(), std::vector<const AppSignal*>{});
+				auto [newIt, b] = m_bvbRegSignals.emplace(ioSignal->regValueAddr(), std::vector<BuimAppSignal>{});
 				it = newIt;
 			}
 
-			it->second.push_back(ioSignal);
+			it->second.emplace_back(module.place,
+									module.device->caption(),
+									ioSignal);
 		}
 
 		int acquiredRawDataSizeW = 0;
@@ -17692,6 +17715,10 @@ namespace Builder
 
 		RETURN_IF_FALSE(res);
 
+		QString line;
+
+		line.fill(QChar('-'), 90);
+
 		QStringList file;
 
 		file.append(QString("BVB %1 registration info file\n").arg(lmEquipmentID()));
@@ -17701,25 +17728,46 @@ namespace Builder
 						arg(QString::number(appDataUID, 16).toUpper().rightJustified(8, QChar('0'), false)).
 						arg(appDataUID));
 
-		file.append("-----------------------------------------------------------------------------------------");
-		file.append("  Value   | Validity |            AppSignalID");
-		file.append("-----------------------------------------------------------------------------------------");
+		file.append(line);
+		file.append("  Module  | Place |  Value   | Validity |            AppSignalID");
+		file.append(line);
 
-		for(const auto& [regValueAddr, appSignals] : m_bvbRegSignals)
+		int prevPlace = -1;
+
+		for(const auto& [regValueAddr, buimAppSignals] : m_bvbRegSignals)
 		{
-			for(const AppSignal* appSignal : appSignals)
+			for(const BuimAppSignal& bas : buimAppSignals)
 			{
+				const AppSignal* appSignal = bas.appSignal;
+
 				TEST_PTR_CONTINUE(appSignal);
 
 				Q_ASSERT(regValueAddr == appSignal->regValueAddr());
 
-				file.append(QString(" %1 | %2 | %3").
+				QString placeStr(QStringLiteral("          |       "));
+
+				if (bas.buimPlace != prevPlace)
+				{
+					if (prevPlace != -1)
+					{
+						file.append(line);
+					}
+
+					placeStr = QString(" %1 |  %2   ").arg(bas.buimCaption, -8).arg(bas.buimPlace, -2);
+
+					prevPlace = bas.buimPlace;
+				}
+
+				file.append(QString("%1| %2 | %3 | %4").
+									arg(placeStr).
 									arg(appSignal->regValueAddr().toString(true)).
 									arg(appSignal->regValidityAddr().isValid() ?
 											appSignal->regValidityAddr().toString(true) : "   No   ").
 									arg(appSignal->appSignalID()));
 			}
 		}
+
+		file.append(line);
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 														getInfoFileName("reg"), file);

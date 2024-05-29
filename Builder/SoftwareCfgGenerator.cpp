@@ -1,18 +1,20 @@
 #include "SoftwareCfgGenerator.h"
-#include "../VFrame30/VduSchema.h"
-#include "../VFrame30/SchemaItems/SchemaItemAfb.h"
 #include "./Vdu/VduSchemaGenerator.h"
 #include "DeviceHelper.h"
 #include "LanControllerInfoHelper.h"
 #include "ScriptChecker.h"
-#include "AppSignalListStorage.h"
 
-#include "../libs/AppSignalLists/include/AppSignalLists/SignalList.h"
-#include "../VFrame30/SchemaLayer.h"
+#include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/XmlHelper.h"
 
-#include <HardwareLib/Workstation.h>
 #include <HardwareLib/Software.h>
+#include <HardwareLib/Workstation.h>
+#include <VFrame30/SchemaItemAfb.h>
+#include <VFrame30/SchemaLayer.h>
+#include <VFrame30/VduSchema.h>
 
+#include "AppSignalListStorage.h"
+#include "../libs/AppSignalLists/include/AppSignalLists/SignalList.h"
 
 namespace Builder
 {

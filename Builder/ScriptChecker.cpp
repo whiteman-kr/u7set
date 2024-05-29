@@ -1,4 +1,7 @@
 #include "ScriptChecker.h"
+#include "IssueLogger.h"
+
+#include <VFrame30/Schema.h>
 
 namespace Builder
 {

@@ -1,9 +1,4 @@
 #pragma once
-#include <variant>
-#include <QDialog>
-#include <QTreeView>
-#include <QPlainTextEdit>
-#include <QPushButton>
 
 #ifdef _DEBUG
 	#include <QAbstractItemModelTester>

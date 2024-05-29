@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../VFrame30/SchemaDetails.h"
+#include <VFrame30/SchemaDetails.h>
 #include <SchemaClientLib/SchemaListWidget.h>
 
 namespace UiLib

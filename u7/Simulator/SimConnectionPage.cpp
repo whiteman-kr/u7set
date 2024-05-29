@@ -3,6 +3,7 @@
 
 #include <Simulator/SimAppSignalManager.h>
 #include <Simulator/SimConnections.h>
+#include <Simulator/SimControl.h>
 #include <Simulator/SimRam.h>
 
 SimConnectionPage::SimConnectionPage(SimIdeSimulator* simulator, QString connectionId, QWidget* parent) :

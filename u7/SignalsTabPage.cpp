@@ -1,19 +1,4 @@
-﻿#include <QMessageBox>
-#include <QFormLayout>
-#include <QDialogButtonBox>
-#include <QToolBar>
-#include <QLabel>
-#include <QCompleter>
-#include <QPushButton>
-#include <QTableView>
-#include <QHeaderView>
-#include <QClipboard>
-#include <QSplitter>
-#include <QScrollBar>
-#include <QStandardItemModel>
-#include <QAbstractItemModelTester>
-
-#include <UiLib/StandardColors.h>
+﻿#include <UiLib/StandardColors.h>
 
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Ui/WidgetUtils.h"

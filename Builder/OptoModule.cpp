@@ -8,6 +8,7 @@
 
 #include "../lib/ConstStrings.h"
 #include "../UtilsLib/Crc.h"
+#include "../UtilsLib/WUtils.h"
 #include "../Builder/Context.h"
 #include "./Vdu/VduOptoConnectionsInfoGenerator.h"
 

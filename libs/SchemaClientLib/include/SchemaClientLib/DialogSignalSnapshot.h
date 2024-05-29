@@ -2,8 +2,8 @@
 
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../OnlineLib/SoftwareEndpoint.h"
-#include "../VFrame30/SchemaDetails.h"
 #include "../lib/ISignalDataServer.h"
+#include <VFrame30/SchemaDetails.h>
 
 #include <set>
 #include <vector>

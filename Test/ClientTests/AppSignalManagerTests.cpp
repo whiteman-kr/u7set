@@ -1,6 +1,7 @@
 #include "../../AppSignalLib/ComparatorSet.h"
 #include <ClientLib/AppSignalManager.h>
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+#include <span>
 
 using namespace testing;
 
@@ -225,7 +226,7 @@ TEST(AppSignalManagerTests, setStateAsVector)
 	AppSignalState state1{sp1.hash(), {}, 1.0, {.valid = 1, .stateAvailable = 1}};
 	AppSignalState state2{sp2.hash(), {}, 2.0, {.valid = 1, .stateAvailable = 1}};
 
-	sm.setState({state1, state2}, dataServerHash, std::bit_cast<Qt::HANDLE>(1ull));
+	sm.setState(std::vector{state1, state2}, dataServerHash, std::bit_cast<Qt::HANDLE>(1ull));
 
 	auto state = sm.signalState(sp1.hash(), nullptr);
 	EXPECT_TRUE(state.isValid());
@@ -284,10 +285,13 @@ TEST(AppSignalManagerTests, recentUsedRemove)
 	//
 	AppSignalLib::RecentUsed recentUsed{10};	// Keep up to 5 signals
 
-	recentUsed.add({1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+	std::array<Hash, 10> testAddSet = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+	recentUsed.add(testAddSet);
 
 	recentUsed.remove(2);
-	recentUsed.remove({4, 6, 8});
+
+	std::array<Hash, 3> testRemoveSet = {4, 6, 8};
+	recentUsed.remove(testRemoveSet);
 
 	std::vector<Hash> keptSignals = recentUsed.hashes();
 
@@ -339,9 +343,9 @@ TEST(AppSignalManagerTests, recentUsedFetchOutdate)
 
 	QThread::currentThread()->msleep(50);
 
-	recentUsed.add({11, 12, 13});		// Now ftech timer already ellapsed, so no actual add should happen.
+	recentUsed.add(std::vector<Hash>{11, 12, 13});		// Now fetch timer already elapsed, so no actual add should happen.
 
-	// There were no fetches during 3 secconds, so cache is completely invalidated and
+	// There were no fetches during 3 seconds, so cache is completely invalidated and
 	// not used till any new fetch (no item can be added till call hashes()).
 	//
 	auto s = recentUsed.hashes();
@@ -375,7 +379,7 @@ TEST(AppSignalManagerTests, addRecentAppSignal)
 	v2.push_back(sp3);	// ADS2 has one more signal
 	sm.addSignals(v2, "ADS2");
 
-	sm.addRecentAppSignals({sp1.hash(), sp2.hash(), sp3.hash()});
+	sm.addRecentAppSignals(std::vector{sp1.hash(), sp2.hash(), sp3.hash()});
 
 	{
 		std::vector<Hash> adsSignals = sm.recentlyUsedAppSignals("ADS1");
@@ -601,7 +605,7 @@ TEST(AppSignalManagerTests, signalState)
 
 	std::vector<AppSignalState> recStates;
 	int foundCount = 0;
-	sm.signalState({sp1.appSignalId(), sp2.appSignalId(), QLatin1String("#FALSEID")}, &recStates, &foundCount);
+	sm.signalState(std::vector<QString>{sp1.appSignalId(), sp2.appSignalId(), QLatin1String("#FALSEID")}, &recStates, &foundCount);
 
 	ASSERT_EQ(recStates.size(), 3);
 	EXPECT_EQ(foundCount, 2);

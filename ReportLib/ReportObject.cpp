@@ -1,6 +1,5 @@
 #include "Report.h"
 #include "ReportObject.h"
-#include <QTextCursor>
 
 namespace ReportLib
 {

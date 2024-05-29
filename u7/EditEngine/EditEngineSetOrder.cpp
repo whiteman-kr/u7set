@@ -1,6 +1,6 @@
 #include "EditEngineSetOrder.h"
 #include "SchemaEditor/EditSchemaWidget.h"
-#include "../../VFrame30/SchemaLayer.h"
+#include <VFrame30/SchemaLayer.h>
 
 namespace EditEngine
 {

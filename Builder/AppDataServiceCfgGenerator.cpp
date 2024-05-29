@@ -4,6 +4,7 @@
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/DataSource.h"
+#include "../OnlineLib/SoftwareSettings.h"
 
 #include <HardwareLib/DeviceModule.h>
 
@@ -56,14 +57,25 @@ namespace Builder
 		return result;
 	}
 
-	bool AppDataServiceCfgGenerator::writeAppSignalsExtXml(const AppSignalSet* signalSet,
+	bool AppDataServiceCfgGenerator::writeAppSignalsExtXml(	const Context* context,
+															const AppSignalSet* signalSet,
 															const std::set<Hash>* limitedSet,
-															BuildResultWriter* resultWriter,
 															const QString& subDir)
 	{
-		TEST_PTR_RETURN_FALSE(signalSet);
+		TEST_PTR_RETURN_FALSE(context);
+		TEST_PTR_RETURN_FALSE(context->m_log);
+
+		IssueLogger* log = context->m_log;
+
+		TEST_PTR_LOG_RETURN_FALSE(signalSet, log);
+
 		// limitedSet may be nullptr
-		TEST_PTR_RETURN_FALSE(resultWriter);
+
+		BuildResultWriter* resultWriter = context->m_buildResultWriter.get();
+
+		TEST_PTR_LOG_RETURN_FALSE(resultWriter, log);
+
+		bool result = true;
 
 		QByteArray extData;
 		XmlWriteHelper extXml(&extData);
@@ -105,10 +117,44 @@ namespace Builder
 		if (writtenSignalsCount != signalCount)
 		{
 			Q_ASSERT(false);
-			LOG_INTERNAL_ERROR(resultWriter->log());
+			LOG_INTERNAL_ERROR(log);
+			result = false;
 		}
 
 		extXml.writeEndElement();	// </Signals>
+
+		extXml.writeStartElement(XmlElement::ACTUATORS);
+		extXml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(context->m_actuators.size()));
+
+		for(const auto& [actuatorID, devModule] : context->m_actuators)
+		{
+			if (devModule == nullptr)
+			{
+				LOG_INTERNAL_ERROR(log);
+				result = false;
+				continue;
+			}
+
+			extXml.writeStartElement(XmlElement::ACTUATOR);
+			extXml.writeStringAttribute(XmlAttribute::ID, actuatorID);
+
+			QString actuatorDesc;
+
+			if (DeviceHelper::isPropertyExists(devModule, EquipmentPropNames::ACTUATOR_DESCRIPTION) == true)
+			{
+				bool res = DeviceHelper::getStrProperty(devModule, EquipmentPropNames::ACTUATOR_DESCRIPTION, &actuatorDesc, log);
+
+				//result &= res;
+			}
+
+			extXml.writeStringAttribute(XmlAttribute::DESCRIPTION, actuatorDesc);
+			extXml.writeStringAttribute(XmlAttribute::EQUIPMENT_ID, devModule->equipmentIdTemplate());
+			extXml.writeStringAttribute(XmlAttribute::MODULE_CAPTION, devModule->caption());
+			extXml.writeEndElement();	// </Actuator>
+		}
+
+		extXml.writeEndElement();	// </Actuators>
+
 		extXml.writeEndElement();	// </AppSignals>
 		extXml.writeEndDocument();
 
@@ -120,7 +166,7 @@ namespace Builder
 			return false;
 		}
 
-		return true;
+		return result;
 	}
 
 	bool AppDataServiceCfgGenerator::writeAppDataSourcesXml()
@@ -285,9 +331,9 @@ namespace Builder
 			return true;
 		}
 
-		return writeAppSignalsExtXml(dynamic_cast<AppSignalSet*>(m_signalSet),
+		return writeAppSignalsExtXml(m_context,
+									dynamic_cast<AppSignalSet*>(m_signalSet),
 									&m_acquiredAppSignals,
-									m_buildResultWriter,
 									softwareCfgSubdir());
 	}
 

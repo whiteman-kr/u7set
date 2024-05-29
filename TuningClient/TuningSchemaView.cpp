@@ -1,6 +1,6 @@
 #include "TuningSchemaView.h"
 #include "Main.h"
-#include "../VFrame30/PropertyNames.h"
+#include <VFrame30/PropertyNames.h>
 
 TuningSchemaView::TuningSchemaView(TuningConfigController& configController, TuningSchemaManager& schemaManager, QWidget* parent /*= nullptr*/)
 	:  VFrame30::ClientSchemaView(&schemaManager, nullptr, nullptr, parent),
@@ -17,10 +17,6 @@ TuningSchemaView::TuningSchemaView(TuningConfigController& configController, Tun
 	}
 
 	connect(&m_configController, &TuningConfigController::configurationArrived, this, &TuningSchemaView::configurationArrived);
-
-	// Updates scripts
-	//
-	configurationArrived(m_configController.configuration());
 
 	return;
 }

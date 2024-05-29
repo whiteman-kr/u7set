@@ -1,9 +1,9 @@
 #pragma once
 
 #include "SimSchemaManager.h"
-#include "../VFrame30/ClientSchemaWidget.h"
-#include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/TuningController.h"
+#include <VFrame30/ClientSchemaWidget.h>
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/TuningController.h>
 
 class SimSchemaView;
 class SimIdeSimulator;

@@ -1,8 +1,6 @@
 #ifndef DIALOGAFBLIBRARYREPORT_H
 #define DIALOGAFBLIBRARYREPORT_H
 
-#include <QDialog>
-
 #include <HardwareLib/Afb.h>
 
 enum class AfbComponentColumns

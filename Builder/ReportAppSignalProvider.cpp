@@ -121,7 +121,7 @@ AppSignalState ReportAppSignalProvider::signalState(const QString& appSignalId, 
 	return signalState(appSignalId, found);
 }
 
-void ReportAppSignalProvider::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+void ReportAppSignalProvider::signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const
 {
 	// Unlikely this function required for schema editing
 	//
@@ -132,7 +132,7 @@ void ReportAppSignalProvider::signalState(const std::vector<Hash>& appSignalHash
 	return;
 }
 
-void ReportAppSignalProvider::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
+void ReportAppSignalProvider::signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const
 {
 	if (result == nullptr)
 	{
@@ -163,12 +163,12 @@ void ReportAppSignalProvider::signalState(const std::vector<QString>& appSignalI
 	return;
 }
 
-void ReportAppSignalProvider::signalState(const std::vector<Hash>& appSignalHashes, Hash /*dataServerHash*/, std::vector<AppSignalState>* result, int* found) const
+void ReportAppSignalProvider::signalState(std::span<const Hash> appSignalHashes, Hash /*dataServerHash*/, std::vector<AppSignalState>* result, int* found) const
 {
 	return signalState(appSignalHashes, result, found);
 }
 
-void ReportAppSignalProvider::signalState(const std::vector<QString>& appSignalIds, const QString& /*dataServerId*/, std::vector<AppSignalState>* result, int* found) const
+void ReportAppSignalProvider::signalState(std::span<const QString> appSignalIds, const QString& /*dataServerId*/, std::vector<AppSignalState>* result, int* found) const
 {
 	return signalState(appSignalIds, result, found);
 }

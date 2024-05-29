@@ -19,6 +19,44 @@ namespace Gateway
 	{
 		Q_OBJECT
 
+	private:
+
+		static const int TRY_CREATE_SOCKET_INTERVAL_MS = 3000;
+
+		struct GatewayChannelInfo
+		{
+			GatewayChannelInfo(const HostAddressPort& localIP, const HostAddressPort& remoteIP)
+			{
+				localGatewayIP = localIP;
+				remoteGatewayIP = remoteIP;
+			}
+
+			~GatewayChannelInfo()
+			{
+				clearSocket();
+			}
+
+			void clearSocket()
+			{
+				DELETE_IF_NOT_NULL(socket);
+
+				prevTryCreateSocketTime = QDateTime::currentMSecsSinceEpoch();
+			}
+
+			HostAddressPort localGatewayIP;
+			HostAddressPort remoteGatewayIP;
+
+				   //
+
+			bool tryCreateSocket(CircularLoggerShared log);
+
+			qint64 prevTryCreateSocketTime = 0;
+			QUdpSocket* socket = nullptr;
+
+			int statesPacketsSentCount = 0;
+			int eventPacketsSentCount = 0;
+		};
+
 	public:
 		IvsImpulseCommThreadWorker(IvsImpulseHandler& handler);
 
@@ -38,8 +76,8 @@ namespace Gateway
 
 		void sendPacket(const char* packet, qint64 packetSize, bool eventsPacket);
 
-		void logEventsPacket(const char* packet);
-		void logPeriodicPacket(const char* packet);
+		void logEventsPacket(const GatewayChannelInfo& ci, const char* packet);
+		void logPeriodicPacket(const GatewayChannelInfo& ci, const char* packet);
 
 		void checkLogTime();
 
@@ -73,45 +111,6 @@ namespace Gateway
 
 		AnalogStateCode_A getAnalogStateCodeA(const SimpleAppSignalState& state) const;
 		DiscreteState_D getDiscreteStateD(const SimpleAppSignalState& state) const;
-
-	private:
-
-		static const int TRY_CREATE_SOCKET_INTERVAL_MS = 3000;
-
-		struct GatewayChannelInfo
-		{
-			GatewayChannelInfo(const HostAddressPort& localIP, const HostAddressPort& remoteIP)
-			{
-				 localGatewayIP = localIP;
-				 remoteGatewayIP = remoteIP;
-			}
-
-			~GatewayChannelInfo()
-			{
-				clearSocket();
-			}
-
-			void clearSocket()
-			{
-				DELETE_IF_NOT_NULL(socket);
-
-				prevTryCreateSocketTime = QDateTime::currentMSecsSinceEpoch();
-			}
-
-			HostAddressPort localGatewayIP;
-			HostAddressPort remoteGatewayIP;
-
-			//
-
-			bool tryCreateSocket(CircularLoggerShared log);
-
-			qint64 prevTryCreateSocketTime = 0;
-			QUdpSocket* socket = nullptr;
-
-			int statesPacketsSentCount = 0;
-			int eventPacketsSentCount = 0;
-		};
-
 
 	private:
 		CircularLoggerShared m_log;

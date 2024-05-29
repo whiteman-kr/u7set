@@ -30,6 +30,13 @@ add_library(${TARGET} STATIC
 )
 
 target_precompile_headers(${TARGET} PRIVATE
+	<QXmlStreamReader>
+	<QTextCursor>
+	<QPdfWriter>
+	<QPainter>
+	<QFile>
+	<QBuffer>
+
 	"../CommonLib/Types.h"
 	"../CommonLib/Hash.h"
 	"../CommonLib/PropertyObject.h"

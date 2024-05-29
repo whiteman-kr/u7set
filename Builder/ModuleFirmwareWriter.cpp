@@ -4,14 +4,6 @@
 #include "../UtilsLib/WUtils.h"
 #include "../version.h"
 
-#include <QDebug>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJSEngine>
-#include <QtEndian>
-#include <qqml.h>
-
 
 namespace Hardware
 {

@@ -2,6 +2,7 @@
 #include "SoftwareSettingsGetter.h"
 #include "../GatewayService/GatewayDescriptionParser.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../UtilsLib/XmlHelper.h"
 
 namespace Builder
 {

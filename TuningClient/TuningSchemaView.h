@@ -3,7 +3,8 @@
 
 #include "ScriptTuningClientApplication.h"
 #include "TuningSchemaManager.h"
-#include "../VFrame30/ClientSchemaView.h"
+
+#include <VFrame30/ClientSchemaView.h>
 
 
 class TuningSchemaView : public VFrame30::ClientSchemaView

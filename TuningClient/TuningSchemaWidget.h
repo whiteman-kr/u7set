@@ -1,11 +1,8 @@
 #ifndef TUNINGSCHEMAWIDGET_H
 #define TUNINGSCHEMAWIDGET_H
 
-#include "../VFrame30/ClientSchemaWidget.h"
-#include "../VFrame30/SchemaView.h"
-#include "TuningSchemaView.h"
+#include <VFrame30/ClientSchemaWidget.h>
 #include "TuningSchemaManager.h"
-
 
 class TuningSchemaWidget : public VFrame30::ClientSchemaWidget
 {

@@ -1,8 +1,6 @@
 #ifndef DIALOGIMPORTPRESET_H
 #define DIALOGIMPORTPRESET_H
 
-#include <QDialog>
-
 namespace Ui {
 class DialogImportPreset;
 }

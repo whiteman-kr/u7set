@@ -216,9 +216,12 @@ namespace Gateway
 
 		for(GatewayChannelInfo& ci : m_channelsInfo)
 		{
-			TEST_PTR_CONTINUE(ci.socket);
+			if (ci.socket == nullptr)
+			{
+				continue;
+			}
 
-			quint64 res = ci.socket->writeDatagram(packet, packetSize,
+			qint64 res = ci.socket->writeDatagram(packet, packetSize,
 								   ci.remoteGatewayIP.address(), ci.remoteGatewayIP.port());
 
 			if (res == -1)
@@ -236,7 +239,7 @@ namespace Gateway
 			{
 				if (m_packetsLog != nullptr)
 				{
-					logEventsPacket(packet);
+					logEventsPacket(ci, packet);
 				}
 
 				ci.eventPacketsSentCount++;
@@ -253,7 +256,7 @@ namespace Gateway
 			{
 				if (m_packetsLog != nullptr)
 				{
-					logPeriodicPacket(packet);
+					logPeriodicPacket(ci, packet);
 				}
 
 				ci.statesPacketsSentCount++;
@@ -270,7 +273,7 @@ namespace Gateway
 
 	}
 
-	void IvsImpulseCommThreadWorker::logEventsPacket(const char* packet)
+	void IvsImpulseCommThreadWorker::logEventsPacket(const GatewayChannelInfo& ci, const char* packet)
 	{
 		TEST_PTR_RETURN(m_packetsLog);
 		TEST_PTR_RETURN(packet);
@@ -292,7 +295,8 @@ namespace Gateway
 		const IvsImpulsePacketHeader& header = eventPacket->header;
 		const IvsImpulseSignalEvent* event = &eventPacket->signalEvents;
 
-		QString&& str = QString("events Time=%1, SID=%2, DT=%3, LID=%4, LV=%5, FI=%6, PCnt=%7, PacketNo=%8: ").
+		QString&& str = QString("send to %1 events Time=%2, SID=%3, DT=%4, LID=%5, LV=%6, FI=%7, PCnt=%8, PacketNo=%9: ").
+				arg(ci.remoteGatewayIP.addressPortStr()).
 				arg(formatTime(header.time)).
 				arg(header.systemID).arg(QChar(header.dataType)).arg(header.listID).arg(header.listVersion).
 				arg(header.firstParamIndex).arg(header.paramCount).
@@ -308,7 +312,7 @@ namespace Gateway
 		DEBUG_LOG_MSG(m_packetsLog, str);
 	}
 
-	void IvsImpulseCommThreadWorker::logPeriodicPacket(const char* packet)
+	void IvsImpulseCommThreadWorker::logPeriodicPacket(const GatewayChannelInfo& ci, const char* packet)
 	{
 		TEST_PTR_RETURN(m_packetsLog);
 		TEST_PTR_RETURN(packet);
@@ -316,7 +320,8 @@ namespace Gateway
 		const IvsImpulseStatesPacket* statesPacket = reinterpret_cast<const IvsImpulseStatesPacket*>(packet);
 		const IvsImpulsePacketHeader& header = statesPacket->header;
 
-		QString&& str = QString("period Time=%1, SID=%2, DT=%3, LID=%4, LV=%5, FI=%6, PCnt=%7").
+		QString&& str = QString("send to %1 period Time=%2, SID=%3, DT=%4, LID=%5, LV=%6, FI=%7, PCnt=%8").
+				arg(ci.remoteGatewayIP.addressPortStr()).
 				arg(formatTime(header.time)).
 				arg(header.systemID).arg(QChar(header.dataType)).arg(header.listID).arg(header.listVersion).
 				arg(header.firstParamIndex).arg(header.paramCount);

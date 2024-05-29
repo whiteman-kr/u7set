@@ -967,7 +967,7 @@ static const AppSignalParam dummy;
 		return signalState(::calcHash(appSignalId), found);
 	}
 
-	void AppSignalManagerImpl::signalState(const std::vector<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManagerImpl::signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const
 	{
 		// This function must be optimized, signalState every times locks/unlocks/locks/unlock...
 		//
@@ -1001,7 +1001,7 @@ static const AppSignalParam dummy;
 		return;
 	}
 
-	void AppSignalManagerImpl::signalState(const std::vector<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManagerImpl::signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const
 	{
 		std::vector<Hash> appSignalHashes;
 		appSignalHashes.reserve(appSignalIds.size());
@@ -1014,12 +1014,12 @@ static const AppSignalParam dummy;
 		return signalState(appSignalHashes, result, found);
 	}
 
-	void AppSignalManagerImpl::signalState(const std::vector<Hash>& appSignalHashes, Hash /*dataServerHash*/, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManagerImpl::signalState(std::span<const Hash> appSignalHashes, Hash /*dataServerHash*/, std::vector<AppSignalState>* result, int* found) const
 	{
 		return signalState(appSignalHashes, result, found);
 	}
 
-	void AppSignalManagerImpl::signalState(const std::vector<QString>& appSignalIds, const QString& /*dataServerId*/, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManagerImpl::signalState(std::span<const QString> appSignalIds, const QString& /*dataServerId*/, std::vector<AppSignalState>* result, int* found) const
 	{
 		return signalState(appSignalIds, result, found);
 	}

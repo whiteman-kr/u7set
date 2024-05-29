@@ -10,14 +10,6 @@
 #include "Forms/FileHistoryDialog.h"
 #include "GlobalMessanger.h"
 
-#include <QApplication>
-#include <QDir>
-#include <QFileDialog>
-#include <QHeaderView>
-#include <QMessageBox>
-#include <QScrollBar>
-#include <QSortFilterProxyModel>
-
 //
 //
 // FileTreeModelItem

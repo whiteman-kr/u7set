@@ -2,7 +2,8 @@
 
 #include "MonitorSchemaManager.h"
 #include "ScriptMonitorApplication.h"
-#include "../VFrame30/ClientSchemaView.h"
+
+#include <VFrame30/ClientSchemaView.h>
 
 namespace VFrame30
 {

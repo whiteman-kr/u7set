@@ -1,9 +1,9 @@
 #ifndef SIMSIGNALINFO_H
 #define SIMSIGNALINFO_H
 
-#include "../../VFrame30/AppSignalController.h"
 #include "../TuningConnectionStub.h"
 
+#include <VFrame30/AppSignalController.h>
 #include <SchemaClientLib/DialogSignalInfo.h>
 #include <Simulator/SimAppSignalManager.h>
 

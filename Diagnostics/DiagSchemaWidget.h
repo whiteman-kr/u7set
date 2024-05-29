@@ -1,10 +1,10 @@
 #pragma once
 
 #include "DiagnosticsSchemaManager.h"
-#include "../VFrame30/ClientSchemaWidget.h"
-#include "../VFrame30/AppSignalController.h"
-#include "../VFrame30/ITimeStats.h"
 
+#include <VFrame30/ClientSchemaWidget.h>
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/ITimeStats.h>
 
 class DiagSchemaView;
 struct SchemaHistoryItem;

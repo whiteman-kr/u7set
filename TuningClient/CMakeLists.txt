@@ -108,54 +108,68 @@ target_precompile_headers(${TARGET} PRIVATE
 	<set>
 	<cassert>
 
-	<QObject>
-	<QVector>
-	<QVariant>
-	<QSplitter>
-	<QTreeWidget>
-	<QTabWidget>
-	<QHBoxLayout>
-	<QVBoxLayout>
-	<QMessageBox>
-	<QListView>
-	<QPushButton>
-	<QLineEdit>
-	<QCheckBox>
-	<QComboBox>
-	<QTableView>
 	<QAbstractItemModel>
 	<QAbstractTableModel>
-	<QSortFilterProxyModel>
-	<QHeaderView>
-	<QSettings>
-	<QXmlStreamReader>
-	<QXmlStreamWriter>
-	<QFile>
-	<QDebug>
-	<QLabel>
-	<QStatusBar>
-	<QApplication>
-	<QMutex>
-	<QMutexLocker>
-	<QDomDocument>
-	<QJsonObject>
-	<QJsonDocument>
-	<QJsonArray>
 	<QAction>
+	<QActionGroup>
+	<QApplication>
+	<QButtonGroup>
+	<QCheckBox>
+	<QClipboard>
+	<QComboBox>
+	<QCommandLineParser>
+	<QCryptographicHash>
+	<QDebug>
+	<QDialog>
+	<QDialogButtonBox>
+	<QDir>
+	<QDomDocument>
+	<QFile>
+	<QFileDialog>
+	<QGridLayout>
+	<QHBoxLayout>
+	<QHeaderView>
+	<QInputDialog>
+	<QJsonArray>
+	<QJsonDocument>
+	<QJsonObject>
+	<QKeyEvent>
+	<QLabel>
+	<QLineEdit>
+	<QListView>
+	<QListWidget>
+	<QMainWindow>
 	<QMenu>
 	<QMenuBar>
-	<QButtonGroup>
-	<QUuid>
-	<QStandardPaths>
-	<QDir>
-	<QDialogButtonBox>
-	<QTextEdit>
-	<QClipboard>
-	<QSharedMemory>
-	<QCryptographicHash>
-	<QPainter>
-	<QScrollArea>
+	<QMessageBox>
 	<QMouseEvent>
+	<QMutex>
+	<QMutexLocker>
+	<QObject>
+	<QPainter>
+	<QProcess>
+	<QPushButton>
+	<QScrollArea>
+	<QSettings>
+	<QSharedMemory>
+	<QSortFilterProxyModel>
+	<QSplitter>
+	<QStandardPaths>
+	<QStatusBar>
+	<QTableView>
+	<QTableWidget>
+	<QTableWidgetItem>
+	<QTabWidget>
+	<QTextEdit>
+	<QTranslator>
+	<QTreeWidget>
+	<QTreeWidgetItem>
+	<QUuid>
+	<QVariant>
+	<QVBoxLayout>
+	<QVector>
+	<QXmlStreamReader>
+	<QXmlStreamWriter>
 
 	"../CommonLib/Types.h"
 	"../CommonLib/Hash.h"

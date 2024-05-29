@@ -3,8 +3,6 @@
 #include "GlobalMessanger.h"
 #include "DialogSettingsConfigurator.h"
 
-#include <QProcess>
-
 //
 //
 // UploadTabPage

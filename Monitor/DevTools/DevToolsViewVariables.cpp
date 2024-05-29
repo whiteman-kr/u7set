@@ -1,5 +1,6 @@
 #include "DevToolsViewVariables.h"
-#include "../../VFrame30/ClientSchemaWidget.h"
+
+#include <VFrame30/ClientSchemaWidget.h>
 
 namespace Monitor
 {

@@ -1,10 +1,11 @@
 #include "EditConnectionLine.h"
-#include "../VFrame30/DrawParam.h"
-#include "../VFrame30/SchemaItems/PosConnectionImpl.h"
-#include "../VFrame30/SchemaItems/SchemaItem.h"
-#include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/SchemaPoint.h"
-#include "../VFrame30/VFrameTools.h"
+
+#include <VFrame30/DrawParam.h>
+#include <VFrame30/PosConnectionImpl.h>
+#include <VFrame30/SchemaItem.h>
+#include <VFrame30/SchemaLayer.h>
+#include <VFrame30/SchemaPoint.h>
+#include <VFrame30/VFrameTools.h>
 
 
 EditConnectionLine::EditConnectionLine(std::shared_ptr<VFrame30::PosConnectionImpl> item, EditConnectionLine::EditMode mode)

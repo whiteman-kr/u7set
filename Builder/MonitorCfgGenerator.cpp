@@ -1,4 +1,5 @@
 #include "MonitorCfgGenerator.h"
+#include "../OnlineLib/DataSource.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "Context.h"
 #include "ScriptChecker.h"

@@ -1,8 +1,6 @@
 #include "../u7/Settings.h"
 #include "../Tools/qtkeychain/keychain.h"
 
-#include <QStandardPaths>
-
 Settings theSettings;
 
 //

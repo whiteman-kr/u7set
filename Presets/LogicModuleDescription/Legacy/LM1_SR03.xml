@@ -71,7 +71,7 @@
 		<OcmRxDataSizeLimit>1850</OcmRxDataSizeLimit>
 	</Other>	
 
-    <LogicUnitCommnads>
+    <LogicUnitCommnads Version="2">
 		<xi:include href="./instructions/nop.v1.xml" parse="xml" />
 		<xi:include href="./instructions/startafb.v1.xml" parse="xml" />
 		<xi:include href="./instructions/stop.v1.xml" parse="xml" />

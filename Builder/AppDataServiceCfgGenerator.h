@@ -1,7 +1,12 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
-#include "../OnlineLib/SoftwareSettings.h"
+
+namespace OnlineLib
+{
+	class AppDataServiceSettings;
+	class DataSource;
+}
 
 namespace Builder
 {
@@ -15,10 +20,10 @@ namespace Builder
 		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfigurationStep1() override;
 
-		static bool writeAppSignalsExtXml(const AppSignalSet* signalSet,
-										  const std::set<Hash>* limitedSet,
-										  BuildResultWriter* resultWriter,
-										  const QString& subDir);
+		static bool writeAppSignalsExtXml(	const Context* context,
+											const AppSignalSet* signalSet,
+											const std::set<Hash>* limitedSet,
+											const QString& subDir);
 	private:
 		bool writeAppDataSourcesXml();
 		bool writeAppSignalsXml();

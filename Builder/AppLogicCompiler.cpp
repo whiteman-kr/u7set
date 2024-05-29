@@ -1302,9 +1302,9 @@ namespace Builder
 			return false;
 		}
 
-		return AppDataServiceCfgGenerator::writeAppSignalsExtXml(dynamic_cast<AppSignalSet*>(sgSet),
+		return AppDataServiceCfgGenerator::writeAppSignalsExtXml(m_context,
+																 dynamic_cast<AppSignalSet*>(sgSet),
 																 nullptr,
-																 buildResultWriter(),
 																 Directory::COMMON);
 	}
 

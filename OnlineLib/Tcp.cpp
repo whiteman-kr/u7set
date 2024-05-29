@@ -199,9 +199,7 @@ namespace Tcp
 		}
 
 		return QString("%1%2: %3").
-					arg(m_socketDescription.isEmpty() == true ? "Connection" : m_socketDescription).
-					arg(connNoStr).
-					arg(str);
+					arg((m_socketDescription.isEmpty() == true ? "Connection" : m_socketDescription), connNoStr, str);
 	}
 
 	CircularLoggerShared SocketWorker::log()
@@ -874,15 +872,13 @@ namespace Tcp
 	void Server::onConnection()
 	{
 		logMessage(QString("client %1 (%2) connected").
-				   arg(m_connectedSoftwareInfo.equipmentID()).
-				   arg(peerAddr().addressStr()));
+				   arg(m_connectedSoftwareInfo.equipmentID(), peerAddr().addressStr()));
 	}
 
 	void Server::onDisconnection()
 	{
 		logMessage(QString("client %1 (%2) disconnected").
-				   arg(m_connectedSoftwareInfo.equipmentID()).
-				   arg(peerAddr().addressStr()));
+				   arg(m_connectedSoftwareInfo.equipmentID(), peerAddr().addressStr()));
 	}
 
 	void Server::onConnectedSoftwareInfoChanged()
@@ -1100,8 +1096,7 @@ namespace Tcp
 		onServerThreadStarted();
 
 		logMessage(QString("incoming connection from %1, security level - %2").
-					arg(peerAddr().addressStr()).
-					arg(E::valueToString<E::SecurityLevel>(m_securityLevel)));
+					arg(peerAddr().addressStr(), E::valueToString<E::SecurityLevel>(m_securityLevel)));
 
 		startTimeoutTimer();
 	}
@@ -1255,7 +1250,7 @@ namespace Tcp
 		{
 		case Tcp::SetConnectionResult::Ok:
 			logMessage(QString("client %1 with hostname %2 - check PASSED").
-							  arg(clientEquipmentID).arg(clientHostname));
+							  arg(clientEquipmentID, clientHostname));
 			break;
 
 		case Tcp::SetConnectionResult::UnknownClientID:
@@ -1270,10 +1265,10 @@ namespace Tcp
 		case Tcp::SetConnectionResult::WrongClientHostname:
 
 			logError(QString("wrong client '%1' hostname '%2' - check FAILED!").
-							arg(clientEquipmentID).arg(clientHostname));
+							arg(clientEquipmentID, clientHostname));
 
 			reply.set_errormsg((QString("Client '%1' running on computer with wrong hostname '%2'").
-								arg(clientEquipmentID).arg(clientHostname)).toStdString());
+								arg(clientEquipmentID, clientHostname)).toStdString());
 			break;
 
 		default:
@@ -1337,10 +1332,10 @@ namespace Tcp
 	{
 		// close all conection threads
 		//
-		for(SimpleThread* connectionThread : m_runningServers)
+		for(auto const& [worker, thread]: m_runningServers)
 		{
-			connectionThread->quit();
-			delete connectionThread;
+			thread->quit();
+			delete thread;
 		}
 
 		m_runningServers.clear();
@@ -1356,7 +1351,7 @@ namespace Tcp
 		}
 		else
 		{
-			m_serverInstance->logError(QString("error on start listening %1 - %2").arg(addr.addressPortStr()).arg(errStr));
+			m_serverInstance->logError(QString("error on start listening %1 - %2").arg(addr.addressPortStr(), errStr));
 		}
 	}
 
@@ -1391,7 +1386,7 @@ namespace Tcp
 		{
 			m_tcpServer = new TcpServer(this);
 
-			connect(m_tcpServer, &TcpServer::newConnection, this, &Listener::onNewConnection);
+			connect(m_tcpServer, &TcpServer::newIncomingConnection, this, &Listener::onNewConnection);
 		}
 
 		if (m_tcpServer->listen(m_listenAddressPort.address(), m_listenAddressPort.port()) == true)
@@ -1422,7 +1417,7 @@ namespace Tcp
 
 		SimpleThread* newThread = new SimpleThread(newServerInstance);
 
-		m_runningServers.insert(newServerInstance, newThread);
+		m_runningServers.emplace(newServerInstance, newThread);
 
 		newThread->start();
 
@@ -1439,7 +1434,7 @@ namespace Tcp
 
 	void Listener::onServerDisconnected(const SocketWorker* server)
 	{
-		SimpleThread* thread = m_runningServers.value(server, nullptr);
+		SimpleThread* thread = getValueOrNullptr(m_runningServers, server);
 
 		if (thread == nullptr)
 		{
@@ -1447,7 +1442,7 @@ namespace Tcp
 			return;
 		}
 
-		m_runningServers.remove(server);
+		m_runningServers.erase(server);
 
 		thread->quit();
 		delete thread;
@@ -1459,9 +1454,7 @@ namespace Tcp
 	{
 		std::list<ConnectionState> clientsInfo;
 
-		QList<const SocketWorker*>&& servers = m_runningServers.keys();
-
-		for (const SocketWorker* server : servers)
+		for (const auto& [server, thread] : m_runningServers)
 		{
 			clientsInfo.push_back(server->getConnectionState());
 		}
@@ -1580,15 +1573,13 @@ namespace Tcp
 	void Client::onConnection()
 	{
 		logMessage(QString("connected to server %1 (%2)").
-				   arg(m_connectedSoftwareInfo.equipmentID()).
-				   arg(peerAddr().addressStr()));
+				   arg(m_connectedSoftwareInfo.equipmentID(), peerAddr().addressStr()));
 	}
 
 	void Client::onDisconnection()
 	{
 		logMessage(QString("disconnected from server %1 (%2)").
-					   arg(m_connectedSoftwareInfo.equipmentID()).
-					   arg(peerAddr().addressStr()));
+					   arg(m_connectedSoftwareInfo.equipmentID(), peerAddr().addressStr()));
 	}
 
 	void Client::onTryConnectToServer(const HostAddressPort& serverAddr)
@@ -2087,14 +2078,12 @@ namespace Tcp
 			m_setConnResult = SetConnectionResult::WrongServerID;
 
 			logError(QString("wrong server ID - %1 (expected ID - %2)").
-							arg(m_connectedSoftwareInfo.equipmentID()).
-							arg(m_serverEquipmentID));
+							arg(m_connectedSoftwareInfo.equipmentID(), m_serverEquipmentID));
 
 			if (m_enableSignalWrongServerID == true)
 			{
 				emit signal_wrongServerID(QString("Wrong server ID - %1 (expected ID - %2)").
-										  arg(m_connectedSoftwareInfo.equipmentID()).
-										  arg(m_serverEquipmentID));
+										  arg(m_connectedSoftwareInfo.equipmentID(), m_serverEquipmentID));
 				m_enableSignalWrongServerID = false;
 			}
 		}

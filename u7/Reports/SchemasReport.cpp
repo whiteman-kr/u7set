@@ -3,10 +3,9 @@
 #include "Settings.h"
 
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../VFrame30/SchemaDetails.h"
-#include <UiLib/DialogProgress.h>
 
-#include <QDesktopServices>
+#include <VFrame30/SchemaDetails.h>
+#include <UiLib/DialogProgress.h>
 
 using namespace ReportLib;
 using namespace Builder;

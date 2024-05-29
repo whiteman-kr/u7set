@@ -1,29 +1,29 @@
 #include "Parser.h"
 #include "Context.h"
-
-#include <QtConcurrentRun>
+#include "SignalSet.h"
 
 #include <DbLib/DbController.h>
+#include <HardwareLib/Afb.h>
 #include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/PropertyNames.h>
 
-#include "../VFrame30/HorzVertLinks.h"
-#include "../VFrame30/LogicSchema.h"
-#include "../VFrame30/PropertyNames.h"
-#include "../VFrame30/SchemaItems/FblItemRect.h"
-#include "../VFrame30/SchemaItems/SchemaItemAfb.h"
-#include "../VFrame30/SchemaItems/SchemaItemBus.h"
-#include "../VFrame30/SchemaItems/SchemaItemConnection.h"
-#include "../VFrame30/SchemaItems/SchemaItemConst.h"
-#include "../VFrame30/SchemaItems/SchemaItemLink.h"
-#include "../VFrame30/SchemaItems/SchemaItemLoopback.h"
-#include "../VFrame30/SchemaItems/SchemaItemSignal.h"
-#include "../VFrame30/SchemaItems/SchemaItemTerminator.h"
-#include "../VFrame30/SchemaItems/SchemaItemUfb.h"
-#include "../VFrame30/SchemaLayer.h"
-#include "../VFrame30/SchemaPoint.h"
-#include "../VFrame30/UfbSchema.h"
+#include <VFrame30/HorzVertLinks.h>
+#include <VFrame30/LogicSchema.h>
+#include <VFrame30/PropertyNames.h>
+#include <VFrame30/FblItemRect.h>
+#include <VFrame30/SchemaItemAfb.h>
+#include <VFrame30/SchemaItemBus.h>
+#include <VFrame30/SchemaItemConnection.h>
+#include <VFrame30/SchemaItemConst.h>
+#include <VFrame30/SchemaItemLink.h>
+#include <VFrame30/SchemaItemLoopback.h>
+#include <VFrame30/SchemaItemSignal.h>
+#include <VFrame30/SchemaItemTerminator.h>
+#include <VFrame30/SchemaItemUfb.h>
+#include <VFrame30/SchemaLayer.h>
+#include <VFrame30/SchemaPoint.h>
+#include <VFrame30/UfbSchema.h>
 
 
 

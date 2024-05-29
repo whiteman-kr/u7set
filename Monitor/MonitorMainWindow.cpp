@@ -1,21 +1,20 @@
 #include "MonitorMainWindow.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../VFrame30/LogController.h"
-#include "../VFrame30/Schema.h"
 #include "./Archive/MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
+#include "DataSourcesWidget.h"
 #include "DialogSettings.h"
 #include "MonitorSchemaWidget.h"
 #include "MonitorSignalSnapshot.h"
 #include "SelectSchemaWidget.h"
-#include "DataSourcesWidget.h"
 
-#include <UiLib/DialogAbout.h>
+#include <SchemaClientLib/DevToolsWindow.h>
 #include <AppSignalLists/DialogSignalListEditor.h>
 #include <SchemaClientLib/DialogSignalSearch.h>
-#include <SchemaClientLib/DevToolsWindow.h>
 #include <SchemaClientLib/SchemaListWidget.h>
-
+#include <UiLib/DialogAbout.h>
+#include <VFrame30/LogController.h>
+#include <VFrame30/Schema.h>
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow{parent},

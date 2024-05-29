@@ -1,6 +1,8 @@
 #include "SignalsHeap.h"
 #include "UalItems.h"
 
+#include "../UtilsLib/WUtils.h"
+
 namespace Builder
 {
 	Address16 SignalsHeap::HeapItem::address16() const

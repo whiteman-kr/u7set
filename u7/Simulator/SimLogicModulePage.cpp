@@ -3,9 +3,8 @@
 #include "SimWidget.h"
 
 #include <Simulator/SimAppSignalManager.h>
+#include <Simulator/SimControl.h>
 
-#include <QTemporaryFile>
-#include <QDesktopServices>
 
 SimLogicModulePage::SimLogicModulePage(SimIdeSimulator* simulator, VFrame30::AppSignalController* appSignalController, QString equipmentId, QWidget* parent) :
 	SimBasePage(simulator, parent),

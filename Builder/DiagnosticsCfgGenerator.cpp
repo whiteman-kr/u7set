@@ -1,8 +1,9 @@
+#include "DiagnosticsCfgGenerator.h"
+
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../VFrame30/Schema.h"
+#include <VFrame30/Schema.h>
 
 #include "Context.h"
-#include "DiagnosticsCfgGenerator.h"
 #include "ScriptChecker.h"
 #include "SoftwareSettingsGetter.h"
 

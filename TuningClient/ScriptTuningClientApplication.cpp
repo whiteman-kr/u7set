@@ -1,8 +1,6 @@
 #include "ScriptTuningClientApplication.h"
 #include "Settings.h"
 
-#include <QProcess>
-
 ScriptTuningClientApplication::ScriptTuningClientApplication()
 	: QObject{}
 {

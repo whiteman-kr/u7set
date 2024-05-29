@@ -2,9 +2,11 @@
 
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../OnlineLib/SoftwareEndpoint.h"
-#include "../VFrame30/TuningController.h"
 #include "../lib/ISignalDataServer.h"
+
 #include <SchemaClientLib/DragDropHelper.h>
+#include <VFrame30/TuningController.h>
+
 #include <optional>
 
 namespace Ui

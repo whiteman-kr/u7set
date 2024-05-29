@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SchemaClientLib/SchemaClientConfigController.h>
-#include "../VFrame30/Schema.h"
 
 
 struct DiagConfigSettings

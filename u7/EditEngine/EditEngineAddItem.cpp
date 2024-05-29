@@ -1,6 +1,7 @@
 #include "EditEngineAddItem.h"
-#include "../../VFrame30/SchemaLayer.h"
 #include "SchemaEditor/EditSchemaView.h"
+
+#include <VFrame30/SchemaLayer.h>
 
 namespace EditEngine
 {

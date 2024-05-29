@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QStyledItemDelegate>
-#include <QSortFilterProxyModel>
-
 #include <DbLib/DbController.h>
 
 #include "../Builder/AppSignalProperties.h"

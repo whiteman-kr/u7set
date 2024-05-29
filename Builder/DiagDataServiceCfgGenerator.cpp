@@ -1,6 +1,12 @@
 #include "DiagDataServiceCfgGenerator.h"
 #include "SoftwareSettingsGetter.h"
+
+#include "DeviceHelper.h"
+
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/DataSource.h"
+#include "../UtilsLib/XmlHelper.h"
+
 #include <HardwareLib/DeviceChassis.h>
 #include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/DeviceController.h>
