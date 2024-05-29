@@ -335,6 +335,21 @@ VALUE getValueOrNullptr(const std::map<KEY, VALUE>& map, const KEY& key)
 	return getValueOrDefault<KEY, VALUE>(map, key, nullptr);
 }
 
+template <typename KEY, typename VALUE>
+std::map<KEY, VALUE>::iterator findOrInsertKey(std::map<KEY, VALUE>& map, const KEY& key)
+{
+	auto it = map.find(key);
+
+	if (it == map.end())
+	{
+		auto [newIt, b] = map.emplace(key, VALUE{});
+
+		it = newIt;
+	}
+
+	return it;
+}
+
 
 #ifdef __cpp_lib_hardware_interference_size
 	const std::size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
