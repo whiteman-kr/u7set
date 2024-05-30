@@ -570,21 +570,56 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::APP_DATA_RECEIVING_NETMASK,
 											&appDataReceivingNetmask, false, "", log);
 
-	result &= DeviceHelper::getIpPortProperty(software,
-											  EquipmentPropNames::CLIENT_REQUEST_IP,
-											  EquipmentPropNames::CLIENT_REQUEST_PORT,
-											  &clientRequestIP,
-											  false, "", 0, log);
+	// Read RequestControllers settings (suffix _RC**)
 
-	int rtTrendsRequestPort = 0;
+	rqCtrlsSettings.clear();
 
-	result &= DeviceHelper::getPortProperty(software, EquipmentPropNames::RT_TRENDS_REQUEST_PORT,
-											&rtTrendsRequestPort, true, PORT_APP_DATA_SERVICE_RT_TRENDS_REQUEST, log);
+	auto children = software->children();
 
-	rtTrendsRequestIP.setAddressPort(clientRequestIP.addressStr(), rtTrendsRequestPort);
+	int rcSuffixLen = EquipmentPropNames::REQUEST_CONTROLLER_SUFFIX.length();
 
-	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK,
-											&clientRequestNetmask, false, "", log);
+	for(auto& child : children)
+	{
+		QString eqID = child->equipmentIdTemplate();
+
+		if (eqID.mid(eqID.length() - rcSuffixLen - 2, rcSuffixLen) != EquipmentPropNames::REQUEST_CONTROLLER_SUFFIX)
+		{
+			continue;
+		}
+
+		bool ok = true;
+		int rcID = eqID.mid(eqID.length() - 2).toInt(&ok);
+
+		if (ok == false)
+		{
+			continue;
+		}
+
+		RqCtrlSettings settings;
+
+		settings.ID = rcID;
+		settings.equipmentID = eqID;
+
+		result &= DeviceHelper::getIpPortProperty(child.get(),
+												  EquipmentPropNames::CLIENT_REQUEST_IP,
+												  EquipmentPropNames::CLIENT_REQUEST_PORT,
+												  &settings.clientRequestIP,
+												  false, "", 0, log);
+
+		result &= DeviceHelper::getIPv4Property(child.get(), EquipmentPropNames::CLIENT_REQUEST_NETMASK,
+												&settings.clientRequestNetmask, false, "", log);
+
+		int rtTrendsRequestPort = 0;
+
+		result &= DeviceHelper::getPortProperty(software, EquipmentPropNames::RT_TRENDS_REQUEST_PORT,
+												&rtTrendsRequestPort, true, PORT_APP_DATA_SERVICE_RT_TRENDS_REQUEST, log);
+
+		settings.rtTrendsRequestIP.setAddressPort(settings.clientRequestIP.addressStr(), rtTrendsRequestPort);
+
+		rqCtrlsSettings.emplace(settings.ID, settings);
+	}
+
+	//
 
 	result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(software, EquipmentPropNames::SECURITY_LEVEL, &securityLevel, log);
 

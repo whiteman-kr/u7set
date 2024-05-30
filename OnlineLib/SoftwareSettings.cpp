@@ -520,12 +520,23 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,
 							 EquipmentPropNames::ARCH_SERVICE_PORT, archServiceIP);
 
-	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
-							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
-	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+	xml.writeStartElement(XmlElement::REQUEST_CONTROLLERS);
+	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(rqCtrlsSettings.size()));
 
-	xml.writeHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
-							 EquipmentPropNames::RT_TRENDS_REQUEST_PORT, rtTrendsRequestIP);
+	for(const auto& [rcNo, settings] : rqCtrlsSettings)
+	{
+		xml.writeStartElement(XmlElement::REQUEST_CONTROLLER);
+
+		xml.writeIntAttribute(XmlAttribute::ID, rcNo);
+		xml.writeStringAttribute(XmlAttribute::EQUIPMENT_ID, settings.equipmentID);
+		xml.writeStringAttribute(XmlAttribute::CLIENT_REQUEST_IP, settings.clientRequestIP.addressPortStr());
+		xml.writeStringAttribute(XmlAttribute::CLIENT_REQUEST_NETMASK, settings.clientRequestNetmask.toString());
+		xml.writeStringAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, settings.rtTrendsRequestIP.addressPortStr());
+
+		xml.writeEndElement();	// </RequestController>
+	}
+
+	xml.writeEndElement();	// </RequestControllers>
 
 	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
 
@@ -560,12 +571,39 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,
 									  EquipmentPropNames::ARCH_SERVICE_PORT, &archServiceIP);
 
-	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
-									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
-	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+	rqCtrlsSettings.clear();
 
-	result &= xml.readHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
-									  EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtTrendsRequestIP);
+	result &= xml.findElement(XmlElement::REQUEST_CONTROLLERS);
+
+	int rqCtrlsCount = 0;
+
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &rqCtrlsCount);
+
+	for(int i = 0; i < rqCtrlsCount; i++)
+	{
+		result &= xml.findElement(XmlElement::REQUEST_CONTROLLER);
+
+		RqCtrlSettings settings;
+
+		result &= xml.readIntAttribute(XmlAttribute::ID, &settings.ID);
+		result &= xml.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &settings.equipmentID);
+
+		QString str;
+
+		result &= xml.readStringAttribute(XmlAttribute::CLIENT_REQUEST_IP, &str);
+		result &= settings.clientRequestIP.setAddress(str);
+
+		result &= xml.readStringAttribute(XmlAttribute::CLIENT_REQUEST_NETMASK, &str);
+		result &= settings.clientRequestNetmask.setAddress(str);
+
+		result &= xml.readStringAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, &str);
+		result &= settings.rtTrendsRequestIP.setAddress(str);
+
+		if (result == true)
+		{
+			rqCtrlsSettings.emplace(settings.ID, settings);
+		}
+	}
 
 	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel, true);
 

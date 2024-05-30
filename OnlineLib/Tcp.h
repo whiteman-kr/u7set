@@ -376,7 +376,7 @@ namespace Tcp
 		Q_OBJECT
 
 	public:
-		Listener(const HostAddressPort& listenAddressPort, Server* server, CircularLoggerShared logger);
+		Listener(const std::vector<HostAddressPort>& listenAddresses, Server* server, CircularLoggerShared logger);
 		virtual ~Listener();
 
 		virtual void onListenerThreadStarted() {}
@@ -400,9 +400,7 @@ namespace Tcp
 		void updateClientsList();
 
 	private:
-		HostAddressPort m_listenAddressPort;
-
-		TcpServer* m_tcpServer = nullptr;
+		std::vector<std::pair<HostAddressPort, TcpServer*>> m_tcpServers;	// listen IP address -> TcpServer*
 
 		QTimer m_periodicTimer;
 
@@ -412,7 +410,6 @@ namespace Tcp
 
 		friend class TcpServer;
 	};
-
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -425,7 +422,7 @@ namespace Tcp
 		Q_OBJECT
 
 	public:
-		ServerThread(const HostAddressPort& listenAddressPort,
+		ServerThread(const std::vector<HostAddressPort>& listenAddressPorts,
 					 Server* server,
 					 CircularLoggerShared logger);
 		ServerThread(Listener* listener);

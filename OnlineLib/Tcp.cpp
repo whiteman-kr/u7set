@@ -1315,8 +1315,7 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	Listener::Listener(const HostAddressPort& listenAddressPort, Server* server, CircularLoggerShared logger) :
-		m_listenAddressPort(listenAddressPort),
+	Listener::Listener(const std::vector<HostAddressPort>& listenAddresses, Server* server, CircularLoggerShared logger) :
 		m_periodicTimer(this),
 		m_serverInstance(server)
 	{
@@ -1326,6 +1325,13 @@ namespace Tcp
 
 		m_serverInstance->setParent(this);
 		m_serverInstance->setLogger(logger);
+
+		m_tcpServers.resize(listenAddressPorts.size());
+
+		for(const HostAddressPort& listenAddress : listenAddresses)
+		{
+			m_tcpServers.emplace_back(listenAddress, nullptr);
+		}
 	}
 
 	Listener::~Listener()
@@ -1382,20 +1388,28 @@ namespace Tcp
 
 	void Listener::startListening()
 	{
-		if (m_tcpServer == nullptr)
-		{
-			m_tcpServer = new TcpServer(this);
+		int addressCount = TO_INT(m_listenAddressPorts.size());
 
-			connect(m_tcpServer, &TcpServer::newIncomingConnection, this, &Listener::onNewConnection);
-		}
+		Q_ASSERT()
 
-		if (m_tcpServer->listen(m_listenAddressPort.address(), m_listenAddressPort.port()) == true)
+		for(int i = 0; i < addressCount; i++)
 		{
-			onStartListening(m_listenAddressPort, true, "");
-		}
-		else
-		{
-			onStartListening(m_listenAddressPort, false, m_tcpServer->errorString());
+			const HostAddressPort& listenAddressPort = m_listenAddressPorts[i];
+			if (m_tcpServer == nullptr)
+			{
+				m_tcpServer = new TcpServer(this);
+
+				connect(m_tcpServer, &TcpServer::newIncomingConnection, this, &Listener::onNewConnection);
+			}
+
+			if (m_tcpServer->listen(m_listenAddressPort.address(), m_listenAddressPort.port()) == true)
+			{
+				onStartListening(m_listenAddressPort, true, "");
+			}
+			else
+			{
+				onStartListening(m_listenAddressPort, false, m_tcpServer->errorString());
+			}
 		}
 	}
 
@@ -1468,10 +1482,10 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	ServerThread::ServerThread(const HostAddressPort &listenAddressPort,
+	ServerThread::ServerThread(const std::vector<HostAddressPort>& listenAddressPorts,
 							   Server* server,
 							   CircularLoggerShared logger) :
-		SimpleThread(new Listener(listenAddressPort, server, logger))
+		SimpleThread(new Listener(listenAddressPorts, server, logger))
 	{
 	}
 

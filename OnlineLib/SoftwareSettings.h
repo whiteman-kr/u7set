@@ -181,10 +181,16 @@ public:
 	QString archServiceID;
 	HostAddressPort archServiceIP;
 
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
+	struct RqCtrlSettings				//	Request Controller Settings
+	{
+		int ID = 0;
+		QString equipmentID;
+		HostAddressPort clientRequestIP;
+		QHostAddress clientRequestNetmask;
+		HostAddressPort rtTrendsRequestIP;
+	};
 
-	HostAddressPort rtTrendsRequestIP;
+	std::map<int, RqCtrlSettings> rqCtrlsSettings;	// RequestController ID -> controller settings
 
 	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 
