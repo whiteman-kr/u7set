@@ -62,6 +62,7 @@ namespace Builder
 		bool taskCompileApplicationLogic();			// Compile application logic
 		bool taskProcessTuningParameters();			// Tuning Parameters
 		bool taskGenerationModulesConfiguration();	// Generate Modules Configuration
+		bool taskInstalledModulesReportGeneration();			// Generate Installed Modules Report
 		bool taskGenerationBitstreamFile();			// Generate Bitstream File
 		bool taskGenerationVduFonts();				// Generate fonts for VDUs
 		bool taskGenerationSoftwareConfiguration();	// Generate Software Configuration
@@ -181,6 +182,11 @@ namespace Builder
 				{
 					.func = &BuildWorkerThread::taskGenerationModulesConfiguration,
 					.name = "Modules Configuration Generation",
+					.breakOnFailed = true
+				},
+				{
+					.func = &BuildWorkerThread::taskInstalledModulesReportGeneration,
+					.name = "Installed Modules Report Generation",
 					.breakOnFailed = true
 				},
 				{
