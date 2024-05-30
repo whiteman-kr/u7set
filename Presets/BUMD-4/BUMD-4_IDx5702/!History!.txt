@@ -1,2 +1,2 @@
 BUMD-4
-	30.05.2024	Version: 3	BUMD-4_IDx5702_v3.u7devp	RPCT-3896: Added preset in new naming convension and family BUIM (created from BUMD-4_v3.u7devp) 
+	30.05.2024	Version: 3	BUMD-4_IDx5702_v3.u7devp	RPCT-3896: Added preset in new naming convension and family BUIM (created from BUMD-4_v2.u7devp) 
