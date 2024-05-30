@@ -183,14 +183,18 @@ public:
 
 	struct RqCtrlSettings				//	Request Controller Settings
 	{
-		int ID = 0;
+		int ID = -1;
 		QString equipmentID;
 		HostAddressPort clientRequestIP;
 		QHostAddress clientRequestNetmask;
 		HostAddressPort rtTrendsRequestIP;
+
+		bool isValid() const { return ID != -1; }
 	};
 
 	std::map<int, RqCtrlSettings> rqCtrlsSettings;	// RequestController ID -> controller settings
+
+	RqCtrlSettings getRequestControllerSettings(const QString& rcEquipmentID);
 
 	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 

@@ -1411,6 +1411,30 @@ namespace Builder
 				  .arg(propertyName));
 	}
 
+	/// IssueCode: CFG3032
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 is linked to undefined RequestController ID %3.
+	///
+	/// Parameters:
+	///         %1 Object ID
+	///         %2 Property name
+	///			%3 RequestController ID
+	///
+	/// Description:
+	///			Occurs if property is linked to undefined RequestController ID.
+	///
+	void IssueLogger::errCFG3032(QString objectID, QString propertyName, QString rcID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3032,
+				  tr("Property %1.%2 is linked to undefined RequestController ID %3.")
+				  .arg(objectID)
+				  .arg(propertyName)
+				  .arg(rcID));
+	}
+
 	/// IssueCode: CFG3040
 	///
 	/// IssueType: Error

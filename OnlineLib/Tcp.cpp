@@ -1326,7 +1326,7 @@ namespace Tcp
 		m_serverInstance->setParent(this);
 		m_serverInstance->setLogger(logger);
 
-		m_tcpServers.resize(listenAddressPorts.size());
+		m_tcpServers.resize(listenAddresses.size());
 
 		for(const HostAddressPort& listenAddress : listenAddresses)
 		{
@@ -1336,6 +1336,11 @@ namespace Tcp
 
 	Listener::~Listener()
 	{
+		for(auto& [listenAddr, tcpServer] : m_tcpServers)
+		{
+			DELETE_IF_NOT_NULL(tcpServer);
+		}
+
 		// close all conection threads
 		//
 		for(auto const& [worker, thread]: m_runningServers)
@@ -1379,36 +1384,34 @@ namespace Tcp
 	{
 		onListenerThreadFinished();
 
-		if (m_tcpServer != nullptr)
+/*		if (m_tcpServer != nullptr)
 		{
 			m_tcpServer->close();
 			delete m_tcpServer;
-		}
+		}*/
 	}
 
 	void Listener::startListening()
 	{
-		int addressCount = TO_INT(m_listenAddressPorts.size());
-
-		Q_ASSERT()
-
-		for(int i = 0; i < addressCount; i++)
+		for(auto& [listenAddr, tcpServer] : m_tcpServers)
 		{
-			const HostAddressPort& listenAddressPort = m_listenAddressPorts[i];
-			if (m_tcpServer == nullptr)
+			if (tcpServer == nullptr)
 			{
-				m_tcpServer = new TcpServer(this);
+				tcpServer = new TcpServer(this);
 
-				connect(m_tcpServer, &TcpServer::newIncomingConnection, this, &Listener::onNewConnection);
+				connect(tcpServer, &TcpServer::newIncomingConnection, this, &Listener::onNewConnection);
 			}
 
-			if (m_tcpServer->listen(m_listenAddressPort.address(), m_listenAddressPort.port()) == true)
+			if (tcpServer->isListening() == false)
 			{
-				onStartListening(m_listenAddressPort, true, "");
-			}
-			else
-			{
-				onStartListening(m_listenAddressPort, false, m_tcpServer->errorString());
+				if (tcpServer->listen(listenAddr.address(), listenAddr.port()) == true)
+				{
+					onStartListening(listenAddr, true, "");
+				}
+				else
+				{
+					onStartListening(listenAddr, false, tcpServer->errorString());
+				}
 			}
 		}
 	}
@@ -1440,10 +1443,7 @@ namespace Tcp
 
 	void Listener::onPeriodicTimer()
 	{
-		if (!m_tcpServer->isListening())
-		{
-			startListening();
-		}
+		startListening();
 	}
 
 	void Listener::onServerDisconnected(const SocketWorker* server)

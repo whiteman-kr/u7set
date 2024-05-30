@@ -498,6 +498,19 @@ QStringList CfgServiceSettings::knownClients() const
 //
 // -------------------------------------------------------------------------------------
 
+AppDataServiceSettings::RqCtrlSettings AppDataServiceSettings::getRequestControllerSettings(const QString& rcEquipmentID)
+{
+	for(const auto& [rcID, rcSettings] : rqCtrlsSettings)
+	{
+		if (rcSettings.equipmentID == rcEquipmentID)
+		{
+			return rcSettings;
+		}
+	}
+
+	return RqCtrlSettings();
+}
+
 bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
