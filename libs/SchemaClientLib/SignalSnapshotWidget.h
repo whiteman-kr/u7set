@@ -127,6 +127,7 @@ namespace SchemaClientLib
 		void initSignalsView();
 
 		void fillSchemas();
+		void fillAppSignalLists();
 		void fillSignals();
 
 		void updateTableItems();
@@ -160,7 +161,7 @@ namespace SchemaClientLib
 		QPushButton* m_buttonFixate = nullptr;
 
 		SnapshotTableView* m_tableView = nullptr;
-		SignalSnapshotModel* m_model = nullptr;
+		SignalSnapshotModel m_model;
 
 		QAction* m_formatAutoSelect = nullptr;
 		QAction* m_formatDecimal = nullptr;

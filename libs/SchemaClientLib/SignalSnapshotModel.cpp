@@ -311,6 +311,11 @@ namespace SchemaClientLib
 		m_listId = listId;
 	}
 
+	QString SignalSnapshotModel::appSignalList() const 
+	{
+		return m_listId;
+	}
+
 	void SignalSnapshotModel::fillSignals()
 	{
 		if (rowCount() > 0)

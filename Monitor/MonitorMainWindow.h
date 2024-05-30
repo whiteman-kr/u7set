@@ -169,6 +169,9 @@ public:
 	ITuningAuthorization& tuningAuthorization();
 	const ITuningAuthorization& tuningAuthorization() const;
 
+	MonitorAppSignalListSet&  appSignalListSet();
+	const MonitorAppSignalListSet&  appSignalListSet() const;
+
 protected:
 	// Data
 	//

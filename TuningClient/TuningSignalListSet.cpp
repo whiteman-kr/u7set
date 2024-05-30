@@ -1,0 +1,119 @@
+#include "TuningSignalListSet.h"
+#include "Settings.h"
+
+bool TuningSignalListSet::load(QString* errorMessage)
+{
+	QString path = QDir::toNativeSeparators(QObject::tr("%1//TuningSignalLists//%2")
+												.arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
+												.arg(TuningClientAppSettings::instance().instanceStrId()));
+
+	QDir dir(path);
+	if (dir.exists() == false)
+	{
+		return true;
+	}
+
+	QStringList files = dir.entryList(QStringList() << "*.aslist");
+
+	for (QString& fileName : files) 
+	{
+		QString filePath = path + QDir().separator() + fileName;
+
+		QFile f(filePath);
+		if (f.open(QFile::ReadOnly) == false) 
+		{
+			*errorMessage = QString("Error loading TuningSignalList from file %1.").arg(filePath);
+			return false;
+		}
+
+		QByteArray data = f.readAll();
+
+		std::shared_ptr<AppSignalLists::AppSignalList> list = std::make_shared<AppSignalLists::AppSignalList>();
+
+		Proto::Envelope envelope;
+		if (envelope.ParseFromArray(data.constData(), static_cast<int>(data.size())) == false)
+		{
+			*errorMessage = QString("Error parsing TuningSignalList from envelope %1.").arg(filePath);
+			return false;
+		}
+
+		bool ok = list->LoadData(envelope);
+		if (ok == false)
+		{
+			*errorMessage = QString("Error loading TuningSignalList from envelope %1.").arg(filePath);
+			return false;
+		}
+
+		add(list);
+	}
+
+	return true;
+}
+
+bool TuningSignalListSet::save(QString* errorMessage) const
+{
+	QString path = QDir::toNativeSeparators(QObject::tr("%1//TuningSignalLists//%2")
+												.arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
+												.arg(TuningClientAppSettings::instance().instanceStrId()));
+
+	QDir dir(path);
+	if (dir.exists() == false)
+	{
+		if (dir.mkpath(path) == false) 
+		{
+			*errorMessage = QObject::tr("Error creating directory: %1").arg(path);
+			return false;
+		}
+	}
+	else 
+	{
+		QStringList files = dir.entryList(QStringList() << "*.aslist");
+		for (const QString& fileName: files) 
+		{
+			QString filePath = path + QDir().separator() + fileName;
+			QFile f(filePath);
+			bool ok = f.remove();
+			Q_ASSERT(ok);
+		}
+	}
+
+	
+
+	for (const auto& list : m_lists) 
+	{
+		if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagIde) == true) 
+		{
+			continue;
+		}
+
+		Proto::Envelope message;
+		list->SaveData(&message);
+
+		QByteArray data;
+		data.resize(static_cast<int>(message.ByteSizeLong()));
+
+		bool result = message.SerializeToArray(data.data(), static_cast<int>(message.ByteSizeLong()));
+		if (result == false)
+		{
+			Q_ASSERT(result);
+			return false;
+		}
+
+		QString filePath = QDir::toNativeSeparators(QObject::tr("%1//%2.%3").arg(path).arg(list->id()).arg("aslist"));
+
+		QFile f(filePath);
+		if (f.open(QFile::WriteOnly) == false) 
+		{
+			*errorMessage = QObject::tr("Error opening file for writing: %1").arg(filePath);
+			return false;
+		}
+
+		if (f.write(data) != data.size()) 
+		{
+			*errorMessage = QObject::tr("Error writing data to file: %1").arg(filePath);
+			return false;
+		}
+	}
+
+	return true;
+}

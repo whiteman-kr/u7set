@@ -632,7 +632,7 @@ namespace AppSignalLists
 		m_lists.clear();
 	}
 
-	int AppSignalListSet::count() 
+	int AppSignalListSet::count() const
 	{
 		return static_cast<int>(m_lists.size());
 	}
@@ -675,7 +675,7 @@ namespace AppSignalLists
 		return true;
 	}
 
-	std::shared_ptr<AppSignalList> AppSignalListSet::get(int index) 
+	std::shared_ptr<AppSignalList> AppSignalListSet::get(int index) const
 	{
 		if (index < 0 || index >= count()) 
 		{
@@ -685,7 +685,7 @@ namespace AppSignalLists
 		return m_lists[index];
 	}
 
-	std::shared_ptr<AppSignalList> AppSignalListSet::get(const QString& id) 
+	std::shared_ptr<AppSignalList> AppSignalListSet::get(const QString& id) const
 	{
 		auto it = std::find_if(m_lists.begin(),
 							   m_lists.end(),
@@ -700,7 +700,7 @@ namespace AppSignalLists
 		return *it;
 	}
 
-	std::shared_ptr<AppSignalList> AppSignalListSet::get(const QUuid& uuid) 
+	std::shared_ptr<AppSignalList> AppSignalListSet::get(const QUuid& uuid) const
 	{
 		auto it = std::find_if(m_lists.begin(),
 							   m_lists.end(),
@@ -756,6 +756,11 @@ namespace AppSignalLists
 	{
 		Q_ASSERT(false);
 		return false;
+	}
+
+	void AppSignalListSet::fireUpdatePerformed() 
+	{
+		emit updatePerformed();
 	}
 
 } // namespace AppSignalLists

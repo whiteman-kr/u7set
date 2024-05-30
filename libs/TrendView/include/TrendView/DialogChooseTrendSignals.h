@@ -11,9 +11,16 @@
 
 class QItemSelection;
 
+
 namespace Ui
 {
 	class DialogChooseTrendSignals;
+}
+
+namespace AppSignalLists
+{
+	class AppSignalList;
+	class AppSignalListSet;
 }
 
 namespace TrendLibInternal
@@ -32,7 +39,7 @@ namespace TrendLibInternal
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 		QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-		void filterSignals(QString server, QString filter, QStringList tagList);
+		void filterSignals(QString server, std::optional<AppSignalLists::AppSignalList*> appSignalList, QString filter, QStringList tagList);
 
 		const TrendLib::TrendSignalParam& signalByRow(int row) const;
 
@@ -58,6 +65,7 @@ namespace TrendLib
 								 std::vector<TrendLib::TrendSignalParam> trendSignals,
 								 const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
 								 const std::vector<TrendLib::ArchiveServer>& archiveServers,
+								 const AppSignalLists::AppSignalListSet& appSignalLists,
 								 QWidget* parent);
 
 		virtual ~DialogChooseTrendSignals();
@@ -75,6 +83,7 @@ namespace TrendLib
 		virtual void resizeEvent(QResizeEvent* event) override;
 
 		void fillServerCombo();
+		void fillAppSignalLists();
 		void fillSignalList();
 
 		void addSignal(const TrendSignalParam& signal);
@@ -103,6 +112,8 @@ namespace TrendLib
 		void on_trendSignals_doubleClicked(const QModelIndex& index);
 		void slot_trendSignalsSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
+		void listComboIndexChanged(int index);
+
 		void on_buttonBox_accepted();
 
 		void on_trendSignals_customContextMenuRequested(const QPoint& pos);
@@ -117,6 +128,7 @@ namespace TrendLib
 
 		std::vector<TrendLib::TrendSignalParam> m_acceptedSignals;
 		std::vector<TrendLib::ArchiveServer> m_archiveServers;
+		const AppSignalLists::AppSignalListSet& m_appSignalListSet;
 
 		// --
 		//

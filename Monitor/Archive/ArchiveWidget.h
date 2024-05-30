@@ -16,6 +16,7 @@ class ArchiveWidget : public QMainWindow
 public:
 	explicit ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 						   MonitorConfigController* configController,
+						   const AppSignalLists::AppSignalListSet& appSignalListSet,
 						   QWidget* parent);
 	virtual ~ArchiveWidget();
 
@@ -109,6 +110,7 @@ private:
 	QLabel* m_statusBarNetworkRequestsLabel = nullptr;
 
 	ArchiveSource m_source;
+	const AppSignalLists::AppSignalListSet& m_appSignalListSet;
 };
 
 

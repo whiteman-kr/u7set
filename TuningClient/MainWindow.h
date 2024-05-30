@@ -4,6 +4,7 @@
 #include "SchemasWorkspace.h"
 #include "TuningConfigController.h"
 #include "LogonWorkspace.h"
+#include "TuningSignalListSet.h"
 #include "DialogTuningSources.h"
 #include <ClientLib/ClientTranslator.h>
 #include <ClientLib/TuningConnection.h>
@@ -61,6 +62,7 @@ public slots:
 	void showAboutQt();
 	void showAbout();
 	void showTuningUserManual();
+	void showAppSignalListEditor();
 
 	void slot_userFiltersChanged();
 
@@ -110,7 +112,7 @@ private:
 
 	// AppSignalLists
 	//
-	AppSignalLists::AppSignalListSet m_appSignalListSet;
+	TuningSignalListSet m_appSignalListSet;
 
 	// Workspace items
 	//
@@ -132,6 +134,7 @@ private:
 
 	QAction* m_pExitAction = nullptr;
 	QAction* m_pPresetEditorAction = nullptr;
+	QAction* m_pAppSignalListsAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pTuningSourcesAction = nullptr;
 	QAction* m_pStatisticsAction = nullptr;

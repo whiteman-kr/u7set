@@ -231,7 +231,7 @@ bool MonitorMainWindow::eventFilter(QObject *object, QEvent *event)
 
 void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals)
 {
-	MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);
+	MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, m_appSignalListSet, this);
 }
 
 void MonitorMainWindow::saveWindowState()
@@ -1156,7 +1156,7 @@ void MonitorMainWindow::slot_archive()
 	if (archiveWindowToActivate.isEmpty() == true)
 	{
 		std::vector<AppSignalParam> appSignals;
-		MonitorArchive::startNewWidget(m_signalManager, &m_configController, appSignals, this);
+		MonitorArchive::startNewWidget(m_signalManager, &m_configController, appSignals, m_appSignalListSet, this);
 	}
 	else
 	{
@@ -1236,7 +1236,7 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 		return;
 	}
 
-	MonitorArchive::requestArchiveWithNewWidget(m_signalManager, &configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
+	MonitorArchive::requestArchiveWithNewWidget(m_signalManager, &configController(), appSignals, m_appSignalListSet, startTime, endTime, static_cast<E::TimeType>(timeType), this);
 	return;
 }
 
@@ -1305,7 +1305,7 @@ void MonitorMainWindow::slot_trends()
 	if (trendToActivate == nullptr)
 	{
 		std::vector<AppSignalParam> appSignals;
-		MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);
+		MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, m_appSignalListSet, this);
 	}
 	else
 	{
@@ -1488,6 +1488,7 @@ void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configur
 	//
 	m_appSignalListSet.remove(AppSignalLists::AppSignalList::tagIde);
 	m_appSignalListSet.add(m_configController.appSignalListSet());
+	m_appSignalListSet.fireUpdatePerformed();
 
 	showTuningLoginControls();
 
@@ -1740,6 +1741,16 @@ const ITuningAuthorization& MonitorMainWindow::tuningAuthorization() const
 	return m_tuningUserManager;
 }
 
+MonitorAppSignalListSet& MonitorMainWindow::appSignalListSet() 
+{
+	return m_appSignalListSet;
+}
+
+const MonitorAppSignalListSet& MonitorMainWindow::appSignalListSet() const 
+{
+	return m_appSignalListSet;
+}
+	
 const ClientLib::TuningUserManager& MonitorMainWindow::userManager() const
 {
 	return m_tuningUserManager;
@@ -1940,7 +1951,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 
 		if (appSignals.empty() == false)
 		{
-			MonitorArchive::startNewWidget(mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow);
+			MonitorArchive::startNewWidget(mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow->appSignalListSet(), mainWindow);
 		}
 	}
 

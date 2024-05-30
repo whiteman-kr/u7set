@@ -761,6 +761,8 @@ namespace AppSignalLists
 		{
 			QMessageBox::critical(this, qAppName(), errorMessage);
 		}
+
+		m_appLists.updatePerformed();
 	}
 
 	void DialogSignalListEditor::closeEvent(QCloseEvent* e)

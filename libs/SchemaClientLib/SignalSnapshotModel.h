@@ -133,6 +133,7 @@ namespace SchemaClientLib
 		void setSchemaAppSignals(std::set<QString> schemaAppSignals);
 
 		void setAppSignalList(const QString& listId);
+		QString appSignalList() const;
 
 		void fillSignals();
 

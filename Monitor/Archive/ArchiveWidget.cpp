@@ -120,10 +120,12 @@ namespace
 //
 ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 							 MonitorConfigController* configController,
+							 const AppSignalLists::AppSignalListSet& appSignalListSet,
 							 QWidget* parent) :
 	QMainWindow(parent, Qt::WindowSystemMenuHint | Qt::WindowMaximizeButtonHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_signalManager(signalManager),
-	m_archiveConnection(*configController, configController->logFile(), this)
+	m_archiveConnection(*configController, configController->logFile(), this),
+	m_appSignalListSet(appSignalListSet)
 {
 	static int no = 1;
 	QString name = tr("Monitor Archive %1").arg(no++);
@@ -645,9 +647,7 @@ void ArchiveWidget::updateOrCancelButton()
 
 void ArchiveWidget::signalsButton()
 {
-	DialogChooseArchiveSignals dialog(m_signalManager,
-									  m_archiveServices,
-									  m_source,
+	DialogChooseArchiveSignals dialog(m_signalManager, m_archiveServices, m_source, m_appSignalListSet,
 									  this);
 
 	int result = dialog.exec();

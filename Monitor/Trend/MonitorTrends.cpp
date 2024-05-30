@@ -40,9 +40,10 @@ bool MonitorTrends::activateTrendWindow(MonitorTrendsWidget* trendWidget)
 bool MonitorTrends::startTrendApp(const ClientLib::AppSignalManager& signalManager,
 								  const MonitorConfigController& configController,
 								  const std::vector<AppSignalParam>& appSignals,
+								  const AppSignalLists::AppSignalListSet& appSignalListSet,
 								  QWidget* parent)
 {
-	MonitorTrendsWidget* window = new MonitorTrendsWidget(signalManager, configController, parent);
+	MonitorTrendsWidget* window = new MonitorTrendsWidget(signalManager, configController, appSignalListSet, parent);
 
 	std::vector<TrendLib::TrendSignalParam> trendSignals;
 	trendSignals.reserve(appSignals.size());
@@ -126,12 +127,14 @@ void MonitorTrends::unregisterTrendWindow(const MonitorTrendsWidget* window)
 
 MonitorTrendsWidget::MonitorTrendsWidget(const ClientLib::AppSignalManager& signalManager,
 										 const MonitorConfigController& configController,
+										 const AppSignalLists::AppSignalListSet& appSignalListSet,
 										 QWidget* parent) :
 	TrendLib::TrendMainWindow(parent),
 	m_signalManager(signalManager),
 	m_configController(configController),
 	m_archiveDataProvider(m_configController, m_configController.logFile()),
-	m_realtimeDataProvider(m_signalManager, m_configController.logFile())
+	m_realtimeDataProvider(m_signalManager, m_configController.logFile()),
+	m_appSignalListSet(appSignalListSet)
 {
 	static int no = 1;
 	QString trendName = tr("Monitor Trends %1").arg(no++);
@@ -302,6 +305,7 @@ void MonitorTrendsWidget::signalsButton()
 											  trendSignals,
 											  addedTrendSignals,
 											  trendArchiveServers,
+											  m_appSignalListSet,
 											  this);
 
 	int result = dialog.exec();

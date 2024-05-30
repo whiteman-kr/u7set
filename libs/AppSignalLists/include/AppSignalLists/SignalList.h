@@ -210,19 +210,27 @@ namespace AppSignalLists
 		static const char* mimeType; // = "application/x-radiyappsignallist";
 	};
 
-	class AppSignalListSet
+	class AppSignalListSet : public QObject
 	{
+		Q_OBJECT
 	public:
+
+		AppSignalListSet() = default;
+		AppSignalListSet(const AppSignalListSet& That) 
+		{
+			*this = That;
+		}
+
 		void clear();
-		[[nodiscard]] int count();
+		[[nodiscard]] int count() const;
 		
 		bool add(const QByteArray& ba);
 		bool add(std::shared_ptr<AppSignalList> list);
 		bool add(const AppSignalListSet& appSignalListSet);
 
-		[[nodiscard]] std::shared_ptr<AppSignalList> get(int index);
-		[[nodiscard]] std::shared_ptr<AppSignalList> get(const QString& id);
-		[[nodiscard]] std::shared_ptr<AppSignalList> get(const QUuid& uuid);
+		[[nodiscard]] std::shared_ptr<AppSignalList> get(int index) const;
+		[[nodiscard]] std::shared_ptr<AppSignalList> get(const QString& id) const;
+		[[nodiscard]] std::shared_ptr<AppSignalList> get(const QUuid& uuid) const;
 
 		void remove(const QUuid& uuid);
 		void remove(const QString& systemTag);
@@ -231,6 +239,8 @@ namespace AppSignalLists
 
 		virtual bool load(QString* errorMessage);
 		virtual bool save(QString* errorMessage) const;
+		
+		void fireUpdatePerformed();
 
 		AppSignalListSet& operator = (const AppSignalListSet& That) 
 		{
@@ -250,6 +260,10 @@ namespace AppSignalLists
 
 	protected:
 		std::vector<std::shared_ptr<AppSignalList>> m_lists;
+
+	signals:
+		void updatePerformed();
+
 
 	};
 }

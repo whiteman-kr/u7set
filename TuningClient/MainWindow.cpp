@@ -7,6 +7,7 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Tuning/TuningFilter.h"
 
+#include <AppSignalLists/DialogSignalListEditor.h>
 #include <UiLib/DialogAlert.h>
 #include <UiLib/DialogAbout.h>
 #include <ClientLib/TuningLog.h>
@@ -108,6 +109,14 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 		QMessageBox::critical(this, tr("Error"), msg);
 	}
 
+	// Load local appSignalLists
+
+	QString errorMessage;
+	if (m_appSignalListSet.load(&errorMessage) == false)
+	{
+		QMessageBox::critical(this, qAppName(), errorMessage);
+	}
+
 	//
 
 	m_mainWindowTimerId_500ms = startTimer(500);
@@ -172,6 +181,11 @@ void MainWindow::createActions()
 	m_pPresetEditorAction->setEnabled(true);
 	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
 
+	m_pAppSignalListsAction = new QAction(tr("Tuning Signal Lists..."), this);
+	m_pAppSignalListsAction->setStatusTip(tr("Edit tuning signal Lists"));
+	m_pAppSignalListsAction->setEnabled(true);
+	connect(m_pAppSignalListsAction, &QAction::triggered, this, &MainWindow::showAppSignalListEditor);
+
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
 	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
@@ -226,6 +240,7 @@ void MainWindow::createMenu()
 	//
 	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
 	pServiceMenu->addAction(m_pPresetEditorAction);
+	pServiceMenu->addAction(m_pAppSignalListsAction);
 	pServiceMenu->addSeparator();
 	pServiceMenu->addAction(m_pSettingsAction);
 
@@ -1023,6 +1038,12 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 								   configuration.clientSettings.loginPerOperation,
 								   configuration.clientSettings.tuningSessionTimeout,
 								   configuration.matsUsers.users());
+	
+	// Update AppSignalLists: remove all lists with Ide tag and add loaded ones
+	//
+	m_appSignalListSet.remove(AppSignalLists::AppSignalList::tagIde);
+	m_appSignalListSet.add(m_configController.appSignalListSet());
+	m_appSignalListSet.fireUpdatePerformed();
 
 	// --
 	//
@@ -1290,6 +1311,11 @@ void MainWindow::showAbout()
 void MainWindow::showTuningUserManual()
 {
 	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
+}
+
+void MainWindow::showAppSignalListEditor()
+{
+	AppSignalLists::DialogSignalListEditor::showDialog(m_appSignalListSet, m_tuningSignalManager, this);
 }
 
 void MainWindow::slot_userFiltersChanged()

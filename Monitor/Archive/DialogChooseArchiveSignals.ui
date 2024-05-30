@@ -44,10 +44,81 @@
       <bool>false</bool>
      </property>
      <widget class="QWidget" name="layoutWidget">
-      <layout class="QGridLayout" name="gridLayout_src" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0">
+      <layout class="QGridLayout" name="gridLayout_src" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0">
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
+       <item row="6" column="2">
+        <spacer name="verticalSpacer1">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="signalTypeCombo"/>
+       </item>
+       <item row="7" column="2">
+        <widget class="QPushButton" name="addSignalButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>&gt;</string>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QComboBox" name="serverCombo"/>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="filterEdit">
+         <property name="placeholderText">
+          <string>Start typing SignalID</string>
+         </property>
+         <property name="clearButtonEnabled">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="2">
+        <widget class="QPushButton" name="removeSignalButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>&lt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="10" column="2">
+        <spacer name="verticalSpacer2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
        <item row="2" column="0">
         <widget class="QLabel" name="schemaLabel">
          <property name="text">
@@ -55,7 +126,7 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0" rowspan="7" colspan="2">
+       <item row="6" column="0" rowspan="7" colspan="2">
         <widget class="QTreeView" name="filteredSignals">
          <property name="rootIsDecorated">
           <bool>false</bool>
@@ -75,68 +146,6 @@
         </widget>
        </item>
        <item row="9" column="2">
-        <spacer name="verticalSpacer2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="signalTypeLabel">
-         <property name="text">
-          <string>Signal Type</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="2">
-        <spacer name="verticalSpacer1">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="3" column="1">
-        <widget class="QLineEdit" name="filterEdit">
-         <property name="placeholderText">
-          <string>Start typing SignalID</string>
-         </property>
-         <property name="clearButtonEnabled">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="6" column="2">
-        <widget class="QPushButton" name="addSignalButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>&gt;</string>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QComboBox" name="signalTypeCombo"/>
-       </item>
-       <item row="8" column="2">
         <widget class="QPushButton" name="removeAllSignalsButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -149,28 +158,29 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="1" column="0">
+        <widget class="QLabel" name="signalTypeLabel">
+         <property name="text">
+          <string>Signal Type</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
         <widget class="QLabel" name="filterLabel">
          <property name="text">
           <string>Filter</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="2">
-        <widget class="QPushButton" name="removeSignalButton">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+       <item row="3" column="1">
+        <widget class="QComboBox" name="listCombo"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="schemaLabel_3">
          <property name="text">
-          <string>&lt;</string>
+          <string>List</string>
          </property>
         </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QComboBox" name="serverCombo"/>
        </item>
       </layout>
      </widget>
@@ -322,11 +332,34 @@
  <tabstops>
   <tabstop>signalTypeCombo</tabstop>
   <tabstop>serverCombo</tabstop>
+  <tabstop>listCombo</tabstop>
   <tabstop>filterEdit</tabstop>
   <tabstop>filteredSignals</tabstop>
+  <tabstop>startDateEdit</tabstop>
+  <tabstop>startTimeEdit</tabstop>
+  <tabstop>endDateEdit</tabstop>
+  <tabstop>endTimeEdit</tabstop>
+  <tabstop>timeTypeCombo</tabstop>
+  <tabstop>removePeriodicCheckbox</tabstop>
+  <tabstop>archiveSignals</tabstop>
   <tabstop>addSignalButton</tabstop>
   <tabstop>removeSignalButton</tabstop>
   <tabstop>removeAllSignalsButton</tabstop>
+  <tabstop>signalTypeCombo_2</tabstop>
+  <tabstop>addSignalButton_2</tabstop>
+  <tabstop>serverCombo_2</tabstop>
+  <tabstop>filterEdit_2</tabstop>
+  <tabstop>removeSignalButton_2</tabstop>
+  <tabstop>filteredSignals_2</tabstop>
+  <tabstop>removeAllSignalsButton_2</tabstop>
+  <tabstop>comboBox_2</tabstop>
+  <tabstop>removePeriodicCheckbox_2</tabstop>
+  <tabstop>endDateEdit_2</tabstop>
+  <tabstop>endTimeEdit_2</tabstop>
+  <tabstop>startDateEdit_2</tabstop>
+  <tabstop>startTimeEdit_2</tabstop>
+  <tabstop>timeTypeCombo_2</tabstop>
+  <tabstop>archiveSignals_2</tabstop>
  </tabstops>
  <resources/>
  <connections>
