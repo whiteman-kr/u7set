@@ -304,5 +304,6 @@ namespace TuningLib
 		//std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 	};
 
-	Q_DECLARE_METATYPE(std::shared_ptr<TuningUiItem>)
 } // namespace TuningUi
+
+//Q_DECLARE_METATYPE(std::shared_ptr<TuningLib::TuningUiItem>)
