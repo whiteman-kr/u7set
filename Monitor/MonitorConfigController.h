@@ -28,8 +28,6 @@ struct MonitorConfigSettings
 	QString globalScript;
 	QPixmap logoImage;
 	Behavior::MonitorBehavior monitorBehavior;
-	
-	std::vector<AppSignalLists::AppSignalList> appSignalLists;
 
 	// Tuning settings
 	//
@@ -91,6 +89,8 @@ private:
 
 	mutable QReadWriteLock m_configurationLock;		// for access only to m_configuration
 	MonitorConfigSettings m_configuration;
+
+	std::vector<AppSignalLists::AppSignalList> appSignalLists;
 
 	ComparatorSet m_setpoints;
 };

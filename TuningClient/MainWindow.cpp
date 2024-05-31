@@ -114,7 +114,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QString errorMessage;
 	if (m_appSignalListSet.load(&errorMessage) == false)
 	{
-		QMessageBox::critical(this, qAppName(), errorMessage);
+		m_logFile.writeError(errorMessage);
 	}
 
 	//

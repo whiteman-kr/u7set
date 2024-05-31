@@ -56,8 +56,7 @@ namespace Builder
 			QStringList tuningSources;
 			result &= createTuningEquipmentList(&tuningSources);
 
-			std::vector<AppSignal*> tuningSignals;
-			createTuningSignals(tuningSources, m_signalSet, tuningSignals);
+			std::vector<AppSignal*> tuningSignals = createTuningSignals(tuningSources, *m_signalSet);
 			
 			result &= writeTuningSignals(tuningSignals);
 

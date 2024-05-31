@@ -3,7 +3,7 @@
 
 bool TuningSignalListSet::load(QString* errorMessage)
 {
-	QString path = QDir::toNativeSeparators(QObject::tr("%1//TuningSignalLists//%2")
+	QString path = QDir::toNativeSeparators(QString{"%1//TuningSignalLists//%2"}
 												.arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
 												.arg(TuningClientAppSettings::instance().instanceStrId()));
 
@@ -22,7 +22,7 @@ bool TuningSignalListSet::load(QString* errorMessage)
 		QFile f(filePath);
 		if (f.open(QFile::ReadOnly) == false) 
 		{
-			*errorMessage = QString("Error loading TuningSignalList from file %1.").arg(filePath);
+			*errorMessage = tr("Error loading TuningSignalList from file %1.").arg(filePath);
 			return false;
 		}
 
@@ -33,14 +33,14 @@ bool TuningSignalListSet::load(QString* errorMessage)
 		Proto::Envelope envelope;
 		if (envelope.ParseFromArray(data.constData(), static_cast<int>(data.size())) == false)
 		{
-			*errorMessage = QString("Error parsing TuningSignalList from envelope %1.").arg(filePath);
+			*errorMessage = tr("Error parsing TuningSignalList from envelope %1.").arg(filePath);
 			return false;
 		}
 
 		bool ok = list->LoadData(envelope);
 		if (ok == false)
 		{
-			*errorMessage = QString("Error loading TuningSignalList from envelope %1.").arg(filePath);
+			*errorMessage = tr("Error loading TuningSignalList from envelope %1.").arg(filePath);
 			return false;
 		}
 
@@ -52,7 +52,7 @@ bool TuningSignalListSet::load(QString* errorMessage)
 
 bool TuningSignalListSet::save(QString* errorMessage) const
 {
-	QString path = QDir::toNativeSeparators(QObject::tr("%1//TuningSignalLists//%2")
+	QString path = QDir::toNativeSeparators(QString{"%1//TuningSignalLists//%2"}
 												.arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
 												.arg(TuningClientAppSettings::instance().instanceStrId()));
 
@@ -61,7 +61,7 @@ bool TuningSignalListSet::save(QString* errorMessage) const
 	{
 		if (dir.mkpath(path) == false) 
 		{
-			*errorMessage = QObject::tr("Error creating directory: %1").arg(path);
+			*errorMessage = tr("Error creating directory: %1").arg(path);
 			return false;
 		}
 	}
@@ -99,18 +99,18 @@ bool TuningSignalListSet::save(QString* errorMessage) const
 			return false;
 		}
 
-		QString filePath = QDir::toNativeSeparators(QObject::tr("%1//%2.%3").arg(path).arg(list->id()).arg("aslist"));
+		QString filePath = QDir::toNativeSeparators(QString{"%1//%2.%3"}.arg(path).arg(list->id()).arg("aslist"));
 
 		QFile f(filePath);
 		if (f.open(QFile::WriteOnly) == false) 
 		{
-			*errorMessage = QObject::tr("Error opening file for writing: %1").arg(filePath);
+			*errorMessage = tr("Error opening file for writing: %1").arg(filePath);
 			return false;
 		}
 
 		if (f.write(data) != data.size()) 
 		{
-			*errorMessage = QObject::tr("Error writing data to file: %1").arg(filePath);
+			*errorMessage = tr("Error writing data to file: %1").arg(filePath);
 			return false;
 		}
 	}

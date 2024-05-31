@@ -74,8 +74,7 @@ namespace Builder
 
 		// Generate tuning signals
 		//
-		std::vector<AppSignal*> tuningSignals;
-		createTuningSignals(tuningSources, m_signalSet, tuningSignals);
+		std::vector<AppSignal*> tuningSignals = createTuningSignals(tuningSources, *m_signalSet);
 
 		// Write tuning signals
 		//

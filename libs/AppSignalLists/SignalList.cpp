@@ -746,13 +746,13 @@ namespace AppSignalLists
 		return result;
 	}
 
-	bool AppSignalListSet::load(QString* errorMessage) 
+	bool AppSignalListSet::load(QString* /*errorMessage*/) 
 	{
 		Q_ASSERT(false);
 		return false;
 	}
 
-	bool AppSignalListSet::save(QString* errorMessage) const 
+	bool AppSignalListSet::save(QString* /*errorMessage*/) const 
 	{
 		Q_ASSERT(false);
 		return false;
