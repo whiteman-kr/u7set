@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../UtilsLib/ILogFile.h"
-#include "../libs/AppSignalLists/include/AppSignalLists/SignalList.h"
+#include <AppSignalLists/SignalList.h>
 #include <ClientLib/ConfigController.h>
 #include <VFrame30/SchemaDetails.h>
 

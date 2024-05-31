@@ -162,7 +162,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	QString errorMessage;
 	if (m_appSignalListSet.load(&errorMessage) == false)
 	{
-		QMessageBox::critical(this, qAppName(), errorMessage);
+		m_LogFile.writeError(errorMessage);
 	}
 
 	return;
@@ -429,8 +429,8 @@ void MonitorMainWindow::createActions()
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MonitorMainWindow::exit);
 
-	m_pAppSignalListsAction = new QAction(tr("Application Signal Lists..."), this);
-	m_pAppSignalListsAction->setStatusTip(tr("Edit application Signal Lists"));
+	m_pAppSignalListsAction = new QAction(tr("Signal List Editor..."), this);
+	m_pAppSignalListsAction->setStatusTip(tr("Edit application signal lists"));
 	m_pAppSignalListsAction->setEnabled(true);
 	connect(m_pAppSignalListsAction, &QAction::triggered, this, &MonitorMainWindow::showAppSignalListEditor);
 

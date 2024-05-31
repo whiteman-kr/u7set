@@ -3,7 +3,7 @@
 
 bool MonitorAppSignalListSet::load(QString* errorMessage)
 {
-	QString path = QDir::toNativeSeparators(QObject::tr("%1//AppSignalLists//%2")
+	QString path = QDir::toNativeSeparators(QString{"%1//AppSignalLists//%2"}
 												.arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
 												.arg(MonitorAppSettings::instance().equipmentId()));
 
@@ -15,14 +15,14 @@ bool MonitorAppSignalListSet::load(QString* errorMessage)
 
 	QStringList files = dir.entryList(QStringList() << "*.aslist");
 
-	for (QString& fileName : files) 
+	for (QString& fileName : files)
 	{
 		QString filePath = path + QDir().separator() + fileName;
 
 		QFile f(filePath);
-		if (f.open(QFile::ReadOnly) == false) 
+		if (f.open(QFile::ReadOnly) == false)
 		{
-			*errorMessage = QString("Error loading AppSignalList from file %1.").arg(filePath);
+			*errorMessage = tr("Error loading AppSignalList from file %1.").arg(filePath);
 			return false;
 		}
 
@@ -33,14 +33,14 @@ bool MonitorAppSignalListSet::load(QString* errorMessage)
 		Proto::Envelope envelope;
 		if (envelope.ParseFromArray(data.constData(), static_cast<int>(data.size())) == false)
 		{
-			*errorMessage = QString("Error parsing AppSignalList from envelope %1.").arg(filePath);
+			*errorMessage = tr("Error parsing AppSignalList from envelope %1.").arg(filePath);
 			return false;
 		}
 
 		bool ok = list->LoadData(envelope);
 		if (ok == false)
 		{
-			*errorMessage = QString("Error loading AppSignalList from envelope %1.").arg(filePath);
+			*errorMessage = tr("Error loading AppSignalList from envelope %1.").arg(filePath);
 			return false;
 		}
 
@@ -52,23 +52,23 @@ bool MonitorAppSignalListSet::load(QString* errorMessage)
 
 bool MonitorAppSignalListSet::save(QString* errorMessage) const
 {
-	QString path = QDir::toNativeSeparators(QObject::tr("%1//AppSignalLists//%2")
+	QString path = QDir::toNativeSeparators(QString{"%1//AppSignalLists//%2"}
 												.arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))
 												.arg(MonitorAppSettings::instance().equipmentId()));
 
 	QDir dir(path);
 	if (dir.exists() == false)
 	{
-		if (dir.mkpath(path) == false) 
+		if (dir.mkpath(path) == false)
 		{
-			*errorMessage = QObject::tr("Error creating directory: %1").arg(path);
+			*errorMessage = tr("Error creating directory: %1").arg(path);
 			return false;
 		}
 	}
-	else 
+	else
 	{
 		QStringList files = dir.entryList(QStringList() << "*.aslist");
-		for (const QString& fileName: files) 
+		for (const QString& fileName : files)
 		{
 			QString filePath = path + QDir().separator() + fileName;
 			QFile f(filePath);
@@ -77,11 +77,10 @@ bool MonitorAppSignalListSet::save(QString* errorMessage) const
 		}
 	}
 
-	
 
-	for (const auto& list : m_lists) 
+	for (const auto& list : m_lists)
 	{
-		if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagIde) == true) 
+		if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagIde) == true)
 		{
 			continue;
 		}
@@ -99,18 +98,18 @@ bool MonitorAppSignalListSet::save(QString* errorMessage) const
 			return false;
 		}
 
-		QString filePath = QDir::toNativeSeparators(QObject::tr("%1//%2.%3").arg(path).arg(list->id()).arg("aslist"));
+		QString filePath = QDir::toNativeSeparators(QString{"%1//%2.%3"}.arg(path).arg(list->id()).arg("aslist"));
 
 		QFile f(filePath);
-		if (f.open(QFile::WriteOnly) == false) 
+		if (f.open(QFile::WriteOnly) == false)
 		{
-			*errorMessage = QObject::tr("Error opening file for writing: %1").arg(filePath);
+			*errorMessage = tr("Error opening file for writing: %1").arg(filePath);
 			return false;
 		}
 
-		if (f.write(data) != data.size()) 
+		if (f.write(data) != data.size())
 		{
-			*errorMessage = QObject::tr("Error writing data to file: %1").arg(filePath);
+			*errorMessage = tr("Error writing data to file: %1").arg(filePath);
 			return false;
 		}
 	}

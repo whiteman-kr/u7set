@@ -4,6 +4,8 @@
 #include "../../../CommonLib/Hash.h"
 #include "../../../AppSignalLib/TuningValue.h"
 
+#include <map>
+#include <memory>
 #include <optional>
 #include <vector>
 
@@ -75,7 +77,7 @@ namespace AppSignalLists
 		SignalType signalType() const;
 		void setSignalType(SignalType value);
 
-		// Syste, Tags operations
+		// System, Tags operations
 
 		QString systemTags() const;
 		void setSystemTags(const QString& value);

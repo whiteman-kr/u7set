@@ -352,11 +352,8 @@ namespace SchemaClientLib
 			std::shared_ptr<AppSignalLists::AppSignalList> list =  m_appSignalListSet->get(m_listId);
 			if (list != nullptr) 
 			{
-				std::vector<Hash> appSignalListHashesVec = list->listHashesCache();
-				for (const auto& hash : appSignalListHashesVec) 
-				{
-					appSignalListHashes.insert(hash);
-				}
+				const std::vector<Hash>& appSignalListHashesVec = list->listHashesCache();
+				appSignalListHashes.insert(appSignalListHashesVec.begin(), appSignalListHashesVec.end());
 			}
 		}
 
@@ -368,12 +365,11 @@ namespace SchemaClientLib
 		{
 			const AppSignalParam& s = m_allSignals[signalIndex];
 
-			if (filterByAppSignalList == true) 
+			// Filter by signal list
+			//
+			if (filterByAppSignalList == true && appSignalListHashes.contains(s.hash()) == false)
 			{
-				if (appSignalListHashes.contains(s.hash()) == false) 
-				{
-					continue;
-				}
+				continue;
 			}
 
 			// Filter by appDataServiceHashes

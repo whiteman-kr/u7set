@@ -111,8 +111,8 @@ namespace Builder
 
 		QString softwareCfgSubdir() const { return m_software->equipmentIdTemplate(); }
 
-		static void createAppSignals(const QStringList& equipmentList, const SignalSet* signalSet, std::vector<AppSignal*>& appSignals);
-		static void createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, std::vector<AppSignal*>& tuningSignals);
+		static std::vector<AppSignal*> createAppSignals(const QStringList& equipmentList, const SignalSet& signalSet);
+		static std::vector<AppSignal*> createTuningSignals(const QStringList& equipmentList, const SignalSet& signalSet);
 
 		bool writeTuningSignals(const std::vector<AppSignal*>& tuningSignals);
 		bool writeAppSignalLists(const ISignalManager& signalManager, const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);

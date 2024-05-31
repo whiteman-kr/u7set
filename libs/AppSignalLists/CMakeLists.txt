@@ -72,8 +72,6 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	<ProtoSerialization.h>
 	<AppSignalList.pb.h>
-	<Hardware.pb.h>
-	<Network.pb.h>
 
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"

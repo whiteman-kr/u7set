@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../libs/AppSignalLists/include/AppSignalLists/SignalList.h"
+#include <AppSignalLists/SignalList.h>
 
 class MonitorAppSignalListSet : public AppSignalLists::AppSignalListSet
 {

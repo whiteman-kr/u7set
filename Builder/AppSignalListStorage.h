@@ -1,4 +1,4 @@
-#pragma once
+	#pragma once
 
 #include "../AppSignalLib/ISignalManager.h"
 #include <AppSignalLists/SignalList.h>
@@ -17,7 +17,7 @@ namespace Builder
 		bool save(const QUuid& uuid, QString* errorMessage) override;
 	};
 
-class AppSignalListsProvider : public ISignalManager
+	class AppSignalListsProvider : public ISignalManager
 	{
 	public:
 		AppSignalListsProvider(const std::vector<AppSignal*>& signalsVector);
@@ -33,11 +33,12 @@ class AppSignalListsProvider : public ISignalManager
 		virtual AppSignalParam signalParam(Hash signalHash, bool* found) const override;
 		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
 
-		std::map<Hash, AppSignalParam>::iterator begin() 
+		std::map<Hash, AppSignalParam>::const_iterator begin() const
 		{
 			return m_params.begin();
 		}
-		std::map<Hash, AppSignalParam>::iterator end() 
+
+		std::map<Hash, AppSignalParam>::const_iterator end() const
 		{
 			return m_params.end();
 		}

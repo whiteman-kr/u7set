@@ -503,7 +503,7 @@ namespace AppSignalLists
 
 			for (const QString& tag : m_cachedAppSignalTags)
 			{
-				if (objectTagsSet.find(tag) != objectTagsSet.end())
+				if (objectTagsSet.contains(tag) == true)
 				{
 					tagsFound = true;
 					break;
@@ -521,7 +521,7 @@ namespace AppSignalLists
 
 	bool AppSignalList::listMatch(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags) 
 	{
-		if (std::find(appSignalListIds.begin(), appSignalListIds.end(), id()) != appSignalListIds.end())
+		if (appSignalListIds.contains(id()) == true)
 		{
 			// Filter by lists
 			//

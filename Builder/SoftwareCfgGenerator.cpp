@@ -14,7 +14,7 @@
 #include <VFrame30/VduSchema.h>
 
 #include "AppSignalListStorage.h"
-#include "../libs/AppSignalLists/include/AppSignalLists/SignalList.h"
+#include <AppSignalLists/SignalList.h>
 
 namespace Builder
 {
@@ -629,13 +629,11 @@ namespace Builder
 
 		AppSignalListsProvider provider(context->m_signalSet->appSignalSet()->signalsVector());
 
-		for (auto lit = lists.begin(); lit != lists.end(); lit++)
+		for (const auto& list : lists)
 		{
-			AppSignalLists::AppSignalList& list = *(lit->get());
-
 			// Add this list to the map
 			//
-			m_appSignalsListIdToList[list.id()] = *lit;
+			m_appSignalsListIdToList[list->id()] = list;
 
 			// Check for cancel
 			//
@@ -646,39 +644,35 @@ namespace Builder
 
 			// Check if list signals exist in project signal set
 			//
+			for (Hash hash: list->itemsHashes())
 			{
-				auto listHashes = list.itemsHashes();
-				for (Hash hash: listHashes)
+				if (provider.signalExists(hash) == false)
 				{
-					if (provider.signalExists(hash) == false)
-					{
-						const AppSignalLists::AppSignalListItem& item = list.itemByHash(hash);
-						log->errEQP6220(item.appSignalId(), list.id());
-					}
+					const AppSignalLists::AppSignalListItem& item = list->itemByHash(hash);
+					log->errEQP6220(item.appSignalId(), list->id());
 				}
 			}
 
 			// Add filtered signals to the list
 			//
-			auto& cache = list.listHashesCache();
+			auto& mutableCache = list->listHashesCache();
 
-			for (auto sit = provider.begin(); sit != provider.end(); sit++)
+			for (const auto&[signalHash, asp] : provider)
 			{
-				const AppSignalParam& asp = sit->second;
-				if (list.appSignalMatch(asp) == true)
+				if (list->appSignalMatch(asp) == true)
 				{
-					cache.push_back(::calcHash(asp.appSignalId()));
+					mutableCache.push_back(signalHash);
 				}
 			}
 
 			// Add tag "created by ide" to the list
 			//
-			list.systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
+			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
 
 			// Save list to the data buffer
 			//
 			Proto::Envelope envelope;
-			list.SaveData(&envelope);
+			list->SaveData(&envelope);
 
 			QByteArray data;
 			data.resize(static_cast<int>(envelope.ByteSizeLong()));
@@ -692,7 +686,7 @@ namespace Builder
 
 			// Write file
 			//
-			QString fileName = tr("%1.%2").arg(list.id()).arg(Db::File::AppSignalListFileExtension);
+			QString fileName = tr("%1.%2").arg(list->id()).arg(Db::File::AppSignalListFileExtension);
 
 			BuildFile* listsFile = context->m_buildResultWriter->addFile(Directory::APP_SIGNAL_LISTS, fileName, fileName, {CfgFileTag::APPSIGNALLISTS}, data);
 			if (listsFile == nullptr)
@@ -1350,79 +1344,45 @@ namespace Builder
 		return profile + "_" + m_software->equipmentIdTemplate().toLower() + "." + extention;
 	}
 
-	void SoftwareCfgGenerator::createAppSignals(const QStringList& equipmentList,
-												   const SignalSet* signalSet,
-												   std::vector<AppSignal*>& appSignals)
+	std::vector<AppSignal*> SoftwareCfgGenerator::createAppSignals(const QStringList& equipmentList, const SignalSet& signalSet)
 	{
-		if (signalSet == nullptr)
-		{
-			assert(signalSet);
-			return;
-		}
+		std::vector<AppSignal*> appSignals;
 
 		if (equipmentList.empty() == true)
 		{
-			return;
+			return appSignals;
 		}
 
 		// Create signals
 		//
-		appSignals.clear();
+		appSignals.reserve(signalSet.size() / 8); // Just guess
 
-		for (AppSignal* s : *signalSet)
+		for (AppSignal* s : signalSet)
 		{
 			// Check EquipmentIdMasks
 			//
-			bool result = false;
-
-			for (QString m : equipmentList)
+			if (equipmentList.contains(s->lmEquipmentID()) == true)
 			{
-				m = m.trimmed();
-
-				if (m.isEmpty() == true)
-				{
-					continue;
-				}
-
-				QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m));
-				if (rx.match(s->lmEquipmentID()).hasMatch() == true) // exactMatch
-				{
-					result = true;
-					break;
-				}
+				appSignals.push_back(s);
 			}
-
-			if (result == false)
-			{
-				continue;
-			}
-
-			appSignals.push_back(s);
 		}
 
-		return;
+		return appSignals;
 	}
 
-	void SoftwareCfgGenerator::createTuningSignals(const QStringList& equipmentList,
-												   const SignalSet* signalSet,
-												   std::vector<AppSignal*>& tuningSignals)
+	std::vector<AppSignal*> SoftwareCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet& signalSet)
 	{
-		if (signalSet == nullptr)
-		{
-			assert(signalSet);
-			return;
-		}
-
+		std::vector<AppSignal*> tuningSignals;
 		if (equipmentList.empty() == true)
 		{
-			return;
+			return tuningSignals;
 		}
+
+		tuningSignals.reserve(signalSet.size() / 32);
 
 		// Create signals
 		//
-		tuningSignals.clear();
-
-		for (AppSignal* s : *signalSet)
+		for (AppSignal* s : signalSet)
 		{
 			if (s->enableTuning() == false)
 			{
@@ -1431,37 +1391,16 @@ namespace Builder
 
 			// Check EquipmentIdMasks
 			//
-			bool result = false;
-
-			for (QString m : equipmentList)
+			if (equipmentList.contains(s->lmEquipmentID()) == true)
 			{
-				m = m.trimmed();
-
-				if (m.isEmpty() == true)
-				{
-					continue;
-				}
-
-				QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m));
-				if (rx.match(s->lmEquipmentID()).hasMatch() == true) // exactMatch
-				{
-					result = true;
-					break;
-				}
+				tuningSignals.push_back(s);
 			}
-
-			if (result == false)
-			{
-				continue;
-			}
-
-			tuningSignals.push_back(s);
 		}
 
-		return;
+		return tuningSignals;
 	}
 
-		bool SoftwareCfgGenerator::writeTuningSignals(const std::vector<AppSignal*>& tuningSignals)
+	bool SoftwareCfgGenerator::writeTuningSignals(const std::vector<AppSignal*>& tuningSignals)
 	{
 		// Write number of signals
 		//
@@ -1516,11 +1455,7 @@ namespace Builder
 		// Create software hashes set
 		//
 		auto softwareSignalHashes = signalManager.signalHashes();
-		std::set<Hash> softwareSignalHashesSet;
-		for (Hash hash : softwareSignalHashes)
-		{
-			softwareSignalHashesSet.insert(hash);
-		}
+		std::set<Hash> softwareSignalHashesSet{softwareSignalHashes.begin(), softwareSignalHashes.end()};
 
 		bool returnResult = true;
 
@@ -1547,7 +1482,7 @@ namespace Builder
 			bool allHashesExists = true;
 			for (Hash hash : listItemsHashes)
 			{
-				if (softwareSignalHashesSet.find(hash) == softwareSignalHashesSet.end())
+				if (softwareSignalHashesSet.contains(hash) == false)
 				{
 					m_log->errEQP6221(list->itemByHash(hash).appSignalId(), list->id(), m_software->equipmentIdTemplate());
 					allHashesExists = false;
@@ -1563,7 +1498,7 @@ namespace Builder
 
 			// Add link to the list for the software
 			//
-			QString fileName = tr("%1.%2").arg(list->id()).arg(Db::File::AppSignalListFileExtension);
+			QString fileName = QString{"%1.%2"}.arg(list->id()).arg(Db::File::AppSignalListFileExtension);
 
 			BuildFile* listsFile = m_buildResultWriter->getBuildFileByID(Directory::APP_SIGNAL_LISTS, fileName);
 			if (listsFile == nullptr)

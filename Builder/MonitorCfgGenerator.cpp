@@ -64,8 +64,7 @@ namespace Builder
 			QStringList appDataSources;
 			result &= createAppEquipmentList(&appDataSources);
 
-			std::vector<AppSignal*> monitorSignals;
-			createAppSignals(appDataSources, m_signalSet, monitorSignals);
+			std::vector<AppSignal*> monitorSignals = createAppSignals(appDataSources, *m_signalSet);
 
 			ILogFileStub logFileStub;
 			Builder::AppSignalListsProvider signalProvider(monitorSignals);
@@ -155,7 +154,7 @@ namespace Builder
 		//
 		bool result = true;
 		for (QStringList profiles = m_settingsSet.getSettingsProfiles();
-			const QString & profile : profiles)
+			const QString& profile : profiles)
 		{
 			std::shared_ptr<const MonitorSettings> profileSettings = m_settingsSet.getSettingsProfile<MonitorSettings>(profile);
 			TEST_PTR_LOG_RETURN_FALSE(profileSettings, m_log);
