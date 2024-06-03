@@ -2928,7 +2928,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	// clang-format off
 	// Update from DbVersion 380 to 381.
 	//
-	// Problem: Preset of Monitor (v1 to v2) has compatibility breaking changes, here we try to mitigate it.
+	// Problem: Preset of Monitor (to v2) has compatibility breaking changes, here we try to mitigate it.
 	//			Before db project version 381 Monitor (preset version 1) had 2 properties AppDataServiceID1 and AppDataServiceID2
 	//		    then this property was removed starting from the preset version 2 and changed to a single property AppDataServiceIDs
 	//			which is combination of properties AppDataServiceID1 and AppDataServiceID2, but separated with semicolon (;)
@@ -2940,7 +2940,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 	if (device->presetRoot() &&
 		device->presetName() == QStringLiteral("MONITOR") &&
-		device->presetVersion() == 1)
+		device->presetVersion() < 2)
 	{
 		auto ads1 = device->propertyByCaption(QStringLiteral("AppDataServiceID1"));
 		auto ads2 = device->propertyByCaption(QStringLiteral("AppDataServiceID2"));
@@ -2963,13 +2963,13 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	// clang-format off
 	// Update from DbVersion 416 to 417.
 	//
-	// Problem: Preset of AppDataService (v2 to v3) has compatibility breaking changes, here we try to mitigate it.
+	// Problem: Preset of AppDataService (to v3) has compatibility breaking changes, here we try to mitigate it.
 	//			Before db project version 417 AppDataService (preset version 2) had specific properties in section "Connection" -
 	//			"ClientRequestIP", "ClientRequestNetmask", "ClientRequestPort", "RtTrendsRequestPort", "SecurityLevel". 			then these properties were
 	//			removed starting from the preset version 3 and changed to a set of device controllers "Request Controller 1, 2, 3, 4" with exactly the
 	//			same properties.
 	//
-	// Solution: If preset version is 2, then set the values of the "Request Controller 1" (_RC1) to values of the "ClientRequestIP",
+	// Solution: If preset version less then 3, then set the values of the "Request Controller 1" (_RC1) to values of the "ClientRequestIP",
 	//			"ClientRequestNetmask", "ClientRequestPort", "RtTrendsRequestPort", "SecurityLevel".
 	// clang-format on
 
@@ -2978,7 +2978,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 	if (device->presetRoot() &&
 		device->presetName() == QStringLiteral("ADS") &&
-		device->presetVersion() == 2)
+		device->presetVersion() < 3)
 	{
 		auto clientRequestIp = device->propertyByCaption(QStringLiteral("ClientRequestIP"));
 		auto clientRequestNetmask = device->propertyByCaption(QStringLiteral("ClientRequestNetmask"));
