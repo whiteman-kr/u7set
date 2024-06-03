@@ -84,10 +84,10 @@ bool AppDataServiceWorker::isConnectedToArchiveService(quint32 &ip, quint16 &por
 	return false;
 }
 
-E::SecurityLevel AppDataServiceWorker::securityLevel() const
-{
-	return m_curSettingsProfile.securityLevel;
-}
+// E::SecurityLevel AppDataServiceWorker::securityLevel() const
+// {
+// 	return m_curSettingsProfile.securityLevel;
+// }
 
 void AppDataServiceWorker::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
 														 bool isArchivingQueue,
@@ -192,10 +192,19 @@ void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	m_tcpAppDataServerThread = new TcpAppDataServerThread(	softwareInfo(),
-															m_curSettingsProfile.clientRequestIP,
-															m_curSettingsProfile.securityLevel,
-															*this);
+	std::vector<Tcp::ListenAddress> listenAddresses;
+
+	std::for_each(m_curSettingsProfile.rcSettings.begin(),
+				  m_curSettingsProfile.rcSettings.end(),
+				  [&listenAddresses](const RequestControllerSettings& rcs)
+					{
+						if (rcs.enable == true)
+						{
+							listenAddresses.emplace_back(rcs.clientRequestIP, rcs.securityLevel);
+						}
+					 });
+
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(softwareInfo(), listenAddresses, *this);
 	m_tcpAppDataServerThread->start();
 }
 
@@ -244,9 +253,20 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 {
 	assert(m_rtTrendsServerThread == nullptr);
 
-	m_rtTrendsServerThread = new RtTrends::ServerThread(m_curSettingsProfile.rtTrendsRequestIP,
-														*this,
-														m_curSettingsProfile.securityLevel);
+	std::vector<Tcp::ListenAddress> listenAddresses;
+
+	std::for_each(m_curSettingsProfile.rcSettings.begin(),
+				  m_curSettingsProfile.rcSettings.end(),
+				  [&listenAddresses](const RequestControllerSettings& rcs)
+				  {
+						if (rcs.enable == true)
+						{
+							listenAddresses.emplace_back(rcs.rtTrendsRequestIP, rcs.securityLevel);
+						}
+				  });
+
+	m_rtTrendsServerThread = new RtTrends::ServerThread(listenAddresses,
+														*this);
 
 	m_rtTrendsServerThread->start();
 }

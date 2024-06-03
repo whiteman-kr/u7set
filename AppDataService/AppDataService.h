@@ -51,7 +51,7 @@ public:
 	const DynamicAppSignalStates& appSignalStates() const { return m_appSignalStates; }
 	DynamicAppSignalStates& appSignalStates() { return m_appSignalStates; }
 
-	E::SecurityLevel securityLevel() const;
+//	E::SecurityLevel securityLevel() const;
 
 	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, bool isArchivingQueue, const QString& description);
 	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue);

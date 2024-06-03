@@ -146,7 +146,6 @@ namespace Tcp
 	public:
 		FileServer(const QString& rootFolder,
 				   const SoftwareInfo& softwareInfo,
-				   E::SecurityLevel securityLevel,
 				   CircularLoggerShared logger,
 				   const QString& serverDescription);
 

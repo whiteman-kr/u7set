@@ -842,13 +842,10 @@ namespace Tcp
 	int Server::m_staticConnNo = 1;
 
 	Server::Server(const SoftwareInfo& sotwareInfo,
-				   E::SecurityLevel securityLevel,
 				   const QString& serverDescription) :
 		SocketWorker(sotwareInfo, serverDescription),
 		m_autoAckTimer(this)
 	{
-		m_securityLevel = securityLevel;
-
 		m_timeout = TCP_CLIENT_REQUEST_TIMEOUT;
 
 		initReadStatusVariables();
@@ -867,6 +864,11 @@ namespace Tcp
 	void Server::setConnectedSocketDescriptor(qintptr connectedSocketDescriptor)
 	{
 		m_connectedSocketDescriptor = connectedSocketDescriptor;
+	}
+
+	void Server::setSecurityLevel(E::SecurityLevel securityLevel)
+	{
+		m_securityLevel = securityLevel;
 	}
 
 	void Server::onConnection()
@@ -1311,11 +1313,11 @@ namespace Tcp
 
 	// -------------------------------------------------------------------------------------
 	//
-	// Tcp::Listener class implementation
+	// Tcp::ListenerWorker class implementation
 	//
 	// -------------------------------------------------------------------------------------
 
-	Listener::Listener(const std::vector<HostAddressPort>& listenAddresses, Server* server, CircularLoggerShared logger) :
+	ListenerWorker::ListenerWorker(const std::vector<ListenAddress>& listenAddresses, Server* server, CircularLoggerShared logger) :
 		m_periodicTimer(this),
 		m_serverInstance(server)
 	{
@@ -1328,13 +1330,13 @@ namespace Tcp
 
 		m_tcpServers.resize(listenAddresses.size());
 
-		for(const HostAddressPort& listenAddress : listenAddresses)
+		for(const ListenAddress& listenAddress : listenAddresses)
 		{
-			m_tcpServers.emplace_back(listenAddress, nullptr);
+			m_tcpServers.emplace_back(std::make_pair(listenAddress, nullptr));
 		}
 	}
 
-	Listener::~Listener()
+	ListenerWorker::~ListenerWorker()
 	{
 		for(auto& [listenAddr, tcpServer] : m_tcpServers)
 		{
@@ -1354,7 +1356,7 @@ namespace Tcp
 		delete m_serverInstance;
 	}
 
-	void Listener::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
+	void ListenerWorker::onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr)
 	{
 		if (startOk == true)
 		{
@@ -1366,12 +1368,12 @@ namespace Tcp
 		}
 	}
 
-	void Listener::onThreadStarted()
+	void ListenerWorker::onThreadStarted()
 	{
 		m_periodicTimer.setInterval(TCP_PERIODIC_TIMER_INTERVAL);
 
-		connect(&m_periodicTimer, &QTimer::timeout, this, &Listener::onPeriodicTimer);
-		connect(&m_periodicTimer, &QTimer::timeout, this, &Listener::updateClientsList);
+		connect(&m_periodicTimer, &QTimer::timeout, this, &ListenerWorker::onPeriodicTimer);
+		connect(&m_periodicTimer, &QTimer::timeout, this, &ListenerWorker::updateClientsList);
 
 		m_periodicTimer.start();
 
@@ -1380,7 +1382,7 @@ namespace Tcp
 		onListenerThreadStarted();
 	}
 
-	void Listener::onThreadFinished()
+	void ListenerWorker::onThreadFinished()
 	{
 		onListenerThreadFinished();
 
@@ -1391,44 +1393,45 @@ namespace Tcp
 		}*/
 	}
 
-	void Listener::startListening()
+	void ListenerWorker::startListening()
 	{
 		for(auto& [listenAddr, tcpServer] : m_tcpServers)
 		{
 			if (tcpServer == nullptr)
 			{
-				tcpServer = new TcpServer(this);
+				tcpServer = new ListenerSocket(listenAddr, this);
 
-				connect(tcpServer, &TcpServer::newIncomingConnection, this, &Listener::onNewConnection);
+				connect(tcpServer, &ListenerSocket::newIncomingConnection, this, &ListenerWorker::onNewConnection);
 			}
 
 			if (tcpServer->isListening() == false)
 			{
-				if (tcpServer->listen(listenAddr.address(), listenAddr.port()) == true)
+				if (tcpServer->listen(listenAddr.hostAddr.address(), listenAddr.hostAddr.port()) == true)
 				{
-					onStartListening(listenAddr, true, "");
+					onStartListening(listenAddr.hostAddr, true, "");
 				}
 				else
 				{
-					onStartListening(listenAddr, false, tcpServer->errorString());
+					onStartListening(listenAddr.hostAddr, false, tcpServer->errorString());
 				}
 			}
 		}
 	}
 
-	void Listener::onNewConnection(qintptr socketDescriptor)
+	void ListenerWorker::onNewConnection(ListenAddress listenAddr, qintptr socketDescriptor)
 	{
 		// accept new connection
 		//
 		Server* newServerInstance = m_serverInstance->getNewInstance();
 
+		newServerInstance->setSecurityLevel(listenAddr.securityLevel);
 		newServerInstance->initConnectionNo();
 		newServerInstance->setLogger(m_serverInstance->log());
 
-		connect(this, &Listener::connectedClientsListChanged, newServerInstance, &Server::updateClientsInfo);
+		connect(this, &ListenerWorker::connectedClientsListChanged, newServerInstance, &Server::updateClientsInfo);
 
-		connect(newServerInstance, &Server::socketDisconnected, this, &Listener::onServerDisconnected);
-		connect(newServerInstance, &Server::connectedSoftwareInfoChanged, this, &Listener::updateClientsList);
+		connect(newServerInstance, &Server::socketDisconnected, this, &ListenerWorker::onServerDisconnected);
+		connect(newServerInstance, &Server::connectedSoftwareInfoChanged, this, &ListenerWorker::updateClientsList);
 
 		newServerInstance->setConnectedSocketDescriptor(socketDescriptor);
 
@@ -1441,12 +1444,12 @@ namespace Tcp
 		updateClientsList();
 	}
 
-	void Listener::onPeriodicTimer()
+	void ListenerWorker::onPeriodicTimer()
 	{
 		startListening();
 	}
 
-	void Listener::onServerDisconnected(const SocketWorker* server)
+	void ListenerWorker::onServerDisconnected(const SocketWorker* server)
 	{
 		SimpleThread* thread = getValueOrNullptr(m_runningServers, server);
 
@@ -1464,7 +1467,7 @@ namespace Tcp
 		updateClientsList();
 	}
 
-	void Listener::updateClientsList()
+	void ListenerWorker::updateClientsList()
 	{
 		std::list<ConnectionState> clientsInfo;
 
@@ -1478,23 +1481,38 @@ namespace Tcp
 
 	// -------------------------------------------------------------------------------------
 	//
-	// Tcp::ServerThread class implementation
+	// Tcp::ListenerThread class implementation
 	//
 	// -------------------------------------------------------------------------------------
 
-	ServerThread::ServerThread(const std::vector<HostAddressPort>& listenAddressPorts,
-							   Server* server,
-							   CircularLoggerShared logger) :
-		SimpleThread(new Listener(listenAddressPorts, server, logger))
+	ListenerThread::ListenerThread(const HostAddressPort& listenAddress,
+									E::SecurityLevel securityLevel,
+									Server* server,
+									CircularLoggerShared logger) :
+		SimpleThread(new ListenerWorker(std::vector<ListenAddress>{ListenAddress(listenAddress, securityLevel)}, server, logger))
 	{
 	}
 
-	ServerThread::ServerThread(Listener* listener) :
+	ListenerThread::ListenerThread(const ListenAddress& listenAddress,
+									Server* server,
+									CircularLoggerShared logger) :
+		SimpleThread(new ListenerWorker(std::vector<ListenAddress>{listenAddress}, server, logger))
+	{
+	}
+
+	ListenerThread::ListenerThread(const std::vector<ListenAddress>& listenAddresses,
+									Server* server,
+									CircularLoggerShared logger) :
+		SimpleThread(new ListenerWorker(listenAddresses, server, logger))
+	{
+	}
+
+	ListenerThread::ListenerThread(ListenerWorker* listener) :
 		SimpleThread(listener)
 	{
 	}
 
-	ServerThread::~ServerThread()
+	ListenerThread::~ListenerThread()
 	{
 	}
 

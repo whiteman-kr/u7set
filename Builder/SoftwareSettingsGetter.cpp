@@ -181,7 +181,7 @@ bool SoftwareSettingsGetter::getSoftwareConnectionBySoftwareID(const Hardware::E
 		}
 	}
 
-	result = DeviceHelper::getIpPortProperty(	connectedObject,
+	result = DeviceHelper::getIPv4PortProperty(	connectedObject,
 												propConnectedSoftwareIP,
 												propConnectedSoftwarePort,
 												connectedSoftwareIP,
@@ -423,7 +423,7 @@ bool CfgServiceSettingsGetter::readSettings(	const Builder::Context* context,
 
 	bool result = true;
 
-	result &= DeviceHelper::getIpPortProperty(software, EquipmentPropNames::CLIENT_REQUEST_IP,
+	result &= DeviceHelper::getIPv4PortProperty(software, EquipmentPropNames::CLIENT_REQUEST_IP,
 											  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP, false, "", 0, log);
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", log);
 
@@ -561,7 +561,7 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	bool result = true;
 
-	result &= DeviceHelper::getIpPortProperty(software,
+	result &= DeviceHelper::getIPv4PortProperty(software,
 											  EquipmentPropNames::APP_DATA_RECEIVING_IP,
 											  EquipmentPropNames::APP_DATA_RECEIVING_PORT,
 											  &appDataReceivingIP,
@@ -570,9 +570,9 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::APP_DATA_RECEIVING_NETMASK,
 											&appDataReceivingNetmask, false, "", log);
 
-	// Read RequestControllers settings (suffix _RC**)
+	// Read RequestControllers settings (suffix _RC*)
 
-	rqCtrlsSettings.clear();
+	rcSettings.clear();
 
 	auto children = software->children();
 
@@ -580,48 +580,71 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	for(auto& child : children)
 	{
+		if (child->isController() == false)
+		{
+			continue;
+		}
+
 		QString eqID = child->equipmentIdTemplate();
 
-		if (eqID.mid(eqID.length() - rcSuffixLen - 2, rcSuffixLen) != EquipmentPropNames::REQUEST_CONTROLLER_SUFFIX)
+		int idLen = 0;
+
+		if (eqID.at(eqID.length() - 1).isNumber())
+		{
+			idLen = 1;
+		}
+
+		if (eqID.at(eqID.length() - 2).isNumber())
+		{
+			idLen = 2;
+		}
+
+		if (eqID.mid(eqID.length() - rcSuffixLen - idLen, rcSuffixLen) != EquipmentPropNames::REQUEST_CONTROLLER_SUFFIX)
 		{
 			continue;
 		}
 
 		bool ok = true;
-		int rcID = eqID.mid(eqID.length() - 2).toInt(&ok);
+		int rcID = eqID.mid(eqID.length() - idLen).toInt(&ok);
 
 		if (ok == false)
 		{
 			continue;
 		}
 
-		RqCtrlSettings settings;
+		RequestControllerSettings rcs;
 
-		settings.ID = rcID;
-		settings.equipmentID = eqID;
+		rcs.ID = rcID;
+		rcs.equipmentID = eqID;
 
-		result &= DeviceHelper::getIpPortProperty(child.get(),
+		const Hardware::DeviceObject* controller = child.get();
+
+		result &= DeviceHelper::getIPv4PortProperty(controller,
 												  EquipmentPropNames::CLIENT_REQUEST_IP,
 												  EquipmentPropNames::CLIENT_REQUEST_PORT,
-												  &settings.clientRequestIP,
+												  &rcs.clientRequestIP,
 												  false, "", 0, log);
 
-		result &= DeviceHelper::getIPv4Property(child.get(), EquipmentPropNames::CLIENT_REQUEST_NETMASK,
-												&settings.clientRequestNetmask, false, "", log);
+		result &= DeviceHelper::getIPv4Property(controller, EquipmentPropNames::CLIENT_REQUEST_NETMASK,
+												&rcs.clientRequestNetmask, false, "", log);
 
 		int rtTrendsRequestPort = 0;
 
-		result &= DeviceHelper::getPortProperty(software, EquipmentPropNames::RT_TRENDS_REQUEST_PORT,
+		result &= DeviceHelper::getPortProperty(controller, EquipmentPropNames::RT_TRENDS_REQUEST_PORT,
 												&rtTrendsRequestPort, true, PORT_APP_DATA_SERVICE_RT_TRENDS_REQUEST, log);
 
-		settings.rtTrendsRequestIP.setAddressPort(settings.clientRequestIP.addressStr(), rtTrendsRequestPort);
+		rcs.rtTrendsRequestIP.setAddressPort(rcs.clientRequestIP.addressStr(), rtTrendsRequestPort);
 
-		rqCtrlsSettings.emplace(settings.ID, settings);
+		result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(controller, EquipmentPropNames::SECURITY_LEVEL, &rcs.securityLevel, log);
+
+		result &= DeviceHelper::getBoolProperty(controller, EquipmentPropNames::ENABLE, &rcs.enable, log);
+
+		rcSettings.emplace_back(rcs);
 	}
 
-	//
+	std::sort(rcSettings.begin(), rcSettings.end());
 
-	result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(software, EquipmentPropNames::SECURITY_LEVEL, &securityLevel, log);
+	//
 
 	result &= getSoftwareConnection(equipment, software,
 									EquipmentPropNames::ARCH_SERVICE_ID,
@@ -662,7 +685,7 @@ bool DiagDataServiceSettingsGetter::readSettings(const Builder::Context* context
 
 	bool result = true;
 
-	result &= DeviceHelper::getIpPortProperty(software,
+	result &= DeviceHelper::getIPv4PortProperty(software,
 											  EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
 											  EquipmentPropNames::DIAG_DATA_RECEIVING_PORT,
 											  &diagDataReceivingIP,
@@ -671,7 +694,7 @@ bool DiagDataServiceSettingsGetter::readSettings(const Builder::Context* context
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::DIAG_DATA_RECEIVING_NETMASK,
 											&diagDataReceivingNetmask, false, "", log);
 
-	result &= DeviceHelper::getIpPortProperty(software,
+	result &= DeviceHelper::getIPv4PortProperty(software,
 											  EquipmentPropNames::CLIENT_REQUEST_IP,
 											  EquipmentPropNames::CLIENT_REQUEST_PORT,
 											  &clientRequestIP,
@@ -728,7 +751,7 @@ bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	equipmentID = software->equipmentIdTemplate();
 
-	result &= DeviceHelper::getIpPortProperty(software,
+	result &= DeviceHelper::getIPv4PortProperty(software,
 											  EquipmentPropNames::CLIENT_REQUEST_IP,
 											  EquipmentPropNames::CLIENT_REQUEST_PORT,
 											  &clientRequestIP, false, "", 0, log);
@@ -779,7 +802,7 @@ bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 													EquipmentPropNames::ENABLE,
 													&ch.enable, log);
 
-			result &= DeviceHelper::getIpPortProperty(controller,
+			result &= DeviceHelper::getIPv4PortProperty(controller,
 													  EquipmentPropNames::TUNING_DATA_IP,
 													  EquipmentPropNames::TUNING_DATA_PORT,
 													  &ch.tuningDataIP, false, "", 0, log);
@@ -788,7 +811,7 @@ bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 													EquipmentPropNames::TUNING_DATA_NETMASK,
 													&ch.tuningDataNetmask, false, "", log);
 
-			result &= DeviceHelper::getIpPortProperty(controller,
+			result &= DeviceHelper::getIPv4PortProperty(controller,
 													  EquipmentPropNames::TUNING_SIM_IP,
 													  EquipmentPropNames::TUNING_SIM_PORT,
 													  &ch.tuningSimIP, true, Socket::IP_LOCALHOST,
@@ -809,7 +832,7 @@ bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 		ch1.serviceControllerEquipmentID = equipmentID;
 
-		result &= DeviceHelper::getIpPortProperty(software,
+		result &= DeviceHelper::getIPv4PortProperty(software,
 												  EquipmentPropNames::TUNING_DATA_IP,
 												  EquipmentPropNames::TUNING_DATA_PORT,
 												  &ch1.tuningDataIP, false, "", 0, log);
@@ -818,7 +841,7 @@ bool TuningServiceSettingsGetter::readSettings(const Builder::Context* context,
 												EquipmentPropNames::TUNING_DATA_NETMASK,
 												&ch1.tuningDataNetmask, false, "", log);
 
-		result &= DeviceHelper::getIpPortProperty(software,
+		result &= DeviceHelper::getIPv4PortProperty(software,
 												  EquipmentPropNames::TUNING_SIM_IP,
 												  EquipmentPropNames::TUNING_SIM_PORT,
 												  &ch1.tuningSimIP, true, Socket::IP_LOCALHOST,
@@ -1204,7 +1227,7 @@ bool ArchivingServiceSettingsGetter::readSettings(const Builder::Context* contex
 
 	bool result = true;
 
-	result &= DeviceHelper::getIpPortProperty(software,
+	result &= DeviceHelper::getIPv4PortProperty(software,
 											  EquipmentPropNames::CLIENT_REQUEST_IP,
 											  EquipmentPropNames::CLIENT_REQUEST_PORT,
 											  &clientRequestIP, false, "", 0, log);
@@ -1215,7 +1238,7 @@ bool ArchivingServiceSettingsGetter::readSettings(const Builder::Context* contex
 											false, "", log);
 	//
 
-	result &= DeviceHelper::getIpPortProperty(software,
+	result &= DeviceHelper::getIPv4PortProperty(software,
 											  EquipmentPropNames::APP_DATA_RECEIVING_IP,
 											  EquipmentPropNames::APP_DATA_RECEIVING_PORT,
 											  &appDataReceivingIP, false, "", 0, log);
@@ -1226,7 +1249,7 @@ bool ArchivingServiceSettingsGetter::readSettings(const Builder::Context* contex
 											false, "", log);
 	//
 
-	result &= DeviceHelper::getIpPortProperty(software,
+	result &= DeviceHelper::getIPv4PortProperty(software,
 											  EquipmentPropNames::DIAG_DATA_RECEIVING_IP,
 											  EquipmentPropNames::DIAG_DATA_RECEIVING_PORT,
 											  &diagDataReceivingIP, false, "", 0, log);
@@ -1669,7 +1692,7 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 			}
 			else
 			{
-				const Hardware::Software* appDataService = appDataServiceRc->parent().get();
+				const Hardware::Software* appDataService = appDataServiceRc->parent()->toSoftware().get();
 
 				if (appDataService == nullptr)
 				{
@@ -1682,12 +1705,12 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 					{
 						// Property %1.%2 is linked to not compatible software %3.
 						//
-						log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+						log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
 						result = false;
 					}
 					else
 					{
-						appDataServices[appDataServiceId] = appDataService;
+						appDataServices[appDataServiceRcId] = appDataService;
 					}
 				}
 			}
@@ -1701,7 +1724,7 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 
 	// Reading AppDataService Settings
 	//
-	for (const auto&[appDataServiceId, appDataService] : appDataServices)
+	for (const auto&[appDataServiceRcId, appDataService] : appDataServices)
 	{
 		// Get AppDataService connection settings
 		//
@@ -1713,19 +1736,22 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 			return false;
 		}
 
-		AppDataServiceSettings::RqCtrlSettings rcSettings = adsSettings.getRequestControllerSettings(appDataServiceId);
+		RequestControllerSettings rcs = adsSettings.getRequestControllerSettings(appDataServiceRcId);
 
-		if (rcSettings.isValid() == false)
+		if (rcs.isValid() == false)
 		{
-
+			// Property %1.%2 is linked to undefined RequestController ID %3.
+			//
+			log->errCFG3032(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
+			result = false;
 			continue;
 		}
 
 		SoftwareEndpoint::AppDataService ads;
 
-		ads.equipmentId = rcSettings.equipmentID;
-		ads.address = rcSettings.clientRequestIP;
-		ads.realtimeAddress = rcSettings.rtTrendsRequestIP;
+		ads.equipmentId = rcs.equipmentID;
+		ads.address = rcs.clientRequestIP;
+		ads.realtimeAddress = rcs.rtTrendsRequestIP;
 
 		this->appDataServices.push_back(ads);
 
@@ -1759,7 +1785,7 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 
 		SoftwareEndpoint::ArchiveService as;
 		as.equipmentId = archiveServiceId;
-		as.appDataServiceId = appDataServiceId;
+		as.appDataServiceId = appDataServiceRcId;
 		as.address = archClientRequestAddress;
 
 		this->archiveServices.push_back(as);
@@ -2254,46 +2280,97 @@ bool TestSuiteSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder
 	//
 	std::map<QString, const Hardware::Software*> appDataServices;
 
-	for (const QString& appDataServiceId : appDataServiceIds)
+	for (const QString& appDataServiceRcId : appDataServiceIds)
 	{
-		// ADS->ClientRequestIP, ClientRequestPort
+		// ADS_RC**->ClientRequestIP, ClientRequestPort
 		//
-		const Hardware::Software* appDataService = nullptr;
+		const Hardware::DeviceController* appDataServiceRc = nullptr;
 
-		if (auto appDataServiceDevice = equipment->deviceObject(appDataServiceId);
-			appDataServiceDevice == nullptr)
+		if (auto appDataServiceRcDevice = equipment->deviceObject(appDataServiceRcId);
+			appDataServiceRcDevice == nullptr)
 		{
-			// Property %1.%2 is linked to undefined software ID %3.
+			// Property %1.%2 is linked to undefined RequestController ID %3.
 			//
-			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+			log->errCFG3032(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
 			result = false;
 		}
 		else
 		{
-			if (appDataService = appDataServiceDevice->toSoftware().get();
-				appDataService == nullptr)
+			if (appDataServiceRc = appDataServiceRcDevice->toController().get();
+				appDataServiceRc == nullptr)
 			{
-				// Property %1.%2 is linked to undefined software ID %3.
+				// Property %1.%2 is linked to undefined RequestController ID %3.
 				//
-				log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+				log->errCFG3032(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
 				result = false;
 			}
 			else
 			{
-				if (appDataService->softwareType() != E::SoftwareType::AppDataService)
+				const Hardware::Software* appDataService = appDataServiceRc->parent()->toSoftware().get();
+
+				if (appDataService == nullptr)
 				{
-					// Property %1.%2 is linked to not compatible software %3.
-					//
-					log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+					LOG_INTERNAL_ERROR_MSG(log, QString("Parent of Controller %1 is not a Software object").arg(appDataServiceRcId));
 					result = false;
 				}
 				else
 				{
-					appDataServices[appDataServiceId] = appDataService;
+					if (appDataService->softwareType() != E::SoftwareType::AppDataService)
+					{
+						// Property %1.%2 is linked to not compatible software %3.
+						//
+						log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
+						result = false;
+					}
+					else
+					{
+						appDataServices[appDataServiceRcId] = appDataService;
+					}
 				}
 			}
 		}
 	}
+
+	// for (const QString& appDataServiceRcId : appDataServiceIds)
+	// {
+	// 	// ADS->ClientRequestIP, ClientRequestPort
+	// 	//
+	// 	const Hardware::Software* appDataService = nullptr;
+
+	// 	if (auto appDataServiceDevice = equipment->deviceObject(appDataServiceRcId);
+	// 		appDataServiceDevice == nullptr)
+	// 	{
+	// 		// Property %1.%2 is linked to undefined software ID %3.
+	// 		//
+	// 		log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
+	// 		result = false;
+	// 	}
+	// 	else
+	// 	{
+	// 		if (appDataService = appDataServiceDevice->toSoftware().get();
+	// 			appDataService == nullptr)
+	// 		{
+	// 			// Property %1.%2 is linked to undefined software ID %3.
+	// 			//
+	// 			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
+	// 			result = false;
+	// 		}
+	// 		else
+	// 		{
+	// 			if (appDataService->softwareType() != E::SoftwareType::AppDataService)
+	// 			{
+	// 				// Property %1.%2 is linked to not compatible software %3.
+	// 				//
+	// 				log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
+	// 				result = false;
+	// 			}
+	// 			else
+	// 			{
+	// 				appDataServices[appDataServiceRcId] = appDataService;
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	if (result == false)
 	{
@@ -2302,7 +2379,7 @@ bool TestSuiteSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder
 
 	// Reading AppDataService Settings
 	//
-	for (const auto&[appDataServiceId, appDataService] : appDataServices)
+	for (const auto&[appDataServiceRcId, appDataService] : appDataServices)
 	{
 		// Get AppDataService connection settings
 		//
@@ -2314,12 +2391,23 @@ bool TestSuiteSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder
 			return false;
 		}
 
-		SoftwareEndpoint::AppDataService ads;
-		ads.equipmentId = appDataServiceId;
-		ads.address = adsSettings.clientRequestIP;
-		ads.realtimeAddress = adsSettings.rtTrendsRequestIP;
+		RequestControllerSettings rcs = adsSettings.getRequestControllerSettings(appDataServiceRcId);
 
-		this->appDataServices.push_back(ads);
+		if (rcs.isValid() == false)
+		{
+			// Property %1.%2 is linked to undefined RequestController ID %3.
+			//
+			log->errCFG3032(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
+			result = false;
+			continue;
+		}
+
+		SoftwareEndpoint::AppDataService ads;
+		ads.equipmentId = rcs.equipmentID;
+		ads.address = rcs.clientRequestIP;
+		ads.realtimeAddress = rcs.rtTrendsRequestIP;
+
+		this->appDataServices.emplace_back(ads);
 	}
 
 	return result;

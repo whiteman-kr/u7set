@@ -239,6 +239,15 @@ namespace Tcp
 		mutable CircularLoggerShared m_log;
 	};
 
+	struct ListenAddress
+	{
+		HostAddressPort hostAddr;
+		E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+
+		ListenAddress() = default;
+		ListenAddress(const HostAddressPort& addr, E::SecurityLevel level) :
+			hostAddr(addr), securityLevel(level) {}
+	};
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -252,7 +261,6 @@ namespace Tcp
 
 	public:
 		Server(const SoftwareInfo& sotwareInfo,
-			   E::SecurityLevel securityLevel,
 			   const QString& serverDescription);
 		virtual ~Server();
 
@@ -260,6 +268,7 @@ namespace Tcp
 												// { return new ServerDerivedClass(); }
 
 		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
+		void setSecurityLevel(E::SecurityLevel securityLevel);
 
 		int id() const { return m_connNo; }
 
@@ -342,42 +351,48 @@ namespace Tcp
 
 	// -------------------------------------------------------------------------------------
 	//
-	// Tcp::TcpServer class declaration and implementation
+	// ListenerSocket class declaration and implementation
 	//
 	// Deriving from QTcpServer required to overload incomingConnection()
 	// because new connected socket will be used in another thread and not in Listener's thread
 	//
 	// -------------------------------------------------------------------------------------
 
-	class TcpServer : public QTcpServer
+	class ListenerSocket : public QTcpServer
 	{
 		Q_OBJECT
 
 	public:
-		TcpServer(QObject* parent) : QTcpServer(parent) {}
+		ListenerSocket(const ListenAddress& listenAddr, QObject* parent) :
+			QTcpServer(parent),
+			m_listenAddr(listenAddr)
+		{}
 
 		virtual void incomingConnection(qintptr socketDescriptor) override final
 		{
-			emit newIncomingConnection(socketDescriptor);
+			emit newIncomingConnection(m_listenAddr, socketDescriptor);
 		}
 
 	signals:
-		void newIncomingConnection(qintptr socketDescriptor);
+		void newIncomingConnection(ListenAddress listenAddr, qintptr socketDescriptor);
+
+	private:
+		ListenAddress m_listenAddr;
 	};
 
 	// -------------------------------------------------------------------------------------
 	//
-	// Tcp::Listener class declaration
+	// ListenerWorker class declaration and implementation
 	//
 	// -------------------------------------------------------------------------------------
 
-	class Listener : public SimpleThreadWorker
+	class ListenerWorker : public SimpleThreadWorker
 	{
 		Q_OBJECT
 
 	public:
-		Listener(const std::vector<HostAddressPort>& listenAddresses, Server* server, CircularLoggerShared logger);
-		virtual ~Listener();
+		ListenerWorker(const std::vector<ListenAddress>& listenAddresses, Server* server, CircularLoggerShared logger);
+		virtual ~ListenerWorker();
 
 		virtual void onListenerThreadStarted() {}
 		virtual void onListenerThreadFinished() {}
@@ -392,7 +407,7 @@ namespace Tcp
 		virtual void onThreadFinished() override;
 
 		void startListening();
-		void onNewConnection(qintptr socketDescriptor);
+		void onNewConnection(ListenAddress listenAddr, qintptr socketDescriptor);
 
 	private slots:
 		void onPeriodicTimer();
@@ -400,7 +415,9 @@ namespace Tcp
 		void updateClientsList();
 
 	private:
-		std::vector<std::pair<HostAddressPort, TcpServer*>> m_tcpServers;	// listen IP address -> TcpServer*
+
+	private:
+		std::vector<std::pair<ListenAddress, ListenerSocket*>> m_tcpServers;
 
 		QTimer m_periodicTimer;
 
@@ -408,26 +425,39 @@ namespace Tcp
 
 		std::map<const SocketWorker*, SimpleThread*> m_runningServers;
 
-		friend class TcpServer;
+		friend class ListenerSocket;
 	};
 
 	// -------------------------------------------------------------------------------------
 	//
-	// Tcp::ServerThread class declaration
+	// Tcp::ListenerThread class declaration
 	//
 	// -------------------------------------------------------------------------------------
 
-	class ServerThread : public SimpleThread
+	class ListenerThread : public SimpleThread
 	{
 		Q_OBJECT
 
 	public:
-		ServerThread(const std::vector<HostAddressPort>& listenAddressPorts,
+		ListenerThread(const HostAddressPort& listenAddress,
+					   E::SecurityLevel securityLevel,
+					   Server* server,
+					   CircularLoggerShared logger);
+
+		ListenerThread(const ListenAddress& listenAddress,
 					 Server* server,
 					 CircularLoggerShared logger);
-		ServerThread(Listener* listener);
 
-		virtual ~ServerThread();
+		ListenerThread(const std::vector<ListenAddress>& listenAddresses,
+					 Server* server,
+					 CircularLoggerShared logger);
+
+		ListenerThread(ListenerWorker* listener);
+
+		virtual ~ListenerThread();
+
+	private:
+
 	};
 
 	// -------------------------------------------------------------------------------------

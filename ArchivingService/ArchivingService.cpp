@@ -204,9 +204,11 @@ void ArchivingService::startTcpAppDataServerThread()
 	assert(m_tcpAppDataServerThread == nullptr);
 	assert(m_archive != nullptr);
 
-	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_serviceSettings.securityLevel, m_archive);
+	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_archive);
 
-	m_tcpAppDataServerThread = new Tcp::ServerThread(m_serviceSettings.appDataReceivingIP, server, logger());
+	m_tcpAppDataServerThread = new Tcp::ListenerThread(m_serviceSettings.appDataReceivingIP,
+													   m_serviceSettings.securityLevel,
+													   server, logger());
 	m_tcpAppDataServerThread->start();
 }
 
@@ -231,10 +233,12 @@ void ArchivingService::startTcpArchRequestsServerThread()
 		return;
 	}
 
-	TcpArchRequestsServer* server = new TcpArchRequestsServer(softwareInfo(), m_serviceSettings.securityLevel,
+	TcpArchRequestsServer* server = new TcpArchRequestsServer(softwareInfo(),
 															  m_archive, logger());
 
-	m_tcpArchRequestsServerThread = new Tcp::ServerThread(m_serviceSettings.clientRequestIP, server, logger());
+	m_tcpArchRequestsServerThread = new Tcp::ListenerThread(m_serviceSettings.clientRequestIP,
+															m_serviceSettings.securityLevel,
+															server, logger());
 	m_tcpArchRequestsServerThread->start();
 }
 

@@ -47,7 +47,6 @@ class CfgServer : public Tcp::FileServer, public CfgServerLoaderBase
 public:
 	CfgServer(const QString& buildFolder,
 			  const SoftwareInfo& softwareInfo,
-			  E::SecurityLevel securityLevel,
 			  const SessionParams& sessionParams,
 			  CircularLoggerShared logger);
 

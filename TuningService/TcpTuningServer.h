@@ -109,12 +109,13 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------
 
-	class TcpTuningServerThread : public Tcp::ServerThread
+	class TcpTuningServerThread : public Tcp::ListenerThread
 	{
 	public:
-		TcpTuningServerThread(	const HostAddressPort& listenAddressPort,
-								TcpTuningServer* server,
-								std::shared_ptr<CircularLogger> logger);
+		TcpTuningServerThread(const HostAddressPort& listenAddress,
+							  E::SecurityLevel securityLevel,
+							  TcpTuningServer* server,
+							  std::shared_ptr<CircularLogger> logger);
 	};
 
 }

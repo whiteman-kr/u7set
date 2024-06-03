@@ -435,6 +435,8 @@ namespace XmlAttribute
 	inline const QString CLIENT_REQUEST_IP("ClientRequestIP");
 	inline const QString CLIENT_REQUEST_NETMASK("ClientRequestNetmask");
 	inline const QString RT_TRENDS_REQUEST_IP("RtTrendsRequestIP");
+	inline const QString SECURITY_LEVEL("SecurityLevel");
+	inline const QString ENABLE("Enable");
 }
 
 namespace Latin1Char

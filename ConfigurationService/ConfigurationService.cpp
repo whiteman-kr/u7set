@@ -185,7 +185,6 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
 
 	CfgControlServer* cfgControlServer = new CfgControlServer(softwareInfo(),
-															  m_cfgServiceSettings.securityLevel,
 															  m_autoloadBuildPath,
 															  m_workDirectory,
 															  buildPath,
@@ -195,7 +194,7 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 															  *m_cfgCheckerWorker,
 															  logger());
 
-	m_cfgServerThread = new Tcp::ServerThread(m_clientIP, cfgControlServer, logger());
+	m_cfgServerThread = new Tcp::ListenerThread(m_clientIP, m_cfgServiceSettings.securityLevel, cfgControlServer, logger());
 
 	m_cfgServerThread->start();
 }

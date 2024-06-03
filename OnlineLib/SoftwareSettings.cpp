@@ -387,6 +387,65 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 
 // -------------------------------------------------------------------------------------
 //
+// RequestControllerSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool RequestControllerSettings::isValid() const
+{
+	return ID != -1;
+}
+
+bool RequestControllerSettings::operator < (const RequestControllerSettings& rcs) const
+{
+	return ID < rcs.ID;
+}
+
+bool RequestControllerSettings::writeToXml(XmlWriteHelper& xml) const
+{
+	xml.writeStartElement(XmlElement::REQUEST_CONTROLLER);
+
+	xml.writeIntAttribute(XmlAttribute::ID, ID);
+	xml.writeStringAttribute(XmlAttribute::EQUIPMENT_ID, equipmentID);
+	xml.writeStringAttribute(XmlAttribute::CLIENT_REQUEST_IP, clientRequestIP.addressPortStr());
+	xml.writeStringAttribute(XmlAttribute::CLIENT_REQUEST_NETMASK, clientRequestNetmask.toString());
+	xml.writeStringAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, rtTrendsRequestIP.addressPortStr());
+	xml.writeEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, securityLevel);
+	xml.writeBoolAttribute(XmlAttribute::ENABLE, enable);
+
+	xml.writeEndElement();	// </RequestController>
+
+	return true;
+}
+
+bool RequestControllerSettings::readFromXml(XmlReadHelper& xml)
+{
+	bool result = true;
+
+	result &= xml.findElement(XmlElement::REQUEST_CONTROLLER);
+
+	result &= xml.readIntAttribute(XmlAttribute::ID, &ID);
+	result &= xml.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &equipmentID);
+
+	QString str;
+
+	result &= xml.readStringAttribute(XmlAttribute::CLIENT_REQUEST_IP, &str);
+	result &= clientRequestIP.setAddress(str);
+
+	result &= xml.readStringAttribute(XmlAttribute::CLIENT_REQUEST_NETMASK, &str);
+	result &= clientRequestNetmask.setAddress(str);
+
+	result &= xml.readStringAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, &str);
+	result &= rtTrendsRequestIP.setAddress(str);
+
+	result &= xml.readEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, &securityLevel);
+	result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &enable);
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------
+//
 // CfgServiceSettings class implementation
 //
 // -------------------------------------------------------------------------------------
@@ -498,17 +557,19 @@ QStringList CfgServiceSettings::knownClients() const
 //
 // -------------------------------------------------------------------------------------
 
-AppDataServiceSettings::RqCtrlSettings AppDataServiceSettings::getRequestControllerSettings(const QString& rcEquipmentID)
+RequestControllerSettings AppDataServiceSettings::getRequestControllerSettings(const QString& rcEquipmentID)
 {
-	for(const auto& [rcID, rcSettings] : rqCtrlsSettings)
+	auto it = std::find_if(rcSettings.begin(), rcSettings.end(), [&rcEquipmentID](const RequestControllerSettings& rcs)
+						{
+							return rcs.equipmentID == rcEquipmentID;
+						});
+
+	if (it != rcSettings.end())
 	{
-		if (rcSettings.equipmentID == rcEquipmentID)
-		{
-			return rcSettings;
-		}
+		return RequestControllerSettings(*it);
 	}
 
-	return RqCtrlSettings();
+	return RequestControllerSettings();
 }
 
 bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
@@ -534,24 +595,14 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 							 EquipmentPropNames::ARCH_SERVICE_PORT, archServiceIP);
 
 	xml.writeStartElement(XmlElement::REQUEST_CONTROLLERS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(rqCtrlsSettings.size()));
+	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(rcSettings.size()));
 
-	for(const auto& [rcNo, settings] : rqCtrlsSettings)
+	for(const RequestControllerSettings& rcs : rcSettings)
 	{
-		xml.writeStartElement(XmlElement::REQUEST_CONTROLLER);
-
-		xml.writeIntAttribute(XmlAttribute::ID, rcNo);
-		xml.writeStringAttribute(XmlAttribute::EQUIPMENT_ID, settings.equipmentID);
-		xml.writeStringAttribute(XmlAttribute::CLIENT_REQUEST_IP, settings.clientRequestIP.addressPortStr());
-		xml.writeStringAttribute(XmlAttribute::CLIENT_REQUEST_NETMASK, settings.clientRequestNetmask.toString());
-		xml.writeStringAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, settings.rtTrendsRequestIP.addressPortStr());
-
-		xml.writeEndElement();	// </RequestController>
+		rcs.writeToXml(xml);
 	}
 
 	xml.writeEndElement();	// </RequestControllers>
-
-	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
 
 	writeEndSettings(xml);	// </Settings>
 
@@ -584,7 +635,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,
 									  EquipmentPropNames::ARCH_SERVICE_PORT, &archServiceIP);
 
-	rqCtrlsSettings.clear();
+	rcSettings.clear();
 
 	result &= xml.findElement(XmlElement::REQUEST_CONTROLLERS);
 
@@ -592,33 +643,19 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readIntAttribute(XmlAttribute::COUNT, &rqCtrlsCount);
 
+	rcSettings.reserve(rqCtrlsCount);
+
 	for(int i = 0; i < rqCtrlsCount; i++)
 	{
-		result &= xml.findElement(XmlElement::REQUEST_CONTROLLER);
+		RequestControllerSettings rcs;
 
-		RqCtrlSettings settings;
-
-		result &= xml.readIntAttribute(XmlAttribute::ID, &settings.ID);
-		result &= xml.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &settings.equipmentID);
-
-		QString str;
-
-		result &= xml.readStringAttribute(XmlAttribute::CLIENT_REQUEST_IP, &str);
-		result &= settings.clientRequestIP.setAddress(str);
-
-		result &= xml.readStringAttribute(XmlAttribute::CLIENT_REQUEST_NETMASK, &str);
-		result &= settings.clientRequestNetmask.setAddress(str);
-
-		result &= xml.readStringAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, &str);
-		result &= settings.rtTrendsRequestIP.setAddress(str);
+		result &= rcs.readFromXml(xml);
 
 		if (result == true)
 		{
-			rqCtrlsSettings.emplace(settings.ID, settings);
+			rcSettings.emplace_back(rcs);
 		}
 	}
-
-	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel, true);
 
 	return result;
 }

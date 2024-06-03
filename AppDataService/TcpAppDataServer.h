@@ -18,7 +18,6 @@ class TcpAppDataServer : public Tcp::Server
 {
 public:
 	TcpAppDataServer(const SoftwareInfo& softwareInfo,
-					 E::SecurityLevel securityLevel,
 					 AppDataServiceWorker& appDataService);
 
 	virtual ~TcpAppDataServer() override;
@@ -75,12 +74,11 @@ private:
 //
 // -------------------------------------------------------------------------------
 
-class TcpAppDataServerThread : public Tcp::ServerThread
+class TcpAppDataServerThread : public Tcp::ListenerThread
 {
 public:
 	TcpAppDataServerThread(const SoftwareInfo& softwareInfo,
-							const HostAddressPort& listenAddressPort,
-							E::SecurityLevel securityLevel,
+						   const std::vector<Tcp::ListenAddress>& listenAddresses,
 							AppDataServiceWorker &appDataServiceWorker);
 };
 

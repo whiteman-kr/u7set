@@ -422,10 +422,9 @@ namespace Tcp
 
 	FileServer::FileServer(const QString& rootFolder,
 						   const SoftwareInfo& softwareInfo,
-						   E::SecurityLevel securityLevel,
 						   CircularLoggerShared logger,
 						   const QString& serverDescription) :
-		Server(softwareInfo, securityLevel, serverDescription),
+		Server(softwareInfo, serverDescription),
 		m_reply(new Network::GetFileReply),
 		m_transmitionFilesTimer(this)
 	{
@@ -439,7 +438,7 @@ namespace Tcp
 
 	Server* FileServer::getNewInstance()
 	{
-		return new FileServer(m_rootFolder, localSoftwareInfo(), securityLevel(), log(), socketDescription());
+		return new FileServer(m_rootFolder, localSoftwareInfo(), log(), socketDescription());
 	}
 
 	void FileServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

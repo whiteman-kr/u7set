@@ -134,6 +134,26 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 	return getSettingsProfile<T>(SettingsProfile::DEFAULT);
 }
 
+struct RequestControllerSettings
+{
+	int ID = -1;
+
+	QString equipmentID;
+	HostAddressPort clientRequestIP;
+	QHostAddress clientRequestNetmask;
+	HostAddressPort rtTrendsRequestIP;
+	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+	bool enable = false;
+
+	//
+
+	bool isValid() const;
+	bool operator < (const RequestControllerSettings& rcs) const;
+
+	bool writeToXml(XmlWriteHelper& xml) const;
+	bool readFromXml(XmlReadHelper& xml);
+};
+
 class CfgServiceSettings : virtual public SoftwareSettings
 {
 public:
@@ -181,22 +201,9 @@ public:
 	QString archServiceID;
 	HostAddressPort archServiceIP;
 
-	struct RqCtrlSettings				//	Request Controller Settings
-	{
-		int ID = -1;
-		QString equipmentID;
-		HostAddressPort clientRequestIP;
-		QHostAddress clientRequestNetmask;
-		HostAddressPort rtTrendsRequestIP;
+	std::vector<RequestControllerSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
 
-		bool isValid() const { return ID != -1; }
-	};
-
-	std::map<int, RqCtrlSettings> rqCtrlsSettings;	// RequestController ID -> controller settings
-
-	RqCtrlSettings getRequestControllerSettings(const QString& rcEquipmentID);
-
-	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+	RequestControllerSettings getRequestControllerSettings(const QString& rcEquipmentID);
 
 private:
 	// this methods should be call by SoftwareSettingsSet only

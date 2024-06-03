@@ -353,10 +353,21 @@ void ServiceData::parseServiceInfo()
 		break;
 	case E::SoftwareType::AppDataService:
 	{
-		AppDataServiceSettings* appDataServiceSettings = dynamic_cast<AppDataServiceSettings*>(pSettings);
-		Q_ASSERT(appDataServiceSettings);
-		clientRequestIp = appDataServiceSettings->clientRequestIP.address32IfSet();
-		clientRequestPort = appDataServiceSettings->clientRequestIP.portIfSet();
+		AppDataServiceSettings* adsSettings = dynamic_cast<AppDataServiceSettings*>(pSettings);
+
+		if (adsSettings != nullptr)
+		{
+			if (adsSettings->rcSettings.empty() == false)
+			{
+
+				clientRequestIp = adsSettings->rcSettings[0].clientRequestIP.address32IfSet();
+				clientRequestPort = adsSettings->rcSettings[0].clientRequestIP.portIfSet();
+			}
+		}
+		else
+		{
+			Q_ASSERT(adsSettings);
+		}
 	}
 		break;
 	case E::SoftwareType::DiagDataService:

@@ -11,7 +11,6 @@ class TcpArchRequestsServer : public Tcp::Server
 {
 public:
 	TcpArchRequestsServer(const SoftwareInfo& softwareInfo,
-						  E::SecurityLevel securityLevel,
 						  Archive* archive,
 						  CircularLoggerShared logger);
 

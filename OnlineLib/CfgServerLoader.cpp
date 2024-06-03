@@ -36,10 +36,9 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 
 CfgServer::CfgServer(const QString& buildFolder,
 					 const SoftwareInfo& softwareInfo,
-					 E::SecurityLevel securityLevel,
 					 const SessionParams& sessionParams,
 					 CircularLoggerShared logger) :
-	Tcp::FileServer(buildFolder, softwareInfo, securityLevel, logger, "CfgServer"),
+	Tcp::FileServer(buildFolder, softwareInfo, logger, "CfgServer"),
 	m_sessionParams(sessionParams)
 {
 }
@@ -48,7 +47,6 @@ CfgServer* CfgServer::getNewInstance()
 {
 	return new CfgServer(m_rootFolder,
 						 localSoftwareInfo(),
-						 securityLevel(),
 						 m_sessionParams,
 						 log());
 }

@@ -1,7 +1,6 @@
 #include "TcpAppDataServer.h"
 #include "AppDataService.h"
 
-
 // -------------------------------------------------------------------------------
 //
 // TcpAppDataServer class implementation
@@ -9,9 +8,8 @@
 // -------------------------------------------------------------------------------
 
 TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
-								   E::SecurityLevel securityLevel,
 								   AppDataServiceWorker& appDataService) :
-	Tcp::Server(softwareInfo, securityLevel, "AppDataServer"),
+	Tcp::Server(softwareInfo, "AppDataServer"),
 	m_appDataService(appDataService)
 {
 	setObjectName("TcpAppDataServer");
@@ -108,7 +106,6 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
 	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo(),
-														securityLevel(),
 														m_appDataService);
 	return newServer;
 }
@@ -628,11 +625,9 @@ void TcpAppDataServer::getServerTimes(qint64* utc, qint64* local)
 // -------------------------------------------------------------------------------
 
 TcpAppDataServerThread::TcpAppDataServerThread(const SoftwareInfo& softwareInfo,
-											   const HostAddressPort& listenAddressPort,
-											   E::SecurityLevel securityLevel,
+											   const std::vector<Tcp::ListenAddress>& listenAddresses,
 											   AppDataServiceWorker& appDataServiceWorker) :
-	Tcp::ServerThread(listenAddressPort,
-					  new TcpAppDataServer(softwareInfo, securityLevel, appDataServiceWorker),
+	Tcp::ListenerThread(listenAddresses,  new TcpAppDataServer(softwareInfo, appDataServiceWorker),
 					  appDataServiceWorker.logger())
 {
 }

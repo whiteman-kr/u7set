@@ -68,7 +68,7 @@ namespace RtTrends
 	class Server : public Tcp::Server
 	{
 	public:
-		Server(AppDataServiceWorker& appDataService, E::SecurityLevel securityLevel);
+		Server(AppDataServiceWorker& appDataService);
 
 		Tcp::Server* getNewInstance() override;
 
@@ -114,12 +114,10 @@ namespace RtTrends
 
 	//
 
-	class ServerThread : public Tcp::ServerThread
+	class ServerThread : public Tcp::ListenerThread
 	{
 	public:
-		ServerThread(const HostAddressPort& listenAddressPort,
-					 AppDataServiceWorker& appDataService,
-					 E::SecurityLevel securityLevel);
+		ServerThread(const std::vector<Tcp::ListenAddress>& listenAddresses,
+					 AppDataServiceWorker& appDataService);
 	};
-
 }
