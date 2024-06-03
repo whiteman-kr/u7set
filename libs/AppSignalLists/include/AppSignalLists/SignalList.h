@@ -8,8 +8,11 @@
 #include <memory>
 #include <optional>
 #include <vector>
+#include <set>
 
 class AppSignalParam;
+
+class ILogFile;
 
 namespace Proto
 {
@@ -112,7 +115,7 @@ namespace AppSignalLists
 		// Items operations
 
 		[[nodiscard]] int count() const;
-		[[nodiscard]] std::vector<Hash> itemsHashes() const;
+		[[nodiscard]] std::set<Hash> itemsHashes() const;
 
 		[[nodiscard]] const AppSignalListItem& itemByHash(Hash hash) const;
 		[[nodiscard]] AppSignalListItem& itemByHash(Hash hash);
@@ -122,15 +125,8 @@ namespace AppSignalLists
 		void add(const AppSignalListItem& item);
 		void remove(Hash hash);
 
-		[[nodiscard]] const std::vector<Hash>& listHashesCache() const;
-		[[nodiscard]] std::vector<Hash>& listHashesCache();
-
-		/*
-		void checkSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters);
-		void removeNotExistingSignals(const std::vector<Hash>& signalHashes, int& removedCounter);
-		*/
-
-		//
+		[[nodiscard]] const std::set<Hash>& listHashesCache() const;
+		[[nodiscard]] std::set<Hash>& mutableListHashesCache();
 
 		// Returns true if application signal matches to this list (mask or items list)
 		//
@@ -206,7 +202,7 @@ namespace AppSignalLists
 		// Items
 		//
 		std::map<Hash, AppSignalListItem> m_items;	// Signals added by user are stored here
-		std::vector<Hash> m_listHashesCache;		// All signals hashes that match this filter are stored here. They are filled on build and after local lists editing
+		std::set<Hash> m_listHashesCache;		// All signals hashes that match this filter are stored here. They are filled on build and after local lists editing
 
 	public:
 		static const char* mimeType; // = "application/x-radiyappsignallist";
@@ -260,12 +256,12 @@ namespace AppSignalLists
 			return *this;
 		}
 
+	private:
+
 	protected:
 		std::vector<std::shared_ptr<AppSignalList>> m_lists;
 
 	signals:
 		void updatePerformed();
-
-
 	};
-}
+} // namespace AppSignalLists

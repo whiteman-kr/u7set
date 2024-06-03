@@ -43,6 +43,7 @@ private:
 	void createActions();
 	void createMenu();
 	void createStatusBar();
+	void loadSignalLists();
 
 private slots:
 	void slot_configurationArrived(TuningClientConfigSettings configuration);

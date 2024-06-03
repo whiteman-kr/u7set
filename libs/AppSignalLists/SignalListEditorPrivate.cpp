@@ -682,7 +682,12 @@ namespace AppSignalLists
 			}
 
 			m_appSignalList = list;
-			m_allHashes = m_appSignalList->itemsHashes();
+
+			auto itemsHashesSet = m_appSignalList->itemsHashes();
+			for (Hash hash : itemsHashesSet) 
+			{
+				m_allHashes.push_back(hash);
+			}
 
 			if (list->count() > 0)
 			{

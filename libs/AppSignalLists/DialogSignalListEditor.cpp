@@ -730,7 +730,7 @@ namespace AppSignalLists
 			{
 				continue;
 			}
-			auto& cache = list->listHashesCache();
+			auto& cache = list->mutableListHashesCache();
 			cache.clear();
 			userLists.push_back(list);
 		}
@@ -748,10 +748,10 @@ namespace AppSignalLists
 			{
 				// Add filtered signals to the list
 				//
-				auto& cache = list->listHashesCache();
+				auto& cache = list->mutableListHashesCache();
 				if (list->appSignalMatch(asp) == true)
 				{
-					cache.push_back(hash);
+					cache.insert(hash);
 				}
 			}
 		}

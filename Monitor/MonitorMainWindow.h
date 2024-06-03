@@ -82,6 +82,7 @@ private:
 	void createMenus();
 	void createToolBars();
 	void createStatusBar();
+	void loadSignalLists();
 
 public:
 	MonitorCentralWidget& monitorCentralWidget();
@@ -144,6 +145,8 @@ public slots:
 
 	void slot_loggedIn();
 	void slot_loggedOut();
+
+	void slot_checkSignalLists();
 
 private slots:
 	void slot_tuningSignalsArrived(QByteArray data);

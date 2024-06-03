@@ -10,6 +10,7 @@
 
 #include <SchemaClientLib/DevToolsWindow.h>
 #include <AppSignalLists/DialogSignalListEditor.h>
+#include <AppSignalLists/SignalListChecker.h>
 #include <SchemaClientLib/DialogSignalSearch.h>
 #include <SchemaClientLib/SchemaListWidget.h>
 #include <UiLib/DialogAbout.h>
@@ -62,6 +63,8 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	//
 	qApp->setApplicationName(MonitorAppSettings::instance().windowCaption());
 
+	
+	connect(&m_signalManager, &ClientLib::AppSignalManager::signalParamsUpdated, this, &MonitorMainWindow::slot_checkSignalLists);
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
 	connect(&m_configController, &MonitorConfigController::tuningSignalsArrived, this, &MonitorMainWindow::slot_tuningSignalsArrived);
 	connect(&m_configController, &MonitorConfigController::error, this, &MonitorMainWindow::slot_configurationError);
@@ -159,11 +162,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	
 	// Load local appSignalLists
 	//
-	QString errorMessage;
-	if (m_appSignalListSet.load(&errorMessage) == false)
-	{
-		m_LogFile.writeError(errorMessage);
-	}
+	loadSignalLists();
 
 	return;
 }
@@ -754,6 +753,17 @@ void MonitorMainWindow::createStatusBar()
 	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
 
 	return;
+}
+
+void MonitorMainWindow::loadSignalLists()
+{
+	// Load local lists from file
+	//
+	QString errorMessage;
+	if (m_appSignalListSet.load(&errorMessage) == false)
+	{
+		m_LogFile.writeError(errorMessage);
+	}
 }
 
 MonitorCentralWidget& MonitorMainWindow::monitorCentralWidget()
@@ -1675,6 +1685,11 @@ void MonitorMainWindow::slot_loggedOut()
 	}
 
 	m_loginUserTimeoutAction->setEnabled(false);
+}
+
+void MonitorMainWindow::slot_checkSignalLists() 
+{
+	AppSignalLists::AppSignalListSetChecker::checkForDanglingItems(m_signalManager.signalHashes(), m_appSignalListSet, this, &m_LogFile);
 }
 
 void MonitorMainWindow::slot_tuningSignalsArrived(QByteArray data)

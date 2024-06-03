@@ -352,8 +352,7 @@ namespace SchemaClientLib
 			std::shared_ptr<AppSignalLists::AppSignalList> list =  m_appSignalListSet->get(m_listId);
 			if (list != nullptr) 
 			{
-				const std::vector<Hash>& appSignalListHashesVec = list->listHashesCache();
-				appSignalListHashes.insert(appSignalListHashesVec.begin(), appSignalListHashesVec.end());
+				appSignalListHashes = list->listHashesCache();
 			}
 		}
 

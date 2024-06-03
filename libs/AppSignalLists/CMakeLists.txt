@@ -15,9 +15,13 @@ set(TARGET AppSignalLists)
 qt_add_library(${TARGET} STATIC
 	./include/AppSignalLists/DialogSignalListEditor.h
 	./include/AppSignalLists/SignalList.h
+	./include/AppSignalLists/SignalListChecker.h
 	./include/AppSignalLists/SignalListEditor.h
 	DialogSignalListEditor.cpp
 	SignalList.cpp
+	SignalListChecker.cpp
+	SignalListCheckerPrivate.cpp
+	SignalListCheckerPrivate.h
 	SignalListEditor.cpp
 	SignalListEditorPrivate.cpp
 	SignalListEditorPrivate.h
@@ -64,6 +68,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTableView>
 	<QTranslator>
 	<QTreeWidget>
+	<QTextEdit>
 	<QVBoxLayout>
 
 	"../../CommonLib/Types.h"

@@ -179,10 +179,9 @@ namespace AppSignalLists
 
 		count = appSignalList.listhashescache_size();
 		m_listHashesCache.clear();
-		m_listHashesCache.reserve(count);
 		for (int i = 0; i < count; i++) 
 		{
-			m_listHashesCache.push_back(appSignalList.listhashescache(i));
+			m_listHashesCache.insert(appSignalList.listhashescache(i));
 		}
 
 		return true;
@@ -376,13 +375,12 @@ namespace AppSignalLists
 		return static_cast<int>(m_items.size());
 	}
 
-	std::vector<Hash> AppSignalList::itemsHashes() const 
+	std::set<Hash> AppSignalList::itemsHashes() const 
 	{
-		std::vector<Hash> result;
-		result.reserve(m_items.size());
+		std::set<Hash> result;
 		for (auto& [hash, item]: m_items) 
 		{
-			result.push_back(hash);
+			result.insert(hash);
 		}
 		return result;
 	}
@@ -416,49 +414,22 @@ namespace AppSignalLists
 		return m_items.find(hash) != m_items.end();
 	}
 
-	/*int AppSignalList::itemIndex(Hash hash) const
-	{
-		auto it = std::find_if(m_items.begin(),
-							   m_items.end(),
-							   [hash](const auto& item)
-							   {
-								   return item.appSignalHash() == hash;
-							   });
-		if (it == m_items.end())
-		{
-			Q_ASSERT(false);
-			return -1;
-		}
-		return std::distance(m_items.begin(), it);
-	}*/
-
 	void AppSignalList::add(const AppSignalListItem& item)
 	{
 		m_items[item.appSignalHash()] = item;
 	}
-
-	/*bool AppSignalList::remove(int index)
-	{
-		if (index >= m_items.size())
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-		m_items.erase(m_items.begin() + index);
-		return true;
-	}*/
 
 	void AppSignalList::remove(Hash hash)
 	{
 		m_items.erase(hash);
 	}
 
-	const std::vector<Hash>& AppSignalList::listHashesCache() const 
+	const std::set<Hash>& AppSignalList::listHashesCache() const 
 	{
 		return m_listHashesCache;
 	}
 	
-	std::vector<Hash>& AppSignalList::listHashesCache() 
+	std::set<Hash>& AppSignalList::mutableListHashesCache() 
 	{
 		return m_listHashesCache;
 	}

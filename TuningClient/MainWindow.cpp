@@ -8,6 +8,7 @@
 #include "../lib/Tuning/TuningFilter.h"
 
 #include <AppSignalLists/DialogSignalListEditor.h>
+#include <AppSignalLists/SignalListChecker.h>
 #include <UiLib/DialogAlert.h>
 #include <UiLib/DialogAbout.h>
 #include <ClientLib/TuningLog.h>
@@ -109,13 +110,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 		QMessageBox::critical(this, tr("Error"), msg);
 	}
 
-	// Load local appSignalLists
-
-	QString errorMessage;
-	if (m_appSignalListSet.load(&errorMessage) == false)
-	{
-		m_logFile.writeError(errorMessage);
-	}
+	loadSignalLists();
 
 	//
 
@@ -320,6 +315,16 @@ void MainWindow::createStatusBar()
 	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
 }
 
+void MainWindow::loadSignalLists() 
+{
+	// Load local lists from file
+	//
+	QString errorMessage;
+	if (m_appSignalListSet.load(&errorMessage) == false)
+	{
+		m_logFile.writeError(errorMessage);
+	}
+}
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
 {
@@ -1156,6 +1161,8 @@ void MainWindow::slot_signalsUpdated(QByteArray data)
 		QString completeErrorMessage = QObject::tr("Tuning signals file loading error.");
 		m_logFile.writeError(completeErrorMessage);
 	}
+
+	AppSignalLists::AppSignalListSetChecker::checkForDanglingItems(m_tuningSignalManager.signalHashes(), m_appSignalListSet, this, &m_logFile);
 }
 
 void MainWindow::slot_configurationError(QString error)

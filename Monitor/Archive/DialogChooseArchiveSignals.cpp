@@ -802,11 +802,7 @@ void FilteredArchiveSignalsModel::filterSignals(QString server, DialogChooseArch
 	if (appSignalList.has_value() == true)
 	{
 		Q_ASSERT(appSignalList.value());
-		std::vector<Hash> appSignalListHashesVec = appSignalList.value()->listHashesCache();
-		for (const auto& hash : appSignalListHashesVec)
-		{
-			appSignalListHashes.insert(hash);
-		}
+		appSignalListHashes = appSignalList.value()->listHashesCache();
 	}
 
 	//

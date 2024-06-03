@@ -655,13 +655,13 @@ namespace Builder
 
 			// Add filtered signals to the list
 			//
-			auto& mutableCache = list->listHashesCache();
+			auto& mutableCache = list->mutableListHashesCache();
 
 			for (const auto&[signalHash, asp] : provider)
 			{
 				if (list->appSignalMatch(asp) == true)
 				{
-					mutableCache.push_back(signalHash);
+					mutableCache.insert(signalHash);
 				}
 			}
 
