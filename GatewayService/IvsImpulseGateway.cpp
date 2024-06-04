@@ -324,10 +324,10 @@ namespace Gateway
 		xml.writeStartElement(XmlElement::SETTINGS);
 
 		xml.writeIntAttribute(XmlAttribute::SYSTEM_ID, m_systemID);
-		xml.writeHostAddressPortAttribute(XmlAttribute::LOCAL_GATEWAY_IP1, m_localGatewayIP1);
-		xml.writeHostAddressPortAttribute(XmlAttribute::REMOTE_GATEWAY_IP1, m_remoteGatewayIP1);
-		xml.writeHostAddressPortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, m_localGatewayIP2);
-		xml.writeHostAddressPortAttribute(XmlAttribute::REMOTE_GATEWAY_IP2, m_remoteGatewayIP2);
+		xml.writeIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP1, m_localGatewayIP1);
+		xml.writeIPv4PortAttribute(XmlAttribute::REMOTE_GATEWAY_IP1, m_remoteGatewayIP1);
+		xml.writeIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, m_localGatewayIP2);
+		xml.writeIPv4PortAttribute(XmlAttribute::REMOTE_GATEWAY_IP2, m_remoteGatewayIP2);
 		xml.writeIntAttribute(XmlAttribute::LISTS_VERSION, m_listsVersion);
 		xml.writeEnumKeyAttribute<::E::TimeType>(XmlAttribute::TIME_TYPE, m_timeType);
 		xml.writeIntAttribute(XmlAttribute::PERIOD, m_period);
@@ -349,8 +349,8 @@ namespace Gateway
 		m_localGatewayIP1.clear();
 		m_remoteGatewayIP1.clear();
 
-		okIp1 &= xml.readHostAddressPortAttribute(XmlAttribute::LOCAL_GATEWAY_IP1, &m_localGatewayIP1);
-		okIp1 &= xml.readHostAddressPortAttribute(XmlAttribute::REMOTE_GATEWAY_IP1, &m_remoteGatewayIP1);
+		okIp1 &= xml.readIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP1, &m_localGatewayIP1);
+		okIp1 &= xml.readIPv4PortAttribute(XmlAttribute::REMOTE_GATEWAY_IP1, &m_remoteGatewayIP1);
 
 			   //
 
@@ -359,8 +359,8 @@ namespace Gateway
 		m_localGatewayIP2.clear();
 		m_remoteGatewayIP2.clear();
 
-		okIp2 &= xml.readHostAddressPortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, &m_localGatewayIP2);
-		okIp2 &= xml.readHostAddressPortAttribute(XmlAttribute::REMOTE_GATEWAY_IP2, &m_remoteGatewayIP2);
+		okIp2 &= xml.readIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, &m_localGatewayIP2);
+		okIp2 &= xml.readIPv4PortAttribute(XmlAttribute::REMOTE_GATEWAY_IP2, &m_remoteGatewayIP2);
 
 		result &= okIp1 || okIp2;
 

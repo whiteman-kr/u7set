@@ -84,11 +84,6 @@ bool AppDataServiceWorker::isConnectedToArchiveService(quint32 &ip, quint16 &por
 	return false;
 }
 
-// E::SecurityLevel AppDataServiceWorker::securityLevel() const
-// {
-// 	return m_curSettingsProfile.securityLevel;
-// }
-
 void AppDataServiceWorker::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
 														 bool isArchivingQueue,
 														 const QString& description)

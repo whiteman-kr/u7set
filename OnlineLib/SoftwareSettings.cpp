@@ -407,9 +407,9 @@ bool RequestControllerSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeIntAttribute(XmlAttribute::ID, ID);
 	xml.writeStringAttribute(XmlAttribute::EQUIPMENT_ID, equipmentID);
-	xml.writeStringAttribute(XmlAttribute::CLIENT_REQUEST_IP, clientRequestIP.addressPortStr());
-	xml.writeStringAttribute(XmlAttribute::CLIENT_REQUEST_NETMASK, clientRequestNetmask.toString());
-	xml.writeStringAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, rtTrendsRequestIP.addressPortStr());
+	xml.writeIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, clientRequestIP);
+	xml.writeIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+	xml.writeIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, rtTrendsRequestIP);
 	xml.writeEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, securityLevel);
 	xml.writeBoolAttribute(XmlAttribute::ENABLE, enable);
 
@@ -427,16 +427,9 @@ bool RequestControllerSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute(XmlAttribute::ID, &ID);
 	result &= xml.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &equipmentID);
 
-	QString str;
-
-	result &= xml.readStringAttribute(XmlAttribute::CLIENT_REQUEST_IP, &str);
-	result &= clientRequestIP.setAddress(str);
-
-	result &= xml.readStringAttribute(XmlAttribute::CLIENT_REQUEST_NETMASK, &str);
-	result &= clientRequestNetmask.setAddress(str);
-
-	result &= xml.readStringAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, &str);
-	result &= rtTrendsRequestIP.setAddress(str);
+	result &= xml.readIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, &clientRequestIP);
+	result &= xml.readIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+	result &= xml.readIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, &rtTrendsRequestIP);
 
 	result &= xml.readEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, &securityLevel);
 	result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &enable);
@@ -884,9 +877,9 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 		if (ch.enable == true)
 		{
 			xml.writeStringAttribute(XmlAttribute::CONTROLLER_EQUIPMENT_ID, ch.serviceControllerEquipmentID);
-			xml.writeHostAddressPortAttribute(EquipmentPropNames::TUNING_DATA_IP, ch.tuningDataIP);
-			xml.writeQHostAddressAttribute(EquipmentPropNames::TUNING_DATA_NETMASK, ch.tuningDataNetmask);
-			xml.writeHostAddressPortAttribute(EquipmentPropNames::TUNING_SIM_IP, ch.tuningSimIP);
+			xml.writeIPv4PortAttribute(EquipmentPropNames::TUNING_DATA_IP, ch.tuningDataIP);
+			xml.writeIPv4Attribute(EquipmentPropNames::TUNING_DATA_NETMASK, ch.tuningDataNetmask);
+			xml.writeIPv4PortAttribute(EquipmentPropNames::TUNING_SIM_IP, ch.tuningSimIP);
 
 			// write tuning sources info
 			//
@@ -1018,9 +1011,9 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		if (ch.enable == true)
 		{
 			result &= xml.readStringAttribute(XmlAttribute::CONTROLLER_EQUIPMENT_ID, &ch.serviceControllerEquipmentID);
-			result &= xml.readHostAddressPortAttribute(EquipmentPropNames::TUNING_DATA_IP, &ch.tuningDataIP);
-			result &= xml.readQHostAddressAttribute(EquipmentPropNames::TUNING_DATA_NETMASK, &ch.tuningDataNetmask);
-			result &= xml.readHostAddressPortAttribute(EquipmentPropNames::TUNING_SIM_IP, &ch.tuningSimIP);
+			result &= xml.readIPv4PortAttribute(EquipmentPropNames::TUNING_DATA_IP, &ch.tuningDataIP);
+			result &= xml.readIPv4Attribute(EquipmentPropNames::TUNING_DATA_NETMASK, &ch.tuningDataNetmask);
+			result &= xml.readIPv4PortAttribute(EquipmentPropNames::TUNING_SIM_IP, &ch.tuningSimIP);
 
 			result &= readTuningSourcesFromXml(xml, &ch.sources);
 

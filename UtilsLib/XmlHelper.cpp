@@ -173,12 +173,12 @@ void XmlWriteHelper::writeAddress16Attribute(const QString& name, const Address1
 	writeStringAttribute(name, addr16.toString());
 }
 
-void XmlWriteHelper::writeHostAddressPortAttribute(const QString& name, const HostAddressPort& addr)
+void XmlWriteHelper::writeIPv4PortAttribute(const QString& name, const HostAddressPort& addr)
 {
 	writeStringAttribute(name, addr.addressPortStr());
 }
 
-void XmlWriteHelper::writeQHostAddressAttribute(const QString& name, const QHostAddress& addr)
+void XmlWriteHelper::writeIPv4Attribute(const QString& name, const QHostAddress& addr)
 {
 	writeStringAttribute(name, addr.toString());
 }
@@ -483,7 +483,7 @@ bool XmlReadHelper::readAddress16Attribute(const QString& name, Address16* value
 	return result;
 }
 
-bool XmlReadHelper::readHostAddressPortAttribute(const QString& name, HostAddressPort* addr)
+bool XmlReadHelper::readIPv4PortAttribute(const QString& name, HostAddressPort* addr)
 {
 	TEST_PTR_RETURN_FALSE(addr);
 
@@ -498,7 +498,7 @@ bool XmlReadHelper::readHostAddressPortAttribute(const QString& name, HostAddres
 	return true;
 }
 
-bool XmlReadHelper::readQHostAddressAttribute(const QString& name, QHostAddress* addr)
+bool XmlReadHelper::readIPv4Attribute(const QString& name, QHostAddress* addr)
 {
 	TEST_PTR_RETURN_FALSE(addr);
 
