@@ -18,7 +18,7 @@ struct AppDataService
 	int port;
 };
 
-#if 1
+#if 0
 // EquipmentID of this part of the system.
 const std::string g_equipmentId = "TP_MCRWS00_ADSBRIDGE";
 
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
 
 		if (getOk == true)
 		{
-#if 0
+#if 1
 			for (size_t i = 0; i < signalCount; ++i)
 			{
 				dumpAppSignalParam(signalParams[i]);
@@ -325,7 +325,7 @@ int main(int argc, char* argv[])
 	//
 
 	// Signal IDs to get states for.
-	std::array<const char*, 2> signalIds{"#AZPZ_RACK1_CH01_MD00_PI_BUILDNUMBER", "#AZPZ_RACK1_CH01_MD00_CTRLIN_ARMINGKEYHA"};
+	std::array<const char*, 2> signalIds{"#AZPZ_RACK1_CH01_MD00_CTRLIN_INH02A", "#AZPZ_RACK1_CH01_MD00_CTRLIN_INH03A"};
 	std::array<MatsSignalHash, 2> hashes{AdsCalcHash(signalIds[0]), AdsCalcHash(signalIds[1])};
 	std::array<MatsAppSignalState, hashes.size()> states{};
 

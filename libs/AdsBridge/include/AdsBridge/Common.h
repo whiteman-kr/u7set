@@ -44,7 +44,7 @@ extern "C"
 	 * @param level The log level of the message.
 	 * @param message The log message.
 	 */
-	typedef void (*MatsLogHandler)(enum MatsLogLevel level, const char*);
+	typedef void (*MatsLogHandler)(enum MatsLogLevel level, const char* message);
 
 	/**
 	 * @struct AdsConnectionStatus

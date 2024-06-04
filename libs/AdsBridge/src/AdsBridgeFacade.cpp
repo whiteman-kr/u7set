@@ -119,6 +119,12 @@ namespace AdsBridge
 
 	void AdsBridgeFacade::connect()
 	{
+		if (m_equipmentId.isEmpty() == true)
+		{
+			m_log->writeError("AdsBridgeFacade::connect(), EquipmentID is empty.");
+			return;
+		}
+
 		if (m_appDataServices.empty() == true)
 		{
 			m_log->writeWarning("AdsBridgeFacade::connect(), No AppDataService(s) to connect to.");

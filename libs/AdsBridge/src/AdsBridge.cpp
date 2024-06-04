@@ -24,12 +24,12 @@ namespace
 
 void AdsSetLogHandler(MatsLogHandler handler)
 {
-	AdsBridge::g_logHandler = handler;
+	AdsBridge::LogFile::g_logHandler = handler;
 }
 
 void AdsSetLogLevel(MatsLogLevel level)
 {
-	AdsBridge::g_logLevel = level;
+	AdsBridge::LogFile::g_logLevel = level;
 }
 
 void AdsTestLogHandler(enum MatsLogLevel level, const char* message)
@@ -121,7 +121,7 @@ bool AdsLoadConfiguration(const char* fileName)
 
 bool AdsSetConfiguration(const char* configurationXml, size_t size)
 {
-	g_lastLoadedConfiguration = QByteArray{configurationXml, static_cast<qsizetype>(size)};
+	g_lastLoadedConfiguration = QByteArray::fromRawData(configurationXml, size);
 	return g_adsBridge.setConfiguration(g_lastLoadedConfiguration, SettingsProfile::DEFAULT);
 }
 

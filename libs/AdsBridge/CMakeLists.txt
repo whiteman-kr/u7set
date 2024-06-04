@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-find_package(Qt6 REQUIRED COMPONENTS Core)
+find_package(Qt6 REQUIRED COMPONENTS Network)
 
 #
 # AdsBridge
@@ -34,7 +34,7 @@ target_precompile_headers(AdsBridge PRIVATE
 	"../../AppSignalLib/AppSignalState.h"
 )
 
-target_link_libraries(AdsBridge PRIVATE Qt6::Core)
+target_link_libraries(AdsBridge PRIVATE Qt6::Network)
 target_link_libraries(AdsBridge PRIVATE AppSignalLib OnlineLib ClientLib)
 
 target_include_directories(AdsBridge PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -42,7 +42,25 @@ target_include_directories(AdsBridge INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/inclu
 
 add_code_coverage_options(AdsBridge CODE_COVERAGE)
 
+# Generate API documentation
+#
+
+# Find for Doxygen here as add_subdirectory works with CMake 3.27+ only
+#
+find_package(Doxygen)
+
+if(DOXYGEN_FOUND)
+	message(STATUS "Doxygen found: ${DOXYGEN_EXECUTABLE}")
+
+#	 add_custom_target(AdsBridgeDoc ALL
+#			COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_OUT_DIR=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/scripthelp ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/ScriptHelp.cfg
+#			COMMENT "Generating API documentation with Doxygen"
+#			WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+#			VERBATIM)
+
+endif()
+
 # --
 #
-add_subdirectory(examples)
+add_subdirectory(examples/cpp)
 #add_subdirectory(tests)
