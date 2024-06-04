@@ -103,19 +103,19 @@ extern "C"
 	{
 		MATS_SIGNAL_ANALOG,   ///< Represents an analog signal type.
 		MATS_SIGNAL_DISCRETE, ///< Represents a discrete signal type.
-		MATS_SIGNAL_BUS       /// < Represents a bus signal type.
+		MATS_SIGNAL_BUS       ///< Represents a bus signal type.
 	};
 
 	// clang-format off
 #define MATS_FLAG_VALID				0x00000001	///< Flag mask to indicate that the signal value is valid.
-#define MATS_FLAG_STATE_AVAILABLE	0x00000002	///< Flag mask to indicate that the signal state is available (there is connection with the logic module).
+#define MATS_FLAG_STATE_AVAILABLE	0x00000002	///< Flag mask to indicate that the signal state is available (AppDataService receives signal state from the Logic Module).
 #define MATS_FLAG_SIMULATED			0x00000004	///< Flag mask to indicate that the AFB sim_lock is applied with the specified flag.
 #define MATS_FLAG_BLOCKED			0x00000008	///< Flag mask to indicate that the signal is blocked (AFB sim_lock is applied with the specified flag).
 #define MATS_FLAG_MISMATCH			0x00000010	///< Flag mask to indicate that the signal value is mismatched.
 #define MATS_FLAG_ABOVE_HIGH_LIMIT	0x00000020	///< Flag mask to indicate that the signal value is above the high limit.
 #define MATS_FLAG_BELOW_LOW_LIMIT	0x00000040	///< Flag mask to indicate that the signal value is below the low limit.
 #define MATS_FLAG_SW_SIMULATED		0x00000080	///< Flag mask to indicate that the signal is software simulated.
-#define MATS_FLAG_TUNING_DEFAULT	0x00000100	///< Flag mask to indicate that the signal is tunable and current value is equal to the default tuning value.
+#define MATS_FLAG_TUNING_DEFAULT	0x00000100	///< Flag mask to indicate that the tunable signal has current value equal to the default tuning value.
 	// clang-format on
 
 	/**

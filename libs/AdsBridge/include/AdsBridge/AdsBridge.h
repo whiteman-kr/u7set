@@ -39,10 +39,16 @@ extern "C"
 	 */
 	void AdsSetLogLevel(enum MatsLogLevel level);
 
-	/// @cond
+	/**
+	 * \brief Logs a message to the log handler.
+	 *
+	 * This function logs a message to the log handler with the specified log level.
+	 *
+	 * \param level The log level of the message.
+	 * \param message The message to log.
+	 */
 	void AdsTestLogHandler(enum MatsLogLevel level, const char* message);
-	/// @endcond
-
+	
 	/// @cond
 	bool AdsInitPrivate(int argc, char** argv, const char* equipmentId, bool isQtApplication);
 	/// @endcond

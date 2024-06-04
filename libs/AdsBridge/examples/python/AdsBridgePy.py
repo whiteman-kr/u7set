@@ -13,7 +13,7 @@ def logHandler(level, message):
 
 def main():
     ads = radiy.AdsBridge("AZPZ_WS1_ADSBRIDGE", False,
-                          "{PATH TO THE LIBARRAY}/AdsBridge.dll")
+                          "../../../AdsBridge.dll")
 
     ads.setLogHandler(logHandler)
     ads.setLogLevel(radiy.MatsLogLevel.Debug)

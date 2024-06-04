@@ -1,0 +1,7 @@
+MSVC NOTE: 
+
+Use lib.exe from the MSVC to create import library for dll:
+	
+	lib.exe /DEF:AdsBridge.def /OUT:AdsBridge.lib /MACHINE:X64
+
+AdsBridge.def is in the dirrectory with include files.

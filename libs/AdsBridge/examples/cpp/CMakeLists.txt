@@ -13,7 +13,21 @@ add_executable(AdsBridgeExample
 	src/main.cpp
 )
 
-target_link_directories(AdsBridgeExample PRIVATE ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+# These are the paths to the AdsBridge library used only for the standalone build.
+# This can happen if you build this example from the distribution package.
+#
+target_include_directories(AdsBridgeExample PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
+
+if (WIN32)
+	set(ADSBRIDGE_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../lib ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
+endif()	
+if (UNIX)
+	set(ADSBRIDGE_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
+endif()
+
+target_link_directories(AdsBridgeExample PRIVATE ${ADSBRIDGE_LIB_DIR})
 target_link_libraries(AdsBridgeExample PRIVATE AdsBridge)
 
-add_dependencies(AdsBridgeExample AdsBridge)
+if (TARGET AdsBridge)
+	add_dependencies(AdsBridgeExample AdsBridge)
+endif()

@@ -18,20 +18,14 @@ struct AppDataService
 	int port;
 };
 
-#if 0
 // EquipmentID of this part of the system.
-const std::string g_equipmentId = "TP_MCRWS00_ADSBRIDGE";
+const std::string g_equipmentId = "AZPZ_WS1_ADSBRIDGE";
 
 // Set to true if this is a Qt application and it runs message loop, otherwise message loop will be run in separate thread by AdsBridge.
 const bool g_isQtApplication = false;
 
 // The list of AppDataServices to connect to.
-const std::array g_appDataServices = {AppDataService{"TP_WS00_ADS", "127.0.0.1", 13321}, AppDataService{"TP_WS01_ADS", "127.0.0.2", 13322}};
-#else
-const std::string g_equipmentId = "AZPZ_WS1_ADSBRIDGE";
-const bool g_isQtApplication = false;
-const std::array g_appDataServices = {AppDataService{"AZPZ_WS1_ADS", "127.0.0.1", 13323}};
-#endif
+const std::array g_appDataServices = {AppDataService{"AZPZ_WS1_ADS", "127.0.0.1", 13323}/*, AppDataService{"AZPZ_WS2_ADS", "127.0.0.2", 13323}*/};
 
 // Exit program flag.
 //
@@ -157,25 +151,16 @@ void dumpAppSignalState(const MatsAppSignalState& state, std::string_view appSig
 
 	std::cout << "\thash: " << std::hex << state.hash << std::dec << "\n";
 
-	constexpr std::array flags = {std::make_pair(MATS_FLAG_VALID, "VALID"),
-								  std::make_pair(MATS_FLAG_STATE_AVAILABLE, "STATE_AVAILABLE"),
-								  std::make_pair(MATS_FLAG_SIMULATED, "SIMULATED"),
-								  std::make_pair(MATS_FLAG_BLOCKED, "BLOCKED"),
-								  std::make_pair(MATS_FLAG_MISMATCH, "MISMATCH"),
-								  std::make_pair(MATS_FLAG_ABOVE_HIGH_LIMIT, "ABOVE_HIGH_LIMIT"),
-								  std::make_pair(MATS_FLAG_BELOW_LOW_LIMIT, "BELOW_LOW_LIMIT"),
-								  std::make_pair(MATS_FLAG_SW_SIMULATED, "SW_SIMULATED"),
-								  std::make_pair(MATS_FLAG_TUNING_DEFAULT, "TUNING_DEFAULT")};
-
 	std::cout << "\tflags: ";
-	for (const auto& [flag, flagString] : flags)
-	{
-		if (state.flags & flag)
-		{
-			std::cout << flagString << " ";
-		}
-	}
-
+	std::cout << (state.flags & MATS_FLAG_VALID ? "VALID" : "NOT_VALID ");
+	std::cout << (state.flags & MATS_FLAG_STATE_AVAILABLE ? "" : "STATE_NOT_AVAILABLE ");
+	std::cout << (state.flags & MATS_FLAG_SIMULATED ? "SIMULATED " : "");
+	std::cout << (state.flags & MATS_FLAG_BLOCKED ? "BLOCKED " : "");
+	std::cout << (state.flags & MATS_FLAG_MISMATCH ? "MISMATCH " : "");
+	std::cout << (state.flags & MATS_FLAG_ABOVE_HIGH_LIMIT ? "ABOVE_HIGH_LIMIT " : "");
+	std::cout << (state.flags & MATS_FLAG_BELOW_LOW_LIMIT ? "BELOW_LOW_LIMIT " : "");
+	std::cout << (state.flags & MATS_FLAG_SW_SIMULATED ? "SW_SIMULATED " : "");
+	std::cout << (state.flags & MATS_FLAG_TUNING_DEFAULT ? "TUNING_DEFAULT " : "");
 	std::cout << "\n";
 
 	std::cout << "\tplantTime: " << state.plantTime << "\n";
@@ -199,7 +184,7 @@ int main(int argc, char* argv[])
 	if (initOk == false)
 	{
 		std::cerr << "Failed to initialize AdsBridge.\n";
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	// Adds connections does not start communication, it just adds connections to the list.
@@ -215,21 +200,21 @@ int main(int argc, char* argv[])
 	if (loadOk == false)
 	{
 		std::cerr << "Failed to load configuration.\n";
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	bool setProfileOk = AdsSetConfigurationProfile("Local");
 	if (setProfileOk == false)
 	{
 		std::cerr << "Failed to set configuration profile.\n";
-		return 1;
+		return EXIT_FAILURE;
 	}
 
 	bool initOk = AdsInit(argc, argv, AdsGetSoftwareId(), g_isQtApplication);
 	if (initOk == false)
 	{
 		std::cerr << "Failed to initialize AdsBridge.\n";
-		return 1;
+		return EXIT_FAILURE;
 	}
 #endif
 
@@ -276,20 +261,7 @@ int main(int argc, char* argv[])
 
 	bool getOk = AdsGetSignalList(signalHashes.get(), signalCount);
 
-	if (getOk == true)
-	{
-#if 0
-		// Print signal list.
-		//
-		std::cout << std::hex;
-		for (size_t i = 0; i < signalCount; ++i)
-		{
-			std::cout << "Signal: " << signalHashes[i] << "\n";
-		}
-		std::cout << std::dec;
-#endif
-	}
-	else
+	if (getOk == false)
 	{
 		signalHashes.reset();
 		signalParams.reset();
@@ -351,5 +323,5 @@ int main(int argc, char* argv[])
 	//
 	AdsShutdown();
 
-	return 0;
+	return EXIT_SUCCESS;
 }

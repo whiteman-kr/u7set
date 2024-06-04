@@ -34,7 +34,6 @@ void AdsSetLogLevel(MatsLogLevel level)
 
 void AdsTestLogHandler(enum MatsLogLevel level, const char* message)
 {
-	qDebug() << "AdsTestLogHandler(): BEFORE CALLBACK, message: " << message;
 	switch (level)
 	{
 	case LOG_LEVEL_DEBUG:
@@ -50,7 +49,6 @@ void AdsTestLogHandler(enum MatsLogLevel level, const char* message)
 		g_log.writeError("AdsTestLogHandler(): Unknown message level");
 	}
 
-	qDebug() << "AdsTestLogHandler(): AFTER CALLBACK";
 	return;
 }
 

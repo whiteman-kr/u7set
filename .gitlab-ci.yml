@@ -190,6 +190,7 @@ windows_build_job:
       - bin/release/scripthelp/search/*.*
       - bin/release/docs/*.pdf
       - bin/release/docs/Appendixes/*.pdf
+      - bin/release/dev/**/*
 
 
 windows_test_job:

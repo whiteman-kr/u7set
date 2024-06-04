@@ -42,6 +42,31 @@ target_include_directories(AdsBridge INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/inclu
 
 add_code_coverage_options(AdsBridge CODE_COVERAGE)
 
+add_custom_command(
+  TARGET AdsBridge
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dev/include"
+)
+
+# if this is a Windos build, copy the AdsBridge.lib to the output directory
+if(WIN32)
+	add_custom_command(
+		TARGET AdsBridge
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dev/lib
+	)
+	add_custom_command(
+		TARGET AdsBridge
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different AdsBridge.lib ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dev/lib/AdsBridge.lib
+	)
+	add_custom_command(
+		TARGET AdsBridge
+		POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/MsvcGenLib.txt ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dev/lib/
+	)
+endif()
+
 # Generate API documentation
 #
 
@@ -52,12 +77,13 @@ find_package(Doxygen)
 if(DOXYGEN_FOUND)
 	message(STATUS "Doxygen found: ${DOXYGEN_EXECUTABLE}")
 
-#	 add_custom_target(AdsBridgeDoc ALL
-#			COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_OUT_DIR=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/scripthelp ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/ScriptHelp.cfg
-#			COMMENT "Generating API documentation with Doxygen"
-#			WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-#			VERBATIM)
+	add_custom_target(BridgeApiDoc ALL
+		COMMAND ${CMAKE_COMMAND} -E env DOXYGEN_OUT_DIR=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dev/ ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_LIST_DIR}/doc/ApiDoxygen.cfg
+		COMMENT "Generating BridgeAPI documentation with Doxygen"
+		WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/doc
+		VERBATIM)
 
+	add_dependencies(AdsBridge BridgeApiDoc)
 endif()
 
 # --
