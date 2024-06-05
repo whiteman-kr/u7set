@@ -21,13 +21,13 @@ protected:
 	inline static std::vector<SoftwareEndpoint::AppDataService> s_appDataServices =
 	{
 		{
-			.equipmentId = "SYSTEMID_CLIENTTEST_WS01_ADS",
+			.equipmentId = "SYSTEMID_CLIENTTEST_WS01_ADS_RC1",
 			.shortenId = "WS01_ADS",
 			.address = {"127.0.0.1", 13323},
 			.realtimeAddress = {"127.0.0.1", 13324}
 		},
 		{
-			.equipmentId = "SYSTEMID_CLIENTTEST_WS02_ADS",
+			.equipmentId = "SYSTEMID_CLIENTTEST_WS02_ADS_RC1",
 			.shortenId = "WS02_ADS",
 			.address = {"127.0.0.1", 13326},
 			.realtimeAddress = {"127.0.0.1", 13327}}

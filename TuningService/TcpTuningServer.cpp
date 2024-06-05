@@ -52,10 +52,10 @@ namespace Tuning
 		m_service.clientIsDisconnected(connectedSoftwareInfo(), peerAddr().addressStr());
 	}
 
-	Tcp::Server* TcpTuningServer::getNewInstance()
+	Tcp::Server* TcpTuningServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 	{
 		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_tuningSources, m_logger);
-
+		newServer->setListenAddress(listenAddr);
 		return newServer;
 	}
 

@@ -43,12 +43,11 @@ CfgServer::CfgServer(const QString& buildFolder,
 {
 }
 
-CfgServer* CfgServer::getNewInstance()
+Tcp::Server* CfgServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 {
-	return new CfgServer(m_rootFolder,
-						 localSoftwareInfo(),
-						 m_sessionParams,
-						 log());
+	CfgServer* newServer =  new CfgServer(m_rootFolder, localSoftwareInfo(), m_sessionParams, log());
+	newServer->setListenAddress(listenAddr);
+	return newServer;
 }
 
 void CfgServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

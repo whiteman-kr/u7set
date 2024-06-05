@@ -866,9 +866,21 @@ namespace Tcp
 		m_connectedSocketDescriptor = connectedSocketDescriptor;
 	}
 
-	void Server::setSecurityLevel(E::SecurityLevel securityLevel)
+	void Server::setListenAddress(const ListenAddress& listenAddr)
 	{
-		m_securityLevel = securityLevel;
+		m_listenAddress = listenAddr;
+		m_securityLevel = listenAddr.securityLevel();
+	}
+
+	E::SecurityLevel Server::securityLevel() const
+	{
+		Q_ASSERT(m_securityLevel == m_listenAddress.securityLevel());
+		return m_securityLevel;
+	}
+
+	QString Server::softwareEquipmentID() const
+	{
+		return m_localSoftwareInfo.equipmentID();
 	}
 
 	void Server::onConnection()
@@ -1277,7 +1289,12 @@ namespace Tcp
 			Q_ASSERT(false);
 		}
 
-		m_state.localSoftwareInfo.serializeTo(reply.mutable_serversoftwareinfo());
+		SoftwareInfo localSwInfo = m_state.localSoftwareInfo;
+
+		localSwInfo.setEquipmentID(m_listenAddress.equipmentID());
+
+		localSwInfo.serializeTo(reply.mutable_serversoftwareinfo());
+
 		reply.set_setconnectionresult(static_cast<::google::protobuf::int32>(m_setConnResult));
 
 		sendReply(reply);
@@ -1406,13 +1423,13 @@ namespace Tcp
 
 			if (tcpServer->isListening() == false)
 			{
-				if (tcpServer->listen(listenAddr.hostAddr.address(), listenAddr.hostAddr.port()) == true)
+				if (tcpServer->listen(listenAddr.hostAddr().address(), listenAddr.hostAddr().port()) == true)
 				{
-					onStartListening(listenAddr.hostAddr, true, "");
+					onStartListening(listenAddr.hostAddr(), true, "");
 				}
 				else
 				{
-					onStartListening(listenAddr.hostAddr, false, tcpServer->errorString());
+					onStartListening(listenAddr.hostAddr(), false, tcpServer->errorString());
 				}
 			}
 		}
@@ -1422,9 +1439,8 @@ namespace Tcp
 	{
 		// accept new connection
 		//
-		Server* newServerInstance = m_serverInstance->getNewInstance();
+		Server* newServerInstance = m_serverInstance->getNewInstance(listenAddr);
 
-		newServerInstance->setSecurityLevel(listenAddr.securityLevel);
 		newServerInstance->initConnectionNo();
 		newServerInstance->setLogger(m_serverInstance->log());
 
@@ -1489,7 +1505,8 @@ namespace Tcp
 									E::SecurityLevel securityLevel,
 									Server* server,
 									CircularLoggerShared logger) :
-		SimpleThread(new ListenerWorker(std::vector<ListenAddress>{ListenAddress(listenAddress, securityLevel)}, server, logger))
+		SimpleThread(new ListenerWorker(std::vector<ListenAddress>{ListenAddress(server->softwareEquipmentID(), listenAddress, securityLevel)},
+										  server, logger))
 	{
 	}
 

@@ -50,7 +50,7 @@ public:
 			  const SessionParams& sessionParams,
 			  CircularLoggerShared logger);
 
-	virtual CfgServer* getNewInstance() override;
+	virtual Server* getNewInstance(const Tcp::ListenAddress& listenAddr) override;
 
 	virtual void processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 

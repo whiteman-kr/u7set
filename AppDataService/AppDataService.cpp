@@ -195,7 +195,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 					{
 						if (rcs.enable == true)
 						{
-							listenAddresses.emplace_back(rcs.clientRequestIP, rcs.securityLevel);
+							listenAddresses.emplace_back(rcs.equipmentID, rcs.clientRequestIP, rcs.securityLevel);
 						}
 					 });
 
@@ -256,7 +256,7 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 				  {
 						if (rcs.enable == true)
 						{
-							listenAddresses.emplace_back(rcs.rtTrendsRequestIP, rcs.securityLevel);
+							listenAddresses.emplace_back(rcs.equipmentID, rcs.rtTrendsRequestIP, rcs.securityLevel);
 						}
 				  });
 

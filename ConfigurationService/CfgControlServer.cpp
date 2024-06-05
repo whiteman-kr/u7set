@@ -27,12 +27,14 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 {
 }
 
-CfgControlServer* CfgControlServer::getNewInstance()
+Tcp::Server* CfgControlServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 {
-	return new CfgControlServer(localSoftwareInfo(), m_autoloadBuildPath, m_workDirectory,
-								m_rootFolder, m_sessionParams,
-								m_knownClients, m_checkClientHostname,
-								m_checkerWorker, log());
+	CfgControlServer* newServer = new CfgControlServer(localSoftwareInfo(), m_autoloadBuildPath, m_workDirectory,
+														m_rootFolder, m_sessionParams,
+														m_knownClients, m_checkClientHostname,
+														m_checkerWorker, log());
+	newServer->setListenAddress(listenAddr);
+	return newServer;
 }
 
 void CfgControlServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

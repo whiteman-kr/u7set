@@ -116,9 +116,11 @@ namespace RtTrends
 	{
 	}
 
-	Tcp::Server* Server::getNewInstance()
+	Tcp::Server* Server::getNewInstance(const Tcp::ListenAddress& listenAddr)
 	{
-		return new Server(m_appDataService);
+		RtTrends::Server* newServer = new Server(m_appDataService);
+		newServer->setListenAddress(listenAddr);
+		return newServer;
 	}
 
 	void Server::onServerThreadStarted()

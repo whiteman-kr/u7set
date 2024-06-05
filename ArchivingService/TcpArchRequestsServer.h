@@ -14,7 +14,7 @@ public:
 						  Archive* archive,
 						  CircularLoggerShared logger);
 
-	virtual Tcp::Server* getNewInstance() override;
+	virtual Tcp::Server* getNewInstance(const Tcp::ListenAddress& listenAddr) override;
 	virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 
 private:

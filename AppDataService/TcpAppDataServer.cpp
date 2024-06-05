@@ -103,10 +103,11 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 	}
 }
 
-Tcp::Server* TcpAppDataServer::getNewInstance()
+Tcp::Server* TcpAppDataServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 {
 	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo(),
 														m_appDataService);
+	newServer->setListenAddress(listenAddr);
 	return newServer;
 }
 

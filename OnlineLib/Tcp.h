@@ -239,14 +239,22 @@ namespace Tcp
 		mutable CircularLoggerShared m_log;
 	};
 
-	struct ListenAddress
+	class ListenAddress
 	{
-		HostAddressPort hostAddr;
-		E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
-
+	public:
 		ListenAddress() = default;
-		ListenAddress(const HostAddressPort& addr, E::SecurityLevel level) :
-			hostAddr(addr), securityLevel(level) {}
+		ListenAddress(const QString& eqID, const HostAddressPort& addr, E::SecurityLevel level) :
+			m_equipmentID(eqID), m_hostAddr(addr), m_securityLevel(level) {}
+
+		QString equipmentID() const { return m_equipmentID; }
+		HostAddressPort hostAddr() const { return m_hostAddr; }
+		E::SecurityLevel securityLevel() const { return m_securityLevel; }
+		bool isValid() const { return !m_equipmentID.isEmpty(); }
+
+	private:
+		QString m_equipmentID;			// Software or RequestController EquipmentID
+		HostAddressPort m_hostAddr;
+		E::SecurityLevel m_securityLevel = E::SecurityLevel::Basic;
 	};
 
 	// -------------------------------------------------------------------------------------
@@ -262,17 +270,23 @@ namespace Tcp
 	public:
 		Server(const SoftwareInfo& sotwareInfo,
 			   const QString& serverDescription);
+
 		virtual ~Server();
 
-		virtual Server* getNewInstance() = 0;	// ServerDerivedClass::getNewInstance() must be implemented as:
-												// { return new ServerDerivedClass(); }
+		// ServerDerivedClass::getNewInstance(const ListenAddress& listenAddr) must be implemented as:
+		// {
+		//		Tcp::Server* newServer = new ServerDerivedClass();
+		//		newServer->setListenAddress(listenAddr);
+		//		return newServer;
+		// }
+		virtual Server* getNewInstance(const ListenAddress& listenAddr) = 0;
 
 		void setConnectedSocketDescriptor(qintptr connectedSocketDescriptor);
-		void setSecurityLevel(E::SecurityLevel securityLevel);
+		void setListenAddress(const ListenAddress& listenAddr);
 
+		E::SecurityLevel securityLevel() const;
 		int id() const { return m_connNo; }
-
-		E::SecurityLevel securityLevel() const { return m_securityLevel; }
+		QString softwareEquipmentID() const;
 
 		virtual void onServerThreadStarted() {}
 		virtual void onServerThreadFinished() {}
@@ -335,6 +349,7 @@ namespace Tcp
 		static int m_staticConnNo;
 
 		qintptr m_connectedSocketDescriptor = 0;
+		ListenAddress m_listenAddress;
 
 		ServerState m_serverState = ServerState::WainigForRequest;
 

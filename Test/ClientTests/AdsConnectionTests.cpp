@@ -51,13 +51,13 @@ protected:
 	inline static std::vector<SoftwareEndpoint::AppDataService> AppDataServices =
 	{
 		{
-			.equipmentId = "SYSTEMID_CLIENTTEST_WS01_ADS",
+			.equipmentId = "SYSTEMID_CLIENTTEST_WS01_ADS_RC1",
 			.shortenId = "WS01_ADS",
 			.address = {"127.0.0.1", 13323},
 			.realtimeAddress = {"127.0.0.1", 13324}
 		},
 		{
-			.equipmentId = "SYSTEMID_CLIENTTEST_WS02_ADS",
+			.equipmentId = "SYSTEMID_CLIENTTEST_WS02_ADS_RC1",
 			.shortenId = "WS02_ADS",
 			.address = {"127.0.0.1", 13326},
 			.realtimeAddress = {"127.0.0.1", 13327}}
@@ -71,8 +71,8 @@ TEST_F(AdsConnectionTests, connectToAds)
 	MockAppSignalUpdater signalUpdater;
 	MockRecentAppSignals recentlyUsedSignals;
 
-	QString ads1{"SYSTEMID_CLIENTTEST_WS01_ADS"};
-	QString ads2{"SYSTEMID_CLIENTTEST_WS02_ADS"};
+	QString ads1{"SYSTEMID_CLIENTTEST_WS01_ADS_RC1"};
+	QString ads2{"SYSTEMID_CLIENTTEST_WS02_ADS_RC1"};
 
 	Hash dataServerHash1 = ::calcHash(ads1);
 	Hash dataServerHash2 = ::calcHash(ads2);

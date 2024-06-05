@@ -124,8 +124,8 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	EXPECT_EQ(configController.receivedSettings.schemaTags, "applogic;monitor;sometag");
 
 	ASSERT_EQ(configController.receivedSettings.appDataServices.size(), 2);
-	EXPECT_EQ(configController.receivedSettings.appDataServices[0].equipmentId, "SYSTEMID_CLIENTTEST_WS01_ADS");
-	EXPECT_EQ(configController.receivedSettings.appDataServices[1].equipmentId, "SYSTEMID_CLIENTTEST_WS02_ADS");
+	EXPECT_EQ(configController.receivedSettings.appDataServices[0].equipmentId, "SYSTEMID_CLIENTTEST_WS01_ADS_RC1");
+	EXPECT_EQ(configController.receivedSettings.appDataServices[1].equipmentId, "SYSTEMID_CLIENTTEST_WS02_ADS_RC1");
 
 	ASSERT_EQ(configController.receivedSettings.archiveServices.size(), 2);
 	EXPECT_EQ(configController.receivedSettings.archiveServices[0].equipmentId, "SYSTEMID_CLIENTTEST_WS01_ARCHS");

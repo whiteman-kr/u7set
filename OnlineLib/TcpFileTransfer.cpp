@@ -436,9 +436,11 @@ namespace Tcp
 		connect(&m_transmitionFilesTimer, &QTimer::timeout, [this]{ m_state.isActual = true; });
 	}
 
-	Server* FileServer::getNewInstance()
+	Server* FileServer::getNewInstance(const ListenAddress& listenAddr)
 	{
-		return new FileServer(m_rootFolder, localSoftwareInfo(), log(), socketDescription());
+		FileServer* newServer = new FileServer(m_rootFolder, localSoftwareInfo(), log(), socketDescription());
+		newServer->setListenAddress(listenAddr);
+		return newServer;
 	}
 
 	void FileServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

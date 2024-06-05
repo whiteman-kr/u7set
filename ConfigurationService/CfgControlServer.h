@@ -25,7 +25,7 @@ public:
 					 const CfgCheckerWorker& checkerWorker,
 					 std::shared_ptr<CircularLogger> logger);
 
-	virtual CfgControlServer* getNewInstance() override;
+	virtual Tcp::Server* getNewInstance(const Tcp::ListenAddress& listenAddr) override;
 
 	void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override final;
 

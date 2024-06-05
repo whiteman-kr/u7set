@@ -70,7 +70,7 @@ namespace RtTrends
 	public:
 		Server(AppDataServiceWorker& appDataService);
 
-		Tcp::Server* getNewInstance() override;
+		Tcp::Server* getNewInstance(const Tcp::ListenAddress& listenAddr) override;
 
 		void onServerThreadStarted() override;
 		void onServerThreadFinished() override;
