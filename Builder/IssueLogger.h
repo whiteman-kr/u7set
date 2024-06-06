@@ -168,6 +168,7 @@ namespace Builder
 		void errCFG3030(QString lmID, QString appDataServiceID);							// Several ethernet adapters of LM %1 are connected to AppDataService %2.
 		void wrnCFG3031(QString objectID, QString propertyName);							// Property %1.%2 should be set to the valid writable catalog of workstation.
 		void errCFG3032(QString objectID, QString propertyName, QString rcID);				// Property %1.%2 is linked to undefined RequestController ID %3.
+		void errCFG3033(QString softwareType, QString equipmentID);							// %1 %2 settings read error.
 
 		void errCFG3040(QString monitorId, QString tuningServiceId);						// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
 		void errCFG3041(QString name, QString value, QString message, QString signalId);	// Property %1 has wrong value (%2), required value is %3 in signal %4.

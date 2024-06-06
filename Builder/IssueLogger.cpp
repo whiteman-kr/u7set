@@ -1404,6 +1404,26 @@ namespace Builder
 				  .arg(rcID));
 	}
 
+	/// IssueCode: CFG3033
+	///
+	/// IssueType: Error
+	///
+	/// Title: %1 %2 settings read error.
+	///
+	/// Parameters:
+	///         %1 Software type
+	///         %2 Software EquipmentID
+	///
+	/// Description:
+	///			Check specified software settings.
+	///
+	void IssueLogger::errCFG3033(QString softwareType, QString equipmentID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3033,
+				  tr("%1 %2 settings read error.").arg(softwareType, equipmentID));
+	}
+
 	/// IssueCode: CFG3040
 	///
 	/// IssueType: Error

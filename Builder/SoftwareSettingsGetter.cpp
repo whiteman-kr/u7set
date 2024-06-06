@@ -349,7 +349,14 @@ bool SoftwareSettingsGetter::readSoftwareSettings(const Builder::Context* contex
 
 	hostname = ws->hostname();
 
-	return readSettings(context, software);
+	bool result = readSettings(context, software);
+
+	if (result == false)
+	{
+		context->m_log->errCFG3033(E::valueToString(software->softwareType()), software->equipmentIdTemplate());
+	}
+
+	return result;
 }
 
 bool SoftwareSettingsGetter::readFromDeviceByEquipmentID(const Builder::Context* context,
