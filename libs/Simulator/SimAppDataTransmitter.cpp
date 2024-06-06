@@ -58,7 +58,7 @@ namespace Sim
 									  const QByteArray& data,
 									  TimeStamp timeStamp)
 	{
-		trace_dt(portEquipmentId);
+		// trace_dt(portEquipmentId);
 
 		m_appDataQueueMutex.lock();
 

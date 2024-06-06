@@ -129,9 +129,9 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 
 	ASSERT_EQ(configController.receivedSettings.archiveServices.size(), 2);
 	EXPECT_EQ(configController.receivedSettings.archiveServices[0].equipmentId, "SYSTEMID_CLIENTTEST_WS01_ARCHS");
-	EXPECT_EQ(configController.receivedSettings.archiveServices[0].appDataServiceId, "SYSTEMID_CLIENTTEST_WS01_ADS");
+	EXPECT_EQ(configController.receivedSettings.archiveServices[0].appDataServiceId, "SYSTEMID_CLIENTTEST_WS01_ADS_RC1");
 	EXPECT_EQ(configController.receivedSettings.archiveServices[1].equipmentId, "SYSTEMID_CLIENTTEST_WS02_ARCHS");
-	EXPECT_EQ(configController.receivedSettings.archiveServices[1].appDataServiceId, "SYSTEMID_CLIENTTEST_WS02_ADS");
+	EXPECT_EQ(configController.receivedSettings.archiveServices[1].appDataServiceId, "SYSTEMID_CLIENTTEST_WS02_ADS_RC1");
 
 	EXPECT_EQ(configController.receivedSettings.tuningEnabled, true);
 	EXPECT_EQ(configController.receivedSettings.tuningLogin, true);

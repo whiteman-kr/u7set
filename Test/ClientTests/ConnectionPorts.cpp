@@ -52,14 +52,14 @@ std::pair<bool, QString> ConnectionPorts::init(Sim::Profile profile)
 		}
 
 		{
-			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS01_ADS");
+			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS01_ADS_RC1");
 			ads1.appDataReceivingPort = getProperty(props, "AppDataReceivingPort");
 			ads1.clientRequestPort = getProperty(props, "ClientRequestPort");
 			ads1.rtTrendsRequestPort = getProperty(props, "RtTrendsRequestPort");
 		}
 
 		{
-			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS02_ADS");
+			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS02_ADS_RC1");
 			ads2.appDataReceivingPort = getProperty(props, "AppDataReceivingPort");
 			ads2.clientRequestPort = getProperty(props, "ClientRequestPort");
 			ads2.rtTrendsRequestPort = getProperty(props, "RtTrendsRequestPort");
