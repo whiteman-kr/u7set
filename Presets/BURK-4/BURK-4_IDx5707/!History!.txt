@@ -1,0 +1,3 @@
+BUKR-4
+	06.06.2024	Version: 3	BURK-4_IDx5707_v3.u7devp	RPCT-3896: Added preset in new naming convension and family BUIM (created from BURK-4_v1.u7devp) 
+										   Added property ActuatorDescription
