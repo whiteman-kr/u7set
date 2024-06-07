@@ -2925,6 +2925,13 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		return false;
 	}
 
+	// Fix for clients to set AppDataServiceIDs to AppDataServiceIDs_RC1
+	//
+	if (device->presetRoot() == true)
+	{
+		updateFromPresetFixAppDataServiceIdsToRc1(*device);
+	}
+
 	// clang-format off
 	// Update from DbVersion 380 to 381.
 	//
@@ -3275,6 +3282,81 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	}
 
 	return true;
+}
+
+void EquipmentView::updateFromPresetFixAppDataServiceIdsToRc1(Hardware::DeviceObject& device)
+{
+	if (device.presetRoot() == false)
+	{
+		Q_ASSERT(device.presetRoot() == true);
+	}
+
+	// clang-format off
+	// 
+	// RPCT-3895
+	// 
+	// Update from DbVersion 418.
+	//
+	// Problem: Presets of Monitor (to v7), TestSuite (to v5), Metrology (to v1), Gateway Service (to v3) 
+	//			have compatibility breaking changes, here we try to mitigate it.
+	//			We have to update properties which link clients to AppDataService, before this properties had equipment id of AppDataService
+	//			Now they have to have equipment id of AppDataService.ReceiveControllers(_RC1...).	
+	// Solution: Find properties:
+	//				Monitor.AppDataServiceIDs, 
+	//				TestSuite.AppDataServiceIDs, 
+	//				Metrology.AppDataServiceID1/AppDataServiceID2, 
+	//				GatewayService.AppDataServiceIDs
+	//			Then add _RC1 to the end of the equipment id (if it is not already there) and set the value to the new property.
+	// clang-format on
+	//
+
+	if ((device.presetName() == QStringLiteral("MONITOR") && device.presetVersion() < 7) ||
+		(device.presetName() == QStringLiteral("TESTSUITE") && device.presetVersion() < 5) ||
+		(device.presetName() == QStringLiteral("METROLOGY") && device.presetVersion() < 1) ||
+		(device.presetName() == QStringLiteral("GWS") && device.presetVersion() < 3))
+	{
+		// Monitor can have AppDataServiceIDs (;) and AppDataServiceID1/AppDataServiceID2 (older versions)
+		// TestSuite - AppDataServiceIDs (;)
+		// Metrology - AppDataServiceID1, AppDataServiceID2
+		// GatewayService - AppDataServiceIDs (coma separated)
+		//
+		auto ads1 = device.propertyByCaption(QStringLiteral("AppDataServiceID1"));
+		auto ads2 = device.propertyByCaption(QStringLiteral("AppDataServiceID2"));
+		auto adses = device.propertyByCaption(QStringLiteral("AppDataServiceIDs"));
+
+		if (ads1 != nullptr && ads1->value().toString().trimmed().endsWith("_RC1") == false)
+		{
+			ads1->setValue(ads1->value().toString().trimmed()  + "_RC1");
+		}
+
+		if (ads2 != nullptr && ads2->value().toString().trimmed().endsWith("_RC1") == false)
+		{
+			ads2->setValue(ads2->value().toString().trimmed() + "_RC1");
+		}
+
+		// Monitor, TestSuite have ";" as a separator
+		// GatewayService has "," as separator.
+		//
+		if (adses != nullptr)
+		{
+			QChar separator = device.presetName() == QStringLiteral("GWS") ? QChar(',') : QChar(';');
+
+			QStringList adsList = adses->value().toString().split(separator, Qt::SkipEmptyParts);
+			for (QString& ads : adsList)
+			{
+				if (ads.endsWith("_RC1") == false)
+				{
+					ads += "_RC1";
+				}
+			}
+
+			adses->setValue(adsList.join(separator));
+		}
+
+		return;
+	}
+
+	return;
 }
 
 void EquipmentView::showEvent(QShowEvent* event)

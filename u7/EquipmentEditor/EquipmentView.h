@@ -120,6 +120,8 @@ private:
 								std::vector<AddDeviceUpdatePreset>* addDeviceList,
 								std::vector<const Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals);
 
+	void updateFromPresetFixAppDataServiceIdsToRc1(Hardware::DeviceObject& device);
+
 	// Events
 	//
 protected:

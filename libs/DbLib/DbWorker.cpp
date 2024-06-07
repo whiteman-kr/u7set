@@ -445,6 +445,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0415.sql", "Upgrade to version 415, TestSuite preset update, add FontBold and Section layout to report template"},
 	{":/DatabaseUpgrade/Upgrade0416.sql", "Upgrade to version 416, Updated preset Monitor to version 6, set default value property SchemaTags to: AppLogic Monitor"},
 	{":/DatabaseUpgrade/Upgrade0417.sql", "Upgrade to version 417, Added Request Controllers to AppDataService preset"},
+	{":/DatabaseUpgrade/Upgrade0418.sql", "Upgrade to version 418, Update preset version for Monitor, Metrology, TestSuite, GatewayService (first time), this update aims to update property AppDataServiceIDs to add Receive Controller (_RC1)"},
 };
 
 int DbWorker::counter = 0;
