@@ -3326,12 +3326,34 @@ void EquipmentView::updateFromPresetFixAppDataServiceIdsToRc1(Hardware::DeviceOb
 
 		if (ads1 != nullptr && ads1->value().toString().trimmed().endsWith("_RC1") == false)
 		{
-			ads1->setValue(ads1->value().toString().trimmed()  + "_RC1");
+			QString value = ads1->value().toString().trimmed();
+
+			if (value.isEmpty() == false &&
+				value.endsWith("_RC1") == false && 
+				value.endsWith("_RC2") == false && 
+				value.endsWith("_RC3") == false && 
+				value.endsWith("_RC4") == false)
+			{
+				value += "_RC1";
+			}
+
+			ads1->setValue(value);
 		}
 
 		if (ads2 != nullptr && ads2->value().toString().trimmed().endsWith("_RC1") == false)
 		{
-			ads2->setValue(ads2->value().toString().trimmed() + "_RC1");
+			QString value = ads2->value().toString().trimmed();
+
+			if (value.isEmpty() == false &&
+				value.endsWith("_RC1") == false && 
+				value.endsWith("_RC2") == false && 
+				value.endsWith("_RC3") == false && 
+				value.endsWith("_RC4") == false)
+			{
+				value += "_RC1";
+			}
+
+			ads2->setValue(value);
 		}
 
 		// Monitor, TestSuite have ";" as a separator
@@ -3339,18 +3361,27 @@ void EquipmentView::updateFromPresetFixAppDataServiceIdsToRc1(Hardware::DeviceOb
 		//
 		if (adses != nullptr)
 		{
-			QChar separator = device.presetName() == QStringLiteral("GWS") ? QChar(',') : QChar(';');
+			QString propertyValue = adses->value().toString().trimmed();
 
-			QStringList adsList = adses->value().toString().split(separator, Qt::SkipEmptyParts);
+			propertyValue.replace(QChar(QChar::Space), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::LineFeed), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::CarriageReturn), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::Tabulation), Separator::SEMICOLON);
+			propertyValue.replace(Separator::COMMA, Separator::SEMICOLON);
+
+			QStringList adsList = propertyValue.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 			for (QString& ads : adsList)
 			{
-				if (ads.endsWith("_RC1") == false)
+				if (ads.endsWith("_RC1") == false && 
+					ads.endsWith("_RC2") == false && 
+					ads.endsWith("_RC3") == false && 
+					ads.endsWith("_RC4") == false)
 				{
 					ads += "_RC1";
 				}
 			}
 
-			adses->setValue(adsList.join(separator));
+			adses->setValue(adsList.join(Separator::SEMICOLON));
 		}
 
 		return;
