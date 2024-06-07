@@ -31,10 +31,10 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 	//
 	getSchemasDetails();
 
-	// Get file TUNING_FILTERS
+	// Get file TUNING_UI
 	//
-	QByteArray filterData;
-	getFileBlockedById(CfgFileId::TUNING_FILTERS, &filterData, nullptr);
+	QByteArray uiData;
+	getFileBlockedById(CfgFileId::TUNING_UI, &uiData, nullptr);
 
 	// Get file TUNING_SIGNALS
 	//
@@ -121,7 +121,7 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 	if (uiFilesUpdated == true || apperanceUpdated == true || serversUpdated == true)
 	{
 		emit signalsArrived(signalData);
-		emit filtersArrived(filterData);
+		emit uiArrived(uiData);
 		emit configurationArrived(readConfig);
 	}
 

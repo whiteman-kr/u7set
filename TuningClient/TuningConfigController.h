@@ -47,7 +47,7 @@ protected:
 	//
 signals:
 	void signalsArrived(QByteArray data);
-	void filtersArrived(QByteArray data);
+	void uiArrived(QByteArray data);
 
 	void configurationArrived(TuningClientConfigSettings configuration);
 

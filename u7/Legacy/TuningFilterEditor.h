@@ -1,16 +1,16 @@
 #pragma once
 
-#include "TuningFilter.h"
-#include "TuningModel.h"
+#include "../../lib/Tuning/TuningFilter.h"
 #include <UiLib/PropertyEditor.h>
 
-class ChooseTuningSignalsWidget : public QWidget
+
+class ViewTuningSignalsWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
 
-	ChooseTuningSignalsWidget(ClientLib::TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent);
+	ViewTuningSignalsWidget(ClientLib::TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent);
 
 	enum class BaseFilterType
 	{
@@ -51,15 +51,8 @@ public:
 
 	void setFilter(std::shared_ptr<TuningFilter> selectedFilter);
 
-signals:
-	void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok); 	// Qt::DirectConnection!
-
 private:
-
-	void fillBaseSignalsList();
-
 	void fillFilterValuesTree();
-
 	void setFilterValueItemText(QTreeWidgetItem* item, const TuningFilterSignal& value);
 
 private:
@@ -68,70 +61,16 @@ private:
 
 	std::shared_ptr<TuningFilter> m_filter;
 
-	// Left side
-
-	TuningModel* m_baseModel = nullptr;
-	QTableView* m_baseSignalsTable = nullptr;
-
-	QComboBox* m_baseSignalTypeCombo = nullptr;
-	QComboBox* m_baseFilterTypeCombo = nullptr;
-	QComboBox* m_baseFilterValueCombo = nullptr;
-	QLineEdit* m_baseFilterText = nullptr;
-	QPushButton* m_baseApplyFilter = nullptr;
-
-	int m_sortColumn = 0;
-	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
-
-	// Middle
-
-	QPushButton* m_addValue = nullptr;
-	QPushButton* m_removeValue = nullptr;
-
 	// Right side
 
 	QTreeWidget* m_filterValuesTree = nullptr;
-
-	QPushButton* m_setValue = nullptr;
-	QPushButton* m_setCurrent = nullptr;
 	QPushButton* m_exportValues = nullptr;
-	QPushButton* m_importValues = nullptr;
 
 	//
 	bool m_readOnly = false;
 
 private slots:
-
-	void baseSortIndicatorChanged(int column, Qt::SortOrder order);
-
-	void on_m_baseSignalsTableSelectionChanged(const QItemSelection &, const QItemSelection &);
-
-	void on_m_baseApplyFilter_clicked();
-
-	void on_m_baseFilterTypeCombo_currentIndexChanged(int index);
-
-	void on_m_baseFilterValueCombo_currentIndexChanged(int index);
-
-	void on_m_baseFilterText_Changed();
-
-	void on_m_baseSignalTypeCombo_currentIndexChanged(int index);
-
-	void on_m_baseSignalsTable_doubleClicked(const QModelIndex& index);
-
-	void on_m_filterValuesTree_itemSelectionChanged();
-
-	void on_m_filterValuesTree_doubleClicked(const QModelIndex& index);
-
-	void on_m_add_clicked();
-
-	void on_m_remove_clicked();
-
-	void on_m_setValue_clicked();
-
-	void on_m_setCurrent_clicked();
-
 	void on_m_exportValues_clicked();
-
-	void on_m_importValues_clicked();
 };
 
 class TuningFilterEditor : public QWidget
@@ -218,7 +157,7 @@ private:
 	QTreeWidget* m_presetsTree = nullptr;
 	ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
 
-	ChooseTuningSignalsWidget* m_chooseTuningSignalsWidget = nullptr;
+	ViewTuningSignalsWidget* m_viewTuningSignalsWidget = nullptr;
 
 	//
 
@@ -269,3 +208,32 @@ private:
 	TuningFilter::Source m_source = TuningFilter::Source::User;
 };
 
+//
+// IdeTuningFiltersEditor
+//
+class IdeTuningFiltersEditor : public ExtWidgets::PropertyTextEditor
+{
+public:
+	explicit IdeTuningFiltersEditor(DbController* dbController, QWidget* parent);
+    virtual ~IdeTuningFiltersEditor();
+
+	QString text() const override;
+	void setText(const QString& text) override;
+
+	bool readOnly() const override;
+    void setReadOnly(bool value) override;
+
+	bool externalOkCancelButtons() const override;
+
+private:
+	bool isModified() const override;
+
+private:
+    TuningFilterEditor* m_tuningFilterEditor = nullptr;
+
+	ILogFileStub logFileStub;
+    ClientLib::TuningSignalManager m_signals;
+	TuningFilterStorage m_filters;
+
+	DbController* m_dbController = nullptr;
+};

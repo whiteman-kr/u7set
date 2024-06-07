@@ -10,6 +10,7 @@
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningUserManager.h>
 #include <ClientLib/TuningLog.h>
+#include <TuningLib/TuningUiItem.h>
 #include <SchemaClientLib/DialogTcpStatistics.h>
 #include "../UtilsLib/LogFile.h"
 
@@ -47,14 +48,13 @@ private:
 
 private slots:
 	void slot_configurationArrived(TuningClientConfigSettings configuration);
-	void slot_projectFiltersUpdated(QByteArray data);
+	void slot_uiUpdated(QByteArray data);
 	void slot_signalsUpdated(QByteArray data);
 
 	void slot_configurationError(QString error);
 
 public slots:
 	void exit();
-	void runPresetEditor();
 	void showSettings();
 	void showTuningSources();
 	void showStatistics();
@@ -72,8 +72,6 @@ private:
 	virtual void keyPressEvent(QKeyEvent* event) override;
 	virtual void closeEvent(QCloseEvent *event) override;
 	virtual void timerEvent(QTimerEvent* event) override;
-
-    void checkAndRemoveFilterSignals();
 
 	void createWorkspace();
 	void deleteWorkspace();
@@ -105,6 +103,7 @@ private:
 	TuningConfigController m_configController;
 	ClientLib::TuningSignalManager m_tuningSignalManager;
 	TuningClientFilterStorage m_filterStorage;
+	TuningLib::TuningUiStorage m_tuningUi;
 	ClientLib::TuningUserManager m_userManager;
 
 	// Connections
@@ -134,7 +133,6 @@ private:
 	QTabWidget* m_tabWidget = nullptr;
 
 	QAction* m_pExitAction = nullptr;
-	QAction* m_pPresetEditorAction = nullptr;
 	QAction* m_pAppSignalListsAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pTuningSourcesAction = nullptr;

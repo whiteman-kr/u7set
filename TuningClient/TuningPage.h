@@ -2,7 +2,7 @@
 #define TUNINGPAGE_H
 
 #include <ClientLib/TuningSignalManager.h>
-#include "../lib/Tuning/TuningModel.h"
+#include "TuningModel.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningConfigController.h"
 #include "TuningClientFilterStorage.h"

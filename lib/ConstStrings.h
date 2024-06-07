@@ -459,7 +459,7 @@ namespace CfgFileId
 	inline const QString TUNING_SOURCES("TUNING_SOURCES");
 	inline const QString TUNING_SIGNALS("TUNING_SIGNALS");
 	inline const QString TUNING_SCHEMAS_DETAILS("TUNING_SCHEMAS_DETAILS");
-	inline const QString TUNING_FILTERS("TUNING_FILTERS");
+	inline const QString TUNING_UI("TUNING_UI");
 	inline const QString TUNING_GLOBALSCRIPT("TUNING_GLOBALSCRIPT");
 
 	inline const QString CLIENT_BEHAVIOR("CLIENT_BEHAVIOR");

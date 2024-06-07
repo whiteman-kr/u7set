@@ -4,6 +4,7 @@
 #include "../Builder/ConnectionStorage.h"
 #include "../ProjectDefaults.h"
 
+#include <VFrame30/SchemaDetails.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemConst.h>
 #include <VFrame30/SchemaItemDiagValue.h>

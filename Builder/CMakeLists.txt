@@ -30,8 +30,6 @@ qt_add_library(${TARGET} STATIC
 	../lib/ConstStrings.h
 	../lib/LogicModuleSet.cpp
 	../lib/LogicModuleSet.h
-	../lib/Tuning/TuningFilter.cpp
-	../lib/Tuning/TuningFilter.h
 	../lib/TuningDataStorage.cpp
 	../lib/TuningDataStorage.h
 	../Metrology/MetrologyConnection.cpp
@@ -229,7 +227,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib Behavior Protobuf UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 Simulator ReportLib AppSignalLists)
+target_link_libraries(${TARGET} PUBLIC CommonLib Behavior Protobuf UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 Simulator ReportLib AppSignalLists TuningLib)
 
 target_compile_definitions(${TARGET} PRIVATE IS_BUILDER)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

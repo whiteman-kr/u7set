@@ -11,8 +11,6 @@ namespace VFrame30
 	class SchemaDetails;
 }
 
-const int MAX_VALUES_COLUMN_COUNT = 6;
-
 struct TuningCounters
 {
 	int errorCounter = 0;

@@ -6,6 +6,7 @@
 #include <QClipboard>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
+#include <TuningLib/TuningUiConstants.h>
 
 namespace TuningTags
 {
@@ -545,9 +546,9 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 			{
 				m_valueColumnsCount = 0;
 			}
-			if (m_valueColumnsCount > MAX_VALUES_COLUMN_COUNT)
+			if (m_valueColumnsCount > TuningLib::MaxValuesColumnCount)
 			{
-				m_valueColumnsCount = MAX_VALUES_COLUMN_COUNT;
+				m_valueColumnsCount = TuningLib::MaxValuesColumnCount;
 			}
 
 			m_valueColumnsAppSignalIdSuffixes.resize(m_valueColumnsCount);
@@ -1542,9 +1543,9 @@ void TuningFilter::setValuesColumnCount(int value)
 	{
 		value = 0;
 	}
-	if (value > MAX_VALUES_COLUMN_COUNT)
+	if (value > TuningLib::MaxValuesColumnCount)
 	{
-		value = MAX_VALUES_COLUMN_COUNT;
+		value = TuningLib::MaxValuesColumnCount;
 	}
 
 	m_valueColumnsCount = value;
@@ -1876,7 +1877,7 @@ void TuningFilter::updateOptionalProperties()
 			m_valueColumnsAppSignalIdSuffixes.resize(valuesColumnCount());
 		}
 
-		for (int i = 0; i < MAX_VALUES_COLUMN_COUNT; i++)
+		for (int i = 0; i < TuningLib::MaxValuesColumnCount; i++)
 		{
 			QString propName = tr(TuningTags::prop_ValueColumn1AppSignalSuffixes).arg(i);
 

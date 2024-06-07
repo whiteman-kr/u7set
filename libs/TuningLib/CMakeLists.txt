@@ -13,6 +13,7 @@ find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools PrintSupport Xml)
 set(TARGET TuningLib)
 
 qt_add_library(${TARGET} STATIC
+	./include/TuningLib/TuningUiConstants.h
 	./include/TuningLib/TuningUiItem.h
 	TuningUiItem.cpp
 )

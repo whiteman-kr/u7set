@@ -3,9 +3,9 @@
 
 #include "SoftwareCfgGenerator.h"
 
-#include "../lib/Tuning/TuningFilter.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
+#include <TuningLib/TuningUiItem.h>
 #include <ClientLib/TuningSignalManager.h>
 
 namespace Builder
@@ -24,17 +24,15 @@ namespace Builder
 
 		bool createTuningEquipmentList(QStringList* equipmentList);
 		
-		bool createObjectFilters(const ISignalManager& tuningSignalManager, const QStringList& equipmentList);
-		bool createEquipmentAndSchemaFilters(const QStringList& equipmentList,const ISignalManager& tuningSignalManager);
-		void createCounterFiltersFromTemplates();
+		//bool createObjectFilters(const ISignalManager& tuningSignalManager, const QStringList& equipmentList);
+		//bool createEquipmentAndSchemaFilters(const QStringList& equipmentList,const ISignalManager& tuningSignalManager);
+		//void createCounterFiltersFromTemplates();
 
 		
-		bool writeObjectFilters();
+		bool writeTuningUi();
 		bool writeTuningSchemas();
 		bool writeGlobalScript();
 		bool writeTuningClientBehavior();
-
-		TuningFilterStorage m_tuningFilterStorage;
 	};
 }
 

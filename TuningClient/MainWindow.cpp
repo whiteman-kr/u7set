@@ -1,8 +1,6 @@
 #include "Main.h"
 #include "MainWindow.h"
 
-#include "DialogFilterEditor.h"
-
 #include "../UtilsLib/LogFile.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../lib/Tuning/TuningFilter.h"
@@ -87,8 +85,8 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	// Global connections
 
-	connect(&m_configController, &TuningConfigController::filtersArrived, this, &MainWindow::slot_projectFiltersUpdated, Qt::DirectConnection);
 	connect(&m_configController, &TuningConfigController::signalsArrived, this, &MainWindow::slot_signalsUpdated, Qt::DirectConnection);
+	connect(&m_configController, &TuningConfigController::uiArrived, this, &MainWindow::slot_uiUpdated, Qt::DirectConnection);
 	connect(&m_configController, &TuningConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
 	connect(&m_configController, &TuningConfigController::error, this, &MainWindow::slot_configurationError);
 
@@ -102,13 +100,14 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	QString errorCode;
 
+	/*
 	if (m_filterStorage.load(TuningClientAppSettings::instance().userFiltersFile(), &errorCode) == false)
 	{
 		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
 
 		m_logFile.writeError(msg);
 		QMessageBox::critical(this, tr("Error"), msg);
-	}
+	}*/
 
 	loadSignalLists();
 
@@ -169,13 +168,6 @@ void MainWindow::createActions()
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MainWindow::exit);
 
-
-	m_pPresetEditorAction = new QAction(tr("Filter Editor..."), this);
-	m_pPresetEditorAction->setStatusTip(tr("Edit user filters"));
-	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
-	m_pPresetEditorAction->setEnabled(true);
-	connect(m_pPresetEditorAction, &QAction::triggered, this, &MainWindow::runPresetEditor);
-
 	m_pAppSignalListsAction = new QAction(tr("Tuning Signal Lists..."), this);
 	m_pAppSignalListsAction->setStatusTip(tr("Edit tuning signal Lists"));
 	m_pAppSignalListsAction->setEnabled(true);
@@ -234,7 +226,6 @@ void MainWindow::createMenu()
 	// Tools
 	//
 	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
-	pServiceMenu->addAction(m_pPresetEditorAction);
 	pServiceMenu->addAction(m_pAppSignalListsAction);
 	pServiceMenu->addSeparator();
 	pServiceMenu->addAction(m_pSettingsAction);
@@ -434,7 +425,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void MainWindow::checkAndRemoveFilterSignals()
+/*void MainWindow::checkAndRemoveFilterSignals()
 {
 	// Find and possibly remove non-existing signals from the list
 
@@ -457,7 +448,7 @@ void MainWindow::checkAndRemoveFilterSignals()
 			QMessageBox::critical(this, tr("Error"), errorMsg);
 		}
 	}
-}
+}*/
 
 void MainWindow::createWorkspace()
 {
@@ -487,12 +478,12 @@ void MainWindow::createWorkspace()
 
     // Count user filters signals hashes
 
-    m_filterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager,
+    /*m_filterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager,
                                                          m_tuningSignalManager.signalHashes(),
                                                          m_filterStorage.root().get(),
                                                          TuningFilter::Source::User);
 
-    checkAndRemoveFilterSignals();
+    checkAndRemoveFilterSignals();*/
 
 	// Create new workspaces
 
@@ -1043,7 +1034,7 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 								   configuration.clientSettings.loginPerOperation,
 								   configuration.clientSettings.tuningSessionTimeout,
 								   configuration.matsUsers.users());
-	
+
 	// Update AppSignalLists: remove all lists with Ide tag and add loaded ones
 	//
 	m_appSignalListSet.remove(AppSignalLists::AppSignalList::tagIde);
@@ -1138,18 +1129,12 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 	return;
 }
 
-void MainWindow::slot_projectFiltersUpdated(QByteArray data)
+void MainWindow::slot_uiUpdated(QByteArray data)
 {
 	QString errorStr;
-
-
-	m_filterStorage.removeFilters(TuningFilter::Source::Project);
-	m_filterStorage.removeFilters(TuningFilter::Source::Schema);
-	m_filterStorage.removeFilters(TuningFilter::Source::Equipment);
-
-	if (m_filterStorage.load(data, &errorStr) == false)
+	if (m_tuningUi.load(data, &errorStr) == false) 
 	{
-		QString completeErrorMessage = QObject::tr("Object Filters file loading error: %1").arg(errorStr);
+		QString completeErrorMessage = QObject::tr("UI configuration file loading error: %1").arg(errorStr);
 		m_logFile.writeError(completeErrorMessage);
 	}
 }
@@ -1178,6 +1163,7 @@ void MainWindow::exit()
 	close();
 }
 
+/*
 void MainWindow::runPresetEditor()
 {
 	if (m_userManager.login(this) == false)
@@ -1232,7 +1218,7 @@ void MainWindow::runPresetEditor()
 
 		slot_userFiltersChanged();
 	}
-}
+}*/
 
 void MainWindow::showSettings()
 {
@@ -1322,12 +1308,17 @@ void MainWindow::showTuningUserManual()
 
 void MainWindow::showAppSignalListEditor()
 {
+	if (m_userManager.login(this) == false)
+	{
+		return;
+	}
+
 	AppSignalLists::DialogSignalListEditor::showDialog(m_appSignalListSet, m_tuningSignalManager, this);
 }
 
 void MainWindow::slot_userFiltersChanged()
 {
-    checkAndRemoveFilterSignals();
+    //checkAndRemoveFilterSignals();
 
 	if (m_tuningWorkspace != nullptr)
 	{

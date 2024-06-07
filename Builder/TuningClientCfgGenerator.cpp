@@ -88,8 +88,8 @@ namespace Builder
 
 			// --
 			//
-			result &= createObjectFilters(tuningSignalProvider, tuningSources);
-			result &= writeObjectFilters();
+			//result &= createObjectFilters(tuningSignalProvider, tuningSources);
+			result &= writeTuningUi();
 
 			// Write AppSignalLists
 			//
@@ -110,7 +110,7 @@ namespace Builder
 
 		return result;
 	}
-
+	
 	bool TuningClientCfgGenerator::createTuningEquipmentList(QStringList* equipmentList)
 	{
 		if (equipmentList == nullptr)
@@ -175,7 +175,7 @@ namespace Builder
 
 		return result;
 	}
-
+	/*
 	bool TuningClientCfgGenerator::createObjectFilters(const ISignalManager& tuningSignalManager,
 													   const QStringList& equipmentList)
 	{
@@ -206,7 +206,7 @@ namespace Builder
 			m_log->errEQP6107("Filters", m_software->equipmentId());
 			return false;
 		}
-
+		
 		// Check all filters for non-existing signals
 
 		std::vector<std::pair<QString, QString>> notFoundSignalsAndFilters;
@@ -245,9 +245,9 @@ namespace Builder
 															 TuningFilter::Source::All);
 
 		return true;
-	}
+	}*/
 
-
+	/*
 	bool TuningClientCfgGenerator::createEquipmentAndSchemaFilters(const QStringList& equipmentList,
 														  const ISignalManager& tuningSignalManager)
 	{
@@ -379,26 +379,50 @@ namespace Builder
 				}
 			}
 		}
-	}
+	}*/
 
-	bool TuningClientCfgGenerator::writeObjectFilters()
+	bool TuningClientCfgGenerator::writeTuningUi()
 	{
-		// Save filters to file
+		TuningLib::TuningUiStorage tuningUiStorage;
+		
+		bool ok = true;
+
+		QString uiConfiguration = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "UiConfiguration", &ok).trimmed();
+		if (ok == false)
+		{
+			return false;
+		}
+
+		if (uiConfiguration.isEmpty() == true)
+		{
+			m_log->errCFG3022(m_software->equipmentId(), "UiConfiguration");
+			return false;
+		}
+
+		// Load project ui
+
+		QString errorCode;
+
+		ok = tuningUiStorage.load(uiConfiguration.toUtf8(), &errorCode);
+		if (ok == false)
+		{
+			m_log->errEQP6107("UiConfiguration", m_software->equipmentId());
+			return false;
+		}
 
 		QByteArray data;
 
-		bool ok = m_tuningFilterStorage.save(data);
+		ok = tuningUiStorage.save(data);
 		if (ok == false)
 		{
 			assert(false);
 			return false;
 		}
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CfgFileId::TUNING_FILTERS, "",  data);
-
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningUi.xml", CfgFileId::TUNING_UI, "",  data);
 		if (buildFile == nullptr)
 		{
-			m_log->errCMN0012("ObjectFilters.xml");
+			m_log->errCMN0012("TuningUi.xml");
 			return false;
 		}
 

@@ -139,7 +139,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return QBrush();
@@ -184,7 +184,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 	const TuningModelHashSet& hashes = hashSetByIndex(row);
 
-	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	for (int c = 0; c < TuningLib::MaxValuesColumnCount; c++)
 	{
 		const Hash hash = hashes.hash[c];
 
@@ -267,7 +267,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return QBrush();
@@ -306,7 +306,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 	const TuningModelHashSet& hashes = hashSetByIndex(row);
 
-	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	for (int c = 0; c < TuningLib::MaxValuesColumnCount; c++)
 	{
 		const Hash hash = hashes.hash[c];
 
@@ -383,7 +383,7 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 		}
 	}
 
-	if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+	if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 	{
 		assert(false);
 		return f;
@@ -430,7 +430,7 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 		columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return QVariant();
@@ -470,7 +470,7 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 		columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return QVariant();
@@ -542,7 +542,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return false;
@@ -694,7 +694,7 @@ bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEven
 	int	columnType = static_cast<int>(m_model->columnType(columnIndex));
 
 	int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-	if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+	if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 	{
 		return false;
 	}
@@ -772,7 +772,7 @@ TuningPageColumnsWidth::TuningPageColumnsWidth()
 	m_defaultWidthMap[TuningModelColumns::Units] = 70;
 	m_defaultWidthMap[TuningModelColumns::Type] = 70;
 
-	for (int i = 0; i < MAX_VALUES_COLUMN_COUNT; i++)
+	for (int i = 0; i < TuningLib::MaxValuesColumnCount; i++)
 	{
 		int valueColumn = static_cast<int>(TuningModelColumns::ValueFirst) + i;
 		m_defaultWidthMap[static_cast<TuningModelColumns>(valueColumn)] = 70;

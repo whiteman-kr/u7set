@@ -1,3 +1,4 @@
+#include "include/TuningLib/TuningUiConstants.h"
 #include "include/TuningLib/TuningUiItem.h"
 
 namespace TuningLib
@@ -7,7 +8,8 @@ namespace TuningLib
 		static inline const QString tag_True = "true";
 		static inline const QString tag_False = "false";
 
-		static inline const QString tag_Tree = "Tree";
+		static inline const QString tag_Generic = "Generic";
+
 		static inline const QString tag_Tab = "Tab";
 		static inline const QString tag_Button = "Button";
 		static inline const QString tag_Counter = "Counter";
@@ -17,7 +19,6 @@ namespace TuningLib
 		static inline const QString tag_Analog = "Analog";
 		static inline const QString tag_Discrete = "Discrete";
 
-		static inline const QString tag_Generic = "Generic";
 		static inline const QString tag_FiltersSwitch = "FiltersSwitch";
 
 		static inline const QString tag_StatusBar = "StatusBar";
@@ -27,19 +28,12 @@ namespace TuningLib
 
 		// Property names
 
+		static inline const QLatin1String prop_Uuid = QLatin1String("Uuid");
 		static inline const QLatin1String prop_Caption = QLatin1String("Caption");
-		static inline const QLatin1String prop_SignalType = QLatin1String("SignalType");
-		static inline const QLatin1String prop_Source = QLatin1String("Source");
 		static inline const QLatin1String prop_ID = QLatin1String("ID");
-		static inline const QLatin1String prop_CustomID = QLatin1String("CustomID");
 		static inline const QLatin1String prop_Tags = QLatin1String("Tags");
 		static inline const QLatin1String prop_Filters = QLatin1String("Filters");
-		static inline const QLatin1String prop_StartSchemaId = QLatin1String("StartSchemaId");
 		static inline const QLatin1String prop_InterfaceType = QLatin1String("InterfaceType");
-		static inline const QLatin1String prop_CustomAppSignalMasks = QLatin1String("CustomAppSignalMasks");
-		static inline const QLatin1String prop_AppSignalMasks = QLatin1String("AppSignalMasks");
-		static inline const QLatin1String prop_EquipmentIDMasks = QLatin1String("EquipmentIDMasks");
-		static inline const QLatin1String prop_AppSignalTags = QLatin1String("AppSignalTags");
 
 		static inline const QLatin1String prop_UseColors = QLatin1String("UseColors");
 
@@ -75,13 +69,15 @@ namespace TuningLib
 
 	TuningUiItem::TuningUiItem()
 	{
+		ADD_PROPERTY_GETTER(QString, TuningUiTags::prop_Uuid, true, TuningUiItem::uuidString);
+
 		ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Caption, true, TuningUiItem::caption, TuningUiItem::setCaption);
 
-		ADD_PROPERTY_GETTER(QString, TuningUiTags::prop_ID, true, TuningUiItem::ID);
-
-		ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_CustomID, true, TuningUiItem::customID, TuningUiItem::setCustomID);
+		ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_ID, true, TuningUiItem::ID, TuningUiItem::setID);
 
 		ADD_PROPERTY_GETTER(InterfaceType, TuningUiTags::prop_InterfaceType, true, TuningUiItem::interfaceType);
+
+		ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Filters, true, TuningUiItem::filters, TuningUiItem::setFilters);
 
 		ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Tags, true, TuningUiItem::tags, TuningUiItem::setTags);
 
@@ -230,33 +226,36 @@ namespace TuningLib
 		propColumn->setViewOrder(order++);
 	}
 
+	/*
 	TuningUiItem::TuningUiItem(const TuningUiItem& That) :
 		TuningUiItem()
 	{
 		copy(That);
-
-		updateOptionalProperties();
 	}
 
 	TuningUiItem& TuningUiItem::operator=(const TuningUiItem& That)
 	{
 		copy(That);
-
 		return *this;
-	}
+	}*/
 
 	bool TuningUiItem::load(QXmlStreamReader& reader)
 	{
 		if (isRoot() == false)
 		{
+			if (reader.attributes().hasAttribute(TuningUiTags::prop_Uuid))
+			{
+				setUuid(QUuid::fromString(reader.attributes().value(TuningUiTags::prop_ID).toString()));
+			}
+			else 
+			{
+				Q_ASSERT(false);
+				setUuid(QUuid::createUuid());
+			}
+
 			if (reader.attributes().hasAttribute(TuningUiTags::prop_ID))
 			{
 				setID(reader.attributes().value(TuningUiTags::prop_ID).toString());
-			}
-
-			if (reader.attributes().hasAttribute(TuningUiTags::prop_CustomID))
-			{
-				setCustomID(reader.attributes().value(TuningUiTags::prop_CustomID).toString());
 			}
 
 			if (reader.attributes().hasAttribute(TuningUiTags::prop_Caption))
@@ -331,9 +330,9 @@ namespace TuningLib
 				{
 					m_valueColumnsCount = 0;
 				}
-				if (m_valueColumnsCount > MAX_VALUES_COLUMN_COUNT)
+				if (m_valueColumnsCount > MaxValuesColumnCount)
 				{
-					m_valueColumnsCount = MAX_VALUES_COLUMN_COUNT;
+					m_valueColumnsCount = MaxValuesColumnCount;
 				}
 
 				m_valueColumnsAppSignalIdSuffixes.resize(m_valueColumnsCount);
@@ -461,10 +460,10 @@ namespace TuningLib
 			{
 				QString tagName = reader.name().toString();
 
-				if (tagName == TuningUiTags::tag_Tree || tagName == TuningUiTags::tag_Tab || tagName == TuningUiTags::tag_Button ||
+				if (tagName == TuningUiTags::tag_Generic || tagName == TuningUiTags::tag_Tab || tagName == TuningUiTags::tag_Button ||
 					tagName == TuningUiTags::tag_Counter || tagName == TuningUiTags::tag_SchemasTab)
 				{
-					InterfaceType filterType = InterfaceType::Tree;
+					InterfaceType filterType = InterfaceType::Generic;
 
 					if (tagName == TuningUiTags::tag_Tab)
 					{
@@ -517,9 +516,9 @@ namespace TuningLib
 		}
 		else
 		{
-			if (isTree() == true)
+			if (isGeneric() == true)
 			{
-				writer.writeStartElement(TuningUiTags::tag_Tree);
+				writer.writeStartElement(TuningUiTags::tag_Generic);
 			}
 			else
 			{
@@ -556,8 +555,8 @@ namespace TuningLib
 			}
 		}
 
+		writer.writeAttribute(TuningUiTags::prop_Uuid, uuidString());
 		writer.writeAttribute(TuningUiTags::prop_ID, ID());
-		writer.writeAttribute(TuningUiTags::prop_CustomID, customID());
 		writer.writeAttribute(TuningUiTags::prop_Caption, caption());
 
 		writer.writeAttribute(TuningUiTags::prop_UseColors, useColors() ? TuningUiTags::tag_True : TuningUiTags::tag_False);
@@ -623,6 +622,21 @@ namespace TuningLib
 		return true;
 	}
 
+	QUuid TuningUiItem::uuid() const 
+	{
+		return m_uuid;
+	}
+
+	QString TuningUiItem::uuidString() const 
+	{
+		return m_uuid.toString();
+	}
+
+	void TuningUiItem::setUuid(const QUuid& uuid) 
+	{
+		m_uuid = uuid;
+	}
+
 	QString TuningUiItem::ID() const
 	{
 		return m_ID;
@@ -631,16 +645,6 @@ namespace TuningLib
 	void TuningUiItem::setID(const QString& value)
 	{
 		m_ID = value;
-	}
-
-	QString TuningUiItem::customID() const
-	{
-		return m_customID;
-	}
-
-	void TuningUiItem::setCustomID(const QString& value)
-	{
-		m_customID = value;
 	}
 
 	QString TuningUiItem::caption() const
@@ -658,9 +662,9 @@ namespace TuningLib
 		return interfaceType() == InterfaceType::Root;
 	}
 
-	bool TuningUiItem::isTree() const
+	bool TuningUiItem::isGeneric() const
 	{
-		return interfaceType() == InterfaceType::Tree;
+		return interfaceType() == InterfaceType::Generic;
 	}
 
 	bool TuningUiItem::isTab() const
@@ -893,9 +897,9 @@ namespace TuningLib
 		{
 			value = 0;
 		}
-		if (value > MAX_VALUES_COLUMN_COUNT)
+		if (value > MaxValuesColumnCount)
 		{
-			value = MAX_VALUES_COLUMN_COUNT;
+			value = MaxValuesColumnCount;
 		}
 
 		m_valueColumnsCount = value;
@@ -1033,13 +1037,13 @@ namespace TuningLib
 		m_children.insert(m_children.begin() + index, child);
 	}
 
-	void TuningUiItem::removeChild(const std::shared_ptr<TuningUiItem>& child)
+	bool TuningUiItem::removeChild(const QUuid& uuid)
 	{
 		bool found = false;
 
 		for (auto it = m_children.begin(); it != m_children.end(); it++)
 		{
-			if (it->get() == child.get())
+			if (it->get()->uuid() == uuid)
 			{
 				m_children.erase(it);
 				found = true;
@@ -1047,11 +1051,7 @@ namespace TuningLib
 			}
 		}
 
-		if (found == false)
-		{
-			Q_ASSERT(false);
-			return;
-		}
+		return found;
 	}
 
 	bool TuningUiItem::removeChild(const QString& ID)
@@ -1105,29 +1105,49 @@ namespace TuningLib
 		return m_children[index];
 	}
 
-	std::shared_ptr<TuningUiItem> TuningUiItem::child(const QString& caption) const
+	/*
+	TuningUiItem* TuningUiItem::child(const QString& caption) const
 	{
-		for (std::shared_ptr<TuningUiItem> f : m_children)
+		for (auto& child : m_children)
 		{
-			if (f->caption() == caption)
+			if (child->caption() == caption)
 			{
-				return f;
+				return child.get();
+			}
+		}
+
+		return nullptr;
+	}
+	*/
+	std::shared_ptr<TuningUiItem> TuningUiItem::find(const QString& id) const
+	{
+		for (auto& child : m_children)
+		{
+			if (child->ID() == id)
+			{
+				return child;
+			}
+
+			auto result = child->find(id);
+			if (result != nullptr)
+			{
+				return result;
 			}
 		}
 
 		return nullptr;
 	}
 
-	std::shared_ptr<TuningUiItem> TuningUiItem::find(const QString& id) const
+	std::shared_ptr<TuningUiItem> TuningUiItem::find(const QUuid& uuid) const 
 	{
-		for (std::shared_ptr<TuningUiItem> f : m_children)
+		for (auto& child : m_children)
 		{
-			if (f->ID() == id)
+			if (child->uuid() == uuid)
 			{
-				return f;
+				return child;
 			}
 
-			std::shared_ptr<TuningUiItem> result = f->find(id);
+			auto result = child->find(uuid);
 			if (result != nullptr)
 			{
 				return result;
@@ -1155,18 +1175,6 @@ namespace TuningLib
 		setPropertyVisible(TuningUiTags::prop_TextAlertedColor,
 						   interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Counter);
 
-		// Value columns, add or remove unnecessary properties
-
-		if (interfaceType() == InterfaceType::SchemasTab)
-		{
-			setPropertyVisible(TuningUiTags::prop_SignalType, false);
-
-			setPropertyVisible(TuningUiTags::prop_CustomAppSignalMasks, false);
-			setPropertyVisible(TuningUiTags::prop_AppSignalMasks, false);
-			setPropertyVisible(TuningUiTags::prop_EquipmentIDMasks, false);
-			setPropertyVisible(TuningUiTags::prop_AppSignalTags, false);
-		}
-
 		setPropertyVisible(TuningUiTags::prop_ValueColumnsCount, interfaceType() == InterfaceType::Tab);
 
 		setPropertyVisible(TuningUiTags::prop_ColumnCustomAppId, interfaceType() == InterfaceType::Tab);
@@ -1184,10 +1192,10 @@ namespace TuningLib
 		setPropertyVisible(TuningUiTags::prop_CounterType, interfaceType() == InterfaceType::Counter);
 
 		setPropertyVisible(TuningUiTags::prop_HasDiscreteCounter,
-						   interfaceType() == InterfaceType::Root || interfaceType() == InterfaceType::Tree ||
+						   interfaceType() == InterfaceType::Root || interfaceType() == InterfaceType::Generic ||
 							   interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
 
-		setPropertyVisible(TuningUiTags::prop_StartSchemaId, interfaceType() == InterfaceType::SchemasTab);
+		//setPropertyVisible(TuningUiTags::prop_StartSchemaId, interfaceType() == InterfaceType::SchemasTab);
 
 		if (interfaceType() == InterfaceType::Tab)
 		{
@@ -1196,7 +1204,7 @@ namespace TuningLib
 				m_valueColumnsAppSignalIdSuffixes.resize(valuesColumnCount());
 			}
 
-			for (int i = 0; i < MAX_VALUES_COLUMN_COUNT; i++)
+			for (int i = 0; i < MaxValuesColumnCount; i++)
 			{
 				QString propName = tr(TuningUiTags::prop_ValueColumn1AppSignalSuffixes).arg(i);
 
@@ -1224,10 +1232,31 @@ namespace TuningLib
 		//
 	}
 
+	std::vector<TuningUiItem*> TuningUiItem::childernToVector() const
+	{
+		std::vector<TuningUiItem*> result;
+
+		for (const auto& child : m_children) 
+		{
+			result.push_back(child.get());
+
+			auto childItems = child->childernToVector();
+			for (const auto& ci : childItems) 
+			{
+				result.push_back(ci);
+			}
+		}
+
+		return result;
+	}
+
+	/*
 	void TuningUiItem::copy(const TuningUiItem& That)
 	{
+		//m_uuid = That.m_uuid;	 Is not copied!!!
+		//m_uuid = QUuid::createUuid();
+
 		m_ID = That.m_ID;
-		m_customID = That.m_customID;
 		m_caption = That.m_caption;
 
 		m_interfaceType = That.m_interfaceType;
@@ -1258,13 +1287,12 @@ namespace TuningLib
 
 		for (const auto& f : That.m_children)
 		{
-			TuningUiItem* fi = f.get();
-
-			std::shared_ptr<TuningUiItem> fiCopy = std::make_shared<TuningUiItem>(*fi);
-
+			std::shared_ptr<TuningUiItem> fiCopy = std::make_shared<TuningUiItem>(*f);
 			addChild(fiCopy);
 		}
-	}
+
+		updateOptionalProperties();
+	}*/
 
 	void TuningUiItem::setPropertyVisible(const QLatin1String& name, bool visible)
 	{
@@ -1282,21 +1310,16 @@ namespace TuningLib
 	//
 
 	TuningUiStorage::TuningUiStorage():
-		m_root(std::make_shared<TuningUiItem>())
+		m_root(std::make_unique<TuningUiItem>())
 	{
 		m_root->setID("%UI%ROOT");
 		m_root->setCaption(QObject::tr("Root"));
 		m_root->setInterfaceType(TuningUiItem::InterfaceType::Root);
 	}
 
-	TuningUiStorage::TuningUiStorage(const TuningUiStorage& That)
+	TuningUiItem* TuningUiStorage::root()
 	{
-		*this = That;
-	}
-	
-	std::shared_ptr<TuningUiItem> TuningUiStorage::root()
-	{
-		return m_root;
+		return m_root.get();
 	}
 
 	bool TuningUiStorage::load(const QByteArray& data, QString* errorCode)
@@ -1381,67 +1404,6 @@ namespace TuningLib
 		writer.writeEndDocument();
 
 		return true;
-	}
-
-	bool TuningUiStorage::copyToClipboard(std::vector<std::shared_ptr<TuningUiItem>> filters)
-	{
-		// save data to clipboard
-		//
-		QByteArray data;
-		QXmlStreamWriter writer(&data);
-
-		writer.setAutoFormatting(true);
-		writer.writeStartDocument();
-
-		writer.writeStartElement("TuningUiStorage");
-
-		TuningUiItem root;
-		root.setInterfaceType(TuningUiItem::InterfaceType::Root);
-
-		for (const auto& filter : filters)
-		{
-			std::shared_ptr<TuningUiItem> filterCopy = std::make_shared<TuningUiItem>();
-
-			*filterCopy = *filter;
-
-			root.addChild(filterCopy);
-		}
-
-		root.save(writer);
-
-		writer.writeEndElement();
-
-		writer.writeEndElement(); // ObjectFilterStorage
-
-		writer.writeEndDocument();
-
-		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(data.toStdString().c_str());
-
-		return true;
-	}
-
-	std::shared_ptr<TuningUiItem> TuningUiStorage::pasteFromClipboard()
-	{
-		QClipboard* clipboard = QApplication::clipboard();
-		QString clipboardText = clipboard->text();
-
-		if (clipboardText.isEmpty() == true)
-		{
-			return nullptr;
-		}
-
-		QByteArray data = clipboardText.toUtf8();
-
-		TuningUiStorage clipboardStorage;
-
-		QString errorMsg;
-		if (clipboardStorage.load(data, &errorMsg) == false)
-		{
-			return nullptr;
-		}
-
-		return clipboardStorage.m_root;
 	}
 
 	void TuningUiStorage::add(std::shared_ptr<TuningUiItem> filter, bool moveToTop)

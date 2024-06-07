@@ -7,8 +7,6 @@ namespace VFrame30
 
 namespace TuningLib
 {
-	const int MAX_VALUES_COLUMN_COUNT = 6;
-
 	// Structs
 	//
 	struct TuningCounters
@@ -30,7 +28,7 @@ namespace TuningLib
 		enum class InterfaceType
 		{
 			Root,
-			Tree,
+			Generic,
 			Tab,
 			Button,
 			Counter,
@@ -54,9 +52,8 @@ namespace TuningLib
 	
 	public:
 		TuningUiItem();
-		TuningUiItem(const TuningUiItem& That);
-
-		TuningUiItem& operator=(const TuningUiItem& That);
+		TuningUiItem(const TuningUiItem& That) = delete;
+		TuningUiItem& operator=(const TuningUiItem& That) = delete;
 
 		bool load(QXmlStreamReader& reader);
 		bool save(QXmlStreamWriter& writer) const;
@@ -64,11 +61,12 @@ namespace TuningLib
 	public:
 		// Main Properties
 
+		QUuid uuid() const;
+		QString uuidString() const;
+		void setUuid(const QUuid& uuid);
+
 		QString ID() const;
 		void setID(const QString& value);
-
-		QString customID() const;
-		void setCustomID(const QString& value);
 
 		QString caption() const;
 		void setCaption(const QString& value);
@@ -76,7 +74,7 @@ namespace TuningLib
 		// Interface Type
 
 		bool isRoot() const;
-		bool isTree() const;
+		bool isGeneric() const;
 		bool isTab() const;
 		bool isButton() const;
 		bool isCounter() const;
@@ -188,7 +186,7 @@ namespace TuningLib
 		void addChild(const std::shared_ptr<TuningUiItem>& child);
 		void insertChild(int index, const std::shared_ptr<TuningUiItem>& child);
 
-		void removeChild(const std::shared_ptr<TuningUiItem>& child);
+		bool removeChild(const QUuid& uuid);
 		bool removeChild(const QString& ID);
 		bool removeChild(int index);
 
@@ -197,25 +195,27 @@ namespace TuningLib
 		int childCount() const;
 
 		std::shared_ptr<TuningUiItem> child(int index) const;
-		std::shared_ptr<TuningUiItem> child(const QString& caption) const;
+		//TuningUiItem* child(const QString& caption) const;
 
 		std::shared_ptr<TuningUiItem> find(const QString& id) const; // Recursive search
+		std::shared_ptr<TuningUiItem> find(const QUuid& uuid) const; // Recursive search
 
 		void updateOptionalProperties();
 
+		std::vector<TuningUiItem*> childernToVector() const;
+
 	private:
-		void copy(const TuningUiItem& That);
 		void setPropertyVisible(const QLatin1String& name, bool visible);
 
 	private:
 		//
 		// Properties
 		//
+		QUuid m_uuid;
 		QString m_ID = "ID";
-		QString m_customID;
 		QString m_caption;
 
-		InterfaceType m_interfaceType = InterfaceType::Tree;
+		InterfaceType m_interfaceType = InterfaceType::Generic;
 
 		bool m_useColors = false;
 
@@ -275,35 +275,23 @@ namespace TuningLib
 		Q_OBJECT
 	public:
 		TuningUiStorage();
-		TuningUiStorage(const TuningUiStorage& That);
 
-		TuningUiStorage& operator=(const TuningUiStorage& That)
-		{
-			m_root = That.m_root;
-			//m_schemasDetails = That.m_schemasDetails;
-
-			return *this;
-		}
-
-		std::shared_ptr<TuningUiItem> root();
+		// Access
+		//
+		TuningUiItem* root();
 
 		// Serialization
 		//
 		bool load(const QByteArray& data, QString* errorCode);
 		bool save(QByteArray& data) const;
 
-		bool copyToClipboard(std::vector<std::shared_ptr<TuningUiItem>> filters);
-		std::shared_ptr<TuningUiItem> pasteFromClipboard();
-
 		// Operation
 		//
 		void add(std::shared_ptr<TuningUiItem> filter, bool moveToTop);
 
 	protected:
-		std::shared_ptr<TuningUiItem> m_root;
+		std::unique_ptr<TuningUiItem> m_root;
 		//std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 	};
 
 } // namespace TuningUi
-
-//Q_DECLARE_METATYPE(std::shared_ptr<TuningLib::TuningUiItem>)
