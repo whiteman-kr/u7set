@@ -137,6 +137,7 @@ bool AdsSetConfigurationProfile(const char* profile)
 void AdsShutdown()
 {
 	g_log.writeMessage("AdsShutdown()");
+	g_adsBridge.clearAppDataServices();
 	g_adsBridge.close();
 
 	if (g_appThread.joinable() == true)
@@ -153,11 +154,13 @@ void AdsShutdown()
 
 		g_appThread.join();
 	}
+
+	return;
 }
 
-void AdsAddConnection(const char* adsEquipmentId, const char* address, int port)
+void AdsAddService(const char* adsEquipmentId, const char* address, int port)
 {
-	g_log.writeMessage(QString("AdsAddConnection: %1, %2:%3").arg(adsEquipmentId).arg(address).arg(port));
+	g_log.writeMessage(QString("AdsAddService: %1, %2:%3").arg(adsEquipmentId).arg(address).arg(port));
 	g_adsBridge.addAppDataService(adsEquipmentId, address, port);
 }
 
@@ -167,18 +170,18 @@ void AdsConnect()
 	g_adsBridge.connect();
 }
 
-void AdsClose()
+void AdsCloseConnection()
 {
-	g_log.writeMessage("AdsClose()");
+	g_log.writeMessage("AdsCloseConnection()");
 	g_adsBridge.close();
 }
 
-size_t AdsGetConnectionCount()
+size_t AdsGetTcpConnectionCount()
 {
 	return g_adsBridge.connectionCount();
 }
 
-bool AdsGetConnectionStatuses(struct AdsConnectionStatus* out, size_t count)
+bool AdsGetTcpConnectionStatuses(struct AdsConnectionStatus* out, size_t count)
 {
 	return g_adsBridge.connectionStatus(out, sizeof(AdsConnectionStatus), count);
 }

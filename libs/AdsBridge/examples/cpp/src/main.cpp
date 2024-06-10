@@ -25,7 +25,8 @@ const std::string g_equipmentId = "AZPZ_WS1_ADSBRIDGE";
 const bool g_isQtApplication = false;
 
 // The list of AppDataServices to connect to.
-const std::array g_appDataServices = {AppDataService{"AZPZ_WS1_ADS", "127.0.0.1", 13323}/*, AppDataService{"AZPZ_WS2_ADS", "127.0.0.2", 13323}*/};
+const std::array g_appDataServices = {
+	AppDataService{"AZPZ_WS1_ADS", "127.0.0.1", 13323} /*, AppDataService{"AZPZ_WS2_ADS", "127.0.0.2", 13323}*/};
 
 // Exit program flag.
 //
@@ -99,10 +100,10 @@ void dumpConnectionStatus()
 {
 	std::cout << "------< ConnectionStatus >------\n";
 
-	const auto count = AdsGetConnectionCount();
+	const auto count = AdsGetTcpConnectionCount();
 
 	auto stats = std::make_unique<AdsConnectionStatus[]>(count);
-	bool getOk = AdsGetConnectionStatuses(stats.get(), count);
+	bool getOk = AdsGetTcpConnectionStatuses(stats.get(), count);
 
 	if (getOk == true)
 	{
@@ -191,7 +192,7 @@ int main(int argc, char* argv[])
 	//
 	for (const auto& ads : g_appDataServices)
 	{
-		AdsAddConnection(ads.equipmentId.c_str(), ads.address.c_str(), ads.port);
+		AdsAddService(ads.equipmentId.c_str(), ads.address.c_str(), ads.port);
 	}
 #else
 	// Load configuration from file.
@@ -317,7 +318,7 @@ int main(int argc, char* argv[])
 
 	// Close all connections.
 	//
-	AdsClose();
+	AdsCloseConnection();
 
 	// Shutdown, stop Qt message loop.
 	//

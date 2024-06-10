@@ -88,5 +88,8 @@ endif()
 
 # --
 #
-add_subdirectory(examples/cpp)
-#add_subdirectory(tests)
+if(NOT CODE_COVERAGE)
+	add_subdirectory(examples/cpp)
+endif()
+
+add_subdirectory(tests)

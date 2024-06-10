@@ -18,7 +18,7 @@ def main():
     ads.setLogHandler(logHandler)
     ads.setLogLevel(radiy.MatsLogLevel.Debug)
 
-    ads.addConnection("AZPZ_WS1_ADS", "127.0.0.1", 13323)
+    ads.addService("AZPZ_WS1_ADS", "127.0.0.1", 13323)
     ads.connect()
 
     # Start the user input thread
@@ -83,7 +83,7 @@ def main():
         # Get connection statuses
         #
         if show_connection_status:
-            statuses = ads.getConnectionStatuses()
+            statuses = ads.getTcpConnectionStatuses()
             for status in statuses:
                 print(
                     f"Connection: {status.connectionType}, Status: {status.status}, Received: {status.received}, Sent: {status.sent}")
@@ -102,7 +102,7 @@ def main():
         time.sleep(1)
 
     # Close all connections.
-    ads.close()
+    ads.closeConnection()
     ads.shutdown()
 
 

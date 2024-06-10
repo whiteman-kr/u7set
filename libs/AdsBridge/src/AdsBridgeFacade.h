@@ -36,6 +36,7 @@ namespace AdsBridge
 	public:
 		bool setConfiguration(const QByteArray& data, QString profile = SettingsProfile::DEFAULT);
 		void addAppDataService(const QString& adsEquipmentId, const QString& address, int port);
+		void clearAppDataServices();
 
 		void connect();
 		void close();
@@ -68,6 +69,10 @@ namespace AdsBridge
 		const char* getStringConstPointer(const QString& string) const;
 
 	private:
+		// This is a cache for const char* pointers.
+		// This is required to return const char* pointers to the caller.
+		// The caller must not delete the pointers.
+		//
 		mutable std::shared_mutex m_stringTableMutex;
 		mutable std::set<std::string> m_stringTable;
 	};

@@ -35,7 +35,6 @@ extern "C"
 		adsTestConnectionStatus.requestCount = 123ull;
 		adsTestConnectionStatus.replyCount = 456ull;
 
-
 		memset(&matsTestAppSignalParam, 0, sizeof(matsTestAppSignalParam));
 		matsTestAppSignalParam.hash = 0x123456789abcdef0ull;
 		matsTestAppSignalParam.appSignalId = (char*)0x223344998899AABBull;

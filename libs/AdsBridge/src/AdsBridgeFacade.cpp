@@ -1,8 +1,8 @@
 #include "AdsBridgeFacade.h"
 #include "AdsBridgeLogFile.h"
 
-#include "../../OnlineLib/TcpClientStatistics.h"
 #include "../../OnlineLib/SoftwareSettings.h"
+#include "../../OnlineLib/TcpClientStatistics.h"
 #include "../../UtilsLib/XmlHelper.h"
 
 #include <ClientLib/AdsConnection.h>
@@ -114,6 +114,13 @@ namespace AdsBridge
 
 		m_appDataServices.push_back(ads);
 
+		return;
+	}
+
+	void AdsBridgeFacade::clearAppDataServices()
+	{
+		m_log->writeMessage("AdsBridgeFacade::clearAppDataServices()");
+		m_appDataServices.clear();
 		return;
 	}
 

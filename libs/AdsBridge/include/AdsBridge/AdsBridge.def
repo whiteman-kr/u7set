@@ -13,12 +13,12 @@ EXPORTS
 	AdsSetConfiguration
 	AdsSetConfigurationProfile
 
-	AdsAddConnection
+	AdsAddService
 	AdsConnect
-	AdsClose
+	AdsCloseConnection
 
-	AdsGetConnectionCount
-	AdsGetConnectionStatuses
+	AdsGetTcpConnectionCount
+	AdsGetTcpConnectionStatuses
 
 	AdsSignalParamsLoaded
 	AdsSignalStatesLoaded

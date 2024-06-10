@@ -48,7 +48,7 @@ extern "C"
 	 * \param message The message to log.
 	 */
 	void AdsTestLogHandler(enum MatsLogLevel level, const char* message);
-	
+
 	/// @cond
 	bool AdsInitPrivate(int argc, char** argv, const char* equipmentId, bool isQtApplication);
 	/// @endcond
@@ -130,13 +130,13 @@ extern "C"
 	 * \param address The IPv4 address of the server.
 	 * \param port The port number of the server.
 	 */
-	void AdsAddConnection(const char* adsEquipmentId, const char* address, int port);
+	void AdsAddService(const char* adsEquipmentId, const char* address, int port);
 
 	/**
 	 * \brief Connects to the AppDataService.
 	 *
-	 * This function connects to the AppDataService(s) using the connections that have been added with AdsAddConnection(). The connection
-	 * status can be checked with AdsGetConnectionStatuses().
+	 * This function connects to the AppDataService(s) using the connections that have been added with AdsAddService(). The connection
+	 * status can be checked with AdsGetTcpConnectionStatuses().
 	 */
 	void AdsConnect();
 
@@ -145,16 +145,17 @@ extern "C"
 	 *
 	 * This function closes the connection to the AppDataService(s).
 	 */
-	void AdsClose();
+	void AdsCloseConnection();
 
 	/**
 	 * \brief Checks if the connections to the AppDataService(s) are established.
 	 *
-	 * This function returns the number of connections that are established.
+	 * This function returns the number of connections that are <b>established</b>.
+	 * Note that the <b>connections are not established until AdsConnect() is called </b>.
 	 *
 	 * \return The number of established connections.
 	 */
-	size_t AdsGetConnectionCount();
+	size_t AdsGetTcpConnectionCount();
 
 	/**
 	 * \brief Gets the statuses of connection to AppDataService(s).
@@ -165,7 +166,7 @@ extern "C"
 	 * \param count The number of connection statuses to get.
 	 * \return True if the connection statuses were successfully retrieved, false otherwise.
 	 */
-	bool AdsGetConnectionStatuses(struct AdsConnectionStatus* out, size_t count);
+	bool AdsGetTcpConnectionStatuses(struct AdsConnectionStatus* out, size_t count);
 
 	/**
 	 * \brief Checks if the signal parameters are loaded.

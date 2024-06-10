@@ -48,7 +48,10 @@ extern "C"
 
 	/**
 	 * @struct AdsConnectionStatus
-	 * @brief Represents the status of an AppDataService connection.
+	 * @brief Represents the status of an AppDataService TCP connection.
+	 *
+	 * Each AppDataService has two TCP connections: one for signal parameters and states, and one for updating signal states for the most
+	 * recently observed signals (recents). Therefore, if two AppDataServices are added, AdsGetTcpConnectionCount() returns 4.
 	 */
 	struct AdsConnectionStatus
 	{

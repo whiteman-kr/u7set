@@ -43,13 +43,13 @@ class AdsBridge:
         assert (self.testMatsAppSignalState() == True)
 
         # initialize c instances of widely used functions:
-        self.c_AdsGetConnectionCount = self.ads_lib.AdsGetConnectionCount
-        self.c_AdsGetConnectionCount.restype = ctypes.c_size_t
+        self.c_AdsGetTcpConnectionCount = self.ads_lib.AdsGetTcpConnectionCount
+        self.c_AdsGetTcpConnectionCount.restype = ctypes.c_size_t
 
-        self.c_AdsGetConnectionStatuses = self.ads_lib.AdsGetConnectionStatuses
-        self.c_AdsGetConnectionStatuses.argtypes = [
+        self.c_AdsGetTcpConnectionStatuses = self.ads_lib.AdsGetTcpConnectionStatuses
+        self.c_AdsGetTcpConnectionStatuses.argtypes = [
             ctypes.POINTER(c_AdsConnectionStatus), ctypes.c_size_t]
-        self.c_AdsGetConnectionStatuses.restype = ctypes.c_bool
+        self.c_AdsGetTcpConnectionStatuses.restype = ctypes.c_bool
 
         self.c_AdsSignalParamsLoaded = self.ads_lib.AdsSignalParamsLoaded
         self.c_AdsSignalParamsLoaded.restype = ctypes.c_bool
@@ -106,20 +106,20 @@ class AdsBridge:
 
         c_AdsSetLogLevel(level.value)
 
-    def addConnection(self, adsEquipmentId: str, address: str, port: int) -> None:
+    def addService(self, adsEquipmentId: str, address: str, port: int) -> None:
         '''This function adds connection to the AppDataService. The connection is identified by the EquipmentID, and the IPv4 address/port of the service. The connection is not established until AdsConnect() is called.'''
-        c_AdsAddConnection = self.ads_lib.AdsAddConnection
+        c_AdsAddService = self.ads_lib.AdsAddService
 
-        c_AdsAddConnection.argtypes = [
+        c_AdsAddService.argtypes = [
             ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int]
-        c_AdsAddConnection.restype = None
+        c_AdsAddService.restype = None
 
-        c_AdsAddConnection(ctypes.c_char_p(adsEquipmentId.encode('utf-8')),
+        c_AdsAddService(ctypes.c_char_p(adsEquipmentId.encode('utf-8')),
                            ctypes.c_char_p(address.encode('utf-8')),
                            ctypes.c_int(port))
 
     def connect(self) -> None:
-        '''This funcConnects to the AppDataService(s) using the connections that have been added with AdsAddConnection(). The connection status can be checked with AdsGetConnectionStatuses().'''
+        '''This funcConnects to the AppDataService(s) using the connections that have been added with AdsAddService(). The connection status can be checked with AdsGetTcpConnectionStatuses().'''
         self.ads_lib.argtypes = []
         self.ads_lib.restype = None
         self.ads_lib.AdsConnect()
@@ -128,23 +128,23 @@ class AdsBridge:
         '''This function shuts down the AdsBridge library and stops the message loop if the application is not Qt-based.'''
         self.ads_lib.AdsShutdown()
 
-    def close(self) -> None:
-        '''This function closes the connection to the AppDataService(s).'''
-        self.ads_lib.AdsClose()
+    def closeConnection(self) -> None:
+        '''This function closes the connections to the AppDataService(s).'''
+        self.ads_lib.AdsCloseConnection()
 
-    def getConnectionCount(self) -> int:
+    def getTcpConnectionCount(self) -> int:
         '''This function returns the number of connections that are established.'''
-        connections = self.c_AdsGetConnectionCount()
+        connections = self.c_AdsGetTcpConnectionCount()
         return connections
 
-    def getConnectionStatuses(self) -> list[AdsConnectionStatus]:
+    def getTcpConnectionStatuses(self) -> list[AdsConnectionStatus]:
         '''This function returns the connection statuses of the AppDataService(s).'''
 
-        count = self.getConnectionCount()
+        count = self.getTcpConnectionCount()
         AdsConnectionStatusArray = c_AdsConnectionStatus * count
         c_out = AdsConnectionStatusArray()
 
-        connection_success = self.c_AdsGetConnectionStatuses(
+        connection_success = self.c_AdsGetTcpConnectionStatuses(
             c_out, ctypes.c_size_t(count))
 
         connection_statuses: list[AdsConnectionStatus] = []

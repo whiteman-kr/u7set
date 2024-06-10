@@ -1925,41 +1925,53 @@ bool AdsBridgeSettingsGetter::readAppDataServiceSettings(const Builder::Context*
 	//
 	std::map<QString, const Hardware::Software*> appDataServices;
 
-	for (const QString& appDataServiceId : appDataServiceIds)
+	for (const QString& appDataServiceRcId : appDataServiceIds)
 	{
-		// ADS->ClientRequestIP, ClientRequestPort
+		// ADS_RC**->ClientRequestIP, ClientRequestPort
 		//
-		const Hardware::Software* appDataService = nullptr;
+		const Hardware::DeviceController* appDataServiceRc = nullptr;
 
-		if (auto appDataServiceDevice = equipment->deviceObject(appDataServiceId); appDataServiceDevice == nullptr)
+		if (auto appDataServiceRcDevice = equipment->deviceObject(appDataServiceRcId);
+			appDataServiceRcDevice == nullptr)
 		{
-			// Property %1.%2 is linked to undefined software ID %3.
+			// Property %1.%2 is linked to undefined RequestController ID %3.
 			//
-			log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+			log->errCFG3032(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
 			result = false;
 		}
 		else
 		{
-			if (appDataService = appDataServiceDevice->toSoftware().get(); appDataService == nullptr)
+			if (appDataServiceRc = appDataServiceRcDevice->toController().get();
+				appDataServiceRc == nullptr)
 			{
-				// Property %1.%2 is linked to undefined software ID %3.
+				// Property %1.%2 is linked to undefined RequestController ID %3.
 				//
-				log->errCFG3021(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+				log->errCFG3032(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
 				result = false;
 			}
 			else
 			{
-				if (appDataService->softwareType() != E::SoftwareType::AppDataService)
+				const Hardware::Software* appDataService = appDataServiceRc->parent()->toSoftware().get();
+
+				if (appDataService == nullptr)
 				{
-					// Property %1.%2 is linked to not compatible software %3.
-					//
-					log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceId);
+					LOG_INTERNAL_ERROR_MSG(log, QString("Parent of Controller %1 is not a Software object").arg(appDataServiceRcId));
 					result = false;
 				}
 				else
 				{
-					appDataServices[appDataServiceId] = appDataService;
-				}
+					if (appDataService->softwareType() != E::SoftwareType::AppDataService)
+					{
+						// Property %1.%2 is linked to not compatible software %3.
+						//
+						log->errCFG3017(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
+						result = false;
+					}
+					else
+					{
+						appDataServices[appDataServiceRcId] = appDataService;
+					}
+}
 			}
 		}
 	}
@@ -1971,7 +1983,7 @@ bool AdsBridgeSettingsGetter::readAppDataServiceSettings(const Builder::Context*
 
 	// Reading AppDataService Settings
 	//
-	for (const auto& [appDataServiceId, appDataService] : appDataServices)
+	for (const auto& [appDataServiceRcId, appDataService] : appDataServices)
 	{
 		// Get AppDataService connection settings
 		//
@@ -1983,10 +1995,22 @@ bool AdsBridgeSettingsGetter::readAppDataServiceSettings(const Builder::Context*
 			return false;
 		}
 
+		RequestControllerSettings rcs = adsSettings.getRequestControllerSettings(appDataServiceRcId);
+
+		if (rcs.isValid() == false)
+		{
+			// Property %1.%2 is linked to undefined RequestController ID %3.
+			//
+			log->errCFG3032(software->equipmentIdTemplate(), EquipmentPropNames::APP_DATA_SERVICE_IDS, appDataServiceRcId);
+			result = false;
+			continue;
+		}
+
 		SoftwareEndpoint::AppDataService ads;
-		ads.equipmentId = appDataServiceId;
-		ads.address = adsSettings.clientRequestIP;
-		ads.realtimeAddress = adsSettings.rtTrendsRequestIP;
+
+		ads.equipmentId = rcs.equipmentID;
+		ads.address = rcs.clientRequestIP;
+		ads.realtimeAddress = rcs.rtTrendsRequestIP;
 
 		this->appDataServices.push_back(ads);
 	}
