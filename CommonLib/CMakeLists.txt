@@ -25,7 +25,7 @@ qt_add_library(${TARGET} STATIC
   Types.h
 )
 
-#target_precompile_headers(${TARGET} PUBLIC#
+#target_precompile_headers(${TARGET} PUBLIC
 #	"Types.h"
 #	"Hash.h"
 #	"PropertyObject.h"

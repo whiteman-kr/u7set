@@ -1,15 +1,13 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include <ClientLib/AdsConnection.h>
 #include "AdsConnectionPrivate.h"
+#include <ClientLib/AdsConnection.h>
 
 namespace ClientLib
 {
-	AdsConnection::AdsConnection(IAppSignalUpdater& signalUpdater,
-								 IRecentAppSignals* recentAppSignals,
-								 ILogFile* logFile) :
+	AdsConnection::AdsConnection(IAppSignalUpdater& signalUpdater, IRecentAppSignals* recentAppSignals, ILogFile* logFile) :
 		m_pimpl{std::make_unique<AdsConnectionPrivate>(signalUpdater, recentAppSignals, logFile)}
 	{
 		return;
@@ -17,7 +15,8 @@ namespace ClientLib
 
 	AdsConnection::~AdsConnection() = default;
 
-	void AdsConnection::updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
+	void AdsConnection::updateConnections(const SoftwareInfo& softwareInfo,
+										  const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
 	{
 		return m_pimpl->updateConnections(softwareInfo, appDataServices);
 	}
@@ -42,4 +41,4 @@ namespace ClientLib
 		return m_pimpl->signalStatesLoaded();
 	}
 
-}	// namespace ClientLib
+} // namespace ClientLib

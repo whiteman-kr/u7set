@@ -11,8 +11,8 @@ variables:
   # Build and test data
   #
   QT_VERSION: "6.5.3"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v418"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v418"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v419"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v419"
   PGPASSWORD: "P2ssw0rd"
 
 stages:
@@ -190,6 +190,7 @@ windows_build_job:
       - bin/release/scripthelp/search/*.*
       - bin/release/docs/*.pdf
       - bin/release/docs/Appendixes/*.pdf
+      - bin/release/dev/**/*
 
 
 windows_test_job:
@@ -240,7 +241,7 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "if (Test-Path c:/temp/build/test_simulator) { Remove-Item c:/temp/build/test_simulator -Recurse -Force; }"
     - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Test/BuilderConsoleArgs.xml"
-    
+
 #Run Compiler tests
     - "# ----------------------------------------------"
     - "#               Run Compiler tests"
@@ -252,6 +253,12 @@ windows_test_job:
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/libs/Simulator/Scripts/SimProjectTests.js\""
+
+#Run AdsBridge tests (limited - without AppDataService)
+    - "# ----------------------------------------------"
+    - "#               Run AdsBridge tests"
+    - "# ----------------------------------------------"
+    - "&$Env:CI_PROJECT_DIR/bin/release/AdsBridgeTests.exe --config=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --gtest_filter=-AdsBridgeTests.AdsGetTcpConnectionStatuses:AdsBridgeTests.AdsSignalParamsAndStatesLoaded:AdsBridgeTests.AdsGetSignalList:AdsBridgeTests.AdsGetSignalParams:AdsBridgeTests.AdsGetSignalStates:AdsBridgeTests.AdsGetSignalStatesRequestSignal"
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
@@ -344,6 +351,7 @@ linux_test_job:
     - "sleep 5"
     - "jobs"
     - "./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
+    - "./AdsBridgeTests --config=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --profile=linux_test_job"
     - "StopServices || true"
     - "popd"
 

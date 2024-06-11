@@ -1635,7 +1635,7 @@ namespace Tcp
 	{
 		if (serverAddr.isSet() == true)
 		{
-			logMessage(QString("try connect to server %1").arg(serverAddr.addressPortStr()));
+			logMessage(QString("try to connect to server %1").arg(serverAddr.addressPortStr()));
 		}
 		else
 		{

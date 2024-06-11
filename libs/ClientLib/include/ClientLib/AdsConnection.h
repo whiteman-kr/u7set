@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareEndpoint.h"
+#include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/TcpConnectionState.h"
 
 #include "../UtilsLib/ILogFile.h"
@@ -17,7 +17,7 @@ namespace ClientLib
 	{
 	public:
 		explicit AdsConnection(IAppSignalUpdater& signalUpdater,
-							   IRecentAppSignals* recentAppSignals,		// Can be nullptr, then recent state comm thread will not be created.
+							   IRecentAppSignals* recentAppSignals, // Can be nullptr, then recent state comm thread will not be created.
 							   ILogFile* logFile);
 
 		AdsConnection(const AdsConnection&) = delete;
@@ -44,4 +44,4 @@ namespace ClientLib
 	private:
 		std::unique_ptr<ClientLib::AdsConnectionPrivate> m_pimpl;
 	};
-}
+} // namespace ClientLib
