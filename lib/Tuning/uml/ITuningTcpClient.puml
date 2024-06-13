@@ -1,9 +1,0 @@
-@startuml TuningLib
-!include ../../../doc/uml/Namespace.puml
-
-interface TuningLib::ITuningTcpClient
-{
-}
-
-@enduml
-

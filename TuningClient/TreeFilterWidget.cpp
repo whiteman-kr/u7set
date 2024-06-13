@@ -4,6 +4,7 @@
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningUserManager.h>
 
+using namespace TuningFilters;
 
 TreeFilterWidget::TreeFilterWidget(TuningConfigController& configController,
 								   TuningClientFilterStorage& tuningFilterStorage,

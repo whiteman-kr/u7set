@@ -11,6 +11,8 @@
 #include <SchemaClientLib/DialogWriteTuningValues.h>
 #include <VFrame30/DrawParam.h>
 
+using namespace TuningFilters;
+
 TuningPageHelper::TuningPageHelper(const ClientLib::TuningUserManager& userManager):
 	m_userManager(userManager)
 {

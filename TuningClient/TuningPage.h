@@ -3,7 +3,7 @@
 
 #include <ClientLib/TuningSignalManager.h>
 #include "TuningModel.h"
-#include "../lib/Tuning/TuningFilter.h"
+#include <TuningLib/TuningFilter.h>
 #include "TuningConfigController.h"
 #include "TuningClientFilterStorage.h"
 
@@ -105,8 +105,8 @@ public:
 						TuningClientFilterStorage& tuningFilterStorage,
 						ClientLib::TuningUserManager& userManager,
 						ClientLib::TuningConnection& tuningConnection,
-						std::shared_ptr<TuningFilter> treeFilter,
-						std::shared_ptr<TuningFilter> pageFilter,
+						std::shared_ptr<TuningFilters::TuningFilter> treeFilter,
+						std::shared_ptr<TuningFilters::TuningFilter> pageFilter,
 						QWidget* parent = 0);
 	~TuningPage();
 
@@ -152,9 +152,9 @@ private slots:
 
 public slots:
 
-	void slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter);
+	void slot_treeFilterChanged(std::shared_ptr<TuningFilters::TuningFilter> filter);
 
-	void slot_pageFilterChanged(std::shared_ptr<TuningFilter> filter);
+	void slot_pageFilterChanged(std::shared_ptr<TuningFilters::TuningFilter> filter);
 
 private:
 
@@ -182,8 +182,8 @@ private:
 	// Signals processing
 
 	void invertValue(int channel);	// channel is value column number, if it is set to -1 - all columns are inverted
-	void addSelectedSignalsToFilter(TuningFilter* filter);
-	void restoreSignalsFromFilter(TuningFilter* filter);
+	void addSelectedSignalsToFilter(TuningFilters::TuningFilter* filter);
+	void restoreSignalsFromFilter(TuningFilters::TuningFilter* filter);
 	void setToDefaults(const std::vector<Hash>& hashes);
 
 	void setActionButtonsState();
@@ -224,9 +224,9 @@ private:
 
 	TuningModelClient* m_model = nullptr;
 
-	std::shared_ptr<TuningFilter> m_treeFilter = nullptr;
+	std::shared_ptr<TuningFilters::TuningFilter> m_treeFilter = nullptr;
 
-	std::shared_ptr<TuningFilter> m_pageFilter = nullptr;
+	std::shared_ptr<TuningFilters::TuningFilter> m_pageFilter = nullptr;
 
 	std::map<QString, std::pair<int, Qt::SortOrder>> m_sortData;
 

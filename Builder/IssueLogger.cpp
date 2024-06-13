@@ -9177,6 +9177,74 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6222
+	///
+	/// IssueType: Error
+	///
+	/// Title: Application Signal List ID '%1' ('%2') is not unique.
+	///
+	/// Parameters:
+	///		%1 List ID
+	///		%2 List caption
+	///
+	/// Description:
+	///		Application Signals List ID is not unique.
+	///
+	void IssueLogger::errEQP6222(QString listId, QString listCaption)
+	{
+		if (listCaption.isEmpty() == true) 
+		{
+			LOG_ERROR(IssueType::Equipment, 6222, tr("Application Signal List ID '%1' is not unique.").arg(listId));
+		}
+		else
+		{
+			LOG_ERROR(IssueType::Equipment, 6222, tr("ApplicationSignal List ID '%1' ('%2') is not unique.").arg(listId).arg(listCaption));
+		}
+	}
+
+	/// IssueCode: EQP6250
+	///
+	/// IssueType: Error
+	///
+	/// Title: UI item ID '%1' ('%2') is not unique in TuningClient %3.
+	///
+	/// Parameters:
+	///		%1 UI item ID
+	///		%2 UI item caption
+	///		%3 TuningClient EquipmentID
+	///
+	/// Description:
+	///		TuningClient UI item specified in UiConfiguration property is not unique.
+	///
+	void IssueLogger::errEQP6250(QString uiId, QString uiCaption, QString tuningClientId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6250,
+				  tr("UI item ID '%1' ('%2') is not unique in TuningClient %3.").arg(uiId).arg(uiCaption).arg(tuningClientId));
+	}
+
+	/// IssueCode: EQP6251
+	///
+	/// IssueType: Error
+	///
+	/// Title: Application signals list '%1' specified in UI item ID '%2' ('%3') in TuningClient %4 does not exist.
+	///
+	/// Parameters:
+	///		%1 Filter ID
+	///		%2 UI item ID
+	///		%3 UI item caption
+	///		%4 TuningClient EquipmentID
+	///
+	/// Description:
+	///		Application signals list specified in Filters property of TuningClient UI item does not exist.
+	///
+	void IssueLogger::errEQP6251(QString filterId, QString uiId, QString uiCaption, QString tuningClientId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6251,
+				  tr("Application signals list '%1' specified in UI item ID '%2' ('%3') in TuningClient %4 does not exist.").arg(filterId).arg(uiId).arg(uiCaption).arg(tuningClientId));
+	}
+
 	/// IssueCode: EQP6300
 	///
 	/// IssueType: Error

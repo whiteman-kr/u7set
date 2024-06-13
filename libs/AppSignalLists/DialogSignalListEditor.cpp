@@ -58,7 +58,8 @@ namespace AppSignalLists
 		m_listsTree = new QTreeWidget();
 
 		QStringList l;
-		l << tr("ListID");
+		l << tr("ID");
+		l << tr("Caption");
 		l << tr("Type");
 
 		m_listsTree->setColumnCount(static_cast<int>(l.size()));
@@ -454,40 +455,25 @@ namespace AppSignalLists
 
 	bool DialogSignalListEditor::continueWithDuplicateIds()
 	{
-		bool duplicated = false;
-		QString duplicatedId;
+		std::vector<std::pair<QString, QString>> nonUniqueIds = m_editLists.checkForSameIds();
 
-		for (int i = 0; i < m_editLists.count(); i++)
+		QStringList duplicatedIds;
+		for (const auto& [id, caption] : nonUniqueIds)
 		{
-			AppSignalLists::AppSignalList* c = m_editLists.get(i).get();
-
-			for (int j = 0; j < m_editLists.count(); j++)
+			if (caption.isEmpty() == false)
 			{
-				if (i == j)
-				{
-					continue;
-				}
-
-				AppSignalLists::AppSignalList* e = m_editLists.get(j).get();
-				assert(e);
-
-				if (e->id() == c->id())
-				{
-					duplicated = true;
-					duplicatedId = e->id();
-					break;
-				}
+				duplicatedIds.push_back(QString("%1 ('%2')").arg(id).arg(caption));
 			}
-
-			if (duplicated == true)
+			else
 			{
-				break;
+				duplicatedIds.push_back(id);
 			}
 		}
 
-		if (duplicated == true)
+		if (duplicatedIds.empty() == false)
 		{
-			QString s = tr("AppSignalList with ID '%1' already exists.\r\n\r\nAre you sure you want to continue?").arg(duplicatedId);
+			QString s =
+				tr("Signal lists with duplicated IDs found:\n\n%1\n\nAre you sure you want to continue?").arg(duplicatedIds.join('\n'));
 			auto mbResult = QMessageBox::warning(this, qAppName(), s, QMessageBox::Yes | QMessageBox::No);
 
 			if (mbResult == QMessageBox::No)
@@ -889,6 +875,7 @@ namespace AppSignalLists
 
 		int c = 0;
 		item->setText(c++, list->id());
+		item->setText(c++, list->caption());
 		item->setText(c++, list->systemTags());
 
 		return;

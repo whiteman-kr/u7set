@@ -1,7 +1,7 @@
 #ifndef DIALOGCHOOSEFILTER_H
 #define DIALOGCHOOSEFILTER_H
 
-#include "../lib/Tuning/TuningFilter.h"
+#include <TuningLib/TuningFilter.h>
 
 class QListWidget;
 
@@ -11,9 +11,9 @@ class DialogChooseFilter : public QDialog
 	Q_OBJECT
 
 public:
-	DialogChooseFilter(QWidget* parent, TuningFilter* parentFilter, TuningFilter::InterfaceType interfaceType, TuningFilter::Source source);
+	DialogChooseFilter(QWidget* parent, TuningFilters::TuningFilter* parentFilter, TuningFilters::TuningFilter::InterfaceType interfaceType, TuningFilters::TuningFilter::Source source);
 
-	TuningFilter* chosenFilter() const;
+	TuningFilters::TuningFilter* chosenFilter() const;
 
 private slots:
 	virtual void accept();
@@ -21,7 +21,7 @@ private slots:
 private:
 
 	QListWidget* m_listBox = nullptr;
-	TuningFilter* m_chosenFilter = nullptr;
+	TuningFilters::TuningFilter* m_chosenFilter = nullptr;
 };
 
 #endif // DIALOGCHOOSEFILTER_H

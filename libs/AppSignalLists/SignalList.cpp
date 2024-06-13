@@ -734,4 +734,32 @@ namespace AppSignalLists
 		emit updatePerformed();
 	}
 
+	std::vector<std::pair<QString, QString>> AppSignalListSet::checkForSameIds() const
+	{
+		std::set<QString> ids;
+		std::vector<std::pair<QString, QString>> result;
+
+		for (auto& list: m_lists)
+		{
+			if (list == nullptr)
+			{
+				Q_ASSERT(list);
+				return {};
+			}
+
+			if (ids.find(list->id()) != ids.end())
+			{
+				// Duplicate found
+				//
+				result.push_back({list->id(), list->caption()});
+			}
+			else
+			{
+				ids.insert(list->id());
+			}
+		}
+
+		return result;
+	}
+
 } // namespace AppSignalLists

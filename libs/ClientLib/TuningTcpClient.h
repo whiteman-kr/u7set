@@ -5,8 +5,8 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../lib/Tuning/ITuningAuthorization.h"
 
+#include <ClientLib/ITuningAuthorization.h>
 #include <ClientLib/IRecentAppSignals.h>
 #include <ClientLib/ITuningLog.h>
 #include <ClientLib/ITuningSignalUpdater.h>

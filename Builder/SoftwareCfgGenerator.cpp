@@ -625,6 +625,18 @@ namespace Builder
 			return false;
 		}
 
+		// Validate project lists
+		//
+		std::vector<std::pair<QString, QString>> nonUniqueIds = lists.checkForSameIds();
+		if (nonUniqueIds.empty() == false)
+		{
+			for (const auto& [listId, listCaption] : nonUniqueIds)
+			{
+				log->errEQP6222(listId, listCaption);
+			}
+			return false;
+		}
+
 		bool returnResult = true;
 
 		AppSignalListsProvider provider(context->m_signalSet->appSignalSet()->signalsVector());

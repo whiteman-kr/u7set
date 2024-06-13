@@ -12,6 +12,8 @@ namespace Builder
 	{
 	public:
 		AppSignalListStorage(DbController* db);
+		
+		std::vector<std::pair<QString, QString>> checkForSameIds() const;
 
 		bool load(QString* errorMessage) override;
 		bool save(const QUuid& uuid, QString* errorMessage) override;

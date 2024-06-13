@@ -545,7 +545,7 @@ void TuningUiEditor::onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 
 			uiItem->updateOptionalProperties();
 
-			if (selectedUiItem->ID() == uiItem->ID())
+			if (selectedUiItem->uuid() == uiItem->uuid())
 			{
 				setItemText(item, uiItem);
 				break;
@@ -677,7 +677,23 @@ void TuningUiEditor::initUi()
 
 	m_propertyEditor->installEventFilter(this);
 
+	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &TuningUiEditor::onPropertiesChanged);
 
+	tab->addTab(propertyTabWidget, tr("Properties"));
+
+	//
+
+	m_hSplitter->addWidget(rw);
+
+	//
+
+	mainLayout->setContentsMargins(0, 0, 0, 0);
+	mainLayout->addWidget(m_hSplitter);
+
+	setLayout(mainLayout);
+
+	// Restore size
+	//
 	int splitterPosition = QSettings().value("TuningUiEditor/splitterPosition", -1).toInt();
 	if (splitterPosition < 0 || splitterPosition > 100)
 	{
@@ -693,21 +709,6 @@ void TuningUiEditor::initUi()
 	{
 		m_hSplitter->restoreState(ba);
 	}
-
-	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &TuningUiEditor::onPropertiesChanged);
-
-	tab->addTab(propertyTabWidget, tr("Properties"));
-
-	//
-
-	m_hSplitter->addWidget(rw);
-
-	//
-
-	mainLayout->setContentsMargins(0, 0, 0, 0);
-	mainLayout->addWidget(m_hSplitter);
-
-	setLayout(mainLayout);
 }
 
 void TuningUiEditor::addItem(TuningLib::TuningUiItem::InterfaceType uiType)

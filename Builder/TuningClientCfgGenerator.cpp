@@ -400,9 +400,8 @@ namespace Builder
 		}
 
 		// Load project ui
-
+		//
 		QString errorCode;
-
 		ok = tuningUiStorage.load(uiConfiguration.toUtf8(), &errorCode);
 		if (ok == false)
 		{
@@ -410,8 +409,30 @@ namespace Builder
 			return false;
 		}
 
-		QByteArray data;
+		// Validate project ui
+		//
+		std::vector<std::pair<QString, QString>> nonUniqueIds = tuningUiStorage.checkForSameIds();
+		for (const auto& [uiId, uiCaption] : nonUniqueIds)
+		{
+			m_log->errEQP6250(uiId, uiCaption, m_software->equipmentId());
+		}
 
+		// Check if all signal lists specified in Filters property exist
+		//
+		QStringList appSignalLists;
+		for (const auto& l: m_appSignalsListIdToList) 
+		{
+			appSignalLists.push_back(l.first);
+		}
+		std::vector<std::tuple<QString, QString, QString>> notFoundFilters = tuningUiStorage.checkFilters(appSignalLists);
+		for (const auto& [filterId, uiId, uiCaption] : notFoundFilters)
+		{
+			m_log->errEQP6251(filterId, uiId, uiCaption, m_software->equipmentId());
+		}
+
+		// Save Ui
+		//
+		QByteArray data;
 		ok = tuningUiStorage.save(data);
 		if (ok == false)
 		{

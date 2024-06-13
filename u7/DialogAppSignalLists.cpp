@@ -65,7 +65,8 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent) :
 	m_listsTree = new QTreeWidget();
 
 	QStringList l;
-	l << tr("ListID");
+	l << tr("ID");
+	l << tr("Caption");
 	l << tr("State");
 	l << tr("User");
 
@@ -218,38 +219,6 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent) :
 		return;
 	}
 
-	// Load deprecated connections
-	//
-	/*
-	Builder::ConnectionStorage xmlConnections(m_db);
-
-	ok = xmlConnections.loadFromXmlDeprecated(&errorMessage);
-	if (ok == false)
-	{
-		QMessageBox::critical(parent, qAppName(), errorMessage);
-		return;
-	}
-
-	if (xmlConnections.count() > 0)
-	{
-		QMessageBox::warning(parent, tr("Connections Editor"), tr("%1 connections have been imported from deprecated file
-	Connections.xml.").arg(xmlConnections.count()));
-
-		for (int i = 0; i < xmlConnections.count(); i++)
-		{
-			std::shared_ptr<Hardware::Connection> c = xmlConnections.get(i);
-
-			m_connections.add(c->uuid(), c);
-			m_connections.save(c->uuid(), &errorMessage);
-		}
-
-		ok = xmlConnections.deleteXmlDeprecated(&errorMessage);
-		if (ok == false)
-		{
-			QMessageBox::critical(parent, qAppName(), QString("Delete deprecated connection xml file error: ") + errorMessage);
-		}
-	}
-	*/
 	// fill data
 	//
 	fillAppSignalLists();
@@ -546,40 +515,24 @@ void DialogAppSignalLists::setPropertyEditorObjects()
 
 bool DialogAppSignalLists::continueWithDuplicateIds()
 {
-	bool duplicated = false;
-	QString duplicatedId;
+	std::vector<std::pair<QString, QString>> nonUniqueIds = m_lists->checkForSameIds();
 
-	for (int i = 0; i < m_lists->count(); i++)
+	QStringList duplicatedIds;
+	for (const auto& [id, caption] : nonUniqueIds)
 	{
-		AppSignalLists::AppSignalList* c = m_lists->get(i).get();
-
-		for (int j = 0; j < m_lists->count(); j++)
+		if (caption.isEmpty() == false)
 		{
-			AppSignalLists::AppSignalList* e = m_lists->get(j).get();
-			assert(e);
-
-			if (i == j)
-			{
-				continue;
-			}
-
-			if (e->id() == c->id())
-			{
-				duplicated = true;
-				duplicatedId = e->id();
-				break;
-			}
+			duplicatedIds.push_back(QString("%1 ('%2')").arg(id).arg(caption));
 		}
-
-		if (duplicated == true)
+		else
 		{
-			break;
+			duplicatedIds.push_back(id);
 		}
 	}
 
-	if (duplicated == true)
+	if (duplicatedIds.empty() == false)
 	{
-		QString s = tr("AppSignalList with ID '%1' already exists.\r\n\r\nAre you sure you want to continue?").arg(duplicatedId);
+		QString s = tr("Signal lists with duplicated IDs found:\n\n%1\n\nAre you sure you want to continue?").arg(duplicatedIds.join('\n'));
 		auto mbResult = QMessageBox::warning(this, qAppName(), s, QMessageBox::Yes | QMessageBox::No);
 
 		if (mbResult == QMessageBox::No)
@@ -1138,6 +1091,7 @@ void DialogAppSignalLists::updateTreeItemText(QTreeWidgetItem* item)
 
 	int c = 0;
 	item->setText(c++, list->id());
+	item->setText(c++, list->caption());
 
 	DbFileInfo fi = m_lists->fileInfo(list->uuid());
 

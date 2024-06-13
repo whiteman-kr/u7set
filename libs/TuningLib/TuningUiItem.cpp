@@ -245,7 +245,7 @@ namespace TuningLib
 		{
 			if (reader.attributes().hasAttribute(TuningUiTags::prop_Uuid))
 			{
-				setUuid(QUuid::fromString(reader.attributes().value(TuningUiTags::prop_ID).toString()));
+				setUuid(QUuid::fromString(reader.attributes().value(TuningUiTags::prop_Uuid).toString()));
 			}
 			else 
 			{
@@ -912,6 +912,10 @@ namespace TuningLib
 		return m_valueColumnsAppSignalIdSuffixes;
 	}
 
+	void TuningUiItem::setValueColumnsAppSignalIdSuffixes(const std::vector<QString>& suffixes) 
+	{
+		m_valueColumnsAppSignalIdSuffixes = suffixes;
+	}
 
 	bool TuningUiItem::columnCustomAppId() const
 	{
@@ -1317,6 +1321,11 @@ namespace TuningLib
 		m_root->setInterfaceType(TuningUiItem::InterfaceType::Root);
 	}
 
+	const TuningUiItem* TuningUiStorage::root() const 
+	{
+		return m_root.get();
+	}
+
 	TuningUiItem* TuningUiStorage::root()
 	{
 		return m_root.get();
@@ -1417,4 +1426,73 @@ namespace TuningLib
 			m_root->addChild(filter);
 		}
 	}
+
+	std::vector<std::pair<QString, QString>> TuningUiStorage::checkForSameIds() const
+	{
+		std::set<QString> ids;
+		std::vector<std::pair<QString, QString>> result;
+
+		auto f = [&ids, &result](const TuningUiItem* uiItem, auto&& f)
+		{
+			for (int c = 0; c < uiItem->childCount(); c++) 
+			{
+				TuningUiItem* childUiItem = uiItem->child(c).get();
+				if (childUiItem == nullptr) 
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				if (ids.find(childUiItem->ID()) != ids.end()) 
+				{
+					// Duplicate found
+					//
+					result.push_back({childUiItem->ID(), childUiItem->caption()});
+				}
+				else 
+				{
+					ids.insert(childUiItem->ID());
+				}
+
+				f(childUiItem, f);
+			}
+		};
+
+		f(root(), f);
+
+		return result;
+	}
+
+	std::vector<std::tuple<QString, QString, QString>> TuningUiStorage::checkFilters(const QStringList& appSignalLists) 
+	{
+		std::vector<std::tuple<QString, QString, QString>> result;
+
+		auto f = [appSignalLists, &result](const TuningUiItem* uiItem, auto&& f)
+		{
+			for (int c = 0; c < uiItem->childCount(); c++)
+			{
+				TuningUiItem* childUiItem = uiItem->child(c).get();
+				if (childUiItem == nullptr)
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				const QStringList& filters = childUiItem->filtersList();
+				for (const QString& filter: filters) 
+				{
+					if (appSignalLists.contains(filter) == false) 
+					{
+						result.push_back({filter, childUiItem->ID(), childUiItem->caption()});
+					}
+				}
+				f(childUiItem, f);
+			}
+		};
+
+		f(root(), f);
+
+		return result;
+	}
+
 } // namespace TuningUi

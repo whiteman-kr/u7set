@@ -1,20 +1,14 @@
 #include "TuningFilterEditor.h"
 
-#include <QApplication>
-#include <QComboBox>
-#include <QFileDialog>
-#include <QHBoxLayout>
-#include <QHeaderView>
-#include <QTreeWidget>
-#include <QVBoxLayout>
+using namespace TuningFilters;
 
 //
 // ViewTuningSignalsWidget
 //
 
-ViewTuningSignalsWidget::ViewTuningSignalsWidget(ClientLib::TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent)
-	:QWidget(parent),
-		m_signalManager(signalManager)
+ViewTuningSignalsWidget::ViewTuningSignalsWidget(ClientLib::TuningSignalManager& signalManager, QWidget* parent) :
+	QWidget(parent),
+	m_signalManager(signalManager)
 {
 
 	setWindowTitle(tr("Filter Signals"));
@@ -240,7 +234,6 @@ void ViewTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, cons
 
 TuningFilterEditor::TuningFilterEditor(TuningFilterStorage& filterStorage, ClientLib::TuningSignalManager& signalManager,
 									   bool readOnly,
-									   bool requestValuesEnabled,
 									   bool typeTreeEnabled,
 									   bool typeButtonEnabled,
 									   bool typeTabEnabled,
@@ -252,7 +245,6 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage& filterStorage, Clien
 	m_filterStorage(filterStorage),
 	m_signalManager(signalManager),
 	m_readOnly(readOnly),
-	m_requestValuesEnabled(requestValuesEnabled),
 	m_typeTreeEnabled(typeTreeEnabled),
 	m_typeButtonEnabled(typeButtonEnabled),
 	m_typeTabEnabled(typeTabEnabled),
@@ -949,7 +941,7 @@ void TuningFilterEditor::initUserInterface(QByteArray mainSplitterState, int pro
 
 	// Signals Tab
 
-	m_viewTuningSignalsWidget = new ViewTuningSignalsWidget(m_signalManager, m_requestValuesEnabled, this);
+	m_viewTuningSignalsWidget = new ViewTuningSignalsWidget(m_signalManager, this);
 	
 	tab->addTab(m_viewTuningSignalsWidget, tr("Signals"));
 
@@ -1276,8 +1268,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 	m_tuningFilterEditor = new TuningFilterEditor(m_filters,
 												  m_signals,
-												  false,	/*readOnly*/
-												  false,	/*setCurrentEnabled*/
+												  true,		/*readOnly*/
 												  true,		/*typeTreeEnabled*/
 												  true,		/*typeButtonEnabled*/
 												  true,		/*typeTabEnabled*/

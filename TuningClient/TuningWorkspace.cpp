@@ -2,9 +2,9 @@
 #include "Main.h"
 #include "MainWindow.h"
 #include "Settings.h"
-
 #include <ClientLib/TuningConnection.h>
 
+using namespace TuningFilters;
 //
 // FilterButton
 //

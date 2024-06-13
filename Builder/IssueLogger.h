@@ -585,7 +585,12 @@ namespace Builder
 		//
 		void errEQP6220(QString appSignalId, QString listId);									// Signal %1 specified in Application signals list %2 does not exist.
 		void errEQP6221(QString appSignalId, QString listId, QString softwareEquipmentId);		// Signal %1 specified in Application signals list %2 is not processed by software %3.
+		void errEQP6222(QString listId, QString listCaption);									// Application Signal List ID '%1' ('%2') is not unique.
 
+		// TuningClient UI
+		//
+		void errEQP6250(QString uiId, QString uiCaption, QString tuningClientId);						// UI item ID '%1' ('%2') is not unique in TuningClient %3.
+		void errEQP6251(QString filterId, QString uiId, QString uiCaption, QString tuningClientId);		// Application signals list '%1' specified in UI item ID '%2' ('%3') in TuningClient %4 does not exist.
 
 		// Script evaluations
 		//

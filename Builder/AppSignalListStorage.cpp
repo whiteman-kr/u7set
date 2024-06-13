@@ -12,6 +12,35 @@ namespace Builder
 	{
 	}
 
+	std::vector<std::pair<QString, QString>> AppSignalListStorage::checkForSameIds() const
+	{
+		std::set<QString> ids;
+		std::vector<std::pair<QString, QString>> result;
+
+		for (auto it = begin(); it != end(); it++)
+		{
+			const AppSignalLists::AppSignalList* list = it->get();
+			if (list == nullptr) 
+			{
+				Q_ASSERT(list);
+				return {};
+			}
+
+			if (ids.find(list->id()) != ids.end())
+			{
+				// Duplicate found
+				//
+				result.push_back({list->id(), list->caption()});
+			}
+			else
+			{
+				ids.insert(list->id());
+			}
+		}
+
+		return result;
+	}
+	
 	bool AppSignalListStorage::load(QString* errorMessage)
 	{
 		if (m_db == nullptr || errorMessage == nullptr)

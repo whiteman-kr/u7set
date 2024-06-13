@@ -22,8 +22,6 @@ qt_standard_project_setup()
 
 set (TC_SOURCES
 	../lib/ConstStrings.h
-	../lib/Tuning/TuningFilter.cpp
-	../lib/Tuning/TuningFilter.h
 	DialogChooseFilter.cpp
 	DialogChooseFilter.h
 	DialogProperties.cpp

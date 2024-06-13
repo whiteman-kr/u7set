@@ -240,6 +240,8 @@ namespace AppSignalLists
 		
 		void fireUpdatePerformed();
 
+		std::vector<std::pair<QString, QString>> checkForSameIds() const;
+
 		AppSignalListSet& operator = (const AppSignalListSet& That) 
 		{
 			// Perform a deep copy of all lists

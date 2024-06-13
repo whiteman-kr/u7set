@@ -7,6 +7,8 @@
 #include "Settings.h"
 #include "SwitchFiltersPageOptions.h"
 
+using namespace TuningFilters;
+
 FilterPushButton::FilterPushButton(const QString& caption, std::shared_ptr<TuningFilter> filter, QWidget* parent):
 	QPushButton(caption, parent),
 	m_filter(filter)

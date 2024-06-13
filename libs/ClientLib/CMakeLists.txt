@@ -22,6 +22,8 @@ qt_add_library(${TARGET} STATIC
 	./include/ClientLib/IAppSignalUpdater.h
 	./include/ClientLib/IRecentAppSignals.h
 	./include/ClientLib/ITestObserver.h
+	./include/ClientLib/ITuningAuthorization.h
+	./include/ClientLib/ITuningConnection.h
 	./include/ClientLib/ITuningLog.h
 	./include/ClientLib/ITuningSignalUpdater.h
 	./include/ClientLib/RtDataProvider.h

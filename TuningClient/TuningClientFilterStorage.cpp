@@ -3,6 +3,8 @@
 #include "MainWindow.h"
 #include "TuningSourcesHelper.h"
 
+using namespace TuningFilters;
+
 TuningClientFilterStorage::TuningClientFilterStorage()
 {
 

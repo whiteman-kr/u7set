@@ -2,13 +2,12 @@
 #define SWITCHPRESETSPAGE_H
 
 #include "../AppSignalLib/TuningSignalState.h"
-#include "../lib/Tuning/TuningFilter.h"
 
 #include <ClientLib/TuningSignalManager.h>
 #include <ClientLib/TuningUserManager.h>
-
 #include "TuningClientFilterStorage.h"
 #include "TuningConfigController.h"
+#include <TuningLib/TuningFilter.h>
 
 namespace ClientLib
 {
@@ -23,18 +22,18 @@ class FilterPushButton : public QPushButton
 {
 	Q_OBJECT
 public:
-	FilterPushButton(const QString& caption, std::shared_ptr<TuningFilter> filter, QWidget* parent);
+	FilterPushButton(const QString& caption, std::shared_ptr<TuningFilters::TuningFilter> filter, QWidget* parent);
 
-	std::shared_ptr<TuningFilter> filter();
+	std::shared_ptr<TuningFilters::TuningFilter> filter();
 
 signals:
-	void clicked(std::shared_ptr<TuningFilter> filter);
+	void clicked(std::shared_ptr<TuningFilters::TuningFilter> filter);
 
 private:
 	virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
-	std::shared_ptr<TuningFilter> m_filter;
+	std::shared_ptr<TuningFilters::TuningFilter> m_filter;
 
 };
 
@@ -123,23 +122,23 @@ public:
 							   TuningClientFilterStorage& tuningFilterStorage,
 							   ClientLib::TuningUserManager& userManager,
 							   ClientLib::TuningConnection& tuningConnection,
-							   std::shared_ptr<TuningFilter> workspaceFilter,
+							   std::shared_ptr<TuningFilters::TuningFilter> workspaceFilter,
 							   QWidget* parent = 0);
 	~SwitchFiltersPage();
 
-	void createControls(std::shared_ptr<TuningFilter> root);
+	void createControls(std::shared_ptr<TuningFilters::TuningFilter> root);
 
 private:
 
-	void createFiltersList(std::shared_ptr<TuningFilter> filter);
+	void createFiltersList(std::shared_ptr<TuningFilters::TuningFilter> filter);
 	void createButtons();
 	void createListItems();
 
-	bool changeFilterSignals(std::shared_ptr<TuningFilter> filter);
+	bool changeFilterSignals(std::shared_ptr<TuningFilters::TuningFilter> filter);
 	void apply();
 
-	int countDiscretes(TuningFilter* filter);
-	int countWritingEnabled(TuningFilter* filter);
+	int countDiscretes(TuningFilters::TuningFilter* filter);
+	int countWritingEnabled(TuningFilters::TuningFilter* filter);
 
 protected:
 	  void showEvent(QShowEvent *ev) override;
@@ -150,7 +149,7 @@ private slots:
 	void onNext();
 	void onApply();
 	void onTimer();
-	void onFilterButtonClicked(std::shared_ptr<TuningFilter> filter);
+	void onFilterButtonClicked(std::shared_ptr<TuningFilters::TuningFilter> filter);
 	void onFilterTablePressed();
 
 private:
@@ -163,17 +162,17 @@ private:
 		ColumnCount
 	};
 
-	std::vector<std::shared_ptr<TuningFilter>> m_buttonFilters;
-	std::vector<std::shared_ptr<TuningFilter>> m_listFilters;
+	std::vector<std::shared_ptr<TuningFilters::TuningFilter>> m_buttonFilters;
+	std::vector<std::shared_ptr<TuningFilters::TuningFilter>> m_listFilters;
 
 	TuningConfigController& m_configController;
 	ClientLib::TuningSignalManager& m_tuningSignalManager;
-	TuningFilterStorage& m_tuningFilterStorage;
+	TuningFilters::TuningFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
 
 	ClientLib::TuningConnection& m_tuningConnection;
 
-	std::shared_ptr<TuningFilter> m_workspaceFilter;
+	std::shared_ptr<TuningFilters::TuningFilter> m_workspaceFilter;
 
 	//
 

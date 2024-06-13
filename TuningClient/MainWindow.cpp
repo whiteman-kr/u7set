@@ -1,21 +1,21 @@
 #include "Main.h"
 #include "MainWindow.h"
 
-#include "../UtilsLib/LogFile.h"
-#include "../UtilsLib/Ui/UiTools.h"
-#include "../lib/Tuning/TuningFilter.h"
-
 #include <AppSignalLists/DialogSignalListEditor.h>
 #include <AppSignalLists/SignalListChecker.h>
+#include <ClientLib/TuningLog.h>
+#include <TuningLib/TuningFilter.h>
 #include <UiLib/DialogAlert.h>
 #include <UiLib/DialogAbout.h>
-#include <ClientLib/TuningLog.h>
+#include "../UtilsLib/LogFile.h"
+#include "../UtilsLib/Ui/UiTools.h"
 
 #include "Settings.h"
 #include "DialogSettings.h"
 #include "TuningClientFilterStorage.h"
 #include "TuningSchemaManager.h"
 
+using namespace TuningFilters;
 
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),

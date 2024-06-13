@@ -16,22 +16,22 @@ class FilterButton : public QPushButton
 {
 	Q_OBJECT
 public:
-	FilterButton(std::shared_ptr<TuningFilter> filter, bool check, QWidget* parent = nullptr);
+	FilterButton(std::shared_ptr<TuningFilters::TuningFilter> filter, bool check, QWidget* parent = nullptr);
 
-	std::shared_ptr<TuningFilter> filter();
+	std::shared_ptr<TuningFilters::TuningFilter> filter();
 
 	int counter() const;
 	void update(int discreteCounter);
 
 private:
-	std::shared_ptr<TuningFilter> m_filter;
+	std::shared_ptr<TuningFilters::TuningFilter> m_filter;
 	int m_discreteCounter = 0;
 
 private slots:
 	void slot_toggled(bool checked);
 
 signals:
-	void filterButtonClicked(std::shared_ptr<TuningFilter> filter);
+	void filterButtonClicked(std::shared_ptr<TuningFilters::TuningFilter> filter);
 };
 
 
@@ -44,8 +44,8 @@ public:
 							 TuningClientFilterStorage& tuningFilterStorage,
 							 ClientLib::TuningUserManager& userManager,
 							 ClientLib::TuningConnection& tuningConnection,
-							 std::shared_ptr<TuningFilter> treeFilter,
-							 std::shared_ptr<TuningFilter> workspaceFilter,
+							 std::shared_ptr<TuningFilters::TuningFilter> treeFilter,
+							 std::shared_ptr<TuningFilters::TuningFilter> workspaceFilter,
 							 bool hasFilterTree,
 							 QWidget* parent);
 
@@ -64,7 +64,7 @@ private:
 	void createButtons();
 	void createTabPages();
 
-	QWidget* createTuningPageOrWorkspace(std::shared_ptr<TuningFilter> childWorkspaceFilter);
+	QWidget* createTuningPageOrWorkspace(std::shared_ptr<TuningFilters::TuningFilter> childWorkspaceFilter);
 
 	// Tree items operation
 
@@ -83,7 +83,7 @@ private:
 	ClientLib::TuningUserManager& m_userManager;
 	ClientLib::TuningConnection& m_tuningConnection;
 
-	std::shared_ptr<TuningFilter> m_workspaceFilter;
+	std::shared_ptr<TuningFilters::TuningFilter> m_workspaceFilter;
 
 	// Interface parts
 
@@ -96,12 +96,12 @@ private:
 	// Filters containters
 
 	std::vector<FilterButton*> m_filterButtons;
-	std::vector<std::shared_ptr<TuningFilter>> m_tabsFilters;
+	std::vector<std::shared_ptr<TuningFilters::TuningFilter>> m_tabsFilters;
 
 	//
 
-	std::shared_ptr<TuningFilter> m_treeFilter;				// Currently pressed tree filter
-	std::shared_ptr<TuningFilter> m_currentbuttonFilter;	// Currently pressed button filter
+	std::shared_ptr<TuningFilters::TuningFilter> m_treeFilter;				// Currently pressed tree filter
+	std::shared_ptr<TuningFilters::TuningFilter> m_currentbuttonFilter;	// Currently pressed button filter
 
 	// Tuning controls
 
@@ -115,12 +115,12 @@ private:
 static int m_instanceCounter;
 
 private slots:
-	void slot_parentWorkspaceTreeFilterChanged(std::shared_ptr<TuningFilter> filter);
-	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
+	void slot_parentWorkspaceTreeFilterChanged(std::shared_ptr<TuningFilters::TuningFilter> filter);
+	void slot_filterButtonClicked(std::shared_ptr<TuningFilters::TuningFilter> filter);
 
 signals:
-	void treeFilterChanged(std::shared_ptr<TuningFilter> filter);
-	void buttonFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+	void treeFilterChanged(std::shared_ptr<TuningFilters::TuningFilter> filter);
+	void buttonFilterSelectionChanged(std::shared_ptr<TuningFilters::TuningFilter> filter);
 
 
 };

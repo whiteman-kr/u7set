@@ -1,17 +1,17 @@
 #ifndef CLIENTFILTERSTORAGE_H
 #define CLIENTFILTERSTORAGE_H
 
-#include "../lib/Tuning/TuningFilter.h"
-#include "../OnlineLib/SoftwareSettings.h"
-
 #include <ClientLib/TuningSourceState.h>
+#include <TuningLib/TuningFilter.h>
+#include "../OnlineLib/SoftwareSettings.h"
 
 namespace ClientLib
 {
 	class TuningConnection;
+	class TuningSignalManager;
 }
 
-class TuningClientFilterStorage : public TuningFilterStorage
+class TuningClientFilterStorage : public TuningFilters::TuningFilterStorage
 {
 public:
 	TuningClientFilterStorage();
@@ -27,9 +27,9 @@ public:
 						const ClientLib::TuningConnection& tuningConnection,
 						const std::vector<ClientLib::TuningSource>& sourceStates,
 						TuningClientSettings::LmStatusFlagMode lmStatusFlagMode,
-						TuningFilter* filter = nullptr);
+						TuningFilters::TuningFilter* filter = nullptr);
 
-	void removeFilters(TuningFilter::Source sourceType);
+	void removeFilters(TuningFilters::TuningFilter::Source sourceType);
 };
 
 class DialogCheckFilterSignals : public QDialog

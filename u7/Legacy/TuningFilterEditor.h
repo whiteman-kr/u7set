@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../../lib/Tuning/TuningFilter.h"
+#include <ClientLib/TuningSignalManager.h>
+#include <TuningLib/TuningFilter.h>
 #include <UiLib/PropertyEditor.h>
 
 
@@ -10,7 +11,7 @@ class ViewTuningSignalsWidget : public QWidget
 
 public:
 
-	ViewTuningSignalsWidget(ClientLib::TuningSignalManager& signalManager, bool requestValuesEnabled, QWidget* parent);
+	ViewTuningSignalsWidget(ClientLib::TuningSignalManager& signalManager, QWidget* parent);
 
 	enum class BaseFilterType
 	{
@@ -49,17 +50,17 @@ public:
 	bool readOnly() const;
 	void setReadOnly(bool value);
 
-	void setFilter(std::shared_ptr<TuningFilter> selectedFilter);
+	void setFilter(std::shared_ptr<TuningFilters::TuningFilter> selectedFilter);
 
 private:
 	void fillFilterValuesTree();
-	void setFilterValueItemText(QTreeWidgetItem* item, const TuningFilterSignal& value);
+	void setFilterValueItemText(QTreeWidgetItem* item, const TuningFilters::TuningFilterSignal& value);
 
 private:
 
 	ClientLib::TuningSignalManager& m_signalManager;
 
-	std::shared_ptr<TuningFilter> m_filter;
+	std::shared_ptr<TuningFilters::TuningFilter> m_filter;
 
 	// Right side
 
@@ -79,16 +80,15 @@ class TuningFilterEditor : public QWidget
 
 public:
 
-	explicit TuningFilterEditor(TuningFilterStorage& filterStorage,
+	explicit TuningFilterEditor(TuningFilters::TuningFilterStorage& filterStorage,
 								ClientLib::TuningSignalManager& signalManager,
 								bool readOnly,
-								bool requestValuesEnabled,
 								bool typeTreeEnabled,
 								bool typeButtonEnabled,
 								bool typeTabEnabled,
 								bool typeCounterEnabled,
 								bool typeSchemasTabsEnabled,
-								TuningFilter::Source source,
+								TuningFilters::TuningFilter::Source source,
 								QByteArray mainSplitterState,
 								int propertyEditorSplitterPos);
 
@@ -133,11 +133,11 @@ private:
 
 	void initUserInterface(QByteArray mainSplitterState, int propertyEditorSplitterPos);
 
-	void addPreset(TuningFilter::InterfaceType interfaceType);
+	void addPreset(TuningFilters::TuningFilter::InterfaceType interfaceType);
 
-	void addChildTreeObjects(const std::shared_ptr<TuningFilter>& filter, QTreeWidgetItem* parent);
+	void addChildTreeObjects(const std::shared_ptr<TuningFilters::TuningFilter>& filter, QTreeWidgetItem* parent);
 
-	void setFilterItemText(QTreeWidgetItem* item, TuningFilter* filter);
+	void setFilterItemText(QTreeWidgetItem* item, TuningFilters::TuningFilter* filter);
 
 	void movePresets(int direction);
 
@@ -186,7 +186,7 @@ private:
 
 	bool m_modified = false;
 
-	TuningFilterStorage& m_filterStorage;
+	TuningFilters::TuningFilterStorage& m_filterStorage;
 
 	ClientLib::TuningSignalManager& m_signalManager;
 
@@ -197,7 +197,6 @@ private:
 	QByteArray m_dialogChooseSignalGeometry;
 
 	bool m_readOnly = false;
-	bool m_requestValuesEnabled = false;
 
 	bool m_typeButtonEnabled = false;
 	bool m_typeTabEnabled = false;
@@ -205,7 +204,7 @@ private:
 	bool m_typeCounterEnabled = false;
 	bool m_typeSchemasTabsEnabled = false;
 
-	TuningFilter::Source m_source = TuningFilter::Source::User;
+	TuningFilters::TuningFilter::Source m_source = TuningFilters::TuningFilter::Source::User;
 };
 
 //
@@ -233,7 +232,7 @@ private:
 
 	ILogFileStub logFileStub;
     ClientLib::TuningSignalManager m_signals;
-	TuningFilterStorage m_filters;
+	TuningFilters::TuningFilterStorage m_filters;
 
 	DbController* m_dbController = nullptr;
 };

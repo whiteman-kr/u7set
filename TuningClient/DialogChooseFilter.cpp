@@ -1,6 +1,6 @@
 #include "DialogChooseFilter.h"
 
-Q_DECLARE_METATYPE (TuningFilter*)
+using namespace TuningFilters;
 
 DialogChooseFilter::DialogChooseFilter(QWidget* parent, TuningFilter* parentFilter, TuningFilter::InterfaceType interfaceType, TuningFilter::Source source)
 	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)

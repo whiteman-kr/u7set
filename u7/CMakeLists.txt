@@ -27,8 +27,6 @@ set (U7_SOURCES
 	../lib/Configurator.h
 	../lib/ConstStrings.h
 	../lib/diff_match_patch.h
-	../lib/Tuning/TuningFilter.cpp
-	../lib/Tuning/TuningFilter.h
 	./Ui/FilesTreeView.cpp
 	./Ui/FilesTreeView.h
 	./Ui/PropertyTable.cpp

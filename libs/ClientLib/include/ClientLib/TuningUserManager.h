@@ -2,7 +2,7 @@
 
 #include <QDialog>
 #include <QMutex>
-#include "../lib/Tuning/ITuningAuthorization.h"
+#include <ClientLib/ITuningAuthorization.h>
 #include "../OnlineLib/MatsUsers.h"
 
 #ifdef Q_OS_LINUX

@@ -49,7 +49,7 @@ namespace TuningLib
 			FilterTree,
 		};
 		Q_ENUM(CounterType)
-	
+
 	public:
 		TuningUiItem();
 		TuningUiItem(const TuningUiItem& That) = delete;
@@ -135,8 +135,8 @@ namespace TuningLib
 
 		//
 
-		//QString startSchemaId() const;
-		//void setStartSchemaId(const QString& id);
+		// QString startSchemaId() const;
+		// void setStartSchemaId(const QString& id);
 
 		// Tab appearance
 
@@ -147,6 +147,7 @@ namespace TuningLib
 		void setValuesColumnCount(int value);
 
 		std::vector<QString> valueColumnsAppSignalIdSuffixes() const;
+		void setValueColumnsAppSignalIdSuffixes(const std::vector<QString>& suffixes);
 
 		bool columnCustomAppId() const;
 		void setColumnCustomAppId(bool value);
@@ -189,13 +190,10 @@ namespace TuningLib
 		bool removeChild(const QUuid& uuid);
 		bool removeChild(const QString& ID);
 		bool removeChild(int index);
-
 		void removeAllChildren();
 
 		int childCount() const;
-
 		std::shared_ptr<TuningUiItem> child(int index) const;
-		//TuningUiItem* child(const QString& caption) const;
 
 		std::shared_ptr<TuningUiItem> find(const QString& id) const; // Recursive search
 		std::shared_ptr<TuningUiItem> find(const QUuid& uuid) const; // Recursive search
@@ -233,7 +231,7 @@ namespace TuningLib
 		QStringList m_tags;
 		QStringList m_filters;
 
-		//QString m_startSchemaId;
+		// QString m_startSchemaId;
 
 		// Tab appearance
 		//
@@ -278,6 +276,7 @@ namespace TuningLib
 
 		// Access
 		//
+		const TuningUiItem* root() const;
 		TuningUiItem* root();
 
 		// Serialization
@@ -289,9 +288,14 @@ namespace TuningLib
 		//
 		void add(std::shared_ptr<TuningUiItem> filter, bool moveToTop);
 
+		// Validate
+		// 
+		std::vector<std::pair<QString, QString>> checkForSameIds() const;
+		std::vector<std::tuple<QString, QString, QString>> checkFilters(const QStringList& appSignalLists);
+
 	protected:
 		std::unique_ptr<TuningUiItem> m_root;
-		//std::vector<VFrame30::SchemaDetails> m_schemasDetails;
+		// std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 	};
 
-} // namespace TuningUi
+} // namespace TuningLib

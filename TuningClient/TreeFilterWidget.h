@@ -21,7 +21,7 @@ public:
 					 QWidget* parent);
 	~TreeFilterWidget();
 
-	void fillFiltersTree(std::shared_ptr<TuningFilter> rootFilter);
+	void fillFiltersTree(std::shared_ptr<TuningFilters::TuningFilter> rootFilter);
 	void updateFiltersTree();
 
 	bool isEmpty() const;
@@ -29,10 +29,10 @@ public:
 
 private:
 	void createFilterTree();
-	void addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask);
+	void addChildTreeObjects(const std::shared_ptr<TuningFilters::TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask);
 	void updateTreeItemStatus(QTreeWidgetItem* treeItem = nullptr);
-	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter);
-	void updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFilter* filter);
+	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilters::TuningFilter* filter);
+	void updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFilters::TuningFilter* filter);
 	void activateControl(const QString& equipmentId, bool enable);
 	QTreeWidgetItem* findFilterWidget(const QString& id, QTreeWidgetItem* treeItem);
 
@@ -45,7 +45,7 @@ private slots:
 	void slot_maskApply();
 
 signals:
-	void treeFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+	void treeFilterSelectionChanged(std::shared_ptr<TuningFilters::TuningFilter> filter);
 
 private:
 	TuningConfigController& m_configController;
