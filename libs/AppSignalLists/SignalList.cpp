@@ -658,6 +658,7 @@ namespace AppSignalLists
 
 	std::shared_ptr<AppSignalList> AppSignalListSet::get(const QString& id) const
 	{
+		int todo_optimize_search_using_map = 1;
 		auto it = std::find_if(m_lists.begin(),
 							   m_lists.end(),
 							   [id](const auto& list)

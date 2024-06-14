@@ -5,17 +5,15 @@
 #include <AppSignalLists/SignalListChecker.h>
 #include <ClientLib/TuningLog.h>
 #include <TuningLib/TuningFilter.h>
+#include <TuningLib/TuningFilterToLists.h>
 #include <UiLib/DialogAlert.h>
 #include <UiLib/DialogAbout.h>
 #include "../UtilsLib/LogFile.h"
 #include "../UtilsLib/Ui/UiTools.h"
-
 #include "Settings.h"
 #include "DialogSettings.h"
-#include "TuningClientFilterStorage.h"
+#include "TuningClientUiStorage.h"
 #include "TuningSchemaManager.h"
-
-using namespace TuningFilters;
 
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
@@ -23,8 +21,8 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_tuningLog(m_userManager, "TuningClientSignals", QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()),
 	m_configController(softwareInfo, TuningClientAppSettings::instance().configuratorAddress1(), TuningClientAppSettings::instance().configuratorAddress2(), &m_logFile),
 	m_tuningSignalManager(softwareInfo.equipmentID(), &m_logFile),
-	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, m_userManager, &m_logFile, &m_tuningLog}
-
+	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, m_userManager, &m_logFile, &m_tuningLog},
+	m_tuningUi(m_tuningSignalManager, m_tuningConnection, m_appSignalListSet)
 {
 	// Init translator
 	//
@@ -97,17 +95,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	connect(&m_logFile, &Log::LogFile::writeFailure, m_dialogAlert, &UiLib::DialogAlert::onAlertArrived);
 
 	// Load user filters
-
-	QString errorCode;
-
-	/*
-	if (m_filterStorage.load(TuningClientAppSettings::instance().userFiltersFile(), &errorCode) == false)
-	{
-		QString msg = tr("Failed to load user filters: %1").arg(errorCode);
-
-		m_logFile.writeError(msg);
-		QMessageBox::critical(this, tr("Error"), msg);
-	}*/
 
 	loadSignalLists();
 
@@ -315,6 +302,28 @@ void MainWindow::loadSignalLists()
 	{
 		m_logFile.writeError(errorMessage);
 	}
+
+	// Load legacy local filters
+	//
+	TuningFilters::TuningFilterStorage localFilterStorage;
+	QString errorCode;
+	if (localFilterStorage.load(TuningClientAppSettings::instance().userFiltersFile(), &errorCode) == false)
+	{
+		QString msg = tr("Failed to load legacy user filters: %1").arg(errorCode);
+		m_logFile.writeError(msg);
+		QMessageBox::critical(this, qAppName(), msg);
+	}
+
+	// Merge legacy local filters
+	//
+	TuningLib::TuningUiStorage tuningUiStub;
+	bool ok = TuningFilters::TuningFilterToLists::convert(localFilterStorage, tuningUiStub,  m_appSignalListSet, {}/*systemTags*/);
+	if (ok == false) 
+	{
+		QString msg = tr("Failed to merge legacy user filters: %1").arg(errorCode);
+		m_logFile.writeError(msg);
+		QMessageBox::critical(this, qAppName(), msg);
+	}
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
@@ -411,7 +420,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 		if (updateCountersCounter++ == 0)
 		{
 			std::vector<ClientLib::TuningSource> sourcesInfo = m_tuningConnection.tuningSourcesInfo();
-			m_filterStorage.updateCounters(m_tuningSignalManager, m_tuningConnection, sourcesInfo, m_configController.configuration().lmStatusFlagMode(), nullptr);
+			m_tuningUi.updateCounters(sourcesInfo, m_configController.configuration().lmStatusFlagMode(), nullptr);
 		}
 		updateCountersCounter %= 2;
 
@@ -424,31 +433,6 @@ void MainWindow::timerEvent(QTimerEvent* event)
 
 	return;
 }
-
-/*void MainWindow::checkAndRemoveFilterSignals()
-{
-	// Find and possibly remove non-existing signals from the list
-
-	bool removedNotFound = false;
-
-	std::vector<std::pair<QString, QString>> notFoundSignalsAndFilters;
-
-    m_filterStorage.checkAndRemoveFilterSignals(m_tuningSignalManager.signalHashes(),
-                                                removedNotFound,
-                                                notFoundSignalsAndFilters,
-                                                this);
-
-	if (removedNotFound == true)
-	{
-		QString errorMsg;
-
-        if (m_filterStorage.saveUserFilters(TuningClientAppSettings::instance().userFiltersFile(), &errorMsg) == false)
-		{
-			m_logFile.writeError(errorMsg);
-			QMessageBox::critical(this, tr("Error"), errorMsg);
-		}
-	}
-}*/
 
 void MainWindow::createWorkspace()
 {
@@ -476,46 +460,29 @@ void MainWindow::createWorkspace()
 		setCentralWidget(w);
 	}
 
-    // Count user filters signals hashes
-
-    /*m_filterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager,
-                                                         m_tuningSignalManager.signalHashes(),
-                                                         m_filterStorage.root().get(),
-                                                         TuningFilter::Source::User);
-
-    checkAndRemoveFilterSignals();*/
-
 	// Create new workspaces
 
 	if (m_configController.showSchemas() == true && m_configController.schemaCount() != 0)
 	{
 		bool schemaFiltersFound = false;
 
-		std::shared_ptr<TuningFilter> rootFilter = m_filterStorage.root();
-		if (rootFilter == nullptr)
+		for (int i = 0; i < m_tuningUi.root()->childCount(); i++)
 		{
-			Q_ASSERT(rootFilter);
-			return;
-		}
-
-		int count = rootFilter->childFiltersCount();
-		for (int i = 0; i < count; i++)
-		{
-			std::shared_ptr<TuningFilter> childFilter = rootFilter->childFilter(i);
-			if (childFilter == nullptr)
+			auto uiUtem = m_tuningUi.root()->child(i);
+			if (uiUtem == nullptr)
 			{
-				Q_ASSERT(childFilter);
+				Q_ASSERT(uiUtem);
 				continue;
 			}
 
-			if (childFilter->isSchemasTab() == true)
+			if (uiUtem->isSchemasTab() == true)
 			{
 				schemaFiltersFound = true;
 
 				SchemasWorkspace* sw = new SchemasWorkspace(m_configController,
-															childFilter->caption(),
-															childFilter->tagsList(),
-															childFilter->startSchemaId(),
+															uiUtem->caption(),
+															uiUtem->tagsList(),
+															uiUtem->startSchemaId(),
 															&m_logFile,
 															this);
 				m_schemasWorkspaces.push_back(sw);
@@ -536,6 +503,10 @@ void MainWindow::createWorkspace()
 
 	if (m_configController.showSignals() == true)
 	{
+		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		//!
+		int remove_m_filter_storage = 1;
+		TuningFilters::TuningFilterStorage m_filterStorage;
 		m_tuningWorkspace = new TuningWorkspace(m_configController,
 												m_tuningSignalManager,
 												m_filterStorage,
@@ -740,25 +711,26 @@ void MainWindow::updateStatusBar()
 	{
 		int labelCount = 0;
 
-		int filtersCount = m_filterStorage.root()->childFiltersCount();
-		for (int i = 0; i < filtersCount; i++)
+		// Compute labels count
+		//
+		for (int i = 0; i < m_tuningUi.root()->childCount(); i++)
 		{
-			TuningFilter* f = m_filterStorage.root()->childFilter(i).get();
-			if (f == nullptr)
+			auto uiItem = m_tuningUi.root()->child(i).get();
+			if (uiItem == nullptr)
 			{
-				Q_ASSERT(f);
+				Q_ASSERT(uiItem);
 				return;
 			}
-			if (f->isCounter() == true && f->counterType() == TuningFilter::CounterType::StatusBar)
+			if (uiItem->isCounter() == true && uiItem->counterType() == TuningLib::TuningUiItem::CounterType::StatusBar)
 			{
 				labelCount++;
 			}
 		}
 
+		// If counters count changed, recreate labels
+		//
 		if (static_cast<int>(m_statusDiscreteCount.size()) != labelCount)
 		{
-			// Counters count changed, recreate labels
-
 			for (QLabel* l : m_statusDiscreteCount)
 			{
 				delete l;
@@ -778,23 +750,23 @@ void MainWindow::updateStatusBar()
 			}
 		}
 
+		// Update statusBar counter label state 
+		//
 		size_t labelIndex = 0;
 
-		for (int i = 0; i < filtersCount; i++)
+		for (int i = 0; i < m_tuningUi.root()->childCount(); i++)
 		{
-			TuningFilter* f = m_filterStorage.root()->childFilter(i).get();
-			if (f == nullptr)
+			auto uiItem = m_tuningUi.root()->child(i).get();
+			if (uiItem == nullptr)
 			{
-				Q_ASSERT(f);
+				Q_ASSERT(uiItem);
 				return;
 			}
 
-			if (f->isCounter() == false || f->counterType() != TuningFilter::CounterType::StatusBar)
+			if (uiItem->isCounter() == false || uiItem->counterType() != TuningLib::TuningUiItem::CounterType::StatusBar)
 			{
 				continue;
 			}
-
-			TuningCounters counters = f->counters();
 
 			if (labelIndex >= m_statusDiscreteCount.size())
 			{
@@ -809,7 +781,8 @@ void MainWindow::updateStatusBar()
 				return;
 			}
 
-			text = tr(" %1 %2 ").arg(f->caption()).arg(counters.discreteCounter);
+			TuningLib::TuningCounters counters = uiItem->counters();
+			text = tr(" %1 %2 ").arg(uiItem->caption()).arg(counters.discreteCounter);
 
 			if (l->text() != text)
 			{
@@ -825,7 +798,7 @@ void MainWindow::updateStatusBar()
 			}
 			else
 			{
-				QString styleSheet = QString("QLabel {background-color : %1; color: %2}").arg(f->backAlertedColor().name()).arg(f->textAlertedColor().name());
+				QString styleSheet = QString("QLabel {background-color : %1; color: %2}").arg(uiItem->backAlertedColor().name()).arg(uiItem->textAlertedColor().name());
 
 				if (l->styleSheet() != styleSheet)
 				{
@@ -837,7 +810,7 @@ void MainWindow::updateStatusBar()
 
 	// LM Errors
 
-	TuningCounters rootCounters = m_filterStorage.root()->counters();
+	TuningLib::TuningCounters rootCounters = m_tuningUi.root()->counters();
 
 	{
 		assert(m_statusBarLmErrors);
@@ -1080,12 +1053,6 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 										 configuration.clientSettings.autoApply,
 										 configuration.clientSettings.statusFlagFunction);
 
-	// Update AppSignalLists: remove all lists with Ide tag and add loaded ones
-	//
-	m_appSignalListSet.remove(AppSignalLists::AppSignalList::tagIde);
-	m_appSignalListSet.add(m_configController.appSignalListSet());
-
-
 	createWorkspace();
 
 	m_statusBarSor->setToolTip(configuration.lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::SOR ? m_sorTooltipText : QString());
@@ -1314,15 +1281,14 @@ void MainWindow::showAppSignalListEditor()
 	}
 
 	AppSignalLists::DialogSignalListEditor::showDialog(m_appSignalListSet, m_tuningSignalManager, this);
+	
+	slot_userFiltersChanged();
 }
 
-void MainWindow::slot_userFiltersChanged()
+void MainWindow::slot_userFiltersChanged() 
 {
-    //checkAndRemoveFilterSignals();
-
 	if (m_tuningWorkspace != nullptr)
 	{
 		m_tuningWorkspace->updateFilters();
 	}
-
 }

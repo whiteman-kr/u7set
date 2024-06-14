@@ -137,7 +137,7 @@ int TuningWorkspace::m_instanceCounter = 0;
 
 TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 								 ClientLib::TuningSignalManager& tuningSignalManager,
-								 TuningClientFilterStorage& tuningFilterStorage,
+								 TuningFilters::TuningFilterStorage& tuningFilterStorage,
 								 ClientLib::TuningUserManager& userManager,
 								 ClientLib::TuningConnection& tuningConnection,
 								 std::shared_ptr<TuningFilter> treeFilter,

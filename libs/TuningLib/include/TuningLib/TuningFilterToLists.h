@@ -25,12 +25,14 @@ namespace TuningFilters
 
 		static bool convert(TuningFilters::TuningFilterStorage& tuningFilterStorage,
 							TuningLib::TuningUiStorage& uiStorage,
-							AppSignalLists::AppSignalListSet& appSignalLists);
+							AppSignalLists::AppSignalListSet& appSignalLists,
+							const QStringList& appSignalListsSystemTags);
 
 	private:
 		static bool convertFilter(TuningFilters::TuningFilter* parentFilter,
-							TuningLib::TuningUiItem* parentUi,
-							AppSignalLists::AppSignalListSet& appSignalLists);
+								  TuningLib::TuningUiItem* parentUi,
+								  AppSignalLists::AppSignalListSet& appSignalLists,
+								  const QStringList& appSignalListsSystemTags);
 
 
 	};

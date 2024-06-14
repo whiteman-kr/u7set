@@ -7,20 +7,22 @@ namespace TuningFilters
 {
 	bool TuningFilterToLists::convert(TuningFilters::TuningFilterStorage& tuningFilterStorage,
 									  TuningLib::TuningUiStorage& uiStorage,
-									  AppSignalLists::AppSignalListSet& appSignalLists)
+									  AppSignalLists::AppSignalListSet& appSignalLists,
+									  const QStringList& appSignalListsSystemTags)
 	{
 
 		TuningFilter* rootFilter = tuningFilterStorage.root().get();
 		TuningLib::TuningUiItem* rootUi = uiStorage.root();
 
-		convertFilter(rootFilter, rootUi, appSignalLists);
+		convertFilter(rootFilter, rootUi, appSignalLists, appSignalListsSystemTags);
 
 		return true;
 	}
 
 	bool TuningFilterToLists::convertFilter(TuningFilter* parentFilter,
 											TuningLib::TuningUiItem* parentUi,
-											AppSignalLists::AppSignalListSet& appSignalLists)
+											AppSignalLists::AppSignalListSet& appSignalLists,
+											const QStringList& appSignalListsSystemTags)
 	{
 		for (int i = 0; i < parentFilter->childFiltersCount(); i++) 
 		{
@@ -149,7 +151,14 @@ namespace TuningFilters
 					appSignalList->setSignalType(AppSignalLists::AppSignalList::SignalType::All);
 				}
 				
-				appSignalList->systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
+				appSignalList->systemTagsList() = appSignalListsSystemTags;
+				/*
+				if (filter->interfaceType() != TuningFilters::TuningFilter::InterfaceType::Tree) 
+				{
+					// This is UI list
+					appSignalList->systemTagsList().push_back(AppSignalLists::AppSignalList::tagUi);
+				}*/
+
 				appSignalList->setUserTags({});
 				appSignalList->setCustomAppSignalIDMask(filter->customAppSignalIDMask());
 				appSignalList->setEquipmentIDMask(filter->equipmentIDMask());
@@ -194,7 +203,7 @@ namespace TuningFilters
 
 			// Recursive call for all children
 			//
-			if (convertFilter(filter, uiItem.get(), appSignalLists) == false) 
+			if (convertFilter(filter, uiItem.get(), appSignalLists, appSignalListsSystemTags) == false) 
 			{
 				Q_ASSERT(false);
 				return false;

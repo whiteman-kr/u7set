@@ -47,6 +47,7 @@ namespace TuningLib
 		static inline const QLatin1String prop_ValueColumnsCount = QLatin1String("ValueColumnsCount");
 		static inline const QLatin1String prop_TabType = QLatin1String("TabType");
 		static inline const QLatin1String prop_CounterType = QLatin1String("CounterType");
+		static inline const QLatin1String prop_StartSchemaId = QLatin1String("StartSchemaId");
 
 		static inline const QLatin1String prop_ColumnCustomAppId = QLatin1String("ColumnCustomAppId");
 		static inline const QLatin1String prop_ColumnAppId = QLatin1String("ColumnAppId");
@@ -145,13 +146,13 @@ namespace TuningLib
 														  TuningUiItem::counterType,
 														  TuningUiItem::setCounterType);
 		propCounterType->setCategory("Appearance");
-		/*
+
 		auto propSchemaId = ADD_PROPERTY_GETTER_SETTER(QString,
 													   TuningUiTags::prop_StartSchemaId,
 													   true,
 													   TuningUiItem::startSchemaId,
 													   TuningUiItem::setStartSchemaId);
-		propSchemaId->setCategory("Schemas");*/
+		propSchemaId->setCategory("Schemas");
 
 		// Columns
 
@@ -225,19 +226,6 @@ namespace TuningLib
 		propColumn->setCategory(TuningUiTags::category_Columns);
 		propColumn->setViewOrder(order++);
 	}
-
-	/*
-	TuningUiItem::TuningUiItem(const TuningUiItem& That) :
-		TuningUiItem()
-	{
-		copy(That);
-	}
-
-	TuningUiItem& TuningUiItem::operator=(const TuningUiItem& That)
-	{
-		copy(That);
-		return *this;
-	}*/
 
 	bool TuningUiItem::load(QXmlStreamReader& reader)
 	{
@@ -314,11 +302,10 @@ namespace TuningLib
 				setFilters(reader.attributes().value(TuningUiTags::prop_Filters).toString());
 			}
 
-			/*
 			if (reader.attributes().hasAttribute(TuningUiTags::prop_StartSchemaId))
 			{
 				setStartSchemaId(reader.attributes().value(TuningUiTags::prop_StartSchemaId).toString());
-			}*/
+			}
 
 			// ValueColumns
 
@@ -576,7 +563,7 @@ namespace TuningLib
 		writer.writeAttribute(TuningUiTags::prop_Tags, tags());
 		writer.writeAttribute(TuningUiTags::prop_Filters, filters());
 
-		//writer.writeAttribute(TuningUiTags::prop_StartSchemaId, startSchemaId());
+		writer.writeAttribute(TuningUiTags::prop_StartSchemaId, startSchemaId());
 
 		// ValueColumns
 
@@ -865,7 +852,7 @@ namespace TuningLib
 		return m_filters;
 	}
 
-	/*
+	
 	QString TuningUiItem::startSchemaId() const
 	{
 		return m_startSchemaId;
@@ -874,7 +861,7 @@ namespace TuningLib
 	void TuningUiItem::setStartSchemaId(const QString& id)
 	{
 		m_startSchemaId = id;
-	}*/
+	}
 
 	TuningUiItem::TabType TuningUiItem::tabType() const
 	{
@@ -1199,7 +1186,7 @@ namespace TuningLib
 						   interfaceType() == InterfaceType::Root || interfaceType() == InterfaceType::Generic ||
 							   interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
 
-		//setPropertyVisible(TuningUiTags::prop_StartSchemaId, interfaceType() == InterfaceType::SchemasTab);
+		setPropertyVisible(TuningUiTags::prop_StartSchemaId, interfaceType() == InterfaceType::SchemasTab);
 
 		if (interfaceType() == InterfaceType::Tab)
 		{

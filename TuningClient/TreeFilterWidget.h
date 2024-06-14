@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TuningClientFilterStorage.h"
+#include <TuningLib/TuningFilter.h>
 #include "TuningConfigController.h"
 
 namespace ClientLib
@@ -15,7 +15,7 @@ class TreeFilterWidget : public QWidget
 	Q_OBJECT
 public:
 	TreeFilterWidget(TuningConfigController& configController,
-					 TuningClientFilterStorage& tuningFilterStorage,
+					 TuningFilters::TuningFilterStorage& tuningFilterStorage,
 					 ClientLib::TuningUserManager& userManager,
 					 ClientLib::TuningConnection& tuningConnection,
 					 QWidget* parent);
@@ -49,7 +49,7 @@ signals:
 
 private:
 	TuningConfigController& m_configController;
-	TuningClientFilterStorage& m_tuningFilterStorage;
+	TuningFilters::TuningFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
 	ClientLib::TuningConnection& m_tuningConnection;
 

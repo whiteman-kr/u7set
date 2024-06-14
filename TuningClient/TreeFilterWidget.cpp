@@ -7,7 +7,7 @@
 using namespace TuningFilters;
 
 TreeFilterWidget::TreeFilterWidget(TuningConfigController& configController,
-								   TuningClientFilterStorage& tuningFilterStorage,
+								   TuningFilters::TuningFilterStorage& tuningFilterStorage,
 								   ClientLib::TuningUserManager& userManager,
 								   ClientLib::TuningConnection& tuningConnection,
 								   QWidget* parent):

@@ -166,6 +166,7 @@ namespace AppSignalLists
 
 	public:
 		static inline const QString tagIde = "ide";
+		static inline const QString tagUi = "ui";
 		static inline const QString tagEquipment = "eqp";
 		static inline const QString tagSchema = "schema";
 
@@ -259,8 +260,6 @@ namespace AppSignalLists
 		}
 
 	private:
-
-	protected:
 		std::vector<std::shared_ptr<AppSignalList>> m_lists;
 
 	signals:

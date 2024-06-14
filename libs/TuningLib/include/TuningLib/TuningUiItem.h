@@ -133,10 +133,10 @@ namespace TuningLib
 		const QStringList& filtersList() const;
 		QStringList& filtersList();
 
-		//
+		// Schema tab properties
 
-		// QString startSchemaId() const;
-		// void setStartSchemaId(const QString& id);
+		QString startSchemaId() const;
+		void setStartSchemaId(const QString& id);
 
 		// Tab appearance
 
@@ -231,7 +231,7 @@ namespace TuningLib
 		QStringList m_tags;
 		QStringList m_filters;
 
-		// QString m_startSchemaId;
+		QString m_startSchemaId;
 
 		// Tab appearance
 		//

@@ -46,8 +46,8 @@ set (TC_SOURCES
 	SwitchFiltersPage.h
 	SwitchFiltersPageOptions.cpp
 	SwitchFiltersPageOptions.h
-	TuningClientFilterStorage.cpp
-	TuningClientFilterStorage.h
+	TuningClientUiStorage.cpp
+	TuningClientUiStorage.h
 	TuningConfigController.cpp
 	TuningConfigController.h
 	TuningSignalListSet.cpp 

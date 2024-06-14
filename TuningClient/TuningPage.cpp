@@ -873,7 +873,7 @@ int TuningPage::m_instanceCounter = 0;
 
 TuningPage::TuningPage(TuningConfigController& configController,
 					   ClientLib::TuningSignalManager& tuningSignalManager,
-					   TuningClientFilterStorage& tuningFilterStorage,
+					   TuningFilters::TuningFilterStorage& tuningFilterStorage,
 					   ClientLib::TuningUserManager& userManager,
 					   ClientLib::TuningConnection& tuningConnection,
 					   std::shared_ptr<TuningFilter> treeFilter,

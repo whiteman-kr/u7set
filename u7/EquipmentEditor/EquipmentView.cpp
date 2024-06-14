@@ -2983,7 +2983,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		TuningLib::TuningUiStorage uiStorage;				// Target UI storage
 		AppSignalLists::AppSignalListSet appSignalLists;	// Target Lists storage
 
-		bool ok = TuningFilters::TuningFilterToLists::convert(filterStorage, uiStorage, appSignalLists);
+		bool ok = TuningFilters::TuningFilterToLists::convert(filterStorage, uiStorage, appSignalLists, {AppSignalLists::AppSignalList::tagIde});
 		if (ok == false) 
 		{
 			QMessageBox::critical(this, qAppName(), tr("Error converting Tuning Filters for TuningClient '%1'!").arg(device->equipmentId()));

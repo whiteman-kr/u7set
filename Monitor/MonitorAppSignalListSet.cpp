@@ -77,8 +77,7 @@ bool MonitorAppSignalListSet::save(QString* errorMessage) const
 		}
 	}
 
-
-	for (const auto& list : m_lists)
+	for (const auto& list : lists())
 	{
 		if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagIde) == true)
 		{

@@ -64,7 +64,6 @@ public slots:
 	void showAbout();
 	void showTuningUserManual();
 	void showAppSignalListEditor();
-
 	void slot_userFiltersChanged();
 
 private:
@@ -102,8 +101,6 @@ private:
 	//
 	TuningConfigController m_configController;
 	ClientLib::TuningSignalManager m_tuningSignalManager;
-	TuningClientFilterStorage m_filterStorage;
-	TuningLib::TuningUiStorage m_tuningUi;
 	ClientLib::TuningUserManager m_userManager;
 
 	// Connections
@@ -113,6 +110,10 @@ private:
 	// AppSignalLists
 	//
 	TuningSignalListSet m_appSignalListSet;
+
+	// Ui
+	//
+	TuningClientUiStorage m_tuningUi;
 
 	// Workspace items
 	//

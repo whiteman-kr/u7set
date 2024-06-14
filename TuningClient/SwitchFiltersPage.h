@@ -5,7 +5,7 @@
 
 #include <ClientLib/TuningSignalManager.h>
 #include <ClientLib/TuningUserManager.h>
-#include "TuningClientFilterStorage.h"
+#include "TuningClientUiStorage.h"
 #include "TuningConfigController.h"
 #include <TuningLib/TuningFilter.h>
 
@@ -119,7 +119,7 @@ class SwitchFiltersPage : public QWidget
 public:
 	explicit SwitchFiltersPage(TuningConfigController& configController,
 							   ClientLib::TuningSignalManager& tuningSignalManager,
-							   TuningClientFilterStorage& tuningFilterStorage,
+							   TuningFilters::TuningFilterStorage& tuningFilterStorage,
 							   ClientLib::TuningUserManager& userManager,
 							   ClientLib::TuningConnection& tuningConnection,
 							   std::shared_ptr<TuningFilters::TuningFilter> workspaceFilter,

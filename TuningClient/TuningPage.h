@@ -5,7 +5,7 @@
 #include "TuningModel.h"
 #include <TuningLib/TuningFilter.h>
 #include "TuningConfigController.h"
-#include "TuningClientFilterStorage.h"
+#include "TuningClientUiStorage.h"
 
 namespace ClientLib
 {
@@ -102,7 +102,7 @@ class TuningPage : public QWidget
 public:
 	explicit TuningPage(TuningConfigController& configController,
 						ClientLib::TuningSignalManager& tuningSignalManager,
-						TuningClientFilterStorage& tuningFilterStorage,
+						TuningFilters::TuningFilterStorage& tuningFilterStorage,
 						ClientLib::TuningUserManager& userManager,
 						ClientLib::TuningConnection& tuningConnection,
 						std::shared_ptr<TuningFilters::TuningFilter> treeFilter,
@@ -199,7 +199,7 @@ private slots:
 private:
 	TuningConfigController& m_configController;
 	ClientLib::TuningSignalManager& m_tuningSignalManager;
-    TuningClientFilterStorage& m_tuningFilterStorage;
+    TuningFilters::TuningFilterStorage& m_tuningFilterStorage;
 	ClientLib::TuningUserManager& m_userManager;
 
 	ClientLib::TuningConnection& m_tuningConnection;

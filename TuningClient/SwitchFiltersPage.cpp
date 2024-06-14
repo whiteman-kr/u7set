@@ -38,7 +38,7 @@ QString SwitchFiltersPage::tag_FilterSwitch = "FilterSwitches";
 
 SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
 									 ClientLib::TuningSignalManager& tuningSignalManager,
-									 TuningClientFilterStorage& tuningFilterStorage,
+									 TuningFilters::TuningFilterStorage& tuningFilterStorage,
 									 ClientLib::TuningUserManager& userManager,
 									 ClientLib::TuningConnection& tuningConnection,
 									 std::shared_ptr<TuningFilter> workspaceFilter,
