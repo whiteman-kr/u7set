@@ -1,6 +1,5 @@
 #pragma once
 
-#include <TuningLib/TuningFilter.h>
 #include "TuningConfigController.h"
 
 namespace ClientLib
@@ -9,19 +8,28 @@ namespace ClientLib
 	class TuningConnection;
 }
 
+namespace TuningLib
+{
+	class TuningUiItem;
+	class TuningUiStorage;
+}
+
+class TuningCountersManager;
 
 class TreeFilterWidget : public QWidget
 {
 	Q_OBJECT
 public:
 	TreeFilterWidget(TuningConfigController& configController,
-					 TuningFilters::TuningFilterStorage& tuningFilterStorage,
+					 TuningLib::TuningUiStorage& tuningUi,
+					 AppSignalLists::AppSignalListSet& appSignalLists,
 					 ClientLib::TuningUserManager& userManager,
 					 ClientLib::TuningConnection& tuningConnection,
+					 TuningCountersManager& tuningCounters,
 					 QWidget* parent);
 	~TreeFilterWidget();
 
-	void fillFiltersTree(std::shared_ptr<TuningFilters::TuningFilter> rootFilter);
+	void fillFiltersTree();
 	void updateFiltersTree();
 
 	bool isEmpty() const;
@@ -29,12 +37,12 @@ public:
 
 private:
 	void createFilterTree();
-	void addChildTreeObjects(const std::shared_ptr<TuningFilters::TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask);
+	void addTreeObjects(QTreeWidgetItem* item, const QString& mask, const QStringList& includeSystemTags, const QStringList& excludeSystemTags);
 	void updateTreeItemStatus(QTreeWidgetItem* treeItem = nullptr);
-	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilters::TuningFilter* filter);
-	void updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFilters::TuningFilter* filter);
+	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* list);
+	void updateTreeItemCounters(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* list);
 	void activateControl(const QString& equipmentId, bool enable);
-	QTreeWidgetItem* findFilterWidget(const QString& id, QTreeWidgetItem* treeItem);
+	QTreeWidgetItem* findFilterWidget(const QUuid& uuid, QTreeWidgetItem* treeItem);
 
 private slots:
 	void slot_treeSelectionChanged();
@@ -45,13 +53,15 @@ private slots:
 	void slot_maskApply();
 
 signals:
-	void treeFilterSelectionChanged(std::shared_ptr<TuningFilters::TuningFilter> filter);
+	void treeFilterSelectionChanged(const QUuid& filterUuid);
 
 private:
 	TuningConfigController& m_configController;
-	TuningFilters::TuningFilterStorage& m_tuningFilterStorage;
+	TuningLib::TuningUiStorage& m_tuningUi;
+	AppSignalLists::AppSignalListSet& m_appSignalLists;
 	ClientLib::TuningUserManager& m_userManager;
 	ClientLib::TuningConnection& m_tuningConnection;
+	TuningCountersManager& m_tuningCounters;
 
 	QTreeWidget* m_filterTree = nullptr;
 	QComboBox* m_treeMaskCombo = nullptr;

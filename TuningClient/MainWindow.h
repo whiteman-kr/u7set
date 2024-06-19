@@ -12,6 +12,7 @@
 #include <ClientLib/TuningLog.h>
 #include <TuningLib/TuningUiItem.h>
 #include <SchemaClientLib/DialogTcpStatistics.h>
+#include "TuningCounters.h"
 #include "../UtilsLib/LogFile.h"
 
 namespace UiLib
@@ -44,11 +45,11 @@ private:
 	void createActions();
 	void createMenu();
 	void createStatusBar();
-	void loadSignalLists();
+	void loadLocalSignalLists();
+	void loadIdeSignalLists();
 
 private slots:
 	void slot_configurationArrived(TuningClientConfigSettings configuration);
-	void slot_uiUpdated(QByteArray data);
 	void slot_signalsUpdated(QByteArray data);
 
 	void slot_configurationError(QString error);
@@ -64,7 +65,7 @@ public slots:
 	void showAbout();
 	void showTuningUserManual();
 	void showAppSignalListEditor();
-	void slot_userFiltersChanged();
+	void slot_signalListsChanged();
 
 private:
 
@@ -113,7 +114,8 @@ private:
 
 	// Ui
 	//
-	TuningClientUiStorage m_tuningUi;
+	TuningLib::TuningUiStorage m_tuningUi;
+	TuningCountersManager m_tuningCounters;
 
 	// Workspace items
 	//

@@ -186,13 +186,18 @@ namespace AppSignalLists
 	{
 		for (const auto& list : listSet.lists())
 		{
+			auto& mutableAppListHashesCache = list->mutableAppListHashesCache();
+			auto& mutableTuningListHashesCache = list->mutableTuningListHashesCache();
+			
 			for (Hash itemHash : hashesToRemove)
 			{
-				auto& mutableListHashesCache = list->mutableListHashesCache();
-
-				if (mutableListHashesCache.contains(itemHash) == true)
+				if (mutableAppListHashesCache.contains(itemHash) == true)
 				{
-					mutableListHashesCache.erase(itemHash);
+					mutableAppListHashesCache.erase(itemHash);
+				}
+				if (mutableTuningListHashesCache.contains(itemHash) == true)
+				{
+					mutableTuningListHashesCache.erase(itemHash);
 				}
 			}
 		}

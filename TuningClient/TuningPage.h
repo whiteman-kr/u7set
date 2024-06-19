@@ -3,15 +3,21 @@
 
 #include <ClientLib/TuningSignalManager.h>
 #include "TuningModel.h"
-#include <TuningLib/TuningFilter.h>
 #include "TuningConfigController.h"
-#include "TuningClientUiStorage.h"
 
 namespace ClientLib
 {
 	class TuningUserManager;
 	class TuningConnection;
 }
+
+namespace TuningLib
+{
+	class TuningUiItem;
+	class TuningUiStorage;
+}
+
+class TuningCountersManager;
 
 class TuningPageHelper
 {
@@ -82,15 +88,12 @@ public:
 	TuningPageColumnsWidth();
 
 	bool load(const QString& pageId);
-	bool save() const;
+	bool save(const QString& pageId) const;
 
 	int width(TuningModelColumns column) const;
 	void setWidth(TuningModelColumns column, int width);
 
 private:
-
-	QString m_pageId;
-
 	std::map<TuningModelColumns, int> m_widthMap;
 	std::map<TuningModelColumns, int> m_defaultWidthMap;
 };
@@ -100,14 +103,16 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(TuningConfigController& configController,
-						ClientLib::TuningSignalManager& tuningSignalManager,
-						TuningFilters::TuningFilterStorage& tuningFilterStorage,
-						ClientLib::TuningUserManager& userManager,
-						ClientLib::TuningConnection& tuningConnection,
-						std::shared_ptr<TuningFilters::TuningFilter> treeFilter,
-						std::shared_ptr<TuningFilters::TuningFilter> pageFilter,
-						QWidget* parent = 0);
+	TuningPage(TuningConfigController& configController,
+			   ClientLib::TuningSignalManager& tuningSignalManager,
+			   TuningLib::TuningUiStorage& tuningUi,
+			   AppSignalLists::AppSignalListSet& appSignalLists,
+			   ClientLib::TuningUserManager& userManager,
+			   ClientLib::TuningConnection& tuningConnection,
+			   const QUuid& treeListUuid,             // List selected in list tree
+			   const TuningLib::TuningUiItem& pageUi, // Ui item specifies this page
+			   const TuningCountersManager& tuningCounters,
+			   QWidget* parent = nullptr);
 	~TuningPage();
 
 	void fillObjectsList();
@@ -151,10 +156,8 @@ private slots:
 	void slot_tableCheckboxClicked(const QModelIndex& index);
 
 public slots:
-
-	void slot_treeFilterChanged(std::shared_ptr<TuningFilters::TuningFilter> filter);
-
-	void slot_pageFilterChanged(std::shared_ptr<TuningFilters::TuningFilter> filter);
+	void slot_treeFilterChanged(const QUuid& filterUuid);
+	void slot_pageFilterChanged(const QUuid& uiItemUuid);
 
 private:
 
@@ -182,8 +185,8 @@ private:
 	// Signals processing
 
 	void invertValue(int channel);	// channel is value column number, if it is set to -1 - all columns are inverted
-	void addSelectedSignalsToFilter(TuningFilters::TuningFilter* filter);
-	void restoreSignalsFromFilter(TuningFilters::TuningFilter* filter);
+	void addSelectedSignalsToFilter(AppSignalLists::AppSignalList& list);
+	void restoreSignalsFromFilter(const AppSignalLists::AppSignalList& list);
 	void setToDefaults(const std::vector<Hash>& hashes);
 
 	void setActionButtonsState();
@@ -199,9 +202,9 @@ private slots:
 private:
 	TuningConfigController& m_configController;
 	ClientLib::TuningSignalManager& m_tuningSignalManager;
-    TuningFilters::TuningFilterStorage& m_tuningFilterStorage;
+	TuningLib::TuningUiStorage& m_tuningUi;
+	AppSignalLists::AppSignalListSet& m_appSignalLists;
 	ClientLib::TuningUserManager& m_userManager;
-
 	ClientLib::TuningConnection& m_tuningConnection;
 
 	TuningPageHelper m_helper;
@@ -224,9 +227,11 @@ private:
 
 	TuningModelClient* m_model = nullptr;
 
-	std::shared_ptr<TuningFilters::TuningFilter> m_treeFilter = nullptr;
+	QUuid m_treeListUuid;
 
-	std::shared_ptr<TuningFilters::TuningFilter> m_pageFilter = nullptr;
+	const TuningLib::TuningUiItem* m_pageUi = nullptr;
+
+	const TuningCountersManager& m_tuningCounters;
 
 	std::map<QString, std::pair<int, Qt::SortOrder>> m_sortData;
 
@@ -235,8 +240,6 @@ private:
 	int m_instanceNo = -1;
 
 	TuningPageColumnsWidth m_columnWidthStorage;
-
-	const QString m_autoFilterCaption = tr("Auto-Created Filters");
 };
 
 #endif // TUNINGPAGE_H

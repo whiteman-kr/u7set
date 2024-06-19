@@ -12,7 +12,7 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include "Settings.h"
 #include "DialogSettings.h"
-#include "TuningClientUiStorage.h"
+#include "TuningCounters.h"
 #include "TuningSchemaManager.h"
 
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
@@ -22,7 +22,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_configController(softwareInfo, TuningClientAppSettings::instance().configuratorAddress1(), TuningClientAppSettings::instance().configuratorAddress2(), &m_logFile),
 	m_tuningSignalManager(softwareInfo.equipmentID(), &m_logFile),
 	m_tuningConnection{m_tuningSignalManager, m_tuningSignalManager, m_tuningSignalManager, m_userManager, &m_logFile, &m_tuningLog},
-	m_tuningUi(m_tuningSignalManager, m_tuningConnection, m_appSignalListSet)
+	m_tuningCounters(m_tuningUi, m_tuningSignalManager, m_tuningConnection, m_appSignalListSet)
 {
 	// Init translator
 	//
@@ -84,9 +84,11 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	// Global connections
 
 	connect(&m_configController, &TuningConfigController::signalsArrived, this, &MainWindow::slot_signalsUpdated, Qt::DirectConnection);
-	connect(&m_configController, &TuningConfigController::uiArrived, this, &MainWindow::slot_uiUpdated, Qt::DirectConnection);
 	connect(&m_configController, &TuningConfigController::configurationArrived, this, &MainWindow::slot_configurationArrived);
 	connect(&m_configController, &TuningConfigController::error, this, &MainWindow::slot_configurationError);
+
+	connect(&m_appSignalListSet, &AppSignalLists::AppSignalListSet::updatePerformed, this, &MainWindow::slot_signalListsChanged);
+	connect(&m_appSignalListSet, &AppSignalLists::AppSignalListSet::updatePerformed, &m_tuningCounters, &TuningCountersManager::slot_signalListsChanged);
 
 	// DialogAlert
 
@@ -96,7 +98,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	// Load user filters
 
-	loadSignalLists();
+	loadLocalSignalLists();
 
 	//
 
@@ -293,7 +295,7 @@ void MainWindow::createStatusBar()
 	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
 }
 
-void MainWindow::loadSignalLists() 
+void MainWindow::loadLocalSignalLists() 
 {
 	// Load local lists from file
 	//
@@ -316,14 +318,72 @@ void MainWindow::loadSignalLists()
 
 	// Merge legacy local filters
 	//
-	TuningLib::TuningUiStorage tuningUiStub;
-	bool ok = TuningFilters::TuningFilterToLists::convert(localFilterStorage, tuningUiStub,  m_appSignalListSet, {}/*systemTags*/);
+	bool ok = TuningFilters::TuningFilterToLists::convertGeneric(localFilterStorage, m_appSignalListSet);
 	if (ok == false) 
 	{
 		QString msg = tr("Failed to merge legacy user filters: %1").arg(errorCode);
 		m_logFile.writeError(msg);
 		QMessageBox::critical(this, qAppName(), msg);
 	}
+	/*
+	// Delete old filters file
+	//
+	if (localFilterStorage.root()->childFiltersCount() > 0)
+	{
+		QFile f(TuningClientAppSettings::instance().userFiltersFile());
+		if (f.remove() == false)
+		{
+			QString msg = tr("Failed to remove legacy user filters file:\n%1").arg(TuningClientAppSettings::instance().userFiltersFile());
+			m_logFile.writeError(msg);
+			QMessageBox::critical(this, qAppName(), msg);
+		}
+		else
+		{
+			QString msg = tr("Legacy user filters were successfully merged with tuning signal lists,\nold file was deleted:\n%1")
+							  .arg(TuningClientAppSettings::instance().userFiltersFile());
+			m_logFile.writeError(msg);
+			QMessageBox::information(this, qAppName(), msg);
+		}
+	}*/
+
+	AppSignalLists::AppSignalListSetChecker::checkForDanglingItems(m_tuningSignalManager.signalHashes(), m_appSignalListSet, this, &m_logFile);
+}
+
+void MainWindow::loadIdeSignalLists()
+{
+	// Load Ide Lists
+	//
+	AppSignalLists::AppSignalListSet ideLists = m_configController.appSignalListSet();
+
+	// Load Ui
+	//
+	QString errorStr;
+	if (m_tuningUi.load(m_configController.tuningUiData(), &errorStr) == false)
+	{
+		QString completeErrorMessage = QObject::tr("UI configuration file loading error: %1").arg(errorStr);
+		m_logFile.writeError(completeErrorMessage);
+	}
+
+	// Place UI system tag for all lists
+	//
+	auto allUi = m_tuningUi.root()->childernToVector();
+	for (auto& ui : allUi)
+	{
+		for (const QString& filterId : ui->filtersList())
+		{
+			const auto& uilist = ideLists.get(filterId);
+			if (uilist->systemTagsList().contains(AppSignalLists::AppSignalList::tagUi) == false)
+			{
+				uilist->systemTagsList().insert(uilist->systemTagsList().begin(), AppSignalLists::AppSignalList::tagUi);
+			}
+		}
+	}
+
+	// Update AppSignalLists: remove all lists with Ide tag and add loaded IDE ones
+	//
+	m_appSignalListSet.remove(AppSignalLists::AppSignalList::tagIde);
+	m_appSignalListSet.add(ideLists);
+	m_appSignalListSet.fireUpdatePerformed();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
@@ -419,8 +479,7 @@ void MainWindow::timerEvent(QTimerEvent* event)
 		static int updateCountersCounter = 0;
 		if (updateCountersCounter++ == 0)
 		{
-			std::vector<ClientLib::TuningSource> sourcesInfo = m_tuningConnection.tuningSourcesInfo();
-			m_tuningUi.updateCounters(sourcesInfo, m_configController.configuration().lmStatusFlagMode(), nullptr);
+			m_tuningCounters.update(m_configController.configuration().lmStatusFlagMode());
 		}
 		updateCountersCounter %= 2;
 
@@ -503,18 +562,16 @@ void MainWindow::createWorkspace()
 
 	if (m_configController.showSignals() == true)
 	{
-		//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		//!
-		int remove_m_filter_storage = 1;
-		TuningFilters::TuningFilterStorage m_filterStorage;
 		m_tuningWorkspace = new TuningWorkspace(m_configController,
 												m_tuningSignalManager,
-												m_filterStorage,
+												m_tuningUi,
+												m_appSignalListSet,
 												m_userManager,
 												m_tuningConnection,
-												nullptr,
-												m_filterStorage.root(),
-												true/*hasFilterTree*/,
+												*m_tuningUi.root(),
+												m_tuningCounters,
+												QUuid(),
+												true /*hasFilterTree*/,
 												this);
 	}
 
@@ -781,7 +838,7 @@ void MainWindow::updateStatusBar()
 				return;
 			}
 
-			TuningLib::TuningCounters counters = uiItem->counters();
+			TuningCounters counters = m_tuningCounters.counters(uiItem->filters());
 			text = tr(" %1 %2 ").arg(uiItem->caption()).arg(counters.discreteCounter);
 
 			if (l->text() != text)
@@ -810,7 +867,7 @@ void MainWindow::updateStatusBar()
 
 	// LM Errors
 
-	TuningLib::TuningCounters rootCounters = m_tuningUi.root()->counters();
+	TuningCounters rootCounters = m_tuningCounters.totalCounters();
 
 	{
 		assert(m_statusBarLmErrors);
@@ -1008,11 +1065,7 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 								   configuration.clientSettings.tuningSessionTimeout,
 								   configuration.matsUsers.users());
 
-	// Update AppSignalLists: remove all lists with Ide tag and add loaded ones
-	//
-	m_appSignalListSet.remove(AppSignalLists::AppSignalList::tagIde);
-	m_appSignalListSet.add(m_configController.appSignalListSet());
-	m_appSignalListSet.fireUpdatePerformed();
+	loadIdeSignalLists();
 
 	// --
 	//
@@ -1096,16 +1149,6 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 	return;
 }
 
-void MainWindow::slot_uiUpdated(QByteArray data)
-{
-	QString errorStr;
-	if (m_tuningUi.load(data, &errorStr) == false) 
-	{
-		QString completeErrorMessage = QObject::tr("UI configuration file loading error: %1").arg(errorStr);
-		m_logFile.writeError(completeErrorMessage);
-	}
-}
-
 void MainWindow::slot_signalsUpdated(QByteArray data)
 {
 	if (m_tuningSignalManager.load(data) == false)
@@ -1129,63 +1172,6 @@ void MainWindow::exit()
 {
 	close();
 }
-
-/*
-void MainWindow::runPresetEditor()
-{
-	if (m_userManager.login(this) == false)
-	{
-		return;
-	}
-
-	TuningClientFilterStorage editFilters = m_filterStorage;
-
-	DialogFilterEditor d(m_tuningSignalManager, editFilters, this);
-
-	if (d.exec() == QDialog::Accepted)
-	{
-		//m_filterStorage = editFilters;  // This is not allowed, we need to keep shared pointers to existing non-user filters
-
-		// Delete user filters from main storage
-
-		m_filterStorage.removeFilters(TuningFilter::Source::User);
-
-		// Add user filters from editing storage
-
-		for (int i = 0; i < editFilters.root()->childFiltersCount(); i++)
-		{
-			std::shared_ptr<TuningFilter> child = editFilters.root()->childFilter(i);
-
-			if (child == nullptr)
-			{
-				Q_ASSERT(child);
-				return;
-			}
-
-            if (child->source() == TuningFilter::Source::User)
-			{
-                m_filterStorage.add(child, false);
-			}
-		}
-
-        // Count user filters signals hashes
-
-        m_filterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager,
-                                                       m_tuningSignalManager.signalHashes(),
-                                                       m_filterStorage.root().get(),
-                                                       TuningFilter::Source::User);
-
-        QString errorMsg;
-
-        if (m_filterStorage.saveUserFilters(TuningClientAppSettings::instance().userFiltersFile(), &errorMsg) == false)
-		{
-			m_logFile.writeError(errorMsg);
-			QMessageBox::critical(this, tr("Error"), errorMsg);
-		}
-
-		slot_userFiltersChanged();
-	}
-}*/
 
 void MainWindow::showSettings()
 {
@@ -1281,11 +1267,9 @@ void MainWindow::showAppSignalListEditor()
 	}
 
 	AppSignalLists::DialogSignalListEditor::showDialog(m_appSignalListSet, m_tuningSignalManager, this);
-	
-	slot_userFiltersChanged();
 }
 
-void MainWindow::slot_userFiltersChanged() 
+void MainWindow::slot_signalListsChanged() 
 {
 	if (m_tuningWorkspace != nullptr)
 	{

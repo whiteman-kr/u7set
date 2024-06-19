@@ -615,7 +615,23 @@ void DialogAppSignalLists::onSignalsChanged()
 void DialogAppSignalLists::onAdd()
 {
 	std::shared_ptr<AppSignalLists::AppSignalList> list = std::make_shared<AppSignalLists::AppSignalList>();
-	list->setId(tr("LIST_%1").arg(QString::number(m_db->nextCounterValue()).rightJustified(4, '0')));
+
+	// Create ID with unique number
+	//
+	int number = 0;
+	do
+	{
+		number = m_db->nextCounterValue();
+		QString id = tr("LIST_%1").arg(QString::number(number).rightJustified(4, '0'));
+		if (m_lists->get(id) == nullptr) 
+		{
+			list->setId(id);
+			break;
+		}
+	}while(true);
+	
+	list->setCaption(QString("List %1").arg(QString::number(number).rightJustified(4, '0')));
+
 	addList(list);
 	return;
 }
@@ -783,7 +799,17 @@ void DialogAppSignalLists::onPaste()
 		}
 
 		list->setUuid(QUuid::createUuid());
-		list->setId(tr("%1 (Copy)").arg(list->id()));
+
+		// Create unique id
+		//
+		QString id = tr("%1 (Copy)").arg(list->id());
+		int idCounter = 1;
+		while (m_lists->get(id) != nullptr) 
+		{
+			id = tr("%1 (Copy %2)").arg(list->id()).arg(idCounter++);
+		}
+		list->setId(id);
+		
 		pasteList(list);
 	}
 

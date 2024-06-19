@@ -186,6 +186,9 @@ namespace EquipmentPropNames
 	inline const QString APP_SIGNAL_LIST_IDS("AppSignalListIds");
 	inline const QString APP_SIGNAL_LIST_MASKS("AppSignalListMasks");
 	inline const QString APP_SIGNAL_LIST_TAGS("AppSignalListTags");
+	
+	inline const QString UI_CONFIGURATION("UiConfiguration");
+	
 
 	inline const QString FONTS("Fonts");
 

@@ -7,17 +7,6 @@ namespace VFrame30
 
 namespace TuningLib
 {
-	// Structs
-	//
-	struct TuningCounters
-	{
-		int errorCounter = 0;
-		int sorCounter = 0;
-		bool sorActive = false;
-		bool sorValid = false;
-		int discreteCounter = 0;
-	};
-
 	class TuningUiItem : public PropertyObject
 	{
 		Q_OBJECT
@@ -28,7 +17,6 @@ namespace TuningLib
 		enum class InterfaceType
 		{
 			Root,
-			Generic,
 			Tab,
 			Button,
 			Counter,
@@ -65,16 +53,12 @@ namespace TuningLib
 		QString uuidString() const;
 		void setUuid(const QUuid& uuid);
 
-		QString ID() const;
-		void setID(const QString& value);
-
 		QString caption() const;
 		void setCaption(const QString& value);
 
 		// Interface Type
 
 		bool isRoot() const;
-		bool isGeneric() const;
 		bool isTab() const;
 		bool isButton() const;
 		bool isCounter() const;
@@ -110,9 +94,6 @@ namespace TuningLib
 		void setHasDiscreteCounter(bool value);
 
 		// Counters
-
-		TuningCounters counters() const;
-		void setCounters(TuningCounters value);
 
 		CounterType counterType() const;
 		void setCounterType(CounterType type);
@@ -188,14 +169,12 @@ namespace TuningLib
 		void insertChild(int index, const std::shared_ptr<TuningUiItem>& child);
 
 		bool removeChild(const QUuid& uuid);
-		bool removeChild(const QString& ID);
 		bool removeChild(int index);
 		void removeAllChildren();
 
 		int childCount() const;
 		std::shared_ptr<TuningUiItem> child(int index) const;
 
-		std::shared_ptr<TuningUiItem> find(const QString& id) const; // Recursive search
 		std::shared_ptr<TuningUiItem> find(const QUuid& uuid) const; // Recursive search
 
 		void updateOptionalProperties();
@@ -213,7 +192,7 @@ namespace TuningLib
 		QString m_ID = "ID";
 		QString m_caption;
 
-		InterfaceType m_interfaceType = InterfaceType::Generic;
+		InterfaceType m_interfaceType = InterfaceType::Tab;
 
 		bool m_useColors = false;
 
@@ -262,10 +241,6 @@ namespace TuningLib
 		//
 		TuningUiItem* m_parentItem = nullptr;
 		std::vector<std::shared_ptr<TuningUiItem>> m_children;
-
-		// Counters
-		//
-		TuningCounters m_counters;
 	};
 
 	class TuningUiStorage : public QObject
@@ -279,6 +254,8 @@ namespace TuningLib
 		const TuningUiItem* root() const;
 		TuningUiItem* root();
 
+		TuningUiItem* get(const QUuid& uuid);
+
 		// Serialization
 		//
 		bool load(const QByteArray& data, QString* errorCode);
@@ -290,12 +267,10 @@ namespace TuningLib
 
 		// Validate
 		// 
-		std::vector<std::pair<QString, QString>> checkForSameIds() const;
-		std::vector<std::tuple<QString, QString, QString>> checkFilters(const QStringList& appSignalLists);
+		std::vector<std::pair<QString, QString>> checkFilters(const QStringList& appSignalLists);
 
 	protected:
 		std::unique_ptr<TuningUiItem> m_root;
-		// std::vector<VFrame30::SchemaDetails> m_schemasDetails;
 	};
 
 } // namespace TuningLib

@@ -194,7 +194,7 @@ namespace TrendLibInternal
 		if (appSignalList.has_value() == true)
 		{
 			Q_ASSERT(appSignalList.value());
-			appSignalListHashes = appSignalList.value()->listHashesCache();
+			appSignalListHashes = appSignalList.value()->appListHashesCache();
 		}
 
 		beginResetModel();

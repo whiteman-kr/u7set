@@ -57,6 +57,8 @@ namespace AppSignalLists
 		QUuid uuid = QUuid::createUuid();
 		setUuid(uuid);
 
+		ADD_PROPERTY_GETTER(QString, AppSignalLists::prop_Uuid, true, AppSignalList::uuidString);
+
 		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Caption, true, AppSignalList::caption, AppSignalList::setCaption);
 		ADD_PROPERTY_GETTER_SETTER(SignalType,
 								   AppSignalLists::prop_SignalType,
@@ -132,9 +134,14 @@ namespace AppSignalLists
 			}
 		}
 
-		for (Hash hash: m_listHashesCache) 
+		for (Hash hash: m_appListHashesCache) 
 		{
-			appSignalList->add_listhashescache(hash);
+			appSignalList->add_applisthashescache(hash);
+		}
+
+		for (Hash hash: m_tuningListHashesCache) 
+		{
+			appSignalList->add_tuninglisthashescache(hash);
 		}
 
 		return;
@@ -177,11 +184,18 @@ namespace AppSignalLists
 			m_items[item.appSignalHash()] = item;
 		}
 
-		count = appSignalList.listhashescache_size();
-		m_listHashesCache.clear();
+		count = appSignalList.applisthashescache_size();
+		m_appListHashesCache.clear();
 		for (int i = 0; i < count; i++) 
 		{
-			m_listHashesCache.insert(appSignalList.listhashescache(i));
+			m_appListHashesCache.insert(appSignalList.applisthashescache(i));
+		}
+
+		count = appSignalList.tuninglisthashescache_size();
+		m_tuningListHashesCache.clear();
+		for (int i = 0; i < count; i++) 
+		{
+			m_tuningListHashesCache.insert(appSignalList.tuninglisthashescache(i));
 		}
 
 		return true;
@@ -200,6 +214,11 @@ namespace AppSignalLists
 	QUuid AppSignalList::uuid() const
 	{
 		return m_uuid;
+	}
+
+	QString AppSignalList::uuidString() const 
+	{
+		return m_uuid.toString();
 	}
 
 	void AppSignalList::setUuid(const QUuid& uuid)
@@ -424,14 +443,24 @@ namespace AppSignalLists
 		m_items.erase(hash);
 	}
 
-	const std::set<Hash>& AppSignalList::listHashesCache() const 
+	const std::set<Hash>& AppSignalList::appListHashesCache() const 
 	{
-		return m_listHashesCache;
+		return m_appListHashesCache;
 	}
 	
-	std::set<Hash>& AppSignalList::mutableListHashesCache() 
+	std::set<Hash>& AppSignalList::mutableAppListHashesCache() 
 	{
-		return m_listHashesCache;
+		return m_appListHashesCache;
+	}
+
+	const std::set<Hash>& AppSignalList::tuningListHashesCache() const 
+	{
+		return m_tuningListHashesCache;
+	}
+	
+	std::set<Hash>& AppSignalList::mutableTuningListHashesCache() 
+	{
+		return m_tuningListHashesCache;
 	}
 
 	bool AppSignalList::appSignalMatch(const AppSignalParam& asp) const
@@ -451,27 +480,43 @@ namespace AppSignalLists
 			return false;
 		}
 
-		if (m_cachedEquipmentIDMasks.isEmpty() == false && processMaskList(asp.lmEquipmentId(), m_cachedEquipmentIDMasks) == true)
+		bool equpmentMatch = true;
+		if (m_cachedEquipmentIDMasks.isEmpty() == false)
 		{
-			return true;
+			equpmentMatch = processMaskList(asp.lmEquipmentId(), m_cachedEquipmentIDMasks);
+		}
+		if (equpmentMatch == false) 
+		{
+			return false;
+		}
+		
+
+		bool appSignalIdMatch = true;
+		if (m_cachedAppSignalIDMasks.isEmpty() == false)
+		{
+			appSignalIdMatch = processMaskList(asp.appSignalId(), m_cachedAppSignalIDMasks);
+		}
+		if (appSignalIdMatch == false) 
+		{
+			return false;
 		}
 
-		if (m_cachedAppSignalIDMasks.isEmpty() == false && processMaskList(asp.appSignalId(), m_cachedAppSignalIDMasks) == true)
+		bool customAppSignalIdMatch = true;
+		if (m_cachedCustomAppSignalIDMasks.isEmpty() == false)
 		{
-			return true;
+			customAppSignalIdMatch = processMaskList(asp.customSignalId(), m_cachedCustomAppSignalIDMasks);
+		}
+		if (customAppSignalIdMatch == false) 
+		{
+			return false;
 		}
 
-		if (m_cachedCustomAppSignalIDMasks.isEmpty() == false && processMaskList(asp.customSignalId(), m_cachedCustomAppSignalIDMasks) == true)
-		{
-			return true;
-		}
-
+		bool tagsMatch = true;
 		if (m_cachedAppSignalTags.isEmpty() == false)
 		{
 			bool tagsFound = false;
 
 			const auto& objectTagsSet = asp.tags();
-
 			for (const QString& tag : m_cachedAppSignalTags)
 			{
 				if (objectTagsSet.contains(tag) == true)
@@ -481,13 +526,14 @@ namespace AppSignalLists
 				}
 			}
 
-			if (tagsFound == false)
-			{
-				return false;
-			}
+			tagsMatch = tagsFound;
+		}
+		if (tagsMatch == false) 
+		{
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	bool AppSignalList::listMatch(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags) 
@@ -671,7 +717,7 @@ namespace AppSignalLists
 		}
 		return *it;
 	}
-
+	
 	std::shared_ptr<AppSignalList> AppSignalListSet::get(const QUuid& uuid) const
 	{
 		auto it = std::find_if(m_lists.begin(),

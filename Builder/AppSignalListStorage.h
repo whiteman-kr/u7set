@@ -13,6 +13,9 @@ namespace Builder
 	public:
 		AppSignalListStorage(DbController* db);
 		
+		using DbObjectStorage::get;
+		std::shared_ptr<AppSignalLists::AppSignalList> get(const QString& id, bool* ok = nullptr) const;
+
 		std::vector<std::pair<QString, QString>> checkForSameIds() const;
 
 		bool load(QString* errorMessage) override;

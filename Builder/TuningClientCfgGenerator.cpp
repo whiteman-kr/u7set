@@ -89,7 +89,7 @@ namespace Builder
 			// --
 			//
 			//result &= createObjectFilters(tuningSignalProvider, tuningSources);
-			result &= writeTuningUi();
+			result &= writeTuningUi(settings->appSignalListIds, settings->appSignalListMasks, settings->appSignalListTags);
 
 			// Write AppSignalLists
 			//
@@ -381,7 +381,7 @@ namespace Builder
 		}
 	}*/
 
-	bool TuningClientCfgGenerator::writeTuningUi()
+	bool TuningClientCfgGenerator::writeTuningUi(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags)
 	{
 		TuningLib::TuningUiStorage tuningUiStorage;
 		
@@ -409,25 +409,24 @@ namespace Builder
 			return false;
 		}
 
-		// Validate project ui
-		//
-		std::vector<std::pair<QString, QString>> nonUniqueIds = tuningUiStorage.checkForSameIds();
-		for (const auto& [uiId, uiCaption] : nonUniqueIds)
-		{
-			m_log->errEQP6250(uiId, uiCaption, m_software->equipmentId());
-		}
-
 		// Check if all signal lists specified in Filters property exist
 		//
 		QStringList appSignalLists;
-		for (const auto& l: m_appSignalsListIdToList) 
+		for (const auto& [id, list] : m_appSignalsListIdToList)
 		{
-			appSignalLists.push_back(l.first);
+			// Check if this list is for this software
+			//
+			if (list->listMatch(appSignalListIds, appSignalListMasks, appSignalListTags) == false) 
+			{
+				continue;
+			}
+
+			appSignalLists.push_back(id);
 		}
-		std::vector<std::tuple<QString, QString, QString>> notFoundFilters = tuningUiStorage.checkFilters(appSignalLists);
-		for (const auto& [filterId, uiId, uiCaption] : notFoundFilters)
+		std::vector<std::pair<QString, QString>> notFoundFilters = tuningUiStorage.checkFilters(appSignalLists);
+		for (const auto& [filterId, uiCaption] : notFoundFilters)
 		{
-			m_log->errEQP6251(filterId, uiId, uiCaption, m_software->equipmentId());
+			m_log->errEQP6251(filterId, uiCaption, m_software->equipmentId());
 		}
 
 		// Save Ui

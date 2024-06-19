@@ -47,8 +47,6 @@ protected:
 	//
 signals:
 	void signalsArrived(QByteArray data);
-	void uiArrived(QByteArray data);
-
 	void configurationArrived(TuningClientConfigSettings configuration);
 
 	// Public properties
@@ -56,6 +54,8 @@ signals:
 public:
 	TuningClientConfigSettings configuration() const;
 	ClientLib::ConfigurationInfo configInfo() const;
+
+	const QByteArray& tuningUiData() const;
 
 	QString startSchemaId() const;
 	bool showSignals() const;
@@ -72,6 +72,8 @@ private:
 	mutable QReadWriteLock m_lock;
 	TuningClientConfigSettings m_configuration;
 	VFrame30::SchemaDetailsSet m_schemaDetailsSet;
+
+	QByteArray m_tuningUiData;
 
 	inline static int s_configurationIdCounter = 0;
 };

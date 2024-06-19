@@ -74,7 +74,7 @@ namespace TuningLib
 
 		ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Caption, true, TuningUiItem::caption, TuningUiItem::setCaption);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_ID, true, TuningUiItem::ID, TuningUiItem::setID);
+		//ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_ID, true, TuningUiItem::ID, TuningUiItem::setID);
 
 		ADD_PROPERTY_GETTER(InterfaceType, TuningUiTags::prop_InterfaceType, true, TuningUiItem::interfaceType);
 
@@ -241,10 +241,11 @@ namespace TuningLib
 				setUuid(QUuid::createUuid());
 			}
 
+			/*
 			if (reader.attributes().hasAttribute(TuningUiTags::prop_ID))
 			{
 				setID(reader.attributes().value(TuningUiTags::prop_ID).toString());
-			}
+			}*/
 
 			if (reader.attributes().hasAttribute(TuningUiTags::prop_Caption))
 			{
@@ -450,7 +451,7 @@ namespace TuningLib
 				if (tagName == TuningUiTags::tag_Generic || tagName == TuningUiTags::tag_Tab || tagName == TuningUiTags::tag_Button ||
 					tagName == TuningUiTags::tag_Counter || tagName == TuningUiTags::tag_SchemasTab)
 				{
-					InterfaceType filterType = InterfaceType::Generic;
+					InterfaceType filterType = InterfaceType::Root;
 
 					if (tagName == TuningUiTags::tag_Tab)
 					{
@@ -503,39 +504,32 @@ namespace TuningLib
 		}
 		else
 		{
-			if (isGeneric() == true)
+			if (isTab())
 			{
-				writer.writeStartElement(TuningUiTags::tag_Generic);
+				writer.writeStartElement(TuningUiTags::tag_Tab);
 			}
 			else
 			{
-				if (isTab())
+				if (isButton())
 				{
-					writer.writeStartElement(TuningUiTags::tag_Tab);
+					writer.writeStartElement(TuningUiTags::tag_Button);
 				}
 				else
 				{
-					if (isButton())
+					if (isCounter())
 					{
-						writer.writeStartElement(TuningUiTags::tag_Button);
+						writer.writeStartElement(TuningUiTags::tag_Counter);
 					}
 					else
 					{
-						if (isCounter())
+						if (isSchemasTab())
 						{
-							writer.writeStartElement(TuningUiTags::tag_Counter);
+							writer.writeStartElement(TuningUiTags::tag_SchemasTab);
 						}
 						else
 						{
-							if (isSchemasTab())
-							{
-								writer.writeStartElement(TuningUiTags::tag_SchemasTab);
-							}
-							else
-							{
-								Q_ASSERT(false);
-								return false;
-							}
+							Q_ASSERT(false);
+							return false;
 						}
 					}
 				}
@@ -543,7 +537,6 @@ namespace TuningLib
 		}
 
 		writer.writeAttribute(TuningUiTags::prop_Uuid, uuidString());
-		writer.writeAttribute(TuningUiTags::prop_ID, ID());
 		writer.writeAttribute(TuningUiTags::prop_Caption, caption());
 
 		writer.writeAttribute(TuningUiTags::prop_UseColors, useColors() ? TuningUiTags::tag_True : TuningUiTags::tag_False);
@@ -624,16 +617,6 @@ namespace TuningLib
 		m_uuid = uuid;
 	}
 
-	QString TuningUiItem::ID() const
-	{
-		return m_ID;
-	}
-
-	void TuningUiItem::setID(const QString& value)
-	{
-		m_ID = value;
-	}
-
 	QString TuningUiItem::caption() const
 	{
 		return m_caption;
@@ -647,11 +630,6 @@ namespace TuningLib
 	bool TuningUiItem::isRoot() const
 	{
 		return interfaceType() == InterfaceType::Root;
-	}
-
-	bool TuningUiItem::isGeneric() const
-	{
-		return interfaceType() == InterfaceType::Generic;
 	}
 
 	bool TuningUiItem::isTab() const
@@ -762,16 +740,6 @@ namespace TuningLib
 	void TuningUiItem::setHasDiscreteCounter(bool value)
 	{
 		m_hasDiscreteCounter = value;
-	}
-
-	TuningCounters TuningUiItem::counters() const
-	{
-		return m_counters;
-	}
-
-	void TuningUiItem::setCounters(TuningCounters value)
-	{
-		m_counters = value;
 	}
 
 	TuningUiItem::CounterType TuningUiItem::counterType() const
@@ -1045,23 +1013,6 @@ namespace TuningLib
 		return found;
 	}
 
-	bool TuningUiItem::removeChild(const QString& ID)
-	{
-		bool found = false;
-
-		for (auto it = m_children.begin(); it != m_children.end(); it++)
-		{
-			if (it->get()->ID() == ID)
-			{
-				m_children.erase(it);
-				found = true;
-				break;
-			}
-		}
-
-		return found;
-	}
-
 	bool TuningUiItem::removeChild(int index)
 	{
 		if (index < 0 || index >= static_cast<int>(m_children.size()))
@@ -1094,39 +1045,6 @@ namespace TuningLib
 		}
 
 		return m_children[index];
-	}
-
-	/*
-	TuningUiItem* TuningUiItem::child(const QString& caption) const
-	{
-		for (auto& child : m_children)
-		{
-			if (child->caption() == caption)
-			{
-				return child.get();
-			}
-		}
-
-		return nullptr;
-	}
-	*/
-	std::shared_ptr<TuningUiItem> TuningUiItem::find(const QString& id) const
-	{
-		for (auto& child : m_children)
-		{
-			if (child->ID() == id)
-			{
-				return child;
-			}
-
-			auto result = child->find(id);
-			if (result != nullptr)
-			{
-				return result;
-			}
-		}
-
-		return nullptr;
 	}
 
 	std::shared_ptr<TuningUiItem> TuningUiItem::find(const QUuid& uuid) const 
@@ -1183,8 +1101,8 @@ namespace TuningLib
 		setPropertyVisible(TuningUiTags::prop_CounterType, interfaceType() == InterfaceType::Counter);
 
 		setPropertyVisible(TuningUiTags::prop_HasDiscreteCounter,
-						   interfaceType() == InterfaceType::Root || interfaceType() == InterfaceType::Generic ||
-							   interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+						   interfaceType() == InterfaceType::Root || interfaceType() == InterfaceType::Tab ||
+							   interfaceType() == InterfaceType::Button);
 
 		setPropertyVisible(TuningUiTags::prop_StartSchemaId, interfaceType() == InterfaceType::SchemasTab);
 
@@ -1241,50 +1159,6 @@ namespace TuningLib
 		return result;
 	}
 
-	/*
-	void TuningUiItem::copy(const TuningUiItem& That)
-	{
-		//m_uuid = That.m_uuid;	 Is not copied!!!
-		//m_uuid = QUuid::createUuid();
-
-		m_ID = That.m_ID;
-		m_caption = That.m_caption;
-
-		m_interfaceType = That.m_interfaceType;
-
-		m_useColors = That.useColors();
-
-		m_backColor = That.m_backColor;
-		m_textColor = That.m_textColor;
-
-		m_backSelectedColor = That.m_backSelectedColor;
-		m_textSelectedColor = That.m_textSelectedColor;
-
-		m_backAlertedColor = That.m_backAlertedColor;
-		m_textAlertedColor = That.m_textAlertedColor;
-
-		m_hasDiscreteCounter = That.m_hasDiscreteCounter;
-
-		m_tags = That.m_tags;
-		m_filters = That.m_filters;
-
-		//m_startSchemaId = That.m_startSchemaId;
-
-		m_valueColumnsCount = That.m_valueColumnsCount;
-		m_valueColumnsAppSignalIdSuffixes = That.m_valueColumnsAppSignalIdSuffixes;
-
-		m_tabType = That.m_tabType;
-		m_counterType = That.m_counterType;
-
-		for (const auto& f : That.m_children)
-		{
-			std::shared_ptr<TuningUiItem> fiCopy = std::make_shared<TuningUiItem>(*f);
-			addChild(fiCopy);
-		}
-
-		updateOptionalProperties();
-	}*/
-
 	void TuningUiItem::setPropertyVisible(const QLatin1String& name, bool visible)
 	{
 		if (propertyExists(name) == false)
@@ -1303,7 +1177,6 @@ namespace TuningLib
 	TuningUiStorage::TuningUiStorage():
 		m_root(std::make_unique<TuningUiItem>())
 	{
-		m_root->setID("%UI%ROOT");
 		m_root->setCaption(QObject::tr("Root"));
 		m_root->setInterfaceType(TuningUiItem::InterfaceType::Root);
 	}
@@ -1316,6 +1189,19 @@ namespace TuningLib
 	TuningUiItem* TuningUiStorage::root()
 	{
 		return m_root.get();
+	}
+
+	TuningUiItem* TuningUiStorage::get(const QUuid& uuid) 
+	{
+		auto all = m_root->childernToVector();
+		for (auto& item:all) 
+		{
+			if (item->uuid() == uuid) 
+			{
+				return item;
+			}
+		}
+		return nullptr;
 	}
 
 	bool TuningUiStorage::load(const QByteArray& data, QString* errorCode)
@@ -1414,45 +1300,9 @@ namespace TuningLib
 		}
 	}
 
-	std::vector<std::pair<QString, QString>> TuningUiStorage::checkForSameIds() const
+	std::vector<std::pair<QString, QString>> TuningUiStorage::checkFilters(const QStringList& appSignalLists) 
 	{
-		std::set<QString> ids;
 		std::vector<std::pair<QString, QString>> result;
-
-		auto f = [&ids, &result](const TuningUiItem* uiItem, auto&& f)
-		{
-			for (int c = 0; c < uiItem->childCount(); c++) 
-			{
-				TuningUiItem* childUiItem = uiItem->child(c).get();
-				if (childUiItem == nullptr) 
-				{
-					Q_ASSERT(false);
-					return;
-				}
-
-				if (ids.find(childUiItem->ID()) != ids.end()) 
-				{
-					// Duplicate found
-					//
-					result.push_back({childUiItem->ID(), childUiItem->caption()});
-				}
-				else 
-				{
-					ids.insert(childUiItem->ID());
-				}
-
-				f(childUiItem, f);
-			}
-		};
-
-		f(root(), f);
-
-		return result;
-	}
-
-	std::vector<std::tuple<QString, QString, QString>> TuningUiStorage::checkFilters(const QStringList& appSignalLists) 
-	{
-		std::vector<std::tuple<QString, QString, QString>> result;
 
 		auto f = [appSignalLists, &result](const TuningUiItem* uiItem, auto&& f)
 		{
@@ -1470,7 +1320,7 @@ namespace TuningLib
 				{
 					if (appSignalLists.contains(filter) == false) 
 					{
-						result.push_back({filter, childUiItem->ID(), childUiItem->caption()});
+						result.push_back({filter, childUiItem->caption()});
 					}
 				}
 				f(childUiItem, f);

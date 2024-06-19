@@ -589,8 +589,7 @@ namespace Builder
 
 		// TuningClient UI
 		//
-		void errEQP6250(QString uiId, QString uiCaption, QString tuningClientId);						// UI item ID '%1' ('%2') is not unique in TuningClient %3.
-		void errEQP6251(QString filterId, QString uiId, QString uiCaption, QString tuningClientId);		// Application signals list '%1' specified in UI item ID '%2' ('%3') in TuningClient %4 does not exist.
+		void errEQP6251(QString listId, QString uiCaption, QString tuningClientId);		// Application signals list '%1' specified in UI item '%2' in TuningClient %3 does not exist or is not linked to the software.
 
 		// Script evaluations
 		//

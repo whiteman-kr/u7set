@@ -29,7 +29,7 @@ namespace Builder
 		//void createCounterFiltersFromTemplates();
 
 		
-		bool writeTuningUi();
+		bool writeTuningUi(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);
 		bool writeTuningSchemas();
 		bool writeGlobalScript();
 		bool writeTuningClientBehavior();

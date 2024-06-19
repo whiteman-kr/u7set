@@ -2960,6 +2960,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	//
 
 	QString tuningClientMitigateCompatibilityUiConfiguration;
+	QString tuningClientMitigateCompatibilityAppSignalListTags;
 
 	if (device->presetRoot() &&
 		device->presetName() == QStringLiteral("TUN") &&
@@ -2983,7 +2984,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		TuningLib::TuningUiStorage uiStorage;				// Target UI storage
 		AppSignalLists::AppSignalListSet appSignalLists;	// Target Lists storage
 
-		bool ok = TuningFilters::TuningFilterToLists::convert(filterStorage, uiStorage, appSignalLists, {AppSignalLists::AppSignalList::tagIde});
+		bool ok = TuningFilters::TuningFilterToLists::convertUi(device->equipmentId(), device->equipmentId().toLower(), filterStorage, uiStorage, appSignalLists);
 		if (ok == false) 
 		{
 			QMessageBox::critical(this, qAppName(), tr("Error converting Tuning Filters for TuningClient '%1'!").arg(device->equipmentId()));
@@ -3269,7 +3270,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	//
 	if (monitorMitigateCompatibilityAppDataService.isEmpty() == false)
 	{
-		auto adsProp = device->propertyByCaption(QStringLiteral("AppDataServiceIDs"));
+		auto adsProp = device->propertyByCaption(EquipmentPropNames::APP_DATA_SERVICE_IDS);
 		if (adsProp != nullptr)
 		{
 			adsProp->setValue(monitorMitigateCompatibilityAppDataService);
@@ -3280,10 +3281,24 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	//
 	if (tuningClientMitigateCompatibilityUiConfiguration.isEmpty() == false)
 	{
-		auto uiProp = device->propertyByCaption(QStringLiteral("UiConfiguration"));
+		auto uiProp = device->propertyByCaption(EquipmentPropNames::UI_CONFIGURATION);
 		if (uiProp != nullptr)
 		{
 			uiProp->setValue(tuningClientMitigateCompatibilityUiConfiguration);
+		}
+
+		// Add tag with software id to TuningClient and later to all lists, to link them
+		//
+		auto appSignalListTagsProp = device->propertyByCaption(EquipmentPropNames::APP_SIGNAL_LIST_TAGS);
+		if (appSignalListTagsProp == nullptr)
+		{
+			Q_ASSERT(appSignalListTagsProp);
+		}
+		else
+		{
+			QStringList softwareTags = appSignalListTagsProp->value().toStringList();
+			softwareTags.push_back(device->equipmentId().toLower());
+			appSignalListTagsProp->setValue(softwareTags.join('\n'));
 		}
 	}
 

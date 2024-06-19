@@ -9202,47 +9202,25 @@ namespace Builder
 		}
 	}
 
-	/// IssueCode: EQP6250
-	///
-	/// IssueType: Error
-	///
-	/// Title: UI item ID '%1' ('%2') is not unique in TuningClient %3.
-	///
-	/// Parameters:
-	///		%1 UI item ID
-	///		%2 UI item caption
-	///		%3 TuningClient EquipmentID
-	///
-	/// Description:
-	///		TuningClient UI item specified in UiConfiguration property is not unique.
-	///
-	void IssueLogger::errEQP6250(QString uiId, QString uiCaption, QString tuningClientId)
-	{
-		LOG_ERROR(IssueType::Equipment,
-				  6250,
-				  tr("UI item ID '%1' ('%2') is not unique in TuningClient %3.").arg(uiId).arg(uiCaption).arg(tuningClientId));
-	}
-
 	/// IssueCode: EQP6251
 	///
 	/// IssueType: Error
 	///
-	/// Title: Application signals list '%1' specified in UI item ID '%2' ('%3') in TuningClient %4 does not exist.
+	/// Title: Signals list '%1' specified in UI item '%2' in TuningClient %3 does not exist or is not linked to the software
 	///
 	/// Parameters:
-	///		%1 Filter ID
-	///		%2 UI item ID
-	///		%3 UI item caption
-	///		%4 TuningClient EquipmentID
+	///		%1 List ID
+	///		%2 UI item caption
+	///		%3 TuningClient EquipmentID
 	///
 	/// Description:
-	///		Application signals list specified in Filters property of TuningClient UI item does not exist.
+	///		Signals list specified in Filters property of TuningClient UI item does not exist or is not linked to the software.
 	///
-	void IssueLogger::errEQP6251(QString filterId, QString uiId, QString uiCaption, QString tuningClientId)
+	void IssueLogger::errEQP6251(QString listId, QString uiCaption, QString tuningClientId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6251,
-				  tr("Application signals list '%1' specified in UI item ID '%2' ('%3') in TuningClient %4 does not exist.").arg(filterId).arg(uiId).arg(uiCaption).arg(tuningClientId));
+				  tr("Signals list '%1' specified in UI item '%2' in TuningClient %3 does not exist or is not linked to the software.").arg(listId).arg(uiCaption).arg(tuningClientId));
 	}
 
 	/// IssueCode: EQP6300

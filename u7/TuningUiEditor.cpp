@@ -113,7 +113,7 @@ void TuningUiEditor::onAdd()
 
 	// Allow items
 
-	bool allowTree = (selectedUiItem == nullptr || selectedUiItem->isGeneric());
+	bool allowTree = (selectedUiItem == nullptr);
 	bool allowTabs = (selectedUiItem == nullptr || selectedUiItem->isButton());
 	bool allowButtons = (selectedUiItem == nullptr || selectedUiItem->isTab());
 	bool allowCounters = (selectedUiItem == nullptr);
@@ -154,6 +154,7 @@ void TuningUiEditor::onAdd()
 	allowCounters &= m_typeCounterEnabled;
 	allowSchemasTabs &= m_typeSchemasTabsEnabled;
 
+	/*
 	if (m_typeTabEnabled == false &&
 		m_typeButtonEnabled == false &&
 		m_typeCounterEnabled == false &&
@@ -162,12 +163,13 @@ void TuningUiEditor::onAdd()
 	{
 		addItem(TuningUiItem::InterfaceType::Generic);
 		return;
-	}
+	}*/
 
 	// Create menu
 
 	QMenu menu(this);
 
+	/*
 	{
 		// Tree
 		QAction* action = new QAction(tr("Generic"), &menu);
@@ -181,7 +183,7 @@ void TuningUiEditor::onAdd()
 		action->setEnabled(allowTree);
 
 		menu.addAction(action);
-	}
+	}*/
 
 	{
 		// Tab
@@ -431,10 +433,6 @@ void TuningUiEditor::onPaste()
 		for (const auto& pi : pastedItems) 
 		{
 			QUuid uuid = QUuid::createUuid();
-			if (pi->ID() == pi->uuidString()) 
-			{
-				pi->setID(uuid.toString());
-			}
 			pi->setUuid(uuid);
 		}
 	}
@@ -716,7 +714,6 @@ void TuningUiEditor::addItem(TuningLib::TuningUiItem::InterfaceType uiType)
 	std::shared_ptr<TuningUiItem> uiItem = std::make_shared<TuningUiItem>();
 	uiItem->setInterfaceType(uiType);
 	uiItem->setUuid(QUuid::createUuid());
-	uiItem->setID(uiItem->uuidString());
 	uiItem->setCaption(tr("New Item"));
 	uiItem->updateOptionalProperties();
 

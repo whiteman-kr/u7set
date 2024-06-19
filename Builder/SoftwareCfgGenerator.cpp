@@ -609,6 +609,7 @@ namespace Builder
 	{
 		DbController& db = context->m_db;
 		IssueLogger* log = context->m_log;
+		
 
 		if (log == nullptr)
 		{
@@ -667,13 +668,19 @@ namespace Builder
 
 			// Add filtered signals to the list
 			//
-			auto& mutableCache = list->mutableListHashesCache();
+			auto& mutableAppCache = list->mutableAppListHashesCache();
+			auto& mutableTuningCache = list->mutableTuningListHashesCache();
 
 			for (const auto&[signalHash, asp] : provider)
 			{
 				if (list->appSignalMatch(asp) == true)
 				{
-					mutableCache.insert(signalHash);
+					mutableAppCache.insert(signalHash);
+
+					if (asp.enableTuning() == true) 
+					{
+						mutableTuningCache.insert(signalHash);
+					}
 				}
 			}
 
@@ -1446,21 +1453,11 @@ namespace Builder
 
 	bool SoftwareCfgGenerator::writeAppSignalLists(const ISignalManager& signalManager, const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags)
 	{
-		DbController& db = m_context->m_db;
 		IssueLogger* log = m_context->m_log;
 
 		if (log == nullptr)
 		{
 			Q_ASSERT(log);
-			return false;
-		}
-
-		AppSignalListStorage lists(&db);
-
-		QString errorMsg;
-		if (lists.load(&errorMsg) == false)
-		{
-			m_log->errINT1001(tr("Error parsing AppSignalLists: %1").arg(errorMsg));
 			return false;
 		}
 
@@ -1487,17 +1484,50 @@ namespace Builder
 				continue;
 			}
 
-			// Check if this list does not contain signals that are not processed with this software
-			//
-			auto listItemsHashes = list->itemsHashes();
-
 			bool allHashesExists = true;
-			for (Hash hash : listItemsHashes)
+
+			// Check if this list does not contain manually added signals that are not processed with this software
+			//
+			{
+				auto listItemsHashes = list->itemsHashes();
+				for (Hash hash : listItemsHashes)
+				{
+					if (softwareSignalHashesSet.contains(hash) == false)
+					{
+						m_log->errEQP6221(list->itemByHash(hash).appSignalId(), list->id(), m_software->equipmentIdTemplate());
+						allHashesExists = false;
+					}
+				}
+
+				if (allHashesExists == false)
+				{
+					m_log->errINT1001(m_software->equipmentIdTemplate() + " lists failed");
+					returnResult = false;
+					continue;
+				}
+			}
+
+			// Check if this list does not contain cached hashes that are not processed with this software
+			//
+			const auto& appListItemsCache = list->appListHashesCache();
+			const auto& tuningListItemsCache = list->tuningListHashesCache();
+			for (Hash hash : appListItemsCache)
 			{
 				if (softwareSignalHashesSet.contains(hash) == false)
 				{
-					m_log->errEQP6221(list->itemByHash(hash).appSignalId(), list->id(), m_software->equipmentIdTemplate());
-					allHashesExists = false;
+					const AppSignal* as = m_signalSet->appSignalSet()->getSignalByHash(hash);
+					if (as == nullptr)
+					{
+						Q_ASSERT(as);
+						m_log->errINT1001(tr("Unknown hash was found in list %1 hash cache.").arg(list->id()));
+						continue;
+					}
+
+					if (as->enableTuning() == true && tuningListItemsCache.contains(hash) == false)	// This is possibly TuningSignal, assert it is found in Tuning cache
+					{
+						m_log->errEQP6221(as->appSignalID(), list->id(), m_software->equipmentIdTemplate());
+						allHashesExists = false;
+					}
 				}
 			}
 

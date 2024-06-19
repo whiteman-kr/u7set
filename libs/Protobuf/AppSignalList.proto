@@ -33,5 +33,6 @@ message AppSignalList
     optional string appSignalTags = 9;
     repeated AppSignalListSignal listSignals = 10;
     optional string userTags = 11;
-    repeated uint64 listHashesCache = 12;
+    repeated uint64 appListHashesCache = 12;
+    repeated uint64 tuningListHashesCache = 13;
 }

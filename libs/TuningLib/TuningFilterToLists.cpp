@@ -5,54 +5,70 @@
 
 namespace TuningFilters
 {
-	bool TuningFilterToLists::convert(TuningFilters::TuningFilterStorage& tuningFilterStorage,
-									  TuningLib::TuningUiStorage& uiStorage,
-									  AppSignalLists::AppSignalListSet& appSignalLists,
-									  const QStringList& appSignalListsSystemTags)
+	bool TuningFilterToLists::convertUi(const QString& softwareEquipmentId,
+										const QString& softwareTag,
+										TuningFilters::TuningFilterStorage& tuningFilterStorage,
+										TuningLib::TuningUiStorage& uiStorage,
+										AppSignalLists::AppSignalListSet& appSignalLists)
 	{
-
 		TuningFilter* rootFilter = tuningFilterStorage.root().get();
 		TuningLib::TuningUiItem* rootUi = uiStorage.root();
 
-		convertFilter(rootFilter, rootUi, appSignalLists, appSignalListsSystemTags);
+		int filterNumber = 0;
+
+		convertUiFilter(softwareEquipmentId, softwareTag, filterNumber, rootFilter, rootUi, appSignalLists);
 
 		return true;
 	}
 
-	bool TuningFilterToLists::convertFilter(TuningFilter* parentFilter,
-											TuningLib::TuningUiItem* parentUi,
-											AppSignalLists::AppSignalListSet& appSignalLists,
-											const QStringList& appSignalListsSystemTags)
+	bool TuningFilterToLists::convertGeneric(TuningFilters::TuningFilterStorage& tuningFilterStorage,
+											 AppSignalLists::AppSignalListSet& appSignalLists)
 	{
-		for (int i = 0; i < parentFilter->childFiltersCount(); i++) 
+		TuningFilter* rootFilter = tuningFilterStorage.root().get();
+
+		int filterNumber = 0;
+
+		convertGenericFilter(filterNumber, rootFilter, appSignalLists);
+
+		return true;
+	}
+
+	bool TuningFilterToLists::convertUiFilter(const QString& softwareEquipmentId,
+											  const QString& softwareTag,
+											  int& filterNumber,
+											  TuningFilters::TuningFilter* parentFilter,
+											  TuningLib::TuningUiItem* parentUi,
+											  AppSignalLists::AppSignalListSet& appSignalLists)
+	{
+		for (int i = 0; i < parentFilter->childFiltersCount(); i++)
 		{
 			TuningFilter* filter = parentFilter->childFilter(i).get();
-			if (filter == nullptr) 
+			if (filter == nullptr)
 			{
 				Q_ASSERT(filter);
 				return false;
 			}
 
+			if (filter->isTree() == true) // They are in lists
+			{
+				continue;
+			}
+
+			QString id;
+			do
+			{
+				id = QString("%1_UI_%2").arg(softwareEquipmentId).arg(QString::number(filterNumber++).rightJustified(4, '0'));
+			} while (appSignalLists.get(id) != nullptr);
+
+			filter->setID(id);
+
 			// Create Ui Item
 			//
 			std::shared_ptr<TuningLib::TuningUiItem> uiItem = std::make_shared<TuningLib::TuningUiItem>();
-			uiItem->setUuid(QUuid::createUuid());	
-
-			if (filter->customID().isEmpty() == true) 
-			{
-				uiItem->setID(uiItem->uuidString());
-			}
-			else 
-			{
-				uiItem->setID(filter->customID());
-			}
-
+			uiItem->setUuid(QUuid::createUuid());
 			uiItem->setCaption(filter->caption());
 			switch (filter->interfaceType())
 			{
-			case TuningFilter::InterfaceType::Tree:
-				uiItem->setInterfaceType(TuningLib::TuningUiItem::InterfaceType::Generic);
-				break;
 			case TuningFilter::InterfaceType::Tab:
 				uiItem->setInterfaceType(TuningLib::TuningUiItem::InterfaceType::Tab);
 				break;
@@ -67,7 +83,7 @@ namespace TuningFilters
 				break;
 			default:
 				Q_ASSERT(false);
-				uiItem->setInterfaceType(TuningLib::TuningUiItem::InterfaceType::Generic);
+				uiItem->setInterfaceType(TuningLib::TuningUiItem::InterfaceType::Tab);
 			}
 
 			uiItem->setUseColors(filter->useColors());
@@ -77,7 +93,7 @@ namespace TuningFilters
 			uiItem->setTextSelectedColor(filter->textSelectedColor());
 			uiItem->setBackAlertedColor(filter->backAlertedColor());
 			uiItem->setTextAlertedColor(filter->textAlertedColor());
-			
+
 			uiItem->setHasDiscreteCounter(filter->hasDiscreteCounter());
 
 			switch (filter->counterType())
@@ -92,10 +108,10 @@ namespace TuningFilters
 				Q_ASSERT(false);
 				uiItem->setCounterType(TuningLib::TuningUiItem::CounterType::FilterTree);
 			}
-			
+
 			uiItem->setTags(filter->tags());
 
-			switch(filter->tabType())
+			switch (filter->tabType())
 			{
 			case TuningFilter::TabType::Generic:
 				uiItem->setTabType(TuningLib::TuningUiItem::TabType::Generic);
@@ -126,16 +142,17 @@ namespace TuningFilters
 
 			// Create AppSignalLists
 			//
-			if (filter->isEmpty() == false) 
+			if (filter->isEmpty() == false)
 			{
 				std::shared_ptr<AppSignalLists::AppSignalList> appSignalList = std::make_shared<AppSignalLists::AppSignalList>();
 				appSignalLists.add(appSignalList);
 
 				// Copy list properties
 				//
-				appSignalList->setId(filter->ID());				// Signal list ID is the same as Filter ID! This is requred to keep links in UI item's Filters property!
+				appSignalList->setId(
+					filter->ID()); // Signal list ID is the same as Filter ID! This is requred to keep links in UI item's Filters property!
 				appSignalList->setCaption(filter->caption());
-				switch(filter->signalType())
+				switch (filter->signalType())
 				{
 				case TuningFilter::SignalType::All:
 					appSignalList->setSignalType(AppSignalLists::AppSignalList::SignalType::All);
@@ -150,16 +167,16 @@ namespace TuningFilters
 					Q_ASSERT(false);
 					appSignalList->setSignalType(AppSignalLists::AppSignalList::SignalType::All);
 				}
-				
-				appSignalList->systemTagsList() = appSignalListsSystemTags;
-				/*
-				if (filter->interfaceType() != TuningFilters::TuningFilter::InterfaceType::Tree) 
-				{
-					// This is UI list
-					appSignalList->systemTagsList().push_back(AppSignalLists::AppSignalList::tagUi);
-				}*/
 
-				appSignalList->setUserTags({});
+				if (appSignalList->userTagsList().contains(softwareTag) == false)
+				{
+					appSignalList->userTagsList().push_back(softwareTag);
+				}
+
+				if (appSignalList->systemTagsList().contains(AppSignalLists::AppSignalList::tagUi) == false)
+				{
+					appSignalList->systemTagsList().push_back(AppSignalLists::AppSignalList::tagUi);
+				}
 				appSignalList->setCustomAppSignalIDMask(filter->customAppSignalIDMask());
 				appSignalList->setEquipmentIDMask(filter->equipmentIDMask());
 				appSignalList->setAppSignalIDMask(filter->appSignalIDMask());
@@ -174,7 +191,7 @@ namespace TuningFilters
 					TuningFilter* parentFilter = filter->parentFilter();
 					if (parentFilter == nullptr || parentFilter->isRoot() == true)
 					{
-						return;	// End of recursion
+						return; // End of recursion
 					}
 
 					if (parentFilter->isEmpty() == false)
@@ -190,10 +207,10 @@ namespace TuningFilters
 				// Add list signals
 				//
 				auto filterSignals = filter->getFilterSignals();
-				for (const auto& fs : filterSignals) 
+				for (const auto& fs : filterSignals)
 				{
 					AppSignalLists::AppSignalListItem asi(fs.appSignalId());
-					if (fs.useValue() == true) 
+					if (fs.useValue() == true)
 					{
 						asi.setValue(fs.value());
 					}
@@ -203,7 +220,7 @@ namespace TuningFilters
 
 			// Recursive call for all children
 			//
-			if (convertFilter(filter, uiItem.get(), appSignalLists, appSignalListsSystemTags) == false) 
+			if (convertUiFilter(softwareEquipmentId, softwareTag, filterNumber, filter, uiItem.get(), appSignalLists) == false)
 			{
 				Q_ASSERT(false);
 				return false;
@@ -213,5 +230,84 @@ namespace TuningFilters
 		return true;
 	}
 
-} // namespace TuningFilters
+	bool TuningFilterToLists::convertGenericFilter(int& filterNumber,
+												   TuningFilters::TuningFilter* parentFilter,
+												   AppSignalLists::AppSignalListSet& appSignalLists)
+	{
+		for (int i = 0; i < parentFilter->childFiltersCount(); i++)
+		{
+			TuningFilter* filter = parentFilter->childFilter(i).get();
+			if (filter == nullptr)
+			{
+				Q_ASSERT(filter);
+				return false;
+			}
 
+			if (filter->isTree() == false)
+			{
+				continue;
+			}
+
+
+			// Create AppSignalLists
+			//
+			std::shared_ptr<AppSignalLists::AppSignalList> appSignalList = std::make_shared<AppSignalLists::AppSignalList>();
+			appSignalLists.add(appSignalList);
+
+			// Copy list properties
+			//
+			QString id;
+			do
+			{
+				id = QString("LOCAL_%1").arg(QString::number(filterNumber++).rightJustified(4, '0'));
+			} while (appSignalLists.get(id) != nullptr);
+			appSignalList->setId(id);
+
+			appSignalList->setCaption(filter->caption());
+
+			switch (filter->signalType())
+			{
+			case TuningFilter::SignalType::All:
+				appSignalList->setSignalType(AppSignalLists::AppSignalList::SignalType::All);
+				break;
+			case TuningFilter::SignalType::Analog:
+				appSignalList->setSignalType(AppSignalLists::AppSignalList::SignalType::Analog);
+				break;
+			case TuningFilter::SignalType::Discrete:
+				appSignalList->setSignalType(AppSignalLists::AppSignalList::SignalType::Discrete);
+				break;
+			default:
+				Q_ASSERT(false);
+				appSignalList->setSignalType(AppSignalLists::AppSignalList::SignalType::All);
+			}
+
+			appSignalList->setCustomAppSignalIDMask(filter->customAppSignalIDMask());
+			appSignalList->setEquipmentIDMask(filter->equipmentIDMask());
+			appSignalList->setAppSignalIDMask(filter->appSignalIDMask());
+			appSignalList->setAppSignalTags(filter->appSignalTags());
+
+			// Add list signals
+			//
+			auto filterSignals = filter->getFilterSignals();
+			for (const auto& fs : filterSignals)
+			{
+				AppSignalLists::AppSignalListItem asi(fs.appSignalId());
+				if (fs.useValue() == true)
+				{
+					asi.setValue(fs.value());
+				}
+				appSignalList->add(asi);
+			}
+
+			// Recursive call for all children
+			//
+			if (convertGenericFilter(filterNumber, filter, appSignalLists) == false)
+			{
+				Q_ASSERT(false);
+				return false;
+			}
+		}
+
+		return true;
+	}
+} // namespace TuningFilters

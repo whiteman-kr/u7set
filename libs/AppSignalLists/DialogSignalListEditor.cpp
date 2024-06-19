@@ -21,6 +21,11 @@ namespace AppSignalLists
 		return;
 	}
 
+	DialogSignalListEditor* DialogSignalListEditor::instance() 
+	{
+		return s_instance;
+	}
+
 	DialogSignalListEditor::DialogSignalListEditor(AppSignalListSet& appSignalListSet, ISignalManager& signalManager, QWidget* parent) :
 		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
 		m_appLists(appSignalListSet),
@@ -361,6 +366,13 @@ namespace AppSignalLists
 				break;
 			}
 
+			// Do not add UI lists
+			//
+			if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagUi) == true) 
+			{
+				continue;
+			}
+
 			if (m_masks.empty() == false)
 			{
 				bool maskResult = false;
@@ -435,6 +447,9 @@ namespace AppSignalLists
 				firstList = list.get();
 			}
 		}
+
+		m_btnRemove->setEnabled(readOnly == false);
+		m_removeAction->setEnabled(readOnly == false);
 
 		m_listPropertyEditor->setReadOnly(readOnly);
 		m_listPropertyEditor->setObjects(objects);
@@ -705,39 +720,38 @@ namespace AppSignalLists
 	{
 		m_appLists = m_editLists;
 
-		// Create lists array edited by user
+		// Count cached hashes for all user lists
 		//
-		std::vector<AppSignalList*> userLists;
+		std::vector<Hash> allHashes = m_signalManager.signalHashes();
 		
 		std::vector<AppSignalList*> lists = m_appLists.lists();
 		for (AppSignalList* list : lists) 
 		{
 			if (list->systemTagsList().contains(AppSignalList::tagIde) == true) 
 			{
-				continue;
+				continue;		// We process only user-created lists!!!
 			}
-			auto& cache = list->mutableListHashesCache();
-			cache.clear();
-			userLists.push_back(list);
-		}
 
-		// Count cached hashes for all user lists
-		//
-		std::vector<Hash> allHashes = m_signalManager.signalHashes();
+			auto& appListHashesCache = list->mutableAppListHashesCache();
+			auto& tuningListHashesCache = list->mutableTuningListHashesCache();
+			appListHashesCache.clear();
+			tuningListHashesCache.clear();
 
-		for (Hash hash : allHashes)
-		{
-			bool found = false;
-			const AppSignalParam& asp = m_signalManager.signalParam(hash, &found);
-
-			for (AppSignalList* list : userLists)
+			for (Hash hash : allHashes)
 			{
+				bool found = false;
+				const AppSignalParam& asp = m_signalManager.signalParam(hash, &found);
+
 				// Add filtered signals to the list
 				//
-				auto& cache = list->mutableListHashesCache();
 				if (list->appSignalMatch(asp) == true)
 				{
-					cache.insert(hash);
+					appListHashesCache.insert(hash);
+
+					if (asp.enableTuning() == true) 
+					{
+						tuningListHashesCache.insert(hash);
+					}
 				}
 			}
 		}

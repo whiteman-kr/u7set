@@ -72,6 +72,7 @@ namespace AppSignalLists
 		void setId(const QString& value);
 
 		QUuid uuid() const;
+		QString uuidString() const;
 		void setUuid(const QUuid& uuid);
 
 		QString caption() const;
@@ -125,8 +126,11 @@ namespace AppSignalLists
 		void add(const AppSignalListItem& item);
 		void remove(Hash hash);
 
-		[[nodiscard]] const std::set<Hash>& listHashesCache() const;
-		[[nodiscard]] std::set<Hash>& mutableListHashesCache();
+		[[nodiscard]] const std::set<Hash>& appListHashesCache() const;
+		[[nodiscard]] std::set<Hash>& mutableAppListHashesCache();
+
+		[[nodiscard]] const std::set<Hash>& tuningListHashesCache() const;
+		[[nodiscard]] std::set<Hash>& mutableTuningListHashesCache();
 
 		// Returns true if application signal matches to this list (mask or items list)
 		//
@@ -158,8 +162,8 @@ namespace AppSignalLists
 			m_cachedAppSignalTags = That.m_cachedAppSignalTags;
 
 			m_items = That.m_items;
-			m_listHashesCache = That.m_listHashesCache;
-
+			m_appListHashesCache = That.m_appListHashesCache;
+			m_tuningListHashesCache = That.m_tuningListHashesCache;
 
 			return *this;
 		}
@@ -169,6 +173,7 @@ namespace AppSignalLists
 		static inline const QString tagUi = "ui";
 		static inline const QString tagEquipment = "eqp";
 		static inline const QString tagSchema = "schema";
+		static inline const QString tagTcAuto = "tcauto";
 
 	private:
 		static bool processMaskList(const QString& s, const QStringList& masks);
@@ -203,7 +208,9 @@ namespace AppSignalLists
 		// Items
 		//
 		std::map<Hash, AppSignalListItem> m_items;	// Signals added by user are stored here
-		std::set<Hash> m_listHashesCache;		// All signals hashes that match this filter are stored here. They are filled on build and after local lists editing
+		
+		std::set<Hash> m_appListHashesCache;			// All signals hashes that match this filter are stored here. They are filled on build and after local lists editing
+		std::set<Hash> m_tuningListHashesCache;		// Only Tuning signals hashes that match this filter are stored here for IDE-created filters. On loading by TuningClient, they replace cache.
 
 	public:
 		static const char* mimeType; // = "application/x-radiyappsignallist";

@@ -33,8 +33,7 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 
 	// Get file TUNING_UI
 	//
-	QByteArray uiData;
-	getFileBlockedById(CfgFileId::TUNING_UI, &uiData, nullptr);
+	getFileBlockedById(CfgFileId::TUNING_UI, &m_tuningUiData, nullptr);
 
 	// Get file TUNING_SIGNALS
 	//
@@ -121,7 +120,6 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 	if (uiFilesUpdated == true || apperanceUpdated == true || serversUpdated == true)
 	{
 		emit signalsArrived(signalData);
-		emit uiArrived(uiData);
 		emit configurationArrived(readConfig);
 	}
 
@@ -148,6 +146,11 @@ ClientLib::ConfigurationInfo TuningConfigController::configInfo() const
 {
 	QReadLocker locker(&m_lock);
 	return m_configuration.configInfo;
+}
+
+const QByteArray& TuningConfigController::tuningUiData() const 
+{
+	return m_tuningUiData;
 }
 
 QString TuningConfigController::startSchemaId() const

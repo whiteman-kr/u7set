@@ -13,6 +13,7 @@ namespace AppSignalLists
 	{
 	public:
 		static void showDialog(AppSignalListSet& appSignalListSet, ISignalManager& signalManager, QWidget* parent);
+		static DialogSignalListEditor* instance();
 
 	private:
 		DialogSignalListEditor(AppSignalListSet& appSignalListSet, ISignalManager& signalManager, QWidget* parent);
@@ -20,6 +21,9 @@ namespace AppSignalLists
 
 	public:
 		void setFilter(QString filter);
+
+	signals:
+		void editingFinished();
 
 	private slots:
 		void onMaskReturn();

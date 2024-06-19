@@ -12,6 +12,38 @@ namespace Builder
 	{
 	}
 
+	std::shared_ptr<AppSignalLists::AppSignalList> AppSignalListStorage::get(const QString& id, bool* ok) const 
+	{
+		for (auto it = begin(); it != end(); it++)
+		{
+			const AppSignalLists::AppSignalList* list = it->get();
+			if (list == nullptr)
+			{
+				if (ok != nullptr) 
+				{
+					*ok = false;
+				}
+				Q_ASSERT(list);
+				return nullptr;
+			}
+
+			if (list->id() == id) 
+			{
+				if (ok != nullptr) 
+				{
+					*ok = true;
+				}
+				return *it;
+			}
+		}
+
+		if (ok != nullptr)
+		{
+			*ok = false;
+		}
+		return nullptr;
+	}
+
 	std::vector<std::pair<QString, QString>> AppSignalListStorage::checkForSameIds() const
 	{
 		std::set<QString> ids;
