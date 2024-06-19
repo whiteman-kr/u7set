@@ -4984,8 +4984,6 @@ void DbWorker::slot_getLatestSignals(const std::vector<int>& signalIDs, std::vec
 
 	appendIDsArray(signalIDs, &request, true, &logMessage);
 
-	addLogRecord(db, logMessage);
-
 	QSqlQuery q(db);
 
 	bool result = q.exec(request);
