@@ -102,14 +102,25 @@ public slots:
 	void updateSelectedDevices();
 
 	void updateFromPreset();
+
+private:
+	struct AddDeviceUpdatePreset
+	{
+		int parentFileId;
+		int presetFileId;
+		std::vector<std::pair<QString, QVariant>> propertiesToSet;
+	};
+
 	bool updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObject> device,
 								std::shared_ptr<Hardware::DeviceObject> preset,
 								const QStringList& forceUpdateProperties,
 								const QStringList& presetsToUpdate,
 								std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
 								std::vector<Hardware::DeviceObject*>* deleteDeviceList,
-								std::vector<std::pair<int, int>>* addDeviceList,
+								std::vector<AddDeviceUpdatePreset>* addDeviceList,
 								std::vector<const Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals);
+
+	void updateFromPresetFixAppDataServiceIdsToRc1(Hardware::DeviceObject& device);
 
 	// Events
 	//

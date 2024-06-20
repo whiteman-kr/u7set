@@ -7,16 +7,17 @@
 // -------------------------------------------------------------------------------
 
 TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
-								   E::SecurityLevel securityLevel,
 								   Archive* archive) :
-	Tcp::Server(softwareInfo, securityLevel, "ArchiveAppDataServer"),
+	Tcp::Server(softwareInfo, "ArchiveAppDataServer"),
 	m_archive(archive)
 {
 }
 
-Tcp::Server* TcpAppDataServer::getNewInstance()
+Tcp::Server* TcpAppDataServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 {
-	return new TcpAppDataServer(localSoftwareInfo(), securityLevel(), m_archive);
+	TcpAppDataServer* newServer = new TcpAppDataServer(localSoftwareInfo(), m_archive);
+	newServer->setListenAddress(listenAddr);
+	return newServer;
 }
 
 void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

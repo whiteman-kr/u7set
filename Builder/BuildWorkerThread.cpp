@@ -1,8 +1,9 @@
-#include <HardwareLib/Subsystem.h>
 #include <HardwareLib/PropertyNames.h>
+#include <HardwareLib/Subsystem.h>
 
 #include <Simulator/Simulator.h>
 
+#include "AdsBridgeCfgGenerator.h"
 #include "AppDataServiceCfgGenerator.h"
 #include "AppLogicCompiler.h"
 #include "ArchivingServiceCfgGenerator.h"
@@ -10,11 +11,11 @@
 #include "ConfigurationBuilder.h"
 #include "ConfigurationServiceCfgGenerator.h"
 #include "DiagDataServiceCfgGenerator.h"
+#include "DiagnosticsCfgGenerator.h"
 #include "GatewayServiceCfgGenerator.h"
 #include "LogicModulesInfoWriter.h"
 #include "MetrologyCfgGenerator.h"
 #include "MonitorCfgGenerator.h"
-#include "DiagnosticsCfgGenerator.h"
 #include "Parser.h"
 #include "SchemasReportGenerator.h"
 #include "ScriptChecker.h"
@@ -23,9 +24,10 @@
 #include "TestSuiteCfgGenerator.h"
 #include "TuningClientCfgGenerator.h"
 #include "TuningServiceCfgGenerator.h"
+#include "ModulesReportGenerator.h"
 
-#include "./Vdu/VduFontGenerator.h"
 #include "./Vdu/VduConfigFile.h"
+#include "./Vdu/VduFontGenerator.h"
 
 namespace
 {
@@ -1460,6 +1462,13 @@ namespace Builder
 		return ok;
 	}
 
+	bool BuildWorkerThread::taskInstalledModulesReportGeneration()
+	{
+		ModulesReportGenerator repGen(m_context.get());
+
+		return repGen.run();
+	}
+
 	bool BuildWorkerThread::taskGenerationBitstreamFile()
 	{
 		if (m_log->errorCount() != 0)
@@ -2231,7 +2240,7 @@ namespace Builder
 		LOG_MESSAGE(m_log, QString("Software settings generation for profile: %1").
 							arg(SettingsProfile::DEFAULT));
 
-		for(auto p : m_context->m_software)
+		for(auto& p : m_context->m_software)
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -2298,6 +2307,10 @@ namespace Builder
 
 			case E::SoftwareType::Diagnostics:
 				swCfgGen = std::make_shared<DiagnosticsCfgGenerator>(context, software);
+				break;
+
+			case E::SoftwareType::AdsBridge:
+				swCfgGen = std::make_shared<AdsBridgeCfgGenerator>(context, software);
 				break;
 
 			default:
@@ -2379,7 +2392,7 @@ namespace Builder
 
 		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS);	// <SoftwareItems>
 
-		for(auto p : swCfgGens)
+		for(auto& p : swCfgGens)
 		{
 			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
 
@@ -2400,7 +2413,7 @@ namespace Builder
 		// Software items configuration generation
 		//
 
-		for(auto p : swCfgGens)
+		for(auto& p : swCfgGens)
 		{
 			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
 
@@ -2416,7 +2429,7 @@ namespace Builder
 			result &= swCfgGen->generateConfigurationStep1();
 		}
 
-		for(auto p : swCfgGens)
+		for(auto& p : swCfgGens)
 		{
 			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
 

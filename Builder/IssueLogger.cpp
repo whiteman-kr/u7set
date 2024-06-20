@@ -942,37 +942,6 @@ namespace Builder
 				  .arg(signalID));
 	}
 
-	/// IssueCode: CFG3011
-	///
-	/// IssueType: Error
-	///
-	/// Title: IP address in property %1 has undefined value (%2) in controller %3.
-	///
-	/// Parameters:
-	///         %1 Address Property Name
-	///         %2 Address Property Value
-	///         %3 Controller ID
-	///
-	/// Description:
-	///			Occurs if IP address in an Ethernet controller has undefined value
-	///
-	void IssueLogger::errCFG3011(QString addressProperty, uint address, QString controller)
-	{
-		quint8 a1 = (address >> 24) & 0xff;
-		quint8 a2 = (address >> 16) & 0xff;
-		quint8 a3 = (address >> 8) & 0xff;
-		quint8 a4 = address & 0xff;
-
-		QString str = QString("%1.%2.%3.%4").arg(a1).arg(a2).arg(a3).arg(a4);
-
-		LOG_ERROR(IssueType::FscConfiguration,
-				  3011,
-				  tr("IP address in property %1 has undefined value (%2) in controller %3.")
-				  .arg(addressProperty)
-				  .arg(str)
-				  .arg(controller));
-	}
-
 	/// IssueCode: CFG3012
 	///
 	/// IssueType: Error
@@ -1409,6 +1378,50 @@ namespace Builder
 				  tr("Property %1.%2 should be set to the valid writable catalog of workstation.")
 				  .arg(objectID)
 				  .arg(propertyName));
+	}
+
+	/// IssueCode: CFG3032
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 is linked to undefined RequestController ID %3.
+	///
+	/// Parameters:
+	///         %1 Object ID
+	///         %2 Property name
+	///			%3 RequestController ID
+	///
+	/// Description:
+	///			Occurs if property is linked to undefined RequestController ID.
+	///
+	void IssueLogger::errCFG3032(QString objectID, QString propertyName, QString rcID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3032,
+				  tr("Property %1.%2 is linked to undefined RequestController ID %3.")
+				  .arg(objectID)
+				  .arg(propertyName)
+				  .arg(rcID));
+	}
+
+	/// IssueCode: CFG3033
+	///
+	/// IssueType: Error
+	///
+	/// Title: %1 %2 settings read error.
+	///
+	/// Parameters:
+	///         %1 Software type
+	///         %2 Software EquipmentID
+	///
+	/// Description:
+	///			Check specified software settings.
+	///
+	void IssueLogger::errCFG3033(QString softwareType, QString equipmentID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3033,
+				  tr("%1 %2 settings read error.").arg(softwareType, equipmentID));
 	}
 
 	/// IssueCode: CFG3040

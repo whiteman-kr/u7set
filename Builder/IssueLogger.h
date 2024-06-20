@@ -145,7 +145,6 @@ namespace Builder
 		void errCFG3009(QString signalID1, QString signalID2, QString module);		// Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module %3.
 		void errCFG3010(QString name, double value, double min, double max, int precision, QString signalID);	// Property %1 has wrong value (%2), valid range is %3..%4 [precision %5](signal %6).
 
-		void errCFG3011(QString addressProperty, uint address, QString controller);	// IP address in property %1 has undefined value (%2) in controller %3.
 		void errCFG3012(QString portProperty, uint port, QString controller);		// Port in property %1 has undefined value (%2) in controller %3.
 
 		void errCFG3013(QString name1, double value1, int compareMode, QString name2, double value2, int precision, QString signalID);	//Property %1 (%2) is %3 property %4 (%5) in signal %6.
@@ -168,6 +167,8 @@ namespace Builder
 		void errCFG3029(QString softwareID);												// Software %1 is not linked to ConfigurationService.
 		void errCFG3030(QString lmID, QString appDataServiceID);							// Several ethernet adapters of LM %1 are connected to AppDataService %2.
 		void wrnCFG3031(QString objectID, QString propertyName);							// Property %1.%2 should be set to the valid writable catalog of workstation.
+		void errCFG3032(QString objectID, QString propertyName, QString rcID);				// Property %1.%2 is linked to undefined RequestController ID %3.
+		void errCFG3033(QString softwareType, QString equipmentID);							// %1 %2 settings read error.
 
 		void errCFG3040(QString monitorId, QString tuningServiceId);						// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
 		void errCFG3041(QString name, QString value, QString message, QString signalId);	// Property %1 has wrong value (%2), required value is %3 in signal %4.

@@ -356,6 +356,9 @@ std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings
 	case E::SoftwareType::Diagnostics:
 		return std::make_shared<DiagnosticsSettings>();
 
+	case E::SoftwareType::AdsBridge:
+		return std::make_shared<AdsBridgeSettings>();
+
 	case E::SoftwareType::ServiceControlManager:
 	case E::SoftwareType::Unknown:
 	case E::SoftwareType::BaseService:
@@ -383,6 +386,58 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 	m_settingsMap.insert({profile, sharedSettings});
 
 	return true;
+}
+
+// -------------------------------------------------------------------------------------
+//
+// RequestControllerSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool RequestControllerSettings::isValid() const
+{
+	return ID != -1;
+}
+
+bool RequestControllerSettings::operator < (const RequestControllerSettings& rcs) const
+{
+	return ID < rcs.ID;
+}
+
+bool RequestControllerSettings::writeToXml(XmlWriteHelper& xml) const
+{
+	xml.writeStartElement(XmlElement::REQUEST_CONTROLLER);
+
+	xml.writeIntAttribute(XmlAttribute::ID, ID);
+	xml.writeStringAttribute(XmlAttribute::EQUIPMENT_ID, equipmentID);
+	xml.writeIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, clientRequestIP);
+	xml.writeIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+	xml.writeIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, rtTrendsRequestIP);
+	xml.writeEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, securityLevel);
+	xml.writeBoolAttribute(XmlAttribute::ENABLE, enable);
+
+	xml.writeEndElement();	// </RequestController>
+
+	return true;
+}
+
+bool RequestControllerSettings::readFromXml(XmlReadHelper& xml)
+{
+	bool result = true;
+
+	result &= xml.findElement(XmlElement::REQUEST_CONTROLLER);
+
+	result &= xml.readIntAttribute(XmlAttribute::ID, &ID);
+	result &= xml.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &equipmentID);
+
+	result &= xml.readIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, &clientRequestIP);
+	result &= xml.readIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+	result &= xml.readIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, &rtTrendsRequestIP);
+
+	result &= xml.readEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, &securityLevel);
+	result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &enable);
+
+	return result;
 }
 
 // -------------------------------------------------------------------------------------
@@ -498,6 +553,21 @@ QStringList CfgServiceSettings::knownClients() const
 //
 // -------------------------------------------------------------------------------------
 
+RequestControllerSettings AppDataServiceSettings::getRequestControllerSettings(const QString& rcEquipmentID)
+{
+	auto it = std::find_if(rcSettings.begin(), rcSettings.end(), [&rcEquipmentID](const RequestControllerSettings& rcs)
+						{
+							return rcs.equipmentID == rcEquipmentID;
+						});
+
+	if (it != rcSettings.end())
+	{
+		return RequestControllerSettings(*it);
+	}
+
+	return RequestControllerSettings();
+}
+
 bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
@@ -520,14 +590,15 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,
 							 EquipmentPropNames::ARCH_SERVICE_PORT, archServiceIP);
 
-	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
-							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
-	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+	xml.writeStartElement(XmlElement::REQUEST_CONTROLLERS);
+	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(rcSettings.size()));
 
-	xml.writeHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
-							 EquipmentPropNames::RT_TRENDS_REQUEST_PORT, rtTrendsRequestIP);
+	for(const RequestControllerSettings& rcs : rcSettings)
+	{
+		rcs.writeToXml(xml);
+	}
 
-	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
+	xml.writeEndElement();	// </RequestControllers>
 
 	writeEndSettings(xml);	// </Settings>
 
@@ -560,14 +631,27 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,
 									  EquipmentPropNames::ARCH_SERVICE_PORT, &archServiceIP);
 
-	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
-									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
-	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+	rcSettings.clear();
 
-	result &= xml.readHostAddressPort(EquipmentPropNames::RT_TRENDS_REQUEST_IP,
-									  EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtTrendsRequestIP);
+	result &= xml.findElement(XmlElement::REQUEST_CONTROLLERS);
 
-	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel, true);
+	int rqCtrlsCount = 0;
+
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &rqCtrlsCount);
+
+	rcSettings.reserve(rqCtrlsCount);
+
+	for(int i = 0; i < rqCtrlsCount; i++)
+	{
+		RequestControllerSettings rcs;
+
+		result &= rcs.readFromXml(xml);
+
+		if (result == true)
+		{
+			rcSettings.emplace_back(rcs);
+		}
+	}
 
 	return result;
 }
@@ -796,9 +880,9 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml) const
 		if (ch.enable == true)
 		{
 			xml.writeStringAttribute(XmlAttribute::CONTROLLER_EQUIPMENT_ID, ch.serviceControllerEquipmentID);
-			xml.writeHostAddressPortAttribute(EquipmentPropNames::TUNING_DATA_IP, ch.tuningDataIP);
-			xml.writeQHostAddressAttribute(EquipmentPropNames::TUNING_DATA_NETMASK, ch.tuningDataNetmask);
-			xml.writeHostAddressPortAttribute(EquipmentPropNames::TUNING_SIM_IP, ch.tuningSimIP);
+			xml.writeIPv4PortAttribute(EquipmentPropNames::TUNING_DATA_IP, ch.tuningDataIP);
+			xml.writeIPv4Attribute(EquipmentPropNames::TUNING_DATA_NETMASK, ch.tuningDataNetmask);
+			xml.writeIPv4PortAttribute(EquipmentPropNames::TUNING_SIM_IP, ch.tuningSimIP);
 
 			// write tuning sources info
 			//
@@ -930,9 +1014,9 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 		if (ch.enable == true)
 		{
 			result &= xml.readStringAttribute(XmlAttribute::CONTROLLER_EQUIPMENT_ID, &ch.serviceControllerEquipmentID);
-			result &= xml.readHostAddressPortAttribute(EquipmentPropNames::TUNING_DATA_IP, &ch.tuningDataIP);
-			result &= xml.readQHostAddressAttribute(EquipmentPropNames::TUNING_DATA_NETMASK, &ch.tuningDataNetmask);
-			result &= xml.readHostAddressPortAttribute(EquipmentPropNames::TUNING_SIM_IP, &ch.tuningSimIP);
+			result &= xml.readIPv4PortAttribute(EquipmentPropNames::TUNING_DATA_IP, &ch.tuningDataIP);
+			result &= xml.readIPv4Attribute(EquipmentPropNames::TUNING_DATA_NETMASK, &ch.tuningDataNetmask);
+			result &= xml.readIPv4PortAttribute(EquipmentPropNames::TUNING_SIM_IP, &ch.tuningSimIP);
 
 			result &= readTuningSourcesFromXml(xml, &ch.sources);
 
@@ -1619,6 +1703,99 @@ QStringList MonitorSettings::getUsersAccounts() const
 void MonitorSettings::clear()
 {
 	*this = MonitorSettings{};
+}
+
+// -------------------------------------------------------------------------------------
+//
+// AdsBridgeSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool AdsBridgeSettings::writeToXml(XmlWriteHelper& xml) const
+{
+	writeStartSettings(xml);
+
+	// AppDataServices
+	//
+	for (const SoftwareEndpoint::AppDataService& ads : appDataServices)
+	{
+		xml.writeStartElement(XmlElement::APP_DATA_SERVICE);
+
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ads.equipmentId);
+
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, ads.address.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address.port());
+
+		xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, ads.realtimeAddress.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress.port());
+
+		xml.writeEndElement(); // </AppDataService>
+	}
+
+	// --
+	//
+	writeEndSettings(xml); // </Settings>
+
+	return true;
+}
+
+bool AdsBridgeSettings::readFromXml(XmlReadHelper& xml)
+{
+	clear();
+
+	bool result = true;
+
+	result = startSettingsReading(xml);
+
+	RETURN_IF_FALSE(result);
+
+	while (xml.readNextStartElement() == true)
+	{
+		if (xml.name() == XmlElement::APP_DATA_SERVICE)
+		{
+			SoftwareEndpoint::AppDataService ads;
+			QString clientIp;
+			int clientPort = 0;
+			QString rtIp;
+			int rtPort = 0;
+
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &ads.equipmentId);
+			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientPort);
+			result &= xml.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &rtIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtPort);
+
+			ads.address.setAddressPort(clientIp, clientPort);
+			ads.realtimeAddress.setAddressPort(rtIp, rtPort);
+
+			appDataServices.push_back(ads);
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		// Unknown element
+		//
+		qDebug() << "AdsBridgeSettings::readFromXml UnknownElement " << xml.name();
+		xml.skipCurrentElement();
+	}
+
+	SoftwareSettings::setShortId<SoftwareEndpoint::AppDataService>(&appDataServices);
+
+	result &= (appDataServices.empty() == false);
+
+	return result;
+}
+
+bool AdsBridgeSettings::readFromXml(const QByteArray& xml)
+{
+	XmlReadHelper helper{xml};
+	return readFromXml(helper);
+}
+
+void AdsBridgeSettings::clear()
+{
+	*this = AdsBridgeSettings{};
 }
 
 // -------------------------------------------------------------------------------------

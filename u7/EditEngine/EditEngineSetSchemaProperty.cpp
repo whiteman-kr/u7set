@@ -34,6 +34,10 @@ namespace EditEngine
 		m_schema->setPropertyValue(m_propertyName, m_newValue);
 
 		itemsToSelect->assign(m_selectedItems.begin(), m_selectedItems.end());
+
+		// Ensure that the new scrollbars are set correctly set if schema size was changed.
+		//
+		m_schemaView->setZoom(m_schemaView->zoom());
 		return;
 	}
 
@@ -42,6 +46,10 @@ namespace EditEngine
 		m_schema->setPropertyValue(m_propertyName, m_oldValue);
 
 		itemsToSelect->assign(m_selectedItems.begin(), m_selectedItems.end());
+
+		// Ensure that the new scrollbars are set correctly set if schema size was changed.
+		//
+		m_schemaView->setZoom(m_schemaView->zoom());
 		return;
 	}
 

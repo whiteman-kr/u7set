@@ -134,6 +134,26 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 	return getSettingsProfile<T>(SettingsProfile::DEFAULT);
 }
 
+struct RequestControllerSettings
+{
+	int ID = -1;
+
+	QString equipmentID;
+	HostAddressPort clientRequestIP;
+	QHostAddress clientRequestNetmask;
+	HostAddressPort rtTrendsRequestIP;
+	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+	bool enable = false;
+
+	//
+
+	bool isValid() const;
+	bool operator < (const RequestControllerSettings& rcs) const;
+
+	bool writeToXml(XmlWriteHelper& xml) const;
+	bool readFromXml(XmlReadHelper& xml);
+};
+
 class CfgServiceSettings : virtual public SoftwareSettings
 {
 public:
@@ -181,12 +201,9 @@ public:
 	QString archServiceID;
 	HostAddressPort archServiceIP;
 
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
+	std::vector<RequestControllerSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
 
-	HostAddressPort rtTrendsRequestIP;
-
-	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+	RequestControllerSettings getRequestControllerSettings(const QString& rcEquipmentID);
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -455,6 +472,24 @@ public:
 	void clear();
 };
 
+class AdsBridgeSettings : virtual public SoftwareSettings
+{
+public:
+	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
+
+private:
+	friend class SoftwareSettingsSet;
+
+	// these methods should be call by SoftwareSettingsSet only
+	//
+	bool writeToXml(XmlWriteHelper& xml) const override;
+	bool readFromXml(XmlReadHelper& xml) override;
+
+public:
+	bool readFromXml(const QByteArray& xml);
+
+	void clear();
+};
 
 class DiagnosticsSettings : virtual public SoftwareSettings
 {

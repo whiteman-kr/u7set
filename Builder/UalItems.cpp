@@ -2120,9 +2120,14 @@ namespace Builder
 
 		for(AppSignal* s : m_refSignals)
 		{
-			Q_ASSERT(s->ualAddrIsValid() == false);
-
-			s->setUalAddr(ualAddr);
+			if (s->ualAddrIsValid() == true)
+			{
+				Q_ASSERT(s->ualAddr() == ualAddr);
+			}
+			else
+			{
+				s->setUalAddr(ualAddr);
+			}
 		}
 
 		if (isBus() == false)

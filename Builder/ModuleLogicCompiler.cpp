@@ -6833,9 +6833,13 @@ namespace Builder
 
 	bool ModuleLogicCompiler::disposeBvbSignalsInRegBuf()
 	{
+		TEST_PTR_RETURN_FALSE(m_lmDescription);
+
 		// calculation regBufAddr of BVB chassis I/O signals
 		//
 		bool result = true;
+
+		int bvbAppDataOffset = m_lmDescription->memory().m_appDataOffset;
 
 		std::map<QString, Address16> validitySignalAddr;		// validity signal EquipmentID => validity signal regValueAddr
 
@@ -6922,6 +6926,11 @@ namespace Builder
 				// ioSignal->setRegValueAddr(regValueAddr) doing inside next call
 				//
 				ualIoSignal->setRegValueAddr(regValueAddr);
+
+				Address16 ualAddr(regValueAddr);
+				ualAddr.addWord(bvbAppDataOffset);
+
+				ualIoSignal->setUalAddr(ualAddr);
 			}
 			else
 			{

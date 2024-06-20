@@ -36,21 +36,18 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 
 CfgServer::CfgServer(const QString& buildFolder,
 					 const SoftwareInfo& softwareInfo,
-					 E::SecurityLevel securityLevel,
 					 const SessionParams& sessionParams,
 					 CircularLoggerShared logger) :
-	Tcp::FileServer(buildFolder, softwareInfo, securityLevel, logger, "CfgServer"),
+	Tcp::FileServer(buildFolder, softwareInfo, logger, "CfgServer"),
 	m_sessionParams(sessionParams)
 {
 }
 
-CfgServer* CfgServer::getNewInstance()
+Tcp::Server* CfgServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 {
-	return new CfgServer(m_rootFolder,
-						 localSoftwareInfo(),
-						 securityLevel(),
-						 m_sessionParams,
-						 log());
+	CfgServer* newServer =  new CfgServer(m_rootFolder, localSoftwareInfo(), m_sessionParams, log());
+	newServer->setListenAddress(listenAddr);
+	return newServer;
 }
 
 void CfgServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

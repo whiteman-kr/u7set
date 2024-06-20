@@ -134,6 +134,7 @@ namespace EquipmentPropNames
 	inline const QString ARCH_SERVICE_IP("ArchiveServiceIP");
 	inline const QString ARCH_SERVICE_PORT("ArchiveServicePort");
 	inline const QString AUTO_ARCHIVE_INTERVAL("AutoArchiveInterval");
+	inline const QString REQUEST_CONTROLLER_SUFFIX("_RC");
 
 	// DiagDataService properties
 	//
@@ -305,6 +306,9 @@ namespace XmlElement
 	inline const QString ANALOG_FLOAT_SIGNALS("AnalogFloatSignals");
 	inline const QString ANALOG_INT32_SIGNALS("AnalogInt32Signals");
 	inline const QString DISCRETE_SIGNALS("DiscreteSignals");
+
+	inline const QString REQUEST_CONTROLLERS("RequestControllers");
+	inline const QString REQUEST_CONTROLLER("RequestController");
 }
 
 namespace XmlAttribute
@@ -434,6 +438,12 @@ namespace XmlAttribute
 	inline const QString FORMAT("Format");
 
 	inline const QString MODULE_CAPTION("ModuleCaption");
+
+	inline const QString CLIENT_REQUEST_IP("ClientRequestIP");
+	inline const QString CLIENT_REQUEST_NETMASK("ClientRequestNetmask");
+	inline const QString RT_TRENDS_REQUEST_IP("RtTrendsRequestIP");
+	inline const QString SECURITY_LEVEL("SecurityLevel");
+	inline const QString ENABLE("Enable");
 }
 
 namespace Latin1Char

@@ -444,7 +444,10 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0414.sql", "Upgrade to version 414, Added function api.undo_changes_recursively"},
 	{":/DatabaseUpgrade/Upgrade0415.sql", "Upgrade to version 415, TestSuite preset update, add FontBold and Section layout to report template"},
 	{":/DatabaseUpgrade/Upgrade0416.sql", "Upgrade to version 416, Updated preset Monitor to version 6, set default value property SchemaTags to: AppLogic Monitor"},
-	{":/DatabaseUpgrade/Upgrade0417.sql", "Upgrade to version 417, Create folder $root$/AppSignalLists, Monitor and TuningClient presets update"}
+	{":/DatabaseUpgrade/Upgrade0417.sql", "Upgrade to version 417, Added Request Controllers to AppDataService preset"},
+	{":/DatabaseUpgrade/Upgrade0418.sql", "Upgrade to version 418, Update preset version for Monitor, Metrology, TestSuite, GatewayService (first time), this update aims to update property AppDataServiceIDs to add Receive Controller (_RC1)"},
+	{":/DatabaseUpgrade/Upgrade0419.sql", "Upgrade to version 419, First time add preset AdsBridge"},
+	{":/DatabaseUpgrade/Upgrade0420.sql", "Upgrade to version 420, Create folder $root$/AppSignalLists, Monitor and TuningClient presets update"}
 };
 
 int DbWorker::counter = 0;
@@ -4981,8 +4984,6 @@ void DbWorker::slot_getLatestSignals(const std::vector<int>& signalIDs, std::vec
 	QString request = QString("SELECT * FROM get_latest_signals(%1,").arg(currentUserId());
 
 	appendIDsArray(signalIDs, &request, true, &logMessage);
-
-	addLogRecord(db, logMessage);
 
 	QSqlQuery q(db);
 

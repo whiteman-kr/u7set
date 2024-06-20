@@ -16,7 +16,7 @@ namespace Tuning
 	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service,
 									 const TuningSources& tuningSources,
 									 std::shared_ptr<CircularLogger> logger) :
-		Tcp::Server(service.softwareInfo(), service.securityLevel(), "TuningServer"),
+		Tcp::Server(service.softwareInfo(), "TuningServer"),
 		m_service(service),
 		m_tuningSources(tuningSources),
 		m_logger(logger)
@@ -52,10 +52,10 @@ namespace Tuning
 		m_service.clientIsDisconnected(connectedSoftwareInfo(), peerAddr().addressStr());
 	}
 
-	Tcp::Server* TcpTuningServer::getNewInstance()
+	Tcp::Server* TcpTuningServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 	{
 		TcpTuningServer* newServer =  new TcpTuningServer(m_service, m_tuningSources, m_logger);
-
+		newServer->setListenAddress(listenAddr);
 		return newServer;
 	}
 
@@ -827,10 +827,11 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------
 
-	TcpTuningServerThread::TcpTuningServerThread(const HostAddressPort& listenAddressPort,
-												TcpTuningServer* server,
-												std::shared_ptr<CircularLogger> logger) :
-		Tcp::ServerThread(listenAddressPort, server, logger)
+	TcpTuningServerThread::TcpTuningServerThread(const HostAddressPort &listenAddress,
+												 E::SecurityLevel securityLevel,
+												 TcpTuningServer* server,
+												 std::shared_ptr<CircularLogger> logger) :
+		Tcp::ListenerThread(listenAddress, securityLevel, server, logger)
 	{
 	}
 }

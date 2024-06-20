@@ -3,19 +3,20 @@
 
 
 TcpArchRequestsServer::TcpArchRequestsServer(const SoftwareInfo& softwareInfo,
-											 E::SecurityLevel securityLevel,
 											 Archive* archive,
 											 CircularLoggerShared logger) :
-	Tcp::Server(softwareInfo, securityLevel, "ArchRequestsServer"),
+	Tcp::Server(softwareInfo, "ArchRequestsServer"),
 	m_archive(archive),
 	m_logger(logger)
 {
 	assert(m_archive != nullptr);
 }
 
-Tcp::Server* TcpArchRequestsServer::getNewInstance()
+Tcp::Server* TcpArchRequestsServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 {
-	return new TcpArchRequestsServer(localSoftwareInfo(), securityLevel(), m_archive, m_logger);
+	TcpArchRequestsServer* newServer = new TcpArchRequestsServer(localSoftwareInfo(), m_archive, m_logger);
+	newServer->setListenAddress(listenAddr);
+	return newServer;
 }
 
 void TcpArchRequestsServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)

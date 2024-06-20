@@ -310,7 +310,8 @@ public:
 		TestClient = 9009,
 		TestSuite = 9010,
 		GatewayService = 9011,
-		Diagnostics = 9012
+		Diagnostics = 9012,
+		AdsBridge = 9013,
 	};
 	Q_ENUM(SoftwareType)
 

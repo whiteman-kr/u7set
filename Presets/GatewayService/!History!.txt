@@ -1,6 +1,7 @@
 GWS
 	04.04.2023	Version: 1	GatewayService_v1.u7devp	RPCT-3484: Create GatewayService preset
 	01.04.2024	Version: 2	GatewayService_v2.u7devp	RPCT-3837: GatewayDescription property editor type changet to Script
+	07.06.2024	Version: 3	GatewayService_v3.u7devp	RPCT-3895: Update ADS connection to link to ADS Receive Controller (no actual preset update, changed only preset version)
 
 
 

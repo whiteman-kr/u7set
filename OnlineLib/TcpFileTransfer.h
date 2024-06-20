@@ -146,11 +146,10 @@ namespace Tcp
 	public:
 		FileServer(const QString& rootFolder,
 				   const SoftwareInfo& softwareInfo,
-				   E::SecurityLevel securityLevel,
 				   CircularLoggerShared logger,
 				   const QString& serverDescription);
 
-		virtual Server* getNewInstance() override;
+		virtual Server* getNewInstance(const ListenAddress& listenAddr) override;
 
 		virtual void processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
 

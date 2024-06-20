@@ -18,10 +18,6 @@ namespace Builder
 	{
 	}
 
-	MonitorCfgGenerator::~MonitorCfgGenerator()
-	{
-	}
-
 	bool MonitorCfgGenerator::createSettingsProfile(const QString& profile)
 	{
 		MonitorSettingsGetter settingsGetter;
@@ -209,13 +205,23 @@ namespace Builder
 
 		for (const auto& ads : settings->appDataServices)
 		{
-			std::shared_ptr<Hardware::DeviceObject> appDataServiceObject = m_equipment->deviceObject(ads.equipmentId);
-			if (appDataServiceObject == nullptr)
+			std::shared_ptr<Hardware::DeviceObject> appDataServiceControllerObject = m_equipment->deviceObject(ads.equipmentId);
+			if (appDataServiceControllerObject == nullptr)
 			{
 				m_log->errCFG3021(m_software->equipmentId(), EquipmentPropNames::APP_DATA_SERVICE_IDS, ads.equipmentId);
 				result = false;
 				continue;
 			}
+
+			std::shared_ptr<Hardware::DeviceObject> appDataServiceObject = appDataServiceControllerObject->parent();
+			if (appDataServiceObject == nullptr)
+			{
+				Q_ASSERT(false);
+				m_log->errINT1000(QString("AppDataService controller %1 does not have a parent.").arg(appDataServiceControllerObject->equipmentId()));
+				result = false;
+				continue;
+			}
+
 			std::shared_ptr<Hardware::Software> appDataServiceSoftware = appDataServiceObject->toSoftware();
 			if (appDataServiceSoftware == nullptr)
 			{

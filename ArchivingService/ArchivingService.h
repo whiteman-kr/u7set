@@ -67,8 +67,8 @@ private:
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	Tcp::ServerThread* m_tcpAppDataServerThread = nullptr;
-	Tcp::ServerThread* m_tcpArchRequestsServerThread = nullptr;
+	Tcp::ListenerThread* m_tcpAppDataServerThread = nullptr;
+	Tcp::ListenerThread* m_tcpArchRequestsServerThread = nullptr;
 
 	Archive* m_archive = nullptr;
 };

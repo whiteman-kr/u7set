@@ -29,6 +29,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(QT_VERSION "6.5.3")
 
 find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
+find_package(Threads REQUIRED)
 
 if (MSVC)
 	find_package(Qt6 REQUIRED COMPONENTS AxContainer) # Metrology
@@ -131,9 +132,14 @@ add_subdirectory(TuningService)
 add_subdirectory(GatewayService)
 add_subdirectory(DiagDataService)
 
+add_subdirectory(TestSuiteLib)
+add_subdirectory(TestSuiteConsole)
+
 # Do not compile these projects if code coverage is on.
 #
 if(NOT CODE_COVERAGE)
+	add_subdirectory(TestSuite)
+
     add_subdirectory(./Tools/qtkeychain)
     add_subdirectory(u7)
 
@@ -144,10 +150,6 @@ if(NOT CODE_COVERAGE)
 	add_subdirectory(Metrology)
 	add_subdirectory(mconf)	
 endif()
-
-add_subdirectory(TestSuiteLib)
-add_subdirectory(TestSuite)
-add_subdirectory(TestSuiteConsole)
 
 add_subdirectory(./Test/googletest)
 add_subdirectory(./Test/ClientTests)

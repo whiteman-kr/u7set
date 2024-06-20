@@ -1,0 +1,3 @@
+BUMZ-4
+	06.06.2024	Version: 3	BUMZ-4_IDx5701_v3.u7devp	RPCT-3896: Added preset in new naming convension and family BUIM (created from BUMZ-4_v1.u7devp) 
+										   Added property ActuatorDescription

@@ -10,6 +10,8 @@
 #include <VFrame30/IMatsSchemaItemAssociations.h>
 #include <VFrame30/ITimeStats.h>
 
+#include <exception>
+
 
 namespace
 {

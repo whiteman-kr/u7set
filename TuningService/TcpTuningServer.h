@@ -27,7 +27,7 @@ namespace Tuning
 		virtual void onConnection() override;
 		virtual void onDisconnection() override;
 
-		Tcp::Server* getNewInstance() override;
+		Tcp::Server* getNewInstance(const Tcp::ListenAddress& listenAddr) override;
 
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 
@@ -109,12 +109,13 @@ namespace Tuning
 	//
 	// -------------------------------------------------------------------------------
 
-	class TcpTuningServerThread : public Tcp::ServerThread
+	class TcpTuningServerThread : public Tcp::ListenerThread
 	{
 	public:
-		TcpTuningServerThread(	const HostAddressPort& listenAddressPort,
-								TcpTuningServer* server,
-								std::shared_ptr<CircularLogger> logger);
+		TcpTuningServerThread(const HostAddressPort& listenAddress,
+							  E::SecurityLevel securityLevel,
+							  TcpTuningServer* server,
+							  std::shared_ptr<CircularLogger> logger);
 	};
 
 }

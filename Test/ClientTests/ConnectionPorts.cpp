@@ -54,6 +54,10 @@ std::pair<bool, QString> ConnectionPorts::init(Sim::Profile profile)
 		{
 			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS01_ADS");
 			ads1.appDataReceivingPort = getProperty(props, "AppDataReceivingPort");
+		}
+
+		{
+			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS01_ADS_RC1");
 			ads1.clientRequestPort = getProperty(props, "ClientRequestPort");
 			ads1.rtTrendsRequestPort = getProperty(props, "RtTrendsRequestPort");
 		}
@@ -61,6 +65,10 @@ std::pair<bool, QString> ConnectionPorts::init(Sim::Profile profile)
 		{
 			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS02_ADS");
 			ads2.appDataReceivingPort = getProperty(props, "AppDataReceivingPort");
+		}
+
+		{
+			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS02_ADS_RC1");
 			ads2.clientRequestPort = getProperty(props, "ClientRequestPort");
 			ads2.rtTrendsRequestPort = getProperty(props, "RtTrendsRequestPort");
 		}

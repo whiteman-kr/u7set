@@ -3,4 +3,5 @@ TestSuite
 	19.09.2023	Version: 2	TestSuite_v1.u7devp		RPCT-3665:  Reports development of TestSuite
 	19.09.2023	Version: 3	TestSuite_v2.u7devp		RPCT-3699:  Add ScriptTags property
 	21.03.2024	Version: 4	TestSuite_v4.u7devp		RPCT-3853:  Add FontBold attribute to reports, PageSize and Orientation moved from Report to Section
+	07.06.2024	Version: 5	TestSuite_v5.u7devp		RPCT-3895: Update ADS connection to link to ADS Receive Controller (no actual preset update, changed only preset version)
 

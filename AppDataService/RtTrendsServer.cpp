@@ -107,8 +107,8 @@ namespace RtTrends
 	//
 	// -----------------------------------------------------------------------------------------------
 
-	Server::Server(AppDataServiceWorker& appDataService, E::SecurityLevel securityLevel) :
-		Tcp::Server(appDataService.softwareInfo(), securityLevel, "RtTrendsServer"),
+	Server::Server(AppDataServiceWorker& appDataService) :
+		Tcp::Server(appDataService.softwareInfo(), "RtTrendsServer"),
 		m_appDataService(appDataService),
 		m_signalStates(appDataService.appSignalStates()),
 		m_log(appDataService.logger()),
@@ -116,9 +116,11 @@ namespace RtTrends
 	{
 	}
 
-	Tcp::Server* Server::getNewInstance()
+	Tcp::Server* Server::getNewInstance(const Tcp::ListenAddress& listenAddr)
 	{
-		return new Server(m_appDataService, securityLevel());
+		RtTrends::Server* newServer = new Server(m_appDataService);
+		newServer->setListenAddress(listenAddr);
+		return newServer;
 	}
 
 	void Server::onServerThreadStarted()
@@ -436,12 +438,9 @@ namespace RtTrends
 	//
 	// -----------------------------------------------------------------------------------------------
 
-	ServerThread::ServerThread(	const HostAddressPort& listenAddressPort,
-								AppDataServiceWorker& appDataService,
-								E::SecurityLevel securityLevel) :
-		Tcp::ServerThread(listenAddressPort,
-						  new Server(appDataService, securityLevel),
-						  appDataService.logger())
+	ServerThread::ServerThread(const std::vector<Tcp::ListenAddress>& listenAddresses,
+							   AppDataServiceWorker& appDataService) :
+		Tcp::ListenerThread(listenAddresses, new Server(appDataService), appDataService.logger())
 	{
 		setObjectName("RtTrends::ServerThread");
 	}

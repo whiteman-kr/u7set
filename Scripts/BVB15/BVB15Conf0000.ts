@@ -191,6 +191,7 @@ function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioM
 "use strict";
 
 let FamilyBVB15ID: number = 0x5600;
+let FamilyOTHER: number = 0x0000;
 
 //let configScriptVersion: number = 1;
 //let configScriptVersion: number = 2;	//Changes in LMNumberCount calculation algorithm
@@ -1162,12 +1163,19 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		// Id
 
-		value = ioModule.customModuleFamily | ioModule.moduleVersion;
+		if (ioModule.moduleFamily == FamilyOTHER)
+		{
+			value = ioModule.customModuleFamily | ioModule.moduleVersion;
+		}
+		else
+		{
+			value = ioModule.moduleFamily | ioModule.moduleVersion;
+		}
 
 		if (setData16(confFirmware, log, LMNumber, equipmentID, frame, blockPtr, "ID", value) == false) {
 			return false;
 		}
-		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: ID = " + value + "\r\n");
+		confFirmware.writeLog("    [" + frame + ":" + blockPtr + "]: ID = " + value + " (0x" + value.toString(16).toUpperCase() + ")\r\n");
 
 		blockPtr += 2;
 

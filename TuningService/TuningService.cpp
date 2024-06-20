@@ -551,8 +551,9 @@ namespace Tuning
 		TcpTuningServer* tcpTuningSever = new TcpTuningServer(*this, m_tuningSources, logger());
 
 		m_tcpTuningServerThread = new TcpTuningServerThread(m_serviceSettings.clientRequestIP,
-												tcpTuningSever,
-												logger());
+															m_serviceSettings.securityLevel,
+															tcpTuningSever,
+															logger());
 		m_tcpTuningServerThread->start();
 	}
 

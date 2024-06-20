@@ -2679,7 +2679,7 @@ void EquipmentView::updateFromPreset()
 	//
 	std::vector<std::shared_ptr<Hardware::DeviceObject>> updateDeviceList;
 	std::vector<Hardware::DeviceObject*> deleteDeviceList;
-	std::vector<std::pair<int, int>> addDeviceList;		// first: parent fileId, second: preset file id
+	std::vector<AddDeviceUpdatePreset> addDeviceList;		// first: parent fileId, second: preset file id
 
 	std::vector<const Hardware::DeviceAppSignal*> deviceSignalsToUpdateAppSignals;	// This array will be passed to application signals to
 																					// to updater them
@@ -2788,10 +2788,10 @@ void EquipmentView::updateFromPreset()
 
 	// Add files to DB, addPresetList contains std::pair<int, int>, first: parent file id, second preset file id
 	//
-	for (std::pair<int, int> ad : addDeviceList)
+	for (const AddDeviceUpdatePreset& addDeviceItem : addDeviceList)
 	{
-		int parentFileId = ad.first;
-		int presetFileId = ad.second;
+		auto parentFileId = addDeviceItem.parentFileId;
+		auto presetFileId = addDeviceItem.presetFileId;
 
 		if (parentFileId == -1 || presetFileId == -1)
 		{
@@ -2849,6 +2849,22 @@ void EquipmentView::updateFromPreset()
 
 		setUuid(device.get());
 
+		// Set properties
+		//
+		for (const auto& [propertyCaption, propertyValue] : addDeviceItem.propertiesToSet)
+		{
+			auto property = device->propertyByCaption(propertyCaption);
+
+			if (property == nullptr)
+			{
+				Q_ASSERT(property);
+				continue;
+			}
+
+			property->setValue(propertyValue);
+		}
+		
+
 		// Add device to DB
 		//
 		bool result = db()->addDeviceObject(device.get(), parentFileId, this);
@@ -2883,7 +2899,7 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 										   const QStringList& presetsToUpdate,					// Update only these presets
 										   std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
 										   std::vector<Hardware::DeviceObject*>* deleteDeviceList,	// Devices to delete after update
-										   std::vector<std::pair<int, int>>* addDeviceList,			// Devices to add after update
+										   std::vector<AddDeviceUpdatePreset>* addDeviceList,	// Devices to add after update
 										   std::vector<const Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals)	// DeviceSignal list to updateA ppSignals
 {
 	if (updateDeviceList == nullptr ||
@@ -2915,20 +2931,29 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		return false;
 	}
 
+	// Fix for clients to set AppDataServiceIDs to AppDataServiceIDs_RC1
+	//
+	if (device->presetRoot() == true)
+	{
+		updateFromPresetFixAppDataServiceIdsToRc1(*device);
+	}
+
+	// clang-format off
 	// Update from DbVersion 380 to 381.
 	//
-	// Problem: Preset of Monitor (v1 to v2) has compatibility breaking changes, here we try to mitigate it.
+	// Problem: Preset of Monitor (to v2) has compatibility breaking changes, here we try to mitigate it.
 	//			Before db project version 381 Monitor (preset version 1) had 2 properties AppDataServiceID1 and AppDataServiceID2
 	//		    then this property was removed starting from the preset version 2 and changed to a single property AppDataServiceIDs
 	//			which is combination of properties AppDataServiceID1 and AppDataServiceID2, but separated with semicolon (;)
 	// Solution: If preset version is 1, then find properties AppDataServiceID1 and AppDataServiceID2, then after update if
 	//			 property AppDataServiceIDs is present then set old values to it.
+	// clang-format on
 	//
-	QString monitorMitigateCompatibilityAppDataService;
+	QString mitigationFixMonitorAdses1;
 
 	if (device->presetRoot() &&
 		device->presetName() == QStringLiteral("MONITOR") &&
-		device->presetVersion() == 1)
+		device->presetVersion() < 2)
 	{
 		auto ads1 = device->propertyByCaption(QStringLiteral("AppDataServiceID1"));
 		auto ads2 = device->propertyByCaption(QStringLiteral("AppDataServiceID2"));
@@ -2945,10 +2970,63 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 			adsList << ads2->value().toString();
 		}
 
-		monitorMitigateCompatibilityAppDataService = adsList.join(QChar(';'));
+		mitigationFixMonitorAdses1 = adsList.join(QChar(';'));
 	}
 
-	// End of Monitor fix
+	// clang-format off
+	// Update from DbVersion 416 to 417.
+	//
+	// Problem: Preset of AppDataService (to v3) has compatibility breaking changes, here we try to mitigate it.
+	//			Before db project version 417 AppDataService (preset version 2) had specific properties in section "Connection" -
+	//			"ClientRequestIP", "ClientRequestNetmask", "ClientRequestPort", "RtTrendsRequestPort", "SecurityLevel". 			then these properties were
+	//			removed starting from the preset version 3 and changed to a set of device controllers "Request Controller 1, 2, 3, 4" with exactly the
+	//			same properties.
+	//
+	// Solution: If preset version less then 3, then set the values of the "Request Controller 1" (_RC1) to values of the "ClientRequestIP",
+	//			"ClientRequestNetmask", "ClientRequestPort", "RtTrendsRequestPort", "SecurityLevel".
+	// clang-format on
+
+	std::vector<std::pair<QString, QVariant>> mitigationFixAdsConnection1; // first: property caption, second: property value
+	mitigationFixAdsConnection1.reserve(5);
+
+	if (device->presetRoot() &&
+		device->presetName() == QStringLiteral("ADS") &&
+		device->presetVersion() < 3)
+	{
+		auto clientRequestIp = device->propertyByCaption(QStringLiteral("ClientRequestIP"));
+		auto clientRequestNetmask = device->propertyByCaption(QStringLiteral("ClientRequestNetmask"));
+		auto clientRequestPort = device->propertyByCaption(QStringLiteral("ClientRequestPort"));
+		auto rtTrendsRequestPort = device->propertyByCaption(QStringLiteral("RtTrendsRequestPort"));
+		auto securityLevel = device->propertyByCaption(QStringLiteral("SecurityLevel"));
+
+		if (clientRequestIp != nullptr)
+		{
+			mitigationFixAdsConnection1.emplace_back(clientRequestIp->caption(), clientRequestIp->value());
+		}
+
+		if (clientRequestNetmask != nullptr)
+		{
+			mitigationFixAdsConnection1.emplace_back(clientRequestNetmask->caption(), clientRequestNetmask->value());
+		}
+
+		if (clientRequestPort != nullptr)
+		{
+			mitigationFixAdsConnection1.emplace_back(clientRequestPort->caption(), clientRequestPort->value());
+		}
+
+		if (rtTrendsRequestPort != nullptr)
+		{
+			mitigationFixAdsConnection1.emplace_back(rtTrendsRequestPort->caption(), rtTrendsRequestPort->value());
+		}
+
+		if (securityLevel != nullptr)
+		{
+			mitigationFixAdsConnection1.emplace_back(securityLevel->caption(), securityLevel->value());
+		}
+	}
+
+
+	// End of fixes
 	//
 
 	// Update TuningClient from version 2 to version 3
@@ -3242,7 +3320,20 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 				// Child is not added yet, add it
 				//
-				addDeviceList->push_back(std::make_pair(deviceFileInfo->fileId(), presetChildFileInfo->fileId()));
+				AddDeviceUpdatePreset addDeviceUpdatePreset;
+				addDeviceUpdatePreset.parentFileId = deviceFileInfo->fileId();
+				addDeviceUpdatePreset.presetFileId = presetChildFileInfo->fileId();
+				
+				// Problem: Preset of AppDataService has compatibility breaking changes, here we try to mitigate it.
+				// Add to "Request Controller 1" properties from ClientRequestIP, ClientRequestNetmask, ClientRequestPort, RtTrendsRequestPort, SecurityLevel
+				//
+				if (mitigationFixAdsConnection1.empty() == false && presetChild->equipmentIdTemplate().endsWith("_RC1") == true &&
+					presetChild->caption() == "Request Controller 1")
+				{
+					addDeviceUpdatePreset.propertiesToSet = mitigationFixAdsConnection1;
+				}
+
+				addDeviceList->push_back(addDeviceUpdatePreset);
 			}
 		}
 	}
@@ -3268,12 +3359,12 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 
 	// Problem: Preset of Monitor has compatibility breaking changes, here we try to mitigate it.
 	//
-	if (monitorMitigateCompatibilityAppDataService.isEmpty() == false)
+	if (mitigationFixMonitorAdses1.isEmpty() == false)
 	{
 		auto adsProp = device->propertyByCaption(EquipmentPropNames::APP_DATA_SERVICE_IDS);
 		if (adsProp != nullptr)
 		{
-			adsProp->setValue(monitorMitigateCompatibilityAppDataService);
+			adsProp->setValue(mitigationFixMonitorAdses1);
 		}
 	}
 
@@ -3303,6 +3394,112 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	}
 
 	return true;
+}
+
+void EquipmentView::updateFromPresetFixAppDataServiceIdsToRc1(Hardware::DeviceObject& device)
+{
+	if (device.presetRoot() == false)
+	{
+		Q_ASSERT(device.presetRoot() == true);
+	}
+
+	// clang-format off
+	// 
+	// RPCT-3895
+	// 
+	// Update from DbVersion 418.
+	//
+	// Problem: Presets of Monitor (to v7), TestSuite (to v5), Metrology (to v1), Gateway Service (to v3) 
+	//			have compatibility breaking changes, here we try to mitigate it.
+	//			We have to update properties which link clients to AppDataService, before this properties had equipment id of AppDataService
+	//			Now they have to have equipment id of AppDataService.ReceiveControllers(_RC1...).	
+	// Solution: Find properties:
+	//				Monitor.AppDataServiceIDs, 
+	//				TestSuite.AppDataServiceIDs, 
+	//				Metrology.AppDataServiceID1/AppDataServiceID2, 
+	//				GatewayService.AppDataServiceIDs
+	//			Then add _RC1 to the end of the equipment id (if it is not already there) and set the value to the new property.
+	// clang-format on
+	//
+
+	if ((device.presetName() == QStringLiteral("MONITOR") && device.presetVersion() < 7) ||
+		(device.presetName() == QStringLiteral("TESTSUITE") && device.presetVersion() < 5) ||
+		(device.presetName() == QStringLiteral("METROLOGY") && device.presetVersion() < 1) ||
+		(device.presetName() == QStringLiteral("GWS") && device.presetVersion() < 3))
+	{
+		// Monitor can have AppDataServiceIDs (;) and AppDataServiceID1/AppDataServiceID2 (older versions)
+		// TestSuite - AppDataServiceIDs (;)
+		// Metrology - AppDataServiceID1, AppDataServiceID2
+		// GatewayService - AppDataServiceIDs (coma separated)
+		//
+		auto ads1 = device.propertyByCaption(QStringLiteral("AppDataServiceID1"));
+		auto ads2 = device.propertyByCaption(QStringLiteral("AppDataServiceID2"));
+		auto adses = device.propertyByCaption(QStringLiteral("AppDataServiceIDs"));
+
+		if (ads1 != nullptr && ads1->value().toString().trimmed().endsWith("_RC1") == false)
+		{
+			QString value = ads1->value().toString().trimmed();
+
+			if (value.isEmpty() == false &&
+				value.endsWith("_RC1") == false && 
+				value.endsWith("_RC2") == false && 
+				value.endsWith("_RC3") == false && 
+				value.endsWith("_RC4") == false)
+			{
+				value += "_RC1";
+			}
+
+			ads1->setValue(value);
+		}
+
+		if (ads2 != nullptr && ads2->value().toString().trimmed().endsWith("_RC1") == false)
+		{
+			QString value = ads2->value().toString().trimmed();
+
+			if (value.isEmpty() == false &&
+				value.endsWith("_RC1") == false && 
+				value.endsWith("_RC2") == false && 
+				value.endsWith("_RC3") == false && 
+				value.endsWith("_RC4") == false)
+			{
+				value += "_RC1";
+			}
+
+			ads2->setValue(value);
+		}
+
+		// Monitor, TestSuite have ";" as a separator
+		// GatewayService has "," as separator.
+		//
+		if (adses != nullptr)
+		{
+			QString propertyValue = adses->value().toString().trimmed();
+
+			propertyValue.replace(QChar(QChar::Space), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::LineFeed), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::CarriageReturn), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::Tabulation), Separator::SEMICOLON);
+			propertyValue.replace(Separator::COMMA, Separator::SEMICOLON);
+
+			QStringList adsList = propertyValue.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+			for (QString& ads : adsList)
+			{
+				if (ads.endsWith("_RC1") == false && 
+					ads.endsWith("_RC2") == false && 
+					ads.endsWith("_RC3") == false && 
+					ads.endsWith("_RC4") == false)
+				{
+					ads += "_RC1";
+				}
+			}
+
+			adses->setValue(adsList.join(Separator::SEMICOLON));
+		}
+
+		return;
+	}
+
+	return;
 }
 
 void EquipmentView::showEvent(QShowEvent* event)

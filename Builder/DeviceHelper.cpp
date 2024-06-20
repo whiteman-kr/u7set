@@ -248,12 +248,18 @@ bool DeviceHelper::getIPv4Property(	const Hardware::DeviceObject* device,
 
 	bool res = getIPv4Property(device, name, &ipStr, emptyAllowed, defaultIp, log);
 
-	if (res == false)
+	RETURN_IF_FALSE(res);
+
+	bool result = value->setAddress(ipStr);
+
+	if (result == false)
 	{
-		return false;
+		// Value of property %1.%2 is not valid IPv4 address.
+		//
+		log->errCFG3026(device->equipmentIdTemplate(), name);
 	}
 
-	return value->setAddress(ipStr);
+	return result;
 }
 
 bool DeviceHelper::getPortProperty(const Hardware::DeviceObject* device,
@@ -322,7 +328,7 @@ bool DeviceHelper::getPortProperty(const Hardware::DeviceObject* device,
 	return true;
 }
 
-bool DeviceHelper:: getIpPortProperty(const Hardware::DeviceObject* device,
+bool DeviceHelper:: getIPv4PortProperty(const Hardware::DeviceObject* device,
 									  const QString& ipProperty,
 									  const QString& portProperty,
 									  HostAddressPort* ipPort,
@@ -343,8 +349,17 @@ bool DeviceHelper:: getIpPortProperty(const Hardware::DeviceObject* device,
 
 	bool result = getIPv4Property(device, ipProperty, &ipStr, emptyAllowed, defaultIP, log);
 
+	RETURN_IF_FALSE(result);
+
+	HostAddressPort ipPortLocal;
+
+	result &= ipPortLocal.setAddress(ipStr);
+
 	if (result == false)
 	{
+		// Value of property %1.%2 is not valid IPv4 address.
+		//
+		log->errCFG3026(device->equipmentIdTemplate(), ipProperty);
 		return false;
 	}
 
@@ -352,13 +367,11 @@ bool DeviceHelper:: getIpPortProperty(const Hardware::DeviceObject* device,
 
 	result = getPortProperty(device, portProperty, &port, emptyAllowed, defaultPort, log);
 
-	if (result == false)
-	{
-		return false;
-	}
+	RETURN_IF_FALSE(result);
 
-	ipPort->setAddress(ipStr);
-	ipPort->setPort(port);
+	ipPortLocal.setPort(port);
+
+	*ipPort = ipPortLocal;
 
 	return result;
 }

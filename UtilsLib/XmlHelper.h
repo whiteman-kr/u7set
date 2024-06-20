@@ -37,8 +37,8 @@ public:
 	void writeDoubleAttribute(const QString& name, double value, int decimalPlaces);
 	void writeFloatAttribute(const QString& name, float value);
 	void writeAddress16Attribute(const QString& name, const Address16& addr16);
-	void writeHostAddressPortAttribute(const QString& name, const HostAddressPort& addr);
-	void writeQHostAddressAttribute(const QString& name, const QHostAddress& addr);
+	void writeIPv4PortAttribute(const QString& name, const HostAddressPort& addr);
+	void writeIPv4Attribute(const QString& name, const QHostAddress& addr);
 	void writeUuidAttribute(const QString& name, const QUuid& guid);
 
 	void writeString(const QString& str);
@@ -131,8 +131,8 @@ public:
 	bool readDoubleAttribute(const QString& name, double* value);
 	bool readFloatAttribute(const QString& name, float* value);
 	bool readAddress16Attribute(const QString& name, Address16* value);
-	bool readHostAddressPortAttribute(const QString& name, HostAddressPort* addr);
-	bool readQHostAddressAttribute(const QString& name, QHostAddress* addr);
+	bool readIPv4PortAttribute(const QString& name, HostAddressPort* addr);
+	bool readIPv4Attribute(const QString& name, QHostAddress* addr);
 	bool readUuidAttribute(const QString& name, QUuid* guid);
 
 	template<typename ENUM_TYPE>

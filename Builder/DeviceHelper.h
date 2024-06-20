@@ -51,7 +51,7 @@ public:
 								int defaultPort,
 								Builder::IssueLogger* log);
 
-	static bool getIpPortProperty(const Hardware::DeviceObject* device,
+	static bool getIPv4PortProperty(const Hardware::DeviceObject* device,
 								  const QString& ipProperty,
 								  const QString& portProperty,
 								  HostAddressPort* ipPort,

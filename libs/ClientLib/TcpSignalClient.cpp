@@ -23,7 +23,6 @@ namespace
 
 namespace ClientLib
 {
-
 	TcpSignalClient::TcpSignalClient(const SoftwareInfo& softwareInfo,
 									 const SoftwareEndpoint::AppDataService& adsInfo,
 									 IAppSignalUpdater& signalUpdater,
@@ -37,7 +36,10 @@ namespace ClientLib
 		setObjectName("TcpSignalClient " + adsInfo.equipmentId);
 
 		Q_ASSERT(this->logFile());
-		qDebug() << "TcpSignalClient::TcpSignalClient() " << adsInfo.equipmentId << ", " << serverAddressPort1().addressPortStr();
+		writeMessage(QString("TcpSignalClient::TcpSignalClient() %1, %2").arg(adsInfo.equipmentId).arg(serverAddressPort1().addressPortStr()));
+
+		auto logger = std::make_shared<CircularLogger>(logFile, QString("TSC %1").arg(adsInfo.shortenId));
+		setLogger(logger);
 
 		connect(this, &Tcp::Client::signal_wrongServerID,
 			[this](const QString& errorMessage)
@@ -50,21 +52,18 @@ namespace ClientLib
 
 	TcpSignalClient::~TcpSignalClient()
 	{
-		qDebug() << "TcpSignalClient::~TcpSignalClient() " << serverAddressPort1().addressPortStr();
+		writeMessage(QString("TcpSignalClient::~TcpSignalClient() %1").arg(serverAddressPort1().addressPortStr()));
 	}
 
 	void TcpSignalClient::onClientThreadStarted()
 	{
-		qDebug() << "TcpSignalClient::onClientThreadStarted()" << this->serverAddressPort1().addressPortStr();
-		writeMessage("TcpSignalClient::onClientThreadStarted()");
-
+		writeMessage(QString("TcpSignalClient::onClientThreadStarted() %1").arg(serverAddressPort1().addressPortStr()));
 		return;
 	}
 
 	void TcpSignalClient::onClientThreadFinished()
 	{
-		qDebug() << "TcpSignalClient::onClientThreadFinished()" << this->serverAddressPort1().addressPortStr();
-		writeMessage("TcpSignalClient::onClientThreadFinished()");
+		writeMessage(QString("TcpSignalClient::onClientThreadFinished() %1").arg(serverAddressPort1().addressPortStr()));
 
 		// theSignals.reset();	!!!signal reset moved to AdsConnection::configurationArrived
 		return;
@@ -72,8 +71,7 @@ namespace ClientLib
 
 	void TcpSignalClient::onConnection()
 	{
-		qDebug() << "TcpSignalClient::onConnection()" << this->serverAddressPort1().addressPortStr();
-		writeMessage("TcpSignalClient::onConnection()");
+		writeMessage(QString("TcpSignalClient::onConnection() %1").arg(serverAddressPort1().addressPortStr()));
 
 		Q_ASSERT(isClearToSendRequest() == true);
 
@@ -88,8 +86,7 @@ namespace ClientLib
 
 	void TcpSignalClient::onDisconnection()
 	{
-		qDebug() << "TcpSignalClient::onDisconnection" << this->serverAddressPort1().addressPortStr();
-		writeMessage("onDisconnection()");
+		writeMessage(QString("TcpSignalClient::onDisconnection() %1").arg(serverAddressPort1().addressPortStr()));
 
 		m_signalUpdater.invalidateSignalStates(QThread::currentThreadId());
 
@@ -98,8 +95,7 @@ namespace ClientLib
 
 	void TcpSignalClient::onReplyTimeout()
 	{
-		qDebug() << "TcpSignalClient::onReplyTimeout()" << this->serverAddressPort1().addressPortStr();
-		writeWarning("TcpSignalClient::onReplyTimeout()");
+		writeWarning(QString("TcpSignalClient::onReplyTimeout() %1").arg(serverAddressPort1().addressPortStr()));
 	}
 
 	void TcpSignalClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
@@ -136,7 +132,6 @@ namespace ClientLib
 
 		default:
 			Q_ASSERT(false);
-			qDebug() << "Wrong requestID in TcpSignalClient::processReply()" << this->serverAddressPort1().addressPortStr();
 			writeError(QString("Wrong requestID in TcpSignalClient::processReply(), %1").arg(requestID));
 
 			resetToGetState(true);
@@ -199,7 +194,6 @@ namespace ClientLib
 
 		if (tl_getSignalListStartReply.error() != 0)
 		{
-			qDebug() << "TcpSignalClient::processSignalListNext, error received: " << tl_getSignalListStartReply.error();
 			writeError(QString("processSignalListNext, error received: %1").arg(tl_getSignalListStartReply.error()));
 
 			Q_ASSERT(tl_getSignalListStartReply.error() != 0);
@@ -207,12 +201,6 @@ namespace ClientLib
 			resetToGetSignalList();
 			return;
 		}
-
-		qDebug() << "----------------- processSignalListStart -----------------" << this->serverAddressPort1().addressPortStr();;
-		qDebug() << "error: " << tl_getSignalListStartReply.error();
-		qDebug() << "totalItemCount: " << tl_getSignalListStartReply.totalitemcount();
-		qDebug() << "partCount: " << tl_getSignalListStartReply.partcount();
-		qDebug() << "itemsPerPart: " << tl_getSignalListStartReply.itemsperpart();
 
 		writeMessage("----------------- processSignalListStart -----------------");
 		if (tl_getSignalListStartReply.error() == 0)
@@ -288,7 +276,6 @@ namespace ClientLib
 
 		if (tl_getSignalListNextReply.error() != 0)
 		{
-			qDebug() << "TcpSignalClient::processSignalListNext, error received: " << tl_getSignalListNextReply.error();
 			writeError(QString("processSignalListNext, error received: %1").arg(tl_getSignalListNextReply.error()));
 
 			Q_ASSERT(tl_getSignalListNextReply.error() != 0);
@@ -305,10 +292,6 @@ namespace ClientLib
 			resetToGetSignalList();
 			return;
 		}
-
-		qDebug() << "----------------- processSignalListNext -----------------";
-		qDebug() << "error: " << tl_getSignalListNextReply.error();
-		qDebug() << "part: " << tl_getSignalListNextReply.part();
 
 		writeMessage("----------------- processSignalListNext -----------------");
 		if (tl_getSignalListNextReply.error() == 0)
@@ -399,7 +382,6 @@ namespace ClientLib
 
 		if (tl_getSignalParamReply.error() != 0)
 		{
-			qDebug() << "TcpSignalClient::processSignalParam, error received: " << tl_getSignalParamReply.error();
 			writeError(QString("processSignalParam, error received: %1").arg(tl_getSignalParamReply.error()));
 
 			Q_ASSERT(tl_getSignalParamReply.error() != 0);
@@ -463,7 +445,6 @@ namespace ClientLib
 
 		if (tl_getSignalStateChangesReply.error() != 0)
 		{
-			qDebug() << "TcpSignalClient::processSignalStateChanges, error received: " << tl_getSignalStateChangesReply.error();
 			writeError(QString("processSignalStateChanges, error received: %1").arg(tl_getSignalStateChangesReply.error()));
 			Q_ASSERT(tl_getSignalStateChangesReply.error() != 0);
 
@@ -566,7 +547,6 @@ namespace ClientLib
 
 		if (tl_getSignalStateReply.error() != 0)
 		{
-			qDebug() << "TcpSignalClient::processSignalState, error received: " << tl_getSignalStateReply.error();
 			writeError(QString("processSignalState, error received: %1").arg(tl_getSignalStateReply.error()));
 
 			Q_ASSERT(tl_getSignalStateReply.error() != 0);
@@ -626,18 +606,11 @@ namespace ClientLib
 	{
 		const qint64 serverTimeZoneDiff = serverLocalTimeMs - serverUtcTimeMs;
 
-		qDebug() << "TcpSignalClient::checkTimeDiscrepancy";
-		qDebug() << "\tserverUtcTime, Ms: " << serverUtcTimeMs;
-		qDebug() << "\tserverLocalTime, Ms: " << serverLocalTimeMs;
-		qDebug() << "\tserver time zone shift (seconds): " << serverTimeZoneDiff / 1000;
-
 		// 1. UTC time is different?
 		//
 		{
 			const qint64 limitMs = static_cast<qint64>(3 * 1'000) * 60;  // 3 minutes.
 			const qint64 utcTimeDiscrepancy = std::abs(serverUtcTimeMs - QDateTime::currentDateTime().toMSecsSinceEpoch());
-
-			qDebug() << "\tutcTimeDiscrepancy, ms: " << utcTimeDiscrepancy;
 
 			if (utcTimeDiscrepancy > limitMs)
 			{

@@ -514,10 +514,26 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, con
 	m_settingsTabModel->setData(m_settingsTabModel->index(7, 0), "ArchService ID");
 	m_settingsTabModel->setData(m_settingsTabModel->index(8, 0), "ArchService IP");
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(9, 0), "Client Request IP");
-	m_settingsTabModel->setData(m_settingsTabModel->index(10, 0), "Client Request NetMask");
+	auto appDataSettings = std::dynamic_pointer_cast<AppDataServiceSettings>(m_service.settings);
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(11, 0), "Realtime Trends Request IP");
+	if (appDataSettings == nullptr)
+	{
+		return;
+	}
+
+	int row = 9;
+
+	for(const RequestControllerSettings& rcs : appDataSettings->rcSettings )
+	{
+		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 0),
+									QString("RC%1.Client Request IP").arg(rcs.ID, 2, 10, QChar('0')));
+
+		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 0),
+									QString("RC%1.Client Request NetMask").arg(rcs.ID, 2, 10, QChar('0')));
+
+		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 0),
+									QString("RC%1.Realtime Trends Request IP").arg(rcs.ID, 2, 10, QChar('0')));
+	}
 
 	// Log
 	addTab(new QTableView(this), tr("Log"));
@@ -579,10 +595,14 @@ void AppDataServiceWidget::updateServiceState()
 	m_settingsTabModel->setData(m_settingsTabModel->index(7, 1), appDataSettings->archServiceID);
 	m_settingsTabModel->setData(m_settingsTabModel->index(8, 1), appDataSettings->archServiceIP.addressStr());
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(9, 1), appDataSettings->clientRequestIP.addressStr());
-	m_settingsTabModel->setData(m_settingsTabModel->index(10, 1), appDataSettings->clientRequestNetmask.toString());
+	int row = 9;
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(11, 1), appDataSettings->rtTrendsRequestIP.addressStr());
+	for(const RequestControllerSettings& rcs : appDataSettings->rcSettings )
+	{
+		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.clientRequestIP.addressPortStr());
+		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.clientRequestNetmask.toString());
+		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.rtTrendsRequestIP.addressPortStr());
+	}
 }
 
 void AppDataServiceWidget::updateStateInfo()

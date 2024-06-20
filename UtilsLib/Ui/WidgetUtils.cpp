@@ -129,7 +129,11 @@ int TableDataVisibilityController::ColumnInfo::position() const
 
 void TableDataVisibilityController::ColumnInfo::setPosition(int pos)
 {
-	Q_ASSERT(pos >= 0);
+	if (pos < 0)
+	{
+		pos = 0;
+	}
+
 	m_position = pos;
 }
 

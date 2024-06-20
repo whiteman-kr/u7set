@@ -1,0 +1,3 @@
+BUMKD-4
+	06.06.2024	Version: 3	BUMKD-4_IDx5705_v3.u7devp	RPCT-3896: Added preset in new naming convension and family BUIM (created from BUMKD-4_v1.u7devp) 
+										   Added property ActuatorDescription
