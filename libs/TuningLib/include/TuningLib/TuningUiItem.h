@@ -256,6 +256,8 @@ namespace TuningLib
 
 		TuningUiItem* get(const QUuid& uuid);
 
+		void reset();
+
 		// Serialization
 		//
 		bool load(const QByteArray& data, QString* errorCode);

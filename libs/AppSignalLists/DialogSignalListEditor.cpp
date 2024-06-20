@@ -368,7 +368,9 @@ namespace AppSignalLists
 
 			// Do not add UI lists
 			//
-			if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagUi) == true) 
+			if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagUi) == true ||
+				list->systemTagsList().contains(AppSignalLists::AppSignalList::tagEquipment) == true ||
+				list->systemTagsList().contains(AppSignalLists::AppSignalList::tagSchema) == true) 
 			{
 				continue;
 			}

@@ -357,11 +357,14 @@ void MainWindow::loadIdeSignalLists()
 
 	// Load Ui
 	//
+	m_tuningUi.reset();
+	
 	QString errorStr;
 	if (m_tuningUi.load(m_configController.tuningUiData(), &errorStr) == false)
 	{
 		QString completeErrorMessage = QObject::tr("UI configuration file loading error: %1").arg(errorStr);
 		m_logFile.writeError(completeErrorMessage);
+		return;
 	}
 
 	// Place UI system tag for all lists
@@ -1059,14 +1062,6 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 		m_userManager.logout();
 	}
 
-	m_userManager.setConfiguration(configuration.clientSettings.tuningLogin,
-								   configuration.clientSettings.getUsersAccounts(),
-								   configuration.clientSettings.loginPerOperation,
-								   configuration.clientSettings.tuningSessionTimeout,
-								   configuration.matsUsers.users());
-
-	loadIdeSignalLists();
-
 	// --
 	//
 	QWidget* wm = QApplication::activeModalWidget();
@@ -1100,6 +1095,14 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 	}
 
 	deleteWorkspace();
+
+	m_userManager.setConfiguration(configuration.clientSettings.tuningLogin,
+								   configuration.clientSettings.getUsersAccounts(),
+								   configuration.clientSettings.loginPerOperation,
+								   configuration.clientSettings.tuningSessionTimeout,
+								   configuration.matsUsers.users());
+
+	loadIdeSignalLists();
 
 	m_tuningConnection.updateConnections(m_configController.softwareInfo(),
 										 configuration.clientSettings.tuningServices,

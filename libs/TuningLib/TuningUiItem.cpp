@@ -1204,6 +1204,13 @@ namespace TuningLib
 		return nullptr;
 	}
 
+	void TuningUiStorage::reset() 
+	{
+		m_root = std::make_unique<TuningUiItem>();
+		m_root->setCaption(QObject::tr("Root"));
+		m_root->setInterfaceType(TuningUiItem::InterfaceType::Root);
+	}
+
 	bool TuningUiStorage::load(const QByteArray& data, QString* errorCode)
 	{
 		if (errorCode == nullptr)

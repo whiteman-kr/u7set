@@ -156,8 +156,30 @@ void TreeFilterWidget::fillFiltersTree()
 		autoItem->setExpanded(true);
 	}
 
-	QTreeWidgetItem* allItem = new QTreeWidgetItem({tr("All signals")});
-	addTreeObjects(allItem, mask, {}, {AppSignalLists::AppSignalList::tagSchema, AppSignalLists::AppSignalList::tagEquipment, AppSignalLists::AppSignalList::tagTcAuto, AppSignalLists::AppSignalList::tagUi});
+	// All other lists
+	//
+	QTreeWidgetItem* globalItem = new QTreeWidgetItem({tr("Project Lists")});
+	addTreeObjects(globalItem,
+				   mask,
+				   {AppSignalLists::AppSignalList::tagIde},
+				   {AppSignalLists::AppSignalList::tagSchema,
+					AppSignalLists::AppSignalList::tagEquipment,
+					AppSignalLists::AppSignalList::tagTcAuto,
+					AppSignalLists::AppSignalList::tagUi});
+	m_filterTree->addTopLevelItem(globalItem);
+	globalItem->setExpanded(true);
+
+	// All other lists
+	//
+	QTreeWidgetItem* allItem = new QTreeWidgetItem({tr("Local Lists")});
+	addTreeObjects(allItem,
+				   mask,
+				   {},
+				   {AppSignalLists::AppSignalList::tagSchema,
+					AppSignalLists::AppSignalList::tagEquipment,
+					AppSignalLists::AppSignalList::tagTcAuto,
+					AppSignalLists::AppSignalList::tagUi,
+					AppSignalLists::AppSignalList::tagIde});
 	m_filterTree->addTopLevelItem(allItem);
 	allItem->setExpanded(true);
 
@@ -195,7 +217,15 @@ void TreeFilterWidget::fillFiltersTree()
 
 void TreeFilterWidget::updateFiltersTree()
 {
-	updateTreeItemStatus();
+	if (m_filterTree == nullptr || m_filterTree->isVisible() == false)
+	{
+		return;
+	}
+
+	for (int i = 0; i < m_filterTree->topLevelItemCount(); i++)
+	{
+		updateTreeItemStatus(m_filterTree->topLevelItem(i));
+	}
 }
 
 bool TreeFilterWidget::isEmpty() const
@@ -474,19 +504,10 @@ void TreeFilterWidget::addTreeObjects(QTreeWidgetItem* parentItem, const QString
 
 void TreeFilterWidget::updateTreeItemStatus(QTreeWidgetItem* treeItem)
 {
-	if (m_filterTree == nullptr || m_filterTree->isVisible() == false)
-	{
-		return;
-	}
-
 	if (treeItem == nullptr)
 	{
-		if (m_filterTree->topLevelItemCount() == 0)
-		{
-			return;
-		}
-
-		treeItem = m_filterTree->topLevelItem(0);
+		Q_ASSERT(treeItem);
+		return;
 	}
 
 	QUuid listUuid = treeItem->data(0, Qt::UserRole).toUuid();

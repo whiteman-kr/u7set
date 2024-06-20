@@ -533,6 +533,11 @@ namespace AppSignalLists
 			return false;
 		}
 
+		if (m_items.empty() == false) 
+		{
+			return false;
+		}
+
 		return true;
 	}
 

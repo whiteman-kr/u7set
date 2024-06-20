@@ -604,6 +604,7 @@ bool SwitchFiltersPage::changeFilterSignals(const QString& filterId)
 		tv.setDiscreteValue(newValue);
 
 		ClientLib::TuningWriteCommand c(hash, tv);
+		commands.push_back(c);
 	}
 
 	if (commands.empty() == false)
