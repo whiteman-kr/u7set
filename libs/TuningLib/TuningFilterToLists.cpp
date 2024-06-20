@@ -137,6 +137,7 @@ namespace TuningFilters
 			uiItem->setColumnDefault(filter->columnDefault());
 			uiItem->setColumnValid(filter->columnValid());
 			uiItem->setColumnOutOfRange(filter->columnOutOfRange());
+			uiItem->setStartSchemaId(filter->startSchemaId());
 
 			parentUi->addChild(uiItem);
 
