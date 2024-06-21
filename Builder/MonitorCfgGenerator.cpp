@@ -2,13 +2,11 @@
 #include "../OnlineLib/DataSource.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "Context.h"
-#include "ScriptChecker.h"
 #include "SoftwareSettingsGetter.h"
-#include "TuningClientCfgGenerator.h"
 
+#include "AppSignalListStorage.h"
 #include <Behavior/ClientBehaviorStorage.h>
 #include <Behavior/MonitorBehavior.h>
-#include "AppSignalListStorage.h"
 
 
 namespace Builder
@@ -60,7 +58,7 @@ namespace Builder
 			QStringList appDataSources;
 			result &= createAppEquipmentList(&appDataSources);
 
-			std::vector<AppSignal*> monitorSignals = createAppSignals(appDataSources, *m_signalSet);
+			std::vector<AppSignal*> monitorSignals = createAppSignalList(appDataSources, *m_signalSet);
 
 			ILogFileStub logFileStub;
 			Builder::AppSignalListsProvider signalProvider(monitorSignals);
@@ -82,7 +80,7 @@ namespace Builder
 			QStringList tuningSources;
 			result &= createTuningEquipmentList(&tuningSources);
 
-			std::vector<AppSignal*> tuningSignals = createTuningSignals(tuningSources, *m_signalSet);
+			std::vector<AppSignal*> tuningSignals = createTuningSignalList(tuningSources, *m_signalSet);
 
 			// Generate tuning signals file
 			//

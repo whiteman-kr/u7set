@@ -102,6 +102,38 @@ namespace AppSignalLists
 		return;
 	}
 
+	AppSignalList::AppSignalList(const AppSignalList& that)
+	{
+		*this = that;
+	}
+
+	AppSignalList& AppSignalList::operator=(const AppSignalList& that)
+	{
+		m_id = that.m_id;
+		m_caption = that.m_caption;
+
+		m_signalType = that.m_signalType;
+
+		m_systemTags = that.m_systemTags;
+		m_userTags = that.m_userTags;
+
+		m_customAppSignalIDMasks = that.m_customAppSignalIDMasks;
+		m_equipmentIDMasks = that.m_equipmentIDMasks;
+		m_appSignalIDMasks = that.m_appSignalIDMasks;
+		m_appSignalTags = that.m_appSignalTags;
+
+		m_cachedCustomAppSignalIDMasks = that.m_cachedCustomAppSignalIDMasks;
+		m_cachedEquipmentIDMasks = that.m_cachedEquipmentIDMasks;
+		m_cachedAppSignalIDMasks = that.m_cachedAppSignalIDMasks;
+		m_cachedAppSignalTags = that.m_cachedAppSignalTags;
+
+		m_items = that.m_items;
+		m_appListHashesCache = that.m_appListHashesCache;
+		m_tuningListHashesCache = that.m_tuningListHashesCache;
+
+		return *this;
+	}
+
 	void AppSignalList::SaveData(Proto::Envelope* message) const
 	{
 		const std::string& className = this->metaObject()->className();
@@ -647,6 +679,38 @@ namespace AppSignalLists
 	}
 
 
+	AppSignalListSet::AppSignalListSet(const AppSignalListSet& that)
+	{
+		*this = that;
+	}
+
+	AppSignalListSet::AppSignalListSet(AppSignalListSet&& that) noexcept
+	{
+		m_lists = std::move(that.m_lists);
+	}
+
+	AppSignalListSet& AppSignalListSet::operator= (const AppSignalListSet& that)
+	{
+		// Perform a deep copy of all lists
+		//
+		clear();
+
+		for (const auto& l : that.m_lists)
+		{
+			std::shared_ptr<AppSignalList> list = std::make_shared<AppSignalList>();
+			*list = *l;
+			
+			add(list);
+		}
+
+		return *this;
+	}
+
+	AppSignalListSet& AppSignalListSet::operator= (AppSignalListSet&& that) noexcept
+	{
+		m_lists = std::move(that.m_lists);
+		return *this;
+	}
 
 
 	void AppSignalListSet::clear() 
@@ -684,7 +748,7 @@ namespace AppSignalLists
 
 	bool AppSignalListSet::add(std::shared_ptr<AppSignalList> list)
 	{
-		m_lists.push_back(list);
+		m_lists.push_back(std::move(list));
 		return true;
 	}
 
@@ -709,7 +773,6 @@ namespace AppSignalLists
 
 	std::shared_ptr<AppSignalList> AppSignalListSet::get(const QString& id) const
 	{
-		int todo_optimize_search_using_map = 1;
 		auto it = std::find_if(m_lists.begin(),
 							   m_lists.end(),
 							   [id](const auto& list)
@@ -756,17 +819,9 @@ namespace AppSignalLists
 					  });
 	}
 
-	std::vector<AppSignalList*> AppSignalListSet::lists() const 
+	std::vector<std::shared_ptr<AppSignalList>> AppSignalListSet::lists() const 
 	{
-		std::vector<AppSignalList*> result;
-		
-		result.reserve(m_lists.size());
-		for (const auto& list: m_lists) 
-		{
-			result.push_back(list.get());
-		}
-
-		return result;
+		return m_lists;
 	}
 
 	bool AppSignalListSet::load(QString* /*errorMessage*/) 

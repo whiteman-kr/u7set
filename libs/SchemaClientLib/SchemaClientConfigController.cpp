@@ -37,12 +37,10 @@ namespace SchemaClientLib
 
 	bool SchemaClientConfigController::getAppSignalLists(const std::vector<OnlineLib::BuildFileInfo>& files)
 	{
-		QWriteLocker locker(&m_appSignalListSetLock);
-		m_appSignalListSet.clear();
-
 		bool ok = true;
-
+		std::list<QByteArray> listsData;
 		QByteArray ba;
+
 		for (const auto& fi : files)
 		{
 			if (fi.tag == CfgFileTag::APPSIGNALLISTS)
@@ -50,11 +48,21 @@ namespace SchemaClientLib
 				bool fileOk = getFileBlocked(fi.pathFileName, &ba, nullptr);
 				if (fileOk == true)
 				{
-					fileOk &= m_appSignalListSet.add(ba);
+					listsData.push_back(ba);
 				}
+
 				ok &= fileOk;
 			}
 		}
+
+		QWriteLocker locker(&m_appSignalListSetLock);
+		m_appSignalListSet.clear();
+
+		for (const QByteArray& data : listsData)
+		{
+			ok &= m_appSignalListSet.add(std::move(data));
+		}
+
 		return ok;
 	}
 

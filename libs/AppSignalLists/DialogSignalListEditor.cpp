@@ -726,9 +726,11 @@ namespace AppSignalLists
 		//
 		std::vector<Hash> allHashes = m_signalManager.signalHashes();
 		
-		std::vector<AppSignalList*> lists = m_appLists.lists();
-		for (AppSignalList* list : lists) 
+		auto lists = m_appLists.lists();
+		for (auto& list : lists) 
 		{
+			Q_ASSERT(list);
+
 			if (list->systemTagsList().contains(AppSignalList::tagIde) == true) 
 			{
 				continue;		// We process only user-created lists!!!

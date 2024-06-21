@@ -63,7 +63,6 @@ namespace SchemaClientLib
 
 		mutable QReadWriteLock m_appSignalListSetLock;
 		AppSignalLists::AppSignalListSet m_appSignalListSet;
-
 	};
 
 } // namespace ClientLib

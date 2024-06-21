@@ -44,30 +44,25 @@ namespace Builder
 		return nullptr;
 	}
 
-	std::vector<std::pair<QString, QString>> AppSignalListStorage::checkForSameIds() const
+	// Returs pair of id and caption of the lists with the same id
+	//
+	std::vector<std::pair<QString, QString>> AppSignalListStorage::checkForSameIds() const 
 	{
 		std::set<QString> ids;
 		std::vector<std::pair<QString, QString>> result;
 
-		for (auto it = begin(); it != end(); it++)
+		for (const auto& list : *this)
 		{
-			const AppSignalLists::AppSignalList* list = it->get();
-			if (list == nullptr) 
-			{
-				Q_ASSERT(list);
-				return {};
-			}
+			Q_ASSERT(list);
 
-			if (ids.find(list->id()) != ids.end())
+			if (ids.contains(list->id()) == true)
 			{
 				// Duplicate found
 				//
-				result.push_back({list->id(), list->caption()});
+				result.emplace_back(list->id(), list->caption());
 			}
-			else
-			{
-				ids.insert(list->id());
-			}
+
+			ids.insert(list->id());
 		}
 
 		return result;
@@ -240,6 +235,12 @@ namespace Builder
 	{
 		for (const AppSignal* s : signalsVector)
 		{
+			if (s == nullptr)
+			{
+				Q_ASSERT(s);
+				continue;
+			}
+
 			// Remove bus and non-analog/discrete signals
 			//
 			if (s->isAnalog() == false && s->isDiscrete() == false)
@@ -285,7 +286,7 @@ namespace Builder
 
 	bool AppSignalListsProvider::signalExists(Hash hash) const
 	{
-		return m_params.find(hash) != m_params.end();
+		return m_params.contains(hash);
 	}
 
 	bool AppSignalListsProvider::signalExists(const QString& appSignalId) const

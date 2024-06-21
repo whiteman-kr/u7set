@@ -3,11 +3,6 @@
 
 #include "SoftwareCfgGenerator.h"
 
-#include "../OnlineLib/SoftwareSettings.h"
-
-#include <TuningLib/TuningUiItem.h>
-#include <ClientLib/TuningSignalManager.h>
-
 namespace Builder
 {
 

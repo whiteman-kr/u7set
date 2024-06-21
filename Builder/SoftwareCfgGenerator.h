@@ -19,7 +19,6 @@ namespace VFrame30
 
 namespace Hardware
 {
-	class Software;
 	class EquipmentSet;
 }
 
@@ -111,8 +110,8 @@ namespace Builder
 
 		QString softwareCfgSubdir() const { return m_software->equipmentIdTemplate(); }
 
-		static std::vector<AppSignal*> createAppSignals(const QStringList& equipmentList, const SignalSet& signalSet);
-		static std::vector<AppSignal*> createTuningSignals(const QStringList& equipmentList, const SignalSet& signalSet);
+		static std::vector<AppSignal*> createAppSignalList(const QStringList& equipmentList, const SignalSet& signalSet);
+		static std::vector<AppSignal*> createTuningSignalList(const QStringList& equipmentList, const SignalSet& signalSet);
 
 		bool writeTuningSignals(const std::vector<AppSignal*>& tuningSignals);
 		bool writeAppSignalLists(const ISignalManager& signalManager, const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);

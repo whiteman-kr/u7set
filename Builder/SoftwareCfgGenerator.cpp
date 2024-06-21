@@ -7,7 +7,6 @@
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
 
-#include <HardwareLib/Software.h>
 #include <HardwareLib/Workstation.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaLayer.h>
@@ -609,7 +608,6 @@ namespace Builder
 	{
 		DbController& db = context->m_db;
 		IssueLogger* log = context->m_log;
-		
 
 		if (log == nullptr)
 		{
@@ -635,6 +633,7 @@ namespace Builder
 			{
 				log->errEQP6222(listId, listCaption);
 			}
+
 			return false;
 		}
 
@@ -657,7 +656,7 @@ namespace Builder
 
 			// Check if list signals exist in project signal set
 			//
-			for (Hash hash: list->itemsHashes())
+			for (Hash hash : list->itemsHashes())
 			{
 				if (provider.signalExists(hash) == false)
 				{
@@ -694,7 +693,7 @@ namespace Builder
 			list->SaveData(&envelope);
 
 			QByteArray data;
-			data.resize(static_cast<int>(envelope.ByteSizeLong()));
+			data.resize(static_cast<qsizetype>(envelope.ByteSizeLong()));
 
 			bool result = envelope.SerializeToArray(data.data(), static_cast<int>(envelope.ByteSizeLong()));
 			if (result == false)
@@ -1363,7 +1362,7 @@ namespace Builder
 		return profile + "_" + m_software->equipmentIdTemplate().toLower() + "." + extention;
 	}
 
-	std::vector<AppSignal*> SoftwareCfgGenerator::createAppSignals(const QStringList& equipmentList, const SignalSet& signalSet)
+	std::vector<AppSignal*> SoftwareCfgGenerator::createAppSignalList(const QStringList& equipmentList, const SignalSet& signalSet)
 	{
 		std::vector<AppSignal*> appSignals;
 
@@ -1389,7 +1388,7 @@ namespace Builder
 		return appSignals;
 	}
 
-	std::vector<AppSignal*> SoftwareCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet& signalSet)
+	std::vector<AppSignal*> SoftwareCfgGenerator::createTuningSignalList(const QStringList& equipmentList, const SignalSet& signalSet)
 	{
 		std::vector<AppSignal*> tuningSignals;
 		if (equipmentList.empty() == true)

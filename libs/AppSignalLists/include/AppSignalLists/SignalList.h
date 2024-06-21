@@ -61,7 +61,15 @@ namespace AppSignalLists
 
 	public:
 		AppSignalList();
+		AppSignalList(const AppSignalList& that);
+		AppSignalList(AppSignalList&& that) = delete;
 
+		AppSignalList& operator=(const AppSignalList& that);
+		AppSignalList& operator=(AppSignalList&& that) = delete;
+
+		~AppSignalList() = default;
+
+	public:
 		void SaveData(Proto::Envelope* message) const;
 		bool LoadData(const Proto::Envelope& message);
 
@@ -141,34 +149,6 @@ namespace AppSignalLists
 		bool listMatch(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);
 
 	public:
-		AppSignalList& operator=(const AppSignalList& That) 
-		{
-			m_id = That.m_id;
-			m_caption = That.m_caption;
-
-			m_signalType = That.m_signalType;
-
-			m_systemTags = That.m_systemTags;
-			m_userTags = That.m_userTags;
-
-			m_customAppSignalIDMasks = That.m_customAppSignalIDMasks;
-			m_equipmentIDMasks = That.m_equipmentIDMasks;
-			m_appSignalIDMasks = That.m_appSignalIDMasks;
-			m_appSignalTags = That.m_appSignalTags;
-
-			m_cachedCustomAppSignalIDMasks = That.m_cachedCustomAppSignalIDMasks;
-			m_cachedEquipmentIDMasks = That.m_cachedEquipmentIDMasks;
-			m_cachedAppSignalIDMasks = That.m_cachedAppSignalIDMasks;
-			m_cachedAppSignalTags = That.m_cachedAppSignalTags;
-
-			m_items = That.m_items;
-			m_appListHashesCache = That.m_appListHashesCache;
-			m_tuningListHashesCache = That.m_tuningListHashesCache;
-
-			return *this;
-		}
-
-	public:
 		static inline const QString tagIde = "ide";
 		static inline const QString tagUi = "ui";
 		static inline const QString tagEquipment = "eqp";
@@ -219,14 +199,19 @@ namespace AppSignalLists
 	class AppSignalListSet : public QObject
 	{
 		Q_OBJECT
+
 	public:
-
 		AppSignalListSet() = default;
-		AppSignalListSet(const AppSignalListSet& That) 
-		{
-			*this = That;
-		}
+		
+		AppSignalListSet(const AppSignalListSet& that);
+		AppSignalListSet(AppSignalListSet&& that) noexcept;
 
+		AppSignalListSet& operator= (const AppSignalListSet& that);
+		AppSignalListSet& operator= (AppSignalListSet&& that) noexcept;
+
+		~AppSignalListSet() = default;
+
+	public:
 		void clear();
 		[[nodiscard]] int count() const;
 		
@@ -241,35 +226,19 @@ namespace AppSignalLists
 		void remove(const QUuid& uuid);
 		void remove(const QString& systemTag);
 
-		std::vector<AppSignalList*> lists() const;
+		std::vector<std::shared_ptr<AppSignalList>> lists() const;
 
 		virtual bool load(QString* errorMessage);
 		virtual bool save(QString* errorMessage) const;
 		
-		void fireUpdatePerformed();
-
 		std::vector<std::pair<QString, QString>> checkForSameIds() const;
 
-		AppSignalListSet& operator = (const AppSignalListSet& That) 
-		{
-			// Perform a deep copy of all lists
-			//
-			clear();
-
-			for (const auto& l : That.m_lists) 
-			{
-				std::shared_ptr<AppSignalList> list = std::make_shared<AppSignalList>();
-				*list = *l;
-				add(list);
-			}
-
-			return *this;
-		}
-
-	private:
-		std::vector<std::shared_ptr<AppSignalList>> m_lists;
+		void fireUpdatePerformed();
 
 	signals:
 		void updatePerformed();
+
+	private:
+		std::vector<std::shared_ptr<AppSignalList>> m_lists;
 	};
 } // namespace AppSignalLists

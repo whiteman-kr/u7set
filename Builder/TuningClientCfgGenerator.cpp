@@ -7,6 +7,7 @@
 #include "AppSignalListStorage.h"
 #include <Behavior/ClientBehaviorStorage.h>
 #include <Behavior/TuningClientBehavior.h>
+#include <TuningLib/TuningUiItem.h>
 #include <VFrame30/LogicSchema.h>
 
 namespace Builder
@@ -71,7 +72,7 @@ namespace Builder
 
 		// Generate tuning signals
 		//
-		std::vector<AppSignal*> tuningSignals = createTuningSignals(tuningSources, *m_signalSet);
+		std::vector<AppSignal*> tuningSignals = createTuningSignalList(tuningSources, *m_signalSet);
 
 		// Write tuning signals
 		//
@@ -219,14 +220,13 @@ namespace Builder
 			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagEquipment);
 			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
 
-
 			// Save list to the data buffer
 			//
 			Proto::Envelope envelope;
 			list->SaveData(&envelope);
 
 			QByteArray data;
-			data.resize(static_cast<int>(envelope.ByteSizeLong()));
+			data.resize(static_cast<qsizetype>(envelope.ByteSizeLong()));
 
 			bool result = envelope.SerializeToArray(data.data(), static_cast<int>(envelope.ByteSizeLong()));
 			if (result == false)
@@ -268,7 +268,8 @@ namespace Builder
 			auto& mutableAppCache = list->mutableAppListHashesCache();
 			auto& mutableTuningCache = list->mutableTuningListHashesCache();
 
-			for (const auto schemaSignals = schema->getSignalList(); const QString& schemaSignal : schemaSignals)
+			for (const auto schemaSignals = schema->getSignalList(); 
+				 const QString& schemaSignal : schemaSignals)
 			{
 				Hash hash = ::calcHash(schemaSignal);
 
@@ -304,7 +305,7 @@ namespace Builder
 			list->SaveData(&envelope);
 
 			QByteArray data;
-			data.resize(static_cast<int>(envelope.ByteSizeLong()));
+			data.resize(static_cast<qsizetype>(envelope.ByteSizeLong()));
 
 			bool result = envelope.SerializeToArray(data.data(), static_cast<int>(envelope.ByteSizeLong()));
 			if (result == false)

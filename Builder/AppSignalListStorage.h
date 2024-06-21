@@ -49,6 +49,6 @@ namespace Builder
 		}
 
 	private:
-		std::map<Hash, AppSignalParam> m_params;
+		std::map<Hash, AppSignalParam> m_params;	 // Hash from AppSignalID
 	};
 }

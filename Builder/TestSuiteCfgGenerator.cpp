@@ -2,17 +2,12 @@
 #include "../OnlineLib//SoftwareSettings.h"
 #include "Context.h"
 #include "SoftwareSettingsGetter.h"
-#include "TuningClientCfgGenerator.h"
 
 namespace Builder
 {
 
 	TestSuiteCfgGenerator::TestSuiteCfgGenerator(Context* context, Hardware::Software* software) :
 		SoftwareCfgGenerator(context, software)
-	{
-	}
-
-	TestSuiteCfgGenerator::~TestSuiteCfgGenerator()
 	{
 	}
 
@@ -31,10 +26,10 @@ namespace Builder
 	bool TestSuiteCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
-				m_software->softwareType() != E::SoftwareType::TestSuite ||
-				m_equipment == nullptr ||
-				m_cfgXml == nullptr ||
-				m_buildResultWriter == nullptr)
+			m_software->softwareType() != E::SoftwareType::TestSuite ||
+			m_equipment == nullptr ||
+			m_cfgXml == nullptr ||
+			m_buildResultWriter == nullptr)
 		{
 			Q_ASSERT(m_software && m_software->softwareType() == E::SoftwareType::TestSuite);
 			Q_ASSERT(m_equipment);
@@ -56,7 +51,7 @@ namespace Builder
 			QStringList tuningSources;
 			result &= createTuningEquipmentList(&tuningSources);
 
-			std::vector<AppSignal*> tuningSignals = createTuningSignals(tuningSources, *m_signalSet);
+			std::vector<AppSignal*> tuningSignals = createTuningSignalList(tuningSources, *m_signalSet);
 			
 			result &= writeTuningSignals(tuningSignals);
 
@@ -118,6 +113,7 @@ namespace Builder
 				result = false;
 				continue;
 			}
+
 			std::shared_ptr<Hardware::Software> tuningServiceSoftware = tuningServiceObject->toSoftware();
 			if (tuningServiceSoftware == nullptr)
 			{
@@ -337,4 +333,3 @@ namespace Builder
 		return false;
 	}
 }
-

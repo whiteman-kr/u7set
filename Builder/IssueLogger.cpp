@@ -9146,20 +9146,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 specified in application signals list %2 does not exist.
+	/// Title: AppSignal %1 specified in the application signal list %2 does not exist.
 	///
 	/// Parameters:
-	///		%1 AppSignalId ID
-	///		%2 Signals list ID
+	///		%1 Application signal ID
+	///		%2 Application signal list ID
 	///
 	/// Description:
-	///		Signal that is specified in application signals list does not exist.
+	///		Application signal that is specified in the application signal list does not exist.
 	///
 	void IssueLogger::errEQP6220(QString appSignalId, QString listId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6220,
-				  tr("Signal %1 specified in application signals list %2 does not exist.")
+				  tr("AppSignal %1 specified in the application signal list %2 does not exist.")
 				  .arg(appSignalId)
 				  .arg(listId)
 				  );
@@ -9169,21 +9169,21 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 specified in application signals list %2 is not processed by software %3.
+	/// Title: AppSignal %1 specified in the application signal list %2 is not processed by the software %3.
 	///
 	/// Parameters:
-	///		%1 AppSignalId ID
-	///		%2 Signals list ID
+	///		%1 Application signal ID
+	///		%2 Application signal list ID
 	///		%3 Software EquipmentID
 	///
 	/// Description:
-	///		Signal that is specified in application signals list is not processed by software.
+	///		Application signal that is specified in the application signal list is not processed by the software.
 	///
 	void IssueLogger::errEQP6221(QString appSignalId, QString listId, QString softwareEquipmentId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6221,
-				  tr("Signal %1 specified in Application signals list %2 is not processed by software %3.")
+				  tr("AppSignal %1 specified in the application signal list %2 is not processed by the software %3.")
 				  .arg(appSignalId)
 				  .arg(listId)
 				  .arg(softwareEquipmentId)
@@ -9194,46 +9194,39 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Application Signal List ID '%1' ('%2') is not unique.
+	/// Title: Application signal list ID %1 (%2) is not unique.
 	///
 	/// Parameters:
-	///		%1 List ID
-	///		%2 List caption
+	///		%1 Application signal list ID
+	///		%2 Application signal list caption
 	///
 	/// Description:
-	///		Application Signals List ID is not unique.
+	///		Application signals list ID is not unique, remove duplicates.
 	///
 	void IssueLogger::errEQP6222(QString listId, QString listCaption)
 	{
-		if (listCaption.isEmpty() == true) 
-		{
-			LOG_ERROR(IssueType::Equipment, 6222, tr("Application Signal List ID '%1' is not unique.").arg(listId));
-		}
-		else
-		{
-			LOG_ERROR(IssueType::Equipment, 6222, tr("ApplicationSignal List ID '%1' ('%2') is not unique.").arg(listId).arg(listCaption));
-		}
+		LOG_ERROR(IssueType::Equipment, 6222, tr("Application signal list ID %1 (%2) is not unique.").arg(listId));
 	}
 
 	/// IssueCode: EQP6251
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signals list '%1' specified in UI item '%2' in TuningClient %3 does not exist or is not linked to the software
+	/// Title: Application signals list %1 specified in UI item %2 in TuningClient %3 does not exist or is not linked to the software.
 	///
 	/// Parameters:
-	///		%1 List ID
+	///		%1 Application signal list ID
 	///		%2 UI item caption
 	///		%3 TuningClient EquipmentID
 	///
 	/// Description:
-	///		Signals list specified in Filters property of TuningClient UI item does not exist or is not linked to the software.
+	///		Application signals list specified in the property UiConfiguration of TuningClient does not exist or is not linked to the software.
 	///
 	void IssueLogger::errEQP6251(QString listId, QString uiCaption, QString tuningClientId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6251,
-				  tr("Signals list '%1' specified in UI item '%2' in TuningClient %3 does not exist or is not linked to the software.").arg(listId).arg(uiCaption).arg(tuningClientId));
+				  tr("Application signals list %1 specified in UI item %2 in TuningClient %3 does not exist or is not linked to the software.").arg(listId).arg(uiCaption).arg(tuningClientId));
 	}
 
 	/// IssueCode: EQP6300

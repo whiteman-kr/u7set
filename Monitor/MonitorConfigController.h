@@ -5,7 +5,6 @@
 
 #include <Behavior/MonitorBehavior.h>
 #include <SchemaClientLib/SchemaClientConfigController.h>
-#include <AppSignalLists/SignalList.h>
 
 namespace Hardware
 {
@@ -89,8 +88,6 @@ private:
 
 	mutable QReadWriteLock m_configurationLock;		// for access only to m_configuration
 	MonitorConfigSettings m_configuration;
-
-	std::vector<AppSignalLists::AppSignalList> appSignalLists;
 
 	ComparatorSet m_setpoints;
 };
