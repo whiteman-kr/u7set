@@ -186,12 +186,12 @@ namespace TrendLib
 		m_caption = value;
 	}
 
-	const QString& TrendSignalParam::equipmnetId() const
+	const QString& TrendSignalParam::equipmentId() const
 	{
 		return m_equipmentId;
 	}
 
-	void TrendSignalParam::setEquipmnetId(const QString& value)
+	void TrendSignalParam::setEquipmentId(const QString& value)
 	{
 		m_equipmentId = value;
 	}

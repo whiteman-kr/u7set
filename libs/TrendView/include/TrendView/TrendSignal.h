@@ -55,8 +55,8 @@ namespace TrendLib
 		[[nodiscard]] const QString& caption() const;
 		void setCaption(const QString& value);
 
-		[[nodiscard]] const QString& equipmnetId() const;
-		void setEquipmnetId(const QString& value);
+		[[nodiscard]] const QString& equipmentId() const;
+		void setEquipmentId(const QString& value);
 
 		[[nodiscard]] const QString& archiveServerId() const;
 		void setArchiveServerId(const QString& value);

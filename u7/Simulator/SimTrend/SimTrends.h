@@ -78,5 +78,6 @@ private:
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
 
 	quint64 m_timerCounter = 0;
+	QElapsedTimer m_realtimeUpdateTimer;
 };
 
