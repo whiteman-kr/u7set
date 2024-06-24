@@ -32,15 +32,19 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	//
 	m_translator.addLanguage("en", "English");
 	m_translator.addLanguage("uk", "Ukrainian");
+	m_translator.addLanguage("bg", "Bulgarian");
 
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/Monitor_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/AppSignalLists_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/SchemaClientLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TrendView_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UiLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
+	for (const QString& l : m_translator.languagesList())
+	{
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/Monitor_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/ClientLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/SchemaClientLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/TrendView_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UiLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UtilsLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/qt_%1.qm").arg(l));
+		//m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/AppSignalLists_%1.qm").arg(l));
+	}
 
 	{
 		QStringList failedTranslations;
