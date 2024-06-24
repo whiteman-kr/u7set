@@ -48,6 +48,7 @@ namespace TestSuite
 
 	class ControlThread : public QThread
 	{
+		Q_OBJECT
 	public:
 		ControlThread(ILogFile* appLog, TestLog* testLog, const QString& runContext);
 		virtual ~ControlThread();

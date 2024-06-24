@@ -345,21 +345,6 @@
   <tabstop>addSignalButton</tabstop>
   <tabstop>removeSignalButton</tabstop>
   <tabstop>removeAllSignalsButton</tabstop>
-  <tabstop>signalTypeCombo_2</tabstop>
-  <tabstop>addSignalButton_2</tabstop>
-  <tabstop>serverCombo_2</tabstop>
-  <tabstop>filterEdit_2</tabstop>
-  <tabstop>removeSignalButton_2</tabstop>
-  <tabstop>filteredSignals_2</tabstop>
-  <tabstop>removeAllSignalsButton_2</tabstop>
-  <tabstop>comboBox_2</tabstop>
-  <tabstop>removePeriodicCheckbox_2</tabstop>
-  <tabstop>endDateEdit_2</tabstop>
-  <tabstop>endTimeEdit_2</tabstop>
-  <tabstop>startDateEdit_2</tabstop>
-  <tabstop>startTimeEdit_2</tabstop>
-  <tabstop>timeTypeCombo_2</tabstop>
-  <tabstop>archiveSignals_2</tabstop>
  </tabstops>
  <resources/>
  <connections>

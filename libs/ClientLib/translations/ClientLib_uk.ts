@@ -140,32 +140,32 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningConnectionPrivate.cpp" line="358"/>
+        <location filename="../TuningConnectionPrivate.cpp" line="357"/>
         <source>writeTuningSignal(%1, %2) - Unsupported value type (%3), type must be bool, integer or double.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningConnectionPrivate.cpp" line="392"/>
+        <location filename="../TuningConnectionPrivate.cpp" line="391"/>
         <source>writeTuningSignal(%1, %2) - type bool is implicitly converted to SignedInt32.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningConnectionPrivate.cpp" line="410"/>
+        <location filename="../TuningConnectionPrivate.cpp" line="409"/>
         <source>writeTuningSignal(%1, %2) - value is out of range of type SignedInt32.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningConnectionPrivate.cpp" line="425"/>
+        <location filename="../TuningConnectionPrivate.cpp" line="424"/>
         <source>writeTuningSignal(%1, %2) - type bool is implicitly converted to Float32.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningConnectionPrivate.cpp" line="445"/>
+        <location filename="../TuningConnectionPrivate.cpp" line="444"/>
         <source>writeTuningSignal(%1, %2) - value is out of range of type Float32.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningConnectionPrivate.cpp" line="474"/>
+        <location filename="../TuningConnectionPrivate.cpp" line="473"/>
         <source>writeTuningSignal(%1, %2) - value is out tuning of range [%3, %4].</source>
         <translation></translation>
     </message>
@@ -173,7 +173,7 @@
 <context>
     <name>ClientLib::TuningSignalManager</name>
     <message>
-        <location filename="../TuningSignalManager.cpp" line="557"/>
+        <location filename="../TuningSignalManager.cpp" line="529"/>
         <source>TuningSignalManager::setStates(), Error writing value &apos;%1&apos; to signal &apos;%2&apos; (%3), logic module &apos;%4&apos;: %5</source>
         <translation></translation>
     </message>

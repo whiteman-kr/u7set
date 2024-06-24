@@ -96,8 +96,8 @@ namespace AppSignalLists
 		m_splitter->addWidget(m_listsTree);
 
 		QTabWidget* tab = new QTabWidget();
-		tab->addTab(m_listPropertyEditor, "Properties");
-		tab->addTab(m_signalListWidget, "Signals");
+		tab->addTab(m_listPropertyEditor, tr("Properties"));
+		tab->addTab(m_signalListWidget, tr("Signals"));
 		m_splitter->addWidget(tab);
 
 		m_splitter->setChildrenCollapsible(false);

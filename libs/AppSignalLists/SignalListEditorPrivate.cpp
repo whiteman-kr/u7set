@@ -623,23 +623,23 @@ namespace AppSignalLists
 			switch (static_cast<Columns>(section))
 			{
 			case Columns::CustomAppSignalID:
-				return col_CustomAppSignalId;
+				return QObject::tr(col_CustomAppSignalId.toStdString().c_str());
 			case Columns::EquipmentID:
-				return col_EquipmentID;
+				return QObject::tr(col_EquipmentID.toStdString().c_str());
 			case Columns::AppSignalID:
-				return col_AppSignalId;
+				return QObject::tr(col_AppSignalId.toStdString().c_str());
 			case Columns::Caption:
-				return col_Caption;
+				return QObject::tr(col_Caption.toStdString().c_str());
 			case Columns::Units:
-				return col_Units;
+				return QObject::tr(col_Units.toStdString().c_str());
 			case Columns::Type:
-				return col_Type;
+				return QObject::tr(col_Type.toStdString().c_str());
 			case Columns::LowLimit:
-				return col_LowLimit;
+				return QObject::tr(col_LowLimit.toStdString().c_str());
 			case Columns::HighLimit:
-				return col_HighLimit;
+				return QObject::tr(col_HighLimit.toStdString().c_str());
 			case Columns::Default:
-				return col_Default;
+				return QObject::tr(col_Default.toStdString().c_str());
 			default:
 				Q_ASSERT(false);
 			}
@@ -953,23 +953,23 @@ namespace AppSignalLists
 			switch (static_cast<Columns>(section))
 			{
 			case Columns::CustomAppSignalID:
-				return col_CustomAppSignalId;
+				return QObject::tr(col_CustomAppSignalId.toStdString().c_str());
 			case Columns::EquipmentID:
-				return col_EquipmentID;
+				return QObject::tr(col_EquipmentID.toStdString().c_str());
 			case Columns::AppSignalID:
-				return col_AppSignalId;
+				return QObject::tr(col_AppSignalId.toStdString().c_str());
 			case Columns::Caption:
-				return col_Caption;
+				return QObject::tr(col_Caption.toStdString().c_str());
 			case Columns::Units:
-				return col_Units;
+				return QObject::tr(col_Units.toStdString().c_str());
 			case Columns::Type:
-				return col_Type;
+				return QObject::tr(col_Type.toStdString().c_str());
 			case Columns::LowLimit:
-				return col_LowLimit;
+				return QObject::tr(col_LowLimit.toStdString().c_str());
 			case Columns::HighLimit:
-				return col_HighLimit;
+				return QObject::tr(col_HighLimit.toStdString().c_str());
 			case Columns::Value:
-				return col_Value;
+				return QObject::tr(col_Value.toStdString().c_str());
 			default:
 				Q_ASSERT(false);
 			}

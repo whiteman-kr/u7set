@@ -92,6 +92,10 @@ target_precompile_headers(${TARGET} PRIVATE
 
 target_compile_definitions(${TARGET} PRIVATE UI_LIB_DOMAIN)
 
+#Add translations
+#
+add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::PrintSupport)
 target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib Protobuf AppSignalLib)
 

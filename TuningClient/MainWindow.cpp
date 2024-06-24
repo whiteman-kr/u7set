@@ -27,17 +27,13 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	// Init translator
 	//
 	m_translator.addLanguage("en", "English");
-	m_translator.addLanguage("ru", "Russian");
 	m_translator.addLanguage("uk", "Ukrainian");
-
-	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/translations/TuningClient_ru.qm");
-	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/translations/ClientLib_ru.qm");
-	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/translations/UtilsLib_ru.qm");
-	m_translator.addTranslationFile("ru", qApp->applicationDirPath() + "/translations/qt_ru.qm");
 
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TuningClient_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/AppSignalLists_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/SchemaClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UiLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
 

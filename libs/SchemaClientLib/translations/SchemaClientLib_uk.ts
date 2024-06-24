@@ -1008,47 +1008,255 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="54"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="55"/>
         <source>Snapshot - %1
 </source>
         <translation>Знімок - %1
 </translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="59"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="60"/>
         <source>Generated: %1
 </source>
         <translation>Згенеровано: %1
 </translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="60"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="61"/>
         <source>%1: %2
 </source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../DialogSignalSearch.cpp" line="124"/>
+        <location filename="../SignalSnapshotModel.cpp" line="222"/>
+        <source>Signal ID</source>
+        <translation>ІД сигналу</translation>
+    </message>
+    <message>
+        <location filename="../DialogSignalSearch.cpp" line="125"/>
+        <location filename="../SignalSnapshotModel.cpp" line="226"/>
+        <source>Caption</source>
+        <translation>Найменування</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="223"/>
+        <source>Equipment ID</source>
+        <translation>ІД обладнання</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="224"/>
+        <source>Lm Equipment ID</source>
+        <translation>ІД логічного модуля</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="225"/>
+        <source>App Signal ID</source>
+        <translation>Внутрішній ІД</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="227"/>
+        <source>Type</source>
+        <translation>Тип</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="228"/>
+        <source>Tags</source>
+        <translation>Теги</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="230"/>
+        <source>Server Time UTC%100</source>
+        <translation>Час сервера UTC%100</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="231"/>
+        <source>Server Time</source>
+        <translation>Час сервера</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="232"/>
+        <source>Plant Time</source>
+        <translation>Час станції</translation>
+    </message>
+    <message>
+        <location filename="../AppDataSourcesWidget.cpp" line="45"/>
+        <source>Application Data Source - unknown</source>
+        <translation>Джерело даних - невідомо</translation>
+    </message>
+    <message>
+        <location filename="../AppDataSourcesWidget.cpp" line="49"/>
+        <source>Application Data Source - </source>
+        <translation>Джерело даних - </translation>
+    </message>
+    <message>
+        <location filename="../AppDataSourcesWidget.cpp" line="67"/>
+        <location filename="../TuningSourcesWidget.cpp" line="51"/>
+        <source>Parameter</source>
+        <translation>Параметр</translation>
+    </message>
+    <message>
+        <location filename="../AppDataSourcesWidget.cpp" line="68"/>
+        <location filename="../SignalSnapshotModel.cpp" line="233"/>
+        <location filename="../TuningSourcesWidget.cpp" line="52"/>
+        <source>Value</source>
+        <translation>Значення</translation>
+    </message>
+    <message>
+        <location filename="../AppDataSourcesWidget.cpp" line="75"/>
+        <location filename="../TuningSourcesWidget.cpp" line="58"/>
+        <source>1-Source Information</source>
+        <translation>1-Загальна інформація</translation>
+    </message>
+    <message>
+        <location filename="../AppDataSourcesWidget.cpp" line="100"/>
+        <location filename="../TuningSourcesWidget.cpp" line="81"/>
+        <source>2-Source State</source>
+        <translation>2-Стан джерела</translation>
+    </message>
+    <message>
+        <location filename="../AppDataSourcesWidget.cpp" line="122"/>
+        <source>3-Errors</source>
+        <translation>3-Помилки</translation>
+    </message>
+    <message>
+        <location filename="../AppDataSourcesWidget.cpp" line="185"/>
+        <source>%1 (%2h)</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="234"/>
+        <source>Units</source>
+        <translation>Од. виміру</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="235"/>
+        <source>Valid</source>
+        <translation>Валідний</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="236"/>
+        <source>StateAvailable</source>
+        <translation>Стан доступний</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="237"/>
+        <source>Simulated</source>
+        <translation>Імітація</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="238"/>
+        <source>Blocked</source>
+        <translation>Блокування</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="239"/>
+        <source>Mismatch</source>
+        <translation>Розбіжність</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="240"/>
+        <source>OutOfLimits</source>
+        <translation>Ліміти</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="803"/>
+        <location filename="../SignalSnapshotModel.cpp" line="807"/>
+        <location filename="../SignalSnapshotModel.cpp" line="811"/>
+        <source>yes</source>
+        <translation>так</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="854"/>
+        <source>Bus Type</source>
+        <translation>Тип шини</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="908"/>
+        <source>Analog</source>
+        <translation>Аналоговий</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="909"/>
+        <source>Discrete</source>
+        <translation>Дискретний</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="910"/>
+        <source>Bus</source>
+        <translation>Шина</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="911"/>
+        <source>Input</source>
+        <translation>Вхідний</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="912"/>
+        <source>Output</source>
+        <translation>Вихідний</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="913"/>
+        <source>Internal</source>
+        <translation>Внутрішній</translation>
+    </message>
+    <message>
+        <location filename="../TuningSourcesWidget.cpp" line="105"/>
+        <source>3-Errors in Reply RupFrameHeader</source>
+        <translation>3-Помилки в RupFrameHeader</translation>
+    </message>
+    <message>
+        <location filename="../TuningSourcesWidget.cpp" line="117"/>
+        <source>4-Errors in Reply FotipHeader</source>
+        <translation>4-Помилки в FotipHeader</translation>
+    </message>
+    <message>
+        <location filename="../TuningSourcesWidget.cpp" line="131"/>
+        <source>5-Errors Reported by LM in Reply FotipHeader.flags</source>
+        <translation>5-Помилки в LM FotipHeader.flags</translation>
+    </message>
+    <message>
+        <location filename="../TuningSourcesWidget.cpp" line="172"/>
+        <source>Tuning Source - </source>
+        <translation>Джерело тюнінгу - </translation>
+    </message>
+    <message>
+        <location filename="../TuningSourcesWidget.cpp" line="189"/>
+        <source>Tuning Source - %1</source>
+        <translation>Джерело тюнінгу - %1</translation>
+    </message>
+    <message>
+        <source>Export Schema</source>
+        <translation type="obsolete">Експорт схеми</translation>
+    </message>
+</context>
+<context>
+    <name>QObject::QObject</name>
+    <message>
+        <location filename="../SignalSnapshotModel.cpp" line="795"/>
+        <location filename="../SignalSnapshotModel.cpp" line="799"/>
+        <source>no</source>
+        <translation>ні</translation>
     </message>
 </context>
 <context>
     <name>SchemaClientLib</name>
     <message>
-        <location filename="../include/SchemaClientLib/SchemaTabWidget.h" line="536"/>
         <source>Export Schema</source>
-        <translation>Експорт схеми</translation>
+        <translation type="vanished">Експорт схеми</translation>
     </message>
     <message>
-        <location filename="../include/SchemaClientLib/SchemaTabWidget.h" line="538"/>
         <source>PDF Files (*.pdf);;PNG Files (*.png)</source>
-        <translation>Файли PDF (*.pdf);;Файли PNG (*.png)</translation>
+        <translation type="vanished">Файли PDF (*.pdf);;Файли PNG (*.png)</translation>
     </message>
     <message>
-        <location filename="../include/SchemaClientLib/SchemaTabWidget.h" line="560"/>
         <source>Wrong file &apos;%1&apos; format, expected &apos;.png&apos; or &apos;.pdf&apos;!</source>
-        <translation>Невірний формат файлу&apos;%1&apos; очікується &apos;.png&apos; or &apos;.pdf&apos;!</translation>
+        <translation type="vanished">Невірний формат файлу&apos;%1&apos; очікується &apos;.png&apos; or &apos;.pdf&apos;!</translation>
     </message>
     <message>
-        <location filename="../include/SchemaClientLib/SchemaTabWidget.h" line="567"/>
         <source>Failed to save file &apos;%1&apos;!</source>
-        <translation>Помилка запису файла %1!</translation>
+        <translation type="vanished">Помилка запису файла %1!</translation>
     </message>
 </context>
 <context>
@@ -1280,41 +1488,28 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
 <context>
     <name>SchemaClientLib::DialogAppDataSourceInfo</name>
     <message>
-        <location filename="../AppDataSourcesWidget.cpp" line="49"/>
         <source>Application Data Source - </source>
-        <translation>Джерело даних - </translation>
+        <translation type="vanished">Джерело даних - </translation>
     </message>
     <message>
-        <location filename="../AppDataSourcesWidget.cpp" line="67"/>
         <source>Parameter</source>
-        <translation>Параметр</translation>
+        <translation type="vanished">Параметр</translation>
     </message>
     <message>
-        <location filename="../AppDataSourcesWidget.cpp" line="68"/>
         <source>Value</source>
-        <translation>Значення</translation>
+        <translation type="vanished">Значення</translation>
     </message>
     <message>
-        <location filename="../AppDataSourcesWidget.cpp" line="75"/>
         <source>1-Source Information</source>
-        <translation>1-Загальна інформація</translation>
+        <translation type="vanished">1-Загальна інформація</translation>
     </message>
     <message>
-        <location filename="../AppDataSourcesWidget.cpp" line="100"/>
         <source>2-Source State</source>
-        <translation>2-Стан джерела</translation>
+        <translation type="vanished">2-Стан джерела</translation>
     </message>
     <message>
-        <location filename="../AppDataSourcesWidget.cpp" line="122"/>
         <source>3-Errors</source>
-        <translation>3-Помилки</translation>
-    </message>
-    <message>
-        <location filename="../AppDataSourcesWidget.cpp" line="185"/>
-        <location filename="../AppDataSourcesWidget.cpp" line="198"/>
-        <location filename="../AppDataSourcesWidget.cpp" line="202"/>
-        <source>%1 (%2h)</source>
-        <translation></translation>
+        <translation type="vanished">3-Помилки</translation>
     </message>
 </context>
 <context>
@@ -1369,57 +1564,40 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
 <context>
     <name>SchemaClientLib::DialogTuningSourceInfo</name>
     <message>
-        <location filename="../TuningSourcesWidget.cpp" line="51"/>
         <source>Parameter</source>
-        <translation>Параметр</translation>
+        <translation type="vanished">Параметр</translation>
     </message>
     <message>
-        <location filename="../TuningSourcesWidget.cpp" line="52"/>
         <source>Value</source>
-        <translation>Значення</translation>
+        <translation type="vanished">Значення</translation>
     </message>
     <message>
-        <location filename="../TuningSourcesWidget.cpp" line="58"/>
         <source>1-Source Information</source>
-        <translation>1-Загальна інформація</translation>
+        <translation type="vanished">1-Загальна інформація</translation>
     </message>
     <message>
-        <location filename="../TuningSourcesWidget.cpp" line="81"/>
         <source>2-Source State</source>
-        <translation>2-Стан джерела</translation>
+        <translation type="vanished">2-Стан джерела</translation>
     </message>
     <message>
-        <location filename="../TuningSourcesWidget.cpp" line="105"/>
         <source>3-Errors in Reply RupFrameHeader</source>
-        <translation>3-Помилки в RupFrameHeader</translation>
+        <translation type="vanished">3-Помилки в RupFrameHeader</translation>
     </message>
     <message>
-        <location filename="../TuningSourcesWidget.cpp" line="117"/>
         <source>4-Errors in Reply FotipHeader</source>
-        <translation>4-Помилки в FotipHeader</translation>
+        <translation type="vanished">4-Помилки в FotipHeader</translation>
     </message>
     <message>
-        <location filename="../TuningSourcesWidget.cpp" line="131"/>
         <source>5-Errors Reported by LM in Reply FotipHeader.flags</source>
-        <translation>5-Помилки в LM FotipHeader.flags</translation>
+        <translation type="vanished">5-Помилки в LM FotipHeader.flags</translation>
     </message>
     <message>
-        <location filename="../TuningSourcesWidget.cpp" line="172"/>
         <source>Tuning Source - </source>
-        <translation>Джерело тюнінгу - </translation>
+        <translation type="vanished">Джерело тюнінгу - </translation>
     </message>
     <message>
-        <location filename="../TuningSourcesWidget.cpp" line="189"/>
         <source>Tuning Source - %1</source>
-        <translation>Джерело тюнінгу - %1</translation>
-    </message>
-    <message>
-        <location filename="../TuningSourcesWidget.cpp" line="225"/>
-        <location filename="../TuningSourcesWidget.cpp" line="236"/>
-        <location filename="../TuningSourcesWidget.cpp" line="239"/>
-        <location filename="../TuningSourcesWidget.cpp" line="242"/>
-        <source>%1 (%2h)</source>
-        <translation></translation>
+        <translation type="vanished">Джерело тюнінгу - %1</translation>
     </message>
 </context>
 <context>
@@ -1544,150 +1722,149 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
     </message>
 </context>
 <context>
+    <name>SchemaClientLib::SchemaTabWidgetSignalSlot</name>
+    <message>
+        <location filename="../include/SchemaClientLib/SchemaTabWidget.h" line="536"/>
+        <source>Export Schema</source>
+        <translation>Експорт схеми</translation>
+    </message>
+    <message>
+        <location filename="../include/SchemaClientLib/SchemaTabWidget.h" line="560"/>
+        <source>Wrong file &apos;%1&apos; format, expected &apos;.png&apos; or &apos;.pdf&apos;!</source>
+        <translation>Невірний формат файлу&apos;%1&apos; очікується &apos;.png&apos; or &apos;.pdf&apos;!</translation>
+    </message>
+    <message>
+        <location filename="../include/SchemaClientLib/SchemaTabWidget.h" line="567"/>
+        <source>Failed to save file &apos;%1&apos;!</source>
+        <translation>Помилка запису файла %1!</translation>
+    </message>
+</context>
+<context>
+    <name>SchemaClientLib::SignalSearchItemModel</name>
+    <message>
+        <source>Signal ID</source>
+        <translation type="obsolete">ІД сигналу</translation>
+    </message>
+    <message>
+        <source>Caption</source>
+        <translation type="obsolete">Найменування</translation>
+    </message>
+</context>
+<context>
     <name>SchemaClientLib::SignalSnapshotModel</name>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="220"/>
         <source>Signal ID</source>
-        <translation>ІД сигналу</translation>
+        <translation type="vanished">ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="221"/>
         <source>Equipment ID</source>
-        <translation>ІД обладнання</translation>
+        <translation type="vanished">ІД обладнання</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="222"/>
         <source>Lm Equipment ID</source>
-        <translation>ІД логічного модуля</translation>
+        <translation type="vanished">ІД логічного модуля</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="223"/>
         <source>App Signal ID</source>
-        <translation>Внутрішній ІД</translation>
+        <translation type="vanished">Внутрішній ІД</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="224"/>
         <source>Caption</source>
-        <translation>Найменування</translation>
+        <translation type="vanished">Найменування</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="225"/>
         <source>Type</source>
-        <translation>Тип</translation>
+        <translation type="vanished">Тип</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="226"/>
         <source>Tags</source>
-        <translation>Теги</translation>
+        <translation type="vanished">Теги</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="228"/>
         <source>Server Time UTC%100</source>
-        <translation>Час сервера UTC%100</translation>
+        <translation type="vanished">Час сервера UTC%100</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="229"/>
         <source>Server Time</source>
-        <translation>Час сервера</translation>
+        <translation type="vanished">Час сервера</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="230"/>
         <source>Plant Time</source>
-        <translation>Час станції</translation>
+        <translation type="vanished">Час станції</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="231"/>
         <source>Value</source>
-        <translation>Значення</translation>
+        <translation type="vanished">Значення</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="232"/>
         <source>Units</source>
-        <translation>Од. виміру</translation>
+        <translation type="vanished">Од. виміру</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="233"/>
         <source>Valid</source>
-        <translation>Валідний</translation>
+        <translation type="vanished">Валідний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="234"/>
         <source>StateAvailable</source>
-        <translation>Стан доступний</translation>
+        <translation type="vanished">Стан доступний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="235"/>
         <source>Simulated</source>
-        <translation>Імітація</translation>
+        <translation type="vanished">Імітація</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="236"/>
         <source>Blocked</source>
-        <translation>Блокування</translation>
+        <translation type="vanished">Блокування</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="237"/>
         <source>Mismatch</source>
-        <translation>Розбіжність</translation>
+        <translation type="vanished">Розбіжність</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="238"/>
         <source>OutOfLimits</source>
-        <translation>Ліміти</translation>
+        <translation type="vanished">Ліміти</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="762"/>
-        <location filename="../SignalSnapshotModel.cpp" line="766"/>
         <source>no</source>
-        <translation>ні</translation>
+        <translation type="vanished">ні</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="770"/>
-        <location filename="../SignalSnapshotModel.cpp" line="774"/>
-        <location filename="../SignalSnapshotModel.cpp" line="778"/>
         <source>yes</source>
-        <translation>так</translation>
+        <translation type="vanished">так</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="821"/>
         <source>Bus Type</source>
-        <translation>Тип шини</translation>
+        <translation type="vanished">Тип шини</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="875"/>
         <source>Analog</source>
-        <translation>Аналоговий</translation>
+        <translation type="vanished">Аналоговий</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="876"/>
         <source>Discrete</source>
-        <translation>Дискретний</translation>
+        <translation type="vanished">Дискретний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="877"/>
         <source>Bus</source>
-        <translation>Шина</translation>
+        <translation type="vanished">Шина</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="878"/>
         <source>Input</source>
-        <translation>Вхідний</translation>
+        <translation type="vanished">Вхідний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="879"/>
         <source>Output</source>
-        <translation>Вихідний</translation>
+        <translation type="vanished">Вихідний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="880"/>
         <source>Internal</source>
-        <translation>Внутрішній</translation>
+        <translation type="vanished">Внутрішній</translation>
     </message>
 </context>
 <context>
     <name>SchemaClientLib::SignalSnapshotWidget</name>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="168"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="172"/>
         <source>A mask contains &apos;*&apos; and &apos;?&apos; symbols.
 	&apos;*&apos; symbol means any set of symbols on its place, &apos;?&apos; symbol means one symbol on its place.
 	Several masks can be separated by semicolon or space.
@@ -1712,7 +1889,7 @@ T?30T01? (маска для CustomAppSignalID),
 Після вводу маски натисніть Enter.</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="178"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="182"/>
         <source>Tags for filtering signals.
 
 	Several tags can be separated by semicolon or space: &quot;tag1; tag2&quot; or &quot;tag1 tag2&quot;.
@@ -1725,180 +1902,195 @@ T?30T01? (маска для CustomAppSignalID),
 Після вводу тегів натисніть Enter.</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="188"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="192"/>
         <source>Signals Snapshot</source>
         <translation>Знімок сигналів</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="668"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="692"/>
         <source>Nothing to export.</source>
         <translation>Немає даних для експорту.</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="675"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="699"/>
         <source>Save File</source>
         <translation>Зберегти файл</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="677"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="701"/>
         <source>Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="700"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="724"/>
         <source>Unsupported file format.</source>
         <translation>Непідтримуваний формат.</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="806"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="837"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="820"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="851"/>
         <source>Role</source>
         <translation>Роль</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="835"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="866"/>
         <source>Mask</source>
         <translation>Маска</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="859"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="890"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="876"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="907"/>
         <source>Schema</source>
         <translation>Схема</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="891"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="922"/>
         <source>Tags</source>
         <translation>Теги</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="916"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="983"/>
         <source>Clear Filter</source>
         <translation>Скинути фільтр</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="935"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="971"/>
         <source>Export...</source>
         <translation>Експорт...</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="940"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="946"/>
+        <source>List</source>
+        <translation>Список</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotWidget.cpp" line="976"/>
         <source>Print...</source>
         <translation>Друк...</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="947"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="988"/>
         <source>Fixate</source>
         <translation>Фіксувати</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="974"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1015"/>
         <source>Format</source>
         <translation>Формат</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="976"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1017"/>
         <source>Auto-select</source>
         <translation>Авто-вибір</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="988"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1029"/>
         <source>Decimal (as [-]9.9)</source>
         <translation>Десятковий (як [-]9.9)</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1000"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1041"/>
         <source>Exponential (as [-]9.9e[+|-]999)</source>
         <translation>Експоненційний (як [-]9.9e[+|-]999)</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1014"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1055"/>
         <source>Default</source>
         <translation>За замовч</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1028"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1069"/>
         <source>.%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1050"/>
-        <location filename="../SignalSnapshotWidget.cpp" line="1059"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1091"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1100"/>
         <source>Any</source>
         <translation>Будь-який</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1051"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1092"/>
         <source>Analog</source>
         <translation>Аналоговий</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1052"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1093"/>
         <source>Discrete</source>
         <translation>Дискретний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1060"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1101"/>
         <source>Input</source>
         <translation>Вхідний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1061"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1102"/>
         <source>Output</source>
         <translation>Вихідний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1062"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1103"/>
         <source>Internal</source>
         <translation>Внутрішній</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1063"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1104"/>
         <source>Tunable</source>
         <translation>Сигнал тюнінгу</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1076"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1117"/>
         <source>All</source>
         <translation>Весь текст</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1077"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1118"/>
         <source>AppSignalID</source>
         <translation>Внутрішній ІД</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1078"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1119"/>
         <source>CustomAppSignalID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1079"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1120"/>
         <source>EquipmentID</source>
         <translation>ІД обладнання</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1080"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1121"/>
         <source>LmEquipmentID</source>
         <translation>ІД логічного модуля</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1098"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1139"/>
         <source>All Servers</source>
         <translation>Всі сервери</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1215"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1259"/>
         <source>All Schemas</source>
         <translation>Всі схеми</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotWidget.cpp" line="1298"/>
+        <source>Not selected</source>
+        <translation>Не обраний</translation>
+    </message>
+    <message>
+        <location filename="../SignalSnapshotWidget.cpp" line="1306"/>
+        <source>[%1] %2</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -2116,14 +2308,12 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>SignalSearchItemModel</name>
     <message>
-        <location filename="../DialogSignalSearch.cpp" line="124"/>
         <source>Signal ID</source>
-        <translation>ІД сигналу</translation>
+        <translation type="vanished">ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../DialogSignalSearch.cpp" line="125"/>
         <source>Caption</source>
-        <translation>Найменування</translation>
+        <translation type="vanished">Найменування</translation>
     </message>
 </context>
 <context>

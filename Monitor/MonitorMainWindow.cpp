@@ -35,8 +35,10 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/Monitor_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/AppSignalLists_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/SchemaClientLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TrendView_uk.qm");
+	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UiLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
 	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
 

@@ -11,6 +11,7 @@ namespace AppSignalLists
 {
 	class DialogSignalListEditor : public QDialog
 	{
+		Q_OBJECT
 	public:
 		static void showDialog(AppSignalListSet& appSignalListSet, ISignalManager& signalManager, QWidget* parent);
 		static DialogSignalListEditor* instance();
