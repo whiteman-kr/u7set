@@ -79,7 +79,7 @@ namespace TrendLib
 		//
 		QDateTime startTime = drawParam.startTime();
 
-		for (int laneIndex = 0; laneIndex < drawParam.laneCount(); laneIndex++)
+		for (size_t laneIndex = 0, laneCount = drawParam.laneCount(); laneIndex < laneCount; laneIndex++)
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -90,8 +90,9 @@ namespace TrendLib
 			laneDrawParam.setStartTime(startTime);
 
 			QRectF laneRect = calcLaneRect(laneIndex, drawParam);
+			Lane lane{.index = laneIndex, .laneRect = laneRect, .startTime = startTime};
 
-			drawLane(painter, laneRect, laneDrawParam); // Draw whole lane
+			drawLane(painter, lane, laneDrawParam); // Draw whole lane
 
 			// As laneDrawParam is a copy of drawParam, we need to copy from
 			// laneDrawParam to drawParam vector signalDescriptionRect
@@ -106,11 +107,11 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendImpl::drawLane(QPainter* painter, const QRectF& laneRect, const TrendParam& drawParam) const
+	void TrendImpl::drawLane(QPainter* painter, const Lane& lane, const TrendParam& drawParam) const
 	{
 		painter->setBrush(drawParam.backColor1st());
 		painter->setPen(Qt::PenStyle::NoPen);
-		painter->drawRect(laneRect);
+		painter->drawRect(lane.laneRect);
 
 		std::vector<TrendSignalParam> discretes = signalSet().discreteSignals();
 		std::vector<TrendSignalParam> analogs = signalSet().analogSignals();
@@ -122,7 +123,7 @@ namespace TrendLib
 		// |   +---------------------------+|
 		// +--------------------------------+
 		//
-		QRectF insideRect = calcTrendArea(laneRect, drawParam);
+		QRectF insideRect = calcTrendArea(lane.laneRect, drawParam);
 
 		// Calc signals rects, calculates rect will be written to discretes/analogs
 		//
@@ -134,11 +135,11 @@ namespace TrendLib
 
 		// Draw Time grid
 		//
-		drawTimeGrid(painter, laneRect, insideRect, drawParam);
+		drawTimeGrid(painter, lane.laneRect, insideRect, drawParam);
 
 		// Draw vertical scale, signal id and caption
 		//
-		drawSignalsDecor(painter, laneRect, drawParam, discretes, analogs);
+		drawSignalsDecor(painter, lane, drawParam, discretes, analogs);
 
 		// Draw signal trend
 		//
@@ -383,13 +384,13 @@ namespace TrendLib
 	}
 
 	void TrendImpl::drawSignalsDecor(QPainter* painter,
-									 const QRectF& laneRect,
+									 const Lane& lane,
 									 const TrendParam& drawParam,
 									 const std::vector<TrendSignalParam>& discretes,
 									 const std::vector<TrendSignalParam>& analogs) const
 	{
 		Q_ASSERT(painter);
-		painter->setClipRect(laneRect);
+		painter->setClipRect(lane.laneRect);
 
 		// Draw DISCRETE signal id, caption and scale ("0", "1")
 		//
@@ -420,14 +421,14 @@ namespace TrendLib
 
 			// Draw scale 0/1 for discretes.
 			//
-			QRectF scaleAreaRect = calcScaleAreaRect(laneRect, signalRect);
+			QRectF scaleAreaRect = calcScaleAreaRect(lane.laneRect, signalRect);
 
 			drawText(painter, "0 ", scaleAreaRect, drawParam, Qt::AlignRight | Qt::AlignBottom);
 			drawText(painter, "1 ", scaleAreaRect, drawParam, Qt::AlignRight | Qt::AlignTop);
 
-			// Draw realtime mode last (current) value.
+			// Draw real-time mode last (current) value.
 			//
-			drawSignalsDecorRealtimeValue(painter, signalRect, drawParam, ts);
+			drawSignalsDecorRealtimeValue(painter, lane, signalRect, drawParam, ts);
 		}
 
 		// Draw ANALOG signal id, caption and scale for TrendView::Separated mode
@@ -495,11 +496,11 @@ namespace TrendLib
 
 				// Draw horizontal grid and scale
 				//
-				drawAnalogSignalsGridSeparateMode(painter, laneRect, drawParam, ts);
+				drawAnalogSignalsGridSeparateMode(painter, lane.laneRect, drawParam, ts);
 
-				// Draw realtime mode last value.
+				// Draw real-time mode last value.
 				//
-				drawSignalsDecorRealtimeValue(painter, signalRect, drawParam, ts);
+				drawSignalsDecorRealtimeValue(painter, lane, signalRect, drawParam, ts);
 			}
 		}
 
@@ -560,7 +561,7 @@ namespace TrendLib
 
 				// Draw realtime mode last value.
 				//
-				drawSignalsDecorRealtimeValue(painter, signalRect, drawParam, ts);
+				drawSignalsDecorRealtimeValue(painter, lane, signalRect, drawParam, ts);
 
 				// Shift rect
 				//
@@ -569,7 +570,7 @@ namespace TrendLib
 
 			// Draw horizontal grid and scale
 			//
-			drawAnalogSignalsGridOverlappedMode(painter, laneRect, drawParam, analogs);
+			drawAnalogSignalsGridOverlappedMode(painter, lane.laneRect, drawParam, analogs);
 		}
 
 		//		// --
@@ -580,6 +581,7 @@ namespace TrendLib
 	}
 
 	void TrendImpl::drawSignalsDecorRealtimeValue(QPainter* painter,
+												  const Lane& lane,
 												  const QRectF& signalRect,
 												  const TrendParam& drawParam,
 												  const TrendSignalParam& signalParam) const
@@ -593,6 +595,59 @@ namespace TrendLib
 		//
 		std::optional<TrendStateItem> lastStateOpt = signalSet().lastRealtimeState(signalParam.appSignalHash(), drawParam.timeType());
 
+		// If there is no last state, then draw only the last lane value (sign ?).
+		//
+		bool definitelyDraw = false;
+
+		if (lastStateOpt.has_value() == false)
+		{
+			// Corner case, there is no value at all, draw ? on the last lane only.
+			//
+			if (lane.index == drawParam.laneCount() - 1)
+			{
+				definitelyDraw = true;
+			}
+			else
+			{
+				return;
+			}
+		}
+		else
+		{
+			// lastStateOpt.has_value() == true
+			//
+			TrendStateItem lastState = lastStateOpt.value();
+			QDateTime ts = lastState.getTime(drawParam.timeType()).toDateTime();
+
+			if (lane.index == 0 && ts < lane.startTime)
+			{
+				definitelyDraw = true;
+			}
+
+			QDateTime laneEndTime = lane.startTime.addMSecs(drawParam.duration());
+			if (lane.index == drawParam.laneCount() - 1 && ts > laneEndTime)
+			{
+				definitelyDraw = true;
+			}
+		}
+
+		// Do not draw lanes if the last point out of the lane.
+		//
+		if (definitelyDraw == false)
+		{
+			TrendStateItem lastState = lastStateOpt.value();
+
+			QDateTime ts = lastState.getTime(drawParam.timeType()).toDateTime();
+			QDateTime laneEndTime = lane.startTime.addMSecs(drawParam.duration());
+
+			if (ts < lane.startTime || ts > laneEndTime)
+			{
+				return;
+			}
+		}
+
+		// Form string value.
+		//
 		TrendStateItem lastState = lastStateOpt.value_or(TrendStateItem{});
 		QString strValue;
 
@@ -638,15 +693,15 @@ namespace TrendLib
 
 		boundingRect = QRectF{signalRect.right() - boundingRect.width(), signalRect.top(), boundingRect.width(), boundingRect.height()};
 
-		// Draw realtime value background.
+		// Draw real-time value background.
 		//
 		QColor semitransparentColor = drawParam.backColor2nd();
-		semitransparentColor.setAlpha(100);
+		semitransparentColor.setAlpha(150);
 
 		QBrush fillRectBrush(semitransparentColor);
 		painter->fillRect(boundingRect, fillRectBrush);
 
-		// Draw realtime value text.
+		// Draw real-time value text.
 		//
 		drawText(painter, drawTextValue, boundingRect, drawParam, Qt::AlignRight | Qt::AlignTop | Qt::TextSingleLine, nullptr);
 
@@ -1269,7 +1324,7 @@ namespace TrendLib
 					//					painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
 					//					drawText(painter, QString("%1").arg(pointIndex), QRectF(x - 1.0/64.0, y
 					//- 1.0/64.0, 1.0/32.0, 1.0/32.0), drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextDontClip);
-					//qDebug() << "DEBUG: Discrete draw pointIndex:" << pointIndex
+					// qDebug() << "DEBUG: Discrete draw pointIndex:" << pointIndex
 					//							 << ", Flags: " << state.flags
 					//							 << ", value: " << state.value
 					//							 << ", timestamp: " << ct.toDateTime().toString("HH:mm:ss.zzz");
@@ -1973,7 +2028,7 @@ namespace TrendLib
 		return;
 	}
 
-	QRectF TrendImpl::calcLaneRect(int laneIndex, const TrendParam& drawParam)
+	QRectF TrendImpl::calcLaneRect(size_t laneIndex, const TrendParam& drawParam)
 	{
 		QSizeF inchSize(drawParam.rect().size().width() / drawParam.realDpiX(), drawParam.rect().size().height() / drawParam.realDpiY());
 

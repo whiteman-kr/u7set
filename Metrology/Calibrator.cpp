@@ -1706,20 +1706,20 @@ QString CalibratorIdnCaption(int calibratorType)
 
 CalibratorInterface getCalibratorInterface(int calibratorType)
 {
-	CalibratorInterface interface = CalibratorInterface::NoCalibratorInterface;
+	CalibratorInterface i = CalibratorInterface::NoCalibratorInterface;
 
 	switch (calibratorType)
 	{
-		case CalibratorType::TrxII:		interface = CalibratorInterface::Serial;	break;
-		case CalibratorType::Calys75:	interface = CalibratorInterface::Serial;	break;
-		case CalibratorType::Ktl6221:	interface = CalibratorInterface::Serial;	break;
-		case CalibratorType::Rgl1062:	interface = CalibratorInterface::USB;		break;
+		case CalibratorType::TrxII:		i = CalibratorInterface::Serial;	break;
+		case CalibratorType::Calys75:	i = CalibratorInterface::Serial;	break;
+		case CalibratorType::Ktl6221:	i = CalibratorInterface::Serial;	break;
+		case CalibratorType::Rgl1062:	i = CalibratorInterface::USB;		break;
 
 		default:
-			interface = CalibratorInterface::NoCalibratorInterface;
+			i = CalibratorInterface::NoCalibratorInterface;
 	}
 
-	return interface;
+	return i;
 }
 
 QString CalibratorModeCaption(int calibratorMode)

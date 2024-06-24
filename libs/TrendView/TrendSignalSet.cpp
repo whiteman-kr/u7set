@@ -408,7 +408,7 @@ namespace TrendLib
 
 		for (const TrendSignalParam& s : m_signalParams)
 		{
-			if (equipmentId.isEmpty() == true || s.equipmnetId() == equipmentId)
+			if (equipmentId.isEmpty() == true || s.equipmentId() == equipmentId)
 			{
 				result.emplace_back(s.appSignalHash());
 			}
@@ -1343,7 +1343,7 @@ namespace TrendLib
 			const std::vector<TrendStateItem>& states = chunk.states;
 
 			// For now add all three times, maybe later it will be changed to add just for one time
-			// I just don't know whick kind of time is used now
+			// I just don't know which kind of time is used now
 			//
 			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::Local, signalHash, states);
 			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::System, signalHash, states);

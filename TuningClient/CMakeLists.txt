@@ -98,89 +98,9 @@ add_executable(${TARGET} WIN32
 	${WINDOWS_RESOURCES}
 )
 
-target_precompile_headers(${TARGET} PRIVATE
-	<memory>
-	<algorithm>
-	<set>
-	<cassert>
-
-	<QAbstractItemModel>
-	<QAbstractTableModel>
-	<QAction>
-	<QActionGroup>
-	<QApplication>
-	<QButtonGroup>
-	<QCheckBox>
-	<QClipboard>
-	<QComboBox>
-	<QCommandLineParser>
-	<QCryptographicHash>
-	<QDebug>
-	<QDialog>
-	<QDialogButtonBox>
-	<QDir>
-	<QDomDocument>
-	<QFile>
-	<QFileDialog>
-	<QGridLayout>
-	<QHBoxLayout>
-	<QHeaderView>
-	<QInputDialog>
-	<QJsonArray>
-	<QJsonDocument>
-	<QJsonObject>
-	<QKeyEvent>
-	<QLabel>
-	<QLineEdit>
-	<QListView>
-	<QListWidget>
-	<QMainWindow>
-	<QMenu>
-	<QMenuBar>
-	<QMessageBox>
-	<QMouseEvent>
-	<QMutex>
-	<QMutexLocker>
-	<QObject>
-	<QPainter>
-	<QProcess>
-	<QPushButton>
-	<QScrollArea>
-	<QSettings>
-	<QSharedMemory>
-	<QSortFilterProxyModel>
-	<QSplitter>
-	<QStandardPaths>
-	<QStatusBar>
-	<QTableView>
-	<QTableWidget>
-	<QTableWidgetItem>
-	<QTabWidget>
-	<QTextEdit>
-	<QTranslator>
-	<QTreeWidget>
-	<QTreeWidgetItem>
-	<QUuid>
-	<QVariant>
-	<QVBoxLayout>
-	<QVector>
-	<QXmlStreamReader>
-	<QXmlStreamWriter>
-
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
-	
-	<ProtoSerialization.h>
-	<Network.pb.h>
-	#<AppSignal.pb.h>
-	
-	#"../AppSignalLib/AppSignal.h"
-	"../AppSignalLib/AppSignalParam.h"
-	"../AppSignalLib/AppSignalState.h"
-	"../AppSignalLib/TuningValue.h"
-)
+# Reuse precompiled headers from SchemaClientLib
+#
+target_precompile_headers(${TARGET} REUSE_FROM SchemaClientLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 

@@ -196,18 +196,16 @@ namespace TrendLib
 		}
 
 		QByteArray ba = file.readAll();
-		qDebug() << ba.size();
 
 		// Uncompress data
 		//
-		QByteArray uncommpressedData = qUncompress(ba);
-		qDebug() << uncommpressedData.size();
+		QByteArray uncompressedData = qUncompress(ba);
 
 		// Deserialize
 		//
 		::Proto::TrendWidget message;
 
-		ok = message.ParseFromArray(uncommpressedData.constData(), static_cast<int>(uncommpressedData.size()));
+		ok = message.ParseFromArray(uncompressedData.constData(), static_cast<int>(uncompressedData.size()));
 
 		if (ok == false)
 		{

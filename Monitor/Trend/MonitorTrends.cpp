@@ -607,14 +607,13 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*
 		m_realtimeUpdateTimer.start();
 	}
 
-	// Force to update trend every 500 ms, as signal values (indicator on the left)
+	// Force to update trend every 250 ms, as signal values (indicator on the left)
 	// should be updated even if the trend point not in the current view.
 	//
-	bool updateByTimer = m_realtimeUpdateTimer.elapsed() > 500;
+	bool updateByTimer = m_realtimeUpdateTimer.elapsed() > 250;
 
-	if (updateByTimer == true ||
-		(minTime >= TimeStamp{this->startTime().timeStamp - this->duration() / 10} &&
-		 maxTime <= TimeStamp{this->finishTime().timeStamp + this->duration() / 10}))
+	if (updateByTimer == true || (minTime >= TimeStamp{this->startTime().timeStamp - this->duration() / 10} &&
+								  maxTime <= TimeStamp{this->finishTime().timeStamp + this->duration() / 10}))
 	{
 		updateWidget();
 		m_realtimeUpdateTimer.restart();
