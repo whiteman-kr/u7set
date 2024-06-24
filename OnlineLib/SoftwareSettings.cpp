@@ -1441,7 +1441,7 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStringElement(EquipmentPropNames::START_SCHEMA_ID, startSchemaId);
 	xml.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
 		
-	xml.writeStringElement(EquipmentPropNames::APP_SIGNAL_LIST_IDS, appSignalListIds.join(Separator::SEMICOLON));
+	xml.writeStringElement(EquipmentPropNames::APP_SIGNAL_LIST_IDS, appSignalListIDs.join(Separator::SEMICOLON));
 	xml.writeStringElement(EquipmentPropNames::APP_SIGNAL_LIST_MASKS, appSignalListMasks.join(Separator::SEMICOLON));
 	xml.writeStringElement(EquipmentPropNames::APP_SIGNAL_LIST_TAGS, appSignalListTags.join(Separator::SEMICOLON));
 
@@ -1574,7 +1574,7 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 		if (xml.name() == EquipmentPropNames::APP_SIGNAL_LIST_IDS)
 		{
-			appSignalListIds = xml.elementText().split(Separator::SEMICOLON);
+			appSignalListIDs = xml.elementText().split(Separator::SEMICOLON);
 			continue;
 		}
 		if (xml.name() == EquipmentPropNames::APP_SIGNAL_LIST_MASKS)
@@ -2063,7 +2063,7 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, tuningSessionTimeout);
 	xml.writeBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, loginPerOperation);
 
-	xml.writeStringAttribute(EquipmentPropNames::APP_SIGNAL_LIST_IDS, appSignalListIds.join(Separator::SEMICOLON));
+	xml.writeStringAttribute(EquipmentPropNames::APP_SIGNAL_LIST_IDS, appSignalListIDs.join(Separator::SEMICOLON));
 	xml.writeStringAttribute(EquipmentPropNames::APP_SIGNAL_LIST_MASKS, appSignalListMasks.join(Separator::SEMICOLON));
 	xml.writeStringAttribute(EquipmentPropNames::APP_SIGNAL_LIST_TAGS, appSignalListTags.join(Separator::SEMICOLON));
 
@@ -2177,7 +2177,7 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout);
 	result &= xml.readBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, &loginPerOperation);
 
-	result &= xml.readStringListAttribute(EquipmentPropNames::APP_SIGNAL_LIST_IDS, &appSignalListIds);
+	result &= xml.readStringListAttribute(EquipmentPropNames::APP_SIGNAL_LIST_IDS, &appSignalListIDs);
 	result &= xml.readStringListAttribute(EquipmentPropNames::APP_SIGNAL_LIST_MASKS, &appSignalListMasks);
 	result &= xml.readStringListAttribute(EquipmentPropNames::APP_SIGNAL_LIST_TAGS, &appSignalListTags);
 

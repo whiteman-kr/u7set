@@ -103,16 +103,14 @@ namespace TuningLib
 		QString tags() const;
 		void setTags(const QString& value);
 
-		const QStringList& tagsList() const;
-		QStringList& tagsList();
+		QStringList tagsList() const;
 
 		// Filters
 
 		QString filters() const;
 		void setFilters(const QString& value);
 
-		const QStringList& filtersList() const;
-		QStringList& filtersList();
+		QStringList filtersList() const;
 
 		// Schema tab properties
 
@@ -207,8 +205,8 @@ namespace TuningLib
 
 		bool m_hasDiscreteCounter = false;
 
-		QStringList m_tags;
-		QStringList m_filters;
+		QString m_tags;
+		QString m_filters;
 
 		QString m_startSchemaId;
 

@@ -45,6 +45,11 @@ TuningUiEditor::TuningUiEditor(TuningLib::TuningUiStorage& storage,
 		m_itemsTree->addTopLevelItem(item);
 	}
 
+	if (m_itemsTree->topLevelItemCount() != 0)
+	{
+		m_itemsTree->topLevelItem(0)->setSelected(true);
+	}
+
 	// Set column width
 
 	for (int i = 0; i < m_itemsTree->columnCount(); i++)

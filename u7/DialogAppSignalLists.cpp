@@ -222,6 +222,11 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent) :
 	// fill data
 	//
 	fillAppSignalLists();
+	
+	if (m_listsTree->topLevelItemCount() != 0) 
+	{
+		m_listsTree->topLevelItem(0)->setSelected(true);
+	}
 
 	updateButtonsEnableState();
 
@@ -246,13 +251,19 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent) :
 		restoreGeometry(ba);
 	}
 
+	ba = QSettings().value("DialogAppSignalLists/headerState").toByteArray();
+	if (ba.isEmpty() == false)
+	{
+		m_listsTree->header()->restoreState(ba);
+	}
+
 	ba = QSettings().value("DialogAppSignalLists/splitterState").toByteArray();
 	if (ba.isEmpty() == false)
 	{
 		m_splitter->restoreState(ba);
 	}
 
-	m_listPropertyEditor->setSplitterPosition(QSettings().value("DialogAppSignalLists/splitterPosition", 0).toInt());
+	m_listPropertyEditor->setSplitterPosition(QSettings().value("DialogAppSignalLists/splitterPosition", 200).toInt());
 
 	return;
 }
@@ -260,6 +271,7 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent) :
 DialogAppSignalLists::~DialogAppSignalLists()
 {
 	QSettings().setValue("DialogAppSignalLists/geometry", saveGeometry());
+	QSettings().setValue("DialogAppSignalLists/headerState", m_listsTree->header()->saveState());
 	QSettings().setValue("DialogAppSignalLists/splitterState", m_splitter->saveState());
 	QSettings().setValue("DialogAppSignalLists/splitterPosition", m_listPropertyEditor->splitterPosition());
 

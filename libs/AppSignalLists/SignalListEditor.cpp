@@ -17,12 +17,13 @@ namespace AppSignalLists
 	{
 		// Left part
 		//
+		QWidget* leftWidget = new QWidget();
+		QVBoxLayout* leftLayout = new QVBoxLayout(leftWidget);
+		leftLayout->setContentsMargins(0, 0, 0, 0);
 
-		QHBoxLayout* mainLayout = new QHBoxLayout();
-		QVBoxLayout* leftLayout = new QVBoxLayout();
-
-		// Signals Model
-		//
+		QWidget* rightWidget = new QWidget();
+		QHBoxLayout* rightLayout = new QHBoxLayout(rightWidget);
+		rightLayout->setContentsMargins(0, 0, 0, 0);
 
 		// Signals table
 		//
@@ -125,33 +126,32 @@ namespace AppSignalLists
 		}
 
 		leftLayout->addLayout(leftFilterLayout);
-		mainLayout->addLayout(leftLayout);
 
 		// Middle part
 		//
 
-		QVBoxLayout* midLayout = new QVBoxLayout();
+		QVBoxLayout* addRemoveLayout = new QVBoxLayout();
 
-		midLayout->addStretch();
+		addRemoveLayout->addStretch();
 
 		m_addValueButton = new QPushButton(tr("Add"));
 		connect(m_addValueButton, &QPushButton::clicked, this, &AppSignalListWidget::onAddClicked);
-		midLayout->addWidget(m_addValueButton);
+		addRemoveLayout->addWidget(m_addValueButton);
 		m_addValueButton->setEnabled(false);
 
 		m_removeValueButton = new QPushButton(tr("Remove"));
 		connect(m_removeValueButton, &QPushButton::clicked, this, &AppSignalListWidget::onRemoveClicked);
-		midLayout->addWidget(m_removeValueButton);
+		addRemoveLayout->addWidget(m_removeValueButton);
 		m_removeValueButton->setEnabled(false);
 
-		midLayout->addStretch();
+		addRemoveLayout->addStretch();
 
-		mainLayout->addLayout(midLayout);
+		rightLayout->addLayout(addRemoveLayout);
 
 		// Right part
 		//
 
-		QVBoxLayout* rightLayout = new QVBoxLayout();
+		QVBoxLayout* itemsLayout = new QVBoxLayout();
 
 		m_itemsTable = new QTableView();
 		m_itemsTable->verticalHeader()->hide();
@@ -177,7 +177,7 @@ namespace AppSignalLists
 				this,
 				&AppSignalListWidget::onItemsHeaderColumnContextMenuRequested);
 
-		rightLayout->addWidget(m_itemsTable);
+		itemsLayout->addWidget(m_itemsTable);
 
 		QHBoxLayout* rightGridLayout = new QHBoxLayout();
 
@@ -205,13 +205,25 @@ namespace AppSignalLists
 		rightGridLayout->addWidget(m_importValuesButton);
 		m_importValuesButton->setEnabled(false);
 
-		rightLayout->addLayout(rightGridLayout);
+		itemsLayout->addLayout(rightGridLayout);
+		
+		rightLayout->addLayout(itemsLayout);
 
-		mainLayout->addLayout(rightLayout);
-
+		// Setup splitter
 		//
+		m_splitter = new QSplitter(Qt::Horizontal);
+		m_splitter->addWidget(leftWidget);
+		m_splitter->addWidget(rightWidget);
+		m_splitter->setChildrenCollapsible(false);
 
-		setLayout(mainLayout);
+		// Set main layout
+		//
+		{
+			QHBoxLayout* mainLayout = new QHBoxLayout();
+			mainLayout->setContentsMargins(0, 0, 0, 0);
+			mainLayout->addWidget(m_splitter);
+			setLayout(mainLayout);
+		}
 
 		fillSignalsList();
 
@@ -245,16 +257,17 @@ namespace AppSignalLists
 				m_itemsTable->hideColumn(static_cast<int>(AppSignalListModel::Columns::Type));
 				m_itemsTable->hideColumn(static_cast<int>(AppSignalListModel::Columns::LowLimit));
 				m_itemsTable->hideColumn(static_cast<int>(AppSignalListModel::Columns::HighLimit));
-
-				for (int i = 0; i < m_itemsTable->horizontalHeader()->count(); i++)
-				{
-					m_itemsTable->resizeColumnToContents(i);
-				}
 			}
 			else
 			{
 				m_itemsTable->horizontalHeader()->restoreState(ba);
 			}
+		}
+
+		QByteArray ba = QSettings().value("AppSignalListWidget/splitterState").toByteArray();
+		if (ba.isEmpty() == false)
+		{
+			m_splitter->restoreState(ba);
 		}
 	}
 
@@ -265,6 +278,8 @@ namespace AppSignalLists
 
 		QSettings().setValue("AppSignalListWidget/itemsTreeHeaderCount", static_cast<int>(AppSignalListModel::Columns::Count));
 		QSettings().setValue("AppSignalListWidget/itemsTreeHeader", m_itemsTable->horizontalHeader()->saveState());
+
+		QSettings().setValue("AppSignalListWidget/splitterState", m_splitter->saveState());
 	}
 
 	bool AppSignalListWidget::readOnly() const
@@ -651,11 +666,35 @@ namespace AppSignalLists
 			return;
 		}
 
-		if (m_setValueButton->isEnabled() == true)
+		// Determine if user clicked on Value column of Tunable signal. If so, show Value dialog, otherwise remove the item
+		//
+		if (m_setValueButton->isEnabled() == true && index.column() == static_cast<int>(AppSignalListModel::Columns::Value))
 		{
-			onSetValueClicked();
+			// Determine if signal is tunable
+			//
+			Hash hash = m_itemsModel->itemHash(index.row());
+			if (m_signalManager.signalExists(hash) == false)
+			{
+				return;
+			}
+
+			const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
+
+			bool ok = false;
+			AppSignalParam asp = m_signalManager.signalParam(item.appSignalHash(), &ok);
+			if (ok == false)
+			{
+				Q_ASSERT(false);
+				return;
+			}
+			if (asp.enableTuning() == true)
+			{
+				onSetValueClicked();
+				return;
+			}
 		}
-		// onRemoveClicked();
+
+		onRemoveClicked();
 	}
 
 	void AppSignalListWidget::onItemsHeaderColumnContextMenuRequested(const QPoint& /*pos*/)
@@ -794,6 +833,12 @@ namespace AppSignalLists
 		}
 
 		if (m_appSignalList == nullptr)
+		{
+			return;
+		}
+
+		auto reply = QMessageBox::question(this, "Confirmation", QString("Are you sure you want to remove selected signals?"));
+		if (reply == QMessageBox::No)
 		{
 			return;
 		}

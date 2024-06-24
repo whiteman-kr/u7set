@@ -70,17 +70,20 @@ namespace TuningLib
 
 	TuningUiItem::TuningUiItem()
 	{
-		ADD_PROPERTY_GETTER(QString, TuningUiTags::prop_Uuid, true, TuningUiItem::uuidString);
+		ADD_PROPERTY_GETTER(QString, TuningUiTags::prop_Uuid, true, TuningUiItem::uuidString)->setExpert(true);
 
 		ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Caption, true, TuningUiItem::caption, TuningUiItem::setCaption);
 
-		//ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_ID, true, TuningUiItem::ID, TuningUiItem::setID);
+		auto propInterfaceType = ADD_PROPERTY_GETTER(InterfaceType, TuningUiTags::prop_InterfaceType, true, TuningUiItem::interfaceType);
+		propInterfaceType->setDescription(tr("Specifies UI item type"));
+		propInterfaceType->setCategory(tr("Ui"));
 
-		ADD_PROPERTY_GETTER(InterfaceType, TuningUiTags::prop_InterfaceType, true, TuningUiItem::interfaceType);
+		auto propFilters = ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Filters, true, TuningUiItem::filters, TuningUiItem::setFilters);
+		propFilters->setDescription(tr("Specifies application signal list IDs which are used to filter signals using intersection logic. IDs are separated by semicolon or line break"));
+		propFilters->setCategory(tr("Filtering"));
 
-		ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Filters, true, TuningUiItem::filters, TuningUiItem::setFilters);
-
-		ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Tags, true, TuningUiItem::tags, TuningUiItem::setTags);
+		auto propTags = ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Tags, true, TuningUiItem::tags, TuningUiItem::setTags);
+		propTags->setDescription(tr("Specifies UI item tags. Tags are used in special (SwitchFilters) tab type"));
 
 		auto propUseColors =
 			ADD_PROPERTY_GETTER_SETTER(bool, TuningUiTags::prop_UseColors, true, TuningUiItem::useColors, TuningUiItem::setUseColors);
@@ -138,14 +141,14 @@ namespace TuningLib
 
 		auto propTabType =
 			ADD_PROPERTY_GETTER_SETTER(TabType, TuningUiTags::prop_TabType, true, TuningUiItem::tabType, TuningUiItem::setTabType);
-		propTabType->setCategory("Appearance");
+		propTabType->setCategory("Ui");
 
 		auto propCounterType = ADD_PROPERTY_GETTER_SETTER(CounterType,
 														  TuningUiTags::prop_CounterType,
 														  true,
 														  TuningUiItem::counterType,
 														  TuningUiItem::setCounterType);
-		propCounterType->setCategory("Appearance");
+		propCounterType->setCategory("Counter");
 
 		auto propSchemaId = ADD_PROPERTY_GETTER_SETTER(QString,
 													   TuningUiTags::prop_StartSchemaId,
@@ -754,72 +757,35 @@ namespace TuningLib
 
 	QString TuningUiItem::tags() const
 	{
-		QString result;
-		for (const auto& s : m_tags)
-		{
-			result += s + ';';
-		}
-		result.remove(result.length() - 1, 1);
-
-		return result;
+		return m_tags;
 	}
 
 	void TuningUiItem::setTags(const QString& value)
 	{
-		if (value.isEmpty() == true)
-		{
-			m_tags.clear();
-		}
-		else
-		{
-			m_tags = value.split(';', Qt::SkipEmptyParts);
-		}
+		m_tags = value;
 	}
 
-	const QStringList& TuningUiItem::tagsList() const
+	QStringList TuningUiItem::tagsList() const
 	{
-		return m_tags;
-	}
-
-	QStringList& TuningUiItem::tagsList()
-	{
-		return m_tags;
+		static const auto re = QRegularExpression("[;\\s+]");
+		return m_tags.split(re, Qt::SkipEmptyParts);
 	}
 
 	QString TuningUiItem::filters() const
 	{
-		QString result;
-		for (const auto& s : m_filters)
-		{
-			result += s + ';';
-		}
-		result.remove(result.length() - 1, 1);
-
-		return result;
+		return m_filters;
 	}
 
 	void TuningUiItem::setFilters(const QString& value)
 	{
-		if (value.isEmpty() == true)
-		{
-			m_filters.clear();
-		}
-		else
-		{
-			m_filters = value.split(';', Qt::SkipEmptyParts);
-		}
+		m_filters = value;
 	}
 
-	const QStringList& TuningUiItem::filtersList() const
+	QStringList TuningUiItem::filtersList() const
 	{
-		return m_filters;
+		static const auto re = QRegularExpression("[;\\s+]");
+		return m_filters.split(re, Qt::SkipEmptyParts);;
 	}
-
-	QStringList& TuningUiItem::filtersList()
-	{
-		return m_filters;
-	}
-
 	
 	QString TuningUiItem::startSchemaId() const
 	{
@@ -1322,7 +1288,7 @@ namespace TuningLib
 					return;
 				}
 
-				const QStringList& filters = childUiItem->filtersList();
+				QStringList filters = childUiItem->filtersList();
 				for (const QString& filter: filters) 
 				{
 					if (appSignalLists.contains(filter) == false) 

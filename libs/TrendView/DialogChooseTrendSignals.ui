@@ -22,24 +22,7 @@
   <layout class="QGridLayout" name="gridLayout_3">
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout_2">
-     <item row="0" column="0">
-      <widget class="QLabel" name="serverLabel">
-       <property name="text">
-        <string>Archive Server</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="serverCombo"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="filterLabel">
-       <property name="text">
-        <string>Filter</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
+     <item row="2" column="1">
       <widget class="QLineEdit" name="filterEdit">
        <property name="placeholderText">
         <string>Start typing SignalID</string>
@@ -49,7 +32,24 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0" colspan="2">
+     <item row="0" column="1">
+      <widget class="QComboBox" name="serverCombo"/>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="filterLabel">
+       <property name="text">
+        <string>Filter</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>List</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0" colspan="2">
       <widget class="QTreeView" name="filteredSignals">
        <property name="rootIsDecorated">
         <bool>false</bool>
@@ -65,6 +65,36 @@
        </property>
        <property name="expandsOnDoubleClick">
         <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="listCombo"/>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="serverLabel">
+       <property name="text">
+        <string>Archive Server</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="tagsLabel">
+       <property name="text">
+        <string>Signals Tags</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="tagsEdit">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>Signal tags space separated</string>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -144,36 +174,6 @@
    </item>
    <item row="0" column="2">
     <layout class="QGridLayout" name="gridLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>List</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QComboBox" name="listCombo"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="tagsLabel">
-       <property name="text">
-        <string>Signals Tags</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="tagsEdit">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="placeholderText">
-        <string>Signal tags space separated</string>
-       </property>
-       <property name="clearButtonEnabled">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="0" colspan="2">
       <widget class="QTreeWidget" name="trendSignals">
        <property name="contextMenuPolicy">
@@ -225,8 +225,8 @@
  </widget>
  <tabstops>
   <tabstop>serverCombo</tabstop>
-  <tabstop>filterEdit</tabstop>
   <tabstop>listCombo</tabstop>
+  <tabstop>filterEdit</tabstop>
   <tabstop>tagsEdit</tabstop>
   <tabstop>filteredSignals</tabstop>
   <tabstop>addSignalButton</tabstop>
@@ -245,8 +245,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>603</x>
+     <y>455</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -261,8 +261,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>611</x>
+     <y>455</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>

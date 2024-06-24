@@ -182,6 +182,11 @@ namespace AppSignalLists
 		//
 		fillAppSignalLists();
 
+		if (m_listsTree->topLevelItemCount() != 0)
+		{
+			m_listsTree->topLevelItem(0)->setSelected(true);
+		}
+
 		updateListEditorEnableState();
 
 		// sort items
@@ -206,13 +211,19 @@ namespace AppSignalLists
 			restoreGeometry(ba);
 		}
 
+		ba = QSettings().value("DialogSignalListEditor/headerState").toByteArray();
+		if (ba.isEmpty() == false)
+		{
+			m_listsTree->header()->restoreState(ba);
+		}
+
 		ba = QSettings().value("DialogSignalListEditor/splitterState").toByteArray();
 		if (ba.isEmpty() == false)
 		{
 			m_splitter->restoreState(ba);
 		}
 
-		m_listPropertyEditor->setSplitterPosition(QSettings().value("DialogSignalListEditor/splitterPosition", 0).toInt());
+		m_listPropertyEditor->setSplitterPosition(QSettings().value("DialogSignalListEditor/splitterPosition", 200).toInt());
 
 		return;
 	}
@@ -220,6 +231,7 @@ namespace AppSignalLists
 	DialogSignalListEditor::~DialogSignalListEditor()
 	{
 		QSettings().setValue("DialogSignalListEditor/geometry", saveGeometry());
+		QSettings().setValue("DialogSignalListEditor/headerState", m_listsTree->header()->saveState());
 		QSettings().setValue("DialogSignalListEditor/splitterState", m_splitter->saveState());
 		QSettings().setValue("DialogSignalListEditor/splitterPosition", m_listPropertyEditor->splitterPosition());
 

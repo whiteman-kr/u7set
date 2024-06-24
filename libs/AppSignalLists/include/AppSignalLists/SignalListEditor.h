@@ -88,6 +88,8 @@ namespace AppSignalLists
 		QPushButton* m_addValueButton = nullptr;
 		QPushButton* m_removeValueButton = nullptr;
 
+		QSplitter* m_splitter = nullptr;
+
 		// Right side
 
 		std::unique_ptr<AppSignalListModel> m_itemsModel;

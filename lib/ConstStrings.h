@@ -184,7 +184,7 @@ namespace EquipmentPropNames
 	inline const QString START_SCHEMA_ID("StartSchemaID");
 	inline const QString SCHEMA_TAGS("SchemaTags");
 
-	inline const QString APP_SIGNAL_LIST_IDS("AppSignalListIds");
+	inline const QString APP_SIGNAL_LIST_IDS("AppSignalListIDs");
 	inline const QString APP_SIGNAL_LIST_MASKS("AppSignalListMasks");
 	inline const QString APP_SIGNAL_LIST_TAGS("AppSignalListTags");
 	

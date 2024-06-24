@@ -806,6 +806,13 @@ namespace SchemaClientLib
 		m_schemaCombo->blockSignals(false);
 		m_model.setSchemaAppSignals({});
 
+		// List
+		//
+		m_signalListCombo->blockSignals(true);
+		m_signalListCombo->setCurrentIndex(0);
+		m_signalListCombo->blockSignals(false);
+		m_model.setAppSignalList({});
+
 		// Tags
 		//
 		m_editTags->blockSignals(true);

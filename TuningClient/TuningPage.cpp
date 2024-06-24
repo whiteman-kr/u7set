@@ -1184,13 +1184,13 @@ void TuningPage::fillObjectsList()
 
 	//qDebug() << "FillObjectsList";
 
-	std::set<Hash> hashes;
-
 	if (m_pageUi == nullptr) 
 	{
 		Q_ASSERT(m_pageUi);
 		return;
 	}
+
+	std::set<Hash> hashes;
 
 	bool first = true;
 	for (const QString& id: m_pageUi->filtersList()) 

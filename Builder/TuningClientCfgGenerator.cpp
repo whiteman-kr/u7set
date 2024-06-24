@@ -80,7 +80,7 @@ namespace Builder
 
 		// Write Tuning Ui
 		//
-		result &= writeTuningUi(settings->appSignalListIds, settings->appSignalListMasks, settings->appSignalListTags);
+		result &= writeTuningUi(settings->appSignalListIDs, settings->appSignalListMasks, settings->appSignalListTags);
 
 		// Write Tuning Signal Lists
 		//
@@ -96,7 +96,6 @@ namespace Builder
 
 			// Create Schemas lists
 			//
-			QStringList appSignalListIds = settings->appSignalListIds;
 			if (settings->filterBySchema == true)
 			{
 				result &= createSchemasLists(tuningSignalProvider);
@@ -105,7 +104,7 @@ namespace Builder
 			// Write AppSignalLists
 			//
 			result &=
-				writeAppSignalLists(tuningSignalProvider, settings->appSignalListIds, settings->appSignalListMasks, settings->appSignalListTags);
+				writeAppSignalLists(tuningSignalProvider, settings->appSignalListIDs, settings->appSignalListMasks, settings->appSignalListTags);
 		}
 
 		result &= writeTuningSchemas();

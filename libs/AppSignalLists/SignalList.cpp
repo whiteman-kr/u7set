@@ -57,47 +57,63 @@ namespace AppSignalLists
 		QUuid uuid = QUuid::createUuid();
 		setUuid(uuid);
 
-		ADD_PROPERTY_GETTER(QString, AppSignalLists::prop_Uuid, true, AppSignalList::uuidString);
+		ADD_PROPERTY_GETTER(QString, AppSignalLists::prop_Uuid, true, AppSignalList::uuidString)->setExpert(true);
 
 		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Caption, true, AppSignalList::caption, AppSignalList::setCaption);
-		ADD_PROPERTY_GETTER_SETTER(SignalType,
-								   AppSignalLists::prop_SignalType,
-								   true,
-								   AppSignalList::signalType,
-								   AppSignalList::setSignalType);
-		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_ID, true, AppSignalList::id, AppSignalList::setId);
-		ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Tags, true, AppSignalList::userTags, AppSignalList::setUserTags)
-			->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
-		ADD_PROPERTY_GETTER_SETTER(QString,
-								   AppSignalLists::prop_CustomAppSignalMasks,
-								   true,
-								   AppSignalList::customAppSignalIDMask,
-								   AppSignalList::setCustomAppSignalIDMask)
-			->setCategory("Masks");
+		auto propSignalType = ADD_PROPERTY_GETTER_SETTER(SignalType,
+														 AppSignalLists::prop_SignalType,
+														 true,
+														 AppSignalList::signalType,
+														 AppSignalList::setSignalType);
+		propSignalType->setCategory(tr("Filtering"));
+		propSignalType->setDescription(tr("Filters application signals by type: analog or discrete"));
 
-		ADD_PROPERTY_GETTER_SETTER(QString,
-								   AppSignalLists::prop_AppSignalMasks,
-								   true,
-								   AppSignalList::appSignalIDMask,
-								   AppSignalList::setAppSignalIDMask)
-			->setCategory("Masks");
+		auto propID = ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_ID, true, AppSignalList::id, AppSignalList::setId);
+		propID->setDescription(tr("Specifes application signal list unique ID"));
 
-		ADD_PROPERTY_GETTER_SETTER(QString,
-								   AppSignalLists::prop_EquipmentIDMasks,
-								   true,
-								   AppSignalList::equipmentIDMask,
-								   AppSignalList::setEquipmentIDMask)
-			->setCategory("Masks");
+		auto propTags =
+			ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Tags, true, AppSignalList::userTags, AppSignalList::setUserTags);
+		propTags->setSpecificEditor(E::PropertySpecificEditor::Tags);
+		propTags->setDescription(
+			tr("Tags are used to determine which lists are processed by instances of Monitor or TuningClient, separated by space"));
 
-		auto tagsProperty = ADD_PROPERTY_GETTER_SETTER(QString,
-													   AppSignalLists::prop_AppSignalTags,
-													   true,
-													   AppSignalList::appSignalTags,
-													   AppSignalList::setAppSignalTags);
-		tagsProperty->setCategory("Masks");
-		tagsProperty->setSpecificEditor(E::PropertySpecificEditor::Tags);
+		auto propCustomAppSignalMasks = ADD_PROPERTY_GETTER_SETTER(QString,
+																   AppSignalLists::prop_CustomAppSignalMasks,
+																   true,
+																   AppSignalList::customAppSignalIDMask,
+																   AppSignalList::setCustomAppSignalIDMask);
+		propCustomAppSignalMasks->setCategory("Masks");
+		propCustomAppSignalMasks->setDescription(
+			tr("This property is used to filter application signal CustomAppSignalIDs by wildcards, separated by semicolon or line break"));
 
+		auto propAppSignalMasks = ADD_PROPERTY_GETTER_SETTER(QString,
+															 AppSignalLists::prop_AppSignalMasks,
+															 true,
+															 AppSignalList::appSignalIDMask,
+															 AppSignalList::setAppSignalIDMask);
+		propAppSignalMasks->setCategory("Masks");
+		propAppSignalMasks->setDescription(
+			tr("This property is used to filter application signal AppSignalIDs by wildcards, separated by semicolon or line break"));
+
+
+		auto propEquipmentIDMasks = ADD_PROPERTY_GETTER_SETTER(QString,
+															   AppSignalLists::prop_EquipmentIDMasks,
+															   true,
+															   AppSignalList::equipmentIDMask,
+															   AppSignalList::setEquipmentIDMask);
+		propEquipmentIDMasks->setCategory("Masks");
+		propEquipmentIDMasks->setDescription(
+			tr("This property is used to filter application signal EquipmentIDs by wildcards, separated by semicolon or line break"));
+
+		auto propAppSignalTags = ADD_PROPERTY_GETTER_SETTER(QString,
+															AppSignalLists::prop_AppSignalTags,
+															true,
+															AppSignalList::appSignalTags,
+															AppSignalList::setAppSignalTags);
+		propAppSignalTags->setCategory("Masks");
+		propAppSignalTags->setDescription(tr("This property is used to filter application signals by tags, separated by space"));
+		propAppSignalTags->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 		return;
 	}
@@ -166,12 +182,12 @@ namespace AppSignalLists
 			}
 		}
 
-		for (Hash hash: m_appListHashesCache) 
+		for (Hash hash : m_appListHashesCache)
 		{
 			appSignalList->add_applisthashescache(hash);
 		}
 
-		for (Hash hash: m_tuningListHashesCache) 
+		for (Hash hash : m_tuningListHashesCache)
 		{
 			appSignalList->add_tuninglisthashescache(hash);
 		}
@@ -218,14 +234,14 @@ namespace AppSignalLists
 
 		count = appSignalList.applisthashescache_size();
 		m_appListHashesCache.clear();
-		for (int i = 0; i < count; i++) 
+		for (int i = 0; i < count; i++)
 		{
 			m_appListHashesCache.insert(appSignalList.applisthashescache(i));
 		}
 
 		count = appSignalList.tuninglisthashescache_size();
 		m_tuningListHashesCache.clear();
-		for (int i = 0; i < count; i++) 
+		for (int i = 0; i < count; i++)
 		{
 			m_tuningListHashesCache.insert(appSignalList.tuninglisthashescache(i));
 		}
@@ -248,7 +264,7 @@ namespace AppSignalLists
 		return m_uuid;
 	}
 
-	QString AppSignalList::uuidString() const 
+	QString AppSignalList::uuidString() const
 	{
 		return m_uuid.toString();
 	}
@@ -277,7 +293,7 @@ namespace AppSignalLists
 	{
 		m_signalType = value;
 	}
-		
+
 	QString AppSignalList::systemTags() const
 	{
 		return m_systemTags.join(';');
@@ -426,10 +442,10 @@ namespace AppSignalLists
 		return static_cast<int>(m_items.size());
 	}
 
-	std::set<Hash> AppSignalList::itemsHashes() const 
+	std::set<Hash> AppSignalList::itemsHashes() const
 	{
 		std::set<Hash> result;
-		for (auto& [hash, item]: m_items) 
+		for (auto& [hash, item] : m_items)
 		{
 			result.insert(hash);
 		}
@@ -475,22 +491,22 @@ namespace AppSignalLists
 		m_items.erase(hash);
 	}
 
-	const std::set<Hash>& AppSignalList::appListHashesCache() const 
-	{
-		return m_appListHashesCache;
-	}
-	
-	std::set<Hash>& AppSignalList::mutableAppListHashesCache() 
+	const std::set<Hash>& AppSignalList::appListHashesCache() const
 	{
 		return m_appListHashesCache;
 	}
 
-	const std::set<Hash>& AppSignalList::tuningListHashesCache() const 
+	std::set<Hash>& AppSignalList::mutableAppListHashesCache()
+	{
+		return m_appListHashesCache;
+	}
+
+	const std::set<Hash>& AppSignalList::tuningListHashesCache() const
 	{
 		return m_tuningListHashesCache;
 	}
-	
-	std::set<Hash>& AppSignalList::mutableTuningListHashesCache() 
+
+	std::set<Hash>& AppSignalList::mutableTuningListHashesCache()
 	{
 		return m_tuningListHashesCache;
 	}
@@ -517,18 +533,18 @@ namespace AppSignalLists
 		{
 			equpmentMatch = processMaskList(asp.lmEquipmentId(), m_cachedEquipmentIDMasks);
 		}
-		if (equpmentMatch == false) 
+		if (equpmentMatch == false)
 		{
 			return false;
 		}
-		
+
 
 		bool appSignalIdMatch = true;
 		if (m_cachedAppSignalIDMasks.isEmpty() == false)
 		{
 			appSignalIdMatch = processMaskList(asp.appSignalId(), m_cachedAppSignalIDMasks);
 		}
-		if (appSignalIdMatch == false) 
+		if (appSignalIdMatch == false)
 		{
 			return false;
 		}
@@ -538,7 +554,7 @@ namespace AppSignalLists
 		{
 			customAppSignalIdMatch = processMaskList(asp.customSignalId(), m_cachedCustomAppSignalIDMasks);
 		}
-		if (customAppSignalIdMatch == false) 
+		if (customAppSignalIdMatch == false)
 		{
 			return false;
 		}
@@ -560,12 +576,12 @@ namespace AppSignalLists
 
 			tagsMatch = tagsFound;
 		}
-		if (tagsMatch == false) 
+		if (tagsMatch == false)
 		{
 			return false;
 		}
 
-		if (m_items.empty() == false) 
+		if (m_items.empty() == false)
 		{
 			return false;
 		}
@@ -573,7 +589,9 @@ namespace AppSignalLists
 		return true;
 	}
 
-	bool AppSignalList::listMatch(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags) 
+	bool AppSignalList::listMatch(const QStringList& appSignalListIds,
+								  const QStringList& appSignalListMasks,
+								  const QStringList& appSignalListTags)
 	{
 		if (appSignalListIds.contains(id()) == true)
 		{
@@ -604,7 +622,7 @@ namespace AppSignalLists
 		}
 
 		return false;
-	}	
+	}
 
 	bool AppSignalList::processMaskList(const QString& s, const QStringList& masks)
 	{
@@ -689,7 +707,7 @@ namespace AppSignalLists
 		m_lists = std::move(that.m_lists);
 	}
 
-	AppSignalListSet& AppSignalListSet::operator= (const AppSignalListSet& that)
+	AppSignalListSet& AppSignalListSet::operator=(const AppSignalListSet& that)
 	{
 		// Perform a deep copy of all lists
 		//
@@ -699,21 +717,21 @@ namespace AppSignalLists
 		{
 			std::shared_ptr<AppSignalList> list = std::make_shared<AppSignalList>();
 			*list = *l;
-			
+
 			add(list);
 		}
 
 		return *this;
 	}
 
-	AppSignalListSet& AppSignalListSet::operator= (AppSignalListSet&& that) noexcept
+	AppSignalListSet& AppSignalListSet::operator=(AppSignalListSet&& that) noexcept
 	{
 		m_lists = std::move(that.m_lists);
 		return *this;
 	}
 
 
-	void AppSignalListSet::clear() 
+	void AppSignalListSet::clear()
 	{
 		m_lists.clear();
 	}
@@ -723,7 +741,7 @@ namespace AppSignalLists
 		return static_cast<int>(m_lists.size());
 	}
 
-	bool AppSignalListSet::add(const QByteArray& ba) 
+	bool AppSignalListSet::add(const QByteArray& ba)
 	{
 		std::shared_ptr<AppSignalLists::AppSignalList> list = std::make_shared<AppSignalLists::AppSignalList>();
 
@@ -752,9 +770,9 @@ namespace AppSignalLists
 		return true;
 	}
 
-	bool AppSignalListSet::add(const AppSignalListSet& appSignalListSet) 
+	bool AppSignalListSet::add(const AppSignalListSet& appSignalListSet)
 	{
-		for (const auto& list : appSignalListSet.m_lists) 
+		for (const auto& list : appSignalListSet.m_lists)
 		{
 			add(list);
 		}
@@ -763,7 +781,7 @@ namespace AppSignalLists
 
 	std::shared_ptr<AppSignalList> AppSignalListSet::get(int index) const
 	{
-		if (index < 0 || index >= count()) 
+		if (index < 0 || index >= count())
 		{
 			Q_ASSERT(false);
 			return nullptr;
@@ -779,13 +797,13 @@ namespace AppSignalLists
 							   {
 								   return list->id() == id;
 							   });
-		if (it == m_lists.end()) 
+		if (it == m_lists.end())
 		{
 			return nullptr;
 		}
 		return *it;
 	}
-	
+
 	std::shared_ptr<AppSignalList> AppSignalListSet::get(const QUuid& uuid) const
 	{
 		auto it = std::find_if(m_lists.begin(),
@@ -794,14 +812,14 @@ namespace AppSignalLists
 							   {
 								   return list->uuid() == uuid;
 							   });
-		if (it == m_lists.end()) 
+		if (it == m_lists.end())
 		{
 			return nullptr;
 		}
 		return *it;
 	}
 
-	void AppSignalListSet::remove(const QUuid& uuid) 
+	void AppSignalListSet::remove(const QUuid& uuid)
 	{
 		std::erase_if(m_lists,
 					  [uuid](const auto& it)
@@ -810,7 +828,7 @@ namespace AppSignalLists
 					  });
 	}
 
-	void AppSignalListSet::remove(const QString& systemTag) 
+	void AppSignalListSet::remove(const QString& systemTag)
 	{
 		std::erase_if(m_lists,
 					  [systemTag](const auto& it)
@@ -819,24 +837,24 @@ namespace AppSignalLists
 					  });
 	}
 
-	std::vector<std::shared_ptr<AppSignalList>> AppSignalListSet::lists() const 
+	std::vector<std::shared_ptr<AppSignalList>> AppSignalListSet::lists() const
 	{
 		return m_lists;
 	}
 
-	bool AppSignalListSet::load(QString* /*errorMessage*/) 
+	bool AppSignalListSet::load(QString* /*errorMessage*/)
 	{
 		Q_ASSERT(false);
 		return false;
 	}
 
-	bool AppSignalListSet::save(QString* /*errorMessage*/) const 
+	bool AppSignalListSet::save(QString* /*errorMessage*/) const
 	{
 		Q_ASSERT(false);
 		return false;
 	}
 
-	void AppSignalListSet::fireUpdatePerformed() 
+	void AppSignalListSet::fireUpdatePerformed()
 	{
 		emit updatePerformed();
 	}
@@ -846,7 +864,7 @@ namespace AppSignalLists
 		std::set<QString> ids;
 		std::vector<std::pair<QString, QString>> result;
 
-		for (auto& list: m_lists)
+		for (auto& list : m_lists)
 		{
 			if (list == nullptr)
 			{

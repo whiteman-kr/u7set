@@ -1641,7 +1641,7 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 		schemaTags = schemaTagList.join(Separator::SEMICOLON);
 	}
 
-	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_IDS, &appSignalListIds, log);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_IDS, &appSignalListIDs, log);
 	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_MASKS, &appSignalListMasks, log);
 	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_TAGS, &appSignalListTags, log);
 
@@ -2370,7 +2370,7 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 		schemaTags = schemaTagList.join(Separator::SEMICOLON);
 	}
 
-	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_IDS, &appSignalListIds, log);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_IDS, &appSignalListIDs, log);
 	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_MASKS, &appSignalListMasks, log);
 	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_TAGS, &appSignalListTags, log);
 

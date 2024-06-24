@@ -443,7 +443,7 @@ public:
 	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
 	std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
 
-	QStringList appSignalListIds;
+	QStringList appSignalListIDs;
 	QStringList appSignalListMasks;
 	QStringList appSignalListTags;
 
@@ -555,7 +555,7 @@ public:
 	QString startSchemaID;
 	QString schemaTags;
 
-	QStringList appSignalListIds;
+	QStringList appSignalListIDs;
 	QStringList appSignalListMasks;
 	QStringList appSignalListTags;
 

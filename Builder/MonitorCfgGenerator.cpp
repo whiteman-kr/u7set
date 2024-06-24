@@ -63,7 +63,7 @@ namespace Builder
 			ILogFileStub logFileStub;
 			Builder::AppSignalListsProvider signalProvider(monitorSignals);
 
-			result &= writeAppSignalLists(signalProvider, settings->appSignalListIds, settings->appSignalListMasks, settings->appSignalListTags);
+			result &= writeAppSignalLists(signalProvider, settings->appSignalListIDs, settings->appSignalListMasks, settings->appSignalListTags);
 		}
 
 		if (settings->tuningEnabled == true)
