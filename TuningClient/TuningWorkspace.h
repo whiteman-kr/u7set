@@ -1,53 +1,47 @@
 #pragma once
 
-#include "TuningClientFilterStorage.h"
 #include "TuningConfigController.h"
 #include "TuningPage.h"
 #include "TreeFilterWidget.h"
 #include "SwitchFiltersPage.h"
 
-namespace ClientLib
-{
-	class TuningUserManager;
-}
-
-
 class FilterButton : public QPushButton
 {
 	Q_OBJECT
 public:
-	FilterButton(std::shared_ptr<TuningFilter> filter, bool check, QWidget* parent = nullptr);
+	FilterButton(const TuningLib::TuningUiItem& tuningUiItem, bool check, QWidget* parent = nullptr);
 
-	std::shared_ptr<TuningFilter> filter();
-
+	bool hasDiscreteCounter() const; 
+	QString filters() const;
 	int counter() const;
 	void update(int discreteCounter);
 
 private:
-	std::shared_ptr<TuningFilter> m_filter;
+	const TuningLib::TuningUiItem& m_tuningUiItem;
 	int m_discreteCounter = 0;
 
 private slots:
 	void slot_toggled(bool checked);
 
 signals:
-	void filterButtonClicked(std::shared_ptr<TuningFilter> filter);
+	void filterButtonClicked(const QUuid& uiItem);
 };
-
 
 class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningWorkspace(TuningConfigController& configController,
-							 ClientLib::TuningSignalManager& tuningSignalManager,
-							 TuningClientFilterStorage& tuningFilterStorage,
-							 ClientLib::TuningUserManager& userManager,
-							 ClientLib::TuningConnection& tuningConnection,
-							 std::shared_ptr<TuningFilter> treeFilter,
-							 std::shared_ptr<TuningFilter> workspaceFilter,
-							 bool hasFilterTree,
-							 QWidget* parent);
+	TuningWorkspace(TuningConfigController& configController,
+					ClientLib::TuningSignalManager& tuningSignalManager,
+					TuningLib::TuningUiStorage& tuningUi,
+					AppSignalLists::AppSignalListSet& appSignalLists,
+					ClientLib::TuningUserManager& userManager,
+					ClientLib::TuningConnection& tuningConnection,
+					const TuningLib::TuningUiItem& workspaceUi, // Ui item specifies this workspace
+					TuningCountersManager& tuningCounters,
+					const QUuid& treeListUuid,                  // List selected in list tree
+					bool hasFilterTree,
+					QWidget* parent);
 
 	virtual ~TuningWorkspace();
 
@@ -64,7 +58,11 @@ private:
 	void createButtons();
 	void createTabPages();
 
-	QWidget* createTuningPageOrWorkspace(std::shared_ptr<TuningFilter> childWorkspaceFilter);
+	QWidget* createTuningPageOrWorkspace(const TuningLib::TuningUiItem& childWorkspaceUi);
+	
+	QWidget* createChildWorkspace(const TuningLib::TuningUiItem& childWorkspaceUi);
+	QWidget* createTuningPage(const TuningLib::TuningUiItem& childWorkspaceUi);
+
 
 	// Tree items operation
 
@@ -79,12 +77,13 @@ private:
 
 	TuningConfigController& m_configController;
 	ClientLib::TuningSignalManager& m_tuningSignalManager;
-	TuningClientFilterStorage& m_tuningFilterStorage;
+	TuningLib::TuningUiStorage& m_tuningUi;
+	AppSignalLists::AppSignalListSet& m_appSignalLists;
 	ClientLib::TuningUserManager& m_userManager;
 	ClientLib::TuningConnection& m_tuningConnection;
-
-	std::shared_ptr<TuningFilter> m_workspaceFilter;
-
+	const TuningLib::TuningUiItem& m_workspaceUi;
+	TuningCountersManager& m_tuningCounters;
+	
 	// Interface parts
 
 	TreeFilterWidget* m_treeLayoutWidget = nullptr;
@@ -93,34 +92,38 @@ private:
 	QSplitter* m_hSplitter = nullptr;
 	QTabWidget* m_tab = nullptr;
 
-	// Filters containters
+	// Tree filters
+
+	QUuid m_treeListUuid;	// Currently pressed tree filter
+
+	
+	// Tabs and filters
+
+	std::vector<const TuningLib::TuningUiItem*> m_tabsUiItems;
+
+	// Buttons and filters
 
 	std::vector<FilterButton*> m_filterButtons;
-	std::vector<std::shared_ptr<TuningFilter>> m_tabsFilters;
-
-	//
-
-	std::shared_ptr<TuningFilter> m_treeFilter;				// Currently pressed tree filter
-	std::shared_ptr<TuningFilter> m_currentbuttonFilter;	// Currently pressed button filter
+	const TuningLib::TuningUiItem* m_currentButtonUi = nullptr;
 
 	// Tuning controls
 
 	TuningPage* m_singleTuningPage = nullptr;
-	std::map<QString, TuningPage*> m_tuningPagesMap;
-	std::map<QString, TuningWorkspace*> m_tuningWorkspacesMap;
+	std::map<QUuid, TuningPage*> m_tuningPagesMap;
+	std::map<QUuid, TuningWorkspace*> m_tuningWorkspacesMap;
 	std::vector<SwitchFiltersPage*> m_switchPresetPages;
 
-	std::map<QString, int> m_activeTabPagesMap;
+	std::map<QUuid, int> m_activeTabPagesMap;
 
 static int m_instanceCounter;
 
 private slots:
-	void slot_parentWorkspaceTreeFilterChanged(std::shared_ptr<TuningFilter> filter);
-	void slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter);
+	void slot_parentWorkspaceTreeFilterChanged(const QUuid& filterUuid);
+	void slot_filterButtonClicked(const QUuid& uiItemUuid);
 
 signals:
-	void treeFilterChanged(std::shared_ptr<TuningFilter> filter);
-	void buttonFilterSelectionChanged(std::shared_ptr<TuningFilter> filter);
+	void treeFilterChanged(const QUuid& filterUuid);
+	void buttonFilterSelectionChanged(const QUuid& uiItemUuid);
 
 
 };

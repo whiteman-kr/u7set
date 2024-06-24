@@ -184,6 +184,13 @@ namespace EquipmentPropNames
 	inline const QString START_SCHEMA_ID("StartSchemaID");
 	inline const QString SCHEMA_TAGS("SchemaTags");
 
+	inline const QString APP_SIGNAL_LIST_IDS("AppSignalListIDs");
+	inline const QString APP_SIGNAL_LIST_MASKS("AppSignalListMasks");
+	inline const QString APP_SIGNAL_LIST_TAGS("AppSignalListTags");
+	
+	inline const QString UI_CONFIGURATION("UiConfiguration");
+	
+
 	inline const QString FONTS("Fonts");
 
 	// DeviceAppSigal properties
@@ -465,7 +472,7 @@ namespace CfgFileId
 	inline const QString TUNING_SOURCES("TUNING_SOURCES");
 	inline const QString TUNING_SIGNALS("TUNING_SIGNALS");
 	inline const QString TUNING_SCHEMAS_DETAILS("TUNING_SCHEMAS_DETAILS");
-	inline const QString TUNING_FILTERS("TUNING_FILTERS");
+	inline const QString TUNING_UI("TUNING_UI");
 	inline const QString TUNING_GLOBALSCRIPT("TUNING_GLOBALSCRIPT");
 
 	inline const QString CLIENT_BEHAVIOR("CLIENT_BEHAVIOR");
@@ -480,6 +487,11 @@ namespace CfgFileId
 	inline const QString TESTSUITE_REPORTTEMPLATES("TESTSUITE_REPORTTEMPLATES");
 
 	inline const QString GATEWAY_DESCRIPTION("GATEWAY_DESCRIPTION");
+}
+
+namespace CfgFileTag
+{
+	inline const QString APPSIGNALLISTS("APPSIGNALLISTS");
 }
 
 namespace  SettingsProfile
@@ -567,6 +579,7 @@ namespace Directory
 	inline const QString SUBSYSTEMS("Subsystems");
 	inline const QString TESTS("Tests");
 	inline const QString VDUs("VDUs");
+	inline const QString APP_SIGNAL_LISTS("AppSignalLists");
 }
 
 namespace File

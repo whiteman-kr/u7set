@@ -87,6 +87,7 @@ public slots:
 	DialogMetrologyConnection* createMetrologyDialog();
 	void deleteMetrologyDialog();
 	void openMetrologyConnections();
+	void openAppSignalLists();
 	void addMetrologyConnection();
 	void metrologyDialogClosed();
 

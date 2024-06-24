@@ -77,6 +77,11 @@ namespace Sim
 		return m_impl.signalList();
 	}
 
+	std::vector<Hash> AppSignalManager::signalHashes() const
+	{
+		return m_impl.signalHashes();
+	}
+
 	bool AppSignalManager::signalExists(Hash hash) const
 	{
 		return m_impl.signalExists(hash);

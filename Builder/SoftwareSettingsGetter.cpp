@@ -1626,18 +1626,24 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 
 	// SchemaTags
 	//
-	result = DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
-	RETURN_IF_FALSE(result);
-
-	static const auto re = QRegularExpression("\\W+");
-	QStringList schemaTagList = schemaTags.split(re, Qt::SkipEmptyParts);
-
-	for (QString& tag : schemaTagList)
 	{
-		tag = tag.toLower();
+		result = DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
+		RETURN_IF_FALSE(result);
+
+		static const auto re = QRegularExpression("\\W+");
+		QStringList schemaTagList = schemaTags.split(re, Qt::SkipEmptyParts);
+
+		for (QString& tag : schemaTagList)
+		{
+			tag = tag.toLower();
+		}
+
+		schemaTags = schemaTagList.join(Separator::SEMICOLON);
 	}
 
-	schemaTags = schemaTagList.join(Separator::SEMICOLON);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_IDS, &appSignalListIDs, log);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_MASKS, &appSignalListMasks, log);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_TAGS, &appSignalListTags, log);
 
 	// --
 	//
@@ -2347,12 +2353,26 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 
 	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::START_SCHEMA_ID, &startSchemaID, log);
 
-	result &= DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
+	// SchemaTags
+	//
+	{
+		result = DeviceHelper::getStrProperty(software, EquipmentPropNames::SCHEMA_TAGS, &schemaTags, log);
+		RETURN_IF_FALSE(result);
 
-	static const auto re = QRegularExpression("\\W+");
-	QStringList schemaTagList = schemaTags.split(re, Qt::SkipEmptyParts);
+		static const auto re = QRegularExpression("\\W+");
+		QStringList schemaTagList = schemaTags.split(re, Qt::SkipEmptyParts);
 
-	schemaTags = schemaTagList.join(Separator::SEMICOLON);
+		for (QString& tag : schemaTagList)
+		{
+			tag = tag.toLower();
+		}
+
+		schemaTags = schemaTagList.join(Separator::SEMICOLON);
+	}
+
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_IDS, &appSignalListIDs, log);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_MASKS, &appSignalListMasks, log);
+	result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::APP_SIGNAL_LIST_TAGS, &appSignalListTags, log);
 
 	return result;
 }

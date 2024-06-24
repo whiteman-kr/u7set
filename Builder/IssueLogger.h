@@ -551,7 +551,6 @@ namespace Builder
 
 		void errEQP6106(QString schemaId, QString tuningClientEquipmentId);						// Schema %1 specified in Tuning Client %2 does not exist.
 		void errEQP6107(QString property, QString softwareEquipmentId);							// Error parsing property %1 specified in software %2.
-		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);	// Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
 		void errEQP6109(QString equipmentId, QString tuningClientEquipmentId);					// Tuning Source %1 specified in Tuning Client %2 does not exist.
 
 		void errEQP6110(QString appSignalID);																						//  Signal %1 has wrong physical low Limit
@@ -582,6 +581,16 @@ namespace Builder
 		void errEQP6211(QString monitorId, QString startSchemaId, QString profile);	// The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist.
 
 		void errEQP6212(QString userAccountsProperty, QString login, QString softwareEquipmentId);	// Property %1 in (%3) software contains login (%2) which is not present in MATS users storage.
+		
+		// Application signal lists
+		//
+		void errEQP6220(QString appSignalId, QString listId);								// AppSignal % 1 specified in the application signal list % 2 does not exist.
+		void errEQP6221(QString appSignalId, QString listId, QString softwareEquipmentId);	// AppSignal %1 specified in the application signal list %2 is not processed by the software %3.
+		void errEQP6222(QString listId, QString listCaption);								// Application signal list ID %1 (%2) is not unique.
+
+		// TuningClient UI
+		//
+		void errEQP6251(QString listId, QString uiCaption, QString tuningClientId);			// Application signals list % 1 specified in UI item % 2 in TuningClient % 3 does not exist or is not linked to the software.
 
 		// Script evaluations
 		//

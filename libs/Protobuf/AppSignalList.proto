@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+import "Common.proto";
+import "Envelope.proto";
+import "AppSignal.proto";
+
+package Proto;
+
+//
+// EXTEND AppSignalList
+//
+extend Envelope
+{
+    optional AppSignalList appSignalList = 220;								// AppSignalLists::AppSignalList
+}
+
+message AppSignalListSignal
+{
+    optional string appSignalId = 1;
+    optional TuningValue value = 3;
+}
+
+message AppSignalList
+{
+    optional Uuid uuid = 1;
+    optional string id = 2;
+    optional string caption = 3;
+    optional int32 signalType = 4;
+    optional string systemTags = 5;
+    optional string customAppSignalIDMasks = 6;
+    optional string equipmentIDMasks = 7;
+    optional string appSignalIDMasks = 8;
+    optional string appSignalTags = 9;
+    repeated AppSignalListSignal listSignals = 10;
+    optional string userTags = 11;
+    repeated uint64 appListHashesCache = 12;
+    repeated uint64 tuningListHashesCache = 13;
+}

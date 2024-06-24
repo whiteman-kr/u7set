@@ -25,6 +25,7 @@ qt_add_library(${TARGET} STATIC
 	Bus.h
 	ComparatorSet.cpp
 	ComparatorSet.h
+	ISignalManager.h
 	IAppSignalManager.h
 	ITuningSignalManager.h
 	PropertyNames.cpp

@@ -30,6 +30,14 @@ namespace ReportLib
 		return {};
 	}
 
+	std::vector<Hash> ReportAppSignalProvider::signalHashes() const
+	{
+		// Unlikely this function required for schema editing
+		//
+		Q_ASSERT(false);
+		return {};
+	}
+
 	bool ReportAppSignalProvider::signalExists(Hash hash) const
 	{
 		// Unlikely this function required for schema editing

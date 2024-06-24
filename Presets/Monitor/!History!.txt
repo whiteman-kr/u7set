@@ -5,3 +5,4 @@ Monitor
 	08.01.2024	Version: 5	Monitor_v5.u7devp		RPCT-3786, MATS User Security implementation, TuningUserAccounts property has special editor
 	27.03.2024	Version: 6	Monitor_v6.u7devp		RPCT-3856: Set Monitor preset default value property SchemaTags to 'AppLogic Monitor'
 	07.06.2024	Version: 7	Monitor_v7.u7devp		RPCT-3895: Update ADS connection to link to ADS Receive Controller (no actual preset update, changed only preset version)
+	20.06.2024	Version: 8	Monitor_v7.u7devp		RPCT-3875: Add AppSignalLists properties

@@ -22,16 +22,8 @@ qt_standard_project_setup()
 
 set (TC_SOURCES
 	../lib/ConstStrings.h
-	../lib/Tuning/TuningFilter.cpp
-	../lib/Tuning/TuningFilter.h
-	../lib/Tuning/TuningFilterEditor.cpp
-	../lib/Tuning/TuningFilterEditor.h
-	../lib/Tuning/TuningModel.cpp
-	../lib/Tuning/TuningModel.h
 	DialogChooseFilter.cpp
 	DialogChooseFilter.h
-	DialogFilterEditor.cpp
-	DialogFilterEditor.h
 	DialogProperties.cpp
 	DialogProperties.h
 	DialogSettings.cpp
@@ -54,14 +46,18 @@ set (TC_SOURCES
 	SwitchFiltersPage.h
 	SwitchFiltersPageOptions.cpp
 	SwitchFiltersPageOptions.h
-	TuningClientFilterStorage.cpp
-	TuningClientFilterStorage.h
+	TuningCounters.cpp
+	TuningCounters.h
 	TuningConfigController.cpp
 	TuningConfigController.h
+	TuningSignalListSet.cpp 
+	TuningSignalListSet.h
 	TreeFilterWidget.cpp
 	TreeFilterWidget.h
 	TuningPage.cpp
 	TuningPage.h
+	TuningModel.cpp
+	TuningModel.h
 	TuningSchemaManager.cpp
 	TuningSchemaManager.h
 	TuningSchemaView.cpp
@@ -113,7 +109,7 @@ target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generate
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
-target_link_libraries(${TARGET} PRIVATE CommonLib UtilsLib AppSignalLib OnlineLib VFrame30 ClientLib SchemaClientLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib UtilsLib AppSignalLib OnlineLib VFrame30 ClientLib SchemaClientLib TuningLib)
 
 # Link Visaul Leak Detector
 #

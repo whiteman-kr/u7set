@@ -1,9 +1,13 @@
 #include "TuningModel.h"
-
+#include "../AppSignalLib/AppSignalParam.h"
+#include "../AppSignalLib/ITuningSignalManager.h"
+#include "../AppSignalLib/TuningSignalState.h"
+#include "../AppSignalLib/TuningValue.h"
+#include <ClientLib/TuningSignalManager.h>
 
 Hash TuningModelHashSet::firstHash() const
 {
-	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	for (int c = 0; c < TuningLib::MaxValuesColumnCount; c++)
 	{
 		if (hash[c] != UNDEFINED_HASH)
 		{
@@ -18,7 +22,7 @@ int TuningModelHashSet::hashCount() const
 {
 	int result = 0;
 
-	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	for (int c = 0; c < TuningLib::MaxValuesColumnCount; c++)
 	{
 		if (hash[c] != UNDEFINED_HASH)
 		{
@@ -33,7 +37,7 @@ int TuningModelHashSet::hashCount() const
 // TuningItemSorter
 //
 
-TuningModelSorter::TuningModelSorter(TuningModelColumns column, const TuningModel* model, ClientLib::TuningSignalManager& tuningSignalManager):
+TuningModelSorter::TuningModelSorter(TuningModelColumns column, const TuningModel* model, ClientLib::TuningSignalManager& tuningSignalManager) :
 	m_column(column),
 	m_tuningSignalManager(tuningSignalManager),
 	m_model(model)
@@ -58,7 +62,7 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 	if (columnIndex >= static_cast<int>(TuningModelColumns::ValueFirst) && columnIndex <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		valueColumnIndex = columnIndex - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumnIndex < 0 || valueColumnIndex >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumnIndex < 0 || valueColumnIndex >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return false;
@@ -92,13 +96,13 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 
 	switch (sortColumn)
 	{
-		case TuningModelColumns::CustomAppSignalID:
+	case TuningModelColumns::CustomAppSignalID:
 		{
 			v1 = asp1.customSignalId();
 			v2 = asp2.customSignalId();
 		}
 		break;
-		case TuningModelColumns::EquipmentID:
+	case TuningModelColumns::EquipmentID:
 		{
 			v1 = asp1.lmEquipmentId();
 			v2 = asp2.lmEquipmentId();
@@ -267,8 +271,10 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 // TuningItemModel
 //
 
-TuningModel::TuningModel(ClientLib::TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent)
-	:QAbstractTableModel(parent),
+TuningModel::TuningModel(ClientLib::TuningSignalManager& tuningSignalManager,
+						 const std::vector<QString>& valueColumnsAppSignalIdSuffixes,
+						 QWidget* parent) :
+	QAbstractTableModel(parent),
 	m_tuningSignalManager(tuningSignalManager),
 	m_parentWidget(parent)
 {
@@ -281,7 +287,7 @@ TuningModel::TuningModel(ClientLib::TuningSignalManager& tuningSignalManager, co
 	m_columnsNamesMap[TuningModelColumns::Units] = tr("Units");
 	m_columnsNamesMap[TuningModelColumns::Type] = tr("Type");
 
-	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	for (int c = 0; c < TuningLib::MaxValuesColumnCount; c++)
 	{
 		int valueColumn = static_cast<int>(TuningModelColumns::ValueFirst) + c;
 
@@ -382,7 +388,6 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 		{
 			hashSets[h++].hash[0] = hash;
 		}
-
 	}
 	else
 	{
@@ -412,8 +417,9 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 				{
 					// Get separate parts of suffix set, separated by '+'. Example TZB5_GENERAL_1SF will give TZB5+_1SF
 					// If suffix ends with '$", it is searched in the end of the identifier, otherwise - in the whole identifier.
-					// '$' is useful if suffix is also is a legal part of identifier, 
-					// for example, #LPG_BLOCK_B contains "_B" suffix at the end, but also has a "_B" fragment in the middle. So use "_B$"
+					// '$' is useful if suffix is also is a legal part of identifier,
+					// for example, #LPG_BLOCK_B contains "_B" suffix at the end, but also has a "_B" fragment in the middle. So use
+					// "_B$"
 					//
 
 					QStringList suffixSet = suffix.split('+', Qt::SkipEmptyParts);
@@ -482,7 +488,7 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 			if (hashChannel == -1)
 			{
-				continue;	// No prefixes exist for this signal
+				continue; // No prefixes exist for this signal
 			}
 
 			if (hashChannel < 0 || hashChannel >= channelCount)
@@ -493,14 +499,14 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 			//
 
-			Hash generalHash = hashToGeneralHashMap.at(hash);	// it SHOULD BE calculated earlier
+			Hash generalHash = hashToGeneralHashMap.at(hash); // it SHOULD BE calculated earlier
 
 			// Find a set that contains other channels of this signal (key is general hash), or create a new one if not found
 
 			TuningModelHashSet& set = generalHashToHashSetMap[generalHash];
 			if (set.hash[hashChannel] != UNDEFINED_HASH)
 			{
-				ambiguousHashes++;	// There is already assigned hash here!
+				ambiguousHashes++; // There is already assigned hash here!
 				continue;
 			}
 			set.hash[hashChannel] = hash;
@@ -515,12 +521,13 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 		}
 
 
-		if (ambiguousHashes > 0) 
+		if (ambiguousHashes > 0)
 		{
-			QMessageBox::critical(
-				m_parentWidget,
-				qAppName(),
-				tr("Error: %1 ambiguous signal to columns allocations occured!\n\nPlease recheck columns suffixes configuration in the project.").arg(ambiguousHashes));
+			QMessageBox::critical(m_parentWidget,
+								  qAppName(),
+								  tr("Error: %1 ambiguous signal to columns allocations occured!\n\nPlease recheck columns suffixes "
+									 "configuration in the project.")
+									  .arg(ambiguousHashes));
 		}
 	}
 
@@ -546,7 +553,7 @@ Hash TuningModel::hashByIndex(int row, int valueColumn) const
 		return UNDEFINED_HASH;
 	}
 
-	if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+	if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 	{
 		assert(false);
 		return UNDEFINED_HASH;
@@ -613,7 +620,6 @@ TuningModelColumns TuningModel::columnType(int index) const
 std::vector<TuningModelColumns> TuningModel::columnTypes()
 {
 	return m_columnsTypes;
-
 }
 
 void TuningModel::setColumnTypes(std::vector<TuningModelColumns> columnsIndexes)
@@ -632,7 +638,6 @@ void TuningModel::setColumnTypes(std::vector<TuningModelColumns> columnsIndexes)
 	m_columnsTypes = columnsIndexes;
 
 	endInsertColumns();
-
 }
 
 QString TuningModel::columnText(int index) const
@@ -684,14 +689,12 @@ int TuningModel::rowCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
 	return static_cast<int>(m_hashSets.size());
-
 }
 
 int TuningModel::columnCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
 	return static_cast<int>(m_columnsTypes.size());
-
 }
 
 void TuningModel::sort(int column, Qt::SortOrder order)
@@ -754,20 +757,20 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		int columnType = static_cast<int>(m_columnsTypes[col]);
 
-		if (m_importantFont != nullptr && (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast)))
+		if (m_importantFont != nullptr && (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) &&
+										   columnType <= static_cast<int>(TuningModelColumns::ValueLast)))
 		{
-			return* m_importantFont;
+			return *m_importantFont;
 		}
 
 		if (m_font != nullptr)
 		{
-			return* m_font;
+			return *m_font;
 		}
 	}
 
 	if (role == Qt::TextAlignmentRole)
 	{
-
 		int col = index.column();
 		if (col < 0 || col >= m_columnsTypes.size())
 		{
@@ -787,7 +790,6 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::DisplayRole)
 	{
-
 		int col = index.column();
 		if (col < 0 || col >= m_columnsTypes.size())
 		{
@@ -804,8 +806,8 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		const TuningModelHashSet& hashSet = m_hashSets[row];
 
-		//QString str = QString("%1:%2").arg(row).arg(col);
-		//qDebug() << str;
+		// QString str = QString("%1:%2").arg(row).arg(col);
+		// qDebug() << str;
 
 		Hash aspHash = hashSet.firstHash();
 
@@ -881,7 +883,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 		if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 		{
 			int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-			if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+			if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 			{
 				assert(false);
 				return QVariant();
@@ -957,7 +959,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		QString result;
 
-		for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+		for (int c = 0; c < TuningLib::MaxValuesColumnCount; c++)
 		{
 			const Hash tssHash = hashes.hash[c];
 
@@ -975,8 +977,8 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					if (tss.limitsUnbalance(asp) == true)
 					{
 						result = tr("Base %1, read %2")
-								.arg(asp.tuningLowBound().toString(m_analogFormat, asp.precision()))
-								.arg(tss.lowBound().toString(m_analogFormat, asp.precision()));
+									 .arg(asp.tuningLowBound().toString(m_analogFormat, asp.precision()))
+									 .arg(tss.lowBound().toString(m_analogFormat, asp.precision()));
 						break;
 					}
 					else
@@ -996,8 +998,8 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					if (tss.limitsUnbalance(asp) == true)
 					{
 						result = tr("Base %1, read %2")
-								.arg(asp.tuningHighBound().toString(m_analogFormat, asp.precision()))
-								.arg(tss.highBound().toString(m_analogFormat, asp.precision()));
+									 .arg(asp.tuningHighBound().toString(m_analogFormat, asp.precision()))
+									 .arg(tss.highBound().toString(m_analogFormat, asp.precision()));
 						break;
 					}
 					else
@@ -1027,7 +1029,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					break;
 				}
 			}
-		}	// c
+		} // c
 
 		return result;
 	}
@@ -1075,8 +1077,15 @@ QVariant TuningModel::headerData(int section, Qt::Orientation orientation, int r
 // DialogInputTuningValue
 //
 
-DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, bool sameDefaultValue,
-	TuningValue lowLimit, TuningValue highLimit, E::AnalogFormat analogFormat, int decimalPlaces, QWidget* parent) :
+DialogInputTuningValue::DialogInputTuningValue(TuningValue value,
+											   TuningValue defaultValue,
+											   bool sameValue,
+											   bool sameDefaultValue,
+											   TuningValue lowLimit,
+											   TuningValue highLimit,
+											   E::AnalogFormat analogFormat,
+											   int decimalPlaces,
+											   QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	m_value(value),
 	m_defaultValue(defaultValue),
@@ -1085,7 +1094,6 @@ DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue de
 	m_decimalPlaces(decimalPlaces),
 	m_analogFormat(analogFormat)
 {
-
 	m_discreteCheck = new QCheckBox();
 	connect(m_discreteCheck, &QCheckBox::stateChanged, this, &DialogInputTuningValue::on_m_checkBox_stateChanged);
 
@@ -1149,8 +1157,8 @@ DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue de
 	else
 	{
 		QString str = tr("Enter the value (%1 - %2):")
-				.arg(m_lowLimit.toString(analogFormat, decimalPlaces))
-				.arg(m_highLimit.toString(analogFormat, decimalPlaces));
+						  .arg(m_lowLimit.toString(analogFormat, decimalPlaces))
+						  .arg(m_highLimit.toString(analogFormat, decimalPlaces));
 
 		setWindowTitle(str);
 
@@ -1170,9 +1178,7 @@ DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue de
 	}
 }
 
-DialogInputTuningValue::~DialogInputTuningValue()
-{
-}
+DialogInputTuningValue::~DialogInputTuningValue() {}
 
 void DialogInputTuningValue::accept()
 {
@@ -1224,7 +1230,6 @@ void DialogInputTuningValue::accept()
 		default:
 			assert(false);
 			return;
-
 		}
 
 		if (ok == false)
@@ -1240,7 +1245,6 @@ void DialogInputTuningValue::accept()
 		}
 
 		m_value = newValue;
-
 	}
 
 	QDialog::accept();

@@ -49,6 +49,7 @@ endif()
 set(PROTO_FILES 
     Afb.proto
     AppSignal.proto
+    AppSignalList.proto
     ArchSignal.proto
     BuildInfo.proto
     Bus.proto

@@ -31,10 +31,9 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 	//
 	getSchemasDetails();
 
-	// Get file TUNING_FILTERS
+	// Get file TUNING_UI
 	//
-	QByteArray filterData;
-	getFileBlockedById(CfgFileId::TUNING_FILTERS, &filterData, nullptr);
+	getFileBlockedById(CfgFileId::TUNING_UI, &m_tuningUiData, nullptr);
 
 	// Get file TUNING_SIGNALS
 	//
@@ -97,6 +96,16 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 		}
 	}
 
+	// Get appSignalLists
+	//
+	{
+		bool ok = getAppSignalLists(files);
+		if (ok == false)
+		{
+			m_logFile.writeError("Loading/Parsing Application Signal Lists error.");
+		}
+	}
+
 	// Update Configuration
 	{
 		QWriteLocker locker(&m_lock);
@@ -111,7 +120,6 @@ bool TuningConfigController::updateConfiguration(const ClientLib::ConfigurationI
 	if (uiFilesUpdated == true || apperanceUpdated == true || serversUpdated == true)
 	{
 		emit signalsArrived(signalData);
-		emit filtersArrived(filterData);
 		emit configurationArrived(readConfig);
 	}
 
@@ -138,6 +146,11 @@ ClientLib::ConfigurationInfo TuningConfigController::configInfo() const
 {
 	QReadLocker locker(&m_lock);
 	return m_configuration.configInfo;
+}
+
+const QByteArray& TuningConfigController::tuningUiData() const 
+{
+	return m_tuningUiData;
 }
 
 QString TuningConfigController::startSchemaId() const

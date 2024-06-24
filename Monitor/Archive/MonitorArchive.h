@@ -8,6 +8,10 @@ namespace ClientLib
 	class AppSignalManager;
 }
 
+namespace AppSignalLists
+{
+	class AppSignalListSet;
+}
 
 class MonitorArchive
 {
@@ -21,11 +25,13 @@ public:
 	static bool startNewWidget(ClientLib::AppSignalManager& signalManager,
 							   MonitorConfigController* configController,
 							   const std::vector<AppSignalParam>& appSignals,
+							   const AppSignalLists::AppSignalListSet& appSignalListSet,
 							   QWidget* parent);
 
 	static bool requestArchiveWithNewWidget(ClientLib::AppSignalManager& signalManager,
 											MonitorConfigController* configController,
 											const std::vector<AppSignalParam>& appSignals,
+											const AppSignalLists::AppSignalListSet& appSignalListSet,
 											QDateTime startTime,
 											QDateTime endTime,
 											E::TimeType timeType,

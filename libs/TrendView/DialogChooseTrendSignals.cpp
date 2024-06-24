@@ -4,7 +4,10 @@
 #include <QStringListModel>
 #include <QClipboard>
 #include <QMenu>
+
 #include <TrendView/DialogChooseTrendSignals.h>
+#include "../CommonLib/PropertyObject.h"
+#include "../AppSignalLists/include/AppSignalLists/SignalList.h"
 #include "ui_DialogChooseTrendSignals.h"
 
 namespace TrendLibInternal
@@ -183,8 +186,17 @@ namespace TrendLibInternal
 		}
 	}
 
-	void FilteredTrendSignalsModel::filterSignals(QString server, QString filter, QStringList tagList)
+	void FilteredTrendSignalsModel::filterSignals(QString server, std::optional<AppSignalLists::AppSignalList*> appSignalList, QString filter, QStringList tagList)
 	{
+		// Get hashes list filtered by signal list
+		//
+		std::set<Hash> appSignalListHashes;
+		if (appSignalList.has_value() == true)
+		{
+			Q_ASSERT(appSignalList.value());
+			appSignalListHashes = appSignalList.value()->appListHashesCache();
+		}
+
 		beginResetModel();
 
 		server = server.trimmed();
@@ -199,6 +211,14 @@ namespace TrendLibInternal
 			for (size_t i = 0, signalCount = m_signals.size(); i < signalCount; i++)
 			{
 				const auto& s = m_signals[i];
+
+				if (appSignalList.has_value() == true)
+				{
+					if (appSignalListHashes.contains(s.appSignalHash()) == false)
+					{
+						continue;
+					}
+				}
 
 				if (server.isEmpty() == false &&
 					s.archiveServerId() != server)
@@ -248,6 +268,14 @@ namespace TrendLibInternal
 				}
 
 				const auto& signal = m_signals[index];
+
+				if (appSignalList.has_value() == true)
+				{
+					if (appSignalListHashes.contains(signal.appSignalHash()) == false)
+					{
+						continue;
+					}
+				}
 
 				// if filterText.size() == 1 then we already filrtered it by getting data from m_startWithArrays
 				//
@@ -308,9 +336,11 @@ namespace TrendLib
 													   std::vector<TrendLib::TrendSignalParam> trendSignals,
 													   const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
 													   const std::vector<TrendLib::ArchiveServer>& archiveServers,
+													   const AppSignalLists::AppSignalListSet& appSignalLists,
 													   QWidget* parent) :
 		QDialog(parent),
-		s_allServers(tr("All Servers"))
+		s_allServers(tr("All Servers")),
+		m_appSignalListSet(appSignalLists)
 	{
 		init(signalHasTag, std::move(trendSignals), acceptedSignals, archiveServers);
 
@@ -374,6 +404,14 @@ namespace TrendLib
 
 		connect(ui->serverCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &DialogChooseTrendSignals::serverCurrentIndexChanged);
 
+		// AppSignalLists
+		//
+		connect(&m_appSignalListSet,
+				&AppSignalLists::AppSignalListSet::updatePerformed,
+				this,
+				&DialogChooseTrendSignals::fillAppSignalLists);
+		fillAppSignalLists();
+
 		// --
 		//
 		QStringList headerLabels;
@@ -395,6 +433,10 @@ namespace TrendLib
 		//
 		connect(ui->filteredSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &DialogChooseTrendSignals::slot_filteredSignalsSelectionChanged);
 		connect(ui->trendSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &DialogChooseTrendSignals::slot_trendSignalsSelectionChanged);
+		connect(ui->listCombo,
+				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+				this,
+				&DialogChooseTrendSignals::listComboIndexChanged);
 
 		// --
 		// --
@@ -452,11 +494,59 @@ namespace TrendLib
 		}
 	}
 
+	void DialogChooseTrendSignals::fillAppSignalLists()
+	{
+		// Refresh AppSignalLists combo
+		//
+		QString selectedList = ui->listCombo->currentData().toString();
+
+		ui->listCombo->blockSignals(true);
+
+		ui->listCombo->clear();
+		ui->listCombo->addItem(tr("Not selected"), QString());
+
+		// Remove previously set filter
+		//
+		if (selectedList.isEmpty() == false)
+		{
+			fillSignalList();
+		}
+
+		// Fill lists combo
+		//
+		const auto lists = m_appSignalListSet.lists();
+
+		for (const auto& list : lists)
+		{
+			ui->listCombo->addItem(tr("[%1] %2").arg(list->id()).arg(list->caption()), list->id());
+		}
+		if (lists.empty() == true)
+		{
+			ui->listCombo->setEnabled(false);
+		}
+
+		ui->listCombo->blockSignals(false);
+	}
+
 	void DialogChooseTrendSignals::fillSignalList()
 	{
 		// Get ArchiveServiceId
 		//
 		QString server = ui->serverCombo->currentData().toString();
+
+		// appSignalList
+		//
+		std::optional<AppSignalLists::AppSignalList*> appSignalList;
+
+		QString selectedList = ui->listCombo->currentData().toString();
+		if (selectedList.isEmpty() == false)
+		{
+			std::shared_ptr<AppSignalLists::AppSignalList> list = m_appSignalListSet.get(selectedList);
+			if (list != nullptr)
+			{
+				appSignalList = list.get();
+			}
+		}
 
 		// Filter text
 		//
@@ -472,7 +562,7 @@ namespace TrendLib
 		FilteredTrendSignalsModel* model = dynamic_cast<FilteredTrendSignalsModel*>(ui->filteredSignals->model());
 		Q_ASSERT(model);
 
-		model->filterSignals(server, filterText, tagList);
+		model->filterSignals(server, appSignalList, filterText, tagList);
 
 		return;
 	}
@@ -795,6 +885,11 @@ namespace TrendLib
 	void DialogChooseTrendSignals::slot_trendSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 	{
 		disableControls();
+	}
+
+	void DialogChooseTrendSignals::listComboIndexChanged(int /*index*/)
+	{
+		fillSignalList();
 	}
 
 	void DialogChooseTrendSignals::on_buttonBox_accepted()

@@ -21,14 +21,12 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Svg Serial
 qt_standard_project_setup()
 
 set (U7_SOURCES
+	./Legacy/TuningFilterEditor.cpp
+	./Legacy/TuningFilterEditor.h
 	../lib/Configurator.cpp
 	../lib/Configurator.h
 	../lib/ConstStrings.h
 	../lib/diff_match_patch.h
-	../lib/Tuning/TuningFilterEditor.cpp
-	../lib/Tuning/TuningFilterEditor.h
-	../lib/Tuning/TuningModel.cpp
-	../lib/Tuning/TuningModel.h
 	./Ui/FilesTreeView.cpp
 	./Ui/FilesTreeView.h
 	./Ui/PropertyTable.cpp
@@ -59,6 +57,8 @@ set (U7_SOURCES
 	DbChooseItemsDialog.h
 	DialogAfbLibraryCheck.cpp
 	DialogAfbLibraryCheck.h
+	DialogAppSignalLists.cpp
+	DialogAppSignalLists.h
 	DialogBusEditor.cpp
 	DialogBusEditor.h
 	DialogClientBehavior.cpp
@@ -284,6 +284,8 @@ set (U7_SOURCES
 	TestsTabPage.h
 	TuningConnectionStub.cpp
 	TuningConnectionStub.h
+	TuningUiEditor.cpp
+	TuningUiEditor.h
 	UndoSignalsDialog.cpp
 	UndoSignalsDialog.h
 	UploadTabPage.cpp
@@ -466,6 +468,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<ProtoSerialization.h>
 	<Hardware.pb.h>
 	<AppSignal.pb.h>
+	<AppSignalList.pb.h>
 	<Bus.pb.h>
 
 	"../AppSignalLib/AppSignal.h"
@@ -481,7 +484,7 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql
 	Qt6::SerialPort Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
 target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
-	TrendView Simulator qt6keychain Builder VFrame30 ReportLib SchemaClientLib UiLib)
+	TrendView Simulator qt6keychain Builder VFrame30 ReportLib AppSignalLists SchemaClientLib TuningLib UiLib)
 
 # Link Visaul Leak Detector
 #

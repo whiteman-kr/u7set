@@ -19,8 +19,6 @@ endif (MSVC)
 set(TARGET VFrame30)
 
 qt_add_library(${TARGET} STATIC
-	../../lib/Tuning/ITuningConnection.h
-
 	./include/VFrame30/FblItem.h
 	./include/VFrame30/FblItemLine.h
 	./include/VFrame30/FblItemRect.h

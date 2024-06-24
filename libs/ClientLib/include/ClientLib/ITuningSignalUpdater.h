@@ -13,9 +13,8 @@ public:
 	//
 	virtual void reset() = 0;
 
-	// Get list of tuning signal hashes.
+	// Get list of tuning signal hashes for LM.
 	//
-	virtual std::vector<Hash> signalHashes() const = 0;
 	virtual std::vector<Hash> signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const = 0;
 
 	// Invalidate all signal states by Tuning Service tuningServiceHash.

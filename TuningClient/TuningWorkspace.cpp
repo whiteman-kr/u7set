@@ -2,20 +2,16 @@
 #include "Main.h"
 #include "MainWindow.h"
 #include "Settings.h"
-
 #include <ClientLib/TuningConnection.h>
 
 //
 // FilterButton
 //
 
-FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, bool check, QWidget* parent)
-	:QPushButton(filter->caption(), parent)
+FilterButton::FilterButton(const TuningLib::TuningUiItem& tuningUiItem, bool check, QWidget* parent)
+	:QPushButton(tuningUiItem.caption(), parent),
+	m_tuningUiItem(tuningUiItem)
 {
-	Q_ASSERT(filter);
-
-	m_filter = filter;
-
 	setCheckable(true);
 
 	if (check == true)
@@ -30,9 +26,14 @@ FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, bool check, QWi
 	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
 }
 
-std::shared_ptr<TuningFilter> FilterButton::filter()
+bool FilterButton::hasDiscreteCounter() const 
 {
-	return m_filter;
+	return m_tuningUiItem.hasDiscreteCounter();
+}
+
+QString FilterButton::filters() const 
+{
+	return m_tuningUiItem.filters();
 }
 
 int FilterButton::counter() const
@@ -48,11 +49,11 @@ void FilterButton::update(int discreteCounter)
 
 	if (discreteCounter == 0)
 	{
-		newCaption = m_filter->caption();
+		newCaption = m_tuningUiItem.caption();
 	}
 	else
 	{
-		newCaption = QString(" %1 [%2] ").arg(m_filter->caption()).arg(discreteCounter);
+		newCaption = QString(" %1 [%2] ").arg(m_tuningUiItem.caption()).arg(discreteCounter);
 	}
 
 	m_discreteCounter = discreteCounter;
@@ -70,30 +71,30 @@ void FilterButton::update(int discreteCounter)
 	QColor backSelectedColor = Qt::darkGray;
 	QColor textSelectedColor = Qt::white;
 
-	if (m_filter->useColors() == true)
+	if (m_tuningUiItem.useColors() == true)
 	{
-		if (counter() != 0 && m_filter->backAlertedColor() != m_filter->textAlertedColor())
+		if (counter() != 0 && m_tuningUiItem.backAlertedColor() != m_tuningUiItem.textAlertedColor())
 		{
 			// Alerted state
 
-			backColor = m_filter->backAlertedColor();
-			textColor = m_filter->textAlertedColor();
+			backColor = m_tuningUiItem.backAlertedColor();
+			textColor = m_tuningUiItem.textAlertedColor();
 
 			backSelectedColor = backColor;
 			textSelectedColor = textColor;
 		}
 		else
 		{
-			if (m_filter->backColor() != m_filter->textColor())
+			if (m_tuningUiItem.backColor() != m_tuningUiItem.textColor())
 			{
-				backColor = m_filter->backColor();
-				textColor = m_filter->textColor();
+				backColor = m_tuningUiItem.backColor();
+				textColor = m_tuningUiItem.textColor();
 			}
 
-			if (m_filter->backSelectedColor() != m_filter->textSelectedColor())
+			if (m_tuningUiItem.backSelectedColor() != m_tuningUiItem.textSelectedColor())
 			{
-				backSelectedColor = m_filter->backSelectedColor();
-				textSelectedColor = m_filter->textSelectedColor();
+				backSelectedColor = m_tuningUiItem.backSelectedColor();
+				textSelectedColor = m_tuningUiItem.textSelectedColor();
 			}
 		}
 	}
@@ -124,9 +125,8 @@ void FilterButton::slot_toggled(bool checked)
 {
 	if (checked == true)
 	{
-		emit filterButtonClicked(m_filter);
+		emit filterButtonClicked(m_tuningUiItem.uuid());
 	}
-
 }
 
 //
@@ -136,28 +136,29 @@ void FilterButton::slot_toggled(bool checked)
 int TuningWorkspace::m_instanceCounter = 0;
 
 TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
-								 ClientLib::TuningSignalManager& tuningSignalManager,
-								 TuningClientFilterStorage& tuningFilterStorage,
-								 ClientLib::TuningUserManager& userManager,
-								 ClientLib::TuningConnection& tuningConnection,
-								 std::shared_ptr<TuningFilter> treeFilter,
-								 std::shared_ptr<TuningFilter> workspaceFilter,
-								 bool hasFilterTree,
-								 QWidget* parent) :
+					ClientLib::TuningSignalManager& tuningSignalManager,
+					TuningLib::TuningUiStorage& tuningUi,
+					AppSignalLists::AppSignalListSet& appSignalLists,
+					ClientLib::TuningUserManager& userManager,
+					ClientLib::TuningConnection& tuningConnection,
+					const TuningLib::TuningUiItem& workspaceUi, // Ui item specifies this workspace
+					TuningCountersManager& tuningCounters,
+					const QUuid& treeListUuid,                  // List selected in list tree
+					bool hasFilterTree,
+					QWidget* parent) :
 	m_configController(configController),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningFilterStorage(tuningFilterStorage),
+	m_tuningUi(tuningUi),
+	m_appSignalLists(appSignalLists),
 	m_userManager(userManager),
 	m_tuningConnection(tuningConnection),
-	m_treeFilter(treeFilter),
-	m_workspaceFilter(workspaceFilter),
+	m_workspaceUi(workspaceUi),
+	m_tuningCounters(tuningCounters),
+	m_treeListUuid(treeListUuid),
 	QWidget(parent)
 {
 	//qDebug() << "TuningWorkspace::TuningWorkspace m_instanceCounter = " << m_instanceCounter;
 	m_instanceCounter++;
-
-	//assert(m_treeFilter); // Can be nullptr
-	assert(m_workspaceFilter);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 	setLayout(mainLayout);
@@ -185,17 +186,15 @@ TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 	//
 	if (hasFilterTree == true)
 	{
-		m_treeLayoutWidget = new TreeFilterWidget(m_configController,
-												  m_tuningFilterStorage,
-												  m_userManager,
-												  m_tuningConnection,
-												  this);
-		m_treeLayoutWidget->fillFiltersTree(m_workspaceFilter);
+		m_treeLayoutWidget =
+			new TreeFilterWidget(m_configController, m_tuningUi, m_appSignalLists, m_userManager, m_tuningConnection, m_tuningCounters, this);
 
-		connect(m_treeLayoutWidget, &TreeFilterWidget::treeFilterSelectionChanged, [this](std::shared_ptr<TuningFilter> filter){
-			m_treeFilter = filter;
-			emit treeFilterChanged(filter);
-		});
+		connect(m_treeLayoutWidget,
+				&TreeFilterWidget::treeFilterSelectionChanged,
+				[this](const QUuid& filterUuid)
+				{
+					emit treeFilterChanged(filterUuid);
+				});
 
 		// Create splitter control
 		//
@@ -219,11 +218,11 @@ TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
 
 	// Color
 
-	if (workspaceFilter->useColors() == true)
+	if (workspaceUi.useColors() == true)
 	{
 		QPalette Pal(palette());
 
-		Pal.setColor(QPalette::Window, workspaceFilter->backColor());
+		Pal.setColor(QPalette::Window, workspaceUi.backColor());
 		setAutoFillBackground(true);
 		setPalette(Pal);
 		show();
@@ -297,7 +296,7 @@ void TuningWorkspace::updateFilters()
 {
 	if (m_treeLayoutWidget != nullptr)
 	{
-		m_treeLayoutWidget->fillFiltersTree(m_workspaceFilter);
+		m_treeLayoutWidget->fillFiltersTree();
 
 		// Show/hide filter tree
 		//
@@ -312,7 +311,7 @@ void TuningWorkspace::updateFilters()
 			return;
 		}
 
-		swp->createControls(m_workspaceFilter);
+		swp->createControls();
 	}
 }
 
@@ -328,50 +327,40 @@ void TuningWorkspace::onTimer()
 
 void TuningWorkspace::createButtons()
 {
-	if (m_workspaceFilter == nullptr)
-	{
-		assert(m_workspaceFilter);
-		return;
-	}
-
-	// Buttons
+	// Create buttons
 	//
 	m_filterButtons.clear();
+	m_currentButtonUi = nullptr;
 
-	bool firstButton = true;
-
-	for (int i = 0; i < m_workspaceFilter->childFiltersCount(); i++)
+	for (int i = 0; i < m_workspaceUi.childCount(); i++)
 	{
-		std::shared_ptr<TuningFilter> f = m_workspaceFilter->childFilter(i);
-		if (f == nullptr)
+		TuningLib::TuningUiItem* uiItem = m_workspaceUi.child(i).get();
+		if (uiItem == nullptr)
 		{
-			assert(f);
+			assert(uiItem);
 			continue;
 		}
 
-		if (f->isButton() == false)
+		if (uiItem->isButton() == true)
 		{
-			continue;
+			FilterButton* button = new FilterButton(*uiItem, m_filterButtons.empty() == true /*first button*/);
+			button->installEventFilter(this);
+			connect(button, &FilterButton::filterButtonClicked, this, &TuningWorkspace::slot_filterButtonClicked);
+
+			if (m_filterButtons.empty() == true /*first button*/)
+			{
+				m_currentButtonUi = uiItem;
+			}
+
+			m_filterButtons.push_back(button);
 		}
-
-		FilterButton* button = new FilterButton(f, firstButton);
-		m_filterButtons.push_back(button);
-
-		button->installEventFilter(this);
-
-		if (firstButton)
-		{
-			firstButton = false;
-		}
-
-		connect(button, &FilterButton::filterButtonClicked, this, &TuningWorkspace::slot_filterButtonClicked);
-
 	}
 
+	// Place buttons to layout
+	//
 	if (m_filterButtons.empty() == false)
 	{
 		QButtonGroup* filterButtonGroup = new QButtonGroup(this);
-
 		filterButtonGroup->setExclusive(true);
 
 		m_buttonsLayout = new QHBoxLayout();
@@ -383,72 +372,56 @@ void TuningWorkspace::createButtons()
 		}
 
 		m_buttonsLayout->addStretch();
-
-		m_currentbuttonFilter = m_filterButtons[0]->filter();
 	}
 }
 
 void TuningWorkspace::createTabPages()
 {
-	if (m_workspaceFilter == nullptr)
-	{
-		assert(m_workspaceFilter);
-		return;
-	}
-
 	// Fill tab pages
 	//
-
-	std::vector<std::pair<QWidget*, std::shared_ptr<TuningFilter>>> tuningPages;
-
-	m_tabsFilters.clear();
+	std::vector<std::pair<QWidget*, const TuningLib::TuningUiItem*>> tuningPages;
+	m_tabsUiItems.clear();
 
 	// Workspace level tabs
 
-	for (int i = 0; i < m_workspaceFilter->childFiltersCount(); i++)
+	for (int i = 0; i < m_workspaceUi.childCount(); i++)
 	{
-		std::shared_ptr<TuningFilter> f = m_workspaceFilter->childFilter(i);
-		if (f == nullptr)
+		const TuningLib::TuningUiItem* uiItem = m_workspaceUi.child(i).get();
+		if (uiItem == nullptr)
 		{
-			assert(f);
+			assert(uiItem);
 			continue;
 		}
 
-		if (f->isTab() == false)
+		if (uiItem->isTab() == true)
 		{
-			continue;
+			QWidget* tp = createTuningPageOrWorkspace(*uiItem);
+			tuningPages.push_back(std::make_pair(tp, uiItem));
+			m_tabsUiItems.push_back(uiItem);
 		}
-
-		QWidget* tp = createTuningPageOrWorkspace(f);
-
-		tuningPages.push_back(std::make_pair(tp, f));
-
-		m_tabsFilters.push_back(f);
 	}
 
 	// Buttons level tabs
 
-	if (m_currentbuttonFilter != nullptr)
+	if (m_currentButtonUi != nullptr)
 	{
-		for (int i = 0; i < m_currentbuttonFilter->childFiltersCount(); i++)
+		for (int i = 0; i < m_currentButtonUi->childCount(); i++)
 		{
-			std::shared_ptr<TuningFilter> f = m_currentbuttonFilter->childFilter(i);
-			if (f == nullptr)
+			TuningLib::TuningUiItem* uiItem = m_currentButtonUi->child(i).get();
+			if (uiItem == nullptr)
 			{
-				assert(f);
+				assert(uiItem);
 				continue;
 			}
 
-			if (f->isTab() == false)
+			if (uiItem->isTab() == false)
 			{
 				continue;
 			}
 
-			QWidget* tp = createTuningPageOrWorkspace(f);
-
-			tuningPages.push_back(std::make_pair(tp, f));
-
-			m_tabsFilters.push_back(f);
+			QWidget* tp = createTuningPageOrWorkspace(*uiItem);
+			tuningPages.push_back(std::make_pair(tp, uiItem));
+			m_tabsUiItems.push_back(uiItem);
 		}
 	}
 
@@ -479,29 +452,27 @@ void TuningWorkspace::createTabPages()
 			m_singleTuningPage->setVisible(false);
 		}
 
-		for (const auto& t : tuningPages)
+		for (const auto& [tabPage, uiItem] : tuningPages)
 		{
 			QWidget* w = new QWidget();
 
 			QHBoxLayout* l = new QHBoxLayout(w);
 
-			QWidget* tp = t.first;
+			l->addWidget(tabPage);
 
-			l->addWidget(tp);
-
-			m_tab->addTab(w, t.second->caption());
+			m_tab->addTab(w, uiItem->caption());
 		}
 
 		m_tab->setVisible(true);
 
 		// set the active tab
 
-		if (m_currentbuttonFilter != nullptr)
+		if (m_currentButtonUi != nullptr)
 		{
-			auto it = m_activeTabPagesMap.find(m_currentbuttonFilter->ID());
+			auto it = m_activeTabPagesMap.find(m_currentButtonUi->uuid());
 			if (it != m_activeTabPagesMap.end())
 			{
-				int index = m_activeTabPagesMap[m_currentbuttonFilter->ID()];
+				int index = m_activeTabPagesMap[m_currentButtonUi->uuid()];
 				m_tab->setCurrentIndex(index);
 			}
 		}
@@ -512,28 +483,22 @@ void TuningWorkspace::createTabPages()
 		//
 		if (m_singleTuningPage == nullptr)
 		{
-			std::shared_ptr<TuningFilter> singlePageFilter = nullptr;
+			const TuningLib::TuningUiItem* singlePageUi = nullptr;
 
-			if (m_currentbuttonFilter != nullptr)
+			if (m_currentButtonUi != nullptr)
 			{
 				// If a button is pressed - set button filter as page filter
 
-				singlePageFilter = m_currentbuttonFilter;
+				singlePageUi = m_currentButtonUi;
 			}
 			else
 			{
 				// Otherwise set workspace filter to page filter
 
-				singlePageFilter = std::make_shared<TuningFilter>();
-
-				singlePageFilter->setCaption(m_workspaceFilter->caption());
-
-				// Copy signals' hashes from parent filter to single page's filter
-
-				singlePageFilter->setSignalsHashes(m_workspaceFilter->signalsHashes());
+				singlePageUi = &m_workspaceUi;
 			}
 
-			QWidget* tp = createTuningPageOrWorkspace(singlePageFilter);
+			QWidget* tp = createTuningPageOrWorkspace(*singlePageUi);
 
 			m_rightLayout->addWidget(tp);
 
@@ -549,101 +514,122 @@ void TuningWorkspace::createTabPages()
 	}
 }
 
-QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilter> childWorkspaceFilter)
+QWidget* TuningWorkspace::createTuningPageOrWorkspace(const TuningLib::TuningUiItem& childWorkspaceUi)
 {
-	if (childWorkspaceFilter == nullptr)
+	bool hasTabsAndButtons = false;
+
+	for (int c = 0; c < childWorkspaceUi.childCount(); c++)
 	{
-		assert(childWorkspaceFilter);
-		return new QWidget();
-	}
-
-	QString childWorkspaceFilterId = childWorkspaceFilter->ID();
-
-	bool createChildWorkspace = false;
-
-	for (int c = 0; c < childWorkspaceFilter->childFiltersCount(); c++)
-	{
-		std::shared_ptr<TuningFilter> cf = childWorkspaceFilter->childFilter(c);
-		if (cf == nullptr)
+		const TuningLib::TuningUiItem* uiItem = childWorkspaceUi.child(c).get();
+		if (uiItem == nullptr)
 		{
-			assert(cf);
+			assert(uiItem);
 			continue;
 		}
 
-		if (cf->isTab() == true || cf->isButton() == true || cf->isTree() == true)
+		if (uiItem->isTab() == true || uiItem->isButton() == true)
 		{
-			createChildWorkspace = true;
+			hasTabsAndButtons = true;
 			break;
 		}
 	}
 
-	if (createChildWorkspace == true)
+	if (hasTabsAndButtons == true)
 	{
-		// We have to create nested workspace
+		return createChildWorkspace(childWorkspaceUi);
+	}
+	else
+	{
+		return createTuningPage(childWorkspaceUi);
+	}
+}
+
+QWidget* TuningWorkspace::createChildWorkspace(const TuningLib::TuningUiItem& childWorkspaceUi) 
+{
+	// We have to create nested workspace
+	//
+	auto it = m_tuningWorkspacesMap.find(childWorkspaceUi.uuid());
+	if (it == m_tuningWorkspacesMap.end())
+	{
+		TuningWorkspace* tw = new TuningWorkspace(m_configController,
+												  m_tuningSignalManager,
+												  m_tuningUi,
+												  m_appSignalLists,
+												  m_userManager,
+												  m_tuningConnection,
+												  childWorkspaceUi,
+												  m_tuningCounters,
+												  m_treeListUuid,
+												  false /*hasFilterTree*/,
+												  this /*parent*/);
+
+		m_tuningWorkspacesMap[childWorkspaceUi.uuid()] = tw;
+
+		connect(this, &TuningWorkspace::treeFilterChanged, tw, &TuningWorkspace::slot_parentWorkspaceTreeFilterChanged);
+
+		return tw;
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+QWidget* TuningWorkspace::createTuningPage(const TuningLib::TuningUiItem& childWorkspaceUi)
+{
+	if (childWorkspaceUi.isTab() && childWorkspaceUi.tabType() == TuningLib::TuningUiItem::TabType::FiltersSwitch)
+	{
+		// We have to create Presets Switch page
 		//
-		auto it = m_tuningWorkspacesMap.find(childWorkspaceFilterId);
-		if (it == m_tuningWorkspacesMap.end())
+		SwitchFiltersPage* swp = new SwitchFiltersPage(m_configController,
+													   m_tuningSignalManager,
+													   m_appSignalLists,
+													   m_userManager,
+													   m_tuningConnection,
+													   childWorkspaceUi,
+													   m_tuningCounters,
+													   this);
+		m_switchPresetPages.push_back(swp);
+		return swp;
+	}
+	else
+	{
+		// We have to create tuning page
+		//
+		auto it = m_tuningPagesMap.find(childWorkspaceUi.uuid());
+		if (it == m_tuningPagesMap.end())
 		{
-			TuningWorkspace* tw = new TuningWorkspace(m_configController,
-													  m_tuningSignalManager,
-													  m_tuningFilterStorage,
-													  m_userManager,
-													  m_tuningConnection,
-													  m_treeFilter,
-													  childWorkspaceFilter,
-													  false/*hasFilterTree*/,
-													  this/*parent*/);
+			TuningPage* tp = new TuningPage(m_configController,
+											m_tuningSignalManager,
+											m_tuningUi,
+											m_appSignalLists,
+											m_userManager,
+											m_tuningConnection,
+											m_treeListUuid,
+											childWorkspaceUi,
+											m_tuningCounters,
+											this);
 
-			m_tuningWorkspacesMap[childWorkspaceFilterId] = tw;
+			m_tuningPagesMap[childWorkspaceUi.uuid()] = tp;
 
-			connect(this, &TuningWorkspace::treeFilterChanged, tw, &TuningWorkspace::slot_parentWorkspaceTreeFilterChanged);
+			connect(this, &TuningWorkspace::treeFilterChanged, tp, &TuningPage::slot_treeFilterChanged);
 
-			return tw;
+			if (childWorkspaceUi.isButton() == true)
+			{
+				// Connect button filter event only if this tuning page is selected by button, not tab
+
+				connect(this, &TuningWorkspace::buttonFilterSelectionChanged, tp, &TuningPage::slot_pageFilterChanged);
+			}
+
+			return tp;
 		}
 		else
 		{
 			return it->second;
 		}
 	}
-	else
-	{
-		if (childWorkspaceFilter->isTab() && childWorkspaceFilter->tabType() == TuningFilter::TabType::FiltersSwitch )
-		{
-			// We have to create Presets Switch page
-			//
-			SwitchFiltersPage* swp = new SwitchFiltersPage(m_configController, m_tuningSignalManager, m_tuningFilterStorage, m_userManager, m_tuningConnection, childWorkspaceFilter, this);
-			m_switchPresetPages.push_back(swp);
-			return swp;
-		}
-		else
-		{
-			// We have to create tuning page
-			//
-			auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
-			if (it == m_tuningPagesMap.end())
-			{
-				TuningPage* tp = new TuningPage(m_configController, m_tuningSignalManager, m_tuningFilterStorage, m_userManager, m_tuningConnection, m_treeFilter, childWorkspaceFilter, this);
-
-				m_tuningPagesMap[childWorkspaceFilterId] = tp;
-
-				connect(this, &TuningWorkspace::treeFilterChanged, tp, &TuningPage::slot_treeFilterChanged);
-
-				if (childWorkspaceFilter->isButton() == true)
-				{
-					// Connect button filter event only if this tuning page is selected by button, not tab
-
-					connect(this, &TuningWorkspace::buttonFilterSelectionChanged, tp, &TuningPage::slot_pageFilterChanged);
-				}
-
-				return tp;
-			}
-			else
-			{
-				return it->second;
-			}
-		}
-	}
 }
+
 
 void TuningWorkspace::updateTabsButtonsCounters()
 {
@@ -651,46 +637,35 @@ void TuningWorkspace::updateTabsButtonsCounters()
 
 	if (m_tab != nullptr && m_tab->isVisible() == true)
 	{
-		int tabFiltersCount = static_cast<int>(m_tabsFilters.size());
+		int tabFiltersCount = static_cast<int>(m_tabsUiItems.size());
 
 		if (m_tab->count() != tabFiltersCount)
 		{
-			//qDebug() << m_tab->count();
-			//qDebug() << static_cast<int>(m_tabsFilters.size());
 			assert(m_tab->count() == tabFiltersCount);
+			return;
 		}
 
 		for (int ti = 0; ti < tabFiltersCount; ti++)
 		{
-			std::shared_ptr<TuningFilter> f = m_tabsFilters[ti];
+			const auto& tabUi = m_tabsUiItems[ti];
+			Q_ASSERT (tabUi);
+			Q_ASSERT (tabUi->isTab());
 
-			if (f == nullptr)
-			{
-				assert(f);
-				continue;
-			}
-
-			if (f->isTab() == false)
-			{
-				assert(false);
-				continue;
-			}
-
-			if (f->hasDiscreteCounter() == false)
+			if (tabUi->hasDiscreteCounter() == false)
 			{
 				continue;
 			}
 
-			int discreteCount = f->counters().discreteCounter;
+			int discreteCount = m_tuningCounters.counters(tabUi->filters()).discreteCounter;
 
 			QString newCaption;
 			if (discreteCount == 0)
 			{
-				newCaption = f->caption();
+				newCaption = tabUi->caption();
 			}
 			else
 			{
-				newCaption = QString(" %1 [%2] ").arg(f->caption()).arg(discreteCount);
+				newCaption = QString(" %1 [%2] ").arg(tabUi->caption()).arg(discreteCount);
 			}
 
 			if (m_tab->tabText(ti) != newCaption)
@@ -700,17 +675,17 @@ void TuningWorkspace::updateTabsButtonsCounters()
 
 			// Tab text color
 
-			if (f->useColors() == true)
+			if (tabUi->useColors() == true)
 			{
 				QColor tabTextColor;
 
 				if (discreteCount > 0)
 				{
-					tabTextColor = f->textAlertedColor();
+					tabTextColor = tabUi->textAlertedColor();
 				}
 				else
 				{
-					tabTextColor = f->textColor();
+					tabTextColor = tabUi->textColor();
 				}
 
 				if (m_tab->tabBar()->tabTextColor(ti) != tabTextColor)
@@ -731,21 +706,12 @@ void TuningWorkspace::updateTabsButtonsCounters()
 			return;
 		}
 
-		std::shared_ptr<TuningFilter> f = button->filter();
-
-		if (f == nullptr)
-		{
-			assert(f);
-			continue;
-		}
-
-		if (f->hasDiscreteCounter() == false)
+		if (button->hasDiscreteCounter() == false) 
 		{
 			continue;
 		}
 
-		int discreteCount = f->counters().discreteCounter;
-
+		int discreteCount = m_tuningCounters.counters(button->filters()).discreteCounter;
 		if (discreteCount != button->counter())
 		{
 			button->update(discreteCount);
@@ -817,44 +783,30 @@ bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 	return QWidget::eventFilter(object, event);
 }
 
-void TuningWorkspace::slot_parentWorkspaceTreeFilterChanged(std::shared_ptr<TuningFilter> filter)
+void TuningWorkspace::slot_parentWorkspaceTreeFilterChanged(const QUuid& filterUuid)
 {
 	// This slot is called only for nested workspaces!
 	//
-	m_treeFilter = filter;
-	emit treeFilterChanged(m_treeFilter);
+	emit treeFilterChanged(filterUuid);
 }
 
-void TuningWorkspace::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
+void TuningWorkspace::slot_filterButtonClicked(const QUuid& uiItemUuid)
 {
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	if (m_currentbuttonFilter == nullptr)
-	{
-		assert(m_currentbuttonFilter);
-		return;
-	}
-
 	// Remember the tab index for current button
 
 	if (m_tab != nullptr && m_tab->isVisible() == true)
 	{
 		int index = m_tab->currentIndex();
-
-		m_activeTabPagesMap[m_currentbuttonFilter->ID()] = index;
+		m_activeTabPagesMap[uiItemUuid] = index;
 	}
 
 	// Set the new filter
-
-	m_currentbuttonFilter = filter;
+	m_currentButtonUi = m_tuningUi.get(uiItemUuid);
+	Q_ASSERT(m_currentButtonUi);
 
 	// Update tab
 
 	createTabPages();
 
-	emit buttonFilterSelectionChanged(filter);
+	emit buttonFilterSelectionChanged(uiItemUuid);
 }

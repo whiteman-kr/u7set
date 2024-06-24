@@ -126,8 +126,9 @@ public:
 	MOCK_METHOD(AppSignalParam, signalParam, (Hash hash, bool* found), (const override));
 	MOCK_METHOD(AppSignalParam, signalParam, (const QString& appSignalId, bool* found), (const override));
 
-	MOCK_METHOD(bool, signalParam, (Hash hash, AppSignalParam* result), (const override));
-	MOCK_METHOD(bool, signalParam, (const QString& appSignalId, AppSignalParam* result), (const override));
+	MOCK_METHOD(int, signalsCount, (), (const override));
+	MOCK_METHOD(std::vector<Hash>, signalHashes, (), (const, override));
+	MOCK_METHOD(std::vector<AppSignalParam>, signalList, (), (const override));
 
 	MOCK_METHOD(TuningSignalState, state, (Hash hash, bool* found), (const override));
 	MOCK_METHOD(TuningSignalState, state, (const QString& appSignalId, bool* found), (const override));
@@ -146,7 +147,6 @@ class MockITuningSignalUpdater : public ITuningSignalUpdater
 public:
 	MOCK_METHOD(void, reset, (), (override));
 
-	MOCK_METHOD(std::vector<Hash>, signalHashes, (), (const, override));
 	MOCK_METHOD(std::vector<Hash>, signalHashes, (const std::vector<Hash> lmEquipmentIdHashes), (const, override));
 
 	MOCK_METHOD(void, invalidateSignalStates, (Hash tuningServiceHash), (override));

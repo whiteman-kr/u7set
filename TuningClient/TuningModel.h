@@ -1,9 +1,13 @@
-#ifndef TUNINGMODEL_H
-#define TUNINGMODEL_H
+#pragma once
+#include <TuningLib/TuningUiConstants.h>
+#include "../AppSignalLib/TuningValue.h"
 
-#include "TuningFilter.h"
+namespace ClientLib
+{
+	class TuningSignalManager;
+}
 
-
+class AppSignalParam;
 class TuningModel;
 
 enum class TuningModelColumns
@@ -16,7 +20,7 @@ enum class TuningModelColumns
 	Type,
 
 	ValueFirst = 100,
-	ValueLast = ValueFirst + MAX_VALUES_COLUMN_COUNT - 1,
+	ValueLast = ValueFirst + TuningLib::MaxValuesColumnCount - 1,
 
 	LowLimit,
 	HighLimit,
@@ -31,8 +35,7 @@ struct TuningModelHashSet
 
 	int hashCount() const;
 
-	Hash hash[MAX_VALUES_COLUMN_COUNT]{UNDEFINED_HASH};
-
+	Hash hash[TuningLib::MaxValuesColumnCount]{UNDEFINED_HASH};
 };
 
 class TuningModelSorter
@@ -40,10 +43,7 @@ class TuningModelSorter
 public:
 	TuningModelSorter(TuningModelColumns column, const TuningModel* model, ClientLib::TuningSignalManager& tuningSignalManager);
 
-	bool operator()(const TuningModelHashSet& set1, const TuningModelHashSet& set2) const
-	{
-		return sortFunction(set1, set2, m_column);
-	}
+	bool operator()(const TuningModelHashSet& set1, const TuningModelHashSet& set2) const { return sortFunction(set1, set2, m_column); }
 
 	bool sortFunction(const TuningModelHashSet& set1, const TuningModelHashSet& set2, TuningModelColumns column) const;
 
@@ -60,7 +60,9 @@ class TuningModel : public QAbstractTableModel
 	Q_OBJECT
 
 public:
-	TuningModel(ClientLib::TuningSignalManager& tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
+	TuningModel(ClientLib::TuningSignalManager& tuningSignalManager,
+				const std::vector<QString>& valueColumnsAppSignalIdSuffixes,
+				QWidget* parent);
 	~TuningModel();
 
 	TuningValue defaultValue(const AppSignalParam& asp) const;
@@ -76,7 +78,6 @@ public:
 	ClientLib::TuningSignalManager& tuningSignalManager();
 
 public:
-
 	// Columns processing
 	int valueColumnsCount() const;
 
@@ -108,7 +109,7 @@ public:
 	void setAnalogFormat(E::AnalogFormat format);
 
 protected:
-	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
 	virtual QBrush backColor(const QModelIndex& index) const;
@@ -142,12 +143,18 @@ class DialogInputTuningValue : public QDialog
 	Q_OBJECT
 
 public:
-	explicit DialogInputTuningValue(TuningValue value, TuningValue defaultValue, bool sameValue, bool sameDefaultValue,
-		TuningValue lowLimit, TuningValue highLimit, E::AnalogFormat analogFormat, int decimalPlaces, QWidget* parent);
+	explicit DialogInputTuningValue(TuningValue value,
+									TuningValue defaultValue,
+									bool sameValue,
+									bool sameDefaultValue,
+									TuningValue lowLimit,
+									TuningValue highLimit,
+									E::AnalogFormat analogFormat,
+									int decimalPlaces,
+									QWidget* parent);
 	~DialogInputTuningValue();
 
 private:
-
 	TuningValue m_value;
 	TuningValue m_defaultValue;
 	TuningValue m_lowLimit;
@@ -172,7 +179,3 @@ private slots:
 	void on_m_checkBox_stateChanged(int state);
 	void on_m_buttonDefault_clicked();
 };
-
-
-
-#endif // TUNINGMODEL

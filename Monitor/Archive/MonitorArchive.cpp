@@ -43,11 +43,12 @@ bool MonitorArchive::activateWindow(QString archiveName)
 bool MonitorArchive::startNewWidget(ClientLib::AppSignalManager& signalManager,
 									MonitorConfigController* configController,
 									const std::vector<AppSignalParam>& appSignals,
+									const AppSignalLists::AppSignalListSet& appSignalListSet,
 									QWidget* parent)
 {
 	Q_ASSERT(configController);
 
-	ArchiveWidget* window = new ArchiveWidget(signalManager, configController, parent);
+	ArchiveWidget* window = new ArchiveWidget(signalManager, configController, appSignalListSet, parent);
 	window->setSignals(appSignals);
 	window->show();
 
@@ -57,6 +58,7 @@ bool MonitorArchive::startNewWidget(ClientLib::AppSignalManager& signalManager,
 bool MonitorArchive::requestArchiveWithNewWidget(ClientLib::AppSignalManager& signalManager,
 												 MonitorConfigController* configController,
 												 const std::vector<AppSignalParam>& appSignals,
+												 const AppSignalLists::AppSignalListSet& appSignalListSet,
 												 QDateTime startTime,
 												 QDateTime endTime,
 												 E::TimeType timeType,
@@ -64,7 +66,7 @@ bool MonitorArchive::requestArchiveWithNewWidget(ClientLib::AppSignalManager& si
 {
 	Q_ASSERT(configController);
 
-	ArchiveWidget* window = new ArchiveWidget(signalManager, configController, parent);
+	ArchiveWidget* window = new ArchiveWidget(signalManager, configController, appSignalListSet, parent);
 
 	window->setSignals(appSignals);
 	window->setTime(startTime, endTime, timeType);

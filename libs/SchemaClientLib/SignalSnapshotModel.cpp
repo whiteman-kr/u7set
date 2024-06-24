@@ -1,6 +1,7 @@
 #include "SignalSnapshotModel.h"
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../lib/ISignalDataServer.h"
+#include <../libs/AppSignalLists/include/AppSignalLists/SignalList.h>
 
 //
 // SignalSnapshotSorter
@@ -210,10 +211,11 @@ namespace SchemaClientLib
 //
 namespace SchemaClientLib
 {
-	SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, ISignalDataServer* signalDataServer, QObject* parent) :
+	SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, ISignalDataServer* signalDataServer, AppSignalLists::AppSignalListSet* appSignalListSet, QObject* parent) :
 		QAbstractItemModel(parent),
 		m_appSignalManager(appSignalManager),
-		m_signalDataServer(signalDataServer)
+		m_signalDataServer(signalDataServer),
+		m_appSignalListSet(appSignalListSet)
 	{
 		// Fill column names
 		//
@@ -304,6 +306,16 @@ namespace SchemaClientLib
 		m_schemaAppSignals = schemaAppSignals;
 	}
 
+	void SignalSnapshotModel::setAppSignalList(const QString& listId) 
+	{
+		m_listId = listId;
+	}
+
+	QString SignalSnapshotModel::appSignalList() const 
+	{
+		return m_listId;
+	}
+
 	void SignalSnapshotModel::fillSignals()
 	{
 		if (rowCount() > 0)
@@ -330,6 +342,20 @@ namespace SchemaClientLib
 			std::sort(appDataServiceHashes.begin(), appDataServiceHashes.end());
 		}
 
+		// Get hashes list filtered by signal list
+		//
+		bool filterByAppSignalList = m_appSignalListSet != nullptr && m_listId.isEmpty() == false;
+
+		std::set<Hash> appSignalListHashes;
+		if (filterByAppSignalList == true)
+		{
+			std::shared_ptr<AppSignalLists::AppSignalList> list =  m_appSignalListSet->get(m_listId);
+			if (list != nullptr) 
+			{
+				appSignalListHashes = list->appListHashesCache();
+			}
+		}
+
 		// Fill signals
 		//
 		int count = static_cast<int>(m_allSignals.size());
@@ -337,6 +363,13 @@ namespace SchemaClientLib
 		for (int signalIndex = 0; signalIndex < count; signalIndex++)
 		{
 			const AppSignalParam& s = m_allSignals[signalIndex];
+
+			// Filter by signal list
+			//
+			if (filterByAppSignalList == true && appSignalListHashes.contains(s.hash()) == false)
+			{
+				continue;
+			}
 
 			// Filter by appDataServiceHashes
 			//

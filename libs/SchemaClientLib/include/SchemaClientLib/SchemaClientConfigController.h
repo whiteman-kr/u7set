@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../UtilsLib/ILogFile.h"
+#include <AppSignalLists/SignalList.h>
 #include <ClientLib/ConfigController.h>
 #include <VFrame30/SchemaDetails.h>
 
@@ -28,6 +29,11 @@ namespace SchemaClientLib
 		//
 		bool getSchemasDetails();
 
+		// Call this function to read AppSignalLists from the server.
+		// It must be called in the derived class.
+		//
+		bool getAppSignalLists(const std::vector<OnlineLib::BuildFileInfo>& files);
+
 		// Public properties
 		//
 	public:
@@ -47,11 +53,16 @@ namespace SchemaClientLib
 
 		std::vector<VFrame30::SchemaDetails::TrendIndicatorSchemaItems> trendSchemaItems() const;
 
+		AppSignalLists::AppSignalListSet appSignalListSet() const;
+
 		// Data section
 		//
 	private:
 		mutable QReadWriteLock m_schemaDetailsLock;
 		VFrame30::SchemaDetailsSet m_schemaDetailsSet;
+
+		mutable QReadWriteLock m_appSignalListSetLock;
+		AppSignalLists::AppSignalListSet m_appSignalListSet;
 	};
 
 } // namespace ClientLib

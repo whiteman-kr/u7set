@@ -36,6 +36,7 @@ message Envelope
 	optional SchemaDetailsSet schemaDetailsSet = 105; // VFrame30::SchemaDetailsSet
 
     optional Bus bus = 200;							// AppSignalLib::Bus
+	optional AppSignalList appSignalList = 220;
 */
 }
 

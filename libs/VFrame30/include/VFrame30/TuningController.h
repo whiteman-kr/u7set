@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../AppSignalLib/ITuningSignalManager.h"
-#include "../lib/Tuning/ITuningAuthorization.h"
-#include "../lib/Tuning/ITuningConnection.h"
+#include "../libs/ClientLib/include/ClientLib/ITuningAuthorization.h"
+#include "../libs/ClientLib/include/ClientLib/ITuningConnection.h"
 
 #include <QJSValueList>
 #include <QStringList>

@@ -537,7 +537,8 @@ public:
 		MatsUsers,
         Report,
 		ChooseFileDialog,
-		ChooseDirectoryDialog
+		ChooseDirectoryDialog,
+		TuningUi
 	};
 	Q_ENUM(PropertySpecificEditor)
 

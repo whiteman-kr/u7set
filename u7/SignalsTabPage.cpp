@@ -16,6 +16,7 @@
 #include "CheckinSignalsDialog.h"
 #include "DlgMetrologyConnection.h"
 #include "CreateSignalsDialog.h"
+#include "DialogAppSignalLists.h"
 
 const int DEFAULT_COLUMN_WIDTH = 50;
 
@@ -294,6 +295,10 @@ void SignalsTabPage::createActions(QToolBar *toolBar)
 
 	action = new QAction(QIcon(":/Images/Images/MetrologyConnection.svg"), tr("Metrology connections ..."), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::openMetrologyConnections);
+	toolBar->addAction(action);
+
+	action = new QAction(QIcon(":/Images/Images/AppSignalLists.svg"), tr("Application signal lists ..."), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::openAppSignalLists);
 	toolBar->addAction(action);
 
 	m_addMetrologyConnectionAction = new QAction(QIcon(":/Images/Images/MetrologyConnection.svg"), tr("New metrology connection ..."), this);
@@ -707,6 +712,16 @@ void SignalsTabPage::openMetrologyConnections()
 
 	m_metrologyDialog->show();
 	m_metrologyDialog->loadConnectionBase();
+}
+
+void SignalsTabPage::openAppSignalLists()
+{
+	if (dbController()->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	DialogAppSignalLists::showDialog(dbController(), this);
 }
 
 void SignalsTabPage::addMetrologyConnection()

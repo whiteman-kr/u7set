@@ -6,6 +6,7 @@
 #include "./DevTools/DevToolsViewVariables.h"
 #include "./DevTools/DevToolsSchemaStats.h"
 
+#include "MonitorAppSignalListSet.h"
 #include "MonitorCentralWidget.h"
 #include "MonitorConfigController.h"
 #include "MonitorSchemaManager.h"
@@ -81,6 +82,7 @@ private:
 	void createMenus();
 	void createToolBars();
 	void createStatusBar();
+	void loadSignalLists();
 
 public:
 	MonitorCentralWidget& monitorCentralWidget();
@@ -95,6 +97,8 @@ protected slots:
 	void exit();
 
 	void schemaTreeListToggled(bool checked);
+
+	void showAppSignalListEditor();
 
 	void showLog();
 	void showTuningLog();
@@ -142,6 +146,8 @@ public slots:
 	void slot_loggedIn();
 	void slot_loggedOut();
 
+	void slot_checkSignalLists();
+
 private slots:
 	void slot_tuningSignalsArrived(QByteArray data);
 
@@ -165,6 +171,9 @@ public:
 
 	ITuningAuthorization& tuningAuthorization();
 	const ITuningAuthorization& tuningAuthorization() const;
+
+	MonitorAppSignalListSet&  appSignalListSet();
+	const MonitorAppSignalListSet&  appSignalListSet() const;
 
 protected:
 	// Data
@@ -193,6 +202,8 @@ private:
 
 	UiLib::DialogAlert m_dialogAlert;
 
+	MonitorAppSignalListSet m_appSignalListSet;
+
 	// File menu
 	//
 	QAction* m_pExportAction = nullptr;
@@ -200,6 +211,7 @@ private:
 
 	// Tools menu
 	//
+	QAction* m_pAppSignalListsAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 
 	// ? menu

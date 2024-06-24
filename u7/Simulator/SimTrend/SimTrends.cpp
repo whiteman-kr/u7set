@@ -2,6 +2,7 @@
 #include "../SimIdeSimulator.h"
 #include <TrendView/DialogChooseTrendSignals.h>
 #include <TrendView/TrendSignalSet.h>
+#include "../../libs/AppSignalLists/include/AppSignalLists/SignalList.h"
 
 
 std::list<SimTrendsWidget*> SimTrends::s_trendsList;
@@ -271,11 +272,7 @@ void SimTrendsWidget::signalsButton()
 		const Sim::AppSignalManager* signalManager = nullptr;
 	} signalHasTag{&m_simulator->appSignalManager()};
 
-	TrendLib::DialogChooseTrendSignals dialog(&signalHasTag,
-											  trendSignals,
-											  acceptedTrendSignals,
-											  archiveServers,
-											  this);
+	TrendLib::DialogChooseTrendSignals dialog(&signalHasTag, trendSignals, acceptedTrendSignals, archiveServers, {}, this);
 	
 	int result = dialog.exec();
 	if (result == QDialog::Rejected)

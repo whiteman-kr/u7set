@@ -1,16 +1,9 @@
 #include "DialogChooseFilter.h"
+#include <AppSignalLists/SignalList.h>
 
-Q_DECLARE_METATYPE (TuningFilter*)
-
-DialogChooseFilter::DialogChooseFilter(QWidget* parent, TuningFilter* parentFilter, TuningFilter::InterfaceType interfaceType, TuningFilter::Source source)
+DialogChooseFilter::DialogChooseFilter(const AppSignalLists::AppSignalListSet& appSignalLists, const QStringList& userTags, QWidget* parent)
 	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
-	if (parentFilter == nullptr)
-	{
-		assert(parentFilter);
-		return;
-	}
-
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 
 	QLabel* l = new QLabel(tr("Choose a Filter:"));
@@ -23,31 +16,24 @@ DialogChooseFilter::DialogChooseFilter(QWidget* parent, TuningFilter* parentFilt
 	m_listBox->setSelectionMode(QAbstractItemView::SingleSelection);
 
 	connect(m_listBox, &QListWidget::doubleClicked, this, &DialogChooseFilter::accept);
-
 	mainLayout->addWidget(m_listBox);
 
-	for (int i = 0; i < parentFilter->childFiltersCount(); i++)
+	for (int i = 0; i < appSignalLists.count(); i++)
 	{
-		TuningFilter* cf = parentFilter->childFilter(i).get();
-		if (cf == nullptr)
+		auto list = appSignalLists.get(i);
+		if (list == nullptr) 
 		{
-			assert(cf);
-			return;
-		}
-
-		if (cf->interfaceType() != interfaceType)
-		{
-			continue;
-		}
-		if (cf->source() != source)
-		{
+			Q_ASSERT(list);
 			continue;
 		}
 
-		QListWidgetItem* newItem = new QListWidgetItem;
-		newItem->setData(Qt::UserRole, QVariant::fromValue<TuningFilter*>(cf));
-		newItem->setText(cf->caption());
-		m_listBox->addItem(newItem);
+		if (list->hasAnyUserTag(userTags) == true)
+		{
+			QListWidgetItem* newItem = new QListWidgetItem;
+			newItem->setData(Qt::UserRole, list->uuid());
+			newItem->setText(list->caption());
+			m_listBox->addItem(newItem);
+		}
 	}
 
 	// Buttons
@@ -69,7 +55,7 @@ DialogChooseFilter::DialogChooseFilter(QWidget* parent, TuningFilter* parentFilt
 	setLayout(mainLayout);
 }
 
-TuningFilter* DialogChooseFilter::chosenFilter() const
+QUuid DialogChooseFilter::chosenFilterUuid() const
 {
 	return m_chosenFilter;
 }
@@ -90,14 +76,7 @@ void DialogChooseFilter::accept()
 		return;
 	}
 
-	TuningFilter* cf = item->data(Qt::UserRole).value<TuningFilter*>();
-	if (cf == nullptr)
-	{
-		Q_ASSERT(cf);
-		return;
-	}
-
-	m_chosenFilter = cf;
+	m_chosenFilter = item->data(Qt::UserRole).toUuid();
 
 	QDialog::accept();
 	return;

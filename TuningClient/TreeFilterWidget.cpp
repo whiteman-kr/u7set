@@ -3,20 +3,28 @@
 #include "TuningSourcesHelper.h"
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningUserManager.h>
-
+#include <TuningLib/TuningUiItem.h>
+#include <AppSignalLists/SignalList.h>
+#include "TuningCounters.h"
 
 TreeFilterWidget::TreeFilterWidget(TuningConfigController& configController,
-								   TuningClientFilterStorage& tuningFilterStorage,
+								   TuningLib::TuningUiStorage& tuningUi,
+								   AppSignalLists::AppSignalListSet& appSignalLists,
 								   ClientLib::TuningUserManager& userManager,
 								   ClientLib::TuningConnection& tuningConnection,
-								   QWidget* parent):
+								   TuningCountersManager& tuningCounters,
+								   QWidget* parent) :
 	QWidget(parent),
 	m_configController(configController),
-	m_tuningFilterStorage(tuningFilterStorage),
+	m_tuningUi(tuningUi),
+	m_appSignalLists(appSignalLists),
 	m_userManager(userManager),
-	m_tuningConnection(tuningConnection)
+	m_tuningConnection(tuningConnection),
+	m_tuningCounters(tuningCounters)
 {
 	createFilterTree();
+	fillFiltersTree();
+
 }
 
 TreeFilterWidget::~TreeFilterWidget()
@@ -69,31 +77,24 @@ TreeFilterWidget::~TreeFilterWidget()
 	}
 }
 
-void TreeFilterWidget::fillFiltersTree(std::shared_ptr<TuningFilter> rootFilter)
+void TreeFilterWidget::fillFiltersTree()
 {
 	// Remember previously chosen filter
 	//
-	std::shared_ptr<TuningFilter> selectedFilter;
+	QUuid selectedFilterUuid;
+	
 	{
 		QList <QTreeWidgetItem*> selectedItems = m_filterTree->selectedItems();
 		if (selectedItems.size() == 1)
 		{
 			if (selectedItems[0] != nullptr)
 			{
-				selectedFilter = selectedItems[0]->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+				selectedFilterUuid = selectedItems[0]->data(0, Qt::UserRole).toUuid();
 			}
 		}
 	}
 
 	m_filterTree->clear();
-
-	// Fill the filter tree
-	//
-	if (rootFilter == nullptr)
-	{
-		assert(rootFilter);
-		return;
-	}
 
 	QString mask;
 	if (m_treeMaskCombo != nullptr)
@@ -113,94 +114,97 @@ void TreeFilterWidget::fillFiltersTree(std::shared_ptr<TuningFilter> rootFilter)
 		}
 	}
 
-	QStringList l;
-	l << tr(rootFilter->caption().toUtf8());
-
-	QTreeWidgetItem* rootItem = new QTreeWidgetItem(l);
-	rootItem->setData(0, Qt::UserRole, QVariant::fromValue(rootFilter));
-
-	addChildTreeObjects(rootFilter, rootItem, mask);
-
-	if (rootItem->childCount() == 0)
-	{
-		delete rootItem;
-		return;
-	}
-
-	// Fill filters control
+	// Schemas
 	//
-
-	m_filterTree->addTopLevelItem(rootItem);
-
-	// Restore selection
-
-	if (selectedFilter == nullptr)
+	QTreeWidgetItem* schemasItem = new QTreeWidgetItem({tr("Schemas")});
+	addTreeObjects(schemasItem, mask, {AppSignalLists::AppSignalList::tagSchema}, {});
+	if (schemasItem->childCount() == 0)
 	{
-		rootItem->setSelected(true);
+		delete schemasItem;
 	}
 	else
 	{
-		// Find a pointer to previously selected tree filter (remember we are working with shared_ptrs)
+		m_filterTree->addTopLevelItem(schemasItem);
+		schemasItem->setExpanded(true);
+	}
 
-		selectedFilter = rootFilter->findFilterById(selectedFilter->ID());
+	// Schemas
+	//
+	QTreeWidgetItem* equipmentItem = new QTreeWidgetItem({tr("Equipment")});
+	addTreeObjects(equipmentItem, mask, {AppSignalLists::AppSignalList::tagEquipment}, {});
+	if (equipmentItem->childCount() == 0)
+	{
+		delete equipmentItem;
+	}
+	else
+	{
+		m_filterTree->addTopLevelItem(equipmentItem);
+		equipmentItem->setExpanded(true);
+	}
 
-		if (selectedFilter == nullptr)
+	// Auto-created
+	//
+	QTreeWidgetItem* autoItem = new QTreeWidgetItem({tr("Auto-created")});
+	addTreeObjects(autoItem, mask, {AppSignalLists::AppSignalList::tagTcAuto}, {});
+	if (autoItem->childCount() == 0)
+	{
+		delete autoItem;
+	}
+	else
+	{
+		m_filterTree->addTopLevelItem(autoItem);
+		autoItem->setExpanded(true);
+	}
+
+	// All other lists
+	//
+	QTreeWidgetItem* globalItem = new QTreeWidgetItem({tr("Project Lists")});
+	addTreeObjects(globalItem,
+				   mask,
+				   {AppSignalLists::AppSignalList::tagIde},
+				   {AppSignalLists::AppSignalList::tagSchema,
+					AppSignalLists::AppSignalList::tagEquipment,
+					AppSignalLists::AppSignalList::tagTcAuto,
+					AppSignalLists::AppSignalList::tagUi});
+	m_filterTree->addTopLevelItem(globalItem);
+	globalItem->setExpanded(true);
+
+	// All other lists
+	//
+	QTreeWidgetItem* allItem = new QTreeWidgetItem({tr("Local Lists")});
+	addTreeObjects(allItem,
+				   mask,
+				   {},
+				   {AppSignalLists::AppSignalList::tagSchema,
+					AppSignalLists::AppSignalList::tagEquipment,
+					AppSignalLists::AppSignalList::tagTcAuto,
+					AppSignalLists::AppSignalList::tagUi,
+					AppSignalLists::AppSignalList::tagIde});
+	m_filterTree->addTopLevelItem(allItem);
+	allItem->setExpanded(true);
+
+	// Restore selection
+	//
+	if (selectedFilterUuid.isNull() == false)
+	{
+		// Find a tree item for restored selected filter and select it
+		for (int i = 0; i < m_filterTree->topLevelItemCount(); i++)
 		{
-			// No such filter - select root
-
-			rootItem->setSelected(true);
-		}
-		else
-		{
-			// Find a tree item for restored selected filter and select it
-
-			QTreeWidgetItem* treeFilterWidgetItem = findFilterWidget(selectedFilter->ID(), rootItem);
-
-			if (treeFilterWidgetItem == nullptr)
-			{
-				// No such filter - select root
-
-				rootItem->setSelected(true);
-			}
-			else
+			QTreeWidgetItem* treeFilterWidgetItem = findFilterWidget(selectedFilterUuid, m_filterTree->topLevelItem(i));
+			if (treeFilterWidgetItem != nullptr)
 			{
 				treeFilterWidgetItem->setSelected(true);
 
 				// Expand all parents
 
 				QTreeWidgetItem* parent = treeFilterWidgetItem->parent();
-				while (parent != nullptr && parent != rootItem)
+				while (parent != nullptr)
 				{
 					parent->setExpanded(true);
 					parent = parent->parent();
 				}
 			}
 		}
-	}
-
-	// Expand root item
-
-	rootItem->setExpanded(true);
-
-	// Expand "Equipment" item
-
-	for (int i = 0; i < rootItem->childCount(); i++)
-	{
-		QTreeWidgetItem* rootChildItem = rootItem->child(i);
-
-		std::shared_ptr<TuningFilter> filter = rootChildItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-		if (filter == nullptr)
-		{
-			assert(filter);
-			return;
-		}
-
-		if (filter->isEmpty() == true && filter->isSourceEquipment())
-		{
-			rootChildItem->setExpanded(true);
-			break;
-		}
-
 	}
 
 	m_filterTree->sortItems(0, Qt::AscendingOrder);
@@ -213,7 +217,15 @@ void TreeFilterWidget::fillFiltersTree(std::shared_ptr<TuningFilter> rootFilter)
 
 void TreeFilterWidget::updateFiltersTree()
 {
-	updateTreeItemStatus();
+	if (m_filterTree == nullptr || m_filterTree->isVisible() == false)
+	{
+		return;
+	}
+
+	for (int i = 0; i < m_filterTree->topLevelItemCount(); i++)
+	{
+		updateTreeItemStatus(m_filterTree->topLevelItem(i));
+	}
 }
 
 bool TreeFilterWidget::isEmpty() const
@@ -277,11 +289,10 @@ void TreeFilterWidget::createFilterTree()
 	QStringList counterColumnsNames;
 
 	{
-		int childCount = m_tuningFilterStorage.root()->childFiltersCount();
-		for (int i = 0; i < childCount; i++)
+		for (int i = 0; i < m_tuningUi.root()->childCount(); i++)
 		{
-			auto child = m_tuningFilterStorage.root()->childFilter(i);
-			if (child->isCounter() && child->counterType() == TuningFilter::CounterType::FilterTree)
+			auto child = m_tuningUi.root()->child(i);
+			if (child->isCounter() && child->counterType() == TuningLib::TuningUiItem::CounterType::FilterTree)
 			{
 				counterColumnsNames.push_back(child->caption());
 			}
@@ -416,21 +427,9 @@ void TreeFilterWidget::createFilterTree()
 	treeLayout->addLayout(searchLayout);
 }
 
-void TreeFilterWidget::addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask)
+void TreeFilterWidget::addTreeObjects(QTreeWidgetItem* parentItem, const QString& mask, const QStringList& includeSystemTags, const QStringList& excludeSystemTags)
 {
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	if (parent == nullptr)
-	{
-		assert(parent);
-		return;
-	}
-
-	QStringList specialCaptions;
+	/*QStringList specialCaptions;
 	specialCaptions.push_back("All Signals");
 	specialCaptions.push_back("Equipment");
 	specialCaptions.push_back("Schemas");
@@ -438,112 +437,101 @@ void TreeFilterWidget::addChildTreeObjects(const std::shared_ptr<TuningFilter> f
 	QStringList specialCaptionsTranslated;
 	specialCaptionsTranslated.push_back(tr("All Signals"));
 	specialCaptionsTranslated.push_back(tr("Equipment"));
-	specialCaptionsTranslated.push_back(tr("Schemas"));
+	specialCaptionsTranslated.push_back(tr("Schemas"));*/
 
-	for (int i = 0; i < filter->childFiltersCount(); i++)
+	for (int i = 0; i < m_appSignalLists.count(); i++)
 	{
-		std::shared_ptr<TuningFilter> f = filter->childFilter(i);
-		if (f == nullptr)
+		const AppSignalLists::AppSignalList* list = m_appSignalLists.get(i).get();
+		if (list == nullptr)
 		{
-			assert(f);
+			assert(list);
 			continue;
 		}
 
-		if (f->isTree() == false)
+		bool includeOk = true;
+
+		if (includeSystemTags.isEmpty() == false)
 		{
-			continue;
+			includeOk = false;
+			for (const QString& includeTag : includeSystemTags)
+			{
+				if (list->systemTagsList().contains(includeTag) == true)
+				{
+					includeOk = true;
+					break;
+				}
+			}
 		}
 
-		QString caption = f->caption();
-		if (specialCaptions.contains(caption) == true)
+		bool excludeOk = true;
+
+		for (const QString& excludeTag: excludeSystemTags)
 		{
-			caption = tr(caption.toUtf8());
+			if (list->systemTagsList().contains(excludeTag) == true)
+			{
+				excludeOk = false;
+				break;
+			}
+		}
+
+		if (includeOk == false || excludeOk == false) 
+		{
+			continue;
 		}
 
 		if (mask.isEmpty() == false)
 		{
-			// Check if filter has child filters EXCEPT counters
-			//
-			bool hasChildFilters = false;
-
-			int childFiltersCount = f->childFiltersCount();
-			for (int j = 0; j < childFiltersCount; j++)
-			{
-				TuningFilter* const cf = f->childFilter(j).get();
-				if (cf->isCounter() == false)
-				{
-					hasChildFilters = true;
-					break;
-				}
-			}
-
-			if (hasChildFilters == false &&
-				caption.contains(mask, Qt::CaseInsensitive) == false)
+			if  (list->caption().contains(mask, Qt::CaseInsensitive) == false)
 			{
 				continue;
 			}
 		}
 
+		QTreeWidgetItem* item = new QTreeWidgetItem({QString("%1 [%2]").arg(list->id()).arg(list->caption())});
+		item->setData(0, Qt::UserRole, list->uuid());
 
-		//if (f->isSourceSchema() == true || f->isSourceEquipment() == true)
-		//{
-		//caption += QString(" [+%1 DEBUG counters]").arg(f->childFiltersCount());
-		//}
 
-		static QString equipmentString = tr("Equipment");
-		static QString schemasString = tr("Schemas");
-		Q_UNUSED(equipmentString);
-		Q_UNUSED(schemasString);
-
-		QStringList l;
-		l << tr(caption.toUtf8().data());	// Try to translate filter name!
-
-		QTreeWidgetItem* item = new QTreeWidgetItem(l);
-		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
-
-		parent->addChild(item);
-
-		addChildTreeObjects(f, item, mask);
+		if (parentItem != nullptr)
+		{
+			parentItem->addChild(item);
+		}
+		else 
+		{
+			m_filterTree->addTopLevelItem(item);
+		}
 	}
 }
 
 void TreeFilterWidget::updateTreeItemStatus(QTreeWidgetItem* treeItem)
 {
-	if (m_filterTree == nullptr || m_filterTree->isVisible() == false)
+	if (treeItem == nullptr)
 	{
+		Q_ASSERT(treeItem);
 		return;
 	}
 
-	if (treeItem == nullptr)
+	QUuid listUuid = treeItem->data(0, Qt::UserRole).toUuid();
+	
+	if (listUuid.isNull() == false)
 	{
-		if (m_filterTree->topLevelItemCount() == 0)
+		AppSignalLists::AppSignalList* list = m_appSignalLists.get(listUuid).get();
+		if (list == nullptr)
 		{
+			assert(list);
 			return;
 		}
 
-		treeItem = m_filterTree->topLevelItem(0);
-	}
+		// Counters columns
 
-	std::shared_ptr<TuningFilter> filter = treeItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	if (filter->isEmpty() == false)
-	{
-		updateTreeItemCounters(treeItem, filter.get());
-
-		// Counters column
-
-		TuningCounters counters = filter->counters();
+		updateTreeItemCounters(treeItem, list);
 
 		// Status column
 
-		if (filter->isSourceEquipment() == true)
+		TuningCounters counters = m_tuningCounters.counters(list->id());
+
+		if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagEquipment))
 		{
-			updateTuningSourceTreeItem(treeItem, filter.get());
+			updateTuningSourceTreeItem(treeItem, list);
 		}
 		else
 		{
@@ -651,27 +639,21 @@ void TreeFilterWidget::updateTreeItemStatus(QTreeWidgetItem* treeItem)
 	}
 }
 
-void TreeFilterWidget::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter)
+void TreeFilterWidget::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* list)
 {
-	if (filter == nullptr)
+	if (list == nullptr)
 	{
-		assert(filter);
+		assert(list);
 		return;
 	}
 
-	std::vector<Hash> equipmentHashes = filter->equipmentHashes();
-
-	if (equipmentHashes.size() != 1)
-	{
-		Q_ASSERT(filter);
-		return;
-	}
-
-	Hash hash = equipmentHashes[0];
+	Hash hash = ::calcHash(list->id()); // Assume that list id is source EquipmentId
 
 	assert(m_columnStatusIndex != -1);
 
-	int errorCounter = filter->counters().errorCounter;
+	TuningCounters counters = m_tuningCounters.counters(list->id());
+
+	int errorCounter = counters.errorCounter;
 
 	QStringList statusStrings;
 
@@ -910,46 +892,59 @@ void TreeFilterWidget::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, Tun
 	}
 }
 
-void TreeFilterWidget::updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFilter* filter)
+void TreeFilterWidget::updateTreeItemCounters(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* list)
 {
-	if (filter == nullptr)
+	if (list == nullptr)
 	{
-		Q_ASSERT(filter);
+		Q_ASSERT(list);
 		return;
 	}
 
-	int childCount = filter->childFiltersCount();
-
 	int counterIndex = 0;
 
-	for (int i = 0; i < childCount; i++)
+	for (int i = 0; i < m_tuningUi.root()->childCount(); i++)
 	{
-		TuningFilter* childFilter = filter->childFilter(i).get();
-		if (childFilter == nullptr)
+		const TuningLib::TuningUiItem* counterItem = m_tuningUi.root()->child(i).get();
+		if (counterItem == nullptr) 
 		{
-			Q_ASSERT(childFilter);
+			Q_ASSERT(false);
 			return;
 		}
 
-		if (childFilter->isCounter() == false || childFilter->counterType() != TuningFilter::CounterType::FilterTree)
+		if (counterItem->isCounter() == false || counterItem->counterType() != TuningLib::TuningUiItem::CounterType::FilterTree)
 		{
 			continue;
+		}
+
+		AppSignalLists::AppSignalList* counterList = m_appSignalLists.get(counterItem->filters()).get();
+		if (counterList == nullptr)
+		{
+			Q_ASSERT(counterList);
+			return;
 		}
 
 		// Set column text and color
 
 		if (counterIndex >= static_cast<int>(m_columnDiscreteCountIndexes.size()))
 		{
-			Q_ASSERT(false);
-			return;
+			//Q_ASSERT(false);	// Possibly, workspace has not been recreated yet, just skip
+			continue;
 		}
 
 		int columnIndex = m_columnDiscreteCountIndexes[counterIndex];
 
-		TuningCounters tc = childFilter->counters();
+		// Counters for columns are calculated by following algorithm:
+		// We take counter Ui item and get its filtres (for example, two "BLOCKS_ANALOG;BLOCKS_DISCRETE" filters).
+		// Then we take a filter for the tree item (e. g. for schema or user list) and add it's Id to the request.
+		// We get "BLOCKS_ANALOG;BLOCKS_DISCRETE;USER_LIST_000" counters request.
+		// We filter signals using all these filters and get counters.
+		QStringList columnFilterIds = counterItem->filtersList();
+		columnFilterIds.push_back(counterList->id());
 
-		QColor backColor = tc.discreteCounter == 0 ? Qt::white : childFilter->backAlertedColor();
-		QColor textColor = tc.discreteCounter == 0 ? Qt::black : childFilter->textAlertedColor();
+		TuningCounters tc = m_tuningCounters.counters(columnFilterIds.join(';'));
+
+		QColor backColor = tc.discreteCounter == 0 ? Qt::white : counterItem->backAlertedColor();
+		QColor textColor = tc.discreteCounter == 0 ? Qt::black : counterItem->textAlertedColor();
 
 		//QString text = QString("%1 %2").arg(childFilter->caption()) .arg(tc.discreteCounter);
 		QString text = QString("%1").arg(tc.discreteCounter);
@@ -985,7 +980,7 @@ void TreeFilterWidget::activateControl(const QString& equipmentId, bool enable)
 	ClientLib::TuningSourcesHelper::activateTuningSource(m_tuningConnection, equipmentId, enable, this);
 }
 
-QTreeWidgetItem* TreeFilterWidget::findFilterWidget(const QString& id, QTreeWidgetItem* treeItem)
+QTreeWidgetItem* TreeFilterWidget::findFilterWidget(const QUuid& uuid, QTreeWidgetItem* treeItem)
 {
 	for (int i = 0; i < treeItem->childCount(); i++)
 	{
@@ -996,21 +991,14 @@ QTreeWidgetItem* TreeFilterWidget::findFilterWidget(const QString& id, QTreeWidg
 			return nullptr;
 		}
 
-		std::shared_ptr<TuningFilter> filter = childItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-		if (filter == nullptr)
-		{
-			assert(filter);
-			return nullptr;
-		}
-
-		if (filter->ID() == id)
+		if (uuid == childItem->data(0, Qt::UserRole).toUuid())
 		{
 			return childItem;
 		}
 
 		// Recursive search
 
-		QTreeWidgetItem* result = findFilterWidget(id, childItem);
+		QTreeWidgetItem* result = findFilterWidget(uuid, childItem);
 
 		if (result != nullptr)
 		{
@@ -1035,8 +1023,7 @@ void TreeFilterWidget::slot_treeSelectionChanged()
 		return;
 	}
 
-	std::shared_ptr<TuningFilter> selectedFilter = selected->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-	emit treeFilterSelectionChanged(selectedFilter);
+	emit treeFilterSelectionChanged(selected->data(0, Qt::UserRole).toUuid());
 }
 
 void TreeFilterWidget::slot_treeContextMenuRequested(const QPoint& pos)
@@ -1047,24 +1034,25 @@ void TreeFilterWidget::slot_treeContextMenuRequested(const QPoint& pos)
 		return;
 	}
 
-	std::shared_ptr<TuningFilter> filter = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	if (filter->isEmpty() == true)
+	QUuid uuid = item->data(0, Qt::UserRole).toUuid();
+	if (uuid.isNull()) 
 	{
 		return;
 	}
 
-	if (filter->isSourceEquipment() == false)
+	AppSignalLists::AppSignalList* list = m_appSignalLists.get(uuid).get();
+	if (list == nullptr)
+	{
+		assert(list);
+		return;
+	}
+
+	if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagEquipment) == false)
 	{
 		return;
 	}
 
-	Hash sourceHash = ::calcHash(filter->caption());
+	Hash sourceHash = ::calcHash(list->caption());
 
 	int sourceStatesCount = m_tuningConnection.tuningSourceStatesCount(sourceHash);
 	int activeStatesCount = m_tuningConnection.activatedTuningSourceStatesCount(sourceHash);
@@ -1077,9 +1065,9 @@ void TreeFilterWidget::slot_treeContextMenuRequested(const QPoint& pos)
 
 	QAction* actionEnable = new QAction(tr("Activate Control"), &menu);
 
-	auto fEnableControl = [this, filter]() -> void
+	auto fEnableControl = [this, list]() -> void
 	{
-		activateControl(filter->caption(), true);
+		activateControl(list->caption(), true);
 	};
 	actionEnable->setEnabled(activateEnabled);
 	connect(actionEnable, &QAction::triggered, this, fEnableControl);
@@ -1090,9 +1078,9 @@ void TreeFilterWidget::slot_treeContextMenuRequested(const QPoint& pos)
 
 	QAction* actionDisable = new QAction(tr("Deactivate Control"), &menu);
 
-	auto fDisableControl = [this, filter]() -> void
+	auto fDisableControl = [this, list]() -> void
 	{
-		activateControl(filter->caption(), false);
+		activateControl(list->caption(), false);
 	};
 	actionDisable->setEnabled(deactivateEnabled);
 	connect(actionDisable, &QAction::triggered, this, fDisableControl);
@@ -1114,24 +1102,25 @@ void TreeFilterWidget::slot_treeItemDoubleClicked(QTreeWidgetItem* item, int /*c
 		return;
 	}
 
-	std::shared_ptr<TuningFilter> filter = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
-	if (filter->isEmpty() == true)
+	QUuid uuid = item->data(0, Qt::UserRole).toUuid();
+	if (uuid.isNull()) 
 	{
 		return;
 	}
 
-	if (filter->isSourceEquipment() == false)
+	AppSignalLists::AppSignalList* list = m_appSignalLists.get(uuid).get();
+	if (list == nullptr)
+	{
+		assert(list);
+		return;
+	}
+
+	if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagEquipment) == false)
 	{
 		return;
 	}
 
-	Hash sourceHash = ::calcHash(filter->caption());
+	Hash sourceHash = ::calcHash(list->caption());
 
 	int sourceStatesCount = m_tuningConnection.tuningSourceStatesCount(sourceHash);
 	int activeStatesCount = m_tuningConnection.activatedTuningSourceStatesCount(sourceHash);
@@ -1143,7 +1132,7 @@ void TreeFilterWidget::slot_treeItemDoubleClicked(QTreeWidgetItem* item, int /*c
 		return;
 	}
 
-	activateControl(filter->caption(), activateEnabled == true);
+	activateControl(list->caption(), activateEnabled == true);
 }
 
 void TreeFilterWidget::slot_maskReturnPressed()
@@ -1165,13 +1154,6 @@ void TreeFilterWidget::slot_maskApply()
 		return;
 	}
 
-	std::shared_ptr<TuningFilter> rootFilter = rootItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-	if (rootFilter == nullptr)
-	{
-		assert(rootFilter);
-		return;
-	}
-
 	if (m_treeMaskCombo->currentText().isEmpty() == false)
 	{
 		m_treeMaskCombo->setStyleSheet("QComboBox { color: red }");
@@ -1183,5 +1165,5 @@ void TreeFilterWidget::slot_maskApply()
 		m_treeMaskApply->setStyleSheet(QString());
 	}
 
-	fillFiltersTree(rootFilter);
+	fillFiltersTree();
 }

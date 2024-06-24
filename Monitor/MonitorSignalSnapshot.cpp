@@ -4,9 +4,10 @@
 
 #include <ClientLib/AppSignalManager.h>
 
-MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorConfigController *configController,
-											 ClientLib::AppSignalManager* monitorAppSignalManager,
-											 MonitorCentralWidget* centralWidget)
+MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorConfigController* configController,
+																	   ClientLib::AppSignalManager* monitorAppSignalManager,
+																	   AppSignalLists::AppSignalListSet* appSignalListSet,
+																	   MonitorCentralWidget* centralWidget)
 {
 	if (configController == nullptr || monitorAppSignalManager == nullptr || centralWidget == nullptr)
 	{
@@ -19,6 +20,7 @@ MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorCo
 	MonitorDialogSignalSnapshot* dss = new MonitorDialogSignalSnapshot(configController,
 																	   monitorAppSignalManager,
 																	   monitorAppSignalManager,
+																	   appSignalListSet,
 																	   configController->configInfo().project,
 																	   configController->configInfo().softwareEquipmentId,
 																	   centralWidget);
@@ -36,14 +38,16 @@ MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorCo
 MonitorDialogSignalSnapshot::MonitorDialogSignalSnapshot(MonitorConfigController* configController,
 														 IAppSignalManager* appSignalManager,
 														 ISignalDataServer* signalDataServer,
+														 AppSignalLists::AppSignalListSet* appSignalListSet,
 														 const QString& projectName,
 														 const QString& equipmentId,
 														 QWidget *parent) :
 	SchemaClientLib::DialogSignalSnapshot(appSignalManager,
-						 signalDataServer,
-						 configController->configuration().appDataServices,
-						 projectName,
-						 equipmentId,
+										  signalDataServer,
+										  appSignalListSet,
+										  configController->configuration().appDataServices,
+										  projectName,
+										  equipmentId,
 						 parent),
 	m_configController(configController)
 {

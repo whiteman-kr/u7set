@@ -447,6 +447,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0417.sql", "Upgrade to version 417, Added Request Controllers to AppDataService preset"},
 	{":/DatabaseUpgrade/Upgrade0418.sql", "Upgrade to version 418, Update preset version for Monitor, Metrology, TestSuite, GatewayService (first time), this update aims to update property AppDataServiceIDs to add Receive Controller (_RC1)"},
 	{":/DatabaseUpgrade/Upgrade0419.sql", "Upgrade to version 419, First time add preset AdsBridge"},
+	{":/DatabaseUpgrade/Upgrade0420.sql", "Upgrade to version 420, Create folder $root$/AppSignalLists, Monitor and TuningClient presets update"}
 };
 
 int DbWorker::counter = 0;
