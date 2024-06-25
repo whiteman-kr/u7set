@@ -605,18 +605,22 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 		QElapsedTimer timer;
 		timer.start();
 
+		bool allValid = true;
+
 		while (timer.hasExpired(5000) == false)
 		{
 			QCoreApplication::instance()->processEvents();
 			QThread::msleep(10);
 
-			bool allValid = true;
+			allValid = true;
 			for (int i = 0; i < protoSignalSet.appsignal_size(); i++)
 			{
 				QString appSignalID = QString::fromStdString(protoSignalSet.appsignal(i).appsignalid());
 
-				TuningSignalState state = signalManager.state(appSignalID, nullptr);
-				if (state.valid() == false)
+				bool found = false;
+				TuningSignalState state = signalManager.state(appSignalID, &found);
+				EXPECT_TRUE(found);
+				if (found == true && state.valid() == false)
 				{
 					allValid = false;
 					break;
@@ -627,6 +631,8 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 				break;
 			}
 		}
+
+		EXPECT_TRUE(allValid);
 	}
 
 	// Write set of float values to #CLIENTTEST_TUNING_AF1
@@ -651,9 +657,11 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 				QCoreApplication::instance()->processEvents();
 				QThread::msleep(10);
 
-				state = signalManager.state(asFloat.appSignalID(), nullptr);
-				if (state.valid() == true &&
-						fabs(state.value().floatValue() - floatValues[i]) < std::numeric_limits<float>::epsilon())
+				bool found = false;
+				state = signalManager.state(asFloat.appSignalID(), &found);
+				EXPECT_TRUE(found);
+				if (found == true && state.valid() == true &&
+					fabs(state.value().floatValue() - floatValues[i]) < std::numeric_limits<float>::epsilon())
 				{
 					break;
 				}
@@ -686,8 +694,10 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 				QCoreApplication::instance()->processEvents();
 				QThread::msleep(10);
 
-				state = signalManager.state(asInt.appSignalID(), nullptr);
-				if (state.valid() == true && fabs(state.value().int32Value() == intValues[i]))
+				bool found = false;
+				state = signalManager.state(asInt.appSignalID(), &found);
+				EXPECT_TRUE(found);
+				if (found == true && state.valid() == true && fabs(state.value().int32Value() == intValues[i]))
 				{
 					break;
 				}
