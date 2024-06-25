@@ -212,7 +212,6 @@ namespace VFrame30
 
 		// Draw debug info
 		//
-		virtual void drawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const;
 		virtual void drawScriptError(CDrawParam* drawParam) const;
 
 		// Draw item selection depending on position interface

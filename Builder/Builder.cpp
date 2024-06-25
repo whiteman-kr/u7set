@@ -8,8 +8,6 @@ namespace Builder
 		qmlRegisterAnonymousType<Hardware::OptoPort>("OptoPort", 1);
 		qmlRegisterAnonymousType<UnitsConverter>("UnitsConverter", 1);
 
-		qRegisterMetaType<RunOrder>("RunOrder");
-
 		return;
 	}
 
@@ -26,8 +24,6 @@ namespace Builder
 
 		connect(m_thread, &BuildWorkerThread::started, this, &Builder::started);
 		connect(m_thread, &BuildWorkerThread::finished, this, &Builder::threadFinished);
-
-		connect(m_thread, &BuildWorkerThread::runOrderReady, this, &Builder::runOrderReady);
 
 		return;
 	}

@@ -42,7 +42,6 @@ protected:
 	virtual void paintEvent(QPaintEvent*) override;
 
 	void drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF clipRect);
-	void drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRect);
 	void drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam);
 	void drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam);
 	void drawSelectionArea(QPainter* p);

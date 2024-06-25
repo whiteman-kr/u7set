@@ -1,7 +1,5 @@
 #pragma once
 
-#include "RunOrder.h"
-
 #include <VFrame30/FblItem.h>
 
 class DbController;
@@ -330,8 +328,6 @@ namespace Builder
 
 		bool parse();
 
-		const RunOrder& runOrder() const;
-
 	protected:
 		bool loadUfbFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
 		bool loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out);
@@ -386,8 +382,6 @@ namespace Builder
 							   std::shared_ptr<VFrame30::SchemaLayer> layer,
 							   BushContainer* bushContainer);
 
-		void setRunOrder();
-
 	private:
 		DbController* db();
 		IssueLogger* log() const;
@@ -408,8 +402,6 @@ namespace Builder
 		SignalSet* m_signalSet = nullptr;
 		AppSignalLib::BusSet* m_busSet = nullptr;
 		Hardware::OptoModuleStorage* m_opticModuleStorage = nullptr;
-
-		RunOrder m_runOrder;
 	};
 
 } // namespace Builder

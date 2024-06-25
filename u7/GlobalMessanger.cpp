@@ -88,18 +88,6 @@ Builder::BuildIssues::Counter GlobalMessanger::issueForSchema(const QString& sch
 	return m_buildIssues.issueForSchema(schemaId);
 }
 
-void GlobalMessanger::clearSchemaItemRunOrder()
-{
-	QMutexLocker ml(&m_buildResultMutex);
-	m_runOrder.clear();
-}
-
-std::pair<int, int> GlobalMessanger::schemaItemRunOrder(const QString& equipmentId, const QUuid& itemId) const
-{
-	QMutexLocker ml(&m_buildResultMutex);
-	return m_runOrder.schemaItemRunOrder(equipmentId, itemId);
-}
-
 void GlobalMessanger::fireChangeCurrentTab(QWidget* tab)
 {
 	emit changeCurrentTab(tab);
@@ -108,12 +96,6 @@ void GlobalMessanger::fireChangeCurrentTab(QWidget* tab)
 void GlobalMessanger::fireCompareObject(DbChangesetObject object, CompareData compareData)
 {
 	emit compareObject(object, compareData);
-}
-
-void GlobalMessanger::runOrderReady(::Builder::RunOrder runOrder)
-{
-	QMutexLocker ml(&m_buildResultMutex);
-	m_runOrder = std::move(runOrder);
 }
 
 Builder::BuildIssues& GlobalMessanger::buildIssues()

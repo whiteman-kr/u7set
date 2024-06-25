@@ -28,7 +28,8 @@ public:
 			  DbController* db,
 			  QWidget* parent = nullptr,
 			  Qt::WindowType windowType = Qt::Window,
-			  bool slaveWindow = false);		// Cannot have output pane, do not stores its state
+			  bool slaveWindow = false,           // Cannot have output pane, do not stores its state
+			  SimWidget* masterWindow = nullptr); // If slaveWindow is true, then masterWindow must be not null
 	virtual ~SimWidget();
 
 public:
@@ -93,6 +94,8 @@ public:
 
 private:
 	bool m_slaveWindow = false;				// Cannot have output pane, do not stores its state
+	SimWidget* m_masterWindow = nullptr;	// If slaveWindow is true, then masterWindow must be not null
+
 	bool m_showEventFired = false;			// Save of widget state possible only after showEvent, otherwise stae will be starge, even can hide all child widgets.
 	UiLib::TabWidgetEx* m_tabWidget = nullptr;
 
@@ -128,6 +131,7 @@ private:
 	QLineEdit* m_simulationTimeEdit = nullptr;
 
 	QComboBox* m_speedComboBox = nullptr;
+	static std::vector<QComboBox*> s_speedComboBoxes; // registered m_speedComboBox, for state synchronization
 
 	QAction* m_runAction = nullptr;
 	QAction* m_pauseAction = nullptr;
@@ -135,6 +139,7 @@ private:
 
 	QAction* m_allowLanComm = nullptr;
 	QComboBox* m_profilesComboBox = nullptr;
+	static std::vector<QComboBox*> s_profilesComboBoxes; // registered m_profilesComboBox, for state synchronization
 
 	QAction* m_schemaListAction = nullptr;
 	QAction* m_snapshotAction = nullptr;

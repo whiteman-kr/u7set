@@ -100,6 +100,7 @@ void SimIdeSimulator::clear()
 	m_schemaDetails.clear();
 	m_simulator->clear();
 
+	emit projectUpdated();
 	return;
 }
 

@@ -144,8 +144,6 @@ qt_add_library(${TARGET} STATIC
 	RawDataDescription.h
 	ReportAppSignalProvider.cpp
 	ReportAppSignalProvider.h
-	RunOrder.cpp
-	RunOrder.h
 	SchemasReportGenerator.cpp
 	SchemasReportGenerator.h
 	ScriptChecker.cpp

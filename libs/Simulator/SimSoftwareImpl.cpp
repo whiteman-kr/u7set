@@ -199,6 +199,7 @@ namespace  Sim
 
 	void SoftwareImpl::setEnabled(bool value)
 	{
+		m_log.writeMessage(QObject::tr("Simulation: %1").arg(value ? "enabled" : "disabled"));
 		m_enabled = value;
 	}
 

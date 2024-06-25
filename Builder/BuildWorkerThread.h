@@ -9,7 +9,6 @@
 #include "Context.h"
 #include "TuningBuilder.h"
 #include "OptoModule.h"
-#include "RunOrder.h"
 
 
 namespace Builder
@@ -279,9 +278,6 @@ namespace Builder
 		// Run simulator-based script tests
 		//
 		bool runSimTests();
-
-	signals:
-		void runOrderReady(RunOrder runOrder);
 
 		// Properties
 		//
