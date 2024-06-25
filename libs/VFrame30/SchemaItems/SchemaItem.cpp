@@ -561,10 +561,6 @@ namespace VFrame30
 		assert(false);
 	}
 
-	void SchemaItem::drawDebugInfo(CDrawParam*, const QString&) const
-	{
-	}
-
 	void SchemaItem::drawScriptError(CDrawParam* drawParam) const
 	{
 		if (m_lastScriptError.isEmpty() == true)

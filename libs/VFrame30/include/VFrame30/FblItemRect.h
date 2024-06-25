@@ -60,10 +60,6 @@ namespace VFrame30
 		//
 		virtual void drawLabel(CDrawParam* drawParam) const override;
 
-		// Draw debug info
-		//
-		virtual void drawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const override;
-
 		// Вычислить координаты точки
 		//
 		virtual void SetConnectionsPos(double gridSize, int pinGridStep) override;

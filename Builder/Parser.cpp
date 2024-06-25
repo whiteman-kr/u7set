@@ -3663,7 +3663,7 @@ namespace Builder
 		}
 
 		// Write fully parsed AppLogicData to the output for further analysis by third-party tools.
-		// Active only if Propject setting "Generate Extra Debug Info" is switched on
+		// Active only if Project setting "Generate Extra Debug Info" is switched on
 		//
 		if (m_context->m_projectProperties.generateExtraDebugInfo() == true)
 		{
@@ -3676,16 +3676,7 @@ namespace Builder
 			}
 		}
 
-		//  Save/show item order for displaying on schemas
-		//
-		setRunOrder();
-
 		return result;
-	}
-
-	const RunOrder& Parser::runOrder() const
-	{
-		return m_runOrder;
 	}
 
 	bool Parser::loadUfbFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out)
@@ -5938,78 +5929,6 @@ namespace Builder
 
 		return result;
 	}
-
-	void Parser::setRunOrder()
-	{
-		// Set UFBs run order for drawing on schemas
-		//
-		const AppLogicData* appLogicData = applicationData();
-		const auto& ufbs = appLogicData->ufbs();
-
-		for (const std::pair<QString, std::shared_ptr<AppLogicModule>> ufb : ufbs)
-		{
-			const std::list<AppLogicItem>& items = ufb.second->items();
-
-			std::unordered_map<QUuid, std::pair<int, int>> schemaItemRunOrder;
-			schemaItemRunOrder.reserve(items.size());
-
-			int index = 0;
-			for (const AppLogicItem& it : items)
-			{
-				Q_ASSERT(schemaItemRunOrder.find(it.m_fblItem->guid()) == schemaItemRunOrder.end());
-
-				schemaItemRunOrder[it.m_fblItem->guid()] = std::make_pair(index, index);
-				index++;
-			}
-
-			m_runOrder.setRunOrder(ufb.second->equipmentId(), schemaItemRunOrder);
-		}
-
-		// Set Schema Item Run Order for drawing on schemas
-		//
-		const auto& logicModules = appLogicData->modules();
-
-		for (std::shared_ptr<AppLogicModule> lm : logicModules)
-		{
-			const std::list<AppLogicItem>& items = lm->items();
-
-			std::unordered_map<QUuid, std::pair<int, int>> schemaItemRunOrder;
-			schemaItemRunOrder.reserve(items.size());
-
-			int index = 0;
-			for (const AppLogicItem& it : items)
-			{
-				if (it.m_groupId.isNull() == true)
-				{
-					Q_ASSERT(schemaItemRunOrder.find(it.m_fblItem->guid()) == schemaItemRunOrder.end());
-
-					schemaItemRunOrder[it.m_fblItem->guid()] = std::make_pair(index, index);
-				}
-				else
-				{
-					// it.m_groupId is SchemaItemUfb.guid()
-					//
-					if (schemaItemRunOrder.count(it.m_groupId) == 0)
-					{
-						// This is the first group item
-						//
-						schemaItemRunOrder[it.m_groupId] = std::make_pair(index, index);
-					}
-					else
-					{
-						schemaItemRunOrder[it.m_groupId].second = index;
-					}
-				}
-
-				index++;
-			}
-
-			m_runOrder.setRunOrder(lm->equipmentId(), schemaItemRunOrder);
-		}
-
-		return;
-	}
-
 
 	DbController* Parser::db()
 	{

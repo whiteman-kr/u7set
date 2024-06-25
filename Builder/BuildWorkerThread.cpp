@@ -1184,8 +1184,6 @@ namespace Builder
 
 		bool result = m_context->m_log->errorCount() == errorCount;
 
-		emit runOrderReady(parser.runOrder());
-
 		return result;
 	}
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "IssueLogger.h"
-#include "RunOrder.h"
 
 namespace Builder
 {
@@ -43,8 +42,6 @@ namespace Builder
 		void finished(int errorCount);			// Finished or canceled (if canceled errorCount > 0)
 
 		void progressChanged(int value);		// Always from 0 to 100
-
-		void runOrderReady(RunOrder runOrder);
 
 	private:
 		BuildWorkerThread* m_thread = nullptr;

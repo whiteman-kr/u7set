@@ -672,28 +672,6 @@ namespace VFrame30
 		return;
 	}
 
-	void FblItemRect::drawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const
-	{
-		QPainter* p = drawParam->painter();
-
-		QRectF r = itemRectPinIndent(drawParam);
-
-		QRectF drawRect(r.right(), r.bottom(),
-						widthDocPt(), m_font.drawSize());
-
-		static FontParam font(QStringLiteral("Arial"), drawParam->gridSize() * 1.75, false, false);
-		p->setPen(Qt::red);
-
-		QString str = QString("roi %1").arg(runOrderIndex);
-
-		DrawHelper::drawText(p,
-							 font,
-							 itemUnit(),
-							 str,
-							 drawRect,
-							 Qt::TextDontClip | Qt::AlignTop | Qt::AlignLeft);
-	}
-
 	void FblItemRect::drawMultichannelSlashLines(CDrawParam* drawParam, QPen& linePen) const
 	{
 		if (drawParam == nullptr)

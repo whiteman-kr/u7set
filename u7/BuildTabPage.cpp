@@ -155,8 +155,6 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &BuildTabPage::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &BuildTabPage::projectClosed);
 
-	connect(&m_builder, &Builder::Builder::runOrderReady, &GlobalMessanger::instance(), &GlobalMessanger::runOrderReady);
-
 	connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::build);
 	connect(m_cancelButton, &QAbstractButton::clicked, this, &BuildTabPage::cancel);
 
@@ -402,7 +400,6 @@ void BuildTabPage::buildWasStarted()
 //	progress->setValue(50);
 
 	GlobalMessanger::instance().clearBuildSchemaIssues();
-	GlobalMessanger::instance().clearSchemaItemRunOrder();
 
 	m_buildButton->setEnabled(false);
 	m_cancelButton->setEnabled(true);
