@@ -1191,6 +1191,12 @@ void TuningPage::fillObjectsList()
 	}
 
 	std::set<Hash> hashes;
+	
+	if (m_pageUi->filtersList().isEmpty() == true)
+	{
+		auto allHashes = m_tuningSignalManager.signalHashes();
+		hashes.insert(allHashes.begin(), allHashes.end());
+	}
 
 	bool first = true;
 	for (const QString& id: m_pageUi->filtersList()) 
