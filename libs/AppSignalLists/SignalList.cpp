@@ -321,6 +321,19 @@ namespace AppSignalLists
 		return m_systemTags;
 	}
 
+	bool AppSignalList::hasAnySystemTag(const QStringList& tags) const
+	{
+		for (const auto& tag : tags)
+		{
+			if (m_systemTags.contains(tag) == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	QString AppSignalList::userTags() const
 	{
 		return m_userTags.join(';');

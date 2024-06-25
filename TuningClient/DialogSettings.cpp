@@ -50,13 +50,6 @@ void DialogSettings::setSettings(const TuningClientAppSettings::SystemData& valu
 	ui->m_IP2->setText(value.m_configuratorIpAddress2);
 	ui->m_port2->setText(QString::number(value.m_configuratorPort2));
 
-	ui->m_useCustomFilters->blockSignals(true);
-	ui->m_useCustomFilters->setChecked(value.m_useFiltersCustomFile == true);
-	ui->m_useCustomFilters->blockSignals(false);
-
-	ui->m_customFiltersEdit->setText(value.m_filtersCustomFile);
-	ui->m_customFiltersEdit->setEnabled(value.m_useFiltersCustomFile == true);
-
 	for (int i = 0; i < ui->m_languageCombo->count(); i++)
 	{
 		if (m_settings.m_language == ui->m_languageCombo->itemData(i).toString())
@@ -235,34 +228,9 @@ std::optional<TuningClientAppSettings::SystemData> DialogSettings::parseData()
 	data.m_configuratorIpAddress2 = configuratorIpAddress2;
 	data.m_configuratorPort2 = serverPort2;
 
-	data.m_useFiltersCustomFile = ui->m_useCustomFilters->isChecked() == true;
-	data.m_filtersCustomFile = ui->m_customFiltersEdit->text();
-
 	data.m_language = language;
 
 	return {data};
-}
-
-void DialogSettings::on_m_useCustomFilters_stateChanged(int arg1)
-{
-	Q_UNUSED(arg1);
-
-	ui->m_customFiltersEdit->setEnabled(ui->m_useCustomFilters->isChecked() == true);
-}
-
-void DialogSettings::on_m_filtersBrowse_clicked()
-{
-	static QString path{"."};
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Filters File"),
-													path,
-													tr("Filter Files (*.xml)"));
-	if (fileName.isNull() == true)
-	{
-		return;
-	}
-	path = QFileInfo(fileName).path(); // store path for next time
-
-	ui->m_customFiltersEdit->setText(QDir::toNativeSeparators(fileName));
 }
 
 void DialogSettings::on_saveAsButton_clicked()

@@ -5,7 +5,7 @@
     <name>DialogChooseFilter</name>
     <message>
         <location filename="../DialogChooseFilter.cpp" line="9"/>
-        <source>Choose a Filter:</source>
+        <source>Choose a List:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -106,136 +106,108 @@
     <name>DialogSettings</name>
     <message>
         <location filename="../DialogSettings.ui" line="14"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="217"/>
+        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="186"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="24"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="223"/>
+        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="192"/>
         <source>Connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="30"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="218"/>
+        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="187"/>
         <source>Instance StrID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="47"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="219"/>
+        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="188"/>
         <source>Configurator IP Address 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="57"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="220"/>
+        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="189"/>
         <source>Configurator Port 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="67"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="221"/>
+        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="190"/>
         <source>Configurator IP Address 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="77"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="222"/>
+        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="191"/>
         <source>Configurator Port 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="101"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="226"/>
-        <source>Filters</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../DialogSettings.ui" line="107"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="224"/>
-        <source>Use Custom Filters File:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../DialogSettings.ui" line="117"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="225"/>
-        <source>Browse...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../DialogSettings.ui" line="138"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="228"/>
+        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="194"/>
         <source>Miscellaneous</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.ui" line="144"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="227"/>
+        <location filename="../DialogSettings.ui" line="107"/>
+        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="193"/>
         <source>Language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.ui" line="191"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="229"/>
+        <location filename="../DialogSettings.ui" line="154"/>
+        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="195"/>
         <source>Save As...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="93"/>
+        <location filename="../DialogSettings.cpp" line="86"/>
         <source>TuningClient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="93"/>
+        <location filename="../DialogSettings.cpp" line="86"/>
         <source>Configurator address has been changed, please restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="99"/>
+        <location filename="../DialogSettings.cpp" line="92"/>
         <source>Language has been changed, please restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="146"/>
+        <location filename="../DialogSettings.cpp" line="139"/>
         <source>Instance StrID cannot be empty</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="169"/>
-        <location filename="../DialogSettings.cpp" line="199"/>
+        <location filename="../DialogSettings.cpp" line="162"/>
+        <location filename="../DialogSettings.cpp" line="192"/>
         <source>Incorrect format of the configurator IP Address.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="185"/>
-        <location filename="../DialogSettings.cpp" line="214"/>
+        <location filename="../DialogSettings.cpp" line="178"/>
+        <location filename="../DialogSettings.cpp" line="207"/>
         <source>Incorrect server port.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="256"/>
-        <source>Filters File</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../DialogSettings.cpp" line="258"/>
-        <source>Filter Files (*.xml)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../DialogSettings.cpp" line="279"/>
+        <location filename="../DialogSettings.cpp" line="247"/>
         <source>Save File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="281"/>
+        <location filename="../DialogSettings.cpp" line="249"/>
         <source>ini File (*.ini);;All Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSettings.cpp" line="295"/>
+        <location filename="../DialogSettings.cpp" line="263"/>
         <source>File %1 saving error.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -328,7 +300,7 @@
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="160"/>
-        <source>Tuning Signal Lists...</source>
+        <source>Signal Lists...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -724,13 +696,13 @@ Colld not save crash dump file:
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1596"/>
+        <location filename="../TuningPage.cpp" line="1602"/>
         <source>Activating control of tuning source &apos;%1&apos; failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1602"/>
-        <location filename="../TuningPage.cpp" line="1709"/>
+        <location filename="../TuningPage.cpp" line="1608"/>
+        <location filename="../TuningPage.cpp" line="1715"/>
         <source>Taking control of tuning source &apos;%1&apos; failed!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -930,120 +902,125 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="119"/>
+        <location filename="../TreeFilterWidget.cpp" line="117"/>
+        <source>All Signals</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TreeFilterWidget.cpp" line="122"/>
         <source>Schemas</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="133"/>
+        <location filename="../TreeFilterWidget.cpp" line="136"/>
         <source>Equipment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="147"/>
-        <source>Auto-created</source>
+        <location filename="../TreeFilterWidget.cpp" line="150"/>
+        <source>Auto-created filters</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="161"/>
+        <location filename="../TreeFilterWidget.cpp" line="164"/>
         <source>Project Lists</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="174"/>
+        <location filename="../TreeFilterWidget.cpp" line="177"/>
         <source>Local Lists</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="266"/>
+        <location filename="../TreeFilterWidget.cpp" line="271"/>
         <source>Caption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="273"/>
+        <location filename="../TreeFilterWidget.cpp" line="278"/>
         <source>Access</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="282"/>
+        <location filename="../TreeFilterWidget.cpp" line="287"/>
         <source>SOR</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="310"/>
+        <location filename="../TreeFilterWidget.cpp" line="315"/>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="417"/>
+        <location filename="../TreeFilterWidget.cpp" line="422"/>
         <source>Filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="675"/>
-        <location filename="../TreeFilterWidget.cpp" line="757"/>
+        <location filename="../TreeFilterWidget.cpp" line="679"/>
+        <location filename="../TreeFilterWidget.cpp" line="761"/>
         <source>Unknown</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="685"/>
+        <location filename="../TreeFilterWidget.cpp" line="689"/>
         <source>Non-Valid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="702"/>
+        <location filename="../TreeFilterWidget.cpp" line="706"/>
         <source>Inactive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="713"/>
+        <location filename="../TreeFilterWidget.cpp" line="717"/>
         <source>No Reply</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="724"/>
-        <location filename="../TreeFilterWidget.cpp" line="766"/>
+        <location filename="../TreeFilterWidget.cpp" line="728"/>
+        <location filename="../TreeFilterWidget.cpp" line="770"/>
         <source>Unapplied [%1]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="728"/>
-        <location filename="../TreeFilterWidget.cpp" line="774"/>
+        <location filename="../TreeFilterWidget.cpp" line="732"/>
+        <location filename="../TreeFilterWidget.cpp" line="778"/>
         <source>Active [%1]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="731"/>
+        <location filename="../TreeFilterWidget.cpp" line="735"/>
         <source>%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="781"/>
+        <location filename="../TreeFilterWidget.cpp" line="785"/>
         <source>, E: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="801"/>
+        <location filename="../TreeFilterWidget.cpp" line="805"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="805"/>
+        <location filename="../TreeFilterWidget.cpp" line="809"/>
         <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="805"/>
+        <location filename="../TreeFilterWidget.cpp" line="809"/>
         <source>Yes (%1/%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="1066"/>
+        <location filename="../TreeFilterWidget.cpp" line="1070"/>
         <source>Activate Control</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="1079"/>
+        <location filename="../TreeFilterWidget.cpp" line="1083"/>
         <source>Deactivate Control</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1275,15 +1252,15 @@ Please recheck columns suffixes configuration in the project.</source>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1068"/>
-        <location filename="../TuningPage.cpp" line="1797"/>
-        <location filename="../TuningPage.cpp" line="1822"/>
-        <location filename="../TuningPage.cpp" line="1830"/>
+        <location filename="../TuningPage.cpp" line="1803"/>
+        <location filename="../TuningPage.cpp" line="1828"/>
+        <location filename="../TuningPage.cpp" line="1836"/>
         <source>Set Value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1072"/>
-        <location filename="../TuningPage.cpp" line="2797"/>
+        <location filename="../TuningPage.cpp" line="2804"/>
         <source>Set All</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1294,7 +1271,7 @@ Please recheck columns suffixes configuration in the project.</source>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1082"/>
-        <location filename="../TuningPage.cpp" line="1487"/>
+        <location filename="../TuningPage.cpp" line="1493"/>
         <source>Undo</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1304,12 +1281,12 @@ Please recheck columns suffixes configuration in the project.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1485"/>
+        <location filename="../TuningPage.cpp" line="1491"/>
         <source>Some values were modified but not written. Please select the following:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1581"/>
+        <location filename="../TuningPage.cpp" line="1587"/>
         <source>To write changes, all connections to following tuning sources will be activated:
 
 %1
@@ -1318,7 +1295,7 @@ Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1655"/>
+        <location filename="../TuningPage.cpp" line="1661"/>
         <source>Warning!!!
 
 SOR Signal(s) are set in logic modules!
@@ -1329,177 +1306,177 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1716"/>
+        <location filename="../TuningPage.cpp" line="1722"/>
         <source>Are you sure you want apply the changes?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1797"/>
+        <location filename="../TuningPage.cpp" line="1803"/>
         <source>There is limits mismatch in signal &apos;%1&apos;. Value setting is disabled.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1822"/>
+        <location filename="../TuningPage.cpp" line="1828"/>
         <source>Please select objects of the same type.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1830"/>
+        <location filename="../TuningPage.cpp" line="1836"/>
         <source>Selected objects have different input range.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1943"/>
+        <location filename="../TuningPage.cpp" line="1949"/>
         <source>Set Value...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1956"/>
+        <location filename="../TuningPage.cpp" line="1962"/>
         <source>Set to Defaults</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2001"/>
+        <location filename="../TuningPage.cpp" line="2007"/>
         <source>%1 - %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2022"/>
+        <location filename="../TuningPage.cpp" line="2028"/>
         <source>...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2047"/>
+        <location filename="../TuningPage.cpp" line="2053"/>
         <source>Format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2049"/>
+        <location filename="../TuningPage.cpp" line="2055"/>
         <source>Auto-select</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2058"/>
+        <location filename="../TuningPage.cpp" line="2064"/>
         <source>Decimal (as [-]9.9)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2067"/>
+        <location filename="../TuningPage.cpp" line="2073"/>
         <source>Exponential (as [-]9.9e[+|-]999)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2079"/>
+        <location filename="../TuningPage.cpp" line="2085"/>
         <source>More</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2081"/>
-        <source>Add To New Filter...</source>
+        <location filename="../TuningPage.cpp" line="2087"/>
+        <source>Add To New List...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2085"/>
-        <source>Add To Existing Filter...</source>
+        <location filename="../TuningPage.cpp" line="2091"/>
+        <source>Add To Existing List...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2097"/>
-        <source>Restore Values From Filter...</source>
+        <location filename="../TuningPage.cpp" line="2103"/>
+        <source>Restore Values From List...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2105"/>
+        <location filename="../TuningPage.cpp" line="2551"/>
+        <source>No values restored from the list for current signals.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="2555"/>
+        <source>%1 values were restored from the list. Check them and apply the changes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="2111"/>
         <source>Export Current View to CSV...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2126"/>
+        <location filename="../TuningPage.cpp" line="2132"/>
         <source>Add Signals To List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2126"/>
-        <source>Enter the filter name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="2126"/>
+        <location filename="../TuningPage.cpp" line="2132"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2143"/>
+        <location filename="../TuningPage.cpp" line="2132"/>
+        <source>Enter the list name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="2149"/>
         <source>List with such name already exists. Please enter another name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2187"/>
+        <location filename="../TuningPage.cpp" line="2194"/>
         <source>Export to CSV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2189"/>
+        <location filename="../TuningPage.cpp" line="2196"/>
         <source>CSV (*.csv)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2200"/>
+        <location filename="../TuningPage.cpp" line="2207"/>
         <source>Error writing file %1!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2234"/>
+        <location filename="../TuningPage.cpp" line="2241"/>
         <source>Export complete.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2479"/>
+        <location filename="../TuningPage.cpp" line="2486"/>
         <source>No signals were added.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2488"/>
+        <location filename="../TuningPage.cpp" line="2495"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2491"/>
+        <location filename="../TuningPage.cpp" line="2498"/>
         <source>Adding signals complete.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2544"/>
-        <source>No values restored from the filter for current signals.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="2548"/>
-        <source>%1 values were restored from the filter. Check them and apply the changes.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="2575"/>
+        <location filename="../TuningPage.cpp" line="2582"/>
         <source>Invalid default value &apos;%1&apos; in signal %2 [%3]</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2797"/>
+        <location filename="../TuningPage.cpp" line="2804"/>
         <source>There is limits mismatch in signal &apos;%1&apos;. Operation is disabled.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2805"/>
+        <location filename="../TuningPage.cpp" line="2812"/>
         <source>Set All Discretes To On</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2836"/>
+        <location filename="../TuningPage.cpp" line="2843"/>
         <source>Set All Discretes To Off</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2868"/>
+        <location filename="../TuningPage.cpp" line="2875"/>
         <source>Set All To Defaults</source>
         <translation type="unfinished"></translation>
     </message>

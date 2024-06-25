@@ -2084,11 +2084,11 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 	{
 		QMenu* submenuA = menu.addMenu(tr("More"));
 
-		QAction* a = new QAction(tr("Add To New Filter..."), &menu);
+		QAction* a = new QAction(tr("Add To New List..."), &menu);
 		connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToNewFilter);
 		submenuA->addAction(a);
 
-		a = new QAction(tr("Add To Existing Filter..."), &menu);
+		a = new QAction(tr("Add To Existing List..."), &menu);
 		connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToExistingFilter);
 		submenuA->addAction(a);
 
@@ -2096,11 +2096,11 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 		//
 		for (int i = 0; i < m_appSignalLists.count(); i++)
 		{
-			if (m_appSignalLists.get(i)->userTagsList().contains(AppSignalLists::AppSignalList::tagTcAuto) == true)
+			if (m_appSignalLists.get(i)->systemTagsList().contains(AppSignalLists::AppSignalList::tagTcAuto) == true)
 			{
 				submenuA->addSeparator();
 
-				a = new QAction(tr("Restore Values From Filter..."), &menu);
+				a = new QAction(tr("Restore Values From List..."), &menu);
 				connect(a, &QAction::triggered, this, &TuningPage::slot_restoreValuesFromExistingFilter);
 				submenuA->addAction(a);
 			}
@@ -2129,7 +2129,7 @@ void TuningPage::slot_saveSignalsToNewFilter()
 	{
 		bool ok;
 		filterName =
-			QInputDialog::getText(this, tr("Add Signals To List"), tr("Enter the filter name:"), QLineEdit::Normal, tr("Name"), &ok);
+			QInputDialog::getText(this, tr("Add Signals To List"), tr("Enter the list name:"), QLineEdit::Normal, tr("Name"), &ok);
 
 		if (ok == false)
 		{
@@ -2157,6 +2157,7 @@ void TuningPage::slot_saveSignalsToNewFilter()
 	std::shared_ptr<AppSignalLists::AppSignalList> autoCreatedList = std::make_shared<AppSignalLists::AppSignalList>();
 	autoCreatedList->setId(autoCreatedList->uuid().toString());
 	autoCreatedList->setCaption(filterName);
+	autoCreatedList->systemTagsList().push_back(AppSignalLists::AppSignalList::tagTcAuto);
 	m_appSignalLists.add(autoCreatedList);
 	addSelectedSignalsToFilter(*autoCreatedList);
 }
@@ -2547,11 +2548,11 @@ void TuningPage::restoreSignalsFromFilter(const AppSignalLists::AppSignalList& l
 
 	if (restoredCount == 0)
 	{
-		QMessageBox::critical(this, qAppName(), tr("No values restored from the filter for current signals."));
+		QMessageBox::critical(this, qAppName(), tr("No values restored from the list for current signals."));
 	}
 	else
 	{
-		QMessageBox::warning(this, qAppName(), tr("%1 values were restored from the filter. Check them and apply the changes.").arg(restoredCount));
+		QMessageBox::warning(this, qAppName(), tr("%1 values were restored from the list. Check them and apply the changes.").arg(restoredCount));
 	}
 }
 

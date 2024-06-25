@@ -28,9 +28,6 @@ private:
 	std::optional<TuningClientAppSettings::SystemData> parseData();
 
 private slots:
-	void on_m_useCustomFilters_stateChanged(int arg1);
-	void on_m_filtersBrowse_clicked();
-
 	void on_saveAsButton_clicked();
 
 private:

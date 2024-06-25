@@ -157,7 +157,7 @@ void MainWindow::createActions()
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MainWindow::exit);
 
-	m_pAppSignalListsAction = new QAction(tr("Tuning Signal Lists..."), this);
+	m_pAppSignalListsAction = new QAction(tr("Signal Lists..."), this);
 	m_pAppSignalListsAction->setStatusTip(tr("Edit tuning signal Lists"));
 	m_pAppSignalListsAction->setEnabled(true);
 	connect(m_pAppSignalListsAction, &QAction::triggered, this, &MainWindow::showAppSignalListEditor);

@@ -15,7 +15,7 @@ class DialogChooseFilter : public QDialog
 	Q_OBJECT
 
 public:
-	DialogChooseFilter(const AppSignalLists::AppSignalListSet& appSignalLists, const QStringList& userTags, QWidget* parent);
+	DialogChooseFilter(const AppSignalLists::AppSignalListSet& appSignalLists, const QStringList& systemTags, QWidget* parent);
 	
 	QUuid chosenFilterUuid() const;
 

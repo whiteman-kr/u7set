@@ -1,12 +1,12 @@
 #include "DialogChooseFilter.h"
 #include <AppSignalLists/SignalList.h>
 
-DialogChooseFilter::DialogChooseFilter(const AppSignalLists::AppSignalListSet& appSignalLists, const QStringList& userTags, QWidget* parent)
+DialogChooseFilter::DialogChooseFilter(const AppSignalLists::AppSignalListSet& appSignalLists, const QStringList& systemTags, QWidget* parent)
 	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 
-	QLabel* l = new QLabel(tr("Choose a Filter:"));
+	QLabel* l = new QLabel(tr("Choose a List:"));
 	mainLayout->addWidget(l);
 
 	// Listbox
@@ -27,7 +27,7 @@ DialogChooseFilter::DialogChooseFilter(const AppSignalLists::AppSignalListSet& a
 			continue;
 		}
 
-		if (list->hasAnyUserTag(userTags) == true)
+		if (list->hasAnySystemTag(systemTags) == true)
 		{
 			QListWidgetItem* newItem = new QListWidgetItem;
 			newItem->setData(Qt::UserRole, list->uuid());

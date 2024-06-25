@@ -114,6 +114,9 @@ void TreeFilterWidget::fillFiltersTree()
 		}
 	}
 
+	QTreeWidgetItem* rootItem = new QTreeWidgetItem({tr("All Signals")});
+	m_filterTree->addTopLevelItem(rootItem);
+
 	// Schemas
 	//
 	QTreeWidgetItem* schemasItem = new QTreeWidgetItem({tr("Schemas")});
@@ -124,11 +127,11 @@ void TreeFilterWidget::fillFiltersTree()
 	}
 	else
 	{
-		m_filterTree->addTopLevelItem(schemasItem);
+		rootItem->addChild(schemasItem);
 		schemasItem->setExpanded(true);
 	}
 
-	// Schemas
+	// Equipment
 	//
 	QTreeWidgetItem* equipmentItem = new QTreeWidgetItem({tr("Equipment")});
 	addTreeObjects(equipmentItem, mask, {AppSignalLists::AppSignalList::tagEquipment}, {});
@@ -138,13 +141,13 @@ void TreeFilterWidget::fillFiltersTree()
 	}
 	else
 	{
-		m_filterTree->addTopLevelItem(equipmentItem);
+		rootItem->addChild(equipmentItem);
 		equipmentItem->setExpanded(true);
 	}
 
 	// Auto-created
 	//
-	QTreeWidgetItem* autoItem = new QTreeWidgetItem({tr("Auto-created")});
+	QTreeWidgetItem* autoItem = new QTreeWidgetItem({tr("Auto-created filters")});
 	addTreeObjects(autoItem, mask, {AppSignalLists::AppSignalList::tagTcAuto}, {});
 	if (autoItem->childCount() == 0)
 	{
@@ -152,11 +155,11 @@ void TreeFilterWidget::fillFiltersTree()
 	}
 	else
 	{
-		m_filterTree->addTopLevelItem(autoItem);
+		rootItem->addChild(autoItem);
 		autoItem->setExpanded(true);
 	}
 
-	// All other lists
+	// Project lists
 	//
 	QTreeWidgetItem* globalItem = new QTreeWidgetItem({tr("Project Lists")});
 	addTreeObjects(globalItem,
@@ -166,13 +169,13 @@ void TreeFilterWidget::fillFiltersTree()
 					AppSignalLists::AppSignalList::tagEquipment,
 					AppSignalLists::AppSignalList::tagTcAuto,
 					AppSignalLists::AppSignalList::tagUi});
-	m_filterTree->addTopLevelItem(globalItem);
+	rootItem->addChild(globalItem);
 	globalItem->setExpanded(true);
 
-	// All other lists
+	// Local lists
 	//
-	QTreeWidgetItem* allItem = new QTreeWidgetItem({tr("Local Lists")});
-	addTreeObjects(allItem,
+	QTreeWidgetItem* localItem = new QTreeWidgetItem({tr("Local Lists")});
+	addTreeObjects(localItem,
 				   mask,
 				   {},
 				   {AppSignalLists::AppSignalList::tagSchema,
@@ -180,8 +183,10 @@ void TreeFilterWidget::fillFiltersTree()
 					AppSignalLists::AppSignalList::tagTcAuto,
 					AppSignalLists::AppSignalList::tagUi,
 					AppSignalLists::AppSignalList::tagIde});
-	m_filterTree->addTopLevelItem(allItem);
-	allItem->setExpanded(true);
+	rootItem->addChild(localItem);
+	localItem->setExpanded(true);
+
+	rootItem->setExpanded(true);
 
 	// Restore selection
 	//
@@ -487,9 +492,8 @@ void TreeFilterWidget::addTreeObjects(QTreeWidgetItem* parentItem, const QString
 			}
 		}
 
-		QTreeWidgetItem* item = new QTreeWidgetItem({QString("%1 [%2]").arg(list->id()).arg(list->caption())});
+		QTreeWidgetItem* item = new QTreeWidgetItem({QString("%1").arg(list->caption())});
 		item->setData(0, Qt::UserRole, list->uuid());
-
 
 		if (parentItem != nullptr)
 		{

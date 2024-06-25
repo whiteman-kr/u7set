@@ -97,6 +97,8 @@ namespace AppSignalLists
 		const QStringList& systemTagsList() const;
 		QStringList& systemTagsList();
 
+		bool hasAnySystemTag(const QStringList& tags) const;
+
 		// User Tags operations
 
 		QString userTags() const;
