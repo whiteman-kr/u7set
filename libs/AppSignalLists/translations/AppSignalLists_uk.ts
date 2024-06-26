@@ -47,114 +47,119 @@
 <context>
     <name>AppSignalLists::AppSignalListWidget</name>
     <message>
-        <location filename="../SignalListEditor.cpp" line="59"/>
+        <location filename="../SignalListEditor.cpp" line="61"/>
         <source>All signals</source>
         <translation>Всі сигнали</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="60"/>
+        <location filename="../SignalListEditor.cpp" line="62"/>
         <source>Analog signals</source>
         <translation>Аналогові сигнали</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="61"/>
+        <location filename="../SignalListEditor.cpp" line="63"/>
         <source>Discrete signals</source>
         <translation>Дискретні сигнали</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="74"/>
+        <location filename="../SignalListEditor.cpp" line="76"/>
         <source>All Text</source>
         <translation>Весь текст</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="75"/>
+        <location filename="../SignalListEditor.cpp" line="77"/>
         <source>AppSignalID</source>
         <translation>Внутр. ІД</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="76"/>
+        <location filename="../SignalListEditor.cpp" line="78"/>
         <source>CustomAppSignalID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="77"/>
+        <location filename="../SignalListEditor.cpp" line="79"/>
         <source>EquipmentID</source>
         <translation>ІД обладнання</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="78"/>
+        <location filename="../SignalListEditor.cpp" line="80"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="79"/>
+        <location filename="../SignalListEditor.cpp" line="81"/>
         <source>Tag</source>
         <translation>Тег</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="103"/>
+        <location filename="../SignalListEditor.cpp" line="105"/>
         <source>Apply Filter</source>
         <translation>Застосувати фільтр</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="113"/>
+        <location filename="../SignalListEditor.cpp" line="118"/>
         <source>Value:</source>
         <translation>Значення:</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="117"/>
+        <location filename="../SignalListEditor.cpp" line="122"/>
         <source>Any Value</source>
         <translation>Всі значення</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="118"/>
+        <location filename="../SignalListEditor.cpp" line="123"/>
         <source>Discrete 0</source>
         <translation>Дискретний 0</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="119"/>
+        <location filename="../SignalListEditor.cpp" line="124"/>
         <source>Discrete 1</source>
         <translation>Дискретний 1</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="137"/>
+        <location filename="../SignalListEditor.cpp" line="142"/>
         <source>Add</source>
         <translation>Додати</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="142"/>
+        <location filename="../SignalListEditor.cpp" line="147"/>
         <source>Remove</source>
         <translation>Видалити</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="186"/>
+        <location filename="../SignalListEditor.cpp" line="191"/>
         <source>Set Value</source>
         <translation>Задати</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="193"/>
+        <location filename="../SignalListEditor.cpp" line="198"/>
         <source>Set Current</source>
         <translation>Задати поточне</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="199"/>
+        <location filename="../SignalListEditor.cpp" line="204"/>
         <source>Export...</source>
         <translation>Експорт...</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="203"/>
+        <location filename="../SignalListEditor.cpp" line="208"/>
         <source>Import...</source>
         <translation>Імпорт...</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="934"/>
+        <location filename="../SignalListEditor.cpp" line="939"/>
         <source>Please select signals of same type (analog or discrete).</source>
         <translation>Оберіть сигнали однакового типу (аналогові чи дискретні).</translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="942"/>
+        <location filename="../SignalListEditor.cpp" line="947"/>
         <source>Selected signals have different input range.</source>
         <translation>Обрані сигнали мають різний вхідний діапазон.</translation>
+    </message>
+    <message>
+        <location filename="../SignalListEditor.cpp" line="1022"/>
+        <source>Can&apos;t get current value of signal %1!</source>
+        <translation>Помилка отримання поточного значення сигналу %1!</translation>
     </message>
     <message>
         <location filename="../SignalListEditor.cpp" line="1040"/>
@@ -320,74 +325,74 @@ Updated: %2 signal(s)
 <context>
     <name>AppSignalLists::DialogSignalListEditor</name>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="36"/>
+        <location filename="../DialogSignalListEditor.cpp" line="42"/>
         <source>AppSignalLists Editor</source>
         <translation>Редактор списків</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="60"/>
+        <location filename="../DialogSignalListEditor.cpp" line="66"/>
         <source>Filter</source>
         <translation>Фільтр</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="66"/>
+        <location filename="../DialogSignalListEditor.cpp" line="72"/>
         <source>ID</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="67"/>
+        <location filename="../DialogSignalListEditor.cpp" line="73"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="68"/>
+        <location filename="../DialogSignalListEditor.cpp" line="74"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="99"/>
+        <location filename="../DialogSignalListEditor.cpp" line="105"/>
         <source>Properties</source>
         <translation>Властивості</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="100"/>
+        <location filename="../DialogSignalListEditor.cpp" line="106"/>
         <source>Signals</source>
         <translation>Сигнали</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="107"/>
-        <location filename="../DialogSignalListEditor.cpp" line="158"/>
+        <location filename="../DialogSignalListEditor.cpp" line="113"/>
+        <location filename="../DialogSignalListEditor.cpp" line="164"/>
         <source>Add</source>
         <translation>Додати</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="108"/>
-        <location filename="../DialogSignalListEditor.cpp" line="159"/>
+        <location filename="../DialogSignalListEditor.cpp" line="114"/>
+        <location filename="../DialogSignalListEditor.cpp" line="165"/>
         <source>Remove</source>
         <translation>Видалити</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="110"/>
+        <location filename="../DialogSignalListEditor.cpp" line="116"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="111"/>
+        <location filename="../DialogSignalListEditor.cpp" line="117"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="162"/>
+        <location filename="../DialogSignalListEditor.cpp" line="168"/>
         <source>Copy</source>
         <translation>Копіювати</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="165"/>
+        <location filename="../DialogSignalListEditor.cpp" line="171"/>
         <source>Paste</source>
         <translation>Вставити</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="505"/>
+        <location filename="../DialogSignalListEditor.cpp" line="511"/>
         <source>Signal lists with duplicated IDs found:
 
 %1
@@ -400,23 +405,23 @@ Are you sure you want to continue?</source>
 Ви впевнені, що хочете продовжити?</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="561"/>
+        <location filename="../DialogSignalListEditor.cpp" line="567"/>
         <source>LIST_%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="582"/>
+        <location filename="../DialogSignalListEditor.cpp" line="589"/>
         <source>Are you sure you want to remove selected lists?</source>
         <translation>Ви впевнені, що хочете видалити обрані списки?</translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="720"/>
+        <location filename="../DialogSignalListEditor.cpp" line="727"/>
         <source>%1 (Copy)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="788"/>
-        <location filename="../DialogSignalListEditor.cpp" line="833"/>
+        <location filename="../DialogSignalListEditor.cpp" line="795"/>
+        <location filename="../DialogSignalListEditor.cpp" line="840"/>
         <source>Warning! Changes are not saved. Do you wish to save them?</source>
         <translation>Увага! Дані не збережено. Бажаєте зберегти їх?</translation>
     </message>

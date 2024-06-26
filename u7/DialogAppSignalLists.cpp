@@ -89,7 +89,7 @@ DialogAppSignalLists::DialogAppSignalLists(DbController* db, QWidget* parent) :
 	m_listPropertyEditor = new IdePropertyEditor(this, m_db);
 	connect(m_listPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogAppSignalLists::onPropertiesChanged);
 
-	m_signalListWidget = new AppSignalLists::AppSignalListWidget(*m_signalProvider, false, this);
+	m_signalListWidget = new AppSignalLists::AppSignalListWidget(*m_signalProvider, nullptr, this);
 	connect(m_signalListWidget, &AppSignalLists::AppSignalListWidget::signalsChanged, this, &DialogAppSignalLists::onSignalsChanged);
 
 	maskLayout->addWidget(m_mask);

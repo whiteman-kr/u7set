@@ -651,10 +651,18 @@ namespace AppSignalLists
 	//
 	// AppSignalListModel
 	//
-	AppSignalListModel::AppSignalListModel(ISignalManager& signalManager) :
+	AppSignalListModel::AppSignalListModel(ISignalManager& signalManager, bool hasValueColumn) :
 		QAbstractTableModel(),
 		m_signalManager(signalManager)
 	{
+		for (int c = 0; c < static_cast<int>(Columns::Count); c++) 
+		{
+			if (hasValueColumn == false && c == static_cast<int>(Columns::Value)) 
+			{
+				continue;
+			}
+			m_columns.push_back(static_cast<Columns>(c));
+		}
 	}
 
 	const AppSignalList* AppSignalListModel::list() const
@@ -755,6 +763,16 @@ namespace AppSignalLists
 		return true;
 	}
 
+	AppSignalListModel::Columns AppSignalListModel::column(int index) const 
+	{
+		if (index < 0 || index >= columnCount())
+		{
+			Q_ASSERT(false);
+			return AppSignalListModel::Columns::AppSignalID;
+		}
+		return m_columns[index];
+	}
+
 	QString AppSignalListModel::columnText(int index) const
 	{
 		if (index < 0 || index >= columnCount())
@@ -791,7 +809,7 @@ namespace AppSignalLists
 	int AppSignalListModel::columnCount(const QModelIndex& parent) const
 	{
 		Q_UNUSED(parent);
-		return static_cast<int>(Columns::Count);
+		return static_cast<int>(m_columns.size());
 	}
 
 	void AppSignalListModel::sort(int column, Qt::SortOrder order)
@@ -801,7 +819,7 @@ namespace AppSignalLists
 			return;
 		}
 
-		AppSignalListModelSorter sorter(m_signalManager, m_appSignalList, static_cast<Columns>(column), order);
+		AppSignalListModelSorter sorter(m_signalManager, m_appSignalList, m_columns[column], order);
 		std::sort(m_allHashes.begin(), m_allHashes.end(), sorter);
 
 		emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
@@ -814,7 +832,7 @@ namespace AppSignalLists
 		if (role == Qt::DisplayRole)
 		{
 			int col = index.column();
-			if (col < 0 || col >= static_cast<int>(Columns::Count))
+			if (col < 0 || col >= static_cast<int>(m_columns.size()))
 			{
 				assert(false);
 				return QVariant();
@@ -832,9 +850,9 @@ namespace AppSignalLists
 			bool found = false;
 			const AppSignalParam asp = m_signalManager.signalParam(hash, &found);
 
-			int columnType = col;
+			Columns columnType = m_columns[col];
 
-			if (columnType == static_cast<int>(Columns::AppSignalID))
+			if (columnType == Columns::AppSignalID)
 			{
 				if (found == false) 
 				{
@@ -850,27 +868,27 @@ namespace AppSignalLists
 				return "?";
 			}
 
-			if (columnType == static_cast<int>(Columns::CustomAppSignalID))
+			if (columnType == Columns::CustomAppSignalID)
 			{
 				return asp.customSignalId();
 			}
 
-			if (columnType == static_cast<int>(Columns::EquipmentID))
+			if (columnType == Columns::EquipmentID)
 			{
 				return asp.equipmentId();
 			}
 
-			if (columnType == static_cast<int>(Columns::Caption))
+			if (columnType == Columns::Caption)
 			{
 				return asp.caption();
 			}
 
-			if (columnType == static_cast<int>(Columns::Units))
+			if (columnType == Columns::Units)
 			{
 				return asp.unit();
 			}
 
-			if (columnType == static_cast<int>(Columns::LowLimit))
+			if (columnType == Columns::LowLimit)
 			{
 				if (asp.enableTuning() == true)
 				{
@@ -880,7 +898,7 @@ namespace AppSignalLists
 				return QString::number(asp.lowEngineeringUnits(), 'f', asp.precision());
 			}
 
-			if (columnType == static_cast<int>(Columns::HighLimit))
+			if (columnType == Columns::HighLimit)
 			{
 				if (asp.enableTuning() == true)
 				{
@@ -890,7 +908,7 @@ namespace AppSignalLists
 				return QString::number(asp.highEngineeringUnits(), 'f', asp.precision());
 			}
 
-			if (columnType == static_cast<int>(Columns::Type))
+			if (columnType == Columns::Type)
 			{
 				if (asp.isAnalog() == true)
 				{
@@ -911,7 +929,7 @@ namespace AppSignalLists
 				return "Other";
 			}
 
-			if (columnType == static_cast<int>(Columns::Value))
+			if (columnType == Columns::Value)
 			{
 				if (asp.enableTuning() == true)
 				{
@@ -944,13 +962,13 @@ namespace AppSignalLists
 	{
 		if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
 		{
-			if (section < 0 || section >= static_cast<int>(Columns::Count))
+			if (section < 0 || section >= static_cast<int>(m_columns.size()))
 			{
 				assert(false);
 				return QVariant();
 			}
 
-			switch (static_cast<Columns>(section))
+			switch (m_columns[section])
 			{
 			case Columns::CustomAppSignalID:
 				return QObject::tr(col_CustomAppSignalId.toStdString().c_str());

@@ -2,6 +2,7 @@
 
 #include "SignalList.h"
 #include "../../../AppSignalLib/ISignalManager.h"
+#include "../../../AppSignalLib/ITuningSignalManager.h"
 
 #include <vector>
 #include <memory>
@@ -18,7 +19,7 @@ namespace AppSignalLists
 		Q_OBJECT
 
 	public:
-		AppSignalListWidget(ISignalManager& signalManager, bool requestValuesEnabled, QWidget* parent);
+		AppSignalListWidget(ISignalManager& appSignalManager, ITuningSignalManager* tuningSignalManager, QWidget* parent);
 		~AppSignalListWidget();
 
 		bool readOnly() const;
@@ -29,7 +30,6 @@ namespace AppSignalLists
 
 	signals:
 		void signalsChanged();
-		//void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok); 	// Qt::DirectConnection!
 
 	private:
 		enum class FilterTextType
@@ -64,7 +64,8 @@ namespace AppSignalLists
 		void enableItemsListControls();
 
 	private:
-		ISignalManager& m_signalManager;
+		ISignalManager& m_appSignalManager;
+		ITuningSignalManager* m_tuningSignalManager = nullptr;	// optional, used to get current tuning values
 		std::vector<Hash> m_signalHashes;
 
 		AppSignalList* m_appSignalList = nullptr;

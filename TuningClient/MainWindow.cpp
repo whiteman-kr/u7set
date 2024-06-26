@@ -1269,7 +1269,7 @@ void MainWindow::showAppSignalListEditor()
 		return;
 	}
 
-	AppSignalLists::DialogSignalListEditor::showDialog(m_appSignalListSet, m_tuningSignalManager, this);
+	AppSignalLists::DialogSignalListEditor::showDialog(m_appSignalListSet, m_tuningSignalManager, &m_tuningSignalManager, this);
 }
 
 void MainWindow::slot_signalListsChanged() 

@@ -65,30 +65,6 @@ namespace AppSignalLists
 		Q_OBJECT
 
 	public:
-		AppSignalListModel(ISignalManager& signalManager);
-
-		const AppSignalList* list() const;
-		void setList(AppSignalList* list);
-
-		bool itemExists(Hash hash) const;
-		Hash itemHash(int row) const;
-
-		[[nodiscard]] bool add(const AppSignalListItem& item);
-		[[nodiscard]] bool remove(Hash hash);
-
-		QString columnText(int index) const;
-		QString cellText(int column, int row) const;
-
-		// Item count
-
-		int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-		int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-
-		// Sorting
-
-		void sort(int column, Qt::SortOrder order) override;
-
-	public:
 		enum class Columns
 		{
 			CustomAppSignalID,
@@ -103,6 +79,31 @@ namespace AppSignalLists
 			Count
 		};
 
+	public:
+		AppSignalListModel(ISignalManager& signalManager, bool hasValueColumn);
+
+		const AppSignalList* list() const;
+		void setList(AppSignalList* list);
+
+		bool itemExists(Hash hash) const;
+		Hash itemHash(int row) const;
+
+		[[nodiscard]] bool add(const AppSignalListItem& item);
+		[[nodiscard]] bool remove(Hash hash);
+
+		Columns column(int index) const;
+		QString columnText(int index) const;
+		QString cellText(int column, int row) const;
+
+		// Item count
+
+		int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+		int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+
+		// Sorting
+
+		void sort(int column, Qt::SortOrder order) override;
+
 	private:
 		virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -112,6 +113,8 @@ namespace AppSignalLists
 		const AppSignalList* m_appSignalList = nullptr;
 
 		std::vector<Hash> m_allHashes;
+
+		std::vector <Columns> m_columns;
 	};
 
 	class DialogAppSignalListValue : public QDialog

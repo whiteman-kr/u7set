@@ -5,11 +5,14 @@
 
 namespace AppSignalLists
 {
-	void DialogSignalListEditor::showDialog(AppSignalListSet& appSignalListSet, ISignalManager& signalManager, QWidget* parent)
+	void DialogSignalListEditor::showDialog(AppSignalListSet& appSignalListSet,
+											ISignalManager& signalManager,
+											ITuningSignalManager* tuningSignalManager,
+											QWidget* parent)
 	{
 		if (s_instance == nullptr)
 		{
-			s_instance = new DialogSignalListEditor(appSignalListSet, signalManager, parent);
+			s_instance = new DialogSignalListEditor(appSignalListSet, signalManager, tuningSignalManager, parent);
 			s_instance->show();
 		}
 		else
@@ -26,7 +29,10 @@ namespace AppSignalLists
 		return s_instance;
 	}
 
-	DialogSignalListEditor::DialogSignalListEditor(AppSignalListSet& appSignalListSet, ISignalManager& signalManager, QWidget* parent) :
+	DialogSignalListEditor::DialogSignalListEditor(AppSignalListSet& appSignalListSet,
+												   ISignalManager& signalManager,
+												   ITuningSignalManager* tuningSignalManager,
+												   QWidget* parent) :
 		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
 		m_appLists(appSignalListSet),
 		m_signalManager(signalManager)
@@ -85,7 +91,7 @@ namespace AppSignalLists
 		m_listPropertyEditor = new ExtWidgets::PropertyEditor(this);
 		connect(m_listPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogSignalListEditor::onPropertiesChanged);
 
-		m_signalListWidget = new AppSignalLists::AppSignalListWidget(m_signalManager, false, this);
+		m_signalListWidget = new AppSignalLists::AppSignalListWidget(m_signalManager, tuningSignalManager, this);
 		connect(m_signalListWidget, &AppSignalLists::AppSignalListWidget::signalsChanged, this, &DialogSignalListEditor::onSignalsChanged);
 
 		maskLayout->addWidget(m_mask);
@@ -182,11 +188,6 @@ namespace AppSignalLists
 		//
 		fillAppSignalLists();
 
-		if (m_listsTree->topLevelItemCount() != 0)
-		{
-			m_listsTree->topLevelItem(0)->setSelected(true);
-		}
-
 		updateListEditorEnableState();
 
 		// sort items
@@ -224,6 +225,11 @@ namespace AppSignalLists
 		}
 
 		m_listPropertyEditor->setSplitterPosition(QSettings().value("DialogSignalListEditor/splitterPosition", 200).toInt());
+
+		if (m_listsTree->topLevelItemCount() != 0)
+		{
+			m_listsTree->topLevelItem(0)->setSelected(true);
+		}
 
 		return;
 	}
@@ -393,7 +399,7 @@ namespace AppSignalLists
 
 				for (const QString& mask : m_masks)
 				{
-					if (list->id().contains(mask, Qt::CaseInsensitive) == true)
+					if (list->id().contains(mask, Qt::CaseInsensitive) == true || list->caption().contains(mask, Qt::CaseInsensitive) == true)
 					{
 						maskResult = true;
 						break;
@@ -563,6 +569,7 @@ namespace AppSignalLists
 		}while(m_editLists.get(id) != nullptr);
 
 		list->setId(id);
+		list->setCaption(id.toLower());
 		addList(list);
 
 		return;

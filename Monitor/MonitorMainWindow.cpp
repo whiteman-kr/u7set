@@ -943,7 +943,7 @@ void MonitorMainWindow::schemaTreeListToggled(bool checked)
 
 void MonitorMainWindow::showAppSignalListEditor()
 {
-	AppSignalLists::DialogSignalListEditor::showDialog(m_appSignalListSet, m_signalManager, this);
+	AppSignalLists::DialogSignalListEditor::showDialog(m_appSignalListSet, m_signalManager, nullptr, this);
 }
 
 void MonitorMainWindow::showLog()

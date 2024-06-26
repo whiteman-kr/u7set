@@ -1,5 +1,6 @@
 #include <AppSignalLists/SignalListEditor.h>
 #include "../../AppSignalLib/ISignalManager.h"
+#include "../../AppSignalLib/ITuningSignalManager.h"
 #include "SignalListEditorPrivate.h"
 #include "TextResource.h"
 
@@ -8,12 +9,13 @@ namespace AppSignalLists
 	//
 	// AppSignalListWidget
 	//
-	AppSignalListWidget::AppSignalListWidget(ISignalManager& signalManager, bool requestValuesEnabled, QWidget* parent) :
+	AppSignalListWidget::AppSignalListWidget(ISignalManager& appSignalManager, ITuningSignalManager* tuningSignalManager, QWidget* parent) :
 		QWidget(parent),
-		m_signalManager(signalManager),
-		m_signalHashes(std::move(m_signalManager.signalHashes())),
-		m_signalsModel(std::make_unique<SignalsModel>(m_signalManager)),
-		m_itemsModel(std::make_unique<AppSignalListModel>(m_signalManager))
+		m_appSignalManager(appSignalManager),
+		m_tuningSignalManager(tuningSignalManager),
+		m_signalHashes(std::move(m_appSignalManager.signalHashes())),
+		m_signalsModel(std::make_unique<SignalsModel>(m_appSignalManager)),
+		m_itemsModel(std::make_unique<AppSignalListModel>(m_appSignalManager, m_tuningSignalManager != nullptr))
 	{
 		// Left part
 		//
@@ -106,6 +108,9 @@ namespace AppSignalLists
 
 		// Value filter controls
 		//
+
+		bool requestValuesEnabled = tuningSignalManager != nullptr;
+
 		if (requestValuesEnabled == true)
 		{
 			leftFilterLayout->addSpacing(20);
@@ -183,13 +188,13 @@ namespace AppSignalLists
 
 		rightGridLayout->addStretch();
 
-		m_setValueButton = new QPushButton(tr("Set Value"));
-		connect(m_setValueButton, &QPushButton::clicked, this, &AppSignalListWidget::onSetValueClicked);
-		rightGridLayout->addWidget(m_setValueButton);
-		m_setValueButton->setEnabled(false);
-
 		if (requestValuesEnabled == true)
 		{
+			m_setValueButton = new QPushButton(tr("Set Value"));
+			connect(m_setValueButton, &QPushButton::clicked, this, &AppSignalListWidget::onSetValueClicked);
+			rightGridLayout->addWidget(m_setValueButton);
+			m_setValueButton->setEnabled(false);
+
 			m_setCurrentButton = new QPushButton(tr("Set Current"));
 			connect(m_setCurrentButton, &QPushButton::clicked, this, &AppSignalListWidget::onSetCurrentClicked);
 			rightGridLayout->addWidget(m_setCurrentButton);
@@ -340,7 +345,7 @@ namespace AppSignalLists
 		std::vector<Hash> filteredHashes;
 		filteredHashes.reserve(m_signalHashes.size());
 
-		if (filterText.isEmpty() == true && signalType == SignalType::All)
+		if (filterText.isEmpty() == true && signalType == SignalType::All && filterValue == FilterValueType::All)
 		{
 			// Filter is not set - skip all filtering, just copy hashes array
 			//
@@ -353,7 +358,7 @@ namespace AppSignalLists
 			for (Hash hash : m_signalHashes)
 			{
 				bool ok = false;
-				const AppSignalParam& asp = m_signalManager.signalParam(hash, &ok);
+				const AppSignalParam& asp = m_appSignalManager.signalParam(hash, &ok);
 				Q_ASSERT(ok);
 
 				if (signalType == SignalType::Analog && asp.isAnalog() == false)
@@ -368,8 +373,7 @@ namespace AppSignalLists
 
 				// Value filter
 				//
-				/*
-				if (filterValue != ValueFilterType::All)
+				if (filterValue != FilterValueType::All && m_tuningSignalManager != nullptr)
 				{
 					if (asp.isDiscrete() == false)
 					{
@@ -378,7 +382,7 @@ namespace AppSignalLists
 
 					bool ok = false;
 
-					const TuningSignalState state = m_signalManager.queuedState(hash, &ok);
+					const TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
 					if (ok == true)
 					{
@@ -386,16 +390,16 @@ namespace AppSignalLists
 						{
 							continue;
 						}
-						if (filterValue == ValueFilterType::Zero && state.value().discreteValue() != 0)
+						if (filterValue == FilterValueType::Zero && state.value().discreteValue() != 0)
 						{
 							continue;
 						}
-						if (filterValue == ValueFilterType::One && state.value().discreteValue() != 1)
+						if (filterValue == FilterValueType::One && state.value().discreteValue() != 1)
 						{
 							continue;
 						}
 					}
-				}*/
+				}
 
 				// Text filter
 				//
@@ -503,7 +507,7 @@ namespace AppSignalLists
 			const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 
 			bool ok = false;
-			AppSignalParam asp = m_signalManager.signalParam(item.appSignalHash(), &ok);
+			AppSignalParam asp = m_appSignalManager.signalParam(item.appSignalHash(), &ok);
 			if (ok == false)
 			{
 				continue;
@@ -516,14 +520,17 @@ namespace AppSignalLists
 
 		// Enable control buttons
 		//
-		m_setValueButton->setEnabled(readOnly() == false && selection.size() > 0 && tunableSelected == true);
-
-		m_importValuesButton->setEnabled(readOnly() == false);
+		if (m_setValueButton != nullptr)
+		{
+			m_setValueButton->setEnabled(readOnly() == false && selection.size() > 0 && tunableSelected == true);
+		}
 
 		if (m_setCurrentButton != nullptr)
 		{
-			m_setCurrentButton->setEnabled(readOnly() == false && selection.size() > 0);
+			m_setCurrentButton->setEnabled(readOnly() == false && selection.size() > 0 && tunableSelected == true);
 		}
+
+		m_importValuesButton->setEnabled(readOnly() == false);
 	}
 
 	void AppSignalListWidget::onSignalsSortIndicatorChanged(int column, Qt::SortOrder order)
@@ -668,12 +675,13 @@ namespace AppSignalLists
 
 		// Determine if user clicked on Value column of Tunable signal. If so, show Value dialog, otherwise remove the item
 		//
-		if (m_setValueButton->isEnabled() == true && index.column() == static_cast<int>(AppSignalListModel::Columns::Value))
+		if (m_setValueButton != nullptr && m_setValueButton->isEnabled() == true &&
+			index.column() == static_cast<int>(AppSignalListModel::Columns::Value))
 		{
 			// Determine if signal is tunable
 			//
 			Hash hash = m_itemsModel->itemHash(index.row());
-			if (m_signalManager.signalExists(hash) == false)
+			if (m_appSignalManager.signalExists(hash) == false)
 			{
 				return;
 			}
@@ -681,7 +689,7 @@ namespace AppSignalLists
 			const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 
 			bool ok = false;
-			AppSignalParam asp = m_signalManager.signalParam(item.appSignalHash(), &ok);
+			AppSignalParam asp = m_appSignalManager.signalParam(item.appSignalHash(), &ok);
 			if (ok == false)
 			{
 				Q_ASSERT(false);
@@ -703,20 +711,20 @@ namespace AppSignalLists
 
 		QList<QAction*> actions;
 
-		std::vector<std::pair<AppSignalListModel::Columns, QString>> actionsData;
-		actionsData.reserve(static_cast<int>(AppSignalListModel::Columns::Count));
+		std::vector<std::pair<int, QString>> actionsData;
+		actionsData.reserve(m_itemsModel->columnCount());
 
-		for (int i = 0; i < static_cast<int>(AppSignalListModel::Columns::Count); i++)
+		for (int i = 0; i < m_itemsModel->columnCount(); i++)
 		{
-			actionsData.emplace_back(static_cast<AppSignalListModel::Columns>(i), m_itemsModel->columnText(i));
+			actionsData.emplace_back(static_cast<int>(m_itemsModel->column(i)), m_itemsModel->columnText(i));
 		}
 
-		for (std::pair<AppSignalListModel::Columns, QString> ad : actionsData)
+		for (const auto& [col, text] : actionsData)
 		{
-			QAction* action = new QAction(ad.second, this);
-			action->setData(QVariant::fromValue(ad.first));
+			QAction* action = new QAction(text, this);
+			action->setData(QVariant::fromValue(col));
 			action->setCheckable(true);
-			action->setChecked(!m_itemsTable->horizontalHeader()->isSectionHidden(static_cast<int>(ad.first)));
+			action->setChecked(!m_itemsTable->horizontalHeader()->isSectionHidden(col));
 
 			if (m_itemsTable->horizontalHeader()->count() - m_itemsTable->horizontalHeader()->hiddenSectionCount() == 1 &&
 				action->isChecked() == true)
@@ -744,9 +752,9 @@ namespace AppSignalLists
 
 		int column = action->data().value<int>();
 
-		if (column >= static_cast<int>(AppSignalListModel::Columns::Count))
+		if (column >= m_itemsModel->columnCount())
 		{
-			Q_ASSERT(column < static_cast<int>(AppSignalListModel::Columns::Count));
+			Q_ASSERT(column < m_itemsModel->columnCount());
 			return;
 		}
 
@@ -785,7 +793,7 @@ namespace AppSignalLists
 
 			bool ok = false;
 
-			const AppSignalParam p = m_signalManager.signalParam(hash, &ok);
+			const AppSignalParam p = m_appSignalManager.signalParam(hash, &ok);
 			if (ok == false)
 			{
 				Q_ASSERT(false);
@@ -896,7 +904,7 @@ namespace AppSignalLists
 		{
 			Hash hash = m_itemsModel->itemHash(index.row());
 
-			if (m_signalManager.signalExists(hash) == false)
+			if (m_appSignalManager.signalExists(hash) == false)
 			{
 				continue;
 			}
@@ -904,7 +912,7 @@ namespace AppSignalLists
 			const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 
 			bool ok = false;
-			AppSignalParam asp = m_signalManager.signalParam(item.appSignalHash(), &ok);
+			AppSignalParam asp = m_appSignalManager.signalParam(item.appSignalHash(), &ok);
 			if (ok == false)
 			{
 				Q_ASSERT(false);
@@ -969,15 +977,13 @@ namespace AppSignalLists
 		{
 			Hash hash = m_itemsModel->itemHash(index.row());
 
-			if (m_signalManager.signalExists(hash) == false)
+			if (m_appSignalManager.signalExists(hash) == false)
 			{
 				continue;
 			}
 
 			AppSignalListItem& item = m_appSignalList->itemByHash(hash);
-
 			item.setValue(d.value());
-
 			m_itemsTable->update(index);
 		}
 		emit signalsChanged();
@@ -985,37 +991,34 @@ namespace AppSignalLists
 
 	void AppSignalListWidget::onSetCurrentClicked()
 	{
-		/*
 		if (readOnly() == true)
 		{
 			return;
 		}
 
-		if (m_appSignallist == nullptr)
+		if (m_appSignalList == nullptr)
 		{
 			return;
 		}
 
-		for (const QModelIndex& index : m_signalsTable->selectionModel()->selectedRows())
+		for (const QModelIndex& index : m_itemsTable->selectionModel()->selectedRows())
 		{
 			Hash hash = m_itemsModel->itemHash(index.row());
 
-			if (m_signalManager.signalExists(hash) == false)
+			if (m_appSignalManager.signalExists(hash) == false)
 			{
 				continue;
 			}
 
-			AppSignalListItem& item = (*m_appSignallist)[hash];
-
-			TuningValue currentValue;
+			AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 
 			bool ok = false;
-			emit getCurrentSignalValue(item.appSignalHash(), &currentValue, &ok);
+			auto state = m_tuningSignalManager->state(item.appSignalHash(), &ok);
 
-			if (ok == true)
+			if (ok == true && state.valid() == true)
 			{
-				item.setValue(currentValue);
-				m_itemsTable->update(index);
+				item.setValue(state.value());
+				m_itemsTable->update(m_itemsModel->index(index.row(), static_cast<int>(AppSignalListModel::Columns::Value)));
 			}
 			else
 			{
@@ -1023,7 +1026,7 @@ namespace AppSignalLists
 			}
 		}
 
-		emit signalsChanged();*/
+		emit signalsChanged();
 	}
 
 	void AppSignalListWidget::onExportValuesClicked()
@@ -1167,7 +1170,7 @@ namespace AppSignalLists
 			// Get signal parameters from database
 
 			bool ok = false;
-			const AppSignalParam asp = m_signalManager.signalParam(hash, &ok);
+			const AppSignalParam asp = m_appSignalManager.signalParam(hash, &ok);
 			if (ok == false)
 			{
 				notFoundSignals.push_back(appSignalId);
