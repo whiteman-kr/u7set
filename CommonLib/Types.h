@@ -2,9 +2,9 @@
 
 #include <type_traits>
 #include <cassert>
-#include <QObject>
+#include <QMetaObject>
 #include <QMetaEnum>
-
+#include <QObject>
 
 /*! \brief Contains enumerations used in RPCT*/
 class E : public QObject
