@@ -44,10 +44,10 @@ namespace VFrame30
 		}
 	}
 
-	void Context::reset()
-	{
-		*this = Context{};
-	}
+	//void Context::reset()
+	//{
+	//	*this = Context{};
+	//}
 
 	const VFrame30::DiagStateController* Context::diagStateController() const
 	{

@@ -134,7 +134,7 @@ namespace Builder
 	{
 		Q_ASSERT(m_buildTasks.empty() == false);
 
-		m_context = std::make_unique<Context>(m_log, buildOutputPath(), expertMode());
+		m_context = std::make_unique<Context>(m_log, buildOutputPath(), expertMode(), buildOptions());
 		Q_ASSERT(m_context->m_log);
 
 		m_totalProgress = 0;
@@ -1529,9 +1529,12 @@ namespace Builder
 			return true;
 		}
 
-		if (m_context->m_projectProperties.generateAppLogicDrawings() == true)
+		if (bool generateAppLogicDrawings = BuildOptions::makeDecision(m_context->m_projectProperties.generateAppLogicDrawings(),
+																	   m_context->m_buildOptions.generateAppLogicDrawings);
+			generateAppLogicDrawings == true)
 		{
-			m_log->writeMessage(tr("--------------------------------------[ Generating Schemas Albums ]---------------------------------------"));
+			m_log->writeMessage(
+				tr("--------------------------------------[ Generating Schemas Albums ]---------------------------------------"));
 
 			ok = createSchemasAlbums();
 			if (ok == false)
@@ -2754,7 +2757,8 @@ namespace Builder
 	{
 		Q_ASSERT(m_context);
 
-		if (m_context->m_projectProperties.runSimTestsOnBuild() == false)
+		if (bool runSimTests = BuildOptions::makeDecision(m_context->m_projectProperties.runSimTestsOnBuild(), m_context->m_buildOptions.runSimTestsOnBuild);
+			runSimTests == false)
 		{
 			return true;
 		}
@@ -2996,6 +3000,16 @@ namespace Builder
 	void BuildWorkerThread::setExpertMode(bool value)
 	{
 		m_expertMode = value;
+	}
+
+	BuildOptions BuildWorkerThread::buildOptions() const
+	{
+		return m_buildOptions;
+	}
+
+	void BuildWorkerThread::setBuildOptions(BuildOptions value)
+	{
+		m_buildOptions = value;
 	}
 
 	bool BuildWorkerThread::isInterruptRequested()

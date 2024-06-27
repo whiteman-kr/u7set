@@ -45,10 +45,18 @@ namespace Db
 		constexpr static const char* SafetyProject = "Safety Project";
 		constexpr static const char* SuppressWarnings = "SuppressWarnings";						// A list of suppressed warnings on build
 		constexpr static const char* UppercaseAppSignalId = "UppercaseAppSignalID";
+		
 		constexpr static const char* GenerateAppSignalsXml = "Generate AppSignals.xml";			// Generate file AppSignals.xml on build
+		constexpr static const char* GenerateAppSignalsXmlDescription = "Generate file AppSignals.xml on build";
+
 		constexpr static const char* GenerateAppSignalsExtXml = "Generate AppSignalsExt.xml";	// Generate file AppSignalsExt.xml on build
+		constexpr static const char* GenerateAppSignalsExtXmlDescription = "Generate file AppSignalsExt.xml on build";	// Generate file AppSignalsExt.xml on build
+		
 		constexpr static const char* GenerateAppLogicDrawings = "Generate App Logic Drawings";	// Generate file AppLogicDrawings.pdf on build
+		constexpr static const char* GenerateAppLogicDrawingsDescription = "Generate 'Schemas.pdf/Application Logic.pdf'";
+		
 		constexpr static const char* GenerateExtraDebugInfo = "Generate Extra Debug Info";		// Generate extra debug information on build
+
 		constexpr static const char* RunSimTestsOnBuild = "Run Simulator Tests on Build";		// Run simulator based tests on build project
 		constexpr static const char* SimulatorTestsTimeout = "Simulator Tests Timeout";			// Simulator run tests script timeout
 		constexpr static const char* MismatchPresetVersionAsWarning = "Mismatch Preset Version as Warning";	// If preset version mismatch is detected, treat it as a warning

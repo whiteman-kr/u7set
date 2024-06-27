@@ -1,6 +1,7 @@
 #pragma once
 
 #include "IssueLogger.h"
+#include "BuildOptions.h"
 
 namespace Builder
 {
@@ -26,7 +27,8 @@ namespace Builder
 				   QString projectUserName,
 				   QString projectUserPassword,
 				   QString buildPath,
-				   bool expertMode);
+				   bool expertMode,
+				   BuildOptions buildOptions);
 		bool stop();
 		bool isRunning() const;
 

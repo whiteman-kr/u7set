@@ -99,12 +99,17 @@ private:
 	QPushButton* m_cancelButton = nullptr;
 
 	QSplitter* m_vsplitter = nullptr;
-	QSplitter* m_hsplitter = nullptr;
 
 	QWidget* m_settingsWidget = nullptr;
 
 	QLabel* m_buildLabel[2] = {nullptr, nullptr};
 	QComboBox* m_warningsLevelComboBox = nullptr;
+
+	QComboBox* m_generateAppLogicDrawings = nullptr;
+	QComboBox* m_generateAppSignalsXml = nullptr;
+	QComboBox* m_generateAppSignalsExtXml = nullptr;
+	QComboBox* m_generateExtraDebugInfo = nullptr;
+	QComboBox* m_runSimTestsOnBuild = nullptr;
 
 	int m_logTimerId = -1;
 

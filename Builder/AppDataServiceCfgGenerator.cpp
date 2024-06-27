@@ -142,7 +142,7 @@ namespace Builder
 
 			if (DeviceHelper::isPropertyExists(devModule, EquipmentPropNames::ACTUATOR_DESCRIPTION) == true)
 			{
-				bool res = DeviceHelper::getStrProperty(devModule, EquipmentPropNames::ACTUATOR_DESCRIPTION, &actuatorDesc, log);
+				/*bool res = */DeviceHelper::getStrProperty(devModule, EquipmentPropNames::ACTUATOR_DESCRIPTION, &actuatorDesc, log);
 
 				//result &= res;
 			}

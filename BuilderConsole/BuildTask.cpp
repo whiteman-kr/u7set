@@ -10,15 +10,18 @@ BuildTask::BuildTask(QObject* parent) :
 
 void BuildTask::start()
 {
+	Builder::BuildOptions buildOptions;
+
 	m_builder.start(m_databaseAddress,
-				  m_databasePort,
-				  m_databaseUserName,
-				  m_databasePassword,
-				  m_projectName,
-				  m_projectUserName,
-				  m_projectUserPassword,
-				  m_buildOutputPath,
-				  false);
+					m_databasePort,
+					m_databaseUserName,
+					m_databasePassword,
+					m_projectName,
+					m_projectUserName,
+					m_projectUserPassword,
+					m_buildOutputPath,
+					false,
+					buildOptions);
 
 	return;
 }

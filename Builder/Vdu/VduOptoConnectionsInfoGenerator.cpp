@@ -53,7 +53,7 @@ namespace Builder
 
 		result &= writeVciFile();
 
-		if (m_context->m_projectProperties.generateExtraDebugInfo() == true)
+		if (m_context->generateExtraDebugInfo() == true)
 		{
 			result &= writeTxtFile();
 		}

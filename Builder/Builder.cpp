@@ -47,7 +47,8 @@ namespace Builder
 						QString projectUserName,
 						QString projectUserPassword,
 						QString buildPath,
-						bool expertMode)
+						bool expertMode,
+						BuildOptions buildOptions)
 	{
 		qDebug() << "Build started\n" <<
 					"\tdatabaseAddress: " << databaseAddress << "\n" <<
@@ -71,6 +72,7 @@ namespace Builder
 		m_thread->setProjectUserPassword(projectUserPassword);
 		m_thread->setBuildOutputPath(buildPath);
 		m_thread->setExpertMode(expertMode);
+		m_thread->setBuildOptions(buildOptions);
 
 		m_log.clear();
 

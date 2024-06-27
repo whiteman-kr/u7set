@@ -73,6 +73,8 @@ qt_add_library(${TARGET} STATIC
 	BdfFile.h
 	Builder.cpp
 	Builder.h
+	BuildOptions.cpp
+	BuildOptions.h
 	BuildResultWriter.cpp
 	BuildResultWriter.h
 	BuildWorkerThread.cpp

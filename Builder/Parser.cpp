@@ -3665,7 +3665,7 @@ namespace Builder
 		// Write fully parsed AppLogicData to the output for further analysis by third-party tools.
 		// Active only if Project setting "Generate Extra Debug Info" is switched on
 		//
-		if (m_context->m_projectProperties.generateExtraDebugInfo() == true)
+		if (m_context->generateExtraDebugInfo() == true)
 		{
 			LOG_MESSAGE(m_log, tr("Writing parsed data to the output..."));
 

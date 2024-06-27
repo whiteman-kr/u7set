@@ -181,8 +181,7 @@ namespace Builder
 
 		// Project property Generate Extra debug Info
 		//
-		bool generateExtraDebugIno = false;
-		db.getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtraDebugIno, nullptr);
+		bool generateExtraDebugIno = context->generateExtraDebugInfo();
 
 		// --
 		//

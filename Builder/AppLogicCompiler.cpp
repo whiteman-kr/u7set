@@ -1488,7 +1488,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(m_context);
 
-		if (m_context->m_projectProperties.generateExtraDebugInfo() == false)
+		if (m_context->generateExtraDebugInfo() == false)
 		{
 			return true;
 		}

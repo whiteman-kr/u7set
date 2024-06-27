@@ -626,6 +626,16 @@ public:
 	};
 	Q_ENUM(ValueViewType)
 
+	// For Build Options
+	//
+	enum class BuildOptionValue
+	{
+		Inherit, // Inherited from project settings
+		True,
+		False
+	};
+	Q_ENUM(BuildOptionValue)
+
 	// SchemaItemIndicator Type
 	//
 	enum class IndicatorType	// MUST BE SEQUENTIAL, AS VALUE IS A VECTOR INDEX

@@ -1,14 +1,13 @@
 #pragma once
 
-#include <QJSEngine>
-
 #include <HardwareLib/DeviceModule.h>
 
 #include "../lib/TuningDataStorage.h"
 
+#include "BuildOptions.h"
 #include "Context.h"
-#include "TuningBuilder.h"
 #include "OptoModule.h"
+#include "TuningBuilder.h"
 
 
 namespace Builder
@@ -311,6 +310,9 @@ namespace Builder
 		bool expertMode() const;
 		void setExpertMode(bool value);
 
+		BuildOptions buildOptions() const;
+		void setBuildOptions(BuildOptions value);
+
 		bool isInterruptRequested();
 
 		int progress() const;
@@ -331,6 +333,7 @@ namespace Builder
 		QString m_buildOutputPath;
 
 		bool m_expertMode = false;
+		BuildOptions m_buildOptions;
 
 		IssueLogger* m_log = nullptr;		// Probably it's better to make it as shared_ptr
 
