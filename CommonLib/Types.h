@@ -213,7 +213,8 @@ public:
 		Input,					// physical input, application logic signal
 		Output,					// physical output, application logic signal
 		Validity,				// input/output validity, application logic signal
-		Diagnostics				// Diagnostics signal
+		Diagnostics,			// Diagnostics signal
+		SoftwareCalculated		// Software calculated signal
 	};
 	Q_ENUM(SignalFunction)
 
@@ -223,7 +224,7 @@ public:
 	{
 		LittleEndian,
 		BigEndian,
-		NoEndian				// Direct write byte order is not applicable
+		NoEndian				// Direct write/read byte order is not applicable
 	};
 	Q_ENUM(ByteOrder)
 
@@ -263,7 +264,8 @@ public:
 	enum class MemoryArea
 	{
 		ApplicationData,
-		DiagnosticsData
+		DiagnosticsData,
+		NotApplicable
 	};
 	Q_ENUM(MemoryArea)
 
