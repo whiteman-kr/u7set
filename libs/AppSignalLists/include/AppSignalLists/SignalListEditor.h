@@ -1,13 +1,23 @@
 #pragma once
 
 #include "SignalList.h"
-#include "../../../AppSignalLib/ISignalManager.h"
-#include "../../../AppSignalLib/ITuningSignalManager.h"
-
-#include <vector>
-#include <memory>
 
 #include <QWidget>
+
+#include <memory>
+#include <vector>
+
+class QComboBox;
+class QItemSelection;
+class QLineEdit;
+class QModelIndex;
+class QPoint;
+class QPushButton;
+class QSplitter;
+class QTableView;
+
+class ISignalManager;
+class ITuningSignalManager;
 
 namespace AppSignalLists
 {
@@ -25,7 +35,8 @@ namespace AppSignalLists
 		bool readOnly() const;
 		void setReadOnly(bool value);
 
-		AppSignalList* list() const;
+		AppSignalList* list();
+		const AppSignalList* list() const;
 		void setList(AppSignalList* list);
 
 	signals:
@@ -65,7 +76,7 @@ namespace AppSignalLists
 
 	private:
 		ISignalManager& m_appSignalManager;
-		ITuningSignalManager* m_tuningSignalManager = nullptr;	// optional, used to get current tuning values
+		ITuningSignalManager* m_tuningSignalManager = nullptr; // optional, used to get current tuning values
 		std::vector<Hash> m_signalHashes;
 
 		AppSignalList* m_appSignalList = nullptr;
@@ -133,5 +144,4 @@ namespace AppSignalLists
 		void onExportValuesClicked();
 		void onImportValuesClicked();
 	};
-
-}
+} // namespace AppSignalLists

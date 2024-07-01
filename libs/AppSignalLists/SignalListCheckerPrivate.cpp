@@ -1,6 +1,4 @@
-#include "./include/AppSignalLists/SignalListChecker.h"
 #include "SignalListCheckerPrivate.h"
-#include "../UtilsLib/LogFile.h"
 
 namespace AppSignalLists
 {
@@ -15,7 +13,7 @@ namespace AppSignalLists
 
 		QTextEdit* edit = new QTextEdit();
 
-		QString text = tr("<font size=\"4\">Errors have been occured while loading signal lists:<br><br>");
+		QString text = tr("<font size=\"4\">Errors have been occurred while loading signal lists:<br><br>");
 
 		for (const std::pair<QString, QString>& p : notFoundSignalsAndFilters)
 		{

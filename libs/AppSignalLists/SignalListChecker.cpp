@@ -1,6 +1,7 @@
-#include "./include/AppSignalLists/SignalListChecker.h"
-#include "SignalListCheckerPrivate.h"
+#include <AppSignalLists/SignalListChecker.h>
+#include <AppSignalLists/SignalList.h>
 #include "../UtilsLib/LogFile.h"
+#include "SignalListCheckerPrivate.h"
 
 namespace AppSignalLists
 {
@@ -122,16 +123,17 @@ namespace AppSignalLists
 		{
 			// Check hashes of user-added signals to the list
 			//
-			std::set<Hash> itemsHashes = list->itemsHashes();
+			auto itemsHashes = list->itemsHashes();
 			for (Hash itemHash : itemsHashes)
 			{
 				if (allHashes.contains(itemHash) == false)
 				{
 					result.insert(itemHash);
-					notFoundSignalsInLists.push_back({list->itemByHash(itemHash).appSignalId(), list->id()});
+					notFoundSignalsInLists.emplace_back(list->itemByHash(itemHash).appSignalId(), list->id());
 				}
 			}
 		}
+
 		return result;
 	}
 
@@ -145,7 +147,7 @@ namespace AppSignalLists
 		{
 			QString listId = list->id();
 
-			const std::set<Hash>& listHashesCache = list->itemsHashes();
+			auto listHashesCache = list->itemsHashes();
 			for (Hash cachedHash : listHashesCache)
 			{
 				if (allHashes.contains(cachedHash) == false)
@@ -168,39 +170,34 @@ namespace AppSignalLists
 		return result;
 	}
 
-	void AppSignalListSetChecker::removeListItems(AppSignalListSet& listSet, std::set<Hash> hashesToRemove)
+	void AppSignalListSetChecker::removeListItems(AppSignalListSet& listSet, const std::set<Hash>& hashesToRemove)
 	{
 		for (const auto& list : listSet.lists())
 		{
 			for (Hash itemHash : hashesToRemove)
 			{
-				if (list->itemExists(itemHash) == true)
-				{
-					list->remove(itemHash);
-				}
+				list->remove(itemHash);
 			}
 		}
+
+		return;
 	}
 
-	void AppSignalListSetChecker::removeCachedHashes(AppSignalListSet& listSet, std::set<Hash> hashesToRemove)
+	void AppSignalListSetChecker::removeCachedHashes(AppSignalListSet& listSet, const std::set<Hash>& hashesToRemove)
 	{
 		for (const auto& list : listSet.lists())
 		{
 			auto& mutableAppListHashesCache = list->mutableAppListHashesCache();
 			auto& mutableTuningListHashesCache = list->mutableTuningListHashesCache();
-			
+
 			for (Hash itemHash : hashesToRemove)
 			{
-				if (mutableAppListHashesCache.contains(itemHash) == true)
-				{
-					mutableAppListHashesCache.erase(itemHash);
-				}
-				if (mutableTuningListHashesCache.contains(itemHash) == true)
-				{
-					mutableTuningListHashesCache.erase(itemHash);
-				}
+				mutableAppListHashesCache.erase(itemHash);
+				mutableTuningListHashesCache.erase(itemHash);
 			}
 		}
+
+		return;
 	}
 
 } // namespace AppSignalLists

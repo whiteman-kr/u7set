@@ -1,8 +1,8 @@
-#include <AppSignalLists/SignalListEditor.h>
 #include "../../AppSignalLib/ISignalManager.h"
 #include "../../AppSignalLib/ITuningSignalManager.h"
 #include "SignalListEditorPrivate.h"
 #include "TextResource.h"
+#include <AppSignalLists/SignalListEditor.h>
 
 namespace AppSignalLists
 {
@@ -211,7 +211,7 @@ namespace AppSignalLists
 		m_importValuesButton->setEnabled(false);
 
 		itemsLayout->addLayout(rightGridLayout);
-		
+
 		rightLayout->addLayout(itemsLayout);
 
 		// Setup splitter
@@ -300,7 +300,12 @@ namespace AppSignalLists
 		return;
 	}
 
-	AppSignalList* AppSignalListWidget::list() const
+	AppSignalList* AppSignalListWidget::list()
+	{
+		return m_appSignalList;
+	}
+
+	const AppSignalList* AppSignalListWidget::list() const
 	{
 		return m_appSignalList;
 	}
@@ -359,7 +364,11 @@ namespace AppSignalLists
 			{
 				bool ok = false;
 				const AppSignalParam& asp = m_appSignalManager.signalParam(hash, &ok);
-				Q_ASSERT(ok);
+
+				if (ok == false)
+				{
+					continue;
+				}
 
 				if (signalType == SignalType::Analog && asp.isAnalog() == false)
 				{
@@ -380,8 +389,7 @@ namespace AppSignalLists
 						continue;
 					}
 
-					bool ok = false;
-
+					ok = false;
 					const TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
 					if (ok == true)
@@ -403,7 +411,6 @@ namespace AppSignalLists
 
 				// Text filter
 				//
-
 				if (filterText.isEmpty() == false)
 				{
 					bool filterResult = false;
@@ -1040,7 +1047,10 @@ namespace AppSignalLists
 		int rowCount = m_itemsModel->rowCount();
 
 		static QString path{"."};
-		QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"), path + QDir::separator() + m_appSignalList->id() + ".csv", tr("CSV (*.csv)"));
+		QString fileName = QFileDialog::getSaveFileName(this,
+														tr("Export to CSV"),
+														path + QDir::separator() + m_appSignalList->id() + ".csv",
+														tr("CSV (*.csv)"));
 
 		if (fileName.isEmpty() == true)
 		{

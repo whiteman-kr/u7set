@@ -1,5 +1,5 @@
-#include "./include/AppSignalLists/SignalList.h"
 #include "TextResource.h"
+#include <AppSignalLists/SignalList.h>
 #include <ProtoCommonHelper.h>
 
 namespace AppSignalLists
@@ -70,7 +70,7 @@ namespace AppSignalLists
 		propSignalType->setDescription(tr("Filters application signals by type: analog or discrete"));
 
 		auto propID = ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_ID, true, AppSignalList::id, AppSignalList::setId);
-		propID->setDescription(tr("Specifes application signal list unique ID"));
+		propID->setDescription(tr("Specifies application signal list unique ID"));
 
 		auto propTags =
 			ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Tags, true, AppSignalList::userTags, AppSignalList::setUserTags);
@@ -879,21 +879,15 @@ namespace AppSignalLists
 
 		for (auto& list : m_lists)
 		{
-			if (list == nullptr)
-			{
-				Q_ASSERT(list);
-				return {};
-			}
+			Q_ASSERT(list);
 
-			if (ids.find(list->id()) != ids.end())
+			auto[it, inserted] = ids.insert(list->id());
+			
+			if (inserted == false)
 			{
 				// Duplicate found
 				//
-				result.push_back({list->id(), list->caption()});
-			}
-			else
-			{
-				ids.insert(list->id());
+				result.emplace_back(list->id(), list->caption());
 			}
 		}
 

@@ -1,18 +1,14 @@
 #pragma once
 
-#include "../../../CommonLib/Types.h"
-#include "../../../CommonLib/Hash.h"
 #include "../../../AppSignalLib/TuningValue.h"
 
 #include <map>
 #include <memory>
 #include <optional>
-#include <vector>
 #include <set>
+#include <vector>
 
 class AppSignalParam;
-
-class ILogFile;
 
 namespace Proto
 {
@@ -189,13 +185,15 @@ namespace AppSignalLists
 
 		// Items
 		//
-		std::map<Hash, AppSignalListItem> m_items;	// Signals added by user are stored here
-		
-		std::set<Hash> m_appListHashesCache;			// All signals hashes that match this filter are stored here. They are filled on build and after local lists editing
-		std::set<Hash> m_tuningListHashesCache;		// Only Tuning signals hashes that match this filter are stored here for IDE-created filters. On loading by TuningClient, they replace cache.
+		std::map<Hash, AppSignalListItem> m_items; // Signals added by user are stored here
+
+		std::set<Hash> m_appListHashesCache;    // All signals hashes that match this filter are stored here. They are filled on build and
+												// after local lists editing
+		std::set<Hash> m_tuningListHashesCache; // Only Tuning signals hashes that match this filter are stored here for IDE-created
+												// filters. On loading by TuningClient, they replace cache.
 
 	public:
-		static const char* mimeType; // = "application/x-radiyappsignallist";
+		static const char* mimeType;            // = "application/x-radiyappsignallist";
 	};
 
 	class AppSignalListSet : public QObject
@@ -204,19 +202,19 @@ namespace AppSignalLists
 
 	public:
 		AppSignalListSet() = default;
-		
+
 		AppSignalListSet(const AppSignalListSet& that);
 		AppSignalListSet(AppSignalListSet&& that) noexcept;
 
-		AppSignalListSet& operator= (const AppSignalListSet& that);
-		AppSignalListSet& operator= (AppSignalListSet&& that) noexcept;
+		AppSignalListSet& operator=(const AppSignalListSet& that);
+		AppSignalListSet& operator=(AppSignalListSet&& that) noexcept;
 
 		~AppSignalListSet() = default;
 
 	public:
 		void clear();
 		[[nodiscard]] int count() const;
-		
+
 		bool add(const QByteArray& ba);
 		bool add(std::shared_ptr<AppSignalList> list);
 		bool add(const AppSignalListSet& appSignalListSet);
@@ -232,7 +230,7 @@ namespace AppSignalLists
 
 		virtual bool load(QString* errorMessage);
 		virtual bool save(QString* errorMessage) const;
-		
+
 		std::vector<std::pair<QString, QString>> checkForSameIds() const;
 
 		void fireUpdatePerformed();
