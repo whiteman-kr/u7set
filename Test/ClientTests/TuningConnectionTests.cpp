@@ -608,16 +608,15 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 		bool allValid = true;
 
 		// RPCT-3900 - Investigate and fix the reason of Tuning Write fails
-		// TEMPORARY SOLUTION: wait for 60 secs, as simulator conflicts when two WSLs tries to bind to the same port 50000.
+		// TEMPORARY SOLUTION: wait for 120 secs, as simulator conflicts when two WSLs tries to bind to the same port 50000.
 		// Simulator on linux_test_job and linux_code_coverage tries to send data from the same port.
 		//
-		const int WaitForValidityMs = 60000;
-		const int WaitForValiditySleepMs = 10;
+		const int WaitForValidityMs = 120'000; // Just wait the parallel (ow WSL) test to finish.
 
-		while (timer.hasExpired(WaitForValidityMs / WaitForValiditySleepMs) == false)
+		while (timer.hasExpired(WaitForValidityMs) == false)
 		{
 			QCoreApplication::instance()->processEvents();
-			QThread::msleep(WaitForValiditySleepMs);
+			QThread::msleep(20);
 
 			allValid = true;
 			for (int i = 0; i < protoSignalSet.appsignal_size(); i++)
