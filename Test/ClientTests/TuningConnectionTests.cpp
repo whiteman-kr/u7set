@@ -697,7 +697,7 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 				bool found = false;
 				state = signalManager.state(asInt.appSignalID(), &found);
 				EXPECT_TRUE(found);
-				if (found == true && state.valid() == true && fabs(state.value().int32Value() == intValues[i]))
+				if (found == true && state.valid() == true && state.value().int32Value() == intValues[i])
 				{
 					break;
 				}
