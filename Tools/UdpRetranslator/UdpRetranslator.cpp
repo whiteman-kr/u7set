@@ -18,8 +18,8 @@ struct sockaddr_ll
 
 int main(int argc, char *argv[])
 {
-	asio::io_service ioService;
-	asio::generic::raw_protocol::socket rawSocket(ioService);
+	asio::io_context ioContext;
+	asio::generic::raw_protocol::socket rawSocket(ioContext);
 
 	sockaddr_ll sockaddr;
 
