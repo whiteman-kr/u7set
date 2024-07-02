@@ -79,6 +79,7 @@ message AppSignal
 
     optional int32 signalType = 16 [default = 1];		// E::SignalType::Discrete
     optional int32 inOutType = 17 [default = 2];		// E::SignalInOutType::Internal
+	optional int32 swCalcFunction = 18 [default = 0];	// E::SoftwareCalcFunction
 
     // Signal format
 
@@ -169,6 +170,8 @@ message ProtoAppSignalData
 	
 	optional bool invertSignal = 23 [default = false];
 	optional bool reserved = 24 [default = false];
+
+	optional int32 swCalcFunction = 25 [default = 0 /* E::SoftwareCalcFunction::None */];
 }
 
 // Data structs

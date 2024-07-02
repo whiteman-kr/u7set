@@ -473,14 +473,19 @@ namespace Hardware
 		return m_function == E::SignalFunction::Output;
 	}
 
+	bool DeviceAppSignal::isValiditySignal() const
+	{
+		return m_function == E::SignalFunction::Validity;
+	}
+
 	bool DeviceAppSignal::isDiagSignal() const
 	{
 		return m_function == E::SignalFunction::Diagnostics;
 	}
 
-	bool DeviceAppSignal::isValiditySignal() const
+	bool DeviceAppSignal::isSoftwareCalculatedSignal() const
 	{
-		return m_function == E::SignalFunction::Validity;
+		return m_function == E::SignalFunction::SoftwareCalculated;
 	}
 
 	bool DeviceAppSignal::isAnalogSignal() const

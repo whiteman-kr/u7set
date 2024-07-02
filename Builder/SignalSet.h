@@ -13,7 +13,7 @@ namespace Hardware
 
 namespace Builder
 {
-	typedef std::shared_ptr<Hardware::DeviceModule> DeviceModuleShared;
+	using DeviceModuleShared = std::shared_ptr<Hardware::DeviceModule>;
 
 	class SignalSet : public QObject, public ::AppSignalSet
 	{

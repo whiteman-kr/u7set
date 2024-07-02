@@ -618,6 +618,11 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 	propInvertSignal->setCategory(categorySignalProcessing);
 	propInvertSignal->setViewOrder(110);
 
+	auto propSwCalcFunc = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::SoftwareCalcFunction, AppSignalPropNames::SOFTWARE_CALC_FUNCTION,
+															true, AppSignal::swCalcFunction, AppSignal::setSwCalcFunction, m_signal);
+	propSwCalcFunc->setCategory(categorySignalProcessing);
+	propSwCalcFunc->setViewOrder(120);
+
 	// 5 Electric parameters ()
 
 	// 6 Online monitoring system

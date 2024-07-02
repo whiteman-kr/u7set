@@ -426,6 +426,17 @@ public:
 	};
 	Q_ENUM(SignalInOutType)
 
+	// Software calculated signals functions
+	//
+	enum class SoftwareCalcFunction
+	{
+		None = 0,
+		LockFlagsCount = 1,
+		SimFlagsCount = 2,
+		MismatchFlagsCount = 3,
+	};
+	Q_ENUM(SoftwareCalcFunction)
+
 	/** \brief This enum describes logic module and signal channel.
 	 *
 	This enum describes logic module and signal channel.\n\n

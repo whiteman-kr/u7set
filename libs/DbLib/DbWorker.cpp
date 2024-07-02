@@ -5820,7 +5820,10 @@ void DbWorker::slot_autoAddSignals(const std::vector<const Hardware::DeviceAppSi
 			continue;
 		}
 
-		if (deviceSignal->isInputSignal() || deviceSignal->isOutputSignal() || deviceSignal->isValiditySignal())
+		if (deviceSignal->isInputSignal() ||
+			deviceSignal->isOutputSignal() ||
+			deviceSignal->isValiditySignal() ||
+			deviceSignal->isSoftwareCalculatedSignal())
 		{
 			if (isSignalWithEquipmentIDExists(deviceSignal->equipmentIdTemplate()) == false)
 			{

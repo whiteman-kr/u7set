@@ -984,7 +984,12 @@ namespace Builder
 
 					// signal is associated with current LM
 
-					isIoSignal = true;
+					if (deviceAppSignal->isInputSignal() ||
+						deviceAppSignal->isOutputSignal() ||
+						deviceAppSignal->isValiditySignal())
+					{
+						isIoSignal = true;
+					}
 				}
 
 				break;

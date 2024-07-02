@@ -120,6 +120,9 @@ public:
 	bool isOutput() const { return m_inOutType == E::SignalInOutType::Output; }
 	bool isInternal() const { return m_inOutType == E::SignalInOutType::Internal; }
 
+	E::SoftwareCalcFunction swCalcFunction() const;
+	void setSwCalcFunction(E::SoftwareCalcFunction func);
+
 	// Signal format
 
 	int dataSize() const { return m_dataSize; }
@@ -471,6 +474,7 @@ private:
 	//
 	E::SignalType m_signalType = E::SignalType::Analog;
 	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
+	E::SoftwareCalcFunction m_swCalcFunction = E::SoftwareCalcFunction::None;
 
 	// Signal format
 	//

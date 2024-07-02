@@ -126,19 +126,17 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 		return QString("Unknown device signal E::SignalType");
 	}
 
+	m_swCalcFunction = E::SoftwareCalcFunction::None;
+
 	switch(deviceSignalFunction)
 	{
 	case E::SignalFunction::Input:
 	case E::SignalFunction::Validity:
-
 		m_inOutType = E::SignalInOutType::Input;
-
 		break;
 
 	case E::SignalFunction::Output:
-
 		m_inOutType = E::SignalInOutType::Output;
-
 		break;
 
 	case E::SignalFunction::Diagnostics:
@@ -146,7 +144,31 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 		Q_ASSERT(false);
 		return QString("Can't create AppSignal from diagnostics device signal");
 
-		break;
+	case E::SignalFunction::SoftwareCalculated:
+		{
+			static const std::map<QString, E::SoftwareCalcFunction> suffixToFunction =
+			{
+				{ EquipmentPropNames::SC_FLOCK_COUNT_SUFFIX, E::SoftwareCalcFunction::LockFlagsCount },
+				{ EquipmentPropNames::SC_FSIM_COUNT_SUFFIX, E::SoftwareCalcFunction::SimFlagsCount },
+				{ EquipmentPropNames::SC_FMISMATCH_COUNT_SUFFIX, E::SoftwareCalcFunction::MismatchFlagsCount }
+			};
+
+			for(const auto& [suffix, func] : suffixToFunction)
+			{
+				if (deviceSignalEquipmentID.endsWith(suffix) == true)
+				{
+					m_swCalcFunction = func;
+					break;
+				}
+			}
+
+			if (m_swCalcFunction == E::SoftwareCalcFunction::None)
+			{
+				return QString("Unknown software calculetd function of signal %1").arg(appSignalID);
+			}
+
+			break;
+		}
 
 	default:
 
@@ -249,6 +271,16 @@ void AppSignal::setSignalType(E::SignalType type)
 {
 	m_signalType = type;
 	updateTuningValuesType();
+}
+
+E::SoftwareCalcFunction AppSignal::swCalcFunction() const
+{
+	return m_swCalcFunction;
+}
+
+void AppSignal::setSwCalcFunction(E::SoftwareCalcFunction func)
+{
+	m_swCalcFunction = func;
 }
 
 void AppSignal::setDataSizeW(int sizeW)
@@ -712,6 +744,7 @@ void AppSignal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 	protoData->set_aperturetype(TO_INT(m_apertureType));
 	protoData->set_invertsignal(m_invertSignal);
 	protoData->set_reserved(m_reserved);
+	protoData->set_swcalcfunction(TO_INT(m_swCalcFunction));
 
 	//
 
@@ -771,6 +804,7 @@ void AppSignal::loadProtoData(const char* protoDataPtr, int protoDataSize)
 	m_apertureType = static_cast<E::ApertureType>(protoData.aperturetype());
 	m_invertSignal = protoData.invertsignal();
 	m_reserved = protoData.reserved();
+	m_swCalcFunction = static_cast<E::SoftwareCalcFunction>(protoData.swcalcfunction());
 
 	//
 
@@ -1255,6 +1289,7 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 
 	s->set_signaltype(TO_INT(m_signalType));
 	s->set_inouttype(TO_INT(m_inOutType));
+	s->set_swcalcfunction(TO_INT(m_swCalcFunction));
 
 	// Signal format
 
@@ -1479,6 +1514,7 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 
 	m_signalType = static_cast<E::SignalType>(s.signaltype());
 	m_inOutType = static_cast<E::SignalInOutType>(s.inouttype());
+	m_swCalcFunction = static_cast<E::SoftwareCalcFunction>(s.swcalcfunction());
 
 	// Signal format
 

@@ -27,6 +27,16 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 	},
 
 	{
+		AppSignalPropNames::SOFTWARE_CALC_FUNCTION,
+		QMetaType::QString,
+		false,
+		[](const AppSignal* s) { return E::valueToString<E::SoftwareCalcFunction>(s->swCalcFunction()); },
+		[](AppSignal* s, const QVariant& v) { s->setSwCalcFunction(static_cast<E::SoftwareCalcFunction>(v.toInt())); },
+		AppSignalProperties::NON_SPECIFIC_PROP_HASH,
+		E::enumValuesMap<E::SoftwareCalcFunction>(),
+	},
+
+	{
 		AppSignalPropNames::BYTE_ORDER_PROP,
 		QMetaType::QString,
 		false,

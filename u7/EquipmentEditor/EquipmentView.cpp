@@ -1256,9 +1256,10 @@ void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> m
 				Hardware::DeviceAppSignal* signal = dynamic_cast<Hardware::DeviceAppSignal*>(device);
 				Q_ASSERT(signal);
 
-				if (signal->function() == E::SignalFunction::Input ||
-					signal->function() == E::SignalFunction::Output ||
-					signal->function() == E::SignalFunction::Validity)
+				if (signal->isInputSignal() ||
+					signal->isOutputSignal() ||
+					signal->isValiditySignal() ||
+					signal->isSoftwareCalculatedSignal())
 				{
 					inOuts.push_back(signal);
 				}

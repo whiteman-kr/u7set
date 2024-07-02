@@ -63,8 +63,9 @@ namespace Hardware
 
 		[[nodiscard]] bool isInputSignal() const;
 		[[nodiscard]] bool isOutputSignal() const;
-		[[nodiscard]] bool isDiagSignal() const;
 		[[nodiscard]] bool isValiditySignal() const;
+		[[nodiscard]] bool isDiagSignal() const;
+		[[nodiscard]] bool isSoftwareCalculatedSignal() const;
 
 		[[nodiscard]] bool isAnalogSignal() const;
 		[[nodiscard]] bool isDiscreteSignal() const;

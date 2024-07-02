@@ -81,6 +81,10 @@ namespace EquipmentPropNames
 	inline const QString ACTUATOR_ID("ActuatorID");
 	inline const QString ACTUATOR_DESCRIPTION("ActuatorDescription");
 
+	inline const QString SC_FLOCK_COUNT_SUFFIX("_SC_FLOCK_COUNT");
+	inline const QString SC_FSIM_COUNT_SUFFIX("_SC_FSIM_COUNT");
+	inline const QString SC_FMISMATCH_COUNT_SUFFIX("_SC_FMISMATCH_COUNT");
+
 	// I/O Modules properties
 	//
 	inline const QString TX_DATA_SIZE("TxDataSize");
@@ -688,6 +692,7 @@ namespace AppSignalPropNames
 	inline const QString INSTANCE_CREATED("InstanceCreated");
 	inline const QString TYPE("Type");
 	inline const QString IN_OUT_TYPE("InOutType");
+	inline const QString SOFTWARE_CALC_FUNCTION("SoftwareCalcFunction");
 	inline const QString APP_SIGNAL_ID("AppSignalID");
 	inline const QString CUSTOM_APP_SIGNAL_ID("CustomAppSignalID");
 	inline const QString BUS_TYPE_ID("BusTypeID");
