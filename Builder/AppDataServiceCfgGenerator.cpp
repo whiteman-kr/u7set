@@ -402,30 +402,6 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::findAppDataSourceAcquiredSignals(OnlineLib::DataSource& appDataSource)
 	{
-/*		ModuleLogicCompilerShared mc = m_context->getModuleLogicCompiler(appDataSource.moduleEquipmentID());
-
-		if (mc == nullptr)
-		{
-			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find ModuleLogicCompiler object for %1").arg(appDataSource.moduleEquipmentID()));
-			return false;
-		}
-
-		const std::map<Hash, AppSignal*>& moduleSignals = mc->moduleSignals();
-
-		for(const auto& [h, appSignal] : moduleSignals)
-		{
-			appDataSource.appendAssociatedSignal(E::LanControllerType::AppData, appSignal->appSignalID());
-
-			m_acquiredAppSignals.insert(calcHash(appSignal->appSignalID()));
-		}
-
-		const std::vector<const AppSignal*>& swCalcSignals = mc->swCalcSignals();
-
-		for(const AppSignal* appSignal : swCalcSignals)
-		{
-			appDataSource.appendSwCalcSignal(appSignal->appSignalID());
-		}*/
-
 		Hardware::DeviceObject* lm = m_equipment->deviceObject(appDataSource.moduleEquipmentID()).get();
 
 		if (lm == nullptr)
@@ -464,6 +440,21 @@ namespace Builder
 
 				m_acquiredAppSignals.insert(calcHash(appSignal->appSignalID()));
 			}
+		}
+
+		ModuleLogicCompilerShared mc = m_context->getModuleLogicCompiler(appDataSource.moduleEquipmentID());
+
+		if (mc == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find ModuleLogicCompiler object for %1").arg(appDataSource.moduleEquipmentID()));
+			return false;
+		}
+
+		const std::vector<const AppSignal*>& swCalcSignals = mc->swCalcSignals();
+
+		for(const AppSignal* appSignal : swCalcSignals)
+		{
+			appDataSource.appendSwCalcSignal(appSignal->appSignalID());
 		}
 
 		return true;

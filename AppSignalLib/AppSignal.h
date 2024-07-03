@@ -32,8 +32,7 @@ struct ID_AppSignalID
 
 Q_DECLARE_METATYPE(ID_AppSignalID)
 
-typedef QHash<E::AppSignalStateFlagType, QString> AppSignalStateFlagsMap;
-
+using AppSignalStateFlagsMap = std::map<E::AppSignalStateFlagType, QString>;
 
 class AppSignal
 {
@@ -122,6 +121,7 @@ public:
 
 	E::SoftwareCalcFunction swCalcFunction() const;
 	void setSwCalcFunction(E::SoftwareCalcFunction func);
+	bool isSwCalculated() const;
 
 	// Signal format
 
@@ -402,9 +402,9 @@ public:
 	void initCalculatedProperties();
 
 	bool addFlagSignalID(E::AppSignalStateFlagType flagType, const QString& appSignalID);
-	QString getFlagSignalID(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString()); }
-	QStringList getFlagSignalsIDs() const { return m_stateFlagsSignals.values(); }
-	bool hasFlagsSignals() const { return m_stateFlagsSignals.count(); }
+	QString getFlagSignalID(E::AppSignalStateFlagType flagType) const;
+	QStringList getFlagSignalsIDs() const;
+	bool hasFlagsSignals() const;
 
 	const AppSignalStateFlagsMap& stateFlagsSignals() const { return m_stateFlagsSignals; }
 

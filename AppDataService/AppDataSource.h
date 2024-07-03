@@ -41,6 +41,10 @@ public:
 
 	bool statesQueueIsEmpty(QThread* thread) const;
 
+	void incLockFlagsCount() { m_lockFlagsCount++; }
+	void incSimFlagsCount() { m_simFlagsCount++; }
+	void incMismatchFlagsCount() { m_mismatchFlagsCount++; }
+
 private:
 	virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread) override;
 
@@ -64,7 +68,12 @@ private:
 	//
 
 	qint64 m_workcycle_ms = 0;
-	QVector<DynamicAppSignalState*> m_signalStates;
+	std::vector<DynamicAppSignalState*> m_signalStates;
+	std::map<E::SoftwareCalcFunction, std::vector<DynamicAppSignalState*>> m_swCalcSignalsStates;
+
+	int m_lockFlagsCount = 0;
+	int m_simFlagsCount = 0;
+	int m_mismatchFlagsCount = 0;
 
 	int m_acquiredSignalsCount = 0;
 

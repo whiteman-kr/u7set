@@ -10,6 +10,7 @@ namespace RtTrends
 
 class AppSignalState;
 class AppSignals;
+class AppDataSource;
 
 struct DynamicAppSignalState
 {
@@ -49,7 +50,8 @@ public:
 	void setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
 				   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue);
 
-	int setState(const Times& time,
+	int setState(AppDataSource& source,
+				const Times& time,
 				  bool isSimPacket,
 				  quint16 packetNo,
 				  const char* rupData,
@@ -149,6 +151,7 @@ private:
 	E::SignalType m_signalType = E::SignalType::Discrete;
 	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
+	E::SoftwareCalcFunction m_swCalcFunction = E::SoftwareCalcFunction::None;
 	int m_dataSize = 1;
 
 	bool m_archive = false;

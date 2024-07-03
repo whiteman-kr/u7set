@@ -7,12 +7,10 @@ namespace Sim
 
 	bool FlagsReadStruct::create(const AppSignal& s, const std::unordered_map<Hash, AppSignal>& signalParams, ScopedLog& log)
 	{
-		auto flagIt = s.stateFlagsSignals().constBegin();
+		const AppSignalStateFlagsMap& stateFlagsSignals = s.stateFlagsSignals();
 
-		while (flagIt != s.stateFlagsSignals().constEnd())
+		for(const auto& [flagType, flagAppSignalId] : stateFlagsSignals)
 		{
-			E::AppSignalStateFlagType flagType = flagIt.key();
-			const QString& flagAppSignalId = flagIt.value();
 			Hash flagSignalHash = ::calcHash(flagAppSignalId);
 
 			if (auto flagSignalIt = signalParams.find(flagSignalHash);
@@ -65,10 +63,6 @@ namespace Sim
 					}
 				}
 			}
-
-			// --
-			//
-			++flagIt;
 		}
 
 		return true;

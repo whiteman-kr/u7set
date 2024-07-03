@@ -283,6 +283,11 @@ void AppSignal::setSwCalcFunction(E::SoftwareCalcFunction func)
 	m_swCalcFunction = func;
 }
 
+bool AppSignal::isSwCalculated() const
+{
+	return m_swCalcFunction != E::SoftwareCalcFunction::None;
+}
+
 void AppSignal::setDataSizeW(int sizeW)
 {
 	m_dataSize = sizeW * SIZE_16BIT;
@@ -1456,12 +1461,8 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 
 		assert(calcParam->stateflagssignals_size() == 0);
 
-		QList<E::AppSignalStateFlagType> flagTypes = m_stateFlagsSignals.keys();
-
-		for(E::AppSignalStateFlagType flagType : flagTypes)
+		for(auto const& [flagType, flagSignalID] :  m_stateFlagsSignals)
 		{
-			QString flagSignalID = m_stateFlagsSignals.value(flagType, QString());
-
 			if (flagSignalID.isEmpty() == true)
 			{
 				assert(false);
@@ -1607,7 +1608,7 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 
 		assert(m_stateFlagsSignals.contains(flagType) == false);
 
-		m_stateFlagsSignals.insert(flagType, QString::fromStdString(protoStateFlagSignal.flagsignalid()));
+		m_stateFlagsSignals.emplace(flagType, QString::fromStdString(protoStateFlagSignal.flagsignalid()));
 	}
 
 	// Tags
@@ -1631,9 +1632,31 @@ bool AppSignal::addFlagSignalID(E::AppSignalStateFlagType flagType, const QStrin
 		return false;
 	}
 
-	m_stateFlagsSignals.insert(flagType, appSignalID);
+	m_stateFlagsSignals.emplace(flagType, appSignalID);
 
 	return true;
+}
+
+QString AppSignal::getFlagSignalID(E::AppSignalStateFlagType flagType) const
+{
+	return  getValueOrDefault(m_stateFlagsSignals, flagType, QString());
+}
+
+QStringList AppSignal::getFlagSignalsIDs() const
+{
+	QStringList result;
+
+	for(const auto& [flagType, appSignalID] : m_stateFlagsSignals)
+	{
+		result.append(appSignalID);
+	}
+
+	return result;
+}
+
+bool AppSignal::hasFlagsSignals() const
+{
+	return !m_stateFlagsSignals.empty();
 }
 
 void AppSignal::initTuningValues()

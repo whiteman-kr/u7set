@@ -58,6 +58,7 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 	const QStringList& sourceAssociatedSignals = associatedSignals(E::LanControllerType::AppData);
 
 	m_signalStates.clear();
+	m_signalStates.reserve(sourceAssociatedSignals.size());
 
 	for(const QString& signalID : sourceAssociatedSignals)
 	{
@@ -83,14 +84,23 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 		DynamicAppSignalState* dynState = signalStates->getStateByID(signal->appSignalID());
 
-		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue);
-
 		TEST_PTR_CONTINUE(dynState);
 
-		m_signalStates.append(dynState);
+		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue);
+
+		if (signal->isSwCalculated() == false)
+		{
+			m_signalStates.emplace_back(dynState);
+		}
+		else
+		{
+			auto it = findOrInsertKey(m_swCalcSignalsStates, signal->swCalcFunction());
+
+			it->second.emplace_back(dynState);
+		}
 	}
 
-	m_acquiredSignalsCount = static_cast<int>(m_signalStates.count());
+	m_acquiredSignalsCount = TO_INT(m_signalStates.size());
 
 	int queueSize = std::max(m_acquiredSignalsCount * 3, 200);
 
@@ -329,11 +339,17 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	int pushedStatesCtr = 0;
 
+	// counters will increment inside signalState->setState(...)
+	//
+	m_lockFlagsCount = 0;
+	m_simFlagsCount = 0;
+	m_mismatchFlagsCount = 0;
+
 	for(DynamicAppSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		pushedStatesCtr += signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
+		pushedStatesCtr += signalState->setState(*this, m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
 												autoArchivingGroup, thread);
 
 		if (pushedStatesCtr > 20)
@@ -341,6 +357,11 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 			pushedStatesCtr = 0;
 			wakeupStatesProcessingThread();
 		}
+	}
+
+	for(const auto& [swCalcFunction, swCalcSignalsStates] : m_swCalcSignalsStates)
+	{
+		sdvd vcv re r ewrg erg erg er
 	}
 
 	if (pushedStatesCtr != 0)

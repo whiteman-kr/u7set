@@ -26,6 +26,7 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 	m_analogSignalFormat = signal->analogSignalFormat();
 	m_byteOrder = signal->byteOrder();
 	m_dataSize = signal->dataSize();
+	m_swCalcFunction = signal->swCalcFunction();
 
 	m_archive = signal->archive();
 
@@ -142,13 +143,14 @@ void DynamicAppSignalState::setQueues(SimpleAppSignalStatesArchiveFlagQueue* sig
 
 // returns count of states pushed in statesQueue
 //
-int DynamicAppSignalState::setState(const Times& time,
-								bool isSimPacket,
-								quint16 packetNo,
-								const char* rupData,
-								int rupDataSize,
-								int autoArchivingGroup,
-								const QThread* thread)
+int DynamicAppSignalState::setState(AppDataSource& source,
+									const Times& time,
+									bool isSimPacket,
+									quint16 packetNo,
+									const char* rupData,
+									int rupDataSize,
+									int autoArchivingGroup,
+									const QThread* thread)
 {
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 	SimpleAppSignalState curState;
@@ -388,14 +390,26 @@ int DynamicAppSignalState::setState(const Times& time,
 
 			case E::AppSignalStateFlagType::Simulated:
 				curState.flags.simulated = bit;
+				if (bit)
+				{
+					source.incSimFlagsCount();
+				}
 				break;
 
 			case E::AppSignalStateFlagType::Blocked:
 				curState.flags.blocked = bit;
+				if (bit)
+				{
+					source.incLockFlagsCount();
+				}
 				break;
 
 			case E::AppSignalStateFlagType::Mismatch:
 				curState.flags.mismatch = bit;
+				if (bit)
+				{
+					source.incMismatchFlagsCount();
+				}
 				break;
 
 			case E::AppSignalStateFlagType::AboveHighLimit:
