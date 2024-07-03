@@ -192,8 +192,6 @@ namespace Builder
 
 		const ResourcesUsageInfo& resourcesUsageInfo() const { return m_resourcesUsageInfo; }
 
-		void setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers);
-
 		bool getSignalsAndPinsLinkedToItem(const UalItem* item,
 										   std::set<QString>* linkedSignals,
 										   std::set<const UalItem*>* linkedItems,
@@ -219,6 +217,9 @@ namespace Builder
 		bool noCodeGenRequired() const;
 
 		const LmMemoryMap& lmMemoryMap() const { return m_memoryMap; }
+
+		const std::map<Hash, AppSignal*>& moduleSignals() const { return m_moduleSignals; }
+		const std::vector<const AppSignal*>& swCalcSignals() const { return m_swCalcSignals; }
 
 		const UalAfbs& ualAfbs() const;
 
@@ -257,7 +258,7 @@ namespace Builder
 		bool loadLMSettings();
 		bool loadModulesSettings();
 
-		bool createChassisSignalsMap();
+		bool createModuleSignalsMap();
 
 		bool createUalItemsMaps();
 		QString getUalItemStrID(const AppLogicItem& appLogicItem) const;
@@ -1023,10 +1024,11 @@ namespace Builder
 		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr
 		std::map<QUuid, UalItem*> m_pinParent;					// pin GUID => parent item ptr
 
-		std::map<Hash, AppSignal*> m_chassisSignals;			// all signals available in current chassis, calcHash(AppSignalID) => AppSignal*
+		std::map<Hash, AppSignal*> m_moduleSignals;			// all signals available in current chassis, calcHash(AppSignalID) => AppSignal*
 		std::vector<AppSignal*> m_ioSignals;					// input/output signals of current chassis
 		std::map<Hash, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, calcHash(signal EquipmentID) => AppSignal*
 		std::map<Hash, UalSignal*> m_optoPortValiditySignal;	// calcHash(OptoPort EquipmentID) => OptoPort validity signal
+		std::vector<const AppSignal*> m_swCalcSignals;			// software calculated signals of module
 
 		struct BuimAppSignal
 		{
@@ -1103,10 +1105,10 @@ namespace Builder
 
 		Tuning::TuningDataShared m_tuningData;
 
-		const QVector<ModuleLogicCompiler*>* m_moduleCompilers = nullptr;
-
 		static const QString EMPTY_STR;
 	};
+
+	using ModuleLogicCompilerShared = std::shared_ptr<ModuleLogicCompiler>;
 
 
 #define CHECK_UAL_ADDR_RETURN_FALSE(ualSignal)	if (ualSignal->ualAddrIsValid() == false)	\

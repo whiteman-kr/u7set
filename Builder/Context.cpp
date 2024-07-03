@@ -1,4 +1,5 @@
 #include "Context.h"
+#include "ModuleLogicCompiler.h"
 
 namespace Builder
 {
@@ -30,4 +31,28 @@ namespace Builder
 		bool result = BuildOptions::makeDecision(m_projectProperties.generateExtraDebugInfo(), m_buildOptions.generateExtraDebugInfo);
 		return result;
 	}
+
+	void Context::appendModuleLogicCompiler(std::shared_ptr<ModuleLogicCompiler> mc)
+	{
+		Hash h = calcHash(mc->lmEquipmentID());
+
+		Q_ASSERT(m_moduleLogicCompilers.find(h) == m_moduleLogicCompilers.end());
+
+		m_moduleLogicCompilers.emplace(h, mc);
+	}
+
+	std::shared_ptr<ModuleLogicCompiler> Context::getModuleLogicCompiler(const QString& lmEquipmemtID) const
+	{
+		auto it = m_moduleLogicCompilers.find(calcHash(lmEquipmemtID));
+
+		if (it != m_moduleLogicCompilers.end())
+		{
+			return it->second;
+		}
+
+		Q_ASSERT(false);
+
+		return nullptr;
+	}
+
 } // namespace Builder

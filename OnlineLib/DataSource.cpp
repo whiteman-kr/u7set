@@ -219,6 +219,11 @@ namespace OnlineLib
 		return m_emptyList;
 	}
 
+	void DataSource::appendSwCalcSignal(const QString& appSignalID)
+	{
+		m_swCalcSignals.append(appSignalID);
+	}
+
 	void DataSource::writeToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::DATA_SOURCE);
@@ -258,6 +263,7 @@ namespace OnlineLib
 		xml.writeStringElement(XmlElement::APP_SIGNALS, m_appSignals.join(Separator::COMMA));
 		xml.writeStringElement(XmlElement::TUNING_SIGNALS, m_tuningSignals.join(Separator::COMMA));
 		xml.writeStringElement(XmlElement::DIAG_SIGNALS, m_diagSignals.join(Separator::COMMA));
+		xml.writeStringElement(XmlElement::SW_CALC_SIGNALS, m_swCalcSignals.join(Separator::COMMA));
 
 		writeAdditionalSectionsToXml(xml);
 
@@ -304,6 +310,10 @@ namespace OnlineLib
 		result &= xml.readStringElement(XmlElement::DIAG_SIGNALS, &signalsStr, true);
 
 		m_diagSignals = signalsStr.split(Separator::COMMA, Qt::SkipEmptyParts);
+
+		result &= xml.readStringElement(XmlElement::SW_CALC_SIGNALS, &signalsStr, true);
+
+		m_swCalcSignals = signalsStr.split(Separator::COMMA, Qt::SkipEmptyParts);
 
 		result &= readAdditionalSectionsFromXml(xml);
 

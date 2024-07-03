@@ -288,6 +288,7 @@ namespace XmlElement
 	inline const QString APP_SIGNALS("AppSignals");
 	inline const QString TUNING_SIGNALS("TuningSignals");
 	inline const QString DIAG_SIGNALS("DiagSignals");
+	inline const QString SW_CALC_SIGNALS("SwCalcSignals");
 
 	inline const QString SIGNALS("Signals");
 	inline const QString SIGNAL_ELEM("Signal");

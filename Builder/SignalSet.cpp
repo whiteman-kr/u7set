@@ -367,10 +367,17 @@ namespace Builder
 
 			case Hardware::DeviceType::AppSignal:
 				{
-					Hardware::DeviceModule* module = const_cast<Hardware::DeviceModule*>(device->getParentModule());
+					Hardware::DeviceChassis* chassis = const_cast<Hardware::DeviceChassis*>(device->getParentChassis());
 
-					if (module == nullptr ||
-						(module->isLogicModule() == false && module->isBvb() == false))
+					if (chassis == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					std::shared_ptr<Hardware::DeviceModule> module = chassis->findLogicModuleOrBvb();
+
+					if (module == nullptr)
 					{
 						// Associated logic module is not found. Signal %1 cannot be processed.
 						//
@@ -379,12 +386,9 @@ namespace Builder
 					}
 					else
 					{
-						std::shared_ptr<Hardware::DeviceModule> sharedModule =
-							std::dynamic_pointer_cast<Hardware::DeviceModule>(equipment->deviceObject(module->equipmentIdTemplate()));
-
-						if (sharedModule != nullptr)
+						if (module != nullptr)
 						{
-							linkSignalToLm(&s, sharedModule);
+							linkSignalToLm(&s, module);
 						}
 						else
 						{

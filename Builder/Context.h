@@ -30,6 +30,7 @@ namespace VFrame30
 namespace Builder
 {
 	class AppLogicData;
+	class ModuleLogicCompiler;
 
 	struct PackedLogicSource
 	{
@@ -58,6 +59,9 @@ namespace Builder
 		bool generateAppSignalsExtXml() const;
 		bool generateExtraDebugInfo() const;
 
+		void appendModuleLogicCompiler(std::shared_ptr<ModuleLogicCompiler> mc);
+		std::shared_ptr<ModuleLogicCompiler> getModuleLogicCompiler(const QString& lmEquipmemtID) const;
+
 	public:
 		mutable IssueLogger* m_log = nullptr;
 
@@ -85,6 +89,7 @@ namespace Builder
 		std::shared_ptr<LmDescriptionSet> m_lmDescriptions;
 
 		std::vector<Hardware::DeviceModule*> m_lmModules;
+		std::map<Hash, std::shared_ptr<ModuleLogicCompiler>> m_moduleLogicCompilers;		// calcHash(LM.EquipmentID) => ModuleLogicCompilerShared
 
 		std::vector<Hardware::DeviceModule*> m_fscModules;   // includes LM and BVB modules
 		std::vector<Hardware::DeviceModule*> m_vduModules;   // includes VDU modules

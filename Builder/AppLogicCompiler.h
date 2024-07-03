@@ -74,7 +74,7 @@ namespace Builder
 	private:
 		Context* m_context = nullptr;
 
-		QVector<ModuleLogicCompiler*> m_moduleCompilers;
+//		QVector<ModuleLogicCompiler*> m_moduleCompilers;
 	};
 }
 
