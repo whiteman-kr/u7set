@@ -166,8 +166,7 @@ TEST_F(RtDataProviderTests, discreteData)
 	MockSignalDataServer signalDataServer;
 
 	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const QString&>(Not(Eq(appSignalId)))))
-		.Times(0)
-		.WillRepeatedly(Return(false));
+		.Times(0);
 
 	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const QString&>(Eq(appSignalId))))
 		.Times(AtLeast(20))
@@ -198,6 +197,7 @@ TEST_F(RtDataProviderTests, discreteData)
 	// Check signal patters.
 	//
 	adsRtConnection.setData(E::RtTrendsSamplePeriod::sp_5ms, {appSignalId});
+	adsRtConnection.setSamplePeriod(E::RtTrendsSamplePeriod::sp_10s); // Should not influence to the data as discrete data is not apperture based.
 
 	std::mutex dataMutex;
 	std::deque<TrendLib::TrendStateItem> states0; // States received from AppDataServices[0]
