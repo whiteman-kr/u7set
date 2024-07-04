@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QDomDocument>
 #include <QFile>
 #include <QXmlStreamWriter>
@@ -323,7 +323,7 @@ int main(int argc, char* argv[])
 {
 	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
 
-	QGuiApplication a(argc, argv);
+	QApplication a(argc, argv);
 
 	// --
 	//
