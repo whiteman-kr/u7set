@@ -2,8 +2,8 @@
 
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../OnlineLib/SoftwareEndpoint.h"
-#include "../lib/ISignalDataServer.h"
 
+#include <ClientLib/ISignalDataServer.h>
 #include <SchemaClientLib/DragDropHelper.h>
 #include <VFrame30/TuningController.h>
 
@@ -121,7 +121,7 @@ protected:
 
 	DialogSignalInfo(const AppSignalParam& signal,
 					 IAppSignalManager* appSignalManager,
-					 ISignalDataServer* signalDataServer,                                  // Can be empty, e.g. in Simulator
+					 ClientLib::ISignalDataServer* signalDataServer,                                  // Can be empty, e.g. in Simulator
 					 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices, // Can be empty, e.g. in Simulator
 					 ITuningSignalManager& tuningSignalManager,
 					 ITuningConnection& tuningConnection,
@@ -233,7 +233,7 @@ private:
 	QString m_dataServiceId;      // Specifies server to take data. If empty - take latest
 
 	IAppSignalManager* m_appSignalManager = nullptr;
-	ISignalDataServer* m_signalDataServer = nullptr;
+	ClientLib::ISignalDataServer* m_signalDataServer = nullptr;
 	std::vector<SoftwareEndpoint::AppDataService> m_appDataServices;
 
 	ITuningAuthorization& m_tuningAuthorization;

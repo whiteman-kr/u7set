@@ -2,7 +2,7 @@
 
 namespace TestSuite
 {
-	TestObserver::TestObserver(ISignalDataServer& signalDataServer,
+	TestObserver::TestObserver(ClientLib::ISignalDataServer& signalDataServer,
 							   const SoftwareInfo& softwareInfo,
 							   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 							   ILogFile* logFile) :

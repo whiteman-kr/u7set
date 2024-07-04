@@ -28,7 +28,7 @@ public:
 private:
 	explicit MonitorDialogSignalSnapshot(MonitorConfigController* configController,
 										 IAppSignalManager* appSignalManager,
-										 ISignalDataServer* signalDataServer,
+										 ClientLib::ISignalDataServer* signalDataServer,
 										 AppSignalLists::AppSignalListSet* appSignalListSet,
 										 const QString& projectName,
 										 const QString& equipmentId,

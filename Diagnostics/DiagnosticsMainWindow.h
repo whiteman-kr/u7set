@@ -154,7 +154,7 @@ private:
 	DiagClientLib::DiagStateManager m_diagStateManager;
 	ClientLib::AppSignalManager m_appSignalManager;
 
-	SignalDataServerStub m_signalDataServerStub; // REMOVE IT AFTER IMPLEMENTING REAL ISignalDataServer
+	ClientLib::SignalDataServerStub m_signalDataServerStub; // REMOVE IT AFTER IMPLEMENTING REAL ISignalDataServer
 	DiagnosticsSchemaManager m_schemaManager;
 
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;

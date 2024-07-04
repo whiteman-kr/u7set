@@ -5,9 +5,10 @@
 #include <QClipboard>
 #include <QMenu>
 
+#include <AppSignalLists/SignalList.h>
 #include <TrendView/DialogChooseTrendSignals.h>
+
 #include "../CommonLib/PropertyObject.h"
-#include "../AppSignalLists/include/AppSignalLists/SignalList.h"
 #include "ui_DialogChooseTrendSignals.h"
 
 namespace TrendLibInternal
@@ -15,7 +16,7 @@ namespace TrendLibInternal
 	//
 	//		FilteredTrendSignalsModel
 	//
-	FilteredTrendSignalsModel::FilteredTrendSignalsModel(const ISignalHasTag* signalHasTag,
+	FilteredTrendSignalsModel::FilteredTrendSignalsModel(const TrendLib::ISignalHasTag* signalHasTag,
 														 const std::vector<TrendLib::TrendSignalParam>& signalss,
 														 QObject* parent) :
 		QAbstractTableModel(parent),
@@ -332,7 +333,7 @@ namespace TrendLib
 {
 	using namespace TrendLibInternal;
 
-	DialogChooseTrendSignals::DialogChooseTrendSignals(const ISignalHasTag* signalHasTag,
+	DialogChooseTrendSignals::DialogChooseTrendSignals(const TrendLib::ISignalHasTag* signalHasTag,
 													   std::vector<TrendLib::TrendSignalParam> trendSignals,
 													   const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
 													   const std::vector<TrendLib::ArchiveServer>& archiveServers,
@@ -363,7 +364,7 @@ namespace TrendLib
 		delete ui;
 	}
 
-	void DialogChooseTrendSignals::init(const ISignalHasTag* signalHasTag,
+	void DialogChooseTrendSignals::init(const TrendLib::ISignalHasTag* signalHasTag,
 										std::vector<TrendLib::TrendSignalParam> signalss,
 										const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
 										const std::vector<TrendLib::ArchiveServer>& archiveServers)

@@ -3,10 +3,10 @@
 #include <map>
 #include <vector>
 
-#include "../lib/ISignalHasTag.h"
 #include <QCompleter>
 #include <QDialog>
 
+#include "ISignalHasTag.h"
 #include "TrendSignal.h"
 
 class QItemSelection;
@@ -29,7 +29,7 @@ namespace TrendLibInternal
 	{
 		Q_OBJECT
 	public:
-		FilteredTrendSignalsModel(const ISignalHasTag* signalHasTag,
+		FilteredTrendSignalsModel(const TrendLib::ISignalHasTag* signalHasTag,
 								  const std::vector<TrendLib::TrendSignalParam>& signalss,
 								  QObject* parent);
 
@@ -44,7 +44,7 @@ namespace TrendLibInternal
 		const TrendLib::TrendSignalParam& signalByRow(int row) const;
 
 	private:
-		const ISignalHasTag* m_signalHasTag = nullptr;
+		const TrendLib::ISignalHasTag* m_signalHasTag = nullptr;
 		std::vector<size_t> m_signalIndexes;
 		std::vector<TrendLib::TrendSignalParam> m_signals;
 		std::map<QString, std::vector<size_t>>
@@ -61,7 +61,7 @@ namespace TrendLib
 	public:
 		// Constructor for TrendLib::TrendSignalParam
 		//
-		DialogChooseTrendSignals(const ISignalHasTag* signalHasTag,
+		DialogChooseTrendSignals(const TrendLib::ISignalHasTag* signalHasTag,
 								 std::vector<TrendLib::TrendSignalParam> trendSignals,
 								 const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
 								 const std::vector<TrendLib::ArchiveServer>& archiveServers,
@@ -71,7 +71,7 @@ namespace TrendLib
 		virtual ~DialogChooseTrendSignals();
 
 	protected:
-		void init(const ISignalHasTag* signalHasTag,
+		void init(const TrendLib::ISignalHasTag* signalHasTag,
 				  std::vector<TrendLib::TrendSignalParam> signalss,
 				  const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
 				  const std::vector<TrendLib::ArchiveServer>& archiveServers);
@@ -124,7 +124,7 @@ namespace TrendLib
 	private:
 		Ui::DialogChooseTrendSignals* ui = nullptr;
 
-		const ISignalHasTag* m_signalHasTag = nullptr;
+		const TrendLib::ISignalHasTag* m_signalHasTag = nullptr;
 
 		std::vector<TrendLib::TrendSignalParam> m_acceptedSignals;
 		std::vector<TrendLib::ArchiveServer> m_archiveServers;

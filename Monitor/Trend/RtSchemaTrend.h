@@ -46,7 +46,7 @@ class RtSchemaTrendDataProvider : public QObject
 	Q_OBJECT
 
 public:
-	RtSchemaTrendDataProvider(const ISignalDataServer& signalDataServer, ILogFile* logFile);
+	RtSchemaTrendDataProvider(const ClientLib::ISignalDataServer& signalDataServer, ILogFile* logFile);
 	~RtSchemaTrendDataProvider();
 
 public:
@@ -93,7 +93,7 @@ class RtSchemaTrend : public QObject
 	Q_OBJECT
 
 public:
-	RtSchemaTrend(const MonitorConfigController& configController, const ISignalDataServer& signalDataServer);
+	RtSchemaTrend(const MonitorConfigController& configController, const ClientLib::ISignalDataServer& signalDataServer);
 	virtual ~RtSchemaTrend();
 
 public:
@@ -107,7 +107,7 @@ public:
 
 private:
 	const MonitorConfigController& m_configController;
-	const ISignalDataServer& m_signalDataServer;
+	const ClientLib::ISignalDataServer& m_signalDataServer;
 
 	// trendData() is called from other thread, so we don't wnat to delete data provider
 	// while trendData() is working

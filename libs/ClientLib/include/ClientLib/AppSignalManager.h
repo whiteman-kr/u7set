@@ -1,5 +1,14 @@
 #pragma once
 
+#include "../AppSignalLib/ComparatorSet.h"
+#include "../AppSignalLib/IAppSignalManager.h"
+#include "../AppSignalLib/RecentUsed.h"
+#include "../UtilsLib/ILogFile.h"
+
+#include "ISignalDataServer.h"
+#include "IAppSignalUpdater.h"
+#include "IRecentAppSignals.h"
+
 #include <map>
 #include <set>
 #include <memory>
@@ -7,14 +16,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <QReadWriteLock>
-
-#include "../lib/ISignalDataServer.h"
-#include "../AppSignalLib/ComparatorSet.h"
-#include "../AppSignalLib/IAppSignalManager.h"
-#include "../AppSignalLib/RecentUsed.h"
-#include "../UtilsLib/ILogFile.h"
-#include "IAppSignalUpdater.h"
-#include "IRecentAppSignals.h"
 
 namespace ClientLib
 {

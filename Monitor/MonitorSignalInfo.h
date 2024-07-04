@@ -1,7 +1,7 @@
 #ifndef MONITORSIGNALINFO_H
 #define MONITORSIGNALINFO_H
 
-#include "../lib/ISignalDataServer.h"
+#include <ClientLib/ISignalDataServer.h>
 #include <SchemaClientLib/DialogSignalInfo.h>
 
 class MonitorCentralWidget;
@@ -29,7 +29,7 @@ private:
 	MonitorSignalInfo(const AppSignalParam& signal,
 					  MonitorConfigController* configController,
 					  IAppSignalManager& appSignalManager,
-					  ISignalDataServer* signalDataServer,
+					  ClientLib::ISignalDataServer* signalDataServer,
 					  ITuningSignalManager& tuningSignalManager,
 					  ITuningConnection& tuningConnection,
 					  ITuningAuthorization& tuningAuthorization,

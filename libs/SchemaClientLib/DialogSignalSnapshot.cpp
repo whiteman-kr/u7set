@@ -8,7 +8,7 @@
 namespace SchemaClientLib
 {
 	DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
-											   ISignalDataServer* signalDataServer,
+											   ClientLib::ISignalDataServer* signalDataServer,
 											   AppSignalLists::AppSignalListSet* appSignalListSet,
 											   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 											   const QString& projectName,

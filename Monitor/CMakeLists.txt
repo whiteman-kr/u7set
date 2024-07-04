@@ -23,7 +23,6 @@ qt_standard_project_setup()
 
 set (MONITOR_SOURCES
 	../lib/ConstStrings.h
-	../lib/ISignalDataServer.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h
 	Archive/ArchiveData.cpp

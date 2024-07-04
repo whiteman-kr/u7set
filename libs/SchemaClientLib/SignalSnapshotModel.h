@@ -1,7 +1,11 @@
 #pragma once
 
 class IAppSignalManager;
-class ISignalDataServer;
+
+namespace ClientLib
+{
+	class ISignalDataServer;
+}
 
 namespace SchemaClientLib
 {
@@ -101,7 +105,7 @@ namespace SchemaClientLib
 	public:
 
 	public:
-		SignalSnapshotModel(IAppSignalManager* appSignalManager, ISignalDataServer* signalDataServer, AppSignalLists::AppSignalListSet* appSignalListSet, QObject* parent);
+		SignalSnapshotModel(IAppSignalManager* appSignalManager, ClientLib::ISignalDataServer* signalDataServer, AppSignalLists::AppSignalListSet* appSignalListSet, QObject* parent);
 
 		void setSignals(std::vector<AppSignalParam>& signalList);
 
@@ -157,7 +161,7 @@ namespace SchemaClientLib
 
 	private:
 		IAppSignalManager* m_appSignalManager = nullptr;
-		ISignalDataServer* m_signalDataServer = nullptr;
+		ClientLib::ISignalDataServer* m_signalDataServer = nullptr;
 		AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 
 		QStringList m_columnsNames;

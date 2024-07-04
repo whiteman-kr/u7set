@@ -14,8 +14,7 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Svg Widgets PrintSupport LinguistTools)
 set(TARGET TrendView)
 
 qt_add_library(${TARGET} STATIC
-	../../lib/ISignalDataServer.h
-	../../lib/ISignalHasTag.h
+	./include/TrendView/ISignalHasTag.h
 	./include/TrendView/DialogChooseTrendSignals.h
 	./include/TrendView/ITrendDataProvider.h
 	./include/TrendView/Trend.h
@@ -80,6 +79,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	"../../CommonLib/Types.h"
 	"../../CommonLib/Hash.h"
+	"../../CommonLib/PropertyObject.h"
 
 	<Trends.pb.h>
 
