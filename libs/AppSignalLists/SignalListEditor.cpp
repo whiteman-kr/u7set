@@ -236,7 +236,7 @@ namespace AppSignalLists
 		{
 			int count = QSettings().value("AppSignalListWidget/signalsTableHeaderCount").toInt();
 			QByteArray ba = QSettings().value("AppSignalListWidget/signalsTableHeader").toByteArray();
-			if (ba.isEmpty() == true || count != static_cast<int>(SignalsModel::Columns::Count))
+			if (ba.isEmpty() == true || count != m_signalsModel->columnCount())
 			{
 				m_signalsTable->hideColumn(static_cast<int>(SignalsModel::Columns::CustomAppSignalID));
 				m_signalsTable->hideColumn(static_cast<int>(SignalsModel::Columns::EquipmentID));
@@ -255,7 +255,7 @@ namespace AppSignalLists
 		{
 			int count = QSettings().value("AppSignalListWidget/itemsTreeHeaderCount").toInt();
 			QByteArray ba = QSettings().value("AppSignalListWidget/itemsTreeHeader").toByteArray();
-			if (ba.isEmpty() == true || count != static_cast<int>(AppSignalListModel::Columns::Count))
+			if (ba.isEmpty() == true || count != m_itemsModel->columnCount())
 			{
 				m_itemsTable->hideColumn(static_cast<int>(AppSignalListModel::Columns::CustomAppSignalID));
 				m_itemsTable->hideColumn(static_cast<int>(AppSignalListModel::Columns::EquipmentID));
@@ -278,10 +278,10 @@ namespace AppSignalLists
 
 	AppSignalListWidget::~AppSignalListWidget()
 	{
-		QSettings().setValue("AppSignalListWidget/signalsTableHeaderCount", static_cast<int>(SignalsModel::Columns::Count));
+		QSettings().setValue("AppSignalListWidget/signalsTableHeaderCount", m_signalsModel->columnCount());
 		QSettings().setValue("AppSignalListWidget/signalsTableHeader", m_signalsTable->horizontalHeader()->saveState());
 
-		QSettings().setValue("AppSignalListWidget/itemsTreeHeaderCount", static_cast<int>(AppSignalListModel::Columns::Count));
+		QSettings().setValue("AppSignalListWidget/itemsTreeHeaderCount", m_itemsModel->columnCount());
 		QSettings().setValue("AppSignalListWidget/itemsTreeHeader", m_itemsTable->horizontalHeader()->saveState());
 
 		QSettings().setValue("AppSignalListWidget/splitterState", m_splitter->saveState());
