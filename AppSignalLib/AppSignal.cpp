@@ -148,7 +148,7 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 		{
 			static const std::map<QString, E::SoftwareCalcFunction> suffixToFunction =
 			{
-				{ EquipmentPropNames::SC_FLOCK_COUNT_SUFFIX, E::SoftwareCalcFunction::LockFlagsCount },
+				{ EquipmentPropNames::SC_FBLOCK_COUNT_SUFFIX, E::SoftwareCalcFunction::BlockFlagsCount },
 				{ EquipmentPropNames::SC_FSIM_COUNT_SUFFIX, E::SoftwareCalcFunction::SimFlagsCount },
 				{ EquipmentPropNames::SC_FMISMATCH_COUNT_SUFFIX, E::SoftwareCalcFunction::MismatchFlagsCount }
 			};
@@ -1639,7 +1639,7 @@ bool AppSignal::addFlagSignalID(E::AppSignalStateFlagType flagType, const QStrin
 
 QString AppSignal::getFlagSignalID(E::AppSignalStateFlagType flagType) const
 {
-	return  getValueOrDefault(m_stateFlagsSignals, flagType, QString());
+	return getValueOrDefault(m_stateFlagsSignals, flagType, QString());
 }
 
 QStringList AppSignal::getFlagSignalsIDs() const

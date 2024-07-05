@@ -68,7 +68,13 @@ private:
 	//
 
 	qint64 m_workcycle_ms = 0;
+
+	// states of source aquired signals, excluding software calculated signals
+	//
 	std::vector<DynamicAppSignalState*> m_signalStates;
+
+	// states of software calculated siganals
+	//
 	std::map<E::SoftwareCalcFunction, std::vector<DynamicAppSignalState*>> m_swCalcSignalsStates;
 
 	int m_lockFlagsCount = 0;

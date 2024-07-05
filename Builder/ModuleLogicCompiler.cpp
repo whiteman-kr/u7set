@@ -2518,6 +2518,14 @@ namespace Builder
 			return false;
 		}
 
+		if (appSignal->isSwCalculated() == true)
+		{
+			// Software calculated signal %1 can't be used in user application logic (schema %2).
+			//
+			m_log->errALC5205(appSignal->appSignalID(), ualItem->guid(), ualItem->schemaID());
+			return false;
+		}
+
 		bool result = true;
 
 		UalSignal* ualSignal = m_ualSignals.get(signalID);

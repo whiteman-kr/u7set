@@ -50,14 +50,21 @@ public:
 	void setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
 				   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue);
 
-	int setState(AppDataSource& source,
-				const Times& time,
-				  bool isSimPacket,
-				  quint16 packetNo,
-				  const char* rupData,
-				  int rupDataSize,
-				  int autoArchivingGroup,
-				  const QThread* thread);
+	int setStateRaw(AppDataSource& source,
+					const Times& time,
+					bool isSimPacket,
+					quint16 packetNo,
+					const char* rupData,
+					int rupDataSize,
+					int autoArchivingGroup,
+					const QThread* thread);
+
+	int setStateParsed(const Times& time,
+					   quint16 packetNo,
+					   double value,
+					   AppSignalStateFlags flags,
+					   int autoArchivingGroup,
+					   const QThread* thread);
 
 	int setUnavailable(const Times& time,
 				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
@@ -66,6 +73,7 @@ public:
 	Hash hash() const;
 
 	bool archive() const { return m_archive; }
+	E::SoftwareCalcFunction swCalcFunction() const { return m_swCalcFunction; }
 
 	QString appSignalID() const;
 
@@ -146,7 +154,7 @@ private:
 	// parsing parameters
 
 	Address16 m_valueAddr;
-	Address16 m_validityAddr;
+//	Address16 m_validityAddr;
 
 	E::SignalType m_signalType = E::SignalType::Discrete;
 	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
@@ -159,6 +167,8 @@ private:
 	double m_lowLimit = 0;
 	double m_highLimit = 0;
 	bool m_reverseLimits = false;
+	bool m_overrideAboveHighLimitFlag = false;		// state of flag AboveHighLimit overrided by signal (set_flags used)
+	bool m_overrideBelowLowLimitFlag = false;		// state of flag BelowLowLimit overrided by signal (set_flags used)
 
 	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
 

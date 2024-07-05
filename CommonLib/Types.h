@@ -431,7 +431,7 @@ public:
 	enum class SoftwareCalcFunction
 	{
 		None = 0,
-		LockFlagsCount = 1,
+		BlockFlagsCount = 1,
 		SimFlagsCount = 2,
 		MismatchFlagsCount = 3,
 	};

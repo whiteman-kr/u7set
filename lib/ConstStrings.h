@@ -81,7 +81,7 @@ namespace EquipmentPropNames
 	inline const QString ACTUATOR_ID("ActuatorID");
 	inline const QString ACTUATOR_DESCRIPTION("ActuatorDescription");
 
-	inline const QString SC_FLOCK_COUNT_SUFFIX("_SC_FLOCK_COUNT");
+	inline const QString SC_FBLOCK_COUNT_SUFFIX("_SC_FBLOCK_COUNT");
 	inline const QString SC_FSIM_COUNT_SUFFIX("_SC_FSIM_COUNT");
 	inline const QString SC_FMISMATCH_COUNT_SUFFIX("_SC_FMISMATCH_COUNT");
 

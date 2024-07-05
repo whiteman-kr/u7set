@@ -7850,6 +7850,27 @@ namespace Builder
 						arg(packedAndID).arg(item1).arg(schema1).arg(item2).arg(schema2));
 	}
 
+	/// IssueCode: ALC5205
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Software calculated signal %1 can't be used in user application logic (schema %2).
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///		%2 schema
+	///
+	/// Description:
+	///		Software calculated signals can't be used in user application logic.
+	///
+	void IssueLogger::errALC5205(QString appSignalID, QUuid itemUuid, QString schema)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5205, itemUuid, schema);
+		LOG_ERROR(IssueType::AlCompiler, 5205,
+				  QString(tr("Software calculated signal %1 can't be used "
+							 "in user application logic (schema %2).").arg(appSignalID).arg(schema)));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning

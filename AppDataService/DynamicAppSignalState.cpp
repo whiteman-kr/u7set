@@ -69,6 +69,13 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 
 		for(E::AppSignalStateFlagType flagType : flagsTypes)
 		{
+			if (flagType == E::AppSignalStateFlagType::StateAvailable ||
+				flagType == E::AppSignalStateFlagType::SwSimulated ||
+				flagType == E::AppSignalStateFlagType::TuningDefault)
+			{
+				continue;			// this flags cant't be set by another app signal
+			}
+
 			QString flagSignalID = signal->getFlagSignalID(flagType);
 
 			if (flagSignalID.isEmpty() == true)
@@ -80,13 +87,13 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 
 			if (flagSignal == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
 			if (flagSignal->regValueAddr().isValid() == false)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -100,16 +107,24 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 
 			fspi.flagSignalAddr = flagSignal->regValueAddr();
 
-			Q_ASSERT(fspi.flagSignalAddr.bit() >= 0 && fspi.flagSignalAddr.bit() < 16);
+			if (fspi.flagSignalAddr.isValid() == false ||
+				(fspi.flagSignalAddr.bit() < 0 || fspi.flagSignalAddr.bit() >= 16))
+			{
+				Q_ASSERT(false);		// flag signal reg addr is invalid
+				continue;
+			}
 
-			if (fspi.flagType == E::AppSignalStateFlagType::Validity)
+			if (flagType == E::AppSignalStateFlagType::AboveHighLimit)
 			{
-				m_validityAddr = fspi.flagSignalAddr;		// validity flag should NOT be append to m_flagsSignalsParceInfo, it is Ok
+				m_overrideAboveHighLimitFlag = true;
 			}
-			else
+
+			if (flagType == E::AppSignalStateFlagType::BelowLowLimit)
 			{
-				m_flagsSignalsParceInfo.emplace_back(fspi);
+				m_overrideBelowLowLimitFlag = true;
 			}
+
+			m_flagsSignalsParceInfo.emplace_back(fspi);
 		}
 	}
 
@@ -141,14 +156,99 @@ void DynamicAppSignalState::setQueues(SimpleAppSignalStatesArchiveFlagQueue* sig
 									}															\
 								}
 
-// returns count of states pushed in statesQueue
-//
-int DynamicAppSignalState::setState(AppDataSource& source,
+int DynamicAppSignalState::setStateRaw(AppDataSource& source,
 									const Times& time,
 									bool isSimPacket,
 									quint16 packetNo,
 									const char* rupData,
 									int rupDataSize,
+									int autoArchivingGroup,
+									const QThread* thread)
+{
+	double value = 0;
+	AppSignalStateFlags flags;
+
+	flags.stateAvailable = 1;
+	flags.valid = 1;			// if flag signal for validity is assigned, this value will override in cycle below
+	flags.swSimulated = isSimPacket ? 1 : 0;
+
+	// get signal flags
+	//
+	for(const FlagSignalParceInfo& fspi : m_flagsSignalsParceInfo)
+	{
+		quint32 flagState = 0;
+
+		if(getBit(rupData, rupDataSize, fspi.flagSignalAddr, flagState) == false)
+		{	Q_ASSERT(false);
+			continue;
+		}
+
+		switch(fspi.flagType)
+		{
+		case E::AppSignalStateFlagType::StateAvailable:
+		case E::AppSignalStateFlagType::SwSimulated:
+		case E::AppSignalStateFlagType::TuningDefault:
+			Q_ASSERT(false);						// this flags should NOT be in m_flagsSignalsParceInfo array!
+			break;
+
+		case E::AppSignalStateFlagType::Validity:
+			flags.valid = flagState;
+			break;
+
+		case E::AppSignalStateFlagType::Simulated:
+			flags.simulated = flagState;
+			if (flagState)
+			{
+				source.incSimFlagsCount();
+			}
+			break;
+
+		case E::AppSignalStateFlagType::Blocked:
+			flags.blocked = flagState;
+			if (flagState)
+			{
+				source.incLockFlagsCount();
+			}
+			break;
+
+		case E::AppSignalStateFlagType::Mismatch:
+			flags.mismatch = flagState;
+			if (flagState)
+			{
+				source.incMismatchFlagsCount();
+			}
+			break;
+
+		case E::AppSignalStateFlagType::AboveHighLimit:
+			flags.aboveHighLimit = flagState;
+			break;
+
+		case E::AppSignalStateFlagType::BelowLowLimit:
+			flags.belowLowLimit = flagState;
+			break;
+
+		default:
+			Q_ASSERT(false);								// unknown flagType
+		}
+	}
+
+	if (flags.valid == AppSignalState::VALID)
+	{
+		if (getValue(rupData, rupDataSize, value) == false)
+		{
+			return 0;
+		}
+	}
+
+	return setStateParsed(time, packetNo, value, flags, autoArchivingGroup, thread);
+}
+
+// returns count of states pushed in statesQueue
+//
+int DynamicAppSignalState::setStateParsed(const Times& time,
+									quint16 packetNo,
+									double value,
+									AppSignalStateFlags flags,
 									int autoArchivingGroup,
 									const QThread* thread)
 {
@@ -158,43 +258,16 @@ int DynamicAppSignalState::setState(AppDataSource& source,
 	// curState's fields should be updated always
 	//
 	curState.hash = m_signalHash;
-
 	curState.time = time;
-
 	curState.packetNo = packetNo;
-
-	curState.flags.stateAvailable = 1;
-	curState.flags.swSimulated = isSimPacket;
-
-	// update validity flag
-
-	bool result = false;
-	int pushedStatesCtr = 0;
-
-	quint32 validity = AppSignalState::VALID;
-
-	if (m_validityAddr.isValid() == true)
-	{
-		result = getBit(rupData, rupDataSize, m_validityAddr, validity);
-
-		RETURN_VALUE_IF_FALSE(result, pushedStatesCtr);
-	}
-
-	curState.flags.valid = validity;
-
-	// update signal value
-
-	double value = 0;
-
-	result = getValue(rupData, rupDataSize, value);
-
-	RETURN_VALUE_IF_FALSE(result, pushedStatesCtr);
-
+	curState.flags = flags;
 	curState.value = value;
 
 	//
 
-	if (validity == AppSignalState::INVALID)
+	int pushedStatesCtr = 0;
+
+	if (curState.flags.valid == AppSignalState::INVALID)
 	{
 		if (prevState.flags.valid == AppSignalState::VALID)
 		{
@@ -333,13 +406,25 @@ int DynamicAppSignalState::setState(AppDataSource& source,
 
 						if (m_reverseLimits == false)
 						{
-							curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);
-							curState.flags.belowLowLimit = (curState.value < m_lowLimit ? 1 : 0);
+							if (m_overrideAboveHighLimitFlag == false)
+							{
+								curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);
+							}
+							if (m_overrideBelowLowLimitFlag == false)
+							{
+								curState.flags.belowLowLimit = (curState.value < m_lowLimit ? 1 : 0);
+							}
 						}
 						else
 						{
-							curState.flags.aboveHighLimit = (curState.value < m_highLimit ? 1 : 0);
-							curState.flags.belowLowLimit = (curState.value > m_lowLimit ? 1 : 0);
+							if (m_overrideAboveHighLimitFlag == false)
+							{
+								curState.flags.aboveHighLimit = (curState.value < m_highLimit ? 1 : 0);
+							}
+							if (m_overrideBelowLowLimitFlag == false)
+							{
+								curState.flags.belowLowLimit = (curState.value > m_lowLimit ? 1 : 0);
+							}
 						}
 					}
 				}
@@ -366,63 +451,6 @@ int DynamicAppSignalState::setState(AppDataSource& source,
 		else
 		{
 			// curState.flags.tuningDefault sets to 0 in constructor of curState
-		}
-
-		// update other signal flags
-		//
-		for(const FlagSignalParceInfo& fspi : m_flagsSignalsParceInfo)
-		{
-			quint32 bit = 0;
-
-			result = getBit(rupData, rupDataSize, fspi.flagSignalAddr, bit);
-
-			if (result == false)
-			{
-				continue;
-			}
-
-			switch(fspi.flagType)
-			{
-			case E::AppSignalStateFlagType::Validity:
-			case E::AppSignalStateFlagType::StateAvailable:
-				assert(false);								// this flags should NOT be in m_flagsSignalsParceInfo array!
-				break;
-
-			case E::AppSignalStateFlagType::Simulated:
-				curState.flags.simulated = bit;
-				if (bit)
-				{
-					source.incSimFlagsCount();
-				}
-				break;
-
-			case E::AppSignalStateFlagType::Blocked:
-				curState.flags.blocked = bit;
-				if (bit)
-				{
-					source.incLockFlagsCount();
-				}
-				break;
-
-			case E::AppSignalStateFlagType::Mismatch:
-				curState.flags.mismatch = bit;
-				if (bit)
-				{
-					source.incMismatchFlagsCount();
-				}
-				break;
-
-			case E::AppSignalStateFlagType::AboveHighLimit:
-				curState.flags.aboveHighLimit = bit;
-				break;
-
-			case E::AppSignalStateFlagType::BelowLowLimit:
-				curState.flags.belowLowLimit = bit;
-				break;
-
-			default:
-				assert(false);								// unknown flagType
-			}
 		}
 	}
 

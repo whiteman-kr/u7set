@@ -72,7 +72,8 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 		TEST_PTR_CONTINUE(signal);
 
-		if (signal->regValueAddr().isValid() == false)
+		if (signal->regValueAddr().isValid() == false &&
+			signal->isSwCalculated() == false)
 		{
 			continue;
 		}
@@ -222,6 +223,14 @@ void AppDataSource::invalidateSignals(const QThread* thread)
 		}
 	}
 
+	for(const auto& [swCalcFunction, swCalcSignalsStates] : m_swCalcSignalsStates)
+	{
+		for(DynamicAppSignalState* swCalcSignalState : swCalcSignalsStates)
+		{
+			swCalcSignalState->setUnavailable(m_rupTimes, m_signalStatesQueue, thread);
+		}
+	}
+
 	wakeupStatesProcessingThread();
 
 	qDebug() << "Invalidate";
@@ -349,8 +358,8 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		pushedStatesCtr += signalState->setState(*this, m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
-												autoArchivingGroup, thread);
+		pushedStatesCtr += signalState->setStateRaw(*this, m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
+													autoArchivingGroup, thread);
 
 		if (pushedStatesCtr > 20)
 		{
@@ -359,9 +368,44 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 		}
 	}
 
+	// Update state of software calculated signals
+
+	AppSignalStateFlags swCalcStateFlags;
+
+	swCalcStateFlags.valid = 1,
+	swCalcStateFlags.stateAvailable = 1,
+	swCalcStateFlags.swSimulated = isSimPacket ? 1 : 0;
+
 	for(const auto& [swCalcFunction, swCalcSignalsStates] : m_swCalcSignalsStates)
 	{
-		sdvd vcv re r ewrg erg erg er
+		for(DynamicAppSignalState* swCalcSignalState : swCalcSignalsStates)
+		{
+			TEST_PTR_CONTINUE(swCalcSignalState);
+
+			double value = 0;
+
+			switch(swCalcSignalState->swCalcFunction())
+			{
+			case E::SoftwareCalcFunction::BlockFlagsCount:
+				value = static_cast<double>(m_lockFlagsCount);
+				break;
+
+			case E::SoftwareCalcFunction::SimFlagsCount:
+				value = static_cast<double>(m_simFlagsCount);
+				break;
+
+			case E::SoftwareCalcFunction::MismatchFlagsCount:
+				value = static_cast<double>(m_mismatchFlagsCount);
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+
+			swCalcSignalState->setStateParsed(m_rupTimes, packetNo,
+											  value, swCalcStateFlags,
+											  autoArchivingGroup, thread);
+		}
 	}
 
 	if (pushedStatesCtr != 0)
