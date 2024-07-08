@@ -6,20 +6,21 @@
 #include "SignalSnapshotModel.h"
 
 class IAppSignalManager;
-class ISignalDataServer;
-
-namespace SchemaClientLib
-{
-	class ISignalSnapshotWidget;
-}
 
 namespace AppSignalLists
 {
 	class AppSignalListSet;
 }
 
+namespace ClientLib
+{
+	class ISignalDataServer;
+}
+
 namespace SchemaClientLib
 {
+	class ISignalSnapshotWidget;
+
 	struct DialogSignalSnapshotSettings
 	{
 		QByteArray horzHeader;
@@ -60,7 +61,7 @@ namespace SchemaClientLib
 	public:
 		SignalSnapshotWidget(SchemaClientLib::ISignalSnapshotWidget& signalSnapshotVirtFuncDispatcher,
 							 IAppSignalManager* appSignalManager,
-							 ISignalDataServer* signalDataServer,                                  // Can be nullptr, e.g. in Simulator
+							 ClientLib::ISignalDataServer* signalDataServer,                                  // Can be nullptr, e.g. in Simulator
 							 AppSignalLists::AppSignalListSet* appSignalListSet,                   // Can be nullptr, e.g. in Simulator
 							 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices, // Can be empty, e.g. in Simulator
 							 const QString& projectName,
@@ -143,7 +144,7 @@ namespace SchemaClientLib
 		ISignalSnapshotWidget& m_signalSnapshotVirtFuncDispatcher;
 
 		IAppSignalManager* m_appSignalManager = nullptr;
-		ISignalDataServer* m_signalDataServer = nullptr;
+		ClientLib::ISignalDataServer* m_signalDataServer = nullptr;
 		AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 
 		// Ui

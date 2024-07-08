@@ -22,6 +22,7 @@ add_executable(${TARGET}
 	ConnectionPorts.cpp
 	ConnectionPorts.h
 	main.cpp
+	RtDataProviderTests.cpp
 	TuningConnectionTests.cpp
 	TuningSignalManagerTests.cpp
 	TuninsUserManagerTests.cpp
@@ -30,6 +31,7 @@ add_executable(${TARGET}
 target_precompile_headers(${TARGET} PRIVATE
 	<algorithm>
 	<bit>
+	<deque>
 	<vector>
 	<list>
 	<ranges>

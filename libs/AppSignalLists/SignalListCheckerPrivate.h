@@ -1,5 +1,4 @@
-#include "./include/AppSignalLists/SignalListChecker.h"
-#include "../UtilsLib/LogFile.h"
+#pragma once
 
 namespace AppSignalLists
 {
@@ -9,6 +8,7 @@ namespace AppSignalLists
 	class DialogCheckAppSignalLists : public QDialog
 	{
 		Q_OBJECT
+
 	public:
 		DialogCheckAppSignalLists(std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parent);
 	};
@@ -27,4 +27,4 @@ namespace AppSignalLists
 		inline static bool checkFunctionActive = false;
 	};
 
-} // namespace
+} // namespace AppSignalLists

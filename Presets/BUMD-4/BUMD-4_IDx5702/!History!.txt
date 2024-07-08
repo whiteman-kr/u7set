@@ -1,3 +1,4 @@
 BUMD-4
 	30.05.2024	Version: 3	BUMD-4_IDx5702_v3.u7devp	RPCT-3896: Added preset in new naming convension and family BUIM (created from BUMD-4_v2.u7devp) 
 										   Added property ActuatorDescription
+	01.07.2024	Version: 4 	BUMD-4_IDx5702_v4.u7devp	RPCT-3826: Added UpdateFromPreset for SignalSpecificProperties properties, SKNO and SKNC names update

@@ -1,6 +1,6 @@
 #pragma once
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../lib/ISignalDataServer.h"
+#include <ClientLib/ISignalDataServer.h>
 #include <ClientLib/RtTrendConnectionStatistics.h>
 
 #include "RtTrendTcpClient.h"
@@ -65,7 +65,7 @@ namespace ClientLib
 		RtDataProviderPrivate& operator=(RtDataProviderPrivate&&) = delete;
 
 		RtDataProviderPrivate(const ISignalDataServer& signalDataServer, ILogFile* logFile);
-		~RtDataProviderPrivate();
+		~RtDataProviderPrivate() override;
 
 	public:
 		void clear();

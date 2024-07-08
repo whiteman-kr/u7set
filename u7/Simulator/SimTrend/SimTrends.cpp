@@ -1,8 +1,9 @@
 #include "SimTrends.h"
 #include "../SimIdeSimulator.h"
+
+#include <AppSignalLists/SignalList.h>
 #include <TrendView/DialogChooseTrendSignals.h>
 #include <TrendView/TrendSignalSet.h>
-#include "../../libs/AppSignalLists/include/AppSignalLists/SignalList.h"
 
 
 std::list<SimTrendsWidget*> SimTrends::s_trendsList;
@@ -255,10 +256,11 @@ void SimTrendsWidget::signalsButton()
 		trendSignals.emplace_back(appSignal, TrendLib::ArchiveServer{});
 	}
 
-	// Implement ISignalHasTag
+	// Implement TrendLib::ISignalHasTag
 	//
-	struct SignalHasTag : ISignalHasTag
+	class SignalHasTag : public TrendLib::ISignalHasTag
 	{
+	public:
 		SignalHasTag(const Sim::AppSignalManager* sm) : signalManager(sm)
 		{
 		}
@@ -272,7 +274,9 @@ void SimTrendsWidget::signalsButton()
 		const Sim::AppSignalManager* signalManager = nullptr;
 	} signalHasTag{&m_simulator->appSignalManager()};
 
-	TrendLib::DialogChooseTrendSignals dialog(&signalHasTag, trendSignals, acceptedTrendSignals, archiveServers, {}, this);
+	const AppSignalLists::AppSignalListSet appSignalLists;
+
+	TrendLib::DialogChooseTrendSignals dialog(&signalHasTag, trendSignals, acceptedTrendSignals, archiveServers, appSignalLists, this);
 	
 	int result = dialog.exec();
 	if (result == QDialog::Rejected)

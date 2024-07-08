@@ -230,7 +230,7 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*:TuningConnectionTests.*"
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*:TuningConnectionTests.*:RtDataProviderTests.*"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\""

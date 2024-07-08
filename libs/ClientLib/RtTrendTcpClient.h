@@ -2,9 +2,10 @@
 
 #include <TrendView/TrendSignalState.h>
 
-#include "../lib/ISignalDataServer.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+
+#include <ClientLib/ISignalDataServer.h>
 #include <ClientLib/RtTrendConnectionStatistics.h>
 
 namespace ClientLib

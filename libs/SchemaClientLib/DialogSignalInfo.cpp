@@ -549,7 +549,7 @@ std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
 
 DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 								   IAppSignalManager* appSignalManager,
-								   ISignalDataServer* signalDataServer,
+								   ClientLib::ISignalDataServer* signalDataServer,
 								   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 								   ITuningSignalManager& tuningSignalManager,
 								   ITuningConnection& tuningConnection,

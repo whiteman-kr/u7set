@@ -1,3 +1,5 @@
+#pragma once
+
 namespace AppSignalLists
 {
 	// Column names
@@ -24,4 +26,4 @@ namespace AppSignalLists
 	static const QLatin1String prop_AppSignalMasks = QLatin1String("AppSignalMasks");
 	static const QLatin1String prop_EquipmentIDMasks = QLatin1String("EquipmentIDMasks");
 	static const QLatin1String prop_AppSignalTags = QLatin1String("AppSignalTags");
-}
+} // namespace AppSignalLists

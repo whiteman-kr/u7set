@@ -1,7 +1,7 @@
-#include "../include/AppSignalLists/DialogSignalListEditor.h"
-
+#include "../../AppSignalLib/ISignalManager.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../libs/UiLib/include/UiLib/PropertyEditor.h"
+#include <AppSignalLists/DialogSignalListEditor.h>
+#include <UiLib/PropertyEditor.h>
 
 namespace AppSignalLists
 {
@@ -24,7 +24,7 @@ namespace AppSignalLists
 		return;
 	}
 
-	DialogSignalListEditor* DialogSignalListEditor::instance() 
+	DialogSignalListEditor* DialogSignalListEditor::instance()
 	{
 		return s_instance;
 	}
@@ -112,7 +112,7 @@ namespace AppSignalLists
 
 		m_btnAdd = new QPushButton(tr("Add"));
 		m_btnRemove = new QPushButton(tr("Remove"));
-		
+
 		m_btnOk = new QPushButton(tr("OK"));
 		m_btnCancel = new QPushButton(tr("Cancel"));
 
@@ -124,7 +124,7 @@ namespace AppSignalLists
 
 		connect(m_btnAdd, &QPushButton::clicked, this, &DialogSignalListEditor::onAdd);
 		connect(m_btnRemove, &QPushButton::clicked, this, &DialogSignalListEditor::onRemove);
-		
+
 		connect(m_btnOk, &QPushButton::clicked, this, &DialogSignalListEditor::accept);
 		connect(m_btnCancel, &QPushButton::clicked, this, &DialogSignalListEditor::reject);
 
@@ -388,7 +388,7 @@ namespace AppSignalLists
 			//
 			if (list->systemTagsList().contains(AppSignalLists::AppSignalList::tagUi) == true ||
 				list->systemTagsList().contains(AppSignalLists::AppSignalList::tagEquipment) == true ||
-				list->systemTagsList().contains(AppSignalLists::AppSignalList::tagSchema) == true) 
+				list->systemTagsList().contains(AppSignalLists::AppSignalList::tagSchema) == true)
 			{
 				continue;
 			}
@@ -399,7 +399,8 @@ namespace AppSignalLists
 
 				for (const QString& mask : m_masks)
 				{
-					if (list->id().contains(mask, Qt::CaseInsensitive) == true || list->caption().contains(mask, Qt::CaseInsensitive) == true)
+					if (list->id().contains(mask, Qt::CaseInsensitive) == true ||
+						list->caption().contains(mask, Qt::CaseInsensitive) == true)
 					{
 						maskResult = true;
 						break;
@@ -551,7 +552,7 @@ namespace AppSignalLists
 		return;
 	}
 
-	void DialogSignalListEditor::onSignalsChanged() 
+	void DialogSignalListEditor::onSignalsChanged()
 	{
 		m_modified = true;
 	}
@@ -566,7 +567,7 @@ namespace AppSignalLists
 		{
 			id = tr("LIST_%1").arg(QString::number(counter++).rightJustified(4, '0'));
 
-		}while(m_editLists.get(id) != nullptr);
+		} while (m_editLists.get(id) != nullptr);
 
 		list->setId(id);
 		list->setCaption(id.toLower());
@@ -737,22 +738,22 @@ namespace AppSignalLists
 		return;
 	}
 
-	void DialogSignalListEditor::saveChanges() 
+	void DialogSignalListEditor::saveChanges()
 	{
 		m_appLists = m_editLists;
 
 		// Count cached hashes for all user lists
 		//
 		std::vector<Hash> allHashes = m_signalManager.signalHashes();
-		
+
 		auto lists = m_appLists.lists();
-		for (auto& list : lists) 
+		for (auto& list : lists)
 		{
 			Q_ASSERT(list);
 
-			if (list->systemTagsList().contains(AppSignalList::tagIde) == true) 
+			if (list->systemTagsList().contains(AppSignalList::tagIde) == true)
 			{
-				continue;		// We process only user-created lists!!!
+				continue; // We process only user-created lists!!!
 			}
 
 			auto& appListHashesCache = list->mutableAppListHashesCache();
@@ -771,7 +772,7 @@ namespace AppSignalLists
 				{
 					appListHashesCache.insert(hash);
 
-					if (asp.enableTuning() == true) 
+					if (asp.enableTuning() == true)
 					{
 						tuningListHashesCache.insert(hash);
 					}
@@ -780,7 +781,7 @@ namespace AppSignalLists
 		}
 
 		QString errorMessage;
-		if (m_appLists.save(&errorMessage) == false) 
+		if (m_appLists.save(&errorMessage) == false)
 		{
 			QMessageBox::critical(this, qAppName(), errorMessage);
 		}
@@ -790,10 +791,12 @@ namespace AppSignalLists
 
 	void DialogSignalListEditor::closeEvent(QCloseEvent* e)
 	{
-		if (m_modified == true) 
+		if (m_modified == true)
 		{
-			int reply = QMessageBox::warning(this, qAppName(), tr("Warning! Changes are not saved. Do you wish to save them?"),
-				QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+			int reply = QMessageBox::warning(this,
+											 qAppName(),
+											 tr("Warning! Changes are not saved. Do you wish to save them?"),
+											 QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
 			if (reply == QMessageBox::Yes)
 			{
@@ -835,10 +838,12 @@ namespace AppSignalLists
 
 	void DialogSignalListEditor::reject()
 	{
-		if (m_modified == true) 
+		if (m_modified == true)
 		{
-			int reply = QMessageBox::warning(this, qAppName(), tr("Warning! Changes are not saved. Do you wish to save them?"),
-				QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+			int reply = QMessageBox::warning(this,
+											 qAppName(),
+											 tr("Warning! Changes are not saved. Do you wish to save them?"),
+											 QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
 			if (reply == QMessageBox::Yes)
 			{

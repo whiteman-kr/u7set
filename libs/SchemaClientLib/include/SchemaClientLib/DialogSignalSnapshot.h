@@ -2,7 +2,7 @@
 
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../OnlineLib/SoftwareEndpoint.h"
-#include "../lib/ISignalDataServer.h"
+#include <ClientLib/ISignalDataServer.h>
 #include <VFrame30/SchemaDetails.h>
 
 #include <set>
@@ -43,7 +43,7 @@ namespace SchemaClientLib
 
 	protected:
 		DialogSignalSnapshot(IAppSignalManager* appSignalManager,
-							 ISignalDataServer* signalDataServer,                                  // Can be nullptr, e.g. in Simulator
+							 ClientLib::ISignalDataServer* signalDataServer,                                  // Can be nullptr, e.g. in Simulator
 							 AppSignalLists::AppSignalListSet* appSignalListSet,
 							 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices, // Can be empty, e.g. in Simulator
 							 const QString& projectName,

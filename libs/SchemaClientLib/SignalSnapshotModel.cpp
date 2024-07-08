@@ -1,7 +1,7 @@
 #include "SignalSnapshotModel.h"
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "../lib/ISignalDataServer.h"
-#include <../libs/AppSignalLists/include/AppSignalLists/SignalList.h>
+#include <AppSignalLists/SignalList.h>
+#include <ClientLib/ISignalDataServer.h>
 
 //
 // SignalSnapshotSorter
@@ -211,7 +211,7 @@ namespace SchemaClientLib
 //
 namespace SchemaClientLib
 {
-	SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, ISignalDataServer* signalDataServer, AppSignalLists::AppSignalListSet* appSignalListSet, QObject* parent) :
+	SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, ClientLib::ISignalDataServer* signalDataServer, AppSignalLists::AppSignalListSet* appSignalListSet, QObject* parent) :
 		QAbstractItemModel(parent),
 		m_appSignalManager(appSignalManager),
 		m_signalDataServer(signalDataServer),

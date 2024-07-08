@@ -1,9 +1,10 @@
 #include "SignalSnapshotWidget.h"
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "../lib/ISignalDataServer.h"
-#include <UiLib/ChooseItemsWidget.h>
+
+#include <AppSignalLists/SignalList.h>
+#include <ClientLib/ISignalDataServer.h>
 #include <SchemaClientLib/DialogSignalSnapshot.h>
-#include <../libs/AppSignalLists/include/AppSignalLists/SignalList.h>
+#include <UiLib/ChooseItemsWidget.h>
 #include <UiLib/ExportPrint.h>
 
 
@@ -147,7 +148,7 @@ namespace SchemaClientLib
 {
 	SignalSnapshotWidget::SignalSnapshotWidget(SchemaClientLib::ISignalSnapshotWidget& signalSnapshotVirtFuncDispatcher,
 											   IAppSignalManager* appSignalManager,
-											   ISignalDataServer* signalDataServer,
+											   ClientLib::ISignalDataServer* signalDataServer,
 											   AppSignalLists::AppSignalListSet* appSignalListSet,
 											   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 											   const QString& projectName,

@@ -655,9 +655,9 @@ namespace AppSignalLists
 		QAbstractTableModel(),
 		m_signalManager(signalManager)
 	{
-		for (int c = 0; c < static_cast<int>(Columns::Count); c++) 
+		for (int c = 0; c < static_cast<int>(Columns::Count); c++)
 		{
-			if (hasValueColumn == false && c == static_cast<int>(Columns::Value)) 
+			if (hasValueColumn == false && c == static_cast<int>(Columns::Value))
 			{
 				continue;
 			}
@@ -692,7 +692,7 @@ namespace AppSignalLists
 			m_appSignalList = list;
 
 			auto itemsHashesSet = m_appSignalList->itemsHashes();
-			for (Hash hash : itemsHashesSet) 
+			for (Hash hash : itemsHashesSet)
 			{
 				m_allHashes.push_back(hash);
 			}
@@ -763,7 +763,7 @@ namespace AppSignalLists
 		return true;
 	}
 
-	AppSignalListModel::Columns AppSignalListModel::column(int index) const 
+	AppSignalListModel::Columns AppSignalListModel::column(int index) const
 	{
 		if (index < 0 || index >= columnCount())
 		{
@@ -854,12 +854,12 @@ namespace AppSignalLists
 
 			if (columnType == Columns::AppSignalID)
 			{
-				if (found == false) 
+				if (found == false)
 				{
 					const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 					return item.appSignalId();
 				}
-			
+
 				return asp.appSignalId();
 			}
 

@@ -1,7 +1,6 @@
 #include "MonitorTrends.h"
 
-#include "../lib/ISignalHasTag.h"
-
+#include <TrendView/ISignalHasTag.h>
 #include <TrendView/DialogChooseTrendSignals.h>
 #include <TrendView/TrendSignalSet.h>
 
@@ -282,10 +281,11 @@ void MonitorTrendsWidget::signalsButton()
 	//
 	std::vector<TrendLib::TrendSignalParam> addedTrendSignals = signalSet().trendSignals();
 
-	// Implement ISignalHasTag
+	// Implement TrendLib::ISignalHasTag
 	//
-	struct SignalHasTag : ISignalHasTag
+	class SignalHasTag : public TrendLib::ISignalHasTag
 	{
+	public:
 		SignalHasTag(const ClientLib::AppSignalManager& ms) :
 			monitorAppSignalManager(ms)
 		{

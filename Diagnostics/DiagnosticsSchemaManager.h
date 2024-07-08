@@ -1,7 +1,7 @@
 #pragma once
 
+#include <ClientLib/ISignalDataServer.h>
 #include <SchemaClientLib/ClientSchemaManager.h>
-#include "../lib/ISignalDataServer.h"
 #include "DiagConfigController.h"
 
 
@@ -11,7 +11,7 @@ class DiagnosticsSchemaManager : public SchemaClientLib::ClientSchemaManager
 
 public:
 	explicit DiagnosticsSchemaManager(DiagConfigController& configController,
-									  const ISignalDataServer& signalDataServer,
+									  const ClientLib::ISignalDataServer& signalDataServer,
 									  QObject* parent = nullptr);
 
 	// RealTimeTrends for schemas, SchemaItemIndicator, type = Trend
@@ -38,7 +38,7 @@ public:
 	// Data
 	//
 private:
-	const ISignalDataServer& m_signalDataServer;
+	const ClientLib::ISignalDataServer& m_signalDataServer;
 
 	//// Data for RealTimeTrends on schemas, SchemaItemIndicator, type = Trend
 	////

@@ -3,7 +3,7 @@
 //
 // RtConnection
 //
-RtSchemaTrendDataProvider::RtSchemaTrendDataProvider(const ISignalDataServer& signalDataServer, ILogFile* logFile) :
+RtSchemaTrendDataProvider::RtSchemaTrendDataProvider(const ClientLib::ISignalDataServer& signalDataServer, ILogFile* logFile) :
 	m_dataProvider{signalDataServer, logFile}
 {
 
@@ -377,7 +377,7 @@ void RtSchemaTrendDataProvider::trimArchive_unsafe(int durationSeconds, TrendLib
 //
 // RtTrendSchema
 //
-RtSchemaTrend::RtSchemaTrend(const MonitorConfigController& configController, const ISignalDataServer& signalDataServer) :
+RtSchemaTrend::RtSchemaTrend(const MonitorConfigController& configController, const ClientLib::ISignalDataServer& signalDataServer) :
 	m_configController(configController),
 	m_signalDataServer(signalDataServer)
 {

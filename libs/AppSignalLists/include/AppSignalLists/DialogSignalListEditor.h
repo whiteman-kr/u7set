@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QDialog>
+
 #include "SignalListEditor.h"
 
 namespace ExtWidgets
@@ -77,7 +79,7 @@ namespace AppSignalLists
 
 		QPushButton* m_btnAdd = nullptr;
 		QPushButton* m_btnRemove = nullptr;
-		
+
 		QPushButton* m_btnOk = nullptr;
 		QPushButton* m_btnCancel = nullptr;
 
@@ -92,8 +94,8 @@ namespace AppSignalLists
 
 		QStringList m_masks;
 
-		AppSignalListSet& m_appLists;	// Original lists
-		AppSignalListSet m_editLists;	// Edited lists
+		AppSignalListSet& m_appLists; // Original lists
+		AppSignalListSet m_editLists; // Edited lists
 
 		ISignalManager& m_signalManager;
 
