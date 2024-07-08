@@ -498,7 +498,7 @@ namespace Builder
 						QString item2, QUuid item2Uuid, QString schema2);				// Permanent const 1 on output of packed_or %1 (item %2, schema %3) due to const 1 on input (item %4, schema %5).
 		void wrnALC5204(QString packedAndID, QString item1, QUuid item1Uuid, QString schema1,
 						QString item2, QUuid item2Uuid, QString schema2);				// Permanent const 0 on output of packed_and %1 (item %2, schema %3) due to const 0 on input (item %4, schema %5).
-		void errALC5205(QString appSignalID, QUuid itemUuid, QString schema);			// Software calculated signal %1 can't be used in user application logic (schema %2).
+		void errALC5205(QString appSignalID, QUuid itemUuid, QString schema);			// Software calculated signal %1 cannot be used in user application logic (schema %2).
 
 		// firmware writing errors
 

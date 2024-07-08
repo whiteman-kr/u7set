@@ -386,7 +386,7 @@ private:
 	SchemaFindDialog* m_findDialog = nullptr;
 
 	CreatingSignalOptions m_createSignalOptions;
-	CreatingSignalDialogOptions m_createSignalDialoOptions;
+	CreatingSignalDialogOptions m_createSignalDialogOptions;
 
 	// --
 	//

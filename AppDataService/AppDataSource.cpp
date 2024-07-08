@@ -350,7 +350,7 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	// counters will increment inside signalState->setState(...)
 	//
-	m_lockFlagsCount = 0;
+	m_blockFlagsCount = 0;
 	m_simFlagsCount = 0;
 	m_mismatchFlagsCount = 0;
 
@@ -387,7 +387,7 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 			switch(swCalcSignalState->swCalcFunction())
 			{
 			case E::SoftwareCalcFunction::BlockFlagsCount:
-				value = static_cast<double>(m_lockFlagsCount);
+				value = static_cast<double>(m_blockFlagsCount);
 				break;
 
 			case E::SoftwareCalcFunction::SimFlagsCount:

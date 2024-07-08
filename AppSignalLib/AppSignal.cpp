@@ -142,7 +142,7 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 	case E::SignalFunction::Diagnostics:
 
 		Q_ASSERT(false);
-		return QString("Can't create AppSignal from diagnostics device signal");
+		return QString("Can not create AppSignal from diagnostics device signal");
 
 	case E::SignalFunction::SoftwareCalculated:
 		{
@@ -165,6 +165,21 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 			if (m_swCalcFunction == E::SoftwareCalcFunction::None)
 			{
 				return QString("Unknown software calculetd function of signal %1").arg(appSignalID);
+			}
+
+			switch(m_swCalcFunction)
+			{
+			case E::SoftwareCalcFunction::BlockFlagsCount:
+			case E::SoftwareCalcFunction::SimFlagsCount:
+			case E::SoftwareCalcFunction::MismatchFlagsCount:
+				m_apertureType = E::ApertureType::AbsValue;
+				m_coarseAperture = 1;
+				m_fineAperture = 1;
+				m_decimalPlaces = 0;
+				break;
+
+			default:
+				Q_ASSERT(false);
 			}
 
 			break;
@@ -1666,8 +1681,19 @@ void AppSignal::initTuningValues()
 	switch (signalType())
 	{
 	case E::SignalType::Analog:
-		m_tuningLowBound.setValue(m_tuningLowBound.type(), static_cast<qint64>(lowEngineeringUnits(nullptr)), lowEngineeringUnits(nullptr));
-		m_tuningHighBound.setValue(m_tuningHighBound.type(), static_cast<qint64>(highEngineeringUnits(nullptr)), highEngineeringUnits(nullptr));
+		{
+			double lowBound = lowEngineeringUnits(nullptr);
+			double highBound = highEngineeringUnits(nullptr);
+
+			if (lowBound == highBound )
+			{
+				lowBound = 0;
+				highBound = 100;
+			}
+
+			m_tuningLowBound.setValue(m_tuningLowBound.type(), static_cast<qint64>(lowBound), lowBound);
+			m_tuningHighBound.setValue(m_tuningHighBound.type(), static_cast<qint64>(highBound), highBound);
+		}
 		break;
 
 	case E::SignalType::Discrete:

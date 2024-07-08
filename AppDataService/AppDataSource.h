@@ -41,7 +41,7 @@ public:
 
 	bool statesQueueIsEmpty(QThread* thread) const;
 
-	void incLockFlagsCount() { m_lockFlagsCount++; }
+	void incBlockFlagsCount() { m_blockFlagsCount++; }
 	void incSimFlagsCount() { m_simFlagsCount++; }
 	void incMismatchFlagsCount() { m_mismatchFlagsCount++; }
 
@@ -77,7 +77,7 @@ private:
 	//
 	std::map<E::SoftwareCalcFunction, std::vector<DynamicAppSignalState*>> m_swCalcSignalsStates;
 
-	int m_lockFlagsCount = 0;
+	int m_blockFlagsCount = 0;
 	int m_simFlagsCount = 0;
 	int m_mismatchFlagsCount = 0;
 

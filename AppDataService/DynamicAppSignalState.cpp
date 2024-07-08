@@ -207,7 +207,7 @@ int DynamicAppSignalState::setStateRaw(AppDataSource& source,
 			flags.blocked = flagState;
 			if (flagState)
 			{
-				source.incLockFlagsCount();
+				source.incBlockFlagsCount();
 			}
 			break;
 

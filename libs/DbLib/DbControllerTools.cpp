@@ -236,16 +236,7 @@ QString DbControllerTools::initAppSignalFromDeviceAppSignal(const Hardware::Devi
 	}
 	else
 	{
-		qsizetype pos = deviceSignalEquipmentID.lastIndexOf(QChar('_'));
-
-		if (pos != -1)
-		{
-			appSignalCaption = QString("Signal %1").arg(deviceSignalEquipmentID.mid(pos + 1));
-		}
-		else
-		{
-			appSignalCaption = QString("Signal %1").arg(deviceSignalEquipmentID);
-		}
+		appSignalCaption = deviceSignal.caption();
 	}
 
 	//

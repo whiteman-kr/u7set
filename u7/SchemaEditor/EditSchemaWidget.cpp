@@ -5235,12 +5235,12 @@ void EditSchemaWidget::addNewAppSignal(SchemaItemPtr schemaItem)
 	{
 	}
 
-	m_createSignalDialoOptions.init(schema()->schemaId(),
+	m_createSignalDialogOptions.init(schema()->schemaId(),
 									schema()->caption(),
 									equipmentIdList,
 									itemsAppSignals);
 
-	QStringList signalsIds = CreateSignalDialog::showDialog(db(), &m_createSignalDialoOptions, this);
+	QStringList signalsIds = CreateSignalDialog::showDialog(db(), &m_createSignalDialogOptions, this);
 
 	if (signalsIds.isEmpty() == false)
 	{

@@ -2520,7 +2520,7 @@ namespace Builder
 
 		if (appSignal->isSwCalculated() == true)
 		{
-			// Software calculated signal %1 can't be used in user application logic (schema %2).
+			// Software calculated signal %1 cannot be used in user application logic (schema %2).
 			//
 			m_log->errALC5205(appSignal->appSignalID(), ualItem->guid(), ualItem->schemaID());
 			return false;
@@ -17155,6 +17155,7 @@ namespace Builder
 
 			if (s->isInternal() == true &&
 				s->reserved() == false &&
+				s->isSwCalculated() == false &&
 				m_ualSignals.contains(s->appSignalID()) == false)
 			{
 				m_log->wrnALC5148(s->appSignalID());

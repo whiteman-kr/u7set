@@ -94,7 +94,6 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 	signal.setByteOrder(E::ByteOrder::BigEndian);
 	signal.setDataSizeByType(signal.signalType(), signal.analogSignalFormat());
 	signal.setAnalogSignalFormat(signal.analogSignalFormat());
-	signal.initTuningValues();
 
 	AppSignalPropertyManager* propManager = AppSignalPropertyManager::getInstance();
 
@@ -161,6 +160,8 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 			propManager->setValue(&signal, i, value, theSettings.isExpertMode());
 		}
 	}
+
+	signal.initTuningValues();
 }
 
 // Returns vector of pairs,
