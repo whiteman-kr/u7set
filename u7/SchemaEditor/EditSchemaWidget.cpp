@@ -7415,6 +7415,8 @@ void EditSchemaWidget::editPaste()
 			{
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::valueDiscrete, QVariant(constDiscrete), constDiscreteItems);
 			}
+
+			return;
 		}
 	}
 
@@ -7434,6 +7436,7 @@ void EditSchemaWidget::editPaste()
 		if (allItemsAreRects == true)
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(mimeData->text()), selected);
+			return;
 		}
 	}
 
@@ -7454,6 +7457,7 @@ void EditSchemaWidget::editPaste()
 			mimeData->text().startsWith('#') == true)
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(mimeData->text()), selected);
+			return;
 		}
 	}
 
@@ -7474,6 +7478,7 @@ void EditSchemaWidget::editPaste()
 			mimeData->text().startsWith('#') == true)
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(mimeData->text()), selected);
+			return;
 		}
 	}
 
@@ -7494,6 +7499,7 @@ void EditSchemaWidget::editPaste()
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(mimeData->text()), selected);
 			EditSchemaWidget::m_lastUsedLoopbackId = mimeData->text();
+			return;
 		}
 	}
 
@@ -7513,7 +7519,8 @@ void EditSchemaWidget::editPaste()
 		if (allItemsAreValues == true &&
 			mimeData->text().startsWith('#') == true)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(mimeData->text()), selected);
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(mimeData->text()), selected);
+			return;
 		}
 	}
 
@@ -7533,10 +7540,10 @@ void EditSchemaWidget::editPaste()
 		if (allItemsAreImageValues == true &&
 			mimeData->text().startsWith('#') == true)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(mimeData->text()), selected);
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(mimeData->text()), selected);
+			return;
 		}
 	}
-
 
 	return;
 }

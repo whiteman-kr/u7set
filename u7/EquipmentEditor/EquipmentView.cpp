@@ -1408,7 +1408,8 @@ void EquipmentView::addInOutsToSignals(std::vector<std::shared_ptr<Hardware::Dev
 	{
 		if (has->function() == E::SignalFunction::Input ||
 			has->function() == E::SignalFunction::Output ||
-			has->function() == E::SignalFunction::Validity)
+			has->function() == E::SignalFunction::Validity ||
+			has->function() == E::SignalFunction::SoftwareCalculated)
 		{
 			inOuts.push_back(has.get());
 		}
