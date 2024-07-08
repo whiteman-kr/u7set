@@ -167,6 +167,8 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 				return QString("Unknown software calculetd function of signal %1").arg(appSignalID);
 			}
 
+			m_inOutType = E::SignalInOutType::SoftwareCalculated;
+
 			switch(m_swCalcFunction)
 			{
 			case E::SoftwareCalcFunction::BlockFlagsCount:

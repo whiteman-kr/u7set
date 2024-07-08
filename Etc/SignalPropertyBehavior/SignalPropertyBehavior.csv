@@ -1,38 +1,39 @@
-PropertyName			; DependsOnPrecision	; AnalogInput	; AnalogOutput	; AnalogInternal	; DiscreteInput	; DiscreteOutput	; DiscreteInternal	; BusInput	; BusOutput	; BusInternal
-Type				; False			; Read		; Read		; Read			; Read		; Read			; Read			; Read		; Read		; Read
-InOutType			; False			; Read		; Read		; Read			; Read		; Read			; Read			; Read		; Read		; Read
-DataSize			; False			; Read		; Read		; Read			; Read		; Read			; Read			; Hide		; Hide		; Hide
-ByteOrder			; False			; Read		; Read		; Read			; Read		; Read			; Read			; Hide		; Hide		; Hide
-EnableTuning			; False			; Hide		; Write		; Write			; Hide		; Write			; Write			; Hide		; Hide		; Hide
-TuningDefaultValue		; True			; Hide		; Write		; Write			; Hide		; Write			; Write			; Hide		; Hide		; Hide
-TuningLowBound			; True			; Hide		; Write		; Write			; Hide		; Write			; Write			; Hide		; Hide		; Hide
-TuningHighBound			; True			; Hide		; Write		; Write			; Hide		; Write			; Write			; Hide		; Hide		; Hide
-BusTypeID			; False			; Hide		; Hide		; Hide			; Hide		; Hide			; Hide			; Write		; Write		; Write
-LowValidRange			; True			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-HighValidRange			; True			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-LowEngineeringUnits		; True			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-HighEngineeringUnits		; True			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-FilteringTime			; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-SpreadTolerance			; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-ElectricLowLimit		; False			; Write		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-ElectricHighLimit		; False			; Write		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-Unit				; False			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-SensorType			; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-LowADC				; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-HighADC				; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-LowPhysicalUnits		; True			; Write		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-HighPhysicalUnits		; True			; Write		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-LowDAC				; False			; Hide		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-HighDAC				; False			; Hide		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-OutputMode			; False			; Hide		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-SpecificPropertiesStruct        ; False			; Expert	; Expert	; Expert		; Expert	; Expert                ; Expert		; Expert	; Expert	; Expert
-AnalogSignalFormat		; False			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide          ; Hide
-AdaptiveAperture		; False			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide          ; Hide
-CoarseAperture			; False			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide          ; Hide
-FineAperture			; False			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide          ; Hide
-DecimalPlaces			; False			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide          ; Hide
-Tags				; False			; Write		; Write		; Write			; Write		; Write			; Write                 ; Write		; Write 	; Write
-UserSpecificPropertiesStruct	; False			; Hide		; Hide		; Hide			; Hide		; Hide			; Hide                  ; Hide          ; Hide          ; Hide
-InvertSignal			; False			; Hide		; Hide		; Hide			; Write		; Write			; Hide			; Hide		; Hide		; Hide
-ApertureType			; False			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-Reserved			; False			; Write		; Write		; Write			; Write		; Write			; Write			; Write		; Write		; Write
+PropertyName			; DependsOnPrecision	; AnalogInput	; AnalogOutput	; AnalogInternal	; AnalogSoftwareCalculated	; DiscreteInput	; DiscreteOutput	; DiscreteInternal	; DiscreteSoftwareCalculated	; BusInput	; BusOutput	; BusInternal	; BusSoftwareCalculated	
+Type				; False			; Read		; Read		; Read			; Read				; Read		; Read			; Read			; Read				; Read		; Read		; Read          ; Read
+InOutType			; False			; Read		; Read		; Read			; Read				; Read		; Read			; Read			; Read				; Read		; Read		; Read          ; Read
+DataSize			; False			; Read		; Read		; Read			; Hide				; Read		; Read			; Read			; Hide				; Hide		; Hide		; Hide          ; Hide
+ByteOrder			; False			; Read		; Read		; Read			; Hide				; Read		; Read			; Read			; Hide				; Hide		; Hide		; Hide          ; Hide
+EnableTuning			; False			; Hide		; Write		; Write			; Hide				; Hide		; Write			; Write			; Hide				; Hide		; Hide		; Hide          ; Hide
+TuningDefaultValue		; True			; Hide		; Write		; Write			; Hide				; Hide		; Write			; Write			; Hide				; Hide		; Hide		; Hide          ; Hide
+TuningLowBound			; True			; Hide		; Write		; Write			; Hide				; Hide		; Write			; Write			; Hide				; Hide		; Hide		; Hide          ; Hide
+TuningHighBound			; True			; Hide		; Write		; Write			; Hide				; Hide		; Write			; Write			; Hide				; Hide		; Hide		; Hide          ; Hide
+BusTypeID			; False			; Hide		; Hide		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Write		; Write		; Write         ; Hide
+LowValidRange			; True			; Write		; Hide		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+HighValidRange			; True			; Write		; Hide		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+LowEngineeringUnits		; True			; Write		; Write		; Write			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+HighEngineeringUnits		; True			; Write		; Write		; Write			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+FilteringTime			; False			; Write		; Hide		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+SpreadTolerance			; False			; Write		; Hide		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+ElectricLowLimit		; False			; Write		; Write		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+ElectricHighLimit		; False			; Write		; Write		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+Unit				; False			; Write		; Write		; Write			; Write				; Hide		; Hide			; Hide			; Write				; Hide		; Hide		; Hide          ; Write
+SensorType			; False			; Write		; Hide		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+LowADC				; False			; Write		; Hide		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+HighADC				; False			; Write		; Hide		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+LowPhysicalUnits		; True			; Write		; Write		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+HighPhysicalUnits		; True			; Write		; Write		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+LowDAC				; False			; Hide		; Write		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+HighDAC				; False			; Hide		; Write		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+OutputMode			; False			; Hide		; Write		; Hide			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+SpecificPropertiesStruct        ; False			; Expert	; Expert	; Expert		; Expert			; Expert	; Expert                ; Expert		; Expert			; Expert	; Expert	; Expert        ; Expert
+AnalogSignalFormat		; False			; Write		; Write		; Write			; Write				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide          ; Hide          ; Hide
+AdaptiveAperture		; False			; Write		; Write		; Write			; Hide				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide          ; Hide          ; Hide
+CoarseAperture			; False			; Write		; Write		; Write			; Write				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide          ; Hide          ; Hide
+FineAperture			; False			; Write		; Write		; Write			; Write				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide          ; Hide          ; Hide
+DecimalPlaces			; False			; Write		; Write		; Write			; Write				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide          ; Hide          ; Hide
+Tags				; False			; Write		; Write		; Write			; Write				; Write		; Write			; Write                 ; Write				; Write		; Write 	; Write         ; Write
+UserSpecificPropertiesStruct	; False			; Hide		; Hide		; Hide			; Hide				; Hide		; Hide			; Hide                  ; Hide				; Hide          ; Hide          ; Hide          ; Hide
+InvertSignal			; False			; Hide		; Hide		; Hide			; Hide				; Write		; Write			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+ApertureType			; False			; Write		; Write		; Write			; Write				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
+Reserved			; False			; Write		; Write		; Write			; Hide				; Write		; Write			; Write			; Hide				; Write		; Write		; Write         ; Hide
+SoftwareCalcFunction		; False			; Hide		; Hide		; Hide			; Write				; Hide          ; Hide                  ; Hide                  ; Write                         ; Hide          ; Hide          ; Hide          ; Write
