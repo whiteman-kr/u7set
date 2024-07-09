@@ -15,7 +15,6 @@ qt_standard_project_setup()
 set(TARGET AppDataSrv)
 
 add_executable(${TARGET}
-	../lib/ConstStrings.h
 	AppDataReceiver.cpp
 	AppDataReceiver.h
 	AppDataService.cpp
@@ -95,8 +94,8 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Project includes
 	#
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 
 	<Network.pb.h>
 

@@ -71,9 +71,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTextEdit>
 	<QVBoxLayout>
 
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
-	"../../CommonLib/PropertyObject.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 
 	<ProtoSerialization.h>
 	<AppSignalList.pb.h>

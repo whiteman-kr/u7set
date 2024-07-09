@@ -27,8 +27,8 @@ add_library(AdsBridge SHARED
  )
 
 target_precompile_headers(AdsBridge PRIVATE
-	"../../CommonLib/Hash.h"
-	"../../CommonLib/Types.h"
+	<CommonLib/Hash.h>
+	<CommonLib/Types.h>
 
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"

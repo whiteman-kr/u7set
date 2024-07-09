@@ -6,7 +6,7 @@
 #include "../AppSignalLib/Bus.h"
 #include "IssueLogger.h"
 #include "BuildResultWriter.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 namespace Builder
 {

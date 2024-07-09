@@ -111,7 +111,6 @@ message("-----------------------------------------")
 
 # Add projects.
 #
-add_subdirectory(CommonLib)
 add_subdirectory(UtilsLib)
 add_subdirectory(AppSignalLib)
 add_subdirectory(OnlineLib)

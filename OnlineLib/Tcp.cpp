@@ -3,7 +3,7 @@
 #endif
 
 #include "Tcp.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "../Protobuf/google/protobuf/message.h"
 
 namespace Tcp

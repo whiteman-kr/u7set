@@ -5,9 +5,6 @@
 
 #include <HardwareLib/DataProtocols.h>
 
-//#include "../../UtilsLib/WUtils.h"
-//#include "../../lib/ConstStrings.h"
-
 #ifndef Q_CONSOLE_APP
 	#include <QMessageBox>
 	#include <QProgressDialog>

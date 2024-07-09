@@ -5,7 +5,7 @@
 #include <ServiceLib/Service.h>
 #include "./qtservice/src/qtservice.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 // -------------------------------------------------------------------------------------
 //

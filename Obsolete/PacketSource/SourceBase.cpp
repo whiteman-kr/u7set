@@ -5,7 +5,7 @@
 
 #include "../../UtilsLib/XmlHelper.h"
 #include "../../OnlineLib/DataSource.h"
-#include "../../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 #ifndef Q_CONSOLE_APP
 	#include <QMessageBox>

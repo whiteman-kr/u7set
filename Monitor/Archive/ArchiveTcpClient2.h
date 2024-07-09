@@ -1,5 +1,5 @@
 #pragma once
-#include "../../CommonLib/Times.h"
+#include <CommonLib/Times.h>
 #include "../../OnlineLib/SoftwareSettings.h"
 #include "../../OnlineLib/Tcp.h"
 #include "../../OnlineLib/TcpClientStatistics.h"

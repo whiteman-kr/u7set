@@ -37,20 +37,15 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QFile>
 	<QBuffer>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 	
 	<ProtoSerialization.h>
-	#<Network.pb.h>
-	#<AppSignal.pb.h> 
 	
 	"../AppSignalLib/AppSignal.h"
 	"../AppSignalLib/AppSignalParam.h"
 	"../AppSignalLib/AppSignalState.h"
-	
-	#"../AppSignalLib/TuningValue.h"
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Qml Qt6::Xml Qt6::Network Qt6::Widgets)

@@ -11,7 +11,7 @@
 #include <QVector>
 
 #include "../Protobuf/google/protobuf/message_lite.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 #include <Simulator/SimConsoleLogFile.h>
 #include <Simulator/Simulator.h>

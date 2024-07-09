@@ -4,7 +4,7 @@
 #include <HardwareLib/ModuleFirmware.h>
 #include <HardwareLib/Connection.h>
 
-#include "../CommonLib/HashedVector.h"
+#include <CommonLib/HashedVector.h>
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../lib/TuningDataStorage.h"
 

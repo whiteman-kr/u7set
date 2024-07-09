@@ -3,7 +3,7 @@
 #include <AdsBridge/Common.h>
 
 #include "../../OnlineLib/SoftwareEndpoint.h"
-#include "../../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 #include <memory>
 #include <set>

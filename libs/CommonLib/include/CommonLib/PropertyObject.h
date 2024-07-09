@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../CommonLib/AfbParamValue.h"
+#include "AfbParamValue.h"
 #include <QVariant>
 #include <functional>
 #include <list>

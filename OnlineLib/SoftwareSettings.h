@@ -1,8 +1,8 @@
 #pragma once
 
 #include "SoftwareEndpoint.h"
-#include "../CommonLib/HostAddressPort.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/HostAddressPort.h>
+#include <CommonLib/ConstStrings.h>
 #include "../OnlineLib/MatsUsers.h"
 
 

@@ -1,7 +1,7 @@
 #include "MetrologyMainWindow.h"
 
 #include <UiLib/DialogAbout.h>
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "../UtilsLib/Ui/UiTools.h"
 
 #include "CalibratorBase.h"

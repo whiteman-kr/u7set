@@ -82,9 +82,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 	
 	<ProtoSerialization.h>
 	<Network.pb.h>

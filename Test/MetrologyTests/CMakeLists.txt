@@ -38,8 +38,8 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Project includes
 	#
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 
 	<ProtoSerialization.h>
 

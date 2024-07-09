@@ -47,10 +47,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QDebug>
 	<QSignalSpy>
 
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
-	"../../CommonLib/PropertyObject.h"
-	#"../../CommonLib/AfbParamValue.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 	
 	<Network.pb.h>
 	

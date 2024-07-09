@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../CommonLib/Hash.h"
+#include <CommonLib/Hash.h>
 #include "DataSource.h"
 
 class BaseOnlineDataSource : public OnlineLib::DataSource

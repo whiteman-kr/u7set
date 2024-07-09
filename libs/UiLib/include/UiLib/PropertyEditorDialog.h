@@ -1,6 +1,6 @@
 #pragma once
 
-// #include "../CommonLib/PropertyObject.h" - must be included via precompiled header
+// #include <CommonLib/PropertyObject.h> - must be included via precompiled header
 
 #include <memory>
 

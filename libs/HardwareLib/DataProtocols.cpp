@@ -3,7 +3,7 @@
 #endif
 
 #include <HardwareLib/DataProtocols.h>
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
 

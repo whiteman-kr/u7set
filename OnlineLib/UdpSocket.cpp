@@ -5,7 +5,7 @@
 #include "UdpSocket.h"
 #include "../UtilsLib/WUtils.h"
 #include "../Protobuf/google/protobuf/message.h"
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/HostAddressPort.h>
 
 // -----------------------------------------------------------------------------
 //

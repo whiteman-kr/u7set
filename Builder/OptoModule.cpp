@@ -6,7 +6,7 @@
 #include <HardwareLib/DeviceController.h>
 #include <HardwareLib/DeviceAppSignal.h>
 
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
 #include "../Builder/Context.h"

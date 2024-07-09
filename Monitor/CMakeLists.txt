@@ -22,7 +22,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Qml Xml Svg PrintS
 qt_standard_project_setup()
 
 set (MONITOR_SOURCES
-	../lib/ConstStrings.h
 	Archive/ArchiveConnection.cpp
 	Archive/ArchiveConnection.h
 	Archive/ArchiveData.cpp

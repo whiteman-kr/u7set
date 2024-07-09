@@ -1,6 +1,6 @@
 ﻿#include <UiLib/StandardColors.h>
 
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
 #include "./Forms/ComparePropertyObjectDialog.h"

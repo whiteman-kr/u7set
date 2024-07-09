@@ -4,7 +4,7 @@
 
 #include "DeviceObjectFactory.h"
 #include <ProtoCommonHelper.h>
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 #include <HardwareLib/DeviceObject.h>
 #include <HardwareLib/PropertyNames.h>

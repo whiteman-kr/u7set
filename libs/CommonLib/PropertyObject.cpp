@@ -2,7 +2,7 @@
 #error Do not include this file in the project! Link DbLib instead.
 #endif
 
-#include "PropertyObject.h"
+#include <CommonLib/PropertyObject.h>
 #include <QRegularExpression>
 
 //

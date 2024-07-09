@@ -226,10 +226,10 @@ target_precompile_headers(${TARGET} PRIVATE
 
 		<QtConcurrent/QtConcurrent>
 
-		"../../CommonLib/Types.h"
-		"../../CommonLib/Hash.h"
-		"../../CommonLib/PropertyObject.h"
-		"../../CommonLib/AfbParamValue.h"
+		<CommonLib/Types.h>
+		<CommonLib/Hash.h>
+		<CommonLib/PropertyObject.h>
+		<CommonLib/AfbParamValue.h>
 
 		<ProtoSerialization.h>
 		<ProtoCommonHelper.h>

@@ -212,9 +212,9 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Project headers
 	#
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
-	"../../CommonLib/PropertyObject.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 
 	<ProtoSerialization.h>
 	<AppSignal.pb.h>

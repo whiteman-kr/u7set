@@ -1,7 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/HostAddressPort.h>
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/SoftwareSettings.h"
 

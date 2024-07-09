@@ -4,7 +4,7 @@
 
 #include "BuildInfo.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include <BuildInfo.pb.h>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>

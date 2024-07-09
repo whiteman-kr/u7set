@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/HostAddressPort.h>
 #include "DataProtocols.h"
 
 class QDomNode;

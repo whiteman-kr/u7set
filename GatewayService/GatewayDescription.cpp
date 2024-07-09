@@ -1,4 +1,4 @@
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
 

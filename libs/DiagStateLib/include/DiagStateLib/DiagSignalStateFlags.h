@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../CommonLib/Types.h"
+#include <CommonLib/Types.h>
 
 #pragma pack(push, 1)
 

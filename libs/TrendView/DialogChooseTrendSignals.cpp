@@ -8,7 +8,7 @@
 #include <AppSignalLists/SignalList.h>
 #include <TrendView/DialogChooseTrendSignals.h>
 
-#include "../CommonLib/PropertyObject.h"
+#include <CommonLib/PropertyObject.h>
 #include "ui_DialogChooseTrendSignals.h"
 
 namespace TrendLibInternal

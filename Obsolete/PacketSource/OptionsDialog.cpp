@@ -3,7 +3,7 @@
 #include <QFileDialog>
 
 #include "../../UtilsLib/XmlHelper.h"
-#include "../../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "../../OnlineLib/SocketIO.h"
 
 // -------------------------------------------------------------------------------------------------------------------

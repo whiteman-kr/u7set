@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../CommonLib/Factory.h"
+#include <CommonLib/Factory.h>
 #include <HardwareLib/DeviceObject.h>
 
 namespace Hardware

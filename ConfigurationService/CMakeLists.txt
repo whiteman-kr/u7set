@@ -15,7 +15,6 @@ qt_standard_project_setup()
 set(TARGET CfgSrv)
 
 add_executable(${TARGET}
-	../CommonLib/Types.h
 	CfgChecker.cpp
 	CfgChecker.h
 	CfgControlServer.cpp
@@ -82,8 +81,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 	
 	<Network.pb.h>
 )

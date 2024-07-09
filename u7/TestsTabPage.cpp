@@ -2,7 +2,7 @@
 #include "GlobalMessanger.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Simulator/SimSelectBuildDialog.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 #ifdef QT_DEBUG
 	#include <QAbstractItemModelTester>

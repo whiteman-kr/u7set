@@ -36,7 +36,7 @@ if(UNIX)
 endif(UNIX)
 
 target_precompile_headers(${TARGET} PRIVATE
-	"../../CommonLib/Types.h"
+	<CommonLib/Types.h>
 	<Network.pb.h>
 )
 

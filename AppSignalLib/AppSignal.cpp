@@ -5,7 +5,7 @@
 #include "AppSignal.h"
 #include "AppSignalSpecPropValues.h"
 #include "../UtilsLib/XmlHelper.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 template<typename ENUM_TYPE>
 void writeEnumValueStrSpecPropAttribute(XmlWriteHelper& xml, const AppSignal& s,

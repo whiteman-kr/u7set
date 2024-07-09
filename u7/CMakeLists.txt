@@ -25,7 +25,6 @@ set (U7_SOURCES
 	./Legacy/TuningFilterEditor.h
 	../lib/Configurator.cpp
 	../lib/Configurator.h
-	../lib/ConstStrings.h
 	../lib/diff_match_patch.h
 	./Ui/FilesTreeView.cpp
 	./Ui/FilesTreeView.h
@@ -458,12 +457,12 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QWhatsThis>
 	<QWindow>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	"../CommonLib/AfbParamValue.h"
-	"../CommonLib/DebugInstCounter.h"
-	"../CommonLib/Factory.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
+	<CommonLib/AfbParamValue.h>
+	<CommonLib/DebugInstCounter.h>
+	<CommonLib/Factory.h>
 
 	<ProtoSerialization.h>
 	<Hardware.pb.h>

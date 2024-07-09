@@ -3,7 +3,7 @@
 #include <QtGlobal>
 #include <unordered_map>
 #include <memory>
-#include "../CommonLib/Hash.h"
+#include "Hash.h"
 
 template<typename BaseClass>
 class Factory

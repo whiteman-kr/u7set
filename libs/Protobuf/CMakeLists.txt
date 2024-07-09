@@ -235,9 +235,9 @@ qt_add_library(${TARGET} STATIC
 )
 
 target_precompile_headers(${TARGET} PRIVATE
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
-	"../../CommonLib/PropertyObject.h"	
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 )
 
 # Add the custom target as a dependency of your main target

@@ -91,17 +91,13 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	#"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 	
 	<ProtoSerialization.h>
 	<Network.pb.h>
 	
 	"../AppSignalLib/AppSignal.h"
-	#"../AppSignalLib/AppSignalParam.h"
-	#"../AppSignalLib/AppSignalState.h"
 	"../AppSignalLib/TuningValue.h"
 )
 

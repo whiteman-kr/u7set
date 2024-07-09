@@ -10,19 +10,19 @@ find_package(Qt6 REQUIRED COMPONENTS Core)
 set(TARGET CommonLib)
 
 qt_add_library(${TARGET} STATIC
-  AfbParamValue.h
+  ./include/CommonLib/AfbParamValue.h
+  ./include/CommonLib/ConstStrings.h
+  ./include/CommonLib/DebugInstCounter.h
+  ./include/CommonLib/Factory.h
+  ./include/CommonLib/Hash.h
+  ./include/CommonLib/HashedVector.h
+  ./include/CommonLib/HostAddressPort.h
+  ./include/CommonLib/PropertyObject.h
+  ./include/CommonLib/Times.h
+  ./include/CommonLib/Types.h
   AfbParamValue.cpp
-  DebugInstCounter.h
-  Factory.h
-  Hash.h
-  HashedVector.h
-  HostAddressPort.h
   PropertyObject.cpp
-  PropertyObject.h
-  Times.cpp
-  Times.h
   Types.cpp
-  Types.h
 )
 
 #target_precompile_headers(${TARGET} PUBLIC
@@ -34,6 +34,7 @@ qt_add_library(${TARGET} STATIC
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core)
 target_compile_definitions(${TARGET} PRIVATE COMMON_LIB_DOMAIN)
-target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

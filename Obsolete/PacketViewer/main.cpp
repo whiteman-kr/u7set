@@ -1,6 +1,6 @@
 #include "SourceListWidget.h"
 #include <QApplication>
-#include "../../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 int main(int argc, char *argv[])
 {

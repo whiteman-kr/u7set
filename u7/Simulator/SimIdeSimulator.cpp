@@ -1,5 +1,5 @@
 #include "SimIdeSimulator.h"
-#include "../../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include <Simulator/Simulator.h>
 #include <HardwareLib/DeviceRoot.h>
 

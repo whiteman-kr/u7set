@@ -69,9 +69,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
-	"../../CommonLib/PropertyObject.h"
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
+	<CommonLib/PropertyObject.h>
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 )
 
 target_compile_definitions(${TARGET} PRIVATE UI_LIB_DOMAIN)

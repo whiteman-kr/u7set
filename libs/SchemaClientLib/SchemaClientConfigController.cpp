@@ -1,5 +1,5 @@
 #include <SchemaClientLib/SchemaClientConfigController.h>
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/HostAddressPort.h>
 #include "../OnlineLib/SoftwareSettings.h"
 
 

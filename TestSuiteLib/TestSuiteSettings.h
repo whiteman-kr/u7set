@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDomDocument>
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/HostAddressPort.h>
 
 class QSettings;
 

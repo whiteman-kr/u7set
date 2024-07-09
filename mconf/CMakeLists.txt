@@ -83,7 +83,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Project includes
 	#
-	"../CommonLib/Types.h"
+	<CommonLib/Types.h>
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files

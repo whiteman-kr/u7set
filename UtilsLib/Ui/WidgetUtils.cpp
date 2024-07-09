@@ -4,7 +4,7 @@
 
 #include "WidgetUtils.h"
 #include "../WUtils.h"
-#include "../../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 #include <QListView>
 #include <QPushButton>

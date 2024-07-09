@@ -1,8 +1,8 @@
 #include "DiagnosticsAppSettings.h"
 
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/HostAddressPort.h>
 #include "../OnlineLib/SocketIO.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 DiagnosticsAppSettings& DiagnosticsAppSettings::instance()
 {

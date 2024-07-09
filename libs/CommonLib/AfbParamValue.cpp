@@ -2,7 +2,7 @@
 #error Do not include this file in the project! Link DbLib instead.
 #endif
 
-#include "AfbParamValue.h"
+#include <CommonLib/AfbParamValue.h>
 #include <optional>
 #include <QRegularExpression>
 

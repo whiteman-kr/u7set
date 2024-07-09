@@ -21,9 +21,9 @@ add_executable(${TARGET}
 )
 
 target_precompile_headers(${TARGET} PRIVATE
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 
 	<ProtoSerialization.h>
 

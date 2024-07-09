@@ -118,11 +118,32 @@ struct Times
 	TimeStamp local;
 	TimeStamp plant;
 
-	[[nodiscard]] QDateTime systemToDateTime() const;
-	[[nodiscard]] QDateTime localToDateTime() const;
-	[[nodiscard]] QDateTime plantToDateTime() const;
+	[[nodiscard]] QDateTime systemToDateTime() const
+	{
+		return system.toDateTime();
+	}
 
-	Times& operator += (qint64 timeSpan);
+	[[nodiscard]] QDateTime localToDateTime() const
+	{
+		return local.toDateTime();
+	}
 
-	void clear();
+	[[nodiscard]] QDateTime plantToDateTime() const
+	{
+		return plant.toDateTime();
+	}
+
+	Times& operator += (qint64 timeSpan)
+	{
+		system += timeSpan;
+		local += timeSpan;
+		plant += timeSpan;
+
+		return *this;
+	}
+
+	void clear()
+	{
+		*this = {};
+	}
 };

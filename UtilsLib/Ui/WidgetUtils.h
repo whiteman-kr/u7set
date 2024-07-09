@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDialog>
-#include "HashedVector.h"
+#include <CommonLib/HashedVector.h>
 
 class QStandardItem;
 class QListView;

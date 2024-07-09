@@ -1,8 +1,8 @@
 #pragma once
 
 #include "GatewayDescription.h"
-#include "../CommonLib/Types.h"
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/Types.h>
+#include <CommonLib/HostAddressPort.h>
 
 namespace Gateway
 {

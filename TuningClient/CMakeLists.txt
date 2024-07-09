@@ -21,7 +21,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Xml Svg Pr
 qt_standard_project_setup()
 
 set (TC_SOURCES
-	../lib/ConstStrings.h
 	DialogChooseFilter.cpp
 	DialogChooseFilter.h
 	DialogProperties.cpp

@@ -153,10 +153,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QUdpSocket>
 	<QVector>
 
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
-	"../../CommonLib/PropertyObject.h"
-	"../../CommonLib/AfbParamValue.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
+	<CommonLib/AfbParamValue.h>
 	
 	<ProtoSerialization.h>
 	<Network.pb.h>

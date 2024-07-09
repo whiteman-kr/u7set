@@ -18,19 +18,12 @@ add_executable(${TARGET}
 )
 
 target_precompile_headers(${TARGET} PRIVATE
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 	
-	#<ProtoSerialization.h>
-	#<Network.pb.h>
-	#<AppSignal.pb.h>
-	
-	#"../AppSignalLib/AppSignal.h"
 	"../AppSignalLib/AppSignalParam.h"
 	"../AppSignalLib/AppSignalState.h"
-	#"../AppSignalLib/TuningValue.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

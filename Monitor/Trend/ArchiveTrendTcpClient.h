@@ -3,7 +3,7 @@
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../CommonLib/Times.h"
+#include <CommonLib/Times.h>
 
 #include <TrendView/TrendArchiveServer.h>
 #include <TrendView/TrendSignalState.h>

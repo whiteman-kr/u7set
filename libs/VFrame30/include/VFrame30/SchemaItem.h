@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QJSValue>
-#include "../../CommonLib/Factory.h"
-#include "../../CommonLib/DebugInstCounter.h"
+#include <CommonLib/Factory.h>
+#include <CommonLib/DebugInstCounter.h>
 #include "../../UtilsLib/ILogFile.h"
 
 #include <VFrame30/SchemaPoint.h>

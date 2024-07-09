@@ -27,7 +27,6 @@ qt_add_library(${TARGET} STATIC
 	../GatewayService/IvsImpulseGateway.h
 	../GatewayService/ModbusTcpSlaveGateway.cpp
 	../GatewayService/ModbusTcpSlaveGateway.h
-	../lib/ConstStrings.h
 	../lib/LogicModuleSet.cpp
 	../lib/LogicModuleSet.h
 	../lib/TuningDataStorage.cpp
@@ -212,10 +211,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QVector>
 	<QWidget>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	"../CommonLib/AfbParamValue.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
+	<CommonLib/AfbParamValue.h>
 
 	<ProtoSerialization.h>
 	<ProtoCommonHelper.h>

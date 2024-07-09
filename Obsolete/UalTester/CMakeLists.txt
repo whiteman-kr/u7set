@@ -20,7 +20,6 @@ endif (MSVC)
 set(TARGET UalTester)
 
 add_executable(${TARGET}
-	../../lib/ConstStrings.h
 	CmdLineParam.cpp
 	CmdLineParam.h
 	main.cpp

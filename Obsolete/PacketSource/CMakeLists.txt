@@ -157,17 +157,13 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Project includes
 	#
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
-	#"../../CommonLib/PropertyObject.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 
-	#<ProtoSerialization.h>
 	<Network.pb.h>
 	<AppSignal.pb.h>
 
 	"../../AppSignalLib/AppSignal.h"
-	#"../../AppSignalLib/AppSignalParam.h"
-	#"../../AppSignalLib/AppSignalState.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h

@@ -114,8 +114,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 
 	"../UtilsLib/Ui/WidgetUtils.h"
 	

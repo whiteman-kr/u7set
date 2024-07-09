@@ -125,10 +125,10 @@ target_precompile_headers(${TARGET} PRIVATE
 target_precompile_headers(${TARGET} PRIVATE
 	<QHostAddress>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	"../CommonLib/HostAddressPort.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
+	<CommonLib/HostAddressPort.h>
 	
 	<ProtoSerialization.h>
 	<Network.pb.h>

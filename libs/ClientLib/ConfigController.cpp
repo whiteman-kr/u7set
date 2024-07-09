@@ -3,7 +3,7 @@
 #endif
 
 #include <ClientLib/ConfigController.h>
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/HostAddressPort.h>
 #include "../OnlineLib/CfgServerLoader.h"
 #include <QDomNode>
 

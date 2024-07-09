@@ -1,5 +1,5 @@
 #include "ConfigurationService.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "CfgChecker.h"
 #include "CfgControlServer.h"
 

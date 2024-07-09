@@ -1,6 +1,6 @@
 #include "MonitorAppSettings.h"
 
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "../OnlineLib/SocketIO.h"
 
 MonitorAppSettings& MonitorAppSettings::instance()

@@ -6,8 +6,8 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../CommonLib/Times.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/Times.h>
+#include <CommonLib/ConstStrings.h>
 #include <HardwareLib/DataProtocols.h>
 #include <HardwareLib/LanControllerInfo.h>
 
