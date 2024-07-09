@@ -237,6 +237,7 @@ public:
 	[[nodiscard]] bool isInput() const;
 	[[nodiscard]] bool isOutput() const;
 	[[nodiscard]] bool isInternal() const;
+	[[nodiscard]] bool isSwCalculated() const;
 	[[nodiscard]] E::SignalInOutType inOutType() const;
 	void setInOutType(E::SignalInOutType value);
 

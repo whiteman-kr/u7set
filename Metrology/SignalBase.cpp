@@ -898,9 +898,6 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 					m_signalID =	"CH " +	QString::number(m_location.chassis()).rightJustified(2, '0') + " _ " +
 									"MD " +	QString::number(m_location.module()).rightJustified(2, '0') + " _ " +
 									"IN " +	QString::number(m_location.place()).rightJustified(2, '0');
-
-					// m_signalID.append("(" + m_location.contact() + ")");
-
 					break;
 
 				case E::SignalInOutType::Internal:

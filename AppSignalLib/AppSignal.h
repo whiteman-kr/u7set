@@ -118,10 +118,10 @@ public:
 	bool isInput() const { return m_inOutType == E::SignalInOutType::Input; }
 	bool isOutput() const { return m_inOutType == E::SignalInOutType::Output; }
 	bool isInternal() const { return m_inOutType == E::SignalInOutType::Internal; }
+	bool isSwCalculated() const { return m_inOutType == E::SignalInOutType::SoftwareCalculated; }
 
 	E::SoftwareCalcFunction swCalcFunction() const;
 	void setSwCalcFunction(E::SoftwareCalcFunction func);
-	bool isSwCalculated() const;
 
 	// Signal format
 

@@ -46,7 +46,6 @@ private:
 	bool checkAndSaveSignal();
 	void undoCheckouts();
 
-
 	void saveLastEditedSignalProperties();
 	void saveDialogSettings();
 
