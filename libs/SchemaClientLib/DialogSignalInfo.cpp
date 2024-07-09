@@ -317,7 +317,7 @@ AppSignalFlagsWidget::AppSignalFlagsWidget(QWidget* parent) :
 		tr("VALID"),
 		tr("ST.AVAIL"),
 		tr("SIM"),
-		tr("LOCK"),
+		tr("BLOCK"),
 		tr("MISMATCH"),
 		tr("HIGH"),
 		tr("LOW"),
@@ -331,7 +331,7 @@ AppSignalFlagsWidget::AppSignalFlagsWidget(QWidget* parent) :
 		   "from LM."),
 		tr("Signal is Simulated\n\nSet to 1 when simulation signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no simulation "
 		   "signal exists, also set to 0."),
-		tr("Signal is Locked\n\nSet to 1 when locking signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no locking signal "
+		tr("Signal is Blocked\n\nSet to 1 when blocking signal is set to 1 (see AFB sim_lock),\notherwise set to 0. If no blocking signal "
 		   "exists, also set to 0."),
 		tr("Signal is Mismatched\n\nSet to 1 when mismatch signal is set to 1 (see AFB mismatch),\notherwise set to 0. If no mismatch "
 		   "signal exists, also set to 0."),
