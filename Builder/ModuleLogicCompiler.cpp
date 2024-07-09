@@ -6145,6 +6145,10 @@ namespace Builder
 				}
 				break;
 
+			case E::SignalInOutType::SoftwareCalculated:
+				s->setLmRamAccess(E::LogicModuleRamAccess::Undefined);
+				break;
+
 			default:
 				assert(false);
 			}
@@ -6463,6 +6467,10 @@ namespace Builder
 					result = false;
 					break;
 
+				case E::SignalInOutType::SoftwareCalculated:
+					ioBufAddr.clear();
+					break;
+
 				default:
 					assert(false);
 				}
@@ -6486,6 +6494,9 @@ namespace Builder
 					//
 					log()->errALC5171(ioSignal->appSignalID(), ioSignal->equipmentID());
 					result = false;
+					break;
+
+				case E::SignalInOutType::SoftwareCalculated:
 					break;
 
 				default:

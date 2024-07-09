@@ -256,6 +256,9 @@ void AppSignal::initSpecificProperties()
 			specPropStruct = AppSignalDefaultSpecPropStruct::INTERNAL_ANALOG;
 			break;
 
+		case E::SignalInOutType::SoftwareCalculated:
+			break;
+
 		default:
 			assert(false);
 		}
@@ -298,11 +301,6 @@ E::SoftwareCalcFunction AppSignal::swCalcFunction() const
 void AppSignal::setSwCalcFunction(E::SoftwareCalcFunction func)
 {
 	m_swCalcFunction = func;
-}
-
-bool AppSignal::isSwCalculated() const
-{
-	return m_swCalcFunction != E::SoftwareCalcFunction::None;
 }
 
 void AppSignal::setDataSizeW(int sizeW)
