@@ -25,13 +25,13 @@ set (U7_SOURCES
 	./Legacy/TuningFilterEditor.h
 	../lib/Configurator.cpp
 	../lib/Configurator.h
-	../lib/diff_match_patch.h
 	./Ui/FilesTreeView.cpp
 	./Ui/FilesTreeView.h
 	./Ui/PropertyTable.cpp
 	./Ui/PropertyTable.h
 	./Ui/TextEditCompleter.cpp
 	./Ui/TextEditCompleter.h
+	diff_match_patch.h
 	AppSignalPropertyManager.cpp
 	AppSignalPropertyManager.h
 	AppSignalSetProvider.cpp

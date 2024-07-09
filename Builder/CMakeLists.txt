@@ -27,8 +27,6 @@ qt_add_library(${TARGET} STATIC
 	../GatewayService/IvsImpulseGateway.h
 	../GatewayService/ModbusTcpSlaveGateway.cpp
 	../GatewayService/ModbusTcpSlaveGateway.h
-	../lib/LogicModuleSet.cpp
-	../lib/LogicModuleSet.h
 	../lib/TuningDataStorage.cpp
 	../lib/TuningDataStorage.h
 	../Metrology/MetrologyConnection.cpp
@@ -62,10 +60,10 @@ qt_add_library(${TARGET} STATIC
 	AppLogicCode.h
 	AppLogicCompiler.cpp
 	AppLogicCompiler.h
-	AppSignalProperties.cpp
-	AppSignalProperties.h
 	AppSignalListStorage.cpp
 	AppSignalListStorage.h
+	AppSignalProperties.cpp
+	AppSignalProperties.h
 	ArchivingServiceCfgGenerator.cpp
 	ArchivingServiceCfgGenerator.h
 	BdfFile.cpp
@@ -119,6 +117,8 @@ qt_add_library(${TARGET} STATIC
 	LmDescriptionSet.h
 	LmMemoryMap.cpp
 	LmMemoryMap.h
+	LogicModuleSet.cpp
+	LogicModuleSet.h
 	LogicModulesInfoWriter.cpp
 	LogicModulesInfoWriter.h
 	Loopbacks.cpp
