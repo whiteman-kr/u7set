@@ -101,7 +101,7 @@ TEST_OUTPUT_FILE="AppSignalLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # CommonLib
-TEST_DIR="./build/CommonLib/CMakeFiles/CommonLib.dir"
+TEST_DIR="./build/libs/CommonLib/CMakeFiles/CommonLib.dir"
 TEST_OUTPUT_FILE="CommonLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
