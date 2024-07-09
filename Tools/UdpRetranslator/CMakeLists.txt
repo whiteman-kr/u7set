@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(UdpRtr LANGUAGES CXX)
 
-include(../../cmake/vld.cmake)
+#include(../../cmake/vld.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -21,7 +21,7 @@ set(TARGET UdpRtr)
 add_executable(${TARGET}
 	UdpRetranslator.cpp
 	UdpRetranslator.h
-	../../libs/asio/include/asio.hpp
+#	../../libs/asio/include/asio.hpp
 )
 
 # Add LTO for Release and Windows only. 
@@ -60,28 +60,29 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Qt includes
 	#
-#	<QMetaObject>
-#	<QtGlobal>
+	#	<QMetaObject>
+	#	<QtGlobal>
 
-#	<QDebug>
-#	<QObject>
-#	<QMetaClassInfo>
-#	<QMetaEnum>
+	#	<QDebug>
+	#	<QObject>
+	#	<QMetaClassInfo>
+	#	<QMetaEnum>
 
 	# Project includes
 	#
-	"../../CommonLib/Hash.h"
+#	"../../CommonLib/Hash.h"
 )
 
 #target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
-target_compile_definitions(${TARGET} INTERFACE ASIO_STANDALONE)
-target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/asio/include)
+#target_compile_definitions(${TARGET} INTERFACE ASIO_STANDALONE)
+#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/asio/include)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network)
+
 #target_link_libraries(${TARGET} PUBLIC asio)
 
 # Link Visaul Leak Detector
 #
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()
+#if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
+#	target_link_libraries(${TARGET} PRIVATE vld.lib)
+#endif()
