@@ -15,7 +15,6 @@ bool SimDialogSignalSnapshot::showDialog(SimIdeSimulator* simuator,
 															   simWidget);
 
 	connect(simuator, &SimIdeSimulator::projectUpdated, dss, &SimDialogSignalSnapshot::projectUpdated);
-	connect(simuator, &SimIdeSimulator::schemaDetailsUpdated, dss, &SimDialogSignalSnapshot::schemasUpdated);
 
 	connect(dss, &DialogSignalSnapshot::signalContextMenu, simWidget, &SimWidget::signalContextMenu);
 	connect(dss, &DialogSignalSnapshot::signalInfo, simWidget, &SimWidget::signalInfo);
@@ -64,11 +63,6 @@ void SimDialogSignalSnapshot::projectUpdated()
 	setProjectName(m_simuator->projectName());
 
 	signalsUpdated();
-
-	if (m_simuator->isLoaded() == false)
-	{
-		schemasUpdated();
-	}
 
 	return;
 }

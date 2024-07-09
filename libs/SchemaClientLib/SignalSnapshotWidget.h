@@ -98,7 +98,6 @@ namespace SchemaClientLib
 		void timerEvent(QTimerEvent* event) override;
 
 	public slots:
-		void schemasUpdated();
 		void signalsUpdated(); // Should be called when new signals arrived from AppDataService
 
 	private slots:
@@ -112,7 +111,6 @@ namespace SchemaClientLib
 		void roleComboCurrentIndexChanged(int index);
 		void editMaskReturnPressed();
 		void editTagsReturnPressed();
-		void schemaComboCurrentIndexChanged(int index);
 		void maskTypeComboCurrentIndexChanged(int index);
 		void serverComboIndexChanged(int index);
 		void signalListComboIndexChanged(int index);
@@ -127,7 +125,6 @@ namespace SchemaClientLib
 		void initFiltersView();
 		void initSignalsView();
 
-		void fillSchemas();
 		void fillAppSignalLists();
 		void fillSignals();
 
@@ -150,7 +147,6 @@ namespace SchemaClientLib
 		// Ui
 		QComboBox* m_typeCombo = nullptr;
 		QComboBox* m_roleCombo = nullptr;
-		QComboBox* m_schemaCombo = nullptr;
 		QComboBox* m_maskTypeCombo = nullptr;
 		QComboBox* m_serverCombo = nullptr;
 		QComboBox* m_signalListCombo = nullptr;

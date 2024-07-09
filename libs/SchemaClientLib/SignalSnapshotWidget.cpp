@@ -376,9 +376,7 @@ namespace SchemaClientLib
 		}
 
 		m_firstShow = false;
-
-		fillSchemas();
-
+		
 		fillSignals();
 
 		return;
@@ -409,19 +407,6 @@ namespace SchemaClientLib
 				updateTableItems();
 			}
 		}
-	}
-
-	void SignalSnapshotWidget::schemasUpdated()
-	{
-		// Refresh schemas combo
-		//
-		fillSchemas();
-
-		// Refresh filtered signals list
-		//
-		schemaComboCurrentIndexChanged(0);
-
-		return;
 	}
 
 	void SignalSnapshotWidget::signalsUpdated()
@@ -640,25 +625,6 @@ namespace SchemaClientLib
 		fillSignals();
 	}
 
-	void SignalSnapshotWidget::schemaComboCurrentIndexChanged(int /*index)*/)
-	{
-		// Get current schema's App Signals
-		//
-
-		QString currentSchemaStrId;
-		QVariant data = m_schemaCombo->currentData();
-		if (data.isValid() == true)
-		{
-			currentSchemaStrId = data.toString();
-		}
-
-		std::set<QString> appSignals = schemaAppSignals(currentSchemaStrId);
-
-		m_model.setSchemaAppSignals(appSignals);
-
-		fillSignals();
-	}
-
 	void SignalSnapshotWidget::maskTypeComboCurrentIndexChanged(int index)
 	{
 		m_storeMaskData = true;
@@ -800,13 +766,6 @@ namespace SchemaClientLib
 		m_serverCombo->blockSignals(false);
 		m_model.setDataServiceId({});
 
-		// Schema
-		//
-		m_schemaCombo->blockSignals(true);
-		m_schemaCombo->setCurrentIndex(0);
-		m_schemaCombo->blockSignals(false);
-		m_model.setSchemaAppSignals({});
-
 		// List
 		//
 		m_signalListCombo->blockSignals(true);
@@ -903,21 +862,20 @@ namespace SchemaClientLib
 		row++;
 		col = 0;
 
-		// Schema
+		// Signal List
 		//
-		filterLayout->addWidget(new QLabel(tr("Schema")), row, col++);
+		filterLayout->addWidget(new QLabel(tr("List")), row, col++);
 
-		// Schema Combo
+		// Signal List Combo
 		//
-		m_schemaCombo = new QComboBox();
-		connect(m_schemaCombo,
+		m_signalListCombo = new QComboBox();
+		connect(m_signalListCombo,
 				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 				this,
-				&SignalSnapshotWidget::schemaComboCurrentIndexChanged);
-		filterLayout->addWidget(m_schemaCombo, row, col++);
-		m_schemaCombo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-		m_schemaCombo->setMaximumWidth(QFontMetrics(m_schemaCombo->font()).horizontalAdvance(QString(60, '0')));
-
+				&SignalSnapshotWidget::signalListComboIndexChanged);
+		filterLayout->addWidget(m_signalListCombo, row, col++);
+		m_signalListCombo->setMinimumContentsLength(30);
+		
 		// Tags
 		//
 		filterLayout->addWidget(new QLabel(tr("Tags")), row, col++);
@@ -941,20 +899,6 @@ namespace SchemaClientLib
 
 			filterLayout->addLayout(tagsLayout, row, col++);
 		}
-
-		// Signal List
-		//
-		filterLayout->addWidget(new QLabel(tr("List")), row, col++);
-
-		// Signal List Combo
-		//
-		m_signalListCombo = new QComboBox();
-		connect(m_signalListCombo,
-				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-				this,
-				&SignalSnapshotWidget::signalListComboIndexChanged);
-		filterLayout->addWidget(m_signalListCombo, row, col++);
-		m_signalListCombo->setMinimumContentsLength(20);
 
 		filterLayout->setSpacing(4);
 
@@ -1239,46 +1183,6 @@ namespace SchemaClientLib
 		{
 			m_tableView->horizontalHeader()->restoreState(m_settings.horzHeader);
 		}
-	}
-
-	void SignalSnapshotWidget::fillSchemas()
-	{
-		m_schemaCombo->blockSignals(true);
-
-		// Fill schemas
-		//
-		QString currentStrId;
-
-		QVariant data = m_schemaCombo->currentData();
-		if (data.isValid() == true)
-		{
-			currentStrId = data.toString();
-		}
-
-		m_schemaCombo->clear();
-
-		m_schemaCombo->addItem(tr("All Schemas"), "");
-
-		int selectedIndex = -1;
-
-		std::vector<VFrame30::SchemaDetails> details = schemasDetails();
-
-		for (const VFrame30::SchemaDetails& schema : details)
-		{
-			m_schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, schema.m_schemaId);
-
-			if (currentStrId == schema.m_schemaId)
-			{
-				selectedIndex = m_schemaCombo->count() - 1;
-			}
-		}
-
-		if (selectedIndex != -1)
-		{
-			m_schemaCombo->setCurrentIndex(selectedIndex);
-		}
-
-		m_schemaCombo->blockSignals(false);
 	}
 
 	void SignalSnapshotWidget::fillAppSignalLists()

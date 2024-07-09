@@ -71,7 +71,6 @@ namespace SchemaClientLib
 		void resetSignalsType();
 
 	public slots:
-		void schemasUpdated();
 		void signalsUpdated(); // Should be called when new signals arrived from AppDataService
 
 	protected:

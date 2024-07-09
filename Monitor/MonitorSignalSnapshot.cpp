@@ -29,7 +29,6 @@ MonitorDialogSignalSnapshot* MonitorDialogSignalSnapshot::createDialog(MonitorCo
 	connect(dss, &SchemaClientLib::DialogSignalSnapshot::signalInfo, centralWidget, &MonitorCentralWidget::slot_signalInfo);
 
 	connect(monitorAppSignalManager, &ClientLib::AppSignalManager::signalParamsUpdated, dss, &MonitorDialogSignalSnapshot::signalsUpdated);
-	connect(configController, &MonitorConfigController::configurationUpdated, dss, &MonitorDialogSignalSnapshot::schemasUpdated);
 
 	return dss;
 }

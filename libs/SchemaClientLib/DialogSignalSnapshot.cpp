@@ -116,11 +116,6 @@ namespace SchemaClientLib
 		m_widget->resetSignalsType();
 	}
 
-	void DialogSignalSnapshot::schemasUpdated()
-	{
-		return m_widget->schemasUpdated();
-	}
-
 	void DialogSignalSnapshot::signalsUpdated()
 	{
 		return m_widget->signalsUpdated();
