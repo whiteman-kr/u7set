@@ -422,7 +422,8 @@ public:
 	{
 		Input = 0,
 		Output = 1,
-		Internal = 2
+		Internal = 2,
+		SoftwareCalculated = 3,
 	};
 	Q_ENUM(SignalInOutType)
 

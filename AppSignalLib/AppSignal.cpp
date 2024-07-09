@@ -167,6 +167,8 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 				return QString("Unknown software calculetd function of signal %1").arg(appSignalID);
 			}
 
+			m_inOutType = E::SignalInOutType::SoftwareCalculated;
+
 			switch(m_swCalcFunction)
 			{
 			case E::SoftwareCalcFunction::BlockFlagsCount:
@@ -254,6 +256,9 @@ void AppSignal::initSpecificProperties()
 			specPropStruct = AppSignalDefaultSpecPropStruct::INTERNAL_ANALOG;
 			break;
 
+		case E::SignalInOutType::SoftwareCalculated:
+			break;
+
 		default:
 			assert(false);
 		}
@@ -296,11 +301,6 @@ E::SoftwareCalcFunction AppSignal::swCalcFunction() const
 void AppSignal::setSwCalcFunction(E::SoftwareCalcFunction func)
 {
 	m_swCalcFunction = func;
-}
-
-bool AppSignal::isSwCalculated() const
-{
-	return m_swCalcFunction != E::SoftwareCalcFunction::None;
 }
 
 void AppSignal::setDataSizeW(int sizeW)
