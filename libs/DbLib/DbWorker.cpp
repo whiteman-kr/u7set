@@ -449,6 +449,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0419.sql", "Upgrade to version 419, First time add preset AdsBridge"},
 	{":/DatabaseUpgrade/Upgrade0420.sql", "Upgrade to version 420, Create folder $root$/AppSignalLists, Monitor and TuningClient presets update"},
 	{":/DatabaseUpgrade/Upgrade0421.sql", "Upgrade to version 421, Added flag-counter signals to all supported LMs (SF40, SR03, SR04, SR05, SR20, SR90)" },
+	{":/DatabaseUpgrade/Upgrade0422.sql", "Upgrade to version 422, SignalPropertyBehavior.csv file updating" },
 };
 
 int DbWorker::counter = 0;
