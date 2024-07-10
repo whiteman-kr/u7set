@@ -57,7 +57,7 @@ struct IpHeader
 	unsigned int   ip_srcaddr;       // Source address
 	unsigned int   ip_destaddr;      // Source address
 
-	void convert()
+	void toHost()
 	{
 		ip_totallength = ntohs(ip_totallength);
 		ip_id = ntohs(ip_id);
@@ -66,7 +66,42 @@ struct IpHeader
 		ip_srcaddr = ntohl(ip_srcaddr);
 		ip_destaddr = ntohl(ip_destaddr);
 	}
+
+	void toNetwork()
+	{
+		ip_totallength = htons(ip_totallength);
+		ip_id = htons(ip_id);
+		ip_offset = htons(ip_offset);
+		ip_checksum = htons(ip_checksum);
+		ip_srcaddr = htonl(ip_srcaddr);
+		ip_destaddr = htonl(ip_destaddr);
+	}
 };
+
+struct UdpHeader
+{
+	quint16 srcPort;
+	quint16 destPort;
+	quint16 udpLength;
+	quint16 checksum;
+
+	void toHost()
+	{
+		srcPort = ntohs(srcPort);
+		destPort = ntohs(destPort);
+		udpLength = ntohs(udpLength);
+		checksum = ntohs(checksum);
+	}
+
+	void toNetwork()
+	{
+		srcPort = htons(srcPort);
+		destPort = htons(destPort);
+		udpLength = htons(udpLength);
+		checksum = htons(checksum);
+	}
+};
+
 
 #pragma pack(pop)
 
@@ -93,6 +128,8 @@ void threadFunc()
 
 	int err = 0;
 	WSADATA wsaData;
+
+	enumProtocols();
 
 	err = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
@@ -154,7 +191,6 @@ void threadFunc()
 
 	char recvBuf[2048];
 	sockaddr fromAddr;
-
 	int fromAddrLen = sizeof(fromAddr);
 
 	while(1)
@@ -168,14 +204,19 @@ void threadFunc()
 			return;
 		}
 
-		IpHeader iph = *reinterpret_cast<IpHeader*>(recvBuf);
+		IpHeader iph = *reinterpret_cast<const IpHeader*>(recvBuf);
+		UdpHeader udph = *reinterpret_cast<const UdpHeader*>(recvBuf + sizeof(IpHeader));
 
-		iph.convert();
+		iph.toHost();
+		//udph.toHost();
 
 		QHostAddress srcAddr(iph.ip_srcaddr);
 		QHostAddress destAddr(iph.ip_destaddr);
 
-		QString s = QString("from %1 to %2, len %3\n").arg(srcAddr.toString()).arg(destAddr.toString()).arg(iph.ip_totallength);
+		QString s = QString("from %1:%2 to %3:%4, len %5\n").
+					arg(srcAddr.toString()).arg(udph.srcPort).
+					arg(destAddr.toString()).arg(udph.destPort).
+					arg(iph.ip_totallength);
 
 		std::cout << s.toStdString();
 	}
