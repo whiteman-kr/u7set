@@ -528,8 +528,6 @@ public:
 
 	std::vector<SoftwareEndpoint::TuningService> tuningServices;
 
-	bool autoApply = true;
-
 	bool showSignals = true;
 	bool showSchemas = true;
 	bool showSchemasList = true;
@@ -543,6 +541,15 @@ public:
 	};
 
 	LmStatusFlagMode statusFlagFunction = LmStatusFlagMode::None;
+
+	enum class ApplyMode
+	{
+		Manual,
+		Auto,
+		NoApply
+	};
+
+	ApplyMode applyMode = ApplyMode::Manual;
 
 	bool loginPerOperation = false;
 	bool tuningLogin = false;

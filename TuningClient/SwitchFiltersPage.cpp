@@ -167,7 +167,7 @@ void SwitchFiltersPage::createControls()
 
 	// Apply Button
 	//
-	if (m_configController.configuration().clientSettings.autoApply == false &&
+	if (m_configController.configuration().clientSettings.applyMode == TuningClientSettings::ApplyMode::Manual &&
 		(m_buttonFilters.empty() == false || m_listFilters.empty() == false))
 	{
 		m_applyButton = new QPushButton(tr("Apply"), this);

@@ -1083,7 +1083,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	m_bottomLayout->addWidget(m_undoButton);
 	connect(m_undoButton, &QPushButton::clicked, this, &TuningPage::slot_undo);
 
-	if (m_configController.configuration().clientSettings.autoApply == false)
+	if (m_configController.configuration().clientSettings.applyMode == TuningClientSettings::ApplyMode::Manual)
 	{
 		m_applyButton = new QPushButton(tr("Apply"));
 		connect(m_applyButton, &QPushButton::clicked, this, &TuningPage::slot_Apply);
@@ -2599,8 +2599,8 @@ void TuningPage::setActionButtonsState()
 	bool setValueEnabled = false;
 	bool setAllEnabled = false;
 
-	bool autoApply = m_configController.configuration().clientSettings.autoApply;
-	bool applyEnabled = false;
+	bool applyButtonExists = m_configController.configuration().clientSettings.applyMode == TuningClientSettings::ApplyMode::Manual;
+	bool applyButtonEnabled = false;
 
 	std::vector<Hash> hashes = m_model->allHashes();
 
@@ -2612,7 +2612,7 @@ void TuningPage::setActionButtonsState()
 	{
 		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-		if (autoApply == false)
+		if (applyButtonExists == true)
 		{
 			sourceHashes.insert(::calcHash(asp.lmEquipmentId()));
 		}
@@ -2698,7 +2698,7 @@ void TuningPage::setActionButtonsState()
 
 	// Enable or disable "Apply" button
 	//
-	if (autoApply == false && m_applyButton != nullptr)
+	if (applyButtonExists == true && m_applyButton != nullptr)
 	{
 		for (Hash sourceHash : sourceHashes)
 		{
@@ -2709,24 +2709,24 @@ void TuningPage::setActionButtonsState()
 				{
 					if (ts.state(i).hasunappliedparams() == true)
 					{
-						applyEnabled = true;
+						applyButtonEnabled = true;
 						break;
 					}
 				}
-				if (applyEnabled == true)
+				if (applyButtonEnabled == true)
 				{
 					break;
 				}
 			}
-			if (applyEnabled == true)
+			if (applyButtonEnabled == true)
 			{
 				break;
 			}
 		}
 
-		if (m_applyButton->isEnabled() != applyEnabled)
+		if (m_applyButton->isEnabled() != applyButtonEnabled)
 		{
-			m_applyButton->setEnabled(applyEnabled);
+			m_applyButton->setEnabled(applyButtonEnabled);
 		}
 	}
 }

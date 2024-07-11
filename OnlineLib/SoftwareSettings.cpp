@@ -2051,12 +2051,12 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeStartElement(XmlElement::APPEARANCE);
 
-	xml.writeBoolAttribute(EquipmentPropNames::AUTO_APPLAY, autoApply);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SIGNALS, showSignals);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, showSchemas);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, showSchemasList);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, showSchemasTabs);
 	xml.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, static_cast<int>(statusFlagFunction));
+	xml.writeIntAttribute(EquipmentPropNames::APPLY_MODE, static_cast<int>(applyMode));
 
 	xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tuningLogin);
 	xml.writeStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, tuningUserAccounts);
@@ -2129,15 +2129,17 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.findElement(XmlElement::APPEARANCE);
 
-	result &= xml.readBoolAttribute(EquipmentPropNames::AUTO_APPLAY, &autoApply);
 	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SIGNALS, &showSignals);
 	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, &showSchemas);
 	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, &showSchemasList);
 	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, &showSchemasTabs);
 
+	//
+	// statusFlagFunction
+	//
+
 	int value = 0;
 	bool resultStatusFlagFunction = xml.readIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, &value);
-
 	if (resultStatusFlagFunction == true)
 	{
 		statusFlagFunction = static_cast<LmStatusFlagMode>(value);
@@ -2171,6 +2173,18 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 	}
 
 	result &= resultStatusFlagFunction;
+
+	//
+	// applyMode
+	//
+	value = 0;
+	bool resultApplyMode = xml.readIntAttribute(EquipmentPropNames::APPLY_MODE, &value);
+	if (resultApplyMode == true)
+	{
+		applyMode = static_cast<ApplyMode>(value);
+	}
+
+	//
 
 	result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tuningLogin);
 	result &= xml.readStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts);
@@ -2234,7 +2248,7 @@ const TuningClientSettings& TuningClientSettings::operator = (const TuningClient
 
 bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) const
 {
-	if (autoApply != src.autoApply ||
+	if (applyMode != src.applyMode ||
 			filterByEquipment != src.filterByEquipment ||
 			filterBySchema != src.filterBySchema ||
 			showSchemasList != src.showSchemasList ||
@@ -2256,7 +2270,7 @@ bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) co
 bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) const
 {
 	if (tuningServices.size() != src.tuningServices.size() ||
-			autoApply != src.autoApply ||
+			applyMode != src.applyMode ||
 			statusFlagFunction != src.statusFlagFunction)
 	{
 		return true;

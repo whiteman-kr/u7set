@@ -115,7 +115,7 @@ namespace EquipmentPropNames
 
 	// TuningClient properties
 	//
-	inline const QString AUTO_APPLAY("AutoApply");
+	inline const QString APPLY_MODE("ApplyMode");
 	inline const QString SHOW_SIGNALS("ShowSignals");
 	inline const QString SHOW_SCHEMAS("ShowSchemas");
 	inline const QString SCHEMAS_NAVIGATION("SchemasNavigation");

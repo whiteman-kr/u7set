@@ -2297,7 +2297,6 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 
 	RETURN_IF_FALSE(result);
 
-	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::AUTO_APPLAY, &autoApply, log);
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SHOW_SIGNALS, &showSignals, log);
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::SHOW_SCHEMAS, &showSchemas, log);
 
@@ -2338,6 +2337,17 @@ bool TuningClientSettingsGetter::readSettings(const Builder::Context* context,
 	if (result == true)
 	{
 		statusFlagFunction = static_cast<LmStatusFlagMode>(value);
+	}
+
+	//
+	// applyMode
+	//
+
+	value = 0;
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::APPLY_MODE, &value, log);
+	if (result == true)
+	{
+		applyMode = static_cast<ApplyMode>(value);
 	}
 
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::TUNING_LOGIN, &tuningLogin, log);

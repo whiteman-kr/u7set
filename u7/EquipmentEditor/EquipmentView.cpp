@@ -16,6 +16,7 @@
 
 #include <AppSignalLists/SignalList.h>
 #include "../Builder/AppSignalListStorage.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include <TuningLib/TuningFilter.h>
 #include <TuningLib/TuningUiItem.h>
 #include <TuningLib/TuningFilterToLists.h>
@@ -3031,85 +3032,17 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	// End of fixes
 	//
 
-	// Update TuningClient from version 2 to version 3
+	// Prepare TuningClient compatibility issues mitigation
 	//
-	// Problem: Preset of TuningClient (v2 to v3) has compatibility breaking changes, here we try to mitigate it.
-	//			Before preset version 1 and 2 had Filters property, which is loaded by TuningFilterStorage class.
-	//			Preset version 3 has UiConfiguration property, and AppSignalLists are stored separately.
-	// Solution: Call TuningClient filters mirgation procedure below.
-	//
-
-	QString tuningClientMitigateCompatibilityUiConfiguration;
-	QString tuningClientMitigateCompatibilityAppSignalListTags;
-
-	if (device->presetRoot() &&
-		device->presetName() == QStringLiteral("TUN") &&
-		device->presetVersion() <= 2)
+	bool ok = false;
+	QString tuningClientMitigateCompatibilityUiConfiguration = prepareUpdateFromPresetTuningClientFilters(*device, &ok);
+	if (ok == false) 
 	{
-		auto filters = device->propertyByCaption(QStringLiteral("Filters"))->value().toString();
-
-		TuningFilters::TuningFilterStorage filterStorage;	// Source filters storage
-
-		// Load filters
-		//
-		QString errorMsg;
-		if (filterStorage.load(filters.toUtf8(), &errorMsg) == false) 
-		{
-			QMessageBox::critical(this, qAppName(), errorMsg);
-			return false;
-		}
-
-		// Convert
-		//
-		TuningLib::TuningUiStorage uiStorage;				// Target UI storage
-		AppSignalLists::AppSignalListSet appSignalLists;	// Target Lists storage
-
-		bool ok = TuningFilters::TuningFilterToLists::convertUi(device->equipmentId(), device->equipmentId().toLower(), filterStorage, uiStorage, appSignalLists);
-		if (ok == false) 
-		{
-			QMessageBox::critical(this, qAppName(), tr("Error converting Tuning Filters for TuningClient '%1'!").arg(device->equipmentId()));
-			return false;
-		}
-
-		// Update project AppSignalLists
-		//
-		if (appSignalLists.count() != 0)
-		{
-			auto convertedLists = appSignalLists.lists();
-			Builder::AppSignalListStorage appSignalListStorage(m_dbController);
-			if (appSignalListStorage.load(&errorMsg) == false)
-			{
-				QMessageBox::critical(this, qAppName(), errorMsg);
-				return false;
-			}
-			for (auto& cl : convertedLists)
-			{
-				std::shared_ptr<AppSignalLists::AppSignalList> sl = std::make_shared<AppSignalLists::AppSignalList>();
-				*sl = *cl;
-				if (sl->id().isEmpty() == true)
-				{
-					sl->setId(sl->uuid().toString());
-				}
-				appSignalListStorage.add(sl->uuid(), sl);
-				if (appSignalListStorage.save(sl->uuid(), &errorMsg) == false)
-				{
-					QMessageBox::critical(this, qAppName(), errorMsg);
-					return false;
-				}
-			}
-		}
-		
-		// Save UCiConfiguration property
-		//
-		if (uiStorage.root()->childCount() != 0)
-		{
-			QByteArray ba;
-			uiStorage.save(ba);
-			tuningClientMitigateCompatibilityUiConfiguration = QString::fromUtf8(ba);
-		}
+		return false;
 	}
 
-	// End of update TuningClient from version 2 to version 3
+	std::optional<int> applyMode = prepareUpdateFromPresetTuningClientAutoApply(*device);
+	//
 	//
 
 	//	qDebug();
@@ -3370,30 +3303,19 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		}
 	}
 
-	// Problem: Preset of TuningClient has compatibility breaking changes, here we try to mitigate it.
+	// Mitigate TuningClient compatibility issues
 	//
 	if (tuningClientMitigateCompatibilityUiConfiguration.isEmpty() == false)
 	{
-		auto uiProp = device->propertyByCaption(EquipmentPropNames::UI_CONFIGURATION);
-		if (uiProp != nullptr)
-		{
-			uiProp->setValue(tuningClientMitigateCompatibilityUiConfiguration);
-		}
-
-		// Add tag with software id to TuningClient and later to all lists, to link them
-		//
-		auto appSignalListTagsProp = device->propertyByCaption(EquipmentPropNames::APP_SIGNAL_LIST_TAGS);
-		if (appSignalListTagsProp == nullptr)
-		{
-			Q_ASSERT(appSignalListTagsProp);
-		}
-		else
-		{
-			QStringList softwareTags = appSignalListTagsProp->value().toStringList();
-			softwareTags.push_back(device->equipmentId().toLower());
-			appSignalListTagsProp->setValue(softwareTags.join('\n'));
-		}
+		performUpdateFromPresetTuningClientFilters(*device, tuningClientMitigateCompatibilityUiConfiguration);
 	}
+
+	if (applyMode.has_value() == true) 
+	{
+		performUpdateFromPresetTuningClientAutoApply(*device, applyMode.value());
+	}
+	//
+	//
 
 	return true;
 }
@@ -3502,6 +3424,157 @@ void EquipmentView::updateFromPresetFixAppDataServiceIdsToRc1(Hardware::DeviceOb
 	}
 
 	return;
+}
+
+QString EquipmentView::prepareUpdateFromPresetTuningClientFilters(Hardware::DeviceObject& device, bool* ok) 
+{
+	// Update TuningClient from version 2 to version 3
+	//
+	// Problem: Preset of TuningClient (v2 to v3) has compatibility breaking changes, here we try to mitigate it.
+	//			Before preset version 1 and 2 had Filters property, which is loaded by TuningFilterStorage class.
+	//			Preset version 3 has UiConfiguration property, and AppSignalLists are stored separately.
+	// Solution: Call TuningClient filters mirgation procedure below.
+	//
+	QString result;
+
+	if (device.presetRoot() &&
+		device.presetName() == QStringLiteral("TUN") &&
+		device.presetVersion() <= 2)
+	{
+		auto filters = device.propertyByCaption(QStringLiteral("Filters"))->value().toString();
+
+		TuningFilters::TuningFilterStorage filterStorage;	// Source filters storage
+
+		// Load filters
+		//
+		QString errorMsg;
+		if (filterStorage.load(filters.toUtf8(), &errorMsg) == false) 
+		{
+			QMessageBox::critical(this, qAppName(), errorMsg);
+			if (ok != nullptr)
+			{
+				*ok = false;
+			}
+			return result;
+		}
+
+		// Convert
+		//
+		TuningLib::TuningUiStorage uiStorage;				// Target UI storage
+		AppSignalLists::AppSignalListSet appSignalLists;	// Target Lists storage
+
+		bool convertOk = TuningFilters::TuningFilterToLists::convertUi(device.equipmentId(), device.equipmentId().toLower(), filterStorage, uiStorage, appSignalLists);
+		if (convertOk == false) 
+		{
+			QMessageBox::critical(this, qAppName(), tr("Error converting Tuning Filters for TuningClient '%1'!").arg(device.equipmentId()));
+			if (ok != nullptr)
+			{
+				*ok = false;
+			}
+			return result;
+		}
+
+		// Update project AppSignalLists
+		//
+		if (appSignalLists.count() != 0)
+		{
+			auto convertedLists = appSignalLists.lists();
+			Builder::AppSignalListStorage appSignalListStorage(m_dbController);
+			if (appSignalListStorage.load(&errorMsg) == false)
+			{
+				QMessageBox::critical(this, qAppName(), errorMsg);
+				if (ok != nullptr)
+				{
+					*ok = false;
+				}
+			}
+
+			for (auto& cl : convertedLists)
+			{
+				std::shared_ptr<AppSignalLists::AppSignalList> sl = std::make_shared<AppSignalLists::AppSignalList>();
+				*sl = *cl;
+				if (sl->id().isEmpty() == true)
+				{
+					sl->setId(sl->uuid().toString());
+				}
+				appSignalListStorage.add(sl->uuid(), sl);
+				if (appSignalListStorage.save(sl->uuid(), &errorMsg) == false)
+				{
+					QMessageBox::critical(this, qAppName(), errorMsg);
+					if (ok != nullptr)
+					{
+						*ok = false;
+					}
+					return result;
+				}
+			}
+		}
+		
+		// Save UCiConfiguration property
+		//
+		if (uiStorage.root()->childCount() != 0)
+		{
+			QByteArray ba;
+			uiStorage.save(ba);
+			result = QString::fromUtf8(ba);
+		}
+	}
+	
+			if (ok != nullptr)
+	{
+		*ok = true;
+	}
+	return result;
+}
+
+void EquipmentView::performUpdateFromPresetTuningClientFilters(Hardware::DeviceObject& device,
+															   const QString& tuningClientMitigateCompatibilityUiConfiguration)
+{
+	auto uiProp = device.propertyByCaption(EquipmentPropNames::UI_CONFIGURATION);
+	if (uiProp != nullptr)
+	{
+		uiProp->setValue(tuningClientMitigateCompatibilityUiConfiguration);
+	}
+
+	// Add tag with software id to TuningClient and later to all lists, to link them
+	//
+	auto appSignalListTagsProp = device.propertyByCaption(EquipmentPropNames::APP_SIGNAL_LIST_TAGS);
+	if (appSignalListTagsProp == nullptr)
+	{
+		Q_ASSERT(appSignalListTagsProp);
+	}
+	else
+	{
+		QStringList softwareTags = appSignalListTagsProp->value().toStringList();
+		softwareTags.push_back(device.equipmentId().toLower());
+		appSignalListTagsProp->setValue(softwareTags.join('\n'));
+	}
+}
+	
+std::optional<int> EquipmentView::prepareUpdateFromPresetTuningClientAutoApply(Hardware::DeviceObject& device) 
+{
+	// Preset of TuningClient (v2 to v3) has AutoApply property. New preset version (v4) has ApplyMode and it should be set to the correct value.
+	//
+	std::optional<int> result;
+
+	if (device.presetRoot() == true &&
+		device.presetName() == QStringLiteral("TUN") &&
+		device.presetVersion() <= 3)
+	{
+		bool autoApply = device.propertyByCaption(QStringLiteral("AutoApply"))->value().toBool();
+		result = static_cast<int>(autoApply == true ? TuningClientSettings::ApplyMode::Auto : TuningClientSettings::ApplyMode::Manual);
+	}
+	
+	return result;
+}
+
+void EquipmentView::performUpdateFromPresetTuningClientAutoApply(Hardware::DeviceObject& device, int applyMode)
+{
+	auto uiProp = device.propertyByCaption(EquipmentPropNames::APPLY_MODE);
+	if (uiProp != nullptr)
+	{
+		uiProp->setValue(applyMode);
+	}
 }
 
 void EquipmentView::showEvent(QShowEvent* event)

@@ -1106,7 +1106,7 @@ void MainWindow::slot_configurationArrived(TuningClientConfigSettings configurat
 
 	m_tuningConnection.updateConnections(m_configController.softwareInfo(),
 										 configuration.clientSettings.tuningServices,
-										 configuration.clientSettings.autoApply,
+										 configuration.clientSettings.applyMode == TuningClientSettings::ApplyMode::Auto,
 										 configuration.clientSettings.statusFlagFunction);
 
 	createWorkspace();

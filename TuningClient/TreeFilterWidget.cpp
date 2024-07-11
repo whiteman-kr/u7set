@@ -723,7 +723,8 @@ void TreeFilterWidget::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, con
 					}
 					else
 					{
-						if (state.hasunappliedparams() == true)
+						if (m_configController.configuration().clientSettings.applyMode == TuningClientSettings::ApplyMode::Manual &&
+							state.hasunappliedparams() == true)
 						{
 							statusStrings.push_back(tr("Unapplied [%1]").arg(state.replycount()));
 						}
@@ -741,7 +742,10 @@ void TreeFilterWidget::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, con
 				if (ts.valid() == true) validCount++;
 				if (state.controlisactive() == true) controlIsEnabledCount++;
 				if (state.isreply() == true) isReplyCount++;
-				if (state.hasunappliedparams() == true) hasUnappliedParamsCount++;
+				
+				if (m_configController.configuration().clientSettings.applyMode == TuningClientSettings::ApplyMode::Manual &&
+					state.hasunappliedparams() == true)
+					hasUnappliedParamsCount++;
 
 				if (m_configController.configuration().lmStatusFlagMode() == TuningClientSettings::LmStatusFlagMode::AccessKey &&
 					ts.valid() == true &&
