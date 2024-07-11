@@ -43,67 +43,95 @@ void out_nl(const QString& str)
 
 #pragma pack(push, 1)
 
+// RFC 791, Internet Protocol (IP)
+//
+// All fields in Network (BigEndian) byte order
+//
 struct IpHeader
 {
-	unsigned char  ip_verlen;        // 4-bit IPv4 version
-									 // 4-bit header length (in 32-bit words)
-	unsigned char  ip_tos;           // IP type of service
-	unsigned short ip_totallength;   // Total length
-	unsigned short ip_id;            // Unique identifier
-	unsigned short ip_offset;        // Fragment offset field
-	unsigned char  ip_ttl;           // Time to live
-	unsigned char  ip_protocol;      // Protocol(TCP,UDP etc)
-	unsigned short ip_checksum;      // IP checksum
-	unsigned int   ip_srcaddr;       // Source address
-	unsigned int   ip_destaddr;      // Source address
+
+	//
+	union
+	{
+		struct
+		{
+			quint8  ipVersion : 4;			// 4-bit IPv4 version
+			quint8	ipHeaderLenght : 4;		// 4-bit header length (in 32-bit words)
+		};
+
+		quint8 ipVerLen;
+	};
+
+	quint8 typeOfService;					// requested type of service (mostly - datagram priority)
+	quint16	ipTotalLength;					// IP datagram total length in Bytes
+	quint16 id;								// unique identifier of IP datagram
+											// with the 3 flag bits and the fragment offset values are used in datagram fragmentation and reassembly
+	quint16 fragmentOffset;					// fragment offset field
+	quint8 timeToLive;						// TTL
+	quint8 protocol;						// protocol ID (TCP - 6, UDP - 17, etc)
+	quint16 headerChecksum;					// IP header checksum
+	quint32 sourceIP;						// source IP address
+	quint32 destinationIP;					// destination IP address
+
+	// Minimal IP header size - 20 bytes (ipHeaderLenght == 5)
+
+	// Possible up to 40 bytes of optional data (real IP header size determined by ipHeaderLenght field)
 
 	void toHost()
 	{
-		ip_totallength = ntohs(ip_totallength);
-		ip_id = ntohs(ip_id);
-		ip_offset = ntohs(ip_offset);
-		ip_checksum = ntohs(ip_checksum);
-		ip_srcaddr = ntohl(ip_srcaddr);
-		ip_destaddr = ntohl(ip_destaddr);
+		ipTotalLength = ntohs(ipTotalLength);
+		id = ntohs(id);
+		fragmentOffset = ntohs(fragmentOffset);
+		headerChecksum = ntohs(headerChecksum);
+		sourceIP = ntohl(sourceIP);
+		destinationIP = ntohl(destinationIP);
 	}
 
 	void toNetwork()
 	{
-		ip_totallength = htons(ip_totallength);
-		ip_id = htons(ip_id);
-		ip_offset = htons(ip_offset);
-		ip_checksum = htons(ip_checksum);
-		ip_srcaddr = htonl(ip_srcaddr);
-		ip_destaddr = htonl(ip_destaddr);
+		ipTotalLength = htons(ipTotalLength);
+		id = htons(id);
+		fragmentOffset = htons(fragmentOffset);
+		headerChecksum = htons(headerChecksum);
+		sourceIP = htonl(sourceIP);
+		destinationIP = htonl(destinationIP);
 	}
 };
 
+// RFC 768, User Datagram Protocol (UDP)
+//
+// All fields in Network (BigEndian) byte order
+//
 struct UdpHeader
 {
-	quint16 srcPort;
-	quint16 destPort;
-	quint16 udpLength;
+	quint16 sourcePort;
+	quint16 destinationPort;
+	quint16 udpLength;				// length of the UDP header and UDP data in bytes
 	quint16 checksum;
 
 	void toHost()
 	{
-		srcPort = ntohs(srcPort);
-		destPort = ntohs(destPort);
+		sourcePort = ntohs(sourcePort);
+		destinationPort = ntohs(destinationPort);
 		udpLength = ntohs(udpLength);
 		checksum = ntohs(checksum);
 	}
 
 	void toNetwork()
 	{
-		srcPort = htons(srcPort);
-		destPort = htons(destPort);
+		sourcePort = htons(sourcePort);
+		destinationPort = htons(destinationPort);
 		udpLength = htons(udpLength);
 		checksum = htons(checksum);
 	}
 };
 
-
 #pragma pack(pop)
+
+bool operator < (const QHostAddress& a1, const QHostAddress& a2)
+{
+	return a1.toIPv4Address() < a2.toIPv4Address();
+}
 
 void enumProtocols()
 {
@@ -121,6 +149,40 @@ void enumProtocols()
 //		out_nl();
 	}
 }
+
+/* Compute checksum for count bytes starting at addr, using one's complement of one's complement sum*/
+quint16 compute_checksum(quint8* rawHeaderPtr, int headerLenBytes)
+{
+	unsigned short* addr = reinterpret_cast<unsigned short*>(rawHeaderPtr);
+
+	unsigned int count = headerLenBytes;
+
+	unsigned long sum = 0;
+
+	while (count > 1) {
+		sum += * addr++;
+		count -= 2;
+	}
+	//if any bytes left, pad the bytes and add
+	if(count > 0) {
+		sum += ((*addr)&htons(0xFF00));
+	}
+	//Fold sum to 16 bits: add carrier to result
+	while (sum>>16) {
+		sum = (sum & 0xffff) + (sum >> 16);
+	}
+	//one's complement
+	sum = ~sum;
+
+	return ((quint16)sum);
+}
+
+/* set ip checksum of a given ip header*/
+void compute_ip_checksum(IpHeader* iphdrp){
+	iphdrp->headerChecksum = 0;
+	iphdrp->headerChecksum = compute_checksum(reinterpret_cast<quint8*>(iphdrp), iphdrp->ipHeaderLenght << 2);
+}
+
 
 void threadFunc()
 {
@@ -140,6 +202,37 @@ void threadFunc()
 	}
 
 	std::cout << QString("WSAStartup Ok\n").toStdString();
+
+	SOCKET sendSocket;
+
+	sendSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+	if (sendSocket == INVALID_SOCKET)
+
+	{
+		out << QString("SEND socket open error: %1\n").arg(WSAGetLastError());
+		return;
+	}
+
+	out << "SEND socket open Ok\n";
+
+	sockaddr_in sa;
+	ZeroMemory(&sa, sizeof(sa));
+
+	sa.sin_port = htons((unsigned short)0);
+	sa.sin_family = AF_INET;
+
+	sa.sin_addr.S_un.S_addr = htonl(QHostAddress("192.168.14.85").toIPv4Address());
+
+	err = bind(sendSocket, (sockaddr*)&sa, sizeof(sa));
+
+	if (err == SOCKET_ERROR)
+	{
+		out << QString("Error bind() SEND socket: %1\n").arg(WSAGetLastError());
+		return;
+	}
+
+	out << "SEND socket bind Ok\n";
 
 	SOCKET rawSocket;
 
@@ -173,13 +266,13 @@ void threadFunc()
 
 	out << "RAW socket setsockopt IP_HDRINCL Ok\n";
 
-	sockaddr_in sa;
 	ZeroMemory(&sa, sizeof(sa));
 
 	sa.sin_port = htons((unsigned short)0);
 	sa.sin_family = AF_INET;
 
-	sa.sin_addr.S_un.S_addr = htonl(0);
+	//sa.sin_addr.S_un.S_addr = htonl(QHostAddress("192.168.101.100").toIPv4Address());
+	sa.sin_addr.S_un.S_addr = 0;
 
 	err = bind(rawSocket, (sockaddr*)&sa, sizeof(sa));
 
@@ -190,8 +283,20 @@ void threadFunc()
 	}
 
 	char recvBuf[2048];
-	sockaddr fromAddr;
-	int fromAddrLen = sizeof(fromAddr);
+
+	std::map<QHostAddress, QHostAddress> fromTo =
+	{
+		{ QHostAddress("192.168.14.138"), QHostAddress("192.168.14.85") },
+		{ QHostAddress("1192.168.14.224"), QHostAddress("192.168.14.85") },
+		{ QHostAddress("192.168.14.193"), QHostAddress("192.168.14.85") },
+		{ QHostAddress("192.168.14.222"), QHostAddress("192.168.14.85") },
+		{ QHostAddress("192.168.14.197"), QHostAddress("192.168.14.85") },
+	};
+
+	sockaddr_in toAddr;
+	ZeroMemory(&toAddr, sizeof(toAddr));
+
+	toAddr.sin_family = AF_INET;
 
 	while(1)
 	{
@@ -199,7 +304,6 @@ void threadFunc()
 
 		if (recvLen == SOCKET_ERROR)
 		{
-			err = WSAGetLastError();
 			out << QString("Error recv(): %1\n").arg(WSAGetLastError());
 			return;
 		}
@@ -208,15 +312,51 @@ void threadFunc()
 		UdpHeader udph = *reinterpret_cast<const UdpHeader*>(recvBuf + sizeof(IpHeader));
 
 		iph.toHost();
-		//udph.toHost();
+		udph.toHost();
 
-		QHostAddress srcAddr(iph.ip_srcaddr);
-		QHostAddress destAddr(iph.ip_destaddr);
+		QHostAddress srcAddr(iph.sourceIP);
+		QHostAddress destAddr(iph.destinationIP);
 
-		QString s = QString("from %1:%2 to %3:%4, len %5\n").
-					arg(srcAddr.toString()).arg(udph.srcPort).
-					arg(destAddr.toString()).arg(udph.destPort).
-					arg(iph.ip_totallength);
+		auto it = fromTo.find(srcAddr);
+
+		QString s = QString("from %1:%2 to %3:%4, len %5 (recvLen %6)").
+					arg(srcAddr.toString()).arg(udph.sourcePort).
+					arg(destAddr.toString()).arg(udph.destinationPort).
+					arg(iph.ipTotalLength).arg(recvLen);
+
+		if (it == fromTo.end())
+		{
+			s += " => ignored\n";
+		}
+		else
+		{
+			QHostAddress newDestIP = it->second;
+
+/*			IpHeader* correctedIph = reinterpret_cast<IpHeader*>(recvBuf);
+
+			correctedIph->destinationIP = htonl(newDestIP.toIPv4Address());
+
+			compute_ip_checksum(correctedIph);
+
+			Q_ASSERT(compute_checksum(reinterpret_cast<quint8*>(correctedIph), correctedIph->ipHeaderLenght << 2) == 0);*/
+
+			toAddr.sin_port = htons(13222);
+			toAddr.sin_addr.S_un.S_addr = htonl(newDestIP.toIPv4Address());
+
+			int offset = iph.ipHeaderLenght * 4 + sizeof(UdpHeader);
+
+			int sendLen = sendto(sendSocket, recvBuf + offset, recvLen - offset, 0, reinterpret_cast<sockaddr*>(&toAddr), sizeof(toAddr));
+
+			if (sendLen == SOCKET_ERROR)
+			{
+				s = QString("Error send(): %1\n").arg(WSAGetLastError());
+			}
+			else
+			{
+				//Q_ASSERT(sendLen == recvLen);
+				s += QString(" => %1\n").arg(newDestIP.toString());
+			}
+		}
 
 		std::cout << s.toStdString();
 	}
