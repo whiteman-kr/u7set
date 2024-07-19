@@ -3,8 +3,9 @@
 namespace Metrology
 {
 
-	DbConnectionBase::DbConnectionBase(QObject* parent) :
-		ConnectionBase(parent)
+	DbConnectionBase::DbConnectionBase(QWidget* parent) :
+		ConnectionBase(parent),
+		m_parentWidget(parent)
 	{
 	}
 
@@ -37,30 +38,56 @@ namespace Metrology
 
 		std::shared_ptr<DbFile> file;
 		std::vector<DbFileInfo> fileList;
+
 		int etcFileId = m_dbController->systemFileId(DbDir::EtcDir);
 
-		result = m_dbController->getFileList(&fileList, etcFileId, CONNECTIONS_FILE_NAME, true, nullptr);
+		result = m_dbController->getFileList(&fileList, etcFileId, File::METROLOGY_CONNECTIONS_CSV, true, m_parentWidget);
+
 		if (result == false || fileList.size() != 1)
 		{
 			// if it does not exists, then create a file
 			//
 			std::shared_ptr<DbFile> newFile = std::make_shared<DbFile>();
-			newFile->setFileName(CONNECTIONS_FILE_NAME);
+			newFile->setFileName(File::METROLOGY_CONNECTIONS_CSV);
 
 			result = m_dbController->addFile(newFile, etcFileId, nullptr);
+
 			if (result == false)
 			{
 				return nullptr;
 			}
 
-			result = m_dbController->getFileList(&fileList, etcFileId, CONNECTIONS_FILE_NAME, true, nullptr);
+			result = m_dbController->getFileList(&fileList, etcFileId, File::METROLOGY_CONNECTIONS_CSV, true, m_parentWidget);
+
 			if (result == false || fileList.size() != 1)
+			{
+				return nullptr;
+			}
+
+			// RPCT-3927
+			//
+			// Checkin file MetrologyConnections.csv immediately after creation
+			// to show this file for all users
+
+			result = m_dbController->checkIn(fileList[0], QString("File %1 created").arg(File::METROLOGY_CONNECTIONS_CSV), m_parentWidget);
+
+			if (result == false)
+			{
+				return nullptr;
+			}
+
+			// ... and immediately checkout for editing by current user
+
+			result = m_dbController->checkOut(fileList[0], m_parentWidget);
+
+			if (result == false)
 			{
 				return nullptr;
 			}
 		}
 
 		result = m_dbController->getLatestVersion(fileList[0], &file, nullptr);
+
 		if (result == false || file == nullptr)
 		{
 			return nullptr;

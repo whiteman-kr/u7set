@@ -170,7 +170,7 @@ namespace Builder
 
 				// Creating metrology connections list from DbController
 				//
-				Metrology::DbConnectionBase connectionBase;
+				Metrology::DbConnectionBase connectionBase(nullptr);
 
 				connectionBase.setDbController(&m_context->m_db);
 

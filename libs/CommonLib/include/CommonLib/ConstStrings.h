@@ -609,6 +609,7 @@ namespace File
 
 	inline const QString METROLOGY_ITEMS_XML("MetrologyItems.xml");
 	inline const QString METROLOGY_SIGNAL_SET("MetrologySignal.set");
+	inline const QString METROLOGY_CONNECTIONS_CSV = "MetrologyConnections.csv";
 
 	inline const QString CONNECTIONS_TXT("Connections.txt");
 	inline const QString CONNECTIONS_XML("Connections.xml");

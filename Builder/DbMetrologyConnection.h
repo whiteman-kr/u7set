@@ -6,7 +6,6 @@
 
 namespace Metrology
 {
-	// ==============================================================================================
 
 	class DbConnectionBase : public ConnectionBase
 	{
@@ -15,7 +14,7 @@ namespace Metrology
 
 	public:
 
-		DbConnectionBase(QObject* parent = nullptr);
+		DbConnectionBase(QWidget* parent);
 		virtual ~DbConnectionBase() override {}
 
 	public:
@@ -55,7 +54,7 @@ namespace Metrology
 		int restoreConnection(int restoreID);						// restore connection from last check in, return index of restore connection
 
 	private:
-
+		QWidget* m_parentWidget = nullptr;
 		DbController* m_dbController = nullptr;
 
 		QString m_userName;
@@ -63,5 +62,4 @@ namespace Metrology
 		bool m_userIsAdmin = false;
 	};
 
-	// ==============================================================================================
 }
