@@ -643,19 +643,19 @@ void TreeFilterWidget::updateTreeItemStatus(QTreeWidgetItem* treeItem)
 	}
 }
 
-void TreeFilterWidget::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* list)
+void TreeFilterWidget::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* treeList)
 {
-	if (list == nullptr)
+	if (treeList == nullptr)
 	{
-		assert(list);
+		assert(treeList);
 		return;
 	}
 
-	Hash hash = ::calcHash(list->id()); // Assume that list id is source EquipmentId
+	Hash hash = ::calcHash(treeList->id()); // Assume that list id is source EquipmentId
 
 	assert(m_columnStatusIndex != -1);
 
-	TuningCounters counters = m_tuningCounters.counters(list->id());
+	TuningCounters counters = m_tuningCounters.counters(treeList->id());
 
 	int errorCounter = counters.errorCounter;
 
@@ -900,11 +900,11 @@ void TreeFilterWidget::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, con
 	}
 }
 
-void TreeFilterWidget::updateTreeItemCounters(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* list)
+void TreeFilterWidget::updateTreeItemCounters(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* treeList)
 {
-	if (list == nullptr)
+	if (treeList == nullptr)
 	{
-		Q_ASSERT(list);
+		Q_ASSERT(treeList);
 		return;
 	}
 
@@ -947,7 +947,7 @@ void TreeFilterWidget::updateTreeItemCounters(QTreeWidgetItem* treeItem, const A
 		// We get "BLOCKS_ANALOG;BLOCKS_DISCRETE;USER_LIST_000" counters request.
 		// We filter signals using all these filters and get counters.
 		QStringList columnFilterIds = counterItem->filtersList();
-		columnFilterIds.push_back(counterList->id());
+		columnFilterIds.push_back(treeList->id());
 
 		TuningCounters tc = m_tuningCounters.counters(columnFilterIds.join(';'));
 

@@ -39,8 +39,8 @@ private:
 	void createFilterTree();
 	void addTreeObjects(QTreeWidgetItem* item, const QString& mask, const QStringList& includeSystemTags, const QStringList& excludeSystemTags);
 	void updateTreeItemStatus(QTreeWidgetItem* treeItem);
-	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* list);
-	void updateTreeItemCounters(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* list);
+	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* treeList);
+	void updateTreeItemCounters(QTreeWidgetItem* treeItem, const AppSignalLists::AppSignalList* treeList);
 	void activateControl(const QString& equipmentId, bool enable);
 	QTreeWidgetItem* findFilterWidget(const QUuid& uuid, QTreeWidgetItem* treeItem);
 
