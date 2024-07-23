@@ -1,4 +1,4 @@
-#include "CircularLogger.h"
+#include "UdpRetranslatorApp.h"
 
 // Visual Leak Detector
 //
@@ -23,18 +23,12 @@ VOID serviceCtrlHandler(DWORD CtrlCode);
 
 int main(int argc, char** argv)
 {
-	std::shared_ptr<CircularLogger> log = std::make_shared<CircularLogger>();
+	UdpRetranslatorApp app(argc, argv);
 
-	circularLoggerInit(log, argv[0], "udprtr", "", 10, 10);
+	int result = app.run();
 
-	QThread::msleep(2000);
+	return result;
 
-	DEBUG_LOG_MSG(log, "Log Message");
-	DEBUG_LOG_MSG(log, "Log Message 2");
-
-	QThread::msleep(2000);
-
-	circularLoggerShutdown(log);
 
 	return 1;
 

@@ -21,6 +21,8 @@ set(TARGET UdpRtr)
 add_executable(${TARGET}
 	CircularLogger.cpp
 	CircularLogger.h
+	UdpRetranslatorApp.cpp
+	UdpRetranslatorApp.h
 	UdpRtrMain.cpp
 )
 

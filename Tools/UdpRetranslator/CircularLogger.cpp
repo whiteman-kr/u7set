@@ -119,13 +119,9 @@ void CircularLogger::writeMessage(const QString& message, const char* function, 
 
 void CircularLogger::writeRecord(QString record)
 {
-	//m_stream << record << '\n';
-
-	//m_stream.flush();
-
 	record += "\n";
 
-	qint64 res = m_file.write(record.toUtf8());
+	m_file.write(record.toUtf8());
 	m_file.flush();
 
 	m_fileGrowing += record.length();
@@ -232,7 +228,7 @@ void CircularLogger::checkFileSize()
 
 	if (fileSize >= m_fileSizeLimit * 1024 * 1024)
 	{
-		closeFileStream();
+		closeFile();
 
 		m_lastFileNumber++;
 		m_lastFileID++;
@@ -275,7 +271,7 @@ void CircularLogger::openFile(int index)
 {
 	if (m_file.isOpen() == true)
 	{
-		closeFileStream();
+		closeFile();
 	}
 
 	m_fileName = fileName(index);
@@ -289,8 +285,6 @@ void CircularLogger::openFile(int index)
 		qDebug() << "Error open file: " << C_STR(m_fileName);
 	}
 
-//	m_stream.setDevice(&m_file);
-
 	if (m_file.size() == 0)
 	{
 		writeRecord(QString("%1\n").arg(m_lastFileID));
@@ -301,9 +295,8 @@ void CircularLogger::openFile(int index)
 	}
 }
 
-void CircularLogger::closeFileStream()
+void CircularLogger::closeFile()
 {
-//	m_stream.flush();
 	m_file.flush();
 	m_file.close();
 }
@@ -420,10 +413,14 @@ void CircularLogger::logWriteThreadFunc()
 									  m_recordsQueue.empty() == false;
 						   });
 
-		// here ul is LOCKED!
-
 		if (m_quitRequested == true)
 		{
+			while(m_recordsQueue.empty() == false)
+			{
+				writeRecord(m_recordsQueue.front());
+				m_recordsQueue.pop();
+			}
+
 			ul.unlock();
 			break;
 		}
@@ -441,7 +438,7 @@ void CircularLogger::logWriteThreadFunc()
 		writeRecord(record);
 	}
 
-	closeFileStream();
+	closeFile();
 }
 
 bool circularLoggerInit(std::shared_ptr<CircularLogger> logger,

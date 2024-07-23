@@ -49,7 +49,7 @@ private:
 	int getFileID(int index);
 	QString fileName(int index);
 	void openFile(int index);
-	void closeFileStream();
+	void closeFile();
 
 	QString getRecordTypeStr(RecordType type);
 	QString getCurrentDateTimeStr();
@@ -66,7 +66,6 @@ private:
 
 	QString m_fileName;
 	QFile m_file;
-	QTextStream m_stream;
 	qsizetype m_fileGrowing = 0;
 
 	QString m_logName;
