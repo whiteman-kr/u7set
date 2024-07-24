@@ -67,6 +67,9 @@ linux_build_job:
     - /^.*RPCT-.*$/
   tags:
     - gcc
+  before_script:
+    - export PATH="/home/gitlab-runner/vcpkg:$PATH"
+    - export VCPKG_ROOT="/home/gitlab-runner/vcpkg"
   script:
     - "printenv"
     - "pwd"
@@ -81,7 +84,7 @@ linux_build_job:
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
-    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/release"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/release -DVCPKG_TARGET_TRIPLET=x64-linux"
     - "cmake --build ./build"
 
   artifacts:
@@ -105,6 +108,10 @@ windows_build_job:
     - /^.*RPCT-.*$/
   tags:
     - vs2017
+  before_script:
+    - $Env:VCPKG_ROOT="C:/data/vcpkg/vcpkg"
+    - $Env:VCPKG_DEFAULT_BINARY_CACHE="C:/data/vcpkg/cache_windows_build"
+    - $env:Path += ";C:/data/vcpkg/vcpkg"
   script:
     - "dir env:"
     - "echo $Env:CI_COMMIT_SHA"
@@ -383,6 +390,9 @@ linux_code_coverage_job:
     - /^.*exp.*$/
     - /^.*rpct-.*$/
     - /^.*RPCT-.*$/
+  before_script:
+    - export PATH="/home/gitlab-runner/vcpkg:$PATH"
+    - export VCPKG_ROOT="/home/gitlab-runner/vcpkg"
   script:
     - "printenv"
     - "echo $CI_COMMIT_SHA"
@@ -404,7 +414,7 @@ linux_code_coverage_job:
     - "# ----------------------------------------------"
     - "#                    Build                      "
     - "# ----------------------------------------------"
-    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/debug -DCODE_COVERAGE=ON -DADDRESS_SANITIZER=ON"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/debug -DCODE_COVERAGE=ON -DADDRESS_SANITIZER=ON -DVCPKG_TARGET_TRIPLET=x64-linux"
     - "cmake --build ./build"    
     - "# ----------------------------------------------"
     - "#           Collect Test Coverage Data          "

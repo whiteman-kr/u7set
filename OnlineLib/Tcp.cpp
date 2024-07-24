@@ -4,7 +4,7 @@
 
 #include "Tcp.h"
 #include <CommonLib/ConstStrings.h>
-#include "../Protobuf/google/protobuf/message.h"
+#include <google/protobuf/message.h>
 
 namespace Tcp
 {

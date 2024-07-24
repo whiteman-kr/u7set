@@ -97,7 +97,7 @@ target_compile_definitions(${TARGET} PRIVATE UI_LIB_DOMAIN)
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib Protobuf AppSignalLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib ProtobufEx AppSignalLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

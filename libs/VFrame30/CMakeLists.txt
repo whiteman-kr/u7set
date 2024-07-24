@@ -243,7 +243,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)
-target_link_libraries(${TARGET} PUBLIC CommonLib Behavior Protobuf UtilsLib AppSignalLib HardwareLib DiagStateLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib AppSignalLib HardwareLib DiagStateLib TrendView)
 
 target_compile_definitions(${TARGET} PRIVATE VFRAME30_LIBRARY)
 

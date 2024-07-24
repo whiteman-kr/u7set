@@ -10,7 +10,7 @@
 #include <QTextStream>
 #include <QVector>
 
-#include "../Protobuf/google/protobuf/message_lite.h"
+#include <google/protobuf/message_lite.h>
 #include <CommonLib/ConstStrings.h>
 
 #include <Simulator/SimConsoleLogFile.h>

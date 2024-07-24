@@ -9,6 +9,15 @@ cmake_minimum_required(VERSION 3.16)
 #
 include(cmake/version.cmake)
 
+# Emit error if VCPKG_ROOT is not set
+#
+if(NOT DEFINED ENV{VCPKG_ROOT})
+	message(FATAL_ERROR "VCPKG_ROOT is not set. Please set it to the vcpkg root directory.")
+endif()
+
+set(VCPKG_ROOT $ENV{VCPKG_ROOT})
+include(${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
+
 # Git based 
 #
 project(
@@ -30,6 +39,9 @@ set(QT_VERSION "6.5.3")
 
 find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
 find_package(Threads REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+find_package(asio CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
 
 if (MSVC)
 	find_package(Qt6 REQUIRED COMPONENTS AxContainer) # Metrology
@@ -107,6 +119,7 @@ message("User: ${U7SET_USER_NAME}")
 message("Host: ${U7SET_HOSTNAME}")
 message("Qt Version: ${Qt6_VERSION}")
 message("Qt Path: ${Qt6_DIR}")
+message("VCPKG_ROOT: ${VCPKG_ROOT}")
 message("-----------------------------------------")
 
 # Add projects.
@@ -137,20 +150,17 @@ add_subdirectory(TestSuiteConsole)
 # Do not compile these projects if code coverage is on.
 #
 if(NOT CODE_COVERAGE)
-	add_subdirectory(TestSuite)
-
-    add_subdirectory(./Tools/qtkeychain)
     add_subdirectory(u7)
+	add_subdirectory(TestSuite)
+	add_subdirectory(mconf)	
+	add_subdirectory(./Tools/qtkeychain)
 
 	add_subdirectory(Monitor)
 	add_subdirectory(TuningClient)
 	add_subdirectory(Diagnostics)
-
 	add_subdirectory(Metrology)
-	add_subdirectory(mconf)	
 endif()
 
-add_subdirectory(./Test/googletest)
 add_subdirectory(./Test/ClientTests)
 add_subdirectory(./Test/SimulatorTests)
 add_subdirectory(./Test/u7databaseTests)

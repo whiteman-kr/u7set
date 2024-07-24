@@ -91,7 +91,7 @@ target_compile_definitions(${TARGET} PRIVATE APPSIGNALLISTS_LIB_DOMAIN)
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Widgets)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib UiLib AppSignalLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib UiLib AppSignalLib)
 
 #if (MSVC)
 	#target_link_libraries(${TARGET} PUBLIC Advapi32)

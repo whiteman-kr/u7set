@@ -77,7 +77,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_compile_definitions(${TARGET} PRIVATE UI_LIB_DOMAIN)
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::PrintSupport Qt6::Xml)
-target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib Protobuf AppSignalLib AppSignalLists)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib ProtobufEx AppSignalLib AppSignalLists)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

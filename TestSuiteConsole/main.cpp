@@ -1,7 +1,7 @@
 #include "../TestSuiteLib/TestSuite.h"
 #include "../TestSuiteLib/TestSuiteSettings.h"
 #include "../UtilsLib/LogFile.h"
-#include "../Protobuf/google/protobuf/message_lite.h"
+#include <google/protobuf/message_lite.h>
 #include "version.h"
 
 #include <QGuiApplication>

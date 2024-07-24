@@ -169,7 +169,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
-target_link_libraries(${TARGET} PUBLIC CommonLib Behavior Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib ClientLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ClientLib TrendView)
 
 target_compile_definitions(${TARGET} PRIVATE SIMULATOR_LIBRARY)
 

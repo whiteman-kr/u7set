@@ -1,9 +1,10 @@
 #include "../Builder/Builder.h"
-#include <CommonLib/Times.h>
-#include "../Protobuf/google/protobuf/message.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
 #include "../version.h"
 
+#include <google/protobuf/message_lite.h>
+
+#include <CommonLib/Times.h>
 #include <HardwareLib/HardwareLibrary.h>
 #include <HardwareLib/ModuleFirmware.h>
 #include <VFrame30/VFrame30Library.h>

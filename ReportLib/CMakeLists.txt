@@ -49,7 +49,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Qml Qt6::Xml Qt6::Network Qt6::Widgets)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib TrendView VFrame30)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib OnlineLib AppSignalLib TrendView VFrame30)
 
 
 if (MSVC)

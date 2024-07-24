@@ -3,7 +3,7 @@
 #include <SimCommandTest_LM5_LM6.h>
 #include <SimProfilesTest.h>
 #include <SimAfbParamTests.h>
-#include "../Protobuf/google/protobuf/message_lite.h"
+#include <google/protobuf/message_lite.h>
 
 int main(int argc, char *argv[])
 {

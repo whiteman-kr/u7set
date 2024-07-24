@@ -42,7 +42,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC Protobuf OnlineLib CommonLib)
+target_link_libraries(${TARGET} PUBLIC ProtobufEx OnlineLib CommonLib)
 
 target_compile_definitions(${TARGET} PRIVATE SERVICE_LIB_DOMAIN)
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

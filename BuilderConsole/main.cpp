@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "../Builder/Builder.h"
-#include "../Protobuf/google/protobuf/message.h"
+#include <google/protobuf/message_lite.h>
 #include "../version.h"
 #include "BuildTask.h"
 

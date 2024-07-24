@@ -231,7 +231,7 @@ target_precompile_headers(${TARGET} PRIVATE
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib Protobuf OnlineLib AppSignalLib ClientLib VFrame30 UiLib AppSignalLists)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib ProtobufEx OnlineLib AppSignalLib ClientLib VFrame30 UiLib AppSignalLists)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

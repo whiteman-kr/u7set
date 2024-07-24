@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-add_subdirectory(asio)
-
 add_subdirectory(CommonLib)
 add_subdirectory(AppSignalLists)
 add_subdirectory(AdsBridge)
@@ -11,7 +9,7 @@ add_subdirectory(DbLib)
 add_subdirectory(DiagClientLib)
 add_subdirectory(DiagStateLib)
 add_subdirectory(HardwareLib)
-add_subdirectory(Protobuf)
+add_subdirectory(ProtobufEx)
 add_subdirectory(SchemaClientLib)
 add_subdirectory(ServiceLib)
 add_subdirectory(Simulator)

@@ -136,7 +136,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_compile_definitions(${TARGET} PRIVATE HARDWARE_LIB_DOMAIN)
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Concurrent Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
