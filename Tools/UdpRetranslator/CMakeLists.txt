@@ -19,11 +19,14 @@ qt_standard_project_setup()
 set(TARGET UdpRtr)
 
 add_executable(${TARGET}
+	CaptureDevice.cpp
+	CaptureDevice.h
 	CircularLogger.cpp
 	CircularLogger.h
 	UdpRetranslatorApp.cpp
 	UdpRetranslatorApp.h
 	UdpRtrMain.cpp
+	UdpIpHeaders.h
 )
 
 # Add LTO for Release and Windows only. 
@@ -53,6 +56,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	# C++ includes
 	#
 	<condition_variable>
+	<iostream>
 	<limits>
 	<map>
 	<memory>
@@ -67,7 +71,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	# Windows includes
 
 	<tchar.h>
-	<windows.h>
+	<winsock2.h>		# - don't change order of this includes!
+	<windows.h>			# /
 
 	# Qt includes
 
@@ -79,26 +84,15 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QStandardPaths>
 	<QTextStream>
 	<QThread>
-
-	#
-	#	<QMetaObject>
-	#	<QtGlobal>
-
-	#	<QDebug>
-	#	<QObject>
-	#	<QMetaClassInfo>
-	#	<QMetaEnum>
-
-	# Project includes
-	#
-#	"../../CommonLib/Hash.h"
 )
 
-#target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
-#target_compile_definitions(${TARGET} INTERFACE ASIO_STANDALONE)
 include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../UtilsLib)
+include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/include)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network)
+#target_link_libraries(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/Lib/x64/Packet.lib)
+target_link_libraries(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/Lib/x64/wpcap.lib)
+
 
 # Link Visaul Leak Detector
 
