@@ -13,6 +13,7 @@ int UdpRetranslatorApp::run()
 {
 	m_log = std::make_shared<CircularLogger>();
 	circularLoggerInit(m_log, m_appPathFile, "udprtr", "", 10, 10);
+	m_log->setLogCodeInfo(false);
 
 	RETURN_VALUE_IF_FALSE(loadNpcapDlls(), 1);
 
@@ -45,6 +46,14 @@ int UdpRetranslatorApp::run()
 			BREAK_IF_FALSE(printCaptureDevices());
 			BREAK_IF_FALSE(testCaptureDevice());
 			break;
+		}
+
+		auto it = m_cmdLineArgs.find(ARG_CFG);
+
+		if (it != m_cmdLineArgs.end())
+		{
+			BREAK_IF_FALSE(readCfgFile(it->second));
+			BREAK_IF_FALSE(retranslate());
 		}
 
 		std::cout << "\nUnknown command line arguments.\n";
@@ -115,6 +124,7 @@ void UdpRetranslatorApp::printHelp()
 //	std::cout << "-e\t\trun UDP retranslator as console application\n";
 	std::cout << QString("%1\tprint list of capture devices\n").arg(ARG_DEV_LIST).toStdString();
 	std::cout << QString("%1\ttest capturing on device\n").arg(ARG_TEST_CAP).toStdString();
+	std::cout << QString("%1=cfgFileName\tload config file and start UDP retranslation\n").arg(ARG_CFG).toStdString();
 	std::cout << "\n";
 }
 
@@ -188,6 +198,127 @@ bool UdpRetranslatorApp::testCaptureDevice()
 	capDevice.testCapturing();
 
 	return false;
+}
+
+bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
+{
+	m_captureCfgs.clear();
+
+	QFile cfgFile(cfgFileName);
+
+	bool res = cfgFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(m_log, QString("Error open configuration file %1").arg(cfgFileName));
+		return false;
+	}
+
+	QStringList cfg = QString(cfgFile.readAll()).split("\n", Qt::SkipEmptyParts);
+
+	for(QString& cl : cfg)
+	{
+		cl = cl.trimmed();
+	}
+
+	bool result = true;
+
+	for(QString& cl : cfg)
+	{
+		if (cl.startsWith("captureFrom") == true)
+		{
+			QStringList sl = cl.split("=", Qt::SkipEmptyParts);
+
+			if (sl.size() == 2)
+			{
+				CaptureCfg cc;
+
+				cc.captureDeviceDescription = sl[1];
+
+				m_captureCfgs.push_back(cc);
+			}
+			else
+			{
+				DEBUG_LOG_ERR(m_log, QString("Error parsing cfg line: %1").arg(cl));
+			}
+
+			result = false;
+		}
+		else
+		{
+			if (m_captureCfgs.size() == 0)
+			{
+				DEBUG_LOG_ERR(m_log, QString("Sentence 'captureFrom' not found!"));
+				result = false;
+				continue;
+			}
+
+			QStringList sl = cl.split("->", Qt::SkipEmptyParts);
+
+			if (sl.size() != 3)
+			{
+				DEBUG_LOG_ERR(m_log, QString("Error parsing cfg line: %1").arg(cl));
+
+				result = false;
+			}
+			else
+			{
+				RetranslateEntry re;
+				HostAddressPort hp;
+
+				//
+
+				bool res = hp.setAddressPortStr(sl[0].trimmed(), 0);
+
+				if (res == false)
+				{
+					DEBUG_LOG_ERR(m_log, QString("Wrong source IP:port - %1").arg(sl[0].trimmed()));
+					result = false;
+				}
+				else
+				{
+					re.srcAddr = hp;
+				}
+
+				//
+
+				res = hp.setAddressPortStr(sl[1].trimmed(), 0);
+
+				if (res == false)
+				{
+					DEBUG_LOG_ERR(m_log, QString("Wrong destination IP:port - %1").arg(sl[1].trimmed()));
+					result = false;
+				}
+				else
+				{
+					re.destAddr = hp;
+				}
+
+				//
+
+				res = hp.setAddressPortStr(sl[2].trimmed(), 0);
+
+				if (res == false)
+				{
+					DEBUG_LOG_ERR(m_log, QString("Wrong sendTo IP:port - %1").arg(sl[2].trimmed()));
+					result = false;
+				}
+				else
+				{
+					re.sendToAddr = hp;
+				}
+
+				m_captureCfgs.back().rtrEntry.push_back(re);
+			}
+		}
+	}
+
+	return result;
+}
+
+bool UdpRetranslatorApp::retranslate()
+{
+	return true;
 }
 
 bool UdpRetranslatorApp::runService()

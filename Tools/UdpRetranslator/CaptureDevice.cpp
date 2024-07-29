@@ -3,8 +3,8 @@
 
 pcap_t* currCapHandle = nullptr;
 
-void dumpPacketHandler(u_char* param, const struct pcap_pkthdr* header, const u_char* pkt_data);
-void printPacketInfo(const struct pcap_pkthdr* header, const u_char* pkt_data);
+void dumpPacketHandler(u_char* param, const struct pcap_pkthdr* header, const u_char* packetData);
+void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData, CircularLoggerShared log);
 
 BOOL WINAPI HandlerRoutine(_In_ DWORD dwCtrlType);
 
@@ -146,6 +146,7 @@ bool CaptureDevice::openForCapturing()
 
 	// Open device to capture
 	//
+
 	m_capHandle= pcap_open_live(C_STR(m_name),	// name of the device
 								   65536,		// portion of the packet to capture.
 												// 65536 grants that the whole packet will be captured on all the MACs.
@@ -206,7 +207,7 @@ void CaptureDevice::capture()
 	DEBUG_LOG_ERR(m_log, QString("Listening on '%1'...").arg(m_description));
 	std::cout << "\n";
 
-	pcap_loop(m_capHandle, 0, dumpPacketHandler, NULL);
+	pcap_loop(m_capHandle, 0, dumpPacketHandler, reinterpret_cast<u_char*>(&m_log));
 }
 
 void CaptureDevice::close()
@@ -230,55 +231,68 @@ QString CaptureDevice::description() const
 	return m_description;
 }
 
-void dumpPacketHandler(u_char* param, const struct pcap_pkthdr *header, const u_char* pkt_data)
+void dumpPacketHandler(u_char* param, const struct pcap_pkthdr* header, const u_char* packetData)
 {
-	printPacketInfo(header, pkt_data);
+	TEST_PTR_RETURN(param);
+	TEST_PTR_RETURN(header);
+	TEST_PTR_RETURN(packetData);
+
+	CircularLoggerShared* log = reinterpret_cast<CircularLoggerShared*>(param);
+
+	printPacketInfo(header, packetData, *log);
 }
 
-void printPacketInfo(const struct pcap_pkthdr* header, const u_char* pkt_data)
+void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData, CircularLoggerShared log)
 {
-	struct tm* ltime;
-	char timestr[16];
-	ip_header* ih;
-	udp_header* uh;
-	u_int ip_len;
-	u_short sport, dport;
-	time_t local_tv_sec;
+	TEST_PTR_RETURN(header);
+	TEST_PTR_RETURN(packetData);
+	TEST_PTR_RETURN(log);
 
-	/* convert the timestamp to readable format */
-	local_tv_sec = header->ts.tv_sec;
-	ltime = localtime(&local_tv_sec);
-	strftime(timestr, sizeof timestr, "%H:%M:%S", ltime);
+	QDateTime dt = QDateTime::fromSecsSinceEpoch(header->ts.tv_sec);
+	QTime tm = dt.time();
 
-	/* print timestamp and length of the packet */
-	printf("%s.%.6d: ", timestr, header->ts.tv_usec);
+	static const QChar z('0');
 
-	/* retireve the position of the ip header */
-	ih = (ip_header*)(pkt_data +
-					   14); //length of ethernet header
+	QString str = QString("%1:%2:%3.%4  ").
+				  arg(tm.hour(), 2, 10, z).
+				  arg(tm.minute(), 2, 10, z).
+				  arg(tm.second(), 2, 10, z).
+				  arg(header->ts.tv_usec, 6, 10, z);
 
-	/* retireve the position of the udp header */
-	ip_len = (ih->ver_ihl & 0xf) * 4;
-	uh = (udp_header*)((u_char*)ih + ip_len);
+	const EthernetHeader* eh = reinterpret_cast<const EthernetHeader*>(packetData);
 
-	/* convert from network byte order to host byte order */
-	sport = ntohs(uh->sport);
-	dport = ntohs(uh->dport);
+	// retireve ip header pointer
+	//
+	const IpHeader* ih = reinterpret_cast<const IpHeader*>(packetData + sizeof(EthernetHeader));
 
-	/* print ip addresses and udp ports */
-	printf("%d.%d.%d.%d.%d -> %d.%d.%d.%d.%d ",
-		   ih->saddr.byte1,
-		   ih->saddr.byte2,
-		   ih->saddr.byte3,
-		   ih->saddr.byte4,
-		   sport,
-		   ih->daddr.byte1,
-		   ih->daddr.byte2,
-		   ih->daddr.byte3,
-		   ih->daddr.byte4,
-		   dport);
+	// retireve udp header pointer
+	//
+	const UdpHeader* uh = reinterpret_cast<const UdpHeader*>(packetData + sizeof(EthernetHeader) + ih->headerLenBytes());
 
-	printf("len - %d\n", header->len);
+	u_short srcPort = ntohs(uh->srcPort);
+	u_short destPort = ntohs(uh->destPort);
+
+	static const QChar sp(' ');
+
+	str += QString("%1.%2.%3.%4:%5").
+			arg(ih->srcIP.byte1).
+			arg(ih->srcIP.byte2).
+			arg(ih->srcIP.byte3).
+			arg(ih->srcIP.byte4).
+			arg(srcPort).leftJustified(21, sp);
+
+	str += QStringLiteral("  ->  ");
+
+	str += QString("%1.%2.%3.%4:%5").
+			arg(ih->desIP.byte1).
+			arg(ih->desIP.byte2).
+			arg(ih->desIP.byte3).
+			arg(ih->desIP.byte4).
+			arg(destPort).leftJustified(21, sp);
+
+	str += QString("  len = %1").arg(header->len);
+
+	DEBUG_LOG_MSG(log, str);
 }
 
 BOOL WINAPI HandlerRoutine(_In_ DWORD dwCtrlType)

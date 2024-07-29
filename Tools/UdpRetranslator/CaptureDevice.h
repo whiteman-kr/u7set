@@ -1,9 +1,24 @@
 #pragma once
 
 #include <pcap.h>
+#include <HostAddressPort.h>
 
 #include "CircularLogger.h"
-#include "UdpIpHeaders.h"
+#include "IpHeaders.h"
+
+struct RetranslateEntry
+{
+	HostAddressPort srcAddr;
+	HostAddressPort destAddr;
+	HostAddressPort sendToAddr;
+};
+
+struct CaptureCfg
+{
+	QString captureDeviceDescription;
+
+	std::vector<RetranslateEntry> rtrEntry;
+};
 
 class CaptureDevice
 {
@@ -43,7 +58,7 @@ private:
 	//
 	QString m_name;						// name to hand to "pcap_open_live()
 	QString m_description;				// textual description of interface, or NULL
-	bpf_u_int32 m_flags = 0;				// PCAP_IF_ interface flags
+	bpf_u_int32 m_flags = 0;			// PCAP_IF_ interface flags
 	std::vector<PCapAddr> m_addresses;
 
 	//

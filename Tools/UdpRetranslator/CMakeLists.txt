@@ -23,10 +23,11 @@ add_executable(${TARGET}
 	CaptureDevice.h
 	CircularLogger.cpp
 	CircularLogger.h
+	IpHeaders.cpp
+	IpHeaders.h
 	UdpRetranslatorApp.cpp
 	UdpRetranslatorApp.h
 	UdpRtrMain.cpp
-	UdpIpHeaders.h
 )
 
 # Add LTO for Release and Windows only. 
@@ -87,6 +88,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../UtilsLib)
+include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../CommonLib)
 include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/include)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network)
