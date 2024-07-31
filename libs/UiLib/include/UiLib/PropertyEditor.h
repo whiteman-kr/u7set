@@ -28,6 +28,8 @@ inline int qVariantTypeId(const QVariant& v)
 	Afb::AfbParamValue
 	<QVector<QColor>>
 	QMetaType::QFont
+	QMetaType::QDate
+	QMetaType::QTime
 	QMetaType::QDateTime
 	QMetaType::Int
 	QMetaType::UInt
@@ -145,7 +147,8 @@ namespace ExtWidgets
 			Array,
 			Enum,
 			CheckBox,
-			Color
+			Color,
+			DateTime
 		};
 
 		bool m_expertMode = false;
@@ -372,6 +375,21 @@ namespace ExtWidgets
 
 	private:
 		QComboBox* m_combo = nullptr;
+	};
+
+	//
+	// MultiDateTimeEdit
+	//
+	class MultiDateTimeEdit : public PropertyEditCellWidget
+	{
+		Q_OBJECT
+
+	public:
+		explicit MultiDateTimeEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
+
+	private:
+		QDateTimeEdit* m_dateTimeEdit = nullptr;
 	};
 
 	//

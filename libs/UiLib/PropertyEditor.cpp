@@ -1,6 +1,6 @@
-#include <UiLib/PropertyEditor.h>
-#include "../UtilsLib/Ui/UiTools.h"
 #include "../AppSignalLib/TuningValue.h"
+#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/PropertyEditor.h>
 
 
 namespace ExtWidgets
@@ -117,9 +117,19 @@ namespace ExtWidgets
 			return colorVectorText(value);
 		}
 
+		if (type == qMetaTypeId<QDate>())
+		{
+			return value.toDate().toString("dd.MM.yyyy");
+		}
+
+		if (type == qMetaTypeId<QTime>())
+		{
+			return value.toTime().toString("hh::mm:ss");
+		}
+
 		if (type == qMetaTypeId<QDateTime>())
 		{
-			return value.toString();
+			return value.toDateTime().toString("dd.MM.yyyy hh::mm:ss");
 		}
 
 		char numberFormat = p->precision() > maxDecimalPlaces ? 'g' : 'f';
@@ -133,108 +143,108 @@ namespace ExtWidgets
 		switch (type)
 		{
 		case QMetaType::Int:
-		{
-			int val = value.toInt();
-			return QString::number(val);
-		}
+			{
+				int val = value.toInt();
+				return QString::number(val);
+			}
 			break;
 
 		case QMetaType::UInt:
-		{
-			quint32 val = value.toUInt();
-			return QString::number(val);
-		}
+			{
+				quint32 val = value.toUInt();
+				return QString::number(val);
+			}
 			break;
 
 		case QMetaType::Float:
-		{
-			float val = value.toFloat();
-			return QString::number(val, numberFormat, p->precision());
-		}
+			{
+				float val = value.toFloat();
+				return QString::number(val, numberFormat, p->precision());
+			}
 			break;
 		case QMetaType::Double:
-		{
-			double val = value.toDouble();
-			return QString::number(val, numberFormat, p->precision());
-		}
+			{
+				double val = value.toDouble();
+				return QString::number(val, numberFormat, p->precision());
+			}
 			break;
 		case QMetaType::Bool:
-		{
-			return value.toBool() == true ? QObject::tr("True") : QObject::tr("False");
-		}
+			{
+				return value.toBool() == true ? QObject::tr("True") : QObject::tr("False");
+			}
 			break;
 		case QMetaType::QString:
-		{
-			QString val = value.toString();
-
-			if (val.length() > PropertyEditorTextMaxLength)
 			{
-				val = QObject::tr("<%1 bytes>").arg(val.length());
-			}
+				QString val = value.toString();
 
-			if (noNewLine == true)
-			{
-				val.replace("\n", " ");
-			}
+				if (val.length() > PropertyEditorTextMaxLength)
+				{
+					val = QObject::tr("<%1 bytes>").arg(val.length());
+				}
 
-			return val;
-		}
+				if (noNewLine == true)
+				{
+					val.replace("\n", " ");
+				}
+
+				return val;
+			}
 			break;
 
 		case QMetaType::QStringList:
-		{
-			if (row != -1)
 			{
-				QStringList strings = value.toStringList();
-
-				if (row < 0 || row >= static_cast<int>(strings.size()))
+				if (row != -1)
 				{
-					// No string exists in this row, it is ok - other property can have more rows
-					//
-					return QString();
+					QStringList strings = value.toStringList();
+
+					if (row < 0 || row >= static_cast<int>(strings.size()))
+					{
+						// No string exists in this row, it is ok - other property can have more rows
+						//
+						return QString();
+					}
+
+					return strings[row];
 				}
 
-				return strings[row];
+				return stringListText(value);
 			}
-
-			return stringListText(value);
-		}
 			break;
 
 		case QMetaType::QColor:
-		{
-			QColor color = value.value<QColor>();
+			{
+				QColor color = value.value<QColor>();
 
-			return PropertyEditorBase::colorToText(color);
-		}
+				return PropertyEditorBase::colorToText(color);
+			}
 			break;
 
 		case QMetaType::QUuid:
-		{
-			QUuid uuid = value.value<QUuid>();
-			return uuid.toString();
-		}
+			{
+				QUuid uuid = value.value<QUuid>();
+				return uuid.toString();
+			}
 			break;
 
 		case QMetaType::QByteArray:
-		{
-			QByteArray array = value.value<QByteArray>();
-			return QObject::tr("Data <%1 bytes>").arg(array.size());
-		}
+			{
+				QByteArray array = value.value<QByteArray>();
+				return QObject::tr("Data <%1 bytes>").arg(array.size());
+			}
 			break;
 
 		case QMetaType::QImage:
-		{
-			QImage image = value.value<QImage>();
-			return QObject::tr("Image <Width = %1 Height = %2>").arg(image.width()).arg(image.height());
-		}
+			{
+				QImage image = value.value<QImage>();
+				return QObject::tr("Image <Width = %1 Height = %2>").arg(image.width()).arg(image.height());
+			}
 			break;
 
 		case QMetaType::QFont:
-		{
-			QFont font = value.value<QFont>();
-			return QObject::tr("[%1, %2]").arg(font.family()).arg(font.pointSize());
-		}
+			{
+				QFont font = value.value<QFont>();
+				return QObject::tr("[%1, %2]").arg(font.family()).arg(font.pointSize());
+			}
 			break;
 
 		default:
@@ -327,11 +337,7 @@ namespace ExtWidgets
 
 	QString PropertyEditorBase::colorToText(QColor color)
 	{
-		return QString("[%1;%2;%3;%4]").
-				arg(color.red()).
-				arg(color.green()).
-				arg(color.blue()).
-				arg(color.alpha());
+		return QString("[%1;%2;%3;%4]").arg(color.red()).arg(color.green()).arg(color.blue()).arg(color.alpha());
 	}
 
 	QColor PropertyEditorBase::colorFromText(const QString& t)
@@ -377,17 +383,17 @@ namespace ExtWidgets
 		QStyleOptionButton opt;
 		switch (state)
 		{
-			case Qt::Checked:
-				opt.state |= QStyle::State_On;
-				break;
-			case Qt::Unchecked:
-				opt.state |= QStyle::State_Off;
-				break;
-			case Qt::PartiallyChecked:
-				opt.state |= QStyle::State_NoChange;
-				break;
-			default:
-				Q_ASSERT(false);
+		case Qt::Checked:
+			opt.state |= QStyle::State_On;
+			break;
+		case Qt::Unchecked:
+			opt.state |= QStyle::State_Off;
+			break;
+		case Qt::PartiallyChecked:
+			opt.state |= QStyle::State_NoChange;
+			break;
+		default:
+			Q_ASSERT(false);
 		}
 
 		if (enabled == false)
@@ -477,28 +483,28 @@ namespace ExtWidgets
 
 		switch (value.userType())
 		{
-			case QMetaType::Bool:
+		case QMetaType::Bool:
+			{
+				if (sameValue == true)
 				{
-					if (sameValue == true)
-					{
-						Qt::CheckState checkState = value.toBool() == true ? Qt::Checked : Qt::Unchecked;
-						return drawCheckBox(checkState, enabled);
-					}
-					else
-					{
-						return drawCheckBox(Qt::PartiallyChecked, enabled);
-					}
+					Qt::CheckState checkState = value.toBool() == true ? Qt::Checked : Qt::Unchecked;
+					return drawCheckBox(checkState, enabled);
 				}
-				break;
-			case QMetaType::QColor:
+				else
 				{
-					if (sameValue == true)
-					{
-						QColor color = value.value<QColor>();
-						return UiTools::drawColorBox(color);
-					}
+					return drawCheckBox(Qt::PartiallyChecked, enabled);
 				}
-				break;
+			}
+			break;
+		case QMetaType::QColor:
+			{
+				if (sameValue == true)
+				{
+					QColor color = value.value<QColor>();
+					return UiTools::drawColorBox(color);
+				}
+			}
+			break;
 		case QMetaType::QImage:
 			{
 				if (sameValue == true)
@@ -521,12 +527,19 @@ namespace ExtWidgets
 		return QIcon();
 	}
 
-	PropertyEditCellWidget* PropertyEditorBase::createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent)
+	PropertyEditCellWidget* PropertyEditorBase::createCellEditor(std::shared_ptr<Property> propertyPtr,
+																 bool sameValue,
+																 bool readOnly,
+																 QWidget* parent)
 	{
 		return createCellRowEditor(propertyPtr, -1, sameValue, readOnly, parent);
 	}
 
-	PropertyEditCellWidget* PropertyEditorBase::createCellRowEditor(std::shared_ptr<Property> propertyPtr, int row, bool sameValue, bool readOnly, QWidget* parent)
+	PropertyEditCellWidget* PropertyEditorBase::createCellRowEditor(std::shared_ptr<Property> propertyPtr,
+																	int row,
+																	bool sameValue,
+																	bool readOnly,
+																	QWidget* parent)
 	{
 		if (propertyPtr == nullptr)
 		{
@@ -590,7 +603,7 @@ namespace ExtWidgets
 				break;
 			}
 
-			switch(propertyPtr->value().userType())
+			switch (propertyPtr->value().userType())
 			{
 			case QMetaType::QString:
 			case QMetaType::Int:
@@ -618,6 +631,13 @@ namespace ExtWidgets
 				}
 				break;
 
+			case QMetaType::QDate:
+			case QMetaType::QTime:
+			case QMetaType::QDateTime:
+				{
+					cellEditorType = CellEditorType::DateTime;
+				}
+				break;
 			default:
 				Q_ASSERT(false);
 			}
@@ -660,6 +680,12 @@ namespace ExtWidgets
 			}
 			break;
 
+		case CellEditorType::DateTime:
+			{
+				editor = new MultiDateTimeEdit(parent, propertyPtr, readOnly);
+			}
+			break;
+
 		default:
 			Q_ASSERT(false);
 		}
@@ -696,7 +722,10 @@ namespace ExtWidgets
 	//
 	// ------------ PropertyArrayEditorDialog ------------
 	//
-	PropertyArrayEditorDialog::PropertyArrayEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString& propertyName, const QVariant& value):
+	PropertyArrayEditorDialog::PropertyArrayEditorDialog(PropertyEditorBase* propertyEditorBase,
+														 QWidget* parent,
+														 const QString& propertyName,
+														 const QVariant& value) :
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
 		m_value(value),
 		m_propertyEditorBase(propertyEditorBase)
@@ -1072,8 +1101,7 @@ namespace ExtWidgets
 
 		for (auto prop : props)
 		{
-			if (prop->category().isEmpty() == true &&
-				qVariantTypeId(prop->value()) == QMetaType::QString)
+			if (prop->category().isEmpty() == true && qVariantTypeId(prop->value()) == QMetaType::QString)
 			{
 				return tr("%1 - %2").arg(objectIndex).arg(prop->value().toString());
 			}
@@ -1162,7 +1190,7 @@ namespace ExtWidgets
 			std::sort(selectedRows.begin(), selectedRows.end(), std::greater<int>());
 		}
 
-		//m_treeWidget->clearSelection();
+		// m_treeWidget->clearSelection();
 
 		for (int row : selectedRows)
 		{
@@ -1181,8 +1209,7 @@ namespace ExtWidgets
 					return;
 				}
 
-				if (row < 0 || row >= static_cast<int>(pv->size()) ||
-					row2 < 0 || row2 >= static_cast<int>(pv->size()))
+				if (row < 0 || row >= static_cast<int>(pv->size()) || row2 < 0 || row2 >= static_cast<int>(pv->size()))
 				{
 					Q_ASSERT(false);
 					return;
@@ -1211,8 +1238,7 @@ namespace ExtWidgets
 					return;
 				}
 
-				if (row < 0 || row >= static_cast<int>(pl->size()) ||
-					row2 < 0 || row2 >= static_cast<int>(pl->size()))
+				if (row < 0 || row >= static_cast<int>(pl->size()) || row2 < 0 || row2 >= static_cast<int>(pl->size()))
 				{
 					Q_ASSERT(false);
 					return;
@@ -1241,7 +1267,7 @@ namespace ExtWidgets
 	//
 	// ------------ VectorEditorDialog ------------
 	//
-	VectorEditorDialog::VectorEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value):
+	VectorEditorDialog::VectorEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value) :
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
 		m_valueType(value.userType())
 	{
@@ -1288,7 +1314,7 @@ namespace ExtWidgets
 
 		m_treeWidget->header()->hide();
 
-		connect (m_treeWidget, &QTreeWidget::itemChanged, this, &VectorEditorDialog::itemChanged);
+		connect(m_treeWidget, &QTreeWidget::itemChanged, this, &VectorEditorDialog::itemChanged);
 
 		// Buttons
 
@@ -1353,7 +1379,6 @@ namespace ExtWidgets
 		{
 			resize(thePropertyEditorSettings.m_vectorEditorSize);
 		}
-
 	}
 
 	VectorEditorDialog::~VectorEditorDialog()
@@ -1482,7 +1507,7 @@ namespace ExtWidgets
 		return;
 	}
 
-	void VectorEditorDialog::itemChanged(QTreeWidgetItem *item, int column)
+	void VectorEditorDialog::itemChanged(QTreeWidgetItem* item, int column)
 	{
 		Q_UNUSED(column);
 
@@ -1556,7 +1581,6 @@ namespace ExtWidgets
 				twi = new QTreeWidgetItem();
 				twi->setFlags(twi->flags() | Qt::ItemIsEditable);
 				m_treeWidget->addTopLevelItem(twi);
-
 			}
 
 			if (isValueStringList())
@@ -1622,8 +1646,7 @@ namespace ExtWidgets
 				break;
 			}
 
-			if (row < 0 || row >= count ||
-					row2 < 0 || row2 >= count)
+			if (row < 0 || row >= count || row2 < 0 || row2 >= count)
 			{
 				Q_ASSERT(false);
 				return;
@@ -1664,7 +1687,7 @@ namespace ExtWidgets
 	// ------------ PropertyEditorHelp ------------
 	//
 
-	PropertyEditorHelpDialog::PropertyEditorHelpDialog(const QString& caption, const QString& text, QWidget* parent):
+	PropertyEditorHelpDialog::PropertyEditorHelpDialog(const QString& caption, const QString& text, QWidget* parent) :
 		QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint)
 	{
 		setWindowTitle(caption);
@@ -1682,13 +1705,9 @@ namespace ExtWidgets
 		QHBoxLayout* l = new QHBoxLayout(this);
 
 		l->addWidget(textEdit);
-
 	}
 
-	PropertyEditorHelpDialog::~PropertyEditorHelpDialog()
-	{
-
-	}
+	PropertyEditorHelpDialog::~PropertyEditorHelpDialog() {}
 
 	//
 	// ------------ PropertyTextEditor ------------
@@ -1696,11 +1715,10 @@ namespace ExtWidgets
 	PropertyTextEditor::PropertyTextEditor(QWidget* parent) :
 		QWidget(parent)
 	{
-
 	}
 
-    PropertyTextEditor::~PropertyTextEditor()
-    {
+	PropertyTextEditor::~PropertyTextEditor()
+	{
 		if (m_regExpValidator != nullptr)
 		{
 			delete m_regExpValidator;
@@ -1757,7 +1775,7 @@ namespace ExtWidgets
 
 		QFontMetrics metrics(m_plainTextEdit->font());
 
-		const int tabStop = 4;  // 4 characters
+		const int tabStop = 4; // 4 characters
 		QString spaces;
 		for (int i = 0; i < tabStop; ++i)
 		{
@@ -1800,25 +1818,25 @@ namespace ExtWidgets
 		return true;
 	}
 
-    bool PropertyPlainTextEditor::eventFilter(QObject* obj, QEvent* event)
-    {
-        if (obj == m_plainTextEdit)
-        {
-            if (event->type() == QEvent::KeyPress)
-            {
-                QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+	bool PropertyPlainTextEditor::eventFilter(QObject* obj, QEvent* event)
+	{
+		if (obj == m_plainTextEdit)
+		{
+			if (event->type() == QEvent::KeyPress)
+			{
+				QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
-                if (keyEvent->key() == Qt::Key_Escape)
-                {
-                    emit escapePressed();
-                    return true;
-                }
-            }
-        }
+				if (keyEvent->key() == Qt::Key_Escape)
+				{
+					emit escapePressed();
+					return true;
+				}
+			}
+		}
 
-        // pass the event on to the parent class
-        return PropertyTextEditor::eventFilter(obj, event);
-    }
+		// pass the event on to the parent class
+		return PropertyTextEditor::eventFilter(obj, event);
+	}
 
 	void PropertyPlainTextEditor::onPlainTextContentsChange(int position, int charsRemoved, int charsAdded)
 	{
@@ -1879,14 +1897,12 @@ namespace ExtWidgets
 	// ------------ PropertyEditCellWidget ------------
 	//
 
-	PropertyEditCellWidget::PropertyEditCellWidget(QWidget* parent)
-		:QWidget(parent)
+	PropertyEditCellWidget::PropertyEditCellWidget(QWidget* parent) :
+		QWidget(parent)
 	{
 	}
 
-	PropertyEditCellWidget::~PropertyEditCellWidget()
-	{
-	}
+	PropertyEditCellWidget::~PropertyEditCellWidget() {}
 
 	void PropertyEditCellWidget::setValue(std::shared_ptr<Property> property, bool readOnly)
 	{
@@ -1905,7 +1921,7 @@ namespace ExtWidgets
 
 	// ------------ MultiEnumEdit ------------
 	//
-	MultiEnumEdit::MultiEnumEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
+	MultiEnumEdit::MultiEnumEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly) :
 		PropertyEditCellWidget(parent)
 	{
 		if (p == nullptr)
@@ -1950,20 +1966,20 @@ namespace ExtWidgets
 			return;
 		}
 
-        if (property->isEnum() == false)
-        {
-            assert(false);
-            return;
-        }
+		if (property->isEnum() == false)
+		{
+			assert(false);
+			return;
+		}
 
 		m_combo->blockSignals(true);
 
 		// select an item with a value
 		//
-		bool found =  false;
+		bool found = false;
 		for (int i = 0; i < m_combo->count(); i++)
 		{
-			if (m_combo->itemData(i).toInt() ==  property->value().toInt())
+			if (m_combo->itemData(i).toInt() == property->value().toInt())
 			{
 				m_combo->setCurrentIndex(i);
 				found = true;
@@ -1973,7 +1989,7 @@ namespace ExtWidgets
 		if (found == false)
 		{
 			m_combo->setCurrentIndex(-1);
-        }
+		}
 
 		m_combo->blockSignals(false);
 
@@ -1987,17 +2003,111 @@ namespace ExtWidgets
 	}
 
 
+	// ------------ MultiDateTimeEdit ------------
+	//
+	MultiDateTimeEdit::MultiDateTimeEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly) :
+		PropertyEditCellWidget(parent)
+	{
+		if (p == nullptr)
+		{
+			assert(p);
+			return;
+		}
+
+		m_dateTimeEdit = new QDateTimeEdit(parent);
+
+		switch (p->value().userType())
+		{
+		case QMetaType::QDate:
+			m_dateTimeEdit->setDisplayFormat("dd.MM.yyyy");
+			connect(m_dateTimeEdit,
+					&QDateTimeEdit::dateChanged,
+					this,
+					[this](QDate date)
+					{
+						emit valueChanged(date);
+					});
+			break;
+		case QMetaType::QTime:
+			m_dateTimeEdit->setDisplayFormat("hh:mm:ss");
+			connect(m_dateTimeEdit,
+					&QDateTimeEdit::timeChanged,
+					this,
+					[this](QTime time)
+					{
+						emit valueChanged(time);
+					});
+			break;
+		case QMetaType::QDateTime:
+			m_dateTimeEdit->setDisplayFormat("dd.MM.yyyy hh:mm:ss");
+			connect(m_dateTimeEdit,
+					&QDateTimeEdit::dateTimeChanged,
+					this,
+					[this](QDateTime dateTime)
+					{
+						emit valueChanged(dateTime);
+					});
+			break;
+		default:
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_dateTimeEdit->setEnabled(readOnly == false);
+
+		QHBoxLayout* lt = new QHBoxLayout;
+		lt->setContentsMargins(0, 0, 0, 0);
+		lt->setSpacing(0);
+		lt->addWidget(m_dateTimeEdit);
+
+		setLayout(lt);
+
+		QTimer::singleShot(0, m_dateTimeEdit, SLOT(setFocus()));
+	}
+
+	void MultiDateTimeEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
+	{
+		if (m_dateTimeEdit == nullptr)
+		{
+			Q_ASSERT(m_dateTimeEdit);
+			return;
+		}
+
+		m_dateTimeEdit->blockSignals(true);
+
+		switch (property->value().userType())
+		{
+		case QMetaType::QDate:
+			m_dateTimeEdit->setDate(property->value().toDate());
+			break;
+		case QMetaType::QTime:
+			m_dateTimeEdit->setTime(property->value().toTime());
+			break;
+		case QMetaType::QDateTime:
+			m_dateTimeEdit->setDateTime(property->value().toDateTime());
+			break;
+		default:
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_dateTimeEdit->blockSignals(false);
+
+		m_dateTimeEdit->setEnabled(readOnly == false);
+	}
+
+
 	//
 	// ---------QtMultiColorEdit----------
 	//
 
-	MultiColorEdit::MultiColorEdit(QWidget* parent, bool readOnly):
+	MultiColorEdit::MultiColorEdit(QWidget* parent, bool readOnly) :
 		PropertyEditCellWidget(parent)
 	{
 		m_lineEdit = new QLineEdit(parent);
 
-        m_button = new QToolButton(parent);
-        m_button->setText("...");
+		m_button = new QToolButton(parent);
+		m_button->setText("...");
 
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &MultiColorEdit::onEditingFinished);
 
@@ -2007,7 +2117,7 @@ namespace ExtWidgets
 		lt->setContentsMargins(0, 0, 0, 0);
 		lt->setSpacing(0);
 		lt->addWidget(m_lineEdit);
-        lt->addWidget(m_button, 0, Qt::AlignRight);
+		lt->addWidget(m_button, 0, Qt::AlignRight);
 
 		setLayout(lt);
 
@@ -2056,12 +2166,12 @@ namespace ExtWidgets
 			QString str = PropertyEditorBase::colorToText(selectedColor);
 
 			if (selectedColor != m_oldColor)
-            {
+			{
 				m_oldColor = selectedColor;
-                m_lineEdit->setText(str);
+				m_lineEdit->setText(str);
 
 				emit valueChanged(selectedColor);
-            }
+			}
 		}
 	}
 
@@ -2073,13 +2183,13 @@ namespace ExtWidgets
 			return;
 		}
 
-        QColor color = property->value().value<QColor>();
+		QColor color = property->value().value<QColor>();
 
 		QString str = PropertyEditorBase::colorToText(color);
 
 		m_oldColor = color;
 
-        m_lineEdit->setText(str);
+		m_lineEdit->setText(str);
 		m_lineEdit->setReadOnly(readOnly == true);
 
 		m_button->setEnabled(readOnly == false);
@@ -2089,13 +2199,13 @@ namespace ExtWidgets
 	{
 		if (m_escape == false)
 		{
-            QString t = m_lineEdit->text();
+			QString t = m_lineEdit->text();
 			QColor color = PropertyEditorBase::colorFromText(t);
 
-            if (color != m_oldColor)
+			if (color != m_oldColor)
 			{
-                m_oldColor = color;
-                emit valueChanged(color);
+				m_oldColor = color;
+				emit valueChanged(color);
 			}
 		}
 	}
@@ -2103,8 +2213,14 @@ namespace ExtWidgets
 	//
 	// ---------MultiTextEditorDialog----------
 	//
-	MultiTextEditorDialog::MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString &text, std::shared_ptr<Property> p, bool readOnly):
-		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
+	MultiTextEditorDialog::MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase,
+												 QWidget* parent,
+												 const QString& text,
+												 std::shared_ptr<Property> p,
+												 bool readOnly) :
+		QDialog(parent,
+				Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint |
+					Qt::WindowCloseButtonHint),
 		m_propertyEditorBase(propertyEditorBase),
 		m_property(p)
 	{
@@ -2120,7 +2236,8 @@ namespace ExtWidgets
 
 		if (m_propertyEditorBase->restorePropertyTextEditorSize(m_property, this) == false)
 		{
-			if (thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
+			if (thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.x() != -1 &&
+				thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
 			{
 				move(thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos);
 				restoreGeometry(thePropertyEditorSettings.m_multiLinePropertyEditorGeometry);
@@ -2162,18 +2279,22 @@ namespace ExtWidgets
 		{
 			scriptHelpButton = new QPushButton("?", this);
 
-			connect(scriptHelpButton, &QPushButton::clicked, [this] ()
-			{
-				UiTools::openPdf(m_propertyEditorBase->scriptHelpFile(), this);
-			});
+			connect(scriptHelpButton,
+					&QPushButton::clicked,
+					[this]()
+					{
+						UiTools::openPdf(m_propertyEditorBase->scriptHelpFile(), this);
+					});
 
-			connect(this, &QDialog::finished, [this] (int)
-			{
-				if (m_propertyEditorHelp != nullptr)
-				{
-					m_propertyEditorHelp->accept();
-				}
-			});
+			connect(this,
+					&QDialog::finished,
+					[this](int)
+					{
+						if (m_propertyEditorHelp != nullptr)
+						{
+							m_propertyEditorHelp->accept();
+						}
+					});
 		}
 
 		// OK and Cancel buttons
@@ -2243,7 +2364,6 @@ namespace ExtWidgets
 			thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos = pos();
 			thePropertyEditorSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
 		}
-
 	}
 
 	void MultiTextEditorDialog::accept()
@@ -2263,7 +2383,10 @@ namespace ExtWidgets
 	{
 		if (m_editor->isModified() == true)
 		{
-			int result = QMessageBox::warning(this, qAppName(), tr("Do you want to save your changes?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+			int result = QMessageBox::warning(this,
+											  qAppName(),
+											  tr("Do you want to save your changes?"),
+											  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
 
 			if (result == QMessageBox::Yes)
 			{
@@ -2284,13 +2407,17 @@ namespace ExtWidgets
 	// ---------MultiTextEdit----------
 	//
 
-	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, bool readOnly, QWidget* parent):
+	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, bool readOnly, QWidget* parent) :
 		MultiTextEdit(propertyEditorBase, p, -1, readOnly, parent)
 
 	{
 	}
 
-	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent):
+	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase,
+								 std::shared_ptr<Property> p,
+								 int row,
+								 bool readOnly,
+								 QWidget* parent) :
 		PropertyEditCellWidget(parent),
 		m_property(p),
 		m_row(row),
@@ -2298,7 +2425,6 @@ namespace ExtWidgets
 		m_readOnly(readOnly),
 		m_propertyEditorBase(propertyEditorBase)
 	{
-
 		if (p == nullptr || m_propertyEditorBase == nullptr)
 		{
 			assert(p);
@@ -2341,7 +2467,7 @@ namespace ExtWidgets
 		//
 		if (p->validator().isEmpty() == false)
 		{
-			if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog)// for LoadFileDialog, Validator is used as mask
+			if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog) // for LoadFileDialog, Validator is used as mask
 			{
 				QRegularExpression regexp(p->validator());
 				QRegularExpressionValidator* v = new QRegularExpressionValidator(regexp, this);
@@ -2354,10 +2480,8 @@ namespace ExtWidgets
 		//
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog ||
 			m_property->specificEditor() == E::PropertySpecificEditor::ChooseFileDialog ||
-			m_property->specificEditor() == E::PropertySpecificEditor::ChooseDirectoryDialog ||
-			m_userType == QMetaType::QFont ||
-			m_userType == QMetaType::QByteArray ||
-			(m_userType == QMetaType::QString && p->password() == false) ||
+			m_property->specificEditor() == E::PropertySpecificEditor::ChooseDirectoryDialog || m_userType == QMetaType::QFont ||
+			m_userType == QMetaType::QByteArray || (m_userType == QMetaType::QString && p->password() == false) ||
 			(m_userType == QMetaType::QStringList && m_row != -1))
 		{
 			m_button = new QToolButton(parent);
@@ -2365,8 +2489,7 @@ namespace ExtWidgets
 
 			if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog ||
 				m_property->specificEditor() == E::PropertySpecificEditor::ChooseFileDialog ||
-				m_property->specificEditor() == E::PropertySpecificEditor::ChooseDirectoryDialog ||
-				m_userType == QMetaType::QFont)
+				m_property->specificEditor() == E::PropertySpecificEditor::ChooseDirectoryDialog || m_userType == QMetaType::QFont)
 			{
 				// If property is read-only, button is enabled except for dialogs
 				//
@@ -2417,7 +2540,7 @@ namespace ExtWidgets
 		bool commonEditor = true;
 
 		QString editText;
-		QByteArray editBytes;	// for LoadFileDialog
+		QByteArray editBytes; // for LoadFileDialog
 
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog)
 		{
@@ -2493,13 +2616,12 @@ namespace ExtWidgets
 
 		if (m_userType == QMetaType::QFont)
 		{
-
 			QFont oldFont = m_oldValue.value<QFont>();
 
 			bool ok = false;
-			QFont font = QFontDialog::getFont( &ok, oldFont, this);
-			if (ok == true) {
-
+			QFont font = QFontDialog::getFont(&ok, oldFont, this);
+			if (ok == true)
+			{
 				if (font != oldFont)
 				{
 					emit valueChanged(font);
@@ -2511,7 +2633,6 @@ namespace ExtWidgets
 				m_lineEdit->setText(tr("[%1, %2]").arg(font.family()).arg(font.pointSize()));
 				m_lineEdit->setReadOnly(true);
 				m_lineEdit->blockSignals(false);
-
 			}
 			return;
 		}
@@ -2522,7 +2643,7 @@ namespace ExtWidgets
 			//
 			if (m_userType == QMetaType::QImage)
 			{
-				Q_ASSERT(false);	// Images should have E::PropertySpecificEditor::LoadFileDialog type
+				Q_ASSERT(false); // Images should have E::PropertySpecificEditor::LoadFileDialog type
 				return;
 			}
 
@@ -2545,11 +2666,11 @@ namespace ExtWidgets
 
 		switch (m_userType)
 		{
-			case QMetaType::QByteArray:
+		case QMetaType::QByteArray:
 			{
 				if (editBytes != m_oldValue)
 				{
-					 emit valueChanged(editBytes);
+					emit valueChanged(editBytes);
 				}
 
 				m_oldValue = editBytes;
@@ -2560,7 +2681,7 @@ namespace ExtWidgets
 			}
 			break;
 
-			case QMetaType::QImage:
+		case QMetaType::QImage:
 			{
 				QImage image;
 				if (image.loadFromData(editBytes) == false)
@@ -2570,7 +2691,7 @@ namespace ExtWidgets
 
 				if (image != m_oldValue)
 				{
-					 emit valueChanged(image);
+					emit valueChanged(image);
 				}
 
 				m_oldValue = image;
@@ -2582,11 +2703,11 @@ namespace ExtWidgets
 			}
 			break;
 
-			default:
+		default:
 			{
 				if (editText != m_oldValue)
 				{
-					 emit valueChanged(editText);
+					emit valueChanged(editText);
 				}
 
 				editText = m_property->value().toString();
@@ -2610,7 +2731,6 @@ namespace ExtWidgets
 				m_lineEdit->blockSignals(false);
 			}
 		}
-
 	}
 
 	void MultiTextEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
@@ -2689,29 +2809,28 @@ namespace ExtWidgets
 			}
 			break;
 		case QMetaType::Int:
-		{
-			m_oldValue = property->value().toInt();
-			m_lineEdit->setText(QString::number(m_oldValue.toInt()));
-		}
+			{
+				m_oldValue = property->value().toInt();
+				m_lineEdit->setText(QString::number(m_oldValue.toInt()));
+			}
 			break;
 		case QMetaType::UInt:
-		{
-			m_oldValue = property->value().toUInt();
-			m_lineEdit->setText(QString::number(m_oldValue.toUInt()));
-		}
+			{
+				m_oldValue = property->value().toUInt();
+				m_lineEdit->setText(QString::number(m_oldValue.toUInt()));
+			}
 			break;
 		case QMetaType::Float:
-		{
-			m_oldValue = property->value().toFloat();
-			m_lineEdit->setText(QString::number(m_oldValue.toFloat(), numberFormat, property->precision()));
-
-		}
+			{
+				m_oldValue = property->value().toFloat();
+				m_lineEdit->setText(QString::number(m_oldValue.toFloat(), numberFormat, property->precision()));
+			}
 			break;
 		case QMetaType::Double:
-		{
-			m_oldValue = property->value().toDouble();
-			m_lineEdit->setText(QString::number(m_oldValue.toDouble(), numberFormat, property->precision()));
-		}
+			{
+				m_oldValue = property->value().toDouble();
+				m_lineEdit->setText(QString::number(m_oldValue.toDouble(), numberFormat, property->precision()));
+			}
 			break;
 		case QMetaType::QFont:
 			{
@@ -2733,7 +2852,7 @@ namespace ExtWidgets
 			{
 				if (m_userType == qMetaTypeId<Afb::AfbParamValue>())
 				{
-					m_oldValue = property->value();// QVariant::fromValue(t);
+					m_oldValue = property->value(); // QVariant::fromValue(t);
 					Afb::AfbParamValue v = property->value().value<Afb::AfbParamValue>();
 					m_lineEdit->setText(v.toString(numberFormat, property->precision()));
 				}
@@ -2758,11 +2877,10 @@ namespace ExtWidgets
 		m_textEdited = true;
 	}
 
-	void MultiTextEdit::onTextEdited(const QString &text)
+	void MultiTextEdit::onTextEdited(const QString& text)
 	{
 		Q_UNUSED(text);
 		m_textEdited = true;
-
 	}
 
 	void MultiTextEdit::onEditingFinished()
@@ -2783,30 +2901,29 @@ namespace ExtWidgets
 		{
 		case QMetaType::QString:
 		case QMetaType::QStringList:
-		{
-			if (m_lineEdit->text() != m_oldValue.toString() || m_oldValue.isNull() == true)
 			{
-				m_oldValue = m_lineEdit->text();
-				emit valueChanged(m_oldValue);
+				if (m_lineEdit->text() != m_oldValue.toString() || m_oldValue.isNull() == true)
+				{
+					m_oldValue = m_lineEdit->text();
+					emit valueChanged(m_oldValue);
+				}
 			}
-		}
-		break;
+			break;
 		case QMetaType::QByteArray:
 			{
-				Q_ASSERT(false);	// No editing allowed
+				Q_ASSERT(false); // No editing allowed
 			}
 			break;
 		case QMetaType::QImage:
 			{
-				Q_ASSERT(false);	// No editing allowed
+				Q_ASSERT(false); // No editing allowed
 			}
 			break;
 		case QMetaType::Int:
 			{
 				bool ok = false;
 				int value = m_lineEdit->text().toInt(&ok);
-				if (ok == true &&
-						(value != m_oldValue.toInt() || m_oldValue.isNull() == true))
+				if (ok == true && (value != m_oldValue.toInt() || m_oldValue.isNull() == true))
 				{
 					m_oldValue = value;
 					emit valueChanged(value);
@@ -2817,8 +2934,7 @@ namespace ExtWidgets
 			{
 				bool ok = false;
 				uint value = m_lineEdit->text().toUInt(&ok);
-				if (ok == true &&
-						(value != m_oldValue.toUInt() || m_oldValue.isNull() == true))
+				if (ok == true && (value != m_oldValue.toUInt() || m_oldValue.isNull() == true))
 				{
 					m_oldValue = value;
 					emit valueChanged(value);
@@ -2829,8 +2945,7 @@ namespace ExtWidgets
 			{
 				bool ok = false;
 				float value = m_lineEdit->text().toFloat(&ok);
-				if (ok == true &&
-						(value != m_oldValue.toFloat() || m_oldValue.isNull() == true))
+				if (ok == true && (value != m_oldValue.toFloat() || m_oldValue.isNull() == true))
 				{
 					m_oldValue = value;
 					emit valueChanged(value);
@@ -2841,8 +2956,7 @@ namespace ExtWidgets
 			{
 				bool ok = false;
 				double value = m_lineEdit->text().toDouble(&ok);
-				if (ok == true &&
-						(value != m_oldValue.toDouble() || m_oldValue.isNull() == true))
+				if (ok == true && (value != m_oldValue.toDouble() || m_oldValue.isNull() == true))
 				{
 					m_oldValue = value;
 					emit valueChanged(value);
@@ -2851,20 +2965,19 @@ namespace ExtWidgets
 			break;
 		case QMetaType::QFont:
 			{
-				Q_ASSERT(false);	// No editing allowed
+				Q_ASSERT(false); // No editing allowed
 			}
 			break;
 		default:
 			if (m_userType == TuningValue::tuningValueTypeId())
 			{
 				bool ok = false;
-				TuningValue newValue(m_property->value().value<TuningValue>());	// Initialize newValue's type
+				TuningValue newValue(m_property->value().value<TuningValue>()); // Initialize newValue's type
 				newValue.fromString(m_lineEdit->text(), &ok);
 
 				TuningValue oldValue = m_oldValue.value<TuningValue>();
 
-				if (ok == true &&
-					(m_oldValue.isNull() == true || newValue != oldValue))
+				if (ok == true && (m_oldValue.isNull() == true || newValue != oldValue))
 				{
 					m_oldValue.setValue(newValue);
 					emit valueChanged(m_oldValue);
@@ -2874,13 +2987,12 @@ namespace ExtWidgets
 			{
 				if (m_userType == qMetaTypeId<Afb::AfbParamValue>())
 				{
-					Afb::AfbParamValue newValue(m_property->value().value<Afb::AfbParamValue>());	// Initialize newValue's type
+					Afb::AfbParamValue newValue(m_property->value().value<Afb::AfbParamValue>()); // Initialize newValue's type
 					bool ok = newValue.fromString(m_lineEdit->text());
 
 					Afb::AfbParamValue oldValue = m_oldValue.value<Afb::AfbParamValue>();
 
-					if (ok == true &&
-						(m_oldValue.isNull() == true || newValue != oldValue))
+					if (ok == true && (m_oldValue.isNull() == true || newValue != oldValue))
 					{
 						m_oldValue.setValue(newValue);
 						emit valueChanged(m_oldValue);
@@ -2894,7 +3006,7 @@ namespace ExtWidgets
 			}
 		}
 
-        m_lineEdit->blockSignals(false);
+		m_lineEdit->blockSignals(false);
 
 		m_textEdited = false;
 	}
@@ -2903,13 +3015,12 @@ namespace ExtWidgets
 	//
 	// ---------MultiArrayEdit----------
 	//
-	MultiArrayEdit::MultiArrayEdit(PropertyEditorBase* propertyEditorBase, QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
+	MultiArrayEdit::MultiArrayEdit(PropertyEditorBase* propertyEditorBase, QWidget* parent, std::shared_ptr<Property> p, bool readOnly) :
 		PropertyEditCellWidget(parent),
 		m_currentValue(p->value()),
 		m_property(p),
 		m_propertyEditorBase(propertyEditorBase)
 	{
-
 		m_lineEdit = new QLineEdit(parent);
 		m_lineEdit->setReadOnly(true);
 
@@ -2987,10 +3098,8 @@ namespace ExtWidgets
 
 	void MultiArrayEdit::onButtonPressed()
 	{
-		if (variantIsPropertyVector(m_currentValue) == false &&
-				variantIsPropertyList(m_currentValue) == false &&
-				m_currentValue.userType() != QMetaType::QStringList &&
-				m_currentValue.userType() != qMetaTypeId<QVector<QColor>>())
+		if (variantIsPropertyVector(m_currentValue) == false && variantIsPropertyList(m_currentValue) == false &&
+			m_currentValue.userType() != QMetaType::QStringList && m_currentValue.userType() != qMetaTypeId<QVector<QColor>>())
 		{
 			Q_ASSERT(false);
 			return;
@@ -3020,7 +3129,7 @@ namespace ExtWidgets
 
 		if (newValue != m_currentValue)
 		{
-			 emit valueChanged(newValue);
+			emit valueChanged(newValue);
 		}
 
 		m_currentValue = newValue;
@@ -3037,7 +3146,7 @@ namespace ExtWidgets
 			}
 			else
 			{
-				if ( m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
+				if (m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
 				{
 					m_lineEdit->setText(PropertyTools::colorVectorText(m_currentValue));
 				}
@@ -3048,28 +3157,28 @@ namespace ExtWidgets
 	}
 
 	//
-	// ---------QtMultiCheckBox----------
+	// ---------MultiCheckBox----------
 	//
 
 
-	void PropertyEditorCheckBox::paintEvent(QPaintEvent *e)
+	void PropertyEditorCheckBox::paintEvent(QPaintEvent* e)
 	{
 		Q_UNUSED(e);
 
 		QStyleOptionButton opt;
 		switch (checkState())
 		{
-			case Qt::Checked:
-				opt.state |= QStyle::State_On;
-				break;
-			case Qt::Unchecked:
-				opt.state |= QStyle::State_Off;
-				break;
-			case Qt::PartiallyChecked:
-				opt.state |= QStyle::State_NoChange;
-				break;
-			default:
-				Q_ASSERT(false);
+		case Qt::Checked:
+			opt.state |= QStyle::State_On;
+			break;
+		case Qt::Unchecked:
+			opt.state |= QStyle::State_Off;
+			break;
+		case Qt::PartiallyChecked:
+			opt.state |= QStyle::State_NoChange;
+			break;
+		default:
+			Q_ASSERT(false);
 		}
 
 		if (isEnabled() == false)
@@ -3091,7 +3200,7 @@ namespace ExtWidgets
 		// Center the image vertically
 
 		const int xoff = 0;
-		const int yoff = (pixmapHeight  > indicatorHeight)  ? (pixmapHeight  - indicatorHeight)  / 2 : 0;
+		const int yoff = (pixmapHeight > indicatorHeight) ? (pixmapHeight - indicatorHeight) / 2 : 0;
 
 		opt.rect = QRect(xoff, yoff, indicatorWidth, indicatorHeight);
 
@@ -3102,10 +3211,10 @@ namespace ExtWidgets
 		QRect textRect = rect();
 		textRect.setLeft(0 + indicatorWidth + spacing);
 
-		painter.drawText(textRect, Qt::AlignVCenter,  text());
+		painter.drawText(textRect, Qt::AlignVCenter, text());
 	}
 
-	MultiCheckBox::MultiCheckBox(QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
+	MultiCheckBox::MultiCheckBox(QWidget* parent, std::shared_ptr<Property> p, bool readOnly) :
 		PropertyEditCellWidget(parent),
 		m_property(p),
 		m_userType(p->value().userType())
@@ -3119,7 +3228,7 @@ namespace ExtWidgets
 
 		connect(m_checkBox, &QCheckBox::stateChanged, this, &MultiCheckBox::onStateChanged);
 
-		QHBoxLayout*lt = new QHBoxLayout;
+		QHBoxLayout* lt = new QHBoxLayout;
 		lt->setContentsMargins(3, 1, 0, 0);
 		lt->addWidget(m_checkBox);
 		setLayout(lt);
@@ -3178,13 +3287,13 @@ namespace ExtWidgets
 			return;
 		}
 
-        updateText();
+		updateText();
 		m_checkBox->setTristate(false);
 
 
 		if (m_userType == qMetaTypeId<Afb::AfbParamValue>())
 		{
-			Afb::AfbParamValue newValue(m_property->value().value<Afb::AfbParamValue>());	// Initialize newValue's type
+			Afb::AfbParamValue newValue(m_property->value().value<Afb::AfbParamValue>()); // Initialize newValue's type
 			newValue.setValue(state == Qt::Checked ? true : false);
 
 			emit valueChanged(newValue.toVariant());
@@ -3206,11 +3315,17 @@ namespace ExtWidgets
 
 		switch (m_checkBox->checkState())
 		{
-			case Qt::Checked:           m_checkBox->setText(tr("True"));                break;
-			case Qt::Unchecked:         m_checkBox->setText(tr("False"));               break;
-			case Qt::PartiallyChecked:  m_checkBox->setText(tr("<Different values>"));  break;
-			default:
-				Q_ASSERT(false);
+		case Qt::Checked:
+			m_checkBox->setText(tr("True"));
+			break;
+		case Qt::Unchecked:
+			m_checkBox->setText(tr("False"));
+			break;
+		case Qt::PartiallyChecked:
+			m_checkBox->setText(tr("<Different values>"));
+			break;
+		default:
+			Q_ASSERT(false);
 		}
 	}
 
@@ -3233,7 +3348,6 @@ namespace ExtWidgets
 		{
 			m_propertyEditorFontScaleFactor = 1.0;
 		}
-
 	}
 
 	void PropertyEditorSettings::store(QSettings& s)
@@ -3261,9 +3375,7 @@ namespace ExtWidgets
 	{
 	}
 
-	QWidget* PropertyEditorDelegate::createEditor(QWidget *parent,
-													 const QStyleOptionViewItem &option,
-													 const QModelIndex &index) const
+	QWidget* PropertyEditorDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 	{
 		Q_UNUSED(option);
 
@@ -3303,7 +3415,7 @@ namespace ExtWidgets
 		return m_cellEditor;
 	}
 
-	void PropertyEditorDelegate::destroyEditor(QWidget *editor, const QModelIndex &index) const
+	void PropertyEditorDelegate::destroyEditor(QWidget* editor, const QModelIndex& index) const
 	{
 		Q_UNUSED(editor);
 
@@ -3315,8 +3427,7 @@ namespace ExtWidgets
 		QItemDelegate::destroyEditor(editor, index);
 	}
 
-	void PropertyEditorDelegate::setEditorData(QWidget *editor,
-												  const QModelIndex &index) const
+	void PropertyEditorDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 	{
 		if (m_treeWidget == nullptr || m_propertyEditor == nullptr)
 		{
@@ -3332,7 +3443,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		PropertyEditCellWidget *cellEditor = dynamic_cast<PropertyEditCellWidget*>(editor);
+		PropertyEditCellWidget* cellEditor = dynamic_cast<PropertyEditCellWidget*>(editor);
 		if (cellEditor == nullptr)
 		{
 			Q_ASSERT(cellEditor);
@@ -3349,7 +3460,7 @@ namespace ExtWidgets
 		return;
 	}
 
-	void PropertyEditorDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+	void PropertyEditorDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 	{
 		Q_UNUSED(editor);
 		Q_UNUSED(model);
@@ -3358,49 +3469,46 @@ namespace ExtWidgets
 		// This function is called when user press Enter or changes selection
 	}
 
-	void PropertyEditorDelegate::updateEditorGeometry(QWidget *editor,
-														 const QStyleOptionViewItem &option,
-														 const QModelIndex &index) const
+	void PropertyEditorDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
 	{
 		Q_UNUSED(index);
 		editor->setGeometry(option.rect);
 	}
 
-	QSize PropertyEditorDelegate::sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+	QSize PropertyEditorDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 	{
 		return QItemDelegate::sizeHint(option, index) + QSize(3, 4);
 	}
 
-	void PropertyEditorDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
-				const QModelIndex &index) const
+	void PropertyEditorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 	{
-        // Try to save/restore state to prevent QRasterPaintEngine::brushOriginChanged crash
-        //
-        painter->save();
+		// Try to save/restore state to prevent QRasterPaintEngine::brushOriginChanged crash
+		//
+		painter->save();
 
-        {
-            // Don't draw if editor is active for this index
-            //
-            if (index == m_editIndex)
-            {
-                //painter->fillRect(option.rect, Qt::red);
-            }
-            else
-            {
-                QItemDelegate::paint(painter, option, index);
-            }
+		{
+			// Don't draw if editor is active for this index
+			//
+			if (index == m_editIndex)
+			{
+				// painter->fillRect(option.rect, Qt::red);
+			}
+			else
+			{
+				QItemDelegate::paint(painter, option, index);
+			}
 
-            // Draw vertical grid line
-            //
-            QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &option));
-            painter->save();
-            painter->setPen(QPen(color));
-            int right = (option.direction == Qt::LeftToRight) ? option.rect.right() : option.rect.left();
-            painter->drawLine(right, option.rect.y(), right, option.rect.bottom());
-            painter->restore();
-        }
+			// Draw vertical grid line
+			//
+			QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &option));
+			painter->save();
+			painter->setPen(QPen(color));
+			int right = (option.direction == Qt::LeftToRight) ? option.rect.right() : option.rect.left();
+			painter->drawLine(right, option.rect.y(), right, option.rect.bottom());
+			painter->restore();
+		}
 
-        painter->restore();
+		painter->restore();
 	}
 
 	void PropertyEditorDelegate::onValueChanged(QVariant value)
@@ -3434,7 +3542,7 @@ namespace ExtWidgets
 		return;
 	}
 
-	void PropertyTreeWidget::mousePressEvent(QMouseEvent *event)
+	void PropertyTreeWidget::mousePressEvent(QMouseEvent* event)
 	{
 		QTreeWidget::mousePressEvent(event);
 
@@ -3449,7 +3557,7 @@ namespace ExtWidgets
 		}
 	}
 
-	void PropertyTreeWidget::keyPressEvent(QKeyEvent *event)
+	void PropertyTreeWidget::keyPressEvent(QKeyEvent* event)
 	{
 		if (event->key() == Qt::Key_F2)
 		{
@@ -3469,11 +3577,9 @@ namespace ExtWidgets
 			}
 		}
 
-		if ((event->key() == Qt::Key_Up ||
-			 event->key() == Qt::Key_Down ||
-			 event->key() == Qt::Key_PageUp ||
-			 event->key() == Qt::Key_PageDown)
-			&& indexWidget(currentIndex()) != nullptr)
+		if ((event->key() == Qt::Key_Up || event->key() == Qt::Key_Down || event->key() == Qt::Key_PageUp ||
+			 event->key() == Qt::Key_PageDown) &&
+			indexWidget(currentIndex()) != nullptr)
 		{
 			return;
 		}
@@ -3481,24 +3587,24 @@ namespace ExtWidgets
 		QTreeWidget::keyPressEvent(event);
 	}
 
-	void PropertyTreeWidget::drawRow(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+	void PropertyTreeWidget::drawRow(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 	{
-        // Try to save/restore state to prevent QRasterPaintEngine::brushOriginChanged crash
-        //
-        painter->save();
+		// Try to save/restore state to prevent QRasterPaintEngine::brushOriginChanged crash
+		//
+		painter->save();
 
-        {
-            QStyleOptionViewItem opt = option;
+		{
+			QStyleOptionViewItem opt = option;
 
-            QTreeWidget::drawRow(painter, opt, index);
-            QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
-            painter->save();
-            painter->setPen(QPen(color));
-            painter->drawLine(opt.rect.x(), opt.rect.bottom(), opt.rect.right(), opt.rect.bottom());
-            painter->restore();
-        }
+			QTreeWidget::drawRow(painter, opt, index);
+			QColor color = static_cast<QRgb>(QApplication::style()->styleHint(QStyle::SH_Table_GridLineColor, &opt));
+			painter->save();
+			painter->setPen(QPen(color));
+			painter->drawLine(opt.rect.x(), opt.rect.bottom(), opt.rect.right(), opt.rect.bottom());
+			painter->restore();
+		}
 
-        painter->restore();
+		painter->restore();
 	}
 
 	//
@@ -3529,7 +3635,8 @@ namespace ExtWidgets
 		connect(m_treeWidget, &PropertyTreeWidget::editKeyPressed, this, &PropertyEditor::onCellEditKeyPressed);
 		connect(m_treeWidget, &PropertyTreeWidget::spaceKeyPressed, this, &PropertyEditor::onCellToggleKeyPressed);
 
-		m_treeWidget->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged | QAbstractItemView::DoubleClicked);
+		m_treeWidget->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::CurrentChanged |
+									  QAbstractItemView::DoubleClicked);
 
 		// Edit Delegate
 
@@ -3552,7 +3659,7 @@ namespace ExtWidgets
 
 	void PropertyEditor::clear()
 	{
-		if(m_treeObjects.empty() == false)
+		if (m_treeObjects.empty() == false)
 		{
 			saveScrollPosition();
 			saveExpandedGroups();
@@ -3579,7 +3686,7 @@ namespace ExtWidgets
 	void PropertyEditor::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
 	{
 		QList<std::shared_ptr<PropertyObject>> list =
-		        QList<std::shared_ptr<PropertyObject>>::fromVector(QVector<std::shared_ptr<PropertyObject>>{objects.begin(), objects.end()});
+			QList<std::shared_ptr<PropertyObject>>::fromVector(QVector<std::shared_ptr<PropertyObject>>{objects.begin(), objects.end()});
 
 		return setObjects(list);
 	}
@@ -3612,7 +3719,7 @@ namespace ExtWidgets
 
 		for (std::shared_ptr<PropertyObject> po : m_objects)
 		{
-			bool ok =connect(po.get(), &PropertyObject::propertyListChanged, this, &PropertyEditor::updatePropertiesList);
+			bool ok = connect(po.get(), &PropertyObject::propertyListChanged, this, &PropertyEditor::updatePropertiesList);
 			if (ok == false)
 			{
 				assert(false);
@@ -3755,7 +3862,8 @@ namespace ExtWidgets
 		}
 
 		po.item->setText(static_cast<int>(PropertyEditorColumns::Value), text);
-		po.item->setIcon(static_cast<int>(PropertyEditorColumns::Value), propertyIcon(po.property.get(), po.sameValue, po.readOnly == false));
+		po.item->setIcon(static_cast<int>(PropertyEditorColumns::Value),
+						 propertyIcon(po.property.get(), po.sameValue, po.readOnly == false));
 
 		return;
 	}
@@ -3790,8 +3898,7 @@ namespace ExtWidgets
 
 			if (oldValue == newValue && errorString.isEmpty() == true)
 			{
-				errorString = tr("Property: %1 - incorrect input value")
-							  .arg(propertyName);
+				errorString = tr("Property: %1 - incorrect input value").arg(propertyName);
 			}
 
 			modifiedObjects.append(i);
@@ -3901,7 +4008,7 @@ namespace ExtWidgets
 		return;
 	}
 
-	void PropertyEditor::onCellEditorClosed(QWidget *editor, QAbstractItemDelegate::EndEditHint hint)
+	void PropertyEditor::onCellEditorClosed(QWidget* editor, QAbstractItemDelegate::EndEditHint hint)
 	{
 		Q_UNUSED(editor);
 		Q_UNUSED(hint);
@@ -3960,7 +4067,7 @@ namespace ExtWidgets
 			QList<std::shared_ptr<Property>> propsByName = propertyItems.values(name);
 			if (propsByName.size() != m_objects.size() || propsByName.size() == 0)
 			{
-				continue;   // this property is not in all objects
+				continue; // this property is not in all objects
 			}
 
 			// now check if all properties have the same type and values
@@ -4014,8 +4121,8 @@ namespace ExtWidgets
 					}
 					else
 					{
-                        // Comparing AfbParamValue type
-                        //
+						// Comparing AfbParamValue type
+						//
 						if (value.userType() == qMetaTypeId<Afb::AfbParamValue>() &&
 							_p->value().userType() == qMetaTypeId<Afb::AfbParamValue>())
 						{
@@ -4029,28 +4136,27 @@ namespace ExtWidgets
 						}
 						else
 						{
-                            // Check value type before comparint TuningValues
-                            //
-                            if (value.userType() == qMetaTypeId<TuningValue>() &&
-                                _p->value().userType() == qMetaTypeId<TuningValue>())
-                            {
-                                TuningValue v1 = value.value<TuningValue>();
-                                TuningValue v2 = _p->value().value<TuningValue>();
+							// Check value type before comparint TuningValues
+							//
+							if (value.userType() == qMetaTypeId<TuningValue>() && _p->value().userType() == qMetaTypeId<TuningValue>())
+							{
+								TuningValue v1 = value.value<TuningValue>();
+								TuningValue v2 = _p->value().value<TuningValue>();
 
-                                if (v1.type() != v2.type() || v1 != v2)
-                                {
-                                    sameValue = false;
-                                }
-                            }
-                            else
-                            {
-                                // Comparing common value type
-                                //
-                                if (value != _p->value())
-                                {
-                                    sameValue = false;
-                                }
-                            }
+								if (v1.type() != v2.type() || v1 != v2)
+								{
+									sameValue = false;
+								}
+							}
+							else
+							{
+								// Comparing common value type
+								//
+								if (value != _p->value())
+								{
+									sameValue = false;
+								}
+							}
 						}
 					}
 				}
@@ -4058,7 +4164,7 @@ namespace ExtWidgets
 
 			if (sameType == false)
 			{
-				continue;   // properties are not the same type
+				continue; // properties are not the same type
 			}
 
 			// add the property to the editor
@@ -4136,23 +4242,25 @@ namespace ExtWidgets
 
 		// Sort here
 
-		std::sort(propertyEditorObjects.begin(), propertyEditorObjects.end(), [this](const PropertyEditorObject& o1, const PropertyEditorObject& o2){
-			QString category1 = o1.property->category();
-			if (category1.isEmpty() == true)
-			{
-				category1 = defaultSpecificPropertyCategory();
-			}
+		std::sort(propertyEditorObjects.begin(),
+				  propertyEditorObjects.end(),
+				  [this](const PropertyEditorObject& o1, const PropertyEditorObject& o2)
+				  {
+					  QString category1 = o1.property->category();
+					  if (category1.isEmpty() == true)
+					  {
+						  category1 = defaultSpecificPropertyCategory();
+					  }
 
-			QString category2 = o2.property->category();
-			if (category2.isEmpty() == true)
-			{
-				category2 = defaultSpecificPropertyCategory();
-			}
+					  QString category2 = o2.property->category();
+					  if (category2.isEmpty() == true)
+					  {
+						  category2 = defaultSpecificPropertyCategory();
+					  }
 
-			return std::make_tuple(categoryViewOrder(category1), category1, o1.property->viewOrder(), o1.property->caption()) <
-					std::make_tuple(categoryViewOrder(category2), category2, o2.property->viewOrder(), o2.property->caption());
-
-		});
+					  return std::make_tuple(categoryViewOrder(category1), category1, o1.property->viewOrder(), o1.property->caption()) <
+							 std::make_tuple(categoryViewOrder(category2), category2, o2.property->viewOrder(), o2.property->caption());
+				  });
 
 		// Sort
 
@@ -4206,7 +4314,6 @@ namespace ExtWidgets
 				groupItem->setBackground(static_cast<int>(PropertyEditorColumns::Caption), QColor(0xf0, 0xf0, 0xf0));
 				groupItem->setBackground(static_cast<int>(PropertyEditorColumns::Value), QColor(0xf0, 0xf0, 0xf0));
 			}
-
 		}
 
 		// Add the property now
@@ -4234,10 +4341,10 @@ namespace ExtWidgets
 		//
 		groupItem->addChild(item);
 
-		//if (groupItem->isExpanded() == false)
+		// if (groupItem->isExpanded() == false)
 		//{
-//			groupItem->setExpanded(true);
-//		}
+		//			groupItem->setExpanded(true);
+		//		}
 
 		return;
 	}
@@ -4292,7 +4399,7 @@ namespace ExtWidgets
 
 		if (userType == qMetaTypeId<Afb::AfbParamValue>())
 		{
-			Afb::AfbParamValue v =  p->value().value<Afb::AfbParamValue>();
+			Afb::AfbParamValue v = p->value().value<Afb::AfbParamValue>();
 			return v.value().userType();
 		}
 		else
@@ -4336,10 +4443,10 @@ namespace ExtWidgets
 			return;
 		}
 
-		 if (p->readOnly() == true)
-		 {
-			 return;
-		 }
+		if (p->readOnly() == true)
+		{
+			return;
+		}
 
 		if (p->value().userType() == QMetaType::Bool)
 		{
@@ -4430,4 +4537,4 @@ namespace ExtWidgets
 	}
 
 	PropertyEditorSettings thePropertyEditorSettings;
-}
+} // namespace ExtWidgets
