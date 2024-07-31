@@ -6,7 +6,7 @@ pcap_t* currCapHandle = nullptr;
 void dumpPacketHandler(u_char* param, const struct pcap_pkthdr* header, const u_char* packetData);
 void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData, CircularLoggerShared log);
 
-BOOL WINAPI HandlerRoutine(_In_ DWORD dwCtrlType);
+BOOL WINAPI consoleCtrlHandler(_In_ DWORD dwCtrlType);
 
 CaptureDevice::PCapAddr::PCapAddr(const pcap_addr* pa)
 {
@@ -127,7 +127,7 @@ bool CaptureDevice::testCapturing()
 
 	currCapHandle = m_capHandle;
 
-	BOOL res = SetConsoleCtrlHandler(HandlerRoutine, TRUE);
+	SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
 
 	capture();
 
@@ -135,7 +135,7 @@ bool CaptureDevice::testCapturing()
 
 	close();
 
-	SetConsoleCtrlHandler(HandlerRoutine, FALSE);
+	SetConsoleCtrlHandler(consoleCtrlHandler, FALSE);
 
 	return true;
 }
@@ -207,7 +207,11 @@ void CaptureDevice::capture()
 	DEBUG_LOG_ERR(m_log, QString("Listening on '%1'...").arg(m_description));
 	std::cout << "\n";
 
+	addCaptureHandle(m_capHandle);
+
 	pcap_loop(m_capHandle, 0, dumpPacketHandler, reinterpret_cast<u_char*>(&m_log));
+
+	removeCaptureHandle(m_capHandle);
 }
 
 void CaptureDevice::close()
@@ -218,6 +222,34 @@ void CaptureDevice::close()
 		m_capHandle = NULL;
 
 		DEBUG_LOG_ERR(m_log, QString("Capture closed on '%1'...").arg(m_description));
+	}
+}
+
+void CaptureDevice::addCaptureHandle(pcap_t* capHandle)
+{
+	std::lock_guard lg(m_capHandlesMutex);
+
+	Q_ASSERT(m_capHandles.contains(capHandle) == false);
+
+	m_capHandles.insert(capHandle);
+}
+
+void CaptureDevice::removeCaptureHandle(pcap_t* capHandle)
+{
+	std::lock_guard lg(m_capHandlesMutex);
+
+	Q_ASSERT(m_capHandles.contains(capHandle) == true);
+
+	m_capHandles.erase(capHandle);
+}
+
+void CaptureDevice::breakAllCaptures()
+{
+	std::lock_guard lg(m_capHandlesMutex);
+
+	for(pcap_t* capHandle : m_capHandles)
+	{
+		pcap_breakloop(capHandle);
 	}
 }
 
@@ -295,7 +327,7 @@ void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData,
 	DEBUG_LOG_MSG(log, str);
 }
 
-BOOL WINAPI HandlerRoutine(_In_ DWORD dwCtrlType)
+BOOL WINAPI consoleCtrlHandler(_In_ DWORD dwCtrlType)
 {
 	switch (dwCtrlType)
 	{
@@ -303,7 +335,7 @@ BOOL WINAPI HandlerRoutine(_In_ DWORD dwCtrlType)
 		if (currCapHandle != NULL)
 		{
 			std::cout << "\nCtrl+C pressed by user\n\n";
-			pcap_breakloop(currCapHandle);
+			CaptureDevice::breakAllCaptures();
 		}
 		return TRUE;
 	default:

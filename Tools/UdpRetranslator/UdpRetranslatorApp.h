@@ -5,10 +5,13 @@
 
 #define TO_INT(v) static_cast<int>(v)
 
+extern CircularLoggerShared logger;
+
 class UdpRetranslatorApp
 {
 public:
 	UdpRetranslatorApp(int argc, char** argv);
+	~UdpRetranslatorApp();
 
 	int run();
 
@@ -35,7 +38,6 @@ private:
 	int m_argc = 0;
 	char** m_argv = nullptr;
 
-	CircularLoggerShared m_log;
 	QString m_appPathFile;
 	std::map<QString, QString> m_cmdLineArgs;
 

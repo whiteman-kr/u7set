@@ -1,20 +1,26 @@
 #include "UdpRetranslatorApp.h"
 #include "WUtils.h"
 
+CircularLoggerShared logger;
 
 UdpRetranslatorApp::UdpRetranslatorApp(int argc, char** argv) :
 	m_argc(argc),
 	m_argv(argv)
 {
 	m_appPathFile = m_argv[0];
+
+	logger = std::make_shared<CircularLogger>();
+	circularLoggerInit(logger, m_appPathFile, "udprtr", "", 10, 10);
+	logger->setLogCodeInfo(false);
+}
+
+UdpRetranslatorApp::~UdpRetranslatorApp()
+{
+	circularLoggerShutdown(logger);
 }
 
 int UdpRetranslatorApp::run()
 {
-	m_log = std::make_shared<CircularLogger>();
-	circularLoggerInit(m_log, m_appPathFile, "udprtr", "", 10, 10);
-	m_log->setLogCodeInfo(false);
-
 	RETURN_VALUE_IF_FALSE(loadNpcapDlls(), 1);
 
 	parseCmdLineArgs();
@@ -61,10 +67,6 @@ int UdpRetranslatorApp::run()
 		break;
 	}
 
-	//
-
-	circularLoggerShutdown(m_log);
-
 	return 0;
 }
 
@@ -78,7 +80,7 @@ bool UdpRetranslatorApp::loadNpcapDlls()
 
 	if (len == 0)
 	{
-		DEBUG_LOG_ERR(m_log, QString("GetSystemDirectory error: %1").arg(GetLastError()));
+		DEBUG_LOG_ERR(logger, QString("GetSystemDirectory error: %1").arg(GetLastError()));
 		return false;
 	}
 
@@ -86,7 +88,7 @@ bool UdpRetranslatorApp::loadNpcapDlls()
 
 	if (SetDllDirectory(npcapDllDir) == 0)
 	{
-		DEBUG_LOG_ERR(m_log, QString("SetDllDirectory error: %1").arg(GetLastError()));
+		DEBUG_LOG_ERR(logger, QString("SetDllDirectory error: %1").arg(GetLastError()));
 		return false;
 	}
 
@@ -130,22 +132,22 @@ void UdpRetranslatorApp::printHelp()
 
 bool UdpRetranslatorApp::getCaptureDevices()
 {
-	return CaptureDevice::getCaptureDevices(&m_captureDevices, m_log);
+	return CaptureDevice::getCaptureDevices(&m_captureDevices, logger);
 }
 
 bool UdpRetranslatorApp::printCaptureDevices()
 {
-	DEBUG_LOG_MSG(m_log, "");
+	DEBUG_LOG_MSG(logger, "");
 
 	if(m_captureDevices.empty())
 	{
-		DEBUG_LOG_MSG(m_log, "\nNo capture devices found! Make sure Npcap is installed.\n");
-		DEBUG_LOG_MSG(m_log, "");
+		DEBUG_LOG_MSG(logger, "\nNo capture devices found! Make sure Npcap is installed.\n");
+		DEBUG_LOG_MSG(logger, "");
 		return false;
 	}
 
-	DEBUG_LOG_MSG(m_log, QString("Available capture devices:"));
-	DEBUG_LOG_MSG(m_log, "");
+	DEBUG_LOG_MSG(logger, QString("Available capture devices:"));
+	DEBUG_LOG_MSG(logger, "");
 
 	int devNo = 0;
 
@@ -153,10 +155,10 @@ bool UdpRetranslatorApp::printCaptureDevices()
 	{
 		devNo++;
 
-		DEBUG_LOG_MSG(m_log, QString("%1. %2").arg(devNo).arg(capDev.description()));
+		DEBUG_LOG_MSG(logger, QString("%1. %2").arg(devNo).arg(capDev.description()));
 	}
 
-	DEBUG_LOG_MSG(m_log, "");
+	DEBUG_LOG_MSG(logger, "");
 
 	return true;
 }
@@ -210,7 +212,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 	if (res == false)
 	{
-		DEBUG_LOG_ERR(m_log, QString("Error open configuration file %1").arg(cfgFileName));
+		DEBUG_LOG_ERR(logger, QString("Error open configuration file %1").arg(cfgFileName));
 		return false;
 	}
 
@@ -239,7 +241,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 			}
 			else
 			{
-				DEBUG_LOG_ERR(m_log, QString("Error parsing cfg line: %1").arg(cl));
+				DEBUG_LOG_ERR(logger, QString("Error parsing cfg line: %1").arg(cl));
 			}
 
 			result = false;
@@ -248,7 +250,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 		{
 			if (m_captureCfgs.size() == 0)
 			{
-				DEBUG_LOG_ERR(m_log, QString("Sentence 'captureFrom' not found!"));
+				DEBUG_LOG_ERR(logger, QString("Sentence 'captureFrom' not found!"));
 				result = false;
 				continue;
 			}
@@ -257,7 +259,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 			if (sl.size() != 3)
 			{
-				DEBUG_LOG_ERR(m_log, QString("Error parsing cfg line: %1").arg(cl));
+				DEBUG_LOG_ERR(logger, QString("Error parsing cfg line: %1").arg(cl));
 
 				result = false;
 			}
@@ -272,7 +274,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 				if (res == false)
 				{
-					DEBUG_LOG_ERR(m_log, QString("Wrong source IP:port - %1").arg(sl[0].trimmed()));
+					DEBUG_LOG_ERR(logger, QString("Wrong source IP:port - %1").arg(sl[0].trimmed()));
 					result = false;
 				}
 				else
@@ -286,7 +288,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 				if (res == false)
 				{
-					DEBUG_LOG_ERR(m_log, QString("Wrong destination IP:port - %1").arg(sl[1].trimmed()));
+					DEBUG_LOG_ERR(logger, QString("Wrong destination IP:port - %1").arg(sl[1].trimmed()));
 					result = false;
 				}
 				else
@@ -300,7 +302,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 				if (res == false)
 				{
-					DEBUG_LOG_ERR(m_log, QString("Wrong sendTo IP:port - %1").arg(sl[2].trimmed()));
+					DEBUG_LOG_ERR(logger, QString("Wrong sendTo IP:port - %1").arg(sl[2].trimmed()));
 					result = false;
 				}
 				else
@@ -321,7 +323,166 @@ bool UdpRetranslatorApp::retranslate()
 	return true;
 }
 
+SERVICE_STATUS srvStatus;
+SERVICE_STATUS_HANDLE srvStatusHandle = NULL;
+HANDLE srvStopEvent = INVALID_HANDLE_VALUE;
+
+TCHAR serviceName[] = _T("udprtr");
+
+VOID serviceMain(DWORD argc, LPTSTR* argv);
+VOID serviceCtrlHandler(DWORD CtrlCode);
+
 bool UdpRetranslatorApp::runService()
 {
+	SERVICE_TABLE_ENTRY serviceTable[] =
+	{
+		{
+			.lpServiceName = serviceName,
+			.lpServiceProc = serviceMain
+		},
+
+		{
+			.lpServiceName = NULL,
+			.lpServiceProc = NULL
+		}
+	};
+
+	StartServiceCtrlDispatcher(serviceTable);
+
 	return true;
 }
+
+VOID serviceMain(DWORD argc, LPTSTR* argv)
+{
+	// Register our service control handler with the SCM
+	//
+	srvStatusHandle = RegisterServiceCtrlHandler (serviceName, serviceCtrlHandler);
+
+	if (srvStatusHandle == NULL)
+	{
+		return;
+	}
+
+	ZeroMemory(&srvStatus, sizeof(srvStatus));
+
+	srvStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+	srvStatus.dwControlsAccepted = 0;
+	srvStatus.dwCurrentState = SERVICE_START_PENDING;
+	srvStatus.dwWin32ExitCode = 0;
+	srvStatus.dwServiceSpecificExitCode = 0;
+	srvStatus.dwCheckPoint = 0;
+
+	if (SetServiceStatus (srvStatusHandle , &srvStatus) == FALSE)
+	{
+		DEBUG_LOG_ERR(logger, QString("ServiceMain: SetServiceStatus SERVICE_START_PENDING returned error: %1").arg(GetLastError()));
+		return;
+	}
+
+	DEBUG_LOG_MSG(logger, QString("ServiceMain: SetServiceStatus SERVICE_START_PENDING - Ok"));
+
+	/*
+	 * Perform tasks necessary to start the service here
+	 */
+
+	// Create a service stop event to wait on later
+	//
+	srvStopEvent = CreateEvent (NULL, TRUE, FALSE, NULL);
+
+	if (srvStopEvent == NULL)
+	{
+		// Error creating event
+		// Tell service controller we are stopped and exit
+		srvStatus.dwControlsAccepted = 0;
+		srvStatus.dwCurrentState = SERVICE_STOPPED;
+		srvStatus.dwWin32ExitCode = GetLastError();
+		srvStatus.dwCheckPoint = 1;
+
+		if (SetServiceStatus (srvStatusHandle, &srvStatus) == FALSE)
+		{
+			DEBUG_LOG_ERR(logger, QString("ServiceMain: SetServiceStatus(2) returned error: %1").arg(GetLastError()));
+		}
+
+		return;
+	}
+
+	// Tell the service controller we are started
+	//
+	srvStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
+	srvStatus.dwCurrentState = SERVICE_RUNNING;
+	srvStatus.dwWin32ExitCode = 0;
+	srvStatus.dwCheckPoint = 0;
+
+	if (SetServiceStatus (srvStatusHandle, &srvStatus) == FALSE)
+	{
+		DEBUG_LOG_ERR(logger, QString("ServiceMain: SetServiceStatus SERVICE_RUNNING returned error: %1").arg(GetLastError()));
+	}
+
+	DEBUG_LOG_MSG(logger, QString("ServiceMain: SetServiceStatus SERVICE_RUNNING - Ok"));
+
+	// Start a thread that will perform the main task of the service
+	//
+	//	HANDLE hThread = CreateThread (NULL, 0, ServiceWorkerThread, NULL, 0, NULL);
+
+	// Wait until our worker thread exits signaling that the service needs to stop
+	//
+	//	WaitForSingleObject (hThread, INFINITE);
+
+	/*
+	 * Perform any cleanup tasks
+	 */
+
+	CloseHandle(srvStopEvent);
+
+	// Tell the service controller we are stopped
+	srvStatus.dwControlsAccepted = 0;
+	srvStatus.dwCurrentState = SERVICE_STOPPED;
+	srvStatus.dwWin32ExitCode = 0;
+	srvStatus.dwCheckPoint = 3;
+
+	if (SetServiceStatus (srvStatusHandle, &srvStatus) == FALSE)
+	{
+		DEBUG_LOG_ERR(logger, QString("ServiceMain: SetServiceStatus SERVICE_STOPPED returned error: %1").arg(GetLastError()));
+		return;
+	}
+
+	DEBUG_LOG_MSG(logger, QString("ServiceMain: SetServiceStatus SERVICE_STOPPED - Ok"));
+
+	return;
+}
+
+VOID serviceCtrlHandler(DWORD ctrlCode)
+{
+	switch (ctrlCode)
+	{
+	case SERVICE_CONTROL_STOP :
+
+		if (srvStatus.dwCurrentState != SERVICE_RUNNING)
+		{
+			break;
+		}
+
+		/*
+		 * Perform tasks necessary to stop the service here
+		 */
+
+		srvStatus.dwControlsAccepted = 0;
+		srvStatus.dwCurrentState = SERVICE_STOP_PENDING;
+		srvStatus.dwWin32ExitCode = 0;
+		srvStatus.dwCheckPoint = 4;
+
+		if (SetServiceStatus (srvStatusHandle, &srvStatus) == FALSE)
+		{
+			DEBUG_LOG_ERR(logger, QString("ServiceMain: SetServiceStatus SERVICE_STOP_PENDING returned error: %1").arg(GetLastError()));
+		}
+
+		// This will signal the worker thread to start shutting down
+		//
+		SetEvent (srvStopEvent);
+		break;
+
+	default:
+		break;
+	}
+}
+
+

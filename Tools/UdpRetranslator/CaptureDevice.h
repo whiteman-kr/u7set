@@ -49,10 +49,16 @@ public:
 	void capture();
 	void close();
 
+	static void addCaptureHandle(pcap_t* capHandle);
+	static void removeCaptureHandle(pcap_t* capHandle);
+	static void breakAllCaptures();
+
 	QString name() const;
 	QString description() const;
 
 private:
+	inline static std::mutex m_capHandlesMutex;
+	inline static std::set<pcap_t*> m_capHandles;
 
 	// fields copied from pcap_if_t structure
 	//
@@ -67,6 +73,3 @@ private:
 
 	pcap_t* m_capHandle = nullptr;
 };
-
-extern pcap_t* currCapHandle;
-
