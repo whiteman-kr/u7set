@@ -339,6 +339,59 @@ namespace Builder
 
 		file << LINE;
 
+		//
+
+		auto it = m_context->m_vduSignals.find(m_vduModule->equipmentID());
+
+		if (it != m_context->m_vduSignals.end())
+		{
+			std::map<int, std::vector<Hash>> indexToHashes;
+
+			const std::map<Hash, int>& hashToIndex = it->second;
+
+			for(const auto& [h, indx] : hashToIndex)
+			{
+				auto it2 = findOrInsertKey(indexToHashes, indx);
+
+				it2->second.emplace_back(h);
+			}
+
+			file << Separator::EMPTY_STR;
+			file << Separator::EMPTY_STR;
+			file << "Indexes of opto signals to AppSignalIDs synonims (just for reference, not placed in *.vci file):";
+			file << Separator::EMPTY_STR;
+
+			file << LINE;
+			file << " SignalIndex | AppSignalID(s)";
+			file << LINE;
+
+			std::shared_ptr<SignalSet> signalSet = m_context->m_signalSet;
+			QString ids;
+
+			for(const auto& [indx, hashes] : indexToHashes)
+			{
+				ids.clear();
+
+				for(Hash h : hashes)
+				{
+					const AppSignal* appSignal = signalSet->getSignalByHash(h);
+
+					TEST_PTR_CONTINUE(appSignal);
+
+					if (ids.isEmpty() == false)
+					{
+						ids += Separator::COMMA_SPACE;
+					}
+
+					ids += appSignal->appSignalID();
+				}
+
+				file << QString(" %1      | %2").arg(hex16(indx)).arg(ids);
+			}
+		}
+
+		//
+
 		return m_resultWriter->addFile(Directory::VDUs + Separator::DIR + m_vduModule->equipmentID(),
 										File::OPTO_CONNECTIONS_INFO_TXT, file, false);
 	}
@@ -387,7 +440,15 @@ namespace Builder
 
 		for(const Hardware::TxRxSignalShared& portSignal : portSignals)
 		{
-			const AppSignal* appSignal = m_signalSet->getSignal(portSignal->appSignalID());
+			const QStringList& appSignalIDs = portSignal->appSignalIDs();
+
+			if (appSignalIDs.size() == 0)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			const AppSignal* appSignal = m_signalSet->getSignal(appSignalIDs[0]);
 
 			if (appSignal == nullptr)
 			{
@@ -401,7 +462,10 @@ namespace Builder
 			si.optoPortIndex = portIndex;
 			si.signalIndex = m_vduSignalIndex;
 
-			indexMap.emplace(calcHash(portSignal->appSignalID()), m_vduSignalIndex);
+			for(const QString& appSignalID : appSignalIDs)
+			{
+				indexMap.emplace(calcHash(appSignalID), m_vduSignalIndex);
+			}
 
 			m_vduSignalIndex++;
 
