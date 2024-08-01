@@ -51,6 +51,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QClipboard>
 	<QColorDialog>
 	<QComboBox>
+	<QDateTimeEdit>
 	<QDialog>
 	<QDialogButtonBox>
 	<QFile>
