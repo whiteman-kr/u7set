@@ -4,7 +4,8 @@
     "dependencies": [
         "asio",
         "gtest",
-        "protobuf"
+        "protobuf",
+        "openssl"
     ],
     "overrides": [
         {
@@ -18,6 +19,10 @@
         {
             "name": "protobuf",
             "version": "4.25.1"
+        },
+        {
+            "name": "openssl",
+            "version": "3.3.1"
         }
     ]
 }

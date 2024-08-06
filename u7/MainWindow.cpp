@@ -2,6 +2,7 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../Builder/LogicModuleSet.h"
 #include <UiLib/DialogAbout.h>
+#include <LicenseLib/AppLicenser.h>
 #include "./EquipmentEditor/EquipmentTabPage.h"
 #include "./Forms/DialogDiagSignalTypes.h"
 #include "./Forms/FileHistoryDialog.h"
@@ -1248,9 +1249,17 @@ void MainWindow::afbLibraryCheck()
 void MainWindow::showAbout()
 {
 	QString text = "Supported project database version: " + QString::number(DbController::databaseVersion()) + "<br><br>";
-	text += qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and MATS software configuration.<br>";
+	text += qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and MATS software configuration.";
 
-	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	LicenseLib::AppLicenser appLicenser;
+	UiLib::DialogAbout::show(this,
+							 text,
+							 ":/Logo/RadiyLogo.png",
+							 appLicenser.organization(),
+							 appLicenser.person(),
+							 appLicenser.endDate(),
+							 appLicenser.uuid(),
+							 LicenseLib::AppLicenser::workplaceId());
 
 	return;
 }

@@ -7,15 +7,15 @@
 #include "../UtilsLib/OutputLog.h"
 #include "MconfSettings.h"
 
-#include <optional>
+namespace Hardware
+{
+	class ModuleFirmwareStorage;
+}
 
-class QSplitter;
-class QLineEdit;
-class QPushButton;
-class QTextEdit;
-class Configurator;
-
-using namespace Hardware;
+namespace ModuleConfiguratorLib
+{
+	class Configurator;
+}
 
 class ModuleConfigurator : public QMainWindow
 {
@@ -59,7 +59,7 @@ signals:
 	void readFirmware(QString fileName, std::optional<std::vector<int>> selectedUarts);
 
     void writeDiagData(quint32 factoryNo, QDate manufactureDate, quint32 firmwareCrc);
-	void writeConfData(ModuleFirmwareStorage *storage, const QString& subsystemId, std::optional<std::vector<int>> selectedUarts);
+	void writeConfData(Hardware::ModuleFirmwareStorage *storage, const QString& subsystemId, std::optional<std::vector<int>> selectedUarts);
 	void eraseFlashMemory(int, std::optional<std::vector<int>> selectedUarts);
 	
 private:
@@ -85,7 +85,7 @@ private:
 
 	int m_logTimerId;
 
-	Configurator* m_pConfigurator = nullptr;
+	ModuleConfiguratorLib::Configurator* m_pConfigurator = nullptr;
 	QThread* m_pConfigurationThread = nullptr;
 };
 

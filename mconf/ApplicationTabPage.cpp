@@ -1,7 +1,9 @@
 #include "ApplicationTabPage.h"
 #include "Globals.h"
 #include "../UtilsLib/OutputLog.h"
-#include "../lib/Configurator.h"
+#include <ModuleConfiguratorLib/Configurator.h>
+
+using namespace ModuleConfiguratorLib;
 
 ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
 	: QWidget(parent),

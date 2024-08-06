@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/LicenseLib">
+        <file>public_key_inst1.pem</file>
+    </qresource>
+    <qresource prefix="/"/>
+</RCC>

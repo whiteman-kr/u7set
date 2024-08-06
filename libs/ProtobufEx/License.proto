@@ -1,0 +1,65 @@
+syntax = "proto2";
+
+import "Common.proto";
+
+package Proto;
+
+message LicenseContainter
+{
+	optional License rpct_license = 3;	// License for RPCT
+}
+
+message LicenseBinary
+{
+	optional bytes rpct_license = 3;	// Serialized LicenseContainter
+	optional bytes signature = 10;		// Signature
+}
+
+message License
+{
+	optional Uuid uuid = 1;				// Unique identifier of the license
+	optional string caption = 2;		// Name of the license - can be used for display purposes
+	
+	optional string organization = 10;	// Company/Organization name
+	optional string first_name = 11;	// First name of the license owner
+	optional string last_name = 12;		// Last name of the license owner
+	optional string contact_info = 13;	// Contact information
+
+	optional int64 start_date = 30;		// Start date of the license
+	optional int64 end_date = 31;		// End date of the license
+
+	optional string notes = 40;			// Notes, who bought the license, etc.
+	optional string licenser_version = 41;	// Version of the licenser that created the license
+	optional int64 issue_date = 42;		// Date when the license was issued
+
+	optional WorkplaceLicense workplace = 100;
+	optional ModuleConfiguratorLicense module_configurator = 110;
+}
+
+message WorkplaceLicense
+{
+	optional int32 check_type = 2;		// Type of the check, 0 - strict, 1 - relaxed, 2 - no check
+	optional string workplace_id = 3;
+}
+
+message ModuleConfiguratorLicense
+{
+	optional bool allowed = 2;						// Using module configurator is allowed
+	
+	optional bool limit_module_uart_uuids = 10;		// If true, only modules with UUIDs from the list are allowed to be configured
+	optional string allowed_module_uart_uuids = 11;	// List of module UUIDs (UART uuids) that are allowed to be configured
+
+	optional bool limit_module_types = 20;			// If true, only modules with types from the list are allowed to be configured
+	optional string allowed_module_types = 21;		// List of module UUIDs (UART uuids) that are allowed to be configured
+}
+
+message InternalWorkplaceId
+{
+	optional string machine_id = 2;
+	optional string hardware_id = 3;
+	optional string cpu = 4;
+	optional string macs = 5;
+
+	optional string os = 11;		// Stable name for OS, excludes version - statistics only
+	optional string host = 12;		// statistics only
+}

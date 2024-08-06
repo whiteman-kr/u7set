@@ -140,6 +140,7 @@ namespace Hardware
 	private:
 		bool parse(const QByteArray& data, bool readDataFrames, QString* errorCode);
 		bool parse_version2(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode);
+		bool parse_version3(const QJsonObject& jConfig, bool readDataFrames, QString* errorCode);
 
 		// Properties, for access from JS it is "public slots"
 		//
@@ -155,7 +156,7 @@ namespace Hardware
 		//
 	protected:
 		int m_fileVersion = 0;
-		static const int m_maxFileVersion = 2;	// Latest version
+		static const int m_maxFileVersion = 3;	// Latest version
 
 		bool m_hasBinaryData = false;
 

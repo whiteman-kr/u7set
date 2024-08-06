@@ -331,12 +331,12 @@ namespace Hardware
 				jModuleInfoArray.push_back(jModuleInfo);
 			}
 
-			jSubsystemInfo.insert(QLatin1String("z_modules"), jModuleInfoArray);
+			jSubsystemInfo.insert(QLatin1String("y_modules"), jModuleInfoArray);
 
 			jSubsystemInfoArray.push_back(jSubsystemInfo);
 		}
 
-		jObject.insert(QLatin1String("z_i_subsystemsInfo"), jSubsystemInfoArray);
+		jObject.insert(QLatin1String("y_i_subsystemsInfo"), jSubsystemInfoArray);
 
 		// Store Subsystems Data
 
@@ -473,9 +473,7 @@ namespace Hardware
 						jFrame.insert("data" + QString().number(l * frameStringWidth, 16).rightJustified(4, '0'), QJsonValue(str.trimmed().data()));
 					}
 
-					jFrame.insert(QLatin1String("frameIndex"), i);
-
-					jFirmwareData.insert("z_frame_" + QString().number(i).rightJustified(4, '0'), jFrame);
+					jFirmwareData.insert("y_frame_" + QString().number(i, 16).rightJustified(4, '0'), jFrame);
 				}
 
 				//description
@@ -514,7 +512,7 @@ namespace Hardware
 
 						if (descriptionItems.empty() == false)
 						{
-							jFirmwareData.insert("z_description_channel_" + QString::number(channel).rightJustified(2, '0'), jDescription);
+							jFirmwareData.insert("y_description_channel_" + QString::number(channel).rightJustified(2, '0'), jDescription);
 						}
 					}
 
@@ -528,7 +526,7 @@ namespace Hardware
 				}
 
 
-				jSubsystemData.insert(QLatin1String("z_firmwareData"), jFirmwaresDataArray);
+				jSubsystemData.insert(QLatin1String("y_firmwareData"), jFirmwaresDataArray);
 
 				jSubsystemData.insert(QLatin1String("subsystemId"), subsystemId);
 			}
@@ -536,7 +534,7 @@ namespace Hardware
 			jSubsystemDataArray.push_back(jSubsystemData);
 		}
 
-		jObject.insert(QLatin1String("z_s_subsystemsData"), jSubsystemDataArray);
+		jObject.insert(QLatin1String("y_s_subsystemsData"), jSubsystemDataArray);
 
 		// properties
 		//

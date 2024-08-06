@@ -42,6 +42,7 @@ find_package(Threads REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
 find_package(asio CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 if (MSVC)
 	find_package(Qt6 REQUIRED COMPONENTS AxContainer) # Metrology
@@ -53,7 +54,7 @@ include(cmake/warnings.cmake)
 set_warnings()
 
 # Add LTO for Release and Windows only. 
-# It is diasbale for Unix to speed up CI bulid.
+# It is diasabled for Unix to speed up CI bulid.
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND MSVC)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
@@ -97,6 +98,10 @@ endif()
 #
 option(UPDATE_TRANSLATIONS "Update Translations" OFF)
 
+# Allow usage FTDI functions - is used for getting module configurator serial number.
+#
+option(ALLOW_FTDI "Allow FTDI" OFF)
+
 message("-----------------------------------------")
 message(${PROJECT_NAME})
 message("Version: ${CMAKE_PROJECT_VERSION} (${U7SET_BRANCH_NAME})")
@@ -120,6 +125,7 @@ message("Host: ${U7SET_HOSTNAME}")
 message("Qt Version: ${Qt6_VERSION}")
 message("Qt Path: ${Qt6_DIR}")
 message("VCPKG_ROOT: ${VCPKG_ROOT}")
+message("Allow FTDI: ${ALLOW_FTDI}")
 message("-----------------------------------------")
 
 # Add projects.
@@ -166,6 +172,10 @@ add_subdirectory(./Test/SimulatorTests)
 add_subdirectory(./Test/u7databaseTests)
 add_subdirectory(./Test/MetrologyTests)
 #add_subdirectory(./Test/TestSuiteTest)
+
+if (DEFINED ENV{CI_BUILD_LICENSER})
+	add_subdirectory(./Tools/Licenser)
+endif()
 
 # Create install target.
 # Just run /u7setinstall/createinstall.bat file.

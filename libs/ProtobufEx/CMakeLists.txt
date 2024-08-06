@@ -48,6 +48,7 @@ set(PROTO_FILES
     Envelope.proto
     Hardware.proto
     Network.proto
+    License.proto
     Simulator.proto
     Trends.proto
     VFrame30.proto

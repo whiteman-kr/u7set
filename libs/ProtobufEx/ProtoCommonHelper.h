@@ -13,7 +13,7 @@ namespace Proto
 
 	// Helper serialization functions
 	//
-	const QUuid& Read(const Proto::Uuid& message);
+	QUuid Read(const Proto::Uuid& message);
 	void Write(Proto::Uuid* pMessage, const QUuid& guid);
 
 	// Read/write wstring message

@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/license">
+        <file>TestPublicKey.pem</file>
+        <file>TestPrivateKey.pem</file>
+    </qresource>
+    <qresource prefix="/"/>
+</RCC>
