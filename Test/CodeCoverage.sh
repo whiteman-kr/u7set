@@ -88,6 +88,7 @@ StopServices || true
 #
 ./SimulatorTests
 ./MetrologyTests
+#./LicenseLibTests
 ./u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml
 
 popd
@@ -124,6 +125,11 @@ lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTP
 TEST_DIR="./build/Test/MetrologyTests/CMakeFiles/MetrologyTests.dir"
 TEST_OUTPUT_FILE="MetrologyTests.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+# LicenseLib
+#TEST_DIR="./build/libs/LicenseLib/CMakeFiles/LicenseLib.dir"
+#TEST_OUTPUT_FILE="LicenseLib.info"
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Builder
 TEST_DIR="./build/Builder/CMakeFiles/Builder.dir"
@@ -181,6 +187,7 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/ClientLib.info \
     --add-tracefile $OUTPUT_DIR/AdsBridge.info
 
+#    --add-tracefile $OUTPUT_DIR/LicenseLib.info \
 #    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
 #    --add-tracefile $OUTPUT_DIR/CfgSrv.info
 

@@ -15,6 +15,8 @@ variables:
   SIMULATOR_PROJECT_NAME: "test_simulator_v423"
   PGPASSWORD: "P2ssw0rd"
 
+  CTEST_OUTPUT_ON_FAILURE: "1"
+
 stages:
   - prepare
   - build
@@ -131,6 +133,9 @@ windows_build_job:
     - "& './CI/windeploy.bat'"
 #Copy PostgreSQL DLL to bin/release
     - "copy C:\\libpq_my_build\\libpq.dll $Env:BIN_OUT_DIR\\"
+#Copy FTDI Drivers to release
+    - "mkdir \"$Env:BIN_OUT_DIR/ftdi\""
+    - "copy C:\\ftdi\\CDM-v2.12.36.4-WHQL-Certified.zip $Env:BIN_OUT_DIR\\ftdi\\"
 # Copy documents
     - "mkdir \"$Env:BIN_OUT_DIR/docs\""
     - "copy $Env:CI_PROJECT_DIR\\Metrology\\docs\\Metrology_User_Manual.pdf $Env:BIN_OUT_DIR\\docs\\"
@@ -198,7 +203,7 @@ windows_build_job:
       - bin/release/docs/*.pdf
       - bin/release/docs/Appendixes/*.pdf
       - bin/release/dev/**/*
-
+      - bin/release/ftdi/**/*
 
 windows_test_job:
   stage: test
@@ -240,6 +245,7 @@ windows_test_job:
     - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*:TuningConnectionTests.*:RtDataProviderTests.*"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
+    #- "&$Env:CI_PROJECT_DIR/bin/release/LicenseLibTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\""
 
 #Run Builder test
@@ -368,6 +374,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "$CI_PROJECT_DIR/bin/release/SimulatorTests"
     - "$CI_PROJECT_DIR/bin/release/MetrologyTests"
+    #- "$CI_PROJECT_DIR/bin/release/LicenseLibTests"
     - "$CI_PROJECT_DIR/bin/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml"
 
 #Run ROVT to check configuration generation

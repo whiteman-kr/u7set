@@ -7,6 +7,7 @@ Makefile*
 build-*/**
 build/**
 u7set-cppcheck-build-dir/**
+**/out/**
 out/**
 bin/**
 *embed.manifest

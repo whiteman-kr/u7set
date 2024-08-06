@@ -2,10 +2,8 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include <UiLib/PropertyEditor.h>
 
-
 namespace ExtWidgets
 {
-
 	QString PropertyEditorBase::s_commonCategoryName = "Common";
 
 	//

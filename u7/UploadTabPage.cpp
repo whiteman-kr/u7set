@@ -2,6 +2,9 @@
 #include "Settings.h"
 #include "GlobalMessanger.h"
 #include "DialogSettingsConfigurator.h"
+#include <ModuleConfiguratorLib/Configurator.h>
+
+using namespace ModuleConfiguratorLib;
 
 //
 //

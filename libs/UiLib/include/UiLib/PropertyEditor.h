@@ -3,11 +3,17 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <set>
 
+#include <QDialog>
 #include <QCheckBox>
 #include <QItemDelegate>
 #include <QTreeWidget>
 #include <QVariant>
+
+class QComboBox;
+class QToolButton;
+class QDateTimeEdit;
 
 inline int qVariantTypeId(const QVariant& v)
 {

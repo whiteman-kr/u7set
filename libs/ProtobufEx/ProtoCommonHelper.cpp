@@ -5,7 +5,7 @@ namespace Proto
 {
 	// Helper serialization functions
 	//
-	const QUuid& Read(const Proto::Uuid& message)
+	QUuid Read(const Proto::Uuid& message)
 	{
 		return *(reinterpret_cast<const QUuid*>(message.uuid().c_str()));
 	}

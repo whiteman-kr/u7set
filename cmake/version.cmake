@@ -97,6 +97,7 @@ endif()
 # Set U7SET_BUILD_DATE to current date and time in the format YYYY-MM-DD HH:MM:SS
 #
 string(TIMESTAMP U7SET_BUILD_DATE "%Y-%m-%d %H:%M:%S")
+string(TIMESTAMP U7SET_BUILD_DATE_SECONDS "%s") # Seconds since 1970-01-01 00:00:00 UTC
 
 # Set U7SET_HOSTNAME to current hostname
 #

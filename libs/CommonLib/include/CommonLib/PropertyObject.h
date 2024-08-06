@@ -1464,10 +1464,10 @@ public:
 	explicit PropertyObject(QObject* parent = nullptr) noexcept;
 	PropertyObject(const PropertyObject& src) noexcept;
 
-	PropertyObject(PropertyObject&& src) = delete;		// Fobidden to move properties as some (like PropertyTypedValue) has build in parent, which cannot be moved
+	PropertyObject(PropertyObject&& src) = delete;		// Forbidden to move properties as some (like PropertyTypedValue) has build in parent, which cannot be moved
 
 	PropertyObject& operator=(const PropertyObject& src) noexcept;
-	PropertyObject& operator=(PropertyObject&& src) = delete;			// Fobidden to move properties as some (like PropertyTypedValue) has build in parent, which cannot be moved
+	PropertyObject& operator=(PropertyObject&& src) = delete;			// Forbidden to move properties as some (like PropertyTypedValue) has build in parent, which cannot be moved
 
 	virtual ~PropertyObject() = default;
 
