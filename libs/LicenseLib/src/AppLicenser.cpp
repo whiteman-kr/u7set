@@ -152,7 +152,7 @@ namespace LicenseLib
 
 	QString AppLicenser::licensePath()
 	{
-		// If env varialbe U7_LICENSE_PATH is set, use it, else use "application directory"/license
+		// If env variable U7_LICENSE_PATH is set, use it, else use "application directory"/license
 		//
 		QByteArray env = qgetenv("U7_LICENSE_PATH");
 		if (env.isEmpty() == false)

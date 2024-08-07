@@ -204,6 +204,7 @@ windows_build_job:
       - bin/release/docs/Appendixes/*.pdf
       - bin/release/dev/**/*
       - bin/release/ftdi/**/*
+      - bin/release/license/**/*
 
 windows_test_job:
   stage: test
