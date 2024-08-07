@@ -42,6 +42,12 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/license
 )
 
+add_custom_command(
+	TARGET ${TARGET}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/readme.txt ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/license
+)
+
 add_code_coverage_options(${TARGET} CODE_COVERAGE)
 
 if(ADD_ALL_SMALL_TESTS)
