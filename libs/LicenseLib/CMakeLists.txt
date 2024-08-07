@@ -34,6 +34,14 @@ target_compile_definitions(${TARGET} PRIVATE BEHAVIOR_LIBRARY)
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
+# Create license directory
+#
+add_custom_command(
+	TARGET ${TARGET}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/license
+)
+
 add_code_coverage_options(${TARGET} CODE_COVERAGE)
 
 if(ADD_ALL_SMALL_TESTS)
