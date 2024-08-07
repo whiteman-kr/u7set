@@ -39,6 +39,9 @@ copy ..\bin\release\vc_redist.x64.exe packages\u7set\data
 
 copy ..\bin\release\u7.exe packages\u7set.develop.rpct\data
 
+md packages\u7set\data\license
+copy ..\bin\release\license\*.* packages\u7set\data\license
+
 xcopy ..\bin\release\scripthelp packages\u7set.develop.rpct\data\scripthelp /sy
 xcopy ..\bin\release\scripting packages\u7set.develop.rpct\data\scripting /sy
 
