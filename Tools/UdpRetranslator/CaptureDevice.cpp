@@ -1,8 +1,6 @@
 #include "CaptureDevice.h"
 #include <WUtils.h>
 
-pcap_t* currCapHandle = nullptr;
-
 void dumpPacketHandler(u_char* param, const struct pcap_pkthdr* header, const u_char* packetData);
 void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData, CircularLoggerShared log);
 
@@ -58,7 +56,7 @@ CaptureDevice::CaptureDevice(const pcap_if_t* cd, CircularLoggerShared log)
 
 	if (cd->description != NULL)
 	{
-		m_description = QString(cd->description);
+		m_description = QString(cd->description).trimmed();
 	}
 	else
 	{
@@ -105,9 +103,17 @@ bool CaptureDevice::getCaptureDevices(std::vector<CaptureDevice>* capDevs, Circu
 		devCount++;
 	}
 
-	Q_ASSERT(devCount > 0);
+	if (devCount == 0)
+	{
+		DEBUG_LOG_WRN(log, "No capture devices found!");
+		return true;
+	}
+
+	DEBUG_LOG_WRN(log, QString("Found %1 capture device(s).").arg(devCount));
 
 	capDevs->reserve(devCount);
+
+	devCount = 1;
 
 	for(const pcap_if_t* capDev = captureDevices; capDev; capDev = capDev->next)
 	{
@@ -125,13 +131,9 @@ bool CaptureDevice::testCapturing()
 
 	RETURN_IF_FALSE(result);
 
-	currCapHandle = m_capHandle;
-
 	SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
 
 	capture();
-
-	currCapHandle = NULL;
 
 	close();
 
@@ -207,6 +209,8 @@ void CaptureDevice::capture()
 	DEBUG_LOG_ERR(m_log, QString("Listening on '%1'...").arg(m_description));
 	std::cout << "\n";
 
+	Q_ASSERT(m_capHandle != NULL);
+
 	addCaptureHandle(m_capHandle);
 
 	pcap_loop(m_capHandle, 0, dumpPacketHandler, reinterpret_cast<u_char*>(&m_log));
@@ -225,6 +229,48 @@ void CaptureDevice::close()
 	}
 }
 
+bool CaptureDevice::retranslate(const RetranslateCfg& rtrCfg, int threadNo)
+{
+	DEBUG_LOG_MSG(m_log, QString("Retranslating thread #%1 started").arg(threadNo));
+
+	bool result = openForCapturing();
+
+	RETURN_IF_FALSE(result);
+
+	SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
+
+	capture();
+
+	close();
+
+	DEBUG_LOG_MSG(m_log, QString("Retranslating thread #%1 finished").arg(threadNo));
+
+	return true;
+}
+
+void CaptureDevice::breakAllCaptures()
+{
+	std::lock_guard lg(m_capHandlesMutex);
+
+	for(pcap_t* capHandle : m_capHandles)
+	{
+		if (capHandle != nullptr)
+		{
+			pcap_breakloop(capHandle);
+		}
+	}
+}
+
+QString CaptureDevice::name() const
+{
+	return m_name;
+}
+
+QString CaptureDevice::description() const
+{
+	return m_description;
+}
+
 void CaptureDevice::addCaptureHandle(pcap_t* capHandle)
 {
 	std::lock_guard lg(m_capHandlesMutex);
@@ -241,26 +287,6 @@ void CaptureDevice::removeCaptureHandle(pcap_t* capHandle)
 	Q_ASSERT(m_capHandles.contains(capHandle) == true);
 
 	m_capHandles.erase(capHandle);
-}
-
-void CaptureDevice::breakAllCaptures()
-{
-	std::lock_guard lg(m_capHandlesMutex);
-
-	for(pcap_t* capHandle : m_capHandles)
-	{
-		pcap_breakloop(capHandle);
-	}
-}
-
-QString CaptureDevice::name() const
-{
-	return m_name;
-}
-
-QString CaptureDevice::description() const
-{
-	return m_description;
 }
 
 void dumpPacketHandler(u_char* param, const struct pcap_pkthdr* header, const u_char* packetData)
@@ -326,21 +352,3 @@ void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData,
 
 	DEBUG_LOG_MSG(log, str);
 }
-
-BOOL WINAPI consoleCtrlHandler(_In_ DWORD dwCtrlType)
-{
-	switch (dwCtrlType)
-	{
-	case CTRL_C_EVENT:
-		if (currCapHandle != NULL)
-		{
-			std::cout << "\nCtrl+C pressed by user\n\n";
-			CaptureDevice::breakAllCaptures();
-		}
-		return TRUE;
-	default:
-		// Pass signal on to the next handler
-		return FALSE;
-	}
-}
-

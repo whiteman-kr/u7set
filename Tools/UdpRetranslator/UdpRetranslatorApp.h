@@ -3,17 +3,21 @@
 #include "CircularLogger.h"
 #include "CaptureDevice.h"
 
-#define TO_INT(v) static_cast<int>(v)
+#include <QSettings>
 
-extern CircularLoggerShared logger;
+#define TO_INT(v) static_cast<int>(v)
 
 class UdpRetranslatorApp
 {
 public:
-	UdpRetranslatorApp(int argc, char** argv);
+	UdpRetranslatorApp();
 	~UdpRetranslatorApp();
 
+	bool init(int argc, char** argv);
 	int run();
+
+	bool startRetranslate();
+	static void stopRetranslate();
 
 private:
 	bool loadNpcapDlls();
@@ -24,8 +28,8 @@ private:
 	bool getCaptureDevices();
 	bool printCaptureDevices();
 	bool testCaptureDevice();
-	bool readCfgFile(const QString& cfgFile);
-	bool retranslate();
+	bool readCfgFile(const QString& cfgFileName);
+	bool saveCfgFileName(const QString& cfgFileName);
 
 	bool runService();
 
@@ -43,5 +47,20 @@ private:
 
 	std::vector<CaptureDevice> m_captureDevices;
 
-	std::vector<CaptureCfg> m_captureCfgs;
+	std::vector<RetranslateCfg> m_retranslateCfgs;
+
+	inline static std::mutex m_waitQuitMutex;
+	inline static std::condition_variable m_waitQuit;
+	inline static bool m_quitRequested = false;
+
+	inline static const QString CFG_FILE_NAME = "CfgFileName";
 };
+
+extern CircularLoggerShared logger;
+extern UdpRetranslatorApp app;
+extern QSettings settings;
+
+VOID serviceMain(DWORD argc, LPTSTR* argv);
+VOID serviceCtrlHandler(DWORD CtrlCode);
+
+BOOL WINAPI consoleCtrlHandler(_In_ DWORD dwCtrlType);

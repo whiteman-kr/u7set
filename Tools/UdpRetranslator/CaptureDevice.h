@@ -13,7 +13,7 @@ struct RetranslateEntry
 	HostAddressPort sendToAddr;
 };
 
-struct CaptureCfg
+struct RetranslateCfg
 {
 	QString captureDeviceDescription;
 
@@ -35,7 +35,6 @@ private:
 		sockaddr dstaddr;
 
 		//
-
 	};
 
 public:
@@ -49,12 +48,16 @@ public:
 	void capture();
 	void close();
 
-	static void addCaptureHandle(pcap_t* capHandle);
-	static void removeCaptureHandle(pcap_t* capHandle);
+	bool retranslate(const RetranslateCfg& rtrCfg, int threadNo);
+
 	static void breakAllCaptures();
 
 	QString name() const;
 	QString description() const;
+
+private:
+	static void addCaptureHandle(pcap_t* capHandle);
+	static void removeCaptureHandle(pcap_t* capHandle);
 
 private:
 	inline static std::mutex m_capHandlesMutex;

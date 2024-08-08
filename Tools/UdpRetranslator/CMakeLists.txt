@@ -82,6 +82,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QDir>
 	<QFile>
 	<QFileInfo>
+	<QSettings>
 	<QStandardPaths>
 	<QTextStream>
 	<QThread>

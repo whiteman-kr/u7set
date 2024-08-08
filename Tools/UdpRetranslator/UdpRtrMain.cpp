@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 	int result = 0;
 
 	{
-		UdpRetranslatorApp app(argc, argv);
+		app.init(argc, argv);
 
 		result = app.run();
 	}
