@@ -1334,6 +1334,7 @@ namespace TrendLib
 
 	void TrendSignalSet::slot_realtimeDataReceived(QString sourceEquipmentId,
 												   std::shared_ptr<TrendLib::RealtimeData> data,
+												   E::RtTrendsSamplePeriod samplePeriod,
 												   TrendLib::TrendStateItem /*minState*/,
 												   TrendLib::TrendStateItem /*maxState*/)
 	{
@@ -1345,9 +1346,9 @@ namespace TrendLib
 			// For now add all three times, maybe later it will be changed to add just for one time
 			// I just don't know which kind of time is used now
 			//
-			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::Local, signalHash, states);
-			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::System, signalHash, states);
-			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::Plant, signalHash, states);
+			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::Local, samplePeriod, signalHash, states);
+			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::System, samplePeriod, signalHash, states);
+			appendRealtimeDataToArchive(sourceEquipmentId, E::TimeType::Plant, samplePeriod, signalHash, states);
 		}
 
 		return;
@@ -1446,6 +1447,7 @@ namespace TrendLib
 
 	void TrendSignalSet::appendRealtimeDataToArchive(QString sourceEquipmentId,
 													 E::TimeType timeType,
+													 E::RtTrendsSamplePeriod samplePeriod,
 													 Hash signalhash,
 													 const std::vector<TrendStateItem>& states)
 	{
@@ -1535,16 +1537,22 @@ namespace TrendLib
 					{
 						// This is the wrong source, skip it, but check timeout first
 						//
-						if (archive.serviceUpdateTimer.hasExpired(2000) == true)
+						thread_local const std::array periods_ms{5ll, 10ll, 20ll, 50ll, 100ll, 250ll, 500ll, 1000ll, 5000ll, 10000ll};
+
+						qint64 timerExpireTime = std::max(periods_ms[static_cast<size_t>(samplePeriod)] * 2ll + 500ll,
+														  2000ll); // twice sample period or 2 seconds if sample period is small
+
+						if (archive.serviceUpdateTimer.hasExpired(timerExpireTime) == true)
 						{
 							// We have not received from the active server data some time,
 							// switch to another server
 							//
 							archive.realTimeActiveServiceId = sourceEquipmentId;
+							// qDebug() << "TrendSignalSet::appendRealtimeDataToArchive " << sourceEquipmentId << " is now active";
 						}
 						else
 						{
-							// This is the wrong source and data is comming for active connection (to timeout)
+							// This is the wrong source and data is coming for active connection (to timeout)
 							//
 							return;
 						}
@@ -1553,7 +1561,7 @@ namespace TrendLib
 
 				archive.serviceUpdateTimer.restart();
 
-				// Add realtime data to all signals with the same AppSignalID, no matter which archive server it is from
+				// Add real-time data to all signals with the same AppSignalID, no matter which archive server it is from
 				//
 				TimeStamp lastHourTime{0};
 				std::shared_ptr<OneHourData> hourData;

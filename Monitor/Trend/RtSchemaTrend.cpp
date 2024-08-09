@@ -147,6 +147,7 @@ void RtSchemaTrendDataProvider::updateSignals(const QStringList& appSignalIds)
 
 void RtSchemaTrendDataProvider::slot_realtimeDataReceived(QString sourceEquipmentId,
 														  std::shared_ptr<TrendLib::RealtimeData> data,
+														  E::RtTrendsSamplePeriod /*samplePeriod*/,
 														  TrendLib::TrendStateItem minState,
 														  TrendLib::TrendStateItem maxState)
 {
@@ -276,7 +277,12 @@ void RtSchemaTrendDataProvider::appendRealtimeData_unsafe(QString sourceEquipmen
 		{
 			// This is the wrong source, skip it, but check timeouit firts
 			//
-			if (archive->serviceUpdateTimer.hasExpired(2000) == true)
+			thread_local const std::array periods_ms{5ll, 10ll, 20ll, 50ll, 100ll, 250ll, 500ll, 1000ll, 5000ll, 10000ll};
+
+			qint64 timerExpireTime = std::max(periods_ms[static_cast<size_t>(m_samplePeriod)] * 2ll + 500ll,
+											  2000ll); // twice sample period or 2 seconds if sample period is small
+
+			if (archive->serviceUpdateTimer.hasExpired(timerExpireTime) == true)
 			{
 				// We have not received from the active server data some time,
 				// switch to other server
@@ -285,7 +291,7 @@ void RtSchemaTrendDataProvider::appendRealtimeData_unsafe(QString sourceEquipmen
 			}
 			else
 			{
-				// This is the wrong source and data is comming for active connection (to timeout)
+				// This is the wrong source and data is coming for active connection (to timeout)
 				//
 				return;
 			}

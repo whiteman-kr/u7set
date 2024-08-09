@@ -63,6 +63,7 @@ public:
 private slots:
 	void slot_realtimeDataReceived(QString sourceEquipmentId,
 								   std::shared_ptr<TrendLib::RealtimeData> data,
+								   E::RtTrendsSamplePeriod samplePeriod,
 								   TrendLib::TrendStateItem /*minState*/,
 								   TrendLib::TrendStateItem /*maxState*/);
 	void slot_connectionLost(QString sourceEquipmentId);

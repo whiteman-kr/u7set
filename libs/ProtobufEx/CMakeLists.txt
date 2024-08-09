@@ -65,6 +65,7 @@ message("PROTO_HDRS: ${PROTO_HDRS}")
 set(TARGET ProtobufEx)
 
 qt_add_library(${TARGET} STATIC
+	${PROTO_FILES}
     ${PROTO_SRCS} 
     ${PROTO_HDRS}
 	

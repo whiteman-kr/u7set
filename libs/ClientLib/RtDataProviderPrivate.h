@@ -36,7 +36,11 @@ namespace ClientLib
 		RtTrendConnectionStatistics statistics() const;
 
 	signals:
-		void dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+		void dataReady(QString sourceEquipmentId,
+					   std::shared_ptr<TrendLib::RealtimeData> data,
+					   E::RtTrendsSamplePeriod samplePeriod,
+					   TrendLib::TrendStateItem minState,
+					   TrendLib::TrendStateItem maxState);
 		void requestError(QString text);
 		void connectionLost(QString sourceEquipmentId);
 
@@ -83,7 +87,11 @@ namespace ClientLib
 		[[nodiscard]] bool allConnected(std::chrono::milliseconds timeout) const;
 
 	signals:
-		void dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+		void dataReady(QString sourceEquipmentId,
+					   std::shared_ptr<TrendLib::RealtimeData> data,
+					   E::RtTrendsSamplePeriod samplePeriod,
+					   TrendLib::TrendStateItem minState,
+					   TrendLib::TrendStateItem maxState);
 		void requestError(QString text);
 		void connectionLost(QString sourceEquipmentId);
 

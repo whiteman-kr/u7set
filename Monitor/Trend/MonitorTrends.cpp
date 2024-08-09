@@ -172,7 +172,7 @@ MonitorTrendsWidget::MonitorTrendsWidget(const ClientLib::AppSignalManager& sign
 	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::dataReady, this, &MonitorTrendsWidget::slot_archiveDataReceived); // For updating widget
 
 	// Realtime Trends connections
-	// IMPORTANT: The next to slot connections must be in that order, as TrendLib::TrendSignalSet::slot_realtimeDataReceived
+	// IMPORTANT: The next two slots connections must be in that order, as TrendLib::TrendSignalSet::slot_realtimeDataReceived
 	// updates the "last realtime" point and MonitorTrendsWidget::slot_realtimeDataReceived makes autoshift based on the "last realtime" point.
 	//
 	// Qt doc says: If several slots are connected to one signal, the slots will be executed one after the other,
@@ -538,6 +538,7 @@ void MonitorTrendsWidget::slot_archiveDataReceived(TrendLib::TrendSignalPlusServ
 
 void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
 													std::shared_ptr<TrendLib::RealtimeData> data,
+													E::RtTrendsSamplePeriod /*samplePeriod*/,
 													TrendLib::TrendStateItem minRecState,
 													TrendLib::TrendStateItem maxRecState)
 {

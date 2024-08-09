@@ -55,6 +55,10 @@ namespace LicenseLib
 
 	QByteArray RpctLicense::toRawData(QString privateKeyFileName, QString keyPassword, QString* errorMessage) const
 	{
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif // _MSC_VER
 		if (errorMessage == nullptr)
 		{
 			Q_ASSERT(errorMessage);
@@ -139,6 +143,9 @@ namespace LicenseLib
 		resultMessage.SerializeToArray(resultData.data(), resultData.size());
 
 		return resultData;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // _MSC_VER
 	}
 
 	RpctLicense RpctLicense::fromRawData(const QByteArray& data, QString publicKeyFileName, QString* errorMessage)
@@ -164,6 +171,11 @@ namespace LicenseLib
 
 	RpctLicense RpctLicense::fromRawData(const QByteArray& data, const QByteArray& publicKeyData, QString* errorMessage)
 	{
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif // _MSC_VER
+
 		// Verify signature
 		//
 		if (errorMessage == nullptr)
@@ -262,6 +274,9 @@ namespace LicenseLib
 
 		*result.m_data = container.rpct_license();
 		return result;
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif // _MSC_VER
 	}
 
 	QUuid RpctLicense::uuid() const

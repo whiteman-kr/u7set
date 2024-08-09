@@ -47,6 +47,7 @@ namespace ClientLib
 	signals:
 		void dataReady(QString sourceEquipmentId,
 					   std::shared_ptr<TrendLib::RealtimeData> data,
+					   E::RtTrendsSamplePeriod samplePeriod,
 					   TrendLib::TrendStateItem minState,
 					   TrendLib::TrendStateItem maxState);
 		void requestError(QString text);

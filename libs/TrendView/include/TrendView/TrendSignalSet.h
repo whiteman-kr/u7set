@@ -139,6 +139,7 @@ namespace TrendLib
 
 		void slot_realtimeDataReceived(QString sourceEquipmentId,
 									   std::shared_ptr<TrendLib::RealtimeData> data,
+									   E::RtTrendsSamplePeriod samplePeriod,
 									   TrendLib::TrendStateItem minState,
 									   TrendLib::TrendStateItem maxState);
 		void slot_realtimeRequestError(QString errorText);
@@ -149,6 +150,7 @@ namespace TrendLib
 	private:
 		void appendRealtimeDataToArchive(QString sourceEquipmentId,
 										 E::TimeType timeType,
+										 E::RtTrendsSamplePeriod samplePeriod,
 										 Hash signalhash,
 										 const std::vector<TrendStateItem>& states);
 

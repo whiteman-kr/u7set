@@ -234,7 +234,11 @@ namespace TestSuite
 		// End of ITestObserver
 
 	private slots:
-		void dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+		void dataReady(QString sourceEquipmentId,
+					   std::shared_ptr<TrendLib::RealtimeData> data,
+					   E::RtTrendsSamplePeriod samplePeriod,
+					   TrendLib::TrendStateItem minState,
+					   TrendLib::TrendStateItem maxState);
 		void requestError(QString text);
 		void connectionLost(QString sourceEquipmentId);
 

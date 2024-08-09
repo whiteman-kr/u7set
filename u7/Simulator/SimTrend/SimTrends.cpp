@@ -375,7 +375,7 @@ void SimTrendsWidget::fetchTrendData()
 
 	if (data != nullptr)
 	{
-		signalSet().slot_realtimeDataReceived(QLatin1String{"SIM"}, data, minState, maxState);
+		signalSet().slot_realtimeDataReceived(QLatin1String{"SIM"}, data, E::RtTrendsSamplePeriod::sp_5ms, minState, maxState);
 		this->slot_realtimeDataReceived(QLatin1String{"SIM"}, data, minState, maxState);
 	}
 

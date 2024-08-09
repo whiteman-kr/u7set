@@ -220,6 +220,7 @@ TEST_F(RtDataProviderTests, discreteData)
 	public slots:
 		void dataReceiver(QString sourceEquipmentId,
 						  std::shared_ptr<TrendLib::RealtimeData> data,
+						  E::RtTrendsSamplePeriod /*samplePeriod*/,
 						  TrendLib::TrendStateItem /*minState*/,
 						  TrendLib::TrendStateItem /*maxState*/)
 		{
@@ -406,6 +407,7 @@ TEST_F(RtDataProviderTests, mixedData)
 	public slots:
 		void dataReceiver(QString sourceEquipmentId,
 						  std::shared_ptr<TrendLib::RealtimeData> data,
+						  E::RtTrendsSamplePeriod /*samplePeriod*/,
 						  TrendLib::TrendStateItem /*minState*/,
 						  TrendLib::TrendStateItem /*maxState*/)
 		{

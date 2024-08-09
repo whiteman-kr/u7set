@@ -215,7 +215,11 @@ namespace TestSuite
 		return result;
 	}
 
-	void TestObserver::dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem /*minState*/, TrendLib::TrendStateItem /*maxState*/)
+	void TestObserver::dataReady(QString sourceEquipmentId,
+								 std::shared_ptr<TrendLib::RealtimeData> data,
+								 E::RtTrendsSamplePeriod /*samplePeriod*/,
+								 TrendLib::TrendStateItem /*minState*/,
+								 TrendLib::TrendStateItem /*maxState*/)
 	{
 		Q_ASSERT(QThread::currentThread() == this->thread());
 
