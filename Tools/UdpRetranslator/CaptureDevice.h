@@ -45,7 +45,9 @@ public:
 
 	bool testCapturing();
 	bool openForCapturing();
-	void capture();
+	void dumpPackets();
+	void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData);
+
 	void close();
 
 	bool retranslate(const RetranslateCfg& rtrCfg, int threadNo);
@@ -54,10 +56,19 @@ public:
 
 	QString name() const;
 	QString description() const;
+	CircularLoggerShared log();
+	const RetranslateCfg& retranslateCfg() const;
 
 private:
 	static void addCaptureHandle(pcap_t* capHandle);
 	static void removeCaptureHandle(pcap_t* capHandle);
+
+	void retranslatePackets();
+
+	bool getPacketHeaders(const u_char* packetData, quint32 packetLen,
+						  EthernetHeader **ethHeader,
+						  IpHeader** ipHeader,
+						  UdpHeader** udpHeader);
 
 private:
 	inline static std::mutex m_capHandlesMutex;
@@ -75,4 +86,6 @@ private:
 	CircularLoggerShared m_log;
 
 	pcap_t* m_capHandle = nullptr;
+
+	RetranslateCfg m_rtrCfg;
 };

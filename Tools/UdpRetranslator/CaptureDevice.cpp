@@ -2,6 +2,7 @@
 #include <WUtils.h>
 
 void dumpPacketHandler(u_char* param, const struct pcap_pkthdr* header, const u_char* packetData);
+void retranslatePacketHandler(u_char* param, const struct pcap_pkthdr* header, const u_char* packetData);
 void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData, CircularLoggerShared log);
 
 BOOL WINAPI consoleCtrlHandler(_In_ DWORD dwCtrlType);
@@ -109,11 +110,9 @@ bool CaptureDevice::getCaptureDevices(std::vector<CaptureDevice>* capDevs, Circu
 		return true;
 	}
 
-	DEBUG_LOG_WRN(log, QString("Found %1 capture device(s).").arg(devCount));
+	DEBUG_LOG_MSG(log, QString("Found %1 capture device(s).").arg(devCount));
 
 	capDevs->reserve(devCount);
-
-	devCount = 1;
 
 	for(const pcap_if_t* capDev = captureDevices; capDev; capDev = capDev->next)
 	{
@@ -133,7 +132,7 @@ bool CaptureDevice::testCapturing()
 
 	SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
 
-	capture();
+	dumpPackets();
 
 	close();
 
@@ -204,7 +203,7 @@ bool CaptureDevice::openForCapturing()
 	return true;
 }
 
-void CaptureDevice::capture()
+void CaptureDevice::dumpPackets()
 {
 	DEBUG_LOG_ERR(m_log, QString("Listening on '%1'...").arg(m_description));
 	std::cout << "\n";
@@ -213,9 +212,62 @@ void CaptureDevice::capture()
 
 	addCaptureHandle(m_capHandle);
 
-	pcap_loop(m_capHandle, 0, dumpPacketHandler, reinterpret_cast<u_char*>(&m_log));
+	pcap_loop(m_capHandle, 0, dumpPacketHandler, reinterpret_cast<u_char*>(this));
 
 	removeCaptureHandle(m_capHandle);
+}
+
+void CaptureDevice::printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData)
+{
+	TEST_PTR_RETURN(header);
+	TEST_PTR_RETURN(packetData);
+	TEST_PTR_RETURN(m_log);
+
+	QDateTime dt = QDateTime::fromSecsSinceEpoch(header->ts.tv_sec);
+	QTime tm = dt.time();
+
+	static const QChar z('0');
+
+	QString str = QString("%1:%2:%3.%4  ").
+				  arg(tm.hour(), 2, 10, z).
+				  arg(tm.minute(), 2, 10, z).
+				  arg(tm.second(), 2, 10, z).
+				  arg(header->ts.tv_usec, 6, 10, z);
+
+	EthernetHeader* eh = nullptr;
+	IpHeader* ih = nullptr;
+	UdpHeader* uh = nullptr;
+
+	if (getPacketHeaders(packetData, header->len, &eh, &ih, &uh) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	u_short srcPort = ntohs(uh->srcPort);
+	u_short destPort = ntohs(uh->destPort);
+
+	static const QChar sp(' ');
+
+	str += QString("%1.%2.%3.%4:%5").
+		   arg(ih->srcIP.byte1).
+		   arg(ih->srcIP.byte2).
+		   arg(ih->srcIP.byte3).
+		   arg(ih->srcIP.byte4).
+		   arg(srcPort).leftJustified(21, sp);
+
+	str += QStringLiteral("  ->  ");
+
+	str += QString("%1.%2.%3.%4:%5").
+		   arg(ih->desIP.byte1).
+		   arg(ih->desIP.byte2).
+		   arg(ih->desIP.byte3).
+		   arg(ih->desIP.byte4).
+		   arg(destPort).leftJustified(21, sp);
+
+	str += QString("  len = %1").arg(header->len);
+
+	DEBUG_LOG_MSG(m_log, str);
 }
 
 void CaptureDevice::close()
@@ -231,6 +283,10 @@ void CaptureDevice::close()
 
 bool CaptureDevice::retranslate(const RetranslateCfg& rtrCfg, int threadNo)
 {
+	m_rtrCfg = rtrCfg;
+
+	Q_ASSERT(rtrCfg.captureDeviceDescription == m_description);
+
 	DEBUG_LOG_MSG(m_log, QString("Retranslating thread #%1 started").arg(threadNo));
 
 	bool result = openForCapturing();
@@ -239,7 +295,7 @@ bool CaptureDevice::retranslate(const RetranslateCfg& rtrCfg, int threadNo)
 
 	SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
 
-	capture();
+	retranslatePackets();
 
 	close();
 
@@ -271,6 +327,16 @@ QString CaptureDevice::description() const
 	return m_description;
 }
 
+CircularLoggerShared CaptureDevice::log()
+{
+	return m_log;
+}
+
+const RetranslateCfg& CaptureDevice::retranslateCfg() const
+{
+	return m_rtrCfg;
+}
+
 void CaptureDevice::addCaptureHandle(pcap_t* capHandle)
 {
 	std::lock_guard lg(m_capHandlesMutex);
@@ -289,66 +355,76 @@ void CaptureDevice::removeCaptureHandle(pcap_t* capHandle)
 	m_capHandles.erase(capHandle);
 }
 
+void CaptureDevice::retranslatePackets()
+{
+	DEBUG_LOG_ERR(m_log, QString("Listening on '%1'...").arg(m_description));
+	std::cout << "\n";
+
+	Q_ASSERT(m_capHandle != NULL);
+
+	addCaptureHandle(m_capHandle);
+
+	pcap_loop(m_capHandle, 0, retranslatePacketHandler, reinterpret_cast<u_char*>(this));
+
+	removeCaptureHandle(m_capHandle);
+}
+
+bool CaptureDevice::getPacketHeaders(const u_char* packetData,
+									 quint32 packetLen,
+									 EthernetHeader** ethHeader,
+									 IpHeader** ipHeader,
+									 UdpHeader** udpHeader)
+{
+	TEST_PTR_RETURN_FALSE(packetData);
+	TEST_PTR_RETURN_FALSE(ethHeader);
+	TEST_PTR_RETURN_FALSE(ipHeader);
+	TEST_PTR_RETURN_FALSE(udpHeader);
+
+	u_char* packetDataPtr = const_cast<u_char*>(packetData);
+
+	*ethHeader = reinterpret_cast<EthernetHeader*>(packetDataPtr);
+
+	// retireve ip header pointer
+	//
+	*ipHeader = reinterpret_cast<IpHeader*>(packetDataPtr + sizeof(EthernetHeader));
+
+	// retireve udp header pointer
+	//
+	*udpHeader = reinterpret_cast<UdpHeader*>(packetDataPtr + sizeof(EthernetHeader) + (*ipHeader)->headerLenBytes());
+
+	if ((reinterpret_cast<const u_char*>(*udpHeader) - packetDataPtr) <= (packetLen - sizeof(UdpHeader)))
+	{
+		return true;
+	}
+
+	*ethHeader = nullptr;
+	*ipHeader = nullptr;
+	*udpHeader = nullptr;
+
+	return false;
+}
+
 void dumpPacketHandler(u_char* param, const struct pcap_pkthdr* header, const u_char* packetData)
 {
 	TEST_PTR_RETURN(param);
 	TEST_PTR_RETURN(header);
 	TEST_PTR_RETURN(packetData);
 
-	CircularLoggerShared* log = reinterpret_cast<CircularLoggerShared*>(param);
+	CaptureDevice* capDev = reinterpret_cast<CaptureDevice*>(param);
 
-	printPacketInfo(header, packetData, *log);
+	TEST_PTR_RETURN(capDev);
+
+	capDev->printPacketInfo(header, packetData);
 }
 
-void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData, CircularLoggerShared log)
+void retranslatePacketHandler(u_char* param, const struct pcap_pkthdr* header, const u_char* packetData)
 {
+	TEST_PTR_RETURN(param);
 	TEST_PTR_RETURN(header);
 	TEST_PTR_RETURN(packetData);
-	TEST_PTR_RETURN(log);
 
-	QDateTime dt = QDateTime::fromSecsSinceEpoch(header->ts.tv_sec);
-	QTime tm = dt.time();
+	CaptureDevice* capDev = reinterpret_cast<CaptureDevice*>(param);
 
-	static const QChar z('0');
-
-	QString str = QString("%1:%2:%3.%4  ").
-				  arg(tm.hour(), 2, 10, z).
-				  arg(tm.minute(), 2, 10, z).
-				  arg(tm.second(), 2, 10, z).
-				  arg(header->ts.tv_usec, 6, 10, z);
-
-	const EthernetHeader* eh = reinterpret_cast<const EthernetHeader*>(packetData);
-
-	// retireve ip header pointer
-	//
-	const IpHeader* ih = reinterpret_cast<const IpHeader*>(packetData + sizeof(EthernetHeader));
-
-	// retireve udp header pointer
-	//
-	const UdpHeader* uh = reinterpret_cast<const UdpHeader*>(packetData + sizeof(EthernetHeader) + ih->headerLenBytes());
-
-	u_short srcPort = ntohs(uh->srcPort);
-	u_short destPort = ntohs(uh->destPort);
-
-	static const QChar sp(' ');
-
-	str += QString("%1.%2.%3.%4:%5").
-			arg(ih->srcIP.byte1).
-			arg(ih->srcIP.byte2).
-			arg(ih->srcIP.byte3).
-			arg(ih->srcIP.byte4).
-			arg(srcPort).leftJustified(21, sp);
-
-	str += QStringLiteral("  ->  ");
-
-	str += QString("%1.%2.%3.%4:%5").
-			arg(ih->desIP.byte1).
-			arg(ih->desIP.byte2).
-			arg(ih->desIP.byte3).
-			arg(ih->desIP.byte4).
-			arg(destPort).leftJustified(21, sp);
-
-	str += QString("  len = %1").arg(header->len);
-
-	DEBUG_LOG_MSG(log, str);
+	capDev->printPacketInfo(header, packetData);
 }
+

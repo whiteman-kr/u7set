@@ -194,12 +194,16 @@ void UdpRetranslatorApp::printHelp()
 {
 	std::cout << "\nUse UdpRtr.exe [options]\n\n";
 	std::cout << "where options is:\n\n";
-	std::cout << QString("%1\t\tprint this help\n").arg(ARG_HELP).toStdString();
-//	std::cout << "-e\t\trun UDP retranslator as console application\n";
-	std::cout << QString("%1\tprint list of capture devices\n").arg(ARG_DEV_LIST).toStdString();
-	std::cout << QString("%1\ttest capturing on device\n").arg(ARG_TEST_CAP).toStdString();
+	std::cout << QString("%1\t\t\tprint this help\n").arg(ARG_HELP).toStdString();
+	std::cout << QString("%1\t\tprint list of capture devices\n").arg(ARG_DEV_LIST).toStdString();
+	std::cout << QString("%1\t\ttest capturing on device\n").arg(ARG_TEST_CAP).toStdString();
 	std::cout << QString("%1=cfgFileName\tload config file and start UDP retranslation\n").arg(ARG_CFG).toStdString();
 	std::cout << "\n";
+	std::cout << "Note that Administrator permissions requierd to install, delete, start or stop service.\n\n";
+	std::cout << "To install service use:\t\tsc create UdpRetranslator binPath=[path_to]/udprtr.exe\n";
+	std::cout << "To start service use:\t\tsc start UdpRetranslator\n";
+	std::cout << "To stop service use:\t\tsc stop UdpRetranslator\n";
+	std::cout << "To uninstall service use:\tsc delete UdpRetranslator\n\n";
 }
 
 bool UdpRetranslatorApp::getCaptureDevices()
