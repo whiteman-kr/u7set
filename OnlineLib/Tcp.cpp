@@ -2083,6 +2083,7 @@ namespace Tcp
 			m_ignoredSslErrors.insert(QSslError::SslError::SelfSignedCertificate);
 
 			// No break, it is Ok!
+			[[fallthrough]];
 
 		case E::SecurityLevel::SSL:
 
