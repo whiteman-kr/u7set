@@ -17,12 +17,12 @@ public:
 						   SimWidget* simWidget);
 
 private:
-	explicit SimDialogSignalSnapshot(SimIdeSimulator* simuator,
-									 IAppSignalManager* appSignalManager,
-									 QString projectName,
-									 QString softwareEquipmentId,
-									 QString lmEquipmentId,
-									 QWidget *parent);
+	SimDialogSignalSnapshot(SimIdeSimulator* simuator,
+							IAppSignalManager* appSignalManager,
+							QString projectName,
+							QString softwareEquipmentId,
+							QString lmEquipmentId,
+							QWidget* parent);
 
 private slots:
 	void projectUpdated();

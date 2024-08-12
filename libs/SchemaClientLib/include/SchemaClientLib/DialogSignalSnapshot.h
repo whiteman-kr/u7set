@@ -43,14 +43,12 @@ namespace SchemaClientLib
 
 	protected:
 		DialogSignalSnapshot(IAppSignalManager* appSignalManager,
-							 ClientLib::ISignalDataServer* signalDataServer,                                  // Can be nullptr, e.g. in Simulator
+							 ClientLib::ISignalDataServer* signalDataServer,                       // Can be nullptr, e.g. in Simulator
 							 AppSignalLists::AppSignalListSet* appSignalListSet,
 							 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices, // Can be empty, e.g. in Simulator
 							 const QString& projectName,
 							 const QString& equipmentId,
 							 QWidget* parent);
-
-		DialogSignalSnapshot(IAppSignalManager* appSignalManager, const QString& projectName, const QString& equipmentId, QWidget* parent);
 
 		virtual ~DialogSignalSnapshot();
 

@@ -37,15 +37,6 @@ namespace SchemaClientLib
 		return;
 	}
 
-	DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
-											   const QString& projectName,
-											   const QString& equipmentId,
-											   QWidget* parent) :
-		DialogSignalSnapshot{appSignalManager, nullptr, nullptr, {}, projectName, equipmentId, parent}
-	{
-		return;
-	}
-
 	DialogSignalSnapshot::~DialogSignalSnapshot() = default;
 
 	void DialogSignalSnapshot::showEvent(QShowEvent* event)

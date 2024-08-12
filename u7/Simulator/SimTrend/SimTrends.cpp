@@ -274,10 +274,13 @@ void SimTrendsWidget::signalsButton()
 		const Sim::AppSignalManager* signalManager = nullptr;
 	} signalHasTag{&m_simulator->appSignalManager()};
 
-	const AppSignalLists::AppSignalListSet appSignalLists;
+	TrendLib::DialogChooseTrendSignals dialog(&signalHasTag,
+											  trendSignals,
+											  acceptedTrendSignals,
+											  archiveServers,
+											  m_simulator->appSignalListSet(),
+											  this);
 
-	TrendLib::DialogChooseTrendSignals dialog(&signalHasTag, trendSignals, acceptedTrendSignals, archiveServers, appSignalLists, this);
-	
 	int result = dialog.exec();
 	if (result == QDialog::Rejected)
 	{

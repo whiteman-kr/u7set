@@ -6,10 +6,11 @@
 
 #include <Simulator/SimAppSignalManager.h>
 #include <Simulator/SimSoftware.h>
-#include <VFrame30/IMatsSchemaItemAssociations.h>
 #include <VFrame30/AppSignalController.h>
-#include <VFrame30/LogicSchema.h>
 #include <VFrame30/Context.h>
+#include <VFrame30/IMatsSchemaItemAssociations.h>
+#include <VFrame30/LogicSchema.h>
+#include <VFrame30/SchemaDetails.h>
 
 namespace
 {

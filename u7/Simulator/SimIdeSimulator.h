@@ -1,6 +1,6 @@
 #pragma once
 
-#include <VFrame30/SchemaDetails.h>
+#include <AppSignalLists/SignalList.h>
 #include "../../UtilsLib/ILogFile.h"
 
 class ITuningSignalManager;
@@ -26,13 +26,31 @@ namespace Hardware
 	class DeviceObject;
 }
 
+namespace VFrame30
+{
+	class SchemaDetails;
+	class SchemaDetailsSet;
+}
+
+namespace AppSignalLists
+{
+	class AppSignalListSet;
+}
+
 class SimIdeSimulator : public QObject
 {
 	Q_OBJECT
 
 public:
 	SimIdeSimulator(ILogFile* log, bool allowDebugMessages, QObject* parent);
+
+	SimIdeSimulator() = delete;
+	SimIdeSimulator(const SimIdeSimulator&) = delete;
+	SimIdeSimulator(SimIdeSimulator&&) = delete;
 	virtual ~SimIdeSimulator();
+
+	SimIdeSimulator& operator=(const SimIdeSimulator&) = delete;
+	SimIdeSimulator& operator=(SimIdeSimulator&&) = delete;
 
 public:
 	bool load(QString buildPath); // Overload from Sim::Simulator
@@ -102,6 +120,7 @@ signals:
 
 protected:
 	bool loadSchemaDetails(QString buildPath);
+	bool loadAppSignalLists(QString buildPath);
 
 public:
 	const Sim::Simulator* simulator() const;
@@ -113,10 +132,14 @@ public:
 	QStringList schemasByAppSignalId(const QString& appSignalId) const;
 	QStringList schemasByLoopbackId(const QString& loopbackId) const;
 
+	const AppSignalLists::AppSignalListSet& appSignalListSet() const;
+	AppSignalLists::AppSignalListSet& appSignalListSet();
+
 private:
 	std::unique_ptr<Sim::Simulator> m_simulator;
 	
-	VFrame30::SchemaDetailsSet m_schemaDetails;
+	std::unique_ptr<VFrame30::SchemaDetailsSet> m_schemaDetails;
+	std::unique_ptr<AppSignalLists::AppSignalListSet> m_appSignalListSet;
 
 	// The monitor equipment is a filtered tree of all devices (excluding signals), 
 	// which is read from the file 'Common/MonitorEquipment.dat.

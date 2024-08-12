@@ -61,7 +61,7 @@ namespace SchemaClientLib
 	public:
 		SignalSnapshotWidget(SchemaClientLib::ISignalSnapshotWidget& signalSnapshotVirtFuncDispatcher,
 							 IAppSignalManager* appSignalManager,
-							 ClientLib::ISignalDataServer* signalDataServer,                                  // Can be nullptr, e.g. in Simulator
+							 ClientLib::ISignalDataServer* signalDataServer,                       // Can be nullptr, e.g. in Simulator
 							 AppSignalLists::AppSignalListSet* appSignalListSet,                   // Can be nullptr, e.g. in Simulator
 							 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices, // Can be empty, e.g. in Simulator
 							 const QString& projectName,

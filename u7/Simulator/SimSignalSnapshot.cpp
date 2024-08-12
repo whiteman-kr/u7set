@@ -33,7 +33,7 @@ SimDialogSignalSnapshot::SimDialogSignalSnapshot(SimIdeSimulator* simuator,
 												 QString softwareEquipmentId,
 												 QString lmEquipmentId,
 												 QWidget* parent) :
-	DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, parent),
+	DialogSignalSnapshot(appSignalManager, nullptr, &simuator->appSignalListSet(), {}, projectName, softwareEquipmentId, parent),
 	m_simuator(simuator)
 {
 	if (m_simuator == nullptr)

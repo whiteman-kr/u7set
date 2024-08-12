@@ -1,10 +1,15 @@
 #include "SimIdeSimulator.h"
+#include <AppSignalLists/SignalList.h>
 #include <CommonLib/ConstStrings.h>
-#include <Simulator/Simulator.h>
 #include <HardwareLib/DeviceRoot.h>
+#include <Simulator/Simulator.h>
+#include <VFrame30/SchemaDetails.h>
+
 
 SimIdeSimulator::SimIdeSimulator(ILogFile* log, bool allowDebugMessages, QObject* parent) :
-	m_simulator(new Sim::Simulator(log, allowDebugMessages, parent))
+	m_simulator{std::make_unique<Sim::Simulator>(log, allowDebugMessages, parent)},
+	m_schemaDetails{std::make_unique<VFrame30::SchemaDetailsSet>()},
+	m_appSignalListSet{std::make_unique<AppSignalLists::AppSignalListSet>()}
 {
 }
 
@@ -18,11 +23,13 @@ bool SimIdeSimulator::load(QString buildPath)
 
 	// --
 	//
-	m_schemaDetails.clear();
+	m_schemaDetails->clear();
 
 	bool ok = true;
 
 	ok &= loadSchemaDetails(buildPath);
+	ok &= loadAppSignalLists(buildPath);
+	
 	ok &= m_simulator->load(buildPath);
 
 	// Restore state of ArminKey, TuningKey.
@@ -97,8 +104,9 @@ bool SimIdeSimulator::load(QString buildPath)
 
 void SimIdeSimulator::clear()
 {
-	m_schemaDetails.clear();
+	m_schemaDetails->clear();
 	m_simulator->clear();
+	m_appSignalListSet->clear();
 
 	emit projectUpdated();
 	return;
@@ -106,12 +114,12 @@ void SimIdeSimulator::clear()
 
 const VFrame30::SchemaDetailsSet& SimIdeSimulator::schemaDetails() const
 {
-	return m_schemaDetails;
+	return *m_schemaDetails;
 }
 
 std::vector<VFrame30::SchemaDetails> SimIdeSimulator::schemasForLm(QString equipmentId) const
 {
-	return m_schemaDetails.schemasDetails(equipmentId);
+	return m_schemaDetails->schemasDetails(equipmentId);
 }
 
 std::shared_ptr<Hardware::DeviceObject> SimIdeSimulator::monitorEquipment() const
@@ -283,7 +291,7 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 	}
 	else
 	{
-		ok = m_schemaDetails.Load(fileName);
+		ok = m_schemaDetails->Load(fileName);
 
 		if (ok == false)
 		{
@@ -292,6 +300,46 @@ bool SimIdeSimulator::loadSchemaDetails(QString buildPath)
 	}
 
 	emit schemaDetailsUpdated();
+
+	return ok;
+}
+
+bool SimIdeSimulator::loadAppSignalLists(QString buildPath)
+{
+	// load all files from buildPath/AppSignalLists/*.aslist
+	//
+	bool ok = true;
+
+	QDir dir{QDir::fromNativeSeparators(buildPath) + "/" + Directory::APP_SIGNAL_LISTS};
+
+	QStringList filters = {"*.aslist"};
+	dir.setNameFilters(filters);
+
+	m_appSignalListSet->clear();
+
+	for (const auto& fileName : dir.entryList(QDir::Files))
+	{
+		QString absFileName = dir.absoluteFilePath(fileName);
+		m_simulator->log()->writeMessage(tr("Load app signal list file: %1").arg(absFileName));
+
+		QFile file{absFileName};
+		if (file.open(QIODevice::ReadOnly) == false)
+		{
+			m_simulator->log()->writeError(tr("File %1 cannot be read.").arg(absFileName));
+			ok = false;
+			continue;
+		}
+
+		QByteArray filedata = file.readAll();
+
+		bool listLoaded = m_appSignalListSet->add(filedata);
+		if (listLoaded == false)
+		{
+			m_simulator->log()->writeError(tr("File loading error, file name %1.").arg(absFileName));
+			ok = false;
+			continue;
+		}
+	}
 
 	return ok;
 }
@@ -308,14 +356,14 @@ Sim::Simulator* SimIdeSimulator::simulator()
 
 std::vector<VFrame30::SchemaDetails> SimIdeSimulator::schemasDetails() const
 {
-	std::vector<VFrame30::SchemaDetails> result = m_schemaDetails.schemasDetails();
+	std::vector<VFrame30::SchemaDetails> result = m_schemaDetails->schemasDetails();
 
 	return result;
 }
 
 std::set<QString> SimIdeSimulator::schemaAppSignals(const QString& schemaId)
 {
-	std::shared_ptr<VFrame30::SchemaDetails> details = m_schemaDetails.schemaDetails(schemaId);
+	std::shared_ptr<VFrame30::SchemaDetails> details = m_schemaDetails->schemaDetails(schemaId);
 
 	if (details == nullptr)
 	{
@@ -327,10 +375,20 @@ std::set<QString> SimIdeSimulator::schemaAppSignals(const QString& schemaId)
 
 QStringList SimIdeSimulator::schemasByAppSignalId(const QString& appSignalId) const
 {
-	return m_schemaDetails.schemasByAppSignalId(appSignalId);
+	return m_schemaDetails->schemasByAppSignalId(appSignalId);
 }
 
 QStringList SimIdeSimulator::schemasByLoopbackId(const QString& loopbackId) const
 {
-	return m_schemaDetails.schemasByLoopbackId(loopbackId);
+	return m_schemaDetails->schemasByLoopbackId(loopbackId);
+}
+
+const AppSignalLists::AppSignalListSet& SimIdeSimulator::appSignalListSet() const
+{
+	return *m_appSignalListSet;
+}
+
+AppSignalLists::AppSignalListSet& SimIdeSimulator::appSignalListSet()
+{
+	return *m_appSignalListSet;
 }
