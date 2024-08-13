@@ -2,7 +2,9 @@
 
 // 29 Mar 2024 - Version 1.0 -  The first version of the file format.
 // 10 Apr 2024 - Version 1.1 -  Added VduSchemaFileSchemaItem1::isStatic, VduSchemaFileSchemaItemValue1::decimalPlaces.
-//
+// 13 Aug 2024 - Version 1.2 -  Added VduSchemaFileSchemaItem1::preDrawScript, VduSchemaFileSchemaItem1::clickScript,
+// VduSchemaFileSchemaItem1::objectName, VduSchemaFileSchemaItem1::clickScript, VduSchemaFileSchemaItem1::preDrawScript.
+
 
 // SVDU schema file, extension *.vbs
 // Data stored in little-endian format.
@@ -27,6 +29,8 @@ struct VduSchemaFileProperties1
 	uint32_t backgroundColor;
 	vdu_string_ref schemaId;
 	vdu_string_ref caption;
+	vdu_string_ref onShowScript;
+	vdu_string_ref preDrawScript;
 	uint32_t reserve1;
 	uint32_t reserve2;
 };
@@ -82,6 +86,10 @@ struct VduSchemaFileSchemaItem1
 
 	bool isStatic;          // If true, the item is static and can be cached.
 	bool reserveBool0;
+
+	vdu_string_ref objectName;
+	vdu_string_ref clickScript;
+	vdu_string_ref preDrawScript;
 
 	uint32_t reserve2;
 	uint32_t reserve3;

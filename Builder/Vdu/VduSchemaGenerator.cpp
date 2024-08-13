@@ -191,6 +191,8 @@ namespace Builder
 			schemaProperties.backgroundColor = schema.backgroundColor().rgba();
 			schemaProperties.schemaId = addStringRef(schema.schemaId(), offsetof(VduSchemaFile, schemaProperties.schemaId));
 			schemaProperties.caption = addStringRef(schema.caption(), offsetof(VduSchemaFile, schemaProperties.caption));
+			schemaProperties.onShowScript = addStringRef(schema.onShowScript(), offsetof(VduSchemaFile, schemaProperties.onShowScript));
+			schemaProperties.preDrawScript = addStringRef(schema.preDrawScript(), offsetof(VduSchemaFile, schemaProperties.preDrawScript));
 			schemaProperties.reserve1 = 0;
 			schemaProperties.reserve2 = 0;
 		};
@@ -430,6 +432,23 @@ namespace Builder
 		fileSchemaItem.itemType = itemType;
 		fileSchemaItem.totalItemSize = static_cast<TotalItemSizeType>(sizeof(VduSchemaFileSchemaItem1) + specificItemSize);
 		fileSchemaItem.isStatic = schemaItem.IsStatic();
+
+		fileSchemaItem.objectName = StringRefStub;
+		addedStringReferences.emplace_back(schemaItem.objectName().trimmed(), offsetof(VduSchemaFileSchemaItem1, objectName));
+
+		// onClickScript
+		//
+		QString clickScript = (schemaItem.acceptClick() == false || schemaItem.clickScript().trimmed().isEmpty() == true) ?
+								  QString{""} :
+								  schemaItem.clickScript().trimmed();
+
+		fileSchemaItem.clickScript = StringRefStub;
+		addedStringReferences.emplace_back(clickScript, offsetof(VduSchemaFileSchemaItem1, clickScript));
+
+		// onClickScript
+		//
+		fileSchemaItem.preDrawScript = StringRefStub;
+		addedStringReferences.emplace_back(schemaItem.preDrawScript().trimmed(), offsetof(VduSchemaFileSchemaItem1, preDrawScript));
 
 		// Save specific item, depending on itemType.
 		//
