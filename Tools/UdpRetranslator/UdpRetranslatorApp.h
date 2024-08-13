@@ -16,7 +16,8 @@ public:
 	bool init(int argc, char** argv);
 	int run();
 
-	bool startRetranslate();
+	static void startRetranslate();
+	void waitQuitRequested();
 	static void stopRetranslate();
 
 private:
@@ -49,6 +50,7 @@ private:
 
 	std::vector<RetranslateCfg> m_retranslateCfgs;
 
+	inline static bool m_instanceCreated = false;
 	inline static std::mutex m_waitQuitMutex;
 	inline static std::condition_variable m_waitQuit;
 	inline static bool m_quitRequested = false;

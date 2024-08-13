@@ -7,6 +7,14 @@ QSettings settings(QSettings::SystemScope, "RadiyQt6", "UdpRetranslator");
 
 UdpRetranslatorApp::UdpRetranslatorApp()
 {
+	if (m_instanceCreated == false)
+	{
+		m_instanceCreated = true;
+	}
+	else
+	{
+		Q_ASSERT(false);			// UdpRetranslatorApp is singleton!
+	}
 }
 
 UdpRetranslatorApp::~UdpRetranslatorApp()
@@ -71,7 +79,7 @@ int UdpRetranslatorApp::run()
 			BREAK_IF_FALSE(printCaptureDevices());
 			BREAK_IF_FALSE(readCfgFile(it->second));
 			saveCfgFileName(it->second);
-			BREAK_IF_FALSE(startRetranslate());
+			startRetranslate();
 			break;
 		}
 
@@ -83,35 +91,76 @@ int UdpRetranslatorApp::run()
 	return 0;
 }
 
-bool UdpRetranslatorApp::startRetranslate()
+void UdpRetranslatorApp::startRetranslate()
 {
-	DEBUG_LOG_MSG(logger, QString("Configuration file name '%1'").arg(settings.value(CFG_FILE_NAME).toString()));
+	DEBUG_LOG_MSG(logger, QString("UdpRetranslatorApp::startRetranslate started"));
+
+	QString cfgFileName = settings.value(CFG_FILE_NAME).toString();
+
+	DEBUG_LOG_MSG(logger, QString("Configuration file name: %1").arg(cfgFileName));
+
+	if (app.readCfgFile(cfgFileName) == false)
+	{
+		return;
+	}
+
+	if (app.getCaptureDevices() == false)
+	{
+		return;
+	}
+
 	// start retranslating threads
 	//
-	std::vector<std::thread*> rtrThreads;
+	std::list<std::thread> rtrThreads;
 
 	int threadNo = 1;
 
-	for(const RetranslateCfg& rtrCfg : m_retranslateCfgs)
+	DEBUG_LOG_MSG(logger, QString("Retranslate cfg found - %1").arg(app.m_retranslateCfgs.size()));
+
+	for(const RetranslateCfg& rtrCfg : app.m_retranslateCfgs)
 	{
-		auto it = std::find_if(m_captureDevices.begin(), m_captureDevices.end(),
+		auto it = std::find_if(app.m_captureDevices.begin(), app.m_captureDevices.end(),
 							[&rtrCfg] (const CaptureDevice& capDevice)
 							{
 								return rtrCfg.captureDeviceDescription == capDevice.description();
 							});
 
-		if (it == m_captureDevices.end())
+		if (it == app.m_captureDevices.end())
 		{
 			DEBUG_LOG_ERR(logger, QString("Capture device '%1' is not found!").arg(rtrCfg.captureDeviceDescription));
 		}
 		else
 		{
-			std::thread* rtrThread = new std::thread(&CaptureDevice::retranslate, it, rtrCfg, threadNo++);
-
-			rtrThreads.emplace_back(rtrThread);
+//			DEBUG_LOG_MSG(logger, QString("Running capture thread for device: '%1'").arg(rtrCfg.captureDeviceDescription));
+			rtrThreads.emplace_back(&CaptureDevice::retranslate, it, rtrCfg, threadNo++);
+			DEBUG_LOG_MSG(logger, QString("Running capture thread for device: '%1'").
+											arg(rtrCfg.captureDeviceDescription));
 		}
 	}
 
+	app.waitQuitRequested();
+
+	// stop retranslating threads
+	//
+
+	DEBUG_LOG_MSG(logger, QString("Breake all captures"));
+
+	CaptureDevice::breakAllCaptures();
+
+	DEBUG_LOG_MSG(logger, QString("Wait for capture threads (%1) finalizing").arg(rtrThreads.size()));
+
+	for(std::thread& rtrThread : rtrThreads)
+	{
+		rtrThread.join();
+	}
+
+	DEBUG_LOG_MSG(logger, QString("All capture threads finalized"));
+
+	DEBUG_LOG_MSG(logger, QString("UdpRetranslatorApp::startRetranslate finished"));
+}
+
+void UdpRetranslatorApp::waitQuitRequested()
+{
 	m_quitRequested = false;
 
 	std::unique_lock ul(m_waitQuitMutex);
@@ -119,18 +168,6 @@ bool UdpRetranslatorApp::startRetranslate()
 	m_waitQuit.wait(ul, [this]() { return m_quitRequested; });
 
 	ul.unlock();
-
-	// stop retranslating threads
-	//
-	CaptureDevice::breakAllCaptures();
-
-	for(std::thread* rtrThread : rtrThreads)
-	{
-		rtrThread->join();
-		delete rtrThread;
-	}
-
-	return true;
 }
 
 void UdpRetranslatorApp::stopRetranslate()
@@ -291,6 +328,8 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 		DEBUG_LOG_ERR(logger, QString("Error open configuration file %1").arg(cfgFileName));
 		return false;
 	}
+
+	DEBUG_LOG_MSG(logger, QString("Open configuration file %1 - Ok").arg(cfgFileName));
 
 	QStringList cfg = QString(cfgFile.readAll()).split("\n", Qt::SkipEmptyParts);
 
@@ -461,6 +500,9 @@ bool UdpRetranslatorApp::runService()
 
 VOID serviceMain(DWORD argc, LPTSTR* argv)
 {
+	Q_UNUSED(argc);
+	Q_UNUSED(argv);
+
 	DEBUG_LOG_MSG(logger, "ServiceMain: started");
 
 	// Register our service control handler with the SCM
@@ -494,7 +536,7 @@ VOID serviceMain(DWORD argc, LPTSTR* argv)
 	srvStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
 	srvStatus.dwCurrentState = SERVICE_RUNNING;
 	srvStatus.dwWin32ExitCode = 0;
-	srvStatus.dwCheckPoint = 0;
+	srvStatus.dwCheckPoint = 1;
 
 	if (SetServiceStatus (srvStatusHandle, &srvStatus) == FALSE)
 	{
@@ -503,7 +545,11 @@ VOID serviceMain(DWORD argc, LPTSTR* argv)
 
 	DEBUG_LOG_MSG(logger, QString("ServiceMain: SetServiceStatus SERVICE_RUNNING - Ok"));
 
-	std::jthread srvThread(&UdpRetranslatorApp::startRetranslate, &app);
+	//
+
+	UdpRetranslatorApp:: startRetranslate();
+
+	//
 
 	// Tell the service controller we are stopped
 	//
@@ -519,6 +565,8 @@ VOID serviceMain(DWORD argc, LPTSTR* argv)
 	}
 
 	DEBUG_LOG_MSG(logger, QString("ServiceMain: SetServiceStatus SERVICE_STOPPED - Ok"));
+
+	DEBUG_LOG_MSG(logger, "ServiceMain: finished");
 
 	return;
 }
