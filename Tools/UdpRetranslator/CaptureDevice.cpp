@@ -77,6 +77,8 @@ CaptureDevice::CaptureDevice(const pcap_if_t* cd, CircularLoggerShared log)
 CaptureDevice::~CaptureDevice()
 {
 	close();
+
+	DELETE_ARRAY_IF_NOT_NULL(m_rtrBuffer);
 }
 
 bool CaptureDevice::getCaptureDevices(std::vector<CaptureDevice>* capDevs, CircularLoggerShared log)
@@ -182,6 +184,9 @@ bool CaptureDevice::openForCapturing()
 
 	u_int netmask = 0xFFFFFF00;		// ??????
 	char packet_filter[] = "udp";		// "ip and udp";
+
+	// udp and ((src 192.168.11.96 and src port 209  and dst 192.168.14.85) or (src 192.168.11.96 or 192.168.14.85))
+
 	bpf_program fcode;
 
 	// compile the filter
@@ -259,10 +264,10 @@ void CaptureDevice::printPacketInfo(const struct pcap_pkthdr* header, const u_ch
 	str += QStringLiteral("  ->  ");
 
 	str += QString("%1.%2.%3.%4:%5").
-		   arg(ih->desIP.byte1).
-		   arg(ih->desIP.byte2).
-		   arg(ih->desIP.byte3).
-		   arg(ih->desIP.byte4).
+		   arg(ih->destIP.byte1).
+		   arg(ih->destIP.byte2).
+		   arg(ih->destIP.byte3).
+		   arg(ih->destIP.byte4).
 		   arg(destPort).leftJustified(21, sp);
 
 	str += QString("  len = %1").arg(header->len);
@@ -281,27 +286,153 @@ void CaptureDevice::close()
 	}
 }
 
-bool CaptureDevice::retranslate(const RetranslateCfg& rtrCfg, int threadNo)
+bool CaptureDevice::retranslate(const RetranslateCfg& rtrCfg, int threadNo, bool isService)
 {
 	m_rtrCfg = rtrCfg;
+	m_isService = isService;
 
 	Q_ASSERT(rtrCfg.captureDeviceDescription == m_description);
 
-	DEBUG_LOG_MSG(m_log, QString("Retranslating thread #%1 started").arg(threadNo));
+	DEBUG_LOG_MSG(m_log, QString("Retranslating thread #%1 started (mode - %2)").
+						 arg(threadNo).arg(m_isService ? "Service" : "Console"));
+
+	m_rtrEnries.clear();
+	m_rtrCounters.clear();
+
+	for(const RetranslateEntry& rtrEntry : rtrCfg.rtrEntries)
+	{
+		m_rtrEnries.emplace(rtrEntry.srcAddr, rtrEntry);
+		m_rtrCounters.emplace(rtrEntry.srcAddr, 0);
+	}
 
 	bool result = openForCapturing();
 
 	RETURN_IF_FALSE(result);
 
-	SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
+	if (isService == false)
+	{
+		SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
+	}
 
-	retranslatePackets();
+	DEBUG_LOG_ERR(m_log, QString("Listening on '%1'...").arg(m_description));
+	std::cout << "\n";
+
+	Q_ASSERT(m_capHandle != NULL);
+
+	addCaptureHandle(m_capHandle);
+
+	pcap_loop(m_capHandle, 0, retranslatePacketHandler, reinterpret_cast<u_char*>(this));
+
+	removeCaptureHandle(m_capHandle);
 
 	close();
 
 	DEBUG_LOG_MSG(m_log, QString("Retranslating thread #%1 finished").arg(threadNo));
 
 	return true;
+}
+
+void CaptureDevice::retranslatePacket(const pcap_pkthdr* header, const u_char* packetData)
+{
+	TEST_PTR_RETURN(m_capHandle);
+
+	EthernetHeader* eh = nullptr;
+	IpHeader* ih = nullptr;
+	UdpHeader* uh = nullptr;
+
+	if (getPacketHeaders(packetData, header->len, &eh, &ih, &uh) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	TEST_PTR_RETURN(eh);
+	TEST_PTR_RETURN(ih);
+	TEST_PTR_RETURN(uh);
+
+	quint32 srcIP = ntohl(ih->srcIP.ip);
+	quint16 srcPort = ntohs(uh->srcPort);
+
+	HostAddressPort srcAddressPort(srcIP, srcPort);
+
+	auto it = m_rtrEnries.find(srcAddressPort);
+
+	if (it == m_rtrEnries.end())
+	{
+		return;
+	}
+
+	const RetranslateEntry& rtrEntry = it->second;
+
+	quint32 destIP = ntohl(ih->destIP.ip);
+	quint16 destPort = ntohs(uh->destPort);
+
+	if (rtrEntry.destAddr != HostAddressPort(destIP, destPort))
+	{
+		return;
+	}
+
+	if (m_rtrBufferSize < header->len)
+	{
+		DELETE_ARRAY_IF_NOT_NULL(m_rtrBuffer);
+
+		m_rtrBufferSize = header->len;
+		m_rtrBuffer = new quint8 [m_rtrBufferSize];
+	}
+
+	std::memcpy(m_rtrBuffer, packetData, header->len);
+
+	EthernetHeader* rtrEh = nullptr;
+	IpHeader* rtrIh = nullptr;
+	UdpHeader* rtrUh = nullptr;
+
+	if (getPacketHeaders(m_rtrBuffer, header->len, &rtrEh, &rtrIh, &rtrUh) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	TEST_PTR_RETURN(rtrEh);
+	TEST_PTR_RETURN(rtrIh);
+	TEST_PTR_RETURN(rtrUh);
+
+	// destination IP address replacement
+	//
+	rtrIh->destIP.ip = htonl(rtrEntry.sendToAddr.address32());
+	calcIpHeaderChecksum(rtrIh);
+
+	// destination UDP Port replacement
+	//
+	rtrUh->destPort = htons(rtrEntry.sendToAddr.port());
+	calcUdpHeaderChecksum(rtrIh);
+
+	quint32 bytesWritten = pcap_inject(m_capHandle, m_rtrBuffer, header->len);
+
+	if (bytesWritten == header->len)
+	{
+		auto it2 = m_rtrCounters.find(srcAddressPort);
+
+		if (it2 != m_rtrCounters.end())
+		{
+			it2->second++;
+
+			if ((it2->second % 1000) == 0)
+			{
+				DEBUG_LOG_MSG(m_log, QString("Retranslated from %1 to %2 packets: %3").
+										arg(srcAddressPort.addressPortStr()).
+										arg(rtrEntry.sendToAddr.addressPortStr()).
+										arg(it2->second));
+			}
+		}
+		else
+		{
+			Q_ASSERT(false);
+		}
+	}
+	else
+	{
+		Q_ASSERT(false);
+	}
 }
 
 void CaptureDevice::breakAllCaptures()
@@ -353,20 +484,6 @@ void CaptureDevice::removeCaptureHandle(pcap_t* capHandle)
 	Q_ASSERT(m_capHandles.contains(capHandle) == true);
 
 	m_capHandles.erase(capHandle);
-}
-
-void CaptureDevice::retranslatePackets()
-{
-	DEBUG_LOG_ERR(m_log, QString("Listening on '%1'...").arg(m_description));
-	std::cout << "\n";
-
-	Q_ASSERT(m_capHandle != NULL);
-
-	addCaptureHandle(m_capHandle);
-
-	pcap_loop(m_capHandle, 0, retranslatePacketHandler, reinterpret_cast<u_char*>(this));
-
-	removeCaptureHandle(m_capHandle);
 }
 
 bool CaptureDevice::getPacketHeaders(const u_char* packetData,
@@ -425,6 +542,5 @@ void retranslatePacketHandler(u_char* param, const struct pcap_pkthdr* header, c
 
 	CaptureDevice* capDev = reinterpret_cast<CaptureDevice*>(param);
 
-	capDev->printPacketInfo(header, packetData);
+	capDev->retranslatePacket(header, packetData);
 }
-

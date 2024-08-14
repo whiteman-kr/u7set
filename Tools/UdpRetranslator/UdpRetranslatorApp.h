@@ -16,7 +16,7 @@ public:
 	bool init(int argc, char** argv);
 	int run();
 
-	static void startRetranslate();
+	static void startRetranslate(bool isService);
 	void waitQuitRequested();
 	static void stopRetranslate();
 

@@ -79,7 +79,7 @@ int UdpRetranslatorApp::run()
 			BREAK_IF_FALSE(printCaptureDevices());
 			BREAK_IF_FALSE(readCfgFile(it->second));
 			saveCfgFileName(it->second);
-			startRetranslate();
+			startRetranslate(false);
 			break;
 		}
 
@@ -91,7 +91,7 @@ int UdpRetranslatorApp::run()
 	return 0;
 }
 
-void UdpRetranslatorApp::startRetranslate()
+void UdpRetranslatorApp::startRetranslate(bool isService)
 {
 	DEBUG_LOG_MSG(logger, QString("UdpRetranslatorApp::startRetranslate started"));
 
@@ -131,8 +131,7 @@ void UdpRetranslatorApp::startRetranslate()
 		}
 		else
 		{
-//			DEBUG_LOG_MSG(logger, QString("Running capture thread for device: '%1'").arg(rtrCfg.captureDeviceDescription));
-			rtrThreads.emplace_back(&CaptureDevice::retranslate, it, rtrCfg, threadNo++);
+			rtrThreads.emplace_back(&CaptureDevice::retranslate, it, rtrCfg, threadNo++, isService);
 			DEBUG_LOG_MSG(logger, QString("Running capture thread for device: '%1'").
 											arg(rtrCfg.captureDeviceDescription));
 		}
@@ -333,15 +332,26 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 	QStringList cfg = QString(cfgFile.readAll()).split("\n", Qt::SkipEmptyParts);
 
-	for(QString& cl : cfg)
-	{
-		cl = cl.trimmed();
-	}
-
 	bool result = true;
 
-	for(QString& cl : cfg)
+	for(QString cl : cfg)		// copy - Ok
 	{
+		cl = cl.trimmed();
+
+		if (cl.startsWith("#") == true)
+		{
+			continue;
+		}
+
+		QStringList ll = cl.split("#");
+
+		if (ll.size() == 0)
+		{
+			continue;
+		}
+
+		cl = ll[0].trimmed();
+
 		if (cl.startsWith("captureFrom") == true)
 		{
 			QStringList sl = cl.split("=", Qt::SkipEmptyParts);
@@ -425,7 +435,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 					re.sendToAddr = hp;
 				}
 
-				m_retranslateCfgs.back().rtrEntry.push_back(re);
+				m_retranslateCfgs.back().rtrEntries.push_back(re);
 			}
 		}
 	}
@@ -547,7 +557,7 @@ VOID serviceMain(DWORD argc, LPTSTR* argv)
 
 	//
 
-	UdpRetranslatorApp:: startRetranslate();
+	UdpRetranslatorApp:: startRetranslate(true);
 
 	//
 

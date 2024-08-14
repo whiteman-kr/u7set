@@ -19,9 +19,9 @@ public:
 	HostAddressPort(const QString& address, int port);
 
 	HostAddressPort& operator=(const HostAddressPort &other) = default;
-	bool operator==(const HostAddressPort &other) const;
-	bool operator!=(const HostAddressPort &other) const;
-	bool operator<(const HostAddressPort &other) const;
+	bool operator == (const HostAddressPort &other) const;
+	bool operator != (const HostAddressPort &other) const;
+	bool operator < (const HostAddressPort &other) const;
 
 	void clear();
 
@@ -57,6 +57,8 @@ public:
 	[[nodiscard]] QString addressStrIfSet() const;
 
 	[[nodiscard]] QString portStr() const;
+
+	[[nodiscard]] quint64 addressPortValue() const;
 
 	[[nodiscard]] bool isNull() const;
 	[[nodiscard]] bool isSet() const;
@@ -132,19 +134,19 @@ inline HostAddressPort::HostAddressPort(const QString& address, int port)
 	m_port = static_cast<quint16>(port);
 }
 
-inline bool HostAddressPort::operator==(const HostAddressPort& other) const
+inline bool HostAddressPort::operator == (const HostAddressPort& other) const
 {
 	return m_hostAddress == other.m_hostAddress && m_port == other.m_port;
 }
 
-inline bool HostAddressPort::operator!=(const HostAddressPort& other) const
+inline bool HostAddressPort::operator != (const HostAddressPort& other) const
 {
 	return m_hostAddress != other.m_hostAddress || m_port != other.m_port;
 }
 
-inline bool HostAddressPort::operator<(const HostAddressPort& other) const
+inline bool HostAddressPort::operator < (const HostAddressPort& other) const
 {
-	return addressPortStr() < other.addressPortStr();
+	return addressPortValue() < other.addressPortValue();
 }
 
 inline void HostAddressPort::clear()
@@ -422,3 +424,15 @@ inline bool HostAddressPort::splitAddressPortStr(const QString& addressPortStr, 
 	return addrOk && portOk;
 }
 
+inline quint64 HostAddressPort::addressPortValue() const
+{
+	bool ok = false;
+
+	quint64 v1 = m_hostAddress.toIPv4Address(&ok);
+
+	Q_ASSERT(ok == true);
+
+	v1 = (v1 << 16) | m_port;
+
+	return v1;
+}

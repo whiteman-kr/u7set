@@ -17,7 +17,7 @@ struct RetranslateCfg
 {
 	QString captureDeviceDescription;
 
-	std::vector<RetranslateEntry> rtrEntry;
+	std::vector<RetranslateEntry> rtrEntries;
 };
 
 class CaptureDevice
@@ -50,7 +50,8 @@ public:
 
 	void close();
 
-	bool retranslate(const RetranslateCfg& rtrCfg, int threadNo);
+	bool retranslate(const RetranslateCfg& rtrCfg, int threadNo, bool isService);
+	void retranslatePacket(const struct pcap_pkthdr* header, const u_char* packetData);
 
 	static void breakAllCaptures();
 
@@ -62,8 +63,6 @@ public:
 private:
 	static void addCaptureHandle(pcap_t* capHandle);
 	static void removeCaptureHandle(pcap_t* capHandle);
-
-	void retranslatePackets();
 
 	bool getPacketHeaders(const u_char* packetData, quint32 packetLen,
 						  EthernetHeader **ethHeader,
@@ -88,4 +87,12 @@ private:
 	pcap_t* m_capHandle = nullptr;
 
 	RetranslateCfg m_rtrCfg;
+
+	bool m_isService = false;
+
+	std::map<HostAddressPort, RetranslateEntry> m_rtrEnries;
+	std::map<HostAddressPort, quint64> m_rtrCounters;
+
+	quint8* m_rtrBuffer = nullptr;
+	quint32 m_rtrBufferSize = 0;
 };
