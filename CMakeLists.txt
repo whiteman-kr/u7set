@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
+# This file sets some options to control GraphViz graphs.
+#set(GRAPHVIZ_GRAPH_NAME "")
+set(GRAPHVIZ_CUSTOM_TARGETS TRUE)
+
 # Creates variables:
 #	U7SET_MAJOR_VERSION, 
 #	U7SET_MINOR_VERSION, 
@@ -185,3 +189,14 @@ add_custom_target(create_install
 	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/u7setinstall"
 	COMMENT "Running createinstall.bat with U7SET_FULL_VERSION=${U7SET_FULL_VERSION}"
 )
+
+# Generate dependency graphs into the build directory/LibraryDependencies
+#
+if(WIN32)
+    # Add a custom target to run the dependencies.bat script
+    add_custom_target(GenerateDependencySvgs
+        COMMAND "${CMAKE_SOURCE_DIR}/dependencies.bat"
+        COMMENT "Generating library dependency SVG files..."
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+    )
+endif()
