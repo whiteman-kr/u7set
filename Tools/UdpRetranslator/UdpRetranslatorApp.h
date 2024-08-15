@@ -31,6 +31,7 @@ private:
 	bool testCaptureDevice();
 	bool readCfgFile(const QString& cfgFileName);
 	bool saveCfgFileName(const QString& cfgFileName);
+	void writeExampleCfgFile();
 
 	bool runService();
 
@@ -38,6 +39,7 @@ private:
 	inline static const QString ARG_HELP = QStringLiteral("-h");
 	inline static const QString ARG_DEV_LIST = QStringLiteral("-devlist");
 	inline static const QString ARG_TEST_CAP = QStringLiteral("-testcap");
+	inline static const QString EXAMPLE_CFG = QStringLiteral("-examplecfg");
 	inline static const QString ARG_CFG = QStringLiteral("-cfg");
 
 	int m_argc = 0;

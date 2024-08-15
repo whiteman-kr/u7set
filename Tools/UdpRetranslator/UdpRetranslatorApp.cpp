@@ -71,6 +71,12 @@ int UdpRetranslatorApp::run()
 			break;
 		}
 
+		if (m_cmdLineArgs.contains(EXAMPLE_CFG))
+		{
+			writeExampleCfgFile();
+			break;
+		}
+
 		auto it = m_cmdLineArgs.find(ARG_CFG);
 
 		if (it != m_cmdLineArgs.end())
@@ -234,6 +240,7 @@ void UdpRetranslatorApp::printHelp()
 	std::cout << QString("%1\t\tprint list of capture devices\n").arg(ARG_DEV_LIST).toStdString();
 	std::cout << QString("%1\t\ttest capturing on device\n").arg(ARG_TEST_CAP).toStdString();
 	std::cout << QString("%1=cfgFileName\tload config file and start UDP retranslation\n").arg(ARG_CFG).toStdString();
+	std::cout << QString("%1\t\twrite example configuration file Example.cfg\n").arg(EXAMPLE_CFG).toStdString();
 	std::cout << "\n";
 	std::cout << "Note that Administrator permissions requierd to install, delete, start or stop service.\n\n";
 	std::cout << "To install service use:\t\tsc create UdpRetranslator binPath=[path_to]/udprtr.exe\n";
@@ -330,13 +337,22 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 	DEBUG_LOG_MSG(logger, QString("Open configuration file %1 - Ok").arg(cfgFileName));
 
-	QStringList cfg = QString(cfgFile.readAll()).split("\n", Qt::SkipEmptyParts);
+	QStringList cfg = QString(cfgFile.readAll()).split("\n", Qt::KeepEmptyParts);
 
 	bool result = true;
+
+	int line = 0;
 
 	for(QString cl : cfg)		// copy - Ok
 	{
 		cl = cl.trimmed();
+
+		line++;
+
+		if (cl.isEmpty())
+		{
+			continue;
+		}
 
 		if (cl.startsWith("#") == true)
 		{
@@ -366,7 +382,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 			}
 			else
 			{
-				DEBUG_LOG_ERR(logger, QString("Error parsing cfg line: %1").arg(cl));
+				DEBUG_LOG_ERR(logger, QString("Error parsing captureFrom sentence '%1' [line %2]").arg(cl).arg(line));
 
 				result = false;
 			}
@@ -375,7 +391,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 		{
 			if (m_retranslateCfgs.size() == 0)
 			{
-				DEBUG_LOG_ERR(logger, QString("Sentence 'captureFrom' not found!"));
+				DEBUG_LOG_ERR(logger, QString("Sentence 'captureFrom' not found! [line %1]").arg(line));
 				result = false;
 				continue;
 			}
@@ -384,7 +400,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 			if (sl.size() != 3)
 			{
-				DEBUG_LOG_ERR(logger, QString("Error parsing cfg line: %1").arg(cl));
+				DEBUG_LOG_ERR(logger, QString("Error parsing cfg line '%1' [line %2]").arg(cl).arg(line));
 
 				result = false;
 			}
@@ -399,7 +415,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 				if (res == false)
 				{
-					DEBUG_LOG_ERR(logger, QString("Wrong source IP:port - %1").arg(sl[0].trimmed()));
+					DEBUG_LOG_ERR(logger, QString("Wrong source IP:port '%1' [line %2]").arg(sl[0].trimmed()).arg(line));
 					result = false;
 				}
 				else
@@ -413,7 +429,7 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 				if (res == false)
 				{
-					DEBUG_LOG_ERR(logger, QString("Wrong destination IP:port - %1").arg(sl[1].trimmed()));
+					DEBUG_LOG_ERR(logger, QString("Wrong destination IP:port '%1' [line %2]").arg(sl[1].trimmed()).arg(line));
 					result = false;
 				}
 				else
@@ -427,12 +443,20 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 				if (res == false)
 				{
-					DEBUG_LOG_ERR(logger, QString("Wrong sendTo IP:port - %1").arg(sl[2].trimmed()));
+					DEBUG_LOG_ERR(logger, QString("Wrong sendTo IP:port '%1' [line %2]").arg(sl[2].trimmed()).arg(line));
 					result = false;
 				}
 				else
 				{
-					re.sendToAddr = hp;
+					if (hp.port() == 0)
+					{
+						DEBUG_LOG_ERR(logger, QString("Port should be specified in sendTo IP:port '%1' [line %2]").arg(sl[2].trimmed()).arg(line));
+						result = false;
+					}
+					else
+					{
+						re.sendToAddr = hp;
+					}
 				}
 
 				m_retranslateCfgs.back().rtrEntries.push_back(re);
@@ -479,6 +503,13 @@ bool UdpRetranslatorApp::saveCfgFileName(const QString& cfgFileName)
 	}
 
 	return result;
+}
+
+void UdpRetranslatorApp::writeExampleCfgFile()
+{
+	QFile resFile(":/Example.cfg");
+
+	bool res = resFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text);
 }
 
 //

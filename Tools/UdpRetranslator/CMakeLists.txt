@@ -18,6 +18,8 @@ qt_standard_project_setup()
 
 set(TARGET UdpRtr)
 
+set (UdpRtr_RESOURCES Resources.qrc)
+
 add_executable(${TARGET}
 	CaptureDevice.cpp
 	CaptureDevice.h
@@ -28,6 +30,7 @@ add_executable(${TARGET}
 	UdpRetranslatorApp.cpp
 	UdpRetranslatorApp.h
 	UdpRtrMain.cpp
+	${UdpRtr_RESOURCES}
 )
 
 # Add LTO for Release and Windows only. 

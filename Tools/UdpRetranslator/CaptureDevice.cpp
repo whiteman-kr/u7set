@@ -128,7 +128,11 @@ bool CaptureDevice::getCaptureDevices(std::vector<CaptureDevice>* capDevs, Circu
 
 bool CaptureDevice::testCapturing()
 {
-	bool result = openForCapturing();
+	bool result = openForCapture();
+
+	RETURN_IF_FALSE(result);
+
+	result = setCaptureFilter("udp");
 
 	RETURN_IF_FALSE(result);
 
@@ -143,22 +147,38 @@ bool CaptureDevice::testCapturing()
 	return true;
 }
 
-bool CaptureDevice::openForCapturing()
+bool CaptureDevice::openForCapture()
 {
-	char errbuf[PCAP_ERRBUF_SIZE];
+	char errbuf[PCAP_ERRBUF_SIZE * 2];
 
 	// Open device to capture
 	//
+	m_capHandle = pcap_create(C_STR(m_name), errbuf);
 
-	m_capHandle= pcap_open_live(C_STR(m_name),	// name of the device
-								   65536,		// portion of the packet to capture.
-												// 65536 grants that the whole packet will be captured on all the MACs.
-								   1,			// promiscuous mode (nonzero means promiscuous)
-								   1000,		// read timeout
-								 errbuf);		// error buffer
 	if (m_capHandle == NULL)
 	{
-		DEBUG_LOG_ERR(m_log, QString("Unable to open device '%1': %2").arg(m_description).arg(errbuf));
+		DEBUG_LOG_ERR(m_log, QString("Error creating capture handle for device '%1': %2").
+								arg(m_description).arg(errbuf));
+		return false;
+	}
+
+	int res = 0;
+
+	res |= pcap_set_buffer_size(m_capHandle, 65536);
+	res |= pcap_set_promisc(m_capHandle, 1);
+	res |= pcap_set_immediate_mode(m_capHandle, 1);
+
+	if (res != 0)
+	{
+		DEBUG_LOG_ERR(m_log, QString("Error set options of capture handle for device '%1'").arg(m_description));
+		return false;
+	}
+
+	res = pcap_activate(m_capHandle);
+
+	if (res != 0)
+	{
+		DEBUG_LOG_ERR(m_log, QString("Error activating capture handle for device '%1'").arg(m_description));
 		return false;
 	}
 
@@ -170,40 +190,77 @@ bool CaptureDevice::openForCapturing()
 		return false;
 	}
 
-	/*
-	if (d->addresses != NULL)
-		// Retrieve the mask of the first address of the interface
-		netmask=((struct sockaddr_in *)(d->addresses->netmask))->sin_addr.S_un.S_addr;
-	else
+	// Oldstyle m_capHandle initialization
+	//
+	// m_capHandle = pcap_open_live(C_STR(m_name),	// name of the device
+	// 							65536,		// portion of the packet to capture.
+	// 										// 65536 grants that the whole packet will be captured on all the MACs.
+	// 							1,			// promiscuous mode (nonzero means promiscuous)
+	// 							1000,		// read timeout
+	// 							errbuf);		// error buffer
+	// if (m_capHandle == NULL)
+	// {
+	// 	DEBUG_LOG_ERR(m_log, QString("Unable to open device '%1': %2").arg(m_description).arg(errbuf));
+	// 	return false;
+	// }
+
+	return true;
+}
+
+bool CaptureDevice::setCaptureFilter(const RetranslateCfg& rtrCfg)
+{
+	QString capFilter;
+
+	for(const RetranslateEntry& re : rtrCfg.rtrEntries)
 	{
-		// If the interface is without addresses we suppose to be in a C class network
-		//netmask=0xffffff;
-		// netmask = 0xc0a80e00;		// 192.168.14.*
-		netmask = 0xc0a80e00;			// 192.168.75.*
-	} */
+		if (capFilter.isEmpty() == false)
+		{
+			capFilter += QStringLiteral(" or ");
+		}
 
-	u_int netmask = 0xFFFFFF00;		// ??????
-	char packet_filter[] = "udp";		// "ip and udp";
+		capFilter += QString("(src host %1").arg(re.srcAddr.addressStr());
 
-	// udp and ((src 192.168.11.96 and src port 209  and dst 192.168.14.85) or (src 192.168.11.96 or 192.168.14.85))
+		if (re.srcAddr.port() != 0)
+		{
+			capFilter += QString(" and src port %1").arg(re.srcAddr.port());
+		}
 
-	bpf_program fcode;
+		capFilter += QString(" and dst host %1").arg(re.destAddr.addressStr());
+
+		if (re.destAddr.port() != 0)
+		{
+			capFilter += QString(" and dst port %1").arg(re.destAddr.port());
+		}
+
+		capFilter += QStringLiteral(")");
+	}
+
+	capFilter = "udp and (" + capFilter + ")";
+
+	return setCaptureFilter(capFilter);
+}
+
+bool CaptureDevice::setCaptureFilter(const QString& capFilter)
+{
+	bpf_program capFilterCode;
 
 	// compile the filter
 	//
-	if (pcap_compile(m_capHandle, &fcode, packet_filter, 1, netmask) < 0 )
+	if (pcap_compile(m_capHandle, &capFilterCode, C_STR(capFilter), 1, PCAP_NETMASK_UNKNOWN) < 0 )
 	{
-		DEBUG_LOG_ERR(m_log, QString("Unable to compile the capturing filter. Check filter syntax."));
+		DEBUG_LOG_ERR(m_log, QString("Unable to compile the capturing filter '%1'. Check filter syntax.").arg(capFilter));
 		return false;
 	}
 
 	// set the filter
 	//
-	if (pcap_setfilter(m_capHandle, &fcode) < 0)
+	if (pcap_setfilter(m_capHandle, &capFilterCode) < 0)
 	{
-		DEBUG_LOG_ERR(m_log, QString("Error setting the capture filter."));
+		DEBUG_LOG_ERR(m_log, QString("Error setting the capture filter '%1'.").arg(capFilter));
 		return false;
 	}
+
+	DEBUG_LOG_MSG(m_log, QString("Capture filter '%1' applied").arg(capFilter));
 
 	return true;
 }
@@ -296,16 +353,26 @@ bool CaptureDevice::retranslate(const RetranslateCfg& rtrCfg, int threadNo, bool
 	DEBUG_LOG_MSG(m_log, QString("Retranslating thread #%1 started (mode - %2)").
 						 arg(threadNo).arg(m_isService ? "Service" : "Console"));
 
-	m_rtrEnries.clear();
-	m_rtrCounters.clear();
+	m_rtrEnriesWithPorts.clear();
+	m_rtrEnriesWithoutPorts.clear();
 
 	for(const RetranslateEntry& rtrEntry : rtrCfg.rtrEntries)
 	{
-		m_rtrEnries.emplace(rtrEntry.srcAddr, rtrEntry);
-		m_rtrCounters.emplace(rtrEntry.srcAddr, 0);
+		if (rtrEntry.srcAddr.port() != 0)
+		{
+			m_rtrEnriesWithPorts.emplace(rtrEntry.srcAddr, rtrEntry);
+		}
+		else
+		{
+			m_rtrEnriesWithoutPorts.emplace(rtrEntry.srcAddr.address32(), rtrEntry);
+		}
 	}
 
-	bool result = openForCapturing();
+	bool result = openForCapture();
+
+	RETURN_IF_FALSE(result);
+
+	result = setCaptureFilter(rtrCfg);
 
 	RETURN_IF_FALSE(result);
 
@@ -355,21 +422,44 @@ void CaptureDevice::retranslatePacket(const pcap_pkthdr* header, const u_char* p
 
 	HostAddressPort srcAddressPort(srcIP, srcPort);
 
-	auto it = m_rtrEnries.find(srcAddressPort);
+	RetranslateEntry* rtrEntry = nullptr;
 
-	if (it == m_rtrEnries.end())
+	auto it = m_rtrEnriesWithPorts.find(srcAddressPort);
+
+	if (it != m_rtrEnriesWithPorts.end())
 	{
-		return;
+		rtrEntry = &it->second;
+	}
+	else
+	{
+		auto itwp = m_rtrEnriesWithoutPorts.find(srcAddressPort.address32());
+
+		if (itwp == m_rtrEnriesWithoutPorts.end())
+		{
+			return;
+		}
+
+		rtrEntry = &itwp->second;
 	}
 
-	const RetranslateEntry& rtrEntry = it->second;
+	TEST_PTR_RETURN(rtrEntry);
 
 	quint32 destIP = ntohl(ih->destIP.ip);
 	quint16 destPort = ntohs(uh->destPort);
 
-	if (rtrEntry.destAddr != HostAddressPort(destIP, destPort))
+	if (rtrEntry->destAddr.port() != 0)
 	{
-		return;
+		if (rtrEntry->destAddr != HostAddressPort(destIP, destPort))
+		{
+			return;
+		}
+	}
+	else
+	{
+		if (rtrEntry->destAddr.address32() != destIP)
+		{
+			return;
+		}
 	}
 
 	if (m_rtrBufferSize < header->len)
@@ -398,36 +488,26 @@ void CaptureDevice::retranslatePacket(const pcap_pkthdr* header, const u_char* p
 
 	// destination IP address replacement
 	//
-	rtrIh->destIP.ip = htonl(rtrEntry.sendToAddr.address32());
+	rtrIh->destIP.ip = htonl(rtrEntry->sendToAddr.address32());
 	calcIpHeaderChecksum(rtrIh);
 
 	// destination UDP Port replacement
 	//
-	rtrUh->destPort = htons(rtrEntry.sendToAddr.port());
+	rtrUh->destPort = htons(rtrEntry->sendToAddr.port());
 	calcUdpHeaderChecksum(rtrIh);
 
 	quint32 bytesWritten = pcap_inject(m_capHandle, m_rtrBuffer, header->len);
 
 	if (bytesWritten == header->len)
 	{
-		auto it2 = m_rtrCounters.find(srcAddressPort);
-
-		if (it2 != m_rtrCounters.end())
-		{
-			it2->second++;
-
-			if ((it2->second % 1000) == 0)
-			{
+		rtrEntry->retranslatedCount++;
+//			if ((rtrEntry->retranslatedCount % 1000) == 0)
+//			{
 				DEBUG_LOG_MSG(m_log, QString("Retranslated from %1 to %2 packets: %3").
 										arg(srcAddressPort.addressPortStr()).
-										arg(rtrEntry.sendToAddr.addressPortStr()).
-										arg(it2->second));
-			}
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
+										arg(rtrEntry->sendToAddr.addressPortStr()).
+										arg(rtrEntry->retranslatedCount));
+//			}
 	}
 	else
 	{

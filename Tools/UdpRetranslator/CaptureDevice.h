@@ -11,6 +11,8 @@ struct RetranslateEntry
 	HostAddressPort srcAddr;
 	HostAddressPort destAddr;
 	HostAddressPort sendToAddr;
+
+	quint64 retranslatedCount = 0;
 };
 
 struct RetranslateCfg
@@ -44,7 +46,9 @@ public:
 	static bool getCaptureDevices(std::vector<CaptureDevice>* capDevs, CircularLoggerShared log);
 
 	bool testCapturing();
-	bool openForCapturing();
+	bool openForCapture();
+	bool setCaptureFilter(const RetranslateCfg& rtrCfg);
+	bool setCaptureFilter(const QString& capFilter);
 	void dumpPackets();
 	void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData);
 
@@ -90,8 +94,8 @@ private:
 
 	bool m_isService = false;
 
-	std::map<HostAddressPort, RetranslateEntry> m_rtrEnries;
-	std::map<HostAddressPort, quint64> m_rtrCounters;
+	std::map<HostAddressPort, RetranslateEntry> m_rtrEnriesWithPorts;
+	std::map<quint32, RetranslateEntry> m_rtrEnriesWithoutPorts;
 
 	quint8* m_rtrBuffer = nullptr;
 	quint32 m_rtrBufferSize = 0;
