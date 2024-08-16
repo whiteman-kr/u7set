@@ -42,7 +42,7 @@ quint16 calcIpChecksum(quint8* rawHeaderPtr, int headerLenBytes)
 void calcIpHeaderChecksum(IpHeader* ipHeader)
 {
 	ipHeader->headerChecksum = 0;
-	ipHeader->headerChecksum = calcIpChecksum(reinterpret_cast<quint8*>(ipHeader), ipHeader->headerLenBytes());
+	ipHeader->headerChecksum = htons(calcIpChecksum(reinterpret_cast<quint8*>(ipHeader), ipHeader->headerLenBytes()));
 }
 
 /* set tcp checksum: given IP header and UDP datagram */
@@ -110,5 +110,5 @@ void calcUdpHeaderChecksum(IpHeader* iph)
 
 	// set computation result
 	//
-	uh->checksum = (static_cast<quint16>(sum) == 0x0000) ? 0xFFFF : static_cast<quint16>(sum);
+	uh->checksum = htons((static_cast<quint16>(sum) == 0x0000) ? 0xFFFF : static_cast<quint16>(sum));
 }

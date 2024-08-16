@@ -489,11 +489,13 @@ void CaptureDevice::retranslatePacket(const pcap_pkthdr* header, const u_char* p
 	// destination IP address replacement
 	//
 	rtrIh->destIP.ip = htonl(rtrEntry->sendToAddr.address32());
+	//rtrIh->headerChecksum = 0;
 	calcIpHeaderChecksum(rtrIh);
 
 	// destination UDP Port replacement
 	//
 	rtrUh->destPort = htons(rtrEntry->sendToAddr.port());
+	//rtrUh->checksum = 0;
 	calcUdpHeaderChecksum(rtrIh);
 
 	quint32 bytesWritten = pcap_inject(m_capHandle, m_rtrBuffer, header->len);

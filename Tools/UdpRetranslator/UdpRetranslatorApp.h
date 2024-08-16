@@ -41,6 +41,7 @@ private:
 	inline static const QString ARG_TEST_CAP = QStringLiteral("-testcap");
 	inline static const QString EXAMPLE_CFG = QStringLiteral("-examplecfg");
 	inline static const QString ARG_CFG = QStringLiteral("-cfg");
+	inline static const QString EXAMPLE_CFG_FILE = QStringLiteral("Example.cfg");
 
 	int m_argc = 0;
 	char** m_argv = nullptr;

@@ -44,6 +44,7 @@ int UdpRetranslatorApp::run()
 
 	if (m_cmdLineArgs.empty())
 	{
+		std::cout << "\nTo get help information run: UdpRtr.exe -h\n\n";
 		runService();
 		return 0;
 	}
@@ -507,9 +508,39 @@ bool UdpRetranslatorApp::saveCfgFileName(const QString& cfgFileName)
 
 void UdpRetranslatorApp::writeExampleCfgFile()
 {
-	QFile resFile(":/Example.cfg");
+	QFile resFile(":/" + EXAMPLE_CFG_FILE);
 
 	bool res = resFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger, QString("Error reading resource file '%1'").arg(resFile.fileName()));
+		return;
+	}
+
+	QByteArray fileData = resFile.readAll();
+
+	QFileInfo fi(m_appPathFile);
+
+	QString exampleFileName = fi.absolutePath();
+
+	exampleFileName += "/" + EXAMPLE_CFG_FILE;
+
+	QFile exampleFile(exampleFileName);
+
+	res = exampleFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Text | QIODeviceBase::Truncate);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger, QString("Error open file '%1' for writing").arg(exampleFileName));
+		return;
+	}
+
+	exampleFile.write(fileData);
+
+	DEBUG_LOG_ERR(logger, QString("Example configuration file '%1' written").arg(exampleFileName));
+
+	exampleFile.close();
 }
 
 //
