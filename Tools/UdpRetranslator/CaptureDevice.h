@@ -8,9 +8,11 @@
 
 struct RetranslateEntry
 {
-	HostAddressPort srcAddr;
-	HostAddressPort destAddr;
-	HostAddressPort sendToAddr;
+	HostAddressPort srcAddr;			// original datagram source IP:port
+	HostAddressPort destAddr;			// original datagram destination IP:port
+
+	HostAddressPort rtrSrcAddr;			// retranslated datagram source IP:port
+	HostAddressPort rtrDestAddr;		// retranslated datagram destination IP:port
 
 	quint64 retranslatedCount = 0;
 };
@@ -99,4 +101,11 @@ private:
 
 	quint8* m_rtrBuffer = nullptr;
 	quint32 m_rtrBufferSize = 0;
+
+	QString m_str;
+
+	inline static const QString SRC_DEST_SEPARATOR = QStringLiteral(" -> ");
+	inline static const QString RTR_SEPARATOR = QStringLiteral(" => ");
+	inline static const QChar SPACE = ' ';
+	inline static int IP_PORT_LEN = 21;
 };

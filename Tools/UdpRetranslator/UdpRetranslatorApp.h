@@ -30,6 +30,7 @@ private:
 	bool printCaptureDevices();
 	bool testCaptureDevice();
 	bool readCfgFile(const QString& cfgFileName);
+	bool parseSrcDestAddrs(const QString& srcDestAddrStr, HostAddressPort* srcAddr, HostAddressPort* destAddr);
 	bool saveCfgFileName(const QString& cfgFileName);
 	void writeExampleCfgFile();
 
@@ -42,6 +43,7 @@ private:
 	inline static const QString EXAMPLE_CFG = QStringLiteral("-examplecfg");
 	inline static const QString ARG_CFG = QStringLiteral("-cfg");
 	inline static const QString EXAMPLE_CFG_FILE = QStringLiteral("Example.cfg");
+	inline static const QString COMMENT_SEPARATOR = QStringLiteral("//");
 
 	int m_argc = 0;
 	char** m_argv = nullptr;

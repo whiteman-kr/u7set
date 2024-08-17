@@ -344,125 +344,87 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 	int line = 0;
 
-	for(QString cl : cfg)		// copy - Ok
+	for(QString cfgLine : cfg)		// copy - Ok
 	{
-		cl = cl.trimmed();
+		cfgLine = cfgLine.trimmed();
 
 		line++;
 
-		if (cl.isEmpty())
+		if (cfgLine.isEmpty())
 		{
 			continue;
 		}
 
-		if (cl.startsWith("#") == true)
+		if (cfgLine.startsWith(COMMENT_SEPARATOR) == true)
 		{
 			continue;
 		}
 
-		QStringList ll = cl.split("#");
+		QStringList sl = cfgLine.split(COMMENT_SEPARATOR, Qt::SkipEmptyParts);
 
-		if (ll.size() == 0)
+		if (sl.size() == 0)
 		{
 			continue;
 		}
 
-		cl = ll[0].trimmed();
+		cfgLine = sl[0].trimmed();
 
-		if (cl.startsWith("captureFrom") == true)
+		if (cfgLine.startsWith("captureFrom") == true)
 		{
-			QStringList sl = cl.split("=", Qt::SkipEmptyParts);
+			QStringList sl = cfgLine.split("=", Qt::SkipEmptyParts);
 
-			if (sl.size() == 2)
+			if (sl.size() != 2)
 			{
-				RetranslateCfg cc;
-
-				cc.captureDeviceDescription = sl[1].trimmed();
-
-				m_retranslateCfgs.push_back(cc);
-			}
-			else
-			{
-				DEBUG_LOG_ERR(logger, QString("Error parsing captureFrom sentence '%1' [line %2]").arg(cl).arg(line));
-
-				result = false;
-			}
-		}
-		else
-		{
-			if (m_retranslateCfgs.size() == 0)
-			{
-				DEBUG_LOG_ERR(logger, QString("Sentence 'captureFrom' not found! [line %1]").arg(line));
+				DEBUG_LOG_ERR(logger, QString("Error parsing captureFrom sentence '%1' [line %2]").arg(cfgLine).arg(line));
 				result = false;
 				continue;
 			}
 
-			QStringList sl = cl.split("->", Qt::SkipEmptyParts);
+			RetranslateCfg cc;
 
-			if (sl.size() != 3)
-			{
-				DEBUG_LOG_ERR(logger, QString("Error parsing cfg line '%1' [line %2]").arg(cl).arg(line));
+			cc.captureDeviceDescription = sl[1].trimmed();
 
-				result = false;
-			}
-			else
-			{
-				RetranslateEntry re;
-				HostAddressPort hp;
-
-				//
-
-				bool res = hp.setAddressPortStr(sl[0].trimmed(), 0);
-
-				if (res == false)
-				{
-					DEBUG_LOG_ERR(logger, QString("Wrong source IP:port '%1' [line %2]").arg(sl[0].trimmed()).arg(line));
-					result = false;
-				}
-				else
-				{
-					re.srcAddr = hp;
-				}
-
-				//
-
-				res = hp.setAddressPortStr(sl[1].trimmed(), 0);
-
-				if (res == false)
-				{
-					DEBUG_LOG_ERR(logger, QString("Wrong destination IP:port '%1' [line %2]").arg(sl[1].trimmed()).arg(line));
-					result = false;
-				}
-				else
-				{
-					re.destAddr = hp;
-				}
-
-				//
-
-				res = hp.setAddressPortStr(sl[2].trimmed(), 0);
-
-				if (res == false)
-				{
-					DEBUG_LOG_ERR(logger, QString("Wrong sendTo IP:port '%1' [line %2]").arg(sl[2].trimmed()).arg(line));
-					result = false;
-				}
-				else
-				{
-					if (hp.port() == 0)
-					{
-						DEBUG_LOG_ERR(logger, QString("Port should be specified in sendTo IP:port '%1' [line %2]").arg(sl[2].trimmed()).arg(line));
-						result = false;
-					}
-					else
-					{
-						re.sendToAddr = hp;
-					}
-				}
-
-				m_retranslateCfgs.back().rtrEntries.push_back(re);
-			}
+			m_retranslateCfgs.push_back(cc);
+			continue;
 		}
+
+		if (m_retranslateCfgs.size() == 0)
+		{
+			DEBUG_LOG_ERR(logger, QString("Sentence 'captureFrom' not found! [line %1]").arg(line));
+			result = false;
+			continue;
+		}
+
+		sl = cfgLine.split("=>", Qt::SkipEmptyParts);
+
+		if (sl.size() != 2)
+		{
+			DEBUG_LOG_ERR(logger, QString("Error parsing cfg string '%1' [line %2]").arg(cfgLine).arg(line));
+			result = false;
+			continue;
+		}
+
+		RetranslateEntry re;
+
+		bool res = parseSrcDestAddrs(sl[0].trimmed(), &re.srcAddr, &re.destAddr);
+
+		if (res == false)
+		{
+			DEBUG_LOG_ERR(logger, QString("Error parsing cfg string '%1' [line %2]").arg(cfgLine).arg(line));
+			result = false;
+			continue;
+		}
+
+		res = parseSrcDestAddrs(sl[1].trimmed(), &re.rtrSrcAddr, &re.rtrDestAddr);
+
+		if (res == false)
+		{
+			DEBUG_LOG_ERR(logger, QString("Error parsing cfg string '%1' [line %2]").arg(cfgLine).arg(line));
+			result = false;
+			continue;
+		}
+
+		m_retranslateCfgs.back().rtrEntries.push_back(re);
 	}
 
 	if (result == true)
@@ -473,6 +435,32 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 	{
 		DEBUG_LOG_MSG(logger, QString("Configuration file %1 parsing error!").arg(cfgFileName));
 	}
+
+	return result;
+}
+
+bool UdpRetranslatorApp::parseSrcDestAddrs(const QString& srcDestAddrStr,
+										   HostAddressPort* srcAddr,
+										   HostAddressPort* destAddr)
+{
+	TEST_PTR_RETURN_FALSE(srcAddr);
+	TEST_PTR_RETURN_FALSE(destAddr);
+
+	// expected format of srcDestAddrStr is:
+	//
+	//		srcIpAddr[:port] -> destIpAddr[:port]
+
+	QStringList sl = srcDestAddrStr.split("->", Qt::SkipEmptyParts);
+
+	if (sl.size() != 2)
+	{
+		return false;
+	}
+
+	bool result = true;
+
+	result &= srcAddr->setAddressPortStr(sl[0].trimmed(), 0);
+	result &= destAddr->setAddressPortStr(sl[1].trimmed(), 0);
 
 	return result;
 }

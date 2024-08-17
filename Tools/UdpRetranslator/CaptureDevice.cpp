@@ -72,6 +72,7 @@ CaptureDevice::CaptureDevice(const pcap_if_t* cd, CircularLoggerShared log)
 	}
 
 	m_log = log;
+	m_str.reserve(128);
 }
 
 CaptureDevice::~CaptureDevice()
@@ -309,14 +310,12 @@ void CaptureDevice::printPacketInfo(const struct pcap_pkthdr* header, const u_ch
 	u_short srcPort = ntohs(uh->srcPort);
 	u_short destPort = ntohs(uh->destPort);
 
-	static const QChar sp(' ');
-
 	str += QString("%1.%2.%3.%4:%5").
 		   arg(ih->srcIP.byte1).
 		   arg(ih->srcIP.byte2).
 		   arg(ih->srcIP.byte3).
 		   arg(ih->srcIP.byte4).
-		   arg(srcPort).leftJustified(21, sp);
+		   arg(srcPort).leftJustified(IP_PORT_LEN, SPACE);
 
 	str += QStringLiteral("  ->  ");
 
@@ -325,7 +324,7 @@ void CaptureDevice::printPacketInfo(const struct pcap_pkthdr* header, const u_ch
 		   arg(ih->destIP.byte2).
 		   arg(ih->destIP.byte3).
 		   arg(ih->destIP.byte4).
-		   arg(destPort).leftJustified(21, sp);
+		   arg(destPort).leftJustified(IP_PORT_LEN, SPACE);
 
 	str += QString("  len = %1").arg(header->len);
 
@@ -417,10 +416,8 @@ void CaptureDevice::retranslatePacket(const pcap_pkthdr* header, const u_char* p
 	TEST_PTR_RETURN(ih);
 	TEST_PTR_RETURN(uh);
 
-	quint32 srcIP = ntohl(ih->srcIP.ip);
-	quint16 srcPort = ntohs(uh->srcPort);
-
-	HostAddressPort srcAddressPort(srcIP, srcPort);
+	HostAddressPort srcAddressPort(ntohl(ih->srcIP.ip), ntohs(uh->srcPort));
+	HostAddressPort destAddressPort(ntohl(ih->destIP.ip), ntohs(uh->destPort));
 
 	RetranslateEntry* rtrEntry = nullptr;
 
@@ -444,19 +441,16 @@ void CaptureDevice::retranslatePacket(const pcap_pkthdr* header, const u_char* p
 
 	TEST_PTR_RETURN(rtrEntry);
 
-	quint32 destIP = ntohl(ih->destIP.ip);
-	quint16 destPort = ntohs(uh->destPort);
-
 	if (rtrEntry->destAddr.port() != 0)
 	{
-		if (rtrEntry->destAddr != HostAddressPort(destIP, destPort))
+		if (rtrEntry->destAddr != destAddressPort)
 		{
 			return;
 		}
 	}
 	else
 	{
-		if (rtrEntry->destAddr.address32() != destIP)
+		if (rtrEntry->destAddr.address32() != destAddressPort.address32())
 		{
 			return;
 		}
@@ -486,30 +480,89 @@ void CaptureDevice::retranslatePacket(const pcap_pkthdr* header, const u_char* p
 	TEST_PTR_RETURN(rtrIh);
 	TEST_PTR_RETURN(rtrUh);
 
+	bool recalcIpHeaderChecksum = false;
+	bool recalcUdpHeaderChecksum = false;
+
+	// source IP address replacement
+	//
+	quint32 rtrIP = htonl(rtrEntry->rtrSrcAddr.address32());
+
+	if (rtrIh->srcIP.ip != rtrIP)
+	{
+		rtrIh->srcIP.ip = rtrIP;
+		recalcIpHeaderChecksum = true;
+	}
+
+	// source UDP Port replacement
+	//
+	quint16 rtrPort = htons(rtrEntry->rtrSrcAddr.port());
+
+	if (rtrPort != 0)
+	{
+		rtrUh->srcPort = rtrPort;
+		recalcUdpHeaderChecksum = true;
+	}
+
 	// destination IP address replacement
 	//
-	rtrIh->destIP.ip = htonl(rtrEntry->sendToAddr.address32());
-	//rtrIh->headerChecksum = 0;
-	calcIpHeaderChecksum(rtrIh);
+	rtrIP = htonl(rtrEntry->rtrDestAddr.address32());
+
+	if (rtrIh->destIP.ip != rtrIP)
+	{
+		rtrIh->destIP.ip = rtrIP;
+		recalcIpHeaderChecksum = true;
+	}
 
 	// destination UDP Port replacement
 	//
-	rtrUh->destPort = htons(rtrEntry->sendToAddr.port());
-	//rtrUh->checksum = 0;
-	calcUdpHeaderChecksum(rtrIh);
+	rtrPort = htons(rtrEntry->rtrDestAddr.port());
+
+	if (rtrPort != 0)
+	{
+		rtrUh->destPort = rtrPort;
+		recalcUdpHeaderChecksum = true;
+	}
+
+	if (recalcIpHeaderChecksum == true)
+	{
+		calcIpHeaderChecksum(rtrIh);
+	}
+
+	if (recalcUdpHeaderChecksum == true)
+	{
+		calcUdpHeaderChecksum(rtrIh);
+	}
 
 	quint32 bytesWritten = pcap_inject(m_capHandle, m_rtrBuffer, header->len);
 
 	if (bytesWritten == header->len)
 	{
 		rtrEntry->retranslatedCount++;
-//			if ((rtrEntry->retranslatedCount % 1000) == 0)
-//			{
+
+		if (m_isService == true)
+		{
+			if ((rtrEntry->retranslatedCount % 200 * 60) == 0)			// 1 record per minute for LM packets retranslation
+			{
 				DEBUG_LOG_MSG(m_log, QString("Retranslated from %1 to %2 packets: %3").
-										arg(srcAddressPort.addressPortStr()).
-										arg(rtrEntry->sendToAddr.addressPortStr()).
-										arg(rtrEntry->retranslatedCount));
-//			}
+									 arg(srcAddressPort.addressPortStrWithoutPort0()).
+									 arg(rtrEntry->rtrDestAddr.addressPortStrWithoutPort0()).
+									 arg(rtrEntry->retranslatedCount));
+			}
+		}
+		else
+		{
+			m_str.clear();
+
+			m_str += srcAddressPort.addressPortStrWithoutPort0().leftJustified(IP_PORT_LEN, SPACE);
+			m_str += SRC_DEST_SEPARATOR;
+			m_str += destAddressPort.addressPortStrWithoutPort0().leftJustified(IP_PORT_LEN, SPACE);
+			m_str += RTR_SEPARATOR;
+			m_str += rtrEntry->rtrSrcAddr.addressPortStrWithoutPort0().leftJustified(IP_PORT_LEN, SPACE);
+			m_str += SRC_DEST_SEPARATOR;
+			m_str += rtrEntry->rtrDestAddr.addressPortStrWithoutPort0().leftJustified(IP_PORT_LEN, SPACE);
+
+			DEBUG_LOG_MSG(m_log, m_str);
+		}
 	}
 	else
 	{

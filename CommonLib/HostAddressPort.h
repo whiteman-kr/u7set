@@ -51,6 +51,7 @@ public:
 	[[nodiscard]] QString toString() const;
 	[[nodiscard]] std::string toStdString() const;
 	[[nodiscard]] QString addressPortStr() const;
+	[[nodiscard]] QString addressPortStrWithoutPort0() const;
 	[[nodiscard]] QString addressPortStrIfSet() const;
 
 	[[nodiscard]] QString addressStr() const;
@@ -293,6 +294,21 @@ inline QString HostAddressPort::addressPortStr() const
 {
 	if (isSet() == true)
 	{
+		return QString("%1:%2").arg(address().toString()).arg(port());
+	}
+
+	return QString();
+}
+
+inline QString HostAddressPort::addressPortStrWithoutPort0() const
+{
+	if (isSet() == true)
+	{
+		if (port() == 0)
+		{
+			return address().toString();
+		}
+
 		return QString("%1:%2").arg(address().toString()).arg(port());
 	}
 
