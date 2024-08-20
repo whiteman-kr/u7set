@@ -92,13 +92,11 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../UtilsLib)
-include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../CommonLib)
+include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/CommonLib/include/CommonLib)
 include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/include)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network)
-#target_link_libraries(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/Lib/x64/Packet.lib)
 target_link_libraries(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/Lib/x64/wpcap.lib)
-
 
 # Link Visaul Leak Detector
 
