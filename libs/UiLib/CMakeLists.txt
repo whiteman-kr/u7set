@@ -51,6 +51,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QClipboard>
 	<QColorDialog>
 	<QComboBox>
+	<QDateTimeEdit>
 	<QDialog>
 	<QDialogButtonBox>
 	<QFile>
@@ -85,15 +86,19 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTreeWidgetItem>
 	<QVBoxLayout>
 
-	"../../CommonLib/PropertyObject.h"
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
+	<CommonLib/PropertyObject.h>
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 )
 
 target_compile_definitions(${TARGET} PRIVATE UI_LIB_DOMAIN)
 
+#Add translations
+#
+add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib Protobuf AppSignalLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib ProtobufEx AppSignalLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

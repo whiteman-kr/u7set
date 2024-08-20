@@ -6,8 +6,8 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/CircularLogger.h"
-#include "../CommonLib/Times.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/Times.h>
+#include <CommonLib/ConstStrings.h>
 #include <HardwareLib/DataProtocols.h>
 #include <HardwareLib/LanControllerInfo.h>
 
@@ -94,6 +94,7 @@ namespace OnlineLib
 		void appendAssociatedSignal(E::LanControllerType lanType, const QString& signalID);
 		void clearAssociatedSignals(E::LanControllerType lanType);
 		const QStringList& associatedSignals(E::LanControllerType lanType) const;
+		void appendSwCalcSignal(const QString& appSignalID);
 
 		QString profile() const { return m_profile; }
 		void setProfile(QString profile) { m_profile = profile; }
@@ -143,6 +144,7 @@ namespace OnlineLib
 		QStringList m_appSignals;
 		QStringList m_diagSignals;
 		QStringList m_tuningSignals;
+		QStringList m_swCalcSignals;
 
 		static QStringList m_emptyList;
 	};

@@ -1,14 +1,21 @@
 #pragma once
 #include "MainTabPage.h"
 #include "../UtilsLib/OutputLog.h"
-#include "../lib/Configurator.h"
 #include "../OnlineLib/BuildInfo.h"
-
 #include <HardwareLib/ModuleFirmware.h>
 
 class DbController;
 class QCheckBox;
 class QComboBox;
+
+namespace Hardware
+{
+	class ModuleFirmwareStorage;
+}
+namespace ModuleConfiguratorLib
+{
+	class Configurator;
+}
 
 //
 //
@@ -40,8 +47,8 @@ signals:
 	void readConfiguration(int);
 	void readFirmware(QString fileName, std::optional<std::vector<int>> selectedUarts);
 
-	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
-	void uploadFirmware(ModuleFirmwareStorage* storage, const QString& selectedSubsystem, std::optional<std::vector<int>> selectedUarts);
+	void loadBinaryFile(const QString& fileName, Hardware::ModuleFirmwareStorage* storage);
+	void uploadFirmware(Hardware::ModuleFirmwareStorage* storage, const QString& selectedSubsystem, std::optional<std::vector<int>> selectedUarts);
 	void detectSubsystem();
 
 	void eraseFlashMemory(int, std::optional<std::vector<int>> selectedUarts);
@@ -123,7 +130,7 @@ private:
 	QPushButton* m_pClearLogButton = nullptr;
 	QPushButton* m_pCancelButton = nullptr;
 
-	Configurator* m_pConfigurator = nullptr;
+	ModuleConfiguratorLib::Configurator* m_pConfigurator = nullptr;
 	QThread* m_pConfigurationThread = nullptr;
 
 	// Firmware and processing

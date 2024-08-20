@@ -14,6 +14,13 @@
 
 #include <DbLib/DbControllerTools.h>
 
+#include <AppSignalLists/SignalList.h>
+#include "../Builder/AppSignalListStorage.h"
+#include "../OnlineLib/SoftwareSettings.h"
+#include <TuningLib/TuningFilter.h>
+#include <TuningLib/TuningUiItem.h>
+#include <TuningLib/TuningFilterToLists.h>
+
 #include "../../Builder/SubsystemStorage.h"
 #include "../DialogConnections.h"
 #include "../Forms/CompareDialog.h"
@@ -1250,9 +1257,10 @@ void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> m
 				Hardware::DeviceAppSignal* signal = dynamic_cast<Hardware::DeviceAppSignal*>(device);
 				Q_ASSERT(signal);
 
-				if (signal->function() == E::SignalFunction::Input ||
-					signal->function() == E::SignalFunction::Output ||
-					signal->function() == E::SignalFunction::Validity)
+				if (signal->isInputSignal() ||
+					signal->isOutputSignal() ||
+					signal->isValiditySignal() ||
+					signal->isSoftwareCalculatedSignal())
 				{
 					inOuts.push_back(signal);
 				}
@@ -1401,7 +1409,8 @@ void EquipmentView::addInOutsToSignals(std::vector<std::shared_ptr<Hardware::Dev
 	{
 		if (has->function() == E::SignalFunction::Input ||
 			has->function() == E::SignalFunction::Output ||
-			has->function() == E::SignalFunction::Validity)
+			has->function() == E::SignalFunction::Validity ||
+			has->function() == E::SignalFunction::SoftwareCalculated)
 		{
 			inOuts.push_back(has.get());
 		}
@@ -2925,6 +2934,13 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		return false;
 	}
 
+	// Fix for clients to set AppDataServiceIDs to AppDataServiceIDs_RC1
+	//
+	if (device->presetRoot() == true)
+	{
+		updateFromPresetFixAppDataServiceIdsToRc1(*device);
+	}
+
 	// clang-format off
 	// Update from DbVersion 380 to 381.
 	//
@@ -3016,7 +3032,20 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	// End of fixes
 	//
 
-//	qDebug();
+	// Prepare TuningClient compatibility issues mitigation
+	//
+	bool ok = false;
+	QString tuningClientMitigateCompatibilityUiConfiguration = prepareUpdateFromPresetTuningClientFilters(*device, &ok);
+	if (ok == false) 
+	{
+		return false;
+	}
+
+	std::optional<int> applyMode = prepareUpdateFromPresetTuningClientAutoApply(*device);
+	//
+	//
+
+	//	qDebug();
 //	qDebug() << "EquipmentView::updateDeviceFromPreset"
 //			 << ", device: " << device->equipmentIdTemplate()
 //			 << "(" << device->equipmentId() << ")"
@@ -3267,14 +3296,285 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	//
 	if (mitigationFixMonitorAdses1.isEmpty() == false)
 	{
-		auto adsProp = device->propertyByCaption(QStringLiteral("AppDataServiceIDs"));
+		auto adsProp = device->propertyByCaption(EquipmentPropNames::APP_DATA_SERVICE_IDS);
 		if (adsProp != nullptr)
 		{
 			adsProp->setValue(mitigationFixMonitorAdses1);
 		}
 	}
 
+	// Mitigate TuningClient compatibility issues
+	//
+	if (tuningClientMitigateCompatibilityUiConfiguration.isEmpty() == false)
+	{
+		performUpdateFromPresetTuningClientFilters(*device, tuningClientMitigateCompatibilityUiConfiguration);
+	}
+
+	if (applyMode.has_value() == true) 
+	{
+		performUpdateFromPresetTuningClientAutoApply(*device, applyMode.value());
+	}
+	//
+	//
+
 	return true;
+}
+
+void EquipmentView::updateFromPresetFixAppDataServiceIdsToRc1(Hardware::DeviceObject& device)
+{
+	if (device.presetRoot() == false)
+	{
+		Q_ASSERT(device.presetRoot() == true);
+	}
+
+	// clang-format off
+	// 
+	// RPCT-3895
+	// 
+	// Update from DbVersion 418.
+	//
+	// Problem: Presets of Monitor (to v7), TestSuite (to v5), Metrology (to v1), Gateway Service (to v3) 
+	//			have compatibility breaking changes, here we try to mitigate it.
+	//			We have to update properties which link clients to AppDataService, before this properties had equipment id of AppDataService
+	//			Now they have to have equipment id of AppDataService.ReceiveControllers(_RC1...).	
+	// Solution: Find properties:
+	//				Monitor.AppDataServiceIDs, 
+	//				TestSuite.AppDataServiceIDs, 
+	//				Metrology.AppDataServiceID1/AppDataServiceID2, 
+	//				GatewayService.AppDataServiceIDs
+	//			Then add _RC1 to the end of the equipment id (if it is not already there) and set the value to the new property.
+	// clang-format on
+	//
+
+	if ((device.presetName() == QStringLiteral("MONITOR") && device.presetVersion() < 7) ||
+		(device.presetName() == QStringLiteral("TESTSUITE") && device.presetVersion() < 5) ||
+		(device.presetName() == QStringLiteral("METROLOGY") && device.presetVersion() < 1) ||
+		(device.presetName() == QStringLiteral("GWS") && device.presetVersion() < 3))
+	{
+		// Monitor can have AppDataServiceIDs (;) and AppDataServiceID1/AppDataServiceID2 (older versions)
+		// TestSuite - AppDataServiceIDs (;)
+		// Metrology - AppDataServiceID1, AppDataServiceID2
+		// GatewayService - AppDataServiceIDs (coma separated)
+		//
+		auto ads1 = device.propertyByCaption(QStringLiteral("AppDataServiceID1"));
+		auto ads2 = device.propertyByCaption(QStringLiteral("AppDataServiceID2"));
+		auto adses = device.propertyByCaption(QStringLiteral("AppDataServiceIDs"));
+
+		if (ads1 != nullptr && ads1->value().toString().trimmed().endsWith("_RC1") == false)
+		{
+			QString value = ads1->value().toString().trimmed();
+
+			if (value.isEmpty() == false &&
+				value.endsWith("_RC1") == false && 
+				value.endsWith("_RC2") == false && 
+				value.endsWith("_RC3") == false && 
+				value.endsWith("_RC4") == false)
+			{
+				value += "_RC1";
+			}
+
+			ads1->setValue(value);
+		}
+
+		if (ads2 != nullptr && ads2->value().toString().trimmed().endsWith("_RC1") == false)
+		{
+			QString value = ads2->value().toString().trimmed();
+
+			if (value.isEmpty() == false &&
+				value.endsWith("_RC1") == false && 
+				value.endsWith("_RC2") == false && 
+				value.endsWith("_RC3") == false && 
+				value.endsWith("_RC4") == false)
+			{
+				value += "_RC1";
+			}
+
+			ads2->setValue(value);
+		}
+
+		// Monitor, TestSuite have ";" as a separator
+		// GatewayService has "," as separator.
+		//
+		if (adses != nullptr)
+		{
+			QString propertyValue = adses->value().toString().trimmed();
+
+			propertyValue.replace(QChar(QChar::Space), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::LineFeed), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::CarriageReturn), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::Tabulation), Separator::SEMICOLON);
+			propertyValue.replace(Separator::COMMA, Separator::SEMICOLON);
+
+			QStringList adsList = propertyValue.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+			for (QString& ads : adsList)
+			{
+				if (ads.endsWith("_RC1") == false && 
+					ads.endsWith("_RC2") == false && 
+					ads.endsWith("_RC3") == false && 
+					ads.endsWith("_RC4") == false)
+				{
+					ads += "_RC1";
+				}
+			}
+
+			adses->setValue(adsList.join(Separator::SEMICOLON));
+		}
+
+		return;
+	}
+
+	return;
+}
+
+QString EquipmentView::prepareUpdateFromPresetTuningClientFilters(Hardware::DeviceObject& device, bool* ok) 
+{
+	// Update TuningClient from version 2 to version 3
+	//
+	// Problem: Preset of TuningClient (v2 to v3) has compatibility breaking changes, here we try to mitigate it.
+	//			Before preset version 1 and 2 had Filters property, which is loaded by TuningFilterStorage class.
+	//			Preset version 3 has UiConfiguration property, and AppSignalLists are stored separately.
+	// Solution: Call TuningClient filters mirgation procedure below.
+	//
+	QString result;
+
+	if (device.presetRoot() &&
+		device.presetName() == QStringLiteral("TUN") &&
+		device.presetVersion() <= 2)
+	{
+		auto filters = device.propertyByCaption(QStringLiteral("Filters"))->value().toString();
+
+		TuningFilters::TuningFilterStorage filterStorage;	// Source filters storage
+
+		// Load filters
+		//
+		QString errorMsg;
+		if (filterStorage.load(filters.toUtf8(), &errorMsg) == false) 
+		{
+			QMessageBox::critical(this, qAppName(), errorMsg);
+			if (ok != nullptr)
+			{
+				*ok = false;
+			}
+			return result;
+		}
+
+		// Convert
+		//
+		TuningLib::TuningUiStorage uiStorage;				// Target UI storage
+		AppSignalLists::AppSignalListSet appSignalLists;	// Target Lists storage
+
+		bool convertOk = TuningFilters::TuningFilterToLists::convertUi(device.equipmentId(), device.equipmentId().toLower(), filterStorage, uiStorage, appSignalLists);
+		if (convertOk == false) 
+		{
+			QMessageBox::critical(this, qAppName(), tr("Error converting Tuning Filters for TuningClient '%1'!").arg(device.equipmentId()));
+			if (ok != nullptr)
+			{
+				*ok = false;
+			}
+			return result;
+		}
+
+		// Update project AppSignalLists
+		//
+		if (appSignalLists.count() != 0)
+		{
+			auto convertedLists = appSignalLists.lists();
+			Builder::AppSignalListStorage appSignalListStorage(m_dbController);
+			if (appSignalListStorage.load(&errorMsg) == false)
+			{
+				QMessageBox::critical(this, qAppName(), errorMsg);
+				if (ok != nullptr)
+				{
+					*ok = false;
+				}
+			}
+
+			for (auto& cl : convertedLists)
+			{
+				std::shared_ptr<AppSignalLists::AppSignalList> sl = std::make_shared<AppSignalLists::AppSignalList>();
+				*sl = *cl;
+				if (sl->id().isEmpty() == true)
+				{
+					sl->setId(sl->uuid().toString());
+				}
+				appSignalListStorage.add(sl->uuid(), sl);
+				if (appSignalListStorage.save(sl->uuid(), &errorMsg) == false)
+				{
+					QMessageBox::critical(this, qAppName(), errorMsg);
+					if (ok != nullptr)
+					{
+						*ok = false;
+					}
+					return result;
+				}
+			}
+		}
+		
+		// Save UCiConfiguration property
+		//
+		if (uiStorage.root()->childCount() != 0)
+		{
+			QByteArray ba;
+			uiStorage.save(ba);
+			result = QString::fromUtf8(ba);
+		}
+	}
+	
+			if (ok != nullptr)
+	{
+		*ok = true;
+	}
+	return result;
+}
+
+void EquipmentView::performUpdateFromPresetTuningClientFilters(Hardware::DeviceObject& device,
+															   const QString& tuningClientMitigateCompatibilityUiConfiguration)
+{
+	auto uiProp = device.propertyByCaption(EquipmentPropNames::UI_CONFIGURATION);
+	if (uiProp != nullptr)
+	{
+		uiProp->setValue(tuningClientMitigateCompatibilityUiConfiguration);
+	}
+
+	// Add tag with software id to TuningClient and later to all lists, to link them
+	//
+	auto appSignalListTagsProp = device.propertyByCaption(EquipmentPropNames::APP_SIGNAL_LIST_TAGS);
+	if (appSignalListTagsProp == nullptr)
+	{
+		Q_ASSERT(appSignalListTagsProp);
+	}
+	else
+	{
+		QStringList softwareTags = appSignalListTagsProp->value().toStringList();
+		softwareTags.push_back(device.equipmentId().toLower());
+		appSignalListTagsProp->setValue(softwareTags.join('\n'));
+	}
+}
+	
+std::optional<int> EquipmentView::prepareUpdateFromPresetTuningClientAutoApply(Hardware::DeviceObject& device) 
+{
+	// Preset of TuningClient (v2 to v3) has AutoApply property. New preset version (v4) has ApplyMode and it should be set to the correct value.
+	//
+	std::optional<int> result;
+
+	if (device.presetRoot() == true &&
+		device.presetName() == QStringLiteral("TUN") &&
+		device.presetVersion() <= 3)
+	{
+		bool autoApply = device.propertyByCaption(QStringLiteral("AutoApply"))->value().toBool();
+		result = static_cast<int>(autoApply == true ? TuningClientSettings::ApplyMode::Auto : TuningClientSettings::ApplyMode::Manual);
+	}
+	
+	return result;
+}
+
+void EquipmentView::performUpdateFromPresetTuningClientAutoApply(Hardware::DeviceObject& device, int applyMode)
+{
+	auto uiProp = device.propertyByCaption(EquipmentPropNames::APPLY_MODE);
+	if (uiProp != nullptr)
+	{
+		uiProp->setValue(applyMode);
+	}
 }
 
 void EquipmentView::showEvent(QShowEvent* event)

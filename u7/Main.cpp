@@ -1,17 +1,19 @@
 #include "../Builder/Builder.h"
-#include "../CommonLib/Times.h"
-#include "../Protobuf/google/protobuf/message.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
 #include "../version.h"
 
+#include <google/protobuf/message_lite.h>
+
+#include <CommonLib/Times.h>
 #include <HardwareLib/HardwareLibrary.h>
 #include <HardwareLib/ModuleFirmware.h>
 #include <VFrame30/VFrame30Library.h>
 
+#include <LicenseLib/AppLicenser.h>
+
 #include "GlobalMessanger.h"
 #include "MainWindow.h"
 #include "Settings.h"
-
 
 
 // Visual Leak Detector
@@ -24,10 +26,10 @@
 			#include "D:/Program Files (x86)/Visual Leak Detector/include/vld.h"
 		#endif
 	#endif
-#endif	// Visual Leak Detector
+#endif // Visual Leak Detector
 
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
 	int result = 0;
 	{
@@ -39,18 +41,26 @@ int main(int argc, char *argv[])
 		a.setOrganizationName(Manufacturer::RADIY);
 		a.setOrganizationDomain(Manufacturer::SITE);
 
-		a.setApplicationVersion(QString("%1.%2.%3 (%4)")
-									.arg(U7SET_MAJOR_VERSION)
-									.arg(U7SET_MINOR_VERSION)
-									.arg(U7SET_PATCH_VERSION)
-									.arg(U7SET_BRANCH_NAME));
+		a.setApplicationVersion(
+			QString("%1.%2.%3 (%4)").arg(U7SET_MAJOR_VERSION).arg(U7SET_MINOR_VERSION).arg(U7SET_PATCH_VERSION).arg(U7SET_BRANCH_NAME));
 
+		// Load license
+		//
+		Q_INIT_RESOURCE(LicenseLib); // Init LicenseLib resources
+
+		if (LicenseLib::AppLicenser::guiAppStartValidation(QDateTime::fromSecsSinceEpoch(U7SET_BUILD_DATE_SECONDS).date()) == false)
+		{
+			return EXIT_FAILURE;
+		}
+
+		// --
+		//
 		VFrame30::init();
 		Hardware::init();
 		DbController::init();
 		Builder::init();
 
-		GlobalMessanger::instance();		// Create instance of GlobalMessenger
+		GlobalMessanger::instance(); // Create instance of GlobalMessenger
 
 		// --
 		//
@@ -58,8 +68,6 @@ int main(int argc, char *argv[])
 		qRegisterMetaType<E::SignalType>();
 		qRegisterMetaType<TimeStamp>();
 		qRegisterMetaType<TimeSpan>();
-		qRegisterMetaType<std::vector<UartPair>>();
-		qRegisterMetaType<std::map<QString, std::vector<UartPair>>>();
 		qRegisterMetaType<QVector<int>>();
 		qRegisterMetaType<ID_AppSignalID>();
 		qRegisterMetaType<QVector<ID_AppSignalID>>();
@@ -90,16 +98,16 @@ int main(int argc, char *argv[])
 		MainWindow* w = new MainWindow(&dbController, nullptr);
 		w->show();
 
-#if defined (Q_OS_WIN)
-        CrashExceptionHandler cdh;
-        QObject::connect(&cdh, &CrashExceptionHandler::miniDumpCreated, w, &MainWindow::onMiniDumpCreated);
+#if defined(Q_OS_WIN)
+		CrashExceptionHandler cdh;
+		QObject::connect(&cdh, &CrashExceptionHandler::miniDumpCreated, w, &MainWindow::onMiniDumpCreated);
 #endif
 
 		dbController.enableProgress();
 
 		result = a.exec();
 
-		delete w;	// Delete main windows before shutown procedures
+		delete w; // Delete main windows before shutdown procedures
 
 		// Shutting down
 		//
@@ -115,4 +123,3 @@ int main(int argc, char *argv[])
 	//
 	return result;
 }
-

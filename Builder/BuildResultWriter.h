@@ -2,7 +2,7 @@
 
 #include "../UtilsLib/OutputLog.h"
 #include "../OnlineLib/BuildInfo.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 #include <HardwareLib/DeviceObject.h>
 

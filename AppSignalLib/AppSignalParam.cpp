@@ -155,6 +155,11 @@ bool AppSignalParam::isInternal() const
 	return m_data->m_inOutType == E::SignalInOutType::Internal;
 }
 
+bool AppSignalParam::isSwCalculated() const
+{
+	return m_data->m_inOutType == E::SignalInOutType::SoftwareCalculated;
+}
+
 E::SignalInOutType AppSignalParam::inOutType() const
 {
 	return m_data->m_inOutType;

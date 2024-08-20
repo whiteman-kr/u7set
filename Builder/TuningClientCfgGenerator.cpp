@@ -4,14 +4,16 @@
 
 #include "../OnlineLib/SoftwareSettings.h"
 
-#include <VFrame30/LogicSchema.h>
+#include "AppSignalListStorage.h"
 #include <Behavior/ClientBehaviorStorage.h>
 #include <Behavior/TuningClientBehavior.h>
+#include <TuningLib/TuningUiItem.h>
+#include <VFrame30/LogicSchema.h>
 
 namespace Builder
 {
 
-	TuningClientCfgGenerator::TuningClientCfgGenerator(Context* context, Hardware::Software* software)	:
+	TuningClientCfgGenerator::TuningClientCfgGenerator(Context* context, Hardware::Software* software) :
 		SoftwareCfgGenerator(context, software),
 		m_subsystems(context->m_subsystems.get())
 	{
@@ -32,12 +34,8 @@ namespace Builder
 
 	bool TuningClientCfgGenerator::generateConfigurationStep1()
 	{
-		if (m_software == nullptr ||
-				m_software->softwareType() != E::SoftwareType::TuningClient ||
-				m_equipment == nullptr ||
-				m_cfgXml == nullptr ||
-				m_buildResultWriter == nullptr ||
-				m_subsystems == nullptr)
+		if (m_software == nullptr || m_software->softwareType() != E::SoftwareType::TuningClient || m_equipment == nullptr ||
+			m_cfgXml == nullptr || m_buildResultWriter == nullptr || m_subsystems == nullptr)
 		{
 			assert(m_software);
 			assert(m_software->softwareType() == E::SoftwareType::Monitor);
@@ -61,61 +59,58 @@ namespace Builder
 
 		// Check tuning users list
 		//
-		if (settings->tuningLogin == true &&
-				settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts).isEmpty() == true)
+		if (settings->tuningLogin == true && settings->tuningUserAccounts.split(Separator::SEMICOLON, Qt::SkipEmptyParts).isEmpty() == true)
 		{
-			m_log->errEQP6202(EquipmentPropNames::TUNING_USER_ACCOUNTS, EquipmentPropNames::TUNING_LOGIN, m_software->equipmentIdTemplate());
+			m_log->errEQP6202(EquipmentPropNames::TUNING_USER_ACCOUNTS,
+							  EquipmentPropNames::TUNING_LOGIN,
+							  m_software->equipmentIdTemplate());
 			return false;
 		}
 
-		QStringList equipmentList;
-
-		result &= createEquipmentList(&equipmentList);
-		if (result == false)
-		{
-			return result;
-		}
+		QStringList tuningSources;
+		result &= createTuningEquipmentList(&tuningSources);
 
 		// Generate tuning signals
 		//
-		result &= createTuningSignals(equipmentList, m_signalSet, &m_tuningSet);
-		if (result == false)
+		std::vector<AppSignal*> tuningSignals = createTuningSignalList(tuningSources, *m_signalSet);
+
+		// Write tuning signals
+		//
+		result &= writeTuningSignals(tuningSignals);
+
+		std::vector<std::shared_ptr<AppSignalLists::AppSignalList>> appSignalLists;
+
+		// Write Tuning Signal Lists
+		//
 		{
-			return result;
+			Builder::AppSignalListsProvider tuningSignalProvider(tuningSignals);
+
+			// Create Equipment lists
+			//
+			if (settings->filterByEquipment == true)
+			{
+				result &= createEquipmentLists(tuningSources, tuningSignalProvider);
+			}
+
+			// Create Schemas lists
+			//
+			if (settings->filterBySchema == true)
+			{
+				result &= createSchemasLists(tuningSignalProvider);
+			}
+
+			// Write AppSignalLists
+			//
+			result &= writeAppSignalLists(tuningSignalProvider,
+										  settings->appSignalListIDs,
+										  settings->appSignalListMasks,
+										  settings->appSignalListTags,
+										  appSignalLists);
 		}
+
+		result &= writeTuningUi(appSignalLists, settings->appSignalListIDs, settings->appSignalListMasks, settings->appSignalListTags);
 
 		result &= writeTuningSchemas();
-		if (result == false)
-		{
-			return result;
-		}
-
-
-		result &= writeTuningSignals();
-		if (result == false)
-		{
-			return result;
-		}
-
-		{
-			ILogFileStub logFileStub;
-			ClientLib::TuningSignalManager tuningSignalManager({}, &logFileStub);
-			tuningSignalManager.load(m_tuningSet);
-
-			// --
-			//
-			result &= createObjectFilters(tuningSignalManager, equipmentList);
-			if (result == false)
-			{
-				return result;
-			}
-
-			result &= writeObjectFilters();
-			if (result == false)
-			{
-				return result;
-			}
-		}
 
 		result &= writeGlobalScript();
 
@@ -130,68 +125,7 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningClientCfgGenerator::createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, Proto::AppSignalSet* tuningSet)
-	{
-		if (tuningSet == nullptr ||
-				signalSet == nullptr)
-		{
-			assert(tuningSet);
-			assert(signalSet);
-			return false;
-		}
-
-		if (equipmentList.empty() == true)
-		{
-			return true;
-		}
-
-		// Create signals
-		//
-		tuningSet->Clear();
-
-		for (const AppSignal* s : *signalSet)
-		{
-			if (s->enableTuning() == false)
-			{
-				continue;
-			}
-
-			// Check EquipmentIdMasks
-			//
-			bool result = false;
-
-			for (QString m : equipmentList)
-			{
-				m = m.trimmed();
-
-				if (m.isEmpty() == true)
-				{
-					continue;
-				}
-
-				QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(m));
-				//rx.setPatternSyntax(QRegExp::Wildcard);
-
-				if (rx.match(s->lmEquipmentID()).hasMatch() == true)		// exactMatch
-				{
-					result = true;
-					break;
-				}
-			}
-
-			if (result == false)
-			{
-				continue;
-			}
-
-			::Proto::AppSignal* aspMessage = tuningSet->add_appsignal();
-			s->saveToProto(aspMessage);
-		}
-
-		return true;
-	}
-
-	bool TuningClientCfgGenerator::createEquipmentList(QStringList* equipmentList)
+	bool TuningClientCfgGenerator::createTuningEquipmentList(QStringList* equipmentList)
 	{
 		if (equipmentList == nullptr)
 		{
@@ -205,7 +139,7 @@ namespace Builder
 
 		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
 
-		for(const SoftwareEndpoint::TuningService& tsc : settings->tuningServices)
+		for (const SoftwareEndpoint::TuningService& tsc : settings->tuningServices)
 		{
 			std::shared_ptr<Hardware::DeviceObject> tuningServiceObject = m_equipment->deviceObject(tsc.equipmentId);
 			if (tuningServiceObject == nullptr)
@@ -237,7 +171,7 @@ namespace Builder
 			{
 				QStringList clientEquipmentList = tunClient.uniqueSourcesIDs();
 
-				for (const QString& ce : clientEquipmentList )
+				for (const QString& ce : clientEquipmentList)
 				{
 					if (equipmentList->contains(ce) == false)
 					{
@@ -247,8 +181,9 @@ namespace Builder
 			}
 			else
 			{
-				LOG_INTERNAL_ERROR_MSG(m_log, QString("TuningClient %1 isn't found in clients list of TuningService %2").
-									   arg(equipmentID()).arg(tsc.equipmentId));
+				LOG_INTERNAL_ERROR_MSG(
+					m_log,
+					QString("TuningClient %1 isn't found in clients list of TuningService %2").arg(equipmentID()).arg(tsc.equipmentId));
 				result = false;
 			}
 		}
@@ -256,253 +191,213 @@ namespace Builder
 		return result;
 	}
 
-	bool TuningClientCfgGenerator::createObjectFilters(const ClientLib::TuningSignalManager& tuningSignalManager,
-													   const QStringList& equipmentList)
+	bool TuningClientCfgGenerator::createEquipmentLists(const QStringList& equipmentList, const ISignalManager& tuningSignalManager)
 	{
-		bool ok = true;
-
+		// Filter for EquipmentId
 		//
-		// Filters
-		//
-		QString filters = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "Filters", &ok).trimmed();
-		if (ok == false)
+		for (const QString& equipmentId : equipmentList)
 		{
-			return false;
-		}
+			std::shared_ptr<AppSignalLists::AppSignalList> list = std::make_shared<AppSignalLists::AppSignalList>();
+			list->setId(equipmentId);
+			list->setCaption(equipmentId);
+			list->setEquipmentIDMask(equipmentId);
 
-		if (filters.isEmpty() == true)
-		{
-			m_log->errCFG3022(m_software->equipmentId(), "Filters");
-			return false;
-		}
-
-		// Load project filters
-
-		QString errorCode;
-
-		ok = m_tuningFilterStorage.load(filters.toUtf8(), &errorCode);
-		if (ok == false)
-		{
-			m_log->errEQP6107("Filters", m_software->equipmentId());
-			return false;
-		}
-
-		// Check all filters for non-existing signals
-
-		std::vector<std::pair<QString, QString>> notFoundSignalsAndFilters;
-
-		m_tuningFilterStorage.checkFilterSignals(tuningSignalManager.signalHashes(), notFoundSignalsAndFilters);
-
-		if (notFoundSignalsAndFilters.empty() == false)
-		{
-			for (const std::pair<QString, QString>& p: notFoundSignalsAndFilters)
+			// Add filtered signals to the list
+			//
+			auto& mutableAppCache = list->mutableAppListHashesCache();
+			auto& mutableTuningCache = list->mutableTuningListHashesCache();
+			auto tuningSignals = tuningSignalManager.signalList();
+			for (const auto& asp : tuningSignals)
 			{
-				m_log->errEQP6108(p.first, p.second, m_software->equipmentId());
+				if (list->appSignalMatch(asp) == true)
+				{
+					Hash hash = ::calcHash(asp.appSignalId());
+					mutableAppCache.insert(hash);
+					mutableTuningCache.insert(hash);
+				}
 			}
 
-			return false;
+			// Add tag "created by ide" to the list
+			//
+			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagEquipment);
+			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
+
+			// Save list to the data buffer
+			//
+			Proto::Envelope envelope;
+			list->SaveData(&envelope);
+
+			QByteArray data;
+			data.resize(static_cast<qsizetype>(envelope.ByteSizeLong()));
+
+			bool result = envelope.SerializeToArray(data.data(), static_cast<int>(envelope.ByteSizeLong()));
+			if (result == false)
+			{
+				Q_ASSERT(result);
+				return false;
+			}
+
+			// Write file
+			//
+			QString fileName = tr("%1.%2").arg(list->id()).arg(Db::File::AppSignalListFileExtension);
+			BuildFile* listsFile = m_context->m_buildResultWriter->addFile(m_software->equipmentIdTemplate(),
+																		   fileName,
+																		   fileName,
+																		   {CfgFileTag::APPSIGNALLISTS},
+																		   data);
+			if (listsFile == nullptr)
+			{
+				Q_ASSERT(listsFile);
+				return false;
+			}
+			m_cfgXml->addLinkToFile(listsFile);
 		}
 
-		// Create schemas and equipment filters
-		//
-		ok = createEquipmentAndSchemaFilters(equipmentList, tuningSignalManager);
-		if (ok == false)
-		{
-			assert(false);
-			return false;
-		}
-
-		// Create counter filters for schemas and equipment from templates
-		//
-		createCounterFiltersFromTemplates();
-
-
-		// Count all hashes contained in filters and save them
-		//
-		m_tuningFilterStorage.createSignalsAndEqipmentHashes(tuningSignalManager,
-															 tuningSignalManager.signalHashes(),
-															 m_tuningFilterStorage.root().get(),
-															 TuningFilter::Source::All);
 
 		return true;
 	}
 
-
-	bool TuningClientCfgGenerator::createEquipmentAndSchemaFilters(const QStringList& equipmentList,
-														  const ClientLib::TuningSignalManager& tuningSignalManager)
+	bool TuningClientCfgGenerator::createSchemasLists(const ISignalManager& tuningSignalManager) 
 	{
-		std::shared_ptr<const TuningClientSettings> settings = m_settingsSet.getSettingsDefaultProfile<TuningClientSettings>();
-
-		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
-
-		if (settings->filterBySchema == true)
+		// Filter for EquipmentId
+		//
+		for (const std::shared_ptr<VFrame30::LogicSchema>& schema : m_context->m_appLogicSchemas)
 		{
-			// Filter for Schema
-			//
-			std::shared_ptr<TuningFilter> ofSchema = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-			ofSchema->setID("%AUTOFILTER%_SCHEMA");
-			ofSchema->setCaption(QObject::tr("Schemas"));
-			ofSchema->setSource(TuningFilter::Source::Schema);
+			std::shared_ptr<AppSignalLists::AppSignalList> list = std::make_shared<AppSignalLists::AppSignalList>();
+			list->setId(schema->schemaId());
+			list->setCaption(schema->caption());
 
-			for (const std::shared_ptr<VFrame30::LogicSchema>& schema : m_context->m_appLogicSchemas)
+			auto& mutableAppCache = list->mutableAppListHashesCache();
+			auto& mutableTuningCache = list->mutableTuningListHashesCache();
+
+			for (const auto schemaSignals = schema->getSignalList(); 
+				 const QString& schemaSignal : schemaSignals)
 			{
-				std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-				
-				for (const auto schemaSignals = schema->getSignalList();
-					 const QString& schemaSignal : schemaSignals)
+				Hash hash = ::calcHash(schemaSignal);
+
+				// find if this signal is a tuning signal
+				//
+				if (tuningSignalManager.signalExists(hash) == false)
 				{
-					Hash hash = ::calcHash(schemaSignal);
-
-					// find if this signal is a tuning signal
-					//
-					if (tuningSignalManager.signalExists(hash) == false)
-					{
-						continue;
-					}
-
-					TuningFilterSignal ofv;
-					ofv.setAppSignalId(schemaSignal);
-					ofTs->addFilterSignal(ofv);
-				}
-
-				if (ofTs->filterSignalsCount() == 0)
-				{
-					// Do not add empty filters
-					//
 					continue;
 				}
 
-				ofTs->setID("%AUFOFILTER%_SCHEMA_" + schema->schemaId());
+				AppSignalLists::AppSignalListItem li(schemaSignal);
+				list->add(li);
 
-				//QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
-				ofTs->setCaption(schema->caption());
-				ofTs->setSource(TuningFilter::Source::Schema);
-
-				ofSchema->addChild(ofTs);
+				mutableAppCache.insert(hash);
+				mutableTuningCache.insert(hash);
 			}
 
-			m_tuningFilterStorage.add(ofSchema, true);
-		}	 // filterBySchema
-
-		if (settings->filterByEquipment == true)
-		{
-			// Filter for EquipmentId
-			//
-			std::shared_ptr<TuningFilter> ofEquipment = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-			ofEquipment->setID("%AUTOFILTER%_EQUIPMENT");
-			ofEquipment->setCaption(QObject::tr("Equipment"));
-			ofEquipment->setSource(TuningFilter::Source::Equipment);
-
-			for (const QString& ts : equipmentList)
+			if (list->count() == 0)
 			{
-				std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-				ofTs->setEquipmentIDMask(ts);
-				ofTs->setID("%AUFOFILTER%_EQUIPMENT_" + ts);
-				ofTs->setCaption(ts);
-				ofTs->setSource(TuningFilter::Source::Equipment);
-
-				ofEquipment->addChild(ofTs);
+				// Do not add empty filters
+				//
+				continue;
 			}
 
-			m_tuningFilterStorage.add(ofEquipment, true);
-		} // filterByEquipment
+			// Add tag "created by ide" to the list
+			//
+			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagSchema);
+			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
+
+			// Save list to the data buffer
+			//
+			Proto::Envelope envelope;
+			list->SaveData(&envelope);
+
+			QByteArray data;
+			data.resize(static_cast<qsizetype>(envelope.ByteSizeLong()));
+
+			bool result = envelope.SerializeToArray(data.data(), static_cast<int>(envelope.ByteSizeLong()));
+			if (result == false)
+			{
+				Q_ASSERT(result);
+				return false;
+			}
+
+			// Write file
+			//
+			QString fileName = tr("%1.%2").arg(list->id()).arg(Db::File::AppSignalListFileExtension);
+			BuildFile* listsFile =
+				m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), fileName, fileName, {CfgFileTag::APPSIGNALLISTS}, data);
+			if (listsFile == nullptr)
+			{
+				Q_ASSERT(listsFile);
+				return false;
+			}
+			m_cfgXml->addLinkToFile(listsFile);
+		}
 
 		return true;
 	}
 
-	void TuningClientCfgGenerator::createCounterFiltersFromTemplates()
+	bool TuningClientCfgGenerator::writeTuningUi(std::vector<std::shared_ptr<AppSignalLists::AppSignalList>> appSignalLists,
+												 const QStringList& appSignalListIds,
+												 const QStringList& appSignalListMasks,
+												 const QStringList& appSignalListTags)
 	{
-		std::vector<std::shared_ptr<TuningFilter>> templateFilters;
+		TuningLib::TuningUiStorage tuningUiStorage;
 
-		// Find counter templates
+		bool ok = true;
 
-		const std::shared_ptr<TuningFilter>& root = m_tuningFilterStorage.root();
-
-		int count = root->childFiltersCount();
-		for (int i = count - 1; i >= 0; i--)
+		QString uiConfiguration = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "UiConfiguration", &ok).trimmed();
+		if (ok == false)
 		{
-			std::shared_ptr<TuningFilter> f = root->childFilter(i);
-
-			if (f->isCounter() == true && f->counterType() == TuningFilter::CounterType::FilterTree)
-			{
-				templateFilters.insert(templateFilters.begin(), f);
-			}
-		}
-
-		// Add counter filters to every schema and equipment filter
-
-		count = root->childFiltersCount();
-
-		for (int i = 0; i < count; i++)
-		{
-			std::shared_ptr<TuningFilter> f = root->childFilter(i);
-
-			if (f->isSourceSchema() == true || f->isSourceEquipment() == true) // This is parent schemas or equipment filter
-			{
-				Q_ASSERT(f->hasDiscreteCounter() == false);
-
-				int schemaCount = f->childFiltersCount();
-
-				for (int s = 0; s < schemaCount; s++)
-				{
-					std::shared_ptr<TuningFilter> sf = f->childFilter(s);
-
-					Q_ASSERT(sf->hasDiscreteCounter() == false);
-
-					Q_ASSERT(sf->isSourceSchema() == true || sf->isSourceEquipment() == true);
-
-					for (auto& tf: templateFilters)
-					{
-						std::shared_ptr<TuningFilter> cf = std::make_shared<TuningFilter>(*tf);
-						sf->addChild(cf);
-					}
-				}
-			}
-		}
-	}
-
-	bool TuningClientCfgGenerator::writeTuningSignals()
-	{
-		// Write number of signals
-		//
-		QByteArray data;
-		data.resize(static_cast<int>(m_tuningSet.ByteSizeLong()));
-
-		m_tuningSet.SerializeToArray(data.data(), static_cast<int>(m_tuningSet.ByteSizeLong()));
-
-		// Write file
-		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CfgFileId::TUNING_SIGNALS, "", data);
-
-		if (buildFile == nullptr)
-		{
-			m_log->errCMN0012("TuningSignals.dat");
 			return false;
 		}
 
-		m_cfgXml->addLinkToFile(buildFile);
+		if (uiConfiguration.isEmpty() == true)
+		{
+			m_log->errCFG3022(m_software->equipmentId(), "UiConfiguration");
+			return false;
+		}
 
-		return true;
-	}
+		// Load project ui
+		//
+		QString errorCode;
+		ok = tuningUiStorage.load(uiConfiguration.toUtf8(), &errorCode);
+		if (ok == false)
+		{
+			m_log->errEQP6107("UiConfiguration", m_software->equipmentId());
+			return false;
+		}
 
-	bool TuningClientCfgGenerator::writeObjectFilters()
-	{
-		// Save filters to file
+		// Check if all signal lists specified in Filters property exist
+		//
+		QStringList listIds;
+		for (const auto& list : appSignalLists)
+		{
+			// Check if this list is for this software
+			//
+			if (list->listMatch(appSignalListIds, appSignalListMasks, appSignalListTags) == false)
+			{
+				continue;
+			}
 
+			listIds.push_back(list->id());
+		}
+		std::vector<std::pair<QString, QString>> notFoundFilters = tuningUiStorage.checkFilters(listIds);
+		for (const auto& [filterId, uiCaption] : notFoundFilters)
+		{
+			m_log->errEQP6251(filterId, uiCaption, m_software->equipmentId());
+		}
+
+		// Save Ui
+		//
 		QByteArray data;
-
-		bool ok = m_tuningFilterStorage.save(data);
+		ok = tuningUiStorage.save(data);
 		if (ok == false)
 		{
 			assert(false);
 			return false;
 		}
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CfgFileId::TUNING_FILTERS, "",  data);
-
+		BuildFile* buildFile =
+			m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningUi.xml", CfgFileId::TUNING_UI, "", data);
 		if (buildFile == nullptr)
 		{
-			m_log->errCMN0012("ObjectFilters.xml");
+			m_log->errCMN0012("TuningUi.xml");
 			return false;
 		}
 
@@ -527,7 +422,7 @@ namespace Builder
 		//
 		if (schemaTagList.isEmpty() == true)
 		{
-			for (auto&[tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
+			for (auto& [tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
 			{
 				Q_UNUSED(tag);
 				if (schemaFile->fileName.endsWith(QStringLiteral(".") + Db::File::TvsFileExtension, Qt::CaseInsensitive) == true)
@@ -548,8 +443,7 @@ namespace Builder
 					const QString& mapTag = it->first;
 					std::shared_ptr<SchemaFile> schemaFile = it->second;
 
-					if (mapTag != tag ||
-							schemaFile == nullptr)
+					if (mapTag != tag || schemaFile == nullptr)
 					{
 						assert(mapTag == tag);
 						assert(schemaFile);
@@ -576,10 +470,10 @@ namespace Builder
 		{
 			QByteArray fileData;
 
-			if (bool ok = detailsSet.saveToByteArray(&fileData);
-					ok == true)
+			if (bool ok = detailsSet.saveToByteArray(&fileData); ok == true)
 			{
-				BuildFile* schemaDetailsBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemaDetails.pbuf", fileData);
+				BuildFile* schemaDetailsBuildFile =
+					m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemaDetails.pbuf", fileData);
 
 				if (schemaDetailsBuildFile != nullptr)
 				{
@@ -620,7 +514,11 @@ namespace Builder
 
 			// Write file.
 			//
-			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), File::GLOBAL_SCRIPT, CfgFileId::TUNING_GLOBALSCRIPT, "", globalScript);
+			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(),
+																			File::GLOBAL_SCRIPT,
+																			CfgFileId::TUNING_GLOBALSCRIPT,
+																			"",
+																			globalScript);
 
 			m_cfgXml->addLinkToFile(globalScriptBuildFile);
 		}
@@ -672,8 +570,7 @@ namespace Builder
 		//
 		Behavior::ClientBehaviorStorage tcBehaviorStorage;
 
-		for (auto behaviors = allBehaviorStorage.tuningClientBehaviors();
-			 auto b : behaviors)
+		for (auto behaviors = allBehaviorStorage.tuningClientBehaviors(); auto b : behaviors)
 		{
 			if (b->behaviorId() == behaviorId)
 			{
@@ -695,7 +592,11 @@ namespace Builder
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningClientBehavior.xml", CfgFileId::CLIENT_BEHAVIOR, "", data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(),
+															"TuningClientBehavior.xml",
+															CfgFileId::CLIENT_BEHAVIOR,
+															"",
+															data);
 
 		if (buildFile == nullptr)
 		{
@@ -707,4 +608,4 @@ namespace Builder
 
 		return ok;
 	}
-}
+} // namespace Builder

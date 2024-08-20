@@ -1,19 +1,23 @@
 #include "SimWidget.h"
-#include "SimProjectWidget.h"
+#include "SimCodePage.h"
+#include "SimConnectionPage.h"
+#include "SimLogicModulePage.h"
 #include "SimOutputWidget.h"
 #include "SimOverridePane.h"
-#include "SimSelectBuildDialog.h"
-#include "SimLogicModulePage.h"
-#include "SimConnectionPage.h"
-#include "SimSelectSchemaPage.h"
+#include "SimProjectWidget.h"
 #include "SimSchemaPage.h"
-#include "SimCodePage.h"
-#include "SimTrend/SimTrends.h"
-#include "SimSignalSnapshot.h"
+#include "SimSelectBuildDialog.h"
+#include "SimSelectSchemaPage.h"
 #include "SimSignalInfo.h"
+#include "SimSignalSnapshot.h"
+#include "SimTrend/SimTrends.h"
 
-#include <UiLib/TabWidgetEx.h>
 #include <SchemaClientLib/DialogSignalSearch.h>
+#include <UiLib/TabWidgetEx.h>
+
+
+std::vector<QComboBox*> SimWidget::s_speedComboBoxes;
+std::vector<QComboBox*> SimWidget::s_profilesComboBoxes;
 
 
 SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
@@ -21,14 +25,23 @@ SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
 					 DbController* db,
 					 QWidget* parent /*= nullptr*/,
 					 Qt::WindowType windowType /*= Qt::Window*/,
-					 bool slaveWindow /*= false*/) :
+					 bool slaveWindow /*= false*/,
+					 SimWidget* masterWindow /*= nullptr*/) :
 	QMainWindow(parent),
 	HasDbController(db),
 	m_slaveWindow(slaveWindow),
+	m_masterWindow(masterWindow),
 	m_ideLogFile(ideLogFile ? ideLogFile : std::make_shared<Sim::ConsoleLogFile>()),
 	m_simulator(simulator ? simulator : std::make_shared<SimIdeSimulator>(m_ideLogFile.get(), true, nullptr)),
 	m_schemaManager(m_simulator.get())
 {
+	Q_ASSERT((slaveWindow == false && masterWindow == nullptr) || (slaveWindow == true && masterWindow != nullptr));
+
+	if (m_slaveWindow == false)
+	{
+		m_masterWindow = this;
+	}
+
 	// --
 	//
 	m_appSignalController = new VFrame30::AppSignalController{m_simulator->appSignalManager(), this};
@@ -104,6 +117,8 @@ SimWidget::SimWidget(std::shared_ptr<Sim::ConsoleLogFile> ideLogFile,
 
 SimWidget::~SimWidget()
 {
+	std::erase(s_speedComboBoxes, m_speedComboBox);
+	std::erase(s_profilesComboBoxes, m_profilesComboBox);
 }
 
 void SimWidget::startTrends(const std::vector<AppSignalParam>& appSignals)
@@ -226,7 +241,7 @@ void SimWidget::createToolBar()
 	m_simulationTimeEdit = new QLineEdit{this};
 	m_simulationTimeEdit->setPlaceholderText("Infinite");
 	m_simulationTimeEdit->setClearButtonEnabled(false);
-	m_simulationTimeEdit->setToolTip("Simualtion time in seconds.\n\"0\" - at least one workcyle.\nClear the field for an infinite simulation (till Stop or Pause).\nExamples: \"0.500\" - 500ms, \"60\" - 1min, \"3600\" - 1hour.");
+	m_simulationTimeEdit->setToolTip("Simulation time in seconds.\n\"0\" - at least one workcycle.\nClear the field for an infinite simulation (till Stop or Pause).\nExamples: \"0.500\" - 500ms, \"60\" - 1min, \"3600\" - 1hour.");
 	m_simulationTimeEdit->setSizePolicy(QSizePolicy::Policy::Minimum, m_simulationTimeEdit->sizePolicy().verticalPolicy());
 	m_simulationTimeEdit->setMaxLength(18);
 
@@ -241,6 +256,14 @@ void SimWidget::createToolBar()
 	m_simulationTimeEditValidator.setDecimals(3);
 
 	m_simulationTimeEdit->setValidator(&m_simulationTimeEditValidator);
+
+	if (m_slaveWindow == true)
+	{
+		Q_ASSERT(m_masterWindow != nullptr);
+		Q_ASSERT(m_masterWindow->m_simulationTimeEdit != nullptr);
+
+		m_simulationTimeEdit->setText(m_masterWindow->m_simulationTimeEdit->text());
+	}
 
 	// --
 	//
@@ -262,9 +285,54 @@ void SimWidget::createToolBar()
 			m_simulator->control().setSpeedFactor(ok ? d : 1.0);
 		};
 
+	if (m_slaveWindow == true)
+	{
+		Q_ASSERT(m_masterWindow != nullptr);
+		Q_ASSERT(m_masterWindow->m_speedComboBox != nullptr);
+
+		for (auto cb : s_speedComboBoxes)
+		{
+			Q_ASSERT(cb);
+
+			connect(cb,
+					&QComboBox::currentIndexChanged,
+					[this](int index)
+					{
+						m_speedComboBox->blockSignals(true);
+						m_speedComboBox->setCurrentIndex(index);
+						m_speedComboBox->blockSignals(false);
+					});
+
+			connect(m_speedComboBox,
+					&QComboBox::currentIndexChanged,
+					[cb](int index)
+					{
+						cb->blockSignals(true);
+						cb->setCurrentIndex(index);
+						cb->blockSignals(false);
+					});
+		}
+	}
+
+	s_speedComboBoxes.push_back(m_speedComboBox);
+
 	connect(m_speedComboBox, &QComboBox::currentIndexChanged, speedChangedFunc);
 
-	speedChangedFunc(3);	// Call first time to init m_simualtor
+	if (m_slaveWindow == false)
+	{
+		// This is a master window, so we need to init simulator
+		//
+		speedChangedFunc(3); // Call first time to init m_simulator, x1
+	}
+	else
+	{
+		Q_ASSERT(m_masterWindow != nullptr);
+		Q_ASSERT(m_masterWindow->m_speedComboBox != nullptr);
+
+		m_speedComboBox->blockSignals(true);
+		m_speedComboBox->setCurrentIndex(m_masterWindow->m_speedComboBox->currentIndex());
+		m_speedComboBox->blockSignals(false);
+	}
 
 	// --
 	//
@@ -282,13 +350,57 @@ void SimWidget::createToolBar()
 	m_stopAction->setShortcut(Qt::SHIFT | Qt::Key_F5);
 	connect(m_stopAction, &QAction::triggered, this, &SimWidget::stopSimulation);
 
-	m_allowLanComm = new QAction{QIcon(":/Images/Images/SimAllowRegData.svg"), tr("Allow LogicModules' Application Data transmittion to AppDataSrv"), this};
-	m_allowLanComm->setCheckable(true);
-	m_allowLanComm->setChecked(m_simulator->software().enabled());
-	connect(m_allowLanComm, &QAction::toggled, this, &SimWidget::allowLanCommToggled);
+	if (m_slaveWindow == false)
+	{
+		m_allowLanComm = new QAction{QIcon(":/Images/Images/SimAllowRegData.svg"),
+									 tr("Allow LogicModules' Application Data transmitting to AppDataSrv"),
+									 this};
+		m_allowLanComm->setCheckable(true);
+		m_allowLanComm->setChecked(m_simulator->software().enabled());
+		connect(m_allowLanComm, &QAction::toggled, this, &SimWidget::allowLanCommToggled);
+	}
+	else
+	{
+		Q_ASSERT(m_masterWindow);
+		Q_ASSERT(m_masterWindow->m_allowLanComm);
+
+		m_allowLanComm = m_masterWindow->m_allowLanComm;
+	}
 
 	m_profilesComboBox = new QComboBox{};
 	m_profilesComboBox->setMinimumContentsLength(15);
+
+	if (m_slaveWindow == true)
+	{
+		Q_ASSERT(m_masterWindow != nullptr);
+		Q_ASSERT(m_masterWindow->m_profilesComboBox != nullptr);
+
+		for (auto cb : s_profilesComboBoxes)
+		{
+			Q_ASSERT(cb);
+
+			connect(cb,
+					&QComboBox::currentIndexChanged,
+					[this](int index)
+					{
+						m_profilesComboBox->blockSignals(true);
+						m_profilesComboBox->setCurrentIndex(index);
+						m_profilesComboBox->blockSignals(false);
+					});
+
+			connect(m_profilesComboBox,
+					&QComboBox::currentIndexChanged,
+					[cb](int index)
+					{
+						cb->blockSignals(true);
+						cb->setCurrentIndex(index);
+						cb->blockSignals(false);
+					});
+		}
+	}
+
+	s_profilesComboBoxes.push_back(m_profilesComboBox);
+
 	connect(m_profilesComboBox, &QComboBox::currentTextChanged, this, &SimWidget::profileComboTextChanged);
 
 	m_trendsAction = new QAction{QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this};
@@ -315,12 +427,23 @@ void SimWidget::createToolBar()
 	m_timeIndicator = new QLabel;
 
 #if defined(Q_OS_WIN)
-		QFont f = QFont("Consolas");
+	QFont f = QFont("Consolas");
 #else
-		QFont f = QFont("Courier");
+	QFont f = QFont("Courier");
 #endif
 	m_timeIndicator->setFont(f);
-	updateTimeIndicator(Sim::ControlStatus{});
+
+	if (m_slaveWindow == false)
+	{
+		updateTimeIndicator(Sim::ControlStatus{});
+	}
+	else
+	{
+		Q_ASSERT(m_masterWindow);
+		Q_ASSERT(m_masterWindow->m_timeIndicator);
+
+		m_timeIndicator->setText(m_masterWindow->m_timeIndicator->text());
+	}
 
 	// --
 	//
@@ -720,7 +843,7 @@ void SimWidget::closeBuild()
 
 	if (m_outputWidget != nullptr)
 	{
-		// m_outputWidget exist only for the main simualtor tab page.
+		// m_outputWidget exist only for the main simulator tab page.
 		//
 		m_outputWidget->clear();
 	}
@@ -1096,7 +1219,7 @@ void SimWidget::addNewWindow()
 {
 	qDebug() << "SimulatorWidget::addNewWindow()";
 
-	SimWidget* widget = new SimWidget{m_ideLogFile, m_simulator, db(), this->parentWidget(), Qt::Window, true};
+	SimWidget* widget = new SimWidget{m_ideLogFile, m_simulator, db(), this->parentWidget(), Qt::Window, true, m_masterWindow};
 	widget->setWindowTitle(tr("u7 Simulator"));
 
 	widget->show();

@@ -3,17 +3,24 @@
 #include <map>
 #include <vector>
 
-#include "../lib/ISignalHasTag.h"
 #include <QCompleter>
 #include <QDialog>
 
+#include "ISignalHasTag.h"
 #include "TrendSignal.h"
 
 class QItemSelection;
 
+
 namespace Ui
 {
 	class DialogChooseTrendSignals;
+}
+
+namespace AppSignalLists
+{
+	class AppSignalList;
+	class AppSignalListSet;
 }
 
 namespace TrendLibInternal
@@ -22,7 +29,7 @@ namespace TrendLibInternal
 	{
 		Q_OBJECT
 	public:
-		FilteredTrendSignalsModel(const ISignalHasTag* signalHasTag,
+		FilteredTrendSignalsModel(const TrendLib::ISignalHasTag* signalHasTag,
 								  const std::vector<TrendLib::TrendSignalParam>& signalss,
 								  QObject* parent);
 
@@ -32,12 +39,12 @@ namespace TrendLibInternal
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 		QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-		void filterSignals(QString server, QString filter, QStringList tagList);
+		void filterSignals(QString server, std::optional<AppSignalLists::AppSignalList*> appSignalList, QString filter, QStringList tagList);
 
 		const TrendLib::TrendSignalParam& signalByRow(int row) const;
 
 	private:
-		const ISignalHasTag* m_signalHasTag = nullptr;
+		const TrendLib::ISignalHasTag* m_signalHasTag = nullptr;
 		std::vector<size_t> m_signalIndexes;
 		std::vector<TrendLib::TrendSignalParam> m_signals;
 		std::map<QString, std::vector<size_t>>
@@ -54,16 +61,17 @@ namespace TrendLib
 	public:
 		// Constructor for TrendLib::TrendSignalParam
 		//
-		DialogChooseTrendSignals(const ISignalHasTag* signalHasTag,
+		DialogChooseTrendSignals(const TrendLib::ISignalHasTag* signalHasTag,
 								 std::vector<TrendLib::TrendSignalParam> trendSignals,
 								 const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
 								 const std::vector<TrendLib::ArchiveServer>& archiveServers,
+								 const AppSignalLists::AppSignalListSet& appSignalLists,
 								 QWidget* parent);
 
 		virtual ~DialogChooseTrendSignals();
 
 	protected:
-		void init(const ISignalHasTag* signalHasTag,
+		void init(const TrendLib::ISignalHasTag* signalHasTag,
 				  std::vector<TrendLib::TrendSignalParam> signalss,
 				  const std::vector<TrendLib::TrendSignalParam>& acceptedSignals,
 				  const std::vector<TrendLib::ArchiveServer>& archiveServers);
@@ -75,6 +83,7 @@ namespace TrendLib
 		virtual void resizeEvent(QResizeEvent* event) override;
 
 		void fillServerCombo();
+		void fillAppSignalLists();
 		void fillSignalList();
 
 		void addSignal(const TrendSignalParam& signal);
@@ -103,6 +112,8 @@ namespace TrendLib
 		void on_trendSignals_doubleClicked(const QModelIndex& index);
 		void slot_trendSignalsSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
+		void listComboIndexChanged(int index);
+
 		void on_buttonBox_accepted();
 
 		void on_trendSignals_customContextMenuRequested(const QPoint& pos);
@@ -113,10 +124,11 @@ namespace TrendLib
 	private:
 		Ui::DialogChooseTrendSignals* ui = nullptr;
 
-		const ISignalHasTag* m_signalHasTag = nullptr;
+		const TrendLib::ISignalHasTag* m_signalHasTag = nullptr;
 
 		std::vector<TrendLib::TrendSignalParam> m_acceptedSignals;
 		std::vector<TrendLib::ArchiveServer> m_archiveServers;
+		const AppSignalLists::AppSignalListSet& m_appSignalListSet;
 
 		// --
 		//

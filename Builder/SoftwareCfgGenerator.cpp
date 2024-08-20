@@ -7,12 +7,13 @@
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
 
-#include <HardwareLib/Software.h>
 #include <HardwareLib/Workstation.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaLayer.h>
 #include <VFrame30/VduSchema.h>
 
+#include "AppSignalListStorage.h"
+#include <AppSignalLists/SignalList.h>
 
 namespace Builder
 {
@@ -175,8 +176,7 @@ namespace Builder
 
 		// Project property Generate Extra debug Info
 		//
-		bool generateExtraDebugIno = false;
-		db.getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtraDebugIno, nullptr);
+		bool generateExtraDebugIno = context->generateExtraDebugInfo();
 
 		// --
 		//
@@ -1240,6 +1240,224 @@ namespace Builder
 		}
 
 		return profile + "_" + m_software->equipmentIdTemplate().toLower() + "." + extention;
+	}
+
+	std::vector<AppSignal*> SoftwareCfgGenerator::createAppSignalList(const QStringList& equipmentList, const SignalSet& signalSet)
+	{
+		std::vector<AppSignal*> appSignals;
+
+		if (equipmentList.empty() == true)
+		{
+			return appSignals;
+		}
+
+		// Create signals
+		//
+		appSignals.reserve(signalSet.size() / 8); // Just guess
+
+		for (AppSignal* s : signalSet)
+		{
+			// Check EquipmentIdMasks
+			//
+			if (equipmentList.contains(s->lmEquipmentID()) == true)
+			{
+				appSignals.push_back(s);
+			}
+		}
+
+		return appSignals;
+	}
+
+	std::vector<AppSignal*> SoftwareCfgGenerator::createTuningSignalList(const QStringList& equipmentList, const SignalSet& signalSet)
+	{
+		std::vector<AppSignal*> tuningSignals;
+		if (equipmentList.empty() == true)
+		{
+			return tuningSignals;
+		}
+
+		tuningSignals.reserve(signalSet.size() / 32);
+
+		// Create signals
+		//
+		for (AppSignal* s : signalSet)
+		{
+			if (s->enableTuning() == false)
+			{
+				continue;
+			}
+
+			// Check EquipmentIdMasks
+			//
+			if (equipmentList.contains(s->lmEquipmentID()) == true)
+			{
+				tuningSignals.push_back(s);
+			}
+		}
+
+		return tuningSignals;
+	}
+
+	bool SoftwareCfgGenerator::writeTuningSignals(const std::vector<AppSignal*>& tuningSignals)
+	{
+		// Write number of signals
+		//
+		::Proto::AppSignalSet tuningSignalSet;
+
+		for (const auto& s : tuningSignals) 
+		{
+			::Proto::AppSignal* aspMessage = tuningSignalSet.add_appsignal();
+			s->saveToProto(aspMessage);
+		}
+
+		QByteArray data;
+		data.resize(static_cast<int>(tuningSignalSet.ByteSizeLong()));
+
+		tuningSignalSet.SerializeToArray(data.data(), static_cast<int>(tuningSignalSet.ByteSizeLong()));
+
+		// Write file
+		//
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CfgFileId::TUNING_SIGNALS, "", data);
+
+		if (buildFile == nullptr)
+		{
+			m_log->errCMN0012("TuningSignals.dat");
+			return false;
+		}
+
+		m_cfgXml->addLinkToFile(buildFile);
+
+		return true;
+	}
+
+	bool SoftwareCfgGenerator::writeAppSignalLists(const ISignalManager& signalManager,
+												   const QStringList& appSignalListIds,
+												   const QStringList& appSignalListMasks,
+												   const QStringList& appSignalListTags,
+												   std::vector<std::shared_ptr<AppSignalLists::AppSignalList>>& appSignalLists)
+	{
+		IssueLogger* log = m_context->m_log;
+
+		if (log == nullptr)
+		{
+			Q_ASSERT(log);
+			return false;
+		}
+	
+		AppSignalListStorage lists(m_dbController);
+
+		QString errorMsg;
+		if (lists.load(&errorMsg) == false)
+		{
+			log->errINT1001(tr("Error parsing AppSignalLists: %1").arg(errorMsg));
+			return false;
+		}
+
+		// Validate project lists
+		//
+		std::vector<std::pair<QString, QString>> nonUniqueIds = lists.checkForSameIds();
+		if (nonUniqueIds.empty() == false)
+		{
+			for (const auto& [listId, listCaption] : nonUniqueIds)
+			{
+				log->errEQP6222(listId, listCaption);
+			}
+
+			return false;
+		}
+
+		bool returnResult = true;
+
+		auto allSignals = signalManager.signalList();
+
+		for (const auto& list : lists)
+		{
+			// Check if this list is for this software
+			//
+			if (list->listMatch(appSignalListIds, appSignalListMasks, appSignalListTags) == false)
+			{
+				continue;
+			}
+
+			// Add this list to the map
+			//
+			appSignalLists.push_back(list);
+
+			// Check for cancel
+			//
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			// Check if list signals exist in project signal set
+			//
+			for (Hash hash : list->itemsHashes())
+			{
+				if (signalManager.signalExists(hash) == false)
+				{
+					const AppSignalLists::AppSignalListItem& item = list->itemByHash(hash);
+					m_log->errEQP6220(item.appSignalId(), list->id());
+				}
+			}
+
+			// Add filtered signals to the list
+			//
+			auto& mutableAppCache = list->mutableAppListHashesCache();
+			auto& mutableTuningCache = list->mutableTuningListHashesCache();
+
+			for (const auto& asp : allSignals)
+			{
+				if (list->appSignalMatch(asp) == true)
+				{
+					mutableAppCache.insert(asp.hash());
+
+					if (asp.enableTuning() == true)
+					{
+						mutableTuningCache.insert(asp.hash());
+					}
+				}
+			}
+
+			// Add tag "created by ide" to the list
+			//
+			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
+
+			
+			// Save list to the data buffer
+			//
+			Proto::Envelope envelope;
+			list->SaveData(&envelope);
+
+			QByteArray data;
+			data.resize(static_cast<qsizetype>(envelope.ByteSizeLong()));
+
+			bool result = envelope.SerializeToArray(data.data(), static_cast<int>(envelope.ByteSizeLong()));
+			if (result == false)
+			{
+				Q_ASSERT(result);
+				return false;
+			}
+
+			// Write file
+			//
+			QString fileName = tr("%1.%2").arg(list->id()).arg(Db::File::AppSignalListFileExtension);
+
+			BuildFile* listsFile = m_context->m_buildResultWriter->addFile(m_software->equipmentIdTemplate(),
+																		   fileName,
+																		   fileName,
+																		   {CfgFileTag::APPSIGNALLISTS},
+																		   data);
+			if (listsFile == nullptr)
+			{
+				Q_ASSERT(listsFile);
+				return false;
+			}
+
+			returnResult &= m_cfgXml->addLinkToFile(listsFile);
+		}
+
+		return returnResult;
 	}
 
 	bool SoftwareCfgGenerator::writeMatsUsers(const QString& propertyName, const QStringList& tuningUserAccounts)

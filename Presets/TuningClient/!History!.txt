@@ -1,4 +1,6 @@
 TuningClient
 	16.08.2023	Version: 1	TuningClient_v1.u7devp	RPCT-3631: Property OnConfigurationArrived removed, now it is a part of the GlobalScript.
 	08.01.2024	Version: 2	TuningClient_v2.u7devp	RPCT-3786, MATS User Security implementation, TuningUserAccounts property has special editor
+	02.05.2024	Version: 3	TuningClient_v3.u7devp	RPCT-3875: Add AppSignalLists property
+	11.07.2024	Version: 4	TuningClient_v4.u7devp	RPCT-3899: AutoApply property is replaced by ApplyMode
 

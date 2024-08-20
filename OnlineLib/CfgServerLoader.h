@@ -5,7 +5,7 @@
 #include "TcpFileTransfer.h"
 #include "TcpClientStatistics.h"
 #include "SoftwareSettings.h"
-#include "../CommonLib/HashedVector.h"
+#include <CommonLib/HashedVector.h>
 #include "../OnlineLib/BuildInfo.h"
 
 using BuildFileInfoArray = std::vector<OnlineLib::BuildFileInfo>;

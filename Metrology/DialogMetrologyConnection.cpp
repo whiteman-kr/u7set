@@ -1204,7 +1204,7 @@ void DialogMetrologyConnection::onExport()
 
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Export to file"),
-													Metrology::CONNECTIONS_FILE_NAME,
+													File::METROLOGY_CONNECTIONS_CSV,
 													filter);
 	if (fileName.isEmpty() == true)
 	{
@@ -1224,7 +1224,7 @@ void DialogMetrologyConnection::onImport()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
 													tr("Import from file"),
-													Metrology::CONNECTIONS_FILE_NAME,
+													File::METROLOGY_CONNECTIONS_CSV,
 													"CSV files (*.csv);;All files (*.*)");
 	if (fileName.isEmpty() == true)
 	{

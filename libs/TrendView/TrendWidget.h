@@ -63,7 +63,6 @@ namespace TrendLib
 
 	public:
 		explicit TrendWidget(QWidget* parent = nullptr);
-		virtual ~TrendWidget() = default;
 
 	public:
 		bool save(QString fileName, QString* errorMessage) const;

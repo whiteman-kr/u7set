@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../CommonLib/Hash.h"
+#include <CommonLib/Hash.h>
 #include "../UtilsLib/WUtils.h"
 #include "CircularLogger.h"
 #include "OnlineDataSource.h"

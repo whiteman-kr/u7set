@@ -25,6 +25,7 @@ qt_add_library(${TARGET} STATIC
 	Bus.h
 	ComparatorSet.cpp
 	ComparatorSet.h
+	ISignalManager.h
 	IAppSignalManager.h
 	ITuningSignalManager.h
 	PropertyNames.cpp
@@ -76,9 +77,9 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_precompile_headers(${TARGET} PRIVATE
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 
 	<ProtoSerialization.h>
 	<Hardware.pb.h>
@@ -86,7 +87,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Network)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib)
 
 target_compile_definitions(${TARGET} PRIVATE APP_SIGNAL_LIB_DOMAIN)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

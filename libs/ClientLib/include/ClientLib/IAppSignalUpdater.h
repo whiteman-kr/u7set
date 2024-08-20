@@ -3,7 +3,6 @@
 
 namespace ClientLib
 {
-
 	class IAppSignalUpdater
 	{
 	public:

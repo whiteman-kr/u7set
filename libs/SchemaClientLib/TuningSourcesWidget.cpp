@@ -48,14 +48,14 @@ namespace SchemaClientLib
 		setMinimumSize(640, 600);
 
 		QStringList headerLabels;
-		headerLabels << tr("Parameter");
-		headerLabels << tr("Value");
+		headerLabels << QObject::tr("Parameter");
+		headerLabels << QObject::tr("Value");
 		headerLabels << QString();
 
 		m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 		m_treeWidget->setHeaderLabels(headerLabels);
 
-		QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList() << tr("1-Source Information"));
+		QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList() << QObject::tr("1-Source Information"));
 
 		createDataItem(infoItem, "ID");
 		createDataItem(infoItem, "EquipmentID");
@@ -78,7 +78,7 @@ namespace SchemaClientLib
 
 		infoItem->setExpanded(true);
 
-		QTreeWidgetItem* stateItem = new QTreeWidgetItem(QStringList() << tr("2-Source State"));
+		QTreeWidgetItem* stateItem = new QTreeWidgetItem(QStringList() << QObject::tr("2-Source State"));
 
 		createDataItem(stateItem, "LmTime");
 		createDataItem(stateItem, "LanEquipmentID");
@@ -102,7 +102,7 @@ namespace SchemaClientLib
 
 		stateItem->setExpanded(true);
 
-		QTreeWidgetItem* errorsRUPItem = new QTreeWidgetItem(QStringList() << tr("3-Errors in Reply RupFrameHeader"));
+		QTreeWidgetItem* errorsRUPItem = new QTreeWidgetItem(QStringList() << QObject::tr("3-Errors in Reply RupFrameHeader"));
 
 		createDataItem(errorsRUPItem, "ErrRupProtocolVersion");
 		createDataItem(errorsRUPItem, "ErrRupFrameSize");
@@ -114,7 +114,7 @@ namespace SchemaClientLib
 
 		m_treeWidget->addTopLevelItem(errorsRUPItem);
 
-		QTreeWidgetItem* errorsFotipItem = new QTreeWidgetItem(QStringList() << tr("4-Errors in Reply FotipHeader"));
+		QTreeWidgetItem* errorsFotipItem = new QTreeWidgetItem(QStringList() << QObject::tr("4-Errors in Reply FotipHeader"));
 
 		createDataItem(errorsFotipItem, "ErrFotipProtocolVersion");
 		createDataItem(errorsFotipItem, "ErrFotipUniqueID");
@@ -128,7 +128,7 @@ namespace SchemaClientLib
 
 		m_treeWidget->addTopLevelItem(errorsFotipItem);
 
-		QTreeWidgetItem* errorsFotipFlagItem = new QTreeWidgetItem(QStringList() << tr("5-Errors Reported by LM in Reply FotipHeader.flags"));
+		QTreeWidgetItem* errorsFotipFlagItem = new QTreeWidgetItem(QStringList() << QObject::tr("5-Errors Reported by LM in Reply FotipHeader.flags"));
 
 		createDataItem(errorsFotipFlagItem, "FotipFlagBoundsCheckSuccess");
 		createDataItem(errorsFotipFlagItem, "FotipFlagWriteSuccess");
@@ -169,7 +169,7 @@ namespace SchemaClientLib
 
 		if (tss.empty() == true)
 		{
-			static const QString noTuningSourceString = tr("Tuning Source - ") + "?";
+			static const QString noTuningSourceString = QObject::tr("Tuning Source - ") + "?";
 
 			if (windowTitle() != noTuningSourceString)
 			{
@@ -186,7 +186,7 @@ namespace SchemaClientLib
 				{
 					// Update Window title
 
-					QString title = tr("Tuning Source - %1").arg(ts.equipmentId());
+					QString title = QObject::tr("Tuning Source - %1").arg(ts.equipmentId());
 
 					if (windowTitle() != title)
 					{
@@ -222,7 +222,7 @@ namespace SchemaClientLib
 		{
 			if (::calcHash(ts.controllerEquipmentId(i)) == m_lanEquipmentHash)
 			{
-				setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(info.id())).arg(QString::number(info.id(), 16)));
+				setDataItemText("ID", QString("%1 (%2h)").arg(QString::number(info.id())).arg(QString::number(info.id(), 16)));
 				setDataItemText("EquipmentID", info.moduleequipmentid().c_str());
 				setDataItemText("Caption", info.modulecaption().c_str());
 				setDataItemNumber("DataType", info.lancontrollerinfo()[i].lancontrollertype());
@@ -233,13 +233,13 @@ namespace SchemaClientLib
 				setDataItemText("Subsystem", info.subsystemid().c_str());
 
 				setDataItemNumber("LmNumber", info.lmnumber());
-				setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(info.moduletype())).arg(QString::number(info.moduletype(), 16)));
+				setDataItemText("LmModuleType", QString("%1 (%2h)").arg(QString::number(info.moduletype())).arg(QString::number(info.moduletype(), 16)));
 				setDataItemText("LmAdapterID", info.lancontrollerinfo()[i].equipmentid().c_str());
 				setDataItemNumber("LmDataEnable", info.lancontrollerinfo()[i].tuningenable());
-				setDataItemText("RupTuningDataUID", tr("%1 (%2h)").
+				setDataItemText("RupTuningDataUID", QString("%1 (%2h)").
 								arg(QString::number(info.lancontrollerinfo()[i].ruptuningdatauid())).
 								arg(QString::number(info.lancontrollerinfo()[i].ruptuningdatauid(), 16)));
-				setDataItemText("FotipTuningDataUID", tr("%1 (%2h)").
+				setDataItemText("FotipTuningDataUID", QString("%1 (%2h)").
 								arg(QString::number(info.lancontrollerinfo()[i].fotiptuningdatauid())).
 								arg(QString::number(info.lancontrollerinfo()[i].fotiptuningdatauid(), 16)));
 				break;

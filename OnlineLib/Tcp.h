@@ -12,7 +12,7 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/Crc.h"
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/HostAddressPort.h>
 
 #include "CircularLogger.h"
 #include "SocketIO.h"

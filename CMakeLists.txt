@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
+# This file sets some options to control GraphViz graphs.
+#set(GRAPHVIZ_GRAPH_NAME "")
+set(GRAPHVIZ_CUSTOM_TARGETS TRUE)
+
 # Creates variables:
 #	U7SET_MAJOR_VERSION, 
 #	U7SET_MINOR_VERSION, 
@@ -8,6 +12,15 @@ cmake_minimum_required(VERSION 3.16)
 #	U7SET_RELEASE_TYPE
 #
 include(cmake/version.cmake)
+
+# Emit error if VCPKG_ROOT is not set
+#
+if(NOT DEFINED ENV{VCPKG_ROOT})
+	message(FATAL_ERROR "VCPKG_ROOT is not set. Please set it to the vcpkg root directory.")
+endif()
+
+set(VCPKG_ROOT $ENV{VCPKG_ROOT})
+include(${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
 # Git based 
 #
@@ -29,6 +42,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(QT_VERSION "6.5.3")
 
 find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
+find_package(Threads REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+find_package(asio CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 if (MSVC)
 	find_package(Qt6 REQUIRED COMPONENTS AxContainer) # Metrology
@@ -40,7 +58,7 @@ include(cmake/warnings.cmake)
 set_warnings()
 
 # Add LTO for Release and Windows only. 
-# It is diasbale for Unix to speed up CI bulid.
+# It is diasabled for Unix to speed up CI bulid.
 #
 if(CMAKE_BUILD_TYPE STREQUAL "Release" AND MSVC)
     set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
@@ -84,6 +102,10 @@ endif()
 #
 option(UPDATE_TRANSLATIONS "Update Translations" OFF)
 
+# Allow usage FTDI functions - is used for getting module configurator serial number.
+#
+option(ALLOW_FTDI "Allow FTDI" OFF)
+
 message("-----------------------------------------")
 message(${PROJECT_NAME})
 message("Version: ${CMAKE_PROJECT_VERSION} (${U7SET_BRANCH_NAME})")
@@ -106,11 +128,12 @@ message("User: ${U7SET_USER_NAME}")
 message("Host: ${U7SET_HOSTNAME}")
 message("Qt Version: ${Qt6_VERSION}")
 message("Qt Path: ${Qt6_DIR}")
+message("VCPKG_ROOT: ${VCPKG_ROOT}")
+message("Allow FTDI: ${ALLOW_FTDI}")
 message("-----------------------------------------")
 
 # Add projects.
 #
-add_subdirectory(CommonLib)
 add_subdirectory(UtilsLib)
 add_subdirectory(AppSignalLib)
 add_subdirectory(OnlineLib)
@@ -131,30 +154,32 @@ add_subdirectory(TuningService)
 add_subdirectory(GatewayService)
 add_subdirectory(DiagDataService)
 
+add_subdirectory(TestSuiteLib)
+add_subdirectory(TestSuiteConsole)
+
 # Do not compile these projects if code coverage is on.
 #
 if(NOT CODE_COVERAGE)
-    add_subdirectory(./Tools/qtkeychain)
     add_subdirectory(u7)
+	add_subdirectory(TestSuite)
+	add_subdirectory(mconf)	
+	add_subdirectory(./Tools/qtkeychain)
 
 	add_subdirectory(Monitor)
 	add_subdirectory(TuningClient)
 	add_subdirectory(Diagnostics)
-
 	add_subdirectory(Metrology)
-	add_subdirectory(mconf)	
 endif()
 
-add_subdirectory(TestSuiteLib)
-add_subdirectory(TestSuite)
-add_subdirectory(TestSuiteConsole)
-
-add_subdirectory(./Test/googletest)
 add_subdirectory(./Test/ClientTests)
 add_subdirectory(./Test/SimulatorTests)
 add_subdirectory(./Test/u7databaseTests)
 add_subdirectory(./Test/MetrologyTests)
 #add_subdirectory(./Test/TestSuiteTest)
+
+if (DEFINED ENV{CI_BUILD_LICENSER})
+	add_subdirectory(./Tools/Licenser)
+endif()
 
 # Create install target.
 # Just run /u7setinstall/createinstall.bat file.
@@ -164,3 +189,14 @@ add_custom_target(create_install
 	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/u7setinstall"
 	COMMENT "Running createinstall.bat with U7SET_FULL_VERSION=${U7SET_FULL_VERSION}"
 )
+
+# Generate dependency graphs into the build directory/LibraryDependencies
+#
+if(WIN32)
+    # Add a custom target to run the dependencies.bat script
+    add_custom_target(GenerateDependencySvgs
+        COMMAND "${CMAKE_SOURCE_DIR}/dependencies.bat"
+        COMMENT "Generating library dependency SVG files..."
+        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+    )
+endif()

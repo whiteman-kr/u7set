@@ -5,7 +5,7 @@
 #include "AppSignal.h"
 #include "AppSignalSpecPropValues.h"
 #include "../UtilsLib/XmlHelper.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 template<typename ENUM_TYPE>
 void writeEnumValueStrSpecPropAttribute(XmlWriteHelper& xml, const AppSignal& s,
@@ -126,27 +126,66 @@ QString AppSignal::initFromDeviceSignal(const QString& deviceSignalEquipmentID,
 		return QString("Unknown device signal E::SignalType");
 	}
 
+	m_swCalcFunction = E::SoftwareCalcFunction::None;
+
 	switch(deviceSignalFunction)
 	{
 	case E::SignalFunction::Input:
 	case E::SignalFunction::Validity:
-
 		m_inOutType = E::SignalInOutType::Input;
-
 		break;
 
 	case E::SignalFunction::Output:
-
 		m_inOutType = E::SignalInOutType::Output;
-
 		break;
 
 	case E::SignalFunction::Diagnostics:
 
 		Q_ASSERT(false);
-		return QString("Can't create AppSignal from diagnostics device signal");
+		return QString("Can not create AppSignal from diagnostics device signal");
 
-		break;
+	case E::SignalFunction::SoftwareCalculated:
+		{
+			static const std::map<QString, E::SoftwareCalcFunction> suffixToFunction =
+			{
+				{ EquipmentPropNames::SC_FBLOCK_COUNT_SUFFIX, E::SoftwareCalcFunction::BlockFlagsCount },
+				{ EquipmentPropNames::SC_FSIM_COUNT_SUFFIX, E::SoftwareCalcFunction::SimFlagsCount },
+				{ EquipmentPropNames::SC_FMISMATCH_COUNT_SUFFIX, E::SoftwareCalcFunction::MismatchFlagsCount }
+			};
+
+			for(const auto& [suffix, func] : suffixToFunction)
+			{
+				if (deviceSignalEquipmentID.endsWith(suffix) == true)
+				{
+					m_swCalcFunction = func;
+					break;
+				}
+			}
+
+			if (m_swCalcFunction == E::SoftwareCalcFunction::None)
+			{
+				return QString("Unknown software calculetd function of signal %1").arg(appSignalID);
+			}
+
+			m_inOutType = E::SignalInOutType::SoftwareCalculated;
+
+			switch(m_swCalcFunction)
+			{
+			case E::SoftwareCalcFunction::BlockFlagsCount:
+			case E::SoftwareCalcFunction::SimFlagsCount:
+			case E::SoftwareCalcFunction::MismatchFlagsCount:
+				m_apertureType = E::ApertureType::AbsValue;
+				m_coarseAperture = 1;
+				m_fineAperture = 1;
+				m_decimalPlaces = 0;
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+
+			break;
+		}
 
 	default:
 
@@ -217,6 +256,9 @@ void AppSignal::initSpecificProperties()
 			specPropStruct = AppSignalDefaultSpecPropStruct::INTERNAL_ANALOG;
 			break;
 
+		case E::SignalInOutType::SoftwareCalculated:
+			break;
+
 		default:
 			assert(false);
 		}
@@ -249,6 +291,16 @@ void AppSignal::setSignalType(E::SignalType type)
 {
 	m_signalType = type;
 	updateTuningValuesType();
+}
+
+E::SoftwareCalcFunction AppSignal::swCalcFunction() const
+{
+	return m_swCalcFunction;
+}
+
+void AppSignal::setSwCalcFunction(E::SoftwareCalcFunction func)
+{
+	m_swCalcFunction = func;
 }
 
 void AppSignal::setDataSizeW(int sizeW)
@@ -712,6 +764,7 @@ void AppSignal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 	protoData->set_aperturetype(TO_INT(m_apertureType));
 	protoData->set_invertsignal(m_invertSignal);
 	protoData->set_reserved(m_reserved);
+	protoData->set_swcalcfunction(TO_INT(m_swCalcFunction));
 
 	//
 
@@ -771,6 +824,7 @@ void AppSignal::loadProtoData(const char* protoDataPtr, int protoDataSize)
 	m_apertureType = static_cast<E::ApertureType>(protoData.aperturetype());
 	m_invertSignal = protoData.invertsignal();
 	m_reserved = protoData.reserved();
+	m_swCalcFunction = static_cast<E::SoftwareCalcFunction>(protoData.swcalcfunction());
 
 	//
 
@@ -1255,6 +1309,7 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 
 	s->set_signaltype(TO_INT(m_signalType));
 	s->set_inouttype(TO_INT(m_inOutType));
+	s->set_swcalcfunction(TO_INT(m_swCalcFunction));
 
 	// Signal format
 
@@ -1421,12 +1476,8 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 
 		assert(calcParam->stateflagssignals_size() == 0);
 
-		QList<E::AppSignalStateFlagType> flagTypes = m_stateFlagsSignals.keys();
-
-		for(E::AppSignalStateFlagType flagType : flagTypes)
+		for(auto const& [flagType, flagSignalID] :  m_stateFlagsSignals)
 		{
-			QString flagSignalID = m_stateFlagsSignals.value(flagType, QString());
-
 			if (flagSignalID.isEmpty() == true)
 			{
 				assert(false);
@@ -1479,6 +1530,7 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 
 	m_signalType = static_cast<E::SignalType>(s.signaltype());
 	m_inOutType = static_cast<E::SignalInOutType>(s.inouttype());
+	m_swCalcFunction = static_cast<E::SoftwareCalcFunction>(s.swcalcfunction());
 
 	// Signal format
 
@@ -1571,7 +1623,7 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 
 		assert(m_stateFlagsSignals.contains(flagType) == false);
 
-		m_stateFlagsSignals.insert(flagType, QString::fromStdString(protoStateFlagSignal.flagsignalid()));
+		m_stateFlagsSignals.emplace(flagType, QString::fromStdString(protoStateFlagSignal.flagsignalid()));
 	}
 
 	// Tags
@@ -1595,9 +1647,31 @@ bool AppSignal::addFlagSignalID(E::AppSignalStateFlagType flagType, const QStrin
 		return false;
 	}
 
-	m_stateFlagsSignals.insert(flagType, appSignalID);
+	m_stateFlagsSignals.emplace(flagType, appSignalID);
 
 	return true;
+}
+
+QString AppSignal::getFlagSignalID(E::AppSignalStateFlagType flagType) const
+{
+	return getValueOrDefault(m_stateFlagsSignals, flagType, QString());
+}
+
+QStringList AppSignal::getFlagSignalsIDs() const
+{
+	QStringList result;
+
+	for(const auto& [flagType, appSignalID] : m_stateFlagsSignals)
+	{
+		result.append(appSignalID);
+	}
+
+	return result;
+}
+
+bool AppSignal::hasFlagsSignals() const
+{
+	return !m_stateFlagsSignals.empty();
 }
 
 void AppSignal::initTuningValues()
@@ -1607,8 +1681,19 @@ void AppSignal::initTuningValues()
 	switch (signalType())
 	{
 	case E::SignalType::Analog:
-		m_tuningLowBound.setValue(m_tuningLowBound.type(), static_cast<qint64>(lowEngineeringUnits(nullptr)), lowEngineeringUnits(nullptr));
-		m_tuningHighBound.setValue(m_tuningHighBound.type(), static_cast<qint64>(highEngineeringUnits(nullptr)), highEngineeringUnits(nullptr));
+		{
+			double lowBound = lowEngineeringUnits(nullptr);
+			double highBound = highEngineeringUnits(nullptr);
+
+			if (lowBound == highBound )
+			{
+				lowBound = 0;
+				highBound = 100;
+			}
+
+			m_tuningLowBound.setValue(m_tuningLowBound.type(), static_cast<qint64>(lowBound), lowBound);
+			m_tuningHighBound.setValue(m_tuningHighBound.type(), static_cast<qint64>(highBound), highBound);
+		}
 		break;
 
 	case E::SignalType::Discrete:

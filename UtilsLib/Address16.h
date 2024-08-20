@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 // ----------------------------------------------------------------------------------------
 //

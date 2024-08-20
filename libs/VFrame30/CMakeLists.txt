@@ -19,8 +19,6 @@ endif (MSVC)
 set(TARGET VFrame30)
 
 qt_add_library(${TARGET} STATIC
-	../../lib/Tuning/ITuningConnection.h
-
 	./include/VFrame30/FblItem.h
 	./include/VFrame30/FblItemLine.h
 	./include/VFrame30/FblItemRect.h
@@ -228,10 +226,10 @@ target_precompile_headers(${TARGET} PRIVATE
 
 		<QtConcurrent/QtConcurrent>
 
-		"../../CommonLib/Types.h"
-		"../../CommonLib/Hash.h"
-		"../../CommonLib/PropertyObject.h"
-		"../../CommonLib/AfbParamValue.h"
+		<CommonLib/Types.h>
+		<CommonLib/Hash.h>
+		<CommonLib/PropertyObject.h>
+		<CommonLib/AfbParamValue.h>
 
 		<ProtoSerialization.h>
 		<ProtoCommonHelper.h>
@@ -245,7 +243,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Svg)
-target_link_libraries(${TARGET} PUBLIC CommonLib Behavior Protobuf UtilsLib AppSignalLib HardwareLib DiagStateLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib AppSignalLib HardwareLib DiagStateLib TrendView)
 
 target_compile_definitions(${TARGET} PRIVATE VFRAME30_LIBRARY)
 

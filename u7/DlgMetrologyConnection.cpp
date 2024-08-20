@@ -618,7 +618,8 @@ DialogMetrologyConnection::DialogMetrologyConnection(AppSignalSetProvider* signa
 													 QWidget* parent) :
 	QDialog(parent),
 	m_signalSetProvider(signalSetProvider),
-	m_db(dbController)
+	m_db(dbController),
+	m_connectionBase(parent)
 {
 	TEST_PTR_RETURN(m_signalSetProvider);
 
@@ -866,7 +867,8 @@ bool DialogMetrologyConnection::loadConnectionBase()
 
 	if (result == false)
 	{
-		QMessageBox::critical(this, m_windowTitle, tr("Error: File of meterology connection %1 is not open!").arg(Metrology::CONNECTIONS_FILE_NAME));
+		QMessageBox::critical(this, m_windowTitle, tr("Error: File of %1 is not open!").
+												   arg(File::METROLOGY_CONNECTIONS_CSV));
 		return false;
 	}
 
@@ -932,7 +934,8 @@ bool DialogMetrologyConnection::saveConnectionBase(bool checkIn, const QString& 
 	bool resultSave = m_connectionBase.save(checkIn, comment);
 	if (resultSave == false)
 	{
-		QMessageBox::critical(this, m_windowTitle, QString("Error: Failed to save metrology connections file: %1 to database!").arg(Metrology::CONNECTIONS_FILE_NAME));
+		QMessageBox::critical(this, m_windowTitle, QString("Error: Failed to save %1 file to database!").
+												   arg(File::METROLOGY_CONNECTIONS_CSV));
 		return false;
 	}
 
@@ -946,7 +949,8 @@ bool DialogMetrologyConnection::checkOutConnectionBase()
 	bool result = m_connectionBase.checkOut();
 	if (result == false)
 	{
-		QMessageBox::critical(this, m_windowTitle, QString("Error: Failed to check out metrology connections file: %1").arg(Metrology::CONNECTIONS_FILE_NAME));
+		QMessageBox::critical(this, m_windowTitle, QString("Error: Failed to check out file: %1").
+												   arg(File::METROLOGY_CONNECTIONS_CSV));
 	}
 
 	updateCheckInStateOnToolBar();
@@ -1540,7 +1544,7 @@ void DialogMetrologyConnection::exportConnections()
 
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Export to file"),
-													Metrology::CONNECTIONS_FILE_NAME,
+													File::METROLOGY_CONNECTIONS_CSV,
 													filter);
 	if (fileName.isEmpty() == true)
 	{
@@ -1562,7 +1566,7 @@ void DialogMetrologyConnection::importConnections()
 
 	QString fileName = QFileDialog::getOpenFileName(this,
 													tr("Import from file"),
-													Metrology::CONNECTIONS_FILE_NAME,
+													File::METROLOGY_CONNECTIONS_CSV,
 													"CSV files (*.csv);;All files (*.*)");
 	if (fileName.isEmpty() == true)
 	{

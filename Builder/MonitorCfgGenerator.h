@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
-#include "../OnlineLib/SoftwareSettings.h"
 
 namespace Builder
 {
@@ -11,7 +10,6 @@ namespace Builder
 	{
 	public:
 		MonitorCfgGenerator(Context* context, Hardware::Software* software);
-		~MonitorCfgGenerator();
 
 		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfigurationStep1() override;
@@ -19,21 +17,19 @@ namespace Builder
 
 	protected:
 		bool initSchemaTags();
-		bool initTuningSources();
+		
+		bool createAppEquipmentList(QStringList* equipmentList);
+		bool createTuningEquipmentList(QStringList* equipmentList);
 
 		bool writeSchemasByTags();
 
 		// Generate tuning signals file
 		//
-		bool writeTuningSignals();
 		bool writeMonitorBehavior();
 		bool writeMonitorLogo();
 
 	private:
-		QStringList m_tuningSources;
-
 		VFrame30::SchemaDetailsSet m_detailsSet;
-		QStringList m_schemaTagList;		// Generated in writeMonitorSettings
+		QStringList m_schemaTagList; // Generated in writeMonitorSettings
 	};
-}
-
+} // namespace Builder

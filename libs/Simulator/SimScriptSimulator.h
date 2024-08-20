@@ -41,7 +41,9 @@ namespace Sim
 		SimScriptItem m_globalScript;
 		std::vector<SimScriptItem> m_scripts;
 
+		std::mutex m_jsMutex; // Mutex only on changing m_jsEngine value as pointer.
 		std::unique_ptr<QJSEngine> m_jsEngine;
+
 		QJSValue m_jsThis;
 		QJSValue m_jsLog;
 

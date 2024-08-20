@@ -11,6 +11,7 @@
 #include <SchemaClientLib/DialogWriteTuningValues.h>
 #include <VFrame30/DrawParam.h>
 
+
 TuningPageHelper::TuningPageHelper(const ClientLib::TuningUserManager& userManager):
 	m_userManager(userManager)
 {
@@ -139,7 +140,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return QBrush();
@@ -184,7 +185,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 	const TuningModelHashSet& hashes = hashSetByIndex(row);
 
-	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	for (int c = 0; c < TuningLib::MaxValuesColumnCount; c++)
 	{
 		const Hash hash = hashes.hash[c];
 
@@ -267,7 +268,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return QBrush();
@@ -306,7 +307,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 	const TuningModelHashSet& hashes = hashSetByIndex(row);
 
-	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	for (int c = 0; c < TuningLib::MaxValuesColumnCount; c++)
 	{
 		const Hash hash = hashes.hash[c];
 
@@ -383,7 +384,7 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 		}
 	}
 
-	if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+	if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 	{
 		assert(false);
 		return f;
@@ -430,7 +431,7 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 		columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return QVariant();
@@ -470,7 +471,7 @@ QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 		columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return QVariant();
@@ -542,7 +543,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 		{
 			assert(false);
 			return false;
@@ -694,7 +695,7 @@ bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEven
 	int	columnType = static_cast<int>(m_model->columnType(columnIndex));
 
 	int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
-	if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+	if (valueColumn < 0 || valueColumn >= TuningLib::MaxValuesColumnCount)
 	{
 		return false;
 	}
@@ -772,7 +773,7 @@ TuningPageColumnsWidth::TuningPageColumnsWidth()
 	m_defaultWidthMap[TuningModelColumns::Units] = 70;
 	m_defaultWidthMap[TuningModelColumns::Type] = 70;
 
-	for (int i = 0; i < MAX_VALUES_COLUMN_COUNT; i++)
+	for (int i = 0; i < TuningLib::MaxValuesColumnCount; i++)
 	{
 		int valueColumn = static_cast<int>(TuningModelColumns::ValueFirst) + i;
 		m_defaultWidthMap[static_cast<TuningModelColumns>(valueColumn)] = 70;
@@ -787,12 +788,10 @@ TuningPageColumnsWidth::TuningPageColumnsWidth()
 
 bool TuningPageColumnsWidth::load(const QString& pageId)
 {
-	m_pageId = pageId;
-
 	m_widthMap.clear();
 
 	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-	QString value = settings.value(QString("PageColumnsWidth/%1").arg(m_pageId)).toString();
+	QString value = settings.value(QString("PageColumnsWidth/%1").arg(pageId)).toString();
 
 	QStringList l = value.split(';', Qt::SkipEmptyParts);
 
@@ -815,9 +814,9 @@ bool TuningPageColumnsWidth::load(const QString& pageId)
 	return true;
 }
 
-bool TuningPageColumnsWidth::save() const
+bool TuningPageColumnsWidth::save(const QString& pageId) const
 {
-	if (m_pageId.isEmpty() == true)
+	if (pageId.isEmpty() == true)
 	{
 		assert(false);
 		return false;
@@ -834,7 +833,7 @@ bool TuningPageColumnsWidth::save() const
 	}
 
 	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-	settings.setValue(QString("PageColumnsWidth/%1").arg(m_pageId), value);
+	settings.setValue(QString("PageColumnsWidth/%1").arg(pageId), value);
 
 	return true;
 }
@@ -871,34 +870,47 @@ int TuningPage::m_instanceCounter = 0;
 
 TuningPage::TuningPage(TuningConfigController& configController,
 					   ClientLib::TuningSignalManager& tuningSignalManager,
-					   TuningClientFilterStorage& tuningFilterStorage,
+					   TuningLib::TuningUiStorage& tuningUi,
+					   AppSignalLists::AppSignalListSet& appSignalLists,
 					   ClientLib::TuningUserManager& userManager,
 					   ClientLib::TuningConnection& tuningConnection,
-					   std::shared_ptr<TuningFilter> treeFilter,
-					   std::shared_ptr<TuningFilter> pageFilter,
+					   const QUuid& treeListUuid,                // List selected in list tree
+					   const TuningLib::TuningUiItem& pageUi, // Ui item specifies this page
+					   const TuningCountersManager& tuningCounters,
 					   QWidget* parent) :
 	QWidget(parent),
 	m_configController(configController),
 	m_tuningSignalManager(tuningSignalManager),
-	m_tuningFilterStorage(tuningFilterStorage),
+	m_tuningUi(tuningUi),
+	m_appSignalLists(appSignalLists),
 	m_userManager(userManager),
 	m_tuningConnection(tuningConnection),
-	m_treeFilter(treeFilter),
-	m_pageFilter(pageFilter),
+	m_treeListUuid(treeListUuid),
+	m_pageUi(&pageUi),
+	m_tuningCounters(tuningCounters),
 	m_helper(userManager)
 {
+	Q_ASSERT(m_pageUi);
+
+	// Get the tab filter (if page filter is button, take its parent, if no tab exists - root will be taken
+
+	static TuningLib::TuningUiItem emptyTab;
+
+	const TuningLib::TuningUiItem* tabUi = m_pageUi;
+	
+	while (tabUi->isTab() == false && tabUi->isRoot() == false) 
+	{
+		tabUi = tabUi->parentItem();
+	}
+	if (tabUi == nullptr || tabUi->isTab() == false) 
+	{
+		tabUi = &emptyTab;
+	}
+
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
 
 	m_instanceNo = m_instanceCounter;
 	m_instanceCounter++;
-
-	//assert(m_treeFilter);		This can be nullptr
-
-	if (m_pageFilter == nullptr)
-	{
-		Q_ASSERT(m_pageFilter);
-		return;
-	}
 
 	// Object List
 	//
@@ -909,27 +921,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	// Models and data
 	//
 
-	// Get the tab filter (if page filter is button, take its parent, if no tab exists - create an empty temporary)
-
-	TuningFilter* tabFilter = m_pageFilter.get();
-
-	if (pageFilter->isButton() == true)
-	{
-		TuningFilter* parentFilter = m_pageFilter->parentFilter();
-
-		if (parentFilter != nullptr && parentFilter->isTab() == true)
-		{
-			tabFilter = parentFilter;
-		}
-	}
-
-	if (tabFilter == nullptr)
-	{
-		assert(false);	// page filter must exist !
-		return;
-	}
-
-	std::vector<QString> valueColumnsAppSignalIdSuffixes = tabFilter->valueColumnsAppSignalIdSuffixes();
+	std::vector<QString> valueColumnsAppSignalIdSuffixes = tabUi->valueColumnsAppSignalIdSuffixes();
 
 	m_model = new TuningModelClient(m_tuningSignalManager, m_userManager, valueColumnsAppSignalIdSuffixes, this);
 	m_objectList->setItemDelegate(new SelectionControlDelegate(this, m_model));
@@ -942,27 +934,27 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	f.setBold(true);
 	m_model->setImportantFont(f);
 
-	if (tabFilter->columnCustomAppId() == true)
+	if (tabUi->columnCustomAppId() == true)
 	{
 		m_model->addColumn(TuningModelColumns::CustomAppSignalID);
 	}
-	if (tabFilter->columnAppId() == true)
+	if (tabUi->columnAppId() == true)
 	{
 		m_model->addColumn(TuningModelColumns::AppSignalID);
 	}
-	if (tabFilter->columnEquipmentId() == true)
+	if (tabUi->columnEquipmentId() == true)
 	{
 		m_model->addColumn(TuningModelColumns::EquipmentID);
 	}
-	if (tabFilter->columnCaption() == true)
+	if (tabUi->columnCaption() == true)
 	{
 		m_model->addColumn(TuningModelColumns::Caption);
 	}
-	if (tabFilter->columnUnits() == true)
+	if (tabUi->columnUnits() == true)
 	{
 		m_model->addColumn(TuningModelColumns::Units);
 	}
-	if (tabFilter->columnType() == true)
+	if (tabUi->columnType() == true)
 	{
 		m_model->addColumn(TuningModelColumns::Type);
 	}
@@ -974,26 +966,25 @@ TuningPage::TuningPage(TuningConfigController& configController,
 		m_model->addColumn(static_cast<TuningModelColumns>(valueColumn));
 	}
 
-	if (tabFilter->columnLimits() == true)
+	if (tabUi->columnLimits() == true)
 	{
 		m_model->addColumn(TuningModelColumns::LowLimit);
 		m_model->addColumn(TuningModelColumns::HighLimit);
 	}
-	if (tabFilter->columnDefault() == true)
+	if (tabUi->columnDefault() == true)
 	{
 		m_model->addColumn(TuningModelColumns::Default);
 	}
-	if (tabFilter->columnValid() == true)
+	if (tabUi->columnValid() == true)
 	{
 		m_model->addColumn(TuningModelColumns::Valid);
 	}
-	if (tabFilter->columnOutOfRange() == true)
+	if (tabUi->columnOutOfRange() == true)
 	{
 		m_model->addColumn(TuningModelColumns::OutOfRange);
 	}
 
 	m_bottomLayout = new QHBoxLayout();
-
 
 	// Filter controls
 	//
@@ -1020,7 +1011,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	// Load masks
 	//
 	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
-	QStringList masks = settings.value(QString("Masks/%1").arg(tabFilter->ID())).toStringList();
+	QStringList masks = settings.value(QString("Masks/%1").arg(m_pageUi->uuidString())).toStringList();
 	m_filterTextCombo->addItems(masks);
 	m_filterTextCombo->setEditText(QString());
 
@@ -1092,7 +1083,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 	m_bottomLayout->addWidget(m_undoButton);
 	connect(m_undoButton, &QPushButton::clicked, this, &TuningPage::slot_undo);
 
-	if (m_configController.configuration().clientSettings.autoApply == false)
+	if (m_configController.configuration().clientSettings.applyMode == TuningClientSettings::ApplyMode::Manual)
 	{
 		m_applyButton = new QPushButton(tr("Apply"));
 		connect(m_applyButton, &QPushButton::clicked, this, &TuningPage::slot_Apply);
@@ -1129,7 +1120,7 @@ TuningPage::TuningPage(TuningConfigController& configController,
 
 	// load column width
 
-	m_columnWidthStorage.load(tabFilter->ID());
+	m_columnWidthStorage.load(m_pageUi->uuidString());
 
 	for (int c = 0; c < m_model->columnCount(); c++)
 	{
@@ -1140,11 +1131,11 @@ TuningPage::TuningPage(TuningConfigController& configController,
 
 	// Color
 
-	if (m_pageFilter->isTab() == true && m_pageFilter->useColors() == true)
+	if (tabUi->useColors() == true)
 	{
 		QPalette Pal(palette());
 
-		Pal.setColor(QPalette::Window, m_pageFilter->backColor());
+		Pal.setColor(QPalette::Window, tabUi->backColor());
 		setAutoFillBackground(true);
 		setPalette(Pal);
 	}
@@ -1162,30 +1153,26 @@ TuningPage::TuningPage(TuningConfigController& configController,
 
 TuningPage::~TuningPage()
 {
+	Q_ASSERT(m_pageUi);
+
 	for (int c = 0; c < m_model->columnCount(); c++)
 	{
 		m_columnWidthStorage.setWidth(m_model->columnType(c), m_objectList->columnWidth(c));
 	}
 
-	m_columnWidthStorage.save();
+	m_columnWidthStorage.save(m_pageUi->uuidString());
 
 	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
 	// Save masks
 	//
 
-	if (m_pageFilter == nullptr)
-	{
-		Q_ASSERT(m_pageFilter);
-		return;
-	}
-
 	QStringList masks;
 	for (int i = 0; i < m_filterTextCombo->count(); i++)
 	{
 		masks.push_back(m_filterTextCombo->itemText(i));
 	}
-	settings.setValue(QString("Masks/%1").arg(m_pageFilter->ID()), masks);
+	settings.setValue(QString("Masks/%1").arg(m_pageUi->uuidString()), masks);
 
 	m_instanceCounter--;
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
@@ -1193,58 +1180,98 @@ TuningPage::~TuningPage()
 
 void TuningPage::fillObjectsList()
 {
+	Q_ASSERT(m_pageUi);
+
 	//qDebug() << "FillObjectsList";
 
-	//if (m_pageFilter != nullptr)
-	//{
-	//		qDebug() << "Button " << m_pageFilter->caption();
-	//	}
-
-	if (m_pageFilter == nullptr)
+	if (m_pageUi == nullptr) 
 	{
-		Q_ASSERT(m_pageFilter);
+		Q_ASSERT(m_pageUi);
 		return;
 	}
 
-	std::vector<Hash> hashes;
-
-	std::vector<Hash> pageHashes = m_pageFilter->signalsHashes();
-
-	//qDebug() << "pageHashes.size() = " << pageHashes.size();
-
-	// Tree Filter
-
-	std::vector<Hash> treeHashes;
-
-	if (m_treeFilter != nullptr && m_treeFilter->isRoot() == false)
+	std::set<Hash> hashes;
+	
+	if (m_pageUi->filtersList().isEmpty() == true)
 	{
-		if (m_treeFilter->isEmpty() == false)
+		auto allHashes = m_tuningSignalManager.signalHashes();
+		hashes.insert(allHashes.begin(), allHashes.end());
+	}
+
+	static const auto re = QRegularExpression("[;\\s]"); // Separators are whitespace and semicolon, '+' is NOT a separator!  We need to keep unions.
+	QStringList uiFiltersList = m_pageUi->filters().split(re, Qt::SkipEmptyParts);	
+
+	bool first = true;
+	for (const QString& uiFilters : uiFiltersList) 
+	{
+		if (uiFilters.contains('+') == true) 
 		{
-			treeHashes = m_treeFilter->signalsHashes();
+			// Filters union
+			//
+			QStringList uiFiltersUnion = uiFilters.split('+', Qt::SkipEmptyParts);
 
-			std::sort(treeHashes.begin(), treeHashes.end());
-
-			//qDebug() << "treehashes.size() = " << treeHashes.size();
-
-			hashes.reserve(pageHashes.size());
-
-			// Place in hashes array only items that are found in treeHashes
-
-			for (Hash pageHash : pageHashes)
+			for (const QString& id : uiFiltersUnion) 
 			{
-				if (std::binary_search(treeHashes.begin(), treeHashes.end(), pageHash) == true)
+				AppSignalLists::AppSignalList* pageList = m_appSignalLists.get(id).get();
+				if (pageList == nullptr)
 				{
-					hashes.push_back(pageHash);
+					Q_ASSERT(false);
+					continue;
 				}
+
+				hashes.insert(pageList->tuningListHashesCache().begin(), pageList->tuningListHashesCache().end());
+			}
+			
+			first = false;
+		}
+		else
+		{
+			// Filters intersection
+			//
+			AppSignalLists::AppSignalList* pageList = m_appSignalLists.get(uiFilters).get();
+			if (pageList == nullptr)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			if (first == true)
+			{
+				first = false;
+				hashes = pageList->tuningListHashesCache();
+			}
+			else
+			{
+				std::vector<Hash> v_intersection;
+				std::set_intersection(hashes.begin(),
+									  hashes.end(),
+									  pageList->tuningListHashesCache().begin(),
+									  pageList->tuningListHashesCache().end(),
+									  std::back_inserter(v_intersection));
+				hashes.clear();
+				hashes.insert(v_intersection.begin(), v_intersection.end());
 			}
 		}
 	}
-	else
-	{
-		hashes = pageHashes;
-	}
 
-	//qDebug() << "hashes.size() = " << hashes.size();
+	// Tree Filter
+
+	std::set<Hash> treeHashes;
+
+	AppSignalLists::AppSignalList* treeList = m_treeListUuid.isNull() == false ? m_appSignalLists.get(m_treeListUuid).get() : nullptr;
+	if (treeList != nullptr)
+	{
+		treeHashes = treeList->tuningListHashesCache();
+
+		std::vector<Hash> v_intersection;
+		std::set_intersection(hashes.begin(),
+							  hashes.end(),
+							  treeHashes.begin(),
+							  treeHashes.end(),
+							  std::back_inserter(v_intersection));
+		hashes.clear();
+		hashes.insert(v_intersection.begin(), v_intersection.end());
+	}
 
 	//
 
@@ -1296,35 +1323,21 @@ void TuningPage::fillObjectsList()
 		bool modifyDefaultValue = false;
 		TuningValue modifiedDefaultValue;
 
-		if (treeHashes.empty() == false)
+		// Modify the default value from selected tree filter
+		//
+		if (treeList != nullptr)
 		{
-			// Modify the default value from selected tree filter
-			//
-			if (m_treeFilter == nullptr)
+			if (treeList->itemExists(hash) == true)
 			{
-				Q_ASSERT(m_treeFilter);
-				continue;
-			}
-
-			if (m_treeFilter->filterSignalExists(hash) == true)
-			{
-				TuningFilterSignal filterSignal;
-
-				ok = m_treeFilter->filterSignal(hash, filterSignal);
-				if (ok == false)
-				{
-					Q_ASSERT(false);
-					return;
-				}
-
-				if (filterSignal.useValue() == true)
+				AppSignalLists::AppSignalListItem tv = treeList->itemByHash(hash);
+				if (tv.hasValue() == true)
 				{
 					modifyDefaultValue = true;
-					modifiedDefaultValue = filterSignal.value();
+					modifiedDefaultValue = tv.value();
 				}
 			}
 		}
-		else
+		/*else
 		{
 			// Modify the default value from page filter
 			//
@@ -1351,7 +1364,7 @@ void TuningPage::fillObjectsList()
 					modifiedDefaultValue = filterSignal.value();
 				}
 			}
-		}
+		}*/
 
 		// Value filter
 		//
@@ -1471,11 +1484,11 @@ void TuningPage::fillObjectsList()
 
 	// Sort list
 	//
-	const auto& it = m_sortData.find(m_pageFilter->ID());
+	const auto& it = m_sortData.find(m_pageUi->uuidString());
 	if (it == m_sortData.end())
 	{
 		const std::pair<int, Qt::SortOrder> sortData = std::make_pair(0, Qt::AscendingOrder);
-		m_sortData[m_pageFilter->ID()] = sortData;
+		m_sortData[m_pageUi->uuidString()] = sortData;
 		m_objectList->sortByColumn(sortData.first, sortData.second);
 	}
 	else
@@ -1670,9 +1683,7 @@ void TuningPage::apply()
 
 	// Get SOR counters
 
-	TuningCounters rootCounters = m_tuningFilterStorage.root()->counters();
-
-	if (rootCounters.sorCounter > 0)
+	if (m_tuningCounters.totalCounters().sorCounter > 0)
 	{
 		if (QMessageBox::warning(this, qAppName(),
 								 tr("Warning!!!\n\nSOR Signal(s) are set in logic modules!\n\nIf you apply these changes, module can run into RUN SAFE STATE.\n\nAre you sure you STILL WANT TO APPLY the changes?"),
@@ -1755,13 +1766,8 @@ void TuningPage::undo()
 
 void TuningPage::sortIndicatorChanged(int column, Qt::SortOrder order)
 {
-	if (m_pageFilter == nullptr)
-	{
-		Q_ASSERT(m_pageFilter);
-		return;
-	}
-
-	m_sortData[m_pageFilter->ID()] = std::make_pair(column, order);
+	Q_ASSERT(m_pageUi);
+	m_sortData[m_pageUi->uuidString()] = std::make_pair(column, order);
 	m_objectList->sortByColumn(column, order);
 
 	return;
@@ -2106,32 +2112,26 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 	{
 		QMenu* submenuA = menu.addMenu(tr("More"));
 
-		QAction* a = new QAction(tr("Add To New Filter..."), &menu);
+		QAction* a = new QAction(tr("Add To New List..."), &menu);
 		connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToNewFilter);
 		submenuA->addAction(a);
 
-		a = new QAction(tr("Add To Existing Filter..."), &menu);
+		a = new QAction(tr("Add To Existing List..."), &menu);
 		connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToExistingFilter);
 		submenuA->addAction(a);
 
 		// If AutoFilter filter exists, add Restore command
-
-		std::shared_ptr<TuningFilter> root = m_tuningFilterStorage.root();
-
-		if (root == nullptr)
+		//
+		for (int i = 0; i < m_appSignalLists.count(); i++)
 		{
-			assert(root);
-			return;
-		}
+			if (m_appSignalLists.get(i)->systemTagsList().contains(AppSignalLists::AppSignalList::tagTcAuto) == true)
+			{
+				submenuA->addSeparator();
 
-		std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
-		if (autoCreatedFilter != nullptr)
-		{
-			submenuA->addSeparator();
-
-			a = new QAction(tr("Restore Values From Filter..."), &menu);
-			connect(a, &QAction::triggered, this, &TuningPage::slot_restoreValuesFromExistingFilter);
-			submenuA->addAction(a);
+				a = new QAction(tr("Restore Values From List..."), &menu);
+				connect(a, &QAction::triggered, this, &TuningPage::slot_restoreValuesFromExistingFilter);
+				submenuA->addAction(a);
+			}
 		}
 
 		submenuA->addSeparator();
@@ -2152,53 +2152,42 @@ void TuningPage::slot_saveSignalsToNewFilter()
 		return;
 	}
 
-	bool ok;
-	QString filterName = QInputDialog::getText(this, tr("Add Signals To Filter"),
-											   tr("Enter the filter name:"), QLineEdit::Normal,
-											   tr("Name"), &ok);
-
-	if (ok == false)
+	QString filterName;
+	do
 	{
-		return;
-	}
+		bool ok;
+		filterName =
+			QInputDialog::getText(this, tr("Add Signals To List"), tr("Enter the list name:"), QLineEdit::Normal, tr("Name"), &ok);
 
-	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage.root();
+		if (ok == false)
+		{
+			return;
+		}
+		bool alreadyExists = false;
+		for (int i = 0; i < m_appSignalLists.count(); i++)
+		{
+			if (m_appSignalLists.get(i)->caption() == filterName)
+			{
+				alreadyExists = true;
+				break;
+			}
+		}
+		if (alreadyExists == true) 
+		{
+			QMessageBox::critical(this, qAppName(), tr("List with such name already exists. Please enter another name."));
+		}
+		else 
+		{
+			break;
+		}
+	}while(true);
 
-	if (root == nullptr)
-	{
-		assert(root);
-		return;
-	}
-
-	// Get AutoFilter filter
-
-	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
-	if (autoCreatedFilter == nullptr)
-	{
-		autoCreatedFilter = std::make_shared<TuningFilter>();
-
-		QUuid uid = QUuid::createUuid();
-		autoCreatedFilter->setID(uid.toString());
-		autoCreatedFilter->setCaption(m_autoFilterCaption);
-		autoCreatedFilter->setSource(TuningFilter::Source::User);
-		autoCreatedFilter->setInterfaceType(TuningFilter::InterfaceType::Tree);
-
-		root->addChild(autoCreatedFilter);
-	}
-
-	// Create Filter
-
-	std::shared_ptr<TuningFilter> filter = std::make_shared<TuningFilter>();
-
-	QUuid uid = QUuid::createUuid();
-	filter->setID(uid.toString());
-	filter->setCaption(filterName);
-	filter->setSource(TuningFilter::Source::User);
-	filter->setInterfaceType(TuningFilter::InterfaceType::Tree);
-
-	autoCreatedFilter->addChild(filter);
-
-	addSelectedSignalsToFilter(filter.get());
+	std::shared_ptr<AppSignalLists::AppSignalList> autoCreatedList = std::make_shared<AppSignalLists::AppSignalList>();
+	autoCreatedList->setId(autoCreatedList->uuid().toString());
+	autoCreatedList->setCaption(filterName);
+	autoCreatedList->systemTagsList().push_back(AppSignalLists::AppSignalList::tagTcAuto);
+	m_appSignalLists.add(autoCreatedList);
+	addSelectedSignalsToFilter(*autoCreatedList);
 }
 
 void TuningPage::slot_saveSignalsToExistingFilter()
@@ -2208,32 +2197,19 @@ void TuningPage::slot_saveSignalsToExistingFilter()
 		return;
 	}
 
-	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage.root();
-
-	if (root == nullptr)
-	{
-		assert(root);
-		return;
-	}
-
-	// Get AutoFilter filter
-
-	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
-	if (autoCreatedFilter == nullptr)
-	{
-		QMessageBox::critical(this, qAppName(), tr("Can't add signals - no existing automatic filters found. Please add them to a new filter."));
-		return;
-	}
-
-	DialogChooseFilter* d = new DialogChooseFilter(this, autoCreatedFilter.get(), TuningFilter::InterfaceType::Tree, TuningFilter::Source::User);
-
-	if (d->exec() != QDialog::Accepted || d->chosenFilter() == nullptr)
+	DialogChooseFilter* d = new DialogChooseFilter(m_appSignalLists, {AppSignalLists::AppSignalList::tagTcAuto}, this);
+	if (d->exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
-	addSelectedSignalsToFilter(d->chosenFilter());
-
+	auto list = m_appSignalLists.get(d->chosenFilterUuid()).get();
+	if (list == nullptr) 
+	{
+		Q_ASSERT(list);
+		return;
+	}
+	addSelectedSignalsToFilter(*list);
 }
 
 void TuningPage::slot_exportContentsToCSV()
@@ -2297,31 +2273,21 @@ void TuningPage::slot_exportContentsToCSV()
 
 void TuningPage::slot_restoreValuesFromExistingFilter()
 {
-	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage.root();
 
-	if (root == nullptr)
-	{
-		assert(root);
-		return;
-	}
-
-	// Get AutoFilter filter
-
-	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
-	if (autoCreatedFilter == nullptr)
-	{
-		QMessageBox::warning(this, qAppName(), tr("No auto-created filters exist."));
-		return;
-	}
-
-	DialogChooseFilter* d = new DialogChooseFilter(this, autoCreatedFilter.get(), TuningFilter::InterfaceType::Tree, TuningFilter::Source::User);
-
-	if (d->exec() != QDialog::Accepted || d->chosenFilter() == nullptr)
+	DialogChooseFilter* d = new DialogChooseFilter(m_appSignalLists, {AppSignalLists::AppSignalList::tagTcAuto}, this);
+	if (d->exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
-	restoreSignalsFromFilter(d->chosenFilter());
+	auto list = m_appSignalLists.get(d->chosenFilterUuid()).get();
+	if (list == nullptr) 
+	{
+		Q_ASSERT(list);
+		return;
+	}
+
+	restoreSignalsFromFilter(*list);
 }
 
 void TuningPage::slot_setAnalogFormat(E::AnalogFormat analogFormat)
@@ -2365,22 +2331,17 @@ void TuningPage::slot_ApplyFilter()
 	fillObjectsList();
 }
 
-void TuningPage::slot_treeFilterChanged(std::shared_ptr<TuningFilter> filter)
+void TuningPage::slot_treeFilterChanged(const QUuid& filterUuid)
 {
-	m_treeFilter = filter;
+	m_treeListUuid = filterUuid;
 
 	fillObjectsList();
 }
 
-void TuningPage::slot_pageFilterChanged(std::shared_ptr<TuningFilter> filter)
+void TuningPage::slot_pageFilterChanged(const QUuid& uiItemUuid)
 {
-	if (filter == nullptr)
-	{
-		Q_ASSERT(filter);
-		return;
-	}
-
-	m_pageFilter = filter;
+	m_pageUi = m_tuningUi.get(uiItemUuid);
+	Q_ASSERT(m_pageUi);
 
 	fillObjectsList();
 }
@@ -2489,14 +2450,8 @@ void TuningPage::invertValue(int channel)
 	}
 }
 
-void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
+void TuningPage::addSelectedSignalsToFilter(AppSignalLists::AppSignalList& list)
 {
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
 	int addedCount = 0;
 
 	QModelIndexList mi = m_objectList->selectionModel()->selectedRows();
@@ -2537,17 +2492,18 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 				continue;
 			}
 
-			TuningFilterSignal tv;
-
+			
+			AppSignalLists::AppSignalListItem tv;
 			tv.setAppSignalId(asp.appSignalId());
 
 			if (state.valid() == true)
 			{
-				tv.setUseValue(true);
 				tv.setValue(state.value());
 			}
 
-			filter->addFilterSignal(tv);
+			list.add(tv);
+			list.mutableAppListHashesCache().insert(asp.hash());
+			list.mutableTuningListHashesCache().insert(asp.hash());
 
 			addedCount++;
 		}
@@ -2559,38 +2515,24 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 		return;
 	}
 
-    // Count user filters signals hashes
-
-    m_tuningFilterStorage.createSignalsAndEqipmentHashes(m_tuningSignalManager,
-                                                   m_tuningSignalManager.signalHashes(),
-                                                   m_tuningFilterStorage.root().get(),
-                                                   TuningFilter::Source::User);
-
-    // SaveFilters to file
+	// SaveFilters to file
 
     QString errorMsg;
-
-    if (m_tuningFilterStorage.saveUserFilters(TuningClientAppSettings::instance().userFiltersFile(), &errorMsg) == false)
+    if (m_appSignalLists.save(&errorMsg) == false)
 	{
 		QMessageBox::critical(this, tr("Error"), errorMsg);
 	}
 
 	QMessageBox::information(this, qAppName(), tr("Adding signals complete."));
 
-	QTimer::singleShot(500, theApp.mainWindow(), &MainWindow::slot_userFiltersChanged);
+	QTimer::singleShot(500, theApp.mainWindow(), &MainWindow::slot_signalListsChanged);
 }
 
-void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
+void TuningPage::restoreSignalsFromFilter(const AppSignalLists::AppSignalList& list)
 {
-	if (filter == nullptr)
-	{
-		assert(filter);
-		return;
-	}
-
 	int restoredCount = 0;
 
-	TuningFilterSignal tv;
+	;
 
 	for (int r = 0; r < m_model->rowCount(); r++)
 	{
@@ -2603,15 +2545,10 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 				continue;
 			}
 
-			bool exists = filter->filterSignalExists(hash);
+			bool exists = list.itemExists(hash);
 			if (exists == true)
 			{
-				exists = filter->filterSignal(hash, tv);
-				if (exists == false)
-				{
-					Q_ASSERT(false);
-					return;
-				}
+				AppSignalLists::AppSignalListItem tv = list.itemByHash(hash);
 
 				bool found = false;
 
@@ -2639,11 +2576,11 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 
 	if (restoredCount == 0)
 	{
-		QMessageBox::critical(this, qAppName(), tr("No values restored from the filter for current signals."));
+		QMessageBox::critical(this, qAppName(), tr("No values restored from the list for current signals."));
 	}
 	else
 	{
-		QMessageBox::warning(this, qAppName(), tr("%1 values were restored from the filter. Check them and apply the changes.").arg(restoredCount));
+		QMessageBox::warning(this, qAppName(), tr("%1 values were restored from the list. Check them and apply the changes.").arg(restoredCount));
 	}
 }
 
@@ -2690,8 +2627,8 @@ void TuningPage::setActionButtonsState()
 	bool setValueEnabled = false;
 	bool setAllEnabled = false;
 
-	bool autoApply = m_configController.configuration().clientSettings.autoApply;
-	bool applyEnabled = false;
+	bool applyButtonExists = m_configController.configuration().clientSettings.applyMode == TuningClientSettings::ApplyMode::Manual;
+	bool applyButtonEnabled = false;
 
 	std::vector<Hash> hashes = m_model->allHashes();
 
@@ -2703,7 +2640,7 @@ void TuningPage::setActionButtonsState()
 	{
 		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
 
-		if (autoApply == false)
+		if (applyButtonExists == true)
 		{
 			sourceHashes.insert(::calcHash(asp.lmEquipmentId()));
 		}
@@ -2789,7 +2726,7 @@ void TuningPage::setActionButtonsState()
 
 	// Enable or disable "Apply" button
 	//
-	if (autoApply == false && m_applyButton != nullptr)
+	if (applyButtonExists == true && m_applyButton != nullptr)
 	{
 		for (Hash sourceHash : sourceHashes)
 		{
@@ -2800,24 +2737,24 @@ void TuningPage::setActionButtonsState()
 				{
 					if (ts.state(i).hasunappliedparams() == true)
 					{
-						applyEnabled = true;
+						applyButtonEnabled = true;
 						break;
 					}
 				}
-				if (applyEnabled == true)
+				if (applyButtonEnabled == true)
 				{
 					break;
 				}
 			}
-			if (applyEnabled == true)
+			if (applyButtonEnabled == true)
 			{
 				break;
 			}
 		}
 
-		if (m_applyButton->isEnabled() != applyEnabled)
+		if (m_applyButton->isEnabled() != applyButtonEnabled)
 		{
-			m_applyButton->setEnabled(applyEnabled);
+			m_applyButton->setEnabled(applyButtonEnabled);
 		}
 	}
 }

@@ -772,7 +772,7 @@ namespace Builder
 
 		if (areaToRead.isValid() == false)
 		{
-			logError(cmd, QString("Can't read address %1").arg(readAddr));
+			logError(cmd, QString("Can not read address %1").arg(readAddr));
 			return false;
 		}
 
@@ -811,13 +811,13 @@ namespace Builder
 
 		if (areaToRead.isValid() == false)
 		{
-			logError(cmd, QString("Can't read address %1[%2]").arg(readAddr).arg(bitNo));
+			logError(cmd, QString("Can not read address %1[%2]").arg(readAddr).arg(bitNo));
 			return false;
 		}
 
 		if (bitNo > 15)
 		{
-			logError(cmd, QString("Can't read address %1[%2], bitNo out ouf range").arg(readAddr).arg(bitNo));
+			logError(cmd, QString("Can not read address %1[%2], bitNo out ouf range").arg(readAddr).arg(bitNo));
 			return false;
 		}
 
@@ -853,7 +853,7 @@ namespace Builder
 
 		if (areaToWrite.isValid() == false)
 		{
-			logError(cmd, QString("Can't write address %1").arg(writeAddr));
+			logError(cmd, QString("Can not write address %1").arg(writeAddr));
 			return false;
 		}
 
@@ -878,7 +878,7 @@ namespace Builder
 		if (m_bitMemArea.addressInArea(writeAddr, 1) == false &&
 			m_appWordMemArea.addressInArea(writeAddr, 1) == false)
 		{
-			logError(cmd, QString("Can't write address %1[%2]").arg(writeAddr).arg(bitNo));
+			logError(cmd, QString("Can not write address %1[%2]").arg(writeAddr).arg(bitNo));
 			return false;
 		}
 
@@ -886,13 +886,13 @@ namespace Builder
 
 		if (areaToWrite.isValid() == false)
 		{
-			logError(cmd, QString("Can't write address %1[%2]").arg(writeAddr).arg(bitNo));
+			logError(cmd, QString("Can not write address %1[%2]").arg(writeAddr).arg(bitNo));
 			return false;
 		}
 
 		if (bitNo > 15)
 		{
-			logError(cmd, QString("Can't write address %1[%2], bitNo out ouf range").arg(writeAddr).arg(bitNo));
+			logError(cmd, QString("Can not write address %1[%2], bitNo out ouf range").arg(writeAddr).arg(bitNo));
 			return false;
 		}
 

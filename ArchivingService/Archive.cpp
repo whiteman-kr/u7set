@@ -1,6 +1,6 @@
 #include "Archive.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "ArchFile.h"
 #include "ArchRequest.h"
 #include "ArchWriterThread.h"

@@ -2,8 +2,8 @@
 #include "../Context.h"
 
 #include "../../UtilsLib/Crc.h"
-#include "../../lib/ConstStrings.h"
 
+#include <CommonLib/ConstStrings.h>
 #include <HardwareLib/DeviceModule.h>
 #include <VFrame30/Schema.h>
 

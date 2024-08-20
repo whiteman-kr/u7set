@@ -111,15 +111,15 @@ DbProjectProperties::DbProjectProperties()
 
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppSignalsXml, true, DbProjectProperties::generateAppSignalsXml, DbProjectProperties::setGenerateAppSignalsXml);
 	p->setCategory("Build");
-	p->setDescription("Generate file AppSignals.xml on build");
+	p->setDescription(Db::ProjectProperty::GenerateAppSignalsXmlDescription);
 
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppSignalsExtXml, true, DbProjectProperties::generateAppSignalsExtXml, DbProjectProperties::setGenerateAppSignalsExtXml);
 	p->setCategory("Build");
-	p->setDescription("Generate file AppSignalsExt.xml on build");
+	p->setDescription(Db::ProjectProperty::GenerateAppSignalsExtXmlDescription);
 
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppLogicDrawings, true, DbProjectProperties::generateAppLogicDrawings, DbProjectProperties::setGenerateAppLogicDrawings);
 	p->setCategory("Build");
-	p->setDescription("Generate file AppLogicDrawings.pdf on build");
+	p->setDescription(Db::ProjectProperty::GenerateAppLogicDrawingsDescription);
 
 	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateExtraDebugInfo, true, DbProjectProperties::generateExtraDebugInfo, DbProjectProperties::setGenerateExtraDebugInfo);
 	p->setCategory("Build");

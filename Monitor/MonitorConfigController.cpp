@@ -17,7 +17,7 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 	return;
 }
 
-bool MonitorConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
+bool MonitorConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files)
 {
 	// This method is called from the main thread.
 	//
@@ -223,6 +223,16 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 
 				config.equipment = std::move(equipment);
 			}
+		}
+	}
+
+	// Get appSignalLists
+	//
+	{
+		bool ok = getAppSignalLists(files);
+		if (ok == false)
+		{
+			m_logFile.writeError("Loading/Parsing Application Signal Lists error.");
 		}
 	}
 

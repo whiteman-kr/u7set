@@ -6,7 +6,7 @@
 #include <HardwareLib/HardwareLibrary.h>
 
 #include <VFrame30/VFrame30Library.h>
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 
 int main(int argc, char* argv[])

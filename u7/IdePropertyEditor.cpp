@@ -4,6 +4,7 @@
 #include "SvgEditor.h"
 #include "DbChooseItemsDialog.h"
 #include "Reports/ReportPropertyEditor.h"
+#include "Legacy/TuningFilterEditor.h"
 
 
 //
@@ -32,7 +33,21 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 		return editor;
 	}
 
-	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::SpecificPropertyStruct)
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::TuningUi)
+	{
+		// This is Filters Editor for TuningClient
+		//
+		if (dbController == nullptr)
+		{
+			Q_ASSERT(dbController);
+			return new ExtWidgets::PropertyPlainTextEditor(parent);
+		}
+
+		IdeTuningUiEditor* editor = new IdeTuningUiEditor(parent);
+		return editor;
+	}
+
+    if (propertyPtr->specificEditor() == E::PropertySpecificEditor::SpecificPropertyStruct)
 	{
 		// This is Specific Properties
 		//
@@ -140,6 +155,7 @@ bool IdePropertyEditorHelper::storePropertyTextEditorSize(std::shared_ptr<Proper
 
 
 //
+// IdePropertyEditor
 // IdePropertyEditor
 //
 IdePropertyEditor::IdePropertyEditor(QWidget* parent, DbController* dbController /*= nullptr*/) :
@@ -714,45 +730,21 @@ bool IdeCodePropertyEditor::isModified() const
 }
 
 //
-// IdeTuningFiltersEditor
+// IdeTuningUiEditor
 //
 
-IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidget* parent):
-  PropertyTextEditor(parent),
-  m_dbController(dbController),
-  m_signals({}, &logFileStub)
+IdeTuningUiEditor::IdeTuningUiEditor(QWidget* parent):
+  PropertyTextEditor(parent)
 {
-	AppSignalSet tuningSignalSet;
-	::Proto::AppSignalSet appSignalSet;
-
-	// Load tuning signals
-	//
-
-	bool ok = m_dbController->getTunableSignals(&tuningSignalSet, parent);
-
-	if (ok == true)
-	{
-		for (const AppSignal* s : tuningSignalSet)
-		{
-			Proto::AppSignal* pas = appSignalSet.add_appsignal();
-			s->saveToProto(pas);
-		}
-	}
-
-	m_signals.load(appSignalSet);
 }
 
-IdeTuningFiltersEditor::~IdeTuningFiltersEditor()
+IdeTuningUiEditor::~IdeTuningUiEditor()
 {
-	if (m_tuningFilterEditor != nullptr)
-	{
-		m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersSplitterPosition, &theSettings.m_tuningFiltersPropertyEditorSplitterPos);
-	}
 }
 
-void IdeTuningFiltersEditor::setText(const QString& text)
+void IdeTuningUiEditor::setText(const QString& text)
 {
-    if (m_tuningFilterEditor != nullptr)
+    if (m_tuningUiEditor != nullptr)
     {
         assert(false);
         return;
@@ -764,7 +756,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 	QByteArray rawData = text.toUtf8();
 
-	bool ok = m_filters.load(rawData, &errorCode);
+	bool ok = m_storage.load(rawData, &errorCode);
 
     if (ok == false)
     {
@@ -773,31 +765,25 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 
 
-	m_tuningFilterEditor = new TuningFilterEditor(m_filters,
-												  m_signals,
-												  false,	/*readOnly*/
-												  false,	/*setCurrentEnabled*/
-												  true,		/*typeTreeEnabled*/
-												  true,		/*typeButtonEnabled*/
-												  true,		/*typeTabEnabled*/
-												  true,		/*typeCounterEnabled*/
-												  true,		/*typeSchemasTabsEnabled*/
-												  TuningFilter::Source::Project,
-												  theSettings.m_tuningFiltersSplitterPosition,
-												  theSettings.m_tuningFiltersPropertyEditorSplitterPos
-												  );
+	m_tuningUiEditor = new TuningUiEditor(m_storage,
+										  false, /*readOnly*/
+										  true,  /*typeTreeEnabled*/
+										  true,  /*typeButtonEnabled*/
+										  true,  /*typeTabEnabled*/
+										  true,  /*typeCounterEnabled*/
+										  true   /*typeSchemasTabsEnabled*/
+	);
 
     QHBoxLayout* l = new QHBoxLayout(this);
     l->setContentsMargins(0, 0, 0, 0);
-    l->addWidget(m_tuningFilterEditor);
-
+    l->addWidget(m_tuningUiEditor);
 }
 
-QString IdeTuningFiltersEditor::text() const
+QString IdeTuningUiEditor::text() const
 {
     QByteArray data;
 
-    bool ok = m_filters.save(data);
+    bool ok = m_storage.save(data);
 
     if (ok == true)
     {
@@ -810,24 +796,23 @@ QString IdeTuningFiltersEditor::text() const
     return QString();
 }
 
-bool IdeTuningFiltersEditor::readOnly() const
+bool IdeTuningUiEditor::readOnly() const
 {
 	return false;
 }
 
-void IdeTuningFiltersEditor::setReadOnly(bool value)
+void IdeTuningUiEditor::setReadOnly(bool value)
 {
-	m_tuningFilterEditor->setReadOnly(value);
+	m_tuningUiEditor->setReadOnly(value);
 
 }
 
-bool IdeTuningFiltersEditor::externalOkCancelButtons() const
+bool IdeTuningUiEditor::externalOkCancelButtons() const
 {
 	return true;
 }
 
-bool IdeTuningFiltersEditor::isModified() const
+bool IdeTuningUiEditor::isModified() const
 {
 	return false;
 }
-

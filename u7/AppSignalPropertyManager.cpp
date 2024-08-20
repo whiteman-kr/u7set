@@ -27,6 +27,16 @@ const std::vector<AppSignalPropertyDescription> AppSignalPropertyManager::m_repl
 	},
 
 	{
+		AppSignalPropNames::SOFTWARE_CALC_FUNCTION,
+		QMetaType::QString,
+		false,
+		[](const AppSignal* s) { return E::valueToString<E::SoftwareCalcFunction>(s->swCalcFunction()); },
+		[](AppSignal* s, const QVariant& v) { s->setSwCalcFunction(static_cast<E::SoftwareCalcFunction>(v.toInt())); },
+		AppSignalProperties::NON_SPECIFIC_PROP_HASH,
+		E::enumValuesMap<E::SoftwareCalcFunction>(),
+	},
+
+	{
 		AppSignalPropNames::BYTE_ORDER_PROP,
 		QMetaType::QString,
 		false,
@@ -309,7 +319,11 @@ E::PropertyBehaviourType AppSignalPropertyManager::getBehaviour(const AppSignal&
 		return m_defaultBehaviour;
 	}
 
-	return m_propDescriptions[propertyIndex].getBehaviour(signal);
+	const AppSignalPropertyDescription& d = m_propDescriptions[propertyIndex];
+
+	E::PropertyBehaviourType behaviour = m_propDescriptions[propertyIndex].getBehaviour(signal);
+
+	return behaviour;
 }
 
 bool AppSignalPropertyManager::dependsOnPrecision(const QString& propName) const
@@ -607,14 +621,6 @@ void AppSignalPropertyManager::updatePropertiesBehaviour(const QString& propBeha
 			continue;
 		}
 
-		bool hidePropery = false;
-
-		if (propName == AppSignalPropNames::INVERT_SIGNAL &&
-			isSafetyProject == true)
-		{
-			hidePropery = true;
-		}
-
 		AppSignalPropertyBehavior behaviour;
 
 		behaviour.setDependsOnPrecision(fields[precisionIndex].toLower() == "true");
@@ -633,8 +639,11 @@ void AppSignalPropertyManager::updatePropertiesBehaviour(const QString& propBeha
 
 					if (ok == true)
 					{
-						if (hidePropery == true)
+						if (propName == AppSignalPropNames::INVERT_SIGNAL &&
+							isSafetyProject == true)
 						{
+							// Hide InvertSignal property in Safe projects
+							//
 							behaviourType = E::PropertyBehaviourType::Hide;
 						}
 
@@ -753,7 +762,15 @@ void AppSignalPropertyManager::addNewProperty(const AppSignalPropertyDescription
 	}
 
 	m_propNameToIndex.emplace(newProperty.name(), static_cast<int>(m_propDescriptions.size()));
-	m_propDescriptions.emplace_back(newProperty);
+
+	auto& newElem = m_propDescriptions.emplace_back(newProperty);
+
+	auto it = m_propertiesBehaviour.find(newProperty.name());
+
+	if (it != m_propertiesBehaviour.end())
+	{
+		newElem.setBehaviour(it->second);
+	}
 
 	if (emitSignals == true)
 	{

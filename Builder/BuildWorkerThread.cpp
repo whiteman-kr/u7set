@@ -1,8 +1,9 @@
-#include <HardwareLib/Subsystem.h>
 #include <HardwareLib/PropertyNames.h>
+#include <HardwareLib/Subsystem.h>
 
 #include <Simulator/Simulator.h>
 
+#include "AdsBridgeCfgGenerator.h"
 #include "AppDataServiceCfgGenerator.h"
 #include "AppLogicCompiler.h"
 #include "ArchivingServiceCfgGenerator.h"
@@ -10,11 +11,11 @@
 #include "ConfigurationBuilder.h"
 #include "ConfigurationServiceCfgGenerator.h"
 #include "DiagDataServiceCfgGenerator.h"
+#include "DiagnosticsCfgGenerator.h"
 #include "GatewayServiceCfgGenerator.h"
 #include "LogicModulesInfoWriter.h"
 #include "MetrologyCfgGenerator.h"
 #include "MonitorCfgGenerator.h"
-#include "DiagnosticsCfgGenerator.h"
 #include "Parser.h"
 #include "SchemasReportGenerator.h"
 #include "ScriptChecker.h"
@@ -25,8 +26,8 @@
 #include "TuningServiceCfgGenerator.h"
 #include "ModulesReportGenerator.h"
 
-#include "./Vdu/VduFontGenerator.h"
 #include "./Vdu/VduConfigFile.h"
+#include "./Vdu/VduFontGenerator.h"
 
 namespace
 {
@@ -133,7 +134,7 @@ namespace Builder
 	{
 		Q_ASSERT(m_buildTasks.empty() == false);
 
-		m_context = std::make_unique<Context>(m_log, buildOutputPath(), expertMode());
+		m_context = std::make_unique<Context>(m_log, buildOutputPath(), expertMode(), buildOptions());
 		Q_ASSERT(m_context->m_log);
 
 		m_totalProgress = 0;
@@ -1183,8 +1184,6 @@ namespace Builder
 
 		bool result = m_context->m_log->errorCount() == errorCount;
 
-		emit runOrderReady(parser.runOrder());
-
 		return result;
 	}
 
@@ -1530,9 +1529,12 @@ namespace Builder
 			return true;
 		}
 
-		if (m_context->m_projectProperties.generateAppLogicDrawings() == true)
+		if (bool generateAppLogicDrawings = BuildOptions::makeDecision(m_context->m_projectProperties.generateAppLogicDrawings(),
+																	   m_context->m_buildOptions.generateAppLogicDrawings);
+			generateAppLogicDrawings == true)
 		{
-			m_log->writeMessage(tr("--------------------------------------[ Generating Schemas Albums ]---------------------------------------"));
+			m_log->writeMessage(
+				tr("--------------------------------------[ Generating Schemas Albums ]---------------------------------------"));
 
 			ok = createSchemasAlbums();
 			if (ok == false)
@@ -2308,6 +2310,10 @@ namespace Builder
 				swCfgGen = std::make_shared<DiagnosticsCfgGenerator>(context, software);
 				break;
 
+			case E::SoftwareType::AdsBridge:
+				swCfgGen = std::make_shared<AdsBridgeCfgGenerator>(context, software);
+				break;
+
 			default:
 				m_context->m_log->errEQP6100(software->equipmentIdTemplate(), software->uuid());
 				result = false;
@@ -2751,7 +2757,8 @@ namespace Builder
 	{
 		Q_ASSERT(m_context);
 
-		if (m_context->m_projectProperties.runSimTestsOnBuild() == false)
+		if (bool runSimTests = BuildOptions::makeDecision(m_context->m_projectProperties.runSimTestsOnBuild(), m_context->m_buildOptions.runSimTestsOnBuild);
+			runSimTests == false)
 		{
 			return true;
 		}
@@ -2993,6 +3000,16 @@ namespace Builder
 	void BuildWorkerThread::setExpertMode(bool value)
 	{
 		m_expertMode = value;
+	}
+
+	BuildOptions BuildWorkerThread::buildOptions() const
+	{
+		return m_buildOptions;
+	}
+
+	void BuildWorkerThread::setBuildOptions(BuildOptions value)
+	{
+		m_buildOptions = value;
 	}
 
 	bool BuildWorkerThread::isInterruptRequested()

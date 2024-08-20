@@ -1,5 +1,5 @@
-#include <ClientLib/RtDataProvider.h>
 #include "RtDataProviderPrivate.h"
+#include <ClientLib/RtDataProvider.h>
 
 namespace ClientLib
 {

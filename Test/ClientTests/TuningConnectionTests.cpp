@@ -126,8 +126,9 @@ public:
 	MOCK_METHOD(AppSignalParam, signalParam, (Hash hash, bool* found), (const override));
 	MOCK_METHOD(AppSignalParam, signalParam, (const QString& appSignalId, bool* found), (const override));
 
-	MOCK_METHOD(bool, signalParam, (Hash hash, AppSignalParam* result), (const override));
-	MOCK_METHOD(bool, signalParam, (const QString& appSignalId, AppSignalParam* result), (const override));
+	MOCK_METHOD(int, signalsCount, (), (const override));
+	MOCK_METHOD(std::vector<Hash>, signalHashes, (), (const, override));
+	MOCK_METHOD(std::vector<AppSignalParam>, signalList, (), (const override));
 
 	MOCK_METHOD(TuningSignalState, state, (Hash hash, bool* found), (const override));
 	MOCK_METHOD(TuningSignalState, state, (const QString& appSignalId, bool* found), (const override));
@@ -146,7 +147,6 @@ class MockITuningSignalUpdater : public ITuningSignalUpdater
 public:
 	MOCK_METHOD(void, reset, (), (override));
 
-	MOCK_METHOD(std::vector<Hash>, signalHashes, (), (const, override));
 	MOCK_METHOD(std::vector<Hash>, signalHashes, (const std::vector<Hash> lmEquipmentIdHashes), (const, override));
 
 	MOCK_METHOD(void, invalidateSignalStates, (Hash tuningServiceHash), (override));
@@ -605,18 +605,28 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 		QElapsedTimer timer;
 		timer.start();
 
-		while (timer.hasExpired(5000) == false)
+		bool allValid = true;
+
+		// RPCT-3900 - Investigate and fix the reason of Tuning Write fails
+		// TEMPORARY SOLUTION: wait for 120 secs, as simulator conflicts when two WSLs tries to bind to the same port 50000.
+		// Simulator on linux_test_job and linux_code_coverage tries to send data from the same port.
+		//
+		const int WaitForValidityMs = 120'000; // Just wait the parallel (ow WSL) test to finish.
+
+		while (timer.hasExpired(WaitForValidityMs) == false)
 		{
 			QCoreApplication::instance()->processEvents();
-			QThread::msleep(10);
+			QThread::msleep(20);
 
-			bool allValid = true;
+			allValid = true;
 			for (int i = 0; i < protoSignalSet.appsignal_size(); i++)
 			{
 				QString appSignalID = QString::fromStdString(protoSignalSet.appsignal(i).appsignalid());
 
-				TuningSignalState state = signalManager.state(appSignalID, nullptr);
-				if (state.valid() == false)
+				bool found = false;
+				TuningSignalState state = signalManager.state(appSignalID, &found);
+				EXPECT_TRUE(found);
+				if (found == true && state.valid() == false)
 				{
 					allValid = false;
 					break;
@@ -627,6 +637,8 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 				break;
 			}
 		}
+
+		EXPECT_TRUE(allValid);
 	}
 
 	// Write set of float values to #CLIENTTEST_TUNING_AF1
@@ -651,9 +663,11 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 				QCoreApplication::instance()->processEvents();
 				QThread::msleep(10);
 
-				state = signalManager.state(asFloat.appSignalID(), nullptr);
-				if (state.valid() == true &&
-						fabs(state.value().floatValue() - floatValues[i]) < std::numeric_limits<float>::epsilon())
+				bool found = false;
+				state = signalManager.state(asFloat.appSignalID(), &found);
+				EXPECT_TRUE(found);
+				if (found == true && state.valid() == true &&
+					fabs(state.value().floatValue() - floatValues[i]) < std::numeric_limits<float>::epsilon())
 				{
 					break;
 				}
@@ -686,8 +700,10 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 				QCoreApplication::instance()->processEvents();
 				QThread::msleep(10);
 
-				state = signalManager.state(asInt.appSignalID(), nullptr);
-				if (state.valid() == true && fabs(state.value().int32Value() == intValues[i]))
+				bool found = false;
+				state = signalManager.state(asInt.appSignalID(), &found);
+				EXPECT_TRUE(found);
+				if (found == true && state.valid() == true && state.value().int32Value() == intValues[i])
 				{
 					break;
 				}

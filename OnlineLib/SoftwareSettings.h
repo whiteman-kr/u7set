@@ -1,8 +1,8 @@
 #pragma once
 
 #include "SoftwareEndpoint.h"
-#include "../CommonLib/HostAddressPort.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/HostAddressPort.h>
+#include <CommonLib/ConstStrings.h>
 #include "../OnlineLib/MatsUsers.h"
 
 
@@ -443,6 +443,10 @@ public:
 	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
 	std::vector<SoftwareEndpoint::ArchiveService> archiveServices;
 
+	QStringList appSignalListIDs;
+	QStringList appSignalListMasks;
+	QStringList appSignalListTags;
+
 	QString startSchemaId;
 	QString schemaTags;
 
@@ -468,6 +472,24 @@ public:
 	void clear();
 };
 
+class AdsBridgeSettings : virtual public SoftwareSettings
+{
+public:
+	std::vector<SoftwareEndpoint::AppDataService> appDataServices;
+
+private:
+	friend class SoftwareSettingsSet;
+
+	// these methods should be call by SoftwareSettingsSet only
+	//
+	bool writeToXml(XmlWriteHelper& xml) const override;
+	bool readFromXml(XmlReadHelper& xml) override;
+
+public:
+	bool readFromXml(const QByteArray& xml);
+
+	void clear();
+};
 
 class DiagnosticsSettings : virtual public SoftwareSettings
 {
@@ -506,8 +528,6 @@ public:
 
 	std::vector<SoftwareEndpoint::TuningService> tuningServices;
 
-	bool autoApply = true;
-
 	bool showSignals = true;
 	bool showSchemas = true;
 	bool showSchemasList = true;
@@ -522,6 +542,15 @@ public:
 
 	LmStatusFlagMode statusFlagFunction = LmStatusFlagMode::None;
 
+	enum class ApplyMode
+	{
+		Manual,
+		Auto,
+		NoApply
+	};
+
+	ApplyMode applyMode = ApplyMode::Manual;
+
 	bool loginPerOperation = false;
 	bool tuningLogin = false;
 	QString tuningUserAccounts;
@@ -532,6 +561,10 @@ public:
 
 	QString startSchemaID;
 	QString schemaTags;
+
+	QStringList appSignalListIDs;
+	QStringList appSignalListMasks;
+	QStringList appSignalListTags;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only

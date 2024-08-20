@@ -20,13 +20,10 @@ if (MSVC)
 endif (MSVC)
 
 add_executable(${TARGET} WIN32
-	../lib/Configurator.cpp
-	../lib/Configurator.h
 	ApplicationTabPage.cpp
 	ApplicationTabPage.h
 	DiagTabPage.cpp
 	DiagTabPage.h
-	ftdi/ftd2xx.h
 	Globals.cpp
 	Globals.h
 	main.cpp
@@ -83,23 +80,13 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Project includes
 	#
-	"../CommonLib/Types.h"
+	<CommonLib/Types.h>
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Sql Qt6::Network Qt6::Xml Qt6::Widgets Qt6::Gui Qt6::SerialPort Qt6::Qml)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib HardwareLib UiLib)
-
-if(MSVC)
-	add_library(ftdi STATIC IMPORTED)
-	set_target_properties(ftdi PROPERTIES
-	  IMPORTED_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}/ftdi64/ftd2xx.lib"
-	  INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/ftdi"
-    )
-
-    target_link_libraries(${TARGET} PRIVATE ftdi)
-endif()
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib HardwareLib ModuleConfiguratorLib UiLib LicenseLib)
 
 # Link Visaul Leak Detector
 #

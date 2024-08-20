@@ -372,7 +372,7 @@ namespace ClientLib
 		//
 		if (realtimeData->signalData.empty() == false)
 		{
-			emit dataReady(connectedSoftwareInfo().equipmentID(), realtimeData, minState, maxState);
+			emit dataReady(connectedSoftwareInfo().equipmentID(), realtimeData, m_samplePeriod, minState, maxState);
 		}
 
 		// New network data exchange cycle

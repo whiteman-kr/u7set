@@ -1,7 +1,7 @@
 #ifndef LMDESCRIPTIONSET_H
 #define LMDESCRIPTIONSET_H
 
-#include "../lib/LogicModuleSet.h"
+#include "LogicModuleSet.h"
 #include "IssueLogger.h"
 
 namespace Builder

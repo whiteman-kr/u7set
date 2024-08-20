@@ -377,18 +377,27 @@ namespace Builder
 
 					std::shared_ptr<Hardware::DeviceModule> module = chassis->findLogicModuleOrBvb();
 
-					if (module != nullptr)
-					{
-						linkSignalToLm(&s, module);
-					}
-					else
+					if (module == nullptr)
 					{
 						// Associated logic module is not found. Signal %1 cannot be processed.
 						//
 						m_log->errALC5154(s.appSignalID());
 						result = false;
 					}
+					else
+					{
+						if (module != nullptr)
+						{
+							linkSignalToLm(&s, module);
+						}
+						else
+						{
+							LOG_INTERNAL_ERROR(m_log);
+							result = false;
+						}
+					}
 				}
+
 				break;
 
 			default:

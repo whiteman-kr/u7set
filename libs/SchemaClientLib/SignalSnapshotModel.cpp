@@ -1,6 +1,7 @@
 #include "SignalSnapshotModel.h"
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "../lib/ISignalDataServer.h"
+#include <AppSignalLists/SignalList.h>
+#include <ClientLib/ISignalDataServer.h>
 
 //
 // SignalSnapshotSorter
@@ -210,32 +211,33 @@ namespace SchemaClientLib
 //
 namespace SchemaClientLib
 {
-	SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, ISignalDataServer* signalDataServer, QObject* parent) :
+	SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, ClientLib::ISignalDataServer* signalDataServer, AppSignalLists::AppSignalListSet* appSignalListSet, QObject* parent) :
 		QAbstractItemModel(parent),
 		m_appSignalManager(appSignalManager),
-		m_signalDataServer(signalDataServer)
+		m_signalDataServer(signalDataServer),
+		m_appSignalListSet(appSignalListSet)
 	{
 		// Fill column names
 		//
-		m_columnsNames << tr("Signal ID");
-		m_columnsNames << tr("Equipment ID");
-		m_columnsNames << tr("Lm Equipment ID");
-		m_columnsNames << tr("App Signal ID");
-		m_columnsNames << tr("Caption");
-		m_columnsNames << tr("Type");
-		m_columnsNames << tr("Tags");
+		m_columnsNames << QObject::tr("Signal ID");
+		m_columnsNames << QObject::tr("Equipment ID");
+		m_columnsNames << QObject::tr("Lm Equipment ID");
+		m_columnsNames << QObject::tr("App Signal ID");
+		m_columnsNames << QObject::tr("Caption");
+		m_columnsNames << QObject::tr("Type");
+		m_columnsNames << QObject::tr("Tags");
 
-		m_columnsNames << tr("Server Time UTC%100").arg(QChar(0x00B1));
-		m_columnsNames << tr("Server Time");
-		m_columnsNames << tr("Plant Time");
-		m_columnsNames << tr("Value");
-		m_columnsNames << tr("Units");
-		m_columnsNames << tr("Valid");
-		m_columnsNames << tr("StateAvailable");
-		m_columnsNames << tr("Simulated");
-		m_columnsNames << tr("Blocked");
-		m_columnsNames << tr("Mismatch");
-		m_columnsNames << tr("OutOfLimits");
+		m_columnsNames << QObject::tr("Server Time UTC%100").arg(QChar(0x00B1));
+		m_columnsNames << QObject::tr("Server Time");
+		m_columnsNames << QObject::tr("Plant Time");
+		m_columnsNames << QObject::tr("Value");
+		m_columnsNames << QObject::tr("Units");
+		m_columnsNames << QObject::tr("Valid");
+		m_columnsNames << QObject::tr("StateAvailable");
+		m_columnsNames << QObject::tr("Simulated");
+		m_columnsNames << QObject::tr("Blocked");
+		m_columnsNames << QObject::tr("Mismatch");
+		m_columnsNames << QObject::tr("OutOfLimits");
 
 		return;
 	}
@@ -304,6 +306,16 @@ namespace SchemaClientLib
 		m_schemaAppSignals = schemaAppSignals;
 	}
 
+	void SignalSnapshotModel::setAppSignalList(const QString& listId) 
+	{
+		m_listId = listId;
+	}
+
+	QString SignalSnapshotModel::appSignalList() const 
+	{
+		return m_listId;
+	}
+
 	void SignalSnapshotModel::fillSignals()
 	{
 		if (rowCount() > 0)
@@ -330,6 +342,20 @@ namespace SchemaClientLib
 			std::sort(appDataServiceHashes.begin(), appDataServiceHashes.end());
 		}
 
+		// Get hashes list filtered by signal list
+		//
+		bool filterByAppSignalList = m_appSignalListSet != nullptr && m_listId.isEmpty() == false;
+
+		std::set<Hash> appSignalListHashes;
+		if (filterByAppSignalList == true)
+		{
+			std::shared_ptr<AppSignalLists::AppSignalList> list =  m_appSignalListSet->get(m_listId);
+			if (list != nullptr) 
+			{
+				appSignalListHashes = list->appListHashesCache();
+			}
+		}
+
 		// Fill signals
 		//
 		int count = static_cast<int>(m_allSignals.size());
@@ -337,6 +363,13 @@ namespace SchemaClientLib
 		for (int signalIndex = 0; signalIndex < count; signalIndex++)
 		{
 			const AppSignalParam& s = m_allSignals[signalIndex];
+
+			// Filter by signal list
+			//
+			if (filterByAppSignalList == true && appSignalListHashes.contains(s.hash()) == false)
+			{
+				continue;
+			}
 
 			// Filter by appDataServiceHashes
 			//
@@ -759,23 +792,23 @@ namespace SchemaClientLib
 				}
 			case SnapshotColumns::Valid:
 				{
-					return (state.m_flags.valid == true) ? tr("") : tr("no");
+					return (state.m_flags.valid == true) ? QObject::tr("") : QObject::tr("no");
 				}
 			case SnapshotColumns::StateAvailable:
 				{
-					return (state.m_flags.stateAvailable == true) ? tr("") : tr("no");
+					return (state.m_flags.stateAvailable == true) ? QObject::tr("") : QObject::tr("no");
 				}
 			case SnapshotColumns::Simulated:
 				{
-					return (state.m_flags.simulated == true) ? tr("yes") : tr("");
+					return (state.m_flags.simulated == true) ? QObject::tr("yes") : QObject::tr("");
 				}
 			case SnapshotColumns::Blocked:
 				{
-					return (state.m_flags.blocked == true) ? tr("yes") : tr("");
+					return (state.m_flags.blocked == true) ? QObject::tr("yes") : QObject::tr("");
 				}
 			case SnapshotColumns::Mismatch:
 				{
-					return (state.m_flags.mismatch == true) ? tr("yes") : tr("");
+					return (state.m_flags.mismatch == true) ? QObject::tr("yes") : QObject::tr("");
 				}
 			case SnapshotColumns::OutOfLimits:
 				{
@@ -818,7 +851,7 @@ namespace SchemaClientLib
 						valueResult = static_cast<int>(state.m_value) == 0 ? "0" : "1";
 						break;
 					case E::SignalType::Bus:
-						valueResult = tr("Bus Type");
+						valueResult = QObject::tr("Bus Type");
 						break;
 					default:
 						Q_ASSERT(false);
@@ -872,22 +905,22 @@ namespace SchemaClientLib
 			case SnapshotColumns::Type:
 				{
 					// An array for translation
-					QString signalProperties[] = {tr("Analog"), // E::SignalType
-												  tr("Discrete"),
-												  tr("Bus"),
-												  tr("Input"),  // E::SignalInOutType
-												  tr("Output"),
-												  tr("Internal")};
+					QString signalProperties[] = {QObject::tr("Analog"), // E::SignalType
+												  QObject::tr("Discrete"),
+												  QObject::tr("Bus"),
+												  QObject::tr("Input"),  // E::SignalInOutType
+												  QObject::tr("Output"),
+												  QObject::tr("Internal")};
 					Q_UNUSED(signalProperties);
 
-					QString str = tr(E::valueToString<E::SignalType>(s.type()).toUtf8());
+					QString str = QObject::tr(E::valueToString<E::SignalType>(s.type()).toUtf8());
 					if (s.isAnalog())
 					{
 						str = QString("%1 (%2)").arg(str).arg(
 							E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(s.analogSignalFormat())));
 					}
 
-					str = QString("%1, %2").arg(str).arg(tr(E::valueToString<E::SignalInOutType>(s.inOutType()).toUtf8()));
+					str = QString("%1, %2").arg(str).arg(QObject::tr(E::valueToString<E::SignalInOutType>(s.inOutType()).toUtf8()));
 
 					return str;
 				}

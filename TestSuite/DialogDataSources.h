@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../lib/Tuning/ITuningAuthorization.h"
-
+#include <ClientLib/ITuningAuthorization.h>
 #include <ClientLib/TuningSignalManager.h>
 #include <ClientLib/AdsSourceStateConnection.h>
 #include <ClientLib/TuningConnection.h>

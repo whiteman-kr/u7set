@@ -4,6 +4,7 @@
 #include "../OnlineLib/SocketIO.h"
 
 #include <ClientLib/AppSignalManager.h>
+#include <AppSignalLists/SignalList.h>
 
 //
 //
@@ -18,10 +19,12 @@ using namespace MonitorInternal;
 DialogChooseArchiveSignals::DialogChooseArchiveSignals(const ClientLib::AppSignalManager& signalManager,
 													   const std::vector<SoftwareEndpoint::ArchiveService>& archiveServices,
 													   const ArchiveSource& init,
+													   const AppSignalLists::AppSignalListSet& lists,
 													   QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::DialogChooseArchiveSignals),
 	m_archiveServices(archiveServices),
+	m_appSignalListSet(lists),
 	s_allServers(tr("All Servers"))
 {
 	ui->setupUi(this);
@@ -74,6 +77,14 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(const ClientLib::AppSigna
 	{
 		ui->timeTypeCombo->setCurrentIndex(currentTimeType);
 	}
+
+	//AppSignalLists
+	//
+	connect(&m_appSignalListSet,
+			&AppSignalLists::AppSignalListSet::updatePerformed,
+			this,
+			&DialogChooseArchiveSignals::fillAppSignalLists);
+	fillAppSignalLists();
 
 	// Remove periodic records checkbox
 	//
@@ -128,6 +139,11 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(const ClientLib::AppSigna
 	//
 	connect(ui->filteredSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &DialogChooseArchiveSignals::slot_filteredSignalsSelectionChanged);
 	connect(ui->archiveSignals->selectionModel(), &QItemSelectionModel::selectionChanged, this, &DialogChooseArchiveSignals::slot_archiveSignalsSelectionChanged);
+	connect(ui->listCombo,
+			static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			this,
+			&DialogChooseArchiveSignals::listComboIndexChanged);
+
 
 	// --
 	// --
@@ -183,6 +199,40 @@ void DialogChooseArchiveSignals::fillServerCombo()
 	return;
 }
 
+void DialogChooseArchiveSignals::fillAppSignalLists()
+{
+	// Refresh AppSignalLists combo
+	//
+	QString selectedList = ui->listCombo->currentData().toString();
+
+	ui->listCombo->blockSignals(true);
+
+	ui->listCombo->clear();
+	ui->listCombo->addItem(tr("Not selected"), QString());
+
+	// Remove previously set filter
+	//
+	if (selectedList.isEmpty() == false)
+	{
+		fillSignalList();
+	}
+
+	// Fill lists combo
+	//
+	const auto lists = m_appSignalListSet.lists();
+
+	for (const auto& list : lists)
+	{
+		ui->listCombo->addItem(tr("[%1] %2").arg(list->id()).arg(list->caption()), list->id());
+	}
+	if (lists.empty() == true)
+	{
+		ui->listCombo->setEnabled(false);
+	}
+
+	ui->listCombo->blockSignals(false);
+}
+
 void DialogChooseArchiveSignals::fillSignalList()
 {
 	filterSignals();
@@ -206,13 +256,27 @@ void DialogChooseArchiveSignals::filterSignals()
 	// signalIdFilter
 	//
 	QString signalIdFilter = ui->filterEdit->text();
+	
+	// appSignalList
+	//
+	std::optional<AppSignalLists::AppSignalList*> appSignalList;
+
+	QString selectedList = ui->listCombo->currentData().toString();
+	if (selectedList.isEmpty() == false)
+	{
+		std::shared_ptr<AppSignalLists::AppSignalList> list = m_appSignalListSet.get(selectedList);
+		if (list != nullptr)
+		{
+			appSignalList = list.get();
+		}
+	}
 
 	// Apply filter to model
 	//
 	FilteredArchiveSignalsModel* model = dynamic_cast<FilteredArchiveSignalsModel*>(ui->filteredSignals->model());
 	Q_ASSERT(model);
 
-	model->filterSignals(server, signaType, signalIdFilter);
+	model->filterSignals(server, signaType, appSignalList, signalIdFilter);
 
 	return;
 }
@@ -501,9 +565,15 @@ void DialogChooseArchiveSignals::on_archiveSignals_doubleClicked(const QModelInd
 	removeSelectedSignal();
 }
 
-void DialogChooseArchiveSignals::slot_archiveSignalsSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+void DialogChooseArchiveSignals::slot_archiveSignalsSelectionChanged(const QItemSelection& /*selected*/,
+																	 const QItemSelection& /*deselected*/)
 {
 	updateControls();
+}
+
+void DialogChooseArchiveSignals::listComboIndexChanged(int /*index*/)
+{
+	fillSignalList();
 }
 
 void DialogChooseArchiveSignals::on_buttonBox_accepted()
@@ -724,8 +794,19 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 	}
 }
 
-void FilteredArchiveSignalsModel::filterSignals(QString server, DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter)
+void FilteredArchiveSignalsModel::filterSignals(QString server, DialogChooseArchiveSignals::ArchiveSignalType signalType, std::optional<AppSignalLists::AppSignalList*> appSignalList, const QString& signalIdFilter)
 {
+	// Get hashes list filtered by signal list
+	//
+	std::set<Hash> appSignalListHashes;
+	if (appSignalList.has_value() == true)
+	{
+		Q_ASSERT(appSignalList.value());
+		appSignalListHashes = appSignalList.value()->appListHashesCache();
+	}
+
+	//
+	//	
 	beginResetModel();
 
 	QString filterText = signalIdFilter.trimmed().toLower();
@@ -740,6 +821,14 @@ void FilteredArchiveSignalsModel::filterSignals(QString server, DialogChooseArch
 		for (size_t i = 0, signalCount = m_signals.size(); i < signalCount; i++)
 		{
 			const ArchiveSignal& s = m_signals[i];
+
+			if (appSignalList.has_value() == true)
+			{
+				if (appSignalListHashes.contains(s.signalParam.hash()) == false)
+				{
+					continue;
+				}
+			}
 
 			if ((signalType == DialogChooseArchiveSignals::ArchiveSignalType::AllSignals) ||
 				(signalType == DialogChooseArchiveSignals::ArchiveSignalType::AnalogSignals && s.signalParam.isAnalog() == true) ||
@@ -787,6 +876,14 @@ void FilteredArchiveSignalsModel::filterSignals(QString server, DialogChooseArch
 			}
 
 			const ArchiveSignal& s = m_signals[index];
+
+			if (appSignalList.has_value() == true)
+			{
+				if (appSignalListHashes.contains(s.signalParam.hash()) == false)
+				{
+					continue;
+				}
+			}
 
 			// if filterText.size() == 1 then we already filrtered it by getting data from m_startWithArrays
 			//

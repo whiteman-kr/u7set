@@ -1,5 +1,7 @@
 #include "SimTrends.h"
 #include "../SimIdeSimulator.h"
+
+#include <AppSignalLists/SignalList.h>
 #include <TrendView/DialogChooseTrendSignals.h>
 #include <TrendView/TrendSignalSet.h>
 
@@ -254,10 +256,11 @@ void SimTrendsWidget::signalsButton()
 		trendSignals.emplace_back(appSignal, TrendLib::ArchiveServer{});
 	}
 
-	// Implement ISignalHasTag
+	// Implement TrendLib::ISignalHasTag
 	//
-	struct SignalHasTag : ISignalHasTag
+	class SignalHasTag : public TrendLib::ISignalHasTag
 	{
+	public:
 		SignalHasTag(const Sim::AppSignalManager* sm) : signalManager(sm)
 		{
 		}
@@ -275,8 +278,9 @@ void SimTrendsWidget::signalsButton()
 											  trendSignals,
 											  acceptedTrendSignals,
 											  archiveServers,
+											  m_simulator->appSignalListSet(),
 											  this);
-	
+
 	int result = dialog.exec();
 	if (result == QDialog::Rejected)
 	{
@@ -374,7 +378,7 @@ void SimTrendsWidget::fetchTrendData()
 
 	if (data != nullptr)
 	{
-		signalSet().slot_realtimeDataReceived(QLatin1String{"SIM"}, data, minState, maxState);
+		signalSet().slot_realtimeDataReceived(QLatin1String{"SIM"}, data, E::RtTrendsSamplePeriod::sp_5ms, minState, maxState);
 		this->slot_realtimeDataReceived(QLatin1String{"SIM"}, data, minState, maxState);
 	}
 
@@ -401,7 +405,7 @@ void SimTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
 		return;
 	}
 
-	// Shift view area if autoshift mode is turned on
+	// Shift view area if auto-shift mode is turned on
 	//
 	if (isRealtimeAutoShift() == true)
 	{
@@ -410,10 +414,22 @@ void SimTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
 
 	// Update widget if received data somewhere in view
 	//
-	if (minTime >= TimeStamp{startTime().timeStamp - duration() / 10} &&
-	    maxTime <= TimeStamp{finishTime().timeStamp + duration() / 10})
+
+	// Force to update trend every 250 ms, as signal values (indicator on the left)
+	// should be updated even if the trend point not in the current view.
+	//
+	if (m_realtimeUpdateTimer.isValid() == false)
+	{
+		m_realtimeUpdateTimer.start();
+	}
+
+	bool updateByTimer = m_realtimeUpdateTimer.elapsed() > 250;
+
+	if (updateByTimer == true ||
+		(minTime >= TimeStamp{startTime().timeStamp - duration() / 10} && maxTime <= TimeStamp{finishTime().timeStamp + duration() / 10}))
 	{
 		updateWidget();
+		m_realtimeUpdateTimer.restart();
 	}
 
 	return;

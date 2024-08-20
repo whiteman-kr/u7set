@@ -15,7 +15,6 @@ qt_standard_project_setup()
 set(TARGET AppDataSrv)
 
 add_executable(${TARGET}
-	../lib/ConstStrings.h
 	AppDataReceiver.cpp
 	AppDataReceiver.h
 	AppDataService.cpp
@@ -95,8 +94,8 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Project includes
 	#
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 
 	<Network.pb.h>
 
@@ -107,7 +106,7 @@ target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generate
 
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib)
 
 # Link Visaul Leak Detector
 #

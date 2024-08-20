@@ -498,6 +498,7 @@ namespace Builder
 						QString item2, QUuid item2Uuid, QString schema2);				// Permanent const 1 on output of packed_or %1 (item %2, schema %3) due to const 1 on input (item %4, schema %5).
 		void wrnALC5204(QString packedAndID, QString item1, QUuid item1Uuid, QString schema1,
 						QString item2, QUuid item2Uuid, QString schema2);				// Permanent const 0 on output of packed_and %1 (item %2, schema %3) due to const 0 on input (item %4, schema %5).
+		void errALC5205(QString appSignalID, QUuid itemUuid, QString schema);			// Software calculated signal %1 cannot be used in user application logic (schema %2).
 
 		// firmware writing errors
 
@@ -551,7 +552,6 @@ namespace Builder
 
 		void errEQP6106(QString schemaId, QString tuningClientEquipmentId);						// Schema %1 specified in Tuning Client %2 does not exist.
 		void errEQP6107(QString property, QString softwareEquipmentId);							// Error parsing property %1 specified in software %2.
-		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);	// Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
 		void errEQP6109(QString equipmentId, QString tuningClientEquipmentId);					// Tuning Source %1 specified in Tuning Client %2 does not exist.
 
 		void errEQP6110(QString appSignalID);																						//  Signal %1 has wrong physical low Limit
@@ -582,6 +582,16 @@ namespace Builder
 		void errEQP6211(QString monitorId, QString startSchemaId, QString profile);	// The specified schema %1 in property %2.StartSchemaID (profile %3) does not exist.
 
 		void errEQP6212(QString userAccountsProperty, QString login, QString softwareEquipmentId);	// Property %1 in (%3) software contains login (%2) which is not present in MATS users storage.
+		
+		// Application signal lists
+		//
+		void errEQP6220(QString appSignalId, QString listId);								// AppSignal % 1 specified in the application signal list % 2 does not exist.
+		void errEQP6221(QString appSignalId, QString listId, QString softwareEquipmentId);	// AppSignal %1 specified in the application signal list %2 is not processed by the software %3.
+		void errEQP6222(QString listId, QString listCaption);								// Application signal list ID %1 (%2) is not unique.
+
+		// TuningClient UI
+		//
+		void errEQP6251(QString listId, QString uiCaption, QString tuningClientId);			// Application signals list % 1 specified in UI item % 2 in TuningClient % 3 does not exist or is not linked to the software.
 
 		// Script evaluations
 		//
@@ -619,4 +629,3 @@ namespace Builder
 	};
 
 }
-

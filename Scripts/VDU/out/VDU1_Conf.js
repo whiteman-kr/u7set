@@ -626,9 +626,14 @@ var ConfigLib;
             if (optoPort.connectionID() == "" && optoPort.txDataSizeW() == 0 && optoPort.rxDataSizeW() == 0) {
                 continue;
             }
+            const optoVersion = 1;
             confFirmware.writeLog("    OptoPort " + controller.equipmentId + ": connection ID = " + optoPort.equipmentID() +
                 " (" + optoPort.connectionID() + ")\r\n");
-            ptr += 2; // reserved
+            if (ConfigLib.setData16(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "Version for Opto " + (p + 1), optoVersion) == false) {
+                return false;
+            }
+            confFirmware.writeLog("    [" + frame + ":" + ptr + "]: Version for Opto " + (p + 1) + " = " + optoVersion + "\r\n");
+            ptr += 2;
             let value = optoPort.txStartAddress();
             if (ConfigLib.setData16(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "TX startAddress for TxRx Block (Opto) " + (p + 1), value) == false) {
                 return false;
@@ -653,6 +658,7 @@ var ConfigLib;
                 return false;
             }
             confFirmware.writeLog("    [" + frame + ":" + ptr + "]: RX data words quantity for TxRx Block (Opto) " + (p + 1) + " = " + value + "\r\n");
+            ptr += 2;
             let dataUID = 0;
             if (optoPort.isLinked() == true) {
                 let linkedPort = optoPort.linkedPortID();

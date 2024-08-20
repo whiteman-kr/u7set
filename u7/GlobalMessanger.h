@@ -4,7 +4,6 @@
 #include <DbLib/DbStruct.h>
 #include "../UtilsLib/OutputLog.h"
 #include "../Builder/IssueLogger.h"
-#include "../Builder/RunOrder.h"
 
 
 enum class CompareVersionType
@@ -71,9 +70,6 @@ public:
 	OutputMessageLevel issueForSchemaItem(const QUuid& itemId) const;
 	Builder::BuildIssues::Counter issueForSchema(const QString& schemaId) const;
 
-	void clearSchemaItemRunOrder();
-	std::pair<int, int> schemaItemRunOrder(const QString& equipmentId, const QUuid& itemId) const;
-
 	// Select tab
 	//
 	void fireChangeCurrentTab(QWidget* tab);
@@ -81,9 +77,6 @@ public:
 	// CompareObject
 	//
 	void fireCompareObject(DbChangesetObject object, CompareData compareData);
-
-public slots:
-	void runOrderReady(::Builder::RunOrder runOrder);
 
 	// --
 	//
@@ -124,7 +117,6 @@ private:
 	Builder::BuildIssues m_buildIssues;
 
 	mutable QMutex m_buildResultMutex;
-	Builder::RunOrder m_runOrder;
 
 	// -- end of data for m_buildResultMutex
 	//

@@ -7,7 +7,7 @@
 #pragma warning(disable : 6330)
 #pragma warning(disable : 4244)
 #endif
-	#include "../../lib/diff_match_patch.h"
+	#include "diff_match_patch.h"
 #ifdef Q_OS_WIN
 #pragma warning(pop)
 #endif

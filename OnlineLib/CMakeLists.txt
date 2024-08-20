@@ -125,10 +125,10 @@ target_precompile_headers(${TARGET} PRIVATE
 target_precompile_headers(${TARGET} PRIVATE
 	<QHostAddress>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	"../CommonLib/HostAddressPort.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
+	<CommonLib/HostAddressPort.h>
 	
 	<ProtoSerialization.h>
 	<Network.pb.h>
@@ -136,8 +136,8 @@ target_precompile_headers(${TARGET} PRIVATE
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
-target_link_libraries(${TARGET} PRIVATE Qt6::Network Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC asio CommonLib Protobuf UtilsLib HardwareLib)
+target_link_libraries(${TARGET} PRIVATE Qt6::Network Qt6::Qml asio::asio)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib HardwareLib)
 
 target_compile_definitions(${TARGET} PRIVATE ONLINE_LIB_DOMAIN)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

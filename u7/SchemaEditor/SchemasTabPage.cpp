@@ -377,7 +377,6 @@ void SchemasTabPage::projectOpened()
 void SchemasTabPage::projectClosed()
 {
 	GlobalMessanger::instance().clearBuildSchemaIssues();
-	GlobalMessanger::instance().clearSchemaItemRunOrder();
 
 	m_requireRestoreSession = false;
 

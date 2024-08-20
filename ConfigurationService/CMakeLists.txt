@@ -15,7 +15,6 @@ qt_standard_project_setup()
 set(TARGET CfgSrv)
 
 add_executable(${TARGET}
-	../CommonLib/Types.h
 	CfgChecker.cpp
 	CfgChecker.h
 	CfgControlServer.cpp
@@ -82,8 +81,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 	
 	<Network.pb.h>
 )
@@ -91,7 +90,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Network Qt6::Qml Qt6::Xml Qt6::Widgets)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib ServiceLib OnlineLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib ServiceLib OnlineLib)
 
 # Link Visaul Leak Detector
 #

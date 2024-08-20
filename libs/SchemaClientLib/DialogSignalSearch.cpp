@@ -121,8 +121,8 @@ SignalSearchItemModel::SignalSearchItemModel(QObject* parent) :
 {
 	// Fill column names
 	//
-	m_columnsNames << tr("Signal ID");
-	m_columnsNames << tr("Caption");
+	m_columnsNames << QObject::tr("Signal ID");
+	m_columnsNames << QObject::tr("Caption");
 
 	return;
 }

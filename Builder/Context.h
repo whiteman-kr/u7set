@@ -9,6 +9,7 @@
 
 #include "DiagSignalTypesStorage.h"
 
+#include "BuildOptions.h"
 #include "BuildResultWriter.h"
 #include "ConnectionStorage.h"
 #include "DbMatsUsers.h"
@@ -24,11 +25,12 @@ namespace VFrame30
 	class Schema;
 	class VduSchema;
 	class LogicSchema;
-}
+} // namespace VFrame30
 
 namespace Builder
 {
 	class AppLogicData;
+	class ModuleLogicCompiler;
 
 	struct PackedLogicSource
 	{
@@ -45,7 +47,7 @@ namespace Builder
 	class Context
 	{
 	public:
-		Context(IssueLogger* log, QString buildOutputPath, bool expertMode);
+		Context(IssueLogger* log, QString buildOutputPath, bool expertMode, BuildOptions buildOptions);
 		Context(const Context&) = delete;
 		Context(Context&&) = delete;
 		Context& operator=(const Context&) = delete;
@@ -57,6 +59,9 @@ namespace Builder
 		bool generateAppSignalsExtXml() const;
 		bool generateExtraDebugInfo() const;
 
+		void appendModuleLogicCompiler(std::shared_ptr<ModuleLogicCompiler> mc);
+		std::shared_ptr<ModuleLogicCompiler> getModuleLogicCompiler(const QString& lmEquipmemtID) const;
+
 	public:
 		mutable IssueLogger* m_log = nullptr;
 
@@ -66,6 +71,7 @@ namespace Builder
 		QString m_buildOutputPath;
 
 		bool m_expertMode = false;
+		BuildOptions m_buildOptions;
 
 		int m_lastChangesetId = 0;
 
@@ -83,11 +89,12 @@ namespace Builder
 		std::shared_ptr<LmDescriptionSet> m_lmDescriptions;
 
 		std::vector<Hardware::DeviceModule*> m_lmModules;
+		std::map<Hash, std::shared_ptr<ModuleLogicCompiler>> m_moduleLogicCompilers;		// calcHash(LM.EquipmentID) => ModuleLogicCompilerShared
 
-		std::vector<Hardware::DeviceModule*> m_fscModules;		// includes LM and BVB modules
-		std::vector<Hardware::DeviceModule*> m_vduModules;		// includes VDU modules
+		std::vector<Hardware::DeviceModule*> m_fscModules;   // includes LM and BVB modules
+		std::vector<Hardware::DeviceModule*> m_vduModules;   // includes VDU modules
 
-		std::map<QString, std::map<Hash, int>> m_vduSignals;	// VDU EquipmentID => (Hash(appSignalID) => VDU signal index)
+		std::map<QString, std::map<Hash, int>> m_vduSignals; // VDU EquipmentID => (Hash(appSignalID) => VDU signal index)
 
 		Sim::Profiles m_simProfiles;
 
@@ -106,7 +113,8 @@ namespace Builder
 
 		std::unordered_set<QString> m_analogSignalsOnSchemas;
 
-		std::map<QString, std::list<LmPackedLogicSources>> m_packedLogicSources;	// Key is label of packed_*_out schema item => list of LmPacketLogicSources
+		std::map<QString, std::list<LmPackedLogicSources>>
+			m_packedLogicSources; // Key is label of packed_*_out schema item => list of LmPacketLogicSources
 
 		DbMatsUserStorage m_matsUsers;
 
@@ -121,11 +129,11 @@ namespace Builder
 		struct GeneratedVduSchema
 		{
 			std::shared_ptr<VFrame30::Schema> schema;
-			uint64_t crc64 = 0; // Generated CRC64 of the schema in VDU format
+			uint64_t crc64 = 0;                        // Generated CRC64 of the schema in VDU format
 		};
 
 		using VduSchemaList = std::list<GeneratedVduSchema>;
-		std::map<QString, VduSchemaList> m_vduSchemas;	// Key is VduEquipmentID, value is VduSchemas assigned to this VDU.
+		std::map<QString, VduSchemaList> m_vduSchemas; // Key is VduEquipmentID, value is VduSchemas assigned to this VDU.
 	};
 
 } // namespace Builder

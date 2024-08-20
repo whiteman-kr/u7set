@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../OnlineLib/Tcp.h"
-#include "../CommonLib/Times.h"
+#include <CommonLib/Times.h>
 
 #include "Archive.h"
 

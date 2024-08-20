@@ -37,9 +37,9 @@ target_precompile_headers(${TARGET} PRIVATE
 		<QObject>
 		<QString>
 
-		<Types.h>
-		<Hash.h>
-		<PropertyObject.h>
+		<CommonLib/Types.h>
+		<CommonLib/Hash.h>
+		<CommonLib/PropertyObject.h>
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui)

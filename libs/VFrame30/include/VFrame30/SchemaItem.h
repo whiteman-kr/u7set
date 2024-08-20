@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QJSValue>
-#include "../../CommonLib/Factory.h"
-#include "../../CommonLib/DebugInstCounter.h"
+#include <CommonLib/Factory.h>
+#include <CommonLib/DebugInstCounter.h>
 #include "../../UtilsLib/ILogFile.h"
 
 #include <VFrame30/SchemaPoint.h>
@@ -212,7 +212,6 @@ namespace VFrame30
 
 		// Draw debug info
 		//
-		virtual void drawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const;
 		virtual void drawScriptError(CDrawParam* drawParam) const;
 
 		// Draw item selection depending on position interface

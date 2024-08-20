@@ -6,15 +6,21 @@
 #include "SignalSnapshotModel.h"
 
 class IAppSignalManager;
-class ISignalDataServer;
 
-namespace SchemaClientLib
+namespace AppSignalLists
 {
-	class ISignalSnapshotWidget;
+	class AppSignalListSet;
+}
+
+namespace ClientLib
+{
+	class ISignalDataServer;
 }
 
 namespace SchemaClientLib
 {
+	class ISignalSnapshotWidget;
+
 	struct DialogSignalSnapshotSettings
 	{
 		QByteArray horzHeader;
@@ -55,7 +61,8 @@ namespace SchemaClientLib
 	public:
 		SignalSnapshotWidget(SchemaClientLib::ISignalSnapshotWidget& signalSnapshotVirtFuncDispatcher,
 							 IAppSignalManager* appSignalManager,
-							 ISignalDataServer* signalDataServer,                                  // Can be nullptr, e.g. in Simulator
+							 ClientLib::ISignalDataServer* signalDataServer,                       // Can be nullptr, e.g. in Simulator
+							 AppSignalLists::AppSignalListSet* appSignalListSet,                   // Can be nullptr, e.g. in Simulator
 							 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices, // Can be empty, e.g. in Simulator
 							 const QString& projectName,
 							 const QString& equipmentId,
@@ -91,7 +98,6 @@ namespace SchemaClientLib
 		void timerEvent(QTimerEvent* event) override;
 
 	public slots:
-		void schemasUpdated();
 		void signalsUpdated(); // Should be called when new signals arrived from AppDataService
 
 	private slots:
@@ -105,9 +111,9 @@ namespace SchemaClientLib
 		void roleComboCurrentIndexChanged(int index);
 		void editMaskReturnPressed();
 		void editTagsReturnPressed();
-		void schemaComboCurrentIndexChanged(int index);
 		void maskTypeComboCurrentIndexChanged(int index);
 		void serverComboIndexChanged(int index);
+		void signalListComboIndexChanged(int index);
 		void buttonExportClicked();
 		void buttonPrintClicked();
 		void buttonChooseTagsClicked();
@@ -119,7 +125,7 @@ namespace SchemaClientLib
 		void initFiltersView();
 		void initSignalsView();
 
-		void fillSchemas();
+		void fillAppSignalLists();
 		void fillSignals();
 
 		void updateTableItems();
@@ -135,14 +141,15 @@ namespace SchemaClientLib
 		ISignalSnapshotWidget& m_signalSnapshotVirtFuncDispatcher;
 
 		IAppSignalManager* m_appSignalManager = nullptr;
-		ISignalDataServer* m_signalDataServer = nullptr;
+		ClientLib::ISignalDataServer* m_signalDataServer = nullptr;
+		AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 
 		// Ui
 		QComboBox* m_typeCombo = nullptr;
 		QComboBox* m_roleCombo = nullptr;
-		QComboBox* m_schemaCombo = nullptr;
 		QComboBox* m_maskTypeCombo = nullptr;
 		QComboBox* m_serverCombo = nullptr;
+		QComboBox* m_signalListCombo = nullptr;
 
 		QLineEdit* m_editMask = nullptr;
 		QLineEdit* m_editTags = nullptr;
@@ -151,7 +158,7 @@ namespace SchemaClientLib
 		QPushButton* m_buttonFixate = nullptr;
 
 		SnapshotTableView* m_tableView = nullptr;
-		SignalSnapshotModel* m_model = nullptr;
+		SignalSnapshotModel m_model;
 
 		QAction* m_formatAutoSelect = nullptr;
 		QAction* m_formatDecimal = nullptr;

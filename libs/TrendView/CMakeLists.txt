@@ -14,8 +14,7 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Svg Widgets PrintSupport LinguistTools)
 set(TARGET TrendView)
 
 qt_add_library(${TARGET} STATIC
-	../../lib/ISignalDataServer.h
-	../../lib/ISignalHasTag.h
+	./include/TrendView/ISignalHasTag.h
 	./include/TrendView/DialogChooseTrendSignals.h
 	./include/TrendView/ITrendDataProvider.h
 	./include/TrendView/Trend.h
@@ -78,8 +77,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QToolBar>
 	<QFile>
 
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 
 	<Trends.pb.h>
 
@@ -92,7 +92,7 @@ target_precompile_headers(${TARGET} PRIVATE
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib AppSignalLib AppSignalLists)
 
 target_compile_definitions(${TARGET} PRIVATE TREND_VIEW_LIBRARY)
 

@@ -10,6 +10,11 @@ namespace ClientLib
 	class AppSignalManager;
 }
 
+namespace AppSignalLists
+{
+	class AppSignalListSet;
+}
+
 class MonitorDialogSignalSnapshot : public SchemaClientLib::DialogSignalSnapshot
 {
 	Q_OBJECT
@@ -17,12 +22,14 @@ class MonitorDialogSignalSnapshot : public SchemaClientLib::DialogSignalSnapshot
 public:
 	static MonitorDialogSignalSnapshot* createDialog(MonitorConfigController* configController,
 													 ClientLib::AppSignalManager* monitorAppSignalManager,
+													 AppSignalLists::AppSignalListSet* appSignalListSet,
 													 MonitorCentralWidget* centralWidget);
 
 private:
 	explicit MonitorDialogSignalSnapshot(MonitorConfigController* configController,
 										 IAppSignalManager* appSignalManager,
-										 ISignalDataServer* signalDataServer,
+										 ClientLib::ISignalDataServer* signalDataServer,
+										 AppSignalLists::AppSignalListSet* appSignalListSet,
 										 const QString& projectName,
 										 const QString& equipmentId,
 										 QWidget *parent);

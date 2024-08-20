@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../CommonLib/HashedVector.h"
 #include "../UtilsLib/Address16.h"
 
+#include <CommonLib/HashedVector.h>
 #include <HardwareLib/DeviceObject.h>
 #include <HardwareLib/Connection.h>
 #include <HardwareLib/EquipmentSet.h>

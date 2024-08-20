@@ -1,8 +1,8 @@
 #pragma once
 
 #include <VFrame30/SchemaLayer.h>
-#include "../CommonLib/DebugInstCounter.h"
-#include "../CommonLib/Factory.h"
+#include <CommonLib/DebugInstCounter.h>
+#include <CommonLib/Factory.h>
 #include "../UtilsLib/ILogFile.h"
 
 

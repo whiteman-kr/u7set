@@ -1,7 +1,6 @@
 #include "MonitorTrends.h"
 
-#include "../lib/ISignalHasTag.h"
-
+#include <TrendView/ISignalHasTag.h>
 #include <TrendView/DialogChooseTrendSignals.h>
 #include <TrendView/TrendSignalSet.h>
 
@@ -40,9 +39,10 @@ bool MonitorTrends::activateTrendWindow(MonitorTrendsWidget* trendWidget)
 bool MonitorTrends::startTrendApp(const ClientLib::AppSignalManager& signalManager,
 								  const MonitorConfigController& configController,
 								  const std::vector<AppSignalParam>& appSignals,
+								  const AppSignalLists::AppSignalListSet& appSignalListSet,
 								  QWidget* parent)
 {
-	MonitorTrendsWidget* window = new MonitorTrendsWidget(signalManager, configController, parent);
+	MonitorTrendsWidget* window = new MonitorTrendsWidget(signalManager, configController, appSignalListSet, parent);
 
 	std::vector<TrendLib::TrendSignalParam> trendSignals;
 	trendSignals.reserve(appSignals.size());
@@ -126,12 +126,14 @@ void MonitorTrends::unregisterTrendWindow(const MonitorTrendsWidget* window)
 
 MonitorTrendsWidget::MonitorTrendsWidget(const ClientLib::AppSignalManager& signalManager,
 										 const MonitorConfigController& configController,
+										 const AppSignalLists::AppSignalListSet& appSignalListSet,
 										 QWidget* parent) :
 	TrendLib::TrendMainWindow(parent),
 	m_signalManager(signalManager),
 	m_configController(configController),
 	m_archiveDataProvider(m_configController, m_configController.logFile()),
-	m_realtimeDataProvider(m_signalManager, m_configController.logFile())
+	m_realtimeDataProvider(m_signalManager, m_configController.logFile()),
+	m_appSignalListSet(appSignalListSet)
 {
 	static int no = 1;
 	QString trendName = tr("Monitor Trends %1").arg(no++);
@@ -170,7 +172,7 @@ MonitorTrendsWidget::MonitorTrendsWidget(const ClientLib::AppSignalManager& sign
 	connect(&m_archiveDataProvider, &MonitorTrendArchiveConnections::dataReady, this, &MonitorTrendsWidget::slot_archiveDataReceived); // For updating widget
 
 	// Realtime Trends connections
-	// IMPORTANT: The next to slot connections must be in that order, as TrendLib::TrendSignalSet::slot_realtimeDataReceived
+	// IMPORTANT: The next two slots connections must be in that order, as TrendLib::TrendSignalSet::slot_realtimeDataReceived
 	// updates the "last realtime" point and MonitorTrendsWidget::slot_realtimeDataReceived makes autoshift based on the "last realtime" point.
 	//
 	// Qt doc says: If several slots are connected to one signal, the slots will be executed one after the other,
@@ -279,10 +281,11 @@ void MonitorTrendsWidget::signalsButton()
 	//
 	std::vector<TrendLib::TrendSignalParam> addedTrendSignals = signalSet().trendSignals();
 
-	// Implement ISignalHasTag
+	// Implement TrendLib::ISignalHasTag
 	//
-	struct SignalHasTag : ISignalHasTag
+	class SignalHasTag : public TrendLib::ISignalHasTag
 	{
+	public:
 		SignalHasTag(const ClientLib::AppSignalManager& ms) :
 			monitorAppSignalManager(ms)
 		{
@@ -302,6 +305,7 @@ void MonitorTrendsWidget::signalsButton()
 											  trendSignals,
 											  addedTrendSignals,
 											  trendArchiveServers,
+											  m_appSignalListSet,
 											  this);
 
 	int result = dialog.exec();
@@ -534,6 +538,7 @@ void MonitorTrendsWidget::slot_archiveDataReceived(TrendLib::TrendSignalPlusServ
 
 void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*/,
 													std::shared_ptr<TrendLib::RealtimeData> data,
+													E::RtTrendsSamplePeriod /*samplePeriod*/,
 													TrendLib::TrendStateItem minRecState,
 													TrendLib::TrendStateItem maxRecState)
 {
@@ -603,14 +608,13 @@ void MonitorTrendsWidget::slot_realtimeDataReceived(QString /*sourceEquipmentId*
 		m_realtimeUpdateTimer.start();
 	}
 
-	// Force to update trend every 500 ms, as signal values (indicator on the left)
+	// Force to update trend every 250 ms, as signal values (indicator on the left)
 	// should be updated even if the trend point not in the current view.
 	//
-	bool updateByTimer = m_realtimeUpdateTimer.elapsed() > 500;
+	bool updateByTimer = m_realtimeUpdateTimer.elapsed() > 250;
 
-	if (updateByTimer == true ||
-		(minTime >= TimeStamp{this->startTime().timeStamp - this->duration() / 10} &&
-		 maxTime <= TimeStamp{this->finishTime().timeStamp + this->duration() / 10}))
+	if (updateByTimer == true || (minTime >= TimeStamp{this->startTime().timeStamp - this->duration() / 10} &&
+								  maxTime <= TimeStamp{this->finishTime().timeStamp + this->duration() / 10}))
 	{
 		updateWidget();
 		m_realtimeUpdateTimer.restart();

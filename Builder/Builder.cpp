@@ -8,8 +8,6 @@ namespace Builder
 		qmlRegisterAnonymousType<Hardware::OptoPort>("OptoPort", 1);
 		qmlRegisterAnonymousType<UnitsConverter>("UnitsConverter", 1);
 
-		qRegisterMetaType<RunOrder>("RunOrder");
-
 		return;
 	}
 
@@ -26,8 +24,6 @@ namespace Builder
 
 		connect(m_thread, &BuildWorkerThread::started, this, &Builder::started);
 		connect(m_thread, &BuildWorkerThread::finished, this, &Builder::threadFinished);
-
-		connect(m_thread, &BuildWorkerThread::runOrderReady, this, &Builder::runOrderReady);
 
 		return;
 	}
@@ -51,7 +47,8 @@ namespace Builder
 						QString projectUserName,
 						QString projectUserPassword,
 						QString buildPath,
-						bool expertMode)
+						bool expertMode,
+						BuildOptions buildOptions)
 	{
 		qDebug() << "Build started\n" <<
 					"\tdatabaseAddress: " << databaseAddress << "\n" <<
@@ -75,6 +72,7 @@ namespace Builder
 		m_thread->setProjectUserPassword(projectUserPassword);
 		m_thread->setBuildOutputPath(buildPath);
 		m_thread->setExpertMode(expertMode);
+		m_thread->setBuildOptions(buildOptions);
 
 		m_log.clear();
 

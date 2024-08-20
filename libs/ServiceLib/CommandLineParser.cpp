@@ -4,7 +4,7 @@
 
 #include "../OnlineLib/CircularLogger.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include <ServiceLib/CommandLineParser.h>
 
 

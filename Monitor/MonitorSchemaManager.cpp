@@ -2,7 +2,7 @@
 #include "MonitorConfigController.h"
 
 MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController& configController,
-										   const ISignalDataServer& signalDataServer,
+										   const ClientLib::ISignalDataServer& signalDataServer,
 										   QObject* parent /*= nullptr*/) :
 	SchemaClientLib::ClientSchemaManager(configController, parent),
 	m_signalDataServer(signalDataServer),

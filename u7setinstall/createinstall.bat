@@ -29,13 +29,18 @@ echo --------------- Copying Source Files ------------------
 xcopy ..\bin\release\qt*.qm packages\u7set\data /sy
 xcopy ..\bin\release\ClientLib*.qm packages\u7set\data /sy
 xcopy ..\bin\release\TrendView*.qm packages\u7set\data /sy
+xcopy ..\bin\release\UiLib*.qm packages\u7set\data /sy
 xcopy ..\bin\release\UtilsLib*.qm packages\u7set\data /sy
 xcopy ..\bin\release\SchemaClientLib*.qm packages\u7set\data /sy
+xcopy ..\bin\release\AppSignalLists*.qm packages\u7set\data /sy
 
 xcopy ..\bin\release\*.dll packages\u7set\data /sy
 copy ..\bin\release\vc_redist.x64.exe packages\u7set\data
 
 copy ..\bin\release\u7.exe packages\u7set.develop.rpct\data
+
+md packages\u7set\data\license
+copy ..\bin\release\license\*.* packages\u7set\data\license
 
 xcopy ..\bin\release\scripthelp packages\u7set.develop.rpct\data\scripthelp /sy
 xcopy ..\bin\release\scripting packages\u7set.develop.rpct\data\scripting /sy

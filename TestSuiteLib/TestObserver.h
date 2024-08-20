@@ -204,7 +204,7 @@ namespace TestSuite
 
 	public:
 		TestObserver() = delete;
-		TestObserver(ISignalDataServer& signalDataServer,
+		TestObserver(ClientLib::ISignalDataServer& signalDataServer,
 					 const SoftwareInfo& softwareInfo,
 					 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 					 ILogFile* logFile);
@@ -234,7 +234,11 @@ namespace TestSuite
 		// End of ITestObserver
 
 	private slots:
-		void dataReady(QString sourceEquipmentId, std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+		void dataReady(QString sourceEquipmentId,
+					   std::shared_ptr<TrendLib::RealtimeData> data,
+					   E::RtTrendsSamplePeriod samplePeriod,
+					   TrendLib::TrendStateItem minState,
+					   TrendLib::TrendStateItem maxState);
 		void requestError(QString text);
 		void connectionLost(QString sourceEquipmentId);
 
@@ -245,7 +249,7 @@ namespace TestSuite
 		void dataReceived();
 
 	private:
-		ISignalDataServer& m_signalDataServer;
+		ClientLib::ISignalDataServer& m_signalDataServer;
 		const SoftwareInfo m_softwareInfo;
 		std::vector<SoftwareEndpoint::AppDataService> m_appDataServices;
 		ILogFile* m_logFile = nullptr;

@@ -1,7 +1,7 @@
 #pragma once
 
+#include <ClientLib/ISignalDataServer.h>
 #include <SchemaClientLib/ClientSchemaManager.h>
-#include "../lib/ISignalDataServer.h"
 #include "./Trend/RtSchemaTrend.h"
 
 
@@ -14,7 +14,7 @@ class MonitorSchemaManager : public SchemaClientLib::ClientSchemaManager
 
 public:
 	explicit MonitorSchemaManager(MonitorConfigController& configController,
-								  const ISignalDataServer& signalDataServer,
+								  const ClientLib::ISignalDataServer& signalDataServer,
 								  QObject* parent = nullptr);
 
 public:
@@ -40,7 +40,7 @@ public:
 	// Data
 	//
 private:
-	const ISignalDataServer& m_signalDataServer;
+	const ClientLib::ISignalDataServer& m_signalDataServer;
 
 	// Data for RealTimeTrends on schemas, SchemaItemIndicator, type = Trend
 	//

@@ -19,9 +19,15 @@ namespace VFrame30
 
 namespace Hardware
 {
-	class Software;
 	class EquipmentSet;
 }
+
+namespace AppSignalLists
+{
+	class AppSignalList;
+}
+
+class ISignalManager;
 
 namespace Builder
 {
@@ -70,6 +76,8 @@ namespace Builder
 
 		static bool generalSoftwareCfgGeneration(Context* context);
 		static bool loadAllSchemas(Context* context);
+		static bool generateVduFonts(Context& context);
+		static bool generateVduSchemas(const std::vector<VFrame30::VduSchema*>& schemas, Context& context);
 		static void clearStaticData();
 
 		static bool writeSchemaScriptProperties(VFrame30::Schema* schema, QString dir, BuildResultWriter* buildResultWriter);
@@ -101,6 +109,15 @@ namespace Builder
 
 		QString softwareCfgSubdir() const { return m_software->equipmentIdTemplate(); }
 
+		static std::vector<AppSignal*> createAppSignalList(const QStringList& equipmentList, const SignalSet& signalSet);
+		static std::vector<AppSignal*> createTuningSignalList(const QStringList& equipmentList, const SignalSet& signalSet);
+
+		bool writeTuningSignals(const std::vector<AppSignal*>& tuningSignals);
+		bool writeAppSignalLists(const ISignalManager& signalManager,
+								 const QStringList& appSignalListIds,
+								 const QStringList& appSignalListMasks,
+								 const QStringList& appSignalListTags,
+								 std::vector<std::shared_ptr<AppSignalLists::AppSignalList>>& appSignalLists);
 		bool writeMatsUsers(const QString& propertyName, const QStringList& tuningUserAccounts);
 
 		template <typename TYPE>

@@ -1,13 +1,20 @@
 #pragma once
 
-#include <TrendView/TrendSignalSet.h>
 #include <TrendView/TrendParam.h>
+#include <TrendView/TrendSignalSet.h>
 
 #include "TrendRuler.h"
 
 
 namespace TrendLib
 {
+	struct Lane
+	{
+		size_t index;
+		QRectF laneRect;
+		QDateTime startTime;
+	};
+
 	class TrendImpl
 	{
 	public:
@@ -22,7 +29,7 @@ namespace TrendLib
 		void draw(QImage* image, const TrendParam& drawParam) const;
 		void draw(QPainter* painter, const TrendParam& drawParam, bool needAdjustPainter) const;
 
-		void drawLane(QPainter* painter, const QRectF& laneRect, const TrendParam& drawParam) const;
+		void drawLane(QPainter* painter, const Lane& lane, const TrendParam& drawParam) const;
 
 		void drawBackground(QPainter* painter,
 							const QRectF& insideRect,
@@ -33,12 +40,13 @@ namespace TrendLib
 		void drawTimeGrid(QPainter* painter, const QRectF& laneRect, const QRectF& insideRect, const TrendParam& drawParam) const;
 
 		void drawSignalsDecor(QPainter* painter,
-							  const QRectF& laneRect,
+							  const Lane& laneRect,
 							  const TrendParam& drawParam,
 							  const std::vector<TrendSignalParam>& discretes,
 							  const std::vector<TrendSignalParam>& analogs) const;
 
 		void drawSignalsDecorRealtimeValue(QPainter* painter,
+										   const Lane& lane,
 										   const QRectF& signalRect,
 										   const TrendParam& drawParam,
 										   const TrendSignalParam& signalParam) const;
@@ -76,7 +84,7 @@ namespace TrendLib
 									std::vector<TrendSignalParam>* discretes,
 									std::vector<TrendSignalParam>* analogs);
 
-		static QRectF calcLaneRect(int laneIndex, const TrendParam& drawParam);
+		static QRectF calcLaneRect(size_t laneIndex, const TrendParam& drawParam);
 		QRectF calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam) const;
 		static QRectF calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam, size_t analogSignalCount);
 		static QRectF calcScaleAreaRect(const QRectF& laneRect, const QRectF& signalRect);
@@ -134,4 +142,4 @@ namespace TrendLib
 
 		const static double discreteSignalHeight; // = 5.0 / 8.0;		// if inches
 	};
-} // namespace TrendView
+} // namespace TrendLib

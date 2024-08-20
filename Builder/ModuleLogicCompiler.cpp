@@ -175,9 +175,9 @@ namespace Builder
 
 	AppSignal* ModuleLogicCompiler::getSignal(const QString& appSignalID)
 	{
-		auto it = m_chassisSignals.find(calcHash(appSignalID));
+		auto it = m_moduleSignals.find(calcHash(appSignalID));
 
-		if (it == m_chassisSignals.end())
+		if (it == m_moduleSignals.end())
 		{
 			return nullptr;
 		}
@@ -214,7 +214,7 @@ namespace Builder
 		{
 			PROC_TO_CALL(ModuleLogicCompiler::loadLMSettings),
 			PROC_TO_CALL(ModuleLogicCompiler::loadModulesSettings),
-			PROC_TO_CALL(ModuleLogicCompiler::createChassisSignalsMap),
+			PROC_TO_CALL(ModuleLogicCompiler::createModuleSignalsMap),
 			PROC_TO_CALL(ModuleLogicCompiler::createUalItemsMaps),
 			PROC_TO_CALL(ModuleLogicCompiler::createUalAfbsMap),
 			PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
@@ -363,13 +363,6 @@ namespace Builder
 	bool ModuleLogicCompiler::generateExtraDebugInfo() const
 	{
 		return m_context->generateExtraDebugInfo();
-	}
-
-	void ModuleLogicCompiler::setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers)
-	{
-		TEST_PTR_LOG_RETURN(moduleCompilers, log());
-
-		m_moduleCompilers = moduleCompilers;
 	}
 
 	bool ModuleLogicCompiler::getSignalsAndPinsLinkedToItem(const UalItem* item,
@@ -903,12 +896,13 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createChassisSignalsMap()
+	bool ModuleLogicCompiler::createModuleSignalsMap()
 	{
 		bool result = true;
 
-		m_chassisSignals.clear();
+		m_moduleSignals.clear();
 		m_ioSignals.clear();
+		m_swCalcSignals.clear();
 
 		for(AppSignal* sg : *m_signals)
 		{
@@ -955,6 +949,11 @@ namespace Builder
 
 					// signal is associated with current LM
 
+					if (sg->swCalcFunction() != E::SoftwareCalcFunction::None)
+					{
+						m_swCalcSignals.emplace_back(sg);
+					}
+
 					isIoSignal = false;
 				}
 				break;
@@ -984,7 +983,17 @@ namespace Builder
 
 					// signal is associated with current LM
 
-					isIoSignal = true;
+					if (deviceAppSignal->isInputSignal() ||
+						deviceAppSignal->isOutputSignal() ||
+						deviceAppSignal->isValiditySignal())
+					{
+						isIoSignal = true;
+					}
+
+					if (sg->swCalcFunction() != E::SoftwareCalcFunction::None)
+					{
+						m_swCalcSignals.emplace_back(sg);
+					}
 				}
 
 				break;
@@ -994,7 +1003,7 @@ namespace Builder
 				continue;
 			}
 
-			auto [newIt, inserted] = m_chassisSignals.emplace(calcHash(sg->appSignalID()), sg);
+			auto [newIt, inserted] = m_moduleSignals.emplace(calcHash(sg->appSignalID()), sg);
 
 			if (inserted == false)
 			{
@@ -1825,7 +1834,7 @@ namespace Builder
 
 		// fill m_ualSignals by Input and Tuning Acquired signals
 		//
-		for(const auto& [appSignalID, appSignal] : m_chassisSignals)
+		for(const auto& [appSignalID, appSignal] : m_moduleSignals)
 		{
 			TEST_PTR_CONTINUE(appSignal);
 
@@ -1860,7 +1869,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(const auto& [appSignalID, appSignal] : m_chassisSignals)
+		for(const auto& [appSignalID, appSignal] : m_moduleSignals)
 		{
 			TEST_PTR_CONTINUE(appSignal);
 
@@ -2164,7 +2173,7 @@ namespace Builder
 		}
 		else
 		{
-			if (m_chassisSignals.contains(calcHash(receivedAppSignalID)) == true)
+			if (m_moduleSignals.contains(calcHash(receivedAppSignalID)) == true)
 			{
 				// LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
 				//
@@ -2458,7 +2467,7 @@ namespace Builder
 				{
 					m_signals->append(validitySignal, m_lmShared);
 
-					m_chassisSignals.emplace(calcHash(validitySignal->appSignalID()), validitySignal);
+					m_moduleSignals.emplace(calcHash(validitySignal->appSignalID()), validitySignal);
 					m_ioSignals.emplace_back(validitySignal);
 					m_equipmentSignals.emplace(calcHash(validitySignalEquipmentID), validitySignal);
 				}
@@ -2501,11 +2510,19 @@ namespace Builder
 			return false;
 		}
 
-		if (m_chassisSignals.contains(calcHash(signalID)) == false)
+		if (m_moduleSignals.contains(calcHash(signalID)) == false)
 		{
 			// The signal '%1' is not associated with LM '%2'.
 			//
 			m_log->errALC5030(signalID, m_lm->equipmentId(), ualItem->guid());
+			return false;
+		}
+
+		if (appSignal->isSwCalculated() == true)
+		{
+			// Software calculated signal %1 cannot be used in user application logic (schema %2).
+			//
+			m_log->errALC5205(appSignal->appSignalID(), ualItem->guid(), ualItem->schemaID());
 			return false;
 		}
 
@@ -5006,7 +5023,7 @@ namespace Builder
 
 		bool result = true;
 
-		for(const auto& [hash, signal] : m_chassisSignals)
+		for(const auto& [hash, signal] : m_moduleSignals)
 		{
 			TEST_PTR_CONTINUE(signal);
 
@@ -6089,7 +6106,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(auto& [hash, s] : m_chassisSignals)
+		for(auto& [hash, s] : m_moduleSignals)
 		{
 			if(s == nullptr)
 			{
@@ -6126,6 +6143,10 @@ namespace Builder
 				{
 					s->setLmRamAccess(E::LogicModuleRamAccess::ReadWrite);
 				}
+				break;
+
+			case E::SignalInOutType::SoftwareCalculated:
+				s->setLmRamAccess(E::LogicModuleRamAccess::Undefined);
 				break;
 
 			default:
@@ -6446,6 +6467,10 @@ namespace Builder
 					result = false;
 					break;
 
+				case E::SignalInOutType::SoftwareCalculated:
+					ioBufAddr.clear();
+					break;
+
 				default:
 					assert(false);
 				}
@@ -6469,6 +6494,9 @@ namespace Builder
 					//
 					log()->errALC5171(ioSignal->appSignalID(), ioSignal->equipmentID());
 					result = false;
+					break;
+
+				case E::SignalInOutType::SoftwareCalculated:
 					break;
 
 				default:
@@ -8040,7 +8068,7 @@ namespace Builder
 			{
 				AppSignal* s = m_signals->getSignal(id);
 
-				if (s != nullptr && m_chassisSignals.contains(calcHash(s->appSignalID())) == true)
+				if (s != nullptr && m_moduleSignals.contains(calcHash(s->appSignalID())) == true)
 				{
 					find = true;
 					break;
@@ -8307,7 +8335,7 @@ namespace Builder
 
 		QString rxSignalID = receiver->appSignalIds();
 
-		if (m_chassisSignals.contains(calcHash(rxSignalID)) == false)
+		if (m_moduleSignals.contains(calcHash(rxSignalID)) == false)
 		{
 			// Single-port Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
 			//
@@ -17132,12 +17160,13 @@ namespace Builder
 
 	bool ModuleLogicCompiler::detectUnusedSignals()
 	{
-		for(const auto& [hash, s] : m_chassisSignals)
+		for(const auto& [hash, s] : m_moduleSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
 			if (s->isInternal() == true &&
 				s->reserved() == false &&
+				s->isSwCalculated() == false &&
 				m_ualSignals.contains(s->appSignalID()) == false)
 			{
 				m_log->wrnALC5148(s->appSignalID());
@@ -17151,7 +17180,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(const auto& [hash, s] : m_chassisSignals)
+		for(const auto& [hash, s] : m_moduleSignals)
 		{
 			TEST_PTR_CONTINUE(s);
 
@@ -17286,6 +17315,26 @@ namespace Builder
 		m_memoryMap.getFile(memFile,
 							m_ualSignals.discreteSignalsHeap().getHeapItemsLog(),
 							m_ualSignals.analogAndBusSignalsHeap().getHeapItemsLog());
+
+		// Append Software Calculated Signals section
+
+		if (m_swCalcSignals.size() > 0)
+		{
+			static const QString line(QString().fill('-', 80));
+
+			memFile.append(line);
+			memFile.append("Software Calculated Signals (not disposed in LM memory)");
+			memFile.append(line);
+
+			for(const AppSignal* s : m_swCalcSignals)
+			{
+				TEST_PTR_CONTINUE(s);
+
+				memFile.append(QString(" %1 %2").arg(E::valueToString(s->swCalcFunction()), -25, QChar(' ')).
+						arg(s->appSignalID()));
+
+			}
+		}
 
 		BuildFile* buildFile = m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_lmSubsystemID),
 												getInfoFileName("mem"), memFile);

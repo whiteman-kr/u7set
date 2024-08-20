@@ -3,11 +3,6 @@
 
 #include "SoftwareCfgGenerator.h"
 
-#include "../lib/Tuning/TuningFilter.h"
-#include "../OnlineLib/SoftwareSettings.h"
-
-#include <ClientLib/TuningSignalManager.h>
-
 namespace Builder
 {
 
@@ -19,26 +14,21 @@ namespace Builder
 		virtual bool createSettingsProfile(const QString& profile) override;
 		virtual bool generateConfigurationStep1() override;
 
-		static bool createTuningSignals(const QStringList& equipmentList, const SignalSet* signalSet, ::Proto::AppSignalSet* tuningSet);
-
 	private:
 		SubsystemStorage* m_subsystems = nullptr;
 
-		bool createEquipmentList(QStringList* equipmentList);
-		bool createObjectFilters(const ClientLib::TuningSignalManager& tuningSignalManager, const QStringList& equipmentList);
-		bool createEquipmentAndSchemaFilters(const QStringList& equipmentList,const ClientLib::TuningSignalManager& tuningSignalManager);
-		void createCounterFiltersFromTemplates();
+		bool createTuningEquipmentList(QStringList* equipmentList);
+		bool createEquipmentLists(const QStringList& equipmentList,const ISignalManager& tuningSignalManager);
+		bool createSchemasLists(const ISignalManager& tuningSignalManager);
 
-		bool writeTuningSignals();
-		bool writeObjectFilters();
+		
+		bool writeTuningUi(std::vector<std::shared_ptr<AppSignalLists::AppSignalList>> appSignalLists,
+						   const QStringList& appSignalListIds,
+						   const QStringList& appSignalListMasks,
+						   const QStringList& appSignalListTags);
 		bool writeTuningSchemas();
 		bool writeGlobalScript();
 		bool writeTuningClientBehavior();
-
-	private:
-		::Proto::AppSignalSet m_tuningSet;
-
-		TuningFilterStorage m_tuningFilterStorage;
 	};
 }
 

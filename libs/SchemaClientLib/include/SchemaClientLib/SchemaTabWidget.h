@@ -533,9 +533,9 @@ namespace SchemaClientLib
 
 		static QString path{"."};
 		QString fileName = QFileDialog::getSaveFileName(this,
-														tr("Export Schema"),
+														SchemaTabWidgetSignalSlot::tr("Export Schema"),
 														path + QDir::separator() + schema->schemaId() + ".pdf",
-														tr("PDF Files (*.pdf);;PNG Files (*.png)"));
+														"PDF Files (*.pdf);;PNG Files (*.png)");
 		if (fileName.isEmpty() == true)
 		{
 			return;
@@ -557,14 +557,14 @@ namespace SchemaClientLib
 			}
 			else
 			{
-				QMessageBox::critical(this, qAppName(), tr("Wrong file '%1' format, expected '.png' or '.pdf'!").arg(fileName));
+				QMessageBox::critical(this, qAppName(), SchemaTabWidgetSignalSlot::tr("Wrong file '%1' format, expected '.png' or '.pdf'!").arg(fileName));
 				return;
 			}
 		}
 
 		if (ok == false)
 		{
-			QMessageBox::critical(this, qAppName(), tr("Failed to save file '%1'!").arg(fileName));
+			QMessageBox::critical(this, qAppName(), SchemaTabWidgetSignalSlot::tr("Failed to save file '%1'!").arg(fileName));
 		}
 
 		return;

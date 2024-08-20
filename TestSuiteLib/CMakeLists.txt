@@ -67,10 +67,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QWriteLocker>
 	<QXmlStreamWriter>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 	
 	#<ProtoSerialization.h>
 	#<AppSignal.pb.h>
@@ -87,7 +86,7 @@ target_precompile_headers(${TARGET} PRIVATE
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Qml Qt6::Xml Qt6::Test)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib VFrame30)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib AppSignalLib OnlineLib ClientLib VFrame30)
 
 target_compile_definitions(${TARGET} PRIVATE TEST_SUITE_LIBRARY)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

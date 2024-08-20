@@ -9,7 +9,7 @@
 
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/Tcp.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "version.h"
 
 const char* const semaphoreString = "ServiceControlManagerSemaphore";

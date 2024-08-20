@@ -59,12 +59,12 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QSqlQuery>
 	<QThread>
 
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
-	"../../CommonLib/PropertyObject.h"
-	"../../CommonLib/AfbParamValue.h"
-	"../../CommonLib/DebugInstCounter.h"
-	"../../CommonLib/Factory.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
+	<CommonLib/AfbParamValue.h>
+	<CommonLib/DebugInstCounter.h>
+	<CommonLib/Factory.h>
 	
 	<ProtoSerialization.h>
 	<AppSignal.pb.h>
@@ -72,10 +72,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../AppSignalLib/AppSignal.h"
 	
 	<DbLib/DbController.h>
-	"../../libs/DbLib/DbWorker.h"  # include private libraray part for testing reaon 
+	"../../libs/DbLib/DbWorker.h"  # include private libraray part for testing reason 
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Sql Qt6::Network Qt6::Widgets Qt6::Xml Qt6::Qml)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib DbLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib OnlineLib HardwareLib DbLib)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

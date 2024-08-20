@@ -1,6 +1,7 @@
 #include "BuildTabPage.h"
-#include "Settings.h"
+#include "../Builder/Builder.h"
 #include "GlobalMessanger.h"
+#include "Settings.h"
 
 
 //
@@ -8,14 +9,11 @@
 // BuildTabPage
 //
 //
-
 BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent),
-	m_builder(&GlobalMessanger::instance().buildIssues())
+	m_builder{std::make_unique<Builder::Builder>(&GlobalMessanger::instance().buildIssues())}
 {
 	assert(dbcontroller != nullptr);
-
-	//	BuildTabPage::m_this = this;
 
 	//
 	// Controls
@@ -45,9 +43,8 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	QColor highlight = p.highlight().color();
 	QColor highlightText = p.highlightedText().color();
 
-	QString selectionColor = QString("QTextEdit { selection-background-color: %1; selection-color: %2; }")
-							 .arg(highlight.name())
-							 .arg(highlightText.name());
+	QString selectionColor =
+		QString("QTextEdit { selection-background-color: %1; selection-color: %2; }").arg(highlight.name()).arg(highlightText.name());
 
 	m_outputWidget->setStyleSheet(selectionColor);
 
@@ -59,10 +56,10 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_cancelButton->setEnabled(false);
 
 	m_prevIssueButton = new QPushButton(tr("Prev Issue <Shift+F6>"));
-	//m_prevIssueButton->setShortcut(Qt::SHIFT + Qt::Key_F6);	// Too slow, use usual QAction
+	// m_prevIssueButton->setShortcut(Qt::SHIFT + Qt::Key_F6);	// Too slow, use usual QAction
 
 	m_nextIssueButton = new QPushButton(tr("Next Issue <F6>"));
-	//m_nextIssueButton->setShortcut(Qt::Key_F6);				// Too slow, use usual QAction
+	// m_nextIssueButton->setShortcut(Qt::Key_F6);				// Too slow, use usual QAction
 
 	m_findTextEdit = new QLineEdit();
 	m_findTextEdit->setPlaceholderText("Find Text");
@@ -73,7 +70,7 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_findTextEdit->setCompleter(searchCompleter);
 
 	m_findTextButton = new QPushButton(tr("Search <F3>"));
-	//m_findTextButton->setShortcut(Qt::Key_F3);				// Too slow, use usual QAction
+	// m_findTextButton->setShortcut(Qt::Key_F3);				// Too slow, use usual QAction
 
 	QGridLayout* rightWidgetLayout = new QGridLayout();
 
@@ -96,17 +93,15 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Left Side
 	//
-	m_vsplitter = new QSplitter(this);
+	m_vsplitter = new QSplitter{this};
+	m_vsplitter->setChildrenCollapsible(false);
 
-	m_settingsWidget = new QWidget(m_vsplitter);
-	QVBoxLayout* settingsWidgetLayout = new QVBoxLayout();
+	m_settingsWidget = new QWidget{m_vsplitter};
+	auto settingsWidgetLayout = new QFormLayout();
 
-//	m_debugCheckBox = new QCheckBox(tr("Debug build"), m_settingsWidget);
-//	m_debugCheckBox->setChecked(true);
-//	settingsWidgetLayout->addWidget(m_debugCheckBox);
 	QLabel* buildLabel = new QLabel("Build:");
 	buildLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
-	settingsWidgetLayout->addWidget(buildLabel);
+	settingsWidgetLayout->addRow(buildLabel);
 
 	for (int i = 0; i < 2; i++)
 	{
@@ -115,7 +110,7 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 		m_buildLabel[i]->setTextFormat(Qt::RichText);
 		m_buildLabel[i]->setTextInteractionFlags(Qt::TextBrowserInteraction);
 		m_buildLabel[i]->setOpenExternalLinks(true);
-		settingsWidgetLayout->addWidget(m_buildLabel[i]);
+		settingsWidgetLayout->addRow(m_buildLabel[i]);
 	}
 
 	m_warningsLevelComboBox = new QComboBox(m_settingsWidget);
@@ -125,10 +120,89 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_warningsLevelComboBox->insertItem(static_cast<int>(WarningShowLevel::Important), tr("Important Warnings"));
 	m_warningsLevelComboBox->insertItem(static_cast<int>(WarningShowLevel::HideAll), tr("Hide All Warning"));
 	m_warningsLevelComboBox->setCurrentIndex(theSettings.buildWarningLevel());
-	settingsWidgetLayout->addWidget(m_warningsLevelComboBox);
+	settingsWidgetLayout->addRow(m_warningsLevelComboBox);
 
-	settingsWidgetLayout->addStretch();
+	// Option: Generate App Logic Drawings
+	//
+	QFrame* buildOptionLine = new QFrame;
+	buildOptionLine->setFrameShape(QFrame::HLine);
+	buildOptionLine->setFrameShadow(QFrame::Sunken);
+	settingsWidgetLayout->addRow(buildOptionLine);
 
+	// Option: Generate App Logic Drawings
+	//
+	auto buildOptions = new QLabel("Build Options:");
+	buildOptions->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Minimum);
+	settingsWidgetLayout->addRow(buildOptions);
+
+	auto createBuildOptionComboBox = [layout = settingsWidgetLayout, this](QString name, QString toolTip, QWidget* parent) -> QComboBox*
+	{
+		QLabel* label = new QLabel(name + QString(":"));
+		label->setToolTip(toolTip);
+
+		auto cb = new QComboBox{parent};
+		cb->setEditable(false);
+		cb->insertItem(static_cast<int>(E::BuildOptionValue::Inherit),
+					   E::valueToString(E::BuildOptionValue::Inherit),
+					   static_cast<int>(E::BuildOptionValue::Inherit));
+		cb->insertItem(static_cast<int>(E::BuildOptionValue::True),
+					   E::valueToString(E::BuildOptionValue::True),
+					   static_cast<int>(E::BuildOptionValue::True));
+		cb->insertItem(static_cast<int>(E::BuildOptionValue::False),
+					   E::valueToString(E::BuildOptionValue::False),
+					   static_cast<int>(E::BuildOptionValue::False));
+		cb->setToolTip(toolTip);
+
+		connect(cb,
+				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+				[this, name](int index)
+				{
+					QString strValue = E::valueToString(static_cast<E::BuildOptionValue>(index));
+					db()->setUserProperty(name, strValue, this);
+				});
+
+		layout->addRow(label, cb);
+
+		return cb;
+	};
+
+	m_generateAppLogicDrawings =
+		createBuildOptionComboBox(Db::ProjectProperty::GenerateAppLogicDrawings,
+								  tr("Inherit: Inherit value from the project setting\nTrue: %1\nFalse: Do not generate data")
+									  .arg(Db::ProjectProperty::GenerateAppLogicDrawingsDescription),
+								  m_settingsWidget);
+
+	m_generateAppSignalsXml =
+		createBuildOptionComboBox(Db::ProjectProperty::GenerateAppSignalsXml,
+								  tr("Inherit: Inherit value from the project setting\nTrue: %1\nFalse: Do not generate data")
+									  .arg(Db::ProjectProperty::GenerateAppSignalsXmlDescription),
+								  m_settingsWidget);
+
+	m_generateAppSignalsExtXml =
+		createBuildOptionComboBox(Db::ProjectProperty::GenerateAppSignalsExtXml,
+								  tr("Inherit: Inherit value from the project setting\nTrue: %1\nFalse: Do not generate data")
+									  .arg(Db::ProjectProperty::GenerateAppSignalsExtXmlDescription),
+								  m_settingsWidget);
+
+	m_generateExtraDebugInfo =
+		createBuildOptionComboBox(Db::ProjectProperty::GenerateExtraDebugInfo,
+								  tr("Inherit: Inherit value from the project setting\nTrue: %1\nFalse: Do not generate data")
+									  .arg(Db::ProjectProperty::GenerateExtraDebugInfo),
+								  m_settingsWidget);
+
+	QFrame* testOptionLine = new QFrame;
+	testOptionLine->setFrameShape(QFrame::HLine);
+	testOptionLine->setFrameShadow(QFrame::Sunken);
+	settingsWidgetLayout->addRow(testOptionLine);
+
+	m_runSimTestsOnBuild =
+		createBuildOptionComboBox(Db::ProjectProperty::RunSimTestsOnBuild,
+								  tr("Inherit: Inherit value from the project setting\nTrue: %1\nFalse: Do not tun tests")
+								  .arg(Db::ProjectProperty::RunSimTestsOnBuild),
+								  m_settingsWidget);
+
+	// --
+	//
 	m_settingsWidget->setLayout(settingsWidgetLayout);
 
 	// V Splitter
@@ -155,22 +229,19 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &BuildTabPage::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &BuildTabPage::projectClosed);
 
-	connect(&m_builder, &Builder::Builder::runOrderReady, &GlobalMessanger::instance(), &GlobalMessanger::runOrderReady);
-
 	connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::build);
 	connect(m_cancelButton, &QAbstractButton::clicked, this, &BuildTabPage::cancel);
 
-	connect(&m_builder, &Builder::Builder::started, this, &BuildTabPage::buildWasStarted);
-	connect(&m_builder, &Builder::Builder::finished, this, &BuildTabPage::buildWasFinished);
+	connect(m_builder.get(), &Builder::Builder::started, this, &BuildTabPage::buildWasStarted);
+	connect(m_builder.get(), &Builder::Builder::finished, this, &BuildTabPage::buildWasFinished);
 
-	connect(&m_builder, &Builder::Builder::started, this, &BuildTabPage::buildStarted);
-	connect(&m_builder, &Builder::Builder::finished, this, &BuildTabPage::buildFinished);
+	connect(m_builder.get(), &Builder::Builder::started, this, &BuildTabPage::buildStarted);
+	connect(m_builder.get(), &Builder::Builder::finished, this, &BuildTabPage::buildFinished);
 
-	connect(m_warningsLevelComboBox , static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-			[](int index)
-			{
-				theSettings.setBuildWarningLevel(index);
-			});
+	connect(m_warningsLevelComboBox,
+			static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			this,
+			&BuildTabPage::warningsLevelChanged);
 
 	connect(m_prevIssueButton, &QPushButton::clicked, this, &BuildTabPage::prevIssue);
 	connect(m_nextIssueButton, &QPushButton::clicked, this, &BuildTabPage::nextIssue);
@@ -180,9 +251,11 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// Output Log
 	//
-	m_logTimerId = startTimer(10);
+	m_logTimerId = startTimer(20);
 
-	m_builder.log().setHtmlFont("Verdana");
+	m_builder->log().setHtmlFont("Verdana");
+
+	m_messages.reserve(1024 * 10);
 
 	// Evidently, project is not opened yet
 	//
@@ -199,7 +272,7 @@ BuildTabPage::~BuildTabPage()
 
 bool BuildTabPage::isBuildRunning() const
 {
-	return m_builder.isRunning();
+	return m_builder->isRunning();
 }
 
 const std::map<QUuid, OutputMessageLevel>* BuildTabPage::itemsIssues() const
@@ -209,18 +282,18 @@ const std::map<QUuid, OutputMessageLevel>* BuildTabPage::itemsIssues() const
 
 void BuildTabPage::cancelBuild()
 {
-	if (m_builder.isRunning() == true)
+	if (m_builder->isRunning() == true)
 	{
-		m_builder.stop();
+		m_builder->stop();
 
-		// wait for 20 seconds while bild stops
+		// wait for 20 seconds while build stops
 		//
-		for (int i = 0; i < 20000 && m_builder.isRunning() == true; i++)
+		for (int i = 0; i < 20000 && m_builder->isRunning() == true; i++)
 		{
 			QThread::msleep(10);
 		}
 
-		if (m_builder.isRunning() == true)
+		if (m_builder->isRunning() == true)
 		{
 			qDebug() << "WARNING: Exit while the build thread is still running!";
 		}
@@ -229,7 +302,7 @@ void BuildTabPage::cancelBuild()
 
 int BuildTabPage::progress() const
 {
-	return m_builder.progress();
+	return m_builder->progress();
 }
 
 void BuildTabPage::CreateActions()
@@ -259,57 +332,16 @@ void BuildTabPage::closeEvent(QCloseEvent* e)
 
 void BuildTabPage::timerEvent(QTimerEvent* event)
 {
-	if (event->timerId() == m_logTimerId &&
-		m_builder.log().isEmpty() == false &&
-		m_outputWidget != nullptr)
+	if (event->timerId() == m_logTimerId && m_builder->log().isEmpty() == false && m_outputWidget != nullptr)
 	{
-		WarningShowLevel warningShowLevel = static_cast<WarningShowLevel>(theSettings.buildWarningLevel());
+		thread_local std::vector<OutputLogItem> messages;
+		messages.clear();
 
-		std::vector<OutputLogItem> messages;
-		messages.reserve(20);
+		m_builder->log().popMessages(&messages, 40);
 
-		if (m_builder.log().isEmpty() == false)
-		{
-			m_builder.log().popMessages(&messages, 40);
-		}
+		std::copy(messages.begin(), messages.end(), std::back_inserter(m_messages));
 
-		QString outputMessagesBuffer;
-		outputMessagesBuffer.reserve(128000);
-
-		for (size_t i = 0; i < messages.size(); i++)
-		{
-			const OutputLogItem& m = messages[i];
-
-			if (warningShowLevel == WarningShowLevel::HideAll &&
-				m.isWarning() == true)
-			{
-				continue;
-			}
-
-			if (warningShowLevel == WarningShowLevel::Important &&
-				(m.isWarning1() == true || m.isWarning2()))
-			{
-				continue;
-			}
-
-			if (warningShowLevel == WarningShowLevel::Middle &&
-				m.isWarning2())
-			{
-				continue;
-			}
-
-			outputMessagesBuffer.append(m.toHtml());
-
-			if (i != messages.size() - 1)
-			{
-				outputMessagesBuffer += QLatin1String("<br>");
-			}
-		}
-
-		if (outputMessagesBuffer.isEmpty() == false)
-		{
-			m_outputWidget->append(outputMessagesBuffer);
-		}
+		appendMessagesToOutputLog(messages);
 
 		return;
 	}
@@ -341,7 +373,32 @@ void BuildTabPage::projectOpened()
 		m_buildLabel[1]->setText(QString());
 	}
 
+	// Set Build options
+	//
+	{
+		auto setBuildOption = [this](QComboBox* cb, QString property)
+		{
+			QString strValue;
+			db()->getUserProperty(property, &strValue, E::valueToString(E::BuildOptionValue::Inherit), this);
+
+			int index = static_cast<int>(E::stringToValue<E::BuildOptionValue>(strValue).first);
+
+			cb->blockSignals(true);
+			cb->setCurrentIndex(index);
+			cb->blockSignals(false);
+		};
+
+		setBuildOption(m_generateAppLogicDrawings, Db::ProjectProperty::GenerateAppLogicDrawings);
+		setBuildOption(m_generateAppSignalsXml, Db::ProjectProperty::GenerateAppSignalsXml);
+		setBuildOption(m_generateAppSignalsExtXml, Db::ProjectProperty::GenerateAppSignalsExtXml);
+		setBuildOption(m_generateExtraDebugInfo, Db::ProjectProperty::GenerateExtraDebugInfo);
+		setBuildOption(m_runSimTestsOnBuild, Db::ProjectProperty::RunSimTestsOnBuild);
+	}
+
+	// --
+	//
 	this->setEnabled(true);
+
 	return;
 }
 
@@ -354,6 +411,7 @@ void BuildTabPage::projectClosed()
 
 	m_findTextEdit->clear();
 	m_outputWidget->clear();
+	m_messages.clear();
 
 	this->setEnabled(false);
 	return;
@@ -362,47 +420,55 @@ void BuildTabPage::projectClosed()
 void BuildTabPage::build()
 {
 	m_outputWidget->clear();
+	m_messages.clear();
 
 	// --
 	//
+	Builder::BuildOptions buildOptions;
+
+	buildOptions.generateAppLogicDrawings = static_cast<E::BuildOptionValue>(m_generateAppLogicDrawings->currentData().toInt());
+	buildOptions.generateAppSignalsXml = static_cast<E::BuildOptionValue>(m_generateAppSignalsXml->currentData().toInt());
+	buildOptions.generateAppSignalsExtXml = static_cast<E::BuildOptionValue>(m_generateAppSignalsExtXml->currentData().toInt());
+	buildOptions.generateExtraDebugInfo = static_cast<E::BuildOptionValue>(m_generateExtraDebugInfo->currentData().toInt());
+	buildOptions.runSimTestsOnBuild = static_cast<E::BuildOptionValue>(m_runSimTestsOnBuild->currentData().toInt());
+
 	GlobalMessanger::instance().fireBuildStarted();
 
-	m_builder.start(
-		db()->host(),
-		db()->port(),
-		db()->serverUsername(),
-		db()->serverPassword(),
-		db()->currentProject().projectName(),
-		db()->currentUser().username(),
-		db()->currentUser().password(),
-		theSettings.buildOutputPath(),
-		theSettings.isExpertMode());
+	m_builder->start(db()->host(),
+					 db()->port(),
+					 db()->serverUsername(),
+					 db()->serverPassword(),
+					 db()->currentProject().projectName(),
+					 db()->currentUser().username(),
+					 db()->currentUser().password(),
+					 theSettings.buildOutputPath(),
+					 theSettings.isExpertMode(),
+					 buildOptions);
 
 	return;
 }
 
 void BuildTabPage::cancel()
 {
-	m_builder.stop();
+	m_builder->stop();
 }
 
 void BuildTabPage::buildWasStarted()
 {
-	// This is required for showng progress indicator on task bar button
-//#ifdef Q_OS_WIN32
-//	m_taskbarButton->setWindow(windowHandle());
-//#endif
+	// This is required for showing progress indicator on task bar button
+	// #ifdef Q_OS_WIN32
+	//	m_taskbarButton->setWindow(windowHandle());
+	// #endif
 
-//	QWinTaskbarButton* button = new QWinTaskbarButton(this);
-//	button->setWindow(windowHandle());
-//	QWinTaskbarProgress* progress = button->progress();
+	//	QWinTaskbarButton* button = new QWinTaskbarButton(this);
+	//	button->setWindow(windowHandle());
+	//	QWinTaskbarProgress* progress = button->progress();
 
-//	progress->setRange(0, 100);
-//	progress->show();
-//	progress->setValue(50);
+	//	progress->setRange(0, 100);
+	//	progress->show();
+	//	progress->setValue(50);
 
 	GlobalMessanger::instance().clearBuildSchemaIssues();
-	GlobalMessanger::instance().clearSchemaItemRunOrder();
 
 	m_buildButton->setEnabled(false);
 	m_cancelButton->setEnabled(true);
@@ -410,9 +476,9 @@ void BuildTabPage::buildWasStarted()
 
 void BuildTabPage::buildWasFinished(int errorCount)
 {
-//	QWinTaskbarButton* button = new QWinTaskbarButton(this);
-//	QWinTaskbarProgress* progress = button->progress();
-//	progress->hide();
+	//	QWinTaskbarButton* button = new QWinTaskbarButton(this);
+	//	QWinTaskbarProgress* progress = button->progress();
+	//	progress->hide();
 
 	m_buildButton->setEnabled(true);
 	m_cancelButton->setEnabled(false);
@@ -446,32 +512,22 @@ void BuildTabPage::buildWasFinished(int errorCount)
 	return;
 }
 
-//void BuildTabPage::newLogItem(OutputLogItem logItem)
-//{
-//	WarningShowLevel warningShowLevel = static_cast<WarningShowLevel>(theSettings.buildWarningLevel());
+void BuildTabPage::warningsLevelChanged(int index)
+{
+	theSettings.setBuildWarningLevel(index);
 
-//	if (warningShowLevel == WarningShowLevel::HideAll &&
-//		logItem.isWarning() == true)
-//	{
-//		return;
-//	}
+	// Refill the output window
+	//
+	QTextCursor m_lastNavCursor;
+	m_lastNavIsPrevIssue = false;
+	m_lastNavIsNextIssue = false;
 
-//	if (warningShowLevel == WarningShowLevel::Important &&
-//		(logItem.isWarning1() == true || logItem.isWarning2() == true))
-//	{
-//		return;
-//	}
+	m_outputWidget->clear();
 
-//	if (warningShowLevel == WarningShowLevel::Middle && logItem.isWarning2() == true)
-//	{
-//		return;
-//	}
+	appendMessagesToOutputLog(m_messages);
 
-//	QString s = logItem.toHtml();
-//	m_outputWidget->append(s);
-
-//	return;
-//}
+	return;
+}
 
 void BuildTabPage::prevIssue()
 {
@@ -481,8 +537,7 @@ void BuildTabPage::prevIssue()
 
 	//  --
 	//
-	if ((m_lastNavIsNextIssue == true || m_lastNavIsPrevIssue == true) &&
-		m_outputWidget->textCursor() == m_lastNavCursor)
+	if ((m_lastNavIsNextIssue == true || m_lastNavIsPrevIssue == true) && m_outputWidget->textCursor() == m_lastNavCursor)
 	{
 		m_lastNavCursor.movePosition(QTextCursor::StartOfLine);
 		m_outputWidget->setTextCursor(m_lastNavCursor);
@@ -512,7 +567,7 @@ void BuildTabPage::prevIssue()
 		textCursor.movePosition(QTextCursor::PreviousCharacter);
 		m_outputWidget->setTextCursor(textCursor);
 
-		// Hightlight the line
+		// Highlight the line
 		//
 		QTextEdit::ExtraSelection highlight;
 		highlight.cursor = m_outputWidget->textCursor();
@@ -538,12 +593,9 @@ void BuildTabPage::nextIssue()
 {
 	assert(m_outputWidget);
 
-	QString regExpVal("\\b(ERR|WRN)\\b");
-
 	//  --
 	//
-	if (m_lastNavIsPrevIssue == true &&
-		m_outputWidget->textCursor() == m_lastNavCursor)
+	if (m_lastNavIsPrevIssue == true && m_outputWidget->textCursor() == m_lastNavCursor)
 	{
 		m_lastNavCursor.movePosition(QTextCursor::EndOfLine);
 		m_outputWidget->setTextCursor(m_lastNavCursor);
@@ -551,7 +603,7 @@ void BuildTabPage::nextIssue()
 
 	// Find Issue
 	//
-	QRegularExpression rx(regExpVal);
+	thread_local const QRegularExpression rx{"\\b(ERR|WRN)\\b"};
 	bool found = m_outputWidget->find(rx);
 
 	if (found == false)
@@ -573,7 +625,7 @@ void BuildTabPage::nextIssue()
 		textCursor.clearSelection();
 		m_outputWidget->setTextCursor(textCursor);
 
-		// Hightlight the line
+		// Highlight the line
 		//
 		QTextEdit::ExtraSelection highlight;
 		highlight.cursor = m_outputWidget->textCursor();
@@ -631,7 +683,7 @@ void BuildTabPage::search()
 
 	if (found == false)
 	{
-		// Try to find one more time from the documnet start
+		// Try to find one more time from the document start
 		//
 		QTextCursor textCursor = m_outputWidget->textCursor();
 		textCursor.movePosition(QTextCursor::Start);
@@ -640,10 +692,10 @@ void BuildTabPage::search()
 		found = m_outputWidget->find(searchText);
 	}
 
-//	if (found == true)
-//	{
-//		m_outputWidget->setFocus();
-//	}
+	//	if (found == true)
+	//	{
+	//		m_outputWidget->setFocus();
+	//	}
 
 	return;
 }
@@ -660,9 +712,8 @@ void BuildTabPage::getProjectBuildPath(QString* buildCurrentPath, QString* build
 	buildCurrentPath->clear();
 	buildLastPath->clear();
 
-	QString buildBasePath = QDir::fromNativeSeparators(QStringLiteral("%1/%2")
-			.arg(theSettings.buildOutputPath())
-			.arg(db()->currentProject().projectName()));
+	QString buildBasePath =
+		QDir::fromNativeSeparators(QStringLiteral("%1/%2").arg(theSettings.buildOutputPath()).arg(db()->currentProject().projectName()));
 
 	// Current build path (/build)
 	//
@@ -682,4 +733,47 @@ void BuildTabPage::getProjectBuildPath(QString* buildCurrentPath, QString* build
 	}
 
 	return;
+}
+
+void BuildTabPage::appendMessagesToOutputLog(const std::vector<OutputLogItem>& messages)
+{
+	WarningShowLevel warningShowLevel = static_cast<WarningShowLevel>(theSettings.buildWarningLevel());
+
+	QString outputMessagesBuffer;
+	outputMessagesBuffer.reserve(64000);
+
+	auto filter = [warningShowLevel](const OutputLogItem& m)
+	{
+		if (warningShowLevel == WarningShowLevel::HideAll && m.isWarning() == true)
+		{
+			return false;
+		}
+
+		if (warningShowLevel == WarningShowLevel::Important && (m.isWarning1() == true || m.isWarning2()))
+		{
+			return false;
+		}
+
+		if (warningShowLevel == WarningShowLevel::Middle && m.isWarning2())
+		{
+			return false;
+		}
+
+		return true;
+	};
+
+	for (const OutputLogItem& m : messages | std::views::filter(filter))
+	{
+		outputMessagesBuffer.append(m.toHtml());
+
+		if (&m != &messages.back()) // It is not the last message.
+		{
+			outputMessagesBuffer += QLatin1String("<br>");
+		}
+	}
+
+	if (outputMessagesBuffer.isEmpty() == false)
+	{
+		m_outputWidget->append(outputMessagesBuffer);
+	}
 }

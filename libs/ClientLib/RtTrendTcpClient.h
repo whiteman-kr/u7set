@@ -2,9 +2,10 @@
 
 #include <TrendView/TrendSignalState.h>
 
-#include "../lib/ISignalDataServer.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
+
+#include <ClientLib/ISignalDataServer.h>
 #include <ClientLib/RtTrendConnectionStatistics.h>
 
 namespace ClientLib
@@ -66,6 +67,7 @@ namespace ClientLib
 	signals:
 		void dataReady(QString sourceEquipmentId,
 					   std::shared_ptr<TrendLib::RealtimeData> data,
+					   E::RtTrendsSamplePeriod samplePeriod,
 					   TrendLib::TrendStateItem minState,
 					   TrendLib::TrendStateItem maxState);
 		void requestError(QString text);

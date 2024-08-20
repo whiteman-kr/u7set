@@ -76,6 +76,10 @@ sleep 5
 #
 ./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage
 
+# Run AdsBridgeTests, they are functional.
+#
+./AdsBridgeTests --config=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --profile=linux_code_coverage
+
 # Stop services after ClientTests (functional tests)
 #
 StopServices || true
@@ -84,6 +88,7 @@ StopServices || true
 #
 ./SimulatorTests
 ./MetrologyTests
+#./LicenseLibTests
 ./u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsCoverage.xml
 
 popd
@@ -97,7 +102,7 @@ TEST_OUTPUT_FILE="AppSignalLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # CommonLib
-TEST_DIR="./build/CommonLib/CMakeFiles/CommonLib.dir"
+TEST_DIR="./build/libs/CommonLib/CMakeFiles/CommonLib.dir"
 TEST_OUTPUT_FILE="CommonLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
@@ -120,6 +125,11 @@ lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTP
 TEST_DIR="./build/Test/MetrologyTests/CMakeFiles/MetrologyTests.dir"
 TEST_OUTPUT_FILE="MetrologyTests.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+# LicenseLib
+#TEST_DIR="./build/libs/LicenseLib/CMakeFiles/LicenseLib.dir"
+#TEST_OUTPUT_FILE="LicenseLib.info"
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Builder
 TEST_DIR="./build/Builder/CMakeFiles/Builder.dir"
@@ -146,6 +156,11 @@ TEST_DIR="./build/libs/ClientLib/CMakeFiles/ClientLib.dir"
 TEST_OUTPUT_FILE="ClientLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
+# AdsBridge
+TEST_DIR="./build/libs/AdsBridge/CMakeFiles/AdsBridge.dir"
+TEST_OUTPUT_FILE="AdsBridge.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
 # AppDataSrv -- Cannot collect .gcda as process is killed and not finished normally
 #TEST_DIR="./AppDataService"
 #TEST_OUTPUT_FILE="AppDataSrv.info"
@@ -169,8 +184,10 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/Builder.info \
     --add-tracefile $OUTPUT_DIR/Simulator.info \
     --add-tracefile $OUTPUT_DIR/UtilsLib.info \
-    --add-tracefile $OUTPUT_DIR/ClientLib.info
+    --add-tracefile $OUTPUT_DIR/ClientLib.info \
+    --add-tracefile $OUTPUT_DIR/AdsBridge.info
 
+#    --add-tracefile $OUTPUT_DIR/LicenseLib.info \
 #    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
 #    --add-tracefile $OUTPUT_DIR/CfgSrv.info
 

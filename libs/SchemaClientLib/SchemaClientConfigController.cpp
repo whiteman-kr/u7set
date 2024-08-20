@@ -1,5 +1,5 @@
 #include <SchemaClientLib/SchemaClientConfigController.h>
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/HostAddressPort.h>
 #include "../OnlineLib/SoftwareSettings.h"
 
 
@@ -30,6 +30,37 @@ namespace SchemaClientLib
 		if (ok == true)
 		{
 			m_schemaDetailsSet.Load(ba);
+		}
+
+		return ok;
+	}
+
+	bool SchemaClientConfigController::getAppSignalLists(const std::vector<OnlineLib::BuildFileInfo>& files)
+	{
+		bool ok = true;
+		std::list<QByteArray> listsData;
+		QByteArray ba;
+
+		for (const auto& fi : files)
+		{
+			if (fi.tag == CfgFileTag::APPSIGNALLISTS)
+			{
+				bool fileOk = getFileBlocked(fi.pathFileName, &ba, nullptr);
+				if (fileOk == true)
+				{
+					listsData.push_back(ba);
+				}
+
+				ok &= fileOk;
+			}
+		}
+
+		QWriteLocker locker(&m_appSignalListSetLock);
+		m_appSignalListSet.clear();
+
+		for (const QByteArray& data : listsData)
+		{
+			ok &= m_appSignalListSet.add(std::move(data));
 		}
 
 		return ok;
@@ -122,6 +153,12 @@ namespace SchemaClientLib
 	{
 		QReadLocker l(&m_schemaDetailsLock);
 		return m_schemaDetailsSet.trendIndicators();
+	}
+
+	AppSignalLists::AppSignalListSet SchemaClientConfigController::appSignalListSet() const 
+	{
+		QReadLocker l(&m_appSignalListSetLock);
+		return m_appSignalListSet;
 	}
 
 } // namespace ClientLib

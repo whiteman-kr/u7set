@@ -3,7 +3,7 @@
 #endif
 
 #include "MatsUsers.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 namespace OnlineLib
 {

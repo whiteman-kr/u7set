@@ -9,6 +9,11 @@ namespace ClientLib
 	class AppSignalManager;
 }
 
+namespace AppSignalLists
+{
+	class AppSignalList;
+	class AppSignalListSet;
+}
 
 namespace Ui {
 	class DialogChooseArchiveSignals;
@@ -22,15 +27,18 @@ public:
 	DialogChooseArchiveSignals(const ClientLib::AppSignalManager& signalManager,
 							   const std::vector<SoftwareEndpoint::ArchiveService>& archiveServices,
 							   const ArchiveSource& init,
+							   const AppSignalLists::AppSignalListSet& lists,
 							   QWidget* parent);
 	virtual ~DialogChooseArchiveSignals();
 
 	[[nodiscard]] ArchiveSource accpetedResult() const;
 
-protected:
+private:
 	void fillServerCombo();
+	void fillAppSignalLists();
 	void fillSignalList();
 	void filterSignals();
+
 
 	void addSignal(const ArchiveSignal& archiveSignal);
 	void removeSelectedSignal();
@@ -55,6 +63,8 @@ private slots:
 
 	void on_archiveSignals_doubleClicked(const QModelIndex &index);
 	void slot_archiveSignalsSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	
+	void listComboIndexChanged(int index);
 
 	void on_buttonBox_accepted();
 
@@ -78,6 +88,7 @@ private:
 	// --
 	//
 	ArchiveSource m_result;
+	const AppSignalLists::AppSignalListSet& m_appSignalListSet;
 
 	// Variable to restore last UI state
 	//
@@ -102,7 +113,7 @@ namespace MonitorInternal// Anonymous namespace, as this class is used just in t
 		QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 		QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
-		void filterSignals(QString server, DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter);
+		void filterSignals(QString server, DialogChooseArchiveSignals::ArchiveSignalType signalType, std::optional<AppSignalLists::AppSignalList*> appSignalList, const QString& signalIdFilter);
 
 		[[nodiscard]] ArchiveSignal signalByRow(int row) const;		// can throw std::out_of_range()
 

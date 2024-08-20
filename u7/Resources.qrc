@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/Images">
         <file>Images/AddPreset.svg</file>
+        <file>Images/AppSignalLists.svg</file>
         <file>Images/changes.png</file>
         <file>Images/checkin.png</file>
         <file>Images/ClearLog.svg</file>

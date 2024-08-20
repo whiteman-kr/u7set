@@ -9,12 +9,13 @@
 #include "SelectSchemaWidget.h"
 
 #include <SchemaClientLib/DevToolsWindow.h>
+#include <AppSignalLists/DialogSignalListEditor.h>
+#include <AppSignalLists/SignalListChecker.h>
 #include <SchemaClientLib/DialogSignalSearch.h>
 #include <SchemaClientLib/SchemaListWidget.h>
 #include <UiLib/DialogAbout.h>
 #include <VFrame30/LogController.h>
 #include <VFrame30/Schema.h>
-
 
 MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow{parent},
@@ -31,13 +32,19 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	//
 	m_translator.addLanguage("en", "English");
 	m_translator.addLanguage("uk", "Ukrainian");
+	m_translator.addLanguage("bg", "Bulgarian");
 
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/Monitor_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/SchemaClientLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TrendView_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
+	for (const QString& l : m_translator.languagesList())
+	{
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/Monitor_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/ClientLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/SchemaClientLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/TrendView_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UiLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UtilsLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/qt_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/AppSignalLists_%1.qm").arg(l));
+	}
 
 	{
 		QStringList failedTranslations;
@@ -62,6 +69,8 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	//
 	qApp->setApplicationName(MonitorAppSettings::instance().windowCaption());
 
+	
+	connect(&m_signalManager, &ClientLib::AppSignalManager::signalParamsUpdated, this, &MonitorMainWindow::slot_checkSignalLists);
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
 	connect(&m_configController, &MonitorConfigController::tuningSignalsArrived, this, &MonitorMainWindow::slot_tuningSignalsArrived);
 	connect(&m_configController, &MonitorConfigController::error, this, &MonitorMainWindow::slot_configurationError);
@@ -156,6 +165,11 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 				schemaListWidget->setDetails(m_configController.schemasDetailsSet());
 			});
 
+	
+	// Load local appSignalLists
+	//
+	loadSignalLists();
+
 	return;
 }
 
@@ -222,7 +236,7 @@ bool MonitorMainWindow::eventFilter(QObject *object, QEvent *event)
 
 void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals)
 {
-	MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);
+	MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, m_appSignalListSet, this);
 }
 
 void MonitorMainWindow::saveWindowState()
@@ -420,6 +434,11 @@ void MonitorMainWindow::createActions()
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MonitorMainWindow::exit);
 
+	m_pAppSignalListsAction = new QAction(tr("Signal List Editor..."), this);
+	m_pAppSignalListsAction->setStatusTip(tr("Edit application signal lists"));
+	m_pAppSignalListsAction->setEnabled(true);
+	connect(m_pAppSignalListsAction, &QAction::triggered, this, &MonitorMainWindow::showAppSignalListEditor);
+
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
 	m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
@@ -613,6 +632,7 @@ void MonitorMainWindow::createMenus()
 	toolsMenu->addAction(m_findSignalAction);
 
 	toolsMenu->addSeparator();
+	toolsMenu->addAction(m_pAppSignalListsAction);
 	toolsMenu->addAction(m_pSettingsAction);
 
 	// Help
@@ -739,6 +759,17 @@ void MonitorMainWindow::createStatusBar()
 	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
 
 	return;
+}
+
+void MonitorMainWindow::loadSignalLists()
+{
+	// Load local lists from file
+	//
+	QString errorMessage;
+	if (m_appSignalListSet.load(&errorMessage) == false)
+	{
+		m_LogFile.writeError(errorMessage);
+	}
 }
 
 MonitorCentralWidget& MonitorMainWindow::monitorCentralWidget()
@@ -908,6 +939,11 @@ void MonitorMainWindow::schemaTreeListToggled(bool checked)
 	QSettings().setValue("m_schemaListAction.checked", checked);
 
 	return;
+}
+
+void MonitorMainWindow::showAppSignalListEditor()
+{
+	AppSignalLists::DialogSignalListEditor::showDialog(m_appSignalListSet, m_signalManager, nullptr, this);
 }
 
 void MonitorMainWindow::showLog()
@@ -1136,7 +1172,7 @@ void MonitorMainWindow::slot_archive()
 	if (archiveWindowToActivate.isEmpty() == true)
 	{
 		std::vector<AppSignalParam> appSignals;
-		MonitorArchive::startNewWidget(m_signalManager, &m_configController, appSignals, this);
+		MonitorArchive::startNewWidget(m_signalManager, &m_configController, appSignals, m_appSignalListSet, this);
 	}
 	else
 	{
@@ -1216,7 +1252,7 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 		return;
 	}
 
-	MonitorArchive::requestArchiveWithNewWidget(m_signalManager, &configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
+	MonitorArchive::requestArchiveWithNewWidget(m_signalManager, &configController(), appSignals, m_appSignalListSet, startTime, endTime, static_cast<E::TimeType>(timeType), this);
 	return;
 }
 
@@ -1285,7 +1321,7 @@ void MonitorMainWindow::slot_trends()
 	if (trendToActivate == nullptr)
 	{
 		std::vector<AppSignalParam> appSignals;
-		MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, this);
+		MonitorTrends::startTrendApp(m_signalManager, m_configController, appSignals, m_appSignalListSet, this);
 	}
 	else
 	{
@@ -1297,9 +1333,8 @@ void MonitorMainWindow::slot_trends()
 
 void MonitorMainWindow::slot_signalSnapshot()
 {
-	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(&m_configController,
-																			   &m_signalManager,
-																			   &m_monitorCentralWidget);
+	MonitorDialogSignalSnapshot* d =
+		MonitorDialogSignalSnapshot::createDialog(&m_configController, &m_signalManager, &m_appSignalListSet, &m_monitorCentralWidget);
 	d->show();
 
 	return;
@@ -1307,10 +1342,8 @@ void MonitorMainWindow::slot_signalSnapshot()
 
 void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 {
-	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(
-										 &configController(),
-										 &m_signalManager,
-										 &m_monitorCentralWidget);
+	MonitorDialogSignalSnapshot* d =
+		MonitorDialogSignalSnapshot::createDialog(&configController(), &m_signalManager, &m_appSignalListSet, &m_monitorCentralWidget);
 
 	std::vector<AppSignalParam> specialSignals;
 
@@ -1372,9 +1405,7 @@ void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 
 void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
 {
-	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
-													   &m_signalManager,
-													   &m_monitorCentralWidget);
+	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(), &m_signalManager, &m_appSignalListSet, &m_monitorCentralWidget);
 
 	d->resetSignalsType();
 	d->setSignalsMask(masks);
@@ -1385,9 +1416,7 @@ void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
 
 void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
 {
-	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
-													   &m_signalManager,
-													   &m_monitorCentralWidget);
+	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(), &m_signalManager, &m_appSignalListSet, &m_monitorCentralWidget);
 
 	d->resetSignalsType();
 	d->setSignalsMask({});
@@ -1470,6 +1499,12 @@ void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configur
 										 false /*loginPerOperation*/,
 										 configuration.tuningSessionTimeout,
 										 m_configController.configuration().matsUsers.users());
+
+	// Update AppSignalLists: remove all lists with Ide tag and add loaded ones
+	//
+	m_appSignalListSet.remove(AppSignalLists::AppSignalList::tagIde);
+	m_appSignalListSet.add(m_configController.appSignalListSet());
+	m_appSignalListSet.fireUpdatePerformed();
 
 	showTuningLoginControls();
 
@@ -1658,6 +1693,11 @@ void MonitorMainWindow::slot_loggedOut()
 	m_loginUserTimeoutAction->setEnabled(false);
 }
 
+void MonitorMainWindow::slot_checkSignalLists() 
+{
+	AppSignalLists::AppSignalListSetChecker::checkForDanglingItems(m_signalManager.signalHashes(), m_appSignalListSet, this, &m_LogFile);
+}
+
 void MonitorMainWindow::slot_tuningSignalsArrived(QByteArray data)
 {
 	if (m_tuningSignalManager.load(data) == false)
@@ -1722,6 +1762,16 @@ const ITuningAuthorization& MonitorMainWindow::tuningAuthorization() const
 	return m_tuningUserManager;
 }
 
+MonitorAppSignalListSet& MonitorMainWindow::appSignalListSet() 
+{
+	return m_appSignalListSet;
+}
+
+const MonitorAppSignalListSet& MonitorMainWindow::appSignalListSet() const 
+{
+	return m_appSignalListSet;
+}
+	
 const ClientLib::TuningUserManager& MonitorMainWindow::userManager() const
 {
 	return m_tuningUserManager;
@@ -1922,7 +1972,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 
 		if (appSignals.empty() == false)
 		{
-			MonitorArchive::startNewWidget(mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow);
+			MonitorArchive::startNewWidget(mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow->appSignalListSet(), mainWindow);
 		}
 	}
 

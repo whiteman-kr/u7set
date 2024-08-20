@@ -39,17 +39,23 @@ RUN powershell -Command \
     Expand-Archive -Path git.zip -DestinationPath c:\ ; \
     Remove-Item git.zip -Force
 
-COPY "INSTALL/6.3.2.zip" .
+COPY "INSTALL/6.5.3.zip" .
 RUN powershell -Command \
     $ErrorActionPreference = 'Stop'; \
-    Expand-Archive -Path 6.3.2.zip -DestinationPath c:\Qt ; \
-    Remove-Item 6.3.2.zip -Force
+    Expand-Archive -Path 6.5.3.zip -DestinationPath c:\Qt ; \
+    Remove-Item 6.5.3.zip -Force
 
-COPY "INSTALL/doxygen-1.9.5.windows.x64.bin.zip" .
+COPY "INSTALL/doxygen-1.11.0.windows.x64.bin.zip" .
 RUN powershell -Command \
     $ErrorActionPreference = 'Stop'; \
-    Expand-Archive -Path doxygen-1.9.5.windows.x64.bin.zip -DestinationPath c:\Doxygen ; \
-    Remove-Item doxygen-1.9.5.windows.x64.bin.zip -Force
+    Expand-Archive -Path doxygen-1.11.0.windows.x64.bin.zip -DestinationPath c:\Doxygen ; \
+    Remove-Item doxygen-1.11.0.windows.x64.bin.zip -Force
+
+COPY "INSTALL/windows_10_cmake_Release_Graphviz-11.0.0-win64.zip" .
+RUN powershell -Command \
+    $ErrorActionPreference = 'Stop'; \
+    Expand-Archive -Path windows_10_cmake_Release_Graphviz-11.0.0-win64.zip -DestinationPath c:\Graphviz ; \
+    Remove-Item windows_10_cmake_Release_Graphviz-11.0.0-win64.zip -Force
 
 COPY "INSTALL/TortoiseSVN.zip" .
 RUN powershell -Command \
@@ -72,12 +78,16 @@ RUN powershell -Command \
 RUN echo 192.168.14.242 delo >> "C:\Windows\System32\drivers\etc\hosts"
 
 WORKDIR C:/libpq_my_build
-COPY "INSTALL/libpq.dll" . 
+COPY "INSTALL/libpq.dll" .
 
-RUN setx /M PATH "C:\Qt\6.3.2\msvc2019_64\bin;%PATH%"
+WORKDIR C:/ftdi
+COPY "INSTALL/CDM-v2.12.36.4-WHQL-Certified.zip" .
+
+RUN setx /M PATH "C:\Qt\6.5.3\msvc2019_64\bin;%PATH%"
 RUN setx /M PATH "C:\Qt\Tools\QtCreator\bin\jom;%PATH%"
 RUN setx /M PATH "C:\Qt\Tools\QtInstallerFramework\4.5\bin;%PATH%"
 RUN setx /M PATH "C:\Doxygen;%PATH%"
+RUN setx /M PATH "C:\graphviz\Graphviz-11.0.0-win64\bin;%PATH%"
 RUN setx /M PATH "C:\TortoiseSVN\bin;%PATH%"
 RUN setx /M PATH "C:\git\bin;%PATH%"
 RUN setx /M SIGN_PASSWORD "Mkp1DPcfsTKI"

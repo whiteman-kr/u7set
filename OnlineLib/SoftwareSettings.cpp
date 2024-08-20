@@ -356,6 +356,9 @@ std::shared_ptr<SoftwareSettings> SoftwareSettingsSet::createAppropriateSettings
 	case E::SoftwareType::Diagnostics:
 		return std::make_shared<DiagnosticsSettings>();
 
+	case E::SoftwareType::AdsBridge:
+		return std::make_shared<AdsBridgeSettings>();
+
 	case E::SoftwareType::ServiceControlManager:
 	case E::SoftwareType::Unknown:
 	case E::SoftwareType::BaseService:
@@ -1437,6 +1440,10 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 	//
 	xml.writeStringElement(EquipmentPropNames::START_SCHEMA_ID, startSchemaId);
 	xml.writeStringElement(EquipmentPropNames::SCHEMA_TAGS, schemaTags);
+		
+	xml.writeStringElement(EquipmentPropNames::APP_SIGNAL_LIST_IDS, appSignalListIDs.join(Separator::SEMICOLON));
+	xml.writeStringElement(EquipmentPropNames::APP_SIGNAL_LIST_MASKS, appSignalListMasks.join(Separator::SEMICOLON));
+	xml.writeStringElement(EquipmentPropNames::APP_SIGNAL_LIST_TAGS, appSignalListTags.join(Separator::SEMICOLON));
 
 	// AppDataServices
 	//
@@ -1565,6 +1572,22 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 			continue;
 		}
 
+		if (xml.name() == EquipmentPropNames::APP_SIGNAL_LIST_IDS)
+		{
+			appSignalListIDs = xml.elementText().split(Separator::SEMICOLON);
+			continue;
+		}
+		if (xml.name() == EquipmentPropNames::APP_SIGNAL_LIST_MASKS)
+		{
+			appSignalListMasks = xml.elementText().split(Separator::SEMICOLON);
+			continue;
+		}
+		if (xml.name() == EquipmentPropNames::APP_SIGNAL_LIST_TAGS)
+		{
+			appSignalListTags = xml.elementText().split(Separator::SEMICOLON);
+			continue;
+		}
+
 		if (xml.name() == XmlElement::APP_DATA_SERVICE)
 		{
 			SoftwareEndpoint::AppDataService ads;
@@ -1680,6 +1703,99 @@ QStringList MonitorSettings::getUsersAccounts() const
 void MonitorSettings::clear()
 {
 	*this = MonitorSettings{};
+}
+
+// -------------------------------------------------------------------------------------
+//
+// AdsBridgeSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+bool AdsBridgeSettings::writeToXml(XmlWriteHelper& xml) const
+{
+	writeStartSettings(xml);
+
+	// AppDataServices
+	//
+	for (const SoftwareEndpoint::AppDataService& ads : appDataServices)
+	{
+		xml.writeStartElement(XmlElement::APP_DATA_SERVICE);
+
+		xml.writeStringAttribute(EquipmentPropNames::EQUIPMENT_ID, ads.equipmentId);
+
+		xml.writeStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, ads.address.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, ads.address.port());
+
+		xml.writeStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, ads.realtimeAddress.addressStr());
+		xml.writeIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, ads.realtimeAddress.port());
+
+		xml.writeEndElement(); // </AppDataService>
+	}
+
+	// --
+	//
+	writeEndSettings(xml); // </Settings>
+
+	return true;
+}
+
+bool AdsBridgeSettings::readFromXml(XmlReadHelper& xml)
+{
+	clear();
+
+	bool result = true;
+
+	result = startSettingsReading(xml);
+
+	RETURN_IF_FALSE(result);
+
+	while (xml.readNextStartElement() == true)
+	{
+		if (xml.name() == XmlElement::APP_DATA_SERVICE)
+		{
+			SoftwareEndpoint::AppDataService ads;
+			QString clientIp;
+			int clientPort = 0;
+			QString rtIp;
+			int rtPort = 0;
+
+			result &= xml.readStringAttribute(EquipmentPropNames::EQUIPMENT_ID, &ads.equipmentId);
+			result &= xml.readStringAttribute(EquipmentPropNames::CLIENT_REQUEST_IP, &clientIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::CLIENT_REQUEST_PORT, &clientPort);
+			result &= xml.readStringAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_IP, &rtIp);
+			result &= xml.readIntAttribute(EquipmentPropNames::RT_TRENDS_REQUEST_PORT, &rtPort);
+
+			ads.address.setAddressPort(clientIp, clientPort);
+			ads.realtimeAddress.setAddressPort(rtIp, rtPort);
+
+			appDataServices.push_back(ads);
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		// Unknown element
+		//
+		qDebug() << "AdsBridgeSettings::readFromXml UnknownElement " << xml.name();
+		xml.skipCurrentElement();
+	}
+
+	SoftwareSettings::setShortId<SoftwareEndpoint::AppDataService>(&appDataServices);
+
+	result &= (appDataServices.empty() == false);
+
+	return result;
+}
+
+bool AdsBridgeSettings::readFromXml(const QByteArray& xml)
+{
+	XmlReadHelper helper{xml};
+	return readFromXml(helper);
+}
+
+void AdsBridgeSettings::clear()
+{
+	*this = AdsBridgeSettings{};
 }
 
 // -------------------------------------------------------------------------------------
@@ -1935,17 +2051,21 @@ bool TuningClientSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeStartElement(XmlElement::APPEARANCE);
 
-	xml.writeBoolAttribute(EquipmentPropNames::AUTO_APPLAY, autoApply);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SIGNALS, showSignals);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, showSchemas);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, showSchemasList);
 	xml.writeBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, showSchemasTabs);
 	xml.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, static_cast<int>(statusFlagFunction));
+	xml.writeIntAttribute(EquipmentPropNames::APPLY_MODE, static_cast<int>(applyMode));
 
 	xml.writeBoolAttribute(EquipmentPropNames::TUNING_LOGIN, tuningLogin);
 	xml.writeStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, tuningUserAccounts);
 	xml.writeIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, tuningSessionTimeout);
 	xml.writeBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, loginPerOperation);
+
+	xml.writeStringAttribute(EquipmentPropNames::APP_SIGNAL_LIST_IDS, appSignalListIDs.join(Separator::SEMICOLON));
+	xml.writeStringAttribute(EquipmentPropNames::APP_SIGNAL_LIST_MASKS, appSignalListMasks.join(Separator::SEMICOLON));
+	xml.writeStringAttribute(EquipmentPropNames::APP_SIGNAL_LIST_TAGS, appSignalListTags.join(Separator::SEMICOLON));
 
 	xml.writeBoolAttribute(EquipmentPropNames::FILTER_BY_EQUIPMENT, filterByEquipment);
 	xml.writeBoolAttribute(EquipmentPropNames::FILTER_BY_SCHEMA, filterBySchema);
@@ -2009,15 +2129,17 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.findElement(XmlElement::APPEARANCE);
 
-	result &= xml.readBoolAttribute(EquipmentPropNames::AUTO_APPLAY, &autoApply);
 	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SIGNALS, &showSignals);
 	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS, &showSchemas);
 	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_LIST, &showSchemasList);
 	result &= xml.readBoolAttribute(EquipmentPropNames::SHOW_SCHEMAS_TABS, &showSchemasTabs);
 
+	//
+	// statusFlagFunction
+	//
+
 	int value = 0;
 	bool resultStatusFlagFunction = xml.readIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, &value);
-
 	if (resultStatusFlagFunction == true)
 	{
 		statusFlagFunction = static_cast<LmStatusFlagMode>(value);
@@ -2052,10 +2174,26 @@ bool TuningClientSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= resultStatusFlagFunction;
 
+	//
+	// applyMode
+	//
+	value = 0;
+	bool resultApplyMode = xml.readIntAttribute(EquipmentPropNames::APPLY_MODE, &value);
+	if (resultApplyMode == true)
+	{
+		applyMode = static_cast<ApplyMode>(value);
+	}
+
+	//
+
 	result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tuningLogin);
 	result &= xml.readStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts);
 	result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout);
 	result &= xml.readBoolAttribute(EquipmentPropNames::LOGIN_PER_OPERATION, &loginPerOperation);
+
+	result &= xml.readStringListAttribute(EquipmentPropNames::APP_SIGNAL_LIST_IDS, &appSignalListIDs);
+	result &= xml.readStringListAttribute(EquipmentPropNames::APP_SIGNAL_LIST_MASKS, &appSignalListMasks);
+	result &= xml.readStringListAttribute(EquipmentPropNames::APP_SIGNAL_LIST_TAGS, &appSignalListTags);
 
 	result &= xml.readBoolAttribute(EquipmentPropNames::FILTER_BY_EQUIPMENT, &filterByEquipment);
 	result &= xml.readBoolAttribute(EquipmentPropNames::FILTER_BY_SCHEMA, &filterBySchema);
@@ -2110,7 +2248,7 @@ const TuningClientSettings& TuningClientSettings::operator = (const TuningClient
 
 bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) const
 {
-	if (autoApply != src.autoApply ||
+	if (applyMode != src.applyMode ||
 			filterByEquipment != src.filterByEquipment ||
 			filterBySchema != src.filterBySchema ||
 			showSchemasList != src.showSchemasList ||
@@ -2132,7 +2270,7 @@ bool TuningClientSettings::appearanceChanged(const TuningClientSettings& src) co
 bool TuningClientSettings::connectionChanged(const TuningClientSettings& src) const
 {
 	if (tuningServices.size() != src.tuningServices.size() ||
-			autoApply != src.autoApply ||
+			applyMode != src.applyMode ||
 			statusFlagFunction != src.statusFlagFunction)
 	{
 		return true;

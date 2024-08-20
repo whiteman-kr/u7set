@@ -316,9 +316,9 @@ namespace Builder
 				continue;
 			}
 
-			ModuleLogicCompiler* moduleLogicCompiler = new ModuleLogicCompiler(*this, lm);
+			ModuleLogicCompilerShared moduleLogicCompiler = std::make_shared<ModuleLogicCompiler>(*this, lm);
 
-			m_moduleCompilers.append(moduleLogicCompiler);
+			m_context->appendModuleLogicCompiler(moduleLogicCompiler);
 
 			result &= moduleLogicCompiler->pass1();
 
@@ -330,13 +330,6 @@ namespace Builder
 		}
 
 		RETURN_IF_FALSE(result);
-
-		for(ModuleLogicCompiler* mc : m_moduleCompilers)
-		{
-			TEST_PTR_CONTINUE(mc);
-
-			mc->setModuleCompilersRef(&m_moduleCompilers);
-		}
 
 		if (m_context->m_vduModules.empty() == false)
 		{
@@ -368,7 +361,7 @@ namespace Builder
 
 		// second compiler pass
 		//
-		for(ModuleLogicCompiler* moduleLogicCompiler : m_moduleCompilers)
+		for(auto& [h, moduleLogicCompiler] : m_context->m_moduleLogicCompilers)
 		{
 			if (moduleLogicCompiler == nullptr)
 			{
@@ -545,7 +538,7 @@ namespace Builder
 			return "  ";
 		};
 
-		for(const ModuleLogicCompiler* moduleCompiler : m_moduleCompilers)
+		for(const auto [h, moduleCompiler] : m_context->m_moduleLogicCompilers)
 		{
 			const ModuleLogicCompiler::ResourcesUsageInfo& info = moduleCompiler->resourcesUsageInfo();
 
@@ -1488,7 +1481,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(m_context);
 
-		if (m_context->m_projectProperties.generateExtraDebugInfo() == false)
+		if (m_context->generateExtraDebugInfo() == false)
 		{
 			return true;
 		}
@@ -1642,12 +1635,6 @@ namespace Builder
 
 	void ApplicationLogicCompiler::clear()
 	{
-		for(ModuleLogicCompiler* mc : m_moduleCompilers)
-		{
-			delete mc;
-		}
-
-		m_moduleCompilers.clear();
 	}
 }
 

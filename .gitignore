@@ -7,6 +7,7 @@ Makefile*
 build-*/**
 build/**
 u7set-cppcheck-build-dir/**
+**/out/**
 out/**
 bin/**
 *embed.manifest
@@ -26,3 +27,4 @@ Test/AfbTests/LM1_SF00/AFB_TESTS/UALTESTS/Reports/*
 Test/AfbTests/LM1_SF00/AFB_TESTS/UALTESTS/Archive/**
 enc_temp_folder/
 *.bak
+**/__pycache__

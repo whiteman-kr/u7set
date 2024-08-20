@@ -8,7 +8,8 @@
 namespace SchemaClientLib
 {
 	DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
-											   ISignalDataServer* signalDataServer,
+											   ClientLib::ISignalDataServer* signalDataServer,
+											   AppSignalLists::AppSignalListSet* appSignalListSet,
 											   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 											   const QString& projectName,
 											   const QString& equipmentId,
@@ -20,26 +21,19 @@ namespace SchemaClientLib
 		m_widget = new SchemaClientLib::SignalSnapshotWidget{*this,
 															 appSignalManager,
 															 signalDataServer,
+															 appSignalListSet,
 															 appDataServices,
 															 projectName,
 															 equipmentId,
 															 this};
 
 		auto layout = new QVBoxLayout{this};
+		layout->setContentsMargins(0, 0, 0, 0);
 		layout->addWidget(m_widget);
 		setLayout(layout);
 
 		connect(m_widget, &SchemaClientLib::SignalSnapshotWidget::signalContextMenu, this, &DialogSignalSnapshot::signalContextMenu);
 		connect(m_widget, &SchemaClientLib::SignalSnapshotWidget::signalInfo, this, &DialogSignalSnapshot::signalInfo);
-		return;
-	}
-
-	DialogSignalSnapshot::DialogSignalSnapshot(IAppSignalManager* appSignalManager,
-											   const QString& projectName,
-											   const QString& equipmentId,
-											   QWidget* parent) :
-		DialogSignalSnapshot{appSignalManager, nullptr, {}, projectName, equipmentId, parent}
-	{
 		return;
 	}
 
@@ -111,11 +105,6 @@ namespace SchemaClientLib
 	void DialogSignalSnapshot::resetSignalsType()
 	{
 		m_widget->resetSignalsType();
-	}
-
-	void DialogSignalSnapshot::schemasUpdated()
-	{
-		return m_widget->schemasUpdated();
 	}
 
 	void DialogSignalSnapshot::signalsUpdated()

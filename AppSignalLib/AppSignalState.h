@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include "../CommonLib/Times.h"
+#include <CommonLib/Times.h>
 #include "AppSignalStateFlags.h"
 
 namespace Proto

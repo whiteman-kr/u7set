@@ -4,7 +4,7 @@
 #include <functional>
 #include <memory>
 #include <array>
-#include "../CommonLib/DebugInstCounter.h"
+#include <CommonLib/DebugInstCounter.h>
 
 class DbFileInfo;
 

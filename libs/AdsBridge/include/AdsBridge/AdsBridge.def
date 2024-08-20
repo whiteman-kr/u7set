@@ -1,0 +1,35 @@
+LIBRARY AdsBridge
+EXPORTS
+	AdsSetLogHandler
+	AdsSetLogLevel
+	AdsTestLogHandler
+
+	AdsInitPrivate
+	AdsShutdown
+
+	AdsGetSoftwareId
+
+	AdsLoadConfiguration
+	AdsSetConfiguration
+	AdsSetConfigurationProfile
+
+	AdsAddService
+	AdsConnect
+	AdsCloseConnection
+
+	AdsGetTcpConnectionCount
+	AdsGetTcpConnectionStatuses
+
+	AdsSignalParamsLoaded
+	AdsSignalStatesLoaded
+
+	AdsGetSignalCount
+	AdsGetSignalList
+	AdsGetSignalParams
+	AdsGetSignalStates
+
+	AdsCalcHash
+
+	AdsTestAdsConnectionStatus
+	AdsTestMatsAppSignalParam
+	AdsTestMatsAppSignalState

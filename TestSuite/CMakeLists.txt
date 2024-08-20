@@ -52,54 +52,9 @@ add_executable(${TARGET} WIN32
 	${TC_FORMS}
 )
 
-target_precompile_headers(${TARGET} PRIVATE
-	<algorithm>
-	<cassert>
-	<cstdint>
-	<functional>
-	<memory>
-	<vector>
-
-	<QAction>
-	<QApplication>
-	<QComboBox>
-	<QCompleter>
-	<QDockWidget>
-	<QHBoxLayout>
-	<QLabel>
-	<QLineEdit>
-	<QList>
-	<QMenu>
-	<QMenuBar>
-	<QMessageBox>
-	<QMutex>
-	<QPushButton>
-	<QRegularExpression>
-	<QSettings>
-	<QStatusBar>
-	<QTextBrowser>
-	<QTextEdit>
-	<QTime>
-	<QTimer>
-	<QToolBar>
-	<QTreeWidget>
-	<QTreeWidgetItem>
-	<QVBoxLayout>
-
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
-	
-	#<ProtoSerialization.h>
-	<Network.pb.h>
-	#<AppSignal.pb.h>
-	
-	#"../AppSignalLib/AppSignal.h"
-	"../AppSignalLib/AppSignalParam.h"
-	"../AppSignalLib/AppSignalState.h"
-	#"../AppSignalLib/TuningValue.h"
-)
+# Reuse precompiled headers from SchemaClientLib
+#
+target_precompile_headers(${TARGET} REUSE_FROM SchemaClientLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
@@ -108,7 +63,7 @@ target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generate
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Sql Qt6::Xml Qt6::Test)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib ClientLib SchemaClientLib TestSuiteLib ReportLib UiLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib OnlineLib ClientLib SchemaClientLib TestSuiteLib ReportLib UiLib)
 
 # Link Visaul Leak Detector
 #

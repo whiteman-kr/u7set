@@ -1,8 +1,10 @@
 #include "SignalSnapshotWidget.h"
 #include "../AppSignalLib/IAppSignalManager.h"
-#include "../lib/ISignalDataServer.h"
-#include <UiLib/ChooseItemsWidget.h>
+
+#include <AppSignalLists/SignalList.h>
+#include <ClientLib/ISignalDataServer.h>
 #include <SchemaClientLib/DialogSignalSnapshot.h>
+#include <UiLib/ChooseItemsWidget.h>
 #include <UiLib/ExportPrint.h>
 
 
@@ -146,7 +148,8 @@ namespace SchemaClientLib
 {
 	SignalSnapshotWidget::SignalSnapshotWidget(SchemaClientLib::ISignalSnapshotWidget& signalSnapshotVirtFuncDispatcher,
 											   IAppSignalManager* appSignalManager,
-											   ISignalDataServer* signalDataServer,
+											   ClientLib::ISignalDataServer* signalDataServer,
+											   AppSignalLists::AppSignalListSet* appSignalListSet,
 											   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices,
 											   const QString& projectName,
 											   const QString& equipmentId,
@@ -155,6 +158,8 @@ namespace SchemaClientLib
 		m_signalSnapshotVirtFuncDispatcher(signalSnapshotVirtFuncDispatcher),
 		m_appSignalManager(appSignalManager),
 		m_signalDataServer(signalDataServer),
+		m_appSignalListSet(appSignalListSet),
+		m_model(m_appSignalManager, m_signalDataServer, m_appSignalListSet, this),
 		m_appDataServices(appDataServices),
 		m_projectName(projectName),
 		m_equipmentId(equipmentId)
@@ -190,8 +195,16 @@ namespace SchemaClientLib
 		createControls();
 		createMenus();
 
-		initFiltersView();
 		initSignalsView();
+		initFiltersView();
+
+		if (m_appSignalListSet != nullptr)
+		{
+			connect(m_appSignalListSet,
+					&AppSignalLists::AppSignalListSet::updatePerformed,
+					this,
+					&SignalSnapshotWidget::fillAppSignalLists);
+		}
 
 		m_updateStateTimerId = startTimer(500);
 
@@ -203,7 +216,7 @@ namespace SchemaClientLib
 											   const QString& projectName,
 											   const QString& equipmentId,
 											   QWidget* parent) :
-		SignalSnapshotWidget(signalSnapshotVirtFuncDispatcher, appSignalManager, nullptr, {}, projectName, equipmentId, parent)
+		SignalSnapshotWidget(signalSnapshotVirtFuncDispatcher, appSignalManager, nullptr, nullptr, {}, projectName, equipmentId, parent)
 	{
 	}
 
@@ -333,8 +346,8 @@ namespace SchemaClientLib
 		//
 		m_storeType = false;
 		m_storeRole = false;
-		m_model->setSignalType(SnapshotSignalType::Any);
-		m_model->setSignalRole(SnapshotSignalRole::Any);
+		m_model.setSignalType(SnapshotSignalType::Any);
+		m_model.setSignalRole(SnapshotSignalRole::Any);
 
 		m_typeCombo->blockSignals(true);
 		m_typeCombo->setCurrentIndex(static_cast<int>(SnapshotSignalType::Any));
@@ -363,9 +376,7 @@ namespace SchemaClientLib
 		}
 
 		m_firstShow = false;
-
-		fillSchemas();
-
+		
 		fillSignals();
 
 		return;
@@ -391,41 +402,28 @@ namespace SchemaClientLib
 	{
 		if (event->timerId() == m_updateStateTimerId)
 		{
-			if (m_buttonFixate->isChecked() == false && m_model->rowCount() > 0)
+			if (m_buttonFixate->isChecked() == false && m_model.rowCount() > 0)
 			{
 				updateTableItems();
 			}
 		}
 	}
 
-	void SignalSnapshotWidget::schemasUpdated()
-	{
-		// Refresh schemas combo
-		//
-		fillSchemas();
-
-		// Refresh filtered signals list
-		//
-		schemaComboCurrentIndexChanged(0);
-
-		return;
-	}
-
 	void SignalSnapshotWidget::signalsUpdated()
 	{
-		bool emptyModel = m_model->rowCount() == 0;
+		bool emptyModel = m_model.rowCount() == 0;
 
 		// Set new signals to the model
 		//
 		if (specificSignals().empty() == true)
 		{
 			std::vector<AppSignalParam> allSignals = m_appSignalManager->signalList();
-			m_model->setSignals(allSignals);
+			m_model.setSignals(allSignals);
 		}
 		else
 		{
 			std::vector<AppSignalParam> specSignals = specificSignals();
-			m_model->setSignals(specSignals);
+			m_model.setSignals(specSignals);
 		}
 
 		// Refresh signals list
@@ -433,7 +431,7 @@ namespace SchemaClientLib
 
 		fillSignals();
 
-		if (emptyModel == true && m_model->rowCount() > 0)
+		if (emptyModel == true && m_model.rowCount() > 0)
 		{
 			m_tableView->resizeColumnsToContents();
 		}
@@ -530,7 +528,7 @@ namespace SchemaClientLib
 
 		bool found = false;
 
-		const AppSignalParam& s = m_model->signalParam(rowIndex, &found);
+		const AppSignalParam& s = m_model.signalParam(rowIndex, &found);
 
 		if (found == false)
 		{
@@ -542,17 +540,17 @@ namespace SchemaClientLib
 
 		// Check analog format options
 
-		m_formatAutoSelect->setChecked(m_model->analogFormat() == E::AnalogFormat::g_9_or_9e ||
-									   m_model->analogFormat() == E::AnalogFormat::G_9_or_9E);
-		m_formatDecimal->setChecked(m_model->analogFormat() == E::AnalogFormat::f_9);
-		m_formatExponential->setChecked(m_model->analogFormat() == E::AnalogFormat::e_9e ||
-										m_model->analogFormat() == E::AnalogFormat::E_9E);
+		m_formatAutoSelect->setChecked(m_model.analogFormat() == E::AnalogFormat::g_9_or_9e ||
+									   m_model.analogFormat() == E::AnalogFormat::G_9_or_9E);
+		m_formatDecimal->setChecked(m_model.analogFormat() == E::AnalogFormat::f_9);
+		m_formatExponential->setChecked(m_model.analogFormat() == E::AnalogFormat::e_9e ||
+										m_model.analogFormat() == E::AnalogFormat::E_9E);
 
-		m_precisionDefault->setChecked(m_model->analogPrecision() == -1);
+		m_precisionDefault->setChecked(m_model.analogPrecision() == -1);
 
 		for (int i = 0; i < static_cast<int>(m_precisionActions.size()); i++)
 		{
-			m_precisionActions[i]->setChecked(m_model->analogPrecision() == i);
+			m_precisionActions[i]->setChecked(m_model.analogPrecision() == i);
 		}
 
 		//
@@ -574,7 +572,7 @@ namespace SchemaClientLib
 
 		bool found = false;
 
-		const AppSignalParam& s = m_model->signalParam(rowIndex, &found);
+		const AppSignalParam& s = m_model.signalParam(rowIndex, &found);
 
 		if (found == false)
 		{
@@ -597,7 +595,7 @@ namespace SchemaClientLib
 	void SignalSnapshotWidget::typeComboCurrentIndexChanged(int index)
 	{
 		m_storeType = true;
-		m_model->setSignalType(static_cast<SnapshotSignalType>(index));
+		m_model.setSignalType(static_cast<SnapshotSignalType>(index));
 
 		fillSignals();
 	}
@@ -605,7 +603,7 @@ namespace SchemaClientLib
 	void SignalSnapshotWidget::roleComboCurrentIndexChanged(int index)
 	{
 		m_storeRole = true;
-		m_model->setSignalRole(static_cast<SnapshotSignalRole>(index));
+		m_model.setSignalRole(static_cast<SnapshotSignalRole>(index));
 
 		fillSignals();
 	}
@@ -627,30 +625,11 @@ namespace SchemaClientLib
 		fillSignals();
 	}
 
-	void SignalSnapshotWidget::schemaComboCurrentIndexChanged(int /*index)*/)
-	{
-		// Get current schema's App Signals
-		//
-
-		QString currentSchemaStrId;
-		QVariant data = m_schemaCombo->currentData();
-		if (data.isValid() == true)
-		{
-			currentSchemaStrId = data.toString();
-		}
-
-		std::set<QString> appSignals = schemaAppSignals(currentSchemaStrId);
-
-		m_model->setSchemaAppSignals(appSignals);
-
-		fillSignals();
-	}
-
 	void SignalSnapshotWidget::maskTypeComboCurrentIndexChanged(int index)
 	{
 		m_storeMaskData = true;
 
-		m_model->setMaskType(static_cast<SnapshotMaskType>(index));
+		m_model.setMaskType(static_cast<SnapshotMaskType>(index));
 
 		QString mask = m_editMask->text();
 		if (mask.isEmpty() == true)
@@ -663,14 +642,19 @@ namespace SchemaClientLib
 
 	void SignalSnapshotWidget::serverComboIndexChanged(int /*index*/)
 	{
-		m_model->setDataServiceId(m_serverCombo->currentData().toString());
+		m_model.setDataServiceId(m_serverCombo->currentData().toString());
+		fillSignals();
+	}
+
+	void SignalSnapshotWidget::signalListComboIndexChanged(int /*index*/) 
+	{
+		m_model.setAppSignalList(m_signalListCombo->currentData().toString());
 		fillSignals();
 	}
 
 	void SignalSnapshotWidget::buttonExportClicked()
 	{
-		Q_ASSERT(m_model);
-		if (m_model->rowCount() == 0)
+		if (m_model.rowCount() == 0)
 		{
 			QMessageBox::warning(this, qAppName(), tr("Nothing to export."));
 			return;
@@ -754,14 +738,14 @@ namespace SchemaClientLib
 		m_typeCombo->blockSignals(true);
 		m_typeCombo->setCurrentIndex(static_cast<int>(SnapshotSignalType::Any));
 		m_typeCombo->blockSignals(false);
-		m_model->setSignalType(SnapshotSignalType::Any);
+		m_model.setSignalType(SnapshotSignalType::Any);
 
 		// Role
 		//
 		m_roleCombo->blockSignals(true);
 		m_roleCombo->setCurrentIndex(static_cast<int>(SnapshotSignalRole::Any));
 		m_roleCombo->blockSignals(false);
-		m_model->setSignalRole(SnapshotSignalRole::Any);
+		m_model.setSignalRole(SnapshotSignalRole::Any);
 
 		// Mask
 		//
@@ -773,21 +757,21 @@ namespace SchemaClientLib
 		m_maskTypeCombo->setCurrentIndex(static_cast<int>(SnapshotMaskType::All));
 		m_maskTypeCombo->blockSignals(false);
 
-		m_model->setMasks({});
+		m_model.setMasks({});
 
 		// Server
 		//
 		m_serverCombo->blockSignals(true);
 		m_serverCombo->setCurrentIndex(0);
 		m_serverCombo->blockSignals(false);
-		m_model->setDataServiceId({});
+		m_model.setDataServiceId({});
 
-		// Schema
+		// List
 		//
-		m_schemaCombo->blockSignals(true);
-		m_schemaCombo->setCurrentIndex(0);
-		m_schemaCombo->blockSignals(false);
-		m_model->setSchemaAppSignals({});
+		m_signalListCombo->blockSignals(true);
+		m_signalListCombo->setCurrentIndex(0);
+		m_signalListCombo->blockSignals(false);
+		m_model.setAppSignalList({});
 
 		// Tags
 		//
@@ -795,7 +779,7 @@ namespace SchemaClientLib
 		m_editTags->clear();
 		m_editTags->blockSignals(false);
 
-		m_model->setTags({});
+		m_model.setTags({});
 
 		//
 		fillSignals();
@@ -878,21 +862,20 @@ namespace SchemaClientLib
 		row++;
 		col = 0;
 
-		// Schema
+		// Signal List
 		//
-		filterLayout->addWidget(new QLabel(tr("Schema")), row, col++);
+		filterLayout->addWidget(new QLabel(tr("List")), row, col++);
 
-		// Schema Combo
+		// Signal List Combo
 		//
-		m_schemaCombo = new QComboBox();
-		connect(m_schemaCombo,
+		m_signalListCombo = new QComboBox();
+		connect(m_signalListCombo,
 				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 				this,
-				&SignalSnapshotWidget::schemaComboCurrentIndexChanged);
-		filterLayout->addWidget(m_schemaCombo, row, col++);
-		m_schemaCombo->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-		m_schemaCombo->setMaximumWidth(QFontMetrics(m_schemaCombo->font()).horizontalAdvance(QString(60, '0')));
-
+				&SignalSnapshotWidget::signalListComboIndexChanged);
+		filterLayout->addWidget(m_signalListCombo, row, col++);
+		m_signalListCombo->setMinimumContentsLength(30);
+		
 		// Tags
 		//
 		filterLayout->addWidget(new QLabel(tr("Tags")), row, col++);
@@ -915,15 +898,6 @@ namespace SchemaClientLib
 			tagsLayout->addWidget(m_buttonChooseTags);
 
 			filterLayout->addLayout(tagsLayout, row, col++);
-		}
-
-		col++;
-
-		{
-			m_clearFilterButton = new QPushButton(tr("Clear Filter"));
-			m_clearFilterButton->setAutoDefault(false);
-			filterLayout->addWidget(m_clearFilterButton, row, col++);
-			connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalSnapshotWidget::buttonClearFilterClicked);
 		}
 
 		filterLayout->setSpacing(4);
@@ -950,6 +924,11 @@ namespace SchemaClientLib
 		exPrintLayout->addWidget(b);
 
 		exPrintLayout->addStretch();
+
+		m_clearFilterButton = new QPushButton(tr("Clear Filter"));
+		m_clearFilterButton->setAutoDefault(false);
+		exPrintLayout->addWidget(m_clearFilterButton);
+		connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalSnapshotWidget::buttonClearFilterClicked);
 
 		m_buttonFixate = new QPushButton(tr("Fixate"));
 		m_buttonFixate->setAutoDefault(false);
@@ -987,7 +966,7 @@ namespace SchemaClientLib
 				this,
 				[this]()
 				{
-					m_model->setAnalogFormat(E::AnalogFormat::g_9_or_9e);
+					m_model.setAnalogFormat(E::AnalogFormat::g_9_or_9e);
 					updateTableItems();
 				});
 		menuFormat->addAction(m_formatAutoSelect);
@@ -999,7 +978,7 @@ namespace SchemaClientLib
 				this,
 				[this]()
 				{
-					m_model->setAnalogFormat(E::AnalogFormat::f_9);
+					m_model.setAnalogFormat(E::AnalogFormat::f_9);
 					updateTableItems();
 				});
 		menuFormat->addAction(m_formatDecimal);
@@ -1011,7 +990,7 @@ namespace SchemaClientLib
 				this,
 				[this]()
 				{
-					m_model->setAnalogFormat(E::AnalogFormat::e_9e);
+					m_model.setAnalogFormat(E::AnalogFormat::e_9e);
 					updateTableItems();
 				});
 		menuFormat->addAction(m_formatExponential);
@@ -1025,7 +1004,7 @@ namespace SchemaClientLib
 				this,
 				[this]()
 				{
-					m_model->setAnalogPrecision(-1);
+					m_model.setAnalogPrecision(-1);
 					updateTableItems();
 				});
 		menuFormat->addAction(m_precisionDefault);
@@ -1039,7 +1018,7 @@ namespace SchemaClientLib
 					this,
 					[this, i]()
 					{
-						m_model->setAnalogPrecision(i);
+						m_model.setAnalogPrecision(i);
 						updateTableItems();
 					});
 			m_precisionActions << a;
@@ -1113,6 +1092,10 @@ namespace SchemaClientLib
 		}
 		m_serverCombo->blockSignals(false);
 
+		// Signal Lists setup
+		//
+		fillAppSignalLists();
+
 		// Tags setup
 		//
 		m_tagsCompleter = new QCompleter(m_storedTags, this);
@@ -1137,19 +1120,18 @@ namespace SchemaClientLib
 	{
 		// create models
 		//
-		m_model = new SignalSnapshotModel(m_appSignalManager, m_signalDataServer, this);
 
 		std::vector<AppSignalParam> allSignals = m_appSignalManager->signalList();
-		m_model->setSignals(allSignals);
+		m_model.setSignals(allSignals);
 
-		m_model->setSignalType(static_cast<SnapshotSignalType>(m_storedType));
-		m_model->setSignalRole(static_cast<SnapshotSignalRole>(m_storedRole));
-		m_model->setMaskType(static_cast<SnapshotMaskType>(m_storedMaskType));
+		m_model.setSignalType(static_cast<SnapshotSignalType>(m_storedType));
+		m_model.setSignalRole(static_cast<SnapshotSignalRole>(m_storedRole));
+		m_model.setMaskType(static_cast<SnapshotMaskType>(m_storedMaskType));
 
 		// Table view setup
 		//
 
-		m_tableView->setModel(m_model);
+		m_tableView->setModel(&m_model);
 		m_tableView->verticalHeader()->hide();
 		m_tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 		m_tableView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
@@ -1203,55 +1185,49 @@ namespace SchemaClientLib
 		}
 	}
 
-	void SignalSnapshotWidget::fillSchemas()
+	void SignalSnapshotWidget::fillAppSignalLists()
 	{
-		m_schemaCombo->blockSignals(true);
-
-		// Fill schemas
+		// Remove appSignalList
 		//
-		QString currentStrId;
-
-		QVariant data = m_schemaCombo->currentData();
-		if (data.isValid() == true)
+		if (m_model.appSignalList().isEmpty() == false) 
 		{
-			currentStrId = data.toString();
+			m_model.setAppSignalList(QString());
+			fillSignals();
 		}
 
-		m_schemaCombo->clear();
-
-		m_schemaCombo->addItem(tr("All Schemas"), "");
-
-		int selectedIndex = -1;
-
-		std::vector<VFrame30::SchemaDetails> details = schemasDetails();
-
-		for (const VFrame30::SchemaDetails& schema : details)
+		// Refresh AppSignalLists combo
+		//
+		m_signalListCombo->blockSignals(true);
+		
+		m_signalListCombo->clear();
+		m_signalListCombo->addItem(tr("Not selected"), QString());
+		
+		if (m_appSignalListSet != nullptr)
 		{
-			m_schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, schema.m_schemaId);
+			const auto lists = m_appSignalListSet->lists();
 
-			if (currentStrId == schema.m_schemaId)
+			for (const auto& list : lists)
 			{
-				selectedIndex = m_schemaCombo->count() - 1;
+				m_signalListCombo->addItem(tr("[%1] %2").arg(list->id()).arg(list->caption()), list->id());
+			}
+			if (lists.empty() == true)
+			{
+				m_signalListCombo->setEnabled(false);
 			}
 		}
-
-		if (selectedIndex != -1)
-		{
-			m_schemaCombo->setCurrentIndex(selectedIndex);
-		}
-
-		m_schemaCombo->blockSignals(false);
+		
+		m_signalListCombo->blockSignals(false);
 	}
 
 	void SignalSnapshotWidget::fillSignals()
 	{
-		bool modelWasEmpty = m_model->rowCount() == 0;
+		bool modelWasEmpty = m_model.rowCount() == 0;
 
-		m_model->fillSignals();
+		m_model.fillSignals();
 
 		m_tableView->sortByColumn(m_settings.sortColumn, m_settings.sortOrder);
 
-		if (modelWasEmpty == true && m_model->rowCount() > 0)
+		if (modelWasEmpty == true && m_model.rowCount() > 0)
 		{
 			m_tableView->resizeColumnsToContents();
 		}
@@ -1272,22 +1248,22 @@ namespace SchemaClientLib
 
 		if (to == -1)
 		{
-			to = m_model->rowCount() - 1;
+			to = m_model.rowCount() - 1;
 		}
 
 		// Update signal states
 		//
-		m_model->updateStates(from, to);
+		m_model.updateStates(from, to);
 
 		// Redraw visible table items
 		//
-		for (int col = 0; col < m_model->columnCount(); col++)
+		for (int col = 0; col < m_model.columnCount(); col++)
 		{
 			if (col >= static_cast<int>(SnapshotColumns::SystemTime))
 			{
 				for (int row = from; row <= to; row++)
 				{
-					m_tableView->update(m_model->index(row, col));
+					m_tableView->update(m_model.index(row, col));
 				}
 			}
 		}
@@ -1330,7 +1306,7 @@ namespace SchemaClientLib
 			}
 		}
 
-		m_model->setMasks(masks);
+		m_model.setMasks(masks);
 	}
 
 	void SignalSnapshotWidget::tagsChanged()
@@ -1364,6 +1340,6 @@ namespace SchemaClientLib
 			}
 		}
 
-		m_model->setTags(tags);
+		m_model.setTags(tags);
 	}
 } // namespace SchemaClientLib

@@ -32,8 +32,7 @@ struct ID_AppSignalID
 
 Q_DECLARE_METATYPE(ID_AppSignalID)
 
-typedef QHash<E::AppSignalStateFlagType, QString> AppSignalStateFlagsMap;
-
+using AppSignalStateFlagsMap = std::map<E::AppSignalStateFlagType, QString>;
 
 class AppSignal
 {
@@ -119,6 +118,10 @@ public:
 	bool isInput() const { return m_inOutType == E::SignalInOutType::Input; }
 	bool isOutput() const { return m_inOutType == E::SignalInOutType::Output; }
 	bool isInternal() const { return m_inOutType == E::SignalInOutType::Internal; }
+	bool isSwCalculated() const { return m_inOutType == E::SignalInOutType::SoftwareCalculated; }
+
+	E::SoftwareCalcFunction swCalcFunction() const;
+	void setSwCalcFunction(E::SoftwareCalcFunction func);
 
 	// Signal format
 
@@ -399,9 +402,9 @@ public:
 	void initCalculatedProperties();
 
 	bool addFlagSignalID(E::AppSignalStateFlagType flagType, const QString& appSignalID);
-	QString getFlagSignalID(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString()); }
-	QStringList getFlagSignalsIDs() const { return m_stateFlagsSignals.values(); }
-	bool hasFlagsSignals() const { return m_stateFlagsSignals.count(); }
+	QString getFlagSignalID(E::AppSignalStateFlagType flagType) const;
+	QStringList getFlagSignalsIDs() const;
+	bool hasFlagsSignals() const;
 
 	const AppSignalStateFlagsMap& stateFlagsSignals() const { return m_stateFlagsSignals; }
 
@@ -471,6 +474,7 @@ private:
 	//
 	E::SignalType m_signalType = E::SignalType::Analog;
 	E::SignalInOutType m_inOutType = E::SignalInOutType::Internal;
+	E::SoftwareCalcFunction m_swCalcFunction = E::SoftwareCalcFunction::None;
 
 	// Signal format
 	//

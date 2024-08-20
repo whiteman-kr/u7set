@@ -42,11 +42,11 @@ namespace SchemaClientLib
 
 		if (foundState == adsStates.end())
 		{
-			setWindowTitle("Application Data Source - unknown");
+			setWindowTitle(QObject::tr("Application Data Source - unknown"));
 		}
 		else
 		{
-			setWindowTitle(tr("Application Data Source - ") + foundState->state.lmequipmentid().c_str());
+			setWindowTitle(QObject::tr("Application Data Source - ") + foundState->state.lmequipmentid().c_str());
 		}
 
 		//
@@ -64,15 +64,15 @@ namespace SchemaClientLib
 		setMinimumSize(700, 600);
 
 		QStringList headerLabels;
-		headerLabels << tr("Parameter");
-		headerLabels << tr("Value");
+		headerLabels << QObject::tr("Parameter");
+		headerLabels << QObject::tr("Value");
 		headerLabels << QString();
 
 		m_treeWidget->setColumnCount(static_cast<int>(headerLabels.size()));
 		m_treeWidget->setHeaderLabels(headerLabels);
 
 		{
-			QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList() << tr("1-Source Information"));
+			QTreeWidgetItem* infoItem = new QTreeWidgetItem(QStringList() << QObject::tr("1-Source Information"));
 
 			createDataItem(infoItem, "ID");
 			createDataItem(infoItem, "EquipmentID");
@@ -97,7 +97,7 @@ namespace SchemaClientLib
 		}
 
 		{
-			QTreeWidgetItem* stateItem = new QTreeWidgetItem(QStringList() << tr("2-Source State"));
+			QTreeWidgetItem* stateItem = new QTreeWidgetItem(QStringList() << QObject::tr("2-Source State"));
 
 			createDataItem(stateItem, "Uptime");
 			createDataItem(stateItem, "LmTime");
@@ -119,7 +119,7 @@ namespace SchemaClientLib
 		}
 
 		{
-			QTreeWidgetItem* errorItem = new QTreeWidgetItem(QStringList() << tr("3-Errors"));
+			QTreeWidgetItem* errorItem = new QTreeWidgetItem(QStringList() << QObject::tr("3-Errors"));
 
 			createDataItem(errorItem, "ErrorProtocolVersion");
 			createDataItem(errorItem, "ErrorFramesQuantity");
@@ -182,7 +182,7 @@ namespace SchemaClientLib
 
 		item->setData(0, Qt::UserRole, 0);
 
-		setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(adsState->info.id())).arg(QString::number(adsState->info.id(), 16)));
+		setDataItemText("ID", QObject::tr("%1 (%2h)").arg(QString::number(adsState->info.id())).arg(QString::number(adsState->info.id(), 16)));
 		setDataItemText("EquipmentID", QString::fromStdString(adsState->info.moduleequipmentid()));
 		setDataItemText("Caption", QString::fromStdString(adsState->info.modulecaption()));
 		setDataItemNumber("DataType", adsState->info.lancontrollerinfo()[0].lancontrollertype());
@@ -195,11 +195,11 @@ namespace SchemaClientLib
 		setDataItemNumber("LmNumber", adsState->info.lmnumber());
 		setDataItemText(
 			"LmModuleType",
-			tr("%1 (%2h)").arg(QString::number(adsState->info.moduletype())).arg(QString::number(adsState->info.moduletype(), 16)));
+			QString("%1 (%2h)").arg(QString::number(adsState->info.moduletype())).arg(QString::number(adsState->info.moduletype(), 16)));
 		setDataItemText("LmAdapterID", QString::fromStdString(adsState->info.lancontrollerinfo()[0].equipmentid()));
 		setDataItemNumber("LmDataEnable", adsState->info.lancontrollerinfo()[0].appdataenable());
 		setDataItemText("RupAppDataUID",
-						tr("%1 (%2h)")
+						QString("%1 (%2h)")
 							.arg(QString::number(adsState->info.lancontrollerinfo()[0].rupappdatauid()))
 							.arg(QString::number(adsState->info.lancontrollerinfo()[0].rupappdatauid(), 16)));
 		setDataItemNumber("AcquiredSignalsCount", adsState->info.acquiredsignalscount());

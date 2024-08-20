@@ -1,5 +1,5 @@
 #pragma once
-#include "HostAddressPort.h"
+#include <CommonLib/HostAddressPort.h>
 #include "SoftwareInfo.h"
 
 namespace Tcp

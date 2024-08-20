@@ -1,7 +1,7 @@
 #ifndef TUNINGCONNECTIONSTUB_H
 #define TUNINGCONNECTIONSTUB_H
-#include "../lib/Tuning/ITuningConnection.h"
-#include "../lib/Tuning/ITuningAuthorization.h"
+#include <ClientLib/ITuningAuthorization.h>
+#include <ClientLib/ITuningConnection.h>
 
 class TuningConnectionStub : public ITuningConnection
 {

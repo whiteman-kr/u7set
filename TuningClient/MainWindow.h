@@ -4,12 +4,15 @@
 #include "SchemasWorkspace.h"
 #include "TuningConfigController.h"
 #include "LogonWorkspace.h"
+#include "TuningSignalListSet.h"
 #include "DialogTuningSources.h"
 #include <ClientLib/ClientTranslator.h>
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningUserManager.h>
 #include <ClientLib/TuningLog.h>
+#include <TuningLib/TuningUiItem.h>
 #include <SchemaClientLib/DialogTcpStatistics.h>
+#include "TuningCounters.h"
 #include "../UtilsLib/LogFile.h"
 
 namespace UiLib
@@ -42,17 +45,17 @@ private:
 	void createActions();
 	void createMenu();
 	void createStatusBar();
+	void loadLocalSignalLists();
+	void loadIdeSignalLists();
 
 private slots:
 	void slot_configurationArrived(TuningClientConfigSettings configuration);
-	void slot_projectFiltersUpdated(QByteArray data);
 	void slot_signalsUpdated(QByteArray data);
 
 	void slot_configurationError(QString error);
 
 public slots:
 	void exit();
-	void runPresetEditor();
 	void showSettings();
 	void showTuningSources();
 	void showStatistics();
@@ -61,16 +64,14 @@ public slots:
 	void showAboutQt();
 	void showAbout();
 	void showTuningUserManual();
-
-	void slot_userFiltersChanged();
+	void showAppSignalListEditor();
+	void slot_signalListsChanged();
 
 private:
 
 	virtual void keyPressEvent(QKeyEvent* event) override;
 	virtual void closeEvent(QCloseEvent *event) override;
 	virtual void timerEvent(QTimerEvent* event) override;
-
-    void checkAndRemoveFilterSignals();
 
 	void createWorkspace();
 	void deleteWorkspace();
@@ -101,12 +102,20 @@ private:
 	//
 	TuningConfigController m_configController;
 	ClientLib::TuningSignalManager m_tuningSignalManager;
-	TuningClientFilterStorage m_filterStorage;
 	ClientLib::TuningUserManager m_userManager;
 
 	// Connections
 	//
 	ClientLib::TuningConnection m_tuningConnection;
+
+	// AppSignalLists
+	//
+	TuningSignalListSet m_appSignalListSet;
+
+	// Ui
+	//
+	TuningLib::TuningUiStorage m_tuningUi;
+	TuningCountersManager m_tuningCounters;
 
 	// Workspace items
 	//
@@ -127,7 +136,7 @@ private:
 	QTabWidget* m_tabWidget = nullptr;
 
 	QAction* m_pExitAction = nullptr;
-	QAction* m_pPresetEditorAction = nullptr;
+	QAction* m_pAppSignalListsAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pTuningSourcesAction = nullptr;
 	QAction* m_pStatisticsAction = nullptr;

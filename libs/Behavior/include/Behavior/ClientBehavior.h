@@ -1,6 +1,6 @@
 #pragma once
 
-#include <PropertyObject.h>
+#include <CommonLib/PropertyObject.h>
 
 class QXmlStreamWriter;
 class QXmlStreamReader;

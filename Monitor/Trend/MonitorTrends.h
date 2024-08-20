@@ -21,6 +21,7 @@ public:
 	static bool startTrendApp(const ClientLib::AppSignalManager& signalManager,
 							  const MonitorConfigController& configController,
 							  const std::vector<AppSignalParam>& appSignals,
+							  const AppSignalLists::AppSignalListSet& appSignalListSet,
 							  QWidget* parent);
 
 	static void registerTrendWindow(MonitorTrendsWidget* window);
@@ -38,6 +39,7 @@ class MonitorTrendsWidget : public TrendLib::TrendMainWindow
 public:
 	MonitorTrendsWidget(const ClientLib::AppSignalManager& signalManager,
 						const MonitorConfigController& configController,
+						const AppSignalLists::AppSignalListSet& appSignalListSet,
 						QWidget* parent);
 	virtual ~MonitorTrendsWidget();
 
@@ -63,6 +65,7 @@ protected slots:
 
 	void slot_realtimeDataReceived(QString sourceEquipmentId,
 								   std::shared_ptr<TrendLib::RealtimeData> data,
+								   E::RtTrendsSamplePeriod samplePeriod,
 								   TrendLib::TrendStateItem minState,
 								   TrendLib::TrendStateItem maxState);
 	void slot_trendModeChanged();
@@ -77,6 +80,8 @@ private:
 
 	MonitorTrendArchiveConnections m_archiveDataProvider;
 	ClientLib::RtDataProvider m_realtimeDataProvider;
+
+	const AppSignalLists::AppSignalListSet& m_appSignalListSet;
 
 	enum  StatusBarColumns
 	{

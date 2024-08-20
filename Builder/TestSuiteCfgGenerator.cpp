@@ -2,17 +2,12 @@
 #include "../OnlineLib//SoftwareSettings.h"
 #include "Context.h"
 #include "SoftwareSettingsGetter.h"
-#include "TuningClientCfgGenerator.h"
 
 namespace Builder
 {
 
 	TestSuiteCfgGenerator::TestSuiteCfgGenerator(Context* context, Hardware::Software* software) :
 		SoftwareCfgGenerator(context, software)
-	{
-	}
-
-	TestSuiteCfgGenerator::~TestSuiteCfgGenerator()
 	{
 	}
 
@@ -31,10 +26,10 @@ namespace Builder
 	bool TestSuiteCfgGenerator::generateConfigurationStep1()
 	{
 		if (m_software == nullptr ||
-				m_software->softwareType() != E::SoftwareType::TestSuite ||
-				m_equipment == nullptr ||
-				m_cfgXml == nullptr ||
-				m_buildResultWriter == nullptr)
+			m_software->softwareType() != E::SoftwareType::TestSuite ||
+			m_equipment == nullptr ||
+			m_cfgXml == nullptr ||
+			m_buildResultWriter == nullptr)
 		{
 			Q_ASSERT(m_software && m_software->softwareType() == E::SoftwareType::TestSuite);
 			Q_ASSERT(m_equipment);
@@ -47,17 +42,18 @@ namespace Builder
 		//
 		bool result = true;
 
-		result &= initTuningSources();
-
 		std::shared_ptr<const TestSuiteSettings> settings = m_settingsSet.getSettingsDefaultProfile<TestSuiteSettings>();
 
 		TEST_PTR_LOG_RETURN_FALSE(settings, m_log);
 
 		if (settings->tuningEnabled == true)
 		{
-			// Generate tuning signals file
-			//
-			result &= writeTuningSignals();
+			QStringList tuningSources;
+			result &= createTuningEquipmentList(&tuningSources);
+
+			std::vector<AppSignal*> tuningSignals = createTuningSignalList(tuningSources, *m_signalSet);
+			
+			result &= writeTuningSignals(tuningSignals);
 
 			if (settings->login == true && settings->userAccounts.isEmpty() == true)
 			{
@@ -81,8 +77,14 @@ namespace Builder
 		return result;
 	}
 
-	bool TestSuiteCfgGenerator::initTuningSources()
+	bool TestSuiteCfgGenerator::createTuningEquipmentList(QStringList* equipmentList)
 	{
+		if (equipmentList == nullptr)
+		{
+			assert(equipmentList);
+			return false;
+		}
+
 		std::shared_ptr<const TestSuiteSettings> settings = m_settingsSet.getSettingsDefaultProfile<TestSuiteSettings>();
 
 		if (settings->tuningEnabled == false)
@@ -94,13 +96,13 @@ namespace Builder
 		{
 			// Property %1.TuningServiceID can't be empty if tuning enabled.
 			//
-			m_log-> errEQP6206(equipmentID());
+			m_log->errEQP6206(equipmentID());
 			return false;
 		}
 
 		bool result = true;
 
-		m_tuningSources.clear();
+		equipmentList->clear();
 
 		for(const SoftwareEndpoint::TuningService& tsc : settings->tuningServices)
 		{
@@ -111,6 +113,7 @@ namespace Builder
 				result = false;
 				continue;
 			}
+
 			std::shared_ptr<Hardware::Software> tuningServiceSoftware = tuningServiceObject->toSoftware();
 			if (tuningServiceSoftware == nullptr)
 			{
@@ -135,9 +138,9 @@ namespace Builder
 
 				for (const QString& ce : clientEquipmentList )
 				{
-					if (m_tuningSources.contains(ce) == false)
+					if (equipmentList->contains(ce) == false)
 					{
-						m_tuningSources.append(ce);
+						equipmentList->append(ce);
 					}
 				}
 			}
@@ -151,44 +154,6 @@ namespace Builder
 		}
 
 		return result;
-	}
-
-	bool TestSuiteCfgGenerator::writeTuningSignals()
-	{
-		if (m_tuningSources.empty() == true)
-		{
-			//Q_ASSERT(m_tuningSources.empty() == false);
-			return false;
-		}
-
-		::Proto::AppSignalSet tuningSet;
-
-		bool ok = TuningClientCfgGenerator::createTuningSignals(m_tuningSources, m_signalSet, &tuningSet);
-		if (ok == false)
-		{
-			m_log->errINT1000("Generate tuning signal set error: TestSuiteCfgGenerator::writeTuningSignals, call for TuningClientCfgGenerator::createTuningSignals");
-			return false;
-		}
-
-		// Write number of signals
-		//
-		QByteArray data;
-		data.resize(static_cast<int>(tuningSet.ByteSizeLong()));
-
-		tuningSet.SerializeToArray(data.data(), static_cast<int>(tuningSet.ByteSizeLong()));
-
-		// Write file
-		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "TuningSignals.dat", CfgFileId::TUNING_SIGNALS, "", data);
-
-		if (buildFile == nullptr)
-		{
-			m_log->errCMN0012("TuningSignals.dat");
-			return false;
-		}
-
-		ok = m_cfgXml->addLinkToFile(buildFile);
-		return ok;
 	}
 
 	bool TestSuiteCfgGenerator::writeTestScripts()
@@ -368,4 +333,3 @@ namespace Builder
 		return false;
 	}
 }
-

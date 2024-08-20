@@ -22,8 +22,6 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Network Qml Xml Svg PrintS
 qt_standard_project_setup()
 
 set (DIAGNOSTICS_SOURCES
-	../lib/ConstStrings.h
-#	../lib/ISignalDataServer.h
 #	../lib/Ui/DialogChooseTags.cpp
 #	../lib/Ui/DialogChooseTags.h
 #	../lib/Ui/DialogTcpStatistics.cpp
@@ -113,55 +111,14 @@ add_executable(${TARGET} WIN32
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_precompile_headers(${TARGET} PRIVATE
-	# C includes, must be before c++ includes
-	#
-	<cassert>
-	<cstdint>
-
-	# C++ includes
-	#
-	<algorithm>
-	<array>
-	<atomic>
-	<chrono>
-	<concepts>
-	<deque>
-	<functional>
-	<limits>
-	<list>
-	<map>
-	<memory>
-	<queue>
-	<ranges>
-	<set>
-	<type_traits>
-	<vector>
-
-	# Qt includes
-	#
-	<QtPrintSupport>
-
-	# Project includes
-	#
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
-	
-	<ProtoSerialization.h>
-	<Network.pb.h>
-	
-	#"../AppSignalLib/AppSignal.h"
-	"../AppSignalLib/AppSignalParam.h"
-	"../AppSignalLib/AppSignalState.h"
-	#"../AppSignalLib/TuningValue.h"
-)
+# Reuse precompiled headers from SchemaClientLib
+#
+target_precompile_headers(${TARGET} REUSE_FROM SchemaClientLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib HardwareLib DiagStateLib OnlineLib TrendView 
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib DiagStateLib OnlineLib TrendView 
 	VFrame30 ClientLib SchemaClientLib DiagClientLib UiLib)
 
 # Link Visaul Leak Detector

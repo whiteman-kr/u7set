@@ -21,7 +21,10 @@ qt_add_library(${TARGET} STATIC
 	./include/ClientLib/ConfigController.h
 	./include/ClientLib/IAppSignalUpdater.h
 	./include/ClientLib/IRecentAppSignals.h
+	./include/ClientLib/ISignalDataServer.h
 	./include/ClientLib/ITestObserver.h
+	./include/ClientLib/ITuningAuthorization.h
+	./include/ClientLib/ITuningConnection.h
 	./include/ClientLib/ITuningLog.h
 	./include/ClientLib/ITuningSignalUpdater.h
 	./include/ClientLib/RtDataProvider.h
@@ -107,9 +110,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
-	"../../CommonLib/PropertyObject.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
 
 	<ProtoSerialization.h>
 	<Network.pb.h>
@@ -128,7 +131,7 @@ target_compile_definitions(${TARGET} PRIVATE CLIENT_LIB_DOMAIN)
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC CommonLib Protobuf UtilsLib OnlineLib AppSignalLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib OnlineLib AppSignalLib TrendView)
 
 if (MSVC)
 	target_link_libraries(${TARGET} PUBLIC Advapi32)

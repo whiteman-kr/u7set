@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QVector>
 
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 
 class AppSignal;

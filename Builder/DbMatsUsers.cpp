@@ -1,6 +1,6 @@
 #include "DbMatsUsers.h"
 #include <DbLib/DbController.h>
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 namespace Builder
 {

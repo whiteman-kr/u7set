@@ -3,7 +3,7 @@
 
 #include <HardwareLib/Afb.h>
 
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 namespace Builder
 {

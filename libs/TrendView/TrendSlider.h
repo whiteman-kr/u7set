@@ -1,7 +1,7 @@
 #ifndef TRENDSLIDER_H
 #define TRENDSLIDER_H
 
-#include "../CommonLib/Times.h"
+#include <CommonLib/Times.h>
 #include "TrendRuler.h"
 #include <QWidget>
 

@@ -2,7 +2,8 @@
 
 #include <UiLib/CodeEditor.h>
 #include <UiLib/PropertyEditor.h>
-#include "../lib/Tuning/TuningFilterEditor.h"
+#include "TuningUiEditor.h"
+#include <TuningLib/TuningUiItem.h>
 #include "./Ui/PropertyTable.h"
 
 
@@ -183,13 +184,13 @@ private:
 };
 
 //
-// IdeTuningFiltersEditor
+// IdeTuningUiEditor
 //
-class IdeTuningFiltersEditor : public ExtWidgets::PropertyTextEditor
+class IdeTuningUiEditor : public ExtWidgets::PropertyTextEditor
 {
 public:
-	explicit IdeTuningFiltersEditor(DbController* dbController, QWidget* parent);
-    virtual ~IdeTuningFiltersEditor();
+	explicit IdeTuningUiEditor(QWidget* parent);
+    virtual ~IdeTuningUiEditor();
 
 	QString text() const override;
 	void setText(const QString& text) override;
@@ -203,13 +204,7 @@ private:
 	bool isModified() const override;
 
 private:
-    TuningFilterEditor* m_tuningFilterEditor = nullptr;
-
-	ILogFileStub logFileStub;
-    ClientLib::TuningSignalManager m_signals;
-	TuningFilterStorage m_filters;
-
-	DbController* m_dbController = nullptr;
+    TuningUiEditor* m_tuningUiEditor = nullptr;
+	TuningLib::TuningUiStorage m_storage;
 };
-
 

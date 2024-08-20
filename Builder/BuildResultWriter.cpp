@@ -1,6 +1,6 @@
 #include "BuildResultWriter.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 #include "../u7/Settings.h"
 #include "IssueLogger.h"
 #include <DbLib/DbController.h>

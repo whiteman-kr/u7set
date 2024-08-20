@@ -152,13 +152,6 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	//
 	drawBuildIssues(&drawParam, clipRect);
 
-	// Draw run order - Update: run order does not work after UFB became more complex and now they can have signals inside
-	//
-	//if (theSettings.isDebugMode() == true)
-	//{
-	//	drawRunOrder(&drawParam, clipRect);
-	//}
-
 	// Draw selection
 	//
 	if (m_selectedItems.empty() == false)
@@ -256,123 +249,6 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 				// Draw item issue
 				//
 				item->drawIssue(drawParam, issue);
-			}
-		}
-	}
-
-	return;
-}
-
-void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRect)
-{
-	if (schema()->isLogicSchema() == false &&
-		schema()->isUfbSchema() == false)
-	{
-		return;
-	}
-
-	if (drawParam == nullptr)
-	{
-		assert(drawParam != nullptr);
-		return;
-	}
-
-	// Draw items by layers which has Show flag
-	//
-	double clipX = static_cast<double>(clipRect.left());
-	double clipY = static_cast<double>(clipRect.top());
-	double clipWidth = static_cast<double>(clipRect.width());
-	double clipHeight = static_cast<double>(clipRect.height());
-
-	// Find compile layer
-	//
-	for (const auto& layer : schema()->layers())
-	{
-		if (layer->compile() == false || layer->show() == false)
-		{
-			continue;
-		}
-
-		for (const auto& item : layer->items())
-		{
-			QString orderIndexText;
-			orderIndexText.reserve(32);
-
-			if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
-			{
-				orderIndexText = "?";
-
-				if (schema()->isLogicSchema() == true)
-				{
-					VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema());
-					if (logicSchema == nullptr)
-					{
-						assert(logicSchema);
-						return;
-					}
-
-					if (logicSchema->isMultichannelSchema() == true)
-					{
-						QStringList eqIds = logicSchema->equipmentIdList();
-
-						for (int i = 0; i < eqIds.size(); i++)
-						{
-							auto runIndex = GlobalMessanger::instance().schemaItemRunOrder(eqIds[i], item->guid());
-
-							if (i == 0)
-							{
-								if (runIndex.first == runIndex.second)
-								{
-									orderIndexText = QString::number(runIndex.first);
-								}
-								else
-								{
-									orderIndexText = QString("%1-%2").arg(runIndex.first).arg(runIndex.second);
-								}
-							}
-							else
-							{
-								if (runIndex.first == runIndex.second)
-								{
-									orderIndexText.append(QLatin1String(", ") + QString::number(runIndex.first));
-								}
-								else
-								{
-									orderIndexText.append(QString(", %1-%2").arg(runIndex.first).arg(runIndex.second));
-								}
-							}
-						}
-					}
-					else
-					{
-						auto runIndex = GlobalMessanger::instance().schemaItemRunOrder(logicSchema->equipmentIds(), item->guid());
-
-						if (runIndex.first == runIndex.second)
-						{
-							orderIndexText = QString::number(runIndex.first);
-						}
-						else
-						{
-							orderIndexText = QString("%1-%2").arg(runIndex.first).arg(runIndex.second);
-						}
-					}
-				}
-
-				if (schema()->isUfbSchema() == true)
-				{
-					auto runIndex = GlobalMessanger::instance().schemaItemRunOrder(schema()->schemaId(), item->guid());
-
-					if (runIndex.first == runIndex.second)
-					{
-						orderIndexText = QString::number(runIndex.first);
-					}
-					else
-					{
-						orderIndexText = QString("%1-%2").arg(runIndex.first).arg(runIndex.second);
-					}
-				}
-
-				item->drawDebugInfo(drawParam, orderIndexText);
 			}
 		}
 	}

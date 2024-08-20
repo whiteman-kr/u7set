@@ -4,6 +4,7 @@
 #include "../Builder/ConnectionStorage.h"
 #include "../ProjectDefaults.h"
 
+#include <VFrame30/SchemaDetails.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemConst.h>
 #include <VFrame30/SchemaItemDiagValue.h>
@@ -5234,12 +5235,12 @@ void EditSchemaWidget::addNewAppSignal(SchemaItemPtr schemaItem)
 	{
 	}
 
-	m_createSignalDialoOptions.init(schema()->schemaId(),
+	m_createSignalDialogOptions.init(schema()->schemaId(),
 									schema()->caption(),
 									equipmentIdList,
 									itemsAppSignals);
 
-	QStringList signalsIds = CreateSignalDialog::showDialog(db(), &m_createSignalDialoOptions, this);
+	QStringList signalsIds = CreateSignalDialog::showDialog(db(), &m_createSignalDialogOptions, this);
 
 	if (signalsIds.isEmpty() == false)
 	{
@@ -7414,6 +7415,8 @@ void EditSchemaWidget::editPaste()
 			{
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::valueDiscrete, QVariant(constDiscrete), constDiscreteItems);
 			}
+
+			return;
 		}
 	}
 
@@ -7433,6 +7436,7 @@ void EditSchemaWidget::editPaste()
 		if (allItemsAreRects == true)
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(mimeData->text()), selected);
+			return;
 		}
 	}
 
@@ -7453,6 +7457,7 @@ void EditSchemaWidget::editPaste()
 			mimeData->text().startsWith('#') == true)
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(mimeData->text()), selected);
+			return;
 		}
 	}
 
@@ -7473,6 +7478,7 @@ void EditSchemaWidget::editPaste()
 			mimeData->text().startsWith('#') == true)
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(mimeData->text()), selected);
+			return;
 		}
 	}
 
@@ -7493,6 +7499,7 @@ void EditSchemaWidget::editPaste()
 		{
 			m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(mimeData->text()), selected);
 			EditSchemaWidget::m_lastUsedLoopbackId = mimeData->text();
+			return;
 		}
 	}
 
@@ -7512,7 +7519,8 @@ void EditSchemaWidget::editPaste()
 		if (allItemsAreValues == true &&
 			mimeData->text().startsWith('#') == true)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(mimeData->text()), selected);
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(mimeData->text()), selected);
+			return;
 		}
 	}
 
@@ -7532,10 +7540,10 @@ void EditSchemaWidget::editPaste()
 		if (allItemsAreImageValues == true &&
 			mimeData->text().startsWith('#') == true)
 		{
-			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(mimeData->text()), selected);
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(mimeData->text()), selected);
+			return;
 		}
 	}
-
 
 	return;
 }

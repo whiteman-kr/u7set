@@ -5,10 +5,10 @@
 #include <HardwareLib/DeviceController.h>
 #include <HardwareLib/Software.h>
 
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/ConstStrings.h>
+#include <CommonLib/HostAddressPort.h>
 #include "../OnlineLib/SocketIO.h"
 #include "../UtilsLib/WUtils.h"
-#include "../lib/ConstStrings.h"
 
 bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger *log)
 {

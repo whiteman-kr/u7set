@@ -3,8 +3,8 @@
 #endif
 
 #include "Tcp.h"
-#include "../lib/ConstStrings.h"
-#include "../Protobuf/google/protobuf/message.h"
+#include <CommonLib/ConstStrings.h>
+#include <google/protobuf/message.h>
 
 namespace Tcp
 {
@@ -1635,7 +1635,7 @@ namespace Tcp
 	{
 		if (serverAddr.isSet() == true)
 		{
-			logMessage(QString("try connect to server %1").arg(serverAddr.addressPortStr()));
+			logMessage(QString("try to connect to server %1").arg(serverAddr.addressPortStr()));
 		}
 		else
 		{
@@ -2083,6 +2083,7 @@ namespace Tcp
 			m_ignoredSslErrors.insert(QSslError::SslError::SelfSignedCertificate);
 
 			// No break, it is Ok!
+			[[fallthrough]];
 
 		case E::SecurityLevel::SSL:
 

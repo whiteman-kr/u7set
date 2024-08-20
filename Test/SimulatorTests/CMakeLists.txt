@@ -62,22 +62,19 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QReadWriteLock>
 	<QUdpSocket>
 
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
-	"../../CommonLib/PropertyObject.h"
-	"../../CommonLib/AfbParamValue.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/PropertyObject.h>
+	<CommonLib/AfbParamValue.h>
 	
 	<ProtoSerialization.h>
-	#<Network.pb.h>
-	#<AppSignal.pb.>
 	
 	"../../AppSignalLib/AppSignal.h"
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"
-	#../"../AppSignalLib/TuningValue.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Network Qt6::Qml Qt6::Xml Qt6::Concurrent)
-target_link_libraries(${TARGET} PRIVATE Protobuf HardwareLib Simulator)
+target_link_libraries(${TARGET} PRIVATE ProtobufEx HardwareLib Simulator)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

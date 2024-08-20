@@ -5,67 +5,73 @@
     <name>DialogChooseTrendSignals</name>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="20"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="191"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="216"/>
         <source>Trend Signals</source>
         <translation>Сигнали графіку</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="139"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="197"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="135"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="226"/>
         <source>&lt;&lt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="122"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="195"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="28"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="217"/>
         <source>Start typing SignalID</source>
         <translation>Почніть друк ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="153"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="199"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="41"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="218"/>
         <source>Filter</source>
         <translation>Фільтр</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="67"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="192"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="48"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="219"/>
+        <source>List</source>
+        <translation>Список</translation>
+    </message>
+    <message>
+        <location filename="../DialogChooseTrendSignals.ui" line="128"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="225"/>
         <source>&lt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="132"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="196"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="121"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="224"/>
         <source>&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="160"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="200"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="156"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="228"/>
         <source>Down</source>
         <translation>Вниз</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="170"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="201"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="84"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="221"/>
         <source>Signals Tags</source>
         <translation>Теги</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="177"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="202"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="149"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="227"/>
         <source>Up</source>
         <translation>Вгору</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="112"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="194"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="94"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="223"/>
         <source>Signal tags space separated</source>
         <translation>Теги, розділені пробілом</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="146"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="198"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="77"/>
+        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="220"/>
         <source>Archive Server</source>
         <translation>Сервер архіву</translation>
     </message>
@@ -292,8 +298,8 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../TrendImpl.cpp" line="478"/>
-        <location filename="../TrendImpl.cpp" line="545"/>
+        <location filename="../TrendImpl.cpp" line="479"/>
+        <location filename="../TrendImpl.cpp" line="546"/>
         <source> [can&apos;t render the trend, scale is not valid for current mode]</source>
         <translation></translation>
     </message>
@@ -301,37 +307,47 @@
 <context>
     <name>TrendLib::DialogChooseTrendSignals</name>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="313"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="342"/>
         <source>All Servers</source>
         <translation>Всі сервери</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="380"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="418"/>
         <source>SignalID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="381"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="419"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="382"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="420"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="383"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="421"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="491"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="506"/>
+        <source>Not selected</source>
+        <translation>Не обрано</translation>
+    </message>
+    <message>
+        <location filename="../DialogChooseTrendSignals.cpp" line="521"/>
+        <source>[%1] %2</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../DialogChooseTrendSignals.cpp" line="581"/>
         <source>The maximum number of signals reached.</source>
         <translation>Досягнуто максимальної кількості сигналів.</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="846"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="941"/>
         <source>Copy SignalID</source>
         <translation>Копіювати ІД сигналу</translation>
     </message>
@@ -783,18 +799,18 @@
         <translation></translation>
     </message>
     <message>
+        <location filename="../TrendWidget.cpp" line="215"/>
         <location filename="../TrendWidget.cpp" line="217"/>
-        <location filename="../TrendWidget.cpp" line="219"/>
         <source>Parse trend file error. </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendWidget.cpp" line="227"/>
+        <location filename="../TrendWidget.cpp" line="225"/>
         <source>Read trend data structure error.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TrendWidget.cpp" line="400"/>
+        <location filename="../TrendWidget.cpp" line="398"/>
         <source>Rendering initial image, please wait...</source>
         <translation>Відбувається відображення, очікуйте...</translation>
     </message>
@@ -802,22 +818,22 @@
 <context>
     <name>TrendLibInternal::FilteredTrendSignalsModel</name>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="91"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="94"/>
         <source>SignalID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="93"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="96"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="95"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="98"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="97"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="100"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>

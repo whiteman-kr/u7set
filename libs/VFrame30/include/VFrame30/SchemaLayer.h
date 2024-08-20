@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../CommonLib/DebugInstCounter.h"
-#include "../CommonLib/Factory.h"
+#include <CommonLib/DebugInstCounter.h>
+#include <CommonLib/Factory.h>
 
 #include <VFrame30/SchemaItem.h>
 

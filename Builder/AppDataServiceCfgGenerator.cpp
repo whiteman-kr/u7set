@@ -5,6 +5,7 @@
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/DataSource.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "ModuleLogicCompiler.h"
 
 #include <HardwareLib/DeviceModule.h>
 
@@ -142,7 +143,7 @@ namespace Builder
 
 			if (DeviceHelper::isPropertyExists(devModule, EquipmentPropNames::ACTUATOR_DESCRIPTION) == true)
 			{
-				bool res = DeviceHelper::getStrProperty(devModule, EquipmentPropNames::ACTUATOR_DESCRIPTION, &actuatorDesc, log);
+				/*bool res = */DeviceHelper::getStrProperty(devModule, EquipmentPropNames::ACTUATOR_DESCRIPTION, &actuatorDesc, log);
 
 				//result &= res;
 			}
@@ -439,6 +440,21 @@ namespace Builder
 
 				m_acquiredAppSignals.insert(calcHash(appSignal->appSignalID()));
 			}
+		}
+
+		ModuleLogicCompilerShared mc = m_context->getModuleLogicCompiler(appDataSource.moduleEquipmentID());
+
+		if (mc == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find ModuleLogicCompiler object for %1").arg(appDataSource.moduleEquipmentID()));
+			return false;
+		}
+
+		const std::vector<const AppSignal*>& swCalcSignals = mc->swCalcSignals();
+
+		for(const AppSignal* appSignal : swCalcSignals)
+		{
+			appDataSource.appendSwCalcSignal(appSignal->appSignalID());
 		}
 
 		return true;

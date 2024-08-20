@@ -1,6 +1,5 @@
 #pragma once
 #include "MainTabPage.h"
-#include "../Builder/Builder.h"
 
 class DbController;
 class QCheckBox;
@@ -9,6 +8,13 @@ class QPushButton;
 class QSplitter;
 class QComboBox;
 class QTextBrowser;
+
+namespace Builder
+{
+	class Builder;
+}
+
+class OutputLogItem;
 
 //
 //
@@ -36,8 +42,6 @@ public:
 protected:
 	void CreateActions();
 
-signals:
-
 	// Events
 	//
 protected:
@@ -55,6 +59,8 @@ protected slots:
 	void buildWasStarted();
 	void buildWasFinished(int errorCount);
 
+	void warningsLevelChanged(int index);
+
 	void prevIssue();
 	void nextIssue();
 
@@ -66,6 +72,8 @@ signals:
 
 private:
 	void getProjectBuildPath(QString* buildCurrentPath, QString* buildLastPath) const;
+
+	void appendMessagesToOutputLog(const std::vector<OutputLogItem>& messages);
 
 	// Data
 	//
@@ -91,18 +99,23 @@ private:
 	QPushButton* m_cancelButton = nullptr;
 
 	QSplitter* m_vsplitter = nullptr;
-	QSplitter* m_hsplitter = nullptr;
 
 	QWidget* m_settingsWidget = nullptr;
 
-	//QCheckBox* m_debugCheckBox = nullptr;
 	QLabel* m_buildLabel[2] = {nullptr, nullptr};
 	QComboBox* m_warningsLevelComboBox = nullptr;
 
+	QComboBox* m_generateAppLogicDrawings = nullptr;
+	QComboBox* m_generateAppSignalsXml = nullptr;
+	QComboBox* m_generateAppSignalsExtXml = nullptr;
+	QComboBox* m_generateExtraDebugInfo = nullptr;
+	QComboBox* m_runSimTestsOnBuild = nullptr;
+
 	int m_logTimerId = -1;
 
-	Builder::Builder m_builder;		// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
+	std::unique_ptr<Builder::Builder> m_builder;		// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
 
+	std::vector<OutputLogItem> m_messages;
 	std::map<QUuid, OutputMessageLevel> m_itemsIssues;		// contains QUuid of all schemes items with issues
 
 	// Issue navigation

@@ -417,6 +417,8 @@ namespace Sim
 	{
 		value = std::clamp(value, 0.1, 256.0);
 		m_speedFactor.store(value, std::memory_order_relaxed);
+
+		m_log.writeText(tr("Speed factor set to %1").arg(value));
 	}
 
 	void ControlImpl::run()

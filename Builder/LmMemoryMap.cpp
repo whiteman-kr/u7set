@@ -1,4 +1,4 @@
-#include "../lib/ConstStrings.h"
+#include <CommonLib/ConstStrings.h>
 
 #include "LmMemoryMap.h"
 #include "UalItems.h"

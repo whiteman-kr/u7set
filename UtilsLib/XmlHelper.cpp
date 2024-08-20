@@ -3,8 +3,8 @@
 #endif
 
 #include "XmlHelper.h"
-#include "../lib/ConstStrings.h"
-#include "../CommonLib/HostAddressPort.h"
+#include <CommonLib/ConstStrings.h>
+#include <CommonLib/HostAddressPort.h>
 
 // -------------------------------------------------------------------------------------
 //

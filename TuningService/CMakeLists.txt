@@ -91,24 +91,20 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
-	"../CommonLib/Types.h"
-	"../CommonLib/Hash.h"
-	#"../CommonLib/PropertyObject.h"
-	#"../CommonLib/AfbParamValue.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 	
 	<ProtoSerialization.h>
 	<Network.pb.h>
 	
 	"../AppSignalLib/AppSignal.h"
-	#"../AppSignalLib/AppSignalParam.h"
-	#"../AppSignalLib/AppSignalState.h"
 	"../AppSignalLib/TuningValue.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Xml)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib ServiceLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib OnlineLib HardwareLib ServiceLib)
 
 # Link Visaul Leak Detector
 #

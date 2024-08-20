@@ -8,7 +8,7 @@ namespace TestSuite
 {
 	TestController::TestController(const ConfigSettings& configuration,
 								   const SoftwareInfo& softwareInfo,
-								   ISignalDataServer* signalDataServer,
+								   ClientLib::ISignalDataServer* signalDataServer,
 								   ILogFile* appLog,
 								   ILogFile* testLog,
 								   IInputController& inputController,

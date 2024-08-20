@@ -1,8 +1,8 @@
 #pragma once
-#include <set>
-#include <QObject>
 #include <QDateTime>
 #include <QMutex>
+#include <QObject>
+#include <set>
 
 #ifdef Q_CC_MSVC
 	#define SHORT_FUNC_INFO __FUNCTION__
@@ -17,12 +17,12 @@
 
 #define LOG_STRING(PARAM) #PARAM
 
-#define LOG_EMPTY_LINE(logObject)	logObject->writeEmptyLine();
+#define LOG_EMPTY_LINE(logObject) logObject->writeEmptyLine();
 
-#define LOG_ERROR_OBSOLETE(logObject, prefix, message)		logObject->writeError(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
-#define LOG_WARNING_OBSOLETE(logObject, prefix, message)	logObject->writeWarning0(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
-#define LOG_MESSAGE(logObject, message)	logObject->writeMessage(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
-#define LOG_SUCCESS(logObject, message)	logObject->writeSuccess(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_ERROR_OBSOLETE(logObject, prefix, message) logObject->writeError(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_WARNING_OBSOLETE(logObject, prefix, message) logObject->writeWarning0(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_MESSAGE(logObject, message) logObject->writeMessage(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_SUCCESS(logObject, message) logObject->writeSuccess(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
 #define LOG_OK(logObject) logObject->writeSuccess(QObject::tr("Ok"), __FILE__, __LINE__, SHORT_FUNC_INFO);
 
@@ -112,7 +112,7 @@ public:
 	Q_INVOKABLE void writeError(const QString& str, QString file, int fileLine, QString func);
 	Q_INVOKABLE void writeError(QString issueCategory, int issueCode, const QString& str, QString file, int fileLine, QString func);
 
-    Q_INVOKABLE void writeDump(const std::vector<quint8> &data);
+	Q_INVOKABLE void writeDump(const std::vector<quint8>& data);
 	Q_INVOKABLE void writeEmptyLine();
 
 	void setSuppressIssues(std::vector<int> warnings);
@@ -151,7 +151,7 @@ public:
 	void setHtmlFont(QString fontName);
 
 private:
-	std::list<OutputLogItem> m_messages;			// List buffer for writing messages to main window Log Widget
+	std::list<OutputLogItem> m_messages; // List buffer for writing messages to main window Log Widget
 
 	std::set<int> m_suppressedIssues;
 
@@ -161,7 +161,7 @@ private:
 	int m_errorCount = 0;
 	int m_warningCount = 0;
 	int m_messagesNo = 0;
-	mutable QMutex m_mutex;							// access to windowMessageList, fileMessageList
+	mutable QMutex m_mutex; // access to windowMessageList, fileMessageList
 
 	QString m_htmlFont;
 };

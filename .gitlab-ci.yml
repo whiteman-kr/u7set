@@ -11,9 +11,11 @@ variables:
   # Build and test data
   #
   QT_VERSION: "6.5.3"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v417"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v417"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v423"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v423"
   PGPASSWORD: "P2ssw0rd"
+
+  CTEST_OUTPUT_ON_FAILURE: "1"
 
 stages:
   - prepare
@@ -67,6 +69,9 @@ linux_build_job:
     - /^.*RPCT-.*$/
   tags:
     - gcc
+  before_script:
+    - export PATH="/home/gitlab-runner/vcpkg:$PATH"
+    - export VCPKG_ROOT="/home/gitlab-runner/vcpkg"
   script:
     - "printenv"
     - "pwd"
@@ -81,7 +86,7 @@ linux_build_job:
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
-    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/release"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/release -DVCPKG_TARGET_TRIPLET=x64-linux"
     - "cmake --build ./build"
 
   artifacts:
@@ -105,6 +110,10 @@ windows_build_job:
     - /^.*RPCT-.*$/
   tags:
     - vs2017
+  before_script:
+    - $Env:VCPKG_ROOT="C:/data/vcpkg/vcpkg"
+    - $Env:VCPKG_DEFAULT_BINARY_CACHE="C:/data/vcpkg/cache_windows_build"
+    - $env:Path += ";C:/data/vcpkg/vcpkg"
   script:
     - "dir env:"
     - "echo $Env:CI_COMMIT_SHA"
@@ -124,6 +133,9 @@ windows_build_job:
     - "& './CI/windeploy.bat'"
 #Copy PostgreSQL DLL to bin/release
     - "copy C:\\libpq_my_build\\libpq.dll $Env:BIN_OUT_DIR\\"
+#Copy FTDI Drivers to release
+    - "mkdir \"$Env:BIN_OUT_DIR/ftdi\""
+    - "copy C:\\ftdi\\CDM-v2.12.36.4-WHQL-Certified.zip $Env:BIN_OUT_DIR\\ftdi\\"
 # Copy documents
     - "mkdir \"$Env:BIN_OUT_DIR/docs\""
     - "copy $Env:CI_PROJECT_DIR\\Metrology\\docs\\Metrology_User_Manual.pdf $Env:BIN_OUT_DIR\\docs\\"
@@ -190,7 +202,9 @@ windows_build_job:
       - bin/release/scripthelp/search/*.*
       - bin/release/docs/*.pdf
       - bin/release/docs/Appendixes/*.pdf
-
+      - bin/release/dev/**/*
+      - bin/release/ftdi/**/*
+      - bin/release/license/**/*
 
 windows_test_job:
   stage: test
@@ -229,9 +243,10 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run unit tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*:TuningConnectionTests.*"
+    - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*:TuningConnectionTests.*:RtDataProviderTests.*"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
+    #- "&$Env:CI_PROJECT_DIR/bin/release/LicenseLibTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\""
 
 #Run Builder test
@@ -240,7 +255,7 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "if (Test-Path c:/temp/build/test_simulator) { Remove-Item c:/temp/build/test_simulator -Recurse -Force; }"
     - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Test/BuilderConsoleArgs.xml"
-    
+
 #Run Compiler tests
     - "# ----------------------------------------------"
     - "#               Run Compiler tests"
@@ -252,6 +267,12 @@ windows_test_job:
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/libs/Simulator/Scripts/SimProjectTests.js\""
+
+#Run AdsBridge tests (limited - without AppDataService)
+    - "# ----------------------------------------------"
+    - "#               Run AdsBridge tests"
+    - "# ----------------------------------------------"
+    - "&$Env:CI_PROJECT_DIR/bin/release/AdsBridgeTests.exe --config=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --gtest_filter=-AdsBridgeTests.AdsGetTcpConnectionStatuses:AdsBridgeTests.AdsSignalParamsAndStatesLoaded:AdsBridgeTests.AdsGetSignalList:AdsBridgeTests.AdsGetSignalParams:AdsBridgeTests.AdsGetSignalStates:AdsBridgeTests.AdsGetSignalStatesRequestSignal"
 
 #Run ROVT to check configuration generation
     - "# ----------------------------------------------"
@@ -344,6 +365,7 @@ linux_test_job:
     - "sleep 5"
     - "jobs"
     - "./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
+    - "./AdsBridgeTests --config=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --profile=linux_test_job"
     - "StopServices || true"
     - "popd"
 
@@ -353,6 +375,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "$CI_PROJECT_DIR/bin/release/SimulatorTests"
     - "$CI_PROJECT_DIR/bin/release/MetrologyTests"
+    #- "$CI_PROJECT_DIR/bin/release/LicenseLibTests"
     - "$CI_PROJECT_DIR/bin/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml"
 
 #Run ROVT to check configuration generation
@@ -375,6 +398,9 @@ linux_code_coverage_job:
     - /^.*exp.*$/
     - /^.*rpct-.*$/
     - /^.*RPCT-.*$/
+  before_script:
+    - export PATH="/home/gitlab-runner/vcpkg:$PATH"
+    - export VCPKG_ROOT="/home/gitlab-runner/vcpkg"
   script:
     - "printenv"
     - "echo $CI_COMMIT_SHA"
@@ -396,7 +422,7 @@ linux_code_coverage_job:
     - "# ----------------------------------------------"
     - "#                    Build                      "
     - "# ----------------------------------------------"
-    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/debug -DCODE_COVERAGE=ON -DADDRESS_SANITIZER=ON"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/debug -DCODE_COVERAGE=ON -DADDRESS_SANITIZER=ON -DVCPKG_TARGET_TRIPLET=x64-linux"
     - "cmake --build ./build"    
     - "# ----------------------------------------------"
     - "#           Collect Test Coverage Data          "

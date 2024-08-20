@@ -158,9 +158,6 @@ void Settings::writeUserScope() const
     s.setValue("TextEditorProperties/pos", m_DialogTextEditorWindowPos);
     s.setValue("TextEditorProperties/geometry", m_DialogTextEditorWindowGeometry);
 
-	s.setValue("TuningFiltersEditor/MainSplitterPosition", m_tuningFiltersSplitterPosition);
-    s.setValue("TuningFiltersEditor/PropertyEditorSplitterPos", m_tuningFiltersPropertyEditorSplitterPos);
-
 	s.setValue("LoginDialog/loginCompleter", m_loginCompleter);
 
 	s.setValue("ConnectionEditor/pos", m_connectionEditorWindowPos);
@@ -239,9 +236,6 @@ void Settings::loadUserScope()
 
     m_DialogTextEditorWindowPos = s.value("TextEditorProperties/pos", QPoint(-1, -1)).toPoint();
     m_DialogTextEditorWindowGeometry = s.value("TextEditorProperties/geometry").toByteArray();
-
-	m_tuningFiltersSplitterPosition = s.value("TuningFiltersEditor/MainSplitterPosition").toByteArray();
-    m_tuningFiltersPropertyEditorSplitterPos = s.value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
 
 	m_loginCompleter = s.value("LoginDialog/loginCompleter").toStringList();
 	if (m_loginCompleter.isEmpty() == true)

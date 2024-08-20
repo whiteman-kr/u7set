@@ -1,6 +1,7 @@
 #include "ModuleConfigurator.h"
-#include "../lib/Configurator.h"
+#include <ModuleConfiguratorLib/Configurator.h>
 #include <UiLib/DialogAbout.h>
+#include <LicenseLib/AppLicenser.h>
 #include "ApplicationTabPage.h"
 #include "DiagTabPage.h"
 #include "Globals.h"
@@ -8,6 +9,8 @@
 #include "version.h"
 #include <QDragEnterEvent>
 #include <QMimeData>
+
+using namespace ModuleConfiguratorLib;
 
 ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	: QMainWindow(parent)
@@ -593,9 +596,17 @@ void ModuleConfigurator::aboutQtClicked()
 
 void ModuleConfigurator::aboutClicked()
 {
-	QString text = qApp->applicationName() + tr(" allows user to upload firmware to flash memory of logic modules.<br>");
-	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png");
+	QString text = qApp->applicationName() + tr(" allows user to upload firmware to flash memory of logic modules.");
 
+	LicenseLib::AppLicenser licenser;
+	UiLib::DialogAbout::show(this,
+							 text,
+							 ":/Logo/RadiyLogo.png",
+							 licenser.organization(),
+							 licenser.person(),
+							 licenser.endDate(),
+							 licenser.uuid(),
+							 licenser.workplaceId());
 	return;
 }
 

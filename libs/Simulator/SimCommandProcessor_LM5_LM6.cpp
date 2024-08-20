@@ -1,4 +1,4 @@
-#include "../CommonLib/Times.h"
+#include <CommonLib/Times.h>
 #include "SimCommandProcessor_LM5_LM6.h"
 #include "SimException.h"
 #include "SimAfb.h"

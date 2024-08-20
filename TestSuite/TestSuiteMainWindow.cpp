@@ -36,12 +36,16 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	//
 	m_translator.addLanguage("en", "English");
 	m_translator.addLanguage("uk", "Ukrainian");
+	m_translator.addLanguage("bg", "Bulgarian");
 
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TestSuite_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/TestSuiteLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/ClientLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/UtilsLib_uk.qm");
-	m_translator.addTranslationFile("uk", qApp->applicationDirPath() + "/translations/qt_uk.qm");
+	for (const QString& l : m_translator.languagesList())
+	{
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/TestSuite_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/TestSuiteLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/ClientLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UtilsLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/qt_%1.qm").arg(l));
+	}
 
 	{
 		QStringList failedTranslations;

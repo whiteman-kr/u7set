@@ -5,7 +5,7 @@
 #include "TestSuiteConfigController.h"
 
 #include "../UtilsLib/ILogFile.h"
-#include "../lib/ISignalDataServer.h"
+#include <ClientLib/ISignalDataServer.h>
 
 #include <QJSValue>
 
@@ -39,7 +39,7 @@ namespace TestSuite
 	public:
 		explicit TestController(const ConfigSettings& configuration,
 								const SoftwareInfo& softwareInfo,
-								ISignalDataServer* signalDataServer,
+								ClientLib::ISignalDataServer* signalDataServer,
 								ILogFile* appLog,
 								ILogFile* testLog,
 								IInputController& inputController,
@@ -133,7 +133,7 @@ namespace TestSuite
 	private:
 		const ConfigSettings m_configuration;
 		const SoftwareInfo m_softwareInfo;
-		ISignalDataServer* m_signalDataServer = nullptr;
+		ClientLib::ISignalDataServer* m_signalDataServer = nullptr;
 		
 		ILogFile* m_appLog = nullptr;
 		ILogFile* m_testLog = nullptr;

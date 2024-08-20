@@ -15,7 +15,6 @@ bool SimDialogSignalSnapshot::showDialog(SimIdeSimulator* simuator,
 															   simWidget);
 
 	connect(simuator, &SimIdeSimulator::projectUpdated, dss, &SimDialogSignalSnapshot::projectUpdated);
-	connect(simuator, &SimIdeSimulator::schemaDetailsUpdated, dss, &SimDialogSignalSnapshot::schemasUpdated);
 
 	connect(dss, &DialogSignalSnapshot::signalContextMenu, simWidget, &SimWidget::signalContextMenu);
 	connect(dss, &DialogSignalSnapshot::signalInfo, simWidget, &SimWidget::signalInfo);
@@ -34,7 +33,7 @@ SimDialogSignalSnapshot::SimDialogSignalSnapshot(SimIdeSimulator* simuator,
 												 QString softwareEquipmentId,
 												 QString lmEquipmentId,
 												 QWidget* parent) :
-	DialogSignalSnapshot(appSignalManager, projectName, softwareEquipmentId, parent),
+	DialogSignalSnapshot(appSignalManager, nullptr, &simuator->appSignalListSet(), {}, projectName, softwareEquipmentId, parent),
 	m_simuator(simuator)
 {
 	if (m_simuator == nullptr)
@@ -64,11 +63,6 @@ void SimDialogSignalSnapshot::projectUpdated()
 	setProjectName(m_simuator->projectName());
 
 	signalsUpdated();
-
-	if (m_simuator->isLoaded() == false)
-	{
-		schemasUpdated();
-	}
 
 	return;
 }

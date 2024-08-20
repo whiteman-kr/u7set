@@ -4,21 +4,12 @@
 #include <vector>
 
 #include "AppSignalParam.h"
+#include "ISignalManager.h"
 #include "TuningSignalState.h"
 
-class ITuningSignalManager
+class ITuningSignalManager : public ISignalManager
 {
 public:
-	virtual bool signalExists(Hash hash) const = 0;
-	virtual bool signalExists(const QString& appSignalId) const = 0;
-	virtual bool signalsExist(const QStringList& signalIds) const = 0;
-
-	virtual AppSignalParam signalParam(Hash hash, bool* found) const = 0;
-	virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const = 0;
-
-	virtual bool signalParam(Hash hash, AppSignalParam* result) const = 0;
-	virtual bool signalParam(const QString& appSignalId, AppSignalParam* result) const = 0;
-
 	virtual TuningSignalState state(Hash hash, bool* found) const = 0;
 	virtual TuningSignalState state(const QString& appSignalId, bool* found) const = 0;
 

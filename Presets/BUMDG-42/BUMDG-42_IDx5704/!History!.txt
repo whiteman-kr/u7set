@@ -1,3 +1,4 @@
 BUMDG-42
 	06.06.2024	Version: 3	BUMDG-42_IDx5704_v3.u7devp	RPCT-3896: Added preset in new naming convension and family BUIM (created from BUMDG-42_v2.u7devp) 
 										   Added property ActuatorDescription
+	01.07.2024	Version: 4 	BUMDG-41_IDx5704_v4.u7devp	RPCT-3826: Added UpdateFromPreset for SignalSpecificProperties properties, SKNO and SKNC names update

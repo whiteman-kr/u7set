@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IssueLogger.h"
-#include "RunOrder.h"
+#include "BuildOptions.h"
 
 namespace Builder
 {
@@ -27,7 +27,8 @@ namespace Builder
 				   QString projectUserName,
 				   QString projectUserPassword,
 				   QString buildPath,
-				   bool expertMode);
+				   bool expertMode,
+				   BuildOptions buildOptions);
 		bool stop();
 		bool isRunning() const;
 
@@ -43,8 +44,6 @@ namespace Builder
 		void finished(int errorCount);			// Finished or canceled (if canceled errorCount > 0)
 
 		void progressChanged(int value);		// Always from 0 to 100
-
-		void runOrderReady(RunOrder runOrder);
 
 	private:
 		BuildWorkerThread* m_thread = nullptr;

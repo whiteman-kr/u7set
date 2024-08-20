@@ -39,23 +39,18 @@ namespace ClientLib
 		bool load(const QByteArray& data);
 		bool load(const ::Proto::AppSignalSet& message);
 
-		// AppSignalParams
-		//
-		int signalsCount() const;
-		std::vector<AppSignalParam> signalList() const;
-
 		// Implementation ITuningSignalManager
 		//
-	public:
-		virtual bool signalExists(Hash hash) const override;
-		virtual bool signalExists(const QString& appSignalId) const override;
-		virtual bool signalsExist(const QStringList& signalIds) const override;
+		int signalsCount() const override;
+		std::vector<Hash> signalHashes() const override;
+		std::vector<AppSignalParam> signalList() const override;
 
-		virtual AppSignalParam signalParam(Hash hash, bool* found) const override;
-		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
+		bool signalExists(Hash hash) const override;
+		bool signalExists(const QString& appSignalId) const override;
+		bool signalsExist(const QStringList& signalIds) const override;
 
-		virtual bool signalParam(Hash hash, AppSignalParam* result) const override;
-		virtual bool signalParam(const QString& appSignalId, AppSignalParam* result) const override;
+		AppSignalParam signalParam(Hash hash, bool* found) const override;
+		AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
 
 		// State requesting functions
 		//
@@ -87,7 +82,6 @@ namespace ClientLib
 	public:
 		void reset() override;
 
-		std::vector<Hash> signalHashes() const override;
 		std::vector<Hash> signalHashes(const std::vector<Hash> lmEquipmentIdHashes) const override;
 
 		void invalidateSignalStates(Hash tuningServiceHash) override;

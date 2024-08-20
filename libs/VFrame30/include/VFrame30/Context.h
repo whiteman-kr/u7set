@@ -5,6 +5,7 @@
 #include <VFrame30/IViewVariables.h>
 #include <VFrame30/TuningController.h>
 #include <memory>
+#include "Context.h"
 
 namespace VFrame30
 {
@@ -19,13 +20,11 @@ namespace VFrame30
 				VFrame30::IViewVariables* viewVariables,
 				ILogFile* log);
 
-		Context() = default;
-		Context(const Context&) = default;
-		Context(Context&&) noexcept = default;
+		Context(const Context&) = delete;
+		Context(Context&&) noexcept = delete;
+		Context& operator=(const Context&) = delete;
+		Context& operator=(Context&&) noexcept = delete;
 		~Context() = default;
-
-		Context& operator=(const Context&) = default;
-		Context& operator=(Context&&) noexcept = default;
 
 	public:
 		static std::shared_ptr<Context> create(const VFrame30::DiagStateController* diagStateController,
@@ -36,7 +35,7 @@ namespace VFrame30
 
 		static std::shared_ptr<Context> create(VFrame30::SchemaView* clientSchemaView);
 
-		void reset();
+		//void reset();
 
 		const VFrame30::DiagStateController* diagStateController() const;
 		void setDiagStateController(const VFrame30::DiagStateController* value);

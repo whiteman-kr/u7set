@@ -1,7 +1,7 @@
 #pragma once
 
 #include <HardwareLib/LogicModulesInfo.h>
-#include "../CommonLib/Times.h"
+#include <CommonLib/Times.h>
 #include <Simulator/SimRam.h>
 
 #include "SimScopedLog.h"

@@ -58,6 +58,7 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 	const QStringList& sourceAssociatedSignals = associatedSignals(E::LanControllerType::AppData);
 
 	m_signalStates.clear();
+	m_signalStates.reserve(sourceAssociatedSignals.size());
 
 	for(const QString& signalID : sourceAssociatedSignals)
 	{
@@ -71,7 +72,8 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 		TEST_PTR_CONTINUE(signal);
 
-		if (signal->regValueAddr().isValid() == false)
+		if (signal->regValueAddr().isValid() == false &&
+			signal->isSwCalculated() == false)
 		{
 			continue;
 		}
@@ -83,14 +85,23 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 		DynamicAppSignalState* dynState = signalStates->getStateByID(signal->appSignalID());
 
-		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue);
-
 		TEST_PTR_CONTINUE(dynState);
 
-		m_signalStates.append(dynState);
+		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue);
+
+		if (signal->isSwCalculated() == false)
+		{
+			m_signalStates.emplace_back(dynState);
+		}
+		else
+		{
+			auto it = findOrInsertKey(m_swCalcSignalsStates, signal->swCalcFunction());
+
+			it->second.emplace_back(dynState);
+		}
 	}
 
-	m_acquiredSignalsCount = static_cast<int>(m_signalStates.count());
+	m_acquiredSignalsCount = TO_INT(m_signalStates.size());
 
 	int queueSize = std::max(m_acquiredSignalsCount * 3, 200);
 
@@ -212,6 +223,14 @@ void AppDataSource::invalidateSignals(const QThread* thread)
 		}
 	}
 
+	for(const auto& [swCalcFunction, swCalcSignalsStates] : m_swCalcSignalsStates)
+	{
+		for(DynamicAppSignalState* swCalcSignalState : swCalcSignalsStates)
+		{
+			swCalcSignalState->setUnavailable(m_rupTimes, m_signalStatesQueue, thread);
+		}
+	}
+
 	wakeupStatesProcessingThread();
 
 	qDebug() << "Invalidate";
@@ -329,17 +348,63 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	int pushedStatesCtr = 0;
 
+	// counters will increment inside signalState->setState(...)
+	//
+	m_blockFlagsCount = 0;
+	m_simFlagsCount = 0;
+	m_mismatchFlagsCount = 0;
+
 	for(DynamicAppSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		pushedStatesCtr += signalState->setState(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
-												autoArchivingGroup, thread);
+		pushedStatesCtr += signalState->setStateRaw(*this, m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
+													autoArchivingGroup, thread);
 
 		if (pushedStatesCtr > 20)
 		{
 			pushedStatesCtr = 0;
 			wakeupStatesProcessingThread();
+		}
+	}
+
+	// Update state of software calculated signals
+
+	AppSignalStateFlags swCalcStateFlags;
+
+	swCalcStateFlags.valid = 1,
+	swCalcStateFlags.stateAvailable = 1,
+	swCalcStateFlags.swSimulated = isSimPacket ? 1 : 0;
+
+	for(const auto& [swCalcFunction, swCalcSignalsStates] : m_swCalcSignalsStates)
+	{
+		for(DynamicAppSignalState* swCalcSignalState : swCalcSignalsStates)
+		{
+			TEST_PTR_CONTINUE(swCalcSignalState);
+
+			double value = 0;
+
+			switch(swCalcSignalState->swCalcFunction())
+			{
+			case E::SoftwareCalcFunction::BlockFlagsCount:
+				value = static_cast<double>(m_blockFlagsCount);
+				break;
+
+			case E::SoftwareCalcFunction::SimFlagsCount:
+				value = static_cast<double>(m_simFlagsCount);
+				break;
+
+			case E::SoftwareCalcFunction::MismatchFlagsCount:
+				value = static_cast<double>(m_mismatchFlagsCount);
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+
+			swCalcSignalState->setStateParsed(m_rupTimes, packetNo,
+											  value, swCalcStateFlags,
+											  autoArchivingGroup, thread);
 		}
 	}
 

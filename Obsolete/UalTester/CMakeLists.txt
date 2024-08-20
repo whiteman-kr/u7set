@@ -20,7 +20,6 @@ endif (MSVC)
 set(TARGET UalTester)
 
 add_executable(${TARGET}
-	../../lib/ConstStrings.h
 	CmdLineParam.cpp
 	CmdLineParam.h
 	main.cpp
@@ -65,7 +64,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Qml)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib ServiceLib OnlineLib  HardwareLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib ServiceLib OnlineLib  HardwareLib)
 
 # Link Visaul Leak Detector
 #

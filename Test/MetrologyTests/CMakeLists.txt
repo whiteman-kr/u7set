@@ -38,8 +38,8 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Project includes
 	#
-	"../../CommonLib/Types.h"
-	"../../CommonLib/Hash.h"
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
 
 	<ProtoSerialization.h>
 
@@ -48,6 +48,6 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Network Qt6::Qml)
-target_link_libraries(${TARGET} PRIVATE CommonLib Protobuf UtilsLib AppSignalLib OnlineLib HardwareLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib OnlineLib HardwareLib)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

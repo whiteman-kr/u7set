@@ -24,6 +24,8 @@ module App {
 		setVisibleStatusBar(visible: boolean): void;
 		setVisibleMenu(visible: boolean): void;
 		setFullScreen(fullScreen: boolean): void;
+
+		start(program: string, args: string, workDir?: string): boolean;
 	}
 
 	export interface ScriptTuningClientApplication {
