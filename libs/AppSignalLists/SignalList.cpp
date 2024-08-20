@@ -388,8 +388,8 @@ namespace AppSignalLists
 		}
 		else
 		{
-			value.replace('\n', ';');
-			m_cachedCustomAppSignalIDMasks = value.split(';', Qt::SkipEmptyParts);
+			static const auto re = QRegularExpression("[;\\s]");
+			m_cachedCustomAppSignalIDMasks = value.split(re, Qt::SkipEmptyParts);
 		}
 	}
 
@@ -407,8 +407,8 @@ namespace AppSignalLists
 		}
 		else
 		{
-			value.replace('\n', ';');
-			m_cachedEquipmentIDMasks = value.split(';', Qt::SkipEmptyParts);
+			static const auto re = QRegularExpression("[;\\s]");
+			m_cachedEquipmentIDMasks = value.split(re, Qt::SkipEmptyParts);
 		}
 	}
 
@@ -426,8 +426,8 @@ namespace AppSignalLists
 		}
 		else
 		{
-			value.replace('\n', ';');
-			m_cachedAppSignalIDMasks = value.split(';', Qt::SkipEmptyParts);
+			static const auto re = QRegularExpression("[;\\s]");
+			m_cachedAppSignalIDMasks = value.split(re, Qt::SkipEmptyParts);
 		}
 	}
 
@@ -445,8 +445,8 @@ namespace AppSignalLists
 		}
 		else
 		{
-			value.replace('\n', ';');
-			m_cachedAppSignalTags = value.split(';', Qt::SkipEmptyParts);
+			static const auto re = QRegularExpression("[;\\s]");
+			m_cachedAppSignalTags = value.split(re, Qt::SkipEmptyParts);
 		}
 	}
 

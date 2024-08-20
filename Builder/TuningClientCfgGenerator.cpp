@@ -78,9 +78,7 @@ namespace Builder
 		//
 		result &= writeTuningSignals(tuningSignals);
 
-		// Write Tuning Ui
-		//
-		result &= writeTuningUi(settings->appSignalListIDs, settings->appSignalListMasks, settings->appSignalListTags);
+		std::vector<std::shared_ptr<AppSignalLists::AppSignalList>> appSignalLists;
 
 		// Write Tuning Signal Lists
 		//
@@ -103,9 +101,14 @@ namespace Builder
 
 			// Write AppSignalLists
 			//
-			result &=
-				writeAppSignalLists(tuningSignalProvider, settings->appSignalListIDs, settings->appSignalListMasks, settings->appSignalListTags);
+			result &= writeAppSignalLists(tuningSignalProvider,
+										  settings->appSignalListIDs,
+										  settings->appSignalListMasks,
+										  settings->appSignalListTags,
+										  appSignalLists);
 		}
+
+		result &= writeTuningUi(appSignalLists, settings->appSignalListIDs, settings->appSignalListMasks, settings->appSignalListTags);
 
 		result &= writeTuningSchemas();
 
@@ -329,7 +332,8 @@ namespace Builder
 		return true;
 	}
 
-	bool TuningClientCfgGenerator::writeTuningUi(const QStringList& appSignalListIds,
+	bool TuningClientCfgGenerator::writeTuningUi(std::vector<std::shared_ptr<AppSignalLists::AppSignalList>> appSignalLists,
+												 const QStringList& appSignalListIds,
 												 const QStringList& appSignalListMasks,
 												 const QStringList& appSignalListTags)
 	{
@@ -361,8 +365,8 @@ namespace Builder
 
 		// Check if all signal lists specified in Filters property exist
 		//
-		QStringList appSignalLists;
-		for (const auto& [id, list] : m_appSignalsListIdToList)
+		QStringList listIds;
+		for (const auto& list : appSignalLists)
 		{
 			// Check if this list is for this software
 			//
@@ -371,9 +375,9 @@ namespace Builder
 				continue;
 			}
 
-			appSignalLists.push_back(id);
+			listIds.push_back(list->id());
 		}
-		std::vector<std::pair<QString, QString>> notFoundFilters = tuningUiStorage.checkFilters(appSignalLists);
+		std::vector<std::pair<QString, QString>> notFoundFilters = tuningUiStorage.checkFilters(listIds);
 		for (const auto& [filterId, uiCaption] : notFoundFilters)
 		{
 			m_log->errEQP6251(filterId, uiCaption, m_software->equipmentId());

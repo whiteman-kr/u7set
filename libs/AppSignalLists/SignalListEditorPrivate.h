@@ -92,7 +92,8 @@ namespace AppSignalLists
 		[[nodiscard]] bool remove(Hash hash);
 
 		Columns column(int index) const;
-		QString columnText(int index) const;
+		QString columnName(int index) const;	// Untranslated
+		QString columnText(int index) const;	// Translated
 		QString cellText(int column, int row) const;
 
 		// Item count

@@ -1071,7 +1071,7 @@ namespace AppSignalLists
 		QString csvHeader;
 		for (int c = 0; c < columnCount; c++)
 		{
-			csvHeader += m_itemsModel->columnText(c) + ';';
+			csvHeader += m_itemsModel->columnName(c) + ';';
 		}
 		out << csvHeader << "\r\n";
 

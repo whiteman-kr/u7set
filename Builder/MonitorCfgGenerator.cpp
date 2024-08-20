@@ -63,7 +63,12 @@ namespace Builder
 			ILogFileStub logFileStub;
 			Builder::AppSignalListsProvider signalProvider(monitorSignals);
 
-			result &= writeAppSignalLists(signalProvider, settings->appSignalListIDs, settings->appSignalListMasks, settings->appSignalListTags);
+			std::vector<std::shared_ptr<AppSignalLists::AppSignalList>> appSignalLists;
+			result &= writeAppSignalLists(signalProvider,
+										  settings->appSignalListIDs,
+										  settings->appSignalListMasks,
+										  settings->appSignalListTags,
+										  appSignalLists);
 		}
 
 		if (settings->tuningEnabled == true)

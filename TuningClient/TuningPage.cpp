@@ -1198,31 +1198,59 @@ void TuningPage::fillObjectsList()
 		hashes.insert(allHashes.begin(), allHashes.end());
 	}
 
-	bool first = true;
-	for (const QString& id: m_pageUi->filtersList()) 
-	{
-		AppSignalLists::AppSignalList* pageList = m_appSignalLists.get(id).get();
-		if (pageList == nullptr) 
-		{
-			Q_ASSERT(false);
-			continue;
-		}
+	static const auto re = QRegularExpression("[;\\s]"); // Separators are whitespace and semicolon, '+' is NOT a separator!  We need to keep unions.
+	QStringList uiFiltersList = m_pageUi->filters().split(re, Qt::SkipEmptyParts);	
 
-		if (first == true)
+	bool first = true;
+	for (const QString& uiFilters : uiFiltersList) 
+	{
+		if (uiFilters.contains('+') == true) 
 		{
+			// Filters union
+			//
+			QStringList uiFiltersUnion = uiFilters.split('+', Qt::SkipEmptyParts);
+
+			for (const QString& id : uiFiltersUnion) 
+			{
+				AppSignalLists::AppSignalList* pageList = m_appSignalLists.get(id).get();
+				if (pageList == nullptr)
+				{
+					Q_ASSERT(false);
+					continue;
+				}
+
+				hashes.insert(pageList->tuningListHashesCache().begin(), pageList->tuningListHashesCache().end());
+			}
+			
 			first = false;
-			hashes = pageList->tuningListHashesCache();
 		}
-		else 
+		else
 		{
-			std::vector<Hash> v_intersection;
-			std::set_intersection(hashes.begin(),
-								  hashes.end(),
-								  pageList->tuningListHashesCache().begin(),
-								  pageList->tuningListHashesCache().end(),
-								  std::back_inserter(v_intersection));
-			hashes.clear();
-			hashes.insert(v_intersection.begin(), v_intersection.end());
+			// Filters intersection
+			//
+			AppSignalLists::AppSignalList* pageList = m_appSignalLists.get(uiFilters).get();
+			if (pageList == nullptr)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			if (first == true)
+			{
+				first = false;
+				hashes = pageList->tuningListHashesCache();
+			}
+			else
+			{
+				std::vector<Hash> v_intersection;
+				std::set_intersection(hashes.begin(),
+									  hashes.end(),
+									  pageList->tuningListHashesCache().begin(),
+									  pageList->tuningListHashesCache().end(),
+									  std::back_inserter(v_intersection));
+				hashes.clear();
+				hashes.insert(v_intersection.begin(), v_intersection.end());
+			}
 		}
 	}
 
