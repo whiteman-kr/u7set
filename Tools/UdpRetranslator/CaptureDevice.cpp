@@ -497,7 +497,7 @@ void CaptureDevice::retranslatePacket(const pcap_pkthdr* header, const u_char* p
 	//
 	quint16 rtrPort = htons(rtrEntry->rtrSrcAddr.port());
 
-	if (rtrPort != 0)
+	if (rtrPort != 0 && rtrUh->srcPort != rtrPort)
 	{
 		rtrUh->srcPort = rtrPort;
 		recalcUdpHeaderChecksum = true;
@@ -517,7 +517,7 @@ void CaptureDevice::retranslatePacket(const pcap_pkthdr* header, const u_char* p
 	//
 	rtrPort = htons(rtrEntry->rtrDestAddr.port());
 
-	if (rtrPort != 0)
+	if (rtrPort != 0 && rtrUh->destPort != rtrPort)
 	{
 		rtrUh->destPort = rtrPort;
 		recalcUdpHeaderChecksum = true;
