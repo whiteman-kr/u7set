@@ -102,6 +102,6 @@ target_link_libraries(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/Lib/x6
 
 # Link Visaul Leak Detector
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()
+#if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
+#	target_link_libraries(${TARGET} PRIVATE vld.lib)
+#endif()

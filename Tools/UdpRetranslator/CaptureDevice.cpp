@@ -268,7 +268,7 @@ bool CaptureDevice::setCaptureFilter(const QString& capFilter)
 
 void CaptureDevice::dumpPackets()
 {
-	DEBUG_LOG_ERR(m_log, QString("Listening on '%1'...").arg(m_description));
+	DEBUG_LOG_MSG(m_log, QString("Listening on '%1'...").arg(m_description));
 	std::cout << "\n";
 
 	Q_ASSERT(m_capHandle != NULL);
@@ -380,7 +380,7 @@ bool CaptureDevice::retranslate(const RetranslateCfg& rtrCfg, int threadNo, bool
 		SetConsoleCtrlHandler(consoleCtrlHandler, TRUE);
 	}
 
-	DEBUG_LOG_ERR(m_log, QString("Listening on '%1'...").arg(m_description));
+	DEBUG_LOG_MSG(m_log, QString("Listening on '%1'...").arg(m_description));
 	std::cout << "\n";
 
 	Q_ASSERT(m_capHandle != NULL);
@@ -541,7 +541,7 @@ void CaptureDevice::retranslatePacket(const pcap_pkthdr* header, const u_char* p
 
 		if (m_isService == true)
 		{
-			if ((rtrEntry->retranslatedCount % 200 * 60) == 0)			// 1 record per minute for LM packets retranslation
+			if ((rtrEntry->retranslatedCount % (200 * 60)) == 0)			// 1 record per minute for LM packets retranslation
 			{
 				DEBUG_LOG_MSG(m_log, QString("Retranslated from %1 to %2 packets: %3").
 									 arg(srcAddressPort.addressPortStrWithoutPort0()).
