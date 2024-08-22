@@ -1,9 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-# This file sets some options to control GraphViz graphs.
-#set(GRAPHVIZ_GRAPH_NAME "")
-set(GRAPHVIZ_CUSTOM_TARGETS TRUE)
-
 # Creates variables:
 #	U7SET_MAJOR_VERSION, 
 #	U7SET_MINOR_VERSION, 
