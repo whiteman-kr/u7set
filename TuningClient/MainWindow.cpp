@@ -375,6 +375,11 @@ void MainWindow::loadIdeSignalLists()
 		for (const QString& filterId : ui->filtersList())
 		{
 			const auto& uilist = ideLists.get(filterId);
+			if (uilist == nullptr) 
+			{
+				Q_ASSERT(uilist);
+				continue;
+			}
 			if (uilist->systemTagsList().contains(AppSignalLists::AppSignalList::tagUi) == false)
 			{
 				uilist->systemTagsList().insert(uilist->systemTagsList().begin(), AppSignalLists::AppSignalList::tagUi);

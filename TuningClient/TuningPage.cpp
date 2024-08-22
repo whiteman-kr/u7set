@@ -871,7 +871,7 @@ int TuningPage::m_instanceCounter = 0;
 TuningPage::TuningPage(TuningConfigController& configController,
 					   ClientLib::TuningSignalManager& tuningSignalManager,
 					   TuningLib::TuningUiStorage& tuningUi,
-					   AppSignalLists::AppSignalListSet& appSignalLists,
+					   TuningSignalListSet& appSignalLists,
 					   ClientLib::TuningUserManager& userManager,
 					   ClientLib::TuningConnection& tuningConnection,
 					   const QUuid& treeListUuid,                // List selected in list tree
@@ -1197,61 +1197,18 @@ void TuningPage::fillObjectsList()
 		auto allHashes = m_tuningSignalManager.signalHashes();
 		hashes.insert(allHashes.begin(), allHashes.end());
 	}
-
-	static const auto re = QRegularExpression("[;\\s]"); // Separators are whitespace and semicolon, '+' is NOT a separator!  We need to keep unions.
-	QStringList uiFiltersList = m_pageUi->filters().split(re, Qt::SkipEmptyParts);	
-
-	bool first = true;
-	for (const QString& uiFilters : uiFiltersList) 
+	else
 	{
-		if (uiFilters.contains('+') == true) 
+		static const auto re =
+			QRegularExpression("[;\\s]"); // Separators are whitespace and semicolon, '+' is NOT a separator!  We need to keep unions.
+		QStringList filtersList = m_pageUi->filters().split(re, Qt::SkipEmptyParts);
+		std::set<QString> filtersSet;
+		for (const QString& s : filtersList)
 		{
-			// Filters union
-			//
-			QStringList uiFiltersUnion = uiFilters.split('+', Qt::SkipEmptyParts);
-
-			for (const QString& id : uiFiltersUnion) 
-			{
-				AppSignalLists::AppSignalList* pageList = m_appSignalLists.get(id).get();
-				if (pageList == nullptr)
-				{
-					Q_ASSERT(false);
-					continue;
-				}
-
-				hashes.insert(pageList->tuningListHashesCache().begin(), pageList->tuningListHashesCache().end());
-			}
-			
-			first = false;
+			filtersSet.insert(s);
 		}
-		else
-		{
-			// Filters intersection
-			//
-			AppSignalLists::AppSignalList* pageList = m_appSignalLists.get(uiFilters).get();
-			if (pageList == nullptr)
-			{
-				Q_ASSERT(false);
-				continue;
-			}
 
-			if (first == true)
-			{
-				first = false;
-				hashes = pageList->tuningListHashesCache();
-			}
-			else
-			{
-				std::vector<Hash> v_intersection;
-				std::set_intersection(hashes.begin(),
-									  hashes.end(),
-									  pageList->tuningListHashesCache().begin(),
-									  pageList->tuningListHashesCache().end(),
-									  std::back_inserter(v_intersection));
-				hashes.clear();
-				hashes.insert(v_intersection.begin(), v_intersection.end());
-			}
-		}
+		hashes = m_appSignalLists.filtersSetHashes(filtersSet);
 	}
 
 	// Tree Filter

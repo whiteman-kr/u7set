@@ -33,7 +33,7 @@ QString SwitchFiltersPage::tag_FilterSwitch = "FilterSwitches";
 
 SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
 					  ClientLib::TuningSignalManager& tuningSignalManager,
-					  AppSignalLists::AppSignalListSet& appSignalLists,
+					  TuningSignalListSet& appSignalLists,
 					  ClientLib::TuningUserManager& userManager,
 					  ClientLib::TuningConnection& tuningConnection,
 					  const TuningLib::TuningUiItem& uiItem,

@@ -18,6 +18,7 @@ namespace TuningLib
 }
 
 class TuningCountersManager;
+class TuningSignalListSet;
 
 class TuningPageHelper
 {
@@ -106,7 +107,7 @@ public:
 	TuningPage(TuningConfigController& configController,
 			   ClientLib::TuningSignalManager& tuningSignalManager,
 			   TuningLib::TuningUiStorage& tuningUi,
-			   AppSignalLists::AppSignalListSet& appSignalLists,
+			   TuningSignalListSet& appSignalLists,
 			   ClientLib::TuningUserManager& userManager,
 			   ClientLib::TuningConnection& tuningConnection,
 			   const QUuid& treeListUuid,             // List selected in list tree
@@ -203,7 +204,7 @@ private:
 	TuningConfigController& m_configController;
 	ClientLib::TuningSignalManager& m_tuningSignalManager;
 	TuningLib::TuningUiStorage& m_tuningUi;
-	AppSignalLists::AppSignalListSet& m_appSignalLists;
+	TuningSignalListSet& m_appSignalLists;
 	ClientLib::TuningUserManager& m_userManager;
 	ClientLib::TuningConnection& m_tuningConnection;
 

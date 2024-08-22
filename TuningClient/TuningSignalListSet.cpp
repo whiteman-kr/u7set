@@ -1,6 +1,75 @@
 #include "TuningSignalListSet.h"
 #include "Settings.h"
 
+
+std::set<Hash> TuningSignalListSet::filtersSetHashes(const std::set<QString>& filtersSet) const
+{
+	std::set<Hash> result;
+
+	// Make filters hashes intersection for this counter
+	//
+	bool first = true;
+	for (const QString& uiFilters : filtersSet)
+	{
+		std::set<Hash> filterHashes;
+
+		if (uiFilters.contains('+') == true)
+		{
+			// Filters union
+			//
+			QStringList uiFiltersUnion = uiFilters.split('+', Qt::SkipEmptyParts);
+
+			for (const QString& id : uiFiltersUnion)
+			{
+				AppSignalLists::AppSignalList* pageList = get(id).get();
+				if (pageList == nullptr)
+				{
+					Q_ASSERT(false);
+					continue;
+				}
+
+				filterHashes.insert(pageList->tuningListHashesCache().begin(), pageList->tuningListHashesCache().end());
+			}
+		}
+		else
+		{
+			// Separate filter
+			//
+			AppSignalLists::AppSignalList* pageList = get(uiFilters).get();
+			if (pageList == nullptr)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			filterHashes = pageList->tuningListHashesCache();
+		}
+
+		if (first == true)
+		{
+			first = false;
+			result = filterHashes;
+		}
+		else
+		{
+			std::vector<Hash> v_intersection;
+			std::set_intersection(result.begin(),
+								  result.end(),
+								  filterHashes.begin(),
+								  filterHashes.end(),
+								  std::back_inserter(v_intersection));
+			result.clear();
+			result.insert(v_intersection.begin(), v_intersection.end());
+		}
+	}
+
+	return result;
+}
+
+
+
+
+
 bool TuningSignalListSet::load(QString* errorMessage)
 {
 	QString path = QDir::toNativeSeparators(QString{"%1//TuningSignalLists//%2"}

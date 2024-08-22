@@ -4,7 +4,7 @@
 TuningCountersManager::TuningCountersManager(const TuningLib::TuningUiStorage& tuningUi,
 											 const ClientLib::TuningSignalManager& tunigSignals,
 											 const ClientLib::TuningConnection& tuningConnection,
-											 const AppSignalLists::AppSignalListSet& appSignalListSet) :
+											 const TuningSignalListSet& appSignalListSet) :
 	m_tuningUi(tuningUi),
 	m_tunigSignals(tunigSignals),
 	m_tuningConnection(tuningConnection),
@@ -38,6 +38,11 @@ TuningCounters TuningCountersManager::totalCounters() const
 
 TuningCounters TuningCountersManager::counters(const QString& filters) 
 {
+	if (filters.isEmpty() == true) 
+	{
+		return {};
+	}
+
 	auto it = m_countersBase.find(filters);
 	if (it == m_countersBase.end()) 
 	{
@@ -67,60 +72,7 @@ TuningCounters TuningCountersManager::counters(const QString& filters)
 			}
 		}
 
-		// Make filters hashes intersection for this counter
-		//
-		bool first = true;
-		for (const QString& uiFilters : filtersSet)
-		{
-			if (uiFilters.contains('+') == true)
-			{
-				// Filters union
-				//
-				QStringList uiFiltersUnion = uiFilters.split('+', Qt::SkipEmptyParts);
-
-				for (const QString& id : uiFiltersUnion)
-				{
-					AppSignalLists::AppSignalList* pageList = m_appSignalListSet.get(id).get();
-					if (pageList == nullptr)
-					{
-						Q_ASSERT(false);
-						continue;
-					}
-
-					data.tuningSignalHashes.insert(pageList->tuningListHashesCache().begin(), pageList->tuningListHashesCache().end());
-				}
-
-				first = false;
-			}
-			else
-			{
-				// Filters intersection
-				//
-				AppSignalLists::AppSignalList* pageList = m_appSignalListSet.get(uiFilters).get();
-				if (pageList == nullptr)
-				{
-					Q_ASSERT(false);
-					continue;
-				}
-
-				if (first == true)
-				{
-					first = false;
-					data.tuningSignalHashes = pageList->tuningListHashesCache();
-				}
-				else
-				{
-					std::vector<Hash> v_intersection;
-					std::set_intersection(data.tuningSignalHashes.begin(),
-										  data.tuningSignalHashes.end(),
-										  pageList->tuningListHashesCache().begin(),
-										  pageList->tuningListHashesCache().end(),
-										  std::back_inserter(v_intersection));
-					data.tuningSignalHashes.clear();
-					data.tuningSignalHashes.insert(v_intersection.begin(), v_intersection.end());
-				}
-			}
-		}
+		data.tuningSignalHashes = m_appSignalListSet.filtersSetHashes(filtersSet);
 
 		m_countersBase[filters] = data;
 		return data.counters;

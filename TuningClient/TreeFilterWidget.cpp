@@ -6,10 +6,11 @@
 #include <TuningLib/TuningUiItem.h>
 #include <AppSignalLists/SignalList.h>
 #include "TuningCounters.h"
+#include "TuningSignalListSet.h"
 
 TreeFilterWidget::TreeFilterWidget(TuningConfigController& configController,
 								   TuningLib::TuningUiStorage& tuningUi,
-								   AppSignalLists::AppSignalListSet& appSignalLists,
+								   TuningSignalListSet& appSignalLists,
 								   ClientLib::TuningUserManager& userManager,
 								   ClientLib::TuningConnection& tuningConnection,
 								   TuningCountersManager& tuningCounters,
@@ -945,13 +946,6 @@ void TreeFilterWidget::updateTreeItemCounters(QTreeWidgetItem* treeItem, const A
 			continue;
 		}
 
-		AppSignalLists::AppSignalList* counterList = m_appSignalLists.get(counterItem->filters()).get();
-		if (counterList == nullptr)
-		{
-			Q_ASSERT(counterList);
-			return;
-		}
-
 		// Set column text and color
 
 		if (counterIndex >= static_cast<int>(m_columnDiscreteCountIndexes.size()))
@@ -967,7 +961,11 @@ void TreeFilterWidget::updateTreeItemCounters(QTreeWidgetItem* treeItem, const A
 		// Then we take a filter for the tree item (e. g. for schema or user list) and add it's Id to the request.
 		// We get "BLOCKS_ANALOG;BLOCKS_DISCRETE;USER_LIST_000" counters request.
 		// We filter signals using all these filters and get counters.
-		QStringList columnFilterIds = counterItem->filtersList();
+		//QStringList columnFilterIds = counterItem->filtersList();
+		static const auto re =
+			QRegularExpression("[;\\s]"); // Separators are whitespace and semicolon, '+' is NOT a separator! We need to keep unions.
+		QStringList columnFilterIds = counterItem->filters().split(re, Qt::SkipEmptyParts);
+
 		columnFilterIds.push_back(treeList->id());
 
 		TuningCounters tc = m_tuningCounters.counters(columnFilterIds.join(';'));
@@ -975,7 +973,7 @@ void TreeFilterWidget::updateTreeItemCounters(QTreeWidgetItem* treeItem, const A
 		QColor backColor = tc.discreteCounter == 0 ? Qt::white : counterItem->backAlertedColor();
 		QColor textColor = tc.discreteCounter == 0 ? Qt::black : counterItem->textAlertedColor();
 
-		//QString text = QString("%1 %2").arg(childFilter->caption()) .arg(tc.discreteCounter);
+		//QString text = QString("%1 %2").arg(columnFilterIds.join(';')).arg(tc.discreteCounter);
 		QString text = QString("%1").arg(tc.discreteCounter);
 
 		if (treeItem->text(columnIndex) != text)

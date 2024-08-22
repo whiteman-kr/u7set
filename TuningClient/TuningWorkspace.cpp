@@ -136,16 +136,16 @@ void FilterButton::slot_toggled(bool checked)
 int TuningWorkspace::m_instanceCounter = 0;
 
 TuningWorkspace::TuningWorkspace(TuningConfigController& configController,
-					ClientLib::TuningSignalManager& tuningSignalManager,
-					TuningLib::TuningUiStorage& tuningUi,
-					AppSignalLists::AppSignalListSet& appSignalLists,
-					ClientLib::TuningUserManager& userManager,
-					ClientLib::TuningConnection& tuningConnection,
-					const TuningLib::TuningUiItem& workspaceUi, // Ui item specifies this workspace
-					TuningCountersManager& tuningCounters,
-					const QUuid& treeListUuid,                  // List selected in list tree
-					bool hasFilterTree,
-					QWidget* parent) :
+								 ClientLib::TuningSignalManager& tuningSignalManager,
+								 TuningLib::TuningUiStorage& tuningUi,
+								 TuningSignalListSet& appSignalLists,
+								 ClientLib::TuningUserManager& userManager,
+								 ClientLib::TuningConnection& tuningConnection,
+								 const TuningLib::TuningUiItem& workspaceUi, // Ui item specifies this workspace
+								 TuningCountersManager& tuningCounters,
+								 const QUuid& treeListUuid,                  // List selected in list tree
+								 bool hasFilterTree,
+								 QWidget* parent) :
 	m_configController(configController),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningUi(tuningUi),
