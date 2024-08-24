@@ -1,8 +1,0 @@
-@startuml VFrame30
-!include ../../doc/uml/Namespace.puml
-
-interface VFrame30::ISchemaViewHistory #F0FFF0
-{
-}
-
-@enduml

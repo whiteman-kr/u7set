@@ -189,10 +189,10 @@ add_custom_target(create_install
 # Generate dependency graphs into the build directory/LibraryDependencies
 #
 if(WIN32)
-    # Add a custom target to run the dependencies.bat script
-    add_custom_target(GenerateDependencySvgs
-        COMMAND "${CMAKE_SOURCE_DIR}/dependencies.bat"
-        COMMENT "Generating library dependency SVG files..."
-        WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
-    )
+	# Add a custom target to run the dependencies.bat script
+	add_custom_target(GenerateDependencySvgs
+		COMMAND "${CMAKE_SOURCE_DIR}/dependencies.bat"
+		COMMENT "Generating library dependency SVG files..."
+		WORKING_DIRECTORY "${CMAKE_BINARY_DIR}"
+	)
 endif()

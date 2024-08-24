@@ -1,8 +1,0 @@
-@startuml TrendLib
-!include ../../doc/uml/Namespace.puml
-
-interface TrendLib::ITrendDataProvider #F0FFF0
-{
-}
-
-@enduml
