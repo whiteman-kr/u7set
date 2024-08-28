@@ -2142,7 +2142,13 @@ void TuningPage::slot_saveSignalsToNewFilter()
 	std::shared_ptr<AppSignalLists::AppSignalList> autoCreatedList = std::make_shared<AppSignalLists::AppSignalList>();
 	autoCreatedList->setId(autoCreatedList->uuid().toString());
 	autoCreatedList->setCaption(filterName);
-	autoCreatedList->systemTagsList().push_back(AppSignalLists::AppSignalList::tagTcAuto);
+
+	{
+		QStringList tags = autoCreatedList->systemTagsList();
+		tags.push_back(AppSignalLists::AppSignalList::tagTcAuto);
+		autoCreatedList->setSystemTags(tags.join(' '));
+	}
+
 	m_appSignalLists.add(autoCreatedList);
 	addSelectedSignalsToFilter(*autoCreatedList);
 }

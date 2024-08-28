@@ -1421,9 +1421,12 @@ namespace Builder
 
 			// Add tag "created by ide" to the list
 			//
-			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
-
-			
+			{
+				QStringList tags = list->systemTagsList();
+				tags.push_back(AppSignalLists::AppSignalList::tagIde);
+				list->setSystemTags(tags.join(' '));
+			}
+		
 			// Save list to the data buffer
 			//
 			Proto::Envelope envelope;

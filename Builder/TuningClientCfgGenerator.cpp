@@ -219,8 +219,12 @@ namespace Builder
 
 			// Add tag "created by ide" to the list
 			//
-			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagEquipment);
-			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
+			{
+				QStringList tags = list->systemTagsList();
+				tags.push_back(AppSignalLists::AppSignalList::tagEquipment);
+				tags.push_back(AppSignalLists::AppSignalList::tagIde);
+				list->setSystemTags(tags.join(' '));
+			}
 
 			// Save list to the data buffer
 			//
@@ -298,8 +302,12 @@ namespace Builder
 
 			// Add tag "created by ide" to the list
 			//
-			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagSchema);
-			list->systemTagsList().push_back(AppSignalLists::AppSignalList::tagIde);
+			{
+				QStringList tags = list->systemTagsList();
+				tags.push_back(AppSignalLists::AppSignalList::tagSchema);
+				tags.push_back(AppSignalLists::AppSignalList::tagIde);
+				list->setSystemTags(tags.join(' '));
+			}
 
 			// Save list to the data buffer
 			//

@@ -71,6 +71,7 @@ namespace AppSignalLists
 
 		auto propID = ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_ID, true, AppSignalList::id, AppSignalList::setId);
 		propID->setDescription(tr("Specifies application signal list unique ID"));
+		propID->setValidator("^[A-Za-z0-9_]+$");
 
 		auto propTags =
 			ADD_PROPERTY_GETTER_SETTER(QString, AppSignalLists::prop_Tags, true, AppSignalList::userTags, AppSignalList::setUserTags);
@@ -131,7 +132,9 @@ namespace AppSignalLists
 		m_signalType = that.m_signalType;
 
 		m_systemTags = that.m_systemTags;
+		m_cachedSystemTags = that.m_cachedSystemTags;
 		m_userTags = that.m_userTags;
+		m_cachedUserTags = that.m_cachedUserTags;
 
 		m_customAppSignalIDMasks = that.m_customAppSignalIDMasks;
 		m_equipmentIDMasks = that.m_equipmentIDMasks;
@@ -296,36 +299,33 @@ namespace AppSignalLists
 
 	QString AppSignalList::systemTags() const
 	{
-		return m_systemTags.join(';');
+		return m_systemTags;
 	}
 
 	void AppSignalList::setSystemTags(const QString& value)
 	{
+		m_systemTags = value;
 		if (value.isEmpty() == true)
 		{
-			m_systemTags.clear();
+			m_cachedSystemTags.clear();
 		}
 		else
 		{
-			m_systemTags = value.split(';', Qt::SkipEmptyParts);
+			static const auto re = QRegularExpression("[;\\s]");
+			m_cachedSystemTags = value.split(re, Qt::SkipEmptyParts);
 		}
 	}
-
+	
 	const QStringList& AppSignalList::systemTagsList() const
 	{
-		return m_systemTags;
-	}
-
-	QStringList& AppSignalList::systemTagsList()
-	{
-		return m_systemTags;
+		return m_cachedSystemTags;
 	}
 
 	bool AppSignalList::hasAnySystemTag(const QStringList& tags) const
 	{
 		for (const auto& tag : tags)
 		{
-			if (m_systemTags.contains(tag) == true)
+			if (m_cachedSystemTags.contains(tag) == true)
 			{
 				return true;
 			}
@@ -336,36 +336,33 @@ namespace AppSignalLists
 
 	QString AppSignalList::userTags() const
 	{
-		return m_userTags.join(';');
+		return m_userTags;
 	}
 
 	void AppSignalList::setUserTags(const QString& value)
 	{
+		m_userTags = value;
 		if (value.isEmpty() == true)
 		{
-			m_userTags.clear();
+			m_cachedUserTags.clear();
 		}
 		else
 		{
-			m_userTags = value.split(';', Qt::SkipEmptyParts);
+			static const auto re = QRegularExpression("[;\\s]");
+			m_cachedUserTags = value.split(re, Qt::SkipEmptyParts);
 		}
 	}
 
 	const QStringList& AppSignalList::userTagsList() const
 	{
-		return m_userTags;
-	}
-
-	QStringList& AppSignalList::userTagsList()
-	{
-		return m_userTags;
+		return m_cachedUserTags;
 	}
 
 	bool AppSignalList::hasAnyUserTag(const QStringList& tags) const
 	{
 		for (const auto& tag : tags)
 		{
-			if (m_userTags.contains(tag) == true)
+			if (m_cachedUserTags.contains(tag) == true)
 			{
 				return true;
 			}
@@ -544,7 +541,7 @@ namespace AppSignalLists
 		bool equpmentMatch = true;
 		if (m_cachedEquipmentIDMasks.isEmpty() == false)
 		{
-			equpmentMatch = processMaskList(asp.lmEquipmentId(), m_cachedEquipmentIDMasks);
+			equpmentMatch = processMaskList(asp.equipmentId(), m_cachedEquipmentIDMasks);
 		}
 		if (equpmentMatch == false)
 		{

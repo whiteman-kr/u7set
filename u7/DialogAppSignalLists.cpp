@@ -814,11 +814,11 @@ void DialogAppSignalLists::onPaste()
 
 		// Create unique id
 		//
-		QString id = tr("%1 (Copy)").arg(list->id());
+		QString id = tr("%1_Copy").arg(list->id());
 		int idCounter = 1;
 		while (m_lists->get(id) != nullptr) 
 		{
-			id = tr("%1 (Copy %2)").arg(list->id()).arg(idCounter++);
+			id = tr("%1_Copy_%2").arg(list->id()).arg(idCounter++);
 		}
 		list->setId(id);
 		
