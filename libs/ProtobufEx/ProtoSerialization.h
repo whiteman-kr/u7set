@@ -38,6 +38,8 @@ namespace Proto
 		{
 		}
 
+		virtual ~ObjectSerialization() = default;
+
 		bool saveToFile(const QString& fileName) const
 		{
 			std::fstream output(fileName.toStdString(), std::ios::out | std::ios::binary);

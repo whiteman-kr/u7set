@@ -81,9 +81,9 @@ namespace
 			header.display0.mode = 0;
 
 			header.display0.startSchemaId = addStringRef(propertyByCaption("Display0_StartSchemaID", QString()),
-														 offsetof(VduConfigFile1, VduConfigFile1::display0.startSchemaId));
+														 offsetof(VduConfigFile1, display0.startSchemaId));
 			header.display0.displayName =
-				addStringRef(propertyByCaption("Display0_Name", QString()), offsetof(VduConfigFile1, VduConfigFile1::display0.displayName));
+				addStringRef(propertyByCaption("Display0_Name", QString()), offsetof(VduConfigFile1, display0.displayName));
 
 			// Write font count.
 			//

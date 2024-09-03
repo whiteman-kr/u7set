@@ -20,7 +20,7 @@ namespace SchemaClientLib
 		void updateParentItemState(QTreeWidgetItem* item);
 
 	protected:
-		void timerEvent(QTimerEvent* event);
+		void timerEvent(QTimerEvent* event) override;
 		virtual void updateData() = 0;
 
 	public slots:

@@ -111,9 +111,9 @@ private:
 	bool saveFileToDatabase(const QByteArray& data, DbController* db, const QString& fileName, const QString& comment);
 
 protected:
-	virtual void keyPressEvent(QKeyEvent* evt);
+	virtual void keyPressEvent(QKeyEvent* event) override;
 	virtual void showEvent(QShowEvent* event) override;
-	virtual void closeEvent(QCloseEvent* e) override;
+	virtual void closeEvent(QCloseEvent* event) override;
 
 private slots:
 	void onAddClicked();

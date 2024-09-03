@@ -15,20 +15,22 @@ namespace VFrame30
 	class IPosRect
 	{
 	public:
-		virtual double leftDocPt() const = 0;
+		virtual ~IPosRect() = default;
+
+		[[nodiscard]] virtual double leftDocPt() const = 0;
 		virtual void setLeftDocPt(double value) = 0;
 
-		virtual double topDocPt() const = 0;
+		[[nodiscard]] virtual double topDocPt() const = 0;
 		virtual void setTopDocPt(double value) = 0;
 
-		virtual double widthDocPt() const = 0;
+		[[nodiscard]] virtual double widthDocPt() const = 0;
 		virtual void setWidthDocPt(double value) = 0;
 
-		virtual double heightDocPt() const = 0;
+		[[nodiscard]] virtual double heightDocPt() const = 0;
 		virtual void setHeightDocPt(double value) = 0;
 
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const = 0;
-		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const = 0;
+		[[nodiscard]] virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const = 0;
+		[[nodiscard]] virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const = 0;
 	};
 
 

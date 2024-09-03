@@ -72,6 +72,8 @@ namespace ExtWidgets
 	class IStringModifier
 	{
 	public:
+		virtual ~IStringModifier() = default;
+
 		virtual void operator()(QString& s) const = 0;
 	};
 

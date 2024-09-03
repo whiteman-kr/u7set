@@ -25,7 +25,7 @@ public:
 	ConfigurationServiceWorker(const ConfigurationServiceWorker* worker);
 
 	virtual ServiceWorker* createInstance() const override;
-	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 public slots:
 	void onBuildPathChanged(QString newBuildPath);

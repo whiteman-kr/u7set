@@ -24,8 +24,8 @@ protected:
 			asFloat.setHash(::calcHash(asFloat.appSignalID()));
 			asFloat.setSignalType(E::SignalType::Analog);
 			asFloat.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-			TuningValue tvLow{{TuningValueType::Float}, 0};
-			TuningValue tvHigh{{TuningValueType::Float}, 100};
+			TuningValue tvLow{TuningValueType::Float, 0};
+			TuningValue tvHigh{TuningValueType::Float, 100};
 			asFloat.setTuningLowBound(tvLow);
 			asFloat.setTuningHighBound(tvHigh);
 			asFloat.setTuningDefaultValue(tvLow);
@@ -41,8 +41,8 @@ protected:
 			asInt.setHash(::calcHash(asInt.appSignalID()));
 			asInt.setSignalType(E::SignalType::Analog);
 			asInt.setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);
-			TuningValue tvLow{{TuningValueType::SignedInt32}, 0};
-			TuningValue tvHigh{{TuningValueType::SignedInt32}, 100};
+			TuningValue tvLow{TuningValueType::SignedInt32, 0};
+			TuningValue tvHigh{TuningValueType::SignedInt32, 100};
 			asInt.setTuningLowBound(tvLow);
 			asInt.setTuningHighBound(tvHigh);
 			asInt.setTuningDefaultValue(tvLow);
@@ -58,8 +58,8 @@ protected:
 			asDiscrete.setHash(::calcHash(asDiscrete.appSignalID()));
 			asDiscrete.setSignalType(E::SignalType::Discrete);
 			asDiscrete.setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);
-			TuningValue tvLow{{TuningValueType::Discrete}, 0};
-			TuningValue tvHigh{{TuningValueType::Discrete}, 1};
+			TuningValue tvLow{TuningValueType::Discrete, 0};
+			TuningValue tvHigh{TuningValueType::Discrete, 1};
 			asDiscrete.setTuningLowBound(tvLow);
 			asDiscrete.setTuningHighBound(tvHigh);
 			asDiscrete.setTuningDefaultValue(tvLow);
@@ -647,7 +647,7 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 
 	for (int i = 0; i < floatValues.size(); i++)
 	{
-		TuningValue tv({TuningValueType::Float}, floatValues[i]);
+		TuningValue tv(TuningValueType::Float, floatValues[i]);
 		EXPECT_TRUE(tc.writeTuningSignal(asFloat.appSignalID(), tv));
 
 		// Wait for signal is written
@@ -684,7 +684,7 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 
 	for (int i = 0; i < intValues.size(); i++)
 	{
-		TuningValue tv({TuningValueType::SignedInt32}, intValues[i]);
+		TuningValue tv(TuningValueType::SignedInt32, intValues[i]);
 		EXPECT_TRUE(tc.writeTuningSignal(asInt.appSignalID(), tv));
 
 		// Wait for signal is written
@@ -893,7 +893,7 @@ TEST_F(TuningConnectionTests, writeDiscreteSignals)
 
 	for (int i = 0; i < discreteValues.size(); i++)
 	{
-		TuningValue tv({TuningValueType::Discrete}, discreteValues[i]);
+		TuningValue tv(TuningValueType::Discrete, discreteValues[i]);
 		EXPECT_TRUE(tc.writeTuningSignal(asDiscrete.appSignalID(), tv));
 
 		// Wait for signal is written
@@ -910,7 +910,7 @@ TEST_F(TuningConnectionTests, writeDiscreteSignals)
 				QThread::msleep(10);
 
 				state = signalManager.state(asDiscrete.appSignalID(), nullptr);
-				if (state.valid() == true && fabs(state.value().discreteValue() == discreteValues[i]))
+				if (state.valid() == true && state.value().discreteValue() == discreteValues[i])
 				{
 					break;
 				}

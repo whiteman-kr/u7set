@@ -1011,8 +1011,8 @@ namespace AppSignalLists
 		m_defaultValue(defaultValue),
 		m_lowLimit(lowLimit),
 		m_highLimit(highLimit),
-		m_decimalPlaces(decimalPlaces),
-		m_analogFormat(analogFormat)
+		m_analogFormat(analogFormat),
+		m_decimalPlaces(decimalPlaces)
 	{
 		m_discreteCheck = new QCheckBox();
 		connect(m_discreteCheck, &QCheckBox::stateChanged, this, &DialogAppSignalListValue::onValueCheckStateChanged);

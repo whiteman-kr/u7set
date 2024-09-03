@@ -174,7 +174,7 @@ TEST_F(AdsBridgeTests, AdsLoadConfiguration)
 
 TEST_F(AdsBridgeTests, AdsSetConfiguration)
 {
-	// Load data from the configuration file (ÑTestSettings::ConfigurationFile).
+	// Load data from the configuration file (CTestSettings::ConfigurationFile).
 	//
 	std::string configurationData;
 

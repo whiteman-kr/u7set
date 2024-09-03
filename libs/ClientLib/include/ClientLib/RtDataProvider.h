@@ -24,10 +24,10 @@ namespace ClientLib
 		explicit RtDataProvider(const ISignalDataServer& signalDataServer, ILogFile* logFile);
 
 		RtDataProvider(const RtDataProvider&) = delete;
-		RtDataProvider(RtDataProvider&&) = default;
+		RtDataProvider(RtDataProvider&&) = delete;
 
 		RtDataProvider& operator=(const RtDataProvider&) = delete;
-		RtDataProvider& operator=(RtDataProvider&&) = default;
+		RtDataProvider& operator=(RtDataProvider&&) = delete;
 
 		~RtDataProvider() override;
 

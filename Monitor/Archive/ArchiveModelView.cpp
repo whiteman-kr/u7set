@@ -70,6 +70,10 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 
 	case ArchiveColumns::Server:
 		return tr("Server");
+
+	case ArchiveColumns::ColumnCount:
+		Q_ASSERT(false);
+		break;		
 	}
 
 	Q_ASSERT(false);

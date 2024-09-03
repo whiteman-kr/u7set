@@ -416,7 +416,7 @@ namespace ExtWidgets
 		void onButtonPressed();
 
 	private:
-		bool eventFilter(QObject* watched, QEvent* event);
+		bool eventFilter(QObject* watched, QEvent* event) override;
 
 
 	private:
@@ -534,7 +534,7 @@ namespace ExtWidgets
 		void onButtonPressed();
 
 	private:
-		bool eventFilter(QObject* watched, QEvent* event);
+		bool eventFilter(QObject* watched, QEvent* event) override;
 
 	private:
 		QLineEdit* m_lineEdit = nullptr;

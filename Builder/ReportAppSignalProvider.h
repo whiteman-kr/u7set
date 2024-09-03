@@ -19,6 +19,7 @@ public:
 	//
 public:
 	virtual int signalsCount() const override;
+	virtual std::vector<Hash> signalHashes() const override;
 	virtual std::vector<AppSignalParam> signalList() const override;
 
 	virtual bool signalExists(Hash hash) const override;

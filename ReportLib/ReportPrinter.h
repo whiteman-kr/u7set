@@ -17,6 +17,8 @@ namespace ReportLib
 	class PrintObject
 	{
 	public:
+		virtual ~PrintObject() = default;
+
 		enum class Type
 		{
 			Undefined,

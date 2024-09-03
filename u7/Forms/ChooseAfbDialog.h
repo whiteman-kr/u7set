@@ -30,8 +30,8 @@ private:
 	int getSelectedIndex();
     QString getSelectedCategory();
 
-	virtual void reject();
-	virtual void closeEvent(QCloseEvent* e);
+	virtual void reject() override;
+	virtual void closeEvent(QCloseEvent* e) override;
 
 	virtual bool eventFilter(QObject* object, QEvent* event) override;
 

@@ -455,6 +455,9 @@ namespace Builder
 				l.setPlace(pDeviceObject->place());
 				l.setContact(pDeviceObject->equipmentId().remove(pDeviceObject->parent()->equipmentId()));
 				break;
+
+			default:
+				break;
 		}
 
 		getSignalLocation(pDeviceObject->parent().get(), l);

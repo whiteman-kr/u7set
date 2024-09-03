@@ -67,11 +67,11 @@ public:
 	bool editorActive();
 
 protected:
-	virtual bool edit(const QModelIndex&  index, EditTrigger trigger, QEvent*  event);
+	virtual bool edit(const QModelIndex&  index, EditTrigger trigger, QEvent*  event) override;
 	virtual void mousePressEvent(QMouseEvent *event) override;
 
 protected slots:
-	virtual void closeEditor(QWidget*  editor, QAbstractItemDelegate::EndEditHint hint);
+	virtual void closeEditor(QWidget*  editor, QAbstractItemDelegate::EndEditHint hint) override;
 
 signals:
 	void checkBoxClicked(const QModelIndex& index);

@@ -132,6 +132,7 @@ namespace EditEngine
 	public:
 		EditCommand() = delete;		// use EditCommand(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 		EditCommand(EditSchemaView* schemaView, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		virtual ~EditCommand() = default;
 
 	public:
 		void execute(std::vector<SchemaItemPtr>* itemsToSelect);

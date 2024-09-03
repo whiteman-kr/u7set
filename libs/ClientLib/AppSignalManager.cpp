@@ -77,6 +77,53 @@ namespace ClientLib
 		return;
 	}
 
+	void AppSignalManager::invalidateSignalStates(Qt::HANDLE sourceThreadId)
+	{
+		QWriteLocker wl(&m_statesLocker);
+
+		for (auto&[signalHash, source] : m_states)
+		{
+			source.invalidateSource(sourceThreadId);
+		}
+
+		return;
+	}
+
+	void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId)
+	{
+		Hash signalHash = ::calcHash(appSignalId);
+		return setState(signalHash, state, dataServerHash, sourceThreadId);
+	}
+
+	void AppSignalManager::setState(Hash signalHash, const AppSignalState& arrivedState, Hash dataServerHash, Qt::HANDLE sourceThreadId)
+	{
+		if (signalHash == 0)
+		{
+			assert(signalHash != 0);
+			return;
+		}
+
+		QWriteLocker wl(&m_statesLocker);
+
+		Sources& currentState = m_states[signalHash];
+		currentState.set(arrivedState, dataServerHash, sourceThreadId);
+
+		return;
+	}
+
+	void AppSignalManager::setState(std::span<const AppSignalState> states, Hash dataServerHash, Qt::HANDLE sourceThreadId)
+	{
+		QWriteLocker wl(&m_statesLocker);
+
+		for (const AppSignalState& newState : states)
+		{
+			Sources& currentStateAndSources = m_states[newState.hash()];
+			currentStateAndSources.set(newState, dataServerHash, sourceThreadId);
+		}
+
+		return;
+	}
+
 	void AppSignalManager::addSignalPrivate(const AppSignalParam& appSignal, const QString& appDataServiceId)
 	{
 		m_signalParams.emplace(appSignal.hash(), appSignal);
@@ -148,6 +195,18 @@ namespace ClientLib
 		return m_recentUsed.hashes().empty() == false;
 	}
 
+	void AppSignalManager::setSetpoints(ComparatorSet&& setpoints)
+	{
+		m_setpoints = std::move(setpoints);
+		return;
+	}
+
+	void AppSignalManager::setSetpoints(const ComparatorSet& setpoints)
+	{
+		m_setpoints = setpoints;
+		return;
+	}
+
 	std::vector<Hash> AppSignalManager::signalHashes() const
 	{
 		QReadLocker rl(&m_paramsLocker);
@@ -161,65 +220,6 @@ namespace ClientLib
 		}
 
 		return result;
-	}
-
-	void AppSignalManager::invalidateSignalStates(Qt::HANDLE sourceThreadId)
-	{
-		QWriteLocker wl(&m_statesLocker);
-
-		for (auto&[signalHash, source] : m_states)
-		{
-			source.invalidateSource(sourceThreadId);
-		}
-
-		return;
-	}
-
-	void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId)
-	{
-		Hash signalHash = ::calcHash(appSignalId);
-		return setState(signalHash, state, dataServerHash, sourceThreadId);
-	}
-
-	void AppSignalManager::setState(Hash signalHash, const AppSignalState& arrivedState, Hash dataServerHash, Qt::HANDLE sourceThreadId)
-	{
-		if (signalHash == 0)
-		{
-			assert(signalHash != 0);
-			return;
-		}
-
-		QWriteLocker wl(&m_statesLocker);
-
-		Sources& currentState = m_states[signalHash];
-		currentState.set(arrivedState, dataServerHash, sourceThreadId);
-
-		return;
-	}
-
-	void AppSignalManager::setState(std::span<const AppSignalState> states, Hash dataServerHash, Qt::HANDLE sourceThreadId)
-	{
-		QWriteLocker wl(&m_statesLocker);
-
-		for (const AppSignalState& newState : states)
-		{
-			Sources& currentStateAndSources = m_states[newState.hash()];
-			currentStateAndSources.set(newState, dataServerHash, sourceThreadId);
-		}
-
-		return;
-	}
-
-	void AppSignalManager::setSetpoints(ComparatorSet&& setpoints)
-	{
-		m_setpoints = std::move(setpoints);
-		return;
-	}
-
-	void AppSignalManager::setSetpoints(const ComparatorSet& setpoints)
-	{
-		m_setpoints = setpoints;
-		return;
 	}
 
 	int AppSignalManager::signalsCount() const
@@ -593,7 +593,7 @@ namespace ClientLib
 
 		// Filter all signals which are not belong to serviceEquipmentId.
 		//
-		std::erase_if(inOutSignalHashes, [&sh, this](Hash hash) {
+		std::erase_if(inOutSignalHashes, [&sh](Hash hash) {
 			return sh.contains(hash) == false;
 		});
 

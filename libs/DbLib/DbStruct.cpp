@@ -1040,7 +1040,7 @@ bool DbFileTree::removeIf(std::function<bool(const DbFileInfo&)> pred)
 		}
 	}
 
-	return true;
+	return ok;
 }
 
 

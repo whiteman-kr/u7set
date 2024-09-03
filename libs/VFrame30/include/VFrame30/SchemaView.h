@@ -1,6 +1,6 @@
 #pragma once
-#include <VFrame30/VFrame30Types.h>
 #include <VFrame30/Session.h>
+#include <VFrame30/VFrame30Types.h>
 
 #include <QWidget>
 class QPainter;
@@ -17,15 +17,25 @@ namespace VFrame30
 
 	class SchemaView : public std::enable_shared_from_this<SchemaView>
 	{
-	  protected:
+	protected:
 		SchemaView();
 		explicit SchemaView(std::shared_ptr<Schema> schema);
 
+	public:
+		virtual ~SchemaView() = default;
+
 		// Methods
 		//
-	  public:
+	public:
 		static void Ajust(QPainter* painter, SchemaUnit units, double startX, double startY, double zoom);
-		static void Ajust(QPainter* painter, int dpiX, int dpiY, double devicePixelRatioF, SchemaUnit units, double startX, double startY, double zoom);
+		static void Ajust(QPainter* painter,
+						  int dpiX,
+						  int dpiY,
+						  double devicePixelRatioF,
+						  SchemaUnit units,
+						  double startX,
+						  double startY,
+						  double zoom);
 
 		virtual DrawMode drawMode() const = 0;
 
@@ -43,7 +53,7 @@ namespace VFrame30
 
 		// Properties
 		//
-	  public:
+	public:
 		double zoom() const;
 
 		const Session& session() const;
@@ -51,7 +61,7 @@ namespace VFrame30
 
 		// Data
 		//
-	  protected:
+	protected:
 		std::shared_ptr<VFrame30::Schema> m_schema;
 
 		double m_zoom = 100.0;
@@ -65,11 +75,11 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-	  public:
+	public:
 		explicit SchemaViewWidget(QWidget* parent = nullptr);
 		explicit SchemaViewWidget(std::shared_ptr<Schema> schema, QWidget* parent = nullptr);
 
-	  public:
+	public:
 		void updateControlWidgets(bool editMode);
 		void deleteControlWidgets();
 
@@ -81,22 +91,22 @@ namespace VFrame30
 		//
 		void draw(CDrawParam& drawParam, const QRectF& clipRect);
 
-	  protected:
+	protected:
 		virtual void paintEvent(QPaintEvent*) override;
 
 		// Events
 		//
-	  protected:
+	protected:
 		virtual void mouseMoveEvent(QMouseEvent* event) override;
 
-	  public:
+	public:
 		// Properties
 		//
 		double setZoom(double value, bool repaint = true);
 
 		// Signals
 		//
-	  signals:
+	signals:
 		void signal_schemaChanged(VFrame30::Schema* schema);
 	};
 } // namespace VFrame30

@@ -794,8 +794,8 @@ namespace Afb
 		m_visible(true),
 		m_byteOrder(E::ByteOrder::BigEndian),
 		m_instantiator(false),
-		m_afbParamValue(E::SignalType::Analog, E::DataFormat::UnsignedInt, 16),
 		m_user(false),
+		m_afbParamValue(E::SignalType::Analog, E::DataFormat::UnsignedInt, 16),
 		m_operandIndex(0)
 	{
 		m_defaultValue = 0;

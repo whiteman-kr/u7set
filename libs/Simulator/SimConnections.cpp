@@ -23,7 +23,7 @@ namespace Sim
 		return m_impl != nullptr;
 	}
 
-	bool Connection::operator==(nullptr_t) const
+	bool Connection::operator==(std::nullptr_t) const
 	{
 		return m_impl == nullptr;
 	}

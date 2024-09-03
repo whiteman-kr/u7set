@@ -6,6 +6,8 @@ namespace VFrame30
 	class ISchemaViewHistory
 	{
 	public:
+		virtual ~ISchemaViewHistory() = default;
+
 		[[nodiscard]] virtual bool canBackHistory() const = 0;
 		[[nodiscard]] virtual bool canForwardHistory() const = 0;
 

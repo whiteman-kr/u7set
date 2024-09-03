@@ -6,6 +6,8 @@
 class ISignalManager
 {
 public:
+	virtual ~ISignalManager() = default;
+
 	// AppSignals
 	//
 	[[nodiscard]] virtual int signalsCount() const = 0;

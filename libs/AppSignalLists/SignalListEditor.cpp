@@ -13,7 +13,7 @@ namespace AppSignalLists
 		QWidget(parent),
 		m_appSignalManager(appSignalManager),
 		m_tuningSignalManager(tuningSignalManager),
-		m_signalHashes(std::move(m_appSignalManager.signalHashes())),
+		m_signalHashes(m_appSignalManager.signalHashes()),
 		m_signalsModel(std::make_unique<SignalsModel>(m_appSignalManager)),
 		m_itemsModel(std::make_unique<AppSignalListModel>(m_appSignalManager, m_tuningSignalManager != nullptr))
 	{

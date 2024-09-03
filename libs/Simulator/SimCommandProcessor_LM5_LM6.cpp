@@ -108,10 +108,10 @@ namespace Sim
 		constexpr quint16 armingKeyHighBBit = 9;
 		constexpr quint16 armingKeyLowBBit = 12;
 
-		constexpr quint16 armingKeyMask = (0x0001 << armingKeyValidityBit) ||
-										  (0x0001 << armingKeyHighABit) ||
-										  (0x0001 << armingKeyLowABit) ||
-										  (0x0001 << armingKeyHighBBit) ||
+		constexpr quint16 armingKeyMask = (0x0001 << armingKeyValidityBit) |
+										  (0x0001 << armingKeyHighABit) |
+										  (0x0001 << armingKeyLowABit) |
+										  (0x0001 << armingKeyHighBBit) |
 										  (0x0001 << armingKeyLowBBit);
 
 		const quint16 armingKey = m_device->armingKey();

@@ -279,7 +279,7 @@ namespace Gateway
 	{
 		m_regsMutex.lock();
 
-		for(const auto [hash, states] : m_signalsStates)
+		for(const auto& [hash, states] : m_signalsStates)
 		{
 			for(const SignalState& state : states)
 			{

@@ -2148,7 +2148,7 @@ namespace ExtWidgets
 			}
 		}
 
-		return QWidget::eventFilter(watched, event);
+		return PropertyEditCellWidget::eventFilter(watched, event);
 	}
 
 	void MultiColorEdit::onButtonPressed()
@@ -2530,7 +2530,7 @@ namespace ExtWidgets
 			}
 		}
 
-		return QWidget::eventFilter(watched, event);
+		return PropertyEditCellWidget::eventFilter(watched, event);
 	}
 
 	void MultiTextEdit::onButtonPressed()

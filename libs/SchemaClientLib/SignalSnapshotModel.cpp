@@ -383,50 +383,36 @@ namespace SchemaClientLib
 
 			// Filter by Signal Type
 			//
-			switch (m_signalType)
+			if (m_signalType == SnapshotSignalType::Analog && s.isAnalog() == false)
 			{
-			case SnapshotSignalType::Analog:
-				if (s.isAnalog() == false)
-				{
-					continue;
-				}
-				break;
-			case SnapshotSignalType::Discrete:
-				if (s.isDiscrete() == false)
-				{
-					continue;
-				}
-				break;
+				continue;
+			}
+
+			if (m_signalType == SnapshotSignalType::Discrete && s.isDiscrete() == false)
+			{
+				continue;
 			}
 
 			// Filter by Signal Role
 			//
-			switch (m_signalRole)
+			if (m_signalRole == SnapshotSignalRole::Input && s.isInput() == false)
 			{
-			case SnapshotSignalRole::Input:
-				if (s.isInput() == false)
-				{
-					continue;
-				}
-				break;
-			case SnapshotSignalRole::Output:
-				if (s.isOutput() == false)
-				{
-					continue;
-				}
-				break;
-			case SnapshotSignalRole::Internal:
-				if (s.isInternal() == false)
-				{
-					continue;
-				}
-				break;
-			case SnapshotSignalRole::Tunable:
-				if (s.enableTuning() == false)
-				{
-					continue;
-				}
-				break;
+				continue;
+			}
+
+			if (m_signalRole == SnapshotSignalRole::Output && s.isOutput() == false)
+			{
+				continue;
+			}
+
+			if (m_signalRole == SnapshotSignalRole::Internal && s.isInternal() == false)
+			{
+				continue;
+			}
+			
+			if (m_signalRole == SnapshotSignalRole::Tunable && s.enableTuning() == false)
+			{
+				continue;
 			}
 
 			// Filter by Mask

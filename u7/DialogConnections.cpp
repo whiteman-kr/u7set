@@ -1205,6 +1205,10 @@ void DialogConnections::updateTreeItemText(QTreeWidgetItem* item)
 		case E::VcsItemAction::Deleted:
 			b.setColor(StandardColors::VcsDeleted);
 			break;
+		case E::VcsItemAction::Unknown:
+			Q_ASSERT(false);
+			b.setColor(StandardColors::VcsDeleted);
+			break;
 		}
 	}
 	else

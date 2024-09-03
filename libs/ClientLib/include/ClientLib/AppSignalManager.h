@@ -68,8 +68,6 @@ namespace ClientLib
 		// End of IRecentAppSignals implementation
 
 	public:
-		std::vector<Hash> signalHashes() const;
-
 		// Setpoints/Comparators
 		//
 		void setSetpoints(ComparatorSet&& setpoints);
@@ -77,6 +75,8 @@ namespace ClientLib
 
 		// IAppSignalManager implementation - AppSignals
 		//
+		virtual std::vector<Hash> signalHashes() const override final;
+
 		virtual int signalsCount() const override final;
 		virtual std::vector<AppSignalParam> signalList() const override final;
 

@@ -147,6 +147,7 @@ namespace ReportLib
 		};
 
 		ReportObject(Type type);
+		virtual ~ReportObject() = default;
 
 		Type type() const;
 
