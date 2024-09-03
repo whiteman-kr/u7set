@@ -425,7 +425,7 @@ function generate_waim(confFirmware, module, LMNumber, frame, log, signalSet, op
             ptr += 4;
 			
             
-			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K1", k2) == false)         // K2
+			if (setDataFloat(confFirmware, log, LMNumber, module.equipmentId, frame, ptr, "K2", k2) == false)         // K2
 			{
 				return false;
 			}
