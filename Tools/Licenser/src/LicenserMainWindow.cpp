@@ -238,14 +238,13 @@ void LicenserMainWindow::loadLicenses()
 
 void LicenserMainWindow::selectPrivateKey()
 {
+	// Get private key file name
+	//
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Select Private Key"), QString{}, tr("Private Key (*.pem)"));
 	if (fileName.isEmpty() == true)
 	{
 		return;
 	}
-
-	m_privateKeyFileName = fileName;
-	m_privateKeyLabel->setText(tr("Private Key: ") + fileName);
 
 	// Ask for a password
 	//
@@ -259,10 +258,29 @@ void LicenserMainWindow::selectPrivateKey()
 
 	if (ok == false)
 	{
-		m_privateKeyFileName.clear();
-		m_privateKeyLabel->clear();
 		return;
 	}
+
+	// Test the password
+	//
+	{
+		RpctLicenseObject license;
+		license.setUuid(QUuid::createUuid()); // it makes license not null
+		
+		QString errorMessage;
+		QByteArray data = license.toRawData(fileName, password, &errorMessage);
+
+		if (data.isEmpty() == true || errorMessage.isEmpty() == false)
+		{
+			QMessageBox::critical(this, tr("Error"), tr("Cannot load private key: ") + errorMessage);
+			return;
+		}
+	}
+
+	// Save password
+	//
+	m_privateKeyFileName = fileName;
+	m_privateKeyLabel->setText(tr("Private Key: ") + fileName);
 
 	m_privateKeyPassword = password;
 

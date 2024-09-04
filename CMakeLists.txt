@@ -102,6 +102,16 @@ option(UPDATE_TRANSLATIONS "Update Translations" OFF)
 #
 option(ALLOW_FTDI "Allow FTDI" OFF)
 
+# Build Licenser
+#
+option(BUILD_LICENSER "Build Licenser" OFF)
+
+if (DEFINED ENV{CI_BUILD_LICENSER})
+	set(BUILD_LICENSER ON)
+endif()
+
+# ---
+#
 message("-----------------------------------------")
 message(${PROJECT_NAME})
 message("Version: ${CMAKE_PROJECT_VERSION} (${U7SET_BRANCH_NAME})")
@@ -126,6 +136,7 @@ message("Qt Version: ${Qt6_VERSION}")
 message("Qt Path: ${Qt6_DIR}")
 message("VCPKG_ROOT: ${VCPKG_ROOT}")
 message("Allow FTDI: ${ALLOW_FTDI}")
+message("Build Licenser: ${BUILD_LICENSER}")
 message("-----------------------------------------")
 
 # Add projects.
@@ -173,7 +184,7 @@ add_subdirectory(./Test/u7databaseTests)
 add_subdirectory(./Test/MetrologyTests)
 #add_subdirectory(./Test/TestSuiteTest)
 
-if (DEFINED ENV{CI_BUILD_LICENSER})
+if (BUILD_LICENSER)
 	add_subdirectory(./Tools/Licenser)
 endif()
 
