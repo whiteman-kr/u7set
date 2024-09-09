@@ -283,8 +283,8 @@ namespace TrendLib
 		//
 		struct PosTimePair
 		{
-			double x;
-			TimeStamp timeStamp;
+			double x{};
+			TimeStamp timeStamp{};
 		};
 
 		int timeGridCount = static_cast<int>(insideRect.width() / inchGridInterval);

@@ -72,7 +72,7 @@ namespace VFrame30
 		//
 		IndicatorSetpoint(std::shared_ptr<Comparator> comparator_,
 						  SetpointSource setpointSource_,
-						  const std::shared_ptr<CustomSetPoint> customSetpointData_,
+						  std::shared_ptr<CustomSetPoint> customSetpointData_,
 						  std::optional<double> value_,
 						  std::optional<bool> alerted_,
 						  QRgb setpointColor_,
@@ -153,7 +153,7 @@ namespace VFrame30
 		{
 			DrawSetpointStruct(int signalIndex_,
 							   const QRectF& barRect_,
-							   const IndicatorSetpoint& indicatorSetpoint_) :
+							   IndicatorSetpoint indicatorSetpoint_) :
 				signalIndex(signalIndex_),
 				barRect(barRect_),
 				indicatorSetpoint(std::move(indicatorSetpoint_))

@@ -63,7 +63,7 @@ public:
 	bool m_boolStatProp = false;
 	int m_intStatProp = 0;
 	QString m_qstringStatProp;
-	Priority m_priorityStatProp;
+	Priority m_priorityStatProp{Priority::VeryLow};
 
 	static const int m_testPropertyCount = 4;
 };

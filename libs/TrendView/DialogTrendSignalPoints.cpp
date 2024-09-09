@@ -403,7 +403,7 @@ void DialogTrendSignalPoints::on_buttonEdit_clicked()
 
 	// Add new points
 	//
-	for (TrendLib::TrendStateItem stateItem : stateItems)
+	for (const auto& stateItem : stateItems)
 	{
 		m_trendSignalSet->addTrendPoint(m_trendSignal, m_timeType, stateItem);
 	}

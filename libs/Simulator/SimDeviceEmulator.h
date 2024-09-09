@@ -90,8 +90,8 @@ namespace Sim
 
 		// Specific data for specific CommandController
 		//
-		std::array<std::byte, 16> m_commandFuncPtr;	// This function can be called ONLY in in class and instance where it was initialized
-		std::array<std::byte, 16> m_afbFuncPtr;		// This function can be called ONLY in in class and instance where it was initialized
+		std::array<std::byte, 16> m_commandFuncPtr{};	// This function can be called ONLY in in class and instance where it was initialized
+		std::array<std::byte, 16> m_afbFuncPtr{};		// This function can be called ONLY in in class and instance where it was initialized
 
 		Ram::Handle m_memoryAreaFrom = std::numeric_limits<Ram::Handle>::max();
 		Ram::Handle m_memoryAreaTo = std::numeric_limits<Ram::Handle>::max();

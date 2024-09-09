@@ -28,7 +28,7 @@ namespace Tuning
 		// Tuning Source channel identification
 		// only once initialized fields that not require std::atomic<>
 		//
-		quint64	sourceID;					// generate by DataSource::generateID()
+		quint64	sourceID{};					// generate by DataSource::generateID()
 		std::string lanEquipmentID;
 		int channel = CHANNEL_1;
 

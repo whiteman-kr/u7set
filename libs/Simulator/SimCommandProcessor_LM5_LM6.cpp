@@ -4212,7 +4212,7 @@ namespace Sim
 			struct Operand
 			{
 				AfbComponentParam value;
-				quint16 operandIndex;	// 1-based
+				quint16 operandIndex{};	// 1-based
 			};
 
 			std::array<Operand, maxInputCount> operands;

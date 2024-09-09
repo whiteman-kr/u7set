@@ -202,7 +202,7 @@ namespace UiLib
 		else
 		{
 			QString cellText;
-			for (const QModelIndex mi : selectedIndexes)
+			for (const QModelIndex& mi : selectedIndexes)
 			{
 				int row = mi.row();
 

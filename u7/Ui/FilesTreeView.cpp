@@ -1230,7 +1230,7 @@ QModelIndexList FileTreeView::selectedSourceRows() const
 
 		QModelIndexList selectedIndexList;
 
-		for (QModelIndex mi : proxySelection)
+		for (const QModelIndex& mi : proxySelection)
 		{
 			selectedIndexList.push_back(proxyModel->mapToSource(mi));
 		}
