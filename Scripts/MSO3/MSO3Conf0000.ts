@@ -216,7 +216,7 @@ function main(builder: Builder, root: ScriptDeviceObject, logicModules: ScriptDe
 
 	for (let i: number = 0; i < logicModules.length; i++) {
 
-		if (logicModules[i].customModuleFamily != FamilyMSO3 || logicModules[i].moduleVersion != VersionMSO3) {
+		if (logicModules[i].moduleFamily != FamilyMSO3 || logicModules[i].moduleVersion != VersionMSO3) {
 			continue;
 		}
 
@@ -335,11 +335,11 @@ function valToADC(val: number, lowLimit: number, highLimit: number, lowADC: numb
 function module_mso3(builder: Builder, root: ScriptDeviceObject, module: ScriptDeviceModule, confFirmware: ModuleFirmware, log: IssueLogger,
 	signalSet: SignalSet, subsystemStorage: SubsystemStorage, opticModuleStorage: OptoModuleStorage, logicModuleDescription: LogicModule): boolean {
 
-	if (module.customModuleFamily == FamilyMSO3 && module.moduleVersion == VersionMSO3) {
+	if (module.moduleFamily == FamilyMSO3 && module.moduleVersion == VersionMSO3) {
 		let place: number = module.place;
 
-		if (place != 0) {
-			log.errCFG3002("Place", place, 0, 0, module.equipmentId);
+		if (place != 0 && place != 73) {
+			log.errCFG3002("Place", place, 0, 73, module.equipmentId);
 			return false;
 		}
 
@@ -537,7 +537,7 @@ function generate_mso3_rev1(builder: Builder, root: ScriptDeviceObject, module: 
 
 		let ioModule: ScriptDeviceModule = chassis.child(i).toModule();
 
-		if (ioModule.customModuleFamily == FamilyMSO3 && ioModule.moduleVersion == VersionMSO3) {
+		if (ioModule.moduleFamily == FamilyMSO3 && ioModule.moduleVersion == VersionMSO3) {
 			continue;
 		}
 
@@ -1122,7 +1122,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 		let ioModule: ScriptDeviceModule = chassis.child(i).toModule();
 
-		if (ioModule.customModuleFamily == FamilyMSO3 && ioModule.moduleVersion == VersionMSO3) {
+		if (ioModule.moduleFamily == FamilyMSO3 && ioModule.moduleVersion == VersionMSO3) {
 			continue;
 		}
 

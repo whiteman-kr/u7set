@@ -28,12 +28,14 @@ namespace Hardware
 			TIM = 0x1900,
 			RIM = 0x1A00,
 			FIM = 0x1B00,
+			VDU = 0x1C00,
+
+			MSO = 0x2200,
 			MPS = 0x5100,
 			BVK4 = 0x5300,	// obsolete, for compatibility
 			BP336 = 0x5500,	// obsolete, for compatibility
 			BVB = 0x5600,
 			BUIM = 0x5700,
-			VDU = 0x1C00
 		};
 		Q_ENUM(FamilyType)
 
@@ -79,7 +81,7 @@ namespace Hardware
 		[[nodiscard]] bool isFSCConfigurationModule() const;
 		[[nodiscard]] bool isOptoModule() const;
 		[[nodiscard]] bool isBvb() const;
-		[[nodiscard]] bool isMso3() const;
+		[[nodiscard]] bool isMso() const;
 		[[nodiscard]] bool isVdu() const;
 
 		// Data

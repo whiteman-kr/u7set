@@ -612,7 +612,7 @@ const Hardware::DeviceModule* DeviceHelper::getLm(const Hardware::DeviceChassis*
 
 		if (module->isLogicModule() == true)
 		{
-			if (module->place() == LM1_PLACE)
+			if (module->place() == LM_PLACE1)
 			{
 				return 	module;
 			}
@@ -793,7 +793,7 @@ void DeviceHelper::getChildDiagSignals(std::shared_ptr<const Hardware::DeviceObj
 	}
 }
 
-bool DeviceHelper::isTwoChannelSoftware(const Hardware::DeviceObject* swObject, QStringList* channelsCntrollersIds)
+bool DeviceHelper::isTwoChannelSoftware(const Hardware::DeviceObject* swObject, QStringList* channelsControllersIds)
 {
 	if (swObject->isSoftware() == false)
 	{
@@ -801,9 +801,9 @@ bool DeviceHelper::isTwoChannelSoftware(const Hardware::DeviceObject* swObject, 
 		return false;
 	}
 
-	if (channelsCntrollersIds != nullptr)
+	if (channelsControllersIds != nullptr)
 	{
-		channelsCntrollersIds->clear();
+		channelsControllersIds->clear();
 	}
 
 	for(int ch = CHANNEL_1; ch < 2;  ch++)
@@ -814,17 +814,17 @@ bool DeviceHelper::isTwoChannelSoftware(const Hardware::DeviceObject* swObject, 
 
 		if (controller == nullptr || controller->isController() == false)
 		{
-			if (channelsCntrollersIds != nullptr)
+			if (channelsControllersIds != nullptr)
 			{
-				channelsCntrollersIds->clear();
+				channelsControllersIds->clear();
 			}
 
 			return false;
 		}
 
-		if (channelsCntrollersIds != nullptr)
+		if (channelsControllersIds != nullptr)
 		{
-			channelsCntrollersIds->append(controller->equipmentIdTemplate());
+			channelsControllersIds->append(controller->equipmentIdTemplate());
 		}
 	}
 

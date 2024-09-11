@@ -2026,19 +2026,17 @@ namespace Hardware
 		{
 			if (module->isLogicModule() == true)
 			{
-				Q_ASSERT(m_place == DeviceHelper::LM1_PLACE);
+				Q_ASSERT(m_place == DeviceHelper::LM_PLACE1);
 			}
 
 			if (module->isBvb() == true)
 			{
-				if (module->isMso3() == true)
-				{
-					Q_ASSERT(m_place == DeviceHelper::MSO1_PLACE || m_place == DeviceHelper::MSO2_PLACE);
-				}
-				else
-				{
-					Q_ASSERT(m_place == DeviceHelper::BVB1_PLACE || m_place == DeviceHelper::BVB2_PLACE);
-				}
+				Q_ASSERT(m_place == DeviceHelper::BVB_PLACE1 || m_place == DeviceHelper::BVB_PLACE2);
+			}
+
+			if (module->isMso() == true)
+			{
+				Q_ASSERT(m_place == DeviceHelper::MSO_PLACE1 || m_place == DeviceHelper::MSO_PLACE2);
 			}
 
 			m_moduleDataAddr = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
