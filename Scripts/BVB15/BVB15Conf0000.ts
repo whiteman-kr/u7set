@@ -216,7 +216,7 @@ function main(builder: Builder, root: ScriptDeviceObject, logicModules: ScriptDe
 
 	for (let i: number = 0; i < logicModules.length; i++) {
 
-		if (logicModules[i].customModuleFamily != FamilyBVB15ID) {
+		if (logicModules[i].moduleFamily != FamilyBVB15ID) {
 			continue;
 		}
 
@@ -335,7 +335,7 @@ function valToADC(val: number, lowLimit: number, highLimit: number, lowADC: numb
 function module_bvb15(builder: Builder, root: ScriptDeviceObject, module: ScriptDeviceModule, confFirmware: ModuleFirmware, log: IssueLogger,
 	signalSet: SignalSet, subsystemStorage: SubsystemStorage, opticModuleStorage: OptoModuleStorage, logicModuleDescription: LogicModule): boolean {
 
-	if (module.customModuleFamily == FamilyBVB15ID) {
+	if (module.moduleFamily == FamilyBVB15ID) {
 		let place: number = module.place;
 
 		if (place != 0 &&
@@ -537,7 +537,7 @@ function generate_bvb15_rev1(builder: Builder, root: ScriptDeviceObject, module:
 
 		let ioModule: ScriptDeviceModule = chassis.child(i).toModule();
 
-		if (ioModule.customModuleFamily == FamilyBVB15ID) {
+		if (ioModule.moduleFamily == FamilyBVB15ID) {
 			continue;
 		}
 
@@ -1122,7 +1122,7 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 			return false;
 		}
 
-		if (ioModule.customModuleFamily == FamilyBVB15ID) {
+		if (ioModule.moduleFamily == FamilyBVB15ID) {
 			continue;
 		}
 
