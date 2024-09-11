@@ -41,9 +41,9 @@ namespace Builder
 		m_moduleLogicCompilers.emplace(h, mc);
 	}
 
-	std::shared_ptr<ModuleLogicCompiler> Context::getModuleLogicCompiler(const QString& lmEquipmemtID) const
+	std::shared_ptr<ModuleLogicCompiler> Context::getModuleLogicCompiler(const QString& lmEquipmentID) const
 	{
-		auto it = m_moduleLogicCompilers.find(calcHash(lmEquipmemtID));
+		auto it = m_moduleLogicCompilers.find(calcHash(lmEquipmentID));
 
 		if (it != m_moduleLogicCompilers.end())
 		{

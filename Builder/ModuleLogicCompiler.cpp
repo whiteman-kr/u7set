@@ -696,12 +696,36 @@ namespace Builder
 		m.device = m_lmShared;
 		m.place = m_lmShared->place();
 
-		if ((m_lmShared->isLogicModule() && m.place != DeviceHelper::LM1_PLACE) ||
-			(m_lmShared->isBvb() && m.place != DeviceHelper::BVB1_PLACE &&
-									m.place != DeviceHelper::BVB2_PLACE))
+		if (m_lmShared->isLogicModule() && m.place != DeviceHelper::LM1_PLACE)
 		{
-			LOG_INTERNAL_ERROR(m_log);
+			// Module %1 should be installed on place %2.
+			//
+			m_log->errEQP6012(m_lmShared->equipmentIdTemplate(), DeviceHelper::LM1_PLACE);
 			return false;
+		}
+
+		if	(m_lmShared->isBvb())
+		{
+			if (m_lmShared->isMso3())
+			{
+				if (m.place != DeviceHelper::MSO1_PLACE && m.place != DeviceHelper::MSO2_PLACE)
+				{
+					// Module %1 should be installed on place %2 or %3.
+					//
+					m_log->errEQP6013(m_lmShared->equipmentIdTemplate(), DeviceHelper::MSO1_PLACE, DeviceHelper::MSO2_PLACE);
+					return false;
+				}
+			}
+			else
+			{
+				if (m.place != DeviceHelper::BVB1_PLACE && m.place != DeviceHelper::BVB2_PLACE)
+				{
+					// Module %1 should be installed on place %2 or %3.
+					//
+					m_log->errEQP6013(m_lmShared->equipmentIdTemplate(), DeviceHelper::BVB1_PLACE, DeviceHelper::BVB2_PLACE);
+					return false;
+				}
+			}
 		}
 
 		m.txDiagDataOffset = m_lmDescription->memory().m_txDiagDataOffset;
@@ -829,7 +853,14 @@ namespace Builder
 			//
 			if (module.device->isBvb() == true)
 			{
-				Q_ASSERT(module.place == DeviceHelper::BVB1_PLACE || module.place == DeviceHelper::BVB2_PLACE);
+				if (module.device->isMso3() == true)
+				{
+					Q_ASSERT(module.place == DeviceHelper::MSO1_PLACE || module.place == DeviceHelper::MSO2_PLACE);
+				}
+				else
+				{
+					Q_ASSERT(module.place == DeviceHelper::BVB1_PLACE || module.place == DeviceHelper::BVB2_PLACE);
+				}
 				continue;
 			}
 			const Hardware::DeviceModule* deviceModule = module.device.get();

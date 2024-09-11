@@ -240,6 +240,11 @@ namespace Hardware
 		return moduleFamily() == FamilyType::BVB;
 	}
 
+	bool DeviceModule::isMso3() const
+	{
+		return customModuleFamily() == 8704;	// 0x2200
+	}
+
 	bool DeviceModule::isVdu() const
 	{
 		return moduleFamily() == FamilyType::VDU;

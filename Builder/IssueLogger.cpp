@@ -8237,14 +8237,14 @@ namespace Builder
 	/// Description:
 	///		Property Place for Logic Module must be set to 0.
 	///
-	void IssueLogger::errEQP6009(QString equipmemtId, QUuid equpmentUuid)
+	void IssueLogger::errEQP6009(QString equipmentId, QUuid equpmentUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 6009, equpmentUuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6009,
 				  tr("Property Place must be 0 (Equipment object %1).")
-				  .arg(equipmemtId)
+				  .arg(equipmentId)
 				  );
 	}
 
@@ -8289,6 +8289,47 @@ namespace Builder
 				  tr("Device object %1 not found on %2.")
 				  .arg(equipmentId)
 				  .arg(buildStep));
+	}
+
+	/// IssueCode: EQP6012
+	///
+	/// IssueType: Error
+	///
+	/// Title: Module %1 should be installed on place %2.
+	///
+	/// Parameters:
+	///		%1 Module EquipmentID
+	///		%2 place
+	///
+	/// Description:
+	///		Module should be installed on specified place. Check module property Place.
+	///
+	void IssueLogger::errEQP6012(QString equipmentId, int place)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6012,
+				  tr("Module %1 should be installed on place %2.").arg(equipmentId).arg(place));
+	}
+
+	/// IssueCode: EQP6013
+	///
+	/// IssueType: Error
+	///
+	/// Title: Module %1 should be installed on place %2 or %3.
+	///
+	/// Parameters:
+	///		%1 Module EquipmentID
+	///		%2 place 1
+	///		%3 place 2
+	///
+	/// Description:
+	///		Module should be installed on specified places. Check module property Place.
+	///
+	void IssueLogger::errEQP6013(QString equipmentId, int place1, int place2)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6013,
+				  tr("Module %1 should be installed on place %2 or %3.").arg(equipmentId).arg(place1).arg(place2));
 	}
 
 	/// IssueCode: EQP6020

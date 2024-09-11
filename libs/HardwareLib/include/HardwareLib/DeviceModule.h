@@ -79,6 +79,7 @@ namespace Hardware
 		[[nodiscard]] bool isFSCConfigurationModule() const;
 		[[nodiscard]] bool isOptoModule() const;
 		[[nodiscard]] bool isBvb() const;
+		[[nodiscard]] bool isMso3() const;
 		[[nodiscard]] bool isVdu() const;
 
 		// Data

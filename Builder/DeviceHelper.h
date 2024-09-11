@@ -19,6 +19,10 @@ public:
 	static const int BVB1_PLACE = 0;
 	static const int BVB2_PLACE = 13;
 
+	static const int MSO1_PLACE = 0;
+	static const int MSO2_PLACE = 9;
+
+
 public:
 	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger* log);
 	static bool getUIntProperty(const Hardware::DeviceObject* device, const QString& name, quint32* value, Builder::IssueLogger *log);

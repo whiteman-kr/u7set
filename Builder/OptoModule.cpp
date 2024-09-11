@@ -2031,7 +2031,14 @@ namespace Hardware
 
 			if (module->isBvb() == true)
 			{
-				Q_ASSERT(m_place == DeviceHelper::BVB1_PLACE || m_place == DeviceHelper::BVB2_PLACE);
+				if (module->isMso3() == true)
+				{
+					Q_ASSERT(m_place == DeviceHelper::MSO1_PLACE || m_place == DeviceHelper::MSO2_PLACE);
+				}
+				else
+				{
+					Q_ASSERT(m_place == DeviceHelper::BVB1_PLACE || m_place == DeviceHelper::BVB2_PLACE);
+				}
 			}
 
 			m_moduleDataAddr = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
