@@ -1784,7 +1784,7 @@ void EquipmentView::copySelectedDevices()
 			return;
 		}
 
-		allObjectsArePresetRoots &= device->presetRoot() & device->isPreset();
+		allObjectsArePresetRoots &= device->presetRoot() && device->isPreset();
 
 		devices.push_back(device.get());
 	}

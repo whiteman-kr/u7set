@@ -80,7 +80,7 @@ private:
 	{
 		TrendLib::TrendSignalPlusServerId signalPlusServerId;
 		TimeStamp hourToRequest;
-		E::TimeType timeType;
+		E::TimeType timeType{E::TimeType::Plant};
 
 		bool operator== (const RequestQueue& r) const
 		{

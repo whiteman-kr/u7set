@@ -1,26 +1,50 @@
 #include "UdpRetranslatorApp.h"
 #include "WUtils.h"
 
+CircularLoggerShared logger;
+UdpRetranslatorApp app;
+QSettings settings(QSettings::SystemScope, "RadiyQt6", "UdpRetranslator");
 
-UdpRetranslatorApp::UdpRetranslatorApp(int argc, char** argv) :
-	m_argc(argc),
-	m_argv(argv)
+UdpRetranslatorApp::UdpRetranslatorApp()
 {
+	if (m_instanceCreated == false)
+	{
+		m_instanceCreated = true;
+	}
+	else
+	{
+		Q_ASSERT(false);			// UdpRetranslatorApp is singleton!
+	}
+}
+
+UdpRetranslatorApp::~UdpRetranslatorApp()
+{
+	circularLoggerShutdown(logger);
+}
+
+bool UdpRetranslatorApp::init(int argc, char** argv)
+{
+	m_argc = argc;
+	m_argv = argv;
+
 	m_appPathFile = m_argv[0];
+
+	logger = std::make_shared<CircularLogger>();
+	circularLoggerInit(logger, m_appPathFile, "udprtr", "", 10, 10);
+	logger->setLogCodeInfo(false);
+
+	return true;
 }
 
 int UdpRetranslatorApp::run()
 {
-	m_log = std::make_shared<CircularLogger>();
-	circularLoggerInit(m_log, m_appPathFile, "udprtr", "", 10, 10);
-	m_log->setLogCodeInfo(false);
-
 	RETURN_VALUE_IF_FALSE(loadNpcapDlls(), 1);
 
 	parseCmdLineArgs();
 
 	if (m_cmdLineArgs.empty())
 	{
+		std::cout << "\nTo get help information run: UdpRtr.exe -h\n\n";
 		runService();
 		return 0;
 	}
@@ -48,12 +72,22 @@ int UdpRetranslatorApp::run()
 			break;
 		}
 
+		if (m_cmdLineArgs.contains(EXAMPLE_CFG))
+		{
+			writeExampleCfgFile();
+			break;
+		}
+
 		auto it = m_cmdLineArgs.find(ARG_CFG);
 
 		if (it != m_cmdLineArgs.end())
 		{
+			BREAK_IF_FALSE(getCaptureDevices());
+			BREAK_IF_FALSE(printCaptureDevices());
 			BREAK_IF_FALSE(readCfgFile(it->second));
-			BREAK_IF_FALSE(retranslate());
+			saveCfgFileName(it->second);
+			startRetranslate(false);
+			break;
 		}
 
 		std::cout << "\nUnknown command line arguments.\n";
@@ -61,11 +95,94 @@ int UdpRetranslatorApp::run()
 		break;
 	}
 
+	return 0;
+}
+
+void UdpRetranslatorApp::startRetranslate(bool isService)
+{
+	DEBUG_LOG_MSG(logger, QString("UdpRetranslatorApp::startRetranslate started"));
+
+	QString cfgFileName = settings.value(CFG_FILE_NAME).toString();
+
+	DEBUG_LOG_MSG(logger, QString("Configuration file name: %1").arg(cfgFileName));
+
+	if (app.readCfgFile(cfgFileName) == false)
+	{
+		return;
+	}
+
+	if (app.getCaptureDevices() == false)
+	{
+		return;
+	}
+
+	// start retranslating threads
+	//
+	std::list<std::thread> rtrThreads;
+
+	int threadNo = 1;
+
+	DEBUG_LOG_MSG(logger, QString("Retranslate cfg found - %1").arg(app.m_retranslateCfgs.size()));
+
+	for(const RetranslateCfg& rtrCfg : app.m_retranslateCfgs)
+	{
+		auto it = std::find_if(app.m_captureDevices.begin(), app.m_captureDevices.end(),
+							[&rtrCfg] (const CaptureDevice& capDevice)
+							{
+								return rtrCfg.captureDeviceDescription == capDevice.description();
+							});
+
+		if (it == app.m_captureDevices.end())
+		{
+			DEBUG_LOG_ERR(logger, QString("Capture device '%1' is not found!").arg(rtrCfg.captureDeviceDescription));
+		}
+		else
+		{
+			rtrThreads.emplace_back(&CaptureDevice::retranslate, it, rtrCfg, threadNo++, isService);
+			DEBUG_LOG_MSG(logger, QString("Running capture thread for device: '%1'").
+											arg(rtrCfg.captureDeviceDescription));
+		}
+	}
+
+	app.waitQuitRequested();
+
+	// stop retranslating threads
 	//
 
-	circularLoggerShutdown(m_log);
+	DEBUG_LOG_MSG(logger, QString("Breake all captures"));
 
-	return 0;
+	CaptureDevice::breakAllCaptures();
+
+	DEBUG_LOG_MSG(logger, QString("Wait for capture threads (%1) finalizing").arg(rtrThreads.size()));
+
+	for(std::thread& rtrThread : rtrThreads)
+	{
+		rtrThread.join();
+	}
+
+	DEBUG_LOG_MSG(logger, QString("All capture threads finalized"));
+
+	DEBUG_LOG_MSG(logger, QString("UdpRetranslatorApp::startRetranslate finished"));
+}
+
+void UdpRetranslatorApp::waitQuitRequested()
+{
+	m_quitRequested = false;
+
+	std::unique_lock ul(m_waitQuitMutex);
+
+	m_waitQuit.wait(ul, [this]() { return m_quitRequested; });
+
+	ul.unlock();
+}
+
+void UdpRetranslatorApp::stopRetranslate()
+{
+	std::lock_guard lg(m_waitQuitMutex);
+
+	m_quitRequested = true;
+
+	m_waitQuit.notify_all();
 }
 
 bool UdpRetranslatorApp::loadNpcapDlls()
@@ -78,7 +195,7 @@ bool UdpRetranslatorApp::loadNpcapDlls()
 
 	if (len == 0)
 	{
-		DEBUG_LOG_ERR(m_log, QString("GetSystemDirectory error: %1").arg(GetLastError()));
+		DEBUG_LOG_ERR(logger, QString("GetSystemDirectory error: %1").arg(GetLastError()));
 		return false;
 	}
 
@@ -86,7 +203,7 @@ bool UdpRetranslatorApp::loadNpcapDlls()
 
 	if (SetDllDirectory(npcapDllDir) == 0)
 	{
-		DEBUG_LOG_ERR(m_log, QString("SetDllDirectory error: %1").arg(GetLastError()));
+		DEBUG_LOG_ERR(logger, QString("SetDllDirectory error: %1").arg(GetLastError()));
 		return false;
 	}
 
@@ -120,32 +237,37 @@ void UdpRetranslatorApp::printHelp()
 {
 	std::cout << "\nUse UdpRtr.exe [options]\n\n";
 	std::cout << "where options is:\n\n";
-	std::cout << QString("%1\t\tprint this help\n").arg(ARG_HELP).toStdString();
-//	std::cout << "-e\t\trun UDP retranslator as console application\n";
-	std::cout << QString("%1\tprint list of capture devices\n").arg(ARG_DEV_LIST).toStdString();
-	std::cout << QString("%1\ttest capturing on device\n").arg(ARG_TEST_CAP).toStdString();
+	std::cout << QString("%1\t\t\tprint this help\n").arg(ARG_HELP).toStdString();
+	std::cout << QString("%1\t\tprint list of capture devices\n").arg(ARG_DEV_LIST).toStdString();
+	std::cout << QString("%1\t\ttest capturing on device\n").arg(ARG_TEST_CAP).toStdString();
 	std::cout << QString("%1=cfgFileName\tload config file and start UDP retranslation\n").arg(ARG_CFG).toStdString();
+	std::cout << QString("%1\t\twrite example configuration file Example.cfg\n").arg(EXAMPLE_CFG).toStdString();
 	std::cout << "\n";
+	std::cout << "Note that Administrator permissions requierd to install, delete, start or stop service.\n\n";
+	std::cout << "To install service use:\t\tsc create UdpRetranslator binPath=[path_to]/udprtr.exe\n";
+	std::cout << "To start service use:\t\tsc start UdpRetranslator\n";
+	std::cout << "To stop service use:\t\tsc stop UdpRetranslator\n";
+	std::cout << "To uninstall service use:\tsc delete UdpRetranslator\n\n";
 }
 
 bool UdpRetranslatorApp::getCaptureDevices()
 {
-	return CaptureDevice::getCaptureDevices(&m_captureDevices, m_log);
+	return CaptureDevice::getCaptureDevices(&m_captureDevices, logger);
 }
 
 bool UdpRetranslatorApp::printCaptureDevices()
 {
-	DEBUG_LOG_MSG(m_log, "");
+	DEBUG_LOG_MSG(logger, "");
 
 	if(m_captureDevices.empty())
 	{
-		DEBUG_LOG_MSG(m_log, "\nNo capture devices found! Make sure Npcap is installed.\n");
-		DEBUG_LOG_MSG(m_log, "");
+		DEBUG_LOG_MSG(logger, "\nNo capture devices found! Make sure Npcap is installed.\n");
+		DEBUG_LOG_MSG(logger, "");
 		return false;
 	}
 
-	DEBUG_LOG_MSG(m_log, QString("Available capture devices:"));
-	DEBUG_LOG_MSG(m_log, "");
+	DEBUG_LOG_MSG(logger, QString("Available capture devices:"));
+	DEBUG_LOG_MSG(logger, "");
 
 	int devNo = 0;
 
@@ -153,10 +275,10 @@ bool UdpRetranslatorApp::printCaptureDevices()
 	{
 		devNo++;
 
-		DEBUG_LOG_MSG(m_log, QString("%1. %2").arg(devNo).arg(capDev.description()));
+		DEBUG_LOG_MSG(logger, QString("%1. %2").arg(devNo).arg(capDev.description()));
 	}
 
-	DEBUG_LOG_MSG(m_log, "");
+	DEBUG_LOG_MSG(logger, "");
 
 	return true;
 }
@@ -202,7 +324,7 @@ bool UdpRetranslatorApp::testCaptureDevice()
 
 bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 {
-	m_captureCfgs.clear();
+	m_retranslateCfgs.clear();
 
 	QFile cfgFile(cfgFileName);
 
@@ -210,118 +332,356 @@ bool UdpRetranslatorApp::readCfgFile(const QString& cfgFileName)
 
 	if (res == false)
 	{
-		DEBUG_LOG_ERR(m_log, QString("Error open configuration file %1").arg(cfgFileName));
+		DEBUG_LOG_ERR(logger, QString("Error open configuration file %1").arg(cfgFileName));
 		return false;
 	}
 
-	QStringList cfg = QString(cfgFile.readAll()).split("\n", Qt::SkipEmptyParts);
+	DEBUG_LOG_MSG(logger, QString("Open configuration file %1 - Ok").arg(cfgFileName));
 
-	for(QString& cl : cfg)
-	{
-		cl = cl.trimmed();
-	}
+	QStringList cfg = QString(cfgFile.readAll()).split("\n", Qt::KeepEmptyParts);
 
 	bool result = true;
 
-	for(QString& cl : cfg)
+	int line = 0;
+
+	for(QString cfgLine : cfg)		// copy - Ok
 	{
-		if (cl.startsWith("captureFrom") == true)
+		cfgLine = cfgLine.trimmed();
+
+		line++;
+
+		if (cfgLine.isEmpty())
 		{
-			QStringList sl = cl.split("=", Qt::SkipEmptyParts);
-
-			if (sl.size() == 2)
-			{
-				CaptureCfg cc;
-
-				cc.captureDeviceDescription = sl[1];
-
-				m_captureCfgs.push_back(cc);
-			}
-			else
-			{
-				DEBUG_LOG_ERR(m_log, QString("Error parsing cfg line: %1").arg(cl));
-			}
-
-			result = false;
+			continue;
 		}
-		else
+
+		if (cfgLine.startsWith(COMMENT_SEPARATOR) == true)
 		{
-			if (m_captureCfgs.size() == 0)
+			continue;
+		}
+
+		QStringList sl = cfgLine.split(COMMENT_SEPARATOR, Qt::SkipEmptyParts);
+
+		if (sl.size() == 0)
+		{
+			continue;
+		}
+
+		cfgLine = sl[0].trimmed();
+
+		if (cfgLine.startsWith("captureFrom") == true)
+		{
+			QStringList sl = cfgLine.split("=", Qt::SkipEmptyParts);
+
+			if (sl.size() != 2)
 			{
-				DEBUG_LOG_ERR(m_log, QString("Sentence 'captureFrom' not found!"));
+				DEBUG_LOG_ERR(logger, QString("Error parsing captureFrom sentence '%1' [line %2]").arg(cfgLine).arg(line));
 				result = false;
 				continue;
 			}
 
-			QStringList sl = cl.split("->", Qt::SkipEmptyParts);
+			RetranslateCfg cc;
 
-			if (sl.size() != 3)
-			{
-				DEBUG_LOG_ERR(m_log, QString("Error parsing cfg line: %1").arg(cl));
+			cc.captureDeviceDescription = sl[1].trimmed();
 
-				result = false;
-			}
-			else
-			{
-				RetranslateEntry re;
-				HostAddressPort hp;
-
-				//
-
-				bool res = hp.setAddressPortStr(sl[0].trimmed(), 0);
-
-				if (res == false)
-				{
-					DEBUG_LOG_ERR(m_log, QString("Wrong source IP:port - %1").arg(sl[0].trimmed()));
-					result = false;
-				}
-				else
-				{
-					re.srcAddr = hp;
-				}
-
-				//
-
-				res = hp.setAddressPortStr(sl[1].trimmed(), 0);
-
-				if (res == false)
-				{
-					DEBUG_LOG_ERR(m_log, QString("Wrong destination IP:port - %1").arg(sl[1].trimmed()));
-					result = false;
-				}
-				else
-				{
-					re.destAddr = hp;
-				}
-
-				//
-
-				res = hp.setAddressPortStr(sl[2].trimmed(), 0);
-
-				if (res == false)
-				{
-					DEBUG_LOG_ERR(m_log, QString("Wrong sendTo IP:port - %1").arg(sl[2].trimmed()));
-					result = false;
-				}
-				else
-				{
-					re.sendToAddr = hp;
-				}
-
-				m_captureCfgs.back().rtrEntry.push_back(re);
-			}
+			m_retranslateCfgs.push_back(cc);
+			continue;
 		}
+
+		if (m_retranslateCfgs.size() == 0)
+		{
+			DEBUG_LOG_ERR(logger, QString("Sentence 'captureFrom' not found! [line %1]").arg(line));
+			result = false;
+			continue;
+		}
+
+		sl = cfgLine.split("=>", Qt::SkipEmptyParts);
+
+		if (sl.size() != 2)
+		{
+			DEBUG_LOG_ERR(logger, QString("Error parsing cfg string '%1' [line %2]").arg(cfgLine).arg(line));
+			result = false;
+			continue;
+		}
+
+		RetranslateEntry re;
+
+		bool res = parseSrcDestAddrs(sl[0].trimmed(), &re.srcAddr, &re.destAddr);
+
+		if (res == false)
+		{
+			DEBUG_LOG_ERR(logger, QString("Error parsing cfg string '%1' [line %2]").arg(cfgLine).arg(line));
+			result = false;
+			continue;
+		}
+
+		res = parseSrcDestAddrs(sl[1].trimmed(), &re.rtrSrcAddr, &re.rtrDestAddr);
+
+		if (res == false)
+		{
+			DEBUG_LOG_ERR(logger, QString("Error parsing cfg string '%1' [line %2]").arg(cfgLine).arg(line));
+			result = false;
+			continue;
+		}
+
+		m_retranslateCfgs.back().rtrEntries.push_back(re);
+	}
+
+	if (result == true)
+	{
+		DEBUG_LOG_MSG(logger, QString("Configuration file %1 successfully parsed").arg(cfgFileName));
+	}
+	else
+	{
+		DEBUG_LOG_MSG(logger, QString("Configuration file %1 parsing error!").arg(cfgFileName));
 	}
 
 	return result;
 }
 
-bool UdpRetranslatorApp::retranslate()
+bool UdpRetranslatorApp::parseSrcDestAddrs(const QString& srcDestAddrStr,
+										   HostAddressPort* srcAddr,
+										   HostAddressPort* destAddr)
 {
-	return true;
+	TEST_PTR_RETURN_FALSE(srcAddr);
+	TEST_PTR_RETURN_FALSE(destAddr);
+
+	// expected format of srcDestAddrStr is:
+	//
+	//		srcIpAddr[:port] -> destIpAddr[:port]
+
+	QStringList sl = srcDestAddrStr.split("->", Qt::SkipEmptyParts);
+
+	if (sl.size() != 2)
+	{
+		return false;
+	}
+
+	bool result = true;
+
+	result &= srcAddr->setAddressPortStr(sl[0].trimmed(), 0);
+	result &= destAddr->setAddressPortStr(sl[1].trimmed(), 0);
+
+	return result;
 }
+
+bool UdpRetranslatorApp::saveCfgFileName(const QString& cfgFileName)
+{
+	bool result = false;
+
+	settings.setValue(CFG_FILE_NAME, cfgFileName);
+	settings.sync();
+
+	switch(settings.status())
+	{
+	case QSettings::NoError:
+		DEBUG_LOG_MSG(logger, "Settings save - Ok");
+		result = true;
+		break;
+
+	case QSettings::AccessError:
+		DEBUG_LOG_ERR(logger, "Settings save AccessError. Run UdpRetranslator with Administrator permissions.");
+		break;
+
+	case QSettings::FormatError:
+		DEBUG_LOG_ERR(logger, "Settings save FormatError.");
+		break;
+
+	default:
+		Q_ASSERT(false);
+	}
+
+	return result;
+}
+
+void UdpRetranslatorApp::writeExampleCfgFile()
+{
+	QFile resFile(":/" + EXAMPLE_CFG_FILE);
+
+	bool res = resFile.open(QIODeviceBase::ReadOnly | QIODeviceBase::Text);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger, QString("Error reading resource file '%1'").arg(resFile.fileName()));
+		return;
+	}
+
+	QByteArray fileData = resFile.readAll();
+
+	QFileInfo fi(m_appPathFile);
+
+	QString exampleFileName = fi.absolutePath();
+
+	exampleFileName += "/" + EXAMPLE_CFG_FILE;
+
+	QFile exampleFile(exampleFileName);
+
+	res = exampleFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Text | QIODeviceBase::Truncate);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger, QString("Error open file '%1' for writing").arg(exampleFileName));
+		return;
+	}
+
+	exampleFile.write(fileData);
+
+	DEBUG_LOG_ERR(logger, QString("Example configuration file '%1' written").arg(exampleFileName));
+
+	exampleFile.close();
+}
+
+//
+
+SERVICE_STATUS srvStatus;
+SERVICE_STATUS_HANDLE srvStatusHandle = NULL;
+
+TCHAR serviceName[] = _T("UdpRetranslator");
 
 bool UdpRetranslatorApp::runService()
 {
+	SERVICE_TABLE_ENTRY serviceTable[] =
+	{
+		{
+			.lpServiceName = serviceName,
+			.lpServiceProc = serviceMain
+		},
+
+		{
+			.lpServiceName = NULL,
+			.lpServiceProc = NULL
+		}
+	};
+
+	StartServiceCtrlDispatcher(serviceTable);
+
 	return true;
 }
+
+VOID serviceMain(DWORD argc, LPTSTR* argv)
+{
+	Q_UNUSED(argc);
+	Q_UNUSED(argv);
+
+	DEBUG_LOG_MSG(logger, "ServiceMain: started");
+
+	// Register our service control handler with the SCM
+	//
+	srvStatusHandle = RegisterServiceCtrlHandler (serviceName, serviceCtrlHandler);
+
+	if (srvStatusHandle == NULL)
+	{
+		return;
+	}
+
+	ZeroMemory(&srvStatus, sizeof(srvStatus));
+
+	srvStatus.dwServiceType = SERVICE_WIN32_OWN_PROCESS;
+	srvStatus.dwControlsAccepted = 0;
+	srvStatus.dwCurrentState = SERVICE_START_PENDING;
+	srvStatus.dwWin32ExitCode = 0;
+	srvStatus.dwServiceSpecificExitCode = 0;
+	srvStatus.dwCheckPoint = 0;
+
+	if (SetServiceStatus (srvStatusHandle , &srvStatus) == FALSE)
+	{
+		DEBUG_LOG_ERR(logger, QString("ServiceMain: SetServiceStatus SERVICE_START_PENDING returned error: %1").arg(GetLastError()));
+		return;
+	}
+
+	DEBUG_LOG_MSG(logger, QString("ServiceMain: SetServiceStatus SERVICE_START_PENDING - Ok"));
+
+	// Tell the service controller we are started
+	//
+	srvStatus.dwControlsAccepted = SERVICE_ACCEPT_STOP;
+	srvStatus.dwCurrentState = SERVICE_RUNNING;
+	srvStatus.dwWin32ExitCode = 0;
+	srvStatus.dwCheckPoint = 1;
+
+	if (SetServiceStatus (srvStatusHandle, &srvStatus) == FALSE)
+	{
+		DEBUG_LOG_ERR(logger, QString("ServiceMain: SetServiceStatus SERVICE_RUNNING returned error: %1").arg(GetLastError()));
+	}
+
+	DEBUG_LOG_MSG(logger, QString("ServiceMain: SetServiceStatus SERVICE_RUNNING - Ok"));
+
+	//
+
+	UdpRetranslatorApp:: startRetranslate(true);
+
+	//
+
+	// Tell the service controller we are stopped
+	//
+	srvStatus.dwControlsAccepted = 0;
+	srvStatus.dwCurrentState = SERVICE_STOPPED;
+	srvStatus.dwWin32ExitCode = 0;
+	srvStatus.dwCheckPoint = 3;
+
+	if (SetServiceStatus (srvStatusHandle, &srvStatus) == FALSE)
+	{
+		DEBUG_LOG_ERR(logger, QString("ServiceMain: SetServiceStatus SERVICE_STOPPED returned error: %1").arg(GetLastError()));
+		return;
+	}
+
+	DEBUG_LOG_MSG(logger, QString("ServiceMain: SetServiceStatus SERVICE_STOPPED - Ok"));
+
+	DEBUG_LOG_MSG(logger, "ServiceMain: finished");
+
+	return;
+}
+
+VOID serviceCtrlHandler(DWORD ctrlCode)
+{
+	DEBUG_LOG_MSG(logger, QString("ServiceCtrlHandler: receives CtrlCode - %1").arg(ctrlCode));
+
+	switch (ctrlCode)
+	{
+	case SERVICE_CONTROL_STOP :
+
+		DEBUG_LOG_MSG(logger, QString("ServiceCtrlHandler: receives SERVICE_CONTROL_STOP"));
+
+		if (srvStatus.dwCurrentState != SERVICE_RUNNING)
+		{
+			break;
+		}
+
+		srvStatus.dwControlsAccepted = 0;
+		srvStatus.dwCurrentState = SERVICE_STOP_PENDING;
+		srvStatus.dwWin32ExitCode = 0;
+		srvStatus.dwCheckPoint = 4;
+
+		if (SetServiceStatus (srvStatusHandle, &srvStatus) == FALSE)
+		{
+			DEBUG_LOG_ERR(logger, QString("ServiceCtrlHandler: SetServiceStatus SERVICE_STOP_PENDING returned error: %1").arg(GetLastError()));
+		}
+
+		DEBUG_LOG_MSG(logger, QString("ServiceMain: SetServiceStatus SERVICE_STOP_PENDING - Ok"));
+
+		app.stopRetranslate();
+
+		break;
+
+	default:
+		DEBUG_LOG_WRN(logger, QString("ServiceCtrlHandler: has no processing for this CtrlCode"));
+		break;
+	}
+}
+
+BOOL WINAPI consoleCtrlHandler(_In_ DWORD dwCtrlType)
+{
+	switch (dwCtrlType)
+	{
+	case CTRL_C_EVENT:
+		std::cout << "\nCtrl+C pressed by user\n\n";
+		CaptureDevice::breakAllCaptures();
+		UdpRetranslatorApp::stopRetranslate();
+		return TRUE;
+
+	default:
+		// Pass signal on to the next handler
+		return FALSE;
+	}
+}
+
+

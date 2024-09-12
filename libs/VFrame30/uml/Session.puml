@@ -1,9 +1,0 @@
-@startuml VFrame30
-!include ../../doc/uml/Namespace.puml
-
-class VFrame30::Session #F0FFF0
-{
-	public PropertyObject
-}
-
-@enduml

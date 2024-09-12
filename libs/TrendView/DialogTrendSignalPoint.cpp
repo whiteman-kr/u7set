@@ -9,8 +9,8 @@ DialogTrendSignalPoint::DialogTrendSignalPoint(std::vector<TrendLib::TrendStateI
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogTrendSignalPoint),
 	m_stateItems(stateItems),
-	m_trendSignal(std::move(trendSignal)),
-	m_timeType(timeType)
+	m_timeType(timeType),
+	m_trendSignal(std::move(trendSignal))
 {
 	ui->setupUi(this);
 	setWindowTitle(tr("Points"));

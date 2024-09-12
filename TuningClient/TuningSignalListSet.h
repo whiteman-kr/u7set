@@ -4,7 +4,10 @@
 
 class TuningSignalListSet : public AppSignalLists::AppSignalListSet
 {
-	Q_OBJECT
+public:
+	std::set<Hash> filtersSetHashes(const std::set<QString>& filtersSet) const;
+
+Q_OBJECT 
 public:
 	virtual bool load(QString* errorMessage) override;
 	virtual bool save(QString* errorMessage) const override;

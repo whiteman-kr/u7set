@@ -951,10 +951,11 @@ namespace ExtWidgets
 
 		// Find selected indexes and sort in descending order
 
-		std::vector<int> selectedRows;
-
 		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
-		for (auto si : selectedIndexes)
+		std::vector<int> selectedRows;
+		selectedRows.reserve(selectedIndexes.size());
+
+		for (const auto& si : selectedIndexes)
 		{
 			selectedRows.push_back(si.row());
 		}
@@ -1172,7 +1173,9 @@ namespace ExtWidgets
 		}
 
 		std::vector<int> selectedRows;
-		for (auto si : selectedIndexes)
+		selectedRows.reserve(selectedIndexes.size());
+
+		for (const auto& si : selectedIndexes)
 		{
 			selectedRows.push_back(si.row());
 		}
@@ -1456,10 +1459,11 @@ namespace ExtWidgets
 
 		// Find selected indexes and sort in descending order
 
-		std::vector<int> selectedRows;
-
 		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
-		for (auto si : selectedIndexes)
+		std::vector<int> selectedRows;
+		selectedRows.reserve(selectedIndexes.size());
+
+		for (const auto& si : selectedIndexes)
 		{
 			selectedRows.push_back(si.row());
 		}
@@ -1610,7 +1614,9 @@ namespace ExtWidgets
 		}
 
 		std::vector<int> selectedRows;
-		for (auto si : selectedIndexes)
+		selectedRows.reserve(selectedIndexes.size());
+
+		for (const auto& si : selectedIndexes)
 		{
 			selectedRows.push_back(si.row());
 		}
@@ -2148,7 +2154,7 @@ namespace ExtWidgets
 			}
 		}
 
-		return QWidget::eventFilter(watched, event);
+		return PropertyEditCellWidget::eventFilter(watched, event);
 	}
 
 	void MultiColorEdit::onButtonPressed()
@@ -2530,7 +2536,7 @@ namespace ExtWidgets
 			}
 		}
 
-		return QWidget::eventFilter(watched, event);
+		return PropertyEditCellWidget::eventFilter(watched, event);
 	}
 
 	void MultiTextEdit::onButtonPressed()

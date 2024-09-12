@@ -187,7 +187,7 @@ namespace TrendLib
 
 		QPointF m_startSelectViewPoint;
 		QPointF m_finishSelectViewPoint;
-		int m_selectViewLaneIndex;
+		int m_selectViewLaneIndex{};
 		TrendSignalParam m_selectViewAreaSignal;
 	};
 }

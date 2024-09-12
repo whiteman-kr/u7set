@@ -9,8 +9,8 @@ struct ArchiveRequest
 {
 	TimeStamp startTime;
 	TimeStamp endTime;
-	E::TimeType timeType;
-	bool removePrioodicRecords;
+	E::TimeType timeType{};
+	bool removePrioodicRecords{};
 	std::map<Hash, QString> appSignals;		// Key is signal hash, value is appSignalId
 };
 

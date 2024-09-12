@@ -79,7 +79,9 @@ namespace TuningLib
 		propInterfaceType->setCategory(tr("Ui"));
 
 		auto propFilters = ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Filters, true, TuningUiItem::filters, TuningUiItem::setFilters);
-		propFilters->setDescription(tr("Specifies application signal list IDs which are used to filter signals using intersection logic. IDs are separated by semicolon or line break"));
+		propFilters->setDescription(
+			tr("Specifies application signal list IDs which are used to filter signals.\n\nWhen IDs are separated by semicolon or line "
+			   "break, the intersection logic (A;B;C) is used.\nWhen IDs are separated by '+', the union logic (A+B+C) is used."));
 		propFilters->setCategory(tr("Filtering"));
 
 		auto propTags = ADD_PROPERTY_GETTER_SETTER(QString, TuningUiTags::prop_Tags, true, TuningUiItem::tags, TuningUiItem::setTags);
@@ -767,7 +769,7 @@ namespace TuningLib
 
 	QStringList TuningUiItem::tagsList() const
 	{
-		static const auto re = QRegularExpression("[;\\s+]");
+		static const auto re = QRegularExpression("[;\\s]");
 		return m_tags.split(re, Qt::SkipEmptyParts);
 	}
 
@@ -783,7 +785,7 @@ namespace TuningLib
 
 	QStringList TuningUiItem::filtersList() const
 	{
-		static const auto re = QRegularExpression("[;\\s+]");
+		static const auto re = QRegularExpression("[;\\s+]");	// Plus is filters separator!
 		return m_filters.split(re, Qt::SkipEmptyParts);;
 	}
 	

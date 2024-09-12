@@ -210,7 +210,7 @@ bool BaseOnlineDataSource::pushRupFrame(quint32 sourceIP,
 
 	if (m_dataProcessingEnabled == false)
 	{
-		false;
+		return false;
 	}
 
 	m_receivedFramesCount++;

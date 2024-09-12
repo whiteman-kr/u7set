@@ -26,7 +26,7 @@ namespace Sim
 		[[nodiscard]] bool isNull() const;
 
 		operator bool() const;
-		bool operator==(nullptr_t) const;
+		bool operator==(std::nullptr_t) const;
 
 		QString connectionId() const;
 

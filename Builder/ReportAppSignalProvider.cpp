@@ -23,6 +23,14 @@ int ReportAppSignalProvider::signalsCount() const
 	return 0;
 }
 
+std::vector<Hash> ReportAppSignalProvider::signalHashes() const
+{
+	// Implement if required.
+	//
+	Q_ASSERT(false);
+	return {};
+}
+
 std::vector<AppSignalParam> ReportAppSignalProvider::signalList() const
 {
 	// Unlikely this function required for schema editing

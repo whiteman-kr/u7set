@@ -2,3 +2,4 @@ FIM-SR
 	22.11.2021	Version: 0	FIM-SR_v0.u7devp	Initial FIM-SR preset version
 	30.01.2024	Version: 1	FIM_SR_v1.u7devp	Input signal default LowElectricUnit changed to 0 Hz. 
 								Sensor type changed to Hz_0_50000=40
+	03.09.2024	Version: 2 	FIM-SR_v2.u7devp	RPCT-3940: Configuration script misprint fix

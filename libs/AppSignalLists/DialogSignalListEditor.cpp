@@ -725,7 +725,15 @@ namespace AppSignalLists
 			}
 
 			list->setUuid(QUuid::createUuid());
-			list->setId(tr("%1 (Copy)").arg(list->id()));
+			list->setId(tr("%1_Copy").arg(list->id()));
+
+			// Remove IDE tag
+			{
+				QStringList tags = list->systemTagsList();
+				tags.removeAll(AppSignalLists::AppSignalList::tagIde);
+				list->setSystemTags(tags.join(' '));
+			}
+
 			pasteList(list);
 		}
 

@@ -15,6 +15,7 @@ namespace ReportLib
 	{
 	public:
 		explicit ReportGenerator(const ReportTemplate& reportTemplate);
+		virtual ~ReportGenerator() = default;
 
 		bool generate(QBuffer& buffer, std::atomic_bool& stop);
 

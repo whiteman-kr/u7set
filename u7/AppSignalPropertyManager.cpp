@@ -319,8 +319,6 @@ E::PropertyBehaviourType AppSignalPropertyManager::getBehaviour(const AppSignal&
 		return m_defaultBehaviour;
 	}
 
-	const AppSignalPropertyDescription& d = m_propDescriptions[propertyIndex];
-
 	E::PropertyBehaviourType behaviour = m_propDescriptions[propertyIndex].getBehaviour(signal);
 
 	return behaviour;

@@ -272,7 +272,7 @@ namespace ModuleConfiguratorLib
 		QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
 		std::strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
 
-		lastConfiguration = lastConfiguration;
+		this->lastConfiguration = lastConfiguration;
 	}
 
 	//

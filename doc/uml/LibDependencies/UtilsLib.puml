@@ -1,8 +1,0 @@
-  @startuml
-  
-  !include ./CommonLib.puml
-
-  [UtilsLib]
-  UtilsLib -up-> CommonLib
-
-  @enduml

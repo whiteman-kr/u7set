@@ -22,7 +22,10 @@ namespace Builder
 		bool createSchemasLists(const ISignalManager& tuningSignalManager);
 
 		
-		bool writeTuningUi(const QStringList& appSignalListIds, const QStringList& appSignalListMasks, const QStringList& appSignalListTags);
+		bool writeTuningUi(std::vector<std::shared_ptr<AppSignalLists::AppSignalList>> appSignalLists,
+						   const QStringList& appSignalListIds,
+						   const QStringList& appSignalListMasks,
+						   const QStringList& appSignalListTags);
 		bool writeTuningSchemas();
 		bool writeGlobalScript();
 		bool writeTuningClientBehavior();

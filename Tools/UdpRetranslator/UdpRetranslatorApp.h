@@ -3,14 +3,22 @@
 #include "CircularLogger.h"
 #include "CaptureDevice.h"
 
+#include <QSettings>
+
 #define TO_INT(v) static_cast<int>(v)
 
 class UdpRetranslatorApp
 {
 public:
-	UdpRetranslatorApp(int argc, char** argv);
+	UdpRetranslatorApp();
+	~UdpRetranslatorApp();
 
+	bool init(int argc, char** argv);
 	int run();
+
+	static void startRetranslate(bool isService);
+	void waitQuitRequested();
+	static void stopRetranslate();
 
 private:
 	bool loadNpcapDlls();
@@ -21,8 +29,10 @@ private:
 	bool getCaptureDevices();
 	bool printCaptureDevices();
 	bool testCaptureDevice();
-	bool readCfgFile(const QString& cfgFile);
-	bool retranslate();
+	bool readCfgFile(const QString& cfgFileName);
+	bool parseSrcDestAddrs(const QString& srcDestAddrStr, HostAddressPort* srcAddr, HostAddressPort* destAddr);
+	bool saveCfgFileName(const QString& cfgFileName);
+	void writeExampleCfgFile();
 
 	bool runService();
 
@@ -30,16 +40,34 @@ private:
 	inline static const QString ARG_HELP = QStringLiteral("-h");
 	inline static const QString ARG_DEV_LIST = QStringLiteral("-devlist");
 	inline static const QString ARG_TEST_CAP = QStringLiteral("-testcap");
+	inline static const QString EXAMPLE_CFG = QStringLiteral("-examplecfg");
 	inline static const QString ARG_CFG = QStringLiteral("-cfg");
+	inline static const QString EXAMPLE_CFG_FILE = QStringLiteral("Example.cfg");
+	inline static const QString COMMENT_SEPARATOR = QStringLiteral("//");
 
 	int m_argc = 0;
 	char** m_argv = nullptr;
 
-	CircularLoggerShared m_log;
 	QString m_appPathFile;
 	std::map<QString, QString> m_cmdLineArgs;
 
 	std::vector<CaptureDevice> m_captureDevices;
 
-	std::vector<CaptureCfg> m_captureCfgs;
+	std::vector<RetranslateCfg> m_retranslateCfgs;
+
+	inline static bool m_instanceCreated = false;
+	inline static std::mutex m_waitQuitMutex;
+	inline static std::condition_variable m_waitQuit;
+	inline static bool m_quitRequested = false;
+
+	inline static const QString CFG_FILE_NAME = "CfgFileName";
 };
+
+extern CircularLoggerShared logger;
+extern UdpRetranslatorApp app;
+extern QSettings settings;
+
+VOID serviceMain(DWORD argc, LPTSTR* argv);
+VOID serviceCtrlHandler(DWORD CtrlCode);
+
+BOOL WINAPI consoleCtrlHandler(_In_ DWORD dwCtrlType);

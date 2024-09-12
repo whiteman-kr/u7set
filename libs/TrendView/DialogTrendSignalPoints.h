@@ -94,7 +94,7 @@ private:
 	E::TimeType m_timeType = E::TimeType::Plant;
 	E::TrendMode m_trendMode = E::TrendMode::Archive;
 
-	TrendLib::TrendStateItem m_editStateItem;
+	TrendLib::TrendStateItem m_editStateItem{};
 };
 
 #endif // DIALOGTRENDSIGNALPOINTS_H

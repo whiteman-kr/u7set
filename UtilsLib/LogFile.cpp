@@ -969,8 +969,6 @@ namespace Log
 
 		const char* endPtr = ptr + ba.length();
 
-		qint64 numLines = 0;
-
 		const quint64 sessionHash = currentSessionOnly == true ? m_sessionHash : 0;
 
         const int maxReadResultSize = 1000;
@@ -1009,7 +1007,6 @@ namespace Log
                     }
 				}
 
-				numLines++;
 				ptr++;
 			}
 

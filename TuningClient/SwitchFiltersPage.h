@@ -20,6 +20,7 @@ namespace TuningLib
 }
 
 class TuningCountersManager;
+class TuningSignalListSet;
 
 //
 // FilterPushButton
@@ -47,13 +48,13 @@ private:
 // FilterTableWidget
 //
 
-class FilterTableWidget:public QTableWidget
+class FilterTableWidget : public QTableWidget
 {
 	Q_OBJECT
 public:
 	FilterTableWidget(QWidget* parent): QTableWidget(parent){}
 protected:
-	void keyPressEvent(QKeyEvent *e)
+	void keyPressEvent(QKeyEvent *e) override
 	{
 		if(e->key()==Qt::Key_Space)
 		{
@@ -100,7 +101,7 @@ protected:
 		}
 	}
 
-	void keyPressEvent(QKeyEvent *e)
+	void keyPressEvent(QKeyEvent* e) override
 	{
 		if(e->key()==Qt::Key_Space)
 		{
@@ -125,7 +126,7 @@ class SwitchFiltersPage : public QWidget
 public:
 	SwitchFiltersPage(TuningConfigController& configController,
 					  ClientLib::TuningSignalManager& tuningSignalManager,
-					  AppSignalLists::AppSignalListSet& appSignalLists,
+					  TuningSignalListSet& appSignalLists,
 					  ClientLib::TuningUserManager& userManager,
 					  ClientLib::TuningConnection& tuningConnection,
 					  const TuningLib::TuningUiItem& uiItem,
@@ -172,7 +173,7 @@ private:
 
 	TuningConfigController& m_configController;
 	ClientLib::TuningSignalManager& m_tuningSignalManager;
-	AppSignalLists::AppSignalListSet& m_appSignalLists;
+	TuningSignalListSet& m_appSignalLists;
 	ClientLib::TuningUserManager& m_userManager;
 	ClientLib::TuningConnection& m_tuningConnection;
 	const TuningLib::TuningUiItem& m_workspaceUi;

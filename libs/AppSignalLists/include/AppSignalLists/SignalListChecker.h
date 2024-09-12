@@ -20,10 +20,10 @@ namespace AppSignalLists
 		// Checking and removing "dangling" list items
 		//
 	public:
-		[[nodiscard]] static void checkForDanglingItems(const std::vector<Hash>& allHashes,
-														AppSignalListSet& listSet,
-														QWidget* parent,
-														ILogFile* logFile);
+		static void checkForDanglingItems(const std::vector<Hash>& allHashes,
+										  AppSignalListSet& listSet,
+										  QWidget* parent,
+										  ILogFile* logFile);
 
 	private:
 		[[nodiscard]] static std::set<Hash> findDanglingListItems(const std::set<Hash>& allHashes,
@@ -33,7 +33,7 @@ namespace AppSignalLists
 																	 AppSignalListSet& listSet,
 																	 std::map<QString, int>& notFoundCachedHashesInLists);
 
-		[[nodiscard]] static void removeListItems(AppSignalListSet& listSet, const std::set<Hash>& hashesToRemove);
-		[[nodiscard]] static void removeCachedHashes(AppSignalListSet& listSet, const std::set<Hash>& hashesToRemove);
+		static void removeListItems(AppSignalListSet& listSet, const std::set<Hash>& hashesToRemove);
+		static void removeCachedHashes(AppSignalListSet& listSet, const std::set<Hash>& hashesToRemove);
 	};
 } // namespace AppSignalLists

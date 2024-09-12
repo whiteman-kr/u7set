@@ -19,12 +19,12 @@ public:
 
 	struct Item
 	{
-		ItemType type;
+		ItemType type = ItemType::RawDataSize;
 
 		bool rawDataSizeIsAuto = false;			// for type - RawDataSize
 		int rawDataSize = 0;					//
 
-		int offset;								// for AppData* and DiagData*
+		int offset = 0;							// for AppData* and DiagData*
 	};
 
 	const int RAW_DATA_SIZE_INDEX = 0;

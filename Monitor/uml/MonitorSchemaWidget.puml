@@ -1,9 +1,0 @@
-@startuml
-
-!include ../../VFrame30/uml/ClientSchemaWidget.puml
-
-class MonitorSchemaWidget extends VFrame30::ClientSchemaWidget
-{
-}
-
-@enduml

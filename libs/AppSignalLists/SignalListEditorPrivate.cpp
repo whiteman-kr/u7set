@@ -444,8 +444,32 @@ namespace AppSignalLists
 			Q_ASSERT(false);
 			return QString();
 		}
+	
+		switch (static_cast<Columns>(index))
+		{
+		case Columns::CustomAppSignalID:
+			return QObject::tr(col_CustomAppSignalId.toStdString().c_str());
+		case Columns::EquipmentID:
+			return QObject::tr(col_EquipmentID.toStdString().c_str());
+		case Columns::AppSignalID:
+			return QObject::tr(col_AppSignalId.toStdString().c_str());
+		case Columns::Caption:
+			return QObject::tr(col_Caption.toStdString().c_str());
+		case Columns::Units:
+			return QObject::tr(col_Units.toStdString().c_str());
+		case Columns::Type:
+			return QObject::tr(col_Type.toStdString().c_str());
+		case Columns::LowLimit:
+			return QObject::tr(col_LowLimit.toStdString().c_str());
+		case Columns::HighLimit:
+			return QObject::tr(col_HighLimit.toStdString().c_str());
+		case Columns::Default:
+			return QObject::tr(col_Default.toStdString().c_str());
+		default:
+			Q_ASSERT(false);
+		}
 
-		return headerData(index, Qt::Horizontal, Qt::DisplayRole).toString();
+		return QString();
 	}
 
 	QString SignalsModel::cellText(int column, int row) const
@@ -614,35 +638,7 @@ namespace AppSignalLists
 	{
 		if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
 		{
-			if (section < 0 || section >= static_cast<int>(Columns::Count))
-			{
-				assert(false);
-				return QVariant();
-			}
-
-			switch (static_cast<Columns>(section))
-			{
-			case Columns::CustomAppSignalID:
-				return QObject::tr(col_CustomAppSignalId.toStdString().c_str());
-			case Columns::EquipmentID:
-				return QObject::tr(col_EquipmentID.toStdString().c_str());
-			case Columns::AppSignalID:
-				return QObject::tr(col_AppSignalId.toStdString().c_str());
-			case Columns::Caption:
-				return QObject::tr(col_Caption.toStdString().c_str());
-			case Columns::Units:
-				return QObject::tr(col_Units.toStdString().c_str());
-			case Columns::Type:
-				return QObject::tr(col_Type.toStdString().c_str());
-			case Columns::LowLimit:
-				return QObject::tr(col_LowLimit.toStdString().c_str());
-			case Columns::HighLimit:
-				return QObject::tr(col_HighLimit.toStdString().c_str());
-			case Columns::Default:
-				return QObject::tr(col_Default.toStdString().c_str());
-			default:
-				Q_ASSERT(false);
-			}
+			return columnText(section);
 		}
 		return QVariant();
 	}
@@ -773,7 +769,7 @@ namespace AppSignalLists
 		return m_columns[index];
 	}
 
-	QString AppSignalListModel::columnText(int index) const
+	QString AppSignalListModel::columnName(int index) const
 	{
 		if (index < 0 || index >= columnCount())
 		{
@@ -781,7 +777,37 @@ namespace AppSignalLists
 			return QString();
 		}
 
-		return headerData(index, Qt::Horizontal, Qt::DisplayRole).toString();
+		switch (m_columns[index])
+		{
+		case Columns::CustomAppSignalID:
+			return col_CustomAppSignalId;
+		case Columns::EquipmentID:
+			return col_EquipmentID;
+		case Columns::AppSignalID:
+			return col_AppSignalId;
+		case Columns::Caption:
+			return col_Caption;
+		case Columns::Units:
+			return col_Units;
+		case Columns::Type:
+			return col_Type;
+		case Columns::LowLimit:
+			return col_LowLimit;
+		case Columns::HighLimit:
+			return col_HighLimit;
+		case Columns::Value:
+			return col_Value;
+		default:
+			Q_ASSERT(false);
+		}
+
+		return QString();
+	}
+
+	
+	QString AppSignalListModel::columnText(int index) const
+	{
+		return QObject::tr(columnName(index).toUtf8());
 	}
 
 	QString AppSignalListModel::cellText(int column, int row) const
@@ -962,35 +988,7 @@ namespace AppSignalLists
 	{
 		if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
 		{
-			if (section < 0 || section >= static_cast<int>(m_columns.size()))
-			{
-				assert(false);
-				return QVariant();
-			}
-
-			switch (m_columns[section])
-			{
-			case Columns::CustomAppSignalID:
-				return QObject::tr(col_CustomAppSignalId.toStdString().c_str());
-			case Columns::EquipmentID:
-				return QObject::tr(col_EquipmentID.toStdString().c_str());
-			case Columns::AppSignalID:
-				return QObject::tr(col_AppSignalId.toStdString().c_str());
-			case Columns::Caption:
-				return QObject::tr(col_Caption.toStdString().c_str());
-			case Columns::Units:
-				return QObject::tr(col_Units.toStdString().c_str());
-			case Columns::Type:
-				return QObject::tr(col_Type.toStdString().c_str());
-			case Columns::LowLimit:
-				return QObject::tr(col_LowLimit.toStdString().c_str());
-			case Columns::HighLimit:
-				return QObject::tr(col_HighLimit.toStdString().c_str());
-			case Columns::Value:
-				return QObject::tr(col_Value.toStdString().c_str());
-			default:
-				Q_ASSERT(false);
-			}
+			return columnText(section);
 		}
 
 		return QVariant();
@@ -1013,8 +1011,8 @@ namespace AppSignalLists
 		m_defaultValue(defaultValue),
 		m_lowLimit(lowLimit),
 		m_highLimit(highLimit),
-		m_decimalPlaces(decimalPlaces),
-		m_analogFormat(analogFormat)
+		m_analogFormat(analogFormat),
+		m_decimalPlaces(decimalPlaces)
 	{
 		m_discreteCheck = new QCheckBox();
 		connect(m_discreteCheck, &QCheckBox::stateChanged, this, &DialogAppSignalListValue::onValueCheckStateChanged);

@@ -18,6 +18,8 @@ qt_standard_project_setup()
 
 set(TARGET UdpRtr)
 
+set (UdpRtr_RESOURCES Resources.qrc)
+
 add_executable(${TARGET}
 	CaptureDevice.cpp
 	CaptureDevice.h
@@ -28,6 +30,7 @@ add_executable(${TARGET}
 	UdpRetranslatorApp.cpp
 	UdpRetranslatorApp.h
 	UdpRtrMain.cpp
+	${UdpRtr_RESOURCES}
 )
 
 # Add LTO for Release and Windows only. 
@@ -82,22 +85,21 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QDir>
 	<QFile>
 	<QFileInfo>
+	<QSettings>
 	<QStandardPaths>
 	<QTextStream>
 	<QThread>
 )
 
 include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../UtilsLib)
-include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../CommonLib)
+include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/CommonLib/include/CommonLib)
 include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/include)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network)
-#target_link_libraries(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/Lib/x64/Packet.lib)
 target_link_libraries(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/Lib/x64/wpcap.lib)
-
 
 # Link Visaul Leak Detector
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()
+#if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
+#	target_link_libraries(${TARGET} PRIVATE vld.lib)
+#endif()

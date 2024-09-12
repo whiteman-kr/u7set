@@ -58,7 +58,7 @@ namespace SchemaClientLib
 		QWriteLocker locker(&m_appSignalListSetLock);
 		m_appSignalListSet.clear();
 
-		for (const QByteArray& data : listsData)
+		for (auto&& data : listsData)
 		{
 			ok &= m_appSignalListSet.add(std::move(data));
 		}

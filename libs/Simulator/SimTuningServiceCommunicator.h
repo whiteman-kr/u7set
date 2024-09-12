@@ -206,8 +206,8 @@ namespace Sim
 		QUdpSocket* m_socket = nullptr;
 
 		qint64 m_lastRequestTime = 0;
-		SimRupFotip m_request;
-		SimRupFotip m_reply;
+		SimRupFotip m_request{};
+		SimRupFotip m_reply{};
 
 		std::map<quint32, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByIP;
 		std::map<std::pair<QString, QString>, std::shared_ptr<TuningSourceHandler>> m_tuningSourcesByEquipmentID;

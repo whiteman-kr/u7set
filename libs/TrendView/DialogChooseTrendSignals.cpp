@@ -340,8 +340,8 @@ namespace TrendLib
 													   const AppSignalLists::AppSignalListSet& appSignalLists,
 													   QWidget* parent) :
 		QDialog(parent),
-		s_allServers(tr("All Servers")),
-		m_appSignalListSet(appSignalLists)
+		m_appSignalListSet(appSignalLists),
+		s_allServers(tr("All Servers"))
 	{
 		init(signalHasTag, std::move(trendSignals), acceptedSignals, archiveServers);
 

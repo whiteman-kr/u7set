@@ -4,12 +4,14 @@
 
 namespace VFrame30
 {
-	// Интерфейс для SchemaItem который хранит координаты в виде направленной линии,
-	// Хранятся либо в дюймах либо в точках в зависимости от Unit
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ SchemaItem пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ,
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ Unit
 	//
 	class IPosConnection
 	{
 	public:
+		virtual ~IPosConnection() = default;
+
 		virtual const std::list<SchemaPoint>& GetPointList() const = 0;
 		virtual void SetPointList(const std::list<SchemaPoint>& points) = 0;
 
@@ -62,7 +64,7 @@ namespace VFrame30
 	public:
 		virtual void drawHighlight(CDrawParam* drawParam) const override;
 
-		// Рисование элемента при его создании изменении
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		//
 		virtual void drawOutline(CDrawParam* drawParam) const override;
 
@@ -70,7 +72,7 @@ namespace VFrame30
 		//
 		virtual void drawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const override;
 
-		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 		//
 		virtual void drawSelection(CDrawParam* drawParam, bool drawSizeBar) const override;
 
@@ -83,8 +85,8 @@ namespace VFrame30
 		// Determine and Calculation Functions
 		//
 	public:
-		// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
-		// координаты и размер прямоугольника заданы в дюймах или пикселях
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ),
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		// 
 		virtual bool isIntersectRect(double x, double y, double width, double height) const override;
 
@@ -96,7 +98,7 @@ namespace VFrame30
 		//
 	private:
 		std::list<SchemaPoint> points;
-		std::list<SchemaPoint> extPoints;	// точки, которые используются при DrawOutline, не сериализируются
+		std::list<SchemaPoint> extPoints;	// пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ DrawOutline, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 	public:
 		virtual const std::list<SchemaPoint>& GetPointList() const override;
@@ -106,7 +108,7 @@ namespace VFrame30
 		virtual void DeleteAllPoints() override;
 		virtual void DeleteLastPoint() override;
 
-		// Реализация интерефейса ISchemaItemPropertiesPos
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ISchemaItemPropertiesPos
 		//
 	public:
 		virtual double left() const override;

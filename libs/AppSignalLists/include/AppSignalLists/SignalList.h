@@ -91,8 +91,7 @@ namespace AppSignalLists
 		void setSystemTags(const QString& value);
 
 		const QStringList& systemTagsList() const;
-		QStringList& systemTagsList();
-
+		
 		bool hasAnySystemTag(const QStringList& tags) const;
 
 		// User Tags operations
@@ -101,7 +100,6 @@ namespace AppSignalLists
 		void setUserTags(const QString& value);
 
 		const QStringList& userTagsList() const;
-		QStringList& userTagsList();
 
 		bool hasAnyUserTag(const QStringList& tags) const;
 
@@ -166,8 +164,10 @@ namespace AppSignalLists
 
 		SignalType m_signalType = SignalType::All;
 
-		QStringList m_systemTags;
-		QStringList m_userTags;
+		QString m_systemTags;
+		QString m_userTags;
+		QStringList m_cachedSystemTags;
+		QStringList m_cachedUserTags;
 
 		// Filters
 		//

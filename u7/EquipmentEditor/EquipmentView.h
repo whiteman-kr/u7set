@@ -106,8 +106,8 @@ public slots:
 private:
 	struct AddDeviceUpdatePreset
 	{
-		int parentFileId;
-		int presetFileId;
+		int parentFileId{};
+		int presetFileId{};
 		std::vector<std::pair<QString, QVariant>> propertiesToSet;
 	};
 

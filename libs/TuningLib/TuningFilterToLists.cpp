@@ -171,12 +171,16 @@ namespace TuningFilters
 
 				if (appSignalList->userTagsList().contains(softwareTag) == false)
 				{
-					appSignalList->userTagsList().push_back(softwareTag);
+					QStringList tags = appSignalList->userTagsList();
+					tags.push_back(softwareTag);
+					appSignalList->setUserTags(tags.join(' '));
 				}
 
 				if (appSignalList->systemTagsList().contains(AppSignalLists::AppSignalList::tagUi) == false)
 				{
-					appSignalList->systemTagsList().push_back(AppSignalLists::AppSignalList::tagUi);
+					QStringList tags = appSignalList->systemTagsList();
+					tags.push_back(AppSignalLists::AppSignalList::tagUi);
+					appSignalList->setSystemTags(tags.join(' '));
 				}
 				appSignalList->setCustomAppSignalIDMask(filter->customAppSignalIDMask());
 				appSignalList->setEquipmentIDMask(filter->equipmentIDMask());

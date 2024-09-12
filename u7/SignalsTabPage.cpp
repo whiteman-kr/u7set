@@ -557,7 +557,7 @@ void SignalsTabPage::cloneSignal()
 
 	std::vector<int> signalsToCloneIDs;
 
-	for (const QModelIndex selIndex : selection)
+	for (const QModelIndex& selIndex : selection)
 	{
 		int row = getMappedSourceRow(selIndex);
 		int id = m_signalSetProvider->signalID(row);

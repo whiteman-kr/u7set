@@ -3545,7 +3545,7 @@ void EditSchemaWidget::addItem(SchemaItemPtr newItem)
 		setMouseState(MouseState::AddSchemaPosRectStartPoint);
 
 		VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(newItem.get());
-		itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());		// chachedGridSize and pinStep will be initialized here
+		std::ignore = itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());		// chachedGridSize and pinStep will be initialized here
 	}
 
 	// ����������� ������� � ������������� ISchemaPosConnection

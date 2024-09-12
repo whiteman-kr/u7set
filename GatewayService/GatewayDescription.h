@@ -154,6 +154,7 @@ namespace Gateway
 	{
 	public:
 		SignalList();
+		virtual ~SignalList() = default;
 
 		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
 		bool settingIsSet(E::Setting st) const;
@@ -207,7 +208,7 @@ namespace Gateway
 		Gateway();
 		Gateway(E::GatewayType gwType);
 		Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc);
-		~Gateway();
+		virtual ~Gateway();
 
 		E::GatewayType gatewayType() const;
 		QString gatewayID() const;

@@ -40,7 +40,7 @@ public:
 	TuningCountersManager(const TuningLib::TuningUiStorage& tuningUi,
 						  const ClientLib::TuningSignalManager& tunigSignals,
 						  const ClientLib::TuningConnection& tuningConnection,
-						  const AppSignalLists::AppSignalListSet& appSignalListSet);
+						  const TuningSignalListSet& appSignalListSet);
 
 	void update(TuningClientSettings::LmStatusFlagMode lmStatusFlagMode);
 
@@ -58,7 +58,7 @@ private:
 	const TuningLib::TuningUiStorage& m_tuningUi;
 	const ClientLib::TuningSignalManager& m_tunigSignals;
 	const ClientLib::TuningConnection& m_tuningConnection;
-	const AppSignalLists::AppSignalListSet& m_appSignalListSet;
+	const TuningSignalListSet& m_appSignalListSet;
 
 	TuningCounters m_totalCounters;
 

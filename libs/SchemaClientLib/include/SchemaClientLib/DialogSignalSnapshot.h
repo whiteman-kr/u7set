@@ -71,10 +71,6 @@ namespace SchemaClientLib
 	public slots:
 		void signalsUpdated(); // Should be called when new signals arrived from AppDataService
 
-	protected:
-		virtual std::vector<VFrame30::SchemaDetails> schemasDetails() = 0;
-		virtual std::set<QString> schemaAppSignals(const QString& schemaStrId) = 0;
-
 	signals:
 		void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 		void signalInfo(QString appSignalId);

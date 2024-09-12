@@ -4,22 +4,24 @@
 
 namespace VFrame30
 {
-	// Интерфейс для SchemaItem который хранит координаты в виде направленной линии,
-	// Хранятся либо в дюймах либо в точках в зависимости от Unit
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ SchemaItem пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ,
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ Unit
 	//
 	class IPosLine
 	{
 	public:
-		virtual double startXDocPt() const = 0;
+		virtual ~IPosLine() = default;
+
+		[[nodiscard]] virtual double startXDocPt() const = 0;
 		virtual void setStartXDocPt(double value) = 0;
 
-		virtual double startYDocPt() const = 0;
+		[[nodiscard]] virtual double startYDocPt() const = 0;
 		virtual void setStartYDocPt(double value) = 0;
 
-		virtual double endXDocPt() const = 0;
+		[[nodiscard]] virtual double endXDocPt() const = 0;
 		virtual void setEndXDocPt(double value) = 0;
 
-		virtual double endYDocPt() const = 0;
+		[[nodiscard]] virtual double endYDocPt() const = 0;
 		virtual void setEndYDocPt(double value) = 0;
 	};
 
@@ -81,11 +83,11 @@ namespace VFrame30
 	public:
 		virtual void drawHighlight(CDrawParam* drawParam) const override;
 
-		// Рисование элемента при его создании изменении
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		//
 		virtual void drawOutline(CDrawParam* drawParam) const override;
 
-		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 		//
 		virtual void drawSelection(CDrawParam* drawParam, bool drawSizeBar) const override;
 
@@ -94,8 +96,8 @@ namespace VFrame30
 		// Determine and Calculation Functions
 		//
 	public:
-		// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
-		// координаты и размер прямоугольника заданы в дюймах или пикселях
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ),
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		// 
 		virtual bool isIntersectRect(double x, double y, double width, double height) const override;
 

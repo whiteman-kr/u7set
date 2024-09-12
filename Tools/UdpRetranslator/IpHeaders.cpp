@@ -39,8 +39,77 @@ quint16 calcIpChecksum(quint8* rawHeaderPtr, int headerLenBytes)
 
 // set IP checksum of a given ip header
 //
-void calcChecksum(IpHeader* ipHeader)
+void calcIpHeaderChecksum(IpHeader* ipHeader)
 {
 	ipHeader->headerChecksum = 0;
-	ipHeader->headerChecksum = calcIpChecksum(reinterpret_cast<quint8*>(ipHeader), ipHeader->ipHeaderLenght * 4);
+	ipHeader->headerChecksum = calcIpChecksum(reinterpret_cast<quint8*>(ipHeader), ipHeader->headerLenBytes());
+}
+
+// set tcp checksum: given IP header and UDP datagram
+//
+void calcUdpHeaderChecksum(IpHeader* iph)
+{
+	unsigned long sum = 0;
+
+	UdpHeader* uh = reinterpret_cast<UdpHeader*>(iph->payloadPtr());
+	unsigned short udpLen = htons(uh->udpLength);
+
+	//add the pseudo header
+
+	// add the source IP
+	//
+	sum += (iph->srcIP.ip >> 16) & 0xFFFF;
+	sum += (iph->srcIP.ip) & 0xFFFF;
+
+	// add the dest IP
+	//
+	sum += (iph->destIP.ip >> 16) & 0xFFFF;
+	sum += (iph->destIP.ip) & 0xFFFF;
+
+	//protocol and reserved: 17
+	//
+	sum += htons(IPPROTO_UDP);
+
+	//the length
+	//
+	sum += uh->udpLength;
+
+	// initialize checksum to 0
+	//
+	uh->checksum = 0;
+
+	// add the IP payload
+	//
+	quint16* ipPayloadPtr = reinterpret_cast<quint16*>(iph->payloadPtr());
+
+	while (udpLen > 1)
+	{
+		sum += *ipPayloadPtr;
+
+		ipPayloadPtr++;
+
+		udpLen -= 2;
+	}
+
+	// if any bytes left, pad the bytes and add
+	//
+	if(udpLen > 0)
+	{
+		sum += ((*ipPayloadPtr) & htons(0xFF00));
+	}
+
+	// Fold sum to 16 bits: add carrier to result
+	//
+	while (sum>>16)
+	{
+		sum = (sum & 0xffff) + (sum >> 16);
+	}
+
+	// printf("one's complementn");
+	//
+	sum = ~sum;
+
+	// set computation result
+	//
+	uh->checksum = (static_cast<quint16>(sum) == 0x0000) ? 0xFFFF : static_cast<quint16>(sum);
 }

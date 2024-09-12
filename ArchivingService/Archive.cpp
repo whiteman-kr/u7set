@@ -116,8 +116,8 @@ Archive::Archive(const QString& projectID,					// Read only archive constructor
 				 CircularLoggerShared logger) :
 	m_readOnlyArchive(true),
 	m_projectID(projectID),
-	m_equipmentID(equipmentID),
 	m_archInfoFileData(new QByteArray),
+	m_equipmentID(equipmentID),
 	m_log(logger)
 {
 	m_archInfoFileData->swap(archFileInfoData);

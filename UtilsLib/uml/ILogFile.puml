@@ -1,8 +1,0 @@
-@startuml UtilsLib
-!include ../../doc/uml/Namespace.puml
-
-interface UtilsLib::ILogFile
-{
-}
-
-@enduml

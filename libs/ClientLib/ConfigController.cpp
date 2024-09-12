@@ -410,35 +410,39 @@ namespace ClientLib
 
 		switch (m_softwareInfo.softwareType())
 		{
-		case E::SoftwareType::Monitor:
+		using enum E::SoftwareType;
+		
+		case Monitor:
 			callUpdateFunc(dynamic_cast<const MonitorSettings*>(curSettingsProfile.get()));
 			return;
 
-		case E::SoftwareType::Diagnostics:
+		case Diagnostics:
 			callUpdateFunc(dynamic_cast<const DiagnosticsSettings*>(curSettingsProfile.get()));
 			return;
 
-		case E::SoftwareType::TuningClient:
+		case TuningClient:
 			callUpdateFunc(dynamic_cast<const TuningClientSettings*>(curSettingsProfile.get()));
 			return;
 
-		case E::SoftwareType::TestClient:
+		case TestClient:
 			callUpdateFunc(dynamic_cast<const TestClientSettings*>(curSettingsProfile.get()));
 			return;
 
-		case E::SoftwareType::TestSuite:
+		case TestSuite:
 			callUpdateFunc(dynamic_cast<const TestSuiteSettings*>(curSettingsProfile.get()));
 			return;
 
-		case E::SoftwareType::Unknown:
-		case E::SoftwareType::BaseService:
-		case E::SoftwareType::ConfigurationService:
-		case E::SoftwareType::AppDataService:
-		case E::SoftwareType::ArchiveService:
-		case E::SoftwareType::TuningService:
-		case E::SoftwareType::DiagDataService:
-		case E::SoftwareType::Metrology:
-		case E::SoftwareType::ServiceControlManager:
+		case AdsBridge:
+		case AppDataService:
+		case ArchiveService:
+		case BaseService:
+		case ConfigurationService:
+		case DiagDataService:
+		case GatewayService:
+		case Metrology:
+		case ServiceControlManager:
+		case TuningService:
+		case Unknown:
 			// Not supported by this class
 			//
 			Q_ASSERT(false);

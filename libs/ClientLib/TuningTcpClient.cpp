@@ -1245,11 +1245,11 @@ namespace ClientLib
 		{
 			// Set Access key flag to Validity flag & Control flag if Access Key function is inactive
 			//
-			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.controlIsEnabled();
+			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() && arrivedState.controlIsEnabled();
 		}
 		else
 		{
-			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() & arrivedState.writingIsEnabled();
+			arrivedState.m_flags.writingIsEnabled = arrivedState.valid() && arrivedState.writingIsEnabled();
 		}
 
 		arrivedStates.push_back(arrivedState);

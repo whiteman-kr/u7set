@@ -1316,7 +1316,7 @@ namespace SchemaClientLib
 
 		QStringList tags;
 
-		if (m_storeTags = true && tagsText.isEmpty() == false)
+		if (m_storeTags == true && tagsText.isEmpty() == false)
 		{
 			tags = tagsText.split(';', Qt::SkipEmptyParts);
 

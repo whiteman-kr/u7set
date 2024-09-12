@@ -451,6 +451,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0421.sql", "Upgrade to version 421, Added flag-counter signals to all supported LMs (SF40, SR03, SR04, SR05, SR20, SR90)" },
 	{":/DatabaseUpgrade/Upgrade0422.sql", "Upgrade to version 422, SignalPropertyBehavior.csv file updating" },
 	{":/DatabaseUpgrade/Upgrade0423.sql", "Upgrade to version 423, AutoApply property is replaced by ApplyMode in TuningClient" },
+	{":/DatabaseUpgrade/Upgrade0424.sql", "Upgrade to version 424, Fixing typos in TIM, TIM and WAIM presets scripts logs"},
 };
 
 int DbWorker::counter = 0;

@@ -1546,7 +1546,7 @@ void EquipmentTabPage::exportPreset()
 								.arg(presetVersion);
 		}
 
-		allObjectsArePresetRoots &= device->presetRoot() & device->isPreset();
+		allObjectsArePresetRoots &= device->presetRoot() && device->isPreset();
 
 		devices.push_back(device.get());
 	}

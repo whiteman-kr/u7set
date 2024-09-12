@@ -8,16 +8,20 @@
 
 struct RetranslateEntry
 {
-	HostAddressPort srcAddr;
-	HostAddressPort destAddr;
-	HostAddressPort sendToAddr;
+	HostAddressPort srcAddr;			// original datagram source IP:port
+	HostAddressPort destAddr;			// original datagram destination IP:port
+
+	HostAddressPort rtrSrcAddr;			// retranslated datagram source IP:port
+	HostAddressPort rtrDestAddr;		// retranslated datagram destination IP:port
+
+	quint64 retranslatedCount = 0;
 };
 
-struct CaptureCfg
+struct RetranslateCfg
 {
 	QString captureDeviceDescription;
 
-	std::vector<RetranslateEntry> rtrEntry;
+	std::vector<RetranslateEntry> rtrEntries;
 };
 
 class CaptureDevice
@@ -35,7 +39,6 @@ private:
 		sockaddr dstaddr;
 
 		//
-
 	};
 
 public:
@@ -45,14 +48,36 @@ public:
 	static bool getCaptureDevices(std::vector<CaptureDevice>* capDevs, CircularLoggerShared log);
 
 	bool testCapturing();
-	bool openForCapturing();
-	void capture();
+	bool openForCapture();
+	bool setCaptureFilter(const RetranslateCfg& rtrCfg);
+	bool setCaptureFilter(const QString& capFilter);
+	void dumpPackets();
+	void printPacketInfo(const struct pcap_pkthdr* header, const u_char* packetData);
+
 	void close();
+
+	bool retranslate(const RetranslateCfg& rtrCfg, int threadNo, bool isService);
+	void retranslatePacket(const struct pcap_pkthdr* header, const u_char* packetData);
+
+	static void breakAllCaptures();
 
 	QString name() const;
 	QString description() const;
+	CircularLoggerShared log();
+	const RetranslateCfg& retranslateCfg() const;
 
 private:
+	static void addCaptureHandle(pcap_t* capHandle);
+	static void removeCaptureHandle(pcap_t* capHandle);
+
+	bool getPacketHeaders(const u_char* packetData, quint32 packetLen,
+						  EthernetHeader **ethHeader,
+						  IpHeader** ipHeader,
+						  UdpHeader** udpHeader);
+
+private:
+	inline static std::mutex m_capHandlesMutex;
+	inline static std::set<pcap_t*> m_capHandles;
 
 	// fields copied from pcap_if_t structure
 	//
@@ -66,7 +91,21 @@ private:
 	CircularLoggerShared m_log;
 
 	pcap_t* m_capHandle = nullptr;
+
+	RetranslateCfg m_rtrCfg;
+
+	bool m_isService = false;
+
+	std::map<HostAddressPort, RetranslateEntry> m_rtrEnriesWithPorts;
+	std::map<quint32, RetranslateEntry> m_rtrEnriesWithoutPorts;
+
+	quint8* m_rtrBuffer = nullptr;
+	quint32 m_rtrBufferSize = 0;
+
+	QString m_str;
+
+	inline static const QString SRC_DEST_SEPARATOR = QStringLiteral(" -> ");
+	inline static const QString RTR_SEPARATOR = QStringLiteral(" => ");
+	inline static const QChar SPACE = ' ';
+	inline static int IP_PORT_LEN = 21;
 };
-
-extern pcap_t* currCapHandle;
-

@@ -27,10 +27,10 @@ namespace Gateway
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
 
 	private:
-		int m_listNo;
-		E::SignalListDataType m_dataType;
-		bool m_sendEvents;
-		bool m_includeAppSignalID;
+		int m_listNo{};
+		E::SignalListDataType m_dataType{E::SignalListDataType::Unknown};
+		bool m_sendEvents{};
+		bool m_includeAppSignalID{};
 	};
 
 	using IvsImpulseSignalListShared = std::shared_ptr<IvsImpulseSignalList>;

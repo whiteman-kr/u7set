@@ -48,7 +48,7 @@ private:
 	std::vector<VALUE> m_vector;
 	std::map<KEY, qsizetype> m_map;		// key => index in m_vector
 
-	VALUE m_notValidValue;
+	VALUE m_notValidValue{};
 };
 
 template <typename KEY, typename VALUE>

@@ -61,14 +61,15 @@ struct IpHeader
 	quint8 timeToLive;						// TTL
 	quint8 protocol;						// protocol ID (TCP - 6, UDP - 17, etc)
 	quint16 headerChecksum;					// IP header checksum
-	IPv4Addr srcIP;						// source IP address
-	IPv4Addr desIP;					// destination IP address
+	IPv4Addr srcIP;							// source IP address
+	IPv4Addr destIP;						// destination IP address
 
 	// Minimal IP header size - 20 bytes (ipHeaderLenght == 5)
 
 	// Possible up to 40 bytes of optional data (real IP header size determined by ipHeaderLenght field)
 
 	quint32 headerLenBytes() const { return ipHeaderLenght * 4; }
+	quint8* payloadPtr() { return (reinterpret_cast<quint8*>(this) + headerLenBytes()); }
 
 	void toHost()
 	{
@@ -77,7 +78,7 @@ struct IpHeader
 		fragmentOffset = ntohs(fragmentOffset);
 		headerChecksum = ntohs(headerChecksum);
 		srcIP.ip = ntohl(srcIP.ip);
-		desIP.ip = ntohl(desIP.ip);
+		destIP.ip = ntohl(destIP.ip);
 	}
 
 	void toNetwork()
@@ -87,7 +88,7 @@ struct IpHeader
 		fragmentOffset = htons(fragmentOffset);
 		headerChecksum = htons(headerChecksum);
 		srcIP.ip = htonl(srcIP.ip);
-		desIP.ip = htonl(desIP.ip);
+		destIP.ip = htonl(destIP.ip);
 	}
 };
 
@@ -127,7 +128,8 @@ quint16 calcIpChecksum(quint8* rawHeaderPtr, int headerLenBytes);
 
 // set IP checksum of a given ip header
 //
-void calcChecksum(IpHeader* ipHeader);
+void calcIpHeaderChecksum(IpHeader* ipHeader);
+void calcUdpHeaderChecksum(IpHeader* ipHeader);
 
 
 

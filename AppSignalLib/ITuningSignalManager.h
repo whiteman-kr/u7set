@@ -10,6 +10,8 @@
 class ITuningSignalManager : public ISignalManager
 {
 public:
+	virtual ~ITuningSignalManager() = default;
+
 	virtual TuningSignalState state(Hash hash, bool* found) const = 0;
 	virtual TuningSignalState state(const QString& appSignalId, bool* found) const = 0;
 

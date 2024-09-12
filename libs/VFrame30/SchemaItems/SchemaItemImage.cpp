@@ -109,7 +109,7 @@ namespace VFrame30
 			return;
 		};
 
-		return drawRotated(drawParam, [drawParam, this, &drawPrivate]()
+		return drawRotated(drawParam, [drawParam, &drawPrivate]()
 						   {
 							   return drawPrivate(drawParam);
 						   });

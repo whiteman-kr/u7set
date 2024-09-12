@@ -431,9 +431,6 @@ TEST_F(RtDataProviderTests, mixedData)
 	QElapsedTimer timer;
 	timer.start();
 
-	TrendLib::TrendStateItem lastState0{};
-	TrendLib::TrendStateItem lastState1{};
-
 	while (timer.hasExpired(3'000) == false)
 	{
 		QCoreApplication::instance()->processEvents();

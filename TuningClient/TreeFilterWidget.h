@@ -15,6 +15,7 @@ namespace TuningLib
 }
 
 class TuningCountersManager;
+class TuningSignalListSet;
 
 class TreeFilterWidget : public QWidget
 {
@@ -22,7 +23,7 @@ class TreeFilterWidget : public QWidget
 public:
 	TreeFilterWidget(TuningConfigController& configController,
 					 TuningLib::TuningUiStorage& tuningUi,
-					 AppSignalLists::AppSignalListSet& appSignalLists,
+					 TuningSignalListSet& appSignalLists,
 					 ClientLib::TuningUserManager& userManager,
 					 ClientLib::TuningConnection& tuningConnection,
 					 TuningCountersManager& tuningCounters,
@@ -58,7 +59,7 @@ signals:
 private:
 	TuningConfigController& m_configController;
 	TuningLib::TuningUiStorage& m_tuningUi;
-	AppSignalLists::AppSignalListSet& m_appSignalLists;
+	TuningSignalListSet& m_appSignalLists;
 	ClientLib::TuningUserManager& m_userManager;
 	ClientLib::TuningConnection& m_tuningConnection;
 	TuningCountersManager& m_tuningCounters;

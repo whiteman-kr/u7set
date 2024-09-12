@@ -32,7 +32,7 @@ namespace SchemaClientLib
 		void disableControlClicked();
 
 	protected:
-		void timerEvent(QTimerEvent* event);
+		void timerEvent(QTimerEvent* event) override;
 
 		virtual bool login(); // Override this function to ask password before activating/deactivating sources
 

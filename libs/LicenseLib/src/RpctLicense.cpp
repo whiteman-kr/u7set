@@ -71,6 +71,7 @@ namespace LicenseLib
 
 		if (isNull() == true)
 		{
+			*errorMessage = "License is empty";
 			return compressed;
 		}
 

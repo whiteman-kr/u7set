@@ -592,11 +592,14 @@ namespace UiLib
 	{
 		bool keyEventProcessed = false;
 
-		if (m_autoIndent == true &&
-				(qApp->keyboardModifiers() == Qt::NoModifier && (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return)) // Enter key
-			|| e->text() == "}")
+		if (m_autoIndent == true)
 		{
-			keyEventProcessed |= processAutoIdent(e);
+			bool enterPressed = qApp->keyboardModifiers() == Qt::NoModifier && (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return);
+
+			if (enterPressed == true || e->text() == "}")
+			{
+				keyEventProcessed |= processAutoIdent(e);
+			}
 		}
 
 		if ((qApp->keyboardModifiers() & Qt::ControlModifier) != 0 && e->key() == Qt::Key_Slash)

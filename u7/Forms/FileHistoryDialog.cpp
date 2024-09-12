@@ -138,7 +138,7 @@ void FileHistoryDialog::fillList(QString filterText)
 		//
 		if (const QString& comment = ci.comment();
 			hideUpdateEvents == true && 
-			(comment.startsWith(QLatin1StringView{"Update: "}) == true) || (comment.startsWith(QLatin1StringView{"Upgrade: "}) == true))
+			(comment.startsWith(QLatin1StringView{"Update: "}) == true || comment.startsWith(QLatin1StringView{"Upgrade: "}) == true))
 		{
 			continue;
 		}

@@ -3,3 +3,4 @@ AOM_SR
 	11.11.2021	Version: 2	AOM-SR_v2.u7devp		RPCT-3188:  Validity signals are added to output controller
 	16.11.2021	Version: 3	AOM-SR_v3.u7devp		RPCT-3188:  Validity signals are specified in input signals properties
 	15.12.2021	Version: 4	AOM-SR_v4.u7devp		RPCT-3188:  Validity signals addresses changed
+	03.09.2024	Version: 5 	AOM-SR_v5.u7devp		RPCT-3940: Configuration script misprint fix

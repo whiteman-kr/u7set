@@ -871,7 +871,7 @@ int TuningPage::m_instanceCounter = 0;
 TuningPage::TuningPage(TuningConfigController& configController,
 					   ClientLib::TuningSignalManager& tuningSignalManager,
 					   TuningLib::TuningUiStorage& tuningUi,
-					   AppSignalLists::AppSignalListSet& appSignalLists,
+					   TuningSignalListSet& appSignalLists,
 					   ClientLib::TuningUserManager& userManager,
 					   ClientLib::TuningConnection& tuningConnection,
 					   const QUuid& treeListUuid,                // List selected in list tree
@@ -1197,33 +1197,18 @@ void TuningPage::fillObjectsList()
 		auto allHashes = m_tuningSignalManager.signalHashes();
 		hashes.insert(allHashes.begin(), allHashes.end());
 	}
-
-	bool first = true;
-	for (const QString& id: m_pageUi->filtersList()) 
+	else
 	{
-		AppSignalLists::AppSignalList* pageList = m_appSignalLists.get(id).get();
-		if (pageList == nullptr) 
+		static const auto re =
+			QRegularExpression("[;\\s]"); // Separators are whitespace and semicolon, '+' is NOT a separator!  We need to keep unions.
+		QStringList filtersList = m_pageUi->filters().split(re, Qt::SkipEmptyParts);
+		std::set<QString> filtersSet;
+		for (const QString& s : filtersList)
 		{
-			Q_ASSERT(false);
-			continue;
+			filtersSet.insert(s);
 		}
 
-		if (first == true)
-		{
-			first = false;
-			hashes = pageList->tuningListHashesCache();
-		}
-		else 
-		{
-			std::vector<Hash> v_intersection;
-			std::set_intersection(hashes.begin(),
-								  hashes.end(),
-								  pageList->tuningListHashesCache().begin(),
-								  pageList->tuningListHashesCache().end(),
-								  std::back_inserter(v_intersection));
-			hashes.clear();
-			hashes.insert(v_intersection.begin(), v_intersection.end());
-		}
+		hashes = m_appSignalLists.filtersSetHashes(filtersSet);
 	}
 
 	// Tree Filter
@@ -2157,7 +2142,13 @@ void TuningPage::slot_saveSignalsToNewFilter()
 	std::shared_ptr<AppSignalLists::AppSignalList> autoCreatedList = std::make_shared<AppSignalLists::AppSignalList>();
 	autoCreatedList->setId(autoCreatedList->uuid().toString());
 	autoCreatedList->setCaption(filterName);
-	autoCreatedList->systemTagsList().push_back(AppSignalLists::AppSignalList::tagTcAuto);
+
+	{
+		QStringList tags = autoCreatedList->systemTagsList();
+		tags.push_back(AppSignalLists::AppSignalList::tagTcAuto);
+		autoCreatedList->setSystemTags(tags.join(' '));
+	}
+
 	m_appSignalLists.add(autoCreatedList);
 	addSelectedSignalsToFilter(*autoCreatedList);
 }

@@ -325,7 +325,7 @@ void MainWindow::loadLocalSignalLists()
 		m_logFile.writeError(msg);
 		QMessageBox::critical(this, qAppName(), msg);
 	}
-	/*
+
 	// Delete old filters file
 	//
 	if (localFilterStorage.root()->childFiltersCount() > 0)
@@ -344,7 +344,7 @@ void MainWindow::loadLocalSignalLists()
 			m_logFile.writeError(msg);
 			QMessageBox::information(this, qAppName(), msg);
 		}
-	}*/
+	}
 
 	AppSignalLists::AppSignalListSetChecker::checkForDanglingItems(m_tuningSignalManager.signalHashes(), m_appSignalListSet, this, &m_logFile);
 }
@@ -375,9 +375,16 @@ void MainWindow::loadIdeSignalLists()
 		for (const QString& filterId : ui->filtersList())
 		{
 			const auto& uilist = ideLists.get(filterId);
+			if (uilist == nullptr) 
+			{
+				Q_ASSERT(uilist);
+				continue;
+			}
 			if (uilist->systemTagsList().contains(AppSignalLists::AppSignalList::tagUi) == false)
 			{
-				uilist->systemTagsList().insert(uilist->systemTagsList().begin(), AppSignalLists::AppSignalList::tagUi);
+				QStringList tags = uilist->systemTagsList();
+				tags.push_back(AppSignalLists::AppSignalList::tagUi);
+				uilist->setSystemTags(tags.join(' '));
 			}
 		}
 	}

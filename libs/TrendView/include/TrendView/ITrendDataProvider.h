@@ -12,6 +12,8 @@ namespace TrendLib
 	class ITrendDataProvider
 	{
 	public:
+		virtual ~ITrendDataProvider() = default;
+
 		// Get copy of trend data for specified signal.
 		// trendUuid: is used in case of SchemaItemIndicator in Trend mode to identify Connection by SchemaItem::guid()
 		//

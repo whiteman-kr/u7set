@@ -21,8 +21,8 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 	m_equipmentID(softwareInfo.equipmentID()),
 	m_autoloadBuildPath(autoloadBuildPath),
 	m_workDirectory(workDirectory),
-	m_sessionParams(sessionParams),
 	m_knownClients(clients),
+	m_sessionParams(sessionParams),
 	m_checkClientHostname(checkClientHostname)
 {
 }
