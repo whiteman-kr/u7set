@@ -79,7 +79,21 @@ struct VduAppSignalInfo
 	vdu_string_ref refCaption;
 	vdu_string_ref refUnit;
 
-	uint32_t reserv2;
+	uint32_t tuningDefaultValue;			// real type of value depends from vduSignalType
+
+	// boolean properties of signal
+	//
+	union
+	{
+		struct
+		{
+			uint16_t enableTuning : 1;		// boolProps.bit0
+		};
+
+		uint16_t boolProps;
+	};
+
+	uint16_t reserv2;
 };
 
 #pragma pack(pop)

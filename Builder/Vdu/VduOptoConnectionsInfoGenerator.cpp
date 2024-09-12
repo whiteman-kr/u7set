@@ -201,7 +201,7 @@ namespace Builder
 	{
 		QStringList file;
 
-		static const QString LINE(QString().fill('-', 159));
+		static const QString LINE(QString().fill('-', 176));
 
 		file << QString(" VDU EquipmentID: %1\n").arg(m_vduModule->equipmentID());
 
@@ -401,13 +401,13 @@ namespace Builder
 															QStringList& file)
 	{
 		file << line;
-		file << QString("  Address   | signalIndex | portIndex | signalType | offsetW | bitNo  | reserv1 | refAppSignalID | refCustomAppSignalID | refCaption | refUnit    | reserv2");
+		file << QString("  Address   | signalIndex | portIndex | signalType | offsetW | bitNo  | reserv1 | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | boolProps | reserv2");
 		file << line;
 
 		for(const VduAppSignalInfo& si : appSignals)
 		{
 			file << addrStr(sizeof(si),
-							QString("%1      | %2    | %3     | %4  | %5 | %6  | %7     | %8           | %9 | %10 | %11").
+							QString("%1      | %2    | %3     | %4  | %5 | %6  | %7     | %8      | %9 | %10 | %11 | %12    | %13").
 							arg(hex16(si.signalIndex)).
 							arg(hex16(si.optoPortIndex)).
 							arg(hex16(si.vduSignalType)).
@@ -418,7 +418,9 @@ namespace Builder
 							arg(hex32(si.refCustomAppSignalID)).
 							arg(hex32(si.refCaption)).
 							arg(hex32(si.refUnit)).
-							arg(hex32(si.reserv2)));
+							arg(hex32(si.tuningDefaultValue)).
+							arg(hex16(si.boolProps)).
+							arg(hex16(si.reserv2)));
 		}
 	}
 
@@ -485,7 +487,20 @@ namespace Builder
 			si.refCaption = appendString(appSignal->caption());
 			si.refUnit = appendString(appSignal->unit());
 
-			si.reserv2 = MARKER32;
+			si.boolProps = 0;
+
+			if (appSignal->enableTuning())
+			{
+				si.tuningDefaultValue = appSignal->tuningDefaultValue().untypedUInt32Value();
+				si.enableTuning = 1;
+			}
+			else
+			{
+				si.tuningDefaultValue = 0;
+				si.enableTuning = 0;
+			}
+
+			si.reserv2 = MARKER16;
 
 			vduSignals.emplace_back(si);
 		}

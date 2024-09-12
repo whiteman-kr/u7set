@@ -61,6 +61,8 @@ public:
 	float toFloat() const;
 	void fromFloat(float value);
 
+	quint32 untypedUInt32Value();
+
 	QString toString() const;
 	QString toString(E::AnalogFormat analogFormat, int precision) const;
 	QString toTypedString(int precision = 3) const;
