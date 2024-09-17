@@ -245,6 +245,17 @@ namespace Hardware
 		return moduleFamily() == FamilyType::MSO;
 	}
 
+	bool DeviceModule::isNonPlatformAppDataSourceModule() const
+	{
+		return isBvb() || isMso();
+	}
+
+	bool DeviceModule::isAppDataSourceModule() const
+	{
+		return isLogicModule() || isNonPlatformAppDataSourceModule();
+	}
+
+
 	bool DeviceModule::isVdu() const
 	{
 		return moduleFamily() == FamilyType::VDU;

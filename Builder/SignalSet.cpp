@@ -351,7 +351,7 @@ namespace Builder
 				{
 					std::shared_ptr<Hardware::DeviceModule> module = std::dynamic_pointer_cast<Hardware::DeviceModule>(device);
 
-					if (module != nullptr && (module->isLogicModule() == true || module->isBvb() == true))
+					if (module != nullptr && (module->isLogicModule() || module->isNonPlatformAppDataSourceModule()))
 					{
 						linkSignalToLm(sg, module);
 					}
@@ -375,7 +375,7 @@ namespace Builder
 						continue;
 					}
 
-					std::shared_ptr<Hardware::DeviceModule> module = chassis->findLogicModuleOrBvb();
+					std::shared_ptr<Hardware::DeviceModule> module = chassis->findAppDataSourceModule();
 
 					if (module == nullptr)
 					{

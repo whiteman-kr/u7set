@@ -82,6 +82,8 @@ namespace Hardware
 		[[nodiscard]] bool isOptoModule() const;
 		[[nodiscard]] bool isBvb() const;
 		[[nodiscard]] bool isMso() const;
+		[[nodiscard]] bool isNonPlatformAppDataSourceModule() const;
+		[[nodiscard]] bool isAppDataSourceModule() const;
 		[[nodiscard]] bool isVdu() const;
 
 		// Data

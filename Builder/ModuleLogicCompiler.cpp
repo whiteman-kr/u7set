@@ -295,7 +295,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
 
 			PROC_TO_CALL(ModuleLogicCompiler::writeResult),
-			PROC_TO_CALL(ModuleLogicCompiler::writeBvbRegInfoFile)
+			PROC_TO_CALL(ModuleLogicCompiler::writeNonPlatformRegInfoFile)
 		};
 
 		bool result = runProcs(procs);
@@ -804,7 +804,7 @@ namespace Builder
 									 module->place() == DeviceHelper::BVB_PLACE2)) ||
 					//
 				(module->isMso() && (module->place() == DeviceHelper::MSO_PLACE1 ||
-											module->place() == DeviceHelper::MSO_PLACE2))	)
+									 module->place() == DeviceHelper::MSO_PLACE2))	)
 			{
 				if (module->place() != m_lm->place())
 				{
@@ -1003,9 +1003,10 @@ namespace Builder
 						continue;
 					}
 
-					if (deviceModule->isLogicModule() == false && deviceModule->isBvb() == false)
+					if (!(deviceModule->isLogicModule() ||
+						  deviceModule->isNonPlatformAppDataSourceModule()))
 					{
-						assert(false); // signal must be associated with Logic Module only
+						assert(false); // signal must be associated with LM or non-platform app data module
 						continue;
 					}
 
@@ -1275,7 +1276,7 @@ namespace Builder
 		// primarily created signals
 		//
 		result &= createUalSignalsFromInputAndTuningAcquiredSignals();
-		result &= createBvbOutputSignals();
+		result &= createUalSignalsForNonPlatformModules();
 		result &= createUalSignalsFromBusComposers();
 		result &= createUalSignalsFromOptoValidity();
 		result &= createUalSignalsFromReceivers();
@@ -1927,9 +1928,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createBvbOutputSignals()
+	bool ModuleLogicCompiler::createUalSignalsForNonPlatformModules()
 	{
-		if (m_lm->isBvb() == false)
+		if (m_lm->isNonPlatformAppDataSourceModule() == false)
 		{
 			return true;
 		}
@@ -6438,7 +6439,7 @@ namespace Builder
 
 		do
 		{
-			if (m_lm->isBvb() == false)
+			if (m_lm->isLogicModule() == true)
 			{
 				// platform-based LM processing
 				//
@@ -6469,15 +6470,20 @@ namespace Builder
 				if (disposeAnalogAndBusSignalsHeap() == false) break;
 
 				if (setSignalsRegValidityAddr() == false) break;
-			}
-			else
-			{
-				// BVB chassis processing
-				//
-				if (disposeBvbSignalsInRegBuf() == false) break;
+
+				result = true;
+				break;
 			}
 
-			result = true;
+			if (m_lm->isNonPlatformAppDataSourceModule())
+			{
+				// Non platform chassis processing
+				//
+				if (disposeNonPlatformAppSignalsInRegBuf() == false) break;
+
+				result = true;
+				break;
+			}
 		}
 		while(false);
 
@@ -6794,14 +6800,8 @@ namespace Builder
 		{
 			assert(false);			// set actual raw data size here !!!
 		}
-		else
-		{
-			m_memoryMap.setAcquiredRawDataSize(0);
-		}
 
-		m_memoryMap.recalculateAddresses();
-
-		return true;
+		return m_memoryMap.setAcquiredRawDataSize(0);
 	}
 
 	bool ModuleLogicCompiler::disposeAcquiredAnalogSignalsInRegBuf()
@@ -6926,11 +6926,11 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::disposeBvbSignalsInRegBuf()
+	bool ModuleLogicCompiler::disposeNonPlatformAppSignalsInRegBuf()
 	{
 		TEST_PTR_RETURN_FALSE(m_lmDescription);
 
-		// calculation regBufAddr of BVB chassis I/O signals
+		// calculation regBufAddr of non-platform chassis I/O signals
 		//
 		bool result = true;
 
@@ -7034,11 +7034,11 @@ namespace Builder
 
 			ioSignal->setRegValidityAddr(regValidityAddr);
 
-			auto it = m_bvbRegSignals.find(ioSignal->regValueAddr());
+			auto it = m_nonPlatformRegSignals.find(ioSignal->regValueAddr());
 
-			if (it == m_bvbRegSignals.end())
+			if (it == m_nonPlatformRegSignals.end())
 			{
-				auto [newIt, b] = m_bvbRegSignals.emplace(ioSignal->regValueAddr(), std::vector<BuimAppSignal>{});
+				auto [newIt, b] = m_nonPlatformRegSignals.emplace(ioSignal->regValueAddr(), std::vector<NonPlatformAppSignal>{});
 				it = newIt;
 			}
 
@@ -7047,23 +7047,9 @@ namespace Builder
 									ioSignal);
 		}
 
-		int acquiredRawDataSizeW = 0;
+		int acquiredRawDataSizeW = m_lmDescription->memory().m_moduleCount * m_lmDescription->memory().m_moduleDataSize;
 
-		for(const auto& [place, module] : m_modules)
-		{
-			if ((module.place == DeviceHelper::BVB_PLACE1 ||
-				module.place == DeviceHelper::BVB_PLACE2) &&
-				module.place != m_lm->place())
-			{
-				continue;
-			}
-
-			acquiredRawDataSizeW += module.txAppDataSize;
-		}
-
-		m_memoryMap.setAcquiredRawDataSize(acquiredRawDataSizeW);
-
-		return result;
+		return m_memoryMap.setAcquiredRawDataSize(acquiredRawDataSizeW);
 	}
 
 	bool ModuleLogicCompiler::appendAfbsForInOutSignalsConversion()
@@ -7239,10 +7225,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::findFbsForInOutSignalsConversion()
 	{
-		if (m_lm->isBvb() == true)
-		{
-			return true;
-		}
+		Q_ASSERT(m_lm->isLogicModule() == true);
 
 		bool result = true;
 
@@ -17819,11 +17802,11 @@ namespace Builder
 		return bf != nullptr;
 	}
 
-	bool ModuleLogicCompiler::writeBvbRegInfoFile() const
+	bool ModuleLogicCompiler::writeNonPlatformRegInfoFile() const
 	{
 		TEST_PTR_RETURN_FALSE(m_lm);
 
-		if (m_lm->isBvb() == false)
+		if (m_lm->isNonPlatformAppDataSourceModule() == false)
 		{
 			return true;			// Its Ok
 		}
@@ -17846,7 +17829,7 @@ namespace Builder
 
 		QStringList file;
 
-		file.append(QString("BVB %1 registration info file\n").arg(lmEquipmentID()));
+		file.append(QString("%1 %2 registration info file\n").arg(m_lm->caption()).arg(lmEquipmentID()));
 		file.append(QString("App data size:       %1 words (%2 bytes)").arg(appDataSizeW).arg(appDataSizeW * 2));
 		file.append(QString("RUP frames quantity: %1").arg(rupFramesQuantity));
 		file.append(QString("App data UID:        0x%1 (%2)\n").
@@ -17859,9 +17842,9 @@ namespace Builder
 
 		int prevPlace = -1;
 
-		for(const auto& [regValueAddr, buimAppSignals] : m_bvbRegSignals)
+		for(const auto& [regValueAddr, buimAppSignals] : m_nonPlatformRegSignals)
 		{
-			for(const BuimAppSignal& bas : buimAppSignals)
+			for(const NonPlatformAppSignal& bas : buimAppSignals)
 			{
 				const AppSignal* appSignal = bas.appSignal;
 
@@ -17871,16 +17854,16 @@ namespace Builder
 
 				QString placeStr(QStringLiteral("          |       "));
 
-				if (bas.buimPlace != prevPlace)
+				if (bas.modulePlace != prevPlace)
 				{
 					if (prevPlace != -1)
 					{
 						file.append(line);
 					}
 
-					placeStr = QString(" %1 |  %2   ").arg(bas.buimCaption, -8).arg(bas.buimPlace, -2);
+					placeStr = QString(" %1 |  %2   ").arg(bas.moduleCaption, -8).arg(bas.modulePlace, -2);
 
-					prevPlace = bas.buimPlace;
+					prevPlace = bas.modulePlace;
 				}
 
 				file.append(QString("%1| %2 | %3 | %4").

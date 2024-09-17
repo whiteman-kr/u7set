@@ -107,7 +107,7 @@ namespace Hardware
 		return {};
 	}
 
-	std::shared_ptr<DeviceModule> DeviceChassis::findLogicModuleOrBvb()
+	std::shared_ptr<DeviceModule> DeviceChassis::findAppDataSourceModule()
 	{
 		for (const auto& child : m_children)
 		{
@@ -127,7 +127,7 @@ namespace Hardware
 					continue;
 				}
 
-				if (module->isLogicModule() || module->isBvb())
+				if (module->isAppDataSourceModule())
 				{
 					return module;
 				}

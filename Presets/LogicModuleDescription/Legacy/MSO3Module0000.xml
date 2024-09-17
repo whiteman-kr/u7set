@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LogicModule DescriptionNumber="0" ConfigurationScriptFile="MSO3Conf0000.js" SimulationScriptFile="LM1_SR01_SIM.js" Version="1.0003">
 	<FlashMemory>
-		<AppLogicFrameCount>256</AppLogicFrameCount>
-		<AppLogicFramePayload>1016</AppLogicFramePayload>
-		<AppLogicFrameSize>1024</AppLogicFrameSize>
+		<AppLogicFrameCount>0</AppLogicFrameCount>
+		<AppLogicFramePayload>0</AppLogicFramePayload>
+		<AppLogicFrameSize>0</AppLogicFrameSize>
 		<AppLogicUartID>0</AppLogicUartID>
 		<AppLogicWriteBitstream>false</AppLogicWriteBitstream>
 		<ConfigFrameCount>256</ConfigFrameCount>
@@ -19,30 +19,30 @@
 		<MaxConfigurationCount>62</MaxConfigurationCount>
 	</FlashMemory>
 	<Memory>
-		<CodeMemorySize>65536</CodeMemorySize>
+		<CodeMemorySize>0</CodeMemorySize>
 		<AppMemorySize>65536</AppMemorySize>
-		<AppDataOffset>57782</AppDataOffset>
-		<AppDataSize>2</AppDataSize>
-		<AppLogicBitDataOffset>46080</AppLogicBitDataOffset>
-		<AppLogicBitDataSize>256</AppLogicBitDataSize>
-		<AppLogicWordDataOffset>53956</AppLogicWordDataOffset>;
-		<AppLogicWordDataSize>3570</AppLogicWordDataSize>;
+		<AppDataOffset>0</AppDataOffset>
+		<AppDataSize>0</AppDataSize>
+		<AppLogicBitDataOffset>0</AppLogicBitDataOffset>
+		<AppLogicBitDataSize>0</AppLogicBitDataSize>
+		<AppLogicWordDataOffset>0</AppLogicWordDataOffset>;
+		<AppLogicWordDataSize>65536</AppLogicWordDataSize>;
 		<ModuleDataOffset>0</ModuleDataOffset>
-		<ModuleDataSize>2560</ModuleDataSize>
+		<ModuleDataSize>14</ModuleDataSize>
 		<ModuleCount>72</ModuleCount>
-		<TuningDataOffset>46336</TuningDataOffset>
-		<TuningDataSize>7620</TuningDataSize>				<!--TuningDataFrameCount * TuningDataFramePayload-->
-		<TuningDataFrameCount>15</TuningDataFrameCount>
-		<TuningDataFramePayload>508</TuningDataFramePayload>
-		<TuningDataFrameSize>512</TuningDataFrameSize>
-		<TxDiagDataOffset>57526</TxDiagDataOffset>
-		<TxDiagDataSize>155</TxDiagDataSize>
+		<TuningDataOffset>0</TuningDataOffset>
+		<TuningDataSize>0</TuningDataSize>				<!--TuningDataFrameCount * TuningDataFramePayload-->
+		<TuningDataFrameCount>0</TuningDataFrameCount>
+		<TuningDataFramePayload>0</TuningDataFramePayload>
+		<TuningDataFrameSize>0</TuningDataFrameSize>
+		<TxDiagDataOffset>0</TxDiagDataOffset>
+		<TxDiagDataSize>0</TxDiagDataSize>
 	</Memory>
 	<LogicUnit>
-		<ALPPhaseTime>2500</ALPPhaseTime>
+		<ALPPhaseTime>0</ALPPhaseTime>
 		<ClockFrequency>96000000</ClockFrequency>
 		<CycleDuration>5000</CycleDuration>
-		<IDRPhaseTime>1000</IDRPhaseTime>
+		<IDRPhaseTime>0</IDRPhaseTime>
 	</LogicUnit>
 	<OptoInterface>
 		<OptoPortCount>3</OptoPortCount>
@@ -59,8 +59,8 @@
 		</LanController>
 	</Lan>
 	<Other>
-		<OcmTxDataSizeLimit>2397</OcmTxDataSizeLimit>
-		<OcmRxDataSizeLimit>2397</OcmRxDataSizeLimit>
+		<OcmTxDataSizeLimit>0</OcmTxDataSizeLimit>
+		<OcmRxDataSizeLimit>0</OcmRxDataSizeLimit>
 	</Other>	
 
 	<LogicUnitCommnads Version="0">
