@@ -350,6 +350,7 @@ std::map<KEY, VALUE>::iterator findOrInsertKey(std::map<KEY, VALUE>& map, const 
 	return it;
 }
 
+#define ROUND_TO(value, roundTo)	(((value + roundTo - 1) / roundTo) * roundTo)
 
 #ifdef __cpp_lib_hardware_interference_size
 	const std::size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
@@ -358,6 +359,11 @@ std::map<KEY, VALUE>::iterator findOrInsertKey(std::map<KEY, VALUE>& map, const 
 	const std::size_t CACHE_LINE_SIZE = 64;
 #endif
 
-#define ROUND_TO_CACHE_LINE_SIZE(size)	(((size + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE) * CACHE_LINE_SIZE)
+//#define ROUND_TO_CACHE_LINE_SIZE(size)	(((size + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE) * CACHE_LINE_SIZE)
+
+#define ROUND_TO_CACHE_LINE_SIZE(size)	ROUND_TO(size, CACHE_LINE_SIZE)
+
 #define CACHE_ALIGNED					alignas(CACHE_LINE_SIZE)
+
+
 

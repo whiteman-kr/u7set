@@ -7047,9 +7047,26 @@ namespace Builder
 									ioSignal);
 		}
 
-		int acquiredRawDataSizeW = m_lmDescription->memory().m_moduleCount * m_lmDescription->memory().m_moduleDataSize;
+		int acquiredRawDataSizeW = 0;
 
-		return m_memoryMap.setAcquiredRawDataSize(acquiredRawDataSizeW);
+		if (m_nonPlatformRegSignals.empty() == false)
+		{
+			Address16 ioSignalMaxRegAddr = m_nonPlatformRegSignals.rbegin()->first;
+
+			int maxRegDataSize = m_lmDescription->memory().m_moduleCount * m_lmDescription->memory().m_moduleDataSize;
+
+			if (ioSignalMaxRegAddr.offset() >= maxRegDataSize)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, "Non-platform AppSignal regAddr out of range");
+				return false;
+			}
+
+			acquiredRawDataSizeW = ROUND_TO(ioSignalMaxRegAddr.offset(), m_lmDescription->memory().m_moduleDataSize);
+		}
+
+		bool res = m_memoryMap.setAcquiredRawDataSize(acquiredRawDataSizeW);
+
+		return res;
 	}
 
 	bool ModuleLogicCompiler::appendAfbsForInOutSignalsConversion()
