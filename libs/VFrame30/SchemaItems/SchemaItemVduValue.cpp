@@ -1,7 +1,7 @@
-#include <VFrame30/SchemaItemVduValue.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/MacrosExpander.h>
 #include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemVduValue.h>
 #include <VFrame30/SchemaView.h>
 
 
@@ -55,11 +55,19 @@ namespace VFrame30
 								 SchemaItemVduValue::setTextColor);
 
 		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::appSignalId,
+								 PropertyNames::text,
 								 PropertyNames::textCategory,
 								 true,
-								 SchemaItemVduValue::appSignalId,
-								 SchemaItemVduValue::setAppSignalId);
+								 SchemaItemVduValue::text,
+								 SchemaItemVduValue::setText)
+			->setDescription(PropertyNames::textVduItemValueDescription);
+
+		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::appSignalIDs,
+								 PropertyNames::functionalCategory,
+								 true,
+								 SchemaItemVduValue::appSignalIdsString,
+								 SchemaItemVduValue::setAppSignalIdsString);
 
 		ADD_PROPERTY_GET_SET_CAT(int,
 								 PropertyNames::precision,
@@ -82,8 +90,8 @@ namespace VFrame30
 								 PropertyNames::textCategory,
 								 true,
 								 SchemaItemVduValue::getFontSize,
-								 SchemaItemVduValue::setFontSize)->
-			setPrecision(0);
+								 SchemaItemVduValue::setFontSize)
+			->setPrecision(0);
 
 		ADD_PROPERTY_GET_SET_CAT(bool,
 								 PropertyNames::fontBold,
@@ -135,7 +143,9 @@ namespace VFrame30
 		valueMessage->set_fillcolor(m_fillColor.rgba());
 		valueMessage->set_textcolor(m_textColor.rgba());
 
-		valueMessage->set_appsignalid(m_appSignalId.toUtf8());
+		valueMessage->set_text(m_text.toUtf8());
+
+		valueMessage->set_appsignalids(appSignalIdsString().toUtf8());
 		m_font.SaveData(valueMessage->mutable_font());
 
 		valueMessage->set_precision(m_precision);
@@ -178,7 +188,9 @@ namespace VFrame30
 		m_fillColor = QColor::fromRgba(valueMessage.fillcolor());
 		m_textColor = QColor::fromRgba(valueMessage.textcolor());
 
-		m_appSignalId = QString::fromUtf8(valueMessage.appsignalid().c_str());
+		m_text = QString::fromUtf8(valueMessage.text().c_str());
+
+		setAppSignalIdsString(QString::fromUtf8(valueMessage.appsignalids().c_str()));
 		m_font.LoadData(valueMessage.font());
 
 		m_precision = valueMessage.precision();
@@ -218,7 +230,7 @@ namespace VFrame30
 		painter->setFont(font);
 		painter->setPen(m_textColor);
 
-		QString text{"?"};
+		QString text = parseText(m_text, context()->appSignalController());
 
 		painter->drawText(boundingRect, static_cast<int>(Qt::AlignHCenter) | static_cast<int>(Qt::AlignVCenter), text, nullptr);
 
@@ -233,6 +245,136 @@ namespace VFrame30
 	double SchemaItemVduValue::minimumPossibleWidthDocPt(double gridSize, int /*pinGridStep*/) const
 	{
 		return gridSize;
+	}
+
+	QString SchemaItemVduValue::parseText(QStringView text, const VFrame30::AppSignalController* appSignalController) const
+	{
+		// %% - Percent
+		// %i - CustomAppSignalID
+		// %c - Signal caption
+		// %v - Signal value
+		// %V - Signal value + unit
+		// %s - +/- signal value
+		// %S - +/- signal value + unit
+		// %u - unit
+		// %e - Value in exponential form (1.0e-11)
+		// %E - Value in exponential form (1.0E-11)
+		// %x - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009abc).
+		// %X - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009ABC).
+
+		QString appSignalId = appSignalIds().isEmpty() ? QStringLiteral("#NOT_FOUND") : appSignalIds().first();
+
+		bool signalFound = false;
+		AppSignalParam signalParam;
+		
+		if (appSignalController != nullptr)
+		{
+			signalParam = appSignalController->signalParam(appSignalId, &signalFound);
+		}
+
+		if (signalFound == false)
+		{
+			signalParam.setAppSignalId("#NOT_FOUND");
+			signalParam.setCustomSignalId("NOT_FOUND");
+			signalParam.setCaption("NOT_FOUND");
+		}
+
+		bool treatAsFloat = E::SignalType::Analog && signalParam.analogSignalFormat() == E::AnalogAppSignalFormat::Float32;
+
+		QString result = text.toString();
+
+		qsizetype index = 0;
+		for (;;)
+		{
+			index = result.indexOf('%', index); // index is increased in the loop body
+			if (index == -1 || index + 1 >= result.size())
+			{
+				break;
+			}
+
+			QChar nextChar = result.at(index + 1);
+			QString replaceText;
+
+			switch (nextChar.unicode())
+			{
+			case '%':
+				replaceText = QStringLiteral("%");
+				break;
+
+			case 'i':
+				replaceText = signalParam.customSignalId();
+				break;
+
+			case 'c':
+				replaceText = signalParam.caption();
+				break;
+
+			case 'v':
+				replaceText = treatAsFloat ? QString::number(123.123456780123456789, 'f', precision()) : QString::number(123, 'f', 0);
+				break;
+
+			case 'V':
+				{
+					QString valueText =
+						treatAsFloat ? QString::number(123.123456780123456789, 'f', precision()) : QString::number(123, 'f', 0);
+					replaceText = QString("%1 %2").arg(valueText).arg(signalParam.unit());
+				}
+				break;
+
+			case 's':
+				replaceText = treatAsFloat ? QString::number(123.123456780123456789, 'f', precision()) : QString::number(123, 'f', 0);
+				break;
+
+			case 'S':
+				{
+					QString valueText =
+						treatAsFloat ? QString::number(123.123456780123456789, 'f', precision()) : QString::number(123, 'f', 0);
+
+					replaceText = QString("+%1 %2").arg(valueText).arg(signalParam.unit());
+				}
+				break;
+
+			case 'u':
+				replaceText = signalParam.unit();
+				break;
+
+			case 'e':
+				replaceText = QStringLiteral("1.0e-11");
+				break;
+
+			case 'E':
+				replaceText = QStringLiteral("1.0E-11");
+				break;
+
+			case 'x':
+				{
+					QString valueText = treatAsFloat ? QString::number(0) : QString::number(123, 16);
+					replaceText = valueText.rightJustified(precision(), '0').toLower();
+				}
+				break;
+
+			case 'X':
+				{
+					QString valueText = treatAsFloat ? QString::number(0) : QString::number(123, 16);
+					replaceText = valueText.rightJustified(precision(), '0').toUpper();
+				}
+				break;
+
+			default:
+				replaceText = QStringLiteral("???");
+				break;
+			}
+
+			result.replace(index, 2, replaceText);
+			index += replaceText.size();
+		}
+
+		return result;
+	}
+
+	void SchemaItemVduValue::accept(VduItemVisitor& visitor) const
+	{
+		return visitor.visit(*this);
 	}
 
 	int SchemaItemVduValue::weight() const
@@ -285,14 +427,35 @@ namespace VFrame30
 		m_textColor = color;
 	}
 
-	const QString& SchemaItemVduValue::appSignalId() const
+	const QString& SchemaItemVduValue::text() const
 	{
-		return m_appSignalId;
+		return m_text;
 	}
 
-	void SchemaItemVduValue::setAppSignalId(const QString& value)
+	void SchemaItemVduValue::setText(const QString& value)
 	{
-		m_appSignalId = value;
+		m_text = value.left(127);
+	}
+
+	QString SchemaItemVduValue::appSignalIdsString() const
+	{
+		return m_appSignalIds.join(QChar::LineFeed);
+	}
+
+	void SchemaItemVduValue::setAppSignalIdsString(const QString& value)
+	{
+		thread_local const auto re = QRegularExpression("\\s+");
+		m_appSignalIds = value.split(re, Qt::SkipEmptyParts);
+	}
+
+	QStringList SchemaItemVduValue::appSignalIds() const
+	{
+		return m_appSignalIds;
+	}
+
+	void SchemaItemVduValue::setAppSignalIds(const QStringList& value)
+	{
+		m_appSignalIds = value;
 	}
 
 	int SchemaItemVduValue::precision() const

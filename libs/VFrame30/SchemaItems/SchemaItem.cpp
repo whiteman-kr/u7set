@@ -1,6 +1,7 @@
 #include <VFrame30/SchemaItem.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemControl.h>
+#include <VFrame30/SchemaItemVdu.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/Schema.h>
@@ -822,6 +823,11 @@ namespace VFrame30
 	bool SchemaItem::isControl() const
 	{
 		return dynamic_cast<const SchemaItemControl*>(this) != nullptr;
+	}
+
+	bool SchemaItem::isVduItem() const
+	{
+		return dynamic_cast<const SchemaItemVdu*>(this) != nullptr;
 	}
 
 	bool SchemaItem::isLocked() const

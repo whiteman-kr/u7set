@@ -191,6 +191,21 @@ namespace VFrame30
 		//"$(highlimit) High limit\n"
 		//"$(lowlimit) Low limit"};
 
+		inline static const QString textVduItemValueDescription = R"($Text to display, may contain placeholders:\n
+Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"\n
+%% - Percent\n
+%i - CustomAppSignalID\n
+%c - Signal caption\n
+%v - Signal value\n
+%V - Signal value + unit\n
+%s - +/- signal value\n
+%S - +/- signal value + unit\n
+%u - unit\n
+%e - Value in exponential form (1.0e-11)\n
+%E - Value in exponential form (1.0E-11)\n
+%X - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009abc).\n
+%X - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009ABC).$)";
+
 		inline static const QString userText{"UserText"};
 		inline static const QString userTextPos{"UserTextPos"};
 

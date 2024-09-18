@@ -9416,6 +9416,28 @@ namespace Builder
 				  .arg(itemLabel));
 	}
 
+	/// IssueCode: EQP6405
+	///
+	/// IssueType: Warning
+	///
+	/// Title: SchemaItem %1 has an incompatible type with VDU, SchemaID %2. The SchemaItem will be ignored.
+	///
+	/// Parameters:
+	///		%1 Schema item label
+	///		%2 SchemaID
+	///
+	/// Description:
+	///		The schema item has an incompatible type with the VDU. It has been ignored and will not be displayed on the VDU.
+	///
+	void IssueLogger::wrnEQP6405(QString schemaId, QString itemLabel, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Warning2, 6405, itemUuid, schemaId);
+
+		LOG_WARNING2(IssueType::Equipment,
+					 6405,
+					 QString(tr("SchemaItem %1 has an incompatible type with VDU, SchemaID %2. The SchemaItem will be ignored.")).arg(itemLabel).arg(schemaId));
+	}
+
 	// --
 
 	/// IssueCode: DGN7000

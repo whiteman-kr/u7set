@@ -1,7 +1,7 @@
 #include "VduSchemaGenerator.h"
 
-#include "VduSchemaFile.h"
 #include "../Context.h"
+#include "VduSchemaFile.h"
 
 #include "../../UtilsLib/Crc.h"
 
@@ -14,6 +14,252 @@
 #include <VFrame30/VduSchema.h>
 
 // #define VDU_DEBUG
+
+namespace
+{
+	class VduStringWriter
+	{
+	public:
+		using Offset = vdu_string_ref;
+
+		Offset addStringRef(const QString& str, Offset offset)
+		{
+			m_offsetToString.insert(std::make_pair(str, offset));
+			m_strings.insert(str);
+
+			return StringRefStub;
+		}
+
+		const std::set<QString>& strings() const { return m_strings; }
+
+		std::vector<Offset> offsets(const QString& str) const
+		{
+			std::vector<Offset> result(m_offsetToString.count(str));
+
+			auto [beginIt, endIt] = m_offsetToString.equal_range(str);
+			std::transform(beginIt,
+						   endIt,
+						   result.begin(),
+						   [](const auto& p)
+						   {
+							   return p.second;
+						   });
+
+			return result;
+		}
+
+	private:
+		std::multimap<QString, Offset> m_offsetToString;
+		std::set<QString> m_strings;
+	};
+
+	class SaveVduItemVisitor : public VFrame30::VduItemVisitor
+	{
+		QString m_vduEquipmentId;
+		Builder::IssueLogger& m_log;
+		const Builder::VduFontProvider& m_vduFontProvider;
+		const std::map<Hash, int>& m_appSignalHashToSignalIndex;
+
+	public:
+		QByteArray outData;
+		std::list<std::pair<QString, size_t>> addedStringReferences;
+		uint16_t itemType = 0;
+
+		SaveVduItemVisitor(QString vduEquipmentId,
+						   Builder::IssueLogger& m_log,
+						   const Builder::VduFontProvider& m_vduFontProvider,
+						   const std::map<Hash, int>& appSignalHashToSignalIndex) :
+			m_vduEquipmentId(vduEquipmentId),
+			m_log(m_log),
+			m_vduFontProvider(m_vduFontProvider),
+			m_appSignalHashToSignalIndex(appSignalHashToSignalIndex)
+		{
+		}
+
+		void visit(const VFrame30::SchemaItemVduLine& schemaItem) override
+		{
+			outData.clear();
+			addedStringReferences.clear();
+
+			VduSchemaFileSchemaItemLine1 structLine{};
+
+			structLine.version = 1;
+			structLine.itemType = VduFileSchemaItemLineId; // ! Do not forget to set itemType.
+
+			structLine.x1 = static_cast<decltype(structLine.x1)>(schemaItem.startXDocPt());
+			structLine.y1 = static_cast<decltype(structLine.y1)>(schemaItem.startYDocPt());
+			structLine.x2 = static_cast<decltype(structLine.x2)>(schemaItem.endXDocPt());
+			structLine.y2 = static_cast<decltype(structLine.y2)>(schemaItem.endYDocPt());
+
+			structLine.weight = static_cast<decltype(structLine.weight)>(schemaItem.weight());
+
+			structLine.color = schemaItem.lineColor().rgba();
+
+			itemType = structLine.itemType;
+			outData = QByteArray(reinterpret_cast<const char*>(&structLine), sizeof(structLine));
+		}
+
+		void visit(const VFrame30::SchemaItemVduRect& schemaItem) override
+		{
+			outData.clear();
+			addedStringReferences.clear();
+
+			VduSchemaFileSchemaItemRect1 structRect{};
+
+			structRect.version = 1;
+			structRect.itemType = VduFileSchemaItemRectId; // ! Do not forget to set itemType.
+
+			using PosType = decltype(VduSchemaFileSchemaItemRect1::left);
+			using SizeType = decltype(VduSchemaFileSchemaItemRect1::width);
+
+			structRect.left = static_cast<PosType>(schemaItem.leftDocPt());
+			structRect.top = static_cast<PosType>(schemaItem.topDocPt());
+			structRect.width = static_cast<SizeType>(schemaItem.widthDocPt());
+			structRect.height = static_cast<SizeType>(schemaItem.heightDocPt());
+
+			structRect.weight = static_cast<decltype(structRect.weight)>(schemaItem.weight());
+			structRect.fill = schemaItem.fill();
+			structRect.drawRect = schemaItem.drawRect();
+
+			structRect.lineColor = schemaItem.lineColor().rgba();
+			structRect.fillColor = schemaItem.fillColor().rgba();
+			structRect.textColor = schemaItem.textColor().rgba();
+
+			// Set font index.
+			//
+			int fontIndex = m_vduFontProvider.getFontIndex(m_vduEquipmentId,
+														   schemaItem.getFontName(),
+														   schemaItem.getFontSize(),
+														   schemaItem.getFontBold(),
+														   schemaItem.getFontItalic(),
+														   false);
+
+			if (fontIndex == -1)
+			{
+				// Font not found.
+				//
+				QString font = QString{"'%1, %2%3%4'"}
+								   .arg(schemaItem.getFontName())
+								   .arg(schemaItem.getFontSize())
+								   .arg(schemaItem.getFontBold() ? ", bold" : "")
+								   .arg(schemaItem.getFontItalic() ? ", italic" : "");
+
+				m_log.errEQP6401(m_vduEquipmentId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid(), font);
+
+				return;
+			}
+
+			structRect.fontIndex = fontIndex;
+
+			addedStringReferences.emplace_back(schemaItem.text(),
+											   sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemRect1, text));
+
+			structRect.text = StringRefStub;
+
+			itemType = structRect.itemType;
+			outData = QByteArray(reinterpret_cast<const char*>(&structRect), sizeof(structRect));
+		}
+
+		void visit(const VFrame30::SchemaItemVduValue& schemaItem) override
+		{
+			outData.clear();
+			addedStringReferences.clear();
+
+			VduSchemaFileSchemaItemValue1 structValue{};
+
+			structValue.version = 1;
+			structValue.itemType = VduFileSchemaItemValueId;
+
+			using PosType = decltype(structValue.left);
+			using SizeType = decltype(structValue.width);
+
+			structValue.left = static_cast<PosType>(schemaItem.leftDocPt());
+			structValue.top = static_cast<PosType>(schemaItem.topDocPt());
+			structValue.width = static_cast<SizeType>(schemaItem.widthDocPt());
+			structValue.height = static_cast<SizeType>(schemaItem.heightDocPt());
+
+			structValue.weight = static_cast<decltype(structValue.weight)>(schemaItem.weight());
+			structValue.drawRect = schemaItem.drawRect();
+
+			structValue.lineColor = schemaItem.lineColor().rgba();
+			structValue.fillColor = schemaItem.fillColor().rgba();
+			structValue.textColor = schemaItem.textColor().rgba();
+
+			int fontIndex = m_vduFontProvider.getFontIndex(m_vduEquipmentId,
+														   schemaItem.getFontName(),
+														   schemaItem.getFontSize(),
+														   schemaItem.getFontBold(),
+														   schemaItem.getFontItalic(),
+														   false);
+
+			if (fontIndex == -1)
+			{
+				// Font not found.
+				//
+				QString font = QString{"'%1, %2%3%4'"}
+								   .arg(schemaItem.getFontName())
+								   .arg(schemaItem.getFontSize())
+								   .arg(schemaItem.getFontBold() ? ", bold" : "")
+								   .arg(schemaItem.getFontItalic() ? ", italic" : "");
+
+				m_log.errEQP6401(m_vduEquipmentId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid(), font);
+
+				return;
+			}
+
+			structValue.fontIndex = fontIndex;
+
+			structValue.decimalPlaces = schemaItem.precision();
+
+			// Save text, this text is embedded to the structure, as it can be used in the script.
+			// NOW WE WRITE TEXT AS UTF8, MAYBE WE NEED TO WRITE IT AS UTF16, we will see later.
+			//
+			auto text = schemaItem.text().toUtf8();
+			text.truncate(sizeof(structValue.text) - 2);
+
+			std::memcpy(structValue.text, text.constData(), text.size());
+			structValue.text[sizeof(structValue.text) - 1] = 0;
+			structValue.text[sizeof(structValue.text) - 2] = 0;
+
+			// Set app signal indexes.
+			//
+			QStringList appSignalIds = schemaItem.appSignalIds();
+			structValue.appSignalCount = static_cast<decltype(structValue.appSignalCount)>(appSignalIds.size());
+
+			outData = QByteArray(reinterpret_cast<const char*>(&structValue), sizeof(structValue));
+
+			for (const QString& appSignalId : appSignalIds)
+			{
+				auto sit = m_appSignalHashToSignalIndex.find(::calcHash(appSignalId));
+
+				if (sit == m_appSignalHashToSignalIndex.end())
+				{
+					// Signal not found.
+					//
+					m_log.errEQP6400(m_vduEquipmentId,
+									 appSignalId,
+									 schemaItem.parentSchema()->schemaId(),
+									 schemaItem.label(),
+									 schemaItem.guid());
+
+					outData.clear();
+					addedStringReferences.clear();
+					return;
+				}
+
+				// Signal index follows the structValue.
+				//
+				uint32_t signalIndex = static_cast<uint32_t>(sit->second);
+				outData.append(reinterpret_cast<const char*>(&signalIndex), sizeof(signalIndex));
+			}
+
+			// OutData already set.
+			//
+			itemType = structValue.itemType;
+			return;
+		}
+	};
+} // namespace
 
 namespace Builder
 {
@@ -110,8 +356,8 @@ namespace Builder
 						Builder::VduSchemaGenerator::generateVduBackgroundBitmap(schema->shared_from_this(), backgroundImage);
 					if (genBitmapOk == false)
 					{
-						log->errINT1001(
-							QString("vdu::VduSchemaGenerator::generateVduBackgroundBitmap internal error, schema:").arg(schema->schemaId()));
+						log->errINT1001(QString("vdu::VduSchemaGenerator::generateVduBackgroundBitmap internal error, schema:")
+											.arg(schema->schemaId()));
 						result = false;
 						continue;
 					}
@@ -158,13 +404,7 @@ namespace Builder
 
 		bool result = true;
 
-		std::multimap<QString, size_t> strings; // string -> referenceOffset
-
-		auto addStringRef = [&strings](const QString& str, size_t offset) -> vdu_string_ref
-		{
-			strings.insert(std::make_pair(str, offset));
-			return StringRefStub;               // "STRR" - for debug, easy to find in hex editor.
-		};
+		VduStringWriter strings;
 
 		struct VduSchemaFile file;
 		std::memset(&file, 0, sizeof(file));
@@ -189,10 +429,18 @@ namespace Builder
 			schemaProperties.height = static_cast<uint16_t>(schema.docHeight());
 			schemaProperties.reserve0 = 0;
 			schemaProperties.backgroundColor = schema.backgroundColor().rgba();
-			schemaProperties.schemaId = addStringRef(schema.schemaId(), offsetof(VduSchemaFile, schemaProperties.schemaId));
-			schemaProperties.caption = addStringRef(schema.caption(), offsetof(VduSchemaFile, schemaProperties.caption));
-			schemaProperties.onShowScript = addStringRef(schema.onShowScript(), offsetof(VduSchemaFile, schemaProperties.onShowScript));
-			schemaProperties.preDrawScript = addStringRef(schema.preDrawScript(), offsetof(VduSchemaFile, schemaProperties.preDrawScript));
+			schemaProperties.schemaId =
+				strings.addStringRef(schema.schemaId(),
+									 offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, schemaId));
+			schemaProperties.caption =
+				strings.addStringRef(schema.caption(),
+									 offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, caption));
+			schemaProperties.onShowScript =
+				strings.addStringRef(schema.onShowScript(),
+									 offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, onShowScript));
+			schemaProperties.preDrawScript =
+				strings.addStringRef(schema.preDrawScript(),
+									 offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, preDrawScript));
 			schemaProperties.reserve1 = 0;
 			schemaProperties.reserve2 = 0;
 		};
@@ -204,45 +452,75 @@ namespace Builder
 												   0,
 												   [](int sum, const auto& layer) -> int
 												   {
-													   return sum + static_cast<int>(layer->items().size());
+													   auto vduItems = layer->items() | std::views::filter(
+																							[](auto&& item)
+																							{
+																								return item->isVduItem();
+																							});
+													   return sum + static_cast<int>(std::ranges::distance(vduItems));
 												   });
 
 		file.schemaItemCount = static_cast<uint16_t>(totalSchemaItemCount);
+
+		std::vector<uint32_t> schemaOffsets;
+		schemaOffsets.reserve(totalSchemaItemCount);
 
 		// Save data to output buffer.
 		//
 		out.clear();
 		out.append(reinterpret_cast<const char*>(&file), sizeof(file));
 
+		// Reserve space for schemaItemOffsets.
+		// Later we will fill it with offsets to the schema items (schemaOffsets).
+		//
+		qsizetype schemaItemOffsetsTable = out.size();
+		out.append(totalSchemaItemCount * sizeof(decltype(schemaOffsets)::value_type), '@'); // @ will be replaced with real data.
+
 #ifdef VDU_DEBUG
 		qDebug() << "out.append(reinterpret_cast<const char*>(&file), sizeof(file)); out.size() == " << out.size();
 #endif
 
+		// Forming file.items in the output buffer.
+		//
+		for (const auto& layer : schema.layers())
 		{
-			// Forming file.items in the output buffer.
-			//
-			for (const auto& layer : schema.layers())
+			for (const auto& item : layer->items())
 			{
-				for (const auto& item : layer->items())
+				if (item->isVduItem() == false)
 				{
-					QByteArray outSchemaItem{};
-					std::list<std::pair<QString, size_t>> addedStringReferences;
-
-					saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedStringReferences, context);
-
-					// Add added string references to the main string ref container.
-					//
-					for (const auto& [str, referenceOffset] : addedStringReferences)
-					{
-						addStringRef(str, referenceOffset + out.size());
-					}
-
-					// Save item's data to the output buffer.
-					//
-					out.append(outSchemaItem);
+					log.wrnEQP6405(schema.schemaId(), item->label(), item->guid());
+					continue;
 				}
+
+				QByteArray outSchemaItem{};
+				std::list<std::pair<QString, size_t>> addedStringReferences;
+
+				saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedStringReferences, context);
+
+				// Add added string references to the main string ref container.
+				//
+				for (const auto& [str, referenceOffset] : addedStringReferences)
+				{
+					strings.addStringRef(str, referenceOffset + out.size());
+				}
+
+				// Save item's data to the output buffer.
+				//
+				schemaOffsets.push_back(out.size()); // Save offset to the schema item.
+
+				out.append(outSchemaItem);           // Save Item data.
 			}
 		}
+
+		// Forming file.schemaItemOffsets[totalSchemaItemCount]
+		// Write schema item offset table by offset schemaItemOffsetsTable
+		//
+		Q_ASSERT(schemaOffsets.size() == totalSchemaItemCount);
+
+		QByteArray schemaOffsetsData = QByteArray::fromRawData(reinterpret_cast<const char*>(schemaOffsets.data()),
+															   schemaOffsets.size() * sizeof(decltype(schemaOffsets)::value_type));
+
+		out.replace(schemaItemOffsetsTable, schemaOffsetsData.size(), schemaOffsetsData);
 
 		// Resolve strings:
 		// String consist of 16 bit size of string in symbols, followed with string data. Padding to 4 bytes.
@@ -253,14 +531,19 @@ namespace Builder
 
 		// Align to 4 bytes the beginning of string area.
 		//
-		for (size_t ps = 0, rest = 4 - (out.size() % 4); ps < rest; ps++)
+		auto addPadding = [](auto& container, size_t padding)
 		{
-			out.push_back(char{0});
-		}
+			for (size_t ps = 0, rest = padding - (container.size() % padding); ps < rest; ps++)
+			{
+				container.push_back(char{0});
+			}
+		};
 
-		for (const auto& [str, offset] : strings)
+		addPadding(out, 4);
+
+		for (const QString& str : strings.strings())
 		{
-			uint32_t stringOffset = out.size();
+			auto stringOffset = static_cast<vdu_string_ref>(out.size());
 
 			// Write string size.
 			//
@@ -273,14 +556,14 @@ namespace Builder
 
 			// Replace string_ref with offset to the string.
 			//
-			out.replace(offset, sizeof(vdu_string_ref), reinterpret_cast<const char*>(&stringOffset), sizeof(stringOffset));
+			for (vdu_string_ref fileOffset : strings.offsets(str))
+			{
+				out.replace(fileOffset, sizeof(vdu_string_ref), reinterpret_cast<const char*>(&stringOffset), sizeof(stringOffset));
+			}
 
 			// Add padding bytes to strings (aligned to 4 bytes).
 			//
-			for (size_t ps = 0, rest = 4 - (out.size() % 4); ps < rest; ps++)
-			{
-				out.push_back(char{0});
-			}
+			addPadding(out, 4);
 		}
 
 		// Calculate CRC64 for the whole file.
@@ -389,39 +672,6 @@ namespace Builder
 	{
 		IssueLogger& log = *context.m_log;
 
-		// Get item type id and size of the specific item structure.
-		//
-		using ItemTypeId = decltype(VduSchemaFileSchemaItem1::itemType);
-		ItemTypeId itemType = 0;
-
-		using TotalItemSizeType = decltype(VduSchemaFileSchemaItem1::totalItemSize);
-		TotalItemSizeType specificItemSize = 0;
-
-		if (dynamic_cast<const VFrame30::SchemaItemVduLine*>(&schemaItem) != nullptr)
-		{
-			itemType = VduFileSchemaItemLineId;
-			specificItemSize = sizeof(VduSchemaFileSchemaItemLine1);
-		}
-
-		if (dynamic_cast<const VFrame30::SchemaItemVduRect*>(&schemaItem) != nullptr)
-		{
-			itemType = VduFileSchemaItemRectId;
-			specificItemSize = sizeof(VduSchemaFileSchemaItemRect1);
-		}
-
-		if (dynamic_cast<const VFrame30::SchemaItemVduValue*>(&schemaItem) != nullptr)
-		{
-			itemType = VduFileSchemaItemValueId;
-			specificItemSize = sizeof(VduSchemaFileSchemaItemValue1);
-		}
-
-		if (itemType == 0 || specificItemSize == 0)
-		{
-			Q_ASSERT(itemType != 0);
-			Q_ASSERT(specificItemSize != 0);
-			return false;
-		}
-
 		// --
 		//
 		VduSchemaFileSchemaItem1 fileSchemaItem;
@@ -429,8 +679,8 @@ namespace Builder
 
 		fileSchemaItem.version = 1;
 		fileSchemaItem.size = sizeof(fileSchemaItem);
-		fileSchemaItem.itemType = itemType;
-		fileSchemaItem.totalItemSize = static_cast<TotalItemSizeType>(sizeof(VduSchemaFileSchemaItem1) + specificItemSize);
+		// fileSchemaItem.itemType = filled in the end, when specific item data is saved.
+		// fileSchemaItem.totalItemSize = filled in the end, when specific item data is saved.
 		fileSchemaItem.isStatic = schemaItem.IsStatic();
 
 		fileSchemaItem.objectName = StringRefStub;
@@ -452,186 +702,30 @@ namespace Builder
 
 		// Save specific item, depending on itemType.
 		//
-		QByteArray specificData;
+		SaveVduItemVisitor saveVduItemVisitor(vduEquipmentId, log, context.m_vduFontProvider, appSignalHashToSignalIndex);
 
-		switch (itemType)
-		{
-		case VduFileSchemaItemLineId:
-			{
-				const auto& schemaItemVduLine = static_cast<const VFrame30::SchemaItemVduLine&>(schemaItem);
+		dynamic_cast<const VFrame30::SchemaItemVdu&>(schemaItem).accept(saveVduItemVisitor);
 
-				VduSchemaFileSchemaItemLine1 structLine{};
-
-				structLine.version = 1;
-				structLine.itemType = itemType;
-
-				structLine.x1 = static_cast<decltype(structLine.x1)>(schemaItemVduLine.startXDocPt());
-				structLine.y1 = static_cast<decltype(structLine.y1)>(schemaItemVduLine.startYDocPt());
-				structLine.x2 = static_cast<decltype(structLine.x2)>(schemaItemVduLine.endXDocPt());
-				structLine.y2 = static_cast<decltype(structLine.y2)>(schemaItemVduLine.endYDocPt());
-
-				structLine.weight = static_cast<decltype(structLine.weight)>(schemaItemVduLine.weight());
-
-				structLine.color = schemaItemVduLine.lineColor().rgba();
-
-				specificData.append(reinterpret_cast<const char*>(&structLine), sizeof(structLine));
-			}
-			break;
-		case VduFileSchemaItemRectId:
-			{
-				const auto& schemaItemVduRect = static_cast<const VFrame30::SchemaItemVduRect&>(schemaItem);
-
-				VduSchemaFileSchemaItemRect1 structRect{};
-
-				structRect.version = 1;
-				structRect.itemType = itemType;
-
-				using PosType = decltype(VduSchemaFileSchemaItemRect1::left);
-				using SizeType = decltype(VduSchemaFileSchemaItemRect1::width);
-
-				structRect.left = static_cast<PosType>(schemaItemVduRect.leftDocPt());
-				structRect.top = static_cast<PosType>(schemaItemVduRect.topDocPt());
-				structRect.width = static_cast<SizeType>(schemaItemVduRect.widthDocPt());
-				structRect.height = static_cast<SizeType>(schemaItemVduRect.heightDocPt());
-
-				structRect.weight = static_cast<decltype(structRect.weight)>(schemaItemVduRect.weight());
-				structRect.fill = schemaItemVduRect.fill();
-				structRect.drawRect = schemaItemVduRect.drawRect();
-
-				structRect.lineColor = schemaItemVduRect.lineColor().rgba();
-				structRect.fillColor = schemaItemVduRect.fillColor().rgba();
-				structRect.textColor = schemaItemVduRect.textColor().rgba();
-
-				// Set font index.
-				//
-				int fontIndex = context.m_vduFontProvider
-					.getFontIndex(vduEquipmentId,
-								  schemaItemVduRect.getFontName(),
-								  schemaItemVduRect.getFontSize(),
-								  schemaItemVduRect.getFontBold(),
-								  schemaItemVduRect.getFontItalic(),
-								  false);
-
-				if (fontIndex == -1)
-				{
-					// Font not found.
-					//
-					QString font = QString{"'%1, %2%3%4'"}
-						.arg(schemaItemVduRect.getFontName())
-						.arg(schemaItemVduRect.getFontSize())
-						.arg(schemaItemVduRect.getFontBold() ? ", bold" : "")
-						.arg(schemaItemVduRect.getFontItalic() ? ", italic" : "");
-
-					log.errEQP6401(vduEquipmentId,
-								   schemaItem.parentSchema()->schemaId(),
-								   schemaItem.label(),
-								   schemaItem.guid(),
-								   font);
-
-					return false;
-				}
-
-				structRect.fontIndex = fontIndex;
-
-				addedStringReferences.emplace_back(schemaItemVduRect.text(),
-												   sizeof(fileSchemaItem) + offsetof(VduSchemaFileSchemaItemRect1, text));
-
-				structRect.text = StringRefStub;
-
-				specificData.append(reinterpret_cast<const char*>(&structRect), sizeof(structRect));
-			}
-			break;
-		case VduFileSchemaItemValueId:
-			{
-				const auto& schemaItemVduValue = static_cast<const VFrame30::SchemaItemVduValue&>(schemaItem);
-
-				VduSchemaFileSchemaItemValue1 structValue{};
-
-				structValue.version = 1;
-				structValue.itemType = itemType;
-
-				using PosType = decltype(structValue.left);
-				using SizeType = decltype(structValue.width);
-
-				structValue.left = static_cast<PosType>(schemaItemVduValue.leftDocPt());
-				structValue.top = static_cast<PosType>(schemaItemVduValue.topDocPt());
-				structValue.width = static_cast<SizeType>(schemaItemVduValue.widthDocPt());
-				structValue.height = static_cast<SizeType>(schemaItemVduValue.heightDocPt());
-
-				structValue.weight = static_cast<decltype(structValue.weight)>(schemaItemVduValue.weight());
-				structValue.drawRect = schemaItemVduValue.drawRect();
-
-				structValue.lineColor = schemaItemVduValue.lineColor().rgba();
-				structValue.fillColor = schemaItemVduValue.fillColor().rgba();
-				structValue.textColor = schemaItemVduValue.textColor().rgba();
-
-				// TODO: Set font index.
-				//
-				int fontIndex = context.m_vduFontProvider
-									.getFontIndex(vduEquipmentId,
-												  schemaItemVduValue.getFontName(),
-												  schemaItemVduValue.getFontSize(),
-												  schemaItemVduValue.getFontBold(),
-												  schemaItemVduValue.getFontItalic(),
-												  false);
-
-				if (fontIndex == -1)
-				{
-					// Font not found.
-					//
-					QString font = QString{"'%1, %2%3%4'"}
-						.arg(schemaItemVduValue.getFontName())
-						.arg(schemaItemVduValue.getFontSize())
-						.arg(schemaItemVduValue.getFontBold() ? ", bold" : "")
-						.arg(schemaItemVduValue.getFontItalic() ? ", italic" : "");
-
-					log.errEQP6401(vduEquipmentId,
-								   schemaItem.parentSchema()->schemaId(),
-								   schemaItem.label(),
-								   schemaItem.guid(),
-								   font);
-
-					return false;
-				}
-
-				structValue.fontIndex = fontIndex;
-
-				structValue.decimalPlaces = schemaItemVduValue.precision();
-
-				// Set app signal index.
-				//
-				{
-					QString appSignalId = schemaItemVduValue.appSignalId();
-
-					auto sit = appSignalHashToSignalIndex.find(::calcHash(appSignalId));
-					if (sit == appSignalHashToSignalIndex.end())
-					{
-						// Signal not found.
-						//
-						log.errEQP6400(vduEquipmentId,
-									   appSignalId,
-									   schemaItem.parentSchema()->schemaId(),
-									   schemaItem.label(),
-									   schemaItem.guid());
-						return false;
-					}
-
-					structValue.appSignalIndex = sit->second;
-				}
-
-				specificData.append(reinterpret_cast<const char*>(&structValue), sizeof(structValue));
-			}
-			break;
-		}
-
-
-		// Forming output buffer.
+		// Save result after visiting specific item. SaveVduItemVisitor
 		//
+		QByteArray specificData = saveVduItemVisitor.outData;
+
+		std::copy(saveVduItemVisitor.addedStringReferences.begin(),
+				  saveVduItemVisitor.addedStringReferences.end(),
+				  std::back_inserter(addedStringReferences));
+
 		if (specificData.isEmpty() == true)
 		{
-			Q_ASSERT(specificData.isEmpty() == false);
+			// Error occurred during saving specific item.
+			//
 			return false;
 		}
+
+		Q_ASSERT(saveVduItemVisitor.itemType != 0);
+		fileSchemaItem.itemType = saveVduItemVisitor.itemType;
+
+		using TotalItemSizeType = decltype(VduSchemaFileSchemaItem1::totalItemSize);
+		fileSchemaItem.totalItemSize = static_cast<TotalItemSizeType>(sizeof(VduSchemaFileSchemaItem1) + specificData.size());
 
 		out.clear();
 		out.append(reinterpret_cast<const char*>(&fileSchemaItem), sizeof(fileSchemaItem));
