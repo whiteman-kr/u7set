@@ -523,7 +523,7 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, con
 
 	int row = 9;
 
-	for(const RequestControllerSettings& rcs : appDataSettings->rcSettings )
+	for(const RqCtrlSettings& rcs : appDataSettings->rcSettings )
 	{
 		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 0),
 									QString("RC%1.Client Request IP").arg(rcs.ID, 2, 10, QChar('0')));
@@ -597,7 +597,7 @@ void AppDataServiceWidget::updateServiceState()
 
 	int row = 9;
 
-	for(const RequestControllerSettings& rcs : appDataSettings->rcSettings )
+	for(const RqCtrlSettings& rcs : appDataSettings->rcSettings )
 	{
 		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.clientRequestIP.addressPortStr());
 		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.clientRequestNetmask.toString());

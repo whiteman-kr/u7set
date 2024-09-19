@@ -390,21 +390,21 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 
 // -------------------------------------------------------------------------------------
 //
-// RequestControllerSettings class implementation
+// RqCtrlSettings class implementation
 //
 // -------------------------------------------------------------------------------------
 
-bool RequestControllerSettings::isValid() const
+bool RqCtrlSettings::isValid() const
 {
 	return ID != -1;
 }
 
-bool RequestControllerSettings::operator < (const RequestControllerSettings& rcs) const
+bool RqCtrlSettings::operator < (const RqCtrlSettings& rcs) const
 {
 	return ID < rcs.ID;
 }
 
-bool RequestControllerSettings::writeToXml(XmlWriteHelper& xml) const
+bool RqCtrlSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	xml.writeStartElement(XmlElement::REQUEST_CONTROLLER);
 
@@ -421,7 +421,7 @@ bool RequestControllerSettings::writeToXml(XmlWriteHelper& xml) const
 	return true;
 }
 
-bool RequestControllerSettings::readFromXml(XmlReadHelper& xml)
+bool RqCtrlSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
@@ -553,19 +553,19 @@ QStringList CfgServiceSettings::knownClients() const
 //
 // -------------------------------------------------------------------------------------
 
-RequestControllerSettings AppDataServiceSettings::getRequestControllerSettings(const QString& rcEquipmentID)
+RqCtrlSettings AppDataServiceSettings::getRequestControllerSettings(const QString& rcEquipmentID)
 {
-	auto it = std::find_if(rcSettings.begin(), rcSettings.end(), [&rcEquipmentID](const RequestControllerSettings& rcs)
+	auto it = std::find_if(rcSettings.begin(), rcSettings.end(), [&rcEquipmentID](const RqCtrlSettings& rcs)
 						{
 							return rcs.equipmentID == rcEquipmentID;
 						});
 
 	if (it != rcSettings.end())
 	{
-		return RequestControllerSettings(*it);
+		return RqCtrlSettings(*it);
 	}
 
-	return RequestControllerSettings();
+	return RqCtrlSettings();
 }
 
 bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
@@ -593,7 +593,7 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeStartElement(XmlElement::REQUEST_CONTROLLERS);
 	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(rcSettings.size()));
 
-	for(const RequestControllerSettings& rcs : rcSettings)
+	for(const RqCtrlSettings& rcs : rcSettings)
 	{
 		rcs.writeToXml(xml);
 	}
@@ -643,7 +643,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	for(int i = 0; i < rqCtrlsCount; i++)
 	{
-		RequestControllerSettings rcs;
+		RqCtrlSettings rcs;
 
 		result &= rcs.readFromXml(xml);
 

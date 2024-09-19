@@ -412,6 +412,151 @@ bool SoftwareSettingsGetter::readFromDeviceByEquipmentID(const Builder::Context*
 }
 
 
+bool SoftwareSettingsGetter::getRequestControllersSettings(const Builder::Context* context,
+														   const Hardware::Software* software,
+														   const std::vector<quint32>& rcsProps,
+														   std::vector<RqCtrlSettings>* rcSettings) const
+{
+	TEST_PTR_RETURN_FALSE(context);
+	TEST_PTR_RETURN_FALSE(context->m_log);
+
+	Builder::IssueLogger* log = context->m_log;
+
+	TEST_PTR_LOG_RETURN_FALSE(software, log);
+	TEST_PTR_LOG_RETURN_FALSE(rcSettings, log);
+
+	bool result = true;
+
+	// Read RequestControllers settings (suffix _RC*)
+
+	rcSettings->clear();
+
+	auto children = software->children();
+
+	int rcSuffixLen = EquipmentPropNames::REQUEST_CONTROLLER_SUFFIX.length();
+
+	for(auto& child : children)
+	{
+		if (child->isController() == false)
+		{
+			continue;
+		}
+
+		QString eqID = child->equipmentIdTemplate();
+
+		int idLen = 0;
+
+		if (eqID.at(eqID.length() - 1).isNumber())
+		{
+			idLen = 1;
+		}
+
+		if (eqID.at(eqID.length() - 2).isNumber())
+		{
+			idLen = 2;
+		}
+
+		if (eqID.mid(eqID.length() - rcSuffixLen - idLen, rcSuffixLen) != EquipmentPropNames::REQUEST_CONTROLLER_SUFFIX)
+		{
+			continue;
+		}
+
+		bool ok = true;
+		int rcID = eqID.mid(eqID.length() - idLen).toInt(&ok);
+
+		if (ok == false)
+		{
+			continue;
+		}
+
+		RqCtrlSettings rcs;
+
+		rcs.ID = rcID;
+		rcs.equipmentID = eqID;
+
+		const Hardware::DeviceObject* controller = child.get();
+
+		bool clientRequestIpInitialized = false;
+
+		for(const quint32 rcsProp : rcsProps)
+		{
+			if (RqCtrlSettings::knownRcsProps.contains(rcsProp) == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(log, QString("Unknown RcCtrlSettings::RCS_* constant value"));
+				result = false;
+				break;
+			}
+
+			switch(rcsProp)
+			{
+			case RqCtrlSettings::RCS_ENABLE:
+				result &= DeviceHelper::getBoolProperty(controller, EquipmentPropNames::ENABLE, &rcs.enable, log);
+				break;
+
+			case RqCtrlSettings::RCS_SECURITY_LEVEL:
+				result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(controller, EquipmentPropNames::SECURITY_LEVEL, &rcs.securityLevel, log);
+				break;
+
+			case RqCtrlSettings::RCS_CLIENT_REQUEST_IP:
+				if (clientRequestIpInitialized == false)
+				{
+					result &= DeviceHelper::getIPv4PortProperty(controller,
+																EquipmentPropNames::CLIENT_REQUEST_IP,
+																EquipmentPropNames::CLIENT_REQUEST_PORT,
+																&rcs.clientRequestIP,
+																false, "", 0, log);
+					clientRequestIpInitialized = true;
+				}
+				break;
+
+			case RqCtrlSettings::RCS_CLIENT_REQUEST_NETMASK:
+				result &= DeviceHelper::getIPv4Property(controller, EquipmentPropNames::CLIENT_REQUEST_NETMASK,
+														&rcs.clientRequestNetmask, false, "", log);
+				break;
+
+			case RqCtrlSettings::RCS_RT_TRENDS_REQUEST_IP:
+				{
+					if (clientRequestIpInitialized == false)
+					{
+						result &= DeviceHelper::getIPv4PortProperty(controller,
+																	EquipmentPropNames::CLIENT_REQUEST_IP,
+																	EquipmentPropNames::CLIENT_REQUEST_PORT,
+																	&rcs.clientRequestIP,
+																	false, "", 0, log);
+						clientRequestIpInitialized = true;
+					}
+
+					int rtTrendsRequestPort = 0;
+
+					result &= DeviceHelper::getPortProperty(controller, EquipmentPropNames::RT_TRENDS_REQUEST_PORT,
+														&rtTrendsRequestPort, true, PORT_APP_DATA_SERVICE_RT_TRENDS_REQUEST, log);
+
+					rcs.rtTrendsRequestIP.setAddressPort(rcs.clientRequestIP.addressStr(), rtTrendsRequestPort);
+				}
+				break;
+
+			}
+
+			BREAK_IF_FALSE(result);
+		}
+
+		BREAK_IF_FALSE(result);
+
+		rcSettings->emplace_back(rcs);
+	}
+
+	if (result == true)
+	{
+		std::sort(rcSettings->begin(), rcSettings->end());
+	}
+	else
+	{
+		rcSettings->clear();
+	}
+
+	return result;
+}
+
 // -------------------------------------------------------------------------------------
 //
 // CfgServiceSettingsGetter class implementation
@@ -619,7 +764,7 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 			continue;
 		}
 
-		RequestControllerSettings rcs;
+		RqCtrlSettings rcs;
 
 		rcs.ID = rcID;
 		rcs.equipmentID = eqID;
@@ -1749,7 +1894,7 @@ bool MonitorSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder::
 			return false;
 		}
 
-		RequestControllerSettings rcs = adsSettings.getRequestControllerSettings(appDataServiceRcId);
+		RqCtrlSettings rcs = adsSettings.getRequestControllerSettings(appDataServiceRcId);
 
 		if (rcs.isValid() == false)
 		{
@@ -2001,7 +2146,7 @@ bool AdsBridgeSettingsGetter::readAppDataServiceSettings(const Builder::Context*
 			return false;
 		}
 
-		RequestControllerSettings rcs = adsSettings.getRequestControllerSettings(appDataServiceRcId);
+		RqCtrlSettings rcs = adsSettings.getRequestControllerSettings(appDataServiceRcId);
 
 		if (rcs.isValid() == false)
 		{
@@ -2572,7 +2717,7 @@ bool TestSuiteSettingsGetter::readAppDataServiceAndArchiveSettings(const Builder
 			return false;
 		}
 
-		RequestControllerSettings rcs = adsSettings.getRequestControllerSettings(appDataServiceRcId);
+		RqCtrlSettings rcs = adsSettings.getRequestControllerSettings(appDataServiceRcId);
 
 		if (rcs.isValid() == false)
 		{

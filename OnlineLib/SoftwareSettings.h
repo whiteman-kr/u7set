@@ -134,7 +134,7 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 	return getSettingsProfile<T>(SettingsProfile::DEFAULT);
 }
 
-struct RequestControllerSettings
+struct RqCtrlSettings
 {
 	int ID = -1;
 
@@ -148,10 +148,25 @@ struct RequestControllerSettings
 	//
 
 	bool isValid() const;
-	bool operator < (const RequestControllerSettings& rcs) const;
+	bool operator < (const RqCtrlSettings& rcs) const;
 
 	bool writeToXml(XmlWriteHelper& xml) const;
 	bool readFromXml(XmlReadHelper& xml);
+
+	static const quint32 RCS_ENABLE = 1;
+	static const quint32 RCS_SECURITY_LEVEL = 2;
+	static const quint32 RCS_CLIENT_REQUEST_IP = 3;
+	static const quint32 RCS_CLIENT_REQUEST_NETMASK = 4;
+	static const quint32 RCS_RT_TRENDS_REQUEST_IP = 5;
+
+	inline static const std::set<quint32> knownRcsProps =
+	{
+		RCS_ENABLE,
+		RCS_SECURITY_LEVEL,
+		RCS_CLIENT_REQUEST_IP,
+		RCS_CLIENT_REQUEST_NETMASK,
+		RCS_RT_TRENDS_REQUEST_IP,
+	};
 };
 
 class CfgServiceSettings : virtual public SoftwareSettings
@@ -201,9 +216,9 @@ public:
 	QString archServiceID;
 	HostAddressPort archServiceIP;
 
-	std::vector<RequestControllerSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
+	std::vector<RqCtrlSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
 
-	RequestControllerSettings getRequestControllerSettings(const QString& rcEquipmentID);
+	RqCtrlSettings getRequestControllerSettings(const QString& rcEquipmentID);
 
 private:
 	// this methods should be call by SoftwareSettingsSet only

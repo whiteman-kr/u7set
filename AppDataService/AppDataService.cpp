@@ -191,7 +191,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 
 	std::for_each(m_curSettingsProfile.rcSettings.begin(),
 				  m_curSettingsProfile.rcSettings.end(),
-				  [&listenAddresses](const RequestControllerSettings& rcs)
+				  [&listenAddresses](const RqCtrlSettings& rcs)
 					{
 						if (rcs.enable == true)
 						{
@@ -252,7 +252,7 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 
 	std::for_each(m_curSettingsProfile.rcSettings.begin(),
 				  m_curSettingsProfile.rcSettings.end(),
-				  [&listenAddresses](const RequestControllerSettings& rcs)
+				  [&listenAddresses](const RqCtrlSettings& rcs)
 				  {
 						if (rcs.enable == true)
 						{

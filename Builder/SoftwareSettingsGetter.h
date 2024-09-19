@@ -75,6 +75,11 @@ public:
 protected:
 	virtual bool readSettings(const Builder::Context* context,
 								const Hardware::Software* software) = 0;
+
+	bool getRequestControllersSettings(const Builder::Context* context,
+									   const Hardware::Software* software,
+									   const std::vector<quint32>& rcsProps,		// array of RcCtrlSettings::RCS_* constants
+									   std::vector<RqCtrlSettings>* rcSettings) const;
 };
 
 
