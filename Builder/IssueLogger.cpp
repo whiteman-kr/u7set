@@ -6610,19 +6610,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   LM- or BVB-family module is not found in chassis %1.
+	/// Title:	   LM-, BVB- or MSO-family module is not found in chassis %1.
 	///
 	/// Parameters:
 	///		%1 chassis equipmentID
 	///
 	/// Description:
-	///		LM- or BVB-family module is not found in chassis. Check equipment configuration.
+	///		LM-, BVB- or MSO-family module is not found in chassis. Check equipment configuration.
 	///
 	void IssueLogger::errALC5149(QString chassisEquipmentID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5149,
-				  QString(tr("LM- or BVB-family module is not found in chassis %1.")).arg(chassisEquipmentID));
+				  QString(tr("LM-, BVB- or MSO-family module is not found in chassis %1.")).arg(chassisEquipmentID));
 	}
 
 	/// IssueCode: ALC5150

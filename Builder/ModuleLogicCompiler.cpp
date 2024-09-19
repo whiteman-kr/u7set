@@ -17329,14 +17329,15 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeLmInfoFiles()
 	{
+		bool result = true;
+
 		if (noCodeGenRequired() == true)
 		{
-			return true;
+			result &= writeOptoModulesReport();
+			return result;
 		}
 
 		TEST_PTR_RETURN_FALSE(m_lm);
-
-		bool result = true;
 
 		result &= writeAsmFile(m_appLogicCode);
 
@@ -17757,21 +17758,7 @@ namespace Builder
 
 			file.append(delim);
 
-			if (module->isLmOrBvb())
-			{
-				str = QString(tr("Opto module LM (or BVB) %1")).arg(module->equipmentID());
-			}
-			else
-			{
-				if (module->isOcm())
-				{
-					str = QString(tr("Opto module OCM %1")).arg(module->equipmentID());
-				}
-				else
-				{
-					assert(false);
-				}
-			}
+			str = QString(tr("Opto module %1 %2")).arg(module->moduleFamilyStr()).arg(module->equipmentID());
 
 			file.append(str);
 			file.append(delim);

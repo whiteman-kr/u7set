@@ -387,10 +387,13 @@ namespace Hardware
 
 		bool init(DeviceModule* module, LmDescription* lmDescription, Builder::IssueLogger* log);
 
-		bool isLmOrBvb() const;
+		bool isLmBvbMso() const;
 		bool isOcm() const;
 		bool isBvb() const;
+		bool isMso() const;
 		bool isVdu() const;
+
+		QString moduleFamilyStr() const;
 
 		QString equipmentID() const;
 		const DeviceModule* deviceModule() const;

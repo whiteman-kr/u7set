@@ -625,7 +625,7 @@ const Hardware::DeviceModule* DeviceHelper::getLm(const Hardware::DeviceChassis*
 	return nullptr;
 }
 
-const Hardware::DeviceModule* DeviceHelper::getLmOrBvb(const Hardware::DeviceChassis* chassis)
+const Hardware::DeviceModule* DeviceHelper::getLmBvbMso(const Hardware::DeviceChassis* chassis)
 {
 	if (chassis == nullptr)
 	{
@@ -658,7 +658,7 @@ const Hardware::DeviceModule* DeviceHelper::getLmOrBvb(const Hardware::DeviceCha
 			continue;
 		}
 
-		if (module->isLogicModule() == true || module->isBvb() == true)
+		if (module->isLogicModule() || module->isBvb() || module->isMso())
 		{
 			return 	module;
 		}
@@ -690,7 +690,7 @@ const Hardware::DeviceModule* DeviceHelper::getAssociatedLm(const Hardware::Devi
 	return getLm(chassis);
 }
 
-const Hardware::DeviceModule* DeviceHelper::getAssociatedLmOrBvb(const Hardware::DeviceObject* object)
+const Hardware::DeviceModule* DeviceHelper::getAssociatedLmBvbMso(const Hardware::DeviceObject* object)
 {
 	//
 	// object is under chassis
@@ -710,7 +710,7 @@ const Hardware::DeviceModule* DeviceHelper::getAssociatedLmOrBvb(const Hardware:
 		return nullptr;
 	}
 
-	return getLmOrBvb(chassis);
+	return getLmBvbMso(chassis);
 }
 
 const Hardware::Software* DeviceHelper::getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID)

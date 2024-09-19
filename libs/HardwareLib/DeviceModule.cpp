@@ -140,6 +140,11 @@ namespace Hardware
 		m_type = (m_type & 0x00FF) | tmp;
 	}
 
+	QString DeviceModule::moduleFamilyStr() const
+	{
+		return E::valueToString(moduleFamily());
+	}
+
 	int DeviceModule::customModuleFamily() const
 	{
 		return m_customModuleFamily;

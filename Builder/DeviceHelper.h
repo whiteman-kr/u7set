@@ -82,10 +82,10 @@ public:
 
 	static const Hardware::DeviceModule* getModuleOnPlace(const Hardware::DeviceModule* lm, int place);
 	static const Hardware::DeviceModule* getLm(const Hardware::DeviceChassis* chassis);
-	static const Hardware::DeviceModule* getLmOrBvb(const Hardware::DeviceChassis* chassis);
+	static const Hardware::DeviceModule* getLmBvbMso(const Hardware::DeviceChassis* chassis);
 
 	static const Hardware::DeviceModule* getAssociatedLm(const Hardware::DeviceObject* object);
-	static const Hardware::DeviceModule* getAssociatedLmOrBvb(const Hardware::DeviceObject* object);
+	static const Hardware::DeviceModule* getAssociatedLmBvbMso(const Hardware::DeviceObject* object);
 
 	static const Hardware::Software* getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID);
 	static QStringList getSoftwareControllersIDs(const Hardware::Software* software);

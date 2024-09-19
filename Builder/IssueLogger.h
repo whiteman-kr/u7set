@@ -435,7 +435,7 @@ namespace Builder
 		void errALC5146(QString signalID, QUuid signalGuid, QString schemaID);			// Tunable signal %1 is connected to LoopbackTarget (Logic schema %2).
 		void errALC5147(QString signalID, QString lbID1, QString lbID2);				// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
 		void wrnALC5148(QString signalID);												// Internal signal %1 is unused.
-		void errALC5149(QString chassisEquipmentID);									// LM- or BVB-family module is not found in chassis %1
+		void errALC5149(QString chassisEquipmentID);									// LM-, BVB- or MSO-family module is not found in chassis %1
 		void errALC5150(QString monitorID, QString tuningServiceID);					// Monitor %1 cannot be connected to TuningService with enabled SingleLmControl mode.
 		void errALC5151(QString busTypeID);												// Bus type %1 has not initialized.
 		void errALC5152(QString inBusSignal, QString busTypeID);						// Bus input signal %1 placement is out of bus size (bus type %2).

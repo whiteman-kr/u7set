@@ -59,6 +59,8 @@ namespace Hardware
 		[[nodiscard]] FamilyType moduleFamily() const;
 		void setModuleFamily(FamilyType value);
 
+		QString moduleFamilyStr() const;
+
 		[[nodiscard]] int customModuleFamily() const;
 		void setCustomModuleFamily(int value);
 
