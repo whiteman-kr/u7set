@@ -14,7 +14,6 @@ namespace Network
 	class SessionParams;	// protobuf class
 }
 
-
 struct SessionParams
 {
 	QString currentSettingsProfile;
@@ -22,6 +21,43 @@ struct SessionParams
 
 	void saveTo(Network::SessionParams* sp);
 	void loadFrom(const Network::SessionParams& sp);
+};
+
+struct RqCtrlSettings
+{
+	int ID = -1;
+
+	QString equipmentID;
+	HostAddressPort clientRequestIP;
+	QHostAddress clientRequestNetmask;
+	HostAddressPort rtTrendsRequestIP;
+	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
+	bool enable = false;
+
+	quint32	propsMask = 0;			// OR of PROP_* constants
+
+	static const quint32 PROP_ENABLE = 1;
+	static const quint32 PROP_SECURITY_LEVEL = 2;
+	static const quint32 PROP_CLIENT_REQUEST_IP = 4;
+	static const quint32 PROP_CLIENT_REQUEST_NETMASK = 8;
+	static const quint32 PROP_RT_TRENDS_REQUEST_IP = 16;
+
+	inline static const std::set<quint32> knownPropsFlags =
+	{
+			PROP_ENABLE,
+			PROP_SECURITY_LEVEL,
+			PROP_CLIENT_REQUEST_IP,
+			PROP_CLIENT_REQUEST_NETMASK,
+			PROP_RT_TRENDS_REQUEST_IP,
+	};
+
+	//
+
+	bool isValid() const;
+	bool operator < (const RqCtrlSettings& rcs) const;
+
+	bool writeToXml(XmlWriteHelper& xml) const;
+	bool readFromXml(XmlReadHelper& xml);
 };
 
 class SoftwareSettings
@@ -37,6 +73,9 @@ protected:
 	void writeEndSettings(XmlWriteHelper& xml) const;
 
 	bool startSettingsReading(XmlReadHelper& xml);
+
+	void writeRqControllersToXml(XmlWriteHelper& xml, const std::vector<RqCtrlSettings>& rcSettings) const;
+	bool readRqControllersFromXml(XmlReadHelper& xml, std::vector<RqCtrlSettings>* rcSettings);
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -134,41 +173,6 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 	return getSettingsProfile<T>(SettingsProfile::DEFAULT);
 }
 
-struct RqCtrlSettings
-{
-	int ID = -1;
-
-	QString equipmentID;
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
-	HostAddressPort rtTrendsRequestIP;
-	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
-	bool enable = false;
-
-	//
-
-	bool isValid() const;
-	bool operator < (const RqCtrlSettings& rcs) const;
-
-	bool writeToXml(XmlWriteHelper& xml) const;
-	bool readFromXml(XmlReadHelper& xml);
-
-	static const quint32 RCS_ENABLE = 1;
-	static const quint32 RCS_SECURITY_LEVEL = 2;
-	static const quint32 RCS_CLIENT_REQUEST_IP = 3;
-	static const quint32 RCS_CLIENT_REQUEST_NETMASK = 4;
-	static const quint32 RCS_RT_TRENDS_REQUEST_IP = 5;
-
-	inline static const std::set<quint32> knownRcsProps =
-	{
-		RCS_ENABLE,
-		RCS_SECURITY_LEVEL,
-		RCS_CLIENT_REQUEST_IP,
-		RCS_CLIENT_REQUEST_NETMASK,
-		RCS_RT_TRENDS_REQUEST_IP,
-	};
-};
-
 class CfgServiceSettings : virtual public SoftwareSettings
 {
 public:
@@ -180,10 +184,10 @@ public:
 	};
 
 public:
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
+
+	std::vector<RqCtrlSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
+
 	bool checkHostname = false;
-	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 
 	QList<ClientInfo> clients;
 

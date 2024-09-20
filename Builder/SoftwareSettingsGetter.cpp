@@ -412,16 +412,12 @@ bool SoftwareSettingsGetter::readFromDeviceByEquipmentID(const Builder::Context*
 }
 
 
-bool SoftwareSettingsGetter::getRequestControllersSettings(const Builder::Context* context,
-														   const Hardware::Software* software,
-														   const std::vector<quint32>& rcsProps,
-														   std::vector<RqCtrlSettings>* rcSettings) const
+bool SoftwareSettingsGetter::getRqControllersSettings(  const Hardware::Software* software,
+														const std::vector<quint32>& rcsPropsFlags,
+														std::vector<RqCtrlSettings>* rcSettings,
+														Builder::IssueLogger* log) const
 {
-	TEST_PTR_RETURN_FALSE(context);
-	TEST_PTR_RETURN_FALSE(context->m_log);
-
-	Builder::IssueLogger* log = context->m_log;
-
+	TEST_PTR_RETURN_FALSE(log);
 	TEST_PTR_LOG_RETURN_FALSE(software, log);
 	TEST_PTR_LOG_RETURN_FALSE(rcSettings, log);
 
@@ -478,26 +474,26 @@ bool SoftwareSettingsGetter::getRequestControllersSettings(const Builder::Contex
 
 		bool clientRequestIpInitialized = false;
 
-		for(const quint32 rcsProp : rcsProps)
+		for(const quint32 rcsPropFlag : rcsPropsFlags)
 		{
-			if (RqCtrlSettings::knownRcsProps.contains(rcsProp) == false)
+			if (RqCtrlSettings::knownPropsFlags.contains(rcsPropFlag) == false)
 			{
-				LOG_INTERNAL_ERROR_MSG(log, QString("Unknown RcCtrlSettings::RCS_* constant value"));
+				LOG_INTERNAL_ERROR_MSG(log, QString("Unknown RcCtrlSettings::PROP_* constant value"));
 				result = false;
 				break;
 			}
 
-			switch(rcsProp)
+			switch(rcsPropFlag)
 			{
-			case RqCtrlSettings::RCS_ENABLE:
+			case RqCtrlSettings::PROP_ENABLE:
 				result &= DeviceHelper::getBoolProperty(controller, EquipmentPropNames::ENABLE, &rcs.enable, log);
 				break;
 
-			case RqCtrlSettings::RCS_SECURITY_LEVEL:
+			case RqCtrlSettings::PROP_SECURITY_LEVEL:
 				result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(controller, EquipmentPropNames::SECURITY_LEVEL, &rcs.securityLevel, log);
 				break;
 
-			case RqCtrlSettings::RCS_CLIENT_REQUEST_IP:
+			case RqCtrlSettings::PROP_CLIENT_REQUEST_IP:
 				if (clientRequestIpInitialized == false)
 				{
 					result &= DeviceHelper::getIPv4PortProperty(controller,
@@ -509,12 +505,12 @@ bool SoftwareSettingsGetter::getRequestControllersSettings(const Builder::Contex
 				}
 				break;
 
-			case RqCtrlSettings::RCS_CLIENT_REQUEST_NETMASK:
+			case RqCtrlSettings::PROP_CLIENT_REQUEST_NETMASK:
 				result &= DeviceHelper::getIPv4Property(controller, EquipmentPropNames::CLIENT_REQUEST_NETMASK,
 														&rcs.clientRequestNetmask, false, "", log);
 				break;
 
-			case RqCtrlSettings::RCS_RT_TRENDS_REQUEST_IP:
+			case RqCtrlSettings::PROP_RT_TRENDS_REQUEST_IP:
 				{
 					if (clientRequestIpInitialized == false)
 					{
@@ -538,6 +534,8 @@ bool SoftwareSettingsGetter::getRequestControllersSettings(const Builder::Contex
 			}
 
 			BREAK_IF_FALSE(result);
+
+			rcs.propsMask |= rcsPropFlag;
 		}
 
 		BREAK_IF_FALSE(result);
@@ -575,13 +573,23 @@ bool CfgServiceSettingsGetter::readSettings(	const Builder::Context* context,
 
 	bool result = true;
 
-	result &= DeviceHelper::getIPv4PortProperty(software, EquipmentPropNames::CLIENT_REQUEST_IP,
+	static const std::vector<quint32> requiredProps =
+		{
+			RqCtrlSettings::PROP_ENABLE,
+			RqCtrlSettings::PROP_SECURITY_LEVEL,
+			RqCtrlSettings::PROP_CLIENT_REQUEST_IP,
+			RqCtrlSettings::PROP_CLIENT_REQUEST_NETMASK,
+		};
+
+	result &= getRqControllersSettings(software, requiredProps, &rcSettings, context->m_log);
+
+/*	result &= DeviceHelper::getIPv4PortProperty(software, EquipmentPropNames::CLIENT_REQUEST_IP,
 											  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP, false, "", 0, log);
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", log);
 
-	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::CHECK_HOSTNAME, &checkHostname, log);
+	result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(software, EquipmentPropNames::SECURITY_LEVEL, &securityLevel, log); */
 
-	result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(software, EquipmentPropNames::SECURITY_LEVEL, &securityLevel, log);
+	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::CHECK_HOSTNAME, &checkHostname, log);
 
 	RETURN_IF_FALSE(result);
 
@@ -722,9 +730,18 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::APP_DATA_RECEIVING_NETMASK,
 											&appDataReceivingNetmask, false, "", log);
 
-	// Read RequestControllers settings (suffix _RC*)
+	static const std::vector<quint32> requiredProps =
+	{
+		RqCtrlSettings::PROP_ENABLE,
+		RqCtrlSettings::PROP_SECURITY_LEVEL,
+		RqCtrlSettings::PROP_CLIENT_REQUEST_IP,
+		RqCtrlSettings::PROP_CLIENT_REQUEST_NETMASK,
+		RqCtrlSettings::PROP_RT_TRENDS_REQUEST_IP,
+	};
 
-	rcSettings.clear();
+	result &= getRqControllersSettings(software, requiredProps, &rcSettings, context->m_log);
+
+/*	rcSettings.clear();
 
 	auto children = software->children();
 
@@ -794,7 +811,7 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 		rcSettings.emplace_back(rcs);
 	}
 
-	std::sort(rcSettings.begin(), rcSettings.end());
+	std::sort(rcSettings.begin(), rcSettings.end());*/
 
 	//
 
