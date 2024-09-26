@@ -13,7 +13,6 @@
 #include "OptoModule.h"
 #include "LmMemoryMap.h"
 #include "UalItems.h"
-#include "MemWriteMap.h"
 #include "Loopbacks.h"
 #include "SignalSet.h"
 #include "CodeChecker.h"

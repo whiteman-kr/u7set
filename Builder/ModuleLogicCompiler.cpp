@@ -16114,11 +16114,6 @@ namespace Builder
 
 		int rawDataOffset = Hardware::OptoPort::TX_DATA_ID_SIZE_W;		// txDataID
 
-		int txRawDataStartAddr = port->txBufAddress() + rawDataOffset;
-		int txRawDataSizeW = port->txRawDataSizeW();
-
-		MemWriteMap memWriteMap(txRawDataStartAddr, txRawDataSizeW, true);
-
 		const Hardware::RawDataDescription& rawDataDescription = port->rawDataDescription();
 
 		for(const Hardware::RawDataDescriptionItem& item : rawDataDescription)
@@ -16766,7 +16761,7 @@ namespace Builder
 				assert(false);
 			}
 
-			if (cmd.isNoCommand() == false)
+			if (cmd.isValidCommand() == true)
 			{
 				if (firstCommand == true)
 				{
