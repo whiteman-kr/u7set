@@ -76,10 +76,12 @@ protected:
 	virtual bool readSettings(const Builder::Context* context,
 								const Hardware::Software* software) = 0;
 
-	bool getRqControllersSettings(const Hardware::Software* software,
+	static bool getRqControllersSettings(const Hardware::Software* software,
 								  const std::vector<quint32>& rcsPropsFlags,		// array of RcCtrlSettings::RCS_* constants
 								  std::vector<RqCtrlSettings>* rcSettings,
-								  Builder::IssueLogger* log) const;
+								  Builder::IssueLogger* log);
+
+	static bool isRqCtrlExist(const QString& rqCtrlEquipmentID, const std::vector<RqCtrlSettings>& rcSettings);
 };
 
 

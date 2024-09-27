@@ -637,20 +637,13 @@ void AppDataServiceWidget::updateStateInfo()
 		}
 	}
 
-	quint32 ip = m_service.clientRequestIp;
-	qint32 port = m_service.clientRequestPort;
-
-	quint32 workingIp = getWorkingClientRequestIp();
-
-	if (ip != workingIp)
-	{
-		ip = workingIp;
-	}
+	HostAddressPort workingIp = getWorkingClientRequestIp();
 
 	if (m_tcpClientSocket != nullptr)
 	{
 		HostAddressPort&& curAddress = m_tcpClientSocket->serverAddressPort(0);
-		if (curAddress.address32() != ip || curAddress.port() != port)
+
+		if (curAddress != workingIp)
 		{
 			dropTcpConnection();
 		}
@@ -658,7 +651,7 @@ void AppDataServiceWidget::updateStateInfo()
 
 	if (m_tcpClientSocket == nullptr)
 	{
-		createTcpConnection(getWorkingClientRequestIp(), static_cast<quint16>(port));
+		createTcpConnection(workingIp.address32(), workingIp.port());
 	}
 }
 

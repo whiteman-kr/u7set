@@ -27,7 +27,7 @@ public:
 	void setStateTabMaxRowQuantity(int rowQuantity) { m_stateTabMaxRowQuantity = rowQuantity; }
 	void setClientQuantityRowIndexOnStateTab(int index) { m_clientQuantityRowIndex = index; }
 
-	quint32 getWorkingClientRequestIp();
+	HostAddressPort getWorkingClientRequestIp();
 
 	const SoftwareInfo& softwareInfo() { return m_softwareInfo; }
 

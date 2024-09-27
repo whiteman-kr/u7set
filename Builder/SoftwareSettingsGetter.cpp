@@ -415,7 +415,7 @@ bool SoftwareSettingsGetter::readFromDeviceByEquipmentID(const Builder::Context*
 bool SoftwareSettingsGetter::getRqControllersSettings(  const Hardware::Software* software,
 														const std::vector<quint32>& rcsPropsFlags,
 														std::vector<RqCtrlSettings>* rcSettings,
-														Builder::IssueLogger* log) const
+														Builder::IssueLogger* log)
 {
 	TEST_PTR_RETURN_FALSE(log);
 	TEST_PTR_LOG_RETURN_FALSE(software, log);
@@ -555,6 +555,15 @@ bool SoftwareSettingsGetter::getRqControllersSettings(  const Hardware::Software
 	return result;
 }
 
+bool SoftwareSettingsGetter::isRqCtrlExist(const QString& rqCtrlEquipmentID, const std::vector<RqCtrlSettings>& rcSettings)
+{
+	return std::find_if(rcSettings.begin(), rcSettings.end(),
+						[&] (const RqCtrlSettings& rcs)
+						{
+							return rcs.equipmentID == rqCtrlEquipmentID;
+						}) != rcSettings.end();
+}
+
 // -------------------------------------------------------------------------------------
 //
 // CfgServiceSettingsGetter class implementation
@@ -583,12 +592,6 @@ bool CfgServiceSettingsGetter::readSettings(	const Builder::Context* context,
 
 	result &= getRqControllersSettings(software, requiredProps, &rcSettings, context->m_log);
 
-/*	result &= DeviceHelper::getIPv4PortProperty(software, EquipmentPropNames::CLIENT_REQUEST_IP,
-											  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP, false, "", 0, log);
-	result &= DeviceHelper::getIPv4Property(software, EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask, false, "", log);
-
-	result &= DeviceHelper::getEnumValueProperty<E::SecurityLevel>(software, EquipmentPropNames::SECURITY_LEVEL, &securityLevel, log); */
-
 	result &= DeviceHelper::getBoolProperty(software, EquipmentPropNames::CHECK_HOSTNAME, &checkHostname, log);
 
 	RETURN_IF_FALSE(result);
@@ -600,10 +603,6 @@ bool CfgServiceSettingsGetter::readSettings(	const Builder::Context* context,
 
 bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context, const Hardware::Software* cfgService)
 {
-	const QString PROP_CFG_SERVICE_ID1(EquipmentPropNames::CFG_SERVICE_ID1);
-	const QString PROP_CFG_SERVICE_ID2(EquipmentPropNames::CFG_SERVICE_ID2);
-	const QString PROP_CFG_SERVICE_IDS(EquipmentPropNames::CFG_SERVICE_IDS);
-
 	Builder::IssueLogger* log = context->m_log;
 
 	bool result = true;
@@ -612,10 +611,14 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 
 	std::set<const Hardware::Workstation*> reportedWs;
 
-	for(auto p : context->m_software)
+	static const std::vector<QString> propIDs =
 	{
-		Hardware::Software* software = p.second;
+		EquipmentPropNames::CFG_SERVICE_ID1,
+		EquipmentPropNames::CFG_SERVICE_ID2
+	};
 
+	for(const auto& [swEquipmentID, software] : context->m_software)
+	{
 		if (software == nullptr)
 		{
 			Q_ASSERT(false);
@@ -627,44 +630,41 @@ bool CfgServiceSettingsGetter::buildClientsList(const Builder::Context* context,
 			continue;			// exclude yourself
 		}
 
-		QString ID1;
-		QString ID2;
+		QStringList cfgSrvRqCtrlIDs;
 
-		if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_IDS) == true)
+		if (DeviceHelper::isPropertyExists(software, EquipmentPropNames::CFG_SERVICE_IDS) == true)
 		{
-			QStringList ids;
-			result &= DeviceHelper::getStrListProperty(software, PROP_CFG_SERVICE_IDS, &ids, log);
+			result &= DeviceHelper::getStrListProperty(software, EquipmentPropNames::CFG_SERVICE_IDS, &cfgSrvRqCtrlIDs, log);
+		}
 
-			if (ids.size() == 1)
+		//
+
+		for(const QString& propID : propIDs)
+		{
+			if (DeviceHelper::isPropertyExists(software, propID) == true)
 			{
-				ID1 = ids[0];
-			}
-			else
-			{
-				if (ids.size() >= 2)
+				QString id;
+
+				bool res = DeviceHelper::getStrProperty(software, propID, &id, log);
+
+				if (res == true)
 				{
-					ID1 = ids[0];
-					ID2 = ids[1];
+					cfgSrvRqCtrlIDs.append(id);
 				}
+
+				res &= result;
 			}
 		}
 
 		//
 
-		if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID1) == true)
+		for(const QString& cfgSrvRqCtrlID : cfgSrvRqCtrlIDs)
 		{
-			result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, &ID1, log);
-		}
+			if (isRqCtrlExist(cfgSrvRqCtrlID, rcSettings) == false)
+			{
+				continue;
+			}
 
-		if (DeviceHelper::isPropertyExists(software, PROP_CFG_SERVICE_ID2) == true)
-		{
-			result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, &ID2, log);
-		}
-
-		//
-
-		if (ID1 == cfgService->equipmentIdTemplate() || ID2 == cfgService->equipmentIdTemplate())
-		{
 			QString hostname = software->hostname();
 
 			if (checkHostname == true && hostname.isEmpty() == true)

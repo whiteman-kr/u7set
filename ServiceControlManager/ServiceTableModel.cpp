@@ -210,7 +210,10 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			if (serviceState != ServiceState::Undefined &&
 				serviceState != ServiceState::Unavailable)
 			{
-				str += tr("\nListening clients on %1:%2").arg(QHostAddress(service.clientRequestIp).toString()).arg(service.clientRequestPort);
+				if (service.clientRequestIPs.empty() == false)
+				{
+					str += tr("\nListening clients on %1").arg(service.clientRequestIPs[0].addressPortStr());
+				}
 			}
 			return str;
 		}
@@ -329,7 +332,7 @@ int ServiceTableModel::hostsInfoCount() const
 	return static_cast<int>(m_hostsInfo.count());
 }
 
-void ServiceData::parseServiceInfo()
+bool ServiceData::parseServiceInfo()
 {
 	sessionParams.loadFrom(information.sessionparams());
 	QString settingsXml = QString::fromStdString(information.settingsxml());
@@ -338,67 +341,80 @@ void ServiceData::parseServiceInfo()
 	{
 		settings = SoftwareSettingsSet::createAppropriateSettings(type);
 	}
+
 	SoftwareSettings* pSettings = settings.get();
 	SoftwareSettingsSet::readSettingsFromXmlString(settingsXml, settings.get());
+
+	clientRequestIPs.clear();
 
 	switch (type)
 	{
 	case E::SoftwareType::ConfigurationService:
-	{
-		CfgServiceSettings* cfgServiceSettings = dynamic_cast<CfgServiceSettings*>(pSettings);
-		Q_ASSERT(cfgServiceSettings);
-		clientRequestIp = cfgServiceSettings->clientRequestIP.address32IfSet();
-		clientRequestPort = cfgServiceSettings->clientRequestIP.portIfSet();
-	}
+		{
+			CfgServiceSettings* cfgServiceSettings = dynamic_cast<CfgServiceSettings*>(pSettings);
+
+			TEST_PTR_RETURN_FALSE(cfgServiceSettings);
+
+			fillClientRequestIPs(cfgServiceSettings->rcSettings);
+		}
 		break;
+
 	case E::SoftwareType::AppDataService:
-	{
-		AppDataServiceSettings* adsSettings = dynamic_cast<AppDataServiceSettings*>(pSettings);
-
-		if (adsSettings != nullptr)
 		{
-			if (adsSettings->rcSettings.empty() == false)
-			{
+			AppDataServiceSettings* adsSettings = dynamic_cast<AppDataServiceSettings*>(pSettings);
 
-				clientRequestIp = adsSettings->rcSettings[0].clientRequestIP.address32IfSet();
-				clientRequestPort = adsSettings->rcSettings[0].clientRequestIP.portIfSet();
-			}
+			TEST_PTR_RETURN_FALSE(adsSettings);
+
+			fillClientRequestIPs(adsSettings->rcSettings);
 		}
-		else
-		{
-			Q_ASSERT(adsSettings);
-		}
-	}
 		break;
+
 	case E::SoftwareType::DiagDataService:
-	{
-		DiagDataServiceSettings* diagDataServiceSettings = dynamic_cast<DiagDataServiceSettings*>(pSettings);
-		Q_ASSERT(diagDataServiceSettings);
-		clientRequestIp = diagDataServiceSettings->clientRequestIP.address32IfSet();
-		clientRequestPort = diagDataServiceSettings->clientRequestIP.portIfSet();
-	}
-		break;
-	case E::SoftwareType::TuningService:
-	{
-		TuningServiceSettings* tuningDataServiceSettings = dynamic_cast<TuningServiceSettings*>(pSettings);
-		Q_ASSERT(tuningDataServiceSettings);
+		{
+			DiagDataServiceSettings* diagDataServiceSettings = dynamic_cast<DiagDataServiceSettings*>(pSettings);
 
-		// TO DO 2ch tuning!
-		//
-		clientRequestIp = tuningDataServiceSettings->clientRequestIP.address32IfSet();
-		clientRequestPort = tuningDataServiceSettings->clientRequestIP.portIfSet();
-	}
+			TEST_PTR_RETURN_FALSE(diagDataServiceSettings);
+
+			clientRequestIPs.emplace_back(diagDataServiceSettings->clientRequestIP);
+		}
 		break;
+
+	case E::SoftwareType::TuningService:
+		{
+			TuningServiceSettings* tuningDataServiceSettings = dynamic_cast<TuningServiceSettings*>(pSettings);
+
+			TEST_PTR_RETURN_FALSE(tuningDataServiceSettings);
+
+			// TO DO 2ch tuning!
+			//
+			clientRequestIPs.emplace_back(tuningDataServiceSettings->clientRequestIP);
+		}
+		break;
+
 	case E::SoftwareType::ArchiveService:
-	{
-        ArchivingServiceSettings* archivingServiceSettings = dynamic_cast<ArchivingServiceSettings*>(pSettings);
-        Q_ASSERT(archivingServiceSettings);
-		clientRequestIp = archivingServiceSettings->clientRequestIP.address32IfSet();
-		clientRequestPort = archivingServiceSettings->clientRequestIP.portIfSet();
-	}
+		{
+			ArchivingServiceSettings* archivingServiceSettings = dynamic_cast<ArchivingServiceSettings*>(pSettings);
+
+			TEST_PTR_RETURN_FALSE(archivingServiceSettings);
+
+			clientRequestIPs.emplace_back(archivingServiceSettings->clientRequestIP);
+		}
 		break;
+
 	default:
 		Q_ASSERT(false);
+	}
+
+	return true;
+}
+
+void ServiceData::fillClientRequestIPs(const std::vector<RqCtrlSettings>& rcSettings)
+{
+	clientRequestIPs.clear();
+
+	for(const RqCtrlSettings& rcs : rcSettings)
+	{
+		clientRequestIPs.emplace_back(rcs.clientRequestIP);
 	}
 }
 

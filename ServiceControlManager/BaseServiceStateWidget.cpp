@@ -163,18 +163,10 @@ void BaseServiceStateWidget::updateServiceState()
 
 				m_stateTabModel->setData(m_stateTabModel->index(3, 1), formatUptime(runtime));
 
-				quint32 ip = m_service.clientRequestIp;
-				qint32 port = m_service.clientRequestPort;
-
-				QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
-
-				if (ip != getWorkingClientRequestIp())
-				{
-					address = QHostAddress(ip).toString() + QString(":%1").arg(port) + " => " + QHostAddress(getWorkingClientRequestIp()).toString() + QString(":%1").arg(port);
-				}
+				HostAddressPort workingIp = getWorkingClientRequestIp();
 
 				m_stateTabModel->setData(m_stateTabModel->index(4, 0), "Client request address");
-				m_stateTabModel->setData(m_stateTabModel->index(4, 1), address);
+				m_stateTabModel->setData(m_stateTabModel->index(4, 1), workingIp.addressPortStr());
 			}
 			break;
 
@@ -458,16 +450,14 @@ void BaseServiceStateWidget::addClientsTab(bool showStateColumn)
 	clientsTableView->setColumnWidth(7, 100);
 }
 
-quint32 BaseServiceStateWidget::getWorkingClientRequestIp()
+HostAddressPort BaseServiceStateWidget::getWorkingClientRequestIp()
 {
-	QHostAddress address(m_service.clientRequestIp);
-
-	if (address == QHostAddress::AnyIPv4)
+	if (m_service.clientRequestIPs.empty())
 	{
-		address.setAddress(m_udpIp);
+		return HostAddressPort(m_udpIp, m_udpPort);
 	}
 
-	return address.toIPv4Address();
+	return m_service.clientRequestIPs[0];
 }
 
 void BaseServiceStateWidget::sendCommand(int command)

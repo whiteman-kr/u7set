@@ -53,9 +53,9 @@ namespace Builder
 			content += getCommentStart(os) + " To run simulation append param -mode=simulation to command line or run this script with the argument simulation\n\n";
 
 			content += "if [[ $1 = \"simulation\" ]]\nthen\n";
-			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, true);
+			content += QString("\t") + getCommandLine(profile, os, true);
 			content += "else\n";
-			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, false);
+			content += QString("\t") + getCommandLine(profile, os, false);
 			content += "fi\n";
 		}
 		else
@@ -68,9 +68,9 @@ namespace Builder
 			content += getCommentStart(os) + " To run simulation append param -mode=simulation to command line or run this script with the argument simulation\n\n";
 
 			content += "if \"%~1\" == \"simulation\" (\n";
-			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, true);
+			content += QString("\t") + getCommandLine(profile, os, true);
 			content += ") else (\n";
-			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, false);
+			content += QString("\t") + getCommandLine(profile, os, false);
 			content += ")\n";
 		}
 
@@ -83,7 +83,6 @@ namespace Builder
 	}
 
 	QString ConfigurationServiceCfgGenerator::getCommandLine(const QString& profile,
-															 const HostAddressPort& clientRequestIP,
 															 E::OS os,
 															 bool simulation) const
 	{
@@ -121,8 +120,6 @@ namespace Builder
 				.arg(m_dbController->currentProject().projectName());
 
 		cmdLine += " -b=" + appDataPath + "/" + buildDir;
-
-		cmdLine += " -ip=" + clientRequestIP.addressPortStr();
 
 		if (simulation == true)
 		{

@@ -505,7 +505,7 @@ bool RqCtrlSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute(XmlAttribute::ID, &ID);
 	result &= xml.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &equipmentID);
 
-	result &= xml.readUInt32Attribute(XmlAttribute::EQUIPMENT_ID, &propsMask);
+	result &= xml.readUInt32Attribute(XmlAttribute::PROPS_MASK, &propsMask);
 
 	for(const quint32 propFlag : knownPropsFlags)
 	{

@@ -18,10 +18,7 @@ namespace Builder
 	private:
 		bool writeRunScriptFile(const QString& profile, const CfgServiceSettings& settings, E::OS os);
 
-		QString getCommandLine(const QString& profile,
-								const HostAddressPort& clientRequestIP,
-								E::OS os,
-								bool simulation) const;
+		QString getCommandLine(const QString& profile, E::OS os, bool simulation) const;
 	};
 
 }
