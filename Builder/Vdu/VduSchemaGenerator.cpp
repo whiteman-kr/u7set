@@ -17,42 +17,35 @@
 
 namespace
 {
-	class VduStringWriter
+	enum class VduStringType
 	{
-	public:
-		using Offset = vdu_string_ref;
-
-		Offset addStringRef(const QString& str, Offset offset)
-		{
-			m_offsetToString.insert(std::make_pair(str, offset));
-			m_strings.insert(str);
-
-			return StringRefStub;
-		}
-
-		const std::set<QString>& strings() const { return m_strings; }
-
-		std::vector<Offset> offsets(const QString& str) const
-		{
-			std::vector<Offset> result(m_offsetToString.count(str));
-
-			auto [beginIt, endIt] = m_offsetToString.equal_range(str);
-			std::transform(beginIt,
-						   endIt,
-						   result.begin(),
-						   [](const auto& p)
-						   {
-							   return p.second;
-						   });
-
-			return result;
-		}
-
-	private:
-		std::multimap<QString, Offset> m_offsetToString;
-		std::set<QString> m_strings;
+		UTF16,
+		UTF8
 	};
 
+	struct VduFileString
+	{
+		QString string;
+		VduStringType type = VduStringType::UTF16;
+		uint32_t stringRefOffset = 0; // Offset to the string reference in the file.
+
+		static const uint32_t stub = StringRefStub;
+
+		// --
+		//
+		static VduFileString createUtf16(const QString& string, uint32_t stringRefOffset)
+		{
+			return VduFileString{.string = string.trimmed(), .type = VduStringType::UTF16, .stringRefOffset = stringRefOffset};
+		}
+
+		static VduFileString createUtf8(const QString& string, uint32_t stringRefOffset)
+		{
+			return VduFileString{.string = string.trimmed(), .type = VduStringType::UTF8, .stringRefOffset = stringRefOffset};
+		}
+	};
+
+	// --
+	//
 	class SaveVduItemVisitor : public VFrame30::VduItemVisitor
 	{
 		QString m_vduEquipmentId;
@@ -62,8 +55,15 @@ namespace
 
 	public:
 		QByteArray outData;
-		std::list<std::pair<QString, size_t>> addedStringReferences;
+		std::list<VduFileString> addedStrings;
 		uint16_t itemType = 0;
+
+		void reset()
+		{
+			outData.clear();
+			addedStrings.clear();
+			itemType = 0;
+		}
 
 		SaveVduItemVisitor(QString vduEquipmentId,
 						   Builder::IssueLogger& m_log,
@@ -78,8 +78,7 @@ namespace
 
 		void visit(const VFrame30::SchemaItemVduLine& schemaItem) override
 		{
-			outData.clear();
-			addedStringReferences.clear();
+			reset();
 
 			VduSchemaFileSchemaItemLine1 structLine{};
 
@@ -101,8 +100,7 @@ namespace
 
 		void visit(const VFrame30::SchemaItemVduRect& schemaItem) override
 		{
-			outData.clear();
-			addedStringReferences.clear();
+			reset();
 
 			VduSchemaFileSchemaItemRect1 structRect{};
 
@@ -145,16 +143,16 @@ namespace
 								   .arg(schemaItem.getFontItalic() ? ", italic" : "");
 
 				m_log.errEQP6401(m_vduEquipmentId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid(), font);
-
 				return;
 			}
 
 			structRect.fontIndex = fontIndex;
 
-			addedStringReferences.emplace_back(schemaItem.text(),
-											   sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemRect1, text));
+			structRect.text = VduFileString::stub;
 
-			structRect.text = StringRefStub;
+			auto text = VduFileString::createUtf16(schemaItem.text(),
+												   sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemRect1, text));
+			addedStrings.push_back(std::move(text));
 
 			itemType = structRect.itemType;
 			outData = QByteArray(reinterpret_cast<const char*>(&structRect), sizeof(structRect));
@@ -162,8 +160,7 @@ namespace
 
 		void visit(const VFrame30::SchemaItemVduValue& schemaItem) override
 		{
-			outData.clear();
-			addedStringReferences.clear();
+			reset();
 
 			VduSchemaFileSchemaItemValue1 structValue{};
 
@@ -203,7 +200,6 @@ namespace
 								   .arg(schemaItem.getFontItalic() ? ", italic" : "");
 
 				m_log.errEQP6401(m_vduEquipmentId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid(), font);
-
 				return;
 			}
 
@@ -242,8 +238,7 @@ namespace
 									 schemaItem.label(),
 									 schemaItem.guid());
 
-					outData.clear();
-					addedStringReferences.clear();
+					reset();
 					return;
 				}
 
@@ -258,6 +253,133 @@ namespace
 			itemType = structValue.itemType;
 			return;
 		}
+	};
+
+	bool saveSchemaItem1(QString vduEquipmentId,
+						 const VFrame30::SchemaItem& schemaItem,
+						 const std::map<Hash, int>& appSignalHashToSignalIndex,
+						 QByteArray& out,
+						 std::list<VduFileString>& addedStrings,
+						 Builder::Context& context)
+	{
+		Builder::IssueLogger& log = *context.m_log;
+
+		// --
+		//
+		VduSchemaFileSchemaItem1 fileSchemaItem{};
+		std::memset(&fileSchemaItem, 0, sizeof(fileSchemaItem));
+
+		fileSchemaItem.version = 1;
+		fileSchemaItem.size = sizeof(fileSchemaItem);
+		// fileSchemaItem.itemType = filled in the end, when specific item data is saved.
+		// fileSchemaItem.totalItemSize = filled in the end, when specific item data is saved.
+		fileSchemaItem.isStatic = schemaItem.IsStatic();
+
+		{
+			fileSchemaItem.objectName = VduFileString::stub;
+
+			auto objectName = VduFileString::createUtf8(schemaItem.objectName(), offsetof(VduSchemaFileSchemaItem1, objectName));
+			addedStrings.push_back(std::move(objectName));
+		}
+
+		// onClickScript
+		//
+		{
+			fileSchemaItem.clickScript = VduFileString::stub;
+
+			QString clickScriptStr = (schemaItem.acceptClick() == false) ? QString{} : schemaItem.clickScript();
+
+			auto clickScript = VduFileString::createUtf8(clickScriptStr, offsetof(VduSchemaFileSchemaItem1, clickScript));
+			addedStrings.push_back(std::move(clickScript));
+		}
+
+		// preDrawScript
+		//
+		{
+			fileSchemaItem.preDrawScript = VduFileString::stub;
+
+			auto preDrawScript = VduFileString::createUtf8(schemaItem.preDrawScript(), offsetof(VduSchemaFileSchemaItem1, preDrawScript));
+			addedStrings.push_back(std::move(preDrawScript));
+		}
+
+		// Save specific item struct, depending on itemType.
+		//
+		SaveVduItemVisitor saveVduItemVisitor(vduEquipmentId, log, context.m_vduFontProvider, appSignalHashToSignalIndex);
+
+		dynamic_cast<const VFrame30::SchemaItemVdu&>(schemaItem).accept(saveVduItemVisitor);
+
+		// Save result after visiting specific item. SaveVduItemVisitor
+		//
+		QByteArray specificData = saveVduItemVisitor.outData;
+
+		std::copy(saveVduItemVisitor.addedStrings.begin(), saveVduItemVisitor.addedStrings.end(), std::back_inserter(addedStrings));
+
+		if (specificData.isEmpty() == true)
+		{
+			// Error occurred during saving specific item.
+			//
+			return false;
+		}
+
+		Q_ASSERT(saveVduItemVisitor.itemType != 0);
+		fileSchemaItem.itemType = saveVduItemVisitor.itemType;
+
+		using TotalItemSizeType = decltype(VduSchemaFileSchemaItem1::totalItemSize);
+		fileSchemaItem.totalItemSize = static_cast<TotalItemSizeType>(sizeof(VduSchemaFileSchemaItem1) + specificData.size());
+
+		out.clear();
+		out.append(reinterpret_cast<const char*>(&fileSchemaItem), sizeof(fileSchemaItem));
+		out.append(specificData);
+
+		return true;
+	}
+
+	// Accumulate string references and strings, then write them to the file.
+	//
+	class VduStringWriter
+	{
+	public:
+		using Offset = uint32_t;
+
+		void clear() { *this = {}; }
+
+		Offset addString(const QString& str, Offset offset, VduStringType type)
+		{
+			auto vduString =
+				type == VduStringType::UTF16 ? VduFileString::createUtf16(str, offset) : VduFileString::createUtf8(str, offset);
+
+			m_offsetToString.insert(std::pair{Key{str, type}, vduString});
+			m_strings.insert(std::pair{str, type});
+
+			return VduFileString::stub;
+		}
+
+		std::vector<std::pair<QString, VduStringType>> strings() const { return {m_strings.begin(), m_strings.end()}; }
+
+		std::vector<VduFileString> offsets(const QString& str, VduStringType type) const
+		{
+			Key key{str, type};
+
+			auto [beginIt, endIt] = m_offsetToString.equal_range(key);
+
+			std::vector<VduFileString> result(std::distance(beginIt, endIt));
+
+			std::transform(beginIt,
+						   endIt,
+						   result.begin(),
+						   [](const auto& p)
+						   {
+							   return p.second;
+						   });
+
+			return result;
+		}
+
+	private:
+		using Key = std::pair<QString, VduStringType>;
+
+		std::multimap<Key, VduFileString> m_offsetToString;
+		std::set<Key> m_strings;
 	};
 } // namespace
 
@@ -398,13 +520,13 @@ namespace Builder
 											   const VFrame30::VduSchema& schema,
 											   const std::map<Hash, int>& appSignalHashToSignalIndex,
 											   QByteArray& out,
-											   Context& context)
+											   Builder::Context& context)
 	{
-		IssueLogger& log = *context.m_log;
+		Builder::IssueLogger& log = *context.m_log;
 
 		bool result = true;
 
-		VduStringWriter strings;
+		VduStringWriter stringWriter;
 
 		struct VduSchemaFile file;
 		std::memset(&file, 0, sizeof(file));
@@ -429,18 +551,27 @@ namespace Builder
 			schemaProperties.height = static_cast<uint16_t>(schema.docHeight());
 			schemaProperties.reserve0 = 0;
 			schemaProperties.backgroundColor = schema.backgroundColor().rgba();
+
 			schemaProperties.schemaId =
-				strings.addStringRef(schema.schemaId(),
-									 offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, schemaId));
+				stringWriter.addString(schema.schemaId(),
+									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, schemaId),
+									   VduStringType::UTF16);
+
 			schemaProperties.caption =
-				strings.addStringRef(schema.caption(),
-									 offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, caption));
+				stringWriter.addString(schema.caption(),
+									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, caption),
+									   VduStringType::UTF16);
+
 			schemaProperties.onShowScript =
-				strings.addStringRef(schema.onShowScript(),
-									 offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, onShowScript));
+				stringWriter.addString(schema.onShowScript(),
+									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, onShowScript),
+									   VduStringType::UTF8);
+
 			schemaProperties.preDrawScript =
-				strings.addStringRef(schema.preDrawScript(),
-									 offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, preDrawScript));
+				stringWriter.addString(schema.preDrawScript(),
+									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, preDrawScript),
+									   VduStringType::UTF8);
+
 			schemaProperties.reserve1 = 0;
 			schemaProperties.reserve2 = 0;
 		};
@@ -493,15 +624,15 @@ namespace Builder
 				}
 
 				QByteArray outSchemaItem{};
-				std::list<std::pair<QString, size_t>> addedStringReferences;
+				std::list<VduFileString> addedItemStrings; // Strings added in the fallowing call of saveSchemaItem1(...).
 
-				saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedStringReferences, context);
+				saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedItemStrings, context);
 
 				// Add added string references to the main string ref container.
 				//
-				for (const auto& [str, referenceOffset] : addedStringReferences)
+				for (const auto& str : addedItemStrings)
 				{
-					strings.addStringRef(str, referenceOffset + out.size());
+					stringWriter.addString(str.string, str.stringRefOffset + out.size(), str.type);
 				}
 
 				// Save item's data to the output buffer.
@@ -541,24 +672,49 @@ namespace Builder
 
 		addPadding(out, 4);
 
-		for (const QString& str : strings.strings())
+		for (const auto [str, type] : stringWriter.strings())
 		{
 			auto stringOffset = static_cast<vdu_string_ref>(out.size());
 
 			// Write string size.
 			//
-			uint16_t stringSize = static_cast<uint16_t>(str.size());
-			out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
 
-			// Write string data.
-			//
-			out.append(reinterpret_cast<const char*>(str.constData()), (str.size() + 1) * sizeof(QChar)); // +1 for null terminator
+			if (type == VduStringType::UTF16)
+			{
+				// Write string size.
+				//
+				uint16_t stringSize = static_cast<uint16_t>(str.size());
+				out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
+
+				// Write string data.
+				//
+				out.append(reinterpret_cast<const char*>(str.constData()), (str.size() + 1) * sizeof(QChar)); // +1 for null terminator
+			}
+			else
+			{
+				Q_ASSERT(type == VduStringType::UTF8);
+
+				std::string utf8Str = str.toUtf8().toStdString();
+
+				// Write string size.
+				//
+				uint16_t stringSize = static_cast<uint16_t>(utf8Str.size());
+				out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
+
+				// Write string data.
+				//
+				out.append(reinterpret_cast<const char*>(utf8Str.data()),
+						   (utf8Str.size() + 1) * sizeof(std::string::value_type)); // +1 for null terminator
+			}
 
 			// Replace string_ref with offset to the string.
 			//
-			for (vdu_string_ref fileOffset : strings.offsets(str))
+			for (const auto& stringData : stringWriter.offsets(str, type))
 			{
-				out.replace(fileOffset, sizeof(vdu_string_ref), reinterpret_cast<const char*>(&stringOffset), sizeof(stringOffset));
+				out.replace(stringData.stringRefOffset,
+							sizeof(vdu_string_ref),
+							reinterpret_cast<const char*>(&stringOffset),
+							sizeof(stringOffset));
 			}
 
 			// Add padding bytes to strings (aligned to 4 bytes).
@@ -659,77 +815,6 @@ namespace Builder
 		schema->Draw(&drawParam, clipRect);
 
 		schema->setContext(oldContext);
-
-		return true;
-	}
-
-	bool VduSchemaGenerator::saveSchemaItem1(QString vduEquipmentId,
-											 const VFrame30::SchemaItem& schemaItem,
-											 const std::map<Hash, int>& appSignalHashToSignalIndex,
-											 QByteArray& out,
-											 std::list<std::pair<QString, size_t>>& addedStringReferences,
-											 Context& context)
-	{
-		IssueLogger& log = *context.m_log;
-
-		// --
-		//
-		VduSchemaFileSchemaItem1 fileSchemaItem;
-		std::memset(&fileSchemaItem, 0, sizeof(fileSchemaItem));
-
-		fileSchemaItem.version = 1;
-		fileSchemaItem.size = sizeof(fileSchemaItem);
-		// fileSchemaItem.itemType = filled in the end, when specific item data is saved.
-		// fileSchemaItem.totalItemSize = filled in the end, when specific item data is saved.
-		fileSchemaItem.isStatic = schemaItem.IsStatic();
-
-		fileSchemaItem.objectName = StringRefStub;
-		addedStringReferences.emplace_back(schemaItem.objectName().trimmed(), offsetof(VduSchemaFileSchemaItem1, objectName));
-
-		// onClickScript
-		//
-		QString clickScript = (schemaItem.acceptClick() == false || schemaItem.clickScript().trimmed().isEmpty() == true) ?
-								  QString{""} :
-								  schemaItem.clickScript().trimmed();
-
-		fileSchemaItem.clickScript = StringRefStub;
-		addedStringReferences.emplace_back(clickScript, offsetof(VduSchemaFileSchemaItem1, clickScript));
-
-		// onClickScript
-		//
-		fileSchemaItem.preDrawScript = StringRefStub;
-		addedStringReferences.emplace_back(schemaItem.preDrawScript().trimmed(), offsetof(VduSchemaFileSchemaItem1, preDrawScript));
-
-		// Save specific item, depending on itemType.
-		//
-		SaveVduItemVisitor saveVduItemVisitor(vduEquipmentId, log, context.m_vduFontProvider, appSignalHashToSignalIndex);
-
-		dynamic_cast<const VFrame30::SchemaItemVdu&>(schemaItem).accept(saveVduItemVisitor);
-
-		// Save result after visiting specific item. SaveVduItemVisitor
-		//
-		QByteArray specificData = saveVduItemVisitor.outData;
-
-		std::copy(saveVduItemVisitor.addedStringReferences.begin(),
-				  saveVduItemVisitor.addedStringReferences.end(),
-				  std::back_inserter(addedStringReferences));
-
-		if (specificData.isEmpty() == true)
-		{
-			// Error occurred during saving specific item.
-			//
-			return false;
-		}
-
-		Q_ASSERT(saveVduItemVisitor.itemType != 0);
-		fileSchemaItem.itemType = saveVduItemVisitor.itemType;
-
-		using TotalItemSizeType = decltype(VduSchemaFileSchemaItem1::totalItemSize);
-		fileSchemaItem.totalItemSize = static_cast<TotalItemSizeType>(sizeof(VduSchemaFileSchemaItem1) + specificData.size());
-
-		out.clear();
-		out.append(reinterpret_cast<const char*>(&fileSchemaItem), sizeof(fileSchemaItem));
-		out.append(specificData);
 
 		return true;
 	}

@@ -3,15 +3,23 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-// string_ref is an offset in a file to a string.
-// String consist of 16 bit size of string in symbols, followed with string data. Padding to 4 bytes.
-// The string is a null terminated QChar string.
-// (In Qt, Unicode characters are 16-bit entities without any markup or structure).
-// Note: String in file must be aligned to 4 bytes.
+// vdu_string_ref is an offset in a file to UTF16 string (QChar).
+// String starts from the string size (16-bit), then follows string data (16-bit QChars).
+// The string is a null terminated.
+// Padding and alignment is 4 bytes.
 //
 typedef uint32_t vdu_string_ref;
 typedef uint32_t vdu_file_ref;
 
 inline const vdu_string_ref StringRefStub = 0x52525453; // "STRR" - for debug, easy to find in hex editor.
 
+// vdu_cstr is an offset in a file to UTF8 string
+// String starts from the string size (16-bit), then follows string data.
+// The string is a null terminated.
+// Padding and alignment is 4 bytes.
+//
+typedef uint32_t vdu_cstr;
+
+// --
+//
 inline const int VDU_OPTO_PORTS_COUNT = 8;

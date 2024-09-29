@@ -18,22 +18,14 @@ namespace Builder
 		VduSchemaGenerator() = delete;
 
 	public:
-		static bool generateVduSchemas(const std::vector<VFrame30::VduSchema*>& schemas, Context& context);
+		static bool generateVduSchemas(const std::vector<VFrame30::VduSchema*>& schemas, Builder::Context& context);
 
 		static bool generateVduSchema(QString vduEquipmentId,
 									  const VFrame30::VduSchema& schema,
 									  const std::map<Hash, int>& appSignalHashToSignalIndex,
 									  QByteArray& out,
-									  Context& context);
+									  Builder::Context& context);
 
 		static bool generateVduBackgroundBitmap(std::shared_ptr<VFrame30::Schema> schema, QImage& out);
-
-	private:
-		static bool saveSchemaItem1(QString vduEquipmentId,
-									const VFrame30::SchemaItem& schemaItem,
-									const std::map<Hash, int>& appSignalHashToSignalIndex,
-									QByteArray& out,
-									std::list<std::pair<QString, size_t>>& addedStringReferences,
-									Context& context);
 	};
 } // namespace Builder
