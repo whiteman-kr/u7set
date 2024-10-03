@@ -10,12 +10,30 @@ namespace Builder
 		m_header{static_cast<quint32>(c), width, height, 0},
 		m_image(QSize(width, height), QImage::Format_Grayscale8)
 	{
+
+#if 1   // NoAntialiasing
+		//
+		QImage monoImage{QSize{width, height}, QImage::Format_Mono};
+		QPainter painter(&monoImage);
+
+		painter.setRenderHint(QPainter::TextAntialiasing, false);
+		painter.setRenderHint(QPainter::Antialiasing, false);
+
+		painter.setFont(font);
+		painter.fillRect(0, 0, width, height, Qt::white);
+		painter.setPen(Qt::black);
+		painter.drawText(0, fm.ascent(), QChar(c));
+		painter.end();
+
+		m_image = monoImage.convertedTo(QImage::Format_Grayscale8);
+#else
 		QPainter painter(&m_image);
 		painter.setFont(font);
 		painter.fillRect(0, 0, width, height, Qt::white);
 		painter.setPen(Qt::black);
 		painter.drawText(0, fm.ascent(), QChar(c));
 		painter.end();
+#endif
 
 		// Render to m_data
 		//
