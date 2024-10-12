@@ -130,8 +130,6 @@ void ConfigurationServiceWidget::updateServiceState()
 
 //	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), cfgSettings->clientRequestIP.addressStr());
 //	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), cfgSettings->clientRequestNetmask.toString());
-
-	DEBUG_STOP;		// ^^^^^^^^^^ check
 }
 
 void ConfigurationServiceWidget::updateClientsInfo()

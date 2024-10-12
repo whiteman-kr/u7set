@@ -16,7 +16,7 @@ namespace Builder
 		virtual bool generateConfigurationStep1() override;
 
 	private:
-		bool writeRunScriptFile(const QString& profile, const CfgServiceSettings& settings, E::OS os);
+		bool writeRunScriptFile(const QString& profile, E::OS os);
 
 		QString getCommandLine(const QString& profile, E::OS os, bool simulation) const;
 	};

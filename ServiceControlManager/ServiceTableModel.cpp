@@ -414,7 +414,7 @@ void ServiceData::fillClientRequestIPs(const std::vector<RqCtrlSettings>& rcSett
 
 	for(const RqCtrlSettings& rcs : rcSettings)
 	{
-		clientRequestIPs.emplace_back(rcs.clientRequestIP);
+		clientRequestIPs.emplace_back(rcs.clientRequestIP());
 	}
 }
 

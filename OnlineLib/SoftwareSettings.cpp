@@ -436,14 +436,121 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 //
 // -------------------------------------------------------------------------------------
 
+int RqCtrlSettings::ID() const
+{
+	Q_ASSERT(m_propsMask & PROP_ID);
+	return m_ID;
+}
+
+void RqCtrlSettings::setID(int id)
+{
+	m_ID = id;
+	m_propsMask |= PROP_ID;
+}
+
+QString RqCtrlSettings::equipmentID() const
+{
+	Q_ASSERT(m_propsMask & PROP_EQUIPMENT_ID);
+	return m_equipmentID;
+}
+
+void RqCtrlSettings::setEquipmentID(const QString& equipmentID)
+{
+	m_equipmentID = equipmentID;
+	m_propsMask |= PROP_EQUIPMENT_ID;
+}
+
+bool RqCtrlSettings::enable() const
+{
+	Q_ASSERT(m_propsMask & PROP_ENABLE);
+	return m_enable;
+}
+
+void RqCtrlSettings::setEnable(bool enable)
+{
+	m_enable = enable;
+	m_propsMask |= PROP_ENABLE;
+}
+
+E::SecurityLevel RqCtrlSettings::securityLevel() const
+{
+	Q_ASSERT(m_propsMask & PROP_SECURITY_LEVEL);
+	return m_securityLevel;
+}
+
+void RqCtrlSettings::setSecurityLevel(E::SecurityLevel level)
+{
+	m_securityLevel = level;
+	m_propsMask |= PROP_SECURITY_LEVEL;
+}
+
+HostAddressPort RqCtrlSettings::clientRequestIP() const
+{
+	Q_ASSERT(m_propsMask & PROP_CLIENT_REQUEST_IP);
+	return m_clientRequestIP;
+}
+
+void RqCtrlSettings::setClientRequestIP(const HostAddressPort& addrPort)
+{
+	m_clientRequestIP = addrPort;
+	m_propsMask |= PROP_CLIENT_REQUEST_IP;
+}
+
+bool RqCtrlSettings::hasClientRequestIP() const
+{
+	return (m_propsMask & PROP_CLIENT_REQUEST_IP) != 0;
+}
+
+QHostAddress RqCtrlSettings::clientRequestNetmask() const
+{
+	Q_ASSERT(m_propsMask & PROP_CLIENT_REQUEST_NETMASK);
+	return m_clientRequestNetmask;
+}
+
+void RqCtrlSettings::setClientRequestNetmask(const QHostAddress& netmask)
+{
+	m_clientRequestNetmask = netmask;
+	m_propsMask |= PROP_CLIENT_REQUEST_NETMASK;
+}
+
+HostAddressPort RqCtrlSettings::rtTrendsRequestIP() const
+{
+	Q_ASSERT(m_propsMask & PROP_RT_TRENDS_REQUEST_IP);
+	return m_rtTrendsRequestIP;
+}
+
+void RqCtrlSettings::setRtTrendsRequestIP(const HostAddressPort& addrPort)
+{
+	m_rtTrendsRequestIP = addrPort;
+	m_propsMask |= PROP_RT_TRENDS_REQUEST_IP;
+}
+
+bool RqCtrlSettings::hasRtTrendsRequestIP() const
+{
+	return (m_propsMask & PROP_RT_TRENDS_REQUEST_IP) != 0;
+}
+
+void RqCtrlSettings::clear()
+{
+	m_propsMask = 0;
+
+	m_ID = -1;
+	m_equipmentID.clear();
+	m_enable = false;
+	m_securityLevel = E::SecurityLevel::Basic;
+	m_clientRequestIP.clear();
+	m_clientRequestNetmask.clear();
+	m_rtTrendsRequestIP.clear();
+}
+
 bool RqCtrlSettings::isValid() const
 {
-	return ID != -1;
+	return m_ID != -1;
 }
 
 bool RqCtrlSettings::operator < (const RqCtrlSettings& rcs) const
 {
-	return ID < rcs.ID;
+	return m_ID < rcs.m_ID;
 }
 
 bool RqCtrlSettings::writeToXml(XmlWriteHelper& xml) const
@@ -452,37 +559,47 @@ bool RqCtrlSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeStartElement(XmlElement::REQUEST_CONTROLLER);
 
-	xml.writeIntAttribute(XmlAttribute::ID, ID);
-	xml.writeStringAttribute(XmlAttribute::EQUIPMENT_ID, equipmentID);
-	xml.writeUInt32Attribute(XmlAttribute::PROPS_MASK, propsMask, true);
+	Q_ASSERT(m_propsMask != 0);
+	xml.writeUInt32Attribute(XmlAttribute::PROPS_MASK, m_propsMask, true);
 
-	for(const quint32 propFlag : knownPropsFlags)
+	Q_ASSERT(m_propsMask & PROP_ID);
+	Q_ASSERT(m_propsMask & PROP_EQUIPMENT_ID);
+
+	for(const quint32 propFlag : m_knownPropsFlags)
 	{
-		if ((propsMask & propFlag) == 0)
+		if ((m_propsMask & propFlag) == 0)
 		{
 			continue;
 		}
 
 		switch(propFlag)
 		{
+		case PROP_ID:
+			xml.writeIntAttribute(XmlAttribute::ID, m_ID);
+			break;
+
+		case PROP_EQUIPMENT_ID:
+			xml.writeStringAttribute(XmlAttribute::EQUIPMENT_ID, m_equipmentID);
+			break;
+
 		case PROP_ENABLE:
-			xml.writeBoolAttribute(XmlAttribute::ENABLE, enable);
+			xml.writeBoolAttribute(XmlAttribute::ENABLE, m_enable);
 			break;
 
 		case PROP_SECURITY_LEVEL:
-			xml.writeEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, securityLevel);
+			xml.writeEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, m_securityLevel);
 			break;
 
 		case PROP_CLIENT_REQUEST_IP:
-			xml.writeIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, clientRequestIP);
+			xml.writeIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, m_clientRequestIP);
 			break;
 
 		case PROP_CLIENT_REQUEST_NETMASK:
-			xml.writeIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+			xml.writeIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, m_clientRequestNetmask);
 			break;
 
 		case PROP_RT_TRENDS_REQUEST_IP:
-			xml.writeIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, rtTrendsRequestIP);
+			xml.writeIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, m_rtTrendsRequestIP);
 			break;
 
 		default:
@@ -502,38 +619,46 @@ bool RqCtrlSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.findElement(XmlElement::REQUEST_CONTROLLER);
 
-	result &= xml.readIntAttribute(XmlAttribute::ID, &ID);
-	result &= xml.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &equipmentID);
+	result &= xml.readUInt32Attribute(XmlAttribute::PROPS_MASK, &m_propsMask);
 
-	result &= xml.readUInt32Attribute(XmlAttribute::PROPS_MASK, &propsMask);
+	Q_ASSERT(m_propsMask & PROP_ID);
+	Q_ASSERT(m_propsMask & PROP_EQUIPMENT_ID);
 
-	for(const quint32 propFlag : knownPropsFlags)
+	for(const quint32 propFlag : m_knownPropsFlags)
 	{
-		if ((propsMask & propFlag) == 0)
+		if ((m_propsMask & propFlag) == 0)
 		{
 			continue;
 		}
 
 		switch(propFlag)
 		{
+		case PROP_ID:
+			result &= xml.readIntAttribute(XmlAttribute::ID, &m_ID);
+			break;
+
+		case PROP_EQUIPMENT_ID:
+			result &= xml.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &m_equipmentID);
+			break;
+
 		case PROP_ENABLE:
-			result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &enable);
+			result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &m_enable);
 			break;
 
 		case PROP_SECURITY_LEVEL:
-			result &= xml.readEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, &securityLevel);
+			result &= xml.readEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, &m_securityLevel);
 			break;
 
 		case PROP_CLIENT_REQUEST_IP:
-			result &= xml.readIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, &clientRequestIP);
+			result &= xml.readIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, &m_clientRequestIP);
 			break;
 
 		case PROP_CLIENT_REQUEST_NETMASK:
-			result &= xml.readIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+			result &= xml.readIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, &m_clientRequestNetmask);
 			break;
 
 		case PROP_RT_TRENDS_REQUEST_IP:
-			result &= xml.readIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, &rtTrendsRequestIP);
+			result &= xml.readIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, &m_rtTrendsRequestIP);
 			break;
 
 		default:
@@ -543,6 +668,11 @@ bool RqCtrlSettings::readFromXml(XmlReadHelper& xml)
 	}
 
 	return result;
+}
+
+bool RqCtrlSettings::isKnownPropsFlag(quint32 propFlag)
+{
+	return m_knownPropsFlags.contains(propFlag);
 }
 
 // -------------------------------------------------------------------------------------
@@ -560,7 +690,7 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	writeRqControllersToXml(xml, rcSettings);
 
 	xml.writeStartElement(XmlElement::CLIENTS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(clients.count()));
+	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(clients.size()));
 
 	for(const ClientInfo& ci : clients)
 	{
@@ -624,7 +754,7 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 
 		BREAK_IF_FALSE(result);
 
-		clients.append(ci);
+		clients.emplace_back(ci);
 	}
 
 	return result;
@@ -650,15 +780,13 @@ QStringList CfgServiceSettings::knownClients() const
 
 RqCtrlSettings AppDataServiceSettings::getRequestControllerSettings(const QString& rcEquipmentID)
 {
-	auto it = std::find_if(rcSettings.begin(), rcSettings.end(), [&rcEquipmentID](const RqCtrlSettings& rcs)
-						{
-							return rcs.equipmentID == rcEquipmentID;
-						});
-
-	if (it != rcSettings.end())
+	for(const RqCtrlSettings& rcs : rcSettings)
 	{
-		return RqCtrlSettings(*it);
-	}
+		if (rcs.equipmentID() == rcEquipmentID)
+		{
+			return rcs;
+		}
+	};
 
 	return RqCtrlSettings();
 }

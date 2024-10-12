@@ -187,9 +187,9 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 
 	for(const RqCtrlSettings& rcs: m_cfgServiceSettings.rcSettings)
 	{
-		if (rcs.enable)
+		if (rcs.enable())
 		{
-			listenAddrs.emplace_back(rcs.equipmentID, rcs.clientRequestIP, rcs.securityLevel);
+			listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
 		}
 	}
 

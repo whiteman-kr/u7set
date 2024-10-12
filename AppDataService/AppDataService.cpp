@@ -191,9 +191,9 @@ void AppDataServiceWorker::runTcpAppDataServer()
 
 	for(const RqCtrlSettings& rcs :  m_curSettingsProfile.rcSettings)
 	{
-		if (rcs.enable == true)
+		if (rcs.enable() == true)
 		{
-			listenAddrs.emplace_back(rcs.equipmentID, rcs.clientRequestIP, rcs.securityLevel);
+			listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
 		}
 	 };
 
@@ -252,10 +252,10 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 				  m_curSettingsProfile.rcSettings.end(),
 				  [&listenAddresses](const RqCtrlSettings& rcs)
 				  {
-						if (rcs.enable == true)
-						{
-							listenAddresses.emplace_back(rcs.equipmentID, rcs.rtTrendsRequestIP, rcs.securityLevel);
-						}
+					if (rcs.enable() == true)
+					{
+						listenAddresses.emplace_back(rcs.equipmentID(), rcs.rtTrendsRequestIP(), rcs.securityLevel());
+					}
 				  });
 
 	m_rtTrendsServerThread = new RtTrends::ServerThread(listenAddresses,

@@ -26,8 +26,8 @@ namespace Builder
 
 		bool result = m_settingsSet.addProfile<CfgServiceSettingsGetter>(profile, settingsGetter);
 
-		result &= writeRunScriptFile(profile, settingsGetter, E::OS::Windows);
-		result &= writeRunScriptFile(profile, settingsGetter, E::OS::Linux);
+		result &= writeRunScriptFile(profile, E::OS::Windows);
+		result &= writeRunScriptFile(profile, E::OS::Linux);
 
 		return result;
 	}
@@ -38,7 +38,6 @@ namespace Builder
 	}
 
 	bool ConfigurationServiceCfgGenerator::writeRunScriptFile(const QString& profile,
-															  const CfgServiceSettings& settings,
 															  E::OS os)
 	{
 		TEST_PTR_RETURN_FALSE(m_software);

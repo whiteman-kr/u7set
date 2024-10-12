@@ -5,7 +5,6 @@
 #include <CommonLib/ConstStrings.h>
 #include "../OnlineLib/MatsUsers.h"
 
-
 class XmlWriteHelper;
 class XmlReadHelper;
 
@@ -23,41 +22,77 @@ struct SessionParams
 	void loadFrom(const Network::SessionParams& sp);
 };
 
-struct RqCtrlSettings
+class RqCtrlSettings
 {
-	int ID = -1;
+public:
+	static const quint32 PROP_UNKNOWN = 0;
 
-	QString equipmentID;
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
-	HostAddressPort rtTrendsRequestIP;
-	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
-	bool enable = false;
-
-	quint32	propsMask = 0;			// OR of PROP_* constants
-
-	static const quint32 PROP_ENABLE = 1;
-	static const quint32 PROP_SECURITY_LEVEL = 2;
-	static const quint32 PROP_CLIENT_REQUEST_IP = 4;
-	static const quint32 PROP_CLIENT_REQUEST_NETMASK = 8;
-	static const quint32 PROP_RT_TRENDS_REQUEST_IP = 16;
-
-	inline static const std::set<quint32> knownPropsFlags =
-	{
-			PROP_ENABLE,
-			PROP_SECURITY_LEVEL,
-			PROP_CLIENT_REQUEST_IP,
-			PROP_CLIENT_REQUEST_NETMASK,
-			PROP_RT_TRENDS_REQUEST_IP,
-	};
+	static const quint32 PROP_ID = 1;
+	static const quint32 PROP_EQUIPMENT_ID = 2;
+	static const quint32 PROP_ENABLE = 4;
+	static const quint32 PROP_SECURITY_LEVEL = 8;
+	static const quint32 PROP_CLIENT_REQUEST_IP = 16;
+	static const quint32 PROP_CLIENT_REQUEST_NETMASK = 32;
+	static const quint32 PROP_RT_TRENDS_REQUEST_IP = 64;
 
 	//
+
+	int ID() const;
+	void setID(int id);
+
+	QString equipmentID() const;
+	void setEquipmentID(const QString& equipmentID);
+
+	bool enable() const;
+	void setEnable(bool enable);
+
+	E::SecurityLevel securityLevel() const;
+	void setSecurityLevel(E::SecurityLevel level);
+
+	HostAddressPort clientRequestIP() const;
+	void setClientRequestIP(const HostAddressPort& addrPort);
+	bool hasClientRequestIP() const;
+
+	QHostAddress clientRequestNetmask() const;
+	void setClientRequestNetmask(const QHostAddress& netmask);
+
+	HostAddressPort rtTrendsRequestIP() const;
+	void setRtTrendsRequestIP(const HostAddressPort& addrPort);
+	bool hasRtTrendsRequestIP() const;
+
+	//
+
+	void clear();
 
 	bool isValid() const;
 	bool operator < (const RqCtrlSettings& rcs) const;
 
 	bool writeToXml(XmlWriteHelper& xml) const;
 	bool readFromXml(XmlReadHelper& xml);
+
+	static bool isKnownPropsFlag(quint32 propFlag);
+
+private:
+	quint32	m_propsMask = 0;			// OR of PROP_* constants
+
+	int m_ID = -1;
+	QString m_equipmentID;
+	bool m_enable = false;
+	E::SecurityLevel m_securityLevel = E::SecurityLevel::Basic;
+	HostAddressPort m_clientRequestIP;
+	QHostAddress m_clientRequestNetmask;
+	HostAddressPort m_rtTrendsRequestIP;
+
+	inline static const std::set<quint32> m_knownPropsFlags =
+	{
+		PROP_ID,
+		PROP_EQUIPMENT_ID,
+		PROP_ENABLE,
+		PROP_SECURITY_LEVEL,
+		PROP_CLIENT_REQUEST_IP,
+		PROP_CLIENT_REQUEST_NETMASK,
+		PROP_RT_TRENDS_REQUEST_IP,
+	};
 };
 
 class SoftwareSettings
@@ -189,7 +224,7 @@ public:
 
 	bool checkHostname = false;
 
-	QList<ClientInfo> clients;
+	std::list<ClientInfo> clients;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only

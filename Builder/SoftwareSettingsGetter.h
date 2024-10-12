@@ -76,12 +76,32 @@ protected:
 	virtual bool readSettings(const Builder::Context* context,
 								const Hardware::Software* software) = 0;
 
+	static bool isRqCtrlEquipmentID(const QString& equipmentID, int* rqCtrlID = nullptr);
+
+	static bool getRqCtrlSettings(const Hardware::Software* software,
+								  const QString& rqCtrlID,
+								  const std::vector<quint32>& rcsPropsFlags,		// array of RcCtrlSettings::RCS_* constants
+								  RqCtrlSettings* rcSettings,
+								  Builder::IssueLogger* log);
+
+	static bool getRqCtrlSettings(const Hardware::Software* software,
+								  const Hardware::DeviceController* rqCtrl,
+								  const std::vector<quint32>& rcsPropsFlags,		// array of RcCtrlSettings::RCS_* constants
+								  RqCtrlSettings* rcSettings,
+								  Builder::IssueLogger* log);
+
 	static bool getRqControllersSettings(const Hardware::Software* software,
 								  const std::vector<quint32>& rcsPropsFlags,		// array of RcCtrlSettings::RCS_* constants
 								  std::vector<RqCtrlSettings>* rcSettings,
 								  Builder::IssueLogger* log);
 
 	static bool isRqCtrlExist(const QString& rqCtrlEquipmentID, const std::vector<RqCtrlSettings>& rcSettings);
+
+	static bool getAppDataServices(const Hardware::EquipmentSet* equipment,
+								   const Hardware::Software* software,
+								   const QStringList& appDataServiceIds,
+								   std::map<QString, const Hardware::Software*>* appDataServices,
+								   Builder::IssueLogger* log);
 };
 
 
