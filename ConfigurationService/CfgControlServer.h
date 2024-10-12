@@ -20,7 +20,7 @@ public:
 					 const QString& workDirectory,
 					 const QString& buildPath,
 					 const SessionParams& sessionParams,
-					 const QList<CfgServiceSettings::ClientInfo>& clients,
+					 const std::list<CfgServiceSettings::ClientInfo>& clients,
 					 bool checkClientHostname,
 					 const CfgCheckerWorker& checkerWorker,
 					 std::shared_ptr<CircularLogger> logger);
@@ -41,7 +41,7 @@ private:
 	QString m_equipmentID;
 	QString m_autoloadBuildPath;
 	QString m_workDirectory;
-	QList<CfgServiceSettings::ClientInfo> m_knownClients;
+	std::list<CfgServiceSettings::ClientInfo> m_knownClients;
 	bool m_checkClientHostname = false;
 
 	SessionParams m_sessionParams;

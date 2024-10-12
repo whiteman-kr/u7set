@@ -523,16 +523,16 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, con
 
 	int row = 9;
 
-	for(const RequestControllerSettings& rcs : appDataSettings->rcSettings )
+	for(const RqCtrlSettings& rcs : appDataSettings->rcSettings )
 	{
 		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 0),
-									QString("RC%1.Client Request IP").arg(rcs.ID, 2, 10, QChar('0')));
+									QString("RC%1.Client Request IP").arg(rcs.ID(), 2, 10, QChar('0')));
 
 		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 0),
-									QString("RC%1.Client Request NetMask").arg(rcs.ID, 2, 10, QChar('0')));
+									QString("RC%1.Client Request NetMask").arg(rcs.ID(), 2, 10, QChar('0')));
 
 		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 0),
-									QString("RC%1.Realtime Trends Request IP").arg(rcs.ID, 2, 10, QChar('0')));
+									QString("RC%1.Realtime Trends Request IP").arg(rcs.ID(), 2, 10, QChar('0')));
 	}
 
 	// Log
@@ -597,11 +597,11 @@ void AppDataServiceWidget::updateServiceState()
 
 	int row = 9;
 
-	for(const RequestControllerSettings& rcs : appDataSettings->rcSettings )
+	for(const RqCtrlSettings& rcs : appDataSettings->rcSettings )
 	{
-		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.clientRequestIP.addressPortStr());
-		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.clientRequestNetmask.toString());
-		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.rtTrendsRequestIP.addressPortStr());
+		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.clientRequestIP().addressPortStr());
+		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.clientRequestNetmask().toString());
+		m_settingsTabModel->setData(m_settingsTabModel->index(row++, 1), rcs.rtTrendsRequestIP().addressPortStr());
 	}
 }
 
@@ -637,20 +637,13 @@ void AppDataServiceWidget::updateStateInfo()
 		}
 	}
 
-	quint32 ip = m_service.clientRequestIp;
-	qint32 port = m_service.clientRequestPort;
-
-	quint32 workingIp = getWorkingClientRequestIp();
-
-	if (ip != workingIp)
-	{
-		ip = workingIp;
-	}
+	HostAddressPort workingIp = getWorkingClientRequestIp();
 
 	if (m_tcpClientSocket != nullptr)
 	{
 		HostAddressPort&& curAddress = m_tcpClientSocket->serverAddressPort(0);
-		if (curAddress.address32() != ip || curAddress.port() != port)
+
+		if (curAddress != workingIp)
 		{
 			dropTcpConnection();
 		}
@@ -658,7 +651,7 @@ void AppDataServiceWidget::updateStateInfo()
 
 	if (m_tcpClientSocket == nullptr)
 	{
-		createTcpConnection(getWorkingClientRequestIp(), static_cast<quint16>(port));
+		createTcpConnection(workingIp.address32(), workingIp.port());
 	}
 }
 

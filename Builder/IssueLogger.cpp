@@ -1424,6 +1424,67 @@ namespace Builder
 				  tr("%1 %2 settings read error.").arg(softwareType, equipmentID));
 	}
 
+	/// IssueCode: CFG3034
+	///
+	/// IssueType: Error
+	///
+	/// Title: RequestController %1 is not found in software %2.
+	///
+	/// Parameters:
+	///         %1 RequestController EquipmentID
+	///         %2 Software EquipmentID
+	///
+	/// Description:
+	///			Specified RequestController is not found in software.
+	///
+	void IssueLogger::errCFG3034(QString rcID, QString softwareID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3034,
+				  tr("RequestController %1 is not found in software %2.").arg(rcID, softwareID));
+	}
+
+	/// IssueCode: CFG3035
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Software %1 linked to disabled RequestController %2.
+	///
+	/// Parameters:
+	///         %1 Software EquipmentID
+	///         %2 RequestController EquipmentID
+	///
+	/// Description:
+	///			Specified software linked to disabled RequestController. Check RequestController properties.
+	///
+	void IssueLogger::wrnCFG3035(QString softwareID, QString rcID)
+	{
+		LOG_WARNING0(IssueType::FscConfiguration,
+				  3035,
+				  tr("Software %1 linked to disabled RequestController %2.").arg(softwareID, rcID));
+	}
+
+	/// IssueCode: CFG3036
+	///
+	/// IssueType: Error
+	///
+	/// Title: Request Controllers %1 and %2 have same ClientRequestIP %3.
+	///
+	/// Parameters:
+	///         %1 Request Controller 1 EquipmentID
+	///         %2 Request Controller 2 EquipmentID
+	///         %3 ClientRequestIP
+	///
+	/// Description:
+	///			Specified Request Controllers has same ClientRequestIP. Check controllers settings.
+	///
+	void IssueLogger::errCFG3036(QString rcID1, QString rcID2, QString addrPortStr)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3036,
+				  tr("Request Controllers %1 and %2 have same ClientRequestIP %3.").arg(rcID1, rcID2, addrPortStr));
+	}
+
 	/// IssueCode: CFG3040
 	///
 	/// IssueType: Error

@@ -3,5 +3,6 @@ CFGS
 	13.12.2022	Version: 2	Configuration Service_v2.u7devp	RPCT-3357: Add property SecurityLevel to all software services
 	17.01.2023	Version: 3	Configuration Service_v3.u7devp	RPCT-3357: Property SecurityLevel has SSL=2, RPCT-3331: CheckHostname is not expert
 	24.04.2023	Version: 4	Configuration Service_v4.u7devp	RPCT-3518: Property CheckHostname is set to false
+	10.09.2024	Version: 5	Configuration Service_v5.u7devp	RPCT-3947: Added Request Controllers
 
 

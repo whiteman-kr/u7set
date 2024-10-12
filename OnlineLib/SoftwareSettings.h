@@ -5,7 +5,6 @@
 #include <CommonLib/ConstStrings.h>
 #include "../OnlineLib/MatsUsers.h"
 
-
 class XmlWriteHelper;
 class XmlReadHelper;
 
@@ -14,7 +13,6 @@ namespace Network
 	class SessionParams;	// protobuf class
 }
 
-
 struct SessionParams
 {
 	QString currentSettingsProfile;
@@ -22,6 +20,79 @@ struct SessionParams
 
 	void saveTo(Network::SessionParams* sp);
 	void loadFrom(const Network::SessionParams& sp);
+};
+
+class RqCtrlSettings
+{
+public:
+	static const quint32 PROP_UNKNOWN = 0;
+
+	static const quint32 PROP_ID = 1;
+	static const quint32 PROP_EQUIPMENT_ID = 2;
+	static const quint32 PROP_ENABLE = 4;
+	static const quint32 PROP_SECURITY_LEVEL = 8;
+	static const quint32 PROP_CLIENT_REQUEST_IP = 16;
+	static const quint32 PROP_CLIENT_REQUEST_NETMASK = 32;
+	static const quint32 PROP_RT_TRENDS_REQUEST_IP = 64;
+
+	//
+
+	int ID() const;
+	void setID(int id);
+
+	QString equipmentID() const;
+	void setEquipmentID(const QString& equipmentID);
+
+	bool enable() const;
+	void setEnable(bool enable);
+
+	E::SecurityLevel securityLevel() const;
+	void setSecurityLevel(E::SecurityLevel level);
+
+	HostAddressPort clientRequestIP() const;
+	void setClientRequestIP(const HostAddressPort& addrPort);
+	bool hasClientRequestIP() const;
+
+	QHostAddress clientRequestNetmask() const;
+	void setClientRequestNetmask(const QHostAddress& netmask);
+
+	HostAddressPort rtTrendsRequestIP() const;
+	void setRtTrendsRequestIP(const HostAddressPort& addrPort);
+	bool hasRtTrendsRequestIP() const;
+
+	//
+
+	void clear();
+
+	bool isValid() const;
+	bool operator < (const RqCtrlSettings& rcs) const;
+
+	bool writeToXml(XmlWriteHelper& xml) const;
+	bool readFromXml(XmlReadHelper& xml);
+
+	static bool isKnownPropsFlag(quint32 propFlag);
+
+private:
+	quint32	m_propsMask = 0;			// OR of PROP_* constants
+
+	int m_ID = -1;
+	QString m_equipmentID;
+	bool m_enable = false;
+	E::SecurityLevel m_securityLevel = E::SecurityLevel::Basic;
+	HostAddressPort m_clientRequestIP;
+	QHostAddress m_clientRequestNetmask;
+	HostAddressPort m_rtTrendsRequestIP;
+
+	inline static const std::set<quint32> m_knownPropsFlags =
+	{
+		PROP_ID,
+		PROP_EQUIPMENT_ID,
+		PROP_ENABLE,
+		PROP_SECURITY_LEVEL,
+		PROP_CLIENT_REQUEST_IP,
+		PROP_CLIENT_REQUEST_NETMASK,
+		PROP_RT_TRENDS_REQUEST_IP,
+	};
 };
 
 class SoftwareSettings
@@ -37,6 +108,9 @@ protected:
 	void writeEndSettings(XmlWriteHelper& xml) const;
 
 	bool startSettingsReading(XmlReadHelper& xml);
+
+	void writeRqControllersToXml(XmlWriteHelper& xml, const std::vector<RqCtrlSettings>& rcSettings) const;
+	bool readRqControllersFromXml(XmlReadHelper& xml, std::vector<RqCtrlSettings>* rcSettings);
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -134,26 +208,6 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 	return getSettingsProfile<T>(SettingsProfile::DEFAULT);
 }
 
-struct RequestControllerSettings
-{
-	int ID = -1;
-
-	QString equipmentID;
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
-	HostAddressPort rtTrendsRequestIP;
-	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
-	bool enable = false;
-
-	//
-
-	bool isValid() const;
-	bool operator < (const RequestControllerSettings& rcs) const;
-
-	bool writeToXml(XmlWriteHelper& xml) const;
-	bool readFromXml(XmlReadHelper& xml);
-};
-
 class CfgServiceSettings : virtual public SoftwareSettings
 {
 public:
@@ -165,12 +219,12 @@ public:
 	};
 
 public:
-	HostAddressPort clientRequestIP;
-	QHostAddress clientRequestNetmask;
-	bool checkHostname = false;
-	E::SecurityLevel securityLevel = E::SecurityLevel::Basic;
 
-	QList<ClientInfo> clients;
+	std::vector<RqCtrlSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
+
+	bool checkHostname = false;
+
+	std::list<ClientInfo> clients;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only
@@ -201,9 +255,9 @@ public:
 	QString archServiceID;
 	HostAddressPort archServiceIP;
 
-	std::vector<RequestControllerSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
+	std::vector<RqCtrlSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
 
-	RequestControllerSettings getRequestControllerSettings(const QString& rcEquipmentID);
+	RqCtrlSettings getRequestControllerSettings(const QString& rcEquipmentID);
 
 private:
 	// this methods should be call by SoftwareSettingsSet only

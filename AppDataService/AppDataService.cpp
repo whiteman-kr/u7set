@@ -187,19 +187,17 @@ void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	std::vector<Tcp::ListenAddress> listenAddresses;
+	std::vector<Tcp::ListenAddress> listenAddrs;
 
-	std::for_each(m_curSettingsProfile.rcSettings.begin(),
-				  m_curSettingsProfile.rcSettings.end(),
-				  [&listenAddresses](const RequestControllerSettings& rcs)
-					{
-						if (rcs.enable == true)
-						{
-							listenAddresses.emplace_back(rcs.equipmentID, rcs.clientRequestIP, rcs.securityLevel);
-						}
-					 });
+	for(const RqCtrlSettings& rcs :  m_curSettingsProfile.rcSettings)
+	{
+		if (rcs.enable() == true)
+		{
+			listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
+		}
+	 };
 
-	m_tcpAppDataServerThread = new TcpAppDataServerThread(softwareInfo(), listenAddresses, *this);
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(softwareInfo(), listenAddrs, *this);
 	m_tcpAppDataServerThread->start();
 }
 
@@ -252,12 +250,12 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 
 	std::for_each(m_curSettingsProfile.rcSettings.begin(),
 				  m_curSettingsProfile.rcSettings.end(),
-				  [&listenAddresses](const RequestControllerSettings& rcs)
+				  [&listenAddresses](const RqCtrlSettings& rcs)
 				  {
-						if (rcs.enable == true)
-						{
-							listenAddresses.emplace_back(rcs.equipmentID, rcs.rtTrendsRequestIP, rcs.securityLevel);
-						}
+					if (rcs.enable() == true)
+					{
+						listenAddresses.emplace_back(rcs.equipmentID(), rcs.rtTrendsRequestIP(), rcs.securityLevel());
+					}
 				  });
 
 	m_rtTrendsServerThread = new RtTrends::ServerThread(listenAddresses,

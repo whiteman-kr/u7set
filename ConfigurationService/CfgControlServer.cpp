@@ -12,7 +12,7 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 								   const QString& workDirectory,
 								   const QString& buildPath,
 								   const SessionParams& sessionParams,
-								   const QList<CfgServiceSettings::ClientInfo>& clients,
+								   const std::list<CfgServiceSettings::ClientInfo> &clients,
 								   bool checkClientHostname,
 								   const CfgCheckerWorker& checkerWorker,
 								   std::shared_ptr<CircularLogger> logger) :
