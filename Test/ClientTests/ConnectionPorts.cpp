@@ -42,12 +42,12 @@ std::pair<bool, QString> ConnectionPorts::init(Sim::Profile profile)
 	try
 	{
 		{
-			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS01_CFGS");
+			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS01_CFGS_RC1");
 			cfgService1.clientRequestPort = getProperty(props, "ClientRequestPort");
 		}
 
 		{
-			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS02_CFGS");
+			Sim::ProfileProperties props = profile.properties("SYSTEMID_CLIENTTEST_WS02_CFGS_RC1");
 			cfgService2.clientRequestPort = getProperty(props, "ClientRequestPort");
 		}
 
