@@ -452,6 +452,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0422.sql", "Upgrade to version 422, SignalPropertyBehavior.csv file updating" },
 	{":/DatabaseUpgrade/Upgrade0423.sql", "Upgrade to version 423, AutoApply property is replaced by ApplyMode in TuningClient" },
 	{":/DatabaseUpgrade/Upgrade0424.sql", "Upgrade to version 424, Fixing typos in TIM, TIM and WAIM presets scripts logs"},
+	{":/DatabaseUpgrade/Upgrade0425.sql", "Upgrade to version 425, Added Request Controllers to CfgService preset, modification of AppDataService preset"},
 };
 
 int DbWorker::counter = 0;

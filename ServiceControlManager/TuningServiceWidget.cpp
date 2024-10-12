@@ -117,21 +117,13 @@ void TuningServiceWidget::updateStateInfo()
 {
 	if (m_service.information.servicestate() == ServiceState::Work)
 	{
-		quint32 ip = m_service.clientRequestIp;
-		qint32 port = m_service.clientRequestPort;
-
-		quint32 workingIp = getWorkingClientRequestIp();
-
-		if (ip != workingIp)
-		{
-			//address = QHostAddress(ip).toString() + QString(":%1").arg(port) + " => " + QHostAddress(workingIp).toString() + QString(":%1").arg(port);
-			ip = workingIp;
-		}
+		HostAddressPort workingIp = getWorkingClientRequestIp();
 
 		if (m_tcpClientSocket != nullptr)
 		{
 			HostAddressPort&& curAddress = m_tcpClientSocket->currentServerAddressPort();
-			if (curAddress.address32() != ip || curAddress.port() != port)
+
+			if (curAddress != workingIp)
 			{
 				dropTcpConnection();
 			}
@@ -139,7 +131,7 @@ void TuningServiceWidget::updateStateInfo()
 
 		if (m_tcpClientSocket == nullptr)
 		{
-			createTcpConnection(getWorkingClientRequestIp(), static_cast<quint16>(port));
+			createTcpConnection(workingIp.address32(), workingIp.port());
 		}
 	}
 

@@ -99,6 +99,7 @@ Component.prototype.serverInstallToggled = function (checked) {
 			ComponentSelectionPage.selectComponent("u7set.mats.appdatasrv");
 			ComponentSelectionPage.selectComponent("u7set.mats.archsrv");
 			ComponentSelectionPage.selectComponent("u7set.mats.tunsrv");
+			ComponentSelectionPage.selectComponent("u7set.mats.gatewaysrv");
 			ComponentSelectionPage.selectComponent("u7set.mats.scm");
 			ComponentSelectionPage.selectComponent("u7set.mats.monitor");
 			ComponentSelectionPage.selectComponent("u7set.mats.monitor.docs");

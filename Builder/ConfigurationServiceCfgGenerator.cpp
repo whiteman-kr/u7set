@@ -26,8 +26,8 @@ namespace Builder
 
 		bool result = m_settingsSet.addProfile<CfgServiceSettingsGetter>(profile, settingsGetter);
 
-		result &= writeRunScriptFile(profile, settingsGetter, E::OS::Windows);
-		result &= writeRunScriptFile(profile, settingsGetter, E::OS::Linux);
+		result &= writeRunScriptFile(profile, E::OS::Windows);
+		result &= writeRunScriptFile(profile, E::OS::Linux);
 
 		return result;
 	}
@@ -38,7 +38,6 @@ namespace Builder
 	}
 
 	bool ConfigurationServiceCfgGenerator::writeRunScriptFile(const QString& profile,
-															  const CfgServiceSettings& settings,
 															  E::OS os)
 	{
 		TEST_PTR_RETURN_FALSE(m_software);
@@ -53,9 +52,9 @@ namespace Builder
 			content += getCommentStart(os) + " To run simulation append param -mode=simulation to command line or run this script with the argument simulation\n\n";
 
 			content += "if [[ $1 = \"simulation\" ]]\nthen\n";
-			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, true);
+			content += QString("\t") + getCommandLine(profile, os, true);
 			content += "else\n";
-			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, false);
+			content += QString("\t") + getCommandLine(profile, os, false);
 			content += "fi\n";
 		}
 		else
@@ -68,9 +67,9 @@ namespace Builder
 			content += getCommentStart(os) + " To run simulation append param -mode=simulation to command line or run this script with the argument simulation\n\n";
 
 			content += "if \"%~1\" == \"simulation\" (\n";
-			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, true);
+			content += QString("\t") + getCommandLine(profile, os, true);
 			content += ") else (\n";
-			content += QString("\t") + getCommandLine(profile, settings.clientRequestIP, os, false);
+			content += QString("\t") + getCommandLine(profile, os, false);
 			content += ")\n";
 		}
 
@@ -83,7 +82,6 @@ namespace Builder
 	}
 
 	QString ConfigurationServiceCfgGenerator::getCommandLine(const QString& profile,
-															 const HostAddressPort& clientRequestIP,
 															 E::OS os,
 															 bool simulation) const
 	{
@@ -121,8 +119,6 @@ namespace Builder
 				.arg(m_dbController->currentProject().projectName());
 
 		cmdLine += " -b=" + appDataPath + "/" + buildDir;
-
-		cmdLine += " -ip=" + clientRequestIP.addressPortStr();
 
 		if (simulation == true)
 		{

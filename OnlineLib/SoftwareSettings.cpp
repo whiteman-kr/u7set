@@ -66,6 +66,48 @@ bool SoftwareSettings::startSettingsReading(XmlReadHelper& xml)
 	return result;
 }
 
+void SoftwareSettings::writeRqControllersToXml(XmlWriteHelper& xml, const std::vector<RqCtrlSettings>& rcSettings) const
+{
+	xml.writeStartElement(XmlElement::REQUEST_CONTROLLERS);
+	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(rcSettings.size()));
+
+	for(const RqCtrlSettings& rcs : rcSettings)
+	{
+		rcs.writeToXml(xml);
+	}
+
+	xml.writeEndElement();	// </RequestControllers>
+}
+
+bool SoftwareSettings::readRqControllersFromXml(XmlReadHelper& xml, std::vector<RqCtrlSettings>* rcSettings)
+{
+	TEST_PTR_RETURN_FALSE(rcSettings);
+
+	bool result = true;
+
+	rcSettings->clear();
+
+	result &= xml.findElement(XmlElement::REQUEST_CONTROLLERS);
+
+	int rqCtrlsCount = 0;
+
+	result &= xml.readIntAttribute(XmlAttribute::COUNT, &rqCtrlsCount);
+
+	rcSettings->reserve(rqCtrlsCount);
+
+	for(int i = 0; i < rqCtrlsCount; i++)
+	{
+		RqCtrlSettings rcs;
+
+		result &= rcs.readFromXml(xml);
+
+		BREAK_IF_FALSE(result);
+
+		rcSettings->emplace_back(rcs);
+	}
+
+	return result;
+}
 
 template<typename SERVICETYPE>		// SERVICETYPE is one of TuningService, AppDataService, ArchiveService
 void SoftwareSettings::setShortId(std::vector<SERVICETYPE>* services)
@@ -390,54 +432,247 @@ bool SoftwareSettingsSet::addSharedProfile(const QString& profile, std::shared_p
 
 // -------------------------------------------------------------------------------------
 //
-// RequestControllerSettings class implementation
+// RqCtrlSettings class implementation
 //
 // -------------------------------------------------------------------------------------
 
-bool RequestControllerSettings::isValid() const
+int RqCtrlSettings::ID() const
 {
-	return ID != -1;
+	Q_ASSERT(m_propsMask & PROP_ID);
+	return m_ID;
 }
 
-bool RequestControllerSettings::operator < (const RequestControllerSettings& rcs) const
+void RqCtrlSettings::setID(int id)
 {
-	return ID < rcs.ID;
+	m_ID = id;
+	m_propsMask |= PROP_ID;
 }
 
-bool RequestControllerSettings::writeToXml(XmlWriteHelper& xml) const
+QString RqCtrlSettings::equipmentID() const
 {
+	Q_ASSERT(m_propsMask & PROP_EQUIPMENT_ID);
+	return m_equipmentID;
+}
+
+void RqCtrlSettings::setEquipmentID(const QString& equipmentID)
+{
+	m_equipmentID = equipmentID;
+	m_propsMask |= PROP_EQUIPMENT_ID;
+}
+
+bool RqCtrlSettings::enable() const
+{
+	Q_ASSERT(m_propsMask & PROP_ENABLE);
+	return m_enable;
+}
+
+void RqCtrlSettings::setEnable(bool enable)
+{
+	m_enable = enable;
+	m_propsMask |= PROP_ENABLE;
+}
+
+E::SecurityLevel RqCtrlSettings::securityLevel() const
+{
+	Q_ASSERT(m_propsMask & PROP_SECURITY_LEVEL);
+	return m_securityLevel;
+}
+
+void RqCtrlSettings::setSecurityLevel(E::SecurityLevel level)
+{
+	m_securityLevel = level;
+	m_propsMask |= PROP_SECURITY_LEVEL;
+}
+
+HostAddressPort RqCtrlSettings::clientRequestIP() const
+{
+	Q_ASSERT(m_propsMask & PROP_CLIENT_REQUEST_IP);
+	return m_clientRequestIP;
+}
+
+void RqCtrlSettings::setClientRequestIP(const HostAddressPort& addrPort)
+{
+	m_clientRequestIP = addrPort;
+	m_propsMask |= PROP_CLIENT_REQUEST_IP;
+}
+
+bool RqCtrlSettings::hasClientRequestIP() const
+{
+	return (m_propsMask & PROP_CLIENT_REQUEST_IP) != 0;
+}
+
+QHostAddress RqCtrlSettings::clientRequestNetmask() const
+{
+	Q_ASSERT(m_propsMask & PROP_CLIENT_REQUEST_NETMASK);
+	return m_clientRequestNetmask;
+}
+
+void RqCtrlSettings::setClientRequestNetmask(const QHostAddress& netmask)
+{
+	m_clientRequestNetmask = netmask;
+	m_propsMask |= PROP_CLIENT_REQUEST_NETMASK;
+}
+
+HostAddressPort RqCtrlSettings::rtTrendsRequestIP() const
+{
+	Q_ASSERT(m_propsMask & PROP_RT_TRENDS_REQUEST_IP);
+	return m_rtTrendsRequestIP;
+}
+
+void RqCtrlSettings::setRtTrendsRequestIP(const HostAddressPort& addrPort)
+{
+	m_rtTrendsRequestIP = addrPort;
+	m_propsMask |= PROP_RT_TRENDS_REQUEST_IP;
+}
+
+bool RqCtrlSettings::hasRtTrendsRequestIP() const
+{
+	return (m_propsMask & PROP_RT_TRENDS_REQUEST_IP) != 0;
+}
+
+void RqCtrlSettings::clear()
+{
+	m_propsMask = 0;
+
+	m_ID = -1;
+	m_equipmentID.clear();
+	m_enable = false;
+	m_securityLevel = E::SecurityLevel::Basic;
+	m_clientRequestIP.clear();
+	m_clientRequestNetmask.clear();
+	m_rtTrendsRequestIP.clear();
+}
+
+bool RqCtrlSettings::isValid() const
+{
+	return m_ID != -1;
+}
+
+bool RqCtrlSettings::operator < (const RqCtrlSettings& rcs) const
+{
+	return m_ID < rcs.m_ID;
+}
+
+bool RqCtrlSettings::writeToXml(XmlWriteHelper& xml) const
+{
+	bool result = true;
+
 	xml.writeStartElement(XmlElement::REQUEST_CONTROLLER);
 
-	xml.writeIntAttribute(XmlAttribute::ID, ID);
-	xml.writeStringAttribute(XmlAttribute::EQUIPMENT_ID, equipmentID);
-	xml.writeIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, clientRequestIP);
-	xml.writeIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
-	xml.writeIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, rtTrendsRequestIP);
-	xml.writeEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, securityLevel);
-	xml.writeBoolAttribute(XmlAttribute::ENABLE, enable);
+	Q_ASSERT(m_propsMask != 0);
+	xml.writeUInt32Attribute(XmlAttribute::PROPS_MASK, m_propsMask, true);
+
+	Q_ASSERT(m_propsMask & PROP_ID);
+	Q_ASSERT(m_propsMask & PROP_EQUIPMENT_ID);
+
+	for(const quint32 propFlag : m_knownPropsFlags)
+	{
+		if ((m_propsMask & propFlag) == 0)
+		{
+			continue;
+		}
+
+		switch(propFlag)
+		{
+		case PROP_ID:
+			xml.writeIntAttribute(XmlAttribute::ID, m_ID);
+			break;
+
+		case PROP_EQUIPMENT_ID:
+			xml.writeStringAttribute(XmlAttribute::EQUIPMENT_ID, m_equipmentID);
+			break;
+
+		case PROP_ENABLE:
+			xml.writeBoolAttribute(XmlAttribute::ENABLE, m_enable);
+			break;
+
+		case PROP_SECURITY_LEVEL:
+			xml.writeEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, m_securityLevel);
+			break;
+
+		case PROP_CLIENT_REQUEST_IP:
+			xml.writeIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, m_clientRequestIP);
+			break;
+
+		case PROP_CLIENT_REQUEST_NETMASK:
+			xml.writeIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, m_clientRequestNetmask);
+			break;
+
+		case PROP_RT_TRENDS_REQUEST_IP:
+			xml.writeIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, m_rtTrendsRequestIP);
+			break;
+
+		default:
+			Q_ASSERT(false);
+			result = false;
+		}
+	}
 
 	xml.writeEndElement();	// </RequestController>
 
-	return true;
+	return result;
 }
 
-bool RequestControllerSettings::readFromXml(XmlReadHelper& xml)
+bool RqCtrlSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = true;
 
 	result &= xml.findElement(XmlElement::REQUEST_CONTROLLER);
 
-	result &= xml.readIntAttribute(XmlAttribute::ID, &ID);
-	result &= xml.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &equipmentID);
+	result &= xml.readUInt32Attribute(XmlAttribute::PROPS_MASK, &m_propsMask);
 
-	result &= xml.readIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, &clientRequestIP);
-	result &= xml.readIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
-	result &= xml.readIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, &rtTrendsRequestIP);
+	Q_ASSERT(m_propsMask & PROP_ID);
+	Q_ASSERT(m_propsMask & PROP_EQUIPMENT_ID);
 
-	result &= xml.readEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, &securityLevel);
-	result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &enable);
+	for(const quint32 propFlag : m_knownPropsFlags)
+	{
+		if ((m_propsMask & propFlag) == 0)
+		{
+			continue;
+		}
+
+		switch(propFlag)
+		{
+		case PROP_ID:
+			result &= xml.readIntAttribute(XmlAttribute::ID, &m_ID);
+			break;
+
+		case PROP_EQUIPMENT_ID:
+			result &= xml.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &m_equipmentID);
+			break;
+
+		case PROP_ENABLE:
+			result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &m_enable);
+			break;
+
+		case PROP_SECURITY_LEVEL:
+			result &= xml.readEnumKeyAttribute(XmlAttribute::SECURITY_LEVEL, &m_securityLevel);
+			break;
+
+		case PROP_CLIENT_REQUEST_IP:
+			result &= xml.readIPv4PortAttribute(XmlAttribute::CLIENT_REQUEST_IP, &m_clientRequestIP);
+			break;
+
+		case PROP_CLIENT_REQUEST_NETMASK:
+			result &= xml.readIPv4Attribute(XmlAttribute::CLIENT_REQUEST_NETMASK, &m_clientRequestNetmask);
+			break;
+
+		case PROP_RT_TRENDS_REQUEST_IP:
+			result &= xml.readIPv4PortAttribute(XmlAttribute::RT_TRENDS_REQUEST_IP, &m_rtTrendsRequestIP);
+			break;
+
+		default:
+			Q_ASSERT(false);
+			result = false;
+		}
+	}
 
 	return result;
+}
+
+bool RqCtrlSettings::isKnownPropsFlag(quint32 propFlag)
+{
+	return m_knownPropsFlags.contains(propFlag);
 }
 
 // -------------------------------------------------------------------------------------
@@ -450,17 +685,12 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml) const
 {
 	writeStartSettings(xml);
 
-	xml.writeHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
-							 EquipmentPropNames::CLIENT_REQUEST_PORT, clientRequestIP);
-
-	xml.writeHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, clientRequestNetmask);
-
-	xml.writeEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, securityLevel);
-
 	xml.writeBoolElement(EquipmentPropNames::CHECK_HOSTNAME, checkHostname);
 
+	writeRqControllersToXml(xml, rcSettings);
+
 	xml.writeStartElement(XmlElement::CLIENTS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(clients.count()));
+	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(clients.size()));
 
 	for(const ClientInfo& ci : clients)
 	{
@@ -490,14 +720,9 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	RETURN_IF_FALSE(result);
 
-	result &= xml.readHostAddressPort(EquipmentPropNames::CLIENT_REQUEST_IP,
-									  EquipmentPropNames::CLIENT_REQUEST_PORT, &clientRequestIP);
-
-	result &= xml.readHostAddress(EquipmentPropNames::CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
-
-	result &= xml.readEnumKeyElement<E::SecurityLevel>(EquipmentPropNames::SECURITY_LEVEL, &securityLevel, true);
-
 	result &= xml.readBoolElement(EquipmentPropNames::CHECK_HOSTNAME, &checkHostname, true);
+
+	result &= readRqControllersFromXml(xml, &rcSettings);
 
 	RETURN_IF_FALSE(result);
 
@@ -529,7 +754,7 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 
 		BREAK_IF_FALSE(result);
 
-		clients.append(ci);
+		clients.emplace_back(ci);
 	}
 
 	return result;
@@ -553,19 +778,17 @@ QStringList CfgServiceSettings::knownClients() const
 //
 // -------------------------------------------------------------------------------------
 
-RequestControllerSettings AppDataServiceSettings::getRequestControllerSettings(const QString& rcEquipmentID)
+RqCtrlSettings AppDataServiceSettings::getRequestControllerSettings(const QString& rcEquipmentID)
 {
-	auto it = std::find_if(rcSettings.begin(), rcSettings.end(), [&rcEquipmentID](const RequestControllerSettings& rcs)
-						{
-							return rcs.equipmentID == rcEquipmentID;
-						});
-
-	if (it != rcSettings.end())
+	for(const RqCtrlSettings& rcs : rcSettings)
 	{
-		return RequestControllerSettings(*it);
-	}
+		if (rcs.equipmentID() == rcEquipmentID)
+		{
+			return rcs;
+		}
+	};
 
-	return RequestControllerSettings();
+	return RqCtrlSettings();
 }
 
 bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
@@ -590,15 +813,7 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,
 							 EquipmentPropNames::ARCH_SERVICE_PORT, archServiceIP);
 
-	xml.writeStartElement(XmlElement::REQUEST_CONTROLLERS);
-	xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(rcSettings.size()));
-
-	for(const RequestControllerSettings& rcs : rcSettings)
-	{
-		rcs.writeToXml(xml);
-	}
-
-	xml.writeEndElement();	// </RequestControllers>
+	writeRqControllersToXml(xml, rcSettings);
 
 	writeEndSettings(xml);	// </Settings>
 
@@ -631,27 +846,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,
 									  EquipmentPropNames::ARCH_SERVICE_PORT, &archServiceIP);
 
-	rcSettings.clear();
-
-	result &= xml.findElement(XmlElement::REQUEST_CONTROLLERS);
-
-	int rqCtrlsCount = 0;
-
-	result &= xml.readIntAttribute(XmlAttribute::COUNT, &rqCtrlsCount);
-
-	rcSettings.reserve(rqCtrlsCount);
-
-	for(int i = 0; i < rqCtrlsCount; i++)
-	{
-		RequestControllerSettings rcs;
-
-		result &= rcs.readFromXml(xml);
-
-		if (result == true)
-		{
-			rcSettings.emplace_back(rcs);
-		}
-	}
+	result &= readRqControllersFromXml(xml, &rcSettings);
 
 	return result;
 }
