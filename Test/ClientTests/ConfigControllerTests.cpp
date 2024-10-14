@@ -114,11 +114,11 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	//
 	EXPECT_EQ(configController.receivedSettings.configService1.address.toStdString(),
 			  HostAddressPort("127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort).toStdString());
-	EXPECT_EQ(configController.receivedSettings.configService1.equipmentId, "SYSTEMID_CLIENTTEST_WS01_CFGS");
+	EXPECT_EQ(configController.receivedSettings.configService1.equipmentId, "SYSTEMID_CLIENTTEST_WS01_CFGS_RC1");
 
 	EXPECT_EQ(configController.receivedSettings.configService2.address.toStdString(),
 			  HostAddressPort("127.0.0.1", g_connectionPorts.cfgService2.clientRequestPort).toStdString());
-	EXPECT_EQ(configController.receivedSettings.configService2.equipmentId, "SYSTEMID_CLIENTTEST_WS02_CFGS");
+	EXPECT_EQ(configController.receivedSettings.configService2.equipmentId, "SYSTEMID_CLIENTTEST_WS02_CFGS_RC1");
 
 	EXPECT_EQ(configController.receivedSettings.startSchemaId, "STARTSCHEMA");
 	EXPECT_EQ(configController.receivedSettings.schemaTags, "applogic;monitor;sometag");
