@@ -169,6 +169,9 @@ namespace Builder
 		void wrnCFG3031(QString objectID, QString propertyName);							// Property %1.%2 should be set to the valid writable catalog of workstation.
 		void errCFG3032(QString objectID, QString propertyName, QString rcID);				// Property %1.%2 is linked to undefined RequestController ID %3.
 		void errCFG3033(QString softwareType, QString equipmentID);							// %1 %2 settings read error.
+		void errCFG3034(QString rcID, QString softwareID);									// RequestController %1 is not found in software %2.
+		void wrnCFG3035(QString softwareID, QString rcID);									// Software %1 linked to disabled RequestController %2.
+		void errCFG3036(QString rcID1, QString rcID2, QString addrPortStr);			// Request Controllers %1 and %2 have same ClientRequestIP %3
 
 		void errCFG3040(QString monitorId, QString tuningServiceId);						// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
 		void errCFG3041(QString name, QString value, QString message, QString signalId);	// Property %1 has wrong value (%2), required value is %3 in signal %4.
@@ -435,7 +438,7 @@ namespace Builder
 		void errALC5146(QString signalID, QUuid signalGuid, QString schemaID);			// Tunable signal %1 is connected to LoopbackTarget (Logic schema %2).
 		void errALC5147(QString signalID, QString lbID1, QString lbID2);				// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
 		void wrnALC5148(QString signalID);												// Internal signal %1 is unused.
-		void errALC5149(QString chassisEquipmentID);									// LM- or BVB-family module is not found in chassis %1
+		void errALC5149(QString chassisEquipmentID);									// LM-, BVB- or MSO-family module is not found in chassis %1
 		void errALC5150(QString monitorID, QString tuningServiceID);					// Monitor %1 cannot be connected to TuningService with enabled SingleLmControl mode.
 		void errALC5151(QString busTypeID);												// Bus type %1 has not initialized.
 		void errALC5152(QString inBusSignal, QString busTypeID);						// Bus input signal %1 placement is out of bus size (bus type %2).
@@ -515,8 +518,8 @@ namespace Builder
 
 		// EQP			Equipment issues						6000-6999
 		//
-		void errEQP6000(QString equipmemtId, QUuid equpmentUuid);
-		void errEQP6001(QString equipmemtId, QUuid equipmentUuid1, QUuid equipmentUuid2);
+		void errEQP6000(QString equipmentId, QUuid equpmentUuid);
+		void errEQP6001(QString equipmentId, QUuid equipmentUuid1, QUuid equipmentUuid2);
 		void errEQP6002(QUuid equipmentUuid, QString equipmentId1, QString equipmentId2);
 		void errEQP6003(QString lm1, QString lm2, QString ipAddress, QUuid lm1Uuid, QUuid lm2Uuid);		//	Ethernet adapters of LMs %1 and %2 has duplicate IP address %3.
 		void errEQP6004(QString lm, QString lmDescriptionFile, QUuid lmUuid);							//	file lmDescriptionFile is not found.
@@ -526,10 +529,12 @@ namespace Builder
 		void errEQP6007(QString subsystemId);	//	All modules in subsystem must have same type, version and LmDescriptionFile (properties ModuleFamily, ModuleVersion, LmDescriptionFile)
 
         void errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace); // Child childEquipmentId is not allowed in parent equipmentId
-		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);	// Property Place must be 0 (Equipment object %1).
+		void errEQP6009(QString equipmentId, QUuid equpmentUuid);	// Property Place must be 0 (Equipment object %1).
 
-		void errEQP6010(QString equipmemtId);						// Device object %1 not found.
-		void errEQP6011(QString equipmemtId, QString buildStep);	// Device object %1 not found on %2.
+		void errEQP6010(QString equipmentId);							// Device object %1 not found.
+		void errEQP6011(QString equipmentId, QString buildStep);		// Device object %1 not found on %2.
+		void errEQP6012(QString equipmentId, int place);				// Module %1 should be installed on place %2.
+		void errEQP6013(QString equipmentId, int place1, int place2);	// Module %1 should be installed on place %2 or %3.
 
 		void errEQP6020(QString lm, QUuid lmUuid);					// Property lmDescriptionFile is empty
 		void errEQP6021(QString deviceEquipmentID, QString devicePropertyName, QUuid deviceUuid);	// Property %1.%2 is empty.

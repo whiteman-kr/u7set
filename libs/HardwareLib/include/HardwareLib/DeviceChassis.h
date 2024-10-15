@@ -25,7 +25,7 @@ namespace Hardware
 
 	public:
 		[[nodiscard]] std::shared_ptr<DeviceModule> findLogicModule();
-		[[nodiscard]] std::shared_ptr<DeviceModule> findLogicModuleOrBvb();
+		[[nodiscard]] std::shared_ptr<DeviceModule> findAppDataSourceModule();
 
 		// Properties
 		//

@@ -203,7 +203,7 @@ namespace Builder
 		bool appendNonAcquiredInternalBusses(const QVector<UalSignal*>& ualSignals);
 		bool appendNonAcquiredDiscreteInvertedInputSignals(const QVector<UalSignal*>& ualSignals);
 
-		Address16 setAcquiredRawDataSize(int sizeW);
+		bool setAcquiredRawDataSize(int sizeW);
 
 		double bitAddressedMemoryUsed();
 		double wordAddressedMemoryUsed();

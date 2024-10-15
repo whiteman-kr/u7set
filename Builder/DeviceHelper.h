@@ -14,10 +14,14 @@ class DeviceHelper : public QObject
 {
 	Q_OBJECT
 public:
-	static const int LM1_PLACE = 0;
+	static const int LM_PLACE1 = 0;
 
-	static const int BVB1_PLACE = 0;
-	static const int BVB2_PLACE = 13;
+	static const int BVB_PLACE1 = 0;
+	static const int BVB_PLACE2 = 13;
+
+	static const int MSO_PLACE1 = 0;
+	static const int MSO_PLACE2 = 73;		// MSO can query up to 72 I/O modules
+
 
 public:
 	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger* log);
@@ -78,10 +82,10 @@ public:
 
 	static const Hardware::DeviceModule* getModuleOnPlace(const Hardware::DeviceModule* lm, int place);
 	static const Hardware::DeviceModule* getLm(const Hardware::DeviceChassis* chassis);
-	static const Hardware::DeviceModule* getLmOrBvb(const Hardware::DeviceChassis* chassis);
+	static const Hardware::DeviceModule* getLmBvbMso(const Hardware::DeviceChassis* chassis);
 
 	static const Hardware::DeviceModule* getAssociatedLm(const Hardware::DeviceObject* object);
-	static const Hardware::DeviceModule* getAssociatedLmOrBvb(const Hardware::DeviceObject* object);
+	static const Hardware::DeviceModule* getAssociatedLmBvbMso(const Hardware::DeviceObject* object);
 
 	static const Hardware::Software* getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID);
 	static QStringList getSoftwareControllersIDs(const Hardware::Software* software);
@@ -89,7 +93,7 @@ public:
 	static void getChildDiagSignals(std::shared_ptr<const Hardware::DeviceObject> parent,
 								   std::vector<std::shared_ptr<const Hardware::DiagSignal>>* diagSignals);
 
-	static bool isTwoChannelSoftware(const Hardware::DeviceObject* swObject, QStringList* channelsCntrollersIds = nullptr);
+	static bool isTwoChannelSoftware(const Hardware::DeviceObject* swObject, QStringList* channelsControllersIds = nullptr);
 
 private:
 	static void logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger* log);

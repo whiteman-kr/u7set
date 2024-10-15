@@ -13,7 +13,6 @@
 #include "OptoModule.h"
 #include "LmMemoryMap.h"
 #include "UalItems.h"
-#include "MemWriteMap.h"
 #include "Loopbacks.h"
 #include "SignalSet.h"
 #include "CodeChecker.h"
@@ -291,7 +290,7 @@ namespace Builder
 		bool createUalItemSignalsList();
 
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
-		bool createBvbOutputSignals();
+		bool createUalSignalsForNonPlatformModules();
 
 		bool createUalSignalsFromBusComposers();
 		bool createUalSignalsFromBusComposer(UalItem* ualItem);
@@ -466,7 +465,7 @@ namespace Builder
 
 		// BVB chassis signals processing
 		//
-		bool disposeBvbSignalsInRegBuf();
+		bool disposeNonPlatformAppSignalsInRegBuf();
 
 		//
 
@@ -856,7 +855,7 @@ namespace Builder
 		bool writeLoopbacksReport();
 		bool writeHeapsLog();
 
-		bool writeBvbRegInfoFile() const;
+		bool writeNonPlatformRegInfoFile() const;
 
 		bool calcAppDataUID();
 		bool calcDiagDataUID();
@@ -1024,20 +1023,20 @@ namespace Builder
 		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr
 		std::map<QUuid, UalItem*> m_pinParent;					// pin GUID => parent item ptr
 
-		std::map<Hash, AppSignal*> m_moduleSignals;			// all signals available in current chassis, calcHash(AppSignalID) => AppSignal*
+		std::map<Hash, AppSignal*> m_moduleSignals;				// all signals available in current chassis, calcHash(AppSignalID) => AppSignal*
 		std::vector<AppSignal*> m_ioSignals;					// input/output signals of current chassis
 		std::map<Hash, AppSignal*> m_equipmentSignals;			// equipment signals to app signals map, calcHash(signal EquipmentID) => AppSignal*
 		std::map<Hash, UalSignal*> m_optoPortValiditySignal;	// calcHash(OptoPort EquipmentID) => OptoPort validity signal
 		std::vector<const AppSignal*> m_swCalcSignals;			// software calculated signals of module
 
-		struct BuimAppSignal
+		struct NonPlatformAppSignal
 		{
-			int buimPlace = -1;
-			QString buimCaption;
+			int modulePlace = -1;
+			QString moduleCaption;
 			const AppSignal* appSignal = nullptr;
 		};
 
-		std::map<Address16, std::vector<BuimAppSignal>> m_bvbRegSignals;	// BVB chassis signal regValueAddr => vector(AppSignal)
+		std::map<Address16, std::vector<NonPlatformAppSignal>> m_nonPlatformRegSignals;	// non platform chassis AppSignal regValueAddr => vector(AppSignal)
 
 		std::map<Hash, std::set<QUuid>> m_ualItemsSignals;		// Hash(appSignalID) => set of UalItem.guid (type Signal) with this appSignalID
 

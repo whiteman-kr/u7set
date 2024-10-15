@@ -311,10 +311,30 @@ namespace Builder
 		// recalc application bit-addressed memory mapping
 		//
 		m_appBitAdressed.bitAccumulator.setStartAddress(m_appBitAdressed.memory.startAddress());
-		m_appBitAdressed.bitAccumulator.setSizeW(BIT_ACCUMULATOR_SIZE_W);			// bit accumulator 32 bit size
+
+		if (m_appBitAdressed.memory.sizeW() > 0)
+		{
+			m_appBitAdressed.bitAccumulator.setSizeW(BIT_ACCUMULATOR_SIZE_W);			// bit accumulator 32 bit size
+		}
+		else
+		{
+			m_appBitAdressed.bitAccumulator.setSizeW(0);
+		}
+
+		//
 
 		m_appBitAdressed.constBits.setStartAddress(m_appBitAdressed.bitAccumulator.nextAddress());
-		m_appBitAdressed.constBits.setSizeW(1);					// const bits: bit 0 == 0, bit 1 == 1
+
+		if (m_appBitAdressed.memory.sizeW() > 0)
+		{
+			m_appBitAdressed.constBits.setSizeW(1);					// const bits: bit 0 == 0, bit 1 == 1
+		}
+		else
+		{
+			m_appBitAdressed.constBits.setSizeW(0);
+		}
+
+		//
 
 		m_appBitAdressed.acquiredDiscreteOutputSignals.setStartAddress(m_appBitAdressed.constBits.nextAddress());
 		m_appBitAdressed.acquiredDiscreteInternalSignals.setStartAddress(m_appBitAdressed.acquiredDiscreteOutputSignals.nextAddress());
@@ -325,8 +345,7 @@ namespace Builder
 
 		if (m_appBitAdressed.discreteSignalsHeap.nextAddress() > m_appBitAdressed.memory.nextAddress())
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Out of bit-addressed memory range!"));
-
+			LOG_INTERNAL_ERROR_MSG(m_log, tr("Out of bit-addressed memory range!"));
 			return false;
 		}
 
@@ -379,14 +398,21 @@ namespace Builder
 		m_appWordAdressed.nonAcquiredDiscreteInvertedInputSignals.setStartAddress(m_appWordAdressed.nonAcquiredInternalBuses.nextAddress());
 
 		m_appWordAdressed.wordAccumulator.setStartAddress(m_appWordAdressed.nonAcquiredDiscreteInvertedInputSignals.nextAddress());
-		m_appWordAdressed.wordAccumulator.setSizeW(WORD_ACCUMULATOR_SIZE_W * 2);
+
+		if (m_appWordAdressed.memory.sizeW() > 0)
+		{
+			m_appWordAdressed.wordAccumulator.setSizeW(WORD_ACCUMULATOR_SIZE_W * 2);
+		}
+		else
+		{
+			m_appWordAdressed.wordAccumulator.setSizeW(0);
+		}
 
 		m_appWordAdressed.analogAndBusSignalsHeap.setStartAddress(m_appWordAdressed.wordAccumulator.nextAddress());
 
 		if (m_appWordAdressed.analogAndBusSignalsHeap.nextAddress() > m_appWordAdressed.memory.nextAddress())
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Out of word-addressed memory range!"));
-
+			LOG_INTERNAL_ERROR_MSG(m_log, tr("Out of word-addressed memory range!"));
 			return false;
 		}
 
@@ -1124,12 +1150,11 @@ namespace Builder
 		return result;
 	}
 
-	Address16 LmMemoryMap::setAcquiredRawDataSize(int sizeW)
+	bool LmMemoryMap::setAcquiredRawDataSize(int sizeW)
 	{
 		m_appWordAdressed.acquiredRawData.setSizeW(sizeW);
-		recalculateAddresses();
 
-		return Address16(m_appWordAdressed.acquiredRawData.startAddress(), 0);
+		return recalculateAddresses();
 	}
 
 	double LmMemoryMap::bitAddressedMemoryUsed()

@@ -15,8 +15,8 @@ struct ServiceData
 {
 	Network::ServiceInfo information;
 
-	quint32 clientRequestIp;
-	quint16 clientRequestPort;
+	std::vector<HostAddressPort> clientRequestIPs;
+
 	SessionParams sessionParams;
 	std::shared_ptr<SoftwareSettings> settings;
 	E::SoftwareType type = E::SoftwareType::Unknown;
@@ -25,7 +25,8 @@ struct ServiceData
 	QWidget* statusWidget = nullptr;
 
 	ServiceData();
-	void parseServiceInfo();
+	bool parseServiceInfo();
+	void fillClientRequestIPs(const std::vector<RqCtrlSettings>& rcSettings);
 };
 
 struct HostInfo

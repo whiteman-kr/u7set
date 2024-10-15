@@ -834,4 +834,15 @@ namespace Sim
 	{
 		m_simulator->software().setEnabled(value);
 	}
+
+	bool ScriptSimulator::debugMessagesEnabled() const
+	{
+		return m_log.debugMessagesEnabled();
+	}
+
+	void ScriptSimulator::setDebugMessagesEnabled(bool value)
+	{
+		m_log.setDebugMessagesEnabled(value);
+	}
+
 } // namespace Sim

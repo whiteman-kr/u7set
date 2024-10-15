@@ -1,44 +1,61 @@
-'use strict'
+"use strict";
 
 // If Project Property 'Run Simulator Tests on Build' is set to 'true',
-// then following constant 'SkipOnBuild' can control whether tests will be executed
-// on the build from this particular file.
+// then following constant 'SkipOnBuild' can control whether tests will
+// be executed  on the build from this particular file.
 // Note, if SkipOnBuild is 'true' then manual tests run is still possible.
-// 'true': Do not execute tests on build
-// 'false': Execute tests ob build (note project property 'Run Simulator Tests on Build')
+// 'true': Do not execute tests on build.
+// 'false': Execute tests ob build (note project property
+// 'Run Simulator Tests on Build').
 //
 var SkipOnBuild = false;
 
-// Using script tags, project developer can create multiple instances of TestSuite preset that process different set scripts.
-// ScriptTags variable is a string array that contains a set of tags. Script tags are also specified
-// in ScriptTags property of TestSuite preset. Test scripts are processed by TestSuite if both test and preset script tags match,
-// or if no tags are specified at all.
+// Using script tags, project developer can create multiple instances of
+// TestSuite preset that process different set scripts.
+// ScriptTags variable is a string array that contains a set of tags.
+// Script tags are also specified in ScriptTags property of TestSuite preset.
+// Test scripts are processed by TestSuite if both test and preset script
+// tags match, or if no tags are specified at all.
 // Note: GlobalScript.js file is always processed by every TestSuite.
-
+//
 var ScriptTags = ["simtest"];
 
-// To give a custom caption to the the whole script function, declare a variable that has the same name as
-// the script file name without path and extention and add 'caption' prefix.
-// Custom script caption is displayed in TestSuite user interface and in reports.
-// Example: 'ScriptSample.js' file should have 'captionScriptSample' caption variable name.
+// To give a custom caption to the the whole script function, declare a
+// variable that has the same name as the script file name without path
+// and extention and add 'caption' prefix.
+// Custom script caption is displayed in TestSuite user interface and
+// in reports.
+// Example: 'ScriptSample.js' file should have 'captionScriptSample'
+// caption variable name.
+// Note: This variable is not used in Simulator tests.
 //
 //var captionScriptSample = "Script Sample";
 
-// Optional allow<FileName> function is used to give permission for running tests in current script.
+// Optional allow<FileName> function is used to give permission for running
+// tests in current script.
 // To use current script running permission:
-// 1. Uncomment the next function example and replace SCRIPT_FILENAME_NO_EXT fragment with script filename,
+// 1. Uncomment the next function example and replace SCRIPT_FILENAME_NO_EXT
+// fragment with script filename,
 // for example "allowTestScript01" will be used for TestScript01.js script.
-// 2. Write the code that returns true if running script is allowed, otherwise returns false
+// 2. Write the code that returns true if running script is allowed, 
+// otherwise returns false.
+// Note: This variable is not used in Simulator tests.
+//
 /*
-function allow<SCRIPT_FILENAME_NO_EXT>(ctrl)
+function allowscript(ctrl)
 {
-    // Script execution is allowed when #SCRIPT1_PERMISSION_CH1, #SCRIPT1_PERMISSION_CH2 and #SCRIPT1_PERMISSION_CH3 values are set to 1.
+    // Script execution is allowed when #SCRIPT1_PERMISSION_CH1,
+    // #SCRIPT1_PERMISSION_CH2 and #SCRIPT1_PERMISSION_CH3
+    // values are set to 1.
     //
     const enabledSignals = ["#SCRIPT1_PERMISSION_CH1", "#SCRIPT1_PERMISSION_CH2", "#SCRIPT1_PERMISSION_CH3"];
-    for (let i = 0; i < enabledSignals.length; i++) 
+
+    for (let i = 0; i < enabledSignals.length; i++)
     {
-        let state = ctrl.signalState(enabledSignals[i]);
-        if (state.stateAvailable === false || state.valid === false || state.value === 0) 
+        const state = ctrl.signalState(enabledSignals[i]);
+        if (state.stateAvailable === false ||
+            state.valid === false ||
+            state.value === 0)
         {
             return false;
         }
@@ -47,7 +64,7 @@ function allow<SCRIPT_FILENAME_NO_EXT>(ctrl)
 }
 */
 
-// initTestCase() - will be called before the first test function is executed.
+// initTestCase() will be called before the first test function is executed.
 //
 function initTestCase(ctrl)
 {
@@ -55,12 +72,13 @@ function initTestCase(ctrl)
 
     if (isSimulator === true)
     {
-        // Unlock simulation timer binding to PC's time. This param can significantly increase
-        // simulation speed but it depends on underlying hardware and project size.
+        // Unlock simulation timer binding to PC's time. This parameter can
+        // significantly increase simulation speed but it depends on
+        // underlying hardware and project size.
         //
         ctrl.unlockTimer = true;
 
-        // Allow or disable LogicModules' Application Data transmittion to AppDataSrv.
+        // Allow or disable LogicModules' Application Data transmitting to AppDataSrv.
         //
         ctrl.appDataTrasmittion = false;
 
@@ -71,19 +89,17 @@ function initTestCase(ctrl)
 
     if (isTestSuite === true)
     {
-        // Add initialization for TestSuite here, will be called once befor all tests.
-        //
+        // Add initialization for TestSuite here, will be called once
+        // before all tests.
 
         // Write testing start time to the log, START_TIME is a report template tag
         //
         const currentDate = new Date();
         log.writeMessage("Started at: " + currentDate.toLocaleString(), "START_TIME");
     }
-
-    return;
 }
 
-// cleanupTestCase() - will be called after the last test function was executed.
+// cleanupTestCase() will be called after the last test function was executed.
 //
 function cleanupTestCase(ctrl)
 {
@@ -96,51 +112,80 @@ function cleanupTestCase(ctrl)
     }
 }
 
-// init() - will be called before each test function is executed.
+// init() will be called before each test function is executed.
 //
 function init(ctrl)
 {
+    // Add additional code, for example, to acqure the alert before the test.
+
+    /*
+    const tolerance = 0;
+    const ON = 1;
+    const OFF = 0;
+    const timeoutMs = 5000;
+
+    if (ctrl.signalValue("#ALERTED_1") === ON)
+    {
+        // Set the Reset signal to "ON"
+        //
+        ctrl.overrideSignalValue("#ALERT_RESET_1", ON);
+
+        // Wait while the Alert signal gets OFF value. If it does not for 5000 ms, throw an error.
+        //
+        if (ctrl.expectSignalValue("#ALERTED_1", timeoutMs, OFF, tolerance) === false)
+        {
+            assert("Failed to reset the alert!");
+        }
+
+        // Set the Reset signal to OFF
+        //
+        ctrl.overrideSignalValue("#ALERT_RESET_1", OFF);
+    }
+    */
 }
 
-// cleanup() - will be called after every test function.
+// cleanup() will be called after every test function.
 //
 function cleanup(ctrl)
 {
     if (isSimulator === true)
     {
-        ctrl.reset();                        // Reset module, requires 5 ms run for actual reset.
+        ctrl.reset(); // Reset module, requires 5 ms run for actual reset.
         ctrl.connectionsSetEnabled(true);    // Enable all connections.
     }
 
     if (isTestSuite === true)
     {
+        // Add additional code, for example add some messages to the report.
     }
 
-    ctrl.overridesReset();                   // Remove all signal overrides.
+    log.writeMessage("Test function complete.");
 
-    return;
+    ctrl.overridesReset();                   // Remove all signal overrides.
 }
 
-
-// To give a custom name to the test function, declare a variable that has the same name as test function name but replace 'test' prefix to 'caption' prefix.
+// To give a custom name to the test function, declare a variable that has
+// the same name as test function name but replace 'test' prefix to 'caption'
+// prefix.
 // Custom caption is displayed in TestSuite user interface and in reports.
-// Example 1: 'testWaterPressure' function should have 'captionWaterPressure' caption variable name.
+// Example 1: 'testWaterPressure' function should have 'captionWaterPressure'
+// caption variable name.
 // Example 2: 'test1' function should have 'caption1' caption variable name.
+// Note: This variable is not used in Simulator tests.
 //
-var caption1 = "Sample Test 1"; // Test 1 caption
+var caption1 = "Sample Test"; // Test 1 caption
 
-// Test 1
+// Generic test example
 //
-
 function test1(ctrl)
 {
     /*
-    // Simulator test example:
-    //
-
     // Start simulation for N msecs:
     //
-    ctrl.startForMs(50);
+    if (isSimulator === true)
+    {
+        ctrl.startForMs(50);
+    }
 
     // Check signal value:
     //
@@ -160,49 +205,65 @@ function test1(ctrl)
     log.writeWarning("Text");
     log.writeError("Text");
 
-    // Log messages are used in generated reports. To add log message to the report:
-    // 1. Edit ReportTemplates property of TestSuite preset in RPCT and specify same tags for Text, Table objects etc (Tag attribute).
-    // 2. Specify tag parameter in the log writing function (for example, "report_tab_tag1" or "report_text_tag1"). 
-    // 3. To use tables in reports, generated text should be divided to different columns using specified separator.
-    //    By default, a semicolon is used and can be changed in ReportTemplates property. For example, if table has three
-    //    columns, message text should look like "A;B;C", where A, B and C - text to be displayed in every column See the example below.
-    // 4. Report can contain multiple records with same tag. By default, every message is added to the report. To display message only once,
-    //    "$FIRST(tag)" and "$LAST(tag) tags descriptions are used in report templates. These descriptions specify to display only first
-    //    or only last appearance of the tagged message. The example is testing start and end time.
-
-    // Write message to console/test log for generating reports:
+    // Log messages are used by the TestSuite for generated reports.
+    // To add log message to the report:
     //
-    log.writeMessage("Column 1 Value;Column 2 Value;Column 3 Value", "report_tab_tag1");    // Table message
-    
-    log.writeWarning("Text", "report_text_tag1");   // Text message
-    log.writeError("Text", "report_text_tag2");     // Text message
-    */
+    // 1. Edit ReportTemplates property of TestSuite preset in RPCT and
+    // specify same tags for Text, Table objects etc (Tag attribute).
+    //
+    // 2. Specify tag parameter in the log writing function (for example,
+    // "report_tab_tag1" or "report_text_tag1").
+    //
+    // 3. To use tables in reports, generated text should be divided to
+    // different columns using specified separator.
+    // By default, a semicolon is used and can be changed in ReportTemplates
+    // property. For example, if table has three columns, message text should
+    // look like "A;B;C", where A, B and C - text to be displayed in every
+    // column. See the example below.
+    //
+    // 4. Report can contain multiple records with same tag. By default, every
+    // message is added to the report. To display message only once,
+    // "$FIRST(tag)" and "$LAST(tag) tags descriptions are used in report
+    // templates. These descriptions specify to display only first
+    // or only last appearance of the tagged message. The example is testing
+    // start and end time.
 
-    return;
+    // Write message to log for generating reports by the TestSuite:
+    //
+    if (isTestSuite === true)
+    {
+        // Table message
+        log.writeMessage("Column 1 Value;Column 2 Value;Column 3 Value", "report_tab_tag1");
+
+        log.writeWarning("Text", "report_text_tag1");   // Text message
+        log.writeError("Text", "report_text_tag2");     // Text message
+    }
+    */
 }
 
-var caption2 = "Sample Test 2"; // Test 1 caption
+var caption2 = "Observer Test"; // Test 2 caption
+
+// Observer using example:
+//
 function test2(ctrl)
 {
     /*
-    // Observer using example:
-    //
-
     // Create observer.
     //
-    let observer = ctrl.createObserver();
+    const observer = ctrl.createObserver();
 
     // Add expectation which will be initial condition.
     //
-    let initiatorId = observer.addEqualExpectation("#INPUT", 1);
+    const initiatorId = observer.addEqualExpectation("#INPUT", 1);
     observer.setInitiator(initiatorId);
 
     // Add expectations for measure time.
     //
-    observer.addEqualExpectation("#OUTPUT1", 1); // Wait this signal to become 1.
-    observer.addEqualExpectation("#OUTPUT2", 0); // Wait this signal to become 0.
+    observer.addEqualExpectation("#OUTPUT1", 1); // Wait the signal to become 1.
+    observer.addEqualExpectation("#OUTPUT2", 0); // Wait the signal to become 0.
 
-    // Observer connects to AppDataService for signal state retrieval, start of measurements.
+    // Observer connects to AppDataService for signal state retrieval,
+    // start of measurements.
     //
     observer.start();
 
@@ -213,7 +274,7 @@ function test2(ctrl)
     // Wait for satisfying all three expectations.
     // returns true if all expectations were fulfilled.
     //
-    let waitResult = observer.wait(5000);
+    const waitResult = observer.wait(5000);
     assert(waitResult);
 
     // Expected signal #OUTPUT1 to become 1 after 50 ms.
@@ -224,6 +285,4 @@ function test2(ctrl)
     //
     assert(observer.elapsedMs("#OUTPUT2") === 100);
     */
-
-    return;
 }

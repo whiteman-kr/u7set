@@ -54,7 +54,7 @@ function main(builder, root, logicModules, confFirmware, log, signalSet, subsyst
     log.writeMessage("Subsystem " + subSysID + ", configuration script: " + logicModuleDescription.jsConfigurationStringFile() + ", version: " + configScriptVersion + ", logic modules count: " + logicModules.length);
     var LMNumberCount = 0;
     for (var i = 0; i < logicModules.length; i++) {
-        if (logicModules[i].customModuleFamily != FamilyBVB15ID) {
+        if (logicModules[i].moduleFamily != FamilyBVB15ID) {
             continue;
         }
         var result = module_bvb15(builder, root, logicModules[i], confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription);
@@ -146,7 +146,7 @@ function valToADC(val, lowLimit, highLimit, lowADC, highADC) {
     return Math.round(res);
 }
 function module_bvb15(builder, root, module, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
-    if (module.customModuleFamily == FamilyBVB15ID) {
+    if (module.moduleFamily == FamilyBVB15ID) {
         var place = module.place;
         if (place != 0 &&
             place != 13) {
@@ -306,7 +306,7 @@ function generate_bvb15_rev1(builder, root, module, confFirmware, log, signalSet
             continue;
         }
         var ioModule = chassis.child(i).toModule();
-        if (ioModule.customModuleFamily == FamilyBVB15ID) {
+        if (ioModule.moduleFamily == FamilyBVB15ID) {
             continue;
         }
         var ioPlace = ioModule.place;
@@ -737,7 +737,7 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
             log.errCFG3000("EquipmentID", "I/O_module");
             return false;
         }
-        if (ioModule.customModuleFamily == FamilyBVB15ID) {
+        if (ioModule.moduleFamily == FamilyBVB15ID) {
             continue;
         }
         var ioEquipmentID = ioModule.equipmentId;

@@ -1424,6 +1424,67 @@ namespace Builder
 				  tr("%1 %2 settings read error.").arg(softwareType, equipmentID));
 	}
 
+	/// IssueCode: CFG3034
+	///
+	/// IssueType: Error
+	///
+	/// Title: RequestController %1 is not found in software %2.
+	///
+	/// Parameters:
+	///         %1 RequestController EquipmentID
+	///         %2 Software EquipmentID
+	///
+	/// Description:
+	///			Specified RequestController is not found in software.
+	///
+	void IssueLogger::errCFG3034(QString rcID, QString softwareID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3034,
+				  tr("RequestController %1 is not found in software %2.").arg(rcID, softwareID));
+	}
+
+	/// IssueCode: CFG3035
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Software %1 linked to disabled RequestController %2.
+	///
+	/// Parameters:
+	///         %1 Software EquipmentID
+	///         %2 RequestController EquipmentID
+	///
+	/// Description:
+	///			Specified software linked to disabled RequestController. Check RequestController properties.
+	///
+	void IssueLogger::wrnCFG3035(QString softwareID, QString rcID)
+	{
+		LOG_WARNING0(IssueType::FscConfiguration,
+				  3035,
+				  tr("Software %1 linked to disabled RequestController %2.").arg(softwareID, rcID));
+	}
+
+	/// IssueCode: CFG3036
+	///
+	/// IssueType: Error
+	///
+	/// Title: Request Controllers %1 and %2 have same ClientRequestIP %3.
+	///
+	/// Parameters:
+	///         %1 Request Controller 1 EquipmentID
+	///         %2 Request Controller 2 EquipmentID
+	///         %3 ClientRequestIP
+	///
+	/// Description:
+	///			Specified Request Controllers has same ClientRequestIP. Check controllers settings.
+	///
+	void IssueLogger::errCFG3036(QString rcID1, QString rcID2, QString addrPortStr)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3036,
+				  tr("Request Controllers %1 and %2 have same ClientRequestIP %3.").arg(rcID1, rcID2, addrPortStr));
+	}
+
 	/// IssueCode: CFG3040
 	///
 	/// IssueType: Error
@@ -6610,19 +6671,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   LM- or BVB-family module is not found in chassis %1.
+	/// Title:	   LM-, BVB- or MSO-family module is not found in chassis %1.
 	///
 	/// Parameters:
 	///		%1 chassis equipmentID
 	///
 	/// Description:
-	///		LM- or BVB-family module is not found in chassis. Check equipment configuration.
+	///		LM-, BVB- or MSO-family module is not found in chassis. Check equipment configuration.
 	///
 	void IssueLogger::errALC5149(QString chassisEquipmentID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5149,
-				  QString(tr("LM- or BVB-family module is not found in chassis %1.")).arg(chassisEquipmentID));
+				  QString(tr("LM-, BVB- or MSO-family module is not found in chassis %1.")).arg(chassisEquipmentID));
 	}
 
 	/// IssueCode: ALC5150
@@ -8237,14 +8298,14 @@ namespace Builder
 	/// Description:
 	///		Property Place for Logic Module must be set to 0.
 	///
-	void IssueLogger::errEQP6009(QString equipmemtId, QUuid equpmentUuid)
+	void IssueLogger::errEQP6009(QString equipmentId, QUuid equpmentUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, 6009, equpmentUuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6009,
 				  tr("Property Place must be 0 (Equipment object %1).")
-				  .arg(equipmemtId)
+				  .arg(equipmentId)
 				  );
 	}
 
@@ -8289,6 +8350,47 @@ namespace Builder
 				  tr("Device object %1 not found on %2.")
 				  .arg(equipmentId)
 				  .arg(buildStep));
+	}
+
+	/// IssueCode: EQP6012
+	///
+	/// IssueType: Error
+	///
+	/// Title: Module %1 should be installed on place %2.
+	///
+	/// Parameters:
+	///		%1 Module EquipmentID
+	///		%2 place
+	///
+	/// Description:
+	///		Module should be installed on specified place. Check module property Place.
+	///
+	void IssueLogger::errEQP6012(QString equipmentId, int place)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6012,
+				  tr("Module %1 should be installed on place %2.").arg(equipmentId).arg(place));
+	}
+
+	/// IssueCode: EQP6013
+	///
+	/// IssueType: Error
+	///
+	/// Title: Module %1 should be installed on place %2 or %3.
+	///
+	/// Parameters:
+	///		%1 Module EquipmentID
+	///		%2 place 1
+	///		%3 place 2
+	///
+	/// Description:
+	///		Module should be installed on specified places. Check module property Place.
+	///
+	void IssueLogger::errEQP6013(QString equipmentId, int place1, int place2)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6013,
+				  tr("Module %1 should be installed on place %2 or %3.").arg(equipmentId).arg(place1).arg(place2));
 	}
 
 	/// IssueCode: EQP6020

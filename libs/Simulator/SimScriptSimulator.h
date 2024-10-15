@@ -83,7 +83,7 @@ namespace Sim
 		Q_PROPERTY(bool enabledLanComm READ enabledLanComm WRITE setEnabledLanComm)
 
 		/// \brief Allows or disables debug log messages.
-		Q_PROPERTY(bool debugMessagesEnabled READ(m_log.debugMessagesEnabled) WRITE(m_log.setDebugMessagesEnabled))
+		Q_PROPERTY(bool debugMessagesEnabled READ debugMessagesEnabled WRITE setDebugMessagesEnabled)
 
 	public:
 		explicit ScriptSimulator(SimulatorPrivate* simulator, QObject* parent = nullptr);
@@ -214,6 +214,9 @@ namespace Sim
 
 		[[nodiscard]] bool enabledLanComm() const;
 		void setEnabledLanComm(bool value);
+
+		[[nodiscard]] bool debugMessagesEnabled() const;
+		void setDebugMessagesEnabled(bool value);
 
 		// Data
 		//

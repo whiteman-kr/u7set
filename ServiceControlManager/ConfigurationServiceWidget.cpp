@@ -82,25 +82,15 @@ void ConfigurationServiceWidget::updateStateInfo()
 
 		stateTabModel()->setData(stateTabModel()->index(8, 1), clientsTabModel()->rowCount());
 
-		quint32 ip = m_service.clientRequestIp;
-		quint32 port = m_service.clientRequestPort;
+		HostAddressPort workingIp = getWorkingClientRequestIp();
 
-		QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
-		quint32 workingIp = getWorkingClientRequestIp();
-
-		if (ip != workingIp)
-		{
-			address = QHostAddress(ip).toString() + QString(":%1").arg(port) + " => " + QHostAddress(getWorkingClientRequestIp()).toString() + QString(":%1").arg(port);
-			ip = workingIp;
-		}
-
-		m_parametersTabModel->setData(m_parametersTabModel->index(2, 1), address);
+		m_parametersTabModel->setData(m_parametersTabModel->index(2, 1), workingIp.addressPortStr());
 
 		if (m_tcpClientSocket != nullptr)
 		{
 			HostAddressPort&& curAddress = m_tcpClientSocket->currentServerAddressPort();
 
-			if (curAddress.address32() != ip || curAddress.port() != port)
+			if (curAddress != workingIp)
 			{
 				dropTcpConnection();
 			}
@@ -108,7 +98,7 @@ void ConfigurationServiceWidget::updateStateInfo()
 
 		if (m_tcpClientSocket == nullptr)
 		{
-			createTcpConnection(getWorkingClientRequestIp(), static_cast<quint16>(port));
+			createTcpConnection(workingIp.address32(), workingIp.port());
 		}
 	}
 }
@@ -138,8 +128,8 @@ void ConfigurationServiceWidget::updateServiceState()
 		return;
 	}
 
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), cfgSettings->clientRequestIP.addressStr());
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), cfgSettings->clientRequestNetmask.toString());
+//	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), cfgSettings->clientRequestIP.addressStr());
+//	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), cfgSettings->clientRequestNetmask.toString());
 }
 
 void ConfigurationServiceWidget::updateClientsInfo()

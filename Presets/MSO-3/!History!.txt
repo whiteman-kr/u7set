@@ -2,3 +2,5 @@ MSO-3
 	22.11.2021	Version: 0	MSO-3_v0.u7devp			Initial preset version
 	20.02.2024	Version: 1	MSO-3_v1.u7devp			RPCT-3832, u7: Add DiagLANDataSize to all LMs, BVB and MSO
 	15.04.2024	Version: 2	MSO-3_v2.u7devp			RPCT-3832, u7: Fixed description file property value
+	11.09.2024	Version: 3	MSO-3_v3.u7devp			RPCT-3880: ModuleFamily set to MSO, CustomModuleFamily set to 0.
+									Removed Platfom Interface Controller

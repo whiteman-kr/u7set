@@ -60,7 +60,7 @@ namespace Builder
 		bool generateExtraDebugInfo() const;
 
 		void appendModuleLogicCompiler(std::shared_ptr<ModuleLogicCompiler> mc);
-		std::shared_ptr<ModuleLogicCompiler> getModuleLogicCompiler(const QString& lmEquipmemtID) const;
+		std::shared_ptr<ModuleLogicCompiler> getModuleLogicCompiler(const QString& lmEquipmentID) const;
 
 	public:
 		mutable IssueLogger* m_log = nullptr;

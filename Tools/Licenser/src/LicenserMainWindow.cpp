@@ -352,6 +352,18 @@ bool LicenserMainWindow::save(QString fileName)
 	Q_ASSERT(m_license);
 	Q_ASSERT(m_license->isNull() == false);
 
+	if (m_license->isNull() == true)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("License is empty!"));
+		return false;
+	}
+
+	if (m_license->workplaceId().trimmed().isEmpty() == true)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("WorkplaceID is empty!"));
+		return false;
+	}
+
 	QString v = qApp->applicationName() + " v" + qApp->applicationVersion();
 	m_license->setLicenserVersion(v);
 	m_license->setIssueDate(QDate::currentDate());

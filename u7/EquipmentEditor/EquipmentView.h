@@ -121,6 +121,7 @@ private:
 								std::vector<const Hardware::DeviceAppSignal*>* deviceSignalsToUpdateAppSignals);
 
 	void updateFromPresetFixAppDataServiceIdsToRc1(Hardware::DeviceObject& device);
+	void updateFromPresetFixConfigServiceIdsToRc1(Hardware::DeviceObject& device);
 
 	QString prepareUpdateFromPresetTuningClientFilters(Hardware::DeviceObject& device, bool* ok);
 	void performUpdateFromPresetTuningClientFilters(Hardware::DeviceObject& device, const QString& tuningClientMitigateCompatibilityUiConfiguration);

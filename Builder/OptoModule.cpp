@@ -184,7 +184,7 @@ namespace Hardware
 		}
 		else
 		{
-			lm = DeviceHelper::getAssociatedLmOrBvb(m_controller);
+			lm = DeviceHelper::getAssociatedLmBvbMso(m_controller);
 		}
 
 		if (lm == nullptr)
@@ -195,8 +195,9 @@ namespace Hardware
 
 		m_lmID = lm->equipmentIdTemplate();
 
-		if (m_optoModule.isLmOrBvb() == true ||
-			m_optoModule.isVdu() == true)
+		if (m_optoModule.isLmBvbMso() ||
+
+			m_optoModule.isVdu())
 		{
 			Q_ASSERT(m_optoModule.txDataSizeW() == m_optoModule.rxDataSizeW());
 			m_portBaseAddr = m_optoModule.moduleDataAddr() + portNo * m_optoModule.txDataSizeW();
@@ -212,8 +213,9 @@ namespace Hardware
 			m_portBaseAddr = m_optoModule.moduleDataAddr();
 		}
 
-		if (m_optoModule.isBvb() == true ||
-			m_optoModule.isVdu() == true)
+		if (m_optoModule.isBvb() ||
+			m_optoModule.isMso() ||
+			m_optoModule.isVdu())
 		{
 			return true;
 		}
@@ -1248,7 +1250,7 @@ namespace Hardware
 		}
 		else
 		{
-			lm = DeviceHelper::getAssociatedLmOrBvb(m_controller);
+			lm = DeviceHelper::getAssociatedLmBvbMso(m_controller);
 		}
 
 		TEST_PTR_RETURN_FALSE(lm);
@@ -2020,18 +2022,24 @@ namespace Hardware
 
 		bool result = true;
 
-		if (module->isLogicModule() == true	||
-			module->isBvb() == true ||
-			module->isVdu() == true)
+		if (module->isLogicModule() ||
+			module->isBvb() ||
+			module->isMso() ||
+			module->isVdu())
 		{
 			if (module->isLogicModule() == true)
 			{
-				Q_ASSERT(m_place == DeviceHelper::LM1_PLACE);
+				Q_ASSERT(m_place == DeviceHelper::LM_PLACE1);
 			}
 
 			if (module->isBvb() == true)
 			{
-				Q_ASSERT(m_place == DeviceHelper::BVB1_PLACE || m_place == DeviceHelper::BVB2_PLACE);
+				Q_ASSERT(m_place == DeviceHelper::BVB_PLACE1 || m_place == DeviceHelper::BVB_PLACE2);
+			}
+
+			if (module->isMso() == true)
+			{
+				Q_ASSERT(m_place == DeviceHelper::MSO_PLACE1 || m_place == DeviceHelper::MSO_PLACE2);
 			}
 
 			m_moduleDataAddr = m_lmDescription->optoInterface().m_optoInterfaceDataOffset;
@@ -2131,7 +2139,7 @@ namespace Hardware
 			return false;
 		}
 
-		if (isLmOrBvb() == true ||
+		if (isLmBvbMso() == true ||
 			isVdu() == true)
 		{
 			m_lm = module;
@@ -2140,7 +2148,7 @@ namespace Hardware
 		{
 			assert(isOcm() == true);
 
-			const DeviceModule* lm = DeviceHelper::getAssociatedLmOrBvb(module);
+			const DeviceModule* lm = DeviceHelper::getAssociatedLmBvbMso(module);
 
 			if (lm == nullptr)
 			{
@@ -2157,7 +2165,7 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoModule::isLmOrBvb() const
+	bool OptoModule::isLmBvbMso() const
 	{
 		if (m_deviceModule == nullptr)
 		{
@@ -2165,7 +2173,7 @@ namespace Hardware
 			return false;
 		}
 
-		return m_deviceModule->isLogicModule() || m_deviceModule->isBvb();
+		return m_deviceModule->isLogicModule() || m_deviceModule->isBvb() || m_deviceModule->isMso();
 	}
 
 	bool OptoModule::isOcm() const
@@ -2190,6 +2198,17 @@ namespace Hardware
 		return m_deviceModule->isBvb();
 	}
 
+	bool OptoModule::isMso() const
+	{
+		if (m_deviceModule == nullptr)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		return m_deviceModule->isMso();
+	}
+
 	bool OptoModule::isVdu() const
 	{
 		if (m_deviceModule == nullptr)
@@ -2199,6 +2218,11 @@ namespace Hardware
 		}
 
 		return m_deviceModule->isVdu();
+	}
+
+	QString OptoModule::moduleFamilyStr() const
+	{
+		return m_deviceModule->moduleFamilyStr();
 	}
 
 	QString OptoModule::equipmentID() const
@@ -2324,7 +2348,7 @@ namespace Hardware
 	{
 		bool result = true;
 
-		if (isLmOrBvb() == true ||
+		if (isLmBvbMso() == true ||
 			isVdu() == true)
 		{
 			// calculate tx buffers offsets for ports of LM module
@@ -2549,7 +2573,7 @@ namespace Hardware
 
 	bool OptoModule::calculateRxBufAddresses()
 	{
-		if (isLmOrBvb() == true ||
+		if (isLmBvbMso() == true ||
 			isVdu() == true)
 		{
 			// calculate rx buf offsets for ports of LM module
@@ -3970,10 +3994,11 @@ namespace Hardware
 	{
 		TEST_PTR_LOG_RETURN_FALSE(module, m_log);
 
-		if (module->isLogicModule() != true &&
-			module->isOptoModule() != true &&
-			module->isBvb() != true &&
-			module->isVdu() != true)
+		if (!(module->isLogicModule() ||
+			  module->isOptoModule() ||
+			  module->isBvb() ||
+			  module->isMso() ||
+			  module->isVdu()))
 		{
 			// this is not opto-module
 			//
@@ -4002,11 +4027,11 @@ namespace Hardware
 			//
 			TEST_PTR_LOG_RETURN_FALSE(m_lmDescriptionSet, m_log);
 
-			const DeviceModule* chassisLm = DeviceHelper::getAssociatedLmOrBvb(module);
+			const DeviceModule* chassisLm = DeviceHelper::getAssociatedLmBvbMso(module);
 
 			if (chassisLm == nullptr)
 			{
-				// LM- or BVB-family module is not found is chassis %1
+				// LM-, BVB- or MSO- family module is not found is chassis %1
 				//
 				m_log->errALC5149(module->parent()->equipmentIdTemplate());
 				return false;

@@ -335,6 +335,7 @@ namespace XmlAttribute
 	inline const QString SOFTWARE_CONTROLLERS("SoftwareControllers");
 	inline const QString WORKSTATION_EQUIPMENT_ID("WorkstationEquipmentID");
 	inline const QString LM_EQUIPMENT_ID("LmEquipmentID");
+	inline const QString PROPS_MASK("PropsMask");
 
 	inline const QString DATA_ID("DataID");
 	inline const QString HEX_DATA_ID("HexDataID");

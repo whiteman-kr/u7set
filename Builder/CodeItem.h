@@ -62,10 +62,8 @@ namespace Builder
 		BinCommandCode& operator = (const BinCommandCode& cCode);
 
 		void setNoCommand() { word1 = LmCommand::NO_COMMAND; }
-		bool isNoCommand() const { return word1 == LmCommand::NO_COMMAND; }
 
 		void setOpCode(LmCommandCode code, quint16 cmdCodeMask);
-//		LmCommandCode getOpCode() const { return static_cast<LmCommandCode>(opCode.code); }
 
 		void setFbType(int fbType);
 		quint16 getFbType() const { return opCode.fbType; }
@@ -266,8 +264,6 @@ namespace Builder
 		bool isNewLine() const { return m_isCommand == false && m_comment.isEmpty(); }
 
 		bool hasError() const { return m_result == false; }
-
-		bool isNoCommand() const { return m_code.isNoCommand(); }
 
 		bool isOpCode(LmCommandCode code) const { return m_lmCmdCode == code; }
 

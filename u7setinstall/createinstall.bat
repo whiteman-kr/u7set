@@ -13,6 +13,7 @@ md packages\u7set.develop.rpct.docs\data\docs
 md packages\u7set.develop.rpct.docs\data\docs\Appendixes
 md packages\u7set.mats.cfgsrv\data
 md packages\u7set.mats.appdatasrv\data
+md packages\u7set.mats.gatewaysrv\data
 md packages\u7set.mats.archsrv\data
 md packages\u7set.mats.tunsrv\data
 md packages\u7set.mats.scm\data
@@ -56,6 +57,7 @@ copy ..\bin\release\CfgSrv.exe packages\u7set.mats.cfgsrv\data
 copy ..\bin\release\AppDataSrv.exe packages\u7set.mats.appdatasrv\data
 copy ..\bin\release\ArchSrv.exe packages\u7set.mats.archsrv\data
 copy ..\bin\release\TuningSrv.exe packages\u7set.mats.tunsrv\data
+copy ..\bin\release\GatewaySrv.exe packages\u7set.mats.gatewaysrv\data
 copy ..\bin\release\scm.exe packages\u7set.mats.scm\data
 copy ..\bin\release\Monitor.exe packages\u7set.mats.monitor\data
 xcopy ..\bin\release\Monitor*.qm packages\u7set.mats.monitor\data /sy

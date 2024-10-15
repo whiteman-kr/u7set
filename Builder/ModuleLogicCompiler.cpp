@@ -295,7 +295,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::calcDiagDataUID),
 
 			PROC_TO_CALL(ModuleLogicCompiler::writeResult),
-			PROC_TO_CALL(ModuleLogicCompiler::writeBvbRegInfoFile)
+			PROC_TO_CALL(ModuleLogicCompiler::writeNonPlatformRegInfoFile)
 		};
 
 		bool result = runProcs(procs);
@@ -446,12 +446,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(m_lm);
 
-		if (m_lm->isBvb() == true)
-		{
-			return true;
-		}
-
-		return false;
+		return m_lm->isBvb() || m_lm->isMso();
 	}
 
 	const UalAfbs& ModuleLogicCompiler::ualAfbs() const
@@ -696,12 +691,37 @@ namespace Builder
 		m.device = m_lmShared;
 		m.place = m_lmShared->place();
 
-		if ((m_lmShared->isLogicModule() && m.place != DeviceHelper::LM1_PLACE) ||
-			(m_lmShared->isBvb() && m.place != DeviceHelper::BVB1_PLACE &&
-									m.place != DeviceHelper::BVB2_PLACE))
+		if (m_lmShared->isLogicModule())
 		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			if (m.place != DeviceHelper::LM_PLACE1)
+			{
+				// Module %1 should be installed on place %2.
+				//
+				m_log->errEQP6012(m_lmShared->equipmentIdTemplate(), DeviceHelper::LM_PLACE1);
+				return false;
+			}
+		}
+
+		if	(m_lmShared->isBvb())
+		{
+			if (m.place != DeviceHelper::BVB_PLACE1 && m.place != DeviceHelper::BVB_PLACE2)
+			{
+				// Module %1 should be installed on place %2 or %3.
+				//
+				m_log->errEQP6013(m_lmShared->equipmentIdTemplate(), DeviceHelper::BVB_PLACE1, DeviceHelper::BVB_PLACE2);
+				return false;
+			}
+		}
+
+		if (m_lmShared->isMso())
+		{
+			if (m.place != DeviceHelper::MSO_PLACE1 && m.place != DeviceHelper::MSO_PLACE2)
+			{
+				// Module %1 should be installed on place %2 or %3.
+				//
+				m_log->errEQP6013(m_lmShared->equipmentIdTemplate(), DeviceHelper::MSO_PLACE1, DeviceHelper::MSO_PLACE2);
+				return false;
+			}
 		}
 
 		m.txDiagDataOffset = m_lmDescription->memory().m_txDiagDataOffset;
@@ -778,9 +798,13 @@ namespace Builder
 				continue;
 			}
 
-			if ((module->isLogicModule() &&module->place() == DeviceHelper::LM1_PLACE) ||
-				(module->isBvb() && (module->place() == DeviceHelper::BVB1_PLACE ||
-									 module->place() == DeviceHelper::BVB2_PLACE)))
+			if ((module->isLogicModule() &&module->place() == DeviceHelper::LM_PLACE1) ||
+					//
+				(module->isBvb() && (module->place() == DeviceHelper::BVB_PLACE1 ||
+									 module->place() == DeviceHelper::BVB_PLACE2)) ||
+					//
+				(module->isMso() && (module->place() == DeviceHelper::MSO_PLACE1 ||
+									 module->place() == DeviceHelper::MSO_PLACE2))	)
 			{
 				if (module->place() != m_lm->place())
 				{
@@ -806,46 +830,68 @@ namespace Builder
 
 		}
 
+		bool isLmChassis = m_lm->isLogicModule();
 		bool isBvbChassis = m_lm->isBvb();
+		bool isMsoChassis = m_lm->isMso();
+
 		int appRegDataOffset = 0;
 		int diagRegDataOffset = 0;
-
-		int prevBuimModulePlace = 0;
-		const int BUIM_REG_INFO_SIZE_W = 14;
+		int prevModulePlace = 0;
 
 		// read modules properties
 		//
 		for(auto& [place, module] : m_modules)
 		{
-			// skip LM
-			//
-			if (module.device->isLogicModule() == true)
-			{
-				Q_ASSERT(module.place == DeviceHelper::LM1_PLACE);
-				continue;
-			}
-
-			// skip BVB
-			//
-			if (module.device->isBvb() == true)
-			{
-				Q_ASSERT(module.place == DeviceHelper::BVB1_PLACE || module.place == DeviceHelper::BVB2_PLACE);
-				continue;
-			}
 			const Hardware::DeviceModule* deviceModule = module.device.get();
 
 			TEST_PTR_CONTINUE(deviceModule);
 
+			if (isLmChassis == true)
+			{
+				if (deviceModule->isLogicModule())
+				{
+					continue;
+				}
+
+				// parameters of data RECEIVED from module to LM (i.e. TRANSMITTED by module)
+				//
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DATA_SIZE, &module.txDataSize, m_log);
+
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DIAG_DATA_OFFSET, &module.txDiagDataOffset, m_log);
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DIAG_DATA_SIZE, &module.txDiagDataSize, m_log);
+
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_APP_DATA_OFFSET, &module.txAppDataOffset, m_log);
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_APP_DATA_SIZE, &module.txAppDataSize, m_log);
+
+				// parameters of data TRANSMITTED from LM to module (i.e. RECEIVED by module)
+				//
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::RX_DATA_SIZE, &module.rxDataSize, m_log);
+
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::RX_APP_DATA_OFFSET, &module.rxAppDataOffset, m_log);
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::RX_APP_DATA_SIZE, &module.rxAppDataSize, m_log);
+
+				module.moduleDataOffset = m_memoryMap.getModuleDataOffset(module.place);
+
+				continue;
+			}
+
+			//
+
 			if (isBvbChassis == true)
 			{
-				if (prevBuimModulePlace + 1 != module.place)
+				if (deviceModule->isBvb())
+				{
+					continue;
+				}
+
+				const int BUIM_REG_INFO_SIZE_W = 14;
+
+				if (prevModulePlace + 1 != module.place)
 				{
 					// in BVB registration packet empty space reserved for not installed modules
 					//
-					appRegDataOffset = (module.place - prevBuimModulePlace - 1) * BUIM_REG_INFO_SIZE_W;
+					appRegDataOffset = (module.place - prevModulePlace - 1) * BUIM_REG_INFO_SIZE_W;
 				}
-
-				// chassis with BVB
 
 				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_APP_DATA_SIZE, &module.txAppDataSize, m_log);
 				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DIAG_DATA_SIZE, &module.txDiagDataSize, m_log);
@@ -867,29 +913,50 @@ namespace Builder
 
 				appRegDataOffset += module.txAppDataSize;
 				diagRegDataOffset += module.txDiagDataSize;
+
+				continue;
 			}
-			else
+
+			//
+
+			if (isMsoChassis == true)
 			{
-				// chassis with platform LM
+				if (deviceModule->isMso())
+				{
+					continue;
+				}
 
-				// parameters of data RECEIVED from module to LM (i.e. TRANSMITTED by module)
-				//
-				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DATA_SIZE, &module.txDataSize, m_log);
+				const int MSO_IO_MODULE_REG_INFO_SIZE_W = 14;
 
-				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DIAG_DATA_OFFSET, &module.txDiagDataOffset, m_log);
+				if (prevModulePlace + 1 != module.place)
+				{
+					// in MSO registration packet empty space reserved for not installed modules
+					//
+					appRegDataOffset = (module.place - prevModulePlace - 1) * MSO_IO_MODULE_REG_INFO_SIZE_W;
+				}
+
+				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_APP_DATA_SIZE, &module.txAppDataSize, m_log);
 				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_DIAG_DATA_SIZE, &module.txDiagDataSize, m_log);
 
-				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_APP_DATA_OFFSET, &module.txAppDataOffset, m_log);
-				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::TX_APP_DATA_SIZE, &module.txAppDataSize, m_log);
+				if (module.txAppDataSize != MSO_IO_MODULE_REG_INFO_SIZE_W)
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("MSO i/o module %1 reg info size is not equal %2 words!").
+											arg(deviceModule->equipmentIdTemplate()).
+											arg(MSO_IO_MODULE_REG_INFO_SIZE_W));
+					result = false;
+				}
 
-				// parameters of data TRANSMITTED from LM to module (i.e. RECEIVED by module)
-				//
-				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::RX_DATA_SIZE, &module.rxDataSize, m_log);
+				module.txAppDataOffset = 0;
+				module.txDiagDataOffset = 0;
+				module.txDataSize = 0;				// its Ok, because it is not LM and app and diag data transmit in separate streams
 
-				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::RX_APP_DATA_OFFSET, &module.rxAppDataOffset, m_log);
-				result &= DeviceHelper::getIntProperty(deviceModule, EquipmentPropNames::RX_APP_DATA_SIZE, &module.rxAppDataSize, m_log);
+				module.appRegDataOffset = appRegDataOffset;
+				module.diagRegDataOffset = diagRegDataOffset;
 
-				module.moduleDataOffset = m_memoryMap.getModuleDataOffset(module.place);
+				appRegDataOffset += module.txAppDataSize;
+				diagRegDataOffset += module.txDiagDataSize;
+
+				continue;
 			}
 		}
 
@@ -936,9 +1003,11 @@ namespace Builder
 						continue;
 					}
 
-					if (!(deviceModule->isLogicModule() || deviceModule->isBvb() || deviceModule->isVdu()))
+					if (!(deviceModule->isLogicModule() ||
+						  deviceModule->isVdu() ||
+						  deviceModule->isNonPlatformAppDataSourceModule()))
 					{
-						assert(false); // signal must be associated with Logic Module only
+						assert(false); // signal must be associated with LM or non-platform app data module
 						continue;
 					}
 
@@ -1208,7 +1277,7 @@ namespace Builder
 		// primarily created signals
 		//
 		result &= createUalSignalsFromInputAndTuningAcquiredSignals();
-		result &= createBvbOutputSignals();
+		result &= createUalSignalsForNonPlatformModules();
 		result &= createUalSignalsFromBusComposers();
 		result &= createUalSignalsFromOptoValidity();
 		result &= createUalSignalsFromReceivers();
@@ -1860,9 +1929,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createBvbOutputSignals()
+	bool ModuleLogicCompiler::createUalSignalsForNonPlatformModules()
 	{
-		if (m_lm->isBvb() == false)
+		if (m_lm->isNonPlatformAppDataSourceModule() == false)
 		{
 			return true;
 		}
@@ -6371,7 +6440,7 @@ namespace Builder
 
 		do
 		{
-			if (m_lm->isBvb() == false)
+			if (m_lm->isLogicModule() == true)
 			{
 				// platform-based LM processing
 				//
@@ -6402,15 +6471,20 @@ namespace Builder
 				if (disposeAnalogAndBusSignalsHeap() == false) break;
 
 				if (setSignalsRegValidityAddr() == false) break;
-			}
-			else
-			{
-				// BVB chassis processing
-				//
-				if (disposeBvbSignalsInRegBuf() == false) break;
+
+				result = true;
+				break;
 			}
 
-			result = true;
+			if (m_lm->isNonPlatformAppDataSourceModule())
+			{
+				// Non platform chassis processing
+				//
+				if (disposeNonPlatformAppSignalsInRegBuf() == false) break;
+
+				result = true;
+				break;
+			}
 		}
 		while(false);
 
@@ -6727,14 +6801,8 @@ namespace Builder
 		{
 			assert(false);			// set actual raw data size here !!!
 		}
-		else
-		{
-			m_memoryMap.setAcquiredRawDataSize(0);
-		}
 
-		m_memoryMap.recalculateAddresses();
-
-		return true;
+		return m_memoryMap.setAcquiredRawDataSize(0);
 	}
 
 	bool ModuleLogicCompiler::disposeAcquiredAnalogSignalsInRegBuf()
@@ -6859,11 +6927,11 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::disposeBvbSignalsInRegBuf()
+	bool ModuleLogicCompiler::disposeNonPlatformAppSignalsInRegBuf()
 	{
 		TEST_PTR_RETURN_FALSE(m_lmDescription);
 
-		// calculation regBufAddr of BVB chassis I/O signals
+		// calculation regBufAddr of non-platform chassis I/O signals
 		//
 		bool result = true;
 
@@ -6967,11 +7035,11 @@ namespace Builder
 
 			ioSignal->setRegValidityAddr(regValidityAddr);
 
-			auto it = m_bvbRegSignals.find(ioSignal->regValueAddr());
+			auto it = m_nonPlatformRegSignals.find(ioSignal->regValueAddr());
 
-			if (it == m_bvbRegSignals.end())
+			if (it == m_nonPlatformRegSignals.end())
 			{
-				auto [newIt, b] = m_bvbRegSignals.emplace(ioSignal->regValueAddr(), std::vector<BuimAppSignal>{});
+				auto [newIt, b] = m_nonPlatformRegSignals.emplace(ioSignal->regValueAddr(), std::vector<NonPlatformAppSignal>{});
 				it = newIt;
 			}
 
@@ -6982,33 +7050,36 @@ namespace Builder
 
 		int acquiredRawDataSizeW = 0;
 
-		for(const auto& [place, module] : m_modules)
+		if (m_nonPlatformRegSignals.empty() == false)
 		{
-			if ((module.place == DeviceHelper::BVB1_PLACE ||
-				module.place == DeviceHelper::BVB2_PLACE) &&
-				module.place != m_lm->place())
+			Address16 ioSignalMaxRegAddr = m_nonPlatformRegSignals.rbegin()->first;
+
+			int maxRegDataSize = m_lmDescription->memory().m_moduleCount * m_lmDescription->memory().m_moduleDataSize;
+
+			if (ioSignalMaxRegAddr.offset() >= maxRegDataSize)
 			{
-				continue;
+				LOG_INTERNAL_ERROR_MSG(m_log, "Non-platform AppSignal regAddr out of range");
+				return false;
 			}
 
-			acquiredRawDataSizeW += module.txAppDataSize;
+			acquiredRawDataSizeW = ROUND_TO(ioSignalMaxRegAddr.offset(), m_lmDescription->memory().m_moduleDataSize);
 		}
 
-		m_memoryMap.setAcquiredRawDataSize(acquiredRawDataSizeW);
+		bool res = m_memoryMap.setAcquiredRawDataSize(acquiredRawDataSizeW);
 
-		return result;
+		return res;
 	}
 
 	bool ModuleLogicCompiler::appendAfbsForInOutSignalsConversion()
 	{
+		if (noCodeGenRequired())
+		{
+			return true;
+		}
+
 		if (findFbsForInOutSignalsConversion() == false)
 		{
 			return false;
-		}
-
-		if (m_lm->isBvb() == true)
-		{
-			return true;
 		}
 
 		auto assignUalAfbToFbConv = [this](const UalAfb* ualAfb) -> bool
@@ -7172,10 +7243,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::findFbsForInOutSignalsConversion()
 	{
-		if (m_lm->isBvb() == true)
-		{
-			return true;
-		}
+		Q_ASSERT(m_lm->isLogicModule() == true);
 
 		bool result = true;
 
@@ -16047,11 +16115,6 @@ namespace Builder
 
 		int rawDataOffset = Hardware::OptoPort::TX_DATA_ID_SIZE_W;		// txDataID
 
-		int txRawDataStartAddr = port->txBufAddress() + rawDataOffset;
-		int txRawDataSizeW = port->txRawDataSizeW();
-
-		MemWriteMap memWriteMap(txRawDataStartAddr, txRawDataSizeW, true);
-
 		const Hardware::RawDataDescription& rawDataDescription = port->rawDataDescription();
 
 		for(const Hardware::RawDataDescriptionItem& item : rawDataDescription)
@@ -16699,7 +16762,7 @@ namespace Builder
 				assert(false);
 			}
 
-			if (cmd.isNoCommand() == false)
+			if (cmd.isValidCommand() == true)
 			{
 				if (firstCommand == true)
 				{
@@ -17262,14 +17325,15 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeLmInfoFiles()
 	{
+		bool result = true;
+
 		if (noCodeGenRequired() == true)
 		{
-			return true;
+			result &= writeOptoModulesReport();
+			return result;
 		}
 
 		TEST_PTR_RETURN_FALSE(m_lm);
-
-		bool result = true;
 
 		result &= writeAsmFile(m_appLogicCode);
 
@@ -17690,21 +17754,7 @@ namespace Builder
 
 			file.append(delim);
 
-			if (module->isLmOrBvb())
-			{
-				str = QString(tr("Opto module LM (or BVB) %1")).arg(module->equipmentID());
-			}
-			else
-			{
-				if (module->isOcm())
-				{
-					str = QString(tr("Opto module OCM %1")).arg(module->equipmentID());
-				}
-				else
-				{
-					assert(false);
-				}
-			}
+			str = QString(tr("Opto module %1 %2")).arg(module->moduleFamilyStr()).arg(module->equipmentID());
 
 			file.append(str);
 			file.append(delim);
@@ -17752,11 +17802,11 @@ namespace Builder
 		return bf != nullptr;
 	}
 
-	bool ModuleLogicCompiler::writeBvbRegInfoFile() const
+	bool ModuleLogicCompiler::writeNonPlatformRegInfoFile() const
 	{
 		TEST_PTR_RETURN_FALSE(m_lm);
 
-		if (m_lm->isBvb() == false)
+		if (m_lm->isNonPlatformAppDataSourceModule() == false)
 		{
 			return true;			// Its Ok
 		}
@@ -17779,7 +17829,7 @@ namespace Builder
 
 		QStringList file;
 
-		file.append(QString("BVB %1 registration info file\n").arg(lmEquipmentID()));
+		file.append(QString("%1 %2 registration info file\n").arg(m_lm->caption()).arg(lmEquipmentID()));
 		file.append(QString("App data size:       %1 words (%2 bytes)").arg(appDataSizeW).arg(appDataSizeW * 2));
 		file.append(QString("RUP frames quantity: %1").arg(rupFramesQuantity));
 		file.append(QString("App data UID:        0x%1 (%2)\n").
@@ -17792,9 +17842,9 @@ namespace Builder
 
 		int prevPlace = -1;
 
-		for(const auto& [regValueAddr, buimAppSignals] : m_bvbRegSignals)
+		for(const auto& [regValueAddr, buimAppSignals] : m_nonPlatformRegSignals)
 		{
-			for(const BuimAppSignal& bas : buimAppSignals)
+			for(const NonPlatformAppSignal& bas : buimAppSignals)
 			{
 				const AppSignal* appSignal = bas.appSignal;
 
@@ -17804,16 +17854,16 @@ namespace Builder
 
 				QString placeStr(QStringLiteral("          |       "));
 
-				if (bas.buimPlace != prevPlace)
+				if (bas.modulePlace != prevPlace)
 				{
 					if (prevPlace != -1)
 					{
 						file.append(line);
 					}
 
-					placeStr = QString(" %1 |  %2   ").arg(bas.buimCaption, -8).arg(bas.buimPlace, -2);
+					placeStr = QString(" %1 |  %2   ").arg(bas.moduleCaption, -8).arg(bas.modulePlace, -2);
 
-					prevPlace = bas.buimPlace;
+					prevPlace = bas.modulePlace;
 				}
 
 				file.append(QString("%1| %2 | %3 | %4").

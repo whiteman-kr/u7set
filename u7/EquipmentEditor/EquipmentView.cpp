@@ -2934,11 +2934,15 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		return false;
 	}
 
-	// Fix for clients to set AppDataServiceIDs to AppDataServiceIDs_RC1
-	//
 	if (device->presetRoot() == true)
 	{
+		// Fix for clients to set AppDataServiceIDs to AppDataServiceIDs_RC1
+		//
 		updateFromPresetFixAppDataServiceIdsToRc1(*device);
+
+		// Fix for clients to set ConfigServiceIDs to ConfigServiceIDs_RC1
+		//
+		updateFromPresetFixConfigServiceIdsToRc1(*device);
 	}
 
 	// clang-format off
@@ -3028,6 +3032,50 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		}
 	}
 
+	// clang-format off
+	//
+	// Problem: Preset of ConfigService (to v5) has compatibility breaking changes, here we try to mitigate it.
+	//			Before ConfigService (preset version <= 4) had specific properties in section "Connection" -
+	//			"ClientRequestIP", "ClientRequestNetmask", "ClientRequestPort", "RtTrendsRequestPort", "SecurityLevel". 			
+	//			then these properties were removed starting from the preset version 5 and changed to a set of device controllers 
+	//			"Request Controller 1, 2, 3, 4" with exactly the same properties.
+	//
+	// Solution: If preset version less then 5, then set the values of the "Request Controller 1" (_RC1) to values of the "ClientRequestIP",
+	//			"ClientRequestNetmask", "ClientRequestPort", "RtTrendsRequestPort", "SecurityLevel".
+	// clang-format on
+
+	std::vector<std::pair<QString, QVariant>> mitigationFixCfsServiceConnection1; // first: property caption, second: property value
+	mitigationFixCfsServiceConnection1.reserve(5);
+
+	if (device->presetRoot() &&
+		device->presetName() == QStringLiteral("CFGS") &&
+		device->presetVersion() < 5)
+	{
+		auto clientRequestIp = device->propertyByCaption(QStringLiteral("ClientRequestIP"));
+		auto clientRequestNetmask = device->propertyByCaption(QStringLiteral("ClientRequestNetmask"));
+		auto clientRequestPort = device->propertyByCaption(QStringLiteral("ClientRequestPort"));
+		auto securityLevel = device->propertyByCaption(QStringLiteral("SecurityLevel"));
+
+		if (clientRequestIp != nullptr)
+		{
+			mitigationFixCfsServiceConnection1.emplace_back(clientRequestIp->caption(), clientRequestIp->value());
+		}
+
+		if (clientRequestNetmask != nullptr)
+		{
+			mitigationFixCfsServiceConnection1.emplace_back(clientRequestNetmask->caption(), clientRequestNetmask->value());
+		}
+
+		if (clientRequestPort != nullptr)
+		{
+			mitigationFixCfsServiceConnection1.emplace_back(clientRequestPort->caption(), clientRequestPort->value());
+		}
+
+		if (securityLevel != nullptr)
+		{
+			mitigationFixCfsServiceConnection1.emplace_back(securityLevel->caption(), securityLevel->value());
+		}
+	}
 
 	// End of fixes
 	//
@@ -3258,14 +3306,27 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 				AddDeviceUpdatePreset addDeviceUpdatePreset;
 				addDeviceUpdatePreset.parentFileId = deviceFileInfo->fileId();
 				addDeviceUpdatePreset.presetFileId = presetChildFileInfo->fileId();
-				
+
 				// Problem: Preset of AppDataService has compatibility breaking changes, here we try to mitigate it.
-				// Add to "Request Controller 1" properties from ClientRequestIP, ClientRequestNetmask, ClientRequestPort, RtTrendsRequestPort, SecurityLevel
+				// Add to "Request Controller 1" properties from ClientRequestIP, ClientRequestNetmask, ClientRequestPort,
+				// RtTrendsRequestPort, SecurityLevel
 				//
-				if (mitigationFixAdsConnection1.empty() == false && presetChild->equipmentIdTemplate().endsWith("_RC1") == true &&
-					presetChild->caption() == "Request Controller 1")
+				if (presetChild->presetName() == QStringLiteral("ADS") && 
+					mitigationFixAdsConnection1.empty() == false &&
+					presetChild->equipmentIdTemplate().endsWith("_RC1") == true && presetChild->caption() == "Request Controller 1")
 				{
 					addDeviceUpdatePreset.propertiesToSet = mitigationFixAdsConnection1;
+				}
+
+				// Problem: Preset of ConfigService has compatibility breaking changes, here we try to mitigate it.
+				// Add to "Request Controller 1" properties from ClientRequestIP, ClientRequestNetmask, ClientRequestPort,
+				// SecurityLevel
+				//
+				if (presetChild->presetName() == QStringLiteral("CFGS") && 
+					mitigationFixCfsServiceConnection1.empty() == false &&
+					presetChild->equipmentIdTemplate().endsWith("_RC1") == true && presetChild->caption() == "Request Controller 1")
+				{
+					addDeviceUpdatePreset.propertiesToSet = mitigationFixCfsServiceConnection1;
 				}
 
 				addDeviceList->push_back(addDeviceUpdatePreset);
@@ -3419,8 +3480,96 @@ void EquipmentView::updateFromPresetFixAppDataServiceIdsToRc1(Hardware::DeviceOb
 
 			adses->setValue(adsList.join(Separator::SEMICOLON));
 		}
+	}
 
-		return;
+	return;
+}
+
+void EquipmentView::updateFromPresetFixConfigServiceIdsToRc1(Hardware::DeviceObject& device)
+{
+	if (device.presetRoot() == false)
+	{
+		Q_ASSERT(device.presetRoot() == true);
+	}
+
+	// RPCT-3947 Update links to ConfigurationService, add _RC1
+	//
+	// RPCT-3947 - Find properties: ConfigurationServiceID1,  ConfigurationServiceID2, ConfigurationServiceIDs
+	// Then add _RC1 to the end of the equipment id (if it is
+	// not already there) and set the value to the new property.
+	//
+	static const std::array clientPresets = {QStringLiteral("ADS"),
+											 QStringLiteral("ARCHS"),
+											 QStringLiteral("DDS"),
+											 QStringLiteral("GWS"),
+											 QStringLiteral("METROLOGY"),
+											 QStringLiteral("MONITOR"),
+											 QStringLiteral("TESTCLIENT"),
+											 QStringLiteral("TESTSUITE"),
+											 QStringLiteral("TUN"),
+											 QStringLiteral("TUNS")};
+
+	if (std::find(clientPresets.begin(), clientPresets.end(), device.presetName()) != clientPresets.end())
+	{
+		auto cgfs1 = device.propertyByCaption(QStringLiteral("ConfigurationServiceID1"));
+		auto cgfs2 = device.propertyByCaption(QStringLiteral("ConfigurationServiceID2"));
+		auto cgfses = device.propertyByCaption(QStringLiteral("ConfigurationServiceIDs"));
+
+		if (cgfs1 != nullptr && cgfs1->value().toString().trimmed().endsWith("_RC1") == false)
+		{
+			QString value = cgfs1->value().toString().trimmed();
+
+			if (value.isEmpty() == false && value.endsWith("_RC1") == false && value.endsWith("_RC2") == false &&
+				value.endsWith("_RC3") == false && value.endsWith("_RC4") == false)
+			{
+				value += "_RC1";
+			}
+
+			cgfs1->setValue(value);
+		}
+
+		if (cgfs2 != nullptr && cgfs2->value().toString().trimmed().endsWith("_RC1") == false)
+		{
+			QString value = cgfs2->value().toString().trimmed();
+
+			if (value.isEmpty() == false && 
+				value.endsWith("_RC1") == false && 
+				value.endsWith("_RC2") == false &&
+				value.endsWith("_RC3") == false && 
+				value.endsWith("_RC4") == false)
+			{
+				value += "_RC1";
+			}
+
+			cgfs2->setValue(value);
+		}
+
+		// GatewayService has "," as separator.
+		//
+		if (cgfses != nullptr)
+		{
+			QString propertyValue = cgfses->value().toString().trimmed();
+
+			propertyValue.replace(QChar(QChar::Space), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::LineFeed), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::CarriageReturn), Separator::SEMICOLON);
+			propertyValue.replace(QChar(QChar::Tabulation), Separator::SEMICOLON);
+			propertyValue.replace(Separator::COMMA, Separator::SEMICOLON);
+
+			QStringList cfgsList = propertyValue.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
+			for (QString& cfgs : cfgsList)
+			{
+				if (cfgs.endsWith("_RC1") == false && 
+					cfgs.endsWith("_RC2") == false && 
+					cfgs.endsWith("_RC3") == false &&
+					cfgs.endsWith("_RC4") == false)
+				{
+					cfgs += "_RC1";
+				}
+			}
+
+			cgfses->setValue(cfgsList.join(Separator::COMMA));
+		}
 	}
 
 	return;
@@ -3433,7 +3582,7 @@ QString EquipmentView::prepareUpdateFromPresetTuningClientFilters(Hardware::Devi
 	// Problem: Preset of TuningClient (v2 to v3) has compatibility breaking changes, here we try to mitigate it.
 	//			Before preset version 1 and 2 had Filters property, which is loaded by TuningFilterStorage class.
 	//			Preset version 3 has UiConfiguration property, and AppSignalLists are stored separately.
-	// Solution: Call TuningClient filters mirgation procedure below.
+	// Solution: Call TuningClient filters migration procedure below.
 	//
 	QString result;
 

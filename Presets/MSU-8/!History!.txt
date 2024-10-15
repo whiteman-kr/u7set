@@ -1,0 +1,4 @@
+MSU-8
+	22.11.2021	Version: 0	MSU-8_v0.u7devp		Preset added
+	17.09.2024	Version: 1	MSU-8_v1.u7devp		RPCT-3880: Output Controller added
+

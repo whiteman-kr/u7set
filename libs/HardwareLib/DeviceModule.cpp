@@ -140,6 +140,11 @@ namespace Hardware
 		m_type = (m_type & 0x00FF) | tmp;
 	}
 
+	QString DeviceModule::moduleFamilyStr() const
+	{
+		return E::valueToString(moduleFamily());
+	}
+
 	int DeviceModule::customModuleFamily() const
 	{
 		return m_customModuleFamily;
@@ -227,7 +232,10 @@ namespace Hardware
 
 	bool DeviceModule::isFSCConfigurationModule() const
 	{
-		return moduleFamily() == FamilyType::LM || moduleFamily() == FamilyType::BVB || moduleFamily() == FamilyType::VDU;
+		return moduleFamily() == FamilyType::LM ||
+			   moduleFamily() == FamilyType::VDU ||
+			   moduleFamily() == FamilyType::BVB ||
+			   moduleFamily() == FamilyType::MSO;
 	}
 
 	bool DeviceModule::isOptoModule() const
@@ -239,6 +247,22 @@ namespace Hardware
 	{
 		return moduleFamily() == FamilyType::BVB;
 	}
+
+	bool DeviceModule::isMso() const
+	{
+		return moduleFamily() == FamilyType::MSO;
+	}
+
+	bool DeviceModule::isNonPlatformAppDataSourceModule() const
+	{
+		return isBvb() || isMso();
+	}
+
+	bool DeviceModule::isAppDataSourceModule() const
+	{
+		return isLogicModule() || isNonPlatformAppDataSourceModule();
+	}
+
 
 	bool DeviceModule::isVdu() const
 	{

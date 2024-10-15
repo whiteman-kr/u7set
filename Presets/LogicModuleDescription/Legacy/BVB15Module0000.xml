@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LogicModule DescriptionNumber="0" ConfigurationScriptFile="BVB15Conf0000.js" Version="1.0005">
 	<FlashMemory>
-		<AppLogicFrameCount>256</AppLogicFrameCount>
-		<AppLogicFramePayload>1016</AppLogicFramePayload>
-		<AppLogicFrameSize>1024</AppLogicFrameSize>
+		<AppLogicFrameCount>0</AppLogicFrameCount>
+		<AppLogicFramePayload>0</AppLogicFramePayload>
+		<AppLogicFrameSize>0</AppLogicFrameSize>
 		<AppLogicUartID>0</AppLogicUartID>
 		<AppLogicWriteBitstream>false</AppLogicWriteBitstream>
 		<ConfigFrameCount>256</ConfigFrameCount>
@@ -23,12 +23,12 @@
 		<AppMemorySize>65536</AppMemorySize>
 		<AppDataOffset>0</AppDataOffset>
 		<AppDataSize>0</AppDataSize>
-		<AppLogicBitDataOffset>46080</AppLogicBitDataOffset>
-		<AppLogicBitDataSize>256</AppLogicBitDataSize>
-		<AppLogicWordDataOffset>53956</AppLogicWordDataOffset>
-		<AppLogicWordDataSize>3570</AppLogicWordDataSize>
+		<AppLogicBitDataOffset>0</AppLogicBitDataOffset>
+		<AppLogicBitDataSize>0</AppLogicBitDataSize>
+		<AppLogicWordDataOffset>0</AppLogicWordDataOffset>
+		<AppLogicWordDataSize>65536</AppLogicWordDataSize>
 		<ModuleDataOffset>0</ModuleDataOffset>
-		<ModuleDataSize>0</ModuleDataSize>
+		<ModuleDataSize>14</ModuleDataSize>
 		<ModuleCount>12</ModuleCount>
 		<TuningDataOffset>0</TuningDataOffset>
 		<TuningDataSize>0</TuningDataSize>
