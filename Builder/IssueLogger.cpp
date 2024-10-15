@@ -1960,14 +1960,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: EquipmentID %1 must be LM family module type (LogicSchema %2).
+	/// Title: EquipmentID %1 must be from the LM, BVB, or VDU module family (LogicSchema %2).
 	///
 	/// Parameters:
 	///		%1 Logic modules StrID
 	///		%2 Logic schema StrID
 	///
 	/// Description:
-	///		Logic Schema has property EquipmentIDs but the equipment object with pointed ID is not a module or is not LM family type.
+	///		The Logic Schema has a property for EquipmentIDs, but the equipment object with the specified ID is either not a module or does not belong to the LM, BVB, or VDU family.
 	///
 	void IssueLogger::errALP4003(QString schema, QString equipmentId)
 	{
@@ -1975,7 +1975,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4003,
-				  tr("EquipmentID %1 must be LM family module type (LogicSchema %2).")
+				  tr("EquipmentID %1 must be from the LM, BVB, or VDU module family (LogicSchema %2).")
 				  .arg(equipmentId)
 				  .arg(schema));
 	}

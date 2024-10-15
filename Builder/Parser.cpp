@@ -3154,18 +3154,38 @@ namespace Builder
 			Q_ASSERT(fscModule != nullptr);
 			Q_ASSERT(fscModule->isFSCConfigurationModule());
 
-			auto propertySubsytem = fscModule->propertyByCaption(Hardware::PropertyNames::lmSubsystemID);
-			auto propertyLmNumber = fscModule->propertyByCaption(Hardware::PropertyNames::lmNumber);
+			QString filePath;
+			QString fileName;
 
-			if (propertySubsytem == nullptr || propertyLmNumber == nullptr)
+			if (fscModule->isVdu() == true)
 			{
-				Q_ASSERT(propertySubsytem);
-				Q_ASSERT(propertyLmNumber);
-				continue;
-			};
+				// Write xml to the output file.
+				// Filename like: build\VDUs\SYSTEMID_RACKID_VDU01\logic-parsed.xml
+				//
+				filePath = Directory::VDUs + u'/' + fscModule->equipmentIdTemplate();
+				fileName = "logic-parsed.xml";
+			}
+			else
+			{
+				auto propertySubsytem = fscModule->propertyByCaption(Hardware::PropertyNames::lmSubsystemID);
+				auto propertyLmNumber = fscModule->propertyByCaption(Hardware::PropertyNames::lmNumber);
 
-			QString subsystem = propertySubsytem->value().toString();
-			QString lmNumber = propertyLmNumber->value().toString();
+				if (propertySubsytem == nullptr || propertyLmNumber == nullptr)
+				{
+					Q_ASSERT(propertySubsytem);
+					Q_ASSERT(propertyLmNumber);
+					continue;
+				};
+
+				QString subsystem = propertySubsytem->value().toString();
+				QString lmNumber = propertyLmNumber->value().toString();
+
+				// Write xml to the output file.
+				// Filename like: build\Subsystems\SUBSYSID00\subsysid00-1-parsed.xml
+				//
+				filePath = Directory::SUBSYSTEMS + u'/' + subsystem;
+				fileName = subsystem.toLower() + "-" + lmNumber + "-" + "parsed.xml";
+			}
 
 			// Generate XML
 			//
@@ -3176,18 +3196,13 @@ namespace Builder
 				continue;
 			}
 
-			// Write xml to the output file.
-			// Filename like: build\Subsystems\SUBSYSID00\subsysid00-1-parsed.xml
-			//
-			QString filePath = Directory::SUBSYSTEMS + u'/' + subsystem;
-			QString fileName = subsystem.toLower() + "-" + lmNumber + "-" + "parsed.xml";
-
 			BuildFile* buildFile = buildResultWriter.addFile(filePath, fileName, data, false);
 			if (buildFile == nullptr)
 			{
 				result = false;
 				continue;
 			}
+
 		}
 
 		return result;
@@ -4167,7 +4182,8 @@ namespace Builder
 
 				if (module != nullptr &&
 					module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM &&
-					module->moduleFamily() != Hardware::DeviceModule::FamilyType::BVB)
+					module->moduleFamily() != Hardware::DeviceModule::FamilyType::BVB &&
+					module->moduleFamily() != Hardware::DeviceModule::FamilyType::VDU)
 				{
 					// EquipmentID '%1' must be LM family module type (Logic Schema '%2').
 					//

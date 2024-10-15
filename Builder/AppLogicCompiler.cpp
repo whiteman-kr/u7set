@@ -331,21 +331,23 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		if (m_context->m_vduModules.empty() == false)
+		auto isVduModule = [](Hardware::DeviceModule* module)
 		{
-			LOG_MESSAGE(log(), QString(tr("VDUs processing pass #1...")));
+			return module->isVdu();
+		};
 
-			for(const Hardware::DeviceModule* vduModule : m_context->m_vduModules)
+		LOG_MESSAGE(log(), QString(tr("VDUs processing pass #1...")));
+
+		for (const Hardware::DeviceModule* vduModule : m_context->m_fscModules | std::views::filter(isVduModule))
+		{
+			TEST_PTR_CONTINUE(vduModule);
+
+			result &= vduProcessingPass1(vduModule);
+
+			if (isBuildCancelled() == true)
 			{
-				TEST_PTR_CONTINUE(vduModule);
-
-				result &= vduProcessingPass1(vduModule);
-
-				if (isBuildCancelled() == true)
-				{
-					result = false;
-					break;
-				}
+				result = false;
+				break;
 			}
 		}
 
@@ -381,21 +383,23 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		if (m_context->m_vduModules.empty() == false)
+		auto isVduModule = [](Hardware::DeviceModule* module)
 		{
-			LOG_MESSAGE(log(), QString(tr("VDUs processing pass #2...")));
+			return module->isVdu();
+		};
 
-			for(const Hardware::DeviceModule* vduModule : m_context->m_vduModules)
+		LOG_MESSAGE(log(), QString(tr("VDUs processing pass #2...")));
+
+		for (const Hardware::DeviceModule* vduModule : m_context->m_fscModules | std::views::filter(isVduModule))
+		{
+			TEST_PTR_CONTINUE(vduModule);
+
+			result &= vduProcessingPass2(vduModule);
+
+			if (isBuildCancelled() == true)
 			{
-				TEST_PTR_CONTINUE(vduModule);
-
-				result &= vduProcessingPass2(vduModule);
-
-				if (isBuildCancelled() == true)
-				{
-					result = false;
-					break;
-				}
+				result = false;
+				break;
 			}
 		}
 

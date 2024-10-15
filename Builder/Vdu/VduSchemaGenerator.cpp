@@ -394,7 +394,12 @@ namespace Builder
 
 		bool result = true;
 
-		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
+		auto isVduModule = [](Hardware::DeviceModule* module)
+		{
+			return module->isVdu();
+		};
+
+		for (const Hardware::DeviceModule* vdu : context.m_fscModules | std::views::filter(isVduModule))
 		{
 			Q_ASSERT(vdu);
 

@@ -225,7 +225,6 @@ namespace Builder
 		m_db(&context->m_db),
 		m_deviceRoot(context->m_equipmentSet->root().get()),
 		m_fscModules(context->m_fscModules),
-		m_vduModules(context->m_vduModules),
 		m_lmDescriptions(context->m_lmDescriptions.get()),
 		m_signalSet(context->m_signalSet.get()),
 		m_subsystems(context->m_subsystems.get()),
@@ -247,6 +246,12 @@ namespace Builder
 
 		qRegisterMetaType<Builder::JsBusSignal*>();
 
+		std::sort(m_fscModules.begin(),
+				  m_fscModules.end(),
+				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
+				  {
+					  return a->equipmentIdTemplate() < b->equipmentIdTemplate();
+				  });
 
 		return;
 	}
@@ -603,12 +608,6 @@ namespace Builder
 			return false;
 		}
 
-		if (m_vduModules.empty() == true)
-		{
-			// No VDU modules exist
-			return true;
-		}
-
 		std::set<quint16> ssKeyValues;
 
 		//
@@ -620,11 +619,14 @@ namespace Builder
 		QString lmDescriptionFile;
 		LmDescription* description = nullptr;
 
-		for (auto it = m_vduModules.begin(); it != m_vduModules.end(); it++)
+		auto isVduModule = [](Hardware::DeviceModule* module) 
+			{
+				return module->isVdu();
+			};
+
+		for (auto vdu : m_fscModules | std::views::filter(isVduModule))
 		{
 			Hardware::ModuleFirmwareWriter writer;
-
-			Hardware::DeviceModule* vdu = *it;
 			if (vdu == nullptr)
 			{
 				assert(vdu);
@@ -639,7 +641,7 @@ namespace Builder
 
 			if (lmDescriptionFile.isEmpty() == true)
 			{
-				// Load descruiption only for first VDU
+				// Load description only for first VDU
 
 				lmDescriptionFile = vdu->propertyValue("LmDescriptionFile").toString();
 
@@ -765,19 +767,12 @@ namespace Builder
 
 		}
 
-				// Find all LM modules and save ssKey and channel information
+		// Find all LM modules and save ssKey and channel information
 		//
-
-		std::sort(m_vduModules.begin(), m_vduModules.end(),
-				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
-		{
-			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
-		});
-
 		QStringList report;
 		report << "Jumpers configuration for VDU modules";
 
-		for (Hardware::DeviceModule* m : m_vduModules)
+		for (Hardware::DeviceModule* m : m_fscModules  | std::views::filter(isVduModule))
 		{
 			quint16 ssKey = m_subsystems->ssKeyForVdu(m->equipmentId());
 

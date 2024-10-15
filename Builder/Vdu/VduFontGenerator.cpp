@@ -11,7 +11,7 @@ namespace Builder
 		m_image(QSize(width, height), QImage::Format_Grayscale8)
 	{
 
-#if 1   // NoAntialiasing
+#if 0   // NoAntialiasing
 		//
 		QImage monoImage{QSize{width, height}, QImage::Format_Mono};
 		QPainter painter(&monoImage);
@@ -27,6 +27,8 @@ namespace Builder
 
 		m_image = monoImage.convertedTo(QImage::Format_Grayscale8);
 #else
+		// Antialiasing
+		//
 		QPainter painter(&m_image);
 		painter.setFont(font);
 		painter.fillRect(0, 0, width, height, Qt::white);
@@ -120,7 +122,12 @@ namespace Builder
 
 		bool result = true;
 
-		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
+		auto isVduModule = [](Hardware::DeviceModule* module)
+			{
+				return module->isVdu();
+			};
+
+		for (const Hardware::DeviceModule* vdu : context.m_fscModules | std::views::filter(isVduModule))
 		{
 			Q_ASSERT(vdu);
 

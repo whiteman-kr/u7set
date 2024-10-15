@@ -145,7 +145,6 @@ namespace Builder
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
 		std::vector<Hardware::DeviceModule*> m_fscModules;
-		std::vector<Hardware::DeviceModule*> m_vduModules;
 		LmDescriptionSet* m_lmDescriptions = nullptr;
         SignalSet* m_signalSet = nullptr;
 		SubsystemStorage* m_subsystems = nullptr;

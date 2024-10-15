@@ -227,7 +227,7 @@ namespace Hardware
 
 	bool DeviceModule::isFSCConfigurationModule() const
 	{
-		return moduleFamily() == FamilyType::LM || moduleFamily() == FamilyType::BVB;
+		return moduleFamily() == FamilyType::LM || moduleFamily() == FamilyType::BVB || moduleFamily() == FamilyType::VDU;
 	}
 
 	bool DeviceModule::isOptoModule() const
