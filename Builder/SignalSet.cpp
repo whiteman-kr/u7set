@@ -351,13 +351,14 @@ namespace Builder
 				{
 					std::shared_ptr<Hardware::DeviceModule> module = std::dynamic_pointer_cast<Hardware::DeviceModule>(device);
 
-					if (module != nullptr && (module->isLogicModule() == true || module->isBvb() == true))
+					if (module != nullptr &&
+						(module->isLogicModule() || module->isBvb() || module->isVdu()))
 					{
 						linkSignalToLm(sg, module);
 					}
 					else
 					{
-						// The signal %1 can be bind only to Logic Module or Equipment Signal.
+						// The signal %1 can be bind only to Logic Module, VDU or Equipment Signal.
 						//
 						m_log->errALC5031(s.appSignalID());
 						result = false;

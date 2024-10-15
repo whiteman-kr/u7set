@@ -4036,7 +4036,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: The signal %1 can be bind only to Logic Module or Equipment Signal.
+	/// Title: The signal %1 can be bind only to Logic Module, VDU or Equipment Signal.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -4048,7 +4048,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5031,
-				  QString(tr("The signal %1 can be bind only to Logic Module or Equipment Signal.").
+				  QString(tr("The signal %1 can be bind only to Logic Module, VDU or Equipment Signal.").
 						  arg(appSignalID)));
 	}
 

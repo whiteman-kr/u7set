@@ -936,7 +936,7 @@ namespace Builder
 						continue;
 					}
 
-					if (deviceModule->isLogicModule() == false && deviceModule->isBvb() == false)
+					if (!(deviceModule->isLogicModule() || deviceModule->isBvb() || deviceModule->isVdu()))
 					{
 						assert(false); // signal must be associated with Logic Module only
 						continue;
