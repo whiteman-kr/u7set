@@ -73,6 +73,7 @@ namespace Builder
 
 	private:
 		Context* m_context = nullptr;
+		int m_vdusCount = 0;
 
 //		QVector<ModuleLogicCompiler*> m_moduleCompilers;
 	};

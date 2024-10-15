@@ -238,6 +238,7 @@ namespace Hardware
 			   moduleFamily() == FamilyType::MSO;
 	}
 
+
 	bool DeviceModule::isOptoModule() const
 	{
 		return moduleFamily() == FamilyType::OCM;
@@ -263,9 +264,15 @@ namespace Hardware
 		return isLogicModule() || isNonPlatformAppDataSourceModule();
 	}
 
-
 	bool DeviceModule::isVdu() const
 	{
 		return moduleFamily() == FamilyType::VDU;
+	}
+
+	bool DeviceModule::hasSubsystem() const
+	{
+		return moduleFamily() == FamilyType::LM ||
+			   moduleFamily() == FamilyType::BVB ||
+			   moduleFamily() == FamilyType::MSO;
 	}
 } // namespace Hardware

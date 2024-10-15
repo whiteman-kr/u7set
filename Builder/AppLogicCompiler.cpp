@@ -316,6 +316,12 @@ namespace Builder
 				continue;
 			}
 
+			if (lm->isVdu())
+			{
+				m_vdusCount++;
+				continue;
+			}
+
 			ModuleLogicCompilerShared moduleLogicCompiler = std::make_shared<ModuleLogicCompiler>(*this, lm);
 
 			m_context->appendModuleLogicCompiler(moduleLogicCompiler);
@@ -331,23 +337,26 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		auto isVduModule = [](Hardware::DeviceModule* module)
+		if (m_vdusCount > 0)
 		{
-			return module->isVdu();
-		};
+			LOG_MESSAGE(log(), QString(tr("VDUs processing pass #1...")));
 
-		LOG_MESSAGE(log(), QString(tr("VDUs processing pass #1...")));
-
-		for (const Hardware::DeviceModule* vduModule : m_context->m_fscModules | std::views::filter(isVduModule))
-		{
-			TEST_PTR_CONTINUE(vduModule);
-
-			result &= vduProcessingPass1(vduModule);
-
-			if (isBuildCancelled() == true)
+			for (const Hardware::DeviceModule* module : fscModules())
 			{
-				result = false;
-				break;
+				TEST_PTR_CONTINUE(module);
+
+				if (!module->isVdu())
+				{
+					continue;
+				}
+
+				result &= vduProcessingPass1(module);
+
+				if (isBuildCancelled() == true)
+				{
+					result = false;
+					break;
+				}
 			}
 		}
 
@@ -383,23 +392,26 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		auto isVduModule = [](Hardware::DeviceModule* module)
+		if (m_vdusCount > 0)
 		{
-			return module->isVdu();
-		};
+			LOG_MESSAGE(log(), QString(tr("VDUs processing pass #2...")));
 
-		LOG_MESSAGE(log(), QString(tr("VDUs processing pass #2...")));
-
-		for (const Hardware::DeviceModule* vduModule : m_context->m_fscModules | std::views::filter(isVduModule))
-		{
-			TEST_PTR_CONTINUE(vduModule);
-
-			result &= vduProcessingPass2(vduModule);
-
-			if (isBuildCancelled() == true)
+			for (const Hardware::DeviceModule* module : fscModules())
 			{
-				result = false;
-				break;
+				TEST_PTR_CONTINUE(module);
+
+				if (module->isVdu() == false)
+				{
+					continue;
+				}
+
+				result &= vduProcessingPass2(module);
+
+				if (isBuildCancelled() == true)
+				{
+					result = false;
+					break;
+				}
 			}
 		}
 

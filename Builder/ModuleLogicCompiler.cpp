@@ -446,7 +446,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(m_lm);
 
-		return m_lm->isBvb() || m_lm->isMso();
+		return m_lm->isBvb() || m_lm->isMso() || m_lm->isVdu();
 	}
 
 	const UalAfbs& ModuleLogicCompiler::ualAfbs() const
@@ -680,9 +680,24 @@ namespace Builder
 		m_lmAppLogicFramePayload = m_lmDescription->flashMemory().m_appLogicFramePayload;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
 
-		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
-		result &= getLMIntProperty("LMNumber", &m_lmNumber);
-		result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
+		if (m_lmShared->hasSubsystem())
+		{
+			result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
+			result &= getLMIntProperty("LMNumber", &m_lmNumber);
+			result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
+
+			// check LM subsystem ID
+			//
+			m_lmSubsystemKey = m_appLogicCompiler.subsystems()->ssKey(m_lmSubsystemID);
+
+			if (m_lmSubsystemKey == -1)
+			{
+				// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
+				//
+				m_log->errALC5056(m_lmSubsystemID, lmEquipmentID());
+				return false;
+			}
+		}
 
 		m_modules.clear();
 
@@ -738,18 +753,6 @@ namespace Builder
 		Q_ASSERT(m_modules.contains(m.place) == false);
 
 		m_modules.emplace(m.place, m);
-
-		// check LM subsystem ID
-		//
-		m_lmSubsystemKey = m_appLogicCompiler.subsystems()->ssKey(m_lmSubsystemID);
-
-		if (m_lmSubsystemKey == -1)
-		{
-			// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
-			//
-			m_log->errALC5056(m_lmSubsystemID, lmEquipmentID());
-			return false;
-		}
 
 		return result;
 	}
@@ -6485,6 +6488,14 @@ namespace Builder
 				result = true;
 				break;
 			}
+
+			if (m_lm->isVdu())
+			{
+				result = true;
+				break;
+			}
+
+			Q_ASSERT(false);
 		}
 		while(false);
 
