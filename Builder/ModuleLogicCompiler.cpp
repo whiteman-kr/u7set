@@ -8569,6 +8569,8 @@ namespace Builder
 		//
 		result &= m_optoModuleStorage->calculateRxBufAddresses(lmID);
 
+		result &= m_optoModuleStorage->writeVduConnectionsInfoFile(lmID, m_context);
+
 		return result;
 	}
 

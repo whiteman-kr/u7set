@@ -3323,6 +3323,11 @@ namespace Hardware
 
 		OptoModuleShared optoModule = getOptoModule(vduEquipmentID);
 
+		if (optoModule->isVdu() == false)
+		{
+			return true;		// its Ok
+		}
+
 		TEST_PTR_RETURN_FALSE(optoModule);
 
 		return Builder::VduOptoConnectionsInfoGenerator().writeFiles(optoModule, context);

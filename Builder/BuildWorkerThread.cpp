@@ -914,13 +914,6 @@ namespace Builder
 				Q_ASSERT(lm);
 				Q_ASSERT(lm->isFSCConfigurationModule() == true);
 
-				if (lm->isVdu() == true)
-				{
-					// VDU does not belong to any subsystem.
-					//
-					continue;
-				}
-
 				auto lmSubsystemIdProp = lm->propertyByCaption(Hardware::PropertyNames::lmSubsystemID);
 
 				if (lmSubsystemIdProp == nullptr)
