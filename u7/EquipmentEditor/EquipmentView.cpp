@@ -925,8 +925,7 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 		auto module = device->toModule();
 
 		if (module != nullptr &&
-			module->isFSCConfigurationModule() &&
-			module->hasSubsystem())
+			module->isFSCConfigurationModule())
 		{
 			// Get susbsystems
 			//

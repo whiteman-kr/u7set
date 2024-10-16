@@ -5,7 +5,7 @@ VDU-1
 	08.04.2024	Version: 3	VDU-1_v3.u7devp RPCT-3872: Added property Fonts
 	09.04.2024	Version: 4	VDU-1_v4.u7devp RPCT-3872: Added Display0 properties
 	01.08.2024	Version: 5	VDU-1_v5.u7devp RPCT-3872: FamilyType changed from 0x7100 to 0x1C00
-	15.10.2024	Version: 6	VDU-1_v6.u7devp RPCT-3872: Added property DiagLANDataSize
+	16.10.2024	Version: 6	VDU-1_v6.u7devp RPCT-3549: Added properties: DiagLANDataSize, SubsystemID, SubsystemChannel, LMNumber. Worstation removed.
 
 
 

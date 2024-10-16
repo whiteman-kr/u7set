@@ -680,23 +680,20 @@ namespace Builder
 		m_lmAppLogicFramePayload = m_lmDescription->flashMemory().m_appLogicFramePayload;
 		m_lmAppLogicFrameCount = m_lmDescription->flashMemory().m_appLogicFrameCount;
 
-		if (m_lmShared->hasSubsystem())
+		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
+		result &= getLMIntProperty("LMNumber", &m_lmNumber);
+		result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
+
+		// check LM subsystem ID
+		//
+		m_lmSubsystemKey = m_appLogicCompiler.subsystems()->ssKey(m_lmSubsystemID);
+
+		if (m_lmSubsystemKey == -1)
 		{
-			result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
-			result &= getLMIntProperty("LMNumber", &m_lmNumber);
-			result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
-
-			// check LM subsystem ID
+			// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
 			//
-			m_lmSubsystemKey = m_appLogicCompiler.subsystems()->ssKey(m_lmSubsystemID);
-
-			if (m_lmSubsystemKey == -1)
-			{
-				// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
-				//
-				m_log->errALC5056(m_lmSubsystemID, lmEquipmentID());
-				return false;
-			}
+			m_log->errALC5056(m_lmSubsystemID, lmEquipmentID());
+			return false;
 		}
 
 		m_modules.clear();

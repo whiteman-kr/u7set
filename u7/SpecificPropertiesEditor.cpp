@@ -538,9 +538,9 @@ bool SpecificPropertyModel::checkLimits(QString* errorMsg)
 			double lowLimitDouble = lowLimit.toDouble();
 			double highLimitDouble = highLimit.toDouble();
 
-			if (lowLimitDouble >= highLimitDouble)
+			if (lowLimitDouble > highLimitDouble)
 			{
-				*errorMsg = tr("Property '%1' error:\r\n\r\nHighLimit property value must be greater than LowLimit property value.").arg(spd->caption());
+				*errorMsg = tr("Property '%1' error:\r\n\r\nHighLimit property value must be greater or equal to LowLimit property value.").arg(spd->caption());
 				return false;
 			}
 

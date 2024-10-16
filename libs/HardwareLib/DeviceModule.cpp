@@ -269,10 +269,4 @@ namespace Hardware
 		return moduleFamily() == FamilyType::VDU;
 	}
 
-	bool DeviceModule::hasSubsystem() const
-	{
-		return moduleFamily() == FamilyType::LM ||
-			   moduleFamily() == FamilyType::BVB ||
-			   moduleFamily() == FamilyType::MSO;
-	}
 } // namespace Hardware

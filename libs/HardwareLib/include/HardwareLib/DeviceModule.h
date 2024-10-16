@@ -87,7 +87,6 @@ namespace Hardware
 		[[nodiscard]] bool isNonPlatformAppDataSourceModule() const;
 		[[nodiscard]] bool isAppDataSourceModule() const;
 		[[nodiscard]] bool isVdu() const;
-		[[nodiscard]] bool hasSubsystem() const;
 
 		// Data
 		//
