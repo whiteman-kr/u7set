@@ -1204,13 +1204,13 @@ void AppSignalSetProvider::reloadPropertiesBehaviour()
 
 	DbFileInfo propBehaviourFileInfo;
 
-	m_db->getFileInfo(etcFileId, QString(Db::File::SignalPropertyBehaviorFileName),
+	m_db->getFileInfo(etcFileId, QString(File::SignalPropertyBehaviorFileName),
 								&propBehaviourFileInfo, nullptr);
 
 	if (propBehaviourFileInfo.isNull() == true)
 	{
 		QMessageBox::critical(m_parentWidget, "Error", QString("File \"%1\" is not found!").
-										arg(Db::File::SignalPropertyBehaviorFileName));
+										arg(File::SignalPropertyBehaviorFileName));
 		return;
 	}
 
@@ -1221,7 +1221,7 @@ void AppSignalSetProvider::reloadPropertiesBehaviour()
 	if (result == false)
 	{
 		QMessageBox::critical(m_parentWidget, "Error", QString("Could not load file \"%1\"").
-										arg(Db::File::SignalPropertyBehaviorFileName));
+										arg(File::SignalPropertyBehaviorFileName));
 		return;
 	}
 

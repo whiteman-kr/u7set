@@ -3683,7 +3683,7 @@ namespace Builder
 	{
 		int ufblFileId = m_db->systemFileId(DbDir::UfblDir);
 
-		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(db, out, ufblFileId, QLatin1String(".") + Db::File::UfbFileExtension);
+		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(db, out, ufblFileId, QLatin1String(".") + File::UfbFileExtension);
 
 		m_log->writeMessage(tr("Loaded %1 UFB logic file(s).").arg(out->size()));
 		m_log->writeMessage("");
@@ -3694,7 +3694,7 @@ namespace Builder
 	{
 		int alFileId = m_db->systemFileId(DbDir::AppLogicDir);
 
-		bool ok = loadSchemaFiles<VFrame30::LogicSchema>(db, out, alFileId, QLatin1String(".") + Db::File::AlFileExtension);
+		bool ok = loadSchemaFiles<VFrame30::LogicSchema>(db, out, alFileId, QLatin1String(".") + File::AlFileExtension);
 		m_log->writeMessage(tr("Loaded %1 Application Logic file(s).").arg(out->size()));
 		m_log->writeMessage("");
 		return ok;

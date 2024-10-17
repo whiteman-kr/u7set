@@ -227,50 +227,10 @@ set (U7_SOURCES
 	SignalsModels.h
 	SignalsTabPage.cpp
 	SignalsTabPage.h
-	Simulator/ScriptSimApplication.cpp
-	Simulator/ScriptSimApplication.h
-	Simulator/SimBasePage.cpp
-	Simulator/SimBasePage.h
-	Simulator/SimCodePage.cpp
-	Simulator/SimCodePage.h
-	Simulator/SimConnectionPage.cpp
-	Simulator/SimConnectionPage.h
-	Simulator/SimIdeSimulator.cpp
-	Simulator/SimIdeSimulator.h
-	Simulator/SimLogicModulePage.cpp
-	Simulator/SimLogicModulePage.h
-	Simulator/SimMemoryWidget.cpp
-	Simulator/SimMemoryWidget.h
-	Simulator/SimOutputWidget.cpp
-	Simulator/SimOutputWidget.h
-	Simulator/SimOverridePane.cpp
-	Simulator/SimOverridePane.h
-	Simulator/SimOverrideValueWidget.cpp
-	Simulator/SimOverrideValueWidget.h
 	Simulator/SimProfileEditor.cpp
 	Simulator/SimProfileEditor.h
-	Simulator/SimProjectWidget.cpp
-	Simulator/SimProjectWidget.h
-	Simulator/SimSchemaManager.cpp
-	Simulator/SimSchemaManager.h
-	Simulator/SimSchemaPage.cpp
-	Simulator/SimSchemaPage.h
-	Simulator/SimSchemaView.cpp
-	Simulator/SimSchemaView.h
-	Simulator/SimSchemaWidget.cpp
-	Simulator/SimSchemaWidget.h
 	Simulator/SimSelectBuildDialog.cpp
 	Simulator/SimSelectBuildDialog.h
-	Simulator/SimSelectSchemaPage.cpp
-	Simulator/SimSelectSchemaPage.h
-	Simulator/SimSignalInfo.cpp
-	Simulator/SimSignalInfo.h
-	Simulator/SimSignalSnapshot.cpp
-	Simulator/SimSignalSnapshot.h
-	Simulator/SimTrend/SimTrends.cpp
-	Simulator/SimTrend/SimTrends.h
-	Simulator/SimWidget.cpp
-	Simulator/SimWidget.h
 	SimulatorTabPage.cpp
 	SimulatorTabPage.h
 	SpecificPropertiesEditor.cpp
@@ -279,8 +239,6 @@ set (U7_SOURCES
 	SvgEditor.h
 	TestsTabPage.cpp
 	TestsTabPage.h
-	TuningConnectionStub.cpp
-	TuningConnectionStub.h
 	TuningUiEditor.cpp
 	TuningUiEditor.h
 	UndoSignalsDialog.cpp
@@ -481,7 +439,7 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql
 	Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
 target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
-	TrendView Simulator qt6keychain Builder VFrame30 ReportLib AppSignalLists SchemaClientLib ModuleConfiguratorLib TuningLib UiLib LicenseLib)
+	TrendView SimulatorUi qt6keychain Builder VFrame30 ReportLib AppSignalLists SchemaClientLib ModuleConfiguratorLib TuningLib UiLib LicenseLib)
 
 # Link Visaul Leak Detector
 #

@@ -2549,7 +2549,7 @@ bool ProjectDiffGenerator::isHardwareFile(const QString& fileName) const
 
 bool ProjectDiffGenerator::isBusTypeFile(const QString& fileName) const
 {
-	if (fileName.endsWith(Db::File::BusFileExtension) == true)
+	if (fileName.endsWith(File::BusFileExtension) == true)
 	{
 		return true;
 	}
@@ -2559,7 +2559,7 @@ bool ProjectDiffGenerator::isBusTypeFile(const QString& fileName) const
 
 bool ProjectDiffGenerator::isConnectionFile(const QString& fileName) const
 {
-	if (fileName.endsWith(Db::File::OclFileExtension) == true)
+	if (fileName.endsWith(File::OclFileExtension) == true)
 	{
 		return true;
 	}
@@ -2569,7 +2569,7 @@ bool ProjectDiffGenerator::isConnectionFile(const QString& fileName) const
 
 bool ProjectDiffGenerator::isDiagSignalTypeFile(const QString& fileName) const
 {
-	if (fileName.endsWith(Db::File::DiagSignalTypeSetFileExtension) == true)
+	if (fileName.endsWith(File::DiagSignalTypeSetFileExtension) == true)
 	{
 		return true;
 	}
@@ -2603,18 +2603,18 @@ bool ProjectDiffGenerator::isSchemaFile(const QString& fileName) const
 {
 	const std::array<QString, 12> TextExtensions =
 	{
-		Db::File::AlFileExtension,			// Script
-		Db::File::AlTemplExtension,			// Xml Document
-		Db::File::UfbFileExtension,			// Xml Schema
-		Db::File::UfbTemplExtension,			// Table
-		Db::File::MvsFileExtension,
-		Db::File::MvsTemplExtension,
-		Db::File::TvsFileExtension,
-		Db::File::TvsTemplExtension,
-		Db::File::DvsFileExtension,
-		Db::File::DvsTemplExtension,
-		Db::File::VduFileExtension,
-		Db::File::VduTemplExtension
+		File::AlFileExtension,			// Script
+		File::AlTemplExtension,			// Xml Document
+		File::UfbFileExtension,			// Xml Schema
+		File::UfbTemplExtension,			// Table
+		File::MvsFileExtension,
+		File::MvsTemplExtension,
+		File::TvsFileExtension,
+		File::TvsTemplExtension,
+		File::DvsFileExtension,
+		File::DvsTemplExtension,
+		File::VduFileExtension,
+		File::VduTemplExtension
 	};
 
 	for (const QString& ext : TextExtensions)

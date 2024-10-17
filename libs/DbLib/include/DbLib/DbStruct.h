@@ -94,42 +94,6 @@ namespace Db
 			};
 
 		static QString systemDirToName(DbDir systemDir);
-
-		constexpr static const char* SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
-		constexpr static const char* TagsFileName = "Tags.csv";
-		constexpr static const char* SimProfilesFileName = "SimProfiles.txt";
-
-		constexpr static const char* AlFileExtension = "als";						// Application Logic schema file extension
-		constexpr static const char* AlTemplExtension = "templ_als";				// Application Logic schema template file extnesion
-
-		constexpr static const char* UfbFileExtension = "ufb";						// User Functional Block schema file extnesion;		// User Functional Block schema file extnesion
-		constexpr static const char* UfbTemplExtension = "templ_ufb";				// User Functional Block template file extnesion
-
-		constexpr static const char* MvsFileExtension = "mvs";						// Monitor schema file extnesion
-		constexpr static const char* MvsTemplExtension = "templ_mvs";				// Monitor schema template file extnesion
-
-		constexpr static const char* TvsFileExtension = "tvs";						// TuningClient schema file extnesion
-		constexpr static const char* TvsTemplExtension = "templ_tvs";				// TuningClient schema template file extnesion
-
-		constexpr static const char* DvsFileExtension = "dvs";						// Diagnostics schema file extnesion
-		constexpr static const char* DvsTemplExtension = "templ_dvs";				// Diagnostics schema template file extnesion
-
-		constexpr static const char* VduFileExtension = "vus";						// VDU schema file extnesion
-		constexpr static const char* VduTemplExtension = "templ_vus";				// VDU schema template file extnesion
-		constexpr static const char* VduNativeFileExtension = "vbs";				// VDU schema file extension in native VDU format
-
-		constexpr static const char* OclFileExtension = "ocl";						// (Optical) Connection Link
-		constexpr static const char* BusFileExtension = "bus_type";					// Bus type
-
-		constexpr static const char* AppSignalFileExtension = "asg";				// Application signal file extention (::Proto::AppSignal message)
-		constexpr static const char* AppSignalSetFileExtension = "asgs";			// Application signals set file extention (::Proto::AppSignalSet message)
-
-		constexpr static const char* AppSignalListFileExtension = "aslist";			// Application signals list file extention
-
-		constexpr static const char* JavaScriptFileExtension = "js";				// JavaScript file extension
-
-		constexpr static const char* DiagSignalTypeFileExtension = "dsgt";			// Diagnostics Signal Type file extension
-		constexpr static const char* DiagSignalTypeSetFileExtension = "dsgts";		// Diagnostics Signal Types set file extension
 	};
 }
 

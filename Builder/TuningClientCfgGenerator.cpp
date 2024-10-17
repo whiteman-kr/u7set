@@ -243,7 +243,7 @@ namespace Builder
 
 			// Write file
 			//
-			QString fileName = tr("%1.%2").arg(list->id()).arg(Db::File::AppSignalListFileExtension);
+			QString fileName = tr("%1.%2").arg(list->id()).arg(File::AppSignalListFileExtension);
 			BuildFile* listsFile = m_context->m_buildResultWriter->addFile(m_software->equipmentIdTemplate(),
 																		   fileName,
 																		   fileName,
@@ -326,7 +326,7 @@ namespace Builder
 
 			// Write file
 			//
-			QString fileName = tr("%1.%2").arg(list->id()).arg(Db::File::AppSignalListFileExtension);
+			QString fileName = tr("%1.%2").arg(list->id()).arg(File::AppSignalListFileExtension);
 			BuildFile* listsFile =
 				m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), fileName, fileName, {CfgFileTag::APPSIGNALLISTS}, data);
 			if (listsFile == nullptr)
@@ -433,7 +433,7 @@ namespace Builder
 			for (auto& [tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
 			{
 				Q_UNUSED(tag);
-				if (schemaFile->fileName.endsWith(QStringLiteral(".") + Db::File::TvsFileExtension, Qt::CaseInsensitive) == true)
+				if (schemaFile->fileName.endsWith(QStringLiteral(".") + File::TvsFileExtension, Qt::CaseInsensitive) == true)
 				{
 					tuningSchemas.insert(schemaFile);
 				}

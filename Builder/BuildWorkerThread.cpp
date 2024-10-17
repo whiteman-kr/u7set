@@ -746,7 +746,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		bool ok = m_context->m_db.getFileList(&fileList, DbDir::BusTypesDir, Db::File::BusFileExtension, true, nullptr);
+		bool ok = m_context->m_db.getFileList(&fileList, DbDir::BusTypesDir, File::BusFileExtension, true, nullptr);
 		if (ok == false)
 		{
 			return false;
@@ -1124,10 +1124,10 @@ namespace Builder
 		//
 		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
 
-		QString strAlFileExtension{Db::File::AlFileExtension};
-		QString strUfbFileExtension{Db::File::UfbFileExtension};
-		QString strMvsFileExtension{Db::File::MvsFileExtension};
-		QString strDvsFileExtension{Db::File::DvsFileExtension};
+		QString strAlFileExtension{File::AlFileExtension};
+		QString strUfbFileExtension{File::UfbFileExtension};
+		QString strMvsFileExtension{File::MvsFileExtension};
+		QString strDvsFileExtension{File::DvsFileExtension};
 
 		bool success = true;
 
@@ -1271,7 +1271,7 @@ namespace Builder
 		//
 		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
 
-		QString javaScriptFileExtension{Db::File::JavaScriptFileExtension};
+		QString javaScriptFileExtension{File::JavaScriptFileExtension};
 
 		bool filesResult = true;
 
@@ -2102,10 +2102,10 @@ namespace Builder
 
 		std::vector<DbFileInfo> fileList;
 
-		bool ok = db.getFileList(&fileList, DbDir::EtcDir, Db::File::SimProfilesFileName, true, nullptr);
+		bool ok = db.getFileList(&fileList, DbDir::EtcDir, File::SimProfilesFileName, true, nullptr);
 		if (ok == false)
 		{
-			log->errPDB2001(db.systemFileId(DbDir::EtcDir), Db::File::SimProfilesFileName, db.lastError());
+			log->errPDB2001(db.systemFileId(DbDir::EtcDir), File::SimProfilesFileName, db.lastError());
 			return false;
 		}
 

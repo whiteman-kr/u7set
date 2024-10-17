@@ -203,12 +203,12 @@ namespace Builder
 						{
 							return  (f.action() != E::VcsItemAction::Deleted) &&
 									(f.isFolder() == false) &&
-									(f.fileName().endsWith(QLatin1String(".") + Db::File::AlFileExtension, Qt::CaseInsensitive) ||
-									 f.fileName().endsWith(QLatin1String(".") + Db::File::MvsFileExtension, Qt::CaseInsensitive) ||
-									 f.fileName().endsWith(QLatin1String(".") + Db::File::DvsFileExtension, Qt::CaseInsensitive) ||
-									 f.fileName().endsWith(QLatin1String(".") + Db::File::UfbFileExtension, Qt::CaseInsensitive) ||
-									 f.fileName().endsWith(QLatin1String(".") + Db::File::TvsFileExtension, Qt::CaseInsensitive) ||
-									 f.fileName().endsWith(QLatin1String(".") + Db::File::VduFileExtension, Qt::CaseInsensitive));
+									(f.fileName().endsWith(QLatin1String(".") + File::AlFileExtension, Qt::CaseInsensitive) ||
+									 f.fileName().endsWith(QLatin1String(".") + File::MvsFileExtension, Qt::CaseInsensitive) ||
+									 f.fileName().endsWith(QLatin1String(".") + File::DvsFileExtension, Qt::CaseInsensitive) ||
+									 f.fileName().endsWith(QLatin1String(".") + File::UfbFileExtension, Qt::CaseInsensitive) ||
+									 f.fileName().endsWith(QLatin1String(".") + File::TvsFileExtension, Qt::CaseInsensitive) ||
+									 f.fileName().endsWith(QLatin1String(".") + File::VduFileExtension, Qt::CaseInsensitive));
 						});
 
 		// Multithreaded load all schemas
@@ -1444,7 +1444,7 @@ namespace Builder
 
 			// Write file
 			//
-			QString fileName = tr("%1.%2").arg(list->id()).arg(Db::File::AppSignalListFileExtension);
+			QString fileName = tr("%1.%2").arg(list->id()).arg(File::AppSignalListFileExtension);
 
 			BuildFile* listsFile = m_context->m_buildResultWriter->addFile(m_software->equipmentIdTemplate(),
 																		   fileName,

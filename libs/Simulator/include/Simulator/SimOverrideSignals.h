@@ -6,6 +6,8 @@
 
 #include <QObject>
 
+#include "../../UtilsLib/Address16.h"
+
 #include "SimOverrideRamRecord.h"
 
 class QJSValue;

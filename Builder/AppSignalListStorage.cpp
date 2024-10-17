@@ -82,7 +82,8 @@ namespace Builder
 		std::vector<DbFileInfo> fileList;
 
 		bool ok =
-			m_db->getFileList(&fileList, DbDir::AppSignalListsDir, Db::File::AppSignalListFileExtension, false /*removeDeleted*/, nullptr);
+			m_db->getFileList(&fileList, DbDir::AppSignalListsDir, File::AppSignalListFileExtension, false /*removeDeleted*/, nullptr);
+
 		if (ok == false)
 		{
 			*errorMessage = m_db->lastError();
@@ -175,7 +176,7 @@ namespace Builder
 			//
 			std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-			QString fileName = QString("appsignallist-%1.%2").arg(list->uuid().toString()).arg(Db::File::AppSignalListFileExtension);
+			QString fileName = QString("appsignallist-%1.%2").arg(list->uuid().toString()).arg(File::AppSignalListFileExtension);
 			fileName = fileName.remove('{');
 			fileName = fileName.remove('}');
 

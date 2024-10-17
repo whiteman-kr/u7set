@@ -7,7 +7,12 @@
 #include <SchemaClientLib/DragDropHelper.h>
 #include <VFrame30/TuningController.h>
 
+#include <QDialog>
+#include <QLabel>
+
 #include <optional>
+
+class QTreeWidgetItem;
 
 namespace Ui
 {

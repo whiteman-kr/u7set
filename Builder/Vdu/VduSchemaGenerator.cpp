@@ -91,7 +91,7 @@ namespace Builder
 
 				// Save result.
 				//
-				QString nativeVduSchemaFileName = QString("%1.%2").arg(schema->schemaId()).arg(Db::File::VduNativeFileExtension);
+				QString nativeVduSchemaFileName = QString("%1.%2").arg(schema->schemaId()).arg(File::VduNativeFileExtension);
 
 				QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + "/Schemas";
 

@@ -1136,10 +1136,10 @@ void SchemaListModel::refresh()
 		return;		// do not reset model, just leave it as is
 	}
 
-	files.removeFilesWithExtension(Db::File::AlTemplExtension);
-	files.removeFilesWithExtension(Db::File::MvsTemplExtension);
-	files.removeFilesWithExtension(Db::File::UfbTemplExtension);
-	files.removeFilesWithExtension(Db::File::DvsTemplExtension);
+	files.removeFilesWithExtension(File::AlTemplExtension);
+	files.removeFilesWithExtension(File::MvsTemplExtension);
+	files.removeFilesWithExtension(File::UfbTemplExtension);
+	files.removeFilesWithExtension(File::DvsTemplExtension);
 
 	// Parse file details, befor applying filter, as we want to keep tags for all schemas
 	//
@@ -3254,7 +3254,7 @@ void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDe
 
 	// --
 	//
-	addSchemaFile(schema, Db::File::AlFileExtension, parentFile.fileId());
+	addSchemaFile(schema, File::AlFileExtension, parentFile.fileId());
 
 	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
 
@@ -3333,37 +3333,37 @@ void SchemaControlTabPage::addFile()
 	if (schema->isLogicSchema() == true)
 	{
 		defaultId = "APPSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = Db::File::AlFileExtension;
+		extension = File::AlFileExtension;
 	}
 
 	if (schema->isUfbSchema() == true)
 	{
 		defaultId = "UFBID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = Db::File::UfbFileExtension;
+		extension = File::UfbFileExtension;
 	}
 
 	if (schema->isMonitorSchema() == true)
 	{
 		defaultId = "MONITORSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = Db::File::MvsFileExtension;
+		extension = File::MvsFileExtension;
 	}
 
 	if (schema->isTuningSchema() == true)
 	{
 		defaultId = "TUNINGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = Db::File::TvsFileExtension;
+		extension = File::TvsFileExtension;
 	}
 
 	if (schema->isDiagSchema() == true)
 	{
 		defaultId = "DIAGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = Db::File::DvsFileExtension;
+		extension = File::DvsFileExtension;
 	}
 
 	if (schema->isVduSchema() == true)
 	{
 		defaultId = "VDUSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = Db::File::VduFileExtension;
+		extension = File::VduFileExtension;
 	}
 
 	Q_ASSERT(extension.isEmpty() == false);
@@ -4278,18 +4278,18 @@ void SchemaControlTabPage::compareObject(DbChangesetObject object, CompareData c
 	// Check file extension,
 	// can compare next files
 	//
-	if (object.name().endsWith("." + QString(Db::File::AlFileExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::AlTemplExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::UfbFileExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::UfbTemplExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::MvsFileExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::MvsTemplExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::TvsFileExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::TvsTemplExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::DvsFileExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::DvsTemplExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::VduFileExtension)) == false &&
-		object.name().endsWith("." + QString(Db::File::VduTemplExtension)) == false)
+	if (object.name().endsWith("." + QString(File::AlFileExtension)) == false &&
+		object.name().endsWith("." + QString(File::AlTemplExtension)) == false &&
+		object.name().endsWith("." + QString(File::UfbFileExtension)) == false &&
+		object.name().endsWith("." + QString(File::UfbTemplExtension)) == false &&
+		object.name().endsWith("." + QString(File::MvsFileExtension)) == false &&
+		object.name().endsWith("." + QString(File::MvsTemplExtension)) == false &&
+		object.name().endsWith("." + QString(File::TvsFileExtension)) == false &&
+		object.name().endsWith("." + QString(File::TvsTemplExtension)) == false &&
+		object.name().endsWith("." + QString(File::DvsFileExtension)) == false &&
+		object.name().endsWith("." + QString(File::DvsTemplExtension)) == false &&
+		object.name().endsWith("." + QString(File::VduFileExtension)) == false &&
+		object.name().endsWith("." + QString(File::VduTemplExtension)) == false)
 	{
 		return;
 	}

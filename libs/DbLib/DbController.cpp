@@ -2786,7 +2786,7 @@ bool DbController::getTags(std::vector<DbTag>* tags)
 
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = getFileList(&fileList, DbDir::EtcDir, Db::File::TagsFileName, true, nullptr);
+	bool ok = getFileList(&fileList, DbDir::EtcDir, File::TagsFileName, true, nullptr);
 	if (ok == false || fileList.size() != 1)
 	{
 		*tags = defaultTags;
@@ -2833,20 +2833,20 @@ bool DbController::writeTags(const std::vector<DbTag> tags, const QString& comme
 	std::vector<DbFileInfo> fileList;
 	int etcFileId = systemFileId(DbDir::EtcDir);
 
-	bool ok = getFileList(&fileList, etcFileId, Db::File::TagsFileName, true, nullptr);
+	bool ok = getFileList(&fileList, etcFileId, File::TagsFileName, true, nullptr);
 	if (ok == false || fileList.size() != 1)
 	{
 		// create a file, if it does not exists
 		//
 		std::shared_ptr<DbFile> pf = std::make_shared<DbFile>();
-		pf->setFileName(Db::File::TagsFileName);
+		pf->setFileName(File::TagsFileName);
 
 		if (addFile(pf, etcFileId, nullptr) == false)
 		{
 			return false;
 		}
 
-		ok = getFileList(&fileList, etcFileId, Db::File::TagsFileName, true, nullptr);
+		ok = getFileList(&fileList, etcFileId, File::TagsFileName, true, nullptr);
 		if (ok == false || fileList.size() != 1)
 		{
 			return false;

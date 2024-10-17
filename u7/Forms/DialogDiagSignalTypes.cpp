@@ -741,7 +741,7 @@ void DialogDiagSignalTypes::onExport()
 	QString defaultFileName;
 	if (selectedItems.size() > 1)
 	{
-		defaultFileName = tr("DiagSignalTypes.%1").arg(Db::File::DiagSignalTypeSetFileExtension);
+		defaultFileName = tr("DiagSignalTypes.%1").arg(File::DiagSignalTypeSetFileExtension);
 	}
 
 	for (const auto& item : selectedItems)
@@ -757,7 +757,7 @@ void DialogDiagSignalTypes::onExport()
 
 		if (defaultFileName.isEmpty() == true)
 		{
-			defaultFileName = tr("%1.%2").arg(dst->signalTypeId()).arg(Db::File::DiagSignalTypeSetFileExtension);
+			defaultFileName = tr("%1.%2").arg(dst->signalTypeId()).arg(File::DiagSignalTypeSetFileExtension);
 		}
 
 		auto envelope = envelopeSet.add_items();
@@ -780,7 +780,7 @@ void DialogDiagSignalTypes::onExport()
 	}
 
 	static QString path{"."};
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Export"), path + QDir::separator() + defaultFileName, tr("Diagnostics Signal Types Set (*.%1)").arg(Db::File::DiagSignalTypeSetFileExtension));
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Export"), path + QDir::separator() + defaultFileName, tr("Diagnostics Signal Types Set (*.%1)").arg(File::DiagSignalTypeSetFileExtension));
 
 	if (fileName.isEmpty() == true)
 	{
@@ -809,7 +809,7 @@ void DialogDiagSignalTypes::onExport()
 void DialogDiagSignalTypes::onImport()
 {
 	static QString path{"."};
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Import"), path + QDir::separator(), tr("Diagnostics Signal Types Set (*.%1)").arg(Db::File::DiagSignalTypeSetFileExtension));
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Import"), path + QDir::separator(), tr("Diagnostics Signal Types Set (*.%1)").arg(File::DiagSignalTypeSetFileExtension));
 
 	if (fileName.isEmpty() == true)
 	{
