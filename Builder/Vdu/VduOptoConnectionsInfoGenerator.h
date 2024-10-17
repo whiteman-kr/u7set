@@ -36,6 +36,8 @@ namespace Builder
 							 std::vector<VduAppSignalInfo>& vduSignals);
 
 		VduSignalType getVduSignalType(Hardware::TxRxSignalShared s);
+		uint32_t vduSignalLowBoundUntyped(VduSignalType type);
+		uint32_t vduSignalHighBoundUntyped(VduSignalType type);
 
 		// returns offset in m_strings NOT in file!
 		//

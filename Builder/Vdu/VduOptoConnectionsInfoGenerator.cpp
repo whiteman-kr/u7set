@@ -138,7 +138,7 @@ namespace Builder
 		m_header.magic[2] = 'I';
 		m_header.magic[3] = '\0';
 
-		m_header.fileVersion = 1;
+		m_header.fileVersion = VCI_FILE_VERSION;
 
 		m_header.optoPortsCount = static_cast<uint16_t>(m_optoPortsInfo.size());
 		m_header.rxAppSignalsCount = static_cast<uint16_t>(m_rxAppSignals.size());
@@ -201,7 +201,7 @@ namespace Builder
 	{
 		QStringList file;
 
-		static const QString LINE(QString().fill('-', 176));
+		static const QString LINE(QString().fill('-', 185));
 
 		file << QString(" VDU EquipmentID: %1\n").arg(m_vduModule->equipmentID());
 
@@ -401,26 +401,26 @@ namespace Builder
 															QStringList& file)
 	{
 		file << line;
-		file << QString("  Address   | signalIndex | portIndex | signalType | offsetW | bitNo  | reserv1 | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | boolProps | reserv2");
+		file << QString("  Address   | signalIndex | portIndex | signalType | offsetW | bitNo  | boolProps | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | tunLowBound | tunHighBound");
 		file << line;
 
 		for(const VduAppSignalInfo& si : appSignals)
 		{
 			file << addrStr(sizeof(si),
-							QString("%1      | %2    | %3     | %4  | %5 | %6  | %7     | %8      | %9 | %10 | %11 | %12    | %13").
+							QString("%1      | %2    | %3     | %4  | %5 | %6    | %7     | %8      | %9 | %10 | %11 | %12  | %13").
 							arg(hex16(si.signalIndex)).
 							arg(hex16(si.optoPortIndex)).
 							arg(hex16(si.vduSignalType)).
 							arg(hex16(si.valueOffsetW)).
 							arg(hex16(si.valueBitNo)).
-							arg(hex16(si.reserv1)).
+							arg(hex16(si.boolProps)).
 							arg(hex32(si.refAppSignalID)).
 							arg(hex32(si.refCustomAppSignalID)).
 							arg(hex32(si.refCaption)).
 							arg(hex32(si.refUnit)).
 							arg(hex32(si.tuningDefaultValue)).
-							arg(hex16(si.boolProps)).
-							arg(hex16(si.reserv2)));
+							arg(hex32(si.tuningLowBound)).
+							arg(hex32(si.tuningHighBound)));
 		}
 	}
 
@@ -471,14 +471,19 @@ namespace Builder
 
 			m_vduSignalIndex++;
 
-			si.vduSignalType = static_cast<uint16_t>(getVduSignalType(portSignal));
+			VduSignalType vduSignalType = getVduSignalType(portSignal);
+
+			si.vduSignalType = static_cast<uint16_t>(vduSignalType);
 
 			Address16 addrInBuf = portSignal->addrInBuf();
 
 			si.valueOffsetW = addrInBuf.offset();
 			si.valueBitNo = addrInBuf.bit();
 
-			si.reserv1 = MARKER16;
+			//
+
+			si.boolProps = 0;
+			si.enableTuning = appSignal->enableTuning() ? 1 : 0;
 
 			// here this is offsets in m_string table, NOT in file!
 			//
@@ -487,20 +492,20 @@ namespace Builder
 			si.refCaption = appendString(appSignal->caption());
 			si.refUnit = appendString(appSignal->unit());
 
-			si.boolProps = 0;
+			//
 
 			if (appSignal->enableTuning())
 			{
 				si.tuningDefaultValue = appSignal->tuningDefaultValue().untypedUInt32Value();
-				si.enableTuning = 1;
+				si.tuningLowBound = appSignal->tuningLowBound().untypedUInt32Value();
+				si.tuningHighBound = appSignal->tuningHighBound().untypedUInt32Value();
 			}
 			else
 			{
 				si.tuningDefaultValue = 0;
-				si.enableTuning = 0;
+				si.tuningLowBound = vduSignalLowBoundUntyped(vduSignalType);
+				si.tuningHighBound = vduSignalHighBoundUntyped(vduSignalType);
 			}
-
-			si.reserv2 = MARKER16;
 
 			vduSignals.emplace_back(si);
 		}
@@ -537,6 +542,46 @@ namespace Builder
 		Q_ASSERT(false);
 
 		return VduSignalType::Unknown;
+	}
+
+	uint32_t VduOptoConnectionsInfoGenerator::vduSignalLowBoundUntyped(VduSignalType type)
+	{
+		switch(type)
+		{
+		case VduSignalType::Discrete:
+			return 0;
+
+		case VduSignalType::AnalogSignedInt32:
+			return std::bit_cast<uint32_t>(std::numeric_limits<qint32>::min());
+
+		case VduSignalType::AnalogFloat32:
+			return std::bit_cast<uint32_t>(std::numeric_limits<float>::lowest());
+
+		case VduSignalType::Unknown:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	uint32_t VduOptoConnectionsInfoGenerator::vduSignalHighBoundUntyped(VduSignalType type)
+	{
+		switch(type)
+		{
+		case VduSignalType::Discrete:
+			return 1;
+
+		case VduSignalType::AnalogSignedInt32:
+			return std::bit_cast<uint32_t>(std::numeric_limits<qint32>::max());
+
+		case VduSignalType::AnalogFloat32:
+			return std::bit_cast<uint32_t>(std::numeric_limits<float>::max());
+
+		case VduSignalType::Unknown:
+			Q_ASSERT(false);
+		}
+
+		return 0;
 	}
 
 	vdu_string_ref VduOptoConnectionsInfoGenerator::appendString(const QString& str)

@@ -13,11 +13,12 @@
 
 #pragma pack(push, 1)
 
+inline const int VCI_FILE_VERSION = 2;
 
 struct VduOptoConnectionsInfoFileHeader
 {
 	char magic[4];							// 'VCI\0'
-	uint16_t fileVersion;
+	uint16_t fileVersion;					// == VCI_FILE_VERSION
 
 	uint16_t optoPortsCount;
 	uint16_t rxAppSignalsCount;
@@ -72,15 +73,6 @@ struct VduAppSignalInfo
 	uint16_t valueOffsetW;			// offset in opto port buffer in words
 	uint16_t valueBitNo;
 
-	uint16_t reserv1;
-
-	vdu_string_ref refAppSignalID;
-	vdu_string_ref refCustomAppSignalID;
-	vdu_string_ref refCaption;
-	vdu_string_ref refUnit;
-
-	uint32_t tuningDefaultValue;			// real type of value depends from vduSignalType
-
 	// boolean properties of signal
 	//
 	union
@@ -93,7 +85,16 @@ struct VduAppSignalInfo
 		uint16_t boolProps;
 	};
 
-	uint16_t reserv2;
+	vdu_string_ref refAppSignalID;
+	vdu_string_ref refCustomAppSignalID;
+	vdu_string_ref refCaption;
+	vdu_string_ref refUnit;
+
+	// real type of next values depends from vduSignalType
+	//
+	uint32_t tuningDefaultValue;
+	uint32_t tuningLowBound;
+	uint32_t tuningHighBound;
 };
 
 #pragma pack(pop)
