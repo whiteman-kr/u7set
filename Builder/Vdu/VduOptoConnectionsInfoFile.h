@@ -13,7 +13,7 @@
 
 #pragma pack(push, 1)
 
-inline const int VCI_FILE_VERSION = 2;
+inline const uint16_t VCI_FILE_VERSION = 2;
 
 struct VduOptoConnectionsInfoFileHeader
 {
