@@ -1,8 +1,8 @@
 #pragma once
 #include <SimulatorUi/SimIdeSimulator.h>
 
-#include <Simulator/SimConnections.h>
-#include <Simulator/SimControlStatus.h>
+#include <SimulatorLib/SimConnections.h>
+#include <SimulatorLib/SimControlStatus.h>
 
 #include <QTreeWidgetItem>
 

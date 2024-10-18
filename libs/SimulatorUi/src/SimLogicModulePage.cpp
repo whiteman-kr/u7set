@@ -3,8 +3,8 @@
 #include "SimWidgetPrivate.h"
 #include <SimulatorUi/SimIdeSimulator.h>
 
-#include <Simulator/SimAppSignalManager.h>
-#include <Simulator/SimControl.h>
+#include <SimulatorLib/SimAppSignalManager.h>
+#include <SimulatorLib/SimControl.h>
 
 #include <QCompleter>
 #include <QDesktopServices>

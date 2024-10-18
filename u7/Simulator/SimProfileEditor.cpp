@@ -2,7 +2,7 @@
 #include "GlobalMessanger.h"
 
 #include "../../UtilsLib/Ui/UiTools.h"
-#include <Simulator/SimProfiles.h>
+#include <SimulatorLib/SimProfiles.h>
 #include <UiLib/CodeEditor.h>
 
 

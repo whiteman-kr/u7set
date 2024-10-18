@@ -1,6 +1,6 @@
 #pragma once
-#include <Simulator/SimOverrideSignals.h>
-#include <Simulator/Simulator.h>
+#include <SimulatorLib/SimOverrideSignals.h>
+#include <SimulatorLib/Simulator.h>
 #include <SimulatorUi/ISimPropertyStorage.h>
 #include <UiLib/DoubleValidatorEx.h>
 
@@ -148,17 +148,17 @@ namespace SimOverrideUI
 
 		const std::map<QString, QString> m_templatesAnalog // Key is template name, value is template filename to load
 			{
-				{QStringLiteral("Sine"), QStringLiteral(":/Simulator/Templates/Sine.js")},
-				{QStringLiteral("Square"), QStringLiteral(":/Simulator/Templates/Square.js")},
-				{QStringLiteral("Triangle"), QStringLiteral(":/Simulator/Templates/Triangle.js")},
-				{QStringLiteral("Sawtooth Front"), QStringLiteral(":/Simulator/Templates/SawtoothFront.js")},
-				{QStringLiteral("Sawtooth Back"), QStringLiteral(":/Simulator/Templates/SawtoothBack.js")},
+				{QStringLiteral("Sine"), QStringLiteral(":/SimulatorUi/Templates/Sine.js")},
+				{QStringLiteral("Square"), QStringLiteral(":/SimulatorUi/Templates/Square.js")},
+				{QStringLiteral("Triangle"), QStringLiteral(":/SimulatorUi/Templates/Triangle.js")},
+				{QStringLiteral("Sawtooth Front"), QStringLiteral(":/SimulatorUi/Templates/SawtoothFront.js")},
+				{QStringLiteral("Sawtooth Back"), QStringLiteral(":/SimulatorUi/Templates/SawtoothBack.js")},
 			};
 
 		const std::map<QString, QString> m_templatesDiscrete // Key is template name, value is template filename to load
 			{
-				{QStringLiteral("Square"), QStringLiteral(":/Simulator/Templates/DiscreteSquare.js")},
-				{QStringLiteral("Series"), QStringLiteral(":/Simulator/Templates/DiscreteSeries.js")},
+				{QStringLiteral("Square"), QStringLiteral(":/SimulatorUi/Templates/DiscreteSquare.js")},
+				{QStringLiteral("Series"), QStringLiteral(":/SimulatorUi/Templates/DiscreteSeries.js")},
 			};
 	};
 

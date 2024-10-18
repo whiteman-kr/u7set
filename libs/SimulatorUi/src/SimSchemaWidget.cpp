@@ -4,8 +4,8 @@
 #include "SimWidgetPrivate.h"
 #include <SimulatorUi/SimIdeSimulator.h>
 
-#include <Simulator/SimAppSignalManager.h>
-#include <Simulator/SimSoftware.h>
+#include <SimulatorLib/SimAppSignalManager.h>
+#include <SimulatorLib/SimSoftware.h>
 #include <VFrame30/AppSignalController.h>
 #include <VFrame30/Context.h>
 #include <VFrame30/IMatsSchemaItemAssociations.h>

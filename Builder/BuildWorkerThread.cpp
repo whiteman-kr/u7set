@@ -1,7 +1,7 @@
 #include <HardwareLib/PropertyNames.h>
 #include <HardwareLib/Subsystem.h>
 
-#include <Simulator/Simulator.h>
+#include <SimulatorLib/Simulator.h>
 
 #include "AdsBridgeCfgGenerator.h"
 #include "AppDataServiceCfgGenerator.h"

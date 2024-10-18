@@ -44,10 +44,13 @@ int main(int argc, char* argv[])
 		a.setApplicationVersion(
 			QString("%1.%2.%3 (%4)").arg(U7SET_MAJOR_VERSION).arg(U7SET_MINOR_VERSION).arg(U7SET_PATCH_VERSION).arg(U7SET_BRANCH_NAME));
 
-		// Load license
-		//
-		Q_INIT_RESOURCE(LicenseLib); // Init LicenseLib resources
+		Q_INIT_RESOURCE(LicenseLib);
+		Q_INIT_RESOURCE(TrendView);
+		Q_INIT_RESOURCE(SimulatorLib);
+		Q_INIT_RESOURCE(SimulatorUi);
 
+		// --
+		//
 		if (LicenseLib::AppLicenser::guiAppStartValidation(QDateTime::fromSecsSinceEpoch(U7SET_BUILD_DATE_SECONDS).date()) == false)
 		{
 			return EXIT_FAILURE;
@@ -80,7 +83,7 @@ int main(int argc, char* argv[])
 
 		// Init TrendLib resources
 		//
-		Q_INIT_RESOURCE(TrendView);
+
 
 		// Start database communication thread
 		//

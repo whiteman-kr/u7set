@@ -1,7 +1,7 @@
 #include "SimSchemaPage.h"
 #include "SimSchemaView.h"
 #include <SimulatorUi/SimIdeSimulator.h>
-#include <Simulator/SimControl.h>
+#include <SimulatorLib/SimControl.h>
 
 #include <QGridLayout>
 

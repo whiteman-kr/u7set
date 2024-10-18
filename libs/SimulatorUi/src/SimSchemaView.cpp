@@ -5,8 +5,8 @@
 #include <SimulatorUi/SimIdeSimulator.h>
 
 #include <HardwareLib/ScriptEquipment.h>
-#include <Simulator/SimOverrideSignals.h>
-#include <Simulator/SimSoftware.h>
+#include <SimulatorLib/SimOverrideSignals.h>
+#include <SimulatorLib/SimSoftware.h>
 #include <VFrame30/PropertyNames.h>
 
 

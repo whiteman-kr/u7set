@@ -3,7 +3,7 @@
 #include "SimSchemaManager.h"
 #include <ILogFile.h>
 
-#include <Simulator/SimControlStatus.h>
+#include <SimulatorLib/SimControlStatus.h>
 #include <SimulatorUi/ISimPropertyStorage.h>
 #include <SimulatorUi/SimIdeSimulator.h>
 #include <VFrame30/AppSignalController.h>
@@ -36,7 +36,7 @@ namespace SimUi
 	public:
 		SimWidgetPrivate(std::shared_ptr<ILogFile> ideLogFile,
 						 std::shared_ptr<SimIdeSimulator> simulator,
-						 std::function<QString(void)> getProjectPathFunc,
+						 std::function<QString(QWidget*)> getProjectPathFunc,
 						 ISimPropertyStorage& propertyStorage,
 						 DbProjectStateNotifier* dbProjectStateNotifier,
 						 QWidget* parent = nullptr,
@@ -106,10 +106,10 @@ namespace SimUi
 		const SimSchemaManager& schemaManager() const;
 
 	private:
-		bool m_slaveWindow = false;                        // Cannot have output pane, do not stores its state
-		SimWidgetPrivate* m_masterWindow = nullptr;        // If slaveWindow is true, then masterWindow must be not null
+		bool m_slaveWindow = false;                            // Cannot have output pane, do not stores its state
+		SimWidgetPrivate* m_masterWindow = nullptr;            // If slaveWindow is true, then masterWindow must be not null
 
-		std::function<QString(void)> m_getProjectPathFunc; // This function is called to get project path (action openProject)
+		std::function<QString(QWidget*)> m_getProjectPathFunc; // This function is called to get project path (action openProject)
 		ISimPropertyStorage& m_propertyStorage;
 		DbProjectStateNotifier* m_dbProjectStateNotifier = nullptr;
 

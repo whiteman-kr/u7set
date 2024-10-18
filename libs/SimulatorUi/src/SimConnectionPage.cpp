@@ -1,9 +1,9 @@
 #include "SimConnectionPage.h"
 
-#include <Simulator/SimAppSignalManager.h>
-#include <Simulator/SimConnections.h>
-#include <Simulator/SimControl.h>
-#include <Simulator/SimRam.h>
+#include <SimulatorLib/SimAppSignalManager.h>
+#include <SimulatorLib/SimConnections.h>
+#include <SimulatorLib/SimControl.h>
+#include <SimulatorLib/SimRam.h>
 #include <SimulatorUi/SimIdeSimulator.h>
 
 #include <QCoreApplication>

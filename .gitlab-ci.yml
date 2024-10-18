@@ -266,7 +266,7 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/libs/Simulator/Scripts/SimProjectTests.js\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorConsole.exe -build=c:/temp/build/$Env:SIMULATOR_PROJECT_NAME/build -script=\"$Env:CI_PROJECT_DIR/libs/SimulatorLib/Scripts/SimProjectTests.js\""
 
 #Run AdsBridge tests (limited - without AppDataService)
     - "# ----------------------------------------------"
@@ -340,7 +340,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run Simulator AFBs tests"
     - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin/release/SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -script=\"$CI_PROJECT_DIR/libs/Simulator/Scripts/SimProjectTests.js\""
+    - "$CI_PROJECT_DIR/bin/release/SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -script=\"$CI_PROJECT_DIR/libs/SimulatorLib/Scripts/SimProjectTests.js\""
 
 #Run unit tests
     - "# ----------------------------------------------"

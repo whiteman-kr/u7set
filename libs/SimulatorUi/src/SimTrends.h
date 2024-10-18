@@ -1,5 +1,5 @@
 #pragma once
-#include <Simulator/SimAppSignalManager.h>
+#include <SimulatorLib/SimAppSignalManager.h>
 #include <TrendView/TrendMainWindow.h>
 
 

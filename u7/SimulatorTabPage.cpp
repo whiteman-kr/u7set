@@ -1,6 +1,6 @@
 #include "SimulatorTabPage.h"
 #include "./Simulator/SimSelectBuildDialog.h"
-#include <Simulator/SimConsoleLogFile.h>
+#include <SimulatorLib/SimConsoleLogFile.h>
 
 
 // SimPropertyStorage - implementation of ISimPropertyStorage that uses DbController to store properties
@@ -91,9 +91,9 @@ SimulatorTabPage::SimulatorTabPage(DbController* dbc, QWidget* parent) :
 
 	// Controls
 	//
-	std::function<QString(void)> getPathFunc = [this]()
+	std::function<QString(QWidget*)> getPathFunc = [this](QWidget* parent)
 	{
-		return getProjectPathFunc();
+		return getProjectPathFunc(parent);
 	};
 
 	m_simulatorWidget = new SimUi::SimWidget{std::make_shared<Sim::ConsoleLogFile>(),
@@ -116,14 +116,14 @@ SimulatorTabPage::SimulatorTabPage(DbController* dbc, QWidget* parent) :
 	return;
 }
 
-QString SimulatorTabPage::getProjectPathFunc()
+QString SimulatorTabPage::getProjectPathFunc(QWidget* parent)
 {
 	QSettings settings;
 
 	QString project = db()->currentProject().projectName().toLower();
 	QString lastPath = settings.value("SimulatorWidget/ProjectLastPath/" + project).toString();
 
-	SimSelectBuildDialog d{project, lastPath, this};
+	SimSelectBuildDialog d{project, lastPath, parent};
 
 	int result = d.exec();
 

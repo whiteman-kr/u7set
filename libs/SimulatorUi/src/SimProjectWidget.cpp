@@ -1,7 +1,7 @@
 #include "SimProjectWidget.h"
 
-#include <Simulator/SimControl.h>
-#include <Simulator/SimSubsystem.h>
+#include <SimulatorLib/SimControl.h>
+#include <SimulatorLib/SimSubsystem.h>
 
 #include <QGridLayout>
 #include <QHeaderView>

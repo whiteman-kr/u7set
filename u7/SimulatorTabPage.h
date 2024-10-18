@@ -55,7 +55,7 @@ protected:
 	virtual void closeEvent(QCloseEvent*) override;
 
 private:
-	QString getProjectPathFunc();
+	QString getProjectPathFunc(QWidget* parent);
 
 	// Data
 	//

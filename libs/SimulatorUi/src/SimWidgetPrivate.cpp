@@ -11,9 +11,9 @@
 #include "SimSignalSnapshot.h"
 #include "SimTrends.h"
 
-#include <Simulator/SimControl.h>
-#include <Simulator/SimLogicModule.h>
-#include <Simulator/SimSoftware.h>
+#include <SimulatorLib/SimControl.h>
+#include <SimulatorLib/SimLogicModule.h>
+#include <SimulatorLib/SimSoftware.h>
 #include <SimulatorUi/SimWidget.h>
 
 #include <SchemaClientLib/DialogSignalSearch.h>
@@ -40,7 +40,7 @@ namespace SimUi
 
 	SimWidgetPrivate::SimWidgetPrivate(std::shared_ptr<ILogFile> ideLogFile,
 									   std::shared_ptr<SimIdeSimulator> simulator,
-									   std::function<QString(void)> getProjectPathFunc,
+									   std::function<QString(QWidget*)> getProjectPathFunc,
 									   ISimPropertyStorage& propertyStorage,
 									   DbProjectStateNotifier* dbProjectStateNotifier,
 									   QWidget* parent /*= nullptr*/,
@@ -250,19 +250,19 @@ namespace SimUi
 		m_toolBar = new SimToolBar{"ToolBar"};
 		addToolBar(m_toolBar);
 
-		m_openProjectAction = new QAction{QIcon(":/Images/Images/SimOpen.svg"), tr("Open Build"), this};
+		m_openProjectAction = new QAction{QIcon(":/SimulatorUi/Images/SimOpen.svg"), tr("Open Build"), this};
 		m_openProjectAction->setShortcut(QKeySequence::Open);
 		connect(m_openProjectAction, &QAction::triggered, this, &SimWidgetPrivate::openBuild);
 
-		m_closeProjectAction = new QAction{QIcon(":/Images/Images/SimClose.svg"), tr("Close"), this};
+		m_closeProjectAction = new QAction{QIcon(":/SimulatorUi/Images/SimClose.svg"), tr("Close"), this};
 		m_closeProjectAction->setShortcut(QKeySequence::Close);
 		connect(m_closeProjectAction, &QAction::triggered, this, &SimWidgetPrivate::closeBuild);
 
-		m_refreshProjectAction = new QAction{QIcon(":/Images/Images/SimRefresh.svg"), tr("Refresh"), this};
+		m_refreshProjectAction = new QAction{QIcon(":/SimulatorUi/Images/SimRefresh.svg"), tr("Refresh"), this};
 		m_refreshProjectAction->setShortcut(QKeySequence::Refresh);
 		connect(m_refreshProjectAction, &QAction::triggered, this, &SimWidgetPrivate::refreshBuild);
 
-		m_addWindowAction = new QAction{QIcon(":/Images/Images/SimAddWindow.svg"), tr("Add Window"), this};
+		m_addWindowAction = new QAction{QIcon(":/SimulatorUi/Images/SimAddWindow.svg"), tr("Add Window"), this};
 		m_addWindowAction->setShortcut(QKeySequence::New);
 		connect(m_addWindowAction, &QAction::triggered, this, &SimWidgetPrivate::addNewWindow);
 		m_toolBar->addAction(m_addWindowAction);
@@ -369,23 +369,23 @@ namespace SimUi
 
 		// --
 		//
-		m_runAction = new QAction{QIcon(":/Images/Images/SimRun.svg"), tr("Run simulation for complete project"), this};
+		m_runAction = new QAction{QIcon(":/SimulatorUi/Images/SimRun.svg"), tr("Run simulation for complete project"), this};
 		QList<QKeySequence> runsKeys;
 		runsKeys << QKeySequence{Qt::CTRL | Qt::Key_R};
 		runsKeys << QKeySequence{Qt::CTRL | Qt::Key_F5};
 		m_runAction->setShortcuts(runsKeys);
 		connect(m_runAction, &QAction::triggered, this, &SimWidgetPrivate::runSimulation);
 
-		m_pauseAction = new QAction{QIcon(":/Images/Images/SimPause.svg"), tr("Pause current simulation"), this};
+		m_pauseAction = new QAction{QIcon(":/SimulatorUi/Images/SimPause.svg"), tr("Pause current simulation"), this};
 		connect(m_pauseAction, &QAction::triggered, this, &SimWidgetPrivate::pauseSimulation);
 
-		m_stopAction = new QAction{QIcon(":/Images/Images/SimStop.svg"), tr("Stop current simulation"), this};
+		m_stopAction = new QAction{QIcon(":/SimulatorUi/Images/SimStop.svg"), tr("Stop current simulation"), this};
 		m_stopAction->setShortcut(Qt::SHIFT | Qt::Key_F5);
 		connect(m_stopAction, &QAction::triggered, this, &SimWidgetPrivate::stopSimulation);
 
 		if (m_slaveWindow == false)
 		{
-			m_allowLanComm = new QAction{QIcon(":/Images/Images/SimAllowRegData.svg"),
+			m_allowLanComm = new QAction{QIcon(":/SimulatorUi/Images/SimAllowRegData.svg"),
 										 tr("Allow LogicModules' Application Data transmitting to AppDataSrv"),
 										 this};
 			m_allowLanComm->setCheckable(true);
@@ -436,23 +436,23 @@ namespace SimUi
 
 		connect(m_profilesComboBox, &QComboBox::currentTextChanged, this, &SimWidgetPrivate::profileComboTextChanged);
 
-		m_trendsAction = new QAction{QIcon(":/Images/Images/SimTrends.svg"), tr("Trends"), this};
+		m_trendsAction = new QAction{QIcon(":/SimulatorUi/Images/SimTrends.svg"), tr("Trends"), this};
 		m_trendsAction->setEnabled(true);
 		m_trendsAction->setData(
 			QVariant("IAmIndependentTrend")); // This is required to find this action in MonitorToolBar for drag and drop
 		connect(m_trendsAction, &QAction::triggered, this, &SimWidgetPrivate::showTrends);
 
-		m_findSignalAction = new QAction{QIcon(":/Images/Images/SimFindSignal.svg"), tr("Find Signal"), this};
+		m_findSignalAction = new QAction{QIcon(":/SimulatorUi/Images/SimFindSignal.svg"), tr("Find Signal"), this};
 		m_findSignalAction->setEnabled(true);
 		m_findSignalAction->setShortcut(QKeySequence::Find);
 		connect(m_findSignalAction, &QAction::triggered, this, &SimWidgetPrivate::showFindSignal);
 
 
-		m_schemaListAction = new QAction{QIcon(":/Images/Images/SchemaList.svg"), tr("Show All Schemas"), this};
+		m_schemaListAction = new QAction{QIcon(":/SimulatorUi/Images/SchemaList.svg"), tr("Show All Schemas"), this};
 		m_schemaListAction->setEnabled(true);
 		connect(m_schemaListAction, &QAction::triggered, this, &SimWidgetPrivate::openAppSchemasTabPage);
 
-		m_snapshotAction = new QAction{QIcon(":/Images/Images/SimSnapshot.svg"), tr("Signals Snapshot"), this};
+		m_snapshotAction = new QAction{QIcon(":/SimulatorUi/Images/SimSnapshot.svg"), tr("Signals Snapshot"), this};
 		m_snapshotAction->setEnabled(true);
 		connect(m_snapshotAction, &QAction::triggered, this, &SimWidgetPrivate::showSnapshot);
 
@@ -619,7 +619,7 @@ namespace SimUi
 			return;
 		}
 
-		QString path = m_getProjectPathFunc();
+		QString path = m_getProjectPathFunc(this);
 
 		if (path.isEmpty() == false)
 		{
@@ -1238,7 +1238,7 @@ namespace SimUi
 		SimLogicModulePage* controlPage = new SimLogicModulePage{m_simulator.get(), m_appSignalController, lmEquipmentId, m_tabWidget};
 
 		int tabIndex = m_tabWidget->addTab(controlPage, lmEquipmentId);
-		m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimLogicModuleIcon.svg"}});
+		m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/SimulatorUi/Images/SimLogicModuleIcon.svg"}});
 
 		m_tabWidget->setCurrentIndex(tabIndex);
 
@@ -1297,7 +1297,7 @@ namespace SimUi
 		SimConnectionPage* page = new SimConnectionPage{m_simulator.get(), connectionId, m_tabWidget};
 
 		int tabIndex = m_tabWidget->addTab(page, connectionId);
-		m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimConnectionIcon.svg"}});
+		m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/SimulatorUi/Images/SimConnectionIcon.svg"}});
 
 		m_tabWidget->setCurrentIndex(tabIndex);
 
@@ -1336,7 +1336,7 @@ namespace SimUi
 		SimSelectSchemaPage* page = new SimSelectSchemaPage{m_simulator.get(), m_tabWidget};
 
 		int tabIndex = m_tabWidget->addTab(page, tr("AppLogic Schemas"));
-		m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/Images/Images/SimAppLogicSchemas.svg"}});
+		m_tabWidget->setTabIcon(tabIndex, QIcon{QPixmap{":/SimulatorUi/Images/SimAppLogicSchemas.svg"}});
 		m_tabWidget->setTabToolTip(0,
 								   tr("Application Logic Schemas\n"
 									  "[CTRL + `]"));

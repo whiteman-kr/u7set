@@ -6,18 +6,7 @@ namespace SimUi
 {
 	SimWidget::SimWidget(std::shared_ptr<ILogFile> ideLogFile,
 						 std::shared_ptr<SimIdeSimulator> simulator,
-						 std::function<QString(void)> getProjectPathFunc,
-						 ISimPropertyStorage& propertyStorage,
-						 DbProjectStateNotifier* dbProjectStateNotifier,
-						 QWidget* parent,
-						 Qt::WindowType windowType) :
-		SimWidget{ideLogFile, simulator, getProjectPathFunc, propertyStorage, dbProjectStateNotifier, parent, windowType, false, nullptr}
-	{
-	}
-
-	SimWidget::SimWidget(std::shared_ptr<ILogFile> ideLogFile,
-						 std::shared_ptr<SimIdeSimulator> simulator,
-						 std::function<QString(void)> getProjectPathFunc,
+						 std::function<QString(QWidget*)> getProjectPathFunc,
 						 ISimPropertyStorage& propertyStorage,
 						 DbProjectStateNotifier* dbProjectStateNotifier,
 						 QWidget* parent,

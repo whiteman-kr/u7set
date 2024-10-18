@@ -45,7 +45,7 @@ mkdir -p $OUTPUT_DIR
 
 # Init is not required, as we have an empty dir at start.
 #
-#lcov $LCOV_CLEAR_ARGUMENTS --output-file $OUTPUT_DIR/Simulator.info --directory ./Simulator/debug
+#lcov $LCOV_CLEAR_ARGUMENTS --output-file $OUTPUT_DIR/Simulator.info --directory ./SimulatorLib/debug
 
 # Build project u7_test_simulator.
 #
@@ -137,8 +137,8 @@ TEST_OUTPUT_FILE="Builder.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Simulator
-TEST_DIR="./build/libs/Simulator/CMakeFiles/Simulator.dir"
-TEST_OUTPUT_FILE="Simulator.info"
+TEST_DIR="./build/libs/SimulatorLib/CMakeFiles/SimulatorLib.dir"
+TEST_OUTPUT_FILE="SimulatorLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # TrendView
@@ -182,7 +182,7 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/HardwareLib.info \
     --add-tracefile $OUTPUT_DIR/MetrologyTests.info \
     --add-tracefile $OUTPUT_DIR/Builder.info \
-    --add-tracefile $OUTPUT_DIR/Simulator.info \
+    --add-tracefile $OUTPUT_DIR/SimulatorLib.info \
     --add-tracefile $OUTPUT_DIR/UtilsLib.info \
     --add-tracefile $OUTPUT_DIR/ClientLib.info \
     --add-tracefile $OUTPUT_DIR/AdsBridge.info

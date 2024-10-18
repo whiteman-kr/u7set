@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SimBasePage.h"
-#include <Simulator/SimLogicModule.h>
+#include <SimulatorLib/SimLogicModule.h>
 
 #include <QAbstractTableModel>
 #include <QTreeView>

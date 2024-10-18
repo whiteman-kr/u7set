@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Simulator/Simulator.h>
+#include <SimulatorLib/Simulator.h>
 #include <SimulatorUi/ISimPropertyStorage.h>
 
 #include <QTreeWidget>

@@ -4,7 +4,7 @@
 
 #include "../UtilsLib/Ui/UiTools.h"
 
-#include <Simulator/SimAppSignalManager.h>
+#include <SimulatorLib/SimAppSignalManager.h>
 #include <SimulatorUi/SimIdeSimulator.h>
 
 

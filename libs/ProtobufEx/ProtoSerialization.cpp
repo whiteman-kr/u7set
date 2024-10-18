@@ -4,20 +4,17 @@ namespace Proto
 {
 	bool ParseFromIstream(::google::protobuf::Message& message, std::fstream& stream)
 	{
-		bool result = message.ParseFromIstream(&stream);
-		return result;
+		return message.ParseFromIstream(&stream);
 	}
 
 	bool ParseFromString(::google::protobuf::Message& message, const char* str)
 	{
-		bool result = message.ParseFromString(str);
-		return result;
+		return message.ParseFromString(str);
 	}
 
 	bool ParseFromArray(::google::protobuf::Message& message, const QByteArray& data)
 	{
-		bool result = message.ParseFromArray(data.constData(), data.size());
-		return result;
+		return message.ParseFromArray(data.constData(), data.size());
 	}
 
 }

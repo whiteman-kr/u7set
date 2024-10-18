@@ -60,6 +60,6 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest_main GTest::gmock)
-target_link_libraries(${TARGET} PRIVATE ClientLib Simulator)
+target_link_libraries(${TARGET} PRIVATE ClientLib SimulatorLib)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

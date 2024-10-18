@@ -126,7 +126,7 @@ protected:
 
 	DialogSignalInfo(const AppSignalParam& signal,
 					 IAppSignalManager* appSignalManager,
-					 ClientLib::ISignalDataServer* signalDataServer,                                  // Can be empty, e.g. in Simulator
+					 ClientLib::ISignalDataServer* signalDataServer,                       // Can be empty, e.g. in Simulator
 					 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices, // Can be empty, e.g. in Simulator
 					 ITuningSignalManager& tuningSignalManager,
 					 ITuningConnection& tuningConnection,
