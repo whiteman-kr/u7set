@@ -67,7 +67,8 @@ copy ..\bin\release\TuningClient.exe packages\u7set.mats.tuningclient\data
 xcopy ..\bin\release\TuningClient*.qm packages\u7set.mats.tuningclient\data /sy
 copy ..\bin\release\docs\D11.9_FSC_Tuning_User_Manual.pdf packages\u7set.mats.tuningclient.docs\data\docs
 
-copy ..\bin\release\Simulator*.exe packages\u7set.tools.simulator\data
+copy ..\bin\release\Simulator.exe packages\u7set.tools.simulator\data
+copy ..\bin\release\SimulatorConsole.exe packages\u7set.tools.simulator\data
 copy ..\bin\release\Metrology.exe packages\u7set.tools.metrology\data
 copy ..\bin\release\mconf.exe packages\u7set.tools.mconf\data
 copy ..\bin\release\TestSuite.exe packages\u7set.tools.testsuite\data
