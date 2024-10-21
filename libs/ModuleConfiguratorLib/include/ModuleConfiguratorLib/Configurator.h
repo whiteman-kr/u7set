@@ -1,7 +1,12 @@
 #pragma once
+
+#include <QUuid>
 #include <memory>
 
+
 class OutputLog;
+class QSerialPort;
+
 
 namespace ModuleConfiguratorLib
 {

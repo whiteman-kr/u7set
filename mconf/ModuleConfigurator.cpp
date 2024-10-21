@@ -1,19 +1,30 @@
 #include "ModuleConfigurator.h"
-#include <ModuleConfiguratorLib/Configurator.h>
-#include <UiLib/DialogAbout.h>
-#include <LicenseLib/AppLicenser.h>
 #include "ApplicationTabPage.h"
 #include "DiagTabPage.h"
 #include "Globals.h"
 #include "SettingsForm.h"
 #include "version.h"
+
+#include <LicenseLib/AppLicenser.h>
+#include <ModuleConfiguratorLib/Configurator.h>
+#include <UiLib/DialogAbout.h>
+
 #include <QDragEnterEvent>
+#include <QMessageBox>
 #include <QMimeData>
+#include <QPushButton>
+#include <QSettings>
+#include <QSplitter>
+#include <QTabWidget>
+#include <QTextEdit>
+#include <QFileDialog>
+
 
 using namespace ModuleConfiguratorLib;
 
-ModuleConfigurator::ModuleConfigurator(QWidget *parent)
-	: QMainWindow(parent)
+
+ModuleConfigurator::ModuleConfigurator(QWidget* parent) :
+	QMainWindow(parent)
 {
 	ui.setupUi(this);
 
@@ -25,20 +36,22 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	// Tab widget
 	//
 	m_tabWidget = new QTabWidget(this);
-	
+
 	ApplicationTabPage* appTabPage = new ApplicationTabPage(m_settings.expertMode());
 	DiagTabPage* diagTabPage = new DiagTabPage();
 
 	m_tabWidget->addTab(appTabPage, "Output Bitstream Files");
 	m_tabWidget->addTab(diagTabPage, "Service Information");
 
-	connect(m_tabWidget, &QTabWidget::currentChanged, [this](int tabIndex)
-	{
-		if (m_pEraseButton != nullptr)
-		{
-			m_pEraseButton->setEnabled(tabIndex == 0);
-		}
-	});
+	connect(m_tabWidget,
+			&QTabWidget::currentChanged,
+			[this](int tabIndex)
+			{
+				if (m_pEraseButton != nullptr)
+				{
+					m_pEraseButton->setEnabled(tabIndex == 0);
+				}
+			});
 
 	// Log
 	//
@@ -46,7 +59,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	m_pLog->setReadOnly(true);
 	m_pLog->document()->setUndoRedoEnabled(false);
 	m_pLog->document()->setMaximumBlockCount(600);
-	
+
 
 	// Read data from module button
 	//
@@ -121,7 +134,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	QHBoxLayout* pMainLayout = new QHBoxLayout();
 	pMainLayout->addWidget(m_pSplitter);
 	pMainLayout->addLayout(pRightLayout);
-	
+
 	QWidget* pCentralWidget = new QWidget();
 
 	pCentralWidget->setLayout(pMainLayout);
@@ -153,17 +166,21 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 
 	m_pConfigurator = new Configurator(m_settings.serialPort(), &theLog);
 	m_pConfigurationThread = new QThread(this);
-	
+
 	connect(this, &ModuleConfigurator::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
-	
+
 	connect(this, &ModuleConfigurator::readServiceInformation, m_pConfigurator, &Configurator::readServiceInformation);
 	connect(this, &ModuleConfigurator::readFirmware, m_pConfigurator, &Configurator::readFirmware);
 
-	//connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32, quint32)));
+	// connect(this, SIGNAL(writeDiagData(quint32, QDate, quint32, quint32)), m_pConfigurator, SLOT(writeDiagData(quint32, QDate, quint32,
+	// quint32)));
 	connect(this, &ModuleConfigurator::writeConfData, m_pConfigurator, &Configurator::uploadFirmware);
-	connect(this, &ModuleConfigurator::writeDiagData, m_pConfigurator, &Configurator::uploadServiceInformation);	// Template version in 5.0.1 has a bug, will be resolved in 5.0.2
+	connect(this,
+			&ModuleConfigurator::writeDiagData,
+			m_pConfigurator,
+			&Configurator::uploadServiceInformation); // Template version in 5.0.1 has a bug, will be resolved in 5.0.2
 	connect(this, &ModuleConfigurator::eraseFlashMemory, m_pConfigurator, &Configurator::eraseFlashMemory);
-	
+
 	connect(m_pConfigurator, &Configurator::operationStarted, this, &ModuleConfigurator::disableControls);
 	connect(m_pConfigurator, &Configurator::operationFinished, this, &ModuleConfigurator::enableControls);
 	connect(m_pConfigurator, &Configurator::operationFinished, appTabPage, &ApplicationTabPage::enableControls);
@@ -179,9 +196,9 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	connect(m_pConfigurator, &Configurator::loadBinaryFileHeaderComplete, appTabPage, &ApplicationTabPage::loadBinaryFileHeaderComplete);
 	connect(m_pConfigurator, &Configurator::uartOperationStart, appTabPage, &ApplicationTabPage::uartOperationStart);
 	connect(m_pConfigurator, &Configurator::uploadFirmwareComplete, appTabPage, &ApplicationTabPage::uploadComplete);
-	
+
 	connect(m_pConfigurationThread, &QThread::finished, m_pConfigurator, &QObject::deleteLater);
-	
+
 	m_pConfigurator->moveToThread(m_pConfigurationThread);
 
 	m_pConfigurationThread->start();
@@ -262,9 +279,7 @@ void ModuleConfigurator::timerEvent(QTimerEvent* pTimerEvent)
 		return;
 	}
 
-	if (pTimerEvent->timerId() == m_logTimerId &&
-			theLog.isEmpty() == false &&
-			m_pLog != nullptr)
+	if (pTimerEvent->timerId() == m_logTimerId && theLog.isEmpty() == false && m_pLog != nullptr)
 	{
 		std::list<OutputLogItem> messages;
 		for (int i = 0; i < 30 && theLog.isEmpty() == false; i++)
@@ -436,7 +451,7 @@ void ModuleConfigurator::configureClicked()
 			emit writeConfData(page->configuration(), page->selectedSubsystem(), selectedUarts);
 		}
 	}
-	catch(QString message)
+	catch (QString message)
 	{
 		theLog.writeError(message);
 		return;
@@ -453,7 +468,7 @@ void ModuleConfigurator::readClicked()
 		//
 		if (dynamic_cast<DiagTabPage*>(m_tabWidget->currentWidget()) != nullptr)
 		{
-			//DiagTabPage* page = dynamic_cast<DiagTabPage*>(m_tabWidget->currentWidget());
+			// DiagTabPage* page = dynamic_cast<DiagTabPage*>(m_tabWidget->currentWidget());
 
 			theLog.writeMessage("");
 			theLog.writeMessage(tr("Reading service information..."));
@@ -495,9 +510,8 @@ void ModuleConfigurator::readClicked()
 
 			emit readFirmware(fileName, selectedUarts);
 		}
-
 	}
-	catch(QString message)
+	catch (QString message)
 	{
 		theLog.writeError(message);
 		return;
@@ -519,19 +533,19 @@ void ModuleConfigurator::eraseClicked()
 	mb.addButton(tr("Cancel"), QMessageBox::RejectRole);
 	mb.addButton(tr("Erase"), QMessageBox::AcceptRole);
 	mb.setIcon(QMessageBox::Warning);
-	
+
 	if (mb.exec() == QMessageBox::Rejected)
 	{
 		return;
 	}
-	
+
 	try
 	{
 		// --
 		//
 		theLog.writeMessage("");
 		theLog.writeMessage(tr("Erasing flash memory..."));
-		
+
 		// Read
 		//
 
@@ -554,28 +568,27 @@ void ModuleConfigurator::eraseClicked()
 		else
 		{
 			Q_ASSERT(false);
-			throw (tr("Attempt to erase service information"));
+			throw(tr("Attempt to erase service information"));
 		}
 	}
-	catch(QString message)
+	catch (QString message)
 	{
 		theLog.writeError(message);
 		return;
 	}
-	
+
 	return;
 }
 
 void ModuleConfigurator::cancelClicked()
 {
 	m_pConfigurator->cancelOperation();
-
 }
 
 void ModuleConfigurator::settingsClicked()
 {
 	SettingsForm settingsForm(m_settings, this);
-	
+
 	int result = settingsForm.exec();
 	if (result == QDialog::Accepted)
 	{
@@ -630,7 +643,7 @@ void ModuleConfigurator::disableControls()
 
 	m_pReadButton->setEnabled(false);
 	m_pConfigureButton->setEnabled(false);
-	
+
 	if (m_tabWidget->currentIndex() == 0)
 	{
 		if (m_pEraseButton != nullptr)
@@ -674,16 +687,18 @@ void ModuleConfigurator::communicationReadFinished(int protocolVersion, std::vec
 	{
 		DiagTabPage* page = dynamic_cast<DiagTabPage*>(m_tabWidget->currentWidget());
 
-		//CONF_SERVICE_DATA_V1 serviceDataVersion = *reinterpret_cast<CONF_SERVICE_DATA_V1*>(data.data());
+		// CONF_SERVICE_DATA_V1 serviceDataVersion = *reinterpret_cast<CONF_SERVICE_DATA_V1*>(data.data());
 
 		switch (protocolVersion)
 		{
 		case 1:
 			{
-				CONF_SERVICE_DATA_V1 serviceDataVersion = *reinterpret_cast<CONF_SERVICE_DATA_V1*>(data.data());
+				ModuleConfiguratorLib::CONF_SERVICE_DATA_V1 serviceDataVersion = *reinterpret_cast<ModuleConfiguratorLib::CONF_SERVICE_DATA_V1*>(data.data());
 
 				page->setFactoryNo(serviceDataVersion.factoryNo());
-				page->setManufactureDate(QDate(serviceDataVersion.manufactureYear(), serviceDataVersion.manufactureMonth(), serviceDataVersion.manufactureDay()));
+				page->setManufactureDate(QDate(serviceDataVersion.manufactureYear(),
+											   serviceDataVersion.manufactureMonth(),
+											   serviceDataVersion.manufactureDay()));
 
 				page->setFirmwareCrc(serviceDataVersion.firmwareCrc());
 			}
@@ -695,4 +710,3 @@ void ModuleConfigurator::communicationReadFinished(int protocolVersion, std::vec
 
 	return;
 }
-

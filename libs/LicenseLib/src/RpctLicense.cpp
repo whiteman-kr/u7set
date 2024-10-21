@@ -471,4 +471,42 @@ namespace LicenseLib
 		Q_ASSERT(m_data);
 		m_data->mutable_module_configurator()->set_allowed_module_uart_uuids(value.toStdString());
 	}
+
+	bool RpctLicense::allowedU7() const
+	{
+		if (issueDate() <= QDate{2024, 10, 18})
+		{
+			//  Licenses issued before 2024-10-18 are allowed to use u7
+			//
+			return true;
+		}
+
+		Q_ASSERT(m_data);
+		return m_data->u7().allowed();
+	}
+
+	void RpctLicense::setAllowedU7(bool value)
+	{
+		return m_data->mutable_u7()->set_allowed(value);
+	}
+
+	bool RpctLicense::allowedSimulatorApp() const
+	{
+		if (issueDate() <= QDate{2024, 10, 18})
+		{
+			//  Licenses issued before 2024-10-18 are allowed to use u7
+			//
+			return true;
+		}
+
+		Q_ASSERT(m_data);
+		return m_data->simulator().allowed();
+	}
+
+	void RpctLicense::setSimulatorApp(bool value)
+	{
+		Q_ASSERT(m_data);
+		m_data->mutable_simulator()->set_allowed(value);
+	}
+
 } // namespace LicenseLib

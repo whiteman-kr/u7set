@@ -1,9 +1,12 @@
 #include "ModuleConfigurator.h"
 #include "version.h"
+
 #include <CommonLib/ConstStrings.h>
 #include <LicenseLib/AppLicenser.h>
-#include <QtWidgets/QApplication>
+
 #include <google/protobuf/stubs/common.h>
+
+#include <QtWidgets/QApplication>
 
 Q_DECLARE_METATYPE(std::vector<quint8>)
 

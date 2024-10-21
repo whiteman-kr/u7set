@@ -48,36 +48,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<memory>
 	<vector>
 
-	<QApplication>
-	<QComboBox>
-	<QDateEdit>
-	<QDebug>
-	<QFileDialog>
-	<QGridLayout>
-	<QHBoxLayout>
-	<QLabel>
-	<QLineEdit>
-	<QMessageBox>
-	<QPushButton>
-	<QSerialPort>
-	<QSerialPortInfo>
-	<QSettings>
-	<QSplitter>
-	<QSqlDatabase>
-	<QSqlDriver>
-	<QSqlError>
-	<QSqlQuery>
-	<QString>
-	<QTabWidget>
-	<QtEndian>
-	<QTextEdit>
-	<QThread>
-	<QtNetwork/QHostInfo>
-	<QTreeWidget>
-	<QTreeWidgetItem>
-	<QUuid>
-	<QVBoxLayout>
-
 	# Project includes
 	#
 	<CommonLib/Types.h>

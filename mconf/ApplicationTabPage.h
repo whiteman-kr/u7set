@@ -5,7 +5,13 @@
 #include <HardwareLib/ModuleFirmware.h>
 
 #include <optional>
-using namespace Hardware;
+
+
+class QLineEdit;
+class QTreeWidget;
+class QTreeWidgetItem;
+
+
 
 class ApplicationTabPage : public QWidget
 {
@@ -27,7 +33,7 @@ public:
 	void openBitstreamFile(const QString& fileName);
 
 signals:
-	void loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage);
+	void loadBinaryFile(const QString& fileName, Hardware::ModuleFirmwareStorage* storage);
 	void detectSubsystem();
 	void detectUarts();
 
@@ -69,17 +75,13 @@ private:
 	};
 
 	QLineEdit* m_fileNameEdit = nullptr;
-
 	QTreeWidget* m_subsystemsListTree = nullptr;
-
 	QTreeWidget* m_bitstreamUartListTree = nullptr;
-
 	QTreeWidget* m_pUartsListTree = nullptr;
 
-	ModuleFirmwareStorage m_firmware;
+	Hardware::ModuleFirmwareStorage m_firmware;
 
 	std::vector<int> m_uartIds;
-
 	std::map<int, QString> m_uartIdTypes;
 };
 

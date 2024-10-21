@@ -56,6 +56,15 @@ int main(int argc, char* argv[])
 			return EXIT_FAILURE;
 		}
 
+		bool isAppLicenseValid = LicenseLib::AppLicenser::showRestrictionMessageBox(nullptr,
+																					LicenseLib::AppLicenser{}.validator().validateAppU7(),
+																					"Application u7 (RPCT)");
+
+		if (isAppLicenseValid == false)
+		{
+			return EXIT_FAILURE;
+		}
+
 		// --
 		//
 		VFrame30::init();

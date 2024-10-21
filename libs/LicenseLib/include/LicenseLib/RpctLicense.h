@@ -101,6 +101,16 @@ namespace LicenseLib
 		QString mcAllowedModuleUartUuids() const;
 		void setMcAllowedModuleUartUuids(const QString& value);
 
+		// u7
+		//
+		bool allowedU7() const;
+		void setAllowedU7(bool value);
+
+		// Simulator application
+		//
+		bool allowedSimulatorApp() const;
+		void setSimulatorApp(bool value);
+
 	private:
 		std::unique_ptr<Proto::License> m_data;
 	};
