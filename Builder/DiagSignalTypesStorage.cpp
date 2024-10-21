@@ -74,7 +74,7 @@ bool DiagSignalTypesStorage::load(QString* errorMessage)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = m_db->getFileList(&fileList, DbDir::DiagSignalTypesDir, Db::File::DiagSignalTypeFileExtension, false /*removeDeleted*/, nullptr);
+	bool ok = m_db->getFileList(&fileList, DbDir::DiagSignalTypesDir, File::DiagSignalTypeFileExtension, false /*removeDeleted*/, nullptr);
 	if (ok == false)
 	{
 		*errorMessage = m_db->lastError();
@@ -143,7 +143,7 @@ bool DiagSignalTypesStorage::save(const QUuid& uuid, QString* errorMessage)
 	//
 	DbFileInfo fi = fileInfo(dst->uuid());
 
-	const QString& fileName = QString("%1.%2").arg(dst->signalTypeId().toLower()).arg(Db::File::DiagSignalTypeFileExtension);
+	const QString& fileName = QString("%1.%2").arg(dst->signalTypeId().toLower()).arg(File::DiagSignalTypeFileExtension);
 
 	if (fi.isNull() == true)
 	{

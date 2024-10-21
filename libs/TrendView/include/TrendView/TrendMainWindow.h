@@ -7,7 +7,10 @@
 
 #include "TrendSignal.h"
 
+class QAction;
 class QComboBox;
+class QPushButton;
+class QStatusBar;
 
 namespace Ui
 {
@@ -20,6 +23,7 @@ namespace TrendLib
 	class TrendWidget;
 	class TrendSlider;
 	class TrendSignalSet;
+
 
 	class TrendMainWindow : public QMainWindow
 	{

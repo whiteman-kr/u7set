@@ -1,4 +1,5 @@
 #include "MconfSettings.h"
+#include <QSettings>
 
 
 MconfSettings::MconfSettings(void) :

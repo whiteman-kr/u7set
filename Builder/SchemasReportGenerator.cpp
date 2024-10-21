@@ -1263,12 +1263,12 @@ namespace Builder
 
 					// Filter files by extension
 					//
-					if (fi->fileName().endsWith("." + QString(Db::File::AlFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(Db::File::UfbFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(Db::File::MvsFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(Db::File::TvsFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(Db::File::DvsFileExtension)) == false &&
-						fi->fileName().endsWith("." + QString(Db::File::VduFileExtension)) == false)
+					if (fi->fileName().endsWith("." + QString(File::AlFileExtension)) == false &&
+						fi->fileName().endsWith("." + QString(File::UfbFileExtension)) == false &&
+						fi->fileName().endsWith("." + QString(File::MvsFileExtension)) == false &&
+						fi->fileName().endsWith("." + QString(File::TvsFileExtension)) == false &&
+						fi->fileName().endsWith("." + QString(File::DvsFileExtension)) == false &&
+						fi->fileName().endsWith("." + QString(File::VduFileExtension)) == false)
 					{
 						continue;
 					}

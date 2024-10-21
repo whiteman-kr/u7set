@@ -48,7 +48,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "AppSchemaID";
 
 		tempateParentFileId = db->systemFileId(DbDir::AppLogicDir);
-		templateFileExtension = Db::File::AlTemplExtension;
+		templateFileExtension = File::AlTemplExtension;
 
 		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
@@ -65,7 +65,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "UserFunctionalBlock ID";
 
 		tempateParentFileId = db->systemFileId(DbDir::UfblDir);
-		templateFileExtension = Db::File::UfbTemplExtension;
+		templateFileExtension = File::UfbTemplExtension;
 
 		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
@@ -82,7 +82,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "MonitorSchemaID";
 
 		tempateParentFileId = db->systemFileId(DbDir::MonitorSchemasDir);
-		templateFileExtension = Db::File::MvsTemplExtension;
+		templateFileExtension = File::MvsTemplExtension;
 
 		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
@@ -101,7 +101,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "TuningSchemaID";
 
 		tempateParentFileId = db->systemFileId(DbDir::TuningSchemasDir);
-		templateFileExtension = Db::File::TvsTemplExtension;
+		templateFileExtension = File::TvsTemplExtension;
 
 		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
@@ -120,7 +120,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "DiagSchemaID";
 
 		tempateParentFileId = db->systemFileId(DbDir::DiagSchemasDir);
-		templateFileExtension = Db::File::DvsTemplExtension;
+		templateFileExtension = File::DvsTemplExtension;
 
 		if (VFrame30::Settings::regionalUnit() == SchemaUnit::Inch)
 		{
@@ -139,7 +139,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "VduSchemaID";
 
 		tempateParentFileId = db->systemFileId(DbDir::VduSchemasDir);
-		templateFileExtension = Db::File::VduTemplExtension;
+		templateFileExtension = File::VduTemplExtension;
 
 		units.push_back(pxUnits);
 	}

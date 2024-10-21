@@ -1,11 +1,11 @@
 #include "SimCommandTest_LM5_LM6.h"
 
-#include <Simulator/SimConsoleLogFile.h>
+#include <SimulatorLib/SimConsoleLogFile.h>
 
-#include "../../libs/Simulator/SimCommandProcessor_LM5_LM6.h"
-#include "../../libs/Simulator/SimDeviceEmulator.h"
-#include "../../libs/Simulator/SimException.h"
-#include "../../libs/Simulator/SimulatorPrivate.h"
+#include "../../libs/SimulatorLib/SimCommandProcessor_LM5_LM6.h"
+#include "../../libs/SimulatorLib/SimDeviceEmulator.h"
+#include "../../libs/SimulatorLib/SimException.h"
+#include "../../libs/SimulatorLib/SimulatorPrivate.h"
 
 #include <QtTest>
 

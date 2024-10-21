@@ -4338,7 +4338,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	std::vector<DbFileInfo> fileList = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
 		{
-			return file.fileName().endsWith(QString(".") + Db::File::UfbFileExtension, Qt::CaseInsensitive) == true &&
+			return file.fileName().endsWith(QString(".") + File::UfbFileExtension, Qt::CaseInsensitive) == true &&
 				file.isFolder() == false;
 		});
 
@@ -4436,7 +4436,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<AppSignalLib::Bu
 	//
 	DbFileTree filesTree;
 
-	bool ok = db->getFileListTree(&filesTree, DbDir::BusTypesDir, QString(".") + Db::File::BusFileExtension, true, parentWidget);
+	bool ok = db->getFileListTree(&filesTree, DbDir::BusTypesDir, QString(".") + File::BusFileExtension, true, parentWidget);
 	if (ok == false)
 	{
 		return false;

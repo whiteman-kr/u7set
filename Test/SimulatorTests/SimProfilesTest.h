@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <Simulator/SimProfiles.h>
+#include <SimulatorLib/SimProfiles.h>
 
 class SimProfilesTest : public QObject
 {

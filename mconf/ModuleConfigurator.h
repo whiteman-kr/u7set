@@ -17,6 +17,12 @@ namespace ModuleConfiguratorLib
 	class Configurator;
 }
 
+class QPushButton;
+class QTextEdit;
+class QSplitter;
+class QTabWidget;
+
+
 class ModuleConfigurator : public QMainWindow
 {
 	Q_OBJECT

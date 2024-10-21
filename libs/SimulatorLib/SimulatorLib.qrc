@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/SimulatorLib">
+        <file>Scripts/ScriptSample.js</file>
+    </qresource>
+</RCC>

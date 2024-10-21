@@ -16,6 +16,7 @@
 #include <Behavior/TuningClientBehavior.h>
 
 #include <QJSEngine>
+#include <QMessageBox>
 
 class QPaintEvent;
 class QTimerEvent;

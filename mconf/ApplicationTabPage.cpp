@@ -1,15 +1,27 @@
 #include "ApplicationTabPage.h"
-#include "Globals.h"
 #include "../UtilsLib/OutputLog.h"
+#include "Globals.h"
+
 #include <ModuleConfiguratorLib/Configurator.h>
+
+#include <QCoreApplication>
+#include <QFileDialog>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QTreeWidget>
+#include <QVBoxLayout>
+
 
 using namespace ModuleConfiguratorLib;
 
-ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
-	: QWidget(parent),
-	  m_expertMode(expertMode)
-{
 
+ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget* parent) :
+	QWidget(parent),
+	m_expertMode(expertMode)
+{
 	QVBoxLayout* pLeftLayout = new QVBoxLayout();
 
 	//
@@ -89,7 +101,7 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
 
 	pLeftLayout->addLayout(bl);
 
-	//pLeftLayout->addStretch();
+	// pLeftLayout->addStretch();
 
 	if (expertMode == true)
 	{
@@ -138,21 +150,16 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget *parent)
 
 	//
 	setLayout(pLeftLayout);
-
-
 }
 
-ApplicationTabPage::~ApplicationTabPage()
-{
-
-}
+ApplicationTabPage::~ApplicationTabPage() {}
 
 bool ApplicationTabPage::isFileLoaded() const
 {
 	return m_firmware.isEmpty() == false;
 }
 
-ModuleFirmwareStorage *ApplicationTabPage::configuration()
+Hardware::ModuleFirmwareStorage* ApplicationTabPage::configuration()
 {
 	return &m_firmware;
 }
@@ -201,7 +208,7 @@ std::optional<std::vector<int>> ApplicationTabPage::selectedUarts() const
 
 	std::vector<int> selectedUarts;
 
-	if ( m_pUartsListTree == nullptr)
+	if (m_pUartsListTree == nullptr)
 	{
 		Q_ASSERT(m_pUartsListTree);
 		return {};
@@ -218,7 +225,7 @@ std::optional<std::vector<int>> ApplicationTabPage::selectedUarts() const
 
 	for (int i = 0; i < count; i++)
 	{
-		QTreeWidgetItem* item =	m_pUartsListTree->topLevelItem(i);
+		QTreeWidgetItem* item = m_pUartsListTree->topLevelItem(i);
 
 		bool ok = false;
 
@@ -360,9 +367,9 @@ void ApplicationTabPage::loadBinaryFileHeaderComplete()
 
 	// User must think
 	//
-	//if (m_pSubsystemsListWidget->topLevelItemCount() > 0)
+	// if (m_pSubsystemsListWidget->topLevelItemCount() > 0)
 	//{
-		//m_pSubsystemsListWidget->setCurrentItem(m_pSubsystemsListWidget->topLevelItem(0));
+	// m_pSubsystemsListWidget->setCurrentItem(m_pSubsystemsListWidget->topLevelItem(0));
 	//}
 }
 
@@ -513,8 +520,7 @@ void ApplicationTabPage::detectUartsComplete(std::vector<int> uartIds)
 		return;
 	}
 
-	if (uartIds.size() == 1 &&
-		(uartIds[0] & ConfigurationUartMask) == ConfigurationUartValue)
+	if (uartIds.size() == 1 && (uartIds[0] & ConfigurationUartMask) == ConfigurationUartValue)
 	{
 		m_uartIds.clear();
 
@@ -553,7 +559,7 @@ void ApplicationTabPage::clearSubsystemsUartData()
 
 void ApplicationTabPage::fillUartsList()
 {
-	if ( m_pUartsListTree == nullptr)
+	if (m_pUartsListTree == nullptr)
 	{
 		Q_ASSERT(m_pUartsListTree);
 		return;
@@ -561,12 +567,12 @@ void ApplicationTabPage::fillUartsList()
 
 	// Remember previous checked uarts
 
-	std::map<int, bool> previousUarts;	// key is uartId, value is Process
+	std::map<int, bool> previousUarts; // key is uartId, value is Process
 
 	int count = m_pUartsListTree->topLevelItemCount();
 	for (int i = 0; i < count; i++)
 	{
-		QTreeWidgetItem* item =	m_pUartsListTree->topLevelItem(i);
+		QTreeWidgetItem* item = m_pUartsListTree->topLevelItem(i);
 		if (item == nullptr)
 		{
 			Q_ASSERT(item);
@@ -591,7 +597,6 @@ void ApplicationTabPage::fillUartsList()
 	{
 		for (int uartId : m_uartIds)
 		{
-
 			QString numberStr = QString::number(uartId, 16) + "h";
 
 			QString typeStr = tr("Custom");

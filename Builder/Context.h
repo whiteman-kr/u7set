@@ -1,7 +1,7 @@
 #pragma once
 
 #include <DbLib/DbController.h>
-#include <Simulator/SimProfiles.h>
+#include <SimulatorLib/SimProfiles.h>
 
 #include "../AppSignalLib/Bus.h"
 #include "../AppSignalLib/ComparatorSet.h"

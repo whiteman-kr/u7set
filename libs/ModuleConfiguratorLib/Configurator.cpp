@@ -975,7 +975,7 @@ namespace ModuleConfiguratorLib
 	}
 
 
-	bool Configurator::loadBinaryFileWorker(const QString& fileName, ModuleFirmwareStorage* storage, bool loadBinaryData)
+	bool Configurator::loadBinaryFileWorker(const QString& fileName, Hardware::ModuleFirmwareStorage* storage, bool loadBinaryData)
 	{
 		if (storage == nullptr)
 		{
@@ -1025,7 +1025,7 @@ namespace ModuleConfiguratorLib
 		return result;
 	}
 
-	void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage* storage,
+	void Configurator::uploadFirmwareWorker(Hardware::ModuleFirmwareStorage* storage,
 											const QString& subsystemId,
 											std::optional<std::vector<int>> selectedUarts)
 	{
@@ -2238,7 +2238,7 @@ namespace ModuleConfiguratorLib
 		return;
 	}
 
-	void Configurator::loadBinaryFile(const QString& fileName, ModuleFirmwareStorage* storage)
+	void Configurator::loadBinaryFile(const QString& fileName, Hardware::ModuleFirmwareStorage* storage)
 	{
 		m_fileName = fileName;
 
@@ -2249,7 +2249,7 @@ namespace ModuleConfiguratorLib
 		emit operationFinished();
 	}
 
-	void Configurator::uploadFirmware(ModuleFirmwareStorage* storage,
+	void Configurator::uploadFirmware(Hardware::ModuleFirmwareStorage* storage,
 									  const QString& subsystemId,
 									  std::optional<std::vector<int>> selectedUarts)
 	{

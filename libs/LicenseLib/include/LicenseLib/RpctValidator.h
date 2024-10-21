@@ -29,6 +29,9 @@ namespace LicenseLib
 		ValidationResult validateDate(const QDate& currentDate, const QDate& softwareReleaseDate) const;
 		ValidationResult validateWorkplace() const;
 
+		ValidationResult validateAppU7() const;
+		ValidationResult validateAppSimulator() const;
+
 		ValidationResult validateModuleConfigurator() const;
 		ValidationResult validateModuleConfiguratorModule(QUuid uartUuid) const;
 

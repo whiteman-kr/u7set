@@ -24,6 +24,7 @@ qt_add_library(${TARGET} STATIC
 	./include/TrendView/TrendSignal.h
 	./include/TrendView/TrendSignalSet.h
 	./include/TrendView/TrendSignalState.h
+
 	DialogChooseTrendSignals.cpp
 	DialogTrendSignalPoint.cpp
 	DialogTrendSignalPoint.h
@@ -87,8 +88,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../AppSignalLib/AppSignalState.h"
 )
 
-#Add translations
-#
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Svg Qt6::Widgets Qt6::PrintSupport)

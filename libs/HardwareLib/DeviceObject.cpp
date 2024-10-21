@@ -432,7 +432,7 @@ namespace Hardware
 
 		if (deviceObject == nullptr)
 		{
-			Q_ASSERT(deviceObject);
+			Q_ASSERT(deviceObject); // Have you called Hardware::init()? It is necessary to register all device types.
 			return deviceObject;
 		}
 

@@ -75,6 +75,6 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Network Qt6::Qml Qt6::Xml Qt6::Concurrent)
-target_link_libraries(${TARGET} PRIVATE ProtobufEx HardwareLib Simulator)
+target_link_libraries(${TARGET} PRIVATE ProtobufEx HardwareLib SimulatorLib)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

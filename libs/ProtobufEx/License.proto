@@ -34,6 +34,9 @@ message License
 
 	optional WorkplaceLicense workplace = 100;
 	optional ModuleConfiguratorLicense module_configurator = 110;
+	
+	optional U7License u7 = 111;		// u7, module configurator is regulated by module_configurator, buildin simulator is allowed.
+	optional Simulator simulator = 112; // Simulator as a standalone application
 }
 
 message WorkplaceLicense
@@ -62,4 +65,23 @@ message InternalWorkplaceId
 
 	optional string os = 11;		// Stable name for OS, excludes version - statistics only
 	optional string host = 12;		// statistics only
+}
+
+// u7 (AKA IDE, RPCT) as a standalone application.
+//
+message U7License
+{
+	// u7, module configurator is regulated by module_configurator, buildin simulator is allowed.
+	// All licenses issued up to 18 Oct 2024 are allowed to use the U7License.
+	//
+	optional bool allowed = 2;
+}
+
+// Simulator as a standalone application.
+//
+message Simulator
+{
+	// All licenses issued up to 18 Oct 2024 are allowed to use the simulator.
+	//
+	optional bool allowed = 2;
 }

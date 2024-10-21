@@ -168,6 +168,7 @@ add_subdirectory(TestSuiteConsole)
 #
 if(NOT CODE_COVERAGE)
     add_subdirectory(u7)
+	add_subdirectory(Simulator)
 	add_subdirectory(TestSuite)
 	add_subdirectory(mconf)	
 	add_subdirectory(./Tools/qtkeychain)

@@ -1,8 +1,14 @@
-#ifndef SETTINGSFORM_H
-#define SETTINGSFORM_H
+#pragma once
 
-#include <QWidget>
 #include "MconfSettings.h"
+
+#include <QDialog>
+
+class QComboBox;
+class QLabel;
+class QLineEdit;
+class QCheckBox;
+
 
 class SettingsForm : public QDialog
 {
@@ -44,5 +50,3 @@ private:
 	QLineEdit* m_pServerPassword = nullptr;
 	QLabel* m_pServerPasswordLabel = nullptr;
 };
-
-#endif // SETTINGSFORM_H

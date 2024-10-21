@@ -173,7 +173,7 @@ namespace Builder
 			//
 			std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-			QString fileName = QString("connection-%1.%2").arg(connection->uuid().toString()).arg(Db::File::OclFileExtension);
+			QString fileName = QString("connection-%1.%2").arg(connection->uuid().toString()).arg(File::OclFileExtension);
 			fileName = fileName.remove('{');
 			fileName = fileName.remove('}');
 
@@ -235,7 +235,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		bool ok = m_db->getFileList(&fileList, DbDir::ConnectionsDir, Db::File::OclFileExtension, false /*removeDeleted*/, nullptr);
+		bool ok = m_db->getFileList(&fileList, DbDir::ConnectionsDir, File::OclFileExtension, false /*removeDeleted*/, nullptr);
 		if (ok == false)
 		{
 			*errorMessage = m_db->lastError();

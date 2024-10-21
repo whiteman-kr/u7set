@@ -180,7 +180,7 @@ namespace Builder
 		//
 		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
 
-		QString javaScriptFileExtension{Db::File::JavaScriptFileExtension};
+		QString javaScriptFileExtension{File::JavaScriptFileExtension};
 
 		for (auto& [fileId, fileInfo] : files)
 		{

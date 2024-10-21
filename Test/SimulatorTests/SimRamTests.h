@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <Simulator/SimRam.h>
+#include <SimulatorLib/SimRam.h>
 
 class SimRamTests : public QObject
 {

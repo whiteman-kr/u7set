@@ -178,10 +178,10 @@ namespace Locator
 			return false;
 		}
 
-		m_files.removeFilesWithExtension(Db::File::AlTemplExtension);
-		m_files.removeFilesWithExtension(Db::File::MvsTemplExtension);
-		m_files.removeFilesWithExtension(Db::File::UfbTemplExtension);
-		m_files.removeFilesWithExtension(Db::File::DvsTemplExtension);
+		m_files.removeFilesWithExtension(File::AlTemplExtension);
+		m_files.removeFilesWithExtension(File::MvsTemplExtension);
+		m_files.removeFilesWithExtension(File::UfbTemplExtension);
+		m_files.removeFilesWithExtension(File::DvsTemplExtension);
 
 		m_schemaDetails.reserve(m_files.size());
 		for (const auto&[fileId, fileInfo] : m_files)

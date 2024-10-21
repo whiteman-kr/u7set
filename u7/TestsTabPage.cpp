@@ -1189,7 +1189,7 @@ void TestsWidget::newFile()
 	// Read script template
 	//
 	QByteArray templateScript;
-	QFile rcFile{":/Simulator/ScriptSample.js"};
+	QFile rcFile{":/SimulatorLib/Scripts/ScriptSample.js"};
 
 	if (rcFile.open(QIODevice::ReadOnly) == false)
 	{

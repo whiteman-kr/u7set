@@ -16,7 +16,6 @@ set(TARGET SimulatorConsole)
 
 add_executable(${TARGET}
 	main.cpp
-	SimulatorConsole.qrc
 )
 
 
@@ -34,7 +33,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
-target_link_libraries(${TARGET} PRIVATE ProtobufEx Simulator)
+target_link_libraries(${TARGET} PRIVATE ProtobufEx SimulatorLib)
 
 # Link Visaul Leak Detector
 #

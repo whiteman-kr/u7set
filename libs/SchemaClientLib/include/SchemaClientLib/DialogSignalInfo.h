@@ -7,7 +7,12 @@
 #include <SchemaClientLib/DragDropHelper.h>
 #include <VFrame30/TuningController.h>
 
+#include <QDialog>
+#include <QLabel>
+
 #include <optional>
+
+class QTreeWidgetItem;
 
 namespace Ui
 {
@@ -121,7 +126,7 @@ protected:
 
 	DialogSignalInfo(const AppSignalParam& signal,
 					 IAppSignalManager* appSignalManager,
-					 ClientLib::ISignalDataServer* signalDataServer,                                  // Can be empty, e.g. in Simulator
+					 ClientLib::ISignalDataServer* signalDataServer,                       // Can be empty, e.g. in Simulator
 					 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices, // Can be empty, e.g. in Simulator
 					 ITuningSignalManager& tuningSignalManager,
 					 ITuningConnection& tuningConnection,

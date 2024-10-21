@@ -198,6 +198,28 @@ namespace LicenseLib
 		return (matches >= expectedMatches) ? ValidationResult::Valid : ValidationResult::Invalid;
 	}
 
+	ValidationResult RpctValidator::validateAppU7() const
+	{
+#ifndef NDEBUG
+		if (AppLicenser::noLicenseCheck() == true)
+		{
+			return ValidationResult::Valid;
+		}
+#endif
+		return m_license->allowedU7() ? ValidationResult::Valid : ValidationResult::Invalid;
+	}
+
+	ValidationResult RpctValidator::validateAppSimulator() const
+	{
+#ifndef NDEBUG
+		if (AppLicenser::noLicenseCheck() == true)
+		{
+			return ValidationResult::Valid;
+		}
+#endif
+		return m_license->allowedSimulatorApp() ? ValidationResult::Valid : ValidationResult::Invalid;
+	}
+
 	ValidationResult RpctValidator::validateModuleConfigurator() const
 	{
 #ifndef NDEBUG

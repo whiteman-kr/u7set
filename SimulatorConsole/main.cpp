@@ -13,8 +13,8 @@
 #include <google/protobuf/message_lite.h>
 #include <CommonLib/ConstStrings.h>
 
-#include <Simulator/SimConsoleLogFile.h>
-#include <Simulator/Simulator.h>
+#include <SimulatorLib/SimConsoleLogFile.h>
+#include <SimulatorLib/Simulator.h>
 
 static QtMessageHandler originalMessageHandler = 0;
 
@@ -76,7 +76,7 @@ bool generateScript(QString fileName)
 		return false;
 	}
 
-	QFile rcFile{":/ScriptSample.js"};
+	QFile rcFile{":/SimulatorLib/Scripts/ScriptSample.js"};
 	if (rcFile.open(QIODevice::ReadOnly) == false)
 	{
 		std::cout << rcFile.errorString().toStdString() << "\n";
@@ -183,6 +183,8 @@ int main(int argc, char* argv[])
 
 	QCoreApplication app(argc, argv);
 
+	Q_INIT_RESOURCE(SimulatorLib);
+
 	// Parse arguments
 	//
 	QStringList args = QCoreApplication::arguments();
@@ -206,7 +208,8 @@ int main(int argc, char* argv[])
 	{
 		if (args[argIndex].startsWith("-create=", Qt::CaseInsensitive) == true)
 		{
-			bool ok = generateScript(args[argIndex]);
+			QString fileName = QString{args[argIndex]}.replace("-create=", "", Qt::CaseInsensitive);
+			bool ok = generateScript(fileName);
 			return ok == true ? EXIT_SUCCESS : EXIT_FAILURE;
 		}
 
