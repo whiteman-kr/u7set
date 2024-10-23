@@ -1,4 +1,4 @@
-#include "PropertyTable.h"
+#include <UiLib/PropertyTable.h>
 #include "../AppSignalLib/TuningValue.h"
 #include <UiLib/ChooseItemsWidget.h>
 #include <UiLib/PropertyEditor.h>

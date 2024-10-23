@@ -2,9 +2,9 @@
 
 #include <UiLib/CodeEditor.h>
 #include <UiLib/PropertyEditor.h>
+#include <UiLib/PropertyTable.h>
 #include "TuningUiEditor.h"
 #include <TuningLib/TuningUiItem.h>
-#include "./Ui/PropertyTable.h"
 
 
 //

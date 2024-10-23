@@ -25,8 +25,6 @@ set (U7_SOURCES
 	./Legacy/TuningFilterEditor.h
 	./Ui/FilesTreeView.cpp
 	./Ui/FilesTreeView.h
-	./Ui/PropertyTable.cpp
-	./Ui/PropertyTable.h
 	./Ui/TextEditCompleter.cpp
 	./Ui/TextEditCompleter.h
 	diff_match_patch.h
