@@ -18,7 +18,7 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, db, this);
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
-	m_propertyTable = new SchemaItemPropertyTable(editEngine, this, this);
+	m_propertyTable = new SchemaItemPropertyTable(editEngine, this, db, this);
 	m_propertyTable->setReadOnly(editEngine->readOnly());
 
 	QTabWidget* tabWidget = new QTabWidget();
@@ -267,8 +267,9 @@ EditEngine::EditEngine* SchemaItemPropertyEditor::editEngine()
 //
 SchemaItemPropertyTable::SchemaItemPropertyTable(EditEngine::EditEngine* editEngine,
 												 SchemaItemPropertiesDialog* schemaItemPropertiesDialog,
+												 DbController* dbController,
 												 QWidget* parent) :
-	IdePropertyTable(parent),
+	IdePropertyTable(parent, dbController),
 	m_editEngine(editEngine),
 	m_schemaItemPropertiesDialog(schemaItemPropertiesDialog)
 {
@@ -282,7 +283,7 @@ SchemaItemPropertyTable::SchemaItemPropertyTable(EditEngine::EditEngine* editEng
 
 SchemaItemPropertyTable::~SchemaItemPropertyTable() {}
 
-void SchemaItemPropertyTable::valueChanged(const ExtWidgets::ModifiedObjectsData& modifiedObjectsData)
+void SchemaItemPropertyTable::valueChanged(const std::vector<ExtWidgets::ModifiedProperty>& modifiedProperties)
 {
 	bool result = editEngine()->startBatch();
 	if (result == false)
@@ -296,37 +297,31 @@ void SchemaItemPropertyTable::valueChanged(const ExtWidgets::ModifiedObjectsData
 
 	// Modify properties
 
-	for (const QString& propertyName : modifiedObjectsData.keys())
+	for (const auto& mp : modifiedProperties)
 	{
-		QList<std::pair<std::shared_ptr<PropertyObject>, QVariant>> objectsData =
-			modifiedObjectsData.values(propertyName);
+		std::vector<SchemaItemPtr> items;
 
-		for (auto objectData : objectsData)
+		SchemaItemPtr vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(mp.object);
+		assert(vi.get() != nullptr);
+
+		QVariant value = mp.newValue;
+
+		if (value.isValid() == false)
 		{
-			std::vector<SchemaItemPtr> items;
-
-			SchemaItemPtr vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(objectData.first);
-			assert(vi.get() != nullptr);
-
-			QVariant value = objectData.second;
-
-			if (value.isValid() == false)
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			// Do not set property, if it has the same value
-			//
-			if (vi->propertyValue(propertyName) == value)
-			{
-				continue;
-			}
-
-			items.push_back(vi);
-
-			editEngine()->runSetProperty(propertyName, value, items);
+			Q_ASSERT(false);
+			continue;
 		}
+
+		// Do not set property, if it has the same value
+		//
+		if (vi->propertyValue(mp.propertyName) == value)
+		{
+			continue;
+		}
+
+		items.push_back(vi);
+
+		editEngine()->runSetProperty(mp.propertyName, value, items);
 	}
 
 	editEngine()->endBatch();

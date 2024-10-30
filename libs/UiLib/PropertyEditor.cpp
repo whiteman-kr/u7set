@@ -650,7 +650,7 @@ namespace ExtWidgets
 		{
 		case CellEditorType::Text:
 			{
-				editor = new MultiTextEdit(this, propertyPtr, readOnly, parent);
+				editor = new MultiTextEdit(this, propertyPtr, row, readOnly, parent);
 			}
 			break;
 
@@ -951,11 +951,10 @@ namespace ExtWidgets
 
 		// Find selected indexes and sort in descending order
 
-		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
 		std::vector<int> selectedRows;
-		selectedRows.reserve(selectedIndexes.size());
 
-		for (const auto& si : selectedIndexes)
+		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
+		for (auto si : selectedIndexes)
 		{
 			selectedRows.push_back(si.row());
 		}
@@ -1173,9 +1172,7 @@ namespace ExtWidgets
 		}
 
 		std::vector<int> selectedRows;
-		selectedRows.reserve(selectedIndexes.size());
-
-		for (const auto& si : selectedIndexes)
+		for (auto si : selectedIndexes)
 		{
 			selectedRows.push_back(si.row());
 		}
@@ -1459,11 +1456,10 @@ namespace ExtWidgets
 
 		// Find selected indexes and sort in descending order
 
-		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
 		std::vector<int> selectedRows;
-		selectedRows.reserve(selectedIndexes.size());
 
-		for (const auto& si : selectedIndexes)
+		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
+		for (auto si : selectedIndexes)
 		{
 			selectedRows.push_back(si.row());
 		}
@@ -1614,9 +1610,7 @@ namespace ExtWidgets
 		}
 
 		std::vector<int> selectedRows;
-		selectedRows.reserve(selectedIndexes.size());
-
-		for (const auto& si : selectedIndexes)
+		for (auto si : selectedIndexes)
 		{
 			selectedRows.push_back(si.row());
 		}
@@ -2410,13 +2404,6 @@ namespace ExtWidgets
 	//
 	// ---------MultiTextEdit----------
 	//
-
-	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, bool readOnly, QWidget* parent) :
-		MultiTextEdit(propertyEditorBase, p, -1, readOnly, parent)
-
-	{
-	}
-
 	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase,
 								 std::shared_ptr<Property> p,
 								 int row,
@@ -2790,6 +2777,10 @@ namespace ExtWidgets
 		case QMetaType::QStringList:
 			{
 				QStringList l = property->value().toStringList();
+				if (m_row == 0 && l.isEmpty() == true)
+				{
+					l.push_back("");
+				}
 				if (m_row < 0 || m_row >= static_cast<int>(l.size()))
 				{
 					Q_ASSERT(false);
