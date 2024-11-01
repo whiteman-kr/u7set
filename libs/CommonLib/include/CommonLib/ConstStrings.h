@@ -439,6 +439,7 @@ namespace XmlAttribute
 	inline const QString FOTIP_TUNING_DATA_UID("FotipTuningDataUID");
 
 	inline const QString MODBUS_DEVICE_ID("ModbusDeviceID");
+	inline const QString MODBUS_MODE("ModbusMode");
 	inline const QString REG_ADDR("RegAddr");
 	inline const QString REG_BIT("RegBit");
 	inline const QString FORMAT("Format");

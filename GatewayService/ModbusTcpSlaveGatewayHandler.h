@@ -31,6 +31,7 @@ namespace Gateway
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
 		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
 
+		E::ModbusMode modbusMode() const;
 		int modbusDeviceID() const;
 
 		int getRegistersValues(int startRegAddr, int regsCount,

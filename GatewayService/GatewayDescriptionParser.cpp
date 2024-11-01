@@ -197,7 +197,8 @@ namespace Gateway
 
 		// ModbusTcpSlave gateway specific settings
 		//
-		{ E::Setting::ModbusDeviceID,	E::SettingType::Int	},
+		{ E::Setting::ModbusDeviceID,		E::SettingType::Int		},
+		{ E::Setting::ModbusMode,			E::SettingType::String	},
 
 		// ModbusTcpSlave signal lists specific settings
 		//
@@ -735,8 +736,8 @@ namespace Gateway
 	}
 
 	bool Parser::parseSettingValue(E::Setting setting,
-													 const QString& valueStr,
-													 ParseLineResult* plr)
+									const QString& valueStr,
+									ParseLineResult* plr)
 	{
 		TEST_PTR_RETURN_FALSE(plr);
 

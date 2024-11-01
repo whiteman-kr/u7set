@@ -23,7 +23,12 @@ LocalGatewayIP1 = 192.168.101.100:55002		// * IP and port of Modbus TCP server. 
 						
 //LocalGatewayIP2 = 127.0.0.1			// optional second channel IP
 
-ModbusDeviceID = 20				
+ModbusDeviceID = 20
+
+ModbusMode = TCP_RTU				// TCP_RTU - RTU over TCP (RTU with TCP header)
+						// RTU     - binary mode 
+						// ASCII   - character mode, packets starts with ':', ends with CR+LF
+
 
 [SignalList]
 

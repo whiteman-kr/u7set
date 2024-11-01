@@ -51,6 +51,72 @@ namespace Modbus
 			return;
 		}
 
+		bool result = true;
+
+		switch(m_handler.modbusMode())
+		{
+		case ::Gateway::E::ModbusMode::ASCII:
+			result = asciiRequestProcessing(bytesReceived);
+			break;
+
+		case ::Gateway::E::ModbusMode::RTU:
+			result = rtuRequestProcessing(bytesReceived);
+			break;
+
+		case ::Gateway::E::ModbusMode::TCP_RTU:
+			result = tcpRtuRequestProcessing(bytesReceived);
+			break;
+		}
+
+		startReceive();
+	}
+
+	bool TcpSlaveThread::Connection::asciiRequestProcessing(size_t bytesReceived)
+	{
+		const size_t MIN_REQUEST_SIZE = 1 +		// start marker ':'
+										2 +		// slave address 'XX'
+										2 +		// function '03'
+										4 +		// regs start address 'XXXX'
+										4 +		// regs count 'XXXX'
+										2 +		// CRC 'XX'
+										2;		// end marker CR+LF
+
+		if (bytesReceived < MIN_REQUEST_SIZE)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		unsigned char* request = m_receiveBuffer;
+
+		if (isHexDigits(request + ASCII_START_MARKER_LEN,
+						bytesReceived - ASCII_START_MARKER_LEN - ASCII_END_MARKER_LEN) == false)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		if (request[0] != ASCII_START_MARKER)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		bool result = true;
+
+		if ()
+
+		return result;
+	}
+
+	bool TcpSlaveThread::Connection::rtuRequestProcessing(size_t bytesReceived)
+	{
+		Q_ASSERT(false);		// not implemented!
+		return false;
+	}
+
+	bool TcpSlaveThread::Connection::tcpRtuRequestProcessing(size_t bytesReceived)
+	{
 		TcpFrame& request = getRequestRef();
 
 		request.reverseBytes();
@@ -60,8 +126,10 @@ namespace Modbus
 		if (request.header.length + sizeof(request.header) != bytesReceived)
 		{
 			Q_ASSERT(false);
-			return;
+			return false;
 		}
+
+		bool result = true;
 
 		if (request.modbusDeviceID == m_handler.modbusDeviceID())
 		{
@@ -76,16 +144,17 @@ namespace Modbus
 			default:
 				DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData: unknown modbus function code %1. Request ignored.").
 												arg(request.functionCode));
+				result = false;
 			}
 
-			if (sendBytesCount > 0)
+			if (result == true && sendBytesCount > 0)
 			{
 				Q_ASSERT(sendBytesCount <= SEND_BUFFER_SIZE);
 				m_socket.write_some(asio::buffer(m_sendBuffer, sendBytesCount));
 			}
 		}
 
-		startReceive();
+		return result;
 	}
 
 	int TcpSlaveThread::Connection::onFnReadHoldingRegisters(TcpFrame& request)
@@ -154,6 +223,84 @@ namespace Modbus
 	{
 		Q_ASSERT(sizeof(Modbus::TcpFrame) < sizeof(m_sendBuffer));
 		return *reinterpret_cast<TcpFrame*>(m_sendBuffer);
+	}
+
+	bool TcpSlaveThread::Connection::isHexDigits(const unsigned char* ptr, int len) const
+	{
+		int result = 1;
+
+		for(int i = 0; i < len; i++)
+		{
+			result &= std::isxdigit(ptr[i]);
+		}
+
+		return (result == 0 ? false : true);
+	}
+
+	quint8 TcpSlaveThread::Connection::asciiDecodeXX(const unsigned char* ptr)
+	{
+		Q_ASSERT(std::isxdigit(ptr[0]));		// high
+		Q_ASSERT(std::isxdigit(ptr[1]));		// low
+
+		quint8 result = ptr[0] - '0';
+
+		result <<= 4;
+
+		result += ptr[1] - '0';
+
+		return result;
+	}
+
+	quint16 TcpSlaveThread::Connection::asciiDecodeXXXX(unsigned char* ptr)
+	{
+'lvme;rbmew;rbmbbrer
+	}
+
+	quint64 asciiDecode(const unsigned char* ptr, int len) const
+	{
+		TEST_PTR_RETURN_VALUE(ptr, 0);
+
+		if(len <= 0 || len > sizeof(quint64) * 2)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		quint64 result = 0;
+
+		for(int i = 0; i < len; i++)
+		{
+			unsigned char ch = ptr[i];
+
+			if (ch >= '0' && ch <= '9')
+			{
+				ch -= '0';
+			}
+			else
+			{
+				if (ch >= 'A' && ch <= 'F')
+				{
+					ch = 0x0A + ch - 'A';
+				}
+				else
+				{
+					if (ch >= 'a' && ch <= 'f')
+					{
+						ch = 0x0A + ch - 'a';
+					}
+					else
+					{
+						Q_ASSERT(false);		// ch is not a hex digit!
+						return 0;
+					}
+				}
+			}
+
+			result <<= 4;
+			result += ch;
+		}
+
+		return result;
 	}
 
    // --------------------------------------------------------------------------------------------------------

@@ -331,8 +331,8 @@ namespace Gateway
 	const std::set<E::Setting> ModbusTcpSlaveGateway::m_requiredSettings =
 	{
 			E::Setting::LocalGatewayIP1,
-
 			E::Setting::ModbusDeviceID,
+			E::Setting::ModbusMode,
 	};
 
 	const std::set<E::Setting> ModbusTcpSlaveGateway::m_optionalSettings =
@@ -398,6 +398,27 @@ namespace Gateway
 				}
 				break;
 
+			case E::Setting::ModbusMode:
+				{
+					bool ok = true;
+
+					m_modbusMode = ::E::stringToValue<E::ModbusMode>(sv.value.toString(), &ok);
+
+					if (ok == false)
+					{
+						QStringList values = ::E::enumKeyStrings<E::ModbusMode>();
+
+						values.remove(0);		// remove E::ModbusMode::Unknown
+
+						log.logError(sv.lineNo, QString("Wrong ModbusMode value. Should be one of: %1").
+												arg(values.join(", ")));
+
+						m_modbusMode = E::ModbusMode::Unknown;
+						result = false;
+					}
+				}
+				break;
+
 			default:
 				;	// ok
 			}
@@ -419,6 +440,11 @@ namespace Gateway
 	HostAddressPort ModbusTcpSlaveGateway::localGatewayIP2() const
 	{
 		return m_localGatewayIP2;
+	}
+
+	E::ModbusMode ModbusTcpSlaveGateway::modbusMode() const
+	{
+		return m_modbusMode;
 	}
 
 	int ModbusTcpSlaveGateway::modbusDeviceID() const
@@ -464,6 +490,7 @@ namespace Gateway
 
 		xml.writeIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP1, m_localGatewayIP1);
 		xml.writeIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, m_localGatewayIP2);
+		xml.writeEnumKeyAttribute(XmlAttribute::MODBUS_MODE, m_modbusMode);
 		xml.writeIntAttribute(XmlAttribute::MODBUS_DEVICE_ID, m_modbusDeviceID);
 
 		xml.writeEndElement();		//	</Settings>
@@ -492,6 +519,8 @@ namespace Gateway
 		okIp2 &= xml.readIPv4PortAttribute(XmlAttribute::LOCAL_GATEWAY_IP2, &m_localGatewayIP2);
 
 		result &= okIp1 || okIp2;
+
+		result &= xml.readEnumKeyAttribute(XmlAttribute::MODBUS_MODE, &m_modbusMode);
 
 		result &= xml.readIntAttribute(XmlAttribute::MODBUS_DEVICE_ID, &m_modbusDeviceID);
 

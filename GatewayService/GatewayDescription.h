@@ -56,6 +56,7 @@ namespace Gateway
 
 			ModbusDeviceID,
 			SignalsFormat,
+			ModbusMode
 		};
 		Q_ENUM(Setting)
 
@@ -100,6 +101,15 @@ namespace Gateway
 			LE,
 		};
 		Q_ENUM(ModbusByteOrder)
+
+		enum class ModbusMode
+		{
+			Unknown,
+			ASCII,						// ASCII character mode, packets starts with ':', ends with CR+LF
+			RTU,						// binary mode RTU
+			TCP_RTU						// RTU over TCP (RTU with TCP header)
+		};
+		Q_ENUM(ModbusMode)
 	};
 
 	class ParserLog;

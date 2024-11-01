@@ -15,8 +15,6 @@ namespace Gateway
 
 namespace Modbus
 {
-
-
 	//
 	// Master/Slave and Client/Server roles in Modbus-TCP:
 	//
@@ -44,10 +42,20 @@ namespace Modbus
 		private:
 			void onReceiveData(const error_code& error, size_t bytesReceived);
 
+			bool asciiRequestProcessing(size_t bytesReceived);
+			bool rtuRequestProcessing(size_t bytesReceived);
+			bool tcpRtuRequestProcessing(size_t bytesReceived);
+
 			int onFnReadHoldingRegisters(TcpFrame& request);
 
 			TcpFrame& getRequestRef();
 			TcpFrame& getReplyRef();
+
+			bool isHexDigits(const unsigned char* ptr, int len) const;
+			quint8 asciiDecodeXX(const unsigned char* ptr) const;
+			quint16 asciiDecodeXXXX(const unsigned char* ptr) const;
+
+			quint64 asciiDecode(const unsigned char* ptr, int len) const;
 
 		private:
 			Listener& m_listener;
@@ -57,10 +65,10 @@ namespace Modbus
 			int m_connectionNo = 0;
 
 			static inline const int RECEIVE_BUFFER_SIZE = 1024;
-			char m_receiveBuffer[RECEIVE_BUFFER_SIZE];
+			unsigned char m_receiveBuffer[RECEIVE_BUFFER_SIZE];
 
 			static inline const int SEND_BUFFER_SIZE = 1024;
-			char m_sendBuffer[SEND_BUFFER_SIZE];
+			unsigned char m_sendBuffer[SEND_BUFFER_SIZE];
 
 			static inline int m_connectionInstance = 0;
 		};

@@ -175,6 +175,11 @@ namespace Gateway
 		updateRegisters(m_hashesToUpdate);
 	}
 
+	E::ModbusMode ModbusTcpSlaveHandler::modbusMode() const
+	{
+		return m_gateway->modbusMode();
+	}
+
 	int ModbusTcpSlaveHandler::modbusDeviceID() const
 	{
 		return m_gateway->modbusDeviceID();

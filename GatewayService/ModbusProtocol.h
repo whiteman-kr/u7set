@@ -1,5 +1,6 @@
 #pragma once
 
+
 namespace Modbus
 {
 	inline const quint8 FC_READ_COILS = 0x01;					// Read digital outputs and switching outputs
@@ -11,6 +12,12 @@ namespace Modbus
 	using RegisterValue = quint16;
 
 	inline const int REGISTER_SIZE_BYTES = sizeof(RegisterValue);
+
+	inline const unsigned char ASCII_START_MARKER = ':';
+	inline const int ASCII_START_MARKER_LEN = 1;
+
+	inline const unsigned char ASCII_END_MARKER[2] = { 0x0D, 0x0A };	// CR + LF
+	inline const int ASCII_END_MARKER_LEN = 2;
 
 #pragma pack(push, 1)
 
@@ -25,7 +32,7 @@ namespace Modbus
 	struct Fn03_ReadHoldingRegisters_Reply
 	{
 		quint8 bytesCount;										// real filled size in bytes
-		RegisterValue regValues[FN03_MAX_REGS_COUNT];					// registers values
+		RegisterValue regValues[FN03_MAX_REGS_COUNT];			// registers values
 	};
 
 	struct TcpHeader
@@ -57,5 +64,4 @@ namespace Modbus
 
 	quint8 LRC (const quint8* data, int dataLength);		// Modbus ASCII mode LRC calculation
 	quint16 CRC16 (const quint8 *data, int dataLength);		// Modbus RTU mode CRC16 calculation
-
 }
