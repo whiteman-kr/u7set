@@ -181,6 +181,7 @@ void LicenserMainWindow::newLicense()
 	m_license->setStartDate(QDate::currentDate());
 	m_license->setEndDate(m_license->startDate().addYears(1));
 	m_license->setWorkplaceCheckType(LicenseLib::WorkplaceCheckType::Relaxed);
+	m_license->setIssueDate(QDate::currentDate());
 	
 	m_modified = true;
 	m_openFileName.clear();
