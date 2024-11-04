@@ -58,7 +58,12 @@ namespace ExtWidgets
 
 	};
 
-	typedef QMultiMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> ModifiedObjectsData;
+	struct ModifiedProperty
+	{
+		QString propertyName;
+		std::shared_ptr<PropertyObject> object;
+		QVariant newValue;
+	};
 
 	struct PropertyTableObject
 	{
@@ -239,7 +244,8 @@ namespace ExtWidgets
 		void setGroupByCategory(bool value);
 
 	protected:
-		virtual void valueChanged(const ModifiedObjectsData& modifiedObjectsData);
+		virtual void valueChanged(const std::vector<ModifiedProperty>& modifiedProperties);
+		
 		virtual void hideEvent(QHideEvent* event) override;
 
 	protected slots:

@@ -30,7 +30,7 @@ TreeFilterWidget::TreeFilterWidget(TuningConfigController& configController,
 
 TreeFilterWidget::~TreeFilterWidget()
 {
-	if (isVisible() == true)
+	if (isEmpty() == false)
 	{
 		QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
@@ -38,7 +38,6 @@ TreeFilterWidget::~TreeFilterWidget()
 		{
 			int width = m_filterTree->columnWidth(m_columnNameIndex);
 			settings.setValue("TuningWorkspace/FilterTreeColumnIndex", width);
-
 		}
 		if (m_columnAccessIndex != -1)
 		{
@@ -70,7 +69,7 @@ TreeFilterWidget::~TreeFilterWidget()
 		if (m_treeMaskCombo != nullptr)
 		{
 			TuningClientAppSettings::instance().user().m_tuningWorkspaceMasks.clear();
-			for (int i = 0; i < m_treeMaskCombo->count(); i++)
+			for (int i = 0; i < m_treeMaskCombo->count() % 20 /*20 last masks*/; i++)
 			{
 				TuningClientAppSettings::instance().user().m_tuningWorkspaceMasks.push_back(m_treeMaskCombo->itemText(i));
 			}
@@ -422,7 +421,7 @@ void TreeFilterWidget::createFilterTree()
 
 	m_treeMaskCombo = new QComboBox();
 	m_treeMaskCombo->setEditable(true);
-	m_treeMaskCombo->setInsertPolicy(QComboBox::NoInsert);
+	m_treeMaskCombo->setInsertPolicy(QComboBox::InsertAtTop);
 
 	// Load masks
 	//
@@ -1169,18 +1168,6 @@ void TreeFilterWidget::slot_maskReturnPressed()
 
 void TreeFilterWidget::slot_maskApply()
 {
-	if (m_filterTree->topLevelItemCount() != 1)
-	{
-		return;
-	}
-
-	QTreeWidgetItem* rootItem = m_filterTree->topLevelItem(0);
-	if (rootItem == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
 	if (m_treeMaskCombo->currentText().isEmpty() == false)
 	{
 		m_treeMaskCombo->setStyleSheet("QComboBox { color: red }");

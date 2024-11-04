@@ -50,7 +50,7 @@ class IdePropertyTable : public ExtWidgets::PropertyTable
 	Q_OBJECT
 
 public:
-	IdePropertyTable(QWidget* parent, DbController* dbController = nullptr);
+	IdePropertyTable(QWidget* parent, DbController* dbController);
 	virtual ~IdePropertyTable();
 
 	virtual ExtWidgets::PropertyEditor* createChildPropertyEditor(QWidget* parent) override;
