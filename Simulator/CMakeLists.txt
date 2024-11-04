@@ -25,6 +25,8 @@ add_executable(${TARGET} WIN32
 	./src/Main.cpp
 	./src/SimPropertyStorage.cpp
 	./src/SimPropertyStorage.h
+
+	${WINDOWS_RESOURCES}
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
