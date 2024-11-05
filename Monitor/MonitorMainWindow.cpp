@@ -46,6 +46,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/AppSignalLists_%1.qm").arg(l));
 	}
 
+	if (MonitorAppSettings::instance().language() != "en")
 	{
 		QStringList failedTranslations;
 		if (m_translator.setLanguage(MonitorAppSettings::instance().language(), failedTranslations) == false)
