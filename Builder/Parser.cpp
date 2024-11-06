@@ -3157,15 +3157,6 @@ namespace Builder
 			QString filePath;
 			QString fileName;
 
-			if (fscModule->isVdu() == true)
-			{
-				// Write xml to the output file.
-				// Filename like: build\VDUs\SYSTEMID_RACKID_VDU01\logic-parsed.xml
-				//
-				filePath = Directory::VDUs + u'/' + fscModule->equipmentIdTemplate();
-				fileName = "logic-parsed.xml";
-			}
-			else
 			{
 				auto propertySubsytem = fscModule->propertyByCaption(Hardware::PropertyNames::lmSubsystemID);
 				auto propertyLmNumber = fscModule->propertyByCaption(Hardware::PropertyNames::lmNumber);
