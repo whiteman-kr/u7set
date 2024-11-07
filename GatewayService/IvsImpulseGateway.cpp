@@ -29,14 +29,9 @@ namespace Gateway
 		return m_requiredSettings.contains(st);
 	}
 
-	bool IvsImpulseSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
+	ParseResult IvsImpulseSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
-		bool result = true;
-
-		// result &= Gateway::checkRequiredSettings(m_requiredSettings,
-		// 										 m_settingsValues,
-		// 										 lineNo, log);
-		RETURN_IF_FALSE(result);
+		ParseResult result = ParseResult::Ok;
 
 		switch(st)
 		{
@@ -71,7 +66,7 @@ namespace Gateway
 						{
 							log.logError(lineNo, QString("unknown signal list data type '%1' use 'A', 'B' or 'D'").
 													arg(dataTypeStr));
-							result = false;
+							result = ParseResult::Error;
 						}
 					}
 				}

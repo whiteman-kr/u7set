@@ -3,6 +3,7 @@
 
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
+#include "../CommonLib/include/CommonLib/Types.h"
 
 namespace Gateway
 {
@@ -68,44 +69,86 @@ namespace Gateway
 		return m_requiredSettings.contains(st);
 	}
 
-	bool ModbusSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
+	ParseResult ModbusSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
 		Q_UNUSED(lineNo);
 		Q_UNUSED(st);
 		Q_UNUSED(value);
 		Q_UNUSED(log);
 
-		bool result = true;
+		ParseResult pr = ParseResult::Ok;
 
 		switch(st)
 		{
 		case E::Setting::SignalsFormat:
-			result &= checkAndApplySignalsFormat(lineNo, value.toString(), log);
+			pr = checkAndApplySignalsFormat(lineNo, value.toString(), log);
 			break;
 
 		default:
 			Q_ASSERT(false);
-			result = false;
 			log.logError(lineNo, "unknown setting");
+			pr = ParseResult::Error;
+
 		}
 
-		return result;
+		return pr;
 	}
 
-	bool ModbusSignalList::appendAddressSignalID(const QString& addressStr, const QString& signalID, QString* errMsg)
+	ParseResult ModbusSignalList::checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log)
+	{
+		ParseResult pr = SignalList::checkSignalTypeAndFormat(lineNo, appSignal, log);
+
+		if (pr != ParseResult::Ok)
+		{
+			return pr;
+		}
+
+		if (appSignal->isAnalog())
+		{
+			switch(m_modbusFormat.signalFormat)
+			{
+			case E::ModbusSignalFormat::AnalogFloat16:
+			case E::ModbusSignalFormat::AnalogFloat32:
+
+				if (appSignal->analogSignalFormat() != ::E::AnalogAppSignalFormat::Float32)
+				{
+					log.logError(lineNo, QString("uncompatible signal %1 format, expected Float32").
+													arg(appSignal->appSignalID()));
+					pr = ParseResult::Error;
+				}
+				break;
+
+			case E::ModbusSignalFormat::AnalogSInt16:
+			case E::ModbusSignalFormat::AnalogSInt32:
+
+				if (appSignal->analogSignalFormat() != ::E::AnalogAppSignalFormat::SignedInt32)
+				{
+					log.logError(lineNo, QString("uncompatible signal %1 format, expected SignedInt32").
+										 arg(appSignal->appSignalID()));
+					pr = ParseResult::Error;
+				}
+
+				break;
+			}
+		}
+
+		return pr;
+	}
+
+	ParseResult ModbusSignalList::appendAddressSignalID(int lineNo, const QString& addressStr, const QString& signalID, ParserLog& log)
 	{
 		Hash hash = calcHash(signalID.trimmed());
 
 		if (m_signals.contains(hash) == true)
 		{
-			*errMsg = QString("signal %1 already in signal list").arg(signalID);
-			return false;
+			log.logError(lineNo, QString("signal %1 already in signal list").arg(signalID));
+			return ParseResult::Error;
 		}
 
 		if (m_modbusFormat.isValid() == false)
 		{
-			*errMsg = "setting 'SignalsFormat' should be specified first";
-			return false;
+			log.logError(lineNo, "setting 'SignalsFormat' should be specified first");
+			return ParseResult::Error;
 		}
 
 		QString str(addressStr);
@@ -116,8 +159,8 @@ namespace Gateway
 
 		if (addr.isEmpty() == true)
 		{
-			*errMsg = "address of signal is not specified";
-			return false;
+			log.logError(lineNo, "address of signal is not specified");
+			return ParseResult::Error;
 		}
 
 		QString regAddrStr = addr[0].trimmed().toLower();
@@ -129,16 +172,16 @@ namespace Gateway
 
 		if (ok == false)
 		{
-			*errMsg = QString("error converting register address %1 to int value").arg(regAddrStr);
-			return false;
+			log.logError(lineNo, QString("error converting register address %1 to int value").arg(regAddrStr));
+			return ParseResult::Error;
 		}
 
 		if (m_modbusFormat.isDiscrete() == true)
 		{
 			if (addr.size() < 2)
 			{
-				*errMsg = "register bit number or mask should be specified for discrete signal";
-				return false;
+				log.logError(lineNo, "register bit number or mask should be specified for discrete signal");
+				return ParseResult::Error;
 			}
 
 			QString bitNoStr = addr[1];
@@ -154,22 +197,22 @@ namespace Gateway
 
 			if (ok == false)
 			{
-				*errMsg = QString("error converting register bitNo or mask '%1' to int value").arg(bitNoStr);
-				return false;
+				log.logError(lineNo, QString("error converting register bitNo or mask '%1' to int value").arg(bitNoStr));
+				return ParseResult::Error;
 			}
 
 			if (isMask == true)
 			{
 				if (bitNoOrMask == 0)
 				{
-					*errMsg = "mask can't be 0";
-					return false;
+					log.logError(lineNo, "mask can't be 0");
+					return ParseResult::Error;
 				}
 
 				if ((bitNoOrMask & ~0xFFFF) != 0)
 				{
-					*errMsg = "mask should be set in 16 bit range";
-					return false;
+					log.logError(lineNo, "mask should be set in 16 bit range");
+					return ParseResult::Error;
 				}
 
 				int setBitsCount = 0;
@@ -188,8 +231,8 @@ namespace Gateway
 
 				if (setBitsCount > 1)
 				{
-					*errMsg = "only one bit in mask should be set to 1";
-					return false;
+					log.logError(lineNo, "only one bit in mask should be set to 1");
+					return ParseResult::Error;
 				}
 
 				Q_ASSERT(setBitNo != -1);
@@ -200,8 +243,8 @@ namespace Gateway
 			{
 				if (bitNoOrMask < 0 || bitNoOrMask > 15)
 				{
-					*errMsg = "register bitNo should be in range 0..15";
-					return false;
+					log.logError(lineNo, "register bitNo should be in range 0..15");
+					return ParseResult::Error;
 				}
 
 				bitNo = bitNoOrMask;
@@ -211,8 +254,8 @@ namespace Gateway
 		{
 			if (addr.size() > 1)
 			{
-				*errMsg = "only register number should be specified for analog signal";
-				return false;
+				log.logError(lineNo, "only register number should be specified for analog signal");
+				return ParseResult::Error;
 			}
 
 			bitNo = 0;
@@ -220,10 +263,11 @@ namespace Gateway
 
 		Address16 addr16(regAddr, bitNo);
 
-		appendSignalID(signalID, errMsg);
+		appendSignalID(lineNo, signalID, log);
+
 		m_signals.emplace(hash, addr16);
 
-		return true;
+		return ParseResult::Ok;
 	}
 
 	ModbusFormat ModbusSignalList::modbusFormat() const
@@ -258,7 +302,7 @@ namespace Gateway
 		return result;
 	}
 
-	bool ModbusSignalList::checkAndApplySignalsFormat(int lineNo, QString formatStr, ParserLog& log)
+	ParseResult ModbusSignalList::checkAndApplySignalsFormat(int lineNo, QString formatStr, ParserLog& log)
 	{
 		formatStr = formatStr.toLower();
 		formatStr.replace(Separator::COMMA, Separator::SPACE);
@@ -277,7 +321,7 @@ namespace Gateway
 			if (m_modbusFormat.byteOrder != E::ModbusByteOrder::Unknown)
 			{
 				log.logError(lineNo, "undefined byte order");
-				return false;
+				return ParseResult::Error;
 			}
 
 			m_modbusFormat.byteOrder = E::ModbusByteOrder::LE;
@@ -286,7 +330,7 @@ namespace Gateway
 		if (m_modbusFormat.byteOrder == E::ModbusByteOrder::Unknown)
 		{
 			log.logError(lineNo, "byte order BE or LE is not specified");
-			return false;
+			return ParseResult::Error;
 		}
 
 		static const std::map<E::ModbusSignalFormat, ::E::SignalType> signalsFormats =
@@ -305,7 +349,7 @@ namespace Gateway
 				if (m_modbusFormat.signalFormat != E::ModbusSignalFormat::Unknown)
 				{
 					log.logError(lineNo, QString("undefined signals format"));
-					return false;
+					return ParseResult::Error;
 				}
 
 				m_modbusFormat.signalFormat = modbusFormat;
@@ -316,10 +360,10 @@ namespace Gateway
 		if (m_modbusFormat.signalFormat == E::ModbusSignalFormat::Unknown)
 		{
 			log.logError(lineNo, QString("undefined signals format"));
-			return false;
+			return ParseResult::Error;
 		}
 
-		return true;
+		return ParseResult::Ok;
 	}
 
    // ---------------------------------------------------------------------------------

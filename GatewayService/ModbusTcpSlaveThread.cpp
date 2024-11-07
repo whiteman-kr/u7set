@@ -73,13 +73,13 @@ namespace Modbus
 
 	bool TcpSlaveThread::Connection::asciiRequestProcessing(size_t bytesReceived)
 	{
-		const size_t MIN_REQUEST_SIZE = 1 +		// start marker ':'
-										2 +		// slave address 'XX'
-										2 +		// function '03'
-										4 +		// regs start address 'XXXX'
-										4 +		// regs count 'XXXX'
-										2 +		// CRC 'XX'
-										2;		// end marker CR+LF
+		const size_t MIN_REQUEST_SIZE = ASCII_START_MARKER_LEN +	// marker ':'
+										ASCII_DEVICE_ID_LEN +		// modbus deviceID 'XX'
+										ASCII_FUNCTION_LEN +		// function '03'
+										ASCII_REG_START_ADDR_LEN +	// regs start address 'XXXX'
+										ASCII_REG_COUNT_LEN +		// regs count 'XXXX'
+										ASCII_CRC_LEN +				// CRC 'XX'
+										ASCII_END_MARKER_LEN;		// end marker CR+LF
 
 		if (bytesReceived < MIN_REQUEST_SIZE)
 		{
@@ -87,16 +87,10 @@ namespace Modbus
 			return false;
 		}
 
-		unsigned char* request = m_receiveBuffer;
+		quint8* request = m_receiveBuffer;
+		quint8* ptr = request;
 
-		if (isHexDigits(request + ASCII_START_MARKER_LEN,
-						bytesReceived - ASCII_START_MARKER_LEN - ASCII_END_MARKER_LEN) == false)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-
-		if (request[0] != ASCII_START_MARKER)
+		if (*ptr != Modbus::ASCII_START_MARKER)
 		{
 			Q_ASSERT(false);
 			return false;
@@ -104,7 +98,61 @@ namespace Modbus
 
 		bool result = true;
 
-		if ()
+		ptr += Modbus::ASCII_START_MARKER_LEN;
+
+		quint8 modbusDeviceID = asciiDecodeXX(ptr, &result);
+
+		RETURN_IF_FALSE(result);
+
+		if (modbusDeviceID != m_handler.modbusDeviceID())
+		{
+			return true;			// its Ok, request to another device
+		}
+
+		ptr += Modbus::ASCII_DEVICE_ID_LEN;
+
+		quint8 function = asciiDecodeXX(ptr, &result);
+
+		RETURN_IF_FALSE(result);
+
+		if (function != FC_READ_HOLDING_REGISTERS)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		ptr += Modbus::ASCII_FUNCTION_LEN;
+
+		quint16 regsStartAddr = asciiDecodeXXXX(ptr, &result);
+
+		RETURN_IF_FALSE(result);
+
+		ptr += Modbus::ASCII_REG_START_ADDR_LEN;
+
+		quint16 regsCount = asciiDecodeXXXX(ptr, &result);
+
+		RETURN_IF_FALSE(result);
+
+		ptr += Modbus::ASCII_REG_COUNT_LEN;
+
+		quint8 receivedCrc = asciiDecodeXX(ptr, &result);
+
+		RETURN_IF_FALSE(result);
+
+		quint8 calculatedCrc = nonStandardModbusCrcCalculation(request + ASCII_START_MARKER_LEN,
+																ASCII_DEVICE_ID_LEN +
+																ASCII_FUNCTION_LEN +
+																ASCII_REG_START_ADDR_LEN +
+																ASCII_REG_COUNT_LEN);
+		if (receivedCrc != calculatedCrc)
+		{
+			return false;
+		}
+
+		int sendBytesCount = onAsciiFnReadHoldingRegisters(regsStartAddr, regsCount);
+
+		Q_ASSERT(sendBytesCount <= SEND_BUFFER_SIZE);
+		m_socket.write_some(asio::buffer(m_sendBuffer, sendBytesCount));
 
 		return result;
 	}
@@ -112,6 +160,8 @@ namespace Modbus
 	bool TcpSlaveThread::Connection::rtuRequestProcessing(size_t bytesReceived)
 	{
 		Q_ASSERT(false);		// not implemented!
+
+		Q_UNUSED(bytesReceived);
 		return false;
 	}
 
@@ -125,33 +175,35 @@ namespace Modbus
 
 		if (request.header.length + sizeof(request.header) != bytesReceived)
 		{
-			Q_ASSERT(false);
+			//Q_ASSERT(false);
 			return false;
+		}
+
+		if (request.modbusDeviceID != m_handler.modbusDeviceID())
+		{
+			return true;					// its Ok, request to another device
 		}
 
 		bool result = true;
 
-		if (request.modbusDeviceID == m_handler.modbusDeviceID())
+		int sendBytesCount = 0;
+
+		switch(request.functionCode)
 		{
-			int sendBytesCount = 0;
+		case FC_READ_HOLDING_REGISTERS:
+			sendBytesCount = onFnReadHoldingRegisters(request);
+			break;
 
-			switch(request.functionCode)
-			{
-			case FC_READ_HOLDING_REGISTERS:
-				sendBytesCount = onFnReadHoldingRegisters(request);
-				break;
+		default:
+			DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData: unknown modbus function code %1. Request ignored.").
+											arg(request.functionCode));
+			result = false;
+		}
 
-			default:
-				DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData: unknown modbus function code %1. Request ignored.").
-												arg(request.functionCode));
-				result = false;
-			}
-
-			if (result == true && sendBytesCount > 0)
-			{
-				Q_ASSERT(sendBytesCount <= SEND_BUFFER_SIZE);
-				m_socket.write_some(asio::buffer(m_sendBuffer, sendBytesCount));
-			}
+		if (result == true && sendBytesCount > 0)
+		{
+			Q_ASSERT(sendBytesCount <= SEND_BUFFER_SIZE);
+			m_socket.write_some(asio::buffer(m_sendBuffer, sendBytesCount));
 		}
 
 		return result;
@@ -225,7 +277,50 @@ namespace Modbus
 		return *reinterpret_cast<TcpFrame*>(m_sendBuffer);
 	}
 
-	bool TcpSlaveThread::Connection::isHexDigits(const unsigned char* ptr, int len) const
+	int TcpSlaveThread::Connection::onAsciiFnReadHoldingRegisters(quint16 regsStartAddr, quint16 regsCount)
+	{
+		Q_ASSERT(regsCount <= ASCII_REG_VALUES_COUNT);
+
+		int bytesCount = m_handler.getRegistersValues(regsStartAddr, regsCount,
+													  m_asciiRegValues, ASCII_REG_VALUES_COUNT,
+													  QThread::currentThread());
+
+		Q_ASSERT(bytesCount == regsCount * sizeof(quint16));
+		Q_ASSERT(bytesCount <= 0xFF);
+
+		quint8* ptr = m_sendBuffer;
+
+		*ptr = ':';
+		ptr++;
+
+		ptr = asciiEncodeXX(FC_READ_HOLDING_REGISTERS, ptr);
+
+		ptr = asciiEncodeXX(bytesCount, ptr);
+
+		for(quint16 i = 0; i < regsCount; i++)
+		{
+			ptr = asciiEncodeXXXX(m_asciiRegValues[i], ptr);
+		}
+
+		quint8 crc = nonStandardModbusCrcCalculation(m_sendBuffer + ASCII_START_MARKER_LEN,	// skip start marker
+													 ASCII_FUNCTION_LEN +
+													 ASCII_BYTES_COUNT_LEN +
+													 bytesCount * 2);		// 2 chars on 1 byte
+
+		ptr = asciiEncodeXX(crc, ptr);
+
+		*ptr = ASCII_END_MARKER[0];
+		ptr++;
+
+		*ptr = ASCII_END_MARKER[1];
+		ptr++;
+
+		int sendBytesCount = ptr - m_sendBuffer;
+
+		return sendBytesCount;
+	}
+
+	bool TcpSlaveThread::Connection::isHexDigits(const quint8* ptr, int len) const
 	{
 		int result = 1;
 
@@ -237,32 +332,29 @@ namespace Modbus
 		return (result == 0 ? false : true);
 	}
 
-	quint8 TcpSlaveThread::Connection::asciiDecodeXX(const unsigned char* ptr)
+	quint8 TcpSlaveThread::Connection::asciiDecodeXX(const quint8* ptr, bool* ok) const
 	{
-		Q_ASSERT(std::isxdigit(ptr[0]));		// high
-		Q_ASSERT(std::isxdigit(ptr[1]));		// low
-
-		quint8 result = ptr[0] - '0';
-
-		result <<= 4;
-
-		result += ptr[1] - '0';
-
-		return result;
+		quint64 result = asciiDecode(ptr, sizeof(quint8) * 2, ok);
+		Q_ASSERT(result <= 0xFF);
+		return static_cast<quint8>(result);
 	}
 
-	quint16 TcpSlaveThread::Connection::asciiDecodeXXXX(unsigned char* ptr)
+	quint16 TcpSlaveThread::Connection::asciiDecodeXXXX(const quint8* ptr, bool* ok) const
 	{
-'lvme;rbmew;rbmbbrer
+		quint64 result = asciiDecode(ptr, sizeof(quint16) * 2, ok);
+		Q_ASSERT(result <= 0xFFFF);
+		return static_cast<quint16>(result);
 	}
 
-	quint64 asciiDecode(const unsigned char* ptr, int len) const
+	quint64 TcpSlaveThread::Connection::asciiDecode(const quint8* ptr, int len, bool* ok) const
 	{
 		TEST_PTR_RETURN_VALUE(ptr, 0);
+		TEST_PTR_RETURN_VALUE(ok, 0);
 
 		if(len <= 0 || len > sizeof(quint64) * 2)
 		{
 			Q_ASSERT(false);
+			*ok = false;
 			return 0;
 		}
 
@@ -272,35 +364,154 @@ namespace Modbus
 		{
 			unsigned char ch = ptr[i];
 
-			if (ch >= '0' && ch <= '9')
+			ch = asciiDecodeX(ch, ok);
+
+			if (*ok == false)
 			{
-				ch -= '0';
-			}
-			else
-			{
-				if (ch >= 'A' && ch <= 'F')
-				{
-					ch = 0x0A + ch - 'A';
-				}
-				else
-				{
-					if (ch >= 'a' && ch <= 'f')
-					{
-						ch = 0x0A + ch - 'a';
-					}
-					else
-					{
-						Q_ASSERT(false);		// ch is not a hex digit!
-						return 0;
-					}
-				}
+				return 0;
 			}
 
 			result <<= 4;
 			result += ch;
 		}
 
+		*ok = true;
+
 		return result;
+	}
+
+	quint8 TcpSlaveThread::Connection::asciiDecodeX(quint8 ch, bool* ok) const
+	{
+		if (ch >= '0' && ch <= '9')
+		{
+			ch -= '0';
+		}
+		else
+		{
+			if (ch >= 'A' && ch <= 'F')
+			{
+				ch = 0x0A + ch - 'A';
+			}
+			else
+			{
+				if (ch >= 'a' && ch <= 'f')
+				{
+					ch = 0x0A + ch - 'a';
+				}
+				else
+				{
+					Q_ASSERT(false);		// ch is not a hex digit!
+					*ok = false;
+					return 0;
+				}
+			}
+		}
+
+		return ch;
+	}
+
+	quint8* TcpSlaveThread::Connection::asciiEncodeXX(quint8 v8, quint8* ptr)
+	{
+		*ptr = asciiEncodeX((v8 >> 4) & 0x0F);
+		ptr++;
+
+		*ptr = asciiEncodeX(v8 & 0x0F);
+		ptr++;
+
+		return ptr;
+	}
+
+	quint8* TcpSlaveThread::Connection::asciiEncodeXXXX(quint16 v16, quint8* ptr)
+	{
+		ptr = asciiEncodeXX((v16 >> 8) & 0xFF, ptr);
+		ptr = asciiEncodeXX(v16 & 0xFF, ptr);
+
+		return ptr;
+	}
+
+	quint8 TcpSlaveThread::Connection::asciiEncodeX(quint8 ch)
+	{
+		if (ch <= 9)
+		{
+			return ch + '0';
+		}
+
+		if (ch <= 0x0F)
+		{
+			return ch - 0x0A + 'A';
+		}
+
+		Q_ASSERT(false);
+
+		return '0';
+	}
+
+	quint8 TcpSlaveThread::Connection::nonStandardModbusCrcCalculation(const quint8* ptr, int lenInChars)
+	{
+		// Non-standart modbus request CRC calculation used on AEC Kozloduy in UIK system.
+		//
+		// Reverse ingeneered from request making code:
+		//
+		// static void makeRequest(array<unsigned char>^ request, int chan, bool Ust)
+		// {
+		// 	request[0] = ':'; //header
+		// 	request[1] = '0'; //slave address
+		// 	request[2] = '0' + chan;
+		// 	request[3] = '0'; //function
+		// 	request[4] = '3';
+		// 	request[5] = '0'; //start address Hi
+		// 	request[6] = '0';
+		// 	request[7] = '0'; //start Lo
+		// 	request[8] = '0';
+		// 	request[9] = '0'; //Number Hi
+		// 	request[10]= '0';
+		// 	request[11]= '6'; //Number Lo
+		// 	request[12]= '6';
+		// 	request[13]= '0'; //CRC
+		// 	request[14]= '0';
+		// 	request[15]= 0x0D;
+		// 	request[16]= 0x0A;
+		//
+		// 	if(Ust)
+		// 	{
+		// 		request[7] = '6'; //start Lo
+		// 		request[8] = '6';
+		// 		request[11]= '4'; //Number Lo
+		// 		request[12]= '6';
+		// 	}
+		//
+		// ---------------- Non-standard CRC calculation! -----------------------
+		//
+		//	1. ASCII decoding is used before summing CRC
+		//  2. Result is not two's complementing
+		//
+		//	Standard Modbus LRC calculation see in ModbusProtocol.cpp
+		//
+		//  //
+		//
+		// 	unsigned int CRC=0;
+		// 	for(int i=1;i<13;i+=2)
+		// 		CRC+=uncodeASCII(request[i])*16 + uncodeASCII(request[i+1]);
+		// 	CRC = CRC & 0xFF;
+		// ----------------------------------------------------------------------
+		//
+		// 	request[13] = codeASCII(CRC>>4);
+		// 	request[14] = codeASCII(CRC&0xF);
+		// }
+
+		quint8 crc = 0;
+		bool ok = true;
+
+		for(int i = 0; i < lenInChars; i++)
+		{
+			quint8 ch = asciiDecodeX(ptr[0], &ok);
+
+			Q_ASSERT(ok == true);
+
+			crc += ch;
+		}
+
+		return crc;
 	}
 
    // --------------------------------------------------------------------------------------------------------

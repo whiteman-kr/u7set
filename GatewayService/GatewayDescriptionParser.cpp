@@ -370,7 +370,7 @@ namespace Gateway
 		return result;
 	}
 
-	Parser::ParseResult Parser::parseUnknownSection(E::Section& parsingSection,
+	ParseResult Parser::parseUnknownSection(E::Section& parsingSection,
 													const ParseLineResult& plr)
 	{
 		if (plr.lineType == LineType::Section &&
@@ -385,7 +385,7 @@ namespace Gateway
 		return ParseResult::CriticalError;
 	}
 
-	Parser::ParseResult Parser::parseGatewaySection(E::Section& parsingSection,
+	ParseResult Parser::parseGatewaySection(E::Section& parsingSection,
 													   const ParseLineResult& plr)
 	{
 		GatewayShared gw = m_gateways->last();
@@ -477,7 +477,7 @@ namespace Gateway
 		return ParseResult::Error;
 	}
 
-	Parser::ParseResult Parser::parseSignalListSection(E::Section& parsingSection,
+	ParseResult Parser::parseSignalListSection(E::Section& parsingSection,
 													   const ParseLineResult& plr)
 	{
 		GatewayShared gw = m_gateways->last();
@@ -534,7 +534,8 @@ namespace Gateway
 		return ParseResult::Error;
 	}
 
-	Parser::ParseResult Parser::appendAddressSignalID(SignalListShared signalList, const ParseLineResult& plr, bool appendAddr)
+	ParseResult Parser::appendAddressSignalID(SignalListShared signalList,
+													  const ParseLineResult& plr, bool appendAddr)
 	{
 		QString appSignalID = plr.value.toString().trimmed();
 
@@ -546,40 +547,23 @@ namespace Gateway
 			return ParseResult::Error;
 		}
 
-		std::optional<::E::SignalType> listSignalType = signalList->signalType();
+		ParseResult pr = signalList->checkSignalTypeAndFormat(plr.lineNo, s, m_log);
 
-		if (listSignalType.has_value() == false)
+		if (pr != ParseResult::Ok)
 		{
-			m_log.logError(plr.lineNo, QString("required signal type of list is undefined, set list signal type (format) first"));
-			return ParseResult::CriticalError;
+			return pr;
 		}
-
-		if (s->signalType() != listSignalType.value())
-		{
-			m_log.logError(plr.lineNo, QString("signal type of '%1' isn't corresponds to list signal type '%2'").
-									   arg(s->appSignalID()).arg(::E::valueToString(listSignalType.value())));
-			return ParseResult::Error;
-		}
-
-		QString errMsg;
-		bool res = true;
 
 		if (appendAddr == false)
 		{
-			res = signalList->appendSignalID(appSignalID, &errMsg);
+			pr = signalList->appendSignalID(plr.lineNo, appSignalID, m_log);
 		}
 		else
 		{
-			res = signalList->appendAddressSignalID(plr.addressStr, appSignalID, &errMsg);
+			pr = signalList->appendAddressSignalID(plr.lineNo, plr.addressStr, appSignalID, m_log);
 		}
 
-		if (res == false)
-		{
-			m_log.logError(plr.lineNo, errMsg);
-			return ParseResult::Error;
-		}
-
-		return ParseResult::Ok;
+		return pr;
 	}
 
 	bool Parser::parseLine(const QString& str, ParseLineResult* plr)

@@ -59,6 +59,13 @@ namespace Gateway
 		int m_wrnCount = 0;
 	};
 
+	enum class ParseResult
+	{
+		Ok,
+		Error,
+		CriticalError
+	};
+
 	class Parser
 	{
 	private:
@@ -79,13 +86,6 @@ namespace Gateway
 		static const std::map<E::Setting, E::SettingType> m_settingType;
 
 	public:
-		enum class ParseResult
-		{
-			Ok,
-			Error,
-			CriticalError
-		};
-
 		enum class LineType
 		{
 			Unknown,

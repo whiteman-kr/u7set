@@ -28,8 +28,10 @@ namespace Gateway
 		ModbusSignalList();
 
 		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
-		virtual bool appendAddressSignalID(const QString& addressStr, const QString& signalID, QString* errMsg) override;
+
+		virtual ParseResult checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
+		virtual ParseResult checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log) override;
+		virtual ParseResult appendAddressSignalID(int lineNo, const QString& addressStr, const QString& signalID, ParserLog& log) override;
 
 		ModbusFormat modbusFormat() const;
 		Address16 getAddress(Hash hash) const;
@@ -38,7 +40,7 @@ namespace Gateway
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
 
-		bool checkAndApplySignalsFormat(int lineNo, QString formatStr, ParserLog& log);		// copy str Ok!
+		ParseResult checkAndApplySignalsFormat(int lineNo, QString formatStr, ParserLog& log);		// copy str Ok!
 
 	private:
 		ModbusFormat m_modbusFormat;

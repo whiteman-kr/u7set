@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <asio.hpp>
+#include <QtTypes>
 #include "../OnlineLib/CircularLogger.h"
 #include "ModbusProtocol.h"
 
@@ -51,11 +52,19 @@ namespace Modbus
 			TcpFrame& getRequestRef();
 			TcpFrame& getReplyRef();
 
-			bool isHexDigits(const unsigned char* ptr, int len) const;
-			quint8 asciiDecodeXX(const unsigned char* ptr) const;
-			quint16 asciiDecodeXXXX(const unsigned char* ptr) const;
+			int onAsciiFnReadHoldingRegisters(quint16 regsStartAddr, quint16 regsCount);
 
-			quint64 asciiDecode(const unsigned char* ptr, int len) const;
+			bool isHexDigits(const quint8* ptr, int len) const;
+			quint8 asciiDecodeXX(const quint8* ptr, bool* ok) const;
+			quint16 asciiDecodeXXXX(const quint8* ptr, bool* ok) const;
+			quint64 asciiDecode(const quint8* ptr, int len, bool* ok) const;
+			quint8 asciiDecodeX(quint8 ch, bool* ok) const;
+
+			quint8* asciiEncodeXX(quint8 v8, quint8* ptr);
+			quint8* asciiEncodeXXXX(quint16 v16, quint8* ptr);
+			quint8 asciiEncodeX(quint8 ch);
+
+			quint8 nonStandardModbusCrcCalculation(const quint8* ptr, int len);
 
 		private:
 			Listener& m_listener;
@@ -69,6 +78,10 @@ namespace Modbus
 
 			static inline const int SEND_BUFFER_SIZE = 1024;
 			unsigned char m_sendBuffer[SEND_BUFFER_SIZE];
+
+			inline static const int ASCII_REG_VALUES_COUNT = 256;
+
+			RegisterValue m_asciiRegValues[ASCII_REG_VALUES_COUNT];
 
 			static inline int m_connectionInstance = 0;
 		};

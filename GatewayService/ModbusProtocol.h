@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QtTypes>
 
 namespace Modbus
 {
@@ -18,6 +19,13 @@ namespace Modbus
 
 	inline const unsigned char ASCII_END_MARKER[2] = { 0x0D, 0x0A };	// CR + LF
 	inline const int ASCII_END_MARKER_LEN = 2;
+
+	inline const int ASCII_DEVICE_ID_LEN = 2;
+	inline const int ASCII_FUNCTION_LEN = 2;
+	inline const int ASCII_REG_START_ADDR_LEN = 4;
+	inline const int ASCII_REG_COUNT_LEN = 4;
+	inline const int ASCII_CRC_LEN = 2;
+	inline const int ASCII_BYTES_COUNT_LEN = 2;
 
 #pragma pack(push, 1)
 
@@ -62,6 +70,6 @@ namespace Modbus
 
 #pragma pack(pop)
 
-	quint8 LRC (const quint8* data, int dataLength);		// Modbus ASCII mode LRC calculation
-	quint16 CRC16 (const quint8 *data, int dataLength);		// Modbus RTU mode CRC16 calculation
+	quint8 LRC(const quint8* data, int dataLength);		// Modbus ASCII mode LRC calculation
+	quint16 CRC16(const quint8 *data, int dataLength);		// Modbus RTU mode CRC16 calculation
 }

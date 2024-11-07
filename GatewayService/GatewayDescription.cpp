@@ -112,9 +112,12 @@ namespace Gateway
 
 	bool SignalList::setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
-		bool res = checkAndApplySetting(lineNo, st, value, log);
+		ParseResult pr = checkAndApplySetting(lineNo, st, value, log);
 
-		RETURN_IF_FALSE(res);
+		if (pr != ParseResult::Ok)
+		{
+			return false;
+		}
 
 		Q_ASSERT(m_settingsValues.contains(st) == false);
 
@@ -134,27 +137,50 @@ namespace Gateway
 		return false;
 	}
 
-	bool SignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
+	ParseResult SignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
 		Q_UNUSED(lineNo);
 		Q_UNUSED(st);
 		Q_UNUSED(value);
 		Q_UNUSED(log);
-		return true;
+		return ParseResult::Ok;
 	}
 
-	bool SignalList::appendSignalID(const QString& appSignalID, QString* errMsg)
+	ParseResult SignalList::checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log)
 	{
-		Q_UNUSED(errMsg);
-		m_signalIDs.emplace_back(appSignalID);
-		return true;
+		TEST_PTR_RETURN_VALUE(appSignal, ParseResult::CriticalError);
+
+		if (m_signalType.has_value() == false)
+		{
+			log.logError(lineNo, QString("required signal type of list is undefined, set list signal type (format) first"));
+			return ParseResult::CriticalError;
+		}
+
+		if (appSignal->signalType() != m_signalType.value())
+		{
+			log.logError(lineNo, QString("signal type of '%1' isn't corresponds to list signal type '%2'").
+									   arg(appSignal->appSignalID(), ::E::valueToString(m_signalType.value())));
+			return ParseResult::Error;
+		}
+
+		return ParseResult::Ok;
 	}
 
-	bool SignalList::appendAddressSignalID(const QString& addressStr, const QString& appSignalID, QString* errMsg)
+	ParseResult SignalList::appendSignalID(int lineNo, const QString& appSignalID, ParserLog& log)
+	{
+		Q_UNUSED(lineNo);
+		Q_UNUSED(log);
+
+		m_signalIDs.emplace_back(appSignalID);
+
+		return ParseResult::Ok;
+	}
+
+	ParseResult SignalList::appendAddressSignalID(int lineNo, const QString& addressStr, const QString& appSignalID, ParserLog& log)
 	{
 		Q_UNUSED(addressStr);
-		appendSignalID(appSignalID, errMsg);
-		return true;
+
+		return appendSignalID(lineNo, appSignalID, log);
 	}
 
 	std::optional<::E::SignalType> SignalList::signalType() const

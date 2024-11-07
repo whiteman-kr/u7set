@@ -22,9 +22,8 @@ namespace Modbus
 
 	// Modbus ASCII mode LRC (Longitudinal Redundancy Check) calculation
 	//
-	quint8 LRC (const quint8* data, int dataLength)
+	quint8 LRC(const quint8* data, int dataLength)
 	{
-
 		quint8 lrc = 0 ;
 
 		for (int i = 0; i < dataLength; i++)

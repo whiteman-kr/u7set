@@ -113,6 +113,8 @@ namespace Gateway
 	};
 
 	class ParserLog;
+	class Parser;
+	enum class ParseResult;
 
 	struct SettingValue
 	{
@@ -170,10 +172,11 @@ namespace Gateway
 		bool settingIsSet(E::Setting st) const;
 
 		virtual bool isKnownSetting(E::Setting st) const;
-		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
 
-		virtual bool appendSignalID(const QString& appSignalID, QString* errMsg);
-		virtual bool appendAddressSignalID(const QString& addressStr, const QString& appSignalID, QString* errMsg);
+		virtual ParseResult checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
+		virtual ParseResult checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log);
+		virtual ParseResult appendSignalID(int lineNo, const QString& appSignalID, ParserLog& log);
+		virtual ParseResult appendAddressSignalID(int lineNo, const QString& addressStr, const QString& appSignalID, ParserLog& log);
 
 		std::optional<::E::SignalType> signalType() const;
 		void setSignalType(::E::SignalType st);

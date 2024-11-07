@@ -67,9 +67,6 @@ namespace Gateway
 		ModbusTcpSlaveGatewayShared m_gateway;
 		const AppSignals& m_appSignals;
 
-//		AppSignalStates m_states;
-//		std::atomic_bool m_signalStatesUpdated = { false };
-
 		AppDataServiceClientThread* m_appDataServiceClientThread = nullptr;
 
 		Modbus::TcpSlaveThread* m_modbusTcpSlaveThread1 = nullptr;
@@ -80,7 +77,8 @@ namespace Gateway
 		std::map<Hash, std::list<SignalState>> m_signalsStates;
 
 		SimpleMutex m_regsMutex;
-		std::vector<Modbus::RegisterValue> m_registers;				// modbus 16-bit registers
+		std::vector<Modbus::RegisterValue> m_registers;		// modbus 16-bit registers
+															// values stored in required BE or LE byte order!
 
 		mutable std::set<Hash> m_hashesToUpdate;
 

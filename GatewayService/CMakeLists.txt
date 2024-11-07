@@ -19,6 +19,8 @@ add_executable(${TARGET}
 	AppDataServiceClient.h
 	AppSignalState.cpp
 	AppSignalState.h
+	Float16.cpp
+	Float16.h
 	GatewayDescription.cpp
 	GatewayDescription.h
 	GatewayDescriptionParser.cpp

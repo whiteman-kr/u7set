@@ -1,7 +1,8 @@
 #include <string.h>
+#include <Network.pb.h>
 
 #include "ModbusTcpSlaveGatewayHandler.h"
-#include <Network.pb.h>
+#include "Float16.h"
 
 namespace Gateway
 {
@@ -325,7 +326,7 @@ namespace Gateway
 		// Human readable value for regsStartAddr == 1 in request decremented by 1, i.e. send as 0!
 		// So m_registers also indexed from 0
 		//
-		int regAddr = state.modbusAddress.offset() - 1;
+		int regAddr = state.modbusAddress.offset();		// - 1;
 
 		if (regAddr >= TO_INT(m_registers.size()))
 		{
@@ -359,7 +360,16 @@ namespace Gateway
 
 		case E::ModbusSignalFormat::AnalogFloat16:
 			{
-				Q_ASSERT(false);			// convertion function is unknown
+				Float16 f16;
+
+				f16.uint16 = encodeFloat16(static_cast<float>(state.value));
+
+				if (state.reverseBytes)
+				{
+					f16.uint16 = reverseUint16(f16.uint16);
+				}
+
+				m_registers[regAddr] = f16.uint16;
 			}
 			break;
 
@@ -371,7 +381,7 @@ namespace Gateway
 
 				if (state.reverseBytes)
 				{
-					regValue = reverseUint32(regValue);
+					regValue = reverseUint16(regValue);
 				}
 
 				m_registers[regAddr] = regValue;
@@ -386,6 +396,11 @@ namespace Gateway
 					return;
 				}
 
+				if (regAddr == 3)
+				{
+					DEBUG_STOP;
+				}
+
 				float fp32 = static_cast<float>(state.value);
 
 				quint32 uint32 = std::bit_cast<quint32>(fp32);
@@ -393,15 +408,10 @@ namespace Gateway
 				if (state.reverseBytes)
 				{
 					uint32 = reverseUint32(uint32);
+				}
 
-					m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
-					m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
-				}
-				else
-				{
-					m_registers[regAddr] = reverseUint16(static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF));
-					m_registers[regAddr + 1] = reverseUint16(static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF));
-				}
+				m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
+				m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
 			}
 			break;
 
@@ -420,15 +430,10 @@ namespace Gateway
 				if (state.reverseBytes)
 				{
 					uint32 = reverseUint32(uint32);
+				}
 
-					m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
-					m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
-				}
-				else
-				{
-					m_registers[regAddr] = reverseUint16(static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF));
-					m_registers[regAddr + 1] = reverseUint16(static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF));
-				}
+				m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
+				m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
 			}
 			break;
 
