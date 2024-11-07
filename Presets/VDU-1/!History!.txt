@@ -6,6 +6,7 @@ VDU-1
 	09.04.2024	Version: 4	VDU-1_v4.u7devp RPCT-3872: Added Display0 properties
 	01.08.2024	Version: 5	VDU-1_v5.u7devp RPCT-3872: FamilyType changed from 0x7100 to 0x1C00
 	16.10.2024	Version: 6	VDU-1_v6.u7devp RPCT-3549: Added properties: DiagLANDataSize, SubsystemID, SubsystemChannel, LMNumber. Worstation removed.
+	07.11.2024	Version: 7	VDU-1_v7.u7devp RPCT-3550: Added Input, Output and Platform interface controller and their signals
 
 
 
