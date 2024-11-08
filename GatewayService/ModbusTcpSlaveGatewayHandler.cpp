@@ -16,11 +16,6 @@ namespace Gateway
 	{
 		format = frmt;
 		modbusAddress = addr16;
-
-		reverseBytes =	(std::endian::native == std::endian::little &&
-						format.byteOrder == E::ModbusByteOrder::BE) ||
-						(std::endian::native == std::endian::big &&
-						format.byteOrder == E::ModbusByteOrder::LE);
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -323,10 +318,7 @@ namespace Gateway
 
 	void ModbusTcpSlaveHandler::updateRegister(const SignalState& state)
 	{
-		// Human readable value for regsStartAddr == 1 in request decremented by 1, i.e. send as 0!
-		// So m_registers also indexed from 0
-		//
-		int regAddr = state.modbusAddress.offset();		// - 1;
+		int regAddr = state.modbusAddress.offset();
 
 		if (regAddr >= TO_INT(m_registers.size()))
 		{
@@ -342,10 +334,7 @@ namespace Gateway
 
 				quint16 mask = 1 << state.modbusAddress.bit();
 
-				if (state.reverseBytes)
-				{
-					mask = reverseUint16(mask);
-				}
+				mask = reverse16(mask, state.format.byteOrder);
 
 				if (state.value == 0)
 				{
@@ -360,31 +349,24 @@ namespace Gateway
 
 		case E::ModbusSignalFormat::AnalogFloat16:
 			{
-				Float16 f16;
+				quint16 f16;
 
-				f16.uint16 = encodeFloat16(static_cast<float>(state.value));
+				f16 = encodeFloat16(static_cast<float>(state.value));
 
-				if (state.reverseBytes)
-				{
-					f16.uint16 = reverseUint16(f16.uint16);
-				}
+				f16 = reverse16(f16, state.format.byteOrder);
 
-				m_registers[regAddr] = f16.uint16;
+				m_registers[regAddr] = f16;
 			}
 			break;
 
 		case E::ModbusSignalFormat::AnalogSInt16:
 			{
 				qint16 sint16 = static_cast<qint16>(state.value);
+				qint16 uint16 = static_cast<quint16>(sint16);
 
-				Modbus::RegisterValue regValue = std::bit_cast<Modbus::RegisterValue>(sint16);
+				uint16 = reverse16(uint16, state.format.byteOrder);
 
-				if (state.reverseBytes)
-				{
-					regValue = reverseUint16(regValue);
-				}
-
-				m_registers[regAddr] = regValue;
+				m_registers[regAddr] = uint16;
 			}
 			break;
 
@@ -396,22 +378,12 @@ namespace Gateway
 					return;
 				}
 
-				if (regAddr == 3)
-				{
-					DEBUG_STOP;
-				}
+				quint32 uint32 = std::bit_cast<quint32>(static_cast<float>(state.value));
 
-				float fp32 = static_cast<float>(state.value);
-
-				quint32 uint32 = std::bit_cast<quint32>(fp32);
-
-				if (state.reverseBytes)
-				{
-					uint32 = reverseUint32(uint32);
-				}
+				uint32 = reverse32(uint32, state.format.byteOrder);
 
 				m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
-				m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
+				m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>(uint32 >> 16);
 			}
 			break;
 
@@ -423,17 +395,12 @@ namespace Gateway
 					return;
 				}
 
-				qint32 sint32 = static_cast<qint32>(state.value);
+				quint32 uint32 = std::bit_cast<quint32>(static_cast<qint32>(state.value));
 
-				quint32 uint32 = std::bit_cast<quint32>(sint32);
-
-				if (state.reverseBytes)
-				{
-					uint32 = reverseUint32(uint32);
-				}
+				uint32 = reverse32(uint32, state.format.byteOrder);
 
 				m_registers[regAddr] = static_cast<Modbus::RegisterValue>(uint32 & 0xFFFF);
-				m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>((uint32 >> 16) & 0xFFFF);
+				m_registers[regAddr + 1] = static_cast<Modbus::RegisterValue>(uint32 >> 16);
 			}
 			break;
 
@@ -442,4 +409,66 @@ namespace Gateway
 		}
 	}
 
+	quint16 ModbusTcpSlaveHandler::reverse16(quint16 leValue, E::ModbusByteOrder bo) const
+	{
+		switch(bo)
+		{
+		case E::ModbusByteOrder::LE:
+		case E::ModbusByteOrder::BE_ByteSwap:
+			return leValue;
+
+		case E::ModbusByteOrder::BE:
+		case E::ModbusByteOrder::LE_ByteSwap:
+			return reverseUint16(leValue);
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	quint32 ModbusTcpSlaveHandler::reverse32(quint32 le_Value, E::ModbusByteOrder bo) const
+	{
+		switch(bo)
+		{
+		case E::ModbusByteOrder::LE:
+			return le_Value;
+
+		case E::ModbusByteOrder::LE_ByteSwap:
+			{
+				quint16 leValueLow = static_cast<quint16>(le_Value & 0x0000FFFF);
+				quint16 leValueHigh = static_cast<quint16>(le_Value >> 16);
+
+				leValueLow = reverseUint16(leValueLow);
+				leValueHigh = reverseUint16(leValueHigh);
+
+				le_Value = leValueHigh;
+				le_Value <<= 16;
+				le_Value |= leValueLow;
+
+				return le_Value;
+			}
+
+		case E::ModbusByteOrder::BE_ByteSwap:
+			{
+				// swap low and high 16 bit words only!
+				//
+				quint16 leValueHigh = static_cast<quint16>(le_Value >> 16);
+
+				le_Value <<= 16;
+				le_Value |= leValueHigh;
+
+				return le_Value;
+			}
+
+		case E::ModbusByteOrder::BE:
+			return reverseUint32(le_Value);
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
 }

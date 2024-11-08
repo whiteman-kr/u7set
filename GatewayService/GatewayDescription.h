@@ -97,8 +97,16 @@ namespace Gateway
 		enum class ModbusByteOrder
 		{
 			Unknown,
-			BE,
-			LE,
+										// Byte order in 16-bit registers, low addr to high addr
+										//
+										// 32-bit value: 0x44332211		|  16-bit value: 0x2211
+										//								|  LE_ByteSwap equal to BE,
+										//	  reg[0]	  reg[1]		|  BE_ByteSwap equal to LE
+										//  LSB   MSB   LSB   MSB		|   LSB   MSB
+			LE,							// [0x11 0x22] [0x33 0x44]		|  [0x11 0x22]
+			LE_ByteSwap,				// [0x22 0x11] [0x44 0x33]		|  [0x22 0x11]
+			BE,							// [0x44 0x33] [0x22 0x11]		|  [0x22 0x11]
+			BE_ByteSwap,				// [0x33 0x44] [0x11 0x22]		|  [0x11 0x22]
 		};
 		Q_ENUM(ModbusByteOrder)
 
@@ -107,7 +115,7 @@ namespace Gateway
 			Unknown,
 			ASCII,						// ASCII character mode, packets starts with ':', ends with CR+LF
 			RTU,						// binary mode RTU
-			TCP_RTU						// RTU over TCP (RTU with TCP header)
+			TCP							// TCP (RTU with TCP header)
 		};
 		Q_ENUM(ModbusMode)
 	};

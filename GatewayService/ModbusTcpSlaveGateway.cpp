@@ -311,25 +311,22 @@ namespace Gateway
 
 		m_modbusFormat.byteOrder = E::ModbusByteOrder::Unknown;
 
-		if (options.contains(::E::valueToString(E::ModbusByteOrder::BE).toLower()) == true)
-		{
-			m_modbusFormat.byteOrder = E::ModbusByteOrder::BE;
-		}
+		QStringList keys = ::E::enumKeyStrings<E::ModbusByteOrder>();
 
-		if (options.contains(::E::valueToString(E::ModbusByteOrder::LE).toLower()) == true)
+		for(const QString& key : keys)
 		{
-			if (m_modbusFormat.byteOrder != E::ModbusByteOrder::Unknown)
+			if (options.contains(key.toLower()))
 			{
-				log.logError(lineNo, "undefined byte order");
-				return ParseResult::Error;
+				bool ok = 0;
+				m_modbusFormat.byteOrder = ::E::stringToValue<E::ModbusByteOrder>(key, &ok);
+				break;
 			}
-
-			m_modbusFormat.byteOrder = E::ModbusByteOrder::LE;
 		}
 
 		if (m_modbusFormat.byteOrder == E::ModbusByteOrder::Unknown)
 		{
-			log.logError(lineNo, "byte order BE or LE is not specified");
+			log.logError(lineNo, QString("byte order %1 should specified").
+								 arg(keys.join(", ")));
 			return ParseResult::Error;
 		}
 

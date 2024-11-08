@@ -63,7 +63,7 @@ namespace Modbus
 			result = rtuRequestProcessing(bytesReceived);
 			break;
 
-		case ::Gateway::E::ModbusMode::TCP_RTU:
+		case ::Gateway::E::ModbusMode::TCP:
 			result = tcpRtuRequestProcessing(bytesReceived);
 			break;
 		}

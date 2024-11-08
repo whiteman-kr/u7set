@@ -45,7 +45,6 @@ namespace Gateway
 			ModbusFormat format;
 			Address16 modbusAddress;
 
-			bool reverseBytes = false;
 			double value = 0;
 		};
 
@@ -58,6 +57,9 @@ namespace Gateway
 		void updateAllRegisters();
 		void updateRegisters(const std::set<Hash>& hashes);
 		void updateRegister(const SignalState& state);
+
+		quint16 reverse16(quint16 leValue, E::ModbusByteOrder bo) const;
+		quint32 reverse32(quint32 leValue, E::ModbusByteOrder bo) const;
 
 	private:
 		const SoftwareInfo m_softwareInfo;
