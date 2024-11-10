@@ -301,7 +301,7 @@ namespace LicenseLib
 	void RpctLicense::setCaption(const QString& value)
 	{
 		Q_ASSERT(m_data);
-		m_data->set_caption(value.toStdString());
+		m_data->set_caption(value.trimmed().toStdString());
 	}
 
 	QString RpctLicense::organization() const
@@ -313,7 +313,7 @@ namespace LicenseLib
 	void RpctLicense::setOrganization(const QString& value)
 	{
 		Q_ASSERT(m_data);
-		m_data->set_organization(value.toStdString());
+		m_data->set_organization(value.trimmed().toStdString());
 	}
 
 	QString RpctLicense::firstName() const
@@ -325,7 +325,7 @@ namespace LicenseLib
 	void RpctLicense::setFirstName(const QString& value)
 	{
 		Q_ASSERT(m_data);
-		m_data->set_first_name(value.toStdString());
+		m_data->set_first_name(value.trimmed().toStdString());
 	}
 
 	QString RpctLicense::lastName() const
@@ -337,7 +337,7 @@ namespace LicenseLib
 	void RpctLicense::setLastName(const QString& value)
 	{
 		Q_ASSERT(m_data);
-		m_data->set_last_name(value.toStdString());
+		m_data->set_last_name(value.trimmed().toStdString());
 	}
 
 	QString RpctLicense::contactInfo() const
@@ -433,7 +433,7 @@ namespace LicenseLib
 	void RpctLicense::setWorkplaceId(const QString& value)
 	{
 		Q_ASSERT(m_data);
-		m_data->mutable_workplace()->set_workplace_id(value.toStdString());
+		m_data->mutable_workplace()->set_workplace_id(value.trimmed().toStdString());
 	}
 
 	bool RpctLicense::allowedModuleConfigurator() const

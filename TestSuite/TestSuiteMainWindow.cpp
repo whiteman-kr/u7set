@@ -47,6 +47,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/qt_%1.qm").arg(l));
 	}
 
+	if (AppConfigSettings::instance().language() != "en")
 	{
 		QStringList failedTranslations;
 		if (m_translator.setLanguage(AppConfigSettings().instance().language(), failedTranslations) == false)

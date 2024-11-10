@@ -121,5 +121,8 @@ module Signal {
 		apply(): void;
 		
 		isLoggedIn(): boolean;
+
+		userName(): string;
+		userTags(): Array<string>;
 	}
 }

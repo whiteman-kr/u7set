@@ -41,6 +41,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/qt_%1.qm").arg(l));
 	}
 
+	if (TuningClientAppSettings::instance().language() != "en")
 	{
 		QStringList failedTranslations;
 		if (m_translator.setLanguage(TuningClientAppSettings::instance().language(), failedTranslations) == false)
