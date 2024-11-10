@@ -35,6 +35,7 @@ namespace Gateway
 			GatewayType,
 			GatewayID,
 			GatewayDescription,
+			Enable,
 
 			// IVS Impulse specific settings
 
@@ -224,16 +225,18 @@ namespace Gateway
 	{
 	private:
 		static const std::set<E::Setting> m_gatewayRequiredSettings;
+		static const std::set<E::Setting> m_gatewayOptionalSettings;
 
 	public:
 		Gateway();
 		Gateway(E::GatewayType gwType);
-		Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc);
+		Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable);
 		virtual ~Gateway();
 
 		E::GatewayType gatewayType() const;
 		QString gatewayID() const;
 		QString gatewayDescription() const;
+		bool enable() const;
 		int signalListsCount() const;
 
 		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value);
@@ -272,6 +275,7 @@ namespace Gateway
 		E::GatewayType m_gatewayType = E::GatewayType::Unknown;
 		QString m_gatewayID;
 		QString m_gatewayDescription;
+		bool m_enable = true;
 
 		SettingsValues m_settingsValues;
 
@@ -300,7 +304,8 @@ namespace Gateway
 
 		GatewayShared createTypedGateway(E::GatewayType gwType,
 										 const QString& gwID,
-										 const QString& gwDesc);
+										 const QString& gwDesc,
+										 bool enable);
 
 		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 

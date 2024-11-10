@@ -562,7 +562,7 @@ namespace CmdLineArg
 	inline const QString WORK_DIRECTORY("w");
 	inline const QString BUILD_PATH("b");
 
-	inline const QString LOG_GATEWAY_PACKETS("logGwPackets");
+	inline const QString LOG_GW("logGw");
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
 
 	inline const QString READ_ONLY("readonly");

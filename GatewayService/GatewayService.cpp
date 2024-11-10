@@ -67,7 +67,7 @@ void GatewayServiceWorker::initServiceSpecificCmdLineArgs()
 	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
 	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
-	addSimpleNoWritableCmdLineArg(CmdLineArg::LOG_GATEWAY_PACKETS, "Turn On 2 hours gateway packet logging.");
+	addValueCmdLineArg(CmdLineArg::LOG_GW, SoftwareSetting::LOG_GATEWAY_PACKETS, "Turn On 1 hour packet logging for specified gateways.", "GatewayID1[, GatewayID2 ...]");
 
 //	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
 
@@ -77,14 +77,14 @@ void GatewayServiceWorker::initServiceSpecificCmdLineArgs()
 
 void GatewayServiceWorker::loadServiceSpecificSettings()
 {
-	m_logGatewayPackets = cmdLineArgIsSet(CmdLineArg::LOG_GATEWAY_PACKETS);
+	m_logGatewayIDs = getSettingValue(SoftwareSetting::LOG_GATEWAY_PACKETS);
 
 	DEBUG_LOG_MSG(logger(), "");
 	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::LOG_GATEWAY_PACKETS).arg(m_logGatewayPackets));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::LOG_GATEWAY_PACKETS).arg(m_logGatewayIDs));
 	DEBUG_LOG_MSG(logger(), "");
 }
 
@@ -295,7 +295,7 @@ void GatewayServiceWorker::applyNewConfiguration()
 	bool result = true;
 
 	result &= m_handlers.init(m_gateways, softwareInfo(), m_curSettingsProfile, m_appSignals,
-							  logger(), m_logGatewayPackets);
+							  logger(), m_logGatewayIDs);
 	if (result == false)
 	{
 		DEBUG_LOG_ERR(logger(), QString("Handlers initialization ERROR!"));

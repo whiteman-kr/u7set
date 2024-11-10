@@ -181,8 +181,8 @@ namespace Gateway
 	{
 	}
 
-	IvsImpulseGateway::IvsImpulseGateway(const QString& gwID, const QString& gwDesc) :
-		Gateway(E::GatewayType::IVS_Impulse, gwID, gwDesc)
+	IvsImpulseGateway::IvsImpulseGateway(const QString& gwID, const QString& gwDesc, bool enable) :
+		Gateway(E::GatewayType::IVS_Impulse, gwID, gwDesc, enable)
 	{
 	}
 

@@ -58,7 +58,7 @@ namespace Gateway
 
 	public:
 		ModbusTcpSlaveGateway();
-		ModbusTcpSlaveGateway(const QString& gwID, const QString& gwDesc);
+		ModbusTcpSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable);
 
 		virtual bool isKnownSetting(E::Setting st) const override;
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;

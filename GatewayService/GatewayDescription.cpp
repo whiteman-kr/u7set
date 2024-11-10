@@ -299,6 +299,11 @@ namespace Gateway
 		E::Setting::GatewayDescription,
 	};
 
+	const std::set<E::Setting> Gateway::m_gatewayOptionalSettings =
+	{
+		E::Setting::Enable,
+	};
+
 	Gateway::Gateway() :
 		m_gatewayType(E::GatewayType::Unknown)
 	{
@@ -309,10 +314,11 @@ namespace Gateway
 	{
 	}
 
-	Gateway::Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc) :
+	Gateway::Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable) :
 		m_gatewayType(gwType),
 		m_gatewayID(gwID),
-		m_gatewayDescription(gwDesc)
+		m_gatewayDescription(gwDesc),
+		m_enable(enable)
 	{
 	}
 
@@ -335,6 +341,11 @@ namespace Gateway
 		return m_gatewayDescription;
 	}
 
+	bool Gateway::enable() const
+	{
+		return m_enable;
+	}
+
 	int Gateway::signalListsCount() const
 	{
 		return TO_INT(m_signalLists.size());
@@ -352,7 +363,8 @@ namespace Gateway
 
 	bool Gateway::isKnownSetting(E::Setting st) const
 	{
-		return m_gatewayRequiredSettings.contains(st);
+		return m_gatewayRequiredSettings.contains(st) ||
+			   m_gatewayOptionalSettings.contains(st);
 	}
 
 	bool Gateway::checkAndApplySettings(int lineNo, ParserLog& log)
@@ -381,6 +393,9 @@ namespace Gateway
 			case E::Setting::GatewayDescription:
 				m_gatewayDescription = sv.value.toString();
 				break;
+
+			case E::Setting::Enable:
+				m_enable = sv.value.toBool();
 
 			default:
 				;		// ok
@@ -572,24 +587,24 @@ namespace Gateway
 		m_gateways.clear();
 	}
 
-	GatewayShared Gateways::createTypedGateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc)
+	GatewayShared Gateways::createTypedGateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable)
 	{
 		GatewayShared gw;
 
 		switch(gwType)
 		{
 		case E::GatewayType::IVS_Impulse:
-			gw = std::make_shared<IvsImpulseGateway>(gwID, gwDesc);
+			gw = std::make_shared<IvsImpulseGateway>(gwID, gwDesc, enable);
 			break;
 
 		case E::GatewayType::ModbusTcpSlave:
-			gw = std::make_shared<ModbusTcpSlaveGateway>(gwID, gwDesc);
+			gw = std::make_shared<ModbusTcpSlaveGateway>(gwID, gwDesc, enable);
 			break;
 
 		case E::GatewayType::Unknown:
 		default:
 			Q_ASSERT(false);
-			gw = std::make_shared<Gateway>(gwType, gwID, gwDesc);
+			gw = std::make_shared<Gateway>(gwType, gwID, gwDesc, enable);
 		};
 
 		return gw;
@@ -612,6 +627,7 @@ namespace Gateway
 			xml.writeEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, gw->gatewayType());
 			xml.writeStringAttribute(XmlAttribute::GATEWAY_ID, gw->gatewayID());
 			xml.writeStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, gw->gatewayDescription());
+			xml.writeBoolAttribute(XmlAttribute::ENABLE, gw->enable());
 
 			gw->writeToXml(xml);
 
@@ -658,16 +674,19 @@ namespace Gateway
 			E::GatewayType gatewayType;
 			QString gatewayID;
 			QString datewayDescription;
+			bool enable = true;
 
 			result &= xml.readEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, &gatewayType);
 			result &= xml.readStringAttribute(XmlAttribute::GATEWAY_ID, &gatewayID);
 			result &= xml.readStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, &datewayDescription);
+			result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &enable);
 
 			BREAK_IF_FALSE(result);
 
 			GatewayShared gw = createTypedGateway(gatewayType,
 												  gatewayID,
-												  datewayDescription);
+												  datewayDescription,
+												  enable);
 			result &= gw->readFromXml(xml);
 
 			BREAK_IF_FALSE(result);

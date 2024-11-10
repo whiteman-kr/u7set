@@ -176,6 +176,7 @@ namespace Gateway
 		{ E::Setting::GatewayType,			E::SettingType::AlphaNumericUnderlineString	},
 		{ E::Setting::GatewayID,			E::SettingType::AlphaNumericUnderlineString	},
 		{ E::Setting::GatewayDescription,	E::SettingType::String	},
+		{ E::Setting::Enable,				E::SettingType::Bool	},
 
 		// IVS Impulse gateway specific settings
 		//

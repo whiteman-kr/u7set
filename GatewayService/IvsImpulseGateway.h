@@ -51,7 +51,7 @@ namespace Gateway
 
 	public:
 		IvsImpulseGateway();
-		IvsImpulseGateway(const QString& gwID, const QString& gwDesc);
+		IvsImpulseGateway(const QString& gwID, const QString& gwDesc, bool enable);
 
 		virtual bool isKnownSetting(E::Setting st) const override;
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;

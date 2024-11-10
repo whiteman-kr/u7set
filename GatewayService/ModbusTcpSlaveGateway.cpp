@@ -386,8 +386,8 @@ namespace Gateway
 	{
 	}
 
-	ModbusTcpSlaveGateway::ModbusTcpSlaveGateway(const QString& gwID, const QString& gwDesc) :
-		Gateway(E::GatewayType::ModbusTcpSlave, gwID, gwDesc)
+	ModbusTcpSlaveGateway::ModbusTcpSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable) :
+		Gateway(E::GatewayType::ModbusTcpSlave, gwID, gwDesc, enable)
 	{
 	}
 
