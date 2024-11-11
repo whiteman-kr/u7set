@@ -29,12 +29,15 @@ namespace Gateway
 
 		CircularLoggerShared log();
 
+		QString gatewayID() const;
+
 		bool enableLogging() const;
 		void logRequest(const QString& msg, CircularLogger::RecordType recType = CircularLogger::RecordType::Message);
 		void logReply(const QString& msg, CircularLogger::RecordType recType = CircularLogger::RecordType::Message);
 
 	private:
 		void writeToGwLog(const QString& msg, CircularLogger::RecordType recType);
+		void closeGwLog();
 
 	protected:
 		QString m_gatewayID;

@@ -43,9 +43,19 @@ namespace Modbus
 		private:
 			void onReceiveData(const error_code& error, size_t bytesReceived);
 
-			bool asciiRequestProcessing(size_t bytesReceived);
-			bool rtuRequestProcessing(size_t bytesReceived);
-			bool tcpRtuRequestProcessing(size_t bytesReceived);
+			void logRequest(const error_code& error, size_t bytesReceived);
+			void logAsciiRequest(const error_code& error, size_t bytesReceived);
+			void logRtuRequest(const error_code& error, size_t bytesReceived);
+			void logTcpRequest(const error_code& error, size_t bytesReceived);
+
+			void logReply(size_t sendBytes);
+			void logAsciiReply(size_t sendBytes);
+			void logRtuReply(size_t sendBytes);
+			void logTcpReply(size_t sendBytes);
+
+			size_t asciiRequestProcessing(size_t bytesReceived);
+			size_t rtuRequestProcessing(size_t bytesReceived);
+			size_t tcpRequestProcessing(size_t bytesReceived);
 
 			int onFnReadHoldingRegisters(TcpFrame& request);
 
@@ -71,12 +81,16 @@ namespace Modbus
 			::Gateway::ModbusTcpSlaveHandler& m_handler;
 			tcp::socket m_socket;
 
-			int m_connectionNo = 0;
+			bool m_enableLogging = false;
+			QString m_logStr;
 
-			static inline const int RECEIVE_BUFFER_SIZE = 1024;
+			int m_connectionNo = 0;
+			bool m_firstStartReceive = true;
+
+			static inline const size_t RECEIVE_BUFFER_SIZE = 1024;
 			unsigned char m_receiveBuffer[RECEIVE_BUFFER_SIZE];
 
-			static inline const int SEND_BUFFER_SIZE = 1024;
+			static inline const size_t SEND_BUFFER_SIZE = 1024;
 			unsigned char m_sendBuffer[SEND_BUFFER_SIZE];
 
 			inline static const int ASCII_REG_VALUES_COUNT = 256;

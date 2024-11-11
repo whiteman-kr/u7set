@@ -81,10 +81,10 @@ void GatewayServiceWorker::loadServiceSpecificSettings()
 
 	DEBUG_LOG_MSG(logger(), "");
 	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::LOG_GATEWAY_PACKETS).arg(m_logGatewayIDs));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID, equipmentID()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1, cfgServiceIP1().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2, cfgServiceIP2().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::LOG_GATEWAY_PACKETS, m_logGatewayIDs));
 	DEBUG_LOG_MSG(logger(), "");
 }
 

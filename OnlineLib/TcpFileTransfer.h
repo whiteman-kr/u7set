@@ -60,7 +60,7 @@ namespace Tcp
 
 		bool m_transferInProgress = false;
 
-		const size_t MD5_LEN = 128 / 8;		// MD5 code lenght in bytes
+		const size_t MD5_LEN = 128 / 8;		// MD5 code length in bytes
 
 		const int FILE_PART_SIZE = 65536;
 

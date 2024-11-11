@@ -35,6 +35,13 @@ namespace Modbus
 
 	void TcpSlaveThread::Connection::startReceive()
 	{
+		if (m_firstStartReceive)
+		{
+			asio::ip::tcp::no_delay option(true);
+			m_socket.set_option(option);
+			m_firstStartReceive = false;
+		}
+
 		m_socket.async_receive(asio::buffer(m_receiveBuffer, RECEIVE_BUFFER_SIZE),
 							   bind(&TcpSlaveThread::Connection::onReceiveData, this,
 									std::placeholders::_1,
@@ -43,35 +50,298 @@ namespace Modbus
 
 	void TcpSlaveThread::Connection::onReceiveData(const error_code& error, size_t bytesReceived)
 	{
+		m_enableLogging = m_handler.enableLogging();
+
+		logRequest(error, bytesReceived);
+
 		if (error)
 		{
-			DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData error: %1").
-											arg(QString::fromStdString(error.message())));
+			DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData error: %1, bytesReceived %2").
+												arg(QString::fromStdString(error.message())).arg(bytesReceived));
 			m_listener.removeConnection(m_connectionNo);
 			return;
 		}
 
-		bool result = true;
+		if (bytesReceived == 0)
+		{
+			startReceive();
+			return;
+		}
+
+		size_t sendBytesCount = 0;
 
 		switch(m_handler.modbusMode())
 		{
 		case ::Gateway::E::ModbusMode::ASCII:
-			result = asciiRequestProcessing(bytesReceived);
+			sendBytesCount = asciiRequestProcessing(bytesReceived);
 			break;
 
 		case ::Gateway::E::ModbusMode::RTU:
-			result = rtuRequestProcessing(bytesReceived);
+			sendBytesCount = rtuRequestProcessing(bytesReceived);
 			break;
 
 		case ::Gateway::E::ModbusMode::TCP:
-			result = tcpRtuRequestProcessing(bytesReceived);
+			sendBytesCount = tcpRequestProcessing(bytesReceived);
 			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		if (sendBytesCount > 0)
+		{
+			logReply(sendBytesCount);
+
+			Q_ASSERT(sendBytesCount <= SEND_BUFFER_SIZE);
+			m_socket.write_some(asio::buffer(m_sendBuffer, sendBytesCount));
 		}
 
 		startReceive();
 	}
 
-	bool TcpSlaveThread::Connection::asciiRequestProcessing(size_t bytesReceived)
+	void TcpSlaveThread::Connection::logRequest(const error_code& error, size_t bytesReceived)
+	{
+		if (m_enableLogging == false)
+		{
+			return;
+		}
+
+		switch(m_handler.modbusMode())
+		{
+		case ::Gateway::E::ModbusMode::ASCII:
+			logAsciiRequest(error, bytesReceived);
+			break;
+
+		case ::Gateway::E::ModbusMode::RTU:
+			logRtuRequest(error, bytesReceived);
+			break;
+
+		case ::Gateway::E::ModbusMode::TCP:
+			logTcpRequest(error, bytesReceived);
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+	}
+
+	void TcpSlaveThread::Connection::logAsciiRequest(const error_code& error, size_t bytesReceived)
+	{
+		Q_UNUSED(error);
+		Q_UNUSED(bytesReceived);
+	}
+
+	void TcpSlaveThread::Connection::logRtuRequest(const error_code& error, size_t bytesReceived)
+	{
+		Q_UNUSED(error);
+		Q_UNUSED(bytesReceived);
+	}
+
+	void TcpSlaveThread::Connection::logTcpRequest(const error_code& error, size_t bytesReceived)
+	{
+		m_logStr.clear();
+
+		m_logStr.append(QString("Gateway %1 receive Modbus TCP request from %2, socket error code %3 ('%4'), bytes received %5").
+				   arg(m_handler.gatewayID(), peerAddress()).
+				   arg(error.value()).
+				   arg(error ? QString::fromStdString(error.message()) : QStringLiteral("NoErr")).
+				   arg(bytesReceived));
+
+		m_handler.logRequest(m_logStr);
+
+		if (error || bytesReceived == 0)
+		{
+			return;
+		}
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("Binary:"));
+
+		for(size_t i = 0; i < bytesReceived && i < RECEIVE_BUFFER_SIZE; i++)
+		{
+			m_logStr.append(QString(" %1").arg(m_receiveBuffer[i], 2, 16, QChar('0')).toUpper());
+		}
+
+		m_handler.logRequest(m_logStr);
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("TCP header: "));
+
+		const TcpFrame& req = getRequestRef();
+
+		TcpHeader reqHeader = req.header;
+
+		reqHeader.reverseBytes();
+
+		m_logStr.append(QString("transactionID %1, protocolID %2, length %3").
+					arg(reqHeader.transactionID).arg(reqHeader.protocolID).arg(reqHeader.length));
+
+		m_handler.logRequest(m_logStr);
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("Modbus request: "));
+
+		switch(req.functionCode)
+		{
+		case FC_READ_HOLDING_REGISTERS:
+			{
+				Fn03_ReadHoldingRegisters_Request fn03Req = req.fn03Request;
+
+				fn03Req.reverseBytes();
+
+				m_logStr.append(QString("deviceID %1, function %2, start register %3, regs count %4").
+								arg(req.modbusDeviceID).
+								arg(req.functionCode).
+								arg(fn03Req.regsStartAddr).
+								arg(fn03Req.regsCount));
+				m_handler.logRequest(m_logStr);
+			}
+			break;
+
+		default:
+			m_logStr.append(QString("function %1 is not supported!").arg(req.functionCode));
+			m_handler.logRequest(m_logStr, CircularLogger::RecordType::Error);
+		}
+	}
+
+	void TcpSlaveThread::Connection::logReply(size_t sendBytes)
+	{
+		if (m_enableLogging == false)
+		{
+			return;
+		}
+
+		switch(m_handler.modbusMode())
+		{
+		case ::Gateway::E::ModbusMode::ASCII:
+			logAsciiReply(sendBytes);
+			break;
+
+		case ::Gateway::E::ModbusMode::RTU:
+			logRtuReply(sendBytes);
+			break;
+
+		case ::Gateway::E::ModbusMode::TCP:
+			logTcpReply(sendBytes);
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+	}
+
+	void TcpSlaveThread::Connection::logAsciiReply(size_t sendBytes)
+	{
+		Q_UNUSED(sendBytes);
+	}
+
+	void TcpSlaveThread::Connection::logRtuReply(size_t sendBytes)
+	{
+		Q_UNUSED(sendBytes);
+	}
+
+	void TcpSlaveThread::Connection::logTcpReply(size_t sendBytes)
+	{
+		m_logStr.clear();
+
+		m_logStr.append(QString("Gateway %1 sent Modbus TCP reply to %2, bytes sent %3").
+						arg(m_handler.gatewayID(), peerAddress()).
+						arg(sendBytes));
+
+		m_handler.logReply(m_logStr);
+
+		if (sendBytes == 0)
+		{
+			return;
+		}
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("Binary:"));
+
+		for(size_t i = 0; i < sendBytes && i < SEND_BUFFER_SIZE; i++)
+		{
+			m_logStr.append(QString(" %1").arg(m_sendBuffer[i], 2, 16, QChar('0')).toUpper());
+		}
+
+		m_handler.logReply(m_logStr);
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("TCP header: "));
+
+		const TcpFrame& rep = getReplyRef();
+
+		TcpHeader repHeader = rep.header;
+
+		repHeader.reverseBytes();
+
+		m_logStr.append(QString("transactionID %1, protocolID %2, length %3").
+						arg(repHeader.transactionID).arg(repHeader.protocolID).arg(repHeader.length));
+
+		m_handler.logReply(m_logStr);
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("Modbus reply: "));
+
+		switch(rep.functionCode)
+		{
+		case FC_READ_HOLDING_REGISTERS:
+			{
+				const Fn03_ReadHoldingRegisters_Reply& fn03Rep = rep.fn03Reply;
+
+				quint8 bytesCount = rep.fn03Reply.bytesCount;
+				quint32 regsCount = static_cast<quint32>(bytesCount / sizeof(quint16));
+
+				m_logStr.append(QString("deviceID %1, function %2, bytes count %3, regs count %4").
+								arg(rep.modbusDeviceID).
+								arg(rep.functionCode).
+								arg(bytesCount).
+								arg(regsCount));
+				m_handler.logReply(m_logStr);
+
+				//
+
+				m_logStr.clear();
+
+				m_logStr.append(QStringLiteral("Modbus reply:"));
+
+				const TcpFrame& req = getRequestRef();
+
+				for(quint32 i = 0; i < regsCount; i++)
+				{
+					m_logStr.append(QString(" r[%1]=0x%3").
+									arg(req.fn03Request.regsStartAddr + i).
+									arg(fn03Rep.regValues[i], 4, 16, QChar('0')));
+				}
+				m_handler.logReply(m_logStr);
+			}
+			break;
+
+		default:
+			m_logStr.append(QString("function %1 is not supported!").arg(rep.functionCode));
+			m_handler.logReply(m_logStr, CircularLogger::RecordType::Error);
+		}
+
+	}
+
+	size_t TcpSlaveThread::Connection::asciiRequestProcessing(size_t bytesReceived)
 	{
 		const size_t MIN_REQUEST_SIZE = ASCII_START_MARKER_LEN +	// marker ':'
 										ASCII_DEVICE_ID_LEN +		// modbus deviceID 'XX'
@@ -146,26 +416,26 @@ namespace Modbus
 																ASCII_REG_COUNT_LEN);
 		if (receivedCrc != calculatedCrc)
 		{
-			return false;
+			DEBUG_LOG_ERR(m_listener.log(), QString("CRC error: received 0x%1, calculated 0x%2").
+												arg(receivedCrc, 2, 16, QChar('0')).
+												arg(calculatedCrc, 2, 16, QChar('0')));
+			return 0;
 		}
 
-		int sendBytesCount = onAsciiFnReadHoldingRegisters(regsStartAddr, regsCount);
+		size_t sendBytesCount = onAsciiFnReadHoldingRegisters(regsStartAddr, regsCount);
 
-		Q_ASSERT(sendBytesCount <= SEND_BUFFER_SIZE);
-		m_socket.write_some(asio::buffer(m_sendBuffer, sendBytesCount));
-
-		return result;
+		return sendBytesCount;
 	}
 
-	bool TcpSlaveThread::Connection::rtuRequestProcessing(size_t bytesReceived)
+	size_t TcpSlaveThread::Connection::rtuRequestProcessing(size_t bytesReceived)
 	{
 		Q_ASSERT(false);		// not implemented!
 
 		Q_UNUSED(bytesReceived);
-		return false;
+		return 0;
 	}
 
-	bool TcpSlaveThread::Connection::tcpRtuRequestProcessing(size_t bytesReceived)
+	size_t TcpSlaveThread::Connection::tcpRequestProcessing(size_t bytesReceived)
 	{
 		TcpFrame& request = getRequestRef();
 
@@ -173,18 +443,20 @@ namespace Modbus
 
 		Q_ASSERT(request.header.protocolID == 0);
 
-		if (request.header.length + sizeof(request.header) != bytesReceived)
+		size_t expectedSize = request.header.length + sizeof(request.header);
+
+		if (expectedSize != bytesReceived)
 		{
-			//Q_ASSERT(false);
-			return false;
+			DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData error: wrong request size, expected %1, received %2 bytes").
+												arg(expectedSize).arg(bytesReceived));
+			startReceive();
+			return 0;
 		}
 
 		if (request.modbusDeviceID != m_handler.modbusDeviceID())
 		{
-			return true;					// its Ok, request to another device
+			return 0;					// its Ok, request to another device
 		}
-
-		bool result = true;
 
 		int sendBytesCount = 0;
 
@@ -197,16 +469,9 @@ namespace Modbus
 		default:
 			DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData: unknown modbus function code %1. Request ignored.").
 											arg(request.functionCode));
-			result = false;
 		}
 
-		if (result == true && sendBytesCount > 0)
-		{
-			Q_ASSERT(sendBytesCount <= SEND_BUFFER_SIZE);
-			m_socket.write_some(asio::buffer(m_sendBuffer, sendBytesCount));
-		}
-
-		return result;
+		return sendBytesCount;
 	}
 
 	int TcpSlaveThread::Connection::onFnReadHoldingRegisters(TcpFrame& request)

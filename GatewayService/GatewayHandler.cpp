@@ -26,6 +26,7 @@ namespace Gateway
 			m_gwLog = std::make_shared<CircularLogger>();
 
 			m_gwLog->init(gatewayID, Separator::EMPTY_STR, 10, 20);
+			m_gwLog->setLogCodeInfo(false);
 		}
 	}
 
@@ -36,6 +37,8 @@ namespace Gateway
 
 	void Handler::shutdown()
 	{
+		closeGwLog();
+
 		m_shutwownCalled = true;
 	}
 
@@ -64,6 +67,11 @@ namespace Gateway
 		return m_log;
 	}
 
+	QString Handler::gatewayID() const
+	{
+		return m_gatewayID;
+	}
+
 	bool Handler::enableLogging() const
 	{
 		return m_logGatewayPackets;
@@ -79,12 +87,12 @@ namespace Gateway
 
 		if (m_lastMsgIsRequest == false)
 		{
-			LOG_MSG(m_log, Separator::EMPTY_STR);
+			LOG_MSG(m_gwLog, Separator::EMPTY_STR);
 		}
 
 		m_lastMsgIsRequest = true;
 
-		QString logMsg = QStringLiteral("Request: ");
+		QString logMsg = QStringLiteral("REQ: ");
 
 		logMsg.append(msg);
 
@@ -101,12 +109,12 @@ namespace Gateway
 
 		if (m_lastMsgIsRequest == true)
 		{
-			LOG_MSG(m_log, Separator::EMPTY_STR);
+			LOG_MSG(m_gwLog, Separator::EMPTY_STR);
 		}
 
 		m_lastMsgIsRequest = false;
 
-		QString logMsg = QStringLiteral("Replay:  ");
+		QString logMsg = QStringLiteral("REP: ");
 
 		logMsg.append(msg);
 
@@ -130,10 +138,8 @@ namespace Gateway
 
 		if (curTimeSecs - m_logStartTimeSecs > GW_LOG_PERIOD_SECS)
 		{
-			m_logGatewayPackets = false;
-			m_logStartTimeSecs = 0;
-			m_gwLog->shutdown();
-			m_gwLog.reset();
+			closeGwLog();
+			return;
 		}
 
 		switch(recType)
@@ -153,6 +159,18 @@ namespace Gateway
 		case CircularLogger::RecordType::Config:
 		default:
 			Q_ASSERT(false);
+		}
+	}
+
+	void Handler::closeGwLog()
+	{
+		m_logGatewayPackets = false;
+		m_logStartTimeSecs = 0;
+
+		if (m_gwLog != nullptr)
+		{
+			m_gwLog->shutdown();
+			m_gwLog.reset();
 		}
 	}
 
