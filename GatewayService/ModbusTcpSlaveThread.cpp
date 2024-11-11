@@ -35,6 +35,13 @@ namespace Modbus
 
 	void TcpSlaveThread::Connection::startReceive()
 	{
+		if (m_firstStartReceive)
+		{
+			asio::ip::tcp::no_delay option(true);
+			m_socket.set_option(option);
+			m_firstStartReceive = false;
+		}
+
 		m_socket.async_receive(asio::buffer(m_receiveBuffer, RECEIVE_BUFFER_SIZE),
 							   bind(&TcpSlaveThread::Connection::onReceiveData, this,
 									std::placeholders::_1,
@@ -45,9 +52,18 @@ namespace Modbus
 	{
 		if (error)
 		{
-			DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData error: %1").
-											arg(QString::fromStdString(error.message())));
-			m_listener.removeConnection(m_connectionNo);
+			DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData error: %1, bytesReceived %2").
+												arg(QString::fromStdString(error.message())).arg(bytesReceived));
+			if (error != asio::error::eof)
+			{
+				m_listener.removeConnection(m_connectionNo);
+				return;
+			}
+		}
+
+		if (bytesReceived == 0)
+		{
+			startReceive();
 			return;
 		}
 
@@ -57,9 +73,13 @@ namespace Modbus
 
 		Q_ASSERT(request.header.protocolID == 0);
 
-		if (request.header.length + sizeof(request.header) != bytesReceived)
+		size_t expectedSize = request.header.length + sizeof(request.header);
+
+		if (expectedSize != bytesReceived)
 		{
-			Q_ASSERT(false);
+			DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData error: wrong request size, expected %1, received %2 bytes").
+												arg(expectedSize).arg(bytesReceived));
+			startReceive();
 			return;
 		}
 

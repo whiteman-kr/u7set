@@ -55,6 +55,7 @@ namespace Modbus
 			tcp::socket m_socket;
 
 			int m_connectionNo = 0;
+			bool m_firstStartReceive = true;
 
 			static inline const int RECEIVE_BUFFER_SIZE = 1024;
 			char m_receiveBuffer[RECEIVE_BUFFER_SIZE];
