@@ -1,7 +1,7 @@
 #include "GatewayDescriptionParser.h"
 #include "../UtilsLib/WUtils.h"
 #include "IvsImpulseGateway.h"
-#include "ModbusTcpSlaveGateway.h"
+#include "ModbusSlaveGateway.h"
 
 namespace Gateway
 {
@@ -870,7 +870,7 @@ namespace Gateway
 			return std::make_shared<IvsImpulseGateway>();
 
 		case E::GatewayType::ModbusTcpSlave:
-			return std::make_shared<ModbusTcpSlaveGateway>();
+			return std::make_shared<ModbusSlaveGateway>();
 
 		default:
 			Q_ASSERT(false);

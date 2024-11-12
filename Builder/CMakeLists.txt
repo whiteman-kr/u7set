@@ -25,8 +25,8 @@ qt_add_library(${TARGET} STATIC
 	../GatewayService/GatewayDescriptionParser.h
 	../GatewayService/IvsImpulseGateway.cpp
 	../GatewayService/IvsImpulseGateway.h
-	../GatewayService/ModbusTcpSlaveGateway.cpp
-	../GatewayService/ModbusTcpSlaveGateway.h
+	../GatewayService/ModbusSlaveGateway.cpp
+	../GatewayService/ModbusSlaveGateway.h
 	../lib/TuningDataStorage.cpp
 	../lib/TuningDataStorage.h
 	../Metrology/MetrologyConnection.cpp

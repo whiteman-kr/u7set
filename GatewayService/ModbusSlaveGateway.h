@@ -48,7 +48,7 @@ namespace Gateway
 		std::map<Hash, Address16> m_signals;		// calcHash(AppSignalID) => Address16
 	};
 
-	class ModbusTcpSlaveGateway : public Gateway
+	class ModbusSlaveGateway : public Gateway
 	{
 	public:
 		static const std::set<E::Setting> m_requiredSettings;
@@ -57,8 +57,8 @@ namespace Gateway
 		inline static const int MODBUS_DEFAULT_PORT = 502;
 
 	public:
-		ModbusTcpSlaveGateway();
-		ModbusTcpSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable);
+		ModbusSlaveGateway();
+		ModbusSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable);
 
 		virtual bool isKnownSetting(E::Setting st) const override;
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
@@ -102,5 +102,5 @@ namespace Gateway
 		std::map<Address16, std::pair<QString, ModbusFormat>> m_modbusSignals;
 	};
 
-	using ModbusTcpSlaveGatewayShared = std::shared_ptr<ModbusTcpSlaveGateway>;
+	using ModbusSlaveGatewayShared = std::shared_ptr<ModbusSlaveGateway>;
 }

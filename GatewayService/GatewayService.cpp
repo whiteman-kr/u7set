@@ -269,7 +269,7 @@ bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 		}
 	}
 
-	DEBUG_LOG_MSG(logger(), QString("All gatreways acquire %1 signal(s)").arg(aquiredSignalsCount));
+	DEBUG_LOG_MSG(logger(), QString("All gateways acquire %1 signal(s)").arg(aquiredSignalsCount));
 
 	return true;
 }
@@ -278,7 +278,15 @@ bool GatewayServiceWorker::readGatewayDescription(const QByteArray& fileData)
 {
 	XmlReadHelper xml(fileData);
 
-	bool result = m_gateways.readFromXml(xml);
+	QStringList disabledGateways;
+
+	bool result = m_gateways.readFromXml(xml, true, &disabledGateways);
+
+	if (disabledGateways.size() > 0)
+	{
+		DEBUG_LOG_WRN(logger(), QString("Gateway(s) %1 disabled and will NOT BE RUN!").
+								arg(disabledGateways.join(", ")));
+	}
 
 	return result;
 }

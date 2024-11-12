@@ -1,5 +1,5 @@
 #include "GatewayDescriptionParser.h"
-#include "ModbusTcpSlaveGateway.h"
+#include "ModbusSlaveGateway.h"
 
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
@@ -369,36 +369,36 @@ namespace Gateway
    //
    // ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting> ModbusTcpSlaveGateway::m_requiredSettings =
+	const std::set<E::Setting> ModbusSlaveGateway::m_requiredSettings =
 	{
 			E::Setting::LocalGatewayIP1,
 			E::Setting::ModbusDeviceID,
 			E::Setting::ModbusMode,
 	};
 
-	const std::set<E::Setting> ModbusTcpSlaveGateway::m_optionalSettings =
+	const std::set<E::Setting> ModbusSlaveGateway::m_optionalSettings =
 	{
 			E::Setting::LocalGatewayIP2,
 	};
 
-	ModbusTcpSlaveGateway::ModbusTcpSlaveGateway() :
+	ModbusSlaveGateway::ModbusSlaveGateway() :
 		Gateway(E::GatewayType::ModbusTcpSlave)
 	{
 	}
 
-	ModbusTcpSlaveGateway::ModbusTcpSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable) :
+	ModbusSlaveGateway::ModbusSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable) :
 		Gateway(E::GatewayType::ModbusTcpSlave, gwID, gwDesc, enable)
 	{
 	}
 
-	bool ModbusTcpSlaveGateway::isKnownSetting(E::Setting st) const
+	bool ModbusSlaveGateway::isKnownSetting(E::Setting st) const
 	{
 		return Gateway::isKnownSetting(st) ||
 			   m_requiredSettings.contains(st) ||
 			   m_optionalSettings.contains(st);
 	}
 
-	bool ModbusTcpSlaveGateway::checkAndApplySettings(int lineNo, ParserLog& log)
+	bool ModbusSlaveGateway::checkAndApplySettings(int lineNo, ParserLog& log)
 	{
 		bool result = true;
 
@@ -468,32 +468,32 @@ namespace Gateway
 		return result;
 	}
 
-	void ModbusTcpSlaveGateway::appendSignalList()
+	void ModbusSlaveGateway::appendSignalList()
 	{
 		m_signalLists.push_back(std::make_shared<ModbusSignalList>());
 	}
 
-	HostAddressPort ModbusTcpSlaveGateway::localGatewayIP1() const
+	HostAddressPort ModbusSlaveGateway::localGatewayIP1() const
 	{
 		return m_localGatewayIP1;
 	}
 
-	HostAddressPort ModbusTcpSlaveGateway::localGatewayIP2() const
+	HostAddressPort ModbusSlaveGateway::localGatewayIP2() const
 	{
 		return m_localGatewayIP2;
 	}
 
-	E::ModbusMode ModbusTcpSlaveGateway::modbusMode() const
+	E::ModbusMode ModbusSlaveGateway::modbusMode() const
 	{
 		return m_modbusMode;
 	}
 
-	int ModbusTcpSlaveGateway::modbusDeviceID() const
+	int ModbusSlaveGateway::modbusDeviceID() const
 	{
 		return m_modbusDeviceID;
 	}
 
-	void ModbusTcpSlaveGateway::getRequiredSignalsHashes(std::set<Hash>* hashes) const
+	void ModbusSlaveGateway::getRequiredSignalsHashes(std::set<Hash>* hashes) const
 	{
 		TEST_PTR_RETURN(hashes);
 
@@ -504,7 +504,7 @@ namespace Gateway
 		}
 	}
 
-	void ModbusTcpSlaveGateway::getEventSignalsHashes(std::set<Hash>* hashes) const
+	void ModbusSlaveGateway::getEventSignalsHashes(std::set<Hash>* hashes) const
 	{
 		TEST_PTR_RETURN(hashes);
 
@@ -520,12 +520,12 @@ namespace Gateway
 		}
 	}
 
-	const std::map<Address16, std::pair<QString, ModbusFormat>>& ModbusTcpSlaveGateway::modbusSignals() const
+	const std::map<Address16, std::pair<QString, ModbusFormat>>& ModbusSlaveGateway::modbusSignals() const
 	{
 		return m_modbusSignals;
 	}
 
-	void ModbusTcpSlaveGateway::writeSettingsToXml(XmlWriteHelper& xml) const
+	void ModbusSlaveGateway::writeSettingsToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::SETTINGS);
 
@@ -537,7 +537,7 @@ namespace Gateway
 		xml.writeEndElement();		//	</Settings>
 	}
 
-	bool ModbusTcpSlaveGateway::readSettingsFromXml(XmlReadHelper& xml)
+	bool ModbusSlaveGateway::readSettingsFromXml(XmlReadHelper& xml)
 	{
 		bool result = true;
 
@@ -568,9 +568,11 @@ namespace Gateway
 		return result;
 	}
 
-	void ModbusTcpSlaveGateway::writeSignalListsToXml(XmlWriteHelper& xml) const
+	void ModbusSlaveGateway::writeSignalListsToXml(XmlWriteHelper& xml) const
 	{
-		xml.writeStartElement(XmlElement::SIGNALS);
+		Gateway::writeSignalListsToXml(xml);
+
+		xml.writeStartElement(XmlElement::MODBUS_SIGNALS);
 		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_modbusSignals.size()));
 
 		for(const auto& [addr16, p] : m_modbusSignals)
@@ -580,7 +582,7 @@ namespace Gateway
 
 			xml.writeStartElement(XmlElement::SIGNAL_ELEM);
 
-			xml.writeIntAttribute(XmlAttribute::REG_ADDR, addr16.offset());
+			xml.writeIntAttribute(XmlAttribute::REG_NO, addr16.offset());
 			xml.writeIntAttribute(XmlAttribute::REG_BIT, addr16.bit());
 			xml.writeEnumKeyAttribute(XmlAttribute::FORMAT, format.signalFormat);
 			xml.writeEnumKeyAttribute(XmlAttribute::BYTE_ORDER_ATTR, format.byteOrder);
@@ -592,13 +594,15 @@ namespace Gateway
 		xml.writeEndElement();		//	</Signals>
 	}
 
-	bool ModbusTcpSlaveGateway::readSignalListsFromXml(XmlReadHelper& xml)
+	bool ModbusSlaveGateway::readSignalListsFromXml(XmlReadHelper& xml)
 	{
+		Gateway::readSignalListsFromXml(xml);
+
 		m_modbusSignals.clear();
 
 		bool result = true;
 
-		result &= xml.findElement(XmlElement::SIGNALS);
+		result &= xml.findElement(XmlElement::MODBUS_SIGNALS);
 
 		RETURN_IF_FALSE(result);
 
@@ -617,7 +621,7 @@ namespace Gateway
 			ModbusFormat format;
 			QString appSignalID;
 
-			result &= xml.readIntAttribute(XmlAttribute::REG_ADDR, &offset);
+			result &= xml.readIntAttribute(XmlAttribute::REG_NO, &offset);
 			result &= xml.readIntAttribute(XmlAttribute::REG_BIT, &bit);
 			result &= xml.readEnumKeyAttribute(XmlAttribute::FORMAT, &format.signalFormat);
 			result &= xml.readEnumKeyAttribute(XmlAttribute::BYTE_ORDER_ATTR, &format.byteOrder);
@@ -632,7 +636,7 @@ namespace Gateway
 		return result;
 	}
 
-	bool ModbusTcpSlaveGateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter,
+	bool ModbusSlaveGateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter,
 												  ParserLog& log)
 	{
 		Q_UNUSED(signalSetAdapter);
@@ -650,7 +654,7 @@ namespace Gateway
 		return result;
 	}
 
-	bool ModbusTcpSlaveGateway::buildModbusSignalsList(ParserLog& log)
+	bool ModbusSlaveGateway::buildModbusSignalsList(ParserLog& log)
 	{
 		m_modbusSignals.clear();
 
@@ -769,7 +773,7 @@ namespace Gateway
 		return result;
 	}
 
-	bool ModbusTcpSlaveGateway::generateModbusSignalsFile()
+	bool ModbusSlaveGateway::generateModbusSignalsFile()
 	{
 		bool result = true;
 
@@ -781,10 +785,10 @@ namespace Gateway
 		fd.append(QString("Description: %1 ").arg(m_gatewayDescription));
 		fd.append("");
 
-		static const QString line("----------------------------------------------------------------------------------------------------");
+		static const QString line("--------------------------------------------------------------------------------------------------------------");
 
 		fd.append(line);
-		fd.append(" RegAddr | BitNo |  Mask  |       Format      | AppSignalID");
+		fd.append("  RegNo  | RegAddr | BitNo |  Mask  |          Format           | AppSignalID");
 		fd.append(line);
 
 		QString bitStr;
@@ -806,9 +810,10 @@ namespace Gateway
 				maskStr = QStringLiteral("      ");
 			}
 
-			fd.append(QString("  %1  |   %2  | %3 | %4 | %5").
-						arg(addr16.offset(), 5, 10, Latin1Char::ZERO).arg(bitStr).arg(maskStr).
-						arg(format.toString(), -17, Latin1Char::SPACE).arg(signalID));
+			fd.append(QString("  %1  |  %2  |   %3  | %4 | %5 | %6").
+						arg(addr16.offset(), 5, 10, Latin1Char::ZERO).
+						arg(addr16.offset() - 1, 5, 10, Latin1Char::ZERO).arg(bitStr).arg(maskStr).
+						arg(format.toString(), -25, Latin1Char::SPACE).arg(signalID));
 		}
 
 		fd.append(line);

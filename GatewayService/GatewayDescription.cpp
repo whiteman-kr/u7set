@@ -5,7 +5,7 @@
 #include "GatewayDescription.h"
 #include "GatewayDescriptionParser.h"
 #include "IvsImpulseGateway.h"
-#include "ModbusTcpSlaveGateway.h"
+#include "ModbusSlaveGateway.h"
 
 namespace Gateway
 {
@@ -598,7 +598,7 @@ namespace Gateway
 			break;
 
 		case E::GatewayType::ModbusTcpSlave:
-			gw = std::make_shared<ModbusTcpSlaveGateway>(gwID, gwDesc, enable);
+			gw = std::make_shared<ModbusSlaveGateway>(gwID, gwDesc, enable);
 			break;
 
 		case E::GatewayType::Unknown:
@@ -651,7 +651,7 @@ namespace Gateway
 		}
 	}
 
-	bool Gateways::readFromXml(XmlReadHelper& xml)
+	bool Gateways::readFromXml(XmlReadHelper& xml, bool skipDisabledGateways, QStringList* disabledGateways)
 	{
 		m_gateways.clear();
 
@@ -680,6 +680,19 @@ namespace Gateway
 			result &= xml.readStringAttribute(XmlAttribute::GATEWAY_ID, &gatewayID);
 			result &= xml.readStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, &datewayDescription);
 			result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &enable);
+
+			if (enable == false)
+			{
+				if (disabledGateways != nullptr)
+				{
+					disabledGateways->append(gatewayID);
+				}
+
+				if (skipDisabledGateways)
+				{
+					continue;
+				}
+			}
 
 			BREAK_IF_FALSE(result);
 

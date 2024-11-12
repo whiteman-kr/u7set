@@ -114,9 +114,10 @@ namespace Gateway
 		enum class ModbusMode
 		{
 			Unknown,
-			ASCII,						// ASCII character mode, packets starts with ':', ends with CR+LF
-			RTU,						// binary mode RTU
-			TCP							// TCP (RTU with TCP header)
+			//ASCII,					// ASCII character mode, packets starts with ':', ends with CR+LF
+			//RTU,						// binary mode RTU
+			TCP,						// TCP (RTU with TCP header)
+			UDP_ASCII					// ASCII protocol over UDP
 		};
 		Q_ENUM(ModbusMode)
 	};
@@ -310,7 +311,7 @@ namespace Gateway
 		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 
 		virtual void writeToXml(XmlWriteHelper& xml) const;
-		virtual bool readFromXml(XmlReadHelper& xml);
+		virtual bool readFromXml(XmlReadHelper& xml, bool skipDisabledGateways, QStringList* disabledGateways);
 
 	private:
 		std::vector<GatewayShared> m_gateways;

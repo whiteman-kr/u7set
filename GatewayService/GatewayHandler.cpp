@@ -1,6 +1,6 @@
 #include "GatewayHandler.h"
 #include "IvsImpulseGatewayHandler.h"
-#include "ModbusTcpSlaveGatewayHandler.h"
+#include "ModbusSlaveGatewayHandler.h"
 
 namespace Gateway
 {
@@ -92,7 +92,7 @@ namespace Gateway
 
 		m_lastMsgIsRequest = true;
 
-		QString logMsg = QStringLiteral("REQ: ");
+		QString logMsg = QStringLiteral("=> ");
 
 		logMsg.append(msg);
 
@@ -114,7 +114,7 @@ namespace Gateway
 
 		m_lastMsgIsRequest = false;
 
-		QString logMsg = QStringLiteral("REP: ");
+		QString logMsg = QStringLiteral("<= ");
 
 		logMsg.append(msg);
 
@@ -203,11 +203,16 @@ namespace Gateway
 		{
 			if (gw->enable() == false)
 			{
-				DEBUG_LOG_WRN(log, QString("Gateway %1 disabled so NOT RUN!"));
+				DEBUG_LOG_WRN(log, QString("Gateway %1 disabled so NOT RUN!").arg(gw->gatewayID()));
 				continue;
 			}
 
 			bool enableLogging = logGwIDs.contains(gw->gatewayID());
+
+			if (enableLogging)
+			{
+				DEBUG_LOG_MSG(log, QString("1 hour request/reply detail logging turned ON for gateway %1").arg(gw->gatewayID()));
+			}
 
 			switch(gw->gatewayType())
 			{
@@ -231,7 +236,7 @@ namespace Gateway
 
 			case E::GatewayType::ModbusTcpSlave:
 				{
-					ModbusTcpSlaveGatewayShared modbusGateway = std::dynamic_pointer_cast<ModbusTcpSlaveGateway>(gw);
+					ModbusSlaveGatewayShared modbusGateway = std::dynamic_pointer_cast<ModbusSlaveGateway>(gw);
 
 					if (modbusGateway == nullptr)
 					{
@@ -239,8 +244,8 @@ namespace Gateway
 						break;
 					}
 
-					ModbusTcpSlaveHandlerShared modbusHandler =
-						std::make_shared<ModbusTcpSlaveHandler>(swInfo, settings, modbusGateway, appSignals,
+					ModbusSlaveHandlerShared modbusHandler =
+						std::make_shared<ModbusSlaveHandler>(swInfo, settings, modbusGateway, appSignals,
 															log, enableLogging);
 
 					m_handlers.push_back(modbusHandler);

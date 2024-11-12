@@ -616,6 +616,11 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 			{
 				m_configurationXmlReady = true;
 
+				logMessage(Separator::EMPTY_STR);
+				logMessage(QString("loading configuration: project %1, buildNo %2, build date %3...").
+								arg(m_buildInfo.project).arg(m_buildInfo.id).arg(m_buildInfo.dateStr()));
+				logMessage(Separator::EMPTY_STR);
+
 				BuildFileInfoArray bfiArray;
 
 				for(const CfgFileInfo& cfi : m_cfgFilesInfo)

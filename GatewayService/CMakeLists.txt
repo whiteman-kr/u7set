@@ -39,10 +39,10 @@ add_executable(${TARGET}
 	IvsImpulseGatewayHandler.h
 	ModbusProtocol.cpp
 	ModbusProtocol.h
-	ModbusTcpSlaveGateway.cpp
-	ModbusTcpSlaveGateway.h
-	ModbusTcpSlaveGatewayHandler.cpp
-	ModbusTcpSlaveGatewayHandler.h
+	ModbusSlaveGateway.cpp
+	ModbusSlaveGateway.h
+	ModbusSlaveGatewayHandler.cpp
+	ModbusSlaveGatewayHandler.h
 	ModbusTcpSlaveThread.cpp
 	ModbusTcpSlaveThread.h
 )
