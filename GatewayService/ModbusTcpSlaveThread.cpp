@@ -131,7 +131,7 @@ namespace Modbus
 
 	void TcpSlaveThread::Listener::run()
 	{
-		startTimer500ms();
+		startTimer();
 		startListening();
 
 		m_ioContext.run();
@@ -179,14 +179,14 @@ namespace Modbus
 		return true;
 	}
 
-	void TcpSlaveThread::Listener::startTimer500ms()
+	void TcpSlaveThread::Listener::startTimer()
 	{
 		m_timer.expires_after(asio::chrono::milliseconds(1000));
-		m_timer.async_wait(bind(&TcpSlaveThread::Listener::onTimer500ms, this,
+		m_timer.async_wait(bind(&TcpSlaveThread::Listener::onTimer, this,
 								std::placeholders::_1));
 	}
 
-	void TcpSlaveThread::Listener::onTimer500ms(const error_code& error)
+	void TcpSlaveThread::Listener::onTimer(const error_code& error)
 	{
 		Q_UNUSED(error);
 
@@ -195,7 +195,7 @@ namespace Modbus
 			return;
 		}
 
-		startTimer500ms();
+		startTimer();
 	}
 
 	void TcpSlaveThread::Listener::startListening()

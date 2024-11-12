@@ -55,16 +55,30 @@ namespace Gateway
 												this, m_log);
 		m_appDataServiceClientThread->start();
 
-		if (listeningIP1().isSet() == true)
+		switch(modbusMode())
 		{
-			m_modbusTcpSlaveThread1 = new TcpSlaveThread(listeningIP1(), *this);
-			m_modbusTcpSlaveThread1->start();
-		}
+		case E::ModbusMode::TCP:
 
-		if (listeningIP2().isSet() == true)
-		{
-			m_modbusTcpSlaveThread2 = new TcpSlaveThread(listeningIP2(), *this);
-			m_modbusTcpSlaveThread2->start();
+			if (listeningIP1().isSet() == true)
+			{
+				m_modbusTcpSlaveThread1 = new TcpSlaveThread(listeningIP1(), *this);
+				m_modbusTcpSlaveThread1->start();
+			}
+
+			if (listeningIP2().isSet() == true)
+			{
+				m_modbusTcpSlaveThread2 = new TcpSlaveThread(listeningIP2(), *this);
+				m_modbusTcpSlaveThread2->start();
+			}
+
+			break;
+
+		case E::ModbusMode::UDP_ASCII:
+
+			break;
+
+		default:
+			Q_ASSERT(false);
 		}
 	}
 

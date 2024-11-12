@@ -77,8 +77,8 @@ namespace Modbus
 		private:
 			bool exitIfStopRequested();
 
-			void startTimer500ms();
-			void onTimer500ms(const error_code& error);
+			void startTimer();
+			void onTimer(const error_code& error);
 
 			void startListening();
 			void onAcceptConnection(ConnectionShared newConnection,
