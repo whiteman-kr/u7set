@@ -5,73 +5,61 @@
     <name>DialogChooseTrendSignals</name>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="20"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="216"/>
         <source>Trend Signals</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="28"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="217"/>
         <source>Start typing SignalID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="41"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="218"/>
         <source>Filter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="48"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="219"/>
         <source>List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="77"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="220"/>
         <source>Archive Server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="84"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="221"/>
         <source>Signals Tags</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="94"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="223"/>
         <source>Signal tags space separated</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="121"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="224"/>
         <source>&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="128"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="225"/>
         <source>&lt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="135"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="226"/>
         <source>&lt;&lt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="149"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="227"/>
         <source>Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="156"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogChooseTrendSignals.h" line="228"/>
         <source>Down</source>
         <translation type="unfinished"></translation>
     </message>
@@ -80,37 +68,31 @@
     <name>DialogTrendSignalPoint</name>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="14"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="120"/>
         <source>Dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="45"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="121"/>
         <source>dd.MM.yyyy H:mm:ss:zzz</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="52"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="122"/>
         <source>Valid:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="59"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="123"/>
         <source>Value:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="66"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="124"/>
         <source>Time:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoint.ui" line="86"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoint.h" line="125"/>
         <source>Realtime:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -124,25 +106,21 @@
     <name>DialogTrendSignalPoints</name>
     <message>
         <location filename="../DialogTrendSignalPoints.ui" line="14"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoints.h" line="98"/>
         <source>Dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoints.ui" line="25"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoints.h" line="99"/>
         <source>Add...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoints.ui" line="32"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoints.h" line="100"/>
         <source>Edit...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalPoints.ui" line="39"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalPoints.h" line="101"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
@@ -171,91 +149,76 @@
     <name>DialogTrendSignalProperties</name>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="14"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="244"/>
         <source>Dialog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="22"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="245"/>
         <source>Precision</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="29"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="246"/>
         <source>Limits</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="36"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="247"/>
         <source>View High</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="43"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="248"/>
         <source>Color</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="50"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="249"/>
         <source>Line Weight</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="91"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="250"/>
         <source>View Low</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="112"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="251"/>
         <source>Signal ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="126"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="252"/>
         <source>Color Widget</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="147"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="253"/>
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="154"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="254"/>
         <source>Units</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="161"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="255"/>
         <source>Caption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="175"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="256"/>
         <source>Format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="189"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="257"/>
         <source>Points...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogTrendSignalProperties.ui" line="209"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_DialogTrendSignalProperties.h" line="258"/>
         <source>Apply</source>
         <translation type="unfinished"></translation>
     </message>
@@ -272,47 +235,47 @@
 <context>
     <name>TrendLib::DialogChooseTrendSignals</name>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="342"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="344"/>
         <source>All Servers</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="418"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="419"/>
         <source>SignalID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="419"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="420"/>
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="420"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="421"/>
         <source>Caption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="421"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="422"/>
         <source>Server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="506"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="507"/>
         <source>Not selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="521"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="522"/>
         <source>[%1] %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="581"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="582"/>
         <source>The maximum number of signals reached.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="941"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="942"/>
         <source>Copy SignalID</source>
         <translation type="unfinished"></translation>
     </message>
@@ -781,22 +744,22 @@
 <context>
     <name>TrendLibInternal::FilteredTrendSignalsModel</name>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="94"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="95"/>
         <source>SignalID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="96"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="97"/>
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="98"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="99"/>
         <source>Caption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="100"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="101"/>
         <source>Server</source>
         <translation type="unfinished"></translation>
     </message>
@@ -833,79 +796,66 @@
     <name>TrendsMainWindow</name>
     <message>
         <location filename="../TrendsMainWindow.ui" line="14"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="100"/>
         <source>Trends</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="28"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="119"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="38"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="120"/>
         <source>?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="52"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="101"/>
         <source>&amp;Open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="55"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="103"/>
         <source>Ctrl+O</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="64"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="105"/>
         <source>&amp;Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="67"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="107"/>
         <source>Ctrl+S</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="72"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="109"/>
         <source>E&amp;xit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="77"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="110"/>
         <source>&amp;About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="89"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="111"/>
         <source>&amp;Print</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="92"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="113"/>
         <source>Ctrl+P</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="104"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="115"/>
         <source>AutoScale</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../TrendsMainWindow.ui" line="107"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/TrendView/TrendView_autogen/include/ui_TrendsMainWindow.h" line="117"/>
         <source>Autoscale signal trend to visible area</source>
         <translation type="unfinished"></translation>
     </message>

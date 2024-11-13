@@ -15,31 +15,31 @@
     </message>
     <message>
         <location filename="../SignalList.cpp" line="73"/>
-        <source>Specifes application signal list unique ID</source>
+        <source>Specifies application signal list unique ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="79"/>
+        <location filename="../SignalList.cpp" line="80"/>
         <source>Tags are used to determine which lists are processed by instances of Monitor or TuningClient, separated by space</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="88"/>
+        <location filename="../SignalList.cpp" line="89"/>
         <source>This property is used to filter application signal CustomAppSignalIDs by wildcards, separated by semicolon or line break</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="97"/>
+        <location filename="../SignalList.cpp" line="98"/>
         <source>This property is used to filter application signal AppSignalIDs by wildcards, separated by semicolon or line break</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="107"/>
+        <location filename="../SignalList.cpp" line="108"/>
         <source>This property is used to filter application signal EquipmentIDs by wildcards, separated by semicolon or line break</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalList.cpp" line="115"/>
+        <location filename="../SignalList.cpp" line="116"/>
         <source>This property is used to filter application signals by tags, separated by space</source>
         <translation type="unfinished"></translation>
     </message>
@@ -127,7 +127,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="191"/>
+        <location filename="../SignalListEditor.cpp" line="193"/>
         <source>Set Value</source>
         <translation type="unfinished"></translation>
     </message>
@@ -147,54 +147,54 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="939"/>
+        <location filename="../SignalListEditor.cpp" line="949"/>
         <source>Please select signals of same type (analog or discrete).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="947"/>
+        <location filename="../SignalListEditor.cpp" line="957"/>
         <source>Selected signals have different input range.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="1022"/>
+        <location filename="../SignalListEditor.cpp" line="1032"/>
         <source>Can&apos;t get current value of signal %1!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="1040"/>
+        <location filename="../SignalListEditor.cpp" line="1051"/>
         <source>Export to CSV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="1040"/>
-        <location filename="../SignalListEditor.cpp" line="1091"/>
+        <location filename="../SignalListEditor.cpp" line="1053"/>
+        <location filename="../SignalListEditor.cpp" line="1104"/>
         <source>CSV (*.csv)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="1051"/>
-        <location filename="../SignalListEditor.cpp" line="1101"/>
+        <location filename="../SignalListEditor.cpp" line="1064"/>
+        <location filename="../SignalListEditor.cpp" line="1114"/>
         <source>Error writing file %1!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="1075"/>
+        <location filename="../SignalListEditor.cpp" line="1088"/>
         <source>Export complete.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="1091"/>
+        <location filename="../SignalListEditor.cpp" line="1104"/>
         <source>Import from CSV</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="1151"/>
+        <location filename="../SignalListEditor.cpp" line="1164"/>
         <source>Error: &apos;%1&apos; and &apos;%2&apos; columns are absent in CSV file. Import is impossible.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="1227"/>
+        <location filename="../SignalListEditor.cpp" line="1240"/>
         <source>Import complete.
 
 Added: %1 signal(s)
@@ -202,7 +202,7 @@ Updated: %2 signal(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="1241"/>
+        <location filename="../SignalListEditor.cpp" line="1254"/>
         <source>Import complete.
 
 Added: %1 signal(s)
@@ -213,7 +213,7 @@ Updated: %2 signal(s)
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditor.cpp" line="1248"/>
+        <location filename="../SignalListEditor.cpp" line="1261"/>
         <source> and more.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -221,66 +221,66 @@ Updated: %2 signal(s)
 <context>
     <name>AppSignalLists::DialogAppSignalListValue</name>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1009"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1025"/>
         <source>OK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1013"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1029"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1041"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1057"/>
         <source>Enter the value:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1054"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1070"/>
         <source>Different values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1059"/>
         <location filename="../SignalListEditorPrivate.cpp" line="1075"/>
-        <location filename="../SignalListEditorPrivate.cpp" line="1080"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1091"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1096"/>
         <source>Default: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1063"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1079"/>
         <source>Enter the value (%1 - %2):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1091"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1107"/>
         <source>Please select the value.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1109"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1125"/>
         <source>Please enter the value.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1139"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1155"/>
         <source>The value is incorrect.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1145"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1161"/>
         <source>The value is out of range.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1157"/>
-        <location filename="../SignalListEditorPrivate.cpp" line="1168"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1173"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1184"/>
         <source>1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListEditorPrivate.cpp" line="1157"/>
-        <location filename="../SignalListEditorPrivate.cpp" line="1168"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1173"/>
+        <location filename="../SignalListEditorPrivate.cpp" line="1184"/>
         <source>0</source>
         <translation type="unfinished"></translation>
     </message>
@@ -288,27 +288,27 @@ Updated: %2 signal(s)
 <context>
     <name>AppSignalLists::DialogCheckAppSignalLists</name>
     <message>
-        <location filename="../SignalListCheckerPrivate.cpp" line="18"/>
-        <source>&lt;font size=&quot;4&quot;&gt;Errors have been occured while loading signal lists:&lt;br&gt;&lt;br&gt;</source>
+        <location filename="../SignalListCheckerPrivate.cpp" line="16"/>
+        <source>&lt;font size=&quot;4&quot;&gt;Errors have been occurred while loading signal lists:&lt;br&gt;&lt;br&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListCheckerPrivate.cpp" line="23"/>
+        <location filename="../SignalListCheckerPrivate.cpp" line="21"/>
         <source>Signal with id &lt;font color=&quot;red&quot;&gt;&apos;%1&apos;&lt;/font&gt; was not found in the list &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListCheckerPrivate.cpp" line="28"/>
+        <location filename="../SignalListCheckerPrivate.cpp" line="26"/>
         <source>&lt;br&gt;Do you wish to remove these signals from lists?&lt;/font&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListCheckerPrivate.cpp" line="35"/>
+        <location filename="../SignalListCheckerPrivate.cpp" line="33"/>
         <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListCheckerPrivate.cpp" line="38"/>
+        <location filename="../SignalListCheckerPrivate.cpp" line="36"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
@@ -383,7 +383,7 @@ Updated: %2 signal(s)
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="511"/>
+        <location filename="../DialogSignalListEditor.cpp" line="512"/>
         <source>Signal lists with duplicated IDs found:
 
 %1
@@ -392,23 +392,23 @@ Are you sure you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="567"/>
+        <location filename="../DialogSignalListEditor.cpp" line="568"/>
         <source>LIST_%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="589"/>
+        <location filename="../DialogSignalListEditor.cpp" line="590"/>
         <source>Are you sure you want to remove selected lists?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="727"/>
-        <source>%1 (Copy)</source>
+        <location filename="../DialogSignalListEditor.cpp" line="728"/>
+        <source>%1_Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../DialogSignalListEditor.cpp" line="795"/>
-        <location filename="../DialogSignalListEditor.cpp" line="840"/>
+        <location filename="../DialogSignalListEditor.cpp" line="806"/>
+        <location filename="../DialogSignalListEditor.cpp" line="853"/>
         <source>Warning! Changes are not saved. Do you wish to save them?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -416,17 +416,17 @@ Are you sure you want to continue?</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../SignalListChecker.cpp" line="47"/>
+        <location filename="../SignalListChecker.cpp" line="48"/>
         <source>List &apos;%1&apos;: signal with id &apos;%2&apos; does not exist in the project database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListChecker.cpp" line="72"/>
+        <location filename="../SignalListChecker.cpp" line="73"/>
         <source>List &apos;%1&apos;: found &apos;%2&apos; dangling hashes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListChecker.cpp" line="77"/>
+        <location filename="../SignalListChecker.cpp" line="78"/>
         <source>Warning!
 
 Found %1 dangling cached items in %2 list(s).
@@ -439,57 +439,57 @@ Do you wish to remove them permanently?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../SignalListChecker.cpp" line="110"/>
+        <location filename="../SignalListChecker.cpp" line="111"/>
         <source>List items checking completed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TextResource.h" line="5"/>
+        <location filename="../TextResource.h" line="7"/>
         <source>CustomAppSignalID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TextResource.h" line="6"/>
+        <location filename="../TextResource.h" line="8"/>
         <source>AppSignalID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TextResource.h" line="7"/>
+        <location filename="../TextResource.h" line="9"/>
         <source>EquipmentID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TextResource.h" line="8"/>
+        <location filename="../TextResource.h" line="10"/>
         <source>Caption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TextResource.h" line="9"/>
+        <location filename="../TextResource.h" line="11"/>
         <source>Units</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TextResource.h" line="10"/>
+        <location filename="../TextResource.h" line="12"/>
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TextResource.h" line="11"/>
+        <location filename="../TextResource.h" line="13"/>
         <source>LowLimit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TextResource.h" line="12"/>
+        <location filename="../TextResource.h" line="14"/>
         <source>HighLimit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TextResource.h" line="13"/>
+        <location filename="../TextResource.h" line="15"/>
         <source>Default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TextResource.h" line="14"/>
+        <location filename="../TextResource.h" line="16"/>
         <source>Value</source>
         <translation type="unfinished"></translation>
     </message>

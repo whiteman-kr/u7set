@@ -87,52 +87,52 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="202"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="206"/>
         <source>VALIDITY</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="206"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="210"/>
         <source>SIMLOCK</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="210"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="214"/>
         <source>LIMIT</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="214"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="218"/>
         <source>AUTO</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="218"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="222"/>
         <source>FINEAP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="222"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="226"/>
         <source>COARSEAP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="279"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="283"/>
         <source>Analog</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="282"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="286"/>
         <source>Discrete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="285"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="289"/>
         <source>Bus</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="291"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="295"/>
         <source>StateIndex: %1
 SignalID: %2
 AppSignalID: %3
@@ -148,7 +148,7 @@ Server: %14</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="365"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="369"/>
         <source>Unsuported</source>
         <translation type="unfinished"></translation>
     </message>
@@ -279,23 +279,23 @@ Server: %14</source>
 <context>
     <name>ArchiveView</name>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="571"/>
-        <location filename="../Archive/ArchiveModelView.cpp" line="731"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="575"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="735"/>
         <source>Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="617"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="621"/>
         <source>View %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="716"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="720"/>
         <source>Remove </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="740"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="744"/>
         <source>Signals...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -578,55 +578,46 @@ Server: %14</source>
     <name>DialogColumns</name>
     <message>
         <location filename="../DialogColumns.ui" line="14"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogColumns.h" line="133"/>
         <source>Choose Columns</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogColumns.ui" line="24"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogColumns.h" line="134"/>
         <source>Existing Columns</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogColumns.ui" line="34"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogColumns.h" line="135"/>
         <source>Selected Columns</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogColumns.ui" line="44"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogColumns.h" line="136"/>
         <source>&gt;&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogColumns.ui" line="51"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogColumns.h" line="137"/>
         <source>&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogColumns.ui" line="58"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogColumns.h" line="138"/>
         <source>&lt;&lt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogColumns.ui" line="65"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogColumns.h" line="139"/>
         <source>&lt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogColumns.ui" line="85"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogColumns.h" line="140"/>
         <source>Move Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogColumns.ui" line="92"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogColumns.h" line="141"/>
         <source>Move Down</source>
         <translation type="unfinished"></translation>
     </message>
@@ -645,111 +636,92 @@ Server: %14</source>
     <name>DialogSettings</name>
     <message>
         <location filename="../DialogSettings.ui" line="17"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="261"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="33"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="271"/>
         <source>Connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="39"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="262"/>
         <source>Instance StrID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="59"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="263"/>
         <source>Configurator IP Address 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="79"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="265"/>
         <source>Configurator Port 1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="86"/>
         <location filename="../DialogSettings.ui" line="114"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="266"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="270"/>
         <source>00000</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="93"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="267"/>
         <source>Configurator IP Address 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="107"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="269"/>
         <source>Configurator Port 2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="135"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="277"/>
         <source>View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="141"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="272"/>
         <source>Show Logo</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="148"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="273"/>
         <source>Show Items Labels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="168"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="274"/>
         <source>Window Caption</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="178"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="275"/>
         <source>Show Shemas TabBar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="185"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="276"/>
         <source>Zoom Mode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="196"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="280"/>
         <source>Other</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="202"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="278"/>
         <source>Single Instance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="215"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="279"/>
         <source>Language:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="249"/>
-        <location filename="../../../build-u7set-vc-Debug/Monitor/Monitor_autogen/include/ui_DialogSettings.h" line="281"/>
         <source>Save As...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -930,385 +902,385 @@ Server: %14</source>
 <context>
     <name>MonitorMainWindow</name>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="136"/>
+        <location filename="../MonitorMainWindow.cpp" line="137"/>
         <source>Schemas List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="307"/>
-        <location filename="../MonitorMainWindow.cpp" line="1686"/>
+        <location filename="../MonitorMainWindow.cpp" line="308"/>
+        <location filename="../MonitorMainWindow.cpp" line="1687"/>
         <source>Logged Out
 00:00:00</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="308"/>
+        <location filename="../MonitorMainWindow.cpp" line="309"/>
         <source>Click to re-login with current user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="312"/>
-        <location filename="../MonitorMainWindow.cpp" line="584"/>
-        <location filename="../MonitorMainWindow.cpp" line="1690"/>
+        <location filename="../MonitorMainWindow.cpp" line="313"/>
+        <location filename="../MonitorMainWindow.cpp" line="585"/>
+        <location filename="../MonitorMainWindow.cpp" line="1691"/>
         <source>Logged Out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="313"/>
+        <location filename="../MonitorMainWindow.cpp" line="314"/>
         <source>Click to log out current user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="422"/>
+        <location filename="../MonitorMainWindow.cpp" line="423"/>
         <source>Export Schema...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="423"/>
+        <location filename="../MonitorMainWindow.cpp" line="424"/>
         <source>Export current schema to a file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="429"/>
+        <location filename="../MonitorMainWindow.cpp" line="430"/>
         <source>Exit</source>
         <translation>Изход</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="430"/>
+        <location filename="../MonitorMainWindow.cpp" line="431"/>
         <source>Quit the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="437"/>
+        <location filename="../MonitorMainWindow.cpp" line="438"/>
         <source>Signal List Editor...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="438"/>
+        <location filename="../MonitorMainWindow.cpp" line="439"/>
         <source>Edit application signal lists</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="442"/>
+        <location filename="../MonitorMainWindow.cpp" line="443"/>
         <source>Settings...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="443"/>
+        <location filename="../MonitorMainWindow.cpp" line="444"/>
         <source>Change application settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="448"/>
+        <location filename="../MonitorMainWindow.cpp" line="449"/>
         <source>MATS User Manual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="449"/>
+        <location filename="../MonitorMainWindow.cpp" line="450"/>
         <source>Show MATS User Manual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="452"/>
+        <location filename="../MonitorMainWindow.cpp" line="453"/>
         <source>DevTools...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="453"/>
+        <location filename="../MonitorMainWindow.cpp" line="454"/>
         <source>Show software statistics</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="457"/>
+        <location filename="../MonitorMainWindow.cpp" line="458"/>
         <source>Debug...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="458"/>
+        <location filename="../MonitorMainWindow.cpp" line="459"/>
         <source>Perform some debug actions, don&apos;t run it!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="462"/>
+        <location filename="../MonitorMainWindow.cpp" line="463"/>
         <source>Log...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="463"/>
+        <location filename="../MonitorMainWindow.cpp" line="464"/>
         <source>Show application log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="466"/>
+        <location filename="../MonitorMainWindow.cpp" line="467"/>
         <source>Tuning Log...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="467"/>
+        <location filename="../MonitorMainWindow.cpp" line="468"/>
         <source>Show tuning log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="471"/>
+        <location filename="../MonitorMainWindow.cpp" line="472"/>
         <source>About Qt...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="472"/>
+        <location filename="../MonitorMainWindow.cpp" line="473"/>
         <source>Show Qt information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="476"/>
+        <location filename="../MonitorMainWindow.cpp" line="477"/>
         <source>About Monitor...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="477"/>
+        <location filename="../MonitorMainWindow.cpp" line="478"/>
         <source>Show application information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="482"/>
+        <location filename="../MonitorMainWindow.cpp" line="483"/>
         <source>Schemas</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="483"/>
+        <location filename="../MonitorMainWindow.cpp" line="484"/>
         <source>Open schema list page...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="493"/>
+        <location filename="../MonitorMainWindow.cpp" line="494"/>
         <source>New Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="494"/>
+        <location filename="../MonitorMainWindow.cpp" line="495"/>
         <source>Open current schema in new tab page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="504"/>
+        <location filename="../MonitorMainWindow.cpp" line="505"/>
         <source>Close Tab</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="505"/>
+        <location filename="../MonitorMainWindow.cpp" line="506"/>
         <source>Close current tab page</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="512"/>
+        <location filename="../MonitorMainWindow.cpp" line="513"/>
         <source>Zoom In</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="513"/>
+        <location filename="../MonitorMainWindow.cpp" line="514"/>
         <source>Zoom in schema view</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="519"/>
+        <location filename="../MonitorMainWindow.cpp" line="520"/>
         <source>Zoom Out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="520"/>
+        <location filename="../MonitorMainWindow.cpp" line="521"/>
         <source>Zoom out schema view</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="526"/>
+        <location filename="../MonitorMainWindow.cpp" line="527"/>
         <source>Zoom 100%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="527"/>
+        <location filename="../MonitorMainWindow.cpp" line="528"/>
         <source>Set zoom to 100%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="532"/>
+        <location filename="../MonitorMainWindow.cpp" line="533"/>
         <source>Fit to Screen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="533"/>
+        <location filename="../MonitorMainWindow.cpp" line="534"/>
         <source>Set zoom to fit screen</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="539"/>
+        <location filename="../MonitorMainWindow.cpp" line="540"/>
         <source>Go Back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="540"/>
+        <location filename="../MonitorMainWindow.cpp" line="541"/>
         <source>Click to go back</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="546"/>
+        <location filename="../MonitorMainWindow.cpp" line="547"/>
         <source>Go Forward</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="547"/>
+        <location filename="../MonitorMainWindow.cpp" line="548"/>
         <source>Click to go forward</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="553"/>
+        <location filename="../MonitorMainWindow.cpp" line="554"/>
         <source>Archive</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="559"/>
+        <location filename="../MonitorMainWindow.cpp" line="560"/>
         <source>Trends</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="565"/>
+        <location filename="../MonitorMainWindow.cpp" line="566"/>
         <source>Signals Snapshot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="566"/>
+        <location filename="../MonitorMainWindow.cpp" line="567"/>
         <source>View signals state in real time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="571"/>
+        <location filename="../MonitorMainWindow.cpp" line="572"/>
         <source>Find Signal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="572"/>
+        <location filename="../MonitorMainWindow.cpp" line="573"/>
         <source>Find signal by it&apos;s ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="578"/>
+        <location filename="../MonitorMainWindow.cpp" line="579"/>
         <source>Login</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="579"/>
+        <location filename="../MonitorMainWindow.cpp" line="580"/>
         <source>Log in to change tunable values</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="595"/>
+        <location filename="../MonitorMainWindow.cpp" line="596"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="603"/>
+        <location filename="../MonitorMainWindow.cpp" line="604"/>
         <source>&amp;Schema</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="611"/>
+        <location filename="../MonitorMainWindow.cpp" line="612"/>
         <source>&amp;View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="625"/>
+        <location filename="../MonitorMainWindow.cpp" line="626"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="641"/>
+        <location filename="../MonitorMainWindow.cpp" line="642"/>
         <source>&amp;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="665"/>
+        <location filename="../MonitorMainWindow.cpp" line="666"/>
         <source>ToolBar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="749"/>
+        <location filename="../MonitorMainWindow.cpp" line="750"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="798"/>
+        <location filename="../MonitorMainWindow.cpp" line="799"/>
         <source>CfgService</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="806"/>
+        <location filename="../MonitorMainWindow.cpp" line="807"/>
         <source>AppDataService</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="814"/>
+        <location filename="../MonitorMainWindow.cpp" line="815"/>
         <source>TuningService</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="824"/>
+        <location filename="../MonitorMainWindow.cpp" line="825"/>
         <source> Project: %1   Build: %2  </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="839"/>
+        <location filename="../MonitorMainWindow.cpp" line="840"/>
         <source> Log E: %1 W: %2 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="873"/>
+        <location filename="../MonitorMainWindow.cpp" line="874"/>
         <source>%1:
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="877"/>
+        <location filename="../MonitorMainWindow.cpp" line="878"/>
         <source>Not configured</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="894"/>
-        <location filename="../MonitorMainWindow.cpp" line="907"/>
+        <location filename="../MonitorMainWindow.cpp" line="895"/>
+        <location filename="../MonitorMainWindow.cpp" line="908"/>
         <source>ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="894"/>
-        <location filename="../MonitorMainWindow.cpp" line="907"/>
+        <location filename="../MonitorMainWindow.cpp" line="895"/>
+        <location filename="../MonitorMainWindow.cpp" line="908"/>
         <source>down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="905"/>
+        <location filename="../MonitorMainWindow.cpp" line="906"/>
         <source>%1: %2 (Replies: %3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="912"/>
+        <location filename="../MonitorMainWindow.cpp" line="913"/>
         <source>%1: %2/%3 (Replies: %4)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1038"/>
+        <location filename="../MonitorMainWindow.cpp" line="1039"/>
         <source> allows user to view schemas and trends.&lt;br&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1090"/>
+        <location filename="../MonitorMainWindow.cpp" line="1091"/>
         <source>Data Sources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1192"/>
+        <location filename="../MonitorMainWindow.cpp" line="1193"/>
         <source>Signals database is not loaded!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1220"/>
-        <location filename="../MonitorMainWindow.cpp" line="1377"/>
+        <location filename="../MonitorMainWindow.cpp" line="1221"/>
+        <location filename="../MonitorMainWindow.cpp" line="1378"/>
         <source>Signals with specified identifiers were not found:
 
 %1
@@ -1317,7 +1289,7 @@ and %2 more.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1226"/>
+        <location filename="../MonitorMainWindow.cpp" line="1227"/>
         <source>Signals with specified identifiers were not found:
 
 %1
@@ -1325,39 +1297,39 @@ and %2 more.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1235"/>
+        <location filename="../MonitorMainWindow.cpp" line="1236"/>
         <source>No signals supplied!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1243"/>
+        <location filename="../MonitorMainWindow.cpp" line="1244"/>
         <source>Incorrect time type! Supported values: 0 - Plant, 1 - System, 2 - Local.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1249"/>
+        <location filename="../MonitorMainWindow.cpp" line="1250"/>
         <source>Archive request Start Time (%1) should be earlier than End Time (%2).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1384"/>
+        <location filename="../MonitorMainWindow.cpp" line="1385"/>
         <source>Signals with specified identifiers were not found!
 
 %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1526"/>
+        <location filename="../MonitorMainWindow.cpp" line="1527"/>
         <source>Configuration error: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1668"/>
+        <location filename="../MonitorMainWindow.cpp" line="1669"/>
         <source>Tuning logged in, username: %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1682"/>
+        <location filename="../MonitorMainWindow.cpp" line="1683"/>
         <source>Tuning logged out.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1397,22 +1369,22 @@ and %2 more.</source>
 <context>
     <name>MonitorTrendsWidget</name>
     <message>
-        <location filename="../Trend/MonitorTrends.cpp" line="140"/>
+        <location filename="../Trend/MonitorTrends.cpp" line="139"/>
         <source>Monitor Trends %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Trend/MonitorTrends.cpp" line="218"/>
+        <location filename="../Trend/MonitorTrends.cpp" line="217"/>
         <source> Queue: %1 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Trend/MonitorTrends.cpp" line="219"/>
+        <location filename="../Trend/MonitorTrends.cpp" line="218"/>
         <source> Requests/replies: %1/%2 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../Trend/MonitorTrends.cpp" line="223"/>
+        <location filename="../Trend/MonitorTrends.cpp" line="222"/>
         <source> Connected %1/%2</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1495,7 +1467,12 @@ and %2 more.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1705"/>
+        <location filename="../MonitorMainWindow.cpp" line="46"/>
+        <source>/translations/AppSignalLists_%1.qm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../MonitorMainWindow.cpp" line="1706"/>
         <source>Tuning signals file loading error.</source>
         <translation type="unfinished"></translation>
     </message>

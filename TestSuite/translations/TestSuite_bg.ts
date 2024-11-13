@@ -371,362 +371,362 @@
     <name>TestSuiteMainWindow</name>
     <message>
         <location filename="../TestSuiteMainWindow.cpp" line="33"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="1121"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1122"/>
         <source>%1 - %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="82"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="83"/>
         <source>Test Log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="151"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="152"/>
         <source>TestListWidget</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="176"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="177"/>
         <source>Output</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="190"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="191"/>
         <source>ToolBar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="233"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="234"/>
         <source>Load Test Log...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="234"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="235"/>
         <source>Load Test Log from file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="239"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="240"/>
         <source>Save Test Log...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="240"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="241"/>
         <source>Save Test Log to file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="245"/>
         <location filename="../TestSuiteMainWindow.cpp" line="246"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="247"/>
         <source>Clear Test Log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="251"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="252"/>
         <source>Exit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="252"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="253"/>
         <source>Quit the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="259"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="260"/>
         <source>Reload Tests Scripts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="265"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="266"/>
         <source>Run tests</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="274"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="275"/>
         <source>Stop tests</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="280"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="350"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="281"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="351"/>
         <source>Report</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="283"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="284"/>
         <source>Report...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="284"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="285"/>
         <source>Generate the report</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="287"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="288"/>
         <source>Settings...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="288"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="289"/>
         <source>Change application settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="293"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="294"/>
         <source>Data Sources...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="294"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="295"/>
         <source>View Data Sources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="298"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="299"/>
         <source>Connection Statistics...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="299"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="300"/>
         <source>View Connection Statistics</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="303"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="304"/>
         <source>Application Log...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="304"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="305"/>
         <source>Show application log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="307"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="308"/>
         <source>About Qt...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="308"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="309"/>
         <source>Show Qt information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="311"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="312"/>
         <source>About TestSuite...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="312"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="313"/>
         <source>Show application information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="318"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="319"/>
         <source>View GlobalScript</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="319"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="320"/>
         <source>View GlobalScript Code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="332"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="333"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="337"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="338"/>
         <source>&amp;Tests</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="343"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="344"/>
         <source>&amp;Reports</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="359"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="360"/>
         <source>&amp;Tools</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="364"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="365"/>
         <source>&amp;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="411"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="412"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="441"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="442"/>
         <source> ConfigService: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="445"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="446"/>
         <source> no connection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="449"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="450"/>
         <source>%1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="459"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="460"/>
         <source>Address: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="530"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="531"/>
         <source>%1:
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="534"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="535"/>
         <source>Not configured</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="561"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="574"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="562"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="575"/>
         <source>ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="561"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="574"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="562"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="575"/>
         <source>down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="572"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="573"/>
         <source>%1: %2 (Replies: %3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="579"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="580"/>
         <source>%1: %2/%3 (Replies: %4)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="617"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="618"/>
         <source>Error loading scripts from path %1: %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="657"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="658"/>
         <source>Generate report: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="741"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="742"/>
         <source>Load Test Log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="743"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="781"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="744"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="782"/>
         <source>TestSuite Log File (*.tsl);;CSV Files, semicolon separated (*.csv)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="772"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="773"/>
         <source>Test log is empty. No information could be saved.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="779"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="780"/>
         <source>Save Test Log</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="807"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="808"/>
         <source>No permission to start testing.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="818"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="819"/>
         <source>Tests are not running.
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="823"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="824"/>
         <source>Requesting test configuration...
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="828"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="829"/>
         <source>Initializing input controller...
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="833"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="834"/>
         <source>Initializing output controller...
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="838"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="839"/>
         <source>Running script file: %1 (%2 of %3)
 Test function: %4 (%5 of %6)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="849"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="850"/>
         <source>Creating reports...
 </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="893"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="894"/>
         <source>Please stop testing before closing the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="941"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="942"/>
         <source>Tests execution failed: authorization failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="954"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="955"/>
         <source>Please choose at least one test to run.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="998"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="1256"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="999"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1257"/>
         <source>Test log is empty. Do you want to load test log from file?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="1007"/>
-        <location filename="../TestSuiteMainWindow.cpp" line="1265"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1008"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1266"/>
         <source>No data exist for the report!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="1172"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1173"/>
         <source> allows user to run application logic tests.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="1325"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1326"/>
         <source>: no global permission: script terminated.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../TestSuiteMainWindow.cpp" line="1340"/>
+        <location filename="../TestSuiteMainWindow.cpp" line="1341"/>
         <source>: no local permission: script terminated.</source>
         <translation type="unfinished"></translation>
     </message>

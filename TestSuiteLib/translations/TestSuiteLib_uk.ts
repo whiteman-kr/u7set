@@ -406,12 +406,12 @@ Do you with to open it?</source>
 <context>
     <name>TestSuite::TestObserver</name>
     <message>
-        <location filename="../TestObserver.cpp" line="347"/>
+        <location filename="../TestObserver.cpp" line="351"/>
         <source>ScriptTestObserver: RtDataProvider request error: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TestObserver.cpp" line="357"/>
+        <location filename="../TestObserver.cpp" line="361"/>
         <source>ScriptTestObserver: RtDataProvider lost connection to AppDataService %1</source>
         <translation></translation>
     </message>

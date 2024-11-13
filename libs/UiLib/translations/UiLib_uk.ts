@@ -311,24 +311,85 @@ Are you sure you want to continue?</source>
     </message>
 </context>
 <context>
+    <name>ExtWidgets::DialogAppend</name>
+    <message>
+        <location filename="../PropertyTable.cpp" line="19"/>
+        <source>Append what:</source>
+        <translation>Доповнити:</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="26"/>
+        <source>To the beginning</source>
+        <translation>На початок</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="36"/>
+        <source>OK</source>
+        <translation>ОК</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="40"/>
+        <source>Cancel</source>
+        <translation>Скасувати</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="67"/>
+        <source>Please fill the &quot;Find What&quot; field!</source>
+        <translation>Заповніть поле &quot;Знайти що&quot;!</translation>
+    </message>
+</context>
+<context>
+    <name>ExtWidgets::DialogReplace</name>
+    <message>
+        <location filename="../PropertyTable.cpp" line="90"/>
+        <source>Find what:</source>
+        <translation>Знайти що:</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="97"/>
+        <source>Replace with:</source>
+        <translation>Замінити чим:</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="104"/>
+        <source>Case Sensitive</source>
+        <translation>Врахувати регістр</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="114"/>
+        <source>OK</source>
+        <translation>ОК</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="118"/>
+        <source>Cancel</source>
+        <translation>Скасувати</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="150"/>
+        <source>Please fill the &quot;Find What&quot; field!</source>
+        <translation>Заповніть поле &quot;Знайти що&quot;!</translation>
+    </message>
+</context>
+<context>
     <name>ExtWidgets::MultiArrayEdit</name>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2923"/>
+        <location filename="../PropertyEditor.cpp" line="3029"/>
         <source>&lt;PropertyVector&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2931"/>
+        <location filename="../PropertyEditor.cpp" line="3037"/>
         <source>&lt;PropertyList&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2936"/>
+        <location filename="../PropertyEditor.cpp" line="3042"/>
         <source>&lt;StringList&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2941"/>
+        <location filename="../PropertyEditor.cpp" line="3047"/>
         <source>QColor [0 items]</source>
         <translation></translation>
     </message>
@@ -336,17 +397,17 @@ Are you sure you want to continue?</source>
 <context>
     <name>ExtWidgets::MultiCheckBox</name>
     <message>
-        <location filename="../PropertyEditor.cpp" line="3209"/>
+        <location filename="../PropertyEditor.cpp" line="3314"/>
         <source>True</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="3210"/>
+        <location filename="../PropertyEditor.cpp" line="3317"/>
         <source>False</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="3211"/>
+        <location filename="../PropertyEditor.cpp" line="3320"/>
         <source>&lt;Different values&gt;</source>
         <translation></translation>
     </message>
@@ -354,48 +415,48 @@ Are you sure you want to continue?</source>
 <context>
     <name>ExtWidgets::MultiTextEdit</name>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2425"/>
-        <location filename="../PropertyEditor.cpp" line="2459"/>
+        <location filename="../PropertyEditor.cpp" line="2539"/>
+        <location filename="../PropertyEditor.cpp" line="2573"/>
         <source>Select File</source>
         <translation>Обрати файл</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2435"/>
+        <location filename="../PropertyEditor.cpp" line="2549"/>
         <source>File loading error!</source>
         <translation>Помилка завантаження файлу!</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2481"/>
+        <location filename="../PropertyEditor.cpp" line="2595"/>
         <source>Select Directory</source>
         <translation>Обрати каталог</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2511"/>
-        <location filename="../PropertyEditor.cpp" line="2721"/>
+        <location filename="../PropertyEditor.cpp" line="2624"/>
+        <location filename="../PropertyEditor.cpp" line="2835"/>
         <source>[%1, %2]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2558"/>
-        <location filename="../PropertyEditor.cpp" line="2635"/>
+        <location filename="../PropertyEditor.cpp" line="2670"/>
+        <location filename="../PropertyEditor.cpp" line="2746"/>
         <source>Data &lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2568"/>
+        <location filename="../PropertyEditor.cpp" line="2680"/>
         <source>Image loading error!</source>
         <translation>Помилка завантаження зображення!</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2579"/>
-        <location filename="../PropertyEditor.cpp" line="2644"/>
+        <location filename="../PropertyEditor.cpp" line="2691"/>
+        <location filename="../PropertyEditor.cpp" line="2755"/>
         <source>Image &lt;Width = %1 Height = %2&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2602"/>
-        <location filename="../PropertyEditor.cpp" line="2657"/>
-        <location filename="../PropertyEditor.cpp" line="2682"/>
+        <location filename="../PropertyEditor.cpp" line="2714"/>
+        <location filename="../PropertyEditor.cpp" line="2768"/>
+        <location filename="../PropertyEditor.cpp" line="2797"/>
         <source>&lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
@@ -403,22 +464,22 @@ Are you sure you want to continue?</source>
 <context>
     <name>ExtWidgets::MultiTextEditorDialog</name>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2113"/>
+        <location filename="../PropertyEditor.cpp" line="2227"/>
         <source> (Read-Only)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2183"/>
+        <location filename="../PropertyEditor.cpp" line="2302"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2187"/>
+        <location filename="../PropertyEditor.cpp" line="2306"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="2266"/>
+        <location filename="../PropertyEditor.cpp" line="2386"/>
         <source>Do you want to save your changes?</source>
         <translation>Ви бажаєте зберегти зміни?</translation>
     </message>
@@ -426,42 +487,42 @@ Are you sure you want to continue?</source>
 <context>
     <name>ExtWidgets::PropertyArrayEditorDialog</name>
     <message>
-        <location filename="../PropertyEditor.cpp" line="720"/>
+        <location filename="../PropertyEditor.cpp" line="747"/>
         <source>Property</source>
         <translation>Властивість</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="736"/>
+        <location filename="../PropertyEditor.cpp" line="763"/>
         <source>Up</source>
         <translation>Вгору</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="740"/>
+        <location filename="../PropertyEditor.cpp" line="767"/>
         <source>Down</source>
         <translation>Вниз</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="750"/>
+        <location filename="../PropertyEditor.cpp" line="777"/>
         <source>Add</source>
         <translation>Додати</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="754"/>
+        <location filename="../PropertyEditor.cpp" line="781"/>
         <source>Remove</source>
         <translation>Видалити</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="788"/>
+        <location filename="../PropertyEditor.cpp" line="815"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="792"/>
+        <location filename="../PropertyEditor.cpp" line="819"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="1078"/>
+        <location filename="../PropertyEditor.cpp" line="1104"/>
         <source>%1 - %2</source>
         <translation></translation>
     </message>
@@ -469,91 +530,171 @@ Are you sure you want to continue?</source>
 <context>
     <name>ExtWidgets::PropertyEditor</name>
     <message>
-        <location filename="../PropertyEditor.cpp" line="3521"/>
+        <location filename="../PropertyEditor.cpp" line="3622"/>
         <source>Property</source>
         <translation>Властивість</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="3522"/>
+        <location filename="../PropertyEditor.cpp" line="3623"/>
         <source>Value</source>
         <translation>Значення</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="3731"/>
+        <location filename="../PropertyEditor.cpp" line="3833"/>
         <source>&lt;PropertyVector&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="3736"/>
+        <location filename="../PropertyEditor.cpp" line="3838"/>
         <source>&lt;PropertyList&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="3743"/>
-        <location filename="../PropertyEditor.cpp" line="3752"/>
+        <location filename="../PropertyEditor.cpp" line="3845"/>
+        <location filename="../PropertyEditor.cpp" line="3854"/>
         <source>&lt;Different values&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="3793"/>
+        <location filename="../PropertyEditor.cpp" line="3896"/>
         <source>Property: %1 - incorrect input value</source>
         <translation>Властивість: %1 - невірне значення</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="3914"/>
+        <location filename="../PropertyEditor.cpp" line="4016"/>
         <source>Error</source>
         <translation>Помилка</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="4079"/>
+        <location filename="../PropertyEditor.cpp" line="4180"/>
         <source>[ReadOnly] </source>
         <translation></translation>
     </message>
 </context>
 <context>
+    <name>ExtWidgets::PropertyTable</name>
+    <message>
+        <location filename="../PropertyTable.cpp" line="795"/>
+        <source>To filter properties, enter a caption fragment. Multiple fragments can be separated by semicolons.</source>
+        <translation>Для фільтрування властивостей, введіть фрагмент імені або декілька, розділені крапкою з комою.</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="801"/>
+        <source>Property Filter
+
+To filter properties, enter a caption fragment.
+
+Multiple fragments can be separated by semicolons.
+
+Example: Caption;Enable</source>
+        <translation>Фільтр властивостей
+
+Щоб відфільтрувати, введіть фрагмент найменування.
+
+Декілька фрагментів можуть бути розділені крапкою з комою.
+
+Приклад: Caption;Enable</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="806"/>
+        <source>Group by Category</source>
+        <translation>Групувати за категоріями</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="816"/>
+        <source>Property Filter:</source>
+        <translation>Фільтр:</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="1440"/>
+        <source>Insert String Before...</source>
+        <translation>Вставити рядок перед...</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="1443"/>
+        <source>Insert String After...</source>
+        <translation>Вставити рядок після...</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="1449"/>
+        <source>Remove String...</source>
+        <translation>Видалити рядок...</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="1465"/>
+        <source>Append...</source>
+        <translation>Доповнити...</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="1468"/>
+        <source>Replace...</source>
+        <translation>Замінити...</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="1480"/>
+        <source>Expand Values to all Rows</source>
+        <translation>Розширити значення на всі рядки</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="2038"/>
+        <source>Please select properties of same type.</source>
+        <translation>Оберіть властивості одного типу.</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="2185"/>
+        <source>Enter the value:</source>
+        <translation>Введіть значення:</translation>
+    </message>
+    <message>
+        <location filename="../PropertyTable.cpp" line="2187"/>
+        <source>NewLine</source>
+        <translation>Новий рядок</translation>
+    </message>
+</context>
+<context>
     <name>ExtWidgets::VectorEditorDialog</name>
     <message>
-        <location filename="../PropertyEditor.cpp" line="1277"/>
+        <location filename="../PropertyEditor.cpp" line="1301"/>
         <source>Strings</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="1281"/>
+        <location filename="../PropertyEditor.cpp" line="1305"/>
         <source>Colors</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="1297"/>
+        <location filename="../PropertyEditor.cpp" line="1321"/>
         <source>Add</source>
         <translation>Додати</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="1301"/>
+        <location filename="../PropertyEditor.cpp" line="1325"/>
         <source>Remove</source>
         <translation>Видалити</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="1305"/>
+        <location filename="../PropertyEditor.cpp" line="1329"/>
         <source>Up</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="1309"/>
+        <location filename="../PropertyEditor.cpp" line="1333"/>
         <source>Down</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="1329"/>
+        <location filename="../PropertyEditor.cpp" line="1353"/>
         <source>OK</source>
         <translation>ОК</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="1333"/>
+        <location filename="../PropertyEditor.cpp" line="1357"/>
         <source>Cancel</source>
         <translation>Скасувати</translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="1401"/>
+        <location filename="../PropertyEditor.cpp" line="1424"/>
         <source>String - %1</source>
         <translation></translation>
     </message>
@@ -632,47 +773,47 @@ b) Невірна конфігурація проекту.
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="27"/>
+        <location filename="../PropertyEditor.cpp" line="25"/>
         <source>PropertyVector [%1 items]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="41"/>
+        <location filename="../PropertyEditor.cpp" line="39"/>
         <source>PropertyList [%1 items]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="60"/>
+        <location filename="../PropertyEditor.cpp" line="58"/>
         <source>QStringList [%1 items]</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="163"/>
+        <location filename="../PropertyEditor.cpp" line="171"/>
         <source>True</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="163"/>
+        <location filename="../PropertyEditor.cpp" line="171"/>
         <source>False</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="172"/>
+        <location filename="../PropertyEditor.cpp" line="180"/>
         <source>&lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="222"/>
+        <location filename="../PropertyEditor.cpp" line="230"/>
         <source>Data &lt;%1 bytes&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="229"/>
+        <location filename="../PropertyEditor.cpp" line="237"/>
         <source>Image &lt;Width = %1 Height = %2&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../PropertyEditor.cpp" line="236"/>
+        <location filename="../PropertyEditor.cpp" line="244"/>
         <source>[%1, %2]</source>
         <translation></translation>
     </message>
@@ -718,39 +859,64 @@ b) Невірна конфігурація проекту.
 <context>
     <name>UiLib::DialogAbout</name>
     <message>
-        <location filename="../DialogAbout.cpp" line="33"/>
+        <location filename="../DialogAbout.cpp" line="41"/>
         <source>Build: %1 Release</source>
         <translation>Збірка: %1 Release</translation>
     </message>
     <message>
-        <location filename="../DialogAbout.cpp" line="35"/>
+        <location filename="../DialogAbout.cpp" line="43"/>
         <source>Build: %1 Debug</source>
         <translation>Збірка: %1 Debug</translation>
     </message>
     <message>
-        <location filename="../DialogAbout.cpp" line="37"/>
+        <location filename="../DialogAbout.cpp" line="45"/>
         <source>&lt;br&gt;PipelineID: %1</source>
         <translation>&lt;br&gt;ІД процесу: %1</translation>
     </message>
     <message>
-        <location filename="../DialogAbout.cpp" line="39"/>
+        <location filename="../DialogAbout.cpp" line="47"/>
         <source>&lt;br&gt;Commit SHA: %1</source>
         <translation>&lt;br&gt;SHA коміту: %1</translation>
     </message>
     <message>
-        <location filename="../DialogAbout.cpp" line="40"/>
+        <location filename="../DialogAbout.cpp" line="48"/>
         <source>&lt;br&gt;Branch: %1</source>
         <translation>&lt;br&gt;Гілка: %1</translation>
     </message>
     <message>
-        <location filename="../DialogAbout.cpp" line="41"/>
+        <location filename="../DialogAbout.cpp" line="49"/>
         <source>&lt;br&gt;Build Date: %1</source>
         <translation>&lt;br&gt;Дата збірки: %1</translation>
     </message>
     <message>
-        <location filename="../DialogAbout.cpp" line="55"/>
+        <location filename="../DialogAbout.cpp" line="61"/>
+        <source>License organization: %1</source>
+        <translation>Організація: %1</translation>
+    </message>
+    <message>
+        <location filename="../DialogAbout.cpp" line="62"/>
+        <source>&lt;br&gt;Issued for: %1</source>
+        <translation>&lt;br&gt;Видана: %1</translation>
+    </message>
+    <message>
+        <location filename="../DialogAbout.cpp" line="63"/>
+        <source>&lt;br&gt;License end date: %1</source>
+        <translation>&lt;br&gt;Діє до: %1</translation>
+    </message>
+    <message>
+        <location filename="../DialogAbout.cpp" line="64"/>
+        <source>&lt;br&gt;LicenseID: %1</source>
+        <translation>&lt;br&gt;ІД ліцензії: %1</translation>
+    </message>
+    <message>
+        <location filename="../DialogAbout.cpp" line="80"/>
         <source>Copy commit SHA1</source>
         <translation>Скопіювати SHA1</translation>
+    </message>
+    <message>
+        <location filename="../DialogAbout.cpp" line="88"/>
+        <source>Copy WorkplaceID</source>
+        <translation>Скопіювати ІД ПК</translation>
     </message>
 </context>
 <context>
