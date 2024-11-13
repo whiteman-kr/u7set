@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 
 IF NOT EXIST %BIN_OUT_DIR%\docs (
 	mkdir %BIN_OUT_DIR%\docs
