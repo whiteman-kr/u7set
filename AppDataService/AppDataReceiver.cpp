@@ -342,8 +342,9 @@ void AppDataReceiver::closeSocket()
 		m_socket->close();
 		delete m_socket;
 		m_socket = nullptr;
-		m_socketBound = false;
 	}
+
+	m_socketBound = false;
 }
 
 void AppDataReceiver::startReceive()

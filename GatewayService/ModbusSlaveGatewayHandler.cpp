@@ -2,6 +2,9 @@
 #include <Network.pb.h>
 
 #include "ModbusSlaveGatewayHandler.h"
+#include "ModbusTcpSlaveThread.h"
+#include "ModbusUdpSlaveThread.h"
+
 #include "Float16.h"
 
 namespace Gateway
@@ -61,20 +64,30 @@ namespace Gateway
 
 			if (listeningIP1().isSet() == true)
 			{
-				m_modbusTcpSlaveThread1 = new TcpSlaveThread(listeningIP1(), *this);
-				m_modbusTcpSlaveThread1->start();
+				m_tcpSlaveThread1 = new TcpSlaveThread(listeningIP1(), *this);
+				m_tcpSlaveThread1->start();
 			}
 
 			if (listeningIP2().isSet() == true)
 			{
-				m_modbusTcpSlaveThread2 = new TcpSlaveThread(listeningIP2(), *this);
-				m_modbusTcpSlaveThread2->start();
+				m_tcpSlaveThread2 = new TcpSlaveThread(listeningIP2(), *this);
+				m_tcpSlaveThread2->start();
 			}
-
 			break;
 
 		case E::ModbusMode::UDP_ASCII:
 
+			if (listeningIP1().isSet() == true)
+			{
+				m_udpSlaveThread1 = new UdpSlaveThread(listeningIP1(), *this);
+				m_udpSlaveThread1->start();
+			}
+
+			if (listeningIP2().isSet() == true)
+			{
+				m_udpSlaveThread2 = new UdpSlaveThread(listeningIP2(), *this);
+				m_udpSlaveThread2->start();
+			}
 			break;
 
 		default:
@@ -84,18 +97,32 @@ namespace Gateway
 
 	void ModbusSlaveHandler::shutdown()
 	{
-		if (m_modbusTcpSlaveThread1 != nullptr)
+		if (m_udpSlaveThread1 != nullptr)
 		{
-			m_modbusTcpSlaveThread1->stop();
-			delete m_modbusTcpSlaveThread1;
-			m_modbusTcpSlaveThread1 = nullptr;
+			m_udpSlaveThread1->stop();
+			delete m_udpSlaveThread1;
+			m_udpSlaveThread1 = nullptr;
 		}
 
-		if (m_modbusTcpSlaveThread2 != nullptr)
+		if (m_udpSlaveThread2 != nullptr)
 		{
-			m_modbusTcpSlaveThread2->stop();
-			delete m_modbusTcpSlaveThread2;
-			m_modbusTcpSlaveThread2 = nullptr;
+			m_udpSlaveThread2->stop();
+			delete m_udpSlaveThread2;
+			m_udpSlaveThread2 = nullptr;
+		}
+
+		if (m_tcpSlaveThread1 != nullptr)
+		{
+			m_tcpSlaveThread1->stop();
+			delete m_tcpSlaveThread1;
+			m_tcpSlaveThread1 = nullptr;
+		}
+
+		if (m_tcpSlaveThread2 != nullptr)
+		{
+			m_tcpSlaveThread2->stop();
+			delete m_tcpSlaveThread2;
+			m_tcpSlaveThread2 = nullptr;
 		}
 
 		if (m_appDataServiceClientThread != nullptr)
@@ -196,29 +223,9 @@ namespace Gateway
 		return m_gateway->modbusDeviceID();
 	}
 
-	quint8* ModbusSlaveHandler::recvBuffer()
-	{
-		return m_recvBuffer;
-	}
-
-	size_t ModbusSlaveHandler::recvBufferSize() const
-	{
-		return RECV_BUFFER_SIZE;
-	}
-
-	quint8* ModbusSlaveHandler::sendBuffer()
-	{
-		return m_sendBuffer;
-	}
-
-	size_t ModbusSlaveHandler::sendBufferSize() const
-	{
-		return SEND_BUFFER_SIZE;
-	}
-
 	int ModbusSlaveHandler::getRegistersValues(int startRegAddr, int regsCount,
-												  RegisterValue* destBuffer, int maxRegsCount,
-												  QThread* thread)
+												RegisterValue* destBuffer, int maxRegsCount,
+												QThread* thread)
 	{
 		if (maxRegsCount < regsCount)
 		{
@@ -253,14 +260,13 @@ namespace Gateway
 		return regsCount * REGISTER_SIZE_BYTES;
 	}
 
-	size_t ModbusSlaveHandler::tcpRequestProcessing(int connNo,
-													const QString& peerAddr,
-													const error_code& error,
-													size_t bytesReceived)
+	size_t ModbusSlaveHandler::tcpRequestProcessing(MbshProcData& mpd)
 	{
-		logTcpRequest(connNo, peerAddr, error, bytesReceived);
+		logTcpRequest(mpd);
 
-		TcpFrame& request = getTcpRequestRef();
+		mpd.sendBytes = 0;
+
+		TcpFrame& request = getTcpRequestRef(mpd);
 
 		request.reverseBytes();
 
@@ -268,7 +274,7 @@ namespace Gateway
 
 		size_t expectedSize = request.header.length + sizeof(request.header);
 
-		if (expectedSize != bytesReceived)
+		if (expectedSize != mpd.bytesReceived)
 		{
 			// DEBUG_LOG_ERR(m_listener.log(), QString("ModbusSlaveHandler::onReceiveData error: wrong request size, expected %1, received %2 bytes").
 			// 								arg(expectedSize).arg(bytesReceived));
@@ -280,12 +286,10 @@ namespace Gateway
 			return 0;					// its Ok, request to another device
 		}
 
-		size_t sendBytesCount = 0;
-
 		switch(request.functionCode)
 		{
 		case FC_READ_HOLDING_REGISTERS:
-			sendBytesCount = onFnReadHoldingRegisters(request);
+			mpd.sendBytes = onFnReadHoldingRegisters(mpd);
 			break;
 
 		default:;
@@ -293,12 +297,12 @@ namespace Gateway
 			// 								arg(request.functionCode));
 		}
 
-		if (sendBytesCount > 0)
+		if (mpd.sendBytes > 0)
 		{
-			logTcpReply(connNo, peerAddr, sendBytesCount);
+			logTcpReply(mpd);
 		}
 
-		return sendBytesCount;
+		return mpd.sendBytes;
 	}
 
 	bool ModbusSlaveHandler::init()
@@ -555,24 +559,21 @@ namespace Gateway
 		return 0;
 	}
 
-	void ModbusSlaveHandler::logTcpRequest(int connNo,
-										   const QString& peerAddr,
-										   const error_code& error,
-										   size_t bytesReceived)
+	void ModbusSlaveHandler::logTcpRequest(MbshProcData& mpd)
 	{
 		m_logStr.clear();
 
 		m_logStr.append(QString("Gateway %1 #%2 Modbus TCP request from %3, socket error code %4 ('%5'), bytes received %6").
 						arg(gatewayID()).
-						arg(connNo).
-						arg(peerAddr).
-						arg(error.value()).
-						arg(error ? QString::fromStdString(error.message()) : QStringLiteral("NoErr")).
-						arg(bytesReceived));
+						arg(mpd.connNo).
+						arg(mpd.peerAddr).
+						arg(mpd.error.value()).
+						arg(mpd.error ? QString::fromStdString(mpd.error.message()) : QStringLiteral("NoErr")).
+						arg(mpd.bytesReceived));
 
 		logRequest(m_logStr);
 
-		if (error || bytesReceived == 0)
+		if (mpd.error || mpd.bytesReceived == 0)
 		{
 			return;
 		}
@@ -583,9 +584,9 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("Binary:"));
 
-		for(size_t i = 0; i < bytesReceived && i < RECV_BUFFER_SIZE; i++)
+		for(size_t i = 0; i < mpd.bytesReceived && i < mpd.recvBufferSize; i++)
 		{
-			m_logStr.append(QString(" %1").arg(m_recvBuffer[i], 2, 16, QChar('0')).toUpper());
+			m_logStr.append(QString(" %1").arg(mpd.recvBuffer[i], 2, 16, QChar('0')).toUpper());
 		}
 
 		logRequest(m_logStr);
@@ -596,7 +597,7 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("TCP header: "));
 
-		const TcpFrame& req = getTcpRequestRef();
+		const TcpFrame& req = getTcpRequestRef(mpd);
 
 		TcpHeader reqHeader = req.header;
 
@@ -636,19 +637,19 @@ namespace Gateway
 		}
 	}
 
-	void ModbusSlaveHandler::logTcpReply(int connNo, const QString& peerAddr, size_t sendBytes)
+	void ModbusSlaveHandler::logTcpReply(MbshProcData& mpd)
 	{
 		m_logStr.clear();
 
 		m_logStr.append(QString("Gateway %1 #%2 Modbus TCP reply to %3, bytes sent %4").
 						arg(gatewayID()).
-						arg(connNo).
-						arg(peerAddr).
-						arg(sendBytes));
+						arg(mpd.connNo).
+						arg(mpd.peerAddr).
+						arg(mpd.sendBytes));
 
 		logReply(m_logStr);
 
-		if (sendBytes == 0)
+		if (mpd.sendBytes == 0)
 		{
 			return;
 		}
@@ -659,9 +660,9 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("Binary:"));
 
-		for(size_t i = 0; i < sendBytes && i < SEND_BUFFER_SIZE; i++)
+		for(size_t i = 0; i < mpd.sendBytes && i < mpd.sendBufferSize; i++)
 		{
-			m_logStr.append(QString(" %1").arg(m_sendBuffer[i], 2, 16, QChar('0')).toUpper());
+			m_logStr.append(QString(" %1").arg(mpd.sendBuffer[i], 2, 16, QChar('0')).toUpper());
 		}
 
 		logReply(m_logStr);
@@ -672,7 +673,7 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("TCP header: "));
 
-		const TcpFrame& rep = getTcpReplyRef();
+		const TcpFrame& rep = getTcpReplyRef(mpd);
 
 		TcpHeader repHeader = rep.header;
 
@@ -711,7 +712,7 @@ namespace Gateway
 
 			m_logStr.append(QStringLiteral("Modbus reply:"));
 
-			const TcpFrame& req = getTcpRequestRef();
+			const TcpFrame& req = getTcpRequestRef(mpd);
 
 			for(quint32 i = 0; i < regsCount; i++)
 			{
@@ -730,26 +731,24 @@ namespace Gateway
 
 	}
 
-	void ModbusSlaveHandler::logAsciiRequest(const error_code& error, size_t bytesReceived)
+	void ModbusSlaveHandler::logAsciiRequest(MbshProcData& mpd)
 	{
-		Q_UNUSED(error);
-		Q_UNUSED(bytesReceived);
+		Q_UNUSED(mpd);
 	}
 
-	void ModbusSlaveHandler::logRtuRequest(const error_code& error, size_t bytesReceived)
+	void ModbusSlaveHandler::logAsciiReply(MbshProcData& mpd)
 	{
-		Q_UNUSED(error);
-		Q_UNUSED(bytesReceived);
+		Q_UNUSED(mpd);
 	}
 
-	void ModbusSlaveHandler::logAsciiReply(size_t sendBytes)
+	void ModbusSlaveHandler::logRtuRequest(MbshProcData& mpd)
 	{
-		Q_UNUSED(sendBytes);
+		Q_UNUSED(mpd);
 	}
 
-	void ModbusSlaveHandler::logRtuReply(size_t sendBytes)
+	void ModbusSlaveHandler::logRtuReply(MbshProcData& mpd)
 	{
-		Q_UNUSED(sendBytes);
+		Q_UNUSED(mpd);
 	}
 
 	size_t ModbusSlaveHandler::asciiRequestProcessing(size_t bytesReceived)
@@ -850,8 +849,10 @@ namespace Gateway
 		return 0;
 	}
 
-	int ModbusSlaveHandler::onFnReadHoldingRegisters(TcpFrame& request)
+	size_t ModbusSlaveHandler::onFnReadHoldingRegisters(MbshProcData& mpd)
 	{
+		TcpFrame& request = getTcpRequestRef(mpd);
+
 		if (request.functionCode != FC_READ_HOLDING_REGISTERS)
 		{
 			Q_ASSERT(false);
@@ -867,7 +868,7 @@ namespace Gateway
 
 		Q_ASSERT(regsCount <= 127);
 
-		TcpFrame& reply = getTcpReplyRef();
+		TcpFrame& reply = getTcpReplyRef(mpd);
 
 		int bytesCount = getRegistersValues(regsStartAddr, regsCount,
 											reply.fn03Reply.regValues, FN03_MAX_REGS_COUNT,
@@ -897,28 +898,30 @@ namespace Gateway
 
 		//
 
-		int sendBytesCount = sizeof(reply.header) + reply.header.length;
+		size_t sendBytesCount = sizeof(reply.header) + reply.header.length;
 
 		reply.reverseBytes();		// translate header fields to BE
 
 		return sendBytesCount;
 	}
 
-	TcpFrame& ModbusSlaveHandler::getTcpRequestRef()
+	TcpFrame& ModbusSlaveHandler::getTcpRequestRef(MbshProcData& mpd)
 	{
-		Q_ASSERT(sizeof(TcpFrame) < sizeof(m_recvBuffer));
-		return *reinterpret_cast<TcpFrame*>(m_recvBuffer);
+		Q_ASSERT(mpd.recvBuffer != nullptr);
+		return *reinterpret_cast<TcpFrame*>(mpd.recvBuffer);
 	}
 
-	TcpFrame& ModbusSlaveHandler::getTcpReplyRef()
+	TcpFrame& ModbusSlaveHandler::getTcpReplyRef(MbshProcData& mpd)
 	{
-		Q_ASSERT(sizeof(TcpFrame) < sizeof(m_sendBuffer));
-		return *reinterpret_cast<TcpFrame*>(m_sendBuffer);
+		Q_ASSERT(mpd.sendBuffer != nullptr);
+		return *reinterpret_cast<TcpFrame*>(mpd.sendBuffer);
 	}
 
-	int ModbusSlaveHandler::onAsciiFnReadHoldingRegisters(quint16 regsStartAddr, quint16 regsCount)
+	int ModbusSlaveHandler::onAsciiFnReadHoldingRegisters(MbshProcData& mpd)
 	{
-		Q_ASSERT(regsCount <= ASCII_REG_VALUES_COUNT);
+		Q_UNUSED(mpd);
+
+/*		Q_ASSERT(regsCount <= ASCII_REG_VALUES_COUNT);
 
 		int bytesCount = getRegistersValues(regsStartAddr, regsCount,
 											m_asciiRegValues, ASCII_REG_VALUES_COUNT,
@@ -927,7 +930,7 @@ namespace Gateway
 		Q_ASSERT(bytesCount == regsCount * sizeof(quint16));
 		Q_ASSERT(bytesCount <= 0xFF);
 
-		quint8* ptr = m_sendBuffer;
+		quint8* ptr = mpd.sendBuffer;
 
 		*ptr = ':';
 		ptr++;
@@ -956,7 +959,9 @@ namespace Gateway
 
 		int sendBytesCount = ptr - m_sendBuffer;
 
-		return sendBytesCount;
+		return sendBytesCount;*/
+
+		return 0;
 	}
 
 	bool ModbusSlaveHandler::isHexDigits(const quint8* ptr, int len) const

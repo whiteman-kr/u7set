@@ -1,5 +1,4 @@
 #include "ModbusTcpSlaveThread.h"
-#include "ModbusSlaveGatewayHandler.h"
 
 namespace Modbus
 {
@@ -16,6 +15,16 @@ namespace Modbus
 	{
 		m_connectionInstance++;
 		m_connNo = m_connectionInstance;
+
+		//
+
+		m_mpd.connNo = m_connNo;
+
+		m_mpd.recvBuffer = m_recvBuffer;
+		m_mpd.recvBufferSize = RECV_BUFFER_SIZE;
+
+		m_mpd.sendBuffer = m_sendBuffer;
+		m_mpd.sendBufferSize = SEND_BUFFER_SIZE;
 	}
 
 	tcp::socket& TcpSlaveThread::Connection::socket()
@@ -40,6 +49,8 @@ namespace Modbus
 		if (m_firstStartReceive)
 		{
 			m_peerAddr = peerAddress();
+			m_mpd.peerAddr = m_peerAddr;
+
 			asio::ip::tcp::no_delay option(true);
 			m_socket.set_option(option);
 			m_firstStartReceive = false;
@@ -48,7 +59,7 @@ namespace Modbus
 								 arg(m_handler.gatewayID()).arg(m_connNo).arg(m_peerAddr));
 		}
 
-		m_socket.async_receive(asio::buffer(m_handler.recvBuffer(), m_handler.recvBufferSize()),
+		m_socket.async_receive(asio::buffer(m_recvBuffer, RECV_BUFFER_SIZE),
 							   bind(&TcpSlaveThread::Connection::onReceiveData, this,
 									std::placeholders::_1,
 									std::placeholders::_2));
@@ -85,15 +96,19 @@ namespace Modbus
 			return;
 		}
 
-		size_t sendBytesCount = 0;
+		// other fields of m_mpd struct already initialized!
+		//
+		m_mpd.error = error;
+		m_mpd.bytesReceived = bytesReceived;
+		m_mpd.sendBytes = 0;
 
-		sendBytesCount = m_handler.tcpRequestProcessing(m_connNo, m_peerAddr, error, bytesReceived);
+		size_t sendBytes = m_handler.tcpRequestProcessing(m_mpd);
 
-		if (sendBytesCount > 0)
+		if (sendBytes > 0)
 		{
-			if (sendBytesCount <= m_handler.sendBufferSize())
+			if (sendBytes <= SEND_BUFFER_SIZE)
 			{
-				m_socket.write_some(asio::buffer(m_handler.sendBuffer(), sendBytesCount));
+				m_socket.write_some(asio::buffer(m_sendBuffer, sendBytes));
 			}
 			else
 			{

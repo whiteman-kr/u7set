@@ -35,6 +35,10 @@ namespace Modbus
 		bool isSocketWorkable() const;
 		void closeSocket();
 
+		void startReceive();
+		void onReceiveData(const error_code& error, size_t bytesReceived);
+		void initIndexes();
+
 	private:
 		HostAddressPort m_recvIP;
 		::Gateway::ModbusSlaveHandler& m_handler;
@@ -52,6 +56,12 @@ namespace Modbus
 		udp::endpoint m_recvEndpoint;
 		udp::socket* m_socket = nullptr;
 		bool m_socketBound = false;
+
+		static const size_t RECV_BUFFER_SIZE = 1024;
+		quint8 m_recvBuffer[RECV_BUFFER_SIZE];
+		udp::endpoint m_recvFromIP;
+		int m_recvBufferIndex = 0;
+		int m_startMarkerIndex = -1;
 	};
 
 }

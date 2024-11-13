@@ -49,6 +49,8 @@ namespace Modbus
 				createAndBindSocket();
 
 				m_ioContext->run();
+
+				exit = true;
 			}
 
 			catch (std::exception& e)
@@ -98,7 +100,14 @@ namespace Modbus
 			return false;
 		}
 
-		m_ioContext->stop();
+		if (m_ioContext != nullptr)
+		{
+			m_ioContext->stop();
+		}
+		else
+		{
+			Q_ASSERT(false);
+		}
 
 		return true;
 	}
@@ -130,39 +139,42 @@ namespace Modbus
 			{
 				m_socketBound = true;
 
-				DEBUG_LOG_MSG(m_log, QString("AppDataReceiver socket created and bound to %1").
-									 arg(m_recvIP.addressPortStr()));
+				DEBUG_LOG_MSG(m_log, QString("Gateway %1 listening socket created and bound to %2").
+											arg(m_handler.gatewayID(), m_recvIP.addressPortStr()));
 
-				asio::socket_base::receive_buffer_size rxBufferSize(10 * 1024 * 1024);
+				asio::socket_base::receive_buffer_size rxBufferSize(1024);
 
 				m_socket->set_option(rxBufferSize, error);
 
 				if (error)
 				{
-					DEBUG_LOG_ERR(m_log, "AppDataReceiver error changing udp socket receive buffer size");
+					DEBUG_LOG_ERR(m_log, QString("Gateway %1 error changing listening socket receive buffer size").
+											arg(m_handler.gatewayID()));
 				}
 
 				m_socket->get_option(rxBufferSize);
 
-				DEBUG_LOG_MSG(m_log, QString("AppDataReceiver udp socket receive buffer size %1 bytes").
-									 arg(rxBufferSize.value()));
-
+				DEBUG_LOG_MSG(m_log, QString("Gateway %1 listening socket receive buffer size %2 bytes").
+											arg(m_handler.gatewayID()).
+											arg(rxBufferSize.value()));
+				initIndexes();
 				startReceive();
 			}
 			else
 			{
-				DEBUG_LOG_MSG(m_log, QString("AppDataReceiver error binding listening socket to %1: %2").
-									 arg(m_dataReceivingIP.addressPortStr()).
-									 arg(QString::fromStdString(error.message())));
+				DEBUG_LOG_MSG(m_log, QString("Gateway %1 error binding listening socket to %2: %3").
+											arg(m_handler.gatewayID()).
+											arg(m_recvIP.addressPortStr()).
+											arg(QString::fromStdString(error.message())));
 
 				closeSocket();
 			}
 		}
 		else
 		{
-			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket opening error: %1").
-								 arg(QString::fromStdString(error.message())));
-
+			DEBUG_LOG_MSG(m_log, QString("Gateway %1 listening socket opening error: %2").
+											arg(m_handler.gatewayID()).
+											arg(QString::fromStdString(error.message())));
 			closeSocket();
 		}
 
@@ -172,8 +184,8 @@ namespace Modbus
 	bool UdpSlaveThread::isSocketWorkable() const
 	{
 		return	m_socket != nullptr &&
-			   m_socket->is_open() &&
-			   m_socketBound == true;
+				m_socket->is_open() &&
+				m_socketBound == true;
 	}
 
 	void UdpSlaveThread::closeSocket()
@@ -183,8 +195,14 @@ namespace Modbus
 			m_socket->close();
 			delete m_socket;
 			m_socket = nullptr;
-			m_socketBound = false;
+
+			DEBUG_LOG_MSG(m_log, QString("Gateway %1 close listening socket").
+								 arg(m_handler.gatewayID()));
 		}
+
+		m_socketBound = false;
+
+		initIndexes();
 	}
 
 	void UdpSlaveThread::startReceive()
@@ -195,137 +213,32 @@ namespace Modbus
 			return;
 		}
 
-		m_writeIndex ^= 1;
-
-		m_socket->async_receive_from(asio::buffer(m_receiveBuffer[m_writeIndex], RECV_BUFFER_SIZE),
-									 m_receiveFromIP[m_writeIndex],
-									 bind(&AppDataReceiver::receivePackets, this,
+		m_socket->async_receive_from(asio::buffer(m_recvBuffer + m_recvBufferIndex, RECV_BUFFER_SIZE), m_recvFromIP,
+									 bind(&UdpSlaveThread::onReceiveData, this,
 										  std::placeholders::_1,
 										  std::placeholders::_2));
 	}
 
-	void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceived)
+	void UdpSlaveThread::onReceiveData(const error_code& error, size_t bytesReceived)
 	{
-		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
-
-		if (stopIfQuitRequested() == true)
+		if (exitIfStopRequested() == true)
 		{
 			return;
 		}
 
 		if (error)
 		{
-			m_socketErrorCtr++;
+			DEBUG_LOG_MSG(m_log, QString("Gateway %1 data receive error '%2' (%3)").
+								arg(m_handler.gatewayID(), QString::fromStdString(error.message())).
+								 arg(error.value()));
+			closeSocket();
 			return;
-		}
-
-		m_noReceiveCtr = 0;
-
-		udp::endpoint receiveFromIP = m_receiveFromIP[m_writeIndex];
-		Rup::SimFrame& simFrame = *reinterpret_cast<Rup::SimFrame*>(m_receiveBuffer[m_writeIndex]);
-
-		startReceive();
-
-		m_receivedPerSecond += static_cast<int>(bytesReceived);
-
-		bool isSimFrame = false;
-		bool isValidFrame = false;
-		bool crcOk = false;
-		quint32 sourceIP = 0;
-
-		do
-		{
-			if (bytesReceived == sizeof(Rup::Frame))
-			{
-				sourceIP = receiveFromIP.address().to_v4().to_ulong();
-				isValidFrame = true;
-				break;
-			}
-
-			//
-
-			if (bytesReceived == sizeof(Rup::SimFrame))
-			{
-				if (m_isSimulationMode == false)
-				{
-					m_errNotExpectedSimPacket++;
-
-					if ((m_errNotExpectedSimPacket % 1000) == 0)
-					{
-						qDebug() << C_STR(QString("Software is not in SIMULATION mode, %1 sim packets has been ignored.").
-										  arg(m_errNotExpectedSimPacket));
-					}
-
-					break;
-				}
-
-				quint16 simVersion = reverseUint16(simFrame.simVersion);
-
-				if (simVersion != 1)
-				{
-					m_errSimVersion++;
-					break;
-				}
-
-				sourceIP = reverseUint32(simFrame.sourceIP);
-
-				m_simFramesCount++;
-
-				isSimFrame = true;
-				isValidFrame = true;
-				break;
-			}
-
-			// received datagram  has unknown size, skip this datagram
-			//
-			m_errDatagramSize++;
-			break;
-		}
-		while(true);		// Its OK!
-
-		if (isValidFrame == true)
-		{
-			m_rupFramesReceivedPerSecond++;
-			m_rupFramesCount++;
-
-			crcOk = simFrame.rupFrame.checkCRC64();
-
-			if (crcOk == false)
-			{
-				m_errRupFrameCRC++;
-			}
-
-			AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
-
-			if (source != nullptr)
-			{
-				if (crcOk == true)
-				{
-					source->pushRupFrame(sourceIP, serverTime,
-										 isSimFrame, simFrame.rupFrame,
-										 source->cachedAppDataUID(), m_thisThread);
-
-					requireBufferProcessing(source);
-				}
-				else
-				{
-					source->incErrorFrameCRC();
-				}
-			}
-			else
-			{
-				m_errUnknownAppDataSourceIP++;
-
-				//			qDebug() << "Unknown IP" << C_STR(HostAddressPort(sourceIP, 0).addressStr());
-
-				if (m_unknownAppDataSourcesIP.contains(sourceIP) == false &&
-					m_unknownAppDataSourcesIP.size() < 500)
-				{
-					m_unknownAppDataSourcesIP.insert(sourceIP);
-				}
-			}
 		}
 	}
 
-
+	void UdpSlaveThread::initIndexes()
+	{
+		m_recvBufferIndex = 0;
+		m_startMarkerIndex = -1;
+	}
 }
