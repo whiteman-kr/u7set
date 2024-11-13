@@ -757,7 +757,7 @@ void MainWindow::showShortcuts()
 
 void MainWindow::showRpctUserManual()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.6_RPCT-UM.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.6_FSC_ RPCT_User_Manual.pdf", this);
 }
 
 void MainWindow::showRpctInstallManual()
@@ -792,7 +792,7 @@ void MainWindow::showScriptHelp()
 
 void MainWindow::showMatsUserManual()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_RPCT_MATS_User_Manual.pdf", this);
 }
 
 void MainWindow::showTuningUserManual()
