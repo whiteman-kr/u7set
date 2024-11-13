@@ -120,7 +120,7 @@ windows_build_job:
     - "git status"
     - "git log -1"
     - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2019_64"
-    - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR/bin/release"
+    - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR\\bin\\release"
 #Build Project
     - "# ----------------------------------------------"
     - "#               Build Project"
