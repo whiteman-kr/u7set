@@ -86,7 +86,7 @@ int UdpRetranslatorApp::run()
 			BREAK_IF_FALSE(printCaptureDevices());
 			BREAK_IF_FALSE(readCfgFile(it->second));
 			saveCfgFileName(it->second);
-			startRetranslate(false);
+			startRetranslate(false, it->second);
 			break;
 		}
 
@@ -98,11 +98,14 @@ int UdpRetranslatorApp::run()
 	return 0;
 }
 
-void UdpRetranslatorApp::startRetranslate(bool isService)
+void UdpRetranslatorApp::startRetranslate(bool isService, QString cfgFileName)
 {
 	DEBUG_LOG_MSG(logger, QString("UdpRetranslatorApp::startRetranslate started"));
 
-	QString cfgFileName = settings.value(CFG_FILE_NAME).toString();
+	if (isService)
+	{
+		cfgFileName = settings.value(CFG_FILE_NAME).toString();
+	}
 
 	DEBUG_LOG_MSG(logger, QString("Configuration file name: %1").arg(cfgFileName));
 
@@ -607,7 +610,7 @@ VOID serviceMain(DWORD argc, LPTSTR* argv)
 
 	//
 
-	UdpRetranslatorApp:: startRetranslate(true);
+	UdpRetranslatorApp:: startRetranslate(true, "");
 
 	//
 

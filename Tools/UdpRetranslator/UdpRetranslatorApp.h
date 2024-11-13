@@ -16,7 +16,7 @@ public:
 	bool init(int argc, char** argv);
 	int run();
 
-	static void startRetranslate(bool isService);
+	static void startRetranslate(bool isService, QString cfgFileName);		// copy Ok
 	void waitQuitRequested();
 	static void stopRetranslate();
 
