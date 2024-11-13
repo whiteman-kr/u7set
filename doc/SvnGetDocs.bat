@@ -1,4 +1,4 @@
-rem @echo off
+@echo off
 
 IF NOT EXIST %BIN_OUT_DIR%\docs (
 	mkdir %BIN_OUT_DIR%\docs
@@ -31,7 +31,7 @@ FOR /F "delims=|" %%d  IN (SvnDocList.txt) DO (
 )
 
 IF NOT EXIST "%BIN_OUT_DIR%\docs\D11.5_AFBL_RM.pdf" goto SvnError
-IF NOT EXIST "%BIN_OUT_DIR%\docs\D11.6_RPCT-UM.pdf" goto SvnError
+IF NOT EXIST "%BIN_OUT_DIR%\docs\D11.6_FSC_ RPCT_User_Manual.pdf" goto SvnError
 IF NOT EXIST "%BIN_OUT_DIR%\docs\Appendixes\D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf"  goto SvnError
 IF NOT EXIST "%BIN_OUT_DIR%\docs\Appendixes\D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf"  goto SvnError
 IF NOT EXIST "%BIN_OUT_DIR%\docs\D11.8_FSC_MATS_User_Manual.pdf" goto SvnError
