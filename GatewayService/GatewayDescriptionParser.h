@@ -146,6 +146,8 @@ namespace Gateway
 
 		ParseResult appendAddressSignalID(SignalListShared signalList, const ParseLineResult& plr, bool appendAddr);
 
+		ParseResult parsePropValue(const ParseLineResult& plr, bool* isPropValue, double* propValue);
+
 		bool parseLine(const QString& str, ParseLineResult* plr);
 		bool parseSettingValue(E::Setting setting, const QString& valueStr, ParseLineResult* plr);
 
