@@ -59,10 +59,12 @@ namespace Gateway
 		E::ModbusMode modbusMode() const;
 		int modbusDeviceID() const;
 
-		int getRegistersValues(int startRegAddr, int regsCount,
+		int getRegistersValues(int regsStartAddr, int regsCount,
 							   Modbus::RegisterValue* destBuffer, int maxRegsCount, QThread* thread);
 
 		size_t tcpRequestProcessing(MbshProcData& mpd);
+		size_t asciiRequestProcessing(MbshProcData& mpd);
+		size_t rtuRequestProcessing(MbshProcData& mpd);
 
 	private:
 		struct SignalState
@@ -99,15 +101,12 @@ namespace Gateway
 		void logRtuRequest(MbshProcData& mpd);
 		void logRtuReply(MbshProcData& mpd);
 
-		size_t asciiRequestProcessing(size_t bytesReceived);
-		size_t rtuRequestProcessing(size_t bytesReceived);
-
 		size_t onFnReadHoldingRegisters(MbshProcData& mpd);
 
 		Modbus::TcpFrame& getTcpRequestRef(MbshProcData& mpd);
 		Modbus::TcpFrame& getTcpReplyRef(MbshProcData& mpd);
 
-		int onAsciiFnReadHoldingRegisters(MbshProcData& mpd);
+		size_t onAsciiFnReadHoldingRegisters(quint16 regsStartAddr, quint16 regsCount, MbshProcData& mpd);
 
 		bool isHexDigits(const quint8* ptr, int len) const;
 		quint8 asciiDecodeXX(const quint8* ptr, bool* ok) const;
@@ -137,9 +136,8 @@ namespace Gateway
 		Modbus::UdpSlaveThread* m_udpSlaveThread1 = nullptr;
 		Modbus::UdpSlaveThread* m_udpSlaveThread2 = nullptr;
 
-		inline static const int ASCII_REG_VALUES_COUNT = 256;
-
-		RegisterValue m_asciiRegValues[ASCII_REG_VALUES_COUNT];
+		inline static const int BIN_DATA_SIZE = 1024;
+		quint8 m_binData[BIN_DATA_SIZE];
 
 		//
 

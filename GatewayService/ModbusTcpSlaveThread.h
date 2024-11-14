@@ -45,7 +45,7 @@ namespace Modbus
 			tcp::socket m_socket;
 			QString m_peerAddr;
 
-			static inline const size_t RECV_BUFFER_SIZE = 1024;
+			static inline const size_t RECV_BUFFER_SIZE = 256;
 			quint8 m_recvBuffer[RECV_BUFFER_SIZE];
 
 			static inline const size_t SEND_BUFFER_SIZE = 1024;

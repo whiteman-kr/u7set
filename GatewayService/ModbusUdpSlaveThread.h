@@ -5,6 +5,7 @@
 #include <QtTypes>
 #include "../OnlineLib/CircularLogger.h"
 #include "ModbusProtocol.h"
+#include "ModbusSlaveGatewayHandler.h"
 
 using namespace asio;
 using namespace asio::ip;
@@ -37,10 +38,11 @@ namespace Modbus
 
 		void startReceive();
 		void onReceiveData(const error_code& error, size_t bytesReceived);
-		void initIndexes();
+		void restartScan();
 
 	private:
-		HostAddressPort m_recvIP;
+		HostAddressPort m_listeningIP;
+		udp::endpoint m_listeningEndpoint;
 		::Gateway::ModbusSlaveHandler& m_handler;
 		CircularLoggerShared m_log;
 
@@ -53,15 +55,23 @@ namespace Modbus
 		std::jthread* m_thread = nullptr;
 		std::stop_token m_stopToken;
 
-		udp::endpoint m_recvEndpoint;
 		udp::socket* m_socket = nullptr;
 		bool m_socketBound = false;
+		udp::endpoint m_recvFromEndpoint;
 
-		static const size_t RECV_BUFFER_SIZE = 1024;
+		static const int TEMP_BUFFER_SIZE = 512;
+		quint8 m_tempBuffer[TEMP_BUFFER_SIZE];
+
+		static const int RECV_BUFFER_SIZE = 256;
 		quint8 m_recvBuffer[RECV_BUFFER_SIZE];
-		udp::endpoint m_recvFromIP;
-		int m_recvBufferIndex = 0;
-		int m_startMarkerIndex = -1;
+
+		int m_delimiterCount = 0;
+		int m_recvBufferIndex = -1;
+
+		static const int SEND_BUFFER_SIZE = 2048;
+		quint8 m_sendBuffer[SEND_BUFFER_SIZE];
+
+		Gateway::MbshProcData m_mpd;
 	};
 
 }

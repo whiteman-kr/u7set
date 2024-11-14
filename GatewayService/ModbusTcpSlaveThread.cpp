@@ -15,16 +15,6 @@ namespace Modbus
 	{
 		m_connectionInstance++;
 		m_connNo = m_connectionInstance;
-
-		//
-
-		m_mpd.connNo = m_connNo;
-
-		m_mpd.recvBuffer = m_recvBuffer;
-		m_mpd.recvBufferSize = RECV_BUFFER_SIZE;
-
-		m_mpd.sendBuffer = m_sendBuffer;
-		m_mpd.sendBufferSize = SEND_BUFFER_SIZE;
 	}
 
 	tcp::socket& TcpSlaveThread::Connection::socket()
@@ -49,7 +39,6 @@ namespace Modbus
 		if (m_firstStartReceive)
 		{
 			m_peerAddr = peerAddress();
-			m_mpd.peerAddr = m_peerAddr;
 
 			asio::ip::tcp::no_delay option(true);
 			m_socket.set_option(option);
@@ -96,11 +85,21 @@ namespace Modbus
 			return;
 		}
 
-		// other fields of m_mpd struct already initialized!
-		//
+		// MbshProcData structure filling
+
+		m_mpd.connNo = m_connNo;
+		m_mpd.peerAddr = m_peerAddr;
 		m_mpd.error = error;
+
+		m_mpd.recvBuffer = m_recvBuffer;
+		m_mpd.recvBufferSize = RECV_BUFFER_SIZE;
 		m_mpd.bytesReceived = bytesReceived;
+
+		m_mpd.sendBuffer = m_sendBuffer;
+		m_mpd.sendBufferSize = SEND_BUFFER_SIZE;
 		m_mpd.sendBytes = 0;
+
+		//
 
 		size_t sendBytes = m_handler.tcpRequestProcessing(m_mpd);
 

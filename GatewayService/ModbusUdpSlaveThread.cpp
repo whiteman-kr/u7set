@@ -5,12 +5,12 @@ namespace Modbus
 {
 
 	UdpSlaveThread::UdpSlaveThread(const HostAddressPort& listeningIP, ::Gateway::ModbusSlaveHandler& handler) :
-		m_recvIP(listeningIP),
+		m_listeningIP(listeningIP),
 		m_handler(handler),
 		m_log(handler.log())
 	{
-		m_recvEndpoint = udp::endpoint(ip::address::from_string(m_recvIP.addressStr().toStdString()),
-												m_recvIP.port());
+		m_listeningEndpoint = udp::endpoint(ip::address::from_string(m_listeningIP.addressStr().toStdString()),
+												m_listeningIP.port());
 	}
 
 	void UdpSlaveThread::start()
@@ -90,6 +90,11 @@ namespace Modbus
 			return;
 		}
 
+		if (m_socket == nullptr)
+		{
+			createAndBindSocket();
+		}
+
 		startTimer();
 	}
 
@@ -133,14 +138,14 @@ namespace Modbus
 		{
 			m_socketBound = false;
 
-			m_socket->bind(m_recvEndpoint, error);
+			m_socket->bind(m_listeningEndpoint, error);
 
 			if (!error)
 			{
 				m_socketBound = true;
 
 				DEBUG_LOG_MSG(m_log, QString("Gateway %1 listening socket created and bound to %2").
-											arg(m_handler.gatewayID(), m_recvIP.addressPortStr()));
+											arg(m_handler.gatewayID(), m_listeningIP.addressPortStr()));
 
 				asio::socket_base::receive_buffer_size rxBufferSize(1024);
 
@@ -157,14 +162,14 @@ namespace Modbus
 				DEBUG_LOG_MSG(m_log, QString("Gateway %1 listening socket receive buffer size %2 bytes").
 											arg(m_handler.gatewayID()).
 											arg(rxBufferSize.value()));
-				initIndexes();
+				restartScan();
 				startReceive();
 			}
 			else
 			{
 				DEBUG_LOG_MSG(m_log, QString("Gateway %1 error binding listening socket to %2: %3").
 											arg(m_handler.gatewayID()).
-											arg(m_recvIP.addressPortStr()).
+											arg(m_listeningIP.addressPortStr()).
 											arg(QString::fromStdString(error.message())));
 
 				closeSocket();
@@ -202,7 +207,7 @@ namespace Modbus
 
 		m_socketBound = false;
 
-		initIndexes();
+		restartScan();
 	}
 
 	void UdpSlaveThread::startReceive()
@@ -213,10 +218,10 @@ namespace Modbus
 			return;
 		}
 
-		m_socket->async_receive_from(asio::buffer(m_recvBuffer + m_recvBufferIndex, RECV_BUFFER_SIZE), m_recvFromIP,
-									 bind(&UdpSlaveThread::onReceiveData, this,
-										  std::placeholders::_1,
-										  std::placeholders::_2));
+		m_socket->async_receive_from(asio::buffer(m_tempBuffer, TEMP_BUFFER_SIZE),
+													m_recvFromEndpoint,
+													bind(&UdpSlaveThread::onReceiveData, this,
+															std::placeholders::_1, std::placeholders::_2));
 	}
 
 	void UdpSlaveThread::onReceiveData(const error_code& error, size_t bytesReceived)
@@ -225,7 +230,7 @@ namespace Modbus
 		{
 			return;
 		}
-
+		
 		if (error)
 		{
 			DEBUG_LOG_MSG(m_log, QString("Gateway %1 data receive error '%2' (%3)").
@@ -234,11 +239,113 @@ namespace Modbus
 			closeSocket();
 			return;
 		}
+
+/*		if (bytesReceived < TEMP_BUFFER_SIZE - 1)
+		{
+			m_tempBuffer[bytesReceived] = 0;
+
+			QString recvStr(QString(reinterpret_cast<const char*>(m_tempBuffer)));
+
+			qDebug() << C_STR(QString("receive %1 from %2:%3: %4").
+							  arg(bytesReceived).
+								arg(QString::fromStdString(m_recvFromEndpoint.address().to_string())).
+							  arg(m_recvFromEndpoint.port()).
+							  arg(recvStr));
+		}*/
+
+		for(size_t i = 0; i < bytesReceived; i++)
+		{
+			if (i >= TEMP_BUFFER_SIZE ||
+				m_recvBufferIndex >= RECV_BUFFER_SIZE)
+			{
+				restartScan();
+				break;
+			}
+
+			quint8 ch = m_tempBuffer[i];
+
+			bool skipChar = false;
+
+			switch(ch)
+			{
+			case ASCII_START_MARKER:
+				m_recvBufferIndex = 0;			// start copy Modbus ASCII request into m_recvBuffer
+				m_delimiterCount = 0;
+				break;
+
+			case ASCII_END_MARKER_1:
+				if (m_recvBufferIndex >= 0 && m_delimiterCount == 0)
+				{
+					m_delimiterCount = 1;
+				}
+				else
+				{
+					restartScan();
+					skipChar = true;
+				}
+				break;
+
+			case ASCII_END_MARKER_2:
+				if (m_recvBufferIndex >= 0 && m_delimiterCount == 1)
+				{
+					m_delimiterCount = 2;
+				}
+				else
+				{
+					restartScan();
+					skipChar = true;
+				}
+				break;
+			}
+
+			if (skipChar)
+			{
+				continue;
+			}
+
+			if (m_recvBufferIndex >= 0)
+			{
+				m_recvBuffer[m_recvBufferIndex] = ch;
+				m_recvBufferIndex++;
+
+				if (m_delimiterCount == 2)
+				{
+					// MbshProcData structure filling
+
+					m_mpd.connNo = 1;
+					m_mpd.peerAddr;
+					m_mpd.error;
+
+					m_mpd.recvBuffer = m_recvBuffer;
+					m_mpd.recvBufferSize = RECV_BUFFER_SIZE;
+					m_mpd.bytesReceived = m_recvBufferIndex;
+
+					m_mpd.sendBuffer = m_sendBuffer;
+					m_mpd.sendBufferSize = SEND_BUFFER_SIZE;
+					m_mpd.sendBytes = 0;
+
+					//
+
+					size_t sendBytes = m_handler.asciiRequestProcessing(m_mpd);
+
+					if (sendBytes > 0)
+					{
+						m_socket->send_to(asio::buffer(m_sendBuffer, sendBytes), m_recvFromEndpoint);
+					}
+
+					restartScan();
+				}
+			}
+		}
+
+		//m_socket->send_to(asio::buffer(m_tempBuffer + m_tempBufferIndex, bytesReceived), m_recvFromEndpoint);
+
+		startReceive();
 	}
 
-	void UdpSlaveThread::initIndexes()
+	void UdpSlaveThread::restartScan()
 	{
-		m_recvBufferIndex = 0;
-		m_startMarkerIndex = -1;
+		m_recvBufferIndex = -1;
+		m_delimiterCount = 0;
 	}
 }

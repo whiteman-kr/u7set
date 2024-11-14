@@ -14,10 +14,11 @@ namespace Modbus
 
 	inline const int REGISTER_SIZE_BYTES = sizeof(RegisterValue);
 
-	inline const unsigned char ASCII_START_MARKER = ':';
+	inline const quint8 ASCII_START_MARKER = ':';
 	inline const int ASCII_START_MARKER_LEN = 1;
 
-	inline const unsigned char ASCII_END_MARKER[2] = { 0x0D, 0x0A };	// CR + LF
+	inline const quint8 ASCII_END_MARKER_1 = 0x0D;			// CR
+	inline const quint8 ASCII_END_MARKER_2 = 0x0A;			// LF
 	inline const int ASCII_END_MARKER_LEN = 2;
 
 	inline const int ASCII_DEVICE_ID_LEN = 2;
@@ -43,6 +44,18 @@ namespace Modbus
 		RegisterValue regValues[FN03_MAX_REGS_COUNT];			// registers values
 	};
 
+	struct Message
+	{
+		quint8	modbusDeviceID = 0;
+		quint8	functionCode = 0;			// FC_* values
+
+		union
+		{
+			Fn03_ReadHoldingRegisters_Request fn03Request;
+			Fn03_ReadHoldingRegisters_Reply fn03Reply;
+		};
+	};
+
 	struct TcpHeader
 	{
 		quint16 transactionID = 0;
@@ -55,21 +68,12 @@ namespace Modbus
 	struct TcpFrame
 	{
 		TcpHeader header;
-
-		quint8	modbusDeviceID = 0;
-		quint8	functionCode = 0;			// FC_* values
-
-		union
-		{
-			Fn03_ReadHoldingRegisters_Request fn03Request;
-			Fn03_ReadHoldingRegisters_Reply fn03Reply;
-		};
-
-		void reverseBytes();
+		Message msg;
 	};
+
 
 #pragma pack(pop)
 
-	quint8 LRC(const quint8* data, int dataLength);		// Modbus ASCII mode LRC calculation
-	quint16 CRC16(const quint8 *data, int dataLength);		// Modbus RTU mode CRC16 calculation
+	quint8 LRC(const quint8* data, size_t dataLength);			// Modbus ASCII mode LRC calculation
+	quint16 CRC16(const quint8 *data, size_t dataLength);		// Modbus RTU mode CRC16 calculation
 }
