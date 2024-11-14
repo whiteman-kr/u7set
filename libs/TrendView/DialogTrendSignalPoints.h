@@ -39,10 +39,11 @@ public:
 	TrendLib::TrendStateItem stateItemByIndex(int index, int* oneHourIndex, int* recordIndex, int* stateIndex, bool* ok) const;
 
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+
+	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
 private:
-	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 
@@ -82,6 +83,8 @@ private slots:
 	void on_tableView_doubleClicked(const QModelIndex& index);
 
 private:
+	bool eventFilter(QObject* obj, QEvent* event) override;
+	void copySelection();
 	void updatePoints();
 
 private:

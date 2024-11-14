@@ -86,7 +86,7 @@ namespace TrendLib
 		void fillAppSignalLists();
 		void fillSignalList();
 
-		void addSignal(const TrendSignalParam& signal);
+		bool addSignal(const TrendSignalParam& signal);
 		void removeSelectedSignal();
 
 		bool trendSignalsHasSignalId(QString signalId, QString archiveServerShortId);

@@ -128,6 +128,9 @@
        </item>
        <item row="6" column="0" rowspan="7" colspan="2">
         <widget class="QTreeView" name="filteredSignals">
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
          <property name="rootIsDecorated">
           <bool>false</bool>
          </property>
@@ -283,6 +286,9 @@
        </item>
        <item row="4" column="0" colspan="3">
         <widget class="QTreeWidget" name="archiveSignals">
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
          <property name="rootIsDecorated">
           <bool>false</bool>
          </property>

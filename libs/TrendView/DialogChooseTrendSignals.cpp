@@ -345,16 +345,6 @@ namespace TrendLib
 	{
 		init(signalHasTag, std::move(trendSignals), acceptedSignals, archiveServers);
 
-		QObject::connect(ui->trendSignals, &QTreeWidget::itemSelectionChanged, [this]()
-			{
-				QList<QTreeWidgetItem*> selectedItems = ui->trendSignals->selectedItems();
-				if (selectedItems.isEmpty() == false)
-				{
-					QTreeWidgetItem* selectedItem = selectedItems.first();
-					ui->trendSignals->setCurrentItem(selectedItem);
-				}
-			});
-
 		return;
 	}
 
@@ -568,19 +558,19 @@ namespace TrendLib
 		return;
 	}
 
-	void DialogChooseTrendSignals::addSignal(const TrendSignalParam& signal)
+	bool DialogChooseTrendSignals::addSignal(const TrendSignalParam& signal)
 	{
 		if (trendSignalsHasSignalId(signal.signalId(), signal.archiveServerShortId()) == true)
 		{
 			// SignaID already presnt in TrenSignals
 			//
-			return;
+			return true;
 		}
 
 		if (ui->trendSignals->topLevelItemCount() >= 16)
 		{
 			QMessageBox::critical(this, qAppName(), tr("The maximum number of signals reached."));
-			return;
+			return false;
 		}
 
 		QString signalType;
@@ -614,24 +604,27 @@ namespace TrendLib
 		item->setToolTip(3, toolTip);
 
 		ui->trendSignals->addTopLevelItem(item);
-		ui->trendSignals->setCurrentItem(item, QItemSelectionModel::SelectCurrent);
+		item->setSelected(true);
 
-		disableControls();
-
-		return;
+		return true;
 	}
 
 	void DialogChooseTrendSignals::removeSelectedSignal()
 	{
 		Q_ASSERT(ui->trendSignals);
 
-		QModelIndex currentIndex = ui->trendSignals->currentIndex();
-
-		if (currentIndex.isValid() == true)
+		do
 		{
-			QTreeWidgetItem* takenItem = ui->trendSignals->takeTopLevelItem(currentIndex.row());
+			const auto& selectedIndexes = ui->trendSignals->selectionModel()->selectedRows();
+
+			if (selectedIndexes.isEmpty() == true || selectedIndexes[0].isValid() == false)
+			{
+				break;
+			}
+
+			QTreeWidgetItem* takenItem = ui->trendSignals->takeTopLevelItem(selectedIndexes[0].row());
 			delete takenItem;
-		}
+		} while (true);
 
 		disableControls();
 		return;
@@ -671,7 +664,7 @@ namespace TrendLib
 
 		// --
 		//
-		bool enableAddButton = true;
+		bool enableAddButton = false;
 		bool enableRemoveButton = true;
 		bool enableRemoveAll = true;
 
@@ -681,26 +674,29 @@ namespace TrendLib
 		// Add Signal Button
 		//
 		{
-			QModelIndex index = ui->filteredSignals->currentIndex();
+			auto indexes = ui->filteredSignals->selectionModel()->selectedRows();
+			for (const auto& index : indexes)
+			{
+				Q_ASSERT(index.isValid());
 
-			if (index.isValid() == true)
-			{
-				const TrendLib::TrendSignalParam& signal = fileterModel->signalByRow(index.row());
-				enableAddButton = !trendSignalsHasSignalId(signal.signalId(), signal.archiveServerShortId());
-			}
-			else
-			{
-				enableAddButton = false;
+				if (index.isValid() == true)
+				{
+					const TrendLib::TrendSignalParam& signal = fileterModel->signalByRow(index.row());
+					enableAddButton |= !trendSignalsHasSignalId(signal.signalId(), signal.archiveServerShortId());
+				}
+				else
+				{
+					enableAddButton = false;
+				}
 			}
 		}
 
 		// Remove Signal Button
 		//
 		{
-			QModelIndex index = ui->trendSignals->currentIndex();
+			auto indexes = ui->trendSignals->selectionModel()->selectedRows();
 
-			if (index.isValid() == false ||
-				index.row() < 0)
+			if (indexes.isEmpty() == true)
 			{
 				enableRemoveButton = false;
 			}
@@ -719,12 +715,19 @@ namespace TrendLib
 		// Move up/down.
 		//
 		{
-			QModelIndex index = ui->trendSignals->currentIndex();
+			auto selectedItems = ui->trendSignals->selectionModel()->selectedRows();
 
-			if (index.isValid() == true)
+			std::vector<int> selectedRows;
+			for (const auto& index : selectedItems)
 			{
-				enableMoveUp = index.row() > 0;
-				enableMoveDown = (index.row() + 1) < ui->trendSignals->topLevelItemCount();
+				selectedRows.push_back(index.row());
+			}
+			std::sort(selectedRows.begin(), selectedRows.end(), std::less());
+
+			if (selectedRows.empty() == false)
+			{
+				enableMoveUp = selectedRows[0] > 0;
+				enableMoveDown = selectedRows[selectedRows.size() - 1] < ui->trendSignals->topLevelItemCount() - 1;
 			}
 		}
 
@@ -747,22 +750,25 @@ namespace TrendLib
 
 	void DialogChooseTrendSignals::on_addSignalButton_clicked()
 	{
-		QModelIndex index = ui->filteredSignals->currentIndex();
-		if (index.isValid() == false)
-		{
-			return;
-		}
-
-		const FilteredTrendSignalsModel* model = dynamic_cast<const FilteredTrendSignalsModel*>(index.model());
-
+		const FilteredTrendSignalsModel* model = dynamic_cast<FilteredTrendSignalsModel*>(ui->filteredSignals->model());
 		if (model == nullptr)
 		{
-			Q_ASSERT(dynamic_cast<const FilteredTrendSignalsModel*>(index.model()) != nullptr);
+			Q_ASSERT(model);
 			return;
 		}
 
-		const auto& signal = model->signalByRow(index.row());
-		addSignal(signal);
+		auto indexes = ui->filteredSignals->selectionModel()->selectedRows();
+		for (const auto& index : indexes)
+		{
+			Q_ASSERT(index.isValid());
+
+			const auto& signal = model->signalByRow(index.row());
+			if (addSignal(signal) == false) 
+			{
+				break;
+			}
+		}
+		disableControls();
 
 		return;
 	}
@@ -852,23 +858,27 @@ namespace TrendLib
 		return;
 	}
 
-	void DialogChooseTrendSignals::on_filteredSignals_doubleClicked(const QModelIndex& index)
+	void DialogChooseTrendSignals::on_filteredSignals_doubleClicked(const QModelIndex& /*index*/)
 	{
-		if (index.isValid() == false)
-		{
-			return;
-		}
-
-		const FilteredTrendSignalsModel* model = dynamic_cast<const FilteredTrendSignalsModel*>(index.model());
-
+		const FilteredTrendSignalsModel* model = dynamic_cast<FilteredTrendSignalsModel*>(ui->filteredSignals->model());
 		if (model == nullptr)
 		{
-			Q_ASSERT(dynamic_cast<const FilteredTrendSignalsModel*>(index.model()) != nullptr);
+			Q_ASSERT(model);
 			return;
 		}
 
-		const auto signal = model->signalByRow(index.row());
-		addSignal(signal);
+		auto indexes = ui->filteredSignals->selectionModel()->selectedRows();
+		for (const auto& index : indexes)
+		{
+			Q_ASSERT(index.isValid());
+
+			const auto& signal = model->signalByRow(index.row());
+			if (addSignal(signal) == false)
+			{
+				break;
+			}
+		}
+		disableControls();
 
 		return;
 	}
@@ -959,18 +969,30 @@ namespace TrendLib
 	{
 		Q_ASSERT(ui->trendSignals);
 
-		QModelIndex currentIndex = ui->trendSignals->currentIndex();
+		auto selectedItems = ui->trendSignals->selectionModel()->selectedRows();
 
-		if (currentIndex.isValid() == true && currentIndex.row() > 0)
+		std::vector<int> selectedRows;
+		for (const auto& index : selectedItems)
 		{
+			selectedRows.push_back(index.row());
+		}
+		std::sort(selectedRows.begin(), selectedRows.end(), std::less());
+
+		for (int row : selectedRows)
+		{
+			if (row == 0)
+			{
+				break;
+			}
+
 			// Reorder item.
 			//
-			QTreeWidgetItem* itemToMove = ui->trendSignals->takeTopLevelItem(currentIndex.row());
-			ui->trendSignals->insertTopLevelItem(currentIndex.row() - 1, itemToMove);
+			QTreeWidgetItem* itemToMove = ui->trendSignals->takeTopLevelItem(row);
+			ui->trendSignals->insertTopLevelItem(row - 1, itemToMove);
 
 			// Select moved item.
 			//
-			ui->trendSignals->setCurrentItem(itemToMove);
+			itemToMove->setSelected(true);
 		}
 
 		disableControls();
@@ -982,18 +1004,30 @@ namespace TrendLib
 	{
 		Q_ASSERT(ui->trendSignals);
 
-		QModelIndex currentIndex = ui->trendSignals->currentIndex();
+		auto selectedItems = ui->trendSignals->selectionModel()->selectedRows();
 
-		if (currentIndex.isValid() == true && (currentIndex.row() + 1) < ui->trendSignals->topLevelItemCount())
+		std::vector<int> selectedRows;
+		for (const auto& index : selectedItems)
 		{
+			selectedRows.push_back(index.row());
+		}
+		std::sort(selectedRows.begin(), selectedRows.end(), std::greater());
+
+		for (int row : selectedRows)
+		{
+			if ((row + 1) >= ui->trendSignals->topLevelItemCount())
+			{
+				break;
+			}
+
 			// Reorder item.
 			//
-			QTreeWidgetItem* itemToMove = ui->trendSignals->takeTopLevelItem(currentIndex.row());
-			ui->trendSignals->insertTopLevelItem(currentIndex.row() + 1, itemToMove);
+			QTreeWidgetItem* itemToMove = ui->trendSignals->takeTopLevelItem(row);
+			ui->trendSignals->insertTopLevelItem(row + 1, itemToMove);
 
 			// Select moved item.
 			//
-			ui->trendSignals->setCurrentItem(itemToMove);
+			itemToMove->setSelected(true);
 		}
 
 		disableControls();
