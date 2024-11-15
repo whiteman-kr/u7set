@@ -172,6 +172,13 @@ namespace Gateway
 		QByteArray m_fileData;
 	};
 
+	struct RegisterPropValue
+	{
+		int lineNo = 0;
+		QString labelPropName;
+		double value;
+	};
+
 	class SignalList
 	{
 	public:
