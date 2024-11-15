@@ -536,8 +536,19 @@ namespace Gateway
 	}
 
 	ParseResult Parser::appendAddressSignalID(SignalListShared signalList,
-													  const ParseLineResult& plr, bool appendAddr)
+												const ParseLineResult& plr, bool appendAddr)
 	{
+		bool isPropValue = false;
+		double propValue = 0;
+
+		ParseResult pr = parsePropValue(plr, &isPropValue, &propValue);
+
+		if (isPropValue)
+		{
+			;
+			return pr;
+		}
+
 		QString appSignalID = plr.value.toString().trimmed();
 
 		const AppSignal* s = m_signalSetAdapter.getAppSignal(appSignalID);
@@ -548,7 +559,7 @@ namespace Gateway
 			return ParseResult::Error;
 		}
 
-		ParseResult pr = signalList->checkSignalTypeAndFormat(plr.lineNo, s, m_log);
+		pr = signalList->checkSignalTypeAndFormat(plr.lineNo, s, m_log);
 
 		if (pr != ParseResult::Ok)
 		{
@@ -565,6 +576,55 @@ namespace Gateway
 		}
 
 		return pr;
+	}
+
+	ParseResult Parser::parsePropValue(const ParseLineResult& plr, bool* isPropValue, double* propValue)
+	{
+		TEST_PTR_RETURN_VALUE(isPropValue, ParseResult::CriticalError);
+		TEST_PTR_RETURN_VALUE(propValue, ParseResult::CriticalError);
+
+		static const QString PROP_STR("prop(");
+		static const int PROP_STR_LEN = PROP_STR.length();
+		static const QString PROP_VALUE_SYNTAX_ERROR("property value syntax error, use: prop(item_label.propName)");
+
+		QString str = plr.value.toString().trimmed();
+
+		if (str.length() < PROP_STR_LEN)
+		{
+			*isPropValue = false;
+			return ParseResult::Ok;
+		}
+
+		if (str.mid(0, PROP_STR_LEN).toLower() != PROP_STR)
+		{
+			*isPropValue = false;
+			return ParseResult::Ok;
+		}
+
+		*isPropValue = true;
+
+		if (str.endsWith(")") == false)
+		{
+			m_log.logError(plr.lineNo, PROP_VALUE_SYNTAX_ERROR);
+			return ParseResult::Error;
+		}
+
+		QString labelPropName = str.mid(PROP_STR_LEN, str.length() - PROP_STR_LEN - 1);
+
+		QStringList sl = labelPropName.split(Separator::DOT, Qt::SkipEmptyParts);
+
+		if (sl.size() != 2)
+		{
+			m_log.logError(plr.lineNo, PROP_VALUE_SYNTAX_ERROR);
+			return ParseResult::Error;
+		}
+
+		QString label = sl[0];
+		QString propName = sl[1];
+
+		m_log.logWarning(plr.lineNo, QString("Property value detected %1.%2").arg(label).arg(propName));
+
+		return ParseResult::Ok;
 	}
 
 	bool Parser::parseLine(const QString& str, ParseLineResult* plr)

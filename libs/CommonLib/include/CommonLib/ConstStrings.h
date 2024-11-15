@@ -701,6 +701,7 @@ namespace Separator
 	inline const QString NEW_LINE("\n");
 	inline const QString CR("\r");					// Carriage Return
 	inline const QString LF("\n");					// Line Feed
+	inline const QString TAB("\t");					// Line Feed
 	inline const QString CR_LF("\r\n");
 	inline const QString UNDERSCORE("_");
 	inline const QString DOUBLE_QUOTES("\"");
