@@ -26,7 +26,24 @@ namespace VFrame30
 
 		ADD_PROPERTY_GET_SET_CAT(E::LineCap, PropertyNames::lineCapStart, PropertyNames::appearanceCategory, true, SchemaItemPath::lineCapStart, SchemaItemPath::setLineCapStart);
 		ADD_PROPERTY_GET_SET_CAT(E::LineCap, PropertyNames::lineCapEnd, PropertyNames::appearanceCategory, true, SchemaItemPath::lineCapEnd, SchemaItemPath::setLineCapEnd);
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineCapFactor, PropertyNames::appearanceCategory, true, SchemaItemPath::lineCapFactor, SchemaItemPath::setLineCapFactor);
+		
+		
+		
+		// lineCapFactor is not visible in the properties, but it is saved in the file
+		// It is obsoloete and replaced by lineCapSize
+		ADD_PROPERTY_GET_SET_CAT(double,
+								 PropertyNames::lineCapFactor,
+								 PropertyNames::appearanceCategory,
+								 false,
+								 SchemaItemPath::lineCapFactor,
+								 SchemaItemPath::setLineCapFactor);
+
+		ADD_PROPERTY_GET_SET_CAT(double,
+								 PropertyNames::lineCapSize,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemPath::lineCapSize,
+								 SchemaItemPath::setLineCapSize);
 
 		// --
 		//
@@ -63,7 +80,15 @@ namespace VFrame30
 
 		path->set_linecapstart(static_cast<int>(m_lineCapStart));
 		path->set_linecapend(static_cast<int>(m_lineCapEnd));
-		path->set_linecapfactor(m_lineCapFactor);
+		
+		if (m_useLineCapSize == false)
+		{
+			path->set_linecapfactorobsolete(m_lineCapFactorObsolete);
+		}
+		else
+		{
+			path->set_linecapsize(m_lineCapSize);
+		}
 
 		return true;
 	}
@@ -102,7 +127,26 @@ namespace VFrame30
 
 		m_lineCapStart = static_cast<E::LineCap>(path.linecapstart());
 		m_lineCapEnd = static_cast<E::LineCap>(path.linecapend());
-		m_lineCapFactor = path.linecapfactor();
+		
+		m_useLineCapSize = path.has_linecapsize();
+		if (m_useLineCapSize == false)
+		{
+			m_lineCapFactorObsolete = path.linecapfactorobsolete();
+
+			// Obsolete way to set cap size, using lineCapFactor
+			//
+			setPropertyVisible(PropertyNames::lineCapFactor, true);
+			setPropertyVisible(PropertyNames::lineCapSize, false);
+		}
+		else
+		{
+			m_lineCapSize = path.linecapsize();
+
+			// New way to set cap size, using lineCapSize
+			//
+			setPropertyVisible(PropertyNames::lineCapFactor, false);
+			setPropertyVisible(PropertyNames::lineCapSize, true);
+		}
 
 		return true;
 	}
@@ -158,7 +202,15 @@ namespace VFrame30
 			p->setPen(Qt::NoPen);
 			p->setBrush(m_lineColor);
 
-			SchemaItemLine::drawLineCap(p, itemUnit(), p1, angleRadStart, m_weight, m_lineCapStart, m_lineCapFactor);
+			if (m_useLineCapSize == false)
+			{
+				SchemaItemLine::drawLineCapFactor(p, itemUnit(), p1, angleRadStart, m_weight, m_lineCapStart, m_lineCapFactorObsolete);
+			}
+			else
+			{
+				SchemaItemLine::drawLineCapSize(p, itemUnit(), p1, angleRadStart, m_lineCapStart, m_lineCapSize);
+			}
+
 		}
 
 		if (m_lineCapEnd != E::LineCap::NoCap && poinlist.size() > 1)
@@ -171,7 +223,14 @@ namespace VFrame30
 			p->setPen(Qt::NoPen);
 			p->setBrush(m_lineColor);
 
-			SchemaItemLine::drawLineCap(p, itemUnit(), p2, angleRadEnd, m_weight, m_lineCapEnd, m_lineCapFactor);
+			if (m_useLineCapSize == false)
+			{
+				SchemaItemLine::drawLineCapFactor(p, itemUnit(), p2, angleRadEnd, m_weight, m_lineCapEnd, m_lineCapFactorObsolete);
+			}
+			else
+			{
+				SchemaItemLine::drawLineCapSize(p, itemUnit(), p2, angleRadEnd, m_lineCapEnd, m_lineCapSize);
+			}
 		}
 
 		p->setRenderHint(QPainter::Antialiasing, al);			// Restore antialising
@@ -269,14 +328,42 @@ namespace VFrame30
 
 	double SchemaItemPath::lineCapFactor() const
 	{
-		return m_lineCapFactor;
+		return m_lineCapFactorObsolete;
 	}
 
 	void SchemaItemPath::setLineCapFactor(double value)
 	{
-		m_lineCapFactor = value;
+		m_lineCapFactorObsolete = value;
 	}
 
+	double SchemaItemPath::lineCapSize() const
+	{
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_lineCapSize);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(m_lineCapSize, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
+		}
+	}
 
+	void SchemaItemPath::setLineCapSize(double value)
+	{
+		if (value < 0)
+		{
+			value = 0;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			m_weight = VFrame30::RoundDisplayPoint(value);
+		}
+		else
+		{
+			m_lineCapSize = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+		}
+	}
 }
 

@@ -1636,6 +1636,17 @@ public:
 
 	std::vector<std::pair<int, QString>> enumValues(const QString& caption);
 
+	bool setPropertyVisible(const QString& caption, bool visible) 
+	{
+		auto prop = propertyByCaption(caption);
+		if (prop == nullptr)
+		{
+			return false;
+		}
+		prop->setVisible(visible);
+		return true;
+	}
+
 	//
 	// Parse specific properties
 	//

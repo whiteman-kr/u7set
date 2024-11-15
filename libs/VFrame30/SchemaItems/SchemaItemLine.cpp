@@ -25,7 +25,17 @@ namespace VFrame30
 
 		ADD_PROPERTY_GET_SET_CAT(E::LineCap, PropertyNames::lineCapStart, PropertyNames::appearanceCategory, true, SchemaItemLine::lineCapStart, SchemaItemLine::setLineCapStart);
 		ADD_PROPERTY_GET_SET_CAT(E::LineCap, PropertyNames::lineCapEnd, PropertyNames::appearanceCategory, true, SchemaItemLine::lineCapEnd, SchemaItemLine::setLineCapEnd);
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineCapFactor, PropertyNames::appearanceCategory, true, SchemaItemLine::lineCapFactor, SchemaItemLine::setLineCapFactor);
+		
+		// lineCapFactor is not visible in the properties, but it is saved in the file
+		// It is obsoloete and replaced by lineCapSize
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineCapFactor, PropertyNames::appearanceCategory, false, SchemaItemLine::lineCapFactor, SchemaItemLine::setLineCapFactor);
+
+		ADD_PROPERTY_GET_SET_CAT(double,
+								 PropertyNames::lineCapSize,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemLine::lineCapSize,
+								 SchemaItemLine::setLineCapSize);
 
 		// --
 		//
@@ -62,7 +72,15 @@ namespace VFrame30
 
 		lineMessage->set_linecapstart(static_cast<int>(m_lineCapStart));
 		lineMessage->set_linecapend(static_cast<int>(m_lineCapEnd));
-		lineMessage->set_linecapfactor(m_lineCapFactor);
+		
+		if (m_useLineCapSize == false) 
+		{
+			lineMessage->set_linecapfactorobsolete(m_lineCapFactorObsolete);
+		}
+		else 
+		{
+			lineMessage->set_linecapsize(m_lineCapSize);
+		}
 
 		return true;
 	}
@@ -100,7 +118,26 @@ namespace VFrame30
 
 		m_lineCapStart = static_cast<E::LineCap>(lineMessage.linecapstart());
 		m_lineCapEnd = static_cast<E::LineCap>(lineMessage.linecapend());
-		m_lineCapFactor = lineMessage.linecapfactor();
+		
+		m_useLineCapSize = lineMessage.has_linecapsize();
+		if (m_useLineCapSize == false)
+		{
+			m_lineCapFactorObsolete = lineMessage.linecapfactorobsolete();
+
+			// Obsolete way to set cap size, using lineCapFactor
+			//
+			setPropertyVisible(PropertyNames::lineCapFactor, true);
+			setPropertyVisible(PropertyNames::lineCapSize, false);
+		}
+		else 
+		{
+			m_lineCapSize = lineMessage.linecapsize();
+
+			// New way to set cap size, using lineCapSize
+			//
+			setPropertyVisible(PropertyNames::lineCapFactor, false);
+			setPropertyVisible(PropertyNames::lineCapSize, true);
+		}
 
 		return true;
 	}
@@ -152,7 +189,14 @@ namespace VFrame30
 			p->setPen(Qt::NoPen);
 			p->setBrush(m_lineColor);
 
-			SchemaItemLine::drawLineCap(p, itemUnit(), p1, angleRadStart, lineWeight, m_lineCapStart, m_lineCapFactor);
+			if (m_useLineCapSize == false)
+			{
+				SchemaItemLine::drawLineCapFactor(p, itemUnit(), p1, angleRadStart, lineWeight, m_lineCapStart, m_lineCapFactorObsolete);
+			}
+			else
+			{
+				SchemaItemLine::drawLineCapSize(p, itemUnit(), p1, angleRadStart, m_lineCapStart, m_lineCapSize);
+			}
 		}
 
 		if (m_lineCapEnd != E::LineCap::NoCap)
@@ -162,7 +206,14 @@ namespace VFrame30
 			p->setPen(Qt::NoPen);
 			p->setBrush(m_lineColor);
 
-			SchemaItemLine::drawLineCap(p, itemUnit(), p2, angleRadEnd, lineWeight, m_lineCapEnd, m_lineCapFactor);
+			if (m_useLineCapSize == false)
+			{
+				SchemaItemLine::drawLineCapFactor(p, itemUnit(), p2, angleRadEnd, lineWeight, m_lineCapEnd, m_lineCapFactorObsolete);
+			}
+			else
+			{
+				SchemaItemLine::drawLineCapSize(p, itemUnit(), p2, angleRadEnd, m_lineCapEnd, m_lineCapSize);
+			}
 		}
 
 		p->setRenderHint(QPainter::Antialiasing, al);			// Restore antialising
@@ -172,7 +223,38 @@ namespace VFrame30
 
 	// Draw line cap, Pen and Brush MUST be already selected in the Painter
 	//
-	void SchemaItemLine::drawLineCap(QPainter* painter, SchemaUnit units, const QPointF& pos, double angleRad, double lineWeight, E::LineCap capStyle, double factor)
+	void SchemaItemLine::drawLineCapFactor(QPainter* painter,
+										   SchemaUnit units,
+										   const QPointF& pos,
+										   double angleRad,
+										   double lineWeight,
+										   E::LineCap capStyle,
+										   double factor)
+	{
+		if (painter == nullptr)
+		{
+			Q_ASSERT(painter);
+			return;
+		}
+
+		lineWeight = (units == SchemaUnit::Display) ?
+						 std::max(1.0, lineWeight) :
+						 std::max((1.0 / painter->device()->physicalDpiY() * painter->device()->devicePixelRatioF()), lineWeight);
+
+		double capHeight = lineWeight * 2.0 * factor;
+		capHeight = (units == SchemaUnit::Display) ? std::max(3.0, capHeight) : std::max(mm2in(0.3), capHeight);
+
+		return drawLineCapSize(painter, units, pos, angleRad, capStyle, capHeight);
+	}
+
+	// Draw line cap, Pen and Brush MUST be already selected in the Painter
+	//
+	void SchemaItemLine::drawLineCapSize(QPainter* painter,
+										   SchemaUnit units,
+										   const QPointF& pos,
+										   double angleRad,
+										   E::LineCap capStyle,
+										 double capSize)
 	{
 		if (painter == nullptr)
 		{
@@ -183,15 +265,7 @@ namespace VFrame30
 		const double x = pos.x();
 		const double y = pos.y();
 
-		lineWeight = (units == SchemaUnit::Display) ?
-						 std::max(1.0, lineWeight) :
-						 std::max((1.0 / painter->device()->physicalDpiY() * painter->device()->devicePixelRatioF()), lineWeight);
-
-		double capHeight = lineWeight * 2.0 * factor;
-		capHeight = (units == SchemaUnit::Display) ?
-						std::max(3.0, capHeight) :
-						std::max(mm2in(0.3), capHeight);
-
+		const double capHeight = capSize;
 		const double capHeightHalf = capHeight / 2.0;
 		const double capHeightThird = capHeight / 3.0;
 		const double capHeightTwoThird = capHeight * 2.0 / 3.0;
@@ -202,10 +276,7 @@ namespace VFrame30
 			break;
 		case E::LineCap::BarCap:
 			{
-				QPolygonF pol{QRectF(x - capHeightHalf,
-									 y - capHeightHalf,
-									 capHeight,
-									 capHeight)};
+				QPolygonF pol{QRectF(x - capHeightHalf * 0.8, y - capHeightHalf * 0.8, capHeight * 0.8, capHeight * 0.8)};
 
 				QTransform t;
 				t.translate(x, y);
@@ -217,7 +288,9 @@ namespace VFrame30
 			break;
 		case E::LineCap::CircleCap:
 			{
-				painter->drawEllipse(pos, capHeightHalf, capHeightHalf);
+				// Explain 0.8 - the cicle is a quite big compared to the arrow, so it is reduced
+				//
+				painter->drawEllipse(pos, capHeightHalf * 0.8, capHeightHalf * 0.8);
 			}
 			break;
 		case E::LineCap::Arrow1Cap:
@@ -229,7 +302,7 @@ namespace VFrame30
 
 				QTransform t;
 				t.translate(x, y);
-				t.rotateRadians(angleRad - M_PI_2);	// -90 degrees
+				t.rotateRadians(angleRad - M_PI_2); // -90 degrees
 				t.translate(-x, -y);
 
 				painter->drawConvexPolygon(t.map(pol));
@@ -243,7 +316,7 @@ namespace VFrame30
 
 				QTransform t;
 				t.translate(x, y);
-				t.rotateRadians(angleRad - M_PI_2);	// -90 degrees
+				t.rotateRadians(angleRad - M_PI_2); // -90 degrees
 				t.translate(-x, -y);
 
 				painter->drawConvexPolygon(t.map(pol));
@@ -344,13 +417,42 @@ namespace VFrame30
 
 	double SchemaItemLine::lineCapFactor() const
 	{
-		return m_lineCapFactor;
+		return m_lineCapFactorObsolete;
 	}
 
 	void SchemaItemLine::setLineCapFactor(double value)
 	{
-		m_lineCapFactor = value;
+		m_lineCapFactorObsolete = value;
 	}
 
+	double SchemaItemLine::lineCapSize() const
+	{
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return VFrame30::RoundDisplayPoint(m_lineCapSize);
+		}
+		else
+		{
+			double pt = VFrame30::ConvertPoint(m_lineCapSize, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
+		}
+	}
+
+	void SchemaItemLine::setLineCapSize(double value)
+	{
+		if (value < 0)
+		{
+			value = 0;
+		}
+
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			m_weight = VFrame30::RoundDisplayPoint(value);
+		}
+		else
+		{
+			m_lineCapSize = VFrame30::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+		}
+	}
 }
 
