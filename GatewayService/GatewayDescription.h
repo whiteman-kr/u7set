@@ -117,7 +117,8 @@ namespace Gateway
 			//ASCII,					// ASCII character mode, packets starts with ':', ends with CR+LF
 			//RTU,						// binary mode RTU
 			TCP,						// TCP (RTU with TCP header)
-			UDP_ASCII					// ASCII protocol over UDP
+			UDP_ASCII,					// ASCII protocol over UDP
+			UDP_ASCII_KZ_UIK			// ASCII protocol over UDP specific for UIK system on Kozloduy AES
 		};
 		Q_ENUM(ModbusMode)
 	};

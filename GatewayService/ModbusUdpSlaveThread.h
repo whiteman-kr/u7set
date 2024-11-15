@@ -40,6 +40,7 @@ namespace Modbus
 		void onReceiveData(const error_code& error, size_t bytesReceived);
 		void restartScan();
 
+
 	private:
 		HostAddressPort m_listeningIP;
 		udp::endpoint m_listeningEndpoint;

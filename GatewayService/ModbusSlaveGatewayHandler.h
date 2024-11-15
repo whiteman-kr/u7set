@@ -106,10 +106,13 @@ namespace Gateway
 		Modbus::TcpFrame& getTcpRequestRef(MbshProcData& mpd);
 		Modbus::TcpFrame& getTcpReplyRef(MbshProcData& mpd);
 
-		size_t onAsciiFnReadHoldingRegisters(quint16 regsStartAddr, quint16 regsCount, MbshProcData& mpd);
+		size_t onAsciiFn03ReadHoldingRegisters(Message& msg, MbshProcData& mpd);
 
-		bool convertAsciiToBin(quint8* asciiPtr, size_t asciiLen,
+		bool convertAsciiToBin(const quint8* asciiPtr, size_t asciiLen,
 							   quint8* binPtr, size_t* binLen);
+
+		quint8 calcCrc(const quint8* data, size_t dataLength) const;
+		quint8 crcKzUik(const quint8* data, size_t dataLength) const;
 
 		bool isHexDigits(const quint8* ptr, int len) const;
 		quint8 asciiDecodeXX(const quint8* ptr, bool* ok) const;
@@ -120,8 +123,6 @@ namespace Gateway
 		quint8* asciiEncodeXX(quint8 v8, quint8* ptr);
 		quint8* asciiEncodeXXXX(quint16 v16, quint8* ptr);
 		quint8 asciiEncodeX(quint8 ch);
-
-		quint8 nonStandardModbusCrcCalculation(const quint8* ptr, int len);
 
 	private:
 		const SoftwareInfo m_softwareInfo;

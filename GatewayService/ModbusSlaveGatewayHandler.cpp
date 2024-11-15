@@ -76,6 +76,7 @@ namespace Gateway
 			break;
 
 		case E::ModbusMode::UDP_ASCII:
+		case E::ModbusMode::UDP_ASCII_KZ_UIK:
 
 			if (listeningIP1().isSet() == true)
 			{
@@ -313,36 +314,14 @@ namespace Gateway
 			return 0;
 		}
 
-		quint8* ptr = mpd.recvBuffer;
+		size_t binDataLen = 0;
 
-		if (*ptr != ASCII_START_MARKER)
-		{
-			return 0;
-		}
-
-		bool result = true;
-
-		ptr += ASCII_START_MARKER_LEN;
-
-		size_t binDataLen = (mpd.bytesReceived - ASCII_START_MARKER_LEN - ASCII_END_MARKER_LEN) / 2;
-
-		for(size_t i = 0; i < binDataLen; i++)
-		{
-			bool ok = true;
-
-			m_binData[i] = asciiDecodeXX(ptr, &ok);
-
-			if (ok == false)
-			{
-				return 0;
-			}
-
-			ptr += 2;
-		}
-
-		Message& msg = *reinterpret_cast<Message*>(m_binData);
+		bool result = convertAsciiToBin(mpd.recvBuffer, mpd.bytesReceived,
+									 m_binData, &binDataLen);
 
 		RETURN_IF_FALSE(result);
+
+		Message& msg = *reinterpret_cast<Message*>(m_binData);
 
 		if (msg.modbusDeviceID != modbusDeviceID())
 		{
@@ -355,34 +334,26 @@ namespace Gateway
 			return false;
 		}
 
-		msg.fn03Request.reverseBytes();
-
-		quint16 regsStartAddr = msg.fn03Request.regsStartAddr;
-		quint16 regsCount = msg.fn03Request.regsCount;
-
 		quint8 receivedCrc = m_binData[binDataLen - 1];
 
-		RETURN_IF_FALSE(result);
-
-/*		quint8 calculatedCrc = nonStandardModbusCrcCalculation(request + ASCII_START_MARKER_LEN,
-																ASCII_DEVICE_ID_LEN +
-																ASCII_FUNCTION_LEN +
-																ASCII_REG_START_ADDR_LEN +
-																ASCII_REG_COUNT_LEN); */
-
-		quint8 calculatedCrc = LRC(m_binData, binDataLen - 1);
+		quint8 calculatedCrc = calcCrc(m_binData, binDataLen - 1);
 
 		if (receivedCrc != calculatedCrc)
 		{
-			DEBUG_LOG_ERR(log(), QString("CRC error: received 0x%1, calculated 0x%2").
+			DEBUG_LOG_ERR(log(), QString("Modbus request CRC error: received 0x%1, calculated 0x%2").
 											arg(receivedCrc, 2, 16, QChar('0')).
 											arg(calculatedCrc, 2, 16, QChar('0')));
 			//return 0;
 		}
 
-		size_t sendBytesCount = onAsciiFnReadHoldingRegisters(regsStartAddr, regsCount, mpd);
+		mpd.sendBytes = onAsciiFn03ReadHoldingRegisters(msg, mpd);
 
-		return sendBytesCount;
+		if (mpd.sendBytes > 0)
+		{
+			logAsciiReply(mpd);
+		}
+
+		return mpd.sendBytes;
 	}
 
 	size_t ModbusSlaveHandler::rtuRequestProcessing(MbshProcData& mpd)
@@ -740,9 +711,10 @@ namespace Gateway
 
 		m_logStr.clear();
 
-		m_logStr.append(QString("Gateway %1 #%2 Modbus TCP reply to %3, bytes sent %4").
+		m_logStr.append(QString("Gateway %1 #%2 Modbus %3 reply to %4, bytes sent %5").
 						arg(gatewayID()).
 						arg(mpd.connNo).
+						arg(::E::valueToString(modbusMode())).
 						arg(mpd.peerAddr).
 						arg(mpd.sendBytes));
 
@@ -792,36 +764,36 @@ namespace Gateway
 		switch(rep.msg.functionCode)
 		{
 		case FC_READ_HOLDING_REGISTERS:
-		{
-			const Fn03_ReadHoldingRegisters_Reply& fn03Rep = rep.msg.fn03Reply;
-
-			quint8 bytesCount = rep.msg.fn03Reply.bytesCount;
-			quint32 regsCount = static_cast<quint32>(bytesCount / sizeof(quint16));
-
-			m_logStr.append(QString("deviceID %1, function %2, bytes count %3, regs count %4").
-							arg(rep.msg.modbusDeviceID).
-							arg(rep.msg.functionCode).
-							arg(bytesCount).
-							arg(regsCount));
-			logReply(m_logStr);
-
-			//
-
-			m_logStr.clear();
-
-			m_logStr.append(QStringLiteral("Modbus reply:"));
-
-			const TcpFrame& req = getTcpRequestRef(mpd);
-
-			for(quint32 i = 0; i < regsCount; i++)
 			{
-				m_logStr.append(QString(" r[%1]=0x%3").
-								arg(req.msg.fn03Request.regsStartAddr + i).
-								arg(fn03Rep.regValues[i], 4, 16, QChar('0')));
+				const Fn03_ReadHoldingRegisters_Reply& fn03Rep = rep.msg.fn03Reply;
+
+				quint8 bytesCount = rep.msg.fn03Reply.bytesCount;
+				quint32 regsCount = static_cast<quint32>(bytesCount / sizeof(quint16));
+
+				m_logStr.append(QString("deviceID %1, function %2, bytes count %3, regs count %4").
+								arg(rep.msg.modbusDeviceID).
+								arg(rep.msg.functionCode).
+								arg(bytesCount).
+								arg(regsCount));
+				logReply(m_logStr);
+
+				//
+
+				m_logStr.clear();
+
+				m_logStr.append(QStringLiteral("Modbus reply:"));
+
+				const TcpFrame& req = getTcpRequestRef(mpd);
+
+				for(quint32 i = 0; i < regsCount; i++)
+				{
+					m_logStr.append(QString(" r[%1]=0x%3").
+									arg(req.msg.fn03Request.regsStartAddr + i).
+									arg(fn03Rep.regValues[i], 4, 16, QChar('0')));
+				}
+				logReply(m_logStr);
 			}
-			logReply(m_logStr);
-		}
-		break;
+			break;
 
 		default:
 			m_logStr.append(QString("function %1 is not supported!").arg(rep.msg.functionCode));
@@ -861,7 +833,16 @@ namespace Gateway
 		m_logStr.clear();
 
 		m_logStr.append(QStringLiteral("ASCII:  "));
-		m_logStr.append(mpd.recvBuffer, mpd.bytesReceived);
+
+		if (mpd.bytesReceived >= mpd.recvBufferSize)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		mpd.recvBuffer[mpd.bytesReceived] = 0;		// make null terminated string
+
+		m_logStr.append(mpd.recvBuffer);
 
 		m_logStr.replace(Separator::CR, "\\r");
 		m_logStr.replace(Separator::LF, "\\n");
@@ -870,16 +851,16 @@ namespace Gateway
 
 		//
 
-		m_logStr.clear();
+		// m_logStr.clear();
 
-		m_logStr.append(QStringLiteral("Binary:"));
+		// m_logStr.append(QStringLiteral("Binary:"));
 
-		for(size_t i = 0; i < mpd.bytesReceived && i < mpd.recvBufferSize; i++)
-		{
-			m_logStr.append(QString(" %1").arg(mpd.recvBuffer[i], 2, 16, QChar('0')).toUpper());
-		}
+		// for(size_t i = 0; i < mpd.bytesReceived && i < mpd.recvBufferSize; i++)
+		// {
+		// 	m_logStr.append(QString(" %1").arg(mpd.recvBuffer[i], 2, 16, QChar('0')).toUpper());
+		// }
 
-		logRequest(m_logStr);
+		// logRequest(m_logStr);
 
 		//
 
@@ -887,8 +868,25 @@ namespace Gateway
 		{
 			logRequest(QString("Wrong Modbus ASCII F03 request len %1, expected %2. Request ignored.").
 					   arg(mpd.bytesReceived).arg(ASCII_FN03_REQUEST_SIZE));
-			return 0;
+			return;
 		}
+
+		//
+
+		size_t binDataLen = 0;
+
+		bool result = convertAsciiToBin(mpd.recvBuffer, mpd.bytesReceived,
+										m_binData, &binDataLen);
+
+		if (result == false)
+		{
+			return;
+		}
+
+		Message& msg = *reinterpret_cast<Message*>(m_binData);
+
+		quint8 receivedCrc = m_binData[binDataLen - 1];
+		quint8 calculatedCrc = calcCrc(m_binData, binDataLen - 1);
 
 		//
 
@@ -896,25 +894,33 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("Modbus request: "));
 
-		switch(req.msg.functionCode)
+		switch(msg.functionCode)
 		{
 		case FC_READ_HOLDING_REGISTERS:
-		{
-			Fn03_ReadHoldingRegisters_Request fn03Req = req.msg.fn03Request;
 
-			fn03Req.reverseBytes();
+			msg.fn03Request.reverseBytes();
 
-			m_logStr.append(QString("deviceID %1, function %2, start register %3, regs count %4").
-							arg(req.msg.modbusDeviceID).
-							arg(req.msg.functionCode).
-							arg(fn03Req.regsStartAddr).
-							arg(fn03Req.regsCount));
+			m_logStr.append(QString("deviceID %1, function %2, start register %3, regs count %4, ").
+							arg(msg.modbusDeviceID).
+							arg(msg.functionCode).
+							arg(msg.fn03Request.regsStartAddr).
+							arg(msg.fn03Request.regsCount));
+
+			if (receivedCrc == calculatedCrc)
+			{
+				m_logStr.append(QString("CRC %1 (Ok)").arg(receivedCrc));
+			}
+			else
+			{
+				m_logStr.append(QString("CRC %1 (ERROR, expected %2)").arg(receivedCrc, calculatedCrc));
+			}
+
 			logRequest(m_logStr);
-		}
-		break;
+
+			break;
 
 		default:
-			m_logStr.append(QString("function %1 is not supported!").arg(req.msg.functionCode));
+			m_logStr.append(QString("function %1 is not supported!").arg(msg.functionCode));
 			logRequest(m_logStr, CircularLogger::RecordType::Error);
 		}
 	}
@@ -926,6 +932,115 @@ namespace Gateway
 			return;
 		}
 
+		m_logStr.clear();
+
+		m_logStr.append(QString("Gateway %1 #%2 Modbus %3 reply to %4, bytes sent %5").
+						arg(gatewayID()).
+						arg(mpd.connNo).
+						arg(::E::valueToString(modbusMode())).
+						arg(mpd.peerAddr).
+						arg(mpd.sendBytes));
+
+		logReply(m_logStr);
+
+		if (mpd.sendBytes == 0)
+		{
+			return;
+		}
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("ASCII:  "));
+
+		if (mpd.sendBytes >= mpd.sendBufferSize)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		mpd.sendBuffer[mpd.sendBytes] = 0;		// make null terminated string
+
+		m_logStr.append(mpd.sendBuffer);
+
+		m_logStr.replace(Separator::CR, "\\r");
+		m_logStr.replace(Separator::LF, "\\n");
+
+		logReply(m_logStr);
+
+		//
+
+		// m_logStr.clear();
+
+		// m_logStr.append(QStringLiteral("Binary:"));
+
+		// for(size_t i = 0; i < mpd.sendBytes && i < mpd.sendBufferSize; i++)
+		// {
+		// 	m_logStr.append(QString(" %1").arg(mpd.sendBuffer[i], 2, 16, QChar('0')).toUpper());
+		// }
+
+		// logReply(m_logStr);
+
+		//
+
+		size_t binDataLen = 0;
+
+		bool result = convertAsciiToBin(mpd.sendBuffer, mpd.sendBytes,
+										m_binData, &binDataLen);
+
+		if (result == false)
+		{
+			return;
+		}
+
+		Message& msg = *reinterpret_cast<Message*>(m_binData);
+
+		quint8 sendCrc = m_binData[binDataLen - 1];
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("Modbus reply: "));
+
+		switch(msg.functionCode)
+		{
+		case FC_READ_HOLDING_REGISTERS:
+		{
+			const Fn03_ReadHoldingRegisters_Reply& fn03Rep = msg.fn03Reply;
+
+			quint8 bytesCount = msg.fn03Reply.bytesCount;
+			quint32 regsCount = static_cast<quint32>(bytesCount / sizeof(quint16));
+
+			m_logStr.append(QString("deviceID %1, function %2, bytes count %3, regs count %4, CRC %5").
+							arg(msg.modbusDeviceID).
+							arg(msg.functionCode).
+							arg(bytesCount).
+							arg(regsCount).
+							arg(sendCrc));
+			logReply(m_logStr);
+
+			//
+
+			m_logStr.clear();
+
+			m_logStr.append(QStringLiteral("Modbus reply:"));
+
+			for(quint32 i = 0; i < regsCount; i++)
+			{
+				m_logStr.append(QString(" r[%1]=0x%3").
+								arg(msg.fn03Request.regsStartAddr + i).
+								arg(fn03Rep.regValues[i], 4, 16, QChar('0')));
+			}
+			logReply(m_logStr);
+		}
+		break;
+
+		default:
+			m_logStr.append(QString("function %1 is not supported!").arg(msg.functionCode));
+			logReply(m_logStr, CircularLogger::RecordType::Error);
+		}
 	}
 
 	void ModbusSlaveHandler::logRtuRequest(MbshProcData& mpd)
@@ -1006,22 +1121,23 @@ namespace Gateway
 		return *reinterpret_cast<TcpFrame*>(mpd.sendBuffer);
 	}
 
-	size_t ModbusSlaveHandler::onAsciiFnReadHoldingRegisters(quint16 regsStartAddr, quint16 regsCount,
-															 MbshProcData& mpd)
+	size_t ModbusSlaveHandler::onAsciiFn03ReadHoldingRegisters(Message& msg, MbshProcData& mpd)
 	{
-		if (regsCount > FN03_MAX_REGS_COUNT)
+		msg.fn03Request.reverseBytes();
+
+		if (msg.fn03Request.regsCount > FN03_MAX_REGS_COUNT)
 		{
 			return 0;
 		}
-
-		Message& msg = *reinterpret_cast<Message*>(m_binData);
 
 		size_t binDataLen = 0;
 
 		binDataLen += sizeof(msg.modbusDeviceID);
 		binDataLen += sizeof(msg.functionCode);
 
-		int bytesCount = getRegistersValues(regsStartAddr, regsCount,
+		int regsCount = msg.fn03Request.regsCount;
+
+		int bytesCount = getRegistersValues(msg.fn03Request.regsStartAddr, regsCount,
 											msg.fn03Reply.regValues, FN03_MAX_REGS_COUNT,
 											QThread::currentThread());
 
@@ -1033,9 +1149,7 @@ namespace Gateway
 		binDataLen += sizeof(msg.fn03Reply.bytesCount);
 		binDataLen += msg.fn03Reply.bytesCount;
 
-		// quint8 crc = nonStandardModbusCrcCalculation(m_binData,	binDataLen);		// 2 chars on 1 byte
-
-		quint8 crc = LRC(m_binData,	binDataLen);		// 2 chars on 1 byte
+		quint8 crc = calcCrc(m_binData,	binDataLen);
 
 		m_binData[binDataLen] = crc;
 
@@ -1066,12 +1180,132 @@ namespace Gateway
 		return sendBytes;
 	}
 
-	bool ModbusSlaveHandler::convertAsciiToBin(quint8* asciiPtr, size_t asciiLen,
-											quint8* binPtr, size_t* binLen)
+	bool ModbusSlaveHandler::convertAsciiToBin(const quint8* asciiPtr, size_t asciiLen,
+												quint8* binPtr, size_t* binLen)
 	{
 		TEST_PTR_RETURN_FALSE(asciiPtr);
 		TEST_PTR_RETURN_FALSE(binPtr);
 		TEST_PTR_RETURN_FALSE(binLen);
+
+		*binLen = 0;
+
+		if (asciiLen < ASCII_START_MARKER_LEN + ASCII_END_MARKER_LEN)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		if (asciiPtr[0] != ASCII_START_MARKER ||
+			asciiPtr[asciiLen - 2] != ASCII_END_MARKER_1 ||
+			asciiPtr[asciiLen - 1] != ASCII_END_MARKER_2)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		asciiPtr++;		// skip ASCII_START_MARKER
+
+		size_t binDataLen = (asciiLen - ASCII_START_MARKER_LEN - ASCII_END_MARKER_LEN) / 2;
+
+		bool result = true;
+
+		for(size_t i = 0; i < binDataLen; i++)
+		{
+			bool ok = true;
+
+			binPtr[i] = asciiDecodeXX(asciiPtr, &ok);
+
+			result &= ok;
+
+			asciiPtr += 2;
+		}
+
+		if (result)
+		{
+			*binLen = binDataLen;
+		}
+
+		return result;
+	}
+
+	quint8 ModbusSlaveHandler::calcCrc(const quint8* data, size_t dataLength) const
+	{
+		switch(modbusMode())
+		{
+		case E::ModbusMode::UDP_ASCII:
+			return LRC(data, dataLength);
+
+		case E::ModbusMode::UDP_ASCII_KZ_UIK:
+			return crcKzUik(data, dataLength);
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	quint8 ModbusSlaveHandler::crcKzUik(const quint8* data, size_t dataLength) const
+	{
+		// Non-standart modbus request CRC calculation used on AEC Kozloduy in UIK system.
+		//
+		// Reverse ingeneered from request making code:
+		//
+		// static void makeRequest(array<unsigned char>^ request, int chan, bool Ust)
+		// {
+		// 	request[0] = ':'; //header
+		// 	request[1] = '0'; //slave address
+		// 	request[2] = '0' + chan;
+		// 	request[3] = '0'; //function
+		// 	request[4] = '3';
+		// 	request[5] = '0'; //start address Hi
+		// 	request[6] = '0';
+		// 	request[7] = '0'; //start Lo
+		// 	request[8] = '0';
+		// 	request[9] = '0'; //Number Hi
+		// 	request[10]= '0';
+		// 	request[11]= '6'; //Number Lo
+		// 	request[12]= '6';
+		// 	request[13]= '0'; //CRC
+		// 	request[14]= '0';
+		// 	request[15]= 0x0D;
+		// 	request[16]= 0x0A;
+		//
+		// 	if(Ust)
+		// 	{
+		// 		request[7] = '6'; //start Lo
+		// 		request[8] = '6';
+		// 		request[11]= '4'; //Number Lo
+		// 		request[12]= '6';
+		// 	}
+		//
+		// ---------------- Non-standard CRC calculation! -----------------------
+		//
+		//  Result is not two's complementing!
+		//
+		//	Standard Modbus LRC calculation see in ModbusProtocol.cpp
+		//
+		//  //
+		//
+		// 	unsigned int CRC=0;
+		// 	for(int i=1;i<13;i+=2)
+		// 		CRC+=uncodeASCII(request[i])*16 + uncodeASCII(request[i+1]);
+		// 	CRC = CRC & 0xFF;
+		// ----------------------------------------------------------------------
+		//
+		// 	request[13] = codeASCII(CRC>>4);
+		// 	request[14] = codeASCII(CRC&0xF);
+		// }
+
+		quint8 crc = 0;
+
+		while(dataLength--)
+		{
+			crc += *data;
+			data++;
+		}
+
+		return crc;
 	}
 
 	bool ModbusSlaveHandler::isHexDigits(const quint8* ptr, int len) const
@@ -1198,73 +1432,5 @@ namespace Gateway
 		Q_ASSERT(false);
 
 		return '0';
-	}
-
-	quint8 ModbusSlaveHandler::nonStandardModbusCrcCalculation(const quint8* ptr, int lenInChars)
-	{
-		// Non-standart modbus request CRC calculation used on AEC Kozloduy in UIK system.
-		//
-		// Reverse ingeneered from request making code:
-		//
-		// static void makeRequest(array<unsigned char>^ request, int chan, bool Ust)
-		// {
-		// 	request[0] = ':'; //header
-		// 	request[1] = '0'; //slave address
-		// 	request[2] = '0' + chan;
-		// 	request[3] = '0'; //function
-		// 	request[4] = '3';
-		// 	request[5] = '0'; //start address Hi
-		// 	request[6] = '0';
-		// 	request[7] = '0'; //start Lo
-		// 	request[8] = '0';
-		// 	request[9] = '0'; //Number Hi
-		// 	request[10]= '0';
-		// 	request[11]= '6'; //Number Lo
-		// 	request[12]= '6';
-		// 	request[13]= '0'; //CRC
-		// 	request[14]= '0';
-		// 	request[15]= 0x0D;
-		// 	request[16]= 0x0A;
-		//
-		// 	if(Ust)
-		// 	{
-		// 		request[7] = '6'; //start Lo
-		// 		request[8] = '6';
-		// 		request[11]= '4'; //Number Lo
-		// 		request[12]= '6';
-		// 	}
-		//
-		// ---------------- Non-standard CRC calculation! -----------------------
-		//
-		//	1. ASCII decoding is used before summing CRC
-		//  2. Result is not two's complementing
-		//
-		//	Standard Modbus LRC calculation see in ModbusProtocol.cpp
-		//
-		//  //
-		//
-		// 	unsigned int CRC=0;
-		// 	for(int i=1;i<13;i+=2)
-		// 		CRC+=uncodeASCII(request[i])*16 + uncodeASCII(request[i+1]);
-		// 	CRC = CRC & 0xFF;
-		// ----------------------------------------------------------------------
-		//
-		// 	request[13] = codeASCII(CRC>>4);
-		// 	request[14] = codeASCII(CRC&0xF);
-		// }
-
-		quint8 crc = 0;
-		bool ok = true;
-
-		for(int i = 0; i < lenInChars; i++)
-		{
-			quint8 ch = asciiDecodeX(ptr[0], &ok);
-
-			Q_ASSERT(ok == true);
-
-			crc += ch;
-		}
-
-		return crc;
 	}
 }

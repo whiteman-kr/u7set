@@ -242,20 +242,21 @@ namespace Modbus
 			return;
 		}
 
-		QString recvStr;
-
-		if (bytesReceived < TEMP_BUFFER_SIZE - 1)
-		{
-			m_tempBuffer[bytesReceived] = 0;
-
-			recvStr = QString(reinterpret_cast<const char*>(m_tempBuffer));
-
-			qDebug() << C_STR(QString("receive %1 from %2:%3: %4").
-							  arg(bytesReceived).
+		QString peerAddr =QString("%1:%2").
 								arg(QString::fromStdString(m_recvFromEndpoint.address().to_string())).
-							  arg(m_recvFromEndpoint.port()).
-							  arg(recvStr));
-		}
+								arg(m_recvFromEndpoint.port());
+
+		// QString recvStr;
+
+		// if (bytesReceived < TEMP_BUFFER_SIZE - 1)
+		// {
+		// 	m_tempBuffer[bytesReceived] = 0;
+
+		// 	recvStr = QString(reinterpret_cast<const char*>(m_tempBuffer));
+
+		// 	qDebug() << C_STR(QString("receive %1 from %2: %3").
+		// 					  arg(bytesReceived).arg(peerAddr).arg(recvStr));
+		// }
 
 		// General ASCII Modbus message format:
 		//
@@ -345,8 +346,8 @@ namespace Modbus
 					// MbshProcData structure filling
 
 					m_mpd.connNo = 1;
-					m_mpd.peerAddr;
-					m_mpd.error;
+					m_mpd.peerAddr = peerAddr;
+					m_mpd.error = error;
 
 					m_mpd.recvBuffer = m_recvBuffer;
 					m_mpd.recvBufferSize = RECV_BUFFER_SIZE;
