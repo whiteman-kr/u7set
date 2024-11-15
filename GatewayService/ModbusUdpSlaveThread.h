@@ -65,7 +65,7 @@ namespace Modbus
 		static const int RECV_BUFFER_SIZE = 256;
 		quint8 m_recvBuffer[RECV_BUFFER_SIZE];
 
-		int m_delimiterCount = 0;
+		int m_endMarkerCount = 0;
 		int m_recvBufferIndex = -1;
 
 		static const int SEND_BUFFER_SIZE = 2048;

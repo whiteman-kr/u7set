@@ -306,26 +306,18 @@ namespace Gateway
 
 	size_t ModbusSlaveHandler::asciiRequestProcessing(MbshProcData& mpd)
 	{
-		static const size_t MIN_REQUEST_SIZE =	ASCII_START_MARKER_LEN +	// marker ':'
-												ASCII_DEVICE_ID_LEN +		// modbus deviceID 'XX'
-												ASCII_FUNCTION_LEN +		// function '03'
-												ASCII_REG_START_ADDR_LEN +	// regs start address 'XXXX'
-												ASCII_REG_COUNT_LEN +		// regs count 'XXXX'
-												ASCII_CRC_LEN +				// CRC 'XX'
-												ASCII_END_MARKER_LEN;		// end marker CR+LF
+		logAsciiRequest(mpd);
 
-		if (mpd.bytesReceived < MIN_REQUEST_SIZE)
+		if (mpd.bytesReceived != ASCII_FN03_REQUEST_SIZE)
 		{
-			Q_ASSERT(false);
-			return false;
+			return 0;
 		}
 
 		quint8* ptr = mpd.recvBuffer;
 
 		if (*ptr != ASCII_START_MARKER)
 		{
-			Q_ASSERT(false);
-			return false;
+			return 0;
 		}
 
 		bool result = true;
@@ -657,11 +649,17 @@ namespace Gateway
 
 	void ModbusSlaveHandler::logTcpRequest(MbshProcData& mpd)
 	{
+		if (enableLogging() == false)
+		{
+			return;
+		}
+
 		m_logStr.clear();
 
-		m_logStr.append(QString("Gateway %1 #%2 Modbus TCP request from %3, socket error code %4 ('%5'), bytes received %6").
+		m_logStr.append(QString("Gateway %1 #%2 Modbus %3 request from %4, socket error code %5 ('%6'), bytes received %7").
 						arg(gatewayID()).
 						arg(mpd.connNo).
+						arg(::E::valueToString(modbusMode())).
 						arg(mpd.peerAddr).
 						arg(mpd.error.value()).
 						arg(mpd.error ? QString::fromStdString(mpd.error.message()) : QStringLiteral("NoErr")).
@@ -735,6 +733,11 @@ namespace Gateway
 
 	void ModbusSlaveHandler::logTcpReply(MbshProcData& mpd)
 	{
+		if (enableLogging() == false)
+		{
+			return;
+		}
+
 		m_logStr.clear();
 
 		m_logStr.append(QString("Gateway %1 #%2 Modbus TCP reply to %3, bytes sent %4").
@@ -828,12 +831,101 @@ namespace Gateway
 
 	void ModbusSlaveHandler::logAsciiRequest(MbshProcData& mpd)
 	{
-		Q_UNUSED(mpd);
+		if (enableLogging() == false)
+		{
+			return;
+		}
+
+		m_logStr.clear();
+
+		m_logStr.append(QString("Gateway %1 #%2 Modbus %3 request from %4, socket error code %5 ('%6'), bytes received %7").
+						arg(gatewayID()).
+						arg(mpd.connNo).
+						arg(::E::valueToString(modbusMode())).
+						arg(mpd.peerAddr).
+						arg(mpd.error.value()).
+						arg(mpd.error ? QString::fromStdString(mpd.error.message()) : QStringLiteral("NoErr")).
+						arg(mpd.bytesReceived));
+
+		logRequest(m_logStr);
+
+		//
+
+		if (mpd.error || mpd.bytesReceived == 0)
+		{
+			return;
+		}
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("ASCII:  "));
+		m_logStr.append(mpd.recvBuffer, mpd.bytesReceived);
+
+		m_logStr.replace(Separator::CR, "\\r");
+		m_logStr.replace(Separator::LF, "\\n");
+
+		logRequest(m_logStr);
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("Binary:"));
+
+		for(size_t i = 0; i < mpd.bytesReceived && i < mpd.recvBufferSize; i++)
+		{
+			m_logStr.append(QString(" %1").arg(mpd.recvBuffer[i], 2, 16, QChar('0')).toUpper());
+		}
+
+		logRequest(m_logStr);
+
+		//
+
+		if (mpd.bytesReceived != ASCII_FN03_REQUEST_SIZE)
+		{
+			logRequest(QString("Wrong Modbus ASCII F03 request len %1, expected %2. Request ignored.").
+					   arg(mpd.bytesReceived).arg(ASCII_FN03_REQUEST_SIZE));
+			return 0;
+		}
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("Modbus request: "));
+
+		switch(req.msg.functionCode)
+		{
+		case FC_READ_HOLDING_REGISTERS:
+		{
+			Fn03_ReadHoldingRegisters_Request fn03Req = req.msg.fn03Request;
+
+			fn03Req.reverseBytes();
+
+			m_logStr.append(QString("deviceID %1, function %2, start register %3, regs count %4").
+							arg(req.msg.modbusDeviceID).
+							arg(req.msg.functionCode).
+							arg(fn03Req.regsStartAddr).
+							arg(fn03Req.regsCount));
+			logRequest(m_logStr);
+		}
+		break;
+
+		default:
+			m_logStr.append(QString("function %1 is not supported!").arg(req.msg.functionCode));
+			logRequest(m_logStr, CircularLogger::RecordType::Error);
+		}
 	}
 
 	void ModbusSlaveHandler::logAsciiReply(MbshProcData& mpd)
 	{
-		Q_UNUSED(mpd);
+		if (enableLogging() == false)
+		{
+			return;
+		}
+
 	}
 
 	void ModbusSlaveHandler::logRtuRequest(MbshProcData& mpd)
@@ -972,6 +1064,14 @@ namespace Gateway
 		mpd.sendBytes = sendBytes;
 
 		return sendBytes;
+	}
+
+	bool ModbusSlaveHandler::convertAsciiToBin(quint8* asciiPtr, size_t asciiLen,
+											quint8* binPtr, size_t* binLen)
+	{
+		TEST_PTR_RETURN_FALSE(asciiPtr);
+		TEST_PTR_RETURN_FALSE(binPtr);
+		TEST_PTR_RETURN_FALSE(binLen);
 	}
 
 	bool ModbusSlaveHandler::isHexDigits(const quint8* ptr, int len) const

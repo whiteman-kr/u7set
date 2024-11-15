@@ -17,8 +17,8 @@ namespace Modbus
 	inline const quint8 ASCII_START_MARKER = ':';
 	inline const int ASCII_START_MARKER_LEN = 1;
 
-	inline const quint8 ASCII_END_MARKER_1 = 0x0D;			// CR
-	inline const quint8 ASCII_END_MARKER_2 = 0x0A;			// LF
+	inline const quint8 ASCII_END_MARKER_1 = 0x0D;				// CR
+	inline const quint8 ASCII_END_MARKER_2 = 0x0A;				// LF
 	inline const int ASCII_END_MARKER_LEN = 2;
 
 	inline const int ASCII_DEVICE_ID_LEN = 2;
@@ -27,6 +27,14 @@ namespace Modbus
 	inline const int ASCII_REG_COUNT_LEN = 4;
 	inline const int ASCII_CRC_LEN = 2;
 	inline const int ASCII_BYTES_COUNT_LEN = 2;
+
+	static const size_t ASCII_FN03_REQUEST_SIZE =	ASCII_START_MARKER_LEN +	// marker ':'
+													ASCII_DEVICE_ID_LEN +		// modbus deviceID 'XX'
+													ASCII_FUNCTION_LEN +		// function '03'
+													ASCII_REG_START_ADDR_LEN +	// regs start address 'XXXX'
+													ASCII_REG_COUNT_LEN +		// regs count 'XXXX'
+													ASCII_CRC_LEN +				// CRC 'XX'
+													ASCII_END_MARKER_LEN;		// end marker CR+LF
 
 #pragma pack(push, 1)
 

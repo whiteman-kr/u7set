@@ -108,6 +108,9 @@ namespace Gateway
 
 		size_t onAsciiFnReadHoldingRegisters(quint16 regsStartAddr, quint16 regsCount, MbshProcData& mpd);
 
+		bool convertAsciiToBin(quint8* asciiPtr, size_t asciiLen,
+							   quint8* binPtr, size_t* binLen);
+
 		bool isHexDigits(const quint8* ptr, int len) const;
 		quint8 asciiDecodeXX(const quint8* ptr, bool* ok) const;
 		quint16 asciiDecodeXXXX(const quint8* ptr, bool* ok) const;

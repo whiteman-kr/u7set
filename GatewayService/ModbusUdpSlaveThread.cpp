@@ -1,3 +1,5 @@
+#include <cctype>
+
 #include "ModbusUdpSlaveThread.h"
 #include "ModbusSlaveGatewayHandler.h"
 
@@ -240,18 +242,30 @@ namespace Modbus
 			return;
 		}
 
-/*		if (bytesReceived < TEMP_BUFFER_SIZE - 1)
+		QString recvStr;
+
+		if (bytesReceived < TEMP_BUFFER_SIZE - 1)
 		{
 			m_tempBuffer[bytesReceived] = 0;
 
-			QString recvStr(QString(reinterpret_cast<const char*>(m_tempBuffer)));
+			recvStr = QString(reinterpret_cast<const char*>(m_tempBuffer));
 
 			qDebug() << C_STR(QString("receive %1 from %2:%3: %4").
 							  arg(bytesReceived).
 								arg(QString::fromStdString(m_recvFromEndpoint.address().to_string())).
 							  arg(m_recvFromEndpoint.port()).
 							  arg(recvStr));
-		}*/
+		}
+
+		// General ASCII Modbus message format:
+		//
+		// ':XXXX ... XXXCRLF'
+		//
+		// where
+		//	':' - ASCII_START_MARKER
+		//  X  - hex digits 0123456789ABCDEFabcdef
+		//  CR - ASCII_END_MARKER_1
+		//  LF - ASCII_END_MARKER_2
 
 		for(size_t i = 0; i < bytesReceived; i++)
 		{
@@ -262,6 +276,11 @@ namespace Modbus
 				break;
 			}
 
+			if (bytesReceived > 6)
+			{
+				DEBUG_STOP;
+			}
+
 			quint8 ch = m_tempBuffer[i];
 
 			bool skipChar = false;
@@ -269,14 +288,14 @@ namespace Modbus
 			switch(ch)
 			{
 			case ASCII_START_MARKER:
-				m_recvBufferIndex = 0;			// start copy Modbus ASCII request into m_recvBuffer
-				m_delimiterCount = 0;
+				m_recvBufferIndex = 0;			// start scan and copy Modbus ASCII request into m_recvBuffer
+				m_endMarkerCount = 0;
 				break;
 
 			case ASCII_END_MARKER_1:
-				if (m_recvBufferIndex >= 0 && m_delimiterCount == 0)
+				if (m_recvBufferIndex >= 0 && m_endMarkerCount == 0)
 				{
-					m_delimiterCount = 1;
+					m_endMarkerCount = 1;
 				}
 				else
 				{
@@ -286,9 +305,9 @@ namespace Modbus
 				break;
 
 			case ASCII_END_MARKER_2:
-				if (m_recvBufferIndex >= 0 && m_delimiterCount == 1)
+				if (m_recvBufferIndex >= 0 && m_endMarkerCount == 1)
 				{
-					m_delimiterCount = 2;
+					m_endMarkerCount = 2;
 				}
 				else
 				{
@@ -296,6 +315,19 @@ namespace Modbus
 					skipChar = true;
 				}
 				break;
+
+			default:
+				// ch is not: ASCII_START_MARKER, ASCII_END_MARKER_1, ASCII_END_MARKER_2
+				//
+				if (std::isxdigit(ch) == false ||			// char is not hexdigit
+					m_recvBufferIndex < 0 ||				// scan still not started
+					m_endMarkerCount > 0)					// ASCII_END_MARKER_1 already detected
+				{
+					{
+						restartScan();
+						skipChar = true;
+					}
+				}
 			}
 
 			if (skipChar)
@@ -308,7 +340,7 @@ namespace Modbus
 				m_recvBuffer[m_recvBufferIndex] = ch;
 				m_recvBufferIndex++;
 
-				if (m_delimiterCount == 2)
+				if (m_endMarkerCount == 2)
 				{
 					// MbshProcData structure filling
 
@@ -346,6 +378,6 @@ namespace Modbus
 	void UdpSlaveThread::restartScan()
 	{
 		m_recvBufferIndex = -1;
-		m_delimiterCount = 0;
+		m_endMarkerCount = 0;
 	}
 }
