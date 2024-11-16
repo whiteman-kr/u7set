@@ -11,14 +11,52 @@ namespace Gateway
 {
 	// ---------------------------------------------------------------------------------
 	//
-	//	Gateway::ModbusTcpSlaveHandler::SignalState struct implementation
+	//	Gateway::ModbusSlaveHandler::SignalState struct implementation
 	//
 	// ---------------------------------------------------------------------------------
 
-	ModbusSlaveHandler::SignalState::SignalState(const ModbusFormat& frmt, const Address16& registerNo)
+	ModbusSlaveHandler::SignalState::SignalState(const ModbusFormat& frmt, const Address16& registerNo,
+												bool isConst, double constValue) :
+		m_format(frmt),
+		m_regNo(registerNo),
+		m_isConst(isConst)
 	{
-		format = frmt;
-		regNo = registerNo;
+		if (isConst)
+		{
+			m_value = constValue;
+		}
+	}
+
+	const ModbusFormat& ModbusSlaveHandler::SignalState::format() const
+	{
+		return m_format;
+	}
+
+	const Address16& ModbusSlaveHandler::SignalState::regNo() const
+	{
+		return m_regNo;
+	}
+
+	double ModbusSlaveHandler::SignalState::value() const
+	{
+		return m_value;
+	}
+
+	bool ModbusSlaveHandler::SignalState::isConst() const
+	{
+		return m_isConst;
+	}
+
+	void ModbusSlaveHandler::SignalState::setValue(double value)
+	{
+		if (!m_isConst)
+		{
+			m_value = value;
+		}
+		else
+		{
+			Q_ASSERT(false);
+		}
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -173,7 +211,7 @@ namespace Gateway
 
 			for(SignalState& st : states)
 			{
-				st.value = state.value();
+				st.setValue(state.value());
 			}
 		}
 
@@ -196,7 +234,6 @@ namespace Gateway
 
 			if (it == m_signalsStates.end())
 			{
-				Q_ASSERT(false);
 				continue;
 			}
 
@@ -206,7 +243,7 @@ namespace Gateway
 
 			for(SignalState& st : states)
 			{
-				st.value = state.value();
+				st.setValue(state.value());
 			}
 		}
 
@@ -323,9 +360,31 @@ namespace Gateway
 
 		Message& msg = *reinterpret_cast<Message*>(m_binData);
 
-		if (msg.modbusDeviceID != modbusDeviceID())
+		quint16 regsStartAddrOffset = 0;
+
+		switch(modbusMode())
 		{
-			return 0;			// its Ok, request to another device
+		case E::ModbusMode::UDP_ASCII:
+			if (msg.modbusDeviceID != modbusDeviceID())
+			{
+				return 0;			// its Ok, request to another device
+			}
+			break;
+
+		case E::ModbusMode::UDP_ASCII_KZ_UIK:
+			if (msg.modbusDeviceID >= modbusDeviceID() && msg.modbusDeviceID <= modbusDeviceID() + 2)
+			{
+				regsStartAddrOffset = (msg.modbusDeviceID - modbusDeviceID()) * 300;
+			}
+			else
+			{
+				return 0;			// its Ok, request to another device
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+			return 0;
 		}
 
 		if (msg.functionCode != FC_READ_HOLDING_REGISTERS)
@@ -346,7 +405,7 @@ namespace Gateway
 			//return 0;
 		}
 
-		mpd.sendBytes = onAsciiFn03ReadHoldingRegisters(msg, mpd);
+		mpd.sendBytes = onAsciiFn03ReadHoldingRegisters(msg, mpd, regsStartAddrOffset);
 
 		if (mpd.sendBytes > 0)
 		{
@@ -366,7 +425,7 @@ namespace Gateway
 
 	bool ModbusSlaveHandler::init()
 	{
-		const std::map<Address16, std::pair<QString, ModbusFormat>>& mbSignals = m_gateway->modbusSignals();
+		const std::map<Address16, ModbusSlaveGateway::ModbusSignal>& mbSignals = m_gateway->modbusSignals();
 
 		auto itLast = mbSignals.rbegin();
 
@@ -376,8 +435,9 @@ namespace Gateway
 		}
 
 		Address16 maxAddr = itLast->first;
+		const ModbusSlaveGateway::ModbusSignal& mbs = itLast->second;
 
-		const ModbusFormat lastSignalFormat = itLast->second.second;
+		const ModbusFormat lastSignalFormat = mbs.format;
 
 		maxAddr.addWord(lastSignalFormat.registersCount());			// maxAddr here is +1 to real registers count, it is ok
 
@@ -390,12 +450,9 @@ namespace Gateway
 
 		m_signalsStates.clear();
 
-		for(const auto& [addr16, p] : mbSignals)
+		for(const auto& [addr16, mbSignal] : mbSignals)
 		{
-			const QString& appSignalID = p.first;
-			const ModbusFormat& format = p.second;
-
-			Hash hash = calcHash(appSignalID);
+			Hash hash = calcHash(mbSignal.signalID);
 
 			auto it = m_signalsStates.find(hash);
 
@@ -406,8 +463,10 @@ namespace Gateway
 				it = newIt;
 			}
 
-			it->second.emplace_back(format, addr16);
+			it->second.emplace_back(mbSignal.format, mbSignal.addr, mbSignal.isConst, mbSignal.constValue);
 		}
+
+		updateAllRegisters();		// to init registers values
 
 		return true;
 	}
@@ -464,7 +523,7 @@ namespace Gateway
 
 	void ModbusSlaveHandler::updateRegister(const SignalState& state)
 	{
-		int regAddr = state.regNo.offset() - 1;		// !!! reagAddr == regNo - 1 !!!
+		int regAddr = state.regNo().offset() - 1;		// !!! reagAddr == regNo - 1 !!!
 
 		if (regAddr >= TO_INT(m_registers.size()))
 		{
@@ -472,17 +531,17 @@ namespace Gateway
 			return;
 		}
 
-		switch(state.format.signalFormat)
+		switch(state.format().signalFormat)
 		{
 		case E::ModbusSignalFormat::DiscreteBit:
 			{
 				RegisterValue& reg = m_registers[regAddr];
 
-				quint16 mask = 1 << state.regNo.bit();
+				quint16 mask = 1 << state.regNo().bit();
 
-				mask = reverse16(mask, state.format.byteOrder);
+				mask = reverse16(mask, state.format().byteOrder);
 
-				if (state.value == 0)
+				if (state.value() == 0)
 				{
 					reg &= (~mask);
 				}
@@ -497,9 +556,9 @@ namespace Gateway
 			{
 				quint16 f16;
 
-				f16 = encodeFloat16(static_cast<float>(state.value));
+				f16 = encodeFloat16(static_cast<float>(state.value()));
 
-				f16 = reverse16(f16, state.format.byteOrder);
+				f16 = reverse16(f16, state.format().byteOrder);
 
 				m_registers[regAddr] = f16;
 			}
@@ -507,10 +566,10 @@ namespace Gateway
 
 		case E::ModbusSignalFormat::AnalogSInt16:
 			{
-				qint16 sint16 = static_cast<qint16>(state.value);
+				qint16 sint16 = static_cast<qint16>(state.value());
 				qint16 uint16 = static_cast<quint16>(sint16);
 
-				uint16 = reverse16(uint16, state.format.byteOrder);
+				uint16 = reverse16(uint16, state.format().byteOrder);
 
 				m_registers[regAddr] = uint16;
 			}
@@ -524,9 +583,9 @@ namespace Gateway
 					return;
 				}
 
-				quint32 uint32 = std::bit_cast<quint32>(static_cast<float>(state.value));
+				quint32 uint32 = std::bit_cast<quint32>(static_cast<float>(state.value()));
 
-				uint32 = reverse32(uint32, state.format.byteOrder);
+				uint32 = reverse32(uint32, state.format().byteOrder);
 
 				m_registers[regAddr] = static_cast<RegisterValue>(uint32 & 0xFFFF);
 				m_registers[regAddr + 1] = static_cast<RegisterValue>(uint32 >> 16);
@@ -541,9 +600,9 @@ namespace Gateway
 					return;
 				}
 
-				quint32 uint32 = std::bit_cast<quint32>(static_cast<qint32>(state.value));
+				quint32 uint32 = std::bit_cast<quint32>(static_cast<qint32>(state.value()));
 
-				uint32 = reverse32(uint32, state.format.byteOrder);
+				uint32 = reverse32(uint32, state.format().byteOrder);
 
 				m_registers[regAddr] = static_cast<RegisterValue>(uint32 & 0xFFFF);
 				m_registers[regAddr + 1] = static_cast<RegisterValue>(uint32 >> 16);
@@ -1121,7 +1180,7 @@ namespace Gateway
 		return *reinterpret_cast<TcpFrame*>(mpd.sendBuffer);
 	}
 
-	size_t ModbusSlaveHandler::onAsciiFn03ReadHoldingRegisters(Message& msg, MbshProcData& mpd)
+	size_t ModbusSlaveHandler::onAsciiFn03ReadHoldingRegisters(Message& msg, MbshProcData& mpd, quint16 regsStartAddrOffset)
 	{
 		msg.fn03Request.reverseBytes();
 
@@ -1135,9 +1194,10 @@ namespace Gateway
 		binDataLen += sizeof(msg.modbusDeviceID);
 		binDataLen += sizeof(msg.functionCode);
 
+		int regsStartAddr = msg.fn03Request.regsStartAddr + regsStartAddrOffset;
 		int regsCount = msg.fn03Request.regsCount;
 
-		int bytesCount = getRegistersValues(msg.fn03Request.regsStartAddr, regsCount,
+		int bytesCount = getRegistersValues(regsStartAddr, regsCount,
 											msg.fn03Reply.regValues, FN03_MAX_REGS_COUNT,
 											QThread::currentThread());
 

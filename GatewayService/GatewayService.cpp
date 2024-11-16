@@ -1,7 +1,6 @@
 #include "GatewayService.h"
 
 #include "../OnlineLib/CfgServerLoader.h"
-#include "GatewayDescriptionParser.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -344,54 +343,4 @@ void GatewayServiceWorker::stopTimer()
 void GatewayServiceWorker::onTimer()
 {
 }
-
-void GatewayServiceWorker::parseGatewayDescription(const QString& filePathName, const QString& gwDesc)
-{
-	DEBUG_LOG_MSG(logger(), "");
-	DEBUG_LOG_MSG(logger(), QString("Parsing gateway description file: %1").arg(filePathName));
-
-	AppSignals appSignals;
-
-	Gateway::Parser gdp(appSignals);
-
-	gdp.parse(gwDesc);
-
-	int errCount = 0;
-	int wrnCount = 0;
-
-	const Gateway::ParserLog& parserLog = gdp.log();
-
-	for(const auto& r : parserLog)
-	{
-		switch(r.msgType)
-		{
-		case Gateway::LogMsgType::Message:
-			{
-				QString msg = r.msg;
-				msg = msg.mid(0, 1).toUpper() + msg.mid(1);
-				DEBUG_LOG_MSG(logger(), msg);
-			}
-			break;
-
-		case Gateway::LogMsgType::Warning:
-			DEBUG_LOG_WRN(logger(), "Warning: " + r.msg);
-			wrnCount++;
-			break;
-
-		case Gateway::LogMsgType::Error:
-			DEBUG_LOG_ERR(logger(), "Error: " + r.msg);
-			errCount++;
-			break;
-
-		default:
-			Q_ASSERT(false);
-		}
-	}
-
-	DEBUG_LOG_MSG(logger(), QString("Parsing finished with %1 errors, %2 warnings")
-										.arg(errCount).arg(wrnCount));
-	DEBUG_LOG_MSG(logger(), "");
-}
-
-
 

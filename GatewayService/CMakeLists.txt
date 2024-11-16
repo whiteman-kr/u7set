@@ -15,6 +15,8 @@ qt_standard_project_setup()
 set(TARGET GatewaySrv)
 
 add_executable(${TARGET}
+	../Builder/GatewayParserLog.cpp
+	../Builder/GatewayParserLog.h
 	AppDataServiceClient.cpp
 	AppDataServiceClient.h
 	AppSignalState.cpp
@@ -23,8 +25,6 @@ add_executable(${TARGET}
 	Float16.h
 	GatewayDescription.cpp
 	GatewayDescription.h
-	GatewayDescriptionParser.cpp
-	GatewayDescriptionParser.h
 	GatewayHandler.cpp
 	GatewayHandler.h
 	GatewayService.cpp

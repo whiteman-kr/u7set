@@ -308,6 +308,7 @@ namespace Builder
 
 		bool getAfbParamByIndex(int index, AfbParam* afbParam) const;
 		const AfbParam* getParamByOpName(const QString& opName) const;
+		const AfbParam* getParamByCaption(const QString& caption, bool toLower = false) const;
 
 		int getParamIntValueByOpName(const QString& opName, bool* ok) const;
 
@@ -408,9 +409,14 @@ namespace Builder
 		std::vector<UalAfb*>::iterator end();
 		std::vector<UalAfb*>::const_iterator end() const;
 
+		std::tuple<bool, bool, double> getUalAfbParamValue(const QString& itemLabel, const QString& paramName) const;
+
 	private:
 		std::vector<UalAfb*> m_afbs;
 		std::map<QUuid, UalAfb*> m_guidToAfb;
+
+		mutable std::map<Hash, const UalAfb*> m_labelHashToAfb;
+
 		int m_fbNumber = 1;
 	};
 

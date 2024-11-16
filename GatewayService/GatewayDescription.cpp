@@ -3,7 +3,6 @@
 #include "../UtilsLib/XmlHelper.h"
 
 #include "GatewayDescription.h"
-#include "GatewayDescriptionParser.h"
 #include "IvsImpulseGateway.h"
 #include "ModbusSlaveGateway.h"
 
@@ -176,11 +175,32 @@ namespace Gateway
 		return ParseResult::Ok;
 	}
 
-	ParseResult SignalList::appendAddressSignalID(int lineNo, const QString& addressStr, const QString& appSignalID, ParserLog& log)
+	ParseResult SignalList::parseAddressStr(int lineNo, const QString& addStr, Address16* addr, ParserLog& log)
 	{
-		Q_UNUSED(addressStr);
+		Q_UNUSED(addStr);
+		Q_UNUSED(addr);
 
-		return appendSignalID(lineNo, appSignalID, log);
+		log.logError(lineNo, "parseAddressStr is not implemented for this gateway type");
+		return 	ParseResult::Error;
+	}
+
+	ParseResult SignalList::appendAddressSignalID(int lineNo, const Address16& addr16, const QString& appSignalID, ParserLog& log)
+	{
+		Q_UNUSED(addr16);
+		Q_UNUSED(appSignalID);
+
+		log.logError(lineNo, "appendAddressSignalID is not implemented for this gateway type");
+		return 	ParseResult::Error;
+	}
+
+	ParseResult SignalList::appendAddressConstValue(int lineNo, const Address16& addr16, const QString& desc, double constValue, ParserLog& log)
+	{
+		Q_UNUSED(addr16);
+		Q_UNUSED(desc);
+		Q_UNUSED(constValue);
+
+		log.logError(lineNo, "appendAddressConstValue is not implemented for this gateway type");
+		return 	ParseResult::Error;
 	}
 
 	std::optional<::E::SignalType> SignalList::signalType() const
@@ -444,7 +464,8 @@ namespace Gateway
 		{
 			if (settingsValues.contains(st) == false)
 			{
-				log.logRequirtedSettingIsNotSet(lineNo, st);
+				log.logError(lineNo, QString("required setting '%1' is not set").
+											arg(::E::valueToString<E::Setting>(st)));
 				result = false;
 			}
 		}
@@ -534,9 +555,9 @@ namespace Gateway
 		return result;
 	}
 
-	bool Gateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log)
+	bool Gateway::generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log)
 	{
-		Q_UNUSED(signalSetAdapter);
+		Q_UNUSED(signalSet);
 		Q_UNUSED(log);
 		return true;
 	}

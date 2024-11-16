@@ -3,6 +3,8 @@
 class XmlWriteHelper;
 class XmlReadHelper;
 
+#include "../Builder/GatewayParserLog.h"
+
 namespace Gateway
 {
 	class E : public QObject
@@ -194,7 +196,9 @@ namespace Gateway
 		virtual ParseResult checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
 		virtual ParseResult checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log);
 		virtual ParseResult appendSignalID(int lineNo, const QString& appSignalID, ParserLog& log);
-		virtual ParseResult appendAddressSignalID(int lineNo, const QString& addressStr, const QString& appSignalID, ParserLog& log);
+		virtual ParseResult parseAddressStr(int lineNo, const QString& addStr, Address16* addr, ParserLog& log);
+		virtual ParseResult appendAddressSignalID(int lineNo, const Address16& addr16, const QString& appSignalID, ParserLog& log);
+		virtual ParseResult appendAddressConstValue(int lineNo, const Address16& addr16, const QString& desc, double constValue, ParserLog& log);
 
 		std::optional<::E::SignalType> signalType() const;
 		void setSignalType(::E::SignalType st);
@@ -204,7 +208,7 @@ namespace Gateway
 		const std::vector<QString>& signalIDs() const;
 		int signalsCount() const;
 
-		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
+		virtual void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 
 		void writeToXml(XmlWriteHelper& xml) const;
 		bool readFromXml(XmlReadHelper& xml);
@@ -278,7 +282,7 @@ namespace Gateway
 		virtual void writeSignalListsToXml(XmlWriteHelper& xml) const;
 		virtual bool readSignalListsFromXml(XmlReadHelper& xml);
 
-		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
+		virtual bool generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log);
 
 	protected:
 		E::GatewayType m_gatewayType = E::GatewayType::Unknown;

@@ -67,14 +67,23 @@ namespace Gateway
 		size_t rtuRequestProcessing(MbshProcData& mpd);
 
 	private:
-		struct SignalState
+		class SignalState
 		{
-			SignalState(const ModbusFormat& frmt, const Address16& registerNo);
+		public:
+			SignalState(const ModbusFormat& frmt, const Address16& registerNo, bool isConst, double constValue);
 
-			ModbusFormat format;
-			Address16 regNo;		// regAddr (index in m_registers) == regNo.offset() - 1 !!!
+			const ModbusFormat& format() const;
+			const Address16& regNo() const;
+			double value() const;
+			bool isConst() const;
 
-			double value = 0;
+			void setValue(double value);
+
+		private:
+			ModbusFormat m_format;
+			Address16 m_regNo;			// regAddr (index in m_registers) == regNo.offset() - 1 !!!
+			double m_value = 0;
+			bool m_isConst = false;
 		};
 
 	private:
@@ -106,7 +115,7 @@ namespace Gateway
 		Modbus::TcpFrame& getTcpRequestRef(MbshProcData& mpd);
 		Modbus::TcpFrame& getTcpReplyRef(MbshProcData& mpd);
 
-		size_t onAsciiFn03ReadHoldingRegisters(Message& msg, MbshProcData& mpd);
+		size_t onAsciiFn03ReadHoldingRegisters(Message& msg, MbshProcData& mpd, quint16 regsStartAddrOffset);
 
 		bool convertAsciiToBin(const quint8* asciiPtr, size_t asciiLen,
 							   quint8* binPtr, size_t* binLen);

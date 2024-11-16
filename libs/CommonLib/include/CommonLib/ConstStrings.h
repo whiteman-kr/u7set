@@ -444,6 +444,8 @@ namespace XmlAttribute
 	inline const QString REG_NO("RegNo");
 	inline const QString REG_BIT("RegBit");
 	inline const QString FORMAT("Format");
+	inline const QString IS_CONST("IsConst");
+	inline const QString CONST_VALUE("ConstValue");
 
 	inline const QString MODULE_CAPTION("ModuleCaption");
 

@@ -277,11 +277,6 @@ namespace Modbus
 				break;
 			}
 
-			if (bytesReceived > 6)
-			{
-				DEBUG_STOP;
-			}
-
 			quint8 ch = m_tempBuffer[i];
 
 			bool skipChar = false;
