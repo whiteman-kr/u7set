@@ -538,15 +538,18 @@ namespace Gateway
 	ParseResult Parser::appendAddressSignalID(SignalListShared signalList,
 												const ParseLineResult& plr, bool appendAddr)
 	{
-		bool isPropValue = false;
-		double propValue = 0;
+		QString labelPropName;
 
-		ParseResult pr = parsePropValue(plr, &isPropValue, &propValue);
+		ParseResult pr = parsePropValue(plr, &labelPropName);
 
-		if (isPropValue)
+		if (pr != ParseResult::Ok)
 		{
-			;
 			return pr;
+		}
+
+		if (labelPropName.isEmpty() == false)
+		{
+
 		}
 
 		QString appSignalID = plr.value.toString().trimmed();
@@ -578,10 +581,11 @@ namespace Gateway
 		return pr;
 	}
 
-	ParseResult Parser::parsePropValue(const ParseLineResult& plr, bool* isPropValue, double* propValue)
+	ParseResult Parser::parsePropValue(const ParseLineResult& plr, QString* labelPropName)
 	{
-		TEST_PTR_RETURN_VALUE(isPropValue, ParseResult::CriticalError);
-		TEST_PTR_RETURN_VALUE(propValue, ParseResult::CriticalError);
+		TEST_PTR_RETURN_VALUE(labelPropName, ParseResult::CriticalError);
+
+		labelPropName->clear();
 
 		static const QString PROP_STR("prop(");
 		static const int PROP_STR_LEN = PROP_STR.length();
@@ -591,17 +595,13 @@ namespace Gateway
 
 		if (str.length() < PROP_STR_LEN)
 		{
-			*isPropValue = false;
 			return ParseResult::Ok;
 		}
 
 		if (str.mid(0, PROP_STR_LEN).toLower() != PROP_STR)
 		{
-			*isPropValue = false;
 			return ParseResult::Ok;
 		}
-
-		*isPropValue = true;
 
 		if (str.endsWith(")") == false)
 		{
@@ -609,9 +609,9 @@ namespace Gateway
 			return ParseResult::Error;
 		}
 
-		QString labelPropName = str.mid(PROP_STR_LEN, str.length() - PROP_STR_LEN - 1);
+		QString lPropName = str.mid(PROP_STR_LEN, str.length() - PROP_STR_LEN - 1);
 
-		QStringList sl = labelPropName.split(Separator::DOT, Qt::SkipEmptyParts);
+		QStringList sl = lPropName.split(Separator::DOT, Qt::SkipEmptyParts);
 
 		if (sl.size() != 2)
 		{
@@ -619,10 +619,9 @@ namespace Gateway
 			return ParseResult::Error;
 		}
 
-		QString label = sl[0];
-		QString propName = sl[1];
+		*labelPropName = lPropName;
 
-		m_log.logWarning(plr.lineNo, QString("Property value detected %1.%2").arg(label).arg(propName));
+		m_log.logWarning(plr.lineNo, QString("Property value detected %1").arg(*labelPropName));
 
 		return ParseResult::Ok;
 	}
