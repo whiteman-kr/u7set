@@ -1,5 +1,4 @@
 #include "ModbusTcpSlaveThread.h"
-#include "ModbusSlaveGatewayHandler.h"
 
 namespace Modbus
 {
@@ -40,6 +39,7 @@ namespace Modbus
 		if (m_firstStartReceive)
 		{
 			m_peerAddr = peerAddress();
+
 			asio::ip::tcp::no_delay option(true);
 			m_socket.set_option(option);
 			m_firstStartReceive = false;
@@ -48,7 +48,7 @@ namespace Modbus
 								 arg(m_handler.gatewayID()).arg(m_connNo).arg(m_peerAddr));
 		}
 
-		m_socket.async_receive(asio::buffer(m_handler.recvBuffer(), m_handler.recvBufferSize()),
+		m_socket.async_receive(asio::buffer(m_recvBuffer, RECV_BUFFER_SIZE),
 							   bind(&TcpSlaveThread::Connection::onReceiveData, this,
 									std::placeholders::_1,
 									std::placeholders::_2));
@@ -85,15 +85,29 @@ namespace Modbus
 			return;
 		}
 
-		size_t sendBytesCount = 0;
+		// MbshProcData structure filling
 
-		sendBytesCount = m_handler.tcpRequestProcessing(m_connNo, m_peerAddr, error, bytesReceived);
+		m_mpd.connNo = m_connNo;
+		m_mpd.peerAddr = m_peerAddr;
+		m_mpd.error = error;
 
-		if (sendBytesCount > 0)
+		m_mpd.recvBuffer = m_recvBuffer;
+		m_mpd.recvBufferSize = RECV_BUFFER_SIZE;
+		m_mpd.bytesReceived = bytesReceived;
+
+		m_mpd.sendBuffer = m_sendBuffer;
+		m_mpd.sendBufferSize = SEND_BUFFER_SIZE;
+		m_mpd.sendBytes = 0;
+
+		//
+
+		size_t sendBytes = m_handler.tcpRequestProcessing(m_mpd);
+
+		if (sendBytes > 0)
 		{
-			if (sendBytesCount <= m_handler.sendBufferSize())
+			if (sendBytes <= SEND_BUFFER_SIZE)
 			{
-				m_socket.write_some(asio::buffer(m_handler.sendBuffer(), sendBytesCount));
+				m_socket.write_some(asio::buffer(m_sendBuffer, sendBytes));
 			}
 			else
 			{
@@ -131,7 +145,7 @@ namespace Modbus
 
 	void TcpSlaveThread::Listener::run()
 	{
-		startTimer500ms();
+		startTimer();
 		startListening();
 
 		m_ioContext.run();
@@ -179,14 +193,14 @@ namespace Modbus
 		return true;
 	}
 
-	void TcpSlaveThread::Listener::startTimer500ms()
+	void TcpSlaveThread::Listener::startTimer()
 	{
 		m_timer.expires_after(asio::chrono::milliseconds(1000));
-		m_timer.async_wait(bind(&TcpSlaveThread::Listener::onTimer500ms, this,
+		m_timer.async_wait(bind(&TcpSlaveThread::Listener::onTimer, this,
 								std::placeholders::_1));
 	}
 
-	void TcpSlaveThread::Listener::onTimer500ms(const error_code& error)
+	void TcpSlaveThread::Listener::onTimer(const error_code& error)
 	{
 		Q_UNUSED(error);
 
@@ -195,7 +209,7 @@ namespace Modbus
 			return;
 		}
 
-		startTimer500ms();
+		startTimer();
 	}
 
 	void TcpSlaveThread::Listener::startListening()

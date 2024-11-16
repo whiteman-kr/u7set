@@ -2,20 +2,61 @@
 #include <Network.pb.h>
 
 #include "ModbusSlaveGatewayHandler.h"
+#include "ModbusTcpSlaveThread.h"
+#include "ModbusUdpSlaveThread.h"
+
 #include "Float16.h"
 
 namespace Gateway
 {
 	// ---------------------------------------------------------------------------------
 	//
-	//	Gateway::ModbusTcpSlaveHandler::SignalState struct implementation
+	//	Gateway::ModbusSlaveHandler::SignalState struct implementation
 	//
 	// ---------------------------------------------------------------------------------
 
-	ModbusSlaveHandler::SignalState::SignalState(const ModbusFormat& frmt, const Address16& registerNo)
+	ModbusSlaveHandler::SignalState::SignalState(const ModbusFormat& frmt, const Address16& registerNo,
+												bool isConst, double constValue) :
+		m_format(frmt),
+		m_regNo(registerNo),
+		m_isConst(isConst)
 	{
-		format = frmt;
-		regNo = registerNo;
+		if (isConst)
+		{
+			m_value = constValue;
+		}
+	}
+
+	const ModbusFormat& ModbusSlaveHandler::SignalState::format() const
+	{
+		return m_format;
+	}
+
+	const Address16& ModbusSlaveHandler::SignalState::regNo() const
+	{
+		return m_regNo;
+	}
+
+	double ModbusSlaveHandler::SignalState::value() const
+	{
+		return m_value;
+	}
+
+	bool ModbusSlaveHandler::SignalState::isConst() const
+	{
+		return m_isConst;
+	}
+
+	void ModbusSlaveHandler::SignalState::setValue(double value)
+	{
+		if (!m_isConst)
+		{
+			m_value = value;
+		}
+		else
+		{
+			Q_ASSERT(false);
+		}
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -55,33 +96,72 @@ namespace Gateway
 												this, m_log);
 		m_appDataServiceClientThread->start();
 
-		if (listeningIP1().isSet() == true)
+		switch(modbusMode())
 		{
-			m_modbusTcpSlaveThread1 = new TcpSlaveThread(listeningIP1(), *this);
-			m_modbusTcpSlaveThread1->start();
-		}
+		case E::ModbusMode::TCP:
 
-		if (listeningIP2().isSet() == true)
-		{
-			m_modbusTcpSlaveThread2 = new TcpSlaveThread(listeningIP2(), *this);
-			m_modbusTcpSlaveThread2->start();
+			if (listeningIP1().isSet() == true)
+			{
+				m_tcpSlaveThread1 = new TcpSlaveThread(listeningIP1(), *this);
+				m_tcpSlaveThread1->start();
+			}
+
+			if (listeningIP2().isSet() == true)
+			{
+				m_tcpSlaveThread2 = new TcpSlaveThread(listeningIP2(), *this);
+				m_tcpSlaveThread2->start();
+			}
+			break;
+
+		case E::ModbusMode::UDP_ASCII:
+		case E::ModbusMode::UDP_ASCII_KZ_UIK:
+
+			if (listeningIP1().isSet() == true)
+			{
+				m_udpSlaveThread1 = new UdpSlaveThread(listeningIP1(), *this);
+				m_udpSlaveThread1->start();
+			}
+
+			if (listeningIP2().isSet() == true)
+			{
+				m_udpSlaveThread2 = new UdpSlaveThread(listeningIP2(), *this);
+				m_udpSlaveThread2->start();
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
 		}
 	}
 
 	void ModbusSlaveHandler::shutdown()
 	{
-		if (m_modbusTcpSlaveThread1 != nullptr)
+		if (m_udpSlaveThread1 != nullptr)
 		{
-			m_modbusTcpSlaveThread1->stop();
-			delete m_modbusTcpSlaveThread1;
-			m_modbusTcpSlaveThread1 = nullptr;
+			m_udpSlaveThread1->stop();
+			delete m_udpSlaveThread1;
+			m_udpSlaveThread1 = nullptr;
 		}
 
-		if (m_modbusTcpSlaveThread2 != nullptr)
+		if (m_udpSlaveThread2 != nullptr)
 		{
-			m_modbusTcpSlaveThread2->stop();
-			delete m_modbusTcpSlaveThread2;
-			m_modbusTcpSlaveThread2 = nullptr;
+			m_udpSlaveThread2->stop();
+			delete m_udpSlaveThread2;
+			m_udpSlaveThread2 = nullptr;
+		}
+
+		if (m_tcpSlaveThread1 != nullptr)
+		{
+			m_tcpSlaveThread1->stop();
+			delete m_tcpSlaveThread1;
+			m_tcpSlaveThread1 = nullptr;
+		}
+
+		if (m_tcpSlaveThread2 != nullptr)
+		{
+			m_tcpSlaveThread2->stop();
+			delete m_tcpSlaveThread2;
+			m_tcpSlaveThread2 = nullptr;
 		}
 
 		if (m_appDataServiceClientThread != nullptr)
@@ -124,7 +204,6 @@ namespace Gateway
 
 			if (it == m_signalsStates.end())
 			{
-				Q_ASSERT(false);
 				continue;
 			}
 
@@ -132,7 +211,7 @@ namespace Gateway
 
 			for(SignalState& st : states)
 			{
-				st.value = state.value();
+				st.setValue(state.value());
 			}
 		}
 
@@ -155,7 +234,6 @@ namespace Gateway
 
 			if (it == m_signalsStates.end())
 			{
-				Q_ASSERT(false);
 				continue;
 			}
 
@@ -165,7 +243,7 @@ namespace Gateway
 
 			for(SignalState& st : states)
 			{
-				st.value = state.value();
+				st.setValue(state.value());
 			}
 		}
 
@@ -182,29 +260,9 @@ namespace Gateway
 		return m_gateway->modbusDeviceID();
 	}
 
-	quint8* ModbusSlaveHandler::recvBuffer()
-	{
-		return m_recvBuffer;
-	}
-
-	size_t ModbusSlaveHandler::recvBufferSize() const
-	{
-		return RECV_BUFFER_SIZE;
-	}
-
-	quint8* ModbusSlaveHandler::sendBuffer()
-	{
-		return m_sendBuffer;
-	}
-
-	size_t ModbusSlaveHandler::sendBufferSize() const
-	{
-		return SEND_BUFFER_SIZE;
-	}
-
-	int ModbusSlaveHandler::getRegistersValues(int startRegAddr, int regsCount,
-												  RegisterValue* destBuffer, int maxRegsCount,
-												  QThread* thread)
+	int ModbusSlaveHandler::getRegistersValues(int regsStartAddr, int regsCount,
+												RegisterValue* destBuffer, int maxRegsCount,
+												QThread* thread)
 	{
 		if (maxRegsCount < regsCount)
 		{
@@ -214,9 +272,9 @@ namespace Gateway
 
 		int copyRegCount = regsCount;
 
-		if (startRegAddr + copyRegCount > m_registers.size())
+		if (regsStartAddr + copyRegCount > m_registers.size())
 		{
-			copyRegCount = static_cast<int>(m_registers.size()) - startRegAddr;
+			copyRegCount = static_cast<int>(m_registers.size()) - regsStartAddr;
 		}
 
 		int copyDestSizeBytes = copyRegCount * REGISTER_SIZE_BYTES;
@@ -224,7 +282,7 @@ namespace Gateway
 		m_regsMutex.lock(thread);
 
 		std::memcpy(reinterpret_cast<char*>(destBuffer),
-					reinterpret_cast<char*>(m_registers.data() + startRegAddr),
+					reinterpret_cast<char*>(m_registers.data() + regsStartAddr),
 					copyDestSizeBytes);
 
 		m_regsMutex.unlock(thread);
@@ -239,39 +297,36 @@ namespace Gateway
 		return regsCount * REGISTER_SIZE_BYTES;
 	}
 
-	size_t ModbusSlaveHandler::tcpRequestProcessing(int connNo,
-													const QString& peerAddr,
-													const error_code& error,
-													size_t bytesReceived)
+	size_t ModbusSlaveHandler::tcpRequestProcessing(MbshProcData& mpd)
 	{
-		logTcpRequest(connNo, peerAddr, error, bytesReceived);
+		logTcpRequest(mpd);
 
-		TcpFrame& request = getTcpRequestRef();
+		mpd.sendBytes = 0;
 
-		request.reverseBytes();
+		TcpFrame& request = getTcpRequestRef(mpd);
+
+		request.header.reverseBytes();
 
 		Q_ASSERT(request.header.protocolID == 0);
 
 		size_t expectedSize = request.header.length + sizeof(request.header);
 
-		if (expectedSize != bytesReceived)
+		if (expectedSize != mpd.bytesReceived)
 		{
 			// DEBUG_LOG_ERR(m_listener.log(), QString("ModbusSlaveHandler::onReceiveData error: wrong request size, expected %1, received %2 bytes").
 			// 								arg(expectedSize).arg(bytesReceived));
 			return 0;
 		}
 
-		if (request.modbusDeviceID != modbusDeviceID())
+		if (request.msg.modbusDeviceID != modbusDeviceID())
 		{
 			return 0;					// its Ok, request to another device
 		}
 
-		size_t sendBytesCount = 0;
-
-		switch(request.functionCode)
+		switch(request.msg.functionCode)
 		{
 		case FC_READ_HOLDING_REGISTERS:
-			sendBytesCount = onFnReadHoldingRegisters(request);
+			mpd.sendBytes = onFnReadHoldingRegisters(mpd);
 			break;
 
 		default:;
@@ -279,17 +334,98 @@ namespace Gateway
 			// 								arg(request.functionCode));
 		}
 
-		if (sendBytesCount > 0)
+		if (mpd.sendBytes > 0)
 		{
-			logTcpReply(connNo, peerAddr, sendBytesCount);
+			logTcpReply(mpd);
 		}
 
-		return sendBytesCount;
+		return mpd.sendBytes;
+	}
+
+	size_t ModbusSlaveHandler::asciiRequestProcessing(MbshProcData& mpd)
+	{
+		logAsciiRequest(mpd);
+
+		if (mpd.bytesReceived != ASCII_FN03_REQUEST_SIZE)
+		{
+			return 0;
+		}
+
+		size_t binDataLen = 0;
+
+		bool result = convertAsciiToBin(mpd.recvBuffer, mpd.bytesReceived,
+									 m_binData, &binDataLen);
+
+		RETURN_IF_FALSE(result);
+
+		Message& msg = *reinterpret_cast<Message*>(m_binData);
+
+		quint16 regsStartAddrOffset = 0;
+
+		switch(modbusMode())
+		{
+		case E::ModbusMode::UDP_ASCII:
+			if (msg.modbusDeviceID != modbusDeviceID())
+			{
+				return 0;			// its Ok, request to another device
+			}
+			break;
+
+		case E::ModbusMode::UDP_ASCII_KZ_UIK:
+			if (msg.modbusDeviceID >= modbusDeviceID() && msg.modbusDeviceID <= modbusDeviceID() + 2)
+			{
+				regsStartAddrOffset = (msg.modbusDeviceID - modbusDeviceID()) * 300;
+			}
+			else
+			{
+				return 0;			// its Ok, request to another device
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		if (msg.functionCode != FC_READ_HOLDING_REGISTERS)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		quint8 receivedCrc = m_binData[binDataLen - 1];
+
+		quint8 calculatedCrc = calcCrc(m_binData, binDataLen - 1);
+
+		if (receivedCrc != calculatedCrc)
+		{
+			DEBUG_LOG_ERR(log(), QString("Modbus request CRC error: received 0x%1, calculated 0x%2").
+											arg(receivedCrc, 2, 16, QChar('0')).
+											arg(calculatedCrc, 2, 16, QChar('0')));
+			//return 0;
+		}
+
+		mpd.sendBytes = onAsciiFn03ReadHoldingRegisters(msg, mpd, regsStartAddrOffset);
+
+		if (mpd.sendBytes > 0)
+		{
+			logAsciiReply(mpd);
+		}
+
+		return mpd.sendBytes;
+	}
+
+	size_t ModbusSlaveHandler::rtuRequestProcessing(MbshProcData& mpd)
+	{
+		Q_ASSERT(false);		// not implemented!
+
+		Q_UNUSED(mpd);
+		return 0;
 	}
 
 	bool ModbusSlaveHandler::init()
 	{
-		const std::map<Address16, std::pair<QString, ModbusFormat>>& mbSignals = m_gateway->modbusSignals();
+		const std::map<Address16, ModbusSlaveGateway::ModbusSignal>& mbSignals = m_gateway->modbusSignals();
 
 		auto itLast = mbSignals.rbegin();
 
@@ -299,8 +435,9 @@ namespace Gateway
 		}
 
 		Address16 maxAddr = itLast->first;
+		const ModbusSlaveGateway::ModbusSignal& mbs = itLast->second;
 
-		const ModbusFormat lastSignalFormat = itLast->second.second;
+		const ModbusFormat lastSignalFormat = mbs.format;
 
 		maxAddr.addWord(lastSignalFormat.registersCount());			// maxAddr here is +1 to real registers count, it is ok
 
@@ -313,12 +450,9 @@ namespace Gateway
 
 		m_signalsStates.clear();
 
-		for(const auto& [addr16, p] : mbSignals)
+		for(const auto& [addr16, mbSignal] : mbSignals)
 		{
-			const QString& appSignalID = p.first;
-			const ModbusFormat& format = p.second;
-
-			Hash hash = calcHash(appSignalID);
+			Hash hash = calcHash(mbSignal.signalID);
 
 			auto it = m_signalsStates.find(hash);
 
@@ -329,8 +463,10 @@ namespace Gateway
 				it = newIt;
 			}
 
-			it->second.emplace_back(format, addr16);
+			it->second.emplace_back(mbSignal.format, mbSignal.addr, mbSignal.isConst, mbSignal.constValue);
 		}
+
+		updateAllRegisters();		// to init registers values
 
 		return true;
 	}
@@ -387,7 +523,7 @@ namespace Gateway
 
 	void ModbusSlaveHandler::updateRegister(const SignalState& state)
 	{
-		int regAddr = state.regNo.offset() - 1;		// !!! reagAddr == regNo - 1 !!!
+		int regAddr = state.regNo().offset() - 1;		// !!! reagAddr == regNo - 1 !!!
 
 		if (regAddr >= TO_INT(m_registers.size()))
 		{
@@ -395,17 +531,17 @@ namespace Gateway
 			return;
 		}
 
-		switch(state.format.signalFormat)
+		switch(state.format().signalFormat)
 		{
 		case E::ModbusSignalFormat::DiscreteBit:
 			{
 				RegisterValue& reg = m_registers[regAddr];
 
-				quint16 mask = 1 << state.regNo.bit();
+				quint16 mask = 1 << state.regNo().bit();
 
-				mask = reverse16(mask, state.format.byteOrder);
+				mask = reverse16(mask, state.format().byteOrder);
 
-				if (state.value == 0)
+				if (state.value() == 0)
 				{
 					reg &= (~mask);
 				}
@@ -420,9 +556,9 @@ namespace Gateway
 			{
 				quint16 f16;
 
-				f16 = encodeFloat16(static_cast<float>(state.value));
+				f16 = encodeFloat16(static_cast<float>(state.value()));
 
-				f16 = reverse16(f16, state.format.byteOrder);
+				f16 = reverse16(f16, state.format().byteOrder);
 
 				m_registers[regAddr] = f16;
 			}
@@ -430,10 +566,10 @@ namespace Gateway
 
 		case E::ModbusSignalFormat::AnalogSInt16:
 			{
-				qint16 sint16 = static_cast<qint16>(state.value);
+				qint16 sint16 = static_cast<qint16>(state.value());
 				qint16 uint16 = static_cast<quint16>(sint16);
 
-				uint16 = reverse16(uint16, state.format.byteOrder);
+				uint16 = reverse16(uint16, state.format().byteOrder);
 
 				m_registers[regAddr] = uint16;
 			}
@@ -447,9 +583,9 @@ namespace Gateway
 					return;
 				}
 
-				quint32 uint32 = std::bit_cast<quint32>(static_cast<float>(state.value));
+				quint32 uint32 = std::bit_cast<quint32>(static_cast<float>(state.value()));
 
-				uint32 = reverse32(uint32, state.format.byteOrder);
+				uint32 = reverse32(uint32, state.format().byteOrder);
 
 				m_registers[regAddr] = static_cast<RegisterValue>(uint32 & 0xFFFF);
 				m_registers[regAddr + 1] = static_cast<RegisterValue>(uint32 >> 16);
@@ -464,9 +600,9 @@ namespace Gateway
 					return;
 				}
 
-				quint32 uint32 = std::bit_cast<quint32>(static_cast<qint32>(state.value));
+				quint32 uint32 = std::bit_cast<quint32>(static_cast<qint32>(state.value()));
 
-				uint32 = reverse32(uint32, state.format.byteOrder);
+				uint32 = reverse32(uint32, state.format().byteOrder);
 
 				m_registers[regAddr] = static_cast<RegisterValue>(uint32 & 0xFFFF);
 				m_registers[regAddr + 1] = static_cast<RegisterValue>(uint32 >> 16);
@@ -541,24 +677,27 @@ namespace Gateway
 		return 0;
 	}
 
-	void ModbusSlaveHandler::logTcpRequest(int connNo,
-										   const QString& peerAddr,
-										   const error_code& error,
-										   size_t bytesReceived)
+	void ModbusSlaveHandler::logTcpRequest(MbshProcData& mpd)
 	{
+		if (enableLogging() == false)
+		{
+			return;
+		}
+
 		m_logStr.clear();
 
-		m_logStr.append(QString("Gateway %1 #%2 Modbus TCP request from %3, socket error code %4 ('%5'), bytes received %6").
+		m_logStr.append(QString("Gateway %1 #%2 Modbus %3 request from %4, socket error code %5 ('%6'), bytes received %7").
 						arg(gatewayID()).
-						arg(connNo).
-						arg(peerAddr).
-						arg(error.value()).
-						arg(error ? QString::fromStdString(error.message()) : QStringLiteral("NoErr")).
-						arg(bytesReceived));
+						arg(mpd.connNo).
+						arg(::E::valueToString(modbusMode())).
+						arg(mpd.peerAddr).
+						arg(mpd.error.value()).
+						arg(mpd.error ? QString::fromStdString(mpd.error.message()) : QStringLiteral("NoErr")).
+						arg(mpd.bytesReceived));
 
 		logRequest(m_logStr);
 
-		if (error || bytesReceived == 0)
+		if (mpd.error || mpd.bytesReceived == 0)
 		{
 			return;
 		}
@@ -569,9 +708,9 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("Binary:"));
 
-		for(size_t i = 0; i < bytesReceived && i < RECV_BUFFER_SIZE; i++)
+		for(size_t i = 0; i < mpd.bytesReceived && i < mpd.recvBufferSize; i++)
 		{
-			m_logStr.append(QString(" %1").arg(m_recvBuffer[i], 2, 16, QChar('0')).toUpper());
+			m_logStr.append(QString(" %1").arg(mpd.recvBuffer[i], 2, 16, QChar('0')).toUpper());
 		}
 
 		logRequest(m_logStr);
@@ -582,7 +721,7 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("TCP header: "));
 
-		const TcpFrame& req = getTcpRequestRef();
+		const TcpFrame& req = getTcpRequestRef(mpd);
 
 		TcpHeader reqHeader = req.header;
 
@@ -599,17 +738,17 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("Modbus request: "));
 
-		switch(req.functionCode)
+		switch(req.msg.functionCode)
 		{
 		case FC_READ_HOLDING_REGISTERS:
 		{
-			Fn03_ReadHoldingRegisters_Request fn03Req = req.fn03Request;
+			Fn03_ReadHoldingRegisters_Request fn03Req = req.msg.fn03Request;
 
 			fn03Req.reverseBytes();
 
 			m_logStr.append(QString("deviceID %1, function %2, start register %3, regs count %4").
-							arg(req.modbusDeviceID).
-							arg(req.functionCode).
+							arg(req.msg.modbusDeviceID).
+							arg(req.msg.functionCode).
 							arg(fn03Req.regsStartAddr).
 							arg(fn03Req.regsCount));
 			logRequest(m_logStr);
@@ -617,24 +756,30 @@ namespace Gateway
 		break;
 
 		default:
-			m_logStr.append(QString("function %1 is not supported!").arg(req.functionCode));
+			m_logStr.append(QString("function %1 is not supported!").arg(req.msg.functionCode));
 			logRequest(m_logStr, CircularLogger::RecordType::Error);
 		}
 	}
 
-	void ModbusSlaveHandler::logTcpReply(int connNo, const QString& peerAddr, size_t sendBytes)
+	void ModbusSlaveHandler::logTcpReply(MbshProcData& mpd)
 	{
+		if (enableLogging() == false)
+		{
+			return;
+		}
+
 		m_logStr.clear();
 
-		m_logStr.append(QString("Gateway %1 #%2 Modbus TCP reply to %3, bytes sent %4").
+		m_logStr.append(QString("Gateway %1 #%2 Modbus %3 reply to %4, bytes sent %5").
 						arg(gatewayID()).
-						arg(connNo).
-						arg(peerAddr).
-						arg(sendBytes));
+						arg(mpd.connNo).
+						arg(::E::valueToString(modbusMode())).
+						arg(mpd.peerAddr).
+						arg(mpd.sendBytes));
 
 		logReply(m_logStr);
 
-		if (sendBytes == 0)
+		if (mpd.sendBytes == 0)
 		{
 			return;
 		}
@@ -645,9 +790,9 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("Binary:"));
 
-		for(size_t i = 0; i < sendBytes && i < SEND_BUFFER_SIZE; i++)
+		for(size_t i = 0; i < mpd.sendBytes && i < mpd.sendBufferSize; i++)
 		{
-			m_logStr.append(QString(" %1").arg(m_sendBuffer[i], 2, 16, QChar('0')).toUpper());
+			m_logStr.append(QString(" %1").arg(mpd.sendBuffer[i], 2, 16, QChar('0')).toUpper());
 		}
 
 		logReply(m_logStr);
@@ -658,7 +803,7 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("TCP header: "));
 
-		const TcpFrame& rep = getTcpReplyRef();
+		const TcpFrame& rep = getTcpReplyRef(mpd);
 
 		TcpHeader repHeader = rep.header;
 
@@ -675,20 +820,264 @@ namespace Gateway
 
 		m_logStr.append(QStringLiteral("Modbus reply: "));
 
-		switch(rep.functionCode)
+		switch(rep.msg.functionCode)
+		{
+		case FC_READ_HOLDING_REGISTERS:
+			{
+				const Fn03_ReadHoldingRegisters_Reply& fn03Rep = rep.msg.fn03Reply;
+
+				quint8 bytesCount = rep.msg.fn03Reply.bytesCount;
+				quint32 regsCount = static_cast<quint32>(bytesCount / sizeof(quint16));
+
+				m_logStr.append(QString("deviceID %1, function %2, bytes count %3, regs count %4").
+								arg(rep.msg.modbusDeviceID).
+								arg(rep.msg.functionCode).
+								arg(bytesCount).
+								arg(regsCount));
+				logReply(m_logStr);
+
+				//
+
+				m_logStr.clear();
+
+				m_logStr.append(QStringLiteral("Modbus reply:"));
+
+				const TcpFrame& req = getTcpRequestRef(mpd);
+
+				for(quint32 i = 0; i < regsCount; i++)
+				{
+					m_logStr.append(QString(" r[%1]=0x%3").
+									arg(req.msg.fn03Request.regsStartAddr + i).
+									arg(fn03Rep.regValues[i], 4, 16, QChar('0')));
+				}
+				logReply(m_logStr);
+			}
+			break;
+
+		default:
+			m_logStr.append(QString("function %1 is not supported!").arg(rep.msg.functionCode));
+			logReply(m_logStr, CircularLogger::RecordType::Error);
+		}
+	}
+
+	void ModbusSlaveHandler::logAsciiRequest(MbshProcData& mpd)
+	{
+		if (enableLogging() == false)
+		{
+			return;
+		}
+
+		m_logStr.clear();
+
+		m_logStr.append(QString("Gateway %1 #%2 Modbus %3 request from %4, socket error code %5 ('%6'), bytes received %7").
+						arg(gatewayID()).
+						arg(mpd.connNo).
+						arg(::E::valueToString(modbusMode())).
+						arg(mpd.peerAddr).
+						arg(mpd.error.value()).
+						arg(mpd.error ? QString::fromStdString(mpd.error.message()) : QStringLiteral("NoErr")).
+						arg(mpd.bytesReceived));
+
+		logRequest(m_logStr);
+
+		//
+
+		if (mpd.error || mpd.bytesReceived == 0)
+		{
+			return;
+		}
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("ASCII:  "));
+
+		if (mpd.bytesReceived >= mpd.recvBufferSize)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		mpd.recvBuffer[mpd.bytesReceived] = 0;		// make null terminated string
+
+		m_logStr.append(mpd.recvBuffer);
+
+		m_logStr.replace(Separator::CR, "\\r");
+		m_logStr.replace(Separator::LF, "\\n");
+
+		logRequest(m_logStr);
+
+		//
+
+		// m_logStr.clear();
+
+		// m_logStr.append(QStringLiteral("Binary:"));
+
+		// for(size_t i = 0; i < mpd.bytesReceived && i < mpd.recvBufferSize; i++)
+		// {
+		// 	m_logStr.append(QString(" %1").arg(mpd.recvBuffer[i], 2, 16, QChar('0')).toUpper());
+		// }
+
+		// logRequest(m_logStr);
+
+		//
+
+		if (mpd.bytesReceived != ASCII_FN03_REQUEST_SIZE)
+		{
+			logRequest(QString("Wrong Modbus ASCII F03 request len %1, expected %2. Request ignored.").
+					   arg(mpd.bytesReceived).arg(ASCII_FN03_REQUEST_SIZE));
+			return;
+		}
+
+		//
+
+		size_t binDataLen = 0;
+
+		bool result = convertAsciiToBin(mpd.recvBuffer, mpd.bytesReceived,
+										m_binData, &binDataLen);
+
+		if (result == false)
+		{
+			return;
+		}
+
+		Message& msg = *reinterpret_cast<Message*>(m_binData);
+
+		quint8 receivedCrc = m_binData[binDataLen - 1];
+		quint8 calculatedCrc = calcCrc(m_binData, binDataLen - 1);
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("Modbus request: "));
+
+		switch(msg.functionCode)
+		{
+		case FC_READ_HOLDING_REGISTERS:
+
+			msg.fn03Request.reverseBytes();
+
+			m_logStr.append(QString("deviceID %1, function %2, start register %3, regs count %4, ").
+							arg(msg.modbusDeviceID).
+							arg(msg.functionCode).
+							arg(msg.fn03Request.regsStartAddr).
+							arg(msg.fn03Request.regsCount));
+
+			if (receivedCrc == calculatedCrc)
+			{
+				m_logStr.append(QString("CRC %1 (Ok)").arg(receivedCrc));
+			}
+			else
+			{
+				m_logStr.append(QString("CRC %1 (ERROR, expected %2)").arg(receivedCrc, calculatedCrc));
+			}
+
+			logRequest(m_logStr);
+
+			break;
+
+		default:
+			m_logStr.append(QString("function %1 is not supported!").arg(msg.functionCode));
+			logRequest(m_logStr, CircularLogger::RecordType::Error);
+		}
+	}
+
+	void ModbusSlaveHandler::logAsciiReply(MbshProcData& mpd)
+	{
+		if (enableLogging() == false)
+		{
+			return;
+		}
+
+		m_logStr.clear();
+
+		m_logStr.append(QString("Gateway %1 #%2 Modbus %3 reply to %4, bytes sent %5").
+						arg(gatewayID()).
+						arg(mpd.connNo).
+						arg(::E::valueToString(modbusMode())).
+						arg(mpd.peerAddr).
+						arg(mpd.sendBytes));
+
+		logReply(m_logStr);
+
+		if (mpd.sendBytes == 0)
+		{
+			return;
+		}
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("ASCII:  "));
+
+		if (mpd.sendBytes >= mpd.sendBufferSize)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		mpd.sendBuffer[mpd.sendBytes] = 0;		// make null terminated string
+
+		m_logStr.append(mpd.sendBuffer);
+
+		m_logStr.replace(Separator::CR, "\\r");
+		m_logStr.replace(Separator::LF, "\\n");
+
+		logReply(m_logStr);
+
+		//
+
+		// m_logStr.clear();
+
+		// m_logStr.append(QStringLiteral("Binary:"));
+
+		// for(size_t i = 0; i < mpd.sendBytes && i < mpd.sendBufferSize; i++)
+		// {
+		// 	m_logStr.append(QString(" %1").arg(mpd.sendBuffer[i], 2, 16, QChar('0')).toUpper());
+		// }
+
+		// logReply(m_logStr);
+
+		//
+
+		size_t binDataLen = 0;
+
+		bool result = convertAsciiToBin(mpd.sendBuffer, mpd.sendBytes,
+										m_binData, &binDataLen);
+
+		if (result == false)
+		{
+			return;
+		}
+
+		Message& msg = *reinterpret_cast<Message*>(m_binData);
+
+		quint8 sendCrc = m_binData[binDataLen - 1];
+
+		//
+
+		m_logStr.clear();
+
+		m_logStr.append(QStringLiteral("Modbus reply: "));
+
+		switch(msg.functionCode)
 		{
 		case FC_READ_HOLDING_REGISTERS:
 		{
-			const Fn03_ReadHoldingRegisters_Reply& fn03Rep = rep.fn03Reply;
+			const Fn03_ReadHoldingRegisters_Reply& fn03Rep = msg.fn03Reply;
 
-			quint8 bytesCount = rep.fn03Reply.bytesCount;
+			quint8 bytesCount = msg.fn03Reply.bytesCount;
 			quint32 regsCount = static_cast<quint32>(bytesCount / sizeof(quint16));
 
-			m_logStr.append(QString("deviceID %1, function %2, bytes count %3, regs count %4").
-							arg(rep.modbusDeviceID).
-							arg(rep.functionCode).
+			m_logStr.append(QString("deviceID %1, function %2, bytes count %3, regs count %4, CRC %5").
+							arg(msg.modbusDeviceID).
+							arg(msg.functionCode).
 							arg(bytesCount).
-							arg(regsCount));
+							arg(regsCount).
+							arg(sendCrc));
 			logReply(m_logStr);
 
 			//
@@ -697,12 +1086,10 @@ namespace Gateway
 
 			m_logStr.append(QStringLiteral("Modbus reply:"));
 
-			const TcpFrame& req = getTcpRequestRef();
-
 			for(quint32 i = 0; i < regsCount; i++)
 			{
 				m_logStr.append(QString(" r[%1]=0x%3").
-								arg(req.fn03Request.regsStartAddr + i).
+								arg(msg.fn03Request.regsStartAddr + i).
 								arg(fn03Rep.regValues[i], 4, 16, QChar('0')));
 			}
 			logReply(m_logStr);
@@ -710,141 +1097,32 @@ namespace Gateway
 		break;
 
 		default:
-			m_logStr.append(QString("function %1 is not supported!").arg(rep.functionCode));
+			m_logStr.append(QString("function %1 is not supported!").arg(msg.functionCode));
 			logReply(m_logStr, CircularLogger::RecordType::Error);
 		}
-
 	}
 
-	void ModbusSlaveHandler::logAsciiRequest(const error_code& error, size_t bytesReceived)
+	void ModbusSlaveHandler::logRtuRequest(MbshProcData& mpd)
 	{
-		Q_UNUSED(error);
-		Q_UNUSED(bytesReceived);
+		Q_UNUSED(mpd);
 	}
 
-	void ModbusSlaveHandler::logRtuRequest(const error_code& error, size_t bytesReceived)
+	void ModbusSlaveHandler::logRtuReply(MbshProcData& mpd)
 	{
-		Q_UNUSED(error);
-		Q_UNUSED(bytesReceived);
+		Q_UNUSED(mpd);
 	}
 
-	void ModbusSlaveHandler::logAsciiReply(size_t sendBytes)
+	size_t ModbusSlaveHandler::onFnReadHoldingRegisters(MbshProcData& mpd)
 	{
-		Q_UNUSED(sendBytes);
-	}
+		TcpFrame& request = getTcpRequestRef(mpd);
 
-	void ModbusSlaveHandler::logRtuReply(size_t sendBytes)
-	{
-		Q_UNUSED(sendBytes);
-	}
-
-	size_t ModbusSlaveHandler::asciiRequestProcessing(size_t bytesReceived)
-	{
-		Q_UNUSED(bytesReceived);
-
-/*		const size_t MIN_REQUEST_SIZE = ASCII_START_MARKER_LEN +	// marker ':'
-										ASCII_DEVICE_ID_LEN +		// modbus deviceID 'XX'
-										ASCII_FUNCTION_LEN +		// function '03'
-										ASCII_REG_START_ADDR_LEN +	// regs start address 'XXXX'
-										ASCII_REG_COUNT_LEN +		// regs count 'XXXX'
-										ASCII_CRC_LEN +				// CRC 'XX'
-										ASCII_END_MARKER_LEN;		// end marker CR+LF
-
-		if (bytesReceived < MIN_REQUEST_SIZE)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-
-		quint8* request = m_receiveBuffer;
-		quint8* ptr = request;
-
-		if (*ptr != ASCII_START_MARKER)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-
-		bool result = true;
-
-		ptr += ASCII_START_MARKER_LEN;
-
-		quint8 modbusDeviceID = asciiDecodeXX(ptr, &result);
-
-		RETURN_IF_FALSE(result);
-
-		if (modbusDeviceID != m_handler.modbusDeviceID())
-		{
-			return true;			// its Ok, request to another device
-		}
-
-		ptr += ASCII_DEVICE_ID_LEN;
-
-		quint8 function = asciiDecodeXX(ptr, &result);
-
-		RETURN_IF_FALSE(result);
-
-		if (function != FC_READ_HOLDING_REGISTERS)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-
-		ptr += ASCII_FUNCTION_LEN;
-
-		quint16 regsStartAddr = asciiDecodeXXXX(ptr, &result);
-
-		RETURN_IF_FALSE(result);
-
-		ptr += ASCII_REG_START_ADDR_LEN;
-
-		quint16 regsCount = asciiDecodeXXXX(ptr, &result);
-
-		RETURN_IF_FALSE(result);
-
-		ptr += ASCII_REG_COUNT_LEN;
-
-		quint8 receivedCrc = asciiDecodeXX(ptr, &result);
-
-		RETURN_IF_FALSE(result);
-
-		quint8 calculatedCrc = nonStandardModbusCrcCalculation(request + ASCII_START_MARKER_LEN,
-															   ASCII_DEVICE_ID_LEN +
-																   ASCII_FUNCTION_LEN +
-																   ASCII_REG_START_ADDR_LEN +
-																   ASCII_REG_COUNT_LEN);
-		if (receivedCrc != calculatedCrc)
-		{
-			DEBUG_LOG_ERR(m_listener.log(), QString("CRC error: received 0x%1, calculated 0x%2").
-											arg(receivedCrc, 2, 16, QChar('0')).
-											arg(calculatedCrc, 2, 16, QChar('0')));
-			return 0;
-		}
-
-		size_t sendBytesCount = onAsciiFnReadHoldingRegisters(regsStartAddr, regsCount);
-
-		return sendBytesCount;*/
-
-		return 0;
-	}
-
-	size_t ModbusSlaveHandler::rtuRequestProcessing(size_t bytesReceived)
-	{
-		Q_ASSERT(false);		// not implemented!
-
-		Q_UNUSED(bytesReceived);
-		return 0;
-	}
-
-	int ModbusSlaveHandler::onFnReadHoldingRegisters(TcpFrame& request)
-	{
-		if (request.functionCode != FC_READ_HOLDING_REGISTERS)
+		if (request.msg.functionCode != FC_READ_HOLDING_REGISTERS)
 		{
 			Q_ASSERT(false);
 			return 0;
 		}
 
-		Fn03_ReadHoldingRegisters_Request& fn03Request = request.fn03Request;
+		Fn03_ReadHoldingRegisters_Request& fn03Request = request.msg.fn03Request;
 
 		fn03Request.reverseBytes();
 
@@ -853,10 +1131,10 @@ namespace Gateway
 
 		Q_ASSERT(regsCount <= 127);
 
-		TcpFrame& reply = getTcpReplyRef();
+		TcpFrame& reply = getTcpReplyRef(mpd);
 
 		int bytesCount = getRegistersValues(regsStartAddr, regsCount,
-											reply.fn03Reply.regValues, FN03_MAX_REGS_COUNT,
+											reply.msg.fn03Reply.regValues, FN03_MAX_REGS_COUNT,
 											QThread::currentThread());
 		Q_ASSERT(bytesCount < 256);
 
@@ -867,82 +1145,227 @@ namespace Gateway
 
 		// set size of reply data after header
 		//
-		reply.header.length = sizeof(reply.modbusDeviceID) +
-							  sizeof(reply.functionCode) +
-							  sizeof(reply.fn03Reply.bytesCount) +
+		reply.header.length = sizeof(reply.msg.modbusDeviceID) +
+							  sizeof(reply.msg.functionCode) +
+							  sizeof(reply.msg.fn03Reply.bytesCount) +
 							  bytesCount;
 
 		// copy request function params to reply
 		//
-		reply.modbusDeviceID = request.modbusDeviceID;
-		reply.functionCode = request.functionCode;
+		reply.msg.modbusDeviceID = request.msg.modbusDeviceID;
+		reply.msg.functionCode = request.msg.functionCode;
 
 		// fill reply bytes count
 		//
-		reply.fn03Reply.bytesCount = static_cast<quint8>(bytesCount);
+		reply.msg.fn03Reply.bytesCount = static_cast<quint8>(bytesCount);
 
 		//
 
-		int sendBytesCount = sizeof(reply.header) + reply.header.length;
+		size_t sendBytesCount = sizeof(reply.header) + reply.header.length;
 
-		reply.reverseBytes();		// translate header fields to BE
+		reply.header.reverseBytes();		// translate header fields to BE
 
 		return sendBytesCount;
 	}
 
-	TcpFrame& ModbusSlaveHandler::getTcpRequestRef()
+	TcpFrame& ModbusSlaveHandler::getTcpRequestRef(MbshProcData& mpd)
 	{
-		Q_ASSERT(sizeof(TcpFrame) < sizeof(m_recvBuffer));
-		return *reinterpret_cast<TcpFrame*>(m_recvBuffer);
+		Q_ASSERT(mpd.recvBuffer != nullptr);
+		return *reinterpret_cast<TcpFrame*>(mpd.recvBuffer);
 	}
 
-	TcpFrame& ModbusSlaveHandler::getTcpReplyRef()
+	TcpFrame& ModbusSlaveHandler::getTcpReplyRef(MbshProcData& mpd)
 	{
-		Q_ASSERT(sizeof(TcpFrame) < sizeof(m_sendBuffer));
-		return *reinterpret_cast<TcpFrame*>(m_sendBuffer);
+		Q_ASSERT(mpd.sendBuffer != nullptr);
+		return *reinterpret_cast<TcpFrame*>(mpd.sendBuffer);
 	}
 
-	int ModbusSlaveHandler::onAsciiFnReadHoldingRegisters(quint16 regsStartAddr, quint16 regsCount)
+	size_t ModbusSlaveHandler::onAsciiFn03ReadHoldingRegisters(Message& msg, MbshProcData& mpd, quint16 regsStartAddrOffset)
 	{
-		Q_ASSERT(regsCount <= ASCII_REG_VALUES_COUNT);
+		msg.fn03Request.reverseBytes();
+
+		if (msg.fn03Request.regsCount > FN03_MAX_REGS_COUNT)
+		{
+			return 0;
+		}
+
+		size_t binDataLen = 0;
+
+		binDataLen += sizeof(msg.modbusDeviceID);
+		binDataLen += sizeof(msg.functionCode);
+
+		int regsStartAddr = msg.fn03Request.regsStartAddr + regsStartAddrOffset;
+		int regsCount = msg.fn03Request.regsCount;
 
 		int bytesCount = getRegistersValues(regsStartAddr, regsCount,
-											m_asciiRegValues, ASCII_REG_VALUES_COUNT,
+											msg.fn03Reply.regValues, FN03_MAX_REGS_COUNT,
 											QThread::currentThread());
 
-		Q_ASSERT(bytesCount == regsCount * sizeof(quint16));
+		Q_ASSERT(bytesCount == regsCount * sizeof(RegisterValue));
 		Q_ASSERT(bytesCount <= 0xFF);
 
-		quint8* ptr = m_sendBuffer;
+		msg.fn03Reply.bytesCount = static_cast<quint8>(bytesCount);
+
+		binDataLen += sizeof(msg.fn03Reply.bytesCount);
+		binDataLen += msg.fn03Reply.bytesCount;
+
+		quint8 crc = calcCrc(m_binData,	binDataLen);
+
+		m_binData[binDataLen] = crc;
+
+		binDataLen += sizeof(crc);
+
+		// Encoding bin data to ASCII
+		//
+		quint8* ptr = mpd.sendBuffer;
 
 		*ptr = ':';
 		ptr++;
 
-		ptr = asciiEncodeXX(FC_READ_HOLDING_REGISTERS, ptr);
-
-		ptr = asciiEncodeXX(bytesCount, ptr);
-
-		for(quint16 i = 0; i < regsCount; i++)
+		for(size_t i = 0; i < binDataLen; i++)
 		{
-			ptr = asciiEncodeXXXX(m_asciiRegValues[i], ptr);
+			ptr = asciiEncodeXX(m_binData[i], ptr);
 		}
 
-		quint8 crc = nonStandardModbusCrcCalculation(m_sendBuffer + ASCII_START_MARKER_LEN,	// skip start marker
-																	ASCII_FUNCTION_LEN +
-																	ASCII_BYTES_COUNT_LEN +
-																	bytesCount * 2);		// 2 chars on 1 byte
-
-		ptr = asciiEncodeXX(crc, ptr);
-
-		*ptr = ASCII_END_MARKER[0];
+		*ptr = ASCII_END_MARKER_1;
 		ptr++;
 
-		*ptr = ASCII_END_MARKER[1];
+		*ptr = ASCII_END_MARKER_2;
 		ptr++;
 
-		int sendBytesCount = ptr - m_sendBuffer;
+		size_t sendBytes = ptr - mpd.sendBuffer;
 
-		return sendBytesCount;
+		mpd.sendBytes = sendBytes;
+
+		return sendBytes;
+	}
+
+	bool ModbusSlaveHandler::convertAsciiToBin(const quint8* asciiPtr, size_t asciiLen,
+												quint8* binPtr, size_t* binLen)
+	{
+		TEST_PTR_RETURN_FALSE(asciiPtr);
+		TEST_PTR_RETURN_FALSE(binPtr);
+		TEST_PTR_RETURN_FALSE(binLen);
+
+		*binLen = 0;
+
+		if (asciiLen < ASCII_START_MARKER_LEN + ASCII_END_MARKER_LEN)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		if (asciiPtr[0] != ASCII_START_MARKER ||
+			asciiPtr[asciiLen - 2] != ASCII_END_MARKER_1 ||
+			asciiPtr[asciiLen - 1] != ASCII_END_MARKER_2)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		asciiPtr++;		// skip ASCII_START_MARKER
+
+		size_t binDataLen = (asciiLen - ASCII_START_MARKER_LEN - ASCII_END_MARKER_LEN) / 2;
+
+		bool result = true;
+
+		for(size_t i = 0; i < binDataLen; i++)
+		{
+			bool ok = true;
+
+			binPtr[i] = asciiDecodeXX(asciiPtr, &ok);
+
+			result &= ok;
+
+			asciiPtr += 2;
+		}
+
+		if (result)
+		{
+			*binLen = binDataLen;
+		}
+
+		return result;
+	}
+
+	quint8 ModbusSlaveHandler::calcCrc(const quint8* data, size_t dataLength) const
+	{
+		switch(modbusMode())
+		{
+		case E::ModbusMode::UDP_ASCII:
+			return LRC(data, dataLength);
+
+		case E::ModbusMode::UDP_ASCII_KZ_UIK:
+			return crcKzUik(data, dataLength);
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	quint8 ModbusSlaveHandler::crcKzUik(const quint8* data, size_t dataLength) const
+	{
+		// Non-standart modbus request CRC calculation used on AEC Kozloduy in UIK system.
+		//
+		// Reverse ingeneered from request making code:
+		//
+		// static void makeRequest(array<unsigned char>^ request, int chan, bool Ust)
+		// {
+		// 	request[0] = ':'; //header
+		// 	request[1] = '0'; //slave address
+		// 	request[2] = '0' + chan;
+		// 	request[3] = '0'; //function
+		// 	request[4] = '3';
+		// 	request[5] = '0'; //start address Hi
+		// 	request[6] = '0';
+		// 	request[7] = '0'; //start Lo
+		// 	request[8] = '0';
+		// 	request[9] = '0'; //Number Hi
+		// 	request[10]= '0';
+		// 	request[11]= '6'; //Number Lo
+		// 	request[12]= '6';
+		// 	request[13]= '0'; //CRC
+		// 	request[14]= '0';
+		// 	request[15]= 0x0D;
+		// 	request[16]= 0x0A;
+		//
+		// 	if(Ust)
+		// 	{
+		// 		request[7] = '6'; //start Lo
+		// 		request[8] = '6';
+		// 		request[11]= '4'; //Number Lo
+		// 		request[12]= '6';
+		// 	}
+		//
+		// ---------------- Non-standard CRC calculation! -----------------------
+		//
+		//  Result is not two's complementing!
+		//
+		//	Standard Modbus LRC calculation see in ModbusProtocol.cpp
+		//
+		//  //
+		//
+		// 	unsigned int CRC=0;
+		// 	for(int i=1;i<13;i+=2)
+		// 		CRC+=uncodeASCII(request[i])*16 + uncodeASCII(request[i+1]);
+		// 	CRC = CRC & 0xFF;
+		// ----------------------------------------------------------------------
+		//
+		// 	request[13] = codeASCII(CRC>>4);
+		// 	request[14] = codeASCII(CRC&0xF);
+		// }
+
+		quint8 crc = 0;
+
+		while(dataLength--)
+		{
+			crc += *data;
+			data++;
+		}
+
+		return crc;
 	}
 
 	bool ModbusSlaveHandler::isHexDigits(const quint8* ptr, int len) const
@@ -1069,73 +1492,5 @@ namespace Gateway
 		Q_ASSERT(false);
 
 		return '0';
-	}
-
-	quint8 ModbusSlaveHandler::nonStandardModbusCrcCalculation(const quint8* ptr, int lenInChars)
-	{
-		// Non-standart modbus request CRC calculation used on AEC Kozloduy in UIK system.
-		//
-		// Reverse ingeneered from request making code:
-		//
-		// static void makeRequest(array<unsigned char>^ request, int chan, bool Ust)
-		// {
-		// 	request[0] = ':'; //header
-		// 	request[1] = '0'; //slave address
-		// 	request[2] = '0' + chan;
-		// 	request[3] = '0'; //function
-		// 	request[4] = '3';
-		// 	request[5] = '0'; //start address Hi
-		// 	request[6] = '0';
-		// 	request[7] = '0'; //start Lo
-		// 	request[8] = '0';
-		// 	request[9] = '0'; //Number Hi
-		// 	request[10]= '0';
-		// 	request[11]= '6'; //Number Lo
-		// 	request[12]= '6';
-		// 	request[13]= '0'; //CRC
-		// 	request[14]= '0';
-		// 	request[15]= 0x0D;
-		// 	request[16]= 0x0A;
-		//
-		// 	if(Ust)
-		// 	{
-		// 		request[7] = '6'; //start Lo
-		// 		request[8] = '6';
-		// 		request[11]= '4'; //Number Lo
-		// 		request[12]= '6';
-		// 	}
-		//
-		// ---------------- Non-standard CRC calculation! -----------------------
-		//
-		//	1. ASCII decoding is used before summing CRC
-		//  2. Result is not two's complementing
-		//
-		//	Standard Modbus LRC calculation see in ModbusProtocol.cpp
-		//
-		//  //
-		//
-		// 	unsigned int CRC=0;
-		// 	for(int i=1;i<13;i+=2)
-		// 		CRC+=uncodeASCII(request[i])*16 + uncodeASCII(request[i+1]);
-		// 	CRC = CRC & 0xFF;
-		// ----------------------------------------------------------------------
-		//
-		// 	request[13] = codeASCII(CRC>>4);
-		// 	request[14] = codeASCII(CRC&0xF);
-		// }
-
-		quint8 crc = 0;
-		bool ok = true;
-
-		for(int i = 0; i < lenInChars; i++)
-		{
-			quint8 ch = asciiDecodeX(ptr[0], &ok);
-
-			Q_ASSERT(ok == true);
-
-			crc += ch;
-		}
-
-		return crc;
 	}
 }

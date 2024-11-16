@@ -1,17 +1,40 @@
 #pragma once
 
+#include <asio.hpp>
+
 #include "GatewayDescription.h"
 #include "GatewayHandler.h"
 #include "AppDataServiceClient.h"
 
 #include "ModbusProtocol.h"
 #include "ModbusSlaveGateway.h"
-#include "ModbusTcpSlaveThread.h"
 
 using namespace Modbus;
+using namespace asio;
+
+namespace Modbus
+{
+	class TcpSlaveThread;
+	class UdpSlaveThread;
+}
 
 namespace Gateway
 {
+	struct MbshProcData				// ModbusSlaveHandler processing data
+	{
+		int connNo = 0;
+		QString peerAddr;
+		error_code error;
+
+		quint8* recvBuffer = nullptr;
+		size_t recvBufferSize = 0;
+		size_t bytesReceived = 0;
+
+		quint8* sendBuffer = nullptr;
+		size_t sendBufferSize = 0;
+		size_t sendBytes = 0;
+	};
+
 	class ModbusSlaveHandler : public Handler
 	{
 	public:
@@ -36,26 +59,31 @@ namespace Gateway
 		E::ModbusMode modbusMode() const;
 		int modbusDeviceID() const;
 
-		quint8* recvBuffer();
-		size_t recvBufferSize() const;
-		quint8* sendBuffer();
-		size_t sendBufferSize() const;
-
-		int getRegistersValues(int startRegAddr, int regsCount,
+		int getRegistersValues(int regsStartAddr, int regsCount,
 							   Modbus::RegisterValue* destBuffer, int maxRegsCount, QThread* thread);
 
-		size_t tcpRequestProcessing(int connNo, const QString& peerAddr,
-									const error_code& error,
-									size_t bytesReceived);
+		size_t tcpRequestProcessing(MbshProcData& mpd);
+		size_t asciiRequestProcessing(MbshProcData& mpd);
+		size_t rtuRequestProcessing(MbshProcData& mpd);
+
 	private:
-		struct SignalState
+		class SignalState
 		{
-			SignalState(const ModbusFormat& frmt, const Address16& registerNo);
+		public:
+			SignalState(const ModbusFormat& frmt, const Address16& registerNo, bool isConst, double constValue);
 
-			ModbusFormat format;
-			Address16 regNo;		// regAddr (index in m_registers) == regNo.offset() - 1 !!!
+			const ModbusFormat& format() const;
+			const Address16& regNo() const;
+			double value() const;
+			bool isConst() const;
 
-			double value = 0;
+			void setValue(double value);
+
+		private:
+			ModbusFormat m_format;
+			Address16 m_regNo;			// regAddr (index in m_registers) == regNo.offset() - 1 !!!
+			double m_value = 0;
+			bool m_isConst = false;
 		};
 
 	private:
@@ -73,24 +101,27 @@ namespace Gateway
 
 		//
 
-		void logTcpRequest(int connNo, const QString& peerAddr, const error_code& error, size_t bytesReceived);
-		void logTcpReply(int connNo, const QString&peerAddr, size_t sendBytes);
+		void logTcpRequest(MbshProcData& mpd);
+		void logTcpReply(MbshProcData& mpd);
 
-		void logAsciiRequest(const error_code& error, size_t bytesReceived);
-		void logRtuRequest(const error_code& error, size_t bytesReceived);
+		void logAsciiRequest(MbshProcData& mpd);
+		void logAsciiReply(MbshProcData& mpd);
 
-		void logAsciiReply(size_t sendBytes);
-		void logRtuReply(size_t sendBytes);
+		void logRtuRequest(MbshProcData& mpd);
+		void logRtuReply(MbshProcData& mpd);
 
-		size_t asciiRequestProcessing(size_t bytesReceived);
-		size_t rtuRequestProcessing(size_t bytesReceived);
+		size_t onFnReadHoldingRegisters(MbshProcData& mpd);
 
-		int onFnReadHoldingRegisters(Modbus::TcpFrame& request);
+		Modbus::TcpFrame& getTcpRequestRef(MbshProcData& mpd);
+		Modbus::TcpFrame& getTcpReplyRef(MbshProcData& mpd);
 
-		Modbus::TcpFrame& getTcpRequestRef();
-		Modbus::TcpFrame& getTcpReplyRef();
+		size_t onAsciiFn03ReadHoldingRegisters(Message& msg, MbshProcData& mpd, quint16 regsStartAddrOffset);
 
-		int onAsciiFnReadHoldingRegisters(quint16 regsStartAddr, quint16 regsCount);
+		bool convertAsciiToBin(const quint8* asciiPtr, size_t asciiLen,
+							   quint8* binPtr, size_t* binLen);
+
+		quint8 calcCrc(const quint8* data, size_t dataLength) const;
+		quint8 crcKzUik(const quint8* data, size_t dataLength) const;
 
 		bool isHexDigits(const quint8* ptr, int len) const;
 		quint8 asciiDecodeXX(const quint8* ptr, bool* ok) const;
@@ -102,8 +133,6 @@ namespace Gateway
 		quint8* asciiEncodeXXXX(quint16 v16, quint8* ptr);
 		quint8 asciiEncodeX(quint8 ch);
 
-		quint8 nonStandardModbusCrcCalculation(const quint8* ptr, int len);
-
 	private:
 		const SoftwareInfo m_softwareInfo;
 		HostAddressPort m_appDataService1;
@@ -114,18 +143,14 @@ namespace Gateway
 
 		AppDataServiceClientThread* m_appDataServiceClientThread = nullptr;
 
-		Modbus::TcpSlaveThread* m_modbusTcpSlaveThread1 = nullptr;
-		Modbus::TcpSlaveThread* m_modbusTcpSlaveThread2 = nullptr;
+		Modbus::TcpSlaveThread* m_tcpSlaveThread1 = nullptr;
+		Modbus::TcpSlaveThread* m_tcpSlaveThread2 = nullptr;
 
-		static inline const size_t RECV_BUFFER_SIZE = 1024;
-		quint8 m_recvBuffer[RECV_BUFFER_SIZE];
+		Modbus::UdpSlaveThread* m_udpSlaveThread1 = nullptr;
+		Modbus::UdpSlaveThread* m_udpSlaveThread2 = nullptr;
 
-		static inline const size_t SEND_BUFFER_SIZE = 1024;
-		quint8 m_sendBuffer[SEND_BUFFER_SIZE];
-
-		inline static const int ASCII_REG_VALUES_COUNT = 256;
-
-		RegisterValue m_asciiRegValues[ASCII_REG_VALUES_COUNT];
+		inline static const int BIN_DATA_SIZE = 1024;
+		quint8 m_binData[BIN_DATA_SIZE];
 
 		//
 

@@ -62,8 +62,6 @@ private:
 
 	void onTimer();
 
-	void parseGatewayDescription(const QString& filePathName, const QString& gwDesc);
-
 	const AppSignal* getSignalFunc(const QString& signalID);
 
 private:

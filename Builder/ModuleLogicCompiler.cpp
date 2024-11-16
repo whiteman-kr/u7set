@@ -597,6 +597,13 @@ namespace Builder
 		return Address16();
 	}
 
+	// returns: std::tuple<item found, param found, param value>
+	//
+	std::tuple<bool, bool, double> ModuleLogicCompiler::getUalAfbParamValue(const QString& itemLabel, const QString& paramName)
+	{
+		return m_ualAfbs.getUalAfbParamValue(itemLabel, paramName);
+	}
+
 	bool ModuleLogicCompiler::getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const
 	{
 		TEST_PTR_RETURN_FALSE(m_log);

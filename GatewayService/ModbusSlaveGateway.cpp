@@ -1,4 +1,4 @@
-#include "GatewayDescriptionParser.h"
+//#include "../Builder/GatewayDescriptionParser.h"
 #include "ModbusSlaveGateway.h"
 
 #include "../UtilsLib/WUtils.h"
@@ -135,35 +135,31 @@ namespace Gateway
 		return pr;
 	}
 
-	ParseResult ModbusSignalList::appendAddressSignalID(int lineNo, const QString& addressStr, const QString& signalID, ParserLog& log)
+	ParseResult ModbusSignalList::parseAddressStr(int lineNo, const QString& addrStr, Address16* addr16, ParserLog& log)
 	{
-		Hash hash = calcHash(signalID.trimmed());
-
-		if (m_signals.contains(hash) == true)
-		{
-			log.logError(lineNo, QString("signal %1 already in signal list").arg(signalID));
-			return ParseResult::Error;
-		}
-
 		if (m_modbusFormat.isValid() == false)
 		{
 			log.logError(lineNo, "setting 'SignalsFormat' should be specified first");
 			return ParseResult::Error;
 		}
 
-		QString str(addressStr);
+		TEST_PTR_RETURN_VALUE(addr16, ParseResult::CriticalError);
+
+		addr16->clear();
+
+		QString str(addrStr);
 
 		str.replace(Separator::COMMA, Separator::SPACE);
 
-		QStringList addr = str.split(Separator::SPACE, Qt::SkipEmptyParts);
+		QStringList addrParts = str.split(Separator::SPACE, Qt::SkipEmptyParts);
 
-		if (addr.isEmpty() == true)
+		if (addrParts.isEmpty() == true)
 		{
 			log.logError(lineNo, "address of signal is not specified");
 			return ParseResult::Error;
 		}
 
-		QString regAddrStr = addr[0].trimmed().toLower();
+		QString regAddrStr = addrParts[0].trimmed().toLower();
 
 		bool ok = false;
 
@@ -178,13 +174,13 @@ namespace Gateway
 
 		if (m_modbusFormat.isDiscrete() == true)
 		{
-			if (addr.size() < 2)
+			if (addrParts.size() < 2)
 			{
 				log.logError(lineNo, "register bit number or mask should be specified for discrete signal");
 				return ParseResult::Error;
 			}
 
-			QString bitNoStr = addr[1];
+			QString bitNoStr = addrParts[1];
 			bool isMask = false;
 
 			if (bitNoStr.startsWith("(") && bitNoStr.endsWith(")"))
@@ -252,7 +248,7 @@ namespace Gateway
 		}
 		else
 		{
-			if (addr.size() > 1)
+			if (addrParts.size() > 1)
 			{
 				log.logError(lineNo, "only register number should be specified for analog signal");
 				return ParseResult::Error;
@@ -261,13 +257,77 @@ namespace Gateway
 			bitNo = 0;
 		}
 
-		Address16 addr16(regAddr, bitNo);
+		addr16->set(regAddr, bitNo);
+
+		return ParseResult::Ok;
+	}
+
+	ParseResult ModbusSignalList::appendAddressSignalID(int lineNo, const Address16& addr,
+														const QString& signalID, ParserLog& log)
+	{
+		Hash hash = calcHash(signalID.trimmed());
+
+		if (m_signalAddrs.contains(hash) == true)
+		{
+			log.logError(lineNo, QString("signal %1 already in signal list").arg(signalID));
+			return ParseResult::Error;
+		}
+
+		if (m_modbusFormat.isValid() == false)
+		{
+			log.logError(lineNo, "setting 'SignalsFormat' should be specified first");
+			return ParseResult::Error;
+		}
 
 		appendSignalID(lineNo, signalID, log);
 
-		m_signals.emplace(hash, addr16);
+		m_signalAddrs.emplace(hash, addr);
 
 		return ParseResult::Ok;
+	}
+
+	ParseResult ModbusSignalList::appendAddressConstValue(int lineNo, const Address16& addr16,
+														  const QString& desc, double constValue, ParserLog& log)
+	{
+		ParseResult pr = appendAddressSignalID(lineNo, addr16, desc, log);
+
+		Hash hash = calcHash(desc);
+
+		m_constValues.emplace(hash, constValue);
+
+		return pr;
+	}
+
+	void ModbusSignalList::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
+	{
+		TEST_PTR_RETURN(acquiredSignals);
+
+		for(const QString& id : m_signalIDs)
+		{
+			Hash h = calcHash(id);
+
+			if (m_constValues.contains(h) == false)
+			{
+				acquiredSignals->insert(h);
+			}
+		}
+	}
+
+	void ModbusSignalList::initConstValues(const std::map<Hash, double>& constValues)
+	{
+		m_constValues.clear();
+
+		for(const QString& id : m_signalIDs)
+		{
+			Hash h = calcHash(id);
+
+			auto it = constValues.find(h);
+
+			if (it != constValues.end())
+			{
+				m_constValues.emplace(*it);
+			}
+		}
 	}
 
 	ModbusFormat ModbusSignalList::modbusFormat() const
@@ -277,7 +337,24 @@ namespace Gateway
 
 	Address16 ModbusSignalList::getAddress(Hash hash) const
 	{
-		return getValueOrDefault(m_signals, hash, Address16());
+		return getValueOrDefault(m_signalAddrs, hash, Address16());
+	}
+
+	bool ModbusSignalList::isConst(Hash h, double* constValue) const
+	{
+		TEST_PTR_RETURN_FALSE(constValue);
+
+		*constValue = 0;
+
+		auto it = m_constValues.find(h);
+
+		if (it != m_constValues.end())
+		{
+			*constValue = it->second;
+			return true;
+		}
+
+		return false;
 	}
 
 	void ModbusSignalList::writeSettingsToXml(XmlWriteHelper& xml) const
@@ -497,10 +574,12 @@ namespace Gateway
 	{
 		TEST_PTR_RETURN(hashes);
 
-		for(const auto& [addr16, p] : m_modbusSignals)
+		for(const auto& [addr16, mbSignal] : m_modbusSignals)
 		{
-			const QString& appSignalID = p.first;
-			hashes->emplace(calcHash(appSignalID));
+			if (mbSignal.isConst == false)
+			{
+				hashes->emplace(calcHash(mbSignal.signalID));
+			}
 		}
 	}
 
@@ -508,19 +587,16 @@ namespace Gateway
 	{
 		TEST_PTR_RETURN(hashes);
 
-		for(const auto& [addr16, p] : m_modbusSignals)
+		for(const auto& [addr16, mbSignal] : m_modbusSignals)
 		{
-			const ModbusFormat& format = p.second;
-
-			if (format.isDiscrete() == true)
+			if (mbSignal.isConst == false && mbSignal.format.isDiscrete())
 			{
-				const QString& appSignalID = p.first;
-				hashes->emplace(calcHash(appSignalID));
+				hashes->emplace(calcHash(mbSignal.signalID));
 			}
 		}
 	}
 
-	const std::map<Address16, std::pair<QString, ModbusFormat>>& ModbusSlaveGateway::modbusSignals() const
+	const std::map<Address16, ModbusSlaveGateway::ModbusSignal>& ModbusSlaveGateway::modbusSignals() const
 	{
 		return m_modbusSignals;
 	}
@@ -572,21 +648,22 @@ namespace Gateway
 	{
 		Gateway::writeSignalListsToXml(xml);
 
+		//
+
 		xml.writeStartElement(XmlElement::MODBUS_SIGNALS);
 		xml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_modbusSignals.size()));
 
-		for(const auto& [addr16, p] : m_modbusSignals)
+		for(const auto& [addr16, mbSignal] : m_modbusSignals)
 		{
-			const QString& signalID = p.first;
-			const ModbusFormat& format = p.second;
-
 			xml.writeStartElement(XmlElement::SIGNAL_ELEM);
 
-			xml.writeIntAttribute(XmlAttribute::REG_NO, addr16.offset());
-			xml.writeIntAttribute(XmlAttribute::REG_BIT, addr16.bit());
-			xml.writeEnumKeyAttribute(XmlAttribute::FORMAT, format.signalFormat);
-			xml.writeEnumKeyAttribute(XmlAttribute::BYTE_ORDER_ATTR, format.byteOrder);
-			xml.writeStringAttribute(XmlAttribute::APP_SIGNAL_ID, signalID);
+			xml.writeIntAttribute(XmlAttribute::REG_NO, mbSignal.addr.offset());
+			xml.writeIntAttribute(XmlAttribute::REG_BIT, mbSignal.addr.bit());
+			xml.writeEnumKeyAttribute(XmlAttribute::FORMAT, mbSignal.format.signalFormat);
+			xml.writeEnumKeyAttribute(XmlAttribute::BYTE_ORDER_ATTR, mbSignal.format.byteOrder);
+			xml.writeStringAttribute(XmlAttribute::APP_SIGNAL_ID, mbSignal.signalID);
+			xml.writeBoolAttribute(XmlAttribute::IS_CONST, mbSignal.isConst);
+			xml.writeDoubleAttribute(XmlAttribute::CONST_VALUE, mbSignal.constValue);
 
 			xml.writeEndElement();		//	</Signal>
 		}
@@ -610,6 +687,8 @@ namespace Gateway
 
 		result &= xml.readIntAttribute(XmlAttribute::COUNT, &signalCount);
 
+		std::map<Hash, double> constValues;
+
 		for(int i = 0; i < signalCount; i++)
 		{
 			result &= xml.findElement(XmlElement::SIGNAL_ELEM);
@@ -618,28 +697,48 @@ namespace Gateway
 
 			int offset = 0;
 			int bit = 0;
-			ModbusFormat format;
-			QString appSignalID;
+			ModbusSignal mbSignal;
 
 			result &= xml.readIntAttribute(XmlAttribute::REG_NO, &offset);
 			result &= xml.readIntAttribute(XmlAttribute::REG_BIT, &bit);
-			result &= xml.readEnumKeyAttribute(XmlAttribute::FORMAT, &format.signalFormat);
-			result &= xml.readEnumKeyAttribute(XmlAttribute::BYTE_ORDER_ATTR, &format.byteOrder);
-			result &= xml.readStringAttribute(XmlAttribute::APP_SIGNAL_ID, &appSignalID);
+			result &= xml.readEnumKeyAttribute(XmlAttribute::FORMAT, &mbSignal.format.signalFormat);
+			result &= xml.readEnumKeyAttribute(XmlAttribute::BYTE_ORDER_ATTR, &mbSignal.format.byteOrder);
+			result &= xml.readStringAttribute(XmlAttribute::APP_SIGNAL_ID, &mbSignal.signalID);
+			result &= xml.readBoolAttribute(XmlAttribute::IS_CONST, &mbSignal.isConst);
+			result &= xml.readDoubleAttribute(XmlAttribute::CONST_VALUE, &mbSignal.constValue);
+
+			mbSignal.addr.set(offset, bit);
 
 			BREAK_IF_FALSE(result);
 
-			m_modbusSignals.emplace(Address16(offset, bit),
-									std::pair<QString, ModbusFormat>{appSignalID, format});
+			m_modbusSignals.emplace(mbSignal.addr, mbSignal);
+
+			if (mbSignal.isConst)
+			{
+				constValues.emplace(calcHash(mbSignal.signalID), mbSignal.constValue);
+			}
+		}
+
+		//
+
+		const SignalLists& lists = signalLists();
+
+		for(const SignalListShared& sl : lists)
+		{
+			std::shared_ptr<ModbusSignalList> mbsl = std::dynamic_pointer_cast<ModbusSignalList>(sl);
+
+			TEST_PTR_CONTINUE(mbsl);
+
+			mbsl->initConstValues(constValues);
 		}
 
 		return result;
 	}
 
-	bool ModbusSlaveGateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter,
-												  ParserLog& log)
+	bool ModbusSlaveGateway::generateRequiredFiles(const AppSignalSet* signalSet,
+												   ParserLog& log)
 	{
-		Q_UNUSED(signalSetAdapter);
+		Q_UNUSED(signalSet);
 
 		m_files.clear();
 
@@ -703,8 +802,9 @@ namespace Gateway
 
 				if (it != m_modbusSignals.end())
 				{
+					const ModbusSignal& mbs = it->second;
 					log.logError(QString("signal %1 address %2 is not unique (already assigned to %3)").
-												arg(signalID).arg(addr16.toString()).arg(it->second.first));
+												arg(signalID).arg(addr16.toString()).arg(mbs.signalID));
 					result = false;
 					continue;
 				}
@@ -766,7 +866,17 @@ namespace Gateway
 					}
 				}
 
-				m_modbusSignals.emplace(addr16, std::pair<QString, ModbusFormat>{signalID, format});
+				double constValue = 0;
+
+				ModbusSignal mbSignal;
+
+				mbSignal.signalID = signalID;
+				mbSignal.addr = addr16;
+				mbSignal.format = format;
+				mbSignal.isConst = mbsl->isConst(hash, &constValue);
+				mbSignal.constValue = constValue;
+
+				m_modbusSignals.emplace(mbSignal.addr, mbSignal);
 			}
 		}
 
@@ -794,15 +904,12 @@ namespace Gateway
 		QString bitStr;
 		QString maskStr;
 
-		for(const auto& [addr16, p] : m_modbusSignals)
+		for(const auto& [addr16, mbSignal] : m_modbusSignals)
 		{
-			const QString& signalID = p.first;
-			const ModbusFormat& format = p.second;
-
-			if (format.isDiscrete() == true)
+			if (mbSignal.format.isDiscrete() == true)
 			{
-				bitStr = QString("%1").arg(addr16.bit(), 2, 10, Latin1Char::ZERO);
-				maskStr = QString("0x%1").arg(1 << addr16.bit(), 4, 16, Latin1Char::ZERO).toUpper();
+				bitStr = QString("%1").arg(mbSignal.addr.bit(), 2, 10, Latin1Char::ZERO);
+				maskStr = QString("0x%1").arg(1 << mbSignal.addr.bit(), 4, 16, Latin1Char::ZERO).toUpper();
 			}
 			else
 			{
@@ -811,9 +918,9 @@ namespace Gateway
 			}
 
 			fd.append(QString("  %1  |  %2  |   %3  | %4 | %5 | %6").
-						arg(addr16.offset(), 5, 10, Latin1Char::ZERO).
-						arg(addr16.offset() - 1, 5, 10, Latin1Char::ZERO).arg(bitStr).arg(maskStr).
-						arg(format.toString(), -25, Latin1Char::SPACE).arg(signalID));
+						arg(mbSignal.addr.offset(), 5, 10, Latin1Char::ZERO).
+						arg(mbSignal.addr.offset() - 1, 5, 10, Latin1Char::ZERO).arg(bitStr).arg(maskStr).
+						arg(mbSignal.format.toString(), -25, Latin1Char::SPACE).arg(mbSignal.signalID));
 		}
 
 		fd.append(line);

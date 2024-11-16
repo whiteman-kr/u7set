@@ -5,14 +5,10 @@
 #include <QtTypes>
 #include "../OnlineLib/CircularLogger.h"
 #include "ModbusProtocol.h"
+#include "ModbusSlaveGatewayHandler.h"
 
 using namespace asio;
 using namespace asio::ip;
-
-namespace Gateway
-{
-	class ModbusSlaveHandler;
-}
 
 namespace Modbus
 {
@@ -49,8 +45,16 @@ namespace Modbus
 			tcp::socket m_socket;
 			QString m_peerAddr;
 
+			static inline const size_t RECV_BUFFER_SIZE = 256;
+			quint8 m_recvBuffer[RECV_BUFFER_SIZE];
+
+			static inline const size_t SEND_BUFFER_SIZE = 1024;
+			quint8 m_sendBuffer[SEND_BUFFER_SIZE];
+
 			int m_connNo = 0;
 			bool m_firstStartReceive = true;
+
+			Gateway::MbshProcData m_mpd;
 
 			static inline int m_connectionInstance = 0;
 		};
@@ -77,8 +81,8 @@ namespace Modbus
 		private:
 			bool exitIfStopRequested();
 
-			void startTimer500ms();
-			void onTimer500ms(const error_code& error);
+			void startTimer();
+			void onTimer(const error_code& error);
 
 			void startListening();
 			void onAcceptConnection(ConnectionShared newConnection,

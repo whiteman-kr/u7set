@@ -444,6 +444,8 @@ namespace XmlAttribute
 	inline const QString REG_NO("RegNo");
 	inline const QString REG_BIT("RegBit");
 	inline const QString FORMAT("Format");
+	inline const QString IS_CONST("IsConst");
+	inline const QString CONST_VALUE("ConstValue");
 
 	inline const QString MODULE_CAPTION("ModuleCaption");
 
@@ -701,6 +703,7 @@ namespace Separator
 	inline const QString NEW_LINE("\n");
 	inline const QString CR("\r");					// Carriage Return
 	inline const QString LF("\n");					// Line Feed
+	inline const QString TAB("\t");					// Line Feed
 	inline const QString CR_LF("\r\n");
 	inline const QString UNDERSCORE("_");
 	inline const QString DOUBLE_QUOTES("\"");

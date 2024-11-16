@@ -1,71 +1,11 @@
 #pragma once
 
-#include "GatewayDescription.h"
+#include "../GatewayService/GatewayDescription.h"
+#include "GatewayParserLog.h"
+#include "Context.h"
 
 namespace Gateway
 {
-	class SignalSetAdapter
-	{
-	public:
-		SignalSetAdapter() = delete;
-
-		SignalSetAdapter(const AppSignalSet* appSignalSet);
-		SignalSetAdapter(const AppSignals& appSignals);
-
-		const AppSignal* getAppSignal(const QString& appSignalID) const;
-
-	private:
-		const AppSignalSet* m_appSignalSet = nullptr;
-		const AppSignals* m_appSignals = nullptr;
-	};
-
-	enum class LogMsgType
-	{
-		Nothing,
-		Message,
-		Warning,
-		Error
-	};
-
-	struct LogRecord
-	{
-		int lineNo;
-		LogMsgType msgType;
-		QString msg;
-	};
-
-	class ParserLog : public std::vector<LogRecord>
-	{
-	public:
-		void logResult(int lineNo, LogMsgType msgType, const QString& msg);
-
-		void logError(int lineNo, const QString& errMsg);
-		void logError(const QString& errMsg);
-
-		void logWarning(int lineNo, const QString& wrnMsg);
-		void logWarning(const QString& wrnMsg);
-
-		void logRequirtedSettingIsNotSet(int lineNo, E::Setting st);
-
-		int errorCount() const;
-		int warningCount() const;
-
-	private:
-		QString message(int lineNo, const QString& msg);
-		void log(int lineNo, LogMsgType msgType, const QString& msg);
-
-	private:
-		int m_errCount = 0;
-		int m_wrnCount = 0;
-	};
-
-	enum class ParseResult
-	{
-		Ok,
-		Error,
-		CriticalError
-	};
-
 	class Parser
 	{
 	private:
@@ -124,9 +64,8 @@ namespace Gateway
 		Parser() = delete;
 		Parser(const Parser&) = delete;
 
-		Parser(const AppSignalSet* appSignalSet, GatewaysShared gateways = nullptr);
-		Parser(const AppSignals& appSignals, GatewaysShared gateways = nullptr);
-		~Parser();
+		Parser(const Builder::Context* context, GatewaysShared gateways = nullptr);
+		virtual ~Parser();
 
 		bool parse(const QString& desc);
 
@@ -135,7 +74,6 @@ namespace Gateway
 		GatewaysShared gateways();
 
 	private:
-		void commonInitialization();
 		void clear();
 
 		bool generateGatewaysRequiredFiles();
@@ -145,6 +83,9 @@ namespace Gateway
 		ParseResult parseSignalListSection(E::Section& parsingSection, const ParseLineResult& plr);
 
 		ParseResult appendAddressSignalID(SignalListShared signalList, const ParseLineResult& plr, bool appendAddr);
+
+		ParseResult parsePropValue(int lineNo, const QString& plrValue, bool* isPropValue, double* propValue);
+		ParseResult findPropertyValue(int lineNo, const QString& itemLabel, const QString& propName, double* propValue);
 
 		bool parseLine(const QString& str, ParseLineResult* plr);
 		bool parseSettingValue(E::Setting setting, const QString& valueStr, ParseLineResult* plr);
@@ -156,12 +97,17 @@ namespace Gateway
 
 		GatewayShared createTypedGateway(E::GatewayType gwType);
 
-
 	private:
-		const SignalSetAdapter m_signalSetAdapter;
+		const Builder::Context* m_context = nullptr;
+		const AppSignalSet* m_appSignalSet = nullptr;
 		GatewaysShared m_gateways;
 
 		ParserLog m_log;
+
+		//
+
+		std::set<Hash> m_mlFoundIn;
+		std::set<Hash> m_mlNotFoundIn;
 
 		//
 
