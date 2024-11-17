@@ -38,10 +38,6 @@ namespace Gateway
 	class IvsImpulseGateway : public Gateway
 	{
 	public:
-		static const std::set<E::Setting> m_requiredSettings;
-		static const std::set<E::Setting> m_optionalSettings;
-
-	public:
 
 		struct DataType_ListID
 		{
@@ -53,7 +49,8 @@ namespace Gateway
 		IvsImpulseGateway();
 		IvsImpulseGateway(const QString& gwID, const QString& gwDesc, bool enable);
 
-		virtual bool isKnownSetting(E::Setting st) const override;
+		void initSettings();
+
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
 
 		virtual void appendSignalList() override;

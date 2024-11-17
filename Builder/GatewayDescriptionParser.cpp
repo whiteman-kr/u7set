@@ -56,41 +56,46 @@ namespace Gateway
 				   E::SettingType>
 				   Parser::m_settingType =
 	{
-		{ E::Setting::Unknown,				E::SettingType::Unknown	},
+		{ E::Setting::Unknown,					E::SettingType::Unknown	},
 
 		// Common gateways settings
 		//
-		{ E::Setting::GatewayType,			E::SettingType::AlphaNumericUnderlineString	},
-		{ E::Setting::GatewayID,			E::SettingType::AlphaNumericUnderlineString	},
-		{ E::Setting::GatewayDescription,	E::SettingType::String	},
-		{ E::Setting::Enable,				E::SettingType::Bool	},
+		{ E::Setting::GatewayType,				E::SettingType::AlphaNumericUnderlineString	},
+		{ E::Setting::GatewayID,				E::SettingType::AlphaNumericUnderlineString	},
+		{ E::Setting::GatewayDescription,		E::SettingType::String	},
+		{ E::Setting::Enable,					E::SettingType::Bool	},
+		{ E::Setting::UniqueSignalsInAllLists,	E::SettingType::Bool	},
+
+		// Common signal lists settings
+		//
+		{ E::Setting::UniqueSignalsInList,		E::SettingType::Bool	},
 
 		// IVS Impulse gateway specific settings
 		//
-		{ E::Setting::SystemID,			E::SettingType::Int	},
-		{ E::Setting::LocalGatewayIP1,		E::SettingType::IpPort	},
-		{ E::Setting::RemoteGatewayIP1,	E::SettingType::IpPort	},
-		{ E::Setting::LocalGatewayIP2,		E::SettingType::IpPort	},
-		{ E::Setting::RemoteGatewayIP2,	E::SettingType::IpPort	},
-		{ E::Setting::ListsVersion,		E::SettingType::Int	},
-		{ E::Setting::Period,				E::SettingType::Int	},
-		{ E::Setting::TimeType,			E::SettingType::String	},
+		{ E::Setting::SystemID,					E::SettingType::Int		},
+		{ E::Setting::LocalGatewayIP1,			E::SettingType::IpPort	},
+		{ E::Setting::RemoteGatewayIP1,			E::SettingType::IpPort	},
+		{ E::Setting::LocalGatewayIP2,			E::SettingType::IpPort	},
+		{ E::Setting::RemoteGatewayIP2,			E::SettingType::IpPort	},
+		{ E::Setting::ListsVersion,				E::SettingType::Int		},
+		{ E::Setting::Period,					E::SettingType::Int		},
+		{ E::Setting::TimeType,					E::SettingType::String	},
 
 		// IVS Impulse signal lists specific settings
 		//
-		{ E::Setting::SendEvents,			E::SettingType::Bool	},
-		{ E::Setting::ListNo,				E::SettingType::Int	},
-		{ E::Setting::DataType,			E::SettingType::String	},
-		{ E::Setting::IncludeAppSignalID,	E::SettingType::Bool	},
+		{ E::Setting::SendEvents,				E::SettingType::Bool	},
+		{ E::Setting::ListNo,					E::SettingType::Int		},
+		{ E::Setting::DataType,					E::SettingType::String	},
+		{ E::Setting::IncludeAppSignalID,		E::SettingType::Bool	},
 
 		// ModbusTcpSlave gateway specific settings
 		//
-		{ E::Setting::ModbusDeviceID,		E::SettingType::Int	},
-		{ E::Setting::ModbusMode,			E::SettingType::String	},
+		{ E::Setting::ModbusDeviceID,			E::SettingType::Int		},
+		{ E::Setting::ModbusMode,				E::SettingType::String	},
 
 		// ModbusTcpSlave signal lists specific settings
 		//
-		{ E::Setting::SignalsFormat,		E::SettingType::String	},
+		{ E::Setting::SignalsFormat,			E::SettingType::String	},
 	};
 
 	const QRegularExpression Parser::m_anyWhitespaceSymbol("\\s");

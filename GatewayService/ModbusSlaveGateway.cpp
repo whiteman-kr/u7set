@@ -446,33 +446,25 @@ namespace Gateway
    //
    // ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting> ModbusSlaveGateway::m_requiredSettings =
-	{
-			E::Setting::LocalGatewayIP1,
-			E::Setting::ModbusDeviceID,
-			E::Setting::ModbusMode,
-	};
-
-	const std::set<E::Setting> ModbusSlaveGateway::m_optionalSettings =
-	{
-			E::Setting::LocalGatewayIP2,
-	};
-
 	ModbusSlaveGateway::ModbusSlaveGateway() :
 		Gateway(E::GatewayType::ModbusTcpSlave)
 	{
+		initSettings();
 	}
 
 	ModbusSlaveGateway::ModbusSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable) :
 		Gateway(E::GatewayType::ModbusTcpSlave, gwID, gwDesc, enable)
 	{
+		initSettings();
 	}
 
-	bool ModbusSlaveGateway::isKnownSetting(E::Setting st) const
+	void ModbusSlaveGateway::initSettings()
 	{
-		return Gateway::isKnownSetting(st) ||
-			   m_requiredSettings.contains(st) ||
-			   m_optionalSettings.contains(st);
+		appendRequiredSettings({	E::Setting::LocalGatewayIP1,
+									E::Setting::ModbusDeviceID,
+									E::Setting::ModbusMode });
+
+		appendOptionalSetting(E::Setting::LocalGatewayIP2);
 	}
 
 	bool ModbusSlaveGateway::checkAndApplySettings(int lineNo, ParserLog& log)
@@ -480,9 +472,7 @@ namespace Gateway
 		bool result = true;
 
 		result &= Gateway::checkAndApplySettings(lineNo, log);
-		result &= Gateway::checkRequiredSettings(m_requiredSettings,
-												 m_settingsValues,
-												 lineNo, log);
+
 		RETURN_IF_FALSE(result);
 
 		HostAddressPort addrPort;

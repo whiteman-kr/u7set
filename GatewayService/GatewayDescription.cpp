@@ -312,18 +312,6 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting> Gateway::m_gatewayRequiredSettings =
-	{
-		E::Setting::GatewayType,
-		E::Setting::GatewayID,
-		E::Setting::GatewayDescription,
-	};
-
-	const std::set<E::Setting> Gateway::m_gatewayOptionalSettings =
-	{
-		E::Setting::Enable,
-	};
-
 	Gateway::Gateway() :
 		m_gatewayType(E::GatewayType::Unknown)
 	{
@@ -332,6 +320,7 @@ namespace Gateway
 	Gateway::Gateway(E::GatewayType gwType) :
 		m_gatewayType(gwType)
 	{
+		privateInitSettings();
 	}
 
 	Gateway::Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable) :
@@ -340,10 +329,37 @@ namespace Gateway
 		m_gatewayDescription(gwDesc),
 		m_enable(enable)
 	{
+		privateInitSettings();
 	}
 
 	Gateway::~Gateway()
 	{
+	}
+
+	void Gateway::appendRequiredSetting(E::Setting reqSetting)
+	{
+		m_requiredSettings.insert(reqSetting);
+	}
+
+	void Gateway::appendRequiredSettings(const std::vector<E::Setting>& reqSettings)
+	{
+		for(E::Setting s : reqSettings)
+		{
+			m_requiredSettings.insert(s);
+		}
+	}
+
+	void Gateway::appendOptionalSetting(E::Setting optSetting)
+	{
+		m_optionalSettings.insert(optSetting);
+	}
+
+	void Gateway::appendOptionalSettings(const std::vector<E::Setting>& optSettings)
+	{
+		for(E::Setting s : optSettings)
+		{
+			m_optionalSettings.insert(s);
+		}
 	}
 
 	E::GatewayType Gateway::gatewayType() const
@@ -383,15 +399,15 @@ namespace Gateway
 
 	bool Gateway::isKnownSetting(E::Setting st) const
 	{
-		return m_gatewayRequiredSettings.contains(st) ||
-			   m_gatewayOptionalSettings.contains(st);
+		return m_requiredSettings.contains(st) ||
+			   m_optionalSettings.contains(st);
 	}
 
 	bool Gateway::checkAndApplySettings(int lineNo, ParserLog& log)
 	{
 		bool result = true;
 
-		result &= checkRequiredSettings(m_gatewayRequiredSettings, m_settingsValues, lineNo, log);
+		result &= checkRequiredSettings(m_settingsValues, lineNo, log);
 
 		RETURN_IF_FALSE(result);
 
@@ -416,6 +432,11 @@ namespace Gateway
 
 			case E::Setting::Enable:
 				m_enable = sv.value.toBool();
+				break;
+
+			case E::Setting::UniqueSignalsInAllLists:
+				m_uniqSignalsInAllLists = sv.value.toBool();
+				break;
 
 			default:
 				;		// ok
@@ -452,25 +473,6 @@ namespace Gateway
 	const std::vector<File>& Gateway::files() const
 	{
 		return m_files;
-	}
-
-	bool Gateway::checkRequiredSettings(const std::set<E::Setting> reqSettings,
-									  const SettingsValues& settingsValues,
-									  int lineNo, ParserLog& log)
-	{
-		bool result = true;
-
-		for(E::Setting st : reqSettings)
-		{
-			if (settingsValues.contains(st) == false)
-			{
-				log.logError(lineNo, QString("required setting '%1' is not set").
-											arg(::E::valueToString<E::Setting>(st)));
-				result = false;
-			}
-		}
-
-		return result;
 	}
 
 	void Gateway::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
@@ -560,6 +562,40 @@ namespace Gateway
 		Q_UNUSED(signalSet);
 		Q_UNUSED(log);
 		return true;
+	}
+
+	void Gateway::privateInitSettings()
+	{
+		m_requiredSettings =
+		{
+			E::Setting::GatewayType,
+			E::Setting::GatewayID,
+			E::Setting::GatewayDescription,
+		};
+
+		m_optionalSettings =
+		{
+			E::Setting::Enable,
+			E::Setting::UniqueSignalsInAllLists
+		};
+	}
+
+	bool Gateway::checkRequiredSettings(const SettingsValues& settingsValues,
+										int lineNo, ParserLog& log)
+	{
+		bool result = true;
+
+		for(E::Setting st : m_requiredSettings)
+		{
+			if (settingsValues.contains(st) == false)
+			{
+				log.logError(lineNo, QString("required setting '%1' is not set").
+									 arg(::E::valueToString<E::Setting>(st)));
+				result = false;
+			}
+		}
+
+		return result;
 	}
 
 	// ---------------------------------------------------------------------------------

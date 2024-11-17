@@ -159,37 +159,30 @@ namespace Gateway
    //
    // ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting> IvsImpulseGateway::m_requiredSettings =
-		{
-			E::Setting::LocalGatewayIP1,
-			E::Setting::RemoteGatewayIP1,
-			E::Setting::SystemID,
-			E::Setting::ListsVersion,
-			E::Setting::Period,
-			E::Setting::TimeType
-	};
-
-	const std::set<E::Setting> IvsImpulseGateway::m_optionalSettings =
-		{
-			E::Setting::LocalGatewayIP2,
-			E::Setting::RemoteGatewayIP2
-	};
-
 	IvsImpulseGateway::IvsImpulseGateway() :
 		Gateway(E::GatewayType::IVS_Impulse)
 	{
+		initSettings();
 	}
 
 	IvsImpulseGateway::IvsImpulseGateway(const QString& gwID, const QString& gwDesc, bool enable) :
 		Gateway(E::GatewayType::IVS_Impulse, gwID, gwDesc, enable)
 	{
+		initSettings();
 	}
 
-	bool IvsImpulseGateway::isKnownSetting(E::Setting st) const
+	void IvsImpulseGateway::initSettings()
 	{
-		return Gateway::isKnownSetting(st) ||
-			   m_requiredSettings.contains(st) ||
-			   m_optionalSettings.contains(st);
+		appendRequiredSettings({	E::Setting::LocalGatewayIP1,
+									E::Setting::RemoteGatewayIP1,
+									E::Setting::SystemID,
+									E::Setting::ListsVersion,
+									E::Setting::Period,
+									E::Setting::TimeType });
+
+		appendOptionalSettings({	E::Setting::LocalGatewayIP2,
+								E::Setting::RemoteGatewayIP2 });
+
 	}
 
 	bool IvsImpulseGateway::checkAndApplySettings(int lineNo, ParserLog& log)
@@ -197,9 +190,7 @@ namespace Gateway
 		bool result = true;
 
 		result &= Gateway::checkAndApplySettings(lineNo, log);
-		result &= Gateway::checkRequiredSettings(m_requiredSettings,
-												 m_settingsValues,
-												 lineNo, log);
+
 		RETURN_IF_FALSE(result);
 
 		HostAddressPort addrPort;

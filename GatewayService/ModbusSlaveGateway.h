@@ -59,9 +59,6 @@ namespace Gateway
 	class ModbusSlaveGateway : public Gateway
 	{
 	public:
-		static const std::set<E::Setting> m_requiredSettings;
-		static const std::set<E::Setting> m_optionalSettings;
-
 		inline static const int MODBUS_DEFAULT_PORT = 502;
 
 		struct ModbusSignal
@@ -77,7 +74,8 @@ namespace Gateway
 		ModbusSlaveGateway();
 		ModbusSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable);
 
-		virtual bool isKnownSetting(E::Setting st) const override;
+		void initSettings();
+
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
 
 		virtual void appendSignalList() override;

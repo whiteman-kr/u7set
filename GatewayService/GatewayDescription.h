@@ -38,6 +38,8 @@ namespace Gateway
 			GatewayID,
 			GatewayDescription,
 			Enable,
+			UniqueSignalsInAllLists,
+			UniqueSignalsInList,
 
 			// IVS Impulse specific settings
 
@@ -226,6 +228,8 @@ namespace Gateway
 		std::vector<QString> m_signalIDs;			// AppSignalIDs
 		std::optional<::E::SignalType> m_signalType;
 
+		bool m_uniqSignalsInList = false;
+
 		friend class Parser;
 	};
 
@@ -236,15 +240,17 @@ namespace Gateway
 
 	class Gateway
 	{
-	private:
-		static const std::set<E::Setting> m_gatewayRequiredSettings;
-		static const std::set<E::Setting> m_gatewayOptionalSettings;
-
 	public:
 		Gateway();
 		Gateway(E::GatewayType gwType);
 		Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable);
 		virtual ~Gateway();
+
+		void appendRequiredSetting(E::Setting reqSetting);
+		void appendRequiredSettings(const std::vector<E::Setting>& reqSettings);
+
+		void appendOptionalSetting(E::Setting optSetting);
+		void appendOptionalSettings(const std::vector<E::Setting>& optSettings);
 
 		E::GatewayType gatewayType() const;
 		QString gatewayID() const;
@@ -255,7 +261,8 @@ namespace Gateway
 		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value);
 		bool settingIsSet(E::Setting st) const;
 
-		virtual bool isKnownSetting(E::Setting st) const;
+		bool isKnownSetting(E::Setting st) const;
+
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log);
 
 		virtual void appendSignalList();
@@ -265,10 +272,6 @@ namespace Gateway
 		int signalsCount() const;
 
 		const std::vector<File>& files() const;
-
-		static bool checkRequiredSettings(const std::set<E::Setting> reqSettings,
-										  const SettingsValues& settingsValues,
-										  int lineNo, ParserLog& log);
 
 		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 
@@ -284,16 +287,27 @@ namespace Gateway
 
 		virtual bool generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log);
 
+	private:
+		void privateInitSettings();
+
+		bool checkRequiredSettings(const SettingsValues& settingsValues,
+								   int lineNo, ParserLog& log);
+
 	protected:
 		E::GatewayType m_gatewayType = E::GatewayType::Unknown;
 		QString m_gatewayID;
 		QString m_gatewayDescription;
 		bool m_enable = true;
+		bool m_uniqSignalsInAllLists = false;
 
 		SettingsValues m_settingsValues;
 
 		SignalLists m_signalLists;
 		std::vector<File> m_files;
+
+	private:
+		std::set<E::Setting> m_requiredSettings;
+		std::set<E::Setting> m_optionalSettings;
 
 		friend class Parser;
 	};
