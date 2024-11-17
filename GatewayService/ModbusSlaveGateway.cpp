@@ -269,8 +269,8 @@ namespace Gateway
 
 		if (m_signalAddrs.contains(hash) == true)
 		{
-			log.logError(lineNo, QString("signal %1 already in signal list").arg(signalID));
-			return ParseResult::Error;
+			log.logWarning(lineNo, QString("signal %1 already in signal list").arg(signalID));
+			return ParseResult::Ok;
 		}
 
 		if (m_modbusFormat.isValid() == false)

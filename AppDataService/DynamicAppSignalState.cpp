@@ -232,13 +232,13 @@ int DynamicAppSignalState::setStateRaw(AppDataSource& source,
 		}
 	}
 
-	if (flags.valid == AppSignalState::VALID)
-	{
+//	if (flags.valid == AppSignalState::VALID)
+//	{
 		if (getValue(rupData, rupDataSize, value) == false)
 		{
 			return 0;
 		}
-	}
+//	}
 
 	return setStateParsed(time, packetNo, value, flags, autoArchivingGroup, thread);
 }
