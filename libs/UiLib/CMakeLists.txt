@@ -24,6 +24,8 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/ExportPrint.h
 	./include/UiLib/PropertyEditor.h
 	./include/UiLib/PropertyEditorDialog.h
+	./include/UiLib/PropertyTable.h
+	./include/UiLib/PropertyTableDialog.h
 	./include/UiLib/StandardColors.h
 	./include/UiLib/TabWidgetEx.h
 	./include/UiLib/TagSelectorWidget.h
@@ -36,6 +38,8 @@ qt_add_library(${TARGET} STATIC
 	ExportPrint.cpp
 	PropertyEditor.cpp
 	PropertyEditorDialog.cpp
+	PropertyTable.cpp
+	PropertyTableDialog.cpp
 	TabWidgetEx.cpp
 	TagSelectorWidget.cpp
 )
@@ -85,6 +89,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTreeWidget>
 	<QTreeWidgetItem>
 	<QVBoxLayout>
+	<QSortFilterProxyModel>
+	<QInputDialog>
+	<QMimeData>
 
 	<CommonLib/PropertyObject.h>
 	<CommonLib/Types.h>

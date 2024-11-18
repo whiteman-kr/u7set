@@ -1,4 +1,4 @@
-#include "PropertyTable.h"
+#include <UiLib/PropertyTable.h>
 #include "../AppSignalLib/TuningValue.h"
 #include <UiLib/ChooseItemsWidget.h>
 #include <UiLib/PropertyEditor.h>
@@ -979,49 +979,38 @@ namespace ExtWidgets
 		m_buttonGroupByCategory->setChecked(value);
 	}
 
-	void PropertyTable::valueChanged(const ModifiedObjectsData& modifiedObjectsData)
+	void PropertyTable::valueChanged(const std::vector<ModifiedProperty>& modifiedProperties)
 	{
 		// Set the new property value in all objects
 		//
 		QString errorString;
 
-		QList<std::shared_ptr<PropertyObject>> modifiedObjects;
+		std::set<std::shared_ptr<PropertyObject>> modifiedObjectsSet;
 
-		const auto keys = modifiedObjectsData.keys();
-
-		for (const QString& propertyName : keys)
+		for (const ModifiedProperty& mp : modifiedProperties)
 		{
-			QList<std::pair<std::shared_ptr<PropertyObject>, QVariant>> objectsData = modifiedObjectsData.values(propertyName);
+			// Do not set property, if it has same value
 
-			for (const auto& objectData : objectsData)
+			QVariant oldValue = mp.object->propertyValue(mp.propertyName);
+
+			if (oldValue == mp.newValue)
 			{
-				std::shared_ptr<PropertyObject> object = objectData.first;
-				QVariant value = objectData.second;
-
-				// Do not set property, if it has same value
-
-				QVariant oldValue = object->propertyValue(propertyName);
-
-				if (oldValue == value)
-				{
-					continue;
-				}
-
-				// Warning!!! If property changing changes the list of properties (e.g. SpecificProperties),
-				// property pointer becomes unusable! So next calls to property-> will cause crash
-
-				object->setPropertyValue(propertyName, value);
-
-				QVariant newValue = object->propertyValue(propertyName);
-
-				if (oldValue == newValue && errorString.isEmpty() == true)
-				{
-					errorString = QString("Property: %1 - incorrect input value")
-								  .arg(propertyName);
-				}
-
-				modifiedObjects.append(object);
+				continue;
 			}
+
+			// Warning!!! If property changing changes the list of properties (e.g. SpecificProperties),
+			// property pointer becomes unusable! So next calls to property-> will cause crash
+
+			mp.object->setPropertyValue(mp.propertyName, mp.newValue);
+
+			QVariant newValue = mp.object->propertyValue(mp.propertyName);
+
+			if (oldValue == newValue && errorString.isEmpty() == true)
+			{
+				errorString = QString("Property: %1 - incorrect input value").arg(mp.propertyName);
+			}
+
+			modifiedObjectsSet.insert(mp.object);
 		}
 
 		if (errorString.isEmpty() == false)
@@ -1029,8 +1018,15 @@ namespace ExtWidgets
 			emit showErrorMessage(errorString);
 		}
 
-		if (modifiedObjects.count() > 0)
+		if (modifiedObjectsSet.empty() == false)
 		{
+			QList<std::shared_ptr<PropertyObject>> modifiedObjects;
+
+			for (const auto& mo : modifiedObjectsSet)
+			{
+				modifiedObjects.push_back(mo);
+			}
+
 			emit propertiesChanged(modifiedObjects);
 		}
 
@@ -1207,7 +1203,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		ModifiedObjectsData modifiedObjectsData;
+		std::vector<ModifiedProperty> modifiedProperties;
 
 		for (int r = 0; r < textRows.size(); r++)
 		{
@@ -1348,17 +1344,17 @@ namespace ExtWidgets
 
 				if (ok == true)
 				{
-					modifiedObjectsData.insert(p->caption(), std::make_pair(po, v));
+					modifiedProperties.push_back({p->caption(), po, v});
 				}
 			}
 		}
 
-		if (modifiedObjectsData.empty() == true)
+		if (modifiedProperties.empty() == true)
 		{
 			return;
 		}
 
-		valueChanged(modifiedObjectsData);
+		valueChanged(modifiedProperties);
 
 		updatePropertiesValues();
 
@@ -1587,7 +1583,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		ModifiedObjectsData modifiedObjectsData;
+		std::vector<ModifiedProperty> modifiedProperties;
 
 		std::map<std::pair<QString, std::shared_ptr<PropertyObject>>, QVariant> multiRowValues;
 
@@ -1616,7 +1612,7 @@ namespace ExtWidgets
 
 				modifier(s);
 
-				modifiedObjectsData.insert(p->caption(), std::make_pair(po, s));
+				modifiedProperties.push_back({p->caption(), po, s});
 			}
 
 			if (p->value().userType() == QMetaType::QStringList)
@@ -1667,15 +1663,15 @@ namespace ExtWidgets
 			const std::shared_ptr<PropertyObject>& po = key.second;
 			const QVariant& value = it.second;
 
-			modifiedObjectsData.insert(propertyName, std::make_pair(po, value));
+			modifiedProperties.push_back({propertyName, po, value});
 		}
 
-		if (modifiedObjectsData.empty() == true)
+		if (modifiedProperties.empty() == true)
 		{
 			return;
 		}
 
-		valueChanged(modifiedObjectsData);
+		valueChanged(modifiedProperties);
 
 		// Force redraw all selected cells
 
@@ -1696,12 +1692,10 @@ namespace ExtWidgets
 			return;
 		}
 
-		ModifiedObjectsData modifiedObjectsData;
+		std::vector<ModifiedProperty> modifiedProperties;
 
 		for (const QModelIndex& mi : selectedIndexes)
 		{
-			QVariant newValue = value;
-
 			std::shared_ptr<PropertyObject> po = m_proxyModel.propertyObjectByIndex(mi);
 
 			if (po == nullptr)
@@ -1719,9 +1713,28 @@ namespace ExtWidgets
 				return;
 			}
 
-			if (p->value().userType() == QMetaType::QStringList && newValue.userType() == QMetaType::QString)
+			QVariant newValue = value;
+
+			if (p->value().userType() == QMetaType::QStringList && value.userType() == QMetaType::QString)
 			{
 				QStringList l = p->value().toStringList();
+
+				// If this string list was already modified in multi-selection mode, take it from the modificationData
+				//
+				for (auto& mp : modifiedProperties)
+				{
+					if (mp.propertyName == p->caption() && mp.object == po)
+					{
+						l = mp.newValue.toStringList();
+						break;
+					}
+				}
+				//
+
+				if (row == 0 && l.isEmpty() == true)
+				{
+					l.push_back("");
+				}
 
 				if (row < 0 || row >= static_cast<int>(l.size()))
 				{
@@ -1729,20 +1742,33 @@ namespace ExtWidgets
 					return;
 				}
 
-				l[row] = newValue.toString();
+				l[row] = value.toString();
 
 				newValue = l;
 			}
 
-			modifiedObjectsData.insert(p->caption(), std::make_pair(po, newValue));
+			bool alreadyAdded = false;
+			for (auto& mp : modifiedProperties)
+			{
+				if (mp.propertyName == p->caption() && mp.object == po)
+				{
+					mp.newValue = newValue;
+					alreadyAdded = true;
+					break;
+				}
+			}
+			if (alreadyAdded == false)
+			{
+				modifiedProperties.push_back({p->caption(), po, newValue});
+			}
 		}
 
-		if (modifiedObjectsData.empty() == true)
+		if (modifiedProperties.empty() == true)
 		{
 			return;
 		}
 
-		valueChanged(modifiedObjectsData);
+		valueChanged(modifiedProperties);
 
 		// Force redraw all selected cells
 
@@ -2064,7 +2090,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		ModifiedObjectsData modifiedObjectsData;
+		std::vector<ModifiedProperty> modifiedProperties;
 
 		for (const QModelIndex& mi : selectedIndexes)
 		{
@@ -2093,7 +2119,7 @@ namespace ExtWidgets
 			{
 				bool b = p->value().toBool();
 
-				modifiedObjectsData.insert(p->caption(), std::make_pair(po, !b));
+				modifiedProperties.push_back({p->caption(), po, !b});
 			}
 
 			if (p->value().userType() == qMetaTypeId<Afb::AfbParamValue>())
@@ -2104,16 +2130,16 @@ namespace ExtWidgets
 
 				v.setValue(!b);
 
-				modifiedObjectsData.insert(p->caption(), std::make_pair(po, v.toVariant()));
+				modifiedProperties.push_back({p->caption(), po, v.toVariant()});
 			}
 		}
 
-		if (modifiedObjectsData.empty() == true)
+		if (modifiedProperties.empty() == true)
 		{
 			return;
 		}
 
-		valueChanged(modifiedObjectsData);
+		valueChanged(modifiedProperties);
 
 		// Force redraw all selected cells
 

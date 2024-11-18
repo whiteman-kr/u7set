@@ -83,6 +83,7 @@ Component.prototype.developInstallToggled = function (checked) {
 			ComponentSelectionPage.selectComponent("u7set.develop.rpct.docs");
 			ComponentSelectionPage.selectComponent("u7set.mats.monitor.docs");
 			ComponentSelectionPage.selectComponent("u7set.mats.tuningclient.docs");
+			ComponentSelectionPage.selectComponent("u7set.tools.simulator");
 		}
         installer.setDefaultPageVisible(QInstaller.ComponentSelection, false);
     }

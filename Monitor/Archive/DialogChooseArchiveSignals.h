@@ -40,7 +40,7 @@ private:
 	void filterSignals();
 
 
-	void addSignal(const ArchiveSignal& archiveSignal);
+	bool addSignal(const ArchiveSignal& archiveSignal);
 	void removeSelectedSignal();
 
 	[[nodiscard]] bool signalAlreadyPresent(const QString& customSignalId, const QString& archiveServiceId);

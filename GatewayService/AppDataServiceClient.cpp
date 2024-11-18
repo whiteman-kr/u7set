@@ -132,7 +132,10 @@ namespace Gateway
 			return;
 		}
 
-		DEBUG_LOG_MSG(log(), QString("state changes %1").arg(m_gwGetStateChangesReply.appsignalstates_size()));
+		if (m_gwGetStateChangesReply.appsignalstates_size() > 0)
+		{
+			//qDebug() << C_STR(QString("state changes %1").arg(m_gwGetStateChangesReply.appsignalstates_size()));
+		}
 
 		m_handler->processStateChanges(m_gwGetStateChangesReply);
 

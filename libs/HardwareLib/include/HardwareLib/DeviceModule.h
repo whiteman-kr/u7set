@@ -29,6 +29,7 @@ namespace Hardware
 			RIM = 0x1A00,
 			FIM = 0x1B00,
 			VDU = 0x1C00,
+			PLM = 0x1D00,
 
 			MSO = 0x2200,
 			MPS = 0x5100,

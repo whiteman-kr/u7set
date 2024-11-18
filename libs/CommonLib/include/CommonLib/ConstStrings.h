@@ -291,6 +291,7 @@ namespace XmlElement
 	inline const QString SW_CALC_SIGNALS("SwCalcSignals");
 
 	inline const QString SIGNALS("Signals");
+	inline const QString MODBUS_SIGNALS("ModbusSignals");
 	inline const QString SIGNAL_ELEM("Signal");
 
 	inline const QString ACTUATORS("Actuators");
@@ -439,9 +440,12 @@ namespace XmlAttribute
 	inline const QString FOTIP_TUNING_DATA_UID("FotipTuningDataUID");
 
 	inline const QString MODBUS_DEVICE_ID("ModbusDeviceID");
-	inline const QString REG_ADDR("RegAddr");
+	inline const QString MODBUS_MODE("ModbusMode");
+	inline const QString REG_NO("RegNo");
 	inline const QString REG_BIT("RegBit");
 	inline const QString FORMAT("Format");
+	inline const QString IS_CONST("IsConst");
+	inline const QString CONST_VALUE("ConstValue");
 
 	inline const QString MODULE_CAPTION("ModuleCaption");
 
@@ -561,7 +565,7 @@ namespace CmdLineArg
 	inline const QString WORK_DIRECTORY("w");
 	inline const QString BUILD_PATH("b");
 
-	inline const QString LOG_GATEWAY_PACKETS("logGwPackets");
+	inline const QString LOG_GW("logGw");
 	inline const QString LOG_RUP_TIME_ERR("logRupTimeErr");
 
 	inline const QString READ_ONLY("readonly");
@@ -699,6 +703,7 @@ namespace Separator
 	inline const QString NEW_LINE("\n");
 	inline const QString CR("\r");					// Carriage Return
 	inline const QString LF("\n");					// Line Feed
+	inline const QString TAB("\t");					// Line Feed
 	inline const QString CR_LF("\r\n");
 	inline const QString UNDERSCORE("_");
 	inline const QString DOUBLE_QUOTES("\"");

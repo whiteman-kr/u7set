@@ -3,9 +3,8 @@
 #include "../UtilsLib/XmlHelper.h"
 
 #include "GatewayDescription.h"
-#include "GatewayDescriptionParser.h"
 #include "IvsImpulseGateway.h"
-#include "ModbusTcpSlaveGateway.h"
+#include "ModbusSlaveGateway.h"
 
 namespace Gateway
 {
@@ -112,9 +111,12 @@ namespace Gateway
 
 	bool SignalList::setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
-		bool res = checkAndApplySetting(lineNo, st, value, log);
+		ParseResult pr = checkAndApplySetting(lineNo, st, value, log);
 
-		RETURN_IF_FALSE(res);
+		if (pr != ParseResult::Ok)
+		{
+			return false;
+		}
 
 		Q_ASSERT(m_settingsValues.contains(st) == false);
 
@@ -134,27 +136,71 @@ namespace Gateway
 		return false;
 	}
 
-	bool SignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
+	ParseResult SignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
 		Q_UNUSED(lineNo);
 		Q_UNUSED(st);
 		Q_UNUSED(value);
 		Q_UNUSED(log);
-		return true;
+		return ParseResult::Ok;
 	}
 
-	bool SignalList::appendSignalID(const QString& appSignalID, QString* errMsg)
+	ParseResult SignalList::checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log)
 	{
-		Q_UNUSED(errMsg);
+		TEST_PTR_RETURN_VALUE(appSignal, ParseResult::CriticalError);
+
+		if (m_signalType.has_value() == false)
+		{
+			log.logError(lineNo, QString("required signal type of list is undefined, set list signal type (format) first"));
+			return ParseResult::CriticalError;
+		}
+
+		if (appSignal->signalType() != m_signalType.value())
+		{
+			log.logError(lineNo, QString("signal type of '%1' isn't corresponds to list signal type '%2'").
+									   arg(appSignal->appSignalID(), ::E::valueToString(m_signalType.value())));
+			return ParseResult::Error;
+		}
+
+		return ParseResult::Ok;
+	}
+
+	ParseResult SignalList::appendSignalID(int lineNo, const QString& appSignalID, ParserLog& log)
+	{
+		Q_UNUSED(lineNo);
+		Q_UNUSED(log);
+
 		m_signalIDs.emplace_back(appSignalID);
-		return true;
+
+		return ParseResult::Ok;
 	}
 
-	bool SignalList::appendAddressSignalID(const QString& addressStr, const QString& appSignalID, QString* errMsg)
+	ParseResult SignalList::parseAddressStr(int lineNo, const QString& addStr, Address16* addr, ParserLog& log)
 	{
-		Q_UNUSED(addressStr);
-		appendSignalID(appSignalID, errMsg);
-		return true;
+		Q_UNUSED(addStr);
+		Q_UNUSED(addr);
+
+		log.logError(lineNo, "parseAddressStr is not implemented for this gateway type");
+		return 	ParseResult::Error;
+	}
+
+	ParseResult SignalList::appendAddressSignalID(int lineNo, const Address16& addr16, const QString& appSignalID, ParserLog& log)
+	{
+		Q_UNUSED(addr16);
+		Q_UNUSED(appSignalID);
+
+		log.logError(lineNo, "appendAddressSignalID is not implemented for this gateway type");
+		return 	ParseResult::Error;
+	}
+
+	ParseResult SignalList::appendAddressConstValue(int lineNo, const Address16& addr16, const QString& desc, double constValue, ParserLog& log)
+	{
+		Q_UNUSED(addr16);
+		Q_UNUSED(desc);
+		Q_UNUSED(constValue);
+
+		log.logError(lineNo, "appendAddressConstValue is not implemented for this gateway type");
+		return 	ParseResult::Error;
 	}
 
 	std::optional<::E::SignalType> SignalList::signalType() const
@@ -273,6 +319,11 @@ namespace Gateway
 		E::Setting::GatewayDescription,
 	};
 
+	const std::set<E::Setting> Gateway::m_gatewayOptionalSettings =
+	{
+		E::Setting::Enable,
+	};
+
 	Gateway::Gateway() :
 		m_gatewayType(E::GatewayType::Unknown)
 	{
@@ -283,10 +334,11 @@ namespace Gateway
 	{
 	}
 
-	Gateway::Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc) :
+	Gateway::Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable) :
 		m_gatewayType(gwType),
 		m_gatewayID(gwID),
-		m_gatewayDescription(gwDesc)
+		m_gatewayDescription(gwDesc),
+		m_enable(enable)
 	{
 	}
 
@@ -309,6 +361,11 @@ namespace Gateway
 		return m_gatewayDescription;
 	}
 
+	bool Gateway::enable() const
+	{
+		return m_enable;
+	}
+
 	int Gateway::signalListsCount() const
 	{
 		return TO_INT(m_signalLists.size());
@@ -326,7 +383,8 @@ namespace Gateway
 
 	bool Gateway::isKnownSetting(E::Setting st) const
 	{
-		return m_gatewayRequiredSettings.contains(st);
+		return m_gatewayRequiredSettings.contains(st) ||
+			   m_gatewayOptionalSettings.contains(st);
 	}
 
 	bool Gateway::checkAndApplySettings(int lineNo, ParserLog& log)
@@ -355,6 +413,9 @@ namespace Gateway
 			case E::Setting::GatewayDescription:
 				m_gatewayDescription = sv.value.toString();
 				break;
+
+			case E::Setting::Enable:
+				m_enable = sv.value.toBool();
 
 			default:
 				;		// ok
@@ -403,7 +464,8 @@ namespace Gateway
 		{
 			if (settingsValues.contains(st) == false)
 			{
-				log.logRequirtedSettingIsNotSet(lineNo, st);
+				log.logError(lineNo, QString("required setting '%1' is not set").
+											arg(::E::valueToString<E::Setting>(st)));
 				result = false;
 			}
 		}
@@ -493,9 +555,9 @@ namespace Gateway
 		return result;
 	}
 
-	bool Gateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log)
+	bool Gateway::generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log)
 	{
-		Q_UNUSED(signalSetAdapter);
+		Q_UNUSED(signalSet);
 		Q_UNUSED(log);
 		return true;
 	}
@@ -546,24 +608,24 @@ namespace Gateway
 		m_gateways.clear();
 	}
 
-	GatewayShared Gateways::createTypedGateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc)
+	GatewayShared Gateways::createTypedGateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable)
 	{
 		GatewayShared gw;
 
 		switch(gwType)
 		{
 		case E::GatewayType::IVS_Impulse:
-			gw = std::make_shared<IvsImpulseGateway>(gwID, gwDesc);
+			gw = std::make_shared<IvsImpulseGateway>(gwID, gwDesc, enable);
 			break;
 
 		case E::GatewayType::ModbusTcpSlave:
-			gw = std::make_shared<ModbusTcpSlaveGateway>(gwID, gwDesc);
+			gw = std::make_shared<ModbusSlaveGateway>(gwID, gwDesc, enable);
 			break;
 
 		case E::GatewayType::Unknown:
 		default:
 			Q_ASSERT(false);
-			gw = std::make_shared<Gateway>(gwType, gwID, gwDesc);
+			gw = std::make_shared<Gateway>(gwType, gwID, gwDesc, enable);
 		};
 
 		return gw;
@@ -586,6 +648,7 @@ namespace Gateway
 			xml.writeEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, gw->gatewayType());
 			xml.writeStringAttribute(XmlAttribute::GATEWAY_ID, gw->gatewayID());
 			xml.writeStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, gw->gatewayDescription());
+			xml.writeBoolAttribute(XmlAttribute::ENABLE, gw->enable());
 
 			gw->writeToXml(xml);
 
@@ -609,7 +672,7 @@ namespace Gateway
 		}
 	}
 
-	bool Gateways::readFromXml(XmlReadHelper& xml)
+	bool Gateways::readFromXml(XmlReadHelper& xml, bool skipDisabledGateways, QStringList* disabledGateways)
 	{
 		m_gateways.clear();
 
@@ -632,16 +695,32 @@ namespace Gateway
 			E::GatewayType gatewayType;
 			QString gatewayID;
 			QString datewayDescription;
+			bool enable = true;
 
 			result &= xml.readEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, &gatewayType);
 			result &= xml.readStringAttribute(XmlAttribute::GATEWAY_ID, &gatewayID);
 			result &= xml.readStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, &datewayDescription);
+			result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &enable);
+
+			if (enable == false)
+			{
+				if (disabledGateways != nullptr)
+				{
+					disabledGateways->append(gatewayID);
+				}
+
+				if (skipDisabledGateways)
+				{
+					continue;
+				}
+			}
 
 			BREAK_IF_FALSE(result);
 
 			GatewayShared gw = createTypedGateway(gatewayType,
 												  gatewayID,
-												  datewayDescription);
+												  datewayDescription,
+												  enable);
 			result &= gw->readFromXml(xml);
 
 			BREAK_IF_FALSE(result);

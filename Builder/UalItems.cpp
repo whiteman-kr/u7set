@@ -1057,6 +1057,36 @@ namespace Builder
 		return nullptr;
 	}
 
+	const AfbParam* UalAfb::getParamByCaption(const QString& caption, bool toLower) const
+	{
+		const std::vector<AfbParam>& params = afb().params();
+
+		if (toLower)
+		{
+			QString cpLowercase = caption.toLower();
+
+			for(const AfbParam& param : params)
+			{
+				if (param.caption().toLower() == cpLowercase)
+				{
+					return &param;
+				}
+			}
+		}
+		else
+		{
+			for(const AfbParam& param : params)
+			{
+				if (param.caption() == caption)
+				{
+					return &param;
+				}
+			}
+		}
+
+		return nullptr;
+	}
+
 	int UalAfb::getParamIntValueByOpName(const QString& opName, bool* ok) const
 	{
 		TEST_PTR_RETURN_VALUE(ok, 0);
@@ -1368,6 +1398,60 @@ namespace Builder
 	std::vector<UalAfb*>::const_iterator UalAfbs::end() const
 	{
 		return m_afbs.end();
+	}
+
+	std::tuple<bool, bool, double> UalAfbs::getUalAfbParamValue(const QString& itemLabel, const QString& paramName) const
+	{
+		static const std::tuple<bool, bool, double> NOT_FOUND_RESULT(false, false, 0);
+
+		if (m_afbs.empty())
+		{
+			return NOT_FOUND_RESULT;
+		}
+
+		if (m_labelHashToAfb.empty() == true)
+		{
+			for(const UalAfb* afb : m_afbs)
+			{
+				TEST_PTR_CONTINUE(afb);
+				m_labelHashToAfb.emplace(calcHash(afb->label()), afb);
+			}
+		}
+
+		auto it = m_labelHashToAfb.find(calcHash(itemLabel));
+
+		if (it == m_labelHashToAfb.end())
+		{
+			return NOT_FOUND_RESULT;
+		}
+
+		bool itemFound = true;
+		bool paramFound = false;
+		double paramValue = 0;
+
+		const UalAfb* afb = it->second;
+
+		const AfbParam* param = nullptr;
+
+		param = afb->getParamByCaption(paramName, true);
+
+		if (param == nullptr)
+		{
+			param = afb->getParamByCaption(paramName, false);
+
+			if (param == nullptr)
+			{
+				param = afb->getParamByOpName(paramName);
+			}
+		}
+
+		if (param != nullptr)
+		{
+			paramFound = true;
+			paramValue = param->afbParamValue().value().toDouble();
+		}
+
+		return std::tuple(itemFound, paramFound, paramValue);
 	}
 
 	// ---------------------------------------------------------------------------------------

@@ -19,8 +19,12 @@
         <translation>ІМІТ</translation>
     </message>
     <message>
-        <location filename="../DialogSignalInfo.cpp" line="320"/>
         <source>LOCK</source>
+        <translation type="vanished">БЛОК</translation>
+    </message>
+    <message>
+        <location filename="../DialogSignalInfo.cpp" line="320"/>
+        <source>BLOCK</source>
         <translation>БЛОК</translation>
     </message>
     <message>
@@ -80,11 +84,21 @@ otherwise set to 0. If no simulation signal exists, also set to 0.</source>
     </message>
     <message>
         <location filename="../DialogSignalInfo.cpp" line="334"/>
+        <source>Signal is Blocked
+
+Set to 1 when blocking signal is set to 1 (see AFB sim_lock),
+otherwise set to 0. If no blocking signal exists, also set to 0.</source>
+        <translation>Сигнал заблокований
+
+Встановлений в 1 якщо сигнал імітації заблокований (див AFB sim_lock),
+інакше встановлений в 0. Якщо сигналу блокування немає, також встановлений в 0.</translation>
+    </message>
+    <message>
         <source>Signal is Locked
 
 Set to 1 when locking signal is set to 1 (see AFB sim_lock),
 otherwise set to 0. If no locking signal exists, also set to 0.</source>
-        <translation>Сигнал заблокований
+        <translation type="vanished">Сигнал заблокований
 
 Встановлений в 1 якщо сигнал імітації заблокований (див AFB sim_lock),
 інакше встановлений в 0. Якщо сигналу блокування немає, також встановлений в 0.</translation>
@@ -251,36 +265,29 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
     <name>DialogSignalInfo</name>
     <message>
         <location filename="../DialogSignalInfo.ui" line="20"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="656"/>
         <source>Dialog</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="60"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="665"/>
         <source>State</source>
         <translation>Стан</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="87"/>
         <location filename="../DialogSignalInfo.cpp" line="631"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="657"/>
         <source>Plant Time</source>
         <translation>Час станції</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="141"/>
         <location filename="../DialogSignalInfo.ui" line="416"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="658"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="671"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;0.0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="174"/>
         <location filename="../DialogSignalInfo.ui" line="449"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="659"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="672"/>
         <source>%c</source>
         <translation></translation>
     </message>
@@ -292,56 +299,42 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
         <location filename="../DialogSignalInfo.ui" line="607"/>
         <location filename="../DialogSignalInfo.ui" line="638"/>
         <location filename="../DialogSignalInfo.ui" line="648"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="660"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="661"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="677"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="678"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="680"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="684"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="685"/>
         <source>TextLabel</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="228"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="662"/>
         <source>Server Time</source>
         <translation>Час сервера</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="241"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="663"/>
         <source>Flags:</source>
         <translation>Прапори:</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="254"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="664"/>
         <source>Value:</source>
         <translation>Значення:</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="280"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="666"/>
         <source>Properties</source>
         <translation>Властивості</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="300"/>
         <location filename="../DialogSignalInfo.cpp" line="636"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="667"/>
         <source>Extended</source>
         <translation>Додатково</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="316"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="668"/>
         <source>Setpoints</source>
         <translation>Уставки</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="332"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="669"/>
         <source>Schemas</source>
         <translation>Схеми</translation>
     </message>
@@ -351,73 +344,61 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
         <location filename="../DialogSignalInfo.cpp" line="1685"/>
         <location filename="../DialogSignalInfo.cpp" line="1910"/>
         <location filename="../DialogSignalInfo.cpp" line="1921"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="687"/>
         <source>Tuning</source>
         <translation>Тюнінг</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="365"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="670"/>
         <source>Tuning Value:</source>
         <translation>Значення тюнінга:</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="467"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="673"/>
         <source>Tuning Flags:</source>
         <translation>Прапори тюнінга:</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="511"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="674"/>
         <source>Write 0</source>
         <translation>Запис 0</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="524"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="675"/>
         <source>Write 1</source>
         <translation>Запис 1</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="553"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="676"/>
         <source>Write</source>
         <translation>Запис</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="597"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="679"/>
         <source>Write Request Time</source>
         <translation>Час запиту на запис</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="614"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="681"/>
         <source>Successful Write Time</source>
         <translation>Час успішного запису</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="621"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="682"/>
         <source>Successful Read Time</source>
         <translation>Час успішного читання</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="628"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="683"/>
         <source>LM Time</source>
         <translation>Час LM</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="655"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="686"/>
         <source>Unsuccessful Write Time</source>
         <translation>Час неуспішного запису</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="767"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="689"/>
         <source>SignalID</source>
         <translation>ІД сигналу</translation>
     </message>
@@ -425,7 +406,6 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
         <location filename="../DialogSignalInfo.ui" line="807"/>
         <location filename="../DialogSignalInfo.cpp" line="1352"/>
         <location filename="../DialogSignalInfo.cpp" line="1552"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="690"/>
         <source>EquipmentID</source>
         <translation>ІД обладнання</translation>
     </message>
@@ -433,13 +413,11 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
         <location filename="../DialogSignalInfo.ui" line="823"/>
         <location filename="../DialogSignalInfo.cpp" line="1351"/>
         <location filename="../DialogSignalInfo.cpp" line="1551"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="691"/>
         <source>AppSignalID</source>
         <translation>Внутрішній ІД</translation>
     </message>
     <message>
         <location filename="../DialogSignalInfo.ui" line="839"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="692"/>
         <source>Other</source>
         <translation>Інше</translation>
     </message>
@@ -447,7 +425,6 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
         <location filename="../DialogSignalInfo.ui" line="877"/>
         <location filename="../DialogSignalInfo.cpp" line="1342"/>
         <location filename="../DialogSignalInfo.cpp" line="1545"/>
-        <location filename="../../../../build-u7set-vc-Debug/libs/SchemaClientLib/SchemaClientLib_autogen/include/ui_DialogSignalInfo.h" line="693"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
@@ -1008,21 +985,21 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="55"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="56"/>
         <source>Snapshot - %1
 </source>
         <translation>Знімок - %1
 </translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="60"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="61"/>
         <source>Generated: %1
 </source>
         <translation>Згенеровано: %1
 </translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="61"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="62"/>
         <source>%1: %2
 </source>
         <translation></translation>
@@ -1160,44 +1137,44 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
         <translation>Ліміти</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="803"/>
-        <location filename="../SignalSnapshotModel.cpp" line="807"/>
-        <location filename="../SignalSnapshotModel.cpp" line="811"/>
+        <location filename="../SignalSnapshotModel.cpp" line="789"/>
+        <location filename="../SignalSnapshotModel.cpp" line="793"/>
+        <location filename="../SignalSnapshotModel.cpp" line="797"/>
         <source>yes</source>
         <translation>так</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="854"/>
+        <location filename="../SignalSnapshotModel.cpp" line="840"/>
         <source>Bus Type</source>
         <translation>Тип шини</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="908"/>
+        <location filename="../SignalSnapshotModel.cpp" line="894"/>
         <source>Analog</source>
         <translation>Аналоговий</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="909"/>
+        <location filename="../SignalSnapshotModel.cpp" line="895"/>
         <source>Discrete</source>
         <translation>Дискретний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="910"/>
+        <location filename="../SignalSnapshotModel.cpp" line="896"/>
         <source>Bus</source>
         <translation>Шина</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="911"/>
+        <location filename="../SignalSnapshotModel.cpp" line="897"/>
         <source>Input</source>
         <translation>Вхідний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="912"/>
+        <location filename="../SignalSnapshotModel.cpp" line="898"/>
         <source>Output</source>
         <translation>Вихідний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="913"/>
+        <location filename="../SignalSnapshotModel.cpp" line="899"/>
         <source>Internal</source>
         <translation>Внутрішній</translation>
     </message>
@@ -1234,8 +1211,8 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
 <context>
     <name>QObject::QObject</name>
     <message>
-        <location filename="../SignalSnapshotModel.cpp" line="795"/>
-        <location filename="../SignalSnapshotModel.cpp" line="799"/>
+        <location filename="../SignalSnapshotModel.cpp" line="781"/>
+        <location filename="../SignalSnapshotModel.cpp" line="785"/>
         <source>no</source>
         <translation>ні</translation>
     </message>
@@ -1864,7 +1841,7 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
 <context>
     <name>SchemaClientLib::SignalSnapshotWidget</name>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="172"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="173"/>
         <source>A mask contains &apos;*&apos; and &apos;?&apos; symbols.
 	&apos;*&apos; symbol means any set of symbols on its place, &apos;?&apos; symbol means one symbol on its place.
 	Several masks can be separated by semicolon or space.
@@ -1889,7 +1866,7 @@ T?30T01? (маска для CustomAppSignalID),
 Після вводу маски натисніть Enter.</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="182"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="183"/>
         <source>Tags for filtering signals.
 
 	Several tags can be separated by semicolon or space: &quot;tag1; tag2&quot; or &quot;tag1 tag2&quot;.
@@ -1902,193 +1879,191 @@ T?30T01? (маска для CustomAppSignalID),
 Після вводу тегів натисніть Enter.</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="192"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="193"/>
         <source>Signals Snapshot</source>
         <translation>Знімок сигналів</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="692"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="659"/>
         <source>Nothing to export.</source>
         <translation>Немає даних для експорту.</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="699"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="666"/>
         <source>Save File</source>
         <translation>Зберегти файл</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="701"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="668"/>
         <source>Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="724"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="691"/>
         <source>Unsupported file format.</source>
         <translation>Непідтримуваний формат.</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="837"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="797"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="851"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="811"/>
         <source>Role</source>
         <translation>Роль</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="866"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="826"/>
         <source>Mask</source>
         <translation>Маска</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="890"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="850"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="907"/>
         <source>Schema</source>
-        <translation>Схема</translation>
+        <translation type="vanished">Схема</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="922"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="881"/>
         <source>Tags</source>
         <translation>Теги</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="983"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="928"/>
         <source>Clear Filter</source>
         <translation>Скинути фільтр</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="971"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="916"/>
         <source>Export...</source>
         <translation>Експорт...</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="946"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="867"/>
         <source>List</source>
         <translation>Список</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="976"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="921"/>
         <source>Print...</source>
         <translation>Друк...</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="988"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="933"/>
         <source>Fixate</source>
         <translation>Фіксувати</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1015"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="960"/>
         <source>Format</source>
         <translation>Формат</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1017"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="962"/>
         <source>Auto-select</source>
         <translation>Авто-вибір</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1029"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="974"/>
         <source>Decimal (as [-]9.9)</source>
         <translation>Десятковий (як [-]9.9)</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1041"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="986"/>
         <source>Exponential (as [-]9.9e[+|-]999)</source>
         <translation>Експоненційний (як [-]9.9e[+|-]999)</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1055"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1000"/>
         <source>Default</source>
         <translation>За замовч</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1069"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1014"/>
         <source>.%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1091"/>
-        <location filename="../SignalSnapshotWidget.cpp" line="1100"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1036"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1045"/>
         <source>Any</source>
         <translation>Будь-який</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1092"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1037"/>
         <source>Analog</source>
         <translation>Аналоговий</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1093"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1038"/>
         <source>Discrete</source>
         <translation>Дискретний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1101"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1046"/>
         <source>Input</source>
         <translation>Вхідний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1102"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1047"/>
         <source>Output</source>
         <translation>Вихідний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1103"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1048"/>
         <source>Internal</source>
         <translation>Внутрішній</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1104"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1049"/>
         <source>Tunable</source>
         <translation>Сигнал тюнінгу</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1117"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1062"/>
         <source>All</source>
         <translation>Весь текст</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1118"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1063"/>
         <source>AppSignalID</source>
         <translation>Внутрішній ІД</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1119"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1064"/>
         <source>CustomAppSignalID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1120"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1065"/>
         <source>EquipmentID</source>
         <translation>ІД обладнання</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1121"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1066"/>
         <source>LmEquipmentID</source>
         <translation>ІД логічного модуля</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1139"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1084"/>
         <source>All Servers</source>
         <translation>Всі сервери</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1259"/>
         <source>All Schemas</source>
-        <translation>Всі схеми</translation>
+        <translation type="vanished">Всі схеми</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1298"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1203"/>
         <source>Not selected</source>
         <translation>Не обраний</translation>
     </message>
     <message>
-        <location filename="../SignalSnapshotWidget.cpp" line="1306"/>
+        <location filename="../SignalSnapshotWidget.cpp" line="1211"/>
         <source>[%1] %2</source>
         <translation></translation>
     </message>

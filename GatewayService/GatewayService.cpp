@@ -1,7 +1,6 @@
 #include "GatewayService.h"
 
 #include "../OnlineLib/CfgServerLoader.h"
-#include "GatewayDescriptionParser.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -67,7 +66,7 @@ void GatewayServiceWorker::initServiceSpecificCmdLineArgs()
 	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 	addValueCmdLineArg(CmdLineArg::CFG_IP1, SoftwareSetting::CFG_SERVICE_IP1, "IP address of first Configuration Service.", "IPv4:Port");
 	addValueCmdLineArg(CmdLineArg::CFG_IP2, SoftwareSetting::CFG_SERVICE_IP2, "IP address of second Configuration Service.", "IPv4:Port");
-	addSimpleNoWritableCmdLineArg(CmdLineArg::LOG_GATEWAY_PACKETS, "Turn On 2 hours gateway packet logging.");
+	addValueCmdLineArg(CmdLineArg::LOG_GW, SoftwareSetting::LOG_GATEWAY_PACKETS, "Turn On 1 hour packet logging for specified gateways.", "GatewayID1[, GatewayID2 ...]");
 
 //	cp.addSimpleOption(CmdLineOption::CFG_PARSE, "Parse gateway description file.");
 
@@ -77,14 +76,14 @@ void GatewayServiceWorker::initServiceSpecificCmdLineArgs()
 
 void GatewayServiceWorker::loadServiceSpecificSettings()
 {
-	m_logGatewayPackets = cmdLineArgIsSet(CmdLineArg::LOG_GATEWAY_PACKETS);
+	m_logGatewayIDs = getSettingValue(SoftwareSetting::LOG_GATEWAY_PACKETS);
 
 	DEBUG_LOG_MSG(logger(), "");
 	DEBUG_LOG_MSG(logger(), QString(tr("Service settings:")));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID).arg(equipmentID()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStrIfSet()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
-	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::LOG_GATEWAY_PACKETS).arg(m_logGatewayPackets));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::EQUIPMENT_ID, equipmentID()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP1, cfgServiceIP1().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2, cfgServiceIP2().addressPortStrIfSet()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::LOG_GATEWAY_PACKETS, m_logGatewayIDs));
 	DEBUG_LOG_MSG(logger(), "");
 }
 
@@ -269,7 +268,7 @@ bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 		}
 	}
 
-	DEBUG_LOG_MSG(logger(), QString("All gatreways acquire %1 signal(s)").arg(aquiredSignalsCount));
+	DEBUG_LOG_MSG(logger(), QString("All gateways acquire %1 signal(s)").arg(aquiredSignalsCount));
 
 	return true;
 }
@@ -278,7 +277,15 @@ bool GatewayServiceWorker::readGatewayDescription(const QByteArray& fileData)
 {
 	XmlReadHelper xml(fileData);
 
-	bool result = m_gateways.readFromXml(xml);
+	QStringList disabledGateways;
+
+	bool result = m_gateways.readFromXml(xml, true, &disabledGateways);
+
+	if (disabledGateways.size() > 0)
+	{
+		DEBUG_LOG_WRN(logger(), QString("Gateway(s) %1 disabled and will NOT BE RUN!").
+								arg(disabledGateways.join(", ")));
+	}
 
 	return result;
 }
@@ -295,7 +302,7 @@ void GatewayServiceWorker::applyNewConfiguration()
 	bool result = true;
 
 	result &= m_handlers.init(m_gateways, softwareInfo(), m_curSettingsProfile, m_appSignals,
-							  logger(), m_logGatewayPackets);
+							  logger(), m_logGatewayIDs);
 	if (result == false)
 	{
 		DEBUG_LOG_ERR(logger(), QString("Handlers initialization ERROR!"));
@@ -336,54 +343,4 @@ void GatewayServiceWorker::stopTimer()
 void GatewayServiceWorker::onTimer()
 {
 }
-
-void GatewayServiceWorker::parseGatewayDescription(const QString& filePathName, const QString& gwDesc)
-{
-	DEBUG_LOG_MSG(logger(), "");
-	DEBUG_LOG_MSG(logger(), QString("Parsing gateway description file: %1").arg(filePathName));
-
-	AppSignals appSignals;
-
-	Gateway::Parser gdp(appSignals);
-
-	gdp.parse(gwDesc);
-
-	int errCount = 0;
-	int wrnCount = 0;
-
-	const Gateway::ParserLog& parserLog = gdp.log();
-
-	for(const auto& r : parserLog)
-	{
-		switch(r.msgType)
-		{
-		case Gateway::LogMsgType::Message:
-			{
-				QString msg = r.msg;
-				msg = msg.mid(0, 1).toUpper() + msg.mid(1);
-				DEBUG_LOG_MSG(logger(), msg);
-			}
-			break;
-
-		case Gateway::LogMsgType::Warning:
-			DEBUG_LOG_WRN(logger(), "Warning: " + r.msg);
-			wrnCount++;
-			break;
-
-		case Gateway::LogMsgType::Error:
-			DEBUG_LOG_ERR(logger(), "Error: " + r.msg);
-			errCount++;
-			break;
-
-		default:
-			Q_ASSERT(false);
-		}
-	}
-
-	DEBUG_LOG_MSG(logger(), QString("Parsing finished with %1 errors, %2 warnings")
-										.arg(errCount).arg(wrnCount));
-	DEBUG_LOG_MSG(logger(), "");
-}
-
-
 

@@ -14,7 +14,7 @@ namespace Gateway
 		IvsImpulseSignalList();
 
 		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
+		virtual ParseResult checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
 
 		int listNo() const;
 		E::SignalListDataType dataType() const;
@@ -51,7 +51,7 @@ namespace Gateway
 
 	public:
 		IvsImpulseGateway();
-		IvsImpulseGateway(const QString& gwID, const QString& gwDesc);
+		IvsImpulseGateway(const QString& gwID, const QString& gwDesc, bool enable);
 
 		virtual bool isKnownSetting(E::Setting st) const override;
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
@@ -74,14 +74,14 @@ namespace Gateway
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
 
 	private:
-		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log) override;
+		virtual bool generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log) override;
 
 		bool checkSignalListsSettings(ParserLog& log);
-		bool generateSignalListsFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
+		bool generateSignalListsFiles(const AppSignalSet* signalSet, ParserLog& log);
 
 		bool generateSignalListFile(const IvsImpulseSignalList& signalList,
 									File& file,
-									const SignalSetAdapter& signalSetAdapter,
+									const AppSignalSet* signalSet,
 									ParserLog& log);
 
 	private:

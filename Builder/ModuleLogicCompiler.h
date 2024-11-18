@@ -249,6 +249,8 @@ namespace Builder
 
 		Address16 getDiscreteUalAddrBitConstIncluded(const UalSignal* ualSignal) const;
 
+		std::tuple<bool, bool, double> getUalAfbParamValue(const QString& itemLabel, const QString& paramName);
+
 	private:
 		bool getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
 

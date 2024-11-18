@@ -1,43 +1,11 @@
 #include "GatewayDescriptionParser.h"
 #include "../UtilsLib/WUtils.h"
-#include "IvsImpulseGateway.h"
-#include "ModbusTcpSlaveGateway.h"
+#include "../GatewayService/IvsImpulseGateway.h"
+#include "../GatewayService/ModbusSlaveGateway.h"
+#include "ModuleLogicCompiler.h"
 
 namespace Gateway
 {
-	// ---------------------------------------------------------------------------------
-	//
-	// Class Gateway::SignalSetAdapter implementation
-	//
-	// ---------------------------------------------------------------------------------
-
-	SignalSetAdapter::SignalSetAdapter(const AppSignalSet* appSignalSet) :
-		m_appSignalSet(appSignalSet)
-	{
-	}
-
-	SignalSetAdapter::SignalSetAdapter(const AppSignals& appSignals) :
-		m_appSignals(&appSignals)
-	{
-	}
-
-	const AppSignal* SignalSetAdapter::getAppSignal(const QString& appSignalID) const
-	{
-		if (m_appSignalSet != nullptr)
-		{
-			return m_appSignalSet->getSignal(appSignalID);
-		}
-
-		if (m_appSignals != nullptr)
-		{
-			return m_appSignals->getSignalByID(appSignalID);
-		}
-
-		Q_ASSERT(false);
-
-		return nullptr;
-	}
-
 	// ---------------------------------------------------------------------------------
 	//
 	// Struct Gateway::Parser::ParseLineResult implementation
@@ -69,87 +37,6 @@ namespace Gateway
 
 	// ---------------------------------------------------------------------------------
 	//
-	// Class Gateway::ParserLog implementation
-	//
-	// ---------------------------------------------------------------------------------
-
-	void ParserLog::logResult(int lineNo, LogMsgType msgType, const QString& msg)
-	{
-		log(lineNo, msgType, message(lineNo, msg));
-	}
-
-	void ParserLog::logError(int lineNo, const QString& errMsg)
-	{
-		log(lineNo, LogMsgType::Error, message(lineNo, errMsg));
-	}
-
-	void ParserLog::logError(const QString& errMsg)
-	{
-		log(0, LogMsgType::Error, errMsg);
-	}
-
-	void ParserLog::logWarning(int lineNo,
-								  const QString& wrnMsg)
-	{
-		log(lineNo, LogMsgType::Warning, message(lineNo, wrnMsg));
-	}
-
-	void ParserLog::logWarning(const QString& wrnMsg)
-	{
-		log(0, LogMsgType::Warning, wrnMsg);
-	}
-
-	void ParserLog::logRequirtedSettingIsNotSet(int lineNo, E::Setting st)
-	{
-		logError(lineNo, QString("required setting '%1' is not set").
-						arg(::E::valueToString<E::Setting>(st)));
-	}
-
-	int ParserLog::errorCount() const
-	{
-		return m_errCount;
-	}
-
-	int ParserLog::warningCount() const
-	{
-		return m_wrnCount;
-	}
-
-	QString ParserLog::message(int lineNo, const QString& msg)
-	{
-		if (lineNo == 0)
-		{
-			return msg;
-		}
-
-		return QString("line %1, %2").arg(lineNo).arg(msg);
-	}
-
-	void ParserLog::log(int lineNo, LogMsgType msgType, const QString& msg)
-	{
-		push_back({lineNo, msgType, msg});
-
-		switch(msgType)
-		{
-		case LogMsgType::Error:
-			m_errCount++;
-			break;
-
-		case LogMsgType::Warning:
-			m_wrnCount++;
-			break;
-
-		case LogMsgType::Message:
-			break;
-
-		case LogMsgType::Nothing:
-		default:
-			Q_ASSERT(false);
-		}
-	}
-
-	// ---------------------------------------------------------------------------------
-	//
 	// Class Gateway::Parser implementation
 	//
 	// ---------------------------------------------------------------------------------
@@ -176,28 +63,30 @@ namespace Gateway
 		{ E::Setting::GatewayType,			E::SettingType::AlphaNumericUnderlineString	},
 		{ E::Setting::GatewayID,			E::SettingType::AlphaNumericUnderlineString	},
 		{ E::Setting::GatewayDescription,	E::SettingType::String	},
+		{ E::Setting::Enable,				E::SettingType::Bool	},
 
 		// IVS Impulse gateway specific settings
 		//
-		{ E::Setting::SystemID,				E::SettingType::Int		},
+		{ E::Setting::SystemID,			E::SettingType::Int	},
 		{ E::Setting::LocalGatewayIP1,		E::SettingType::IpPort	},
-		{ E::Setting::RemoteGatewayIP1,		E::SettingType::IpPort	},
+		{ E::Setting::RemoteGatewayIP1,	E::SettingType::IpPort	},
 		{ E::Setting::LocalGatewayIP2,		E::SettingType::IpPort	},
-		{ E::Setting::RemoteGatewayIP2,		E::SettingType::IpPort	},
-		{ E::Setting::ListsVersion,			E::SettingType::Int		},
-		{ E::Setting::Period,				E::SettingType::Int		},
-		{ E::Setting::TimeType,				E::SettingType::String	},
+		{ E::Setting::RemoteGatewayIP2,	E::SettingType::IpPort	},
+		{ E::Setting::ListsVersion,		E::SettingType::Int	},
+		{ E::Setting::Period,				E::SettingType::Int	},
+		{ E::Setting::TimeType,			E::SettingType::String	},
 
 		// IVS Impulse signal lists specific settings
 		//
 		{ E::Setting::SendEvents,			E::SettingType::Bool	},
-		{ E::Setting::ListNo,				E::SettingType::Int		},
-		{ E::Setting::DataType,				E::SettingType::String	},
+		{ E::Setting::ListNo,				E::SettingType::Int	},
+		{ E::Setting::DataType,			E::SettingType::String	},
 		{ E::Setting::IncludeAppSignalID,	E::SettingType::Bool	},
 
 		// ModbusTcpSlave gateway specific settings
 		//
-		{ E::Setting::ModbusDeviceID,	E::SettingType::Int	},
+		{ E::Setting::ModbusDeviceID,		E::SettingType::Int	},
+		{ E::Setting::ModbusMode,			E::SettingType::String	},
 
 		// ModbusTcpSlave signal lists specific settings
 		//
@@ -207,27 +96,18 @@ namespace Gateway
 	const QRegularExpression Parser::m_anyWhitespaceSymbol("\\s");
 	const QRegularExpression Parser::m_notAlphaNumericUnderlineSymbols("[^a-zA-Z0-9_]");
 
-	Parser::Parser(const AppSignalSet* appSignalSet, GatewaysShared gateways) :
-		m_signalSetAdapter(appSignalSet),
+	Parser::Parser(const Builder::Context* context, GatewaysShared gateways) :
+		m_context(context),
 		m_gateways(gateways)
 	{
-		commonInitialization();
-	}
+		if (m_context == nullptr)
+		{
+			Q_ASSERT(false);
+			return;
+		}
 
-	Parser::Parser(const AppSignals& appSignals, GatewaysShared gateways) :
-		m_signalSetAdapter(appSignals),
-		m_gateways(gateways)
-	{
-		commonInitialization();
-	}
+		m_appSignalSet = context->m_signalSet->appSignalSet();
 
-	Parser::~Parser()
-	{
-		clear();
-	}
-
-	void Parser::commonInitialization()
-	{
 		if (m_gateways == nullptr)
 		{
 			m_gateways = std::make_shared<Gateways>();
@@ -235,6 +115,20 @@ namespace Gateway
 
 		m_knownSections = ::E::enumKeyStrings<E::Section>();
 		m_knownSettings = ::E::enumKeyStrings<E::Setting>();
+
+		//
+
+		const std::map<Hash, Builder::ModuleLogicCompilerShared>& mlCompilers = m_context->m_moduleLogicCompilers;
+
+		for(const auto& [mlHash, mlComp] : mlCompilers)
+		{
+			m_mlNotFoundIn.insert(mlHash);
+		}
+	}
+
+	Parser::~Parser()
+	{
+		clear();
 	}
 
 	void Parser::clear()
@@ -363,14 +257,14 @@ namespace Gateway
 
 		for(GatewayShared gw : *m_gateways)
 		{
-			result &= gw->generateRequiredFiles(m_signalSetAdapter, m_log);
+			result &= gw->generateRequiredFiles(m_appSignalSet, m_log);
 		}
 
 		return result;
 	}
 
-	Parser::ParseResult Parser::parseUnknownSection(E::Section& parsingSection,
-													const ParseLineResult& plr)
+	ParseResult Parser::parseUnknownSection(E::Section& parsingSection,
+											const ParseLineResult& plr)
 	{
 		if (plr.lineType == LineType::Section &&
 			plr.section == E::Section::Gateway)
@@ -384,8 +278,8 @@ namespace Gateway
 		return ParseResult::CriticalError;
 	}
 
-	Parser::ParseResult Parser::parseGatewaySection(E::Section& parsingSection,
-													   const ParseLineResult& plr)
+	ParseResult Parser::parseGatewaySection(E::Section& parsingSection,
+											const ParseLineResult& plr)
 	{
 		GatewayShared gw = m_gateways->last();
 
@@ -476,8 +370,8 @@ namespace Gateway
 		return ParseResult::Error;
 	}
 
-	Parser::ParseResult Parser::parseSignalListSection(E::Section& parsingSection,
-													   const ParseLineResult& plr)
+	ParseResult Parser::parseSignalListSection(E::Section& parsingSection,
+												const ParseLineResult& plr)
 	{
 		GatewayShared gw = m_gateways->last();
 		SignalListShared sl = gw->m_signalLists.back();
@@ -533,52 +427,206 @@ namespace Gateway
 		return ParseResult::Error;
 	}
 
-	Parser::ParseResult Parser::appendAddressSignalID(SignalListShared signalList, const ParseLineResult& plr, bool appendAddr)
+	ParseResult Parser::appendAddressSignalID(SignalListShared signalList,
+											  const ParseLineResult& plr, bool appendAddr)
 	{
-		QString appSignalID = plr.value.toString().trimmed();
+		TEST_PTR_RETURN_VALUE(m_appSignalSet, ParseResult::CriticalError);
 
-		const AppSignal* s = m_signalSetAdapter.getAppSignal(appSignalID);
+		QString plrValue = plr.value.toString().trimmed();
+
+		//
+
+		bool isPropValue = false;
+		double propValue = 0;
+
+		ParseResult pr = parsePropValue(plr.lineNo, plrValue, &isPropValue, &propValue);
+
+		if (isPropValue)
+		{
+			Address16 addr16;
+
+			pr = signalList->parseAddressStr(plr.lineNo, plr.addressStr, &addr16, m_log);
+
+			if (pr != ParseResult::Ok)
+			{
+				return pr;
+			}
+
+			pr = signalList->appendAddressConstValue(plr.lineNo, addr16, plrValue, propValue, m_log);
+
+			return pr;
+		}
+
+		//
+
+		const AppSignal* s = m_appSignalSet->getSignal(plrValue);
 
 		if (s == nullptr)
 		{
-			m_log.logError(plr.lineNo, QString("signal '%1' not found").arg(appSignalID));
+			m_log.logError(plr.lineNo, QString("signal '%1' not found").arg(plrValue));
 			return ParseResult::Error;
 		}
 
-		std::optional<::E::SignalType> listSignalType = signalList->signalType();
+		pr = signalList->checkSignalTypeAndFormat(plr.lineNo, s, m_log);
 
-		if (listSignalType.has_value() == false)
+		if (pr != ParseResult::Ok)
 		{
-			m_log.logError(plr.lineNo, QString("required signal type of list is undefined, set list signal type (format) first"));
-			return ParseResult::CriticalError;
+			return pr;
 		}
-
-		if (s->signalType() != listSignalType.value())
-		{
-			m_log.logError(plr.lineNo, QString("signal type of '%1' isn't corresponds to list signal type '%2'").
-									   arg(s->appSignalID()).arg(::E::valueToString(listSignalType.value())));
-			return ParseResult::Error;
-		}
-
-		QString errMsg;
-		bool res = true;
 
 		if (appendAddr == false)
 		{
-			res = signalList->appendSignalID(appSignalID, &errMsg);
+			pr = signalList->appendSignalID(plr.lineNo, plrValue, m_log);
 		}
 		else
 		{
-			res = signalList->appendAddressSignalID(plr.addressStr, appSignalID, &errMsg);
+			Address16 addr16;
+
+			pr = signalList->parseAddressStr(plr.lineNo, plr.addressStr, &addr16, m_log);
+
+			if (pr != ParseResult::Ok)
+			{
+				return pr;
+			}
+
+			pr = signalList->appendAddressSignalID(plr.lineNo, addr16, plrValue, m_log);
 		}
 
-		if (res == false)
+		return pr;
+	}
+
+	ParseResult Parser::parsePropValue(int lineNo, const QString& plrValue, bool* isPropValue, double* propValue)
+	{
+		TEST_PTR_RETURN_VALUE(isPropValue, ParseResult::CriticalError);
+		TEST_PTR_RETURN_VALUE(propValue, ParseResult::CriticalError);
+
+		// plrValue already trimmed!
+
+		static const QString PROP_VALUE("propvalue(");
+		static const int PROP_VALUE_LEN = PROP_VALUE.length();
+		static const QString PROP_VALUE_END(")");
+		static const QString PROP_VALUE_SYNTAX_ERROR("property value syntax error, use: propValue(item_label.propName)");
+
+		*isPropValue = false;
+		*propValue = 0;
+
+		if (plrValue.length() < PROP_VALUE_LEN)
 		{
-			m_log.logError(plr.lineNo, errMsg);
+			return ParseResult::Ok;
+		}
+
+		if (plrValue.mid(0, PROP_VALUE_LEN).toLower() != PROP_VALUE)
+		{
+			return ParseResult::Ok;
+		}
+
+		if (plrValue.endsWith(PROP_VALUE_END) == false)
+		{
+			m_log.logError(lineNo, PROP_VALUE_SYNTAX_ERROR);
 			return ParseResult::Error;
 		}
 
-		return ParseResult::Ok;
+		QString lPropName = plrValue.mid(PROP_VALUE_LEN, plrValue.length() - PROP_VALUE_LEN - 1);
+
+		QStringList sl = lPropName.split(Separator::DOT, Qt::SkipEmptyParts);
+
+		if (sl.size() != 2)
+		{
+			m_log.logError(lineNo, PROP_VALUE_SYNTAX_ERROR);
+			return ParseResult::Error;
+		}
+
+		*isPropValue = true;
+
+		QString label = sl[0];
+		QString propName = sl[1];
+
+		ParseResult res = findPropertyValue(lineNo, label, propName, propValue);
+
+		return res;
+	}
+
+	ParseResult Parser::findPropertyValue(int lineNo, const QString& itemLabel, const QString& propName, double* propValue)
+	{
+		const std::map<Hash, Builder::ModuleLogicCompilerShared>& mlCompilers = m_context->m_moduleLogicCompilers;
+
+		// first search in already found LMs
+		//
+		for(Hash mlHash : m_mlFoundIn)
+		{
+			auto it = mlCompilers.find(mlHash);
+
+			if (it == mlCompilers.end())
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			Builder::ModuleLogicCompilerShared mlCompiler = it->second;
+
+			TEST_PTR_CONTINUE(mlCompiler);
+
+			const auto [itemFound, propFound, prValue] = mlCompiler->getUalAfbParamValue(itemLabel, propName);
+
+			if (itemFound)
+			{
+				if (propFound)
+				{
+					*propValue = prValue;
+					return ParseResult::Ok;
+				}
+				else
+				{
+					m_log.logError(lineNo, QString("Property '%1' is not found in item '%2'").
+												arg(propName, itemLabel));
+					return ParseResult::Error;
+				}
+			}
+		}
+
+		// search in other LMs
+		//
+		for(Hash mlHash : m_mlNotFoundIn)
+		{
+			auto it = mlCompilers.find(mlHash);
+
+			if (it == mlCompilers.end())
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			Builder::ModuleLogicCompilerShared mlCompiler = it->second;
+
+			TEST_PTR_CONTINUE(mlCompiler);
+
+			const auto [itemFound, paramFound, paramValue] = mlCompiler->getUalAfbParamValue(itemLabel, propName);
+
+			if (itemFound)
+			{
+				m_mlFoundIn.insert(mlHash);
+				m_mlNotFoundIn.erase(mlHash);
+
+				//
+
+				if (paramFound)
+				{
+					*propValue = paramValue;
+					return ParseResult::Ok;
+				}
+				else
+				{
+					m_log.logError(lineNo, QString("property '%1' is not found in item '%2'").
+										   arg(propName, itemLabel));
+					return ParseResult::Error;
+				}
+			}
+		}
+
+		m_log.logError(lineNo, QString("item label '%1' is not found").
+									   arg(itemLabel));
+
+		return ParseResult::Error;		// prop value is not found
 	}
 
 	bool Parser::parseLine(const QString& str, ParseLineResult* plr)
@@ -735,8 +783,8 @@ namespace Gateway
 	}
 
 	bool Parser::parseSettingValue(E::Setting setting,
-													 const QString& valueStr,
-													 ParseLineResult* plr)
+								   const QString& valueStr,
+								   ParseLineResult* plr)
 	{
 		TEST_PTR_RETURN_FALSE(plr);
 
@@ -884,7 +932,7 @@ namespace Gateway
 			return std::make_shared<IvsImpulseGateway>();
 
 		case E::GatewayType::ModbusTcpSlave:
-			return std::make_shared<ModbusTcpSlaveGateway>();
+			return std::make_shared<ModbusSlaveGateway>();
 
 		default:
 			Q_ASSERT(false);

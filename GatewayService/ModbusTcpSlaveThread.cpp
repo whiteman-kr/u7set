@@ -1,5 +1,4 @@
 #include "ModbusTcpSlaveThread.h"
-#include "ModbusTcpSlaveGatewayHandler.h"
 
 namespace Modbus
 {
@@ -15,7 +14,7 @@ namespace Modbus
 		m_handler(listener.gatewayHandler())
 	{
 		m_connectionInstance++;
-		m_connectionNo = m_connectionInstance;
+		m_connNo = m_connectionInstance;
 	}
 
 	tcp::socket& TcpSlaveThread::Connection::socket()
@@ -25,17 +24,31 @@ namespace Modbus
 
 	QString TcpSlaveThread::Connection::peerAddress() const
 	{
-		return QString::fromStdString(m_socket.remote_endpoint().address().to_string());
+		return QString("%1:%2").
+					arg(QString::fromStdString(m_socket.remote_endpoint().address().to_string())).
+					arg(m_socket.remote_endpoint().port());
 	}
 
 	int TcpSlaveThread::Connection::connectionNo() const
 	{
-		return m_connectionNo;
+		return m_connNo;
 	}
 
 	void TcpSlaveThread::Connection::startReceive()
 	{
-		m_socket.async_receive(asio::buffer(m_receiveBuffer, RECEIVE_BUFFER_SIZE),
+		if (m_firstStartReceive)
+		{
+			m_peerAddr = peerAddress();
+
+			asio::ip::tcp::no_delay option(true);
+			m_socket.set_option(option);
+			m_firstStartReceive = false;
+
+			m_handler.logRequest(QString("Gateway %1 accept new connection #%2 from %3").
+								 arg(m_handler.gatewayID()).arg(m_connNo).arg(m_peerAddr));
+		}
+
+		m_socket.async_receive(asio::buffer(m_recvBuffer, RECV_BUFFER_SIZE),
 							   bind(&TcpSlaveThread::Connection::onReceiveData, this,
 									std::placeholders::_1,
 									std::placeholders::_2));
@@ -45,115 +58,64 @@ namespace Modbus
 	{
 		if (error)
 		{
-			DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData error: %1").
-											arg(QString::fromStdString(error.message())));
-			m_listener.removeConnection(m_connectionNo);
-			return;
-		}
+			int ev = error.value();
 
-		TcpFrame& request = getRequestRef();
-
-		request.reverseBytes();
-
-		Q_ASSERT(request.header.protocolID == 0);
-
-		if (request.header.length + sizeof(request.header) != bytesReceived)
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		if (request.modbusDeviceID == m_handler.modbusDeviceID())
-		{
-			int sendBytesCount = 0;
-
-			switch(request.functionCode)
+			if (ev == 2)
 			{
-			case FC_READ_HOLDING_REGISTERS:
-				sendBytesCount = onFnReadHoldingRegisters(request);
-				break;
-
-			default:
-				DEBUG_LOG_ERR(m_listener.log(), QString("TcpSlaveThread::Connection::onReceiveData: unknown modbus function code %1. Request ignored.").
-												arg(request.functionCode));
+				DEBUG_LOG_ERR(m_listener.log(), QString("Gateway %1 remote %2 close connection #%3").
+												arg(m_handler.gatewayID(), m_peerAddr).arg(m_connNo));
+			}
+			else
+			{
+				DEBUG_LOG_ERR(m_listener.log(), QString("Gateway %1 receive data error '%2' (%3) from %3 on connection  #%4").
+												arg(m_handler.gatewayID(), QString::fromStdString(error.message())).
+												arg(ev).arg(m_peerAddr).arg(m_connNo));
 			}
 
-			if (sendBytesCount > 0)
+			m_handler.logReply(QString("Gateway %1 close connection #%2 with %3").
+								 arg(m_handler.gatewayID()).arg(m_connNo).arg(m_peerAddr));
+
+			m_listener.removeConnection(m_connNo);
+			return;
+		}
+
+		if (bytesReceived == 0)
+		{
+			startReceive();
+			return;
+		}
+
+		// MbshProcData structure filling
+
+		m_mpd.connNo = m_connNo;
+		m_mpd.peerAddr = m_peerAddr;
+		m_mpd.error = error;
+
+		m_mpd.recvBuffer = m_recvBuffer;
+		m_mpd.recvBufferSize = RECV_BUFFER_SIZE;
+		m_mpd.bytesReceived = bytesReceived;
+
+		m_mpd.sendBuffer = m_sendBuffer;
+		m_mpd.sendBufferSize = SEND_BUFFER_SIZE;
+		m_mpd.sendBytes = 0;
+
+		//
+
+		size_t sendBytes = m_handler.tcpRequestProcessing(m_mpd);
+
+		if (sendBytes > 0)
+		{
+			if (sendBytes <= SEND_BUFFER_SIZE)
 			{
-				Q_ASSERT(sendBytesCount <= SEND_BUFFER_SIZE);
-				m_socket.write_some(asio::buffer(m_sendBuffer, sendBytesCount));
+				m_socket.write_some(asio::buffer(m_sendBuffer, sendBytes));
+			}
+			else
+			{
+				Q_ASSERT(false);
 			}
 		}
 
 		startReceive();
-	}
-
-	int TcpSlaveThread::Connection::onFnReadHoldingRegisters(TcpFrame& request)
-	{
-		if (request.functionCode != FC_READ_HOLDING_REGISTERS)
-		{
-			Q_ASSERT(false);
-			return 0;
-		}
-
-		Fn03_ReadHoldingRegisters_Request& fn03Request = request.fn03Request;
-
-		fn03Request.reverseBytes();
-
-		// Human readable value for regsStartAddr == 1 in request decremented by 1, i.e. send as 0!
-		//
-		int regsStartAddr = fn03Request.regsStartAddr;
-		int regsCount = fn03Request.regsCount;
-
-		Q_ASSERT(regsCount <= 127);
-
-		TcpFrame& reply = getReplyRef();
-
-		int bytesCount = m_handler.getRegistersValues(regsStartAddr, regsCount,
-											reply.fn03Reply.regValues, FN03_MAX_REGS_COUNT,
-											QThread::currentThread());
-		Q_ASSERT(bytesCount < 256);
-
-		// copy request header fields to reply
-		//
-		reply.header.transactionID = request.header.transactionID;
-		reply.header.protocolID = request.header.protocolID;
-
-		// set size of reply data after header
-		//
-		reply.header.length = sizeof(reply.modbusDeviceID) +
-							  sizeof(reply.functionCode) +
-							  sizeof(reply.fn03Reply.bytesCount) +
-							  bytesCount;
-
-		// copy request function params to reply
-		//
-		reply.modbusDeviceID = request.modbusDeviceID;
-		reply.functionCode = request.functionCode;
-
-		// fill reply bytes count
-		//
-		reply.fn03Reply.bytesCount = static_cast<quint8>(bytesCount);
-
-		//
-
-		int sendBytesCount = sizeof(reply.header) + reply.header.length;
-
-		reply.reverseBytes();		// translate header fields to BE
-
-		return sendBytesCount;
-	}
-
-	TcpFrame& TcpSlaveThread::Connection::getRequestRef()
-	{
-		Q_ASSERT(sizeof(Modbus::TcpFrame) < sizeof(m_receiveBuffer));
-		return *reinterpret_cast<TcpFrame*>(m_receiveBuffer);
-	}
-
-	TcpFrame& TcpSlaveThread::Connection::getReplyRef()
-	{
-		Q_ASSERT(sizeof(Modbus::TcpFrame) < sizeof(m_sendBuffer));
-		return *reinterpret_cast<TcpFrame*>(m_sendBuffer);
 	}
 
    // --------------------------------------------------------------------------------------------------------
@@ -163,7 +125,7 @@ namespace Modbus
    // --------------------------------------------------------------------------------------------------------
 
 	TcpSlaveThread::Listener::Listener(const HostAddressPort& listeningIP,
-									   ::Gateway::ModbusTcpSlaveHandler& handler,
+									   ::Gateway::ModbusSlaveHandler& handler,
 										io_context& ioContext,
 										std::stop_token stopToken) :
 		m_listeningIP(listeningIP),
@@ -183,13 +145,13 @@ namespace Modbus
 
 	void TcpSlaveThread::Listener::run()
 	{
-		startTimer500ms();
+		startTimer();
 		startListening();
 
 		m_ioContext.run();
 	}
 
-	::Gateway::ModbusTcpSlaveHandler& TcpSlaveThread::Listener::gatewayHandler()
+	::Gateway::ModbusSlaveHandler& TcpSlaveThread::Listener::gatewayHandler()
 	{
 		return m_handler;
 	}
@@ -210,8 +172,8 @@ namespace Modbus
 
 		if (removedCount == 1)
 		{
-				DEBUG_LOG_MSG(m_log, QString("TcpSlaveThread::Listener connection #%1 removed").
-								 arg(connectionNo));
+			DEBUG_LOG_MSG(m_log, QString("Gateway %1 close connection #%2").
+								arg(m_handler.gatewayID()).arg(connectionNo));
 		}
 		else
 		{
@@ -231,14 +193,14 @@ namespace Modbus
 		return true;
 	}
 
-	void TcpSlaveThread::Listener::startTimer500ms()
+	void TcpSlaveThread::Listener::startTimer()
 	{
 		m_timer.expires_after(asio::chrono::milliseconds(1000));
-		m_timer.async_wait(bind(&TcpSlaveThread::Listener::onTimer500ms, this,
+		m_timer.async_wait(bind(&TcpSlaveThread::Listener::onTimer, this,
 								std::placeholders::_1));
 	}
 
-	void TcpSlaveThread::Listener::onTimer500ms(const error_code& error)
+	void TcpSlaveThread::Listener::onTimer(const error_code& error)
 	{
 		Q_UNUSED(error);
 
@@ -247,7 +209,7 @@ namespace Modbus
 			return;
 		}
 
-		startTimer500ms();
+		startTimer();
 	}
 
 	void TcpSlaveThread::Listener::startListening()
@@ -260,8 +222,8 @@ namespace Modbus
 								std::bind(&Listener::onAcceptConnection, this, m_newConnection,
 										  std::placeholders::_1));
 
-		DEBUG_LOG_MSG(m_log, QString("Modbus::TcpSlaveThread wait conections on %1").
-							 arg(m_listeningIP.addressPortStr()));
+		DEBUG_LOG_MSG(m_log, QString("Gateway %1 wait conections on %2").
+							 arg(m_handler.gatewayID(), m_listeningIP.addressPortStr()));
 	}
 
 	void TcpSlaveThread::Listener::onAcceptConnection(ConnectionShared newConnection,
@@ -269,16 +231,16 @@ namespace Modbus
 	{
 		if (error)
 		{
-			DEBUG_LOG_ERR(m_log, QString("Modbus::TcpSlaveThread::Listener::onAcceptConnection error: %1").
-								 arg(QString::fromStdString(error.message())));
+			DEBUG_LOG_ERR(m_log, QString("Gateway %1 accept connection error: %2").
+								 arg(m_handler.gatewayID(), QString::fromStdString(error.message())));
 			return;
 		}
 
 		Q_ASSERT(m_newConnection == newConnection);
 		Q_ASSERT(m_acceptedConnections.contains(newConnection->connectionNo()) == false);
 
-		DEBUG_LOG_MSG(m_log, QString("Modbus::TcpSlaveThread on %1 accept new connection #%2 from %3").
-							 arg(m_listeningIP.addressPortStr()).
+		DEBUG_LOG_MSG(m_log, QString("Gateway %1 on %2 accept new connection #%3 from %4").
+							 arg(m_handler.gatewayID(), m_listeningIP.addressPortStr()).
 							 arg(newConnection->connectionNo()).
 							 arg(newConnection->peerAddress()));
 
@@ -297,7 +259,7 @@ namespace Modbus
    //
    // --------------------------------------------------------------------------------------------------------
 
-	TcpSlaveThread::TcpSlaveThread(const HostAddressPort& listeningIP, ::Gateway::ModbusTcpSlaveHandler& handler) :
+	TcpSlaveThread::TcpSlaveThread(const HostAddressPort& listeningIP, ::Gateway::ModbusSlaveHandler& handler) :
 		m_listeningIP(listeningIP),
 		m_handler(handler),
 		m_log(handler.log())
@@ -324,22 +286,29 @@ namespace Modbus
 
 	void TcpSlaveThread::run()
 	{
-		DEBUG_LOG_MSG(m_log, "Modbus::TcpSlaveThread started");
+		DEBUG_LOG_MSG(m_log, QString("Gateway %1 started").arg(m_handler.gatewayID()));
 
-		try
+		bool exit = false;
+
+		while(!exit)
 		{
-			io_context ioContext;
+			try
+			{
+				io_context ioContext;
 
-			Listener listener(m_listeningIP, m_handler, ioContext, m_thread->get_stop_token());
+				Listener listener(m_listeningIP, m_handler, ioContext, m_thread->get_stop_token());
 
-			listener.run();
+				listener.run();
+
+				exit = true;
+			}
+
+			catch (std::exception& e)
+			{
+				std::cout << e.what() << std::endl;
+			}
 		}
 
-		catch (std::exception& e)
-		{
-			std::cout << e.what() << std::endl;
-		}
-
-		DEBUG_LOG_MSG(m_log, "Modbus::TcpSlaveThread stoped");
+		DEBUG_LOG_MSG(m_log, QString("Gateway %1 stoped").arg(m_handler.gatewayID()));
 	}
 }

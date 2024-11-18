@@ -86,11 +86,14 @@ class SchemaItemPropertyTable : public IdePropertyTable
 	Q_OBJECT
 
 public:
-	explicit SchemaItemPropertyTable(EditEngine::EditEngine* editEngine, SchemaItemPropertiesDialog* schemaItemPropertiesDialog, QWidget* parent);
+	explicit SchemaItemPropertyTable(EditEngine::EditEngine* editEngine,
+									 SchemaItemPropertiesDialog* schemaItemPropertiesDialog,
+									 DbController* dbController,
+									 QWidget* parent);
 	virtual ~SchemaItemPropertyTable();
 
 protected slots:
-	virtual void valueChanged(const ExtWidgets::ModifiedObjectsData& modifiedObjectsData) override;
+	virtual void valueChanged(const std::vector<ExtWidgets::ModifiedProperty>& modifiedProperties);
 
 protected:
 	EditEngine::EditEngine* editEngine();

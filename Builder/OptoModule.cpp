@@ -29,7 +29,7 @@ namespace Hardware
 	{
 	}
 
-	bool TxRxSignal::init(const QString& nearestSignalID, const Builder::UalSignal* ualSignal)
+	bool TxRxSignal::init(const QString& nearestSignalID, const Builder::UalSignal* ualSignal, Builder::IssueLogger* log)
 	{
 		if (ualSignal == nullptr)
 		{
@@ -40,7 +40,13 @@ namespace Hardware
 		m_nearestSignalID = nearestSignalID;
 		m_appSignalIDs = ualSignal->refSignalIDs();
 
-		assert(hasSignalID(m_nearestSignalID));
+		if (!m_nearestSignalID.isEmpty() && hasSignalID(m_nearestSignalID) == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(log, QString("Not found nearest signalID '%1', in ref IDs '%2'").
+										arg(m_nearestSignalID, m_appSignalIDs.join(',')));
+			Q_ASSERT(false);
+			return false;
+		}
 
 		m_signalType = ualSignal->signalType();
 		m_analogFormat = ualSignal->analogSignalFormat();
@@ -1783,7 +1789,7 @@ namespace Hardware
 
 		TxRxSignalShared txSignal = std::make_shared<TxRxSignal>();
 
-		bool res = txSignal->init(nearestSignalID, ualSignal);
+		bool res = txSignal->init(nearestSignalID, ualSignal, m_log);
 
 		if (res == false)
 		{
@@ -1827,7 +1833,7 @@ namespace Hardware
 
 		TxRxSignalShared rxSignal = std::make_shared<TxRxSignal>();
 
-		bool res = rxSignal->init(ualSignal->appSignalID(), ualSignal);
+		bool res = rxSignal->init(ualSignal->appSignalID(), ualSignal, m_log);
 
 		if (res == false)
 		{

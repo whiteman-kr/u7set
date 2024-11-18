@@ -22,7 +22,6 @@ public:
 
 	static bool writeFileCheck(const QString& logPath, const QString& logName);
 
-
 public slots:
 	void writeRecord(const QString record);
 
@@ -48,7 +47,7 @@ private:
 	QString m_path;
 
 	const int MAX_LOG_FILE_COUNT = 10;
-	const int MAX_LOG_FILE_SIZE = 10;		// in megabytes
+	const int MAX_LOG_FILE_SIZE = 50;		// in megabytes
 
 	int m_fileCount = 0;
 	int m_fileSizeLimit = 0;				// in megabytes

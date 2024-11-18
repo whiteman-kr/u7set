@@ -15,29 +15,24 @@ namespace Modbus
 		length = reverseUint16(length);
 	}
 
-	void TcpFrame::reverseBytes()
-	{
-		header.reverseBytes();
-	}
-
 	// Modbus ASCII mode LRC (Longitudinal Redundancy Check) calculation
 	//
-	quint8 LRC (const quint8* data, int dataLength)
+	quint8 LRC(const quint8* data, size_t dataLength)
 	{
-
 		quint8 lrc = 0 ;
 
-		for (int i = 0; i < dataLength; i++)
+		while(dataLength--)
 		{
-			lrc += *data++;
+			lrc += *data;
+			data++;
 		}
 
-		return (-lrc);
+		return (~lrc) + 1;		// two's complement
 	}
 
 	// Modbus RTU mode CRC16 calculation
 	//
-	quint16 CRC16 (const quint8 *data, int dataLength)
+	quint16 CRC16 (const quint8* data, size_t dataLength)
 	{
 		static const quint16 wCRCTable[] =
 		{

@@ -1,6 +1,6 @@
 #include "GatewayServiceCfgGenerator.h"
 #include "SoftwareSettingsGetter.h"
-#include "../GatewayService/GatewayDescriptionParser.h"
+#include "GatewayDescriptionParser.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../UtilsLib/XmlHelper.h"
 
@@ -63,7 +63,7 @@ namespace Builder
 
 		Gateway::GatewaysShared gateways = std::make_shared<Gateway::Gateways>();
 
-		Gateway::Parser parser(m_context->m_signalSet->appSignalSet(), gateways);
+		Gateway::Parser parser(m_context, gateways);
 
 		result = parser.parse(settings->gatewayDescription);
 

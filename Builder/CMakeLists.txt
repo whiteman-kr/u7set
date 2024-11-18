@@ -21,12 +21,10 @@ set(TARGET Builder)
 qt_add_library(${TARGET} STATIC
 	../GatewayService/GatewayDescription.cpp
 	../GatewayService/GatewayDescription.h
-	../GatewayService/GatewayDescriptionParser.cpp
-	../GatewayService/GatewayDescriptionParser.h
 	../GatewayService/IvsImpulseGateway.cpp
 	../GatewayService/IvsImpulseGateway.h
-	../GatewayService/ModbusTcpSlaveGateway.cpp
-	../GatewayService/ModbusTcpSlaveGateway.h
+	../GatewayService/ModbusSlaveGateway.cpp
+	../GatewayService/ModbusSlaveGateway.h
 	../lib/TuningDataStorage.cpp
 	../lib/TuningDataStorage.h
 	../Metrology/MetrologyConnection.cpp
@@ -107,6 +105,10 @@ qt_add_library(${TARGET} STATIC
 	DiagSignalTypesStorage.cpp
 	DiagSignalTypesStorage.h
 	FbParamCalculation.cpp
+	GatewayDescriptionParser.cpp
+	GatewayDescriptionParser.h
+	GatewayParserLog.cpp
+	GatewayParserLog.h
 	GatewayServiceCfgGenerator.cpp
 	GatewayServiceCfgGenerator.h
 	IssueLogger.cpp

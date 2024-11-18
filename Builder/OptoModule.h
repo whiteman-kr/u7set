@@ -48,7 +48,7 @@ namespace Hardware
 	public:
 		TxRxSignal();
 
-		bool init(const QString& nearestSignalID, const Builder::UalSignal* ualSignal);
+		bool init(const QString& nearestSignalID, const Builder::UalSignal* ualSignal, Builder::IssueLogger* log);
 
 		bool initRawSignal(const RawDataDescriptionItem& item, int offsetFromBeginningOfBuffer);
 

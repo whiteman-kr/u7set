@@ -232,13 +232,13 @@ int DynamicAppSignalState::setStateRaw(AppDataSource& source,
 		}
 	}
 
-	if (flags.valid == AppSignalState::VALID)
-	{
+//	if (flags.valid == AppSignalState::VALID)
+//	{
 		if (getValue(rupData, rupDataSize, value) == false)
 		{
 			return 0;
 		}
-	}
+//	}
 
 	return setStateParsed(time, packetNo, value, flags, autoArchivingGroup, thread);
 }
@@ -263,178 +263,188 @@ int DynamicAppSignalState::setStateParsed(const Times& time,
 	curState.flags = flags;
 	curState.value = value;
 
-	//
-
 	int pushedStatesCtr = 0;
 
-	if (curState.flags.valid == AppSignalState::INVALID)
-	{
-		if (prevState.flags.valid == AppSignalState::VALID)
+	{ 	// --- Signal state Validity processing start ---
+
+		if (curState.flags.valid == AppSignalState::INVALID)
 		{
-			// prevState is valid and not stored, archive it
+			// new state is NOT valid
 			//
-			if (m_prevStateIsStored == false)
+			if (prevState.flags.valid == AppSignalState::VALID)
 			{
-				PUSH_AUTO_POINT(prevState)
-				m_prevStateIsStored = true;
+				// prevState is valid and not stored, archive it
+				//
+				if (m_prevStateIsStored == false)
+				{
+					PUSH_AUTO_POINT(prevState)
+					m_prevStateIsStored = true;
+				}
+			}
+			else
+			{
+				// validity is not changed, nothing to do
 			}
 		}
 		else
 		{
-			// validity is not changed, nothing to do
-		}
-	}
-	else
-	{
-		// new state is valid
-		//
-		if (prevState.flags.valid == AppSignalState::INVALID)
-		{
-			// prevState is invalid, archive invalid autopoint with time (curState.time - 1)
+			// new state is valid
 			//
-			SimpleAppSignalState tmpState = prevState;
-
-			tmpState.time = curState.time;
-			tmpState.time += -1;						// current time offset back on 1 ms
-
-			PUSH_AUTO_POINT(tmpState)
-		}
-		else
-		{
-			//  prevState also is valid, check signal's value
-			//
-			switch(m_signalType)
+			if (prevState.flags.valid == AppSignalState::INVALID)
 			{
-			case E::SignalType::Discrete:
+				// prevState is invalid, archive invalid autopoint with time (curState.time - 1)
+				//
+				SimpleAppSignalState tmpState = prevState;
 
-				if (curState.value != prevState.value)
+				tmpState.time = curState.time;
+				tmpState.time += -1;						// current time offset back on 1 ms
+
+				PUSH_AUTO_POINT(tmpState)
+			}
+			else
+			{
+				// validity is not changed, nothing to do
+			}
+		}
+	} // --- Signal state Validity processing end ---
+
+	//
+
+	{ // --- Signal state Value processing start ---
+
+		//  prevState also is valid, check signal's value
+		//
+		switch(m_signalType)
+		{
+		case E::SignalType::Discrete:
+
+			if (curState.value != prevState.value)
+			{
+				curState.flags.fineAperture = 0;		// its important!
+				curState.flags.coarseAperture = 1;		//
+			}
+			break;
+
+		case E::SignalType::Analog:
+		{
+			AnalogValueStatus curValueStatus = analogValueStatus(curState.value);
+			AnalogValueStatus prevValueStatus = analogValueStatus(prevState.value);
+
+			bool checkApertures = true;
+
+			if (curValueStatus == AnalogValueStatus::Normal)
+			{
+				if (prevValueStatus != AnalogValueStatus::Normal && !m_prevStateIsStored)
 				{
-					curState.flags.fineAperture = 0;		// its important!
-					curState.flags.coarseAperture = 1;		//
+					PUSH_AUTO_POINT(prevState)
+
+					curState.flags.fineAperture = 1;
+					curState.flags.coarseAperture = 1;
+					checkApertures = false;
 				}
-				break;
-
-			case E::SignalType::Analog:
+			}
+			else
+			{
+				// curValue is NaN or Inf
+				//
+				if (prevValueStatus != curValueStatus && !m_prevStateIsStored)
 				{
-					AnalogValueStatus curValueStatus = analogValueStatus(curState.value);
-					AnalogValueStatus prevValueStatus = analogValueStatus(prevState.value);
+					PUSH_AUTO_POINT(prevState)
 
-					bool checkApertures = true;
+					curState.flags.fineAperture = 1;
+					curState.flags.coarseAperture = 1;
+				}
 
-					if (curValueStatus == AnalogValueStatus::Normal)
+				checkApertures = false;
+			}
+
+			// check aperture changes
+			//
+			if (checkApertures == true)
+			{
+				switch(m_apertureType)
+				{
+				case E::ApertureType::ValuePercent:
+
+					if (m_fineStoredValue != 0)
 					{
-						if (prevValueStatus != AnalogValueStatus::Normal && !m_prevStateIsStored)
-						{
-							PUSH_AUTO_POINT(prevState)
+						double fineAbsAperture = fabs(((value - m_fineStoredValue) * 100) / m_fineStoredValue);
 
+						if (fineAbsAperture > m_absFineAperture)
+						{
 							curState.flags.fineAperture = 1;
-							curState.flags.coarseAperture = 1;
-							checkApertures = false;
 						}
 					}
 					else
 					{
-						// curValue is NaN or Inf
-						//
-						if (prevValueStatus != curValueStatus && !m_prevStateIsStored)
-						{
-							PUSH_AUTO_POINT(prevState)
+						m_fineStoredValue = curState.value;
+					}
 
-							curState.flags.fineAperture = 1;
+					if (m_coarseStoredValue != 0)
+					{
+						double coarseAbsAperture = fabs(((value - m_coarseStoredValue) * 100) / m_coarseStoredValue);
+
+						if (coarseAbsAperture > m_absCoarseAperture)
+						{
 							curState.flags.coarseAperture = 1;
 						}
-
-						checkApertures = false;
 					}
-
-					// check aperture changes
-					//
-					if (checkApertures == true)
+					else
 					{
-						switch(m_apertureType)
-						{
-						case E::ApertureType::ValuePercent:
-
-							if (m_fineStoredValue != 0)
-							{
-								double fineAbsAperture = fabs(((value - m_fineStoredValue) * 100) / m_fineStoredValue);
-
-								if (fineAbsAperture > m_absFineAperture)
-								{
-									curState.flags.fineAperture = 1;
-								}
-							}
-							else
-							{
-								m_fineStoredValue = curState.value;
-							}
-
-							if (m_coarseStoredValue != 0)
-							{
-								double coarseAbsAperture = fabs(((value - m_coarseStoredValue) * 100) / m_coarseStoredValue);
-
-								if (coarseAbsAperture > m_absCoarseAperture)
-								{
-									curState.flags.coarseAperture = 1;
-								}
-							}
-							else
-							{
-								m_coarseStoredValue = curState.value;
-							}
-
-							break;
-
-						case E::ApertureType::RangePercent:
-						case E::ApertureType::AbsValue:
-
-							if (fabs(m_fineStoredValue - curState.value) > m_absFineAperture)
-							{
-								curState.flags.fineAperture = 1;
-							}
-
-							if (fabs(m_coarseStoredValue - curState.value) > m_absCoarseAperture)
-							{
-								curState.flags.coarseAperture = 1;
-							}
-
-							break;
-
-						default:
-							Q_ASSERT(false);
-						}
-
-						if (m_reverseLimits == false)
-						{
-							if (m_overrideAboveHighLimitFlag == false)
-							{
-								curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);
-							}
-							if (m_overrideBelowLowLimitFlag == false)
-							{
-								curState.flags.belowLowLimit = (curState.value < m_lowLimit ? 1 : 0);
-							}
-						}
-						else
-						{
-							if (m_overrideAboveHighLimitFlag == false)
-							{
-								curState.flags.aboveHighLimit = (curState.value < m_highLimit ? 1 : 0);
-							}
-							if (m_overrideBelowLowLimitFlag == false)
-							{
-								curState.flags.belowLowLimit = (curState.value > m_lowLimit ? 1 : 0);
-							}
-						}
+						m_coarseStoredValue = curState.value;
 					}
+
+					break;
+
+				case E::ApertureType::RangePercent:
+				case E::ApertureType::AbsValue:
+
+					if (fabs(m_fineStoredValue - curState.value) > m_absFineAperture)
+					{
+						curState.flags.fineAperture = 1;
+					}
+
+					if (fabs(m_coarseStoredValue - curState.value) > m_absCoarseAperture)
+					{
+						curState.flags.coarseAperture = 1;
+					}
+
+					break;
+
+				default:
+					Q_ASSERT(false);
 				}
 
-				break;
-
-			case E::SignalType::Bus:
-				assert(false);					// bus signals should not be parsed here
-				break;
+				if (m_reverseLimits == false)
+				{
+					if (m_overrideAboveHighLimitFlag == false)
+					{
+						curState.flags.aboveHighLimit = (curState.value > m_highLimit ? 1 : 0);
+					}
+					if (m_overrideBelowLowLimitFlag == false)
+					{
+						curState.flags.belowLowLimit = (curState.value < m_lowLimit ? 1 : 0);
+					}
+				}
+				else
+				{
+					if (m_overrideAboveHighLimitFlag == false)
+					{
+						curState.flags.aboveHighLimit = (curState.value < m_highLimit ? 1 : 0);
+					}
+					if (m_overrideBelowLowLimitFlag == false)
+					{
+						curState.flags.belowLowLimit = (curState.value > m_lowLimit ? 1 : 0);
+					}
+				}
 			}
+		}
+
+		break;
+
+		case E::SignalType::Bus:
+			assert(false);					// bus signals should not be parsed here
+			break;
 		}
 
 		// update tuningDefault flag
@@ -452,7 +462,7 @@ int DynamicAppSignalState::setStateParsed(const Times& time,
 		{
 			// curState.flags.tuningDefault sets to 0 in constructor of curState
 		}
-	}
+	} // // --- Signal state Value processing end ---
 
 	if (m_autoArchivingGroup == autoArchivingGroup)
 	{

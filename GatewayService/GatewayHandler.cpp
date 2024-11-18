@@ -1,6 +1,6 @@
 #include "GatewayHandler.h"
 #include "IvsImpulseGatewayHandler.h"
-#include "ModbusTcpSlaveGatewayHandler.h"
+#include "ModbusSlaveGatewayHandler.h"
 
 namespace Gateway
 {
@@ -10,18 +10,36 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
-	Handler::Handler(const SoftwareInfo& swInfo,
+	Handler::Handler(const QString& gatewayID,
+					 const SoftwareInfo& swInfo,
 					 const GatewayServiceSettings& settings,
 					 CircularLoggerShared log, bool logGatewayPackets) :
+		m_gatewayID(gatewayID),
 		m_swInfo(swInfo),
 		m_settings(settings),
 		m_log(log),
 		m_logGatewayPackets(logGatewayPackets)
 	{
+		if (m_logGatewayPackets)
+		{
+			m_logStartTimeSecs = QDateTime::currentSecsSinceEpoch();
+			m_gwLog = std::make_shared<CircularLogger>();
+
+			m_gwLog->init(gatewayID, Separator::EMPTY_STR, 10, 20);
+			m_gwLog->setLogCodeInfo(false);
+		}
 	}
 
 	Handler::~Handler()
 	{
+		Q_ASSERT(m_shutwownCalled);
+	}
+
+	void Handler::shutdown()
+	{
+		closeGwLog();
+
+		m_shutwownCalled = true;
 	}
 
 	void Handler::getRequiredSignalsHashes(std::set<Hash>* hashes) const
@@ -49,6 +67,113 @@ namespace Gateway
 		return m_log;
 	}
 
+	QString Handler::gatewayID() const
+	{
+		return m_gatewayID;
+	}
+
+	bool Handler::enableLogging() const
+	{
+		return m_logGatewayPackets;
+	}
+
+	void Handler::logRequest(const QString& msg, CircularLogger::RecordType recType)
+	{
+		if (m_logGatewayPackets == false ||
+			m_gwLog == nullptr)
+		{
+			return;
+		}
+
+		if (m_lastMsgIsRequest == false)
+		{
+			LOG_MSG(m_gwLog, Separator::EMPTY_STR);
+		}
+
+		m_lastMsgIsRequest = true;
+
+		QString logMsg = QStringLiteral("=> ");
+
+		logMsg.append(msg);
+
+		writeToGwLog(logMsg, recType);
+	}
+
+	void Handler::logReply(const QString& msg, CircularLogger::RecordType recType)
+	{
+		if (m_logGatewayPackets == false ||
+			m_gwLog == nullptr)
+		{
+			return;
+		}
+
+		if (m_lastMsgIsRequest == true)
+		{
+			LOG_MSG(m_gwLog, Separator::EMPTY_STR);
+		}
+
+		m_lastMsgIsRequest = false;
+
+		QString logMsg = QStringLiteral("<= ");
+
+		logMsg.append(msg);
+
+		writeToGwLog(logMsg, recType);
+	}
+
+	void Handler::writeToGwLog(const QString& msg, CircularLogger::RecordType recType)
+	{
+		if (m_logGatewayPackets == false)
+		{
+			return;
+		}
+
+		if (m_gwLog == nullptr ||
+			m_logStartTimeSecs == 0)
+		{
+			return;
+		}
+
+		qint64 curTimeSecs = QDateTime::currentSecsSinceEpoch();
+
+		if (curTimeSecs - m_logStartTimeSecs > GW_LOG_PERIOD_SECS)
+		{
+			closeGwLog();
+			return;
+		}
+
+		switch(recType)
+		{
+		case CircularLogger::RecordType::Error:
+			LOG_ERR(m_gwLog, msg);
+			break;
+
+		case CircularLogger::RecordType::Warning:
+			LOG_WRN(m_gwLog, msg);
+			break;
+
+		case CircularLogger::RecordType::Message:
+			LOG_MSG(m_gwLog, msg);
+			break;
+
+		case CircularLogger::RecordType::Config:
+		default:
+			Q_ASSERT(false);
+		}
+	}
+
+	void Handler::closeGwLog()
+	{
+		m_logGatewayPackets = false;
+		m_logStartTimeSecs = 0;
+
+		if (m_gwLog != nullptr)
+		{
+			m_gwLog->shutdown();
+			m_gwLog.reset();
+		}
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	// Gateway::Handlers class implementation
@@ -64,14 +189,31 @@ namespace Gateway
 						const GatewayServiceSettings& settings,
 						const AppSignals& appSignals,
 						CircularLoggerShared log,
-						bool logGatewayPackets)
+						QString logGatewayIDs)
 	{
 		Q_ASSERT(m_handlers.empty());
+
+		logGatewayIDs.replace(Separator::COMMA, Separator::SPACE);
+
+		QStringList logGwIDs = logGatewayIDs.split(Separator::SPACE, Qt::SkipEmptyParts);
 
 		bool result = true;
 
 		for(const GatewayShared& gw : gateways)
 		{
+			if (gw->enable() == false)
+			{
+				DEBUG_LOG_WRN(log, QString("Gateway %1 disabled so NOT RUN!").arg(gw->gatewayID()));
+				continue;
+			}
+
+			bool enableLogging = logGwIDs.contains(gw->gatewayID());
+
+			if (enableLogging)
+			{
+				DEBUG_LOG_MSG(log, QString("1 hour request/reply detail logging turned ON for gateway %1").arg(gw->gatewayID()));
+			}
+
 			switch(gw->gatewayType())
 			{
 			case E::GatewayType::IVS_Impulse:
@@ -86,7 +228,7 @@ namespace Gateway
 
 					IvsImpulseHandlerShared ivsHandler =
 							std::make_shared<IvsImpulseHandler>(swInfo, settings, ivsGateway, appSignals,
-																log, logGatewayPackets);
+																log, enableLogging);
 
 					m_handlers.push_back(ivsHandler);
 				}
@@ -94,7 +236,7 @@ namespace Gateway
 
 			case E::GatewayType::ModbusTcpSlave:
 				{
-					ModbusTcpSlaveGatewayShared modbusGateway = std::dynamic_pointer_cast<ModbusTcpSlaveGateway>(gw);
+					ModbusSlaveGatewayShared modbusGateway = std::dynamic_pointer_cast<ModbusSlaveGateway>(gw);
 
 					if (modbusGateway == nullptr)
 					{
@@ -102,9 +244,9 @@ namespace Gateway
 						break;
 					}
 
-					ModbusTcpSlaveHandlerShared modbusHandler =
-						std::make_shared<ModbusTcpSlaveHandler>(swInfo, settings, modbusGateway, appSignals,
-															log, logGatewayPackets);
+					ModbusSlaveHandlerShared modbusHandler =
+						std::make_shared<ModbusSlaveHandler>(swInfo, settings, modbusGateway, appSignals,
+															log, enableLogging);
 
 					m_handlers.push_back(modbusHandler);
 				}

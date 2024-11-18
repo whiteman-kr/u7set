@@ -2,9 +2,9 @@
 
 #include <UiLib/CodeEditor.h>
 #include <UiLib/PropertyEditor.h>
+#include <UiLib/PropertyTable.h>
 #include "TuningUiEditor.h"
 #include <TuningLib/TuningUiItem.h>
-#include "./Ui/PropertyTable.h"
 
 
 //
@@ -50,7 +50,7 @@ class IdePropertyTable : public ExtWidgets::PropertyTable
 	Q_OBJECT
 
 public:
-	IdePropertyTable(QWidget* parent, DbController* dbController = nullptr);
+	IdePropertyTable(QWidget* parent, DbController* dbController);
 	virtual ~IdePropertyTable();
 
 	virtual ExtWidgets::PropertyEditor* createChildPropertyEditor(QWidget* parent) override;

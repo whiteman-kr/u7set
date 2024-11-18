@@ -62,8 +62,6 @@ private:
 
 	void onTimer();
 
-	void parseGatewayDescription(const QString& filePathName, const QString& gwDesc);
-
 	const AppSignal* getSignalFunc(const QString& signalID);
 
 private:
@@ -74,7 +72,7 @@ private:
 	std::set<Hash> m_acquiredSignals;		// set of Hash(appSignalID) of acquired signals
 	AppSignals m_appSignals;
 
-	bool m_logGatewayPackets = false;
+	QString m_logGatewayIDs;
 
 	Gateway::Gateways m_gateways;
 	Gateway::Handlers m_handlers;

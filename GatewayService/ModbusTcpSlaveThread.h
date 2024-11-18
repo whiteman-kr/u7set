@@ -2,21 +2,16 @@
 
 #include <thread>
 #include <asio.hpp>
+#include <QtTypes>
 #include "../OnlineLib/CircularLogger.h"
 #include "ModbusProtocol.h"
+#include "ModbusSlaveGatewayHandler.h"
 
 using namespace asio;
 using namespace asio::ip;
 
-namespace Gateway
-{
-	class ModbusTcpSlaveHandler;
-}
-
 namespace Modbus
 {
-
-
 	//
 	// Master/Slave and Client/Server roles in Modbus-TCP:
 	//
@@ -44,23 +39,22 @@ namespace Modbus
 		private:
 			void onReceiveData(const error_code& error, size_t bytesReceived);
 
-			int onFnReadHoldingRegisters(TcpFrame& request);
-
-			TcpFrame& getRequestRef();
-			TcpFrame& getReplyRef();
-
 		private:
 			Listener& m_listener;
-			::Gateway::ModbusTcpSlaveHandler& m_handler;
+			::Gateway::ModbusSlaveHandler& m_handler;
 			tcp::socket m_socket;
+			QString m_peerAddr;
 
-			int m_connectionNo = 0;
+			static inline const size_t RECV_BUFFER_SIZE = 256;
+			quint8 m_recvBuffer[RECV_BUFFER_SIZE];
 
-			static inline const int RECEIVE_BUFFER_SIZE = 1024;
-			char m_receiveBuffer[RECEIVE_BUFFER_SIZE];
+			static inline const size_t SEND_BUFFER_SIZE = 1024;
+			quint8 m_sendBuffer[SEND_BUFFER_SIZE];
 
-			static inline const int SEND_BUFFER_SIZE = 1024;
-			char m_sendBuffer[SEND_BUFFER_SIZE];
+			int m_connNo = 0;
+			bool m_firstStartReceive = true;
+
+			Gateway::MbshProcData m_mpd;
 
 			static inline int m_connectionInstance = 0;
 		};
@@ -71,14 +65,14 @@ namespace Modbus
 		{
 		public:
 			Listener(const HostAddressPort& listeningIP,
-					::Gateway::ModbusTcpSlaveHandler& handler,
+					::Gateway::ModbusSlaveHandler& handler,
 					io_context& ioContext,
 					std::stop_token stopToken);
 			virtual ~Listener();
 
 			void run();
 
-			::Gateway::ModbusTcpSlaveHandler& gatewayHandler();
+			::Gateway::ModbusSlaveHandler& gatewayHandler();
 			io_context& ioContext();
 			CircularLoggerShared log();
 
@@ -87,8 +81,8 @@ namespace Modbus
 		private:
 			bool exitIfStopRequested();
 
-			void startTimer500ms();
-			void onTimer500ms(const error_code& error);
+			void startTimer();
+			void onTimer(const error_code& error);
 
 			void startListening();
 			void onAcceptConnection(ConnectionShared newConnection,
@@ -96,7 +90,7 @@ namespace Modbus
 
 		private:
 			HostAddressPort m_listeningIP;
-			::Gateway::ModbusTcpSlaveHandler& m_handler;
+			::Gateway::ModbusSlaveHandler& m_handler;
 
 			io_context& m_ioContext;
 			std::stop_token m_stopToken;
@@ -110,7 +104,7 @@ namespace Modbus
 		};
 
 	public:
-		TcpSlaveThread(const HostAddressPort& listeningIP, ::Gateway::ModbusTcpSlaveHandler& handler);
+		TcpSlaveThread(const HostAddressPort& listeningIP, ::Gateway::ModbusSlaveHandler& handler);
 
 		void start();
 		void stop();
@@ -120,7 +114,7 @@ namespace Modbus
 
 	private:
 		HostAddressPort m_listeningIP;
-		::Gateway::ModbusTcpSlaveHandler& m_handler;
+		::Gateway::ModbusSlaveHandler& m_handler;
 		CircularLoggerShared m_log;
 
 		std::jthread* m_thread = nullptr;

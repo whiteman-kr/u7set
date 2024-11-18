@@ -1,4 +1,3 @@
-#include "GatewayDescriptionParser.h"
 #include "IvsImpulseGateway.h"
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
@@ -29,14 +28,9 @@ namespace Gateway
 		return m_requiredSettings.contains(st);
 	}
 
-	bool IvsImpulseSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
+	ParseResult IvsImpulseSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
 	{
-		bool result = true;
-
-		// result &= Gateway::checkRequiredSettings(m_requiredSettings,
-		// 										 m_settingsValues,
-		// 										 lineNo, log);
-		RETURN_IF_FALSE(result);
+		ParseResult result = ParseResult::Ok;
 
 		switch(st)
 		{
@@ -71,7 +65,7 @@ namespace Gateway
 						{
 							log.logError(lineNo, QString("unknown signal list data type '%1' use 'A', 'B' or 'D'").
 													arg(dataTypeStr));
-							result = false;
+							result = ParseResult::Error;
 						}
 					}
 				}
@@ -186,8 +180,8 @@ namespace Gateway
 	{
 	}
 
-	IvsImpulseGateway::IvsImpulseGateway(const QString& gwID, const QString& gwDesc) :
-		Gateway(E::GatewayType::IVS_Impulse, gwID, gwDesc)
+	IvsImpulseGateway::IvsImpulseGateway(const QString& gwID, const QString& gwDesc, bool enable) :
+		Gateway(E::GatewayType::IVS_Impulse, gwID, gwDesc, enable)
 	{
 	}
 
@@ -373,11 +367,11 @@ namespace Gateway
 		return result;
 	}
 
-	bool IvsImpulseGateway::generateRequiredFiles(const SignalSetAdapter& signalSetAdapter,
+	bool IvsImpulseGateway::generateRequiredFiles(const AppSignalSet* signalSet,
 												  ParserLog& log)
 	{
 		RETURN_IF_FALSE(checkSignalListsSettings(log));
-		RETURN_IF_FALSE(generateSignalListsFiles(signalSetAdapter, log));
+		RETURN_IF_FALSE(generateSignalListsFiles(signalSet, log));
 
 		return true;
 	}
@@ -424,8 +418,10 @@ namespace Gateway
 		return result;
 	}
 
-	bool IvsImpulseGateway::generateSignalListsFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log)
+	bool IvsImpulseGateway::generateSignalListsFiles(const AppSignalSet* signalSet, ParserLog& log)
 	{
+		TEST_PTR_RETURN_FALSE(signalSet);
+
 		m_files.clear();
 		bool result = true;
 
@@ -446,7 +442,7 @@ namespace Gateway
 
 			File& file = m_files.emplace_back(m_gatewayType, m_gatewayID, fileName);
 
-			result &= generateSignalListFile(*sl, file, signalSetAdapter, log);
+			result &= generateSignalListFile(*sl, file, signalSet, log);
 		}
 
 		return result;
@@ -454,9 +450,11 @@ namespace Gateway
 
 	bool IvsImpulseGateway::generateSignalListFile(const IvsImpulseSignalList& signalList,
 												   File& file,
-												   const SignalSetAdapter& signalSetAdapter,
+												   const AppSignalSet* signalSet,
 												   ParserLog& log)
 	{
+		TEST_PTR_RETURN_FALSE(signalSet);
+
 		QTextStream ts(&file.mutableFileData());
 
 		bool result = true;
@@ -467,7 +465,7 @@ namespace Gateway
 
 		for(const QString& signalID : signalList.signalIDs())
 		{
-			const AppSignal* s = signalSetAdapter.getAppSignal(signalID);
+			const AppSignal* s = signalSet->getSignal(signalID);
 
 			TEST_PTR_CONTINUE(s);
 

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1">
+<TS version="2.1" language="bg_BG">
 <context>
     <name>DialogChooseFilter</name>
     <message>
         <location filename="../DialogChooseFilter.cpp" line="9"/>
         <source>Choose a List:</source>
-        <translation type="unfinished"></translation>
+        <translation>Изберете списък:</translation>
     </message>
     <message>
         <location filename="../DialogChooseFilter.cpp" line="45"/>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>Да</translation>
     </message>
     <message>
         <location filename="../DialogChooseFilter.cpp" line="49"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Откажи</translation>
     </message>
 </context>
 <context>
@@ -24,34 +24,34 @@
     <message>
         <location filename="../TuningModel.cpp" line="1105"/>
         <source>OK</source>
-        <translation type="unfinished"></translation>
+        <translation>Да</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1109"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Откажи</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1137"/>
         <source>Enter the value:</source>
-        <translation type="unfinished"></translation>
+        <translation>Въведете стойност:</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1150"/>
         <source>Different values</source>
-        <translation type="unfinished"></translation>
+        <translation>Различни стойности</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1155"/>
         <location filename="../TuningModel.cpp" line="1171"/>
         <location filename="../TuningModel.cpp" line="1176"/>
         <source>Default: </source>
-        <translation type="unfinished"></translation>
+        <translation>По подразбиране: </translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1159"/>
         <source>Enter the value (%1 - %2):</source>
-        <translation type="unfinished"></translation>
+        <translation>Въведете стойнот (%1 - %2):</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1189"/>
@@ -59,39 +59,39 @@
         <location filename="../TuningModel.cpp" line="1237"/>
         <location filename="../TuningModel.cpp" line="1243"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1189"/>
         <source>Please select the value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Моля, избепете стойност.</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1207"/>
         <source>Please enter the value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Моля, въведете стойност.</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1237"/>
         <source>The value is incorrect.</source>
-        <translation type="unfinished"></translation>
+        <translation>Стойността е неправилна.</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1243"/>
         <source>The value is out of range.</source>
-        <translation type="unfinished"></translation>
+        <translation>Стойността е извън диапазона.</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1255"/>
         <location filename="../TuningModel.cpp" line="1266"/>
         <source>1</source>
-        <translation type="unfinished"></translation>
+        <translation>1</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1255"/>
         <location filename="../TuningModel.cpp" line="1266"/>
         <source>0</source>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
 </context>
 <context>
@@ -99,117 +99,107 @@
     <message>
         <location filename="../DialogProperties.cpp" line="13"/>
         <source>Properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Свойства</translation>
     </message>
 </context>
 <context>
     <name>DialogSettings</name>
     <message>
         <location filename="../DialogSettings.ui" line="14"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="186"/>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Настройки</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="24"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="192"/>
         <source>Connection</source>
-        <translation type="unfinished"></translation>
+        <translation>Връзка</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="30"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="187"/>
         <source>Instance StrID</source>
-        <translation type="unfinished"></translation>
+        <translation>Инстанция на StrID</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="47"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="188"/>
         <source>Configurator IP Address 1</source>
-        <translation type="unfinished"></translation>
+        <translation>IP адрес 1 за конфигуратора</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="57"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="189"/>
         <source>Configurator Port 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Порт 1 на конфигуратора</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="67"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="190"/>
         <source>Configurator IP Address 2</source>
-        <translation type="unfinished"></translation>
+        <translation>IP адрес 2 за конфигуратора</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="77"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="191"/>
         <source>Configurator Port 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Порт 1 на конфигуратора</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="101"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="194"/>
         <source>Miscellaneous</source>
-        <translation type="unfinished"></translation>
+        <translation>Други</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="107"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="193"/>
         <source>Language</source>
-        <translation type="unfinished"></translation>
+        <translation>Език</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="154"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_DialogSettings.h" line="195"/>
         <source>Save As...</source>
-        <translation type="unfinished"></translation>
+        <translation>Запази като...</translation>
     </message>
     <message>
         <location filename="../DialogSettings.cpp" line="86"/>
         <source>TuningClient</source>
-        <translation type="unfinished"></translation>
+        <translation>TuningClient</translation>
     </message>
     <message>
         <location filename="../DialogSettings.cpp" line="86"/>
         <source>Configurator address has been changed, please restart the application.</source>
-        <translation type="unfinished"></translation>
+        <translation>Адресът на конфигуратора беше променен, моля презаредете приложението.</translation>
     </message>
     <message>
         <location filename="../DialogSettings.cpp" line="92"/>
         <source>Language has been changed, please restart the application.</source>
-        <translation type="unfinished"></translation>
+        <translation>Езикът беше променен, моля презаредете приложението.</translation>
     </message>
     <message>
         <location filename="../DialogSettings.cpp" line="139"/>
         <source>Instance StrID cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Инстанцията на StrID не може да бъде празна</translation>
     </message>
     <message>
         <location filename="../DialogSettings.cpp" line="162"/>
         <location filename="../DialogSettings.cpp" line="192"/>
         <source>Incorrect format of the configurator IP Address.</source>
-        <translation type="unfinished"></translation>
+        <translation>Неправилен формат на IP адреса на конфигуратора.</translation>
     </message>
     <message>
         <location filename="../DialogSettings.cpp" line="178"/>
         <location filename="../DialogSettings.cpp" line="207"/>
         <source>Incorrect server port.</source>
-        <translation type="unfinished"></translation>
+        <translation>Неправилен порт на сървъра.</translation>
     </message>
     <message>
         <location filename="../DialogSettings.cpp" line="247"/>
         <source>Save File</source>
-        <translation type="unfinished"></translation>
+        <translation>Запазете файла</translation>
     </message>
     <message>
         <location filename="../DialogSettings.cpp" line="249"/>
         <source>ini File (*.ini);;All Files (*.*)</source>
-        <translation type="unfinished"></translation>
+        <translation>ini файл (*.ini);;Всички файлове (*.*)</translation>
     </message>
     <message>
         <location filename="../DialogSettings.cpp" line="263"/>
         <source>File %1 saving error.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при запазването на файл %1.</translation>
     </message>
 </context>
 <context>
@@ -217,27 +207,27 @@
     <message>
         <location filename="../DialogTuningSources.cpp" line="39"/>
         <source>Tuning Data Sources</source>
-        <translation type="unfinished"></translation>
+        <translation>Източници на данни за Tuning</translation>
     </message>
     <message>
         <location filename="../DialogTuningSources.cpp" line="49"/>
         <source>Activate Control...</source>
-        <translation type="unfinished"></translation>
+        <translation>Активиране на управлението...</translation>
     </message>
     <message>
         <location filename="../DialogTuningSources.cpp" line="54"/>
         <source>Deactivate Control...</source>
-        <translation type="unfinished"></translation>
+        <translation>Деактивиране на управлението...</translation>
     </message>
     <message>
         <location filename="../DialogTuningSources.cpp" line="72"/>
         <source>Details...</source>
-        <translation type="unfinished"></translation>
+        <translation>Подробности...</translation>
     </message>
     <message>
         <location filename="../DialogTuningSources.cpp" line="79"/>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Затвори</translation>
     </message>
 </context>
 <context>
@@ -245,7 +235,7 @@
     <message>
         <location filename="../TuningWorkspace.cpp" line="102"/>
         <source>					   QPushButton {   						   background-color: %1;						   color: %2;    					   }   					   QPushButton:checked{						   background-color: %3;						   color: %4;    						   border: none;					   }					   </source>
-        <translation type="unfinished"></translation>
+        <translation>					   QPushButton {   						   цвят на фона: %1;						   цвят: %2;    					   }   					   QPushButton:checked{						   цвят на фона: %3;						   цвят: %4;    						   без рамка;					   }					   </translation>
     </message>
 </context>
 <context>
@@ -253,324 +243,341 @@
     <message>
         <location filename="../LogonWorkspace.cpp" line="18"/>
         <source>Click to login/logout</source>
-        <translation type="unfinished"></translation>
+        <translation>Кликнете за вход/изход</translation>
     </message>
     <message>
         <location filename="../LogonWorkspace.cpp" line="23"/>
         <source>Current user name</source>
-        <translation type="unfinished"></translation>
+        <translation>Име на текущият потребител</translation>
     </message>
     <message>
         <location filename="../LogonWorkspace.cpp" line="45"/>
         <source>Time to logout, click to re-login</source>
-        <translation type="unfinished"></translation>
+        <translation>Време за излизане, кликнете за повторно влизане</translation>
     </message>
     <message>
         <location filename="../LogonWorkspace.h" line="29"/>
         <source>Login</source>
-        <translation type="unfinished"></translation>
+        <translation>Вход</translation>
     </message>
     <message>
         <location filename="../LogonWorkspace.h" line="30"/>
         <source>Logout</source>
-        <translation type="unfinished"></translation>
+        <translation>Изход</translation>
     </message>
     <message>
         <location filename="../LogonWorkspace.h" line="31"/>
         <source>Logged Out</source>
-        <translation type="unfinished"></translation>
+        <translation>Излязъл от системата</translation>
     </message>
 </context>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../MainWindow.cpp" line="82"/>
+        <location filename="../MainWindow.cpp" line="83"/>
         <source>Waiting for configuration...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="152"/>
-        <source>Exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Изчаква се конфигурация...</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="153"/>
-        <source>Quit the application</source>
-        <translation type="unfinished"></translation>
+        <source>Exit</source>
+        <translation>Изход</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="160"/>
-        <source>Signal Lists...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../MainWindow.cpp" line="154"/>
+        <source>Quit the application</source>
+        <translation>Затваряне на приложението</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="161"/>
-        <source>Edit tuning signal Lists</source>
-        <translation type="unfinished"></translation>
+        <source>Signal Lists...</source>
+        <translation>Списъци на сигнали...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="165"/>
-        <source>Settings...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../MainWindow.cpp" line="162"/>
+        <source>Edit tuning signal Lists</source>
+        <translation>Редактиране на списъците с настроечни сигнали</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="166"/>
-        <source>Change application settings</source>
-        <translation type="unfinished"></translation>
+        <source>Settings...</source>
+        <translation>Настройки...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="171"/>
-        <source>Tuning sources...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../MainWindow.cpp" line="167"/>
+        <source>Change application settings</source>
+        <translation>Промяна настройките на приложението</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="172"/>
-        <source>View tuning sources</source>
-        <translation type="unfinished"></translation>
+        <source>Tuning sources...</source>
+        <translation>Източници на настройки...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="177"/>
-        <source>Connection Statistics...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../MainWindow.cpp" line="173"/>
+        <source>View tuning sources</source>
+        <translation>Преглед на източниците на настройки</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="178"/>
-        <source>View Connection Statistics</source>
-        <translation type="unfinished"></translation>
+        <source>Connection Statistics...</source>
+        <translation>Статистика за връзката...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="182"/>
-        <source>Application Log...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../MainWindow.cpp" line="179"/>
+        <source>View Connection Statistics</source>
+        <translation>Преглед на статистиката за връзката</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="183"/>
-        <source>Show application log</source>
-        <translation type="unfinished"></translation>
+        <source>Application Log...</source>
+        <translation>Дневник на приложението...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="186"/>
-        <source>Signals Log...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../MainWindow.cpp" line="184"/>
+        <source>Show application log</source>
+        <translation>Покажи дневнтика на приложението</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="187"/>
-        <source>Show signals log</source>
-        <translation type="unfinished"></translation>
+        <source>Signals Log...</source>
+        <translation>Дневнтик на сигналите...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="190"/>
-        <source>About Qt...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../MainWindow.cpp" line="188"/>
+        <source>Show signals log</source>
+        <translation>Покажи дневника на сигналите</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="191"/>
-        <source>Show Qt information</source>
-        <translation type="unfinished"></translation>
+        <source>About Qt...</source>
+        <translation>Относно Qt...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="195"/>
-        <source>About TuningClient...</source>
-        <translation type="unfinished"></translation>
+        <location filename="../MainWindow.cpp" line="192"/>
+        <source>Show Qt information</source>
+        <translation>Покажи информация за Qt</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="196"/>
-        <source>Show application information</source>
-        <translation type="unfinished"></translation>
+        <source>About TuningClient...</source>
+        <translation>Относно TuningClient...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="201"/>
-        <source>Tuning User Manual</source>
-        <translation type="unfinished"></translation>
+        <location filename="../MainWindow.cpp" line="197"/>
+        <source>Show application information</source>
+        <translation>Покажи информация за приложението</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="202"/>
+        <source>Tuning User Manual</source>
+        <translation>Ръководство на потребителя на Tuning</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="203"/>
         <source>Show Tuning User Manual</source>
-        <translation type="unfinished"></translation>
+        <translation>Покажи Ръководство на потребителя на Tuning</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="211"/>
+        <location filename="../MainWindow.cpp" line="212"/>
         <source>&amp;File</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="217"/>
+        <location filename="../MainWindow.cpp" line="218"/>
         <source>&amp;Service</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Услуга</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="225"/>
+        <location filename="../MainWindow.cpp" line="226"/>
         <source>&amp;?</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;?</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="263"/>
+        <location filename="../MainWindow.cpp" line="264"/>
         <source>LM Errors (click for details)</source>
-        <translation type="unfinished"></translation>
+        <translation>LM Грешки (кликнете за подробности)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="285"/>
+        <location filename="../MainWindow.cpp" line="286"/>
         <source>Error and warning counters in the log (click to view log)</source>
-        <translation type="unfinished"></translation>
+        <translation>Дневник на броячите на грешки и предупреждения (кликнете за да прегледате дневника)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="314"/>
+        <location filename="../MainWindow.cpp" line="315"/>
         <source>Failed to load legacy user filters: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешно зареждане на наследени потребителски филтри: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="324"/>
+        <location filename="../MainWindow.cpp" line="325"/>
         <source>Failed to merge legacy user filters: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешно обединяване на наследени потребителски филтри: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="432"/>
+        <location filename="../MainWindow.cpp" line="337"/>
+        <source>Failed to remove legacy user filters file:
+%1</source>
+        <translation>Неуспешно премахване на наследения файл с потребителски филтри:
+%1</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="343"/>
+        <source>Legacy user filters were successfully merged with tuning signal lists,
+old file was deleted:
+%1</source>
+        <translation>Наследените потребителски филтри бяха успешно обединени със списъци със сигнали за настройка,
+стария файл беше изтрит:
+%1</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="440"/>
         <source>Warning! Some values were modified but not written. Are you sure you want to exit?</source>
-        <translation type="unfinished"></translation>
+        <translation>Внимание! Някои стойности са променени, но не са записани. Сигурни ли сте, че искате да излезете?</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="557"/>
+        <location filename="../MainWindow.cpp" line="565"/>
         <source>Schemas</source>
-        <translation type="unfinished"></translation>
+        <translation>Схеми</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="596"/>
+        <location filename="../MainWindow.cpp" line="604"/>
         <source>No workspaces exist, configuration error.</source>
-        <translation type="unfinished"></translation>
+        <translation>Няма работни пространства, грешка в конфигурацията.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="628"/>
+        <location filename="../MainWindow.cpp" line="636"/>
         <source>Signals</source>
-        <translation type="unfinished"></translation>
+        <translation>Сигнали</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="711"/>
+        <location filename="../MainWindow.cpp" line="719"/>
         <source>Project %1, build %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="734"/>
-        <source> ConfigService: </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="738"/>
-        <source> no connection</source>
-        <translation type="unfinished"></translation>
+        <translation>Проект %1, компилация %2</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="742"/>
+        <source> ConfigService: </source>
+        <translation> ConfigService: </translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="746"/>
+        <source> no connection</source>
+        <translation> няма връзка</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="750"/>
         <source>%1</source>
-        <translation type="unfinished"></translation>
+        <translation>%1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="752"/>
+        <location filename="../MainWindow.cpp" line="760"/>
         <source>Address: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Адрес: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="805"/>
+        <location filename="../MainWindow.cpp" line="813"/>
         <source>Counter %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Брояч: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="845"/>
+        <location filename="../MainWindow.cpp" line="853"/>
         <source> %1 %2 </source>
-        <translation type="unfinished"></translation>
+        <translation> %1 %2 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="880"/>
+        <location filename="../MainWindow.cpp" line="888"/>
         <source> LM Errors: %1 </source>
-        <translation type="unfinished"></translation>
+        <translation> LM Грешки: %1 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="912"/>
+        <location filename="../MainWindow.cpp" line="920"/>
         <source> SOR: -</source>
-        <translation type="unfinished"></translation>
+        <translation> SOR: -</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="918"/>
+        <location filename="../MainWindow.cpp" line="926"/>
         <source> SOR: ? </source>
-        <translation type="unfinished"></translation>
+        <translation> SOR: ? </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="924"/>
+        <location filename="../MainWindow.cpp" line="932"/>
         <source> SOR: No </source>
-        <translation type="unfinished"></translation>
+        <translation> SOR: Не </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="930"/>
+        <location filename="../MainWindow.cpp" line="938"/>
         <source> SOR: Yes </source>
-        <translation type="unfinished"></translation>
+        <translation> SOR: Да </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="934"/>
+        <location filename="../MainWindow.cpp" line="942"/>
         <source> SOR: Yes [%1] </source>
-        <translation type="unfinished"></translation>
+        <translation> SOR: Да [%1] </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="974"/>
+        <location filename="../MainWindow.cpp" line="982"/>
         <source> Log E: %1 W: %2 </source>
-        <translation type="unfinished"></translation>
+        <translation> Дневник Г: %1 П: %2 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1004"/>
+        <location filename="../MainWindow.cpp" line="1012"/>
         <source>%1:
 </source>
-        <translation type="unfinished"></translation>
+        <translation>%1:
+</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1008"/>
+        <location filename="../MainWindow.cpp" line="1016"/>
         <source>Not configured</source>
-        <translation type="unfinished"></translation>
+        <translation>Не е конфигуриран</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1025"/>
-        <location filename="../MainWindow.cpp" line="1038"/>
+        <location filename="../MainWindow.cpp" line="1033"/>
+        <location filename="../MainWindow.cpp" line="1046"/>
         <source>ok</source>
-        <translation type="unfinished"></translation>
+        <translation>Да</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1025"/>
-        <location filename="../MainWindow.cpp" line="1038"/>
+        <location filename="../MainWindow.cpp" line="1033"/>
+        <location filename="../MainWindow.cpp" line="1046"/>
         <source>down</source>
-        <translation type="unfinished"></translation>
+        <translation>надолу</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1036"/>
+        <location filename="../MainWindow.cpp" line="1044"/>
         <source>%1: %2 (Replies: %3)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: %2 (Отговора: %3)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1043"/>
+        <location filename="../MainWindow.cpp" line="1051"/>
         <source>%1: %2/%3 (Replies: %4)</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: %2/%3 (Отговора: %4)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1075"/>
-        <location filename="../MainWindow.cpp" line="1094"/>
+        <location filename="../MainWindow.cpp" line="1083"/>
+        <location filename="../MainWindow.cpp" line="1102"/>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1075"/>
+        <location filename="../MainWindow.cpp" line="1083"/>
         <source>Program configuraton has been changed. Press OK to restart the program.</source>
-        <translation type="unfinished"></translation>
+        <translation>Конфигурацията на програмата беше променена. Натиснете Да, за да рестартирате програмата.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1094"/>
+        <location filename="../MainWindow.cpp" line="1102"/>
         <source>Program configuration has been changed and will be updated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Конфигурацията на програмата беше променена и ще бъде актуализирана.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1170"/>
+        <location filename="../MainWindow.cpp" line="1178"/>
         <source>Configuration error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Конфигурационна грешка: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1256"/>
+        <location filename="../MainWindow.cpp" line="1264"/>
         <source> allows user to modify tuning values.</source>
-        <translation type="unfinished"></translation>
+        <translation> позволява на потребителя да променя стойностите за настройка.</translation>
     </message>
 </context>
 <context>
@@ -584,7 +591,13 @@ A crash dump has been created:
 %1
 
 Please send this file and program execulable file to support.</source>
-        <translation type="unfinished"></translation>
+        <translation>Приложението се срина!
+
+Създаден беше дъмп за срива:
+
+%1
+
+Моля, изпратете този файл и изпълнимия файл на програмата на поддръжката.</translation>
     </message>
     <message>
         <location filename="../Main.cpp" line="86"/>
@@ -593,138 +606,142 @@ Please send this file and program execulable file to support.</source>
 Colld not save crash dump file:
 
 %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Приложението се срина!
+
+Не можа да се запише файл с дъмп за срива:
+
+%1.</translation>
     </message>
     <message>
         <location filename="../Main.cpp" line="111"/>
         <source>%LOCALAPPDATA%\CrashDumps</source>
-        <translation type="unfinished"></translation>
+        <translation>%LOCALAPPDATA%\CrashDumps</translation>
     </message>
     <message>
         <location filename="../Main.cpp" line="115"/>
         <source>SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\%1</source>
-        <translation type="unfinished"></translation>
+        <translation>SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\%1</translation>
     </message>
     <message>
         <location filename="../Main.cpp" line="186"/>
         <source>Application settings file %1 is not exist.</source>
-        <translation type="unfinished"></translation>
+        <translation>Файлът %1 с настройки за приложението не съществува.</translation>
     </message>
     <message>
         <location filename="../Main.cpp" line="201"/>
         <source>Error loading application settings from file %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при зареждане за настройките на приложението от файл %1.</translation>
     </message>
     <message>
         <location filename="../Main.cpp" line="284"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка</translation>
     </message>
     <message>
         <location filename="../Main.cpp" line="284"/>
         <source>Application is already running!</source>
-        <translation type="unfinished"></translation>
+        <translation>Приложението вече е стартирано!</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="35"/>
         <source>/translations/TuningClient_%1.qm</source>
-        <translation type="unfinished"></translation>
+        <translation>/translations/TuningClient_%1.qm</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="36"/>
         <source>/translations/AppSignalLists_%1.qm</source>
-        <translation type="unfinished"></translation>
+        <translation>/translations/AppSignalLists_%1.qm</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="37"/>
         <source>/translations/ClientLib_%1.qm</source>
-        <translation type="unfinished"></translation>
+        <translation>/translations/ClientLib_%1.qm</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="38"/>
         <source>/translations/SchemaClientLib_%1.qm</source>
-        <translation type="unfinished"></translation>
+        <translation>/translations/SchemaClientLib_%1.qm</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="39"/>
         <source>/translations/UiLib_%1.qm</source>
-        <translation type="unfinished"></translation>
+        <translation>/translations/UiLib_%1.qm</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="40"/>
         <source>/translations/UtilsLib_%1.qm</source>
-        <translation type="unfinished"></translation>
+        <translation>/translations/UtilsLib_%1.qm</translation>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="41"/>
         <source>/translations/qt_%1.qm</source>
-        <translation type="unfinished"></translation>
+        <translation>/translations/qt_%1.qm</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="60"/>
+        <location filename="../MainWindow.cpp" line="61"/>
         <source>SOR counter (click for details)</source>
-        <translation type="unfinished"></translation>
+        <translation>SOR брояч (кликнете за подробности)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="365"/>
+        <location filename="../MainWindow.cpp" line="366"/>
         <source>UI configuration file loading error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при зареждане на конфигурационния файл на потребителския интерфейс: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1119"/>
+        <location filename="../MainWindow.cpp" line="1127"/>
         <source>Single LM Control Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Единичен LM контролен режим</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1120"/>
+        <location filename="../MainWindow.cpp" line="1128"/>
         <source>Multiple LM Control Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Множествен режим на управление на LM</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1121"/>
+        <location filename="../MainWindow.cpp" line="1129"/>
         <source>Mixed LM Control Mode</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="1159"/>
+        <location filename="../MainWindow.cpp" line="1167"/>
         <source>Tuning signals file loading error.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при зареждане на файл за сигнали за настройка.</translation>
     </message>
     <message>
         <location filename="../Settings.cpp" line="92"/>
         <source>%1/%2/UserFilters.xml</source>
-        <translation type="unfinished"></translation>
+        <translation>%1/%2/UserFilters.xml</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1602"/>
+        <location filename="../TuningPage.cpp" line="1587"/>
         <source>Activating control of tuning source &apos;%1&apos; failed!</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешно активиране на управлението на източника на настройка &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1608"/>
-        <location filename="../TuningPage.cpp" line="1715"/>
+        <location filename="../TuningPage.cpp" line="1593"/>
+        <location filename="../TuningPage.cpp" line="1700"/>
         <source>Taking control of tuning source &apos;%1&apos; failed!</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешно поемане на контрол върху източника на настройка &apos;%1&apos;!</translation>
     </message>
     <message>
         <location filename="../TuningSourcesHelper.cpp" line="170"/>
         <source>activate</source>
-        <translation type="unfinished"></translation>
+        <translation>активирай</translation>
     </message>
     <message>
         <location filename="../TuningSourcesHelper.cpp" line="170"/>
         <source>deactivate</source>
-        <translation type="unfinished"></translation>
+        <translation>деактивирай</translation>
     </message>
     <message>
         <location filename="../TuningSourcesHelper.cpp" line="173"/>
         <source>Are you sure you want to %1 the source %2?</source>
-        <translation type="unfinished"></translation>
+        <translation>Сигурни ли сте, че искате да %1 източника %2?</translation>
     </message>
     <message>
         <location filename="../TuningSourcesHelper.cpp" line="185"/>
         <source>Source activation/deactivation failed!</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешно активиране/дезактивиране на източника!</translation>
     </message>
 </context>
 <context>
@@ -732,19 +749,19 @@ Colld not save crash dump file:
     <message>
         <location filename="../SchemasWorkspace.cpp" line="223"/>
         <source>ID</source>
-        <translation type="unfinished"></translation>
+        <translation>ID</translation>
     </message>
     <message>
         <location filename="../SchemasWorkspace.cpp" line="224"/>
         <source>Caption</source>
-        <translation type="unfinished"></translation>
+        <translation>Надпис</translation>
     </message>
     <message>
         <location filename="../SchemasWorkspace.cpp" line="291"/>
         <location filename="../SchemasWorkspace.cpp" line="368"/>
         <location filename="../SchemasWorkspace.cpp" line="437"/>
         <source>No schemas exist for current page</source>
-        <translation type="unfinished"></translation>
+        <translation>Няма схема за текущата страница</translation>
     </message>
 </context>
 <context>
@@ -752,74 +769,74 @@ Colld not save crash dump file:
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="157"/>
         <source>This tab should be used only with Multiple LM Control Mode of TuningServices. Disable &quot;SingleLMControl&quot; mode for all services.</source>
-        <translation type="unfinished"></translation>
+        <translation>Този раздел трябва да се използва само с Multiple LM Control Mode на TuningServices. Деактивирайте режима &quot;SingleLMControl&quot; за всички услуги.</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="173"/>
         <source>Apply</source>
-        <translation type="unfinished"></translation>
+        <translation>Приложи</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="312"/>
         <source>No filters to display.
 Create filters that contain one of the following tags: &apos;%1&apos; or &apos;%2&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Създайте филтри, които съдържат един от следните етикети: &apos;%1&apos; или &apos;%2&apos;.</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="436"/>
         <source>State</source>
-        <translation type="unfinished"></translation>
+        <translation>Състояние</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="437"/>
         <source>Caption</source>
-        <translation type="unfinished"></translation>
+        <translation>Надпис</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="438"/>
         <source>Counter</source>
-        <translation type="unfinished"></translation>
+        <translation>Брояч</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="473"/>
         <location filename="../SwitchFiltersPage.cpp" line="883"/>
         <source>OFF</source>
-        <translation type="unfinished"></translation>
+        <translation>OFF</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="531"/>
         <source>Are you sure you want to switch ON  signals of the filter &apos;%1&apos;?</source>
-        <translation type="unfinished"></translation>
+        <translation>Сигурни ли сте, че искате да включите сигналите на филтъра &apos;%1&apos;?</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="544"/>
         <source>Are you sure you want to switch OFF signals of the filter &apos;%1&apos;?</source>
-        <translation type="unfinished"></translation>
+        <translation>Сигурни ли сте, че искате да изключите сигналите на филтъра &apos;%1&apos;?</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="556"/>
         <source>Signals of the filter &apos;%1&apos; have different values. Please select the following action:</source>
-        <translation type="unfinished"></translation>
+        <translation>Сигналите на филтъра &apos;%1&apos; имат различни стойности. Моля, изберете следното действие:</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="557"/>
         <source>Set All to 0</source>
-        <translation type="unfinished"></translation>
+        <translation>Установете всички на 0</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="558"/>
         <source>Set All to 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Установете всички на 1</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="559"/>
         <source>Set All to 2</source>
-        <translation type="unfinished"></translation>
+        <translation>Установете всички на 2</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="626"/>
         <source>Are you sure you want apply the changes?</source>
-        <translation type="unfinished"></translation>
+        <translation>Сигурни ли сте, че искате да приложите промените?</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="638"/>
@@ -830,68 +847,71 @@ SOR Signal(s) are set in logic modules!
 If you apply these changes, module can run into RUN SAFE STATE.
 
 Are you sure you STILL WANT TO APPLY the changes?</source>
-        <translation type="unfinished"></translation>
+        <translation>Предупреждение!!!
+
+Сигналите SOR се задават в логически модули!
+
+Ако приложите тези промени, модулът може да премине в RUN SAFE STATE.
+
+Сигурни ли сте, че ВСЕ ОЩЕ ИСКАТЕ ДА ПРИЛОЖИТЕ промените?</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="786"/>
         <source>%1
 
 %2 / %3</source>
-        <translation type="unfinished"></translation>
+        <translation>%1
+
+%2 / %3</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="814"/>
         <location filename="../SwitchFiltersPage.cpp" line="825"/>
         <source>QPushButton { background-color: %1; color: %2 }</source>
-        <translation type="unfinished"></translation>
+        <translation>QPushButton { цвят на фона: %1; цвят: %2 }</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="872"/>
         <source>%1 / %2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 / %2</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="892"/>
         <source>ON</source>
-        <translation type="unfinished"></translation>
+        <translation>ON</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="899"/>
         <source>PARTIAL</source>
-        <translation type="unfinished"></translation>
+        <translation>PARTIAL</translation>
     </message>
 </context>
 <context>
     <name>SwitchPresetsPageOptions</name>
     <message>
         <location filename="../SwitchFiltersPageOptions.ui" line="14"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_SwitchFiltersPageOptions.h" line="85"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Диалог</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPageOptions.ui" line="55"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_SwitchFiltersPageOptions.h" line="86"/>
         <source>Columns Count:</source>
-        <translation type="unfinished"></translation>
+        <translation>Брой на колоните:</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPageOptions.ui" line="68"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_SwitchFiltersPageOptions.h" line="87"/>
         <source>Rows Count:</source>
-        <translation type="unfinished"></translation>
+        <translation>Брой на редовете:</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPageOptions.ui" line="94"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_SwitchFiltersPageOptions.h" line="88"/>
         <source>Button Width:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ширина на бутона:</translation>
     </message>
     <message>
         <location filename="../SwitchFiltersPageOptions.ui" line="107"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_SwitchFiltersPageOptions.h" line="89"/>
         <source>Button Height:</source>
-        <translation type="unfinished"></translation>
+        <translation>Височина на бутона:</translation>
     </message>
 </context>
 <context>
@@ -899,130 +919,130 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../TreeFilterWidget.cpp" line="51"/>
         <source>TuningWorkspace/FilterTreeColumnCounter%1</source>
-        <translation type="unfinished"></translation>
+        <translation>TuningWorkspace/FilterTreeColumnCounter%1</translation>
     </message>
     <message>
         <location filename="../TreeFilterWidget.cpp" line="117"/>
         <source>All Signals</source>
-        <translation type="unfinished"></translation>
+        <translation>Всички сигнали</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="122"/>
+        <location filename="../TreeFilterWidget.cpp" line="121"/>
         <source>Schemas</source>
-        <translation type="unfinished"></translation>
+        <translation>Схеми</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="136"/>
+        <location filename="../TreeFilterWidget.cpp" line="135"/>
         <source>Equipment</source>
-        <translation type="unfinished"></translation>
+        <translation>Оборудване</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="150"/>
+        <location filename="../TreeFilterWidget.cpp" line="149"/>
         <source>Auto-created filters</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматично създадени филтри</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="164"/>
+        <location filename="../TreeFilterWidget.cpp" line="163"/>
         <source>Project Lists</source>
-        <translation type="unfinished"></translation>
+        <translation>Списъци на проекта</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="177"/>
+        <location filename="../TreeFilterWidget.cpp" line="183"/>
         <source>Local Lists</source>
-        <translation type="unfinished"></translation>
+        <translation>Локални списъци</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="271"/>
+        <location filename="../TreeFilterWidget.cpp" line="292"/>
         <source>Caption</source>
-        <translation type="unfinished"></translation>
+        <translation>Надпис</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="278"/>
+        <location filename="../TreeFilterWidget.cpp" line="299"/>
         <source>Access</source>
-        <translation type="unfinished"></translation>
+        <translation>Достъп</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="287"/>
+        <location filename="../TreeFilterWidget.cpp" line="308"/>
         <source>SOR</source>
-        <translation type="unfinished"></translation>
+        <translation>SOR</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="315"/>
+        <location filename="../TreeFilterWidget.cpp" line="336"/>
         <source>Status</source>
-        <translation type="unfinished"></translation>
+        <translation>Състояние</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="422"/>
+        <location filename="../TreeFilterWidget.cpp" line="443"/>
         <source>Filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Филтър</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="679"/>
-        <location filename="../TreeFilterWidget.cpp" line="761"/>
+        <location filename="../TreeFilterWidget.cpp" line="700"/>
+        <location filename="../TreeFilterWidget.cpp" line="786"/>
         <source>Unknown</source>
-        <translation type="unfinished"></translation>
+        <translation>Неизвестен</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="689"/>
+        <location filename="../TreeFilterWidget.cpp" line="710"/>
         <source>Non-Valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Не валиден</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="706"/>
+        <location filename="../TreeFilterWidget.cpp" line="727"/>
         <source>Inactive</source>
-        <translation type="unfinished"></translation>
+        <translation>Не активен</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="717"/>
+        <location filename="../TreeFilterWidget.cpp" line="738"/>
         <source>No Reply</source>
-        <translation type="unfinished"></translation>
+        <translation>Няма отговор</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="728"/>
-        <location filename="../TreeFilterWidget.cpp" line="770"/>
+        <location filename="../TreeFilterWidget.cpp" line="750"/>
+        <location filename="../TreeFilterWidget.cpp" line="795"/>
         <source>Unapplied [%1]</source>
-        <translation type="unfinished"></translation>
+        <translation>Неприложен [%1]</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="732"/>
-        <location filename="../TreeFilterWidget.cpp" line="778"/>
+        <location filename="../TreeFilterWidget.cpp" line="754"/>
+        <location filename="../TreeFilterWidget.cpp" line="803"/>
         <source>Active [%1]</source>
-        <translation type="unfinished"></translation>
+        <translation>Активен [%1]</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="735"/>
+        <location filename="../TreeFilterWidget.cpp" line="757"/>
         <source>%1</source>
-        <translation type="unfinished"></translation>
+        <translation>%1</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="785"/>
+        <location filename="../TreeFilterWidget.cpp" line="810"/>
         <source>, E: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>, Г: %1</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="805"/>
+        <location filename="../TreeFilterWidget.cpp" line="830"/>
         <source>No</source>
-        <translation type="unfinished"></translation>
+        <translation>Не</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="809"/>
+        <location filename="../TreeFilterWidget.cpp" line="834"/>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>Да</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="809"/>
+        <location filename="../TreeFilterWidget.cpp" line="834"/>
         <source>Yes (%1/%2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Да (%1/%2)</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="1070"/>
+        <location filename="../TreeFilterWidget.cpp" line="1092"/>
         <source>Activate Control</source>
-        <translation type="unfinished"></translation>
+        <translation>Активирайте управлението</translation>
     </message>
     <message>
-        <location filename="../TreeFilterWidget.cpp" line="1083"/>
+        <location filename="../TreeFilterWidget.cpp" line="1105"/>
         <source>Deactivate Control</source>
-        <translation type="unfinished"></translation>
+        <translation>Деактивирайте управлението</translation>
     </message>
 </context>
 <context>
@@ -1030,17 +1050,17 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../TuningConfigController.cpp" line="54"/>
         <source>MATS users storage loading failed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешно зареждането хранилището на MATS потребителите.</translation>
     </message>
     <message>
         <location filename="../TuningConfigController.cpp" line="117"/>
         <source>New configuration arrived</source>
-        <translation type="unfinished"></translation>
+        <translation>Пристигна нова конфигурация</translation>
     </message>
     <message>
         <location filename="../TuningConfigController.cpp" line="133"/>
         <source>Tuning Service Connection: %1, %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Връзка с услугата за настройка: %1, %2</translation>
     </message>
 </context>
 <context>
@@ -1048,115 +1068,117 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../TuningModel.cpp" line="283"/>
         <source>CustomAppSignalID</source>
-        <translation type="unfinished"></translation>
+        <translation>CustomAppSignalID</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="284"/>
         <source>EquipmentID</source>
-        <translation type="unfinished"></translation>
+        <translation>EquipmentID</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="285"/>
         <source>AppSignalID</source>
-        <translation type="unfinished"></translation>
+        <translation>AppSignalID</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="286"/>
         <source>Caption</source>
-        <translation type="unfinished"></translation>
+        <translation>Надпис</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="287"/>
         <source>Units</source>
-        <translation type="unfinished"></translation>
+        <translation>Единици</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="288"/>
         <location filename="../TuningModel.cpp" line="304"/>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Тип</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="296"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Стойност</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="300"/>
         <source>Value %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Стойност %1</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="305"/>
         <source>LowLimit</source>
-        <translation type="unfinished"></translation>
+        <translation>ДолнаГраница</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="306"/>
         <source>HighLimit</source>
-        <translation type="unfinished"></translation>
+        <translation>ГорнаГраница</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="307"/>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>По подразбиране</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="308"/>
         <source>Valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Валиден</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="309"/>
         <source>OutOfRange</source>
-        <translation type="unfinished"></translation>
+        <translation>ИзвънОбхват</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="528"/>
         <source>Error: %1 ambiguous signal to columns allocations occured!
 
 Please recheck columns suffixes configuration in the project.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка: Възникна %1 двусмислен сигнал за разпределението на колоните!
+
+Моля, проверете отново конфигурацията на суфиксите за колоните в проекта.</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="826"/>
         <location filename="../TuningModel.cpp" line="836"/>
         <location filename="../TuningModel.cpp" line="846"/>
         <source>%1 [+%2]</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 [+%2]</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="903"/>
         <source>-</source>
-        <translation type="unfinished"></translation>
+        <translation>-</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="918"/>
         <source>%1 =&gt; %2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 =&gt; %2</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="923"/>
         <location filename="../TuningModel.cpp" line="940"/>
         <source>Writing</source>
-        <translation type="unfinished"></translation>
+        <translation>Предупреждение</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="945"/>
         <location filename="../TuningModel.cpp" line="1028"/>
         <source>RANGE</source>
-        <translation type="unfinished"></translation>
+        <translation>RANGE</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="979"/>
         <location filename="../TuningModel.cpp" line="1000"/>
         <source>Base %1, read %2</source>
-        <translation type="unfinished"></translation>
+        <translation>База %1, прочетени %2</translation>
     </message>
     <message>
         <location filename="../TuningModel.cpp" line="1019"/>
         <source>NO</source>
-        <translation type="unfinished"></translation>
+        <translation>NO</translation>
     </message>
 </context>
 <context>
@@ -1164,33 +1186,33 @@ Please recheck columns suffixes configuration in the project.</source>
     <message>
         <location filename="../TuningPage.cpp" line="495"/>
         <source>Control is disabled - tuning source is not active.</source>
-        <translation type="unfinished"></translation>
+        <translation>Управлението е деактивирано - източникът на настройка не е активен.</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="499"/>
         <location filename="../TuningPage.cpp" line="503"/>
         <source>Writing is disabled - no access key is set.</source>
-        <translation type="unfinished"></translation>
+        <translation>Записът е забранен - не е зададен ключ за достъп.</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="510"/>
         <source>Writing is disabled - user is not logged in.</source>
-        <translation type="unfinished"></translation>
+        <translation>Записът е забранен - потребителят не е влязъл в системата.</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="517"/>
         <source>Writing is disabled - current user is not allowed to tune this signal.</source>
-        <translation type="unfinished"></translation>
+        <translation>Записването е забранено - текущият потребител няма право да настройва този сигнал.</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="575"/>
         <source>Value has invalid format!</source>
-        <translation type="unfinished"></translation>
+        <translation>Стойността е с невалиден формат!</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="581"/>
         <source>Value is out of range!</source>
-        <translation type="unfinished"></translation>
+        <translation>Стойността е извън обхвата!</translation>
     </message>
 </context>
 <context>
@@ -1198,104 +1220,108 @@ Please recheck columns suffixes configuration in the project.</source>
     <message>
         <location filename="../TuningPage.cpp" line="992"/>
         <source>All Text</source>
-        <translation type="unfinished"></translation>
+        <translation>Целият текст</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="993"/>
         <source>AppSignalID</source>
-        <translation type="unfinished"></translation>
+        <translation>AppSignalID</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="994"/>
         <source>CustomAppSignalID</source>
-        <translation type="unfinished"></translation>
+        <translation>CustomAppSignalID</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="995"/>
         <source>EquipmentID</source>
-        <translation type="unfinished"></translation>
+        <translation>EquipmentID</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="996"/>
         <source>Caption</source>
-        <translation type="unfinished"></translation>
+        <translation>Надпис</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1039"/>
         <source>Filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Филтър</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1048"/>
         <source>Value:</source>
-        <translation type="unfinished"></translation>
+        <translation>Стойност:</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1052"/>
         <source>Any Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Произволна стойност</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1053"/>
         <source>Discrete 0</source>
-        <translation type="unfinished"></translation>
+        <translation>Дискретна 0</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1054"/>
         <source>Discrete 1</source>
-        <translation type="unfinished"></translation>
+        <translation>Дискретна 1</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1055"/>
         <source>Not Default</source>
-        <translation type="unfinished"></translation>
+        <translation>Не е по подразбиране</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1068"/>
-        <location filename="../TuningPage.cpp" line="1803"/>
-        <location filename="../TuningPage.cpp" line="1828"/>
-        <location filename="../TuningPage.cpp" line="1836"/>
+        <location filename="../TuningPage.cpp" line="1788"/>
+        <location filename="../TuningPage.cpp" line="1813"/>
+        <location filename="../TuningPage.cpp" line="1821"/>
         <source>Set Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Задайте стойност</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1072"/>
-        <location filename="../TuningPage.cpp" line="2804"/>
+        <location filename="../TuningPage.cpp" line="2795"/>
         <source>Set All</source>
-        <translation type="unfinished"></translation>
+        <translation>Задайте всички</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1078"/>
         <source>Write</source>
-        <translation type="unfinished"></translation>
+        <translation>Запиши</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1082"/>
-        <location filename="../TuningPage.cpp" line="1493"/>
+        <location filename="../TuningPage.cpp" line="1478"/>
         <source>Undo</source>
-        <translation type="unfinished"></translation>
+        <translation>Отмени</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="1088"/>
         <source>Apply</source>
-        <translation type="unfinished"></translation>
+        <translation>Приложи</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1491"/>
+        <location filename="../TuningPage.cpp" line="1476"/>
         <source>Some values were modified but not written. Please select the following:</source>
-        <translation type="unfinished"></translation>
+        <translation>Някои стойности са променени, но не са записани. Моля, изберете следното:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1587"/>
+        <location filename="../TuningPage.cpp" line="1572"/>
         <source>To write changes, all connections to following tuning sources will be activated:
 
 %1
 
 Continue?</source>
-        <translation type="unfinished"></translation>
+        <translation>За да запишете промените, всички връзки към следните източници на настройка ще бъдат активирани:
+
+%1
+
+Продължи?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1661"/>
+        <location filename="../TuningPage.cpp" line="1646"/>
         <source>Warning!!!
 
 SOR Signal(s) are set in logic modules!
@@ -1303,182 +1329,188 @@ SOR Signal(s) are set in logic modules!
 If you apply these changes, module can run into RUN SAFE STATE.
 
 Are you sure you STILL WANT TO APPLY the changes?</source>
-        <translation type="unfinished"></translation>
+        <translation>Предупреждение!!!
+
+Сигналите SOR се задават в логическите модули!
+
+Ако приложите тези промени, модулът може да премине в RUN SAFE STATE.
+
+Сигурни ли сте, че ВСЕ ОЩЕ ИСКАТЕ ДА ПРИЛОЖИТЕ промените?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1722"/>
+        <location filename="../TuningPage.cpp" line="1707"/>
         <source>Are you sure you want apply the changes?</source>
-        <translation type="unfinished"></translation>
+        <translation>Сигурни ли сте, че искате да приложите промените?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1803"/>
+        <location filename="../TuningPage.cpp" line="1788"/>
         <source>There is limits mismatch in signal &apos;%1&apos;. Value setting is disabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Има несъответствие на границите за сигнал &apos;%1&apos;. Настройката на стойността е забранена.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1828"/>
+        <location filename="../TuningPage.cpp" line="1813"/>
         <source>Please select objects of the same type.</source>
-        <translation type="unfinished"></translation>
+        <translation>Моля, изберете обекти от същия тип.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1836"/>
+        <location filename="../TuningPage.cpp" line="1821"/>
         <source>Selected objects have different input range.</source>
-        <translation type="unfinished"></translation>
+        <translation>Избраните обекти имат различен входен обхват.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1949"/>
+        <location filename="../TuningPage.cpp" line="1934"/>
         <source>Set Value...</source>
-        <translation type="unfinished"></translation>
+        <translation>Задаване на стойност...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1962"/>
+        <location filename="../TuningPage.cpp" line="1947"/>
         <source>Set to Defaults</source>
-        <translation type="unfinished"></translation>
+        <translation>Установете стойностите по подразбиране</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2007"/>
+        <location filename="../TuningPage.cpp" line="1992"/>
         <source>%1 - %2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 - %2</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2028"/>
+        <location filename="../TuningPage.cpp" line="2013"/>
         <source>...</source>
-        <translation type="unfinished"></translation>
+        <translation>...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2053"/>
+        <location filename="../TuningPage.cpp" line="2038"/>
         <source>Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Формат</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2055"/>
+        <location filename="../TuningPage.cpp" line="2040"/>
         <source>Auto-select</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматичен избор</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2064"/>
+        <location filename="../TuningPage.cpp" line="2049"/>
         <source>Decimal (as [-]9.9)</source>
-        <translation type="unfinished"></translation>
+        <translation>Десетична (като [-]9,9)</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2073"/>
+        <location filename="../TuningPage.cpp" line="2058"/>
         <source>Exponential (as [-]9.9e[+|-]999)</source>
-        <translation type="unfinished"></translation>
+        <translation>Експоненциална (като [-]9,9e[+|-]999)</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2085"/>
+        <location filename="../TuningPage.cpp" line="2070"/>
         <source>More</source>
-        <translation type="unfinished"></translation>
+        <translation>Още</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2087"/>
+        <location filename="../TuningPage.cpp" line="2072"/>
         <source>Add To New List...</source>
-        <translation type="unfinished"></translation>
+        <translation>Добави към нов списък...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2091"/>
+        <location filename="../TuningPage.cpp" line="2076"/>
         <source>Add To Existing List...</source>
-        <translation type="unfinished"></translation>
+        <translation>Добави към съществуващ списък...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2103"/>
+        <location filename="../TuningPage.cpp" line="2088"/>
         <source>Restore Values From List...</source>
-        <translation type="unfinished"></translation>
+        <translation>Възставови стойностите от списък...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2551"/>
+        <location filename="../TuningPage.cpp" line="2542"/>
         <source>No values restored from the list for current signals.</source>
-        <translation type="unfinished"></translation>
+        <translation>Няма възстановени стойности от списъка за текущиите сигнали.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2555"/>
+        <location filename="../TuningPage.cpp" line="2546"/>
         <source>%1 values were restored from the list. Check them and apply the changes.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 стойности бяха възстановени от списъка. Проверете ги и приложете промените.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2111"/>
+        <location filename="../TuningPage.cpp" line="2096"/>
         <source>Export Current View to CSV...</source>
-        <translation type="unfinished"></translation>
+        <translation>Експортирай текущия изглед в CSV...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2132"/>
+        <location filename="../TuningPage.cpp" line="2117"/>
         <source>Add Signals To List</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавете сигналите към списъка</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2132"/>
+        <location filename="../TuningPage.cpp" line="2117"/>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Име</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2132"/>
+        <location filename="../TuningPage.cpp" line="2117"/>
         <source>Enter the list name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Въведете името на списъка:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2149"/>
+        <location filename="../TuningPage.cpp" line="2134"/>
         <source>List with such name already exists. Please enter another name.</source>
-        <translation type="unfinished"></translation>
+        <translation>Списък с същото име вече съществува. Моля, въведете друго име.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2194"/>
+        <location filename="../TuningPage.cpp" line="2185"/>
         <source>Export to CSV</source>
-        <translation type="unfinished"></translation>
+        <translation>Експортирай към CSV</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2196"/>
+        <location filename="../TuningPage.cpp" line="2187"/>
         <source>CSV (*.csv)</source>
-        <translation type="unfinished"></translation>
+        <translation>CSV (*.csv)</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2207"/>
+        <location filename="../TuningPage.cpp" line="2198"/>
         <source>Error writing file %1!</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при записа на файл %1!</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2241"/>
+        <location filename="../TuningPage.cpp" line="2232"/>
         <source>Export complete.</source>
-        <translation type="unfinished"></translation>
+        <translation>Експорта завърши.</translation>
+    </message>
+    <message>
+        <location filename="../TuningPage.cpp" line="2477"/>
+        <source>No signals were added.</source>
+        <translation>Не са добавени сигнали.</translation>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="2486"/>
-        <source>No signals were added.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../TuningPage.cpp" line="2495"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2498"/>
+        <location filename="../TuningPage.cpp" line="2489"/>
         <source>Adding signals complete.</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавянето на сигнали завърши.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2582"/>
+        <location filename="../TuningPage.cpp" line="2573"/>
         <source>Invalid default value &apos;%1&apos; in signal %2 [%3]</source>
-        <translation type="unfinished"></translation>
+        <translation>Невалидна стойност по подразбиране &apos;%1&apos; в сигнал %2 [%3]</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2804"/>
+        <location filename="../TuningPage.cpp" line="2795"/>
         <source>There is limits mismatch in signal &apos;%1&apos;. Operation is disabled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Има несъответствие на границите за сигнал &apos;%1&apos;. Операцията е забранена.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2812"/>
+        <location filename="../TuningPage.cpp" line="2803"/>
         <source>Set All Discretes To On</source>
-        <translation type="unfinished"></translation>
+        <translation>Задайте всички дискрети на Вкл</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2843"/>
+        <location filename="../TuningPage.cpp" line="2834"/>
         <source>Set All Discretes To Off</source>
-        <translation type="unfinished"></translation>
+        <translation>Задайте всички дискрети на Изкл</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2875"/>
+        <location filename="../TuningPage.cpp" line="2866"/>
         <source>Set All To Defaults</source>
-        <translation type="unfinished"></translation>
+        <translation>Задайте за всички стойностите по подразбиране</translation>
     </message>
 </context>
 <context>
@@ -1486,72 +1518,65 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
     <message>
         <location filename="../TuningSchemaWidget.cpp" line="154"/>
         <source>Signals</source>
-        <translation type="unfinished"></translation>
+        <translation>Сигнали</translation>
     </message>
     <message>
         <location filename="../TuningSchemaWidget.cpp" line="178"/>
         <source>Impact Signals</source>
-        <translation type="unfinished"></translation>
+        <translation>Въздействащи сигнали</translation>
     </message>
 </context>
 <context>
     <name>TuningSignalInfo</name>
     <message>
         <location filename="../TuningSignalInfo.ui" line="14"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_TuningSignalInfo.h" line="161"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Диалог</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="24"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_TuningSignalInfo.h" line="162"/>
         <source>LmEquipmentID</source>
-        <translation type="unfinished"></translation>
+        <translation>LmEquipmentID</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="31"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_TuningSignalInfo.h" line="163"/>
         <source>CustomAppSignalID</source>
-        <translation type="unfinished"></translation>
+        <translation>CustomAppSignalID</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="38"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_TuningSignalInfo.h" line="164"/>
         <source>Caption</source>
-        <translation type="unfinished"></translation>
+        <translation>Надпис</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="59"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_TuningSignalInfo.h" line="165"/>
         <source>EquipmentID</source>
-        <translation type="unfinished"></translation>
+        <translation>EquipmentID</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="83"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_TuningSignalInfo.h" line="166"/>
         <source>AppSignalID</source>
-        <translation type="unfinished"></translation>
+        <translation>AppSignalID</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.ui" line="107"/>
-        <location filename="../../../build-u7set-vc-Debug/TuningClient/TuningClient_autogen/include/ui_TuningSignalInfo.h" line="167"/>
         <source>Tags</source>
-        <translation type="unfinished"></translation>
+        <translation>Етикети</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="44"/>
         <source>Property</source>
-        <translation type="unfinished"></translation>
+        <translation>Свойство</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="44"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Стойност</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="48"/>
         <source>%1 - %2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 - %2</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="108"/>
@@ -1567,7 +1592,7 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <location filename="../TuningSignalInfo.cpp" line="146"/>
         <location filename="../TuningSignalInfo.cpp" line="150"/>
         <source>Yes</source>
-        <translation type="unfinished"></translation>
+        <translation>Да</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="108"/>
@@ -1583,168 +1608,168 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <location filename="../TuningSignalInfo.cpp" line="146"/>
         <location filename="../TuningSignalInfo.cpp" line="150"/>
         <source>No</source>
-        <translation type="unfinished"></translation>
+        <translation>Не</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="122"/>
         <location filename="../TuningSignalInfo.cpp" line="156"/>
         <source> (this client)</source>
-        <translation type="unfinished"></translation>
+        <translation> (този клиент)</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="140"/>
         <source>Common</source>
-        <translation type="unfinished"></translation>
+        <translation>Общ</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="179"/>
         <location filename="../TuningSignalInfo.cpp" line="243"/>
         <source>Disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Забранен</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="185"/>
         <source>?</source>
-        <translation type="unfinished"></translation>
+        <translation>?</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="209"/>
         <source>New Value:</source>
-        <translation type="unfinished"></translation>
+        <translation>Нова стойност</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="210"/>
         <source>Source:</source>
-        <translation type="unfinished"></translation>
+        <translation>Източник:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="211"/>
         <source>Valid:</source>
-        <translation type="unfinished"></translation>
+        <translation>Валиден:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="212"/>
         <source>OutOfRange:</source>
-        <translation type="unfinished"></translation>
+        <translation>OutOfRange:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="213"/>
         <source>WriteInProgress:</source>
-        <translation type="unfinished"></translation>
+        <translation>WriteInProgress:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="214"/>
         <source>ControlIsEnabled:</source>
-        <translation type="unfinished"></translation>
+        <translation>ControlIsEnabled:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="215"/>
         <source>TuningDefault:</source>
-        <translation type="unfinished"></translation>
+        <translation>TuningDefault:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="218"/>
         <source>WritingIsEnabled:</source>
-        <translation type="unfinished"></translation>
+        <translation>WritingIsEnabled:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="220"/>
         <source>WriteClientHash:</source>
-        <translation type="unfinished"></translation>
+        <translation>WriteClientHash:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="221"/>
         <source>WriteErrorCode:</source>
-        <translation type="unfinished"></translation>
+        <translation>WriteErrorCode:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="222"/>
         <source>LM Time:</source>
-        <translation type="unfinished"></translation>
+        <translation>LM час:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="224"/>
         <source>SuccessfulReadTime:</source>
-        <translation type="unfinished"></translation>
+        <translation>SuccessfulReadTime:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="225"/>
         <source>WriteRequestTime:</source>
-        <translation type="unfinished"></translation>
+        <translation>WriteRequestTime:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="226"/>
         <source>SuccessfulWriteTime:</source>
-        <translation type="unfinished"></translation>
+        <translation>SuccessfulWriteTime:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="227"/>
         <source>UnsuccessfulWriteTime:</source>
-        <translation type="unfinished"></translation>
+        <translation>UnsuccessfulWriteTime:</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="310"/>
         <source>Precision</source>
-        <translation type="unfinished"></translation>
+        <translation>Точност</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="351"/>
         <source>Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Формат</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="353"/>
         <source>Auto-select</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматично избран</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="362"/>
         <source>Decimal (as [-]9.9)</source>
-        <translation type="unfinished"></translation>
+        <translation>Десетична (като [-]9,9)</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="371"/>
         <source>Exponential (as [-]9.9e[+|-]999)</source>
-        <translation type="unfinished"></translation>
+        <translation>Експоненциална (като [-]9,9e[+|-]999)</translation>
     </message>
     <message>
         <location filename="../TuningSignalInfo.cpp" line="391"/>
         <location filename="../TuningSignalInfo.cpp" line="420"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Копирай</translation>
     </message>
 </context>
 <context>
     <name>TuningSignalListSet</name>
     <message>
-        <location filename="../TuningSignalListSet.cpp" line="25"/>
+        <location filename="../TuningSignalListSet.cpp" line="94"/>
         <source>Error loading TuningSignalList from file %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при зареждане на TuningSignalList от файл %1.</translation>
     </message>
     <message>
-        <location filename="../TuningSignalListSet.cpp" line="36"/>
+        <location filename="../TuningSignalListSet.cpp" line="105"/>
         <source>Error parsing TuningSignalList from envelope %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при анализиране на TuningSignalList от плик %1.</translation>
     </message>
     <message>
-        <location filename="../TuningSignalListSet.cpp" line="43"/>
+        <location filename="../TuningSignalListSet.cpp" line="112"/>
         <source>Error loading TuningSignalList from envelope %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при зареждане на TuningSignalList от плик %1.</translation>
     </message>
     <message>
-        <location filename="../TuningSignalListSet.cpp" line="64"/>
+        <location filename="../TuningSignalListSet.cpp" line="133"/>
         <source>Error creating directory: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при създаване на директория: %1</translation>
     </message>
     <message>
-        <location filename="../TuningSignalListSet.cpp" line="107"/>
+        <location filename="../TuningSignalListSet.cpp" line="176"/>
         <source>Error opening file for writing: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при отваряне на файл за запис: %1</translation>
     </message>
     <message>
-        <location filename="../TuningSignalListSet.cpp" line="113"/>
+        <location filename="../TuningSignalListSet.cpp" line="182"/>
         <source>Error writing data to file: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при записване на данни във файл: %1</translation>
     </message>
 </context>
 </TS>

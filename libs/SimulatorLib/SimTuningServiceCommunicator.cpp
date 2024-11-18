@@ -605,7 +605,7 @@ namespace Sim
 
 		if (size != sizeof(SimRupFotip))
 		{
-			logWarningThinned(__LINE__, QString("Tuning request from %1 wrong lenght %2, expected %3. "
+			logWarningThinned(__LINE__, QString("Tuning request from %1 wrong length %2, expected %3. "
 												"Check that TuningService is in Simulation mode.").
 														arg(m_controllerEquipmentID).arg(size).arg(sizeof(SimRupFotip)));
 			return true;

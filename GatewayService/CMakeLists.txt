@@ -15,14 +15,16 @@ qt_standard_project_setup()
 set(TARGET GatewaySrv)
 
 add_executable(${TARGET}
+	../Builder/GatewayParserLog.cpp
+	../Builder/GatewayParserLog.h
 	AppDataServiceClient.cpp
 	AppDataServiceClient.h
 	AppSignalState.cpp
 	AppSignalState.h
+	Float16.cpp
+	Float16.h
 	GatewayDescription.cpp
 	GatewayDescription.h
-	GatewayDescriptionParser.cpp
-	GatewayDescriptionParser.h
 	GatewayHandler.cpp
 	GatewayHandler.h
 	GatewayService.cpp
@@ -37,12 +39,14 @@ add_executable(${TARGET}
 	IvsImpulseGatewayHandler.h
 	ModbusProtocol.cpp
 	ModbusProtocol.h
-	ModbusTcpSlaveGateway.cpp
-	ModbusTcpSlaveGateway.h
-	ModbusTcpSlaveGatewayHandler.cpp
-	ModbusTcpSlaveGatewayHandler.h
+	ModbusSlaveGateway.cpp
+	ModbusSlaveGateway.h
+	ModbusSlaveGatewayHandler.cpp
+	ModbusSlaveGatewayHandler.h
 	ModbusTcpSlaveThread.cpp
 	ModbusTcpSlaveThread.h
+	ModbusUdpSlaveThread.cpp
+	ModbusUdpSlaveThread.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

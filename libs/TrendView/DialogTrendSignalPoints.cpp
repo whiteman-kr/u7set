@@ -3,6 +3,8 @@
 #include "DialogTrendSignalPoint.h"
 #include "TrendSettings.h"
 #include "TrendScale.h"
+#include <QKeyEvent>
+#include <QClipboard>
 
 TrendPointsModel::TrendPointsModel(QObject* parent)
 	: QAbstractTableModel(parent)
@@ -245,11 +247,13 @@ DialogTrendSignalPoints::DialogTrendSignalPoints(const TrendLib::TrendSignalPara
 	m_editStateItem.setValid(true);
 	m_editStateItem.value = 0;
 
+
 	// --
 	//
 	ui->tableView->setModel(&m_pointsModel);
 	ui->tableView->setWordWrap(false);
 	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	ui->tableView->installEventFilter(this);
 
 	ui->tableView->horizontalHeader()->setSectionResizeMode(static_cast<int>(TrendPointsModel::Columns::Time), QHeaderView::Stretch);
 	ui->tableView->horizontalHeader()->setSectionResizeMode(static_cast<int>(TrendPointsModel::Columns::Value), QHeaderView::Stretch);
@@ -289,6 +293,62 @@ DialogTrendSignalPoints::DialogTrendSignalPoints(const TrendLib::TrendSignalPara
 DialogTrendSignalPoints::~DialogTrendSignalPoints()
 {
 	delete ui;
+}
+
+bool DialogTrendSignalPoints::eventFilter(QObject* obj, QEvent* event)
+{
+	if (obj == ui->tableView)
+	{
+		if (event->type() == QEvent::KeyPress)
+		{
+			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+
+			if (keyEvent->key() == Qt::Key_C && (keyEvent->modifiers() & Qt::ControlModifier) != 0)
+			{
+				copySelection();
+				return true;
+			}
+		}
+	}
+
+	// pass the event on to the parent class
+	return QDialog::eventFilter(obj, event);
+}
+
+void DialogTrendSignalPoints::copySelection() 
+{
+	auto selectedItems = ui->tableView->selectionModel()->selectedRows();
+
+	std::vector<int> selectedRows;
+	for (const auto& index : selectedItems) 
+	{
+		selectedRows.push_back(index.row());
+	}
+	std::sort(selectedRows.begin(), selectedRows.end(), std::less());
+
+	int startColumn = static_cast<int>(TrendPointsModel::Columns::Time);
+	int endColumn = static_cast<int>(TrendPointsModel::Columns::Value);
+
+	QString text;
+	for (const auto& row : selectedRows) 
+	{
+		for (auto c = startColumn; c <= endColumn; c++) 
+		{
+			text.append(m_pointsModel.data(m_pointsModel.index(row, c), Qt::DisplayRole).toString());
+			if (c != endColumn) 
+			{
+				text.append("\t\t");
+			}
+		}
+
+		text.append('\n');
+	}
+
+	if (text.isEmpty() == false)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(text);
+	}
 }
 
 void DialogTrendSignalPoints::updatePoints()

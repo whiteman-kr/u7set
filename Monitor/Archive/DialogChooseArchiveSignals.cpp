@@ -155,10 +155,11 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(const ClientLib::AppSigna
 	// Fill added signals
 	//
 	std::ranges::for_each(init.acceptedSignals,
-		[this](const ArchiveSignal& appSignal)
-		{
-			addSignal(appSignal);
-		});
+						  [this](const ArchiveSignal& appSignal)
+						  {
+							  addSignal(appSignal);
+						  });
+	updateControls();
 
 	return;
 }
@@ -281,19 +282,19 @@ void DialogChooseArchiveSignals::filterSignals()
 	return;
 }
 
-void DialogChooseArchiveSignals::addSignal(const ArchiveSignal& archiveSignal)
+bool DialogChooseArchiveSignals::addSignal(const ArchiveSignal& archiveSignal)
 {
 	if (signalAlreadyPresent(archiveSignal.signalParam.customSignalId(), archiveSignal.archiveServiceId) == true)
 	{
 		// SignaID already present in ArchiveSignals
 		//
-		return;
+		return true;
 	}
 
 	if (ui->archiveSignals->topLevelItemCount() >= ARCH_REQUEST_MAX_SIGNALS)
 	{
 		QMessageBox::critical(this, qAppName(), tr("The maximum number of signals reached."));
-		return;
+		return false;
 	}
 
 	const AppSignalParam& signalParam = archiveSignal.signalParam;
@@ -331,23 +332,26 @@ void DialogChooseArchiveSignals::addSignal(const ArchiveSignal& archiveSignal)
 	item->setToolTip(3, toolTip);
 
 	ui->archiveSignals->addTopLevelItem(item);
-	ui->archiveSignals->setCurrentItem(item, QItemSelectionModel::SelectCurrent);
+	item->setSelected(true);
 
-	updateControls();
-
-	return;
+	return true;
 }
 
 void DialogChooseArchiveSignals::removeSelectedSignal()
 {
 	Q_ASSERT(ui->archiveSignals);
 
-	QModelIndex currentIndex = ui->archiveSignals->currentIndex();
-
-	if (currentIndex.isValid() == true)
+	do
 	{
-		ui->archiveSignals->takeTopLevelItem(currentIndex.row());
-	}
+		const auto& selectedIndexes = ui->archiveSignals->selectionModel()->selectedRows();
+
+		if (selectedIndexes.isEmpty() == true || selectedIndexes[0].isValid() == false) 
+		{
+			break;
+		}
+
+		ui->archiveSignals->takeTopLevelItem(selectedIndexes[0].row());
+	} while (true);
 
 	updateControls();
 	return;
@@ -388,38 +392,42 @@ void DialogChooseArchiveSignals::updateControls()
 
 	// --
 	//
-	bool enableAddButton = true;
+	bool enableAddButton = false;
 	bool enableRemoveButton = true;
 	bool enableRemoveAll = true;
 
 	// Add Signal Button
 	//
-	try
 	{
-		QModelIndex index = ui->filteredSignals->currentIndex();
-
-		if (index.isValid() == true)
+		auto indexes = ui->filteredSignals->selectionModel()->selectedRows();
+		for (const auto& index : indexes)
 		{
-			ArchiveSignal signal = fileterModel->signalByRow(index.row());
-			enableAddButton = !signalAlreadyPresent(signal.signalParam.customSignalId(), signal.archiveServiceId);
+			Q_ASSERT(index.isValid());
+			try
+			{
+				if (index.isValid() == true)
+				{
+					ArchiveSignal signal = fileterModel->signalByRow(index.row());
+					enableAddButton |= !signalAlreadyPresent(signal.signalParam.customSignalId(), signal.archiveServiceId);
+				}
+				else
+				{
+					enableAddButton = false;
+				}
+			}
+			catch (std::out_of_range&)
+			{
+				enableAddButton = false;
+			}
 		}
-		else
-		{
-			enableAddButton = false;
-		}
-	}
-	catch (std::out_of_range&)
-	{
-		enableAddButton = false;
 	}
 
 	// Remove Signal Button
 	//
 	{
-		QModelIndex index = ui->archiveSignals->currentIndex();
+		auto indexes = ui->archiveSignals->selectionModel()->selectedRows();
 
-		if (index.isValid() == false ||
-			index.row() < 0)
+		if (indexes.isEmpty() == true)
 		{
 			enableRemoveButton = false;
 		}
@@ -456,28 +464,32 @@ void DialogChooseArchiveSignals::serverCurrentIndexChanged(int /*index*/)
 
 void DialogChooseArchiveSignals::on_addSignalButton_clicked()
 {
-	QModelIndex index = ui->filteredSignals->currentIndex();
-	if (index.isValid() == false)
-	{
-		return;
-	}
-
-	const FilteredArchiveSignalsModel* model = dynamic_cast<const FilteredArchiveSignalsModel*>(index.model());
-
+	const FilteredArchiveSignalsModel* model = dynamic_cast<FilteredArchiveSignalsModel*>(ui->filteredSignals->model());
 	if (model == nullptr)
 	{
-		Q_ASSERT(dynamic_cast<const FilteredArchiveSignalsModel*>(index.model()) != nullptr);
+		Q_ASSERT(model);
 		return;
 	}
 
-	try
+	auto indexes = ui->filteredSignals->selectionModel()->selectedRows();
+	for (const auto& index : indexes)
 	{
-		auto signal = model->signalByRow(index.row());
-		addSignal(signal);
+		Q_ASSERT(index.isValid());
+
+		try
+		{
+			auto signal = model->signalByRow(index.row());
+			if (addSignal(signal) == false)
+			{
+				break;
+			}
+		}
+		catch (std::out_of_range&)
+		{
+		}
 	}
-	catch (std::out_of_range&)
-	{
-	}
+	updateControls();
+
 
 	return;
 }
@@ -528,29 +540,33 @@ void DialogChooseArchiveSignals::on_filterEdit_editingFinished()
 	return;
 }
 
-void DialogChooseArchiveSignals::on_filteredSignals_doubleClicked(const QModelIndex& index)
+void DialogChooseArchiveSignals::on_filteredSignals_doubleClicked(const QModelIndex& /*index*/)
 {
-	if (index.isValid() == false)
-	{
-		return;
-	}
-
-	const FilteredArchiveSignalsModel* model = dynamic_cast<const FilteredArchiveSignalsModel*>(index.model());
-
+	const FilteredArchiveSignalsModel* model = dynamic_cast<FilteredArchiveSignalsModel*>(ui->filteredSignals->model());
 	if (model == nullptr)
 	{
-		Q_ASSERT(dynamic_cast<const FilteredArchiveSignalsModel*>(index.model()) != nullptr);
+		Q_ASSERT(model);
 		return;
 	}
 
-	try
+	auto indexes = ui->filteredSignals->selectionModel()->selectedRows();
+	for (const auto& index : indexes)
 	{
-		auto signal = model->signalByRow(index.row());
-		addSignal(signal);
+		Q_ASSERT(index.isValid());
+		
+		try
+		{
+			auto signal = model->signalByRow(index.row());
+			if (addSignal(signal) == false)
+			{
+				break;
+			}
+		}
+		catch (std::out_of_range&)
+		{
+		}
 	}
-	catch (std::out_of_range&)
-	{
-	}
+	updateControls();
 
 	return;
 }

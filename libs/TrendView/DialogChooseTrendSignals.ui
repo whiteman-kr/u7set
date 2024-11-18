@@ -51,6 +51,9 @@
      </item>
      <item row="4" column="0" colspan="2">
       <widget class="QTreeView" name="filteredSignals">
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
+       </property>
        <property name="rootIsDecorated">
         <bool>false</bool>
        </property>
@@ -178,6 +181,9 @@
       <widget class="QTreeWidget" name="trendSignals">
        <property name="contextMenuPolicy">
         <enum>Qt::CustomContextMenu</enum>
+       </property>
+       <property name="selectionMode">
+        <enum>QAbstractItemView::ExtendedSelection</enum>
        </property>
        <property name="rootIsDecorated">
         <bool>false</bool>

@@ -42,6 +42,7 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 		//m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/AppSignalLists_%1.qm").arg(l));
 	}
 
+	if (DiagnosticsAppSettings::instance().language() != "en")
 	{
 		QStringList failedTranslations;
 		if (m_translator.setLanguage(DiagnosticsAppSettings::instance().language(), failedTranslations) == false)

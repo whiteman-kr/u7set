@@ -28,25 +28,35 @@ namespace Gateway
 		ModbusSignalList();
 
 		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
-		virtual bool appendAddressSignalID(const QString& addressStr, const QString& signalID, QString* errMsg) override;
+
+		virtual ParseResult checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
+		virtual ParseResult checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log) override;
+		virtual ParseResult parseAddressStr(int lineNo, const QString& addrStr, Address16* addr16, ParserLog& log) override;
+		virtual ParseResult appendAddressSignalID(int lineNo, const Address16& addr, const QString& signalID, ParserLog& log) override;
+		virtual ParseResult appendAddressConstValue(int lineNo, const Address16& addr16, const QString& desc, double constValue, ParserLog& log) override;
+		virtual void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const override;
+
+		void initConstValues(const std::map<Hash, double>& constValues);
 
 		ModbusFormat modbusFormat() const;
 		Address16 getAddress(Hash hash) const;
+
+		bool isConst(Hash h, double* constValue) const;
 
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
 
-		bool checkAndApplySignalsFormat(int lineNo, QString formatStr, ParserLog& log);		// copy str Ok!
+		ParseResult checkAndApplySignalsFormat(int lineNo, QString formatStr, ParserLog& log);		// copy str Ok!
 
 	private:
 		ModbusFormat m_modbusFormat;
 
-		std::map<Hash, Address16> m_signals;		// calcHash(AppSignalID) => Address16
+		std::map<Hash, Address16> m_signalAddrs;		// calcHash(AppSignalID) => Address16
+		std::map<Hash, double> m_constValues;			// calcHash(AppSignalID) => const value
 	};
 
-	class ModbusTcpSlaveGateway : public Gateway
+	class ModbusSlaveGateway : public Gateway
 	{
 	public:
 		static const std::set<E::Setting> m_requiredSettings;
@@ -54,9 +64,18 @@ namespace Gateway
 
 		inline static const int MODBUS_DEFAULT_PORT = 502;
 
+		struct ModbusSignal
+		{
+			QString signalID;
+			Address16 addr;
+			ModbusFormat format;
+			bool isConst = false;
+			double constValue = 0;
+		};
+
 	public:
-		ModbusTcpSlaveGateway();
-		ModbusTcpSlaveGateway(const QString& gwID, const QString& gwDesc);
+		ModbusSlaveGateway();
+		ModbusSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable);
 
 		virtual bool isKnownSetting(E::Setting st) const override;
 		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
@@ -69,12 +88,13 @@ namespace Gateway
 		HostAddressPort localGatewayIP2() const;
 		HostAddressPort remoteGatewayIP2() const;
 
+		E::ModbusMode modbusMode() const;
 		int modbusDeviceID() const;
 
 		void getRequiredSignalsHashes(std::set<Hash>* hashes) const;
 		void getEventSignalsHashes(std::set<Hash>* hashes) const;
 
-		const std::map<Address16, std::pair<QString, ModbusFormat>>& modbusSignals() const;
+		const std::map<Address16, ModbusSignal>& modbusSignals() const;
 
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
@@ -84,7 +104,7 @@ namespace Gateway
 		virtual bool readSignalListsFromXml(XmlReadHelper& xml) override;
 
 	private:
-		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log) override;
+		virtual bool generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log) override;
 
 		bool buildModbusSignalsList(ParserLog& log);
 		bool generateModbusSignalsFile();
@@ -93,10 +113,11 @@ namespace Gateway
 		HostAddressPort m_localGatewayIP1;
 		HostAddressPort m_localGatewayIP2;
 
+		E::ModbusMode m_modbusMode = E::ModbusMode::Unknown;
 		int m_modbusDeviceID = 0;
 
-		std::map<Address16, std::pair<QString, ModbusFormat>> m_modbusSignals;
+		std::map<Address16, ModbusSignal> m_modbusSignals;
 	};
 
-	using ModbusTcpSlaveGatewayShared = std::shared_ptr<ModbusTcpSlaveGateway>;
+	using ModbusSlaveGatewayShared = std::shared_ptr<ModbusSlaveGateway>;
 }

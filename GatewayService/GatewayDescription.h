@@ -3,6 +3,8 @@
 class XmlWriteHelper;
 class XmlReadHelper;
 
+#include "../Builder/GatewayParserLog.h"
+
 namespace Gateway
 {
 	class E : public QObject
@@ -35,6 +37,7 @@ namespace Gateway
 			GatewayType,
 			GatewayID,
 			GatewayDescription,
+			Enable,
 
 			// IVS Impulse specific settings
 
@@ -56,6 +59,7 @@ namespace Gateway
 
 			ModbusDeviceID,
 			SignalsFormat,
+			ModbusMode
 		};
 		Q_ENUM(Setting)
 
@@ -96,13 +100,34 @@ namespace Gateway
 		enum class ModbusByteOrder
 		{
 			Unknown,
-			BE,
-			LE,
+										// Byte order in 16-bit registers, low addr to high addr
+										//
+										// 32-bit value: 0x44332211		|  16-bit value: 0x2211
+										//								|  LE_ByteSwap equal to BE,
+										//	  reg[0]	  reg[1]		|  BE_ByteSwap equal to LE
+										//  LSB   MSB   LSB   MSB		|   LSB   MSB
+			LE,							// [0x11 0x22] [0x33 0x44]		|  [0x11 0x22]
+			LE_ByteSwap,				// [0x22 0x11] [0x44 0x33]		|  [0x22 0x11]
+			BE,							// [0x44 0x33] [0x22 0x11]		|  [0x22 0x11]
+			BE_ByteSwap,				// [0x33 0x44] [0x11 0x22]		|  [0x11 0x22]
 		};
 		Q_ENUM(ModbusByteOrder)
+
+		enum class ModbusMode
+		{
+			Unknown,
+			//ASCII,					// ASCII character mode, packets starts with ':', ends with CR+LF
+			//RTU,						// binary mode RTU
+			TCP,						// TCP (RTU with TCP header)
+			UDP_ASCII,					// ASCII protocol over UDP
+			UDP_ASCII_KZ_UIK			// ASCII protocol over UDP specific for UIK system on Kozloduy AES
+		};
+		Q_ENUM(ModbusMode)
 	};
 
 	class ParserLog;
+	class Parser;
+	enum class ParseResult;
 
 	struct SettingValue
 	{
@@ -150,6 +175,13 @@ namespace Gateway
 		QByteArray m_fileData;
 	};
 
+	struct RegisterPropValue
+	{
+		int lineNo = 0;
+		QString labelPropName;
+		double value;
+	};
+
 	class SignalList
 	{
 	public:
@@ -160,10 +192,13 @@ namespace Gateway
 		bool settingIsSet(E::Setting st) const;
 
 		virtual bool isKnownSetting(E::Setting st) const;
-		virtual bool checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
 
-		virtual bool appendSignalID(const QString& appSignalID, QString* errMsg);
-		virtual bool appendAddressSignalID(const QString& addressStr, const QString& appSignalID, QString* errMsg);
+		virtual ParseResult checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
+		virtual ParseResult checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log);
+		virtual ParseResult appendSignalID(int lineNo, const QString& appSignalID, ParserLog& log);
+		virtual ParseResult parseAddressStr(int lineNo, const QString& addStr, Address16* addr, ParserLog& log);
+		virtual ParseResult appendAddressSignalID(int lineNo, const Address16& addr16, const QString& appSignalID, ParserLog& log);
+		virtual ParseResult appendAddressConstValue(int lineNo, const Address16& addr16, const QString& desc, double constValue, ParserLog& log);
 
 		std::optional<::E::SignalType> signalType() const;
 		void setSignalType(::E::SignalType st);
@@ -173,7 +208,7 @@ namespace Gateway
 		const std::vector<QString>& signalIDs() const;
 		int signalsCount() const;
 
-		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
+		virtual void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 
 		void writeToXml(XmlWriteHelper& xml) const;
 		bool readFromXml(XmlReadHelper& xml);
@@ -203,16 +238,18 @@ namespace Gateway
 	{
 	private:
 		static const std::set<E::Setting> m_gatewayRequiredSettings;
+		static const std::set<E::Setting> m_gatewayOptionalSettings;
 
 	public:
 		Gateway();
 		Gateway(E::GatewayType gwType);
-		Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc);
+		Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable);
 		virtual ~Gateway();
 
 		E::GatewayType gatewayType() const;
 		QString gatewayID() const;
 		QString gatewayDescription() const;
+		bool enable() const;
 		int signalListsCount() const;
 
 		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value);
@@ -245,12 +282,13 @@ namespace Gateway
 		virtual void writeSignalListsToXml(XmlWriteHelper& xml) const;
 		virtual bool readSignalListsFromXml(XmlReadHelper& xml);
 
-		virtual bool generateRequiredFiles(const SignalSetAdapter& signalSetAdapter, ParserLog& log);
+		virtual bool generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log);
 
 	protected:
 		E::GatewayType m_gatewayType = E::GatewayType::Unknown;
 		QString m_gatewayID;
 		QString m_gatewayDescription;
+		bool m_enable = true;
 
 		SettingsValues m_settingsValues;
 
@@ -279,12 +317,13 @@ namespace Gateway
 
 		GatewayShared createTypedGateway(E::GatewayType gwType,
 										 const QString& gwID,
-										 const QString& gwDesc);
+										 const QString& gwDesc,
+										 bool enable);
 
 		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 
 		virtual void writeToXml(XmlWriteHelper& xml) const;
-		virtual bool readFromXml(XmlReadHelper& xml);
+		virtual bool readFromXml(XmlReadHelper& xml, bool skipDisabledGateways, QStringList* disabledGateways);
 
 	private:
 		std::vector<GatewayShared> m_gateways;

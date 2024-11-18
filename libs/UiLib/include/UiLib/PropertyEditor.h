@@ -512,15 +512,9 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		explicit MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, bool readOnly, QWidget* parent);
-
 		// Row parameter is used for QStringList property type. In this case, valueChanged signal returns QString type, NOT QStringList!
 		//
-		explicit MultiTextEdit(PropertyEditorBase* propertyEditorBase,
-							   std::shared_ptr<Property> p,
-							   int row,
-							   bool readOnly,
-							   QWidget* parent);
+		MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent);
 
 		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
