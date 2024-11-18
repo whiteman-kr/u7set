@@ -178,19 +178,16 @@
     <name>DialogReport</name>
     <message>
         <location filename="../DialogReport.ui" line="14"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_DialogReport.h" line="66"/>
         <source>Test Report</source>
         <translation>Формування звіту</translation>
     </message>
     <message>
         <location filename="../DialogReport.ui" line="20"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_DialogReport.h" line="67"/>
         <source>Please choose a report to generate:</source>
         <translation>Оберіть звіт для формування:</translation>
     </message>
     <message>
         <location filename="../DialogReport.ui" line="43"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_DialogReport.h" line="68"/>
         <source>Generate</source>
         <translation>Згненерувати</translation>
     </message>
@@ -515,19 +512,16 @@ Data will not be available at the time of reconnection.</source>
     <name>TestSuiteDialogSettings</name>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="14"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="188"/>
         <source>Settings</source>
         <translation>Налаштування</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="20"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="189"/>
         <source>Save As...</source>
         <translation>Зберегти як...</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="54"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="195"/>
         <source>Connection</source>
         <translation>З&apos;єднання</translation>
     </message>
@@ -553,61 +547,51 @@ Data will not be available at the time of reconnection.</source>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="60"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="190"/>
         <source>Instance StrID</source>
         <translation>ІД екземпляра</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="89"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="191"/>
         <source>Configurator IP Address 1</source>
         <translation>IP-адреса сервіса конфігурації 1</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="99"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="192"/>
         <source>Configurator Port 1</source>
         <translation>Порт сервіса конфігурації 1</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="109"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="193"/>
         <source>Configurator IP Address 2</source>
         <translation>IP-адреса сервіса конфігурації 2</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="119"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="194"/>
         <source>Configurator Port 2</source>
         <translation>Порт сервіса конфігурації 2</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="143"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="198"/>
         <source>Tests</source>
         <translation>Тестування</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="155"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="196"/>
         <source>Browse...</source>
         <translation>Огляд...</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="178"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="197"/>
         <source>Load Test Scripts from directory:</source>
         <translation>Завантажувати тести з папки:</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="184"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="200"/>
         <source>Miscellaneous</source>
         <translation>Різне</translation>
     </message>
     <message>
         <location filename="../TestSuiteDialogSettings.ui" line="212"/>
-        <location filename="../../../build-u7set-vc-Debug/TestSuite/TestSuite_autogen/include/ui_TestSuiteDialogSettings.h" line="199"/>
         <source>Language:</source>
         <translation>Мова:</translation>
     </message>

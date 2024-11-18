@@ -748,7 +748,7 @@ Server: %14</source>
         <translation>Сервер</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="164"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="167"/>
         <source>Signal Type</source>
         <translation>Тип сигналу</translation>
     </message>
@@ -763,12 +763,12 @@ Server: %14</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="157"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="160"/>
         <source>&lt;&lt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="171"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="174"/>
         <source>Filter</source>
         <translation>Фільтр</translation>
     </message>
@@ -778,39 +778,39 @@ Server: %14</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="181"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="184"/>
         <source>List</source>
         <translation>Список</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="192"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="195"/>
         <source>Remove Periodic Records</source>
         <translation>Видалити періодичні записи</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="214"/>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="264"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="217"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="267"/>
         <source>MM/dd/yyyy</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="227"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="230"/>
         <source>Request End Time</source>
         <translation>Кінцевий час</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="234"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="237"/>
         <source>Request Time Type</source>
         <translation>Тип часу</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="241"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="244"/>
         <source>Request Start Time</source>
         <translation>Початковий час</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="248"/>
-        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="277"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="251"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.ui" line="280"/>
         <source>HH:mm:ss</source>
         <translation></translation>
     </message>
@@ -865,17 +865,17 @@ Server: %14</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="211"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="212"/>
         <source>Not selected</source>
         <translation>Не обраний</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="226"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="227"/>
         <source>[%1] %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="295"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="296"/>
         <source>The maximum number of signals reached.</source>
         <translation>Обрана максимальна кількість сигналів.</translation>
     </message>
@@ -2217,22 +2217,22 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>MonitorInternal::FilteredArchiveSignalsModel</name>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="696"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="712"/>
         <source>SignalID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="699"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="715"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="702"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="718"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="705"/>
+        <location filename="../Archive/DialogChooseArchiveSignals.cpp" line="721"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>

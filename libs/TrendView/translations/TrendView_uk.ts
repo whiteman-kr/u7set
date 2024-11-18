@@ -9,7 +9,7 @@
         <translation>Сигнали графіку</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="135"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="138"/>
         <source>&lt;&lt;</source>
         <translation></translation>
     </message>
@@ -29,37 +29,37 @@
         <translation>Список</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="128"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="131"/>
         <source>&lt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="121"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="124"/>
         <source>&gt;</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="156"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="159"/>
         <source>Down</source>
         <translation>Вниз</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="84"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="87"/>
         <source>Signals Tags</source>
         <translation>Теги</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="149"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="152"/>
         <source>Up</source>
         <translation>Вгору</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="94"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="97"/>
         <source>Signal tags space separated</source>
         <translation>Теги, розділені пробілом</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.ui" line="77"/>
+        <location filename="../DialogChooseTrendSignals.ui" line="80"/>
         <source>Archive Server</source>
         <translation>Сервер архіву</translation>
     </message>
@@ -125,22 +125,22 @@
         <translation>Видалити</translation>
     </message>
     <message>
-        <location filename="../DialogTrendSignalPoints.cpp" line="238"/>
+        <location filename="../DialogTrendSignalPoints.cpp" line="240"/>
         <source>Points - %1</source>
         <translation>Точки - %1</translation>
     </message>
     <message>
-        <location filename="../DialogTrendSignalPoints.cpp" line="260"/>
+        <location filename="../DialogTrendSignalPoints.cpp" line="264"/>
         <source>ServerTime</source>
         <translation>Час сервера</translation>
     </message>
     <message>
-        <location filename="../DialogTrendSignalPoints.cpp" line="261"/>
+        <location filename="../DialogTrendSignalPoints.cpp" line="265"/>
         <source>ServerTime +0UTC</source>
         <translation>Час сервера +0UTC</translation>
     </message>
     <message>
-        <location filename="../DialogTrendSignalPoints.cpp" line="262"/>
+        <location filename="../DialogTrendSignalPoints.cpp" line="266"/>
         <source>PlantTime</source>
         <translation>Час станції</translation>
     </message>
@@ -275,42 +275,42 @@
         <translation>Всі сервери</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="419"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="409"/>
         <source>SignalID</source>
         <translation>ІД сигналу</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="420"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="410"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="421"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="411"/>
         <source>Caption</source>
         <translation>Найменування</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="422"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="412"/>
         <source>Server</source>
         <translation>Сервер</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="507"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="497"/>
         <source>Not selected</source>
         <translation>Не обрано</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="522"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="512"/>
         <source>[%1] %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="582"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="572"/>
         <source>The maximum number of signals reached.</source>
         <translation>Досягнуто максимальної кількості сигналів.</translation>
     </message>
     <message>
-        <location filename="../DialogChooseTrendSignals.cpp" line="942"/>
+        <location filename="../DialogChooseTrendSignals.cpp" line="952"/>
         <source>Copy SignalID</source>
         <translation>Копіювати ІД сигналу</translation>
     </message>
@@ -804,27 +804,27 @@
 <context>
     <name>TrendPointsModel</name>
     <message>
-        <location filename="../DialogTrendSignalPoints.cpp" line="199"/>
+        <location filename="../DialogTrendSignalPoints.cpp" line="201"/>
         <source>Record</source>
         <translation>Запис</translation>
     </message>
     <message>
-        <location filename="../DialogTrendSignalPoints.cpp" line="201"/>
+        <location filename="../DialogTrendSignalPoints.cpp" line="203"/>
         <source>Index</source>
         <translation>Індекс</translation>
     </message>
     <message>
-        <location filename="../DialogTrendSignalPoints.cpp" line="203"/>
+        <location filename="../DialogTrendSignalPoints.cpp" line="205"/>
         <source>Time</source>
         <translation>Час</translation>
     </message>
     <message>
-        <location filename="../DialogTrendSignalPoints.cpp" line="205"/>
+        <location filename="../DialogTrendSignalPoints.cpp" line="207"/>
         <source>Value</source>
         <translation>Значення</translation>
     </message>
     <message>
-        <location filename="../DialogTrendSignalPoints.cpp" line="207"/>
+        <location filename="../DialogTrendSignalPoints.cpp" line="209"/>
         <source>Realtime</source>
         <translation>Реалтайм</translation>
     </message>
