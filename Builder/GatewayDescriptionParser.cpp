@@ -290,6 +290,8 @@ namespace Gateway
 
 		bool res = true;
 
+		ParseResult pr = ParseResult::Ok;
+
 		switch(plr.lineType)
 		{
 		case LineType::Setting:
@@ -307,8 +309,8 @@ namespace Gateway
 					if (res == false ||
 						gatewayType == E::GatewayType::Unknown)
 					{
-						m_log.logError(plr.lineNo, QString("unknown GatewayType '%1'").
-											arg(plr.value.toString()));
+						m_log.logError(plr.lineNo, QString("unknown GatewayType '%1', use: %2").
+												   arg(plr.value.toString(), knownGatewayTypes().join(", ")));
 						return ParseResult::CriticalError;
 					}
 
@@ -316,11 +318,7 @@ namespace Gateway
 
 					Q_ASSERT(m_gateways->last() != nullptr);
 
-					bool alreadyExists = m_gateways->last()->setSettingValue(plr.lineNo, plr.setting, plr.value);
-
-					Q_ASSERT(alreadyExists == false);
-
-					return ParseResult::Ok;
+					return m_gateways->last()->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
 				}
 				else
 				{
@@ -329,37 +327,22 @@ namespace Gateway
 				}
 			}
 
-			if (gw->isKnownSetting(plr.setting) == false)
-			{
-				m_log.logError(plr.lineNo, QString("unknown gateway setting '%1'").
-							arg(::E::valueToString<E::Setting>(plr.setting)));
-				return ParseResult::Error;
-			}
-
-			if (gw->settingIsSet(plr.setting) == true)
-			{
-				m_log.logWarning(plr.lineNo, QString("gateway setting '%1' already set").
-						   arg(::E::valueToString<E::Setting>(plr.setting)));
-			}
-
-			gw->setSettingValue(plr.lineNo, plr.setting, plr.value);
-
-			return (res == true ? ParseResult::Ok : ParseResult::Error);
+			return gw->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
 
 		case LineType::Section:
 			switch(plr.section)
 			{
 			case E::Section::Gateway:
-				gw->checkAndApplySettings(plr.lineNo, m_log);
+				pr = gw->checkAndApplySettings(plr.lineNo, m_log);
 				m_gateways->append(std::make_shared<Gateway>());
 				parsingSection = E::Section::Gateway;
-				return ParseResult::Ok;
+				return pr;
 
 			case E::Section::SignalList:
-				gw->checkAndApplySettings(plr.lineNo, m_log);
+				pr = gw->checkAndApplySettings(plr.lineNo, m_log);
 				m_gateways->last()->appendSignalList();
 				parsingSection = E::Section::SignalList;
-				return ParseResult::Ok;
+				return pr;
 
 			default:
 				Q_ASSERT(false);
@@ -384,27 +367,21 @@ namespace Gateway
 		switch(plr.lineType)
 		{
 		case LineType::Setting:
-			if (sl->isKnownSetting(plr.setting) == false)
-			{
-				m_log.logError(plr.lineNo, QString("unknown signal list setting '%1'").
-								arg(::E::valueToString<E::Setting>(plr.setting)));
-				return ParseResult::Error;
-			}
-
-			if (sl->settingIsSet(plr.setting) == true)
-			{
-				m_log.logWarning(plr.lineNo, QString("signal list setting '%1' already set").
-						   arg(::E::valueToString<E::Setting>(plr.setting)));
-			}
-
 			sl->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
-
 			return ParseResult::Ok;
 
 		case LineType::SignalID:
+			if (sl->isSettingsChecked() == false)
+			{
+				sl->checkAndApplySettings(plr.lineNo, m_log);
+			}
 			return appendAddressSignalID(sl, plr, false);
 
 		case LineType::AddressSignalID:
+			if (sl->isSettingsChecked() == false)
+			{
+				sl->checkAndApplySettings(plr.lineNo, m_log);
+			}
 			return appendAddressSignalID(sl, plr, true);
 
 		case LineType::Section:
@@ -460,6 +437,12 @@ namespace Gateway
 			pr = signalList->appendAddressConstValue(plr.lineNo, addr16, plrValue, propValue, m_log);
 
 			return pr;
+		}
+
+		if (plrValue.startsWith("#") == false)
+		{
+			m_log.logError(plr.lineNo, "signal ID should starts with '#' symbol");
+			return ParseResult::Error;
 		}
 
 		//
@@ -936,7 +919,7 @@ namespace Gateway
 		case E::GatewayType::IVS_Impulse:
 			return std::make_shared<IvsImpulseGateway>();
 
-		case E::GatewayType::ModbusTcpSlave:
+		case E::GatewayType::ModbusSlave:
 			return std::make_shared<ModbusSlaveGateway>();
 
 		default:
@@ -945,4 +928,14 @@ namespace Gateway
 
 		return nullptr;
 	}
+
+	QStringList Parser::knownGatewayTypes() const
+	{
+		QStringList kgt = ::E::enumKeyStrings<E::GatewayType>();
+
+		kgt.remove(0);
+
+		return kgt;
+	}
+
 }

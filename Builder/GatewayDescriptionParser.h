@@ -97,6 +97,8 @@ namespace Gateway
 
 		GatewayShared createTypedGateway(E::GatewayType gwType);
 
+		QStringList knownGatewayTypes() const;
+
 	private:
 		const Builder::Context* m_context = nullptr;
 		const AppSignalSet* m_appSignalSet = nullptr;

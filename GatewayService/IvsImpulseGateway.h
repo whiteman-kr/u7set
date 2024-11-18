@@ -7,14 +7,10 @@ namespace Gateway
 {
 	class IvsImpulseSignalList : public SignalList
 	{
-	private:
-		static const std::set<E::Setting> m_requiredSettings;
-
 	public:
 		IvsImpulseSignalList();
 
-		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual ParseResult checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
+		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
 
 		int listNo() const;
 		E::SignalListDataType dataType() const;
@@ -38,7 +34,6 @@ namespace Gateway
 	class IvsImpulseGateway : public Gateway
 	{
 	public:
-
 		struct DataType_ListID
 		{
 			E::SignalListDataType dataType = E::SignalListDataType::Unknown;
@@ -51,7 +46,7 @@ namespace Gateway
 
 		void initSettings();
 
-		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
+		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
 
 		virtual void appendSignalList() override;
 

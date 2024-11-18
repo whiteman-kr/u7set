@@ -21,15 +21,11 @@ namespace Gateway
 
 	class ModbusSignalList : public SignalList
 	{
-	private:
-		static const std::set<E::Setting> m_requiredSettings;
-
 	public:
 		ModbusSignalList();
 
-		virtual bool isKnownSetting(E::Setting st) const override;
+		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
 
-		virtual ParseResult checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
 		virtual ParseResult checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log) override;
 		virtual ParseResult parseAddressStr(int lineNo, const QString& addrStr, Address16* addr16, ParserLog& log) override;
 		virtual ParseResult appendAddressSignalID(int lineNo, const Address16& addr, const QString& signalID, ParserLog& log) override;
@@ -76,7 +72,7 @@ namespace Gateway
 
 		void initSettings();
 
-		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
+		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
 
 		virtual void appendSignalList() override;
 

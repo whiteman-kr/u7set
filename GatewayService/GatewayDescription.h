@@ -16,7 +16,7 @@ namespace Gateway
 		{
 			Unknown,
 			IVS_Impulse,
-			ModbusTcpSlave
+			ModbusSlave
 		};
 		Q_ENUM(GatewayType)
 
@@ -131,33 +131,6 @@ namespace Gateway
 	class Parser;
 	enum class ParseResult;
 
-	struct SettingValue
-	{
-		int lineNo = 0;
-		E::Setting setting = E::Setting::Unknown;
-		QVariant value;
-
-		QString settingName() const { return ::E::valueToString<E::Setting>(setting); }
-	};
-
-	class SettingsValues
-	{
-	public:
-		bool contains(E::Setting st) const;
-		bool insert(int lineNo, E::Setting st, const QVariant& value);
-
-		std::map<E::Setting, SettingValue>::const_iterator begin() const;
-		std::map<E::Setting, SettingValue>::iterator begin();
-
-		std::map<E::Setting, SettingValue>::const_iterator end() const;
-		std::map<E::Setting, SettingValue>::iterator end();
-
-		SettingValue getSettingVaue(E::Setting st) const;
-
-	private:
-		std::map<E::Setting, SettingValue> m_settingsValues;
-	};
-
 	class File
 	{
 	public:
@@ -177,25 +150,72 @@ namespace Gateway
 		QByteArray m_fileData;
 	};
 
-	struct RegisterPropValue
+	struct SettingValue
 	{
 		int lineNo = 0;
-		QString labelPropName;
-		double value;
+		E::Setting setting = E::Setting::Unknown;
+		QVariant value;
+
+			   //
+
+		SettingValue() {}
+		QString settingName() const { return ::E::valueToString<E::Setting>(setting); }
+		bool isValid() const { return setting != E::Setting::Unknown; }
 	};
 
-	class SignalList
+	class SettingsSet
+	{
+	public:
+		SettingsSet();
+		virtual ~SettingsSet();
+
+		void appendRequiredSetting(E::Setting reqSetting);
+		void appendRequiredSettings(const std::vector<E::Setting>& reqSettings);
+
+		void appendOptionalSetting(E::Setting optSetting);
+		void appendOptionalSettings(const std::vector<E::Setting>& optSettings);
+
+		bool isKnownSetting(E::Setting st) const;
+		bool settingIsSet(E::Setting st) const;
+
+		//
+
+		const std::map<E::Setting, SettingValue>& settingsValues() const;
+
+		ParseResult setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
+		const SettingValue& getSettingValue(E::Setting st) const;
+
+		QString settingName(E::Setting st) const;
+
+		bool isSettingsChecked() const;
+
+		ParseResult checkAndApplySettings(int lineNo, ParserLog& log);
+
+	protected:
+		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log);
+
+	private:
+		ParseResult checkRequiredSettings(int lineNo, ParserLog& log);
+
+	private:
+		std::set<E::Setting> m_requiredSettings;
+		std::set<E::Setting> m_optionalSettings;
+
+		std::map<E::Setting, SettingValue> m_settingsValues;
+
+		bool m_settingsChecked = false;
+
+		inline static const SettingValue m_invalidSettingValue;
+	};
+
+	class SignalList : public SettingsSet
 	{
 	public:
 		SignalList();
 		virtual ~SignalList() = default;
 
-		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
-		bool settingIsSet(E::Setting st) const;
+		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
 
-		virtual bool isKnownSetting(E::Setting st) const;
-
-		virtual ParseResult checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
 		virtual ParseResult checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log);
 		virtual ParseResult appendSignalID(int lineNo, const QString& appSignalID, ParserLog& log);
 		virtual ParseResult parseAddressStr(int lineNo, const QString& addStr, Address16* addr, ParserLog& log);
@@ -204,8 +224,6 @@ namespace Gateway
 
 		std::optional<::E::SignalType> signalType() const;
 		void setSignalType(::E::SignalType st);
-
-		SettingValue getSettingValue(E::Setting st) const;
 
 		const std::vector<QString>& signalIDs() const;
 		int signalsCount() const;
@@ -223,9 +241,8 @@ namespace Gateway
 		virtual bool readSignalsFromXml(XmlReadHelper& xml);
 
 	protected:
-		SettingsValues m_settingsValues;
 
-		std::vector<QString> m_signalIDs;			// AppSignalIDs
+		std::vector<QString> m_signalIDs;				// AppSignalIDs
 		std::optional<::E::SignalType> m_signalType;
 
 		bool m_uniqSignalsInList = false;
@@ -236,9 +253,7 @@ namespace Gateway
 	using SignalListShared = std::shared_ptr<SignalList>;
 	using SignalLists = std::vector<SignalListShared>;
 
-	class SignalSetAdapter;
-
-	class Gateway
+	class Gateway : public SettingsSet
 	{
 	public:
 		Gateway();
@@ -246,24 +261,13 @@ namespace Gateway
 		Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable);
 		virtual ~Gateway();
 
-		void appendRequiredSetting(E::Setting reqSetting);
-		void appendRequiredSettings(const std::vector<E::Setting>& reqSettings);
-
-		void appendOptionalSetting(E::Setting optSetting);
-		void appendOptionalSettings(const std::vector<E::Setting>& optSettings);
-
 		E::GatewayType gatewayType() const;
 		QString gatewayID() const;
 		QString gatewayDescription() const;
 		bool enable() const;
 		int signalListsCount() const;
 
-		bool setSettingValue(int lineNo, E::Setting st, const QVariant& value);
-		bool settingIsSet(E::Setting st) const;
-
-		bool isKnownSetting(E::Setting st) const;
-
-		virtual bool checkAndApplySettings(int lineNo, ParserLog& log);
+		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
 
 		virtual void appendSignalList();
 
@@ -288,10 +292,7 @@ namespace Gateway
 		virtual bool generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log);
 
 	private:
-		void privateInitSettings();
-
-		bool checkRequiredSettings(const SettingsValues& settingsValues,
-								   int lineNo, ParserLog& log);
+		void initSettingsSet();
 
 	protected:
 		E::GatewayType m_gatewayType = E::GatewayType::Unknown;
@@ -300,14 +301,10 @@ namespace Gateway
 		bool m_enable = true;
 		bool m_uniqSignalsInAllLists = false;
 
-		SettingsValues m_settingsValues;
+//		SettingsValues m_settingsValues;
 
 		SignalLists m_signalLists;
 		std::vector<File> m_files;
-
-	private:
-		std::set<E::Setting> m_requiredSettings;
-		std::set<E::Setting> m_optionalSettings;
 
 		friend class Parser;
 	};

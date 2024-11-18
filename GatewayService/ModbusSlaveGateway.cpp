@@ -46,7 +46,7 @@ namespace Gateway
 
 	QString ModbusFormat::toString() const
 	{
-		return QString("%1 %2").arg(::E::valueToString(signalFormat)).arg(::E::valueToString(byteOrder));
+		return QString("%1 %2").arg(::E::valueToString(signalFormat), ::E::valueToString(byteOrder));
 	}
 
    // ---------------------------------------------------------------------------------
@@ -55,40 +55,24 @@ namespace Gateway
    //
    // ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting> ModbusSignalList::m_requiredSettings =
-	{
-		E::Setting::SignalsFormat,
-	};
-
 	ModbusSignalList::ModbusSignalList()
 	{
+		appendRequiredSetting(E::Setting::SignalsFormat);
 	}
 
-	bool ModbusSignalList::isKnownSetting(E::Setting st) const
+	ParseResult ModbusSignalList::checkAndApplySetting(const SettingValue& sv, ParserLog& log)
 	{
-		return m_requiredSettings.contains(st);
-	}
-
-	ParseResult ModbusSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
-	{
-		Q_UNUSED(lineNo);
-		Q_UNUSED(st);
-		Q_UNUSED(value);
-		Q_UNUSED(log);
-
 		ParseResult pr = ParseResult::Ok;
 
-		switch(st)
+		switch(sv.setting)
 		{
-		case E::Setting::SignalsFormat:
-			pr = checkAndApplySignalsFormat(lineNo, value.toString(), log);
+		default:
+			pr = SignalList::checkAndApplySetting(sv, log);
 			break;
 
-		default:
-			Q_ASSERT(false);
-			log.logError(lineNo, "unknown setting");
-			pr = ParseResult::Error;
-
+		case E::Setting::SignalsFormat:
+			pr = checkAndApplySignalsFormat(sv.lineNo, sv.value.toString(), log);
+			break;
 		}
 
 		return pr;
@@ -447,13 +431,13 @@ namespace Gateway
    // ---------------------------------------------------------------------------------
 
 	ModbusSlaveGateway::ModbusSlaveGateway() :
-		Gateway(E::GatewayType::ModbusTcpSlave)
+		Gateway(E::GatewayType::ModbusSlave)
 	{
 		initSettings();
 	}
 
 	ModbusSlaveGateway::ModbusSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable) :
-		Gateway(E::GatewayType::ModbusTcpSlave, gwID, gwDesc, enable)
+		Gateway(E::GatewayType::ModbusSlave, gwID, gwDesc, enable)
 	{
 		initSettings();
 	}
@@ -467,72 +451,63 @@ namespace Gateway
 		appendOptionalSetting(E::Setting::LocalGatewayIP2);
 	}
 
-	bool ModbusSlaveGateway::checkAndApplySettings(int lineNo, ParserLog& log)
+	ParseResult ModbusSlaveGateway::checkAndApplySetting(const SettingValue& sv, ParserLog& log)
 	{
-		bool result = true;
-
-		result &= Gateway::checkAndApplySettings(lineNo, log);
-
-		RETURN_IF_FALSE(result);
+		ParseResult pr = ParseResult::Ok;
 
 		HostAddressPort addrPort;
 
-		for(const auto& p: m_settingsValues)
+		switch(sv.setting)
 		{
-			E::Setting st = p.first;
-			const SettingValue& sv = p.second;
+		default:
+			pr = Gateway::checkAndApplySetting(sv, log);
+			break;
 
-			switch(st)
+		case E::Setting::LocalGatewayIP1:
+			addrPort.setAddressPortStr(sv.value.toString(), MODBUS_DEFAULT_PORT);
+			m_localGatewayIP1 = addrPort;
+			break;
+
+		case E::Setting::LocalGatewayIP2:
+			addrPort.setAddressPortStr(sv.value.toString(),  MODBUS_DEFAULT_PORT);
+			m_localGatewayIP2 = addrPort;
+			break;
+
+		case E::Setting::ModbusDeviceID:
 			{
-			case E::Setting::LocalGatewayIP1:
-				addrPort.setAddressPortStr(sv.value.toString(), MODBUS_DEFAULT_PORT);
-				m_localGatewayIP1 = addrPort;
-				break;
+				m_modbusDeviceID = sv.value.toInt();
 
-			case E::Setting::LocalGatewayIP2:
-				addrPort.setAddressPortStr(sv.value.toString(),  MODBUS_DEFAULT_PORT);
-				m_localGatewayIP2 = addrPort;
-				break;
-
-			case E::Setting::ModbusDeviceID:
+				if (m_modbusDeviceID < 0 || m_modbusDeviceID > 255)
 				{
-					m_modbusDeviceID = sv.value.toInt();
-
-					if (m_modbusDeviceID < 0 || m_modbusDeviceID > 255)
-					{
-						log.logError(sv.lineNo, "Wrong ModbusDeviceID value. Should be in range 0..255.");
-						result = false;
-					}
+					log.logError(sv.lineNo, "wrong ModbusDeviceID value. Should be in range 0..255.");
+					pr = ParseResult::Error;
 				}
-				break;
-
-			case E::Setting::ModbusMode:
-				{
-					bool ok = true;
-
-					m_modbusMode = ::E::stringToValue<E::ModbusMode>(sv.value.toString(), &ok);
-
-					if (ok == false)
-					{
-						QStringList values = ::E::enumKeyStrings<E::ModbusMode>();
-
-						values.remove(0);		// remove E::ModbusMode::Unknown
-
-						log.logError(sv.lineNo, QString("Wrong ModbusMode value. Should be one of: %1").
-												arg(values.join(", ")));
-
-						m_modbusMode = E::ModbusMode::Unknown;
-						result = false;
-					}
-				}
-				break;
-
-			default:
-				;	// ok
 			}
+			break;
+
+		case E::Setting::ModbusMode:
+			{
+				bool ok = true;
+
+				m_modbusMode = ::E::stringToValue<E::ModbusMode>(sv.value.toString(), &ok);
+
+				if (ok == false)
+				{
+					QStringList values = ::E::enumKeyStrings<E::ModbusMode>();
+
+					values.remove(0);		// remove E::ModbusMode::Unknown
+
+					log.logError(sv.lineNo, QString("wrong ModbusMode value. Should be one of: %1").
+											arg(values.join(", ")));
+
+					m_modbusMode = E::ModbusMode::Unknown;
+					pr = ParseResult::Error;
+				}
+			}
+			break;
 		}
 
-		return result;
+		return pr;
 	}
 
 	void ModbusSlaveGateway::appendSignalList()
