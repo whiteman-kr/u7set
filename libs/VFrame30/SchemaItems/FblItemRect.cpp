@@ -1,15 +1,15 @@
-#include <VFrame30/FblItemRect.h>
-#include <VFrame30/SchemaLayer.h>
-#include <VFrame30/PropertyNames.h>
-#include <VFrame30/Settings.h>
 #include <VFrame30/DrawParam.h>
-#include <VFrame30/SchemaItemSignal.h>
-#include <VFrame30/SchemaItemConst.h>
+#include <VFrame30/FblItemRect.h>
+#include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaItemAfb.h>
-#include <VFrame30/SchemaItemConnection.h>
-#include <VFrame30/SchemaItemTerminator.h>
 #include <VFrame30/SchemaItemBus.h>
+#include <VFrame30/SchemaItemConnection.h>
+#include <VFrame30/SchemaItemConst.h>
 #include <VFrame30/SchemaItemLoopback.h>
+#include <VFrame30/SchemaItemSignal.h>
+#include <VFrame30/SchemaItemTerminator.h>
+#include <VFrame30/SchemaLayer.h>
+#include <VFrame30/Settings.h>
 
 namespace VFrame30
 {
@@ -45,28 +45,58 @@ namespace VFrame30
 		m_static = false;
 	}
 
-	FblItemRect::~FblItemRect(void)
-	{
-	}
+	FblItemRect::~FblItemRect(void) {}
 
 	void FblItemRect::propertyDemand(const QString& prop)
 	{
 		PosRectImpl::propertyDemand(prop);
 
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, FblItemRect::weight, FblItemRect::setWeight);
+		ADD_PROPERTY_GET_SET_CAT(double,
+								 PropertyNames::lineWeight,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 FblItemRect::weight,
+								 FblItemRect::setWeight);
 
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, FblItemRect::lineColor, FblItemRect::setLineColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, FblItemRect::fillColor, FblItemRect::setFillColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::lineColor,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 FblItemRect::lineColor,
+								 FblItemRect::setLineColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::fillColor,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 FblItemRect::fillColor,
+								 FblItemRect::setFillColor);
 
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, FblItemRect::textColor, FblItemRect::setTextColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::textColor,
+								 PropertyNames::textCategory,
+								 true,
+								 FblItemRect::textColor,
+								 FblItemRect::setTextColor);
 
-		addProperty<QString, FblItemRect, &FblItemRect::getFontName, &FblItemRect::setFontName>(PropertyNames::fontName, PropertyNames::appearanceCategory, true);
-		addProperty<double, FblItemRect, &FblItemRect::getFontSize, &FblItemRect::setFontSize>(PropertyNames::fontSize, PropertyNames::appearanceCategory, true);
-		addProperty<bool, FblItemRect, &FblItemRect::getFontBold, &FblItemRect::setFontBold>(PropertyNames::fontBold, PropertyNames::appearanceCategory, true);
-		addProperty<bool, FblItemRect, &FblItemRect::getFontItalic, &FblItemRect::setFontItalic>(PropertyNames::fontItalic, PropertyNames::appearanceCategory, true);
+		addProperty<QString, FblItemRect, &FblItemRect::getFontName, &FblItemRect::setFontName>(PropertyNames::fontName,
+																								PropertyNames::appearanceCategory,
+																								true);
+		addProperty<double, FblItemRect, &FblItemRect::getFontSize, &FblItemRect::setFontSize>(PropertyNames::fontSize,
+																							   PropertyNames::appearanceCategory,
+																							   true);
+		addProperty<bool, FblItemRect, &FblItemRect::getFontBold, &FblItemRect::setFontBold>(PropertyNames::fontBold,
+																							 PropertyNames::appearanceCategory,
+																							 true);
+		addProperty<bool, FblItemRect, &FblItemRect::getFontItalic, &FblItemRect::setFontItalic>(PropertyNames::fontItalic,
+																								 PropertyNames::appearanceCategory,
+																								 true);
 
-		addProperty<QString, FblItemRect, &FblItemRect::userText, &FblItemRect::setUserText>(PropertyNames::userText, PropertyNames::textCategory, true);
-		addProperty<E::TextPos, FblItemRect, &FblItemRect::userTextPos, &FblItemRect::setUserTextPos>(PropertyNames::userTextPos, PropertyNames::textCategory, true);
+		addProperty<QString, FblItemRect, &FblItemRect::userText, &FblItemRect::setUserText>(PropertyNames::userText,
+																							 PropertyNames::textCategory,
+																							 true);
+		addProperty<E::TextPos, FblItemRect, &FblItemRect::userTextPos, &FblItemRect::setUserTextPos>(PropertyNames::userTextPos,
+																									  PropertyNames::textCategory,
+																									  true);
 
 		return;
 	}
@@ -103,8 +133,8 @@ namespace VFrame30
 
 		m_font.SaveData(itemMessage->mutable_font());
 
-		//itemMessage->set_label(m_label.toStdString());
-		//itemMessage->set_labelpos(static_cast<::google::protobuf::int32>(m_labelPos));
+		// itemMessage->set_label(m_label.toStdString());
+		// itemMessage->set_labelpos(static_cast<::google::protobuf::int32>(m_labelPos));
 
 		itemMessage->set_usertext(m_userText.toStdString());
 		itemMessage->set_usertextpos(static_cast<::google::protobuf::int32>(m_userTextPos));
@@ -189,7 +219,7 @@ namespace VFrame30
 				SchemaPoint calculatedPoint = CalcPointPos(ir, *input, inputCount, inputIndex, gridSize, pinGridStep);
 				input->setPoint(calculatedPoint);
 
-				inputIndex ++;
+				inputIndex++;
 			}
 		}
 
@@ -207,7 +237,7 @@ namespace VFrame30
 				SchemaPoint calculatedPoint = CalcPointPos(ir, *output, outputCount, outputIndex, gridSize, pinGridStep);
 				output->setPoint(calculatedPoint);
 
-				outputIndex ++;
+				outputIndex++;
 			}
 		}
 
@@ -240,7 +270,7 @@ namespace VFrame30
 				return true;
 			}
 
-			index ++;
+			index++;
 		}
 
 		// Look for point in outputs
@@ -259,7 +289,7 @@ namespace VFrame30
 				return true;
 			}
 
-			index ++;
+			index++;
 		}
 
 		// The point is not found
@@ -268,13 +298,12 @@ namespace VFrame30
 		return false;
 	}
 
-	SchemaPoint FblItemRect::CalcPointPos(
-			const QRectF& fblItemRect,
-			const AfbPin& connection,
-			int pinCount,
-			int index,
-			double gridSize,
-			int pinGridStep) const
+	SchemaPoint FblItemRect::CalcPointPos(const QRectF& fblItemRect,
+										  const AfbPin& connection,
+										  int pinCount,
+										  int index,
+										  double gridSize,
+										  int pinGridStep) const
 	{
 		if (pinCount == 0)
 		{
@@ -289,22 +318,22 @@ namespace VFrame30
 
 		// Calc
 		//
-//		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
+		//		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
 
-//		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
-//		double halfpinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep) / 2.0, gridSize);
+		//		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		//		double halfpinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep) / 2.0, gridSize);
 
-//		double top = VFrame30::snapToGrid(fblItemRect.top(), gridSize);
+		//		double top = VFrame30::snapToGrid(fblItemRect.top(), gridSize);
 
-//		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
-//		y = VFrame30::snapToGrid(y, gridSize);
+		//		double y = top + halfpinVertGap + pinVertGap * static_cast<double>(index);
+		//		y = VFrame30::snapToGrid(y, gridSize);
 
-//		return SchemaPoint(x, y);
+		//		return SchemaPoint(x, y);
 
 		double x = connection.dirrection() == ConnectionDirrection::Input ? fblItemRect.left() : fblItemRect.right();
 
-		double pinVertGap =	gridSize * static_cast<double>(pinGridStep);
-		double halfpinVertGap =	gridSize * static_cast<double>(pinGridStep) / 2.0;
+		double pinVertGap = gridSize * static_cast<double>(pinGridStep);
+		double halfpinVertGap = gridSize * static_cast<double>(pinGridStep) / 2.0;
 
 		double top = VFrame30::snapToGrid(fblItemRect.top(), gridSize);
 
@@ -321,48 +350,31 @@ namespace VFrame30
 	//
 	void FblItemRect::draw(CDrawParam* drawParam) const
 	{
-		QPainter* p = drawParam->painter();
-		p->setBrush(Qt::NoBrush);
+		QPainter* painter = drawParam->painter();
+		painter->setBrush(Qt::NoBrush);
 
-		QRectF r = itemRectWithPins(drawParam);
+		QRectF rect = itemRectPinIndent(drawParam);
+		rect.setTopRight(drawParam->gridToDpi(rect.topRight()));
+		rect.setBottomLeft(drawParam->gridToDpi(rect.bottomLeft()));
 
-		// --
-		//
-		const double dpiX = drawParam->realDpiX();
-
-		// Correct rect width
-		//
-		double pinWidth = GetPinWidth(itemUnit(), dpiX);
+		double pinWidth = GetPinWidth(itemUnit(), drawParam->realDpiX());
 
 		FontParam smallFont = m_font;
 		smallFont.setDrawSize(m_font.drawSize() * 0.75);
 		smallFont.setBold(false);
 		smallFont.setItalic(false);
 
-		if (inputsCount() > 0)
-		{
-			r.setLeft(r.left() + pinWidth);
-		}
-
-		if (outputsCount() > 0)
-		{
-			r.setRight(r.right() - pinWidth);
-		}
-
-		r.setTopRight(drawParam->gridToDpi(r.topRight()));
-		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
-
-		QRectF userTextRect{r};	// save rect for future use
+		QRectF userTextRect{rect}; // save rect for future use
 
 		// Draw main rect
 		//
-		p->fillRect(r, fillColor());
+		painter->fillRect(rect, fillColor());
 
 		// Regular pen
 		//
 		QPen pen{lineColor()};
-		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
-		p->setPen(pen);
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight); // Don't use getter!
+		painter->setPen(pen);
 
 		// Bus pen
 		//
@@ -372,7 +384,7 @@ namespace VFrame30
 
 		// --
 		//
-		p->drawRect(r);
+		painter->drawRect(rect);
 
 		// Draw in/outs
 		//
@@ -384,7 +396,7 @@ namespace VFrame30
 		// Draw input pins
 		//
 		QPen redPen{QColor(0xE0B00000)};
-		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
+		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight); // Don't use getter!
 
 		QPen redBusPen{redPen.color()};
 		redBusPen.setWidthF(BusSideLineWidth);
@@ -409,30 +421,30 @@ namespace VFrame30
 
 			if (input.signalType() == E::SignalType::Bus)
 			{
-				p->setPen(busPen);
+				painter->setPen(busPen);
 			}
 			else
 			{
-				p->setPen(pen);
+				painter->setPen(pen);
 			}
 
-			p->drawLine(pt1, pt2);
+			painter->drawLine(pt1, pt2);
 
 			if (connectionCount > 1)
 			{
 				if (input.signalType() == E::SignalType::Bus)
 				{
-					p->setPen(busPen);
+					painter->setPen(busPen);
 				}
 				else
 				{
-					p->setPen(pen);
+					painter->setPen(pen);
 				}
 
-				p->setBrush(pen.color());
+				painter->setBrush(pen.color());
 
-				DrawPinJoint(p, pt1.x(), pt1.y(), pinWidth);
-				p->setBrush(Qt::NoBrush);
+				DrawPinJoint(painter, pt1.x(), pt1.y(), pinWidth);
+				painter->setBrush(Qt::NoBrush);
 			}
 			else
 			{
@@ -440,14 +452,14 @@ namespace VFrame30
 				//
 				if (input.signalType() == E::SignalType::Bus)
 				{
-					p->setPen(redBusPen);
+					painter->setPen(redBusPen);
 				}
 				else
 				{
-					p->setPen(redPen);
+					painter->setPen(redPen);
 				}
 
-				DrawPinCross(p, pt1.x(), pt1.y(), pinWidth);
+				DrawPinCross(painter, pt1.x(), pt1.y(), pinWidth);
 			}
 
 			// Draw pin text
@@ -461,7 +473,7 @@ namespace VFrame30
 			FontParam font = m_font;
 			font.setDrawSize(m_font.drawSize() * 0.75);
 
-			DrawHelper::drawText(p,
+			DrawHelper::drawText(painter,
 								 font,
 								 itemUnit(),
 								 input.caption(),
@@ -487,29 +499,29 @@ namespace VFrame30
 
 			if (output.signalType() == E::SignalType::Bus)
 			{
-				p->setPen(busPen);
+				painter->setPen(busPen);
 			}
 			else
 			{
-				p->setPen(pen);
+				painter->setPen(pen);
 			}
 
-			p->drawLine(pt1, pt2);
+			painter->drawLine(pt1, pt2);
 
 			if (connectionCount > 1)
 			{
 				if (output.signalType() == E::SignalType::Bus)
 				{
-					p->setPen(busPen);
+					painter->setPen(busPen);
 				}
 				else
 				{
-					p->setPen(pen);
+					painter->setPen(pen);
 				}
 
-				p->setBrush(pen.color());
-				DrawPinJoint(p, pt1.x(), pt1.y(), pinWidth);
-				p->setBrush(Qt::NoBrush);
+				painter->setBrush(pen.color());
+				DrawPinJoint(painter, pt1.x(), pt1.y(), pinWidth);
+				painter->setBrush(Qt::NoBrush);
 			}
 			else
 			{
@@ -517,14 +529,14 @@ namespace VFrame30
 				//
 				if (output.signalType() == E::SignalType::Bus)
 				{
-					p->setPen(redBusPen);
+					painter->setPen(redBusPen);
 				}
 				else
 				{
-					p->setPen(redPen);
+					painter->setPen(redPen);
 				}
 
-				DrawPinCross(p, pt1.x(), pt1.y(), pinWidth);
+				DrawPinCross(painter, pt1.x(), pt1.y(), pinWidth);
 			}
 
 			// Draw pin text
@@ -538,7 +550,7 @@ namespace VFrame30
 			FontParam font = m_font;
 			font.setDrawSize(m_font.drawSize() * 0.75);
 
-			DrawHelper::drawText(p,
+			DrawHelper::drawText(painter,
 								 font,
 								 itemUnit(),
 								 output.caption(),
@@ -590,8 +602,8 @@ namespace VFrame30
 				assert(false);
 			}
 
-			p->setPen(Qt::black);
-			DrawHelper::drawText(p, smallFont, itemUnit(), userText(), userTextRect, Qt::TextDontClip | alignFlags);
+			painter->setPen(Qt::black);
+			DrawHelper::drawText(painter, smallFont, itemUnit(), userText(), userTextRect, Qt::TextDontClip | alignFlags);
 		}
 
 		return;
@@ -735,13 +747,14 @@ namespace VFrame30
 			return {};
 		}
 
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+		QRectF r = itemRectWithPins(drawParam);
 		double pinWidth = GetPinWidth(itemUnit(), drawParam->realDpiX());
 
 		if (inputsCount() > 0)
 		{
 			r.setLeft(r.left() + pinWidth);
 		}
+
 		if (outputsCount() > 0)
 		{
 			r.setRight(r.right() - pinWidth);
@@ -768,7 +781,7 @@ namespace VFrame30
 		{
 			// Can't do anything, required variables are not set
 			//
-			//qDebug() << Q_FUNC_INFO << " Variables m_gridSize and m_pingGridStep were not initiazized, cannot perform operation";
+			// qDebug() << Q_FUNC_INFO << " Variables m_gridSize and m_pingGridStep were not initiazized, cannot perform operation";
 			return;
 		}
 
@@ -797,7 +810,7 @@ namespace VFrame30
 			pinCount = 1;
 		}
 
-		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double pinVertGap = VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 		double minHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
 		return minHeight;
@@ -827,7 +840,8 @@ namespace VFrame30
 			const std::vector<VFrame30::AfbPin>& ins = inputs();
 			for (const VFrame30::AfbPin& pin : ins)
 			{
-				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption() << " Pos(x, y):" << pin.x() << pin.y();
+				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption()
+						 << " Pos(x, y):" << pin.x() << pin.y();
 
 				const std::vector<QUuid>& asios = pin.associatedIOs();
 				if (asios.empty() == false)
@@ -846,7 +860,8 @@ namespace VFrame30
 			const std::vector<VFrame30::AfbPin>& outs = outputs();
 			for (const VFrame30::AfbPin& pin : outs)
 			{
-				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption() << " Pos(x, y):" << pin.x() << pin.y();
+				qDebug() << "\t\tguid: " << pin.guid() << ", opIndex: " << pin.afbOperandIndex() << ", caption: " << pin.caption()
+						 << " Pos(x, y):" << pin.x() << pin.y();
 
 				const std::vector<QUuid>& asios = pin.associatedIOs();
 				if (asios.empty() == false)
@@ -1176,5 +1191,4 @@ namespace VFrame30
 		m_userTextPos = value;
 	}
 
-}
-
+} // namespace VFrame30
