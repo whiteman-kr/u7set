@@ -446,6 +446,8 @@ namespace XmlAttribute
 	inline const QString FORMAT("Format");
 	inline const QString IS_CONST("IsConst");
 	inline const QString CONST_VALUE("ConstValue");
+	inline const QString UNIQ_SIGNALS_IN_ALL_LISTS("UniqSignalsInAllLists");
+	inline const QString UNIQ_SIGNALS_IN_LIST("UniqSignalsInList");
 
 	inline const QString MODULE_CAPTION("ModuleCaption");
 

@@ -154,17 +154,6 @@ namespace Gateway
 	IvsImpulseGateway::IvsImpulseGateway() :
 		Gateway(E::GatewayType::IVS_Impulse)
 	{
-		initSettings();
-	}
-
-	IvsImpulseGateway::IvsImpulseGateway(const QString& gwID, const QString& gwDesc, bool enable) :
-		Gateway(E::GatewayType::IVS_Impulse, gwID, gwDesc, enable)
-	{
-		initSettings();
-	}
-
-	void IvsImpulseGateway::initSettings()
-	{
 		appendRequiredSettings({	E::Setting::LocalGatewayIP1,
 									E::Setting::RemoteGatewayIP1,
 									E::Setting::SystemID,
@@ -173,8 +162,7 @@ namespace Gateway
 									E::Setting::TimeType });
 
 		appendOptionalSettings({	E::Setting::LocalGatewayIP2,
-								E::Setting::RemoteGatewayIP2 });
-
+									E::Setting::RemoteGatewayIP2 });
 	}
 
 	ParseResult IvsImpulseGateway::checkAndApplySetting(const SettingValue& sv, ParserLog& log)

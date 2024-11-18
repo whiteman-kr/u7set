@@ -38,8 +38,8 @@ namespace Gateway
 			GatewayID,
 			GatewayDescription,
 			Enable,
-			UniqueSignalsInAllLists,
-			UniqueSignalsInList,
+			UniqSignalsInAllLists,
+			UniqSignalsInList,
 
 			// IVS Impulse specific settings
 
@@ -183,6 +183,7 @@ namespace Gateway
 		const std::map<E::Setting, SettingValue>& settingsValues() const;
 
 		ParseResult setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
+		bool setSettingValue(E::Setting st, const QVariant& value);
 		const SettingValue& getSettingValue(E::Setting st) const;
 
 		QString settingName(E::Setting st) const;
@@ -246,6 +247,7 @@ namespace Gateway
 		std::optional<::E::SignalType> m_signalType;
 
 		bool m_uniqSignalsInList = false;
+		std::set<Hash> m_existSignals;					// hashes of AppSignalIDs
 
 		friend class Parser;
 	};
@@ -258,13 +260,16 @@ namespace Gateway
 	public:
 		Gateway();
 		Gateway(E::GatewayType gwType);
-		Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable);
-		virtual ~Gateway();
+		virtual ~Gateway() = default;
+
+		static std::shared_ptr<Gateway> createTypedGateway(E::GatewayType gwType);
 
 		E::GatewayType gatewayType() const;
 		QString gatewayID() const;
 		QString gatewayDescription() const;
 		bool enable() const;
+		bool uniqSignalsInAllLists() const;
+
 		int signalListsCount() const;
 
 		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
@@ -280,7 +285,7 @@ namespace Gateway
 		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 
 		void writeToXml(XmlWriteHelper& xml) const;
-		bool readFromXml(XmlReadHelper& xml);
+		static std::shared_ptr<Gateway> readFromXml(XmlReadHelper& xml);	// returns typedGateway
 
 	protected:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const;
@@ -315,8 +320,9 @@ namespace Gateway
 	{
 	public:
 		void append(GatewayShared gw);
-		void setLast(GatewayShared gw);
+		void replaceLast(GatewayShared gw);
 		GatewayShared last();
+		bool isUniqGatewayID(const QString& gwID) const;
 
 		std::vector<GatewayShared>::iterator begin();
 		std::vector<GatewayShared>::iterator end();
@@ -325,11 +331,6 @@ namespace Gateway
 		std::vector<GatewayShared>::const_iterator end() const;
 
 		void clear();
-
-		GatewayShared createTypedGateway(E::GatewayType gwType,
-										 const QString& gwID,
-										 const QString& gwDesc,
-										 bool enable);
 
 		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 

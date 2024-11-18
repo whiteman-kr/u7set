@@ -95,9 +95,8 @@ namespace Gateway
 		bool parseBoolValueStr(const QString& valueStr, ParseLineResult* plr);
 		bool parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr);
 
-		GatewayShared createTypedGateway(E::GatewayType gwType);
-
 		QStringList knownGatewayTypes() const;
+		E::GatewayType getGatewayType(const QString& gwTypeStr) const;
 
 	private:
 		const Builder::Context* m_context = nullptr;

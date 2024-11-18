@@ -68,9 +68,7 @@ namespace Gateway
 
 	public:
 		ModbusSlaveGateway();
-		ModbusSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable);
-
-		void initSettings();
+		virtual ~ModbusSlaveGateway() = default;
 
 		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
 

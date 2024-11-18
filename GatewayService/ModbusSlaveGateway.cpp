@@ -251,12 +251,6 @@ namespace Gateway
 	{
 		Hash hash = calcHash(signalID.trimmed());
 
-		if (m_signalAddrs.contains(hash) == true)
-		{
-			log.logWarning(lineNo, QString("signal %1 already in signal list").arg(signalID));
-			return ParseResult::Ok;
-		}
-
 		if (m_modbusFormat.isValid() == false)
 		{
 			log.logError(lineNo, "setting 'SignalsFormat' should be specified first");
@@ -432,17 +426,6 @@ namespace Gateway
 
 	ModbusSlaveGateway::ModbusSlaveGateway() :
 		Gateway(E::GatewayType::ModbusSlave)
-	{
-		initSettings();
-	}
-
-	ModbusSlaveGateway::ModbusSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable) :
-		Gateway(E::GatewayType::ModbusSlave, gwID, gwDesc, enable)
-	{
-		initSettings();
-	}
-
-	void ModbusSlaveGateway::initSettings()
 	{
 		appendRequiredSettings({	E::Setting::LocalGatewayIP1,
 									E::Setting::ModbusDeviceID,

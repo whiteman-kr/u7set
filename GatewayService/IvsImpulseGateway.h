@@ -42,15 +42,13 @@ namespace Gateway
 
 	public:
 		IvsImpulseGateway();
-		IvsImpulseGateway(const QString& gwID, const QString& gwDesc, bool enable);
-
-		void initSettings();
+		virtual ~IvsImpulseGateway() = default;
 
 		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
 
 		virtual void appendSignalList() override;
 
-			   //
+	   //
 
 		int systemID() const;
 		HostAddressPort localGatewayIP1() const;

@@ -64,11 +64,11 @@ namespace Gateway
 		{ E::Setting::GatewayID,				E::SettingType::AlphaNumericUnderlineString	},
 		{ E::Setting::GatewayDescription,		E::SettingType::String	},
 		{ E::Setting::Enable,					E::SettingType::Bool	},
-		{ E::Setting::UniqueSignalsInAllLists,	E::SettingType::Bool	},
+		{ E::Setting::UniqSignalsInAllLists,	E::SettingType::Bool	},
 
 		// Common signal lists settings
 		//
-		{ E::Setting::UniqueSignalsInList,		E::SettingType::Bool	},
+		{ E::Setting::UniqSignalsInList,		E::SettingType::Bool	},
 
 		// IVS Impulse gateway specific settings
 		//
@@ -215,8 +215,7 @@ namespace Gateway
 			if (pr == ParseResult::CriticalError)
 			{
 				errCount++;
-				result = false;
-				break;
+				return false;		// break parsing
 			}
 		}
 
@@ -288,7 +287,11 @@ namespace Gateway
 	{
 		GatewayShared gw = m_gateways->last();
 
-		bool res = true;
+		if (gw == nullptr)
+		{
+			m_log.logError(plr.lineNo, QString("last Gateway not exists"));
+			return ParseResult::CriticalError;
+		}
 
 		ParseResult pr = ParseResult::Ok;
 
@@ -300,29 +303,42 @@ namespace Gateway
 			{
 				if (plr.setting == E::Setting::GatewayType)
 				{
-					QString gatewayTypeStr = plr.value.toString();
+					QString gwTypeStr = plr.value.toString();
 
-					res = true;
+					E::GatewayType gatewayType = getGatewayType(gwTypeStr);
 
-					E::GatewayType gatewayType = ::E::stringToValue<E::GatewayType>(gatewayTypeStr, &res);
-
-					if (res == false ||
-						gatewayType == E::GatewayType::Unknown)
+					if (gatewayType == E::GatewayType::Unknown)
 					{
 						m_log.logError(plr.lineNo, QString("unknown GatewayType '%1', use: %2").
 												   arg(plr.value.toString(), knownGatewayTypes().join(", ")));
 						return ParseResult::CriticalError;
 					}
 
-					m_gateways->setLast(createTypedGateway(gatewayType));
+					GatewayShared typedGateway = Gateway::createTypedGateway(gatewayType);
 
-					Q_ASSERT(m_gateways->last() != nullptr);
+					if (typedGateway == nullptr)
+					{
+						Q_ASSERT(false);
+						m_log.logError(plr.lineNo, QString("createTypedGateway ERROR!"));
+						return ParseResult::CriticalError;
+					}
 
-					return m_gateways->last()->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
+					m_gateways->replaceLast(typedGateway);
+
+					return typedGateway->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
 				}
 				else
 				{
-					m_log.logError(plr.lineNo, QString("setting 'GatewayType' expected"));
+					m_log.logError(plr.lineNo, QString("setting 'GatewayType' should be specified first"));
+					return ParseResult::CriticalError;
+				}
+			}
+			else
+			{
+				if (plr.setting == E::Setting::GatewayID &&
+					m_gateways->isUniqGatewayID(plr.value.toString()) == false)
+				{
+					m_log.logError(plr.lineNo, QString("GatewayID should be unique"));
 					return ParseResult::CriticalError;
 				}
 			}
@@ -717,7 +733,7 @@ namespace Gateway
 
 			if (st == E::Setting::Unknown)
 			{
-				plr->setError(QString("unknown setting - %1").arg(settingID));
+				plr->setError(QString("unknown setting '%1'").arg(settingID));
 				return false;
 			}
 
@@ -912,23 +928,6 @@ namespace Gateway
 		return ipValid && portValid;
 	}
 
-	GatewayShared Parser::createTypedGateway(E::GatewayType gwType)
-	{
-		switch(gwType)
-		{
-		case E::GatewayType::IVS_Impulse:
-			return std::make_shared<IvsImpulseGateway>();
-
-		case E::GatewayType::ModbusSlave:
-			return std::make_shared<ModbusSlaveGateway>();
-
-		default:
-			Q_ASSERT(false);
-		}
-
-		return nullptr;
-	}
-
 	QStringList Parser::knownGatewayTypes() const
 	{
 		QStringList kgt = ::E::enumKeyStrings<E::GatewayType>();
@@ -936,6 +935,20 @@ namespace Gateway
 		kgt.remove(0);
 
 		return kgt;
+	}
+
+	E::GatewayType Parser::getGatewayType(const QString& gwTypeStr) const
+	{
+		bool ok = false;
+
+		E::GatewayType gwType = ::E::stringToValue<E::GatewayType>(gwTypeStr, &ok);
+
+		if (ok == false)
+		{
+			gwType = E::GatewayType::Unknown;
+		}
+
+		return gwType;
 	}
 
 }

@@ -122,6 +122,14 @@ namespace Gateway
 		return ParseResult::Ok;
 	}
 
+	bool SettingsSet::setSettingValue(E::Setting st, const QVariant& value)
+	{
+		ParserLog log;
+		ParseResult pr = setSettingValue(0, st, value, log);
+
+		return (pr == ParseResult::Ok);
+	}
+
 	const SettingValue& SettingsSet::getSettingValue(E::Setting st) const
 	{
 		auto it = m_settingsValues.find(st);
@@ -210,7 +218,7 @@ namespace Gateway
 
 	SignalList::SignalList()
 	{
-		appendOptionalSetting(E::Setting::UniqueSignalsInList);
+		appendOptionalSetting(E::Setting::UniqSignalsInList);
 
 		m_signalIDs.reserve(1000);
 	}
@@ -224,7 +232,7 @@ namespace Gateway
 		default:
 			return SettingsSet::checkAndApplySetting(sv, log);
 
-		case E::Setting::UniqueSignalsInList:
+		case E::Setting::UniqSignalsInList:
 			m_uniqSignalsInList = sv.value.toBool();
 			break;
 		}
@@ -258,6 +266,15 @@ namespace Gateway
 		Q_UNUSED(log);
 
 		m_signalIDs.emplace_back(appSignalID);
+
+		Hash h = calcHash(appSignalID);
+
+		if (m_uniqSignalsInList && m_existSignals.contains(h))
+		{
+			log.logWarning(lineNo, QString("signal '%1' duplicated in list").arg(appSignalID));
+		}
+
+		m_existSignals.insert(h);
 
 		return ParseResult::Ok;
 	}
@@ -403,20 +420,29 @@ namespace Gateway
 	Gateway::Gateway(E::GatewayType gwType) :
 		m_gatewayType(gwType)
 	{
-		initSettingsSet();
+		appendRequiredSettings({	E::Setting::GatewayType,
+									E::Setting::GatewayID,
+									E::Setting::GatewayDescription	});
+
+		appendOptionalSettings({	E::Setting::Enable,
+									E::Setting::UniqSignalsInAllLists	});
 	}
 
-	Gateway::Gateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable) :
-		m_gatewayType(gwType),
-		m_gatewayID(gwID),
-		m_gatewayDescription(gwDesc),
-		m_enable(enable)
+	std::shared_ptr<Gateway> Gateway::createTypedGateway(E::GatewayType gwType)
 	{
-		initSettingsSet();
-	}
+		switch(gwType)
+		{
+		case E::GatewayType::IVS_Impulse:
+			return std::make_shared<IvsImpulseGateway>();
 
-	Gateway::~Gateway()
-	{
+		case E::GatewayType::ModbusSlave:
+			return std::make_shared<ModbusSlaveGateway>();
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return nullptr;
 	}
 
 	E::GatewayType Gateway::gatewayType() const
@@ -439,6 +465,11 @@ namespace Gateway
 		return m_enable;
 	}
 
+	bool Gateway::uniqSignalsInAllLists() const
+	{
+		return m_uniqSignalsInAllLists;
+	}
+
 	int Gateway::signalListsCount() const
 	{
 		return TO_INT(m_signalLists.size());
@@ -456,7 +487,21 @@ namespace Gateway
 			return SettingsSet::checkAndApplySetting(sv, log);
 
 		case E::Setting::GatewayType:
-			// setting GatewayType was checked and applied early
+			{
+				// m_gatewayType should be set during typedGateway creation in Parser
+				// here only check gatewayType
+				//
+				bool ok = false	;
+
+				E::GatewayType gwType = ::E::stringToValue<E::GatewayType>(sv.value.toString(), &ok);
+
+				if (!ok || m_gatewayType != gwType)
+				{
+					Q_ASSERT(false);
+					log.logError(sv.lineNo, "check m_gatewayType ERROR!");
+					pr = ParseResult::CriticalError;
+				}
+			}
 			break;
 
 		case E::Setting::GatewayID:
@@ -471,7 +516,7 @@ namespace Gateway
 			m_enable = sv.value.toBool();
 			break;
 
-		case E::Setting::UniqueSignalsInAllLists:
+		case E::Setting::UniqSignalsInAllLists:
 			m_uniqSignalsInAllLists = sv.value.toBool();
 			break;
 		}
@@ -520,18 +565,67 @@ namespace Gateway
 
 	void Gateway::writeToXml(XmlWriteHelper& xml) const
 	{
+		xml.writeStartElement(XmlElement::GATEWAY);
+
+		xml.writeEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, m_gatewayType);
+		xml.writeStringAttribute(XmlAttribute::GATEWAY_ID, m_gatewayID);
+		xml.writeStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, m_gatewayDescription);
+		xml.writeBoolAttribute(XmlAttribute::ENABLE, m_enable);
+		xml.writeBoolAttribute(XmlAttribute::UNIQ_SIGNALS_IN_ALL_LISTS, m_uniqSignalsInAllLists);
+
 		writeSettingsToXml(xml);
 		writeSignalListsToXml(xml);
+
+		xml.writeEndElement();			// </Gateway>
 	}
 
-	bool Gateway::readFromXml(XmlReadHelper& xml)
+	std::shared_ptr<Gateway> Gateway::readFromXml(XmlReadHelper& xml)
 	{
 		bool result = true;
 
-		result &= readSettingsFromXml(xml);
-		result &= readSignalListsFromXml(xml);
+		result &= xml.findElement(XmlElement::GATEWAY);
 
-		return result;
+		RETURN_VALUE_IF_FALSE(result, nullptr);
+
+		E::GatewayType gatewayType;
+
+		result &= xml.readEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, &gatewayType);
+
+		RETURN_VALUE_IF_FALSE(result, nullptr);
+
+		GatewayShared gw = Gateway::createTypedGateway(gatewayType);
+
+		if (gw == nullptr)
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+
+		QString gatewayID;
+		QString datewayDescription;
+		bool enable = true;
+		bool uniqSignalsInAllLists = false;
+
+		result &= xml.readStringAttribute(XmlAttribute::GATEWAY_ID, &gatewayID);
+		result &= xml.readStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, &datewayDescription);
+		result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &enable);
+		result &= xml.readBoolAttribute(XmlAttribute::UNIQ_SIGNALS_IN_ALL_LISTS, &uniqSignalsInAllLists);
+
+		RETURN_VALUE_IF_FALSE(result, nullptr);
+
+		//
+
+		result &= gw->setSettingValue(E::Setting::GatewayID, gatewayID);
+		result &= gw->setSettingValue(E::Setting::GatewayDescription, datewayDescription);
+		result &= gw->setSettingValue(E::Setting::Enable, enable);
+		result &= gw->setSettingValue(E::Setting::UniqSignalsInAllLists, uniqSignalsInAllLists);
+
+		//
+
+		result &= gw->readSettingsFromXml(xml);
+		result &= gw->readSignalListsFromXml(xml);
+
+		return gw;
 	}
 
 	void Gateway::writeSettingsToXml(XmlWriteHelper& xml) const
@@ -599,22 +693,6 @@ namespace Gateway
 
 	void Gateway::initSettingsSet()
 	{
-		static const std::vector<E::Setting> reqSettings =
-		{
-			E::Setting::GatewayType,
-			E::Setting::GatewayID,
-			E::Setting::GatewayDescription,
-		};
-
-		appendRequiredSettings(reqSettings);
-
-		static const std::vector<E::Setting> optSettings =
-		{
-			E::Setting::Enable,
-			E::Setting::UniqueSignalsInAllLists
-		};
-
-		appendOptionalSettings(optSettings);
 	}
 
 	// ---------------------------------------------------------------------------------
@@ -628,14 +706,39 @@ namespace Gateway
 		m_gateways.push_back(gw);
 	}
 
-	void Gateways::setLast(GatewayShared gw)
+	void Gateways::replaceLast(GatewayShared gw)
 	{
+		if (m_gateways.empty())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
 		m_gateways.back() = gw;
 	}
 
 	GatewayShared Gateways::last()
 	{
+		if (m_gateways.empty())
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+
 		return m_gateways.back();
+	}
+
+	bool Gateways::isUniqGatewayID(const QString& gwID) const
+	{
+		for(const GatewayShared& gw : m_gateways)
+		{
+			if (gw->gatewayID() == gwID)
+			{
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	std::vector<GatewayShared>::iterator Gateways::begin()
@@ -663,27 +766,16 @@ namespace Gateway
 		m_gateways.clear();
 	}
 
-	GatewayShared Gateways::createTypedGateway(E::GatewayType gwType, const QString& gwID, const QString& gwDesc, bool enable)
+	void Gateways::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
 	{
-		GatewayShared gw;
+		TEST_PTR_RETURN(acquiredSignals);
 
-		switch(gwType)
+		acquiredSignals->clear();
+
+		for(auto& gw : m_gateways)
 		{
-		case E::GatewayType::IVS_Impulse:
-			gw = std::make_shared<IvsImpulseGateway>(gwID, gwDesc, enable);
-			break;
-
-		case E::GatewayType::ModbusSlave:
-			gw = std::make_shared<ModbusSlaveGateway>(gwID, gwDesc, enable);
-			break;
-
-		case E::GatewayType::Unknown:
-		default:
-			Q_ASSERT(false);
-			gw = std::make_shared<Gateway>(gwType, gwID, gwDesc, enable);
-		};
-
-		return gw;
+			gw->fillAcquiredSignalsSet(acquiredSignals);
+		}
 	}
 
 	void Gateways::writeToXml(XmlWriteHelper& xml) const
@@ -698,33 +790,12 @@ namespace Gateway
 		{
 			TEST_PTR_CONTINUE(gw);
 
-			xml.writeStartElement(XmlElement::GATEWAY);
-
-			xml.writeEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, gw->gatewayType());
-			xml.writeStringAttribute(XmlAttribute::GATEWAY_ID, gw->gatewayID());
-			xml.writeStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, gw->gatewayDescription());
-			xml.writeBoolAttribute(XmlAttribute::ENABLE, gw->enable());
-
 			gw->writeToXml(xml);
-
-			xml.writeEndElement();			// </Gateway>
 		}
 
 		xml.writeEndElement();		// </Gateways>
 
 		xml.writeEndDocument();
-	}
-
-	void Gateways::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
-	{
-		TEST_PTR_RETURN(acquiredSignals);
-
-		acquiredSignals->clear();
-
-		for(auto& gw : m_gateways)
-		{
-			gw->fillAcquiredSignalsSet(acquiredSignals);
-		}
 	}
 
 	bool Gateways::readFromXml(XmlReadHelper& xml, bool skipDisabledGateways, QStringList* disabledGateways)
@@ -743,25 +814,19 @@ namespace Gateway
 
 		for(int i = 0; i < gatewaysCount; i++)
 		{
-			result &= xml.findElement(XmlElement::GATEWAY);
+			GatewayShared gw = Gateway::readFromXml(xml);		// returns typedGateway
 
-			BREAK_IF_FALSE(result);
+			if (gw == nullptr)
+			{
+				result = false;
+				continue;
+			}
 
-			E::GatewayType gatewayType;
-			QString gatewayID;
-			QString datewayDescription;
-			bool enable = true;
-
-			result &= xml.readEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, &gatewayType);
-			result &= xml.readStringAttribute(XmlAttribute::GATEWAY_ID, &gatewayID);
-			result &= xml.readStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, &datewayDescription);
-			result &= xml.readBoolAttribute(XmlAttribute::ENABLE, &enable);
-
-			if (enable == false)
+			if (gw->enable() == false)
 			{
 				if (disabledGateways != nullptr)
 				{
-					disabledGateways->append(gatewayID);
+					disabledGateways->append(gw->gatewayID());
 				}
 
 				if (skipDisabledGateways)
@@ -769,16 +834,6 @@ namespace Gateway
 					continue;
 				}
 			}
-
-			BREAK_IF_FALSE(result);
-
-			GatewayShared gw = createTypedGateway(gatewayType,
-												  gatewayID,
-												  datewayDescription,
-												  enable);
-			result &= gw->readFromXml(xml);
-
-			BREAK_IF_FALSE(result);
 
 			m_gateways.push_back(gw);
 		}
