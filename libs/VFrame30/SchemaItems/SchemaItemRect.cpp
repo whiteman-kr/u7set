@@ -286,7 +286,12 @@ namespace VFrame30
 				m_cacheTextImage.isNull() == true ||
 				m_cacheTextImage.size() != clipRectInt.size())
 			{
-				double deviceDpr = drawParam->devicePixelRatio();
+				const double deviceDpr = drawParam->devicePixelRatio();
+
+				const double dpiX = CDrawParam::realDpiX(painter);
+				const double dpiY = CDrawParam::realDpiY(painter);
+				const double physicalDpiX = dpiX / deviceDpr;
+				const double physicalDpiY = dpiY / deviceDpr;
 
 				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
 				m_cacheTextImage.setDevicePixelRatio(deviceDpr);
@@ -296,8 +301,8 @@ namespace VFrame30
 				QPainter p{&m_cacheTextImage};
 
 				SchemaView::Ajust(&p,
-								  painter->device()->physicalDpiX(),
-								  painter->device()->physicalDpiY(),
+								  physicalDpiX,
+								  physicalDpiY,
 								  painter->device()->devicePixelRatioF(),
 								  itemUnit(),
 								  0,
@@ -335,18 +340,20 @@ namespace VFrame30
 				m_cacheTextImage.size() != clipRectInt.size())
 			{
 				double deviceDpr = drawParam->devicePixelRatio();
+				double physicalDpiX = dpiX / deviceDpr;
+				double physicalDpiY = dpiY / deviceDpr;
 
 				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
-				m_cacheTextImage.setDotsPerMeterX(static_cast<int>(painter->device()->physicalDpiX() / 25.4 * 1000.0));
-				m_cacheTextImage.setDotsPerMeterY(static_cast<int>(painter->device()->physicalDpiY() / 25.4 * 1000.0));
+				m_cacheTextImage.setDotsPerMeterX(static_cast<int>(physicalDpiX / 25.4 * 1000.0));
+				m_cacheTextImage.setDotsPerMeterY(static_cast<int>(physicalDpiY / 25.4 * 1000.0));
 				m_cacheTextImage.setDevicePixelRatio(deviceDpr);
 
 				m_cacheTextImage.fill(qRgba(0, 0, 0, 0));	// Transparent
 
 				QPainter p{&m_cacheTextImage};
 				SchemaView::Ajust(&p,
-								  painter->device()->physicalDpiX(),
-								  painter->device()->physicalDpiY(),
+								  physicalDpiX, 
+								  physicalDpiY,
 								  deviceDpr,
 								  itemUnit(),
 								  0,

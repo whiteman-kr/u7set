@@ -977,13 +977,14 @@ void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 	//
 	p->setPen(QColor{0x00, 0x00, 0x80, 0xFF});
 
+	auto screen = this->screen();
+	assert(screen);
+
 	const double dpiX = (unit == SchemaUnit::Display) ?
-							(1.0) :
-							(p->device()->physicalDpiX() * devicePixelRatioF());
+							(1.0) : (screen->physicalDotsPerInchX() * devicePixelRatioF());
 
 	const double dpiY = (unit == SchemaUnit::Display) ?
-							(1.0) :
-							(p->device()->physicalDpiY() * devicePixelRatioF());
+							(1.0) : (screen->physicalDotsPerInchY() * devicePixelRatioF());
 
 	const double dpiXScale = gridSize * dpiX * scale;
 	const double dpiYScale = gridSize * dpiY * scale;

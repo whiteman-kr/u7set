@@ -694,7 +694,7 @@ namespace VFrame30
 
 		QPainter* painter = drawParam->painter();
 
-		double pinWidth = GetPinWidth(itemUnit(), painter->device());
+		double pinWidth = GetPinWidth(itemUnit(), drawParam->realDpiX());
 
 		painter->setPen(linePen);
 

@@ -78,11 +78,16 @@ namespace VFrame30
 		static double realDpiX(QPainter* painter) noexcept;
 		static double realDpiY(QPainter* painter) noexcept;
 
+		static double realScreenDpiX(QPainter* painter) noexcept;
+		static double realScreenDpiY(QPainter* painter) noexcept;
+
 		double gridToDpiX(double pos) const noexcept;
 		double gridToDpiY(double pos) const noexcept;
 		QPointF gridToDpi(double x, double y) const noexcept;
 		QPointF gridToDpi(const QPointF& pos) const noexcept;
 		QRectF gridToDpi(const QRectF& rect) const noexcept;
+
+		static double gridToDpi(double pos, double dpi, double zoom, SchemaUnit unit) noexcept;
 
 		DrawMode drawMode() const noexcept;
 
@@ -140,13 +145,14 @@ namespace VFrame30
 							 const QString& str,
 							 const QRectF& rect,
 							 int flags,
-							 QRectF* boundingRect = nullptr);
+							 QRectF* boundingRect = nullptr,
+							 std::pair<double, double> dpi = {0, 0});
 
 		static void drawTextCahed(QPainter* p,
 								  const FontParam& font,
 								  SchemaUnit unit,
 								  const QString& str,
-								  const QRectF& rect,
+								  QRectF rect,
 								  int flags,
 								  double zoom);
 

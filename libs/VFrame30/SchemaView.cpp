@@ -18,18 +18,35 @@ namespace VFrame30
 
 	void SchemaView::Ajust(QPainter* painter, SchemaUnit units, double startX, double startY, double zoom)
 	{
-		int dpix = painter->device()->physicalDpiX();
-		int dpiy = painter->device()->physicalDpiY();
+		auto device = painter->device();
+		if (device == nullptr)
+		{
+			assert(device);
+			return;
+		}
+		
+		double dpix;
+		double dpiy;
+
+		if (auto widget = dynamic_cast<const QWidget*>(device); widget != nullptr)
+		{
+			auto screen = widget->screen();
+			dpix = screen ? screen->physicalDotsPerInchX() : device->physicalDpiX();
+			dpiy = screen ? screen->physicalDotsPerInchY() : device->physicalDpiY();
+		}
+		else
+		{
+			dpix = device->physicalDpiX();
+			dpiy = device->physicalDpiY();
+		}
+
 		double dpr = painter->device()->devicePixelRatioF();
 
 		return SchemaView::Ajust(painter, dpix, dpiy, dpr, units, startX, startY, zoom);
 	}
 
-	void SchemaView::Ajust(QPainter* painter, int dpiX, int dpiY, double devicePixelRatioF, SchemaUnit units, double startX, double startY, double zoom)
+	void SchemaView::Ajust(QPainter* painter, double dpiX, double dpiY, double devicePixelRatioF, SchemaUnit units, double startX, double startY, double zoom)
 	{
-		double dpix = static_cast<double>(dpiX);
-		double dpiy = static_cast<double>(dpiY);
-
 		// Set transform matrix
 		//
 		painter->resetTransform();
@@ -41,8 +58,8 @@ namespace VFrame30
 			startX = startX + 0.5 / devicePixelRatioF;
 			startY = startY + 0.5 / devicePixelRatioF;
 
-			double scalex = dpix * zoom;
-			double scaley = dpiy * zoom;
+			double scalex = dpiX * zoom;
+			double scaley = dpiY * zoom;
 
 			painter->translate(startX, startY);
 			painter->scale(scalex, scaley);
@@ -65,7 +82,19 @@ namespace VFrame30
 		// Drawing can be performed in other device, not in windows, for example to pdf, that's why device is required
 		//
 		Q_ASSERT(device);
-		return device->physicalDpiX() * device->devicePixelRatioF();
+
+		double dpiX;
+		if (auto widget = dynamic_cast<const QWidget*>(device); widget != nullptr)
+		{
+			auto screen = widget->screen();
+			dpiX = screen ? screen->physicalDotsPerInchX() : device->physicalDpiX();
+		}
+		else
+		{
+			dpiX = device->physicalDpiX();
+		}
+
+		return dpiX * device->devicePixelRatioF();
 	}
 
 	double SchemaView::realDpiY(const QPaintDevice* device) const
@@ -73,7 +102,19 @@ namespace VFrame30
 		// Drawing can be performed in other device, not in windows, for example to pdf, that's why device is required
 		//
 		Q_ASSERT(device);
-		return device->physicalDpiY() * device->devicePixelRatioF();
+
+		double dpiY;
+		if (auto widget = dynamic_cast<const QWidget*>(device); widget != nullptr)
+		{
+			auto screen = widget->screen();
+			dpiY = screen ? screen->physicalDotsPerInchY() : device->physicalDpiY();
+		}
+		else
+		{
+			dpiY = device->physicalDpiY();
+		}
+
+		return dpiY * device->devicePixelRatioF();
 	}
 
 	void SchemaView::setSchema(std::shared_ptr<Schema> schema, bool repaint)
@@ -441,8 +482,12 @@ namespace VFrame30
 	{
 		// Calc DPI
 		//
-		double realDpiX = physicalDpiX() * devicePixelRatioF();
-		double realDpiY = physicalDpiY() * devicePixelRatioF();
+		auto screen = this->screen();
+		double physicalDpiX = screen ? screen->physicalDotsPerInchX() : this->physicalDpiX();
+		double physicalDpiY = screen ? screen->physicalDotsPerInchY() : this->physicalDpiY();
+
+		double realDpiX = physicalDpiX * devicePixelRatioF();
+		double realDpiY = physicalDpiY * devicePixelRatioF();
 
 		// if value is 0 then fit page into parent
 		//
