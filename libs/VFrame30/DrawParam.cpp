@@ -41,7 +41,7 @@ namespace
 		double dpiY{};
 		double zoom{};
 
-		QImage image{};
+		QPixmap pixmap{};
 
 		Hash hash() { return getHash(font, unit, text, size, flags, textColor, dpiX, dpiY, zoom); }
 
@@ -479,7 +479,7 @@ namespace VFrame30
 		return QRectF{gridToDpi(rect.topLeft()), gridToDpi(rect.bottomRight())};
 	}
 
-	double CDrawParam::gridToDpi(double pos, double dpi, double zoom, SchemaUnit unit) noexcept 
+	double CDrawParam::gridToDpi(double pos, double dpi, double zoom, SchemaUnit unit) noexcept
 	{
 		zoom /= 100.0;
 
@@ -638,18 +638,23 @@ namespace VFrame30
 								   int flags,
 								   double zoom)
 	{
-		return drawText(painter, font, unit, str, rect, flags);
-/*
 		Q_ASSERT(painter);
 
+		if (str.isEmpty() || rect.isEmpty() == true)
+		{
+			return;
+		}
+
+		double devicePixelRatioF = painter->device()->devicePixelRatioF();
 		const double dpiX = CDrawParam::realScreenDpiX(painter);
 		const double dpiY = CDrawParam::realScreenDpiY(painter);
+		double zoomFactor = zoom / 100.0;
 
-		// Make sure the rect is grided to dpi.
-		//
-		QRectF rectDirect = rect;
-
-#if 1
+		if (unit == SchemaUnit::Display || font.drawSize() > 0.5 || dpiX > 400 || painter->worldTransform().isRotating() == true)
+		{
+			return drawText(painter, font, unit, str, rect, flags);
+		}
+#if 0
 		// Fall back to drawText, still draw cached if Ctrl is pressed.
 		//
 		if ((QGuiApplication::queryKeyboardModifiers() & Qt::ControlModifier) == 0)
@@ -657,45 +662,25 @@ namespace VFrame30
 			return drawText(painter, font, unit, str, rect, flags);
 		}
 #endif
-		if (str.isEmpty() || rect.isEmpty() == true)
-		{
-			return;
-		}
+		QRgb textColor = painter->pen().color().rgb();                   // Text color is taken from the current pen.
 
-		rect.setLeft(CDrawParam::gridToDpi(rect.left(), dpiX, zoom, unit));
-		rect.setTop(CDrawParam::gridToDpi(rect.top(), dpiY, zoom, unit));
-		rect.setWidth(CDrawParam::gridToDpi(rect.width(), dpiX, zoom, unit));
-		rect.setHeight(CDrawParam::gridToDpi(rect.height(), dpiY, zoom, unit));
-
-		QRgb textColor = painter->pen().color().rgb(); // Text color is taken from the current pen.
-
-		// Draw in pixels, for now we do not cache text out for SchemaUnit::Display, as this unit mode is discouraged.
-		//
-		QFont f = font.qfont(unit, dpiY);
-
-		if (unit == SchemaUnit::Display)
-		{
-			painter->setFont(f);
-			painter->drawText(rect, flags, str);
-			return;
-		}
-
-		// Draw for inches.
-		//
-
-		// Draw in inches.
-		//
-
-		// Get cached image, if there is no one, create it.
-		//
 		const double reduceZoom = (dpiY > 120) ? 300 : 600;              // Kind of HiDpi Screen?
 		const double sizeReduceFactor = (zoom > reduceZoom) ? 0.5 : 1.0; // It makes images smaller depending on zoom.
 
-		const double imageWidth = rect.width() * dpiX * (zoom / 100.0) * sizeReduceFactor;
-		const double imageHeight = rect.height() * dpiY * (zoom / 100.0) * sizeReduceFactor;
+		// Draw in pixels, for now we do not cache text out for SchemaUnit::Display, as this unit mode is discouraged.
+		//
+		QFont f{font.name()};
 
-		QSize imageSize{static_cast<int>(std::round(imageWidth)), static_cast<int>(std::round(imageHeight))}; // ROUND
-		QRect clipRectInt{0, 0, imageSize.width(), imageSize.height()};
+		f.setBold(font.bold());
+		f.setItalic(font.italic());
+		f.setUnderline(font.underline());
+		int pixelSize = static_cast<int>(font.drawSize() * dpiY / devicePixelRatioF * zoomFactor * sizeReduceFactor);
+		f.setPixelSize(pixelSize > 0 ? pixelSize : 1);
+
+		const double imageWidth = std::ceil(rect.width() * dpiX * (zoom / 100.0) * sizeReduceFactor);
+		const double imageHeight = std::ceil(rect.height() * dpiY * (zoom / 100.0) * sizeReduceFactor);
+
+		QSize imageSize{static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
 
 		Hash cacheItemHash = DrawTextCacheItem::getHash(f, unit, str, imageSize, flags, textColor, dpiX, dpiY, zoom);
 		bool newCacheItem = false;
@@ -709,65 +694,66 @@ namespace VFrame30
 			newCacheItem = true;
 		}
 
-		// Draw in inches
-		//
-		if (unit == SchemaUnit::Inch)
+		if (newCacheItem == true)
 		{
-			if (cacheItem->image.size() != clipRectInt.size()) // if image size is different, then it was just created.
+			QPixmap pixmap{imageSize};
+			pixmap.setDevicePixelRatio(painter->device()->devicePixelRatioF());
+			pixmap.fill(Qt::transparent);
+
+			QPainter cacheImagePainter{&pixmap};
+
+			QRectF textRect{0,
+							0,
+							rect.width() * dpiX / devicePixelRatioF * zoomFactor * sizeReduceFactor,
+							rect.height() * dpiY / devicePixelRatioF * zoomFactor * sizeReduceFactor};
+
+			cacheImagePainter.setPen(painter->pen());
+			cacheImagePainter.setFont(f);
+			cacheImagePainter.drawText(textRect, flags, str, nullptr);
+
+			cacheItem->pixmap = pixmap;
+		}
+
+		// Draw cached pixmap.
+		//
+		painter->setWorldMatrixEnabled(false);
+
+		QRectF rc;
+		rc.setLeft(rect.left() * dpiX / devicePixelRatioF * zoomFactor);
+		rc.setTop(rect.top() * dpiY / devicePixelRatioF * zoomFactor);
+		rc.setRight(rect.right() * dpiX / devicePixelRatioF * zoomFactor);
+		rc.setBottom(rect.bottom() * dpiY / devicePixelRatioF * zoomFactor);
+		rc.translate(0.5, 0.5);
+
+		if (sizeReduceFactor == 1.0)
+		{
+			painter->drawPixmap(rc.topLeft(), cacheItem->pixmap);
+		}
+		else
+		{
+			// Scale pixmap to rect rc.
+			//
+			double imageWidthF = rect.width() * dpiX * (zoom / 100.0) * sizeReduceFactor;
+			double imageHeightF = rect.height() * dpiY * (zoom / 100.0) * sizeReduceFactor;
+
+			painter->drawPixmap(rc, cacheItem->pixmap, QRectF{0, 0, imageWidthF, imageHeightF});
+		}
+
+		painter->setWorldMatrixEnabled(true);
+
+		// Save new item to cache.
+		//
+		if (newCacheItem == true)
+		{
+			int pixmapBytes = cacheItem->pixmap.size().width() * cacheItem->pixmap.size().height() * 4; // 4 bytes per pixel.
+			if (pixmapBytes < 3'000'000)                                                                // up to 3Mb per image.
 			{
-				// Create image and draw text to it.
-				//
-				double devicePixelRatioF = painter->device()->devicePixelRatioF();
-				double painterPhysicalDpiX = dpiX / devicePixelRatioF;
-				double painterPhysicalDpiY = dpiY / devicePixelRatioF;
-
-				cacheItem->image = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
-				cacheItem->image.setDotsPerMeterX(static_cast<int>(painterPhysicalDpiX * 1000.0 / 25.4));
-				cacheItem->image.setDotsPerMeterY(static_cast<int>(painterPhysicalDpiY * 1000.0 / 25.4));
-				cacheItem->image.setDevicePixelRatio(devicePixelRatioF);
-
-				cacheItem->image.fill(Qt::transparent);
-
-				QPainter cacheImagePainter{&cacheItem->image};
-
-				SchemaView::Ajust(&cacheImagePainter,
-								  painterPhysicalDpiX,
-								  painterPhysicalDpiY,
-								  devicePixelRatioF,
-								  unit,
-								  -0.5 / devicePixelRatioF,
-								  -0.5 / devicePixelRatioF,
-								  //0,
-								  //0,
-								  zoom * sizeReduceFactor);
-				
-				QRectF textRect = rect;
-				textRect.moveTo(0, 0);
-
-				cacheImagePainter.setPen(textColor);
-				cacheImagePainter.setFont(f);
-
-				DrawHelper::drawText(&cacheImagePainter, font, unit, str, textRect, flags, nullptr, {dpiX, dpiY});
+				cache.insert(cacheItemHash, cacheItem, pixmapBytes);
 			}
 		}
 
-		// Draw cached image
-		//
-		Q_ASSERT(cacheItem != nullptr && cacheItem->image.isNull() == false);
-
-		painter->drawImage(rect, cacheItem->image);
-		//painter->drawImage(rect, cacheItem->image);
-
-		// Add to cache new item, cache only images not greater then specified size.
-		//
-		if (newCacheItem == true && cacheItem->image.sizeInBytes() < 2'000'000)
-		{
-			cache.insert(cacheItemHash, cacheItem, cacheItem->image.sizeInBytes());
-		}
-
-		return;*/
+		return;
 	}
-
 
 	void DrawHelper::drawText(QPainter* painter,
 							  SchemaUnit unit,

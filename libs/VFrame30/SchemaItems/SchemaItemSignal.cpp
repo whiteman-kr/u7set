@@ -835,6 +835,7 @@ namespace VFrame30
 						}
 
 						double subCellLeft = cellLeft + subColumnWidth * f;
+						double cellTextIndent = drawParam->gridToDpiY(m_font.drawSize() / 8.0);
 
 						cells.emplace_back(row,
 										   cellColumnIndex,
@@ -843,7 +844,7 @@ namespace VFrame30
 										   cellFillColor(row, cellColumnIndex),
 										   cellTextColor(row, cellColumnIndex),
 										   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
-										   m_font.drawSize() / 8.0,
+										   cellTextIndent,
 										   signalIsInverted);
 
 						cellColumnIndex++;
@@ -875,6 +876,8 @@ namespace VFrame30
 											 &signalIsInverted);
 					}
 
+					double cellTextIndent = drawParam->gridToDpiY(m_font.drawSize() / 4.0);
+
 					cells.emplace_back(row,
 									   cellColumnIndex,
 									   QRectF{cellLeft, cellTop, columnWidth, cellHeight},
@@ -882,7 +885,7 @@ namespace VFrame30
 									   cellFillColor(row, cellColumnIndex),
 									   cellTextColor(row, cellColumnIndex),
 									   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
-									   m_font.drawSize() / 4.0,
+									   cellTextIndent,
 									   signalIsInverted);
 
 					cellColumnIndex++;
@@ -925,8 +928,10 @@ namespace VFrame30
 			}
 
 			QRectF textRect = cell.rect;
-			textRect.setLeft(textRect.left() + cell.textIndent);
-			textRect.setRight(textRect.right() - cell.textIndent);
+			textRect.setTop(rect.top() + drawParam->gridToDpiY((cell.row) * columntHeight));
+			textRect.setLeft(drawParam->gridToDpiY(textRect.left() + cell.textIndent));
+			textRect.setBottom(rect.top() + drawParam->gridToDpiY((cell.row + 1) * columntHeight));
+			textRect.setRight(drawParam->gridToDpiY(textRect.right() - cell.textIndent));
 
 			if (textRect.width() > cell.textIndent)
 			{
@@ -1109,7 +1114,7 @@ namespace VFrame30
 			}
 		}
 
-		// Fill cells and draw vertical line devider from the other columns.
+		// Fill cells and draw vertical line divider from the other columns.
 		//
 		bool someCellsAreFilled = false;
 
