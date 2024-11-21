@@ -749,6 +749,29 @@ namespace Hardware
 		return nullptr;
 	}
 
+	std::shared_ptr<Hardware::DeviceModule> DeviceObject::getParentModuleShared()
+	{
+		Hardware::DeviceObject* deviceObject = this;
+
+		do
+		{
+			deviceObject = deviceObject->parent().get();
+
+			if (deviceObject == nullptr)
+			{
+				break;
+			}
+
+			if (deviceObject->isModule())
+			{
+				return deviceObject->toModule();
+			}
+		}
+		while(deviceObject != nullptr);
+
+		return nullptr;
+	}
+
 	const Hardware::DeviceModule* DeviceObject::getParentModule() const
 	{
 		const Hardware::DeviceObject* deviceObject = this;
@@ -818,29 +841,6 @@ namespace Hardware
 		return nullptr;
 	}
 
-	const Hardware::DeviceChassis* DeviceObject::getParentChassis() const
-	{
-		const Hardware::DeviceObject* deviceObject = this;
-
-		do
-		{
-			deviceObject = deviceObject->parent().get();
-
-			if (deviceObject == nullptr)
-			{
-				break;
-			}
-
-			if (deviceObject->isChassis())
-			{
-				return deviceObject->toChassis().get();
-			}
-		}
-		while(deviceObject != nullptr);
-
-		return nullptr;
-	}
-
 	std::shared_ptr<const Hardware::DeviceChassis> DeviceObject::getParentChassisShared() const
 	{
 		std::shared_ptr<const Hardware::DeviceObject> deviceObject = parent();
@@ -862,6 +862,18 @@ namespace Hardware
 		while(deviceObject != nullptr);
 
 		return nullptr;
+	}
+
+	const Hardware::DeviceChassis* DeviceObject::getParentChassis() const
+	{
+		std::shared_ptr<const Hardware::DeviceChassis> chassisShared = getParentChassisShared();
+
+		if (chassisShared == nullptr)
+		{
+			return nullptr;
+		}
+
+		return chassisShared.get();
 	}
 
 	const Hardware::DeviceRack* DeviceObject::getParentRack() const

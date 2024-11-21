@@ -506,6 +506,7 @@ namespace Builder
 		//
 		bool initComparatorSignals();
 		bool finalizeOptoConnectionsProcessing();
+		bool writeVduConnectionsInfoFile();
 		bool setOptoUalSignalsAddresses();
 
 		bool generateIdrPhaseCode();

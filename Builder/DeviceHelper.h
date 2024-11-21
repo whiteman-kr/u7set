@@ -86,6 +86,7 @@ public:
 
 	static const Hardware::DeviceModule* getAssociatedLm(const Hardware::DeviceObject* object);
 	static const Hardware::DeviceModule* getAssociatedLmBvbMso(const Hardware::DeviceObject* object);
+	static std::shared_ptr<Hardware::DeviceModule> getParentVduModule(Hardware::DeviceObject *object);
 
 	static const Hardware::Software* getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID);
 	static QStringList getSoftwareControllersIDs(const Hardware::Software* software);

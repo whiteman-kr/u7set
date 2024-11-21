@@ -5,6 +5,7 @@
 #include <HardwareLib/EquipmentSet.h>
 #include <HardwareLib/DeviceChassis.h>
 #include <HardwareLib/DeviceModule.h>
+#include "DeviceHelper.h"
 
 namespace Builder
 {
@@ -379,6 +380,16 @@ namespace Builder
 					}
 
 					std::shared_ptr<Hardware::DeviceModule> module = chassis->findAppDataSourceModule();
+
+					if (module == nullptr)
+					{
+						module = DeviceHelper::getParentVduModule(device.get());
+
+						if (module != nullptr)
+						{
+							s.setAcquire(false);
+						}
+					}
 
 					if (module == nullptr)
 					{

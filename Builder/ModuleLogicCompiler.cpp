@@ -15,6 +15,7 @@
 #include "DiagDataServiceCfgGenerator.h"
 #include "Parser.h"
 #include "LmDescriptionSet.h"
+#include "./Vdu/VduAppSignalsInfoGenerator.h"
 
 #define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
 
@@ -259,6 +260,7 @@ namespace Builder
 			PROC_TO_CALL(Builder::ModuleLogicCompiler::initComparatorSignals),
 
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
+			PROC_TO_CALL(ModuleLogicCompiler::writeVduConnectionsInfoFile),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
 			//PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),			// extra debug info signal lists
 
@@ -8575,8 +8577,6 @@ namespace Builder
 		// calculate absoulute addresses of receving buffers
 		//
 		result &= m_optoModuleStorage->calculateRxBufAddresses(lmID);
-
-		result &= m_optoModuleStorage->writeVduConnectionsInfoFile(lmID, m_context);
 
 		return result;
 	}
@@ -18279,6 +18279,38 @@ namespace Builder
 		});*/
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::writeVduConnectionsInfoFile()
+	{
+		if (m_lm->isVdu() == false)
+		{
+			return true;
+		}
+
+/*		Hardware::OptoModuleShared optoModule = m_optoModuleStorage->getOptoModule(lmEquipmentID());
+
+		TEST_PTR_RETURN_FALSE(optoModule);
+
+		Q_ASSERT(optoModule->isVdu() == true);
+
+		std::map<QString, std::pair<E::SignalInOutType, Address16>> inOutSignals;	// AppSignalsID => { inOutType, inOutAddress }
+
+		for(const AppSignal* ioSignal : m_ioSignals)
+		{
+			TEST_PTR_CONTINUE(ioSignal);
+
+			Q_ASSERT(ioSignal->isInput() || ioSignal->isOutput());
+
+			inOutSignals.emplace(ioSignal->appSignalID(),
+								 std::make_pair(ioSignal->inOutType(), ioSignal->ioBufAddr()));
+		}*/
+
+		VduAppSignalsInfoGenerator vg;
+
+		bool res = vg.writeFiles(this);
+
+		return res;
 	}
 
 	void ModuleLogicCompiler::printCodeStatistics(const AppLogicCode& code,

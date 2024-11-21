@@ -10,7 +10,6 @@
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
 #include "../Builder/Context.h"
-#include "./Vdu/VduOptoConnectionsInfoGenerator.h"
 
 #include "DeviceHelper.h"
 #include "UalItems.h"
@@ -3320,23 +3319,6 @@ namespace Hardware
 		m_log->errALC5042(appSignalID, connectionID, receiverUuid, schemaID);
 
 		return false;
-	}
-
-	bool OptoModuleStorage::writeVduConnectionsInfoFile(const QString& vduEquipmentID,
-														Builder::Context* context) const
-	{
-		TEST_PTR_RETURN_FALSE(context);
-
-		OptoModuleShared optoModule = getOptoModule(vduEquipmentID);
-
-		if (optoModule->isVdu() == false)
-		{
-			return true;		// its Ok
-		}
-
-		TEST_PTR_RETURN_FALSE(optoModule);
-
-		return Builder::VduOptoConnectionsInfoGenerator().writeFiles(optoModule, context);
 	}
 
 	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& connectionID) const
