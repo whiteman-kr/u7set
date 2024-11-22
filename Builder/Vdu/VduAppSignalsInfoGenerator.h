@@ -21,23 +21,26 @@ namespace Builder
 		virtual ~VduAppSignalsInfoGenerator();
 
 		bool writeFiles(const ModuleLogicCompiler* mlc);
+
 	private:
-		bool fillPortsInfo();
 		bool fillAppSignalsInfo();
+		bool fillPortsInfo();
 		bool fillHeader();
 
 		bool writeVciFile();
 		bool writeTxtFile();
 
-		void printSignalsInfo(const std::vector<VduAppSignal>& appSignals,
-							  const QString& line,
-							  QStringList& file);
+		void printHeader(QStringList& file);
+		void printAppSignals(QStringList& file);
+		void printHashToIndex(QStringList& file);
 
 		bool fillSignalsInfo(int portIndex,
 							 const QVector<Hardware::TxRxSignalShared>& portSignals,
 							 std::vector<VduAppSignal>& vduSignals);
 
 		bool appendVduSignal(const QString& appSignalID, bool isRxSignal, Hash32* h32);
+
+		bool appendHash32AppSignalID(const QString& appSignalID);
 
 		VduSignalInOutType getVduSignalInOutType(const AppSignal* s);
 		VduSignalType getVduSignalType(const AppSignal* s);
@@ -56,7 +59,7 @@ namespace Builder
 		QString hex32(qint64 v);
 		QString hex64(quint64 v);
 
-		Hash32 calcHash32(const QString& str) const;
+		Hash32 utf8Hash32(const QString& str) const;
 
 	private:
 		const ModuleLogicCompiler* m_mlc = nullptr;
@@ -70,9 +73,13 @@ namespace Builder
 
 		VduAppSignalsFileHeader m_header;
 		std::map<QString, VduAppSignal> m_vduSignals;			// AppSignalID => VduAppSignal
-		std::map<Hash32, quint16> m_hashToSignalIndex;
-		std::map<Hash32, Hash32> m_rxSignalsSynonims;			// calcHash32(rxSignal appSignalID synonim) => calcHash32(rxSignal->appSignalIDs[0])
+		std::map<Hash32, quint16> m_hash32ToSignalIndex;		// utf8Hash32(AppSignalID) => VduAppSignal.signalIndex
+
+		std::map<Hash32, QString> m_hash32AppSignalID;			// utf8Hash32(AppSignalID) => AppSignalID,
+																// to check Hash32 collisions and
+																// m_context->m_vduSignals filling
 		std::vector<VduOptoPort> m_optoPorts;
+
 		std::vector<VduTxRxAppSignal> m_rxAppSignals;
 		std::vector<VduTxRxAppSignal> m_txAppSignals;
 
@@ -81,5 +88,7 @@ namespace Builder
 
 		uint64_t m_crc64 = 0;
 		uint64_t m_crc64Offset = 0;
+
+		inline static const QString LINE = QString().fill('-', 216);
 	};
 }
