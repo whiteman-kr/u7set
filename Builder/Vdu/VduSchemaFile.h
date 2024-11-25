@@ -11,6 +11,7 @@
 // 18 Sep 2024| 1.3  |	Added schema item offset table, VduSchemaFileSchemaItemValue1::text, VduSchemaFileSchemaItemValue1::appSignalCount, 
 //            |      |	VduSchemaFileSchemaItemValue1::appSignalIndexes.
 // 29 Sep 2024| 1.4  |	Added UTF8 text format for scripts and SchemaItem::ObjectName.
+// 25 Nov 2024| 1.5  |	All text formats changed to UTF-8.
 // -----------+------+--------------------------------------------------------------
 // clang-format on
 
@@ -37,8 +38,8 @@ struct VduSchemaFileProperties1
 	uint16_t height;     // In pixels
 	uint32_t reserve0;
 	uint32_t backgroundColor;
-	vdu_string_ref schemaId;
-	vdu_string_ref caption;
+	vdu_cstr schemaId;
+	vdu_cstr caption;
 	vdu_cstr onShowScript;
 	vdu_cstr preDrawScript;
 	uint32_t reserve1;
@@ -78,7 +79,7 @@ struct VduSchemaFile
 
 	// 4. Strings
 	// Strings: a list of strings.
-	// see vdu_string_ref
+	// see vdu_cstr
 
 	// 5. crc64
 	// uint64_t crc64; // CRC64 of the file from the beginning to the end of the strings.
@@ -152,7 +153,7 @@ struct VduSchemaFileSchemaItemRect1
 
 	uint16_t fontIndex; // Fonts are generated on build, each font is a folder with name as index, this folder contains font files.
 	uint16_t reserve3;
-	vdu_string_ref text;
+	vdu_cstr text;
 	uint32_t reserve4;
 
 	int32_t align;      // HorzAlign | VertAlign

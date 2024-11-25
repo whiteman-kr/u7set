@@ -21,20 +21,20 @@ namespace Builder
 	/// \brief Represents the display configuration in the VDU config file.
 	struct VduConfigDisplay1
 	{
-		uint16_t version;             ///< Structure version, 1
-		uint16_t size;                ///< Structure size, sizeof(VduConfigDisplay1)
+		uint16_t version;       ///< Structure version, 1
+		uint16_t size;          ///< Structure size, sizeof(VduConfigDisplay1)
 
-		uint16_t width;               ///< Display width, in pixels
-		uint16_t height;              ///< Display height, in pixels
+		uint16_t width;         ///< Display width, in pixels
+		uint16_t height;        ///< Display height, in pixels
 
-		uint16_t mode;                ///< Color mode, always 0
+		uint16_t mode;          ///< Color mode, always 0
 		uint16_t reserve0;
 
 		uint32_t reserve1;
 		uint32_t reserve2;
 
-		vdu_string_ref startSchemaId; ///< The ID of the starting schema for the display.
-		vdu_string_ref displayName;   ///< The display name.
+		vdu_cstr startSchemaId; ///< The ID of the starting schema for the display.
+		vdu_cstr displayName;   ///< The display name.
 
 		uint32_t reserve3;
 		uint32_t reserve4;
@@ -49,12 +49,12 @@ namespace Builder
 		uint16_t size;              ///< Structure size, sizeof(VduConfigFile1)
 		uint32_t reserve1;
 
-		vdu_string_ref project;     ///< The project name.
+		vdu_cstr project;           ///< The project name.
 		uint32_t buildNo;           ///< The build number.
 		uint32_t reserve2;
 
-		vdu_string_ref equipmentId; ///< VDU equipment ID.
-		vdu_string_ref caption;     ///< VDU caption.
+		vdu_cstr equipmentId;       ///< VDU equipment ID.
+		vdu_cstr caption;           ///< VDU caption.
 		uint32_t reserve3;
 		uint32_t reserve4;
 
@@ -85,17 +85,17 @@ namespace Builder
 	/// \brief Represents the schema configuration in the VDU config file.
 	struct VduConfigSchema1
 	{
-		uint16_t version;        ///< Structure version, 1
-		uint16_t size;           ///< Structure size, sizeof(VduConfigSchema1)
+		uint16_t version;  ///< Structure version, 1
+		uint16_t size;     ///< Structure size, sizeof(VduConfigSchema1)
 		uint32_t reserve0;
 
-		vdu_string_ref schemaId; ///< The ID of the schema.
-		vdu_string_ref caption;  ///< The caption.
+		vdu_cstr schemaId; ///< The ID of the schema.
+		vdu_cstr caption;  ///< The caption.
 
 		uint32_t reserve1;
 		uint32_t reserve2;
 
-		uint64_t crc64;          ///< The CRC64 value of the schema file.
+		uint64_t crc64;    ///< The CRC64 value of the schema file.
 	};
 #pragma pack(pop)
 
