@@ -13,9 +13,6 @@ namespace Builder
 
 	class VduAppSignalsInfoGenerator
 	{
-		inline static const uint32_t MARKER16 = 0x2323;			//	'##'
-		inline static const uint32_t MARKER32 = 0x23232323;		//	'####'
-
 	public:
 		VduAppSignalsInfoGenerator();
 		virtual ~VduAppSignalsInfoGenerator();
@@ -24,22 +21,24 @@ namespace Builder
 
 	private:
 		bool fillAppSignalsInfo();
-		bool fillPortsInfo();
+		bool fillOptoPortsInfo();
+		bool fillTxRxSignalsInfo(uint16_t portIndex,
+								 const QVector<Hardware::TxRxSignalShared>& portTxRxSignals,
+								 std::vector<VduTxRxAppSignal>* txRxSignals);
 		bool fillHeader();
 
 		bool writeVciFile();
 		bool writeTxtFile();
 
-		void printHeader(QStringList& file);
-		void printAppSignals(QStringList& file);
-		void printHashToIndex(QStringList& file);
-
-		bool fillSignalsInfo(int portIndex,
-							 const QVector<Hardware::TxRxSignalShared>& portSignals,
-							 std::vector<VduAppSignal>& vduSignals);
+		void printHeader(QStringList& file) const;
+		void printAppSignals(QStringList& file) const;
+		void printHashToIndex(QStringList& file) const;
+		void printOptoPortsInfo(QStringList& file) const;
+		void printTxRxSignalsInfo(QStringList& file,
+								  const std::vector<VduTxRxAppSignal>& txRxSignals) const;
+		void printStringsTable(QStringList& file) const;
 
 		bool appendVduSignal(const QString& appSignalID, bool isRxSignal, Hash32* h32);
-
 		bool appendHash32AppSignalID(const QString& appSignalID);
 
 		VduSignalInOutType getVduSignalInOutType(const AppSignal* s);
@@ -54,10 +53,10 @@ namespace Builder
 
 		void recalcStringsRefs(uint32_t stringsOffsetInFile);
 
-		QString addrStr(int fieldSize, const QString& str);
-		QString hex16(qint64 v);
-		QString hex32(qint64 v);
-		QString hex64(quint64 v);
+		QString addrStr(int fieldSize, const QString& str) const;
+		QString hex16(qint64 v) const;
+		QString hex32(qint64 v) const;
+		QString hex64(quint64 v) const;
 
 		Hash32 utf8Hash32(const QString& str) const;
 
@@ -69,7 +68,7 @@ namespace Builder
 		BuildResultWriterShared m_resultWriter;
 		IssueLogger* m_log = nullptr;
 
-		int m_txtOffset = 0;
+		mutable int m_txtOffset = 0;
 
 		VduAppSignalsFileHeader m_header;
 		std::map<QString, VduAppSignal> m_vduSignals;			// AppSignalID => VduAppSignal
@@ -80,8 +79,8 @@ namespace Builder
 																// m_context->m_vduSignals filling
 		std::vector<VduOptoPort> m_optoPorts;
 
-		std::vector<VduTxRxAppSignal> m_rxAppSignals;
 		std::vector<VduTxRxAppSignal> m_txAppSignals;
+		std::vector<VduTxRxAppSignal> m_rxAppSignals;
 
 		std::vector<uint8_t> m_strings;
 		std::map<Hash32, vdu_cstr> m_stringRefs;

@@ -39,10 +39,10 @@ struct VduAppSignalsFileHeader
 											// sorted by VduOptoPort.portIndex ascending
 
 	vdu_file_ref refRxAppSignals;			// ref to array of VduTxRxAppSignal structures,
-											// sortred by fields: portIndex, valueOffsetW, valueBitNo
+											// sortred by fields: portIndex
 
 	vdu_file_ref refTxAppSignals;			// ref to array of VduTxRxAppSignal structures,
-											// sortred by fields: portIndex, valueOffsetW, valueBitNo
+											// sortred by fields: portIndex
 	vdu_file_ref refStrings;
 
 	//
@@ -67,12 +67,11 @@ enum class VduSignalInOutType
 	Output = 3,
 };
 
-// table of VduAppSignal struct sorted by VduAppSignal.hash ascending
+// table of VduAppSignal struct sorted by VduAppSignal.signalIndex ascending
 //
 struct VduAppSignal
 {
 	uint16_t signalIndex;
-	uint32_t hash;					// calcHash32(appSignalID.toUtf8())
 
 	uint16_t vduSignalInOutType;	// values of VduSignalInOutType enum
 	uint16_t vduSignalType;			// values of VduSignalType enum
@@ -109,7 +108,7 @@ struct VduAppSignal
 struct VduHashToIndex
 {
 	uint32_t hash;					// calcHash32(appSignalID.toUtf8())
-	uint16_t signalIndex;
+	uint32_t signalIndex;			// 32-bit! signal index
 };
 
 struct VduOptoPort
@@ -133,6 +132,5 @@ struct VduTxRxAppSignal
 	uint16_t valueOffsetW;			// offset in opto port buffer in words
 	uint16_t valueBitNo;
 };
-
 
 #pragma pack(pop)
