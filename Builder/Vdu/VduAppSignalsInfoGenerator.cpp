@@ -831,6 +831,57 @@ namespace Builder
 		return true;
 	}
 
+	vdu_cstr VduAppSignalsInfoGenerator::appendString(const QString& str)
+	{
+		QByteArray utf8Str = str.toUtf8();
+
+		Hash32 hash = ::calcHash32(utf8Str);
+
+		auto it = m_stringRefs.find(hash);
+
+		if (it != m_stringRefs.end())
+		{
+			return it->second;
+		}
+
+		vdu_cstr ref = static_cast<vdu_cstr>(m_strings.size());
+
+		m_stringRefs.emplace(hash, ref);
+
+		size_t utf8StrSize = utf8Str.size();
+
+		if (utf8StrSize > std::numeric_limits<uint16_t>::max())
+		{
+			Q_ASSERT(false);		// string too long
+			return 0;
+		}
+
+		m_strings.push_back(utf8StrSize & 0xFF);
+		m_strings.push_back((utf8StrSize >> 8) & 0xFF);
+
+		for(char ch : utf8Str)
+		{
+			m_strings.push_back(ch);
+		}
+
+		m_strings.push_back(0);				// string null termination
+
+		size_t len = m_strings.size() % 4;
+
+		if (len != 0)
+		{
+			// align m_strings on 4 bytes
+			//
+			while(len < 4)
+			{
+				m_strings.push_back(0);
+				len++;
+			}
+		}
+
+		return ref;
+	}
+
 	VduSignalInOutType VduAppSignalsInfoGenerator::getVduSignalInOutType(const AppSignal* s)
 	{
 		TEST_PTR_RETURN_VALUE(s, VduSignalInOutType::Unknown);
@@ -922,57 +973,6 @@ namespace Builder
 		}
 
 		return 0;
-	}
-
-	vdu_cstr VduAppSignalsInfoGenerator::appendString(const QString& str)
-	{
-		QByteArray utf8Str = str.toUtf8();
-
-		Hash32 hash = ::calcHash32(utf8Str);
-
-		auto it = m_stringRefs.find(hash);
-
-		if (it != m_stringRefs.end())
-		{
-			return it->second;
-		}
-
-		vdu_cstr ref = static_cast<vdu_cstr>(m_strings.size() * sizeof(char16_t));
-
-		m_stringRefs.emplace(hash, ref);
-
-		size_t utf8StrSize = utf8Str.size();
-
-		if (utf8StrSize > std::numeric_limits<uint16_t>::max())
-		{
-			Q_ASSERT(false);		// string too long
-			return 0;
-		}
-
-		m_strings.push_back(utf8StrSize & 0xFF);
-		m_strings.push_back((utf8StrSize >> 8) & 0xFF);
-
-		for(char ch : utf8Str)
-		{
-			m_strings.push_back(ch);
-		}
-
-		m_strings.push_back(0);				// string null termination
-
-		size_t len = m_strings.size() % 4;
-
-		if (len != 0)
-		{
-			// align m_strings on 4 bytes
-			//
-			while(len < 4)
-			{
-				m_strings.push_back(0);
-				len++;
-			}
-		}
-
-		return ref;
 	}
 
 	void VduAppSignalsInfoGenerator::recalcStringsRefs(uint32_t stringsOffsetInFile)

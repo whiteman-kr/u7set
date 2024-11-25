@@ -41,15 +41,15 @@ namespace Builder
 		bool appendVduSignal(const QString& appSignalID, bool isRxSignal, Hash32* h32);
 		bool appendHash32AppSignalID(const QString& appSignalID);
 
+		// returns offset in m_strings NOT in file!
+		//
+		vdu_cstr appendString(const QString& str);
+
 		VduSignalInOutType getVduSignalInOutType(const AppSignal* s);
 		VduSignalType getVduSignalType(const AppSignal* s);
 
 		uint32_t vduSignalLowBoundUntyped(VduSignalType type);
 		uint32_t vduSignalHighBoundUntyped(VduSignalType type);
-
-		// returns offset in m_strings NOT in file!
-		//
-		vdu_cstr appendString(const QString& str);
 
 		void recalcStringsRefs(uint32_t stringsOffsetInFile);
 
