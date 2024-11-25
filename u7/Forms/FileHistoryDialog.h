@@ -1,6 +1,5 @@
 #pragma once
 
-#include <DbLib/DbStruct.h>
 
 namespace Ui {
 	class FileHistoryDialog;

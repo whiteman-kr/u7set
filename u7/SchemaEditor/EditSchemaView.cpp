@@ -2,7 +2,6 @@
 
 #include <VFrame30/Context.h>
 #include <VFrame30/DrawParam.h>
-#include <VFrame30/LogicSchema.h>
 #include <VFrame30/PosConnectionImpl.h>
 #include <VFrame30/PosLineImpl.h>
 #include <VFrame30/PosRectImpl.h>

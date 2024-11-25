@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../Builder/DbMatsUsers.h"
 
 class MatsUsersEditorDelegate : public QItemDelegate
 {

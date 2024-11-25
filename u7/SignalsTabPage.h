@@ -1,8 +1,5 @@
 #pragma once
 
-#include <DbLib/DbController.h>
-
-#include "../Builder/AppSignalProperties.h"
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
 #include "AppSignalSetProvider.h"

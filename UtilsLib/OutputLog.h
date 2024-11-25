@@ -20,8 +20,10 @@
 #define LOG_EMPTY_LINE(logObject) logObject->writeEmptyLine();
 
 #define LOG_ERROR_OBSOLETE(logObject, prefix, message) logObject->writeError(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_ERROR_OBSOLETE_REF(logObject, prefix, message) logObject.writeError(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 #define LOG_WARNING_OBSOLETE(logObject, prefix, message) logObject->writeWarning0(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 #define LOG_MESSAGE(logObject, message) logObject->writeMessage(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_MESSAGE_REF(logObject, message) logObject.writeMessage(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 #define LOG_SUCCESS(logObject, message) logObject->writeSuccess(message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
 #define LOG_OK(logObject) logObject->writeSuccess(QObject::tr("Ok"), __FILE__, __LINE__, SHORT_FUNC_INFO);

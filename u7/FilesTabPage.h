@@ -2,7 +2,6 @@
 
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
-#include <DbLib/DbStruct.h>
 #include "./Ui/FilesTreeView.h"
 
 

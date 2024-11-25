@@ -1,8 +1,5 @@
 #pragma once
 #include <HardwareLib/DeviceObject.h>
-#include <DbLib/DbStruct.h>
-
-class DbController;
 
 //
 //

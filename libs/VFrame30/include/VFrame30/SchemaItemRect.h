@@ -175,7 +175,9 @@ namespace VFrame30
 	public:
 		SchemaItemRect(void);
 		explicit SchemaItemRect(SchemaUnit unit);
-		virtual ~SchemaItemRect(void) = default;
+
+	protected:
+		virtual void propertyDemand(const QString& prop) override;
 
 		// Serialization
 		//

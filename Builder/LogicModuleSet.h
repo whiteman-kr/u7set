@@ -6,7 +6,6 @@
 
 #include <HardwareLib/LmDescription.h>
 
-class DbController;
 
 class LogicModuleSet : public QObject
 {

@@ -4,7 +4,6 @@
 #include "../OnlineLib/BuildInfo.h"
 #include <HardwareLib/ModuleFirmware.h>
 
-class DbController;
 class QCheckBox;
 class QComboBox;
 

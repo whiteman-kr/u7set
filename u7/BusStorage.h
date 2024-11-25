@@ -2,7 +2,6 @@
 #define BUSSTORAGE_H
 
 #include "../AppSignalLib/Bus.h"
-#include <DbLib/DbObjectStorage.h>
 
 class BusStorage : public DbObjectStorage<std::shared_ptr<AppSignalLib::Bus>>
 {

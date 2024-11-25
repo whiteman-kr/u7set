@@ -14,18 +14,18 @@ namespace VFrame30
 		double Y;
 
 		SchemaPoint();
-		SchemaPoint(const Proto::SchemaPoint& vip);
-		SchemaPoint(const QPointF& point);
+		SchemaPoint(const ::Proto::SchemaPoint& vip);
+		SchemaPoint(const ::QPointF& point);
 		SchemaPoint(double x, double y);
 
-		bool operator == (const QPointF& pt) const;
+		bool operator == (const ::QPointF& pt) const;
 		bool operator == (const SchemaPoint& pt) const;
 		bool operator < (const SchemaPoint& pt) const;
 
-		operator QPointF() const;
+		operator ::QPointF() const;
 
-		bool SaveData(Proto::SchemaPoint* vip) const;
-		bool LoadData(const Proto::SchemaPoint& vip);
+		bool SaveData(::Proto::SchemaPoint* vip) const;
+		bool LoadData(const ::Proto::SchemaPoint& vip);
 	};
 
 }

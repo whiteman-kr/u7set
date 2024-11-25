@@ -1703,7 +1703,7 @@ signals:
 	void propertyListChanged();		// One or more properties were added or deleted
 
 private:
-	QHash<QString, std::shared_ptr<Property>> m_properties;		// key is property Caption
+	std::unordered_map<QString, std::shared_ptr<Property>> m_properties;		// key is property Caption
 	mutable bool m_allPropsAlreadyDemanded = false;
 };
 

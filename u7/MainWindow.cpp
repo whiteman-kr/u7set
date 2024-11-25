@@ -27,7 +27,6 @@
 #include "GlobalMessanger.h"
 #include "ProjectDefaults.h"
 #include "ProjectsTabPage.h"
-#include "Reports/DialogSchemasReport.h"
 #include "Reports/SchemasReport.h"
 #include "Settings.h"
 #include "SignalsTabPage.h"

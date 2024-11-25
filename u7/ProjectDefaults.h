@@ -1,7 +1,5 @@
 #pragma once
 
-class DbController;
-
 class ProjectDefaults
 {
 private:

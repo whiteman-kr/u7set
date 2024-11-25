@@ -1,6 +1,6 @@
 #include "../UtilsLib/Ui/WidgetUtils.h"
 #include "UndoSignalsDialog.h"
-#include "SignalsTabPage.h"
+#include "SignalsModels.h"
 #include "AppSignalSetProvider.h"
 
 UndoSignalsDialog::UndoSignalsDialog(const QModelIndexList& selectionSrcIndexes,

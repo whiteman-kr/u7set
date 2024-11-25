@@ -1,6 +1,7 @@
 #include "DialogAfbLibraryCheck.h"
 #include "Settings.h"
 
+#include <HardwareLib/Afb.h>
 #include <HardwareLib/LmDescription.h>
 
 DialogAfbLibraryCheck* theDialogAfbLibraryCheck = nullptr;

@@ -1,13 +1,8 @@
 #pragma once
 
-#include <DbLib/DbStruct.h>
-
-class DbController;
-
 namespace Ui {
 	class SelectChangesetDialog;
 }
-
 
 class SelectChangesetDialog : public QDialog
 {

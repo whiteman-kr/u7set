@@ -3,7 +3,6 @@
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
 
-#include <DbLib/DbController.h>
 #include <HardwareLib/DeviceObject.h>
 #include <HardwareLib/ScriptDeviceObject.h>
 

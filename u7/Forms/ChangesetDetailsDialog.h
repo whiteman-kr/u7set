@@ -5,8 +5,6 @@ namespace Ui {
 	class ChangesetDetailsDialog;
 }
 
-class DbController;
-
 class ChangesetDetailsDialog : public QDialog
 {
 	Q_OBJECT

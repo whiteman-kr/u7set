@@ -2,7 +2,6 @@
 #include "ui_SchemaPropertiesDialog.h"
 #include "EditEngine/EditEngine.h"
 #include "IdePropertyEditor.h"
-#include "Settings.h"
 
 
 SchemaPropertiesDialog::SchemaPropertiesDialog(EditEngine::EditEngine* editEngine, DbController* dbController, QWidget* parent) :

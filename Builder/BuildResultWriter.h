@@ -8,9 +8,6 @@
 
 #include "ModuleFirmwareWriter.h"
 
-
-class DbController;
-
 namespace Builder
 {
 	class IssueLogger;

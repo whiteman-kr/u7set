@@ -1,12 +1,8 @@
 #pragma once
 
-#include <DbLib/DbStruct.h>
-
 namespace Ui {
 	class UserManagementDialog;
 }
-
-class DbController;
 
 class UserManagementDialog : public QDialog
 {

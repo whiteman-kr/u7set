@@ -1,7 +1,11 @@
 #ifndef DIALOGAFBLIBRARYREPORT_H
 #define DIALOGAFBLIBRARYREPORT_H
 
-#include <HardwareLib/Afb.h>
+namespace Afb
+{
+	class AfbComponent;
+	class AfbElement;
+} // namespace Afb
 
 enum class AfbComponentColumns
 {

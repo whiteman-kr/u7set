@@ -1,8 +1,6 @@
 #pragma once
 #include <HardwareLib/Subsystem.h>
 
-class DbController;
-
 namespace Builder
 {
 	//
