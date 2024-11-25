@@ -6,7 +6,6 @@
 
 class IdePropertyEditor;
 class IdePropertyTable;
-class DbController;
 class EquipmentModel;
 class EquipmentView;
 

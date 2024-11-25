@@ -8,7 +8,7 @@ namespace VFrame30
 	//
 	AfbPin::AfbPin()
 	{
-		m_associatedIOs.reserve(32);
+		m_associatedIOs.reserve(16);
 	}
 
 	AfbPin::AfbPin(ConnectionDirrection dirrection,
@@ -23,7 +23,7 @@ namespace VFrame30
 		m_signalType(signalType),
 		m_caption(caption)
 	{
-		m_associatedIOs.reserve(32);
+		m_associatedIOs.reserve(16);
 	}
 
 	AfbPin::AfbPin(ConnectionDirrection dirrection,
@@ -36,12 +36,12 @@ namespace VFrame30
 		m_signalType(afbSignal.type()),
 		m_caption(afbSignal.caption())
 	{
-		m_associatedIOs.reserve(32);
+		m_associatedIOs.reserve(16);
 	}
 
 	AfbPin::AfbPin(const Proto::FblConnectionPoint& cpm)
 	{
-		m_associatedIOs.reserve(32);
+		m_associatedIOs.reserve(16);
 		LoadData(cpm);
 	}
 

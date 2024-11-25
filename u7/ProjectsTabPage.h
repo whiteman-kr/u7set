@@ -1,9 +1,6 @@
 #pragma once
 
-#include <DbLib/DbStruct.h>
 #include "MainTabPage.h"
-
-class DbController;
 
 class ProjectsTabPage : public MainTabPage
 {

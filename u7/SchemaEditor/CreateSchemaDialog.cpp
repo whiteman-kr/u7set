@@ -1,6 +1,5 @@
 #include "CreateSchemaDialog.h"
 
-#include <DbLib/DbStruct.h>
 #include <HardwareLib/PropertyNames.h>
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/Schema.h>

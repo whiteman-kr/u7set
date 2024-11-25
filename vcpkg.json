@@ -5,7 +5,8 @@
         "asio",
         "gtest",
         "protobuf",
-        "openssl"
+        "openssl",
+        "boost-graph"
     ],
     "overrides": [
         {
@@ -23,6 +24,10 @@
         {
             "name": "openssl",
             "version": "3.3.1"
+        },
+        {
+            "name": "boost-graph",
+            "version": "1.84.0"
         }
     ]
 }

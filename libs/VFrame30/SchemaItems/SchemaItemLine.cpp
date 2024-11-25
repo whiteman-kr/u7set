@@ -17,6 +17,14 @@ namespace VFrame30
 		m_weight(0),
 		m_lineColor(qRgb(0x00, 0x00, 0x00))
 	{
+		m_static = true;
+		setItemUnit(unit);
+	}
+
+	void SchemaItemLine::propertyDemand(const QString& prop)
+	{
+		PosLineImpl::propertyDemand(prop);
+
 		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemLine::weight, SchemaItemLine::setWeight);
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemLine::lineColor, SchemaItemLine::setLineColor);
 
@@ -37,15 +45,7 @@ namespace VFrame30
 								 SchemaItemLine::lineCapSize,
 								 SchemaItemLine::setLineCapSize);
 
-		// --
-		//
-		m_static = true;
-		setItemUnit(unit);
-	}
-
-
-	SchemaItemLine::~SchemaItemLine(void)
-	{
+		return;
 	}
 
 	// Serialization

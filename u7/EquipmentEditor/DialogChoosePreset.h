@@ -5,7 +5,6 @@ namespace Ui {
 class DialogChoosePreset;
 }
 
-class DbController;
 
 class DialogChoosePreset : public QDialog
 {

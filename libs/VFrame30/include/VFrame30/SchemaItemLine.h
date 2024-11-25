@@ -62,7 +62,9 @@ namespace VFrame30
 	public:
 		SchemaItemLine(void);
 		explicit SchemaItemLine(SchemaUnit unit);
-		virtual ~SchemaItemLine(void);
+
+	protected:
+		virtual void propertyDemand(const QString& prop) override;
 
 		// Serialization
 		//

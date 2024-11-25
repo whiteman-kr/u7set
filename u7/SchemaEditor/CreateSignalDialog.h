@@ -1,10 +1,7 @@
 #ifndef CREATESIGNALDIALOG_H
 #define CREATESIGNALDIALOG_H
 
-
-class DbController;
 class CreateSignalDialog;
-
 
 struct CreatingSignalDialogOptions
 {

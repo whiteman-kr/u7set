@@ -1,7 +1,6 @@
 #pragma once
 #include "MainTabPage.h"
 
-class DbController;
 class QCheckBox;
 class QTextEdit;
 class QPushButton;

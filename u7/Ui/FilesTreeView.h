@@ -1,9 +1,6 @@
 #ifndef FILESTREEMODEL_H
 #define FILESTREEMODEL_H
 
-#include <DbLib/DbStruct.h>
-
-class DbController;
 class FileTreeView;
 class FileTreeModel;
 

@@ -8,6 +8,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Qml Xml Sql Concurrent Gui PrintSupport)
+find_package(Boost REQUIRED COMPONENTS graph)
 
 if (MSVC)
   # MSVC warning suppressions
@@ -171,6 +172,7 @@ qt_add_library(${TARGET} STATIC
 	TuningServiceCfgGenerator.h
 	UalItems.cpp
 	UalItems.h
+	UuidGenerator.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -215,7 +217,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<CommonLib/Hash.h>
 	<CommonLib/PropertyObject.h>
 	<CommonLib/AfbParamValue.h>
-
+	
 	<ProtoSerialization.h>
 	<ProtoCommonHelper.h>
 	<AppSignal.pb.h>
@@ -227,8 +229,12 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../AppSignalLib/AppSignalParam.h"
 	"../AppSignalLib/AppSignalState.h"
 	"../AppSignalLib/TuningValue.h"
+
+	<DbLib/DbController.h>
+	<DbLib/DbObjectStorage.h>
 )
 
+target_link_libraries(${TARGET} PUBLIC Boost::graph)
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
 target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 SimulatorLib ReportLib AppSignalLists TuningLib)
 

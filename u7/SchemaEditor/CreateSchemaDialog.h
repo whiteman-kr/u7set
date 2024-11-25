@@ -11,9 +11,6 @@ namespace VFrame30
 	class UfbSchema;
 }
 
-class DbController;
-class DbFile;
-
 class CreateSchemaDialog : public QDialog
 {
 	Q_OBJECT

@@ -34,6 +34,6 @@ namespace Hardware
 
 	private:
 		std::shared_ptr<DeviceRoot> m_root;
-		QHash<QString, std::shared_ptr<DeviceObject>> m_deviceTable;
+		std::unordered_map<QString, std::shared_ptr<DeviceObject>> m_deviceTable;
 	};
 } // namespace Hardware

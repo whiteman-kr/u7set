@@ -1,5 +1,5 @@
 #include "EditEngineSetOrder.h"
-#include "SchemaEditor/EditSchemaWidget.h"
+#include "SchemaEditor/EditSchemaView.h"
 #include <VFrame30/SchemaLayer.h>
 
 namespace EditEngine

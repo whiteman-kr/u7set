@@ -2,7 +2,6 @@
 
 #include "../AppSignalLib/ISignalManager.h"
 #include <AppSignalLists/SignalList.h>
-#include <DbLib/DbObjectStorage.h>
 
 class AppSignalSet;
 

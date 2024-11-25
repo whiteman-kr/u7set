@@ -1,9 +1,9 @@
 #pragma once
 
 #include <UiLib/ClickableLabel.h>
-#include "../AppSignalSetProvider.h"
 #include "MainTabPage.h"
 
+class AppSignalSetProvider;
 class SchemaControlTabPage;
 
 //

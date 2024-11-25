@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QtGlobal>
-#include <unordered_map>
 #include <memory>
 #include "Hash.h"
 
@@ -19,7 +18,7 @@ public:
 	{
 		quint32 classHash = ::ClassNameHashCode(className);
 
-		Q_ASSERT(factories.find(classHash) == std::end(factories));
+		Q_ASSERT(factories.contains(classHash) == false);
 		factories[classHash] = std::make_shared<DerivedType<DerivedClass>>();		// new DerivedType<DerivedClass>();
 
 		return;
@@ -30,7 +29,7 @@ public:
 	{
 		quint32 classHash = ::ClassNameHashCode(DerivedClass::staticMetaObject.className());
 
-		Q_ASSERT(factories.find(classHash) == std::end(factories));
+		Q_ASSERT(factories.contains(classHash) == false);
 		factories[classHash] = std::make_shared<DerivedType<DerivedClass>>();		// new DerivedType<DerivedClass>();
 
 		return;

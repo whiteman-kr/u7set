@@ -10,12 +10,12 @@ namespace VFrame30
 	{
 	}
 
-	SchemaPoint::SchemaPoint(const Proto::SchemaPoint& vip)
+	SchemaPoint::SchemaPoint(const ::Proto::SchemaPoint& vip)
 	{
 		LoadData(vip);
 	}
 
-	SchemaPoint::SchemaPoint(const QPointF& point) :
+	SchemaPoint::SchemaPoint(const ::QPointF& point) :
 		X(point.x()),
 		Y(point.y())
 	{
@@ -27,7 +27,7 @@ namespace VFrame30
 	{
 	}
 
-	bool SchemaPoint::operator == (const QPointF& pt) const
+	bool SchemaPoint::operator == (const ::QPointF& pt) const
 	{
 		return operator==(SchemaPoint{pt});
 	}
@@ -58,18 +58,18 @@ namespace VFrame30
 		return false;
 	}
 
-	SchemaPoint::operator QPointF() const
+	SchemaPoint::operator ::QPointF() const
 	{
-		return QPointF(X, Y);
+		return ::QPointF(X, Y);
 	}
 
-	bool SchemaPoint::SaveData(Proto::SchemaPoint* vip) const
+	bool SchemaPoint::SaveData(::Proto::SchemaPoint* vip) const
 	{
 		vip->set_x(X);
 		vip->set_y(Y);
 		return true;
 	}
-	bool SchemaPoint::LoadData(const Proto::SchemaPoint& vip)
+	bool SchemaPoint::LoadData(const ::Proto::SchemaPoint& vip)
 	{
 		this->X = vip.x();
 		this->Y = vip.y();

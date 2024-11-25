@@ -1176,7 +1176,9 @@ namespace Builder
 
 	bool BuildWorkerThread::taskParseApplicationLogic()
 	{
-		m_context->m_appLogicData = std::make_shared<AppLogicData>(m_context->m_signalSet.get());
+		assert(m_context->m_lmDescriptions);
+
+		m_context->m_appLogicData = std::make_shared<AppLogicData>(*m_context->m_signalSet.get(), *m_context->m_lmDescriptions, *m_context->m_log);
 		int errorCount = m_context->m_log->errorCount();
 
 		Parser parser(m_context.get());
