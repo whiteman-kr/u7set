@@ -129,31 +129,31 @@ namespace TrendLib
 		TrendLib::Trend& trend();
 		const TrendLib::Trend& trend() const;
 
-		TrendLib::TrendImpl& trendImpl();
-		const TrendLib::TrendImpl& trendImpl() const;
-
-		E::TrendViewMode viewMode() const;
+		[[nodiscard]] E::TrendViewMode viewMode() const;
 		void setViewMode(E::TrendViewMode value);
 
-		E::TrendScaleType scaleType() const;
+		[[nodiscard]] E::TrendScaleType scaleType() const;
 		void setScaleType(E::TrendScaleType value);
 
-		int laneCount() const;
+		[[nodiscard]] int laneCount() const;
 		void setLaneCount(int value);
 
-		E::TimeType timeType() const;
+		[[nodiscard]] E::TimeType timeType() const;
 		void setTimeType(E::TimeType value);
 
-		TimeStamp startTime() const;
+		[[nodiscard]] TimeStamp startTime() const;
 		void setStartTime(const TimeStamp& startTime);
 
-		TimeStamp finishTime() const;
+		[[nodiscard]] TimeStamp finishTime() const;
 
-		qint64 duration() const;
+		[[nodiscard]] qint64 duration() const;
 		void setLaneDuration(qint64 interval);
 
-		E::TrendMode trendMode() const;
+		[[nodiscard]] E::TrendMode trendMode() const;
 		void setTrendMode(E::TrendMode value);
+
+		[[nodiscard]] QString project() const;
+		void setProject(const QString& value);
 
 	private:
 		Trend m_trend;

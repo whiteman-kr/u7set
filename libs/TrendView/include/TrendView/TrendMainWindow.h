@@ -47,7 +47,7 @@ namespace TrendLib
 
 		// Slider methods
 		//
-		bool isTimeInRange(const TimeStamp& value) const;
+		[[nodiscard]] bool isTimeInRange(const TimeStamp& value) const;
 
 	protected:
 		void createToolBar();
@@ -114,22 +114,22 @@ namespace TrendLib
 		[[nodiscard]] TrendLib::TrendSignalSet& signalSet();
 		[[nodiscard]] const TrendLib::TrendSignalSet& signalSet() const;
 
-		E::TrendViewMode viewMode() const;
+		[[nodiscard]] E::TrendViewMode viewMode() const;
 		void setViewMode(E::TrendViewMode value);
 
-		E::TrendScaleType scaleType() const;
+		[[nodiscard]] E::TrendScaleType scaleType() const;
 		void setScaleType(E::TrendScaleType value);
 
-		int laneCount() const;
+		[[nodiscard]] int laneCount() const;
 		void setLaneCount(int value);
 
-		E::TimeType timeType() const;
+		[[nodiscard]] E::TimeType timeType() const;
 		void setTimeType(E::TimeType value);
 
-		TimeStamp startTime() const;
+		[[nodiscard]] TimeStamp startTime() const;
 		void setStartTime(const TimeStamp& startTime);
 
-		TimeStamp finishTime() const;
+		[[nodiscard]] TimeStamp finishTime() const;
 
 		qint64 duration() const;
 		void setLaneDuration(qint64 interval);
@@ -139,8 +139,11 @@ namespace TrendLib
 
 		[[nodiscard]] bool isRealtimeAutoShift() const;
 
-		quint64 rulerStep() const;
+		[[nodiscard]] quint64 rulerStep() const;
 		void setRulerStep(quint64 value);
+
+		[[nodiscard]] QString project() const;
+		void setProject(const QString& value);
 
 	protected:
 		Ui::TrendsMainWindow *ui;

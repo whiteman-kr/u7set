@@ -250,7 +250,7 @@ namespace VFrame30
 	// Draw line cap, Pen and Brush MUST be already selected in the Painter
 	//
 	void SchemaItemLine::drawLineCapSize(QPainter* painter,
-										   SchemaUnit units,
+										   SchemaUnit /*units*/,
 										   const QPointF& pos,
 										   double angleRad,
 										   E::LineCap capStyle,
