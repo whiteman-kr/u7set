@@ -2,17 +2,18 @@
 
 #include "VduTypes.h"
 
-// VDU Application Signals info file, extension *.vas
+// VDU Application Signals info file, VduAppSignals.bin
 //
 // Data stored in little-endian format.
 // The file is a binary file with the following high-level structure:
 // 1. VduAppSignalsFileHeader
 // 2. VduAppSignal array[appSignalsCount]
-// 3. VduOptoPort array[optoPortsCount]
-// 4. VduTxRxAppSignal array[rxAppSignalsCount] - signals received by VDU
-// 5. VduTxRxAppSignal array[txAppSignalsCount] - signals transmitted by VDU
-// 6. Strings
-// 7. crc64
+// 3. VduHash32ToIndex array[hash32ToIndexCount]
+// 4. VduOptoPort array[optoPortsCount]
+// 5. VduTxRxAppSignal array[rxAppSignalsCount] - signals received by VDU
+// 6. VduTxRxAppSignal array[txAppSignalsCount] - signals transmitted by VDU
+// 7. Strings
+// 8. crc64
 
 #pragma pack(push, 1)
 
@@ -24,7 +25,7 @@ struct VduAppSignalsFileHeader
 	uint16_t fileVersion;					// == VAS_FILE_VERSION
 
 	uint16_t appSignalsCount;
-	uint16_t hashToIndexCount;
+	uint16_t hash32ToIndexCount;
 	uint16_t optoPortsCount;
 	uint16_t rxAppSignalsCount;
 	uint16_t txAppSignalsCount;
@@ -32,23 +33,17 @@ struct VduAppSignalsFileHeader
 	vdu_file_ref refAppSignals;				// ref to array of VduAppSignal structures,
 											// sorted by VduAppSignal.signalIndex ascending
 
-	vdu_file_ref refHashToIndex;			// ref to array of VduHashToIndex structures,
-											// sorted by VduHashToIndex.hash ascending
+	vdu_file_ref refHash32ToIndex;			// ref to array of VduHashToIndex structures,
+											// sorted by VduHash32ToIndex.hash32 ascending
 
 	vdu_file_ref refOptoPorts;				// ref to array of VduOptoPort structures,
 											// sorted by VduOptoPort.portIndex ascending
 
 	vdu_file_ref refRxAppSignals;			// ref to array of VduTxRxAppSignal structures,
-											// sortred by fields: portIndex
 
 	vdu_file_ref refTxAppSignals;			// ref to array of VduTxRxAppSignal structures,
-											// sortred by fields: portIndex
+
 	vdu_file_ref refStrings;
-
-	//
-
-//	uint32_t reserve1;
-
 };
 
 enum class VduSignalType
@@ -67,8 +62,6 @@ enum class VduSignalInOutType
 	Output = 3,
 };
 
-// table of VduAppSignal struct sorted by VduAppSignal.signalIndex ascending
-//
 struct VduAppSignal
 {
 	uint16_t signalIndex;
@@ -105,9 +98,9 @@ struct VduAppSignal
 	uint16_t ioBit;
 };
 
-struct VduHashToIndex
+struct VduHash32ToIndex
 {
-	uint32_t hash;					// calcHash32(appSignalID.toUtf8())
+	uint32_t hash32;					// calcHash32(appSignalID.toUtf8())
 	uint32_t signalIndex;			// 32-bit! signal index
 };
 

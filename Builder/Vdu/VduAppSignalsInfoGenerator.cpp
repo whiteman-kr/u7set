@@ -4,6 +4,8 @@
 
 #include "ModuleLogicCompiler.h"
 
+#include <HardwareLib/DeviceAppSignal.h>
+
 #include "Crc.h"
 
 namespace Builder
@@ -55,18 +57,16 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		result &= fillHeader();
-
 		result &= fillOptoPortsInfo();
 
-/*		result &= writeVciFile();
+		result &= fillHeader();
+
+		result &= writeBinFile();
 
 		if (m_context->generateExtraDebugInfo() == true)
 		{
 			result &= writeTxtFile();
-		} */
-
-		result &= writeTxtFile();
+		}
 
 		return result;
 	}
@@ -88,6 +88,38 @@ namespace Builder
 			result &= appendVduSignal(s->appSignalID(), false, &h32);
 
 			Q_ASSERT(h32 != 0);
+		}
+
+		//
+
+		const std::vector<AppSignal*>& ioSignals = m_mlc->ioSignals();
+
+		for(const AppSignal* ioSignal : ioSignals)
+		{
+			TEST_PTR_CONTINUE(ioSignal);
+
+			auto it = m_vduSignals.find(ioSignal->appSignalID());
+
+			if (it == m_vduSignals.end())
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			Hardware::DeviceAppSignal* deviceAppSignal = nullptr;
+
+			bool res = m_mlc->getDeviceAppSignal(*ioSignal, &deviceAppSignal);
+
+			if (res == false)
+			{
+				result = false;
+				continue;
+			}
+
+			VduAppSignal& vas = it->second;
+
+			vas.ioOffset = static_cast<uint16_t>(deviceAppSignal->valueOffset());
+			vas.ioBit = static_cast<uint16_t>(deviceAppSignal->valueBit());
 		}
 
 		RETURN_IF_FALSE(result);
@@ -344,7 +376,7 @@ namespace Builder
 		m_header.fileVersion = VAS_FILE_VERSION;
 
 		m_header.appSignalsCount = static_cast<uint16_t>(m_vduSignals.size());
-		m_header.hashToIndexCount = static_cast<uint16_t>(m_hash32ToSignalIndex.size());
+		m_header.hash32ToIndexCount = static_cast<uint16_t>(m_hash32ToSignalIndex.size());
 		m_header.optoPortsCount = static_cast<uint16_t>(m_optoPorts.size());
 		m_header.rxAppSignalsCount = static_cast<uint16_t>(m_rxAppSignals.size());
 		m_header.txAppSignalsCount = static_cast<uint16_t>(m_txAppSignals.size());
@@ -353,9 +385,9 @@ namespace Builder
 
 		m_header.refAppSignals = sizeof(m_header);
 
-		m_header.refHashToIndex = m_header.refAppSignals + m_header.appSignalsCount * sizeof(VduAppSignal);
+		m_header.refHash32ToIndex = m_header.refAppSignals + m_header.appSignalsCount * sizeof(VduAppSignal);
 
-		m_header.refOptoPorts = m_header.refHashToIndex + m_header.hashToIndexCount * sizeof(VduHashToIndex);
+		m_header.refOptoPorts = m_header.refHash32ToIndex + m_header.hash32ToIndexCount * sizeof(VduHash32ToIndex);
 
 		m_header.refRxAppSignals = m_header.refOptoPorts + m_header.optoPortsCount * sizeof(VduOptoPort);
 
@@ -366,318 +398,6 @@ namespace Builder
 		recalcStringsRefs(m_header.refStrings);
 
 		return true;
-	}
-
-	bool VduAppSignalsInfoGenerator::writeVciFile()
-	{
-		QByteArray data;
-
-		data.append(reinterpret_cast<const char*>(&m_header),
-					sizeof(m_header));
-
-		data.append(reinterpret_cast<const char*>(m_optoPorts.data()),
-					m_optoPorts.size() * sizeof(VduOptoPort));
-
-		data.append(reinterpret_cast<const char*>(m_rxAppSignals.data()),
-					m_rxAppSignals.size() * sizeof(VduAppSignal));
-
-		data.append(reinterpret_cast<const char*>(m_txAppSignals.data()),
-					m_txAppSignals.size() * sizeof(VduAppSignal));
-
-		data.append(reinterpret_cast<const char*>(m_strings.data()),
-					m_strings.size() * sizeof(char16_t));
-
-		m_crc64Offset = data.size();
-		m_crc64 = Crc64().add(data);
-
-		data.append(reinterpret_cast<const char*>(&m_crc64), sizeof(m_crc64));
-
-		return m_resultWriter->addFile(Directory::VDUs + Separator::DIR + m_vduOptoModule->equipmentID(),
-									   File::VDU_APP_SIGNALS_VAS, data, false);
-	}
-
-	bool VduAppSignalsInfoGenerator::writeTxtFile()
-	{
-		QStringList file;
-
-		printHeader(file);
-		printAppSignals(file);
-		printHashToIndex(file);
-		printOptoPortsInfo(file);
-		printTxRxSignalsInfo(file, m_rxAppSignals);
-		printTxRxSignalsInfo(file, m_txAppSignals);
-		printStringsTable(file);
-
-/*
-		file << LINE;
-
-		Q_ASSERT(m_crc64Offset == m_txtOffset);
-
-		file << addrStr(sizeof(m_crc64), QString("CRC64 = %1").arg(hex64(m_crc64)));
-
-		file << LINE;
-
-		//
-
-		auto it = m_context->m_vduSignals.find(m_vduOptoModule->equipmentID());
-
-		if (it != m_context->m_vduSignals.end())
-		{
-			std::map<int, std::vector<Hash>> indexToHashes;
-
-			const std::map<Hash, int>& hashToIndex = it->second;
-
-			for(const auto& [h, indx] : hashToIndex)
-			{
-				auto it2 = findOrInsertKey(indexToHashes, indx);
-
-				it2->second.emplace_back(h);
-			}
-
-			file << Separator::EMPTY_STR;
-			file << Separator::EMPTY_STR;
-			file << "Indexes of opto signals to AppSignalIDs synonims (just for reference, not placed in *.vci file):";
-			file << Separator::EMPTY_STR;
-
-			file << LINE;
-			file << " SignalIndex | AppSignalID(s)";
-			file << LINE;
-
-			std::shared_ptr<SignalSet> signalSet = m_context->m_signalSet;
-			QString ids;
-
-			for(const auto& [indx, hashes] : indexToHashes)
-			{
-				ids.clear();
-
-				for(Hash h : hashes)
-				{
-					const AppSignal* appSignal = signalSet->getSignalByHash(h);
-
-					TEST_PTR_CONTINUE(appSignal);
-
-					if (ids.isEmpty() == false)
-					{
-						ids += Separator::COMMA_SPACE;
-					}
-
-					ids += appSignal->appSignalID();
-				}
-
-				file << QString(" %1      | %2").arg(hex16(indx)).arg(ids);
-			}
-		}
-
-		//*/
-
-		return m_resultWriter->addFile(Directory::VDUs + Separator::DIR + m_vduOptoModule->equipmentID(),
-										File::VDU_APP_SIGNALS_TXT, file, false);
-	}
-
-	void VduAppSignalsInfoGenerator::printHeader(QStringList& file) const
-	{
-		file << QString(" VDU EquipmentID: %1\n").arg(m_vduOptoModule->equipmentID());
-
-		file << LINE;
-		file << "              VDU AppSignals info file header";
-		file << LINE;
-		file << "  Address   | Header field             | Value";
-		file << LINE;
-
-		file << addrStr(sizeof(m_header.magic),
-						QString("signature                | '%1\\0'").arg(m_header.magic));
-
-		file << addrStr(sizeof(m_header.fileVersion),
-						QString("fileVersion              | %1").arg(m_header.fileVersion)) ;
-
-		file << addrStr(sizeof(m_header.appSignalsCount),
-						QString("appSignalsCount          | %1").arg(m_header.appSignalsCount)) ;
-
-		file << addrStr(sizeof(m_header.hashToIndexCount),
-						QString("hashToIndexCount         | %1").arg(m_header.hashToIndexCount)) ;
-
-		file << addrStr(sizeof(m_header.optoPortsCount),
-						QString("optoPortsCount           | %1").arg(m_header.optoPortsCount)) ;
-
-		file << addrStr(sizeof(m_header.rxAppSignalsCount),
-						QString("rxAppSignalsCount        | %1").arg(m_header.rxAppSignalsCount)) ;
-
-		file << addrStr(sizeof(m_header.txAppSignalsCount),
-						QString("txAppSignalsCount        | %1").arg(m_header.txAppSignalsCount)) ;
-
-		file << addrStr(sizeof(m_header.refAppSignals),
-						QString("refAppSignals            | %1").arg(hex32(m_header.refAppSignals)));
-
-		file << addrStr(sizeof(m_header.refHashToIndex),
-						QString("refHashToSignalIndex     | %1").arg(hex32(m_header.refHashToIndex)));
-
-		file << addrStr(sizeof(m_header.refOptoPorts),
-						QString("refOptoPorts             | %1").arg(hex32(m_header.refOptoPorts)));
-
-		file << addrStr(sizeof(m_header.refRxAppSignals),
-						QString("refRxAppSignals          | %1").arg(hex32(m_header.refRxAppSignals)));
-
-		file << addrStr(sizeof(m_header.refTxAppSignals),
-						QString("refTxAppSignals          | %1").arg(hex32(m_header.refTxAppSignals)));
-
-		file << addrStr(sizeof(m_header.refStrings),
-						QString("refStrings               | %1").arg(hex32(m_header.refStrings)));
-	}
-
-	void VduAppSignalsInfoGenerator::printAppSignals(QStringList& file) const
-	{
-		file << LINE;
-		file << "              VDU AppSignals";
-		file << LINE;
-		file << "  Address   | index  | inOutType | signalType | boolProps | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | tunLowBound | tunHighBound | ioffset | ioBit";
-		file << LINE;
-
-		for(const auto& [id, vs] : m_vduSignals)
-		{
-			file << addrStr(sizeof(vs),
-							QString("%1 | %2    | %3     | %4    | %5     | %6      | %7 | %8 | %9 | %10  | %11   | %12  | %13").
-							arg(hex16(vs.signalIndex)).
-							arg(hex16(vs.vduSignalInOutType)).
-							arg(hex16(vs.vduSignalType)).
-							arg(hex16(vs.boolProps)).
-							arg(hex32(vs.refAppSignalID)).
-							arg(hex32(vs.refCustomAppSignalID)).
-							arg(hex32(vs.refCaption)).
-							arg(hex32(vs.refUnit)).
-							arg(hex32(vs.tuningDefaultValue)).
-							arg(hex32(vs.tuningLowBound)).
-							arg(hex32(vs.tuningHighBound)).
-							arg(hex16(vs.ioOffset)).
-							arg(hex16(vs.ioBit)));
-		}
-	}
-
-	void VduAppSignalsInfoGenerator::printHashToIndex(QStringList& file) const
-	{
-		file << LINE;
-		file << "              Hash to SignalIndex";
-		file << LINE;
-		file << "  Address   | hash32     | signalIndex ";
-		file << LINE;
-
-		for(const auto& [h32, index] : m_hash32ToSignalIndex)
-		{
-			file << addrStr(sizeof(VduHashToIndex), QString("%1 | %2").arg(hex32(h32), hex32(index)));
-		}
-	}
-
-	void VduAppSignalsInfoGenerator::printOptoPortsInfo(QStringList& file) const
-	{
-
-		file << LINE;
-		file << "              Opto ports info table";
-		file << LINE;
-		file << "  Address   | portIndex | linkID    | rxDataSizeW | txDataSizeW | rxDataUID  | txDataUID";
-		file << LINE;
-
-		for(const VduOptoPort& pi : m_optoPorts)
-		{
-			file << addrStr(sizeof(pi),
-							QString("%1    | %2    | %3      | %4      | %5 | %6").
-								arg(hex16(pi.optoPortIndex)).
-								arg(hex16(pi.linkID)).
-								arg(hex16(pi.rxDataSizeW)).
-								arg(hex16(pi.txDataSizeW)).
-								arg(hex32(pi.rxDataUID)).
-								arg(hex32(pi.txDataUID)));
-		}
-	}
-
-	void VduAppSignalsInfoGenerator::printTxRxSignalsInfo(QStringList& file,
-														  const std::vector<VduTxRxAppSignal>& txRxSignals) const
-	{
-		file << LINE;
-
-		if (&txRxSignals == &m_rxAppSignals)
-		{
-			file << "              Received app signals info table";
-		}
-		else
-		{
-			file << "              Transmitted app signals info table";
-		}
-
-		file << LINE;
-		file << "  Address   | portIndex | signalIndex | valueOffsetW | valueBitNo";
-		file << LINE;
-
-		for(const VduTxRxAppSignal& s : txRxSignals)
-		{
-			file << addrStr(sizeof(s),
-							QString("%1    | %2      | %3       | %4").
-							arg(hex16(s.optoPortIndex)).
-							arg(hex16(s.signalIndex)).
-							arg(hex16(s.valueOffsetW)).
-							arg(hex16(s.valueBitNo)));
-		}
-	}
-
-	void VduAppSignalsInfoGenerator::printStringsTable(QStringList& file) const
-	{
-		file << LINE;
-		file << "              Strings table";
-		file << LINE;
-
-		int len = -1;
-		QString str;
-		size_t index = 0;
-		char16_t ch = 0;
-		QString printStr;
-
-		while(index < m_strings.size())
-		{
-			int dataSizeW = 0;
-
-			len = m_strings[index];
-			index++;
-			dataSizeW++;
-
-			str.clear();
-			str.reserve(len);
-			printStr.clear();
-
-			do
-			{
-				ch = m_strings[index];
-				index++;
-				dataSizeW++;
-
-				if (ch != 0)
-				{
-					str.append(QChar(ch));
-				}
-				else
-				{
-					printStr.append(QString("%1, '%2\\0'").arg(len).arg(str));
-				}
-			}
-			while(ch != 0 && index < m_strings.size());
-
-			Q_ASSERT(len == str.length());
-
-			if ((index % 2) != 0)
-			{
-				if (index < m_strings.size())
-				{
-					Q_ASSERT(m_strings[index] == 0);
-					printStr.append(QStringLiteral(", 0x0000"));
-
-					index++;
-					dataSizeW++;
-				}
-				else
-				{
-					Q_ASSERT(false);
-				}
-			}
-
-			file << addrStr(dataSizeW * sizeof(char16_t), printStr);
-		}
 	}
 
 	bool VduAppSignalsInfoGenerator::appendVduSignal(const QString& appSignalID, bool isRxSignal, Hash32* h32)
@@ -752,7 +472,7 @@ namespace Builder
 		si.ioOffset = 0xFFFF;
 		si.ioBit = 0xFFFF;
 
-/*		if (isTxSignals)
+		/*		if (isTxSignals)
 		{
 			auto ioIt = m_inOutSignals.find(appSignal->appSignalID());
 
@@ -814,7 +534,7 @@ namespace Builder
 			if(it->second != appSignalID)
 			{
 				LOG_INTERNAL_ERROR_MSG(m_log, QString("Hash32 = %1 collision for '%2' and '%3' strings").
-														arg(hex32(h32), it->second, appSignalID));
+											  arg(hex32(h32), it->second, appSignalID));
 				return false;
 			}
 			else
@@ -833,6 +553,8 @@ namespace Builder
 
 	vdu_cstr VduAppSignalsInfoGenerator::appendString(const QString& str)
 	{
+		// returns offset in m_strings NOT in file!
+
 		QByteArray utf8Str = str.toUtf8();
 
 		Hash32 hash = ::calcHash32(utf8Str);
@@ -866,20 +588,382 @@ namespace Builder
 
 		m_strings.push_back(0);				// string null termination
 
-		size_t len = m_strings.size() % 4;
-
-		if (len != 0)
+		if ((m_strings.size() % 2) != 0)
 		{
-			// align m_strings on 4 bytes
-			//
-			while(len < 4)
-			{
-				m_strings.push_back(0);
-				len++;
-			}
+			m_strings.push_back(0);			// align string record on 2 bytes
 		}
 
 		return ref;
+	}
+
+	void VduAppSignalsInfoGenerator::recalcStringsRefs(uint32_t stringsOffsetInFile)
+	{
+		for(auto& [h, vs] : m_vduSignals)
+		{
+			vs.refAppSignalID += stringsOffsetInFile;
+			vs.refCustomAppSignalID += stringsOffsetInFile;
+			vs.refCaption += stringsOffsetInFile;
+			vs.refUnit += stringsOffsetInFile;
+		}
+	}
+
+	bool VduAppSignalsInfoGenerator::writeBinFile()
+	{
+		QByteArray data;
+
+		data.append(reinterpret_cast<const char*>(&m_header),
+					sizeof(m_header));
+
+		//
+
+		std::vector<VduAppSignal> vduSignals;
+
+		vduSignals.reserve(m_vduSignals.size());
+
+		for(const auto& [id, vs] : m_vduSignals)
+		{
+			vduSignals.emplace_back(vs);
+		}
+
+		data.append(reinterpret_cast<const char*>(vduSignals.data()),
+					vduSignals.size() * sizeof(VduAppSignal));
+
+		//
+
+		std::vector<VduHash32ToIndex> h2i;
+
+		h2i.reserve(m_hash32ToSignalIndex.size());
+
+		for(const auto& [h32, index] : m_hash32ToSignalIndex)
+		{
+			h2i.emplace_back(VduHash32ToIndex{ .hash32 = h32, .signalIndex = index});
+		}
+
+		data.append(reinterpret_cast<const char*>(h2i.data()),
+					h2i.size() * sizeof(VduHash32ToIndex));
+
+		//
+
+		data.append(reinterpret_cast<const char*>(m_optoPorts.data()),
+					m_optoPorts.size() * sizeof(VduOptoPort));
+
+		data.append(reinterpret_cast<const char*>(m_rxAppSignals.data()),
+					m_rxAppSignals.size() * sizeof(VduTxRxAppSignal));
+
+		data.append(reinterpret_cast<const char*>(m_txAppSignals.data()),
+					m_txAppSignals.size() * sizeof(VduTxRxAppSignal));
+
+		data.append(reinterpret_cast<const char*>(m_strings.data()),
+					m_strings.size());
+
+		//
+
+		m_crc64Offset = data.size();
+		m_crc64 = Crc64().add(data);
+
+		data.append(reinterpret_cast<const char*>(&m_crc64), sizeof(m_crc64));
+
+		return m_resultWriter->addFile(Directory::VDUs + Separator::DIR + m_vduOptoModule->equipmentID(),
+									   File::VDU_APP_SIGNALS_BIN, data, false);
+	}
+
+	bool VduAppSignalsInfoGenerator::writeTxtFile()
+	{
+		QStringList file;
+
+		printHeader(file);
+		printAppSignals(file);
+		printHashToIndex(file);
+		printOptoPortsInfo(file);
+		printTxRxSignalsInfo(file, m_rxAppSignals);
+		printTxRxSignalsInfo(file, m_txAppSignals);
+		printStringsTable(file);
+		printCrc64(file);
+		printRefInfo(file);
+
+		return m_resultWriter->addFile(Directory::VDUs + Separator::DIR + m_vduOptoModule->equipmentID(),
+										File::VDU_APP_SIGNALS_TXT, file, false);
+	}
+
+	void VduAppSignalsInfoGenerator::printHeader(QStringList& file) const
+	{
+		file << QString(" VDU EquipmentID: %1\n").arg(m_vduOptoModule->equipmentID());
+
+		file << LINE;
+		file << "              VDU AppSignals info file header";
+		file << LINE;
+		file << "  Address   | Header field             | Value";
+		file << LINE;
+
+		file << addrStr(sizeof(m_header.magic),
+						QString("signature                | '%1\\0'").arg(m_header.magic));
+
+		file << addrStr(sizeof(m_header.fileVersion),
+						QString("fileVersion              | %1").arg(m_header.fileVersion)) ;
+
+		file << addrStr(sizeof(m_header.appSignalsCount),
+						QString("appSignalsCount          | %1").arg(m_header.appSignalsCount)) ;
+
+		file << addrStr(sizeof(m_header.hash32ToIndexCount),
+						QString("hashToIndexCount         | %1").arg(m_header.hash32ToIndexCount)) ;
+
+		file << addrStr(sizeof(m_header.optoPortsCount),
+						QString("optoPortsCount           | %1").arg(m_header.optoPortsCount)) ;
+
+		file << addrStr(sizeof(m_header.rxAppSignalsCount),
+						QString("rxAppSignalsCount        | %1").arg(m_header.rxAppSignalsCount)) ;
+
+		file << addrStr(sizeof(m_header.txAppSignalsCount),
+						QString("txAppSignalsCount        | %1").arg(m_header.txAppSignalsCount)) ;
+
+		file << addrStr(sizeof(m_header.refAppSignals),
+						QString("refAppSignals            | %1").arg(hex32(m_header.refAppSignals)));
+
+		file << addrStr(sizeof(m_header.refHash32ToIndex),
+						QString("refHashToSignalIndex     | %1").arg(hex32(m_header.refHash32ToIndex)));
+
+		file << addrStr(sizeof(m_header.refOptoPorts),
+						QString("refOptoPorts             | %1").arg(hex32(m_header.refOptoPorts)));
+
+		file << addrStr(sizeof(m_header.refRxAppSignals),
+						QString("refRxAppSignals          | %1").arg(hex32(m_header.refRxAppSignals)));
+
+		file << addrStr(sizeof(m_header.refTxAppSignals),
+						QString("refTxAppSignals          | %1").arg(hex32(m_header.refTxAppSignals)));
+
+		file << addrStr(sizeof(m_header.refStrings),
+						QString("refStrings               | %1").arg(hex32(m_header.refStrings)));
+	}
+
+	void VduAppSignalsInfoGenerator::printAppSignals(QStringList& file) const
+	{
+		file << LINE;
+		file << "              VDU AppSignals";
+		file << LINE;
+		file << "  Address   | index  | inOutType | signalType | boolProps | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | tunLowBound | tunHighBound | ioOffset | ioBit";		file << LINE;
+
+		for(const auto& [id, vs] : m_vduSignals)
+		{
+			file << addrStr(sizeof(vs),
+							QString("%1 | %2    | %3     | %4    | %5     | %6      | %7 | %8 | %9 | %10  | %11   | %12   | %13").
+							arg(hex16(vs.signalIndex)).
+							arg(hex16(vs.vduSignalInOutType)).
+							arg(hex16(vs.vduSignalType)).
+							arg(hex16(vs.boolProps)).
+							arg(hex32(vs.refAppSignalID)).
+							arg(hex32(vs.refCustomAppSignalID)).
+							arg(hex32(vs.refCaption)).
+							arg(hex32(vs.refUnit)).
+							arg(hex32(vs.tuningDefaultValue)).
+							arg(hex32(vs.tuningLowBound)).
+							arg(hex32(vs.tuningHighBound)).
+							arg(hex16(vs.ioOffset)).
+							arg(hex16(vs.ioBit)));
+		}
+	}
+
+	void VduAppSignalsInfoGenerator::printHashToIndex(QStringList& file) const
+	{
+		file << LINE;
+		file << "              Hash to SignalIndex";
+		file << LINE;
+		file << "  Address   | hash32     | signalIndex ";
+		file << LINE;
+
+		for(const auto& [h32, index] : m_hash32ToSignalIndex)
+		{
+			file << addrStr(sizeof(VduHash32ToIndex), QString("%1 | %2").arg(hex32(h32), hex32(index)));
+		}
+	}
+
+	void VduAppSignalsInfoGenerator::printOptoPortsInfo(QStringList& file) const
+	{
+
+		file << LINE;
+		file << "              Opto ports info table";
+		file << LINE;
+		file << "  Address   | portIndex | linkID    | rxDataSizeW | txDataSizeW | rxDataUID  | txDataUID";
+		file << LINE;
+
+		for(const VduOptoPort& pi : m_optoPorts)
+		{
+			file << addrStr(sizeof(pi),
+							QString("%1    | %2    | %3      | %4      | %5 | %6").
+								arg(hex16(pi.optoPortIndex)).
+								arg(hex16(pi.linkID)).
+								arg(hex16(pi.rxDataSizeW)).
+								arg(hex16(pi.txDataSizeW)).
+								arg(hex32(pi.rxDataUID)).
+								arg(hex32(pi.txDataUID)));
+		}
+	}
+
+	void VduAppSignalsInfoGenerator::printTxRxSignalsInfo(QStringList& file,
+														  const std::vector<VduTxRxAppSignal>& txRxSignals) const
+	{
+		file << LINE;
+
+		if (&txRxSignals == &m_rxAppSignals)
+		{
+			file << "              Received app signals info table";
+		}
+		else
+		{
+			file << "              Transmitted app signals info table";
+		}
+
+		file << LINE;
+		file << "  Address   | portIndex | signalIndex | valueOffsetW | valueBitNo";
+		file << LINE;
+
+		for(const VduTxRxAppSignal& s : txRxSignals)
+		{
+			file << addrStr(sizeof(s),
+							QString("%1    | %2      | %3       | %4").
+							arg(hex16(s.optoPortIndex)).
+							arg(hex16(s.signalIndex)).
+							arg(hex16(s.valueOffsetW)).
+							arg(hex16(s.valueBitNo)));
+		}
+	}
+
+	void VduAppSignalsInfoGenerator::printStringsTable(QStringList& file) const
+	{
+		file << LINE;
+		file << "              Strings table";
+		file << LINE;
+		file << "  Address   | strLen (bytes) | string";
+		file << LINE;
+
+		static const QString ZERO_CHAR("\\0");
+
+		QString str;
+		int index = 0;
+
+		while(index < m_strings.size())
+		{
+			int strStartIndex = index;
+
+			int strLen = m_strings[index + 1];	// high byte of len
+			strLen <<= 8;
+			strLen |= m_strings[index];			// low byte of len
+
+			index += 2;
+
+			str.clear();
+			str.reserve(strLen + 8);
+
+			str = QString::fromUtf8(reinterpret_cast<const char*>(m_strings.data() + index), strLen);
+
+			index += strLen;
+
+			Q_ASSERT(m_strings[index] == 0);
+			str.append(ZERO_CHAR);
+			index++;
+
+			if ((index % 2) != 0)
+			{
+				Q_ASSERT(m_strings[index] == 0);
+				str.append(ZERO_CHAR);
+				index++;
+			}
+
+			int strDataSize = index - strStartIndex;
+
+			file << addrStr(strDataSize, QString("%1 | %2").
+										 arg(strLen, 14).arg(str));
+		}
+	}
+
+	void VduAppSignalsInfoGenerator::printCrc64(QStringList& file) const
+	{
+		file << LINE;
+
+		Q_ASSERT(m_crc64Offset == m_txtOffset);
+
+		file << addrStr(sizeof(m_crc64), QString("CRC64 = %1").arg(hex64(m_crc64)));
+
+		file << LINE;
+	}
+
+	void VduAppSignalsInfoGenerator::printRefInfo(QStringList& file) const
+	{
+
+		file << Separator::EMPTY_STR;
+		file << Separator::EMPTY_STR;
+		file << LINE;
+		file << QString(" Reference information, not placed in %1 file").arg(File::VDU_APP_SIGNALS_BIN);
+		file << LINE;
+		file << Separator::EMPTY_STR;
+		file << " Sizeof structures:";
+		file << Separator::EMPTY_STR;
+
+		file << QString(" VduAppSignalsFileHeader  %1 (%2)").
+							arg(sizeof(VduAppSignalsFileHeader)).
+							arg(hex16(sizeof(VduAppSignalsFileHeader)));
+
+		file << QString(" VduAppSignal             %1 (%2)").
+							arg(sizeof(VduAppSignal)).
+							arg(hex16(sizeof(VduAppSignal)));
+
+		file << QString(" VduHash32ToIndex         %1 (%2)").
+							arg(sizeof(VduHash32ToIndex)).
+							arg(hex16(sizeof(VduHash32ToIndex)));
+
+		file << QString(" VduOptoPort              %1 (%2)").
+							arg(sizeof(VduOptoPort)).
+							arg(hex16(sizeof(VduOptoPort)));
+
+		file << QString(" VduTxRxAppSignal         %1 (%2)").
+							arg(sizeof(VduTxRxAppSignal)).
+							arg(hex16(sizeof(VduTxRxAppSignal)));
+		file << Separator::EMPTY_STR;
+		file << LINE;
+
+		auto it = m_context->m_vduSignals.find(m_vduOptoModule->equipmentID());
+
+		if (it != m_context->m_vduSignals.end())
+		{
+			std::map<int, std::vector<Hash>> indexToHashes;
+
+			const std::map<Hash, int>& hashToIndex = it->second;
+
+			for(const auto& [h, indx] : hashToIndex)
+			{
+				auto it2 = findOrInsertKey(indexToHashes, indx);
+
+				it2->second.emplace_back(h);
+			}
+
+			file << " SignalIndex | AppSignalID(s)";
+			file << LINE;
+
+			std::shared_ptr<SignalSet> signalSet = m_context->m_signalSet;
+			QString ids;
+
+			for(const auto& [indx, hashes] : indexToHashes)
+			{
+				ids.clear();
+
+				for(Hash h : hashes)
+				{
+					const AppSignal* appSignal = signalSet->getSignalByHash(h);
+
+					TEST_PTR_CONTINUE(appSignal);
+
+					if (ids.isEmpty() == false)
+					{
+						ids += Separator::COMMA_SPACE;
+					}
+
+					ids += appSignal->appSignalID();
+				}
+
+				file << QString(" %1      | %2").arg(hex16(indx), ids);
+			}
+
+			file << LINE;
+		}
 	}
 
 	VduSignalInOutType VduAppSignalsInfoGenerator::getVduSignalInOutType(const AppSignal* s)
@@ -973,17 +1057,6 @@ namespace Builder
 		}
 
 		return 0;
-	}
-
-	void VduAppSignalsInfoGenerator::recalcStringsRefs(uint32_t stringsOffsetInFile)
-	{
-		for(auto& [h, vs] : m_vduSignals)
-		{
-			vs.refAppSignalID += stringsOffsetInFile;
-			vs.refCustomAppSignalID += stringsOffsetInFile;
-			vs.refCaption += stringsOffsetInFile;
-			vs.refUnit += stringsOffsetInFile;
-		}
 	}
 
 	QString VduAppSignalsInfoGenerator::addrStr(int fieldSize, const QString& str) const

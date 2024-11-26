@@ -645,7 +645,7 @@ namespace File
 	inline static const QString GLOBAL_SCRIPT = "GlobalScript.js";
 	inline static const QString GLOBAL_SCRIPT_FULL_PATH = "$root$/Tests/GlobalScript.js";
 
-	inline static const QString VDU_APP_SIGNALS_VAS = "VduAppSignals.vci";
+	inline static const QString VDU_APP_SIGNALS_BIN = "VduAppSignals.bin";
 	inline static const QString VDU_APP_SIGNALS_TXT = "VduAppSignals.txt";
 
 	// Moved from DbStruct

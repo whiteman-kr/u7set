@@ -639,6 +639,50 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::getDeviceAppSignal(const AppSignal& ioSignal,
+												 Hardware::DeviceAppSignal** deviceAppSignal) const
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(deviceAppSignal, m_log);
+
+		if (ioSignal.isInput() == false &&
+			ioSignal.isOutput() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		// retrieve linked device
+		//
+		Hardware::DeviceObject* device = m_equipmentSet->deviceObject(ioSignal.equipmentID()).get();
+
+		if (device == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find DeviceObject with equipmentID %1").
+												arg(ioSignal.equipmentID()));
+			return false;
+		}
+
+		if (device->isAppSignal() == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceObject %1 is not a DeviceAppSignal").
+												arg(ioSignal.equipmentID()));
+			return false;
+		}
+
+		Hardware::DeviceAppSignal* devAppSignal = device->toAppSignal().get();
+
+		if (devAppSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		*deviceAppSignal = devAppSignal;
+
+		return true;
+	}
+
 	bool ModuleLogicCompiler::loadLMSettings()
 	{
 		bool result = true;
@@ -6606,53 +6650,19 @@ namespace Builder
 	bool ModuleLogicCompiler::getIoSignalModule(const AppSignal& ioSignal, Module* module,
 												Hardware::DeviceAppSignal** deviceAppSignal) const
 	{
-		TEST_PTR_RETURN_FALSE(m_log);
-		TEST_PTR_LOG_RETURN_FALSE(module, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(deviceAppSignal, m_log);
+		bool res = getDeviceAppSignal(ioSignal, deviceAppSignal);
 
-		if (ioSignal.isInput() == false &&
-			ioSignal.isOutput() == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		// retrieve linked device
-		//
-		Hardware::DeviceObject* device = m_equipmentSet->deviceObject(ioSignal.equipmentID()).get();
-
-		if (device == nullptr)
-		{
-			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find DeviceObject with equipmentID %1").
-												arg(ioSignal.equipmentID()));
-			return false;
-		}
-
-		if (device->isAppSignal() == false)
-		{
-			LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceObject %1 is not a DeviceAppSignal").
-												arg(ioSignal.equipmentID()));
-			return false;
-		}
-
-		Hardware::DeviceAppSignal* devAppSignal = device->toAppSignal().get();
-
-		if (devAppSignal == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		*deviceAppSignal = devAppSignal;
+		RETURN_IF_FALSE(res);
+		TEST_PTR_RETURN_FALSE(*deviceAppSignal);
 
 		// retrieve associated module
 		//
-		const Hardware::DeviceModule* deviceModule = devAppSignal->getParentModule();
+		const Hardware::DeviceModule* deviceModule = (*deviceAppSignal)->getParentModule();
 
 		if (deviceModule == nullptr)
 		{
 			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find parent DeviceModule for DeviceAppSignal %1").
-												arg(devAppSignal->equipmentIdTemplate()));
+												arg((*deviceAppSignal)->equipmentIdTemplate()));
 			return false;
 		}
 
@@ -18287,24 +18297,6 @@ namespace Builder
 		{
 			return true;
 		}
-
-/*		Hardware::OptoModuleShared optoModule = m_optoModuleStorage->getOptoModule(lmEquipmentID());
-
-		TEST_PTR_RETURN_FALSE(optoModule);
-
-		Q_ASSERT(optoModule->isVdu() == true);
-
-		std::map<QString, std::pair<E::SignalInOutType, Address16>> inOutSignals;	// AppSignalsID => { inOutType, inOutAddress }
-
-		for(const AppSignal* ioSignal : m_ioSignals)
-		{
-			TEST_PTR_CONTINUE(ioSignal);
-
-			Q_ASSERT(ioSignal->isInput() || ioSignal->isOutput());
-
-			inOutSignals.emplace(ioSignal->appSignalID(),
-								 std::make_pair(ioSignal->inOutType(), ioSignal->ioBufAddr()));
-		}*/
 
 		VduAppSignalsInfoGenerator vg;
 
