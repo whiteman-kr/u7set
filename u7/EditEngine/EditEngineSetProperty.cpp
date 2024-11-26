@@ -128,7 +128,7 @@ namespace EditEngine
 			assert(fblElement != nullptr);
 
 			QString errorMsg;
-			bool ok = fblElement->setAfbParam(propertyName, newValue, schema, &errorMsg);
+			bool ok = fblElement->setAfbParam(propertyName, newValue, &errorMsg);
 
 			if (ok == false)
 			{

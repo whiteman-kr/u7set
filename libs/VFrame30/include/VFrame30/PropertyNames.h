@@ -53,6 +53,7 @@ namespace VFrame30
 		inline static const QString pinCount{"PinCount"};
 		inline static const QString showValidityPin{"ValidityPin"};
 
+		inline static const QString lineCapSize{"LineCapSize"};
 		inline static const QString lineCapFactor{"LineCapFactor"};
 		inline static const QString lineCapStart{"LineCapStart"};
 		inline static const QString lineCapEnd{"LineCapEnd"};

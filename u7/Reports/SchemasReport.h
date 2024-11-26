@@ -2,8 +2,6 @@
 
 #include "../Builder/SchemasReportGenerator.h"
 
-class DbController;
-
 class SchemasAlbumGenerator
 {
 public:

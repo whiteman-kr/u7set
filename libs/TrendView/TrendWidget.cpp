@@ -43,6 +43,7 @@ namespace TrendLib
 			std::unique_lock<std::mutex> locker(m_mutex);
 			m_drawParam = drawParam;
 			m_drawParam->signalDescriptionRect().clear();
+			m_drawParam->setProject({}); // Do not show project name.
 		}
 
 		m_newJob.notify_one();
@@ -84,11 +85,10 @@ namespace TrendLib
 
 			// --
 			//
-			if (m_image.size() != drawParam->rect().size())
+			if (m_image.size() != drawParam->rectPx().size())
 			{
-				QSize pixelSize = drawParam->rect().size().toSize();
-
-				m_image = QImage{pixelSize, QImage::Format_RGB32};
+				auto imageSize= drawParam->rectPx().size().toSize();
+				m_image = QImage{imageSize, QImage::Format_RGB32};
 
 				m_image.setDevicePixelRatio(drawParam->devicePixelRatio());
 				m_image.setDotsPerMeterX(static_cast<int>(m_image.physicalDpiX() / 25.4 * 1000.0));
@@ -273,8 +273,7 @@ namespace TrendLib
 		double devicePixelRatio = devicePixelRatioF();
 		QRectF hdRect{0, 0, rect().width() * devicePixelRatio, rect().height() * devicePixelRatio};
 
-		m_trendParam.setRect(hdRect);
-		m_trendParam.setDpi(logicalDpiX(), logicalDpiY(), devicePixelRatio);
+		m_trendParam.setRectPx(hdRect.toRect(), logicalDpiX(), logicalDpiY(), devicePixelRatio);
 
 		// Somehow we draw image in physicalDpiX (for clear picture)
 		// and use logical dpi for calculation mouse areas and all widget positioning
@@ -298,6 +297,7 @@ namespace TrendLib
 			drawParam.setDpi(p.device()->physicalDpiX(),
 							 p.device()->physicalDpiY(),
 							 1.0);
+			drawParam.setProject({}); // Do not show project name.
 
 			m_trend.impl().drawRulers(&p, drawParam);
 		}
@@ -314,18 +314,15 @@ namespace TrendLib
 		pdfWriter.setTitle("Trends");
 		pdfWriter.setPageSize(QPageSize(pageSize));
 		pdfWriter.setPageOrientation(pageOrientation);
-		pdfWriter.pageLayout().setUnits(QPageLayout::Inch);
+
+		const int resolution = pdfWriter.resolution();
+		const double resolutionF = static_cast<double>(resolution);
+
+		auto rectPx = pdfWriter.pageLayout().paintRectPixels(resolution);
+		rectPx.moveTopLeft({0, 0});
 
 		TrendParam drawParam = m_trendParam;
-
-		QRectF rc(pdfWriter.pageLayout().paintRect(QPageLayout::Inch));
-		double resolution = static_cast<double>(pdfWriter.resolution());
-
-		QRectF drawRect{rc.left() * resolution, rc.top() * resolution,
-						rc.width() * resolution,rc.height() * resolution};
-
-		drawParam.setRect(drawRect);
-		drawParam.setDpi(resolution, resolution, 1.0);
+		drawParam.setRectPx(rectPx, resolutionF, resolutionF, 1.0);
 
 		// --
 		//
@@ -334,6 +331,16 @@ namespace TrendLib
 		m_trend.impl().draw(&p, drawParam, true);
 		m_trend.impl().drawRulers(&p, drawParam);
 
+#if 0
+		// Debug, draw bounding rect
+		//
+		p.resetTransform();
+
+		QPen pen(Qt::red, 0, Qt::DashLine, Qt::PenCapStyle::RoundCap);
+		p.setPen(pen);
+		p.setBrush(Qt::NoBrush);
+		p.drawRect(rectPx);
+#endif
 		return true;
 	}
 
@@ -355,20 +362,41 @@ namespace TrendLib
 			return false;
 		}
 
+		const int resolution = printer->resolution();
+		const double resolutionF = static_cast<double>(printer->resolution());
+
+#if 0
+		// Debug, printr all possible margins and sizes.
+		//
+		qDebug() << "Printer info:";
+		qDebug() << "	Printer name: " << printer->printerName();
+		qDebug() << "	Printer resolution: " << printer->resolution();
+		qDebug() << "	Printer printer->paperRect(DevicePixel): " << printer->paperRect(QPrinter::Unit::DevicePixel);
+		qDebug() << "	Printer printer->paperRect(Inch): " << printer->paperRect(QPrinter::Unit::Inch);
+		qDebug() << "	Printer printer->pageRect(DevicePixel): " << printer->pageRect(QPrinter::Unit::DevicePixel);
+		qDebug() << "	Printer printer->pageRect(Inch): " << printer->pageRect(QPrinter::Unit::Inch);
+		
+		qDebug() << "	Printer printer->pageLayout().fullRectPixels(resolution): "
+				 << printer->pageLayout().fullRectPixels(printer->resolution());
+		qDebug() << "	Printer printer->pageLayout().fullRect(Inch): " << printer->pageLayout().fullRect(QPageLayout::Inch);
+		qDebug() << "	Printer printer->pageLayout().fullRect(DevicePixel): " << printer->pageLayout().fullRectPixels(resolution);
+		
+		qDebug() << "	Printer printer->pageLayout().marginsPixels(resolution): " << printer->pageLayout().marginsPixels(resolution);
+		qDebug() << "	Printer printer->pageLayout().margins(Inch): " << printer->pageLayout().margins(QPageLayout::Inch);
+#endif
+
 		// Prepare DrawParam
 		//
+		printer->setFullPage(false);
+
+		QRectF rc = printer->pageLayout().paintRectPixels(resolution);
+		rc.moveTopLeft({0, 0});
+
 		TrendParam drawParam = m_trendParam;
+		drawParam.setBackColor1st(Qt::white);
+		drawParam.setBackColor1st(qRgb(0xF0, 0xF0, 0xF0));
 
-		QRectF rc{printer->pageLayout().paintRect(QPageLayout::Inch)};
-		int resolution = printer->resolution();
-
-		QRectF drawRect{rc.left() * static_cast<double>(resolution),
-						rc.top() * static_cast<double>(resolution),
-						rc.width() * static_cast<double>(resolution),
-						rc.height() * static_cast<double>(resolution)};
-
-		drawParam.setRect(drawRect);
-		drawParam.setDpi(resolution, resolution, printer->devicePixelRatioF());
+		drawParam.setRectPx(rc, resolutionF, resolutionF, printer->devicePixelRatioF());
 
 		// Draw to printer
 		//
@@ -1269,4 +1297,13 @@ namespace TrendLib
 		return;
 	}
 
+	QString TrendWidget::project() const
+	{
+		return m_trendParam.project();
+	}
+
+	void TrendWidget::setProject(const QString& value)
+	{
+		m_trendParam.setProject(value);
+	}
 }

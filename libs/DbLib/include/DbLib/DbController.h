@@ -4,6 +4,7 @@
 #include <QMutex>
 #include "DbStruct.h"
 
+class AppSignalSet;
 class DbWorker;
 class DbProgress;
 struct ID_AppSignalID;	// AppSignal.h

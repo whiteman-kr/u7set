@@ -1,7 +1,5 @@
 #pragma once
 
-#include <DbLib/DbController.h>
-
 #include "AppSignalPropertyManager.h"
 
 class AppSignalSetProvider : public QObject

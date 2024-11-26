@@ -759,7 +759,7 @@ namespace VFrame30
 						continue;
 					}
 
-					horzVertLinks.AddLinks(pointList, schemaItemLink->guid());
+					horzVertLinks.AddLinks(pointList.begin(), pointList.end(), schemaItemLink->guid(), pointList.size());
 				}
 			}
 		}

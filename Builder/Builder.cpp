@@ -91,7 +91,7 @@ namespace Builder
 		}
 
 		m_thread->requestInterruption();
-		bool result = m_thread->wait(120000);		// Wait for a couple minutes.
+		bool result = m_thread->wait(180000);		// Wait for a couple minutes.
 
 		if (result == false)
 		{

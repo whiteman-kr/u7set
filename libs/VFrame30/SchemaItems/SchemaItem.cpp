@@ -18,29 +18,6 @@ namespace VFrame30
 		m_itemUnit(SchemaUnit::Display)
 	{
 		m_guid = QUuid::createUuid();
-
-//		auto guidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::guid, true, SchemaItem::guid);
-//		guidProp->setCategory(PropertyNames::functionalCategory);
-//		guidProp->setExpert(true);
-
-//		auto commentedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::commented, true, SchemaItem::commented, SchemaItem::setCommented);
-//		commentedProp->setCategory(PropertyNames::functionalCategory);
-
-//		auto lockedProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::locked, true, SchemaItem::isLocked, SchemaItem::setLocked);
-//		lockedProp->setCategory(PropertyNames::appearanceCategory);
-
-//		auto acceptClickProp = ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::acceptClick, true, SchemaItem::acceptClick, SchemaItem::setAcceptClick);
-//		acceptClickProp->setCategory(PropertyNames::scriptsCategory);
-
-//		auto clickScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::clickScript, true, SchemaItem::clickScript, SchemaItem::setClickScript);
-//		clickScriptProp->setCategory(PropertyNames::scriptsCategory);
-//		clickScriptProp->setIsScript(true);
-
-//		auto objectNameProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::objectName, true, QObject::objectName, SchemaItem::setObjectName);
-//		objectNameProp->setCategory(PropertyNames::scriptsCategory);
-
-//		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::preDrawScript, PropertyNames::scriptsCategory, true, SchemaItem::preDrawScript, SchemaItem::setPreDrawScript);
-
 		return;
 	}
 

@@ -640,51 +640,51 @@ namespace File
 
 	inline const QString READONLY = "readonly";
 
-	inline static const QString MONITOR_BEHAVIOR = "MonitorBehavior.xml";
+	inline const QString MONITOR_BEHAVIOR = "MonitorBehavior.xml";
 
-	inline static const QString GLOBAL_SCRIPT = "GlobalScript.js";
-	inline static const QString GLOBAL_SCRIPT_FULL_PATH = "$root$/Tests/GlobalScript.js";
+	inline const QString GLOBAL_SCRIPT = "GlobalScript.js";
+	inline const QString GLOBAL_SCRIPT_FULL_PATH = "$root$/Tests/GlobalScript.js";
 
 	inline static const QString VDU_APP_SIGNALS_BIN = "VduAppSignals.bin";
 	inline static const QString VDU_APP_SIGNALS_TXT = "VduAppSignals.txt";
 
 	// Moved from DbStruct
 	//
-	inline static const QString SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
-	inline static const QString TagsFileName = "Tags.csv";
-	inline static const QString SimProfilesFileName = "SimProfiles.txt";
+	inline const QString SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
+	inline const QString TagsFileName = "Tags.csv";
+	inline const QString SimProfilesFileName = "SimProfiles.txt";
 
-	inline static const QString AlFileExtension = "als";                  // Application Logic schema file extension
-	inline static const QString AlTemplExtension = "templ_als";           // Application Logic schema template file extension
+	inline const QString AlFileExtension = "als";                  // Application Logic schema file extension
+	inline const QString AlTemplExtension = "templ_als";           // Application Logic schema template file extension
 
-	inline static const QString UfbFileExtension = "ufb";                 // User Functional Block schema file extension
-	inline static const QString UfbTemplExtension = "templ_ufb";          // User Functional Block template file extension
+	inline const QString UfbFileExtension = "ufb";                 // User Functional Block schema file extension
+	inline const QString UfbTemplExtension = "templ_ufb";          // User Functional Block template file extension
 
-	inline static const QString MvsFileExtension = "mvs";                 // Monitor schema file extension
-	inline static const QString MvsTemplExtension = "templ_mvs";          // Monitor schema template file extension
+	inline const QString MvsFileExtension = "mvs";                 // Monitor schema file extension
+	inline const QString MvsTemplExtension = "templ_mvs";          // Monitor schema template file extension
 
-	inline static const QString TvsFileExtension = "tvs";                 // TuningClient schema file extension
-	inline static const QString TvsTemplExtension = "templ_tvs";          // TuningClient schema template file extension
+	inline const QString TvsFileExtension = "tvs";                 // TuningClient schema file extension
+	inline const QString TvsTemplExtension = "templ_tvs";          // TuningClient schema template file extension
 
-	inline static const QString DvsFileExtension = "dvs";                 // Diagnostics schema file extension
-	inline static const QString DvsTemplExtension = "templ_dvs";          // Diagnostics schema template file extension
+	inline const QString DvsFileExtension = "dvs";                 // Diagnostics schema file extension
+	inline const QString DvsTemplExtension = "templ_dvs";          // Diagnostics schema template file extension
 
-	inline static const QString VduFileExtension = "vus";                 // VDU schema file extension
-	inline static const QString VduTemplExtension = "templ_vus";          // VDU schema template file extension
-	inline static const QString VduNativeFileExtension = "vbs";           // VDU schema file extension in native VDU format
+	inline const QString VduFileExtension = "vus";                 // VDU schema file extension
+	inline const QString VduTemplExtension = "templ_vus";          // VDU schema template file extension
+	inline const QString VduNativeFileExtension = "vbs";           // VDU schema file extension in native VDU format
 
-	inline static const QString OclFileExtension = "ocl";                 // (Optical) Connection Link
-	inline static const QString BusFileExtension = "bus_type";            // Bus type
+	inline const QString OclFileExtension = "ocl";                 // (Optical) Connection Link
+	inline const QString BusFileExtension = "bus_type";            // Bus type
 
-	inline static const QString AppSignalFileExtension = "asg";           // Application signal file extention (::Proto::AppSignal message)
-	inline static const QString AppSignalSetFileExtension = "asgs";       // AppSignalSet file extention (::Proto::AppSignalSet message)
+	inline const QString AppSignalFileExtension = "asg";           // Application signal file extention (::Proto::AppSignal message)
+	inline const QString AppSignalSetFileExtension = "asgs";       // AppSignalSet file extention (::Proto::AppSignalSet message)
 
-	inline static const QString AppSignalListFileExtension = "aslist";    // Application signals list file extention
+	inline const QString AppSignalListFileExtension = "aslist";    // Application signals list file extention
 
-	inline static const QString JavaScriptFileExtension = "js";           // JavaScript file extension
+	inline const QString JavaScriptFileExtension = "js";           // JavaScript file extension
 
-	inline static const QString DiagSignalTypeFileExtension = "dsgt";     // Diagnostics Signal Type file extension
-	inline static const QString DiagSignalTypeSetFileExtension = "dsgts"; // Diagnostics Signal Types set file extension
+	inline const QString DiagSignalTypeFileExtension = "dsgt";     // Diagnostics Signal Type file extension
+	inline const QString DiagSignalTypeSetFileExtension = "dsgts"; // Diagnostics Signal Types set file extension
 } // namespace File
 
 namespace Separator

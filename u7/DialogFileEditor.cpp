@@ -1,4 +1,5 @@
 #include "DialogFileEditor.h"
+#include "IdePropertyEditor.h"
 #include "Settings.h"
 
 

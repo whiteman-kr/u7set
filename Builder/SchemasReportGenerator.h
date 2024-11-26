@@ -5,7 +5,6 @@
 #include "../ReportLib/ReportDiagStateProvider.h"
 #include "../ReportLib/ReportPrinter.h"
 
-#include <DbLib/DbController.h>
 #include <VFrame30/AppSignalController.h>
 #include <VFrame30/DiagStateController.h>
 

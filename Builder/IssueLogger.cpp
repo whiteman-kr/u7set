@@ -2575,7 +2575,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Schema does not have logic layer (Schema %1).
+	/// Title: Schema does not contain logic layer (Schema %1).
 	///
 	/// Parameters:
 	///		%1 SchemaID
@@ -2589,7 +2589,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4022,
-				  tr("Schema does not have logic layer (Schema %1).").arg(schema));
+				  tr("Schema does not contain logic layer (Schema %1).").arg(schema));
 	}
 
 	/// IssueCode: ALP4023

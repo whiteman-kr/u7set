@@ -6,7 +6,6 @@
 //
 class QThread;
 class IssueLogger;
-class DbController;
 
 namespace Hardware
 {

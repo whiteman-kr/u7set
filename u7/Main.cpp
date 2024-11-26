@@ -6,7 +6,6 @@
 
 #include <CommonLib/Times.h>
 #include <HardwareLib/HardwareLibrary.h>
-#include <HardwareLib/ModuleFirmware.h>
 #include <VFrame30/VFrame30Library.h>
 
 #include <LicenseLib/AppLicenser.h>

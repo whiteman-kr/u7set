@@ -112,7 +112,7 @@ std::vector<std::shared_ptr<Property>> PropertyObject::properties() const
 
 	for( auto it = m_properties.cbegin(); it != m_properties.cend(); ++it )
 	{
-		result.push_back(it.value());
+		result.push_back(it->second);
 	}
 
 	return result;
@@ -128,9 +128,9 @@ std::vector<std::shared_ptr<Property>> PropertyObject::specificProperties() cons
 
 	for(auto it = m_properties.cbegin(); it != m_properties.cend(); ++it )
 	{
-		if (it.value()->specific() == true)
+		if (it->second->specific() == true)
 		{
-			result.push_back(it.value());
+			result.push_back(it->second);
 		}
 	}
 
@@ -164,7 +164,7 @@ void PropertyObject::removeAllProperties()
 
 bool PropertyObject::removeProperty(const QString& caption)
 {
-	size_t removed = m_properties.remove(caption);
+	size_t removed = m_properties.erase(caption);
 
 	if (removed > 0)
 	{
@@ -181,16 +181,13 @@ void PropertyObject::removeCategoryProperties(const QString& category)
 {
 	bool someRemoved = false;
 
-	for(auto it = m_properties.begin(); it != m_properties.end();)
+	for (auto it = m_properties.begin(), end = m_properties.end(); it != end;)
 	{
-		if(it.value()->category() == category)
+		auto copy_it = it++;
+		if (copy_it->second->category() == category)
 		{
-			it = m_properties.erase(it);
+			m_properties.erase(copy_it);
 			someRemoved = true;
-		}
-		else
-		{
-			++it;
 		}
 	}
 
@@ -210,14 +207,11 @@ void PropertyObject::removeSpecificProperties()
 
 	for(auto it = m_properties.begin(); it != m_properties.end();)
 	{
-		if(it.value()->specific() == true)
+		auto copy_it = it++;
+		if (copy_it->second->specific() == true)
 		{
-			it = m_properties.erase(it);
+			m_properties.erase(copy_it);
 			someRemoved = true;
-		}
-		else
-		{
-			++it;
 		}
 	}
 
@@ -235,9 +229,9 @@ void PropertyObject::hideCategoryProperties(const QString& category)
 
 	for(auto it = m_properties.begin(); it != m_properties.end(); ++it)
 	{
-		if (it.value()->category() == category)
+		if (it->second->category() == category)
 		{
-			it.value()->setVisible(false);
+			it->second->setVisible(false);
 			someChanged = true;
 		}
 	}
@@ -256,9 +250,9 @@ void PropertyObject::showCategoryProperties(const QString& category)
 
 	for(auto it = m_properties.begin(); it != m_properties.end(); ++it)
 	{
-		if (it.value()->category() == category)
+		if (it->second->category() == category)
 		{
-			it.value()->setVisible(true);
+			it->second->setVisible(true);
 			someChanged = true;
 		}
 	}
@@ -315,12 +309,12 @@ std::shared_ptr<Property> PropertyObject::propertyByCaption(const QString& capti
 		}
 		else
 		{
-			return itt.value();
+			return itt->second;
 		}
 	}
 	else
 	{
-		return it.value();
+		return it->second;
 	}
 }
 
@@ -338,12 +332,12 @@ const std::shared_ptr<Property> PropertyObject::propertyByCaption(const QString&
 		}
 		else
 		{
-			return itt.value();
+			return itt->second;
 		}
 	}
 	else
 	{
-		return it.value();
+		return it->second;
 	}
 }
 

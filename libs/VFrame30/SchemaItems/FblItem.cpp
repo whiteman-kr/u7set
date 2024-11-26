@@ -8,7 +8,7 @@ namespace VFrame30
 	//
 	AfbPin::AfbPin()
 	{
-		m_associatedIOs.reserve(32);
+		m_associatedIOs.reserve(16);
 	}
 
 	AfbPin::AfbPin(ConnectionDirrection dirrection,
@@ -23,7 +23,7 @@ namespace VFrame30
 		m_signalType(signalType),
 		m_caption(caption)
 	{
-		m_associatedIOs.reserve(32);
+		m_associatedIOs.reserve(16);
 	}
 
 	AfbPin::AfbPin(ConnectionDirrection dirrection,
@@ -36,12 +36,12 @@ namespace VFrame30
 		m_signalType(afbSignal.type()),
 		m_caption(afbSignal.caption())
 	{
-		m_associatedIOs.reserve(32);
+		m_associatedIOs.reserve(16);
 	}
 
 	AfbPin::AfbPin(const Proto::FblConnectionPoint& cpm)
 	{
-		m_associatedIOs.reserve(32);
+		m_associatedIOs.reserve(16);
 		LoadData(cpm);
 	}
 
@@ -321,36 +321,13 @@ namespace VFrame30
 		return;
 	}
 
-	double FblItem::GetPinWidth(SchemaUnit unit, double dpi) const
+	double FblItem::GetPinWidth(SchemaUnit unit, double dpiX) const
 	{
 		double pinWidth = static_cast<float>(mm2in(3));	// 3 μμ!
 
 		if (unit == SchemaUnit::Display)
 		{
-			pinWidth = pinWidth * dpi;
-		}
-
-		return pinWidth;
-	}
-
-	double FblItem::GetPinWidth(SchemaUnit unit, QPaintDevice* device) const
-	{
-		double dpi = 96;
-
-		if (device == nullptr)
-		{
-			assert(device);
-		}
-		else
-		{
-			dpi = device->physicalDpiX() * device->devicePixelRatioF();
-		}
-
-		double pinWidth = static_cast<float>(mm2in(3));	// 3 μμ!
-
-		if (unit == SchemaUnit::Display)
-		{
-			pinWidth = pinWidth * dpi;
+			pinWidth = pinWidth * dpiX;
 		}
 
 		return pinWidth;

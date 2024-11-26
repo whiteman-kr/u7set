@@ -29,6 +29,8 @@ namespace TrendLib
 		message->set_back_color_1st(m_backColor1st.rgb());
 		message->set_back_color_2nd(m_backColor2nd.rgb());
 
+		message->set_projectname(m_project.toStdString());
+
 		return true;
 	}
 
@@ -51,17 +53,32 @@ namespace TrendLib
 		m_backColor1st = QColor::fromRgb(message.back_color_1st());
 		m_backColor2nd = QColor::fromRgb(message.back_color_2nd());
 
+		m_project = QString::fromStdString(message.projectname());
+
 		return true;
 	}
 
-	QRectF TrendParam::rect() const
+	const QRectF& TrendParam::rectPx() const
 	{
-		return m_rect;
+		return m_rectPx;
 	}
 
-	void TrendParam::setRect(const QRectF& value)
+	const QRectF& TrendParam::rectIn() const
 	{
-		m_rect = value;
+		return m_rectIn;
+	}
+
+	void TrendParam::setRectPx(const QRectF& value, double dpiX, double dpiY, double devicePixelRatio)
+	{
+		setDpi(dpiX, dpiY, devicePixelRatio);
+
+		m_rectPx = value;
+		
+		m_rectIn.setLeft(value.left() / realDpiX());
+		m_rectIn.setTop(value.top() / realDpiY());
+		m_rectIn.setWidth(value.width() / realDpiX());
+		m_rectIn.setHeight(value.height() / realDpiY());
+
 		return;
 	}
 
@@ -245,6 +262,15 @@ namespace TrendLib
 	double TrendParam::cosmeticPenWidth() const
 	{
 		return m_cosmeticPenWidth;
+	}
+
+	QString TrendParam::project() const
+	{
+		return m_project;
+	}
+	void TrendParam::setProject(const QString& value)
+	{
+		m_project = value;
 	}
 
 	std::vector<std::pair<QString, QRectF>>& TrendParam::signalDescriptionRect()

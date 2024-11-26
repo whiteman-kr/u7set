@@ -1,8 +1,6 @@
 #pragma once
 
-#include "../ReportLib/Report.h"
 #include "../Builder/SchemasReportGenerator.h"
-#include <DbLib/DbController.h>
 
 class VariablesWidget : public QWidget
 {

@@ -13,7 +13,7 @@
 
 namespace ClientLib
 {
-	inline static const int RequestTimeIntervalMs = 20;
+	inline const int RequestTimeIntervalMs = 20;
 	
 	// Number of signals requested by ADS_GET_APP_SIGNAL_STATE.
 	// Assume RequestTimeIntervalMs is 20ms, then we have about 50 requests per second, 
@@ -21,7 +21,7 @@ namespace ClientLib
 	// 250 signals * (1'000ms / RequestTimeIntervalMs) rps = 12500 signals per seconds.
 	// 100'000 / 12500 = 8 signals per second.
 	//
-	inline static const int MaxStateRequestCount = ADS_GET_APP_SIGNAL_STATE_MAX / 8;  // 250 signals per ADS_GET_APP_SIGNAL_STATE
+	inline const int MaxStateRequestCount = ADS_GET_APP_SIGNAL_STATE_MAX / 8;  // 250 signals per ADS_GET_APP_SIGNAL_STATE
 
 	//
 	//		ADS_GET_APP_SIGNAL_LIST_START

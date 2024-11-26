@@ -481,10 +481,12 @@ R"(<p><b>BusComposer:</b> Creates a bus signal</p>
 
 		for (const ::Proto::Property& p :  extractor.properties())
 		{
+			QString pName = QString::fromStdString(p.name());
+
 			auto it = std::find_if(specificProps.begin(), specificProps.end(),
-				[p](const std::shared_ptr<Property>& dp)
+				[&pName](const std::shared_ptr<Property>& dp)
 				{
-					return dp->caption().toStdString() == p.name();
+					return dp->caption() == pName;
 				});
 
 			if (it == specificProps.end())

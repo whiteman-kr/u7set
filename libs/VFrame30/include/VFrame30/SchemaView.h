@@ -29,8 +29,8 @@ namespace VFrame30
 	public:
 		static void Ajust(QPainter* painter, SchemaUnit units, double startX, double startY, double zoom);
 		static void Ajust(QPainter* painter,
-						  int dpiX,
-						  int dpiY,
+						  double dpiX,
+						  double dpiY,
 						  double devicePixelRatioF,
 						  SchemaUnit units,
 						  double startX,

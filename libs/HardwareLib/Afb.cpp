@@ -192,6 +192,7 @@ namespace Afb
 		{
 			QDomElement p = xmlElement.firstChildElement(QLatin1String("Pin"));
 			m_pins.clear();
+			m_pins.reserve(16);
 			m_pinExists.clear();
 
 			while (p.isNull() == false)
@@ -1678,7 +1679,7 @@ namespace Afb
 
 	bool AfbElement::loadFromXml(const Proto::AfbElementXml& data, QString* errorMsg)
 	{
-		QByteArray ba(data.data().data(), static_cast<int>(data.data().size()));
+		QByteArray ba = QByteArray::fromRawData(data.data().data(), static_cast<int>(data.data().size()));
 
 		QDomDocument doc;
 

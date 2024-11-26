@@ -1,8 +1,6 @@
 #ifndef DIALOGSUBSYSTEMLISTEDITOR_H
 #define DIALOGSUBSYSTEMLISTEDITOR_H
 
-#include "../Builder/SubsystemStorage.h"
-
 namespace Ui {
 class DialogSubsystemListEditor;
 }

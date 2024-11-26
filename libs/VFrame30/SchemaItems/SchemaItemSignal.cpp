@@ -1,9 +1,9 @@
-#include <VFrame30/SchemaItemSignal.h>
-#include <VFrame30/SchemaView.h>
+#include <VFrame30/Context.h>
+#include <VFrame30/DrawParam.h>
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/PropertyNames.h>
-#include <VFrame30/DrawParam.h>
-#include <VFrame30/Context.h>
+#include <VFrame30/SchemaItemSignal.h>
+#include <VFrame30/SchemaView.h>
 
 
 namespace VFrame30
@@ -22,24 +22,42 @@ namespace VFrame30
 	SchemaItemSignal::SchemaItemSignal(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true)
+		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(
+			PropertyNames::appSignalIDs,
+			PropertyNames::functionalCategory,
+			true)
 			->setValidator(PropertyNames::appSignalIDsOrReferenceValidator);
 
-		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::impactAppSignalIds, &SchemaItemSignal::setImpactAppSignalIds>(PropertyNames::impactAppSignalIDs, PropertyNames::functionalCategory, true)
+		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::impactAppSignalIds, &SchemaItemSignal::setImpactAppSignalIds>(
+			PropertyNames::impactAppSignalIDs,
+			PropertyNames::functionalCategory,
+			true)
 			->setValidator(PropertyNames::appSignalIDsOrReferenceValidator);
 
-		addProperty<bool, SchemaItemSignal, &SchemaItemSignal::multiLine, &SchemaItemSignal::setMultiLine>(PropertyNames::multiLine, PropertyNames::appearanceCategory, true);
-		addProperty<int, SchemaItemSignal, &SchemaItemSignal::precision, &SchemaItemSignal::setPrecision>(PropertyNames::precision, PropertyNames::monitorCategory, true);
-		addProperty<E::AnalogFormat, SchemaItemSignal, &SchemaItemSignal::analogFormat, &SchemaItemSignal::setAnalogFormat>(PropertyNames::analogFormat, PropertyNames::monitorCategory, true);
-		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::customText, &SchemaItemSignal::setCustomText>(PropertyNames::customText, PropertyNames::monitorCategory, true);
-		addProperty<int, SchemaItemSignal, &SchemaItemSignal::columnCount, &SchemaItemSignal::setColumnCount>(PropertyNames::columnCount, PropertyNames::monitorCategory, true);
+		addProperty<bool, SchemaItemSignal, &SchemaItemSignal::multiLine, &SchemaItemSignal::setMultiLine>(
+			PropertyNames::multiLine,
+			PropertyNames::appearanceCategory,
+			true);
+		addProperty<int, SchemaItemSignal, &SchemaItemSignal::precision, &SchemaItemSignal::setPrecision>(PropertyNames::precision,
+																										  PropertyNames::monitorCategory,
+																										  true);
+		addProperty<E::AnalogFormat, SchemaItemSignal, &SchemaItemSignal::analogFormat, &SchemaItemSignal::setAnalogFormat>(
+			PropertyNames::analogFormat,
+			PropertyNames::monitorCategory,
+			true);
+		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::customText, &SchemaItemSignal::setCustomText>(
+			PropertyNames::customText,
+			PropertyNames::monitorCategory,
+			true);
+		addProperty<int, SchemaItemSignal, &SchemaItemSignal::columnCount, &SchemaItemSignal::setColumnCount>(
+			PropertyNames::columnCount,
+			PropertyNames::monitorCategory,
+			true);
 
 		return;
 	}
 
-	SchemaItemSignal::~SchemaItemSignal(void)
-	{
-	}
+	SchemaItemSignal::~SchemaItemSignal(void) {}
 
 	bool SchemaItemSignal::SaveData(Proto::Envelope* message) const
 	{
@@ -156,22 +174,22 @@ namespace VFrame30
 
 	void SchemaItemSignal::draw(CDrawParam* drawParam) const
 	{
-//		qDebug() << "--------";
-//		int hhh = cellRowCount();
-//		int www = cellColumnCount();
+		//		qDebug() << "--------";
+		//		int hhh = cellRowCount();
+		//		int www = cellColumnCount();
 
-//		for (int y = 0; y < hhh; y++)
-//		{
-//			QString s, d;
-//			for (int x = 0; x < www; x++)
-//			{
-//				s += tr("| %1 ").arg(cellAppSignalID(y, x), 16);
-//				d += tr("| %1 ").arg(E::valueToString<E::ColumnData>(cellData(y, x)), 16);
-//			}
-//			qDebug() << s;
-//			qDebug() << d;
-//			qDebug() << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ";
-//		}
+		//		for (int y = 0; y < hhh; y++)
+		//		{
+		//			QString s, d;
+		//			for (int x = 0; x < www; x++)
+		//			{
+		//				s += tr("| %1 ").arg(cellAppSignalID(y, x), 16);
+		//				d += tr("| %1 ").arg(E::valueToString<E::ColumnData>(cellData(y, x)), 16);
+		//			}
+		//			qDebug() << s;
+		//			qDebug() << d;
+		//			qDebug() << "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ";
+		//		}
 
 		auto context = this->context();
 		if (context == nullptr)
@@ -228,7 +246,7 @@ namespace VFrame30
 		//--
 		//
 		QPen linePen(lineColor());
-		linePen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);		// Don't use getter!
+		linePen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight); // Don't use getter!
 
 		// Draw slash lines
 		//
@@ -314,7 +332,7 @@ namespace VFrame30
 											bool* isInverted)
 	{
 		QString text;
-		
+
 		if (isInverted != nullptr)
 		{
 			*isInverted = false;
@@ -352,9 +370,7 @@ namespace VFrame30
 				text = signal.customSignalId();
 				if (text.isEmpty() == true)
 				{
-					text = drawMode == DrawMode::Editor ?
-							   signal.appSignalId() :
-							   QLatin1String("?");
+					text = drawMode == DrawMode::Editor ? signal.appSignalId() : QLatin1String("?");
 				}
 			}
 			else
@@ -369,9 +385,7 @@ namespace VFrame30
 				text = impactSignal.customSignalId();
 				if (text.isEmpty() == true)
 				{
-					text = drawMode == DrawMode::Editor ?
-							   impactSignal.appSignalId() :
-							   QLatin1String("?");
+					text = drawMode == DrawMode::Editor ? impactSignal.appSignalId() : QLatin1String("?");
 				}
 			}
 			else
@@ -387,14 +401,12 @@ namespace VFrame30
 
 				if (text.isEmpty() == true)
 				{
-					text = drawMode == DrawMode::Editor ?
-							   signal.appSignalId() :
-							   QLatin1String("?");
+					text = drawMode == DrawMode::Editor ? signal.appSignalId() : QLatin1String("?");
 				}
 			}
 			else
 			{
-				text = signal.appSignalId();			// Good to see AppSignalID while editing
+				text = signal.appSignalId(); // Good to see AppSignalID while editing
 			}
 			break;
 
@@ -404,14 +416,12 @@ namespace VFrame30
 				text = impactSignal.caption();
 				if (text.isEmpty() == true)
 				{
-					text = drawMode == DrawMode::Editor ?
-							   impactSignal.appSignalId() :
-							   QLatin1String("?");
+					text = drawMode == DrawMode::Editor ? impactSignal.appSignalId() : QLatin1String("?");
 				}
 			}
 			else
 			{
-				text = impactSignal.appSignalId();			// Good to see AppSignalID while editing
+				text = impactSignal.appSignalId(); // Good to see AppSignalID while editing
 			}
 			break;
 
@@ -551,7 +561,13 @@ namespace VFrame30
 		}
 		else
 		{
-			DrawHelper::drawTextCahed(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop, drawParam->schemaView()->zoom());
+			DrawHelper::drawTextCahed(painter,
+									  m_font,
+									  itemUnit(),
+									  text,
+									  rect,
+									  Qt::AlignLeft | Qt::AlignTop,
+									  drawParam->schemaView()->zoom());
 		}
 #else
 		DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop);
@@ -602,8 +618,8 @@ namespace VFrame30
 					appSignals[signalIndex] = AppSignalParam();
 					appSignalStates[signalIndex] = AppSignalState();
 
-					appSignals[signalIndex].setAppSignalId(id);			// If signal is not found it allows to show AppSignalID at least
-					appSignals[signalIndex].setCustomSignalId(id);		// If signal is not found it allows to show AppSignalID at least
+					appSignals[signalIndex].setAppSignalId(id);    // If signal is not found it allows to show AppSignalID at least
+					appSignals[signalIndex].setCustomSignalId(id); // If signal is not found it allows to show AppSignalID at least
 				}
 				else
 				{
@@ -620,7 +636,7 @@ namespace VFrame30
 				}
 			}
 
-			signalIndex ++;
+			signalIndex++;
 		}
 
 		// Get ImpactAppSignals
@@ -644,7 +660,7 @@ namespace VFrame30
 			impactAppSignals[signalIndex].setCustomSignalId(id);
 			impactAppSignalStates[signalIndex].m_flags.valid = false;
 
-			signalIndex ++;
+			signalIndex++;
 		}
 
 		signalIndex = 0;
@@ -661,12 +677,12 @@ namespace VFrame30
 
 				if (signalFound == false)
 				{
-					impactAppSignals[signalIndex].setAppSignalId(id);			// At least show AppSignalID
-					impactAppSignals[signalIndex].setCustomSignalId(id);		// At least show AppSignalID
+					impactAppSignals[signalIndex].setAppSignalId(id);    // At least show AppSignalID
+					impactAppSignals[signalIndex].setCustomSignalId(id); // At least show AppSignalID
 				}
 			}
 
-			signalIndex ++;
+			signalIndex++;
 		}
 
 		Q_ASSERT(impactAppSignals.size() >= appSignals.size());
@@ -735,55 +751,60 @@ namespace VFrame30
 		};
 
 		std::vector<CellDrawParam> cells;
-		cells.reserve(m_columns.size() * lineCount);		// It will be expanded more if is singleline and has [impact]states
+		cells.reserve(m_columns.size() * lineCount); // It will be expanded more if is singleline and has [impact]states
 
 		for (int row = 0; row < static_cast<int>(lineCount); row++)
 		{
-			double top = drawParam->gridToDpiY(rect.top() + row * columntHeight);
+			double cellTop = rect.top() + drawParam->gridToDpiY(row * columntHeight); // rect.top() already aligned to dpi
+			double cellHeight = columntHeight;
+			if (row == static_cast<int>(lineCount - 1))
+			{
+				// Give all rest height to the last line
+				//
+				cellHeight = rect.bottom() - cellTop;
+			}
+
 			double startOffset = 0;
 
-			int cellColumnIndex = 0;		// Differs from text columnIndex as state column can have several column states
+			int cellColumnIndex = 0;                         // Differs from text columnIndex as state column can have several column states
 			for (size_t columnIndex = 0; columnIndex < m_columns.size(); columnIndex++)
 			{
 				const Column& column = m_columns[columnIndex];
 
+				double cellLeft = rect.left() + startOffset; // startOffset accumulates columnWidth, which is already aligned to dpi
+
 				double columnWidth = rect.width() * (column.width / 100.0);
-				if (columnIndex == m_columns.size() - 1)
+				if (columnIndex == m_columns.size() - 1 || cellLeft + columnWidth > rect.right())
 				{
 					// if this is the last column, give all rest width to it
+					// Or if column width is more than the item rectangle.
 					//
-					columnWidth = rect.width() - startOffset;
+					columnWidth = rect.right() - cellLeft;
+				}
+				else
+				{
+					columnWidth = drawParam->gridToDpiX(columnWidth);
 				}
 
-				double left = drawParam->gridToDpiY(rect.left() + startOffset);
-
-				if (left + columnWidth > rect.right())
+				if ((column.data == E::ColumnData::State || column.data == E::ColumnData::ImpactState) && multiLine() == false)
 				{
-					// Limit width with the item rectangle
-					//
-					columnWidth = rect.right() - left;
-				}
+					auto& ids = column.data == E::ColumnData::State ? signalIds : impactSignalIds;
+					double subColumnWidth = drawParam->gridToDpiX(columnWidth / static_cast<double>(ids.size()));
 
-				if (multiLine() == false &&
-					(column.data == E::ColumnData::State || column.data == E::ColumnData::ImpactState))
-				{
 					// Divide column state on signal count and draw all them
 					//
-					if (column.data == E::ColumnData::State)
+					for (int f = 0; f < ids.size(); f++)
 					{
-						double subColumnWidth = columnWidth / signalIds.size();
+						QString text;
+						bool signalIsInverted = false;
 
-						for (int f = 0; f < signalIds.size(); f++)
+						if (QString overridenText = cellText(row, cellColumnIndex); overridenText.isNull() == false)
 						{
-							QString text;
-							bool signalIsInverted = false;
-
-							if (QString overridenText = cellText(row, cellColumnIndex);
-								overridenText.isNull() == false)
-							{
-								text = overridenText;
-							}
-							else
+							text = overridenText;
+						}
+						else
+						{
+							if (column.data == E::ColumnData::State)
 							{
 								text = getColumnText(context,
 													 drawParam->drawMode(),
@@ -796,36 +817,6 @@ namespace VFrame30
 													 m_analogFormat,
 													 m_precision,
 													 &signalIsInverted);
-							}
-
-							cells.emplace_back(row,
-											   cellColumnIndex,
-											   QRectF{left + subColumnWidth * f, top, subColumnWidth, columntHeight},
-											   text,
-											   cellFillColor(row, cellColumnIndex),
-											   cellTextColor(row, cellColumnIndex),
-											   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
-											   m_font.drawSize() / 8.0,
-											   signalIsInverted);
-
-							cellColumnIndex ++;
-						}
-					}
-					else
-					{
-						Q_ASSERT(column.data == E::ColumnData::ImpactState);
-
-						double subColumnWidth = columnWidth / impactSignalIds.size();
-
-						for (int f = 0; f < impactSignalIds.size(); f++)
-						{
-							QString text;
-							bool signalIsInverted = false;
-
-							if (QString overridenText = cellText(row, cellColumnIndex);
-								overridenText.isNull() == false)
-							{
-								text = overridenText;
 							}
 							else
 							{
@@ -841,19 +832,22 @@ namespace VFrame30
 													 m_precision,
 													 &signalIsInverted);
 							}
-
-							cells.emplace_back(row,
-											   cellColumnIndex,
-											   QRectF{left + subColumnWidth * f, top, subColumnWidth, columntHeight},
-											   text,
-											   cellFillColor(row, cellColumnIndex),
-											   cellTextColor(row, cellColumnIndex),
-											   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
-											   m_font.drawSize() / 8.0,
-											   signalIsInverted);
-
-							cellColumnIndex ++;
 						}
+
+						double subCellLeft = cellLeft + subColumnWidth * f;
+						double cellTextIndent = drawParam->gridToDpiY(m_font.drawSize() / 8.0);
+
+						cells.emplace_back(row,
+										   cellColumnIndex,
+										   QRectF{subCellLeft, cellTop, subColumnWidth, cellHeight},
+										   text,
+										   cellFillColor(row, cellColumnIndex),
+										   cellTextColor(row, cellColumnIndex),
+										   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
+										   cellTextIndent,
+										   signalIsInverted);
+
+						cellColumnIndex++;
 					}
 				}
 				else
@@ -863,8 +857,7 @@ namespace VFrame30
 					QString text;
 					bool signalIsInverted = false;
 
-					if (QString overridenText = cellText(row, cellColumnIndex);
-						overridenText.isNull() == false)
+					if (QString overridenText = cellText(row, cellColumnIndex); overridenText.isNull() == false)
 					{
 						text = overridenText;
 					}
@@ -883,17 +876,19 @@ namespace VFrame30
 											 &signalIsInverted);
 					}
 
+					double cellTextIndent = drawParam->gridToDpiY(m_font.drawSize() / 4.0);
+
 					cells.emplace_back(row,
 									   cellColumnIndex,
-									   QRectF{left, top, columnWidth, columntHeight},
+									   QRectF{cellLeft, cellTop, columnWidth, cellHeight},
 									   text,
 									   cellFillColor(row, cellColumnIndex),
 									   cellTextColor(row, cellColumnIndex),
 									   static_cast<int>(column.horzAlign) | static_cast<int>(Qt::AlignVCenter),
-									   m_font.drawSize() / 4.0,
+									   cellTextIndent,
 									   signalIsInverted);
 
-					cellColumnIndex ++;
+					cellColumnIndex++;
 				}
 
 				// --
@@ -933,8 +928,10 @@ namespace VFrame30
 			}
 
 			QRectF textRect = cell.rect;
-			textRect.setLeft(textRect.left() + cell.textIndent);
-			textRect.setRight(textRect.right() - cell.textIndent);
+			textRect.setTop(rect.top() + drawParam->gridToDpiY((cell.row) * columntHeight));
+			textRect.setLeft(drawParam->gridToDpiY(textRect.left() + cell.textIndent));
+			textRect.setBottom(rect.top() + drawParam->gridToDpiY((cell.row + 1) * columntHeight));
+			textRect.setRight(drawParam->gridToDpiY(textRect.right() - cell.textIndent));
 
 			if (textRect.width() > cell.textIndent)
 			{
@@ -950,7 +947,13 @@ namespace VFrame30
 				}
 				else
 				{
-					DrawHelper::drawTextCahed(painter, font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags, drawParam->schemaView()->zoom());
+					DrawHelper::drawTextCahed(painter,
+											  font,
+											  itemUnit(),
+											  cell.text,
+											  boundingRect,
+											  cell.textDrawFlags,
+											  drawParam->schemaView()->zoom());
 				}
 #else
 				DrawHelper::drawText(painter, font, itemUnit(), cell.text, boundingRect, cell.textDrawFlags);
@@ -966,84 +969,33 @@ namespace VFrame30
 		{
 			for (int i = 0; i < lineCount; i++)
 			{
-				double top = rect.top() + i * columntHeight;
-				double bottom = top + columntHeight;
+				double bottom = rect.top() + drawParam->gridToDpiY((i + 1) * columntHeight);
 
-				if (bottom > rect.bottom() ||
-					i == signalIds.size() - 1)	// Dont draw the last line
+				if (bottom > rect.bottom() || i == signalIds.size() - 1) // Dont draw the last line
 				{
 					break;
 				}
 
-				painter->drawLine(drawParam->gridToDpi(rect.left(), bottom),
-								  drawParam->gridToDpi(rect.right(), bottom));
+				painter->drawLine(QPointF{rect.left(), bottom}, QPointF{rect.right(), bottom});
 			}
 		}
 
 		//  Draw vertical dividers
 		//
-		std::vector<double> xpos;
-		xpos.reserve(32);
-
-		double startOffset = 0;
-
-		for (size_t i = 0; i < m_columns.size(); i++)
+		for (const CellDrawParam& cell : cells | std::views::filter(
+													 [this](const CellDrawParam& cell)
+													 {
+														 return cell.row == 0 && cell.column != (m_columns.size() - 1);
+													 }))
 		{
-			const Column& c = m_columns[i];
-			double width = rect.width() * (c.width / 100.0);
-
-			// if this is the last column, give all rest width to it
-			//
-			if (i == m_columns.size() - 1)
-			{
-				width = rect.width() - startOffset;
-			}
-
-			if (multiLine() == false && c.data == E::ColumnData::State)
-			{
-				double subColumnWidth = width / signalIds.size();
-
-				for (int f = 0; f < signalIds.size(); f++)
-				{
-					double x = rect.left() + startOffset + subColumnWidth * (f + 1);
-					xpos.push_back(x);
-				}
-
-				startOffset += width;
-				continue;
-			}
-
-			if (multiLine() == false && c.data == E::ColumnData::ImpactState)
-			{
-				double subColumnWidth = width / impactSignalIds.size();
-
-				for (int f = 0; f < impactSignalIds.size(); f++)
-				{
-					double x = rect.left() + startOffset + subColumnWidth * (f + 1);
-					xpos.push_back(x);
-				}
-
-				startOffset += width;
-				continue;
-			}
-
-			startOffset += width;
-
-			if (i < m_columns.size() - 1)	// don't draw last vert line
-			{
-				xpos.push_back(rect.left() + startOffset);
-			}
-		}
-
-		for (double x : xpos)
-		{
-			QPointF pt1{drawParam->gridToDpiX(x), rect.top()};
-			QPointF pt2{drawParam->gridToDpiX(x), rect.bottom()};
-
-			if (pt1.x() >= rect.right())
+			double x = cell.rect.right();
+			if (x >= rect.right())
 			{
 				break;
 			}
+
+			QPointF pt1{x, rect.top()};
+			QPointF pt2{x, rect.bottom()};
 
 			painter->drawLine(pt1, pt2);
 		}
@@ -1062,9 +1014,7 @@ namespace VFrame30
 
 	void SchemaItemSignal::drawSinglechannelValues(const Context* context, CDrawParam* drawParam, QPen& linePen) const
 	{
-		if (context == nullptr ||
-			drawParam == nullptr ||
-			multiChannel() == true)
+		if (context == nullptr || drawParam == nullptr || multiChannel() == true)
 		{
 			Q_ASSERT(context);
 			Q_ASSERT(drawParam);
@@ -1082,7 +1032,7 @@ namespace VFrame30
 
 		// Get AppSignal
 		//
-		QString appSignalId = appSignalIds();	// One signal is here as it is singlechannel item
+		QString appSignalId = appSignalIds(); // One signal is here as it is singlechannel item
 
 		AppSignalParam signal;
 		signal.setAppSignalId(appSignalId);
@@ -1093,9 +1043,7 @@ namespace VFrame30
 
 		if (context->appSignalController() != nullptr && isCommented() == false)
 		{
-			if (parentSchema()->isUfbSchema() == true)
-			{
-			}
+			if (parentSchema()->isUfbSchema() == true) {}
 			else
 			{
 				bool signalFound = false;
@@ -1105,8 +1053,8 @@ namespace VFrame30
 
 				if (signalFound == false)
 				{
-					signal.setAppSignalId(appSignalId);			// At least show AppSignalID
-					signal.setCustomSignalId(appSignalId);		// At least show CustomSignalID
+					signal.setAppSignalId(appSignalId);    // At least show AppSignalID
+					signal.setCustomSignalId(appSignalId); // At least show CustomSignalID
 				}
 			}
 		}
@@ -1131,8 +1079,8 @@ namespace VFrame30
 
 			if (signalFound == false)
 			{
-				impactSignal.setAppSignalId(impactAppSignalId);			// At least show AppSignalID
-				impactSignal.setCustomSignalId(impactAppSignalId);		// At least show AppSignalID
+				impactSignal.setAppSignalId(impactAppSignalId);    // At least show AppSignalID
+				impactSignal.setCustomSignalId(impactAppSignalId); // At least show AppSignalID
 			}
 		}
 
@@ -1166,7 +1114,7 @@ namespace VFrame30
 			}
 		}
 
-		// Fill cells and draw vertical line devider from the other columns.
+		// Fill cells and draw vertical line divider from the other columns.
 		//
 		bool someCellsAreFilled = false;
 
@@ -1194,8 +1142,7 @@ namespace VFrame30
 			QString text;
 			bool signalIsInverted = false;
 
-			if (QString overridenText = cellText(0, static_cast<int>(columnIndex));
-				overridenText.isNull() == false)
+			if (QString overridenText = cellText(0, static_cast<int>(columnIndex)); overridenText.isNull() == false)
 			{
 				text = overridenText;
 			}
@@ -1233,10 +1180,21 @@ namespace VFrame30
 				}
 				else
 				{
-					DrawHelper::drawTextCahed(painter, font, itemUnit(), text, textRect, column.horzAlign | static_cast<int>(Qt::AlignTop), drawParam->schemaView()->zoom());
+					DrawHelper::drawTextCahed(painter,
+											  font,
+											  itemUnit(),
+											  text,
+											  textRect,
+											  column.horzAlign | static_cast<int>(Qt::AlignTop),
+											  drawParam->schemaView()->zoom());
 				}
 #else
-				DrawHelper::drawText(painter, font, itemUnit(), text, textRect, static_cast<int>(c.horzAlign) | static_cast<int>(Qt::AlignTop));
+				DrawHelper::drawText(painter,
+									 font,
+									 itemUnit(),
+									 text,
+									 textRect,
+									 static_cast<int>(c.horzAlign) | static_cast<int>(Qt::AlignTop));
 #endif
 			}
 		}
@@ -1248,7 +1206,7 @@ namespace VFrame30
 		{
 			const QRectF& cellRect = cells[columnIndex];
 
-			if (columnIndex < m_columns.size() - 1)	// For all columns exceprt last
+			if (columnIndex < m_columns.size() - 1) // For all columns exceprt last
 			{
 				QPointF verLinePt1{drawParam->gridToDpiX(cellRect.right()), cellRect.top()};
 				QPointF verLinePt2{drawParam->gridToDpiX(cellRect.right()), cellRect.bottom()};
@@ -1271,16 +1229,34 @@ namespace VFrame30
 
 	void SchemaItemSignal::createColumnProperties()
 	{
-static const QString monitorColumnsCategory = "MonitorColumns";
+		static const QString monitorColumnsCategory = "MonitorColumns";
 
-static const QString column_width_caption[8] = {"Column_00_Width", "Column_01_Width", "Column_02_Width", "Column_03_Width",
-												"Column_04_Width", "Column_05_Width", "Column_06_Width", "Column_07_Width"};
+		static const QString column_width_caption[8] = {"Column_00_Width",
+														"Column_01_Width",
+														"Column_02_Width",
+														"Column_03_Width",
+														"Column_04_Width",
+														"Column_05_Width",
+														"Column_06_Width",
+														"Column_07_Width"};
 
-static const QString column_data_caption[8] = {"Column_00_Data", "Column_01_Data", "Column_02_Data", "Column_03_Data",
-											   "Column_04_Data", "Column_05_Data", "Column_06_Data", "Column_07_Data"};
+		static const QString column_data_caption[8] = {"Column_00_Data",
+													   "Column_01_Data",
+													   "Column_02_Data",
+													   "Column_03_Data",
+													   "Column_04_Data",
+													   "Column_05_Data",
+													   "Column_06_Data",
+													   "Column_07_Data"};
 
-static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Column_01_HorzAlign", "Column_02_HorzAlign", "Column_03_HorzAlign",
-											   "Column_04_HorzAlign", "Column_05_HorzAlign", "Column_06_HorzAlign", "Column_07_HorzAlign"};
+		static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign",
+															"Column_01_HorzAlign",
+															"Column_02_HorzAlign",
+															"Column_03_HorzAlign",
+															"Column_04_HorzAlign",
+															"Column_05_HorzAlign",
+															"Column_06_HorzAlign",
+															"Column_07_HorzAlign"};
 
 		if (m_columns.size() > 8)
 		{
@@ -1309,23 +1285,44 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		//
 		for (size_t i = 0; i < m_columns.size(); i++)
 		{
-			addProperty<double>(column_width_caption[i],
-								monitorColumnsCategory,
-								true,
-								[this, i](){return columnWidth(static_cast<int>(i));},
-								[this, i](auto value){return setColumnWidth(value, static_cast<int>(i));});
+			addProperty<double>(
+				column_width_caption[i],
+				monitorColumnsCategory,
+				true,
+				[this, i]()
+				{
+					return columnWidth(static_cast<int>(i));
+				},
+				[this, i](auto value)
+				{
+					return setColumnWidth(value, static_cast<int>(i));
+				});
 
-			addProperty<E::ColumnData>(column_data_caption[i],
-									   monitorColumnsCategory,
-									   true,
-									   [this, i](){return columnData(static_cast<int>(i));},
-									   [this, i](auto value){return setColumnData(value, static_cast<int>(i));});
+			addProperty<E::ColumnData>(
+				column_data_caption[i],
+				monitorColumnsCategory,
+				true,
+				[this, i]()
+				{
+					return columnData(static_cast<int>(i));
+				},
+				[this, i](auto value)
+				{
+					return setColumnData(value, static_cast<int>(i));
+				});
 
-			addProperty<E::HorzAlign>(column_horzAlign_caption[i],
-									  monitorColumnsCategory,
-									  true,
-									  [this, i](){return columnHorzAlign(static_cast<int>(i));},
-									  [this, i](auto value){return setColumnHorzAlign(value, static_cast<int>(i));});
+			addProperty<E::HorzAlign>(
+				column_horzAlign_caption[i],
+				monitorColumnsCategory,
+				true,
+				[this, i]()
+				{
+					return columnHorzAlign(static_cast<int>(i));
+				},
+				[this, i](auto value)
+				{
+					return setColumnHorzAlign(value, static_cast<int>(i));
+				});
 		}
 
 		// Allow signals and notify PropertyEditor that it can update property list now
@@ -1341,9 +1338,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	{
 		if (m_multiLine == true)
 		{
-			int linesCount = qBound(1,
-									static_cast<int>(m_appSignalIds.size()),
-									64);
+			int linesCount = qBound(1, static_cast<int>(m_appSignalIds.size()), 64);
 			return linesCount * gridSize * pinGridStep;
 		}
 		else
@@ -1398,7 +1393,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return transformIntoType<VFrame30::SchemaItemOutput>();
 	}
 
-	template <typename TYPE>
+	template<typename TYPE>
 	SchemaItemPtr SchemaItemSignal::transformIntoType()
 	{
 		Proto::Envelope message;
@@ -1651,8 +1646,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	double SchemaItemSignal::columnWidth(int columnIndex) const
 	{
-		if (columnIndex < 0 ||
-		    columnIndex >= static_cast<int>(m_columns.size()))
+		if (columnIndex < 0 || columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
 			assert(columnIndex < static_cast<int>(m_columns.size()));
@@ -1664,8 +1658,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	void SchemaItemSignal::setColumnWidth(double value, int columnIndex)
 	{
-		if (columnIndex < 0 ||
-		    columnIndex >= static_cast<int>(m_columns.size()))
+		if (columnIndex < 0 || columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
 			assert(columnIndex < static_cast<int>(m_columns.size()));
@@ -1688,8 +1681,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	E::ColumnData SchemaItemSignal::columnData(int columnIndex) const
 	{
-		if (columnIndex < 0 ||
-		    columnIndex >= static_cast<int>(m_columns.size()))
+		if (columnIndex < 0 || columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
 			assert(columnIndex < static_cast<int>(m_columns.size()));
@@ -1701,8 +1693,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	void SchemaItemSignal::setColumnData(E::ColumnData value, int columnIndex)
 	{
-		if (columnIndex < 0 ||
-		    columnIndex >= static_cast<int>(m_columns.size()))
+		if (columnIndex < 0 || columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
 			assert(columnIndex < static_cast<int>(m_columns.size()));
@@ -1715,8 +1706,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	E::HorzAlign SchemaItemSignal::columnHorzAlign(int columnIndex) const
 	{
-		if (columnIndex < 0 ||
-		    columnIndex >= static_cast<int>(m_columns.size()))
+		if (columnIndex < 0 || columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
 			assert(columnIndex < static_cast<int>(m_columns.size()));
@@ -1728,8 +1718,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	void SchemaItemSignal::setColumnHorzAlign(E::HorzAlign value, int columnIndex)
 	{
-		if (columnIndex < 0 ||
-		    columnIndex >= static_cast<int>(m_columns.size()))
+		if (columnIndex < 0 || columnIndex >= static_cast<int>(m_columns.size()))
 		{
 			assert(columnIndex >= 0);
 			assert(columnIndex < static_cast<int>(m_columns.size()));
@@ -1744,10 +1733,8 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	{
 		for (const Column& c : m_columns)
 		{
-			if (c.data == E::ColumnData::ImpactAppSignalID ||
-				c.data == E::ColumnData::ImpactCaption ||
-				c.data == E::ColumnData::ImpactCustomSignalID ||
-				c.data == E::ColumnData::ImpactState)
+			if (c.data == E::ColumnData::ImpactAppSignalID || c.data == E::ColumnData::ImpactCaption ||
+				c.data == E::ColumnData::ImpactCustomSignalID || c.data == E::ColumnData::ImpactState)
 			{
 				return true;
 			}
@@ -1833,14 +1820,14 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	{
 		if (row < 0 || column < 0)
 		{
-			return E::ColumnData::CustomText/*empty*/;
+			return E::ColumnData::CustomText /*empty*/;
 		}
 
 		if (multiLine() == true)
 		{
 			if (static_cast<size_t>(column) >= m_columns.size())
 			{
-				return E::ColumnData::CustomText/*empty*/;
+				return E::ColumnData::CustomText /*empty*/;
 			}
 
 			return m_columns[column].data;
@@ -1858,7 +1845,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 				case E::ColumnData::State:
 					for (int i = 0; i < m_appSignalIds.size(); i++)
 					{
-						x ++;
+						x++;
 						if (x == column)
 						{
 							return c.data;
@@ -1868,7 +1855,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 				case E::ColumnData::ImpactState:
 					for (int i = 0; i < m_impactAppSignalIds.size(); i++)
 					{
-						x ++;
+						x++;
 						if (x == column)
 						{
 							return c.data;
@@ -1909,17 +1896,13 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			case E::ColumnData::CustomSignalID:
 			case E::ColumnData::Caption:
 			case E::ColumnData::State:
-				return (row < m_appSignalIds.size()) == true ?
-							m_appSignalIds[row] :
-							QString{};
+				return (row < m_appSignalIds.size()) == true ? m_appSignalIds[row] : QString{};
 
 			case E::ColumnData::ImpactAppSignalID:
 			case E::ColumnData::ImpactCustomSignalID:
 			case E::ColumnData::ImpactCaption:
 			case E::ColumnData::ImpactState:
-				return (row < m_impactAppSignalIds.size()) == true ?
-							m_impactAppSignalIds[row] :
-							QString{};
+				return (row < m_impactAppSignalIds.size()) == true ? m_impactAppSignalIds[row] : QString{};
 
 			case E::ColumnData::CustomText:
 				return QString{};
@@ -1932,40 +1915,32 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		else
 		{
 			auto foundFunc = [this](const Column& c, int indexInColumn) -> QString
+			{
+				switch (c.data)
 				{
-					switch (c.data)
-					{
-					case E::ColumnData::AppSignalID:
-					case E::ColumnData::CustomSignalID:
-					case E::ColumnData::Caption:
-						return m_appSignalIds.empty() == true ?
-									QString{} :
-									m_appSignalIds.front();
+				case E::ColumnData::AppSignalID:
+				case E::ColumnData::CustomSignalID:
+				case E::ColumnData::Caption:
+					return m_appSignalIds.empty() == true ? QString{} : m_appSignalIds.front();
 
-					case E::ColumnData::State:
-						return indexInColumn < m_appSignalIds.size() ?
-									m_appSignalIds[indexInColumn] :
-									QString{};
+				case E::ColumnData::State:
+					return indexInColumn < m_appSignalIds.size() ? m_appSignalIds[indexInColumn] : QString{};
 
-					case E::ColumnData::ImpactAppSignalID:
-					case E::ColumnData::ImpactCustomSignalID:
-					case E::ColumnData::ImpactCaption:
-						return m_impactAppSignalIds.empty() == true ?
-									QString{} :
-									m_impactAppSignalIds.front();
+				case E::ColumnData::ImpactAppSignalID:
+				case E::ColumnData::ImpactCustomSignalID:
+				case E::ColumnData::ImpactCaption:
+					return m_impactAppSignalIds.empty() == true ? QString{} : m_impactAppSignalIds.front();
 
-					case E::ColumnData::ImpactState:
-						return indexInColumn < m_impactAppSignalIds.size() ?
-									m_impactAppSignalIds[indexInColumn] :
-									QString{};
+				case E::ColumnData::ImpactState:
+					return indexInColumn < m_impactAppSignalIds.size() ? m_impactAppSignalIds[indexInColumn] : QString{};
 
-					case E::ColumnData::CustomText:
-						return QString{};
-					}
-
-					Q_ASSERT(false);
+				case E::ColumnData::CustomText:
 					return QString{};
-				};
+				}
+
+				Q_ASSERT(false);
+				return QString{};
+			};
 
 			int x = -1;
 			for (const Column& c : m_columns)
@@ -1975,7 +1950,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 				case E::ColumnData::State:
 					for (int i = 0; i < m_appSignalIds.size(); i++)
 					{
-						x ++;
+						x++;
 						if (x == column)
 						{
 							return foundFunc(c, i);
@@ -1985,7 +1960,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 				case E::ColumnData::ImpactState:
 					for (int i = 0; i < m_impactAppSignalIds.size(); i++)
 					{
-						x ++;
+						x++;
 						if (x == column)
 						{
 							return foundFunc(c, i);
@@ -2136,7 +2111,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	bool SchemaItemInput::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItemSignal::SaveData(message);
-		
+
 		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
@@ -2146,9 +2121,9 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 		// --
 		//
-		/*Proto::VideoItemInputSignal* inputSignal = */message->MutableExtension(Proto::schemaitem)->mutable_inputsignal();
+		/*Proto::VideoItemInputSignal* inputSignal = */ message->MutableExtension(Proto::schemaitem)->mutable_inputsignal();
 
-		//inputSignal->set_weight(weight);
+		// inputSignal->set_weight(weight);
 
 		return true;
 	}
@@ -2188,12 +2163,12 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			return false;
 		}
 
-		/*const Proto::VideoItemInputSignal& inputSignal = */message.GetExtension(Proto::schemaitem).inputsignal();
-		//fill = inputSignal.fill();
+		/*const Proto::VideoItemInputSignal& inputSignal = */ message.GetExtension(Proto::schemaitem).inputsignal();
+		// fill = inputSignal.fill();
 
 		return true;
 	}
-	
+
 	//
 	// CSchemaItemOutputSignal
 	//
@@ -2240,7 +2215,7 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 	bool SchemaItemOutput::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItemSignal::SaveData(message);
-		
+
 		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
@@ -2250,9 +2225,9 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 		// --
 		//
-		/*Proto::VideoItemOutputSignal* outputSignal = */message->MutableExtension(Proto::schemaitem)->mutable_outputsignal();
+		/*Proto::VideoItemOutputSignal* outputSignal = */ message->MutableExtension(Proto::schemaitem)->mutable_outputsignal();
 
-		//inputSignal->set_weight(weight);
+		// inputSignal->set_weight(weight);
 
 		return true;
 	}
@@ -2291,8 +2266,8 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			return false;
 		}
 
-		/*const Proto::VideoItemOutputSignal& outputSignal = */message.GetExtension(Proto::schemaitem).outputsignal();
-		//fill = inputSignal.fill();
+		/*const Proto::VideoItemOutputSignal& outputSignal = */ message.GetExtension(Proto::schemaitem).outputsignal();
+		// fill = inputSignal.fill();
 
 		return true;
 	}
@@ -2351,9 +2326,9 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 		// --
 		//
-		/*Proto::VideoItemOutputSignal* inoutSignal = */message->MutableExtension(Proto::schemaitem)->mutable_inoutsignal();
+		/*Proto::VideoItemOutputSignal* inoutSignal = */ message->MutableExtension(Proto::schemaitem)->mutable_inoutsignal();
 
-		//inoutSignal->set_weight(weight);
+		// inoutSignal->set_weight(weight);
 
 		return true;
 	}
@@ -2393,11 +2368,10 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			return false;
 		}
 
-		/*const Proto::VideoItemOutputSignal& inoutSignal = */message.GetExtension(Proto::schemaitem).inoutsignal();
-		//fill = inoutSignal.fill();
+		/*const Proto::VideoItemOutputSignal& inoutSignal = */ message.GetExtension(Proto::schemaitem).inoutsignal();
+		// fill = inoutSignal.fill();
 
 		return true;
 	}
 
-}
-
+} // namespace VFrame30

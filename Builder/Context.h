@@ -1,6 +1,5 @@
 #pragma once
 
-#include <DbLib/DbController.h>
 #include <SimulatorLib/SimProfiles.h>
 
 #include "../AppSignalLib/Bus.h"

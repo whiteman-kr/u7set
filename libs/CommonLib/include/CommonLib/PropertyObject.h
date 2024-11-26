@@ -1636,6 +1636,17 @@ public:
 
 	std::vector<std::pair<int, QString>> enumValues(const QString& caption);
 
+	bool setPropertyVisible(const QString& caption, bool visible) 
+	{
+		auto prop = propertyByCaption(caption);
+		if (prop == nullptr)
+		{
+			return false;
+		}
+		prop->setVisible(visible);
+		return true;
+	}
+
 	//
 	// Parse specific properties
 	//
@@ -1692,7 +1703,7 @@ signals:
 	void propertyListChanged();		// One or more properties were added or deleted
 
 private:
-	QHash<QString, std::shared_ptr<Property>> m_properties;		// key is property Caption
+	std::unordered_map<QString, std::shared_ptr<Property>> m_properties;		// key is property Caption
 	mutable bool m_allPropsAlreadyDemanded = false;
 };
 

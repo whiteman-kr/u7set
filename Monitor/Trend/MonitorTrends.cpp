@@ -1,7 +1,8 @@
 #include "MonitorTrends.h"
 
-#include <TrendView/ISignalHasTag.h>
 #include <TrendView/DialogChooseTrendSignals.h>
+#include <TrendView/ISignalHasTag.h>
+#include <TrendView/Trend.h>
 #include <TrendView/TrendSignalSet.h>
 
 
@@ -140,6 +141,8 @@ MonitorTrendsWidget::MonitorTrendsWidget(const ClientLib::AppSignalManager& sign
 	MonitorTrends::registerTrendWindow(this);
 
 	setWindowTitle(trendName);
+
+	setProject(m_configController.configuration().configInfo.project);
 
 	// Status bar
 	//
@@ -643,8 +646,10 @@ void MonitorTrendsWidget::slot_trendModeChanged()
 	return;
 }
 
-void MonitorTrendsWidget::slot_configurationArrived(MonitorConfigSettings /*configuration*/)
+void MonitorTrendsWidget::slot_configurationArrived(MonitorConfigSettings configuration)
 {
+	setProject(configuration.configInfo.project);
+
 	if (trendMode() == E::TrendMode::Archive)
 	{
 		m_archiveDataProvider.updateConnections();

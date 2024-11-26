@@ -862,19 +862,38 @@ namespace TrendLib
 
 		int result = d.exec();
 
-		if (result == QDialog::Accepted)
+		if (result != QDialog::Accepted) 
 		{
-			QPrinter* printer = d.printer();
-
-			lastPageLayout = printer->pageLayout();
-			lastResolution = printer->resolution();
-			lastFullPage = printer->fullPage();
-			lastCopyCount = printer->copyCount();
-
-			// Print
-			//
-			m_trendWidget->print(printer);
+			return;
 		}
+
+#if 0
+		QPrintPreviewDialog preview{d.printer(), this};
+
+		connect(&preview,
+				&QPrintPreviewDialog::paintRequested,
+				[this](QPrinter* printer)
+				{
+					m_trendWidget->print(printer);
+				}
+		);
+
+		auto previewResult = preview.exec();
+		if (previewResult == QDialog::Rejected)
+		{
+			return;
+		}
+#endif
+		QPrinter* printer = d.printer();
+
+		lastPageLayout = printer->pageLayout();
+		lastResolution = printer->resolution();
+		lastFullPage = printer->fullPage();
+		lastCopyCount = printer->copyCount();
+
+		// Print
+		//
+		m_trendWidget->print(printer);
 
 		return;
 	}
@@ -1588,5 +1607,16 @@ namespace TrendLib
 	{
 		trend().impl().rulerSet().setRulerStep(value);
 	}
+
+	QString TrendMainWindow::project() const
+	{
+		return m_trendWidget->project();
+	}
+
+	void TrendMainWindow::setProject(const QString& value)
+	{
+		m_trendWidget->setProject(value);
+	}
+
 
 } // namespace TrendLib

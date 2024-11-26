@@ -339,7 +339,10 @@ message SchemaItemLine
     optional int32 lineStyleCap = 7 [default = 16];		// 16 is default Qt::SquareCap
 	optional int32 lineCapStart = 4 [default = 0];		// 16 is default NoCap
 	optional int32 lineCapEnd = 5 [default = 0];		// 16 is default NoCap
-	optional double lineCapFactor = 6 [default = 2.0];
+
+	optional double lineCapFactorObsolete = 6 [default = 2.0];
+	optional double lineCapSize = 11; // Default 0, then use lineCapFactorObsolete
+	optional double useLineCapSize = 12;
 }
 
 //
@@ -354,7 +357,10 @@ message SchemaItemPath
     optional int32 lineStyleCap = 7 [default = 16];		// 16 is default Qt::SquareCap
 	optional int32 lineCapStart = 4 [default = 0];		// 16 is default NoCap
 	optional int32 lineCapEnd = 5 [default = 0];		// 16 is default NoCap
-	optional double lineCapFactor = 6 [default = 2.0];
+	
+	optional double lineCapFactorObsolete = 6 [default = 2.0];
+	optional double lineCapSize = 11; // Default 0, then use lineCapFactorObsolete
+	optional double useLineCapSize = 12;
 }
 
 //

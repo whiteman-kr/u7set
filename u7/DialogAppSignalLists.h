@@ -14,7 +14,6 @@ namespace Builder
 	class AppSignalListStorage;
 }
 
-class DbController;
 
 class DialogAppSignalLists : public QDialog
 {

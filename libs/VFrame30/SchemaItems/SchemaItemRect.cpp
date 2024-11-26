@@ -17,6 +17,31 @@ namespace VFrame30
 		m_fillColor(qRgb(0xC0, 0xC0, 0xC0)),
 		m_textColor(qRgb(0x00, 0x00, 0x00))
 	{
+		m_font.setName(QStringLiteral("Arial"));
+
+		switch (unit)
+		{
+		case SchemaUnit::Display:
+			m_font.setSize(12.0, unit);
+			break;
+		case SchemaUnit::Inch:
+			m_font.setSize(1.0 / 8.0, unit);		// 1/8"
+			break;
+		case SchemaUnit::Millimeter:
+			m_font.setSize(mm2in(3), unit);
+			break;
+		default:
+			assert(false);
+		}
+
+		m_static = true;
+		setItemUnit(unit);
+	}
+
+	void SchemaItemRect::propertyDemand(const QString& prop)
+	{
+		PosRectRotatable::propertyDemand(prop);
+
 		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemRect::weight, SchemaItemRect::setWeight);
 
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemRect::lineColor, SchemaItemRect::setLineColor);
@@ -43,29 +68,9 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::textCategory, true, SchemaItemRect::getFontName, SchemaItemRect::setFontName);
 		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::textCategory, true, SchemaItemRect::getFontSize, SchemaItemRect::setFontSize);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemRect::getFontBold, SchemaItemRect::setFontBold);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true,  SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true, SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
 
-		// --
-		//
-		m_font.setName(QStringLiteral("Arial"));
-
-		switch (unit)
-		{
-		case SchemaUnit::Display:
-			m_font.setSize(12.0, unit);
-			break;
-		case SchemaUnit::Inch:
-			m_font.setSize(1.0 / 8.0, unit);		// 1/8"
-			break;
-		case SchemaUnit::Millimeter:
-			m_font.setSize(mm2in(3), unit);
-			break;
-		default:
-			assert(false);
-		}
-
-		m_static = true;
-		setItemUnit(unit);
+		return;
 	}
 
 	// Serialization
@@ -286,7 +291,12 @@ namespace VFrame30
 				m_cacheTextImage.isNull() == true ||
 				m_cacheTextImage.size() != clipRectInt.size())
 			{
-				double deviceDpr = drawParam->devicePixelRatio();
+				const double deviceDpr = drawParam->devicePixelRatio();
+
+				const double dpiX = CDrawParam::realDpiX(painter);
+				const double dpiY = CDrawParam::realDpiY(painter);
+				const double physicalDpiX = dpiX / deviceDpr;
+				const double physicalDpiY = dpiY / deviceDpr;
 
 				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
 				m_cacheTextImage.setDevicePixelRatio(deviceDpr);
@@ -296,8 +306,8 @@ namespace VFrame30
 				QPainter p{&m_cacheTextImage};
 
 				SchemaView::Ajust(&p,
-								  painter->device()->physicalDpiX(),
-								  painter->device()->physicalDpiY(),
+								  physicalDpiX,
+								  physicalDpiY,
 								  painter->device()->devicePixelRatioF(),
 								  itemUnit(),
 								  0,
@@ -335,18 +345,20 @@ namespace VFrame30
 				m_cacheTextImage.size() != clipRectInt.size())
 			{
 				double deviceDpr = drawParam->devicePixelRatio();
+				double physicalDpiX = dpiX / deviceDpr;
+				double physicalDpiY = dpiY / deviceDpr;
 
 				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
-				m_cacheTextImage.setDotsPerMeterX(static_cast<int>(painter->device()->physicalDpiX() / 25.4 * 1000.0));
-				m_cacheTextImage.setDotsPerMeterY(static_cast<int>(painter->device()->physicalDpiY() / 25.4 * 1000.0));
+				m_cacheTextImage.setDotsPerMeterX(static_cast<int>(physicalDpiX / 25.4 * 1000.0));
+				m_cacheTextImage.setDotsPerMeterY(static_cast<int>(physicalDpiY / 25.4 * 1000.0));
 				m_cacheTextImage.setDevicePixelRatio(deviceDpr);
 
 				m_cacheTextImage.fill(qRgba(0, 0, 0, 0));	// Transparent
 
 				QPainter p{&m_cacheTextImage};
 				SchemaView::Ajust(&p,
-								  painter->device()->physicalDpiX(),
-								  painter->device()->physicalDpiY(),
+								  physicalDpiX, 
+								  physicalDpiY,
 								  deviceDpr,
 								  itemUnit(),
 								  0,

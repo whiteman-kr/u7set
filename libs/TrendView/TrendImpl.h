@@ -84,6 +84,8 @@ namespace TrendLib
 									std::vector<TrendSignalParam>* discretes,
 									std::vector<TrendSignalParam>* analogs);
 
+		static QRectF calcProjectNameRect(const TrendParam& drawParam);
+
 		static QRectF calcLaneRect(size_t laneIndex, const TrendParam& drawParam);
 		QRectF calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam) const;
 		static QRectF calcTrendArea(const QRectF& laneRect, const TrendParam& drawParam, size_t analogSignalCount);
@@ -121,18 +123,20 @@ namespace TrendLib
 							 const TrendParam& drawParam,
 							 int flags,
 							 QRectF* boundingRect = nullptr);
+		
+		static QSizeF calcTextSize(QPainter* painter, const QString& str, const TrendParam& drawParam);
 
 		// Properties
 		//
 	public:
-		QUuid uuid() const;
+		[[nodiscard]] QUuid uuid() const;
 		void setUuid(QUuid value);
 
-		TrendLib::TrendSignalSet& signalSet();
-		const TrendLib::TrendSignalSet& signalSet() const;
+		[[nodiscard]] TrendLib::TrendSignalSet& signalSet();
+		[[nodiscard]] const TrendLib::TrendSignalSet& signalSet() const;
 
-		TrendLib::TrendRulerSet& rulerSet();
-		const TrendLib::TrendRulerSet& rulerSet() const;
+		[[nodiscard]] TrendLib::TrendRulerSet& rulerSet();
+		[[nodiscard]] const TrendLib::TrendRulerSet& rulerSet() const;
 
 	private:
 		QUuid m_uuid{};                           // id of trend, used for SchemaItemIndicator, to identfy schemaitem

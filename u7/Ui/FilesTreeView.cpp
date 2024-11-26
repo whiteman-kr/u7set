@@ -1,6 +1,5 @@
 #include "FilesTreeView.h"
 
-#include <DbLib/DbController.h>
 #include <DbLib/DbControllerTools.h>
 #include <UiLib/StandardColors.h>
 

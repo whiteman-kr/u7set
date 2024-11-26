@@ -1,5 +1,4 @@
 #pragma once
-#include <DbLib/DbStruct.h>
 #include <UiLib/ClickableLabel.h>
 #include "./Locator/EquipmentLocatorProvider.h"
 #include "./Locator/ConnectionLocatorProvider.h"
@@ -9,7 +8,6 @@
 #include "./Locator/LocatorEditControl.h"
 
 class CentralWidget;
-class DbController;
 class ProjectsTabPage;
 class SchemasTabPage;
 class SchemasTabPage;

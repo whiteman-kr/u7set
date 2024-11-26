@@ -8,7 +8,6 @@
 #include "SignalsTabPage.h"
 #include "Settings.h"
 #include "SignalPropertiesDialog.h"
-#include "BusStorage.h"
 #include "AppSignalSetProvider.h"
 #include "UndoSignalsDialog.h"
 #include "SignalHistoryDialog.h"

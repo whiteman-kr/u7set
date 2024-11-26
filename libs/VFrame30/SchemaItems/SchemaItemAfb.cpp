@@ -584,25 +584,15 @@ namespace VFrame30
 			.arg(label());
 	}
 
-	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, std::shared_ptr<Schema> schema, QString* errorMsg)
+	bool SchemaItemAfb::setAfbParam(const QString& name, QVariant value, QString* errorMsg)
 	{
 		if (name.isEmpty() == true ||
-			schema == nullptr ||
 			errorMsg == nullptr)
 		{
 			assert(name.isEmpty() != true);
-			assert(schema != nullptr);
 			assert(errorMsg);
 			return false;
 		}
-
-		if (value.canConvert<Afb::AfbParamValue>() == false)
-		{
-			Q_ASSERT(value.canConvert<Afb::AfbParamValue>());
-			return false;
-		}
-
-		Afb::AfbParamValue newValue = value.value<Afb::AfbParamValue>();
 
 		auto found = std::find_if(m_afbElement.params().begin(), m_afbElement.params().end(), [&name](const Afb::AfbParam& p)
 								  {
@@ -613,6 +603,29 @@ namespace VFrame30
 		{
 			assert(found != m_afbElement.params().end());
 			return false;
+		}
+
+		Afb::AfbParamValue newValue;
+
+		if (value.canConvert<Afb::AfbParamValue>() == true)
+		{
+			newValue = value.value<Afb::AfbParamValue>();
+		}
+		else
+		{
+			newValue = found->afbParamValue();
+			auto currentValueTypeId = newValue.value().typeId();
+
+			if (value.canConvert(QMetaType{currentValueTypeId}) == true)
+			{
+				value.convert(QMetaType{currentValueTypeId});
+				newValue.setValue(value);
+			}
+			else
+			{
+				*errorMsg = tr("Failed to convert QValue to AfbParamValue");
+				return false;
+			}
 		}
 
 		if (found->afbParamValue() != newValue)

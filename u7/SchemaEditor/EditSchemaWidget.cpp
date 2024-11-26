@@ -6,6 +6,7 @@
 
 #include <VFrame30/SchemaDetails.h>
 #include <VFrame30/SchemaItemAfb.h>
+#include <VFrame30/SchemaItemConnection.h>
 #include <VFrame30/SchemaItemConst.h>
 #include <VFrame30/SchemaItemDiagValue.h>
 #include <VFrame30/SchemaItemImage.h>
