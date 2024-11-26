@@ -17,30 +17,16 @@
 
 namespace
 {
-	enum class VduStringType
-	{
-		UTF16,
-		UTF8
-	};
-
 	struct VduFileString
 	{
 		QString string;
-		VduStringType type = VduStringType::UTF16;
 		uint32_t stringRefOffset = 0; // Offset to the string reference in the file.
 
 		static const uint32_t stub = StringRefStub;
 
-		// --
-		//
-		static VduFileString createUtf16(const QString& string, uint32_t stringRefOffset)
-		{
-			return VduFileString{.string = string.trimmed(), .type = VduStringType::UTF16, .stringRefOffset = stringRefOffset};
-		}
-
 		static VduFileString createUtf8(const QString& string, uint32_t stringRefOffset)
 		{
-			return VduFileString{.string = string.trimmed(), .type = VduStringType::UTF8, .stringRefOffset = stringRefOffset};
+			return VduFileString{.string = string.trimmed(), .stringRefOffset = stringRefOffset};
 		}
 	};
 
@@ -76,6 +62,8 @@ namespace
 		{
 		}
 
+		// SchemaItemVduLine
+		//
 		void visit(const VFrame30::SchemaItemVduLine& schemaItem) override
 		{
 			reset();
@@ -98,6 +86,8 @@ namespace
 			outData = QByteArray(reinterpret_cast<const char*>(&structLine), sizeof(structLine));
 		}
 
+		// SchemaItemVduRect
+		//
 		void visit(const VFrame30::SchemaItemVduRect& schemaItem) override
 		{
 			reset();
@@ -150,7 +140,7 @@ namespace
 
 			structRect.text = VduFileString::stub;
 
-			auto text = VduFileString::createUtf16(schemaItem.text(),
+			auto text = VduFileString::createUtf8(schemaItem.text(),
 												   sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemRect1, text));
 			addedStrings.push_back(std::move(text));
 
@@ -158,6 +148,8 @@ namespace
 			outData = QByteArray(reinterpret_cast<const char*>(&structRect), sizeof(structRect));
 		}
 
+		// SchemaItemVduValue
+		//
 		void visit(const VFrame30::SchemaItemVduValue& schemaItem) override
 		{
 			reset();
@@ -207,8 +199,7 @@ namespace
 
 			structValue.decimalPlaces = schemaItem.precision();
 
-			// Save text, this text is embedded to the structure, as it can be used in the script.
-			// NOW WE WRITE TEXT AS UTF8, MAYBE WE NEED TO WRITE IT AS UTF16, we will see later.
+			// Save text in UTF-8, this text is embedded to the structure, as it can be used in the script.
 			//
 			auto text = schemaItem.text().toUtf8();
 			text.truncate(sizeof(structValue.text) - 2);
@@ -343,22 +334,21 @@ namespace
 
 		void clear() { *this = {}; }
 
-		Offset addString(const QString& str, Offset offset, VduStringType type)
+		Offset addString(const QString& str, Offset offset)
 		{
-			auto vduString =
-				type == VduStringType::UTF16 ? VduFileString::createUtf16(str, offset) : VduFileString::createUtf8(str, offset);
+			auto vduString = VduFileString::createUtf8(str, offset);
 
-			m_offsetToString.insert(std::pair{Key{str, type}, vduString});
-			m_strings.insert(std::pair{str, type});
+			m_offsetToString.insert(std::pair{Key{str}, vduString});
+			m_strings.insert(str);
 
 			return VduFileString::stub;
 		}
 
-		std::vector<std::pair<QString, VduStringType>> strings() const { return {m_strings.begin(), m_strings.end()}; }
+		std::vector<QString> strings() const { return {m_strings.begin(), m_strings.end()}; }
 
-		std::vector<VduFileString> offsets(const QString& str, VduStringType type) const
+		std::vector<VduFileString> offsets(const QString& str) const
 		{
-			Key key{str, type};
+			Key key{str};
 
 			auto [beginIt, endIt] = m_offsetToString.equal_range(key);
 
@@ -376,7 +366,7 @@ namespace
 		}
 
 	private:
-		using Key = std::pair<QString, VduStringType>;
+		using Key = QString;
 
 		std::multimap<Key, VduFileString> m_offsetToString;
 		std::set<Key> m_strings;
@@ -559,23 +549,19 @@ namespace Builder
 
 			schemaProperties.schemaId =
 				stringWriter.addString(schema.schemaId(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, schemaId),
-									   VduStringType::UTF16);
+									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, schemaId));
 
 			schemaProperties.caption =
 				stringWriter.addString(schema.caption(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, caption),
-									   VduStringType::UTF16);
+									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, caption));
 
 			schemaProperties.onShowScript =
 				stringWriter.addString(schema.onShowScript(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, onShowScript),
-									   VduStringType::UTF8);
+									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, onShowScript));
 
 			schemaProperties.preDrawScript =
 				stringWriter.addString(schema.preDrawScript(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, preDrawScript),
-									   VduStringType::UTF8);
+									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, preDrawScript));
 
 			schemaProperties.reserve1 = 0;
 			schemaProperties.reserve2 = 0;
@@ -637,7 +623,7 @@ namespace Builder
 				//
 				for (const auto& str : addedItemStrings)
 				{
-					stringWriter.addString(str.string, str.stringRefOffset + out.size(), str.type);
+					stringWriter.addString(str.string, str.stringRefOffset + out.size());
 				}
 
 				// Save item's data to the output buffer.
@@ -677,44 +663,27 @@ namespace Builder
 
 		addPadding(out, 4);
 
-		for (const auto [str, type] : stringWriter.strings())
+		for (const auto& str : stringWriter.strings())
 		{
-			auto stringOffset = static_cast<vdu_string_ref>(out.size());
+			auto stringOffset = static_cast<vdu_cstr>(out.size());
 
 			// Write string size.
 			//
+			std::string utf8Str = str.toUtf8().toStdString();
 
-			if (type == VduStringType::UTF16)
-			{
-				// Write string size.
-				//
-				uint16_t stringSize = static_cast<uint16_t>(str.size());
-				out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
+			// Write string size.
+			//
+			uint16_t stringSize = static_cast<uint16_t>(utf8Str.size());
+			out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
 
-				// Write string data.
-				//
-				out.append(reinterpret_cast<const char*>(str.constData()), (str.size() + 1) * sizeof(QChar)); // +1 for null terminator
-			}
-			else
-			{
-				Q_ASSERT(type == VduStringType::UTF8);
-
-				std::string utf8Str = str.toUtf8().toStdString();
-
-				// Write string size.
-				//
-				uint16_t stringSize = static_cast<uint16_t>(utf8Str.size());
-				out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
-
-				// Write string data.
-				//
-				out.append(reinterpret_cast<const char*>(utf8Str.data()),
-						   (utf8Str.size() + 1) * sizeof(std::string::value_type)); // +1 for null terminator
-			}
+			// Write string data.
+			//
+			out.append(reinterpret_cast<const char*>(utf8Str.data()),
+					   (utf8Str.size() + 1) * sizeof(std::string::value_type)); // +1 for null terminator
 
 			// Replace string_ref with offset to the string.
 			//
-			for (const auto& stringData : stringWriter.offsets(str, type))
+			for (const auto& stringData : stringWriter.offsets(str))
 			{
 				out.replace(stringData.stringRefOffset,
 							sizeof(vdu_string_ref),

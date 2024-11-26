@@ -14,44 +14,75 @@ void setSchema(string schemaId)
 ## Common - AppSignals
 
 ```c
-bool isDiscrete(string appSignalId)
-bool isDiscreteByIndex(int appSignalIndex)
+bool signalExists(string signalId)
+bool signalExistsByIndex(int signalIndex)
 ```
 
 ```c
-bool isAnalog(string appSignalId)
-bool IsAnalogByIndex(int appSignalIndex)
+bool isDiscrete(string signalId)
+bool isDiscreteByIndex(int signalIndex)
 ```
 
 ```c
-int signalType(string appSignalId)
-int signalTypeByIndex(int appSignalIndex)
+bool isAnalog(string signalId)
+bool IsAnalogByIndex(int signalIndex)
 ```
 
 ```c
-double signalValue(string appSignalId) // double covers float and int32
-double signalValueByIndex(int appSignalIndex)
+int signalType(string signalId)
+int signalTypeByIndex(int signalIndex)
 ```
 
 ```c
-float signalFloatValue(string appSignalId)
-float signalFloatValueByIndex(int appSignalIndex)
+float signalValueFloat(string signalId)
+float signalValueByIndexFloat(int signalIndex)
 ```
 
 ```c
-int32 signalIntValue(string appSignalId)
-int32 signalIntValueByIndex(int appSignalIndex)
+int32 signalValueInt(string signalId)
+int32 signalValueByIndexInt(int signalIndex)
 ```
 
 ```c
-uint32 signalFlags(string appSignalId)
-uint32 signalFlagsByIndex(int appSignalIndex)
+uint32 signalFlags(string signalId)
+uint32 signalFlagsByIndex(int signalIndex)
 ```
 
 ```c
-bool signalExists(string appSignalId)
-bool signalExistsByIndex(int appSignalIndex)
+int32 signalLowLimitInt(string signalId)
+float signalLowLimitFloat(string signalId)
+
+int32 signalLowLimitByIndexInt(int signalIndex)
+float signalLowLimitByIndexFloat(int signalIndex)
 ```
+
+```c
+int32 signalPropertyInt(string signalId, int property)
+int32 signalPropertyByIndexInt(int signalIndex, int property)
+
+float signalPropertyFloat(string signalId, int property)
+float signalPropertyByIndexFloat(int signalIndex, int property)
+
+// Argument property:
+// 1 - LowEngineeringUnit
+// 2 - HighEngineeringUnit
+```
+
+## Control - AppSignals
+
+```c
+bool writeValueInt(string signalId, int32 value);
+bool writeValueByIndexInt(int signalIndex, int32 value);
+
+bool writeValueFloat(string signalId, float value);
+bool writeValueByIndexFloat(string signalId, float value);
+```
+
+```c
+bool copyValue(string sourceSignalId, string targetSignalId);
+bool copyValueByIndex(int sourceSignalIndex, int targetSignalIndex);
+```
+
 
 ## SchemaItem - Common
 
@@ -89,14 +120,13 @@ int signalGlobalIndex(SchemaItem* item, int signalIndex)
 ```
 
 ```c
-double itemSignalValue(SchemaItem* item, int signalIndex)
-// double covers float and all 32-bit integers, 
-// returns NaN if signalIndex is out of range
+int32 itemSignalValueInt(SchemaItem* item, int signalIndex)
+float itemSignalValueFloat(SchemaItem* item, int signalIndex)
 ```
 
 ```c
-int32 itemSignalIntValue(SchemaItem* item, int signalIndex)
-float itemSignalFloatValue(SchemaItem* item, int signalIndex)
+bool itemAcceptClick(SchemaItem* item);
+void itemSetAcceptClick(SchemaItem* item, bool value);
 ```
 
 ### SchemaItemVduLine
@@ -142,6 +172,11 @@ void itemRectSetFillColor(Item* item, uint32 color)
 ```c
 uint32 itemRectTextColor(SchemaItem* item)
 void itemRectSetTextColor(SchemaItem* item, uint32 color)
+```
+
+```c
+string itemRectText(SchemaItem* item)
+void itemRectSetText(SchemaItem* item, string text)
 ```
 
 ### SchemaItemVduValue
