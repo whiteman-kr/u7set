@@ -60,6 +60,7 @@ enum class VduSignalInOutType
 	Internal = 1,
 	Input = 2,
 	Output = 3,
+	RxSignal = 4
 };
 
 struct VduAppSignal
@@ -92,15 +93,24 @@ struct VduAppSignal
 	uint32_t tuningLowBound;
 	uint32_t tuningHighBound;
 
+	uint32_t lowEngineeringUnits;
+	uint32_t highEngineeringUnits;
+
+	//
+
+	uint16_t decimalPlaces;
+
 	// in/out signals addresses in VDU memory
 	//
 	uint16_t ioOffset;
 	uint16_t ioBit;
+
+	uint16_t reserv1;				// align to 4 bytes
 };
 
 struct VduHash32ToIndex
 {
-	uint32_t hash32;					// calcHash32(appSignalID.toUtf8())
+	uint32_t hash32;				// calcHash32(appSignalID.toUtf8())
 	uint32_t signalIndex;			// 32-bit! signal index
 };
 

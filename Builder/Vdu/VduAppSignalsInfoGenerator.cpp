@@ -472,28 +472,6 @@ namespace Builder
 		si.ioOffset = 0xFFFF;
 		si.ioBit = 0xFFFF;
 
-		/*		if (isTxSignals)
-		{
-			auto ioIt = m_inOutSignals.find(appSignal->appSignalID());
-
-			if (ioIt != m_inOutSignals.end())
-			{
-				ioType = getVduSignalInOutType(appSignal);
-
-				si.ioOffset = static_cast<quint16>(ioIt->second.second.offset());
-				si.ioBit = static_cast<quint16>(ioIt->second.second.bit());
-
-				//
-
-				if (eraseIoSignal)
-				{
-					m_inOutSignals.erase(ioIt);
-				}
-			}
-		}*/
-
-		//
-
 		// here this is offsets in m_string table, NOT in file!
 		//
 		si.refAppSignalID = appendString(appSignal->appSignalID());
@@ -518,7 +496,13 @@ namespace Builder
 
 		//
 
-		// si.ioOffset, si.ioBit - already filled
+		si.lowEngineeringUnits = vduSignalUntypedValue(vduSignalType, appSignal->lowEngineeringUnits());
+		si.highEngineeringUnits = vduSignalUntypedValue(vduSignalType, appSignal->highEngineeringUnits());
+		si.decimalPlaces = static_cast<uint16_t>(appSignal->decimalPlaces());
+
+		// si.ioOffset, si.ioBit will be filled later
+
+		si.reserv1 = 0x2424;	// $$
 
 		return true;
 	}
@@ -737,49 +721,59 @@ namespace Builder
 
 	void VduAppSignalsInfoGenerator::printAppSignals(QStringList& file) const
 	{
-		file << LINE;
+		file << LLINE;
 		file << "              VDU AppSignals";
-		file << LINE;
-		file << "  Address   | index  | inOutType | signalType | boolProps | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | tunLowBound | tunHighBound | ioOffset | ioBit";		file << LINE;
+		file << LLINE;
+		file << "  Address   | index  | inOutType | signalType | boolProps | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | tunLowBound | tunHighBound | lowEngUnits | highEngUnits | decPlaces | ioOffset | ioBit";
+		file << LLINE;
 
 		for(const auto& [id, vs] : m_vduSignals)
 		{
 			file << addrStr(sizeof(vs),
-							QString("%1 | %2    | %3     | %4    | %5     | %6      | %7 | %8 | %9 | %10  | %11   | %12   | %13").
-							arg(hex16(vs.signalIndex)).
-							arg(hex16(vs.vduSignalInOutType)).
-							arg(hex16(vs.vduSignalType)).
-							arg(hex16(vs.boolProps)).
-							arg(hex32(vs.refAppSignalID)).
-							arg(hex32(vs.refCustomAppSignalID)).
-							arg(hex32(vs.refCaption)).
-							arg(hex32(vs.refUnit)).
-							arg(hex32(vs.tuningDefaultValue)).
-							arg(hex32(vs.tuningLowBound)).
-							arg(hex32(vs.tuningHighBound)).
-							arg(hex16(vs.ioOffset)).
-							arg(hex16(vs.ioBit)));
+							QString("%1 | %2    | %3     | %4    | %5     | %6      | %7 | %8 | %9 | %10  | %11   | %12  | %13   | %14    | %15   | %16 ").
+							arg(hex16(vs.signalIndex)).					//	1
+							arg(hex16(vs.vduSignalInOutType)).			//	2
+							arg(hex16(vs.vduSignalType)).				//	3
+							arg(hex16(vs.boolProps)).					//	4
+							arg(hex32(vs.refAppSignalID)).				//	5
+							arg(hex32(vs.refCustomAppSignalID)).		//	6
+							arg(hex32(vs.refCaption)).					//	7
+							arg(hex32(vs.refUnit)).						//	8
+							arg(hex32(vs.tuningDefaultValue)).			//	9
+							arg(hex32(vs.tuningLowBound)).				//	10
+							arg(hex32(vs.tuningHighBound)).				//	11
+							arg(hex32(vs.lowEngineeringUnits)).			//	12
+							arg(hex32(vs.highEngineeringUnits)).		//	13
+							arg(hex16(vs.decimalPlaces)).				//	14
+							arg(hex16(vs.ioOffset)).					//	15
+							arg(hex16(vs.ioBit)));						//	16
 		}
 	}
 
 	void VduAppSignalsInfoGenerator::printHashToIndex(QStringList& file) const
 	{
-		file << LINE;
+		file << LLINE;
 		file << "              Hash to SignalIndex";
-		file << LINE;
-		file << "  Address   | hash32     | signalIndex ";
-		file << LINE;
+		file << LLINE;
+		file << "  Address   | hash32     | signalIndex | AppSignalID (for reference only, not included in VduAppSignals.bin )";
+		file << LLINE;
 
 		for(const auto& [h32, index] : m_hash32ToSignalIndex)
 		{
-			file << addrStr(sizeof(VduHash32ToIndex), QString("%1 | %2").arg(hex32(h32), hex32(index)));
+			auto it = m_hash32AppSignalID.find(h32);
+
+			if (it == m_hash32AppSignalID.end())
+			{
+				Q_ASSERT(false);
+			}
+			file << addrStr(sizeof(VduHash32ToIndex), QString("%1 | %2  | %3").arg(hex32(h32), hex32(index), it->second));
 		}
+
+		file << LLINE;
 	}
 
 	void VduAppSignalsInfoGenerator::printOptoPortsInfo(QStringList& file) const
 	{
-
-		file << LINE;
 		file << "              Opto ports info table";
 		file << LINE;
 		file << "  Address   | portIndex | linkID    | rxDataSizeW | txDataSizeW | rxDataUID  | txDataUID";
@@ -1051,6 +1045,26 @@ namespace Builder
 
 		case VduSignalType::AnalogFloat32:
 			return std::bit_cast<uint32_t>(std::numeric_limits<float>::max());
+
+		case VduSignalType::Unknown:
+			Q_ASSERT(false);
+		}
+
+		return 0;
+	}
+
+	uint32_t VduAppSignalsInfoGenerator::vduSignalUntypedValue(VduSignalType type, double dblValue)
+	{
+		switch(type)
+		{
+		case VduSignalType::Discrete:
+			return (dblValue == 0 ? 0 : 1);
+
+		case VduSignalType::AnalogSignedInt32:
+			return std::bit_cast<uint32_t>(static_cast<int32_t>(dblValue));
+
+		case VduSignalType::AnalogFloat32:
+			return std::bit_cast<uint32_t>(static_cast<float>(dblValue));
 
 		case VduSignalType::Unknown:
 			Q_ASSERT(false);

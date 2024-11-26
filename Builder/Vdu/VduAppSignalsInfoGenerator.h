@@ -51,6 +51,8 @@ namespace Builder
 		uint32_t vduSignalLowBoundUntyped(VduSignalType type);
 		uint32_t vduSignalHighBoundUntyped(VduSignalType type);
 
+		uint32_t vduSignalUntypedValue(VduSignalType type, double dbValue);
+
 		QString addrStr(int fieldSize, const QString& str) const;
 		QString hex16(qint64 v) const;
 		QString hex32(qint64 v) const;
@@ -86,6 +88,7 @@ namespace Builder
 		uint64_t m_crc64 = 0;
 		uint64_t m_crc64Offset = 0;
 
-		inline static const QString LINE = QString().fill('-', 181);
+		inline static const QString LLINE = QString().fill('-', 222);
+		inline static const QString LINE = QString().fill('-', 90);
 	};
 }
