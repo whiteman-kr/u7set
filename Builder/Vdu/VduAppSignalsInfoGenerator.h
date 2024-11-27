@@ -20,6 +20,7 @@ namespace Builder
 		bool writeFiles(const ModuleLogicCompiler* mlc);
 
 	private:
+		bool buildIoSignalsAddrMap();
 		bool fillAppSignalsInfo();
 		bool fillOptoPortsInfo();
 		bool fillTxRxSignalsInfo(uint16_t portIndex,
@@ -27,7 +28,8 @@ namespace Builder
 								 std::vector<VduTxRxAppSignal>* txRxSignals);
 		bool fillHeader();
 
-		bool appendVduSignal(const QString& appSignalID, bool isRxSignal, Hash32* h32);
+		bool appendVduSignal(const QString& appSignalID, bool isRxSignal,
+							 uint16_t portIndex, const Address16& rxAddr, Hash32* h32);
 		bool appendHash32AppSignalID(const QString& appSignalID);
 		vdu_cstr appendString(const QString& str);
 		void recalcStringsRefs(uint32_t stringsOffsetInFile);
@@ -68,6 +70,7 @@ namespace Builder
 		BuildResultWriterShared m_resultWriter;
 		IssueLogger* m_log = nullptr;
 
+		std::map<QString, Address16> m_ioSignalsAddr;			// In/Out AppSignalID => Address16
 		mutable int m_txtOffset = 0;
 
 		VduAppSignalsFileHeader m_header;
@@ -80,7 +83,7 @@ namespace Builder
 		std::vector<VduOptoPort> m_optoPorts;
 
 		std::vector<VduTxRxAppSignal> m_txAppSignals;
-		std::vector<VduTxRxAppSignal> m_rxAppSignals;
+//		std::vector<VduTxRxAppSignal> m_rxAppSignals;
 
 		std::vector<uint8_t> m_strings;
 		std::map<Hash32, vdu_cstr> m_stringRefs;
@@ -88,7 +91,9 @@ namespace Builder
 		uint64_t m_crc64 = 0;
 		uint64_t m_crc64Offset = 0;
 
-		inline static const QString LLINE = QString().fill('-', 222);
+		inline static const QString LLINE = QString().fill('-', 235);
 		inline static const QString LINE = QString().fill('-', 90);
+
+		inline static const uint16_t NOT_VALID16 = 0xFFFF;
 	};
 }

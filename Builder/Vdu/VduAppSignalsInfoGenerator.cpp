@@ -71,9 +71,45 @@ namespace Builder
 		return result;
 	}
 
+	bool VduAppSignalsInfoGenerator::buildIoSignalsAddrMap()
+	{
+		const std::vector<AppSignal*>& ioSignals = m_mlc->ioSignals();
+
+		for(const AppSignal* ioSignal : ioSignals)
+		{
+			TEST_PTR_CONTINUE(ioSignal);
+
+			if (m_ioSignalsAddr.contains(ioSignal->appSignalID()))
+			{
+				Q_ASSERT(false);
+				LOG_INTERNAL_ERROR(m_log);
+				continue;
+			}
+
+			Hardware::DeviceAppSignal* deviceAppSignal = nullptr;
+
+			bool res = m_mlc->getDeviceAppSignal(*ioSignal, &deviceAppSignal);
+
+			if (res == false)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceAppSignal not found for app signal %1").
+											arg(ioSignal->appSignalID()));
+				return false;
+			}
+
+			m_ioSignalsAddr.emplace(ioSignal->appSignalID(),
+										Address16(deviceAppSignal->valueOffset(),
+													deviceAppSignal->valueBit()));
+		}
+
+		return true;
+	}
+
 	bool VduAppSignalsInfoGenerator::fillAppSignalsInfo()
 	{
-		bool result = true;
+		bool result = buildIoSignalsAddrMap();
+
+		RETURN_IF_FALSE(result);
 
 		// append VDU module native input/output/internal signals
 		//
@@ -85,41 +121,9 @@ namespace Builder
 
 			Hash32 h32 = 0;
 
-			result &= appendVduSignal(s->appSignalID(), false, &h32);
+			result &= appendVduSignal(s->appSignalID(), false, NOT_VALID16, Address16(), &h32);
 
 			Q_ASSERT(h32 != 0);
-		}
-
-		//
-
-		const std::vector<AppSignal*>& ioSignals = m_mlc->ioSignals();
-
-		for(const AppSignal* ioSignal : ioSignals)
-		{
-			TEST_PTR_CONTINUE(ioSignal);
-
-			auto it = m_vduSignals.find(ioSignal->appSignalID());
-
-			if (it == m_vduSignals.end())
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			Hardware::DeviceAppSignal* deviceAppSignal = nullptr;
-
-			bool res = m_mlc->getDeviceAppSignal(*ioSignal, &deviceAppSignal);
-
-			if (res == false)
-			{
-				result = false;
-				continue;
-			}
-
-			VduAppSignal& vas = it->second;
-
-			vas.ioOffset = static_cast<uint16_t>(deviceAppSignal->valueOffset());
-			vas.ioBit = static_cast<uint16_t>(deviceAppSignal->valueBit());
 		}
 
 		RETURN_IF_FALSE(result);
@@ -130,6 +134,8 @@ namespace Builder
 
 		// apped signals received by opto connections
 		//
+		uint16_t portIndex = 0;
+
 		for(const auto& [equipID, port] : m_vduOptoModule->ports())
 		{
 			TEST_PTR_CONTINUE(port);
@@ -146,11 +152,15 @@ namespace Builder
 
 				Hash32 signalHash = 0;
 
-				result &= appendVduSignal(ids[0], true, &signalHash);
+				bool res = appendVduSignal(ids[0], true, portIndex, rx->addrInBuf(), &signalHash);
+
+				if (res == false)
+				{
+					result = false;
+					continue;
+				}
 
 				Q_ASSERT(signalHash != 0);
-
-				RETURN_IF_FALSE(result);
 
 				if (ids.size() > 1)
 				{
@@ -158,9 +168,13 @@ namespace Builder
 					{
 						const QString& synonym = ids[i];
 
-						result &= appendHash32AppSignalID(synonym);
+						res = appendHash32AppSignalID(synonym);
 
-						RETURN_IF_FALSE(result);
+						if (res == false)
+						{
+							result = false;
+							continue;
+						}
 
 						Hash32 synHash = utf8Hash32(synonym);
 
@@ -176,6 +190,8 @@ namespace Builder
 					}
 				}
 			}
+
+			portIndex++;
 		}
 
 		// set signalIndexes and build m_hash32ToSignalIndex map
@@ -237,50 +253,6 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-
-		//		m_mlc->m_moduleSignals
-
-		/*		for(const auto& [equipID, port] : m_inOutSignals)
-
-		for(const auto& [equipID, port] : m_vduModule->ports())
-		{
-			TEST_PTR_CONTINUE(port);
-
-			result &= fillSignalsInfo(portIndex, port->rxSignals(), m_rxAppSignals);
-		}*/
-
-		/*		int portIndex = 0;
-
-		for(const auto& [equipID, port] : m_vduModule->ports())
-		{
-			TEST_PTR_CONTINUE(port);
-
-			result &= fillSignalsInfo(portIndex, port->rxSignals(), m_rxAppSignals);
-
-			portIndex++;
-		}
-
-		portIndex = 0;
-
-		for(const auto& [equipID, port] : m_vduModule->ports())
-		{
-			TEST_PTR_CONTINUE(port);
-
-			result &= fillSignalsInfo(portIndex, port->txSignals(), m_txAppSignals);
-
-			portIndex++;
-		}
-
-		// append info of ioSignals not transmitted via opto ports
-		//
-		for(const auto& [appSignalID, ioTypeAddr] : m_inOutSignals)
-		{
-			static const quint16 NOT_VALID_PORT_INDEX = 0xFFFF;
-			static const Address16 NOT_VALID_PORT_ADDR;
-
-			result &= appendVduSignal(NOT_VALID_PORT_INDEX, appSignalID, NOT_VALID_PORT_ADDR, true, false, m_txAppSignals);
-		}*/
-
 		return result;
 	}
 
@@ -319,14 +291,14 @@ namespace Builder
 		}
 
 		m_txAppSignals.reserve(txSignalsCount);
-		m_rxAppSignals.reserve(rxSignalsCount);
+//		m_rxAppSignals.reserve(rxSignalsCount);
 
 		portIndex = 0;
 
 		for(const auto& [equipmentID, port] : m_vduOptoModule->ports())
 		{
 			result &= fillTxRxSignalsInfo(portIndex, port->txSignals(), &m_txAppSignals);
-			result &= fillTxRxSignalsInfo(portIndex, port->rxSignals(), &m_rxAppSignals);
+//			result &= fillTxRxSignalsInfo(portIndex, port->rxSignals(), &m_rxAppSignals);
 
 			portIndex++;
 		}
@@ -357,8 +329,8 @@ namespace Builder
 
 			txRxSignals->emplace_back(VduTxRxAppSignal{	.optoPortIndex = portIndex,
 														.signalIndex = signalIndex,
-														.valueOffsetW = static_cast<uint16_t>(ps->addrInBuf().offset()),
-														.valueBitNo = static_cast<uint16_t>(ps->addrInBuf().bit())});
+														.offsetW = static_cast<uint16_t>(ps->addrInBuf().offset()),
+														.bitNo = static_cast<uint16_t>(ps->addrInBuf().bit())});
 		}
 
 		return result;
@@ -378,8 +350,10 @@ namespace Builder
 		m_header.appSignalsCount = static_cast<uint16_t>(m_vduSignals.size());
 		m_header.hash32ToIndexCount = static_cast<uint16_t>(m_hash32ToSignalIndex.size());
 		m_header.optoPortsCount = static_cast<uint16_t>(m_optoPorts.size());
-		m_header.rxAppSignalsCount = static_cast<uint16_t>(m_rxAppSignals.size());
+//		m_header.rxAppSignalsCount = static_cast<uint16_t>(m_rxAppSignals.size());
 		m_header.txAppSignalsCount = static_cast<uint16_t>(m_txAppSignals.size());
+
+		m_header.reserv1 = 0;
 
 		//Q_ASSERT(m_header.optoPortsCount == VDU_OPTO_PORTS_COUNT);
 
@@ -389,9 +363,9 @@ namespace Builder
 
 		m_header.refOptoPorts = m_header.refHash32ToIndex + m_header.hash32ToIndexCount * sizeof(VduHash32ToIndex);
 
-		m_header.refRxAppSignals = m_header.refOptoPorts + m_header.optoPortsCount * sizeof(VduOptoPort);
+//		m_header.refRxAppSignals = m_header.refOptoPorts + m_header.optoPortsCount * sizeof(VduOptoPort);
 
-		m_header.refTxAppSignals = m_header.refRxAppSignals + m_header.rxAppSignalsCount * sizeof(VduTxRxAppSignal);
+		m_header.refTxAppSignals = m_header.refOptoPorts + m_header.optoPortsCount * sizeof(VduOptoPort);
 
 		m_header.refStrings = m_header.refTxAppSignals + m_header.txAppSignalsCount * sizeof(VduTxRxAppSignal);
 
@@ -400,7 +374,8 @@ namespace Builder
 		return true;
 	}
 
-	bool VduAppSignalsInfoGenerator::appendVduSignal(const QString& appSignalID, bool isRxSignal, Hash32* h32)
+	bool VduAppSignalsInfoGenerator::appendVduSignal(const QString& appSignalID, bool isRxSignal,
+													 uint16_t portIndex, const Address16& rxAddr, Hash32* h32)
 	{
 		TEST_PTR_RETURN_FALSE(h32);
 
@@ -412,6 +387,30 @@ namespace Builder
 
 		if (it != m_vduSignals.end())
 		{
+			const VduAppSignal& vs = it->second;
+
+			if (isRxSignal &&
+				(static_cast<VduSignalInOutType>(vs.vduSignalInOutType) == VduSignalInOutType::RxSignal))
+			{
+				QList<Hardware::OptoPortShared> ports;
+				m_vduOptoModule->getOptoPorts(ports);
+
+				if (vs.rxPortIndex >= ports.size() ||
+					portIndex >= ports.size())
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				// App signal %1 received simultaneously via %2 and %3 opto ports of VDU %4
+				//
+				m_log->errCFG3054(appSignalID,
+								  ports[vs.rxPortIndex]->equipmentID(),
+								  ports[portIndex]->equipmentID(),
+								  m_vduOptoModule->equipmentID());
+				return false;
+			}
+
 			*h32 = utf8Hash32(appSignalID);
 			return true;							// already appended
 		}
@@ -420,7 +419,7 @@ namespace Builder
 
 		if (appSignal == nullptr)
 		{
-			LOG_INTERNAL_ERROR_MSG(m_log, QString("AppSignal %1 not found").arg(appSignal->appSignalID()));
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("AppSignal %1 not found").arg(appSignalID));
 			return false;
 		}
 
@@ -437,19 +436,43 @@ namespace Builder
 
 		VduAppSignal& si = it2->second;
 
-		si.signalIndex = 0xFFFF;		// will set after m_vduSignals full filling
+		si.signalIndex = NOT_VALID16;		// will set after m_vduSignals full filling
 
 		VduSignalInOutType inOutType = VduSignalInOutType::Internal;
 
+		si.rxPortIndex = NOT_VALID16;
+		si.offsetW = NOT_VALID16;
+		si.bitNo = NOT_VALID16;
+
 		if (!isRxSignal)
 		{
-			// NOT rx signal
-			//
 			inOutType = getVduSignalInOutType(appSignal);
+
+			if (inOutType == VduSignalInOutType::Input ||
+				inOutType == VduSignalInOutType::Output)
+			{
+				auto it3 = m_ioSignalsAddr.find(appSignalID);
+
+				if (it3 != m_ioSignalsAddr.end())
+				{
+					si.offsetW = it3->second.offset();
+					si.bitNo = it3->second.bit();
+				}
+				else
+				{
+					LOG_INTERNAL_ERROR_MSG(m_log, QString("AppSignal %1 not found in m_ioSignalsAddr map").
+							arg(appSignalID));
+					return false;
+				}
+			}
 		}
 		else
 		{
-			// rx signals always treats as Internal
+			inOutType = VduSignalInOutType::RxSignal;
+
+			si.rxPortIndex = portIndex;
+			si.offsetW = rxAddr.offset();
+			si.bitNo = rxAddr.bit();
 		}
 
 		si.vduSignalInOutType = static_cast<uint16_t>(inOutType);
@@ -468,9 +491,6 @@ namespace Builder
 		}
 
 		//
-
-		si.ioOffset = 0xFFFF;
-		si.ioBit = 0xFFFF;
 
 		// here this is offsets in m_string table, NOT in file!
 		//
@@ -499,10 +519,6 @@ namespace Builder
 		si.lowEngineeringUnits = vduSignalUntypedValue(vduSignalType, appSignal->lowEngineeringUnits());
 		si.highEngineeringUnits = vduSignalUntypedValue(vduSignalType, appSignal->highEngineeringUnits());
 		si.decimalPlaces = static_cast<uint16_t>(appSignal->decimalPlaces());
-
-		// si.ioOffset, si.ioBit will be filled later
-
-		si.reserv1 = 0x2424;	// $$
 
 		return true;
 	}
@@ -631,8 +647,8 @@ namespace Builder
 		data.append(reinterpret_cast<const char*>(m_optoPorts.data()),
 					m_optoPorts.size() * sizeof(VduOptoPort));
 
-		data.append(reinterpret_cast<const char*>(m_rxAppSignals.data()),
-					m_rxAppSignals.size() * sizeof(VduTxRxAppSignal));
+		// data.append(reinterpret_cast<const char*>(m_rxAppSignals.data()),
+		// 			m_rxAppSignals.size() * sizeof(VduTxRxAppSignal));
 
 		data.append(reinterpret_cast<const char*>(m_txAppSignals.data()),
 					m_txAppSignals.size() * sizeof(VduTxRxAppSignal));
@@ -659,7 +675,7 @@ namespace Builder
 		printAppSignals(file);
 		printHashToIndex(file);
 		printOptoPortsInfo(file);
-		printTxRxSignalsInfo(file, m_rxAppSignals);
+//		printTxRxSignalsInfo(file, m_rxAppSignals);
 		printTxRxSignalsInfo(file, m_txAppSignals);
 		printStringsTable(file);
 		printCrc64(file);
@@ -694,11 +710,14 @@ namespace Builder
 		file << addrStr(sizeof(m_header.optoPortsCount),
 						QString("optoPortsCount           | %1").arg(m_header.optoPortsCount)) ;
 
-		file << addrStr(sizeof(m_header.rxAppSignalsCount),
-						QString("rxAppSignalsCount        | %1").arg(m_header.rxAppSignalsCount)) ;
+		// file << addrStr(sizeof(m_header.rxAppSignalsCount),
+		// 				QString("rxAppSignalsCount        | %1").arg(m_header.rxAppSignalsCount)) ;
 
 		file << addrStr(sizeof(m_header.txAppSignalsCount),
 						QString("txAppSignalsCount        | %1").arg(m_header.txAppSignalsCount)) ;
+
+		file << addrStr(sizeof(m_header.reserv1),
+						QString("reserv1                  | %1").arg(m_header.reserv1)) ;
 
 		file << addrStr(sizeof(m_header.refAppSignals),
 						QString("refAppSignals            | %1").arg(hex32(m_header.refAppSignals)));
@@ -709,8 +728,8 @@ namespace Builder
 		file << addrStr(sizeof(m_header.refOptoPorts),
 						QString("refOptoPorts             | %1").arg(hex32(m_header.refOptoPorts)));
 
-		file << addrStr(sizeof(m_header.refRxAppSignals),
-						QString("refRxAppSignals          | %1").arg(hex32(m_header.refRxAppSignals)));
+		// file << addrStr(sizeof(m_header.refRxAppSignals),
+		// 				QString("refRxAppSignals          | %1").arg(hex32(m_header.refRxAppSignals)));
 
 		file << addrStr(sizeof(m_header.refTxAppSignals),
 						QString("refTxAppSignals          | %1").arg(hex32(m_header.refTxAppSignals)));
@@ -724,29 +743,30 @@ namespace Builder
 		file << LLINE;
 		file << "              VDU AppSignals";
 		file << LLINE;
-		file << "  Address   | index  | inOutType | signalType | boolProps | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | tunLowBound | tunHighBound | lowEngUnits | highEngUnits | decPlaces | ioOffset | ioBit";
+		file << "  Address   | index  | inOutType | signalType | boolProps | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | tunLowBound | tunHighBound | lowEngUnits | highEngUnits | decPlaces | rxPortIndex | offsetW | bitNo";
 		file << LLINE;
 
 		for(const auto& [id, vs] : m_vduSignals)
 		{
 			file << addrStr(sizeof(vs),
-							QString("%1 | %2    | %3     | %4    | %5     | %6      | %7 | %8 | %9 | %10  | %11   | %12  | %13   | %14    | %15   | %16 ").
-							arg(hex16(vs.signalIndex)).					//	1
-							arg(hex16(vs.vduSignalInOutType)).			//	2
-							arg(hex16(vs.vduSignalType)).				//	3
-							arg(hex16(vs.boolProps)).					//	4
-							arg(hex32(vs.refAppSignalID)).				//	5
-							arg(hex32(vs.refCustomAppSignalID)).		//	6
-							arg(hex32(vs.refCaption)).					//	7
-							arg(hex32(vs.refUnit)).						//	8
-							arg(hex32(vs.tuningDefaultValue)).			//	9
-							arg(hex32(vs.tuningLowBound)).				//	10
-							arg(hex32(vs.tuningHighBound)).				//	11
-							arg(hex32(vs.lowEngineeringUnits)).			//	12
-							arg(hex32(vs.highEngineeringUnits)).		//	13
-							arg(hex16(vs.decimalPlaces)).				//	14
-							arg(hex16(vs.ioOffset)).					//	15
-							arg(hex16(vs.ioBit)));						//	16
+							QString("%1 | %2    | %3     | %4    | %5     | %6      | %7 | %8 | %9 | %10  | %11   | %12  | %13   | %14    | %15      | %16  | %17").
+							arg(hex16(vs.signalIndex),					//	1
+								hex16(vs.vduSignalInOutType),			//	2
+								hex16(vs.vduSignalType),				//	3
+								hex16(vs.boolProps),					//	4
+								hex32(vs.refAppSignalID),				//	5
+								hex32(vs.refCustomAppSignalID),			//	6
+								hex32(vs.refCaption),					//	7
+								hex32(vs.refUnit),						//	8
+								hex32(vs.tuningDefaultValue),			//	9
+								hex32(vs.tuningLowBound),				//	10
+								hex32(vs.tuningHighBound),				//	11
+								hex32(vs.lowEngineeringUnits),			//	12
+								hex32(vs.highEngineeringUnits),			//	13
+								hex16(vs.decimalPlaces),				//	14
+								hex16(vs.rxPortIndex),					//	15
+								hex16(vs.offsetW),						//	16
+								hex16(vs.bitNo)));						//	17
 		}
 	}
 
@@ -797,14 +817,16 @@ namespace Builder
 	{
 		file << LINE;
 
-		if (&txRxSignals == &m_rxAppSignals)
-		{
-			file << "              Received app signals info table";
-		}
-		else
-		{
-			file << "              Transmitted app signals info table";
-		}
+		// if (&txRxSignals == &m_rxAppSignals)
+		// {
+		// 	file << "              Received app signals info table";
+		// }
+		// else
+		// {
+		// 	file << "              Transmitted app signals info table";
+		// }
+
+		file << "              Transmitted app signals info table";
 
 		file << LINE;
 		file << "  Address   | portIndex | signalIndex | valueOffsetW | valueBitNo";
@@ -816,8 +838,8 @@ namespace Builder
 							QString("%1    | %2      | %3       | %4").
 							arg(hex16(s.optoPortIndex)).
 							arg(hex16(s.signalIndex)).
-							arg(hex16(s.valueOffsetW)).
-							arg(hex16(s.valueBitNo)));
+							arg(hex16(s.offsetW)).
+							arg(hex16(s.bitNo)));
 		}
 	}
 

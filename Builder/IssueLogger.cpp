@@ -1799,6 +1799,29 @@ namespace Builder
 						arg(lmID).arg(diagDataServiceID));
 	}
 
+	/// IssueCode: CFG3054
+	///
+	/// IssueType: Error
+	///
+	/// Title: App signal %1 received simultaneously via %2 and %3 opto ports of VDU %4
+	///
+	/// Parameters:
+	///			%1 AppSignalID
+	///         %2 Opto port 1 EquipmentID
+	///         %3 Opto port 3 EquipmentID
+	///         %4 VDU EquipmentID
+	///
+	/// Description:
+	///			The same app signal received simultaneously via 2 VDU's opto ports.
+	///
+	void IssueLogger::errCFG3054(QString appSignalID, QString optoPort1ID, QString optoPort2ID, QString vduID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3054,
+				  tr("App signal %1 received simultaneously via %2 and %3 opto ports of VDU %4.").
+						arg(appSignalID, optoPort1ID, optoPort2ID, vduID));
+	}
+
 	/// IssueCode: CFG3060
 	///
 	/// IssueType: Error

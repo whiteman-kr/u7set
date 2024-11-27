@@ -10,10 +10,10 @@
 // 2. VduAppSignal array[appSignalsCount]
 // 3. VduHash32ToIndex array[hash32ToIndexCount]
 // 4. VduOptoPort array[optoPortsCount]
-// 5. VduTxRxAppSignal array[rxAppSignalsCount] - signals received by VDU
-// 6. VduTxRxAppSignal array[txAppSignalsCount] - signals transmitted by VDU
-// 7. Strings
-// 8. crc64
+// [OBSOLETE] 5. VduTxRxAppSignal array[rxAppSignalsCount] - signals received by VDU
+// 5. VduTxRxAppSignal array[txAppSignalsCount] - signals transmitted by VDU
+// 6. Strings
+// 7. crc64
 
 #pragma pack(push, 1)
 
@@ -27,8 +27,10 @@ struct VduAppSignalsFileHeader
 	uint16_t appSignalsCount;
 	uint16_t hash32ToIndexCount;
 	uint16_t optoPortsCount;
-	uint16_t rxAppSignalsCount;
+//	uint16_t rxAppSignalsCount;
 	uint16_t txAppSignalsCount;
+
+	uint16_t reserv1;
 
 	vdu_file_ref refAppSignals;				// ref to array of VduAppSignal structures,
 											// sorted by VduAppSignal.signalIndex ascending
@@ -39,7 +41,7 @@ struct VduAppSignalsFileHeader
 	vdu_file_ref refOptoPorts;				// ref to array of VduOptoPort structures,
 											// sorted by VduOptoPort.portIndex ascending
 
-	vdu_file_ref refRxAppSignals;			// ref to array of VduTxRxAppSignal structures,
+	//vdu_file_ref refRxAppSignals;			// ref to array of VduTxRxAppSignal structures,
 
 	vdu_file_ref refTxAppSignals;			// ref to array of VduTxRxAppSignal structures,
 
@@ -100,12 +102,13 @@ struct VduAppSignal
 
 	uint16_t decimalPlaces;
 
-	// in/out signals addresses in VDU memory
+	// rx and in/out signals addresses in VDU memory
 	//
-	uint16_t ioOffset;
-	uint16_t ioBit;
+	uint16_t rxPortIndex;			// port index for RxSignals
 
-	uint16_t reserv1;				// align to 4 bytes
+	uint16_t offsetW;				// offset (in Words) and bitNo (0..15) for Input/Output signals,
+									// offset (in Words) and bitNo (0..15) in appropriate opto port buffer for RxSignals
+	uint16_t bitNo;					//
 };
 
 struct VduHash32ToIndex
@@ -132,8 +135,8 @@ struct VduTxRxAppSignal
 
 	uint16_t signalIndex;			// index in AppSignals table
 
-	uint16_t valueOffsetW;			// offset in opto port buffer in words
-	uint16_t valueBitNo;
+	uint16_t offsetW;				// offset (in Words) in opto port buffer
+	uint16_t bitNo;					// 0..15
 };
 
 #pragma pack(pop)

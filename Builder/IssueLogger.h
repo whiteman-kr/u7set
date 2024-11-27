@@ -196,6 +196,7 @@ namespace Builder
 		void errCFG3051(QString gwParserError);									// Gateway description parsing error: %1
 		void wrnCFG3052(QString gwParserWarning);								// Gateway description parsing warning: %1
 		void errCFG3053(QString lmID, QString diagDataServiceID);				// Several ethernet adapters of LM %1 are connected to DiagDataService %2.
+		void errCFG3054(QString appSignalID, QString optoPort1ID, QString optoPort2ID, QString vduID);		// App signal %1 received simultaneously via %2 and %3 opto ports of VDU %4
 
 		void errCFG3060(QString subSysID, int value, int max, int min);	// Subsystem %1 key has wrong value (%2), valid range is %3..%4.
 
