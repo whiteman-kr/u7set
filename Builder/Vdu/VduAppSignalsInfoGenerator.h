@@ -91,7 +91,7 @@ namespace Builder
 		uint64_t m_crc64 = 0;
 		uint64_t m_crc64Offset = 0;
 
-		inline static const QString LLINE = QString().fill('-', 235);
+		inline static const QString LLINE = QString().fill('-', 203);
 		inline static const QString LINE = QString().fill('-', 90);
 
 		inline static const uint16_t NOT_VALID16 = 0xFFFF;

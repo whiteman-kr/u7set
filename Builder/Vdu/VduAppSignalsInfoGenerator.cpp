@@ -136,18 +136,38 @@ namespace Builder
 		//
 		uint16_t portIndex = 0;
 
+		bool filterAutoIDs = true;
+
 		for(const auto& [equipID, port] : m_vduOptoModule->ports())
 		{
 			TEST_PTR_CONTINUE(port);
 
 			for(const Hardware::TxRxSignalShared& rx : port->rxSignals())
 			{
-				const QStringList& ids = rx->appSignalIDs();
+				QStringList ids = rx->appSignalIDs();
 
 				if (ids.size() == 0)
 				{
 					Q_ASSERT(false);
 					continue;
+				}
+
+				if (filterAutoIDs && ids.size() > 1)
+				{
+					QStringList tmpIds;
+
+					for(const QString& id : ids)
+					{
+						if (id.startsWith("#AUTO_BUS_") == false)
+						{
+							tmpIds.append(id);
+						}
+					}
+
+					if (tmpIds.size() > 0)
+					{
+						ids.swap(tmpIds);
+					}
 				}
 
 				Hash32 signalHash = 0;
@@ -504,20 +524,22 @@ namespace Builder
 		if (appSignal->enableTuning())
 		{
 			si.tuningDefaultValue = appSignal->tuningDefaultValue().untypedUInt32Value();
-			si.tuningLowBound = appSignal->tuningLowBound().untypedUInt32Value();
-			si.tuningHighBound = appSignal->tuningHighBound().untypedUInt32Value();
+			si.lowLimit = appSignal->tuningLowBound().untypedUInt32Value();
+			si.highLimit = appSignal->tuningHighBound().untypedUInt32Value();
 		}
 		else
 		{
 			si.tuningDefaultValue = 0;
-			si.tuningLowBound = vduSignalLowBoundUntyped(vduSignalType);
-			si.tuningHighBound = vduSignalHighBoundUntyped(vduSignalType);
+			si.lowLimit = vduSignalUntypedValue(vduSignalType, appSignal->lowEngineeringUnits());
+			si.highLimit = vduSignalUntypedValue(vduSignalType, appSignal->highEngineeringUnits());
 		}
 
-		//
+		if (vduSignalType == VduSignalType::Discrete)
+		{
+			si.lowLimit = 0;
+			si.highLimit = 1;
+		}
 
-		si.lowEngineeringUnits = vduSignalUntypedValue(vduSignalType, appSignal->lowEngineeringUnits());
-		si.highEngineeringUnits = vduSignalUntypedValue(vduSignalType, appSignal->highEngineeringUnits());
 		si.decimalPlaces = static_cast<uint16_t>(appSignal->decimalPlaces());
 
 		return true;
@@ -743,13 +765,13 @@ namespace Builder
 		file << LLINE;
 		file << "              VDU AppSignals";
 		file << LLINE;
-		file << "  Address   | index  | inOutType | signalType | boolProps | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | tunLowBound | tunHighBound | lowEngUnits | highEngUnits | decPlaces | rxPortIndex | offsetW | bitNo";
+		file << "  Address   | index  | inOutType | signalType | boolProps | refAppSignalID | refCustSignalID | refCaption | refUnit    | tunDefault | lowLimit   | highLimit  | decPlaces | rxPortIndex | offsetW | bitNo";
 		file << LLINE;
 
 		for(const auto& [id, vs] : m_vduSignals)
 		{
 			file << addrStr(sizeof(vs),
-							QString("%1 | %2    | %3     | %4    | %5     | %6      | %7 | %8 | %9 | %10  | %11   | %12  | %13   | %14    | %15      | %16  | %17").
+							QString("%1 | %2    | %3     | %4    | %5     | %6      | %7 | %8 | %9 | %10 | %11 | %12    | %13      | %14  | %15").
 							arg(hex16(vs.signalIndex),					//	1
 								hex16(vs.vduSignalInOutType),			//	2
 								hex16(vs.vduSignalType),				//	3
@@ -759,14 +781,12 @@ namespace Builder
 								hex32(vs.refCaption),					//	7
 								hex32(vs.refUnit),						//	8
 								hex32(vs.tuningDefaultValue),			//	9
-								hex32(vs.tuningLowBound),				//	10
-								hex32(vs.tuningHighBound),				//	11
-								hex32(vs.lowEngineeringUnits),			//	12
-								hex32(vs.highEngineeringUnits),			//	13
-								hex16(vs.decimalPlaces),				//	14
-								hex16(vs.rxPortIndex),					//	15
-								hex16(vs.offsetW),						//	16
-								hex16(vs.bitNo)));						//	17
+								hex32(vs.lowLimit),						//	10
+								hex32(vs.highLimit),					//	11
+								hex16(vs.decimalPlaces),				//	12
+								hex16(vs.rxPortIndex),					//	13
+								hex16(vs.offsetW),						//	14
+								hex16(vs.bitNo)));						//	15
 		}
 	}
 

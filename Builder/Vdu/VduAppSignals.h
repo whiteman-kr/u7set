@@ -92,11 +92,9 @@ struct VduAppSignal
 	// real type of next values depends from vduSignalType
 	//
 	uint32_t tuningDefaultValue;
-	uint32_t tuningLowBound;
-	uint32_t tuningHighBound;
 
-	uint32_t lowEngineeringUnits;
-	uint32_t highEngineeringUnits;
+	uint32_t lowLimit;				// for tuning signals this is a tuningLowBound and tuningHighBound
+	uint32_t highLimit;				// for non-tuning signals this is a lowEngineeringUnits and highEngineeringUnits
 
 	//
 
