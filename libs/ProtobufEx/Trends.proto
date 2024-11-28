@@ -99,6 +99,8 @@ message TrendParam
 	optional uint32 back_color_2nd = 71;
 
     optional int32 scale_type = 5 [default = 0];		// enum TrendScaleType::Generic, TrendScaleType::Logarithmic, TrendScaleType::Exponential 
+
+	optional string projectName = 100;
 }
 
 message TrendWidget

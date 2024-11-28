@@ -1,9 +1,8 @@
 #include "SignalHistoryDialog.h"
 #include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
-#include "AppSignalSetProvider.h"
+#include "AppSignalPropertyManager.h"
 #include "Settings.h"
-#include <DbLib/DbController.h>
 
 SignalHistoryDialog::SignalHistoryDialog(DbController* db, const AppSignal& s, QWidget* parent) :
 	QDialog(parent),

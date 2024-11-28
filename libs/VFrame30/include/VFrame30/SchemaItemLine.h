@@ -62,7 +62,9 @@ namespace VFrame30
 	public:
 		SchemaItemLine(void);
 		explicit SchemaItemLine(SchemaUnit unit);
-		virtual ~SchemaItemLine(void);
+
+	protected:
+		virtual void propertyDemand(const QString& prop) override;
 
 		// Serialization
 		//
@@ -73,7 +75,6 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-
 		// Item is drawn in 100% scale
 		// Graphcis must have scrren coordinate system (0, 0 - left upper corner, down and right - positive pos)
 		//
@@ -81,7 +82,20 @@ namespace VFrame30
 
 		// Draw line cap, Pen and Brush MUST be already selected in the Painter
 		//
-		static void drawLineCap(QPainter* painter, SchemaUnit units, const QPointF& pos, double angleRad, double lineWeight, E::LineCap capStyle, double factor);
+		static void drawLineCapFactor(QPainter* painter,
+									  SchemaUnit units,
+									  const QPointF& pos,
+									  double angleRad,
+									  double lineWeight,
+									  E::LineCap capStyle,
+									  double factor);
+
+		static void drawLineCapSize(QPainter* painter,
+									SchemaUnit units,
+									const QPointF& pos,
+									double angleRad,
+									E::LineCap capStyle,
+									double capSize);
 
 		// Properties and Data
 	public:
@@ -106,8 +120,11 @@ namespace VFrame30
 		double lineCapFactor() const;
 		void setLineCapFactor(double value);
 
+		double lineCapSize() const;
+		void setLineCapSize(double value);
+
 	private:
-		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
+		double m_weight; // Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
 		QColor m_lineColor;
 
 		E::LineStyle m_lineStyle = E::LineStyle::SolidLine;
@@ -115,6 +132,9 @@ namespace VFrame30
 
 		E::LineCap m_lineCapStart = E::LineCap::NoCap;
 		E::LineCap m_lineCapEnd = E::LineCap::NoCap;
-		double m_lineCapFactor = 2.0;
+
+		bool m_useLineCapSize = true;
+		double m_lineCapFactorObsolete = 2.0;
+		double m_lineCapSize = mm2in(1.0); // Size of the line cap in inches
 	};
-}
+} // namespace VFrame30

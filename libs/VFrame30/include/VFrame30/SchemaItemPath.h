@@ -103,6 +103,9 @@ namespace VFrame30
 		double lineCapFactor() const;
 		void setLineCapFactor(double value);
 
+		double lineCapSize() const;
+		void setLineCapSize(double value);
+
 	private:
 		double m_weight;					// Толщина линии, хранится в точках или дюймах в зависимости от UnitDocPt
 		QColor m_lineColor;
@@ -112,6 +115,9 @@ namespace VFrame30
 
 		E::LineCap m_lineCapStart = E::LineCap::NoCap;
 		E::LineCap m_lineCapEnd = E::LineCap::NoCap;
-		double m_lineCapFactor = 2.0;
+
+		bool m_useLineCapSize = true;
+		double m_lineCapFactorObsolete = 2.0;
+		double m_lineCapSize = mm2in(1.0); // Size of the line cap in inches
 	};
 }

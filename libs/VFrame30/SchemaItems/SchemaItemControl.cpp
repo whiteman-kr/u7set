@@ -218,8 +218,10 @@ namespace VFrame30
 			break;
 		case SchemaUnit::Inch:
 			{
-				double dpiX = widget->physicalDpiX();
-				double dpiY = widget->physicalDpiY();
+				const auto widgetScreen = widget->screen();
+
+				double dpiX = widgetScreen ? widgetScreen->physicalDotsPerInchX() : widget->physicalDpiX();
+				double dpiY = widgetScreen ? widgetScreen->physicalDotsPerInchY() : widget->physicalDpiY();
 
 				displayPos = {static_cast<int>(leftDocPt() * zoom / 100.0 * dpiX),
 							  static_cast<int>(topDocPt() * zoom / 100.0 * dpiY)};

@@ -1,6 +1,6 @@
 #include "CentralWidget.h"
-#include "MainTabPage.h"
 #include "UploadTabPage.h"
+
 
 CentralWidget::CentralWidget(QWidget* parent) :
 	UiLib::TabWidgetEx(parent)

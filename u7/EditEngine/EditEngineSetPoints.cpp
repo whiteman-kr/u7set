@@ -1,5 +1,5 @@
 #include "EditEngineSetPoints.h"
-#include "SchemaEditor/EditSchemaWidget.h"
+#include "SchemaEditor/EditSchemaView.h"
 
 namespace EditEngine
 {

@@ -15,7 +15,6 @@ namespace TrendLib
 		}
 
 		bool ok = true;
-
 		ok &= m_signalSet.save(message->mutable_signal_set());
 		ok &= m_rulerSet.save(message->mutable_ruler_set());
 
@@ -75,6 +74,32 @@ namespace TrendLib
 			adjustPainter(painter, drawParam);
 		}
 
+		// Draw project description
+		//
+		if (drawParam.project().isEmpty() == false)
+		{
+			painter->setPen(Qt::black);
+			painter->setBrush(Qt::black);
+
+			QRectF textRect = calcProjectNameRect(drawParam);
+
+			drawText(painter, drawParam.project(), textRect, drawParam, Qt::AlignLeft | Qt::AlignVCenter);
+
+			QString dateTime = QLocale::system().toString(QDateTime::currentDateTime(), QLocale::ShortFormat);
+			drawText(painter, dateTime, textRect, drawParam, Qt::AlignRight | Qt::AlignVCenter);
+
+#if 0
+			// Debug - Draw bounding rect
+			//
+			{
+				QPen pen(Qt::red, 0, Qt::DashLine, Qt::PenCapStyle::RoundCap);
+				painter->setPen(pen);
+				painter->setBrush(Qt::NoBrush);
+				painter->drawRect(textRect);
+			}
+#endif
+		}
+
 		// --
 		//
 		QDateTime startTime = drawParam.startTime();
@@ -93,6 +118,17 @@ namespace TrendLib
 			Lane lane{.index = laneIndex, .laneRect = laneRect, .startTime = startTime};
 
 			drawLane(painter, lane, laneDrawParam); // Draw whole lane
+
+#if 0
+			// Debug - Draw bounding rect by cosmetic pen
+			//
+			{
+				QPen pen(Qt::green, 0, Qt::DashLine, Qt::PenCapStyle::RoundCap);
+				painter->setPen(pen);
+				painter->setBrush(Qt::NoBrush);
+				painter->drawRect(laneRect);
+			}
+#endif
 
 			// As laneDrawParam is a copy of drawParam, we need to copy from
 			// laneDrawParam to drawParam vector signalDescriptionRect
@@ -246,11 +282,10 @@ namespace TrendLib
 			5_sec,  10_sec, 15_sec, 20_sec,  30_sec,  1_min,   90_sec,   2_min,    5_min,       10_min, 15_min,
 			20_min, 30_min, 1_hour, 2_hours, 3_hours, 6_hours, 12_hours, 24_hours, 24_hours * 7};
 
-		QRectF boundRect;
 		QString estimatedString = (drawParam.duration() < 10_sec) ? "HH:MM:SS.XXX" : "HH:MM:SS";
-		drawText(painter, estimatedString, QRectF(), drawParam, Qt::AlignCenter, &boundRect);
+		auto estimatedStringSize = calcTextSize(painter, estimatedString, drawParam);
 
-		double minTimeInterval = boundRect.width() * 1.2;
+		double minTimeInterval = estimatedStringSize.width() * 1.2;
 
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
@@ -791,9 +826,8 @@ namespace TrendLib
 
 		// Draw grid values
 		//
-		QRectF boundTextRect;
-		drawText(painter, "0", QRectF(), drawParam, Qt::AlignCenter, &boundTextRect);
-		double textHeight = boundTextRect.height();
+		const auto boundTextSize = calcTextSize(painter, QStringLiteral("0"), drawParam);
+		const double textHeight = boundTextSize.height();
 
 		painter->setPen(signal.color());
 
@@ -916,9 +950,8 @@ namespace TrendLib
 		//
 		painter->setPen(analogs[0].color());
 
-		QRectF boundTextRect;
-		drawText(painter, "0", QRectF(), drawParam, Qt::AlignCenter, &boundTextRect);
-		double textHeight = boundTextRect.height();
+		const auto boundTextSize = calcTextSize(painter, QStringLiteral("0"), drawParam);
+		const double textHeight = boundTextSize.height();
 
 		painter->setClipRect(scaleAreaRect);
 
@@ -1084,8 +1117,7 @@ namespace TrendLib
 
 		// Draw trend
 		//
-		QRectF textBoundRect;
-		drawText(painter, "0", textBoundRect, drawParam, Qt::AlignLeft | Qt::AlignTop, &textBoundRect);
+		const auto textBoundSize = calcTextSize(painter, QStringLiteral("0"), drawParam);
 
 		E::TimeType timeType = drawParam.timeType();
 
@@ -1104,8 +1136,8 @@ namespace TrendLib
 		double dpiY = drawParam.realDpiY();
 		// double dpiX = drawParam.realDpiX();
 
-		double yPos0 = signalRect.bottom() - textBoundRect.height() / 2.0;
-		double yPos1 = signalRect.top() + textBoundRect.height() * 1.1;
+		double yPos0 = signalRect.bottom() - textBoundSize.height() / 2.0;
+		double yPos1 = signalRect.top() + textBoundSize.height() * 1.1;
 		yPos0 =
 			static_cast<double>(static_cast<int>(yPos0 * dpiY)) / dpiY; // Make sure that Y is proper alligned for nice look of cosmetic pen
 		yPos1 =
@@ -1196,7 +1228,7 @@ namespace TrendLib
 					{
 						break; // end of drawing
 					}
-				}              // for (const TrendStateItem& state : record.states)
+				} // for (const TrendStateItem& state : record.states)
 
 				if (lines.size() >= recomendedSize)
 				{
@@ -1384,7 +1416,7 @@ namespace TrendLib
 					{
 						break; // end of drawing
 					}
-				}              // for (const TrendStateItem& state : record.states)
+				} // for (const TrendStateItem& state : record.states)
 
 				if (lines.size() >= recomendedSize)
 				{
@@ -1398,11 +1430,11 @@ namespace TrendLib
 				{
 					break; // end of drawing
 				}
-			}              // for (const TrendStateRecord& record : data)
+			} // for (const TrendStateRecord& record : data)
 
 			if (lastX >= rectRight)
 			{
-				break;     // end of drawing
+				break; // end of drawing
 			}
 		}
 
@@ -1482,11 +1514,10 @@ namespace TrendLib
 
 			// Calc ruler timestamp text width
 			//
-			QRectF timeStampBoundRect;
-			drawText(painter, " 00:00:00.000 ", QRectF(), drawParam, Qt::AlignCenter, &timeStampBoundRect);
+			const auto timeStampBoundSize = calcTextSize(painter, QStringLiteral(" 00:00:00.000 "), drawParam);
 
-			double rulerTextTop = laneRect.top() + (trendAreaRect.top() - laneRect.top()) / 2.0 - timeStampBoundRect.height() / 2.0;
-			double rulerTextHeight = timeStampBoundRect.height();
+			double rulerTextTop = laneRect.top() + (trendAreaRect.top() - laneRect.top()) / 2.0 - timeStampBoundSize.height() / 2.0;
+			double rulerTextHeight = timeStampBoundSize.height();
 
 			// Draw ruler line
 			//
@@ -1522,7 +1553,7 @@ namespace TrendLib
 					// Draw ruler timestamp
 					//
 					QString text = ruler.timeStamp().toDateTime().toString(" hh:mm:ss.zzz ");
-					QRectF textRect(x - timeStampBoundRect.width() / 2.0, rulerTextTop, timeStampBoundRect.width(), rulerTextHeight);
+					QRectF textRect(x - timeStampBoundSize.width() / 2.0, rulerTextTop, timeStampBoundSize.width(), rulerTextHeight);
 
 					painter->fillRect(textRect, backgroundBrush);
 					drawText(painter, text, textRect, drawParam, Qt::AlignCenter);
@@ -1544,7 +1575,7 @@ namespace TrendLib
 					}
 					else
 					{
-						prevRulerX += timeStampBoundRect.width() / 2.0;
+						prevRulerX += timeStampBoundSize.width() / 2.0;
 					}
 
 					double xx = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX; // Ajust x to look nice (not blurred)
@@ -1554,7 +1585,7 @@ namespace TrendLib
 					}
 					else
 					{
-						xx -= timeStampBoundRect.width() / 2.0;
+						xx -= timeStampBoundSize.width() / 2.0;
 					}
 
 					double y = laneRect.top() + (trendAreaRect.top() - laneRect.top()) / 2.0;
@@ -1587,21 +1618,15 @@ namespace TrendLib
 						distanceText = QString::asprintf(" %02d:%02d:%02d.%03d ", hours, mins, secs, msecs);
 					}
 
-					QRectF distanceTextBoundRect;
-					drawText(painter,
-							 distanceText,
-							 distanceTextBoundRect,
-							 drawParam,
-							 Qt::AlignCenter,
-							 &distanceTextBoundRect); // Get bound rect
+					QSizeF distanceTextBoundSize = calcTextSize(painter, distanceText, drawParam);
 
-					if (distanceTextBoundRect.width() + distanceTextBoundRect.height() / 2 < xx - prevRulerX)
+					if (distanceTextBoundSize.width() + distanceTextBoundSize.height() / 2 < xx - prevRulerX)
 					{
 						QRectF distanceTextRect;
-						distanceTextRect.setLeft(prevRulerX + (xx - prevRulerX) / 2.0 - distanceTextBoundRect.width() / 2.0);
+						distanceTextRect.setLeft(prevRulerX + (xx - prevRulerX) / 2.0 - distanceTextBoundSize.width() / 2.0);
 						distanceTextRect.setTop(rulerTextTop);
-						distanceTextRect.setWidth(distanceTextBoundRect.width());
-						distanceTextRect.setHeight(distanceTextBoundRect.height());
+						distanceTextRect.setWidth(distanceTextBoundSize.width());
+						distanceTextRect.setHeight(distanceTextBoundSize.height());
 
 						painter->fillRect(distanceTextRect, backgroundBrush);
 						drawText(painter, distanceText, distanceTextRect, drawParam, Qt::AlignCenter); // Draw distance between rulers
@@ -1684,8 +1709,7 @@ namespace TrendLib
 
 						// Get text bounding rect
 						//
-						QRectF boundRect;
-						drawText(painter, str, boundRect, drawParam, Qt::AlignRight | Qt::AlignBottom, &boundRect);
+						auto boundRect = calcTextSize(painter, str, drawParam);
 
 						// Calc pos and draw filled rect and text
 						//
@@ -1753,7 +1777,7 @@ namespace TrendLib
 						}
 					} // End of draw signal values on the ruler
 				}
-			}         // for (size_t i = 0; i < laneRulers.size(); i++)
+			} // for (size_t i = 0; i < laneRulers.size(); i++)
 		}
 
 		// Reset clipping
@@ -2028,19 +2052,41 @@ namespace TrendLib
 		return;
 	}
 
+	QRectF TrendImpl::calcProjectNameRect(const TrendParam& drawParam)
+	{
+		QRectF result;
+
+		if (drawParam.project().isEmpty() == true)
+		{
+			return result;
+		}
+
+		result = drawParam.rectIn();
+
+		result.setTop(result.top());
+		result.setLeft(result.left() + 1.0 / 32.0);
+
+		result.setWidth(result.width() - (1.0 / 32.0));
+		result.setHeight(1.0 / 6.0);
+
+		return result;
+	}
+
 	QRectF TrendImpl::calcLaneRect(size_t laneIndex, const TrendParam& drawParam)
 	{
-		QSizeF inchSize(drawParam.rect().size().width() / drawParam.realDpiX(), drawParam.rect().size().height() / drawParam.realDpiY());
+		const QRectF& drawRectInch = drawParam.rectIn();
+		double projectNameHeight = calcProjectNameRect(drawParam).height();
 
 		double laneMargin = 1.0 / 32.0; // 1/16 inch
-		double laneHeight = (inchSize.height() - laneMargin) / static_cast<double>(drawParam.laneCount()) - laneMargin;
+		double laneHeight =
+			(drawRectInch.height() - laneMargin - projectNameHeight) / static_cast<double>(drawParam.laneCount()) - laneMargin;
 
 		QRectF laneRect;
 
-		laneRect.setLeft(laneMargin);
-		laneRect.setWidth(inchSize.width() - laneMargin * 2.0);
+		laneRect.setLeft(drawRectInch.left() + laneMargin);
+		laneRect.setWidth(drawRectInch.width() - laneMargin * 2.0);
 
-		laneRect.setTop(laneMargin + static_cast<double>(laneIndex) * (laneHeight + laneMargin));
+		laneRect.setTop(drawRectInch.top() + projectNameHeight + laneMargin + static_cast<double>(laneIndex) * (laneHeight + laneMargin));
 		laneRect.setHeight(laneHeight);
 
 		return laneRect;
@@ -2174,15 +2220,13 @@ namespace TrendLib
 		*rulerIndex = -1;
 		*outTime = TimeStamp();
 
-		QRectF rect = drawParam.rect();
-
 		// Transform mousePos to inches, as everything for drawing is done in inches
 		//
 		QPointF pos(static_cast<double>(mousePos.x()) / drawParam.dpiX(), static_cast<double>(mousePos.y()) / drawParam.dpiY());
 
 		// MouseOn::Outside
 		//
-		if (rect.contains(mousePos) == false)
+		if (drawParam.rectPx().contains(mousePos) == false)
 		{
 			return MouseOn::Outside;
 		}
@@ -2311,14 +2355,20 @@ namespace TrendLib
 
 		painter->save();
 
-		double realDpiX = drawParam.realDpiX();
-		double realDpiY = drawParam.realDpiY();
-
-		painter->resetTransform();
-		painter->scale(1.0 / drawParam.devicePixelRatio(), 1.0 / drawParam.devicePixelRatio());
+		auto wordlTransform = painter->worldTransform();
+		QTransform scaleTransform{1.0 / drawParam.devicePixelRatio(),
+								  wordlTransform.m12(),
+								  wordlTransform.m21(),
+								  1.0 / drawParam.devicePixelRatio(),
+								  wordlTransform.dx(),
+								  wordlTransform.dy()};
+		painter->setWorldTransform(scaleTransform);
 
 		// Set font
 		//
+		double realDpiX = drawParam.realDpiX();
+		double realDpiY = drawParam.realDpiY();
+
 		QFont font;
 
 		int pixelSize = static_cast<int>(3.7 / 25.4 * realDpiY); // 3.7mm
@@ -2344,6 +2394,37 @@ namespace TrendLib
 
 		painter->restore();
 		return;
+	}
+
+	QSizeF TrendImpl::calcTextSize(QPainter* painter, const QString& str, const TrendParam& drawParam)
+	{
+		painter->save();
+		auto wordlTransform = painter->worldTransform();
+		QTransform scaleTransform{1.0 / drawParam.devicePixelRatio(),
+								  wordlTransform.m12(),
+								  wordlTransform.m21(),
+								  1.0 / drawParam.devicePixelRatio(),
+								  wordlTransform.dx(),
+								  wordlTransform.dy()};
+		painter->setWorldTransform(scaleTransform);
+
+		// Set font
+		//
+		double realDpiY = drawParam.realDpiY();
+
+		QFont font;
+
+		int pixelSize = static_cast<int>(3.7 / 25.4 * realDpiY); // 3.7mm
+		font.setPixelSize(pixelSize);
+		painter->setFont(font);
+
+		QRectF boundingRect;
+		boundingRect = painter->boundingRect(QRectF{}, 0, str);
+
+		QSizeF result{boundingRect.width() / drawParam.realDpiX(), boundingRect.height() / drawParam.realDpiY()};
+
+		painter->restore();
+		return result;
 	}
 
 	QUuid TrendImpl::uuid() const

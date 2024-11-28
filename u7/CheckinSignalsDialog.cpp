@@ -1,8 +1,8 @@
 #include "../UtilsLib/Ui/WidgetUtils.h"
 
-#include "CheckinSignalsDialog.h"
-#include "SignalsTabPage.h"
 #include "AppSignalSetProvider.h"
+#include "CheckinSignalsDialog.h"
+#include "SignalsModels.h"
 
 CheckinSignalsDialog::CheckinSignalsDialog(const QModelIndexList& selectionSrcIndexes,
 											SignalsModel* signalsModel,

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../libs/UiLib/include/UiLib/PropertyEditor.h"
-#include "../libs/UiLib/include/UiLib/ChooseItemsWidget.h"
+#include <UiLib/PropertyEditor.h>
+#include <UiLib/ChooseItemsWidget.h>
 
 class DbChooseItemsDialog : public ExtWidgets::PropertyTextEditor
 {

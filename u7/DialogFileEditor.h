@@ -1,7 +1,7 @@
 #ifndef DIALOGFILEEDITOR_H
 #define DIALOGFILEEDITOR_H
 
-#include "IdePropertyEditor.h"
+class IdeCodeEditor;
 
 class DialogFileEditor : public QDialog
 {

@@ -1,6 +1,5 @@
 #pragma once
 
-class DbController;
 class GlobalMessanger;
 
 class MainTabPage : public QWidget

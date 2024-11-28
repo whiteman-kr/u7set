@@ -1,6 +1,7 @@
 #include "DialogSubsystemListEditor.h"
 #include "ui_DialogSubsystemListEditor.h"
 
+#include "../Builder/SubsystemStorage.h"
 
 //
 //

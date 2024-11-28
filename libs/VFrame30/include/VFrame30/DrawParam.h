@@ -1,19 +1,19 @@
 #pragma once
 
-#include <VFrame30/ITimeStats.h>
 #include <VFrame30/FontParam.h>
+#include <VFrame30/ITimeStats.h>
 #include <VFrame30/Session.h>
 #include <VFrame30/VFrame30Types.h>
 #include <VFrame30/VFrameTools.h>
 
 
+#define VFRAME30_CACHE_DRAW_TEXT // Use cached draw text, DrawHelper::drawTextCahed(...)
 
-#define VFRAME30_CACHE_DRAW_TEXT	// Use cached draw text, DrawHelper::drawTextCahed(...)
 
-
-#define CONTROL_BAR_PX		10
-#define CONTROL_BAR_MM		(VFrame30::mm2in(2.4))
-#define CONTROL_BAR(_unit, _devicePixelRatio, _zoom)	((_unit == SchemaUnit::Display) ? CONTROL_BAR_PX * _devicePixelRatio * (100.0 / _zoom) : CONTROL_BAR_MM * (100.0 / _zoom))
+#define CONTROL_BAR_PX 10
+#define CONTROL_BAR_MM (VFrame30::mm2in(2.4))
+#define CONTROL_BAR(_unit, _devicePixelRatio, _zoom) \
+	((_unit == SchemaUnit::Display) ? CONTROL_BAR_PX * _devicePixelRatio * (100.0 / _zoom) : CONTROL_BAR_MM * (100.0 / _zoom))
 
 class QPainter;
 class QPaintDevice;
@@ -23,7 +23,7 @@ namespace Behavior
 {
 	class MonitorBehavior;
 	class TuningClientBehavior;
-} 
+} // namespace Behavior
 
 namespace VFrame30
 {
@@ -46,13 +46,13 @@ namespace VFrame30
 		const SchemaView* schemaView() const;
 		SchemaView* schemaView();
 
-		const ClientSchemaView* clientSchemaView() const;	// Can be used only in Client mode (Monitor/Tuning/...)
+		const ClientSchemaView* clientSchemaView() const; // Can be used only in Client mode (Monitor/Tuning/...)
 		ClientSchemaView* clientSchemaView();
 
 		VFrame30::ITimeStats* timeStats();
 		VFrame30::ITimeStats* timeStats() const;
 
-		// Params for drawing
+														  // Params for drawing
 		//
 	public:
 		double GetMinFblGridSize() const;
@@ -71,18 +71,23 @@ namespace VFrame30
 
 		double cosmeticPenWidth() const;
 
-		double realDpiX() const noexcept;			// physicalDpiX * devicePixelRatio
-		double realDpiY() const noexcept;			// physicalDpiY * devicePixelRatio
+		double realDpiX() const noexcept; // physicalDpiX * devicePixelRatio
+		double realDpiY() const noexcept; // physicalDpiY * devicePixelRatio
 		double devicePixelRatio() const noexcept;
 
 		static double realDpiX(QPainter* painter) noexcept;
 		static double realDpiY(QPainter* painter) noexcept;
+
+		static double realScreenDpiX(QPainter* painter) noexcept;
+		static double realScreenDpiY(QPainter* painter) noexcept;
 
 		double gridToDpiX(double pos) const noexcept;
 		double gridToDpiY(double pos) const noexcept;
 		QPointF gridToDpi(double x, double y) const noexcept;
 		QPointF gridToDpi(const QPointF& pos) const noexcept;
 		QRectF gridToDpi(const QRectF& rect) const noexcept;
+
+		static double gridToDpi(double pos, double dpi, double zoom, SchemaUnit unit) noexcept;
 
 		DrawMode drawMode() const noexcept;
 
@@ -125,6 +130,9 @@ namespace VFrame30
 		bool m_drawNotesLayer = true;
 
 		double m_cosmeticPenWidth = 0.0;
+
+		mutable double m_cachedDpiX = 0.0;
+		mutable double m_cachedDpiY = 0.0;
 	};
 
 
@@ -137,13 +145,14 @@ namespace VFrame30
 							 const QString& str,
 							 const QRectF& rect,
 							 int flags,
-							 QRectF* boundingRect = nullptr);
+							 QRectF* boundingRect = nullptr,
+							 std::pair<double, double> dpi = {0, 0});
 
 		static void drawTextCahed(QPainter* p,
 								  const FontParam& font,
 								  SchemaUnit unit,
 								  const QString& str,
-								  const QRectF& rect,
+								  QRectF rect,
 								  int flags,
 								  double zoom);
 
@@ -160,5 +169,4 @@ namespace VFrame30
 		//
 		static bool drawSvgCached(QPainter& painter, SchemaUnit unit, const QRectF& rect, const QString& svg, double zoom);
 	};
-}
-
+} // namespace VFrame30

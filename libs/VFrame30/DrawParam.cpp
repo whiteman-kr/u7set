@@ -1,15 +1,24 @@
-#include <VFrame30/DrawParam.h>
 #include <VFrame30/ClientSchemaView.h>
+#include <VFrame30/DrawParam.h>
 
 #include <Behavior/MonitorBehavior.h>
 #include <Behavior/TuningClientBehavior.h>
+
 #include <QSvgRenderer>
 
 namespace
 {
 	struct DrawTextCacheItem
 	{
-		DrawTextCacheItem(const QFont& font, SchemaUnit unit, const QString& text, QSize size, int flags, QRgb textColor, double dpiX, double dpiY, double zoom) :
+		DrawTextCacheItem(const QFont& font,
+						  SchemaUnit unit,
+						  const QString& text,
+						  QSize size,
+						  int flags,
+						  QRgb textColor,
+						  double dpiX,
+						  double dpiY,
+						  double zoom) :
 			font{font},
 			unit{unit},
 			text{text},
@@ -32,15 +41,19 @@ namespace
 		double dpiY{};
 		double zoom{};
 
-		QImage image{};
+		QPixmap pixmap{};
 
-		Hash hash()
-		{
-			return getHash(font, unit, text, size, flags, textColor, dpiX, dpiY, zoom);
-		}
+		Hash hash() { return getHash(font, unit, text, size, flags, textColor, dpiX, dpiY, zoom); }
 
-		static Hash getHash(const QFont& font, SchemaUnit unit, const QString& text, QSize size,
-							int flags, QRgb textColor, double dpiX, double dpiY, double zoom)
+		static Hash getHash(const QFont& font,
+							SchemaUnit unit,
+							const QString& text,
+							QSize size,
+							int flags,
+							QRgb textColor,
+							double dpiX,
+							double dpiY,
+							double zoom)
 		{
 			Hash result = ::calcHash(font.key(), 0);
 			result = ::calcHash(&unit, sizeof(unit), result);
@@ -77,10 +90,7 @@ namespace
 
 		QImage image{};
 
-		Hash hash()
-		{
-			return getHash(unit, svg, size, dpiX, dpiY, zoom);
-		}
+		Hash hash() { return getHash(unit, svg, size, dpiX, dpiY, zoom); }
 
 		static Hash getHash(SchemaUnit unit, const QString& svg, QSize size, double dpiX, double dpiY, double zoom)
 		{
@@ -94,7 +104,7 @@ namespace
 			return result;
 		}
 	};
-}
+} // namespace
 
 
 namespace VFrame30
@@ -228,12 +238,48 @@ namespace VFrame30
 
 	double CDrawParam::realDpiX() const noexcept
 	{
-		return m_painter->device()->physicalDpiX() * m_painter->device()->devicePixelRatioF();
+		if (m_cachedDpiX == 0.0)
+		{
+			auto device = m_painter->device();
+			double dpiX;
+
+			if (auto widget = dynamic_cast<const QWidget*>(device); widget != nullptr)
+			{
+				auto screen = widget->screen();
+				dpiX = screen ? screen->physicalDotsPerInchX() : device->physicalDpiX();
+			}
+			else
+			{
+				dpiX = device->physicalDpiX();
+			}
+
+			m_cachedDpiX = dpiX * device->devicePixelRatioF();
+		}
+
+		return m_cachedDpiX;
 	}
 
 	double CDrawParam::realDpiY() const noexcept
 	{
-		return m_painter->device()->physicalDpiY() * m_painter->device()->devicePixelRatioF();
+		if (m_cachedDpiY == 0.0)
+		{
+			auto device = m_painter->device();
+			double dpiY;
+
+			if (auto widget = dynamic_cast<const QWidget*>(device); widget != nullptr)
+			{
+				auto screen = widget->screen();
+				dpiY = screen ? screen->physicalDotsPerInchY() : device->physicalDpiY();
+			}
+			else
+			{
+				dpiY = device->physicalDpiY();
+			}
+
+			m_cachedDpiY = dpiY * device->devicePixelRatioF();
+		}
+
+		return m_cachedDpiY;
 	}
 
 	double CDrawParam::devicePixelRatio() const noexcept
@@ -243,13 +289,78 @@ namespace VFrame30
 
 	double CDrawParam::realDpiX(QPainter* painter) noexcept
 	{
-		return painter->device()->physicalDpiX() * painter->device()->devicePixelRatioF();
+		const QPaintDevice* device = painter->device();
+		double devicePixelRatioF = device->devicePixelRatioF();
+
+		auto widget = dynamic_cast<const QWidget*>(device);
+
+		if (widget != nullptr)
+		{
+			const auto screen = widget->screen();
+			if (screen != nullptr)
+			{
+				return screen->physicalDotsPerInchX() * devicePixelRatioF;
+			}
+		}
+
+		return device->physicalDpiX() * devicePixelRatioF;
 	}
 
 	double CDrawParam::realDpiY(QPainter* painter) noexcept
 	{
-		return painter->device()->physicalDpiY() * painter->device()->devicePixelRatioF();
+		const QPaintDevice* device = painter->device();
+		double devicePixelRatioF = device->devicePixelRatioF();
+
+		auto widget = dynamic_cast<const QWidget*>(device);
+
+		if (widget != nullptr)
+		{
+			const auto screen = widget->screen();
+			if (screen != nullptr)
+			{
+				return screen->physicalDotsPerInchY() * devicePixelRatioF;
+			}
+		}
+
+		return device->physicalDpiY() * devicePixelRatioF;
 	}
+
+	double CDrawParam::realScreenDpiX(QPainter* painter) noexcept
+	{
+		auto device = painter->device();
+		double dpiX;
+
+		if (auto widget = dynamic_cast<const QWidget*>(device); widget != nullptr)
+		{
+			auto screen = widget->screen();
+			dpiX = screen ? screen->physicalDotsPerInchX() : device->physicalDpiX();
+		}
+		else
+		{
+			dpiX = device->physicalDpiX();
+		}
+
+		return dpiX * device->devicePixelRatioF();
+	}
+
+	double CDrawParam::realScreenDpiY(QPainter* painter) noexcept
+	{
+		auto device = painter->device();
+		double dpiY;
+
+		if (auto widget = dynamic_cast<const QWidget*>(device); widget != nullptr)
+		{
+			auto screen = widget->screen();
+			dpiY = screen ? screen->physicalDotsPerInchY() : device->physicalDpiY();
+		}
+		else
+		{
+			dpiY = device->physicalDpiY();
+		}
+
+		return dpiY * device->devicePixelRatioF();
+	}
+
 
 	double CDrawParam::gridToDpiX(double pos) const noexcept
 	{
@@ -268,13 +379,12 @@ namespace VFrame30
 
 		if (m_schemaUnit == SchemaUnit::Inch)
 		{
-			double dpix = this->realDpiX();
+			double dpix = realDpiX();
 			return (static_cast<double>(static_cast<int>(pos * zoom * dpix)) / dpix) / zoom;
 		}
 
 		Q_ASSERT(false);
 		return pos;
-
 	}
 
 	double CDrawParam::gridToDpiY(double pos) const noexcept
@@ -294,7 +404,7 @@ namespace VFrame30
 
 		if (m_schemaUnit == SchemaUnit::Inch)
 		{
-			const double dpiy = this->realDpiY();
+			const double dpiy = realDpiY();
 			return (static_cast<double>(static_cast<int>(pos * zoom * dpiy)) / dpiy) / zoom;
 		}
 
@@ -318,15 +428,14 @@ namespace VFrame30
 
 		if (m_schemaUnit == SchemaUnit::Display)
 		{
-			result = QPointF((double)qRound(x * zoom) / zoom,
-							 (double)qRound(y * zoom) / zoom);
+			result = QPointF((double)qRound(x * zoom) / zoom, (double)qRound(y * zoom) / zoom);
 		}
 		else
 		{
 			Q_ASSERT(m_schemaUnit == SchemaUnit::Inch);
 
-			const double dpix = this->realDpiX();
-			const double dpiy = this->realDpiY();
+			const double dpix = realDpiX();
+			const double dpiy = realDpiY();
 
 			result = QPointF((static_cast<double>(static_cast<int>(x * zoom * dpix)) / dpix) / zoom,
 							 (static_cast<double>(static_cast<int>(y * zoom * dpiy)) / dpiy) / zoom);
@@ -349,8 +458,7 @@ namespace VFrame30
 
 		if (m_schemaUnit == SchemaUnit::Display)
 		{
-			result = QPointF((double)qRound(pos.x() * zoom) / zoom,
-							 (double)qRound(pos.y() * zoom) / zoom);
+			result = QPointF((double)qRound(pos.x() * zoom) / zoom, (double)qRound(pos.y() * zoom) / zoom);
 		}
 		else
 		{
@@ -369,6 +477,24 @@ namespace VFrame30
 	QRectF CDrawParam::gridToDpi(const QRectF& rect) const noexcept
 	{
 		return QRectF{gridToDpi(rect.topLeft()), gridToDpi(rect.bottomRight())};
+	}
+
+	double CDrawParam::gridToDpi(double pos, double dpi, double zoom, SchemaUnit unit) noexcept
+	{
+		zoom /= 100.0;
+
+		if (unit == SchemaUnit::Display)
+		{
+			return (double)qRound(pos * zoom) / zoom;
+		}
+
+		if (unit == SchemaUnit::Inch)
+		{
+			return (static_cast<double>(static_cast<int>(pos * zoom * dpi)) / dpi) / zoom;
+		}
+
+		Q_ASSERT(false);
+		return pos;
 	}
 
 	DrawMode CDrawParam::drawMode() const noexcept
@@ -452,7 +578,14 @@ namespace VFrame30
 		m_highlightIds = value;
 	}
 
-	void DrawHelper::drawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, const QRectF& rect, int flags, QRectF* boundingRect/* = nullptr*/)
+	void DrawHelper::drawText(QPainter* painter,
+							  const FontParam& font,
+							  SchemaUnit unit,
+							  const QString& str,
+							  const QRectF& rect,
+							  int flags,
+							  QRectF* boundingRect /* = nullptr*/,
+							  std::pair<double, double> dpi /*= {0, 0}*/)
 	{
 		if (painter == nullptr)
 		{
@@ -465,8 +598,8 @@ namespace VFrame30
 			return;
 		}
 
-		const double dpiX = CDrawParam::realDpiX(painter);
-		const double dpiY = CDrawParam::realDpiY(painter);
+		const double dpiX = dpi.first == 0 ? CDrawParam::realDpiX(painter) : dpi.first;
+		const double dpiY = dpi.second == 0 ? CDrawParam::realDpiY(painter) : dpi.second;
 
 		QFont f = font.qfont(unit, dpiY);
 
@@ -501,49 +634,58 @@ namespace VFrame30
 								   const FontParam& font,
 								   SchemaUnit unit,
 								   const QString& str,
-								   const QRectF& rect,
+								   QRectF rect,
 								   int flags,
 								   double zoom)
 	{
-		if (painter == nullptr || str.isEmpty() || rect.isEmpty() == true)
+		Q_ASSERT(painter);
+
+		if (str.isEmpty() || rect.isEmpty() == true)
 		{
-			Q_ASSERT(painter);
 			return;
 		}
 
-		QRgb textColor = painter->pen().color().rgb();		// Text color is taken from the current pen.
+		double devicePixelRatioF = painter->device()->devicePixelRatioF();
+		const double dpiX = CDrawParam::realScreenDpiX(painter);
+		const double dpiY = CDrawParam::realScreenDpiY(painter);
+		double zoomFactor = zoom / 100.0;
 
-		const double dpiX = CDrawParam::realDpiX(painter);
-		const double dpiY = CDrawParam::realDpiY(painter);
-		QFont f = font.qfont(unit, dpiY);
+		if (unit == SchemaUnit::Display || font.drawSize() > 0.5 || dpiX > 400 || painter->worldTransform().isRotating() == true)
+		{
+			return drawText(painter, font, unit, str, rect, flags);
+		}
+#if 0
+		// Fall back to drawText, still draw cached if Ctrl is pressed.
+		//
+		if ((QGuiApplication::queryKeyboardModifiers() & Qt::ControlModifier) == 0)
+		{
+			return drawText(painter, font, unit, str, rect, flags);
+		}
+#endif
+		QRgb textColor = painter->pen().color().rgb();                   // Text color is taken from the current pen.
+
+		const double reduceZoom = (dpiY > 120) ? 300 : 600;              // Kind of HiDpi Screen?
+		const double sizeReduceFactor = (zoom > reduceZoom) ? 0.5 : 1.0; // It makes images smaller depending on zoom.
 
 		// Draw in pixels, for now we do not cache text out for SchemaUnit::Display, as this unit mode is discouraged.
 		//
-		if (unit == SchemaUnit::Display)
-		{
-			painter->setFont(f);
-			painter->drawText(rect, flags, str);
-			return;
-		}
+		QFont f{font.name()};
 
-		// Draw in inches.
-		//
+		f.setBold(font.bold());
+		f.setItalic(font.italic());
+		f.setUnderline(font.underline());
+		int pixelSize = static_cast<int>(font.drawSize() * dpiY / devicePixelRatioF * zoomFactor * sizeReduceFactor);
+		f.setPixelSize(pixelSize > 0 ? pixelSize : 1);
 
-		// Get cached image, if there is no one, create it.
-		//
-		const double reduceZoom = (dpiY > 120) ? 300 : 600;					// Kind of HiDpi Screen?
-		const double sizeReduceFactor = (zoom > reduceZoom) ? 0.5 : 1.0;	// It makes images smaller depending on zoom.
-
-		const double imageWidth = rect.width() * dpiX * (zoom / 100.0) * sizeReduceFactor;
-		const double imageHeight = rect.height() * dpiY * (zoom / 100.0) * sizeReduceFactor;
+		const double imageWidth = std::ceil(rect.width() * dpiX * (zoom / 100.0) * sizeReduceFactor);
+		const double imageHeight = std::ceil(rect.height() * dpiY * (zoom / 100.0) * sizeReduceFactor);
 
 		QSize imageSize{static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
-		QRect clipRectInt{0, 0, imageSize.width(), imageSize.height()};
 
 		Hash cacheItemHash = DrawTextCacheItem::getHash(f, unit, str, imageSize, flags, textColor, dpiX, dpiY, zoom);
 		bool newCacheItem = false;
 
-thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000};			// 50Mb of images.
+		thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000}; // 50Mb of images.
 
 		DrawTextCacheItem* cacheItem = cache.object(cacheItemHash);
 		if (cacheItem == nullptr)
@@ -552,64 +694,73 @@ thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000};			// 50Mb of ima
 			newCacheItem = true;
 		}
 
-		// Draw in inches
-		//
-		if (unit == SchemaUnit::Inch)
+		if (newCacheItem == true)
 		{
-			Q_ASSERT(unit == SchemaUnit::Inch);
+			QPixmap pixmap{imageSize};
+			pixmap.setDevicePixelRatio(painter->device()->devicePixelRatioF());
+			pixmap.fill(Qt::transparent);
 
-			if (cacheItem->image.size() != clipRectInt.size())		// if image size is different, then it was just created.
-			{
-				// Create image and draw text to it.
-				//
-				double devicePixelRatioF = painter->device()->devicePixelRatioF();
+			QPainter cacheImagePainter{&pixmap};
 
-				cacheItem->image = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
-				cacheItem->image.setDotsPerMeterX(static_cast<int>(painter->device()->physicalDpiX() / 25.4 * 1000.0));
-				cacheItem->image.setDotsPerMeterY(static_cast<int>(painter->device()->physicalDpiY() / 25.4 * 1000.0));
-				cacheItem->image.setDevicePixelRatio(devicePixelRatioF);
+			QRectF textRect{0,
+							0,
+							rect.width() * dpiX / devicePixelRatioF * zoomFactor * sizeReduceFactor,
+							rect.height() * dpiY / devicePixelRatioF * zoomFactor * sizeReduceFactor};
 
-				cacheItem->image.fill(qRgba(0, 0, 0, 0));	// Transparent
+			cacheImagePainter.setPen(painter->pen());
+			cacheImagePainter.setFont(f);
+			cacheImagePainter.drawText(textRect, flags, str, nullptr);
 
-				QPainter cacheImagePainter{&cacheItem->image};
-
-				SchemaView::Ajust(&cacheImagePainter,
-								  painter->device()->physicalDpiX(),
-								  painter->device()->physicalDpiY(),
-								  devicePixelRatioF,
-								  unit,
-								  -0.5 / devicePixelRatioF,
-								  -0.5 / devicePixelRatioF,
-								  zoom * sizeReduceFactor);
-
-				QRectF textRect = rect;
-				textRect.moveTo(0, 0);
-
-				cacheImagePainter.setPen(textColor);
-				cacheImagePainter.setFont(f);
-
-				DrawHelper::drawText(&cacheImagePainter, font, unit, str, textRect, flags);
-			}
+			cacheItem->pixmap = pixmap;
 		}
 
-		// Draw cached image
+		// Draw cached pixmap.
 		//
-		Q_ASSERT(cacheItem != nullptr && cacheItem->image.isNull() == false);
+		painter->setWorldMatrixEnabled(false);
 
-		painter->drawImage(rect, cacheItem->image, cacheItem->image.rect());
+		QRectF rc;
+		rc.setLeft(rect.left() * dpiX / devicePixelRatioF * zoomFactor);
+		rc.setTop(rect.top() * dpiY / devicePixelRatioF * zoomFactor);
+		rc.setRight(rect.right() * dpiX / devicePixelRatioF * zoomFactor);
+		rc.setBottom(rect.bottom() * dpiY / devicePixelRatioF * zoomFactor);
+		rc.translate(0.5, 0.5);
 
-		// Add to cache new item, cache only images not greater then specified size.
-		//
-		if (newCacheItem == true && cacheItem->image.sizeInBytes() < 2'000'000)
+		if (sizeReduceFactor == 1.0)
 		{
-			cache.insert(cacheItemHash, cacheItem, cacheItem->image.sizeInBytes());
+			painter->drawPixmap(rc.topLeft(), cacheItem->pixmap);
+		}
+		else
+		{
+			// Scale pixmap to rect rc.
+			//
+			double imageWidthF = rect.width() * dpiX * (zoom / 100.0) * sizeReduceFactor;
+			double imageHeightF = rect.height() * dpiY * (zoom / 100.0) * sizeReduceFactor;
+
+			painter->drawPixmap(rc, cacheItem->pixmap, QRectF{0, 0, imageWidthF, imageHeightF});
+		}
+
+		painter->setWorldMatrixEnabled(true);
+
+		// Save new item to cache.
+		//
+		if (newCacheItem == true)
+		{
+			int pixmapBytes = cacheItem->pixmap.size().width() * cacheItem->pixmap.size().height() * 4; // 4 bytes per pixel.
+			if (pixmapBytes < 3'000'000)                                                                // up to 3Mb per image.
+			{
+				cache.insert(cacheItemHash, cacheItem, pixmapBytes);
+			}
 		}
 
 		return;
 	}
 
-
-	void DrawHelper::drawText(QPainter* painter, SchemaUnit unit, const QString& str, const QRectF& rect, int flags, QRectF* boundingRect/* = nullptr*/)
+	void DrawHelper::drawText(QPainter* painter,
+							  SchemaUnit unit,
+							  const QString& str,
+							  const QRectF& rect,
+							  int flags,
+							  QRectF* boundingRect /* = nullptr*/)
 	{
 		if (painter == nullptr || str.isEmpty() == true)
 		{
@@ -655,21 +806,16 @@ thread_local QCache<Hash, DrawTextCacheItem> cache{50'000'000};			// 50Mb of ima
 		const double dpiX = CDrawParam::realDpiX(&painter);
 		const double dpiY = CDrawParam::realDpiY(&painter);
 
-		const double imageWidth = (unit == SchemaUnit::Inch) ?
-										rect.width() * dpiX * zoomFactor :
-										rect.width() * zoomFactor;
+		const double imageWidth = (unit == SchemaUnit::Inch) ? rect.width() * dpiX * zoomFactor : rect.width() * zoomFactor;
 
-		const double imageHeight = (unit == SchemaUnit::Inch) ?
-										rect.height() * dpiY * zoomFactor :
-										rect.height() * zoomFactor;
+		const double imageHeight = (unit == SchemaUnit::Inch) ? rect.height() * dpiY * zoomFactor : rect.height() * zoomFactor;
 
-		QSize imageSize{static_cast<int>(std::lround(imageWidth)) + extraSizePx,
-						static_cast<int>(std::lround(imageHeight)) + extraSizePx};
+		QSize imageSize{static_cast<int>(std::lround(imageWidth)) + extraSizePx, static_cast<int>(std::lround(imageHeight)) + extraSizePx};
 
 		Hash cacheItemHash = DrawSvgCacheItem::getHash(unit, svg, imageSize, dpiX, dpiY, zoom);
 		bool newCacheItem = false;
 
-thread_local QCache<Hash, DrawSvgCacheItem> cache{100'000'000};			// 100Mb of images.
+		thread_local QCache<Hash, DrawSvgCacheItem> cache{100'000'000}; // 100Mb of images.
 
 		DrawSvgCacheItem* cacheItem = cache.object(cacheItemHash);
 		if (cacheItem == nullptr)
@@ -680,7 +826,7 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{100'000'000};			// 100Mb of im
 
 		// --
 		//
-		if (cacheItem->image.size() != imageSize)		// if image size is different, then it was just created.
+		if (cacheItem->image.size() != imageSize) // if image size is different, then it was just created.
 		{
 			// Create image and draw text to it.
 			//
@@ -698,7 +844,7 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{100'000'000};			// 100Mb of im
 				cacheItem->image.setDevicePixelRatio(devicePixelRatioF);
 			}
 
-			cacheItem->image.fill(qRgba(0, 0, 0, 0));		// Transparent
+			cacheItem->image.fill(qRgba(0, 0, 0, 0)); // Transparent
 
 			QPainter cacheImagePainter{&cacheItem->image};
 
@@ -710,7 +856,7 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{100'000'000};			// 100Mb of im
 							  painter.device()->physicalDpiY(),
 							  devicePixelRatioF,
 							  unit,
-							  0, 
+							  0,
 							  0,
 							  zoom);
 
@@ -795,4 +941,4 @@ thread_local QCache<Hash, DrawSvgCacheItem> cache{100'000'000};			// 100Mb of im
 		return true;
 	}
 
-}
+} // namespace VFrame30

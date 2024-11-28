@@ -2,7 +2,6 @@
 
 #include "../Builder/AppSignalProperties.h"
 
-class DbController;
 
 class AppSignalPropertyManager : public QObject
 {

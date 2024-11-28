@@ -1,15 +1,9 @@
 #ifndef COMPAREDIALOG_H
 #define COMPAREDIALOG_H
 
-#include <DbLib/DbStruct.h>
-
 namespace Ui {
 	class CompareDialog;
 }
-
-class DbController;
-
-
 
 class CompareDialog : public QDialog
 {

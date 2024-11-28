@@ -49,7 +49,7 @@ namespace Hardware
 
 		// fill map for fast access
 		//
-		m_deviceTable.insert(m_root->equipmentIdTemplate(), m_root);
+		m_deviceTable.insert({m_root->equipmentIdTemplate(), m_root});
 		addDeviceChildrenToHashTable(m_root);
 
 		return;
@@ -61,7 +61,7 @@ namespace Hardware
 
 		if (it != m_deviceTable.end())
 		{
-			return it.value();
+			return it->second;
 		}
 		else
 		{
@@ -75,7 +75,7 @@ namespace Hardware
 
 		if (it != m_deviceTable.end())
 		{
-			return it.value();
+			return it->second;
 		}
 		else
 		{
@@ -98,9 +98,9 @@ namespace Hardware
 		std::vector<std::shared_ptr<DeviceObject>> result;
 		result.reserve(m_deviceTable.size());
 
-		for (auto d : m_deviceTable)
+		for (auto& d : m_deviceTable)
 		{
-			result.push_back(d);
+			result.push_back(d.second);
 		}
 
 		return result;
@@ -125,7 +125,7 @@ namespace Hardware
 		for (int i = 0; i < parent->childrenCount(); i++)
 		{
 			const std::shared_ptr<DeviceObject>& child = parent->child(i);
-			m_deviceTable.insert(child->equipmentIdTemplate(), child);
+			m_deviceTable.insert({child->equipmentIdTemplate(), child});
 
 			addDeviceChildrenToHashTable(child);
 		}

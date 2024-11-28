@@ -1,14 +1,19 @@
 #pragma once
 
-#include <VFrame30/FblItem.h>
+#include "UuidGenerator.h"
 
-class DbController;
+#include <VFrame30/FblItem.h>
+#include <VFrame30/HorzVertLinks.h>
+
+
+class AppLogicGraph;
+class LmDescription;
 
 namespace Afb
 {
 	class AfbComponent;
 	class AfbElement;
-}
+} // namespace Afb
 
 namespace AppSignalLib
 {
@@ -29,7 +34,7 @@ namespace VFrame30
 	class SchemaItemAfb;
 	class FblItemRect;
 	class Schema;
-	
+
 	class SchemaItemTerminator;
 	class SchemaItemSignal;
 	class SchemaItemConst;
@@ -48,28 +53,40 @@ namespace Builder
 	class SignalSet;
 	class LmDescriptionSet;
 
-	struct Uuid
+	class Link
 	{
-		enum class Area
-		{
-			Link,
-			UfbDeepCopy
-		};
-
-		static QUuid getNextId(Area area);
-	};
-
-	struct Link
-	{
+	public:
 		Link() = default;
-		Link(const std::list<VFrame30::SchemaPoint>& points);
+
+		template<typename Container>
+		Link(const Container& points)
+		{
+			setPoints(points);
+		}
+
+		template<typename Container>
+		void setPoints(const Container& points)
+		{
+			m_points.clear();
+			m_horzVertLinks.clear();
+
+			Q_ASSERT(points.size() >= 2);
+			m_points.reserve(points.size());
+			m_points = {points.begin(), points.end()};
+
+			constexpr const QUuid uuid{0x66555511, 0x1122, 0x4444, 0x88, 0x86, 0x32, 0x29, 0x22, 0x33, 0x33, 0x11};
+			m_horzVertLinks.AddLinks(m_points.begin(), m_points.end(), uuid, 4);
+		}
+
 
 		VFrame30::SchemaPoint ptBegin() const;
 		VFrame30::SchemaPoint ptEnd() const;
 
 		bool isPinOnLink(VFrame30::SchemaPoint pt) const;
 
-		std::list<VFrame30::SchemaPoint> m_points;
+	private:
+		std::vector<VFrame30::SchemaPoint> m_points;
+		VFrame30::CHorzVertLinks m_horzVertLinks; // Used for IsPointOnLink
 	};
 
 	struct Bush
@@ -122,15 +139,14 @@ namespace Builder
 		std::shared_ptr<VFrame30::FblItemRect> m_fblItem;
 		std::shared_ptr<VFrame30::Schema> m_schema;
 
-		QUuid m_groupId; // ShchemaItemUfb is expanded to the group of items, all these expanded items have the same m_groupId
+		QUuid m_groupId; // SchemaItemUfb is expanded to the group of items, all these expanded items have the same m_groupId
 						 // This id is empty if item is not in group
 
 		// Methods
 		//
 		AppLogicItem() = default;
 		AppLogicItem(const AppLogicItem&) = default;
-		AppLogicItem(const std::shared_ptr<VFrame30::FblItemRect>& fblItem,
-					 const std::shared_ptr<VFrame30::Schema>& schema);
+		AppLogicItem(const std::shared_ptr<VFrame30::FblItemRect>& fblItem, const std::shared_ptr<VFrame30::Schema>& schema);
 
 		const Afb::AfbElement& afbElement() const;
 		Afb::AfbElement& afbElement();
@@ -138,7 +154,7 @@ namespace Builder
 		std::shared_ptr<Afb::AfbComponent> afbComponent();
 		std::shared_ptr<Afb::AfbComponent> afbComponent() const;
 
-		// Items can be kept in set, it is just comparing m_fblItem pointres
+		// Items can be kept in set, it is just comparing m_fblItem pointers
 		//
 		bool operator<(const AppLogicItem& li) const;
 		bool operator==(const AppLogicItem& li) const;
@@ -170,41 +186,33 @@ namespace Builder
 		Q_OBJECT
 
 	public:
-		AppLogicModule() = delete;
-		AppLogicModule(QString moduleId, QString lmDescriptionFile);
+		AppLogicModule(QString moduleId, QString lmDescriptionFile, const ::LmDescription& lmDescription, IssueLogger& log);
+		virtual ~AppLogicModule();
 
-		bool addBranch(std::shared_ptr<VFrame30::Schema> schema,
-					   const BushContainer& bushes,
-					   IssueLogger* log);
+	public:
+		bool addBranch(std::shared_ptr<VFrame30::Schema> schema, const BushContainer& bushes);
 
-		bool orderItems(IssueLogger* log, bool* interruptProcess);
+		bool createGraph();
+		bool orderItems();
 
-		//	Make deep copy with new guid for everything, items, pins, assocs, etc...
+		//	Make deep copy with new guid for everything, items, pins, associated, etc...
 		//
 		std::shared_ptr<AppLogicModule> deepCopy(QUuid groupId, const QString& label) const;
 
-		bool checkItemsRelationsConsistency(IssueLogger* log) const;
+		bool checkItemsRelationsConsistency() const;
 
-		static bool checkItemsRelationsConsistency(const QString& equipmentId,
-												   const std::list<AppLogicItem>& items,
-												   IssueLogger* log);
+		static bool checkItemsRelationsConsistency(const QString& equipmentId, const std::list<AppLogicItem>& items, IssueLogger& log);
 
 		bool removeInOutItemKeepAssoc(const QUuid& itemGuid);
 
 		void dump() const;
 		[[nodiscard]] QByteArray writeParsedXml() const;
 
-	private:
-		bool setItemsOrder(IssueLogger* log,
-						   std::map<QUuid, AppLogicItem>& remainItems,
-						   std::list<AppLogicItem>& orderedItems,
-						   const std::map<QUuid, std::vector<AppLogicItem>>& itemsWithInputs,
-						   bool startLoopFromLastItem,
-						   bool* interruptProcess);
 
+	public:
 		// Set connection between SchemaItemInput/SchemaItemOutput by StrIds
 		//
-		bool setInputOutputsElementsConnection(IssueLogger* log);
+		bool setInputOutputsElementsConnection();
 
 	public:
 		QString equipmentId() const;
@@ -218,15 +226,23 @@ namespace Builder
 		void setFblItemsAcc(std::map<QUuid, AppLogicItem> v);
 
 	private:
-		QString m_equipmentId;                       // EuqipmentId or UFB SchemaID
+		IssueLogger& m_log;
+		QString m_equipmentId;                       // EquipmentId or UFB SchemaID
 		QString m_lmDescriptionFile;                 // LogicModule description filename
+		const LmDescription& m_lmDescription;        // LogicModule description
+
+		mutable UuidGenerator m_uuidGeneratorUfbDeepCopy;
+		mutable UuidGenerator m_uuidGeneratorInOut;
+
+		std::vector<AppLogicItem> m_graphItems;      // Items for graph
+		std::unique_ptr<::AppLogicGraph> m_graph;
+
 		std::list<AppLogicItem> m_items;             // Ordered items
 		std::map<QUuid, AppLogicItem> m_fblItemsAcc; // Temporary buffer, filled in addBranch, cleared in orderItems
 
+
 		//
 		QHash<QString, bool> m_signaledItems;
-
-		static const int LoopbackThreshold = 32;
 	};
 
 
@@ -238,30 +254,28 @@ namespace Builder
 	class AppLogicData
 	{
 	public:
-		explicit AppLogicData(SignalSet* signalSet);
+		explicit AppLogicData(SignalSet& signalSet, LmDescriptionSet& lmDescriptions, IssueLogger& log);
 
 		// Public methods
 		//
 	public:
-		bool addLogicModuleData(QString equipmentId,
-								const BushContainer& bushContainer,
-								std::shared_ptr<VFrame30::LogicSchema> schema,
-								IssueLogger* log);
+		bool addLogicModuleData(QString equipmentId, const BushContainer& bushContainer, std::shared_ptr<VFrame30::LogicSchema> schema);
 
-		bool addUfbData(const BushContainer& bushContainer,
-						std::shared_ptr<VFrame30::UfbSchema> schema,
-						IssueLogger* log);
+		bool addUfbData(const BushContainer& bushContainer, std::shared_ptr<VFrame30::UfbSchema> schema);
 
-		bool orderLogicModuleItems(IssueLogger* log);
-		bool orderUfbItems(IssueLogger* log);
+		bool orderLogicModuleItems();
+		bool orderUfbItems();
 
-		bool expandUfbs(IssueLogger* log);
+		bool expandUfbs();
 
 		static bool bindTwoPins(VFrame30::AfbPin& outPin, VFrame30::AfbPin& inputPin);
 
-		bool setAfbComponents(const LmDescriptionSet* lmDescriptionSet, IssueLogger* log);
+		bool setAfbComponents(const LmDescriptionSet* lmDescriptionSet);
 
-		bool resolvePackedLogicAfbs(IssueLogger* log);
+		bool resolvePackedLogicAfbs();
+
+		bool setInputOutputsElementsConnection();
+		bool createGraphs();
 
 		/// @brief Write fully parsed AppLogicData to the output for further analysis by third-party tools.
 		bool writeToOutput(QString buildPath, BuildResultWriter& buildResultWriter, const std::vector<Hardware::DeviceModule*>& fscModules);
@@ -280,7 +294,9 @@ namespace Builder
 		std::list<std::shared_ptr<AppLogicModule>> m_modules;
 		std::map<QString, std::shared_ptr<AppLogicModule>> m_ufbs;
 
-		SignalSet* m_signalSet = nullptr;
+		SignalSet& m_signalSet;
+		LmDescriptionSet& m_lmDescriptions;
+		IssueLogger& m_log;
 	};
 
 
@@ -290,11 +306,9 @@ namespace Builder
 	class ReadyParseDataContainer
 	{
 	public:
-		void add(QString equipmentId,
-				 std::shared_ptr<BushContainer> bushContainer,
-				 std::shared_ptr<VFrame30::LogicSchema> schema);
+		void add(QString equipmentId, std::shared_ptr<BushContainer> bushContainer, std::shared_ptr<VFrame30::LogicSchema> schema);
 
-		void setToAppData(AppLogicData* appData, IssueLogger* log);
+		void setToAppData(AppLogicData* appData);
 
 	private:
 		struct AppData
@@ -302,10 +316,12 @@ namespace Builder
 			QString equipmentId;
 			std::shared_ptr<BushContainer> bushContainer;
 			std::shared_ptr<VFrame30::LogicSchema> schema;
+
+			bool operator<(const AppData& other) const;
 		};
 
 		mutable QMutex m_mutex;
-		std::list<AppData> m_appData;
+		std::set<AppData> m_appData;
 	};
 
 
@@ -320,8 +336,9 @@ namespace Builder
 
 	public:
 		Parser() = delete;
-		Parser(Builder::Context* context);
+		explicit Parser(Builder::Context* context);
 
+	public:
 		bool parse();
 
 	protected:
@@ -343,18 +360,16 @@ namespace Builder
 
 		bool checkAfbItemsVersion(VFrame30::Schema* schema);
 		bool checkBusItemsVersion(VFrame30::Schema* schema, const AppSignalLib::BusSet& busSet);
-		bool checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema,
-								  const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs);
+		bool checkUfbItemsVersion(VFrame30::LogicSchema* logicSchema, const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs);
 		bool checkForUniqueLoopbackId(VFrame30::Schema* schema);
 		bool checkForUniqueLoopbackId(std::shared_ptr<AppLogicModule> module);
 
 		bool checkForResolvedReferences(std::shared_ptr<AppLogicModule> module);
 
 		bool parsUfbSchema(std::shared_ptr<VFrame30::UfbSchema> ufbSchema);
-		bool parseUfbLayer(std::shared_ptr<VFrame30::UfbSchema> ufbSchema,
-						   std::shared_ptr<VFrame30::SchemaLayer> layer);
+		bool parseUfbLayer(std::shared_ptr<VFrame30::UfbSchema> ufbSchema, std::shared_ptr<VFrame30::SchemaLayer> layer);
 
-		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema, ReadyParseDataContainer* readyParseDataContainer, bool* interruptProcess);
+		bool parseAppLogicSchema(std::shared_ptr<VFrame30::LogicSchema> logicSchema, ReadyParseDataContainer* readyParseDataContainer);
 
 		bool parseAppLogicLayer(std::shared_ptr<VFrame30::LogicSchema> logicSchema,
 								std::shared_ptr<VFrame30::SchemaLayer> layer,
@@ -364,7 +379,9 @@ namespace Builder
 									std::shared_ptr<VFrame30::SchemaLayer> layer,
 									QString equipmentId);
 
-		bool filterSingleChannelBranchesInMultiSchema(std::shared_ptr<VFrame30::LogicSchema> schema, QString equipmnetId, BushContainer* bushContainer);
+		bool filterSingleChannelBranchesInMultiSchema(std::shared_ptr<VFrame30::LogicSchema> schema,
+													  QString equipmnetId,
+													  BushContainer* bushContainer);
 
 		bool findBushes(std::shared_ptr<VFrame30::Schema> schema,
 						std::shared_ptr<VFrame30::SchemaLayer> layer,
@@ -380,7 +397,6 @@ namespace Builder
 
 	private:
 		DbController* db();
-		IssueLogger* log() const;
 		int changesetId() const;
 
 		const AppLogicData* applicationData() const;
@@ -389,7 +405,7 @@ namespace Builder
 	private:
 		Builder::Context* m_context = nullptr;
 		DbController* m_db = nullptr;
-		mutable IssueLogger* m_log = nullptr;
+		IssueLogger& m_log;
 		int m_changesetId = 0;
 
 		std::shared_ptr<AppLogicData> m_applicationData;

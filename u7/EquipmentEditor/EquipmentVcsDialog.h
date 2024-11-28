@@ -5,7 +5,6 @@ namespace Ui {
 	class EquipmentVcsDialog;
 }
 
-class DbController;
 
 class EquipmentVcsDialog : public QDialog
 {

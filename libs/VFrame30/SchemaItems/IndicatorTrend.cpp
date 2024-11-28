@@ -305,7 +305,7 @@ namespace VFrame30
 
 		// --
 		//
-		m_trendParam.setRect(trendRect);
+		m_trendParam.setRectPx(trendRect, m_trendParam.dpiX(), m_trendParam.dpiY(), m_trendParam.devicePixelRatio());
 		m_trendParam.setTimeType(m_timeType);
 
 		if (drawParam->drawMode() != DrawMode::Editor)

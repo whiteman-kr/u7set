@@ -156,8 +156,7 @@ namespace Proto
 									ProtoCompress compression = Proto::ProtoCompress::Auto,
 									size_t autoCompressionLimit = 2048)
 		{
-			thread_local std::string serializedString; // thread_local is used to avoid reallocation of memory
-			serializedString.clear();
+			std::string serializedString;
 
 			bool ok = message.SerializeToString(&serializedString);
 			if (ok == false)

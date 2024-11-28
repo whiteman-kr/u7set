@@ -119,6 +119,7 @@ namespace VFrame30
 		// Read schema items
 		//
 		m_items.clear();
+		m_items.reserve(static_cast<size_t>(layer.items().size()));
 
 		for (int i = 0; i < layer.items().size(); i++)
 		{

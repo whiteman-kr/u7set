@@ -1,5 +1,5 @@
-#include <VFrame30/PosRectImpl.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/PosRectImpl.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/Settings.h>
 
@@ -29,24 +29,32 @@ namespace VFrame30
 		}
 		else
 		{
-			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 1 : 3;		// 1 for mm, 3 for inches
+			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 1 : 3; // 1 for mm, 3 for inches
 		}
 
 		Property* p = nullptr;
 
-		p = addProperty<double, PosRectImpl, &PosRectImpl::left, &PosRectImpl::setLeft>(PropertyNames::left, PropertyNames::positionAndSizeCategory, true);
+		p = addProperty<double, PosRectImpl, &PosRectImpl::left, &PosRectImpl::setLeft>(PropertyNames::left,
+																						PropertyNames::positionAndSizeCategory,
+																						true);
 		p->setPrecision(precision);
 		p->setViewOrder(0);
 
-		p = addProperty<double, PosRectImpl, &PosRectImpl::top, &PosRectImpl::setTop>(PropertyNames::top, PropertyNames::positionAndSizeCategory, true);
+		p = addProperty<double, PosRectImpl, &PosRectImpl::top, &PosRectImpl::setTop>(PropertyNames::top,
+																					  PropertyNames::positionAndSizeCategory,
+																					  true);
 		p->setPrecision(precision);
 		p->setViewOrder(1);
 
-		p = addProperty<double, PosRectImpl, &PosRectImpl::width, &PosRectImpl::setWidth>(PropertyNames::width, PropertyNames::positionAndSizeCategory, true);
+		p = addProperty<double, PosRectImpl, &PosRectImpl::width, &PosRectImpl::setWidth>(PropertyNames::width,
+																						  PropertyNames::positionAndSizeCategory,
+																						  true);
 		p->setPrecision(precision);
 		p->setViewOrder(2);
 
-		p = addProperty<double, PosRectImpl, &PosRectImpl::height, &PosRectImpl::setHeight>(PropertyNames::height, PropertyNames::positionAndSizeCategory, true);
+		p = addProperty<double, PosRectImpl, &PosRectImpl::height, &PosRectImpl::setHeight>(PropertyNames::height,
+																							PropertyNames::positionAndSizeCategory,
+																							true);
 		p->setPrecision(precision);
 		p->setViewOrder(3);
 
@@ -88,7 +96,7 @@ namespace VFrame30
 			assert(message.HasExtension(Proto::schemaitem));
 			return false;
 		}
-		
+
 		// --
 		//
 		bool result = SchemaItem::LoadData(message);
@@ -117,7 +125,7 @@ namespace VFrame30
 	// Action Functions
 	//
 	void PosRectImpl::moveItem(double horzOffsetDocPt, double vertOffsetDocPt)
-	{ 
+	{
 		setLeftDocPt(leftDocPt() + horzOffsetDocPt);
 		setTopDocPt(topDocPt() + vertOffsetDocPt);
 	}
@@ -171,7 +179,7 @@ namespace VFrame30
 	void PosRectImpl::drawHighlight(CDrawParam* drawParam) const
 	{
 		bool highlight = drawParam->highlightIds().contains(label());
-		
+
 		if (highlight == true)
 		{
 			QRectF highlightRect = boundingRectInDocPt(drawParam);
@@ -223,7 +231,7 @@ namespace VFrame30
 
 		// --
 		//
-		QRectF r = boundingRectInDocPt(drawParam); 
+		QRectF r = boundingRectInDocPt(drawParam);
 
 		p->setPen(*outlinePen);
 		p->setBrush(Qt::NoBrush);
@@ -288,7 +296,7 @@ namespace VFrame30
 
 		return;
 	}
-	
+
 	// ���������� ��������� �������, � ����������� �� ������������� ���������� ������������.
 	//
 	void PosRectImpl::drawSelection(CDrawParam* drawParam, bool drawSizeBar) const
@@ -302,7 +310,7 @@ namespace VFrame30
 			selectionPen = std::make_shared<QPen>(QColor(0x33, 0x99, 0xFF, 0x80));
 		}
 
-		selectionPen->setColor(isLocked() == true ?  SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
+		selectionPen->setColor(isLocked() == true ? SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
 
 		// --
 		//
@@ -330,24 +338,21 @@ namespace VFrame30
 			double width = r.width();
 			double height = r.height();
 
-			QRectF controlRectangles[] = 
-			{
-				QRectF{fx - cbs, fy - cbs, cbs, cbs},
-				QRectF{fx + width / 2 - cbs / 2, fy - cbs, cbs, cbs},
-				QRectF{fx + width, fy - cbs, cbs, cbs},
-				QRectF{fx + width, fy + height / 2 - cbs / 2, cbs, cbs},
-				QRectF{fx + width, fy + height, cbs, cbs},
-				QRectF{fx + width / 2 - cbs / 2, fy + height, cbs, cbs},
-				QRectF{fx - cbs, fy + height, cbs, cbs},
-				QRectF{fx - cbs, fy + height / 2 - cbs / 2, cbs, cbs}
-			};
+			QRectF controlRectangles[] = {QRectF{fx - cbs, fy - cbs, cbs, cbs},
+										  QRectF{fx + width / 2 - cbs / 2, fy - cbs, cbs, cbs},
+										  QRectF{fx + width, fy - cbs, cbs, cbs},
+										  QRectF{fx + width, fy + height / 2 - cbs / 2, cbs, cbs},
+										  QRectF{fx + width, fy + height, cbs, cbs},
+										  QRectF{fx + width / 2 - cbs / 2, fy + height, cbs, cbs},
+										  QRectF{fx - cbs, fy + height, cbs, cbs},
+										  QRectF{fx - cbs, fy + height / 2 - cbs / 2, cbs, cbs}};
 
 			for (const QRectF& cr : controlRectangles)
 			{
 				p->fillRect(cr, selectionPen->color());
 			}
 		}
-		
+
 		// --
 		//
 		p->setRenderHints(oldrenderhints);
@@ -362,8 +367,8 @@ namespace VFrame30
 
 		// --
 		//
-//		QPainter::RenderHints oldrenderhints = p->renderHints();
-//		p->setRenderHint(QPainter::Antialiasing, false);
+		//		QPainter::RenderHints oldrenderhints = p->renderHints();
+		//		p->setRenderHint(QPainter::Antialiasing, false);
 
 		// --
 		//
@@ -390,7 +395,7 @@ namespace VFrame30
 
 		// --
 		//
-		//p->setRenderHints(oldrenderhints);
+		// p->setRenderHints(oldrenderhints);
 		return;
 	}
 
@@ -463,7 +468,7 @@ namespace VFrame30
 			return result;
 		}
 
-		return itemRect.intersects(detRect) || detRect.contains(itemRect.topLeft());	// contains for the empty rect (width or height is 0)
+		return itemRect.intersects(detRect) || detRect.contains(itemRect.topLeft()); // contains for the empty rect (width or height is 0)
 	}
 
 	QRectF PosRectImpl::boundingRectInDocPt(const CDrawParam* drawParam) const
@@ -485,10 +490,23 @@ namespace VFrame30
 			result.setBottom(result.top() + 0.000001f);
 		}
 
+		// Align point to the dpi grid.
+		//
+		result.setTopLeft(drawParam->gridToDpi(result.topLeft()));
+		result.setBottomRight(drawParam->gridToDpi(result.bottomRight()));
+
+		if (itemUnit() == SchemaUnit::Inch)
+		{
+			// It makes shure that if two rects are together, no spaces between them.
+			//
+			result.setRight(result.right() + 1.0 / drawParam->realDpiX());
+			result.setBottom(result.bottom() + 1.0 / drawParam->realDpiY());
+		}
+
 		return result;
 	}
 
-	double PosRectImpl::leftDocPt() const 
+	double PosRectImpl::leftDocPt() const
 	{
 		return m_leftDocPt;
 	}
@@ -504,11 +522,11 @@ namespace VFrame30
 		}
 	}
 
-	double PosRectImpl::topDocPt() const 
+	double PosRectImpl::topDocPt() const
 	{
 		return m_topDocPt;
 	}
-	void PosRectImpl::setTopDocPt(double value) 
+	void PosRectImpl::setTopDocPt(double value)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -520,11 +538,11 @@ namespace VFrame30
 		}
 	}
 
-	double PosRectImpl::widthDocPt() const 
+	double PosRectImpl::widthDocPt() const
 	{
 		return m_widthDocPt;
 	}
-	void PosRectImpl::setWidthDocPt(double value) 
+	void PosRectImpl::setWidthDocPt(double value)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -541,11 +559,11 @@ namespace VFrame30
 		}
 	}
 
-	double PosRectImpl::heightDocPt() const 
+	double PosRectImpl::heightDocPt() const
 	{
 		return m_heightDocPt;
 	}
-	void PosRectImpl::setHeightDocPt(double value) 
+	void PosRectImpl::setHeightDocPt(double value)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -590,7 +608,7 @@ namespace VFrame30
 		}
 	}
 
-	double PosRectImpl::top() const 
+	double PosRectImpl::top() const
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -601,7 +619,7 @@ namespace VFrame30
 			double pt = topDocPt();
 			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
-		}			
+		}
 	}
 	void PosRectImpl::setTop(double value)
 	{
@@ -617,7 +635,7 @@ namespace VFrame30
 		}
 	}
 
-	double PosRectImpl::width() const 
+	double PosRectImpl::width() const
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -645,7 +663,7 @@ namespace VFrame30
 		}
 	}
 
-	double PosRectImpl::height() const 
+	double PosRectImpl::height() const
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -656,7 +674,7 @@ namespace VFrame30
 			double pt = heightDocPt();
 			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			return VFrame30::RoundPoint(pt, Settings::regionalUnit());
-		}			
+		}
 	}
 	void PosRectImpl::setHeight(double value)
 	{
@@ -675,8 +693,7 @@ namespace VFrame30
 
 	std::vector<SchemaPoint> PosRectImpl::getPointList() const
 	{
-		std::vector<SchemaPoint> v = {{m_leftDocPt, m_topDocPt},
-									  {m_leftDocPt + m_widthDocPt, m_topDocPt + m_heightDocPt}};
+		std::vector<SchemaPoint> v = {{m_leftDocPt, m_topDocPt}, {m_leftDocPt + m_widthDocPt, m_topDocPt + m_heightDocPt}};
 		return v;
 	}
 
@@ -696,5 +713,4 @@ namespace VFrame30
 
 		return;
 	}
-}
-
+} // namespace VFrame30

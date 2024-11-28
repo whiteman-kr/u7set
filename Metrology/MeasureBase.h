@@ -143,7 +143,7 @@ namespace Measure
 
 	// ==============================================================================================
 
-	inline static const std::vector<int> Timeout =
+	inline const std::vector<int> Timeout =
 	{
 		0, 1, 2, 3, 5, 10, 15, 20, 30, 45, 60,  // default value of seconds
 	};

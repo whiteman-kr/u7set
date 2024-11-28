@@ -1,8 +1,6 @@
 #pragma once
 #include "../OnlineLib/MatsUsers.h"
 
-class DbController;
-
 namespace Builder
 {
 	//

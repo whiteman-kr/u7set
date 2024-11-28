@@ -1,6 +1,6 @@
 #include "DialogMatsUsersEditor.h"
+#include "../Builder/DbMatsUsers.h"
 #include <UiLib/ChooseItemsWidget.h>
-
 
 //
 //
