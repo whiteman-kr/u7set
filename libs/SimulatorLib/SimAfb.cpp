@@ -395,7 +395,12 @@ namespace Sim
 		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
-		float result = op1 + op2;
+		
+		// Force memory flush so FE_OVERFLOW is set immediately.
+		// Using volatile prevents the compiler from optimizing the multiplication
+		// and ensures the operation is performed strictly in IEEE 754 compliance.
+		//
+		volatile float result = op1 + op2;
 
 		// Setting math flags
 		//
@@ -429,7 +434,12 @@ namespace Sim
 		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
-		float result = op1 - op2;
+		
+		// Force memory flush so FE_OVERFLOW is set immediately.
+		// Using volatile prevents the compiler from optimizing the multiplication
+		// and ensures the operation is performed strictly in IEEE 754 compliance.
+		//
+		volatile float result = op1 - op2;
 
 		// Setting math flags
 		//
@@ -463,7 +473,12 @@ namespace Sim
 		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
-		float result = op1 * op2;
+		
+		// Force memory flush so FE_OVERFLOW is set immediately.
+		// Using volatile prevents the compiler from optimizing the multiplication
+		// and ensures the operation is performed strictly in IEEE 754 compliance.
+		//
+		volatile float result = op1 * op2;
 
 		// Setting math flags
 		//
@@ -498,7 +513,12 @@ namespace Sim
 		float op2 = operand.floatValue();
 
 		std::feclearexcept(FE_ALL_EXCEPT);
-		float result = op1 / op2;
+
+		// Force memory flush so FE_OVERFLOW is set immediately.
+		// Using volatile prevents the compiler from optimizing the multiplication
+		// and ensures the operation is performed strictly in IEEE 754 compliance.
+		//
+		volatile float result = op1 / op2;
 
 		// Setting math flags
 		//
