@@ -25,7 +25,12 @@ bool isDiscreteByIndex(int signalIndex)
 
 ```c
 bool isAnalog(string signalId)
-bool IsAnalogByIndex(int signalIndex)
+bool isAnalogByIndex(int signalIndex)
+```
+
+```c
+bool isTuning(string signalId)
+bool isTuningByIndex(int signalIndex)
 ```
 
 ```c
@@ -49,23 +54,42 @@ uint32 signalFlagsByIndex(int signalIndex)
 ```
 
 ```c
-int32 signalLowLimitInt(string signalId)
-float signalLowLimitFloat(string signalId)
-
-int32 signalLowLimitByIndexInt(int signalIndex)
-float signalLowLimitByIndexFloat(int signalIndex)
-```
-
-```c
 int32 signalPropertyInt(string signalId, int property)
 int32 signalPropertyByIndexInt(int signalIndex, int property)
 
 float signalPropertyFloat(string signalId, int property)
 float signalPropertyByIndexFloat(int signalIndex, int property)
 
-// Argument property:
-// 1 - LowEngineeringUnit
-// 2 - HighEngineeringUnit
+// Argument property can be one of the following values:
+// 1 - LowEngUnits (float or int32, depending on the signal type)
+// 2 - HighEngUnits (float or int32, depending on the signal type)
+// 11 - TuningLowBound (float or int32, depending on the signal type)
+// 12 - TuningHighBound (float or int32, depending on the signal type)
+// 100 - DecimalPlaces (int32)
+```
+
+```c
+int32 signalLowEngUnitsInt(string signalId)
+float signalLowEngUnitsFloat(string signalId)
+int32 signalLowEngUnitsByIndexInt(int signalIndex)
+float signalLowEngUnitsByIndexFloat(int signalIndex)
+
+int32 signalHighEngUnitsInt(string signalId)
+float signalHighEngUnitsFloat(string signalId)
+int32 signalHighEngUnitsByIndexInt(int signalIndex)
+float signalHighEngUnitsByIndexFloat(int signalIndex)
+```
+
+```c
+int32 signalTuningLowBoundInt(string signalId)
+float signalTuningLowBoundFloat(string signalId)
+int32 signalTuningLowBoundByIndexInt(int signalIndex)
+float signalTuningLowBoundByIndexFloat(int signalIndex)
+
+int32 signalTuningHighBoundInt(string signalId)
+float signalTuningHighBoundFloat(string signalId)
+int32 signalTuningHighBoundByIndexInt(int signalIndex)
+float signalTuningHighBoundByIndexFloat(int signalIndex)
 ```
 
 ## Control - AppSignals
@@ -223,10 +247,10 @@ Text can contain placeholders for signals in the form of:
 %i - CustomAppSignalID
 %c - Signal caption
 %v - Signal value
-%V - Signal value + unit
+%V - Signal value + units
 %s - +/- signal value
-%S - +/- signal value + unit
-%u - Unit
+%S - +/- signal value + units
+%u - Units
 %e - Value in exponential form (1.0e-11)
 %E - Value in exponential form (1.0E-11)
 %x - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009abc).
