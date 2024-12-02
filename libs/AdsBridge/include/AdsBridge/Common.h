@@ -134,7 +134,7 @@ extern "C"
 		const char* caption;                ///< The caption of the signal.
 		const char* equipmentId;            ///< The ID of the equipment (lmEquipmentId for internal signals).
 		const char* lmEquipmentId;          ///< The ID of the LM equipment.
-		const char* unit;                   ///< The unit of the signal.
+		const char* units;                  ///< The units of the signal.
 		const char* tags;                   ///< Space separated tags associated with the signal.
 
 		enum MatsChannel channel;           ///< The channel of the signal.

@@ -125,7 +125,7 @@ void dumpAppSignalParam(const MatsAppSignalParam& signalParam)
 	std::cout << "\tequipmentId: " << signalParam.equipmentId << "\n";
 	std::cout << "\tlmEquipmentId: " << signalParam.lmEquipmentId << "\n";
 
-	std::cout << "\tunit: " << signalParam.unit << "\n";
+	std::cout << "\tunits: " << signalParam.units << "\n";
 	std::cout << "\ttags: " << signalParam.tags << "\n";
 
 	std::cout << "\tchannel: " << signalParam.channel << "\n";

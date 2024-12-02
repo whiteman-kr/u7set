@@ -64,7 +64,7 @@ def main():
         print(f"    caption: {p.caption}")
         print(f"    equipmentId: {p.equipmentId}")
         print(f"    lmEquipmentId: {p.lmEquipmentId}")
-        print(f"    unit: {p.unit}")
+        print(f"    units: {p.units}")
         print(f"    tags: {p.tags}")
         print(f"    channel: {p.channel}")
         print(f"    inOutType: {p.inOutType}")

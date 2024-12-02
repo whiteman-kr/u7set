@@ -291,7 +291,7 @@ class AdsBridge:
         signal_param.caption = ctypes.c_char_p(0x77223399BBAAEEDD)
         signal_param.equipmentId = ctypes.c_char_p(0x2233D1998899AA9A)
         signal_param.lmEquipmentId = ctypes.c_char_p(0x3233D199889AAA8B)
-        signal_param.unit = ctypes.c_char_p(0xBBAADDFF7711AA99)
+        signal_param.units = ctypes.c_char_p(0xBBAADDFF7711AA99)
         signal_param.tags = ctypes.c_char_p(0x223344998899AABB)
         signal_param.channel = ctypes.c_int(MatsChannel.ChannelD.value)
         signal_param.inOutType = ctypes.c_int(

@@ -12,7 +12,7 @@ class MatsAppSignalParam:
                  caption: str = None,
                  equipmentId: str = None,
                  lmEquipmentId: str = None,
-                 unit: str = None,
+                 units: str = None,
                  tags: str = None,
                  channel: MatsChannel = MatsChannel.ChannelA,
                  inOutType: MatsSignalInOutType = MatsSignalInOutType.Input,
@@ -28,7 +28,7 @@ class MatsAppSignalParam:
         self.caption = caption
         self.equipmentId = equipmentId
         self.lmEquipmentId = lmEquipmentId
-        self.unit = unit
+        self.units = units
         self.tags = tags
         self.channel = channel
         self.inOutType = inOutType
@@ -46,7 +46,7 @@ class c_MatsAppSignalParam(ctypes.Structure):
                 ("caption", ctypes.c_char_p),
                 ("equipmentId", ctypes.c_char_p),
                 ("lmEquipmentId", ctypes.c_char_p),
-                ("unit", ctypes.c_char_p),
+                ("units", ctypes.c_char_p),
                 ("tags", ctypes.c_char_p),
                 ("channel", ctypes.c_int),  # enum
                 ("inOutType", ctypes.c_int),  # enum
@@ -70,7 +70,7 @@ class c_MatsAppSignalParam(ctypes.Structure):
                                           'utf-8'),
                                       lmEquipmentId=self.lmEquipmentId.decode(
                                           'utf-8'),
-                                      unit=self.unit.decode('utf-8'),
+                                      units=self.units.decode('utf-8'),
                                       tags=self.tags.decode('utf-8'),
                                       channel=MatsChannel(self.channel),
                                       inOutType=MatsSignalInOutType(
