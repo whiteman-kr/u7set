@@ -1277,8 +1277,8 @@ void DialogSignalInfo::fillSignalInfo()
 
 	if (m_signal.isAnalog())
 	{
-		ui->labelStrUnit->setText(m_signal.unit());
-		ui->labelStrUnitTuning->setText(m_signal.unit());
+		ui->labelStrUnit->setText(m_signal.units());
+		ui->labelStrUnitTuning->setText(m_signal.units());
 	}
 	else
 	{
@@ -1368,7 +1368,7 @@ void DialogSignalInfo::fillProperties()
 
 		if (m_signal.isAnalog())
 		{
-			itemGroupGeneral->addChild(new QTreeWidgetItem(QStringList() << tr("Unit") << m_signal.unit()));
+			itemGroupGeneral->addChild(new QTreeWidgetItem(QStringList() << tr("Unit") << m_signal.units()));
 		}
 
 		// Tags

@@ -73,7 +73,7 @@ struct AppSignalParamMimeType
 		{
 			// Create a string with template "caption, units"
 			//
-			var units = param2.unit;
+			var units = param2.units;
 
 			var text = param2.caption + ", " + units;
 			...
@@ -113,8 +113,10 @@ class AppSignalParam
 	Q_PROPERTY(QString LmEquipmentID READ lmEquipmentId)
 
 	/// \brief Signal Measure Units
-	Q_PROPERTY(QString unit READ unit)
-	Q_PROPERTY(QString Unit READ unit)
+	Q_PROPERTY(QString units READ units)
+	Q_PROPERTY(QString Units READ units)
+	Q_PROPERTY(QString unit READ units)
+	Q_PROPERTY(QString Unit READ units)
 
 	/// \brief Signal precision (digits after point)
 	Q_PROPERTY(int precision READ precision)
@@ -255,8 +257,8 @@ public:
 	[[nodiscard]] E::ByteOrder byteOrder() const;
 	void setByteOrder(E::ByteOrder value);
 
-	[[nodiscard]] QString unit() const;
-	void setUnit(const QString& value);
+	[[nodiscard]] QString units() const;
+	void setUnits(const QString& value);
 
 	[[nodiscard]] double lowValidRange() const;
 	[[nodiscard]] double highValidRange() const;
@@ -364,7 +366,7 @@ private:
 		E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
 		E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
 
-		QString m_unit;
+		QString m_units;
 
 		double m_lowValidRange = 0;
 		double m_highValidRange = 100;

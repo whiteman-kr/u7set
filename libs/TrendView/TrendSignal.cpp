@@ -17,7 +17,7 @@ namespace TrendLib
 		m_equipmentId(appSignal.equipmentId()),
 		m_archiveServer{archiveServer},
 		m_type(appSignal.type()),
-		m_unit(appSignal.unit()),
+		m_unit(appSignal.units()),
 		m_tags(appSignal.tags()),
 		m_precision(appSignal.precision()),
 		m_highLimit(appSignal.highEngineeringUnits()),

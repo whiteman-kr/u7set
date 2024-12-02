@@ -249,15 +249,15 @@ void AppSignalParam::AppSignalParam::setByteOrder(E::ByteOrder value)
 	m_data->m_byteOrder = value;
 }
 
-QString AppSignalParam::unit() const
+QString AppSignalParam::units() const
 {
-	return m_data->m_unit;
+	return m_data->m_units;
 }
 
-void AppSignalParam::setUnit(const QString& value)
+void AppSignalParam::setUnits(const QString& value)
 {
 	detach();
-	m_data->m_unit = value;
+	m_data->m_units = value;
 }
 
 double AppSignalParam::lowValidRange() const
@@ -593,7 +593,7 @@ void AppSignalParam::PrivateData::load(const AppSignal& s)
 	m_analogSignalFormat = s.analogSignalFormat();
 	m_byteOrder = s.byteOrder();
 
-	m_unit = s.unit();
+	m_units = s.unit();
 
 	m_lowValidRange = s.lowValidRange();
 	m_highValidRange = s.highValidRange();
@@ -648,7 +648,7 @@ void AppSignalParam::PrivateData::save(::Proto::AppSignal* message) const
 	message->set_analogsignalformat(static_cast<int>(m_analogSignalFormat));
 	message->set_byteorder(m_byteOrder);
 
-	message->set_unit(m_unit.toStdString());
+	message->set_unit(m_units.toStdString());
 
 	message->set_decimalplaces(m_precision);
 	message->set_coarseaperture(m_coarseAperture);

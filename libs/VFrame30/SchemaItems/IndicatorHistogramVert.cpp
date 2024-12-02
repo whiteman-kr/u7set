@@ -690,7 +690,7 @@ namespace VFrame30
 		}
 		else
 		{
-			units = signalParam.unit();
+			units = signalParam.units();
 			bool valid = false;
 			bool mismatch = false;
 

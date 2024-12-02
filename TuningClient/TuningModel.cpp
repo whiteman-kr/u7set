@@ -122,8 +122,8 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		break;
 	case TuningModelColumns::Units:
 		{
-			v1 = asp1.unit();
-			v2 = asp2.unit();
+			v1 = asp1.units();
+			v2 = asp2.units();
 		}
 		break;
 	case TuningModelColumns::Type:
@@ -856,7 +856,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::Units))
 		{
-			return asp.unit();
+			return asp.units();
 		}
 
 		if (columnType == static_cast<int>(TuningModelColumns::Type))

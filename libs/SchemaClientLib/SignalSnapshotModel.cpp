@@ -62,8 +62,8 @@ namespace SchemaClientLib
 			v2 = s2.caption();
 			break;
 		case SnapshotColumns::Units:
-			v1 = s1.unit();
-			v2 = s2.unit();
+			v1 = s1.units();
+			v2 = s2.units();
 			break;
 		case SnapshotColumns::Type:
 			if (s1.isDiscrete() == true && s2.isDiscrete() == true)
@@ -885,7 +885,7 @@ namespace SchemaClientLib
 
 			case SnapshotColumns::Units:
 				{
-					return s.unit();
+					return s.units();
 				}
 
 			case SnapshotColumns::Type:

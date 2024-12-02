@@ -250,7 +250,7 @@ namespace AdsBridge
 				outSignal.caption = getStringConstPointer(signalParam.caption());
 				outSignal.equipmentId = getStringConstPointer(signalParam.equipmentId());
 				outSignal.lmEquipmentId = getStringConstPointer(signalParam.lmEquipmentId());
-				outSignal.unit = getStringConstPointer(signalParam.unit());
+				outSignal.unit = getStringConstPointer(signalParam.units());
 				outSignal.tags = getStringConstPointer(signalParam.tagStringList().join(QChar(' ')));
 
 				outSignal.channel = static_cast<MatsChannel>(signalParam.channel());
