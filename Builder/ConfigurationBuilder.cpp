@@ -625,7 +625,11 @@ namespace Builder
 
 		for (auto vdu : m_fscModules | std::views::filter(isVduModule))
 		{
+			const OnlineLib::BuildInfo& bi = m_buildResultWriter->buildInfo();
+
 			Hardware::ModuleFirmwareWriter writer;
+			writer.setProjectInfo(bi.project, bi.user, bi.id, bi.changeset);
+
 			if (vdu == nullptr)
 			{
 				assert(vdu);

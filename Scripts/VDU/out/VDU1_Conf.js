@@ -819,7 +819,15 @@ function generate_vdu(builder, root, module, confFirmware, log, signalSet, subsy
     }
     confFirmware.writeLog("    [" + configFrame + ":" + ptr + "] OptoQuantity = " + OptoQuantity + "\r\n");
     ptr += 2;
-    ptr += 4; // Reserved
+    // Build number
+    const buildNo = confFirmware.buildNumber();
+    if (ConfigLib.setData16(confFirmware, log, LMNumber, module.equipmentId, configFrame, ptr, "BuildNumber", buildNo) == false) //buildNo
+     {
+        return false;
+    }
+    confFirmware.writeLog("    [" + configFrame + ":" + ptr + "] BuildNumber = " + buildNo + "\r\n");
+    ptr += 2;
+    ptr += 2; // Reserved
     // Create OPTO configuration
     //
     confFirmware.writeLog("Writing OPTO configuration.\r\n");
