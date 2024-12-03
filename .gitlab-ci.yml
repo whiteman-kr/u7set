@@ -86,7 +86,7 @@ linux_build_job:
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
-    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/release -DVCPKG_TARGET_TRIPLET=x64-linux"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/release"
     - "cmake --build ./build"
 
   artifacts:
@@ -422,7 +422,7 @@ linux_code_coverage_job:
     - "# ----------------------------------------------"
     - "#                    Build                      "
     - "# ----------------------------------------------"
-    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/debug -DCODE_COVERAGE=ON -DADDRESS_SANITIZER=ON -DVCPKG_TARGET_TRIPLET=x64-linux"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/debug -DCODE_COVERAGE=ON -DADDRESS_SANITIZER=ON"
     - "cmake --build ./build"    
     - "# ----------------------------------------------"
     - "#           Collect Test Coverage Data          "

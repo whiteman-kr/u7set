@@ -15,6 +15,10 @@ if(NOT DEFINED ENV{VCPKG_ROOT})
 	message(FATAL_ERROR "VCPKG_ROOT is not set. Please set it to the vcpkg root directory.")
 endif()
 
+if (UNIX)
+	set(VCPKG_TARGET_TRIPLET "x64-linux")
+endif()
+
 set(VCPKG_ROOT $ENV{VCPKG_ROOT})
 include(${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
@@ -45,9 +49,9 @@ find_package(asio CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 
-if (MSVC)
+if (WIN32)
 	find_package(Qt6 REQUIRED COMPONENTS AxContainer) # Metrology
-endif (MSVC)
+endif (WIN32)
 
 # Set warnings level and exclusions.
 #
