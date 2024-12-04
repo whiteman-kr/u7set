@@ -1754,7 +1754,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3051,
-				  QString(tr("Gateway description parsing error: %1")).
+				  QString(tr("GwDescrParser error: %1")).
 						arg(gwParserError));
 	}
 
@@ -1774,7 +1774,7 @@ namespace Builder
 	{
 		LOG_WARNING0(IssueType::FscConfiguration,
 					3052,
-					QString(tr("Gateway description parsing warning: %1")).
+					QString(tr("GwDescrParser warning: %1")).
 								arg(gwParserWarning));
 	}
 

@@ -69,9 +69,10 @@ namespace Gateway
 
 		bool parse(const QString& desc);
 
-		const ParserLog& log() const;
-
 		GatewaysShared gateways();
+
+		int errorCount() const;
+		int warningCount() const;
 
 	private:
 		void clear();
@@ -91,19 +92,22 @@ namespace Gateway
 		bool parseSettingValue(E::Setting setting, const QString& valueStr, ParseLineResult* plr);
 
 		bool parseIntValueStr(const QString& valueStr, ParseLineResult* plr);
-		bool parseAlphsNumericUnderlineStr(const QString& valueStr, ParseLineResult* plr);
+		bool parseAlphaNumericUnderlineStr(const QString& valueStr, ParseLineResult* plr);
 		bool parseBoolValueStr(const QString& valueStr, ParseLineResult* plr);
 		bool parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr);
 
 		QStringList knownGatewayTypes() const;
 		E::GatewayType getGatewayType(const QString& gwTypeStr) const;
 
+		void flushParserLog() const;
+
 	private:
 		const Builder::Context* m_context = nullptr;
 		const AppSignalSet* m_appSignalSet = nullptr;
-		GatewaysShared m_gateways;
+		Builder::IssueLogger* m_u7Log = nullptr;
 
-		ParserLog m_log;
+		GatewaysShared m_gateways;
+		mutable ParserLog m_log;
 
 		//
 

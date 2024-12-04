@@ -151,6 +151,13 @@ int DynamicDiagSignalState::setState(const Times& time,
 								int autoArchivingGroup,
 								const QThread* thread)
 {
+	Q_UNUSED(time);
+	Q_UNUSED(isSimPacket);
+	Q_UNUSED(packetNo);
+	Q_UNUSED(rupData);
+	Q_UNUSED(rupDataSize);
+	Q_UNUSED(autoArchivingGroup);
+	Q_UNUSED(thread);
 //	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 //	SimpleAppSignalState curState;
 
@@ -674,6 +681,9 @@ void DynamicDiagSignalState::resetGatewayQueueMask(quint32 mask)
 
 bool DynamicDiagSignalState::getValue(const char* rupData, int rupDataSize, double& value)
 {
+	Q_UNUSED(rupData);
+	Q_UNUSED(rupDataSize);
+	Q_UNUSED(value);
 /*	Q_UNUSED(rupDataSize);
 
 	// get double signal value from rupData buffer using parseInfo
@@ -945,6 +955,8 @@ void DynamicDiagSignalStates::buidlHash2State()
 
 bool DynamicDiagSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
 {
+	Q_UNUSED(hash);
+	Q_UNUSED(state);
 /*	if (m_hash2State.contains(hash))
 	{
 		const DynamicDiagSignalState* stateEx = m_hash2State[hash];
@@ -968,9 +980,9 @@ void DynamicDiagSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCoun
 		return;
 	}
 
-	int count = 0;
+//	int count = 0;
 
-	Q_ASSERT(false);			// check!
+//	Q_ASSERT(false);			// check!
 //	for(int i = 0; i < m_size; i++)
 //	{
 //		if (m_appSignalState->archive() == true)

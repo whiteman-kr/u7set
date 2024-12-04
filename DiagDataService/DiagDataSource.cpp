@@ -47,6 +47,7 @@ bool DiagDataSource::invalidateAllSignals(const QThread* thread)
 bool DiagDataSource::init(const std::map<Hash, Hardware::DiagSignalType>& diagSignalTypes,
 						  const ::Network::AcquiredDiagSignalsAndObjects& diagSignalsAndObjects)
 {
+	Q_UNUSED(diagSignalTypes);
 	bool result = true;
 
 	int lmCount = diagSignalsAndObjects.lmdiagsignals().size();
@@ -75,6 +76,8 @@ bool DiagDataSource::init(const std::map<Hash, Hardware::DiagSignalType>& diagSi
 	for(int i = 0; i < signalsCount; i++)
 	{
 		const Network::AcquiredDiagSignal& ds = lmDiagSignals->diagsignals()[i];
+
+		Q_UNUSED(ds);
 
 		// create dynamic signal state
 	}

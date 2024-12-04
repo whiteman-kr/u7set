@@ -271,7 +271,7 @@ namespace Gateway
 
 		if (m_uniqSignalsInList && m_existSignals.contains(h))
 		{
-			log.logWarning(lineNo, QString("signal '%1' duplicated in list").arg(appSignalID));
+			log.logError(lineNo, QString("signal '%1' duplicated in list").arg(appSignalID));
 		}
 
 		m_existSignals.insert(h);

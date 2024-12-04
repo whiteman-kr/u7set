@@ -111,6 +111,8 @@ namespace Gateway
 			return;
 		}
 
+		m_u7Log = m_context->m_log;
+
 		m_appSignalSet = context->m_signalSet->appSignalSet();
 
 		if (m_gateways == nullptr)
@@ -192,6 +194,7 @@ namespace Gateway
 				break;
 
 			case E::Section::Gateway:
+				flushParserLog();
 				pr = parseGatewaySection(parsingSection, plr);
 				break;
 
@@ -226,33 +229,40 @@ namespace Gateway
 			break;
 
 		case E::Section::Gateway:
-			m_gateways->last()->checkAndApplySettings(0, m_log);
-			break;
-
 		case E::Section::SignalList:
+			{
+				GatewayShared gwLast = m_gateways->last();
+
+				if (gwLast != nullptr)
+				{
+					m_gateways->last()->checkAndApplySettings(0, m_log);
+					gwLast->generateRequiredFiles(m_appSignalSet, m_log);
+					flushParserLog();
+				}
+			}
 			break;
 
 		default:
 			Q_ASSERT(false);
 		}
 
-		if (errCount == 0)
-		{
-			result &= generateGatewaysRequiredFiles();
-		}
-
 		return result;
-	}
-
-	const ParserLog& Parser::log() const
-	{
-		return m_log;
 	}
 
 	GatewaysShared Parser::gateways()
 	{
 		Q_ASSERT(m_gateways != nullptr);
 		return m_gateways;
+	}
+
+	int Parser::errorCount() const
+	{
+		return m_log.errorCount();
+	}
+
+	int Parser::warningCount() const
+	{
+		return m_log.warningCount();
 	}
 
 	bool Parser::generateGatewaysRequiredFiles()
@@ -341,6 +351,11 @@ namespace Gateway
 					m_log.logError(plr.lineNo, QString("GatewayID should be unique"));
 					return ParseResult::CriticalError;
 				}
+
+				if (plr.setting == E::Setting::GatewayID)
+				{
+					LOG_MESSAGE(m_u7Log, QString("Parsing gateway %1 description...").arg(plr.value.toString()));
+				}
 			}
 
 			return gw->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
@@ -349,9 +364,20 @@ namespace Gateway
 			switch(plr.section)
 			{
 			case E::Section::Gateway:
-				pr = gw->checkAndApplySettings(plr.lineNo, m_log);
+				{
+					GatewayShared gwLast = m_gateways->last();
+
+					if (gwLast != nullptr)
+					{
+						m_gateways->last()->checkAndApplySettings(plr.lineNo, m_log);
+						gwLast->generateRequiredFiles(m_appSignalSet, m_log);
+						flushParserLog();
+					}
+				}
+
 				m_gateways->append(std::make_shared<Gateway>());
 				parsingSection = E::Section::Gateway;
+
 				return pr;
 
 			case E::Section::SignalList:
@@ -404,8 +430,19 @@ namespace Gateway
 			switch(plr.section)
 			{
 			case E::Section::Gateway:
-				m_gateways->append(std::make_shared<Gateway>());
-				parsingSection = E::Section::Gateway;
+				{
+					GatewayShared gwLast = m_gateways->last();
+
+					if (gwLast != nullptr)
+					{
+						m_gateways->last()->checkAndApplySettings(plr.lineNo, m_log);
+						gwLast->generateRequiredFiles(m_appSignalSet, m_log);
+						flushParserLog();
+					}
+
+					m_gateways->append(std::make_shared<Gateway>());
+					parsingSection = E::Section::Gateway;
+				}
 				return ParseResult::Ok;
 
 			case E::Section::SignalList:
@@ -816,7 +853,7 @@ namespace Gateway
 			break;
 
 		case E::SettingType::AlphaNumericUnderlineString:
-			result &= parseAlphsNumericUnderlineStr(valueStr, plr);
+			result &= parseAlphaNumericUnderlineStr(valueStr, plr);
 			break;
 
 		case E::SettingType::Bool:
@@ -860,7 +897,7 @@ namespace Gateway
 		return result;
 	}
 
-	bool Parser::parseAlphsNumericUnderlineStr(const QString& valueStr, ParseLineResult* plr)
+	bool Parser::parseAlphaNumericUnderlineStr(const QString& valueStr, ParseLineResult* plr)
 	{
 		if (valueStr.contains(m_notAlphaNumericUnderlineSymbols) == true)
 		{
@@ -951,4 +988,39 @@ namespace Gateway
 		return gwType;
 	}
 
+	void Parser::flushParserLog() const
+	{
+		TEST_PTR_RETURN(m_u7Log);
+
+		for(const auto& r : m_log)
+		{
+			switch(r.msgType)
+			{
+			case LogMsgType::Message:
+			{
+				QString msg = r.msg;
+				msg = msg.mid(0, 1).toUpper() + msg.mid(1);
+				LOG_MESSAGE(m_u7Log, msg);
+			}
+			break;
+
+			case LogMsgType::Warning:
+				// Gateway description parsing warning: %1
+				//
+				m_u7Log->wrnCFG3052(r.msg);
+				break;
+
+			case LogMsgType::Error:
+				// Gateway description parsing error: %1
+				//
+				m_u7Log->errCFG3051(r.msg);
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+		}
+
+		m_log.clear();
+	}
 }

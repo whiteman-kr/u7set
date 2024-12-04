@@ -709,7 +709,7 @@ namespace Gateway
 
 		const SignalLists& lists = signalLists();
 
-		std::set<Hash> existsSignals;
+//		std::set<Hash> existsSignals;
 		std::set<int> discreteRegs;
 		std::set<int> discreteAddrs;
 		std::set<int> analogRegs;
@@ -730,12 +730,12 @@ namespace Gateway
 			{
 				Hash hash = calcHash(signalID);
 
-				if (existsSignals.contains(hash))
-				{
-					log.logWarning(QString("signal %1 is repeated in several signal lists").arg(signalID));
-				}
+				// if (existsSignals.contains(hash))
+				// {
+				// 	log.logWarning(QString("signal %1 is repeated in several signal lists").arg(signalID));
+				// }
 
-				existsSignals.insert(hash);
+				// existsSignals.insert(hash);
 
 				Address16 addr16 = mbsl->getAddress(hash);
 
@@ -746,16 +746,16 @@ namespace Gateway
 					continue;
 				}
 
-				auto it = m_modbusSignals.find(addr16);
+				// auto it = m_modbusSignals.find(addr16);
 
-				if (it != m_modbusSignals.end())
-				{
-					const ModbusSignal& mbs = it->second;
-					log.logError(QString("signal %1 address %2 is not unique (already assigned to %3)").
-												arg(signalID).arg(addr16.toString()).arg(mbs.signalID));
-					result = false;
-					continue;
-				}
+				// if (it != m_modbusSignals.end())
+				// {
+				// 	const ModbusSignal& mbs = it->second;
+				// 	log.logError(QString("signal %1 address %2 is not unique (already assigned to %3)").
+				// 								arg(signalID).arg(addr16.toString()).arg(mbs.signalID));
+				// 	result = false;
+				// 	continue;
+				// }
 
 				int regsCount = format.registersCount();
 
@@ -808,6 +808,10 @@ namespace Gateway
 							}
 							else
 							{
+								if (addr16.offset() + i == 20 || addr16.offset() + i == 21)
+								{
+									DEBUG_STOP;
+								}
 								analogRegs.emplace(addr16.offset() + i);
 							}
 						}
