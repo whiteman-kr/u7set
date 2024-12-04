@@ -503,12 +503,11 @@ namespace Builder
 
 		si.vduSignalType = static_cast<uint16_t>(vduSignalType);
 
+		//
+
 		si.boolProps = 0;
 
-		if (!isRxSignal)
-		{
-			si.enableTuning = appSignal->enableTuning() ? 1 : 0;
-		}
+		si.enableTuning = appSignal->enableTuning() ? 1 : 0;
 
 		//
 
