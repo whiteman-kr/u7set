@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
+find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools PrintSupport)
 
 set(TARGET UiLib)
 
@@ -96,7 +96,7 @@ target_compile_definitions(${TARGET} PRIVATE UI_LIB_DOMAIN)
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${TARGET} PUBLIC Qt6::Widgets)
+target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::PrintSupport)
 target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib ProtobufEx AppSignalLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
