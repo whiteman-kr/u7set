@@ -1,14 +1,15 @@
 #pragma once
 
 #include "Report.h"
-#include <QMutex>
-#include <QTextCursor>
-#include <QTextDocument>
 
 class QBuffer;
 class QPdfWriter;
 class QPainter;
 
+#include <QMutex>
+#include <QPrinterInfo>
+#include <QTextDocument>
+#include <QTextCursor>
 
 namespace ReportLib
 {
@@ -32,10 +33,11 @@ namespace ReportLib
 
 		virtual void print(Report& report,
 						   ReportPrinter& printer,
-						   QPdfWriter& pdfWriter,
+						   QPagedPaintDevice& pdfWriter,
 						   QPainter& painter,
 						   int& pageIndex,
-						   QMutex& pageCounterMutex) = 0;
+						   QMutex& pageCounterMutex,
+						   std::atomic_bool& stop) = 0;
 
 		virtual int pageCount() const = 0;
 
@@ -59,10 +61,11 @@ namespace ReportLib
 
 		virtual void print(Report& report,
 						   ReportPrinter& printer,
-						   QPdfWriter& pdfWriter,
+						   QPagedPaintDevice& pdfWriter,
 						   QPainter& painter,
 						   int& pageIndex,
-						   QMutex& pageCounterMutex) override;
+						   QMutex& pageCounterMutex,
+						   std::atomic_bool& stop) override;
 
 		virtual int pageCount() const override;
 
@@ -85,10 +88,11 @@ namespace ReportLib
 
 		virtual void print(Report& report,
 						   ReportPrinter& printer,
-						   QPdfWriter& pdfWriter,
+						   QPagedPaintDevice& pdfWriter,
 						   QPainter& painter,
 						   int& pageIndex,
-						   QMutex& pageCounterMutex) override;
+						   QMutex& pageCounterMutex,
+						   std::atomic_bool& stop) override;
 
 		virtual int pageCount() const override;
 
@@ -161,44 +165,29 @@ namespace ReportLib
 	class ReportPrinter : public QObject
 	{
 	public:
-		struct Statistics
-		{
-			enum Status
-			{
-				None,
-				Preview,
-				Rendering,
-				Printing
-			};
-
-			int sectionCount = 0;
-			int sectionIndex = 0;
-
-			int pagesCount = 0;	// Calculated after text rendering
-			int pageIndex = 0;
-
-			Status status{None};
-		};
-
-	public:
 		ReportPrinter() = default;	// Call this constructor if you do not need to print schemas
 		ReportPrinter(std::shared_ptr<ReportSchemaView> reportSchemaView); // Call this constructor if your report contains schemas
 
 		bool preview(const Report& report, std::vector<RenderedSection>& renderedSections, std::atomic_bool& stop);
 
-		bool print(Report& report, const QString& fileName, std::atomic_bool& stop);
-		bool print(Report& report, QBuffer& buffer, std::atomic_bool& stop);
+		bool save(Report& report, const QString& fileName, std::atomic_bool& stop);
+		bool save(Report& report, QBuffer& buffer, std::atomic_bool& stop);
+
+		bool print(Report& report, QPrinter& printer, std::atomic_bool& stop);
 
 		Statistics statistics() const;
 
-		void printMarginItems(const Report& report,
-							  QPdfWriter& pdfWriter,
+		void printMarginItems(const Report& report, QPagedPaintDevice& pdfWriter,
 							  QPainter& painter,
 							  const QString& tag) const;
 
 	private:
 		[[nodiscard]] bool createRenderedSections(const Report& report, std::vector<RenderedSection>& renderedSections, Statistics::Status status, std::atomic_bool& stop);
-		[[nodiscard]] bool printRenderedSections(Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop);
+		[[nodiscard]] bool saveRenderedSections(Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop);
+		[[nodiscard]] bool printRenderedSections(Report& report,
+												 const std::vector<RenderedSection>& renderedSections,
+												 QPrinter& printer,
+												 std::atomic_bool& stop);
 
 		mutable QMutex m_statisticsMutex;
 		mutable Statistics m_statistics;

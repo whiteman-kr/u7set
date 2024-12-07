@@ -19,7 +19,7 @@ namespace ReportLib
 
 		bool generate(QBuffer& buffer, std::atomic_bool& stop);
 
-		ReportPrinter::Statistics statistics() const;
+		Statistics statistics() const;
 
 	protected:
 		virtual int count() const = 0;

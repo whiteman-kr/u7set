@@ -3,7 +3,50 @@
 
 namespace ReportLib
 {
-    //
+	void Statistics::fill(int* progress, int* progressMin, int* progressMax, QString* progressText) const
+	{
+		if (progress == nullptr || progressMin == nullptr || progressMax == nullptr || progressText == nullptr)
+		{
+			Q_ASSERT(progress);
+			Q_ASSERT(progressMin);
+			Q_ASSERT(progressMax);
+			Q_ASSERT(progressText);
+			return;
+		}
+
+		switch (status)
+		{
+		case None:
+			*progressText = QObject::tr("Idle");
+			*progress = 0;
+			*progressMax = 0;
+			break;
+		case Preview:
+			*progressText = QObject::tr("Generating the preview, section: %1/%2").arg(sectionIndex + 1).arg(sectionCount);
+			*progress = sectionIndex + 1;
+			*progressMax = sectionCount;
+			break;
+		case Rendering:
+			*progressText = QObject::tr("Rendering the report, section: %1/%2").arg(sectionIndex + 1).arg(sectionCount);
+			*progress = sectionIndex + 1;
+			*progressMax = sectionCount;
+			break;
+		case Saving:
+			*progressText = QObject::tr("Saving the report, page: %1/%2").arg(pageIndex + 1).arg(pagesCount);
+			*progress = pageIndex + 1;
+			*progressMax = pagesCount;
+			break;
+		case Printing:
+			*progressText = QObject::tr("Printing the report, page: %1/%2").arg(pageIndex + 1).arg(pagesCount);
+			*progress = pageIndex + 1;
+			*progressMax = pagesCount;
+			break;
+		default:
+			Q_ASSERT(false);
+		}
+	}
+
+	//
     // TextFormat
     //
 
@@ -210,7 +253,12 @@ namespace ReportLib
 
 	}
 
-	void ReportSchema::renderText(QTextCursor& /*cursor*/, double /*fontScaling*/, const ReportTagStorage& /*tagStorage*/) const
+	void ReportSchema::renderText(QTextCursor& /*cursor*/,
+								  double /*fontScaling*/,
+								  const ReportTagStorage& /*tagStorage*/,
+								  QMutex& /*statisticsMutex*/,
+								  Statistics& /*statistics*/,
+								  std::atomic_bool& /*stop*/) const
 	{
 	}
 
@@ -297,12 +345,17 @@ namespace ReportLib
 		});
 	}
 
-	void ReportTable::renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const
+	void ReportTable::renderText(QTextCursor& cursor,
+								 double fontScaling,
+								 const ReportTagStorage& tagStorage,
+								 QMutex& statisticsMutex,
+								 Statistics& statistics,
+								 std::atomic_bool& stop) const
 	{
 		int cols = columnCount();
 		int rows = rowCount();
 
-        QString html = QObject::tr("<html>\
+		QString html = QObject::tr("<html>\
 								   <head>\
 								   <style>\
 								   table, th, td {\
@@ -349,6 +402,11 @@ namespace ReportLib
 
 		for (int r = 0; r < rows; r++)
 		{
+			if (stop.load() == true) 
+			{
+				break;
+			}
+
 			if (alternateRow == true)
 			{
 				html += "<tr class=\"d0\">";
@@ -395,22 +453,11 @@ namespace ReportLib
 
 		html += "</tbody>";
 
-		/* footer
-html += "<tfoot style=\"background: #ffc\">><tr>";
-for (int c = 0; c < cols; c++)
-{
-	const QString& str = m_headerLabels[c];
-
-	html += QObject::tr("<th>%1</th>").arg(str);
-}
-html += "</tr></tfoot";
-*/
-
 		html += "</table>\
 				</body>\
 				</html>";
 
-				cursor.insertHtml(html);
+		cursor.insertHtml(html);
 
 		cursor.insertText("\n\n");
 	}
@@ -432,7 +479,12 @@ html += "</tr></tfoot";
 		return result;
 	}
 
-	void ReportText::renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const
+	void ReportText::renderText(QTextCursor& cursor,
+								double fontScaling,
+								const ReportTagStorage& tagStorage,
+								QMutex& /*statisticsMutex*/,
+								Statistics& /*statistics*/,
+								std::atomic_bool& /*stop*/) const
 	{
 
 		QTextCharFormat cf = cursor.charFormat();

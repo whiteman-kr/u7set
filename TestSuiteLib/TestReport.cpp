@@ -126,7 +126,7 @@ namespace TestSuite
 		}
 		else
 		{
-			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you with to open it?")) == QMessageBox::Yes)
+			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you wish to open it?")) == QMessageBox::Yes)
 			{
 				UiTools::openPdf(fileName, parent);
 			}

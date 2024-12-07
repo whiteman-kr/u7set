@@ -6,6 +6,7 @@
 #include <SchemaClientLib/DialogSignalSnapshot.h>
 #include <UiLib/ChooseItemsWidget.h>
 #include <UiLib/ExportPrint.h>
+#include "../ReportLib/Report.h"
 
 
 //
@@ -13,56 +14,60 @@
 //
 namespace
 {
-	class SnapshotExportPrint : public UiLib::ExportPrint
+	class SnapshotExportPrint : public UiLib::TableExportPrint
 	{
 	public:
-		SnapshotExportPrint(QString projectName, QString softwareEquipmentId, QWidget* parent);
+		SnapshotExportPrint(const QString& projectName,
+							const QString& softwareEquipmentId,
+							QWidget* parent,
+							const QTableView& table,
+							const UiLib::TableExportPrintModel& model, 
+							const QPageLayout& pageLayout);
 
 	protected:
-		virtual void generateHeader(QTextCursor& cursor) override;
+		virtual void generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) override;
 
 	private:
 		QString m_projectName;
 		QString m_softwareEquipmentId;
+		QString m_timeType;
 	};
 
 	//
 	// SnapshotExportPrint
 	//
-	SnapshotExportPrint::SnapshotExportPrint(QString projectName, QString softwareEquipmentId, QWidget* parent) :
-		ExportPrint(parent),
+	SnapshotExportPrint::SnapshotExportPrint(const QString& projectName,
+											 const QString& softwareEquipmentId,
+											 QWidget* parent,
+											 const QTableView& table,
+											 const UiLib::TableExportPrintModel& model, 
+											 const QPageLayout& pageLayout) :
+		TableExportPrint(parent, table, model, pageLayout),
 		m_projectName(projectName),
 		m_softwareEquipmentId(softwareEquipmentId)
 	{
 	}
 
-	void SnapshotExportPrint::generateHeader(QTextCursor& cursor)
+	void SnapshotExportPrint::generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection)
 	{
-		QTextBlockFormat headerCenterFormat = cursor.blockFormat();
-		headerCenterFormat.setAlignment(Qt::AlignHCenter);
+		ReportLib::ReportFont marginFont{"Arial", 10};
 
-		QTextBlockFormat regularFormat = cursor.blockFormat();
-		regularFormat.setAlignment(Qt::AlignLeft);
+		report.addMarginItem({QObject::tr("Generated: %1").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss")),
+							  -1,
+							  -1,
+							  {marginFont, Qt::AlignLeft | Qt::AlignTop}});
+		
+		report.addMarginItem({QObject::tr("Signals Snapshot"), -1, -1, {marginFont, Qt::AlignCenter | Qt::AlignTop}});
 
-		QTextCharFormat headerCharFormat = cursor.charFormat();
-		headerCharFormat.setFontWeight(static_cast<int>(QFont::Bold));
-		headerCharFormat.setFontPointSize(12.0);
+		report.addMarginItem({QObject::tr("Project: %1").arg(m_projectName), -1, -1, {marginFont, Qt::AlignRight | Qt::AlignTop}});
 
-		QTextCharFormat regularCharFormat = cursor.charFormat();
-		headerCharFormat.setFontPointSize(10.0);
+		report.addMarginItem(
+			{QObject::tr("%1: %2").arg(qAppName()).arg(m_softwareEquipmentId), -1, -1, {marginFont, Qt::AlignLeft | Qt::AlignBottom}});
 
-		cursor.setBlockFormat(headerCenterFormat);
-		cursor.setCharFormat(headerCharFormat);
-		cursor.insertText(QObject::tr("Snapshot - %1\n").arg(m_projectName));
-		cursor.insertText("\n");
+		report.addMarginItem({"%PAGE%", -1, -1, {marginFont, Qt::AlignRight | Qt::AlignBottom}});
 
-		cursor.setBlockFormat(regularFormat);
-		cursor.setCharFormat(regularCharFormat);
-		cursor.insertText(QObject::tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
-		cursor.insertText(QObject::tr("%1: %2\n").arg(qAppName()).arg(m_softwareEquipmentId));
-		cursor.insertText("\n");
-
-		cursor.insertText("\n");
+		ReportLib::ReportFont textFont{"Arial", 12};
+		mainSection.addText(" \n", {textFont, Qt::AlignLeft});
 	}
 } // namespace
 
@@ -268,7 +273,7 @@ namespace SchemaClientLib
 	{
 		m_specificSignals = specificSignals;
 
-		signalsUpdated();
+		onSignalsUpdated();
 
 		return;
 	}
@@ -409,7 +414,7 @@ namespace SchemaClientLib
 		}
 	}
 
-	void SignalSnapshotWidget::signalsUpdated()
+	void SignalSnapshotWidget::onSignalsUpdated()
 	{
 		bool emptyModel = m_model.rowCount() == 0;
 
@@ -435,6 +440,8 @@ namespace SchemaClientLib
 		{
 			m_tableView->resizeColumnsToContents();
 		}
+
+		emit signalsUpdated();
 
 		return;
 	}
@@ -682,8 +689,19 @@ namespace SchemaClientLib
 			extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
 			extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
 		{
-			SnapshotExportPrint ep(m_projectName, m_equipmentId, this);
-			ep.exportTable(m_tableView, fileName, extension);
+			QPageLayout pageLayout(QPageSize(QPageSize::A4),
+								   QPageLayout::Orientation::Portrait,
+								   QMarginsF(25, 20, 15, 20),
+								   QPageLayout::Unit::Millimeter);
+
+			pageLayout = UiLib::TableExportPrint::loadPageLayoutFromSettings("SnapshotExportPageLayout", pageLayout);
+
+			SnapshotExportPrint ep(m_projectName, m_equipmentId, this, *m_tableView, m_model, pageLayout);
+			connect(this, &SignalSnapshotWidget::signalsUpdated, &ep, &SnapshotExportPrint::stop);
+			ep.exportTable(fileName);
+			pageLayout = ep.pageLayout();
+
+			UiLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "SnapshotExportPageLayout");
 
 			return;
 		}
@@ -694,8 +712,19 @@ namespace SchemaClientLib
 
 	void SignalSnapshotWidget::buttonPrintClicked()
 	{
-		SnapshotExportPrint ep(m_projectName, m_equipmentId, this);
-		ep.printTable(m_tableView);
+		QPageLayout pageLayout(QPageSize(QPageSize::A4),
+							   QPageLayout::Orientation::Portrait,
+							   QMarginsF(10, 10, 10, 10),
+							   QPageLayout::Unit::Millimeter);
+
+		pageLayout = UiLib::TableExportPrint::loadPageLayoutFromSettings("SnapshotPrintPageLayout", pageLayout);
+
+		SnapshotExportPrint ep(m_projectName, m_equipmentId, this, *m_tableView, m_model, pageLayout);
+		connect(this, &SignalSnapshotWidget::signalsUpdated, &ep, &SnapshotExportPrint::stop);
+		ep.printTable();
+		pageLayout = ep.pageLayout();
+
+		UiLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "SnapshotPrintPageLayout");
 	}
 
 	void SignalSnapshotWidget::buttonChooseTagsClicked()

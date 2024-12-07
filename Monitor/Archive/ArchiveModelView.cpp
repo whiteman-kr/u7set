@@ -6,7 +6,7 @@
 //
 //
 ArchiveModel::ArchiveModel(QObject* parent) :
-	QAbstractTableModel(parent)
+	UiLib::TableExportPrintModel(parent)
 {
 }
 

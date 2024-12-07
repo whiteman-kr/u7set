@@ -8,11 +8,34 @@
 #include <QUuid>
 
 class QTextCursor;
+class QMutex;
 
 namespace ReportLib
 {
 	class ReportSection;
 
+	struct Statistics
+	{
+		enum Status
+		{
+			None,
+			Preview,
+			Rendering,
+			Saving,
+			Printing
+		};
+
+		int sectionCount = 0;
+		int sectionIndex = 0;
+
+		int pagesCount = 0; // Calculated after text rendering
+		int pageIndex = 0;
+
+		Status status{None};
+
+		void fill(int* progress, int* progressMin, int* progressMax, QString* progressText) const;
+	};
+	
 	struct ReportFont
 	{
 		QString family;
@@ -151,7 +174,12 @@ namespace ReportLib
 
 		Type type() const;
 
-		virtual void renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const = 0;
+		virtual void renderText(QTextCursor& cursor,
+								double fontScaling,
+								const ReportTagStorage& tagStorage,
+								QMutex& statisticsMutex,
+								Statistics& statistics,
+								std::atomic_bool& stop) const = 0;
 
 	protected:
 		Type m_type;
@@ -176,7 +204,12 @@ namespace ReportLib
 
 		// Schema functions
 
-		void renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const override;
+		void renderText(QTextCursor& cursor,
+						double fontScaling,
+						const ReportTagStorage& tagStorage,
+						QMutex& statisticsMutex,
+						Statistics& statistics,
+						std::atomic_bool& stop) const override;
 		std::shared_ptr<VFrame30::Schema> schema() const;
 
 		const std::map<QUuid, ReportSchemaCompareAction>& compareActions() const;
@@ -213,7 +246,12 @@ namespace ReportLib
 
 		void sortByColumn(int column);
 
-		void renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const override;
+		void renderText(QTextCursor& cursor,
+						double fontScaling,
+						const ReportTagStorage& tagStorage,
+						QMutex& statisticsMutex,
+						Statistics& statistics,
+						std::atomic_bool& stop) const override;
 
 	private:
 		TableFormat m_format;
@@ -231,7 +269,12 @@ namespace ReportLib
 		static std::shared_ptr<ReportText> create(const QString& text, const TextFormat &format);
 		ReportText(const QString& text, const TextFormat& format);
 
-		void renderText(QTextCursor& cursor, double fontScaling, const ReportTagStorage& tagStorage) const override;
+		void renderText(QTextCursor& cursor,
+						double fontScaling,
+						const ReportTagStorage& tagStorage,
+						QMutex& statisticsMutex,
+						Statistics& statistics,
+						std::atomic_bool& stop) const override;
 
 	private:
 		TextFormat m_format;

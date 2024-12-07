@@ -212,7 +212,7 @@ namespace SchemaClientLib
 namespace SchemaClientLib
 {
 	SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, ClientLib::ISignalDataServer* signalDataServer, AppSignalLists::AppSignalListSet* appSignalListSet, QObject* parent) :
-		QAbstractItemModel(parent),
+		TableExportPrintModel(parent),
 		m_appSignalManager(appSignalManager),
 		m_signalDataServer(signalDataServer),
 		m_appSignalListSet(appSignalListSet)

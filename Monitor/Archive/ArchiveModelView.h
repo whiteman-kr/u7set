@@ -1,5 +1,6 @@
 #pragma once
 
+#include <UiLib/ExportPrint.h>
 #include "ArchiveData.h"
 
 enum class ArchiveColumns
@@ -51,7 +52,7 @@ struct ArchiveSignalParam : public ArchiveSignal
 //		ArchiveModel
 //
 //
-class ArchiveModel : public QAbstractTableModel
+class ArchiveModel : public UiLib::TableExportPrintModel
 {
 	Q_OBJECT
 

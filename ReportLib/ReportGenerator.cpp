@@ -72,10 +72,10 @@ namespace ReportLib
 			generateSection(*rs, footer);
 		}
 
-		return m_printer.print(report, buffer, stop);
+		return m_printer.save(report, buffer, stop);
 	}
 
-	ReportPrinter::Statistics ReportGenerator::statistics() const
+	Statistics ReportGenerator::statistics() const
 	{
 		return m_printer.statistics();
 	}

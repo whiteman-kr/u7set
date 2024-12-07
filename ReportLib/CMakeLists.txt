@@ -34,8 +34,12 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTextCursor>
 	<QPdfWriter>
 	<QPainter>
+	<QPrinter>
+	<QPrinterInfo>
 	<QFile>
 	<QBuffer>
+	<QMutex>
+	<QTextDocument>
 
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>

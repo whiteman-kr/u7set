@@ -239,7 +239,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 	{
 		if (task == TaskType::ExportFilesToSinglePdf)
 		{
-			if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you with to open it?")) == QMessageBox::Yes)
+			if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you wish to open it?")) == QMessageBox::Yes)
 			{
 				UiTools::openPdf(filePath, m_parent);
 			}
@@ -248,7 +248,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 		{
 			if (task == TaskType::ExportFilesToMultiplePdf || task == TaskType::ExportAllSchemasToAlbum)
 			{
-				if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you with to open the containing folder?")) == QMessageBox::Yes)
+				if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you wish to open the containing folder?")) == QMessageBox::Yes)
 				{
 					QUrl url = QUrl::fromLocalFile(filePath);
 					QDesktopServices::openUrl(url);

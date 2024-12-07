@@ -1094,7 +1094,7 @@ namespace Builder
 
 			// Print to file
 			//
-			bool ok = m_printer.print(*report, report->path(), m_stop);
+			bool ok = m_printer.save(*report, report->path(), m_stop);
 			if (ok == false)
 			{
 				emit finished(tr("Error writing report to file %1!").arg(QDir::toNativeSeparators(report->path())));
@@ -1184,7 +1184,7 @@ namespace Builder
 
 		// Print to file
 		//
-		bool ok = m_printer.print(*report, report->path(), m_stop);
+		bool ok = m_printer.save(*report, report->path(), m_stop);
 		if (ok == false)
 		{
 			emit finished(tr("Error writing report to file %1!").arg(QDir::toNativeSeparators(report->path())));
@@ -1471,34 +1471,7 @@ namespace Builder
 			break;
 		case SchemasReportGenerator::WorkerStatus::Printing:
 			{
-				*progressText = tr("Printing to PDF Document...");
-
-				const ReportPrinter::Statistics ps = m_printer.statistics();
-
-				switch (ps.status)
-				{
-				case ReportPrinter::Statistics::Preview:
-					*progressText = tr("Generating preview, section: %1/%2")
-										.arg(ps.sectionIndex)
-										.arg(ps.sectionCount);
-					*progress = ps.sectionIndex;
-					*progressMax = ps.sectionCount;
-					break;
-				case ReportPrinter::Statistics::Rendering:
-					*progressText = tr("Rendering report, section: %1/%2")
-										.arg(ps.sectionIndex)
-										.arg(ps.sectionCount);
-					*progress = ps.sectionIndex;
-					*progressMax = ps.sectionCount;
-					break;
-				case ReportPrinter::Statistics::Printing:
-					*progressText = tr("Printing report, page: %1/%2")
-										.arg(ps.pageIndex)
-										.arg(ps.pagesCount);
-					*progress = ps.pageIndex;
-					*progressMax = ps.pagesCount;
-					break;
-				}
+				m_printer.statistics().fill(progress, progressMin, progressMax, progressText);
 			}
 		}
 	}
@@ -1828,7 +1801,7 @@ namespace Builder
 			// Print to buffer
 			//
 			QBuffer buffer(&m_outputData[groupName + ".pdf"]);
-			bool ok = m_printer.print(*report, buffer, m_stop);
+			bool ok = m_printer.save(*report, buffer, m_stop);
 			if (ok == false)
 			{
 				throw(tr("Error writing report to memory!"));
@@ -1839,7 +1812,7 @@ namespace Builder
 		{
 			// Print to file PDF
 			//
-			bool ok = m_printer.print(*report, report->path(), m_stop);
+			bool ok = m_printer.save(*report, report->path(), m_stop);
 			if (ok == false)
 			{
 				throw(tr("Error writing report to file %1!").arg(QDir::toNativeSeparators(report->path())));

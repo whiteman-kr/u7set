@@ -338,14 +338,14 @@ void ProjectDiffGeneratorThread::run(const QString& fileName,
 	{
 		if (settings.singleFile == true)
 		{
-			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you with to open it?")) == QMessageBox::Yes)
+			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you wish to open it?")) == QMessageBox::Yes)
 			{
 				UiTools::openPdf(fileName, parent);
 			}
 		}
 		else
 		{
-			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you with to open the containing folder?")) == QMessageBox::Yes)
+			if (QMessageBox::question(parent, qAppName(), QObject::tr("Report generating has been finished.\n\nDo you wish to open the containing folder?")) == QMessageBox::Yes)
 			{
 				QFileInfo f(fileName);
 				QUrl url = QUrl::fromLocalFile(f.absolutePath());
@@ -556,7 +556,7 @@ void ProjectDiffGenerator::process()
 				m_statistics.m_printingReportName  = report->path();
 			}
 
-			m_reportPrinter.print(*report, report->path(), m_stop);
+			m_reportPrinter.save(*report, report->path(), m_stop);
 		}
 
 		//
@@ -625,49 +625,11 @@ void ProjectDiffGenerator::progressRequested()
 		break;
 	case ProjectDiffGenerator::WorkerStatus::Printing:
 		{
-			ReportPrinter::Statistics printStatus = m_reportPrinter.statistics();
-
-			if (printStatus.status == ReportPrinter::Statistics::Preview || printStatus.status == ReportPrinter::Statistics::Rendering)
-			{
-				if (stat.m_printingReportName.isEmpty() == false)
-				{
-					progressText.push_back(tr("Creating the report '%1'...").arg(stat.m_printingReportName));
-				}
-				else
-				{
-					progressText.push_back(tr("Creating a report..."));
-				}
-
-				progressText.push_back(tr("Section: %1 / %2").arg(printStatus.sectionIndex).arg(printStatus.sectionCount));
-
-				progress = printStatus.sectionIndex;
-				progressMax = printStatus.sectionCount;
-			}
-			else
-			{
-				if (printStatus.status == ReportPrinter::Statistics::Printing)
-				{
-					if (stat.m_printingReportName.isEmpty() == false)
-					{
-						progressText.push_back(tr("Saving the report '%1'...").arg(stat.m_printingReportName));
-					}
-					else
-					{
-						progressText.push_back(tr("Saving a report..."));
-					}
-
-					progressText.push_back(tr("Page: %1 / %2").arg(printStatus.pageIndex).arg(printStatus.pagesCount));
-
-					progress = printStatus.pageIndex;
-					progressMax = printStatus.pagesCount;
-				}
-				else
-				{
-					progressText.push_back(tr("Printer is idle ..."));
-					progress = 0;
-					progressMax = 0;
-				}
-			}
+			int unused_progressMin = 0;
+			QString text;
+			m_reportPrinter.statistics().fill(&progress, &unused_progressMin, &progressMax, &text);
+			progressText.push_back(text);
+			
 		}
 		break;
 	default:
