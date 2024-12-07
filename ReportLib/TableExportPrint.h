@@ -1,14 +1,13 @@
 #pragma once
-#pragma once
 
-#include "../ReportLib/ReportPrinter.h"
+#include "ReportPrinter.h"
 
 namespace ReportLib
 {
 	class ReportSection;
 }
 
-namespace UiLib
+namespace ReportLib
 {
 	class ITableExportPrint
 	{
@@ -176,4 +175,4 @@ namespace UiLib
 	private:
 		std::unique_ptr<TableExportPrintPrivate> m_impl;
 	};
-} // namespace UiLib
+} // namespace ReportLib

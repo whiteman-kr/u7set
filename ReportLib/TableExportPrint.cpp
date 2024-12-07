@@ -1,9 +1,9 @@
-#include <UiLib/ExportPrint.h>
+#include "TableExportPrint.h"
 #include <UiLib/DialogProgress.h>
 #include "../UtilsLib/Ui/UiTools.h"
-#include "../ReportLib/Report.h"
+#include "Report.h"
 
-namespace UiLib
+namespace ReportLib
 {
 	TableExportPrintModel::TableExportPrintModel(QObject* parent):
 		QAbstractTableModel(parent)
@@ -753,7 +753,7 @@ namespace UiLib
 
 } // namespace UiLib
 
-namespace UiLib
+namespace ReportLib
 {
 	TableExportPrint::TableExportPrint(QWidget* parent,
 							 const QTableView& table,
@@ -848,4 +848,4 @@ namespace UiLib
 		Q_UNUSED(report);
 		Q_UNUSED(mainSection);
 	}
-} // namespace UiLib
+} // namespace ReportLib

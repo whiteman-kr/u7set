@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools PrintSupport)
+find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools)
 
 set(TARGET UiLib)
 
@@ -21,7 +21,6 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/DialogProgress.h
 	./include/UiLib/DialogProgress.h
 	./include/UiLib/DoubleValidatorEx.h
-	./include/UiLib/ExportPrint.h
 	./include/UiLib/PropertyEditor.h
 	./include/UiLib/PropertyEditorDialog.h
 	./include/UiLib/PropertyTable.h
@@ -35,7 +34,6 @@ qt_add_library(${TARGET} STATIC
 	DialogAlert.cpp
 	DialogProgress.cpp
 	DialogProgress.cpp
-	ExportPrint.cpp
 	PropertyEditor.cpp
 	PropertyEditorDialog.cpp
 	PropertyTable.cpp
@@ -50,7 +48,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<set>
 	<vector>
 
-	<QAbstractItemModel>
 	<QApplication>
 	<QClipboard>
 	<QColorDialog>
@@ -68,11 +65,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QMenu>
 	<QMessageBox>
 	<QMouseEvent>
-	<QPageSetupDialog>
 	<QPainter>
 	<QPlainTextEdit>
-	<QPrintDialog>
-	<QPrinter>
+	<QTextDocumentFragment>
 	<QProgressDialog>
 	<QPushButton>
 	<QSettings>
@@ -81,9 +76,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTabWidget>
 	<QTextBrowser>
 	<QTextCursor>
-	<QTextDocument>
-	<QTextDocumentFragment>
-	<QTextDocumentWriter>
 	<QTimer>
 	<QToolButton>
 	<QTreeWidget>
@@ -104,8 +96,8 @@ target_compile_definitions(${TARGET} PRIVATE UI_LIB_DOMAIN)
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib ProtobufEx AppSignalLib ReportLib)
+target_link_libraries(${TARGET} PUBLIC Qt6::Widgets)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib ProtobufEx AppSignalLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

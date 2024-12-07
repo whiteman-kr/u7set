@@ -5,7 +5,7 @@
 #include "MonitorConfigController.h"
 #include "MonitorSignalInfo.h"
 #include "DialogChooseArchiveSignals.h"
-#include <UiLib/ExportPrint.h>
+#include "../ReportLib/TableExportPrint.h"
 #include "../ReportLib/Report.h"
 
 //
@@ -13,7 +13,7 @@
 //
 namespace
 {
-	class ArchiveExportPrint : public UiLib::TableExportPrint
+	class ArchiveExportPrint : public ReportLib::TableExportPrint
 	{
 	public:
 		ArchiveExportPrint(ArchiveSource* source,
@@ -21,7 +21,7 @@ namespace
 						   QString softwareId,
 						   QWidget* parent,
 						   const QTableView& table,
-						   const UiLib::TableExportPrintModel& model,
+						   const ReportLib::TableExportPrintModel& model,
 						   const QPageLayout& pageLayout);
 		virtual ~ArchiveExportPrint() = default;
 
@@ -39,9 +39,9 @@ namespace
 										   QString softwareId,
 										   QWidget* parent,
 										   const QTableView& table,
-										   const UiLib::TableExportPrintModel& model,
+										   const ReportLib::TableExportPrintModel& model,
 										   const QPageLayout& pageLayout) :
-		UiLib::TableExportPrint(parent, table, model, pageLayout),
+		ReportLib::TableExportPrint(parent, table, model, pageLayout),
 		m_source(source),
 		m_projectName(projectName),
 		m_softwareId(softwareId)
@@ -620,13 +620,13 @@ void ArchiveWidget::exportButton()
 							   QMarginsF(25, 20, 15, 20),
 							   QPageLayout::Unit::Millimeter);
 
-		pageLayout = UiLib::TableExportPrint::loadPageLayoutFromSettings("ArchiveExportPageLayout", pageLayout);
+		pageLayout = ReportLib::TableExportPrint::loadPageLayoutFromSettings("ArchiveExportPageLayout", pageLayout);
 
 		ArchiveExportPrint ep(&m_source, m_projectName, m_softwareId, this, *m_view, *m_model, pageLayout);
 		ep.exportTable(fileName);
 		pageLayout = ep.pageLayout();
 
-		UiLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "ArchiveExportPageLayout");
+		ReportLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "ArchiveExportPageLayout");
 		return;
 	}
 
@@ -641,13 +641,13 @@ void ArchiveWidget::printButton()
 						   QMarginsF(10, 10, 10, 10),
 						   QPageLayout::Unit::Millimeter);
 
-	pageLayout = UiLib::TableExportPrint::loadPageLayoutFromSettings("ArchivePrintPageLayout", pageLayout);
+	pageLayout = ReportLib::TableExportPrint::loadPageLayoutFromSettings("ArchivePrintPageLayout", pageLayout);
 
 	ArchiveExportPrint ep(&m_source, m_projectName, m_softwareId, this, *m_view, *m_model, pageLayout);
 	ep.printTable();
 	pageLayout = ep.pageLayout();
 
-	UiLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "ArchivePrintPageLayout");
+	ReportLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "ArchivePrintPageLayout");
 
 	return;
 }

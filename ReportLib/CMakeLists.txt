@@ -27,6 +27,8 @@ add_library(${TARGET} STATIC
 	ReportSchemaView.h
 	ReportTemplate.cpp
 	ReportTemplate.h
+	TableExportPrint.cpp
+	TableExportPrint.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -40,6 +42,16 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QBuffer>
 	<QMutex>
 	<QTextDocument>
+	<QTableView>
+	<QAbstractItemModel>
+	<QPageSetupDialog>
+	<QPrintDialog>
+	<QPrinter>
+	<QMessageBox>
+	<QFileInfo>
+	<QSettings>
+	<QApplication>
+	<QHeaderView>
 
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>

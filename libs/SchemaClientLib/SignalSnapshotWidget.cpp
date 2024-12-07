@@ -5,7 +5,7 @@
 #include <ClientLib/ISignalDataServer.h>
 #include <SchemaClientLib/DialogSignalSnapshot.h>
 #include <UiLib/ChooseItemsWidget.h>
-#include <UiLib/ExportPrint.h>
+#include "../ReportLib/TableExportPrint.h"
 #include "../ReportLib/Report.h"
 
 
@@ -14,14 +14,14 @@
 //
 namespace
 {
-	class SnapshotExportPrint : public UiLib::TableExportPrint
+	class SnapshotExportPrint : public ReportLib::TableExportPrint
 	{
 	public:
 		SnapshotExportPrint(const QString& projectName,
 							const QString& softwareEquipmentId,
 							QWidget* parent,
 							const QTableView& table,
-							const UiLib::TableExportPrintModel& model, 
+							const ReportLib::TableExportPrintModel& model, 
 							const QPageLayout& pageLayout);
 
 	protected:
@@ -40,7 +40,7 @@ namespace
 											 const QString& softwareEquipmentId,
 											 QWidget* parent,
 											 const QTableView& table,
-											 const UiLib::TableExportPrintModel& model, 
+											 const ReportLib::TableExportPrintModel& model, 
 											 const QPageLayout& pageLayout) :
 		TableExportPrint(parent, table, model, pageLayout),
 		m_projectName(projectName),
@@ -694,14 +694,14 @@ namespace SchemaClientLib
 								   QMarginsF(25, 20, 15, 20),
 								   QPageLayout::Unit::Millimeter);
 
-			pageLayout = UiLib::TableExportPrint::loadPageLayoutFromSettings("SnapshotExportPageLayout", pageLayout);
+			pageLayout = ReportLib::TableExportPrint::loadPageLayoutFromSettings("SnapshotExportPageLayout", pageLayout);
 
 			SnapshotExportPrint ep(m_projectName, m_equipmentId, this, *m_tableView, m_model, pageLayout);
 			connect(this, &SignalSnapshotWidget::signalsUpdated, &ep, &SnapshotExportPrint::stop);
 			ep.exportTable(fileName);
 			pageLayout = ep.pageLayout();
 
-			UiLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "SnapshotExportPageLayout");
+			ReportLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "SnapshotExportPageLayout");
 
 			return;
 		}
@@ -717,14 +717,14 @@ namespace SchemaClientLib
 							   QMarginsF(10, 10, 10, 10),
 							   QPageLayout::Unit::Millimeter);
 
-		pageLayout = UiLib::TableExportPrint::loadPageLayoutFromSettings("SnapshotPrintPageLayout", pageLayout);
+		pageLayout = ReportLib::TableExportPrint::loadPageLayoutFromSettings("SnapshotPrintPageLayout", pageLayout);
 
 		SnapshotExportPrint ep(m_projectName, m_equipmentId, this, *m_tableView, m_model, pageLayout);
 		connect(this, &SignalSnapshotWidget::signalsUpdated, &ep, &SnapshotExportPrint::stop);
 		ep.printTable();
 		pageLayout = ep.pageLayout();
 
-		UiLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "SnapshotPrintPageLayout");
+		ReportLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "SnapshotPrintPageLayout");
 	}
 
 	void SignalSnapshotWidget::buttonChooseTagsClicked()
