@@ -20,6 +20,7 @@ enum class ArchiveColumns
 	Mismatch,
 	OutOfLimits,
 	ArchivingReason,
+	Duration,
 
 	// Next are visible by default
 	//

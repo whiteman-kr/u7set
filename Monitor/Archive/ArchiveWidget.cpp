@@ -281,6 +281,7 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::Mismatch));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::OutOfLimits));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::ArchivingReason));
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::Duration));
 	}
 
 	connect(m_view, &ArchiveView::requestToShowSignalInfo, this, &ArchiveWidget::showSignalInfo);

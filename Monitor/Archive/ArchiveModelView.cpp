@@ -65,6 +65,9 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 	case ArchiveColumns::ArchivingReason:
 		return tr("ArchivingReason");
 
+	case ArchiveColumns::Duration:
+		return tr("Duration");
+
 	case ArchiveColumns::Time:
 		return tr("Time");
 
@@ -227,6 +230,48 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 				}
 
 				result = resultString.join(' ');
+			}
+			break;
+		case ArchiveColumns::Duration:
+			{
+				QString timeString = "00:00:00.000";
+				for (int prevRow = row - 1; prevRow >= 0; prevRow--)
+				{
+					// Find a previous state of this signal
+					//
+					const auto& prevState = m_archive.state(prevRow);
+					if (prevState.appState.hash() == m_cachedSignalState.appState.hash())
+					{
+						const TimeStamp& prevTs = prevState.appState.time(m_timeType);
+						TimeStamp ts = m_cachedSignalState.appState.time(m_timeType);
+
+						bool timeNegative = false;
+						ts -= prevTs.timeStamp;
+						if (ts.timeStamp < 0) 
+						{
+							timeNegative = true;
+							ts.timeStamp *= -1;
+						}
+
+						auto dateTime = ts.toDateTime();
+						if (dateTime.daysTo(ts.toDateTime()) > 0)
+						{
+							timeString = dateTime.toString("dd/MM/yyyy HH:mm:ss.zzz");
+						}
+						else
+						{
+							timeString = dateTime.toString("HH:mm:ss.zzz");
+						}
+
+						if (timeNegative == true) 
+						{
+							timeString = "-" + timeString + tr(" (Time error)");
+						}
+
+						break;
+					}
+				}
+				result = timeString;
 			}
 			break;
 		case ArchiveColumns::Time:
