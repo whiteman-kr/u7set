@@ -12,6 +12,7 @@
 //            |      |	VduSchemaFileSchemaItemValue1::appSignalIndexes.
 // 29 Sep 2024| 1.4  |	Added UTF8 text format for scripts and SchemaItem::ObjectName.
 // 25 Nov 2024| 1.5  |	All text formats changed to UTF-8.
+// 08 Dec 2024| 1.6  |	Added VduSchemaFileSchemaItem1::acceptClick.
 // -----------+------+--------------------------------------------------------------
 // clang-format on
 
@@ -91,16 +92,19 @@ const uint16_t VduFileSchemaItemLineId = 0x4E4C;  // LN
 const uint16_t VduFileSchemaItemRectId = 0x4352;  // RC
 const uint16_t VduFileSchemaItemValueId = 0x4C56; // VL
 
+
+// VduSchemaFileSchemaItem1 - Common schema item header, right after it follows specific schema item data.
+//
 struct VduSchemaFileSchemaItem1
 {
-	uint16_t version;                             // 1
-	uint16_t size;                                // sizeof(VduSchemaFileSchemaItem1)
-	uint16_t itemType;                            // VduFileSchemaItemLineId, VduFileSchemaItemRectId, ...
+	uint16_t version;       // 1
+	uint16_t size;          // sizeof(VduSchemaFileSchemaItem1)
+	uint16_t itemType;      // VduFileSchemaItemLineId, VduFileSchemaItemRectId, ...
 	uint16_t reserve0;
 	uint16_t totalItemSize; // sizeof(VduSchemaFileSchemaItem1) + sizeof(VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...)
 
 	bool isStatic;          // If true, the item is static and can be cached.
-	bool reserveBool0;
+	bool acceptClick;       // If true, the item can accept click events.
 
 	vdu_cstr objectName;
 	vdu_cstr clickScript;

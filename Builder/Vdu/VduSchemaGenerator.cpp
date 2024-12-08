@@ -141,7 +141,7 @@ namespace
 			structRect.text = VduFileString::stub;
 
 			auto text = VduFileString::createUtf8(schemaItem.text(),
-												   sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemRect1, text));
+												  sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemRect1, text));
 			addedStrings.push_back(std::move(text));
 
 			itemType = structRect.itemType;
@@ -265,6 +265,7 @@ namespace
 		// fileSchemaItem.itemType = filled in the end, when specific item data is saved.
 		// fileSchemaItem.totalItemSize = filled in the end, when specific item data is saved.
 		fileSchemaItem.isStatic = schemaItem.IsStatic();
+		fileSchemaItem.acceptClick = schemaItem.acceptClick();
 
 		{
 			fileSchemaItem.objectName = VduFileString::stub;
@@ -278,9 +279,7 @@ namespace
 		{
 			fileSchemaItem.clickScript = VduFileString::stub;
 
-			QString clickScriptStr = (schemaItem.acceptClick() == false) ? QString{} : schemaItem.clickScript();
-
-			auto clickScript = VduFileString::createUtf8(clickScriptStr, offsetof(VduSchemaFileSchemaItem1, clickScript));
+			auto clickScript = VduFileString::createUtf8(schemaItem.clickScript(), offsetof(VduSchemaFileSchemaItem1, clickScript));
 			addedStrings.push_back(std::move(clickScript));
 		}
 
