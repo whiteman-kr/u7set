@@ -61,11 +61,19 @@ float signalPropertyFloat(string signalId, int property)
 float signalPropertyByIndexFloat(int signalIndex, int property)
 
 // Argument property can be one of the following values:
+// 0 - TuningDefaultValue (float or int32, depending on the signal type)
 // 1 - LowEngUnits (float or int32, depending on the signal type)
 // 2 - HighEngUnits (float or int32, depending on the signal type)
 // 11 - TuningLowBound (float or int32, depending on the signal type)
 // 12 - TuningHighBound (float or int32, depending on the signal type)
 // 100 - DecimalPlaces (int32)
+```
+
+```c
+int32 signalTuningDefaultValueInt(string signalId)
+float signalTuningDefaultValueFloat(string signalId)
+int32 signalTuningDefaultValueByIndexInt(int signalIndex)
+float signalTuningDefaultValueByIndexFloat(int signalIndex)
 ```
 
 ```c
@@ -90,6 +98,11 @@ int32 signalTuningHighBoundInt(string signalId)
 float signalTuningHighBoundFloat(string signalId)
 int32 signalTuningHighBoundByIndexInt(int signalIndex)
 float signalTuningHighBoundByIndexFloat(int signalIndex)
+```
+
+```c
+int32 decimalPlaces(string signalId)
+int32 decimalPlacesByIndex(int signalIndex)
 ```
 
 ## Control - AppSignals
