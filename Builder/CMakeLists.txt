@@ -51,6 +51,7 @@ qt_add_library(${TARGET} STATIC
 	./Vdu/VduSchemaGenerator.cpp
 	./Vdu/VduSchemaGenerator.h
 	./Vdu/VduTypes.h
+	./Vdu/VduUnicodeSubsets.h
 	AdsBridgeCfgGenerator.cpp
 	AdsBridgeCfgGenerator.h
 	AppDataServiceCfgGenerator.cpp

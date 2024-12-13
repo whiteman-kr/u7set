@@ -9,6 +9,7 @@ VDU-1
 	07.11.2024	Version: 7	VDU-1_v7.u7devp RPCT-3550: Added Input, Output and Platform interface controller and their signals
 	03.12.2024	Version: 8	VDU-1_v8.u7devp RPCT-3550: Added Temperature and Opto validity signals, Number of inputs and Outputs is 6
 	07.12.2024	Version: 9	VDU-1_v7.u7devp RPCT-3550: Added Output signals, Common fault, Build number
+	13.12.2024	Version: 10	VDU-1_v7.u7devp RPCT-3985: Added Unicode subsets selection to the VDU preset
 
 
 

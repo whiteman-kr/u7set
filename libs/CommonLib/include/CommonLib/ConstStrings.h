@@ -196,6 +196,7 @@ namespace EquipmentPropNames
 	
 
 	inline const QString FONTS("Fonts");
+	inline const QString UNICODDE_SUBSETS("UnicodeSubsets");
 
 	// DeviceAppSigal properties
 	//
