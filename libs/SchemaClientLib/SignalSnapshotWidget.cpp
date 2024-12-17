@@ -5,50 +5,39 @@
 #include <ClientLib/ISignalDataServer.h>
 #include <SchemaClientLib/DialogSignalSnapshot.h>
 #include <UiLib/ChooseItemsWidget.h>
-#include "../ReportLib/TableExportPrint.h"
-#include "../ReportLib/Report.h"
 
+#include <ReportLib/ReportObject.h>
+#include <ReportLib/TableViewReportGenerator.h>
 
 //
-// SnapshotExportPrint
+// SnapshotReportGenerator
 //
 namespace
 {
-	class SnapshotExportPrint : public ReportLib::TableExportPrint
+	class SnapshotReportInfo : public ReportLib::ITableViewReportInfo
 	{
 	public:
-		SnapshotExportPrint(const QString& projectName,
-							const QString& softwareEquipmentId,
-							QWidget* parent,
-							const QTableView& table,
-							const ReportLib::TableExportPrintModel& model, 
-							const QPageLayout& pageLayout);
+		SnapshotReportInfo(const QString& projectName, const QString& softwareEquipmentId);
 
 	protected:
-		virtual void generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) override;
+		virtual void generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) const override;
 
 	private:
 		QString m_projectName;
-		QString m_softwareEquipmentId;
-		QString m_timeType;
+		QString m_equipmentId;
 	};
 
 	//
-	// SnapshotExportPrint
+	// SnapshotReportInfo
 	//
-	SnapshotExportPrint::SnapshotExportPrint(const QString& projectName,
-											 const QString& softwareEquipmentId,
-											 QWidget* parent,
-											 const QTableView& table,
-											 const ReportLib::TableExportPrintModel& model, 
-											 const QPageLayout& pageLayout) :
-		TableExportPrint(parent, table, model, pageLayout),
+	SnapshotReportInfo::SnapshotReportInfo(const QString& projectName,
+										   const QString& softwareEquipmentId) :
 		m_projectName(projectName),
-		m_softwareEquipmentId(softwareEquipmentId)
+		m_equipmentId(softwareEquipmentId)
 	{
 	}
 
-	void SnapshotExportPrint::generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection)
+	void SnapshotReportInfo::generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) const
 	{
 		ReportLib::ReportFont marginFont{"Arial", 10};
 
@@ -62,7 +51,7 @@ namespace
 		report.addMarginItem({QObject::tr("Project: %1").arg(m_projectName), -1, -1, {marginFont, Qt::AlignRight | Qt::AlignTop}});
 
 		report.addMarginItem(
-			{QObject::tr("%1: %2").arg(qAppName()).arg(m_softwareEquipmentId), -1, -1, {marginFont, Qt::AlignLeft | Qt::AlignBottom}});
+			{QObject::tr("%1: %2").arg(qAppName()).arg(m_equipmentId), -1, -1, {marginFont, Qt::AlignLeft | Qt::AlignBottom}});
 
 		report.addMarginItem({"%PAGE%", -1, -1, {marginFont, Qt::AlignRight | Qt::AlignBottom}});
 
@@ -694,14 +683,17 @@ namespace SchemaClientLib
 								   QMarginsF(25, 20, 15, 20),
 								   QPageLayout::Unit::Millimeter);
 
-			pageLayout = ReportLib::TableExportPrint::loadPageLayoutFromSettings("SnapshotExportPageLayout", pageLayout);
+			pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("SnapshotExportPageLayout", pageLayout);
 
-			SnapshotExportPrint ep(m_projectName, m_equipmentId, this, *m_tableView, m_model, pageLayout);
-			connect(this, &SignalSnapshotWidget::signalsUpdated, &ep, &SnapshotExportPrint::stop);
-			ep.exportTable(fileName);
-			pageLayout = ep.pageLayout();
+			SnapshotReportInfo ri(m_projectName, m_equipmentId);
 
-			ReportLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "SnapshotExportPageLayout");
+			ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout);
+			connect(this, &SignalSnapshotWidget::signalsUpdated, &generator, &ReportLib::TableViewReportGenerator::stop);
+			
+			generator.exportTable(fileName);
+			
+			pageLayout = generator.pageLayout();
+			ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SnapshotExportPageLayout");
 
 			return;
 		}
@@ -717,14 +709,17 @@ namespace SchemaClientLib
 							   QMarginsF(10, 10, 10, 10),
 							   QPageLayout::Unit::Millimeter);
 
-		pageLayout = ReportLib::TableExportPrint::loadPageLayoutFromSettings("SnapshotPrintPageLayout", pageLayout);
+		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("SnapshotPrintPageLayout", pageLayout);
 
-		SnapshotExportPrint ep(m_projectName, m_equipmentId, this, *m_tableView, m_model, pageLayout);
-		connect(this, &SignalSnapshotWidget::signalsUpdated, &ep, &SnapshotExportPrint::stop);
-		ep.printTable();
-		pageLayout = ep.pageLayout();
+		SnapshotReportInfo ri(m_projectName, m_equipmentId);
 
-		ReportLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "SnapshotPrintPageLayout");
+		ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout);
+		connect(this, &SignalSnapshotWidget::signalsUpdated, &generator, &ReportLib::TableViewReportGenerator::stop);
+
+		generator.printTable();
+		
+		pageLayout = generator.pageLayout();
+		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SnapshotPrintPageLayout");
 	}
 
 	void SignalSnapshotWidget::buttonChooseTagsClicked()

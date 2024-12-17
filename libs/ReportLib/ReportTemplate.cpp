@@ -1,4 +1,4 @@
-#include "ReportTemplate.h"
+#include <ReportLib/ReportTemplate.h>
 
 namespace ReportLib
 {
@@ -445,6 +445,10 @@ namespace ReportLib
 	//
     // SectionTemplate
 	//
+	SectionTemplate::SectionTemplate() :
+		m_pageLayout(QPageSize(QPageSize::A4), QPageLayout::Orientation::Portrait, QMarginsF(30, 20, 15, 20), QPageLayout::Unit::Millimeter)
+	{
+	}
 
     bool SectionTemplate::load(QXmlStreamReader& reader)
 	{

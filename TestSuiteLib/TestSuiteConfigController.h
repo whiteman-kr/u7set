@@ -1,6 +1,6 @@
 #pragma once
 #include <QReadWriteLock>
-#include "../ReportLib/ReportTemplate.h"
+#include <ReportLib/ReportTemplate.h>
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/MatsUsers.h"
 #include "../UtilsLib/ILogFile.h"

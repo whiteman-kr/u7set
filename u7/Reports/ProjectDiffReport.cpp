@@ -2,10 +2,11 @@
 
 #include "../AppSignalLib/Bus.h"
 #include "../Builder/AppSignalProperties.h"
-#include "../ReportLib/ReportPrinter.h"
 #include "../UtilsLib/Ui/UiTools.h"
 
 #include <DbLib/DbControllerTools.h>
+#include <ReportLib/ReportSchemaView.h>
+#include <ReportLib/ReportPrinter.h>
 #include <HardwareLib/Connection.h>
 #include <HardwareLib/DiagSignalType.h>
 #include <UiLib/DialogProgress.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ReportLib/ReportGenerator.h"
+#include <ReportLib/TaggedReportGenerator.h>
 #include "TestLog.h"
 
 namespace ReportLib
@@ -12,10 +12,10 @@ namespace TestSuite
 {
 	class TestLog;
 
-	class TestReportGenerator : public ReportLib::ReportGenerator
+	class TestReportDataProvider: public ReportLib::ITaggedReportDataProvider
 	{
 	public:
-		TestReportGenerator(const ReportLib::ReportTemplate& reportTemplate, const TestLog& testLog);
+		TestReportDataProvider(const TestLog& testLog);
 
 
 	private:
@@ -23,13 +23,13 @@ namespace TestSuite
 		virtual int count(const QString& tag) const override;
 
 		virtual QString text(int index, QString* tag) const override;
-		virtual QString text(const QString& tag, bool* found) override;
+		virtual QString text(const QString& tag, bool* found) const override;
 
 	private:
 		std::vector<TestLogItem> m_items;
 
-		QString m_lastTag;
-		int m_lastIndex{0};
+		mutable QString m_lastTag;
+		mutable int m_lastIndex{0};
 	};
 
 	class TestReport

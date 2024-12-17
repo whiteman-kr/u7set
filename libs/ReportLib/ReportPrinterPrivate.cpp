@@ -1,7 +1,12 @@
-#include "ReportPrinter.h"
+#include "ReportPrinterPrivate.h"
 
+#include <ReportLib/Report.h>
+#include <ReportLib/ReportSchemaView.h>
+
+#include <VFrame30/IViewVariables.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/Schema.h>
+#include <VFrame30/SchemaView.h>
 
 namespace ReportLib
 {
@@ -35,7 +40,7 @@ namespace ReportLib
 	}
 
 	void PrintText::print(Report& report,
-						  ReportPrinter& printer,
+						  ReportPrinterPrivate& printer,
 						  QPagedPaintDevice& pdfWriter,
 						  QPainter& painter,
 						  int& pageIndex,
@@ -143,7 +148,7 @@ namespace ReportLib
 	}
 
 	void PrintSchema::print(Report& report,
-							ReportPrinter& printer,
+							ReportPrinterPrivate& printer,
 							QPagedPaintDevice& pdfWriter,
 							QPainter& painter,
 							int& pageIndex,
@@ -247,15 +252,17 @@ namespace ReportLib
 	}
 
 	//
-	// ReportPrinter
+	// ReportPrinterPrivate
 	//
 
-	ReportPrinter::ReportPrinter(std::shared_ptr<ReportSchemaView> reportSchemaView) :
+	ReportPrinterPrivate::ReportPrinterPrivate(std::shared_ptr<ReportSchemaView> reportSchemaView) :
 		m_schemaView(reportSchemaView)
 	{
 	}
 
-	bool ReportPrinter::preview(const Report& report, std::vector<RenderedSection>& renderedSections, std::atomic_bool& stop)
+	ReportPrinterPrivate::~ReportPrinterPrivate() = default;
+
+	bool ReportPrinterPrivate::preview(const Report& report, std::vector<RenderedSection>& renderedSections, std::atomic_bool& stop)
 	{
 		if (createRenderedSections(report, renderedSections, Statistics::Preview, stop) == false)
 		{
@@ -270,7 +277,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::save(Report& report, const QString& fileName, std::atomic_bool& stop)
+	bool ReportPrinterPrivate::save(Report& report, const QString& fileName, std::atomic_bool& stop)
 	{
 		QBuffer buffer;
 		if (save(report, buffer, stop) == false)
@@ -288,7 +295,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::save(Report& report, QBuffer& buffer, std::atomic_bool& stop)
+	bool ReportPrinterPrivate::save(Report& report, QBuffer& buffer, std::atomic_bool& stop)
 	{
 		std::vector<RenderedSection> renderedSections;
 
@@ -313,7 +320,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::print(Report& report, QPrinter& printer, std::atomic_bool& stop)
+	bool ReportPrinterPrivate::print(Report& report, QPrinter& printer, std::atomic_bool& stop)
 	{
 		std::vector<RenderedSection> renderedSections;
 
@@ -338,13 +345,13 @@ namespace ReportLib
 		return true;
 	}
 
-	ReportLib::Statistics ReportPrinter::statistics() const
+	ReportLib::Statistics ReportPrinterPrivate::statistics() const
 	{
 		QMutexLocker l(&m_statisticsMutex);
 		return m_statistics;
 	}
 
-	void ReportPrinter::printMarginItems(const Report& report, QPagedPaintDevice& pdfWriter, QPainter& painter, const QString& tag) const
+	void ReportPrinterPrivate::printMarginItems(const Report& report, QPagedPaintDevice& pdfWriter, QPainter& painter, const QString& tag) const
 	{
 		int page = 0;
 		int pagesCount = 0;
@@ -372,18 +379,18 @@ namespace ReportLib
 #ifdef DEBUG_PRINT_PAGE_RECT
 		bool first = true;
 #endif
-		for (const ReportMarginItem& item : report.marginItems())
+		for (const std::shared_ptr<ReportMarginItem>& item : report.marginItems())
 		{
-			if (item.pageFrom != -1 && item.pageFrom > page)
+			if (item->pageFrom != -1 && item->pageFrom > page)
 			{
 				continue;
 			}
-			if (item.pageTo != -1 && item.pageTo < page)
+			if (item->pageTo != -1 && item->pageTo < page)
 			{
 				continue;
 			}
 
-			QString text = item.text;
+			QString text = item->text;
 
 			if (text == "%PAGE%")
 			{
@@ -406,11 +413,11 @@ namespace ReportLib
 
 			if (text.isEmpty() == false)
 			{
-				painter.setFont(item.format.font());
-				QFontMetrics fm(item.format.font());
+				painter.setFont(item->format.font());
+				QFontMetrics fm(item->format.font());
 				QRect textBoundingRect = fm.boundingRect(text);
 
-				auto itemAlignment = item.format.alignment();
+				auto itemAlignment = item->format.alignment();
 				if (itemAlignment & Qt::AlignTop)
 				{
 					if (topRect.width() >= textBoundingRect.width() && topRect.height() >= textBoundingRect.height())
@@ -452,7 +459,7 @@ namespace ReportLib
 		painter.restore();
 	}
 
-	bool ReportPrinter::createRenderedSections(const Report& report,
+	bool ReportPrinterPrivate::createRenderedSections(const Report& report,
 											   std::vector<RenderedSection>& renderedSections,
 											   Statistics::Status status,
 											   std::atomic_bool& stop)
@@ -610,7 +617,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::saveRenderedSections(Report& report,
+	bool ReportPrinterPrivate::saveRenderedSections(Report& report,
 											 const std::vector<RenderedSection>& renderedSections,
 											 QBuffer& buffer,
 											 std::atomic_bool& stop)
@@ -694,7 +701,7 @@ namespace ReportLib
 		return true;
 	}
 
-	bool ReportPrinter::printRenderedSections(Report& report, const std::vector<RenderedSection>& renderedSections, QPrinter& printer, std::atomic_bool& stop)
+	bool ReportPrinterPrivate::printRenderedSections(Report& report, const std::vector<RenderedSection>& renderedSections, QPrinter& printer, std::atomic_bool& stop)
 	{
 		int pagesCount = 0;
 

@@ -3,7 +3,7 @@
 #include "Settings.h"
 
 #include "../UtilsLib/Ui/UiTools.h"
-
+#include <ReportLib/ReportSchemaView.h>
 #include <VFrame30/SchemaDetails.h>
 #include <UiLib/DialogProgress.h>
 

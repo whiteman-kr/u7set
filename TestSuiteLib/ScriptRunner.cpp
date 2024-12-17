@@ -1,5 +1,7 @@
 #include "ScriptRunner.h"
 
+#include <QMutexLocker>
+
 namespace TestSuite
 {
 	ScriptRunner::ScriptRunner(const TestScript& script, const TestScript* globalScript, ConfigSettings& configuration, TestController& testController, ILogFile& scriptTestLog, ControlStatus& status, QMutex& statusMutex) :

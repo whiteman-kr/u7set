@@ -1,5 +1,5 @@
-#include "ReportSchemaView.h"
-
+#include <ReportLib/ReportSchemaView.h>
+#include <ReportLib/ReportObject.h>
 #include <VFrame30/Schema.h>
 
 namespace ReportLib

@@ -1,4 +1,6 @@
-#include "ReportAppSignalProvider.h"
+#include <ReportLib/ReportAppSignalProvider.h>
+
+#include "../AppSignalLib/IAppSignalManager.h"
 
 namespace ReportLib
 {

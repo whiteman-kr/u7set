@@ -1,86 +1,88 @@
-#include "TableExportPrint.h"
+#include "TableViewReportPrivate.h"
+#include <ReportLib/Report.h>
+#include <ReportLib/TableViewReportGenerator.h>
+#include "ReportPrinterPrivate.h"
 #include <UiLib/DialogProgress.h>
 #include "../UtilsLib/Ui/UiTools.h"
-#include "Report.h"
 
 namespace ReportLib
 {
-	TableExportPrintModel::TableExportPrintModel(QObject* parent):
-		QAbstractTableModel(parent)
+	TableViewReportDataProvider::TableViewReportDataProvider(QAbstractItemModel& tableModel) :
+		m_tableModel(tableModel)
 	{
 		connect(
 			this,
-			&TableExportPrintModel::signalRowCount,
+			&TableViewReportDataProvider::signalRowCount,
 			this,
 			[this](int& result)
 			{
-				result = rowCount();
+				result = m_tableModel.rowCount();
 			},
 			Qt::BlockingQueuedConnection);
 
 		connect(
 			this,
-			&TableExportPrintModel::signalColumnCount,
+			&TableViewReportDataProvider::signalColumnCount,
 			this,
 			[this](int& result)
 			{
-				result = columnCount();
+				result = m_tableModel.columnCount();
 			},
 			Qt::BlockingQueuedConnection);
 
 		connect(
 			this,
-			&TableExportPrintModel::signalColumnsText,
+			&TableViewReportDataProvider::signalColumnsText,
 			this,
 			[this](QStringList& text)
 			{
 				text.clear();
-				int count = columnCount();
+				int count = m_tableModel.columnCount();
 				for (int i = 0; i < count; i++)
 				{
-					text.push_back(headerData(i, Qt::Horizontal, Qt::DisplayRole).toString());
+					text.push_back(m_tableModel.headerData(i, Qt::Horizontal, Qt::DisplayRole).toString());
 				}
 			},
 			Qt::BlockingQueuedConnection);
 
 		connect(
 			this,
-			&TableExportPrintModel::signalRowsText,
+			&TableViewReportDataProvider::signalRowsText,
 			this,
 			[this](int row, QStringList& text)
 			{
 				text.clear();
-				int count = columnCount();
+				int count = m_tableModel.columnCount();
 				for (int i = 0; i < count; i++)
 				{
-					text.push_back(data(index(row, i), Qt::DisplayRole).toString());
+					text.push_back(m_tableModel.data(m_tableModel.index(row, i), Qt::DisplayRole).toString());
 				}
 			},
 			Qt::BlockingQueuedConnection);
 	}
 
-	int TableExportPrintModel::exportRowCount() const
+	int TableViewReportDataProvider::exportRowCount() const
 	{
 		int result = 0;
 		emit signalRowCount(result);
 		return result;
 	}
-	
-	int TableExportPrintModel::exportColumnCount() const
+
+	int TableViewReportDataProvider::exportColumnCount() const
 	{
 		int result = 0;
 		emit signalColumnCount(result);
 		return result;
 	}
-	
-	QStringList TableExportPrintModel::exportColumnsText() const
+
+	QStringList TableViewReportDataProvider::exportColumnsText() const
 	{
 		QStringList result;
 		emit signalColumnsText(result);
 		return result;
 	}
-	
-	QStringList TableExportPrintModel::exportRowsText(int row) const
+
+	QStringList TableViewReportDataProvider::exportRowsText(int row) const
 	{
 		QStringList result;
 		emit signalRowsText(row, result);
@@ -90,14 +92,13 @@ namespace ReportLib
 	//
 	// --------------------------------------------- ExportPrintPrivateWorker --------------------------
 	//
-	TableExportPrintPrivateWorker::TableExportPrintPrivateWorker(ITableExportPrint& exportPrintInterface,
-													   const TableExportPrintModel& model,
-													   const std::vector<int>& visibleColumns,
-													   const std::vector<int>& columnWidths,
-													   const std::vector<int>& selectedRows) :
-		m_exportPrintInterface{exportPrintInterface},
-		m_model(model),
-		m_printer(std::make_unique<ReportLib::ReportPrinter>()),
+	TableViewReportWorker::TableViewReportWorker(const ITableViewReportInfo& reportInfo,
+												 const QTableView& table,
+												 const std::vector<int>& visibleColumns,
+												 const std::vector<int>& columnWidths,
+												 const std::vector<int>& selectedRows) :
+		m_reportInfo{reportInfo},
+		m_modelDataProvider(*table.model()),
 		m_visibleColumns(visibleColumns),
 		m_columnWidths(columnWidths),
 		m_selectedRows(selectedRows),
@@ -105,39 +106,39 @@ namespace ReportLib
 	{
 	}
 
-	void TableExportPrintPrivateWorker::setFileName(const QString& fileName)
+	void TableViewReportWorker::setFileName(const QString& fileName)
 	{
 		m_fileName = fileName;
 	}
 
-	void TableExportPrintPrivateWorker::setPrinterInfo(const QPrinterInfo& printerInfo) 
+	void TableViewReportWorker::setPrinterInfo(const QPrinterInfo& printerInfo)
 	{
 		m_printerInfo = printerInfo;
 	}
 
-	void TableExportPrintPrivateWorker::setPageLayout(const QPageLayout& layout)
+	void TableViewReportWorker::setPageLayout(const QPageLayout& layout)
 	{
 		m_pageLayout = layout;
 	}
-	
-	void TableExportPrintPrivateWorker::setExportSelected(bool value)
+
+	void TableViewReportWorker::setExportSelected(bool value)
 	{
 		m_exportSelected = value;
 	}
 
-	void TableExportPrintPrivateWorker::setMaxRows(int value) 
+	void TableViewReportWorker::setMaxRows(int value)
 	{
 		m_maxRows = value;
 	}
 
-	void TableExportPrintPrivateWorker::printTable()
+	void TableViewReportWorker::printTable()
 	{
 		QString errorMsg;
-		createReport(m_model, QString(), errorMsg);
+		createReport(QString(), errorMsg);
 		emit finished(errorMsg);
 	}
 
-	void TableExportPrintPrivateWorker::exportTable()
+	void TableViewReportWorker::exportTable()
 	{
 		QFileInfo fileInfo(m_fileName);
 		QString extension = fileInfo.completeSuffix();
@@ -145,19 +146,19 @@ namespace ReportLib
 
 		if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0)
 		{
-			createText(m_model, m_fileName, ';', errorMsg);
+			createText(m_fileName, ';', errorMsg);
 		}
 		else
 		{
 			if (extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
 			{
-				createText(m_model, m_fileName, '\t', errorMsg);
+				createText(m_fileName, '\t', errorMsg);
 			}
 			else
 			{
 				if (extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0)
 				{
-					createReport(m_model, m_fileName, errorMsg);
+					createReport(m_fileName, errorMsg);
 				}
 				else
 				{
@@ -169,12 +170,12 @@ namespace ReportLib
 		emit finished(errorMsg);
 	}
 
-	void TableExportPrintPrivateWorker::stop()
+	void TableViewReportWorker::stop()
 	{
 		m_stop = true;
 	}
 
-	void TableExportPrintPrivateWorker::progressRequested()
+	void TableViewReportWorker::progressRequested()
 	{
 		QString progressText;
 
@@ -189,7 +190,7 @@ namespace ReportLib
 		return;
 	}
 
-	void TableExportPrintPrivateWorker::getProgress(int* progress, int* progressMin, int* progressMax, QString* progressText)
+	void TableViewReportWorker::getProgress(int* progress, int* progressMin, int* progressMax, QString* progressText)
 	{
 		if (progress == nullptr || progressMin == nullptr || progressMax == nullptr || progressText == nullptr)
 		{
@@ -200,10 +201,10 @@ namespace ReportLib
 			return;
 		}
 
-			QMutexLocker l(&m_statisticsMutex);
+		QMutexLocker l(&m_statisticsMutex);
 		if (m_statistics.printerIsActive == true)
 		{
-			m_printer->statistics().fill(progress, progressMin, progressMax, progressText);
+			m_printer.statistics().fill(progress, progressMin, progressMax, progressText);
 		}
 		else
 		{
@@ -213,15 +214,15 @@ namespace ReportLib
 			*progressText = m_statistics.text;
 		}
 	}
-	
-	void TableExportPrintPrivateWorker::generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection)
+
+	void TableViewReportWorker::generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection)
 	{
-		m_exportPrintInterface.generateHeader(report, mainSection);
+		m_reportInfo.generateHeader(report, mainSection);
 	}
 
-	bool TableExportPrintPrivateWorker::createReport(const TableExportPrintModel& model, const QString& fileName, QString& errorMsg)
+	bool TableViewReportWorker::createReport(const QString& fileName, QString& errorMsg)
 	{
-		QStringList columnsList = model.exportColumnsText();
+		QStringList columnsList = m_modelDataProvider.exportColumnsText();
 
 		// Create report objects
 		//
@@ -241,7 +242,7 @@ namespace ReportLib
 		// Create main table
 		//
 		int allWidth = 0;
-		for (int i = 0; i < m_visibleColumns.size(); i++) 
+		for (int i = 0; i < m_visibleColumns.size(); i++)
 		{
 			allWidth += m_columnWidths[i];
 		}
@@ -252,7 +253,7 @@ namespace ReportLib
 			int columnWidth = static_cast<int>(static_cast<double>(m_columnWidths[i]) / allWidth * 100 + 0.5);
 			columns.push_back({columnsList[m_visibleColumns[i]], columnWidth, Qt::AlignLeft});
 		}
-		
+
 		ReportLib::TableFormat format{font, columns};
 		std::shared_ptr<ReportLib::ReportTable> table = std::make_shared<ReportLib::ReportTable>(format);
 		mainSection->addTable(table);
@@ -260,7 +261,7 @@ namespace ReportLib
 		// Fill the table
 		//
 		std::vector<int> rowsToProcess;
-		int rowCount = model.exportRowCount();
+		int rowCount = m_modelDataProvider.exportRowCount();
 		if (m_exportSelected == true) // If more than 1 row is selected - export only them, otherwise export all rows
 		{
 			rowsToProcess = m_selectedRows;
@@ -289,7 +290,7 @@ namespace ReportLib
 				}
 				m_statistics.value++;
 
-				if (m_maxRows > 0 && m_statistics.value > m_maxRows) 
+				if (m_maxRows > 0 && m_statistics.value > m_maxRows)
 				{
 					break;
 				}
@@ -301,7 +302,7 @@ namespace ReportLib
 				return true;
 			}
 
-			QStringList rowsList = model.exportRowsText(row);
+			QStringList rowsList = m_modelDataProvider.exportRowsText(row);
 			QStringList rowStrings;
 			for (int i = 0; i < m_visibleColumns.size(); i++)
 			{
@@ -321,11 +322,11 @@ namespace ReportLib
 		if (fileName.isEmpty() == true)
 		{
 			QPrinter printer(m_printerInfo, QPrinter::HighResolution);
-			result = m_printer->print(report, printer, m_stop);
+			result = m_printer.print(report, printer, m_stop);
 		}
 		else
 		{
-			result = m_printer->save(report, fileName, m_stop);
+			result = m_printer.save(report, fileName, m_stop);
 		}
 
 		if (result == false)
@@ -342,10 +343,9 @@ namespace ReportLib
 
 
 		return result;
-
 	}
 
-	bool TableExportPrintPrivateWorker::createText(const TableExportPrintModel& model, const QString& fileName, const QChar& separator, QString& errorMsg)
+	bool TableViewReportWorker::createText(const QString& fileName, const QChar& separator, QString& errorMsg)
 	{
 		if (fileName.isEmpty() == true)
 		{
@@ -366,7 +366,7 @@ namespace ReportLib
 
 		QTextStream out(&file);
 
-		QStringList columnsList = model.exportColumnsText();
+		QStringList columnsList = m_modelDataProvider.exportColumnsText();
 
 		// Fill header
 		//
@@ -379,11 +379,11 @@ namespace ReportLib
 
 		// Fill table
 		//
-		int rowCount = model.exportRowCount();
+		int rowCount = m_modelDataProvider.exportRowCount();
 		std::vector<int> rowsToProcess = m_selectedRows;
-		if (rowsToProcess.size() <= 1)		// If more than 1 row is selected - export only them, otherwise export all rows
+		if (rowsToProcess.size() <= 1) // If more than 1 row is selected - export only them, otherwise export all rows
 		{
-			for (int row = 0; row < rowCount; row++) 
+			for (int row = 0; row < rowCount; row++)
 			{
 				rowsToProcess.push_back(row);
 			}
@@ -394,7 +394,7 @@ namespace ReportLib
 			m_statistics.value = 0;
 		}
 
-		for (int row: rowsToProcess)
+		for (int row : rowsToProcess)
 		{
 			{
 				QMutexLocker l(&m_statisticsMutex);
@@ -416,7 +416,7 @@ namespace ReportLib
 				break;
 			}
 
-			QStringList rowsList = model.exportRowsText(row);
+			QStringList rowsList = m_modelDataProvider.exportRowsText(row);
 			QStringList rowStrings;
 			for (int i = 0; i < m_visibleColumns.size(); i++)
 			{
@@ -435,29 +435,30 @@ namespace ReportLib
 			}
 			out << rowStrings.join(separator) << Qt::endl;
 		}
-		
+
 		return true;
 	}
 
 	//
 	// --------------------------------------------- ExportPrintPrivate --------------------------
 	//
-	TableExportPrintPrivate::TableExportPrintPrivate(ITableExportPrint& exportPrintInterface,
-										   QWidget* parent,
-										   const TableExportPrintModel& model,
-										   const std::vector<int>& visibleColumns,
-										   const std::vector<int>& columnWidths,
-										   const std::vector<int>& selectedRows,
-										   const QPageLayout& pageLayout) :
+	TableViewReportPrivate::TableViewReportPrivate(QWidget* parent,
+												   const ITableViewReportInfo& reportInfo,
+												   const QTableView& table,
+												   const std::vector<int>& visibleColumns,
+												   const std::vector<int>& columnWidths,
+												   const std::vector<int>& selectedRows,
+												   const QPageLayout& pageLayout) :
+		QObject(parent),
 		m_parent(parent),
 		m_pageLayout(pageLayout),
-		m_model(model),
-		m_worker(new TableExportPrintPrivateWorker(exportPrintInterface, model, visibleColumns, columnWidths, selectedRows)),
+		m_table(table),
+		m_worker(new TableViewReportWorker(reportInfo, table, visibleColumns, columnWidths, selectedRows)),
 		m_selectedRows(selectedRows)
 	{
 	}
-
-	void TableExportPrintPrivate::printTable()
+	
+	void TableViewReportPrivate::printTable()
 	{
 		QPrintDialog dialog(m_parent);
 
@@ -522,9 +523,9 @@ namespace ReportLib
 		{
 			int rowCount = (m_selectedRows.size() > 1 && printer->printRange() == QPrinter::PrintRange::Selection) ?
 							   static_cast<int>(m_selectedRows.size()) :
-							   m_model.rowCount();
+							   m_table.model()->rowCount();
 
-			if (rowCount > TableExportPrintPrivateWorker::m_maxReportStatesForPrint)
+			if (rowCount > TableViewReportWorker::m_maxReportStatesForPrint)
 			{
 				if (QMessageBox::warning(
 						m_parent,
@@ -533,21 +534,21 @@ namespace ReportLib
 							"Warning!\n\nThe report is too large (%1 records ).\nOnly first %2 records will pe printed.\nTo increase the "
 							"report size, export the data to the CSV or TXT format.\n\nDo you wish to continue printing?")
 							.arg(rowCount)
-							.arg(TableExportPrintPrivateWorker::m_maxReportStatesForPrint),
+							.arg(TableViewReportWorker::m_maxReportStatesForPrint),
 						QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
 				{
 					return;
 				}
 
-				m_worker->setMaxRows(TableExportPrintPrivateWorker::m_maxReportStatesForPrint);
+				m_worker->setMaxRows(TableViewReportWorker::m_maxReportStatesForPrint);
 			}
 		}
 		//
 
 		run(TaskType::Print, QString());
 	}
-	
-	void TableExportPrintPrivate::exportTable(const QString& fileName)
+
+	void TableViewReportPrivate::exportTable(const QString& fileName)
 	{
 		QFileInfo fileInfo(fileName);
 		if (fileInfo.completeSuffix().compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0)
@@ -561,7 +562,7 @@ namespace ReportLib
 		// Limit the row count
 		//
 		{
-			int rowCount = m_selectedRows.size() > 1 ? static_cast<int>(m_selectedRows.size()) : m_model.rowCount();
+			int rowCount = m_selectedRows.size() > 1 ? static_cast<int>(m_selectedRows.size()) : m_table.model()->rowCount();
 
 			QString extension = fileInfo.completeSuffix();
 			int maxRowCount = -1;
@@ -569,7 +570,7 @@ namespace ReportLib
 			if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
 				extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
 			{
-				maxRowCount = TableExportPrintPrivateWorker::m_maxReportStatesForCsv;
+				maxRowCount = TableViewReportWorker::m_maxReportStatesForCsv;
 
 				if (rowCount > maxRowCount)
 				{
@@ -587,11 +588,10 @@ namespace ReportLib
 
 					m_worker->setMaxRows(maxRowCount);
 				}
-
 			}
 			else
 			{
-				maxRowCount = TableExportPrintPrivateWorker::m_maxReportStatesForPrint;
+				maxRowCount = TableViewReportWorker::m_maxReportStatesForPrint;
 
 				if (rowCount > maxRowCount)
 				{
@@ -615,26 +615,26 @@ namespace ReportLib
 		//
 
 		m_worker->setPageLayout(pageLayout());
-		
+
 		run(TaskType::Export, fileName);
 	}
 
-	void TableExportPrintPrivate::stop()
+	void TableViewReportPrivate::stop()
 	{
 		m_worker->stop();
 	}
-	
-	const QPageLayout& TableExportPrintPrivate::pageLayout() const
+
+	const QPageLayout& TableViewReportPrivate::pageLayout() const
 	{
 		return m_pageLayout;
 	}
 
-	void TableExportPrintPrivate::setPageLayout(const QPageLayout& layout)
+	void TableViewReportPrivate::setPageLayout(const QPageLayout& layout)
 	{
 		m_pageLayout = layout;
 	}
 
-	bool TableExportPrintPrivate::pageSetup() 
+	bool TableViewReportPrivate::pageSetup()
 	{
 		QPrinter printer(QPrinter::HighResolution);
 
@@ -664,8 +664,8 @@ namespace ReportLib
 
 		return true;
 	}
-		
-	void TableExportPrintPrivate::run(TaskType task, const QString& fileName) 
+
+	void TableViewReportPrivate::run(TaskType task, const QString& fileName)
 	{
 		// Create Progress Dialog
 
@@ -682,12 +682,12 @@ namespace ReportLib
 		case TaskType::Export:
 			{
 				m_worker->setFileName(fileName);
-				QObject::connect(thread, &QThread::started, m_worker, &TableExportPrintPrivateWorker::exportTable);
+				QObject::connect(thread, &QThread::started, m_worker, &TableViewReportWorker::exportTable);
 			}
 			break;
 		case TaskType::Print:
 			{
-				QObject::connect(thread, &QThread::started, m_worker, &TableExportPrintPrivateWorker::printTable);
+				QObject::connect(thread, &QThread::started, m_worker, &TableViewReportWorker::printTable);
 			}
 			break;
 		}
@@ -697,20 +697,20 @@ namespace ReportLib
 		QObject::connect(&dialogProgress,
 						 &UiLib::DialogProgress::getProgress,
 						 m_worker,
-						 &TableExportPrintPrivateWorker::progressRequested,
+						 &TableViewReportWorker::progressRequested,
 						 Qt::DirectConnection);
 		QObject::connect(&dialogProgress,
 						 &UiLib::DialogProgress::cancelClicked,
 						 m_worker,
-						 &TableExportPrintPrivateWorker::stop,
+						 &TableViewReportWorker::stop,
 						 Qt::DirectConnection);
 
-		QObject::connect(m_worker, &TableExportPrintPrivateWorker::progressChanged, &dialogProgress, &UiLib::DialogProgress::setProgressSingle);
+		QObject::connect(m_worker, &TableViewReportWorker::progressChanged, &dialogProgress, &UiLib::DialogProgress::setProgressSingle);
 
 		//  Schedule objects deleting
 
 		QObject::connect(m_worker,
-						 &TableExportPrintPrivateWorker::finished,
+						 &TableViewReportWorker::finished,
 						 m_worker,
 						 [thread, &dialogProgress, this](const QString& errorMessage)
 						 {
@@ -751,101 +751,4 @@ namespace ReportLib
 		return;
 	}
 
-} // namespace UiLib
-
-namespace ReportLib
-{
-	TableExportPrint::TableExportPrint(QWidget* parent,
-							 const QTableView& table,
-							 const TableExportPrintModel& model,
-							 const QPageLayout& pageLayout)
-	{
-
-		std::vector<int> visibleColumns;
-		std::vector<int> columnWidths;
-		int count = model.columnCount();
-		for (int i = 0; i < count; i++)
-		{
-			if (table.horizontalHeader()->isSectionHidden(i) == false)
-			{
-				visibleColumns.push_back(i);
-				columnWidths.push_back(table.columnWidth(i));
-			}
-		}
-
-		std::vector<int> selectedRows; 
-		auto rowsIndexes = table.selectionModel()->selectedRows();
-		for (const auto& ri : rowsIndexes)
-		{
-			selectedRows.push_back(ri.row());
-		}
-
-		m_impl = std::make_unique<TableExportPrintPrivate>(*this, parent, model, visibleColumns, columnWidths, selectedRows, pageLayout);
-	}
-
-	TableExportPrint::~TableExportPrint() = default;
-
-	void TableExportPrint::printTable()
-	{
-		return m_impl->printTable();
-	}
-
-	void TableExportPrint::exportTable(const QString& fileName)
-	{
-		return m_impl->exportTable(fileName);
-	}
-
-	const QPageLayout& TableExportPrint::pageLayout() const
-	{
-		return m_impl->pageLayout();
-	}
-
-	void TableExportPrint::setPageLayout(const QPageLayout& layout)
-	{
-		m_impl->setPageLayout(layout);
-	}
-
-	void TableExportPrint::savePageLayoutToSettings(const QPageLayout& pageLayout, const QString& groupName)
-	{
-		QSettings settings;
-		settings.beginGroup(groupName);
-		settings.setValue("PageSize", pageLayout.pageSize().id());
-		settings.setValue("Orientation", static_cast<int>(pageLayout.orientation()));
-		settings.setValue("MarginsLeft", pageLayout.margins().left());
-		settings.setValue("MarginsTop", pageLayout.margins().top());
-		settings.setValue("MarginsRight", pageLayout.margins().right());
-		settings.setValue("MarginsBottom", pageLayout.margins().bottom());
-		settings.setValue("Units", static_cast<int>(pageLayout.units()));
-		settings.endGroup();
-	}
-
-	QPageLayout TableExportPrint::loadPageLayoutFromSettings(const QString& groupName, const QPageLayout& defaultPageLayout)
-	{
-		QSettings settings;
-		settings.beginGroup(groupName);
-		QPageSize::PageSizeId pageSizeId = static_cast<QPageSize::PageSizeId>(settings.value("PageSize", defaultPageLayout.pageSize().id()).toInt());
-		QPageSize pageSize(pageSizeId);
-		QPageLayout::Orientation orientation =
-			static_cast<QPageLayout::Orientation>(settings.value("Orientation", defaultPageLayout.orientation()).toInt());
-		QMarginsF margins(settings.value("MarginsLeft", defaultPageLayout.margins().left()).toDouble(),
-						  settings.value("MarginsTop", defaultPageLayout.margins().top()).toDouble(),
-						  settings.value("MarginsRight", defaultPageLayout.margins().right()).toDouble(),
-						  settings.value("MarginsBottom", defaultPageLayout.margins().bottom()).toDouble());
-		QPageLayout::Unit units = static_cast<QPageLayout::Unit>(settings.value("Units", defaultPageLayout.units()).toInt());
-		settings.endGroup();
-
-		QPageLayout pageLayout(pageSize, orientation, margins, units);
-		return pageLayout;
-	}
-
-	void TableExportPrint::stop()
-	{
-		return m_impl->stop();
-	}
-
-	void TableExportPrint::generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection)
-	{
-		Q_UNUSED(report);
-		Q_UNUSED(mainSection);
-	}
 } // namespace ReportLib

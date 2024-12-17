@@ -1,5 +1,5 @@
 #include "TestReport.h"
-#include "../ReportLib/ReportTemplate.h"
+#include <ReportLib/ReportTemplate.h>
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -9,26 +9,25 @@
 namespace TestSuite
 {
 	//
-	// TestReportGenerator
+	// TestReportDataProvider
 	//
-	TestReportGenerator::TestReportGenerator(const ReportLib::ReportTemplate& reportTemplate, const TestLog& testLog):
-		ReportLib::ReportGenerator(reportTemplate),
+	TestReportDataProvider::TestReportDataProvider(const TestLog& testLog) :
 		m_items(testLog.items())
 	{
 
 	}
 
-	int TestReportGenerator::count() const 
+	int TestReportDataProvider::count() const 
 	{
 		return static_cast<int>(m_items.size());
 	}
 
-	int TestReportGenerator::count(const QString& /*tag*/) const
+	int TestReportDataProvider::count(const QString& /*tag*/) const
 	{
 		return 0;
 	}
 
-	QString TestReportGenerator::text(int index, QString* tag) const
+	QString TestReportDataProvider::text(int index, QString* tag) const
 	{
 		if (index < 0 || index >= m_items.size()) 
 		{
@@ -44,7 +43,7 @@ namespace TestSuite
 		return m_items[index].message();
 	}
 
-	QString TestReportGenerator::text(const QString& tag, bool* found)
+	QString TestReportDataProvider::text(const QString& tag, bool* found) const
 	{
 		if (found == nullptr)
 		{
@@ -108,7 +107,8 @@ namespace TestSuite
 			return;
 		}
 
-		TestSuite::TestReportGenerator generator(templ, testLog);
+		TestReportDataProvider dataProvider(testLog);
+		ReportLib::TaggedReportGenerator generator(templ, dataProvider);
 
 		std::atomic_bool stop = false;
 
@@ -165,7 +165,8 @@ namespace TestSuite
 				continue;
 			}
 
-			TestSuite::TestReportGenerator generator(templ, testLog);
+			TestReportDataProvider dataProvider(testLog);
+			ReportLib::TaggedReportGenerator generator(templ, dataProvider);
 
 			std::atomic_bool stop = false;
 

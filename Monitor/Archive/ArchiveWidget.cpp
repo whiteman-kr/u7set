@@ -5,28 +5,23 @@
 #include "MonitorConfigController.h"
 #include "MonitorSignalInfo.h"
 #include "DialogChooseArchiveSignals.h"
-#include "../ReportLib/TableExportPrint.h"
-#include "../ReportLib/Report.h"
+#include <ReportLib/TableViewReportGenerator.h>
+#include <ReportLib/Report.h>
+#include <ReportLib/ReportObject.h>
 
 //
-// MonitorExportPrint
+// ArchiveExportPrint
 //
 namespace
 {
-	class ArchiveExportPrint : public ReportLib::TableExportPrint
+	class ArchiveReportInfo : public ReportLib::ITableViewReportInfo
 	{
 	public:
-		ArchiveExportPrint(ArchiveSource* source,
-						   QString projectName,
-						   QString softwareId,
-						   QWidget* parent,
-						   const QTableView& table,
-						   const ReportLib::TableExportPrintModel& model,
-						   const QPageLayout& pageLayout);
-		virtual ~ArchiveExportPrint() = default;
+		ArchiveReportInfo(ArchiveSource* source, QString projectName, QString softwareId);
+		virtual ~ArchiveReportInfo() = default;
 
 	protected:
-		virtual void generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) override;
+		virtual void generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) const override;
 
 		ArchiveSource* m_source = nullptr;
 		QString m_projectName;
@@ -34,21 +29,16 @@ namespace
 	};
 
 
-	ArchiveExportPrint::ArchiveExportPrint(ArchiveSource* source,
+	ArchiveReportInfo::ArchiveReportInfo(ArchiveSource* source,
 										   QString projectName,
-										   QString softwareId,
-										   QWidget* parent,
-										   const QTableView& table,
-										   const ReportLib::TableExportPrintModel& model,
-										   const QPageLayout& pageLayout) :
-		ReportLib::TableExportPrint(parent, table, model, pageLayout),
+										   QString softwareId) :
 		m_source(source),
 		m_projectName(projectName),
 		m_softwareId(softwareId)
 	{
 	}
 
-	void ArchiveExportPrint::generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection)
+	void ArchiveReportInfo::generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) const
 	{
 		if (m_source == nullptr)
 		{
@@ -620,13 +610,14 @@ void ArchiveWidget::exportButton()
 							   QMarginsF(25, 20, 15, 20),
 							   QPageLayout::Unit::Millimeter);
 
-		pageLayout = ReportLib::TableExportPrint::loadPageLayoutFromSettings("ArchiveExportPageLayout", pageLayout);
+		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("ArchiveExportPageLayout", pageLayout);
 
-		ArchiveExportPrint ep(&m_source, m_projectName, m_softwareId, this, *m_view, *m_model, pageLayout);
-		ep.exportTable(fileName);
-		pageLayout = ep.pageLayout();
+		ArchiveReportInfo ri(&m_source, m_projectName, m_softwareId);
+		ReportLib::TableViewReportGenerator generator(this, *m_view, ri, pageLayout);
+		generator.exportTable(fileName);
+		pageLayout = generator.pageLayout();
 
-		ReportLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "ArchiveExportPageLayout");
+		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "ArchiveExportPageLayout");
 		return;
 	}
 
@@ -641,13 +632,14 @@ void ArchiveWidget::printButton()
 						   QMarginsF(10, 10, 10, 10),
 						   QPageLayout::Unit::Millimeter);
 
-	pageLayout = ReportLib::TableExportPrint::loadPageLayoutFromSettings("ArchivePrintPageLayout", pageLayout);
+	pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("ArchivePrintPageLayout", pageLayout);
 
-	ArchiveExportPrint ep(&m_source, m_projectName, m_softwareId, this, *m_view, *m_model, pageLayout);
-	ep.printTable();
-	pageLayout = ep.pageLayout();
+	ArchiveReportInfo ri(&m_source, m_projectName, m_softwareId);
+	ReportLib::TableViewReportGenerator generator(this, *m_view, ri, pageLayout);
+	generator.printTable();
+	pageLayout = generator.pageLayout();
 
-	ReportLib::TableExportPrint::savePageLayoutToSettings(pageLayout, "ArchivePrintPageLayout");
+	ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "ArchivePrintPageLayout");
 
 	return;
 }

@@ -1,19 +1,17 @@
 #pragma once
 
-#include "Report.h"
+#include <ReportLib/Report.h>
+#include <ReportLib/ReportObject.h>
+#include <ReportLib/ReportPrinter.h>
 
-class QBuffer;
-class QPdfWriter;
-class QPainter;
-
-#include <QMutex>
-#include <QPrinterInfo>
-#include <QTextDocument>
-#include <QTextCursor>
+class QPrinter;
+class QPagedPaintDevice;
+class QPageLayout;
 
 namespace ReportLib
 {
 	class ReportPrinter;
+	class ReportSchemaView;
 
 	class PrintObject
 	{
@@ -32,7 +30,7 @@ namespace ReportLib
 		Type type() const {return m_type;}
 
 		virtual void print(Report& report,
-						   ReportPrinter& printer,
+						   ReportPrinterPrivate& printer,
 						   QPagedPaintDevice& pdfWriter,
 						   QPainter& painter,
 						   int& pageIndex,
@@ -60,7 +58,7 @@ namespace ReportLib
 		virtual QRect contentRect() const override;
 
 		virtual void print(Report& report,
-						   ReportPrinter& printer,
+						   ReportPrinterPrivate& printer,
 						   QPagedPaintDevice& pdfWriter,
 						   QPainter& painter,
 						   int& pageIndex,
@@ -87,7 +85,7 @@ namespace ReportLib
 		virtual QRect contentRect() const override;
 
 		virtual void print(Report& report,
-						   ReportPrinter& printer,
+						   ReportPrinterPrivate& printer,
 						   QPagedPaintDevice& pdfWriter,
 						   QPainter& painter,
 						   int& pageIndex,
@@ -105,68 +103,15 @@ namespace ReportLib
 	};
 
 	//
-	// RenderedSection
-	//
-	struct RenderedSection
-	{
-		RenderedSection(std::shared_ptr<ReportSection> section):
-			m_section(section)
-		{
-		}
-
-		int pagesCount() const
-		{
-			int result = 0;
-			for (const std::shared_ptr<PrintObject>& po : m_printObjects)
-			{
-				result += po->pageCount();
-			}
-			return result;
-		}
-
-		// ReportSection access
-		//
-		std::shared_ptr<ReportSection>& section()
-		{
-			return m_section;
-		}
-		const std::shared_ptr<ReportSection>& section() const
-		{
-			return m_section;
-		}
-
-		// Data access
-		//
-		const QPageLayout& pageLayout() const
-		{
-			return m_section->pageLayout();
-		}
-
-		// Rendered objects access
-		//
-		std::vector<std::shared_ptr<PrintObject>>& printObjects()
-		{
-			return m_printObjects;
-		}
-		const std::vector<std::shared_ptr<PrintObject>>& printObjects() const
-		{
-			return m_printObjects;
-		}
-
-	private:
-		std::shared_ptr<ReportSection> m_section;
-		std::vector<std::shared_ptr<PrintObject>> m_printObjects;
-	};
-
-	//
 	// ReportPrinter
 	//
 
-	class ReportPrinter : public QObject
+	class ReportPrinterPrivate// : public QObject
 	{
 	public:
-		ReportPrinter() = default;	// Call this constructor if you do not need to print schemas
-		ReportPrinter(std::shared_ptr<ReportSchemaView> reportSchemaView); // Call this constructor if your report contains schemas
+		ReportPrinterPrivate() = default;	// Call this constructor if you do not need to print schemas
+		ReportPrinterPrivate(std::shared_ptr<ReportSchemaView> reportSchemaView); // Call this constructor if your report contains schemas
+		~ReportPrinterPrivate();
 
 		bool preview(const Report& report, std::vector<RenderedSection>& renderedSections, std::atomic_bool& stop);
 
@@ -177,12 +122,14 @@ namespace ReportLib
 
 		Statistics statistics() const;
 
-		void printMarginItems(const Report& report, QPagedPaintDevice& pdfWriter,
-							  QPainter& painter,
-							  const QString& tag) const;
+		void printMarginItems(const Report& report, QPagedPaintDevice& pdfWriter, QPainter& painter, const QString& tag) const;
 
 	private:
-		[[nodiscard]] bool createRenderedSections(const Report& report, std::vector<RenderedSection>& renderedSections, Statistics::Status status, std::atomic_bool& stop);
+
+		[[nodiscard]] bool createRenderedSections(const Report& report,
+												  std::vector<RenderedSection>& renderedSections,
+												  Statistics::Status status,
+												  std::atomic_bool& stop);
 		[[nodiscard]] bool saveRenderedSections(Report& report, const std::vector<RenderedSection>& renderedSections, QBuffer& buffer, std::atomic_bool& stop);
 		[[nodiscard]] bool printRenderedSections(Report& report,
 												 const std::vector<RenderedSection>& renderedSections,

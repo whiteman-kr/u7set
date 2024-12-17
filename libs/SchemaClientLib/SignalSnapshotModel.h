@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../ReportLib/TableExportPrint.h"
-
 class IAppSignalManager;
 
 namespace ClientLib
@@ -100,7 +98,7 @@ namespace SchemaClientLib
 	//
 	// SnapshotItemModel
 	//
-	class SignalSnapshotModel : public ReportLib::TableExportPrintModel
+	class SignalSnapshotModel : public QAbstractTableModel
 	{
 		friend class SignalSnapshotSorter;
 

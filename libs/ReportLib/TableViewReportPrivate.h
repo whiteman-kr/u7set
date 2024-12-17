@@ -1,26 +1,19 @@
 #pragma once
 
-#include "ReportPrinter.h"
+#include <ReportLib/ReportPrinter.h>
 
 namespace ReportLib
 {
+	class Report;
 	class ReportSection;
-}
+	class ITableViewReportInfo;
 
-namespace ReportLib
-{
-	class ITableExportPrint
-	{
-	public:
-		virtual void generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) = 0;
-	};
-
-	class TableExportPrintModel : public QAbstractTableModel
+	class TableViewReportDataProvider : public QObject
 	{
 		Q_OBJECT
 
 	public:
-		TableExportPrintModel(QObject* parent = nullptr);
+		explicit TableViewReportDataProvider(QAbstractItemModel& tableModel);
 
 	signals:
 		void signalRowCount(int& rowCount) const;
@@ -33,17 +26,20 @@ namespace ReportLib
 		int exportColumnCount() const;
 		QStringList exportColumnsText() const;
 		QStringList exportRowsText(int row) const;
-	};
 
-	class TableExportPrintPrivateWorker : public QObject
+	private:
+		const QAbstractItemModel& m_tableModel;
+	};
+	
+	class TableViewReportWorker : public QObject
 	{
 		Q_OBJECT
 	public:
-		TableExportPrintPrivateWorker(ITableExportPrint& exportPrintInterface,
-									  const TableExportPrintModel& model,
-									  const std::vector<int>& visibleColumns,
-									  const std::vector<int>& columnWidths,
-									  const std::vector<int>& selectedRows);
+		TableViewReportWorker(const ITableViewReportInfo& reportInfo,
+							  const QTableView& table,
+							  const std::vector<int>& visibleColumns,
+							  const std::vector<int>& columnWidths,
+							  const std::vector<int>& selectedRows);
 
 		void setFileName(const QString& fileName);
 		void setPrinterInfo(const QPrinterInfo& printerInfo);
@@ -68,8 +64,8 @@ namespace ReportLib
 		void generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection);
 
 	private:
-		bool createReport(const TableExportPrintModel& model, const QString& fileName, QString& errorMsg);
-		bool createText(const TableExportPrintModel& model, const QString& fileName, const QChar& separator, QString& errorMsg);
+		bool createReport(const QString& fileName, QString& errorMsg);
+		bool createText(const QString& fileName, const QChar& separator, QString& errorMsg);
 
 	public:
 		static const int m_maxReportStatesForPrint = 1000;
@@ -78,9 +74,9 @@ namespace ReportLib
 	private:
 		// Export sources
 		//
-		ITableExportPrint& m_exportPrintInterface;
-		const TableExportPrintModel& m_model;
-		std::unique_ptr<ReportLib::ReportPrinter> m_printer;
+		const ITableViewReportInfo& m_reportInfo;
+		TableViewReportDataProvider m_modelDataProvider;
+		ReportPrinter m_printer;
 
 
 		// Export parameters
@@ -112,18 +108,19 @@ namespace ReportLib
 	};
 
 	//
-	// ExportPrintPrivate
+	// TableViewReportPrivate
 	//
-	class TableExportPrintPrivate
+	class TableViewReportPrivate: public QObject
 	{
 	public:
-		TableExportPrintPrivate(ITableExportPrint& exportPrintInterface,
-								QWidget* parent,
-								const TableExportPrintModel& model,
-								const std::vector<int>& visibleColumns,
-								const std::vector<int>& columnWidths,
-								const std::vector<int>& selectedRows,
-								const QPageLayout& pageLayout);
+		TableViewReportPrivate(QWidget* parent,
+							   const ITableViewReportInfo& reportInfo,
+							   const QTableView& table,
+							   const std::vector<int>& visibleColumns,
+							   const std::vector<int>& columnWidths,
+							   const std::vector<int>& selectedRows,
+							   const QPageLayout& pageLayout);
+		~TableViewReportPrivate() = default;
 
 		void printTable();
 		void exportTable(const QString& fileName);
@@ -144,35 +141,8 @@ namespace ReportLib
 	private:
 		QWidget* m_parent = nullptr;
 		QPageLayout m_pageLayout;
-		const TableExportPrintModel& m_model;
-		TableExportPrintPrivateWorker* m_worker = nullptr;
+		const QTableView& m_table;
+		TableViewReportWorker* m_worker = nullptr;
 		std::vector<int> m_selectedRows;
-	};
-
-	class TableExportPrint : public QObject,
-							 public ITableExportPrint
-	{
-		Q_OBJECT
-	public:
-		TableExportPrint(QWidget* parent, const QTableView& table, const TableExportPrintModel& model, const QPageLayout& pageLayout);
-		virtual ~TableExportPrint();
-
-		void printTable();
-		void exportTable(const QString& fileName);
-
-		const QPageLayout& pageLayout() const;
-		void setPageLayout(const QPageLayout& layout);
-
-		static void savePageLayoutToSettings(const QPageLayout& pageLayout, const QString& groupName);
-		static QPageLayout loadPageLayoutFromSettings(const QString& groupName, const QPageLayout& defaultPageLayout);
-
-	public slots:
-		void stop();
-
-	protected:
-		virtual void generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) override;
-
-	private:
-		std::unique_ptr<TableExportPrintPrivate> m_impl;
 	};
 } // namespace ReportLib

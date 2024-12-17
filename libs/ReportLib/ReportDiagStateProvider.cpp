@@ -1,4 +1,4 @@
-#include "ReportDiagStateProvider.h"
+#include <ReportLib/ReportDiagStateProvider.h>
 
 namespace ReportLib
 {

@@ -1,15 +1,22 @@
-#include "ReportGenerator.h"
-#include "ReportTemplate.h"
+#include "TaggedReportPrivate.h"
+#include "ReportPrinterPrivate.h"
+#include <ReportLib/ReportPrinter.h>
+#include <ReportLib/Report.h>
+#include <ReportLib/ReportTemplate.h>
+#include <ReportLib/TaggedReportGenerator.h>
 
 namespace ReportLib
 {
-	ReportGenerator::ReportGenerator(const ReportTemplate& reportTemplate) :
-		m_template(reportTemplate)
+	TaggedReportPrivate::TaggedReportPrivate(QObject* parent,
+											 const ReportTemplate& reportTemplate,
+											 const ITaggedReportDataProvider& reportDataProvider) :
+		QObject(parent),
+		m_template(reportTemplate),
+		m_reportDataProvider(reportDataProvider)
 	{
-
 	}
 
-	bool ReportGenerator::generate(QBuffer& buffer, std::atomic_bool& stop)
+	bool TaggedReportPrivate::generate(QBuffer& buffer, std::atomic_bool& stop)
 	{
 		Report report{"ProjectName", m_template.caption()};
 		report.setResolution(m_template.resolution());
@@ -39,8 +46,8 @@ namespace ReportLib
 
 		bool firstSection = true;
 
-        const std::vector<SectionTemplate>& sections = m_template.sections();
-        for (const SectionTemplate& section : sections)
+		const std::vector<SectionTemplate>& sections = m_template.sections();
+		for (const SectionTemplate& section : sections)
 		{
 			if (rs == nullptr || firstSection == false)
 			{
@@ -75,14 +82,13 @@ namespace ReportLib
 		return m_printer.save(report, buffer, stop);
 	}
 
-	Statistics ReportGenerator::statistics() const
+	Statistics TaggedReportPrivate::statistics() const
 	{
 		return m_printer.statistics();
 	}
 
-	bool ReportGenerator::generateSection(ReportSection& section, const SectionTemplate& sectionTemplate)
+	bool TaggedReportPrivate::generateSection(ReportSection& section, const SectionTemplate& sectionTemplate)
 	{
-		
 		static QString firstTag = "$FIRST(";
 		static QString lastTag = "$LAST(";
 		static QString nextTag = "$NEXT(";
@@ -109,9 +115,9 @@ namespace ReportLib
 						QString tagValue = tag;
 						tagValue = tagValue.remove(0, firstTag.length());
 						tagValue.chop(1);
-						
+
 						bool ok = false;
-						QString s = text(tagValue, &ok);
+						QString s = m_reportDataProvider.text(tagValue, &ok);
 						if (ok == true)
 						{
 							section.addText(s + "\n", t->format());
@@ -132,7 +138,7 @@ namespace ReportLib
 							QString s;
 							do
 							{
-								QString tx = text(tagValue, &ok);
+								QString tx = m_reportDataProvider.text(tagValue, &ok);
 								if (ok == true)
 								{
 									s = tx;
@@ -154,7 +160,7 @@ namespace ReportLib
 								bool ok = false;
 								do
 								{
-									QString s = text(t->tag(), &ok);
+									QString s = m_reportDataProvider.text(t->tag(), &ok);
 									if (ok == true)
 									{
 										section.addText(s + "\n", t->format());
@@ -184,7 +190,7 @@ namespace ReportLib
 				bool ok = false;
 				do
 				{
-					QString s = text(t->tag(), &ok);
+					QString s = m_reportDataProvider.text(t->tag(), &ok);
 					if (ok == true)
 					{
 						QStringList l;
@@ -198,7 +204,7 @@ namespace ReportLib
 						}
 						table->insertRow(l);
 					}
-				}while (ok == true);
+				} while (ok == true);
 			}
 		}
 
@@ -206,10 +212,10 @@ namespace ReportLib
 			// Place all text with $NEXT(Tag) tag
 			//
 			QString tag;
-			int itemsCount = count();
-			for (int i = 0; i < itemsCount; i++) 
+			int itemsCount = m_reportDataProvider.count();
+			for (int i = 0; i < itemsCount; i++)
 			{
-				QString msg = text(i, &tag);
+				QString msg = m_reportDataProvider.text(i, &tag);
 
 				QString templateTag = QObject::tr("%1%2)").arg(nextTag).arg(tag);
 
@@ -236,5 +242,4 @@ namespace ReportLib
 
 		return true;
 	}
-}
-
+} // namespace ReportLib

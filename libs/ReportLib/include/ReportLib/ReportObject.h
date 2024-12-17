@@ -1,56 +1,30 @@
 #pragma once
 
-#include "ReportSchemaView.h"
-
-#include <VFrame30/IViewVariables.h>
-
 #include <QFont>
-#include <QUuid>
+#include <QPageLayout>
 
 class QTextCursor;
 class QMutex;
 
+namespace VFrame30
+{
+	class Schema;
+}
+
 namespace ReportLib
 {
 	class ReportSection;
+	struct Statistics;
 
-	struct Statistics
-	{
-		enum Status
-		{
-			None,
-			Preview,
-			Rendering,
-			Saving,
-			Printing
-		};
-
-		int sectionCount = 0;
-		int sectionIndex = 0;
-
-		int pagesCount = 0; // Calculated after text rendering
-		int pageIndex = 0;
-
-		Status status{None};
-
-		void fill(int* progress, int* progressMin, int* progressMax, QString* progressText) const;
-	};
-	
 	struct ReportFont
 	{
 		QString family;
 		int pointSize{0};
 		QFont::Weight weight{QFont::Normal};
 
-		operator QFont() const
-		{
-			return QFont{family, pointSize, weight};
-		}
+		operator QFont() const { return QFont{family, pointSize, weight}; }
 
-		QFont operator()(double scaling) const
-		{
-			return QFont{family, static_cast<int>(pointSize * scaling), weight};
-		}
+		QFont operator()(double scaling) const { return QFont{family, static_cast<int>(pointSize * scaling), weight}; }
 	};
 
 	//
@@ -77,16 +51,13 @@ namespace ReportLib
 		struct ColumnFormat
 		{
 			QString caption;
-			int width{30};                          // column width in percent
+			int width{30}; // column width in percent
 			Qt::Alignment alignment{Qt::AlignLeft};
 		};
 
 		TableFormat() = default;
 
-		TableFormat(const ReportFont& font,
-					const QStringList& headerLabels,
-					const std::vector<int> columnWidths,
-					Qt::Alignment alignment);
+		TableFormat(const ReportFont& font, const QStringList& headerLabels, const std::vector<int> columnWidths, Qt::Alignment alignment);
 
 		TableFormat(const ReportFont& font, const std::vector<ColumnFormat>& columnsFormat);
 
@@ -103,33 +74,13 @@ namespace ReportLib
 	};
 
 	//
-	// ReportVariables
-	//
-	class ReportVariables : public VFrame30::IViewVariables
-	{
-	public:
-		// IViewVariables implementation
-		//
-		[[nodiscard]] QStringList viewVariables() const override;
-		[[nodiscard]] bool viewVariableExists(const QString& name) const override;
-		[[nodiscard]] QVariant viewVariable(const QString& name) const override;
-		void setViewVariable(const QString& name, const QVariant& value) override;
-
-		//
-		void setVariables(const std::map<QString, QString>& variables);
-
-	private:
-		std::map<QString, QString> m_variables;
-	};
-
-	//
 	// ReportMarginItem
 	//
 
 	struct ReportMarginItem
 	{
 		ReportMarginItem() = default;
-		ReportMarginItem(const QString& text, int pageFrom, int pageTo, const TextFormat &format);
+		ReportMarginItem(const QString& text, int pageFrom, int pageTo, const TextFormat& format);
 
 		QString text;
 
@@ -141,9 +92,8 @@ namespace ReportLib
 
 	class ReportTagStorage
 	{
-
 	public:
-		ReportTagStorage(const std::map<QString, std::shared_ptr<ReportSection> >& allSections);
+		ReportTagStorage(const std::map<QString, std::shared_ptr<ReportSection>>& allSections);
 
 		QString processTags(const QString& str) const;
 
@@ -183,6 +133,18 @@ namespace ReportLib
 
 	protected:
 		Type m_type;
+	};
+
+	//
+	// ReportSchemaCompareAction
+	//
+
+	enum class ReportSchemaCompareAction
+	{
+		Unmodified,
+		Modified,
+		Added,
+		Deleted
 	};
 
 	//
@@ -256,7 +218,7 @@ namespace ReportLib
 	private:
 		TableFormat m_format;
 		std::vector<QStringList> m_rows;
-		bool m_htmlEscaped = true;	// If set to false, HTML signs (<>) are NOT replaced automatically, User is responsible for that
+		bool m_htmlEscaped = true; // If set to false, HTML signs (<>) are NOT replaced automatically, User is responsible for that
 	};
 
 	//
@@ -266,7 +228,7 @@ namespace ReportLib
 	class ReportText : public ReportObject
 	{
 	public:
-		static std::shared_ptr<ReportText> create(const QString& text, const TextFormat &format);
+		static std::shared_ptr<ReportText> create(const QString& text, const TextFormat& format);
 		ReportText(const QString& text, const TextFormat& format);
 
 		void renderText(QTextCursor& cursor,
@@ -280,4 +242,57 @@ namespace ReportLib
 		TextFormat m_format;
 		QString m_text;
 	};
-}
+
+	//
+	// ReportSection
+	//
+
+	class ReportSection
+	{
+	public:
+		static std::shared_ptr<ReportSection> create(const QString& caption, const QPageLayout& pageLayout);
+
+		explicit ReportSection(const QString& caption);
+		virtual ~ReportSection();
+
+		const QString& caption() const;
+		void setCaption(const QString& value);
+
+		const QString& tag() const;
+		void setTag(const QString& value);
+
+		const QPageLayout& pageLayout() const;
+		void setPageLayout(const QPageLayout& value);
+
+		int startPage() const;
+		void setStartPage(int page);
+
+		// Add object functions
+		//
+		std::shared_ptr<ReportText> addText(const QString& text, const TextFormat& format);
+		std::shared_ptr<ReportText> addText(std::shared_ptr<ReportText> object);
+
+		std::shared_ptr<ReportTable> addTable(const TableFormat& format);
+		std::shared_ptr<ReportTable> addTable(std::shared_ptr<ReportTable> object);
+
+		std::shared_ptr<ReportSchema> addSchema(std::shared_ptr<ReportSchema> object);
+
+		void addObject(std::shared_ptr<ReportObject> object);
+
+		// Object access functions
+		//
+		size_t objectCount() const;
+		std::shared_ptr<ReportObject> object(size_t index);
+
+	private:
+		QString m_caption;
+		QString m_tag; // Text printed in margin with %TAG% text
+		int m_startPage = 0;
+		QPageLayout m_pageLayout = QPageLayout(QPageSize(QPageSize::A4),
+											   QPageLayout::Orientation::Portrait,
+											   QMarginsF(30, 20, 15, 20),
+											   QPageLayout::Unit::Millimeter);
+		std::vector<std::shared_ptr<ReportObject>> m_objects;
+	};
+
+} // namespace ReportLib
