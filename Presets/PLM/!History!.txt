@@ -1,0 +1,4 @@
+PLM
+	18.10.2024	Version: 0	PLM_v0.u7devp 			CMCASETASK-592:  Start developing of PLM
+	05.11.2024	Version: 1	PLM_v1.u7devp 			CMCASETASK-592:  Added PLM working version
+
