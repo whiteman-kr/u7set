@@ -165,7 +165,6 @@ add_subdirectory(TuningService)
 add_subdirectory(GatewayService)
 add_subdirectory(DiagDataService)
 
-add_subdirectory(TestSuiteLib)
 add_subdirectory(TestSuiteConsole)
 
 # Do not compile these projects if code coverage is on.
@@ -183,11 +182,7 @@ if(NOT CODE_COVERAGE)
 	add_subdirectory(Metrology)
 endif()
 
-add_subdirectory(./Test/ClientTests)
-add_subdirectory(./Test/SimulatorTests)
-add_subdirectory(./Test/u7databaseTests)
-add_subdirectory(./Test/MetrologyTests)
-#add_subdirectory(./Test/TestSuiteTest)
+add_subdirectory(Tests)
 
 if (BUILD_LICENSER)
 	add_subdirectory(./Tools/Licenser)

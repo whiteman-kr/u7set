@@ -1,9 +1,6 @@
 #pragma once
 
-#include <ClientLib/TuningUserManager.h>
-
-#include "../TestSuiteLib/TestSuiteSettings.h"
-#include "../TestSuiteLib/TestSuite.h"
+#include <TestSuiteLib/TestSuiteSettings.h>
 
 //
 // AppConfigSettings
@@ -59,7 +56,6 @@ public:
 	QString localScriptsPath() const;
 
 private:
-
 	// Local settings
 	//
 	QString m_localAppDataPath;

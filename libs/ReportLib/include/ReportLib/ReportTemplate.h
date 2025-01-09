@@ -1,7 +1,10 @@
 #pragma once
 
-#include <QPageLayout>
 #include <ReportLib/ReportObject.h>
+
+#include <QPageLayout>
+#include <QXmlStreamReader>
+
 
 namespace ReportLib
 {
