@@ -1,8 +1,10 @@
-#include "../TestSuiteLib/TestSuite.h"
-#include "../TestSuiteLib/TestSuiteSettings.h"
 #include "../UtilsLib/LogFile.h"
-#include <google/protobuf/message_lite.h>
 #include "version.h"
+#include <CommonLib/ConstStrings.h>
+#include <TestSuiteLib/MatsTestSuite.h>
+#include <TestSuiteLib/TestLog.h>
+#include <TestSuiteLib/TestSuiteSettings.h>
+#include <google/protobuf/message_lite.h>
 
 #include <QGuiApplication>
 #include <QStandardPaths>
@@ -22,7 +24,8 @@ void showVersion()
 	QStringList res;
 
 
-	res << QString(" %1 v%2.%3.%4 (%5)").arg("TestSuiteConsole")
+	res << QString(" %1 v%2.%3.%4 (%5)")
+			   .arg("TestSuiteConsole")
 			   .arg(si.majorVersion())
 			   .arg(si.minorVersion())
 			   .arg(si.patchVersion())
@@ -40,7 +43,7 @@ void showVersion()
 	res << QString(" Build hostname: %1").arg(si.buildHostname());
 	res << QString(" Pipeline ID:    %1").arg(si.pipelineID());
 
-	for (const QString& str : res) 
+	for (const QString& str : res)
 	{
 		std::cout << str.toStdString() << std::endl;
 	}
@@ -55,22 +58,35 @@ void showHelp()
 	std::cout << "TestSuiteConsole is a command-line tool that performs hardware testing of RPCT projects." << std::endl;
 	std::cout << std::endl << "Command line parameters:" << std::endl;
 #ifdef Q_OS_WINDOWS
-	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-reports_path=<ReportsPath>] [-tests_filter=<TestsFilter>] [-test_log=<filename>|default] [-cp=NNNN] [-nosecurity] - run build task with settings taken from <FileName.xml> file." << std::endl;
+	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-reports_path=<ReportsPath>] "
+				 "[-tests_filter=<TestsFilter>] [-test_log=<filename>|default] [-cp=NNNN] [-nosecurity] - run build task with settings "
+				 "taken from <FileName.xml> file."
+			  << std::endl;
 #else
-	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-reports_path=<ReportsPath>] [-tests_filter=<TestsFilter>] [-test_log=<filename>|default]  [-nosecurity] - run build task with settings taken from <FileName.xml> file." << std::endl;
+	std::cout << "\tTestSuiteConsole -settings=<FileName.xml> [-scripts_path=<ScriptsPath>] [-reports_path=<ReportsPath>] "
+				 "[-tests_filter=<TestsFilter>] [-test_log=<filename>|default]  [-nosecurity] - run build task with settings taken from "
+				 "<FileName.xml> file."
+			  << std::endl;
 #endif
 	std::cout << "\t\t\tOptional -scripts_path parameter specifies a directory where test scripts are stored." << std::endl;
-	std::cout << "\t\t\tOptional -tests_filter parameter specifies a filter for running tests. Filter contains test function name" << std::endl;
-	std::cout << "\t\t\twith wildcards (\'*\' and \'?\' symbols). If filters starts from '-' symbol, specified tests are excluded." << std::endl;
+	std::cout << "\t\t\tOptional -tests_filter parameter specifies a filter for running tests. Filter contains test function name"
+			  << std::endl;
+	std::cout << "\t\t\twith wildcards (\'*\' and \'?\' symbols). If filters starts from '-' symbol, specified tests are excluded."
+			  << std::endl;
 	std::cout << "\t\t\tSeveral filters can be separated by a semicolon." << std::endl;
-	std::cout << "\t\t\tOptional -test_log parameter specifies the file name to store test log(for example, TestLog.tsl or default)." << std::endl;
+	std::cout << "\t\t\tOptional -test_log parameter specifies the file name to store test log(for example, TestLog.tsl or default)."
+			  << std::endl;
 	std::cout << "\t\t\tIf default specified, log is saved to a file named TestLog_<ddmmyyyy_hhmmss>.tsl." << std::endl;
-	std::cout << "\t\t\tOptional -reports_path parameter specifies the path to store generated reports(for example, TestReports or default)." << std::endl;
+	std::cout
+		<< "\t\t\tOptional -reports_path parameter specifies the path to store generated reports(for example, TestReports or default)."
+		<< std::endl;
 	std::cout << "\t\t\tIf default specified, log is saved to a folder named TestReport_<ddmmyyyy_hhmmss>." << std::endl;
 #ifdef Q_OS_WINDOWS
 	std::cout << "\t\t\tOptional -cp parameter specifies the codepage (for example, 1251)." << std::endl;
 #endif
-	std::cout << "\t\t\tOptional -nosecurity parameter disables requesting username and password if test security control is disabled in the project." << std::endl;
+	std::cout << "\t\t\tOptional -nosecurity parameter disables requesting username and password if test security control is disabled in "
+				 "the project."
+			  << std::endl;
 	std::cout << "or" << std::endl;
 	std::cout << "\tTestSuiteConsole [-create=<FileName.xml>] - create settings template in <FileName.xml> file." << std::endl;
 	std::cout << std::endl;
@@ -125,16 +141,17 @@ void showHelp()
 class ProtobufLibShutdowner
 {
 public:
-	~ProtobufLibShutdowner()
-	{
-		google::protobuf::ShutdownProtobufLibrary();
-	}
+	~ProtobufLibShutdowner() { google::protobuf::ShutdownProtobufLibrary(); }
 };
 
 class ConsoleLogFile : public Log::LogFile
 {
 public:
-	ConsoleLogFile(const QString& logName, const QString& path, int maxFileSize = 1048576, int maxFilesCount = 64, bool addAppInfoOnStart = true) :
+	ConsoleLogFile(const QString& logName,
+				   const QString& path,
+				   int maxFileSize = 1048576,
+				   int maxFilesCount = 64,
+				   bool addAppInfoOnStart = true) :
 		Log::LogFile(logName, path, maxFileSize, maxFilesCount, addAppInfoOnStart)
 	{
 	}
@@ -174,7 +191,7 @@ class ConsoleTestLog : public TestSuite::ITestLogOutput
 public:
 	virtual void logItemArrived(const TestSuite::TestLogItem& item) override
 	{
-		switch(item.type())
+		switch (item.type())
 		{
 		case TestSuite::TestLogItemType::Error:
 			{
@@ -314,19 +331,16 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	QGuiApplication app(argc,argv);
-	//QCoreApplication app(argc, argv);
+	QGuiApplication app(argc, argv);
+	// QCoreApplication app(argc, argv);
 
 	app.setApplicationName("TestSuite");
 	app.setOrganizationName(Manufacturer::RADIY);
 	app.setOrganizationDomain(Manufacturer::SITE);
 
 
-	app.setApplicationVersion(QString("%1.%2.%3 (%4)")
-								  .arg(U7SET_MAJOR_VERSION)
-								  .arg(U7SET_MINOR_VERSION)
-								  .arg(U7SET_PATCH_VERSION)
-								  .arg(U7SET_BRANCH_NAME));
+	app.setApplicationVersion(
+		QString("%1.%2.%3 (%4)").arg(U7SET_MAJOR_VERSION).arg(U7SET_MINOR_VERSION).arg(U7SET_PATCH_VERSION).arg(U7SET_BRANCH_NAME));
 
 	// Parse command line arguments
 	//
@@ -389,15 +403,6 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	// --
-	//
-	ConsoleLogFile appLog{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + settings.instanceStrId()};
-	ConsoleTestLog testLog;
-
-	SoftwareInfo softwareInfo(E::SoftwareType::TestSuite, settings.instanceStrId());
-
-	TestSuite::TestSuite testSuite{softwareInfo, settings, &appLog, &testLog};
-
 	// Ask for password
 	//
 	std::string userName;
@@ -411,7 +416,7 @@ int main(int argc, char* argv[])
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			std::cout << "Enter test user name: ";
+			std::cout << "Enter test user name: " << std::flush;
 			std::getline(std::cin, userName);
 			if (userName.empty() == false)
 			{
@@ -432,37 +437,76 @@ int main(int argc, char* argv[])
 		std::getline(std::cin, password);
 	}
 
+	// --
+	//
+	SoftwareInfo softwareInfo(E::SoftwareType::TestSuite, settings.instanceStrId());
+	ConsoleLogFile appLog{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + settings.instanceStrId()};
+	ConsoleTestLog testLogOutput;
+
+	TestSuite::TestSuiteConfigController configController(softwareInfo,
+														  settings.configuratorAddress1(),
+														  settings.configuratorAddress2(),
+														  &appLog);
+
+	TestSuite::MatsTestSuite testSuite{configController, &appLog, &testLogOutput};
+
+	configController.start();
+
 	// Run tests.
 	//
 	TestSuite::TestScriptSelection filter(args.testsFilter);
+	std::unique_ptr<TestSuite::TestScriptsStorage> scriptProvider;
 
-	TestSuite::ControlParams controlParams{
-		{},
-		args.scriptsPath,
-		args.reportsPath,
-		filter,
-		QString::fromStdString(userName),
-		QString::fromStdString(password)};
+	TestSuite::ControlParams controlParams{{},
+										   args.reportsPath,
+										   filter,
+										   QString::fromStdString(userName),
+										   QString::fromStdString(password)};
 
-	ok = testSuite.execute(controlParams);
+	if (args.scriptsPath.isEmpty() == true)
+	{
+		// Load scripts from CfgService.
+		//
+		ok = testSuite.execute(controlParams);
+	}
+	else
+	{
+		// Load scripts from disk.
+		//
+		QString loadError;
+
+		scriptProvider = std::make_unique<TestSuite::TestScriptsStorage>();
+		bool loadResult = scriptProvider->loadFromPath(args.scriptsPath, &loadError);
+
+		if (loadResult == false)
+		{
+			appLog.writeError(QObject::tr("Error loading scripts from the path: %1, error: ").arg(args.scriptsPath).arg(loadError));
+			return EXIT_FAILURE;
+		}
+
+		ok = testSuite.execute(*scriptProvider, controlParams);
+	}
+
 	if (ok == false)
 	{
 		return EXIT_FAILURE;
 	}
 
-	QObject::connect(&testSuite, &TestSuite::TestSuite::finished, [&args, &testSuite, &appLog](int)
-	{
-		// Save test log to the file
-		//
-		if (args.testLogFileName.isEmpty() == false)
-		{
-			saveTestLog(args.testLogFileName, testSuite.testLog(), appLog);
-		}
+	QObject::connect(&testSuite,
+					 &TestSuite::MatsTestSuite::finished,
+					 [&args, &testSuite, &appLog](int result)
+					 {
+						 // Save test log to the file
+						 //
+						 if (args.testLogFileName.isEmpty() == false)
+						 {
+							 saveTestLog(args.testLogFileName, testSuite.testLog(), appLog);
+						 }
 
-		// Exit the application
-		//
-		QCoreApplication::exit();
-	});
+						 // Exit the application
+						 //
+						 QCoreApplication::exit(result);
+					 });
 
 	return app.exec();
 }

@@ -14,6 +14,8 @@ namespace ReportLib
 	class ITaggedReportDataProvider
 	{
 	public:
+		virtual ~ITaggedReportDataProvider() = default;
+
 		virtual int count() const = 0;
 		virtual int count(const QString& tag) const = 0;
 

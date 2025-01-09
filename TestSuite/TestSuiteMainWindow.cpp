@@ -1,13 +1,10 @@
-#include <QStandardPaths>
-#include <QFileDialog>
-#include <QCloseEvent>
-
-#include <ClientLib/ClientTranslator.h>
-#include <ClientLib/TuningUserManager.h>
-#include <UiLib/DialogAbout.h>
-#include <UiLib/TabWidgetEx.h>
 #include "../OnlineLib/TcpClientStatistics.h"
 #include "../UtilsLib/Ui/UiTools.h"
+#include <ClientLib/ClientTranslator.h>
+#include <ClientLib/TuningUserManager.h>
+#include <TestSuiteLib/TestReport.h>
+#include <UiLib/DialogAbout.h>
+#include <UiLib/TabWidgetEx.h>
 
 #include "AppConfigSettings.h"
 #include "DialogDataSources.h"
@@ -17,13 +14,21 @@
 #include "TestSuiteMainWindow.h"
 #include "TestViewTabPage.h"
 
-TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
-	: QMainWindow(parent),
-	m_appLog(qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + AppConfigSettings().instance().librarySettings().instanceStrId()),
-	m_configController(softwareInfo, 
-		AppConfigSettings().instance().librarySettings().configuratorAddress1(), 
-		AppConfigSettings().instance().librarySettings().configuratorAddress2(), &m_appLog),
-	m_testSuite(softwareInfo, AppConfigSettings().instance().librarySettings(), &m_appLog, &m_testLogOutput),
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <QStandardPaths>
+
+
+TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
+	QMainWindow(parent),
+	m_appLog(qAppName(),
+			 QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' +
+				 AppConfigSettings().instance().librarySettings().instanceStrId()),
+	m_configController(softwareInfo,
+					   AppConfigSettings().instance().librarySettings().configuratorAddress1(),
+					   AppConfigSettings().instance().librarySettings().configuratorAddress2(),
+					   &m_appLog),
+	m_testSuite(m_configController, &m_appLog, &m_testLogOutput),
 	m_dialogAlert(this)
 
 {
@@ -81,7 +86,7 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 
 	m_testLogTabPage = new TestLogTabPage(m_testSuite.testLog(), m_testLogOutput, this);
 	m_tabWidget->addTab(m_testLogTabPage, tr("Test Log"));
-	m_tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0);	// This tab is not closable
+	m_tabWidget->tabBar()->setTabButton(0, QTabBar::RightSide, 0); // This tab is not closable
 
 	m_testLogOutput.setHtmlFont("Verdana");
 
@@ -94,15 +99,18 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 	createMenu();
 	createStatusBar();
 
-	connect(&m_configController, &TestSuite::TestSuiteConfigController::configurationArrived, this, &TestSuiteMainWindow::onConfigurationArrived);
-	connect(&m_testSuite, &TestSuite::TestSuite::testStarted, m_testListWidget, &TestListWidget::onTestStarted);
-	connect(&m_testSuite, &TestSuite::TestSuite::testFinished, m_testListWidget, &TestListWidget::onTestFinished);
-	connect(&m_testSuite, &TestSuite::TestSuite::finished, this, &TestSuiteMainWindow::onTestingFinished);
-	connect(&m_testSuite, &TestSuite::TestSuite::globalPermissionChanged, this, &TestSuiteMainWindow::onGlobalPermissionChanged);
-	connect(&m_testSuite, &TestSuite::TestSuite::scriptPermissionChanged, this, &TestSuiteMainWindow::onScriptPermissionChanged);
+	connect(&m_configController,
+			&TestSuite::TestSuiteConfigController::configurationArrived,
+			this,
+			&TestSuiteMainWindow::onConfigurationArrived);
+	connect(&m_testSuite, &TestSuite::MatsTestSuite::testStarted, m_testListWidget, &TestListWidget::onTestStarted);
+	connect(&m_testSuite, &TestSuite::MatsTestSuite::testFinished, m_testListWidget, &TestListWidget::onTestFinished);
+	connect(&m_testSuite, &TestSuite::MatsTestSuite::finished, this, &TestSuiteMainWindow::onTestingFinished);
+	connect(&m_testSuite, &TestSuite::MatsTestSuite::globalPermissionChanged, this, &TestSuiteMainWindow::onGlobalPermissionChanged);
+	connect(&m_testSuite, &TestSuite::MatsTestSuite::scriptPermissionChanged, this, &TestSuiteMainWindow::onScriptPermissionChanged);
 
-	connect(&m_testSuite, &TestSuite::TestSuite::scriptPermissionChanged, m_testListWidget, &TestListWidget::onScriptPermissionChanged);
-	connect(&m_testSuite, &TestSuite::TestSuite::noPermissionsExist, m_testListWidget, &TestListWidget::onNoPermissionsExist);
+	connect(&m_testSuite, &TestSuite::MatsTestSuite::scriptPermissionChanged, m_testListWidget, &TestListWidget::onScriptPermissionChanged);
+	connect(&m_testSuite, &TestSuite::MatsTestSuite::noPermissionsExist, m_testListWidget, &TestListWidget::onNoPermissionsExist);
 
 
 	// Logs
@@ -152,27 +160,33 @@ void TestSuiteMainWindow::createDocks()
 	QDockWidget* testsListDock = new QDockWidget{tr("TestListWidget"), this};
 	testsListDock->setObjectName("TestListWidget");
 	testsListDock->setFeatures(QDockWidget::NoDockWidgetFeatures);
-	testsListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
+	testsListDock->setTitleBarWidget(new QWidget{}); // Hides title bar
 
 	m_testListWidget = new TestListWidget{m_testSuite, m_appLog, m_configuration, m_testScriptsStorage, this};
 	connect(m_testListWidget, &TestListWidget::testItemClicked, this, &TestSuiteMainWindow::onShowTestContents);
-	connect(m_testListWidget, &TestListWidget::testSelectionChanged, this, [this]() { updateActionsState(); });
+	connect(m_testListWidget,
+			&TestListWidget::testSelectionChanged,
+			this,
+			[this]()
+			{
+				updateActionsState();
+			});
 	testsListDock->setWidget(m_testListWidget);
 
 	addDockWidget(Qt::LeftDockWidgetArea, testsListDock);
 
 	// Overriden Signals dock
 	//
-//	m_overridePaneDock = new QDockWidget{"Overrides", this};
-//	m_overridePaneDock->setObjectName("SimOverridenSignals");
-//	m_overridePaneDock->setWidget(new SimOverridePane{m_simulator.get(), dbc(), m_overridePaneDock});
-//	m_overridePaneDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+	//	m_overridePaneDock = new QDockWidget{"Overrides", this};
+	//	m_overridePaneDock->setObjectName("SimOverridenSignals");
+	//	m_overridePaneDock->setWidget(new SimOverridePane{m_simulator.get(), dbc(), m_overridePaneDock});
+	//	m_overridePaneDock->setAllowedAreas(Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
-//	addDockWidget(Qt::BottomDockWidgetArea, m_overridePaneDock);
+	//	addDockWidget(Qt::BottomDockWidgetArea, m_overridePaneDock);
 
 	// OutputLog dock
 	//
-//	if (m_slaveWindow == false)
+	//	if (m_slaveWindow == false)
 	{
 		m_appLogPaneDock = new QDockWidget{tr("Output"), this};
 		m_appLogPaneDock->setObjectName("AppLogOutputWidget");
@@ -197,9 +211,9 @@ void TestSuiteMainWindow::createToolbar()
 	m_statusIndicator->setMinimumHeight(40);
 
 #if defined(Q_OS_WIN)
-		QFont f = QFont("Consolas");
+	QFont f = QFont("Consolas");
 #else
-		QFont f = QFont("Courier");
+	QFont f = QFont("Courier");
 #endif
 	m_statusIndicator->setFont(f);
 	updateStatusIndicator();
@@ -245,13 +259,13 @@ void TestSuiteMainWindow::createActions()
 
 	m_clearTestLogAction = new QAction(tr("Clear Test Log"), this);
 	m_clearTestLogAction->setStatusTip(tr("Clear Test Log"));
-	//m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
+	// m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
 	m_clearTestLogAction->setEnabled(true);
 	connect(m_clearTestLogAction, &QAction::triggered, this, &TestSuiteMainWindow::onClearTestLog);
 
-    m_pExitAction = new QAction(tr("Exit"), this);
+	m_pExitAction = new QAction(tr("Exit"), this);
 	m_pExitAction->setStatusTip(tr("Quit the application"));
-	//m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
+	// m_pExitAction->setIcon(QIcon(":/Images/Images/Close.svg"));
 	m_pExitAction->setShortcut(QKeySequence::Quit);
 	m_pExitAction->setShortcutContext(Qt::ApplicationShortcut);
 	m_pExitAction->setEnabled(true);
@@ -269,8 +283,8 @@ void TestSuiteMainWindow::createActions()
 	m_runAction->setShortcuts(runsKeys);
 	connect(m_runAction, &QAction::triggered, this, &TestSuiteMainWindow::on_m_run_clicked);
 
-//	m_pauseAction = new QAction{QIcon(":/Images/Images/TestsPause.svg"), tr("Pause tests"), this};
-//	connect(m_pauseAction, &QAction::triggered, this, &SimWidget::pauseSimulation);
+	//	m_pauseAction = new QAction{QIcon(":/Images/Images/TestsPause.svg"), tr("Pause tests"), this};
+	//	connect(m_pauseAction, &QAction::triggered, this, &SimWidget::pauseSimulation);
 
 	m_stopAction = new QAction{QIcon(":/Images/Images/TestsStop.svg"), tr("Stop tests"), this};
 	m_stopAction->setShortcut(Qt::SHIFT | Qt::Key_F5);
@@ -287,7 +301,7 @@ void TestSuiteMainWindow::createActions()
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
-	//m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
+	// m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pSettingsAction->setEnabled(true);
 	connect(m_pSettingsAction, &QAction::triggered, this, &TestSuiteMainWindow::onSettings);
 
@@ -311,8 +325,8 @@ void TestSuiteMainWindow::createActions()
 
 	m_pAboutAction = new QAction(tr("About TestSuite..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
-	//m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
-	//m_pAboutAction->setEnabled(true);
+	// m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
+	// m_pAboutAction->setEnabled(true);
 	connect(m_pAboutAction, &QAction::triggered, this, &TestSuiteMainWindow::showAbout);
 
 
@@ -323,7 +337,6 @@ void TestSuiteMainWindow::createActions()
 	/*m_manualTuningAction = new QAction(tr("Tuning User Manual"), this);
 	m_manualTuningAction->setStatusTip(tr("Show Tuning User Manual"));
 	connect(m_manualTuningAction, &QAction::triggered, this, &MainWindow::showTuningUserManual);*/
-
 }
 
 void TestSuiteMainWindow::createMenu()
@@ -346,12 +359,12 @@ void TestSuiteMainWindow::createMenu()
 	pReportsMenu->addAction(m_saveTestLogAction);
 	pReportsMenu->addSeparator();
 	pReportsMenu->addAction(m_clearTestLogAction);
-    pReportsMenu->addSeparator();
+	pReportsMenu->addSeparator();
 
-    m_multipleReportsMenu = pReportsMenu->addMenu(tr("Report"));
+	m_multipleReportsMenu = pReportsMenu->addMenu(tr("Report"));
 	m_multipleReportsMenu->setEnabled(false);
 	m_multipleReportsMenu->menuAction()->setVisible(false);
-	
+
 	pReportsMenu->addAction(m_singleReportAction);
 	m_singleReportAction->setVisible(false);
 
@@ -370,16 +383,16 @@ void TestSuiteMainWindow::createMenu()
 	pHelpMenu->addSeparator();
 
 	pHelpMenu->addAction(m_pAppLogAction);
-	//pHelpMenu->addAction(m_pSignalLogAction);
+	// pHelpMenu->addAction(m_pSignalLogAction);
 
 	pHelpMenu->addSeparator();
 
 	pHelpMenu->addAction(m_viewGlobalScriptAction);
 
 	pHelpMenu->addSeparator();
-	//pHelpMenu->addAction(m_manualTuningAction);
+	// pHelpMenu->addAction(m_manualTuningAction);
 
-	//pHelpMenu->addSeparator();
+	// pHelpMenu->addSeparator();
 
 	pHelpMenu->addAction(m_aboutQtAction);
 	pHelpMenu->addAction(m_pAboutAction);
@@ -437,7 +450,7 @@ void TestSuiteMainWindow::updateStatusBar()
 	{
 		// ConfigService
 		//
-		Tcp::ConnectionState configConnState =  m_configController.getConnectionState();
+		Tcp::ConnectionState configConnState = m_configController.getConnectionState();
 
 		QString text = tr(" ConfigService: ");
 
@@ -469,20 +482,14 @@ void TestSuiteMainWindow::updateStatusBar()
 	//
 	if (m_configuration.appDataServices.empty() == false)
 	{
-		showSoftwareConnection("AppDataService",
-							   "TcpSignal",
-							   stats,
-							   m_statusBarAppDataConnection);
+		showSoftwareConnection("AppDataService", "TcpSignal", stats, m_statusBarAppDataConnection);
 	}
 
 	// TuningService connection
 	//
 	if (m_configuration.tuningEnabled == true)
 	{
-		showSoftwareConnection("TuningService",
-							   "TuningTcpClient",
-							   stats,
-							   m_statusBarTuningConnection);
+		showSoftwareConnection("TuningService", "TuningTcpClient", stats, m_statusBarTuningConnection);
 	}
 
 	// Log alerts tool
@@ -538,8 +545,7 @@ void TestSuiteMainWindow::showSoftwareConnection(const QString& caption,
 	std::vector<Tcp::ConnectionState> states;
 	for (const TcpClientStatistics::Statistics& stats : connectionStatistics)
 	{
-		if (nameFilter.isEmpty() == true ||
-				stats.objectName.startsWith(nameFilter) == true)
+		if (nameFilter.isEmpty() == true || stats.objectName.startsWith(nameFilter) == true)
 		{
 			states.push_back(stats.state);
 		}
@@ -551,15 +557,15 @@ void TestSuiteMainWindow::showSoftwareConnection(const QString& caption,
 	{
 		if (state.isConnected == true)
 		{
-			statusOk ++;
+			statusOk++;
 		}
 
 		replyCount += state.replyCount;
 
 		toolTipText += QString("%1 %2 (%3)\n")
-							.arg(state.connectedSoftwareInfo.equipmentID())
-							.arg(state.peerAddr.addressPortStr())
-							.arg(state.isConnected ? tr("ok") : tr("down"));
+						   .arg(state.connectedSoftwareInfo.equipmentID())
+						   .arg(state.peerAddr.addressPortStr())
+						   .arg(state.isConnected ? tr("ok") : tr("down"));
 	}
 	toolTipText = toolTipText.trimmed();
 
@@ -570,18 +576,11 @@ void TestSuiteMainWindow::showSoftwareConnection(const QString& caption,
 
 	if (states.size() <= 1)
 	{
-		statusText = tr("%1: %2 (Replies: %3)")
-					 .arg(caption)
-					 .arg(statusOk ? tr("ok") : tr("down"))
-					 .arg(replyCount);
+		statusText = tr("%1: %2 (Replies: %3)").arg(caption).arg(statusOk ? tr("ok") : tr("down")).arg(replyCount);
 	}
 	else
 	{
-		statusText = tr("%1: %2/%3 (Replies: %4)")
-					 .arg(caption)
-					 .arg(statusOk)
-					 .arg(states.size())
-					 .arg(replyCount);
+		statusText = tr("%1: %2/%3 (Replies: %4)").arg(caption).arg(statusOk).arg(states.size()).arg(replyCount);
 	}
 
 	label->setText(statusText);
@@ -593,20 +592,19 @@ void TestSuiteMainWindow::showSoftwareConnection(const QString& caption,
 void TestSuiteMainWindow::loadScriptsFromConfiguration()
 {
 	m_testScriptsStorage.setScripts(m_configData.scripts);
-	
+
 	m_testListWidget->fillTestsTree();
 
 	// Reset or restart tests run control thread
 	//
 	if (m_testSuite.hasRunControl() == false)
 	{
-		m_testSuite.executeRunControl(TestSuite::ControlParams{AppConfigSettings().instance().useLocalScriptsPath() ? AppConfigSettings().instance().localScriptsPath() : QString()});
+		m_testSuite.executeRunControl(m_testScriptsStorage);
 	}
 	else
 	{
 		m_testSuite.resetRunControl();
 	}
-
 }
 
 void TestSuiteMainWindow::loadScriptsFromLocalPath()
@@ -615,7 +613,10 @@ void TestSuiteMainWindow::loadScriptsFromLocalPath()
 	bool ok = m_testScriptsStorage.loadFromPath(AppConfigSettings().instance().localScriptsPath(), &errorMsg);
 	if (ok == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Error loading scripts from path %1: %2.").arg(AppConfigSettings().instance().localScriptsPath()).arg(errorMsg));
+		QMessageBox::critical(
+			this,
+			qAppName(),
+			tr("Error loading scripts from path %1: %2.").arg(AppConfigSettings().instance().localScriptsPath()).arg(errorMsg));
 		return;
 	}
 
@@ -625,7 +626,7 @@ void TestSuiteMainWindow::loadScriptsFromLocalPath()
 	//
 	if (m_testSuite.hasRunControl() == false)
 	{
-		m_testSuite.executeRunControl(TestSuite::ControlParams{AppConfigSettings().instance().useLocalScriptsPath() ? AppConfigSettings().instance().localScriptsPath() : QString()});
+		m_testSuite.executeRunControl(m_testScriptsStorage);
 	}
 	else
 	{
@@ -635,14 +636,14 @@ void TestSuiteMainWindow::loadScriptsFromLocalPath()
 
 void TestSuiteMainWindow::updateReportActions()
 {
-    Q_ASSERT(m_multipleReportsMenu);
-    m_multipleReportsMenu->clear();
+	Q_ASSERT(m_multipleReportsMenu);
+	m_multipleReportsMenu->clear();
 
-    for (QAction* a : m_multipleReportActions)
-    {
-        delete a;
-    }
-    m_multipleReportActions.clear();
+	for (QAction* a : m_multipleReportActions)
+	{
+		delete a;
+	}
+	m_multipleReportActions.clear();
 
 
 	const auto& templates = m_configData.reportTemplates.templates();
@@ -657,7 +658,10 @@ void TestSuiteMainWindow::updateReportActions()
 			QAction* a = new QAction(report.caption(), this);
 			a->setStatusTip(tr("Generate report: %1").arg(report.caption()));
 			a->setEnabled(true);
-			connect(a, &QAction::triggered, this, [this, report]()
+			connect(a,
+					&QAction::triggered,
+					this,
+					[this, report]()
 					{
 						onGenerateReport(report.caption());
 					});
@@ -667,7 +671,7 @@ void TestSuiteMainWindow::updateReportActions()
 		}
 	}
 
-    m_multipleReportsMenu->setEnabled(m_multipleReportActions.empty() == false);
+	m_multipleReportsMenu->setEnabled(m_multipleReportActions.empty() == false);
 }
 
 void TestSuiteMainWindow::updateTestViewTabPages()
@@ -712,7 +716,7 @@ void TestSuiteMainWindow::updateTestViewTabPages()
 		onTabCloseRequested(i);
 	}
 }
-	
+
 void TestSuiteMainWindow::updateActionsState()
 {
 	auto selection = m_testListWidget->getTestScriptSelection();
@@ -802,7 +806,6 @@ void TestSuiteMainWindow::updateStatusIndicator()
 	QString text;
 	QString styleSheet;
 
-	TestSuite::ControlStatus runStatus = m_testSuite.runStatus();
 	if (m_testSuite.globalPermission() == false)
 	{
 		text = tr("No permission to start testing.\n");
@@ -867,19 +870,15 @@ void TestSuiteMainWindow::updateStatusIndicator()
 	return;
 }
 
-bool TestSuiteMainWindow::eventFilter(QObject *object, QEvent *event)
+bool TestSuiteMainWindow::eventFilter(QObject* object, QEvent* event)
 {
-	if ((object == m_statusBarConfigConnection ||
-		 object == m_statusBarAppDataConnection ||
-		 object == m_statusBarTuningConnection) &&
+	if ((object == m_statusBarConfigConnection || object == m_statusBarAppDataConnection || object == m_statusBarTuningConnection) &&
 		event->type() == QEvent::MouseButtonPress)
 	{
 		showStatistics();
 	}
 
-	if (object == m_statusBarLogAlerts &&
-		m_statusBarLogAlerts->text().isEmpty() == false &&
-		event->type() == QEvent::MouseButtonPress)
+	if (object == m_statusBarLogAlerts && m_statusBarLogAlerts->text().isEmpty() == false && event->type() == QEvent::MouseButtonPress)
 	{
 		showAppLog();
 	}
@@ -905,13 +904,12 @@ void TestSuiteMainWindow::timerEvent(QTimerEvent* event)
 	assert(event);
 	// Update status bar
 	//
-	if  (event->timerId() == m_mainWindowTimerId_250ms)
+	if (event->timerId() == m_mainWindowTimerId_250ms)
 	{
 		updateStatusBar();
 
 		updateStatusIndicator();
 	}
-
 }
 
 
@@ -962,19 +960,15 @@ void TestSuiteMainWindow::on_m_run_clicked()
 
 	m_tabWidget->setCurrentIndex(0);
 
-
 	// Run tests
 	//
-	TestSuite::ControlParams controlParams{
-		selection.selectedFiles(),
-		AppConfigSettings().instance().useLocalScriptsPath() ? AppConfigSettings().instance().localScriptsPath() : QString(),	// Scripts path
-		{}, // Reports path
-		selection,
-		userName,
-		password};
+	TestSuite::ControlParams controlParams{selection.selectedFiles(),
+										   {}, // Reports path
+										   selection,
+										   userName,
+										   password};
 
-
-	bool ok = m_testSuite.execute(controlParams);
+	bool ok = m_testSuite.execute(m_testScriptsStorage, controlParams);
 	if (ok == false)
 	{
 		return;
@@ -995,8 +989,7 @@ void TestSuiteMainWindow::on_m_report_clicked()
 {
 	if (m_testSuite.testLog().empty() == true)
 	{
-		if (QMessageBox::question(this, qAppName(),
-								  tr("Test log is empty. Do you want to load test log from file?")) == QMessageBox::Yes)
+		if (QMessageBox::question(this, qAppName(), tr("Test log is empty. Do you want to load test log from file?")) == QMessageBox::Yes)
 		{
 			if (loadTestLog() == false)
 			{
@@ -1107,14 +1100,8 @@ void TestSuiteMainWindow::onSettings()
 		if (needReconnect == true)
 		{
 			m_configController.setConnectionParams(newSettings.librarySettings().instanceStrId(),
-															   newSettings.librarySettings().configuratorAddress1(),
-															   newSettings.librarySettings().configuratorAddress2());
-		}
-
-		if (needReconnect == true || needReloadScripts == true)
-		{
-			m_testSuite.updateSettings(newSettings.librarySettings(), 
-				TestSuite::ControlParams{newSettings.useLocalScriptsPath() ? newSettings.localScriptsPath() : QString()});
+												   newSettings.librarySettings().configuratorAddress1(),
+												   newSettings.librarySettings().configuratorAddress2());
 		}
 
 		m_reloadTestsScriptsAction->setVisible(newSettings.useLocalScriptsPath() == true);
@@ -1151,10 +1138,7 @@ void TestSuiteMainWindow::showStatistics()
 
 void TestSuiteMainWindow::showDataSources()
 {
-	DialogDataSources::create(m_configController,
-							  //m_testSuite.,
-							  &m_appLog,
-							  this);
+	DialogDataSources::create(m_configController, &m_appLog, this);
 }
 
 void TestSuiteMainWindow::showAppLog()
@@ -1253,8 +1237,7 @@ void TestSuiteMainWindow::onGenerateReport(const QString& caption)
 {
 	if (m_testSuite.testLog().empty() == true)
 	{
-		if (QMessageBox::question(this, qAppName(),
-								  tr("Test log is empty. Do you want to load test log from file?")) == QMessageBox::Yes)
+		if (QMessageBox::question(this, qAppName(), tr("Test log is empty. Do you want to load test log from file?")) == QMessageBox::Yes)
 		{
 			if (loadTestLog() == false)
 			{
@@ -1270,7 +1253,7 @@ void TestSuiteMainWindow::onGenerateReport(const QString& caption)
 
 	TestSuite::TestReport::generateReport(m_configData.reportTemplates, m_testSuite.testLog(), caption, this);
 
-    return;
+	return;
 }
 
 void TestSuiteMainWindow::viewGlobalScript()
@@ -1302,10 +1285,7 @@ void TestSuiteMainWindow::onConfigurationArrived()
 
 	updateTestViewTabPages();
 
-	m_testSuite.updateSettings(AppConfigSettings::instance().librarySettings(), 
-		TestSuite::ControlParams{AppConfigSettings::instance().useLocalScriptsPath() ? AppConfigSettings::instance().localScriptsPath() : QString()});
-
-    updateReportActions();
+	updateReportActions();
 
 	updateActionsState();
 
@@ -1331,7 +1311,7 @@ void TestSuiteMainWindow::onGlobalPermissionChanged(bool result)
 	updateActionsState();
 }
 
-void TestSuiteMainWindow::onScriptPermissionChanged(QString scriptFileName, bool permission) 
+void TestSuiteMainWindow::onScriptPermissionChanged(QString scriptFileName, bool permission)
 {
 	TestSuite::ControlStatus testStatus = m_testSuite.testStatus();
 

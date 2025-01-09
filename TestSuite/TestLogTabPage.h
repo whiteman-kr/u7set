@@ -1,8 +1,8 @@
 #ifndef TESTLOGTABPAGE_H
 #define TESTLOGTABPAGE_H
 
-#include "../TestSuiteLib/TestLog.h"
 #include "TestSuiteLog.h"
+#include <TestSuiteLib/TestLog.h>
 
 class TestLogTabPage : public QWidget
 {

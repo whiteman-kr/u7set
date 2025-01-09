@@ -1,12 +1,11 @@
 #ifndef TESTLISTWIDGET_H
 #define TESTLISTWIDGET_H
 
-#include <QTreeWidget>
-#include "../TestSuiteLib/TestSuite.h"
-#include "../TestSuiteLib/TestController.h"
-#include "../TestSuiteLib/TestLog.h"
-#include "../TestSuiteLib/TestScriptsStorage.h"
 #include "TestSuiteLog.h"
+#include <QTreeWidget>
+#include <TestSuiteLib/MatsTestSuite.h>
+#include <TestSuiteLib/TestController.h>
+#include <TestSuiteLib/TestScriptsStorage.h>
 
 class TestTreeWidgetItem : public QTreeWidgetItem
 {
@@ -43,8 +42,8 @@ class TestTreeWidget : public QTreeWidget
 	Q_OBJECT
 
 private:
-	void keyPressEvent(QKeyEvent *event) override;
-	void keyReleaseEvent(QKeyEvent *event) override;
+	void keyPressEvent(QKeyEvent* event) override;
+	void keyReleaseEvent(QKeyEvent* event) override;
 
 signals:
 	void testSelectionChanged();
@@ -55,7 +54,11 @@ class TestListWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	TestListWidget(const TestSuite::TestSuite& testSuite, TestSuiteLogFile& appLog, TestSuite::ConfigSettings& configuration, const TestSuite::TestScriptsStorage& tests, QWidget* parent);
+	TestListWidget(const TestSuite::MatsTestSuite& testSuite,
+				   TestSuiteLogFile& appLog,
+				   TestSuite::ConfigSettings& configuration,
+				   const TestSuite::TestScriptsStorage& tests,
+				   QWidget* parent);
 
 	enum Columns
 	{
@@ -65,14 +68,14 @@ public:
 	};
 	enum ColumnsData
 	{
-		ScriptTreeItem,	// First column is a pointer to TestTreeScript structure
+		ScriptTreeItem, // First column is a pointer to TestTreeScript structure
 		TestFunction
 	};
 
 public:
 	void fillTestsTree();
 	void clearTestsResults();
-	
+
 	void setSelectionEnabled(bool enable);
 
 	TestSuite::TestScriptSelection getTestScriptSelection() const;
@@ -87,11 +90,11 @@ public slots:
 signals:
 	void testSelectionChanged();
 	void testItemClicked(const QString& scriptName, const QString& functionName);
-	
+
 
 private slots:
-	void testItemDoubleClicked(QTreeWidgetItem *item, int column);
-	void testItemChanged(QTreeWidgetItem *item, int column);
+	void testItemDoubleClicked(QTreeWidgetItem* item, int column);
+	void testItemChanged(QTreeWidgetItem* item, int column);
 	void contextMenuRequested();
 	void onFilterApply();
 
@@ -102,8 +105,8 @@ private:
 	QPushButton* m_filterButton = nullptr;
 
 	bool m_selectionEnabled = false;
-	
-	const TestSuite::TestSuite& m_testSuite;
+
+	const TestSuite::MatsTestSuite& m_testSuite;
 	const TestSuite::ConfigSettings& m_configuration;
 
 	const TestSuite::TestScriptsStorage& m_tests;

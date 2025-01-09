@@ -674,6 +674,11 @@ namespace ClientLib
 		return false;
 	}
 
+	void TuningSignalManager::setClientEquipmentId(const QString& clientEquipmentId)
+	{
+		m_tuningClientHash = ::calcHash(clientEquipmentId);
+	}
+
 	void TuningSignalManager::Sources::set(const TuningSignalState& state, Hash tuningServiceHash)
 	{
 		SourceState* emptyState = nullptr;

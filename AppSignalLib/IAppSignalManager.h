@@ -1,8 +1,9 @@
 #pragma once
 
+#include "ISignalManager.h"
 #include <span>
 #include <vector>
-#include "ISignalManager.h"
+#include <memory>
 
 // #include "AppSignalParam.h" -- Commented out to speed up compilation
 // #include "AppSignalState.h" -- Commented out to speed up compilation

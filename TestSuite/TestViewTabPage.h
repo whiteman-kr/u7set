@@ -1,7 +1,6 @@
-#ifndef TESTVIEWTABPAGE_H
-#define TESTVIEWTABPAGE_H
+#pragma once
 
-#include "../TestSuiteLib/TestScriptsStorage.h"
+#include <TestSuiteLib/TestScriptsStorage.h>
 
 namespace UiLib
 {
@@ -25,5 +24,3 @@ private:
 
 	TestSuite::TestScript m_script;
 };
-
-#endif // TESTVIEWTABPAGE_H
