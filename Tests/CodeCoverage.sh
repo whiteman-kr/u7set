@@ -36,7 +36,7 @@ StopServices || true
 # 
 OUTPUT_DIR="./CodeCoverage"
 LCOV_CLEAR_ARGUMENTS="--no-external --capture --initial"
-LCOV_COLLECT_ARGUMENTS="--rc lcov_branch_coverage=1 --capture"
+LCOV_COLLECT_ARGUMENTS="--rc branch_coverage=1 --capture"
 
 # Create output dir.
 #
@@ -108,82 +108,82 @@ popd
 # AppSignalLib
 TEST_DIR="./build/AppSignalLib/CMakeFiles/AppSignalLib.dir"
 TEST_OUTPUT_FILE="AppSignalLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # CommonLib
 TEST_DIR="./build/libs/CommonLib/CMakeFiles/CommonLib.dir"
 TEST_OUTPUT_FILE="CommonLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # OnlineLib
 TEST_DIR="./build/OnlineLib/CMakeFiles/OnlineLib.dir"
 TEST_OUTPUT_FILE="OnlineLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # DbLib
 TEST_DIR="./build/libs/DbLib/CMakeFiles/DbLib.dir"
 TEST_OUTPUT_FILE="DbLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # HardwareLib
 TEST_DIR="./build/libs/HardwareLib/CMakeFiles/HardwareLib.dir"
 TEST_OUTPUT_FILE="HardwareLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Metrology
 TEST_DIR="./build/Tests/MetrologyTests/CMakeFiles/MetrologyTests.dir"
 TEST_OUTPUT_FILE="MetrologyTests.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # LicenseLib
 #TEST_DIR="./build/libs/LicenseLib/CMakeFiles/LicenseLib.dir"
 #TEST_OUTPUT_FILE="LicenseLib.info"
-#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Builder
 TEST_DIR="./build/Builder/CMakeFiles/Builder.dir"
 TEST_OUTPUT_FILE="Builder.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Simulator
 TEST_DIR="./build/libs/SimulatorLib/CMakeFiles/SimulatorLib.dir"
 TEST_OUTPUT_FILE="SimulatorLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # TrendView
 TEST_DIR="./build/libs/TrendView/CMakeFiles/TrendView.dir"
 TEST_OUTPUT_FILE="TrendView.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # UtilsLib
 TEST_DIR="./build/UtilsLib/CMakeFiles/UtilsLib.dir"
 TEST_OUTPUT_FILE="UtilsLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # ClientLib
 TEST_DIR="./build/libs/ClientLib/CMakeFiles/ClientLib.dir"
 TEST_OUTPUT_FILE="ClientLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # TestSuiteLib
 TEST_DIR="./build/libs/TestSuiteLib/CMakeFiles/TestSuiteLib.dir"
 TEST_OUTPUT_FILE="TestSuiteLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # AdsBridge
 TEST_DIR="./build/libs/AdsBridge/CMakeFiles/AdsBridge.dir"
 TEST_OUTPUT_FILE="AdsBridge.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # AppDataSrv -- Cannot collect .gcda as process is killed and not finished normally
 #TEST_DIR="./AppDataService"
 #TEST_OUTPUT_FILE="AppDataSrv.info"
-#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # CfgSrv -- Cannot collect .gcda as process is killed and not finished normally
 #TEST_DIR="./ConfigurationService"
 #TEST_OUTPUT_FILE="CfgSrv.info"
-#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 
 # Combine results to a single file, result stored to $OUTPUT_DIR/u7set-dirty.info

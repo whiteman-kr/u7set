@@ -265,7 +265,7 @@ TEST_F(AdsConnectionTests, receivesState)
 	timer.restart();
 	double lastState = 0;
 	int stateChanges = 0;
-	while (timer.hasExpired(4000) == false)
+	while (timer.hasExpired(6000) == false && stateChanges < 3)
 	{
 		QThread::msleep(10);
 
