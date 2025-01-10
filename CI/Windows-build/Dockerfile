@@ -82,6 +82,7 @@ COPY "INSTALL/libpq.dll" .
 
 WORKDIR C:/ftdi
 COPY "INSTALL/CDM-v2.12.36.4-WHQL-Certified.zip" .
+COPY "INSTALL/ftd2xx.dll" .
 
 RUN setx /M PATH "C:\Qt\6.5.3\msvc2019_64\bin;%PATH%"
 RUN setx /M PATH "C:\Qt\Tools\QtCreator\bin\jom;%PATH%"

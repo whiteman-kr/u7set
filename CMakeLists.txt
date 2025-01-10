@@ -39,7 +39,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Set the Qt version and find required components.
 # Finding components here speeds up cmake configure step.
 #
-set(QT_VERSION "6.5.3")
+set(QT_VERSION "6.8.1")
 
 find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
 find_package(Boost REQUIRED COMPONENTS graph)
