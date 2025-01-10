@@ -108,82 +108,82 @@ popd
 # AppSignalLib
 TEST_DIR="./build/AppSignalLib/CMakeFiles/AppSignalLib.dir"
 TEST_OUTPUT_FILE="AppSignalLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # CommonLib
 TEST_DIR="./build/libs/CommonLib/CMakeFiles/CommonLib.dir"
 TEST_OUTPUT_FILE="CommonLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # OnlineLib
 TEST_DIR="./build/OnlineLib/CMakeFiles/OnlineLib.dir"
 TEST_OUTPUT_FILE="OnlineLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # DbLib
 TEST_DIR="./build/libs/DbLib/CMakeFiles/DbLib.dir"
 TEST_OUTPUT_FILE="DbLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # HardwareLib
 TEST_DIR="./build/libs/HardwareLib/CMakeFiles/HardwareLib.dir"
 TEST_OUTPUT_FILE="HardwareLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # Metrology
 TEST_DIR="./build/Tests/MetrologyTests/CMakeFiles/MetrologyTests.dir"
 TEST_OUTPUT_FILE="MetrologyTests.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # LicenseLib
 #TEST_DIR="./build/libs/LicenseLib/CMakeFiles/LicenseLib.dir"
 #TEST_OUTPUT_FILE="LicenseLib.info"
-#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # Builder
 TEST_DIR="./build/Builder/CMakeFiles/Builder.dir"
 TEST_OUTPUT_FILE="Builder.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # Simulator
 TEST_DIR="./build/libs/SimulatorLib/CMakeFiles/SimulatorLib.dir"
 TEST_OUTPUT_FILE="SimulatorLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # TrendView
 TEST_DIR="./build/libs/TrendView/CMakeFiles/TrendView.dir"
 TEST_OUTPUT_FILE="TrendView.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # UtilsLib
 TEST_DIR="./build/UtilsLib/CMakeFiles/UtilsLib.dir"
 TEST_OUTPUT_FILE="UtilsLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # ClientLib
 TEST_DIR="./build/libs/ClientLib/CMakeFiles/ClientLib.dir"
 TEST_OUTPUT_FILE="ClientLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # TestSuiteLib
 TEST_DIR="./build/libs/TestSuiteLib/CMakeFiles/TestSuiteLib.dir"
 TEST_OUTPUT_FILE="TestSuiteLib.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # AdsBridge
 TEST_DIR="./build/libs/AdsBridge/CMakeFiles/AdsBridge.dir"
 TEST_OUTPUT_FILE="AdsBridge.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # AppDataSrv -- Cannot collect .gcda as process is killed and not finished normally
 #TEST_DIR="./AppDataService"
 #TEST_OUTPUT_FILE="AppDataSrv.info"
-#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 # CfgSrv -- Cannot collect .gcda as process is killed and not finished normally
 #TEST_DIR="./ConfigurationService"
 #TEST_OUTPUT_FILE="CfgSrv.info"
-#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR --ignore-errors errors
 
 
 # Combine results to a single file, result stored to $OUTPUT_DIR/u7set-dirty.info
@@ -224,7 +224,7 @@ lcov --remove $OUTPUT_DIR/u7set-dirty.info \
 # Generate HTML report.
 #
 genhtml --legend \
-    --rc lcov_branch_coverage=1 \
+    --rc branch_coverage=1 \
     --rc genhtml_med_limit=60 \
     --rc genhtml_hi_limit=80 \
     --output-directory $OUTPUT_DIR/Report \
