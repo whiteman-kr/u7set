@@ -118,7 +118,7 @@ windows_build_job:
     - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
-    - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2019_64"
+    - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2022_64"
     - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR\\bin\\release"
 #Build Project
     - "# ----------------------------------------------"

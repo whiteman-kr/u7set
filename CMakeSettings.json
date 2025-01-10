@@ -7,7 +7,7 @@
         "inheritEnvironments": [ "msvc_x64_x64" ],
         "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
         "installRoot": "${projectDir}\\out\\install\\${name}",
-        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2019_64",
+        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
         "buildCommandArgs": "",
         "ctestCommandArgs": ""
     },
@@ -18,7 +18,7 @@
         "inheritEnvironments": [ "msvc_x64_x64" ],
         "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
         "installRoot": "${projectDir}\\out\\install\\${name}",
-        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2019_64",
+        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
         "buildCommandArgs": "",
         "ctestCommandArgs": "",
         "variables": [
@@ -36,7 +36,7 @@
         "inheritEnvironments": [ "msvc_x64_x64" ],
         "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
         "installRoot": "${projectDir}\\out\\install\\${name}",
-        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2019_64",
+        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
         "buildCommandArgs": "",
         "ctestCommandArgs": "",
         "variables": [
@@ -53,7 +53,7 @@
         "configurationType": "Release",
         "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
         "installRoot": "${projectDir}\\out\\install\\${name}",
-        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2019_64",
+        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
         "buildCommandArgs": "",
         "ctestCommandArgs": "",
         "inheritEnvironments": [ "msvc_x64_x64" ]
@@ -64,7 +64,7 @@
         "configurationType": "RelWithDebInfo",
         "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
         "installRoot": "${projectDir}\\out\\install\\${name}",
-        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2019_64",
+        "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
         "buildCommandArgs": "",
         "ctestCommandArgs": "",
         "inheritEnvironments": [ "msvc_x64_x64" ]
