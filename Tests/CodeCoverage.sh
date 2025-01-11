@@ -36,7 +36,7 @@ StopServices || true
 # 
 OUTPUT_DIR="./CodeCoverage"
 LCOV_CLEAR_ARGUMENTS="--no-external --capture --initial"
-LCOV_COLLECT_ARGUMENTS="--rc branch_coverage=1 --capture"
+LCOV_COLLECT_ARGUMENTS="--rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 --capture"
 
 # Create output dir.
 #
