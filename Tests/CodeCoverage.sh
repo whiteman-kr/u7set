@@ -25,7 +25,7 @@ function StopServices() {
     pkill AppDataSrv || true
     pkill TuningSrv || true
     pkill SimulatorConsol || true       # without last e, I assume there is a limitation to 15 symbols.
-    sleep 1
+    sleep 3
 }
 
 # Stop if any service is running.
@@ -36,7 +36,7 @@ StopServices || true
 # 
 OUTPUT_DIR="./CodeCoverage"
 LCOV_CLEAR_ARGUMENTS="--no-external --capture --initial"
-LCOV_COLLECT_ARGUMENTS="--rc branch_coverage=1 --rc geninfo_unexecuted_blocks=1 --ignore-errors mismatch --capture"
+LCOV_COLLECT_ARGUMENTS="--capture"
 
 # Create output dir.
 #
@@ -208,7 +208,7 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
 
 # Filter combined file, result stored to $OUTPUT_DIR/u7set.info.
 #
-lcov --remove $OUTPUT_DIR/u7set-dirty.info \
+lcov --ignore-errors unused --remove $OUTPUT_DIR/u7set-dirty.info \
    "*Qt*.framework*" \
    "/usr/*" \
    "*/Qt/*" \
@@ -234,4 +234,4 @@ genhtml --legend \
 # https://pypi.org/project/lcov-cobertura/
 # sudo pip install lcov-cobertura
 #
-lcov_cobertura $OUTPUT_DIR/u7set.info --output $OUTPUT_DIR/coverage.xml
+# lcov_cobertura $OUTPUT_DIR/u7set.info --output $OUTPUT_DIR/coverage.xml
