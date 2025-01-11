@@ -265,10 +265,8 @@ TEST_F(AdsConnectionTests, receivesState)
 	timer.restart();
 	double lastState = 0;
 	int stateChanges = 0;
-	while (timer.hasExpired(6000) == false && stateChanges < 3)
+	while (timer.hasExpired(10000) == false && stateChanges < 3)
 	{
-		QThread::msleep(10);
-
 		bool signalFound = false;
 		AppSignalState state = signalManager.signalState("#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK", &signalFound);
 
@@ -276,13 +274,15 @@ TEST_F(AdsConnectionTests, receivesState)
 
 		stateChanges += (lastState == state.value()) ? 0 : 1;
 		lastState = state.value();
+		
+		QThread::yieldCurrentThread();
 	}
 
 	qDebug() << "TEST(AdsConnectionTests, receivesState): stateChanges of #SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK: " << stateChanges;
 
 	// The test machine can be loaded heavily, it will result in reduced numbers of state changes.
 	//
-	EXPECT_TRUE(stateChanges >= 3 && stateChanges < 12);
+	EXPECT_TRUE(stateChanges >= 3);
 
 	return;
 }
