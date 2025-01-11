@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.28)
 
 function(add_translation target output_directory)
     qt_add_lupdate(${target} TS_FILES translations/${TARGET}_uk.ts translations/${TARGET}_bg.ts)
