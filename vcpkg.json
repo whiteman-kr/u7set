@@ -27,7 +27,7 @@
         },
         {
             "name": "boost-graph",
-            "version": "1.85.0"
+            "version": "1.84.0"
         }
     ]
 }
