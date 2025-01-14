@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../GatewayService/GatewayDescription.h"
-#include "GatewayParserLog.h"
 #include "Context.h"
+
+#include "../GatewayLib/GatewayDescription.h"
+#include "../GatewayLib/GatewayParserLog.h"
 
 namespace Gateway
 {
@@ -74,6 +75,8 @@ namespace Gateway
 		int errorCount() const;
 		int warningCount() const;
 
+		void flushParserLog();
+
 	private:
 		void clear();
 
@@ -82,6 +85,8 @@ namespace Gateway
 		ParseResult parseUnknownSection(E::Section& parsingSection, const ParseLineResult& plr);
 		ParseResult parseGatewaySection(E::Section& parsingSection, const ParseLineResult& plr);
 		ParseResult parseSignalListSection(E::Section& parsingSection, const ParseLineResult& plr);
+
+		ParseResult finalizeGatewaySection(const ParseLineResult& plr);
 
 		ParseResult appendAddressSignalID(SignalListShared signalList, const ParseLineResult& plr, bool appendAddr);
 
@@ -99,12 +104,10 @@ namespace Gateway
 		QStringList knownGatewayTypes() const;
 		E::GatewayType getGatewayType(const QString& gwTypeStr) const;
 
-		void flushParserLog() const;
-
 	private:
 		const Builder::Context* m_context = nullptr;
 		const AppSignalSet* m_appSignalSet = nullptr;
-		Builder::IssueLogger* m_u7Log = nullptr;
+		Builder::IssueLogger* m_u7log = nullptr;
 
 		GatewaysShared m_gateways;
 		mutable ParserLog m_log;

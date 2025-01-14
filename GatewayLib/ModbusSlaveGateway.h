@@ -39,6 +39,8 @@ namespace Gateway
 
 		bool isConst(Hash h, double* constValue) const;
 
+		bool isUniqueSignalsInList() const;
+
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;

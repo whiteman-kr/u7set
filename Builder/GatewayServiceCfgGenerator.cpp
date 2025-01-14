@@ -142,21 +142,22 @@ namespace Builder
 			m_cfgXml->addLinkToFile(buildFile);
 		}
 
-		QString resultStr = QString("Parsing of %1 gateway description finished with %2 errors, %3 warnings").
+		QString resultStr = QString("parsing of %1 gateway description finished with %2 errors, %3 warnings").
 								arg(equipmentID()).arg(errCount).arg(wrnCount);
 		if (errCount > 0)
 		{
-			log->writeError(resultStr);
+			m_log->errCFG3051(resultStr);
 		}
 		else
 		{
 			if (wrnCount > 0)
 			{
-				log->writeWarning0(resultStr);
+				m_log->wrnCFG3052(resultStr);
 			}
 			else
 			{
-				log->writeMessage(resultStr);
+				resultStr = resultStr.mid(0, 1).toUpper() + resultStr.mid(1);
+				LOG_MESSAGE(m_log, resultStr);
 			}
 		}
 

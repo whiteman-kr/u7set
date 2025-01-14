@@ -1,12 +1,15 @@
 #pragma once
 
+#include "../AppSignalLib/AppSignal.h"
+#include "GatewayParserLog.h"
+
 class XmlWriteHelper;
 class XmlReadHelper;
 
-#include "../Builder/GatewayParserLog.h"
-
 namespace Gateway
 {
+	//
+
 	class E : public QObject
 	{
 		Q_OBJECT
@@ -127,10 +130,6 @@ namespace Gateway
 		Q_ENUM(ModbusMode)
 	};
 
-	class ParserLog;
-	class Parser;
-	enum class ParseResult;
-
 	class File
 	{
 	public:
@@ -182,7 +181,7 @@ namespace Gateway
 
 		const std::map<E::Setting, SettingValue>& settingsValues() const;
 
-		ParseResult setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log);
+		ParseResult setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog* log);
 		bool setSettingValue(E::Setting st, const QVariant& value);
 		const SettingValue& getSettingValue(E::Setting st) const;
 

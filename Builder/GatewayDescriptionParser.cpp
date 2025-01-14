@@ -1,7 +1,7 @@
 #include "GatewayDescriptionParser.h"
 #include "../UtilsLib/WUtils.h"
-#include "../GatewayService/IvsImpulseGateway.h"
-#include "../GatewayService/ModbusSlaveGateway.h"
+#include "../GatewayLib/IvsImpulseGateway.h"
+#include "../GatewayLib/ModbusSlaveGateway.h"
 #include "ModuleLogicCompiler.h"
 
 namespace Gateway
@@ -111,7 +111,7 @@ namespace Gateway
 			return;
 		}
 
-		m_u7Log = m_context->m_log;
+		m_u7log = m_context->m_log;
 
 		m_appSignalSet = context->m_signalSet->appSignalSet();
 
@@ -138,19 +138,12 @@ namespace Gateway
 		clear();
 	}
 
-	void Parser::clear()
-	{
-		m_log.clear();
-		m_gateways = nullptr;
-	}
-
 	bool Parser::parse(const QString& desc)
 	{
 		bool result = true;
 
 		QStringList strs = desc.split(Separator::NEW_LINE, Qt::KeepEmptyParts, Qt::CaseInsensitive);
 
-		int errCount = 0;
 		int lineNo = 0;
 
 		// parsing states
@@ -159,6 +152,8 @@ namespace Gateway
 
 		for(const QString& str : strs)
 		{
+			flushParserLog();
+
 			lineNo++;
 
 			ParseLineResult plr;
@@ -174,14 +169,9 @@ namespace Gateway
 				m_log.logResult(plr.lineNo, plr.msgType, plr.msg);
 			}
 
-			if (plr.lineType == LineType::Comment)
+			if (plr.lineType == LineType::Comment ||
+				plr.msgType == LogMsgType::Error)
 			{
-				continue;
-			}
-
-			if (plr.msgType == LogMsgType::Error)
-			{
-				errCount++;
 				continue;
 			}
 
@@ -194,7 +184,6 @@ namespace Gateway
 				break;
 
 			case E::Section::Gateway:
-				flushParserLog();
 				pr = parseGatewaySection(parsingSection, plr);
 				break;
 
@@ -210,17 +199,16 @@ namespace Gateway
 
 			if (pr == ParseResult::Error)
 			{
-				errCount++;
-				result = false;
 				continue;
 			}
 
 			if (pr == ParseResult::CriticalError)
 			{
-				errCount++;
 				return false;		// break parsing
 			}
 		}
+
+		flushParserLog();
 
 		// finalize parsing
 		switch(parsingSection)
@@ -228,8 +216,23 @@ namespace Gateway
 		case E::Section::Unknown:
 			break;
 
-		case E::Section::Gateway:
 		case E::Section::SignalList:
+			{
+				GatewayShared gwLast = m_gateways->last();
+
+				if (gwLast != nullptr)
+				{
+					auto signalLists = gwLast->signalLists();
+
+					if (signalLists.empty() == false)
+					{
+						signalLists.back()->checkAndApplySettings(0, m_log);
+					}
+				}
+			}
+			break;
+
+		case E::Section::Gateway:
 			{
 				GatewayShared gwLast = m_gateways->last();
 
@@ -237,7 +240,6 @@ namespace Gateway
 				{
 					m_gateways->last()->checkAndApplySettings(0, m_log);
 					gwLast->generateRequiredFiles(m_appSignalSet, m_log);
-					flushParserLog();
 				}
 			}
 			break;
@@ -246,7 +248,9 @@ namespace Gateway
 			Q_ASSERT(false);
 		}
 
-		return result;
+		flushParserLog();
+
+		return m_log.errorCount() == 0;
 	}
 
 	GatewaysShared Parser::gateways()
@@ -263,6 +267,51 @@ namespace Gateway
 	int Parser::warningCount() const
 	{
 		return m_log.warningCount();
+	}
+
+	void Parser::flushParserLog()
+	{
+		if (m_u7log == nullptr)
+		{
+			return;
+		}
+
+		for(const auto& r : m_log)
+		{
+			switch(r.msgType)
+			{
+			case LogMsgType::Message:
+			{
+				QString msg = r.msg;
+				msg = msg.mid(0, 1).toUpper() + msg.mid(1);
+				LOG_MESSAGE(m_u7log, msg);
+			}
+			break;
+
+			case LogMsgType::Warning:
+				// Gateway description parsing warning: %1
+				//
+				m_u7log->wrnCFG3052(r.msg);
+				break;
+
+			case LogMsgType::Error:
+				// Gateway description parsing error: %1
+				//
+				m_u7log->errCFG3051(r.msg);
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+		}
+
+		m_log.clear();
+	}
+
+	void Parser::clear()
+	{
+		m_log.clear();
+		m_gateways = nullptr;
 	}
 
 	bool Parser::generateGatewaysRequiredFiles()
@@ -335,7 +384,7 @@ namespace Gateway
 
 					m_gateways->replaceLast(typedGateway);
 
-					return typedGateway->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
+					return typedGateway->setSettingValue(plr.lineNo, plr.setting, plr.value, &m_log);
 				}
 				else
 				{
@@ -354,30 +403,19 @@ namespace Gateway
 
 				if (plr.setting == E::Setting::GatewayID)
 				{
-					LOG_MESSAGE(m_u7Log, QString("Parsing gateway %1 description...").arg(plr.value.toString()));
+					LOG_MESSAGE(m_u7log, QString("Parsing gateway %1 description...").arg(plr.value.toString()));
 				}
 			}
 
-			return gw->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
+			return gw->setSettingValue(plr.lineNo, plr.setting, plr.value, &m_log);
 
 		case LineType::Section:
 			switch(plr.section)
 			{
 			case E::Section::Gateway:
-				{
-					GatewayShared gwLast = m_gateways->last();
-
-					if (gwLast != nullptr)
-					{
-						m_gateways->last()->checkAndApplySettings(plr.lineNo, m_log);
-						gwLast->generateRequiredFiles(m_appSignalSet, m_log);
-						flushParserLog();
-					}
-				}
-
+				pr = finalizeGatewaySection(plr);
 				m_gateways->append(std::make_shared<Gateway>());
 				parsingSection = E::Section::Gateway;
-
 				return pr;
 
 			case E::Section::SignalList:
@@ -409,13 +447,14 @@ namespace Gateway
 		switch(plr.lineType)
 		{
 		case LineType::Setting:
-			sl->setSettingValue(plr.lineNo, plr.setting, plr.value, m_log);
+			sl->setSettingValue(plr.lineNo, plr.setting, plr.value, &m_log);
 			return ParseResult::Ok;
 
 		case LineType::SignalID:
 			if (sl->isSettingsChecked() == false)
 			{
 				sl->checkAndApplySettings(plr.lineNo, m_log);
+				flushParserLog();
 			}
 			return appendAddressSignalID(sl, plr, false);
 
@@ -423,6 +462,7 @@ namespace Gateway
 			if (sl->isSettingsChecked() == false)
 			{
 				sl->checkAndApplySettings(plr.lineNo, m_log);
+				flushParserLog();
 			}
 			return appendAddressSignalID(sl, plr, true);
 
@@ -431,21 +471,26 @@ namespace Gateway
 			{
 			case E::Section::Gateway:
 				{
-					GatewayShared gwLast = m_gateways->last();
-
-					if (gwLast != nullptr)
+					if (sl->isSettingsChecked() == false)
 					{
-						m_gateways->last()->checkAndApplySettings(plr.lineNo, m_log);
-						gwLast->generateRequiredFiles(m_appSignalSet, m_log);
-						flushParserLog();
+						sl->checkAndApplySettings(plr.lineNo, m_log);
 					}
+
+					ParseResult pr = finalizeGatewaySection(plr);
 
 					m_gateways->append(std::make_shared<Gateway>());
 					parsingSection = E::Section::Gateway;
+
+					return pr;
 				}
-				return ParseResult::Ok;
 
 			case E::Section::SignalList:
+
+				if (sl->isSettingsChecked() == false)
+				{
+					sl->checkAndApplySettings(plr.lineNo, m_log);
+				}
+
 				m_gateways->last()->appendSignalList();
 				parsingSection = E::Section::SignalList;
 				return ParseResult::Ok;
@@ -460,6 +505,22 @@ namespace Gateway
 		}
 
 		return ParseResult::Error;
+	}
+
+	ParseResult Parser::finalizeGatewaySection(const ParseLineResult& plr)
+	{
+		ParseResult pr = ParseResult::Ok;
+
+		GatewayShared gwLast = m_gateways->last();
+
+		if (gwLast != nullptr)
+		{
+			pr = m_gateways->last()->checkAndApplySettings(plr.lineNo, m_log);
+			gwLast->generateRequiredFiles(m_appSignalSet, m_log);
+			flushParserLog();
+		}
+
+		return pr;
 	}
 
 	ParseResult Parser::appendAddressSignalID(SignalListShared signalList,
@@ -986,41 +1047,5 @@ namespace Gateway
 		}
 
 		return gwType;
-	}
-
-	void Parser::flushParserLog() const
-	{
-		TEST_PTR_RETURN(m_u7Log);
-
-		for(const auto& r : m_log)
-		{
-			switch(r.msgType)
-			{
-			case LogMsgType::Message:
-			{
-				QString msg = r.msg;
-				msg = msg.mid(0, 1).toUpper() + msg.mid(1);
-				LOG_MESSAGE(m_u7Log, msg);
-			}
-			break;
-
-			case LogMsgType::Warning:
-				// Gateway description parsing warning: %1
-				//
-				m_u7Log->wrnCFG3052(r.msg);
-				break;
-
-			case LogMsgType::Error:
-				// Gateway description parsing error: %1
-				//
-				m_u7Log->errCFG3051(r.msg);
-				break;
-
-			default:
-				Q_ASSERT(false);
-			}
-		}
-
-		m_log.clear();
 	}
 }

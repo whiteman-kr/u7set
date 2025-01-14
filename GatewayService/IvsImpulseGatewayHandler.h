@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GatewayDescription.h"
+#include "../GatewayLib/GatewayDescription.h"
 #include "GatewayHandler.h"
 #include "AppDataServiceClient.h"
 #include "IvsImpulseCommThread.h"

@@ -1,3 +1,7 @@
+#ifndef GATEWAY_LIB_DOMAIN
+#error Do not include this file in the project! Link GatewayLib instead.
+#endif
+
 #include "IvsImpulseGateway.h"
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"

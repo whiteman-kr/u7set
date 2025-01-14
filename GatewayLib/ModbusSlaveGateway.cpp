@@ -1,9 +1,13 @@
-//#include "../Builder/GatewayDescriptionParser.h"
+#ifndef GATEWAY_LIB_DOMAIN
+#error Do not include this file in the project! Link GatewayLib instead.
+#endif
+
+#include <CommonLib/Types.h>
+
 #include "ModbusSlaveGateway.h"
 
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
-#include "../CommonLib/include/CommonLib/Types.h"
 
 namespace Gateway
 {
@@ -330,6 +334,18 @@ namespace Gateway
 		{
 			*constValue = it->second;
 			return true;
+		}
+
+		return false;
+	}
+
+	bool ModbusSignalList::isUniqueSignalsInList() const
+	{
+		SettingValue sv = getSettingValue(E::Setting::UniqSignalsInList);
+
+		if (sv.value.isValid() == true)
+		{
+			return sv.value.toBool();
 		}
 
 		return false;
@@ -709,7 +725,6 @@ namespace Gateway
 
 		const SignalLists& lists = signalLists();
 
-//		std::set<Hash> existsSignals;
 		std::set<int> discreteRegs;
 		std::set<int> discreteAddrs;
 		std::set<int> analogRegs;
@@ -780,8 +795,12 @@ namespace Gateway
 						{
 							if (discreteAddrs.contains(addr16.bitAddress()) == true)
 							{
-								log.logError(QString("duplicate address %1 of discrete signal %2").
-													 arg(addr16.bitAddress()).arg(signalID));
+								if (mbsl->isUniqueSignalsInList() == true)
+								{
+									log.logError(QString("duplicate address %1 of discrete signal %2").
+														 arg(addr16.bitAddress()).arg(signalID));
+									result = false;
+								}
 							}
 							else
 							{
@@ -802,9 +821,12 @@ namespace Gateway
 						{
 							if (analogRegs.contains(addr16.offset() + i) == true)
 							{
-								log.logError(QString("analog signal %1 register %2 used by another analog signal").
-											 arg(signalID).arg(addr16.offset() + i));
-								result = false;
+								if (mbsl->isUniqueSignalsInList() == true)
+								{
+									log.logError(QString("analog signal %1 register %2 used by another analog signal").
+												 arg(signalID).arg(addr16.offset() + i));
+									result = false;
+								}
 							}
 							else
 							{

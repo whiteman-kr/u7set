@@ -1,3 +1,7 @@
+#ifndef GATEWAY_LIB_DOMAIN
+#error Do not include this file in the project! Link GatewayLib instead.
+#endif
+
 #include <CommonLib/ConstStrings.h>
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
@@ -97,17 +101,23 @@ namespace Gateway
 		return m_settingsValues;
 	}
 
-	ParseResult SettingsSet::setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
+	ParseResult SettingsSet::setSettingValue(int lineNo, E::Setting st, const QVariant& value, ParserLog* log)
 	{
 		if (isKnownSetting(st) == false)
 		{
-			log.logError(lineNo, QString("unknown setting '%1'").arg(settingName(st)));
+			if (log != nullptr)
+			{
+				log->logError(lineNo, QString("unknown setting '%1'").arg(settingName(st)));
+			}
 			return ParseResult::Error;
 		}
 
 		if (m_settingsValues.contains(st))
 		{
-			log.logError(lineNo, QString("setting '%1' already set").arg(settingName(st)));
+			if (log != nullptr)
+			{
+				log->logError(lineNo, QString("setting '%1' already set").arg(settingName(st)));
+			}
 			return ParseResult::Error;
 		}
 
@@ -124,8 +134,7 @@ namespace Gateway
 
 	bool SettingsSet::setSettingValue(E::Setting st, const QVariant& value)
 	{
-		ParserLog log;
-		ParseResult pr = setSettingValue(0, st, value, log);
+		ParseResult pr = setSettingValue(0, st, value, nullptr);
 
 		return (pr == ParseResult::Ok);
 	}
@@ -179,6 +188,11 @@ namespace Gateway
 
 	ParseResult SettingsSet::checkAndApplySettings(int lineNo, ParserLog& log)
 	{
+		if (m_settingsChecked == true)
+		{
+			return ParseResult::Ok;
+		}
+
 		m_settingsChecked = true;
 
 		ParseResult pr = checkRequiredSettings(lineNo, log);
