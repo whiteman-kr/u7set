@@ -1683,13 +1683,14 @@ namespace Afb
 
 		QDomDocument doc;
 
-		bool result = doc.setContent(ba, errorMsg);
-		if (result == false)
+		QDomDocument::ParseResult pr = doc.setContent(ba);
+
+		if (pr.errorMessage.isEmpty() == false)
 		{
 			return false;
 		}
 
-		result = loadFromXml(doc.firstChild().toElement(), errorMsg);
+		bool result = loadFromXml(doc.firstChild().toElement(), errorMsg);
 
 		return result;
 	}

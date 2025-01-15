@@ -53,7 +53,7 @@ namespace Sim
 		QDateTime currentTime() const
 		{
 			auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(m_currentTime);
-			return QDateTime::fromMSecsSinceEpoch(ms.count(), Qt::UTC);
+			return QDateTime::fromMSecsSinceEpoch(ms.count(), TIME_ZONE_UTC);
 		}
 	};
 

@@ -4,6 +4,7 @@
 
 #include <HardwareLib/DataProtocols.h>
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/Times.h>
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
 
@@ -86,7 +87,7 @@ namespace Rup
 
 		QDateTime dt;
 
-		dt.setTimeSpec(Qt::UTC);
+		dt.setTimeZone(TIME_ZONE_UTC);
 
 		dt.setDate(QDate(_year, _month, _day));
 		dt.setTime(QTime(_hour, _minute, _second, _millisecond));

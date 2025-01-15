@@ -65,7 +65,7 @@ const int Archive::MAX_QUEUE_SIZE_FOR_FLUSHING;
 
 QString Archive::formatTime(qint64 time)
 {
-	return QDateTime::fromMSecsSinceEpoch(time, Qt::TimeSpec::UTC).toString("yyyy-MM-dd HH:mm:ss");
+	return QDateTime::fromMSecsSinceEpoch(time, TIME_ZONE_UTC).toString("yyyy-MM-dd HH:mm:ss");
 }
 
 Archive::Archive(const QString& projectID,

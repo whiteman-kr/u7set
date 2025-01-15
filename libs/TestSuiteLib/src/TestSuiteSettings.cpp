@@ -48,17 +48,15 @@ namespace TestSuite
 			return false;
 		}
 
-		QString parseError;
-		int parseErrorLine = -1;
-		int parseErrorColumn = -1;
+		QDomDocument::ParseResult pr = doc.setContent(&file);
 
-		if (doc.setContent(&file, &parseError, &parseErrorLine, &parseErrorColumn) == false)
+		if (pr.errorMessage.isEmpty() == false)
 		{
 			*errorMsg = QObject::tr("Failed to load contents of the file %1, error in line %2, column %3, message %4")
 							.arg(fileName)
-							.arg(parseErrorLine)
-							.arg(parseErrorColumn)
-							.arg(parseError);
+							.arg(pr.errorLine)
+							.arg(pr.errorColumn)
+							.arg(pr.errorMessage);
 			return false;
 		}
 

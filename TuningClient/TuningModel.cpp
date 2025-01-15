@@ -1095,7 +1095,7 @@ DialogInputTuningValue::DialogInputTuningValue(TuningValue value,
 	m_analogFormat(analogFormat)
 {
 	m_discreteCheck = new QCheckBox();
-	connect(m_discreteCheck, &QCheckBox::stateChanged, this, &DialogInputTuningValue::on_m_checkBox_stateChanged);
+	connect(m_discreteCheck, &QCheckBox::checkStateChanged, this, &DialogInputTuningValue::on_m_checkBox_stateChanged);
 
 	m_analogEdit = new QLineEdit();
 
@@ -1250,7 +1250,7 @@ void DialogInputTuningValue::accept()
 	QDialog::accept();
 }
 
-void DialogInputTuningValue::on_m_checkBox_stateChanged(int state)
+void DialogInputTuningValue::on_m_checkBox_stateChanged(Qt::CheckState state)
 {
 	m_discreteCheck->setText(state == Qt::Checked ? tr("1") : tr("0"));
 }

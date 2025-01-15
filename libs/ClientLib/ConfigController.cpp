@@ -341,22 +341,20 @@ namespace ClientLib
 		qDebug() << Q_FUNC_INFO;
 
 		ConfigurationInfo conf{};
+		bool result = true;
 
 		// Parse mml
 		//
-		QString parsingError;
-		int errorLine = 0;
-		int errorColumn = 0;
-
 		QDomDocument xml;
-		bool result = xml.setContent(configurationXmlData, false, &parsingError, &errorLine, &errorColumn);
 
-		if (result == false)
+		QDomDocument::ParseResult pr = xml.setContent(configurationXmlData);
+
+		if (pr.errorMessage.isEmpty() == false)
 		{
-			m_logFile.writeError(QString("Parse Configuration.xml error, %1, line %2, column %3")
-								 .arg(parsingError)
-								 .arg(errorLine)
-								 .arg(errorColumn));
+			m_logFile.writeError(QString("Parse Configuration.xml error, %1, line %2, column %3").
+								 arg(pr.errorMessage).
+								 arg(pr.errorLine).
+								 arg(pr.errorColumn));
 			return;
 		}
 		else

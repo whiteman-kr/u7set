@@ -1015,7 +1015,7 @@ namespace AppSignalLists
 		m_decimalPlaces(decimalPlaces)
 	{
 		m_discreteCheck = new QCheckBox();
-		connect(m_discreteCheck, &QCheckBox::stateChanged, this, &DialogAppSignalListValue::onValueCheckStateChanged);
+		connect(m_discreteCheck, &QCheckBox::checkStateChanged, this, &DialogAppSignalListValue::onValueCheckStateChanged);
 
 		m_analogEdit = new QLineEdit();
 
@@ -1168,7 +1168,7 @@ namespace AppSignalLists
 		QDialog::accept();
 	}
 
-	void DialogAppSignalListValue::onValueCheckStateChanged(int state)
+	void DialogAppSignalListValue::onValueCheckStateChanged(Qt::CheckState state)
 	{
 		m_discreteCheck->setText(state == Qt::Checked ? tr("1") : tr("0"));
 	}

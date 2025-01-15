@@ -173,13 +173,13 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 	m_toolBar->addSeparator();
 
 	m_startDateTimeEdit = new QDateTimeEdit(m_source.requestStartTime.toDateTime(), this);
-	m_startDateTimeEdit->setTimeSpec(Qt::UTC);
+	m_startDateTimeEdit->setTimeZone(TIME_ZONE_UTC);
 	m_startDateTimeEdit->setCalendarPopup(true);
 	m_startDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
 	m_startDateTimeEdit->setMinimumWidth(QFontMetrics(m_startDateTimeEdit->font()).horizontalAdvance("dd/MM/yyyy  HH:mm:ss") + 20);
 
 	m_endDateTimeEdit = new QDateTimeEdit(m_source.requestEndTime.toDateTime(), this);
-	m_endDateTimeEdit->setTimeSpec(Qt::UTC);
+	m_endDateTimeEdit->setTimeZone(TIME_ZONE_UTC);
 	m_endDateTimeEdit->setCalendarPopup(true);
 	m_endDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
 	m_endDateTimeEdit->setMinimumWidth(QFontMetrics(m_endDateTimeEdit->font()).horizontalAdvance("dd/MM/yyyy  HH:mm:ss") + 20);

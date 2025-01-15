@@ -360,8 +360,8 @@ namespace Gateway
 			{
 				// convert local time to UTC0
 				//
-				QDateTime dt = QDateTime::fromMSecsSinceEpoch(time, Qt::UTC);
-				dt.setTimeSpec(Qt::LocalTime);
+				QDateTime dt = QDateTime::fromMSecsSinceEpoch(time, TIME_ZONE_UTC);
+				dt.setTimeZone(TIME_ZONE_LOCAL);
 				time = dt.toMSecsSinceEpoch();
 			}
 			break;
@@ -382,7 +382,7 @@ namespace Gateway
 	{
 		QDateTime dt;
 
-		dt.setTimeSpec(Qt::UTC);
+		dt.setTimeZone(TIME_ZONE_UTC);
 		dt.setSecsSinceEpoch(seconds);
 
 		QDate d = dt.date();

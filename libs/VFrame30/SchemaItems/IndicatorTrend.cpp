@@ -362,7 +362,7 @@ namespace VFrame30
 				Q_ASSERT(appSignalController);
 
 				for (size_t index = 0;
-					 const QString& appSignalId : qAsConst(itemSignalIds))
+					 const QString& appSignalId : std::as_const(itemSignalIds))
 				{
 					bool signalFound = false;
 

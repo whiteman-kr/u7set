@@ -216,6 +216,8 @@ namespace SchemaClientLib
 		m_signalDataServer(signalDataServer),
 		m_appSignalListSet(appSignalListSet)
 	{
+		Q_UNUSED(parent);
+
 		// Fill column names
 		//
 		m_columnsNames << QObject::tr("Signal ID");

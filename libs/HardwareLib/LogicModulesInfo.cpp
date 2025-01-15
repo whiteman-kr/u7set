@@ -48,15 +48,12 @@ bool LogicModulesInfo::load(const QByteArray& xmlData, QString* errMsg)
 
 	QDomDocument xmlDoc;
 
-	QString parsingError;
-	int errLine = 0;
-	int errColumn = 0;
+	QDomDocument::ParseResult pr = xmlDoc.setContent(xmlData);
 
-	bool result = xmlDoc.setContent(xmlData, false, &parsingError, &errLine, &errColumn);
-
-	if (result == false)
+	if (pr.errorMessage.isEmpty() == false)
 	{
-		*errMsg = QString("%1, line %2, column %3").arg(parsingError).arg(errLine).arg(errColumn);
+		*errMsg = QString("%1, line %2, column %3").
+						arg(pr.errorMessage).arg(pr.errorLine).arg(pr.errorColumn);
 		return false;
 	}
 
@@ -72,7 +69,7 @@ bool LogicModulesInfo::load(const QByteArray& xmlData, QString* errMsg)
 
 	int lmsCount = 0;
 
-	result = DomXmlHelper::getIntAttribute(logicModulesElem, XmlAttribute::COUNT, &lmsCount, errMsg);
+	bool result = DomXmlHelper::getIntAttribute(logicModulesElem, XmlAttribute::COUNT, &lmsCount, errMsg);
 
 	if (result == false)
 	{
