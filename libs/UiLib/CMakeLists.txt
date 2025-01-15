@@ -21,6 +21,7 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/DialogProgress.h
 	./include/UiLib/DialogProgress.h
 	./include/UiLib/DoubleValidatorEx.h
+	./include/UiLib/OverrideWindows11Style.h
 	./include/UiLib/PropertyEditor.h
 	./include/UiLib/PropertyEditorDialog.h
 	./include/UiLib/PropertyTable.h
@@ -34,6 +35,7 @@ qt_add_library(${TARGET} STATIC
 	DialogAlert.cpp
 	DialogProgress.cpp
 	DialogProgress.cpp
+	OverrideWindows11Style.cpp
 	PropertyEditor.cpp
 	PropertyEditorDialog.cpp
 	PropertyTable.cpp
