@@ -13,7 +13,7 @@ namespace Builder
 	VduAppSignalsInfoGenerator::VduAppSignalsInfoGenerator()
 	{
 		m_strings.reserve(32768);
-		appendString(QString());
+		appendString(QString(), false);
 	}
 
 	VduAppSignalsInfoGenerator::~VduAppSignalsInfoGenerator()
@@ -513,10 +513,10 @@ namespace Builder
 
 		// here this is offsets in m_string table, NOT in file!
 		//
-		si.refAppSignalID = appendString(appSignal->appSignalID());
-		si.refCustomAppSignalID = appendString(appSignal->customAppSignalID());
-		si.refCaption = appendString(appSignal->caption());
-		si.refUnit = appendString(appSignal->unit());
+		si.refAppSignalID = appendString(appSignal->appSignalID(), false);
+		si.refCustomAppSignalID = appendString(appSignal->customAppSignalID(), true);
+		si.refCaption = appendString(appSignal->caption(), false);
+		si.refUnit = appendString(appSignal->unit(), false);
 
 		//
 
@@ -572,8 +572,10 @@ namespace Builder
 		return true;
 	}
 
-	vdu_cstr VduAppSignalsInfoGenerator::appendString(const QString& str)
+	vdu_cstr VduAppSignalsInfoGenerator::appendString(const QString& str, bool checkExistString)
 	{
+		Q_UNUSED(checkExistString);
+
 		// returns offset in m_strings NOT in file!
 
 		QByteArray utf8Str = str.toUtf8();
@@ -586,6 +588,25 @@ namespace Builder
 		{
 			return it->second;
 		}
+
+		//
+
+/*		if (checkExistString && str.length() > 1 && str[0] != '#')
+		{
+			QString str2 = '#' + str;
+			QByteArray utf8Str2 = str2.toUtf8();
+
+			Hash32 hash2 = ::calcHash32(utf8Str2);
+
+			it = m_stringRefs.find(hash2);
+
+			if (it != m_stringRefs.end())
+			{
+				return (it->second | 0x80000000);
+			}
+		} */
+
+		//
 
 		vdu_cstr ref = static_cast<vdu_cstr>(m_strings.size());
 

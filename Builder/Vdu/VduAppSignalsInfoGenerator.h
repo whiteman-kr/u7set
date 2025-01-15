@@ -31,7 +31,7 @@ namespace Builder
 		bool appendVduSignal(const QString& appSignalID, bool isRxSignal,
 							 uint16_t portIndex, const Address16& rxAddr, Hash32* h32);
 		bool appendHash32AppSignalID(const QString& appSignalID);
-		vdu_cstr appendString(const QString& str);
+		vdu_cstr appendString(const QString& str, bool checkExistString);
 		void recalcStringsRefs(uint32_t stringsOffsetInFile);
 
 		bool writeBinFile();
