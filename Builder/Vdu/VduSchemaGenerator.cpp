@@ -137,6 +137,7 @@ namespace
 			}
 
 			structRect.fontIndex = fontIndex;
+			structRect.wordWrap = schemaItem.wordWrap();
 
 			structRect.text = VduFileString::stub;
 

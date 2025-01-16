@@ -62,6 +62,9 @@ namespace VFrame30
 		const QString& text() const;
 		void setText(const QString& value);
 
+		bool wordWrap() const;
+		void setWordWrap(bool value);
+
 		E::HorzAlign horzAlign() const;
 		void setHorzAlign(E::HorzAlign align);
 
@@ -80,6 +83,7 @@ namespace VFrame30
 		FontParam m_font;
 
 		QString m_text;
+		bool m_wordWrap = false;
 
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
 		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;

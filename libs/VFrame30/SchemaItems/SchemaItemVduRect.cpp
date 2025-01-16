@@ -1,7 +1,7 @@
-#include <VFrame30/SchemaItemVduRect.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/MacrosExpander.h>
 #include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemVduRect.h>
 #include <VFrame30/SchemaView.h>
 
 namespace VFrame30
@@ -16,21 +16,78 @@ namespace VFrame30
 	{
 		assert(units == SchemaUnit::Display);
 
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemVduRect::weight, SchemaItemVduRect::setWeight);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fill, PropertyNames::appearanceCategory, true, SchemaItemVduRect::fill, SchemaItemVduRect::setFill);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemVduRect::drawRect, SchemaItemVduRect::setDrawRect);
+		ADD_PROPERTY_GET_SET_CAT(int,
+								 PropertyNames::lineWeight,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemVduRect::weight,
+								 SchemaItemVduRect::setWeight);
 
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemVduRect::lineColor, SchemaItemVduRect::setLineColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemVduRect::fillColor, SchemaItemVduRect::setFillColor);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::fill,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemVduRect::fill,
+								 SchemaItemVduRect::setFill);
+
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::drawRect,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemVduRect::drawRect,
+								 SchemaItemVduRect::setDrawRect);
+
+
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::lineColor,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemVduRect::lineColor,
+								 SchemaItemVduRect::setLineColor);
+
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::fillColor,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemVduRect::fillColor,
+								 SchemaItemVduRect::setFillColor);
 
 		// Text Category Properties
 		//
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, SchemaItemVduRect::textColor, SchemaItemVduRect::setTextColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::textColor,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduRect::textColor,
+								 SchemaItemVduRect::setTextColor);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::textCategory, true, SchemaItemVduRect::text, SchemaItemVduRect::setText);
+		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::text,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduRect::text,
+								 SchemaItemVduRect::setText);
 
-		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemVduRect::horzAlign, SchemaItemVduRect::setHorzAlign);
-		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemVduRect::vertAlign, SchemaItemVduRect::setVertAlign);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::wordWrap,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduRect::wordWrap,
+								 SchemaItemVduRect::setWordWrap);
+
+		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign,
+								 PropertyNames::alignHorz,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduRect::horzAlign,
+								 SchemaItemVduRect::setHorzAlign);
+
+		ADD_PROPERTY_GET_SET_CAT(E::VertAlign,
+								 PropertyNames::alignVert,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduRect::vertAlign,
+								 SchemaItemVduRect::setVertAlign);
 
 		// Font
 		//
@@ -46,8 +103,8 @@ namespace VFrame30
 								 PropertyNames::textCategory,
 								 true,
 								 SchemaItemVduRect::getFontSize,
-								 SchemaItemVduRect::setFontSize)->
-			setPrecision(0);
+								 SchemaItemVduRect::setFontSize)
+			->setPrecision(0);
 
 		ADD_PROPERTY_GET_SET_CAT(bool,
 								 PropertyNames::fontBold,
@@ -103,6 +160,8 @@ namespace VFrame30
 		rectMessage->set_text(m_text.toUtf8());
 		m_font.SaveData(rectMessage->mutable_font());
 
+		rectMessage->set_wordwrap(m_wordWrap);
+
 		rectMessage->set_horzalign(static_cast<int32_t>(m_horzAlign));
 		rectMessage->set_vertalign(static_cast<int32_t>(m_vertAlign));
 
@@ -148,6 +207,8 @@ namespace VFrame30
 		m_text = QString::fromUtf8(rectMessage.text().c_str());
 		m_font.LoadData(rectMessage.font());
 
+		m_wordWrap = rectMessage.wordwrap();
+
 		m_horzAlign = static_cast<E::HorzAlign>(rectMessage.horzalign());
 		m_vertAlign = static_cast<E::VertAlign>(rectMessage.vertalign());
 
@@ -173,7 +234,7 @@ namespace VFrame30
 			rectPen = QPen{m_lineColor};
 			rectPen.setWidth(m_weight);
 		}
-		
+
 		painter->setPen(rectPen);
 
 		painter->drawRect(boundingRect);
@@ -186,7 +247,11 @@ namespace VFrame30
 		painter->setFont(font);
 		painter->setPen(m_textColor);
 
-		painter->drawText(boundingRect, static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign), m_text, nullptr);
+		int alignFlags = static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign);
+		int wordWrapFlags = wordWrap() ? static_cast<int>(Qt::TextWordWrap) : Qt::TextSingleLine;
+		int drawTextFlags = alignFlags | wordWrapFlags;
+
+		painter->drawText(boundingRect, drawTextFlags, m_text, nullptr);
 
 		return;
 	}
@@ -200,24 +265,6 @@ namespace VFrame30
 	{
 		return gridSize;
 	}
-
-	// void SchemaItemVduRect::drawPlainText(QPainter& painter, QRectF rect, QString text) const
-	//{
-	//	int flags = static_cast<int>(horzAlign()) |
-	//				static_cast<int>(vertAlign()) |
-	//				static_cast<int>((wordWrap() ? Qt::TextWordWrap : 0));
-
-	//	painter.setPen(m_textColor);
-
-	//	DrawHelper::drawText(&painter,
-	//						 m_font,
-	//						 itemUnit(),
-	//						 text,
-	//						 rect,
-	//						 flags);
-
-	//	return;
-	//}
 
 	void SchemaItemVduRect::accept(VduItemVisitor& visitor) const
 	{
@@ -294,6 +341,16 @@ namespace VFrame30
 	void SchemaItemVduRect::setText(const QString& value)
 	{
 		m_text = value;
+	}
+
+	bool SchemaItemVduRect::wordWrap() const
+	{
+		return m_wordWrap;
+	}
+
+	void SchemaItemVduRect::setWordWrap(bool value)
+	{
+		m_wordWrap = value;
 	}
 
 	E::HorzAlign SchemaItemVduRect::horzAlign() const

@@ -156,7 +156,8 @@ struct VduSchemaFileSchemaItemRect1
 	uint32_t reserve2;
 
 	uint16_t fontIndex; // Fonts are generated on build, each font is a folder with name as index, this folder contains font files.
-	uint16_t reserve3;
+	bool wordWrap;
+	bool reserverBool1;
 	vdu_cstr text;
 	uint32_t reserve4;
 

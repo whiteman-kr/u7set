@@ -875,6 +875,7 @@ message SchemaItemVduRect
 	optional uint32 fillColor = 11;
 	optional uint32 textColor = 12;
 	
+	optional bool wordWrap = 16;
 	optional string text = 17;
 	optional FontParam font = 18;
 
