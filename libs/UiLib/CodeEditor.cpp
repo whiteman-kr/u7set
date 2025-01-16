@@ -901,7 +901,7 @@ namespace UiLib
 
 	void Highlighter::highlightBlock(const QString& text)
 	{
-		for (const HighlightingRule& rule : qAsConst(m_highlightingRules))
+		for (const HighlightingRule& rule : std::as_const(m_highlightingRules))
 		{
 			QRegularExpressionMatchIterator matchIterator = rule.pattern.globalMatch(text);
 			while (matchIterator.hasNext())

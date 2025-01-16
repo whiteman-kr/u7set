@@ -478,7 +478,7 @@ namespace Tuning
 
 			m_state.lmTime = QDateTime(	QDate(rts.year, rts.month, rts.day),
 										QTime(rts.hour, rts.minute, rts.second, rts.millisecond),
-										Qt::UTC).toMSecsSinceEpoch();
+										TIME_ZONE_UTC).toMSecsSinceEpoch();
 
 			//
 

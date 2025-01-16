@@ -10,7 +10,7 @@ variables:
 
   # Build and test data
   #
-  QT_VERSION: "6.5.3"
+  QT_VERSION: "6.8.1"
   COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v426"
   SIMULATOR_PROJECT_NAME: "test_simulator_v426"
   PGPASSWORD: "P2ssw0rd"
@@ -21,7 +21,6 @@ stages:
   - prepare
   - build
   - test
-#  - deploy
 
 before_script:
 #  - echo before_script
@@ -86,7 +85,7 @@ linux_build_job:
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
-    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/release -DVCPKG_TARGET_TRIPLET=x64-linux"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/release"
     - "cmake --build ./build"
 
   artifacts:
@@ -119,7 +118,7 @@ windows_build_job:
     - "echo $Env:CI_COMMIT_SHA"
     - "git status"
     - "git log -1"
-    - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2019_64"
+    - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2022_64"
     - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR\\bin\\release"
 #Build Project
     - "# ----------------------------------------------"
@@ -245,22 +244,23 @@ windows_test_job:
     - "# ----------------------------------------------"
     - "&$Env:CI_PROJECT_DIR/bin/release/ClientTests.exe --gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*:TuningConnectionTests.*:RtDataProviderTests.*"
     - "&$Env:CI_PROJECT_DIR/bin/release/SimulatorTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/TestSuiteLibUnitTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
     #- "&$Env:CI_PROJECT_DIR/bin/release/LicenseLibTests.exe"
-    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Test/u7databasetestsArgs.xml\""
+    - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Tests/u7databasetestsArgs.xml\""
 
 #Run Builder test
     - "# ----------------------------------------------"
     - "#               Run BuilderConsole tests"
     - "# ----------------------------------------------"
     - "if (Test-Path c:/temp/build/test_simulator) { Remove-Item c:/temp/build/test_simulator -Recurse -Force; }"
-    - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Test/BuilderConsoleArgs.xml"
+    - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Tests/BuilderConsoleArgs.xml"
 
 #Run Compiler tests
     - "# ----------------------------------------------"
     - "#               Run Compiler tests"
     - "# ----------------------------------------------"
-    - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Test/CompilerTestsArgs.xml"
+    - "&$Env:CI_PROJECT_DIR/bin/release/BuilderConsole.exe $Env:CI_PROJECT_DIR/Tests/CompilerTestsArgs.xml"
 
 #Run Sim AFB Tests
     - "# ----------------------------------------------"
@@ -312,7 +312,7 @@ linux_test_job:
 #Create databases for compiler and simulator tests
     - "echo Creating PostgreSQL databases..."
     - "pushd /tmp"
-    - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
+    - "cp $CI_PROJECT_DIR/Tests/ImportDatabase.sh /tmp"
     - "cp /mnt/f/TestDatabase/u7_${COMPILER_TESTS_PROJECT_NAME}.sql /tmp"
     - "cp /mnt/f/TestDatabase/u7_${SIMULATOR_PROJECT_NAME}.sql /tmp"
     - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${COMPILER_TESTS_PROJECT_NAME}.sql u7_${COMPILER_TESTS_PROJECT_NAME} 5433"
@@ -328,13 +328,13 @@ linux_test_job:
     - "#               Run BuilderConsole tests"
     - "# ----------------------------------------------"
     - "if [ -d \"/tmp/build/test_simulator\" ]; then rm -Rf /tmp/build/test_simulator; fi"
-    - "$CI_PROJECT_DIR/bin/release/BuilderConsole $CI_PROJECT_DIR/Test/BuilderConsoleArgsLinux.xml"
+    - "$CI_PROJECT_DIR/bin/release/BuilderConsole $CI_PROJECT_DIR/Tests/BuilderConsoleArgsLinux.xml"
     
 #Run Compiler tests
     - "# ----------------------------------------------"
     - "#               Run Compiler tests"
     - "# ----------------------------------------------"
-    - "$CI_PROJECT_DIR/bin/release/BuilderConsole $CI_PROJECT_DIR/Test/CompilerTestsArgsLinux.xml"
+    - "$CI_PROJECT_DIR/bin/release/BuilderConsole $CI_PROJECT_DIR/Tests/CompilerTestsArgsLinux.xml"
 
 #Run Sim AFB Tests
     - "# ----------------------------------------------"
@@ -359,13 +359,17 @@ linux_test_job:
     - "./linux_test_job_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &"
     - "./linux_test_job_systemid_clienttest_ws02_ads.sh < /dev/null > clienttest_ws02_ads.out 2>&1 &"
     - "./linux_test_job_systemid_clienttest_ws01_tuns.sh < /dev/null > clienttest_ws01_tuns.out 2>&1 &"
+    - "./linux_test_job_systemid_clienttest_ws01_tuns2.sh < /dev/null > clienttest_ws01_tuns2.out 2>&1 &"
     - "./linux_test_job_systemid_clienttest_ws02_tuns.sh < /dev/null > clienttest_ws02_tuns.out 2>&1 &"
     - "./linux_test_job_systemid_clienttest_ws04_tuns.sh < /dev/null > clienttest_ws04_tuns.out 2>&1 &"
-    - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job -enable_lan -script=\"$CI_PROJECT_DIR/Test/ClientTests/Scripts/TuningTests.js\" > SimulatorConsole.out 2>&1 &"
-    - "sleep 5"
+    - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job -enable_lan -script=\"$CI_PROJECT_DIR/Tests/ClientTests/Scripts/TuningTests.js\" > SimulatorConsole.out 2>&1 &"
+    - "sleep 6"
     - "jobs"
     - "./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
     - "./AdsBridgeTests --config=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --profile=linux_test_job"
+    - "export QT_QPA_PLATFORM=offscreen"
+    - "./TestSuiteConsole -settings=\"../../Tests/TestSuiteConsoleLinuxTest.xml\" -nosecurity"
+    - "./TestSuiteConsole -settings=\"../../Tests/TestSuiteConsoleLinuxTest.xml\" -scripts_path=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS01_TESTSUITE -nosecurity"
     - "StopServices || true"
     - "popd"
 
@@ -374,9 +378,10 @@ linux_test_job:
     - "#               Run unit tests"
     - "# ----------------------------------------------"
     - "$CI_PROJECT_DIR/bin/release/SimulatorTests"
+    - "$CI_PROJECT_DIR/bin/release/TestSuiteLibUnitTests"
     - "$CI_PROJECT_DIR/bin/release/MetrologyTests"
     #- "$CI_PROJECT_DIR/bin/release/LicenseLibTests"
-    - "$CI_PROJECT_DIR/bin/release/u7databasetests -config=$CI_PROJECT_DIR/Test/u7databasetestsArgsLinux.xml"
+    - "$CI_PROJECT_DIR/bin/release/u7databasetests -config=$CI_PROJECT_DIR/Tests/u7databasetestsArgsLinux.xml"
 
 #Run ROVT to check configuration generation
 #    - "# ----------------------------------------------"
@@ -412,7 +417,7 @@ linux_code_coverage_job:
     - "# ----------------------------------------------"
     - "echo Creating PostgreSQL databases..."
     - "pushd /tmp"
-    - "cp $CI_PROJECT_DIR/Test/ImportDatabase.sh /tmp"
+    - "cp $CI_PROJECT_DIR/Tests/ImportDatabase.sh /tmp"
     - "cp /mnt/f/TestDatabase/u7_${SIMULATOR_PROJECT_NAME}.sql /tmp"
     - "echo P2ssw0rd | su postgres /tmp/ImportDatabase.sh /tmp/u7_${SIMULATOR_PROJECT_NAME}.sql u7_${SIMULATOR_PROJECT_NAME} 5434"
     - "rm /tmp/ImportDatabase.sh"
@@ -422,12 +427,12 @@ linux_code_coverage_job:
     - "# ----------------------------------------------"
     - "#                    Build                      "
     - "# ----------------------------------------------"
-    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/debug -DCODE_COVERAGE=ON -DADDRESS_SANITIZER=ON -DVCPKG_TARGET_TRIPLET=x64-linux"
+    - "cmake -S . -B ./build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_PREFIX_PATH=/opt/Qt/${QT_VERSION}/gcc_64 -DBIN_OUT_DIR=$CI_PROJECT_DIR/bin/debug -DCODE_COVERAGE=ON -DADDRESS_SANITIZER=ON"
     - "cmake --build ./build"    
     - "# ----------------------------------------------"
     - "#           Collect Test Coverage Data          "
     - "# ----------------------------------------------"
-    - "./Test/CodeCoverage.sh"
+    - "./Tests/CodeCoverage.sh"
 
   coverage: '/lines......: \d+\.\d+/'
   artifacts:

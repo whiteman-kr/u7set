@@ -1,20 +1,20 @@
 #ifndef TESTSUITEMAINWINDOW_H
 #define TESTSUITEMAINWINDOW_H
 
-#include <QMainWindow>
-#include "../TestSuiteLib/TestSuite.h"
-#include "../TestSuiteLib/TestSuiteConfigController.h"
-#include "../TestSuiteLib/TestScriptsStorage.h"
-#include "../OnlineLib/TcpClientStatistics.h"
-
-#include <UiLib/DialogAlert.h>
 #include <ClientLib/ClientTranslator.h>
 #include <SchemaClientLib/DialogTcpStatistics.h>
+#include <TestSuiteLib/MatsTestSuite.h>
+#include <TestSuiteLib/TestScriptsStorage.h>
+#include <TestSuiteLib/TestSuiteConfigController.h>
+#include <UiLib/DialogAlert.h>
+
+#include "../OnlineLib/TcpClientStatistics.h"
 
 #include "AppLogOutputWidget.h"
 #include "TestListWidget.h"
-
 #include "TestSuiteLog.h"
+
+#include <QMainWindow>
 
 class TestLogTabPage;
 
@@ -28,7 +28,7 @@ class TestSuiteMainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidget *parent = nullptr);
+	TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
 	~TestSuiteMainWindow();
 
 private:
@@ -41,15 +41,16 @@ private:
 	void createStatusBar();
 
 	void updateStatusBar();
-	void showSoftwareConnection(const QString& caption, const QString& nameFilter,
+	void showSoftwareConnection(const QString& caption,
+								const QString& nameFilter,
 								const std::vector<TcpClientStatistics::Statistics>& connectionStatistics,
 								QLabel* label);
 
 	void loadScriptsFromConfiguration();
 	void loadScriptsFromLocalPath();
 
-    void updateReportActions();
-	
+	void updateReportActions();
+
 	void updateTestViewTabPages();
 	void updateActionsState();
 
@@ -58,7 +59,7 @@ private:
 
 	void updateStatusIndicator();
 
-	bool eventFilter(QObject *object, QEvent *event) override;
+	bool eventFilter(QObject* object, QEvent* event) override;
 	void closeEvent(QCloseEvent* event) override;
 	void timerEvent(QTimerEvent* event) override;
 
@@ -84,14 +85,14 @@ private slots:
 	void onTestsScriptsReload();
 	void onShowTestContents(const QString& scriptName, const QString& functionName);
 	void onTabCloseRequested(int index);
-    void onGenerateReport(const QString& caption);
+	void onGenerateReport(const QString& caption);
 	void viewGlobalScript();
 
 	// Processing slots
 	//
 	void onConfigurationArrived();
 	void onTestingFinished(int result);
-	
+
 	void onGlobalPermissionChanged(bool result);
 	void onScriptPermissionChanged(QString scriptFileName, bool permission);
 
@@ -114,21 +115,21 @@ private:
 
 	QAction* m_reloadTestsScriptsAction = nullptr;
 	QAction* m_runAction = nullptr;
-	//QAction* m_pauseAction = nullptr;
+	// QAction* m_pauseAction = nullptr;
 	QAction* m_stopAction = nullptr;
 
 	QAction* m_viewGlobalScriptAction = nullptr;
 
-	QAction* m_reportToolbarAction = nullptr;	// Report button on the toolbar
+	QAction* m_reportToolbarAction = nullptr; // Report button on the toolbar
 
 	QAction* m_saveTestLogAction = nullptr;
 	QAction* m_loadTestLogAction = nullptr;
 	QAction* m_clearTestLogAction = nullptr;
 
-	QAction* m_singleReportAction = nullptr;	// Single report action
-    
-	QMenu* m_multipleReportsMenu = nullptr;		// Multiple reports submenu
-    std::vector<QAction*> m_multipleReportActions;
+	QAction* m_singleReportAction = nullptr;  // Single report action
+
+	QMenu* m_multipleReportsMenu = nullptr;   // Multiple reports submenu
+	std::vector<QAction*> m_multipleReportActions;
 
 	UiLib::TabWidgetEx* m_tabWidget = nullptr;
 
@@ -142,7 +143,7 @@ private:
 	QDockWidget* m_appLogPaneDock = nullptr;
 
 	// Main objects
-	TestSuiteLogFile m_appLog;						// Must be initialized first
+	TestSuiteLogFile m_appLog; // Must be initialized first
 	TestSuiteTestLogOutput m_testLogOutput;
 
 	TestSuite::TestSuiteConfigController m_configController;
@@ -150,7 +151,7 @@ private:
 	TestSuite::ConfigData m_configData;
 
 
-	TestSuite::TestSuite m_testSuite;
+	TestSuite::MatsTestSuite m_testSuite;
 	TestSuite::TestScriptsStorage m_testScriptsStorage;
 
 	// Status bar and statistics
@@ -164,7 +165,6 @@ private:
 	QLabel* m_statusBarLogAlerts = nullptr;
 
 	int m_mainWindowTimerId_250ms = -1;
-
 };
 
 extern TestSuiteMainWindow* theMainWindow;

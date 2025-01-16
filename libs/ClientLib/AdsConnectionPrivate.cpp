@@ -94,13 +94,31 @@ namespace ClientLib
 	void AdsConnectionPrivate::updateConnections(const SoftwareInfo& softwareInfo,
 												 const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
 	{
-		m_logFile.writeMessage("updateConnections()");
+		m_logFile.writeMessage(QString{"updateConnections(), %1 AppDataServices"}.arg(appDataServices.size()));
+		for (const auto& ads : appDataServices)
+		{
+			m_logFile.writeMessage(QString{"updateConnections(),    %1 - %2"}.arg(ads.shortenId).arg(ads.address.toString()));
+		}
 
 		QWriteLocker locker{&m_connsMutex};
 
-		m_conns.clear(); // it will stop all connection threads and destroy them
 		m_signalUpdater.reset();
 
+		// Remove connections that are not in the new configuration.
+		//
+		m_conns.remove_if(
+			[&appDataServices](const Connection& c)
+			{
+				return std::none_of(appDataServices.begin(),
+									appDataServices.end(),
+									[&c](const SoftwareEndpoint::AppDataService& ads)
+									{
+										return c.address() == ads.address;
+									});
+			});
+
+		// Add new connections.
+		//
 		for (const auto& ads : appDataServices)
 		{
 			auto it = std::find_if(m_conns.begin(),
@@ -112,8 +130,6 @@ namespace ClientLib
 
 			if (it != m_conns.end())
 			{
-				// Such connection already exists
-				//
 				continue;
 			}
 

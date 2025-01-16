@@ -15,7 +15,7 @@ DialogTrendSignalPoint::DialogTrendSignalPoint(std::vector<TrendLib::TrendStateI
 	ui->setupUi(this);
 	setWindowTitle(tr("Points"));
 
-	ui->dateTimeEdit->setTimeSpec(Qt::UTC);
+	ui->dateTimeEdit->setTimeZone(TIME_ZONE_UTC);
 
 	bool firstItem = true;
 

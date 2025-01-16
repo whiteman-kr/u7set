@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.16)
-
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
 	include_directories("C:/Program Files (x86)/Visual Leak Detector/include")
 	link_directories("C:/Program Files (x86)/Visual Leak Detector/lib/Win64")

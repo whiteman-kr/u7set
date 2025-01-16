@@ -398,7 +398,7 @@ namespace OnlineLib
 
 	QString DataSource::getTimeStr(qint64 timeMs)
 	{
-		QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, Qt::UTC, 0);
+		QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, TIME_ZONE_UTC);
 
 		QDate date = dt.date();
 		QTime time = dt.time();

@@ -1,5 +1,5 @@
 #include "ReportPropertyEditor.h"
-#include "../ReportLib/ReportTemplate.h"
+#include <ReportLib/ReportTemplate.h>
 #include <UiLib/CodeEditor.h>
 
 ReportPropertyEditor::ReportPropertyEditor(QWidget* parent):

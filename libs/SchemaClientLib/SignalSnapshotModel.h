@@ -98,7 +98,7 @@ namespace SchemaClientLib
 	//
 	// SnapshotItemModel
 	//
-	class SignalSnapshotModel : public QAbstractItemModel
+	class SignalSnapshotModel : public QAbstractTableModel
 	{
 		friend class SignalSnapshotSorter;
 

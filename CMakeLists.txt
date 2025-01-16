@@ -15,6 +15,10 @@ if(NOT DEFINED ENV{VCPKG_ROOT})
 	message(FATAL_ERROR "VCPKG_ROOT is not set. Please set it to the vcpkg root directory.")
 endif()
 
+if (UNIX)
+	set(VCPKG_TARGET_TRIPLET "x64-linux")
+endif()
+
 set(VCPKG_ROOT $ENV{VCPKG_ROOT})
 include(${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
@@ -35,7 +39,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Set the Qt version and find required components.
 # Finding components here speeds up cmake configure step.
 #
-set(QT_VERSION "6.5.3")
+set(QT_VERSION "6.8.1")
 
 find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
 find_package(Boost REQUIRED COMPONENTS graph)
@@ -45,9 +49,9 @@ find_package(asio CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 
-if (MSVC)
+if (WIN32)
 	find_package(Qt6 REQUIRED COMPONENTS AxContainer) # Metrology
-endif (MSVC)
+endif (WIN32)
 
 # Set warnings level and exclusions.
 #
@@ -145,7 +149,6 @@ message("-----------------------------------------")
 add_subdirectory(UtilsLib)
 add_subdirectory(AppSignalLib)
 add_subdirectory(OnlineLib)
-add_subdirectory(ReportLib)
 
 add_subdirectory(libs)
 
@@ -162,7 +165,6 @@ add_subdirectory(TuningService)
 add_subdirectory(GatewayService)
 add_subdirectory(DiagDataService)
 
-add_subdirectory(TestSuiteLib)
 add_subdirectory(TestSuiteConsole)
 
 # Do not compile these projects if code coverage is on.
@@ -180,11 +182,7 @@ if(NOT CODE_COVERAGE)
 	add_subdirectory(Metrology)
 endif()
 
-add_subdirectory(./Test/ClientTests)
-add_subdirectory(./Test/SimulatorTests)
-add_subdirectory(./Test/u7databaseTests)
-add_subdirectory(./Test/MetrologyTests)
-#add_subdirectory(./Test/TestSuiteTest)
+add_subdirectory(Tests)
 
 if (BUILD_LICENSER)
 	add_subdirectory(./Tools/Licenser)

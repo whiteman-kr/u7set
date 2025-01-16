@@ -3,7 +3,6 @@
 
 @section intro Introduction
 
-AdsBridge is a shared library that provides a C-API for connecting to one or several Application Data Services within the MATS ecosystem.
 AdsBridge is a shared library that provides a C-API for connecting to one or several Application Data Services (AppDataService) within the MATS ecosystem. 
 AppDataServices receive signal states from Logic Modules (LMs), which represent hardware components, and then forward them to clients like ArchiveService, Monitor, TestSuite, and AdsBridge. 
 

@@ -155,7 +155,7 @@ namespace AppSignalLists
 		TuningValue value() { return m_value; }
 
 	private slots:
-		void onValueCheckStateChanged(int state);
+		void onValueCheckStateChanged(Qt::CheckState state);
 		void onValueDefaultClicked();
 	};
 } // namespace AppSignalLists

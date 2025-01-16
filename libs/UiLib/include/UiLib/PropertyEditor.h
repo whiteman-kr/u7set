@@ -492,7 +492,7 @@ namespace ExtWidgets
 
 	public slots:
 		void changeValueOnButtonClick();
-		void onStateChanged(int state);
+		void onStateChanged(Qt::CheckState state);
 
 	private:
 		void updateText();

@@ -314,7 +314,7 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	// don't delete this to prevent plantTime conversion from Local to UTC time during call plantTime.toMSecsSinceEpoch()!!!
 	//
-	plantTime.setTimeSpec(Qt::UTC);
+	plantTime.setTimeZone(TIME_ZONE_UTC);
 
 	plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
 	plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
@@ -323,7 +323,7 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	// don't delete this to prevent localTime conversion from Local to UTC time during call localTime.toMSecsSinceEpoch()!!!
 	//
-	localTime.setTimeSpec(Qt::UTC);
+	localTime.setTimeZone(TIME_ZONE_UTC);
 
 	//
 

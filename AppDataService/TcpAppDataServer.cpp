@@ -614,7 +614,7 @@ void TcpAppDataServer::getServerTimes(qint64* utc, qint64* local)
 
 	*utc = currentTimeLocal.toMSecsSinceEpoch();
 
-	currentTimeLocal.setTimeSpec(Qt::UTC);
+	currentTimeLocal.setTimeZone(TIME_ZONE_UTC);
 
 	*local = currentTimeLocal.toMSecsSinceEpoch();
 }

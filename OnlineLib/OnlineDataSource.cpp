@@ -432,7 +432,7 @@ bool BaseOnlineDataSource::parseNextBuffer(const QThread* thread)
 
 		// don't delete this to prevent plantTime conversion from Local to UTC time during call plantTime.toMSecsSinceEpoch()!!!
 		//
-		plantTime.setTimeSpec(Qt::UTC);
+		plantTime.setTimeZone(TIME_ZONE_UTC);
 
 		plantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
 		plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
@@ -441,7 +441,7 @@ bool BaseOnlineDataSource::parseNextBuffer(const QThread* thread)
 
 		// don't delete this to prevent localTime conversion from Local to UTC time during call localTime.toMSecsSinceEpoch()!!!
 		//
-		localTime.setTimeSpec(Qt::UTC);
+		localTime.setTimeZone(TIME_ZONE_UTC);
 
 		//
 
@@ -551,7 +551,7 @@ QString BaseOnlineDataSource::rupFramePlantTimeStr() const
 
 QString BaseOnlineDataSource::getTimeStr(qint64 timeMs)
 {
-	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, Qt::UTC, 0);
+	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, TIME_ZONE_UTC);
 
 	QDate date = dt.date();
 	QTime time = dt.time();

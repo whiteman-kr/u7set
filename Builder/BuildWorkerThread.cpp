@@ -1,6 +1,6 @@
 #include <HardwareLib/PropertyNames.h>
 #include <HardwareLib/Subsystem.h>
-
+#include <ReportLib/ReportSchemaView.h>
 #include <SimulatorLib/Simulator.h>
 
 #include "AdsBridgeCfgGenerator.h"

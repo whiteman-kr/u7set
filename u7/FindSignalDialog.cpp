@@ -89,9 +89,9 @@ FindSignalDialog::FindSignalDialog(QTableView* parent) :
 	connect(m_findString, &QLineEdit::returnPressed, this, &FindSignalDialog::generateListIfNeededWithWarning);
 	connect(m_replaceString, &QLineEdit::returnPressed, this, &FindSignalDialog::generateListIfNeededWithWarning);
 	connect(m_searchInPropertyList, &QComboBox::currentTextChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
-	connect(m_caseSensitive, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
-	connect(m_wholeWords, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
-	connect(m_searchInSelected, &QCheckBox::stateChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
+	connect(m_caseSensitive, &QCheckBox::checkStateChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
+	connect(m_wholeWords, &QCheckBox::checkStateChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
+	connect(m_searchInSelected, &QCheckBox::checkStateChanged, this, &FindSignalDialog::generateListIfNeededWithWarning);
 
 	connect(m_replaceString, &QLineEdit::textEdited, this, &FindSignalDialog::updateAllReplacement);
 

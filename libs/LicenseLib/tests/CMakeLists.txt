@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(ClientTests LANGUAGES CXX)
-
-enable_testing()
+project(LicenseLibTests LANGUAGES CXX)
 
 set(GOOGLETEST_DIR $ENV{GOOGLETEST_DIR})
 

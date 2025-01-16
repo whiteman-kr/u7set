@@ -97,8 +97,11 @@ namespace SchemaClientLib
 		void keyPressEvent(QKeyEvent* event) override;
 		void timerEvent(QTimerEvent* event) override;
 
+	signals:
+		void signalsUpdated();
+
 	public slots:
-		void signalsUpdated(); // Should be called when new signals arrived from AppDataService
+		void onSignalsUpdated(); // Should be called when new signals arrived from AppDataService
 
 	private slots:
 		void headerColumnContextMenuRequested(const QPoint& pos);

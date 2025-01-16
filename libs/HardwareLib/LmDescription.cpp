@@ -254,13 +254,13 @@ bool LmDescription::load(const QByteArray& xml, QString* errorMessage)
 	}
 
 	QDomDocument doc;
-	int parseErrorLine = -1;
-	int parseErrorColumn = -1;
 
-	bool ok = doc.setContent(xml, false, errorMessage, &parseErrorLine, &parseErrorColumn);
-	if (ok == false)
+	QDomDocument::ParseResult pr = doc.setContent(xml);
+
+	if (pr.errorMessage.isEmpty() == false)
 	{
-		errorMessage->append(tr(" Error line %1, column %2").arg(parseErrorLine).arg(parseErrorColumn));
+		errorMessage->append(tr(" Error %1, line %2, column %3").
+								arg(pr.errorMessage).arg(pr.errorLine).arg(pr.errorColumn));
 		return false;
 	}
 
@@ -282,13 +282,13 @@ bool LmDescription::load(const QString& xml, QString* errorMessage)
 	}
 
 	QDomDocument doc;
-	int parseErrorLine = -1;
-	int parseErrorColumn = -1;
 
-	bool ok = doc.setContent(xml, errorMessage, &parseErrorLine, &parseErrorColumn);
-	if (ok == false)
+	QDomDocument::ParseResult pr = doc.setContent(xml);
+
+	if (pr.errorMessage.isEmpty() == false)
 	{
-		errorMessage->append(tr(" Error line %1, column %2").arg(parseErrorLine).arg(parseErrorColumn));
+		errorMessage->append(tr(" Error %1, line %2, column %3").
+								arg(pr.errorMessage).arg(pr.errorLine).arg(pr.errorColumn));
 		return false;
 	}
 

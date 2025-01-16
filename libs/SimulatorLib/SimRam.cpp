@@ -80,7 +80,7 @@ namespace Sim
 
 		// Check if all 0's
 		//
-		bool allZeroes = std::ranges::all_of(qAsConst(m_data), [](auto v) {return v == 0; });
+		bool allZeroes = std::ranges::all_of(std::as_const(m_data), [](auto v) {return v == 0; });
 
 		// --
 		//

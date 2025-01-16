@@ -8,4 +8,3 @@ function(set_warnings)
 	endif()
 
 endfunction()
-
