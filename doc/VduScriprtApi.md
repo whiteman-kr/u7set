@@ -5,6 +5,7 @@
 ```c
 string schemaId()
 string schemaCaption()
+string schemaCaptionById(string schemaId)
 ```
 
 ```c
@@ -164,6 +165,13 @@ float itemSignalValueFloat(SchemaItem* item, int signalIndex)
 ```c
 bool itemAcceptClick(SchemaItem* item);
 void itemSetAcceptClick(SchemaItem* item, bool value);
+```
+
+```c
+bool itemSetLeft(SchemaItem* item, int left);
+bool itemSetTop(SchemaItem* item, int top);
+bool itemSetWidth(SchemaItem* item, int width);
+bool itemSetHeight(SchemaItem* item, int height);
 ```
 
 ### SchemaItemVduLine
