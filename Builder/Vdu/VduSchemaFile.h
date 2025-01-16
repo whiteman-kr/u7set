@@ -193,7 +193,7 @@ struct VduSchemaFileSchemaItemValue1
 	uint16_t decimalPlaces; // Number of decimal places for floating point values.
 	uint16_t reserve5;
 
-	uint32_t reserve6;
+	int32_t align;          // HorzAlign | VertAlign
 	uint32_t reserve7;
 
 	// clang-format off

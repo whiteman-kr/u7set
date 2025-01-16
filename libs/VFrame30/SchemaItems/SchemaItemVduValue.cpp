@@ -76,6 +76,20 @@ namespace VFrame30
 								 SchemaItemVduValue::precision,
 								 SchemaItemVduValue::setPrecision);
 
+		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign,
+								 PropertyNames::alignHorz,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduValue::horzAlign,
+								 SchemaItemVduValue::setHorzAlign);
+
+		ADD_PROPERTY_GET_SET_CAT(E::VertAlign,
+								 PropertyNames::alignVert,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemVduValue::vertAlign,
+								 SchemaItemVduValue::setVertAlign);
+
 		// Font
 		//
 		ADD_PROPERTY_GET_SET_CAT(QString,
@@ -150,6 +164,9 @@ namespace VFrame30
 
 		valueMessage->set_precision(m_precision);
 
+		valueMessage->set_horzalign(static_cast<int32_t>(m_horzAlign));
+		valueMessage->set_vertalign(static_cast<int32_t>(m_vertAlign));
+
 		return true;
 	}
 
@@ -195,6 +212,9 @@ namespace VFrame30
 
 		m_precision = valueMessage.precision();
 
+		m_horzAlign = valueMessage.has_horzalign() ? static_cast<E::HorzAlign>(valueMessage.horzalign()) : E::HorzAlign::AlignHCenter;
+		m_vertAlign = valueMessage.has_vertalign() ? static_cast<E::VertAlign>(valueMessage.vertalign()) : E::VertAlign::AlignVCenter;
+
 		return true;
 	}
 
@@ -232,7 +252,9 @@ namespace VFrame30
 
 		QString text = parseText(m_text, context()->appSignalController());
 
-		painter->drawText(boundingRect, static_cast<int>(Qt::AlignHCenter) | static_cast<int>(Qt::AlignVCenter), text, nullptr);
+		int alignFlags = static_cast<int>(m_horzAlign) | static_cast<int>(m_vertAlign);
+
+		painter->drawText(boundingRect, alignFlags, text, nullptr);
 
 		return;
 	}
@@ -266,7 +288,7 @@ namespace VFrame30
 
 		bool signalFound = false;
 		AppSignalParam signalParam;
-		
+
 		if (appSignalController != nullptr)
 		{
 			signalParam = appSignalController->signalParam(appSignalId, &signalFound);
@@ -470,4 +492,23 @@ namespace VFrame30
 
 	IMPLEMENT_FONT_PROPERTIES(SchemaItemVduValue, Font, m_font);
 
+	E::HorzAlign SchemaItemVduValue::horzAlign() const
+	{
+		return m_horzAlign;
+	}
+
+	void SchemaItemVduValue::setHorzAlign(E::HorzAlign align)
+	{
+		m_horzAlign = align;
+	}
+
+	E::VertAlign SchemaItemVduValue::vertAlign() const
+	{
+		return m_vertAlign;
+	}
+
+	void SchemaItemVduValue::setVertAlign(E::VertAlign align)
+	{
+		m_vertAlign = align;
+	}
 } // namespace VFrame30

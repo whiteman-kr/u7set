@@ -899,6 +899,9 @@ message SchemaItemVduValue
 	optional FontParam font = 18;
 
 	optional uint32 precision = 25;
+
+	optional int32 horzAlign = 30;
+	optional int32 vertAlign = 31;
 }
 
 

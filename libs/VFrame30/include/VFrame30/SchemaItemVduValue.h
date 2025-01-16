@@ -71,6 +71,12 @@ namespace VFrame30
 
 		DECLARE_FONT_PROPERTIES(Font)
 
+		E::HorzAlign horzAlign() const;
+		void setHorzAlign(E::HorzAlign align);
+
+		E::VertAlign vertAlign() const;
+		void setVertAlign(E::VertAlign align);
+
 	private:
 		int m_weight = 0;       // Line weight, in pixels
 		bool m_drawRect = true; // Rect is visible, thickness 0 is possible
@@ -101,5 +107,8 @@ namespace VFrame30
 		int m_precision = 0; // Number of digits after the decimal point
 
 		FontParam m_font;
+
+		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
+		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;
 	};
 } // namespace VFrame30

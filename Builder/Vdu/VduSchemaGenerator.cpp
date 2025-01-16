@@ -145,6 +145,8 @@ namespace
 												  sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemRect1, text));
 			addedStrings.push_back(std::move(text));
 
+			structRect.align = static_cast<int32_t>(schemaItem.horzAlign()) | static_cast<int32_t>(schemaItem.vertAlign());
+
 			itemType = structRect.itemType;
 			outData = QByteArray(reinterpret_cast<const char*>(&structRect), sizeof(structRect));
 		}
@@ -199,6 +201,8 @@ namespace
 			structValue.fontIndex = fontIndex;
 
 			structValue.decimalPlaces = schemaItem.precision();
+
+			structValue.align = static_cast<int32_t>(schemaItem.horzAlign()) | static_cast<int32_t>(schemaItem.vertAlign());
 
 			// Save text in UTF-8, this text is embedded to the structure, as it can be used in the script.
 			//
