@@ -45,10 +45,13 @@ namespace Builder
 
 		// Render to m_data
 		//
-		m_data.resize(imageSize());
+		m_data.clear();
+		m_data.reserve(imageSize());
 
 		const char* imageData = reinterpret_cast<const char*>(m_image.bits());
-		char* data = m_data.data();
+
+		int repeatCount = 0;
+		char pixelColor = 0x55;
 
 		for (int i = 0; i < m_image.height(); i++)
 		{
@@ -57,11 +60,62 @@ namespace Builder
 			{
 				if (j < m_image.width())
 				{
-					*data++ = ((0xff - *imageData) & 0xc0);
+					char nextPixelColor = ((0xff - *imageData) & 0xc0) >> 6; // Bits 0 and 1 mean color, 00, 01, 10, 11
+					if (pixelColor == 0x55)
+					{
+						// First pixel initialization
+						pixelColor = nextPixelColor;
+					}
+
+					if (nextPixelColor == pixelColor && repeatCount < 63)
+					{
+						repeatCount++;
+					}
+					else
+					{
+						m_data.append((repeatCount << 2) | pixelColor); // Bits 7..2 mean count of repeats (0..63)
+						repeatCount = 1;
+						pixelColor = nextPixelColor;
+					}
 				}
 				imageData++;
 			}
 		}
+
+		// Write the last value
+		//
+		if (repeatCount > 1)
+		{
+			m_data.append((repeatCount << 2) | pixelColor); // Bits 7..2 mean count of repeats (0..63)
+		}
+
+		/* left for testing
+		if (m_header.code == 65)
+		{
+			qDebug() << "------------";
+			QString s;
+
+			for (unsigned char c : m_data)
+			{
+				int symbol = (unsigned int)c & 0x3;
+				int repeats = (unsigned int)c >> 2;
+
+				for (int i = 0; i < repeats; i++)
+				{
+					s.append(QString::number(symbol));
+					int l = s.length();
+					if (l >= m_header.width)
+					{
+						qDebug() << s;
+						s.clear();
+					}
+				}
+			}
+			if (s.isEmpty() == false)
+			{
+				qDebug() << s;
+			}
+		}*/
 	}
 
 	void VduSymbol::saveToBmp(QByteArray& out) const
@@ -306,11 +360,11 @@ namespace Builder
 						result &= context.m_buildResultWriter->addFile(dir, fileNameSuffix + ".bmp", ba) != nullptr;
 					}
 #if 0 // This code is left for debugging
-	  //{
-	  // QByteArray ba;
-	  // s.saveToVdut(ba);
-	  // result &= context.m_buildResultWriter->addFile(dir, fileNameSuffix + textSymbolExtension, ba) != nullptr;
-	  //}
+	  {
+	   QByteArray ba;
+	   s.saveToVdut(ba);
+	   result &= context.m_buildResultWriter->addFile(dir, fileNameSuffix + textSymbolExtension, ba) != nullptr;
+	  }
 #endif
 				}
 			}
@@ -321,7 +375,7 @@ namespace Builder
 		for (VduSymbol& s : symbols)
 		{
 			s.setHeaderOffset(offset);
-			offset += s.imageSize();
+			offset += s.data().size();
 		}
 
 		// Save font to the file
