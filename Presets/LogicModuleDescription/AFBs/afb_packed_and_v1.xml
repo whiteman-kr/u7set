@@ -1,4 +1,4 @@
-<AFBComponent Caption="PACKED_AND" OpCode="252" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation">
+<AFBComponent Caption="PACKED_AND" OpCode="252" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation" SoftwareImplemented="true">
     <Pin OpName="i_oprd_quant"	OpIndex ="0"	PinType = "Param"/>
     <Pin OpName="i_bus_width"	OpIndex ="1"	PinType = "Param"/>
     <Pin OpName="i_conf"		OpIndex ="2"	PinType = "Param"/>

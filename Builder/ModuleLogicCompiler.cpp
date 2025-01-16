@@ -18752,10 +18752,9 @@ namespace Builder
 
 		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& components = m_lmDescription->afbComponents();
 
-		for(std::pair<int, std::shared_ptr<Afb::AfbComponent>> pair : components)
+		for(auto const& [componentOpCode, component] : components)
 		{
-			int componentOpCode = pair.first;
-			std::shared_ptr<Afb::AfbComponent> component = pair.second;
+			TEST_PTR_CONTINUE(component);
 
 			if (component->caption() == "SET_FLAGS")
 			{
