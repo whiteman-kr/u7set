@@ -8,6 +8,6 @@
       "noImplicitThis": true,
       "noImplicitReturns" : true,
 //      "watch": true,
-      "outFile": "out/VDU1_Conf.js"
+      "outFile": "out/ConfigScript.js"
   }
 }

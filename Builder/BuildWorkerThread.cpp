@@ -2578,7 +2578,7 @@ namespace Builder
 
 		TEST_PTR_RETURN_FALSE(log);
 
-		const std::vector<Hardware::DeviceModule *>& lmModules = m_context->m_lmModules;
+		const std::vector<Hardware::DeviceModule *>& fscModules = m_context->m_fscModules;
 		std::map<QString, quint64>& lmsUniqueIDs = m_context->m_lmsUniqueIDs;
 
 		lmsUniqueIDs.clear();
@@ -2589,7 +2589,7 @@ namespace Builder
 		// Count Unique ID for this compilation
 		//
 
-		for (auto it = lmModules.begin(); it != lmModules.end(); it++)
+		for (auto it = fscModules.begin(); it != fscModules.end(); it++)
 		{
 			Hardware::DeviceModule* lm = *it;
 
@@ -2600,6 +2600,11 @@ namespace Builder
 				continue;
 			}
 
+			if (lm->isLogicModule() == false && lm->isVdu() == false) 
+			{
+				continue;
+			}
+			
 			QString subsysID = lm->propertyValue(EquipmentPropNames::SUBSYSTEM_ID).toString();
 			if (subsysID.isEmpty())
 			{
@@ -2654,7 +2659,15 @@ namespace Builder
 				}
 			}
 
-			firmwareWriter->setGenericUniqueId(subsysID, lmNumber, genericUniqueId);
+			auto lmDescriptionPtr = m_context->m_lmDescriptions->get(lm);
+			if (lmDescriptionPtr == nullptr) 
+			{
+				log->errINT1001(tr("LM Description is not found for LM='%1' ").arg(lm->equipmentId()) + Q_FUNC_INFO);
+				result = false;
+				continue;
+			}
+
+			firmwareWriter->setGenericUniqueId(subsysID, lmNumber, genericUniqueId, *lmDescriptionPtr);
 
 			lmsUniqueIDs.insert({ lm->equipmentIdTemplate(), genericUniqueId });
 		}

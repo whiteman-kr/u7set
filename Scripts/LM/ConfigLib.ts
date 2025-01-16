@@ -199,13 +199,16 @@ module ConfigStruct
 		storeHash64(frameIndex: number, offset: number, dataString: string): string;
 
 		calcCrc32(frameIndex: number, start: number, count: number): number;
+		calcCrc64(frameIndex: number, start: number, count: number): ArrayBuffer;
 		calcHash64(dataString: string): any;
 
 		jsSetDescriptionFields(descriptionVersion: number, description: string): void;
 		jsAddDescription(channel: number, description: string): void;
 		jsSetUniqueID(LMNumber: number, uniqueID: number): void;
+		jsSetUniqueID64(LMNumber: number, uniqueIDLo: number, uniqueIDHi: number, ): void;
 
 		writeLog(message: string): void;
+		replaceLog(subsystemID: string, oldMessage: string, newMessage: string): void;
 		buildNumber(): number;
 
 		checkMacForUnique(m1: number, m2: number, m3: number): boolean;
@@ -276,6 +279,11 @@ module ConfigStruct
 		FlashMemory_ConfigFramePayload: number;
 		FlashMemory_ConfigFrameCount: number;
 		FlashMemory_ConfigUartId: number;
+		FlashMemory_MaxConfigurationCount: number;
+		FlashMemory_SingleConfigFirstFrame: number;
+		FlashMemory_SingleConfigFrameCount: number;
+		FlashMemory_SingleConfigUniqueIdOffset: number;
+
 		Memory_TxDiagDataSize: number;
 		OptoInterface_OptoPortCount: number;
 		Lan_ControllerCount: number;
@@ -337,7 +345,7 @@ module ConfigLib
 	{
 		if (channel != -1 && equpmentID.length > 0)
 		{
-			confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "8;" + caption + ";0x" + data.toString(16));
+			confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "8;" + caption + ";0x" + (data >>> 0).toString(16));
 		}
 
 		if (confFirmware.setData8(frameIndex, offset, data) == false)
@@ -352,7 +360,7 @@ module ConfigLib
 	{
 		if (channel != -1 && equpmentID.length > 0)
 		{
-			confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "16;" + caption + ";0x" + data.toString(16));
+			confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "16;" + caption + ";0x" + (data >>> 0).toString(16));
 		}
 
 		if (confFirmware.setData16(frameIndex, offset, data) == false)
@@ -367,12 +375,32 @@ module ConfigLib
 	{
 		if (channel != -1 && equpmentID.length > 0)
 		{
-			confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";0x" + data.toString(16));
+			confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "32;" + caption + ";0x" + (data >>> 0).toString(16));
 		}
 
 		if (confFirmware.setData32(frameIndex, offset, data) == false)
 		{
 			log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData32");
+			return false;
+		}
+		return true;
+	}
+
+	export function setData64(confFirmware: ConfigStruct.ModuleFirmware, log: ConfigStruct.IssueLogger, channel: number, equpmentID: string, frameIndex: number, offset: number, caption: string, dataHi: number, dataLo: number): boolean
+	{
+		if (channel != -1 && equpmentID.length > 0)
+		{
+			confFirmware.jsAddDescription(channel, equpmentID + ";" + frameIndex + ";" + offset + ";0;" + "64;" + caption + ";0x" + (dataHi >>> 0).toString(16) + (dataLo >>> 0).toString(16));
+		}
+
+		if (confFirmware.setData32(frameIndex, offset, dataHi) == false)
+		{
+			log.writeError("Frame = " + frameIndex + ", Offset = " + offset + ", frameIndex or offset are out of range in function setData64");
+			return false;
+		}
+		if (confFirmware.setData32(frameIndex, offset + 4, dataLo) == false)
+		{
+			log.writeError("Frame = " + frameIndex + ", Offset = " + (offset + 4) + ", frameIndex or offset are out of range in function setData64");
 			return false;
 		}
 		return true;
@@ -462,13 +490,13 @@ module ConfigLib
 		lan: ConfigStruct.LanConfig,
 		log: ConfigStruct.IssueLogger): boolean
 	{
-	
+
 		// Build prefix
-	
+
 		let controllerPrefix: string;
 		let servicePrefix: string;
 		let overridePrefix: string;
-	
+
 		switch (softwareType)
 		{
 			case ConfigStruct.SoftwareType.TuningService:
@@ -490,18 +518,18 @@ module ConfigLib
 				log.writeError("fillLanServiceData: wrong software type");
 				return false;
 		}
-	
+
 		// Get ethernet controller
-	
+
 		let ethernetControllerObject: ConfigStruct.ScriptDeviceObject = module.childByEquipmentId(module.equipmentId + ethernetcontrollerId);
 		if (ethernetControllerObject == null || ethernetControllerObject.isController() == false)
 		{
 			log.errCFG3004(module.equipmentId + ethernetcontrollerId, module.equipmentId);
 			return false;
 		}
-	
+
 		let ethernetController: ConfigStruct.ScriptDeviceController = ethernetControllerObject.toController();
-	
+
 		let checkControllerProperties: string[] = [controllerPrefix + "ServiceID", controllerPrefix + "Enable", controllerPrefix + "IP", controllerPrefix + "Port", "Override" + overridePrefix + "DataWordCount"];
 		for (let cp: number = 0; cp < checkControllerProperties.length; cp++)
 		{
@@ -511,28 +539,28 @@ module ConfigLib
 				return false;
 			}
 		}
-	
+
 		// Get data from services
-	
+
 		let serviceID: string = ethernetController.propertyString(controllerPrefix + "ServiceID");
-	
+
 		if (ethernetController.propertyBool(controllerPrefix + "Enable") == true)
 		{
-	
+
 			// If Enable == true, take IP from service or default if service is not found
-	
+
 			lan.ip = ethernetController.propertyIP(controllerPrefix + "IP");
 			lan.port = ethernetController.propertyInt(controllerPrefix + "Port");
-	
+
 			let serviceObject: ConfigStruct.ScriptDeviceObject = root.childByEquipmentId(serviceID);	// This can be software or controller
 			let serviceSoftware: ConfigStruct.ScriptDeviceSoftware = null;							// This will be software
-	
+
 			if (serviceObject != null)
 			{
 				if (serviceObject.isController() == true)
 				{
 					let parentObject: ConfigStruct.ScriptDeviceObject = serviceObject.parent();
-	
+
 					if (parentObject != null && parentObject.isSoftware() == true)
 					{
 						serviceSoftware = parentObject.toSoftware();
@@ -546,12 +574,12 @@ module ConfigLib
 					}
 				}
 			}
-	
+
 			if (serviceObject == null || serviceSoftware == null)
 			{
-	
+
 				//Service was not found
-	
+
 				if (lan.serviceIP != 0 && lan.servicePort != 0)
 				{
 					log.wrnCFG3018(controllerPrefix + "DataService", ConfigLib.ipToString(lan.serviceIP), lan.servicePort, ethernetController.equipmentId);
@@ -565,15 +593,15 @@ module ConfigLib
 			{
 				// Check software type
 				//
-	
+
 				if (serviceSoftware.softwareType != softwareType)
 				{
 					log.errCFG3017(ethernetController.equipmentId, "Type", serviceSoftware.equipmentId);
 					return false;
 				}
-	
+
 				// Take address from service
-	
+
 				let checkServiceProperties: string[] = [servicePrefix + "IP", servicePrefix + "Port"];
 				for (let cp: number = 0; cp < checkServiceProperties.length; cp++)
 				{
@@ -583,18 +611,18 @@ module ConfigLib
 						return false;
 					}
 				}
-	
+
 				lan.serviceIP = serviceObject.propertyIP(servicePrefix + "IP");
 				lan.servicePort = serviceObject.propertyInt(servicePrefix + "Port");
 			}
-	
+
 			lan.dataID = module.propertyValue(overridePrefix + "LANDataUID");
 			if (lan.dataID == undefined)
 			{
 				log.errCFG3000(overridePrefix + "LANDataUID", module.equipmentId);
 				return false;
 			}
-	
+
 			let overrideTuningWordsCount: number = ethernetController.propertyInt("Override" + overridePrefix + "DataWordCount");
 			if (overrideTuningWordsCount != -1)
 			{
@@ -605,17 +633,17 @@ module ConfigLib
 		else
 		{
 			// If Enable == false, set service ID is 0 even
-	
+
 			lan.dataID = 0;
 			lan.wordsCount = 0;
 			lan.serviceIP = 0;
 			lan.servicePort = 0;
 		}
-	
-	
+
+
 		return true;
 	}
-	
+
 	export function generate_LANConfiguration_v0(confFirmware: ConfigStruct.ModuleFirmware, frame: number, module: ConfigStruct.ScriptDeviceModule, ethernetControllerId: string, lan1: ConfigStruct.LanConfig, lan2: ConfigStruct.LanConfig, log: ConfigStruct.IssueLogger): boolean
 	{
 
@@ -769,7 +797,7 @@ module ConfigLib
 
 			// DUID
 
-			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN " + (i + 1) + " DUID = " + lan[i].dataID + "\r\n");
+			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN " + (i + 1) + " DUID = " + lan[i].dataID + " (0x" + (lan[i].dataID >>> 0).toString(16) + ")\r\n");
 
 			if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "LAN " + (i + 1) + " DUID", lan[i].dataID) == false)
 			{
@@ -787,25 +815,25 @@ module ConfigLib
 		return true;
 	}
 
-	export function generate_LANConfiguration_v2(confFirmware: ConfigStruct.ModuleFirmware, 
-		lmNumber: number,
-		frame: number, 
-		startPtr: number,
-		module: ConfigStruct.ScriptDeviceModule, 
+	export function generate_LANConfiguration_v1(confFirmware: ConfigStruct.ModuleFirmware,
+		frame: number,
+		module: ConfigStruct.ScriptDeviceModule,
 		ethernetControllerId: string,
-		lan: ConfigStruct.LanConfig[], 
+		lan: ConfigStruct.LanConfig[],
 		log: ConfigStruct.IssueLogger): boolean
 	{
-		let ptr: number = startPtr;
+
+		let ptr: number = 0;
 
 		let controllerEquipmentID: string = module.equipmentId + ethernetControllerId;
+		let LMNumber: number = module.propertyInt("LMNumber");
 
 		// Version
 		//
 		const version: number = 1;
 
 		confFirmware.writeLog("    [" + frame + ":" + ptr + "] : LAN Configuration format version = " + version + "\r\n");
-		if (setData16(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "Version", version) == false)
+		if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "Version", version) == false)
 		{
 			return false;
 		}
@@ -868,17 +896,17 @@ module ConfigLib
 		}
 
 		confFirmware.writeLog("    [" + frame + ":" + ptr + "] : MAC address of LM = " + m1.toString(16) + ":" + m2.toString(16) + ":" + m3.toString(16) + "\r\n");
-		if (setData16(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "MAC1", m1) == false)
+		if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC1", m1) == false)
 		{
 			return false;
 		}
 		ptr += 2;
-		if (setData16(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "MAC2", m2) == false)
+		if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC2", m2) == false)
 		{
 			return false;
 		}
 		ptr += 2;
-		if (setData16(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "MAC3", m3) == false)
+		if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "MAC3", m3) == false)
 		{
 			return false;
 		}
@@ -892,7 +920,7 @@ module ConfigLib
 			let flags: number = 0;
 
 			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : SUBN " + (i + 1) + " Flags = " + flags + "\r\n");
-			if (setData16(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " Flags", flags) == false)
+			if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " Flags", flags) == false)
 			{
 				return false;
 			}
@@ -902,7 +930,7 @@ module ConfigLib
 
 			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : SUBN " + (i + 1) + " IP = " + ipToString(lan[i].ip) + "\r\n");
 
-			if (setData32(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " IP", lan[i].ip) == false)
+			if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " IP", lan[i].ip) == false)
 			{
 				return false;
 			}
@@ -912,7 +940,7 @@ module ConfigLib
 
 			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : SUBN " + (i + 1) + " Port = " + lan[i].port + "\r\n");
 
-			if (setData16(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " Port", lan[i].port) == false)
+			if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " Port", lan[i].port) == false)
 			{
 				return false;
 			}
@@ -922,7 +950,7 @@ module ConfigLib
 
 			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : SUBN " + (i + 1) + " Service IP = " + ipToString(lan[i].serviceIP) + "\r\n");
 
-			if (setData32(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " Service IP", lan[i].serviceIP) == false)
+			if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " Service IP", lan[i].serviceIP) == false)
 			{
 				return false;
 			}
@@ -932,7 +960,7 @@ module ConfigLib
 
 			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : SUBN " + (i + 1) + " Service Port = " + lan[i].servicePort + "\r\n");
 
-			if (setData16(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " Service Port", lan[i].servicePort) == false)
+			if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " Service Port", lan[i].servicePort) == false)
 			{
 				return false;
 			}
@@ -942,7 +970,7 @@ module ConfigLib
 
 			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : SUBN " + (i + 1) + " words count = " + lan[i].wordsCount + "\r\n");
 
-			if (setData16(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " words count", lan[i].wordsCount) == false)
+			if (setData16(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " words count", lan[i].wordsCount) == false)
 			{
 				return false;
 			}
@@ -950,9 +978,10 @@ module ConfigLib
 
 			// DUID
 
-			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : SUBN " + (i + 1) + " DUID = " + lan[i].dataID + "\r\n");
+			
+			confFirmware.writeLog("    [" + frame + ":" + ptr + "] : SUBN " + (i + 1) + " DUID = " + lan[i].dataID + " (0x" + (lan[i].dataID >>> 0).toString(16) + ")\r\n");
 
-			if (setData32(confFirmware, log, lmNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " DUID", lan[i].dataID) == false)
+			if (setData32(confFirmware, log, LMNumber, controllerEquipmentID, frame, ptr, "SUBN " + (i + 1) + " DUID", lan[i].dataID) == false)
 			{
 				return false;
 			}
@@ -966,7 +995,13 @@ module ConfigLib
 
 	// function returns the amount of transmitting words
 	//
-	export function generate_lmTxRxOptoConfiguration(confFirmware: ConfigStruct.ModuleFirmware, log: ConfigStruct.IssueLogger, frame: number, module: ConfigStruct.ScriptDeviceModule, LMNumber: number, opticModuleStorage: ConfigStruct.OptoModuleStorage, logicModuleDescription: ConfigStruct.LogicModule)
+	export function generate_lmTxRxOptoConfiguration(confFirmware: ConfigStruct.ModuleFirmware, 
+		log: ConfigStruct.IssueLogger, 
+		frame: number, 
+		module: ConfigStruct.ScriptDeviceModule, 
+		LMNumber: number, 
+		opticModuleStorage: ConfigStruct.OptoModuleStorage, 
+		logicModuleDescription: ConfigStruct.LogicModule)
 	{
 		if (module.propertyValue("EquipmentID") == undefined)
 		{
@@ -1056,20 +1091,18 @@ module ConfigLib
 			{
 				return false;
 			}
-			confFirmware.writeLog("    [" + frame + ":" + ptr + "]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + dataUID + "\r\n");
+			confFirmware.writeLog("    [" + frame + ":" + ptr + "]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + dataUID + " (0x" + (dataUID >>> 0).toString(16) + ")\r\n");
 		} // p
 
 		return true;
 	}
 
-	export function generate_vduTxRxOptoConfiguration(confFirmware: ConfigStruct.ModuleFirmware, 
-		log: ConfigStruct.IssueLogger, 
-		frame: number, 
-		startPtr: number,
-		module: ConfigStruct.ScriptDeviceModule, 
-		LMNumber: number, 
-		opticModuleStorage: 
-		ConfigStruct.OptoModuleStorage, 
+	export function generate_vduTxRxOptoConfiguration(confFirmware: ConfigStruct.ModuleFirmware,
+		log: ConfigStruct.IssueLogger,
+		frame: number,
+		module: ConfigStruct.ScriptDeviceModule,
+		LMNumber: number,
+		opticModuleStorage: ConfigStruct.OptoModuleStorage,
 		logicModuleDescription: ConfigStruct.LogicModule)
 	{
 		if (module.propertyValue("EquipmentID") == undefined)
@@ -1082,7 +1115,7 @@ module ConfigLib
 
 		let txWordsCount: number = 0;
 
-		let ptr: number = startPtr;
+		let ptr: number = 0;
 
 		for (let p: number = 0; p < portCount; p++)
 		{
@@ -1158,24 +1191,42 @@ module ConfigLib
 
 			ptr += 2;
 
-			let dataUID: number = 0;
-			if (optoPort.isLinked() == true)
 			{
-				let linkedPort: string = optoPort.linkedPortID();
-				let linkedOptoPort: ConfigStruct.OptoPort = opticModuleStorage.jsGetOptoPort(linkedPort);
-				if (linkedOptoPort != null)
+				let txDataUID: number = 0;
+				if (optoPort.isLinked() == true)
 				{
-					dataUID = linkedOptoPort.txDataID();
+					let linkedPort: string = optoPort.linkedPortID();
+					let linkedOptoPort: ConfigStruct.OptoPort = opticModuleStorage.jsGetOptoPort(linkedPort);
+					if (linkedOptoPort != null)
+					{
+						txDataUID = linkedOptoPort.txDataID();
+					}
 				}
+
+				if (ConfigLib.setData32(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "Tx Block (Opto) Data UID " + (p + 1), txDataUID) == false)
+				{
+					return false;
+				}
+				confFirmware.writeLog("    [" + frame + ":" + ptr + "]: Tx Block (Opto) Data UID " + (p + 1) + " = " + txDataUID + " (0x" + (txDataUID >>> 0).toString(16) + ")\r\n");
+
+				ptr += 4;
 			}
 
-			if (ConfigLib.setData32(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "TxRx Block (Opto) Data UID " + (p + 1), dataUID) == false)
 			{
-				return false;
-			}
-			confFirmware.writeLog("    [" + frame + ":" + ptr + "]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + dataUID + "\r\n");
+				let rxDataUID: number = 0;
+				if (optoPort.isLinked() == true)
+				{
+					rxDataUID = optoPort.txDataID();
+				}
 
-			ptr += 4;
+				if (ConfigLib.setData32(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "Rx Block (Opto) Data UID " + (p + 1), rxDataUID) == false)
+				{
+					return false;
+				}
+				confFirmware.writeLog("    [" + frame + ":" + ptr + "]: Rx Block (Opto) Data UID " + (p + 1) + " = " + rxDataUID + " (0x" + (rxDataUID >>> 0).toString(16) + ")\r\n");
+
+				ptr += 4;
+			}
 
 			ptr += 6;	// Reserved
 

@@ -121,8 +121,6 @@ namespace Builder
 
 	private:
 		bool buildFSCConfiguration();
-		bool buildVDUConfiguration();
-
 
 		DbController* db();
 		IssueLogger* log() const;

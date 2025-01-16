@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="VDU1" DescriptionNumber="1" ConfigurationScriptFile="VDU1_Conf.js" Version="1.0">
+<LogicModule Name="VDU1" DescriptionNumber="2" ConfigurationScriptFile="ConfigScript.js" Version="1.0">
 	<FlashMemory>
 	    <AppLogicFrameCount>0</AppLogicFrameCount>
 		<AppLogicFramePayload>0</AppLogicFramePayload>
 		<AppLogicFrameSize>0</AppLogicFrameSize>
 		<AppLogicUartID>0</AppLogicUartID>
 		<AppLogicWriteBitstream>false</AppLogicWriteBitstream>
-		<ConfigFrameCount>2</ConfigFrameCount>
+		<ConfigFrameCount>162</ConfigFrameCount>
 		<ConfigFramePayload>1016</ConfigFramePayload>
 		<ConfigFrameSize>1016</ConfigFrameSize>
 		<ConfigUartID>9218</ConfigUartID>
@@ -16,7 +16,10 @@
 		<TuningFrameSize>0</TuningFrameSize>
 		<TuningUartID>0</TuningUartID>
 		<TuningWriteBitstream>false</TuningWriteBitstream>
-		<MaxConfigurationCount>1</MaxConfigurationCount>
+		<MaxConfigurationCount>40</MaxConfigurationCount>
+		<SingleConfigFirstFrame>2</SingleConfigFirstFrame>
+		<SingleConfigFrameCount>4</SingleConfigFrameCount>
+		<SingleConfigUniqueIDOffset>4</SingleConfigUniqueIDOffset>
 	</FlashMemory>
 	<Memory>
 		<CodeMemorySize>0</CodeMemorySize>

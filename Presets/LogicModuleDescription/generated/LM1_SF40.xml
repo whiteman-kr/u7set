@@ -1,4 +1,4 @@
-<LogicModule Name="LM1_SF40" DescriptionNumber="40" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.8">
+<LogicModule Name="LM1_SF40" DescriptionNumber="40" ConfigurationScriptFile="ConfigScript.js" Version="1.8">
   <FlashMemory>
     <AppLogicFrameCount>256</AppLogicFrameCount>
     <AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -16,6 +16,9 @@
     <TuningUartID>260</TuningUartID>
     <TuningWriteBitstream>true</TuningWriteBitstream>
     <MaxConfigurationCount>12</MaxConfigurationCount>
+    <SingleConfigFirstFrame>2</SingleConfigFirstFrame>
+    <SingleConfigFrameCount>19</SingleConfigFrameCount>
+    <SingleConfigUniqueIDOffset>4</SingleConfigUniqueIDOffset>
   </FlashMemory>
   <Memory>
     <CodeMemorySize>98304</CodeMemorySize>
@@ -8293,7 +8296,6 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    
     <AFB id="#cmp_fp_ls_v1" Caption="cmp_fp_ls" Version="1.9">
       <Properties>
         <Description>Comparator Block, less than single-precision floating-point comparison</Description>
@@ -8526,7 +8528,6 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    
     <AFB id="#cmp_si_eq_v1" Caption="cmp_si_eq" Version="1.8">
       <Properties>
         <Description>Comparator Block, equal 32-bit signed int comparison</Description>

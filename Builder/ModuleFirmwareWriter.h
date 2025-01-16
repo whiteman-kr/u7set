@@ -5,6 +5,8 @@
 #include <HardwareLib/ModuleFirmware.h>
 #include "../Metrology/UnitsConverter.h"
 
+class LmDescription;
+
 namespace Hardware
 {
 	struct UartChannelData
@@ -69,6 +71,7 @@ namespace Hardware
 		Q_INVOKABLE QString storeHash64(int frameIndex, int offset, QString dataString);
 
 		Q_INVOKABLE quint32 calcCrc32(int frameIndex, int start, int count);
+		Q_INVOKABLE QByteArray calcCrc64(int frameIndex, int start, int count);
 
 		Q_INVOKABLE void jsSetDescriptionFields(int descriptionVersion, QString fields);
 
@@ -76,6 +79,7 @@ namespace Hardware
 		Q_INVOKABLE void jsAddDescription(int channel, QString descriptionCSV);
 
 		Q_INVOKABLE void jsSetUniqueID(int lmNumber, quint64 uniqueID);
+		Q_INVOKABLE void jsSetUniqueID64(int lmNumber, quint32 uniqueIDLo, quint32 uniqueIDHi);
 
 		Q_INVOKABLE UnitsConverter* jsGetUnitsConvertor();
 
@@ -84,13 +88,13 @@ namespace Hardware
 		// Script execution log
 		//
 		Q_INVOKABLE void writeLog(QString logString);
-		void replaceLog(const QString& subsysId, const QString& oldString, const QString& newString);
+		Q_INVOKABLE void replaceLog(const QString& subsysId, const QString& oldString, const QString& newString);
 		QByteArray scriptLog(const QString& subsysId) const;
 
 		// Functions that are used to calculate Unique ID
 		//
 		quint64 uniqueID(const QString& subsysId, int uartId, int lmNumber, bool* ok);
-		void setGenericUniqueId(const QString& subsysId, int lmNumber, quint64 genericUniqueId);
+		void setGenericUniqueId(const QString& subsysId, int lmNumber, quint64 genericUniqueId, const LmDescription& lmDescription);
 
 	private:
 		bool storeChannelData(Builder::IssueLogger* log);

@@ -1,4 +1,4 @@
-<LogicModule Name="LM1_SR05" DescriptionNumber="5" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.5">
+<LogicModule Name="LM1_SR05" DescriptionNumber="5" ConfigurationScriptFile="ConfigScript.js" Version="1.5">
   <FlashMemory>
     <AppLogicFrameCount>256</AppLogicFrameCount>
     <AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -16,6 +16,9 @@
     <TuningUartID>260</TuningUartID>
     <TuningWriteBitstream>true</TuningWriteBitstream>
     <MaxConfigurationCount>12</MaxConfigurationCount>
+    <SingleConfigFirstFrame>2</SingleConfigFirstFrame>
+    <SingleConfigFrameCount>19</SingleConfigFrameCount>
+    <SingleConfigUniqueIDOffset>4</SingleConfigUniqueIDOffset>
   </FlashMemory>
   <Memory>
     <CodeMemorySize>98304</CodeMemorySize>
