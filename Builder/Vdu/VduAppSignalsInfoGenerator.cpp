@@ -705,8 +705,9 @@ namespace Builder
 
 		data.append(reinterpret_cast<const char*>(&m_crc64), sizeof(m_crc64));
 
-		return m_resultWriter->addFile(Directory::VDUs + Separator::DIR + m_vduOptoModule->equipmentID(),
-									   File::VDU_APP_SIGNALS_BIN, data, false);
+		return m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_mlc->lmSubsystemID()) +
+										Separator::DIR + m_vduOptoModule->equipmentID(),
+										File::VDU_APP_SIGNALS_BIN, data, false);
 	}
 
 	bool VduAppSignalsInfoGenerator::writeTxtFile()
@@ -723,7 +724,8 @@ namespace Builder
 		printCrc64(file);
 		printRefInfo(file);
 
-		return m_resultWriter->addFile(Directory::VDUs + Separator::DIR + m_vduOptoModule->equipmentID(),
+		return m_resultWriter->addFile(m_resultWriter->subsystemDirectory(m_mlc->lmSubsystemID()) +
+										Separator::DIR + m_vduOptoModule->equipmentID(),
 										File::VDU_APP_SIGNALS_TXT, file, false);
 	}
 

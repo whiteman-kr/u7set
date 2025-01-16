@@ -574,7 +574,6 @@ namespace Builder
 			return std::get<6>(first) > std::get<6>(second);
 		}, 10);
 
-		file.append("");
 		file.append(afbsUsage);
 
 		buildResultWriter()->addFile(Directory::REPORTS, File::RESOURCES_TXT, file);
