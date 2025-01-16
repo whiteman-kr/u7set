@@ -713,6 +713,18 @@ const Hardware::DeviceModule* DeviceHelper::getAssociatedLmBvbMso(const Hardware
 	return getLmBvbMso(chassis);
 }
 
+std::shared_ptr<Hardware::DeviceModule> DeviceHelper::getParentVduModule(Hardware::DeviceObject* object)
+{
+	std::shared_ptr<Hardware::DeviceModule> moduleShared = object->getParentModuleShared();
+
+	if (moduleShared->isVdu())
+	{
+		return moduleShared;
+	}
+
+	return nullptr;
+}
+
 const Hardware::Software* DeviceHelper::getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID)
 {
 	if (equipment == nullptr)

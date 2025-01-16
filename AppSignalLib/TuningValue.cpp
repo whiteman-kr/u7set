@@ -342,6 +342,28 @@ void TuningValue::fromFloat(float value)
 	}
 }
 
+quint32 TuningValue::untypedUInt32Value()
+{
+	switch (m_type)
+	{
+	case TuningValueType::Discrete:
+		return (m_int64 == 0 ? 0 : 1);
+
+	case TuningValueType::SignedInt32:
+		return static_cast<quint32>(m_int64);
+
+	case TuningValueType::Float:
+		return std::bit_cast<quint32>(static_cast<float>(m_double));
+
+	case TuningValueType::Double:
+	case TuningValueType::SignedInt64:
+	default:
+		assert(false);
+	}
+
+	return 0;
+}
+
 QString TuningValue::toString() const
 {
 	return toString(E::AnalogFormat::g_9_or_9e, -1);

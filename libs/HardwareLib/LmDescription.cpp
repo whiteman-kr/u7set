@@ -799,6 +799,9 @@ bool LmDescription::FlashMemory::load(const QDomDocument& document, QString* err
 	m_tuningWriteBitstream = getSectionBoolDefaultValue(QLatin1String("TuningWriteBitstream"), false);
 
 	m_maxConfigurationCount = getSectionUintValue(QLatin1String("MaxConfigurationCount"), errorMessage);
+	m_singleConfigFirstFrame = getSectionUintValue(QLatin1String("SingleConfigFirstFrame"), errorMessage);
+	m_singleConfigFrameCount = getSectionUintValue(QLatin1String("SingleConfigFrameCount"), errorMessage);
+	m_singleConfigUniqueIdOffset = getSectionUintValue(QLatin1String("SingleConfigUniqueIDOffset"), errorMessage);
 
 	return errorMessage->isEmpty();
 }

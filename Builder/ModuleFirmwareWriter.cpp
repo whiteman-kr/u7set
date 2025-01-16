@@ -1,4 +1,5 @@
 #include "../Builder/ModuleFirmwareWriter.h"
+#include <HardwareLib/LmDescription.h>
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/CsvFile.h"
 #include "../UtilsLib/WUtils.h"
@@ -924,6 +925,30 @@ namespace Hardware
 		return result & 0xffffffff;
 	}
 
+	QByteArray ModuleFirmwareWriter::calcCrc64(int frameIndex, int start, int count)
+	{
+		QByteArray result;
+
+		if (scriptFirmwareData == nullptr) // maybe setScriptFirmware is not called!
+		{
+			assert(scriptFirmwareData);
+			return result;
+		}
+
+		//
+
+		if (frameIndex >= static_cast<int>(scriptFirmwareData->frames.size()) || start + count > scriptFirmwareData->eepromFramePayloadSize)
+		{
+			qDebug() << Q_FUNC_INFO << " ERROR: FrameIndex or Frame offset is too big";
+			return 0;
+		}
+
+		quint64 crc64 = qToBigEndian(Crc::crc64(scriptFirmwareData->frames[frameIndex].data() + start, count));
+
+		result.append(reinterpret_cast<const char*>(&crc64), sizeof(crc64));
+		return result;
+	}
+
 	void ModuleFirmwareWriter::jsSetDescriptionFields(int descriptionVersion, QString fields)
 	{
 		if (scriptFirmware == nullptr || scriptFirmwareData == nullptr)	//maybe setScriptFirmware is not called!
@@ -990,15 +1015,28 @@ namespace Hardware
 
 	void ModuleFirmwareWriter::jsSetUniqueID(int lmNumber, quint64 uniqueID)
 	{
-		if (scriptUartChannelData == nullptr)	//maybe setScriptFirmware is not called!
+		if (scriptUartChannelData == nullptr) // maybe setScriptFirmware is not called!
 		{
 			assert(scriptUartChannelData);
 			return;
 		}
 
 		scriptUartChannelData->uniqueIdMap[lmNumber] = uniqueID;
-
 	}
+
+	void ModuleFirmwareWriter::jsSetUniqueID64(int lmNumber, quint32 uniqueIDLo, quint32 uniqueIDHi)
+	{
+		if (scriptUartChannelData == nullptr) // maybe setScriptFirmware is not called!
+		{
+			assert(scriptUartChannelData);
+			return;
+		}
+
+		quint64 uniqueID = (static_cast<quint64>(uniqueIDHi) << 32) | uniqueIDLo;
+
+		scriptUartChannelData->uniqueIdMap[lmNumber] = uniqueID;
+	}
+
 
 	UnitsConverter* ModuleFirmwareWriter::jsGetUnitsConvertor()
 	{
@@ -1088,7 +1126,7 @@ static QByteArray err;
 		return it->second;
 	}
 
-	void ModuleFirmwareWriter::setGenericUniqueId(const QString& subsysId, int lmNumber, quint64 genericUniqueId)
+	void ModuleFirmwareWriter::setGenericUniqueId(const QString& subsysId, int lmNumber, quint64 genericUniqueId, const LmDescription& lmDescription)
 	{
 		bool ok = false;
 
@@ -1124,13 +1162,11 @@ static QByteArray err;
 					return;
 				}
 
-				const int ConfigDataStartFrame = 2;
+				const int configDataStartFrame = lmDescription.flashMemory().singleConfigFirstFrame();
+				const int lmNumberConfigFrameCount = lmDescription.flashMemory().singleConfigFrameCount();
+				const int uniqueIdOffset = lmDescription.flashMemory().singleConfigUniqueIdOffset();
 
-				const int LMNumberConfigFrameCount = 19;
-
-				int frameNumber = ConfigDataStartFrame + LMNumberConfigFrameCount * (lmNumber - 1);
-
-				const int UniqueIdOffset = 4;
+				int frameNumber = configDataStartFrame + lmNumberConfigFrameCount * (lmNumber - 1);
 
 				quint64 uidBE = qToBigEndian(genericUniqueId);
 
@@ -1144,7 +1180,7 @@ static QByteArray err;
 
 				quint8* pData = frame.data();
 
-				auto pUniqueIdPtr = pData + UniqueIdOffset;
+				auto pUniqueIdPtr = pData + uniqueIdOffset;
 				std::memcpy(pUniqueIdPtr, &uidBE, sizeof(uidBE));
 
 				// Write uniqueID description
@@ -1164,10 +1200,17 @@ static QByteArray err;
 				const int UniqueIdDescriptionPos = 9;
 
 				setScriptFirmware(subsysId, uartId);
-				jsInsertDescription(UniqueIdDescriptionPos, lmNumber, tr("%1;%2;%3;0;64;UniqueID;0x%4").arg(equipmentId).arg(frameNumber).arg(UniqueIdOffset).arg(QString::number(genericUniqueId, 16)));
+				jsInsertDescription(UniqueIdDescriptionPos,
+									lmNumber,
+									tr("%1;%2;%3;0;64;UniqueID;0x%4")
+										.arg(equipmentId)
+										.arg(frameNumber)
+										.arg(uniqueIdOffset)
+										.arg(QString::number(genericUniqueId, 16)));
 
-				QString oldString = tr("    [%1:%2] UniqueID = 0\r\n").arg(frameNumber).arg(UniqueIdOffset);
-				QString newString = tr("    [%1:%2] UniqueID = 0x%3\r\n").arg(frameNumber).arg(UniqueIdOffset).arg(QString::number(genericUniqueId, 16));
+				QString oldString = tr("    [%1:%2] UniqueID = 0\r\n").arg(frameNumber).arg(uniqueIdOffset);
+				QString newString =
+					tr("    [%1:%2] UniqueID = 0x%3\r\n").arg(frameNumber).arg(uniqueIdOffset).arg(QString::number(genericUniqueId, 16));
 
 				replaceLog(subsysId, oldString, newString);
 			}

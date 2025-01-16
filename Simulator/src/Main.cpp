@@ -6,6 +6,7 @@
 #include <LicenseLib/AppLicenser.h>
 #include <SimulatorLib/SimConsoleLogFile.h>
 #include <SimulatorUi/SimWidget.h>
+#include <UiLib/OverrideWindows11Style.h>
 #include <VFrame30/VFrame30Library.h>
 
 #include <QApplication>
@@ -48,6 +49,8 @@ int main(int argc, char* argv[])
 
 	{
 		QApplication a(argc, argv);
+
+		UiLib::OverrideWindows11Style(a, argc, argv);
 
 		// --
 		//

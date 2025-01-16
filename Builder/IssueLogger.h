@@ -196,6 +196,7 @@ namespace Builder
 		void errCFG3051(QString gwParserError);									// Gateway description parsing error: %1
 		void wrnCFG3052(QString gwParserWarning);								// Gateway description parsing warning: %1
 		void errCFG3053(QString lmID, QString diagDataServiceID);				// Several ethernet adapters of LM %1 are connected to DiagDataService %2.
+		void errCFG3054(QString appSignalID, QString optoPort1ID, QString optoPort2ID, QString vduID);		// App signal %1 received simultaneously via %2 and %3 opto ports of VDU %4
 
 		void errCFG3060(QString subSysID, int value, int max, int min);	// Subsystem %1 key has wrong value (%2), valid range is %3..%4.
 
@@ -318,7 +319,7 @@ namespace Builder
 		void errALC5027(QUuid transmitterUuid, QString schemaID);									// All transmitter inputs must be directly linked to a signals.
 		void errALC5028(QUuid constUuid, QString schemaID);						// Incompatible constant type (Logic schema %1).
 		void errALC5030(QString appSignalID, QString lmEquipmentID, QUuid signalUuid);		// The signal %1 is not associated with LM %2.
-		void errALC5031(QString appSignalID);												// The signal %1 can be bind to Logic Module or Equipment Signal.
+		void errALC5031(QString appSignalID);												// The signal %1 can be bind to Logic Module, VDU or Equipment Signal.
 		void errALC5032(int txDataSize, QString optoPortID, QString moduleID, int optoPortAppDataSize);		// TxData size (%1 words) of opto port %2 exceed value of OptoPortAppDataSize property of module %3 (%4 words).
 		void errALC5033(QString appSignalId, QString chassisEquipmentID);		// Can't find logic module associated with signal %1 (no LM in chassis %2).
 		void errALC5034(QUuid transmitterUuid, QUuid connectedItemUuid);		// Non-signal element is connected to transmitter.
@@ -609,6 +610,8 @@ namespace Builder
 		//
 		void errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid);
 		void errEQP6401(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, QString font);
+
+		void wrnEQP6405(QString schemaId, QString itemLabel, QUuid itemUuid);
 
 		// Diagnostics compiler errors
 		//

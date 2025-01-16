@@ -453,6 +453,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0423.sql", "Upgrade to version 423, AutoApply property is replaced by ApplyMode in TuningClient" },
 	{":/DatabaseUpgrade/Upgrade0424.sql", "Upgrade to version 424, Fixing typos in TIM, TIM and WAIM presets scripts logs"},
 	{":/DatabaseUpgrade/Upgrade0425.sql", "Upgrade to version 425, Added Request Controllers to CfgService preset, modification of AppDataService preset"},
+	{":/DatabaseUpgrade/Upgrade0426.sql", "Upgrade to version 426, Module configuration script is ConfigScript.js, added extra info to LM descriptions"},
 };
 
 int DbWorker::counter = 0;

@@ -1,4 +1,5 @@
 #include "VduFontGenerator.h"
+#include "VduUnicodeSubsets.h"
 #include "../Context.h"
 #include "../IssueLogger.h"
 
@@ -6,23 +7,51 @@
 
 namespace Builder
 {
-	VduSymbol::VduSymbol(quint16 width, quint16 height, char c, const QFontMetrics& fm, const QFont& font) :
-		m_header{static_cast<quint32>(c), width, height, 0},
+	VduSymbol::VduSymbol(quint16 width, quint16 height, const QChar& c, const QFontMetrics& fm, const QFont& font) :
+		m_header{0, width, height, 0},
 		m_image(QSize(width, height), QImage::Format_Grayscale8)
 	{
+		QByteArray ba = QString(c).toUtf8();
+		for (int i = 0; i < ba.size() && i < sizeof(unsigned long); ++i)
+		{
+			m_header.code |= static_cast<unsigned char>(ba[i]) << (8 * i);
+		}
+
+#if 0   // NoAntialiasing
+		//
+		QImage monoImage{QSize{width, height}, QImage::Format_Mono};
+		QPainter painter(&monoImage);
+
+		painter.setRenderHint(QPainter::TextAntialiasing, false);
+		painter.setRenderHint(QPainter::Antialiasing, false);
+
+		painter.setFont(font);
+		painter.fillRect(0, 0, width, height, Qt::white);
+		painter.setPen(Qt::black);
+		painter.drawText(0, fm.ascent(), c);
+		painter.end();
+
+		m_image = monoImage.convertedTo(QImage::Format_Grayscale8);
+#else
+		// Antialiasing
+		//
 		QPainter painter(&m_image);
 		painter.setFont(font);
 		painter.fillRect(0, 0, width, height, Qt::white);
 		painter.setPen(Qt::black);
-		painter.drawText(0, fm.ascent(), QChar(c));
+		painter.drawText(0, fm.ascent(), c);
 		painter.end();
+#endif
 
 		// Render to m_data
 		//
-		m_data.resize(imageSize());
+		m_data.clear();
+		m_data.reserve(imageSize());
 
 		const char* imageData = reinterpret_cast<const char*>(m_image.bits());
-		char* data = m_data.data();
+
+		int repeatCount = 0;
+		char pixelColor = 0x55;
 
 		for (int i = 0; i < m_image.height(); i++)
 		{
@@ -31,11 +60,62 @@ namespace Builder
 			{
 				if (j < m_image.width())
 				{
-					*data++ = ((0xff - *imageData) & 0xc0);
+					char nextPixelColor = ((0xff - *imageData) & 0xc0) >> 6; // Bits 0 and 1 mean color, 00, 01, 10, 11
+					if (pixelColor == 0x55)
+					{
+						// First pixel initialization
+						pixelColor = nextPixelColor;
+					}
+
+					if (nextPixelColor == pixelColor && repeatCount < 63)
+					{
+						repeatCount++;
+					}
+					else
+					{
+						m_data.append((repeatCount << 2) | pixelColor); // Bits 7..2 mean count of repeats (0..63)
+						repeatCount = 1;
+						pixelColor = nextPixelColor;
+					}
 				}
 				imageData++;
 			}
 		}
+
+		// Write the last value
+		//
+		if (repeatCount > 1)
+		{
+			m_data.append((repeatCount << 2) | pixelColor); // Bits 7..2 mean count of repeats (0..63)
+		}
+
+		/* left for testing
+		if (m_header.code == 65)
+		{
+			qDebug() << "------------";
+			QString s;
+
+			for (unsigned char c : m_data)
+			{
+				int symbol = (unsigned int)c & 0x3;
+				int repeats = (unsigned int)c >> 2;
+
+				for (int i = 0; i < repeats; i++)
+				{
+					s.append(QString::number(symbol));
+					int l = s.length();
+					if (l >= m_header.width)
+					{
+						qDebug() << s;
+						s.clear();
+					}
+				}
+			}
+			if (s.isEmpty() == false)
+			{
+				qDebug() << s;
+			}
+		}*/
 	}
 
 	void VduSymbol::saveToBmp(QByteArray& out) const
@@ -102,7 +182,12 @@ namespace Builder
 
 		bool result = true;
 
-		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
+		auto isVduModule = [](Hardware::DeviceModule* module)
+			{
+				return module->isVdu();
+			};
+
+		for (const Hardware::DeviceModule* vdu : context.m_fscModules | std::views::filter(isVduModule))
 		{
 			Q_ASSERT(vdu);
 
@@ -117,6 +202,31 @@ namespace Builder
 				result = false;
 				continue;
 			}
+
+			// Load Unicode symbols subsets
+			//
+			std::vector<VduSymbolSubset> vduSubsets;
+			vduSubsets.push_back({"BasicLatin", 0x0020, 0x007F});
+
+			for (const auto& specProp: vdu->specificProperties())
+			{
+				if (specProp->category() == EquipmentPropNames::UNICODDE_SUBSETS) 
+				{
+					auto subsetIt = AllUnicodeSubsets.find(specProp->caption());
+					if (subsetIt == AllUnicodeSubsets.end())
+					{
+						context.m_log->errINT1000(QObject::tr("VDU object %1 has incorrect Unicode symbol subset property: %2")
+													  .arg(vdu->equipmentId())
+													  .arg(specProp->caption()));
+						return false;
+					}
+					if (specProp->value().toBool() == true)
+					{
+						vduSubsets.push_back({subsetIt->first, subsetIt->second.first, subsetIt->second.second});
+					}
+				}
+			}
+			context.m_vduFontProvider.setUnicodeSubsets(vdu->equipmentId(), vduSubsets);
 
 			// Parse fonts info from Fonts property
 			//
@@ -153,6 +263,7 @@ namespace Builder
 				{
 					QString errorMessage;
 					VduFontInfo fi;
+
 					if (fi.load(reader, &errorMessage) == true)
 					{
 						fontsInfo.push_back(fi);
@@ -185,14 +296,18 @@ namespace Builder
 			for (const VduFontInfo& fi : fontsInfo)
 			{
 				QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + QString("/Fonts/%1/").arg(fontIndex++);
-				result &= Builder::VduFontGenerator::generateVduFont(fi, vduDir, context.generateExtraDebugInfo(), context);
+				result &= Builder::VduFontGenerator::generateVduFont(fi, vduSubsets, vduDir, context.generateExtraDebugInfo(), context);
 			}
 		}
 
 		return result;
 	}
 
-	bool VduFontGenerator::generateVduFont(const VduFontInfo& fontInfo, const QString& dir, bool generateDebugFiles, Context& context)
+	bool VduFontGenerator::generateVduFont(const VduFontInfo& fontInfo,
+										   const std::vector<VduSymbolSubset>& vduSubsets,
+										   const QString& dir,
+										   bool generateDebugFiles,
+										   Context& context)
 	{
 		bool result = true;
 
@@ -209,39 +324,48 @@ namespace Builder
 		QFontMetrics fm(font);
 
 		std::vector<VduSymbol> symbols;
-		const int start = 32;
-		const int end = 127;
 
-		symbols.reserve(end - start);
-
-		for (int i = start; i <= end; i++)
+		if (vduSubsets.empty() == true)
 		{
-			char c = (char)i;
+			context.m_log->errINT1000(QObject::tr("VDU Font %1 has no Unicode symbol subsets!").arg(fontInfo.family));
+			return false;
+		}
 
-			quint16 height = fm.height();
-			quint16 width = fm.horizontalAdvance(c);
-
-			VduSymbol s(width, height, c, fm, font);
-			symbols.push_back(s);
-
-			QString fileNameSuffix = QString::number(i).rightJustified(3, '0');
-			
-			result &= context.m_buildResultWriter->addFile(dir, fileNameSuffix + symbolExtension, s.data()) != nullptr;
-
-			if (generateDebugFiles == true)
+		for (const VduSymbolSubset& vduSubset : vduSubsets)
+		{
+			for (char16_t i = vduSubset.start; i <= vduSubset.finish; i++)
 			{
-				// Save debug files
-				//
-				{
-					QByteArray ba;
-					s.saveToBmp(ba);
-					result &= context.m_buildResultWriter->addFile(dir, fileNameSuffix + ".bmp", ba) != nullptr;
-				}
+				QChar c(i);
 
+				quint16 height = fm.height();
+				quint16 width = fm.horizontalAdvance(c);
+
+				VduSymbol s(width, height, c, fm, font);
+				symbols.push_back(s);
+
+				QString fileNameSuffix = QString::number(i, 16).rightJustified(4, '0');
+
+#if 0 // This code is left for debugging
+	  // result &= context.m_buildResultWriter->addFile(dir, fileNameSuffix + symbolExtension, s.data()) != nullptr;
+#endif
+
+
+				if (generateDebugFiles == true)
 				{
-					QByteArray ba;
-					s.saveToVdut(ba);
-					result &= context.m_buildResultWriter->addFile(dir, fileNameSuffix + textSymbolExtension, ba) != nullptr;
+					// Save debug files
+					//
+					{
+						QByteArray ba;
+						s.saveToBmp(ba);
+						result &= context.m_buildResultWriter->addFile(dir, fileNameSuffix + ".bmp", ba) != nullptr;
+					}
+#if 0 // This code is left for debugging
+	  {
+	   QByteArray ba;
+	   s.saveToVdut(ba);
+	   result &= context.m_buildResultWriter->addFile(dir, fileNameSuffix + textSymbolExtension, ba) != nullptr;
+	  }
+#endif
 				}
 			}
 		}
@@ -251,7 +375,7 @@ namespace Builder
 		for (VduSymbol& s : symbols)
 		{
 			s.setHeaderOffset(offset);
-			offset += s.imageSize();
+			offset += s.data().size();
 		}
 
 		// Save font to the file
@@ -271,20 +395,6 @@ namespace Builder
 				buffer.write(data);
 			}
 		}
-
-		/*QString fontFileName = QObject::tr("%1_%2").arg(fontInfo.family).arg(fontInfo.pixelSize);
-		if (fontInfo.bold == true)
-		{
-			fontFileName += "b";
-		}
-		if (fontInfo.italic == true)
-		{
-			fontFileName += "i";
-		}
-		if (fontInfo.underlined == true)
-		{
-			fontFileName += "u";
-		}*/
 		
 		QString fontFileName = "font";
 		result &= context.m_buildResultWriter->addFile(dir, fontFileName + genericExtension, ba) != nullptr;

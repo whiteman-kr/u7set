@@ -179,7 +179,7 @@ void EquipmentView::addSystem()
 
 	if (selected.size() > 1)
 	{
-		// Don't know after which item insrt new object
+		// Don't know after which item insert new object
 		//
 		return;
 	}
@@ -211,7 +211,7 @@ void EquipmentView::addRack()
 
 	if (selected.size() > 1)
 	{
-		// Don't know after which item insrt new object
+		// Don't know after which item insert new object
 		//
 		return;
 	}
@@ -243,7 +243,7 @@ void EquipmentView::addChassis()
 
 	if (selected.size() > 1)
 	{
-		// Don't know after which item insrt new object
+		// Don't know after which item insert new object
 		//
 		return;
 	}
@@ -275,7 +275,7 @@ void EquipmentView::addModule()
 
 	if (selected.size() > 1)
 	{
-		// Don't know after which item insrt new object
+		// Don't know after which item insert new object
 		//
 		return;
 	}
@@ -307,7 +307,7 @@ void EquipmentView::addController()
 
 	if (selected.size() > 1)
 	{
-		// Don't know after which item insrt new object
+		// Don't know after which item insert new object
 		//
 		return;
 	}
@@ -338,7 +338,7 @@ void EquipmentView::addAppSignalPort()
 
 	if (selected.size() > 1)
 	{
-		// Don't know after which item insrt new object
+		// Don't know after which item insert new object
 		//
 		return;
 	}
@@ -445,7 +445,7 @@ void EquipmentView::addSoftware()
 
 	if (selected.size() > 1)
 	{
-		// Don't know after which item insrt new object
+		// Don't know after which item insert new object
 		//
 		return;
 	}
@@ -581,10 +581,10 @@ void EquipmentView::replaceObject()
 			return;
 		}
 
-		// Update proprties form deleted device, recursive lambda
+		// Update properties form deleted device, recursive lambda
 		//
-		std::function<void(Hardware::DeviceObject*, Hardware::DeviceObject*)> updatePropertuFunc =
-			[&updatePropertuFunc](Hardware::DeviceObject* dst, const Hardware::DeviceObject* src)
+		std::function<void(Hardware::DeviceObject*, Hardware::DeviceObject*)> updatePropertyFunc =
+			[&updatePropertyFunc](Hardware::DeviceObject* dst, const Hardware::DeviceObject* src)
 			{
 				if (dst->deviceType() != src->deviceType() ||
 					dst->equipmentIdTemplate() != src->equipmentIdTemplate())
@@ -631,7 +631,7 @@ void EquipmentView::replaceObject()
 
 						if (srcChild->equipmentIdTemplate() == dstChildTemplateId)
 						{
-							updatePropertuFunc(dstChild.get(), srcChild.get());
+							updatePropertyFunc(dstChild.get(), srcChild.get());
 							break;
 						}
 					}
@@ -640,7 +640,7 @@ void EquipmentView::replaceObject()
 				return;
 			};
 
-		updatePropertuFunc(device.get(), selectedObjectFullTree.get());	// Recursive func
+		updatePropertyFunc(device.get(), selectedObjectFullTree.get());	// Recursive func
 
 		// Add device
 		//
@@ -918,15 +918,16 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 		return std::shared_ptr<Hardware::DeviceObject>();
 	}
 
-	// If this is LM modlue, then set SusbSysID to the default value
+	// If this is LM module, then set SubSysID to the default value
 	//
 	if (device->isModule() == true)
 	{
 		auto module = device->toModule();
 
-		if (module != nullptr && module->isFSCConfigurationModule() == true)
+		if (module != nullptr &&
+			module->isFSCConfigurationModule())
 		{
-			// Get susbsystems
+			// Get subsystems
 			//
 			Builder::SubsystemStorage subsystems;
 			QString errorCode;
@@ -957,7 +958,7 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::addPresetToConfiguration(
 
 	if (selected.size() > 1)
 	{
-		// Don't know after which item insrt new object
+		// Don't know after which item insert new object
 		//
 		return std::shared_ptr<Hardware::DeviceObject>();
 	}
@@ -999,7 +1000,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 		return QModelIndex();
 	}
 
-	// Set new id, recusively to all children
+	// Set new id, recursively to all children
 	//
 	bool presetMode = isPresetMode();
 
@@ -1042,7 +1043,7 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 
 //		if (selected.size() > 1)
 //		{
-//			// Don't know after which item insrt new object
+//			// Don't know after which item insert new object
 //			//
 //			return;
 //		}
@@ -1292,7 +1293,7 @@ void EquipmentView::addInOutsToSignals(std::shared_ptr<Hardware::DeviceModule> m
 		if (equipmentDevice != module)
 		{
 			QByteArray bytes;
-			equipmentDevice->saveToByteArray(&bytes);	// save and restore to keep equpment version after expanding strid
+			equipmentDevice->saveToByteArray(&bytes);	// save and restore to keep equipment version after expanding strid
 
 			std::shared_ptr<Hardware::DeviceObject> newObject = Hardware::DeviceObject::Create(bytes);
 
@@ -1429,7 +1430,7 @@ void EquipmentView::addInOutsToSignals(std::vector<std::shared_ptr<Hardware::Dev
 	for (const Hardware::DeviceAppSignal* has : inOuts)		// has - hardware app signal
 	{
 		QByteArray bytes;
-		has->saveToByteArray(&bytes);	// save and restore to keep equpment version after expanding strid
+		has->saveToByteArray(&bytes);	// save and restore to keep equipment version after expanding strid
 
 		std::shared_ptr<Hardware::DeviceObject> newObject = Hardware::DeviceObject::Create(bytes);
 		equipmentDevices.push_back(newObject);
@@ -1567,8 +1568,6 @@ void EquipmentView::createInternalAppSignal()
 
 void EquipmentView::addLogicSchemaToLm()
 {
-	qDebug() << __FUNCTION__;
-
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 	if (selectedIndexList.empty() == true)
 	{
@@ -1576,52 +1575,85 @@ void EquipmentView::addLogicSchemaToLm()
 		return;
 	}
 
-	QStringList deviceStrIds;
-	QString lmDescriptioFile;
-	bool lmDescriptioFileInitialized = false;
+	std::vector<std::shared_ptr<const Hardware::DeviceModule>> selectedModules;
+	selectedModules.reserve(selectedIndexList.size());
 
-	for (const QModelIndex& mi : selectedIndexList)
+	std::transform(selectedIndexList.begin(),
+				   selectedIndexList.end(),
+				   std::back_inserter(selectedModules),
+				   [this](const auto& mi)
+				   {
+					   auto device = equipmentModel()->deviceObject(mi);
+					   Q_ASSERT(device);
+					   return device->toModule();
+				   });
+
+	// Check if all selected are modules
+	//
+	bool allOfModules = std::all_of(selectedModules.begin(),
+									selectedModules.end(),
+									[](auto&& module)
+									{
+										return module != nullptr;
+									});
+
+	if (allOfModules == false)
 	{
-		auto device = equipmentModel()->deviceObject(mi);
-		Q_ASSERT(device);
-
-		deviceStrIds.push_back(device->equipmentId());
-
-		if (device->isModule() == true &&
-			device->toModule()->isLogicModule() == true)
-		{
-			QString thisModuleLmDescriprtionFile = device->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
-
-			if (lmDescriptioFileInitialized == false)
-			{
-				lmDescriptioFile = thisModuleLmDescriprtionFile;
-				lmDescriptioFileInitialized = true;
-				continue;
-			}
-
-			if (lmDescriptioFile != thisModuleLmDescriprtionFile)
-			{
-				Q_ASSERT(false);	// How is it possible, it should be fileterd om nenu level
-				return;
-			}
-
-			continue;
-		}
-		else
-		{
-			Q_ASSERT(false);	// How is it possible, it should be fileterd om nenu level
-			return;
-		}
+		Q_ASSERT(allOfModules); // It should be filtered on menu level
+		return;
 	}
 
-	GlobalMessanger::instance().fireAddLogicSchema(deviceStrIds, lmDescriptioFile);
+	// Check if all modules have the same LmDescriptionFile
+	//
+	std::optional<QString> lmDescriptionFile;
+
+	bool allSelectedHaveSameLmDescriptionFile =
+		std::all_of(selectedModules.begin(),
+					selectedModules.end(),
+					[this, &lmDescriptionFile](auto&& module)
+					{
+						QString thisLmDescriptionFile = module->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
+						if (lmDescriptionFile.has_value() == false)
+						{
+							lmDescriptionFile = thisLmDescriptionFile;
+						}
+
+						return thisLmDescriptionFile.isEmpty() == false && lmDescriptionFile.value() == thisLmDescriptionFile;
+					});
+
+	if (lmDescriptionFile.has_value() == false)
+	{
+		Q_ASSERT(lmDescriptionFile.has_value() == true);
+		return;
+	}
+
+	bool lifeIsGood = allSelectedHaveSameLmDescriptionFile == true && lmDescriptionFile.has_value() == true &&
+					  lmDescriptionFile.value().isEmpty() == false;
+
+	Q_ASSERT(lifeIsGood == true);
+
+	// Get deviceStrIds
+	//
+	QStringList deviceStrIds;
+	deviceStrIds.reserve(selectedModules.size());
+
+	std::transform(selectedModules.begin(),
+				   selectedModules.end(),
+				   std::back_inserter(deviceStrIds),
+				   [](auto&& module)
+				   {
+					   return module->equipmentId();
+				   });
+
+	// Fire the event to create logic schema.
+	//
+	GlobalMessanger::instance().fireAddLogicSchema(deviceStrIds, lmDescriptionFile.value());
+
 	return;
 }
 
 void EquipmentView::showLogicSchemaForLm()
 {
-	qDebug() << __FUNCTION__;
-
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 
 	if (selectedIndexList.size() != 1)
@@ -1634,7 +1666,7 @@ void EquipmentView::showLogicSchemaForLm()
 	Q_ASSERT(device);
 
 	auto module = device->toModule();
-	if (module == nullptr || module->isLogicModule() == false)
+	if (module == nullptr || module->isFSCConfigurationModule() == false)
 	{
 		Q_ASSERT(module);
 		return;
@@ -1762,7 +1794,7 @@ void EquipmentView::copySelectedDevices()
 		return;
 	}
 
-	// Check if all selected equipmnet has the same type
+	// Check if all selected equipment has the same type
 	//
 	auto firstDevice = equipmentModel()->deviceObject(selected.first());
 	Q_ASSERT(firstDevice);
@@ -2094,7 +2126,7 @@ bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message
 {
 	QModelIndexList selectedIndexList = selectionModel()->selectedRows();
 
-	// Check if the copy was done from current mode, so copy possible only from editor to edir or preset editor to preset editor
+	// Check if the copy was done from current mode, so copy possible only from editor to edit or preset editor to preset editor
 	//
 	if (isPresetMode() == true && message.preseteditor() == false)
 	{
@@ -2145,7 +2177,7 @@ bool EquipmentView::canPaste(const ::Proto::EnvelopeSetShortDescription& message
 		}
 	}
 
-	// Check if chese devices can be added
+	// Check if devices can be added
 	//
 	auto selectedDevice = equipmentModel()->deviceObject(selectedIndexList.at(0));
 	Q_ASSERT(selectedDevice);
@@ -2269,7 +2301,7 @@ std::shared_ptr<Hardware::DeviceObject> EquipmentView::deviceObject(QString equi
 {
 	std::shared_ptr<Hardware::DeviceObject> result;
 
-	// If the tab page was not shown yet, this update helps to initiate loading of objectes, then search will work.
+	// If the tab page was not shown yet, this update helps to initiate loading of objects, then search will work.
 	//
 	equipmentModel()->updateFirstLevelObjects();
 
@@ -2898,7 +2930,7 @@ void EquipmentView::updateFromPreset()
 
 bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObject> device,		// Device to update from preset
 										   std::shared_ptr<Hardware::DeviceObject> preset,		// Preset to update device
-										   const QStringList& forceUpdateProperties,			// Update theses props even if they not meant to updayt
+										   const QStringList& forceUpdateProperties,			// Update theses props even if they not meant to update
 										   const QStringList& presetsToUpdate,					// Update only these presets
 										   std::vector<std::shared_ptr<Hardware::DeviceObject>>* updateDeviceList,
 										   std::vector<Hardware::DeviceObject*>* deleteDeviceList,	// Devices to delete after update

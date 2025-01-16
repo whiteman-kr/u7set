@@ -232,8 +232,12 @@ namespace Hardware
 
 	bool DeviceModule::isFSCConfigurationModule() const
 	{
-		return moduleFamily() == FamilyType::LM || moduleFamily() == FamilyType::BVB || moduleFamily() == FamilyType::MSO;
+		return moduleFamily() == FamilyType::LM ||
+			   moduleFamily() == FamilyType::VDU ||
+			   moduleFamily() == FamilyType::BVB ||
+			   moduleFamily() == FamilyType::MSO;
 	}
+
 
 	bool DeviceModule::isOptoModule() const
 	{
@@ -260,9 +264,9 @@ namespace Hardware
 		return isLogicModule() || isNonPlatformAppDataSourceModule();
 	}
 
-
 	bool DeviceModule::isVdu() const
 	{
 		return moduleFamily() == FamilyType::VDU;
 	}
+
 } // namespace Hardware

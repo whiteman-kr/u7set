@@ -3,15 +3,17 @@
 #include "Globals.h"
 #include "version.h"
 
-#include <HardwareLib/HardwareLibrary.h>
-
-#include <VFrame30/VFrame30Library.h>
 #include <CommonLib/ConstStrings.h>
+#include <HardwareLib/HardwareLibrary.h>
+#include <UiLib/OverrideWindows11Style.h>
+#include <VFrame30/VFrame30Library.h>
 
 
 int main(int argc, char* argv[])
 {
 	QApplication a(argc, argv);
+
+	UiLib::OverrideWindows11Style(a, argc, argv);
 
 	// --
 	//
@@ -19,11 +21,8 @@ int main(int argc, char* argv[])
 	a.setOrganizationName(Manufacturer::RADIY);
 	a.setOrganizationDomain(Manufacturer::SITE);
 
-	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
-								.arg(U7SET_MAJOR_VERSION)
-								.arg(U7SET_MINOR_VERSION)
-								.arg(U7SET_PATCH_VERSION)
-								.arg(U7SET_BRANCH_NAME));
+	a.setApplicationVersion(
+		QString("%1.%2.%3 (%4)").arg(U7SET_MAJOR_VERSION).arg(U7SET_MINOR_VERSION).arg(U7SET_PATCH_VERSION).arg(U7SET_BRANCH_NAME));
 
 	// --
 	//
@@ -59,7 +58,9 @@ int main(int argc, char* argv[])
 		bool loadSettingsOk = DiagnosticsAppSettings::instance().loadFromFile(settingsFileName);
 		if (loadSettingsOk == false)
 		{
-			QMessageBox::critical(nullptr, qAppName(), QObject::tr("Error loading application settings from file %1.").arg(settingsFileName));
+			QMessageBox::critical(nullptr,
+								  qAppName(),
+								  QObject::tr("Error loading application settings from file %1.").arg(settingsFileName));
 			return 1;
 		}
 	}
@@ -86,8 +87,7 @@ int main(int argc, char* argv[])
 
 	InstanceResolver instanceResolver;
 
-	if (bool ok = instanceResolver.init(settings.equipmentId, settings.singleInstance);
-		ok == false)
+	if (bool ok = instanceResolver.init(settings.equipmentId, settings.singleInstance); ok == false)
 	{
 		qDebug() << "Another instance is active";
 		return 0;

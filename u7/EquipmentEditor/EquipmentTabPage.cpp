@@ -255,7 +255,7 @@ void EquipmentTabPage::CreateActions()
 	connect(m_addControllerAction, &QAction::triggered, m_equipmentView, &EquipmentView::addController);
 
 	m_addAppSignalAction = new QAction(tr("AppSignal Port"), this);
-	m_addAppSignalAction->setStatusTip(tr("Add application signal port to the configuration, AppSignal can be creatod from this equipment AppSignal Port ..."));
+	m_addAppSignalAction->setStatusTip(tr("Add application signal port to the configuration, AppSignal can be created from this equipment AppSignal Port ..."));
 	m_addAppSignalAction->setEnabled(false);
 	connect(m_addAppSignalAction, &QAction::triggered, m_equipmentView, &EquipmentView::addAppSignalPort);
 
@@ -322,7 +322,7 @@ void EquipmentTabPage::CreateActions()
 	m_addPresetControllerAction->setEnabled(false);
 	connect(m_addPresetControllerAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetController);
 
-	m_addPresetWorkstationAction = new QAction(tr("Preset Worksation"), this);
+	m_addPresetWorkstationAction = new QAction(tr("Preset Workstation"), this);
 	m_addPresetWorkstationAction->setStatusTip(tr("Add workstation to the preset..."));
 	m_addPresetWorkstationAction->setEnabled(false);
 	connect(m_addPresetWorkstationAction, &QAction::triggered, m_equipmentView, &EquipmentView::addPresetWorkstation);
@@ -337,7 +337,7 @@ void EquipmentTabPage::CreateActions()
 	m_separatorAction0->setSeparator(true);
 
 	m_createInOutsToSignals = new QAction(tr("Create In/Outs AppSignals"), this);
-	m_createInOutsToSignals->setStatusTip(tr("Add intputs/outputs to application logic signals..."));
+	m_createInOutsToSignals->setStatusTip(tr("Add inputs/outputs to application logic signals..."));
 	m_createInOutsToSignals->setEnabled(false);
 	//m_inOutsToSignals->setVisible(false);
 	connect(m_createInOutsToSignals, &QAction::triggered, m_equipmentView, QOverload<>::of(&EquipmentView::createInOutsToSignals));
@@ -356,8 +356,8 @@ void EquipmentTabPage::CreateActions()
 	m_separatorSchemaLogic = new QAction(tr("Application Logic"), this);
 	m_separatorSchemaLogic->setSeparator(true);
 
-	m_addLogicSchemaToLm = new QAction(tr("Add AppLogic Schema..."), this);
-	m_addLogicSchemaToLm->setStatusTip(tr("Add Application Logic Schema to selected module"));
+	m_addLogicSchemaToLm = new QAction(tr("Create AppLogic Schema..."), this);
+	m_addLogicSchemaToLm->setStatusTip(tr("Create Application Logic Schema for selected module"));
 	m_addLogicSchemaToLm->setIcon(QIcon{":/Images/Images/SimAppLogicSchemas.svg"});
 	m_addLogicSchemaToLm->setEnabled(false);
 	//m_addLogicSchemaToLm->setVisible(false);
@@ -383,7 +383,7 @@ void EquipmentTabPage::CreateActions()
 
 
 	m_showObjectConnections = new QAction(tr("Show Object Connections..."), this);
-	m_showObjectConnections->setStatusTip(tr("Show module or opto port connections"));
+	m_showObjectConnections->setStatusTip(tr("Show module or opto-port connections"));
 	m_showObjectConnections->setIcon(QIcon{":/Images/Images/SimConnectionIcon.svg"});
 	m_showObjectConnections->setEnabled(false);
 	//m_showObjectConnections->setVisible(false);
@@ -604,12 +604,12 @@ void EquipmentTabPage::setActionState()
 	assert(m_importPresetAction);
 	assert(m_diagSignalTypesAction);
 
-	// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
+	// Check in is always true, as we perform check in is performed for the tree, and there is no information
 	// about does parent have any checked out files
 	//
 	m_checkInAction->setEnabled(true);
 	m_deleteObjectAction->setEnabled(true);		// Allow to TRY to delete always. Even part of preset in editConfigurationMode,
-												// It can be usefull to delete preset with all it's childer, especially if it was
+												// It can be useful to delete preset with all it's children, especially if it was
 												// just created, the it will remove from the DB all records.
 
 	if (isPresetMode() == true)
@@ -640,7 +640,7 @@ void EquipmentTabPage::setActionState()
 	m_addSoftwareAction->setEnabled(false);
 
 	m_checkOutAction->setEnabled(false);
-	//m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
+	//m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there is no information
 	m_undoChangesRecursivelyAction->setEnabled(false);
 	m_undoChangesAction->setEnabled(false);
 	m_historyAction->setEnabled(false);
@@ -747,44 +747,33 @@ void EquipmentTabPage::setActionState()
 
 	// Add AppLogic Schema to LM
 	//
-	if (isConfigurationMode() == true &&
-		selectedIndexList.size() >= 1)
+	if (isConfigurationMode() == true && selectedIndexList.size() >= 1)
 	{
-		bool allSelectedAreLMs = true;
-		QString lmDescriptioFile;
-		bool lmDescriptioFileInitialized = false;
+		std::optional<QString> lmDescriptionFile;
 
-		for (const QModelIndex& mi : selectedIndexList)
-		{
-			auto device = m_equipmentModel->deviceObject(mi);
-			assert(device);
+		bool allSelectedHaveSameLmDescriptionFile =
+			std::all_of(selectedIndexList.begin(),
+						selectedIndexList.end(),
+						[this, &lmDescriptionFile](const QModelIndex& mi)
+						{
+							auto device = m_equipmentModel->deviceObject(mi);
+							if (device == nullptr || device->isModule() == false)
+							{
+								assert(device);
+								return false;
+							}
 
-			if (device->isModule() == true &&
-				device->toModule()->isLogicModule() == true)
-			{
-				QString thisModuleLmDescriprtionFile = device->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
+							QString thisLmDescriptionFile = device->propertyValue(Hardware::PropertyNames::lmDescriptionFile).toString();
+							if (lmDescriptionFile.has_value() == false)
+							{
+								lmDescriptionFile = thisLmDescriptionFile;
+							}
 
-				if (lmDescriptioFileInitialized == false)
-				{
-					lmDescriptioFile = thisModuleLmDescriprtionFile;
-					lmDescriptioFileInitialized = true;
-					continue;
-				}
+							return thisLmDescriptionFile.isEmpty() == false && lmDescriptionFile.value() == thisLmDescriptionFile;
+						});
 
-				if (lmDescriptioFile != thisModuleLmDescriprtionFile)
-				{
-					allSelectedAreLMs = false;
-					break;
-				}
-
-				continue;
-			}
-			else
-			{
-				allSelectedAreLMs = false;
-				break;
-			}
-		}
+		bool allSelectedAreLMs = allSelectedHaveSameLmDescriptionFile == true && lmDescriptionFile.has_value() == true &&
+								 lmDescriptionFile.value().isEmpty() == false;
 
 		m_addLogicSchemaToLm->setEnabled(allSelectedAreLMs);
 		m_addLogicSchemaToLm->setVisible(allSelectedAreLMs);
@@ -792,16 +781,14 @@ void EquipmentTabPage::setActionState()
 
 	// Show logic schemas for selected LM
 	//
-	if (isConfigurationMode() == true &&
-		selectedIndexList.size() == 1)
+	if (isConfigurationMode() == true && selectedIndexList.size() == 1)
 	{
 		auto device = m_equipmentModel->deviceObject(selectedIndexList.front());
 		assert(device);
 
 		if (device->isModule() == true)
 		{
-			if (auto module = device->toModule();
-				module->isLogicModule() == true)
+			if (auto module = device->toModule(); module->isFSCConfigurationModule() == true)
 			{
 				m_showLmsLogicSchemas->setEnabled(true);
 				m_showLmsLogicSchemas->setVisible(true);
@@ -971,7 +958,7 @@ void EquipmentTabPage::setActionState()
 	m_historyAction->setEnabled(selectedIndexList.size() == 1);
 	m_compareAction->setEnabled(selectedIndexList.size() == 1);
 
-	// Enbale possible creation items;
+	// Enable possible creation items;
 	//
 	if (selectedIndexList.size() > 1)
 	{
@@ -1080,8 +1067,8 @@ void EquipmentTabPage::setActionState()
 
 	// Update paste
 	//
-	bool enablepaste = m_equipmentView->canPaste();
-	m_pasteObjectAction->setEnabled(enablepaste);
+	bool enablePaste = m_equipmentView->canPaste();
+	m_pasteObjectAction->setEnabled(enablePaste);
 
 	// Always enable to edit diag signa types.
 	//
@@ -1092,8 +1079,8 @@ void EquipmentTabPage::setActionState()
 
 void EquipmentTabPage::clipboardChanged()
 {
-	bool enablepaste = m_equipmentView->canPaste();
-	m_pasteObjectAction->setEnabled(enablepaste);
+	bool enablePaste = m_equipmentView->canPaste();
+	m_pasteObjectAction->setEnabled(enablePaste);
 
 	return;
 }
@@ -1383,7 +1370,7 @@ void EquipmentTabPage::compareObject(DbChangesetObject object, CompareData compa
 		return;
 	}
 
-	// Get vesrions from the project database
+	// Get versions from the project database
 	//
 	std::shared_ptr<Hardware::DeviceObject> source = nullptr;
 

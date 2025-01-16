@@ -55,6 +55,15 @@ namespace Builder
 			return false;
 		}
 
+		if (schema->isVduSchema() == true)
+		{
+			// Lua? script check.
+			//
+			return true;
+		}
+
+		// java script check.
+		//
 		QJSEngine jsEngine;
 
 		// Function for: Check script property of the schema.

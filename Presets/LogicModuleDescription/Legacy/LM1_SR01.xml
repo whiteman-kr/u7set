@@ -17,6 +17,9 @@
 		<TuningUartID>260</TuningUartID>
 		<TuningWriteBitstream>true</TuningWriteBitstream>
 		<MaxConfigurationCount>12</MaxConfigurationCount>
+		<SingleConfigFirstFrame>2</SingleConfigFirstFrame>
+		<SingleConfigFrameCount>19</SingleConfigFrameCount>
+		<SingleConfigUniqueIDOffset>4</SingleConfigUniqueIDOffset>
 	</FlashMemory>
 	<Memory>
 	    <CodeMemorySize>98304</CodeMemorySize>

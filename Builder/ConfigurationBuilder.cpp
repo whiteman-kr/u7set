@@ -1,4 +1,5 @@
 #include "ConfigurationBuilder.h"
+#include "ConfigurationBuilder.h"
 
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
@@ -224,7 +225,6 @@ namespace Builder
 		m_db(&context->m_db),
 		m_deviceRoot(context->m_equipmentSet->root().get()),
 		m_fscModules(context->m_fscModules),
-		m_vduModules(context->m_vduModules),
 		m_lmDescriptions(context->m_lmDescriptions.get()),
 		m_signalSet(context->m_signalSet.get()),
 		m_subsystems(context->m_subsystems.get()),
@@ -246,6 +246,12 @@ namespace Builder
 
 		qRegisterMetaType<Builder::JsBusSignal*>();
 
+		std::sort(m_fscModules.begin(),
+				  m_fscModules.end(),
+				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
+				  {
+					  return a->equipmentIdTemplate() < b->equipmentIdTemplate();
+				  });
 
 		return;
 	}
@@ -257,7 +263,6 @@ namespace Builder
 	bool ConfigurationBuilder::build()
 	{
 		bool ok = true;
-		ok &= buildVDUConfiguration();
 		ok &= buildFSCConfiguration();
 		return ok;
 	}
@@ -586,237 +591,6 @@ namespace Builder
 		if (m_log->errorCount() > errorCount)
 		{
 			// New error messages arrived during build - build failed
-			return false;
-		}
-
-		return true;
-	}
-
-	bool ConfigurationBuilder::buildVDUConfiguration()
-	{
-		if (db() == nullptr || log() == nullptr)
-		{
-			assert(db());
-			assert(log());
-			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("%1: Fatal error, input parameter is nullptr!").arg(__FUNCTION__));
-			return false;
-		}
-
-		if (m_vduModules.empty() == true)
-		{
-			// No VDU modules exist
-			return true;
-		}
-
-		std::set<quint16> ssKeyValues;
-
-		//
-		// Generate Module Configuration Binary File for VDU
-		//
-		LOG_MESSAGE(m_log, "");
-		LOG_MESSAGE(m_log, tr("Generating VDU configurations"));
-
-		QString lmDescriptionFile;
-		LmDescription* description = nullptr;
-
-		for (auto it = m_vduModules.begin(); it != m_vduModules.end(); it++)
-		{
-			Hardware::ModuleFirmwareWriter writer;
-
-			Hardware::DeviceModule* vdu = *it;
-			if (vdu == nullptr)
-			{
-				assert(vdu);
-				return false;
-			}
-
-			if (vdu->propertyExists("LmDescriptionFile") == false)
-			{
-				m_log->errCFG3000("LmDescriptionFile", vdu->equipmentId());
-				return false;
-			}
-
-			if (lmDescriptionFile.isEmpty() == true)
-			{
-				// Load descruiption only for first VDU
-
-				lmDescriptionFile = vdu->propertyValue("LmDescriptionFile").toString();
-
-				description = m_lmDescriptions->get(vdu).get();
-
-				if (description == nullptr)
-				{
-					m_log->errEQP6004(vdu->equipmentIdTemplate(), LogicModuleSet::lmDescriptionFile(vdu), vdu->uuid());
-					return false;
-				}
-			}
-			else
-			{
-				// Check if VDU description is the same
-				if (lmDescriptionFile != vdu->propertyValue("LmDescriptionFile").toString())
-				{
-					m_log->errEQP6007("VDU");
-					return false;
-				}
-			}
-
-			quint16 ssKey = m_subsystems->ssKeyForVdu(vdu->equipmentId());
-			if (ssKeyValues.contains(ssKey) == true) 
-			{
-				LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("%1: Fatal error, Subsystem key for VDU %2 is not unique!").arg(__FUNCTION__).arg(vdu->equipmentId()));
-				return false;
-			}
-			ssKeyValues.insert(ssKey);
-
-			// Run VDU configuration script for every module
-
-			std::vector<Hardware::DeviceModule*> vduModule;
-			vduModule.push_back(vdu);
-
-			if (description->flashMemory().m_configWriteBitstream == true)
-			{
-				if (runConfigurationScriptFile(vdu->equipmentId(), 0, vduModule, description, &writer) == false)
-				{
-					return false;
-				}
-
-
-				const int configFrame = 1;
-				
-				// Write UniqueId
-				//
-				{
-					Hash uniqueId = ::calcHash(vdu->equipmentId());
-
-					const int uniqueIdOffset = 4;
-
-					writer.setData64(configFrame, uniqueIdOffset, uniqueId);
-					writer.jsAddDescription(vdu->place(),
-											tr("%1;%2;%3;0;64;%4;0x%5")
-												.arg(vdu->equipmentId())
-												.arg(configFrame)
-												.arg(uniqueIdOffset)
-												.arg("UniqueId")
-												.arg(QString::number(uniqueId, 16)));
-
-
-					writer.writeLog(tr("    [%1:%2] UniqueId = 0x%3\r\n")
-										.arg(configFrame)
-										.arg(uniqueIdOffset)
-										.arg(QString::number(uniqueId, 16)));
-
-					writer.jsSetUniqueID(vdu->place(), ::calcHash(vdu->equipmentId()));
-				}
-
-				// CRC
-				{
-					const int crcOffset = 172 * 2;
-
-					QString result = writer.storeCrc64(configFrame, 0, crcOffset, crcOffset);
-					if (result.isEmpty() == true) 
-					{
-						m_log->errINT1001(tr("%1: Fatal error, CRC64 for VDU %2 has invalid address (frame %3, offset %3)!")
-											  .arg(__FUNCTION__)
-											  .arg(vdu->equipmentId())
-											  .arg(configFrame)
-											  .arg(crcOffset));
-					}
-
-					writer.jsAddDescription(vdu->place(),
-											tr("%1;%2;%3;0;64;%4;0x%5")
-												.arg(vdu->equipmentId())
-												.arg(configFrame)
-												.arg(crcOffset)
-												.arg("CRC64")
-												.arg(result));
-
-
-					writer.writeLog(tr("    [%1:%2] crc64 = 0x%3\r\n").arg(configFrame).arg(crcOffset).arg(result));
-				}
-			}
-
-			// Save .bts file for VDU
-
-			QByteArray fileData;
-			if (writer.save(fileData, m_log) == true)
-			{
-				BuildFile* buildFile = m_buildResultWriter->addFile(QString("%1/%2").arg(Directory::VDUs).arg(vdu->equipmentId()),
-																	QString("%1.bts").arg(vdu->equipmentId().toLower()), fileData);
-
-				if (buildFile == nullptr)
-				{
-					return false;
-				}
-			}
-
-			// Save .mct file for VDU
-
-			const QByteArray& log = writer.scriptLog(vdu->equipmentId());
-
-			if (log.isEmpty() == false)
-			{
-				if (m_buildResultWriter->addFile(QString("%1/%2").arg(Directory::VDUs).arg(vdu->equipmentId()),
-												 vdu->equipmentId().toLower() + ".mct", log) == nullptr)
-				{
-					return false;
-				}
-			}
-
-		}
-
-				// Find all LM modules and save ssKey and channel information
-		//
-
-		std::sort(m_vduModules.begin(), m_vduModules.end(),
-				  [](const Hardware::DeviceModule* a, const Hardware::DeviceModule* b) -> bool
-		{
-			return a->equipmentIdTemplate() < b->equipmentIdTemplate();
-		});
-
-		QStringList report;
-		report << "Jumpers configuration for VDU modules";
-
-		for (Hardware::DeviceModule* m : m_vduModules)
-		{
-			quint16 ssKey = m_subsystems->ssKeyForVdu(m->equipmentId());
-
-			report << "\r\n";
-			report << "Equipment ID: " + m->equipmentIdTemplate();
-			report << "Caption: " + m->caption();
-			report << "Place: " + QString::number(m->place());
-			report << "Subsystem Code: " + QString::number(ssKey);
-
-			quint16 jumpers = ssKey;
-
-			quint16 crc4 = Crc::crc4(jumpers);
-			jumpers |= (crc4 << 12);
-
-			QString jumpersHex = QString::number(jumpers, 2).rightJustified(16, '0');
-			jumpersHex.insert(4, ' ');
-			jumpersHex.insert(9, ' ');
-			jumpersHex.insert(14, ' ');
-
-			// All other LMs use jumpers
-			//
-			if ((ssKey < 0) || (ssKey > std::numeric_limits<quint16>::max()))
-			{
-				m_log->errCFG3060(m->equipmentIdTemplate(), ssKey, 0, std::numeric_limits<quint16>::max());
-			}
-
-			report << "Jumpers Configuration (HEX): 0x" + QString::number(jumpers, 16);
-			report << "Jumpers Configuration (BIN): " + jumpersHex;
-		}
-
-		QByteArray reportData;
-		for (const QString& s : report)
-		{
-			reportData.append(s.toUtf8());
-			reportData.append(QChar::LineFeed);
-		}
-
-		if (m_buildResultWriter->addFile("Reports", "VduJumpers.txt", reportData) == nullptr)
-		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save VduJumpers.txt file!"));
 			return false;
 		}
 

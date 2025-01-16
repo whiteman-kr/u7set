@@ -219,6 +219,10 @@ namespace VFrame30
 	//	return;
 	//}
 
+	void SchemaItemVduRect::accept(VduItemVisitor& visitor) const
+	{
+		return visitor.visit(*this);
+	}
 
 	int SchemaItemVduRect::weight() const
 	{

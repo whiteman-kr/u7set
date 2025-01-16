@@ -2,6 +2,7 @@
 
 #include <ClientLib/TuningUserManager.h>
 #include <VFrame30/VFrame30Library.h>
+#include <UiLib/OverrideWindows11Style.h>
 
 #include "MainWindow.h"
 #include "ScriptTuningClientApplication.h"
@@ -152,6 +153,9 @@ int main(int argc, char* argv[])
 	int result = 0;
 
 	QApplication a(argc, argv);
+
+	UiLib::OverrideWindows11Style(a, argc, argv);
+
 	a.setApplicationName("TuningClient");
 	a.setOrganizationName(Manufacturer::RADIY);
 	a.setOrganizationDomain(Manufacturer::SITE);

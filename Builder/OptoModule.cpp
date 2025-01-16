@@ -10,7 +10,6 @@
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
 #include "../Builder/Context.h"
-#include "./Vdu/VduOptoConnectionsInfoGenerator.h"
 
 #include "DeviceHelper.h"
 #include "UalItems.h"
@@ -847,6 +846,11 @@ namespace Hardware
 			if (txSignal == nullptr)
 			{
 				ASSERT_RETURN_FALSE;
+			}
+
+			if (m_equipmentID == "SYSTEMID_CH03_VDU01_OPTOPORT01")
+			{
+				DEBUG_STOP;
 			}
 
 			m_rxSignals.append(txSignal);
@@ -1833,6 +1837,11 @@ namespace Hardware
 		if (res == false)
 		{
 			return false;
+		}
+
+		if (m_equipmentID == "SYSTEMID_CH03_VDU01_OPTOPORT01")
+		{
+			DEBUG_STOP;
 		}
 
 		m_rxSignals.append(rxSignal);
@@ -3310,18 +3319,6 @@ namespace Hardware
 		m_log->errALC5042(appSignalID, connectionID, receiverUuid, schemaID);
 
 		return false;
-	}
-
-	bool OptoModuleStorage::writeVduConnectionsInfoFile(const QString& vduEquipmentID,
-														Builder::Context* context) const
-	{
-		TEST_PTR_RETURN_FALSE(context);
-
-		OptoModuleShared optoModule = getOptoModule(vduEquipmentID);
-
-		TEST_PTR_RETURN_FALSE(optoModule);
-
-		return Builder::VduOptoConnectionsInfoGenerator().writeFiles(optoModule, context);
 	}
 
 	std::shared_ptr<Connection> OptoModuleStorage::getConnection(const QString& connectionID) const

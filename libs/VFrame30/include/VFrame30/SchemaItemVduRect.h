@@ -2,10 +2,12 @@
 
 #include <VFrame30/FontParam.h>
 #include <VFrame30/PosRectImpl.h>
+#include <VFrame30/SchemaItemVdu.h>
 
 namespace VFrame30
 {
-	class SchemaItemVduRect : public PosRectImpl
+	class SchemaItemVduRect : public PosRectImpl,
+							  public SchemaItemVdu
 	{
 		Q_OBJECT
 
@@ -28,6 +30,11 @@ namespace VFrame30
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
+
+		// VduItemVisitor
+		//
+	public:
+		void accept(VduItemVisitor& visitor) const override;
 
 		// Properties and Data
 		//
@@ -62,9 +69,9 @@ namespace VFrame30
 		void setVertAlign(E::VertAlign align);
 
 	private:
-		int m_weight = 0;                             // Line weight, in pixels
-		bool m_fill = true;                           // Fill rectangle
-		bool m_drawRect = true;                       // Rect is visible, thickness 0 is possible
+		int m_weight = 0;       // Line weight, in pixels
+		bool m_fill = true;     // Fill rectangle
+		bool m_drawRect = true; // Rect is visible, thickness 0 is possible
 
 		QColor m_lineColor = qRgb(0x00, 0x00, 0x00);
 		QColor m_fillColor = qRgb(0xC0, 0xC0, 0xC0);

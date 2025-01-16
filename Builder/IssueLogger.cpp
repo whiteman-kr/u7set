@@ -1799,6 +1799,29 @@ namespace Builder
 						arg(lmID).arg(diagDataServiceID));
 	}
 
+	/// IssueCode: CFG3054
+	///
+	/// IssueType: Error
+	///
+	/// Title: App signal %1 received simultaneously via %2 and %3 opto ports of VDU %4
+	///
+	/// Parameters:
+	///			%1 AppSignalID
+	///         %2 Opto port 1 EquipmentID
+	///         %3 Opto port 3 EquipmentID
+	///         %4 VDU EquipmentID
+	///
+	/// Description:
+	///			The same app signal received simultaneously via 2 VDU's opto ports.
+	///
+	void IssueLogger::errCFG3054(QString appSignalID, QString optoPort1ID, QString optoPort2ID, QString vduID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3054,
+				  tr("App signal %1 received simultaneously via %2 and %3 opto ports of VDU %4.").
+						arg(appSignalID, optoPort1ID, optoPort2ID, vduID));
+	}
+
 	/// IssueCode: CFG3060
 	///
 	/// IssueType: Error
@@ -2021,14 +2044,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: EquipmentID %1 must be LM family module type (LogicSchema %2).
+	/// Title: EquipmentID %1 must be from the LM, BVB, or VDU module family (LogicSchema %2).
 	///
 	/// Parameters:
 	///		%1 Logic modules StrID
 	///		%2 Logic schema StrID
 	///
 	/// Description:
-	///		Logic Schema has property EquipmentIDs but the equipment object with pointed ID is not a module or is not LM family type.
+	///		The Logic Schema has a property for EquipmentIDs, but the equipment object with the specified ID is either not a module or does not belong to the LM, BVB, or VDU family.
 	///
 	void IssueLogger::errALP4003(QString schema, QString equipmentId)
 	{
@@ -2036,7 +2059,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4003,
-				  tr("EquipmentID %1 must be LM family module type (LogicSchema %2).")
+				  tr("EquipmentID %1 must be from the LM, BVB, or VDU module family (LogicSchema %2).")
 				  .arg(equipmentId)
 				  .arg(schema));
 	}
@@ -4097,7 +4120,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: The signal %1 can be bind only to Logic Module or Equipment Signal.
+	/// Title: The signal %1 can be bind only to Logic Module, VDU or Equipment Signal.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -4109,7 +4132,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5031,
-				  QString(tr("The signal %1 can be bind only to Logic Module or Equipment Signal.").
+				  QString(tr("The signal %1 can be bind only to Logic Module, VDU or Equipment Signal.").
 						  arg(appSignalID)));
 	}
 
@@ -9516,6 +9539,28 @@ namespace Builder
 				  .arg(vduEquipmentId)
 				  .arg(schemaId)
 				  .arg(itemLabel));
+	}
+
+	/// IssueCode: EQP6405
+	///
+	/// IssueType: Warning
+	///
+	/// Title: SchemaItem %1 has an incompatible type with VDU, SchemaID %2. The SchemaItem will be ignored.
+	///
+	/// Parameters:
+	///		%1 Schema item label
+	///		%2 SchemaID
+	///
+	/// Description:
+	///		The schema item has an incompatible type with the VDU. It has been ignored and will not be displayed on the VDU.
+	///
+	void IssueLogger::wrnEQP6405(QString schemaId, QString itemLabel, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Warning2, 6405, itemUuid, schemaId);
+
+		LOG_WARNING2(IssueType::Equipment,
+					 6405,
+					 QString(tr("SchemaItem %1 has an incompatible type with VDU, SchemaID %2. The SchemaItem will be ignored.")).arg(itemLabel).arg(schemaId));
 	}
 
 	// --

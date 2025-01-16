@@ -329,26 +329,6 @@ namespace Builder
 			}
 		}
 
-		RETURN_IF_FALSE(result);
-
-		if (m_context->m_vduModules.empty() == false)
-		{
-			LOG_MESSAGE(log(), QString(tr("VDUs processing pass #1...")));
-
-			for(const Hardware::DeviceModule* vduModule : m_context->m_vduModules)
-			{
-				TEST_PTR_CONTINUE(vduModule);
-
-				result &= vduProcessingPass1(vduModule);
-
-				if (isBuildCancelled() == true)
-				{
-					result = false;
-					break;
-				}
-			}
-		}
-
 		return result;
 	}
 
@@ -378,106 +358,6 @@ namespace Builder
 				break;
 			}
 		}
-
-		RETURN_IF_FALSE(result);
-
-		if (m_context->m_vduModules.empty() == false)
-		{
-			LOG_MESSAGE(log(), QString(tr("VDUs processing pass #2...")));
-
-			for(const Hardware::DeviceModule* vduModule : m_context->m_vduModules)
-			{
-				TEST_PTR_CONTINUE(vduModule);
-
-				result &= vduProcessingPass2(vduModule);
-
-				if (isBuildCancelled() == true)
-				{
-					result = false;
-					break;
-				}
-			}
-		}
-
-		return result;
-	}
-
-	bool ApplicationLogicCompiler::vduProcessingPass1(const Hardware::DeviceModule* vduModule)
-	{
-		TEST_PTR_RETURN_FALSE(vduModule);
-
-		std::shared_ptr<Hardware::OptoModuleStorage> optoStorage = m_context->m_opticModuleStorage;
-
-		TEST_PTR_RETURN_FALSE(optoStorage);
-
-		QString vduEquipmentID = vduModule->equipmentIdTemplate();
-
-		bool result = false;
-
-		//
-		// Copied from bool ModuleLogicCompiler::processTxSignals()!
-		//
-
-		do
-		{
-			// add Tx signals from transmitters in txSignal lists of all Optical and Serial ports associated with current LM
-			// check that added regular Tx signals exists in current LM
-			//
-			//if (processTransmitters() == false) break;
-
-				   // find raw tx signals and set it addresses
-				   //
-			//if (m_optoModuleStorage->initRawTxSignals(lmID) == false) break;
-
-				   // sort Tx signals lists of LM's associated opto ports
-				   //
-			//if (m_optoModuleStorage->sortTxSignals(lmID) == false) break;
-
-				   // calculate relative Tx signals addresses in tx buffers
-				   //
-			if (optoStorage->calculateTxSignalsAddresses(vduEquipmentID) == false) break;
-
-				   // calculate txDataID
-				   //
-			if (optoStorage->calculateTxDataIDs(vduEquipmentID) == false) break;
-
-				   // calculate tx buffers absolute addresses
-				   //
-			if (optoStorage->calculateTxBufAddresses(vduEquipmentID) == false) break;
-
-			result = true;
-		}
-		while(false);
-
-		return result;
-
-	}
-
-	bool ApplicationLogicCompiler::vduProcessingPass2(const Hardware::DeviceModule* vduModule)
-	{
-		TEST_PTR_RETURN_FALSE(vduModule);
-		TEST_PTR_RETURN_FALSE(m_context->m_buildResultWriter);
-
-		std::shared_ptr<Hardware::OptoModuleStorage> optoStorage = m_context->m_opticModuleStorage;
-
-		TEST_PTR_RETURN_FALSE(optoStorage);
-
-		//
-		// Copied from bool ModuleLogicCompiler::finalizeOptoConnectionsProcessing()
-		//
-		bool result = true;
-
-		QString vduEquipmentID = vduModule->equipmentIdTemplate();
-
-		// copying optical ports txSignals lists to connected ports rxSignals lists
-		//
-		result &= optoStorage->copyOpticalPortsTxInRxSignals(vduEquipmentID);
-
-		// calculate absoulute addresses of receving buffers
-		//
-		result &= optoStorage->calculateRxBufAddresses(vduEquipmentID);
-
-		result &= optoStorage->writeVduConnectionsInfoFile(vduEquipmentID, m_context);
 
 		return result;
 	}
