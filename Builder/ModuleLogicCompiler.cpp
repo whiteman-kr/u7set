@@ -18791,7 +18791,7 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(component);
 
-			if (component->caption() == "SET_FLAGS")
+			if (component->isSoftwareImplemented())
 			{
 				continue;
 			}
