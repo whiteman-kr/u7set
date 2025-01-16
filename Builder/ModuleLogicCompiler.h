@@ -185,6 +185,7 @@ namespace Builder
 		QString lmEquipmentID() const;
 		int lmDescriptionNumber() const;
 		QString lmDescriptionName() const;
+		QString lmSubsystemID() const;
 
 		bool expertMode() const;
 		bool generateExtraDebugInfo() const;

@@ -357,6 +357,11 @@ namespace Builder
 		return m_lmDescription->name();
 	}
 
+	QString ModuleLogicCompiler::lmSubsystemID() const
+	{
+		return m_lmSubsystemID;
+	}
+
 	bool ModuleLogicCompiler::expertMode() const
 	{
 		return m_context->m_expertMode;
