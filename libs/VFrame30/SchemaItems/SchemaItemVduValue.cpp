@@ -317,7 +317,7 @@ namespace VFrame30
 				{
 					QString valueText =
 						treatAsFloat ? QString::number(123.123456780123456789, 'f', precision()) : QString::number(123, 'f', 0);
-					replaceText = QString("%1 %2").arg(valueText).arg(signalParam.unit());
+					replaceText = QString("%1 %2").arg(valueText).arg(signalParam.units());
 				}
 				break;
 
@@ -330,12 +330,12 @@ namespace VFrame30
 					QString valueText =
 						treatAsFloat ? QString::number(123.123456780123456789, 'f', precision()) : QString::number(123, 'f', 0);
 
-					replaceText = QString("+%1 %2").arg(valueText).arg(signalParam.unit());
+					replaceText = QString("+%1 %2").arg(valueText).arg(signalParam.units());
 				}
 				break;
 
 			case 'u':
-				replaceText = signalParam.unit();
+				replaceText = signalParam.units();
 				break;
 
 			case 'e':
