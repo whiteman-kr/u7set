@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <cmath>
 #include <set>
+#include <map>
 
 #define ASSERT_RESULT_FALSE_BREAK	Q_ASSERT(false); \
 									result = false; \

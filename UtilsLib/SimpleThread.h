@@ -1,7 +1,9 @@
 #pragma once
 
-#include <QEventLoop>
 #include <atomic>
+
+#include <QEventLoop>
+#include <QThread>
 
 class SimpleThreadWorker : public QObject
 {

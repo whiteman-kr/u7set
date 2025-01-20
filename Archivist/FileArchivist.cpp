@@ -8,5 +8,5 @@ FileArchivist::FileArchivist(int argc, char *argv[]) :
 
 void FileArchivist::copyArchive()
 {
-	qDebug() << "Copy FILE archive";
+//	qDebug() << "Copy FILE archive";
 }

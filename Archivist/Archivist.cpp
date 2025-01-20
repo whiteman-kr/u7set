@@ -1,9 +1,10 @@
 #include "Archivist.h"
 
-Archivist::Archivist(int argc, char* argv[]) :
-	m_archivierCmdParser("Radiy", "Archivist", argc, argv)
+std::shared_ptr<CircularLogger> logger;
+
+Archivist::Archivist(int argc, char* argv[])
 {
-	m_archivierCmdParser.addSimpleNoWritableCmdLineArg("copyfile",
+/*	m_archivierCmdParser.addSimpleNoWritableCmdLineArg("copyfile",
 													 "Copy file archive");
 
 	m_archivierCmdParser.addValueNoWritebleCmdLineArg("src",
@@ -24,12 +25,12 @@ Archivist::Archivist(int argc, char* argv[]) :
 
 	m_archivierCmdParser.addValueNoWritebleCmdLineArg("partsize",
 													"Archive copy parts size, GB",
-													"4");
+													"4");*/
 }
 
 bool Archivist::start()
 {
-	std::cout << C_STR(m_archivierCmdParser.helpText());
+/*	std::cout << C_STR(m_archivierCmdParser.helpText());
 
 	m_archivierCmdParser.parseAndApplyCmdLineArgs();
 
@@ -48,7 +49,7 @@ bool Archivist::start()
 		return false;
 	}
 
-	copyArchive();
+	copyArchive();*/
 
 //	if (archivierCmdParser.cmdLineArgIsSet("copyfile") == true)
 //	{
