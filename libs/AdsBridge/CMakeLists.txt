@@ -48,7 +48,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dev/include"
 )
 
-# if this is a Windos build, copy the AdsBridge.lib to the output directory
+# if this is a Windows build, copy the AdsBridge.lib to the output directory
 if(WIN32)
 	add_custom_command(
 		TARGET AdsBridge
@@ -86,10 +86,18 @@ if(DOXYGEN_FOUND)
 	add_dependencies(AdsBridge BridgeApiDoc)
 endif()
 
+# Copy directory with examples to the output directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dev/examples
+#
+add_custom_command(
+	TARGET AdsBridge
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/examples ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dev/examples
+)
+
 # --
 #
 if(NOT CODE_COVERAGE)
-	add_subdirectory(examples/cpp)
+	add_subdirectory(examples/AdsBridgeCppExample)
 endif()
 
 add_subdirectory(tests)

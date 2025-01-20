@@ -121,6 +121,11 @@ namespace VFrame30
 		return;
 	}
 
+	void SchemaItemVduLine::accept(VduItemVisitor& visitor) const
+	{
+		return visitor.visit(*this);
+	}
+
 	int SchemaItemVduLine::weight() const
 	{
 		return m_weight;

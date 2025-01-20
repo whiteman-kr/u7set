@@ -188,7 +188,7 @@ void TuningSignalInfo::updateInfo()
 			{
 				if (asp.isAnalog() == true)
 				{
-					text = managerState.value().toString(m_analogFormat, m_precision) + " " + asp.unit();
+					text = managerState.value().toString(m_analogFormat, m_precision) + " " + asp.units();
 				}
 				else
 				{

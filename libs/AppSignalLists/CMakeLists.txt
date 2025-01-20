@@ -93,14 +93,6 @@ add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Widgets)
 target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib UiLib AppSignalLib)
 
-#if (MSVC)
-	#target_link_libraries(${TARGET} PUBLIC Advapi32)
-#endif (MSVC)
-#
-#if (UNIX)
-	#target_link_libraries(${TARGET} PUBLIC pam pam_misc)
-#endif (UNIX)
-
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)

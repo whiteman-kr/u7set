@@ -314,7 +314,7 @@ bool ArchFilePartition::close()
 
 QString ArchFilePartition::getFileName(qint64 partitionStartTime, bool shortTerm)
 {
-	QDateTime date = QDateTime::fromMSecsSinceEpoch(partitionStartTime, Qt::UTC);
+	QDateTime date = QDateTime::fromMSecsSinceEpoch(partitionStartTime, TIME_ZONE_UTC);
 
 	QString extension;
 
@@ -626,7 +626,7 @@ QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& 
 		int hour = pi.fileName.mid(11, 2).toInt();
 		int minute = pi.fileName.mid(14, 2).toInt();
 
-		pi.date = QDateTime(QDate(year, month, day), QTime(hour, minute, 0, 0), Qt::TimeSpec::UTC);
+		pi.date = QDateTime(QDate(year, month, day), QTime(hour, minute, 0, 0), TIME_ZONE_UTC);
 		pi.startTime = pi.date.toMSecsSinceEpoch();
 
 		partitionsInfo.append(pi);

@@ -32,19 +32,20 @@ qt_add_library(${TARGET} STATIC
 	../Metrology/UnitsConverterTable.h
 	../TuningService/TuningSource.cpp
 	../TuningService/TuningSource.h
+	./Vdu/VduAppSignals.h
+	./Vdu/VduAppSignalsInfoGenerator.cpp
+	./Vdu/VduAppSignalsInfoGenerator.h
 	./Vdu/VduConfigFile.cpp
 	./Vdu/VduConfigFile.h
 	./Vdu/VduFontGenerator.cpp
 	./Vdu/VduFontGenerator.h
 	./Vdu/VduFontProvider.cpp
 	./Vdu/VduFontProvider.h
-	./Vdu/VduOptoConnectionsInfoFile.h
-	./Vdu/VduOptoConnectionsInfoGenerator.cpp
-	./Vdu/VduOptoConnectionsInfoGenerator.h
 	./Vdu/VduSchemaFile.h
 	./Vdu/VduSchemaGenerator.cpp
 	./Vdu/VduSchemaGenerator.h
 	./Vdu/VduTypes.h
+	./Vdu/VduUnicodeSubsets.h
 	AdsBridgeCfgGenerator.cpp
 	AdsBridgeCfgGenerator.h
 	AppDataServiceCfgGenerator.cpp

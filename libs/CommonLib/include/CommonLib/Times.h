@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QDateTime>
+#include <QTimeZone>
 #include <QMetaType>
 
 
@@ -36,6 +37,8 @@ constexpr int64_t operator "" _day(unsigned long long int value)
 	return value * 24 * 3600 * 1000;
 }
 
+inline static const QTimeZone TIME_ZONE_UTC(QTimeZone::UTC);
+inline static const QTimeZone TIME_ZONE_LOCAL(QTimeZone::LocalTime);
 
 //
 // TimeStamp
@@ -62,17 +65,17 @@ struct TimeStamp
 
 	[[nodiscard]] QDateTime toDateTime() const
 	{
-		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC);
+		return QDateTime::fromMSecsSinceEpoch(timeStamp, TIME_ZONE_UTC);
 	}
 
 	[[nodiscard]] QDate toDate() const
 	{
-		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC).date();
+		return QDateTime::fromMSecsSinceEpoch(timeStamp, TIME_ZONE_UTC).date();
 	}
 
 	[[nodiscard]] QTime toTime() const
 	{
-		return QDateTime::fromMSecsSinceEpoch(timeStamp, Qt::UTC).time();
+		return QDateTime::fromMSecsSinceEpoch(timeStamp, TIME_ZONE_UTC).time();
 	}
 
 	[[nodiscard]] TimeStamp roundedToHour() const

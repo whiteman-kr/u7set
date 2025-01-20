@@ -1,13 +1,13 @@
 #include "TestListWidget.h"
-#include "../TestSuiteLib/ScriptRunner.h"
 #include "AppConfigSettings.h"
-#include <QKeyEvent>
 #include <QHeaderView>
+#include <QKeyEvent>
+#include <TestSuiteLib/ScriptRunner.h>
 
 //
 // TestTreeWidgetItem
 //
-TestTreeWidgetItem::TestTreeWidgetItem(const QString& caption):
+TestTreeWidgetItem::TestTreeWidgetItem(const QString& caption) :
 	QTreeWidgetItem(QStringList() << caption)
 {
 }
@@ -80,7 +80,7 @@ void TestTreeWidgetItem::updatePermissionState(int columnStatus, bool selectionE
 	if (permission() == true)
 	{
 		// Enable checkbox
-		
+
 		restoreCheckState();
 	}
 	else
@@ -219,7 +219,11 @@ void TestTreeWidget::keyReleaseEvent(QKeyEvent* event)
 	QTreeWidget::keyReleaseEvent(event);
 }
 
-TestListWidget::TestListWidget(const TestSuite::TestSuite& testSuite, TestSuiteLogFile& appLog, TestSuite::ConfigSettings& configuration, const TestSuite::TestScriptsStorage& tests, QWidget* parent) :
+TestListWidget::TestListWidget(const TestSuite::MatsTestSuite& testSuite,
+							   TestSuiteLogFile& appLog,
+							   TestSuite::ConfigSettings& configuration,
+							   const TestSuite::TestScriptsStorage& tests,
+							   QWidget* parent) :
 	QWidget(parent),
 	m_testSuite(testSuite),
 	m_appLog(appLog),
@@ -249,7 +253,9 @@ TestListWidget::TestListWidget(const TestSuite::TestSuite& testSuite, TestSuiteL
 	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &TestListWidget::testItemDoubleClicked);
 	connect(m_treeWidget, &QTreeWidget::itemChanged, this, &TestListWidget::testItemChanged);
 	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested, this, &TestListWidget::contextMenuRequested);
-	connect(m_treeWidget, &TestTreeWidget::testSelectionChanged, [this]()
+	connect(m_treeWidget,
+			&TestTreeWidget::testSelectionChanged,
+			[this]()
 			{
 				emit testSelectionChanged();
 			});
@@ -264,7 +270,9 @@ TestListWidget::TestListWidget(const TestSuite::TestSuite& testSuite, TestSuiteL
 	m_filterEdit->setClearButtonEnabled(true);
 	filterLayout->addWidget(m_filterEdit);
 	connect(m_filterEdit, &QLineEdit::returnPressed, this, &TestListWidget::onFilterApply);
-	connect(m_filterEdit, &QLineEdit::textChanged, [this](const QString& text)
+	connect(m_filterEdit,
+			&QLineEdit::textChanged,
+			[this](const QString& text)
 			{
 				if (text.isEmpty() == true)
 				{
@@ -294,7 +302,7 @@ void TestListWidget::fillTestsTree()
 	struct PrevItemState
 	{
 		PrevItemState() = default;
-		explicit PrevItemState(TestTreeWidgetItem* item):
+		explicit PrevItemState(TestTreeWidgetItem* item) :
 			expanded(item->isExpanded()),
 			checked(item->checkState(0) == Qt::Checked)
 		{
@@ -341,16 +349,20 @@ void TestListWidget::fillTestsTree()
 	m_treeWidget->clear();
 
 	QString filterText = m_filterEdit->text();
-	
+
 	TestSuite::OutputControllerStub outputControllerStub;
 	TestSuite::InputControllerStub inputControllerStub;
-	TestSuite::ConfigSettings configSettings;
-	TestSuite::TestController testController{configSettings, SoftwareInfo{}, nullptr, nullptr, nullptr, inputControllerStub, outputControllerStub, nullptr};
+	
+	TestSuite::TestController testController{nullptr, nullptr, &inputControllerStub, &outputControllerStub, nullptr};
+
 	ILogFileStub testLog;
+
 	TestSuite::ControlStatus fakeStatus;
 	QMutex fakeStatusMutex;
 
-	const TestSuite::TestScript* globalScript = m_tests.globalScript();
+	QString softwareEquipmentId;
+
+	const auto globalScript = m_tests.getGloablScript();
 
 	m_treeWidget->blockSignals(true);
 
@@ -367,7 +379,7 @@ void TestListWidget::fillTestsTree()
 
 		// Evaluate script to get functions list
 		//
-		TestSuite::ScriptRunner sr(script, globalScript, configSettings, testController, testLog, fakeStatus, fakeStatusMutex);
+		TestSuite::ScriptRunner sr{softwareEquipmentId, script, globalScript, testController, testLog, fakeStatus, fakeStatusMutex};
 
 		const TestSuite::ScriptInfo& scriptInfo = sr.scriptInfo();
 		if (scriptInfo.empty() == true)
@@ -415,7 +427,9 @@ void TestListWidget::fillTestsTree()
 				// If this function is from existing file - check it if it was selected earlier
 				//
 				auto prevFuncItemIt = prevItemsStates.find(scriptInfo.fileName + function);
-				funcItem->setCheckState(0, prevFuncItemIt != prevItemsStates.end() && prevFuncItemIt->second.checked == true ? Qt::Checked : Qt::Unchecked);
+				funcItem->setCheckState(0,
+										prevFuncItemIt != prevItemsStates.end() && prevFuncItemIt->second.checked == true ? Qt::Checked :
+																															Qt::Unchecked);
 			}
 
 			funcItem->setPermission(m_testSuite.scriptPermission(scriptInfo.fileName) && m_testSuite.globalPermission());
@@ -567,11 +581,11 @@ void TestListWidget::onScriptPermissionChanged(QString scriptFileName, bool perm
 
 			parentItem->setParentItemCheckState();
 			break;
-		}			
+		}
 	}
-		
+
 	m_treeWidget->blockSignals(false);
-	
+
 	emit testSelectionChanged();
 	return;
 }
@@ -603,9 +617,9 @@ void TestListWidget::onNoPermissionsExist()
 
 		parentItem->setParentItemCheckState();
 	}
-		
+
 	m_treeWidget->blockSignals(false);
-	
+
 	emit testSelectionChanged();
 	return;
 }
@@ -634,7 +648,7 @@ void TestListWidget::onTestStarted(QString scriptFileName, QString testFunction)
 			int childCount = parentItem->childCount();
 			for (int c = 0; c < childCount; c++)
 			{
-				TestTreeWidgetItem* childItem =  dynamic_cast<TestTreeWidgetItem*>(parentItem->child(c));
+				TestTreeWidgetItem* childItem = dynamic_cast<TestTreeWidgetItem*>(parentItem->child(c));
 				if (childItem->function() == testFunction)
 				{
 					childItem->setText(Columns::Result, TestSuite::ConstStrings::TEST_RUNNING());
@@ -674,10 +688,11 @@ void TestListWidget::onTestFinished(QString scriptFileName, QString testFunction
 			int childCount = parentItem->childCount();
 			for (int c = 0; c < childCount; c++)
 			{
-				TestTreeWidgetItem* childItem =  dynamic_cast<TestTreeWidgetItem*>(parentItem->child(c));
+				TestTreeWidgetItem* childItem = dynamic_cast<TestTreeWidgetItem*>(parentItem->child(c));
 				if (childItem->function() == testFunction)
 				{
-					childItem->setText(Columns::Result, result ? TestSuite::ConstStrings::TEST_PASSED() : TestSuite::ConstStrings::TEST_FAILED());
+					childItem->setText(Columns::Result,
+									   result ? TestSuite::ConstStrings::TEST_PASSED() : TestSuite::ConstStrings::TEST_FAILED());
 
 					if (result == false)
 					{
@@ -719,14 +734,14 @@ void TestListWidget::testItemDoubleClicked(QTreeWidgetItem* item, int /*column*/
 }
 
 void TestListWidget::testItemChanged(QTreeWidgetItem* item, int column)
-{ 
+{
 	if (column != 0)
 	{
 		return;
 	}
 
 	QTreeWidgetItem* parentItem = item->parent();
-	
+
 	if (parentItem == nullptr)
 	{
 		// Script item changed - check or uncheck all child items
@@ -786,7 +801,10 @@ void TestListWidget::contextMenuRequested()
 			a = menu.addAction(tr("View function '%1'").arg(item->text(Columns::Caption)));
 		}
 
-		connect(a, &QAction::triggered, this, [this, item]()
+		connect(a,
+				&QAction::triggered,
+				this,
+				[this, item]()
 				{
 					TestTreeWidgetItem* testItem = dynamic_cast<TestTreeWidgetItem*>(item);
 					if (testItem == nullptr)
@@ -805,7 +823,10 @@ void TestListWidget::contextMenuRequested()
 
 	QAction* selectAllAction = menu.addAction(tr("Select All"));
 	selectAllAction->setEnabled(m_selectionEnabled);
-	connect(selectAllAction, &QAction::triggered, this, [this]()
+	connect(selectAllAction,
+			&QAction::triggered,
+			this,
+			[this]()
 			{
 				for (int i = 0; i < m_treeWidget->topLevelItemCount(); i++)
 				{
@@ -825,7 +846,10 @@ void TestListWidget::contextMenuRequested()
 
 	QAction* deselectAllAction = menu.addAction(tr("Unselect All"));
 	deselectAllAction->setEnabled(m_selectionEnabled);
-	connect(deselectAllAction, &QAction::triggered, this, [this]()
+	connect(deselectAllAction,
+			&QAction::triggered,
+			this,
+			[this]()
 			{
 				for (int i = 0; i < m_treeWidget->topLevelItemCount(); i++)
 				{
@@ -836,13 +860,19 @@ void TestListWidget::contextMenuRequested()
 	menu.addSeparator();
 
 	QAction* expandAllAction = menu.addAction(tr("Expand All"));
-	connect(expandAllAction, &QAction::triggered, this, [this]()
+	connect(expandAllAction,
+			&QAction::triggered,
+			this,
+			[this]()
 			{
 				m_treeWidget->expandAll();
 			});
 
 	QAction* collapseAllAction = menu.addAction(tr("Collapse All"));
-	connect(collapseAllAction, &QAction::triggered, this, [this]()
+	connect(collapseAllAction,
+			&QAction::triggered,
+			this,
+			[this]()
 			{
 				m_treeWidget->collapseAll();
 			});
@@ -850,7 +880,10 @@ void TestListWidget::contextMenuRequested()
 	menu.addSeparator();
 
 	QAction* resizeToContentsAction = menu.addAction(tr("Auto-Resize"));
-	connect(resizeToContentsAction, &QAction::triggered, this, [this]()
+	connect(resizeToContentsAction,
+			&QAction::triggered,
+			this,
+			[this]()
 			{
 				m_treeWidget->resizeColumnToContents(0);
 				m_treeWidget->resizeColumnToContents(1);

@@ -263,7 +263,7 @@ namespace SchemaClientLib
 
 		QDateTime tm;
 
-		tm.setTimeSpec(Qt::UTC);
+		tm.setTimeZone(TIME_ZONE_UTC);
 
 		tm.setMSecsSinceEpoch(state.lmtime());
 		setDataItemText("LmTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
@@ -706,7 +706,8 @@ namespace SchemaClientLib
 				}
 
 				QDateTime tm;
-				tm.setTimeSpec(Qt::UTC);
+
+				tm.setTimeZone(TIME_ZONE_UTC);
 
 				tm.setMSecsSinceEpoch(state.lmtime());
 				controllerItem->setText(static_cast<int>(Columns::LmTime), tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));

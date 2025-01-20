@@ -196,6 +196,7 @@ namespace EquipmentPropNames
 	
 
 	inline const QString FONTS("Fonts");
+	inline const QString UNICODDE_SUBSETS("UnicodeSubsets");
 
 	// DeviceAppSigal properties
 	//
@@ -647,8 +648,8 @@ namespace File
 	inline const QString GLOBAL_SCRIPT = "GlobalScript.js";
 	inline const QString GLOBAL_SCRIPT_FULL_PATH = "$root$/Tests/GlobalScript.js";
 
-	inline const QString OPTO_CONNECTIONS_INFO_VCI = "OptoConnectionsInfo.vci";
-	inline const QString OPTO_CONNECTIONS_INFO_TXT = "OptoConnectionsInfo.txt";
+	inline static const QString VDU_APP_SIGNALS_BIN = "VduAppSignals.bin";
+	inline static const QString VDU_APP_SIGNALS_TXT = "VduAppSignals.txt";
 
 	// Moved from DbStruct
 	//

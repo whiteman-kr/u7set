@@ -34,7 +34,6 @@ namespace
 		case LOG_LEVEL_ERROR:
 			logLevelString = "ERR: ";
 			break;
-
 		default:
 			logLevelString = "UNK: ";
 			std::terminate();

@@ -5,6 +5,7 @@
 #include <HardwareLib/EquipmentSet.h>
 #include <HardwareLib/DeviceChassis.h>
 #include <HardwareLib/DeviceModule.h>
+#include "DeviceHelper.h"
 
 namespace Builder
 {
@@ -351,13 +352,16 @@ namespace Builder
 				{
 					std::shared_ptr<Hardware::DeviceModule> module = std::dynamic_pointer_cast<Hardware::DeviceModule>(device);
 
-					if (module != nullptr && (module->isLogicModule() || module->isNonPlatformAppDataSourceModule()))
+					if (module != nullptr &&
+						(module->isLogicModule() ||
+						module->isVdu()) ||
+						module->isNonPlatformAppDataSourceModule())
 					{
 						linkSignalToLm(sg, module);
 					}
 					else
 					{
-						// The signal %1 can be bind only to Logic Module or Equipment Signal.
+						// The signal %1 can be bind only to Logic Module, VDU or Equipment Signal.
 						//
 						m_log->errALC5031(s.appSignalID());
 						result = false;
@@ -376,6 +380,16 @@ namespace Builder
 					}
 
 					std::shared_ptr<Hardware::DeviceModule> module = chassis->findAppDataSourceModule();
+
+					if (module == nullptr)
+					{
+						module = DeviceHelper::getParentVduModule(device.get());
+
+						if (module != nullptr)
+						{
+							s.setAcquire(false);
+						}
+					}
 
 					if (module == nullptr)
 					{

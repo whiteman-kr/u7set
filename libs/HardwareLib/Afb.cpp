@@ -187,6 +187,16 @@ namespace Afb
 		//
 		m_simulationFunc = xmlElement.attribute(QLatin1String("SimulationFunc"));
 
+		// SoftwareImplemented
+		//
+		m_softwareImplemented = false;
+
+		if (xmlElement.hasAttribute(QLatin1String("SoftwareImplemented")) == true)
+		{
+			m_softwareImplemented = (xmlElement.attribute(QLatin1String("SoftwareImplemented")).
+												toLower().trimmed() == "true");
+		}
+
 		// Pins
 		//
 		{
@@ -301,6 +311,16 @@ namespace Afb
 	void AfbComponent::setSimulationFunc(const QString& value) noexcept
 	{
 		m_simulationFunc = value;
+	}
+
+	bool AfbComponent::isSoftwareImplemented() const noexcept
+	{
+		return m_softwareImplemented;
+	}
+
+	void AfbComponent::setSoftwareImplemented(bool value) noexcept
+	{
+		m_softwareImplemented = value;
 	}
 
 	const std::unordered_map<int, AfbComponentPin>& AfbComponent::pins() const noexcept
@@ -1683,13 +1703,14 @@ namespace Afb
 
 		QDomDocument doc;
 
-		bool result = doc.setContent(ba, errorMsg);
-		if (result == false)
+		QDomDocument::ParseResult pr = doc.setContent(ba);
+
+		if (pr.errorMessage.isEmpty() == false)
 		{
 			return false;
 		}
 
-		result = loadFromXml(doc.firstChild().toElement(), errorMsg);
+		bool result = loadFromXml(doc.firstChild().toElement(), errorMsg);
 
 		return result;
 	}

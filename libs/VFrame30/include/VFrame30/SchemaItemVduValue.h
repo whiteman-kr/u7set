@@ -2,10 +2,12 @@
 
 #include <VFrame30/FontParam.h>
 #include <VFrame30/PosRectImpl.h>
+#include <VFrame30/SchemaItemVdu.h>
 
 namespace VFrame30
 {
-	class SchemaItemVduValue : public PosRectImpl
+	class SchemaItemVduValue : public PosRectImpl,
+							   public SchemaItemVdu
 	{
 		Q_OBJECT
 
@@ -29,6 +31,14 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
+	private:
+		QString parseText(QStringView text, const VFrame30::AppSignalController* appSignalController) const;
+
+		// VduItemVisitor
+		//
+	public:
+		void accept(VduItemVisitor& visitor) const override;
+
 		// Properties and Data
 		//
 	public:
@@ -47,8 +57,14 @@ namespace VFrame30
 		QColor textColor() const;
 		void setTextColor(QColor color);
 
-		const QString& appSignalId() const;
-		void setAppSignalId(const QString& value);
+		const QString& text() const;
+		void setText(const QString& value);
+
+		QString appSignalIdsString() const;
+		void setAppSignalIdsString(const QString& value);
+
+		QStringList appSignalIds() const;
+		void setAppSignalIds(const QStringList& value);
 
 		int precision() const;
 		void setPrecision(int value);
@@ -56,16 +72,33 @@ namespace VFrame30
 		DECLARE_FONT_PROPERTIES(Font)
 
 	private:
-		int m_weight = 0;                             // Line weight, in pixels
-		bool m_drawRect = true;                       // Rect is visible, thickness 0 is possible
+		int m_weight = 0;       // Line weight, in pixels
+		bool m_drawRect = true; // Rect is visible, thickness 0 is possible
 
 		QColor m_lineColor = qRgb(0xFF, 0xFF, 0xFF);
 		QColor m_fillColor = qRgb(0x00, 0x00, 0xC0);
 		QColor m_textColor = qRgb(0xFF, 0xFF, 0xFF);
 
-		QString m_appSignalId;
+		// clang-format off
+		QString m_text; // Text to display, may contain placeholders:
+						// Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
+						// %% - Percent
+						// %i - CustomAppSignalID
+						// %c - Signal caption
+						// %v - Signal value
+						// %V - Signal value + unit
+						// %s - +/- signal value
+						// %S - +/- signal value + unit
+						// %u - unit
+						// %e - Value in exponential form (1.0e-11)
+						// %E - Value in exponential form (1.0E-11)
+						// %x - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009abc).
+						// %X - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009ABC).
+		// clang-format on
 
-		int m_precision	= 0;                          // Number of digits after the decimal point
+		QStringList m_appSignalIds;
+
+		int m_precision = 0; // Number of digits after the decimal point
 
 		FontParam m_font;
 	};

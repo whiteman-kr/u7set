@@ -219,9 +219,9 @@ SettingsForm::SettingsForm(const MconfSettings& settings, QWidget* parent) :
 	connect(m_pCancelButton, &QPushButton::clicked, this, &QDialog::reject);
 	connect(m_pSerialPort, &QComboBox::currentTextChanged, this, &SettingsForm::currentSerialPortChanged);
 
-	connect(m_pShowDebugInfo, &QCheckBox::stateChanged, this, &SettingsForm::showDebugInfoChanged);
-	connect(m_pVerify, &QCheckBox::stateChanged, this, &SettingsForm::verifyChanged);
-	connect(m_pExpertMode, &QCheckBox::stateChanged, this, &SettingsForm::expertModeChanged);
+	connect(m_pShowDebugInfo, &QCheckBox::checkStateChanged, this, &SettingsForm::showDebugInfoChanged);
+	connect(m_pVerify, &QCheckBox::checkStateChanged, this, &SettingsForm::verifyChanged);
+	connect(m_pExpertMode, &QCheckBox::checkStateChanged, this, &SettingsForm::expertModeChanged);
 
 	return;
 }
@@ -238,19 +238,19 @@ void SettingsForm::currentSerialPortChanged(const QString& text)
 	m_settings.setSerialPort(text);
 }
 
-void SettingsForm::showDebugInfoChanged(int state)
+void SettingsForm::showDebugInfoChanged(Qt::CheckState state)
 {
-	m_settings.setShowDebugInfo(state == static_cast<int>(Qt::Checked));
+	m_settings.setShowDebugInfo(state == Qt::Checked);
 }
 
-void SettingsForm::verifyChanged(int state)
+void SettingsForm::verifyChanged(Qt::CheckState state)
 {
-	m_settings.setVerify(state == static_cast<int>(Qt::Checked));
+	m_settings.setVerify(state == Qt::Checked);
 }
 
-void SettingsForm::expertModeChanged(int state)
+void SettingsForm::expertModeChanged(Qt::CheckState state)
 {
-	m_settings.setExpertMode(state == static_cast<int>(Qt::Checked));
+	m_settings.setExpertMode(state == Qt::Checked);
 }
 
 void SettingsForm::accept()

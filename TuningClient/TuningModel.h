@@ -176,6 +176,6 @@ public:
 	TuningValue value() { return m_value; }
 
 private slots:
-	void on_m_checkBox_stateChanged(int state);
+	void on_m_checkBox_stateChanged(Qt::CheckState state);
 	void on_m_buttonDefault_clicked();
 };

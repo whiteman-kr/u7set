@@ -132,9 +132,8 @@ namespace
 		}
 
 		// Resolve strings:
-		// String consist of 16 bit size of string in symbols, followed with string data. Padding to 4 bytes.
+		// String consist of 16 bit size of string in the UTF-8 format, followed with string data. Padding to 4 bytes.
 		// The string is a null terminated QChar string.
-		// (In Qt, Unicode characters are 16-bit entities without any markup or structure).
 		// Note: String in file must be aligned to 4 bytes.
 		//
 
@@ -151,12 +150,15 @@ namespace
 
 			// Write string size.
 			//
-			uint16_t stringSize = static_cast<uint16_t>(str.size());
+			std::string utf8Str = str.toUtf8().toStdString();
+
+			uint16_t stringSize = static_cast<uint16_t>(utf8Str.size());
 			out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
 
 			// Write string data.
 			//
-			out.append(reinterpret_cast<const char*>(str.constData()), (str.size() + 1) * sizeof(QChar)); // +1 for null terminator
+			out.append(reinterpret_cast<const char*>(utf8Str.data()),
+					   (utf8Str.size() + 1) * sizeof(std::string::value_type)); // +1 for null terminator
 
 			// Replace string_ref with offset to the string.
 			//
@@ -377,7 +379,12 @@ namespace Builder
 
 		bool result = true;
 
-		for (const Hardware::DeviceModule* vdu : context.m_vduModules)
+		auto isVduModule = [](Hardware::DeviceModule* module)
+		{
+			return module->isVdu();
+		};
+
+		for (const Hardware::DeviceModule* vdu : context.m_fscModules | std::views::filter(isVduModule))
 		{
 			Q_ASSERT(vdu);
 

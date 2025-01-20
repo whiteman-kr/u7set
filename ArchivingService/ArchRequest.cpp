@@ -153,7 +153,7 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 		{
 			// convert m_startTime to system time
 			//
-			QDateTime localTime = QDateTime::fromMSecsSinceEpoch(m_startTime, Qt::UTC);
+			QDateTime localTime = QDateTime::fromMSecsSinceEpoch(m_startTime, TIME_ZONE_UTC);
 			sysTimeToFindPartition = localTime.toMSecsSinceEpoch();
 		}
 		break;

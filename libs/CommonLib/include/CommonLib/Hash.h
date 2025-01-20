@@ -7,9 +7,9 @@
 #include <cassert>
 
 using Hash = quint64;
+using Hash32 = uint32_t;
 
 #define UNDEFINED_HASH 0x0000000000000000ULL		// Do not change to other value.
-
 
 inline Hash calcHash(const QString& str, Hash init = 0)
 {
@@ -38,7 +38,6 @@ constexpr Hash calcHash(const QChar* str)
 
 	return hash;
 }
-
 
 inline Hash calcHash(const QByteArray& data)
 {
@@ -116,7 +115,6 @@ namespace std
 
 #include <QCryptographicHash>
 
-
 class Md5Hash : public QCryptographicHash
 {
 public:
@@ -127,7 +125,6 @@ public:
 	static QByteArray hash(const QByteArray& data) { return QCryptographicHash::hash(data, QCryptographicHash::Md5); }
 	static QString hashStr(const QByteArray& data) { return QString(QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex()); }
 };
-
 
 inline quint32 ClassNameHashCode(const std::string& className)
 {
@@ -176,4 +173,37 @@ namespace hash_h
 
 template<typename T>
 using VoidHasher = hash_h::hasher<T>;
+
+inline Hash32 calcHash32(const void* data, size_t bytesCount)
+{
+	const uint8_t* dataPtr = reinterpret_cast<const uint8_t*>(data);
+
+	// FNV1A_Jesteress hash function for 32-bit hash
+	//
+	const uint32_t fnvPrime = 16777619u;          // FNV prime number
+	const uint32_t offsetBasis = 2166136261u;     // FNV start value
+	Hash32 hash = offsetBasis;
+
+	while(bytesCount > 0)
+	{
+		hash ^= static_cast<uint32_t>(*dataPtr++);
+		hash *= fnvPrime;
+		hash ^= (hash >> 1);
+
+		bytesCount--;
+	}
+
+	// Final mixing
+	//
+	hash ^= (hash << 7);
+	hash ^= (hash >> 3);
+	hash ^= (hash << 17);
+
+	return hash;
+}
+
+inline Hash32 calcHash32(const QByteArray& data)
+{
+	return calcHash32(data.constData(), data.size());
+}
 

@@ -15,6 +15,7 @@
 #include "DiagDataServiceCfgGenerator.h"
 #include "Parser.h"
 #include "LmDescriptionSet.h"
+#include "./Vdu/VduAppSignalsInfoGenerator.h"
 
 #define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
 
@@ -259,6 +260,7 @@ namespace Builder
 			PROC_TO_CALL(Builder::ModuleLogicCompiler::initComparatorSignals),
 
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
+			PROC_TO_CALL(ModuleLogicCompiler::writeVduConnectionsInfoFile),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
 			//PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),			// extra debug info signal lists
 
@@ -355,6 +357,11 @@ namespace Builder
 		return m_lmDescription->name();
 	}
 
+	QString ModuleLogicCompiler::lmSubsystemID() const
+	{
+		return m_lmSubsystemID;
+	}
+
 	bool ModuleLogicCompiler::expertMode() const
 	{
 		return m_context->m_expertMode;
@@ -446,7 +453,7 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(m_lm);
 
-		return m_lm->isBvb() || m_lm->isMso();
+		return m_lm->isBvb() || m_lm->isMso() || m_lm->isVdu();
 	}
 
 	const UalAfbs& ModuleLogicCompiler::ualAfbs() const
@@ -637,6 +644,50 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::getDeviceAppSignal(const AppSignal& ioSignal,
+												 Hardware::DeviceAppSignal** deviceAppSignal) const
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(deviceAppSignal, m_log);
+
+		if (ioSignal.isInput() == false &&
+			ioSignal.isOutput() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		// retrieve linked device
+		//
+		Hardware::DeviceObject* device = m_equipmentSet->deviceObject(ioSignal.equipmentID()).get();
+
+		if (device == nullptr)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find DeviceObject with equipmentID %1").
+												arg(ioSignal.equipmentID()));
+			return false;
+		}
+
+		if (device->isAppSignal() == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceObject %1 is not a DeviceAppSignal").
+												arg(ioSignal.equipmentID()));
+			return false;
+		}
+
+		Hardware::DeviceAppSignal* devAppSignal = device->toAppSignal().get();
+
+		if (devAppSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		*deviceAppSignal = devAppSignal;
+
+		return true;
+	}
+
 	bool ModuleLogicCompiler::loadLMSettings()
 	{
 		bool result = true;
@@ -690,6 +741,18 @@ namespace Builder
 		result &= getLMStrProperty("SubsystemID", &m_lmSubsystemID);
 		result &= getLMIntProperty("LMNumber", &m_lmNumber);
 		result &= getLMIntProperty("SubsystemChannel", &m_lmChannel);
+
+		// check LM subsystem ID
+		//
+		m_lmSubsystemKey = m_appLogicCompiler.subsystems()->ssKey(m_lmSubsystemID);
+
+		if (m_lmSubsystemKey == -1)
+		{
+			// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
+			//
+			m_log->errALC5056(m_lmSubsystemID, lmEquipmentID());
+			return false;
+		}
 
 		m_modules.clear();
 
@@ -745,18 +808,6 @@ namespace Builder
 		Q_ASSERT(m_modules.contains(m.place) == false);
 
 		m_modules.emplace(m.place, m);
-
-		// check LM subsystem ID
-		//
-		m_lmSubsystemKey = m_appLogicCompiler.subsystems()->ssKey(m_lmSubsystemID);
-
-		if (m_lmSubsystemKey == -1)
-		{
-			// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
-			//
-			m_log->errALC5056(m_lmSubsystemID, lmEquipmentID());
-			return false;
-		}
 
 		return result;
 	}
@@ -1011,6 +1062,7 @@ namespace Builder
 					}
 
 					if (!(deviceModule->isLogicModule() ||
+						  deviceModule->isVdu() ||
 						  deviceModule->isNonPlatformAppDataSourceModule()))
 					{
 						assert(false); // signal must be associated with LM or non-platform app data module
@@ -6491,6 +6543,14 @@ namespace Builder
 				result = true;
 				break;
 			}
+
+			if (m_lm->isVdu())
+			{
+				result = true;
+				break;
+			}
+
+			Q_ASSERT(false);
 		}
 		while(false);
 
@@ -6595,53 +6655,19 @@ namespace Builder
 	bool ModuleLogicCompiler::getIoSignalModule(const AppSignal& ioSignal, Module* module,
 												Hardware::DeviceAppSignal** deviceAppSignal) const
 	{
-		TEST_PTR_RETURN_FALSE(m_log);
-		TEST_PTR_LOG_RETURN_FALSE(module, m_log);
-		TEST_PTR_LOG_RETURN_FALSE(deviceAppSignal, m_log);
+		bool res = getDeviceAppSignal(ioSignal, deviceAppSignal);
 
-		if (ioSignal.isInput() == false &&
-			ioSignal.isOutput() == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		// retrieve linked device
-		//
-		Hardware::DeviceObject* device = m_equipmentSet->deviceObject(ioSignal.equipmentID()).get();
-
-		if (device == nullptr)
-		{
-			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find DeviceObject with equipmentID %1").
-												arg(ioSignal.equipmentID()));
-			return false;
-		}
-
-		if (device->isAppSignal() == false)
-		{
-			LOG_INTERNAL_ERROR_MSG(m_log, QString("DeviceObject %1 is not a DeviceAppSignal").
-												arg(ioSignal.equipmentID()));
-			return false;
-		}
-
-		Hardware::DeviceAppSignal* devAppSignal = device->toAppSignal().get();
-
-		if (devAppSignal == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		*deviceAppSignal = devAppSignal;
+		RETURN_IF_FALSE(res);
+		TEST_PTR_RETURN_FALSE(*deviceAppSignal);
 
 		// retrieve associated module
 		//
-		const Hardware::DeviceModule* deviceModule = devAppSignal->getParentModule();
+		const Hardware::DeviceModule* deviceModule = (*deviceAppSignal)->getParentModule();
 
 		if (deviceModule == nullptr)
 		{
 			LOG_INTERNAL_ERROR_MSG(m_log, QString("Can't find parent DeviceModule for DeviceAppSignal %1").
-												arg(devAppSignal->equipmentIdTemplate()));
+												arg((*deviceAppSignal)->equipmentIdTemplate()));
 			return false;
 		}
 
@@ -18270,6 +18296,20 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::writeVduConnectionsInfoFile()
+	{
+		if (m_lm->isVdu() == false)
+		{
+			return true;
+		}
+
+		VduAppSignalsInfoGenerator vg;
+
+		bool res = vg.writeFiles(this);
+
+		return res;
+	}
+
 	void ModuleLogicCompiler::printCodeStatistics(const AppLogicCode& code,
 												QStringList& file,
 												bool exludeNotUsedCommands) const
@@ -18752,12 +18792,11 @@ namespace Builder
 
 		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& components = m_lmDescription->afbComponents();
 
-		for(std::pair<int, std::shared_ptr<Afb::AfbComponent>> pair : components)
+		for(auto const& [componentOpCode, component] : components)
 		{
-			int componentOpCode = pair.first;
-			std::shared_ptr<Afb::AfbComponent> component = pair.second;
+			TEST_PTR_CONTINUE(component);
 
-			if (component->caption() == "SET_FLAGS")
+			if (component->isSoftwareImplemented())
 			{
 				continue;
 			}

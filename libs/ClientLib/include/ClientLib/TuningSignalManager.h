@@ -124,10 +124,13 @@ namespace ClientLib
 	signals:
 		void signalsLoaded();			// Emited when new signals loaded
 
+	public:
+		void setClientEquipmentId(const QString& clientEquipmentId);
+
 		// Data
 		//
 	private:
-		const Hash m_tuningClientHash = UNDEFINED_HASH;	// cached client hash value
+		Hash m_tuningClientHash = UNDEFINED_HASH; // cached client hash value
 		HasLogFile m_logFile;
 
 		struct SourceState

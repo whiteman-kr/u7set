@@ -15,7 +15,7 @@ namespace Builder
 	struct VduSymbol
 	{
 	public:
-		VduSymbol(quint16 width, quint16 height, char c, const QFontMetrics& fm, const QFont& font);
+		VduSymbol(quint16 width, quint16 height, const QChar& c, const QFontMetrics& fm, const QFont& font);
 
 		void saveToBmp(QByteArray& out) const;
 		void saveToVdut(QByteArray& out) const;
@@ -36,6 +36,7 @@ namespace Builder
 	class IssueLogger;
 	class Context;
 	struct VduFontInfo;
+	struct VduSymbolSubset;
 
 	class VduFontGenerator
 	{
@@ -44,7 +45,11 @@ namespace Builder
 
 	public:
 		static bool generationVduFonts(Context& context);
-		static bool generateVduFont(const VduFontInfo& fontInfo, const QString& dir, bool generateDebugFiles, Context& context);
+		static bool generateVduFont(const VduFontInfo& fontInfo,
+									const std::vector<VduSymbolSubset>& subsets,
+									const QString& dir,
+									bool generateDebugFiles,
+									Context& context);
 	};
 
 } // namespace Builder

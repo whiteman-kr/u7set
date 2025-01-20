@@ -4,7 +4,12 @@ VDU-1
 	26.01.2024	Version: 2	VDU-1_v2.u7devp RPCT-3550: Added properties SchemaTags, StartSchemaID
 	08.04.2024	Version: 3	VDU-1_v3.u7devp RPCT-3872: Added property Fonts
 	09.04.2024	Version: 4	VDU-1_v4.u7devp RPCT-3872: Added Display0 properties
-	01.08.2024	Version: 5	VDU-1_v4.u7devp RPCT-3872: FamilyType changed from 0x7100 to 0x1C00
+	01.08.2024	Version: 5	VDU-1_v5.u7devp RPCT-3872: FamilyType changed from 0x7100 to 0x1C00
+	16.10.2024	Version: 6	VDU-1_v6.u7devp RPCT-3549: Added properties: DiagLANDataSize, SubsystemID, SubsystemChannel, LMNumber. Worstation removed.
+	07.11.2024	Version: 7	VDU-1_v7.u7devp RPCT-3550: Added Input, Output and Platform interface controller and their signals
+	03.12.2024	Version: 8	VDU-1_v8.u7devp RPCT-3550: Added Temperature and Opto validity signals, Number of inputs and Outputs is 6
+	07.12.2024	Version: 9	VDU-1_v7.u7devp RPCT-3550: Added Output signals, Common fault, Build number
+	13.12.2024	Version: 10	VDU-1_v7.u7devp RPCT-3985: Added Unicode subsets selection to the VDU preset
 
 
 

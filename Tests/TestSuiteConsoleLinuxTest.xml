@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestSuiteConsoleArguments>
+    <!--TestSuite InstanceStrID-->
+    <InstanceStrID>SYSTEMID_CLIENTTEST_WS01_TESTSUITE</InstanceStrID>
+    <!--Configurator IP Address 1-->
+    <ConfiguratorIPAddress1>127.0.0.1</ConfiguratorIPAddress1>
+    <!--Configurator Port 1-->
+    <ConfiguratorPort1>13412</ConfiguratorPort1>
+    <!--Configurator IP Address 2-->
+    <ConfiguratorIPAddress2>127.0.0.1</ConfiguratorIPAddress2>
+    <!--Configurator Port 2-->
+    <ConfiguratorPort2>13412</ConfiguratorPort2>
+</TestSuiteConsoleArguments>

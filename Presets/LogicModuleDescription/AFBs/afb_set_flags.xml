@@ -1,2 +1,2 @@
-<AFBComponent Caption="SET_FLAGS" OpCode="255" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
+<AFBComponent Caption="SET_FLAGS" OpCode="255" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags" SoftwareImplemented="true">
 </AFBComponent>

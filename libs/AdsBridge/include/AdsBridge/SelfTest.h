@@ -16,7 +16,7 @@ extern "C"
 	bool AdsTestMatsAppSignalParam(size_t structSize, const struct MatsAppSignalParam* testValue);
 	bool AdsTestMatsAppSignalState(size_t structSize, const struct MatsAppSignalState* testValue);
 
-	static inline bool AdsSelfTest()
+	inline bool AdsSelfTest()
 	{
 		struct AdsConnectionStatus adsTestConnectionStatus;
 		struct MatsAppSignalParam matsTestAppSignalParam;
@@ -42,7 +42,7 @@ extern "C"
 		matsTestAppSignalParam.caption = (char*)0x77223399BBAAEEDDull;
 		matsTestAppSignalParam.equipmentId = (char*)0x2233D1998899AA9Aull;
 		matsTestAppSignalParam.lmEquipmentId = (char*)0x3233D199889AAA8Bull;
-		matsTestAppSignalParam.unit = (char*)0xBBAADDFF7711AA99ull;
+		matsTestAppSignalParam.units = (char*)0xBBAADDFF7711AA99ull;
 		matsTestAppSignalParam.tags = (char*)0x223344998899AABBull;
 		matsTestAppSignalParam.channel = MATS_CHANNEL_D;
 		matsTestAppSignalParam.inOutType = MATS_SIGNAL_INTERNAL;

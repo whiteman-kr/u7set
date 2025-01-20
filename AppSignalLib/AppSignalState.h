@@ -155,4 +155,4 @@ class AppSignalState
 	static const quint32 INVALID = 0;
 };
 
-Q_DECLARE_METATYPE(AppSignalState)
+ Q_DECLARE_METATYPE( ::AppSignalState )

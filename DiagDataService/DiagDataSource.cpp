@@ -48,6 +48,7 @@ bool DiagDataSource::init(const std::map<Hash, Hardware::DiagSignalType>& diagSi
 						  const ::Network::AcquiredDiagSignalsAndObjects& diagSignalsAndObjects)
 {
 	Q_UNUSED(diagSignalTypes);
+
 	bool result = true;
 
 	int lmCount = diagSignalsAndObjects.lmdiagsignals().size();

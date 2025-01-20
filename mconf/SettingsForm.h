@@ -22,9 +22,9 @@ public:
 
 private slots:
 	void currentSerialPortChanged(const QString & text);
-	void showDebugInfoChanged(int state);
-	void verifyChanged(int state);
-	void expertModeChanged(int state);
+	void showDebugInfoChanged(Qt::CheckState state);
+	void verifyChanged(Qt::CheckState state);
+	void expertModeChanged(Qt::CheckState state);
 
 	virtual void accept() override;
 

@@ -463,7 +463,7 @@ namespace VFrame30
 
 				if (macro.compare(QLatin1String("units"), Qt::CaseInsensitive) == 0)
 				{
-					replaceText = signal.unit();
+					replaceText = signal.units();
 					break;
 				}
 			} while (false);

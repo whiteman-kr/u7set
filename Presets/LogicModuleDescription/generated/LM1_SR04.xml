@@ -1,4 +1,4 @@
-<LogicModule Name="LM1_SR04" DescriptionNumber="4" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.29">
+<LogicModule Name="LM1_SR04" DescriptionNumber="4" ConfigurationScriptFile="ConfigScript.js" Version="1.29">
   <FlashMemory>
     <AppLogicFrameCount>256</AppLogicFrameCount>
     <AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -16,6 +16,9 @@
     <TuningUartID>260</TuningUartID>
     <TuningWriteBitstream>true</TuningWriteBitstream>
     <MaxConfigurationCount>12</MaxConfigurationCount>
+    <SingleConfigFirstFrame>2</SingleConfigFirstFrame>
+    <SingleConfigFrameCount>19</SingleConfigFrameCount>
+    <SingleConfigUniqueIDOffset>4</SingleConfigUniqueIDOffset>
   </FlashMemory>
   <Memory>
     <CodeMemorySize>98304</CodeMemorySize>
@@ -541,7 +544,7 @@
       <Pin OpName="o_param_err" OpIndex="16" PinType="Output" />
       <Pin OpName="o_version" OpIndex="17" PinType="Output" />
     </AFBComponent>
-    <AFBComponent Caption="PACKED_AND" OpCode="252" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation">
+    <AFBComponent Caption="PACKED_AND" OpCode="252" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation" SoftwareImplemented="true">
       <Pin OpName="i_oprd_quant" OpIndex="0" PinType="Param" />
       <Pin OpName="i_bus_width" OpIndex="1" PinType="Param" />
       <Pin OpName="i_conf" OpIndex="2" PinType="Param" />
@@ -565,7 +568,7 @@
       <Pin OpName="o_logic_edi" OpIndex="21" PinType="Output" />
       <Pin OpName="o_version" OpIndex="22" PinType="Output" />
     </AFBComponent>
-    <AFBComponent Caption="PACKED_OR" OpCode="253" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation">
+    <AFBComponent Caption="PACKED_OR" OpCode="253" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_no_simulation" SoftwareImplemented="true">
       <Pin OpName="i_oprd_quant" OpIndex="0" PinType="Param" />
       <Pin OpName="i_bus_width" OpIndex="1" PinType="Param" />
       <Pin OpName="i_conf" OpIndex="2" PinType="Param" />
@@ -589,7 +592,7 @@
       <Pin OpName="o_logic_edi" OpIndex="21" PinType="Output" />
       <Pin OpName="o_version" OpIndex="22" PinType="Output" />
     </AFBComponent>
-    <AFBComponent Caption="SET_FLAGS" OpCode="255" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
+    <AFBComponent Caption="SET_FLAGS" OpCode="255" HasRam="false" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags" SoftwareImplemented="true">
 </AFBComponent>
   </AFBImplementation>
   <AFBL>
@@ -9659,7 +9662,6 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    
     <AFB id="#cmp_si_eq_v1" Caption="cmp_si_eq" Version="1.8">
       <Properties>
         <Description>Comparator Block, equal 32-bit signed int comparison</Description>

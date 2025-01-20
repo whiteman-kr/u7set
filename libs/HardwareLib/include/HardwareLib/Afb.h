@@ -117,6 +117,9 @@ namespace Afb
 		[[nodiscard]] const QString& simulationFunc() const noexcept;
 		void setSimulationFunc(const QString& value) noexcept;
 
+		[[nodiscard]] bool isSoftwareImplemented() const noexcept;
+		void setSoftwareImplemented(bool value) noexcept;
+
 		[[nodiscard]] const std::unordered_map<int, AfbComponentPin>& pins() const noexcept;
 
 		[[nodiscard]] bool pinExists(int pinOpIndex) const noexcept;
@@ -133,6 +136,7 @@ namespace Afb
         int m_versionOpIndex = -1;
 		int m_maxInstCount = 0;
 		QString m_simulationFunc;
+		bool m_softwareImplemented = false;
 
 		std::unordered_map<int, AfbComponentPin> m_pins;		// Key is OpIndex of pin - AfbComponentPin::opIndex()
 		std::vector<bool> m_pinExists;							// For fast searching of pin, intensively used in simulator

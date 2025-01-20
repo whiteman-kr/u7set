@@ -893,13 +893,12 @@ message SchemaItemVduValue
 	optional uint32 lineColor = 10;
 	optional uint32 fillColor = 11;
 	optional uint32 textColor = 12;
-	
-	optional string appSignalId = 17;
+	optional string text = 13;
+	optional string appSignalIds = 17;
 	optional FontParam font = 18;
 
 	optional uint32 precision = 25;
 }
-
 
 
 message SchemaDetailsSet

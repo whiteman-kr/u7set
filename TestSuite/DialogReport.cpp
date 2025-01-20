@@ -1,11 +1,9 @@
 #include "DialogReport.h"
 #include "ui_DialogReport.h"
 
-#include "TestReport.h"
+#include <TestSuiteLib/TestReport.h>
 
-DialogReport::DialogReport(const ReportLib::ReportTemplateStorage& templates,
-						   const TestSuite::TestLog& testLog,
-						   QWidget *parent) :
+DialogReport::DialogReport(const ReportLib::ReportTemplateStorage& templates, const TestSuite::TestLog& testLog, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::DialogReport),
 	m_templates(templates),
@@ -44,4 +42,3 @@ void DialogReport::on_listReports_itemDoubleClicked(QListWidgetItem* /*item*/)
 {
 	on_btnGenerate_clicked();
 }
-

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../UtilsLib/LogFile.h"
-#include "../TestSuiteLib/TestLog.h"
+#include <TestSuiteLib/TestLog.h>
 #include <queue>
 
 class TestSuiteLogFile : public Log::LogFile
@@ -9,7 +9,11 @@ class TestSuiteLogFile : public Log::LogFile
 	Q_OBJECT
 
 public:
-	TestSuiteLogFile(const QString& fileName, const QString& path, int maxFileSize = 1048576, int maxFilesCount = 64, bool addAppInfoOnStart = true);
+	TestSuiteLogFile(const QString& fileName,
+					 const QString& path,
+					 int maxFileSize = 1048576,
+					 int maxFilesCount = 64,
+					 bool addAppInfoOnStart = true);
 
 	bool writeAlert(const QString& text, const QString& tag = {}) override;
 	bool writeError(const QString& text, const QString& tag = {}) override;
@@ -29,7 +33,7 @@ public:
 
 	bool queueIsEmpty() const;
 	void pushQueue(const std::vector<TestSuite::TestLogItem>& in);
-	void popQueue(std::vector<TestSuite::TestLogItem> *out, int maxCount);
+	void popQueue(std::vector<TestSuite::TestLogItem>* out, int maxCount);
 
 private:
 	void logItemArrived(const TestSuite::TestLogItem& item) override;
@@ -39,4 +43,3 @@ private:
 	std::queue<TestSuite::TestLogItem> m_itemsQueue;
 	QString m_htmlFont;
 };
-

@@ -185,6 +185,7 @@ namespace Builder
 		QString lmEquipmentID() const;
 		int lmDescriptionNumber() const;
 		QString lmDescriptionName() const;
+		QString lmSubsystemID() const;
 
 		bool expertMode() const;
 		bool generateExtraDebugInfo() const;
@@ -219,6 +220,7 @@ namespace Builder
 
 		const std::map<Hash, AppSignal*>& moduleSignals() const { return m_moduleSignals; }
 		const std::vector<const AppSignal*>& swCalcSignals() const { return m_swCalcSignals; }
+		const std::vector<AppSignal*>& ioSignals() const { return m_ioSignals; }
 
 		const UalAfbs& ualAfbs() const;
 
@@ -250,6 +252,8 @@ namespace Builder
 		Address16 getDiscreteUalAddrBitConstIncluded(const UalSignal* ualSignal) const;
 
 		std::tuple<bool, bool, double> getUalAfbParamValue(const QString& itemLabel, const QString& paramName);
+
+		bool getDeviceAppSignal(const AppSignal& ioSignal, Hardware::DeviceAppSignal** deviceAppSignal) const;
 
 	private:
 		bool getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
@@ -506,6 +510,7 @@ namespace Builder
 		//
 		bool initComparatorSignals();
 		bool finalizeOptoConnectionsProcessing();
+		bool writeVduConnectionsInfoFile();
 		bool setOptoUalSignalsAddresses();
 
 		bool generateIdrPhaseCode();

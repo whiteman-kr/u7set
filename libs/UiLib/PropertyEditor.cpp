@@ -3221,7 +3221,7 @@ namespace ExtWidgets
 		m_checkBox->setCheckState(Qt::PartiallyChecked);
 		updateText();
 
-		connect(m_checkBox, &QCheckBox::stateChanged, this, &MultiCheckBox::onStateChanged);
+		connect(m_checkBox, &QCheckBox::checkStateChanged, this, &MultiCheckBox::onStateChanged);
 
 		QHBoxLayout* lt = new QHBoxLayout;
 		lt->setContentsMargins(3, 1, 0, 0);
@@ -3274,7 +3274,7 @@ namespace ExtWidgets
 		}
 	}
 
-	void MultiCheckBox::onStateChanged(int state)
+	void MultiCheckBox::onStateChanged(Qt::CheckState state)
 	{
 		if (m_checkBox == nullptr)
 		{

@@ -63,7 +63,7 @@ extern "C"
 	 * \param equipmentId The ID of the equipment instance.
 	 * \param isQtApplication True if the application is Qt-based, false otherwise.
 	 */
-	static inline bool AdsInit(int argc, char** argv, const char* equipmentId, bool isQtApplication)
+	inline bool AdsInit(int argc, char** argv, const char* equipmentId, bool isQtApplication)
 	{
 		// Test structure size, fields and alignment.
 		//

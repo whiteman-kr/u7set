@@ -5,24 +5,23 @@
 #include "MonitorConfigController.h"
 #include "MonitorSignalInfo.h"
 #include "DialogChooseArchiveSignals.h"
-#include <UiLib/ExportPrint.h>
+#include <ReportLib/TableViewReportGenerator.h>
+#include <ReportLib/Report.h>
+#include <ReportLib/ReportObject.h>
 
 //
-// MonitorExportPrint
+// ArchiveExportPrint
 //
 namespace
 {
-	class MonitorExportPrint : public UiLib::ExportPrint
+	class ArchiveReportInfo : public ReportLib::ITableViewReportInfo
 	{
 	public:
-		MonitorExportPrint(ArchiveSource* source,
-						   QString projectName,
-						   QString softwareId,
-						   QWidget* parent);
-		virtual ~MonitorExportPrint() = default;
+		ArchiveReportInfo(ArchiveSource* source, QString projectName, QString softwareId);
+		virtual ~ArchiveReportInfo() = default;
 
 	protected:
-		virtual void generateHeader(QTextCursor& cursor) override;
+		virtual void generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) const override;
 
 		ArchiveSource* m_source = nullptr;
 		QString m_projectName;
@@ -30,18 +29,16 @@ namespace
 	};
 
 
-	MonitorExportPrint::MonitorExportPrint(ArchiveSource* source,
+	ArchiveReportInfo::ArchiveReportInfo(ArchiveSource* source,
 										   QString projectName,
-										   QString softwareId,
-										   QWidget* parent)	:
-		UiLib::ExportPrint(parent),
+										   QString softwareId) :
 		m_source(source),
 		m_projectName(projectName),
 		m_softwareId(softwareId)
 	{
 	}
 
-	void MonitorExportPrint::generateHeader(QTextCursor& cursor)
+	void ArchiveReportInfo::generateHeader(ReportLib::Report& report, ReportLib::ReportSection& mainSection) const
 	{
 		if (m_source == nullptr)
 		{
@@ -49,42 +46,51 @@ namespace
 			return;
 		}
 
-		QTextBlockFormat headerCenterFormat = cursor.blockFormat();
-		headerCenterFormat.setAlignment(Qt::AlignHCenter);
+		ReportLib::ReportFont marginFont{"Arial", 10};
 
-		QTextBlockFormat regularFormat = cursor.blockFormat();
-		regularFormat.setAlignment(Qt::AlignLeft);
+		report.addMarginItem({QObject::tr("Generated: %1").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss")),
+							  -1,
+							  -1,
+							  {marginFont, Qt::AlignLeft | Qt::AlignTop}});
 
-		QTextCharFormat headerCharFormat = cursor.charFormat();
-		headerCharFormat.setFontWeight(static_cast<int>(QFont::Bold));
-		headerCharFormat.setFontPointSize(12.0);
+		report.addMarginItem({QObject::tr("Signals Archive"), -1, -1, {marginFont, Qt::AlignCenter | Qt::AlignTop}});
 
-		QTextCharFormat regularCharFormat = cursor.charFormat();
-		headerCharFormat.setFontPointSize(10.0);
+		report.addMarginItem({QObject::tr("Project: %1").arg(m_projectName), -1, -1, {marginFont, Qt::AlignRight | Qt::AlignTop}});
 
-		cursor.setBlockFormat(headerCenterFormat);
-		cursor.setCharFormat(headerCharFormat);
-		cursor.insertText(QObject::tr("Archive - %1\n").arg(m_projectName));
-		cursor.insertText("\n");
+		report.addMarginItem(
+			{QObject::tr("%1: %2").arg(qAppName()).arg(m_softwareId), -1, -1, {marginFont, Qt::AlignLeft | Qt::AlignBottom}});
 
-		cursor.setBlockFormat(regularFormat);
-		cursor.setCharFormat(regularCharFormat);
-		cursor.insertText(QObject::tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
-		cursor.insertText(QObject::tr("Monitor: %1\n").arg(m_softwareId));
-		cursor.insertText("\n");
+		report.addMarginItem({"%PAGE%", -1, -1, {marginFont, Qt::AlignRight | Qt::AlignBottom}});
 
+		ReportLib::ReportFont textFont{"Arial", 12};
+
+		// Request parameters
+		//
 		QDateTime from = m_source->requestStartTime.toDateTime();
 		QDateTime to = m_source->requestEndTime.toDateTime();
 
+
 		if (from.date() == to.date())
 		{
-			cursor.insertText(QObject::tr("Requested interval: %1 - %2\n").arg(from.toString("dd/MM/yyyy  HH:mm:ss")).arg(to.toString("HH:mm:ss")));
-		}
-		else
-		{
-			cursor.insertText(QObject::tr("Requested interval:: %1 - %2\n").arg(from.toString("dd/MM/yyyy  HH:mm:ss")).arg(to.toString("dd/MM/yyyy  HH:mm:ss")));
+			mainSection.addText(QObject::tr("Requested interval: %1 - %2 (%3)\n\n")
+									.arg(from.toString("dd/MM/yyyy HH:mm:ss"))
+									.arg(to.toString("HH:mm:ss"))
+									.arg(E::valueToString<E::TimeType>(m_source->timeType)),
+								{textFont, Qt::AlignHCenter});
 		}
 
+
+		else
+		{
+			mainSection.addText(QObject::tr("Requested interval: %1 - %2 (%3)\n\n")
+									.arg(from.toString("dd/MM/yyyy HH:mm:ss"))
+									.arg(to.toString("dd/MM/yyyy HH:mm:ss"))
+									.arg(E::valueToString<E::TimeType>(m_source->timeType)),
+								{textFont, Qt::AlignHCenter});
+		}
+
+		// Services and signals
+		//
 		std::map<QString, std::vector<QString>> serviceToSignals;
 		for (const ArchiveSignal& s : m_source->acceptedSignals)
 		{
@@ -93,22 +99,16 @@ namespace
 
 		for (const auto& [service, signalIds] : serviceToSignals)
 		{
-			cursor.insertText(QString("Archive Service: %1\n").arg(service));
+			mainSection.addText(QObject::tr("Archive Service: %1\n").arg(service), {textFont, Qt::AlignLeft});
 
-			auto sortedIds = signalIds;
-			std::sort(sortedIds.begin(), sortedIds.end());
+			QStringList signalList;
+			signalList.reserve(signalIds.size());
+			std::copy(signalIds.begin(), signalIds.end(), std::back_inserter(signalList));
+			std::sort(signalList.begin(), signalList.end());
 
-			cursor.insertText("Signal(s): ");
-			for (const auto& signalId : sortedIds)
-			{
-				cursor.insertText(QString(" %1,").arg(signalId));
-			}
-			cursor.deletePreviousChar();	// Delete last comma
-			cursor.insertText("\n");
-
+			mainSection.addText(QObject::tr("Signal(s): %1\n\n").arg(signalList.join(", ")), {textFont, Qt::AlignLeft});
 		}
 
-		cursor.insertText("\n");
 		return;
 	}
 }
@@ -173,13 +173,13 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 	m_toolBar->addSeparator();
 
 	m_startDateTimeEdit = new QDateTimeEdit(m_source.requestStartTime.toDateTime(), this);
-	m_startDateTimeEdit->setTimeSpec(Qt::UTC);
+	m_startDateTimeEdit->setTimeZone(TIME_ZONE_UTC);
 	m_startDateTimeEdit->setCalendarPopup(true);
 	m_startDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
 	m_startDateTimeEdit->setMinimumWidth(QFontMetrics(m_startDateTimeEdit->font()).horizontalAdvance("dd/MM/yyyy  HH:mm:ss") + 20);
 
 	m_endDateTimeEdit = new QDateTimeEdit(m_source.requestEndTime.toDateTime(), this);
-	m_endDateTimeEdit->setTimeSpec(Qt::UTC);
+	m_endDateTimeEdit->setTimeZone(TIME_ZONE_UTC);
 	m_endDateTimeEdit->setCalendarPopup(true);
 	m_endDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
 	m_endDateTimeEdit->setMinimumWidth(QFontMetrics(m_endDateTimeEdit->font()).horizontalAdvance("dd/MM/yyyy  HH:mm:ss") + 20);
@@ -271,6 +271,7 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::Mismatch));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::OutOfLimits));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::ArchivingReason));
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::Duration));
 	}
 
 	connect(m_view, &ArchiveView::requestToShowSignalInfo, this, &ArchiveWidget::showSignalInfo);
@@ -602,14 +603,21 @@ void ArchiveWidget::exportButton()
 
 	if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
 		extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0/* ||
-		extension.compare(QLatin1String("odt"), Qt::CaseInsensitive) == 0*/)
+		extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
 	{
-		MonitorExportPrint ep(&m_source, m_projectName, m_softwareId, this);
-		ep.exportTable(m_view, fileName, extension);
+		QPageLayout pageLayout(QPageSize(QPageSize::A4),
+							   QPageLayout::Orientation::Landscape,
+							   QMarginsF(25, 20, 15, 20),
+							   QPageLayout::Unit::Millimeter);
 
+		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("ArchiveExportPageLayout", pageLayout);
+
+		ArchiveReportInfo ri(&m_source, m_projectName, m_softwareId);
+		ReportLib::TableViewReportGenerator generator(this, *m_view, ri, pageLayout);
+		generator.exportTable(fileName);
+		pageLayout = generator.pageLayout();
+
+		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "ArchiveExportPageLayout");
 		return;
 	}
 
@@ -619,8 +627,19 @@ void ArchiveWidget::exportButton()
 
 void ArchiveWidget::printButton()
 {
-	MonitorExportPrint ep(&m_source, m_projectName, m_softwareId, this);
-	ep.printTable(m_view);
+	QPageLayout pageLayout(QPageSize(QPageSize::A4),
+						   QPageLayout::Orientation::Landscape,
+						   QMarginsF(10, 10, 10, 10),
+						   QPageLayout::Unit::Millimeter);
+
+	pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("ArchivePrintPageLayout", pageLayout);
+
+	ArchiveReportInfo ri(&m_source, m_projectName, m_softwareId);
+	ReportLib::TableViewReportGenerator generator(this, *m_view, ri, pageLayout);
+	generator.printTable();
+	pageLayout = generator.pageLayout();
+
+	ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "ArchivePrintPageLayout");
 
 	return;
 }

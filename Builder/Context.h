@@ -90,8 +90,7 @@ namespace Builder
 		std::vector<Hardware::DeviceModule*> m_lmModules;
 		std::map<Hash, std::shared_ptr<ModuleLogicCompiler>> m_moduleLogicCompilers;		// calcHash(LM.EquipmentID) => ModuleLogicCompilerShared
 
-		std::vector<Hardware::DeviceModule*> m_fscModules;   // includes LM and BVB modules
-		std::vector<Hardware::DeviceModule*> m_vduModules;   // includes VDU modules
+		std::vector<Hardware::DeviceModule*> m_fscModules;   // includes LM, BVB, VDU modules
 
 		std::map<QString, std::map<Hash, int>> m_vduSignals; // VDU EquipmentID => (Hash(appSignalID) => VDU signal index)
 

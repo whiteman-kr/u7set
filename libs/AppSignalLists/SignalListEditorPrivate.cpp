@@ -83,8 +83,8 @@ namespace
 			break;
 
 		case SignalsModel::Columns::Units:
-			v1 = asp1.unit();
-			v2 = asp2.unit();
+			v1 = asp1.units();
+			v2 = asp2.units();
 			break;
 
 		case SignalsModel::Columns::Type:
@@ -251,8 +251,8 @@ namespace
 
 		case AppSignalListModel::Columns::Units:
 			{
-				v1 = asp1.unit();
-				v2 = asp2.unit();
+				v1 = asp1.units();
+				v2 = asp2.units();
 			}
 			break;
 
@@ -563,7 +563,7 @@ namespace AppSignalLists
 
 			if (columnType == static_cast<int>(Columns::Units))
 			{
-				return asp.unit();
+				return asp.units();
 			}
 
 			if (columnType == static_cast<int>(Columns::LowLimit))
@@ -911,7 +911,7 @@ namespace AppSignalLists
 
 			if (columnType == Columns::Units)
 			{
-				return asp.unit();
+				return asp.units();
 			}
 
 			if (columnType == Columns::LowLimit)
@@ -1015,7 +1015,7 @@ namespace AppSignalLists
 		m_decimalPlaces(decimalPlaces)
 	{
 		m_discreteCheck = new QCheckBox();
-		connect(m_discreteCheck, &QCheckBox::stateChanged, this, &DialogAppSignalListValue::onValueCheckStateChanged);
+		connect(m_discreteCheck, &QCheckBox::checkStateChanged, this, &DialogAppSignalListValue::onValueCheckStateChanged);
 
 		m_analogEdit = new QLineEdit();
 
@@ -1168,7 +1168,7 @@ namespace AppSignalLists
 		QDialog::accept();
 	}
 
-	void DialogAppSignalListValue::onValueCheckStateChanged(int state)
+	void DialogAppSignalListValue::onValueCheckStateChanged(Qt::CheckState state)
 	{
 		m_discreteCheck->setText(state == Qt::Checked ? tr("1") : tr("0"));
 	}

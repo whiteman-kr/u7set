@@ -21,7 +21,7 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/DialogProgress.h
 	./include/UiLib/DialogProgress.h
 	./include/UiLib/DoubleValidatorEx.h
-	./include/UiLib/ExportPrint.h
+	./include/UiLib/OverrideWindows11Style.h
 	./include/UiLib/PropertyEditor.h
 	./include/UiLib/PropertyEditorDialog.h
 	./include/UiLib/PropertyTable.h
@@ -35,7 +35,7 @@ qt_add_library(${TARGET} STATIC
 	DialogAlert.cpp
 	DialogProgress.cpp
 	DialogProgress.cpp
-	ExportPrint.cpp
+	OverrideWindows11Style.cpp
 	PropertyEditor.cpp
 	PropertyEditorDialog.cpp
 	PropertyTable.cpp
@@ -50,7 +50,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<set>
 	<vector>
 
-	<QAbstractItemModel>
 	<QApplication>
 	<QClipboard>
 	<QColorDialog>
@@ -68,11 +67,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QMenu>
 	<QMessageBox>
 	<QMouseEvent>
-	<QPageSetupDialog>
 	<QPainter>
 	<QPlainTextEdit>
-	<QPrintDialog>
-	<QPrinter>
+	<QTextDocumentFragment>
 	<QProgressDialog>
 	<QPushButton>
 	<QSettings>
@@ -81,9 +78,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QTabWidget>
 	<QTextBrowser>
 	<QTextCursor>
-	<QTextDocument>
-	<QTextDocumentFragment>
-	<QTextDocumentWriter>
 	<QTimer>
 	<QToolButton>
 	<QTreeWidget>

@@ -109,7 +109,10 @@ class LmDescription : public QObject
 	Q_PROPERTY(quint32 FlashMemory_ConfigFramePayload READ (m_flashMemory.configFramePayload))
 	Q_PROPERTY(quint32 FlashMemory_ConfigUartId READ (m_flashMemory.configUartId))
 	Q_PROPERTY(quint32 FlashMemory_MaxConfigurationCount READ (m_flashMemory.maxConfigurationCount))
-	Q_PROPERTY(quint32 Memory_TxDiagDataSize READ (m_memory.txDiagDataSize))
+	Q_PROPERTY(quint32 FlashMemory_SingleConfigFirstFrame READ(m_flashMemory.singleConfigFirstFrame))
+	Q_PROPERTY(quint32 FlashMemory_SingleConfigFrameCount READ(m_flashMemory.singleConfigFrameCount))
+	Q_PROPERTY(quint32 FlashMemory_SingleConfigUniqueIdOffset READ(m_flashMemory.singleConfigUniqueIdOffset))
+	Q_PROPERTY(quint32 Memory_TxDiagDataSize READ(m_memory.txDiagDataSize))
 	Q_PROPERTY(quint32 OptoInterface_OptoPortCount READ (m_optoInterface.optoPortCount))
 	Q_PROPERTY(int Lan_ControllerCount READ (m_lan.lanControllerCount))
 
@@ -166,11 +169,19 @@ public:
 
 		quint32 m_maxConfigurationCount = 0;
 
+		quint32 m_singleConfigFirstFrame = 0;
+		quint32 m_singleConfigFrameCount = 0;
+		quint32 m_singleConfigUniqueIdOffset = 0;
+
 		quint32 configFrameCount() const { return m_configFrameCount; }
 		quint32 configFramePayload() const { return m_configFramePayload; }
 		quint32 configUartId() const { return m_configUartId; }
 
 		quint32 maxConfigurationCount() const { return m_maxConfigurationCount; }
+
+		quint32 singleConfigFirstFrame() const { return m_singleConfigFirstFrame; }
+		quint32 singleConfigFrameCount() const { return m_singleConfigFrameCount; }
+		quint32 singleConfigUniqueIdOffset() const { return m_singleConfigUniqueIdOffset; }
 
 		bool load(const QDomDocument& document, QString* errorMessage);
 	};

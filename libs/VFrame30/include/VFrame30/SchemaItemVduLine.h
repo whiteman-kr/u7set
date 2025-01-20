@@ -1,11 +1,13 @@
 #pragma once
 
 #include <VFrame30/PosLineImpl.h>
+#include <VFrame30/SchemaItemVdu.h>
 
 namespace VFrame30
 {
 
-	class SchemaItemVduLine final : public PosLineImpl
+	class SchemaItemVduLine final : public PosLineImpl,
+									public SchemaItemVdu
 	{
 		Q_OBJECT
 
@@ -23,11 +25,15 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-
 		// Item is drawn in 100% scale
 		// Graphics must have screen coordinate system (0, 0 - left upper corner, down and right - positive pos)
 		//
 		virtual void draw(CDrawParam* drawParam) const override;
+
+		// VduItemVisitor
+		//
+	public:
+		void accept(VduItemVisitor& visitor) const override;
 
 		// Properties and Data
 	public:
@@ -41,4 +47,4 @@ namespace VFrame30
 		int m_weight;
 		QColor m_lineColor;
 	};
-}
+} // namespace VFrame30

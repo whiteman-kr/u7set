@@ -54,9 +54,11 @@ qt_add_library(${TARGET} STATIC
 	./include/VFrame30/SchemaItemTerminator.h
 	./include/VFrame30/SchemaItemUfb.h
 	./include/VFrame30/SchemaItemValue.h
+	./include/VFrame30/SchemaItemVdu.h
 	./include/VFrame30/SchemaItemVduLine.h
 	./include/VFrame30/SchemaItemVduRect.h
 	./include/VFrame30/SchemaItemVduValue.h
+	./include/VFrame30/VduItemVisitor.h
 	./SchemaItems/FblItem.cpp
 	./SchemaItems/FblItemLine.cpp
 	./SchemaItems/FblItemRect.cpp

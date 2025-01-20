@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+      "target": "es2020",
+      "module": "none",
+      "alwaysStrict" : true,
+      "sourceMap": false,
+      "noImplicitAny": true,
+      "noImplicitThis": true,
+      "noImplicitReturns" : true,
+//      "watch": true,
+      "outFile": "out/ConfigScript.js"
+  }
+}

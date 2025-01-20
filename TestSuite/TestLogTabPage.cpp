@@ -1,9 +1,9 @@
 #include "TestLogTabPage.h"
 #include "AppConfigSettings.h"
-#include "../TestSuiteLib/TestLog.h"
-#include <QStringListModel>
+#include <TestSuiteLib/TestLog.h>
 
-TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutput& testLogOutput, QWidget* parent):
+
+TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutput& testLogOutput, QWidget* parent) :
 	QWidget(parent),
 	m_testLog(testLog),
 	m_testLogOutput(testLogOutput)
@@ -23,17 +23,17 @@ TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutp
 	QColor highlight = p.highlight().color();
 	QColor highlightText = p.highlightedText().color();
 
-	QString selectionColor = QString("QTextEdit { selection-background-color: %1; selection-color: %2; }")
-							 .arg(highlight.name())
-							 .arg(highlightText.name());
+	QString selectionColor =
+		QString("QTextEdit { selection-background-color: %1; selection-color: %2; }").arg(highlight.name()).arg(highlightText.name());
 
 	m_outputWidget->setStyleSheet(selectionColor);
 
 	m_typeCombo = new QComboBox();
-	m_typeCombo->addItem(tr("All Messages"),	static_cast<int>(TestSuite::TestLogItemType::All));
-	m_typeCombo->addItem(tr("Errors&Warnings"),	static_cast<int>(TestSuite::TestLogItemType::Error) | static_cast<int>(TestSuite::TestLogItemType::Warning));
-	m_typeCombo->addItem(tr("Errors"),			static_cast<int>(TestSuite::TestLogItemType::Error));
-	m_typeCombo->addItem(tr("Warnings"),		static_cast<int>(TestSuite::TestLogItemType::Warning));
+	m_typeCombo->addItem(tr("All Messages"), static_cast<int>(TestSuite::TestLogItemType::All));
+	m_typeCombo->addItem(tr("Errors&Warnings"),
+						 static_cast<int>(TestSuite::TestLogItemType::Error) | static_cast<int>(TestSuite::TestLogItemType::Warning));
+	m_typeCombo->addItem(tr("Errors"), static_cast<int>(TestSuite::TestLogItemType::Error));
+	m_typeCombo->addItem(tr("Warnings"), static_cast<int>(TestSuite::TestLogItemType::Warning));
 	connect(m_typeCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &TestLogTabPage::slot_typeChanged);
 
 	m_prevIssueButton = new QPushButton(tr("Prev Issue <Shift+F6>"));
@@ -68,7 +68,7 @@ TestLogTabPage::TestLogTabPage(TestSuite::TestLog& testLog, TestSuiteTestLogOutp
 
 	rightWidgetLayout->setColumnStretch(6, 100);
 
-	//rightWidgetLayout->setColumnStretch(0, 1);
+	// rightWidgetLayout->setColumnStretch(0, 1);
 
 	//
 	// Layouts
@@ -91,15 +91,9 @@ void TestLogTabPage::clearOutputWidget()
 	m_outputWidget->clear();
 }
 
-void TestLogTabPage::testingWasStarted()
-{
+void TestLogTabPage::testingWasStarted() {}
 
-}
-
-void TestLogTabPage::testingWasFinished(int /*errorCount*/)
-{
-
-}
+void TestLogTabPage::testingWasFinished(int /*errorCount*/) {}
 
 void TestLogTabPage::prevIssue()
 {
@@ -109,8 +103,7 @@ void TestLogTabPage::prevIssue()
 
 	//  --
 	//
-	if ((m_lastNavIsNextIssue == true || m_lastNavIsPrevIssue == true) &&
-		m_outputWidget->textCursor() == m_lastNavCursor)
+	if ((m_lastNavIsNextIssue == true || m_lastNavIsPrevIssue == true) && m_outputWidget->textCursor() == m_lastNavCursor)
 	{
 		m_lastNavCursor.movePosition(QTextCursor::StartOfLine);
 		m_outputWidget->setTextCursor(m_lastNavCursor);
@@ -170,8 +163,7 @@ void TestLogTabPage::nextIssue()
 
 	//  --
 	//
-	if (m_lastNavIsPrevIssue == true &&
-		m_outputWidget->textCursor() == m_lastNavCursor)
+	if (m_lastNavIsPrevIssue == true && m_outputWidget->textCursor() == m_lastNavCursor)
 	{
 		m_lastNavCursor.movePosition(QTextCursor::EndOfLine);
 		m_outputWidget->setTextCursor(m_lastNavCursor);
@@ -241,7 +233,7 @@ void TestLogTabPage::search()
 	// Update completer
 	//
 	QStringList outputSerachCompleter = QSettings().value("TestLogTabPage/m_buildSerachCompleter").toStringList();
-	
+
 	if (outputSerachCompleter.contains(searchText, Qt::CaseInsensitive) == false)
 	{
 		outputSerachCompleter << searchText;
@@ -272,10 +264,10 @@ void TestLogTabPage::search()
 		found = m_outputWidget->find(searchText);
 	}
 
-//	if (found == true)
-//	{
-//		m_outputWidget->setFocus();
-//	}
+	//	if (found == true)
+	//	{
+	//		m_outputWidget->setFocus();
+	//	}
 
 	return;
 }
@@ -325,9 +317,7 @@ void TestLogTabPage::createActions()
 
 void TestLogTabPage::timerEvent(QTimerEvent* event)
 {
-	if (event->timerId() == m_logTimerId &&
-		m_testLogOutput.queueIsEmpty() == false &&
-		m_outputWidget != nullptr)
+	if (event->timerId() == m_logTimerId && m_testLogOutput.queueIsEmpty() == false && m_outputWidget != nullptr)
 	{
 		std::vector<TestSuite::TestLogItem> messages;
 		messages.reserve(20);
