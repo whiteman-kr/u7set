@@ -204,6 +204,7 @@ namespace Gateway
 
 			if (pr == ParseResult::CriticalError)
 			{
+				flushParserLog();
 				return false;		// break parsing
 			}
 		}

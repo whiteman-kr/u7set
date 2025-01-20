@@ -830,10 +830,6 @@ namespace Gateway
 							}
 							else
 							{
-								if (addr16.offset() + i == 20 || addr16.offset() + i == 21)
-								{
-									DEBUG_STOP;
-								}
 								analogRegs.emplace(addr16.offset() + i);
 							}
 						}
