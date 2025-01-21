@@ -2,6 +2,8 @@
 #include "../UtilsLib/WUtils.h"
 #include <iostream>
 #include <QCoreApplication>
+#include <QFile>
+#include <QDir>
 
 #include "Archivist.h"
 #include "FileArchivist.h"
@@ -69,9 +71,13 @@ bool parseCmdLine(int argc, char* argv[], RequestParams* rp)
 
 	if (argc == 2)
 	{
-		if (cmdLineParams[2].toLower() == "-exampleCfg")
+		if (cmdLineParams[2].toLower() == "-examplecfg")
 		{
 			QFile f;
+
+			QString path = QDir::cleanPath(cmdLineParams[0]);
+
+			DEBUG_STOP;
 		}
 	}
 

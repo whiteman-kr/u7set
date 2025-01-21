@@ -30,6 +30,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<set>
 	<map>
 	<iostream>
+
+	<QFile>
+	<QDir>
 )
 
 target_link_libraries(${TARGET} Qt6::Core)

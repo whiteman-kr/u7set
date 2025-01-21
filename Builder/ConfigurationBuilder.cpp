@@ -742,8 +742,9 @@ namespace Builder
 
 		if (jsResult.isError() == true)
 		{
-			QString errorMessage = tr("Uncaught exception while generating module configuration '%1': %2, lineNumber: %3, Stack: %4, ")
+			QString errorMessage = tr("Uncaught exception while generating module configuration '%1', subsystem '%2': %3, lineNumber: %4, Stack: %5, ")
 					.arg(lmDescription->configurationStringFile())
+					.arg(subsystemID)
 					.arg(jsResult.toString())
 					.arg(jsResult.property("lineNumber").toInt())
 					.arg(jsResult.property("stack").toString());
