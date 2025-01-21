@@ -686,7 +686,7 @@ bool DynamicDiagSignalState::getValue(const char* rupData, int rupDataSize, doub
 	Q_UNUSED(rupDataSize);
 	Q_UNUSED(value);
 
-/*	// get double signal value from rupData buffer using parseInfo
+	/*	// get double signal value from rupData buffer using parseInfo
 	//
 	int valueOffset = m_valueAddr.offset() * 2;		// offset in Words => offset in Bytes
 	int bitNo = m_valueAddr.bit();
@@ -958,7 +958,7 @@ bool DynamicDiagSignalStates::getCurrentState(Hash hash, AppSignalState& state) 
 	Q_UNUSED(hash);
 	Q_UNUSED(state);
 
-/*	if (m_hash2State.contains(hash))
+	/*	if (m_hash2State.contains(hash))
 	{
 		const DynamicDiagSignalState* stateEx = m_hash2State[hash];
 
@@ -981,7 +981,10 @@ void DynamicDiagSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCoun
 		return;
 	}
 
-	Q_ASSERT(false);			// check!
+//	int count = 0;
+
+//	Q_ASSERT(false);			// check!
+
 //	for(int i = 0; i < m_size; i++)
 //	{
 //		if (m_appSignalState->archive() == true)

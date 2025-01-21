@@ -15,16 +15,16 @@ qt_standard_project_setup()
 set(TARGET GatewaySrv)
 
 add_executable(${TARGET}
-	../Builder/GatewayParserLog.cpp
-	../Builder/GatewayParserLog.h
+	# ../Builder/GatewayParserLog.cpp
+	# ../Builder/GatewayParserLog.h
 	AppDataServiceClient.cpp
 	AppDataServiceClient.h
 	AppSignalState.cpp
 	AppSignalState.h
 	Float16.cpp
 	Float16.h
-	GatewayDescription.cpp
-	GatewayDescription.h
+	# GatewayDescription.cpp
+	# GatewayDescription.h
 	GatewayHandler.cpp
 	GatewayHandler.h
 	GatewayService.cpp
@@ -33,14 +33,14 @@ add_executable(${TARGET}
 	IvsImpulseCommThread.cpp
 	IvsImpulseCommThread.h
 	IvsImpulseDataProtocol.h
-	IvsImpulseGateway.cpp
-	IvsImpulseGateway.h
+	# IvsImpulseGateway.cpp
+	# IvsImpulseGateway.h
 	IvsImpulseGatewayHandler.cpp
 	IvsImpulseGatewayHandler.h
 	ModbusProtocol.cpp
 	ModbusProtocol.h
-	ModbusSlaveGateway.cpp
-	ModbusSlaveGateway.h
+	# ModbusSlaveGateway.cpp
+	# ModbusSlaveGateway.h
 	ModbusSlaveGatewayHandler.cpp
 	ModbusSlaveGatewayHandler.h
 	ModbusTcpSlaveThread.cpp
@@ -127,7 +127,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
-target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib GatewayLib)
 
 # Link Visaul Leak Detector
 #

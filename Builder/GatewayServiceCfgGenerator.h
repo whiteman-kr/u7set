@@ -19,5 +19,4 @@ namespace Builder
 								const GatewayServiceSettings& settings,
 								E::OS os);
 	};
-
 }

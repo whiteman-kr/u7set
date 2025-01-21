@@ -149,6 +149,7 @@ message("-----------------------------------------")
 add_subdirectory(UtilsLib)
 add_subdirectory(AppSignalLib)
 add_subdirectory(OnlineLib)
+add_subdirectory(GatewayLib)
 
 add_subdirectory(libs)
 

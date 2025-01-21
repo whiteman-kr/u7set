@@ -4,9 +4,9 @@
 #include "../UtilsLib/WUtils.h"
 #include "../OnlineLib/CircularLogger.h"
 
-#include "GatewayDescription.h"
+#include "../GatewayLib/GatewayDescription.h"
+#include "../GatewayLib/IvsImpulseGateway.h"
 #include "AppSignalState.h"
-#include "IvsImpulseGateway.h"
 #include "IvsImpulseDataProtocol.h"
 
 namespace Gateway

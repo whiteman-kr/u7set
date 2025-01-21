@@ -3,8 +3,7 @@
 #include <ServiceLib/Service.h>
 #include "../OnlineLib/CfgServerLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
-
-#include "GatewayDescription.h"
+#include "../GatewayLib/GatewayDescription.h"
 #include "GatewayHandler.h"
 
 class GatewayServiceWorker : public ServiceWorker

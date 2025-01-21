@@ -2,12 +2,11 @@
 
 #include <asio.hpp>
 
-#include "GatewayDescription.h"
+#include "../GatewayLib/ModbusSlaveGateway.h"
+
 #include "GatewayHandler.h"
 #include "AppDataServiceClient.h"
-
 #include "ModbusProtocol.h"
-#include "ModbusSlaveGateway.h"
 
 using namespace Modbus;
 using namespace asio;

@@ -21,15 +21,11 @@ namespace Gateway
 
 	class ModbusSignalList : public SignalList
 	{
-	private:
-		static const std::set<E::Setting> m_requiredSettings;
-
 	public:
 		ModbusSignalList();
 
-		virtual bool isKnownSetting(E::Setting st) const override;
+		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
 
-		virtual ParseResult checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log) override;
 		virtual ParseResult checkSignalTypeAndFormat(int lineNo, const AppSignal* appSignal, ParserLog& log) override;
 		virtual ParseResult parseAddressStr(int lineNo, const QString& addrStr, Address16* addr16, ParserLog& log) override;
 		virtual ParseResult appendAddressSignalID(int lineNo, const Address16& addr, const QString& signalID, ParserLog& log) override;
@@ -42,6 +38,8 @@ namespace Gateway
 		Address16 getAddress(Hash hash) const;
 
 		bool isConst(Hash h, double* constValue) const;
+
+		bool isUniqueSignalsInList() const;
 
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
@@ -59,9 +57,6 @@ namespace Gateway
 	class ModbusSlaveGateway : public Gateway
 	{
 	public:
-		static const std::set<E::Setting> m_requiredSettings;
-		static const std::set<E::Setting> m_optionalSettings;
-
 		inline static const int MODBUS_DEFAULT_PORT = 502;
 
 		struct ModbusSignal
@@ -75,10 +70,9 @@ namespace Gateway
 
 	public:
 		ModbusSlaveGateway();
-		ModbusSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable);
+		virtual ~ModbusSlaveGateway() = default;
 
-		virtual bool isKnownSetting(E::Setting st) const override;
-		virtual bool checkAndApplySettings(int lineNo, ParserLog& log) override;
+		virtual ParseResult checkAndApplySetting(const SettingValue& sv, ParserLog& log) override;
 
 		virtual void appendSignalList() override;
 

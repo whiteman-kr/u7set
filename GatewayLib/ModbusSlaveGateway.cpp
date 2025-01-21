@@ -1,9 +1,13 @@
-//#include "../Builder/GatewayDescriptionParser.h"
+#ifndef GATEWAY_LIB_DOMAIN
+#error Do not include this file in the project! Link GatewayLib instead.
+#endif
+
+#include <CommonLib/Types.h>
+
 #include "ModbusSlaveGateway.h"
 
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
-#include "../CommonLib/include/CommonLib/Types.h"
 
 namespace Gateway
 {
@@ -46,7 +50,7 @@ namespace Gateway
 
 	QString ModbusFormat::toString() const
 	{
-		return QString("%1 %2").arg(::E::valueToString(signalFormat)).arg(::E::valueToString(byteOrder));
+		return QString("%1 %2").arg(::E::valueToString(signalFormat), ::E::valueToString(byteOrder));
 	}
 
    // ---------------------------------------------------------------------------------
@@ -55,40 +59,24 @@ namespace Gateway
    //
    // ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting> ModbusSignalList::m_requiredSettings =
-	{
-		E::Setting::SignalsFormat,
-	};
-
 	ModbusSignalList::ModbusSignalList()
 	{
+		appendRequiredSetting(E::Setting::SignalsFormat);
 	}
 
-	bool ModbusSignalList::isKnownSetting(E::Setting st) const
+	ParseResult ModbusSignalList::checkAndApplySetting(const SettingValue& sv, ParserLog& log)
 	{
-		return m_requiredSettings.contains(st);
-	}
-
-	ParseResult ModbusSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
-	{
-		Q_UNUSED(lineNo);
-		Q_UNUSED(st);
-		Q_UNUSED(value);
-		Q_UNUSED(log);
-
 		ParseResult pr = ParseResult::Ok;
 
-		switch(st)
+		switch(sv.setting)
 		{
-		case E::Setting::SignalsFormat:
-			pr = checkAndApplySignalsFormat(lineNo, value.toString(), log);
+		default:
+			pr = SignalList::checkAndApplySetting(sv, log);
 			break;
 
-		default:
-			Q_ASSERT(false);
-			log.logError(lineNo, "unknown setting");
-			pr = ParseResult::Error;
-
+		case E::Setting::SignalsFormat:
+			pr = checkAndApplySignalsFormat(sv.lineNo, sv.value.toString(), log);
+			break;
 		}
 
 		return pr;
@@ -267,12 +255,6 @@ namespace Gateway
 	{
 		Hash hash = calcHash(signalID.trimmed());
 
-		if (m_signalAddrs.contains(hash) == true)
-		{
-			log.logWarning(lineNo, QString("signal %1 already in signal list").arg(signalID));
-			return ParseResult::Ok;
-		}
-
 		if (m_modbusFormat.isValid() == false)
 		{
 			log.logError(lineNo, "setting 'SignalsFormat' should be specified first");
@@ -352,6 +334,18 @@ namespace Gateway
 		{
 			*constValue = it->second;
 			return true;
+		}
+
+		return false;
+	}
+
+	bool ModbusSignalList::isUniqueSignalsInList() const
+	{
+		SettingValue sv = getSettingValue(E::Setting::UniqSignalsInList);
+
+		if (sv.value.isValid() == true)
+		{
+			return sv.value.toBool();
 		}
 
 		return false;
@@ -446,103 +440,73 @@ namespace Gateway
    //
    // ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting> ModbusSlaveGateway::m_requiredSettings =
-	{
-			E::Setting::LocalGatewayIP1,
-			E::Setting::ModbusDeviceID,
-			E::Setting::ModbusMode,
-	};
-
-	const std::set<E::Setting> ModbusSlaveGateway::m_optionalSettings =
-	{
-			E::Setting::LocalGatewayIP2,
-	};
-
 	ModbusSlaveGateway::ModbusSlaveGateway() :
-		Gateway(E::GatewayType::ModbusTcpSlave)
+		Gateway(E::GatewayType::ModbusSlave)
 	{
+		appendRequiredSettings({	E::Setting::LocalGatewayIP1,
+									E::Setting::ModbusDeviceID,
+									E::Setting::ModbusMode });
+
+		appendOptionalSetting(E::Setting::LocalGatewayIP2);
 	}
 
-	ModbusSlaveGateway::ModbusSlaveGateway(const QString& gwID, const QString& gwDesc, bool enable) :
-		Gateway(E::GatewayType::ModbusTcpSlave, gwID, gwDesc, enable)
+	ParseResult ModbusSlaveGateway::checkAndApplySetting(const SettingValue& sv, ParserLog& log)
 	{
-	}
-
-	bool ModbusSlaveGateway::isKnownSetting(E::Setting st) const
-	{
-		return Gateway::isKnownSetting(st) ||
-			   m_requiredSettings.contains(st) ||
-			   m_optionalSettings.contains(st);
-	}
-
-	bool ModbusSlaveGateway::checkAndApplySettings(int lineNo, ParserLog& log)
-	{
-		bool result = true;
-
-		result &= Gateway::checkAndApplySettings(lineNo, log);
-		result &= Gateway::checkRequiredSettings(m_requiredSettings,
-												 m_settingsValues,
-												 lineNo, log);
-		RETURN_IF_FALSE(result);
+		ParseResult pr = ParseResult::Ok;
 
 		HostAddressPort addrPort;
 
-		for(const auto& p: m_settingsValues)
+		switch(sv.setting)
 		{
-			E::Setting st = p.first;
-			const SettingValue& sv = p.second;
+		default:
+			pr = Gateway::checkAndApplySetting(sv, log);
+			break;
 
-			switch(st)
+		case E::Setting::LocalGatewayIP1:
+			addrPort.setAddressPortStr(sv.value.toString(), MODBUS_DEFAULT_PORT);
+			m_localGatewayIP1 = addrPort;
+			break;
+
+		case E::Setting::LocalGatewayIP2:
+			addrPort.setAddressPortStr(sv.value.toString(),  MODBUS_DEFAULT_PORT);
+			m_localGatewayIP2 = addrPort;
+			break;
+
+		case E::Setting::ModbusDeviceID:
 			{
-			case E::Setting::LocalGatewayIP1:
-				addrPort.setAddressPortStr(sv.value.toString(), MODBUS_DEFAULT_PORT);
-				m_localGatewayIP1 = addrPort;
-				break;
+				m_modbusDeviceID = sv.value.toInt();
 
-			case E::Setting::LocalGatewayIP2:
-				addrPort.setAddressPortStr(sv.value.toString(),  MODBUS_DEFAULT_PORT);
-				m_localGatewayIP2 = addrPort;
-				break;
-
-			case E::Setting::ModbusDeviceID:
+				if (m_modbusDeviceID < 0 || m_modbusDeviceID > 255)
 				{
-					m_modbusDeviceID = sv.value.toInt();
-
-					if (m_modbusDeviceID < 0 || m_modbusDeviceID > 255)
-					{
-						log.logError(sv.lineNo, "Wrong ModbusDeviceID value. Should be in range 0..255.");
-						result = false;
-					}
+					log.logError(sv.lineNo, "wrong ModbusDeviceID value. Should be in range 0..255.");
+					pr = ParseResult::Error;
 				}
-				break;
-
-			case E::Setting::ModbusMode:
-				{
-					bool ok = true;
-
-					m_modbusMode = ::E::stringToValue<E::ModbusMode>(sv.value.toString(), &ok);
-
-					if (ok == false)
-					{
-						QStringList values = ::E::enumKeyStrings<E::ModbusMode>();
-
-						values.remove(0);		// remove E::ModbusMode::Unknown
-
-						log.logError(sv.lineNo, QString("Wrong ModbusMode value. Should be one of: %1").
-												arg(values.join(", ")));
-
-						m_modbusMode = E::ModbusMode::Unknown;
-						result = false;
-					}
-				}
-				break;
-
-			default:
-				;	// ok
 			}
+			break;
+
+		case E::Setting::ModbusMode:
+			{
+				bool ok = true;
+
+				m_modbusMode = ::E::stringToValue<E::ModbusMode>(sv.value.toString(), &ok);
+
+				if (ok == false)
+				{
+					QStringList values = ::E::enumKeyStrings<E::ModbusMode>();
+
+					values.remove(0);		// remove E::ModbusMode::Unknown
+
+					log.logError(sv.lineNo, QString("wrong ModbusMode value. Should be one of: %1").
+											arg(values.join(", ")));
+
+					m_modbusMode = E::ModbusMode::Unknown;
+					pr = ParseResult::Error;
+				}
+			}
+			break;
 		}
 
-		return result;
+		return pr;
 	}
 
 	void ModbusSlaveGateway::appendSignalList()
@@ -761,7 +725,6 @@ namespace Gateway
 
 		const SignalLists& lists = signalLists();
 
-		std::set<Hash> existsSignals;
 		std::set<int> discreteRegs;
 		std::set<int> discreteAddrs;
 		std::set<int> analogRegs;
@@ -782,12 +745,12 @@ namespace Gateway
 			{
 				Hash hash = calcHash(signalID);
 
-				if (existsSignals.contains(hash))
-				{
-					log.logWarning(QString("signal %1 is repeated in several signal lists").arg(signalID));
-				}
+				// if (existsSignals.contains(hash))
+				// {
+				// 	log.logWarning(QString("signal %1 is repeated in several signal lists").arg(signalID));
+				// }
 
-				existsSignals.insert(hash);
+				// existsSignals.insert(hash);
 
 				Address16 addr16 = mbsl->getAddress(hash);
 
@@ -798,16 +761,16 @@ namespace Gateway
 					continue;
 				}
 
-				auto it = m_modbusSignals.find(addr16);
+				// auto it = m_modbusSignals.find(addr16);
 
-				if (it != m_modbusSignals.end())
-				{
-					const ModbusSignal& mbs = it->second;
-					log.logError(QString("signal %1 address %2 is not unique (already assigned to %3)").
-												arg(signalID).arg(addr16.toString()).arg(mbs.signalID));
-					result = false;
-					continue;
-				}
+				// if (it != m_modbusSignals.end())
+				// {
+				// 	const ModbusSignal& mbs = it->second;
+				// 	log.logError(QString("signal %1 address %2 is not unique (already assigned to %3)").
+				// 								arg(signalID).arg(addr16.toString()).arg(mbs.signalID));
+				// 	result = false;
+				// 	continue;
+				// }
 
 				int regsCount = format.registersCount();
 
@@ -832,8 +795,12 @@ namespace Gateway
 						{
 							if (discreteAddrs.contains(addr16.bitAddress()) == true)
 							{
-								log.logError(QString("duplicate address %1 of discrete signal %2").
-													 arg(addr16.bitAddress()).arg(signalID));
+								if (mbsl->isUniqueSignalsInList() == true)
+								{
+									log.logError(QString("duplicate address %1 of discrete signal %2").
+														 arg(addr16.bitAddress()).arg(signalID));
+									result = false;
+								}
 							}
 							else
 							{
@@ -854,9 +821,12 @@ namespace Gateway
 						{
 							if (analogRegs.contains(addr16.offset() + i) == true)
 							{
-								log.logError(QString("analog signal %1 register %2 used by another analog signal").
-											 arg(signalID).arg(addr16.offset() + i));
-								result = false;
+								if (mbsl->isUniqueSignalsInList() == true)
+								{
+									log.logError(QString("analog signal %1 register %2 used by another analog signal").
+												 arg(signalID).arg(addr16.offset() + i));
+									result = false;
+								}
 							}
 							else
 							{
