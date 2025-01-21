@@ -3,8 +3,9 @@
 #include <QString>
 #include <QDateTime>
 #include <iostream>
+#include <QDebug>
 
-#include "../OnlineLib/CircularLogger.h"
+//#include "../OnlineLib/CircularLogger.h"
 
 struct RequestParams
 {
@@ -34,4 +35,4 @@ private:
 	int m_partSize = 0;
 };
 
-extern std::shared_ptr<CircularLogger> logger;
+//extern std::shared_ptr<CircularLogger> logger;

@@ -1,6 +1,6 @@
 #include "Archivist.h"
 
-std::shared_ptr<CircularLogger> logger;
+//std::shared_ptr<CircularLogger> logger;
 
 Archivist::Archivist(int argc, char* argv[])
 {
