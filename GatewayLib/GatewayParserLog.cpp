@@ -8,6 +8,10 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
+	ParserLog::ParserLog()
+	{
+	}
+
 	void ParserLog::logResult(int lineNo, LogMsgType msgType, const QString& msg)
 	{
 		log(lineNo, msgType, message(lineNo, msg));

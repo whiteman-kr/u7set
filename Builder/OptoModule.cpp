@@ -848,11 +848,6 @@ namespace Hardware
 				ASSERT_RETURN_FALSE;
 			}
 
-			if (m_equipmentID == "SYSTEMID_CH03_VDU01_OPTOPORT01")
-			{
-				DEBUG_STOP;
-			}
-
 			m_rxSignals.append(txSignal);
 
 			for(const QString& appSignalID : txSignal->appSignalIDs())
@@ -1837,11 +1832,6 @@ namespace Hardware
 		if (res == false)
 		{
 			return false;
-		}
-
-		if (m_equipmentID == "SYSTEMID_CH03_VDU01_OPTOPORT01")
-		{
-			DEBUG_STOP;
 		}
 
 		m_rxSignals.append(rxSignal);

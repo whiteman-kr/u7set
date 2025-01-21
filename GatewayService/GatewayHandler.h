@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GatewayDescription.h"
+#include "../GatewayLib/GatewayDescription.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/CircularLogger.h"

@@ -20,12 +20,6 @@ endif (MSVC)
 set(TARGET Builder)
 
 qt_add_library(${TARGET} STATIC
-	../GatewayService/GatewayDescription.cpp
-	../GatewayService/GatewayDescription.h
-	../GatewayService/IvsImpulseGateway.cpp
-	../GatewayService/IvsImpulseGateway.h
-	../GatewayService/ModbusSlaveGateway.cpp
-	../GatewayService/ModbusSlaveGateway.h
 	../lib/TuningDataStorage.cpp
 	../lib/TuningDataStorage.h
 	../Metrology/MetrologyConnection.cpp
@@ -109,8 +103,6 @@ qt_add_library(${TARGET} STATIC
 	FbParamCalculation.cpp
 	GatewayDescriptionParser.cpp
 	GatewayDescriptionParser.h
-	GatewayParserLog.cpp
-	GatewayParserLog.h
 	GatewayServiceCfgGenerator.cpp
 	GatewayServiceCfgGenerator.h
 	IssueLogger.cpp
@@ -237,7 +229,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 target_link_libraries(${TARGET} PUBLIC Boost::graph)
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 SimulatorLib ReportLib AppSignalLists TuningLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 SimulatorLib ReportLib AppSignalLists TuningLib GatewayLib)
 
 target_compile_definitions(${TARGET} PRIVATE IS_BUILDER)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
