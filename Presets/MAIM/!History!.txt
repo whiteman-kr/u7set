@@ -1,4 +1,5 @@
 MAIM
 	22.11.2021	Version: 0	MAIM_v0.u7devp		Initial version
 	07.04.2023	Version: 1	MAIM_v1.u7devp		RPCT-3515: Added Enable flag to all inputs
+	21.01.2025	Version: 2	MAIM_v2.u7devp		RPCT-3992:  Configuration script is reorganized for library usage
 

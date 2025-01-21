@@ -183,17 +183,17 @@ function generate_fimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 			{
 				switch (highPhysical.errorCode)
 				{
-					case UnitsConvertorErrorCode.ErrorGeneric:
+					case ConfigStruct.UnitsConvertorErrorCode.ErrorGeneric:
 					{
 						log.errINT1001(highPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrId);
 					}
 						break;
-					case UnitsConvertorErrorCode.LowLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.LowLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricLowLimit", electricLowLimit, highPhysical.expectedLowValidRange, highPhysical.expectedHighValidRange, 4, signalStrId);
 					}
 						break;
-					case UnitsConvertorErrorCode.HighLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.HighLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricHighLimit", electricHighLimit, highPhysical.expectedLowValidRange, highPhysical.expectedHighValidRange, 4, signalStrId);
 					}
@@ -208,17 +208,17 @@ function generate_fimsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 			{
 				switch (lowPhysical.errorCode)
 				{
-					case UnitsConvertorErrorCode.ErrorGeneric:
+					case ConfigStruct.UnitsConvertorErrorCode.ErrorGeneric:
 					{
 						log.errINT1001(lowPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrId);
 					}
 						break;
-					case UnitsConvertorErrorCode.LowLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.LowLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricLowLimit", electricLowLimit, lowPhysical.expectedLowValidRange, lowPhysical.expectedHighValidRange, 4, signalStrId);
 					}
 						break;
-					case UnitsConvertorErrorCode.HighLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.HighLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricHighLimit", electricHighLimit, lowPhysical.expectedLowValidRange, lowPhysical.expectedHighValidRange, 4, signalStrId);
 					}

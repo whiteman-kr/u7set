@@ -246,14 +246,14 @@ function generate_mps36(confFirmware, module, LMNumber, frame, log, signalSet, o
 		
 				switch (sensorType)
 				{
-					case SensorType.NoSensor:			sensorTypeCode = 0;	break;
-					case SensorType.Ohm_Pt100_W1385:	sensorTypeCode = 1;	break;
-					case SensorType.Ohm_Pt50_W1385:		sensorTypeCode = 2;	break;
-					case SensorType.Ohm_Cu_50_W1428:	sensorTypeCode = 3;	break;
-					case SensorType.Ohm_Cu23:			sensorTypeCode = 4;	break;
-					case SensorType.Ohm_Cu_50_W1426:	sensorTypeCode = 5;	break;
-					case SensorType.Ohm_Pt100_W1391:	sensorTypeCode = 6;	break;
-					case SensorType.Ohm_Pt50_W1391:		sensorTypeCode = 7;	break;
+					case ConfigStruct.SensorType.NoSensor:			sensorTypeCode = 0;	break;
+					case ConfigStruct.SensorType.Ohm_Pt100_W1385:	sensorTypeCode = 1;	break;
+					case ConfigStruct.SensorType.Ohm_Pt50_W1385:		sensorTypeCode = 2;	break;
+					case ConfigStruct.SensorType.Ohm_Cu_50_W1428:	sensorTypeCode = 3;	break;
+					case ConfigStruct.SensorType.Ohm_Cu23:			sensorTypeCode = 4;	break;
+					case ConfigStruct.SensorType.Ohm_Cu_50_W1426:	sensorTypeCode = 5;	break;
+					case ConfigStruct.SensorType.Ohm_Pt100_W1391:	sensorTypeCode = 6;	break;
+					case ConfigStruct.SensorType.Ohm_Pt50_W1391:		sensorTypeCode = 7;	break;
 					default:
 							log.errINT1001("Unknown R sensor type " + sensorType + " in " + signalStrId);
 							return false;
@@ -276,9 +276,9 @@ function generate_mps36(confFirmware, module, LMNumber, frame, log, signalSet, o
 				
 				switch (outputMode)
 				{
-					case OutputMode.Plus4_Plus20_mA:	outputModeCode = 5;	break;
-					case OutputMode.Plus0_Plus20_mA:	outputModeCode = 6;	break;
-					case OutputMode.Plus0_Plus24_mA:	outputModeCode = 7;	break;
+					case ConfigStruct.OutputMode.Plus4_Plus20_mA:	outputModeCode = 5;	break;
+					case ConfigStruct.OutputMode.Plus0_Plus20_mA:	outputModeCode = 6;	break;
+					case ConfigStruct.OutputMode.Plus0_Plus24_mA:	outputModeCode = 7;	break;
 					default:
 					{
 						log.errINT1001("Unknown OutputMode type " + outputMode + " in " + signalStrId);
