@@ -121,7 +121,7 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaItemVduLine::accept(VduItemVisitor& visitor) const
+	bool SchemaItemVduLine::accept(VduItemVisitor& visitor) const
 	{
 		return visitor.visit(*this);
 	}

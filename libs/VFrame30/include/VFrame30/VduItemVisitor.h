@@ -4,6 +4,7 @@ namespace VFrame30
 {
 	class SchemaItemVduLine;
 	class SchemaItemVduRect;
+	class SchemaItemVduImage;
 	class SchemaItemVduValue;
 
 	class VduItemVisitor
@@ -11,8 +12,9 @@ namespace VFrame30
 	public:
 		virtual ~VduItemVisitor() = default;
 
-		virtual void visit(const SchemaItemVduLine& item) = 0;
-		virtual void visit(const SchemaItemVduRect& item) = 0;
-		virtual void visit(const SchemaItemVduValue& item) = 0;
+		virtual bool visit(const SchemaItemVduLine& item) = 0;
+		virtual bool visit(const SchemaItemVduRect& item) = 0;
+		virtual bool visit(const SchemaItemVduImage& item) = 0;
+		virtual bool visit(const SchemaItemVduValue& item) = 0;
 	};
 } // namespace VFrame30

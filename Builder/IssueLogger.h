@@ -287,6 +287,11 @@ namespace Builder
 						QString packedLogicId);
 		void errALP4304(QString schema, QString schemaItem, QUuid itemUuid, int minInputCount, int actuallyInputCount, QString packedLogicId);
 
+		// Other related to schemas
+		//
+		void errALP4400(QString schema, QString schemaItem, QUuid itemUuid);
+
+
 		// ALC			Application logic compiler				5000-5999
 		//
 		void errALC5000(QString appSignalID, QUuid itemUuid, QString schemaID);		// Signal identifier %1 is not found (Logic schema %2).
@@ -611,7 +616,7 @@ namespace Builder
 		void errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid);
 		void errEQP6401(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, QString font);
 
-		void wrnEQP6405(QString schemaId, QString itemLabel, QUuid itemUuid);
+		void wrnEQP6405(QString schemaId, QString itemLabel, QUuid itemUuid); // SchemaItem has an incompatible type with VDU
 
 		// Diagnostics compiler errors
 		//

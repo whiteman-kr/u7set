@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../AppSignalLib/IAppSignalManager.h"
 #include <VFrame30/ClientSchemaWidget.h>
 
 class MonitorSchemaView;
@@ -15,7 +16,7 @@ namespace VFrame30
 {
 	class AppSignalController;
 	class ITimeStats;
-}
+} // namespace VFrame30
 
 
 //
@@ -45,15 +46,11 @@ protected:
 	// Methods
 	//
 public:
-
 	// Slots
 	//
 public slots:
 	void contextMenuRequested(const QPoint& pos);
-	void signalContextMenu(QStringList appSignals,
-						   QStringList impactSignals,
-						   QStringList loopbacks,
-						   const QList<QMenu*>& customMenu);
+	void signalContextMenu(QStringList appSignals, QStringList impactSignals, QStringList loopbacks, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
 
 	// Properties
@@ -74,7 +71,6 @@ public:
 	// Data
 	//
 private:
-
 	// Actions
 	//
 	QAction* m_newTabAction = nullptr;
@@ -83,6 +79,4 @@ private:
 	// Data access
 	VFrame30::LogController* m_logController = nullptr;
 	VFrame30::ITimeStats* m_timeStats = nullptr;
-
 };
-

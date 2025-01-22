@@ -19,18 +19,39 @@ endif (MSVC)
 set(TARGET VFrame30)
 
 qt_add_library(${TARGET} STATIC
+	./include/VFrame30/AppSignalController.h
+	./include/VFrame30/BaseSchemaWidget.h
+	./include/VFrame30/ClientSchemaView.h
+	./include/VFrame30/ClientSchemaWidget.h
+	./include/VFrame30/Context.h
+	./include/VFrame30/DiagSchema.h
+	./include/VFrame30/DiagStateController.h
+	./include/VFrame30/DrawParam.h
 	./include/VFrame30/FblItem.h
 	./include/VFrame30/FblItemLine.h
 	./include/VFrame30/FblItemRect.h
+	./include/VFrame30/FontParam.h
+	./include/VFrame30/HorzVertLinks.h
 	./include/VFrame30/ImageItem.h
+	./include/VFrame30/IMatsSchemaItemAssociations.h
 	./include/VFrame30/Indicator.h
 	./include/VFrame30/IndicatorArrowIndicator.h
 	./include/VFrame30/IndicatorHistogramVert.h
 	./include/VFrame30/IndicatorTrend.h
+	./include/VFrame30/ISchemaViewHistory.h
+	./include/VFrame30/ITimeStats.h
+	./include/VFrame30/IViewVariables.h
+	./include/VFrame30/LogController.h
+	./include/VFrame30/LogicSchema.h
+	./include/VFrame30/MacrosExpander.h
+	./include/VFrame30/MonitorSchema.h
 	./include/VFrame30/PosConnectionImpl.h
 	./include/VFrame30/PosLineImpl.h
 	./include/VFrame30/PosRectImpl.h
 	./include/VFrame30/PosRectRotatable.h
+	./include/VFrame30/PropertyNames.h
+	./include/VFrame30/Schema.h
+	./include/VFrame30/SchemaDetails.h
 	./include/VFrame30/SchemaItem.h
 	./include/VFrame30/SchemaItemAfb.h
 	./include/VFrame30/SchemaItemBus.h
@@ -55,10 +76,26 @@ qt_add_library(${TARGET} STATIC
 	./include/VFrame30/SchemaItemUfb.h
 	./include/VFrame30/SchemaItemValue.h
 	./include/VFrame30/SchemaItemVdu.h
+	./include/VFrame30/SchemaItemVduImage.h
 	./include/VFrame30/SchemaItemVduLine.h
 	./include/VFrame30/SchemaItemVduRect.h
 	./include/VFrame30/SchemaItemVduValue.h
+	./include/VFrame30/SchemaLayer.h
+	./include/VFrame30/SchemaManager.h
+	./include/VFrame30/SchemaPoint.h
+	./include/VFrame30/SchemaView.h
+	./include/VFrame30/Session.h
+	./include/VFrame30/Settings.h
+	./include/VFrame30/TuningController.h
+	./include/VFrame30/TuningSchema.h
+	./include/VFrame30/UfbSchema.h
 	./include/VFrame30/VduItemVisitor.h
+	./include/VFrame30/VduSchema.h
+	./include/VFrame30/VFrame30Library.h
+	./include/VFrame30/VFrame30Types.h
+	./include/VFrame30/VFrameTools.h
+	./include/VFrame30/WiringSchema.h
+
 	./SchemaItems/FblItem.cpp
 	./SchemaItems/FblItemLine.cpp
 	./SchemaItems/FblItemRect.cpp
@@ -94,45 +131,11 @@ qt_add_library(${TARGET} STATIC
 	./SchemaItems/SchemaItemTerminator.cpp
 	./SchemaItems/SchemaItemUfb.cpp
 	./SchemaItems/SchemaItemValue.cpp
+	./SchemaItems/SchemaItemVduImage.cpp
 	./SchemaItems/SchemaItemVduLine.cpp
 	./SchemaItems/SchemaItemVduRect.cpp
 	./SchemaItems/SchemaItemVduValue.cpp
 
-	./include/VFrame30/AppSignalController.h
-	./include/VFrame30/BaseSchemaWidget.h
-	./include/VFrame30/ClientSchemaView.h
-	./include/VFrame30/ClientSchemaWidget.h
-	./include/VFrame30/Context.h
-	./include/VFrame30/DiagSchema.h
-	./include/VFrame30/DiagStateController.h
-	./include/VFrame30/DrawParam.h
-	./include/VFrame30/FontParam.h
-	./include/VFrame30/HorzVertLinks.h
-	./include/VFrame30/IMatsSchemaItemAssociations.h
-	./include/VFrame30/ISchemaViewHistory.h
-	./include/VFrame30/ITimeStats.h
-	./include/VFrame30/IViewVariables.h
-	./include/VFrame30/LogController.h
-	./include/VFrame30/LogicSchema.h
-	./include/VFrame30/MacrosExpander.h
-	./include/VFrame30/MonitorSchema.h
-	./include/VFrame30/PropertyNames.h
-	./include/VFrame30/Schema.h
-	./include/VFrame30/SchemaDetails.h
-	./include/VFrame30/SchemaLayer.h
-	./include/VFrame30/SchemaManager.h
-	./include/VFrame30/SchemaPoint.h
-	./include/VFrame30/SchemaView.h
-	./include/VFrame30/Session.h
-	./include/VFrame30/Settings.h
-	./include/VFrame30/TuningController.h
-	./include/VFrame30/TuningSchema.h
-	./include/VFrame30/UfbSchema.h
-	./include/VFrame30/VduSchema.h
-	./include/VFrame30/VFrame30Library.h
-	./include/VFrame30/VFrame30Types.h
-	./include/VFrame30/VFrameTools.h
-	./include/VFrame30/WiringSchema.h
 	AppSignalController.cpp
 	BaseSchemaWidget.cpp
 	ClientSchemaView.cpp

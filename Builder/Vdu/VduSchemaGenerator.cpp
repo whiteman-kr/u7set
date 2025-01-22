@@ -6,12 +6,16 @@
 #include "../../UtilsLib/Crc.h"
 
 #include <HardwareLib/DeviceModule.h>
+#include <VFrame30/Context.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/SchemaItemVduImage.h>
 #include <VFrame30/SchemaItemVduLine.h>
 #include <VFrame30/SchemaItemVduRect.h>
 #include <VFrame30/SchemaItemVduValue.h>
 #include <VFrame30/SchemaView.h>
 #include <VFrame30/VduSchema.h>
+
+#include <QImageWriter>
 
 // #define VDU_DEBUG
 
@@ -30,11 +34,30 @@ namespace
 		}
 	};
 
+	quint32 VduImageHash(const QImage& image)
+	{
+		const QImage converted = image.convertToFormat(QImage::Format_ARGB32);
+
+		QCryptographicHash hash{QCryptographicHash::Md5};
+
+		for (int y = 0; y < converted.height(); ++y)
+		{
+			const uchar* line = converted.constScanLine(y);
+
+			QByteArray lineData = QByteArray::fromRawData(reinterpret_cast<const char*>(line), static_cast<int>(converted.bytesPerLine()));
+			hash.addData(lineData);
+		}
+
+		return ::calcHash32(hash.resultView().constData(), hash.resultView().size());
+	}
+
 	// --
 	//
 	class SaveVduItemVisitor : public VFrame30::VduItemVisitor
 	{
+		Builder::Context& m_context;
 		QString m_vduEquipmentId;
+		QString m_subsystemId;
 		Builder::IssueLogger& m_log;
 		const Builder::VduFontProvider& m_vduFontProvider;
 		const std::map<Hash, int>& m_appSignalHashToSignalIndex;
@@ -51,20 +74,23 @@ namespace
 			itemType = 0;
 		}
 
-		SaveVduItemVisitor(QString vduEquipmentId,
-						   Builder::IssueLogger& m_log,
+		SaveVduItemVisitor(Builder::Context& context,
+						   QString vduEquipmentId,
+						   QString subsystemId,
 						   const Builder::VduFontProvider& m_vduFontProvider,
 						   const std::map<Hash, int>& appSignalHashToSignalIndex) :
-			m_vduEquipmentId(vduEquipmentId),
-			m_log(m_log),
-			m_vduFontProvider(m_vduFontProvider),
-			m_appSignalHashToSignalIndex(appSignalHashToSignalIndex)
+			m_context{context},
+			m_vduEquipmentId{vduEquipmentId},
+			m_subsystemId{subsystemId},
+			m_log{*context.m_log},
+			m_vduFontProvider{m_vduFontProvider},
+			m_appSignalHashToSignalIndex{appSignalHashToSignalIndex}
 		{
 		}
 
 		// SchemaItemVduLine
 		//
-		void visit(const VFrame30::SchemaItemVduLine& schemaItem) override
+		bool visit(const VFrame30::SchemaItemVduLine& schemaItem) override
 		{
 			reset();
 
@@ -84,11 +110,13 @@ namespace
 
 			itemType = structLine.itemType;
 			outData = QByteArray(reinterpret_cast<const char*>(&structLine), sizeof(structLine));
+
+			return true;
 		}
 
 		// SchemaItemVduRect
 		//
-		void visit(const VFrame30::SchemaItemVduRect& schemaItem) override
+		bool visit(const VFrame30::SchemaItemVduRect& schemaItem) override
 		{
 			reset();
 
@@ -97,8 +125,8 @@ namespace
 			structRect.version = 1;
 			structRect.itemType = VduFileSchemaItemRectId; // ! Do not forget to set itemType.
 
-			using PosType = decltype(VduSchemaFileSchemaItemRect1::left);
-			using SizeType = decltype(VduSchemaFileSchemaItemRect1::width);
+			using PosType = decltype(structRect.left);
+			using SizeType = decltype(structRect.width);
 
 			structRect.left = static_cast<PosType>(schemaItem.leftDocPt());
 			structRect.top = static_cast<PosType>(schemaItem.topDocPt());
@@ -133,7 +161,7 @@ namespace
 								   .arg(schemaItem.getFontItalic() ? ", italic" : "");
 
 				m_log.errEQP6401(m_vduEquipmentId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid(), font);
-				return;
+				return false;
 			}
 
 			structRect.fontIndex = fontIndex;
@@ -149,11 +177,77 @@ namespace
 
 			itemType = structRect.itemType;
 			outData = QByteArray(reinterpret_cast<const char*>(&structRect), sizeof(structRect));
+
+			return true;
+		}
+
+		// SchemaItemVduImage
+		//
+		bool visit(const VFrame30::SchemaItemVduImage& schemaItem) override
+		{
+			reset();
+
+			VduSchemaFileSchemaItemImage1 structImage{};
+
+			structImage.version = 1;
+			structImage.itemType = VduFileSchemaItemImageId; // ! Do not forget to set itemType.
+
+			using PosType = decltype(structImage.left);
+			using SizeType = decltype(structImage.width);
+
+			structImage.left = static_cast<PosType>(schemaItem.leftDocPt());
+			structImage.top = static_cast<PosType>(schemaItem.topDocPt());
+			structImage.width = static_cast<SizeType>(schemaItem.widthDocPt());
+			structImage.height = static_cast<SizeType>(schemaItem.heightDocPt());
+
+			// Same image.
+			//
+			auto image = schemaItem.toQImage(QRectF{0, 0, static_cast<qreal>(structImage.width), static_cast<qreal>(structImage.height)});
+
+			if (image.isNull() == true)
+			{
+				m_log.errALP4400(schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid());
+				return false;
+			}
+
+			auto imageHash = quint32{VduImageHash(image)}; // {} Just in case, to prevent narrowing conversion.
+			structImage.imageHash = imageHash;
+
+			structImage.imageFile = VduFileString::stub;
+			QString fileName = QString{"IM_%1"}.arg(imageHash, 8, 16, QChar{'0'}).toUpper() + QString{".bmp"};
+
+			auto vduString =
+				VduFileString::createUtf8(fileName, sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemImage1, imageFile));
+			addedStrings.push_back(std::move(vduString));
+
+			// If file is not exists then save file to output.
+			// '/' in the fron is required for correct work m_buildResultWriter->isBuildFileExists.
+			//
+			QString vduSchemaImageDir =
+				'/' + m_context.m_buildResultWriter->subsystemDirectory(m_subsystemId) + '/' + m_vduEquipmentId + "/Schemas/Resources";
+
+			bool fileAlreadyExists = m_context.m_buildResultWriter->isBuildFileExists(vduSchemaImageDir + '/' + fileName);
+			if (fileAlreadyExists == false)
+			{
+				QBuffer buffer;
+
+				QImageWriter writer{&buffer, "BMP"};
+				writer.write(image);
+
+				m_context.m_buildResultWriter->addFile(vduSchemaImageDir, fileName, buffer.data(), false);
+			}
+
+			// --
+			//
+			itemType = structImage.itemType;
+			outData = QByteArray(reinterpret_cast<const char*>(&structImage), sizeof(structImage));
+
+			return true;
 		}
 
 		// SchemaItemVduValue
 		//
-		void visit(const VFrame30::SchemaItemVduValue& schemaItem) override
+		bool visit(const VFrame30::SchemaItemVduValue& schemaItem) override
 		{
 			reset();
 
@@ -195,7 +289,7 @@ namespace
 								   .arg(schemaItem.getFontItalic() ? ", italic" : "");
 
 				m_log.errEQP6401(m_vduEquipmentId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid(), font);
-				return;
+				return false;
 			}
 
 			structValue.fontIndex = fontIndex;
@@ -235,7 +329,7 @@ namespace
 									 schemaItem.guid());
 
 					reset();
-					return;
+					return false;
 				}
 
 				// Signal index follows the structValue.
@@ -247,21 +341,19 @@ namespace
 			// OutData already set.
 			//
 			itemType = structValue.itemType;
-			return;
+
+			return true;
 		}
 	};
 
 	bool saveSchemaItem1(QString vduEquipmentId,
+						 QString subsystemId,
 						 const VFrame30::SchemaItem& schemaItem,
 						 const std::map<Hash, int>& appSignalHashToSignalIndex,
 						 QByteArray& out,
 						 std::list<VduFileString>& addedStrings,
 						 Builder::Context& context)
 	{
-		Builder::IssueLogger& log = *context.m_log;
-
-		// --
-		//
 		VduSchemaFileSchemaItem1 fileSchemaItem{};
 		std::memset(&fileSchemaItem, 0, sizeof(fileSchemaItem));
 
@@ -299,9 +391,13 @@ namespace
 
 		// Save specific item struct, depending on itemType.
 		//
-		SaveVduItemVisitor saveVduItemVisitor(vduEquipmentId, log, context.m_vduFontProvider, appSignalHashToSignalIndex);
+		SaveVduItemVisitor saveVduItemVisitor(context, vduEquipmentId, subsystemId, context.m_vduFontProvider, appSignalHashToSignalIndex);
 
-		dynamic_cast<const VFrame30::SchemaItemVdu&>(schemaItem).accept(saveVduItemVisitor);
+		bool saveOk = dynamic_cast<const VFrame30::SchemaItemVdu&>(schemaItem).accept(saveVduItemVisitor);
+		if (saveOk == false)
+		{
+			return false;
+		}
 
 		// Save result after visiting specific item. SaveVduItemVisitor
 		//
@@ -385,6 +481,7 @@ namespace Builder
 		Q_ASSERT(log);
 
 		context.m_vduSchemas.clear();
+		auto& buildResultWriter = *context.m_buildResultWriter;
 
 		bool result = true;
 
@@ -399,6 +496,29 @@ namespace Builder
 
 			LOG_MESSAGE(log, QString("Generating schemas for VDU %1.").arg(vdu->equipmentId()));
 
+			// Get VDU subsystemId.
+			//
+			QString subsystemId;
+			{
+				auto subsystemIdProp = vdu->propertyByCaption(EquipmentPropNames::SUBSYSTEM_ID);
+				if (subsystemIdProp == nullptr)
+				{
+					// Property '%1.%2' is not found.
+					//
+					log->errCFG3020(vdu->equipmentId(), EquipmentPropNames::SUBSYSTEM_ID);
+					result = false;
+					continue;
+				}
+
+				subsystemId = subsystemIdProp->value().toString();
+			}
+
+			const QString vduSchemaDir = buildResultWriter.subsystemDirectory(subsystemId) + '/' + vdu->equipmentId() + '/' + "Schemas";
+
+			const QString vduImageDir = vduSchemaDir + '/' + "Images";
+
+			// Get device tags
+			//
 			auto schemaTagsProperty = vdu->propertyByCaption(EquipmentPropNames::SCHEMA_TAGS);
 			if (schemaTagsProperty == nullptr)
 			{
@@ -447,8 +567,12 @@ namespace Builder
 				QStringList errorMessages;
 				QByteArray nativeVduData;
 
-				bool genSchemaOk =
-					Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(), *schema, vduSignals, nativeVduData, context);
+				bool genSchemaOk = Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(),
+																				  subsystemId,
+																				  *schema,
+																				  vduSignals,
+																				  nativeVduData,
+																				  context);
 
 				if (genSchemaOk == false)
 				{
@@ -460,9 +584,7 @@ namespace Builder
 				//
 				QString nativeVduSchemaFileName = QString("%1.%2").arg(schema->schemaId()).arg(File::VduNativeFileExtension);
 
-				QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + "/Schemas";
-
-				context.m_buildResultWriter->addFile(vduDir, nativeVduSchemaFileName, nativeVduData);
+				buildResultWriter.addFile(vduSchemaDir, nativeVduSchemaFileName, nativeVduData);
 
 #if 1
 				// Generate background bitmap from the static data.
@@ -487,7 +609,7 @@ namespace Builder
 					buffer.open(QIODevice::WriteOnly);
 					backgroundImage.save(&buffer, "BMP");
 
-					context.m_buildResultWriter->addFile(vduDir, backgroundBitmapFileName, backgroundImageData);
+					buildResultWriter.addFile(vduSchemaDir, backgroundBitmapFileName, backgroundImageData);
 				}
 #endif
 				// Add schema to the global build context.
@@ -516,6 +638,7 @@ namespace Builder
 	}
 
 	bool VduSchemaGenerator::generateVduSchema(QString vduEquipmentId,
+											   QString subsystemId,
 											   const VFrame30::VduSchema& schema,
 											   const std::map<Hash, int>& appSignalHashToSignalIndex,
 											   QByteArray& out,
@@ -621,7 +744,7 @@ namespace Builder
 				QByteArray outSchemaItem{};
 				std::list<VduFileString> addedItemStrings; // Strings added in the fallowing call of saveSchemaItem1(...).
 
-				saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedItemStrings, context);
+				saveSchemaItem1(vduEquipmentId, subsystemId, *item, appSignalHashToSignalIndex, outSchemaItem, addedItemStrings, context);
 
 				// Add added string references to the main string ref container.
 				//

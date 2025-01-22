@@ -33,7 +33,7 @@ namespace VFrame30
 		// VduItemVisitor
 		//
 	public:
-		void accept(VduItemVisitor& visitor) const override;
+		bool accept(VduItemVisitor& visitor) const override;
 
 		// Properties and Data
 	public:

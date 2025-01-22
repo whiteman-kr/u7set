@@ -1,7 +1,9 @@
 #pragma once
+#include <VFrame30/DrawParam.h>
+
+#include <QImage>
 #include <QSvgRenderer>
 #include <optional>
-#include <VFrame30/DrawParam.h>
 
 namespace Proto
 {
@@ -27,10 +29,14 @@ namespace VFrame30
 
 		bool hasAnyImage() const;
 
+		QImage toQImage(const QRectF& rect) const;
+
 		static void drawError(CDrawParam* drawParam, const QRectF& rect, const QString& errorText);
 		void drawImage(CDrawParam* drawParam, const QRectF& rect) const;
 		void drawRasterImage(CDrawParam* drawParam, const QRectF& rect) const;
+		void drawRasterImage(QPainter& painter, const QRectF& rect, double zoom, SchemaUnit units, double dpiX = .0, double dpiY = .0) const;
 		void drawSvg(CDrawParam* drawParam, const QRectF& rect) const;
+		void drawSvg(QPainter& painter, QSvgRenderer& svgRenderer, const QRectF& rect, double zoom, SchemaUnit units) const;
 
 	public:
 		bool allowScale() const;
@@ -56,12 +62,12 @@ namespace VFrame30
 		QString m_imageId = "IMAGEID";
 
 		QImage m_image;
-		mutable QByteArray m_imageData;							// To prevent from compressing image again and again if it was not changed
+		mutable QByteArray m_imageData;                    // To prevent from compressing image again and again if it was not changed
 
 		QString m_svgData;
-		mutable std::optional<QSvgRenderer> m_svgRenderer;		// Drawing resources
+		mutable std::optional<QSvgRenderer> m_svgRenderer; // Drawing resources
 
-		// Class has COPY constructor, keep in mind when adding new members!!!
+														   // Class has COPY constructor, keep in mind when adding new members!!!
 		//
 	};
 
@@ -110,7 +116,7 @@ namespace VFrame30
 		std::shared_ptr<VFrame30::ImageItem> m_imageItem;
 	};
 
-}
+} // namespace VFrame30
 
 Q_DECLARE_METATYPE(PropertyVector<VFrame30::ImageItem>)
 Q_DECLARE_METATYPE(PropertyList<VFrame30::ImageItem>)

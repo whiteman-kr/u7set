@@ -9,6 +9,6 @@ namespace VFrame30
 	public:
 		virtual ~SchemaItemVdu() = default;
 
-		virtual void accept(VduItemVisitor& visitor) const = 0;
+		virtual bool accept(VduItemVisitor& visitor) const = 0;
 	};
 } // namespace VFrame30

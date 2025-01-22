@@ -394,7 +394,7 @@ namespace VFrame30
 		return result;
 	}
 
-	void SchemaItemVduValue::accept(VduItemVisitor& visitor) const
+	bool SchemaItemVduValue::accept(VduItemVisitor& visitor) const
 	{
 		return visitor.visit(*this);
 	}

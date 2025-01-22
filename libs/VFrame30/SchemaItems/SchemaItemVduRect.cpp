@@ -266,7 +266,7 @@ namespace VFrame30
 		return gridSize;
 	}
 
-	void SchemaItemVduRect::accept(VduItemVisitor& visitor) const
+	bool SchemaItemVduRect::accept(VduItemVisitor& visitor) const
 	{
 		return visitor.visit(*this);
 	}

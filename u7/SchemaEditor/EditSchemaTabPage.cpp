@@ -75,6 +75,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 	{
 		m_toolBar->addAction(m_schemaWidget->m_addVduLineAction);
 		m_toolBar->addAction(m_schemaWidget->m_addVduRectAction);
+		m_toolBar->addAction(m_schemaWidget->m_addVduImageAction);
 		m_toolBar->addSeparator();
 		m_toolBar->addAction(m_schemaWidget->m_addVduValueAction);
 	}

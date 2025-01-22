@@ -5,7 +5,7 @@
 #include <VFrame30/IViewVariables.h>
 #include <VFrame30/TuningController.h>
 #include <memory>
-#include "Context.h"
+
 
 namespace VFrame30
 {

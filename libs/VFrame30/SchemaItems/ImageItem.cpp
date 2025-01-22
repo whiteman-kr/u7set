@@ -2,6 +2,8 @@
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaView.h>
 
+#include <QPrinter>
+
 namespace VFrame30
 {
 	//
@@ -21,7 +23,7 @@ namespace VFrame30
 		m_image(src.m_image),
 		m_imageData(src.m_imageData),
 		m_svgData(src.m_svgData)
-		//m_svgRenderer(src.m_svgRenderer)		// Cannot be copied ((( that's why class has copy constructor
+	// m_svgRenderer(src.m_svgRenderer)		// Cannot be copied ((( that's why class has copy constructor
 	{
 		createProperties();
 		return;
@@ -35,11 +37,21 @@ namespace VFrame30
 		ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::keepAspectRatio, true, ImageItem::keepAspectRatio, ImageItem::setKeepAspectRatio);
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::imageId, true, ImageItem::imageId, ImageItem::setImageId);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QImage, PropertyNames::image, PropertyNames::imageCategory, true, ImageItem::image, ImageItem::setImage);
+		p = ADD_PROPERTY_GET_SET_CAT(QImage,
+									 PropertyNames::image,
+									 PropertyNames::imageCategory,
+									 true,
+									 ImageItem::image,
+									 ImageItem::setImage);
 		p->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
 		p->setValidator(QStringLiteral("Images (*.png *.bmp *.jpg *.jpeg *.gif);; All Files (*.*)"));
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::svg, PropertyNames::imageCategory, true, ImageItem::svgData, ImageItem::setSvgData);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::svg,
+									 PropertyNames::imageCategory,
+									 true,
+									 ImageItem::svgData,
+									 ImageItem::setSvgData);
 		p->setSpecificEditor(E::PropertySpecificEditor::Svg);
 
 		return;
@@ -128,6 +140,30 @@ namespace VFrame30
 		return m_image.isNull() == false || m_svgData.isEmpty() == false;
 	}
 
+	QImage ImageItem::toQImage(const QRectF& rect) const
+	{
+		if (hasAnyImage() == false)
+		{
+			return {};
+		}
+
+		QImage image{rect.size().toSize(), QImage::Format_ARGB32};
+		QPainter painter{&image};
+
+		if (svgData().isEmpty() == false)
+		{
+			QSvgRenderer svgRenderer{svgData().toUtf8()};
+			drawSvg(painter, svgRenderer, rect, 100.0, SchemaUnit::Display);
+		}
+
+		if (image.isNull() == false)
+		{
+			drawRasterImage(painter, rect, 100.0, SchemaUnit::Display);
+		}
+
+		return image;
+	}
+
 	void ImageItem::drawError(CDrawParam* drawParam, const QRectF& rect, const QString& errorText)
 	{
 		if (drawParam == nullptr)
@@ -145,7 +181,7 @@ namespace VFrame30
 
 		painter->drawRect(rect);
 
-		QFont f;		// Default application font
+		QFont f; // Default application font
 		painter->setFont(f);
 
 		DrawHelper::drawText(painter, drawParam->schemaUnit(), errorText, rect, Qt::AlignCenter | Qt::AlignVCenter);
@@ -176,47 +212,62 @@ namespace VFrame30
 			return;
 		}
 
+		return drawRasterImage(*drawParam->painter(),
+							   rect,
+							   drawParam->schemaView()->zoom(),
+							   drawParam->schemaUnit(),
+							   drawParam->realDpiX(),
+							   drawParam->realDpiY());
+	}
+
+	void ImageItem::drawRasterImage(QPainter& painter,
+									const QRectF& rect,
+									[[maybe_unused]] double zoom,
+									SchemaUnit units,
+									double dpiX,
+									double dpiY) const
+	{
 		if (allowScale() == true)
 		{
 			if (m_keepAspectRatio == true)
 			{
 				QRectF imageRect = rect;
 
-				QSizeF imageSize = m_image.size();	// m_image.size() / m_image.devicePixelRatio();
+				QSizeF imageSize = m_image.size(); // m_image.size() / m_image.devicePixelRatio();
 				imageSize.scale(imageRect.width(), imageRect.height(), Qt::KeepAspectRatio);
 
 				imageRect.setSize(imageSize);
-				imageRect.translate(std::fabs(rect.width() - imageRect.width()) / 2,
-									std::fabs(rect.height() - imageRect.height()) / 2);
+				imageRect.translate(std::fabs(rect.width() - imageRect.width()) / 2, std::fabs(rect.height() - imageRect.height()) / 2);
 
-				drawParam->painter()->drawImage(imageRect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
+				painter.drawImage(imageRect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
 			}
 			else
 			{
-				drawParam->painter()->drawImage(rect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
+				painter.drawImage(rect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
 			}
 		}
 		else
 		{
 			QRectF imageRect{rect.left(), rect.top(), static_cast<qreal>(m_image.width()), static_cast<qreal>(m_image.height())};
 
-			switch (drawParam->schemaUnit())
+			switch (units)
 			{
 			case SchemaUnit::Display:
 				// Do nothing
 				//
 				break;
 			case SchemaUnit::Inch:
-				// in this case - size of the image depends on monitor DPI and IT CAN LOOK DIFFERENT FOR SEVERAL MONITORS WITH DIFFERENT DPI!!!
+				// in this case - size of the image depends on monitor DPI and IT CAN LOOK DIFFERENT FOR SEVERAL MONITORS WITH DIFFERENT
+				// DPI!!!
 				//
-				imageRect.setWidth(imageRect.width() / drawParam->realDpiX());
-				imageRect.setHeight(imageRect.height() / drawParam->realDpiY());
+				imageRect.setWidth(imageRect.width() / dpiX);
+				imageRect.setHeight(imageRect.height() / dpiY);
 				break;
 			default:
 				assert(false);
 			}
 
-			drawParam->painter()->drawImage(imageRect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
+			painter.drawImage(imageRect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
 		}
 
 		return;
@@ -249,34 +300,39 @@ namespace VFrame30
 			return;
 		}
 
+		return drawSvg(*drawParam->painter(), *m_svgRenderer, rect, drawParam->schemaView()->zoom(), drawParam->schemaUnit());
+	}
+
+	void ImageItem::drawSvg(QPainter& painter, QSvgRenderer& svgRenderer, const QRectF& rect, double zoom, SchemaUnit units) const
+	{
 		// Keep in mind, auto-scale == false does not work for SVG
 		//
 		QRectF imageRect = rect;
 
 		if (m_keepAspectRatio == true)
 		{
-			QSizeF imageSize = m_svgRenderer->viewBoxF().size();
+			QSizeF imageSize = svgRenderer.viewBoxF().size();
 			imageSize.scale(imageRect.width(), imageRect.height(), Qt::KeepAspectRatio);
 
 			imageRect.setSize(imageSize);
-			imageRect.translate(std::fabs(rect.width() - imageRect.width()) / 2,
-								std::fabs(rect.height() - imageRect.height()) / 2);
+			imageRect.translate(std::fabs(rect.width() - imageRect.width()) / 2, std::fabs(rect.height() - imageRect.height()) / 2);
 		}
 
 #if 1
-		if (drawParam->pdfMode() == true)
+		QPaintDevice* device = painter.device();
+		bool directRendering = dynamic_cast<QPrinter*>(device) || dynamic_cast<QPdfWriter*>(device) || dynamic_cast<QImage*>(device);
+
+		if (directRendering == true)
 		{
-			m_svgRenderer->render(drawParam->painter(), imageRect);
+			svgRenderer.render(&painter, imageRect);
 		}
 		else
 		{
-			DrawHelper::drawSvgCached(*drawParam->painter(), drawParam->schemaUnit(), imageRect, m_svgData, drawParam->schemaView()->zoom());
+			DrawHelper::drawSvgCached(painter, units, imageRect, m_svgData, zoom);
 		}
 #else
-		m_svgRenderer->render(drawParam->painter(), imageRect);
+		svgRenderer.render(painter, imageRect);
 #endif
-
-		return;
 	}
 
 	// Properties and Data
@@ -401,4 +457,4 @@ namespace VFrame30
 	{
 		m_imageItem->setSvgData(data);
 	}
-}
+} // namespace VFrame30

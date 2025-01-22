@@ -1,19 +1,18 @@
 #pragma once
 
-#include <VFrame30/SchemaItem.h>
+#include <Behavior/ClientBehaviorStorage.h>
+#include <Behavior/MonitorBehavior.h>
+#include <Behavior/ScriptMonitorBehavior.h>
+#include <Behavior/TuningClientBehavior.h>
 #include <VFrame30/DiagStateController.h>
 #include <VFrame30/ISchemaViewHistory.h>
 #include <VFrame30/ITimeStats.h>
 #include <VFrame30/IViewVariables.h>
 #include <VFrame30/LogController.h>
+#include <VFrame30/SchemaItem.h>
 #include <VFrame30/SchemaManager.h>
 #include <VFrame30/SchemaView.h>
 #include <VFrame30/TuningController.h>
-
-#include <Behavior/ClientBehaviorStorage.h>
-#include <Behavior/MonitorBehavior.h>
-#include <Behavior/ScriptMonitorBehavior.h>
-#include <Behavior/TuningClientBehavior.h>
 
 #include <QJSEngine>
 #include <QMessageBox>
@@ -26,12 +25,13 @@ namespace Hardware
 {
 	class DeviceObject;
 	class ScriptEquipment;
-}
+} // namespace Hardware
 
 namespace VFrame30
 {
 	class ClientSchemaView;
 	class AppSignalController;
+	class ScriptAppSignalController;
 
 	struct GlobalScriptEvents
 	{

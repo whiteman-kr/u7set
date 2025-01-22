@@ -11,14 +11,13 @@
 #include "SimSignalSnapshot.h"
 #include "SimTrends.h"
 
+#include <SchemaClientLib/DialogSignalSearch.h>
 #include <SimulatorLib/SimControl.h>
 #include <SimulatorLib/SimLogicModule.h>
 #include <SimulatorLib/SimSoftware.h>
 #include <SimulatorUi/SimWidget.h>
-
-#include <SchemaClientLib/DialogSignalSearch.h>
-
 #include <UiLib/TabWidgetEx.h>
+#include <VFrame30/Context.h>
 #include <VFrame30/Schema.h>
 
 #include <QApplication>

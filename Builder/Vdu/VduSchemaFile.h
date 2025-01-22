@@ -13,6 +13,9 @@
 // 29 Sep 2024| 1.4  |	Added UTF8 text format for scripts and SchemaItem::ObjectName.
 // 25 Nov 2024| 1.5  |	All text formats changed to UTF-8.
 // 08 Dec 2024| 1.6  |	Added VduSchemaFileSchemaItem1::acceptClick.
+// 16 Jan 2025| 1.7  |	Added VduSchemaFileSchemaItemRect1::wordWrap.
+// 16 Jan 2025| 1.8  |	Added VduSchemaFileSchemaItemValue1::align.
+// 22 Jan 2025| 1.9  |	Added strcut VduSchemaFileSchemaItemImage1
 // -----------+------+--------------------------------------------------------------
 // clang-format on
 
@@ -90,6 +93,7 @@ struct VduSchemaFile
 //
 const uint16_t VduFileSchemaItemLineId = 0x4E4C;  // LN
 const uint16_t VduFileSchemaItemRectId = 0x4352;  // RC
+const uint16_t VduFileSchemaItemImageId = 0x4D47; // IM
 const uint16_t VduFileSchemaItemValueId = 0x4C56; // VL
 
 
@@ -137,7 +141,7 @@ struct VduSchemaFileSchemaItemLine1
 struct VduSchemaFileSchemaItemRect1
 {
 	uint16_t version;  // 1
-	uint16_t itemType; // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
+	uint16_t itemType; // VduFileSchemaItemRectId = 0x4352
 	uint32_t reserve0;
 
 	uint16_t left;
@@ -165,10 +169,38 @@ struct VduSchemaFileSchemaItemRect1
 	uint32_t reserve5;
 };
 
-struct VduSchemaFileSchemaItemValue1
+struct VduSchemaFileSchemaItemImage1
 {
 	uint16_t version;   // 1
-	uint16_t itemType;  // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
+	uint16_t itemType;  // VduFileSchemaItemImageId = 0x4D47
+	uint32_t reserve0;
+
+	uint16_t left;
+	uint16_t top;
+	uint16_t width;
+	uint16_t height;
+
+	uint32_t reserve1;
+	uint32_t reserve2;
+
+	uint32_t reserve3;
+	uint32_t reserve4;
+	uint32_t reserve5;
+	uint32_t reserve6;
+
+	uint32_t imageHash; // Image hash, used to generate image file name.
+	vdu_cstr imageFile; // File in folder [VduSubsystemId]/[VduEquipmentId]/Resources/IM_[ImageHash].bmp
+
+	uint32_t reserve7;
+	uint32_t reserve8;
+	uint32_t reserve9;
+	uint32_t reserve10;
+};
+
+struct VduSchemaFileSchemaItemValue1
+{
+	uint16_t version;  // 1
+	uint16_t itemType; // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
 	uint32_t reserve0;
 
 	uint16_t left;

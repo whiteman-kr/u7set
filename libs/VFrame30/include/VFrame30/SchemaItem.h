@@ -1,14 +1,14 @@
 #pragma once
 
-#include <CommonLib/Factory.h>
-#include <CommonLib/DebugInstCounter.h>
 #include "../../UtilsLib/ILogFile.h"
+#include <CommonLib/DebugInstCounter.h>
+#include <CommonLib/Factory.h>
 
 #include <VFrame30/SchemaPoint.h>
-#include <VFrame30/Context.h>
 
 #include <QColor>
 #include <QJSValue>
+
 
 class QJSEngine;
 class QPaintDevice;
@@ -27,7 +27,7 @@ namespace VFrame30
 
 	class Context;
 	class CDrawParam;
-}
+} // namespace VFrame30
 
 using SchemaItemPtr = std::shared_ptr<VFrame30::SchemaItem>;
 
@@ -75,12 +75,11 @@ namespace VFrame30
 
 		Base class for all items displayed on schemas.
 	*/
-	class SchemaItem :
-		public PropertyObject,
-		public ISchemaItemPropertiesPos,
-		public IPointList,
-		public Proto::ObjectSerialization<SchemaItem>,
-		public DebugInstCounter<SchemaItem>
+	class SchemaItem : public PropertyObject,
+					   public ISchemaItemPropertiesPos,
+					   public IPointList,
+					   public Proto::ObjectSerialization<SchemaItem>,
+					   public DebugInstCounter<SchemaItem>
 	{
 		Q_OBJECT
 
@@ -109,8 +108,8 @@ namespace VFrame30
 		Value inverting is based on system clock. This is required to synchronize blinking when multiple Monitor or TuningClient
 		applications run on the same computer.
 
-		\warning <b>preDrawScript</b> code calling is not synchronized with <b>blinkPhase</b> inverting. According to this, it is possible that <b>blinkPhase</b> value will not changed
-		in two consecutive <b>preDrawScript</b> calls.
+		\warning <b>preDrawScript</b> code calling is not synchronized with <b>blinkPhase</b> inverting. According to this, it is possible
+		that <b>blinkPhase</b> value will not changed in two consecutive <b>preDrawScript</b> calls.
 		*/
 		Q_PROPERTY(bool blinkPhase READ blinkPhase)
 		Q_PROPERTY(bool BlinkPhase READ blinkPhase)
@@ -124,7 +123,7 @@ namespace VFrame30
 		Q_PROPERTY(QStringList Tags READ tagsAsList)
 
 		/// \brief Item's type as a string, e.g. SchemaItemInput, SchemaItemUfb, SchemaItemAfb, SchemaItemLine, etc...
-		Q_PROPERTY(QString type  READ type)
+		Q_PROPERTY(QString type READ type)
 
 		/// \brief Automatically generated unique label associated with SchemaItem.
 		Q_PROPERTY(QString label READ label)
@@ -140,7 +139,7 @@ namespace VFrame30
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<SchemaItem>;	// For call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<SchemaItem>; // For call CreateObject from Proto::ObjectSerialization
 
 	protected:
 		virtual bool SaveData(Proto::Envelope* message) const override;
@@ -168,7 +167,7 @@ namespace VFrame30
 		static void dump(std::shared_ptr<SchemaItem> item);
 		virtual void dump() const;
 
-		virtual void clickEvent(QJSEngine* engine,  QWidget* parentWidget);
+		virtual void clickEvent(QJSEngine* engine, QWidget* parentWidget);
 		virtual bool preDrawEvent(QJSEngine* engine);
 
 	protected:
@@ -305,7 +304,7 @@ namespace VFrame30
 		bool isControl() const;
 		bool isVduItem() const;
 
-		bool isLocked() const ;
+		bool isLocked() const;
 		void setLocked(bool locked);
 
 		bool isCommented() const;
@@ -317,7 +316,7 @@ namespace VFrame30
 
 		QUuid guid() const;
 		void setGuid(QUuid guid);
-		virtual void setNewGuid();			// set new GUID for item, for it's pins etc, useful for copy (mousemove + ctrl)
+		virtual void setNewGuid(); // set new GUID for item, for it's pins etc, useful for copy (mousemove + ctrl)
 
 		// Item position unit, can be inches or pixels
 		//
@@ -331,22 +330,23 @@ namespace VFrame30
 		void setTags(QString tags);
 		void setTagsList(const QStringList& tags);
 
-		/// \brief Check if SchemaItem has specified tag. There is an implicit tag that is the type of the item, e.g. SchemaItemInput, SchemaItemUfb, SchemaItemAfb, SchemaItemLine, etc..
-		Q_INVOKABLE	bool hasTag(QString tag) const;
+		/// \brief Check if SchemaItem has specified tag. There is an implicit tag that is the type of the item, e.g. SchemaItemInput,
+		/// SchemaItemUfb, SchemaItemAfb, SchemaItemLine, etc..
+		Q_INVOKABLE bool hasTag(QString tag) const;
 
-		QString label() const ;
+		QString label() const;
 		void setLabel(const QString& value);
 
-		E::TextPos labelPos() const ;
+		E::TextPos labelPos() const;
 		void setLabelPos(E::TextPos value);
 
-		bool acceptClick() const ;
+		bool acceptClick() const;
 		void setAcceptClick(bool value);
 
-		QString clickScript() const ;
+		QString clickScript() const;
 		void setClickScript(QString value);
 
-		QString preDrawScript() const ;
+		QString preDrawScript() const;
 		void setPreDrawScript(QString value);
 
 		bool blinkPhase() const;
@@ -370,27 +370,28 @@ namespace VFrame30
 		bool m_static = true;
 		bool m_locked = false;
 		bool m_commented = false;
-		bool m_visible = true;		// Visible for client
+		bool m_visible = true; // Visible for client
 		QUuid m_guid;
-		SchemaUnit m_itemUnit;		// Item position unit, can be inches or pixels
+		SchemaUnit m_itemUnit; // Item position unit, can be inches or pixels
 
 		QStringList m_tags;
 
 		QString m_label;
 		E::TextPos m_labelPos = E::TextPos::RightTop;
 
-		bool m_acceptClick = false;	// The SchemaItem accept mouse Left button click and runs script
-		QString m_clickScript;		// Qt script on mouse left button click
+		bool m_acceptClick = false; // The SchemaItem accept mouse Left button click and runs script
+		QString m_clickScript;      // Qt script on mouse left button click
 		QString m_preDrawScript;
 
 		// Runtime stuff
 		//
-		bool m_blinkPhase = false;			// Taken from m_drawParam
+		bool m_blinkPhase = false;         // Taken from m_drawParam
 
-		CDrawParam* m_drawParam = nullptr;	// Is filled before PreDrawScript (in Schema::draw) to have ability to call MacroExpander::expand in AppSiganlIDs getter from script
+		CDrawParam* m_drawParam = nullptr; // Is filled before PreDrawScript (in Schema::draw) to have ability to call MacroExpander::expand
+										   // in AppSiganlIDs getter from script
 
-		QJSValue m_jsClickScript;		// Evaluated m_clickScript
-		QJSValue m_jsPreDrawScript;		// Evaluated m_preDrawScript
+		QJSValue m_jsClickScript;          // Evaluated m_clickScript
+		QJSValue m_jsPreDrawScript;        // Evaluated m_preDrawScript
 
 		mutable QString m_lastScriptError;
 
@@ -403,4 +404,4 @@ namespace VFrame30
 		static constexpr QColor highlightColor1{0x30, 0x80, 0xFF, 0xF0};
 		static constexpr QColor highlightColor2{0x30, 0x80, 0xFF, 0x50};
 	};
-}
+} // namespace VFrame30

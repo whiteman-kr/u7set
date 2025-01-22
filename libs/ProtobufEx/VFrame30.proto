@@ -263,6 +263,7 @@ message SchemaItem
 	optional SchemaItemVduLine vduLine = 300;				// +PosLineImpl
 	optional SchemaItemVduRect vduRect = 301;				// +PosLineImpl
 	optional SchemaItemVduValue vduValue = 302;				// +PosLineImpl
+	optional SchemaItemVduImage vduImage = 303;				// +PosRectImpl
 }
 
 //
@@ -902,6 +903,14 @@ message SchemaItemVduValue
 
 	optional int32 horzAlign = 30;
 	optional int32 vertAlign = 31;
+}
+
+//
+// SchemaItemVduImage
+//
+message SchemaItemVduImage
+{
+    optional ImageItem image = 1;
 }
 
 

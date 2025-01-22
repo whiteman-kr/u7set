@@ -3440,6 +3440,28 @@ namespace Builder
 							  .arg(packedLogicId)));
 	}
 
+	/// IssueCode: ALP4400
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItem %1 has no assigned image in VduSchema %2.
+	///
+	/// Parameters:
+	///		%1 SchemaItem
+	///		%2 VDU SchemaID
+	///
+	/// Description:
+	///		SchemaItem has no assigned image in VduSchema.
+	///
+	void IssueLogger::errALP4400(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4400, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4400,
+				  QString(tr("SchemaItem %1 has no assigned image in VduSchema %2.").arg(schemaItem).arg(schema)));
+	}
+
 	// ALC			Application logic compiler				5000-5999
 	//
 

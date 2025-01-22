@@ -14,7 +14,6 @@ namespace VFrame30
 	public:
 		SchemaItemVduRect(void);
 		explicit SchemaItemVduRect(SchemaUnit units);
-		virtual ~SchemaItemVduRect(void) = default;
 
 		// Serialization
 		//
@@ -34,7 +33,7 @@ namespace VFrame30
 		// VduItemVisitor
 		//
 	public:
-		void accept(VduItemVisitor& visitor) const override;
+		bool accept(VduItemVisitor& visitor) const override;
 
 		// Properties and Data
 		//
