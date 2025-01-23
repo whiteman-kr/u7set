@@ -395,13 +395,22 @@ namespace Builder
 
 			if (ok == true)
 			{
-				auto addedFile = context.m_buildResultWriter->addFile("/VDUs/" + vdu->equipmentId(), VduConfigFileName, out, false);
+				if (vdu->propertyExists("SubsystemID") == false)
+				{
+					log->errCFG3000("SubsystemID", vdu->equipmentId());
+					return false;
+				}
+				QString subsystemID = vdu->propertyValue("SubsystemID").toString();
+
+				QString vduDir = Directory::SUBSYSTEMS + Separator::DIR + subsystemID + Separator::DIR + vdu->equipmentId();
+
+				auto addedFile = context.m_buildResultWriter->addFile(vduDir, VduConfigFileName, out, false);
 				ok &= addedFile != nullptr;
 
 				// Write dump file
 				//
 				QString configDump = dumpVduConfig(out);
-				addedFile = context.m_buildResultWriter->addFile("/VDUs/" + vdu->equipmentId(), VduConfigDumpFileName, configDump, false);
+				addedFile = context.m_buildResultWriter->addFile(vduDir, VduConfigDumpFileName, configDump, false);
 
 				ok &= addedFile != nullptr;
 			}
