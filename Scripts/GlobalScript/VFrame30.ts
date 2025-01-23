@@ -174,7 +174,7 @@ module VFrame30 {
 		lineColor: QColor;
 	}
 
-	export interface SchemaItemRect extends SchemaItem {
+	export interface SchemaItemRect extends PosRectImpl {
 		lineWeight: number;
 		lineColor: QColor;
 
@@ -225,7 +225,7 @@ module VFrame30 {
 		precision: number;
 	}
 
-	export interface SchemaItemSignal extends SchemaItem {
+	export interface SchemaItemSignal extends PosRectImpl {
 		// Properties
 		//
 		signalIDs: Array<string>;
