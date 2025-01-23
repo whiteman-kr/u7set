@@ -60,14 +60,16 @@ namespace VFrame30
 								 true,
 								 SchemaItemVduValue::text,
 								 SchemaItemVduValue::setText)
-			->setDescription(PropertyNames::textVduItemValueDescription);
+			->setDescription(PropertyNames::textVduItemValueDescription)
+			.setEssential(true);
 
 		ADD_PROPERTY_GET_SET_CAT(QString,
 								 PropertyNames::appSignalIDs,
 								 PropertyNames::functionalCategory,
 								 true,
 								 SchemaItemVduValue::appSignalIdsString,
-								 SchemaItemVduValue::setAppSignalIdsString);
+								 SchemaItemVduValue::setAppSignalIdsString)
+			->setEssential(true);
 
 		ADD_PROPERTY_GET_SET_CAT(int,
 								 PropertyNames::precision,
@@ -394,9 +396,36 @@ namespace VFrame30
 		return result;
 	}
 
-	bool SchemaItemVduValue::accept(VduItemVisitor& visitor) const
+	// IMatsSchemaItemAssociations implementation.
+	//
+	QStringList SchemaItemVduValue::associatedDiagObjectIds() const
 	{
-		return visitor.visit(*this);
+		return {};
+	};
+
+	QStringList SchemaItemVduValue::associatedAppSignalIds() const
+	{
+		return appSignalIds();
+	}
+
+	QStringList SchemaItemVduValue::associatedImpactAppSignalIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemVduValue::associatedConnectionIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemVduValue::associatedLoopbackIds() const
+	{
+		return {};
+	}
+
+	QStringList SchemaItemVduValue::associatedSchemaItemLabels() const
+	{
+		return {};
 	}
 
 	int SchemaItemVduValue::weight() const

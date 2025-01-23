@@ -25,6 +25,7 @@
 #include <VFrame30/SchemaItemUfb.h>
 #include <VFrame30/SchemaItemValue.h>
 #include <VFrame30/SchemaItemVduImage.h>
+#include <VFrame30/SchemaItemVduImageValue.h>
 #include <VFrame30/SchemaItemVduLine.h>
 #include <VFrame30/SchemaItemVduRect.h>
 #include <VFrame30/SchemaItemVduValue.h>
@@ -810,6 +811,17 @@ void EditSchemaWidget::createActions()
 				addItem(std::make_shared<VFrame30::SchemaItemVduValue>(schema()->unit()));
 			});
 
+	m_addVduImageValueAction = new QAction(tr("Image Value"), this);
+	m_addVduImageValueAction->setEnabled(true);
+	m_addVduImageValueAction->setIcon(QIcon(":/Images/Images/SchemaItemImageValue.svg"));
+	m_addVduImageValueAction->setToolTip(tr("Image Value\nType: SchemaItemImageValue"));
+	connect(m_addVduImageValueAction,
+			&QAction::triggered,
+			[this](bool)
+			{
+				auto item = std::make_shared<VFrame30::SchemaItemVduImageValue>(schema()->unit());
+				addItem(item);
+			});
 
 	//
 	// Edit
@@ -1213,7 +1225,6 @@ void EditSchemaWidget::createActions()
 		m_addSubMenu->addAction(m_addPathAction);
 		m_addSubMenu->addAction(m_addTextAction);
 		m_addSubMenu->addAction(m_addImageAction);
-		// m_addMenu->addAction(m_addFrameAction);
 	}
 	else
 	{
@@ -1292,6 +1303,12 @@ void EditSchemaWidget::createActions()
 	if (isDiagSchema() == true)
 	{
 		m_addSubMenu->addAction(m_addDiagSignalAction);
+	}
+
+	if (isVduSchema() == true)
+	{
+		m_addSubMenu->addAction(m_addVduValueAction);
+		m_addSubMenu->addAction(m_addVduImageValueAction);
 	}
 
 	m_editSubMenu = new QMenu(tr("Edit"), this);

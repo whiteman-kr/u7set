@@ -1,6 +1,6 @@
 #include "EditSchemaTabPage.h"
-#include "EditSchemaWidget.h"
 #include "CheckInDialog.h"
+#include "EditSchemaWidget.h"
 
 //
 //
@@ -8,11 +8,13 @@
 //
 //
 EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
-										 std::shared_ptr<VFrame30::Schema> schema,
-										 const DbFileInfo& fileInfo,
-										 DbController* dbcontroller,
-										 AppSignalSetProvider* signalSetProvider) :
-	QMainWindow(nullptr, Qt::WindowType::Widget),	// Always created as widget as from start it's attached to TabWidget, later can be switcher to Qt::Window
+									 std::shared_ptr<VFrame30::Schema> schema,
+									 const DbFileInfo& fileInfo,
+									 DbController* dbcontroller,
+									 AppSignalSetProvider* signalSetProvider) :
+	QMainWindow(
+		nullptr,
+		Qt::WindowType::Widget), // Always created as widget as from start it's attached to TabWidget, later can be switcher to Qt::Window
 	HasDbController(dbcontroller),
 	m_schemaWidget(nullptr),
 	m_tabWidget(tabWidget)
@@ -69,15 +71,16 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 		m_toolBar->addAction(m_schemaWidget->m_addPathAction);
 		m_toolBar->addAction(m_schemaWidget->m_addTextAction);
 		m_toolBar->addAction(m_schemaWidget->m_addImageAction);
-		//m_toolBar->addAction(m_schemaWidget->m_addFrameAction);
 	}
 	else
 	{
 		m_toolBar->addAction(m_schemaWidget->m_addVduLineAction);
 		m_toolBar->addAction(m_schemaWidget->m_addVduRectAction);
 		m_toolBar->addAction(m_schemaWidget->m_addVduImageAction);
+
 		m_toolBar->addSeparator();
 		m_toolBar->addAction(m_schemaWidget->m_addVduValueAction);
+		m_toolBar->addAction(m_schemaWidget->m_addVduImageValueAction);
 	}
 
 	if (schema->isLogicSchema() == true)
@@ -181,9 +184,7 @@ EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget,
 	return;
 }
 
-EditSchemaTabPage::~EditSchemaTabPage()
-{
-}
+EditSchemaTabPage::~EditSchemaTabPage() {}
 
 void EditSchemaTabPage::closeEvent(QCloseEvent* event)
 {
@@ -235,9 +236,9 @@ void EditSchemaTabPage::closeEvent(QCloseEvent* event)
 
 void EditSchemaTabPage::ensureVisible()
 {
-	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
+	setVisible(true); // Widget must be visible for correct work of QApplication::desktop()->screenGeometry
 
-	QRect screenRect  = this->screen()->availableGeometry();
+	QRect screenRect = this->screen()->availableGeometry();
 	QRect intersectRect = screenRect.intersected(frameGeometry());
 
 	if (isMinimized() == true)
@@ -245,19 +246,14 @@ void EditSchemaTabPage::ensureVisible()
 		showNormal();
 	}
 
-	if (isMaximized() == false &&
-		(intersectRect.width() < size().width() ||
-		 intersectRect.height() < size().height()))
+	if (isMaximized() == false && (intersectRect.width() < size().width() || intersectRect.height() < size().height()))
 	{
 		move(screenRect.topLeft());
 	}
 
-	if (isMaximized() == false &&
-		(frameGeometry().width() > screenRect.width() ||
-		 frameGeometry().height() > screenRect.height()))
+	if (isMaximized() == false && (frameGeometry().width() > screenRect.width() || frameGeometry().height() > screenRect.height()))
 	{
-		resize(static_cast<int>(screenRect.width() * 0.7),
-			   static_cast<int>(screenRect.height() * 0.7));
+		resize(static_cast<int>(screenRect.width() * 0.7), static_cast<int>(screenRect.height() * 0.7));
 	}
 
 	return;
@@ -288,7 +284,7 @@ void EditSchemaTabPage::setPageTitle()
 		newTitle = m_schemaWidget->schema()->schemaId();
 		if (modified() == true)
 		{
-			 newTitle += "*";
+			newTitle += "*";
 		}
 	}
 
@@ -296,8 +292,7 @@ void EditSchemaTabPage::setPageTitle()
 
 	if (parentWidget() != nullptr)
 	{
-		if (QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
-			tabWidget != nullptr)
+		if (QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget()); tabWidget != nullptr)
 		{
 			for (int i = 0; i < tabWidget->count(); i++)
 			{
@@ -438,16 +433,14 @@ void EditSchemaTabPage::projectClosed()
 	// Save opened schemas so they can be restored on next project open event
 	//
 	{
-//		static const QUuid currentSession =
+		//		static const QUuid currentSession =
 
-//		QString record = QString{"%1;%2;%3;%4;%5"}
-//						 .arg("1")							// record version
-//						 .arg()
-//						 .arg(schema()->schemaId())			// schema id
-//						 .arg(readOnly() ? "true" : false)	// is read only
-//						 .arg(fileInfo().changeset());		// changeset id, for readonly file
-
-
+		//		QString record = QString{"%1;%2;%3;%4;%5"}
+		//						 .arg("1")							// record version
+		//						 .arg()
+		//						 .arg(schema()->schemaId())			// schema id
+		//						 .arg(readOnly() ? "true" : false)	// is read only
+		//						 .arg(fileInfo().changeset());		// changeset id, for readonly file
 	}
 
 	// Find current tab and close it
@@ -466,8 +459,7 @@ void EditSchemaTabPage::modifiedChanged(bool /*modified*/)
 
 void EditSchemaTabPage::checkInFile()
 {
-	if (readOnly() == true ||
-		fileInfo().state() != E::VcsState::CheckedOut ||
+	if (readOnly() == true || fileInfo().state() != E::VcsState::CheckedOut ||
 		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
 	{
 		return;
@@ -512,8 +504,7 @@ void EditSchemaTabPage::checkInFile()
 
 void EditSchemaTabPage::checkOutFile()
 {
-	if (readOnly() == false ||
-		fileInfo().state() != E::VcsState::CheckedIn)
+	if (readOnly() == false || fileInfo().state() != E::VcsState::CheckedIn)
 	{
 		return;
 	}
@@ -559,9 +550,7 @@ void EditSchemaTabPage::undoChangesFile()
 	// 2 Undo changes to database
 	// 3 Set frame to readonly mode
 	//
-	if (readOnly() == true ||
-		fileInfo().state() != E::VcsState::CheckedOut ||
-		fileInfo().userId() != db()->currentUser().userId())
+	if (readOnly() == true || fileInfo().state() != E::VcsState::CheckedOut || fileInfo().userId() != db()->currentUser().userId())
 	{
 		Q_ASSERT(fileInfo().userId() == db()->currentUser().userId());
 		return;
@@ -672,9 +661,7 @@ void EditSchemaTabPage::itemsOrderTriggered()
 
 bool EditSchemaTabPage::saveWorkcopy()
 {
-	if (readOnly() == true ||
-		modified() == false ||
-		fileInfo().state() != E::VcsState::CheckedOut ||
+	if (readOnly() == true || modified() == false || fileInfo().state() != E::VcsState::CheckedOut ||
 		fileInfo().userId() != db()->currentUser().userId())
 	{
 		Q_ASSERT(fileInfo().userId() == db()->currentUser().userId());
@@ -702,8 +689,7 @@ bool EditSchemaTabPage::saveWorkcopy()
 	{
 		QString newFileName = schema()->schemaId() + "." + file->extension();
 
-		if (bool ok = db()->renameFile(*file, newFileName, file.get(), this);
-			ok == false)
+		if (bool ok = db()->renameFile(*file, newFileName, file.get(), this); ok == false)
 		{
 			// Don't save file if it was not renamed, as it will lead that filename differs from SchemaID
 			// Just return
@@ -714,13 +700,12 @@ bool EditSchemaTabPage::saveWorkcopy()
 		fileWasRenamed = true;
 	}
 
-	file->setDetails(schema()->details(QString{}));	// Details must be set here, as file rename will spoils them
+	file->setDetails(schema()->details(QString{})); // Details must be set here, as file rename will spoils them
 													// Ignore path here
 
 	// Save workcopy
 	//
-	if (bool result = db()->setWorkcopy(file, this);
-		result == false)
+	if (bool result = db()->setWorkcopy(file, this); result == false)
 	{
 		return false;
 	}
@@ -742,7 +727,10 @@ void EditSchemaTabPage::getCurrentWorkcopy()
 {
 	// Select destination folder
 	//
-	QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	QString dir = QFileDialog::getExistingDirectory(this,
+													tr("Select Directory"),
+													QString(),
+													QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	if (dir.isEmpty() == true)
 	{
 		return;
@@ -772,8 +760,7 @@ void EditSchemaTabPage::getCurrentWorkcopy()
 
 void EditSchemaTabPage::setCurrentWorkcopy()
 {
-	if (readOnly() == true ||
-		fileInfo().state() != E::VcsState::CheckedOut ||
+	if (readOnly() == true || fileInfo().state() != E::VcsState::CheckedOut ||
 		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
 	{
 		Q_ASSERT(fileInfo().userId() == db()->currentUser().userId());
@@ -888,4 +875,3 @@ void EditSchemaTabPage::setCompareItemActions(const std::map<QUuid, CompareActio
 {
 	m_schemaWidget->setCompareItemActions(itemsActions);
 }
-

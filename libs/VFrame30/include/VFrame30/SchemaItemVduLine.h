@@ -7,7 +7,7 @@ namespace VFrame30
 {
 
 	class SchemaItemVduLine final : public PosLineImpl,
-									public SchemaItemVdu
+									public SchemaItemVduVisitable<SchemaItemVduLine>
 	{
 		Q_OBJECT
 
@@ -30,12 +30,8 @@ namespace VFrame30
 		//
 		virtual void draw(CDrawParam* drawParam) const override;
 
-		// VduItemVisitor
-		//
-	public:
-		bool accept(VduItemVisitor& visitor) const override;
-
 		// Properties and Data
+		//
 	public:
 		int weight() const;
 		void setWeight(int weight);

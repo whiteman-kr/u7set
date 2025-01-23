@@ -1,7 +1,7 @@
-#include <VFrame30/SchemaItemRect.h>
+#include <VFrame30/DrawParam.h>
 #include <VFrame30/MacrosExpander.h>
 #include <VFrame30/PropertyNames.h>
-#include <VFrame30/DrawParam.h>
+#include <VFrame30/SchemaItemRect.h>
 #include <VFrame30/SchemaView.h>
 
 
@@ -25,7 +25,7 @@ namespace VFrame30
 			m_font.setSize(12.0, unit);
 			break;
 		case SchemaUnit::Inch:
-			m_font.setSize(1.0 / 8.0, unit);		// 1/8"
+			m_font.setSize(1.0 / 8.0, unit); // 1/8"
 			break;
 		case SchemaUnit::Millimeter:
 			m_font.setSize(mm2in(3), unit);
@@ -42,33 +42,114 @@ namespace VFrame30
 	{
 		PosRectRotatable::propertyDemand(prop);
 
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemRect::weight, SchemaItemRect::setWeight);
+		ADD_PROPERTY_GET_SET_CAT(double,
+								 PropertyNames::lineWeight,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemRect::weight,
+								 SchemaItemRect::setWeight);
 
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemRect::lineColor, SchemaItemRect::setLineColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemRect::fillColor, SchemaItemRect::setFillColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::lineColor,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemRect::lineColor,
+								 SchemaItemRect::setLineColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::fillColor,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemRect::fillColor,
+								 SchemaItemRect::setFillColor);
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fill, PropertyNames::appearanceCategory, true, SchemaItemRect::fill, SchemaItemRect::setFill);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemRect::drawRect, SchemaItemRect::setDrawRect);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::fill,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemRect::fill,
+								 SchemaItemRect::setFill);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::drawRect,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemRect::drawRect,
+								 SchemaItemRect::setDrawRect);
 
-		ADD_PROPERTY_GET_SET_CAT(E::LineStyle, PropertyNames::lineStyle, PropertyNames::appearanceCategory, true, SchemaItemRect::lineStyle, SchemaItemRect::setLineStyle);
+		ADD_PROPERTY_GET_SET_CAT(E::LineStyle,
+								 PropertyNames::lineStyle,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemRect::lineStyle,
+								 SchemaItemRect::setLineStyle);
 
 		// Text Category Properties
 		//
-		ADD_PROPERTY_GET_SET_CAT(E::TextFormat, PropertyNames::textFormat, PropertyNames::textCategory, true, SchemaItemRect::textFormat, SchemaItemRect::setTextFormat)
+		ADD_PROPERTY_GET_SET_CAT(E::TextFormat,
+								 PropertyNames::textFormat,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemRect::textFormat,
+								 SchemaItemRect::setTextFormat)
 			->setDescription(PropertyNames::textFormatDescription);
 
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::textColor,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemRect::textColor,
+								 SchemaItemRect::setTextColor);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::textCategory, true, SchemaItemRect::text, SchemaItemRect::setText);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::wordWrap, PropertyNames::textCategory, true, SchemaItemRect::wordWrap, SchemaItemRect::setWordWrap);
+		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::text,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemRect::text,
+								 SchemaItemRect::setText)
+			->setEssential(true);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::wordWrap,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemRect::wordWrap,
+								 SchemaItemRect::setWordWrap);
 
-		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemRect::horzAlign, SchemaItemRect::setHorzAlign);
-		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemRect::vertAlign, SchemaItemRect::setVertAlign);
+		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign,
+								 PropertyNames::alignHorz,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemRect::horzAlign,
+								 SchemaItemRect::setHorzAlign);
+		ADD_PROPERTY_GET_SET_CAT(E::VertAlign,
+								 PropertyNames::alignVert,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemRect::vertAlign,
+								 SchemaItemRect::setVertAlign);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::textCategory, true, SchemaItemRect::getFontName, SchemaItemRect::setFontName);
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::textCategory, true, SchemaItemRect::getFontSize, SchemaItemRect::setFontSize);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemRect::getFontBold, SchemaItemRect::setFontBold);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true, SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
+		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::fontName,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemRect::getFontName,
+								 SchemaItemRect::setFontName);
+		ADD_PROPERTY_GET_SET_CAT(double,
+								 PropertyNames::fontSize,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemRect::getFontSize,
+								 SchemaItemRect::setFontSize);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::fontBold,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemRect::getFontBold,
+								 SchemaItemRect::setFontBold);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::fontItalic,
+								 PropertyNames::textCategory,
+								 true,
+								 SchemaItemRect::getFontItalic,
+								 SchemaItemRect::setFontItalic);
 
 		return;
 	}
@@ -84,7 +165,7 @@ namespace VFrame30
 			assert(message->HasExtension(Proto::schemaitem));
 			return false;
 		}
-		
+
 		// --
 		//
 		Proto::SchemaItemRect* rectMessage = message->MutableExtension(Proto::schemaitem)->mutable_rect();
@@ -153,7 +234,7 @@ namespace VFrame30
 		m_font.LoadData(rectMessage.font());
 
 		m_wordWrap = rectMessage.wordwrap();
-		
+
 		return true;
 	}
 
@@ -161,7 +242,8 @@ namespace VFrame30
 	//
 	void SchemaItemRect::draw(CDrawParam* drawParam) const
 	{
-		return drawRotated(drawParam, [drawParam, this]()
+		return drawRotated(drawParam,
+						   [drawParam, this]()
 						   {
 							   return drawPrivate(drawParam);
 						   });
@@ -197,7 +279,7 @@ namespace VFrame30
 		//
 		QRectF boundingRect = boundingRectInDocPt(drawParam);
 
-		// Filling rect 
+		// Filling rect
 		//
 		if (fill() == true)
 		{
@@ -213,7 +295,7 @@ namespace VFrame30
 			painter->setBrush(Qt::NoBrush);
 		}
 
-		// Drawing rect 
+		// Drawing rect
 		//
 		if (drawRect() == true)
 		{
@@ -236,9 +318,7 @@ namespace VFrame30
 			return;
 		}
 
-		bool textChanged = (text != m_cacheDrewText) ||
-			(m_cachetextFormat != m_textFormat) ||
-			(m_cachedFont != m_font);
+		bool textChanged = (text != m_cacheDrewText) || (m_cachetextFormat != m_textFormat) || (m_cachedFont != m_font);
 
 		if (textChanged == true)
 		{
@@ -287,9 +367,7 @@ namespace VFrame30
 
 			QRect clipRectInt{0, 0, static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
 
-			if (textChanged == true ||
-				m_cacheTextImage.isNull() == true ||
-				m_cacheTextImage.size() != clipRectInt.size())
+			if (textChanged == true || m_cacheTextImage.isNull() == true || m_cacheTextImage.size() != clipRectInt.size())
 			{
 				const double deviceDpr = drawParam->devicePixelRatio();
 
@@ -301,7 +379,7 @@ namespace VFrame30
 				m_cacheTextImage = QImage{clipRectInt.size(), QImage::Format_ARGB32_Premultiplied};
 				m_cacheTextImage.setDevicePixelRatio(deviceDpr);
 
-				m_cacheTextImage.fill(qRgba(0, 0, 0, 0));	// Transparent
+				m_cacheTextImage.fill(qRgba(0, 0, 0, 0)); // Transparent
 
 				QPainter p{&m_cacheTextImage};
 
@@ -340,9 +418,7 @@ namespace VFrame30
 
 			QRect clipRectInt{0, 0, static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
 
-			if (textChanged == true ||
-				m_cacheTextImage.isNull() == true ||
-				m_cacheTextImage.size() != clipRectInt.size())
+			if (textChanged == true || m_cacheTextImage.isNull() == true || m_cacheTextImage.size() != clipRectInt.size())
 			{
 				double deviceDpr = drawParam->devicePixelRatio();
 				double physicalDpiX = dpiX / deviceDpr;
@@ -353,17 +429,10 @@ namespace VFrame30
 				m_cacheTextImage.setDotsPerMeterY(static_cast<int>(physicalDpiY / 25.4 * 1000.0));
 				m_cacheTextImage.setDevicePixelRatio(deviceDpr);
 
-				m_cacheTextImage.fill(qRgba(0, 0, 0, 0));	// Transparent
+				m_cacheTextImage.fill(qRgba(0, 0, 0, 0)); // Transparent
 
 				QPainter p{&m_cacheTextImage};
-				SchemaView::Ajust(&p,
-								  physicalDpiX, 
-								  physicalDpiY,
-								  deviceDpr,
-								  itemUnit(),
-								  0,
-								  0,
-								  m_drawParam->schemaView()->zoom());
+				SchemaView::Ajust(&p, physicalDpiX, physicalDpiY, deviceDpr, itemUnit(), 0, 0, m_drawParam->schemaView()->zoom());
 
 				QRectF textRect = boundingRect;
 				textRect.moveTo(0, 0);
@@ -399,18 +468,11 @@ namespace VFrame30
 
 	void SchemaItemRect::drawPlainText(QPainter& painter, QRectF rect, QString text) const
 	{
-		int flags = static_cast<int>(horzAlign()) |
-					static_cast<int>(vertAlign()) |
-					static_cast<int>((wordWrap() ? Qt::TextWordWrap : 0));
+		int flags = static_cast<int>(horzAlign()) | static_cast<int>(vertAlign()) | static_cast<int>((wordWrap() ? Qt::TextWordWrap : 0));
 
 		painter.setPen(m_textColor);
 
-		DrawHelper::drawText(&painter,
-							 m_font,
-							 itemUnit(),
-							 text,
-							 rect,
-							 flags);
+		DrawHelper::drawText(&painter, m_font, itemUnit(), text, rect, flags);
 
 		return;
 	}
@@ -470,9 +532,7 @@ namespace VFrame30
 
 		m_cacheTextDocument.drawContents(&painter, rect);
 
-		if (itemUnit() == SchemaUnit::Display)
-		{
-		}
+		if (itemUnit() == SchemaUnit::Display) {}
 		else
 		{
 			painter.restore();
@@ -655,5 +715,4 @@ namespace VFrame30
 		m_drawRect = value;
 	}
 
-}
-
+} // namespace VFrame30

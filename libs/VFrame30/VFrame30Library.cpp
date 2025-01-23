@@ -28,6 +28,7 @@
 #include <VFrame30/SchemaItemUfb.h>
 #include <VFrame30/SchemaItemValue.h>
 #include <VFrame30/SchemaItemVduImage.h>
+#include <VFrame30/SchemaItemVduImageValue.h>
 #include <VFrame30/SchemaItemVduLine.h>
 #include <VFrame30/SchemaItemVduRect.h>
 #include <VFrame30/SchemaItemVduValue.h>
@@ -59,7 +60,6 @@ namespace VFrame30
 
 		// Registering SchemaItems
 		//
-		// SchemaItemFactory.Register<SchemaItemFrame>();
 		SchemaItemFactory.Register<FblItemLine>();
 		SchemaItemFactory.Register<FblItemRect>();
 		SchemaItemFactory.Register<SchemaItemAfb>();
@@ -94,6 +94,7 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemVduRect>();
 		SchemaItemFactory.Register<SchemaItemVduImage>();
 		SchemaItemFactory.Register<SchemaItemVduValue>();
+		SchemaItemFactory.Register<SchemaItemVduImageValue>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 

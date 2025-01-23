@@ -17,8 +17,8 @@ namespace VFrame30
 
 		This item is used to display different images depending on signal values.
 
-		Item contains an array of images specified by <b>Images</b> property (not accessible by scripts). Each image can be specified by bitmap or by <b>Svg</b> code.
-		Each array item has a string identifier.
+		Item contains an array of images specified by <b>Images</b> property (not accessible by scripts). Each image can be specified by
+	   bitmap or by <b>Svg</b> code. Each array item has a string identifier.
 
 		An example of Svg code can be found in \ref VFrame30::SchemaItemImage "SchemaItemImage" description.
 
@@ -61,7 +61,8 @@ namespace VFrame30
 		</table>
 
 		Assume bitmaps have been added to <b>Images</b> property with identifiers shown in the table above and
-		two application signal identifiers "#ROD_SWITCH_ACTIVE" and "#ROD_SWITCH_UP" are added to <b>AppSignalIDs</b> property of SchemaItemImageValue.
+		two application signal identifiers "#ROD_SWITCH_ACTIVE" and "#ROD_SWITCH_UP" are added to <b>AppSignalIDs</b> property of
+	   SchemaItemImageValue.
 
 		First, define a function in <b>GlobalScript</b> property of Monitor that implements the logic:
 
@@ -136,7 +137,8 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemImageValue : public PosRectRotatable, public IMatsSchemaItemAssociations
+	class SchemaItemImageValue : public PosRectRotatable,
+								 public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -177,19 +179,19 @@ namespace VFrame30
 		Q_PROPERTY(double Angle READ angle WRITE setAngle)
 
 		/**
-		* @brief Rotation point of the item.
-		*
-		* This property represents the rotation point of the item. The rotation point is the
-		* point around which the item is rotated when the rotation transformation (property Angle) is applied.
-		* Setting this property allows to specify a custom rotation point for the item.
-		*
-		* Possible values for this property are:
-		* - RotationPoint::TopLeft (0)
-		* - RotationPoint::TopRight (1)
-		* - RotationPoint::BottomRight (2)
-		* - RotationPoint::BottomLeft (3)
-		* - RotationPoint::Center (4)
-		*/
+		 * @brief Rotation point of the item.
+		 *
+		 * This property represents the rotation point of the item. The rotation point is the
+		 * point around which the item is rotated when the rotation transformation (property Angle) is applied.
+		 * Setting this property allows to specify a custom rotation point for the item.
+		 *
+		 * Possible values for this property are:
+		 * - RotationPoint::TopLeft (0)
+		 * - RotationPoint::TopRight (1)
+		 * - RotationPoint::BottomRight (2)
+		 * - RotationPoint::BottomLeft (3)
+		 * - RotationPoint::Center (4)
+		 */
 		Q_PROPERTY(RotationPoint rotationPoint READ rotationPoint WRITE setRotationPoint)
 		Q_PROPERTY(RotationPoint RotationPoint READ rotationPoint WRITE setRotationPoint)
 
@@ -215,7 +217,8 @@ namespace VFrame30
 
 	protected:
 		void initDrawingResources() const;
-		// bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		// bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState*
+		// tuningSignalState) const;
 
 		void drawImage(CDrawParam* drawParam, const QString& imageId, const QRectF& rect);
 
@@ -233,7 +236,7 @@ namespace VFrame30
 		// IMatsSchemaItemAssociations implementation.
 		//
 	public:
-		virtual QStringList associatedDiagObjectIds() const override { return {}; };
+		virtual QStringList associatedDiagObjectIds() const override;
 		virtual QStringList associatedAppSignalIds() const override;
 		virtual QStringList associatedImpactAppSignalIds() const override;
 		virtual QStringList associatedConnectionIds() const override;

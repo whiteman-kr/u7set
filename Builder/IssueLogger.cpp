@@ -480,13 +480,20 @@ namespace Builder
 
 	void IssueLogger::errINT1001(QString debugMessage, QString schema, const std::vector<QUuid>& itemsUuids)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 100, itemsUuids, schema);
+		addItemsIssues(OutputMessageLevel::Error, 1001, itemsUuids, schema);
 
 		LOG_ERROR(IssueType::Internal,
 				  1001,
 				  tr("Internal exception, schema %1: %2.")
 					.arg(schema)
 					.arg(debugMessage));
+	}
+
+	void IssueLogger::errINT1001(QString debugMessage, QString schema, QString item, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 1001, itemUuid, schema);
+
+		LOG_ERROR(IssueType::Internal, 1001, tr("Internal exception, schema %1, item %2: %3.").arg(schema, item, debugMessage));
 	}
 
 	// PDB			Project database issues					2000-2999

@@ -8,7 +8,9 @@
 #include <HardwareLib/DeviceModule.h>
 #include <VFrame30/Context.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/ImageItem.h>
 #include <VFrame30/SchemaItemVduImage.h>
+#include <VFrame30/SchemaItemVduImageValue.h>
 #include <VFrame30/SchemaItemVduLine.h>
 #include <VFrame30/SchemaItemVduRect.h>
 #include <VFrame30/SchemaItemVduValue.h>
@@ -31,6 +33,11 @@ namespace
 		static VduFileString createUtf8(const QString& string, uint32_t stringRefOffset)
 		{
 			return VduFileString{.string = string.trimmed(), .stringRefOffset = stringRefOffset};
+		}
+
+		static VduFileString createUtf8(const QString& string, size_t stringRefOffset)
+		{
+			return VduFileString{.string = string.trimmed(), .stringRefOffset = static_cast<uint32_t>(stringRefOffset)};
 		}
 	};
 
@@ -206,6 +213,8 @@ namespace
 
 			if (image.isNull() == true)
 			{
+				// SchemaItem %1 has no assigned image in VduSchema %2.
+				//
 				m_log.errALP4400(schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid());
 				return false;
 			}
@@ -213,28 +222,24 @@ namespace
 			auto imageHash = quint32{VduImageHash(image)}; // {} Just in case, to prevent narrowing conversion.
 			structImage.imageHash = imageHash;
 
-			structImage.imageFile = VduFileString::stub;
-			QString fileName = QString{"IM_%1"}.arg(imageHash, 8, 16, QChar{'0'}).toUpper() + QString{".bmp"};
-
-			auto vduString =
-				VduFileString::createUtf8(fileName, sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemImage1, imageFile));
-			addedStrings.push_back(std::move(vduString));
-
 			// If file is not exists then save file to output.
 			// '/' in the fron is required for correct work m_buildResultWriter->isBuildFileExists.
 			//
-			QString vduSchemaImageDir =
-				'/' + m_context.m_buildResultWriter->subsystemDirectory(m_subsystemId) + '/' + m_vduEquipmentId + "/Schemas/Resources";
+			QString subsystemDir = m_context.m_buildResultWriter->subsystemDirectory(m_subsystemId);
+			QString vduSchemaImageDir = QString{'/'} + subsystemDir + "/" + m_vduEquipmentId + "/Schemas/Images";
+
+			QString fileName = QString{"%1"}.arg(imageHash, 8, 16, QChar{'0'}).toUpper() + QString{".bmp"};
 
 			bool fileAlreadyExists = m_context.m_buildResultWriter->isBuildFileExists(vduSchemaImageDir + '/' + fileName);
 			if (fileAlreadyExists == false)
 			{
-				QBuffer buffer;
+				QByteArray data;
+				QBuffer buffer(&data);
+				buffer.open(QIODevice::WriteOnly);
 
-				QImageWriter writer{&buffer, "BMP"};
-				writer.write(image);
+				image.save(&buffer, "bmp");
 
-				m_context.m_buildResultWriter->addFile(vduSchemaImageDir, fileName, buffer.data(), false);
+				m_context.m_buildResultWriter->addFile(vduSchemaImageDir, fileName, data, false);
 			}
 
 			// --
@@ -341,6 +346,139 @@ namespace
 			// OutData already set.
 			//
 			itemType = structValue.itemType;
+
+			return true;
+		}
+
+		bool visit(const VFrame30::SchemaItemVduImageValue& schemaItem) override
+		{
+			reset();
+
+			VduSchemaFileSchemaItemImageValue1 structImageValue{};
+
+			structImageValue.version = 1;
+			structImageValue.itemType = VduFileSchemaItemImageValueId;
+
+			using PosType = decltype(structImageValue.left);
+			using SizeType = decltype(structImageValue.width);
+
+			structImageValue.left = static_cast<PosType>(schemaItem.leftDocPt());
+			structImageValue.top = static_cast<PosType>(schemaItem.topDocPt());
+			structImageValue.width = static_cast<SizeType>(schemaItem.widthDocPt());
+			structImageValue.height = static_cast<SizeType>(schemaItem.heightDocPt());
+
+			// Images
+			//
+			structImageValue.imageCount = static_cast<decltype(structImageValue.imageCount)>(schemaItem.images().size());
+
+			// Chech if image count is not greater than size of VduSchemaFileSchemaItemImageValue1::images[]
+			//
+			if (const auto maxImageCount = sizeof(structImageValue.images) / sizeof(structImageValue.images[0]);
+				structImageValue.imageCount > maxImageCount)
+			{
+				QString schemaId = schemaItem.parentSchema() ? schemaItem.parentSchema()->schemaId() : QString{};
+				m_log.errINT1001(QString("Item has more than %1 images.").arg(maxImageCount),
+								 schemaId,
+								 schemaItem.label(),
+								 schemaItem.guid());
+				return false;
+			}
+
+			const auto& imageItems = schemaItem.images();
+
+			for (size_t i = 0; i < structImageValue.imageCount; i++)
+			{
+				std::shared_ptr<VFrame30::ImageItem> imageItem = imageItems[i];
+
+				auto& is = structImageValue.images[i];
+				is.version = 1;
+				is.imageId = VduFileString::stub;
+
+				// imageId
+				//
+				{
+					size_t imageIdOffest = sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemImageValue1, images) +
+										   sizeof(is) * i + offsetof(VduSchemaFileSchemaItemImageValue1::Image, imageId);
+
+					addedStrings.push_back(VduFileString::createUtf8(imageItem->imageId(), imageIdOffest));
+				}
+
+				// imageHash
+				//
+				QRectF imageRect{0, 0, static_cast<qreal>(structImageValue.width), static_cast<qreal>(structImageValue.height)};
+				auto image = imageItem->toQImage(imageRect, schemaItem.fillColor());
+
+				if (image.isNull() == true)
+				{
+					// SchemaItem %1 has no assigned image in VduSchema %2.
+					//
+					m_log.errALP4400(schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid());
+					return false;
+				}
+
+				auto imageHash = quint32{VduImageHash(image)}; // {} Just in case, to prevent narrowing conversion.
+				is.imageHash = imageHash;
+
+				// imageFile
+				//
+				{
+					QString fileName = QString{"%1"}.arg(is.imageHash, 8, 16, QChar{'0'}).toUpper() + QString{".bmp"};
+
+					// If file is not exists then save file to output.
+					// '/' in the fron is required for correct work m_buildResultWriter->isBuildFileExists.
+					//
+					QString subsystemDir = m_context.m_buildResultWriter->subsystemDirectory(m_subsystemId);
+					QString vduSchemaImageDir =
+						QStringLiteral("/") + subsystemDir + QStringLiteral("/") + m_vduEquipmentId + "/Schemas/Images";
+
+					bool fileAlreadyExists = m_context.m_buildResultWriter->isBuildFileExists(vduSchemaImageDir + '/' + fileName);
+					if (fileAlreadyExists == false)
+					{
+						QByteArray data;
+						QBuffer buffer(&data);
+						buffer.open(QIODevice::WriteOnly);
+
+						image.save(&buffer, "bmp");
+
+						m_context.m_buildResultWriter->addFile(vduSchemaImageDir, fileName, data, false);
+					}
+				}
+			}
+
+			// Set app signal indexes.
+			//
+			QStringList appSignalIds = schemaItem.signalIds();
+			structImageValue.appSignalCount = static_cast<decltype(structImageValue.appSignalCount)>(appSignalIds.size());
+
+			outData = QByteArray(reinterpret_cast<const char*>(&structImageValue), sizeof(structImageValue));
+
+			for (const QString& appSignalId : appSignalIds)
+			{
+				auto sit = m_appSignalHashToSignalIndex.find(::calcHash(appSignalId));
+
+				if (sit == m_appSignalHashToSignalIndex.end())
+				{
+					// Signal not found.
+					//
+					m_log.errEQP6400(m_vduEquipmentId,
+									 appSignalId,
+									 schemaItem.parentSchema()->schemaId(),
+									 schemaItem.label(),
+									 schemaItem.guid());
+
+					reset();
+					return false;
+				}
+
+				// Signal index follows the structValue.
+				//
+				uint32_t signalIndex = static_cast<uint32_t>(sit->second);
+				outData.append(reinterpret_cast<const char*>(&signalIndex), sizeof(signalIndex));
+			}
+
+			// OutData already set.
+			//
+			itemType = structImageValue.itemType;
 
 			return true;
 		}

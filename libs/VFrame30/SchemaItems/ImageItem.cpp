@@ -140,14 +140,16 @@ namespace VFrame30
 		return m_image.isNull() == false || m_svgData.isEmpty() == false;
 	}
 
-	QImage ImageItem::toQImage(const QRectF& rect) const
+	QImage ImageItem::toQImage(const QRectF& rect, QColor fillColor) const
 	{
+		QImage image{rect.size().toSize(), QImage::Format_ARGB32_Premultiplied};
+		image.fill(fillColor);
+
 		if (hasAnyImage() == false)
 		{
-			return {};
+			return image;
 		}
 
-		QImage image{rect.size().toSize(), QImage::Format_ARGB32};
 		QPainter painter{&image};
 
 		if (svgData().isEmpty() == false)

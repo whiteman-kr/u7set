@@ -114,6 +114,7 @@ namespace Builder
 		void errINT1001(QString debugMessage, QString schema);
 		void errINT1001(QString debugMessage, QString schema, QUuid itemsUuids);
 		void errINT1001(QString debugMessage, QString schema, const std::vector<QUuid>& itemsUuids);
+		void errINT1001(QString debugMessage, QString schema, QString item, QUuid itemUuid);
 
 		// PDB			Project database issues					2000-2999
 		//

@@ -11,7 +11,7 @@ namespace VFrame30
 
 
 	class SchemaItemVduImage final : public PosRectImpl,
-									 public SchemaItemVdu
+									 public SchemaItemVduVisitable<SchemaItemVduImage>
 	{
 		Q_OBJECT
 
@@ -36,11 +36,6 @@ namespace VFrame30
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
 
-		// VduItemVisitor
-		//
-	public:
-		bool accept(VduItemVisitor& visitor) const override;
-
 		// Properties and Data
 		//
 	public:
@@ -58,7 +53,11 @@ namespace VFrame30
 
 		QImage toQImage(const QRectF& rect) const;
 
+		const QColor& fillColor() const;
+		void setFillColor(const QColor& color);
+
 	private:
 		std::unique_ptr<::VFrame30::ImageItem> m_image;
+		QColor m_fillColor = qRgba(0xE0, 0xE0, 0xE0, 0xFF);
 	};
 } // namespace VFrame30

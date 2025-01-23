@@ -77,6 +77,7 @@ qt_add_library(${TARGET} STATIC
 	./include/VFrame30/SchemaItemValue.h
 	./include/VFrame30/SchemaItemVdu.h
 	./include/VFrame30/SchemaItemVduImage.h
+	./include/VFrame30/SchemaItemVduImageValue.h
 	./include/VFrame30/SchemaItemVduLine.h
 	./include/VFrame30/SchemaItemVduRect.h
 	./include/VFrame30/SchemaItemVduValue.h
@@ -132,6 +133,7 @@ qt_add_library(${TARGET} STATIC
 	./SchemaItems/SchemaItemUfb.cpp
 	./SchemaItems/SchemaItemValue.cpp
 	./SchemaItems/SchemaItemVduImage.cpp
+	./SchemaItems/SchemaItemVduImageValue.cpp
 	./SchemaItems/SchemaItemVduLine.cpp
 	./SchemaItems/SchemaItemVduRect.cpp
 	./SchemaItems/SchemaItemVduValue.cpp

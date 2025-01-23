@@ -16,6 +16,7 @@
 // 16 Jan 2025| 1.7  |	Added VduSchemaFileSchemaItemRect1::wordWrap.
 // 16 Jan 2025| 1.8  |	Added VduSchemaFileSchemaItemValue1::align.
 // 22 Jan 2025| 1.9  |	Added strcut VduSchemaFileSchemaItemImage1
+// 23 Jan 2025| 1.10 |	Added strcut VduSchemaFileSchemaItemImageValue1
 // -----------+------+--------------------------------------------------------------
 // clang-format on
 
@@ -67,7 +68,7 @@ struct VduSchemaFile
 	uint16_t schemaItemCount; // Number of schema items - each items is a VduSchemaFileSchemaItem1 + specific data
 							  // (VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...).
 	uint16_t reserve3;
-
+	//
 	// Next fields are present in a text description:
 	//
 
@@ -91,10 +92,11 @@ struct VduSchemaFile
 
 // VduSchemaFileSchemaItem1::itemType
 //
-const uint16_t VduFileSchemaItemLineId = 0x4E4C;  // LN
-const uint16_t VduFileSchemaItemRectId = 0x4352;  // RC
-const uint16_t VduFileSchemaItemImageId = 0x4D47; // IM
-const uint16_t VduFileSchemaItemValueId = 0x4C56; // VL
+const uint16_t VduFileSchemaItemLineId = 0x4E4C;       // LN
+const uint16_t VduFileSchemaItemRectId = 0x4352;       // RC
+const uint16_t VduFileSchemaItemImageId = 0x4D47;      // IM
+const uint16_t VduFileSchemaItemValueId = 0x4C56;      // VL
+const uint16_t VduFileSchemaItemImageValueId = 0x5649; // IV
 
 
 // VduSchemaFileSchemaItem1 - Common schema item header, right after it follows specific schema item data.
@@ -181,26 +183,16 @@ struct VduSchemaFileSchemaItemImage1
 	uint16_t height;
 
 	uint32_t reserve1;
-	uint32_t reserve2;
+	uint32_t imageHash; // Image hash, used to generate image file name: [VduSubsystemId]/[VduEquipmentId]/Images/[ImageHash].bmp
 
 	uint32_t reserve3;
 	uint32_t reserve4;
-	uint32_t reserve5;
-	uint32_t reserve6;
-
-	uint32_t imageHash; // Image hash, used to generate image file name.
-	vdu_cstr imageFile; // File in folder [VduSubsystemId]/[VduEquipmentId]/Resources/IM_[ImageHash].bmp
-
-	uint32_t reserve7;
-	uint32_t reserve8;
-	uint32_t reserve9;
-	uint32_t reserve10;
 };
 
 struct VduSchemaFileSchemaItemValue1
 {
 	uint16_t version;  // 1
-	uint16_t itemType; // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
+	uint16_t itemType; // VduFileSchemaItemValueId
 	uint32_t reserve0;
 
 	uint16_t left;
@@ -247,6 +239,45 @@ struct VduSchemaFileSchemaItemValue1
 
 	uint32_t appSignalCount;
 
+	// Then follows appSignalCount * sizeof(uint32_t) appSignalIndexes
+	//
+	// uint32_t appSignalIndexes[appSignalCount];
+};
+
+struct VduSchemaFileSchemaItemImageValue1
+{
+	uint16_t version;  // 1
+	uint16_t itemType; // VduFileSchemaItemImageValueId, 0x5649, IV
+	uint32_t reserve0;
+
+	uint16_t left;
+	uint16_t top;
+	uint16_t width;
+	uint16_t height;
+
+	uint32_t reserve4[4];
+
+	uint16_t reserve5;
+	uint16_t imageCount;    // 1 - 12
+
+	struct Image
+	{
+		uint16_t version;   // 1
+		uint16_t reserve0;
+
+		vdu_cstr imageId;
+		uint32_t reserve1;
+
+		uint32_t imageHash; // Image hash, used to generate image file name: [VduSubsystemId]/[VduEquipmentId]/Images/[ImageHash].bmp
+		uint32_t reserve2;
+	};
+	Image images[12];
+
+	uint16_t currentImage;  // Placeholder for the currently selected image index in the 'images' array. Default value: 0.
+	uint16_t reserve6;
+
+	uint32_t appSignalCount;
+	//
 	// Then follows appSignalCount * sizeof(uint32_t) appSignalIndexes
 	//
 	// uint32_t appSignalIndexes[appSignalCount];

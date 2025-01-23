@@ -42,6 +42,7 @@ namespace VFrame30
 									 SchemaItemVduImage::setImage);
 		p->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
 		p->setValidator(QStringLiteral("Images (*.png *.bmp *.jpg *.jpeg *.gif);; All Files (*.*)"));
+		p->setEssential(true);
 
 		p = ADD_PROPERTY_GET_SET_CAT(QString,
 									 PropertyNames::svg,
@@ -50,6 +51,15 @@ namespace VFrame30
 									 SchemaItemVduImage::svgData,
 									 SchemaItemVduImage::setSvgData);
 		p->setSpecificEditor(E::PropertySpecificEditor::Svg);
+		p->setEssential(true);
+
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::fillColor,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemVduImage::fillColor,
+								 SchemaItemVduImage::setFillColor);
+
 
 		// --
 		//
@@ -78,6 +88,8 @@ namespace VFrame30
 		Proto::SchemaItemVduImage* imageMessage = message->MutableExtension(Proto::schemaitem)->mutable_vduimage();
 
 		bool ok = m_image->save(imageMessage->mutable_image());
+		imageMessage->set_fillcolor(m_fillColor.rgba());
+
 		return ok;
 	}
 
@@ -108,6 +120,7 @@ namespace VFrame30
 		const Proto::SchemaItemVduImage& imageMessage = message.GetExtension(Proto::schemaitem).vduimage();
 
 		bool ok = m_image->load(imageMessage.image());
+		m_fillColor = QColor::fromRgba(imageMessage.fillcolor());
 
 		return ok;
 	}
@@ -117,6 +130,10 @@ namespace VFrame30
 	void SchemaItemVduImage::draw(CDrawParam* drawParam) const
 	{
 		QRectF rect = boundingRectInDocPt(drawParam);
+
+		// Drawing background
+		//
+		drawParam->painter()->fillRect(rect, m_fillColor);
 
 		if (m_image->hasAnyImage() == false)
 		{
@@ -141,11 +158,6 @@ namespace VFrame30
 	double SchemaItemVduImage::minimumPossibleWidthDocPt(double gridSize, [[maybe_unused]] int pinGridStep) const
 	{
 		return gridSize;
-	}
-
-	bool SchemaItemVduImage::accept(VduItemVisitor& visitor) const
-	{
-		return visitor.visit(*this);
 	}
 
 	// Properties and Data
@@ -201,6 +213,18 @@ namespace VFrame30
 
 	QImage SchemaItemVduImage::toQImage(const QRectF& rect) const
 	{
-		return m_image->toQImage(rect);
+		return m_image->toQImage(rect, m_fillColor);
+	}
+
+	// FillColor property
+	//
+	const QColor& SchemaItemVduImage::fillColor() const
+	{
+		return m_fillColor;
+	}
+
+	void SchemaItemVduImage::setFillColor(const QColor& color)
+	{
+		m_fillColor = color;
 	}
 } // namespace VFrame30

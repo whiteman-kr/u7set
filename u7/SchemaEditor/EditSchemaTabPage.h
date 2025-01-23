@@ -1,8 +1,8 @@
 #pragma once
 
-#include <VFrame30/Schema.h>
 #include "../AppSignalSetProvider.h"
 #include "EditSchemaTypes.h"
+#include <VFrame30/Schema.h>
 
 
 class EditSchemaWidget;
@@ -12,17 +12,18 @@ class EditSchemaWidget;
 // EditSchemaTabPage
 //
 //
-class EditSchemaTabPage : public QMainWindow, public HasDbController
+class EditSchemaTabPage : public QMainWindow,
+						  public HasDbController
 {
 	Q_OBJECT
 
 public:
 	EditSchemaTabPage() = delete;
 	EditSchemaTabPage(QTabWidget* tabWidget,
-						std::shared_ptr<VFrame30::Schema> schema,
-						const DbFileInfo& fileInfo,
-						DbController* db,
-						AppSignalSetProvider* signalSetProvider);
+					  std::shared_ptr<VFrame30::Schema> schema,
+					  const DbFileInfo& fileInfo,
+					  DbController* db,
+					  AppSignalSetProvider* signalSetProvider);
 	virtual ~EditSchemaTabPage();
 
 protected:
@@ -73,10 +74,10 @@ public:
 	bool saveWorkcopy();
 
 protected:
-	void getCurrentWorkcopy();				// Save current schema to a file
-	void setCurrentWorkcopy();				// Load a schema from a file
+	void getCurrentWorkcopy(); // Save current schema to a file
+	void setCurrentWorkcopy(); // Load a schema from a file
 
-	// Properties
+							   // Properties
 	//
 public:
 	VFrame30::Schema* schema();

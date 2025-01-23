@@ -1,8 +1,10 @@
 #pragma once
 
 #include <VFrame30/FontParam.h>
+#include <VFrame30/IMatsSchemaItemAssociations.h>
 #include <VFrame30/PosRectImpl.h>
 #include <VFrame30/SchemaItemVdu.h>
+
 
 namespace VFrame30
 {
@@ -10,7 +12,8 @@ namespace VFrame30
 
 
 	class SchemaItemVduValue : public PosRectImpl,
-							   public SchemaItemVdu
+							   public IMatsSchemaItemAssociations,
+							   public SchemaItemVduVisitable<SchemaItemVduValue>
 	{
 		Q_OBJECT
 
@@ -37,10 +40,15 @@ namespace VFrame30
 	private:
 		QString parseText(QStringView text, const VFrame30::AppSignalController* appSignalController) const;
 
-		// VduItemVisitor
+		// IMatsSchemaItemAssociations implementation.
 		//
 	public:
-		bool accept(VduItemVisitor& visitor) const override;
+		virtual QStringList associatedDiagObjectIds() const override;
+		virtual QStringList associatedAppSignalIds() const override;
+		virtual QStringList associatedImpactAppSignalIds() const override;
+		virtual QStringList associatedConnectionIds() const override;
+		virtual QStringList associatedLoopbackIds() const override;
+		virtual QStringList associatedSchemaItemLabels() const override;
 
 		// Properties and Data
 		//

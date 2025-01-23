@@ -264,6 +264,7 @@ message SchemaItem
 	optional SchemaItemVduRect vduRect = 301;				// +PosLineImpl
 	optional SchemaItemVduValue vduValue = 302;				// +PosLineImpl
 	optional SchemaItemVduImage vduImage = 303;				// +PosRectImpl
+	optional SchemaItemVduImageValue vduImageValue = 304;	// +PosRectImpl
 }
 
 //
@@ -712,7 +713,7 @@ message SchemaItemImageValue
 	optional bool drawRect = 9 [default = false];
 	optional bool fillRect = 10 [default = false];
 
-    repeated ImageItem images = 14;
+	repeated ImageItem images = 14;
 }
 
 //
@@ -911,9 +912,21 @@ message SchemaItemVduValue
 message SchemaItemVduImage
 {
     optional ImageItem image = 1;
+	optional uint32 fillColor = 8 [default = 0xFFE0E0E0];
 }
 
+//
+// SchemaItemVduImageValue
+//
+message SchemaItemVduImageValue
+{
+    optional string signalIds = 2;
+	optional uint32 fillColor = 8 [default = 0xFFE0E0E0];
+    repeated ImageItem images = 14;
+}
 
+// --
+//
 message SchemaDetailsSet
 {
     repeated SchemaDetails schemasDetails = 2;

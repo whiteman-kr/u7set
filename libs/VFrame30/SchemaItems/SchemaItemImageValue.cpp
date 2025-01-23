@@ -1,10 +1,10 @@
-#include <VFrame30/SchemaItemImageValue.h>
 #include "../AppSignalLib/TuningSignalState.h"
 #include <VFrame30/AppSignalController.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/MacrosExpander.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/Schema.h>
+#include <VFrame30/SchemaItemImageValue.h>
 #include <VFrame30/SchemaView.h>
 #include <VFrame30/TuningController.h>
 
@@ -25,21 +25,62 @@ namespace VFrame30
 	{
 		// Functional
 		//
-		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalIdsString, SchemaItemImageValue::setSignalIdsString);
+		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString,
+													  PropertyNames::appSignalIDs,
+													  PropertyNames::functionalCategory,
+													  true,
+													  SchemaItemImageValue::signalIdsString,
+													  SchemaItemImageValue::setSignalIdsString);
 		strIdProperty->setValidator(PropertyNames::appSignalIDsOrReferenceValidator);
 
-		// ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalSource, SchemaItemImageValue::setSignalSource);
+		// ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true,
+		// SchemaItemImageValue::signalSource, SchemaItemImageValue::setSignalSource);
 
-		ADD_PROPERTY_GET_SET_CAT(PropertyVector<ImageItem>, PropertyNames::images, PropertyNames::functionalCategory, true, SchemaItemImageValue::images, SchemaItemImageValue::setImages);
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::currentImageId, PropertyNames::functionalCategory, true, SchemaItemImageValue::currentImageId, SchemaItemImageValue::setCurrentImageId);
+		ADD_PROPERTY_GET_SET_CAT(PropertyVector<ImageItem>,
+								 PropertyNames::images,
+								 PropertyNames::functionalCategory,
+								 true,
+								 SchemaItemImageValue::images,
+								 SchemaItemImageValue::setImages);
+		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::currentImageId,
+								 PropertyNames::functionalCategory,
+								 true,
+								 SchemaItemImageValue::currentImageId,
+								 SchemaItemImageValue::setCurrentImageId);
 
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemImageValue::lineWeight, SchemaItemImageValue::setLineWeight);
+		ADD_PROPERTY_GET_SET_CAT(double,
+								 PropertyNames::lineWeight,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemImageValue::lineWeight,
+								 SchemaItemImageValue::setLineWeight);
 
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemImageValue::lineColor, SchemaItemImageValue::setLineColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemImageValue::fillColor, SchemaItemImageValue::setFillColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::lineColor,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemImageValue::lineColor,
+								 SchemaItemImageValue::setLineColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::fillColor,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemImageValue::fillColor,
+								 SchemaItemImageValue::setFillColor);
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemImageValue::drawRect, SchemaItemImageValue::setDrawRect);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fill, PropertyNames::appearanceCategory, true, SchemaItemImageValue::fillRect, SchemaItemImageValue::setFillRect);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::drawRect,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemImageValue::drawRect,
+								 SchemaItemImageValue::setDrawRect);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::fill,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemImageValue::fillRect,
+								 SchemaItemImageValue::setFillRect);
 
 		// --
 		//
@@ -47,17 +88,14 @@ namespace VFrame30
 		setItemUnit(unit);
 	}
 
-	SchemaItemImageValue::~SchemaItemImageValue(void)
-	{
-	}
+	SchemaItemImageValue::~SchemaItemImageValue(void) {}
 
 	// Serialization
 	//
 	bool SchemaItemImageValue::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectRotatable::SaveData(message);
-		if (result == false ||
-			message->HasExtension(Proto::schemaitem) == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
 			assert(message->HasExtension(Proto::schemaitem));
@@ -137,7 +175,8 @@ namespace VFrame30
 	//
 	void SchemaItemImageValue::draw(CDrawParam* drawParam) const
 	{
-		return drawRotated(drawParam, [drawParam, this]()
+		return drawRotated(drawParam,
+						   [drawParam, this]()
 						   {
 							   return drawPrivate(drawParam);
 						   });
@@ -207,7 +246,8 @@ namespace VFrame30
 
 	void SchemaItemImageValue::drawHighlight(CDrawParam* drawParam) const
 	{
-		return drawRotated(drawParam, [drawParam, this]()
+		return drawRotated(drawParam,
+						   [drawParam, this]()
 						   {
 							   return drawHighlightPrivate(drawParam);
 						   });
@@ -307,6 +347,11 @@ namespace VFrame30
 
 	// IMatsSchemaItemAssociations implementation.
 	//
+	QStringList SchemaItemImageValue::associatedDiagObjectIds() const
+	{
+		return {};
+	};
+
 	QStringList SchemaItemImageValue::associatedAppSignalIds() const
 	{
 		return signalIds();
@@ -344,9 +389,7 @@ namespace VFrame30
 
 		// Expand variables in AppSignalIDs in MonitorMode, if applicable
 		//
-		if (context != nullptr &&
-			context->appSignalController() != nullptr &&
-			context->viewVariables() != nullptr)
+		if (context != nullptr && context->appSignalController() != nullptr && context->viewVariables() != nullptr)
 		{
 			resultList = MacrosExpander::parse(resultList, context, nullptr, this);
 
@@ -379,9 +422,7 @@ namespace VFrame30
 
 		// Expand variables in AppSignalIDs in MonitorMode, if applicable
 		//
-		if (context != nullptr &&
-			context->appSignalController() != nullptr &&
-			context->viewVariables() != nullptr)
+		if (context != nullptr && context->appSignalController() != nullptr && context->viewVariables() != nullptr)
 		{
 			resultList = MacrosExpander::parse(resultList, context, nullptr, this);
 

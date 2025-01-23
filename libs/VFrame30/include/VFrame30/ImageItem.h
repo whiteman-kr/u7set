@@ -5,6 +5,7 @@
 #include <QSvgRenderer>
 #include <optional>
 
+
 namespace Proto
 {
 	class ImageItem;
@@ -29,12 +30,13 @@ namespace VFrame30
 
 		bool hasAnyImage() const;
 
-		QImage toQImage(const QRectF& rect) const;
+		QImage toQImage(const QRectF& rect, QColor fillColor /*= Qt::transparent*/) const;
 
 		static void drawError(CDrawParam* drawParam, const QRectF& rect, const QString& errorText);
 		void drawImage(CDrawParam* drawParam, const QRectF& rect) const;
 		void drawRasterImage(CDrawParam* drawParam, const QRectF& rect) const;
-		void drawRasterImage(QPainter& painter, const QRectF& rect, double zoom, SchemaUnit units, double dpiX = .0, double dpiY = .0) const;
+		void drawRasterImage(QPainter& painter, const QRectF& rect, double zoom, SchemaUnit units, double dpiX = .0, double dpiY = .0)
+			const;
 		void drawSvg(CDrawParam* drawParam, const QRectF& rect) const;
 		void drawSvg(QPainter& painter, QSvgRenderer& svgRenderer, const QRectF& rect, double zoom, SchemaUnit units) const;
 
