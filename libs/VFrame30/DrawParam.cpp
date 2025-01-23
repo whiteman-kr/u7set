@@ -662,7 +662,7 @@ namespace VFrame30
 			return drawText(painter, font, unit, str, rect, flags);
 		}
 #endif
-		QRgb textColor = painter->pen().color().rgb();                   // Text color is taken from the current pen.
+		QRgb textColor = painter->pen().color().rgba();                   // Text color is taken from the current pen.
 
 		const double reduceZoom = (dpiY > 120) ? 300 : 600;              // Kind of HiDpi Screen?
 		const double sizeReduceFactor = (zoom > reduceZoom) ? 0.5 : 1.0; // It makes images smaller depending on zoom.
