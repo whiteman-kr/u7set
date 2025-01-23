@@ -121,6 +121,10 @@ namespace Builder
 
 	private:
 		bool buildFSCConfiguration();
+		bool createJumpersConfigurationReport();
+		bool createSubsystemsReport();
+
+		quint16 jumpersCode(int ssKey, int lmNumber);
 
 		DbController* db();
 		IssueLogger* log() const;
