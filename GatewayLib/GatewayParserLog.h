@@ -27,6 +27,8 @@ namespace Gateway
 	class ParserLog : public std::vector<LogRecord>
 	{
 	public:
+		ParserLog();
+
 		void logResult(int lineNo, LogMsgType msgType, const QString& msg);
 
 		void logError(int lineNo, const QString& errMsg);
@@ -43,6 +45,7 @@ namespace Gateway
 		void log(int lineNo, LogMsgType msgType, const QString& msg);
 
 	private:
+		std::vector<LogRecord> m_log;
 		int m_errCount = 0;
 		int m_wrnCount = 0;
 	};

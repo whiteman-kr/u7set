@@ -1345,7 +1345,7 @@ namespace Tcp
 		m_serverInstance->setParent(this);
 		m_serverInstance->setLogger(logger);
 
-		m_tcpServers.resize(listenAddresses.size());
+		m_tcpServers.reserve(listenAddresses.size());
 
 		for(const ListenAddress& listenAddress : listenAddresses)
 		{

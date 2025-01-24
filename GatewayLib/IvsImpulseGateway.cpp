@@ -1,3 +1,7 @@
+#ifndef GATEWAY_LIB_DOMAIN
+#error Do not include this file in the project! Link GatewayLib instead.
+#endif
+
 #include "IvsImpulseGateway.h"
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
@@ -11,36 +15,31 @@ namespace Gateway
 	//
 	// ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting> IvsImpulseSignalList::m_requiredSettings =
-		{
-			E::Setting::ListNo,
-			E::Setting::DataType,
-			E::Setting::SendEvents,
-			E::Setting::IncludeAppSignalID
-	};
-
 	IvsImpulseSignalList::IvsImpulseSignalList()
 	{
+		appendRequiredSettings({	E::Setting::ListNo,
+									E::Setting::DataType,
+									E::Setting::SendEvents,
+									E::Setting::IncludeAppSignalID	});
 	}
 
-	bool IvsImpulseSignalList::isKnownSetting(E::Setting st) const
+	ParseResult IvsImpulseSignalList::checkAndApplySetting(const SettingValue& sv, ParserLog& log)
 	{
-		return m_requiredSettings.contains(st);
-	}
+		ParseResult pr = ParseResult::Ok;
 
-	ParseResult IvsImpulseSignalList::checkAndApplySetting(int lineNo, E::Setting st, const QVariant& value, ParserLog& log)
-	{
-		ParseResult result = ParseResult::Ok;
-
-		switch(st)
+		switch(sv.setting)
 		{
+		default:
+			pr = SignalList::checkAndApplySetting(sv, log);
+			break;
+
 		case E::Setting::ListNo:
-			m_listNo = value.toInt();
+			m_listNo = sv.value.toInt();
 			break;
 
 		case E::Setting::DataType:
 			{
-				QString dataTypeStr = value.toString();
+				QString dataTypeStr =sv.value.toString();
 
 				if (dataTypeStr == "A")
 				{
@@ -63,9 +62,9 @@ namespace Gateway
 						}
 						else
 						{
-							log.logError(lineNo, QString("unknown signal list data type '%1' use 'A', 'B' or 'D'").
+							log.logError(sv.lineNo, QString("unknown signal list data type '%1' use 'A', 'B' or 'D'").
 													arg(dataTypeStr));
-							result = ParseResult::Error;
+							pr = ParseResult::Error;
 						}
 					}
 				}
@@ -73,18 +72,15 @@ namespace Gateway
 			break;
 
 		case E::Setting::SendEvents:
-			m_sendEvents = value.toBool();
+			m_sendEvents = sv.value.toBool();
 			break;
 
 		case E::Setting::IncludeAppSignalID:
-			m_includeAppSignalID = value.toBool();
+			m_includeAppSignalID = sv.value.toBool();
 			break;
-
-		default:
-			Q_ASSERT(false);
 		}
 
-		return result;
+		return pr;
 	}
 
 	int IvsImpulseSignalList::listNo() const
@@ -159,113 +155,83 @@ namespace Gateway
    //
    // ---------------------------------------------------------------------------------
 
-	const std::set<E::Setting> IvsImpulseGateway::m_requiredSettings =
-		{
-			E::Setting::LocalGatewayIP1,
-			E::Setting::RemoteGatewayIP1,
-			E::Setting::SystemID,
-			E::Setting::ListsVersion,
-			E::Setting::Period,
-			E::Setting::TimeType
-	};
-
-	const std::set<E::Setting> IvsImpulseGateway::m_optionalSettings =
-		{
-			E::Setting::LocalGatewayIP2,
-			E::Setting::RemoteGatewayIP2
-	};
-
 	IvsImpulseGateway::IvsImpulseGateway() :
 		Gateway(E::GatewayType::IVS_Impulse)
 	{
+		appendRequiredSettings({	E::Setting::LocalGatewayIP1,
+									E::Setting::RemoteGatewayIP1,
+									E::Setting::SystemID,
+									E::Setting::ListsVersion,
+									E::Setting::Period,
+									E::Setting::TimeType });
+
+		appendOptionalSettings({	E::Setting::LocalGatewayIP2,
+									E::Setting::RemoteGatewayIP2 });
 	}
 
-	IvsImpulseGateway::IvsImpulseGateway(const QString& gwID, const QString& gwDesc, bool enable) :
-		Gateway(E::GatewayType::IVS_Impulse, gwID, gwDesc, enable)
+	ParseResult IvsImpulseGateway::checkAndApplySetting(const SettingValue& sv, ParserLog& log)
 	{
-	}
-
-	bool IvsImpulseGateway::isKnownSetting(E::Setting st) const
-	{
-		return Gateway::isKnownSetting(st) ||
-			   m_requiredSettings.contains(st) ||
-			   m_optionalSettings.contains(st);
-	}
-
-	bool IvsImpulseGateway::checkAndApplySettings(int lineNo, ParserLog& log)
-	{
-		bool result = true;
-
-		result &= Gateway::checkAndApplySettings(lineNo, log);
-		result &= Gateway::checkRequiredSettings(m_requiredSettings,
-												 m_settingsValues,
-												 lineNo, log);
-		RETURN_IF_FALSE(result);
+		ParseResult pr = ParseResult::Ok;
 
 		HostAddressPort addrPort;
 
-		for(const auto& p: m_settingsValues)
+		switch(sv.setting)
 		{
-			E::Setting st = p.first;
-			const SettingValue& sv = p.second;
+		default:
+			pr = Gateway::checkAndApplySetting(sv, log);
+			break;
 
-			switch(st)
+		case E::Setting::LocalGatewayIP1:
+			addrPort.setAddressPortStr(sv.value.toString(),  0);
+			m_localGatewayIP1 = addrPort;
+			break;
+
+		case E::Setting::RemoteGatewayIP1:
+			addrPort.setAddressPortStr(sv.value.toString(),  0);
+			m_remoteGatewayIP1 = addrPort;
+			break;
+
+		case E::Setting::LocalGatewayIP2:
+			addrPort.setAddressPortStr(sv.value.toString(),  0);
+			m_localGatewayIP2 = addrPort;
+			break;
+
+		case E::Setting::RemoteGatewayIP2:
+			addrPort.setAddressPortStr(sv.value.toString(),  0);
+			m_remoteGatewayIP2 = addrPort;
+			break;
+
+		case E::Setting::SystemID:
+			m_systemID = sv.value.toInt();
+			break;
+
+		case E::Setting::ListsVersion:
+			m_listsVersion = sv.value.toInt();
+			break;
+
+		case E::Setting::Period:
+			m_period = sv.value.toInt();
+			break;
+
+		case E::Setting::TimeType:
 			{
-			case E::Setting::LocalGatewayIP1:
-				addrPort.setAddressPortStr(sv.value.toString(),  0);
-				m_localGatewayIP1 = addrPort;
-				break;
+				QString timeTypeStr = sv.value.toString();
 
-			case E::Setting::RemoteGatewayIP1:
-				addrPort.setAddressPortStr(sv.value.toString(),  0);
-				m_remoteGatewayIP1 = addrPort;
-				break;
+				bool ok = true;
 
-			case E::Setting::LocalGatewayIP2:
-				addrPort.setAddressPortStr(sv.value.toString(),  0);
-				m_localGatewayIP2 = addrPort;
-				break;
+				m_timeType = ::E::stringToValue<::E::TimeType>(timeTypeStr, &ok);
 
-			case E::Setting::RemoteGatewayIP2:
-				addrPort.setAddressPortStr(sv.value.toString(),  0);
-				m_remoteGatewayIP2 = addrPort;
-				break;
-
-			case E::Setting::SystemID:
-				m_systemID = sv.value.toInt();
-				break;
-
-			case E::Setting::ListsVersion:
-				m_listsVersion = sv.value.toInt();
-				break;
-
-			case E::Setting::Period:
-				m_period = sv.value.toInt();
-				break;
-
-			case E::Setting::TimeType:
+				if (ok == false)
 				{
-					QString timeTypeStr = sv.value.toString();
-
-					bool ok = true;
-
-					m_timeType = ::E::stringToValue<::E::TimeType>(timeTypeStr, &ok);
-
-					if (ok == false)
-					{
-						log.logError(sv.lineNo, QString("unknown gateway time type '%1' use 'Plant', 'System' or 'Local'").
-												arg(timeTypeStr));
-						result = false;
-					}
+					log.logError(sv.lineNo, QString("unknown gateway time type '%1' use 'Plant', 'System' or 'Local'").
+											arg(timeTypeStr));
+					pr = ParseResult::Error;
 				}
-				break;
-
-			default:
-				;	// ok
 			}
+			break;
 		}
 
-		return result;
+		return pr;
 	}
 
 	void IvsImpulseGateway::appendSignalList()

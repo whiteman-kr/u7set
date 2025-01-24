@@ -67,45 +67,14 @@ namespace Builder
 
 		result = parser.parse(settings->gatewayDescription);
 
-		const Gateway::ParserLog& parserLog = parser.log();
-
-		for(const auto& r : parserLog)
-		{
-			switch(r.msgType)
-			{
-			case Gateway::LogMsgType::Message:
-				{
-					QString msg = r.msg;
-					msg = msg.mid(0, 1).toUpper() + msg.mid(1);
-					LOG_MESSAGE(log, msg);
-				}
-				break;
-
-			case Gateway::LogMsgType::Warning:
-				// Gateway description parsing warning: %1
-				//
-				log->wrnCFG3052(r.msg);
-				break;
-
-			case Gateway::LogMsgType::Error:
-				// Gateway description parsing error: %1
-				//
-				log->errCFG3051(r.msg);
-				break;
-
-			default:
-				Q_ASSERT(false);
-			}
-		}
-
-		int errCount = parserLog.errorCount();
-		int wrnCount = parserLog.warningCount();
+		int errCount = parser.errorCount();
+		int wrnCount = parser.warningCount();
 
 		BuildFile* buildFile = nullptr;
 
 		if (errCount == 0)
 		{
-			for(const Gateway::GatewayShared gw : *gateways)
+			for(const Gateway::GatewayShared& gw : *gateways)
 			{
 				TEST_PTR_CONTINUE(gw);
 
@@ -173,21 +142,22 @@ namespace Builder
 			m_cfgXml->addLinkToFile(buildFile);
 		}
 
-		QString resultStr = QString("Parsing of %1 gateway description finished with %2 errors, %3 warnings").
+		QString resultStr = QString("parsing of %1 gateway description finished with %2 errors, %3 warnings").
 								arg(equipmentID()).arg(errCount).arg(wrnCount);
 		if (errCount > 0)
 		{
-			log->writeError(resultStr);
+			m_log->errCFG3051(resultStr);
 		}
 		else
 		{
 			if (wrnCount > 0)
 			{
-				log->writeWarning0(resultStr);
+				m_log->wrnCFG3052(resultStr);
 			}
 			else
 			{
-				log->writeMessage(resultStr);
+				resultStr = resultStr.mid(0, 1).toUpper() + resultStr.mid(1);
+				LOG_MESSAGE(m_log, resultStr);
 			}
 		}
 

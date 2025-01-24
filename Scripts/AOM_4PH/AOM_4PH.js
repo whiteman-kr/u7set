@@ -162,17 +162,17 @@ function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, 
 			{
 				switch (highPhysical.errorCode)
 				{
-					case UnitsConvertorErrorCode.ErrorGeneric:
+					case ConfigStruct.UnitsConvertorErrorCode.ErrorGeneric:
 					{
 						log.errINT1001(highPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrId);
 					}
 						break;
-					case UnitsConvertorErrorCode.LowLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.LowLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricLowLimit", electricLowLimit, highPhysical.expectedLowValidRange, highPhysical.expectedHighValidRange, signal.decimalPlaces(), signalStrId);
 					}
 						break;
-					case UnitsConvertorErrorCode.HighLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.HighLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricHighLimit", electricHighLimit, highPhysical.expectedLowValidRange, highPhysical.expectedHighValidRange, signal.decimalPlaces(), signalStrId);
 					}
@@ -185,17 +185,17 @@ function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, 
 			{
 				switch (lowPhysical.errorCode)
 				{
-					case UnitsConvertorErrorCode.ErrorGeneric:
+					case ConfigStruct.UnitsConvertorErrorCode.ErrorGeneric:
 					{
 						log.errINT1001(lowPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrId);
 					}
 						break;
-					case UnitsConvertorErrorCode.LowLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.LowLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricLowLimit", electricLowLimit, lowPhysical.expectedLowValidRange, lowPhysical.expectedHighValidRange, signal.decimalPlaces(), signalStrId);
 					}
 						break;
-					case UnitsConvertorErrorCode.HighLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.HighLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricHighLimit", electricHighLimit, lowPhysical.expectedLowValidRange, lowPhysical.expectedHighValidRange, signal.decimalPlaces(), signalStrId);
 					}
@@ -217,10 +217,10 @@ function generate_aom4ph(confFirmware, module, LMNumber, frame, log, signalSet, 
 			
 			switch (outputMode)
 			{
-				case OutputMode.Plus0_Plus5_V:		outputModeCode = 0;	break;
-				case OutputMode.Plus4_Plus20_mA:	outputModeCode = 1;	break;
-				case OutputMode.Minus10_Plus10_V:	outputModeCode = 2;	break;
-				case OutputMode.Plus0_Plus5_mA:		outputModeCode = 3;	break;
+				case ConfigStruct.OutputMode.Plus0_Plus5_V:		outputModeCode = 0;	break;
+				case ConfigStruct.OutputMode.Plus4_Plus20_mA:	outputModeCode = 1;	break;
+				case ConfigStruct.OutputMode.Minus10_Plus10_V:	outputModeCode = 2;	break;
+				case ConfigStruct.OutputMode.Plus0_Plus5_mA:		outputModeCode = 3;	break;
 				default:
 				{
 					log.errINT1001("Unknown OutputMode type " + outputMode + " in " + signalStrId);

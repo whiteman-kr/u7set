@@ -1,8 +1,9 @@
 #pragma once
 
-#include "../GatewayService/GatewayDescription.h"
-#include "GatewayParserLog.h"
 #include "Context.h"
+
+#include "../GatewayLib/GatewayDescription.h"
+#include "../GatewayLib/GatewayParserLog.h"
 
 namespace Gateway
 {
@@ -69,9 +70,12 @@ namespace Gateway
 
 		bool parse(const QString& desc);
 
-		const ParserLog& log() const;
-
 		GatewaysShared gateways();
+
+		int errorCount() const;
+		int warningCount() const;
+
+		void flushParserLog();
 
 	private:
 		void clear();
@@ -82,6 +86,8 @@ namespace Gateway
 		ParseResult parseGatewaySection(E::Section& parsingSection, const ParseLineResult& plr);
 		ParseResult parseSignalListSection(E::Section& parsingSection, const ParseLineResult& plr);
 
+		ParseResult finalizeGatewaySection(const ParseLineResult& plr);
+
 		ParseResult appendAddressSignalID(SignalListShared signalList, const ParseLineResult& plr, bool appendAddr);
 
 		ParseResult parsePropValue(int lineNo, const QString& plrValue, bool* isPropValue, double* propValue);
@@ -91,18 +97,20 @@ namespace Gateway
 		bool parseSettingValue(E::Setting setting, const QString& valueStr, ParseLineResult* plr);
 
 		bool parseIntValueStr(const QString& valueStr, ParseLineResult* plr);
-		bool parseAlphsNumericUnderlineStr(const QString& valueStr, ParseLineResult* plr);
+		bool parseAlphaNumericUnderlineStr(const QString& valueStr, ParseLineResult* plr);
 		bool parseBoolValueStr(const QString& valueStr, ParseLineResult* plr);
 		bool parseIpPortValueStr(const QString& valueStr, ParseLineResult* plr);
 
-		GatewayShared createTypedGateway(E::GatewayType gwType);
+		QStringList knownGatewayTypes() const;
+		E::GatewayType getGatewayType(const QString& gwTypeStr) const;
 
 	private:
 		const Builder::Context* m_context = nullptr;
 		const AppSignalSet* m_appSignalSet = nullptr;
-		GatewaysShared m_gateways;
+		Builder::IssueLogger* m_u7log = nullptr;
 
-		ParserLog m_log;
+		GatewaysShared m_gateways;
+		mutable ParserLog m_log;
 
 		//
 

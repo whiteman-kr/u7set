@@ -290,17 +290,17 @@ function generate_tim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			{
 				switch (highPhysical.errorCode)
 				{
-					case UnitsConvertorErrorCode.ErrorGeneric:
+					case ConfigStruct.UnitsConvertorErrorCode.ErrorGeneric:
 					{
 						log.errINT1001(highPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrIdA);
 					}
 						break;
-					case UnitsConvertorErrorCode.LowLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.LowLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricLowLimit", electricLowLimit, highPhysical.expectedLowValidRange, highPhysical.expectedHighValidRange, 4, signalStrIdA);
 					}
 						break;
-					case UnitsConvertorErrorCode.HighLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.HighLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricHighLimit", electricHighLimit, highPhysical.expectedLowValidRange, highPhysical.expectedHighValidRange, 4, signalStrIdA);
 					}
@@ -313,17 +313,17 @@ function generate_tim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			{
 				switch (lowPhysical.errorCode)
 				{
-					case UnitsConvertorErrorCode.ErrorGeneric:
+					case ConfigStruct.UnitsConvertorErrorCode.ErrorGeneric:
 					{
 						log.errINT1001(lowPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrIdA);
 					}
 						break;
-					case UnitsConvertorErrorCode.LowLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.LowLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricLowLimit", electricLowLimit, lowPhysical.expectedLowValidRange, lowPhysical.expectedHighValidRange, 4, signalStrIdA);
 					}
 						break;
-					case UnitsConvertorErrorCode.HighLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.HighLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricHighLimit", electricHighLimit, lowPhysical.expectedLowValidRange, lowPhysical.expectedHighValidRange, 4, signalStrIdA);
 					}
@@ -381,47 +381,47 @@ function generate_tim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 
 			switch (sensorType)
 			{
-				case SensorType.mV_Type_B:		
+				case ConfigStruct.SensorType.mV_Type_B:		
 					sensorTypeCode = 0;	
 					highValidRangeMax = 1815;
 					lowValidRangeMin = 255;
 				break;
-				case SensorType.mV_Type_E:		
+				case ConfigStruct.SensorType.mV_Type_E:		
 					sensorTypeCode = 1;	
 					highValidRangeMax = 995;
 					lowValidRangeMin = -195;
 				break;
-				case SensorType.mV_Type_J:		
+				case ConfigStruct.SensorType.mV_Type_J:		
 					sensorTypeCode = 2;	
 					highValidRangeMax = 1195;
 					lowValidRangeMin = -205;
 				break;
-				case SensorType.mV_Type_K:		
+				case ConfigStruct.SensorType.mV_Type_K:		
 					sensorTypeCode = 3;	
 					highValidRangeMax = 1367;
 					lowValidRangeMin = -195;
 				break;
-				case SensorType.mV_Type_N:		
+				case ConfigStruct.SensorType.mV_Type_N:		
 					sensorTypeCode = 4;	
 					highValidRangeMax = 1295;
 					lowValidRangeMin = -195;
 				break;
-				case SensorType.mV_Type_R:		
+				case ConfigStruct.SensorType.mV_Type_R:		
 					sensorTypeCode = 5;	
 					highValidRangeMax = 1763;
 					lowValidRangeMin = -45;
 				break;
-				case SensorType.mV_Type_S:		
+				case ConfigStruct.SensorType.mV_Type_S:		
 					sensorTypeCode = 6;	
 					highValidRangeMax = 1763;
 					lowValidRangeMin = -45;
 				break;
-				case SensorType.mV_Type_T:		
+				case ConfigStruct.SensorType.mV_Type_T:		
 					sensorTypeCode = 7;	
 					highValidRangeMax = 395;
 					lowValidRangeMin = -195;
 				break;
-				case SensorType.mV_Raw_Mul_8:	
+				case ConfigStruct.SensorType.mV_Raw_Mul_8:	
 					sensorTypeCode = 8;	
 					highValidRangeMax = 100;
 					lowValidRangeMin = -35;
@@ -430,7 +430,7 @@ function generate_tim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 						decimalPlaces = 3;
 					}
 				break;
-				case SensorType.mV_Raw_Mul_32:	
+				case ConfigStruct.SensorType.mV_Raw_Mul_32:	
 					sensorTypeCode = 12;	
 					highValidRangeMax = 19;
 					lowValidRangeMin = -8.5;

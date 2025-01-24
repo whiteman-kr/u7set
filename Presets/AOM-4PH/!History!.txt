@@ -1,3 +1,4 @@
 AOM-4PH
-	07.11.2023	Version: 2	AOM-4PH_v2.u7devp 			Validity signals link was removed from output signals
+	07.11.2023	Version: 2	AOM-4PH_v2.u7devp 		Validity signals link was removed from output signals
+	21.01.2025	Version: 3	AOM-4PH_v3.u7devp		RPCT-3992:  	 Configuration script is reorganized for library usage
 

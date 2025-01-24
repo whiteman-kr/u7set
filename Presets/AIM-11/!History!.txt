@@ -1,4 +1,5 @@
 AIM-11
 	02.12.2021	Version: 0	AIM-11_v0.u7devp		CMCASETASK-545:  Added AIM-11 preset
 	15.12.2021	Version: 1	AIM-11_v1.u7devp		CMCASETASK-545:  Rload_Ohm has new range 10.1000 Ohm
+	21.01.2025	Version: 2	AIM-11_v2.u7devp		RPCT-3992:  	 Configuration script is reorganized for library usage
 

@@ -234,7 +234,7 @@ namespace Gateway
 				}
 				break;
 
-			case E::GatewayType::ModbusTcpSlave:
+			case E::GatewayType::ModbusSlave:
 				{
 					ModbusSlaveGatewayShared modbusGateway = std::dynamic_pointer_cast<ModbusSlaveGateway>(gw);
 
