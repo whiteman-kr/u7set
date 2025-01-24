@@ -641,7 +641,7 @@ namespace File
 	inline const QString ARCH_INFO_PROTO = "ArchInfo.proto";
 	inline const QString ARCH_INFO_PROTO_BAK = "ArchInfo.proto.bak";
 
-	inline const QString READONLY = "readonly";
+	inline const QString READONLY = ".readonly";
 
 	inline const QString MONITOR_BEHAVIOR = "MonitorBehavior.xml";
 

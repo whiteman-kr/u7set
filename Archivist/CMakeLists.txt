@@ -46,17 +46,16 @@ target_precompile_headers(Archivist PRIVATE
 	#
 	<QCoreApplication>
 	<QDebug>
+	<QDate>
 	<QDateTime>
-	<QElapsedTimer>
-	<QEventLoop>
 	<QFile>
 	<QFileInfo>
 	<QObject>
 	<QString>
 	<QStringList>
+	<QStorageInfo>
 	<QTextStream>
 	<QThread>
-	<QTimer>
 	<QtGlobal>
 
 	# Project includes
