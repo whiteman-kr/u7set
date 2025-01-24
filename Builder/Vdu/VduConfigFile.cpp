@@ -239,7 +239,7 @@ namespace
 			}
 
 			uint16_t size = *reinterpret_cast<const uint16_t*>(data.constData() + offset);
-			result = QString::fromUtf16(reinterpret_cast<const char16_t*>(data.constData() + offset + 2), size);
+			result = QString::fromUtf8(reinterpret_cast<const char*>(data.constData() + offset + 2), size);
 
 			return result;
 		};
