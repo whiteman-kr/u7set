@@ -1,13 +1,16 @@
 <RCC>
     <qresource prefix="/Images">
         <file>Images/dragndrop.png</file>
-    </qresource>
+		<file>Images/CloseButtonBlack.svg</file>
+		<file>Images/CloseButtonGray.svg</file>
+	</qresource>
     <qresource prefix="/SimulatorUi">
         <file>Images/SchemaList.svg</file>
         <file>Images/SimAddWindow.svg</file>
         <file>Images/SimAllowRegData.svg</file>
         <file>Images/SimAppLogicSchemas.svg</file>
         <file>Images/SimClose.svg</file>
+		<file>Images/SimCloseButtonBlack.svg</file>
         <file>Images/SimConnectionIcon.svg</file>
         <file>Images/SimFindSignal.svg</file>
         <file>Images/SimLogicModuleIcon.svg</file>

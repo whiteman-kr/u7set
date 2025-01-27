@@ -1,4 +1,5 @@
 #include "SimWidgetPrivate.h"
+#include "NotificationPanel.h"
 #include "SimCodePage.h"
 #include "SimConnectionPage.h"
 #include "SimLogicModulePage.h"
@@ -29,6 +30,7 @@
 #include <QLineEdit>
 #include <QMimeData>
 #include <QVBoxLayout>
+#include <QXmlStreamReader>
 
 
 namespace SimUi
@@ -82,8 +84,8 @@ namespace SimUi
 		margins.setTop(0);
 		layout->setContentsMargins(margins);
 
-		createDocks();
 		createToolBar();
+		createDocks();
 
 		updateActions();
 
@@ -117,6 +119,17 @@ namespace SimUi
 		}
 
 		connect(m_simulator.get(), &SimIdeSimulator::projectUpdated, this, &SimWidgetPrivate::updateActions);
+		connect(m_simulator.get(),
+				&SimIdeSimulator::projectUpdated,
+				this,
+				[this]()
+				{
+					if (m_notificationPanel != nullptr)
+					{
+						m_notificationPanel->hide();
+					}
+				});
+
 		connect(&(m_simulator->control()), &Sim::Control::stateChanged, this, &SimWidgetPrivate::controlStateChanged);
 		connect(&(m_simulator->control()), &Sim::Control::statusUpdate, this, &SimWidgetPrivate::updateTimeIndicator);
 
@@ -146,6 +159,8 @@ namespace SimUi
 		addAction(m_showControlTabAccelerator);
 
 		connect(m_showControlTabAccelerator, &QAction::triggered, this, &SimWidgetPrivate::openAppSchemasTabPage);
+
+		startTimer(2000);
 
 		return;
 	}
@@ -522,6 +537,7 @@ namespace SimUi
 		setCorner(Qt::Corner::BottomLeftCorner, Qt::DockWidgetArea::LeftDockWidgetArea);
 		setCorner(Qt::Corner::BottomRightCorner, Qt::DockWidgetArea::BottomDockWidgetArea);
 		setCorner(Qt::Corner::TopRightCorner, Qt::DockWidgetArea::RightDockWidgetArea);
+		setCorner(Qt::Corner::TopLeftCorner, Qt::DockWidgetArea::LeftDockWidgetArea);
 
 		// Project dock
 		//
@@ -559,6 +575,14 @@ namespace SimUi
 			addDockWidget(Qt::BottomDockWidgetArea, m_outputPaneDock);
 		}
 
+		// Notification dock widget
+		//
+		if (m_slaveWindow == false)
+		{
+			m_notificationPanel = new NotificationPanel{this};
+			addDockWidget(Qt::TopDockWidgetArea, m_notificationPanel);
+		}
+
 		return;
 	}
 
@@ -587,10 +611,116 @@ namespace SimUi
 				}
 
 				m_toolBar->setVisible(true);
+
+				Q_ASSERT(m_notificationPanel);
+				m_notificationPanel->hide();
 			}
 		}
 
 		m_showEventFired = true;
+
+		return;
+	}
+
+	void SimWidgetPrivate::timerEvent(QTimerEvent* event)
+	{
+		if (m_slaveWindow == false && m_simulator->isLoaded() == true)
+		{
+			Q_ASSERT(m_notificationPanel);
+
+			// Check if the build was updated and rise notification if it was.
+			//
+			QString path = m_simulator->buildPath();
+
+			QString buildXmlPath = m_simulator->buildPath() + "/build.xml";
+			QFile buildXmlFile(buildXmlPath);
+
+			try
+			{
+				if (buildXmlFile.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+				{
+					throw 1;
+				}
+
+				QXmlStreamReader xml{buildXmlFile.readAll()};
+
+				/*
+				<Build>
+					<BuildInfo Project="cdu" ID="258" Date="23.01.2025 16:28:30" Changeset="0" User="Administrator"
+				Workstation="SERHIY-TP17P"/> <Files Count="112"> <File Name="/Common/AppSignals.asgs" ID="APP_SIGNAL_SET" Tag=""
+				Compressed="Yes" Size="8716" MD5="057327e32266fb553fb1b341526622de"/>
+						...
+					</Files>
+					<BuildResult Errors="0" Warnings="4"/>
+				</Build>
+				*/
+
+				// Read BuildInfo, ID.
+				//
+				int buildNo = 0;
+
+				while (!xml.atEnd() && !xml.hasError())
+				{
+					QXmlStreamReader::TokenType token = xml.readNext();
+
+					if (token == QXmlStreamReader::StartElement)
+					{
+						if (xml.name() == "BuildInfo")
+						{
+							QString buildInfoID = xml.attributes().value("ID").toString();
+							if (buildInfoID.isEmpty())
+							{
+								throw 1;
+							}
+
+							buildNo = buildInfoID.toInt();
+							if (buildNo == m_simulator->buildNo())
+							{
+								// Build has not been changed.
+								//
+								throw 0;
+							}
+						}
+						else
+						{
+							if (xml.name() == "BuildResult")
+							{
+								QString buildResultErrors = xml.attributes().value("Errors").toString();
+								if (buildResultErrors.isEmpty() || buildResultErrors.toInt() != 0)
+								{
+									throw 2;
+								}
+							}
+						}
+					}
+				}
+
+				if (xml.hasError())
+				{
+					throw 3;
+				}
+
+				// Build is updated, show notification.
+				//
+				std::function<void(QString)> reloadProject = [this](QString link)
+				{
+					m_notificationPanel->hide();
+
+					if (link == "reload_project")
+					{
+						refreshBuild();
+					}
+				};
+
+				m_notificationPanel->showNotification(
+					tr("The current project build has been updated to #%1. <a href='reload_project'>Reload Build</a>").arg(buildNo),
+					m_toolBar->height(),
+					std::move(reloadProject));
+			}
+			catch (...)
+			{
+			}
+		}
 
 		return;
 	}
