@@ -1,5 +1,5 @@
-#include <VFrame30/VduSchema.h>
 #include <VFrame30/SchemaLayer.h>
+#include <VFrame30/VduSchema.h>
 
 namespace VFrame30
 {
@@ -14,15 +14,15 @@ namespace VFrame30
 
 		setBackgroundColor(qRgb(0xF8, 0xF8, 0xF8));
 
-		addLayer(std::make_shared<SchemaLayer>(this, "Frame", false));
-		addLayer(std::make_shared<SchemaLayer>(this, "Drawing", true));
-		addLayer(std::make_shared<SchemaLayer>(this, "Notes", false));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerFrameName, false));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerDrawingName, true));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerNotesName, false));
 
 		setTagsList(QStringList{"vdu"});
 
 		return;
 	}
-	
+
 	bool VduSchema::SaveData(Proto::Envelope* message) const
 	{
 		return Schema::SaveData(message);
@@ -32,4 +32,4 @@ namespace VFrame30
 	{
 		return Schema::LoadData(message);
 	}
-}
+} // namespace VFrame30
