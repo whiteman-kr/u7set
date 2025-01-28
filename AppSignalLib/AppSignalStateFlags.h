@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../libs/CommonLib/include/CommonLib/Types.h"
+
 #pragma pack(push, 1)
 
 union AppSignalStateFlags

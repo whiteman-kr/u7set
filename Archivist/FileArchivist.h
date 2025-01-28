@@ -3,6 +3,7 @@
 #include <QMutex>
 #include "Archivist.h"
 #include <ArchSignal.pb.h>
+#include "../ArchivingService/ArchFileRecord.h"
 
 class FileArchivist : public Archivist
 {
@@ -32,7 +33,7 @@ private:
 	bool checkRequiredSpace();
 	bool copyFiles();
 	void copyThreadProc();
-	bool copyFile(const QString& from, const QString& to);
+	bool copyFile(const QString& from, const QString& to, qint64 startPos, qint64 endPos);
 
 	qint64 findBeginPos(const QString& pathFileName, QDateTime beginDate);
 	qint64 findEndPos(const QString& pathFileName, QDateTime endDate);
@@ -50,7 +51,9 @@ private:
 
 //	QString m_destFile;
 
-	char* m_buffer = nullptr;
+	inline static const qint64 BUF_SIZE = 15000 * sizeof(ArchFileRecord);
+
+	char m_buffer[BUF_SIZE];
 
 	QMutex m_copyMutex;
 	std::vector<CopyFileInfo> m_copyFileInfos;
