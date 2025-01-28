@@ -130,8 +130,6 @@ windows_build_job:
     - "#               Copy Qt DLL's"
     - "# ----------------------------------------------"
     - "& './CI/windeploy.bat'"
-#Copy PostgreSQL DLL to bin/release
-    - "copy C:\\libpq_my_build\\libpq.dll $Env:BIN_OUT_DIR\\"
 #Copy FTDI Drivers to release
     - "mkdir \"$Env:BIN_OUT_DIR/ftdi\""
     - "copy C:\\ftdi\\CDM-v2.12.36.4-WHQL-Certified.zip $Env:BIN_OUT_DIR\\ftdi\\"

@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(BuilderConsole LANGUAGES CXX)
 
 include(../cmake/vld.cmake)
+include(../cmake/copy_libpq_dll.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -38,5 +39,10 @@ target_link_libraries(${TARGET} PRIVATE CommonLib Behavior ReportLib HardwareLib
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
 	 target_link_libraries(${TARGET} PRIVATE vld.lib)
 endif()
+
+# Copy PostgreSQL DLLs (libpq.dll and its' dependencies)
+# These dlls are not copied by default.
+#
+copy_libpq_dll(${TARGET})
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

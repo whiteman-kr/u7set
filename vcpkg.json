@@ -5,6 +5,7 @@
     "asio",
     "boost-graph",
     "gtest",
+    "libpq",
     "openssl",
     "protobuf"
   ],
@@ -14,20 +15,20 @@
       "version": "1.32.0"
     },
     {
-      "name": "gtest",
-      "version": "1.15.2"
+      "name": "boost-graph",
+      "version": "1.86.0"
     },
     {
-      "name": "protobuf",
-      "version": "5.29.2"
+      "name": "gtest",
+      "version": "1.15.2"
     },
     {
       "name": "openssl",
       "version": "3.4.0#1"
     },
     {
-      "name": "boost-graph",
-      "version": "1.86.0"
+      "name": "protobuf",
+      "version": "5.29.2"
     }
   ]
 }

@@ -622,7 +622,7 @@ namespace SimUi
 		return;
 	}
 
-	void SimWidgetPrivate::timerEvent(QTimerEvent* event)
+	void SimWidgetPrivate::timerEvent([[maybe_unused]] QTimerEvent* event)
 	{
 		if (m_slaveWindow == false && m_simulator->isLoaded() == true)
 		{

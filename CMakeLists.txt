@@ -42,6 +42,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(QT_VERSION "6.8.1")
 
 find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
+find_package(PostgreSQL REQUIRED)
 find_package(Boost REQUIRED COMPONENTS graph)
 find_package(Threads REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)

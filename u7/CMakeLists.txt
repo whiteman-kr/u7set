@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(u7 LANGUAGES CXX)
 
 include(../cmake/vld.cmake)
+include(../cmake/copy_libpq_dll.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -448,10 +449,16 @@ endif()
 
 target_compile_definitions(${TARGET} PRIVATE QTKEYCHAIN_NO_EXPORT)
 
+#
+# Copy PostgreSQL DLLs (libpq.dll and its' dependencies)
+# These dlls are not copied by default.
+#
+copy_libpq_dll(${TARGET})
 
+# --
 # Generation scripting help
 # Find for Doxygen here as add_subdirectory works with CMake 3.27+ only
-
+#
 find_package(Doxygen)
 
 if(DOXYGEN_FOUND)

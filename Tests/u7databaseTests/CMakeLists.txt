@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 
 project(u7databasetests LANGUAGES CXX)
 
+include(../../cmake/copy_libpq_dll.cmake)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -75,5 +77,10 @@ target_precompile_headers(${TARGET} PRIVATE
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Qt6::Core Qt6::Sql Qt6::Network Qt6::Widgets Qt6::Xml Qt6::Qml)
 target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib OnlineLib HardwareLib DbLib)
+
+# Copy PostgreSQL DLLs (libpq.dll and its' dependencies)
+# These dlls are not copied by default.
+#
+copy_libpq_dll(${TARGET})
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)
