@@ -8,17 +8,21 @@ class FileArchivist : public Archivist
 {
 	struct CopyFileInfo
 	{
+		QString pathFileName;
 		QString fileName;
-		QString shortFileName;
 		QString appSignalID;
 		int groupID = 0;
+
+		//
+
 		qint64 startPos = 0;
 		qint64 endPos = 0;
-		bool fullFile = true;
+		bool copyEntireFile = true;
 	};
 
 public:
 	FileArchivist(const RequestParams& rp);
+	~FileArchivist();
 
 	bool copyArchive() override;
 
@@ -28,9 +32,10 @@ private:
 	bool checkRequiredSpace();
 	bool copyFiles();
 	void copyThreadProc();
+	bool copyFile(const QString& from, const QString& to);
 
-	qint64 findBeginPos(const QString& fileName, const QDateTime& beginDate);
-	qint64 findEndPos(const QString& fileName, const QDateTime& endDate);
+	qint64 findBeginPos(const QString& pathFileName, QDateTime beginDate);
+	qint64 findEndPos(const QString& pathFileName, QDateTime endDate);
 	QString sizeStr(qint64 size);
 	QString timeStr(qint64 time);
 	QString hexFolder(int g);
@@ -40,6 +45,12 @@ private:
 	QString m_project;
 	QString m_archServiceID;
 	QString m_destArchivePath;
+
+	QStorageInfo m_destStorageInfo;
+
+//	QString m_destFile;
+
+	char* m_buffer = nullptr;
 
 	QMutex m_copyMutex;
 	std::vector<CopyFileInfo> m_copyFileInfos;

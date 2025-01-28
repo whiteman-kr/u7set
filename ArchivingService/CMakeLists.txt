@@ -18,6 +18,8 @@ add_executable(${TARGET}
 	ArchFile.h
 	ArchFileBuffer.cpp
 	ArchFileBuffer.h
+	ArchFilePartition.cpp
+	ArchFilePartition.h
 	ArchFileRecord.cpp
 	ArchFileRecord.h
 	Archive.cpp

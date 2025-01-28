@@ -1,16 +1,32 @@
 #include <QDir>
 #include <QStorageInfo>
+#include <CommonLib/Times.h>
 #include "FileArchivist.h"
 #include "../UtilsLib/WUtils.h"
+#include "../ArchivingService/BinSearch.h"
+#include "../ArchivingService/ArchFileRecord.h"
+#include "../ArchivingService/ArchFilePartition.h"
 
 FileArchivist::FileArchivist(const RequestParams& rp) :
 	Archivist(rp)
 {
 }
 
+FileArchivist::~FileArchivist()
+{
+	DELETE_ARRAY_IF_NOT_NULL(m_buffer);
+}
+
 bool FileArchivist::copyArchive()
 {
 	printRequestParams();
+
+	// convert request times to UTC
+
+	m_reqParams.begin = m_reqParams.begin.toUTC();
+	m_reqParams.end = m_reqParams.end.toUTC();
+
+	//
 
 	bool result = true;
 
@@ -60,6 +76,14 @@ bool FileArchivist::readArchInfoProto()
 
 bool FileArchivist::scanArchive()
 {
+	m_destStorageInfo.setPath(m_reqParams.destLocation);
+
+	if (m_destStorageInfo.isValid() == false)
+	{
+		print << "Wrong destination location!\n";
+		return false;
+	}
+
 	m_project = QString::fromStdString(m_archInfo.buildinfo().project());
 	m_archServiceID = QString::fromStdString(m_archInfo.archiveserviceid());
 
@@ -132,36 +156,48 @@ bool FileArchivist::scanArchive()
 				continue;
 			}
 
-			CopyFileInfo& cfi = m_copyFileInfos.emplace_back(CopyFileInfo{});
+			CopyFileInfo cfi;
 
-			cfi.fileName = path + QString("/%1").arg(fileName);
-			cfi.shortFileName = fileName;
+			cfi.pathFileName = path + QString("/%1").arg(fileName);
+			cfi.fileName = fileName;
 			cfi.appSignalID = appSignalID;
 			cfi.groupID = groupID;
 
-			if (fileDate == reqBeginDate)
+			//
+
+			cfi.startPos = 0;
+			cfi.endPos = fi.size();
+
+			if (fileDate > reqBeginDate && fileDate < reqEndDate)
 			{
-				cfi.startPos = 0;	//	findBeginPos(cfi.fileName, m_reqParams.begin);
-				cfi.endPos = fi.size();
-				cfi.fullFile = true;
+				cfi.copyEntireFile = true;
 			}
 			else
 			{
+				cfi.startPos = findBeginPos(cfi.fileName, m_reqParams.begin);
+
+				if (cfi.startPos == -1)
+				{
+					continue;
+				}
+
+
 				if (fileDate == reqEndDate)
 				{
-					cfi.startPos = 0;
-					cfi.endPos = fi.size();	//	findEndPos(cfi.fileName, m_reqParams.end);
-					cfi.fullFile = true;
+					cfi.endPos = findEndPos(cfi.fileName, m_reqParams.end);
+
+					if (cfi.endPos == -1)
+					{
+						continue;
+					}
 				}
-				else
-				{
-					cfi.startPos = 0;
-					cfi.endPos = fi.size();
-					cfi.fullFile = true;
-				}
+
+				cfi.copyEntireFile = (cfi.startPos == 0) && (cfi.endPos == fi.size());
 			}
 
-			m_expectedSize += cfi.endPos - cfi.startPos;
+			m_copyFileInfos.emplace_back(cfi);
+
+			m_expectedSize += ROUND_TO(cfi.endPos - cfi.startPos, m_destStorageInfo.blockSize());
 		}
 	}
 
@@ -176,15 +212,13 @@ bool FileArchivist::scanArchive()
 
 bool FileArchivist::checkRequiredSpace()
 {
-	QStorageInfo si(m_reqParams.destLocation);
-
-	if (si.bytesAvailable() < m_expectedSize)
+	if (m_destStorageInfo.bytesAvailable() < m_expectedSize)
 	{
-		print << "No space available in destionation location\n\n";
+		print << "No space available in destination location\n\n";
 		return false;
 	}
 
-	print << QString("Space available in destionation location: %1\n\n").arg(sizeStr(si.bytesAvailable()));
+	print << QString("Space available in destination location: %1\n\n").arg(sizeStr(m_destStorageInfo.bytesAvailable()));
 
 	print << "Copy archive? (y/n) ";
 
@@ -221,11 +255,7 @@ bool FileArchivist::copyFiles()
 		return false;
 	}
 
-//	print << QString("Folder created: %1\n").arg(path);
-
 	//
-
-	const QChar ZERO('0');
 
 	for(int i = 0; i < 256; i++)
 	{
@@ -250,10 +280,13 @@ bool FileArchivist::copyFiles()
 
 	int copyCount = TO_INT(m_copyFileInfos.size());
 
-	QString prevAppSignalID;
-	QString path3;
-
 	print.newLine();
+
+	//
+
+	//m_destFile = m_destArchivePath + Separator::DIR + "ArchData.file";
+
+	//
 
 	m_copyInfoIndex = 0;
 
@@ -351,6 +384,8 @@ void FileArchivist::copyThreadProc()
 {
 	QDir dr;
 
+	std::error_code err;
+
 	do
 	{
 		m_copyMutex.lock();
@@ -383,24 +418,24 @@ void FileArchivist::copyThreadProc()
 			}
 		}
 
+//		QString	path3 = m_destFile + QString(":%1-%2").arg(hexFolder(cfi.groupID)).arg(cfi.appSignalID.mid(1));
+
 		//			print << QString("Folder created: %1\n").arg(path3);
 
-		if (cfi.fullFile)
+		if (cfi.copyEntireFile)
 		{
-			//std::filesystem::path from(cfi.fileName.toStdString());
+			QString toPath = path3 + QString("/%1").arg(cfi.fileName);
 
-			QString toPath = path3 + QString("/%1").arg(cfi.shortFileName);
+			//QString toPath = path3 + QString("-%1").arg(cfi.shortFileName);
 
 			toPath = dr.toNativeSeparators(toPath);
-
-			//std::filesystem::path to(toPath.toStdString());
 
 			if (QFile::exists(toPath))
 			{
 				QFile::remove(toPath);
 			}
 
-			bool res = QFile::copy(cfi.fileName, toPath);
+			bool res = QFile::copy(cfi.pathFileName, toPath);
 
 			//			qDebug() << toPath;
 
@@ -408,6 +443,25 @@ void FileArchivist::copyThreadProc()
 			{
 				DEBUG_STOP;
 			}
+
+/*			std::filesystem::path from(cfi.fileName.toStdString());
+			std::filesystem::path to(toPath.toStdString());
+
+			std::filesystem::copy(from, to, err);
+
+			if (err.value() != 0)
+			{
+				DEBUG_STOP;
+			}*/
+
+/*			bool res = copyFile(cfi.fileName, toPath);
+
+			//			qDebug() << toPath;
+
+			if (res == false)
+			{
+				DEBUG_STOP;
+			}*/
 		}
 
 		m_copiedCount++;
@@ -415,14 +469,95 @@ void FileArchivist::copyThreadProc()
 	} while(true);
 }
 
-qint64 FileArchivist::findBeginPos(const QString& fileName, const QDateTime& beginDate)
+bool FileArchivist::copyFile(const QString& from, const QString& to)
 {
-	return 0;
+	QFile fromFile(from);
+	QFile toFile(to);
+
+	if (fromFile.open(QIODeviceBase::ReadOnly) == false ||
+		toFile.open(QIODeviceBase::WriteOnly | QIODeviceBase::Truncate) == false)
+	{
+		return false;
+	}
+
+	static const qint64 BUF_SIZE = 1024 * 1024 * 1024;	// 1Gb
+
+	if (m_buffer == nullptr)
+	{
+		m_buffer = new char[BUF_SIZE];
+
+		Q_ASSERT(m_buffer != nullptr);
+	}
+
+	qint64 size = 0;
+
+	do
+	{
+		size = fromFile.read(m_buffer, BUF_SIZE);
+		toFile.write(m_buffer, size);
+	}
+	while(size == BUF_SIZE);
+
+	return true;
 }
 
-qint64 FileArchivist::findEndPos(const QString& fileName, const QDateTime& endDate)
+
+qint64 FileArchivist::findBeginPos(const QString& pathFileName, QDateTime beginDate)
 {
-	return 0;
+	ArchFilePartition afp;
+
+	afp.openForReading(pathFileName);
+
+	beginDate.setTimeZone(TIME_ZONE_UTC);
+
+	TimeStamp ts(beginDate);
+
+	qint64 position = 0;
+
+	ArchFindResult res = afp.binarySearch(E::TimeType::System,  ts.timeStamp, &position);
+
+	if (res != ArchFindResult::Found)
+	{
+		return -1;
+	}
+
+	if (position > ArchFileRecord::SIZE)
+	{
+		position -= ArchFileRecord::SIZE;
+	}
+
+	Q_ASSERT((position % ArchFileRecord::SIZE) == 0);
+
+	return position;
+}
+
+qint64 FileArchivist::findEndPos(const QString& pathFileName, QDateTime endDate)
+{
+	ArchFilePartition afp;
+
+	afp.openForReading(pathFileName);
+
+	endDate.setTimeZone(TIME_ZONE_UTC);
+
+	TimeStamp ts(endDate);
+
+	qint64 position = 0;
+
+	ArchFindResult res = afp.binarySearch(E::TimeType::System,  ts.timeStamp, &position);
+
+	if (res != ArchFindResult::Found)
+	{
+		return -1;
+	}
+
+	if (position + ArchFileRecord::SIZE <= afp.size())
+	{
+		position += ArchFileRecord::SIZE;
+	}
+
+	Q_ASSERT((position % ArchFileRecord::SIZE) == 0);
+
+	return position;
 }
 
 QString FileArchivist::sizeStr(qint64 size)
