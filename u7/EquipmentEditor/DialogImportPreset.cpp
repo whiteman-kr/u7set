@@ -1,12 +1,14 @@
 #include "DialogImportPreset.h"
 #include "ui_DialogImportPreset.h"
 
-DialogImportPreset::DialogImportPreset(const Proto::ExportedDevicePreset2& message, QWidget *parent) :
+#include <ProtoCommonHelper.h>
+
+
+DialogImportPreset::DialogImportPreset(const Proto::ExportedDevicePreset2& message, QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogImportPreset),
 	m_message(&message)
 {
-
 	ui->setupUi(this);
 
 	setWindowTitle(tr("Import Presets"));
@@ -26,9 +28,14 @@ DialogImportPreset::DialogImportPreset(const Proto::ExportedDevicePreset2& messa
 
 		const auto& deviceObjectMessage = it.GetExtension(::Proto::deviceobject);
 
+		QString caption;
+		QString presetName;
+		Proto::Read(deviceObjectMessage.caption(), &caption);
+		Proto::Read(deviceObjectMessage.presetname(), &presetName);
+
 		QStringList l;
-		l.push_back(QString::fromStdString(deviceObjectMessage.caption().text()));
-		l.push_back(QString::fromStdString(deviceObjectMessage.presetname().text()));
+		l.push_back(caption);
+		l.push_back(presetName);
 		l.push_back(QString::number(deviceObjectMessage.presetversion()));
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);
@@ -46,16 +53,15 @@ DialogImportPreset::DialogImportPreset(const Proto::ExportedDevicePreset2& messa
 	}
 
 	ui->projectNameLabel->setText(m_message->description().has_projectname() == true ?
-															  QString::fromStdString(m_message->description().projectname()) :
-															  tr("Unknown"));
+									  QString::fromStdString(m_message->description().projectname()) :
+									  tr("Unknown"));
 
-	ui->userNameLabel->setText(m_message->description().has_username() == true ?
-														  QString::fromStdString(m_message->description().username()) :
-														  tr("Unknown"));
+	ui->userNameLabel->setText(
+		m_message->description().has_username() == true ? QString::fromStdString(m_message->description().username()) : tr("Unknown"));
 
 	ui->exportTimeLabel->setText(m_message->description().has_exporttime() == true ?
-														  QDateTime::fromSecsSinceEpoch(m_message->description().exporttime()).toString("dd/MM/yyyy HH:mm:ss") :
-														  tr("Unknown"));
+									 QDateTime::fromSecsSinceEpoch(m_message->description().exporttime()).toString("dd/MM/yyyy HH:mm:ss") :
+									 tr("Unknown"));
 }
 
 DialogImportPreset::~DialogImportPreset()
@@ -95,10 +101,9 @@ void DialogImportPreset::accept()
 
 	if (m_chosenItems.items_size() == 0)
 	{
-		QMessageBox::warning(this, qAppName(), tr("Please choose at least one preset."));
+		QMessageBox::warning(this, qAppName(), tr("Please select at least one preset."));
 		return;
 	}
 
 	QDialog::accept();
 }
-

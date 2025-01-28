@@ -1,8 +1,8 @@
-#ifndef DIALOGIMPORTPRESET_H
-#define DIALOGIMPORTPRESET_H
+#pragma once
 
-namespace Ui {
-class DialogImportPreset;
+namespace Ui
+{
+	class DialogImportPreset;
 }
 
 class DialogImportPreset : public QDialog
@@ -19,9 +19,7 @@ private:
 	virtual void accept() override;
 
 private:
-	Ui::DialogImportPreset *ui;
+	Ui::DialogImportPreset* ui;
 	const ::Proto::ExportedDevicePreset2* m_message = nullptr;
 	::Proto::EnvelopeSet m_chosenItems;
 };
-
-#endif // DIALOGIMPORTPRESET_H
