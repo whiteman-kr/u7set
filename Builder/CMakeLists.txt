@@ -9,6 +9,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Qml Xml Sql Concurrent Gui PrintSupport)
 find_package(Boost REQUIRED COMPONENTS graph)
+find_package(Lua REQUIRED)
 
 if (MSVC)
   # MSVC warning suppressions
@@ -231,7 +232,15 @@ target_link_libraries(${TARGET} PUBLIC Boost::graph)
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
 target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 SimulatorLib ReportLib AppSignalLists TuningLib GatewayLib)
 
-target_compile_definitions(${TARGET} PRIVATE IS_BUILDER)
-#target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+# Lua library
+#
+target_include_directories(${TARGET} PRIVATE ${LUA_INCLUDE_DIR})
+target_link_libraries(${TARGET} PRIVATE ${LUA_LIBRARIES})
 
+# Add the IS_BUILDER definition
+#
+target_compile_definitions(${TARGET} PRIVATE IS_BUILDER)
+
+# Add the CODE_COVERAGE option
+#
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

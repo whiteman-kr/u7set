@@ -9,6 +9,7 @@
 #include <VFrame30/Context.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/ImageItem.h>
+#include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaItemVduImage.h>
 #include <VFrame30/SchemaItemVduImageValue.h>
 #include <VFrame30/SchemaItemVduLine.h>
@@ -19,10 +20,107 @@
 
 #include <QImageWriter>
 
+extern "C"
+{
+#include <lauxlib.h>
+#include <lua.h>
+#include <lualib.h>
+}
+
 // #define VDU_DEBUG
 
 namespace
 {
+	bool checkLuaScript(const VFrame30::Schema& schema, QString scriptProperty, Builder::IssueLogger& log)
+	{
+		auto property = schema.propertyByCaption(scriptProperty);
+		if (property == nullptr)
+		{
+			log.errINT1001(QString("checkLuaScript(), Property %1 for schema %2 is not found.").arg(scriptProperty).arg(schema.schemaId()),
+						   schema.schemaId());
+			return false;
+		}
+
+		QString script = property->value().toString();
+
+		// --
+		//
+		lua_State* L = luaL_newstate(); // Create a new Lua state
+		if (L == nullptr)
+		{
+			log.errINT1001("checkLuaScript(), Failed to create Lua state.");
+			return false;
+		}
+
+		luaL_openlibs(L); // Open standard libraries if needed
+
+		// Load the string (parse/compile it) but do not run it
+		//
+		int status = luaL_loadstring(L, script.toUtf8());
+		if (status != LUA_OK)
+		{
+			const char* err_msg = lua_tostring(L, -1);
+			QString error = QString::fromUtf8(err_msg ? err_msg : "Unknown error");
+
+			log.errEQP6302(schema.schemaId(), scriptProperty, -1, error);
+
+			lua_pop(L, 1); // Pop error message
+		}
+		else
+		{
+			lua_pop(L, 1); // Pop the compiled chunk
+		}
+
+		lua_close(L);
+		return true;
+	}
+
+	bool checkLuaScript(const VFrame30::SchemaItem& item, QString scriptProperty, Builder::IssueLogger& log)
+	{
+		auto property = item.propertyByCaption(scriptProperty);
+		if (property == nullptr)
+		{
+			log.errINT1001(QString("checkLuaScript(), Property %1 not found.").arg(scriptProperty),
+						   item.parentSchema()->schemaId(),
+						   item.label(),
+						   item.guid());
+			return false;
+		}
+
+		QString script = property->value().toString();
+
+		// --
+		//
+		lua_State* L = luaL_newstate(); // Create a new Lua state
+		if (L == nullptr)
+		{
+			log.errINT1001("checkLuaScript(), Failed to create Lua state.");
+			return false;
+		}
+
+		luaL_openlibs(L); // Open standard libraries if needed
+
+		// Load the string (parse/compile it) but do not run it
+		//
+		int status = luaL_loadstring(L, script.toUtf8());
+		if (status != LUA_OK)
+		{
+			const char* err_msg = lua_tostring(L, -1);
+			QString error = QString::fromUtf8(err_msg ? err_msg : "Unknown error");
+
+			log.errEQP6303(item.parentSchema()->schemaId(), item.label(), item.guid(), scriptProperty, -1, error);
+
+			lua_pop(L, 1); // Pop error message
+		}
+		else
+		{
+			lua_pop(L, 1); // Pop the compiled chunk
+		}
+
+		lua_close(L);
+		return true;
+	}
+
 	struct VduFileString
 	{
 		QString string;
@@ -512,6 +610,12 @@ namespace
 		// onClickScript
 		//
 		{
+			bool scriptIsOk = checkLuaScript(schemaItem, VFrame30::PropertyNames::clickScript, *context.m_log);
+			if (scriptIsOk == false)
+			{
+				return false;
+			}
+
 			fileSchemaItem.clickScript = VduFileString::stub;
 
 			auto clickScript = VduFileString::createUtf8(schemaItem.clickScript(), offsetof(VduSchemaFileSchemaItem1, clickScript));
@@ -521,6 +625,12 @@ namespace
 		// preDrawScript
 		//
 		{
+			bool scriptIsOk = checkLuaScript(schemaItem, VFrame30::PropertyNames::preDrawScript, *context.m_log);
+			if (scriptIsOk == false)
+			{
+				return false;
+			}
+
 			fileSchemaItem.preDrawScript = VduFileString::stub;
 
 			auto preDrawScript = VduFileString::createUtf8(schemaItem.preDrawScript(), offsetof(VduSchemaFileSchemaItem1, preDrawScript));
@@ -804,6 +914,14 @@ namespace Builder
 		// Forming file.body
 		//
 		{
+			bool onShowScriptIsOk = checkLuaScript(schema, VFrame30::PropertyNames::onShowScript, *context.m_log);
+			bool preDrawScriptIsOk = checkLuaScript(schema, VFrame30::PropertyNames::preDrawScript, *context.m_log);
+
+			if (onShowScriptIsOk == false || preDrawScriptIsOk == false)
+			{
+				return false;
+			}
+
 			VduSchemaFileProperties1& schemaProperties = file.schemaProperties;
 			schemaProperties.version = 1;
 			schemaProperties.headerSize = sizeof(schemaProperties);

@@ -1,34 +1,39 @@
 {
-  "name": "u7set",
-  "version": "1.0.0",
-  "dependencies": [
-    "asio",
-    "boost-graph",
-    "gtest",
-    "libpq",
-    "openssl",
-    "protobuf"
-  ],
-  "overrides": [
-    {
-      "name": "asio",
-      "version": "1.32.0"
-    },
-    {
-      "name": "boost-graph",
-      "version": "1.86.0"
-    },
-    {
-      "name": "gtest",
-      "version": "1.15.2"
-    },
-    {
-      "name": "openssl",
-      "version": "3.4.0#1"
-    },
-    {
-      "name": "protobuf",
-      "version": "5.29.2"
-    }
-  ]
+    "name": "u7set",
+    "version": "1.0.0",
+    "dependencies": [
+        "asio",
+        "boost-graph",
+        "gtest",
+        "libpq",
+        "lua",
+        "openssl",
+        "protobuf"
+    ],
+    "overrides": [
+        {
+            "name": "asio",
+            "version": "1.32.0"
+        },
+        {
+            "name": "boost-graph",
+            "version": "1.86.0"
+        },
+        {
+            "name": "gtest",
+            "version": "1.15.2"
+        },
+        {
+            "name": "lua",
+            "version": "5.4.7"
+        },
+        {
+            "name": "openssl",
+            "version": "3.4.0#1"
+        },
+        {
+            "name": "protobuf",
+            "version": "5.29.2"
+        }
+    ]
 }
