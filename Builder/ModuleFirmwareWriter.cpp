@@ -831,6 +831,13 @@ namespace Hardware
 		return reverseFloat(data);
 	}
 
+	quint32 ModuleFirmwareWriter::calcHash32(QString dataString) 
+	{
+		QByteArray bytes = dataString.toUtf8();
+
+		return ::calcHash32(bytes.data(), bytes.size());
+	}
+
 	QList<int> ModuleFirmwareWriter::calcHash64(QString dataString)
 	{
 		QByteArray bytes = dataString.toUtf8();

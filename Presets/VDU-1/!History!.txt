@@ -8,8 +8,9 @@ VDU-1
 	16.10.2024	Version: 6	VDU-1_v6.u7devp RPCT-3549: Added properties: DiagLANDataSize, SubsystemID, SubsystemChannel, LMNumber. Worstation removed.
 	07.11.2024	Version: 7	VDU-1_v7.u7devp RPCT-3550: Added Input, Output and Platform interface controller and their signals
 	03.12.2024	Version: 8	VDU-1_v8.u7devp RPCT-3550: Added Temperature and Opto validity signals, Number of inputs and Outputs is 6
-	07.12.2024	Version: 9	VDU-1_v7.u7devp RPCT-3550: Added Output signals, Common fault, Build number
-	13.12.2024	Version: 10	VDU-1_v7.u7devp RPCT-3985: Added Unicode subsets selection to the VDU preset
+	07.12.2024	Version: 9	VDU-1_v9.u7devp RPCT-3550: Added Output signals, Common fault, Build number
+	13.12.2024	Version: 10	VDU-1_v10.u7devp RPCT-3985: Added Unicode subsets selection to the VDU preset
+	04.02.2025	Version: 11	VDU-1_v11.u7devp RPCT-3995: Added Master PIN code property
 
 
 

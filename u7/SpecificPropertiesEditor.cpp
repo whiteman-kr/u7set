@@ -20,6 +20,11 @@ SpecificPropertyDescription::SpecificPropertyDescription()
 	ADD_PROPERTY_GETTER_SETTER(QString, "Default", true, SpecificPropertyDescription::defaultValue, SpecificPropertyDescription::setDefaultValue);
 	ADD_PROPERTY_GETTER_SETTER(int, "Precision", true, SpecificPropertyDescription::precision, SpecificPropertyDescription::setPrecision);
 	ADD_PROPERTY_GETTER_SETTER(int, "ViewOrder", true, SpecificPropertyDescription::viewOrder, SpecificPropertyDescription::setViewOrder);
+	ADD_PROPERTY_GETTER_SETTER(QString,
+							   "Validator",
+							   true,
+							   SpecificPropertyDescription::validator,
+							   SpecificPropertyDescription::setValidator);
 
 	auto propBool = ADD_PROPERTY_GETTER_SETTER(bool, "UpdateFromPreset", true, SpecificPropertyDescription::updateFromPreset, SpecificPropertyDescription::setUpdateFromPreset);
 	propBool->setCategory(tr("Flags"));
@@ -223,6 +228,16 @@ bool SpecificPropertyDescription::readOnly() const
 void SpecificPropertyDescription::setReadOnly(bool value)
 {
 	m_readOnly = value;
+}
+
+QString SpecificPropertyDescription::validator() const
+{
+	return m_validator;
+}
+
+void SpecificPropertyDescription::setValidator(const QString& value)
+{
+	m_validator = value;
 }
 
 void SpecificPropertyDescription::validateDynamicEnumType(QWidget* parent)
@@ -469,8 +484,9 @@ QString SpecificPropertyModel::toText() const
 															   spd->visible(),
 															   spd->specificEditor(),
 															   static_cast<quint16>(spd->viewOrder()),
-		                                                       spd->essential(),
-		                                                       spd->readOnly());
+															   spd->essential(),
+															   spd->readOnly(),
+															   spd->validator());
 		result += "\r\n";
 	}
 
@@ -880,7 +896,7 @@ QString SpecificPropertiesEditor::text() const
 
 void SpecificPropertiesEditor::setText(const QString& text)
 {
-	static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 7);	// Editor must be reviewed if version is raised
+	static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 8);	// Editor must be reviewed if version is raised
 
 	m_propertiesModel.clear();
 
@@ -1048,6 +1064,18 @@ void SpecificPropertiesEditor::setText(const QString& text)
 			}
 
 			spd->setReadOnly(columns[15].compare(QLatin1String("true"), Qt::CaseInsensitive) == 0);
+		}
+
+		if (version >= 8)
+		{
+			if (columns.size() < 17)
+			{
+				QString message = tr("SpecificProperties: Invalid specific property format: %1").arg(row);
+				QMessageBox::critical(this, qAppName(), message);
+				return;
+			}
+
+			spd->setValidator(columns[16]);
 		}
 
 		// Show/hide dynamic enum property

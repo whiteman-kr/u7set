@@ -66,7 +66,9 @@ namespace Hardware
 		Q_INVOKABLE quint32 data32(int frameIndex, int offset);
 		Q_INVOKABLE float dataFloat(int frameIndex, int offset);
 
+		Q_INVOKABLE quint32 calcHash32(QString dataString);
 		Q_INVOKABLE QList<int> calcHash64(QString dataString);
+
 		Q_INVOKABLE QString storeCrc64(int frameIndex, int start, int count, int offset);
 		Q_INVOKABLE QString storeHash64(int frameIndex, int offset, QString dataString);
 

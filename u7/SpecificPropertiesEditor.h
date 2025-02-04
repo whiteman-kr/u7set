@@ -69,6 +69,9 @@ public:
 	bool readOnly() const;
 	void setReadOnly(bool value);
 
+	QString validator() const;
+	void setValidator(const QString& value);
+
 	void validateDynamicEnumType(QWidget* parent);
 
 	std::tuple<quint16, QString, int, QString> tuple_order() const;
@@ -95,6 +98,7 @@ private:
 	quint16 m_viewOrder = 65535;
 	bool m_essential = false;
 	bool m_readOnly = false;
+	QString m_validator;
 };
 
 class SpecificPropertyModel : public QAbstractTableModel

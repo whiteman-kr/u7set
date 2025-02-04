@@ -206,6 +206,7 @@ module ConfigStruct
 
 		calcCrc32(frameIndex: number, start: number, count: number): number;
 		calcCrc64(frameIndex: number, start: number, count: number): ArrayBuffer;
+		calcHash32(dataString: string): any;
 		calcHash64(dataString: string): any;
 
 		jsSetDescriptionFields(descriptionVersion: number, description: string): void;

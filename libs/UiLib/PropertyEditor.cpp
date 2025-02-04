@@ -2,6 +2,39 @@
 #include "../UtilsLib/Ui/UiTools.h"
 #include <UiLib/PropertyEditor.h>
 
+namespace
+{
+	//
+	// PropertyRegularExpressionValidator
+	//
+	class PropertyRegularExpressionValidator : public QRegularExpressionValidator
+	{
+	public:
+		explicit PropertyRegularExpressionValidator(QObject* parent = nullptr) :
+			QRegularExpressionValidator(parent)
+		{
+		}
+		PropertyRegularExpressionValidator(const QRegularExpression& re, const QString& defaultValue, QObject* parent = nullptr) :
+			QRegularExpressionValidator(re, parent),
+			m_defaultValue(defaultValue)
+		{
+		}
+
+		bool wasFixed() const { return m_wasFixed; }
+
+	private:
+		virtual void fixup(QString& input) const override
+		{
+			m_wasFixed = true;
+			input = m_defaultValue;
+		}
+
+	private:
+		mutable bool m_wasFixed = false;
+		QString m_defaultValue;
+	};
+} // namespace
+
 namespace ExtWidgets
 {
 	QString PropertyEditorBase::s_commonCategoryName = "Common";
@@ -2461,11 +2494,10 @@ namespace ExtWidgets
 			if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog) // for LoadFileDialog, Validator is used as mask
 			{
 				QRegularExpression regexp(p->validator());
-				QRegularExpressionValidator* v = new QRegularExpressionValidator(regexp, this);
-				m_lineEdit->setValidator(v);
+				m_validator = new PropertyRegularExpressionValidator(regexp, m_property->value().toString(), this);
+				m_lineEdit->setValidator(m_validator);
 			}
 		}
-
 
 		// Create Button for File dialogs, Font, ByteArray, Strings and String List
 		//
@@ -2890,6 +2922,19 @@ namespace ExtWidgets
 			return;
 		}
 
+		if (m_validator != nullptr)
+		{
+			PropertyRegularExpressionValidator* pv = dynamic_cast<PropertyRegularExpressionValidator*>(m_validator);
+			if (pv != nullptr && pv->wasFixed() == true)
+			{
+				QMessageBox::critical(
+					this,
+					qAppName(),
+					tr("The value has invalid format!\n\nThe property description is:\n\n'%1'").arg(m_property->description()));
+				return;
+			}
+		}
+
 		m_lineEdit->blockSignals(true);
 
 		switch (m_userType)
@@ -3005,7 +3050,6 @@ namespace ExtWidgets
 
 		m_textEdited = false;
 	}
-
 
 	//
 	// ---------MultiArrayEdit----------

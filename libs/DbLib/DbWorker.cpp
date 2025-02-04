@@ -456,6 +456,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0426.sql", "Upgrade to version 426, Module configuration script is ConfigScript.js, added extra info to LM descriptions"},
 	{":/DatabaseUpgrade/Upgrade0427.sql", "Upgrade to version 427, Property SoftwareImplemented added to some AfbComponets"},
 	{":/DatabaseUpgrade/Upgrade0428.sql", "Upgrade to version 428, I/O modules configuration scripts update to support library enums"},
+	{":/DatabaseUpgrade/Upgrade0429.sql", "Upgrade to version 429, VDU Configuration script calculates the Master PIN code"},
 };
 
 int DbWorker::counter = 0;
