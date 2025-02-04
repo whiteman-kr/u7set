@@ -4,7 +4,8 @@
 
 namespace TrendLib
 {
-	const double TrendImpl::discreteSignalHeight = 5.0 / 8.0; // if inches
+	const double TrendImpl::discreteSignalHeight = 5.0 / 10.0; // 5/10*25.4 = 12.7 mm
+	const double TrendImpl::textSizeMm = 3.4;                  // 3.4 mm
 
 	bool TrendImpl::save(::Proto::Trend* message) const
 	{
@@ -2371,7 +2372,7 @@ namespace TrendLib
 
 		QFont font;
 
-		int pixelSize = static_cast<int>(3.7 / 25.4 * realDpiY); // 3.7mm
+		int pixelSize = static_cast<int>(textSizeMm / 25.4 * realDpiY);
 		font.setPixelSize(pixelSize);
 
 		painter->setFont(font);
@@ -2414,7 +2415,7 @@ namespace TrendLib
 
 		QFont font;
 
-		int pixelSize = static_cast<int>(3.7 / 25.4 * realDpiY); // 3.7mm
+		int pixelSize = static_cast<int>(textSizeMm / 25.4 * realDpiY);
 		font.setPixelSize(pixelSize);
 		painter->setFont(font);
 

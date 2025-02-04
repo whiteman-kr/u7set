@@ -114,7 +114,7 @@ namespace TrendLib
 			Q_ASSERT(message.states_raw_buffer_v1().size() % sizeof(TrendStateItem_v1) == 0);
 			size_t stateCount = message.states_raw_buffer_v1().size() / sizeof(TrendStateItem_v1);
 
-			std::vector<TrendStateItem> v1_states;
+			std::vector<TrendStateItem_v1> v1_states;
 			v1_states.resize(stateCount);
 
 			memcpy(v1_states.data(), message.states_raw_buffer_v1().data(), message.states_raw_buffer_v1().size());
