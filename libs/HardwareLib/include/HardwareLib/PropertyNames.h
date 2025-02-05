@@ -27,7 +27,8 @@ namespace Hardware
 		inline static const QString presetVersion = QStringLiteral("PresetVersion");
 		inline static const QString presetObjectUuid = QStringLiteral("PresetObjectUuid");
 		inline static const QString presetProtectedProperties = QStringLiteral("PresetProtectedProperties");
-		inline static const QString presetProtectedPropertiesDescription = QStringLiteral("Protected from \"Update from Preset\" comma separated property list");
+		inline static const QString presetProtectedPropertiesDescription =
+			QStringLiteral("Protected from \"Update from Preset\" comma separated property list");
 
 		inline static const QString lmDescriptionFile = QStringLiteral("LmDescriptionFile");
 		inline static const QString lmNumber = QStringLiteral("LMNumber");
@@ -54,7 +55,7 @@ namespace Hardware
 		inline static const QString valueHighLimit = QStringLiteral("ValueHighLimit");
 		inline static const QString valueLowLimit = QStringLiteral("ValueLowLimit");
 		inline static const QString valueMultiplier = QStringLiteral("ValueMultiplier");
-		//inline static const QString valueOffset = QStringLiteral("ValueOffset");
+		// inline static const QString valueOffset = QStringLiteral("ValueOffset");
 		inline static const QString useLimits = QStringLiteral("UseLimits");
 
 		inline static const QString isReflection = QStringLiteral("IsReflection");
@@ -76,11 +77,11 @@ namespace Hardware
 		inline static const QString apertureType = QStringLiteral("ApertureType");
 		inline static const QString decimalPlaces = QStringLiteral("DecimalPlaces");
 
-		//static const QString appSignalLowAdc;
-		//static const QString appSignalHighAdc;
-		//static const QString appSignalLowEngUnits;
-		//static const QString appSignalHighEngUnits;
-		
+		// static const QString appSignalLowAdc;
+		// static const QString appSignalHighAdc;
+		// static const QString appSignalLowEngUnits;
+		// static const QString appSignalHighEngUnits;
+
 		inline static const QString appSignalDataFormat = QStringLiteral("AppAnalogSignalFormat");
 		inline static const QString appSignalBusTypeId = QStringLiteral("BusTypeID");
 
@@ -88,7 +89,8 @@ namespace Hardware
 
 		inline static const QString diagSignalTypeId = QStringLiteral("DiagSignalTypeID");
 		inline static const QString systemSignalType = QStringLiteral("SystemSignalType");
-		inline static const QString systemSignalTypeDescription = QStringLiteral("System signal types are predefined and cannot be changed or deleted.");
+		inline static const QString systemSignalTypeDescription =
+			QStringLiteral("System signal types are predefined and cannot be changed or deleted.");
 
 		inline static const QString categoryCommon = QStringLiteral("Common");
 		inline static const QString categoryAppSignal = QStringLiteral("AppSignal");
@@ -98,5 +100,7 @@ namespace Hardware
 		inline static const QString categoryData = QStringLiteral("Data");
 		inline static const QString categoryMats = QStringLiteral("MATS");
 		inline static const QString categoryDiagnostics = QStringLiteral("Diagnostics");
+
+		inline static const QString globalScript = QStringLiteral("GlobalScript");
 	};
-}
+} // namespace Hardware

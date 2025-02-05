@@ -1,9 +1,10 @@
 #include "VduSchemaGenerator.h"
 
-#include "../Context.h"
+#include "VduLuaScript.h"
 #include "VduSchemaFile.h"
 
-#include "../../UtilsLib/Crc.h"
+#include "../Context.h"
+#include "../UtilsLib/Crc.h"
 
 #include <HardwareLib/DeviceModule.h>
 #include <VFrame30/Context.h>
@@ -20,12 +21,6 @@
 
 #include <QImageWriter>
 
-extern "C"
-{
-#include <lauxlib.h>
-#include <lua.h>
-#include <lualib.h>
-}
 
 // #define VDU_DEBUG
 
@@ -43,36 +38,15 @@ namespace
 
 		QString script = property->value().toString();
 
-		// --
-		//
-		lua_State* L = luaL_newstate(); // Create a new Lua state
-		if (L == nullptr)
+		QString errorMessage;
+		bool scriptIsOk = Builder::VduLuaScript::checkLuaScript(script, errorMessage);
+
+		if (scriptIsOk == false)
 		{
-			log.errINT1001("checkLuaScript(), Failed to create Lua state.");
-			return false;
+			log.errEQP6302(schema.schemaId(), scriptProperty, -1, errorMessage);
 		}
 
-		luaL_openlibs(L); // Open standard libraries if needed
-
-		// Load the string (parse/compile it) but do not run it
-		//
-		int status = luaL_loadstring(L, script.toUtf8());
-		if (status != LUA_OK)
-		{
-			const char* err_msg = lua_tostring(L, -1);
-			QString error = QString::fromUtf8(err_msg ? err_msg : "Unknown error");
-
-			log.errEQP6302(schema.schemaId(), scriptProperty, -1, error);
-
-			lua_pop(L, 1); // Pop error message
-		}
-		else
-		{
-			lua_pop(L, 1); // Pop the compiled chunk
-		}
-
-		lua_close(L);
-		return true;
+		return scriptIsOk;
 	}
 
 	bool checkLuaScript(const VFrame30::SchemaItem& item, QString scriptProperty, Builder::IssueLogger& log)
@@ -89,36 +63,15 @@ namespace
 
 		QString script = property->value().toString();
 
-		// --
-		//
-		lua_State* L = luaL_newstate(); // Create a new Lua state
-		if (L == nullptr)
+		QString errorMessage;
+		bool scriptIsOk = Builder::VduLuaScript::checkLuaScript(script, errorMessage);
+
+		if (scriptIsOk == false)
 		{
-			log.errINT1001("checkLuaScript(), Failed to create Lua state.");
-			return false;
+			log.errEQP6303(item.parentSchema()->schemaId(), item.label(), item.guid(), scriptProperty, -1, errorMessage);
 		}
 
-		luaL_openlibs(L); // Open standard libraries if needed
-
-		// Load the string (parse/compile it) but do not run it
-		//
-		int status = luaL_loadstring(L, script.toUtf8());
-		if (status != LUA_OK)
-		{
-			const char* err_msg = lua_tostring(L, -1);
-			QString error = QString::fromUtf8(err_msg ? err_msg : "Unknown error");
-
-			log.errEQP6303(item.parentSchema()->schemaId(), item.label(), item.guid(), scriptProperty, -1, error);
-
-			lua_pop(L, 1); // Pop error message
-		}
-		else
-		{
-			lua_pop(L, 1); // Pop the compiled chunk
-		}
-
-		lua_close(L);
-		return true;
+		return scriptIsOk;
 	}
 
 	struct VduFileString
