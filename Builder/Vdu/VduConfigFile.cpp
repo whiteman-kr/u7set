@@ -466,7 +466,7 @@ namespace Builder
 			QString compileErrorMessage;
 			QByteArray globalScriptBytecode = VduLuaScript::compile(globalScript, compileErrorMessage);
 
-			if (globalScriptBytecode.isEmpty() == true)
+			if (compileErrorMessage.isEmpty() == false)
 			{
 				// Script property %1.%2 evaluation error, line: %3, message: %4.
 				//

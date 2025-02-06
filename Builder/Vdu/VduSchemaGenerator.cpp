@@ -26,6 +26,70 @@
 
 namespace
 {
+	std::optional<QByteArray> compileLuaScript(const VFrame30::Schema& schema, QString scriptProperty, Builder::IssueLogger& log)
+	{
+		std::optional<QByteArray> result;
+
+		auto property = schema.propertyByCaption(scriptProperty);
+		if (property == nullptr)
+		{
+			log.errINT1001(
+				QString("compileLuaScript(), Property %1 for schema %2 is not found.").arg(scriptProperty).arg(schema.schemaId()),
+				schema.schemaId());
+			return result;
+		}
+
+		QString script = property->value().toString().trimmed();
+
+		QString errorMessage;
+		QByteArray bytecode = Builder::VduLuaScript::compile(script, errorMessage);
+
+		if (errorMessage.isEmpty() == false)
+		{
+			log.errEQP6302(schema.schemaId(), scriptProperty, -1, errorMessage);
+			result = std::nullopt;
+		}
+		else
+		{
+			result = bytecode; // Even empty bytecode will init std::optional;
+		}
+
+		return result;
+	}
+
+	std::optional<QByteArray> compileLuaScript(const VFrame30::SchemaItem& item, QString scriptProperty, Builder::IssueLogger& log)
+	{
+		std::optional<QByteArray> result;
+
+		auto property = item.propertyByCaption(scriptProperty);
+		if (property == nullptr)
+		{
+			log.errINT1001(QString("compileLuaScript(), Property %1 not found.").arg(scriptProperty),
+						   item.parentSchema()->schemaId(),
+						   item.label(),
+						   item.guid());
+			return result;
+		}
+
+		QString script = property->value().toString();
+
+		QString errorMessage;
+		QByteArray bytecode = Builder::VduLuaScript::compile(script, errorMessage);
+
+		if (errorMessage.isEmpty() == false)
+		{
+			log.errEQP6303(item.parentSchema()->schemaId(), item.label(), item.guid(), scriptProperty, -1, errorMessage);
+			result = std::nullopt;
+		}
+		else
+		{
+			result = bytecode; // Even empty bytecode will init std::optional;
+		}
+
+		return bytecode;
+	}
+
+#if 0
 	bool checkLuaScript(const VFrame30::Schema& schema, QString scriptProperty, Builder::IssueLogger& log)
 	{
 		auto property = schema.propertyByCaption(scriptProperty);
@@ -73,6 +137,7 @@ namespace
 
 		return scriptIsOk;
 	}
+#endif
 
 	struct VduFileString
 	{
@@ -89,6 +154,24 @@ namespace
 		static VduFileString createUtf8(const QString& string, size_t stringRefOffset)
 		{
 			return VduFileString{.string = string.trimmed(), .stringRefOffset = static_cast<uint32_t>(stringRefOffset)};
+		}
+	};
+
+	struct VduFileLuaBytecode
+	{
+		QByteArray bytecode;
+		uint32_t refOffset = 0; // Offset to the bytecode reference in the file.
+
+		static const uint32_t stub = LuaBytecodeRefStub;
+
+		static VduFileLuaBytecode create(const QByteArray& bytecode, uint32_t stringRefOffset)
+		{
+			return VduFileLuaBytecode{.bytecode = bytecode, .refOffset = stringRefOffset};
+		}
+
+		static VduFileLuaBytecode create(const QByteArray& bytecode, size_t stringRefOffset)
+		{
+			return VduFileLuaBytecode{.bytecode = bytecode, .refOffset = static_cast<uint32_t>(stringRefOffset)};
 		}
 	};
 
@@ -535,12 +618,15 @@ namespace
 		}
 	};
 
+	// Save schema item to the file - actually to the QByteArray.
+	//
 	bool saveSchemaItem1(QString vduEquipmentId,
 						 QString subsystemId,
 						 const VFrame30::SchemaItem& schemaItem,
 						 const std::map<Hash, int>& appSignalHashToSignalIndex,
 						 QByteArray& out,
 						 std::list<VduFileString>& addedStrings,
+						 std::list<VduFileLuaBytecode>& addedLuaBytecodes,
 						 Builder::Context& context)
 	{
 		VduSchemaFileSchemaItem1 fileSchemaItem{};
@@ -563,31 +649,41 @@ namespace
 		// onClickScript
 		//
 		{
-			bool scriptIsOk = checkLuaScript(schemaItem, VFrame30::PropertyNames::clickScript, *context.m_log);
-			if (scriptIsOk == false)
+			auto bytecode = compileLuaScript(schemaItem, VFrame30::PropertyNames::clickScript, *context.m_log);
+			if (bytecode.has_value() == false)
 			{
 				return false;
 			}
 
 			fileSchemaItem.clickScript = VduFileString::stub;
+			fileSchemaItem.clickScriptBytecode = VduFileLuaBytecode::stub;
 
 			auto clickScript = VduFileString::createUtf8(schemaItem.clickScript(), offsetof(VduSchemaFileSchemaItem1, clickScript));
 			addedStrings.push_back(std::move(clickScript));
+
+			auto clickScriptBytecode =
+				VduFileLuaBytecode::create(bytecode.value(), offsetof(VduSchemaFileSchemaItem1, clickScriptBytecode));
+			addedLuaBytecodes.push_back(std::move(clickScriptBytecode));
 		}
 
 		// preDrawScript
 		//
 		{
-			bool scriptIsOk = checkLuaScript(schemaItem, VFrame30::PropertyNames::preDrawScript, *context.m_log);
-			if (scriptIsOk == false)
+			auto bytecode = compileLuaScript(schemaItem, VFrame30::PropertyNames::preDrawScript, *context.m_log);
+			if (bytecode.has_value() == false)
 			{
 				return false;
 			}
 
 			fileSchemaItem.preDrawScript = VduFileString::stub;
+			fileSchemaItem.preDrawScriptBytecode = VduFileLuaBytecode::stub;
 
 			auto preDrawScript = VduFileString::createUtf8(schemaItem.preDrawScript(), offsetof(VduSchemaFileSchemaItem1, preDrawScript));
 			addedStrings.push_back(std::move(preDrawScript));
+
+			auto preDrawScriptBytecode =
+				VduFileLuaBytecode::create(bytecode.value(), offsetof(VduSchemaFileSchemaItem1, preDrawScriptBytecode));
+			addedLuaBytecodes.push_back(std::move(preDrawScriptBytecode));
 		}
 
 		// Save specific item struct, depending on itemType.
@@ -666,12 +762,165 @@ namespace
 			return result;
 		}
 
+		bool writeToOut(QByteArray& out) const
+		{
+			// Resolve strings:
+			// String consist of 16 bit size of string in symbols, followed with string data. Padding to 4 bytes.
+			// The string is a null terminated QChar string.
+			// (In Qt, Unicode characters are 16-bit entities without any markup or structure).
+			// Note: String in file must be aligned to 4 bytes.
+			//
+
+			// Align to 4 bytes the beginning of string area.
+			//
+			auto addPadding = [](auto& container, size_t padding)
+			{
+				while ((container.size() % padding) != 0)
+				{
+					container.push_back(char{0});
+				}
+			};
+
+			addPadding(out, 4);
+
+			for (const auto& str : m_strings)
+			{
+				auto stringOffset = static_cast<vdu_cstr>(out.size());
+
+				// Write string size.
+				//
+				std::string utf8Str = str.toUtf8().toStdString();
+
+				// Write string size.
+				//
+				uint16_t stringSize = static_cast<uint16_t>(utf8Str.size());
+				out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
+
+				// Write string data.
+				//
+				out.append(reinterpret_cast<const char*>(utf8Str.data()),
+						   (utf8Str.size() + 1) * sizeof(std::string::value_type)); // +1 for null terminator
+
+				// Replace string_ref with offset to the string.
+				//
+				for (const auto& stringData : offsets(str))
+				{
+					out.replace(stringData.stringRefOffset,
+								sizeof(vdu_string_ref),
+								reinterpret_cast<const char*>(&stringOffset),
+								sizeof(stringOffset));
+				}
+
+				// Add padding bytes to strings (aligned to 4 bytes).
+				//
+				addPadding(out, 4);
+			}
+
+			return true;
+		}
+
 	private:
 		using Key = QString;
 
 		std::multimap<Key, VduFileString> m_offsetToString;
 		std::set<Key> m_strings;
 	};
+
+	// Accumulate string references and strings, then write them to the file.
+	//
+	class VduLuaBytecodeWriter
+	{
+	public:
+		using Offset = uint32_t;
+
+		void clear() { *this = {}; }
+
+		Offset add(const QByteArray& data, Offset offset)
+		{
+			auto record = VduFileLuaBytecode::create(data, offset);
+
+			m_offsetToBytecode.insert(std::pair{Key{data}, record});
+			m_bytecodes.insert(data);
+
+			return VduFileLuaBytecode::stub;
+		}
+
+		std::vector<QByteArray> allData() const { return {m_bytecodes.begin(), m_bytecodes.end()}; }
+
+		std::vector<VduFileLuaBytecode> offsets(const QByteArray& bytecode) const
+		{
+			Key key{bytecode};
+
+			auto [beginIt, endIt] = m_offsetToBytecode.equal_range(key);
+
+			std::vector<VduFileLuaBytecode> result(std::distance(beginIt, endIt));
+
+			std::transform(beginIt,
+						   endIt,
+						   result.begin(),
+						   [](const auto& p)
+						   {
+							   return p.second;
+						   });
+
+			return result;
+		}
+
+		bool writeToOut(QByteArray& out) const
+		{
+			// Resolve bytecodes:
+			// Bytecode consist of 32 bit size, followed with data. Padding to 4 bytes.
+			// Aligned to 4 bytes.
+			//
+
+			// Align to 4 bytes the beginning of string area.
+			//
+			auto addPadding = [](auto& container, size_t padding)
+			{
+				while ((container.size() % padding) != 0)
+				{
+					container.push_back(char{0});
+				}
+			};
+
+			addPadding(out, 4);
+
+			for (const auto& bc : m_bytecodes)
+			{
+				auto bytecodeOffset = static_cast<vdu_scriptbc>(out.size());
+
+				// Write size.
+				//
+				uint32_t bytecodeSize = static_cast<uint32_t>(bc.size());
+				out.append(reinterpret_cast<const char*>(&bytecodeSize), sizeof(bytecodeSize));
+
+				// Write data.
+				//
+				out.append(bc);
+
+				// Replace refs with offset to the data.
+				//
+				for (const auto& bytecodeRecord : offsets(bc))
+				{
+					out.replace(bytecodeRecord.refOffset,
+								sizeof(vdu_scriptbc),
+								reinterpret_cast<const char*>(&bytecodeOffset),
+								sizeof(bytecodeOffset));
+				}
+
+				addPadding(out, 4);
+			}
+
+			return true;
+		}
+
+	private:
+		using Key = QByteArray;
+
+		std::multimap<Key, VduFileLuaBytecode> m_offsetToBytecode;
+		std::set<Key> m_bytecodes;
+	};
+
 } // namespace
 
 namespace Builder
@@ -850,6 +1099,7 @@ namespace Builder
 		bool result = true;
 
 		VduStringWriter stringWriter;
+		VduLuaBytecodeWriter luaBytecodeWriter;
 
 		struct VduSchemaFile file;
 		std::memset(&file, 0, sizeof(file));
@@ -867,10 +1117,10 @@ namespace Builder
 		// Forming file.body
 		//
 		{
-			bool onShowScriptIsOk = checkLuaScript(schema, VFrame30::PropertyNames::onShowScript, *context.m_log);
-			bool preDrawScriptIsOk = checkLuaScript(schema, VFrame30::PropertyNames::preDrawScript, *context.m_log);
+			auto showScriptBytecode = compileLuaScript(schema, VFrame30::PropertyNames::onShowScript, *context.m_log);
+			auto preDrawScriptBytecode = compileLuaScript(schema, VFrame30::PropertyNames::preDrawScript, *context.m_log);
 
-			if (onShowScriptIsOk == false || preDrawScriptIsOk == false)
+			if (showScriptBytecode.has_value() == false || preDrawScriptBytecode.has_value() == false)
 			{
 				return false;
 			}
@@ -883,21 +1133,37 @@ namespace Builder
 			schemaProperties.reserve0 = 0;
 			schemaProperties.backgroundColor = schema.backgroundColor().rgba();
 
+			const auto schemaPropertiesOffset = offsetof(VduSchemaFile, schemaProperties);
+
 			schemaProperties.schemaId =
-				stringWriter.addString(schema.schemaId(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, schemaId));
+				stringWriter.addString(schema.schemaId(), schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, schemaId));
 
 			schemaProperties.caption =
-				stringWriter.addString(schema.caption(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, caption));
+				stringWriter.addString(schema.caption(), schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, caption));
 
-			schemaProperties.onShowScript =
-				stringWriter.addString(schema.onShowScript(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, onShowScript));
+			// onShowScript
+			{
+				auto fieldOffset = schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, onShowScript);
+				schemaProperties.onShowScript = stringWriter.addString(schema.onShowScript(), fieldOffset);
+			}
 
-			schemaProperties.preDrawScript =
-				stringWriter.addString(schema.preDrawScript(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, preDrawScript));
+			// onShowScriptBytecode
+			{
+				auto fieldOffset = schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, onShowScriptBytecode);
+				schemaProperties.onShowScriptBytecode = luaBytecodeWriter.add(showScriptBytecode.value(), fieldOffset);
+			}
+
+			// preDrawScript
+			{
+				auto fieldOffset = schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, preDrawScript);
+				schemaProperties.preDrawScript = stringWriter.addString(schema.preDrawScript(), fieldOffset);
+			}
+
+			// preDrawScriptBytecode
+			{
+				auto fieldOffset = schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, preDrawScriptBytecode);
+				schemaProperties.preDrawScriptBytecode = luaBytecodeWriter.add(preDrawScriptBytecode.value(), fieldOffset);
+			}
 
 			schemaProperties.reserve1 = 0;
 			schemaProperties.reserve2 = 0;
@@ -951,15 +1217,30 @@ namespace Builder
 				}
 
 				QByteArray outSchemaItem{};
-				std::list<VduFileString> addedItemStrings; // Strings added in the fallowing call of saveSchemaItem1(...).
+				std::list<VduFileString> addedItemStrings;       // Strings added in the fallowing call of saveSchemaItem1(...).
+				std::list<VduFileLuaBytecode> addedLuaBytecodes; // Lua bytecodes added in the fallowing call of saveSchemaItem1(...).
 
-				saveSchemaItem1(vduEquipmentId, subsystemId, *item, appSignalHashToSignalIndex, outSchemaItem, addedItemStrings, context);
+				saveSchemaItem1(vduEquipmentId,
+								subsystemId,
+								*item,
+								appSignalHashToSignalIndex,
+								outSchemaItem,
+								addedItemStrings,
+								addedLuaBytecodes,
+								context);
 
 				// Add added string references to the main string ref container.
 				//
 				for (const auto& str : addedItemStrings)
 				{
 					stringWriter.addString(str.string, str.stringRefOffset + out.size());
+				}
+
+				// Add added Lua bytecode references to the main bytecode ref container.
+				//
+				for (const auto& bc : addedLuaBytecodes)
+				{
+					luaBytecodeWriter.add(bc.bytecode, out.size() + bc.refOffset);
 				}
 
 				// Save item's data to the output buffer.
@@ -980,57 +1261,13 @@ namespace Builder
 
 		out.replace(schemaItemOffsetsTable, schemaOffsetsData.size(), schemaOffsetsData);
 
-		// Resolve strings:
-		// String consist of 16 bit size of string in symbols, followed with string data. Padding to 4 bytes.
-		// The string is a null terminated QChar string.
-		// (In Qt, Unicode characters are 16-bit entities without any markup or structure).
-		// Note: String in file must be aligned to 4 bytes.
+		// Add strings to the output buffer.
 		//
+		stringWriter.writeToOut(out);
 
-		// Align to 4 bytes the beginning of string area.
+		// Add compiled Lua bytecodes to the output buffer.
 		//
-		auto addPadding = [](auto& container, size_t padding)
-		{
-			for (size_t ps = 0, rest = padding - (container.size() % padding); ps < rest; ps++)
-			{
-				container.push_back(char{0});
-			}
-		};
-
-		addPadding(out, 4);
-
-		for (const auto& str : stringWriter.strings())
-		{
-			auto stringOffset = static_cast<vdu_cstr>(out.size());
-
-			// Write string size.
-			//
-			std::string utf8Str = str.toUtf8().toStdString();
-
-			// Write string size.
-			//
-			uint16_t stringSize = static_cast<uint16_t>(utf8Str.size());
-			out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
-
-			// Write string data.
-			//
-			out.append(reinterpret_cast<const char*>(utf8Str.data()),
-					   (utf8Str.size() + 1) * sizeof(std::string::value_type)); // +1 for null terminator
-
-			// Replace string_ref with offset to the string.
-			//
-			for (const auto& stringData : stringWriter.offsets(str))
-			{
-				out.replace(stringData.stringRefOffset,
-							sizeof(vdu_string_ref),
-							reinterpret_cast<const char*>(&stringOffset),
-							sizeof(stringOffset));
-			}
-
-			// Add padding bytes to strings (aligned to 4 bytes).
-			//
-			addPadding(out, 4);
-		}
+		luaBytecodeWriter.writeToOut(out);
 
 		// Calculate CRC64 for the whole file.
 		// Align to 8 bytes the end of string area.

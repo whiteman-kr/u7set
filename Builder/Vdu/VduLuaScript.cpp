@@ -9,7 +9,7 @@ extern "C"
 
 namespace
 {
-	int dumpCallBack(lua_State* L, const void* p, size_t size, void* ud)
+	int dumpCallBack([[maybe_unused]] lua_State* L, const void* p, size_t size, void* ud)
 	{
 		QByteArray* bytecode = static_cast<QByteArray*>(ud);
 		bytecode->append(static_cast<const char*>(p), size);
@@ -47,10 +47,16 @@ namespace Builder
 
 	QByteArray VduLuaScript::compile(QString luaScript, QString& outErrorMessage)
 	{
-		lua_State* L = luaL_newstate();
-
 		QByteArray bytecode;
+
+		luaScript = luaScript.trimmed();
+		if (luaScript.isEmpty() == true)
+		{
+			return bytecode;
+		}
+
 		QByteArray scriptUtf8 = luaScript.toUtf8();
+		lua_State* L = luaL_newstate();
 
 		try
 		{

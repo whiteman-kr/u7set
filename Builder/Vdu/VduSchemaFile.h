@@ -15,8 +15,10 @@
 // 08 Dec 2024| 1.6  |	Added VduSchemaFileSchemaItem1::acceptClick.
 // 16 Jan 2025| 1.7  |	Added VduSchemaFileSchemaItemRect1::wordWrap.
 // 16 Jan 2025| 1.8  |	Added VduSchemaFileSchemaItemValue1::align.
-// 22 Jan 2025| 1.9  |	Added strcut VduSchemaFileSchemaItemImage1
-// 23 Jan 2025| 1.10 |	Added strcut VduSchemaFileSchemaItemImageValue1
+// 22 Jan 2025| 1.9  |	Added struct VduSchemaFileSchemaItemImage1
+// 23 Jan 2025| 1.10 |	Added struct VduSchemaFileSchemaItemImageValue1
+// 06 Feb 2025| 1.11 |	Added fields onShowScriptBytecode, preDrawScriptBytecode to struct VduSchemaFileProperties1
+// 06 Feb 2025| 1.12 |	Added fields clickScriptBytecode, preDrawScriptBytecode to struct VduSchemaFileSchemaItem1
 // -----------+------+--------------------------------------------------------------
 // clang-format on
 
@@ -39,14 +41,22 @@ struct VduSchemaFileProperties1
 {
 	uint16_t version;    // 1
 	uint16_t headerSize; // This header size
+
 	uint16_t width;      // In pixels
 	uint16_t height;     // In pixels
+
 	uint32_t reserve0;
 	uint32_t backgroundColor;
+
 	vdu_cstr schemaId;
 	vdu_cstr caption;
+
 	vdu_cstr onShowScript;
+	vdu_scriptbc onShowScriptBytecode;
+
 	vdu_cstr preDrawScript;
+	vdu_scriptbc preDrawScriptBytecode;
+
 	uint32_t reserve1;
 	uint32_t reserve2;
 };
@@ -113,8 +123,12 @@ struct VduSchemaFileSchemaItem1
 	bool acceptClick;       // If true, the item can accept click events.
 
 	vdu_cstr objectName;
+
 	vdu_cstr clickScript;
+	vdu_scriptbc clickScriptBytecode;
+
 	vdu_cstr preDrawScript;
+	vdu_scriptbc preDrawScriptBytecode;
 
 	uint32_t reserve2;
 	uint32_t reserve3;
