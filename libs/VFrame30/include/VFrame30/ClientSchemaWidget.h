@@ -101,6 +101,7 @@ namespace VFrame30
 		QPoint m_dragStartPosition;							// For drag and drop
 
 	protected:
+		static constexpr size_t HistorySize = 15;
 		std::list<SchemaHistoryItem> m_backHistory;
 		std::list<SchemaHistoryItem> m_forwardHistory;
 	};

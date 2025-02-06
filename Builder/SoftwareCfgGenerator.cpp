@@ -325,10 +325,20 @@ namespace Builder
 			Q_ASSERT(file);
 			Q_ASSERT(schema);
 
+			if (schema->isLogicSchema() == false)
+			{
+				continue;
+			}
+
 			bool schemaModified = false;
 
 			for (auto& layer : schema->layers())
 			{
+				if (layer->compile() == false) 
+				{
+					continue;
+				}
+
 				for (auto& schemaItem : layer->items())
 				{
 					auto schemaItemAfb = schemaItem->toSchemaItemAfb();
