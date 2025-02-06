@@ -7,6 +7,7 @@ R"_(QPushButton {
 	border: 1px outset #8f8f91;
 	border-radius: 4px;
 	background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f6f7fa, stop: 1 #dadbde);
+	color: black;
 	font-family: "Arial";
 	font-size: 14pt;		/* px: pixels, pt: the size of one point (i.e., 1/72 of an inch) */
 	font-style: Normal;	/* Normal, Italic, Oblique */
@@ -52,6 +53,7 @@ R"_(QLineEdit {
 	border-style: solid;
 	border-color: #404040;
 	background-color: white;
+	color: black;
 
 	font-family: "Consolas";
 	font-size: 14pt;		/* px: pixels, pt: the size of one point (i.e., 1/72 of an inch) */
