@@ -318,6 +318,7 @@ namespace VFrame30
 			return;
 		}
 
+#ifdef SCHEMA_ITEM_RECT_CACHE_TEXT_DRAWING
 		bool textChanged = (text != m_cacheDrewText) || (m_cachetextFormat != m_textFormat) || (m_cachedFont != m_font);
 
 		if (textChanged == true)
@@ -328,6 +329,7 @@ namespace VFrame30
 		}
 
 		if (drawParam->pdfMode() == true)
+#endif
 		{
 			// For pdf draw text without caching to image, it makes pdf much smaller and will allows
 			// to select and copy text to the clipboard.
@@ -355,6 +357,7 @@ namespace VFrame30
 			return;
 		}
 
+#ifdef SCHEMA_ITEM_RECT_CACHE_TEXT_DRAWING
 		// Check if image already cached, if not, then create one
 		//
 		if (itemUnit() == SchemaUnit::Display)
@@ -409,13 +412,15 @@ namespace VFrame30
 		{
 			// Inches
 			//
-			const double dpiX = CDrawParam::realDpiX(painter);
-			const double dpiY = CDrawParam::realDpiY(painter);
+			const double dpiX = CDrawParam::realScreenDpiX(painter);
+			const double dpiY = CDrawParam::realScreenDpiY(painter);
 
-			const double zoom = m_drawParam->schemaView()->zoom() / 100.0;
-			const double imageWidth = widthDocPt() * dpiX * zoom;
-			const double imageHeight = heightDocPt() * dpiY * zoom;
+			const double zoomFactor = m_drawParam->schemaView()->zoom() / 100.0;
 
+			const double imageWidth = std::ceil(boundingRect.width() * dpiX * zoomFactor);
+			const double imageHeight = std::ceil(boundingRect.height() * dpiY * zoomFactor);
+
+			QSize imageSize{static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
 			QRect clipRectInt{0, 0, static_cast<int>(imageWidth), static_cast<int>(imageHeight)};
 
 			if (textChanged == true || m_cacheTextImage.isNull() == true || m_cacheTextImage.size() != clipRectInt.size())
@@ -452,6 +457,7 @@ namespace VFrame30
 		//
 		QRectF sourceRect = m_cacheTextImage.rect();
 		painter->drawImage(boundingRect, m_cacheTextImage, sourceRect);
+#endif
 
 		return;
 	}
@@ -612,7 +618,9 @@ namespace VFrame30
 		if (m_textColor != color)
 		{
 			m_textColor = color;
+#ifdef SCHEMA_ITEM_RECT_CACHE_TEXT_DRAWING
 			m_cacheTextImage = {};
+#endif
 		}
 	}
 
@@ -640,7 +648,9 @@ namespace VFrame30
 		if (m_textFormat != value)
 		{
 			m_textFormat = value;
+#ifdef SCHEMA_ITEM_RECT_CACHE_TEXT_DRAWING
 			m_cacheTextImage = {};
+#endif
 		}
 	}
 
@@ -653,7 +663,9 @@ namespace VFrame30
 		if (m_text != value)
 		{
 			m_text = std::move(value);
+#ifdef SCHEMA_ITEM_RECT_CACHE_TEXT_DRAWING
 			m_cacheTextImage = {};
+#endif
 		}
 
 		return;
@@ -667,7 +679,9 @@ namespace VFrame30
 	void SchemaItemRect::setWordWrap(bool value)
 	{
 		m_wordWrap = value;
+#ifdef SCHEMA_ITEM_RECT_CACHE_TEXT_DRAWING
 		m_cacheTextImage = {};
+#endif
 	}
 
 	// Align propertis
@@ -679,7 +693,9 @@ namespace VFrame30
 	void SchemaItemRect::setHorzAlign(E::HorzAlign align)
 	{
 		m_horzAlign = align;
+#ifdef SCHEMA_ITEM_RECT_CACHE_TEXT_DRAWING
 		m_cacheTextImage = {};
+#endif
 	}
 
 	E::VertAlign SchemaItemRect::vertAlign() const
@@ -690,7 +706,9 @@ namespace VFrame30
 	void SchemaItemRect::setVertAlign(E::VertAlign align)
 	{
 		m_vertAlign = align;
+#ifdef SCHEMA_ITEM_RECT_CACHE_TEXT_DRAWING
 		m_cacheTextImage = {};
+#endif
 	}
 
 	// Fill property
