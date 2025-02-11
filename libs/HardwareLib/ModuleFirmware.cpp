@@ -358,6 +358,25 @@ static const std::vector<quint8> err;
 		return;
 	}
 
+	const ModuleFirmware& ModuleFirmwareStorage::firmware(const QString& subsysId, bool* ok) const
+	{
+		static ModuleFirmware err;
+		if (ok == nullptr)
+		{
+			assert(ok);
+			return err;
+		}
+
+		if (m_firmwares.find(subsysId) == m_firmwares.end())
+		{
+			*ok = false;
+			return err;
+		}
+
+		*ok = true;
+		return m_firmwares.at(subsysId);
+	}
+
 	ModuleFirmware& ModuleFirmwareStorage::firmware(const QString& subsysId, bool* ok)
 	{
 static ModuleFirmware err;

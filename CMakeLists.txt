@@ -36,6 +36,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+include(CTest)
+
 # Set the Qt version and find required components.
 # Finding components here speeds up cmake configure step.
 #
@@ -116,6 +118,15 @@ if (DEFINED ENV{CI_BUILD_LICENSER})
 	set(BUILD_LICENSER ON)
 endif()
 
+
+# Build All Small Unit Tests
+#
+option(BUILD_SMALL_TESTS "Build Small Tests" OFF)
+
+if (DEFINED ENV{CI_BUILD_SMALL_TESTS})
+	set(BUILD_SMALL_TESTS ON)
+endif()
+
 # ---
 #
 message("-----------------------------------------")
@@ -143,6 +154,7 @@ message("Qt Path: ${Qt6_DIR}")
 message("VCPKG_ROOT: ${VCPKG_ROOT}")
 message("Allow FTDI: ${ALLOW_FTDI}")
 message("Build Licenser: ${BUILD_LICENSER}")
+message("Small Unit Tests: ${BUILD_SMALL_TESTS}")
 message("-----------------------------------------")
 
 # Add projects.
@@ -177,6 +189,7 @@ if(NOT CODE_COVERAGE)
 	add_subdirectory(TestSuite)
 	add_subdirectory(mconf)	
 	add_subdirectory(./Tools/qtkeychain)
+	add_subdirectory(./Tools/BuildCompConsole)
 
 	add_subdirectory(Monitor)
 	add_subdirectory(TuningClient)

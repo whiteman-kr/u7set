@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(Behavior LANGUAGES CXX)
+project(LicenseLib LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -30,7 +30,6 @@ target_precompile_headers(${TARGET} PRIVATE
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Network OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx)
 
-target_compile_definitions(${TARGET} PRIVATE BEHAVIOR_LIBRARY)
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -50,6 +49,6 @@ add_custom_command(
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)
 
-if(ADD_ALL_SMALL_TESTS)
+if(BUILD_SMALL_TESTS)
 	add_subdirectory(tests)
 endif()

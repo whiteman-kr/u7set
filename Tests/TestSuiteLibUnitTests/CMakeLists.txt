@@ -43,3 +43,5 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest_
 target_link_libraries(${TARGET} PRIVATE TestSuiteLib)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)
+
+add_test(NAME ${TARGET} COMMAND ${TARGET})

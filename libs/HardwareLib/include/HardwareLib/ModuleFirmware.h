@@ -131,6 +131,8 @@ namespace Hardware
 		// Firmware operations
 		//
 		void createFirmware(const QString& subsysId, int ssKey, int uartId, const QString& uartType, int frameSize, int frameCount, const QString& lmDescriptionFile, int lmDescriptionNumber);
+
+		[[nodiscard]] const ModuleFirmware& firmware(const QString& subsysId, bool* ok) const;
 		[[nodiscard]] ModuleFirmware& firmware(const QString& subsysId, bool* ok);
 
 		[[nodiscard]] bool isEmpty() const;
