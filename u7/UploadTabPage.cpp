@@ -1,7 +1,8 @@
 #include "UploadTabPage.h"
-#include "Settings.h"
-#include "GlobalMessanger.h"
 #include "DialogSettingsConfigurator.h"
+#include "GlobalMessanger.h"
+#include "Settings.h"
+#include <BuildCompLib/BuildCompDialog.h>
 #include <ModuleConfiguratorLib/Configurator.h>
 
 using namespace ModuleConfiguratorLib;
@@ -44,6 +45,24 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(m_pBuildTree, &QTreeWidget::itemSelectionChanged, this, &UploadTabPage::buildChanged);
 	pConfigurationLayout->addWidget(m_pBuildTree);
+
+	// Button Compare...
+	//
+	{
+		// Create HBoxLayout, add it to pConfigurationLayout,
+		// create QPushButton, add it to HBoxLayout, connect it to compareBuilds
+		// Add span to HBoxLayout so the button will be on the right side of the layout
+		//
+		QHBoxLayout* pHBoxLayout = new QHBoxLayout();
+		pConfigurationLayout->addLayout(pHBoxLayout);
+
+		QPushButton* compareButton = new QPushButton(tr("Compare..."));
+
+		pHBoxLayout->addStretch();
+		pHBoxLayout->addWidget(compareButton);
+
+		connect(compareButton, &QPushButton::clicked, this, &UploadTabPage::compareBuilds);
+	}
 
 	// Choose Subsystem and Uart Widget
 	//
@@ -469,6 +488,30 @@ void UploadTabPage::closeEvent(QCloseEvent* e)
 	e->accept();
 }
 
+void UploadTabPage::timerEvent(QTimerEvent* pTimerEvent)
+{
+	if (pTimerEvent == nullptr)
+	{
+		assert(pTimerEvent != nullptr);
+		return;
+	}
+
+	if (pTimerEvent->timerId() == m_logTimerId && m_outputLog.isEmpty() == false && m_pLog != nullptr)
+	{
+		std::list<OutputLogItem> messages;
+		for (int i = 0; i < 30 && m_outputLog.isEmpty() == false; i++)
+		{
+			messages.push_back(m_outputLog.popMessages());
+		}
+
+		for (auto m = messages.begin(); m != messages.end(); ++m)
+		{
+			writeLog(*m);
+		}
+	}
+
+	return;
+}
 
 void UploadTabPage::projectOpened()
 {
@@ -1033,29 +1076,62 @@ void UploadTabPage::detectSubsystemComplete(int subsystemId)
 	m_outputLog.writeSuccess(tr("Successful."));
 }
 
-void UploadTabPage::timerEvent(QTimerEvent* pTimerEvent)
+void UploadTabPage::compareBuilds()
 {
-	if (pTimerEvent == nullptr)
+	QString buildPath = m_buildSearchPath + QDir::separator() + m_currentBuild;
+	QDir buildDir{buildPath};
+
+	if (buildDir.exists() == false)
 	{
-		assert(pTimerEvent != nullptr);
+		buildPath.clear();
+	}
+
+	// Choose second *.bts file, start from the directory of the current build (m_buildSearchPath)
+	//
+	QFileDialog fd{this};
+
+	fd.setAcceptMode(QFileDialog::AcceptOpen);
+	fd.setFileMode(QFileDialog::ExistingFile);
+	fd.setDirectory(m_buildSearchPath);
+
+	QStringList filters;
+	filters << "Bitstream files (*.bts)"
+			<< "All files (*.*)";
+
+	fd.setNameFilters(filters);
+
+	if (fd.exec() == QDialog::Rejected)
+	{
 		return;
 	}
 
-	if (pTimerEvent->timerId() == m_logTimerId &&
-		m_outputLog.isEmpty() == false &&
-		m_pLog != nullptr)
+	QStringList fileList = fd.selectedFiles();
+	if (fileList.size() != 1)
 	{
-		std::list<OutputLogItem> messages;
-		for (int i = 0; i < 30 && m_outputLog.isEmpty() == false; i++)
-		{
-			messages.push_back(m_outputLog.popMessages());
-		}
-
-		for (auto m = messages.begin(); m != messages.end(); ++m)
-		{
-			writeLog(*m);
-		}
+		return;
 	}
+
+	QString fileName = fileList[0];
+
+	auto compareDialog = new BuildCompLib::BuildCompDialog{this};
+
+	// Run modal less dialog
+	//
+	compareDialog->show();
+
+	if (buildPath.isEmpty() == true)
+	{
+		compareDialog->setFileLeft(fileName, true);
+	}
+	else
+	{
+		compareDialog->setLeftFolder(buildPath, false);
+		compareDialog->setFileRight(fileName, true);
+	}
+
+	// Delete the widget when it is closed
+	//
+	connect(compareDialog, &BuildCompLib::BuildCompDialog::finished, compareDialog, &BuildCompLib::BuildCompDialog::deleteLater);
 
 	return;
 }

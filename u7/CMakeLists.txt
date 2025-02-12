@@ -439,7 +439,8 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql
 	Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
 target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
-	TrendView SimulatorUi qt6keychain Builder VFrame30 ReportLib AppSignalLists SchemaClientLib ModuleConfiguratorLib TuningLib UiLib LicenseLib)
+	TrendView SimulatorUi qt6keychain Builder VFrame30 ReportLib AppSignalLists SchemaClientLib ModuleConfiguratorLib 
+	TuningLib UiLib LicenseLib BuildCompLib)
 
 # Link Visaul Leak Detector
 #

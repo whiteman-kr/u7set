@@ -21,8 +21,11 @@ namespace BuildCompLib
 		~BuildComp();
 
 	public:
-		tl::expected<bool, QString> setFileLeft(QString fileName);
-		tl::expected<bool, QString> setFileRight(QString fileName);
+		tl::expected<bool, QString> setLeftFolder(QString directory);
+		tl::expected<bool, QString> setRightFolder(QString directory);
+
+		tl::expected<bool, QString> setLeftFile(QString fileName);
+		tl::expected<bool, QString> setRightFile(QString fileName);
 
 		[[nodiscard]] BuildCompLib::CompareResult compare() const;
 

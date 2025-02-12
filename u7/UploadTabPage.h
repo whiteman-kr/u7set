@@ -96,6 +96,8 @@ private slots:
 	void uploadComplete(int uartID);
 	void detectSubsystemComplete(int selectedSubsystem);
 
+	void compareBuilds();
+
 	// Data
 	//
 private:

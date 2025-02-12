@@ -28,6 +28,7 @@ bool g_verbose = false;
 
 std::string g_red = "\033[1;31m";
 std::string g_green = "\033[1;32m";
+std::string g_orange = "\033[1;33m";
 std::string g_reset = "\033[0m";
 
 
@@ -61,7 +62,12 @@ void printResultDetails(const BuildCompLib::CompareResult& result)
 	}
 	else
 	{
+		if (result.projectName == true)
+		{
+			std::cout << g_orange;
+		}
 		std::cout << "Build numbers are the same: " << result.buildNumberLeft << "\n";
+		std::cout << g_reset;
 	}
 
 	auto subsystemSideResultToStr = [](BuildCompLib::CompareResult::Subsystem::SideResult v)
@@ -134,7 +140,7 @@ int main(int argc, char* argv[])
 	// Define options
 	//
 	QCommandLineOption verboseOption({"v", "verbose"}, "Show detailed comparison results.");
-	QCommandLineOption noColorOption({"nc", "no-color"}, "Disable color output.");
+	QCommandLineOption noColorOption("no-color", "Disable color output.");
 
 	cmdParser.addOption(verboseOption);
 	cmdParser.addOption(noColorOption);
@@ -153,6 +159,7 @@ int main(int argc, char* argv[])
 
 	g_red = g_colorTerminal ? "\033[1;31m" : "";
 	g_green = g_colorTerminal ? "\033[1;32m" : "";
+	g_orange = g_colorTerminal ? "\033[1;33m" : "";
 	g_reset = g_colorTerminal ? "\033[0m" : "";
 
 	// Retrieve positional arguments
@@ -174,8 +181,8 @@ int main(int argc, char* argv[])
 
 	BuildCompLib::BuildComp buildComp;
 
-	auto result = buildComp.setFileLeft(file1);
-	if (result == false)
+	auto result = buildComp.setLeftFile(file1);
+	if (!result)
 	{
 		std::cout << g_red;
 		std::cout << "File: " << file1.toStdString() << "\n";
@@ -184,8 +191,8 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	result = buildComp.setFileRight(file2);
-	if (result == false)
+	result = buildComp.setRightFile(file2);
+	if (!result)
 	{
 		std::cout << g_red;
 		std::cout << "File: " << file2.toStdString() << "\n";
@@ -200,6 +207,20 @@ int main(int argc, char* argv[])
 	{
 		printResultDetails(compareResult);
 	}
+	else
+	{
+		// Print warning that two files are the same including build number
+		//
+		if (compareResult.projectName == true && compareResult.buildNumber == true)
+		{
+			std::cout << g_orange;
+			std::cout << "Build numbers are the same: " << compareResult.buildNumberLeft << "\n";
+			std::cout << g_reset;
+		}
+	}
+
+	std::cout << "\n";
+	std::cout << "Summary\n";
 
 	if (compareResult.isSame == true)
 	{
@@ -209,6 +230,26 @@ int main(int argc, char* argv[])
 	else
 	{
 		std::cout << g_red;
+		std::cout << "The following subsystem(s) differ:\n";
+
+		for (const auto& subsystem : compareResult.subsystems)
+		{
+			if (subsystem.left != BuildCompLib::CompareResult::Subsystem::NotModified ||
+				subsystem.right != BuildCompLib::CompareResult::Subsystem::NotModified)
+			{
+				std::cout << "\t" << subsystem.subsystemId.toStdString() << "\n";
+
+				auto modules = subsystem.leftModules + subsystem.rightModules;
+				modules.sort();
+				modules.removeDuplicates();
+
+				for (const auto& rightModule : modules)
+				{
+					std::cout << "\t\t" << rightModule.toStdString() << "\n";
+				}
+			}
+		}
+
 		std::cout << "FC: The files are different.\n";
 	}
 

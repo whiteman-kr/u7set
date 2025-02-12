@@ -112,7 +112,7 @@ namespace BuildCompLib
 	BuildCompImpl::BuildCompImpl() = default;
 	BuildCompImpl::~BuildCompImpl() = default;
 
-	tl::expected<bool, QString> BuildCompImpl::setFileLeft(QString fileName)
+	tl::expected<bool, QString> BuildCompImpl::setLeftFile(QString fileName)
 	{
 		QFile file{fileName};
 		if (file.open(QIODevice::ReadOnly) == false)
@@ -120,10 +120,10 @@ namespace BuildCompLib
 			return tl::make_unexpected(QString("Open file %1 error: %2").arg(fileName).arg(file.errorString()));
 		}
 
-		return setFileLeft(file.readAll());
+		return setLeftFile(file.readAll());
 	}
 
-	tl::expected<bool, QString> BuildCompImpl::setFileRight(QString fileName)
+	tl::expected<bool, QString> BuildCompImpl::setRightFile(QString fileName)
 	{
 		QFile file{fileName};
 		if (file.open(QIODevice::ReadOnly) == false)
@@ -131,10 +131,10 @@ namespace BuildCompLib
 			return tl::make_unexpected(QString("Open file %1 error: %2").arg(fileName).arg(file.errorString()));
 		}
 
-		return setFileRight(file.readAll());
+		return setRightFile(file.readAll());
 	}
 
-	tl::expected<bool, QString> BuildCompImpl::setFileLeft(const QByteArray& data)
+	tl::expected<bool, QString> BuildCompImpl::setLeftFile(const QByteArray& data)
 	{
 		try
 		{
@@ -156,7 +156,7 @@ namespace BuildCompLib
 		return true;
 	}
 
-	tl::expected<bool, QString> BuildCompImpl::setFileRight(const QByteArray& data)
+	tl::expected<bool, QString> BuildCompImpl::setRightFile(const QByteArray& data)
 	{
 		try
 		{
@@ -211,8 +211,24 @@ namespace BuildCompLib
 			bool foundLeft = false;
 			const Hardware::ModuleFirmware& leftFirmware = m_left->firmware(subsystemId, &foundLeft);
 
+			if (foundLeft == true)
+			{
+				for (const auto& lm : leftFirmware.logicModulesInfo())
+				{
+					subsystemResult.leftModules.push_back(lm.equipmentId);
+				}
+			}
+
 			bool foundRight = false;
 			const Hardware::ModuleFirmware& rightFirmware = m_right->firmware(subsystemId, &foundRight);
+
+			if (foundRight == true)
+			{
+				for (const auto& lm : rightFirmware.logicModulesInfo())
+				{
+					subsystemResult.rightModules.push_back(lm.equipmentId);
+				}
+			}
 
 			if (foundLeft == false)
 			{

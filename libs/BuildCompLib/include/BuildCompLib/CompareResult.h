@@ -33,6 +33,9 @@ namespace BuildCompLib
 			QString subsystemId;
 			SideResult left;
 			SideResult right;
+
+			QStringList leftModules;  // Modules on the left side for this subsystem
+			QStringList rightModules; // Modules on the right side for this subsystem
 		};
 
 		std::vector<Subsystem> subsystems;
