@@ -9,9 +9,11 @@ struct RequestParams
 {
 	QString archiveLocation;
 
+	bool checkonly = false;
+
 	QDateTime begin;
 	QDateTime end;
-	QString signalsList;
+	QStringList signalsList;
 
 	QString destLocation;
 
@@ -31,5 +33,3 @@ protected:
 protected:
 	RequestParams m_reqParams;
 };
-
-

@@ -15,21 +15,15 @@
 #include "Archivist.h"
 #include "FileArchivist.h"
 #include "DbArchivist.h"
-
+#include "ArchUtils.h"
 
 bool parseCmdLine(int argc, char* argv[], RequestParams* rp);
 bool parseCfgFile(const QString& cfgFileName, RequestParams* rp);
+bool parseSignalsList(QString signalsListStr, QStringList* signalsList);	// copy of signalsListStr - Ok
 
 int main(int argc, char* argv[])
 {
 	QCoreApplication app(argc, argv);
-
-
-/*	logger = std::make_shared<CircularLogger>();
-
-	LOGGER_INIT(logger, QString(), "");
-
-	logger->setLogCodeInfo(false);*/
 
 	RequestParams rp;
 
@@ -37,19 +31,11 @@ int main(int argc, char* argv[])
 
 	result = parseCmdLine(argc, argv, &rp);
 
+	RETURN_VALUE_IF_FALSE(result, 0);
+
 	FileArchivist fa(rp);
 
 	fa.copyArchive();
-
-//	RETURN_VALUE_IF_FALSE(result, 0);
-
-//	app.exec();
-
-//	QThread::msleep(2000);
-
-//	LOGGER_SHUTDOWN(logger);
-
-//	app.exec();
 
 	return result;
 }
@@ -64,8 +50,6 @@ bool parseCmdLine(int argc, char* argv[], RequestParams* rp)
 	{
 		cmdLineParams.append(argv[i]);
 	}
-
-//	LOG_MSG(logger, QString("Runing: %1").arg(cmdLineParams.join(" ")));
 
 	bool result = true;
 
@@ -96,8 +80,8 @@ bool parseCmdLine(int argc, char* argv[], RequestParams* rp)
 
 			const QChar ZERO('0');
 
-			ts << "archive = D:/project/SYSTEM_RACK_WS_ARHS\t# location of archive\n";
-			ts << QString("begin = %1:%2:%3 %4.%5.%6\t\t\t# request start time\n").
+			ts << "archive = D:/project/SYSTEM_RACK_WS_ARHS\n";
+			ts << QString("begin = %1:%2:%3 %4.%5.%6\n").
 								arg(prev.time().hour(), 2, 10, ZERO).
 								arg(prev.time().minute(), 2, 10, ZERO).
 								arg(prev.time().second(), 2, 10, ZERO).
@@ -105,7 +89,7 @@ bool parseCmdLine(int argc, char* argv[], RequestParams* rp)
 								arg(prev.date().month(), 2, 10, ZERO).
 								arg(prev.date().year(), 4, 10, ZERO);
 
-			ts << QString("end = %1:%2:%3 %4.%5.%6\t\t\t# request end time\n").
+			ts << QString("end = %1:%2:%3 %4.%5.%6\n").
 				  arg(now.time().hour(), 2, 10, ZERO).
 				  arg(now.time().minute(), 2, 10, ZERO).
 				  arg(now.time().second(), 2, 10, ZERO).
@@ -113,8 +97,8 @@ bool parseCmdLine(int argc, char* argv[], RequestParams* rp)
 				  arg(now.date().month(), 2, 10, ZERO).
 				  arg(now.date().year(), 4, 10, ZERO);
 
-			ts << QString("signals = All\t\t\t\t\t# signals filter\n");
-			ts << QString("destLocation = D:/Temp# archive copy location\n");
+			ts << QString("signals = All\n");
+			ts << QString("destLocation = D:/Temp\n");
 
 			f.close();
 
@@ -132,6 +116,23 @@ bool parseCmdLine(int argc, char* argv[], RequestParams* rp)
 			}
 
 			result = parseCfgFile(sl[1], rp);
+		}
+
+		if (cmdLineParams[1].toLower().startsWith("-d"))
+		{
+			QStringList sl = cmdLineParams[1].split("=");
+
+			if (sl.size() < 2)
+			{
+				print << QString("\nSet archive file after -d= !1\n\n");
+				return false;
+			}
+
+			ArchUtils au(QDir::currentPath());
+
+			au.dump(sl[1], false, true, false);
+
+			result = false;
 		}
 	}
 
@@ -160,27 +161,18 @@ bool parseCfgFile(const QString& cfgFileName, RequestParams* rp)
 
 	int lineNo = 1;
 
-	rp->signalsList = "All";
+	rp->signalsList.clear();
 
 	for(int i = 0; i < sl.size(); i++, lineNo++)
 	{
 		QString s = sl[i].trimmed();
 
-		if (s.startsWith("#") == true)
+		if (s.isEmpty())
 		{
 			continue;
 		}
 
-		QStringList pl = s.split("#", Qt::SkipEmptyParts);
-
-		if (pl.size() < 1)
-		{
-			continue;
-		}
-
-		s = pl[0];
-
-		pl = s.split("=", Qt::SkipEmptyParts);
+		QStringList pl = s.split("=", Qt::SkipEmptyParts);
 
 		if (pl.size() < 2)
 		{
@@ -209,6 +201,14 @@ bool parseCfgFile(const QString& cfgFileName, RequestParams* rp)
 			}
 
 			rp->archiveLocation = QDir::toNativeSeparators(paramValue);
+			continue;
+		}
+
+		//
+
+		if (param == "checkonly")
+		{
+			rp->checkonly = stringToBool(paramValue, nullptr);
 			continue;
 		}
 
@@ -248,11 +248,16 @@ bool parseCfgFile(const QString& cfgFileName, RequestParams* rp)
 
 		if (param == "signals")
 		{
-			if (paramValue.isEmpty())
+			if (paramValue.isEmpty() == true || paramValue.trimmed().toLower() == "all")
 			{
-				rp->signalsList = "All";
+				continue;
 			}
-			rp->signalsList = paramValue;
+
+			if (paramValue.isEmpty() == false)
+			{
+				parseSignalsList(paramValue, &rp->signalsList);
+			}
+
 			continue;
 		}
 
@@ -285,9 +290,9 @@ bool parseCfgFile(const QString& cfgFileName, RequestParams* rp)
 	}
 
 	if (rp->archiveLocation.isEmpty() ||
-		rp->begin.isValid() == false ||
-		rp->end.isValid() == false ||
-		rp->destLocation.isEmpty())
+		(rp->checkonly == false && (rp->destLocation.isEmpty() ||
+									rp->begin.isValid() == false ||
+									rp->end.isValid() == false)))
 	{
 		print << QString("\nConfiguration file parsing error!\n\n");
 		return false;
@@ -301,4 +306,37 @@ bool parseCfgFile(const QString& cfgFileName, RequestParams* rp)
 	}
 
 	return result;
+}
+
+bool parseSignalsList(QString signalsListStr, QStringList* signalsList)
+{
+	TEST_PTR_RETURN_FALSE(signalsList);
+
+	signalsListStr.replace(",", " ");
+
+	QStringList slist = signalsListStr.split(" ", Qt::SkipEmptyParts);
+
+	const QString number("#");
+	const QString emptyStr("");
+
+	const QString question("?");
+	const QString questionReplace(".");
+
+	const QString star("*");
+	const QString starReplace(".*");
+
+	for(const QString& sl : slist)
+	{
+		QString regExp = sl;
+
+		regExp.replace(number, emptyStr);
+		regExp.replace(question, questionReplace);
+		regExp.replace(star, starReplace);
+
+		//regExp = strBegin + regExp + strEnd;
+
+		signalsList->append(regExp);
+	}
+
+	return true;
 }

@@ -7,7 +7,7 @@
 
 class FileArchivist : public Archivist
 {
-	struct CopyFileInfo
+	struct FileInfo
 	{
 		QString pathFileName;
 		QString fileName;
@@ -30,10 +30,17 @@ public:
 private:
 	bool readArchInfoProto();
 	bool scanArchive();
+
+	bool checkArchive();
+	void checkThreadProc();
+
 	bool checkRequiredSpace();
 	bool copyFiles();
 	void copyThreadProc();
-	bool copyFile(const QString& from, const QString& to, qint64 startPos, qint64 endPos);
+	bool copyFile(const QString& from, const QString& to, qint64 startPos, qint64 endPos, char* buf, qint64 bufSize);
+
+	void asyncPrintError(const QString& err);
+	void asyncPrintError(const QStringList& errs);
 
 	qint64 findBeginPos(const QString& pathFileName, QDateTime beginDate);
 	qint64 findEndPos(const QString& pathFileName, QDateTime endDate);
@@ -51,15 +58,14 @@ private:
 
 //	QString m_destFile;
 
-	inline static const qint64 BUF_SIZE = 15000 * sizeof(ArchFileRecord);
+	QMutex m_processingMutex;
+	std::vector<FileInfo> m_fileInfos;
+	bool m_prevError = false;
+	int m_fileInfoIndex = 0;
 
-	char m_buffer[BUF_SIZE];
-
-	QMutex m_copyMutex;
-	std::vector<CopyFileInfo> m_copyFileInfos;
-	int m_copyInfoIndex = 0;
-
-	std::atomic<int> m_copiedCount = 0;
+	std::atomic<int> m_processedCount = 0;
 
 	qint64 m_expectedSize = 0;
+
+	inline static const qint64 BUF_SIZE = 10000 * sizeof(ArchFileRecord);
 };

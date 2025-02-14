@@ -295,6 +295,8 @@ namespace OnlineLib
 
 		qint64 m_firstPacketServerTime = 0;
 		qint64 m_lastPacketServerTime = 0;
+		qint32 m_correctionsCount = 0;
+		qint64 m_frame0ServerTime = 0;
 
 		//
 

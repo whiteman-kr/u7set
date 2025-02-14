@@ -255,49 +255,67 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	const Rup::Header& header = readBuffer.frame0Header();
 
-	bool disableTimeCorrection = false;
+	// packet Numerator checking
 
-	if (m_rupFrameNumerator != -1 &&
-		((m_rupFrameNumerator + 1) & 0xFFFF) != header.numerator)
+	bool sequentialNumerator = false;
+	qint64 dN = 0;
+
+	if (m_rupFrameNumerator != -1)
 	{
-		if (header.numerator > m_rupFrameNumerator)
-		{
-			m_lostPacketCount += header.numerator - m_rupFrameNumerator - 1;
-		}
-		else
-		{
-			m_lostPacketCount += 0xFFFF - m_rupFrameNumerator + header.numerator - 1;
-		}
+		dN = static_cast<qint64>(header.numerator) - m_rupFrameNumerator;
 
-		disableTimeCorrection = true;		// no sequential packets, disable time correction
+		sequentialNumerator = (dN == 1) || (dN == -65535);
+
+		if (sequentialNumerator == false)
+		{
+			if (dN > 0)
+			{
+				m_lostPacketCount += dN - 1;
+			}
+			else
+			{
+				m_lostPacketCount += 0xFFFF - m_rupFrameNumerator + header.numerator - 1;
+			}
+		}
 	}
 
 	m_rupFrameNumerator = header.numerator;
 
-	qint64 timeWithoutCorrection = readBuffer.frame0ServerTime;
-	qint64 dt = timeWithoutCorrection - m_lastPacketServerTime;
+	// packet SystemTime checking
 
-	if (dt == 0)
+	qint64 dT = 0;
+
+	m_frame0ServerTime = readBuffer.frame0ServerTime;
+
+	if (m_lastPacketServerTime == 0)
 	{
-		// always do correction
-		//
-		m_lastPacketServerTime += 1;
+		m_lastPacketServerTime = m_frame0ServerTime;
+		m_correctionsCount = 0;
 	}
 	else
 	{
-		if (disableTimeCorrection == true ||
-			dt > 50 ||
-			dt <= (m_workcycle_ms + 1))
+		dT = std::abs(m_frame0ServerTime - m_lastPacketServerTime);
+
+		if (dT == 0)
 		{
-			// NO time correction
-			//
-			m_lastPacketServerTime = timeWithoutCorrection;
+			m_lastPacketServerTime++;
+			m_correctionsCount++;
 		}
 		else
 		{
-			// time correction
-			//
-			m_lastPacketServerTime += m_workcycle_ms;
+			static const qint64 MIN_DIF = static_cast<qint64>(m_workcycle_ms * 1.5);
+			static const qint64 MAX_DIF = m_workcycle_ms * 50;
+
+			if (dT > MIN_DIF && dT < MAX_DIF && sequentialNumerator == true && m_correctionsCount < 50)
+			{
+				m_lastPacketServerTime += m_workcycle_ms;
+				m_correctionsCount++;
+			}
+			else
+			{
+				m_lastPacketServerTime = m_frame0ServerTime;
+				m_correctionsCount = 0;
+			}
 		}
 	}
 

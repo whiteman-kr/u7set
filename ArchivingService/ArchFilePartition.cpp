@@ -233,12 +233,12 @@ bool ArchFilePartition::readRecord(qint64 recordIndex, ArchFileRecord* record)
 		return false;
 	}
 
-	if (record->isNotCorrupted() == false)
+	if (record->isNotCorrupted())
 	{
-		return false;
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 bool ArchFilePartition::read(ArchFileRecord* recordBuffer, int maxRecordsToRead, int* readCount)
@@ -352,15 +352,15 @@ void ArchFilePartition::moveToRecord(qint64 record)
 	m_file.seek(record * sizeof(ArchFileRecord));
 }
 
-ArchFindResult ArchFilePartition::binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition)
+ArchFindResult ArchFilePartition::binarySearch(E::TimeType timeType, qint64 time, qint64* recordIndex)
 {
-	if (startPosition == nullptr)
+	if (recordIndex == nullptr)
 	{
 		assert(false);
 		return ArchFindResult::SearchError;
 	}
 
-	*startPosition = -1;
+	*recordIndex = -1;
 
 	qint64 recordCount  = recordsCount();
 
@@ -408,7 +408,7 @@ ArchFindResult ArchFilePartition::binarySearch(E::TimeType timeType, qint64 time
 		break;
 
 		case BinSearchResult::Found:
-			*startPosition = binSearch.foundIndex();
+			*recordIndex = binSearch.foundIndex();
 			return ArchFindResult::Found;
 
 		case BinSearchResult::NotFound:

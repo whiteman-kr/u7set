@@ -750,7 +750,7 @@ bool Archive::saveArchInfoProtoFile() const
 
 void Archive::writeArchFilesInfoFile(const std::vector<std::vector<ArchFile*>>& archFilesGroups)
 {
-	QFile infoFile(QString("%1/archive.info").arg(m_archFullPath));
+	QFile infoFile(QString("%1/%2").arg(m_archFullPath).arg(File::ARCHIVE_INFO));
 
 	if (infoFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate) == false)
 	{

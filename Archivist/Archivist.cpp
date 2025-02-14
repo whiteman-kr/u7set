@@ -16,7 +16,7 @@ void Archivist::printRequestParams()
 			 arg(m_reqParams.begin.toString("hh:mm:ss dd.MM.yyyy"));
 	print << QString("End time:\t\t%1\n").
 			 arg(m_reqParams.end.toString("hh:mm:ss dd.MM.yyyy"));
-	print << QString("Signals filter:\t\t%1\n").arg(m_reqParams.signalsList);
+	print << QString("Signals filter:\t\t%1\n").arg(m_reqParams.signalsList.join(" "));
 	print << QString("Copy location:\t\t%1\n").arg(m_reqParams.destLocation);
 
 	print.newLine();

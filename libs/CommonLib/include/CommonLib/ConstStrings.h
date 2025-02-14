@@ -640,6 +640,7 @@ namespace File
 
 	inline const QString ARCH_INFO_PROTO = "ArchInfo.proto";
 	inline const QString ARCH_INFO_PROTO_BAK = "ArchInfo.proto.bak";
+	inline const QString ARCHIVE_INFO = "archive.info";
 
 	inline const QString READONLY = ".readonly";
 

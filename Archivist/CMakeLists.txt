@@ -17,6 +17,8 @@ add_executable(Archivist
 	../ArchivingService/ArchFileRecord.cpp
 	Archivist.cpp
 	Archivist.h
+	ArchUtils.cpp
+	ArchUtils.h
 	ArchivistMain.cpp
 	DbArchivist.cpp
 	DbArchivist.h
