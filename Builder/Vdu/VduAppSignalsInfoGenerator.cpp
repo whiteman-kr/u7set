@@ -10,7 +10,8 @@
 
 namespace Builder
 {
-	VduAppSignalsInfoGenerator::VduAppSignalsInfoGenerator()
+	VduAppSignalsInfoGenerator::VduAppSignalsInfoGenerator(const ModuleLogicCompiler* mlc) :
+		m_mlc(mlc)
 	{
 		m_strings.reserve(32768);
 		appendString(QString(), false);
@@ -20,11 +21,10 @@ namespace Builder
 	{
 	}
 
-	bool VduAppSignalsInfoGenerator::writeFiles(const ModuleLogicCompiler* mlc)
+	bool VduAppSignalsInfoGenerator::prepareStructures()
 	{
-		TEST_PTR_RETURN_FALSE(mlc);
+		TEST_PTR_RETURN_FALSE(m_mlc);
 
-		m_mlc = mlc;
 		m_context = m_mlc->builderContext();
 
 		TEST_PTR_RETURN_FALSE(m_context);
@@ -58,6 +58,15 @@ namespace Builder
 		RETURN_IF_FALSE(result);
 
 		result &= fillOptoPortsInfo();
+
+		return result;
+	}
+
+	bool VduAppSignalsInfoGenerator::writeFiles()
+	{
+		TEST_PTR_RETURN_FALSE(m_mlc);
+
+		bool result = true;
 
 		result &= fillHeader();
 
@@ -370,20 +379,33 @@ namespace Builder
 		m_header.appSignalsCount = static_cast<uint16_t>(m_vduSignals.size());
 		m_header.hash32ToIndexCount = static_cast<uint16_t>(m_hash32ToSignalIndex.size());
 		m_header.optoPortsCount = static_cast<uint16_t>(m_optoPorts.size());
-//		m_header.rxAppSignalsCount = static_cast<uint16_t>(m_rxAppSignals.size());
 		m_header.txAppSignalsCount = static_cast<uint16_t>(m_txAppSignals.size());
 
 		m_header.reserv1 = 0;
 
-		//Q_ASSERT(m_header.optoPortsCount == VDU_OPTO_PORTS_COUNT);
+		//
+
+		m_header.vduConfigID = 0;
+
+		auto it = m_mlc->builderContext()->m_vduConfigIDs.find(m_vduOptoModule->equipmentID());
+
+		if (it == m_mlc->builderContext()->m_vduConfigIDs.end())
+		{
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("ConfigurationID is not found for VDU %1").arg(m_vduOptoModule->equipmentID()));
+			return false;
+		}
+		else
+		{
+			m_header.vduConfigID = it->second;
+		}
+
+		//
 
 		m_header.refAppSignals = sizeof(m_header);
 
 		m_header.refHash32ToIndex = m_header.refAppSignals + m_header.appSignalsCount * sizeof(VduAppSignal);
 
 		m_header.refOptoPorts = m_header.refHash32ToIndex + m_header.hash32ToIndexCount * sizeof(VduHash32ToIndex);
-
-//		m_header.refRxAppSignals = m_header.refOptoPorts + m_header.optoPortsCount * sizeof(VduOptoPort);
 
 		m_header.refTxAppSignals = m_header.refOptoPorts + m_header.optoPortsCount * sizeof(VduOptoPort);
 
@@ -718,7 +740,6 @@ namespace Builder
 		printAppSignals(file);
 		printHashToIndex(file);
 		printOptoPortsInfo(file);
-//		printTxRxSignalsInfo(file, m_rxAppSignals);
 		printTxRxSignalsInfo(file, m_txAppSignals);
 		printStringsTable(file);
 		printCrc64(file);
@@ -754,14 +775,14 @@ namespace Builder
 		file << addrStr(sizeof(m_header.optoPortsCount),
 						QString("optoPortsCount           | %1").arg(m_header.optoPortsCount)) ;
 
-		// file << addrStr(sizeof(m_header.rxAppSignalsCount),
-		// 				QString("rxAppSignalsCount        | %1").arg(m_header.rxAppSignalsCount)) ;
-
 		file << addrStr(sizeof(m_header.txAppSignalsCount),
 						QString("txAppSignalsCount        | %1").arg(m_header.txAppSignalsCount)) ;
 
 		file << addrStr(sizeof(m_header.reserv1),
 						QString("reserv1                  | %1").arg(m_header.reserv1)) ;
+
+		file << addrStr(sizeof(m_header.vduConfigID),
+						QString("vduConfigID              | %1").arg(hex64(m_header.vduConfigID)));
 
 		file << addrStr(sizeof(m_header.refAppSignals),
 						QString("refAppSignals            | %1").arg(hex32(m_header.refAppSignals)));

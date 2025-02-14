@@ -559,7 +559,7 @@ namespace Builder
 
 				const quint8* idOffset = data.frames[frameIndex].data() + 14;
 				quint64 configID = qFromBigEndian(*reinterpret_cast<const quint64*>(idOffset));
-				m_context->m_vduComparsionIDs[lm->equipmentId()] = configID;
+				m_context->m_vduConfigIDs[lm->equipmentId()] = configID;
 			}
 		}
 

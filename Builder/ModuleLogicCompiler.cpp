@@ -15,7 +15,6 @@
 #include "DiagDataServiceCfgGenerator.h"
 #include "Parser.h"
 #include "LmDescriptionSet.h"
-#include "./Vdu/VduAppSignalsInfoGenerator.h"
 
 #define LOG_UNDEFINED_UAL_ADDRESS(log, ualSignal) log->writeError(QString("Undefined signal's ualAddress: %1 (File: %2 Line: %3 Function: %4)").arg(ualSignal->refSignalIDs().join(", ")).arg(__FILE__).arg(__LINE__).arg(SHORT_FUNC_INFO));
 
@@ -141,7 +140,8 @@ namespace Builder
 		m_alpCode(AppLogicCode::Type::ALP_Code, false),
 		m_optiAppLogicCode(AppLogicCode::Type::AllCode, true),
 		m_optiIdrCode(AppLogicCode::Type::IDR_Code, true),
-		m_optiAlpCode(AppLogicCode::Type::ALP_Code, true)
+		m_optiAlpCode(AppLogicCode::Type::ALP_Code, true),
+		m_vduAppSignalsGenerator(this)
 	{
 		m_equipmentSet = appLogicCompiler.equipmentSet();
 		m_deviceRoot = m_equipmentSet->root().get();
@@ -260,7 +260,7 @@ namespace Builder
 			PROC_TO_CALL(Builder::ModuleLogicCompiler::initComparatorSignals),
 
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
-			PROC_TO_CALL(ModuleLogicCompiler::writeVduConnectionsInfoFile),
+			PROC_TO_CALL(ModuleLogicCompiler::prepareVduStructures),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
 			//PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),			// extra debug info signal lists
 
@@ -686,6 +686,26 @@ namespace Builder
 		*deviceAppSignal = devAppSignal;
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::prepareVduStructures()
+	{
+		if (m_lm->isVdu() == false)
+		{
+			return true;
+		}
+
+		return m_vduAppSignalsGenerator.prepareStructures();
+	}
+
+	bool ModuleLogicCompiler::writeVduAppSignalsInfoFile()
+	{
+		if (m_lm->isVdu() == false)
+		{
+			return true;
+		}
+
+		return m_vduAppSignalsGenerator.writeFiles();
 	}
 
 	bool ModuleLogicCompiler::loadLMSettings()
@@ -18294,20 +18314,6 @@ namespace Builder
 		});*/
 
 		return true;
-	}
-
-	bool ModuleLogicCompiler::writeVduConnectionsInfoFile()
-	{
-		if (m_lm->isVdu() == false)
-		{
-			return true;
-		}
-
-		VduAppSignalsInfoGenerator vg;
-
-		bool res = vg.writeFiles(this);
-
-		return res;
 	}
 
 	void ModuleLogicCompiler::printCodeStatistics(const AppLogicCode& code,
