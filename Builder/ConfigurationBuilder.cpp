@@ -220,6 +220,7 @@ namespace Builder
 
 	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, Context* context) :
 		m_buildResultWriter(context->m_buildResultWriter.get()),
+		m_context(context),
 		m_buildWorkerThread(buildWorkerThread),
 		m_db(&context->m_db),
 		m_deviceRoot(context->m_equipmentSet->root().get()),
@@ -260,6 +261,7 @@ namespace Builder
 		ok &= buildFSCConfiguration();
 		if (ok == true)
 		{
+			ok &= createVDUConfigurationIDs();
 			ok &= createJumpersConfigurationReport();
 			ok &= createSubsystemsReport();
 		}
@@ -490,6 +492,75 @@ namespace Builder
 		{
 			// New error messages arrived during build - build failed
 			return false;
+		}
+
+		return true;
+	}
+
+	bool ConfigurationBuilder::createVDUConfigurationIDs() 
+	{
+		// Generate VDU Configuration IDs to the context
+		//
+		for (auto it = m_fscModules.begin(); it != m_fscModules.end(); it++)
+		{
+			Hardware::DeviceModule* lm = *it;
+			if (lm == nullptr)
+			{
+				assert(lm);
+				return false;
+			}
+			if (lm->isVdu() == true)
+			{
+				if (lm->propertyExists("SubsystemID") == false)
+				{
+					m_log->errCFG3000("SubsystemID", lm->equipmentId());
+					return false;
+				}
+				QString subsystemID = lm->propertyValue("SubsystemID").toString();
+
+				if (lm->propertyExists("LMNumber") == false)
+				{
+					m_log->errCFG3000("LMNumber", lm->equipmentId());
+					return false;
+				}
+				int lmNumber = lm->propertyValue("LMNumber").toInt();
+
+				bool ok = false;
+				Hardware::ModuleFirmware& fw = m_buildResultWriter->firmwareWriter()->firmware(subsystemID, &ok);
+				if (ok == false)
+				{
+					Q_ASSERT(ok);
+					continue;
+				}
+
+				LmDescription* description = m_lmDescriptions->get(lm).get();
+				if (description == nullptr)
+				{
+					Q_ASSERT(description);
+					continue;
+				}
+
+				const int vduConfigUartID = description->flashMemory().configUartId();
+				if (fw.uartExists(vduConfigUartID) == false)
+				{
+					Q_ASSERT(ok);
+					continue;
+				}
+
+				Hardware::ModuleFirmwareData& data = fw.firmwareData(vduConfigUartID, &ok);
+				if (ok == false)
+				{
+					Q_ASSERT(ok);
+					continue;
+				}
+
+				int frameIndex =
+					description->flashMemory().m_singleConfigFirstFrame + (lmNumber - 1) * description->flashMemory().m_singleConfigFrameCount;
+
+				const quint8* idOffset = data.frames[frameIndex].data() + 14;
+				quint64 configID = qFromBigEndian(*reinterpret_cast<const quint64*>(idOffset));
+				m_context->m_vduComparsionIDs[lm->equipmentId()] = configID;
+			}
 		}
 
 		return true;
