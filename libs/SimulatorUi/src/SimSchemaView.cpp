@@ -7,6 +7,7 @@
 #include <HardwareLib/ScriptEquipment.h>
 #include <SimulatorLib/SimOverrideSignals.h>
 #include <SimulatorLib/SimSoftware.h>
+#include <VFrame30/AppSignalController.h>
 #include <VFrame30/PropertyNames.h>
 
 

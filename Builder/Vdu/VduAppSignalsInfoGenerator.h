@@ -14,10 +14,11 @@ namespace Builder
 	class VduAppSignalsInfoGenerator
 	{
 	public:
-		VduAppSignalsInfoGenerator();
+		VduAppSignalsInfoGenerator(const Builder::ModuleLogicCompiler* mlc);
 		virtual ~VduAppSignalsInfoGenerator();
 
-		bool writeFiles(const ModuleLogicCompiler* mlc);
+		bool prepareStructures();
+		bool writeFiles();
 
 	private:
 		bool buildIoSignalsAddrMap();

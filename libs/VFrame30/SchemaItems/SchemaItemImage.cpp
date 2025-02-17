@@ -1,7 +1,7 @@
-#include <VFrame30/SchemaItemImage.h>
 #include <VFrame30/DrawParam.h>
-#include <VFrame30/MacrosExpander.h>
+#include <VFrame30/ImageItem.h>
 #include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemImage.h>
 
 
 namespace VFrame30
@@ -14,18 +14,39 @@ namespace VFrame30
 		//
 	}
 
-	SchemaItemImage::SchemaItemImage(SchemaUnit unit)
+	SchemaItemImage::SchemaItemImage(SchemaUnit unit) :
+		m_image{std::make_unique<ImageItem>()}
 	{
 		Property* p;
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::allowScale, PropertyNames::appearanceCategory, true, SchemaItemImage::allowScale, SchemaItemImage::setAllowScale);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::keepAspectRatio, PropertyNames::appearanceCategory, true, SchemaItemImage::keepAspectRatio, SchemaItemImage::setKeepAspectRatio);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::allowScale,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemImage::allowScale,
+								 SchemaItemImage::setAllowScale);
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::keepAspectRatio,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemImage::keepAspectRatio,
+								 SchemaItemImage::setKeepAspectRatio);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QImage, PropertyNames::image, PropertyNames::imageCategory, true, SchemaItemImage::image, SchemaItemImage::setImage);
+		p = ADD_PROPERTY_GET_SET_CAT(QImage,
+									 PropertyNames::image,
+									 PropertyNames::imageCategory,
+									 true,
+									 SchemaItemImage::image,
+									 SchemaItemImage::setImage);
 		p->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
 		p->setValidator(QStringLiteral("Images (*.png *.bmp *.jpg *.jpeg *.gif);; All Files (*.*)"));
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::svg, PropertyNames::imageCategory, true, SchemaItemImage::svgData, SchemaItemImage::setSvgData);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::svg,
+									 PropertyNames::imageCategory,
+									 true,
+									 SchemaItemImage::svgData,
+									 SchemaItemImage::setSvgData);
 		p->setSpecificEditor(E::PropertySpecificEditor::Svg);
 
 		// --
@@ -52,7 +73,7 @@ namespace VFrame30
 		//
 		Proto::SchemaItemImage* imageMessage = message->MutableExtension(Proto::schemaitem)->mutable_image();
 
-		bool ok = m_image.save(imageMessage->mutable_image());
+		bool ok = m_image->save(imageMessage->mutable_image());
 		return ok;
 	}
 
@@ -82,7 +103,7 @@ namespace VFrame30
 
 		const Proto::SchemaItemImage& imageMessage = message.GetExtension(Proto::schemaitem).image();
 
-		bool ok = m_image.load(imageMessage.image());
+		bool ok = m_image->load(imageMessage.image());
 
 		return ok;
 	}
@@ -95,21 +116,22 @@ namespace VFrame30
 		{
 			QRectF rect = boundingRectInDocPt(drawParam);
 
-			if (m_image.hasAnyImage() == false)
+			if (m_image->hasAnyImage() == false)
 			{
 				// Image not set, draw rect and information text
 				//
-				m_image.drawError(drawParam, rect, QStringLiteral("No Image"));
+				m_image->drawError(drawParam, rect, QStringLiteral("No Image"));
 				return;
 			}
 
 			// Draw Image
 			//
-			m_image.drawImage(drawParam, rect);
+			m_image->drawImage(drawParam, rect);
 			return;
 		};
 
-		return drawRotated(drawParam, [drawParam, &drawPrivate]()
+		return drawRotated(drawParam,
+						   [drawParam, &drawPrivate]()
 						   {
 							   return drawPrivate(drawParam);
 						   });
@@ -135,47 +157,47 @@ namespace VFrame30
 	//
 	bool SchemaItemImage::allowScale() const
 	{
-		return m_image.allowScale();
+		return m_image->allowScale();
 	}
 
 	void SchemaItemImage::setAllowScale(bool value)
 	{
-		m_image.setAllowScale(value);
+		m_image->setAllowScale(value);
 	}
 
 	// KeepAspectRatio
 	//
 	bool SchemaItemImage::keepAspectRatio() const
 	{
-		return m_image.keepAspectRatio();
+		return m_image->keepAspectRatio();
 	}
 
 	void SchemaItemImage::setKeepAspectRatio(bool value)
 	{
-		m_image.setKeepAspectRatio(value);
+		m_image->setKeepAspectRatio(value);
 	}
 
 	// Image
 	//
 	const QImage& SchemaItemImage::image() const
 	{
-		return m_image.image();
+		return m_image->image();
 	}
 
 	void SchemaItemImage::setImage(const QImage& image)
 	{
-		m_image.setImage(image);
+		m_image->setImage(image);
 	}
 
 	// Svg
 	//
 	const QString& SchemaItemImage::svgData() const
 	{
-		return m_image.svgData();
+		return m_image->svgData();
 	}
 
 	void SchemaItemImage::setSvgData(const QString& data)
 	{
-		m_image.setSvgData(data);
+		m_image->setSvgData(data);
 	}
 } // namespace VFrame30

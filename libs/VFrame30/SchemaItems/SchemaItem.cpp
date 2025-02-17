@@ -1,10 +1,11 @@
+#include <VFrame30/Context.h>
+#include <VFrame30/DrawParam.h>
+#include <VFrame30/PropertyNames.h>
+#include <VFrame30/Schema.h>
 #include <VFrame30/SchemaItem.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemControl.h>
 #include <VFrame30/SchemaItemVdu.h>
-#include <VFrame30/DrawParam.h>
-#include <VFrame30/PropertyNames.h>
-#include <VFrame30/Schema.h>
 
 
 namespace VFrame30
@@ -21,35 +22,55 @@ namespace VFrame30
 		return;
 	}
 
-	SchemaItem::~SchemaItem()
-	{
-	}
+	SchemaItem::~SchemaItem() {}
 
 	void SchemaItem::propertyDemand(const QString& /*prop*/)
 	{
 		addProperty<QUuid, SchemaItem, &SchemaItem::guid, nullptr>(PropertyNames::guid, PropertyNames::functionalCategory, true)
 			->setExpert(true);
 
-		addProperty<bool, SchemaItem, &SchemaItem::commented, &SchemaItem::setCommented>(PropertyNames::commented, PropertyNames::functionalCategory, true);
-		addProperty<bool, SchemaItem, &SchemaItem::isLocked, &SchemaItem::setLocked>(PropertyNames::locked, PropertyNames::commonCategory, true);
+		addProperty<bool, SchemaItem, &SchemaItem::commented, &SchemaItem::setCommented>(PropertyNames::commented,
+																						 PropertyNames::functionalCategory,
+																						 true);
+		addProperty<bool, SchemaItem, &SchemaItem::isLocked, &SchemaItem::setLocked>(PropertyNames::locked,
+																					 PropertyNames::commonCategory,
+																					 true);
 
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::tags, true, SchemaItem::tagsAsString, SchemaItem::setTags)
 			->setSpecificEditor(E::PropertySpecificEditor::Tags);
 
 		addProperty<QString, SchemaItem, &SchemaItem::label, nullptr>(PropertyNames::label, PropertyNames::functionalCategory, true);
-		addProperty<E::TextPos, SchemaItem, &SchemaItem::labelPos, &FblItemRect::setLabelPos>(PropertyNames::labelPos, PropertyNames::functionalCategory, true);
+		addProperty<E::TextPos, SchemaItem, &SchemaItem::labelPos, &FblItemRect::setLabelPos>(PropertyNames::labelPos,
+																							  PropertyNames::functionalCategory,
+																							  true);
 
-		bool isSchemaItemControl = qobject_cast<SchemaItemControl*>(this) != nullptr;	// Some properties are hidden for SchemaItemControl
+		bool isSchemaItemControl = qobject_cast<SchemaItemControl*>(this) != nullptr; // Some properties are hidden for SchemaItemControl
 
-		addProperty<bool, SchemaItem, &SchemaItem::acceptClick, &SchemaItem::setAcceptClick>(PropertyNames::acceptClick, PropertyNames::scriptsCategory, !isSchemaItemControl);
-		auto clickScriptProp = addProperty<QString, SchemaItem, &SchemaItem::clickScript, &SchemaItem::setClickScript>(PropertyNames::clickScript, PropertyNames::scriptsCategory, !isSchemaItemControl);
+		addProperty<bool, SchemaItem, &SchemaItem::acceptClick, &SchemaItem::setAcceptClick>(PropertyNames::acceptClick,
+																							 PropertyNames::scriptsCategory,
+																							 !isSchemaItemControl);
+		auto clickScriptProp =
+			addProperty<QString, SchemaItem, &SchemaItem::clickScript, &SchemaItem::setClickScript>(PropertyNames::clickScript,
+																									PropertyNames::scriptsCategory,
+																									!isSchemaItemControl);
 		clickScriptProp->setIsScript(true);
 
-		addProperty<QString>(PropertyNames::objectName, PropertyNames::scriptsCategory, true,
-		                     [this](){return this->objectName(); },
-		                     [this](QString value){this->setObjectName(value); });
+		addProperty<QString>(
+			PropertyNames::objectName,
+			PropertyNames::scriptsCategory,
+			true,
+			[this]()
+			{
+				return this->objectName();
+			},
+			[this](QString value)
+			{
+				this->setObjectName(value);
+			});
 
-		addProperty<QString, SchemaItem, &SchemaItem::preDrawScript, &SchemaItem::setPreDrawScript>(PropertyNames::preDrawScript, PropertyNames::scriptsCategory, true);
+		addProperty<QString, SchemaItem, &SchemaItem::preDrawScript, &SchemaItem::setPreDrawScript>(PropertyNames::preDrawScript,
+																									PropertyNames::scriptsCategory,
+																									true);
 
 		return;
 	}
@@ -61,7 +82,9 @@ namespace VFrame30
 		const std::string& className = this->metaObject()->className();
 		quint32 classnamehash = ::ClassNameHashCode(className);
 
-		message->set_classnamehash(classnamehash);	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
+		message->set_classnamehash(
+			classnamehash); // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ
+							// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.
 
 		Proto::SchemaItem* schemaItem = message->MutableExtension(Proto::schemaitem);
 
@@ -130,7 +153,7 @@ namespace VFrame30
 
 		if (schemaItem == nullptr)
 		{
-			Q_ASSERT(schemaItem);		// Add class to the factory, VFrame30Library.cpp
+			Q_ASSERT(schemaItem); // Add class to the factory, VFrame30Library.cpp
 			return nullptr;
 		}
 
@@ -144,7 +167,7 @@ namespace VFrame30
 
 	void SchemaItem::moveItem(double /*horzOffsetDocPt*/, double /*vertOffsetDocPt*/)
 	{
-		assert(false);	// Implement in child classes
+		assert(false); // Implement in child classes
 	}
 
 	void SchemaItem::snapToGrid(double /*gridSize*/)
@@ -154,33 +177,33 @@ namespace VFrame30
 
 	double SchemaItem::GetWidthInDocPt() const
 	{
-		assert(false);	// Implement in child classes
+		assert(false); // Implement in child classes
 		return 0;
 	}
 
 	double SchemaItem::GetHeightInDocPt() const
 	{
-		assert(false);	// Implement in child classes
+		assert(false); // Implement in child classes
 		return 0;
 	}
 
 	void SchemaItem::SetWidthInDocPt(double /*widthInDocPt*/)
 	{
-		assert(false);	// Implement in child classes
+		assert(false); // Implement in child classes
 	}
 
 	void SchemaItem::SetHeightInDocPt(double /*heightInDocPt*/)
 	{
-		assert(false);	// Implement in child classes
+		assert(false); // Implement in child classes
 	}
 
 	void SchemaItem::dump(std::shared_ptr<SchemaItem> item)
 	{
 		QString str = QString("SchemaItem %1, [ptr: %2, counter: %3], uuid: %4")
-					  .arg(item->metaObject()->className())
-					  .arg(reinterpret_cast<qulonglong>(item.get()))
-					  .arg(item.use_count())
-					  .arg(item->guid().toString());
+						  .arg(item->metaObject()->className())
+						  .arg(reinterpret_cast<qulonglong>(item.get()))
+						  .arg(item.use_count())
+						  .arg(item->guid().toString());
 
 		qDebug() << str;
 	}
@@ -191,10 +214,9 @@ namespace VFrame30
 		qDebug() << "\tguid:" << guid();
 	}
 
-	void SchemaItem::clickEvent(QJSEngine* engine,  QWidget* parentWidget)
+	void SchemaItem::clickEvent(QJSEngine* engine, QWidget* parentWidget)
 	{
-		if (engine == nullptr ||
-			parentWidget == nullptr)
+		if (engine == nullptr || parentWidget == nullptr)
 		{
 			assert(engine);
 			assert(parentWidget);
@@ -213,8 +235,7 @@ namespace VFrame30
 			m_jsClickScript = evaluateScript("clickScript", m_clickScript, engine, parentWidget);
 		}
 
-		if (m_jsClickScript.isError() == true ||
-			m_jsClickScript.isNull() == true)
+		if (m_jsClickScript.isError() == true || m_jsClickScript.isNull() == true)
 		{
 			return;
 		}
@@ -245,8 +266,7 @@ namespace VFrame30
 			m_jsPreDrawScript = evaluateScript("preDrawScript", m_preDrawScript, engine, nullptr);
 		}
 
-		if (m_jsPreDrawScript.isError() == true ||
-			m_jsPreDrawScript.isNull() == true)
+		if (m_jsPreDrawScript.isError() == true || m_jsPreDrawScript.isNull() == true)
 		{
 			return false;
 		}
@@ -258,9 +278,7 @@ namespace VFrame30
 
 	bool SchemaItem::runScript(QString scriptName, QJSValue& evaluatedJs, QJSEngine* engine)
 	{
-		if (evaluatedJs.isUndefined() == true ||
-			evaluatedJs.isError() == true ||
-			engine == nullptr)
+		if (evaluatedJs.isUndefined() == true || evaluatedJs.isError() == true || engine == nullptr)
 		{
 			assert(engine);
 			return false;
@@ -438,8 +456,7 @@ namespace VFrame30
 
 		for (const auto& p : props)
 		{
-			if (p->visible() == false ||
-				p->readOnly() == true)
+			if (p->visible() == false || p->readOnly() == true)
 			{
 				continue;
 			}
@@ -506,19 +523,13 @@ namespace VFrame30
 		Q_UNUSED(drawParam)
 	}
 
-	void SchemaItem::drawLabel(CDrawParam* /*drawParam*/) const
-	{
-	}
+	void SchemaItem::drawLabel(CDrawParam* /*drawParam*/) const {}
 
-	void SchemaItem::drawHighlight(CDrawParam*) const
-	{
-	}
+	void SchemaItem::drawHighlight(CDrawParam*) const {}
 
 	// Рисование элемента при его создании изменении
 	//
-	void SchemaItem::drawOutline(CDrawParam* ) const
-	{
-	}
+	void SchemaItem::drawOutline(CDrawParam*) const {}
 
 	void SchemaItem::drawOutline(CDrawParam* drawParam, const std::vector<std::shared_ptr<SchemaItem>>& items)
 	{
@@ -564,9 +575,7 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaItem::drawSelection(CDrawParam*, bool) const
-	{
-	}
+	void SchemaItem::drawSelection(CDrawParam*, bool) const {}
 
 	void SchemaItem::drawSelection(CDrawParam* drawParam, const std::vector<std::shared_ptr<SchemaItem>>& items, bool drawSizeBar)
 	{
@@ -584,13 +593,9 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaItem::drawCompareAction(CDrawParam* /*drawParam*/, QColor /*color*/) const
-	{
-	}
+	void SchemaItem::drawCompareAction(CDrawParam* /*drawParam*/, QColor /*color*/) const {}
 
-	void SchemaItem::drawCommentDim(CDrawParam* /*drawParam*/) const
-	{
-	}
+	void SchemaItem::drawCommentDim(CDrawParam* /*drawParam*/) const {}
 
 	// Определение, входит ли точка в элемент, x и y в дюймах или в пикселях
 	//
@@ -719,8 +724,7 @@ namespace VFrame30
 	{
 		std::shared_ptr<Context> result;
 
-		if (auto schema = parentSchema();
-			schema != nullptr)
+		if (auto schema = parentSchema(); schema != nullptr)
 		{
 			result = schema->context();
 		}
@@ -923,8 +927,8 @@ namespace VFrame30
 
 	void SchemaItem::setTags(QString tags)
 	{
-		//tags.replace(';', QChar::LineFeed);
-		//tags.replace(',', QChar::LineFeed);	QChar::LineFeed
+		// tags.replace(';', QChar::LineFeed);
+		// tags.replace(',', QChar::LineFeed);	QChar::LineFeed
 
 		static const auto re = QRegularExpression("\\W+");
 		m_tags = tags.split(re, Qt::SkipEmptyParts);
@@ -1060,7 +1064,7 @@ namespace VFrame30
 
 	QRectF SchemaItem::boundingRectInDocPt(const CDrawParam* /*drawParam*/) const
 	{
-		assert(false);		// Must be implemented in child classes
+		assert(false); // Must be implemented in child classes
 		return {};
 	}
 
@@ -1077,4 +1081,4 @@ namespace VFrame30
 		return m_lastScriptError;
 	}
 
-}
+} // namespace VFrame30

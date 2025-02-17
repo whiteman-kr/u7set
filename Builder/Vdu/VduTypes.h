@@ -20,6 +20,14 @@ inline const vdu_string_ref StringRefStub = 0x52525453; // "STRR" - for debug, e
 //
 typedef uint32_t vdu_cstr;
 
+// vdu_scriptbc is a Lua script bytecode.
+// Data starts from 32-bit size, then follows bytecode.
+// Padding and alignment is 4 bytes.
+//
+typedef uint32_t vdu_scriptbc;
+
+inline const vdu_scriptbc LuaBytecodeRefStub = 0x4342544C; // "LBTC" - for debug, easy to find in hex editor.
+
 // --
 //
 inline const int VDU_OPTO_PORTS_COUNT = 8;

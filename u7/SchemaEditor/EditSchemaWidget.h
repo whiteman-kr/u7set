@@ -30,7 +30,7 @@ class AppSignalSetProvider;
 //
 struct SchemaItemClipboardData
 {
-	static const char* mimeType;	// = "application/x-schemaitem";
+	static const char* mimeType; // = "application/x-schemaitem";
 };
 
 //
@@ -52,7 +52,7 @@ public:
 					 AppSignalSetProvider* signalSetProvider,
 					 QWidget* parent);
 	virtual ~EditSchemaWidget();
-	
+
 protected:
 	void createActions();
 	void updateFileActions();
@@ -101,7 +101,8 @@ protected:
 	void mouseMove_MovingEdgesOrVertex(QMouseEvent* event);
 
 	// Mouse Right Button Down
-	// WARNING, if you add another function in MouseRightUp, add in EditSchemaWidget::contextMenu(const QPoint& pos) exception for this MouseMode
+	// WARNING, if you add another function in MouseRightUp, add in EditSchemaWidget::contextMenu(const QPoint& pos) exception for this
+	// MouseMode
 	//
 	void mouseRightDown_None(QMouseEvent* event);
 	void mouseRightDown_AddSchemaPosConnectionNextPoint(QMouseEvent* event);
@@ -162,17 +163,17 @@ public:
 	// Signals
 	//
 signals:
-	void detachOrAttachWindow();			// Command to the owner to attach or detach window from tab
-	void closeTab(QWidget* tabWidget);		// Command to the owner to Close current tab
-	void checkInFile();						// Command to the owner to CheckIn the file.
-	void checkOutFile();					// Command to the owner to CheckOut the file.
-	void undoChangesFile();					// Command to the owner to Undo the file in version control system, and reread last version.
+	void detachOrAttachWindow();         // Command to the owner to attach or detach window from tab
+	void closeTab(QWidget* tabWidget);   // Command to the owner to Close current tab
+	void checkInFile();                  // Command to the owner to CheckIn the file.
+	void checkOutFile();                 // Command to the owner to CheckOut the file.
+	void undoChangesFile();              // Command to the owner to Undo the file in version control system, and reread last version.
 	void saveWorkcopy();
-	void getCurrentWorkcopy();				// Save current schema to a file
-	void setCurrentWorkcopy();				// Load a schema from a file
-	void modifiedChanged(bool modified);	// Command to the owner to change title
+	void getCurrentWorkcopy();           // Save current schema to a file
+	void setCurrentWorkcopy();           // Load a schema from a file
+	void modifiedChanged(bool modified); // Command to the owner to change title
 
-	// Slots
+										 // Slots
 	//
 public slots:
 	void layers();
@@ -233,8 +234,8 @@ protected slots:
 	void addLoopbackSource();
 	void addLoopbackTarget();
 
-	void addAfbElement();			// Add Application Functional Block
-	void addUfbElement();			// Add User Functional Block
+	void addAfbElement(); // Add Application Functional Block
+	void addUfbElement(); // Add User Functional Block
 
 	void addBusComposer();
 	void addBusExtractor();
@@ -247,6 +248,7 @@ protected slots:
 
 private:
 	struct NextSelectionItem;
+
 protected:
 	bool selectNextLeftItem(NextSelectionItem switchToLeftItem);
 	bool selectNextRightItem(NextSelectionItem switchToRightItem);
@@ -347,7 +349,7 @@ private:
 	SchemaPropertiesDialog* m_schemaPropertiesDialog = nullptr;
 	SchemaItemPropertiesDialog* m_itemsPropertiesDialog = nullptr;
 
-	//Qt::MouseButtons m_mousePressedButtons;
+	// Qt::MouseButtons m_mousePressedButtons;
 
 	struct MouseStateCursor
 	{
@@ -376,11 +378,11 @@ private:
 	static const MouseStateCursor m_mouseStateCursor[];
 	static const SizeActionToMouseCursor m_sizeActionToMouseCursor[];
 
-	std::vector<MouseStateAction> m_mouseLeftDownStateAction;		// Initialized in constructor
-	std::vector<MouseStateAction> m_mouseLeftUpStateAction;			// Initialized in constructor
-	std::vector<MouseStateAction> m_mouseRightDownStateAction;		// Initialized in constructor
-	std::vector<MouseStateAction> m_mouseRightUpStateAction;		// Initialized in constructor
-	std::vector<MouseStateAction> m_mouseMoveStateAction;			// Initialized in constructor
+	std::vector<MouseStateAction> m_mouseLeftDownStateAction;  // Initialized in constructor
+	std::vector<MouseStateAction> m_mouseLeftUpStateAction;    // Initialized in constructor
+	std::vector<MouseStateAction> m_mouseRightDownStateAction; // Initialized in constructor
+	std::vector<MouseStateAction> m_mouseRightUpStateAction;   // Initialized in constructor
+	std::vector<MouseStateAction> m_mouseMoveStateAction;      // Initialized in constructor
 
 	SchemaFindDialog* m_findDialog = nullptr;
 
@@ -399,150 +401,152 @@ private:
 	//
 private:
 	QAction* m_escapeAction = nullptr;
-	QAction* m_f2Action = nullptr;	// Edit inputs/outputs signal strid
+	QAction* m_f2Action = nullptr; // Edit inputs/outputs signal strid
 
 	QAction* m_infoModeAction = nullptr;
 
-	//	Contexet Menu
+								   //	Contexet Menu
 	//
-friend class EditSchemaTabPage;		// EditSchemaTabPage has toolbar, and it will contain some actions from this class
+	friend class EditSchemaTabPage; // EditSchemaTabPage has toolbar, and it will contain some actions from this class
 
 private:
 	// File
 	//
 	QMenu* m_fileSubMenu = nullptr;
-		QAction* m_detachWindow = nullptr;
-		// ------------------------------
-		QAction* m_fileCheckOutAction = nullptr;
-		QAction* m_fileCheckInAction = nullptr;
-		QAction* m_fileUndoChangesAction = nullptr;
-		// ------------------------------
-		QAction* m_fileSeparatorAction0 = nullptr;
-		QAction* m_fileSaveAction = nullptr;
-		QAction* m_fileExportToPdfAction = nullptr;
-		QAction* m_fileSeparatorAction1 = nullptr;
-		// ------------------------------
-		QAction* m_fileExportAction = nullptr;
-		QAction* m_fileImportAction = nullptr;
-		// ------------------------------
-		QAction* m_fileSeparatorAction2 = nullptr;
-		QAction* m_filePropertiesAction = nullptr;
-		// ------------------------------
-		QAction* m_fileSeparatorAction3 = nullptr;
-		QAction* m_fileCloseAction = nullptr;
+	QAction* m_detachWindow = nullptr;
+	// ------------------------------
+	QAction* m_fileCheckOutAction = nullptr;
+	QAction* m_fileCheckInAction = nullptr;
+	QAction* m_fileUndoChangesAction = nullptr;
+	// ------------------------------
+	QAction* m_fileSeparatorAction0 = nullptr;
+	QAction* m_fileSaveAction = nullptr;
+	QAction* m_fileExportToPdfAction = nullptr;
+	QAction* m_fileSeparatorAction1 = nullptr;
+	// ------------------------------
+	QAction* m_fileExportAction = nullptr;
+	QAction* m_fileImportAction = nullptr;
+	// ------------------------------
+	QAction* m_fileSeparatorAction2 = nullptr;
+	QAction* m_filePropertiesAction = nullptr;
+	// ------------------------------
+	QAction* m_fileSeparatorAction3 = nullptr;
+	QAction* m_fileCloseAction = nullptr;
 
 	// Add Item
 	//
 	QMenu* m_addSubMenu = nullptr;
-		QAction* m_addLineAction = nullptr;
-		QAction* m_addRectAction = nullptr;
-		QAction* m_addPathAction = nullptr;
-		QAction* m_addTextAction = nullptr;
-		QAction* m_addImageAction = nullptr;
-		//QAction* m_addFrameAction = nullptr;
-		// ------------------------------
-		QAction* m_addSeparatorAction0 = nullptr;
-		QAction* m_addLinkAction = nullptr;
-		QAction* m_addInputSignalAction = nullptr;
-		QAction* m_addInOutSignalAction = nullptr;
-		QAction* m_addOutputSignalAction = nullptr;
-		QAction* m_addConstantAction = nullptr;
-		QAction* m_addTerminatorAction = nullptr;
-		// ------------------------------
-		QAction* m_addSeparatorAfb = nullptr;
-		QAction* m_addAfbAction = nullptr;
-		QAction* m_addUfbAction = nullptr;
-		// ------------------------------
-		QAction* m_addSeparatorConn = nullptr;
-		QAction* m_addTransmitter = nullptr;
-		QAction* m_addReceiver = nullptr;
-		// ------------------------------
-		QAction* m_addSeparatorLoop = nullptr;
-		QAction* m_addLoopbackSource = nullptr;
-		QAction* m_addLoopbackTarget = nullptr;
-		// ------------------------------
-		QAction* m_addSeparatorBus = nullptr;
-		QAction* m_addBusComposer = nullptr;
-		QAction* m_addBusExtractor = nullptr;
-		
-		// Monitor and Tuning items
-		//
-		QAction* m_addValueAction = nullptr;
-		QAction* m_addImageValueAction = nullptr;
-		QAction* m_addLabelAction = nullptr;
-		QAction* m_addPushButtonAction = nullptr;
-		QAction* m_addLineEditAction = nullptr;
-		QAction* m_addSliderAction = nullptr;
-		QAction* m_addIndicatorAction = nullptr;
+	QAction* m_addLineAction = nullptr;
+	QAction* m_addRectAction = nullptr;
+	QAction* m_addPathAction = nullptr;
+	QAction* m_addTextAction = nullptr;
+	QAction* m_addImageAction = nullptr;
+	// QAction* m_addFrameAction = nullptr;
+	//  ------------------------------
+	QAction* m_addSeparatorAction0 = nullptr;
+	QAction* m_addLinkAction = nullptr;
+	QAction* m_addInputSignalAction = nullptr;
+	QAction* m_addInOutSignalAction = nullptr;
+	QAction* m_addOutputSignalAction = nullptr;
+	QAction* m_addConstantAction = nullptr;
+	QAction* m_addTerminatorAction = nullptr;
+	// ------------------------------
+	QAction* m_addSeparatorAfb = nullptr;
+	QAction* m_addAfbAction = nullptr;
+	QAction* m_addUfbAction = nullptr;
+	// ------------------------------
+	QAction* m_addSeparatorConn = nullptr;
+	QAction* m_addTransmitter = nullptr;
+	QAction* m_addReceiver = nullptr;
+	// ------------------------------
+	QAction* m_addSeparatorLoop = nullptr;
+	QAction* m_addLoopbackSource = nullptr;
+	QAction* m_addLoopbackTarget = nullptr;
+	// ------------------------------
+	QAction* m_addSeparatorBus = nullptr;
+	QAction* m_addBusComposer = nullptr;
+	QAction* m_addBusExtractor = nullptr;
 
-		// Diagnostics items
-		// 
-		QAction* m_addDiagSignalAction = nullptr;
-		
-		// VDU items
-		//
-		QAction* m_addVduLineAction = nullptr;
-		QAction* m_addVduRectAction = nullptr;
-		QAction* m_addVduValueAction = nullptr;
+	// Monitor and Tuning items
+	//
+	QAction* m_addValueAction = nullptr;
+	QAction* m_addImageValueAction = nullptr;
+	QAction* m_addLabelAction = nullptr;
+	QAction* m_addPushButtonAction = nullptr;
+	QAction* m_addLineEditAction = nullptr;
+	QAction* m_addSliderAction = nullptr;
+	QAction* m_addIndicatorAction = nullptr;
+
+	// Diagnostics items
+	//
+	QAction* m_addDiagSignalAction = nullptr;
+
+	// VDU items
+	//
+	QAction* m_addVduLineAction = nullptr;
+	QAction* m_addVduRectAction = nullptr;
+	QAction* m_addVduImageAction = nullptr;
+	QAction* m_addVduValueAction = nullptr;
+	QAction* m_addVduImageValueAction = nullptr;
 
 	// Edit
 	//
 	QMenu* m_editSubMenu = nullptr;
-		QAction* m_undoAction = nullptr;
-		QAction* m_redoAction = nullptr;
-		// ------------------------------
-		QAction* m_editSeparatorAction0 = nullptr;
-		QAction* m_selectAllAction = nullptr;
-		// ------------------------------
-		QAction* m_editSeparatorAction1 = nullptr;
-		QAction* m_editCutAction = nullptr;
-		QAction* m_editCopyAction = nullptr;
-		QAction* m_editPasteAction = nullptr;
-		// ------------------------------
-		QAction* m_editSeparatorAction2 = nullptr;
-		QAction* m_deleteAction = nullptr;
-		// ------------------------------
-		QAction* m_editSeparatorAction3 = nullptr;
-		QAction* m_propertiesAction = nullptr;
+	QAction* m_undoAction = nullptr;
+	QAction* m_redoAction = nullptr;
+	// ------------------------------
+	QAction* m_editSeparatorAction0 = nullptr;
+	QAction* m_selectAllAction = nullptr;
+	// ------------------------------
+	QAction* m_editSeparatorAction1 = nullptr;
+	QAction* m_editCutAction = nullptr;
+	QAction* m_editCopyAction = nullptr;
+	QAction* m_editPasteAction = nullptr;
+	// ------------------------------
+	QAction* m_editSeparatorAction2 = nullptr;
+	QAction* m_deleteAction = nullptr;
+	// ------------------------------
+	QAction* m_editSeparatorAction3 = nullptr;
+	QAction* m_propertiesAction = nullptr;
 
 	// Size and Pos (Align)
 	//
 	QMenu* m_alignSubMenu = nullptr;
-		QAction* m_sameWidthAction = nullptr;
-		QAction* m_sameHeightAction = nullptr;
-		QAction* m_sameSizeAction = nullptr;
-		// ------------------------------
-		QAction* m_sizeAndPosSeparatorAction0 = nullptr;
-		QAction* m_alignLeftAction = nullptr;
-		QAction* m_alignTopAction = nullptr;
-		QAction* m_alignRightAction = nullptr;
-		QAction* m_alignBottomAction = nullptr;
+	QAction* m_sameWidthAction = nullptr;
+	QAction* m_sameHeightAction = nullptr;
+	QAction* m_sameSizeAction = nullptr;
+	// ------------------------------
+	QAction* m_sizeAndPosSeparatorAction0 = nullptr;
+	QAction* m_alignLeftAction = nullptr;
+	QAction* m_alignTopAction = nullptr;
+	QAction* m_alignRightAction = nullptr;
+	QAction* m_alignBottomAction = nullptr;
 
 	// Order
 	//
 	QMenu* m_orderSubMenu = nullptr;
-		QAction* m_bringToFrontAction = nullptr;
-		QAction* m_bringForwardAction = nullptr;
-		QAction* m_sendToBackAction = nullptr;
-		QAction* m_sendBackwardAction = nullptr;
+	QAction* m_bringToFrontAction = nullptr;
+	QAction* m_bringForwardAction = nullptr;
+	QAction* m_sendToBackAction = nullptr;
+	QAction* m_sendBackwardAction = nullptr;
 
 	// Transform
 	//
 	QMenu* m_transformSubMenu = nullptr;
-		QAction* m_transformIntoInputAction = nullptr;
-		QAction* m_transformIntoInOutAction = nullptr;
-		QAction* m_transformIntoOutputAction = nullptr;
+	QAction* m_transformIntoInputAction = nullptr;
+	QAction* m_transformIntoInOutAction = nullptr;
+	QAction* m_transformIntoOutputAction = nullptr;
 
 	// View
 	//
 	QMenu* m_viewSubMenu = nullptr;
-		QAction* m_zoomInAction = nullptr;
-		QAction* m_zoomOutAction = nullptr;
-		QAction* m_zoom100Action = nullptr;
-		QAction* m_zoomFitToScreenAction = nullptr;
-		// ------------------------------
-		QAction* m_viewSeparatorAction0 = nullptr;
-		QAction* m_snapToGridAction = nullptr;
+	QAction* m_zoomInAction = nullptr;
+	QAction* m_zoomOutAction = nullptr;
+	QAction* m_zoom100Action = nullptr;
+	QAction* m_zoomFitToScreenAction = nullptr;
+	// ------------------------------
+	QAction* m_viewSeparatorAction0 = nullptr;
+	QAction* m_snapToGridAction = nullptr;
 
 	// Properties
 	//
@@ -557,8 +561,8 @@ private:
 
 	QAction* m_layersAction = nullptr;
 
-	//QMenu* m_propertiesMenu = nullptr;
-	//QAction* m_propertiesAction = nullptr;
+	// QMenu* m_propertiesMenu = nullptr;
+	// QAction* m_propertiesAction = nullptr;
 	QAction* m_compareDiffAction = nullptr;
 
 	QAction* m_addAppSignalAction = nullptr;
@@ -567,7 +571,6 @@ private:
 	// --
 	// End of ContextMenu
 private:
-
 	bool m_lastSelectedAddSignal = false;
 
 	// Selection of next schema item via Alt + arrow keys
@@ -577,9 +580,9 @@ private:
 		SchemaItemPtr schemaItem;
 		int pinIndex = 0;
 
-		bool isNull() const						{ return schemaItem == nullptr; }
-		bool isFblItemRect() const				{ return dynamic_cast<VFrame30::FblItemRect*>(schemaItem.get()) != nullptr; }
-		VFrame30::FblItemRect* toFblItemRect()	{ return dynamic_cast<VFrame30::FblItemRect*>(schemaItem.get()); }
+		bool isNull() const { return schemaItem == nullptr; }
+		bool isFblItemRect() const { return dynamic_cast<VFrame30::FblItemRect*>(schemaItem.get()) != nullptr; }
+		VFrame30::FblItemRect* toFblItemRect() { return dynamic_cast<VFrame30::FblItemRect*>(schemaItem.get()); }
 	};
 
 	NextSelectionItem m_nextSelectionFromLeft;
@@ -649,4 +652,3 @@ private:
 
 	bool m_replaceEnabled = false;
 };
-

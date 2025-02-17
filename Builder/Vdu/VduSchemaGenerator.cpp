@@ -1,22 +1,144 @@
 #include "VduSchemaGenerator.h"
 
-#include "../Context.h"
+#include "VduLuaScript.h"
 #include "VduSchemaFile.h"
 
-#include "../../UtilsLib/Crc.h"
+#include "../Context.h"
+#include "../UtilsLib/Crc.h"
 
 #include <HardwareLib/DeviceModule.h>
+#include <VFrame30/Context.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/ImageItem.h>
+#include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemVduImage.h>
+#include <VFrame30/SchemaItemVduImageValue.h>
 #include <VFrame30/SchemaItemVduLine.h>
 #include <VFrame30/SchemaItemVduRect.h>
 #include <VFrame30/SchemaItemVduValue.h>
 #include <VFrame30/SchemaView.h>
 #include <VFrame30/VduSchema.h>
 
+#include <QImageWriter>
+
+
 // #define VDU_DEBUG
 
 namespace
 {
+	std::optional<QByteArray> compileLuaScript(const VFrame30::Schema& schema, QString scriptProperty, Builder::IssueLogger& log)
+	{
+		std::optional<QByteArray> result;
+
+		auto property = schema.propertyByCaption(scriptProperty);
+		if (property == nullptr)
+		{
+			log.errINT1001(
+				QString("compileLuaScript(), Property %1 for schema %2 is not found.").arg(scriptProperty).arg(schema.schemaId()),
+				schema.schemaId());
+			return result;
+		}
+
+		QString script = property->value().toString().trimmed();
+
+		QString errorMessage;
+		QByteArray bytecode = Builder::VduLuaScript::compile(script, errorMessage);
+
+		if (errorMessage.isEmpty() == false)
+		{
+			log.errEQP6302(schema.schemaId(), scriptProperty, -1, errorMessage);
+			result = std::nullopt;
+		}
+		else
+		{
+			result = bytecode; // Even empty bytecode will init std::optional;
+		}
+
+		return result;
+	}
+
+	std::optional<QByteArray> compileLuaScript(const VFrame30::SchemaItem& item, QString scriptProperty, Builder::IssueLogger& log)
+	{
+		std::optional<QByteArray> result;
+
+		auto property = item.propertyByCaption(scriptProperty);
+		if (property == nullptr)
+		{
+			log.errINT1001(QString("compileLuaScript(), Property %1 not found.").arg(scriptProperty),
+						   item.parentSchema()->schemaId(),
+						   item.label(),
+						   item.guid());
+			return result;
+		}
+
+		QString script = property->value().toString();
+
+		QString errorMessage;
+		QByteArray bytecode = Builder::VduLuaScript::compile(script, errorMessage);
+
+		if (errorMessage.isEmpty() == false)
+		{
+			log.errEQP6303(item.parentSchema()->schemaId(), item.label(), item.guid(), scriptProperty, -1, errorMessage);
+			result = std::nullopt;
+		}
+		else
+		{
+			result = bytecode; // Even empty bytecode will init std::optional;
+		}
+
+		return bytecode;
+	}
+
+#if 0
+	bool checkLuaScript(const VFrame30::Schema& schema, QString scriptProperty, Builder::IssueLogger& log)
+	{
+		auto property = schema.propertyByCaption(scriptProperty);
+		if (property == nullptr)
+		{
+			log.errINT1001(QString("checkLuaScript(), Property %1 for schema %2 is not found.").arg(scriptProperty).arg(schema.schemaId()),
+						   schema.schemaId());
+			return false;
+		}
+
+		QString script = property->value().toString();
+
+		QString errorMessage;
+		bool scriptIsOk = Builder::VduLuaScript::checkLuaScript(script, errorMessage);
+
+		if (scriptIsOk == false)
+		{
+			log.errEQP6302(schema.schemaId(), scriptProperty, -1, errorMessage);
+		}
+
+		return scriptIsOk;
+	}
+
+	bool checkLuaScript(const VFrame30::SchemaItem& item, QString scriptProperty, Builder::IssueLogger& log)
+	{
+		auto property = item.propertyByCaption(scriptProperty);
+		if (property == nullptr)
+		{
+			log.errINT1001(QString("checkLuaScript(), Property %1 not found.").arg(scriptProperty),
+						   item.parentSchema()->schemaId(),
+						   item.label(),
+						   item.guid());
+			return false;
+		}
+
+		QString script = property->value().toString();
+
+		QString errorMessage;
+		bool scriptIsOk = Builder::VduLuaScript::checkLuaScript(script, errorMessage);
+
+		if (scriptIsOk == false)
+		{
+			log.errEQP6303(item.parentSchema()->schemaId(), item.label(), item.guid(), scriptProperty, -1, errorMessage);
+		}
+
+		return scriptIsOk;
+	}
+#endif
+
 	struct VduFileString
 	{
 		QString string;
@@ -28,13 +150,55 @@ namespace
 		{
 			return VduFileString{.string = string.trimmed(), .stringRefOffset = stringRefOffset};
 		}
+
+		static VduFileString createUtf8(const QString& string, size_t stringRefOffset)
+		{
+			return VduFileString{.string = string.trimmed(), .stringRefOffset = static_cast<uint32_t>(stringRefOffset)};
+		}
 	};
+
+	struct VduFileLuaBytecode
+	{
+		QByteArray bytecode;
+		uint32_t refOffset = 0; // Offset to the bytecode reference in the file.
+
+		static const uint32_t stub = LuaBytecodeRefStub;
+
+		static VduFileLuaBytecode create(const QByteArray& bytecode, uint32_t stringRefOffset)
+		{
+			return VduFileLuaBytecode{.bytecode = bytecode, .refOffset = stringRefOffset};
+		}
+
+		static VduFileLuaBytecode create(const QByteArray& bytecode, size_t stringRefOffset)
+		{
+			return VduFileLuaBytecode{.bytecode = bytecode, .refOffset = static_cast<uint32_t>(stringRefOffset)};
+		}
+	};
+
+	quint32 VduImageHash(const QImage& image)
+	{
+		const QImage converted = image.convertToFormat(QImage::Format_ARGB32);
+
+		QCryptographicHash hash{QCryptographicHash::Md5};
+
+		for (int y = 0; y < converted.height(); ++y)
+		{
+			const uchar* line = converted.constScanLine(y);
+
+			QByteArray lineData = QByteArray::fromRawData(reinterpret_cast<const char*>(line), static_cast<int>(converted.bytesPerLine()));
+			hash.addData(lineData);
+		}
+
+		return ::calcHash32(hash.resultView().constData(), hash.resultView().size());
+	}
 
 	// --
 	//
 	class SaveVduItemVisitor : public VFrame30::VduItemVisitor
 	{
+		Builder::Context& m_context;
 		QString m_vduEquipmentId;
+		QString m_subsystemId;
 		Builder::IssueLogger& m_log;
 		const Builder::VduFontProvider& m_vduFontProvider;
 		const std::map<Hash, int>& m_appSignalHashToSignalIndex;
@@ -51,20 +215,23 @@ namespace
 			itemType = 0;
 		}
 
-		SaveVduItemVisitor(QString vduEquipmentId,
-						   Builder::IssueLogger& m_log,
+		SaveVduItemVisitor(Builder::Context& context,
+						   QString vduEquipmentId,
+						   QString subsystemId,
 						   const Builder::VduFontProvider& m_vduFontProvider,
 						   const std::map<Hash, int>& appSignalHashToSignalIndex) :
-			m_vduEquipmentId(vduEquipmentId),
-			m_log(m_log),
-			m_vduFontProvider(m_vduFontProvider),
-			m_appSignalHashToSignalIndex(appSignalHashToSignalIndex)
+			m_context{context},
+			m_vduEquipmentId{vduEquipmentId},
+			m_subsystemId{subsystemId},
+			m_log{*context.m_log},
+			m_vduFontProvider{m_vduFontProvider},
+			m_appSignalHashToSignalIndex{appSignalHashToSignalIndex}
 		{
 		}
 
 		// SchemaItemVduLine
 		//
-		void visit(const VFrame30::SchemaItemVduLine& schemaItem) override
+		bool visit(const VFrame30::SchemaItemVduLine& schemaItem) override
 		{
 			reset();
 
@@ -84,11 +251,13 @@ namespace
 
 			itemType = structLine.itemType;
 			outData = QByteArray(reinterpret_cast<const char*>(&structLine), sizeof(structLine));
+
+			return true;
 		}
 
 		// SchemaItemVduRect
 		//
-		void visit(const VFrame30::SchemaItemVduRect& schemaItem) override
+		bool visit(const VFrame30::SchemaItemVduRect& schemaItem) override
 		{
 			reset();
 
@@ -97,8 +266,8 @@ namespace
 			structRect.version = 1;
 			structRect.itemType = VduFileSchemaItemRectId; // ! Do not forget to set itemType.
 
-			using PosType = decltype(VduSchemaFileSchemaItemRect1::left);
-			using SizeType = decltype(VduSchemaFileSchemaItemRect1::width);
+			using PosType = decltype(structRect.left);
+			using SizeType = decltype(structRect.width);
 
 			structRect.left = static_cast<PosType>(schemaItem.leftDocPt());
 			structRect.top = static_cast<PosType>(schemaItem.topDocPt());
@@ -133,7 +302,7 @@ namespace
 								   .arg(schemaItem.getFontItalic() ? ", italic" : "");
 
 				m_log.errEQP6401(m_vduEquipmentId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid(), font);
-				return;
+				return false;
 			}
 
 			structRect.fontIndex = fontIndex;
@@ -149,11 +318,75 @@ namespace
 
 			itemType = structRect.itemType;
 			outData = QByteArray(reinterpret_cast<const char*>(&structRect), sizeof(structRect));
+
+			return true;
+		}
+
+		// SchemaItemVduImage
+		//
+		bool visit(const VFrame30::SchemaItemVduImage& schemaItem) override
+		{
+			reset();
+
+			VduSchemaFileSchemaItemImage1 structImage{};
+
+			structImage.version = 1;
+			structImage.itemType = VduFileSchemaItemImageId; // ! Do not forget to set itemType.
+
+			using PosType = decltype(structImage.left);
+			using SizeType = decltype(structImage.width);
+
+			structImage.left = static_cast<PosType>(schemaItem.leftDocPt());
+			structImage.top = static_cast<PosType>(schemaItem.topDocPt());
+			structImage.width = static_cast<SizeType>(schemaItem.widthDocPt());
+			structImage.height = static_cast<SizeType>(schemaItem.heightDocPt());
+
+			// Same image.
+			//
+			auto image = schemaItem.toQImage(QRectF{0, 0, static_cast<qreal>(structImage.width), static_cast<qreal>(structImage.height)});
+
+			if (image.isNull() == true)
+			{
+				// SchemaItem %1 has no assigned image in VduSchema %2.
+				//
+				m_log.errALP4400(schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid());
+				return false;
+			}
+
+			auto imageHash = quint32{VduImageHash(image)}; // {} Just in case, to prevent narrowing conversion.
+			structImage.imageHash = imageHash;
+
+			// If file is not exists then save file to output.
+			// '/' in the fron is required for correct work m_buildResultWriter->isBuildFileExists.
+			//
+			QString subsystemDir = m_context.m_buildResultWriter->subsystemDirectory(m_subsystemId);
+			QString vduSchemaImageDir = QString{'/'} + subsystemDir + "/" + m_vduEquipmentId + "/Schemas/Images";
+
+			QString fileName = QString{"%1"}.arg(imageHash, 8, 16, QChar{'0'}).toUpper() + QString{".bmp"};
+
+			bool fileAlreadyExists = m_context.m_buildResultWriter->isBuildFileExists(vduSchemaImageDir + '/' + fileName);
+			if (fileAlreadyExists == false)
+			{
+				QByteArray data;
+				QBuffer buffer(&data);
+				buffer.open(QIODevice::WriteOnly);
+
+				image.save(&buffer, "bmp");
+
+				m_context.m_buildResultWriter->addFile(vduSchemaImageDir, fileName, data, false);
+			}
+
+			// --
+			//
+			itemType = structImage.itemType;
+			outData = QByteArray(reinterpret_cast<const char*>(&structImage), sizeof(structImage));
+
+			return true;
 		}
 
 		// SchemaItemVduValue
 		//
-		void visit(const VFrame30::SchemaItemVduValue& schemaItem) override
+		bool visit(const VFrame30::SchemaItemVduValue& schemaItem) override
 		{
 			reset();
 
@@ -195,7 +428,7 @@ namespace
 								   .arg(schemaItem.getFontItalic() ? ", italic" : "");
 
 				m_log.errEQP6401(m_vduEquipmentId, schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid(), font);
-				return;
+				return false;
 			}
 
 			structValue.fontIndex = fontIndex;
@@ -235,7 +468,7 @@ namespace
 									 schemaItem.guid());
 
 					reset();
-					return;
+					return false;
 				}
 
 				// Signal index follows the structValue.
@@ -247,21 +480,155 @@ namespace
 			// OutData already set.
 			//
 			itemType = structValue.itemType;
-			return;
+
+			return true;
+		}
+
+		bool visit(const VFrame30::SchemaItemVduImageValue& schemaItem) override
+		{
+			reset();
+
+			VduSchemaFileSchemaItemImageValue1 structImageValue{};
+
+			structImageValue.version = 1;
+			structImageValue.itemType = VduFileSchemaItemImageValueId;
+
+			using PosType = decltype(structImageValue.left);
+			using SizeType = decltype(structImageValue.width);
+
+			structImageValue.left = static_cast<PosType>(schemaItem.leftDocPt());
+			structImageValue.top = static_cast<PosType>(schemaItem.topDocPt());
+			structImageValue.width = static_cast<SizeType>(schemaItem.widthDocPt());
+			structImageValue.height = static_cast<SizeType>(schemaItem.heightDocPt());
+
+			// Images
+			//
+			structImageValue.imageCount = static_cast<decltype(structImageValue.imageCount)>(schemaItem.images().size());
+
+			// Chech if image count is not greater than size of VduSchemaFileSchemaItemImageValue1::images[]
+			//
+			if (const auto maxImageCount = sizeof(structImageValue.images) / sizeof(structImageValue.images[0]);
+				structImageValue.imageCount > maxImageCount)
+			{
+				QString schemaId = schemaItem.parentSchema() ? schemaItem.parentSchema()->schemaId() : QString{};
+				m_log.errINT1001(QString("Item has more than %1 images.").arg(maxImageCount),
+								 schemaId,
+								 schemaItem.label(),
+								 schemaItem.guid());
+				return false;
+			}
+
+			const auto& imageItems = schemaItem.images();
+
+			for (size_t i = 0; i < structImageValue.imageCount; i++)
+			{
+				std::shared_ptr<VFrame30::ImageItem> imageItem = imageItems[i];
+
+				auto& is = structImageValue.images[i];
+				is.version = 1;
+				is.imageId = VduFileString::stub;
+
+				// imageId
+				//
+				{
+					size_t imageIdOffest = sizeof(VduSchemaFileSchemaItem1) + offsetof(VduSchemaFileSchemaItemImageValue1, images) +
+										   sizeof(is) * i + offsetof(VduSchemaFileSchemaItemImageValue1::Image, imageId);
+
+					addedStrings.push_back(VduFileString::createUtf8(imageItem->imageId(), imageIdOffest));
+				}
+
+				// imageHash
+				//
+				QRectF imageRect{0, 0, static_cast<qreal>(structImageValue.width), static_cast<qreal>(structImageValue.height)};
+				auto image = imageItem->toQImage(imageRect, schemaItem.fillColor());
+
+				if (image.isNull() == true)
+				{
+					// SchemaItem %1 has no assigned image in VduSchema %2.
+					//
+					m_log.errALP4400(schemaItem.parentSchema()->schemaId(), schemaItem.label(), schemaItem.guid());
+					return false;
+				}
+
+				auto imageHash = quint32{VduImageHash(image)}; // {} Just in case, to prevent narrowing conversion.
+				is.imageHash = imageHash;
+
+				// imageFile
+				//
+				{
+					QString fileName = QString{"%1"}.arg(is.imageHash, 8, 16, QChar{'0'}).toUpper() + QString{".bmp"};
+
+					// If file is not exists then save file to output.
+					// '/' in the fron is required for correct work m_buildResultWriter->isBuildFileExists.
+					//
+					QString subsystemDir = m_context.m_buildResultWriter->subsystemDirectory(m_subsystemId);
+					QString vduSchemaImageDir =
+						QStringLiteral("/") + subsystemDir + QStringLiteral("/") + m_vduEquipmentId + "/Schemas/Images";
+
+					bool fileAlreadyExists = m_context.m_buildResultWriter->isBuildFileExists(vduSchemaImageDir + '/' + fileName);
+					if (fileAlreadyExists == false)
+					{
+						QByteArray data;
+						QBuffer buffer(&data);
+						buffer.open(QIODevice::WriteOnly);
+
+						image.save(&buffer, "bmp");
+
+						m_context.m_buildResultWriter->addFile(vduSchemaImageDir, fileName, data, false);
+					}
+				}
+			}
+
+			// Set app signal indexes.
+			//
+			QStringList appSignalIds = schemaItem.signalIds();
+			structImageValue.appSignalCount = static_cast<decltype(structImageValue.appSignalCount)>(appSignalIds.size());
+
+			outData = QByteArray(reinterpret_cast<const char*>(&structImageValue), sizeof(structImageValue));
+
+			for (const QString& appSignalId : appSignalIds)
+			{
+				auto sit = m_appSignalHashToSignalIndex.find(::calcHash(appSignalId));
+
+				if (sit == m_appSignalHashToSignalIndex.end())
+				{
+					// Signal not found.
+					//
+					m_log.errEQP6400(m_vduEquipmentId,
+									 appSignalId,
+									 schemaItem.parentSchema()->schemaId(),
+									 schemaItem.label(),
+									 schemaItem.guid());
+
+					reset();
+					return false;
+				}
+
+				// Signal index follows the structValue.
+				//
+				uint32_t signalIndex = static_cast<uint32_t>(sit->second);
+				outData.append(reinterpret_cast<const char*>(&signalIndex), sizeof(signalIndex));
+			}
+
+			// OutData already set.
+			//
+			itemType = structImageValue.itemType;
+
+			return true;
 		}
 	};
 
+	// Save schema item to the file - actually to the QByteArray.
+	//
 	bool saveSchemaItem1(QString vduEquipmentId,
+						 QString subsystemId,
 						 const VFrame30::SchemaItem& schemaItem,
 						 const std::map<Hash, int>& appSignalHashToSignalIndex,
 						 QByteArray& out,
 						 std::list<VduFileString>& addedStrings,
+						 std::list<VduFileLuaBytecode>& addedLuaBytecodes,
 						 Builder::Context& context)
 	{
-		Builder::IssueLogger& log = *context.m_log;
-
-		// --
-		//
 		VduSchemaFileSchemaItem1 fileSchemaItem{};
 		std::memset(&fileSchemaItem, 0, sizeof(fileSchemaItem));
 
@@ -282,26 +649,52 @@ namespace
 		// onClickScript
 		//
 		{
+			auto bytecode = compileLuaScript(schemaItem, VFrame30::PropertyNames::clickScript, *context.m_log);
+			if (bytecode.has_value() == false)
+			{
+				return false;
+			}
+
 			fileSchemaItem.clickScript = VduFileString::stub;
+			fileSchemaItem.clickScriptBytecode = VduFileLuaBytecode::stub;
 
 			auto clickScript = VduFileString::createUtf8(schemaItem.clickScript(), offsetof(VduSchemaFileSchemaItem1, clickScript));
 			addedStrings.push_back(std::move(clickScript));
+
+			auto clickScriptBytecode =
+				VduFileLuaBytecode::create(bytecode.value(), offsetof(VduSchemaFileSchemaItem1, clickScriptBytecode));
+			addedLuaBytecodes.push_back(std::move(clickScriptBytecode));
 		}
 
 		// preDrawScript
 		//
 		{
+			auto bytecode = compileLuaScript(schemaItem, VFrame30::PropertyNames::preDrawScript, *context.m_log);
+			if (bytecode.has_value() == false)
+			{
+				return false;
+			}
+
 			fileSchemaItem.preDrawScript = VduFileString::stub;
+			fileSchemaItem.preDrawScriptBytecode = VduFileLuaBytecode::stub;
 
 			auto preDrawScript = VduFileString::createUtf8(schemaItem.preDrawScript(), offsetof(VduSchemaFileSchemaItem1, preDrawScript));
 			addedStrings.push_back(std::move(preDrawScript));
+
+			auto preDrawScriptBytecode =
+				VduFileLuaBytecode::create(bytecode.value(), offsetof(VduSchemaFileSchemaItem1, preDrawScriptBytecode));
+			addedLuaBytecodes.push_back(std::move(preDrawScriptBytecode));
 		}
 
 		// Save specific item struct, depending on itemType.
 		//
-		SaveVduItemVisitor saveVduItemVisitor(vduEquipmentId, log, context.m_vduFontProvider, appSignalHashToSignalIndex);
+		SaveVduItemVisitor saveVduItemVisitor(context, vduEquipmentId, subsystemId, context.m_vduFontProvider, appSignalHashToSignalIndex);
 
-		dynamic_cast<const VFrame30::SchemaItemVdu&>(schemaItem).accept(saveVduItemVisitor);
+		bool saveOk = dynamic_cast<const VFrame30::SchemaItemVdu&>(schemaItem).accept(saveVduItemVisitor);
+		if (saveOk == false)
+		{
+			return false;
+		}
 
 		// Save result after visiting specific item. SaveVduItemVisitor
 		//
@@ -369,12 +762,165 @@ namespace
 			return result;
 		}
 
+		bool writeToOut(QByteArray& out) const
+		{
+			// Resolve strings:
+			// String consist of 16 bit size of string in symbols, followed with string data. Padding to 4 bytes.
+			// The string is a null terminated QChar string.
+			// (In Qt, Unicode characters are 16-bit entities without any markup or structure).
+			// Note: String in file must be aligned to 4 bytes.
+			//
+
+			// Align to 4 bytes the beginning of string area.
+			//
+			auto addPadding = [](auto& container, size_t padding)
+			{
+				while ((container.size() % padding) != 0)
+				{
+					container.push_back(char{0});
+				}
+			};
+
+			addPadding(out, 4);
+
+			for (const auto& str : m_strings)
+			{
+				auto stringOffset = static_cast<vdu_cstr>(out.size());
+
+				// Write string size.
+				//
+				std::string utf8Str = str.toUtf8().toStdString();
+
+				// Write string size.
+				//
+				uint16_t stringSize = static_cast<uint16_t>(utf8Str.size());
+				out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
+
+				// Write string data.
+				//
+				out.append(reinterpret_cast<const char*>(utf8Str.data()),
+						   (utf8Str.size() + 1) * sizeof(std::string::value_type)); // +1 for null terminator
+
+				// Replace string_ref with offset to the string.
+				//
+				for (const auto& stringData : offsets(str))
+				{
+					out.replace(stringData.stringRefOffset,
+								sizeof(vdu_string_ref),
+								reinterpret_cast<const char*>(&stringOffset),
+								sizeof(stringOffset));
+				}
+
+				// Add padding bytes to strings (aligned to 4 bytes).
+				//
+				addPadding(out, 4);
+			}
+
+			return true;
+		}
+
 	private:
 		using Key = QString;
 
 		std::multimap<Key, VduFileString> m_offsetToString;
 		std::set<Key> m_strings;
 	};
+
+	// Accumulate string references and strings, then write them to the file.
+	//
+	class VduLuaBytecodeWriter
+	{
+	public:
+		using Offset = uint32_t;
+
+		void clear() { *this = {}; }
+
+		Offset add(const QByteArray& data, Offset offset)
+		{
+			auto record = VduFileLuaBytecode::create(data, offset);
+
+			m_offsetToBytecode.insert(std::pair{Key{data}, record});
+			m_bytecodes.insert(data);
+
+			return VduFileLuaBytecode::stub;
+		}
+
+		std::vector<QByteArray> allData() const { return {m_bytecodes.begin(), m_bytecodes.end()}; }
+
+		std::vector<VduFileLuaBytecode> offsets(const QByteArray& bytecode) const
+		{
+			Key key{bytecode};
+
+			auto [beginIt, endIt] = m_offsetToBytecode.equal_range(key);
+
+			std::vector<VduFileLuaBytecode> result(std::distance(beginIt, endIt));
+
+			std::transform(beginIt,
+						   endIt,
+						   result.begin(),
+						   [](const auto& p)
+						   {
+							   return p.second;
+						   });
+
+			return result;
+		}
+
+		bool writeToOut(QByteArray& out) const
+		{
+			// Resolve bytecodes:
+			// Bytecode consist of 32 bit size, followed with data. Padding to 4 bytes.
+			// Aligned to 4 bytes.
+			//
+
+			// Align to 4 bytes the beginning of string area.
+			//
+			auto addPadding = [](auto& container, size_t padding)
+			{
+				while ((container.size() % padding) != 0)
+				{
+					container.push_back(char{0});
+				}
+			};
+
+			addPadding(out, 4);
+
+			for (const auto& bc : m_bytecodes)
+			{
+				auto bytecodeOffset = static_cast<vdu_scriptbc>(out.size());
+
+				// Write size.
+				//
+				uint32_t bytecodeSize = static_cast<uint32_t>(bc.size());
+				out.append(reinterpret_cast<const char*>(&bytecodeSize), sizeof(bytecodeSize));
+
+				// Write data.
+				//
+				out.append(bc);
+
+				// Replace refs with offset to the data.
+				//
+				for (const auto& bytecodeRecord : offsets(bc))
+				{
+					out.replace(bytecodeRecord.refOffset,
+								sizeof(vdu_scriptbc),
+								reinterpret_cast<const char*>(&bytecodeOffset),
+								sizeof(bytecodeOffset));
+				}
+
+				addPadding(out, 4);
+			}
+
+			return true;
+		}
+
+	private:
+		using Key = QByteArray;
+
+		std::multimap<Key, VduFileLuaBytecode> m_offsetToBytecode;
+		std::set<Key> m_bytecodes;
+	};
+
 } // namespace
 
 namespace Builder
@@ -385,6 +931,7 @@ namespace Builder
 		Q_ASSERT(log);
 
 		context.m_vduSchemas.clear();
+		auto& buildResultWriter = *context.m_buildResultWriter;
 
 		bool result = true;
 
@@ -399,6 +946,29 @@ namespace Builder
 
 			LOG_MESSAGE(log, QString("Generating schemas for VDU %1.").arg(vdu->equipmentId()));
 
+			// Get VDU subsystemId.
+			//
+			QString subsystemId;
+			{
+				auto subsystemIdProp = vdu->propertyByCaption(EquipmentPropNames::SUBSYSTEM_ID);
+				if (subsystemIdProp == nullptr)
+				{
+					// Property '%1.%2' is not found.
+					//
+					log->errCFG3020(vdu->equipmentId(), EquipmentPropNames::SUBSYSTEM_ID);
+					result = false;
+					continue;
+				}
+
+				subsystemId = subsystemIdProp->value().toString();
+			}
+
+			const QString vduSchemaDir = buildResultWriter.subsystemDirectory(subsystemId) + '/' + vdu->equipmentId() + '/' + "Schemas";
+
+			const QString vduImageDir = vduSchemaDir + '/' + "Images";
+
+			// Get device tags
+			//
 			auto schemaTagsProperty = vdu->propertyByCaption(EquipmentPropNames::SCHEMA_TAGS);
 			if (schemaTagsProperty == nullptr)
 			{
@@ -447,8 +1017,12 @@ namespace Builder
 				QStringList errorMessages;
 				QByteArray nativeVduData;
 
-				bool genSchemaOk =
-					Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(), *schema, vduSignals, nativeVduData, context);
+				bool genSchemaOk = Builder::VduSchemaGenerator::generateVduSchema(vdu->equipmentId(),
+																				  subsystemId,
+																				  *schema,
+																				  vduSignals,
+																				  nativeVduData,
+																				  context);
 
 				if (genSchemaOk == false)
 				{
@@ -460,9 +1034,7 @@ namespace Builder
 				//
 				QString nativeVduSchemaFileName = QString("%1.%2").arg(schema->schemaId()).arg(File::VduNativeFileExtension);
 
-				QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + "/Schemas";
-
-				context.m_buildResultWriter->addFile(vduDir, nativeVduSchemaFileName, nativeVduData);
+				buildResultWriter.addFile(vduSchemaDir, nativeVduSchemaFileName, nativeVduData);
 
 #if 1
 				// Generate background bitmap from the static data.
@@ -487,7 +1059,7 @@ namespace Builder
 					buffer.open(QIODevice::WriteOnly);
 					backgroundImage.save(&buffer, "BMP");
 
-					context.m_buildResultWriter->addFile(vduDir, backgroundBitmapFileName, backgroundImageData);
+					buildResultWriter.addFile(vduSchemaDir, backgroundBitmapFileName, backgroundImageData);
 				}
 #endif
 				// Add schema to the global build context.
@@ -516,6 +1088,7 @@ namespace Builder
 	}
 
 	bool VduSchemaGenerator::generateVduSchema(QString vduEquipmentId,
+											   QString subsystemId,
 											   const VFrame30::VduSchema& schema,
 											   const std::map<Hash, int>& appSignalHashToSignalIndex,
 											   QByteArray& out,
@@ -526,6 +1099,7 @@ namespace Builder
 		bool result = true;
 
 		VduStringWriter stringWriter;
+		VduLuaBytecodeWriter luaBytecodeWriter;
 
 		struct VduSchemaFile file;
 		std::memset(&file, 0, sizeof(file));
@@ -543,6 +1117,14 @@ namespace Builder
 		// Forming file.body
 		//
 		{
+			auto showScriptBytecode = compileLuaScript(schema, VFrame30::PropertyNames::onShowScript, *context.m_log);
+			auto preDrawScriptBytecode = compileLuaScript(schema, VFrame30::PropertyNames::preDrawScript, *context.m_log);
+
+			if (showScriptBytecode.has_value() == false || preDrawScriptBytecode.has_value() == false)
+			{
+				return false;
+			}
+
 			VduSchemaFileProperties1& schemaProperties = file.schemaProperties;
 			schemaProperties.version = 1;
 			schemaProperties.headerSize = sizeof(schemaProperties);
@@ -551,21 +1133,37 @@ namespace Builder
 			schemaProperties.reserve0 = 0;
 			schemaProperties.backgroundColor = schema.backgroundColor().rgba();
 
+			const auto schemaPropertiesOffset = offsetof(VduSchemaFile, schemaProperties);
+
 			schemaProperties.schemaId =
-				stringWriter.addString(schema.schemaId(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, schemaId));
+				stringWriter.addString(schema.schemaId(), schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, schemaId));
 
 			schemaProperties.caption =
-				stringWriter.addString(schema.caption(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, caption));
+				stringWriter.addString(schema.caption(), schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, caption));
 
-			schemaProperties.onShowScript =
-				stringWriter.addString(schema.onShowScript(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, onShowScript));
+			// onShowScript
+			{
+				auto fieldOffset = schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, onShowScript);
+				schemaProperties.onShowScript = stringWriter.addString(schema.onShowScript(), fieldOffset);
+			}
 
-			schemaProperties.preDrawScript =
-				stringWriter.addString(schema.preDrawScript(),
-									   offsetof(VduSchemaFile, schemaProperties) + offsetof(VduSchemaFileProperties1, preDrawScript));
+			// onShowScriptBytecode
+			{
+				auto fieldOffset = schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, onShowScriptBytecode);
+				schemaProperties.onShowScriptBytecode = luaBytecodeWriter.add(showScriptBytecode.value(), fieldOffset);
+			}
+
+			// preDrawScript
+			{
+				auto fieldOffset = schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, preDrawScript);
+				schemaProperties.preDrawScript = stringWriter.addString(schema.preDrawScript(), fieldOffset);
+			}
+
+			// preDrawScriptBytecode
+			{
+				auto fieldOffset = schemaPropertiesOffset + offsetof(VduSchemaFileProperties1, preDrawScriptBytecode);
+				schemaProperties.preDrawScriptBytecode = luaBytecodeWriter.add(preDrawScriptBytecode.value(), fieldOffset);
+			}
 
 			schemaProperties.reserve1 = 0;
 			schemaProperties.reserve2 = 0;
@@ -619,15 +1217,30 @@ namespace Builder
 				}
 
 				QByteArray outSchemaItem{};
-				std::list<VduFileString> addedItemStrings; // Strings added in the fallowing call of saveSchemaItem1(...).
+				std::list<VduFileString> addedItemStrings;       // Strings added in the fallowing call of saveSchemaItem1(...).
+				std::list<VduFileLuaBytecode> addedLuaBytecodes; // Lua bytecodes added in the fallowing call of saveSchemaItem1(...).
 
-				saveSchemaItem1(vduEquipmentId, *item, appSignalHashToSignalIndex, outSchemaItem, addedItemStrings, context);
+				saveSchemaItem1(vduEquipmentId,
+								subsystemId,
+								*item,
+								appSignalHashToSignalIndex,
+								outSchemaItem,
+								addedItemStrings,
+								addedLuaBytecodes,
+								context);
 
 				// Add added string references to the main string ref container.
 				//
 				for (const auto& str : addedItemStrings)
 				{
 					stringWriter.addString(str.string, str.stringRefOffset + out.size());
+				}
+
+				// Add added Lua bytecode references to the main bytecode ref container.
+				//
+				for (const auto& bc : addedLuaBytecodes)
+				{
+					luaBytecodeWriter.add(bc.bytecode, out.size() + bc.refOffset);
 				}
 
 				// Save item's data to the output buffer.
@@ -648,57 +1261,13 @@ namespace Builder
 
 		out.replace(schemaItemOffsetsTable, schemaOffsetsData.size(), schemaOffsetsData);
 
-		// Resolve strings:
-		// String consist of 16 bit size of string in symbols, followed with string data. Padding to 4 bytes.
-		// The string is a null terminated QChar string.
-		// (In Qt, Unicode characters are 16-bit entities without any markup or structure).
-		// Note: String in file must be aligned to 4 bytes.
+		// Add strings to the output buffer.
 		//
+		stringWriter.writeToOut(out);
 
-		// Align to 4 bytes the beginning of string area.
+		// Add compiled Lua bytecodes to the output buffer.
 		//
-		auto addPadding = [](auto& container, size_t padding)
-		{
-			for (size_t ps = 0, rest = padding - (container.size() % padding); ps < rest; ps++)
-			{
-				container.push_back(char{0});
-			}
-		};
-
-		addPadding(out, 4);
-
-		for (const auto& str : stringWriter.strings())
-		{
-			auto stringOffset = static_cast<vdu_cstr>(out.size());
-
-			// Write string size.
-			//
-			std::string utf8Str = str.toUtf8().toStdString();
-
-			// Write string size.
-			//
-			uint16_t stringSize = static_cast<uint16_t>(utf8Str.size());
-			out.append(reinterpret_cast<const char*>(&stringSize), sizeof(stringSize));
-
-			// Write string data.
-			//
-			out.append(reinterpret_cast<const char*>(utf8Str.data()),
-					   (utf8Str.size() + 1) * sizeof(std::string::value_type)); // +1 for null terminator
-
-			// Replace string_ref with offset to the string.
-			//
-			for (const auto& stringData : stringWriter.offsets(str))
-			{
-				out.replace(stringData.stringRefOffset,
-							sizeof(vdu_string_ref),
-							reinterpret_cast<const char*>(&stringOffset),
-							sizeof(stringOffset));
-			}
-
-			// Add padding bytes to strings (aligned to 4 bytes).
-			//
-			addPadding(out, 4);
-		}
+		luaBytecodeWriter.writeToOut(out);
 
 		// Calculate CRC64 for the whole file.
 		// Align to 8 bytes the end of string area.

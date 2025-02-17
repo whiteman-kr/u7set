@@ -123,7 +123,7 @@ namespace TrendLib
 							 const TrendParam& drawParam,
 							 int flags,
 							 QRectF* boundingRect = nullptr);
-		
+
 		static QSizeF calcTextSize(QPainter* painter, const QString& str, const TrendParam& drawParam);
 
 		// Properties
@@ -139,11 +139,12 @@ namespace TrendLib
 		[[nodiscard]] const TrendLib::TrendRulerSet& rulerSet() const;
 
 	private:
-		QUuid m_uuid{};                           // id of trend, used for SchemaItemIndicator, to identfy schemaitem
+		QUuid m_uuid{}; // id of trend, used for SchemaItemIndicator, to identfy schemaitem
 
 		TrendLib::TrendSignalSet m_signalSet;
 		TrendLib::TrendRulerSet m_rulerSet;
 
-		const static double discreteSignalHeight; // = 5.0 / 8.0;		// if inches
+		const static double discreteSignalHeight;
+		const static double textSizeMm;
 	};
 } // namespace TrendLib

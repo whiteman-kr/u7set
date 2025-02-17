@@ -95,7 +95,7 @@ function generate_aim_11(confFirmware, module, LMNumber, frame, log, signalSet, 
 					return false;
 				}
 
-				if (electricUnit == ElectricUnit.NoUnit) {
+				if (electricUnit == ConfigStruct.ElectricUnit.NoUnit) {
 
 					// Signal should be excluded from build
 
@@ -119,10 +119,10 @@ function generate_aim_11(confFirmware, module, LMNumber, frame, log, signalSet, 
 						return false;
 					}
 
-					if (electricUnit == ElectricUnit.mA) {
+					if (electricUnit == ConfigStruct.ElectricUnit.mA) {
 
-						if (sensorType != SensorType.V_m10_p10) {
-							log.errCFG3041("SensorType", unitsConvertor.sensorTypeName(sensorType), unitsConvertor.sensorTypeName(SensorType.V_m10_p10), signalStrId);
+						if (sensorType != ConfigStruct.SensorType.V_m10_p10) {
+							log.errCFG3041("SensorType", unitsConvertor.sensorTypeName(sensorType), unitsConvertor.sensorTypeName(ConfigStruct.SensorType.V_m10_p10), signalStrId);
 							continue;
 						}
 
@@ -135,24 +135,24 @@ function generate_aim_11(confFirmware, module, LMNumber, frame, log, signalSet, 
 						}
 					}
 
-					if (electricUnit == ElectricUnit.V) {
+					if (electricUnit == ConfigStruct.ElectricUnit.V) {
 
-						if (sensorType != SensorType.V_m10_p10) {
-							log.errCFG3041("SensorType", unitsConvertor.sensorTypeName(sensorType), unitsConvertor.sensorTypeName(SensorType.V_m10_p10), signalStrId);
+						if (sensorType != ConfigStruct.SensorType.V_m10_p10) {
+							log.errCFG3041("SensorType", unitsConvertor.sensorTypeName(sensorType), unitsConvertor.sensorTypeName(ConfigStruct.SensorType.V_m10_p10), signalStrId);
 							continue;
 						}
 					}
 
-					if (electricUnit == ElectricUnit.mV) {
+					if (electricUnit == ConfigStruct.ElectricUnit.mV) {
 
-						if (sensorType == SensorType.NoSensor || sensorType == SensorType.V_m10_p10) {
+						if (sensorType == ConfigStruct.SensorType.NoSensor || sensorType == ConfigStruct.SensorType.V_m10_p10) {
 							log.errCFG3041("SensorType", unitsConvertor.sensorTypeName(sensorType), "mV_Raw_* or mV_Type_*", signalStrId);
 							continue;
 						}
 					}
 
-					if (electricUnit == ElectricUnit.Ohm) {
-						if (sensorType == SensorType.NoSensor) {
+					if (electricUnit == ConfigStruct.ElectricUnit.Ohm) {
+						if (sensorType == ConfigStruct.SensorType.NoSensor) {
 							log.errCFG3041("SensorType", unitsConvertor.sensorTypeName(sensorType), "Ohm_*", signalStrId);
 							continue;
 						}
@@ -245,20 +245,20 @@ function generate_aim_11(confFirmware, module, LMNumber, frame, log, signalSet, 
 					let lowPhysicalConvertResult = null;
 
 					switch (electricUnit) {
-						case ElectricUnit.V:
-						case ElectricUnit.mA:
+						case ConfigStruct.ElectricUnit.V:
+						case ConfigStruct.ElectricUnit.mA:
 							{
 								highPhysicalConvertResult = unitsConvertor.electricToPhysical_Input(electricHighLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, r);
 								lowPhysicalConvertResult = unitsConvertor.electricToPhysical_Input(electricLowLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, r);
 							}
 							break;
-						case ElectricUnit.mV:
+						case ConfigStruct.ElectricUnit.mV:
 							{
 								highPhysicalConvertResult = unitsConvertor.electricToPhysical_ThermoCouple(electricHighLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType);
 								lowPhysicalConvertResult = unitsConvertor.electricToPhysical_ThermoCouple(electricLowLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType);
 							}
 							break;
-						case ElectricUnit.Ohm:
+						case ConfigStruct.ElectricUnit.Ohm:
 							{
 								highPhysicalConvertResult = unitsConvertor.electricToPhysical_ThermoResistor(electricHighLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, r);
 								lowPhysicalConvertResult = unitsConvertor.electricToPhysical_ThermoResistor(electricLowLimit, electricLowLimit, electricHighLimit, electricUnit, sensorType, r);
@@ -277,17 +277,17 @@ function generate_aim_11(confFirmware, module, LMNumber, frame, log, signalSet, 
 
 					if (highPhysicalConvertResult.ok == false) {
 						switch (highPhysicalConvertResult.errorCode) {
-							case UnitsConvertorErrorCode.ErrorGeneric:
+							case ConfigStruct.UnitsConvertorErrorCode.ErrorGeneric:
 								{
 									log.errINT1001(highPhysicalConvertResult.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrId);
 								}
 								break;
-							case UnitsConvertorErrorCode.LowLimitOutOfRange:
+							case ConfigStruct.UnitsConvertorErrorCode.LowLimitOutOfRange:
 								{
 									log.errCFG3010("ElectricLowLimit", electricLowLimit, highPhysicalConvertResult.expectedLowValidRange, highPhysicalConvertResult.expectedHighValidRange, 4, signalStrId);
 								}
 								break;
-							case UnitsConvertorErrorCode.HighLimitOutOfRange:
+							case ConfigStruct.UnitsConvertorErrorCode.HighLimitOutOfRange:
 								{
 									log.errCFG3010("ElectricHighLimit", electricHighLimit, highPhysicalConvertResult.expectedLowValidRange, highPhysicalConvertResult.expectedHighValidRange, 4, signalStrId);
 								}
@@ -301,17 +301,17 @@ function generate_aim_11(confFirmware, module, LMNumber, frame, log, signalSet, 
 
 					if (lowPhysicalConvertResult.ok == false) {
 						switch (lowPhysicalConvertResult.errorCode) {
-							case UnitsConvertorErrorCode.ErrorGeneric:
+							case ConfigStruct.UnitsConvertorErrorCode.ErrorGeneric:
 								{
 									log.errINT1001(lowPhysicalConvertResult.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrId);
 								}
 								break;
-							case UnitsConvertorErrorCode.LowLimitOutOfRange:
+							case ConfigStruct.UnitsConvertorErrorCode.LowLimitOutOfRange:
 								{
 									log.errCFG3010("ElectricLowLimit", electricLowLimit, lowPhysicalConvertResult.expectedLowValidRange, lowPhysicalConvertResult.expectedHighValidRange, 4, signalStrId);
 								}
 								break;
-							case UnitsConvertorErrorCode.HighLimitOutOfRange:
+							case ConfigStruct.UnitsConvertorErrorCode.HighLimitOutOfRange:
 								{
 									log.errCFG3010("ElectricHighLimit", electricHighLimit, lowPhysicalConvertResult.expectedLowValidRange, lowPhysicalConvertResult.expectedHighValidRange, 4, signalStrId);
 								}
@@ -361,14 +361,14 @@ function generate_aim_11(confFirmware, module, LMNumber, frame, log, signalSet, 
 
 						// ---------- mA / V---------------
 
-						case SensorType.V_m10_p10:
+						case ConfigStruct.SensorType.V_m10_p10:
 							{
 								switch (electricUnit) {
-									case ElectricUnit.V:
+									case ConfigStruct.ElectricUnit.V:
 										highSensorPhysicalRange = 12;
 										lowSensorPhysicalRange = -12;
 										break;
-									case ElectricUnit.mA:
+									case ConfigStruct.ElectricUnit.mA:
 										highSensorPhysicalRange = 12;
 										lowSensorPhysicalRange = -12;
 										break;
@@ -383,82 +383,82 @@ function generate_aim_11(confFirmware, module, LMNumber, frame, log, signalSet, 
 
 						// ---------- mV ---------------
 
-						case SensorType.mV_Raw_m1200_p1200:
+						case ConfigStruct.SensorType.mV_Raw_m1200_p1200:
 							highSensorPhysicalRange = 1200;
 							lowSensorPhysicalRange = -1200;
 							break;
-						case SensorType.mV_Type_B:
+						case ConfigStruct.SensorType.mV_Type_B:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = 0;
 							break;
-						case SensorType.mV_Type_E:
+						case ConfigStruct.SensorType.mV_Type_E:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.mV_Type_J:
+						case ConfigStruct.SensorType.mV_Type_J:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.mV_Type_K:
+						case ConfigStruct.SensorType.mV_Type_K:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.mV_Type_N:
+						case ConfigStruct.SensorType.mV_Type_N:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.mV_Type_R:
+						case ConfigStruct.SensorType.mV_Type_R:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.mV_Type_S:
+						case ConfigStruct.SensorType.mV_Type_S:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.mV_Type_T:
+						case ConfigStruct.SensorType.mV_Type_T:
 							highSensorPhysicalRange = 400;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.mV_Type_L:
+						case ConfigStruct.SensorType.mV_Type_L:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.mV_Type_M:
+						case ConfigStruct.SensorType.mV_Type_M:
 							highSensorPhysicalRange = 100;
 							lowSensorPhysicalRange = -50;
 							break;
 
 						// ---------- Ohm ---------------
 
-						case SensorType.Ohm_Raw:
+						case ConfigStruct.SensorType.Ohm_Raw:
 							highSensorPhysicalRange = 10000;
 							lowSensorPhysicalRange = 0;
 							break;
-						case SensorType.Ohm_Pt_a_385:
+						case ConfigStruct.SensorType.Ohm_Pt_a_385:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.Ohm_Pt_a_391:
+						case ConfigStruct.SensorType.Ohm_Pt_a_391:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.Ohm_Cu_a_428:
+						case ConfigStruct.SensorType.Ohm_Cu_a_428:
 							highSensorPhysicalRange = 200;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.Ohm_Cu_a_426:
+						case ConfigStruct.SensorType.Ohm_Cu_a_426:
 							highSensorPhysicalRange = 200;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.Ohm_Pt21:
+						case ConfigStruct.SensorType.Ohm_Pt21:
 							highSensorPhysicalRange = 500;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.Ohm_Cu23:
+						case ConfigStruct.SensorType.Ohm_Cu23:
 							highSensorPhysicalRange = 180;
 							lowSensorPhysicalRange = -50;
 							break;
-						case SensorType.Ohm_Ni_a_617:
+						case ConfigStruct.SensorType.Ohm_Ni_a_617:
 							highSensorPhysicalRange = 180;
 							lowSensorPhysicalRange = -50;
 							break;
@@ -501,43 +501,43 @@ function generate_aim_11(confFirmware, module, LMNumber, frame, log, signalSet, 
 
 					let sensorTypeCode = 0;
 
-					if (electricUnit == ElectricUnit.V) {
+					if (electricUnit == ConfigStruct.ElectricUnit.V) {
 						sensorTypeCode = 0;
 					}
 
-					if (electricUnit == ElectricUnit.mA) {
+					if (electricUnit == ConfigStruct.ElectricUnit.mA) {
 						sensorTypeCode = 1;
 					}
 
-					if (electricUnit == ElectricUnit.mV) {
+					if (electricUnit == ConfigStruct.ElectricUnit.mV) {
 						switch (sensorType) {
-							case SensorType.mV_Raw_m1200_p1200: sensorTypeCode = 2; break;
-							case SensorType.mV_Type_K: 			sensorTypeCode = 3; break;
-							case SensorType.mV_Type_L:			sensorTypeCode = 4; break;
-							case SensorType.mV_Type_R: 			sensorTypeCode = 5; break;
-							case SensorType.mV_Type_S: 			sensorTypeCode = 6; break;
-							case SensorType.mV_Type_B: 			sensorTypeCode = 7; break;
-							case SensorType.mV_Type_J: 			sensorTypeCode = 8; break;
-							case SensorType.mV_Type_T: 			sensorTypeCode = 9; break;
-							case SensorType.mV_Type_E: 			sensorTypeCode = 0xa; break;
-							case SensorType.mV_Type_N: 			sensorTypeCode = 0xb; break;
-							case SensorType.mV_Type_M: 			sensorTypeCode = 0xc; break;
+							case ConfigStruct.SensorType.mV_Raw_m1200_p1200: sensorTypeCode = 2; break;
+							case ConfigStruct.SensorType.mV_Type_K: 			sensorTypeCode = 3; break;
+							case ConfigStruct.SensorType.mV_Type_L:			sensorTypeCode = 4; break;
+							case ConfigStruct.SensorType.mV_Type_R: 			sensorTypeCode = 5; break;
+							case ConfigStruct.SensorType.mV_Type_S: 			sensorTypeCode = 6; break;
+							case ConfigStruct.SensorType.mV_Type_B: 			sensorTypeCode = 7; break;
+							case ConfigStruct.SensorType.mV_Type_J: 			sensorTypeCode = 8; break;
+							case ConfigStruct.SensorType.mV_Type_T: 			sensorTypeCode = 9; break;
+							case ConfigStruct.SensorType.mV_Type_E: 			sensorTypeCode = 0xa; break;
+							case ConfigStruct.SensorType.mV_Type_N: 			sensorTypeCode = 0xb; break;
+							case ConfigStruct.SensorType.mV_Type_M: 			sensorTypeCode = 0xc; break;
 							default:
 								log.errINT1001("Unknown sensor type '" + unitsConvertor.sensorTypeName(sensorType) + "' in " + signalStrId);
 								return false;
 						}
 					}
 
-					if (electricUnit == ElectricUnit.Ohm) {
+					if (electricUnit == ConfigStruct.ElectricUnit.Ohm) {
 						switch (sensorType) {
-							case SensorType.Ohm_Raw: 		sensorTypeCode = 0; break;
-							case SensorType.Ohm_Pt_a_385: 	sensorTypeCode = 1; break;
-							case SensorType.Ohm_Pt_a_391: 	sensorTypeCode = 2; break;
-							case SensorType.Ohm_Cu_a_428: 	sensorTypeCode = 3; break;
-							case SensorType.Ohm_Cu_a_426: 	sensorTypeCode = 4; break;
-							case SensorType.Ohm_Pt21: 		sensorTypeCode = 5; break;
-							case SensorType.Ohm_Cu23: 		sensorTypeCode = 6; break;
-							case SensorType.Ohm_Ni_a_617: 	sensorTypeCode = 7; break;
+							case ConfigStruct.SensorType.Ohm_Raw: 		sensorTypeCode = 0; break;
+							case ConfigStruct.SensorType.Ohm_Pt_a_385: 	sensorTypeCode = 1; break;
+							case ConfigStruct.SensorType.Ohm_Pt_a_391: 	sensorTypeCode = 2; break;
+							case ConfigStruct.SensorType.Ohm_Cu_a_428: 	sensorTypeCode = 3; break;
+							case ConfigStruct.SensorType.Ohm_Cu_a_426: 	sensorTypeCode = 4; break;
+							case ConfigStruct.SensorType.Ohm_Pt21: 		sensorTypeCode = 5; break;
+							case ConfigStruct.SensorType.Ohm_Cu23: 		sensorTypeCode = 6; break;
+							case ConfigStruct.SensorType.Ohm_Ni_a_617: 	sensorTypeCode = 7; break;
 							default:
 								log.errINT1001("Unknown sensor type '" + unitsConvertor.sensorTypeName(sensorType) + "' in " + signalStrId);
 								return false;

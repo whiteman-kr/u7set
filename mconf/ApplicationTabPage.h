@@ -1,8 +1,8 @@
 #ifndef APPLICATIONTABPAGE_H
 #define APPLICATIONTABPAGE_H
 
-#include <QWidget>
 #include <HardwareLib/ModuleFirmware.h>
+#include <QWidget>
 
 #include <optional>
 
@@ -10,7 +10,6 @@
 class QLineEdit;
 class QTreeWidget;
 class QTreeWidgetItem;
-
 
 
 class ApplicationTabPage : public QWidget
@@ -40,6 +39,7 @@ signals:
 private slots:
 	void subsystemChanged(QTreeWidgetItem* item1, QTreeWidgetItem* item2);
 	void openFileClicked();
+	void compareFileClicked();
 	void resetCountersClicked();
 	void detectSubsystemsClicked();
 	void detectUartsClicked();

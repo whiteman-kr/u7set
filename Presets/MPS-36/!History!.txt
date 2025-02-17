@@ -1,0 +1,2 @@
+MPS-3-36
+	21.01.2025	Version: 3	MPS-36_v3.u7devp 		RPCT-3992:  Configuration script is reorganized for library usage

@@ -1,10 +1,13 @@
 #pragma once
 
-#include <VFrame30/ImageItem.h>
 #include <VFrame30/PosRectRotatable.h>
+
+#include <memory>
 
 namespace VFrame30
 {
+	class ImageItem;
+
 	/*! \class SchemaItemImage
 		\ingroup staticSchemaItems
 		\brief This item is used to display static images
@@ -77,19 +80,19 @@ namespace VFrame30
 		Q_PROPERTY(double Angle READ angle WRITE setAngle)
 
 		/**
-		* @brief Rotation point of the item.
-		*
-		* This property represents the rotation point of the item. The rotation point is the
-		* point around which the item is rotated when the rotation transformation (property Angle) is applied.
-		* Setting this property allows to specify a custom rotation point for the item.
-		*
-		* Possible values for this property are:
-		* - RotationPoint::TopLeft (0)
-		* - RotationPoint::TopRight (1)
-		* - RotationPoint::BottomRight (2)
-		* - RotationPoint::BottomLeft (3)
-		* - RotationPoint::Center (4)
-		*/
+		 * @brief Rotation point of the item.
+		 *
+		 * This property represents the rotation point of the item. The rotation point is the
+		 * point around which the item is rotated when the rotation transformation (property Angle) is applied.
+		 * Setting this property allows to specify a custom rotation point for the item.
+		 *
+		 * Possible values for this property are:
+		 * - RotationPoint::TopLeft (0)
+		 * - RotationPoint::TopRight (1)
+		 * - RotationPoint::BottomRight (2)
+		 * - RotationPoint::BottomLeft (3)
+		 * - RotationPoint::Center (4)
+		 */
 		Q_PROPERTY(RotationPoint rotationPoint READ rotationPoint WRITE setRotationPoint)
 		Q_PROPERTY(RotationPoint RotationPoint READ rotationPoint WRITE setRotationPoint)
 
@@ -131,6 +134,6 @@ namespace VFrame30
 		void setSvgData(const QString& data);
 
 	private:
-		ImageItem m_image;
+		std::unique_ptr<::VFrame30::ImageItem> m_image;
 	};
 } // namespace VFrame30

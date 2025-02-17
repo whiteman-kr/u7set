@@ -7,14 +7,13 @@
 namespace VFrame30
 {
 	class SchemaItemVduRect : public PosRectImpl,
-							  public SchemaItemVdu
+							  public SchemaItemVduVisitable<SchemaItemVduRect>
 	{
 		Q_OBJECT
 
 	public:
 		SchemaItemVduRect(void);
 		explicit SchemaItemVduRect(SchemaUnit units);
-		virtual ~SchemaItemVduRect(void) = default;
 
 		// Serialization
 		//
@@ -30,11 +29,6 @@ namespace VFrame30
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
-
-		// VduItemVisitor
-		//
-	public:
-		void accept(VduItemVisitor& visitor) const override;
 
 		// Properties and Data
 		//

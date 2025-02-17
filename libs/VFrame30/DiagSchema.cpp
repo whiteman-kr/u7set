@@ -10,15 +10,14 @@ namespace VFrame30
 		setDocWidth(420);
 		setDocHeight(297);
 
-		addLayer(std::make_shared<SchemaLayer>(this, "Drawing", true));
-		addLayer(std::make_shared<SchemaLayer>(this, "Notes", false));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerFrameName, false));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerDrawingName, true));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerNotesName, false));
 
 		setTagsList(QStringList{"diagnostics"});
 
 		return;
 	}
 
-	DiagSchema::~DiagSchema(void)
-	{
-	}
-}
+	DiagSchema::~DiagSchema(void) {}
+} // namespace VFrame30

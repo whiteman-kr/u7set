@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 project(u7 LANGUAGES CXX)
 
 include(../cmake/vld.cmake)
+include(../cmake/copy_libpq_dll.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -438,7 +439,8 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql
 	Qt6::Xml Qt6::PrintSupport Qt6::Test Qt6::Concurrent Qt6::DBus)
 
 target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
-	TrendView SimulatorUi qt6keychain Builder VFrame30 ReportLib AppSignalLists SchemaClientLib ModuleConfiguratorLib TuningLib UiLib LicenseLib)
+	TrendView SimulatorUi qt6keychain Builder VFrame30 ReportLib AppSignalLists SchemaClientLib ModuleConfiguratorLib 
+	TuningLib UiLib LicenseLib BuildCompLib)
 
 # Link Visaul Leak Detector
 #
@@ -448,10 +450,16 @@ endif()
 
 target_compile_definitions(${TARGET} PRIVATE QTKEYCHAIN_NO_EXPORT)
 
+#
+# Copy PostgreSQL DLLs (libpq.dll and its' dependencies)
+# These dlls are not copied by default.
+#
+copy_libpq_dll(${TARGET})
 
+# --
 # Generation scripting help
 # Find for Doxygen here as add_subdirectory works with CMake 3.27+ only
-
+#
 find_package(Doxygen)
 
 if(DOXYGEN_FOUND)

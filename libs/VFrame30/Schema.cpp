@@ -2,13 +2,13 @@
 #include <VFrame30/Context.h>
 #include <VFrame30/DiagSchema.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/FblItem.h>
 #include <VFrame30/HorzVertLinks.h>
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/MonitorSchema.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/Schema.h>
 #include <VFrame30/SchemaDetails.h>
-#include <VFrame30/FblItem.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/SchemaItemLink.h>
@@ -172,7 +172,7 @@ namespace VFrame30
 			}
 		}
 
-		return QJSValue::NullValue;;
+		return QJSValue::NullValue;
 	}
 
 	QString ScriptSchema::schemaId() const
@@ -202,9 +202,7 @@ namespace VFrame30
 
 	int ScriptSchema::layerCount() const
 	{
-		return m_schema ?
-			static_cast<int>(m_schema->layers().size()) :
-			0;
+		return m_schema ? static_cast<int>(m_schema->layers().size()) : 0;
 	}
 
 	//
@@ -217,7 +215,7 @@ namespace VFrame30
 
 	Schema::~Schema(void)
 	{
-		clearLayers();	// It sets no parent to layers.
+		clearLayers(); // It sets no parent to layers.
 	}
 
 	void Schema::Init(void)
@@ -249,13 +247,17 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(QString, "JoinBottomSchemaID", "Monitor", true, Schema::joinBottomSchemaId, Schema::setJoinBottomSchemaId)
 			->setViewOrder(104);
 
-		addProperty<QString, Schema, &Schema::preDrawScript, &Schema::setPreDrawScript>(PropertyNames::preDrawScript, PropertyNames::scriptsCategory, true)
+		addProperty<QString, Schema, &Schema::preDrawScript, &Schema::setPreDrawScript>(PropertyNames::preDrawScript,
+																						PropertyNames::scriptsCategory,
+																						true)
 			->setIsScript(true);
 
-		addProperty<QString, Schema, &Schema::onShowScript, &Schema::setOnShowScript>(PropertyNames::onShowScript, PropertyNames::scriptsCategory, true)
+		addProperty<QString, Schema, &Schema::onShowScript, &Schema::setOnShowScript>(PropertyNames::onShowScript,
+																					  PropertyNames::scriptsCategory,
+																					  true)
 			->setIsScript(true);
 
-		m_guid = QUuid();  // GUID_NULL
+		m_guid = QUuid(); // GUID_NULL
 
 		m_width = 0;
 		m_height = 0;
@@ -282,7 +284,7 @@ namespace VFrame30
 
 		//				if (item->isFblItemRect() == true)
 		//				{
-		//static int counterValue = 18000;
+		// static int counterValue = 18000;
 		//					//int counterValue = //m_db->nextCounterValue();
 		//					item->toFblItemRect()->setLabel(schemaId() + "_" + QString::number(counterValue++));
 		//				}
@@ -292,7 +294,7 @@ namespace VFrame30
 		std::string className = this->metaObject()->className();
 		quint32 classNameHash = ::ClassNameHashCode(className);
 
-		message->set_classnamehash(classNameHash);	// Required field, class name hash code, by it instance is created
+		message->set_classnamehash(classNameHash); // Required field, class name hash code, by it instance is created
 
 		Proto::Schema* mutableSchema = message->MutableExtension(Proto::schema);
 
@@ -355,7 +357,8 @@ namespace VFrame30
 		Proto::Read(schema.schemaid(), &m_schemaID);
 		Proto::Read(schema.caption(), &m_caption);
 
-		if (schema.has_tags() == true)	// if schema does not have saved tags, then default values are taken from the each schema type constructor
+		if (schema.has_tags() ==
+			true) // if schema does not have saved tags, then default values are taken from the each schema type constructor
 		{
 			setTags(QString::fromStdString(schema.tags()));
 		}
@@ -386,7 +389,6 @@ namespace VFrame30
 		for (int i = 0; i < schema.layers().size(); i++)
 		{
 			std::shared_ptr<SchemaLayer> layer = SchemaLayer::Create(schema.layers(i));
-
 			if (layer == nullptr)
 			{
 				assert(layer);
@@ -407,6 +409,8 @@ namespace VFrame30
 			clearLayers();
 			return false;
 		}
+
+		fixLayerOrder();
 
 		//		int elapsed = t.elapsed();
 		//		qDebug() << "        Schema " << schemaId() << " is loaded for " << elapsed << " ms";
@@ -443,8 +447,7 @@ namespace VFrame30
 
 	void Schema::Draw(CDrawParam* drawParam, const QRectF& clipRect)
 	{
-		if (drawParam == nullptr ||
-			context() == nullptr)
+		if (drawParam == nullptr || context() == nullptr)
 		{
 			Q_ASSERT(drawParam);
 			Q_ASSERT(context());
@@ -463,12 +466,10 @@ namespace VFrame30
 
 		// --
 		//
-		ClientSchemaView* clientView = drawParam->drawMode() == DrawMode::Editor ?
-			nullptr :
-			drawParam->clientSchemaView();
+		ClientSchemaView* clientView = drawParam->drawMode() == DrawMode::Editor ? nullptr : drawParam->clientSchemaView();
 
 		ILogFile* log = context()->log();
-		
+
 		// Run Schema PreDrawEvent scripts.
 		//
 		if (clientView != nullptr)
@@ -532,20 +533,21 @@ namespace VFrame30
 		{
 			for (const SchemaLayerPtr& layer : layers())
 			{
-				std::ranges::for_each(layer->items(), [drawParam](auto& item)
-				{
-					item->setDrawParam(drawParam);
-				});
+				std::ranges::for_each(layer->items(),
+									  [drawParam](auto& item)
+									  {
+										  item->setDrawParam(drawParam);
+									  });
 			}
 		};
 
 		setDrawParam(drawParam);
 
 		std::shared_ptr<void> finalizer(nullptr,
-			[&setDrawParam](void*)
-			{
-				setDrawParam(nullptr);
-			});
+										[&setDrawParam](void*)
+										{
+											setDrawParam(nullptr);
+										});
 
 		for (const SchemaLayerPtr& layer : layers())
 		{
@@ -556,8 +558,7 @@ namespace VFrame30
 				continue;
 			}
 
-			if (drawParam->drawNotesLayer() == false &&
-				layer->name().compare(QLatin1String("Notes"), Qt::CaseInsensitive) == 0)
+			if (drawParam->drawNotesLayer() == false && layer->name().compare(QLatin1String("Notes"), Qt::CaseInsensitive) == 0)
 			{
 				continue;
 			}
@@ -593,14 +594,12 @@ namespace VFrame30
 
 					clientView->setScriptMessageBoxAllowed(mbe);
 
-					if (item->lastScriptError().isEmpty() == false &&
-						log != nullptr)
+					if (item->lastScriptError().isEmpty() == false && log != nullptr)
 					{
 						// Report script error to Monitor or TuningClient log
 						//
-						log->writeWarning(tr("SchemaItem %1, PreDrawEvent script error: %2")
-										  .arg(item->label())
-										  .arg(item->lastScriptError()));
+						log->writeWarning(
+							tr("SchemaItem %1, PreDrawEvent script error: %2").arg(item->label()).arg(item->lastScriptError()));
 					}
 
 					// Collect stats
@@ -846,10 +845,11 @@ namespace VFrame30
 		return;
 	}
 
-	bool Schema::updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs, int* updatedItemCount, QString* errorMessage)
+	bool Schema::updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs,
+										int* updatedItemCount,
+										QString* errorMessage)
 	{
-		if (updatedItemCount == nullptr ||
-			errorMessage == nullptr)
+		if (updatedItemCount == nullptr || errorMessage == nullptr)
 		{
 			assert(updatedItemCount);
 			assert(errorMessage);
@@ -879,11 +879,12 @@ namespace VFrame30
 		//
 		for (std::shared_ptr<VFrame30::SchemaItemAfb> si : schemaAfbItems)
 		{
-			auto foundIt = std::find_if(afbs.begin(), afbs.end(),
-				[&si](const std::shared_ptr<Afb::AfbElement>& afb)
-				{
-					return si->afbStrID() == afb->strID();
-				});
+			auto foundIt = std::find_if(afbs.begin(),
+										afbs.end(),
+										[&si](const std::shared_ptr<Afb::AfbElement>& afb)
+										{
+											return si->afbStrID() == afb->strID();
+										});
 
 			if (foundIt == afbs.end())
 			{
@@ -899,7 +900,7 @@ namespace VFrame30
 
 				if (ok == true)
 				{
-					(*updatedItemCount) ++;
+					(*updatedItemCount)++;
 				}
 			}
 		}
@@ -909,8 +910,7 @@ namespace VFrame30
 
 	bool Schema::updateAllSchemaItemUfb(const std::vector<std::shared_ptr<UfbSchema>>& ufbs, int* updatedItemCount, QString* errorMessage)
 	{
-		if (updatedItemCount == nullptr ||
-			errorMessage == nullptr)
+		if (updatedItemCount == nullptr || errorMessage == nullptr)
 		{
 			assert(updatedItemCount);
 			assert(errorMessage);
@@ -940,11 +940,12 @@ namespace VFrame30
 		//
 		for (std::shared_ptr<VFrame30::SchemaItemUfb> si : schemaUfbItems)
 		{
-			auto foundIt = std::find_if(ufbs.begin(), ufbs.end(),
-				[&si](const std::shared_ptr<UfbSchema>& ufb)
-				{
-					return si->ufbSchemaId() == ufb->schemaId();
-				});
+			auto foundIt = std::find_if(ufbs.begin(),
+										ufbs.end(),
+										[&si](const std::shared_ptr<UfbSchema>& ufb)
+										{
+											return si->ufbSchemaId() == ufb->schemaId();
+										});
 
 			if (foundIt == ufbs.end())
 			{
@@ -960,7 +961,7 @@ namespace VFrame30
 
 				if (ok == true)
 				{
-					(*updatedItemCount) ++;
+					(*updatedItemCount)++;
 				}
 			}
 		}
@@ -970,8 +971,7 @@ namespace VFrame30
 
 	bool Schema::updateAllSchemaItemBusses(const std::vector<AppSignalLib::Bus>& busses, int* updatedItemCount, QString* errorMessage)
 	{
-		if (updatedItemCount == nullptr ||
-			errorMessage == nullptr)
+		if (updatedItemCount == nullptr || errorMessage == nullptr)
 		{
 			assert(updatedItemCount);
 			assert(errorMessage);
@@ -1001,11 +1001,12 @@ namespace VFrame30
 		//
 		for (std::shared_ptr<VFrame30::SchemaItemBus> si : schemaItemBusses)
 		{
-			auto foundIt = std::find_if(busses.begin(), busses.end(),
-				[&si](const AppSignalLib::Bus& bus)
-				{
-					return si->busTypeId() == bus.busTypeId();
-				});
+			auto foundIt = std::find_if(busses.begin(),
+										busses.end(),
+										[&si](const AppSignalLib::Bus& bus)
+										{
+											return si->busTypeId() == bus.busTypeId();
+										});
 
 			if (foundIt == busses.end())
 			{
@@ -1020,7 +1021,7 @@ namespace VFrame30
 				si->setBusType(bus);
 				si->adjustHeight(gridSize(), pinGridStep());
 
-				(*updatedItemCount) ++;
+				(*updatedItemCount)++;
 			}
 		}
 
@@ -1029,7 +1030,7 @@ namespace VFrame30
 
 	QStringList Schema::getSignalList() const
 	{
-		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes duplicates.
+		std::set<QString> signalMap; // signal ids can be duplicated, std::set removes duplicates.
 
 		for (const auto& layer : layers())
 		{
@@ -1043,14 +1044,12 @@ namespace VFrame30
 					continue;
 				}
 
-				for (auto appSignals = itemAssociations->associatedAppSignalIds();
-					 const QString & id : appSignals)
+				for (auto appSignals = itemAssociations->associatedAppSignalIds(); const QString& id : appSignals)
 				{
 					signalMap.insert(id);
 				}
 
-				for (auto appSignals = itemAssociations->associatedImpactAppSignalIds();
-					 const QString & id : appSignals)
+				for (auto appSignals = itemAssociations->associatedImpactAppSignalIds(); const QString& id : appSignals)
 				{
 					signalMap.insert(id);
 				}
@@ -1115,8 +1114,7 @@ namespace VFrame30
 		{
 			for (const auto& item : layer->items())
 			{
-				for (QStringList itemTags = item->tagsAsList();
-					 const auto& tag : itemTags)
+				for (QStringList itemTags = item->tagsAsList(); const auto& tag : itemTags)
 				{
 					tags.insert(tag);
 				}
@@ -1167,8 +1165,7 @@ namespace VFrame30
 	//
 	bool Schema::preDrawEvent(QJSEngine* engine)
 	{
-		if (engine == nullptr ||
-			context() == nullptr)
+		if (engine == nullptr || context() == nullptr)
 		{
 			Q_ASSERT(engine);
 			Q_ASSERT(context());
@@ -1188,8 +1185,7 @@ namespace VFrame30
 			m_evaluatedPreDrawScript = qHash(m_preDrawScript);
 		}
 
-		if (m_jsPreDrawScript.isError() == true ||
-			m_jsPreDrawScript.isNull() == true)
+		if (m_jsPreDrawScript.isError() == true || m_jsPreDrawScript.isNull() == true)
 		{
 			return false;
 		}
@@ -1198,9 +1194,7 @@ namespace VFrame30
 
 		if (m_lastScriptError.isEmpty() == false && context()->log() != nullptr)
 		{
-			context()->log()->writeWarning(tr("Schema %1, preDrawEvent script error: %2")
-							  .arg(schemaId())
-							  .arg(m_lastScriptError));
+			context()->log()->writeWarning(tr("Schema %1, preDrawEvent script error: %2").arg(schemaId()).arg(m_lastScriptError));
 		}
 
 		return result;
@@ -1208,8 +1202,7 @@ namespace VFrame30
 
 	bool Schema::onShowEvent(QJSEngine* engine, ILogFile* log)
 	{
-		if (engine == nullptr ||
-			context() == nullptr)
+		if (engine == nullptr || context() == nullptr)
 		{
 			Q_ASSERT(engine);
 			Q_ASSERT(context());
@@ -1229,8 +1222,7 @@ namespace VFrame30
 			m_evaluatedOnShowScript = qHash(m_preDrawScript);
 		}
 
-		if (m_jsOnShowScript.isError() == true ||
-			m_jsOnShowScript.isNull() == true)
+		if (m_jsOnShowScript.isError() == true || m_jsOnShowScript.isNull() == true)
 		{
 			return false;
 		}
@@ -1239,9 +1231,7 @@ namespace VFrame30
 
 		if (m_lastScriptError.isEmpty() == false && log != nullptr)
 		{
-			log->writeWarning(tr("Schema %1, ShowEvent script error: %2")
-							  .arg(schemaId())
-							  .arg(m_lastScriptError));
+			log->writeWarning(tr("Schema %1, ShowEvent script error: %2").arg(schemaId()).arg(m_lastScriptError));
 		}
 
 		return result;
@@ -1249,10 +1239,7 @@ namespace VFrame30
 
 	bool Schema::runScript(QJSValue& evaluatedJs, QJSEngine* engine)
 	{
-		if (evaluatedJs.isUndefined() == true ||
-			evaluatedJs.isError() == true ||
-			engine == nullptr ||
-			context() == nullptr)
+		if (evaluatedJs.isUndefined() == true || evaluatedJs.isError() == true || engine == nullptr || context() == nullptr)
 		{
 			Q_ASSERT(engine);
 			Q_ASSERT(context());
@@ -1320,10 +1307,11 @@ namespace VFrame30
 							  "\tItem: %2 %3\n"
 							  "\tStack: %4\n"
 							  "\tMessage: %5")
-			.arg(scriptValue.property("lineNumber").toInt())
-			.arg(guid().toString()).arg(metaObject()->className())
-			.arg(scriptValue.property("stack").toString())
-			.arg(scriptValue.toString());
+						  .arg(scriptValue.property("lineNumber").toInt())
+						  .arg(guid().toString())
+						  .arg(metaObject()->className())
+						  .arg(scriptValue.property("stack").toString())
+						  .arg(scriptValue.toString());
 
 		return str;
 	}
@@ -1335,10 +1323,10 @@ namespace VFrame30
 		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
 		qDebug() << "\tMessage: " << scriptValue.toString();
 
-		QMessageBox::critical(parent, QApplication::applicationDisplayName(),
-							  tr("Script uncaught exception at line %1:\n%2")
-								  .arg(scriptValue.property("lineNumber").toInt())
-								  .arg(scriptValue.toString()));
+		QMessageBox::critical(
+			parent,
+			QApplication::applicationDisplayName(),
+			tr("Script uncaught exception at line %1:\n%2").arg(scriptValue.property("lineNumber").toInt()).arg(scriptValue.toString()));
 
 		return;
 	}
@@ -1356,12 +1344,7 @@ namespace VFrame30
 		QPainter* p = drawParam->painter();
 		p->setPen(Qt::red);
 
-		DrawHelper::drawText(p,
-							 font,
-							 unit(),
-							 m_lastScriptError,
-							 pageRect,
-							 Qt::TextDontClip | Qt::AlignTop | Qt::AlignLeft);
+		DrawHelper::drawText(p, font, unit(), m_lastScriptError, pageRect, Qt::TextDontClip | Qt::AlignTop | Qt::AlignLeft);
 
 		return;
 	}
@@ -1419,8 +1402,7 @@ namespace VFrame30
 	{
 		Q_ASSERT(layer->parentSchema() == this);
 
-		for (int index = 0;
-			 const auto& l : m_layers)
+		for (int index = 0; const auto& l : m_layers)
 		{
 			Q_ASSERT(l->parentSchema() == this);
 
@@ -1430,7 +1412,7 @@ namespace VFrame30
 				return;
 			}
 
-			index ++;
+			index++;
 		}
 
 		// Layer was not found
@@ -1441,10 +1423,11 @@ namespace VFrame30
 
 	void Schema::clearLayers()
 	{
-		std::ranges::for_each(m_layers, [](const auto& l)
-		{
-			l->setParentSchema({});
-		});
+		std::ranges::for_each(m_layers,
+							  [](const auto& l)
+							  {
+								  l->setParentSchema({});
+							  });
 		m_layers.clear();
 	}
 
@@ -1452,6 +1435,99 @@ namespace VFrame30
 	{
 		layer->setParentSchema(this);
 		m_layers.push_back(layer);
+
+		return;
+	}
+
+	void Schema::fixLayerOrder()
+	{
+		// Set the right order for layers, a lot of layers were saved in wrong order (logic, frame, notes)
+		// We need order Frame, Logic, Notes
+		//
+		auto layersCopy = layers();
+
+		std::stable_sort(layersCopy.begin(),
+						 layersCopy.end(),
+						 [](const SchemaLayerPtr& left, const SchemaLayerPtr& right)
+						 {
+							 int l = 99;
+							 do
+							 {
+								 if (left->name() == LayerFrameName)
+								 {
+									 l = 0;
+									 break;
+								 }
+
+								 if (left->name() == LayerDrawingName)
+								 {
+									 l = 1;
+									 break;
+								 }
+
+								 if (left->name() == LayerLogicName)
+								 {
+									 l = 2;
+									 break;
+								 }
+
+								 if (left->name() == LayerNotesName)
+								 {
+									 l = 3;
+									 break;
+								 }
+							 } while (false);
+
+							 int r = 99;
+							 do
+							 {
+								 if (right->name() == LayerFrameName)
+								 {
+									 r = 0;
+									 break;
+								 }
+
+								 if (right->name() == LayerDrawingName)
+								 {
+									 r = 1;
+									 break;
+								 }
+
+								 if (right->name() == LayerLogicName)
+								 {
+									 r = 2;
+									 break;
+								 }
+
+								 if (right->name() == LayerNotesName)
+								 {
+									 r = 3;
+									 break;
+								 }
+							 } while (false);
+
+							 return l < r;
+						 });
+
+		clearLayers();
+		for (const auto& l : layersCopy)
+		{
+			addLayer(l);
+		}
+
+		// Layers were reordered need to set active layer again.
+		//
+		if (auto compileLayerIt = std::find_if(layersCopy.begin(),
+											   layersCopy.end(),
+											   [](const auto& l)
+											   {
+												   return l->compile();
+											   });
+			compileLayerIt != layersCopy.end())
+		{
+			Q_ASSERT(*compileLayerIt);
+			setActiveLayer(*compileLayerIt);
+		}
 
 		return;
 	}
@@ -1556,8 +1632,8 @@ namespace VFrame30
 
 	void Schema::setTags(QString tags)
 	{
-		//tags.replace(';', QChar::LineFeed);
-		//tags.replace(',', QChar::LineFeed);	QChar::LineFeed
+		// tags.replace(';', QChar::LineFeed);
+		// tags.replace(',', QChar::LineFeed);	QChar::LineFeed
 
 		static const auto re = QRegularExpression("\\W+");
 
@@ -1890,7 +1966,7 @@ namespace VFrame30
 	{
 		return dynamic_cast<const VFrame30::DiagSchema*>(this) != nullptr;
 	}
-	
+
 	bool Schema::isVduSchema() const
 	{
 		return dynamic_cast<const VFrame30::VduSchema*>(this) != nullptr;
@@ -1956,5 +2032,4 @@ namespace VFrame30
 	{
 		m_context = std::move(context);
 	}
-}
-
+} // namespace VFrame30

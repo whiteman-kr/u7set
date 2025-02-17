@@ -114,6 +114,7 @@ namespace Builder
 		void errINT1001(QString debugMessage, QString schema);
 		void errINT1001(QString debugMessage, QString schema, QUuid itemsUuids);
 		void errINT1001(QString debugMessage, QString schema, const std::vector<QUuid>& itemsUuids);
+		void errINT1001(QString debugMessage, QString schema, QString item, QUuid itemUuid);
 
 		// PDB			Project database issues					2000-2999
 		//
@@ -286,6 +287,11 @@ namespace Builder
 						QString schema2, QString schemaItem2, QUuid itemUuid2, QString counterpart2,
 						QString packedLogicId);
 		void errALP4304(QString schema, QString schemaItem, QUuid itemUuid, int minInputCount, int actuallyInputCount, QString packedLogicId);
+
+		// Other related to schemas
+		//
+		void errALP4400(QString schema, QString schemaItem, QUuid itemUuid);
+
 
 		// ALC			Application logic compiler				5000-5999
 		//
@@ -611,7 +617,7 @@ namespace Builder
 		void errEQP6400(QString vduEquipmentId, QString appSignalId, QString schemaId, QString schemaItemLabel, QUuid itemUuid);
 		void errEQP6401(QString vduEquipmentId, QString schemaId, QString itemLabel, QUuid itemUuid, QString font);
 
-		void wrnEQP6405(QString schemaId, QString itemLabel, QUuid itemUuid);
+		void wrnEQP6405(QString schemaId, QString itemLabel, QUuid itemUuid); // SchemaItem has an incompatible type with VDU
 
 		// Diagnostics compiler errors
 		//

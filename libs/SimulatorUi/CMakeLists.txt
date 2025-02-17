@@ -19,44 +19,46 @@ qt_add_library(${TARGET} STATIC
 	./include/SimulatorUi/SimWidget.h
 	./include/SimulatorUi/SimIdeSimulator.h
 
-	./src/SimWidgetPrivate.h
-	./src/SimWidgetPrivate.cpp
-	./src/SimWidget.cpp
-	./src/SimTrends.h
-	./src/SimTrends.cpp
-	./src/SimSignalSnapshot.h
-	./src/SimSignalSnapshot.cpp
-	./src/SimSignalInfo.h
-	./src/SimSignalInfo.cpp
-	./src/SimSelectSchemaPage.h
-	./src/SimSelectSchemaPage.cpp
-	./src/SimSchemaWidget.h
-	./src/SimSchemaWidget.cpp
-	./src/SimSchemaView.h
-	./src/SimSchemaView.cpp
-	./src/SimSchemaPage.h
-	./src/SimSchemaPage.cpp
-	./src/SimSchemaManager.h
-	./src/SimSchemaManager.cpp
-	./src/SimProjectWidget.h
-	./src/SimProjectWidget.cpp
-	./src/SimOverrideValueWidget.h
-	./src/SimOverrideValueWidget.cpp
-	./src/SimOverridePane.h
-	./src/SimOverridePane.cpp
-	./src/SimOutputWidget.h
-	./src/SimOutputWidget.cpp
-	./src/SimLogicModulePage.h
-	./src/SimLogicModulePage.cpp
-	./src/SimIdeSimulator.cpp
-	./src/SimConnectionPage.h
-	./src/SimConnectionPage.cpp
-	./src/SimCodePage.h
-	./src/SimCodePage.cpp
-	./src/SimBasePage.h
-	./src/SimBasePage.cpp
-	./src/ScriptSimApplication.h
+	./src/NotificationPanel.cpp
+	./src/NotificationPanel.h
 	./src/ScriptSimApplication.cpp
+	./src/ScriptSimApplication.h
+	./src/SimBasePage.cpp
+	./src/SimBasePage.h
+	./src/SimCodePage.cpp
+	./src/SimCodePage.h
+	./src/SimConnectionPage.cpp
+	./src/SimConnectionPage.h
+	./src/SimIdeSimulator.cpp
+	./src/SimLogicModulePage.cpp
+	./src/SimLogicModulePage.h
+	./src/SimOutputWidget.cpp
+	./src/SimOutputWidget.h
+	./src/SimOverridePane.cpp
+	./src/SimOverridePane.h
+	./src/SimOverrideValueWidget.cpp
+	./src/SimOverrideValueWidget.h
+	./src/SimProjectWidget.cpp
+	./src/SimProjectWidget.h
+	./src/SimSchemaManager.cpp
+	./src/SimSchemaManager.h
+	./src/SimSchemaPage.cpp
+	./src/SimSchemaPage.h
+	./src/SimSchemaView.cpp
+	./src/SimSchemaView.h
+	./src/SimSchemaWidget.cpp
+	./src/SimSchemaWidget.h
+	./src/SimSelectSchemaPage.cpp
+	./src/SimSelectSchemaPage.h
+	./src/SimSignalInfo.cpp
+	./src/SimSignalInfo.h
+	./src/SimSignalSnapshot.cpp
+	./src/SimSignalSnapshot.h
+	./src/SimTrends.cpp
+	./src/SimTrends.h
+	./src/SimWidget.cpp
+	./src/SimWidgetPrivate.cpp
+	./src/SimWidgetPrivate.h
 
 	./src/SimulatorUi.qrc
 )

@@ -425,9 +425,10 @@ QString PropertyObject::createSpecificPropertyStruct(const QString& name,
 													 const E::PropertySpecificEditor editor,
 													 quint16 viewOrder,
 													 bool essential,
-													 bool readOnly)
+													 bool readOnly,
+													 const QString& validator)
 {
-	static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 7);	// Function must be reviewed if version is raised
+	static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 8);	// Function must be reviewed if version is raised
 
 	QLatin1String trueString{"true"};
 	QLatin1String falseString{"false"};
@@ -450,6 +451,7 @@ QString PropertyObject::createSpecificPropertyStruct(const QString& name,
 	resultStrings.push_back(QStringLiteral("%1").arg(viewOrder));
 	resultStrings.push_back(essential ? trueString: falseString);
 	resultStrings.push_back(readOnly ? trueString : falseString);
+	resultStrings.push_back(validator);
 
 	static const QChar semicolon = ';';
 	static const QChar quotes = '"';
@@ -668,6 +670,14 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStruct(const QSt
 				result.second += parseResult.second;
 			}
 			break;
+		case 8:
+			{
+				auto parseResult = parseSpecificPropertiesStructV8(columns);
+
+				result.first &= parseResult.first;
+				result.second += parseResult.second;
+			}
+			break;
 		default:
 			result.first = false;
 			result.second += "SpecificProperties: Unsupported version: " + QString::number(version);
@@ -753,7 +763,8 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStructV1(const Q
 										   QStringLiteral("None"),
 										   QStringLiteral("65535"),
 										   QStringLiteral("false"),
-										   QStringLiteral("false"));
+										   QStringLiteral("false"),
+										   QString());
 
 	return result;
 }
@@ -800,7 +811,8 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStructV2(const Q
 										   QStringLiteral("None"),
 										   QStringLiteral("65535"),
 										   QStringLiteral("false"),
-										   QStringLiteral("false"));
+										   QStringLiteral("false"),
+										   QString());
 
 	return result;
 }
@@ -848,7 +860,8 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStructV3(const Q
 										   QStringLiteral("None"),
 										   QStringLiteral("65535"),
 										   QStringLiteral("false"),
-										   QStringLiteral("false"));
+										   QStringLiteral("false"),
+										   QString());
 
 	return result;
 }
@@ -897,7 +910,8 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStructV4(const Q
 										   strEditor,
 										   QStringLiteral("65535"),
 										   QStringLiteral("false"),
-										   QStringLiteral("false"));
+										   QStringLiteral("false"),
+										   QString());
 
 	return result;
 }
@@ -947,7 +961,8 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStructV5(const Q
 										   strEditor,
 										   strViewOrder,
 										   QStringLiteral("false"),
-										   QStringLiteral("false"));
+										   QStringLiteral("false"),
+										   QString());
 
 	return result;
 }
@@ -998,7 +1013,8 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStructV6(const Q
 										   strEditor,
 										   strViewOrder,
 										   strEssential,
-										   QStringLiteral("false"));
+										   QStringLiteral("false"),
+										   QString());
 
 	return result;
 }
@@ -1050,7 +1066,66 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStructV7(const Q
 										   strEditor,
 										   strViewOrder,
 										   strEssential,
-										   strReadOnly);
+										   strReadOnly,
+										   QString());
+
+	return result;
+}
+
+std::pair<bool, QString> PropertyObject::parseSpecificPropertiesStructV8(const QStringList& columns)
+{
+	std::pair<bool, QString> result = std::make_pair(true, "");
+
+	if (columns.count() != 17)
+	{
+		result.first = false;
+		result.second = QStringLiteral("Wrong proprty struct version 8!\n"
+									   "Expected: "
+									   "version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;"
+									   "editor;viewOrder;essential;readOnly;validator\n");
+
+		qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 8!";
+		qDebug() << Q_FUNC_INFO
+				 << " Expected: "
+					"version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;"
+					"essential;readOnly;validator";
+		return result;
+	}
+
+	const QString& name = columns.at(1);
+	const QString& category = columns.at(2);
+	const QString& type = columns.at(3);
+	const QString& min = columns.at(4);
+	const QString& max = columns.at(5);
+	const QString& defaultValue = columns.at(6);
+	const QString& strPrecision = columns.at(7);
+	const QString& strUpdateFromPreset = columns.at(8);
+	const QString& strExpert = columns.at(9);
+	const QString& description = columns.at(10);
+	const QString& strVisible = columns.at(11);
+	const QString& strEditor = columns.at(12);
+	const QString& strViewOrder = columns.at(13);
+	const QString& strEssential = columns.at(14);
+	const QString& strReadOnly = columns.at(15);
+	const QString& strValidator = columns.at(16);
+
+	result = parseSpecificPropertiesCreate(8,
+										   name,
+										   category,
+										   description,
+										   type,
+										   min,
+										   max,
+										   defaultValue,
+										   strPrecision,
+										   strUpdateFromPreset,
+										   strExpert,
+										   strVisible,
+										   strEditor,
+										   strViewOrder,
+										   strEssential,
+										   strReadOnly,
+										   strValidator);
 
 	return result;
 }
@@ -1070,7 +1145,8 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesCreate(int versi
 																	   const QString& strEditor,
 																	   const QString& strViewOrder,
 																	   const QString& strEssential,
-																	   const QString& strReadOnly)
+																	   const QString& strReadOnly,
+																	   const QString& validator)
 {
 	std::pair<bool, QString> result = std::make_pair(true, "");
 
@@ -1338,6 +1414,11 @@ std::pair<bool, QString> PropertyObject::parseSpecificPropertiesCreate(int versi
 	addedProperty->setSpecificEditor(editorType);
 	addedProperty->setViewOrder(viewOrder);
 	addedProperty->setEssential(essential);
+	
+	if (validator.isEmpty() == false)
+	{
+		addedProperty->setValidator(validator);
+	}
 
 	return result;
 }

@@ -1,6 +1,6 @@
-#include <VFrame30/UfbSchema.h>
-#include <VFrame30/SchemaLayer.h>
 #include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaLayer.h>
+#include <VFrame30/UfbSchema.h>
 
 namespace VFrame30
 {
@@ -13,22 +13,29 @@ namespace VFrame30
 
 		ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, UfbSchema::description, UfbSchema::setDescription);
 		ADD_PROPERTY_GETTER(int, "Version", true, UfbSchema::version);
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::lmDescriptionFile, true, UfbSchema::lmDescriptionFile, UfbSchema::setLmDescriptionFile);
+		ADD_PROPERTY_GETTER_SETTER(QString,
+								   PropertyNames::lmDescriptionFile,
+								   true,
+								   UfbSchema::lmDescriptionFile,
+								   UfbSchema::setLmDescriptionFile);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, UfbSchema::specificProperties, UfbSchema::setSpecificProperties)
+		ADD_PROPERTY_GETTER_SETTER(QString,
+								   PropertyNames::specificProperties,
+								   true,
+								   UfbSchema::specificProperties,
+								   UfbSchema::setSpecificProperties)
 			->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 
-		addLayer(std::make_shared<SchemaLayer>(this, "Logic", true));
-		addLayer(std::make_shared<SchemaLayer>(this, "Frame", false));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerFrameName, false));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerLogicName, true));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerNotesName, true));
 
 		setTagsList(QStringList{"ufb"});
 
 		return;
 	}
 
-	UfbSchema::~UfbSchema(void)
-	{
-	}
+	UfbSchema::~UfbSchema(void) {}
 
 	bool UfbSchema::SaveData(Proto::Envelope* message) const
 	{
@@ -47,7 +54,7 @@ namespace VFrame30
 
 		us->set_description(m_description.toStdString());
 
-		this->m_version++;		// Increment version
+		this->m_version++; // Increment version
 		us->set_version(m_version);
 		us->set_lmdescriptionfile(m_lmDescriptionFile.toStdString());
 		us->set_specific_properties_struct(m_specificPropertiesStruct.toStdString());
@@ -69,6 +76,21 @@ namespace VFrame30
 		if (result == false)
 		{
 			return false;
+		}
+
+		// Add frame Notes if it is not present
+		//
+		if (const auto& ls = layers(); std::find_if(ls.begin(),
+													ls.end(),
+													[](const auto& l)
+													{
+														return l->name() == LayerNotesName;
+													}) == ls.end())
+		{
+			// Add layer.
+			//
+			addLayer(std::make_shared<SchemaLayer>(this, LayerNotesName, true));
+			fixLayerOrder();
 		}
 
 		// --
@@ -96,7 +118,7 @@ namespace VFrame30
 
 		Schema::Draw(drawParam, clipRect);
 		return;
-    }
+	}
 
 	QString UfbSchema::description() const
 	{
@@ -132,4 +154,4 @@ namespace VFrame30
 	{
 		m_specificPropertiesStruct = value;
 	}
-}
+} // namespace VFrame30

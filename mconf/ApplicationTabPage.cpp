@@ -2,6 +2,7 @@
 #include "../UtilsLib/OutputLog.h"
 #include "Globals.h"
 
+#include <BuildCompLib/BuildCompDialog.h>
 #include <ModuleConfiguratorLib/Configurator.h>
 
 #include <QCoreApplication>
@@ -27,79 +28,89 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget* parent) :
 	//
 	pLeftLayout->addWidget(new QLabel(tr("Bitstream File Name:")));
 
-	QHBoxLayout* bl = new QHBoxLayout();
+	{
+		auto* bl = new QGridLayout();
 
-	m_fileNameEdit = new QLineEdit();
-	m_fileNameEdit->setReadOnly(true);
+		m_fileNameEdit = new QLineEdit();
+		m_fileNameEdit->setReadOnly(true);
 
-	QPushButton* b = new QPushButton(tr("Browse..."));
-	bl->addWidget(m_fileNameEdit);
-	bl->addWidget(b);
+		QPushButton* browse = new QPushButton(tr("Browse..."));
+		QPushButton* compare = new QPushButton(tr("Compare..."));
 
-	connect(b, &QPushButton::clicked, this, &ApplicationTabPage::openFileClicked);
+		bl->addWidget(m_fileNameEdit, 0, 0);
+		bl->addWidget(browse, 0, 1);
+		bl->addWidget(compare, 1, 1);
 
-	pLeftLayout->addLayout(bl);
+		connect(browse, &QPushButton::clicked, this, &ApplicationTabPage::openFileClicked);
+		connect(compare, &QPushButton::clicked, this, &ApplicationTabPage::compareFileClicked);
+
+		pLeftLayout->addLayout(bl);
+	}
 
 	// Create Subsystems list widget
+	//
+	{
+		pLeftLayout->addWidget(new QLabel(tr("Choose the Subsystem:")));
+		m_subsystemsListTree = new QTreeWidget();
+		m_subsystemsListTree->setRootIsDecorated(false);
+		connect(m_subsystemsListTree, &QTreeWidget::currentItemChanged, this, &ApplicationTabPage::subsystemChanged);
+		pLeftLayout->addWidget(m_subsystemsListTree, 3);
 
-	pLeftLayout->addWidget(new QLabel(tr("Choose the Subsystem:")));
-	m_subsystemsListTree = new QTreeWidget();
-	m_subsystemsListTree->setRootIsDecorated(false);
-	connect(m_subsystemsListTree, &QTreeWidget::currentItemChanged, this, &ApplicationTabPage::subsystemChanged);
-	pLeftLayout->addWidget(m_subsystemsListTree, 3);
+		QStringList l;
+		l << tr("Subsystem");
 
-	QStringList l;
-	l << tr("Subsystem");
+		m_subsystemsListTree->setColumnCount(static_cast<int>(l.size()));
+		m_subsystemsListTree->setHeaderLabels(l);
 
-	m_subsystemsListTree->setColumnCount(static_cast<int>(l.size()));
-	m_subsystemsListTree->setHeaderLabels(l);
-
-	int il = 0;
-	m_subsystemsListTree->setColumnWidth(il++, 100);
+		int il = 0;
+		m_subsystemsListTree->setColumnWidth(il++, 100);
+	}
 
 	// Detect Subsystem
+	{
+		auto bl = new QHBoxLayout();
+		bl->addStretch();
 
-	bl = new QHBoxLayout();
-	bl->addStretch();
+		QPushButton* detectSubSystem = new QPushButton(tr("Detect Subsystem"));
+		connect(detectSubSystem, &QPushButton::clicked, this, &ApplicationTabPage::detectSubsystemsClicked);
+		bl->addWidget(detectSubSystem);
 
-	b = new QPushButton(tr("Detect Subsystem"));
-	connect(b, &QPushButton::clicked, this, &ApplicationTabPage::detectSubsystemsClicked);
-	bl->addWidget(b);
+		pLeftLayout->addLayout(bl);
 
-	pLeftLayout->addLayout(bl);
+		// BTS UART list widget
 
-	// BTS UART list widget
+		pLeftLayout->addWidget(new QLabel(tr("Bitstream Firmware Types:")));
+		m_bitstreamUartListTree = new QTreeWidget();
+		m_bitstreamUartListTree->setRootIsDecorated(false);
+		pLeftLayout->addWidget(m_bitstreamUartListTree, 1);
 
-	pLeftLayout->addWidget(new QLabel(tr("Bitstream Firmware Types:")));
-	m_bitstreamUartListTree = new QTreeWidget();
-	m_bitstreamUartListTree->setRootIsDecorated(false);
-	pLeftLayout->addWidget(m_bitstreamUartListTree, 1);
+		QStringList l;
+		l << tr("UartID");
+		l << tr("Type");
+		l << tr("Upload Count");
+		l << tr("Status");
 
-	l.clear();
-	l << tr("UartID");
-	l << tr("Type");
-	l << tr("Upload Count");
-	l << tr("Status");
+		m_bitstreamUartListTree->setColumnCount(static_cast<int>(l.size()));
+		m_bitstreamUartListTree->setHeaderLabels(l);
 
-	m_bitstreamUartListTree->setColumnCount(static_cast<int>(l.size()));
-	m_bitstreamUartListTree->setHeaderLabels(l);
-
-	il = 0;
-	m_bitstreamUartListTree->setColumnWidth(il++, 80);
-	m_bitstreamUartListTree->setColumnWidth(il++, 100);
-	m_bitstreamUartListTree->setColumnWidth(il++, 100);
-	m_bitstreamUartListTree->setColumnWidth(il++, 60);
+		int il = 0;
+		m_bitstreamUartListTree->setColumnWidth(il++, 80);
+		m_bitstreamUartListTree->setColumnWidth(il++, 100);
+		m_bitstreamUartListTree->setColumnWidth(il++, 100);
+		m_bitstreamUartListTree->setColumnWidth(il++, 60);
+	}
 
 	// Reset Counters
+	{
+		auto bl = new QHBoxLayout();
+		bl->addStretch();
 
-	bl = new QHBoxLayout();
-	bl->addStretch();
+		auto resetButton = new QPushButton(tr("Reset Upload Counters"));
+		bl->addWidget(resetButton);
+		connect(resetButton, &QPushButton::clicked, this, &ApplicationTabPage::resetCountersClicked);
 
-	b = new QPushButton(tr("Reset Upload Counters"));
-	bl->addWidget(b);
-	connect(b, &QPushButton::clicked, this, &ApplicationTabPage::resetCountersClicked);
-
-	pLeftLayout->addLayout(bl);
+		pLeftLayout->addLayout(bl);
+	}
 
 	// pLeftLayout->addStretch();
 
@@ -116,7 +127,7 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget* parent) :
 		m_pUartsListTree->setRootIsDecorated(false);
 		pLeftLayout->addWidget(m_pUartsListTree, 1);
 
-		l.clear();
+		QStringList l;
 		l << tr("UartID");
 		l << tr("Type");
 		l << tr("Process");
@@ -124,7 +135,7 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget* parent) :
 		m_pUartsListTree->setColumnCount(static_cast<int>(l.size()));
 		m_pUartsListTree->setHeaderLabels(l);
 
-		il = 0;
+		int il = 0;
 		m_pUartsListTree->setColumnWidth(il++, 80);
 		m_pUartsListTree->setColumnWidth(il++, 100);
 		m_pUartsListTree->setColumnWidth(il++, 80);
@@ -138,12 +149,12 @@ ApplicationTabPage::ApplicationTabPage(bool expertMode, QWidget* parent) :
 
 		// Reset Counters
 
-		bl = new QHBoxLayout();
+		auto bl = new QHBoxLayout();
 		bl->addStretch();
 
-		b = new QPushButton(tr("Detect UART List"));
-		bl->addWidget(b);
-		connect(b, &QPushButton::clicked, this, &ApplicationTabPage::detectUartsClicked);
+		auto detectUartButton = new QPushButton(tr("Detect UART List"));
+		bl->addWidget(detectUartButton);
+		connect(detectUartButton, &QPushButton::clicked, this, &ApplicationTabPage::detectUartsClicked);
 
 		pLeftLayout->addLayout(bl);
 	}
@@ -346,6 +357,61 @@ void ApplicationTabPage::openFileClicked()
 	QString fileName = fileList[0];
 
 	openBitstreamFile(fileName);
+
+	return;
+}
+
+void ApplicationTabPage::compareFileClicked()
+{
+	QFileDialog fd{this};
+
+	fd.setAcceptMode(QFileDialog::AcceptOpen);
+	fd.setFileMode(QFileDialog::ExistingFile);
+
+	QString alreadySelectedFile = m_fileNameEdit->text();
+	if (alreadySelectedFile.isEmpty() == false)
+	{
+		fd.setDirectory(QFileInfo(alreadySelectedFile).absoluteDir().path());
+	}
+
+	QStringList filters;
+	filters << "Bitstream files (*.bts)"
+			<< "All files (*.*)";
+
+	fd.setNameFilters(filters);
+
+	if (fd.exec() == QDialog::Rejected)
+	{
+		return;
+	}
+
+	QStringList fileList = fd.selectedFiles();
+	if (fileList.size() != 1)
+	{
+		return;
+	}
+
+	QString fileName = fileList[0];
+
+	auto compareDialog = new BuildCompLib::BuildCompDialog{this};
+
+	// Run modal less dialog
+	//
+	compareDialog->show();
+
+	if (m_fileNameEdit->text().isEmpty() == true)
+	{
+		compareDialog->setFileLeft(fileName, true);
+	}
+	else
+	{
+		compareDialog->setFileLeft(m_fileNameEdit->text(), false);
+		compareDialog->setFileRight(fileName, true);
+	}
+
+	// Delete the widget when it is closed
+	//
+	connect(compareDialog, &BuildCompLib::BuildCompDialog::finished, compareDialog, &BuildCompLib::BuildCompDialog::deleteLater);
 
 	return;
 }

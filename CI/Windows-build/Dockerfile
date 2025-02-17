@@ -77,9 +77,6 @@ RUN powershell -Command \
 
 RUN echo 192.168.14.242 delo >> "C:\Windows\System32\drivers\etc\hosts"
 
-WORKDIR C:/libpq_my_build
-COPY "INSTALL/libpq.dll" .
-
 WORKDIR C:/ftdi
 COPY "INSTALL/CDM-v2.12.36.4-WHQL-Certified.zip" .
 COPY "INSTALL/ftd2xx.dll" .

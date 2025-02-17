@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Sql Network Xml Widgets Gui SerialPort Qml)
+find_package(Qt6 REQUIRED COMPONENTS Core Sql Network Xml Widgets Gui SerialPort Qml Svg)
 qt_standard_project_setup()
 
 set(TARGET mconf)
@@ -56,7 +56,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Sql Qt6::Network Qt6::Xml Qt6::Widgets Qt6::Gui Qt6::SerialPort Qt6::Qml)
-target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib HardwareLib ModuleConfiguratorLib UiLib LicenseLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib HardwareLib ModuleConfiguratorLib UiLib LicenseLib BuildCompLib)
 
 # Link Visaul Leak Detector
 #

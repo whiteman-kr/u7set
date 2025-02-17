@@ -1,36 +1,40 @@
+#include <VFrame30/LogicSchema.h>
+#include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaItemConnection.h>
 #include <VFrame30/SchemaItemLoopback.h>
 #include <VFrame30/SchemaItemSignal.h>
-#include <VFrame30/LogicSchema.h>
-#include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaLayer.h>
 
 namespace VFrame30
 {
 	LogicSchema::LogicSchema(void)
 	{
-		//qDebug() << "LogicSchema::LogicSchema(void)";
+		// qDebug() << "LogicSchema::LogicSchema(void)";
 
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::equipmentIds, true, LogicSchema::equipmentIds, LogicSchema::setEquipmentIds);
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::lmDescriptionFile, true, LogicSchema::lmDescriptionFile, LogicSchema::setLmDescriptionFile);
+		ADD_PROPERTY_GETTER_SETTER(QString,
+								   PropertyNames::lmDescriptionFile,
+								   true,
+								   LogicSchema::lmDescriptionFile,
+								   LogicSchema::setLmDescriptionFile);
 
 		setUnit(SchemaUnit::Inch);
 
 		setDocWidth(mm2in(420));
 		setDocHeight(mm2in(297));
 
-		addLayer(std::make_shared<SchemaLayer>(this, "Frame", false));
-		addLayer(std::make_shared<SchemaLayer>(this, "Logic", true));
-		addLayer(std::make_shared<SchemaLayer>(this, "Notes", false));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerFrameName, false));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerLogicName, true));
+		addLayer(std::make_shared<SchemaLayer>(this, LayerNotesName, false));
 
 		setTagsList(QStringList{"applogic"});
 
 		return;
 	}
 
-	LogicSchema ::~LogicSchema (void)
+	LogicSchema ::~LogicSchema(void)
 	{
-		//qDebug() << "LogicSchema::~LogicSchema(void)  SchemaID = " << schemaId();
+		// qDebug() << "LogicSchema::~LogicSchema(void)  SchemaID = " << schemaId();
 	}
 
 	bool LogicSchema::SaveData(Proto::Envelope* message) const
@@ -74,75 +78,6 @@ namespace VFrame30
 		if (result == false)
 		{
 			return false;
-		}
-
-		// Set the right order for layers, a lot of layers were saved in wrong order (logic, frame, notes)
-		// We need order Frame, Logic, Notes
-		//
-		auto layersCopy = layers();
-
-		std::stable_sort(layersCopy.begin(), layersCopy.end(), [](const SchemaLayerPtr& left, const SchemaLayerPtr& right)
-		{
-			int l = 99;
-			do
-			{
-				if (left->name() == QLatin1String("Frame"))
-				{
-					l = 0;
-					break;
-				}
-
-				if (left->name() == QLatin1String("Logic"))
-				{
-					l = 1;
-					break;
-				}
-
-				if (left->name() == QLatin1String("Notes"))
-				{
-					l = 2;
-					break;
-				}
-			} while (false);
-
-			int r = 99;
-			do
-			{
-				if (right->name() == QLatin1String("Frame"))
-				{
-					r = 0;
-					break;
-				}
-
-				if (right->name() == QLatin1String("Logic"))
-				{
-					r = 1;
-					break;
-				}
-
-				if (right->name() == QLatin1String("Notes"))
-				{
-					r = 2;
-					break;
-				}
-			} while (false);
-
-			return l < r;
-		});
-
-		clearLayers();
-		for (const auto &l : layersCopy)
-		{
-			addLayer(l);
-		}
-
-		// Layers were reordered need to set active layer again.
-		//
-		if (auto compileLayerIt = std::find_if(layersCopy.begin(), layersCopy.end(), [](const auto& l) { return l->compile(); });
-			compileLayerIt != layersCopy.end())
-		{
-			Q_ASSERT(*compileLayerIt);
-			setActiveLayer(*compileLayerIt);
 		}
 
 		// --
@@ -196,7 +131,7 @@ namespace VFrame30
 
 		Schema::Draw(drawParam, clipRect);
 		return;
-    }
+	}
 
 	std::map<QString, SchemaItemSignal*> LogicSchema::getSignalItemsMap() const
 	{
@@ -210,8 +145,7 @@ namespace VFrame30
 				//
 				for (const auto& item : layer->items())
 				{
-					if (VFrame30::SchemaItemSignal* itemSignal = item->toType<SchemaItemSignal>();
-							itemSignal != nullptr)
+					if (VFrame30::SchemaItemSignal* itemSignal = item->toType<SchemaItemSignal>(); itemSignal != nullptr)
 					{
 						QStringList appSignals = itemSignal->appSignalIdList();
 						for (const QString& id : appSignals)
@@ -244,8 +178,7 @@ namespace VFrame30
 				//
 				for (const auto& item : layer->items())
 				{
-					if (VFrame30::SchemaItemReceiver* itemReceiver = item->toType<SchemaItemReceiver>();
-							itemReceiver != nullptr)
+					if (VFrame30::SchemaItemReceiver* itemReceiver = item->toType<SchemaItemReceiver>(); itemReceiver != nullptr)
 					{
 						QStringList appSignals = itemReceiver->appSignalIdsAsList();
 						for (const QString& id : appSignals)
@@ -272,8 +205,7 @@ namespace VFrame30
 				//
 				for (const auto& item : layer->items())
 				{
-					if (VFrame30::SchemaItemLoopback* itemLoopback = item->toType<SchemaItemLoopback>();
-							itemLoopback != nullptr)
+					if (VFrame30::SchemaItemLoopback* itemLoopback = item->toType<SchemaItemLoopback>(); itemLoopback != nullptr)
 					{
 						result[itemLoopback->loopbackId()] = itemLoopback;
 					}
@@ -296,7 +228,7 @@ namespace VFrame30
 				for (const auto& item : layer->items())
 				{
 					if (VFrame30::SchemaItemTransmitter* itemTransmitter = item->toType<SchemaItemTransmitter>();
-							itemTransmitter != nullptr)
+						itemTransmitter != nullptr)
 					{
 						for (const QString& c : itemTransmitter->connectionIdsAsList())
 						{
@@ -321,8 +253,7 @@ namespace VFrame30
 				//
 				for (const auto& item : layer->items())
 				{
-					if (VFrame30::SchemaItemReceiver* itemReceiver = item->toType<SchemaItemReceiver>();
-							itemReceiver != nullptr)
+					if (VFrame30::SchemaItemReceiver* itemReceiver = item->toType<SchemaItemReceiver>(); itemReceiver != nullptr)
 					{
 						for (const QString& c : itemReceiver->connectionIdsAsList())
 						{
@@ -403,4 +334,4 @@ namespace VFrame30
 	{
 		m_lmDescriptionFile = value;
 	}
-}
+} // namespace VFrame30

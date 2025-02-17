@@ -86,10 +86,16 @@ module ConfigStruct
 		Ohm_Ni_a_617 = 32,
 
 		Ohm_Raw = 33,
+		
+		uA_m20_p20 = 34,
+		Hz_005_50000 = 35,
 
 		mV_Type_L = 36,
 		mV_Type_M = 37,
 		mV_Raw_m1200_p1200 = 38,
+
+		Hz_0_60000 = 39,
+		Hz_0_50000 = 40
 	}
 
 	export enum OutputMode
@@ -200,6 +206,7 @@ module ConfigStruct
 
 		calcCrc32(frameIndex: number, start: number, count: number): number;
 		calcCrc64(frameIndex: number, start: number, count: number): ArrayBuffer;
+		calcHash32(dataString: string): any;
 		calcHash64(dataString: string): any;
 
 		jsSetDescriptionFields(descriptionVersion: number, description: string): void;
@@ -1195,12 +1202,7 @@ module ConfigLib
 				let txDataUID: number = 0;
 				if (optoPort.isLinked() == true)
 				{
-					let linkedPort: string = optoPort.linkedPortID();
-					let linkedOptoPort: ConfigStruct.OptoPort = opticModuleStorage.jsGetOptoPort(linkedPort);
-					if (linkedOptoPort != null)
-					{
-						txDataUID = linkedOptoPort.txDataID();
-					}
+					txDataUID = optoPort.txDataID();
 				}
 
 				if (ConfigLib.setData32(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "Tx Block (Opto) Data UID " + (p + 1), txDataUID) == false)
@@ -1216,7 +1218,12 @@ module ConfigLib
 				let rxDataUID: number = 0;
 				if (optoPort.isLinked() == true)
 				{
-					rxDataUID = optoPort.txDataID();
+					let linkedPort: string = optoPort.linkedPortID();
+					let linkedOptoPort: ConfigStruct.OptoPort = opticModuleStorage.jsGetOptoPort(linkedPort);
+					if (linkedOptoPort != null)
+					{
+						rxDataUID = linkedOptoPort.txDataID();
+					}
 				}
 
 				if (ConfigLib.setData32(confFirmware, log, LMNumber, controller.equipmentId, frame, ptr, "Rx Block (Opto) Data UID " + (p + 1), rxDataUID) == false)

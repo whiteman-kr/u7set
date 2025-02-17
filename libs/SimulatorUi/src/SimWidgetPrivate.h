@@ -28,6 +28,7 @@ namespace SimUi
 	class SimProjectWidget;
 	class SimOutputWidget;
 	class DbProjectStateNotifier;
+	class NotificationPanel;
 
 	class SimWidgetPrivate : public QMainWindow
 	{
@@ -57,7 +58,8 @@ namespace SimUi
 		void createToolBar();
 		void createDocks();
 
-		virtual void showEvent(QShowEvent* e) override;
+		void showEvent(QShowEvent* e) override;
+		void timerEvent(QTimerEvent* e) override;
 
 	signals:
 		void needUpdateActions();
@@ -128,6 +130,8 @@ namespace SimUi
 
 		QDockWidget* m_overridePaneDock = nullptr;
 		QDockWidget* m_outputPaneDock = nullptr;
+
+		NotificationPanel* m_notificationPanel = nullptr;
 
 		// --
 		//

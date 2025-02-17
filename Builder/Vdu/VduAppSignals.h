@@ -27,10 +27,11 @@ struct VduAppSignalsFileHeader
 	uint16_t appSignalsCount;
 	uint16_t hash32ToIndexCount;
 	uint16_t optoPortsCount;
-//	uint16_t rxAppSignalsCount;
 	uint16_t txAppSignalsCount;
 
 	uint16_t reserv1;
+
+	uint64_t vduConfigID;
 
 	vdu_file_ref refAppSignals;				// ref to array of VduAppSignal structures,
 											// sorted by VduAppSignal.signalIndex ascending

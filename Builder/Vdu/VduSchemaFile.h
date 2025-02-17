@@ -13,6 +13,12 @@
 // 29 Sep 2024| 1.4  |	Added UTF8 text format for scripts and SchemaItem::ObjectName.
 // 25 Nov 2024| 1.5  |	All text formats changed to UTF-8.
 // 08 Dec 2024| 1.6  |	Added VduSchemaFileSchemaItem1::acceptClick.
+// 16 Jan 2025| 1.7  |	Added VduSchemaFileSchemaItemRect1::wordWrap.
+// 16 Jan 2025| 1.8  |	Added VduSchemaFileSchemaItemValue1::align.
+// 22 Jan 2025| 1.9  |	Added struct VduSchemaFileSchemaItemImage1
+// 23 Jan 2025| 1.10 |	Added struct VduSchemaFileSchemaItemImageValue1
+// 06 Feb 2025| 1.11 |	Added fields onShowScriptBytecode, preDrawScriptBytecode to struct VduSchemaFileProperties1
+// 06 Feb 2025| 1.12 |	Added fields clickScriptBytecode, preDrawScriptBytecode to struct VduSchemaFileSchemaItem1
 // -----------+------+--------------------------------------------------------------
 // clang-format on
 
@@ -35,14 +41,22 @@ struct VduSchemaFileProperties1
 {
 	uint16_t version;    // 1
 	uint16_t headerSize; // This header size
+
 	uint16_t width;      // In pixels
 	uint16_t height;     // In pixels
+
 	uint32_t reserve0;
 	uint32_t backgroundColor;
+
 	vdu_cstr schemaId;
 	vdu_cstr caption;
+
 	vdu_cstr onShowScript;
+	vdu_scriptbc onShowScriptBytecode;
+
 	vdu_cstr preDrawScript;
+	vdu_scriptbc preDrawScriptBytecode;
+
 	uint32_t reserve1;
 	uint32_t reserve2;
 };
@@ -64,7 +78,7 @@ struct VduSchemaFile
 	uint16_t schemaItemCount; // Number of schema items - each items is a VduSchemaFileSchemaItem1 + specific data
 							  // (VduSchemaFileSchemaItemLine1 | VduSchemaFileSchemaItemRect1 | ...).
 	uint16_t reserve3;
-
+	//
 	// Next fields are present in a text description:
 	//
 
@@ -88,9 +102,11 @@ struct VduSchemaFile
 
 // VduSchemaFileSchemaItem1::itemType
 //
-const uint16_t VduFileSchemaItemLineId = 0x4E4C;  // LN
-const uint16_t VduFileSchemaItemRectId = 0x4352;  // RC
-const uint16_t VduFileSchemaItemValueId = 0x4C56; // VL
+const uint16_t VduFileSchemaItemLineId = 0x4E4C;       // LN
+const uint16_t VduFileSchemaItemRectId = 0x4352;       // RC
+const uint16_t VduFileSchemaItemImageId = 0x4D47;      // IM
+const uint16_t VduFileSchemaItemValueId = 0x4C56;      // VL
+const uint16_t VduFileSchemaItemImageValueId = 0x5649; // IV
 
 
 // VduSchemaFileSchemaItem1 - Common schema item header, right after it follows specific schema item data.
@@ -107,8 +123,12 @@ struct VduSchemaFileSchemaItem1
 	bool acceptClick;       // If true, the item can accept click events.
 
 	vdu_cstr objectName;
+
 	vdu_cstr clickScript;
+	vdu_scriptbc clickScriptBytecode;
+
 	vdu_cstr preDrawScript;
+	vdu_scriptbc preDrawScriptBytecode;
 
 	uint32_t reserve2;
 	uint32_t reserve3;
@@ -137,7 +157,7 @@ struct VduSchemaFileSchemaItemLine1
 struct VduSchemaFileSchemaItemRect1
 {
 	uint16_t version;  // 1
-	uint16_t itemType; // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
+	uint16_t itemType; // VduFileSchemaItemRectId = 0x4352
 	uint32_t reserve0;
 
 	uint16_t left;
@@ -165,10 +185,28 @@ struct VduSchemaFileSchemaItemRect1
 	uint32_t reserve5;
 };
 
-struct VduSchemaFileSchemaItemValue1
+struct VduSchemaFileSchemaItemImage1
 {
 	uint16_t version;   // 1
-	uint16_t itemType;  // VduFileSchemaItemLine, VduFileSchemaItemRect, ...
+	uint16_t itemType;  // VduFileSchemaItemImageId = 0x4D47
+	uint32_t reserve0;
+
+	uint16_t left;
+	uint16_t top;
+	uint16_t width;
+	uint16_t height;
+
+	uint32_t reserve1;
+	uint32_t imageHash; // Image hash, used to generate image file name: [VduSubsystemId]/[VduEquipmentId]/Images/[ImageHash].bmp
+
+	uint32_t reserve3;
+	uint32_t reserve4;
+};
+
+struct VduSchemaFileSchemaItemValue1
+{
+	uint16_t version;  // 1
+	uint16_t itemType; // VduFileSchemaItemValueId
 	uint32_t reserve0;
 
 	uint16_t left;
@@ -215,6 +253,45 @@ struct VduSchemaFileSchemaItemValue1
 
 	uint32_t appSignalCount;
 
+	// Then follows appSignalCount * sizeof(uint32_t) appSignalIndexes
+	//
+	// uint32_t appSignalIndexes[appSignalCount];
+};
+
+struct VduSchemaFileSchemaItemImageValue1
+{
+	uint16_t version;  // 1
+	uint16_t itemType; // VduFileSchemaItemImageValueId, 0x5649, IV
+	uint32_t reserve0;
+
+	uint16_t left;
+	uint16_t top;
+	uint16_t width;
+	uint16_t height;
+
+	uint32_t reserve4[4];
+
+	uint16_t reserve5;
+	uint16_t imageCount;    // 1 - 12
+
+	struct Image
+	{
+		uint16_t version;   // 1
+		uint16_t reserve0;
+
+		vdu_cstr imageId;
+		uint32_t reserve1;
+
+		uint32_t imageHash; // Image hash, used to generate image file name: [VduSubsystemId]/[VduEquipmentId]/Images/[ImageHash].bmp
+		uint32_t reserve2;
+	};
+	Image images[12];
+
+	uint16_t currentImage;  // Placeholder for the currently selected image index in the 'images' array. Default value: 0.
+	uint16_t reserve6;
+
+	uint32_t appSignalCount;
+	//
 	// Then follows appSignalCount * sizeof(uint32_t) appSignalIndexes
 	//
 	// uint32_t appSignalIndexes[appSignalCount];

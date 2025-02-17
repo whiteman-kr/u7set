@@ -545,6 +545,7 @@ namespace ExtWidgets
 		bool m_readOnly = false;
 
 		PropertyEditorBase* m_propertyEditorBase = nullptr;
+		QRegularExpressionValidator* m_validator = nullptr;
 	};
 
 	//

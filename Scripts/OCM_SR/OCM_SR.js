@@ -110,7 +110,7 @@ function generate_ocmsr(confFirmware, module, LMNumber, frame, log, signalSet, o
 		{
 			return -1;
 		}
-		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + dataUID + "\r\n");
+		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + dataUID + " (0x" + (dataUID >>> 0).toString(16) + ")\r\n");
 				
 		/*if (optoPort.enableSerial() == true)
 		{

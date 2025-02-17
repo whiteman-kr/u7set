@@ -19,8 +19,18 @@ namespace VFrame30
 	{
 		assert(unit == SchemaUnit::Display);
 
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemVduLine::weight, SchemaItemVduLine::setWeight);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemVduLine::lineColor, SchemaItemVduLine::setLineColor);
+		ADD_PROPERTY_GET_SET_CAT(int,
+								 PropertyNames::lineWeight,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemVduLine::weight,
+								 SchemaItemVduLine::setWeight);
+		ADD_PROPERTY_GET_SET_CAT(QColor,
+								 PropertyNames::lineColor,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemVduLine::lineColor,
+								 SchemaItemVduLine::setLineColor);
 
 		// --
 		//
@@ -111,19 +121,14 @@ namespace VFrame30
 		pen.setWidth(lineWeight);
 		painter->setPen(pen);
 
-		bool al = painter->testRenderHint(QPainter::Antialiasing);	// Save antialiasing
+		bool al = painter->testRenderHint(QPainter::Antialiasing); // Save antialiasing
 		painter->setRenderHint(QPainter::Antialiasing);
 
 		painter->drawLine(p1, p2);
 
-		painter->setRenderHint(QPainter::Antialiasing, al);			// Restore antialiasing
+		painter->setRenderHint(QPainter::Antialiasing, al);        // Restore antialiasing
 
 		return;
-	}
-
-	void SchemaItemVduLine::accept(VduItemVisitor& visitor) const
-	{
-		return visitor.visit(*this);
 	}
 
 	int SchemaItemVduLine::weight() const
@@ -145,5 +150,4 @@ namespace VFrame30
 	{
 		m_lineColor = color;
 	}
-}
-
+} // namespace VFrame30

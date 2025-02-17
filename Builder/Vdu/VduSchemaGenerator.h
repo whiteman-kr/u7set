@@ -21,6 +21,7 @@ namespace Builder
 		static bool generateVduSchemas(const std::vector<VFrame30::VduSchema*>& schemas, Builder::Context& context);
 
 		static bool generateVduSchema(QString vduEquipmentId,
+									  QString subsystemId,
 									  const VFrame30::VduSchema& schema,
 									  const std::map<Hash, int>& appSignalHashToSignalIndex,
 									  QByteArray& out,

@@ -5,7 +5,7 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	signalSet: ConfigStruct.SignalSet, subsystemStorage: ConfigStruct.SubsystemStorage, opticModuleStorage: ConfigStruct.OptoModuleStorage, logicModuleDescription: ConfigStruct.LogicModule)
 {
 
-	let checkProperties: string[] = ["SubsystemID", "LMNumber", "AppLANDataSize", "DiagLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID"];
+	let checkProperties: string[] = ["SubsystemID", "LMNumber", "AppLANDataSize", "DiagLANDataSize", "TuningLANDataUID", "AppLANDataUID", "DiagLANDataUID", "MasterPIN"];
 	for (let cp: number = 0; cp < checkProperties.length; cp++)
 	{
 		if (module.propertyValue(checkProperties[cp]) == undefined)
@@ -20,6 +20,7 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	let subSysID: string = module.propertyString("SubsystemID");
 	let LMNumber: number = module.propertyInt("LMNumber");
 	let moduleId: number = module.moduleFamily + module.moduleVersion;
+	let masterPIN: string = module.propertyString("MasterPIN");
 
 	// Constants
 	//
@@ -186,6 +187,18 @@ function generate_vdu(builder: ConfigStruct.Builder, root: ConfigStruct.ScriptDe
 	}
 	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] LanQuantity = " + LanQuantity + "\r\n");
 	ptr += 2;
+
+	// masterPIN
+	
+	const masterPinHash: number = confFirmware.calcHash32(masterPIN);
+
+	if (ConfigLib.setData32(confFirmware, log, LMNumber, module.equipmentId, frameServiceConfig, ptr, "MasterPIN", masterPinHash) == false)
+	{
+		return false;
+	}
+	confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] MasterPIN = " + masterPinHash + "\r\n");
+	ptr += 4;
+	
 	
 	// Create LANs configuration
 	//

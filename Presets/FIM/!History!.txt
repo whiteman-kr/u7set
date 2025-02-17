@@ -1,3 +1,4 @@
 FIM-SR
 	21.11.2023	Version: 0	FIM_v0.u7devp	Initial FIM preset version
 	03.09.2024	Version: 1 	FIM_v1.u7devp	RPCT-3940: Configuration script misprint fix
+	21.01.2025	Version: 2	FIM_v2.u7devp	RPCT-3992:  	 Configuration script is reorganized for library usage

@@ -1,10 +1,12 @@
 #include "VduConfigFile.h"
 #include "../Context.h"
+#include "../UtilsLib/Crc.h"
+#include "VduLuaScript.h"
 
-#include "../../UtilsLib/Crc.h"
 
 #include <CommonLib/ConstStrings.h>
 #include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/PropertyNames.h>
 #include <VFrame30/Schema.h>
 
 namespace
@@ -80,8 +82,8 @@ namespace
 			header.display0.height = propertyByCaption("Display0_Height", 0);
 			header.display0.mode = 0;
 
-			header.display0.startSchemaId = addStringRef(propertyByCaption("Display0_StartSchemaID", QString()),
-														 offsetof(VduConfigFile1, display0.startSchemaId));
+			header.display0.startSchemaId =
+				addStringRef(propertyByCaption("Display0_StartSchemaID", QString()), offsetof(VduConfigFile1, display0.startSchemaId));
 			header.display0.displayName =
 				addStringRef(propertyByCaption("Display0_Name", QString()), offsetof(VduConfigFile1, display0.displayName));
 
@@ -239,7 +241,7 @@ namespace
 			}
 
 			uint16_t size = *reinterpret_cast<const uint16_t*>(data.constData() + offset);
-			result = QString::fromUtf16(reinterpret_cast<const char16_t*>(data.constData() + offset + 2), size);
+			result = QString::fromUtf8(reinterpret_cast<const char*>(data.constData() + offset + 2), size);
 
 			return result;
 		};
@@ -374,8 +376,8 @@ namespace Builder
 {
 	bool VduConfigFileWriter::generate(Builder::Context& context)
 	{
-		IssueLogger* log = context.m_log;
-		Q_ASSERT(log);
+		Q_ASSERT(context.m_log);
+		IssueLogger& log = *context.m_log;
 
 		bool result = true;
 
@@ -384,29 +386,97 @@ namespace Builder
 			return module->isVdu();
 		};
 
+		auto vduDirFunc = [](const Hardware::DeviceModule& vdu, IssueLogger& log)
+		{
+			QString result;
+
+			auto prop = vdu.propertyByCaption(Hardware::PropertyNames::lmSubsystemID);
+			if (prop == nullptr)
+			{
+				log.errCFG3000(Hardware::PropertyNames::lmSubsystemID, vdu.equipmentId());
+				return result;
+			}
+
+			QString subsystemID = prop->value().toString();
+			result = Directory::SUBSYSTEMS + Separator::DIR + subsystemID + Separator::DIR + vdu.equipmentId();
+			return result;
+		};
+
 		for (const Hardware::DeviceModule* vdu : context.m_fscModules | std::views::filter(isVduModule))
 		{
 			Q_ASSERT(vdu);
-
-			LOG_MESSAGE(log, QString("Generating configuration for VDU %1.").arg(vdu->equipmentId()));
+			LOG_MESSAGE_REF(log, QString("Generating configuration for VDU %1.").arg(vdu->equipmentId()));
 
 			QByteArray out;
 			bool ok = generateVduConfig(*vdu, context, out);
 
 			if (ok == true)
 			{
-				auto addedFile = context.m_buildResultWriter->addFile("/VDUs/" + vdu->equipmentId(), VduConfigFileName, out, false);
+				auto vduDir = vduDirFunc(*vdu, log);
+				if (vduDir.isEmpty() == true)
+				{
+					result = false;
+					continue;
+				}
+
+				auto addedFile = context.m_buildResultWriter->addFile(vduDir, VduConfigFileName, out, false);
 				ok &= addedFile != nullptr;
 
 				// Write dump file
 				//
 				QString configDump = dumpVduConfig(out);
-				addedFile = context.m_buildResultWriter->addFile("/VDUs/" + vdu->equipmentId(), VduConfigDumpFileName, configDump, false);
+				addedFile = context.m_buildResultWriter->addFile(vduDir, VduConfigDumpFileName, configDump, false);
 
 				ok &= addedFile != nullptr;
 			}
 
 			result &= ok;
+		}
+
+		// Write GlobalScript.lua, GlobalScript.lbc
+		//
+		for (const Hardware::DeviceModule* vdu : context.m_fscModules | std::views::filter(isVduModule))
+		{
+			Q_ASSERT(vdu);
+
+			LOG_MESSAGE_REF(log, QString("Generating GloablScript for VDU %1.").arg(vdu->equipmentId()));
+
+			auto globalScriptProp = vdu->propertyByCaption(Hardware::PropertyNames::globalScript);
+			if (globalScriptProp == nullptr)
+			{
+				log.errCFG3000(Hardware::PropertyNames::globalScript, vdu->equipmentId());
+				result = false;
+				continue;
+			}
+
+			QString globalScript = globalScriptProp->value().toString().trimmed();
+
+			auto vduDir = vduDirFunc(*vdu, log);
+			if (vduDir.isEmpty() == true)
+			{
+				result = false;
+				continue;
+			}
+
+			auto addedFile = context.m_buildResultWriter->addFile(vduDir, File::VDU_GLOBAL_SCRIPT_LUA, globalScript, false);
+			result &= addedFile != nullptr;
+
+			// Compile Lua script to bytecode.
+			//
+			QString compileErrorMessage;
+			QByteArray globalScriptBytecode = VduLuaScript::compile(globalScript, compileErrorMessage);
+
+			if (compileErrorMessage.isEmpty() == false)
+			{
+				// Script property %1.%2 evaluation error, line: %3, message: %4.
+				//
+				log.errEQP6301(vdu->equipmentId(), Hardware::PropertyNames::globalScript, -1, compileErrorMessage);
+				result = false;
+				continue;
+			}
+
+			addedFile = context.m_buildResultWriter->addFile(vduDir, File::VDU_GLOBAL_SCRIPT_LBC, globalScriptBytecode, false);
+			result &= addedFile != nullptr;
 		}
 
 		return result;

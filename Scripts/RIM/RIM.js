@@ -351,17 +351,17 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			{
 				switch (highPhysical.errorCode)
 				{
-					case UnitsConvertorErrorCode.ErrorGeneric:
+					case ConfigStruct.UnitsConvertorErrorCode.ErrorGeneric:
 					{
 						log.errINT1001(highPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrIdA);
 					}
 						break;
-					case UnitsConvertorErrorCode.LowLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.LowLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricLowLimit", electricLowLimit, highPhysical.expectedLowValidRange, highPhysical.expectedHighValidRange, 4, signalStrIdA);
 					}
 						break;
-					case UnitsConvertorErrorCode.HighLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.HighLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricHighLimit", electricHighLimit, highPhysical.expectedLowValidRange, highPhysical.expectedHighValidRange, 4, signalStrIdA);
 					}
@@ -376,17 +376,17 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			{
 				switch (lowPhysical.errorCode)
 				{
-					case UnitsConvertorErrorCode.ErrorGeneric:
+					case ConfigStruct.UnitsConvertorErrorCode.ErrorGeneric:
 					{
 						log.errINT1001(lowPhysical.errorMessage + ", module " + module.equipmentId + ", signal " + signalStrIdA);
 					}
 						break;
-					case UnitsConvertorErrorCode.LowLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.LowLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricLowLimit", electricLowLimit, lowPhysical.expectedLowValidRange, lowPhysical.expectedHighValidRange, 4, signalStrIdA);
 					}
 						break;
-					case UnitsConvertorErrorCode.HighLimitOutOfRange:
+					case ConfigStruct.UnitsConvertorErrorCode.HighLimitOutOfRange:
 					{
 						log.errCFG3010("ElectricHighLimit", electricHighLimit, lowPhysical.expectedLowValidRange, lowPhysical.expectedHighValidRange, 4, signalStrIdA);
 					}
@@ -449,7 +449,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 			
 			switch (sensorType)
 			{
-				case SensorType.Ohm_Pt_a_385:		
+				case ConfigStruct.SensorType.Ohm_Pt_a_385:		
 					sensorTypeCode = 0;	
 					highValidRangeMax = 850;
 					lowValidRangeMin = -200;
@@ -463,7 +463,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 					}
 				
 				break;
-				case SensorType.Ohm_Pt_a_391:		
+				case ConfigStruct.SensorType.Ohm_Pt_a_391:		
 					sensorTypeCode = 1;	
 					highValidRangeMax = 850;
 					lowValidRangeMin = -200;
@@ -477,7 +477,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 					}
 						
 				break;
-				case SensorType.Ohm_Cu_a_428:		
+				case ConfigStruct.SensorType.Ohm_Cu_a_428:		
 					sensorTypeCode = 2;	
 					highValidRangeMax = 200;
 					lowValidRangeMin = -180;
@@ -490,7 +490,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 					}
 
 				break;
-				case SensorType.Ohm_Cu_a_426:		
+				case ConfigStruct.SensorType.Ohm_Cu_a_426:		
 					sensorTypeCode = 3;	
 					highValidRangeMax = 200;
 					lowValidRangeMin = -50;
@@ -503,7 +503,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 					}
 
 				break;
-				case SensorType.Ohm_Ni_a_617:		
+				case ConfigStruct.SensorType.Ohm_Ni_a_617:		
 					sensorTypeCode = 4;	
 					highValidRangeMax = 180;
 					lowValidRangeMin = -60;
@@ -516,7 +516,7 @@ function generate_rim(confFirmware, module, LMNumber, frame, log, signalSet, opt
 					}
 	
 				break;
-				case SensorType.Ohm_Raw:		
+				case ConfigStruct.SensorType.Ohm_Raw:		
 					sensorTypeCode = 5;	
 					highValidRangeMax = 1500;
 					lowValidRangeMin = 5;

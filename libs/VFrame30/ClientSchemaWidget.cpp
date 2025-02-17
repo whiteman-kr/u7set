@@ -434,7 +434,7 @@ namespace VFrame30
 
 		// Limit size of history
 		//
-		while (m_backHistory.size() > 50)
+		while (m_backHistory.size() > HistorySize)
 		{
 			m_backHistory.pop_front();
 		}

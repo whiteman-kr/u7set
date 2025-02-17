@@ -193,6 +193,13 @@ namespace Builder
 
 			LOG_MESSAGE(log, QString("Generating fonts for VDU %1.").arg(vdu->equipmentId()));
 
+			if (vdu->propertyExists("SubsystemID") == false)
+			{
+				log->errCFG3000("SubsystemID", vdu->equipmentId());
+				return false;
+			}
+			QString subsystemID = vdu->propertyValue("SubsystemID").toString();
+
 			auto fontsProperty = vdu->propertyByCaption(EquipmentPropNames::FONTS);
 			if (fontsProperty == nullptr)
 			{
@@ -295,7 +302,8 @@ namespace Builder
 			int fontIndex = 0;
 			for (const VduFontInfo& fi : fontsInfo)
 			{
-				QString vduDir = Directory::VDUs + "/" + vdu->equipmentId() + QString("/Fonts/%1/").arg(fontIndex++);
+				QString vduDir = Directory::SUBSYSTEMS + Separator::DIR + subsystemID + Separator::DIR + vdu->equipmentId() +
+								 QString("/Fonts/%1/").arg(fontIndex++);
 				result &= Builder::VduFontGenerator::generateVduFont(fi, vduSubsets, vduDir, context.generateExtraDebugInfo(), context);
 			}
 		}

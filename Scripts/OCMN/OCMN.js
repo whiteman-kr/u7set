@@ -105,7 +105,7 @@ function generate_ocmn(confFirmware, module, LMNumber, frame, log, signalSet, op
 		{
 			return -1;
 		}
-		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + dataUID + "\r\n");
+		confFirmware.writeLog("    [" + frame + ":" + ptr +"]: TxRx Block (Opto) Data UID " + (p + 1) + " = " + dataUID + " (0x" + (dataUID >>> 0).toString(16) + ")\r\n");
 				
 		if (optoPort.enableSerial() == true)
 		{
@@ -122,7 +122,7 @@ function generate_ocmn(confFirmware, module, LMNumber, frame, log, signalSet, op
 			{
 				return -1;
 			}
-			confFirmware.writeLog("    [" + frame + ":" + ptr +"]: RS-232/485 Data UID " + (p + 1) + " = " + dataUID + "\r\n");
+			confFirmware.writeLog("    [" + frame + ":" + ptr +"]: RS-232/485 Data UID " + (p + 1) + " = " + dataUID + " (0x" + (dataUID >>> 0).toString(16) + ")\r\n");
 				
 			//
 			// RS232/485_CFG

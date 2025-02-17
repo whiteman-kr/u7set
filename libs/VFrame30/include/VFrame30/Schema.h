@@ -1,10 +1,10 @@
 #pragma once
 
-#include <VFrame30/SchemaLayer.h>
 #include <CommonLib/DebugInstCounter.h>
 #include <CommonLib/Factory.h>
-#include "../UtilsLib/ILogFile.h"
+#include <VFrame30/SchemaLayer.h>
 
+#include "../UtilsLib/ILogFile.h"
 
 namespace Afb
 {
@@ -21,7 +21,6 @@ namespace VFrame30
 {
 	class Context;
 	class Schema;
-	class SchemaLayer;
 	class CDrawParam;
 	class SchemaItem;
 	class LogicSchema;
@@ -83,14 +82,15 @@ namespace VFrame30
 		/// \brief Get schema items with specified tag.
 		QVariantList itemsByTag(QString tag);
 
-		/// \brief Finds schema item by its name (ObjectName property). Returned value has type SchemaItem or undefined if item is not found.
+		/// \brief Finds schema item by its name (ObjectName property). Returned value has type SchemaItem or undefined if item is not
+		/// found.
 		QJSValue findSchemaItem(QString objectName);
 
 	private:
 		QString schemaId() const;
 		QString caption() const;
 
-		QColor backgroundColor() const ;
+		QColor backgroundColor() const;
 		void setBackgroundColor(QColor value);
 
 		int layerCount() const;
@@ -103,11 +103,10 @@ namespace VFrame30
 	//
 	//	Schema
 	//
-	class Schema :
-		public PropertyObject,
-		public Proto::ObjectSerialization<Schema>,
-		public DebugInstCounter<Schema>,
-		public std::enable_shared_from_this<Schema>
+	class Schema : public PropertyObject,
+				   public Proto::ObjectSerialization<Schema>,
+				   public DebugInstCounter<Schema>,
+				   public std::enable_shared_from_this<Schema>
 	{
 		Q_OBJECT
 
@@ -140,7 +139,9 @@ namespace VFrame30
 
 		void BuildFblConnectionMap() const;
 
-		bool updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs, int* updatedItemCount, QString* errorMessage);
+		bool updateAllSchemaItemFbs(const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs,
+									int* updatedItemCount,
+									QString* errorMessage);
 		bool updateAllSchemaItemUfb(const std::vector<std::shared_ptr<UfbSchema>>& ufbs, int* updatedItemCount, QString* errorMessage);
 		bool updateAllSchemaItemBusses(const std::vector<AppSignalLib::Bus>& busses, int* updatedItemCount, QString* errorMessage);
 
@@ -152,7 +153,7 @@ namespace VFrame30
 		///
 		QStringList itemTags() const;
 
-		virtual QString details(const QString& path) const;				// form details JSON object (signal list)
+		virtual QString details(const QString& path) const; // form details JSON object (signal list)
 
 		std::shared_ptr<SchemaItem> getItemById(const QUuid& id) const;
 
@@ -188,6 +189,14 @@ namespace VFrame30
 	protected:
 		void clearLayers();
 		void addLayer(std::shared_ptr<SchemaLayer> layer);
+
+		void fixLayerOrder();
+
+	public:
+		static constexpr QLatin1String LayerFrameName = QLatin1String("Frame");
+		static constexpr QLatin1String LayerDrawingName = QLatin1String("Drawing");
+		static constexpr QLatin1String LayerLogicName = QLatin1String("Logic");
+		static constexpr QLatin1String LayerNotesName = QLatin1String("Notes");
 
 		// Properties and Data
 		//
@@ -289,20 +298,20 @@ namespace VFrame30
 		QString m_joinRightSchemaId;
 		QString m_joinBottomSchemaId;
 
-		double m_width = 0.0;					// pixels or inches, depends on m_unit
-		double m_height = 0.0;					// pixels or inches, depends on m_unit
+		double m_width = 0.0;            // pixels or inches, depends on m_unit
+		double m_height = 0.0;           // pixels or inches, depends on m_unit
 
 		SchemaUnit m_unit = SchemaUnit::Inch;
 
 		int m_activeLayer = 0;
-		double m_gridSize = 1.0;				// Grid size for this schema, depends on SchemaUnit
-		int m_pinGridStep = 2;					// Grid multiplier to determine vertical distance between pins
+		double m_gridSize = 1.0;         // Grid size for this schema, depends on SchemaUnit
+		int m_pinGridStep = 2;           // Grid multiplier to determine vertical distance between pins
 
-		bool m_excludeFromBuild = false;		// Exclude Schema from build or any other processing
+		bool m_excludeFromBuild = false; // Exclude Schema from build or any other processing
 
 		QColor m_backgroundColor = {qRgb(0xFF, 0xFF, 0xFF)};
 
-		int m_changeset = -1;					// Changeset, this field is not stored in file
+		int m_changeset = -1;            // Changeset, this field is not stored in file
 
 		// --
 		//
@@ -314,14 +323,12 @@ namespace VFrame30
 	private:
 		std::shared_ptr<VFrame30::Context> m_context;
 
-		mutable QJSValue m_jsPreDrawScript;				// Evaluated m_preDrawScript
-		mutable size_t m_evaluatedPreDrawScript = 0;	//
+		mutable QJSValue m_jsPreDrawScript;          // Evaluated m_preDrawScript
+		mutable size_t m_evaluatedPreDrawScript = 0; //
 
-		mutable QJSValue m_jsOnShowScript;				// Evaluated m_OnShowScript
+		mutable QJSValue m_jsOnShowScript;           // Evaluated m_OnShowScript
 		mutable size_t m_evaluatedOnShowScript = 0;
 
 		mutable QString m_lastScriptError;
 	};
 } // namespace VFrame30
-
-

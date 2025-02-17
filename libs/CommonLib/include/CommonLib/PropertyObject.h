@@ -1650,23 +1650,24 @@ public:
 	//
 	// Parse specific properties
 	//
-	static const int m_lastSpecificPropertiesVersion = 7;
+	static const int m_lastSpecificPropertiesVersion = 8;
 
 	static QString createSpecificPropertyStruct(const QString& name,
-										   const QString& category,
-										   const QString& description,
-										   const QString& strType,
-										   const QString& strMin,
-										   const QString& strMax,
-										   const QString& strDefaultValue,
-										   int precision,
-										   bool updateFromPreset,
-										   bool expert,
-										   bool visible,
-										   const E::PropertySpecificEditor editor,
-										   quint16 viewOrder,
-										   bool essential,
-										   bool readOnly);
+												const QString& category,
+												const QString& description,
+												const QString& strType,
+												const QString& strMin,
+												const QString& strMax,
+												const QString& strDefaultValue,
+												int precision,
+												bool updateFromPreset,
+												bool expert,
+												bool visible,
+												const E::PropertySpecificEditor editor,
+												quint16 viewOrder,
+												bool essential,
+												bool readOnly,
+												const QString& validator);
 	// Specific properties
 	//
 	std::pair<bool, QString> parseSpecificPropertiesStruct(const QString& specificProperties);
@@ -1677,6 +1678,8 @@ public:
 	std::pair<bool, QString> parseSpecificPropertiesStructV5(const QStringList& columns);
 	std::pair<bool, QString> parseSpecificPropertiesStructV6(const QStringList& columns);
 	std::pair<bool, QString> parseSpecificPropertiesStructV7(const QStringList& columns);
+	std::pair<bool, QString> parseSpecificPropertiesStructV8(const QStringList& columns);
+
 private:
 	std::pair<bool, QString> parseSpecificPropertiesCreate(int version,
 														   const QString& name,
@@ -1693,7 +1696,8 @@ private:
 														   const QString& strEditor,
 														   const QString& strViewOrder,
 														   const QString& strEssential,
-														   const QString& strReadOnly);
+														   const QString& strReadOnly,
+														   const QString& validator);
 
 public:
 	static std::pair<E::SpecificPropertyType, bool> parseSpecificPropertyType(const QString& strType);

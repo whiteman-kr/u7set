@@ -66,7 +66,8 @@ namespace VFrame30
 								 PropertyNames::textCategory,
 								 true,
 								 SchemaItemVduRect::text,
-								 SchemaItemVduRect::setText);
+								 SchemaItemVduRect::setText)
+			->setEssential(true);
 
 		ADD_PROPERTY_GET_SET_CAT(bool,
 								 PropertyNames::wordWrap,
@@ -264,11 +265,6 @@ namespace VFrame30
 	double SchemaItemVduRect::minimumPossibleWidthDocPt(double gridSize, int /*pinGridStep*/) const
 	{
 		return gridSize;
-	}
-
-	void SchemaItemVduRect::accept(VduItemVisitor& visitor) const
-	{
-		return visitor.visit(*this);
 	}
 
 	int SchemaItemVduRect::weight() const

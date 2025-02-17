@@ -591,7 +591,6 @@ namespace Directory
 	inline const QString BIN("Bin");
 	inline const QString SUBSYSTEMS("Subsystems");
 	inline const QString TESTS("Tests");
-	inline const QString VDUs("VDUs");
 	inline const QString APP_SIGNAL_LISTS("AppSignalLists");
 }
 
@@ -651,6 +650,11 @@ namespace File
 
 	inline static const QString VDU_APP_SIGNALS_BIN = "VduAppSignals.bin";
 	inline static const QString VDU_APP_SIGNALS_TXT = "VduAppSignals.txt";
+
+	inline static const QString VDU_GLOBAL_SCRIPT_LUA = "GlobalScript.lua";
+	inline static const QString VDU_GLOBAL_SCRIPT_LBC = "GlobalScript.lbc"; // Lua Byte Code
+
+	inline static const QString SUBSYSTEM_DESC_JSON = "Description.json";
 
 	// Moved from DbStruct
 	//

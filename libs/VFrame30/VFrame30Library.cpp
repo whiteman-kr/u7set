@@ -1,7 +1,11 @@
 #include <VFrame30/VFrame30Library.h>
 
+#include <VFrame30/DiagSchema.h>
 #include <VFrame30/FblItemLine.h>
 #include <VFrame30/FblItemRect.h>
+#include <VFrame30/LogicSchema.h>
+#include <VFrame30/MonitorSchema.h>
+#include <VFrame30/Schema.h>
 #include <VFrame30/SchemaItemAfb.h>
 #include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/SchemaItemConnection.h>
@@ -23,18 +27,16 @@
 #include <VFrame30/SchemaItemTerminator.h>
 #include <VFrame30/SchemaItemUfb.h>
 #include <VFrame30/SchemaItemValue.h>
+#include <VFrame30/SchemaItemVduImage.h>
+#include <VFrame30/SchemaItemVduImageValue.h>
 #include <VFrame30/SchemaItemVduLine.h>
 #include <VFrame30/SchemaItemVduRect.h>
 #include <VFrame30/SchemaItemVduValue.h>
-#include <VFrame30/DiagSchema.h>
-#include <VFrame30/LogicSchema.h>
-#include <VFrame30/MonitorSchema.h>
-#include <VFrame30/Schema.h>
 #include <VFrame30/SchemaLayer.h>
 #include <VFrame30/TuningSchema.h>
 #include <VFrame30/UfbSchema.h>
-#include <VFrame30/WiringSchema.h>
 #include <VFrame30/VduSchema.h>
+#include <VFrame30/WiringSchema.h>
 
 namespace VFrame30
 {
@@ -58,7 +60,6 @@ namespace VFrame30
 
 		// Registering SchemaItems
 		//
-		//SchemaItemFactory.Register<SchemaItemFrame>();
 		SchemaItemFactory.Register<FblItemLine>();
 		SchemaItemFactory.Register<FblItemRect>();
 		SchemaItemFactory.Register<SchemaItemAfb>();
@@ -88,10 +89,12 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemTransmitter>();
 		SchemaItemFactory.Register<SchemaItemUfb>();
 		SchemaItemFactory.Register<SchemaItemValue>();
-		
+
 		SchemaItemFactory.Register<SchemaItemVduLine>();
 		SchemaItemFactory.Register<SchemaItemVduRect>();
+		SchemaItemFactory.Register<SchemaItemVduImage>();
 		SchemaItemFactory.Register<SchemaItemVduValue>();
+		SchemaItemFactory.Register<SchemaItemVduImageValue>();
 
 		QMetaType::registerConverter<int, VFrame30::SchemaItemConst::ConstType>(IntToEnum<VFrame30::SchemaItemConst::ConstType>);
 
@@ -108,4 +111,4 @@ namespace VFrame30
 
 		return true;
 	}
-}
+} // namespace VFrame30
