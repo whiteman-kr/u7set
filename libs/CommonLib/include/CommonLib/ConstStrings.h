@@ -650,6 +650,9 @@ namespace File
 	inline static const QString VDU_APP_SIGNALS_BIN = "VduAppSignals.bin";
 	inline static const QString VDU_APP_SIGNALS_TXT = "VduAppSignals.txt";
 
+	inline static const QString VDU_GLOBAL_SCRIPT_LUA = "GlobalScript.lua";
+	inline static const QString VDU_GLOBAL_SCRIPT_LBC = "GlobalScript.lbc"; // Lua Byte Code
+
 	inline static const QString SUBSYSTEM_DESC_JSON = "Description.json";
 
 	// Moved from DbStruct

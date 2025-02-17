@@ -4,7 +4,7 @@ namespace Builder
 {
 	// Unicode Subsets, see https://www.unicode.org/charts/nameslist
 	//
-	static std::map<QString, std::pair<char16_t, char16_t>> AllUnicodeSubsets = {
+	inline const std::map<QString, std::pair<char16_t, char16_t>> AllUnicodeSubsets = {
 		{"BasicLatin", {0x0000, 0x007F}},
 		{"Latin1Supplement", {0x0080, 0x00FF}},
 		{"LatinExtendedA", {0x0100, 0x017F}},

@@ -121,6 +121,7 @@ namespace Builder
 
 	private:
 		bool buildFSCConfiguration();
+		bool createVDUConfigurationIDs();
 		bool createJumpersConfigurationReport();
 		bool createSubsystemsReport();
 
@@ -142,7 +143,9 @@ namespace Builder
 	private:
 		BuildResultWriter* m_buildResultWriter = nullptr;
 
+
 		BuildWorkerThread* m_buildWorkerThread = nullptr;
+		Context* m_context = nullptr;
 		DbController* m_db = nullptr;
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
 		std::vector<Hardware::DeviceModule*> m_fscModules;

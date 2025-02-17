@@ -1543,6 +1543,16 @@ namespace Builder
 
 	bool BuildWorkerThread::taskGenerationVduConfiguration()
 	{
+		bool result = true;
+
+		for(const auto& [h, mlc] : m_context->m_moduleLogicCompilers)
+		{
+			TEST_PTR_CONTINUE(mlc);
+			result &= mlc->writeVduAppSignalsInfoFile();
+		}
+
+		RETURN_IF_FALSE(result);
+
 		return VduConfigFileWriter::generate(*m_context);
 	}
 

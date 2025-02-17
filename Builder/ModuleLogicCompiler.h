@@ -17,6 +17,7 @@
 #include "SignalSet.h"
 #include "CodeChecker.h"
 #include "CodeOptimization.h"
+#include "./Vdu/VduAppSignalsInfoGenerator.h"
 
 class LmDescription;
 
@@ -254,6 +255,9 @@ namespace Builder
 		std::tuple<bool, bool, double> getUalAfbParamValue(const QString& itemLabel, const QString& paramName);
 
 		bool getDeviceAppSignal(const AppSignal& ioSignal, Hardware::DeviceAppSignal** deviceAppSignal) const;
+
+		bool prepareVduStructures();
+		bool writeVduAppSignalsInfoFile();
 
 	private:
 		bool getLmAssociatedOptoPortsAreas(std::vector<CodeChecker::MemArea>* optoAreas, bool rx) const;
@@ -510,7 +514,6 @@ namespace Builder
 		//
 		bool initComparatorSignals();
 		bool finalizeOptoConnectionsProcessing();
-		bool writeVduConnectionsInfoFile();
 		bool setOptoUalSignalsAddresses();
 
 		bool generateIdrPhaseCode();
@@ -965,6 +968,8 @@ namespace Builder
 		AppLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
 		mutable IssueLogger* m_log = nullptr;
+
+		VduAppSignalsInfoGenerator m_vduAppSignalsGenerator;
 
 		const Hardware::DeviceChassis* m_chassis = nullptr;
 

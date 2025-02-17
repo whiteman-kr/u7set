@@ -42,6 +42,8 @@ qt_add_library(${TARGET} STATIC
 	./Vdu/VduFontGenerator.h
 	./Vdu/VduFontProvider.cpp
 	./Vdu/VduFontProvider.h
+	./Vdu/VduLuaScript.cpp
+	./Vdu/VduLuaScript.h
 	./Vdu/VduSchemaFile.h
 	./Vdu/VduSchemaGenerator.cpp
 	./Vdu/VduSchemaGenerator.h
