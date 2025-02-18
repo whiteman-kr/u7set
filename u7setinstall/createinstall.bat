@@ -1,6 +1,8 @@
 set RPCT_VERSION="%U7SET_FULL_VERSION%"
 echo Software Version is %RPCT_VERSION%
 
+del ..\bin\u7setinstall*.*
+
 powershell -Command "(gc config\config.in) -replace '<Version>1.0.0</Version>', '<Version>%RPCT_VERSION%</Version>' | Out-File -encoding ASCII config\config.xml"
 
 echo --------------- Creating data folders ------------------
