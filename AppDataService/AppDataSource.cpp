@@ -255,31 +255,25 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	const Rup::Header& header = readBuffer.frame0Header();
 
+	qint64 headerNumerator = header.numerator;
+
 	// packet Numerator checking
 
-	bool sequentialNumerator = false;
 	qint64 dN = 0;
 
 	if (m_rupFrameNumerator != -1)
 	{
-		dN = static_cast<qint64>(header.numerator) - m_rupFrameNumerator;
-
-		sequentialNumerator = (dN == 1) || (dN == -65535);
-
-		if (sequentialNumerator == false)
+		if (headerNumerator < m_rupFrameNumerator)
 		{
-			if (dN > 0)
-			{
-				m_lostPacketCount += dN - 1;
-			}
-			else
-			{
-				m_lostPacketCount += 0xFFFF - m_rupFrameNumerator + header.numerator - 1;
-			}
+			headerNumerator += 65536;
 		}
+
+		dN = headerNumerator - m_rupFrameNumerator;
+
+		m_lostPacketCount += dN - 1;
 	}
 
-	m_rupFrameNumerator = header.numerator;
+	m_rupFrameNumerator = headerNumerator;
 
 	// packet SystemTime checking
 
@@ -296,26 +290,44 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	{
 		dT = std::abs(m_frame0ServerTime - m_lastPacketServerTime);
 
-		if (dT == 0)
+		if (dN <= 3)
 		{
-			m_lastPacketServerTime++;
-			m_correctionsCount++;
-		}
-		else
-		{
-			static const qint64 MIN_DIF = static_cast<qint64>(m_workcycle_ms * 1.5);
-			static const qint64 MAX_DIF = m_workcycle_ms * 50;
-
-			if (dT > MIN_DIF && dT < MAX_DIF && sequentialNumerator == true && m_correctionsCount < 50)
+			if (dT < dN * m_workcycle_ms - 2)
 			{
-				m_lastPacketServerTime += m_workcycle_ms;
-				m_correctionsCount++;
+				if (m_correctionsCount < 10)
+				{
+					m_lastPacketServerTime += dN * m_workcycle_ms;
+					m_correctionsCount += dN;
+				}
+				else
+				{
+					m_lastPacketServerTime = m_frame0ServerTime;
+					m_correctionsCount = 0;
+				}
 			}
 			else
 			{
-				m_lastPacketServerTime = m_frame0ServerTime;
-				m_correctionsCount = 0;
+				static const qint64 MIN_DIF = static_cast<qint64>(m_workcycle_ms * 1.5);
+				static const qint64 MAX_DIF = m_workcycle_ms * 75;
+
+				if (dT > MIN_DIF &&
+					dT < MAX_DIF &&
+					m_correctionsCount < 75)
+				{
+					m_lastPacketServerTime += dN * m_workcycle_ms;
+					m_correctionsCount += dN;
+				}
+				else
+				{
+					m_lastPacketServerTime = m_frame0ServerTime;
+					m_correctionsCount = 0;
+				}
 			}
+		}
+		else
+		{
+			m_lastPacketServerTime = m_frame0ServerTime;
+			m_correctionsCount = 0;
 		}
 	}
 
