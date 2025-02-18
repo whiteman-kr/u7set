@@ -22,6 +22,7 @@ md packages\u7set.mats.monitor.docs\data\docs
 md packages\u7set.mats.tuningclient\data
 md packages\u7set.mats.tuningclient.docs\data\docs
 md packages\u7set.tools.metrology\data
+md packages\u7set.tools.metrology.docs\data\docs
 md packages\u7set.tools.mconf\data
 md packages\u7set.tools.testsuite\data
 md packages\u7set.tools.simulator\data
@@ -48,10 +49,9 @@ xcopy ..\bin\release\scripthelp packages\u7set.develop.rpct\data\scripthelp /sy
 xcopy ..\bin\release\scripting packages\u7set.develop.rpct\data\scripting /sy
 
 copy ..\bin\release\docs\D11.5_AFBL_RM.pdf packages\u7set.develop.rpct.docs\data\docs
-copy ..\bin\release\docs\D11.6_RPCT-UM.pdf packages\u7set.develop.rpct.docs\data\docs
+copy "..\bin\release\docs\D11.6_FSC_ RPCT_User_Manual.pdf" packages\u7set.develop.rpct.docs\data\docs
 copy "..\bin\release\docs\Appendixes\D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf" packages\u7set.develop.rpct.docs\data\docs\Appendixes
 copy "..\bin\release\docs\Appendixes\D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf" packages\u7set.develop.rpct.docs\data\docs\Appendixes
-copy "..\bin\release\docs\Appendixes\D11.6 RPCT User Manual Appendix C JavaScript Manual.pdf" packages\u7set.develop.rpct.docs\data\docs\Appendixes
 copy "..\bin\release\docs\Installing and configuring RPCT.pdf" packages\u7set.develop.rpct.docs\data\docs
 copy "..\bin\release\docs\RPCT Quick Start Guide.pdf" packages\u7set.develop.rpct.docs\data\docs
 copy ..\bin\release\CfgSrv.exe packages\u7set.mats.cfgsrv\data
@@ -62,7 +62,7 @@ copy ..\bin\release\GatewaySrv.exe packages\u7set.mats.gatewaysrv\data
 copy ..\bin\release\scm.exe packages\u7set.mats.scm\data
 copy ..\bin\release\Monitor.exe packages\u7set.mats.monitor\data
 xcopy ..\bin\release\Monitor*.qm packages\u7set.mats.monitor\data /sy
-copy ..\bin\release\docs\D11.8_FSC_MATS_User_Manual.pdf packages\u7set.mats.monitor.docs\data\docs
+copy ..\bin\release\docs\D11.8_RPCT_MATS_User_Manual.pdf packages\u7set.mats.monitor.docs\data\docs
 copy ..\bin\release\TuningClient.exe packages\u7set.mats.tuningclient\data
 xcopy ..\bin\release\TuningClient*.qm packages\u7set.mats.tuningclient\data /sy
 copy ..\bin\release\docs\D11.9_FSC_Tuning_User_Manual.pdf packages\u7set.mats.tuningclient.docs\data\docs
@@ -70,6 +70,7 @@ copy ..\bin\release\docs\D11.9_FSC_Tuning_User_Manual.pdf packages\u7set.mats.tu
 copy ..\bin\release\Simulator.exe packages\u7set.tools.simulator\data
 copy ..\bin\release\SimulatorConsole.exe packages\u7set.tools.simulator\data
 copy ..\bin\release\Metrology.exe packages\u7set.tools.metrology\data
+copy ..\bin\release\docs\Metrology_User_Manual.pdf packages\u7set.tools.metrology.docs\data\docs
 copy ..\bin\release\mconf.exe packages\u7set.tools.mconf\data
 copy ..\bin\release\TestSuite.exe packages\u7set.tools.testsuite\data
 copy ..\bin\release\TestSuiteConsole.exe packages\u7set.tools.testsuite\data
