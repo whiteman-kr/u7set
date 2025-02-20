@@ -120,7 +120,6 @@ protected:
 	E::LanControllerType m_sourceType = E::LanControllerType::Unknown;
 	quint32 m_expectedDataUID = 0;
 	int m_acquiredSignalsCount = 0;
-	int m_workcycle_ms = 0;
 
 	// static information
 	//

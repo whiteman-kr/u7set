@@ -65,10 +65,6 @@ private:
 	std::condition_variable* m_statesProcessingRequiredCondition = nullptr;
 	std::queue<AppDataSource*>* m_statesProcessingRequired = nullptr;
 
-	//
-
-	qint64 m_workcycle_ms = 0;
-
 	// states of source aquired signals, excluding software calculated signals
 	//
 	std::vector<DynamicAppSignalState*> m_signalStates;

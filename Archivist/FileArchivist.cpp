@@ -445,7 +445,7 @@ void FileArchivist::checkThreadProc()
 					{
 						if (prevPlantTime >= afr->state.plantTime)
 						{
-							errs << QString("Non-monotonic PlantTime %1 (previous %2) at %3").
+							errs << QString("Non-monotonic PlantTime  %1 (previous %2) at %3").
 									arg(afr->state.plantTime).arg(prevPlantTime).arg(offset);
 						}
 
@@ -455,11 +455,11 @@ void FileArchivist::checkThreadProc()
 									arg(afr->state.systemTime).arg(prevSystemTime).arg(offset);
 						}
 
-						if (prevLocalTime >= afr->state.localTime)
+/*						if (prevLocalTime >= afr->state.localTime)
 						{
-							errs << QString("Non-monotonic LocalTime %1 (previous %2) at %3").
+							errs << QString("Non-monotonic LocalTime  %1 (previous %2) at %3").
 									arg(afr->state.localTime).arg(prevLocalTime).arg(offset);
-						}
+						}*/
 					}
 
 					prevPlantTime = afr->state.plantTime;

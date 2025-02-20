@@ -137,6 +137,7 @@ namespace OnlineLib
 		LanControllersInfo m_lanControllersInfo;	// array of LanControllerInfo!
 
 		int m_moduleWorkcycle_mcs = 0;				// module workcycle in MICROseconds
+		int m_workcycle_ms = 0;
 
 		QString m_profile;
 		int m_acquiredSignalsCount = 0;
@@ -203,6 +204,8 @@ namespace OnlineLib
 		//
 		bool parseNextBuffer(const QThread* thread);
 		virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread);
+
+		void timeCorrection(const ParsingBuffer& readBuffer);
 
 		void checkPlantTime(const Rup::TimeStamp& plantTimeStamp);
 
@@ -296,7 +299,6 @@ namespace OnlineLib
 		qint64 m_firstPacketServerTime = 0;
 		qint64 m_lastPacketServerTime = 0;
 		qint32 m_correctionsCount = 0;
-		qint64 m_frame0ServerTime = 0;
 
 		//
 

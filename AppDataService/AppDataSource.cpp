@@ -22,8 +22,6 @@ AppDataSource::AppDataSource(const OnlineLib::DataSource& dataSource) :
 	initParsingBuffers(appDataFramesQuantity());
 
 	m_acquiredSignalsCount = static_cast<int>(m_appSignals.size());
-
-	m_workcycle_ms = moduleWorkcycle_ms();
 }
 
 // Contructor for object NOT really used for packet receiving.
@@ -253,83 +251,9 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	m_receivedPacketCount++;
 
-	const Rup::Header& header = readBuffer.frame0Header();
-
-	qint64 headerNumerator = header.numerator;
-
-	// packet Numerator checking
-
-	qint64 dN = 0;
-
-	if (m_rupFrameNumerator != -1)
-	{
-		if (headerNumerator < m_rupFrameNumerator)
-		{
-			headerNumerator += 65536;
-		}
-
-		dN = headerNumerator - m_rupFrameNumerator;
-
-		m_lostPacketCount += dN - 1;
-	}
-
-	m_rupFrameNumerator = headerNumerator;
-
-	// packet SystemTime checking
-
-	qint64 dT = 0;
-
-	m_frame0ServerTime = readBuffer.frame0ServerTime;
-
-	if (m_lastPacketServerTime == 0)
-	{
-		m_lastPacketServerTime = m_frame0ServerTime;
-		m_correctionsCount = 0;
-	}
-	else
-	{
-		dT = std::abs(m_frame0ServerTime - m_lastPacketServerTime);
-
-		if (dN <= 3)
-		{
-			if (dT < dN * m_workcycle_ms - 2)
-			{
-				if (m_correctionsCount < 10)
-				{
-					m_lastPacketServerTime += dN * m_workcycle_ms;
-					m_correctionsCount += dN;
-				}
-				else
-				{
-					m_lastPacketServerTime = m_frame0ServerTime;
-					m_correctionsCount = 0;
-				}
-			}
-			else
-			{
-				static const qint64 MIN_DIF = static_cast<qint64>(m_workcycle_ms * 1.5);
-				static const qint64 MAX_DIF = m_workcycle_ms * 75;
-
-				if (dT > MIN_DIF &&
-					dT < MAX_DIF &&
-					m_correctionsCount < 75)
-				{
-					m_lastPacketServerTime += dN * m_workcycle_ms;
-					m_correctionsCount += dN;
-				}
-				else
-				{
-					m_lastPacketServerTime = m_frame0ServerTime;
-					m_correctionsCount = 0;
-				}
-			}
-		}
-		else
-		{
-			m_lastPacketServerTime = m_frame0ServerTime;
-			m_correctionsCount = 0;
-		}
-	}
+	// sets m_lastPacketServerTime with corrections
+	//
+	timeCorrection(readBuffer);
 
 	if (m_firstPacketServerTime == 0)
 	{
@@ -339,6 +263,8 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	//
 
 	QDateTime plantTime;
+
+	const Rup::Header& header = readBuffer.frame0Header();
 
 	const Rup::TimeStamp& timeStamp = header.timeStamp;
 
