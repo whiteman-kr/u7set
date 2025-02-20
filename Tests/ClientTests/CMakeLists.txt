@@ -60,4 +60,6 @@ target_precompile_headers(${TARGET} PRIVATE
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest_main GTest::gmock)
 target_link_libraries(${TARGET} PRIVATE ClientLib SimulatorLib)
 
+add_test(NAME ${TARGET} COMMAND ClientTests "--gtest_filter=-AdsConnectionTests.*:ConfigControllerTests.*:AdsSourceStateConnectionTests.*:TuningConnectionTests.*:RtDataProviderTests.*:TuningUserManagerTests.loginTests:TuningUserManagerTests.checkPasswordsTest")
+
 add_code_coverage_options(${TARGET} CODE_COVERAGE)
