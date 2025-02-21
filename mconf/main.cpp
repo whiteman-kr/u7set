@@ -3,6 +3,7 @@
 
 #include <CommonLib/ConstStrings.h>
 #include <LicenseLib/AppLicenser.h>
+#include <UiLib/OverrideWindows11Style.h>
 
 #include <google/protobuf/stubs/common.h>
 
@@ -13,6 +14,10 @@ Q_DECLARE_METATYPE(std::vector<quint8>)
 int main(int argc, char* argv[])
 {
 	QApplication a(argc, argv);
+
+	// Override Windows11 style, the current implementation does not look well.
+	//
+	UiLib::OverrideWindows11Style(a, argc, argv);
 
 	QCoreApplication::setOrganizationName(Manufacturer::RADIY);
 	QCoreApplication::setOrganizationDomain(Manufacturer::SITE);
@@ -29,7 +34,7 @@ int main(int argc, char* argv[])
 	{
 		return EXIT_FAILURE;
 	}
-	
+
 	qRegisterMetaType<std::vector<quint8>>();
 
 	ModuleConfigurator w;

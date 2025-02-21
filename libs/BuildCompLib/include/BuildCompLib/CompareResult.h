@@ -18,8 +18,8 @@ namespace BuildCompLib
 		QString userNameRight;
 
 		bool buildNumber = true;
-		int buildNumberLeft;
-		int buildNumberRight;
+		int buildNumberLeft = -1;
+		int buildNumberRight = -1;
 
 		struct Subsystem
 		{
@@ -31,8 +31,8 @@ namespace BuildCompLib
 			};
 
 			QString subsystemId;
-			SideResult left;
-			SideResult right;
+			SideResult left = Modified;
+			SideResult right = Modified;
 
 			QStringList leftModules;  // Modules on the left side for this subsystem
 			QStringList rightModules; // Modules on the right side for this subsystem
