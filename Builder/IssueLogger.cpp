@@ -1829,6 +1829,29 @@ namespace Builder
 						arg(appSignalID, optoPort1ID, optoPort2ID, vduID));
 	}
 
+	/// IssueCode: CFG3055
+	///
+	/// IssueType: Error
+	///
+	/// Title: AppSignal %1 (inOutType %2) linked to not compatible DeviceSignal %3 (signalFunction %4)
+	///
+	/// Parameters:
+	///			%1 AppSignalID
+	///         %2 AppSignal InOutType
+	///         %3 Device signal EquipmentID
+	///         %4 Device signal function
+	///
+	/// Description:
+	///			Check types of AppSignal and Device signal
+	///
+	void IssueLogger::errCFG3055(QString appSignalID, E::SignalInOutType inOutType, QString devSignalID, E::SignalFunction devSignalFunction)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3055,
+				  tr("AppSignal %1 (inOutType %2) linked to not compatible DeviceSignal %3 (signalFunction %4).").
+						arg(appSignalID, E::valueToString(inOutType), devSignalID, E::valueToString(devSignalFunction)));
+	}
+
 	/// IssueCode: CFG3060
 	///
 	/// IssueType: Error
