@@ -99,6 +99,7 @@ print("\n")
 # set environement variables
 
 os.environ["RPCT_VERSION"] = version
+os.environ["U7SET_FULL_VERSION"] = version
 os.environ["CI_PIPELINE_ID"] = ppid
 os.environ["CI_RELEASE_TYPE"] = releaseType
 os.environ["CI_COMMIT_REF_SLUG"] = branch

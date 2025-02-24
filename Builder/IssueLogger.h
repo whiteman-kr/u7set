@@ -199,6 +199,8 @@ namespace Builder
 		void errCFG3053(QString lmID, QString diagDataServiceID);				// Several ethernet adapters of LM %1 are connected to DiagDataService %2.
 		void errCFG3054(QString appSignalID, QString optoPort1ID, QString optoPort2ID, QString vduID);		// App signal %1 received simultaneously via %2 and %3 opto ports of VDU %4
 
+		void errCFG3055(QString appSignalID, E::SignalInOutType inOutType, QString devSignalID, E::SignalFunction signalFunction);	// AppSignal %1 (inOutType %2) linked to not compatible DeviceSignal %3 (signalFunction %4)
+
 		void errCFG3060(QString subSysID, int value, int max, int min);	// Subsystem %1 key has wrong value (%2), valid range is %3..%4.
 
 		void errCFG3100(QString equipmentId, int devicePresetVersion, QString presetName, int presetVersion);	// Device %1 has preset version mismatch (%1.PresetVersion = %2, %3.PresetVersion = %4). For updating presets select 'Update from Preset' in Equipment Editor.

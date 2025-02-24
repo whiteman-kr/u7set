@@ -32,3 +32,5 @@ endif()
 
 target_link_libraries(${TARGET} PRIVATE Threads::Threads GTest::gtest_main GTest::gmock)
 target_link_libraries(${TARGET} PRIVATE AdsBridge)
+
+add_test(NAME ${TARGET} COMMAND ${TARGET})

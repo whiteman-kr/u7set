@@ -1130,16 +1130,66 @@ namespace Builder
 
 					// signal is associated with current LM
 
-					if (deviceAppSignal->isInputSignal() ||
-						deviceAppSignal->isOutputSignal() ||
-						deviceAppSignal->isValiditySignal())
+					// check App and Device signals compatibility
+					//
+					bool continu_e = false;
+
+					switch(deviceAppSignal->function())
 					{
-						isIoSignal = true;
+					case E::SignalFunction::Input:
+					case E::SignalFunction::Validity:
+						if (sg->inOutType() != E::SignalInOutType::Input)
+						{
+							result = false;
+							continu_e = true;
+						}
+						else
+						{
+							isIoSignal = true;
+						}
+						break;
+
+					case E::SignalFunction::Output:
+						if (sg->inOutType() != E::SignalInOutType::Output)
+						{
+							result = false;
+							continu_e = true;
+						}
+						else
+						{
+							isIoSignal = true;
+						}
+						break;
+
+					case E::SignalFunction::SoftwareCalculated:
+						if (sg->inOutType() != E::SignalInOutType::SoftwareCalculated)
+						{
+							result = false;
+							continu_e = true;
+						}
+						else
+						{
+							if (sg->swCalcFunction() != E::SoftwareCalcFunction::None)
+							{
+								m_swCalcSignals.emplace_back(sg);
+							}
+						}
+						break;
+
+					case E::SignalFunction::Diagnostics:
+					default:
+						Q_ASSERT(false);
+						result = false;
+						continu_e = true;
 					}
 
-					if (sg->swCalcFunction() != E::SoftwareCalcFunction::None)
+					if (continu_e == true)
 					{
-						m_swCalcSignals.emplace_back(sg);
+						// AppSignal %1 (inOutType %2) linked to not compatible DeviceSignal %3 (signalFunction %4)
+						//
+						m_log->errCFG3055(sg->appSignalID(), sg->inOutType(),
+										  deviceAppSignal->equipmentIdTemplate(), deviceAppSignal->function());
+						continue;
 					}
 				}
 
