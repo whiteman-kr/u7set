@@ -58,24 +58,19 @@ namespace UiLib
 		label->setWordWrap(true);
 		vl->addWidget(label);
 
-		QString licenseInfo = tr("License organization: %1").arg(organization);
-		licenseInfo += tr("<br>Issued for: %1").arg(person);
-		licenseInfo += tr("<br>License end date: %1").arg(licenseEndDate.toString("dd.MM.yyyy"));
-		licenseInfo += tr("<br>LicenseID: %1").arg(licenseId.toString());
+		if (workplaceId.isEmpty() == false)
+		{
+			QString licenseInfo = tr("License organization: %1").arg(organization);
+			licenseInfo += tr("<br>Issued for: %1").arg(person);
+			licenseInfo += tr("<br>License end date: %1").arg(licenseEndDate.toString("dd.MM.yyyy"));
+			licenseInfo += tr("<br>LicenseID: %1").arg(licenseId.toString());
 
-		auto labelLicenseInfo = new QLabel(&aboutDialog);
-		labelLicenseInfo->setText(licenseInfo);
-		labelLicenseInfo->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
-		labelLicenseInfo->setWordWrap(true);
-		vl->addWidget(labelLicenseInfo);
-
-		vl->addWidget(new QLabel{"WorkplaceID: "});
-
-		auto labelWorkplaceId = new QTextEdit(&aboutDialog);
-		labelWorkplaceId->setText(workplaceId);
-		labelWorkplaceId->setReadOnly(true);
-		labelWorkplaceId->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContentsOnFirstShow);
-		vl->addWidget(labelWorkplaceId);
+			auto labelLicenseInfo = new QLabel(&aboutDialog);
+			labelLicenseInfo->setText(licenseInfo);
+			labelLicenseInfo->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
+			labelLicenseInfo->setWordWrap(true);
+			vl->addWidget(labelLicenseInfo);
+		}
 
 		auto copyCommitSHA1Button = new QPushButton(tr("Copy commit SHA1"));
 		connect(copyCommitSHA1Button,
@@ -85,18 +80,35 @@ namespace UiLib
 					qApp->clipboard()->setText(U7SET_COMMIT_HASH);
 				});
 
-		auto copyWorkplaceIdButton = new QPushButton(tr("Copy WorkplaceID"));
-		connect(copyWorkplaceIdButton,
-				&QPushButton::clicked,
-				[&workplaceId](bool)
-				{
-					qApp->clipboard()->setText(workplaceId);
-				});
+		QPushButton* copyWorkplaceIdButton = nullptr;
+
+		if (workplaceId.isEmpty() == false)
+		{
+			vl->addWidget(new QLabel{"WorkplaceID: "});
+
+			auto labelWorkplaceId = new QTextEdit(&aboutDialog);
+			labelWorkplaceId->setText(workplaceId);
+			labelWorkplaceId->setReadOnly(true);
+			labelWorkplaceId->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContentsOnFirstShow);
+			vl->addWidget(labelWorkplaceId);
+
+			copyWorkplaceIdButton = new QPushButton(tr("Copy WorkplaceID"));
+			connect(copyWorkplaceIdButton,
+					&QPushButton::clicked,
+					[&workplaceId](bool)
+					{
+						qApp->clipboard()->setText(workplaceId);
+					});
+		}
 
 		auto buttonBox = new QDialogButtonBox(Qt::Horizontal);
 		buttonBox->addButton(QDialogButtonBox::Ok);
 		buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
-		buttonBox->addButton(copyWorkplaceIdButton, QDialogButtonBox::ActionRole);
+
+		if (copyWorkplaceIdButton != nullptr)
+		{
+			buttonBox->addButton(copyWorkplaceIdButton, QDialogButtonBox::ActionRole);
+		}
 
 		auto mainLayout = new QVBoxLayout;
 		mainLayout->addLayout(hl);

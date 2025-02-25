@@ -14,7 +14,12 @@ qt_standard_project_setup()
 
 set(TARGET scm)
 
+set (SCM_RESOURCES
+	../Etc/Logo/RadiyLogo.qrc
+)
+
 add_executable(${TARGET} WIN32
+	${SCM_RESOURCES}
 	AppDataServiceWidget.cpp
 	AppDataServiceWidget.h
 	AppDataSourceWidget.cpp
@@ -127,7 +132,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Network Qt6::Qml Qt6::Xml Qt6::Widgets)
-target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib ServiceLib OnlineLib ClientLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib ServiceLib OnlineLib ClientLib UiLib)
 
 # Link Visaul Leak Detector
 #
