@@ -1,16 +1,8 @@
-#include "MainWindow.h"
-#include <QApplication>
-#include <QSystemSemaphore>
-#include <QSharedMemory>
-#include <QMessageBox>
 #include <QTranslator>
-#include <QSettings>
-#include <google/protobuf/stubs/common.h>
 
-#include "../OnlineLib/SocketIO.h"
-#include "../OnlineLib/Tcp.h"
-#include <CommonLib/ConstStrings.h>
+#include "MainWindow.h"
 #include "version.h"
+#include "../UtilsLib/WUtils.h"
 
 // Visual Leak Detector
 //

@@ -110,6 +110,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QThread>
 	<QTimer>
 	<QToolBar>
+	<QTranslator>
 	<QtGlobal>
 	<QtNetwork/QHostAddress>
 	<QUdpSocket>
@@ -119,6 +120,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
+	<CommonLib/ConstStrings.h>
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
 

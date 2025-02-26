@@ -1,22 +1,12 @@
-#include "MainWindow.h"
-#include <QTableWidget>
-#include <QHBoxLayout>
-#include <QMenu>
-#include <QDir>
-#include <QSettings>
-#include <QTranslator>
-#include <QMessageBox>
-#include <QPushButton>
 #include <QMenuBar>
-#include <QToolBar>
 #include <QActionGroup>
-#include <QApplication>
-#include "ScanOptionsWidget.h"
-#include "ServiceTableModel.h"
-#include "../OnlineLib/UdpSocket.h"
-#include <functional>
-#include <QHeaderView>
+#include <QDir>
+#include <QTranslator>
 #include <UiLib/DialogAbout.h>
+
+#include "MainWindow.h"
+#include "ScanOptionsWidget.h"
+#include "../OnlineLib/UdpSocket.h"
 
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
@@ -30,7 +20,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	setCentralWidget(m_serviceTable);
 
 	m_serviceTable->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_serviceTable->fontMetrics().height() * 1.4 * 4));
-	m_serviceTable->horizontalHeader()->setDefaultSectionSize(250);
+	m_serviceTable->horizontalHeader()->setDefaultSectionSize(270);
 
 	m_serviceTable->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 

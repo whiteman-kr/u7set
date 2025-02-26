@@ -226,9 +226,12 @@ void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 
 void ConfigurationServiceWidget::dropTcpConnection()
 {
-	m_tcpClientThread->quitAndWait();
-	delete m_tcpClientThread;
-	m_tcpClientThread = nullptr;
+	if (m_tcpClientThread != nullptr)
+	{
+		m_tcpClientThread->quitAndWait();
+		delete m_tcpClientThread;
+		m_tcpClientThread = nullptr;
+	}
 
 	m_tcpClientSocket = nullptr;
 }

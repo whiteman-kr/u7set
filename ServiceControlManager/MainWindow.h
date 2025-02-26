@@ -1,12 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
-#include <QSystemTrayIcon>
-
-#include "../OnlineLib/Tcp.h"
-
-class ServiceTableModel;
-class QTableView;
+#include "ServiceTableModel.h"
 
 class MainWindow : public QMainWindow
 {
@@ -34,4 +29,3 @@ public slots:
     void removeHost();
 	void aboutScm();
 };
-
