@@ -1,14 +1,10 @@
 #pragma once
 
 #include <QMainWindow>
+
 #include "../OnlineLib/UdpSocket.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "ServiceTableModel.h"
-
-class QAction;
-class QLabel;
-class QTableView;
-class QStandardItemModel;
 
 class BaseServiceStateWidget : public QMainWindow
 {
@@ -55,10 +51,9 @@ protected:
 	UdpSocketThread* m_socketThread = nullptr;
 
 	quint32 m_udpIp = 0;
-	int m_udpPort = -1;
+	quint16 m_udpPort = -1;
 
 	ServiceData m_service;
-
 	SoftwareInfo m_softwareInfo;
 
 private:

@@ -88,6 +88,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QHeaderView>
 	<QHostAddress>
 	<QHBoxLayout>
+	<QMainWindow>
 	<QMap>
 	<QMessageBox>
 	<QMetaClassInfo>

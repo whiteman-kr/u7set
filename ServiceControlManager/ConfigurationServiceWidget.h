@@ -1,12 +1,10 @@
-#ifndef CONFIGURATIONSERVICEWIDGET_H
-#define CONFIGURATIONSERVICEWIDGET_H
+#pragma once
 
 class QStandardItemModel;
 class TcpConfigServiceClient;
 
 #include "../OnlineLib/Tcp.h"
 #include "BaseServiceStateWidget.h"
-
 
 class ConfigurationServiceWidget : public BaseServiceStateWidget
 {
@@ -35,5 +33,3 @@ private:
 	TcpConfigServiceClient* m_tcpClientSocket = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
 };
-
-#endif // CONFIGURATIONSERVICEWIDGET_H

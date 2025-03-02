@@ -19,6 +19,7 @@ BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
 	m_service.information.set_servicestate(TO_INT(ServiceState::Undefined));
 
 	QToolBar* toolBar = addToolBar("Service actions");
+
 	m_startServiceButton = toolBar->addAction("Start", this, SLOT(startService()));
 	m_stopServiceButton = toolBar->addAction("Stop", this, SLOT(stopService()));
 	m_restartServiceButton = toolBar->addAction("Restart", this, SLOT(restartService()));
