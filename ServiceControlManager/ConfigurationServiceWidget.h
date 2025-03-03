@@ -10,7 +10,10 @@ class ConfigurationServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
 public:
-	ConfigurationServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent = 0);
+	ConfigurationServiceWidget(	const SoftwareInfo& softwareInfo,
+								const ServiceData& service,
+								quint32 udpIp, quint16 udpPort,
+								QWidget *parent = 0);
 	~ConfigurationServiceWidget();
 
 public slots:

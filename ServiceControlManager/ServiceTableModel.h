@@ -15,7 +15,7 @@ struct ServiceData
 
 	quint16 port = 0;
 
-	Network::ServiceInfo information;
+	Network::ServiceInfo protoServiceInfo;
 
 	std::vector<HostAddressPort> clientRequestIPs;
 
@@ -29,11 +29,13 @@ struct ServiceData
 
 	ServiceData();
 
-	ServiceState serviceState() const;
+	E::ServiceState serviceState() const;
 
-	bool parseServiceInfo();
+	bool parseProtoServiceInfo();
 	void fillClientRequestIPs(const std::vector<RqCtrlSettings>& rcSettings);
 };
+
+E::ServiceState serviceState(const Network::ServiceInfo& protoServiceInfo);
 
 struct Host
 {
@@ -75,7 +77,7 @@ private:
 	void finishtUdpSocketThread();
 	void restartUdpSocketThread();
 
-	void setServiceState(quint32 ip, quint16 port, ServiceState state);
+	void setServiceState(quint32 ip, quint16 port, E::ServiceState state);
 	void getServiceState(quint32 ip, quint16 port, int& hostIndex, int& serviceIndex);
 
 	int hostsCount() const;

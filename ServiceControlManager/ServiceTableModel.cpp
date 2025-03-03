@@ -13,19 +13,20 @@
 
 ServiceData::ServiceData()
 {
-	information.mutable_softwareinfo()->set_softwaretype(E::SoftwareType::BaseService);
-	information.set_servicestate(TO_INT(ServiceState::Undefined));
+	protoServiceInfo.mutable_softwareinfo()->set_softwaretype(E::SoftwareType::BaseService);
+	protoServiceInfo.set_servicestate(TO_INT(E::ServiceState::Undefined));
 }
 
-ServiceState ServiceData::serviceState() const
+E::ServiceState ServiceData::serviceState() const
 {
-	return static_cast<ServiceState>(information.servicestate());
+	return static_cast<E::ServiceState>(protoServiceInfo.servicestate());
 }
 
-bool ServiceData::parseServiceInfo()
+bool ServiceData::parseProtoServiceInfo()
 {
-	sessionParams.loadFrom(information.sessionparams());
-	QString settingsXml = QString::fromStdString(information.settingsxml());
+	sessionParams.loadFrom(protoServiceInfo.sessionparams());
+
+	QString settingsXml = QString::fromStdString(protoServiceInfo.settingsxml());
 
 	if (settings == nullptr)
 	{
@@ -118,6 +119,11 @@ void ServiceData::fillClientRequestIPs(const std::vector<RqCtrlSettings>& rcSett
 	}
 }
 
+E::ServiceState serviceState(const Network::ServiceInfo& protoServiceInfo)
+{
+	return static_cast<E::ServiceState>(protoServiceInfo.servicestate());
+}
+
 // --------------------------------------------------------------------------------------
 //
 //	Host struct implementation
@@ -141,7 +147,7 @@ Host::Host()
 		sd.serviceName = si.name;
 		sd.port = si.port;
 
-		sd.information.mutable_softwareinfo()->set_softwaretype(si.softwareType);
+		sd.protoServiceInfo.mutable_softwareinfo()->set_softwaretype(si.softwareType);
 	}
 }
 
@@ -232,9 +238,9 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 	int serviceIndex = index.column();
 
 	const ServiceData& sd = m_hosts[hostIndex].servicesData[serviceIndex];
-	const Network::ServiceInfo& si = sd.information;
+	const Network::ServiceInfo& si = sd.protoServiceInfo;
 
-	ServiceState serviceState = static_cast<ServiceState>(si.servicestate());
+	E::ServiceState srvState = serviceState(si);
 
 	switch(role)
 	{
@@ -242,8 +248,8 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 		{
 			QString str;
 
-			if (sd.serviceState() == ServiceState::Undefined ||
-				sd.serviceState() == ServiceState::Unavailable)
+			if (sd.serviceState() == E::ServiceState::Undefined ||
+				sd.serviceState() == E::ServiceState::Unavailable)
 			{
 				return QString("Not available");
 			}
@@ -253,29 +259,23 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 				   arg(si.softwareinfo().minorversion()).
 				   arg(si.softwareinfo().patchversion());
 
-			switch(serviceState)
+			switch(srvState)
 			{
-				case ServiceState::Work:
+			case E::ServiceState::Work:
 					str += tr("Running in ") + E::valueToString(sd.sessionParams.softwareRunMode) + " mode";
 					break;
 
-				case ServiceState::Stopped:
-					str += tr("Stopped");
+			case E::ServiceState::Stopped:
+			case E::ServiceState::Starts:
+			case E::ServiceState::Stops:
+					str += E::valueToString(srvState);
 					break;
 
-				case ServiceState::Starts:
-					str += tr("Starts");
-					break;
-
-				case ServiceState::Stops:
-					str += tr("Stops");
-					break;
-
-				case ServiceState::Unavailable:
-				case ServiceState::Undefined:
-				default:
-					Q_ASSERT(false);
-					str += tr("Unknown state");
+			case E::ServiceState::Unavailable:
+			case E::ServiceState::Undefined:
+			default:
+				Q_ASSERT(false);
+				str += tr("Unknown state");
 			}
 
 			str += QString("\n\nUptime %1").arg(formatUptime(si.uptime()));
@@ -285,15 +285,15 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::BackgroundRole:
-		switch(serviceState)
+		switch(srvState)
 		{
-		case ServiceState::Work:
+		case E::ServiceState::Work:
 			return QBrush((sd.sessionParams.softwareRunMode == E::SoftwareRunMode::Normal) ? QColor(0x7f,0xff,0x7f) : QColor(0xff,0xff,0x7f)) ;
-		case ServiceState::Starts:
-		case ServiceState::Stops:
-		case ServiceState::Stopped:
+		case E::ServiceState::Starts:
+		case E::ServiceState::Stops:
+		case E::ServiceState::Stopped:
 			return QBrush(QColor(0xff,0x7f,0x7f));
-		case ServiceState::Unavailable:
+		case E::ServiceState::Unavailable:
 		default:
 			return QBrush(Qt::lightGray);
 		}
@@ -400,8 +400,8 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 			hi.hostIP = sa.toIPv4Address();
 
 			ServiceData& sd = hi.servicesData[serviceIndex];
-			sd.information = newServiceInfo;
-			sd.parseServiceInfo();
+			sd.protoServiceInfo = newServiceInfo;
+			sd.parseProtoServiceInfo();
 
 			beginInsertRows(QModelIndex(), hostsCount(), hostsCount());
 
@@ -415,7 +415,7 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 		}
 
 		ServiceData& sd = m_hosts[hostIndex].servicesData[serviceIndex];
-		Network::ServiceInfo& info = sd.information;
+		Network::ServiceInfo& info = sd.protoServiceInfo;
 
 		if (info.servicestate() != newServiceInfo.servicestate())
 		{
@@ -427,7 +427,7 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 			info = newServiceInfo;
 		}
 
-		sd.parseServiceInfo();
+		sd.parseProtoServiceInfo();
 		QModelIndex changedIndex = index(hostIndex, serviceIndex);
 		emit dataChanged(changedIndex, changedIndex);
 	}
@@ -454,7 +454,7 @@ void ServiceTableModel::serviceNotAck()
 	{
 		if (m_hosts[i].hostIP == ip)
 		{
-			setServiceState(socket->serverAddress().toIPv4Address(), socket->port(), ServiceState::Unavailable);
+			setServiceState(socket->serverAddress().toIPv4Address(), socket->port(), E::ServiceState::Unavailable);
 			return;
 		}
 	}
@@ -522,7 +522,7 @@ void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, Network:
 	{
 		Host hi;
 		hi.hostIP = ip;
-		hi.servicesData[serviceIndex].information = sInfo;
+		hi.servicesData[serviceIndex].protoServiceInfo = sInfo;
 
 		beginInsertRows(QModelIndex(), hostsCount(), hostsCount());
 
@@ -534,7 +534,7 @@ void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, Network:
 	}
 	else
 	{
-		Network::ServiceInfo& info = m_hosts[hostIndex].servicesData[serviceIndex].information;
+		Network::ServiceInfo& info = m_hosts[hostIndex].servicesData[serviceIndex].protoServiceInfo;
 
 		if (info.servicestate() != sInfo.servicestate())
 		{
@@ -556,21 +556,20 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 
 	if (sd.statusWidget == nullptr)
 	{
-		E::SoftwareType serviceSoftwareType = static_cast<E::SoftwareType>(sd.information.softwareinfo().softwaretype());
-		quint16 udpPort = servicesInfo[index.column()].port;
+		E::SoftwareType serviceSoftwareType = static_cast<E::SoftwareType>(sd.protoServiceInfo.softwareinfo().softwaretype());
 
 		switch (serviceSoftwareType)
 		{
 		case E::SoftwareType::ConfigurationService:
-			sd.statusWidget = new ConfigurationServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, udpPort, m_parentWidget);
+			sd.statusWidget = new ConfigurationServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
 			break;
 
 		case E::SoftwareType::AppDataService:
-			sd.statusWidget = new AppDataServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, udpPort, m_parentWidget);
+			sd.statusWidget = new AppDataServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
 			break;
 
 		case E::SoftwareType::TuningService:
-			sd.statusWidget = new TuningServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, udpPort, m_parentWidget);
+			sd.statusWidget = new TuningServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
 			break;
 
 		case E::SoftwareType::ArchiveService:
@@ -645,7 +644,7 @@ void ServiceTableModel::restartUdpSocketThread()
 	startUdpSocketThread();
 }
 
-void ServiceTableModel::setServiceState(quint32 ip, quint16 port, ServiceState state)
+void ServiceTableModel::setServiceState(quint32 ip, quint16 port, E::ServiceState state)
 {
 	int hostIndex = 0;
 
@@ -667,9 +666,9 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, ServiceState s
 				continue;
 			}
 
-			Network::ServiceInfo& si = sd.information;
+			Network::ServiceInfo& si = sd.protoServiceInfo;
 
-			if (static_cast<ServiceState>(si.servicestate()) != state)
+			if (serviceState(si) != state)
 			{
 				si.set_servicestate(TO_INT(state));
 				emit serviceStateChanged(hostIndex);
@@ -691,7 +690,7 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, ServiceState s
 	Host hi;
 
 	hi.hostIP = ip;
-	hi.servicesData[sdIndex].information.set_servicestate(TO_INT(state));
+	hi.servicesData[sdIndex].protoServiceInfo.set_servicestate(TO_INT(state));
 
 	beginInsertRows(QModelIndex(), hostsCount(), hostsCount());
 

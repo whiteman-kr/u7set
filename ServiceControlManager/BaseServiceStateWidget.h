@@ -10,7 +10,11 @@ class BaseServiceStateWidget : public QMainWindow
 {
 	Q_OBJECT
 public:
-	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget* parent = nullptr);
+	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
+									const ServiceData& service,
+									quint32 udpIp, quint16 udpPort,
+									QWidget* parent = nullptr);
+
 	virtual ~BaseServiceStateWidget();
 
 	int addTab(QWidget* page, const QString& label);
@@ -46,19 +50,21 @@ public slots:
 
 protected:
 	virtual void createTcpConnection(quint32 ip, quint16 port);
-	virtual void dropTcpConnection() {}
+	virtual void dropTcpConnection();
 
-	UdpSocketThread* m_socketThread = nullptr;
+protected:
+	UdpSocketThread* m_udpSocketThread = nullptr;
 
 	quint32 m_udpIp = 0;
-	quint16 m_udpPort = -1;
+	quint16 m_udpPort = 0;
 
-	ServiceData m_service;
+	ServiceData m_serviceData;
 	SoftwareInfo m_softwareInfo;
 
 private:
 	void sendCommand(int command);
 
+private:
 	int m_udpAckQuantity = 0;
 
 	QAction* m_startServiceButton;
@@ -76,5 +82,10 @@ private:
 	int m_clientQuantityRowIndex = -1;
 	QStandardItemModel* m_stateTabModel = nullptr;
 	QStandardItemModel* m_clientsTabModel = nullptr;
+
+	static const int SS_ROW_CONNECTED = 0;
+	static const int SS_ROW_UPTIME = 1;
+	static const int SS_ROW_RUNNING_STATE = 2;
+	static const int SS_ROW_RUNNING_TIME = 3;
 };
 

@@ -317,6 +317,18 @@ public:
 	};
 	Q_ENUM(SoftwareType)
 
+	enum ServiceState
+	{
+		Undefined,			// this states used by 'Service Control Manager' only
+		Unavailable,
+
+		Starts,
+		Work,
+		Stopped,
+		Stops
+	};
+	Q_ENUM(ServiceState)
+
 	// OutputMode
 	//
 	enum OutputMode

@@ -3,11 +3,14 @@
 #include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
 
-BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget* parent) :
+BaseServiceStateWidget::BaseServiceStateWidget(	const SoftwareInfo& softwareInfo,
+												const ServiceData& serviceData,
+												quint32 udpIp, quint16 udpPort,
+												QWidget* parent) :
 	QMainWindow(parent),
 	m_udpIp(udpIp),
 	m_udpPort(udpPort),
-	m_service(service),
+	m_serviceData(serviceData),
 	m_softwareInfo(softwareInfo)
 {
 	setWindowFlag(Qt::Dialog, true);
@@ -15,8 +18,8 @@ BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
 	m_tabWidget = new QTabWidget(this);
 	setCentralWidget(m_tabWidget);
 
-	m_service.information.mutable_softwareinfo()->set_softwaretype(softwareInfo.softwareType());
-	m_service.information.set_servicestate(TO_INT(ServiceState::Undefined));
+	m_serviceData.protoServiceInfo.mutable_softwareinfo()->set_softwaretype(softwareInfo.softwareType());
+	m_serviceData.protoServiceInfo.set_servicestate(TO_INT(E::ServiceState::Undefined));
 
 	QToolBar* toolBar = addToolBar("Service actions");
 
@@ -32,14 +35,15 @@ BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
 	m_uptimeStatus->setMargin(5);
 	m_runningStatus->setMargin(5);
 
-	m_socketThread = new UdpSocketThread();
+	m_udpSocketThread = new UdpSocketThread();
 
 	m_baseClientSocket = new UdpClientSocket(QHostAddress(udpIp), udpPort);
+
 	connect(m_baseClientSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceStateWidget::serviceNotFound);
 	connect(m_baseClientSocket, &UdpClientSocket::ackReceived, this, &BaseServiceStateWidget::serviceAckReceived);
 
-	m_socketThread->addWorker(m_baseClientSocket);
-	m_socketThread->start();
+	m_udpSocketThread->addWorker(m_baseClientSocket);
+	m_udpSocketThread->start();
 
 	m_timer = new QTimer(this);
 	connect(m_timer, &QTimer::timeout, this, &BaseServiceStateWidget::askServiceState);
@@ -56,11 +60,11 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 {
 	m_timer->stop();
 
-	if (m_socketThread)
+	if (m_udpSocketThread)
 	{
-		m_socketThread->quitAndWait();
-		delete m_socketThread;
-		m_socketThread = nullptr;
+		m_udpSocketThread->quitAndWait();
+		delete m_udpSocketThread;
+		m_udpSocketThread = nullptr;
 	}
 
 	saveWindowPosition(this, QString("Service_%1_%2").arg(QHostAddress(m_udpIp).toString()).arg(m_udpPort));
@@ -68,101 +72,99 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 
 void BaseServiceStateWidget::updateServiceState()
 {
-	ServiceState serviceState = static_cast<ServiceState>(m_service.information.servicestate());
+	E::ServiceState srvState = m_serviceData.serviceState();
+	const SessionParams& session = m_serviceData.sessionParams;
+	const Network::SoftwareInfo& softwareInfo = m_serviceData.protoServiceInfo.softwareinfo();
 
-	if (serviceState != TO_INT(ServiceState::Unavailable) && serviceState != TO_INT(ServiceState::Undefined))
+	if (srvState == E::ServiceState::Unavailable ||
+		srvState == E::ServiceState::Undefined)
 	{
-		m_stateTabModel->setData(m_stateTabModel->index(0, 1), "Yes");
-
-		m_stateTabModel->setRowCount(serviceState == ServiceState::Work ? m_stateTabMaxRowQuantity : 3);
-
-		m_stateTabModel->setData(m_stateTabModel->index(1, 0), "Uptime");
-		m_stateTabModel->setData(m_stateTabModel->index(2, 0), "Runing state");
-	}
-	else
-	{
-		m_stateTabModel->setData(m_stateTabModel->index(0, 1), "No");
+		m_stateTabModel->setData(m_stateTabModel->index(SS_ROW_CONNECTED, 1), "No");
 		m_stateTabModel->setRowCount(1);
 		return;
 	}
 
+	m_stateTabModel->setData(m_stateTabModel->index(SS_ROW_CONNECTED, 1), "Yes");
+
+	m_stateTabModel->setRowCount(srvState == E::ServiceState::Work ? m_stateTabMaxRowQuantity : 3);
+
+	m_stateTabModel->setData(m_stateTabModel->index(SS_ROW_UPTIME, 0), "Uptime");
+	m_stateTabModel->setData(m_stateTabModel->index(SS_ROW_RUNNING_STATE, 0), "Running state");
+
 	QString serviceName = "Unknown Service";
 	QString serviceShortName = "???";
 
-	for (int i = 0; i < servicesInfo.size(); i++)
+	for (const ServiceInfo& si : servicesInfo)
 	{
-		if (static_cast<E::SoftwareType>(m_service.information.softwareinfo().softwaretype()) == servicesInfo[i].softwareType)
+		if (m_serviceData.type == si.softwareType)
 		{
-			serviceName = servicesInfo[i].name;
-			serviceShortName = servicesInfo[i].shortName;
+			serviceName = si.name;
+			serviceShortName = si.shortName;
 			break;
 		}
 	}
 
-	assert(serviceShortName != "???");
+	Q_ASSERT(serviceShortName != "???");
 
-	switch (serviceState)
+	switch (srvState)
 	{
-		case Stopped:
-		case Starts:
-		case Work:
-		case Stops:
-			{
-				const Network::SoftwareInfo& softwareInfo = m_service.information.softwareinfo();
-				setWindowTitle(serviceName +
-							   QString(" v%1.%2.%3 - %4:%5 (%6)")
-							   .arg(softwareInfo.majorversion())
-							   .arg(softwareInfo.minorversion())
-							   .arg(softwareInfo.patchversion())
-							   .arg(QHostAddress(m_udpIp).toString())
-							   .arg(m_udpPort)
-							   .arg(QString::fromStdString(softwareInfo.equipmentid())));
+	case E::Undefined:
+	case E::Unavailable:
+		setWindowTitle(serviceName + " - No connection");
 
-				m_connectionStateStatus->setText("Connected to service" + QString(" - %1").arg(m_udpAckQuantity));
+		m_connectionStateStatus->setText("No connection with service");
+		m_uptimeStatus->setHidden(true);
+		m_runningStatus->setHidden(true);
 
-				qint64 uptime = m_service.information.uptime();
+		break;
 
-				QString&& uptimeStr = formatUptime(uptime);
+	case E::Stopped:
+	case E::Starts:
+	case E::Work:
+	case E::Stops:
+		{
+			setWindowTitle(serviceName +
+						   QString(" v%1.%2.%3 - %4 (%5:%6)").
+								arg(softwareInfo.majorversion()).
+								arg(softwareInfo.minorversion()).
+								arg(softwareInfo.patchversion()).
+								arg(QString::fromStdString(softwareInfo.equipmentid())).
+								arg(QHostAddress(m_udpIp).toString()).
+								arg(m_udpPort));
 
-				m_stateTabModel->setData(m_stateTabModel->index(1, 1), uptimeStr);
+			m_connectionStateStatus->setText("Connected to service" + QString(" - %1").arg(m_udpAckQuantity));
 
-				m_uptimeStatus->setText(tr("Uptime ") + uptimeStr);
-				m_uptimeStatus->setHidden(false);
+			qint64 uptime = m_serviceData.protoServiceInfo.uptime();
 
-				m_runningStatus->setHidden(false);
-			}
+			QString&& uptimeStr = formatUptime(uptime);
 
-			break;
+			m_stateTabModel->setData(m_stateTabModel->index(SS_ROW_UPTIME, 1), uptimeStr);
 
-		case Undefined:
-		case Unavailable:
-			setWindowTitle(serviceName + " - No connection");
+			m_uptimeStatus->setText(tr("Uptime ") + uptimeStr);
+			m_uptimeStatus->setHidden(false);
 
-			m_connectionStateStatus->setText("No connection with service");
+			m_runningStatus->setHidden(false);
+		}
 
-			m_uptimeStatus->setHidden(true);
-			m_runningStatus->setHidden(true);
+		break;
 
-			break;
-
-		default:
-			assert(false);
+	default:
+		assert(false);
 	}
 
 	QString runningStateStr;
-	QString serviceUptimeStr;
-	switch (serviceState)
+
+	switch (srvState)
 	{
-		case ServiceState::Work:
+	case E::ServiceState::Work:
 			{
-				SessionParams& session = m_service.sessionParams;
 				runningStateStr = tr("Running in ") + E::valueToString(session.softwareRunMode) + tr(" mode with ") + session.currentSettingsProfile + tr(" profile");
 
-				m_stateTabModel->setData(m_stateTabModel->index(3, 0), "Runing time");
+				m_stateTabModel->setData(m_stateTabModel->index(SS_ROW_RUNNING_TIME, 0), "Runing time");
 
-				qint64 runtime = m_service.information.serviceruntime();
+				qint64 runtime = m_serviceData.protoServiceInfo.serviceruntime();
 
-				m_stateTabModel->setData(m_stateTabModel->index(3, 1), formatUptime(runtime));
+				m_stateTabModel->setData(m_stateTabModel->index(SS_ROW_RUNNING_TIME, 1), formatUptime(runtime));
 
 				HostAddressPort workingIp = getWorkingClientRequestIp();
 
@@ -171,69 +173,64 @@ void BaseServiceStateWidget::updateServiceState()
 			}
 			break;
 
-		case ServiceState::Stopped:
-			runningStateStr = tr("Stopped");
+	case E::ServiceState::Stopped:
+	case E::ServiceState::Unavailable:
+	case E::ServiceState::Undefined:
+	case E::ServiceState::Starts:
+	case E::ServiceState::Stops:
+			runningStateStr = E::valueToString(srvState);
 			break;
 
-		case ServiceState::Unavailable:
-			runningStateStr = tr("Unavailable");
-			break;
-
-		case ServiceState::Undefined:
-			runningStateStr = tr("Undefined");
-			break;
-
-		case ServiceState::Starts:
-			runningStateStr = tr("Starts");
-			break;
-
-		case ServiceState::Stops:
-			runningStateStr = tr("Stops");
-			break;
-
-		default:
-			assert(false);
-			runningStateStr = tr("Unknown state");
-			break;
+	default:
+		assert(false);
+		runningStateStr = tr("Unknown state");
+		break;
 	}
 
-	m_runningStatus->setText(runningStateStr + " " + serviceUptimeStr);
-	m_stateTabModel->setData(m_stateTabModel->index(2, 1), runningStateStr);
+	m_runningStatus->setText(runningStateStr);
+	m_stateTabModel->setData(m_stateTabModel->index(SS_ROW_RUNNING_STATE, 1), runningStateStr);
 
-	switch(serviceState)
+	switch(srvState)
 	{
-		case ServiceState::Work:
-			m_runningStatus->setStyleSheet("background-color: rgb(192, 255, 192);");
+	case E::ServiceState::Work:
+			if (session.softwareRunMode == E::SoftwareRunMode::Normal)
+			{
+				m_runningStatus->setStyleSheet("background-color: rgb(127, 255, 127);");
+			}
+			else
+			{
+				m_runningStatus->setStyleSheet("background-color: rgb(255, 255, 127);");
+			}
 			break;
-		case ServiceState::Starts:
-		case ServiceState::Stops:
-		case ServiceState::Stopped:
-			m_runningStatus->setStyleSheet("background-color: rgb(255, 255, 192);");
+	case E::ServiceState::Starts:
+	case E::ServiceState::Stops:
+	case E::ServiceState::Stopped:
+			m_runningStatus->setStyleSheet("background-color: rgb(255, 127, 127);");
 			break;
-		case ServiceState::Unavailable:
+	case E::ServiceState::Unavailable:
 			m_runningStatus->setStyleSheet("background-color: lightGray;");
 			break;
 
-		default:
-			m_runningStatus->setStyleSheet("background-color: red;");
+	default:
+		m_runningStatus->setStyleSheet("background-color: red;");
 	}
 
-	switch (serviceState)
+	switch (srvState)
 	{
-		case ServiceState::Work:
+	case E::ServiceState::Work:
 			m_startServiceButton->setEnabled(false);
 			m_stopServiceButton->setEnabled(true);
 			m_restartServiceButton->setEnabled(true);
 			break;
-		case ServiceState::Stopped:
+	case E::ServiceState::Stopped:
 			m_startServiceButton->setEnabled(true);
 			m_stopServiceButton->setEnabled(false);
 			m_restartServiceButton->setEnabled(true);
 			break;
-		case ServiceState::Unavailable:
-		case ServiceState::Undefined:
-		case ServiceState::Starts:
-		case ServiceState::Stops:
+	case E::ServiceState::Unavailable:
+	case E::ServiceState::Undefined:
+	case E::ServiceState::Starts:
+	case E::ServiceState::Stops:
 			m_startServiceButton->setEnabled(false);
 			m_stopServiceButton->setEnabled(false);
 			m_restartServiceButton->setEnabled(false);
@@ -249,6 +246,7 @@ void BaseServiceStateWidget::updateServiceState()
 void BaseServiceStateWidget::updateClientsModel(const Network::ServiceClients& serviceClients)
 {
 	m_clientsTabModel->setRowCount(serviceClients.clients_size());
+
 	if (m_clientQuantityRowIndex != -1)
 	{
 		stateTabModel()->setData(stateTabModel()->index(m_clientQuantityRowIndex, 1), serviceClients.clients_size());
@@ -280,15 +278,12 @@ void BaseServiceStateWidget::updateClientsModel(const Network::ServiceClients& s
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 5), QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch() - uptime));
 
 		uptime /= 1000;
-		int s = uptime % 60; uptime /= 60;
-		int m = uptime % 60; uptime /= 60;
-		int h = uptime % 24; uptime /= 24;
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), QString("(%1d %2:%3:%4)").arg(uptime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), formatUptime(uptime));
 
 		m_clientsTabModel->setData(m_clientsTabModel->index(i, 7), si.pipelineid());
 
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 8), static_cast<qint64>(ci.replyquantity()));
+		m_clientsTabModel->setData(m_clientsTabModel->index(i, 8), ci.replyquantity());
 	}
 }
 
@@ -321,47 +316,47 @@ void BaseServiceStateWidget::serviceAckReceived(const UdpRequest udpRequest)
 
 	switch (udpRequest.ID())
 	{
-		case RQID_SERVICE_GET_INFO:
+	case RQID_SERVICE_GET_INFO:
 		{
 			Network::ServiceInfo newServiceState;
 
 			bool result = newServiceState.ParseFromArray(udpRequest.data(),
 														 static_cast<int>(udpRequest.dataSize()));
 
-			if (result == true)
+			if (result == false)
 			{
-				ServiceState oldState = static_cast<ServiceState>(m_service.information.servicestate());
-				ServiceState newState = static_cast<ServiceState>(newServiceState.servicestate());
-
-				if (newState != ServiceState::Work && oldState == ServiceState::Work)
-				{
-					emit invalidateData();
-				}
-
-				if (newState == ServiceState::Work &&
-					(oldState != ServiceState::Work ||
-						newServiceState.serviceruntime() < m_service.information.serviceruntime()))
-				{
-					emit needToReloadData();
-				}
-
-				m_service.information = newServiceState;
-				m_service.parseServiceInfo();
-
-				updateServiceState();
+				return;
 			}
-			else
+
+			E::ServiceState oldState = m_serviceData.serviceState();
+			E::ServiceState newState = static_cast<E::ServiceState>(newServiceState.servicestate());
+
+			if (newState != E::ServiceState::Work && oldState == E::ServiceState::Work)
 			{
-				assert(false);
+				emit invalidateData();
 			}
+
+			if (newState == E::ServiceState::Work &&
+				(oldState != E::ServiceState::Work ||
+					newServiceState.serviceruntime() < m_serviceData.protoServiceInfo.serviceruntime()))
+			{
+				emit needToReloadData();
+			}
+
+			m_serviceData.protoServiceInfo = newServiceState;
+			m_serviceData.parseProtoServiceInfo();
+
+			updateServiceState();
 		}
 		break;
-		case RQID_SERVICE_START:
-		case RQID_SERVICE_STOP:
-		case RQID_SERVICE_RESTART:
-			break;
-		default:
-			qDebug() << "Unknown packet ID";
+
+	case RQID_SERVICE_START:
+	case RQID_SERVICE_STOP:
+	case RQID_SERVICE_RESTART:
+		break;
+
+	default:
+		qDebug() << "Unknown packet ID";
 	}
 }
 
@@ -369,9 +364,9 @@ void BaseServiceStateWidget::serviceNotFound()
 {
 	m_udpAckQuantity = 0;
 
-	if (m_service.information.servicestate() != TO_INT(ServiceState::Unavailable))
+	if (m_serviceData.serviceState() != E::ServiceState::Unavailable)
 	{
-		m_service.information.set_servicestate(TO_INT(ServiceState::Unavailable));
+		m_serviceData.protoServiceInfo.set_servicestate(TO_INT(E::ServiceState::Unavailable));
 		updateServiceState();
 	}
 }
@@ -380,8 +375,10 @@ void BaseServiceStateWidget::createTcpConnection(quint32 ip, quint16 port)
 {
 	Q_UNUSED(ip);
 	Q_UNUSED(port);
+}
 
-	assert(port > std::numeric_limits<quint16>::lowest() && port < std::numeric_limits<quint16>::max());
+void BaseServiceStateWidget::dropTcpConnection()
+{
 }
 
 int BaseServiceStateWidget::addTab(QWidget* page, const QString& label)
@@ -415,13 +412,14 @@ void BaseServiceStateWidget::addStateTab()
 	QTableView* stateTableView = addTabWithTableView(250, "State");
 
 	m_stateTabModel = new QStandardItemModel(1, 2, this);
+
 	stateTableView->setModel(m_stateTabModel);
 
 	m_stateTabModel->setHeaderData(0, Qt::Horizontal, "Property");
 	m_stateTabModel->setHeaderData(1, Qt::Horizontal, "Value");
 
-	m_stateTabModel->setData(m_stateTabModel->index(0, 0), "Connected to service");
-	m_stateTabModel->setData(m_stateTabModel->index(0, 1), "No");
+	m_stateTabModel->setData(m_stateTabModel->index(SS_ROW_CONNECTED, 0), "Connected to service");
+	m_stateTabModel->setData(m_stateTabModel->index(SS_ROW_CONNECTED, 1), "No");
 }
 
 void BaseServiceStateWidget::addClientsTab(bool showStateColumn)
@@ -453,20 +451,20 @@ void BaseServiceStateWidget::addClientsTab(bool showStateColumn)
 
 HostAddressPort BaseServiceStateWidget::getWorkingClientRequestIp()
 {
-	if (m_service.clientRequestIPs.empty())
+	if (m_serviceData.clientRequestIPs.empty())
 	{
 		return HostAddressPort(m_udpIp, m_udpPort);
 	}
 
-	return m_service.clientRequestIPs[0];
+	return m_serviceData.clientRequestIPs[0];
 }
 
 void BaseServiceStateWidget::sendCommand(int command)
 {
-	ServiceState state = static_cast<ServiceState>(m_service.information.servicestate());
+	E::ServiceState state = m_serviceData.serviceState();
 
-	if (!(state == ServiceState::Work && (command == RQID_SERVICE_STOP || command == RQID_SERVICE_RESTART)) &&
-		!(state == ServiceState::Stopped && (command == RQID_SERVICE_START || command == RQID_SERVICE_RESTART)))
+	if (!(state == E::ServiceState::Work && (command == RQID_SERVICE_STOP || command == RQID_SERVICE_RESTART)) &&
+		!(state == E::ServiceState::Stopped && (command == RQID_SERVICE_START || command == RQID_SERVICE_RESTART)))
 	{
 		return;
 	}

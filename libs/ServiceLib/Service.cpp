@@ -382,12 +382,12 @@ QString Service::getServiceInstanceName(const QString& serviceName, int argc, ch
 
 void Service::onServiceWork()
 {
-	m_state = ServiceState::Work;
+	m_state = E::ServiceState::Work;
 }
 
 void Service::onServiceStopped()
 {
-	m_state = ServiceState::Stopped;
+	m_state = E::ServiceState::Stopped;
 }
 
 void Service::onBaseRequest(UdpRequest request)
@@ -443,7 +443,7 @@ void Service::startServiceWorkerThread()
 		return;
 	}
 
-	if (m_state != ServiceState::Stopped)
+	if (m_state != E::ServiceState::Stopped)
 	{
 		Q_ASSERT(false);
 		return;
@@ -451,7 +451,7 @@ void Service::startServiceWorkerThread()
 
 	m_serviceWorkerStartTime = QDateTime::currentMSecsSinceEpoch();
 
-	m_state = ServiceState::Starts;
+	m_state = E::ServiceState::Starts;
 
 	m_serviceWorker = m_serviceWorkerFactory.createInstance();
 
@@ -473,7 +473,7 @@ void Service::stopServiceWorkerThread()
 		return;
 	}
 
-	m_state = ServiceState::Stops;
+	m_state = E::ServiceState::Stops;
 
 	m_serviceWorkerThread->quit();
 	m_serviceWorkerThread->wait();
@@ -483,7 +483,7 @@ void Service::stopServiceWorkerThread()
 	m_serviceWorkerThread = nullptr;
 	m_serviceWorker = nullptr;
 
-	m_state = ServiceState::Stopped;
+	m_state = E::ServiceState::Stopped;
 }
 
 void Service::startBaseRequestSocketThread()
@@ -548,7 +548,7 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 		m_serviceWorker->getServiceSpecificInfo(serviceInfo);
 	}
 
-	if (m_state != ServiceState::Stopped)
+	if (m_state != E::ServiceState::Stopped)
 	{
 		serviceInfo.set_serviceruntime((QDateTime::currentMSecsSinceEpoch() - m_serviceWorkerStartTime) / 1000);
 	}

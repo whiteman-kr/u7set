@@ -514,7 +514,7 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, con
 	m_settingsTabModel->setData(m_settingsTabModel->index(7, 0), "ArchService ID");
 	m_settingsTabModel->setData(m_settingsTabModel->index(8, 0), "ArchService IP");
 
-	auto appDataSettings = std::dynamic_pointer_cast<AppDataServiceSettings>(m_service.settings);
+	auto appDataSettings = std::dynamic_pointer_cast<AppDataServiceSettings>(m_serviceData.settings);
 
 	if (appDataSettings == nullptr)
 	{
@@ -574,7 +574,7 @@ void AppDataServiceWidget::updateServiceState()
 
 	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errnotexpectedsimpacket()));
 
-	auto appDataSettings = std::dynamic_pointer_cast<AppDataServiceSettings>(m_service.settings);
+	auto appDataSettings = std::dynamic_pointer_cast<AppDataServiceSettings>(m_serviceData.settings);
 
 	if (appDataSettings == nullptr)
 	{
@@ -607,7 +607,7 @@ void AppDataServiceWidget::updateServiceState()
 
 void AppDataServiceWidget::updateStateInfo()
 {
-	if (m_service.information.servicestate() == ServiceState::Work)
+	if (m_serviceData.protoServiceInfo.servicestate() == E::ServiceState::Work)
 	{
 		stateTabModel()->setData(stateTabModel()->index(5, 0), "Connected client quantity");
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");

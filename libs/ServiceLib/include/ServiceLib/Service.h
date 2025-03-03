@@ -16,17 +16,6 @@ namespace Network
 	class ServiceInfo;
 }
 
-enum ServiceState
-{
-	Stopped,
-	Starts,
-	Work,
-	Stops,
-
-	Undefined,			// this states used by 'Service Control Manager' only
-	Unavailable,
-};
-
 struct ServiceInfo
 {
 	E::SoftwareType softwareType = E::SoftwareType::Unknown;
@@ -270,7 +259,7 @@ private:
 	qint64 m_serviceStartTime = 0;
 	qint64 m_serviceWorkerStartTime = 0;
 
-	ServiceState m_state = ServiceState::Stopped;
+	E::ServiceState m_state = E::ServiceState::Stopped;
 
 	ServiceWorker& m_serviceWorkerFactory;
 	ServiceWorker* m_serviceWorker = nullptr;

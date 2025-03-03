@@ -115,7 +115,7 @@ TuningServiceWidget::~TuningServiceWidget()
 
 void TuningServiceWidget::updateStateInfo()
 {
-	if (m_service.information.servicestate() == ServiceState::Work)
+	if (m_serviceData.serviceState() == E::ServiceState::Work)
 	{
 		HostAddressPort workingIp = getWorkingClientRequestIp();
 
@@ -135,7 +135,7 @@ void TuningServiceWidget::updateStateInfo()
 		}
 	}
 
-	auto tuningSettings = std::dynamic_pointer_cast<TuningServiceSettings>(m_service.settings);
+	auto tuningSettings = std::dynamic_pointer_cast<TuningServiceSettings>(m_serviceData.settings);
 
 	if (tuningSettings == nullptr)
 	{

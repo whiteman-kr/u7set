@@ -5,7 +5,10 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 
-ConfigurationServiceWidget::ConfigurationServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
+ConfigurationServiceWidget::ConfigurationServiceWidget(	const SoftwareInfo& softwareInfo,
+														const ServiceData& service,
+														quint32 udpIp, quint16 udpPort,
+														QWidget *parent) :
 	BaseServiceStateWidget(softwareInfo, service, udpIp, udpPort, parent)
 {
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &ConfigurationServiceWidget::updateStateInfo);
@@ -65,7 +68,7 @@ ConfigurationServiceWidget::~ConfigurationServiceWidget()
 
 void ConfigurationServiceWidget::updateStateInfo()
 {
-	if (m_service.information.servicestate() == ServiceState::Work)
+	if (m_serviceData.serviceState() == E::ServiceState::Work)
 	{
 		stateTabModel()->setData(stateTabModel()->index(5, 0), "Current work build directory");
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Check build attempt quantity");
@@ -121,7 +124,7 @@ void ConfigurationServiceWidget::updateServiceState()
 	stateTabModel()->setData(stateTabModel()->index(6, 1), s.checkbuildattemptquantity());
 	stateTabModel()->setData(stateTabModel()->index(7, 1), E::valueToString<E::ConfigCheckerState>(s.buildcheckerstate()));
 
-	auto cfgSettings = std::dynamic_pointer_cast<CfgServiceSettings>(m_service.settings);
+	auto cfgSettings = std::dynamic_pointer_cast<CfgServiceSettings>(m_serviceData.settings);
 
 	if (cfgSettings == nullptr)
 	{
