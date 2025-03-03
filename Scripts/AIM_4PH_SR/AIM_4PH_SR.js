@@ -146,8 +146,8 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
             ];
 
             res = true;
-
-            for(propName of propsToCheck)
+            
+            for(const propName of propsToCheck)
             {
                 let propValueA = signalA.propertyValue(propName);
 
@@ -208,7 +208,7 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
 
             res = true;
 
-            for(cmpParams of propsToCompare)
+            for(const cmpParams of propsToCompare)
             {
                 let prop1Name = cmpParams[0];
                 let cmpMode = cmpParams[1];
