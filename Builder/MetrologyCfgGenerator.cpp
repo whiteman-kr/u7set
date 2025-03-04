@@ -72,7 +72,7 @@ namespace Builder
 		{
 			xml.writeStartElement("MetrologyItems");
 			{
-				xml.writeIntAttribute("buildID", m_buildResultWriter->buildInfo().id);
+				xml.writeIntAttribute("buildID", m_buildResultWriter->buildInfo().buildNo);
 				xml.writeIntAttribute("Version", CFG_FILE_VER_METROLOGY_ITEMS_XML);			// version of MetrologyItems file
 
 

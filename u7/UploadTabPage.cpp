@@ -2,6 +2,7 @@
 #include "DialogSettingsConfigurator.h"
 #include "GlobalMessanger.h"
 #include "Settings.h"
+#include "../UtilsLib/XmlHelper.h"
 #include <BuildCompLib/BuildCompDialog.h>
 #include <ModuleConfiguratorLib/Configurator.h>
 
@@ -389,7 +390,7 @@ void UploadTabPage::refreshProjectBuilds()
 
 			if (result == true)
 			{
-				strings << buildInfo.date.toString("dd.MM.yyyy hh:mm:ss");
+				strings << buildInfo.dateTime.toString("dd.MM.yyyy hh:mm:ss");
 				strings << (buildSuccess == true ? tr("Success") : tr("Failed"));
 			}
 			else
@@ -866,6 +867,8 @@ bool UploadTabPage::readBuildInfo(const QString& buildPath, OnlineLib::BuildInfo
 		return false;
 	}
 
+	*buildSuccess = false;
+
 	// Read build information from build.xml
 
 	QString buildXmlFileName = buildPath + "/build.xml";
@@ -891,58 +894,33 @@ bool UploadTabPage::readBuildInfo(const QString& buildPath, OnlineLib::BuildInfo
 		return false;
 	}
 
-	bool buildInfoFound = false;
-	bool buildResultFound = false;
+	XmlReadHelper xmlReader(data);
 
-	QXmlStreamReader xmlReader(data);
+	bool res = true;
 
-	while(xmlReader.atEnd() == false)
+	res &= buildInfo->readFromXml(xmlReader);
+	res &= xmlReader.findElement(XmlElement::BUILD_RESULT);
+
+	int errorCount = 0;
+
+	res &= xmlReader.readIntAttribute(XmlAttribute::ERRORS, &errorCount);
+
+	RETURN_IF_FALSE(res);
+
+	if (errorCount != 0)
 	{
-		if (xmlReader.readNextStartElement() == false)
-		{
-			continue;
-		}
-
-		if (xmlReader.name() == QLatin1String("BuildInfo"))
-		{
-			buildInfo->readFromXml(xmlReader);
-			buildInfoFound = true;
-		}
-
-		if (xmlReader.name() == QLatin1String("BuildResult"))
-		{
-			bool ok = false;
-
-			int errorCount = xmlReader.attributes().value("Errors").toInt(&ok);
-
-			if (ok == false || errorCount != 0)
-			{
-				*buildSuccess = false;
-			}
-			else
-			{
-				*buildSuccess = true;
-			}
-
-
-			buildResultFound = true;
-		}
-	}
-
-	if (buildInfoFound == false || buildResultFound == false)
-	{
-		return false;	// Required sections were not found in build.xml
+		return true;
 	}
 
 	// Check if .bts file exists
 
-	QString buildOutputFileName = QString("%1/%2-%3.bts").arg(buildPath).arg(buildInfo->project).arg(QString::number(buildInfo->id).rightJustified(6, '0'));
+	QString buildOutputFileName = QString("%1/%2-%3.bts").arg(buildPath).arg(buildInfo->project).arg(QString::number(buildInfo->buildNo).rightJustified(6, '0'));
 
 	QFile buildOutput(buildOutputFileName);
 
-	if (buildOutput.exists() == false)
+	if (buildOutput.exists() == true)
 	{
-		*buildSuccess = false;
+		*buildSuccess = true;
 	}
 
 	return true;

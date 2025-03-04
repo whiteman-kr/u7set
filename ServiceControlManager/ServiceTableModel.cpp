@@ -24,6 +24,7 @@ E::ServiceState ServiceData::serviceState() const
 
 bool ServiceData::parseProtoServiceInfo()
 {
+	buildInfo.loadFromProto(protoServiceInfo.buildinfo());
 	sessionParams.loadFrom(protoServiceInfo.sessionparams());
 
 	QString settingsXml = QString::fromStdString(protoServiceInfo.settingsxml());

@@ -2,6 +2,7 @@
 
 #include <QAbstractTableModel>
 #include <ServiceLib/Service.h>
+#include "../OnlineLib/BuildInfo.h"
 #include "../OnlineLib/UdpSocket.h"
 
 // For QueuedConnection (scan network)
@@ -16,6 +17,8 @@ struct ServiceData
 	quint16 port = 0;
 
 	Network::ServiceInfo protoServiceInfo;
+
+	OnlineLib::BuildInfo buildInfo;
 
 	std::vector<HostAddressPort> clientRequestIPs;
 

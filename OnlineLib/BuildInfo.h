@@ -4,16 +4,14 @@
 #include <QDateTime>
 #include <cassert>
 
-
 class QXmlStreamReader;
 class QXmlStreamWriter;
-
+class XmlReadHelper;
 
 namespace Proto
 {
 	class BuildInfo;
 }
-
 
 namespace OnlineLib
 {
@@ -24,16 +22,19 @@ namespace OnlineLib
 
 	public:
 		QString project;
-		int id = -1;
-		QDateTime date;
+		int buildNo = -1;
+		QDateTime dateTime;
 		int changeset = 0;
 		QString user;
 		QString workstation;
 
-		QString dateStr() const { return date.toString(dateTimeFormatStr); }
+		void clear();
+
+		QString dateTimeStr() const;
+//		void setDateTime(const std::string& dateTimeStdString);
 
 		void writeToXml(QXmlStreamWriter& xmlWriter) const;
-		void readFromXml(QXmlStreamReader& xmlReader);
+		bool readFromXml(XmlReadHelper& xmlReader, bool findElement = true);
 
 		void saveToProto(Proto::BuildInfo* proto) const;
 		void loadFromProto(const Proto::BuildInfo& proto);
@@ -47,10 +48,10 @@ namespace OnlineLib
 		qint64 size = 0;						// size of file
 		bool compressed = false;
 		QString md5;							// MD5 hash of file
-		QHash<QString, QString> metadata;		// metadata (pairs of strings)
+		std::map<QString, QString> metadata;	// metadata (pairs of strings)
 
 		void writeToXml(QXmlStreamWriter& xmlWriter) const;
-		void readFromXml(QXmlStreamReader& xmlReader);
+		bool readFromXml(XmlReadHelper& xmlReader, bool findElement = true);
 
 		QString getMetadata(const QString& key) const;
 

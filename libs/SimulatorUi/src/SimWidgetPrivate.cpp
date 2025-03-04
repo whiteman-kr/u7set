@@ -665,7 +665,7 @@ namespace SimUi
 
 					if (token == QXmlStreamReader::StartElement)
 					{
-						if (xml.name() == "BuildInfo")
+						if (xml.name() == XmlElement::BUILD_INFO)
 						{
 							QString buildInfoID = xml.attributes().value("ID").toString();
 							if (buildInfoID.isEmpty())
@@ -683,9 +683,9 @@ namespace SimUi
 						}
 						else
 						{
-							if (xml.name() == "BuildResult")
+							if (xml.name() == XmlElement::BUILD_RESULT)
 							{
-								QString buildResultErrors = xml.attributes().value("Errors").toString();
+								QString buildResultErrors = xml.attributes().value(XmlAttribute::ERRORS).toString();
 								if (buildResultErrors.isEmpty() || buildResultErrors.toInt() != 0)
 								{
 									throw 2;

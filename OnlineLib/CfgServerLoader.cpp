@@ -4,8 +4,8 @@
 
 #include "CfgServerLoader.h"
 #include "CircularLogger.h"
+#include "../UtilsLib/XmlHelper.h"
 #include <CommonLib/ConstStrings.h>
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -106,36 +106,54 @@ void CfgServer::readBuildXml()
 		return;
 	}
 
-	QXmlStreamReader xmlReader(data);
+	XmlReadHelper xmlReader(data);
 
-	while(xmlReader.atEnd() == false)
+	bool res = m_buildInfo.readFromXml(xmlReader);
+
+	if (res == false)
 	{
-		if (xmlReader.readNextStartElement() == false)
-		{
-			continue;
-		}
+		m_errorCode = ErrorCode::BuildCantRead;
+		logError(QString("сan't read <BuildInfo> section in file %1!").arg(m_buildXmlPathFileName));
+		return;
+	}
 
-		if (xmlReader.name() == QLatin1String("BuildInfo"))
-		{
-			m_buildInfo.readFromXml(xmlReader);
-			continue;
-		}
+	res = xmlReader.findElement(XmlElement::FILES);
 
-		// find "file" element
-		//
-		if (xmlReader.name() != QLatin1String("File"))
+	if (res == false)
+	{
+		m_errorCode = ErrorCode::BuildCantRead;
+		logError(QString("сan't read <Files> section in file %1!").arg(m_buildXmlPathFileName));
+		return;
+	}
+
+	while(xmlReader.readNextStartElement() == false)
+	{
+		if (xmlReader.name() != XmlElement::FILE)
 		{
-			continue;
+			break;
 		}
 
 		OnlineLib::BuildFileInfo bfi;
 
-		bfi.readFromXml(xmlReader);
+		res &= bfi.readFromXml(xmlReader, false);
+
+		if (res == false)
+		{
+			break;
+		}
 
 		m_buildFileInfo.emplace(bfi.pathFileName, bfi);
 	}
 
-	logMessage(QString("file %1 has been read").arg(m_buildXmlPathFileName));
+	if (res == true)
+	{
+		logMessage(QString("file %1 has been read").arg(m_buildXmlPathFileName));
+	}
+	else
+	{
+		m_errorCode = ErrorCode::BuildCantRead;
+		logError(QString("File %1 reading error!").arg(m_buildXmlPathFileName));
+	}
 }
 
 bool CfgServer::checkFile(QString& pathFileName, QByteArray& fileData)
@@ -618,7 +636,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 				logMessage(Separator::EMPTY_STR);
 				logMessage(QString("loading configuration: project %1, buildNo %2, build date %3...").
-								arg(m_buildInfo.project).arg(m_buildInfo.id).arg(m_buildInfo.dateStr()));
+								arg(m_buildInfo.project).arg(m_buildInfo.buildNo).arg(m_buildInfo.dateTimeStr()));
 				logMessage(Separator::EMPTY_STR);
 
 				BuildFileInfoArray bfiArray;
@@ -759,9 +777,19 @@ bool CfgLoader::readConfigurationXml()
 	cfi.md5 = Md5Hash::hashStr(fileData);
 	cfi.fileData.swap(fileData);
 
-	bool result = m_settingsSet.readFromXml(cfi.fileData);
+	XmlReadHelper xmlReader(cfi.fileData);
 
-	if (result == false)
+	bool res = m_buildInfo.readFromXml(xmlReader);
+
+	if (res == false)
+	{
+		logError(QString("can't read <BuildInfo> section in file %1!").arg(m_configurationXmlPathFileName));
+		return false;
+	}
+
+	res = m_settingsSet.readFromXml(xmlReader);
+
+	if (res == false)
 	{
 		logError("reading software settings set - FAILED!");
 		return false;
@@ -771,37 +799,30 @@ bool CfgLoader::readConfigurationXml()
 	//
 	m_cfgFilesInfo.insert(cfi.pathFileName, cfi);
 
-	QXmlStreamReader xmlReader(cfi.fileData);
+	res = xmlReader.findElement(XmlElement::FILES);
 
-	while(xmlReader.atEnd() == false)
+	if (res == false)
 	{
-		if (xmlReader.readNextStartElement() == false)
+		logError(QString("can't read <Files> section in file %1!").arg(m_configurationXmlPathFileName));
+		return false;
+	}
+
+	while(xmlReader.readNextStartElement() == false)
+	{
+		if (xmlReader.name() != XmlElement::FILE)
 		{
-			continue;
+			break;
 		}
 
-		if (xmlReader.name() == QLatin1String("BuildInfo"))
+		CfgFileInfo cfgFileInfo;
+
+		cfgFileInfo.readFromXml(xmlReader);
+
+		m_cfgFilesInfo.insert(cfgFileInfo.pathFileName, cfgFileInfo);
+
+		if (cfgFileInfo.ID.isEmpty() == false)
 		{
-			m_buildInfo.readFromXml(xmlReader);
-			continue;
-		}
-
-		// find "file" element
-		//
-		if (xmlReader.name() != QLatin1String("File"))
-		{
-			continue;
-		}
-
-		CfgFileInfo xcfi;
-
-		xcfi.readFromXml(xmlReader);
-
-		m_cfgFilesInfo.insert(xcfi.pathFileName, xcfi);
-
-		if (xcfi.ID.isEmpty() == false)
-		{
-			m_fileIDPathMap.emplace(xcfi.ID, xcfi.pathFileName);
+			m_fileIDPathMap.emplace(cfgFileInfo.ID, cfgFileInfo.pathFileName);
 		}
 	}
 

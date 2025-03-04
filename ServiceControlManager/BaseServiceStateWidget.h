@@ -35,6 +35,7 @@ signals:
 	void needToReloadData();
 	void invalidateData();
 	void connectionStatisticChanged();
+	void onUpdateServiceState();
 
 public slots:
 	void updateServiceState();

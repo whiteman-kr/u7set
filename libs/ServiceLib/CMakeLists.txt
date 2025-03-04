@@ -36,6 +36,9 @@ if(UNIX)
 endif(UNIX)
 
 target_precompile_headers(${TARGET} PRIVATE
+	<QObject>
+	<QXmlStreamReader>
+
 	<CommonLib/Types.h>
 	<Network.pb.h>
 )

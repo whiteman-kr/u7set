@@ -115,7 +115,10 @@ public:
 	QXmlStreamReader* xmlStreamReader() const;
 
 	bool readNextStartElement();
+	QXmlStreamReader::TokenType readNext();
 	void skipCurrentElement();
+
+	QXmlStreamReader::TokenType tokenType();
 
 	QString name();
 

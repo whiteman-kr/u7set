@@ -72,6 +72,8 @@ BaseServiceStateWidget::~BaseServiceStateWidget()
 
 void BaseServiceStateWidget::updateServiceState()
 {
+	emit onUpdateServiceState();
+
 	E::ServiceState srvState = m_serviceData.serviceState();
 	const SessionParams& session = m_serviceData.sessionParams;
 	const Network::SoftwareInfo& softwareInfo = m_serviceData.protoServiceInfo.softwareinfo();

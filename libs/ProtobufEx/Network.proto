@@ -3,6 +3,7 @@ syntax = "proto2";
 package Network;
 
 import "AppSignal.proto";
+import "BuildInfo.proto";
 
 // Get signal list
 // 1. Request GetSignalListStartRequest, wait for reply GetSignalListStartReply
@@ -365,6 +366,8 @@ message ServiceInfo
 	optional SessionParams sessionParams = 5;
 
 	optional string settingsXml = 6;					// current service settings XML
+
+	optional Proto.BuildInfo buildInfo = 7;
 }
 
 message GetServiceInfoReply
@@ -392,17 +395,6 @@ message ServiceClientInfo
 message ServiceClients
 {
     repeated ServiceClientInfo clients = 1;
-}
-
-message BuildInfo
-{
-    required string project = 1;
-    required int32 id = 2 [default = -1];
-	//required bool release = 3 [default = false];	Obsolete
-    required int64 date = 4;
-    required int32 changeset = 5 [default = 0];
-    required string user = 6;
-    required string workstation = 7;
 }
 
 message ConfigurationServiceSettings

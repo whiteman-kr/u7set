@@ -6,6 +6,7 @@
 #include "../OnlineLib/UdpSocket.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareInfo.h"
+#include "../OnlineLib/BuildInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
 #include "CommandLineParser.h"
@@ -141,6 +142,12 @@ public:
 
 	int thisInstanceNo() const { return m_thisInstanceNo; }
 
+	void setBuildInfo(const OnlineLib::BuildInfo& buildInfo);
+	OnlineLib::BuildInfo buildInfo() const;
+	void clearBuildInfo();
+
+	bool readBuildInfo(const QByteArray& cfgXmlData);
+
 signals:
 	void work();
 	void stopped();
@@ -186,6 +193,7 @@ private:
 	HostAddressPort m_cfgServiceIP2;
 
 	SoftwareInfo m_softwareInfo;
+	OnlineLib::BuildInfo m_buildInfo;
 
 	SoftwareSettingsSet m_softwareSettingsSet;
 

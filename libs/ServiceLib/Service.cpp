@@ -2,9 +2,12 @@
 #error Do not include this file in the project! Link ServiceLib instead.
 #endif
 
+#include <QXmlStreamReader>
+
 #include <ServiceLib/Service.h>
 #include "./qtservice/src/qtservice.h"
 #include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/XmlHelper.h"
 #include <CommonLib/ConstStrings.h>
 
 // -------------------------------------------------------------------------------------
@@ -248,6 +251,28 @@ bool ServiceWorker::cmdLineArgIsSet(const QString& cmdLineArgName) const
 QString ServiceWorker::helpText() const
 {
 	return m_cmdLineParser.helpText();
+}
+
+void ServiceWorker::setBuildInfo(const OnlineLib::BuildInfo& buildInfo)
+{
+	m_buildInfo = buildInfo;
+}
+
+OnlineLib::BuildInfo ServiceWorker::buildInfo() const
+{
+	return m_buildInfo;
+}
+
+void ServiceWorker::clearBuildInfo()
+{
+	m_buildInfo.clear();
+}
+
+bool ServiceWorker::readBuildInfo(const QByteArray& cfgXmlData)
+{
+	XmlReadHelper xmlReader(cfgXmlData);
+
+	return m_buildInfo.readFromXml(xmlReader);
 }
 
 bool ServiceWorker::processServiceSpecificCmdLineArgs()
@@ -545,6 +570,7 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	if (m_serviceWorker != nullptr)
 	{
+		m_serviceWorker->buildInfo().saveToProto(serviceInfo.mutable_buildinfo());
 		m_serviceWorker->getServiceSpecificInfo(serviceInfo);
 	}
 

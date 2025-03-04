@@ -59,6 +59,9 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(	const SoftwareInfo& soft
 
 	//----------------------------------------------------------------------------------------------------
 	addTabWithTableView(250, "Log");
+
+	connect(this, &BaseServiceStateWidget::onUpdateServiceState,
+			this, &ConfigurationServiceWidget::updateBuildInfo);
 }
 
 ConfigurationServiceWidget::~ConfigurationServiceWidget()
@@ -148,14 +151,14 @@ void ConfigurationServiceWidget::updateClientsInfo()
 
 void ConfigurationServiceWidget::updateBuildInfo()
 {
-	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->buildInfoIsReady() == false)
+/*	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->buildInfoIsReady() == false)
 	{
 		m_buildTabModel->setData(m_buildTabModel->index(0, 1), "Not loaded");
 		m_buildTabModel->setRowCount(1);
 		return;
-	}
+	}*/
 
-	const OnlineLib::BuildInfo& b = m_tcpClientSocket->buildInfo();
+	const OnlineLib::BuildInfo& b = m_serviceData.buildInfo;
 
 	m_buildTabModel->setData(m_buildTabModel->index(0, 1), "Loaded");
 
@@ -168,10 +171,10 @@ void ConfigurationServiceWidget::updateBuildInfo()
 	m_buildTabModel->setData(m_buildTabModel->index(2, 1), "");
 
 	m_buildTabModel->setData(m_buildTabModel->index(3, 0), "Build No");
-	m_buildTabModel->setData(m_buildTabModel->index(3, 1), b.id);
+	m_buildTabModel->setData(m_buildTabModel->index(3, 1), b.buildNo);
 
 	m_buildTabModel->setData(m_buildTabModel->index(4, 0), "Build date");
-	m_buildTabModel->setData(m_buildTabModel->index(4, 1), b.dateStr());
+	m_buildTabModel->setData(m_buildTabModel->index(4, 1), b.dateTimeStr());
 
 	m_buildTabModel->setData(m_buildTabModel->index(5, 0), "Changeset");
 	m_buildTabModel->setData(m_buildTabModel->index(5, 1), b.changeset);
@@ -219,7 +222,7 @@ void ConfigurationServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::serviceStateLoaded, this, &ConfigurationServiceWidget::updateServiceState);
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::clientsLoaded, this, &ConfigurationServiceWidget::updateClientsInfo);
-	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
+//	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &ConfigurationServiceWidget::updateServiceParameters);
 
 	connect(m_tcpClientSocket, &TcpConfigServiceClient::socketDisconnected, this, &ConfigurationServiceWidget::clearServiceData);

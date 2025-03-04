@@ -102,13 +102,13 @@ void CfgControlServer::sendServiceState()
 
 void CfgControlServer::sendLoadedBuildInfo()
 {
-	Network::BuildInfo message;
+	Proto::BuildInfo message;
 
 	const OnlineLib::BuildInfo& b = buildInfo();
 
 	message.set_project(b.project.toStdString());
-	message.set_id(b.id);
-	message.set_date(b.date.toMSecsSinceEpoch());
+	message.set_buildno(b.buildNo);
+	message.set_datetime(b.dateTimeStr().toStdString());
 	message.set_changeset(b.changeset);
 	message.set_user(b.user.toStdString());
 	message.set_workstation(b.workstation.toStdString());

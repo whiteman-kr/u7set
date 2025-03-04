@@ -56,7 +56,7 @@ namespace
 			header.size = sizeof(VduConfigFile1);
 
 			header.project = addStringRef(context.m_db.currentProject().projectName(), offsetof(VduConfigFile1, project));
-			header.buildNo = context.m_buildResultWriter->buildInfo().id;
+			header.buildNo = context.m_buildResultWriter->buildInfo().buildNo;
 
 			header.equipmentId = addStringRef(vdu.equipmentId(), offsetof(VduConfigFile1, equipmentId));
 			header.caption = addStringRef(vdu.caption(), offsetof(VduConfigFile1, caption));

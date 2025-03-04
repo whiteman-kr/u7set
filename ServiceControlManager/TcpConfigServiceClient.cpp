@@ -125,10 +125,9 @@ void TcpConfigServiceClient::onGetConfigurationServiceClientList(const char* rep
 	sendRequest(CFGS_GET_LOADED_BUILD_INFO);
 }
 
-
 void TcpConfigServiceClient::onGetConfigurationServiceLoadedBuildInfoReply(const char* replyData, quint32 replyDataSize)
 {
-	Network::BuildInfo message;
+	Proto::BuildInfo message;
 
 	bool result = message.ParseFromArray(replyData, replyDataSize);
 
@@ -138,16 +137,7 @@ void TcpConfigServiceClient::onGetConfigurationServiceLoadedBuildInfoReply(const
 		return;
 	}
 
-	m_buildInfo.project = QString::fromStdString(message.project());
-
-	m_buildInfo.id = message.id();
-
-	m_buildInfo.date = QDateTime::fromMSecsSinceEpoch(message.date());
-
-	m_buildInfo.changeset = message.changeset();
-
-	m_buildInfo.user = QString::fromStdString(message.user());
-	m_buildInfo.workstation = QString::fromStdString(message.workstation());
+	m_buildInfo.loadFromProto(message);
 
 	m_buildInfoIsReady = true;
 	emit buildInfoLoaded();

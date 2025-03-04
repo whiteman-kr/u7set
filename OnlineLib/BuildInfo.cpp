@@ -4,6 +4,7 @@
 
 #include "BuildInfo.h"
 #include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/XmlHelper.h"
 #include <CommonLib/ConstStrings.h>
 #include <BuildInfo.pb.h>
 #include <QXmlStreamReader>
@@ -11,7 +12,6 @@
 
 namespace OnlineLib
 {
-
 	// --------------------------------------------------------------------------------------
 	//
 	//	BuildInfo structure implementation
@@ -20,40 +20,68 @@ namespace OnlineLib
 
 	const QString BuildInfo::dateTimeFormatStr("dd.MM.yyyy hh:mm:ss");
 
-	void BuildInfo::writeToXml(QXmlStreamWriter& xmlWriter) const
+	void BuildInfo::clear()
 	{
-		xmlWriter.writeStartElement("BuildInfo");
-
-		xmlWriter.writeAttribute("Project", project);
-		xmlWriter.writeAttribute("ID", QString::number(id));
-		xmlWriter.writeAttribute("Date", dateStr());
-		xmlWriter.writeAttribute("Changeset", QString::number(changeset));
-		xmlWriter.writeAttribute("User", user);
-		xmlWriter.writeAttribute("Workstation", workstation);
-
-		xmlWriter.writeEndElement();			// build
+		project.clear();
+		buildNo = -1;
+		dateTime = QDateTime();
+		changeset = 0;
+		user.clear();
+		workstation.clear();
 	}
 
-
-	void BuildInfo::readFromXml(QXmlStreamReader& xmlReader)
+	QString BuildInfo::dateTimeStr() const
 	{
-		if (xmlReader.name() != QLatin1String("BuildInfo"))
+		return dateTime.toString(dateTimeFormatStr);
+	}
+
+	// void BuildInfo::setDateTime(const std::string& dateTimeStdString)
+	// {
+	// 	dateTime = QDateTime::fromString(QString::fromStdString(dateTimeStdString), dateTimeFormatStr);
+	// }
+
+	void BuildInfo::writeToXml(QXmlStreamWriter& xmlWriter) const
+	{
+		xmlWriter.writeStartElement(XmlElement::BUILD_INFO);
+
+		xmlWriter.writeAttribute(XmlAttribute::PROJECT, project);
+		xmlWriter.writeAttribute(XmlAttribute::ID, QString::number(buildNo));
+		xmlWriter.writeAttribute(XmlAttribute::DATE, dateTimeStr());
+		xmlWriter.writeAttribute(XmlAttribute::CHANGESET, QString::number(changeset));
+		xmlWriter.writeAttribute(XmlAttribute::USER, user);
+		xmlWriter.writeAttribute(XmlAttribute::WORKSTATION, workstation);
+
+		xmlWriter.writeEndElement();			// BuildInfo
+	}
+
+	bool BuildInfo::readFromXml(XmlReadHelper& xmlReader, bool findElement)
+	{
+		bool res = true;
+
+		if (findElement == true)
 		{
-			assert(false);
-			return;
+			res = xmlReader.findElement(XmlElement::BUILD_INFO);
+		}
+		else
+		{
+			res = xmlReader.name() == XmlElement::BUILD_INFO;
 		}
 
-		project = xmlReader.attributes().value("Project").toString();
-		id = xmlReader.attributes().value("ID").toInt();
+		RETURN_IF_FALSE(res);
 
-		QString dateTimeStr = xmlReader.attributes().value("Date").toString();
-		date = QDateTime::fromString(dateTimeStr, dateTimeFormatStr);
+		res &= xmlReader.readStringAttribute(XmlAttribute::PROJECT, &project);
+		res &= xmlReader.readIntAttribute(XmlAttribute::ID, &buildNo);
 
-		changeset = xmlReader.attributes().value("Changeset").toInt();
+		QString dateTimeStr;
 
-		user = xmlReader.attributes().value("User").toString();
+		res &= xmlReader.readStringAttribute(XmlAttribute::DATE, &dateTimeStr);
+		dateTime = QDateTime::fromString(dateTimeStr, dateTimeFormatStr);
 
-		workstation = xmlReader.attributes().value("Workstation").toString();
+		res &= xmlReader.readIntAttribute(XmlAttribute::CHANGESET, &changeset);
+		res &= xmlReader.readStringAttribute(XmlAttribute::USER, &user);
+		res &= xmlReader.readStringAttribute(XmlAttribute::WORKSTATION, &workstation);
+
+		return res;
 	}
 
 	void BuildInfo::saveToProto(Proto::BuildInfo* proto) const
@@ -61,8 +89,8 @@ namespace OnlineLib
 		TEST_PTR_RETURN(proto);
 
 		proto->set_project(project.toStdString());
-		proto->set_buildno(id);
-		proto->set_datetime(dateStr().toStdString());
+		proto->set_buildno(buildNo);
+		proto->set_datetime(dateTimeStr().toStdString());
 		proto->set_changeset(changeset);
 		proto->set_user(user.toStdString());
 		proto->set_workstation(workstation.toStdString());
@@ -71,8 +99,8 @@ namespace OnlineLib
 	void BuildInfo::loadFromProto(const Proto::BuildInfo& proto)
 	{
 		project = QString::fromStdString(proto.project());
-		id = proto.buildno();
-		date = QDateTime::fromString(QString::fromStdString(proto.datetime()), dateTimeFormatStr);
+		buildNo = proto.buildno();
+		dateTime = QDateTime::fromString(QString::fromStdString(proto.datetime()), dateTimeFormatStr);
 		changeset = proto.changeset();
 		user = QString::fromStdString(proto.user());
 		workstation = QString::fromStdString(proto.workstation());
@@ -86,73 +114,75 @@ namespace OnlineLib
 
 	void BuildFileInfo::writeToXml(QXmlStreamWriter& xmlWriter) const
 	{
-		xmlWriter.writeStartElement("File");
+		xmlWriter.writeStartElement(XmlElement::FILE);
 
-		xmlWriter.writeAttribute("Name", pathFileName);
-		xmlWriter.writeAttribute("ID", ID);
-		xmlWriter.writeAttribute("Tag", tag);
-		xmlWriter.writeAttribute("Compressed", compressed == true ? "Yes" : "No" );
-		xmlWriter.writeAttribute("Size", QString::number(size));
-		xmlWriter.writeAttribute("MD5", md5);
+		xmlWriter.writeAttribute(XmlAttribute::NAME, pathFileName);
+		xmlWriter.writeAttribute(XmlAttribute::ID, ID);
+		xmlWriter.writeAttribute(XmlAttribute::TAG, tag);
+		xmlWriter.writeAttribute(XmlAttribute::COMPRESSED, boolToString(compressed));
+		xmlWriter.writeAttribute(XmlAttribute::SIZE, QString::number(size));
+		xmlWriter.writeAttribute(XmlAttribute::MD5, md5);
 
-		for(auto it = metadata.begin(); it != metadata.end(); ++it)
+		for(auto const& [key, str] : metadata)
 		{
-			xmlWriter.writeTextElement(it.key(), *it);
+			xmlWriter.writeTextElement(key, str);
 		}
 
-		xmlWriter.writeEndElement();		// file
+		xmlWriter.writeEndElement();		// File
 	}
 
-
-	void BuildFileInfo::readFromXml(QXmlStreamReader& xmlReader)
+	bool BuildFileInfo::readFromXml(XmlReadHelper& xmlReader, bool findElement)
 	{
-		if (xmlReader.name() != QLatin1String("File"))
+		bool res = true;
+
+		if (findElement == true)
 		{
-			assert(false);
-			return;
+			res = xmlReader.findElement(XmlElement::FILE);
+		}
+		else
+		{
+			res = xmlReader.name() == XmlElement::FILE;
 		}
 
-		pathFileName = xmlReader.attributes().value("Name").toString();
-		ID = xmlReader.attributes().value("ID").toString();
-		tag = xmlReader.attributes().value("Tag").toString();
+		RETURN_IF_FALSE(res);
 
-		QString compressedStr = xmlReader.attributes().value("Compressed").toString();
-		compressed = compressedStr == "Yes" ? true : false;
+		res &= xmlReader.readStringAttribute(XmlAttribute::NAME, &pathFileName);
+		res &= xmlReader.readStringAttribute(XmlAttribute::ID, &ID);
+		res &= xmlReader.readStringAttribute(XmlAttribute::TAG, &tag);
+		res &= xmlReader.readBoolAttribute(XmlAttribute::COMPRESSED, &compressed);
+		res &= xmlReader.readInt64Attribute(XmlAttribute::SIZE, &size);
+		res &= xmlReader.readStringAttribute(XmlAttribute::MD5, &md5);
 
-		size = xmlReader.attributes().value("Size").toInt();
-		md5 = xmlReader.attributes().value("MD5").toString();
+		RETURN_IF_FALSE(res);
 
 		metadata.clear();
 
 		xmlReader.readNext();
 
-		while (!(xmlReader.tokenType() == QXmlStreamReader::EndElement && xmlReader.name() == QLatin1String("File")))
+		while (!(xmlReader.tokenType() == QXmlStreamReader::EndElement && xmlReader.name() == XmlElement::FILE))
 		{
 			if (xmlReader.tokenType() == QXmlStreamReader::StartElement)
 			{
-				QString key = xmlReader.name().toString();
+				QString key = xmlReader.name();
+
+				QString value;
+
+				xmlReader.readStringElement(key, &value, false);
+
+				metadata.emplace(key, value);
 
 				xmlReader.readNext();
-
-				if (xmlReader.tokenType() == QXmlStreamReader::Characters)
-				{
-					metadata.insert(key, xmlReader.text().toString());
-				}
 			}
 
 			xmlReader.readNext();
 		}
-	}
 
+		return res;
+	}
 
 	QString BuildFileInfo::getMetadata(const QString& key) const
 	{
-		if (metadata.contains(key))
-		{
-			return metadata[key];
-		}
-
-		return QString();
+		return getValueOrDefault(metadata, key, QString());
 	}
 
 	bool BuildFileInfo::isConfigurationXml() const

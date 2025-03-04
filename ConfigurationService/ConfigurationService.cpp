@@ -38,6 +38,7 @@ void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& se
 void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
 {
 	stopCfgServerThread();
+	clearBuildInfo();
 
 	emit renameWorkBuildToBackupExcept(newBuildPath);
 
@@ -107,7 +108,15 @@ bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath
 
 	cfgXmlFile.close();
 
-	bool res = softwareSettingsSet().readFromXml(cfgXmlData);
+	bool res = readBuildInfo(cfgXmlData);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger(), QString("Error reading BuildInfo from file: %1").arg(File::CONFIGURATION_XML));
+		return false;
+	}
+
+	res = softwareSettingsSet().readFromXml(cfgXmlData);
 
 	if (res == false)
 	{
@@ -182,7 +191,6 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 															  m_cfgServiceSettings.checkHostname,
 															  *m_cfgCheckerWorker,
 															  logger());
-
 	std::vector<Tcp::ListenAddress> listenAddrs;
 
 	for(const RqCtrlSettings& rcs: m_cfgServiceSettings.rcSettings)
@@ -210,7 +218,6 @@ void ConfigurationServiceWorker::stopCfgServerThread()
 	}
 }
 
-
 void ConfigurationServiceWorker::startCfgCheckerThread()
 {
 	m_cfgCheckerWorker = new CfgCheckerWorker(equipmentID(), m_workDirectory, m_autoloadBuildPath, 3 * 1000, logger());
@@ -223,7 +230,6 @@ void ConfigurationServiceWorker::startCfgCheckerThread()
 	connect(this, &ConfigurationServiceWorker::renameWorkBuildToBackupExcept, m_cfgCheckerWorker, &CfgCheckerWorker::renameWorkToBackup);
 }
 
-
 void ConfigurationServiceWorker::stopCfgCheckerThread()
 {
 	assert(m_cfgCheckerThread != nullptr);
@@ -234,7 +240,6 @@ void ConfigurationServiceWorker::stopCfgCheckerThread()
 	m_cfgCheckerWorker = nullptr;
 }
 
-
 void ConfigurationServiceWorker::startUdpThreads()
 {
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_CONFIGURATION_SERVICE_INFO, logger());
@@ -243,7 +248,6 @@ void ConfigurationServiceWorker::startUdpThreads()
 
 	m_infoSocketThread->start();
 }
-
 
 void ConfigurationServiceWorker::stopUdpThreads()
 {

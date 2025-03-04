@@ -182,15 +182,14 @@ namespace Builder
 
 	void BuildFile::addMetadata(const QString& name, const QString& value)
 	{
-		m_info.metadata.insert(name, value);
+		m_info.metadata.emplace(name, value);
 	}
-
 
 	void BuildFile::addMetadata(QList<StringPair>& nameValueList)
 	{
 		for(const StringPair& p : nameValueList)
 		{
-			m_info.metadata.insert(p.first, p.second);
+			m_info.metadata.emplace(p.first, p.second);
 		}
 	}
 
@@ -370,9 +369,9 @@ namespace Builder
 
 	void ConfigurationXmlFile::finalize()
 	{
-		m_xmlWriter.writeStartElement("Files");
+		m_xmlWriter.writeStartElement(XmlElement::FILES);
 
-		m_xmlWriter.writeAttribute("Count", QString("%1").arg(m_linkedFiles.size()));
+		m_xmlWriter.writeAttribute(XmlAttribute::COUNT, QString("%1").arg(m_linkedFiles.size()));
 
 		std::vector<BuildFile*> linkedFiles(m_linkedFiles.begin(), m_linkedFiles.end());
 
@@ -509,8 +508,8 @@ namespace Builder
 
 	bool BuildResult::writeBuildXmlFilesSection(const std::map<QString, BuildFile*>& buildFiles)
 	{
-		m_xmlWriter.writeStartElement("Files");
-		m_xmlWriter.writeAttribute("Count", QString::number(buildFiles.size()));
+		m_xmlWriter.writeStartElement(XmlElement::FILES);
+		m_xmlWriter.writeAttribute(XmlAttribute::COUNT, QString::number(buildFiles.size()));
 
 		for(const auto& [fileName, file] : buildFiles)
 		{
@@ -525,7 +524,7 @@ namespace Builder
 
 	bool BuildResult::closeBuildXml()
 	{
-		m_xmlWriter.writeStartElement("BuildResult");
+		m_xmlWriter.writeStartElement(XmlElement::BUILD_RESULT);
 
 		m_xmlWriter.writeAttribute("Errors", QString::number(m_log->errorCount()));
 		m_xmlWriter.writeAttribute("Warnings", QString::number(m_log->warningCount()));
@@ -584,16 +583,16 @@ namespace Builder
 		m_buildInfo.project = m_dbController->currentProject().projectName();
 		m_buildInfo.user = m_dbController->currentUser().username();
 		m_buildInfo.workstation = QHostInfo::localHostName();
-		m_buildInfo.date = QDateTime::currentDateTime();
+		m_buildInfo.dateTime = QDateTime::currentDateTime();
 
-		if (m_dbController->buildStart(m_buildInfo.workstation, m_buildInfo.changeset, &m_buildInfo.id, nullptr) == false)
+		if (m_dbController->buildStart(m_buildInfo.workstation, m_buildInfo.changeset, &m_buildInfo.buildNo, nullptr) == false)
 		{
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
 		msg = QString(tr("Build #%1 was started. User - %2, host - %3, changeset - %4."))
-				.arg(m_buildInfo.id)
+				.arg(m_buildInfo.buildNo)
 				.arg(m_dbController->currentUser().username())
 				.arg(QHostInfo::localHostName())
 				.arg(m_buildInfo.changeset);
@@ -610,7 +609,7 @@ namespace Builder
 
 	bool BuildResultWriter::finish(int errorCount, int warningCount)
 	{
-		if (m_buildInfo.id == -1)
+		if (m_buildInfo.buildNo == -1)
 		{
 			return false;
 		}
@@ -618,7 +617,7 @@ namespace Builder
 		LOG_EMPTY_LINE(m_log)
 
 		msg = QString(tr("Build #%1 was finished. Errors - %2. Warnings - %3."))
-		        .arg(m_buildInfo.id)
+		        .arg(m_buildInfo.buildNo)
 				.arg(errorCount)
 				.arg(warningCount);
 
@@ -659,7 +658,7 @@ namespace Builder
 			result &= buildResult.finalize(m_buildFiles);
 		}
 
-		result &= m_dbController->buildFinish(m_buildInfo.id, errorCount, warningCount, buildLogStr, nullptr);
+		result &= m_dbController->buildFinish(m_buildInfo.buildNo, errorCount, warningCount, buildLogStr, nullptr);
 
 		return result;
 	}
@@ -786,7 +785,7 @@ namespace Builder
 
 		if (m_firmwareWriter.save(fileData, m_log) == true)
 		{
-			BuildFile* buildFile = addFile("", QString("%1-%2.bts").arg(m_buildInfo.project).arg(QString::number(m_buildInfo.id).rightJustified(6, '0')), fileData);
+			BuildFile* buildFile = addFile("", QString("%1-%2.bts").arg(m_buildInfo.project).arg(QString::number(m_buildInfo.buildNo).rightJustified(6, '0')), fileData);
 
 			if (buildFile == nullptr)
 			{
@@ -1073,7 +1072,7 @@ namespace Builder
 
 		QString buildDir = QString("%1/build-%2").
 								arg(m_dbController->currentProject().projectName()).
-								arg(m_buildInfo.id, 6, 10, Latin1Char::ZERO);
+								arg(m_buildInfo.buildNo, 6, 10, Latin1Char::ZERO);
 
 		QString buildFullPath = appDataPath + "/" + buildDir;
 
