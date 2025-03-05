@@ -2,7 +2,7 @@
 #include "../OnlineLib/UdpSocket.h"
 #include "../OnlineLib/SocketIO.h"
 #include "AppDataServiceWidget.h"
-#include "ConfigurationServiceWidget.h"
+#include "CfgServiceWidget.h"
 #include "TuningServiceWidget.h"
 
 // --------------------------------------------------------------------------------------
@@ -25,6 +25,7 @@ E::ServiceState ServiceData::serviceState() const
 bool ServiceData::parseProtoServiceInfo()
 {
 	buildInfo.loadFromProto(protoServiceInfo.buildinfo());
+	swInfo.serializeFrom(protoServiceInfo.softwareinfo());
 	sessionParams.loadFrom(protoServiceInfo.sessionparams());
 
 	QString settingsXml = QString::fromStdString(protoServiceInfo.settingsxml());
@@ -562,7 +563,7 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 		switch (serviceSoftwareType)
 		{
 		case E::SoftwareType::ConfigurationService:
-			sd.statusWidget = new ConfigurationServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
+			sd.statusWidget = new CfigServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
 			break;
 
 		case E::SoftwareType::AppDataService:

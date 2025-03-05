@@ -6,25 +6,24 @@
 #include "../OnlineLib/SoftwareInfo.h"
 #include "ServiceTableModel.h"
 
-class BaseServiceStateWidget : public QMainWindow
+class BaseServiceWidget : public QMainWindow
 {
 	Q_OBJECT
 public:
-	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo,
+	explicit BaseServiceWidget(const SoftwareInfo& softwareInfo,
 									const ServiceData& service,
 									quint32 udpIp, quint16 udpPort,
 									QWidget* parent = nullptr);
 
-	virtual ~BaseServiceStateWidget();
+	virtual ~BaseServiceWidget();
 
 	int addTab(QWidget* page, const QString& label);
 	QTableView* addTabWithTableView(int defaultSectionSize, const QString& label);
-	void addStateTab();
+	QTableView* createTableView(QStandardItemModel* model, int defaultSectionSize,
+								const QStringList& columns = QStringList());
 	void addClientsTab(bool showStateColumn = true);
-	QStandardItemModel* stateTabModel() { return m_stateTabModel; }
 	QStandardItemModel* clientsTabModel() { return m_clientsTabModel; }
 
-	void setStateTabMaxRowQuantity(int rowQuantity) { m_stateTabMaxRowQuantity = rowQuantity; }
 	void setClientQuantityRowIndexOnStateTab(int index) { m_clientQuantityRowIndex = index; }
 
 	HostAddressPort getWorkingClientRequestIp();
@@ -32,13 +31,21 @@ public:
 	const SoftwareInfo& softwareInfo() { return m_softwareInfo; }
 
 signals:
-	void needToReloadData();
-	void invalidateData();
-	void connectionStatisticChanged();
-	void onUpdateServiceState();
+	void invalidateServiceData();
 
 public slots:
-	void updateServiceState();
+	void updateSrvStatusWidgets();
+	void updateWindowTitle();
+	void updateSrvControlButtons();
+	void updateSrvStatus();
+	void updateBuildInfo();
+	void updateStatusBar();
+
+	void updateBaseSettings();
+	virtual int updateSettings(int rowCount);
+
+	QString getRunningStateStr() const;
+
 	void updateClientsModel(const Network::ServiceClients& serviceClients);
 	void askServiceState();
 
@@ -47,11 +54,19 @@ public slots:
 	void restartService();
 
 	void serviceAckReceived(const UdpRequest udpRequest);
-	void serviceNotFound();
+	void serviceAckTimeout();
 
 protected:
 	virtual void createTcpConnection(quint32 ip, quint16 port);
 	virtual void dropTcpConnection();
+
+	QString rqCtrlInfoStr(const RqCtrlSettings& rcs);
+
+private:
+	void addGeneralTab();
+	void addParametersTab();
+
+	void clearServiceData();
 
 protected:
 	UdpSocketThread* m_udpSocketThread = nullptr;
@@ -64,6 +79,10 @@ protected:
 
 private:
 	void sendCommand(int command);
+
+protected:
+	QStandardItemModel* m_settingsModel = nullptr;
+	QStandardItemModel* m_paramModel = nullptr;
 
 private:
 	int m_udpAckQuantity = 0;
@@ -79,9 +98,11 @@ private:
 	QLabel* m_runningStatus = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
 
-	int m_stateTabMaxRowQuantity = 5;
 	int m_clientQuantityRowIndex = -1;
-	QStandardItemModel* m_stateTabModel = nullptr;
+
+	QStandardItemModel* m_srvStatusModel = nullptr;
+	QStandardItemModel* m_buildInfoModel = nullptr;
+
 	QStandardItemModel* m_clientsTabModel = nullptr;
 
 	static const int SS_ROW_CONNECTED = 0;

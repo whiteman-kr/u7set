@@ -3,7 +3,7 @@
 #include <QAbstractTableModel>
 #include "../AppDataService/AppDataSource.h"
 #include "../OnlineLib/Tcp.h"
-#include "BaseServiceStateWidget.h"
+#include "BaseServiceWidget.h"
 
 
 class QTableView;
@@ -67,7 +67,7 @@ private:
 	TcpAppDataClient* m_clientSocket;
 };
 
-class AppDataServiceWidget : public BaseServiceStateWidget
+class AppDataServiceWidget : public BaseServiceWidget
 {
 	Q_OBJECT
 public:
@@ -79,7 +79,7 @@ signals:
 	void clearTcpClientSocket();
 
 public slots:
-	void updateServiceState();
+	void updateSrvStatus();
 
 	void updateStateInfo();
 

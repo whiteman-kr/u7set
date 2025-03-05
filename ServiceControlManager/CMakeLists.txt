@@ -24,10 +24,10 @@ add_executable(${TARGET} WIN32
 	AppDataServiceWidget.h
 	AppDataSourceWidget.cpp
 	AppDataSourceWidget.h
-	BaseServiceStateWidget.cpp
-	BaseServiceStateWidget.h
-	ConfigurationServiceWidget.cpp
-	ConfigurationServiceWidget.h
+	BaseServiceWidget.cpp
+	BaseServiceWidget.h
+	CfgServiceWidget.cpp
+	CfgServiceWidget.h
 	MainWindow.cpp
 	MainWindow.h
 	ScanOptionsWidget.cpp

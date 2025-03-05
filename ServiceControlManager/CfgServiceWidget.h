@@ -4,24 +4,24 @@ class QStandardItemModel;
 class TcpConfigServiceClient;
 
 #include "../OnlineLib/Tcp.h"
-#include "BaseServiceStateWidget.h"
+#include "BaseServiceWidget.h"
 
-class ConfigurationServiceWidget : public BaseServiceStateWidget
+class CfigServiceWidget : public BaseServiceWidget
 {
 	Q_OBJECT
 public:
-	ConfigurationServiceWidget(	const SoftwareInfo& softwareInfo,
+	CfigServiceWidget(	const SoftwareInfo& softwareInfo,
 								const ServiceData& service,
 								quint32 udpIp, quint16 udpPort,
 								QWidget *parent = 0);
-	~ConfigurationServiceWidget();
+	~CfigServiceWidget();
 
 public slots:
 	void updateStateInfo();
-	void updateServiceState();
 	void updateClientsInfo();
-	void updateBuildInfo();
 	void updateServiceParameters();
+
+	int updateSettings(int rowCount) override;
 
 	void clearServiceData();
 
@@ -30,7 +30,6 @@ protected:
 	void dropTcpConnection() override;
 
 private:
-	QStandardItemModel* m_buildTabModel = nullptr;
 	QStandardItemModel* m_settingsTabModel = nullptr;
 	QStandardItemModel* m_parametersTabModel = nullptr;
 	TcpConfigServiceClient* m_tcpClientSocket = nullptr;

@@ -19,11 +19,12 @@ struct ServiceData
 	Network::ServiceInfo protoServiceInfo;
 
 	OnlineLib::BuildInfo buildInfo;
+	SoftwareInfo swInfo;
+	SessionParams sessionParams;
+	std::shared_ptr<SoftwareSettings> settings;
 
 	std::vector<HostAddressPort> clientRequestIPs;
 
-	SessionParams sessionParams;
-	std::shared_ptr<SoftwareSettings> settings;
 
 	UdpClientSocket* clientSocket = nullptr;
 	QWidget* statusWidget = nullptr;

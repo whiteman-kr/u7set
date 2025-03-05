@@ -445,13 +445,10 @@ void DataSourcesStateModel::reloadList()
 
 
 AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
-	BaseServiceStateWidget(softwareInfo, service, udpIp, udpPort, parent),
+	BaseServiceWidget(softwareInfo, service, udpIp, udpPort, parent),
 	m_tcpClientSocket(nullptr),
 	m_tcpClientThread(nullptr)
 {
-	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &AppDataServiceWidget::updateStateInfo);
-
-	setStateTabMaxRowQuantity(17);
 	setClientQuantityRowIndexOnStateTab(5);
 
 	// Data Sources
@@ -549,14 +546,14 @@ AppDataServiceWidget::~AppDataServiceWidget()
 	dropTcpConnection();
 }
 
-void AppDataServiceWidget::updateServiceState()
+void AppDataServiceWidget::updateSrvStatus()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 	{
 		assert(false);
 		return;
 	}
-	stateTabModel()->setData(stateTabModel()->index(6, 1), m_tcpClientSocket->configServiceConnectionState());
+/*	stateTabModel()->setData(stateTabModel()->index(6, 1), m_tcpClientSocket->configServiceConnectionState());
 	stateTabModel()->setData(stateTabModel()->index(7, 1), m_tcpClientSocket->archiveServiceConnectionState());
 
 	auto state = m_tcpClientSocket->serviceState().appdatareceivestate();
@@ -572,7 +569,7 @@ void AppDataServiceWidget::updateServiceState()
 	stateTabModel()->setData(stateTabModel()->index(14, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
 	stateTabModel()->setData(stateTabModel()->index(15, 1), static_cast<qint64>(state.errrupframecrc()));
 
-	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errnotexpectedsimpacket()));
+	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errnotexpectedsimpacket()));*/
 
 	auto appDataSettings = std::dynamic_pointer_cast<AppDataServiceSettings>(m_serviceData.settings);
 
@@ -609,7 +606,7 @@ void AppDataServiceWidget::updateStateInfo()
 {
 	if (m_serviceData.protoServiceInfo.servicestate() == E::ServiceState::Work)
 	{
-		stateTabModel()->setData(stateTabModel()->index(5, 0), "Connected client quantity");
+/*		stateTabModel()->setData(stateTabModel()->index(5, 0), "Connected client quantity");
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");
 		stateTabModel()->setData(stateTabModel()->index(7, 0), "Connected to ArchiveService");
 
@@ -633,8 +630,8 @@ void AppDataServiceWidget::updateStateInfo()
 		}
 		else
 		{
-			updateServiceState();
-		}
+			updateSrvStatus();
+		}*/
 	}
 
 	HostAddressPort workingIp = getWorkingClientRequestIp();
@@ -740,8 +737,8 @@ void AppDataServiceWidget::updateServiceParameters()
 
 void AppDataServiceWidget::clearServiceData()
 {
-	stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
-	stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
+//	stateTabModel()->setData(stateTabModel()->index(6, 1), "???");
+//	stateTabModel()->setData(stateTabModel()->index(7, 1), "???");
 
 	m_parametersTabModel->setData(m_parametersTabModel->index(0, 1), "???");
 	m_parametersTabModel->setData(m_parametersTabModel->index(1, 1), "???");
@@ -810,7 +807,7 @@ void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 	connect(m_tcpClientSocket, &TcpAppDataClient::clientsLoaded, this, &AppDataServiceWidget::updateClientsInfo);
 	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, [this](){ clientsTabModel()->removeRows(0, clientsTabModel()->rowCount()); });
 
-	connect(m_tcpClientSocket, &TcpAppDataClient::stateLoaded, this, &AppDataServiceWidget::updateServiceState);
+	connect(m_tcpClientSocket, &TcpAppDataClient::stateLoaded, this, &AppDataServiceWidget::updateSrvStatus);
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::settingsLoaded, this, &AppDataServiceWidget::updateServiceParameters);
 

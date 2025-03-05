@@ -6,10 +6,8 @@
 #include <QMessageBox>
 
 TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
-	BaseServiceStateWidget(softwareInfo, service, udpIp, udpPort, parent)
+	BaseServiceWidget(softwareInfo, service, udpIp, udpPort, parent)
 {
-	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &TuningServiceWidget::updateStateInfo);
-
 	//----------------------------------------------------------------------------------------------------
 	addClientsTab();
 

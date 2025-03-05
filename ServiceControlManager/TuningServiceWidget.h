@@ -1,7 +1,7 @@
 #ifndef TUNINGSERVICEWIDGET_H
 #define TUNINGSERVICEWIDGET_H
 
-#include "BaseServiceStateWidget.h"
+#include "BaseServiceWidget.h"
 
 class QStandardItemModel;
 class TcpTuningServiceClient;
@@ -49,7 +49,7 @@ static const QStringList tuningSignalsDynamicFieldsHeaderLabels {
 class QStandardItemModel;
 class TuningSourceWidget;
 
-class TuningServiceWidget : public BaseServiceStateWidget
+class TuningServiceWidget : public BaseServiceWidget
 {
 	Q_OBJECT
 public:
