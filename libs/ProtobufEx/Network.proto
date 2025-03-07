@@ -355,6 +355,20 @@ message SessionParams
 	optional int32 softwareRunMode = 2 [default = 0 /* E::SoftwareRunMode::Normal */];	// enum E::SoftwareRunMode values
 }
 
+message ServiceClientInfo
+{
+	required int32 ip = 1;
+	required int64 uptime = 2;
+	required bool isActual = 3;
+	required int64 replyQuantity = 4;
+	required SoftwareInfo softwareInfo = 5;
+}
+
+message ServiceClients
+{
+	repeated ServiceClientInfo clients = 1;
+}
+
 message ServiceInfo
 {
     required SoftwareInfo softwareInfo = 1;
@@ -368,6 +382,15 @@ message ServiceInfo
 	optional string settingsXml = 6;					// current service settings XML
 
 	optional Proto.BuildInfo buildInfo = 7;
+
+	optional ServiceClients clients = 8;
+
+	// CfgService specific
+	//
+	optional string autoloadBuildPath = 20;
+	optional string workDirectory = 21;
+
+	//
 }
 
 message GetServiceInfoReply
@@ -381,20 +404,6 @@ message ConfigurationServiceState
     required string currentBuildDirectory = 1;
     required int32 checkBuildAttemptQuantity = 2;
     required int32 buildCheckerState = 3;
-}
-
-message ServiceClientInfo
-{
-    required int32 ip = 3;
-    required int64 uptime = 5;
-    required bool isActual = 6;
-    required int64 replyQuantity = 7;
-    required SoftwareInfo softwareInfo = 11;
-}
-
-message ServiceClients
-{
-    repeated ServiceClientInfo clients = 1;
 }
 
 message ConfigurationServiceSettings

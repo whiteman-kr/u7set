@@ -49,10 +49,6 @@ void CfgControlServer::processRequest(quint32 requestID, const char* requestData
 			sendClientList();
 			break;
 
-		case CFGS_GET_LOADED_BUILD_INFO:
-			sendLoadedBuildInfo();
-			break;
-
 		case CFGS_GET_SETTINGS:
 			sendSettings();
 			break;
@@ -96,22 +92,6 @@ void CfgControlServer::sendServiceState()
 	message.set_currentbuilddirectory(m_rootFolder.toStdString());
 	message.set_checkbuildattemptquantity(m_checkerWorker.checkNewBuildAttemptQuantity());
 	message.set_buildcheckerstate(TO_INT(m_checkerWorker.checkNewBuildStage()));
-
-	sendReply(message);
-}
-
-void CfgControlServer::sendLoadedBuildInfo()
-{
-	Proto::BuildInfo message;
-
-	const OnlineLib::BuildInfo& b = buildInfo();
-
-	message.set_project(b.project.toStdString());
-	message.set_buildno(b.buildNo);
-	message.set_datetime(b.dateTimeStr().toStdString());
-	message.set_changeset(b.changeset);
-	message.set_user(b.user.toStdString());
-	message.set_workstation(b.workstation.toStdString());
 
 	sendReply(message);
 }

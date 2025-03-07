@@ -56,6 +56,7 @@ const quint16	PORT_LM_TUNING = 50000;								// default port of LM tuning
 // All services request IDs
 //
 const quint32   RQID_SERVICE_GET_INFO = 1000,
+				RQID_SERVICE_GET_SHORT_INFO = 1010,
 
 				RQID_SECURITY_LEVEL = 1040,
 				RQID_INTRODUCE_MYSELF = 1050,

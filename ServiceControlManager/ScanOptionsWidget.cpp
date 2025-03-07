@@ -168,7 +168,7 @@ void SubnetChecker::startChecking()
 	m_requestHeader.version = 0;
 	m_requestHeader.no = 1;
 	m_requestHeader.errorCode = RQERROR_OK;
-	m_requestHeader.id = RQID_SERVICE_GET_INFO;
+	m_requestHeader.id = RQID_SERVICE_GET_SHORT_INFO;
 	m_requestHeader.dataSize = 0;
 
 	m_sendPacketTimer = new QTimer(this);

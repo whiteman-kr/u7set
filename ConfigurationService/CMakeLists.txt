@@ -20,8 +20,8 @@ add_executable(${TARGET}
 	CfgControlServer.cpp
 	CfgControlServer.h
 	CfgServiceMain.cpp
-	ConfigurationService.cpp
-	ConfigurationService.h
+	CfigService.cpp
+	CfigService.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

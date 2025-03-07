@@ -35,6 +35,8 @@ add_executable(${TARGET} WIN32
 	ScmMain.cpp
 	ScmTcpAppDataClient.cpp
 	ScmTcpAppDataClient.h
+	ServiceData.cpp
+	ServiceData.h
 	ServiceTableModel.cpp
 	ServiceTableModel.h
 	TcpConfigServiceClient.cpp

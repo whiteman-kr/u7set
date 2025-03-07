@@ -256,7 +256,7 @@ private:
 	void startBaseRequestSocketThread();
 	void stopBaseRequestSocketThread();
 
-	void getServiceInfo(Network::ServiceInfo& servicesInfo);
+	void getServiceInfo(Network::ServiceInfo& servicesInfo, bool shortInfo);
 
 private:
 	QMutex m_mutex;

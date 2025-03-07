@@ -11,40 +11,6 @@ CfigServiceWidget::CfigServiceWidget(	const SoftwareInfo& softwareInfo,
 														QWidget *parent) :
 	BaseServiceWidget(softwareInfo, service, udpIp, udpPort, parent)
 {
-	setClientQuantityRowIndexOnStateTab(8);
-
-	//----------------------------------------------------------------------------------------------------
-
-	addClientsTab();
-
-	//----------------------------------------------------------------------------------------------------
-	QTableView* parametersTableView = addTabWithTableView(250, "Parameters");
-
-	m_parametersTabModel = new QStandardItemModel(4, 2, this);
-	parametersTableView->setModel(m_parametersTabModel);
-
-	m_parametersTabModel->setHeaderData(0, Qt::Horizontal, "Property");
-	m_parametersTabModel->setHeaderData(1, Qt::Horizontal, "Value");
-
-	m_parametersTabModel->setData(m_parametersTabModel->index(0, 0), "EquipmentID");
-	m_parametersTabModel->setData(m_parametersTabModel->index(1, 0), "AutoloadBuildPath");
-	m_parametersTabModel->setData(m_parametersTabModel->index(2, 0), "ClientRequestIP");
-	m_parametersTabModel->setData(m_parametersTabModel->index(3, 0), "WorkDirectory");
-
-	//----------------------------------------------------------------------------------------------------
-	QTableView* settingsTableView = addTabWithTableView(250, "Settings");
-
-	m_settingsTabModel = new QStandardItemModel(2, 2, this);
-	settingsTableView->setModel(m_settingsTabModel);
-
-	m_settingsTabModel->setHeaderData(0, Qt::Horizontal, "Property");
-	m_settingsTabModel->setHeaderData(1, Qt::Horizontal, "Value");
-
-	m_settingsTabModel->setData(m_settingsTabModel->index(0, 0), "Client Request IP");
-	m_settingsTabModel->setData(m_settingsTabModel->index(1, 0), "Client Request NetMask");
-
-	//----------------------------------------------------------------------------------------------------
-	addTabWithTableView(250, "Log");
 }
 
 CfigServiceWidget::~CfigServiceWidget()
@@ -96,11 +62,11 @@ void CfigServiceWidget::updateClientsInfo()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->clientsIsReady() == false)
 	{
-		clientsTabModel()->setRowCount(0);
+//		clientsTabModel()->setRowCount(0);
 		return;
 	}
 
-	updateClientsModel(m_tcpClientSocket->clients());
+//	updateClientsModel(m_tcpClientSocket->clients());
 }
 
 void CfigServiceWidget::updateServiceParameters()
@@ -130,26 +96,36 @@ int CfigServiceWidget::updateSettings(int rowCount)
 	sm->setData(sm->index(rowCount, 0), QStringLiteral("Check hostname"));
 	sm->setData(sm->index(rowCount, 1), st->checkHostname ? QStringLiteral("True") : QStringLiteral("False"));
 
-	int i = 1;
+	rowCount++;
 
 	for(const RqCtrlSettings& rcs : st->rcSettings)
 	{
-		sm->setData(sm->index(rowCount + i, 0), QString("Request Controller %1").arg(rcs.ID()));
-		sm->setData(sm->index(rowCount + i, 1), rqCtrlInfoStr(rcs));
-		i++;
+		sm->setData(sm->index(rowCount, 0), QString("Request Controller %1").arg(rcs.ID()));
+		sm->setData(sm->index(rowCount, 1), rqCtrlInfoStr(rcs));
+		rowCount++;
 	}
 
-	return i;
+	sm->setData(sm->index(rowCount, 0), QStringLiteral("Auto load build path"));
+	sm->setData(sm->index(rowCount, 1), QString::fromStdString(m_serviceData.protoServiceInfo.autoloadbuildpath()));
+
+	rowCount++;
+
+	sm->setData(sm->index(rowCount, 0), QStringLiteral("Work directory"));
+	sm->setData(sm->index(rowCount, 1), QString::fromStdString(m_serviceData.protoServiceInfo.workdirectory()));
+
+	rowCount++;
+
+	return rowCount;
 }
 
 void CfigServiceWidget::clearServiceData()
 {
-	clientsTabModel()->setRowCount(0);
+//	clientsTabModel()->setRowCount(0);
 
-	for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
-	{
-		m_parametersTabModel->setData(m_parametersTabModel->index(i, 1), "???");
-	}
+	// for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
+	// {
+	// 	m_parametersTabModel->setData(m_parametersTabModel->index(i, 1), "???");
+	// }
 }
 
 void CfigServiceWidget::createTcpConnection(quint32 ip, quint16 port)

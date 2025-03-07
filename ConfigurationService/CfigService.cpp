@@ -1,4 +1,4 @@
-#include "ConfigurationService.h"
+#include "CfigService.h"
 #include <CommonLib/ConstStrings.h>
 #include "CfgChecker.h"
 #include "CfgControlServer.h"
@@ -33,6 +33,13 @@ void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& se
 	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::ConfigurationService, m_cfgServiceSettings);
 
 	serviceInfo.set_settingsxml(xmlString.toStdString());
+	serviceInfo.set_autoloadbuildpath(m_autoloadBuildPath.toStdString());
+	serviceInfo.set_workdirectory(m_workDirectory.toStdString());
+
+	if (m_cfgServerThread != nullptr)
+	{
+		m_cfgServerThread->getClientsList(serviceInfo.mutable_clients());
+	}
 }
 
 void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)

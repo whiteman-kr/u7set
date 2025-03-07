@@ -21,10 +21,6 @@ public:
 	QTableView* addTabWithTableView(int defaultSectionSize, const QString& label);
 	QTableView* createTableView(QStandardItemModel* model, int defaultSectionSize,
 								const QStringList& columns = QStringList());
-	void addClientsTab(bool showStateColumn = true);
-	QStandardItemModel* clientsTabModel() { return m_clientsTabModel; }
-
-	void setClientQuantityRowIndexOnStateTab(int index) { m_clientQuantityRowIndex = index; }
 
 	HostAddressPort getWorkingClientRequestIp();
 
@@ -44,9 +40,11 @@ public slots:
 	void updateBaseSettings();
 	virtual int updateSettings(int rowCount);
 
+	void updateClients();
+
 	QString getRunningStateStr() const;
 
-	void updateClientsModel(const Network::ServiceClients& serviceClients);
+//	void updateClientsModel(const Network::ServiceClients& serviceClients);
 	void askServiceState();
 
 	void startService();
@@ -64,7 +62,7 @@ protected:
 
 private:
 	void addGeneralTab();
-	void addParametersTab();
+	void addClientsTab();
 
 	void clearServiceData();
 
@@ -81,15 +79,17 @@ private:
 	void sendCommand(int command);
 
 protected:
+	QStandardItemModel* m_srvStatusModel = nullptr;
+	QStandardItemModel* m_buildInfoModel = nullptr;
 	QStandardItemModel* m_settingsModel = nullptr;
-	QStandardItemModel* m_paramModel = nullptr;
+	QStandardItemModel* m_clientsModel = nullptr;
 
 private:
 	int m_udpAckQuantity = 0;
 
-	QAction* m_startServiceButton;
-	QAction* m_stopServiceButton;
-	QAction* m_restartServiceButton;
+	QAction* m_startServiceButton = nullptr;
+	QAction* m_stopServiceButton = nullptr;
+	QAction* m_restartServiceButton = nullptr;
 
 	QTimer* m_timer = nullptr;
 	UdpClientSocket* m_baseClientSocket = nullptr;
@@ -97,13 +97,6 @@ private:
 	QLabel* m_uptimeStatus = nullptr;
 	QLabel* m_runningStatus = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
-
-	int m_clientQuantityRowIndex = -1;
-
-	QStandardItemModel* m_srvStatusModel = nullptr;
-	QStandardItemModel* m_buildInfoModel = nullptr;
-
-	QStandardItemModel* m_clientsTabModel = nullptr;
 
 	static const int SS_ROW_CONNECTED = 0;
 	static const int SS_ROW_UPTIME = 1;

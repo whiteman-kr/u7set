@@ -9,7 +9,7 @@ TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const
 	BaseServiceWidget(softwareInfo, service, udpIp, udpPort, parent)
 {
 	//----------------------------------------------------------------------------------------------------
-	addClientsTab();
+//	addClientsTab();
 
 	//----------------------------------------------------------------------------------------------------
 	QTableView* parametersTableView = addTabWithTableView(250, "Parameters");
@@ -195,11 +195,11 @@ void TuningServiceWidget::updateClientsInfo()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->clientsIsReady() == false)
 	{
-		clientsTabModel()->setRowCount(0);
+//		clientsTabModel()->setRowCount(0);
 		return;
 	}
 
-	updateClientsModel(m_tcpClientSocket->clients());
+//	updateClientsModel(m_tcpClientSocket->clients());
 }
 
 void TuningServiceWidget::updateServiceParameters()
@@ -378,15 +378,15 @@ void TuningServiceWidget::updateTuningSignalsState()
 
 void TuningServiceWidget::clearServiceData()
 {
-	clientsTabModel()->setRowCount(0);
+//	clientsTabModel()->setRowCount(0);
 
-	for (int i = 0; i < m_parametersTabModel->rowCount(); i++)
-	{
-		m_parametersTabModel->setData(m_parametersTabModel->index(i, 1), "???");
-	}
+	// for (int i = 0; i < m_parametersTabModel->rowCount(); i++)
+	// {
+	// 	m_parametersTabModel->setData(m_parametersTabModel->index(i, 1), "???");
+	// }
 
-	m_tuningSourcesTabModel->setRowCount(0);
-	m_tuningSignalsTabModel->setRowCount(0);
+	// m_tuningSourcesTabModel->setRowCount(0);
+	// m_tuningSignalsTabModel->setRowCount(0);
 }
 
 void TuningServiceWidget::onTuningSourceDoubleClicked(const QModelIndex &index)

@@ -126,23 +126,29 @@ void CfgServer::readBuildXml()
 		return;
 	}
 
-	while(xmlReader.readNextStartElement() == false)
+	if (res == true)
 	{
-		if (xmlReader.name() != XmlElement::FILE)
+		do
 		{
-			break;
+			bool r = xmlReader.findElement(XmlElement::FILE);
+
+			if (r == false)
+			{
+				break;
+			}
+
+			OnlineLib::BuildFileInfo bfi;
+
+			res &= bfi.readFromXml(xmlReader, false);
+
+			if (res == false)
+			{
+				break;
+			}
+
+			m_buildFileInfo.emplace(bfi.pathFileName, bfi);
 		}
-
-		OnlineLib::BuildFileInfo bfi;
-
-		res &= bfi.readFromXml(xmlReader, false);
-
-		if (res == false)
-		{
-			break;
-		}
-
-		m_buildFileInfo.emplace(bfi.pathFileName, bfi);
+		while(true);
 	}
 
 	if (res == true)

@@ -33,7 +33,6 @@ private:
 	Tcp::SetConnectionResult checkClient(const QString& clientEquipmentID, const QString& clientHostname) const override;
 
 	void sendServiceState();
-	void sendLoadedBuildInfo();
 	void sendSettings();
 	void sendServiceLog();
 

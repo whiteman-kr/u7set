@@ -425,13 +425,14 @@ void Service::onBaseRequest(UdpRequest request)
 
 	switch(request.ID())
 	{
+		case RQID_SERVICE_GET_SHORT_INFO:
 		case RQID_SERVICE_GET_INFO:
-		{
-			Network::ServiceInfo si;
-			getServiceInfo(si);
-			ack.writeData(si);
+			{
+				Network::ServiceInfo si;
+				getServiceInfo(si, request.ID() == RQID_SERVICE_GET_SHORT_INFO);
+				ack.writeData(si);
+			}
 			break;
-		}
 
 		case RQID_SERVICE_START:
 			LOG_MSG(m_logger, QString("Service START request from SCM (%1).").arg(ha.addressStr()));
@@ -543,7 +544,7 @@ void Service::stopBaseRequestSocketThread()
 	delete m_baseRequestSocketThread;
 }
 
-void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
+void Service::getServiceInfo(Network::ServiceInfo& serviceInfo, bool shortInfo)
 {
 	ServiceWorker* serviceWorker = m_serviceWorker;
 	if (serviceWorker == nullptr)
@@ -568,10 +569,13 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	serviceInfo.set_allocated_sessionparams(sp);
 
-	if (m_serviceWorker != nullptr)
+	if (shortInfo == false)
 	{
-		m_serviceWorker->buildInfo().saveToProto(serviceInfo.mutable_buildinfo());
-		m_serviceWorker->getServiceSpecificInfo(serviceInfo);
+		if (m_serviceWorker != nullptr)
+		{
+			m_serviceWorker->buildInfo().saveToProto(serviceInfo.mutable_buildinfo());
+			m_serviceWorker->getServiceSpecificInfo(serviceInfo);
+		}
 	}
 
 	if (m_state != E::ServiceState::Stopped)

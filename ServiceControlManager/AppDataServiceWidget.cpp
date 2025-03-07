@@ -449,7 +449,7 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, con
 	m_tcpClientSocket(nullptr),
 	m_tcpClientThread(nullptr)
 {
-	setClientQuantityRowIndexOnStateTab(5);
+//	setClientQuantityRowIndexOnStateTab(5);
 
 	// Data Sources
 	m_dataSourcesStateModel = new DataSourcesStateModel(this);
@@ -473,7 +473,7 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, con
 	new TableDataVisibilityController(m_signalsView, "AppDataServiceWidget/Signals", defaultSignalColumnVisibility);
 
 	// Clients
-	addClientsTab(false);
+//	addClientsTab(false);
 
 	// Parameters
 	QTableView* parametersTableView = addTabWithTableView(250, "Parameters");
@@ -716,11 +716,11 @@ void AppDataServiceWidget::updateClientsInfo()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->clientsIsReady() == false)
 	{
-		clientsTabModel()->setRowCount(0);
+//		clientsTabModel()->setRowCount(0);
 		return;
 	}
 
-	updateClientsModel(m_tcpClientSocket->clients());
+//	updateClientsModel(m_tcpClientSocket->clients());
 }
 
 void AppDataServiceWidget::updateServiceParameters()
@@ -805,7 +805,7 @@ void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, m_signalStateModel, &SignalStateModel::invalidateData);
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::clientsLoaded, this, &AppDataServiceWidget::updateClientsInfo);
-	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, [this](){ clientsTabModel()->removeRows(0, clientsTabModel()->rowCount()); });
+//	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, [this](){ clientsTabModel()->removeRows(0, clientsTabModel()->rowCount()); });
 
 	connect(m_tcpClientSocket, &TcpAppDataClient::stateLoaded, this, &AppDataServiceWidget::updateSrvStatus);
 
