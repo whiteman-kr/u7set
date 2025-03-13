@@ -5,8 +5,12 @@
 #include <QTableView>
 #include <QMessageBox>
 
-TuningServiceWidget::TuningServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
-	BaseServiceWidget(softwareInfo, service, udpIp, udpPort, parent)
+TuningServiceWidget::TuningServiceWidget(ServiceTableModel* srvTableModel,
+										const SoftwareInfo& softwareInfo,
+										const ServiceData& service,
+										quint32 udpIp, quint16 udpPort,
+										QWidget* parent) :
+	BaseServiceWidget(srvTableModel, softwareInfo, service, udpIp, udpPort, parent)
 {
 	//----------------------------------------------------------------------------------------------------
 //	addClientsTab();

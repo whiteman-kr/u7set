@@ -6,15 +6,16 @@ class TcpConfigServiceClient;
 #include "../OnlineLib/Tcp.h"
 #include "BaseServiceWidget.h"
 
-class CfigServiceWidget : public BaseServiceWidget
+class CfgServiceWidget : public BaseServiceWidget
 {
 	Q_OBJECT
 public:
-	CfigServiceWidget(	const SoftwareInfo& softwareInfo,
-								const ServiceData& service,
-								quint32 udpIp, quint16 udpPort,
-								QWidget *parent = 0);
-	~CfigServiceWidget();
+	CfgServiceWidget(ServiceTableModel* srvTableModel,
+					const SoftwareInfo& softwareInfo,
+					const ServiceData& service,
+					quint32 udpIp, quint16 udpPort,
+					QWidget* parent = 0);
+	~CfgServiceWidget();
 
 public slots:
 	void updateStateInfo();

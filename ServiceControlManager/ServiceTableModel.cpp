@@ -13,7 +13,7 @@
 
 Host::Host()
 {
-	servicesData.reserve(servicesInfo.size());
+	servicesData.reserve(servicesInfo.size() - 1);
 
 	for (const ServiceInfo& si : servicesInfo)
 	{
@@ -79,6 +79,13 @@ ServiceTableModel::~ServiceTableModel()
 {
 	m_timer.stop();
 
+	for(BaseServiceWidget* srvWidget : m_srvWidgets)
+	{
+		DELETE_IF_NOT_NULL(srvWidget);
+	}
+
+	m_srvWidgets.clear();
+
 	QSettings settings;
 
 	int hstCount = hostsCount();
@@ -91,11 +98,6 @@ ServiceTableModel::~ServiceTableModel()
 
 		settings.setArrayIndex(i);
 		settings.setValue("IP", host.hostIP);
-
-		for (ServiceData& sd : host.servicesData)
-		{
-			DELETE_IF_NOT_NULL(sd.statusWidget);
-		}
 	}
 
 	settings.endArray();
@@ -237,6 +239,17 @@ void ServiceTableModel::addAddress(const QString &connectionAddress)
 	emit serviceStateChanged(hostsCount() - 1);
 }
 
+void ServiceTableModel::deleteSrvWidget(BaseServiceWidget* srvWidget)
+{
+	auto it = m_srvWidgets.find(srvWidget);
+
+	if (it != m_srvWidgets.end())
+	{
+		DELETE_IF_NOT_NULL(srvWidget);
+		m_srvWidgets.erase(it);
+	}
+}
+
 void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 {
 	UdpClientSocket* socket = dynamic_cast<UdpClientSocket*>(sender());
@@ -246,16 +259,22 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 		return;
 	}
 
-	switch (udpRequest.ID())
+	quint32 rqID = udpRequest.ID();
+
+	switch (rqID)
 	{
 	case RQID_SERVICE_GET_INFO:
+		Q_ASSERT(false);
+		break;
+
+	case RQID_SERVICE_GET_SHORT_INFO:
 	{
 		quint32 ip = socket->serverAddress().toIPv4Address();
 
 		int hostIndex = -1;
 		int serviceIndex = -1;
 
-		getServiceState(ip, socket->port(), hostIndex, serviceIndex);
+		getServiceState(ip, socket->port(), &hostIndex, &serviceIndex);
 
 		Network::ServiceInfo newServiceInfo;
 
@@ -371,16 +390,6 @@ void ServiceTableModel::removeHost(int row)
 {
 	beginRemoveRows(QModelIndex(), row, row);
 
-	Host& host = m_hosts[row];
-
-	for (ServiceData& sd : host.servicesData)
-	{
-		if (sd.statusWidget != nullptr)
-		{
-			delete sd.statusWidget;
-		}
-	}
-
 	m_hosts.erase(m_hosts.begin() + row);
 
 	endRemoveRows();
@@ -392,7 +401,8 @@ void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, Network:
 {
 	int hostIndex = -1;
 	int serviceIndex = -1;
-	getServiceState(ip, port, hostIndex, serviceIndex);
+
+	getServiceState(ip, port, &hostIndex, &serviceIndex);
 
 	if (hostIndex >= hostsCount() || serviceIndex == -1 || serviceIndex >= servicesInfo.size())
 	{
@@ -435,36 +445,42 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 {
 	ServiceData& sd = m_hosts[index.row()].servicesData[index.column()];
 
-	if (sd.statusWidget == nullptr)
+	E::SoftwareType serviceSoftwareType = static_cast<E::SoftwareType>(sd.protoServiceInfo.softwareinfo().softwaretype());
+
+	BaseServiceWidget* srvWidget = nullptr;
+
+	switch (serviceSoftwareType)
 	{
-		E::SoftwareType serviceSoftwareType = static_cast<E::SoftwareType>(sd.protoServiceInfo.softwareinfo().softwaretype());
+	case E::SoftwareType::ConfigurationService:
+		srvWidget = new CfgServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
+		break;
 
-		switch (serviceSoftwareType)
-		{
-		case E::SoftwareType::ConfigurationService:
-			sd.statusWidget = new CfigServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
-			break;
+	case E::SoftwareType::AppDataService:
+		srvWidget = new AppDataServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
+		break;
 
-		case E::SoftwareType::AppDataService:
-			sd.statusWidget = new AppDataServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
-			break;
+	case E::SoftwareType::TuningService:
+		srvWidget = new TuningServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
+		break;
 
-		case E::SoftwareType::TuningService:
-			sd.statusWidget = new TuningServiceWidget(m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
-			break;
-
-		case E::SoftwareType::ArchiveService:
-		case E::SoftwareType::DiagDataService:
-		case E::SoftwareType::GatewayService:
-		default:
-			Q_ASSERT(false);		// To Do
-			return;
-		}
+	case E::SoftwareType::ArchiveService:
+	case E::SoftwareType::DiagDataService:
+	case E::SoftwareType::GatewayService:
+	default:
+		Q_ASSERT(false);		// To Do
+		return;
 	}
 
-	sd.statusWidget->showNormal();
-	sd.statusWidget->raise();
-	sd.statusWidget->activateWindow();
+	if (srvWidget == nullptr)
+	{
+		return;
+	}
+
+	m_srvWidgets.insert(srvWidget);
+
+	srvWidget->showNormal();
+	srvWidget->raise();
+	srvWidget->activateWindow();
 }
 
 void ServiceTableModel::startUdpSocketThread()
@@ -584,10 +600,13 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, E::ServiceStat
 	emit serviceStateChanged(hostsCount() - 1);
 }
 
-void ServiceTableModel::getServiceState(quint32 ip, quint16 port, int& hostIndex, int& serviceIndex)
+void ServiceTableModel::getServiceState(quint32 ip, quint16 port, int* hostIndex, int* serviceIndex)
 {
-	hostIndex = 0;
-	serviceIndex = serviceColumn(port);
+	TEST_PTR_RETURN(hostIndex);
+	TEST_PTR_RETURN(serviceIndex);
+
+	*hostIndex = 0;
+	*serviceIndex = serviceColumn(port);
 
 	for(Host& host : m_hosts)
 	{
@@ -596,7 +615,7 @@ void ServiceTableModel::getServiceState(quint32 ip, quint16 port, int& hostIndex
 			return;
 		}
 
-		hostIndex++;
+		(*hostIndex)++;
 	}
 }
 

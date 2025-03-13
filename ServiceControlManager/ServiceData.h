@@ -22,7 +22,6 @@ struct ServiceData
 	std::vector<HostAddressPort> clientRequestIPs;
 
 	UdpClientSocket* clientSocket = nullptr;
-	QWidget* statusWidget = nullptr;
 
 	//
 

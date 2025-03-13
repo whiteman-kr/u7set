@@ -10,15 +10,18 @@ class BaseServiceWidget : public QMainWindow
 {
 	Q_OBJECT
 public:
-	explicit BaseServiceWidget(const SoftwareInfo& softwareInfo,
-									const ServiceData& service,
-									quint32 udpIp, quint16 udpPort,
-									QWidget* parent = nullptr);
-
+	explicit BaseServiceWidget(	ServiceTableModel* srvTableModel,
+								const SoftwareInfo& softwareInfo,
+								const ServiceData& service,
+								quint32 udpIp, quint16 udpPort,
+								QWidget* parent = nullptr);
 	virtual ~BaseServiceWidget();
 
 	int addTab(QWidget* page, const QString& label);
 	QTableView* addTabWithTableView(int defaultSectionSize, const QString& label);
+
+	QTableView* createTableView(QStandardItemModel* model,
+								const std::list<std::pair<QString, int>>& columns);
 	QTableView* createTableView(QStandardItemModel* model, int defaultSectionSize,
 								const QStringList& columns = QStringList());
 
@@ -44,7 +47,6 @@ public slots:
 
 	QString getRunningStateStr() const;
 
-//	void updateClientsModel(const Network::ServiceClients& serviceClients);
 	void askServiceState();
 
 	void startService();
@@ -59,6 +61,8 @@ protected:
 	virtual void dropTcpConnection();
 
 	QString rqCtrlInfoStr(const RqCtrlSettings& rcs);
+
+	void closeEvent(QCloseEvent *event) override;
 
 private:
 	void addGeneralTab();
@@ -85,6 +89,8 @@ protected:
 	QStandardItemModel* m_clientsModel = nullptr;
 
 private:
+	ServiceTableModel* m_srvTableModel = nullptr;
+
 	int m_udpAckQuantity = 0;
 
 	QAction* m_startServiceButton = nullptr;

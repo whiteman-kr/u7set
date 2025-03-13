@@ -12,11 +12,11 @@ public:
     ~MainWindow();
 
 private:
-    QVector<QWidget*> m_widgets;
+	QVector<QWidget*> m_widgets;
     ServiceTableModel* m_serviceModel;
     QTableView* m_serviceTable;
 
-    void openConnectionInfo(QString text);
+//    void openConnectionInfo(QString text);
 
 protected:
 	void closeEvent(QCloseEvent *event);
@@ -24,7 +24,7 @@ protected:
 public slots:
     void openEditor();
     void switchLanguage(QAction* selectedAction);
-    void connectionClicked(QAction* selectedAction);
+//    void connectionClicked(QAction* selectedAction);
     void scanNetwork();
     void removeHost();
 	void aboutScm();

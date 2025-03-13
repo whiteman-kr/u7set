@@ -357,11 +357,14 @@ message SessionParams
 
 message ServiceClientInfo
 {
-	required int32 ip = 1;
-	required int64 uptime = 2;
-	required bool isActual = 3;
-	required int64 replyQuantity = 4;
-	required SoftwareInfo softwareInfo = 5;
+	required int32 requestIP = 1;
+	required int32 requestPort = 2;
+	required int32 clientIP = 3;
+	required int32 clientPort = 4;
+	required int64 uptime = 5;
+	required bool isActual = 6;
+	required int64 replyQuantity = 7;
+	required SoftwareInfo softwareInfo = 8;
 }
 
 message ServiceClients

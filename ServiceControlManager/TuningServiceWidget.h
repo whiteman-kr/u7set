@@ -53,7 +53,11 @@ class TuningServiceWidget : public BaseServiceWidget
 {
 	Q_OBJECT
 public:
-	TuningServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent = 0);
+	TuningServiceWidget(ServiceTableModel* srvTableModel,
+						const SoftwareInfo& softwareInfo,
+						const ServiceData& service,
+						quint32 udpIp, quint16 udpPort,
+						QWidget* parent = 0);
 	~TuningServiceWidget();
 
 signals:

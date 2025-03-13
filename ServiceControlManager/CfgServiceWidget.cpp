@@ -5,20 +5,21 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 
-CfigServiceWidget::CfigServiceWidget(	const SoftwareInfo& softwareInfo,
-														const ServiceData& service,
-														quint32 udpIp, quint16 udpPort,
-														QWidget *parent) :
-	BaseServiceWidget(softwareInfo, service, udpIp, udpPort, parent)
+CfgServiceWidget::CfgServiceWidget(	ServiceTableModel* srvTableModel,
+									const SoftwareInfo& softwareInfo,
+									const ServiceData& service,
+									quint32 udpIp, quint16 udpPort,
+									QWidget *parent) :
+	BaseServiceWidget(srvTableModel, softwareInfo, service, udpIp, udpPort, parent)
 {
 }
 
-CfigServiceWidget::~CfigServiceWidget()
+CfgServiceWidget::~CfgServiceWidget()
 {
 	dropTcpConnection();
 }
 
-void CfigServiceWidget::updateStateInfo()
+void CfgServiceWidget::updateStateInfo()
 {
 	if (m_serviceData.serviceState() == E::ServiceState::Work)
 	{
@@ -58,7 +59,7 @@ void CfigServiceWidget::updateStateInfo()
 	}
 }
 
-void CfigServiceWidget::updateClientsInfo()
+void CfgServiceWidget::updateClientsInfo()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->clientsIsReady() == false)
 	{
@@ -69,7 +70,7 @@ void CfigServiceWidget::updateClientsInfo()
 //	updateClientsModel(m_tcpClientSocket->clients());
 }
 
-void CfigServiceWidget::updateServiceParameters()
+void CfgServiceWidget::updateServiceParameters()
 {
 /*	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->settingsIsReady() == false)
 	{
@@ -85,9 +86,15 @@ void CfigServiceWidget::updateServiceParameters()
 	m_parametersTabModel->setData(m_parametersTabModel->index(3, 1), m_tcpClientSocket->workDirectory());*/
 }
 
-int CfigServiceWidget::updateSettings(int rowCount)
+int CfgServiceWidget::updateSettings(int rowCount)
 {
 	QStandardItemModel* sm = m_settingsModel;
+
+	if (m_serviceData.settings == nullptr)
+	{
+		sm->setRowCount(0);
+		return 0;
+	}
 
 	std::shared_ptr<CfgServiceSettings> st = std::dynamic_pointer_cast<CfgServiceSettings>(m_serviceData.settings);
 
@@ -118,7 +125,7 @@ int CfigServiceWidget::updateSettings(int rowCount)
 	return rowCount;
 }
 
-void CfigServiceWidget::clearServiceData()
+void CfgServiceWidget::clearServiceData()
 {
 //	clientsTabModel()->setRowCount(0);
 
@@ -128,22 +135,22 @@ void CfigServiceWidget::clearServiceData()
 	// }
 }
 
-void CfigServiceWidget::createTcpConnection(quint32 ip, quint16 port)
+void CfgServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 {
 	m_tcpClientSocket = new TcpConfigServiceClient(softwareInfo(), HostAddressPort(ip, port));
 	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
 
-	connect(m_tcpClientSocket, &TcpConfigServiceClient::serviceStateLoaded, this, &CfigServiceWidget::updateSrvStatus);
-	connect(m_tcpClientSocket, &TcpConfigServiceClient::clientsLoaded, this, &CfigServiceWidget::updateClientsInfo);
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::serviceStateLoaded, this, &CfgServiceWidget::updateSrvStatus);
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::clientsLoaded, this, &CfgServiceWidget::updateClientsInfo);
 //	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
-	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &CfigServiceWidget::updateServiceParameters);
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &CfgServiceWidget::updateServiceParameters);
 
-	connect(m_tcpClientSocket, &TcpConfigServiceClient::socketDisconnected, this, &CfigServiceWidget::clearServiceData);
+	connect(m_tcpClientSocket, &TcpConfigServiceClient::socketDisconnected, this, &CfgServiceWidget::clearServiceData);
 
 	m_tcpClientThread->start();
 }
 
-void CfigServiceWidget::dropTcpConnection()
+void CfgServiceWidget::dropTcpConnection()
 {
 	if (m_tcpClientThread != nullptr)
 	{

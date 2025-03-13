@@ -423,37 +423,48 @@ void Service::onBaseRequest(UdpRequest request)
 
 	HostAddressPort ha(request.address().toIPv4Address(), request.port());
 
-	switch(request.ID())
+	quint32 rqID = request.ID();
+	QHostAddress addr = request.address();
+	quint16 port = request.port();
+
+	switch(rqID)
 	{
-		case RQID_SERVICE_GET_SHORT_INFO:
-		case RQID_SERVICE_GET_INFO:
-			{
-				Network::ServiceInfo si;
-				getServiceInfo(si, request.ID() == RQID_SERVICE_GET_SHORT_INFO);
-				ack.writeData(si);
-			}
-			break;
+	case RQID_SERVICE_GET_SHORT_INFO:
+		{
+			Network::ServiceInfo si;
+			getServiceInfo(si, true);
+			ack.writeData(si);
+		}
+		break;
 
-		case RQID_SERVICE_START:
-			LOG_MSG(m_logger, QString("Service START request from SCM (%1).").arg(ha.addressStr()));
-			startServiceWorkerThread();
-			break;
+	case RQID_SERVICE_GET_INFO:
+		{
+			Network::ServiceInfo si;
+			getServiceInfo(si, false);
+			ack.writeData(si);
+		}
+		break;
 
-		case RQID_SERVICE_STOP:
-			LOG_MSG(m_logger, QString("Service STOP request from SCM (%1).").arg(ha.addressStr()));
-			stopServiceWorkerThread();
-			break;
+	case RQID_SERVICE_START:
+		LOG_MSG(m_logger, QString("Service START request from SCM (%1).").arg(ha.addressStr()));
+		startServiceWorkerThread();
+		break;
 
-		case RQID_SERVICE_RESTART:
-			LOG_MSG(m_logger, QString("Service RESTART request from SCM (%1).").arg(ha.addressStr()));
-			stopServiceWorkerThread();
-			startServiceWorkerThread();
-			break;
+	case RQID_SERVICE_STOP:
+		LOG_MSG(m_logger, QString("Service STOP request from SCM (%1).").arg(ha.addressStr()));
+		stopServiceWorkerThread();
+		break;
 
-		default:
-			Q_ASSERT(false);
-			ack.setErrorCode(RQERROR_UNKNOWN_REQUEST);
-			break;
+	case RQID_SERVICE_RESTART:
+		LOG_MSG(m_logger, QString("Service RESTART request from SCM (%1).").arg(ha.addressStr()));
+		stopServiceWorkerThread();
+		startServiceWorkerThread();
+		break;
+
+	default:
+		Q_ASSERT(false);
+		ack.setErrorCode(RQERROR_UNKNOWN_REQUEST);
+		break;
 	}
 
 	emit ackBaseRequest(ack);
@@ -546,6 +557,11 @@ void Service::stopBaseRequestSocketThread()
 
 void Service::getServiceInfo(Network::ServiceInfo& serviceInfo, bool shortInfo)
 {
+	if (shortInfo == false)
+	{
+		DEBUG_STOP;
+	}
+
 	ServiceWorker* serviceWorker = m_serviceWorker;
 	if (serviceWorker == nullptr)
 	{

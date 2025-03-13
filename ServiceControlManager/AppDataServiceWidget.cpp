@@ -443,9 +443,12 @@ void DataSourcesStateModel::reloadList()
 	endResetModel();
 }
 
-
-AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent) :
-	BaseServiceWidget(softwareInfo, service, udpIp, udpPort, parent),
+AppDataServiceWidget::AppDataServiceWidget(ServiceTableModel* srvTableModel,
+											const SoftwareInfo& softwareInfo,
+											const ServiceData& service,
+											quint32 udpIp, quint16 udpPort,
+											QWidget *parent) :
+	BaseServiceWidget(srvTableModel, softwareInfo, service, udpIp, udpPort, parent),
 	m_tcpClientSocket(nullptr),
 	m_tcpClientThread(nullptr)
 {
@@ -825,9 +828,12 @@ void AppDataServiceWidget::dropTcpConnection()
 	m_dataSourcesStateModel->setClient(nullptr);
 	m_signalStateModel->setClient(nullptr);
 
-	m_tcpClientThread->quitAndWait();
-	delete m_tcpClientThread;
-	m_tcpClientThread = nullptr;
+	if (m_tcpClientThread != nullptr)
+	{
+		m_tcpClientThread->quitAndWait();
+		delete m_tcpClientThread;
+		m_tcpClientThread = nullptr;
+	}
 
 	m_tcpClientSocket = nullptr;
 }

@@ -3,16 +3,20 @@
 #include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
 
-BaseServiceWidget::BaseServiceWidget(	const SoftwareInfo& softwareInfo,
-												const ServiceData& serviceData,
-												quint32 udpIp, quint16 udpPort,
-												QWidget* parent) :
+BaseServiceWidget::BaseServiceWidget(	ServiceTableModel* srvTableModel,
+										const SoftwareInfo& softwareInfo,
+										const ServiceData& serviceData,
+										quint32 udpIp, quint16 udpPort,
+										QWidget* parent) :
 	QMainWindow(parent),
+	m_srvTableModel(srvTableModel),
 	m_udpIp(udpIp),
 	m_udpPort(udpPort),
 	m_serviceData(serviceData),
 	m_softwareInfo(softwareInfo)
 {
+	TEST_PTR_RETURN(m_srvTableModel);
+
 	m_serviceData.protoServiceInfo.mutable_softwareinfo()->set_softwaretype(softwareInfo.softwareType());
 	m_serviceData.protoServiceInfo.set_servicestate(TO_INT(E::ServiceState::Undefined));
 
@@ -66,6 +70,7 @@ BaseServiceWidget::BaseServiceWidget(	const SoftwareInfo& softwareInfo,
 	connect(m_timer, &QTimer::timeout, this, &BaseServiceWidget::askServiceState);
 	m_timer->start(500);
 
+	askServiceState();
 	updateSrvStatus();
 }
 
@@ -292,6 +297,13 @@ void BaseServiceWidget::updateStatusBar()
 void BaseServiceWidget::updateBaseSettings()
 {
 	QStandardItemModel* sm = m_settingsModel;
+
+	if (m_serviceData.settings == nullptr)
+	{
+		sm->setRowCount(0);
+		return;
+	}
+
 	const SoftwareInfo& swInfo = m_serviceData.swInfo;
 
 	sm->setData(sm->index(0, 0), "EquipementID");
@@ -343,8 +355,9 @@ void BaseServiceWidget::updateClients()
 		const Network::ServiceClientInfo& client = clients.clients(i);
 		const Network::SoftwareInfo& sw = client.softwareinfo();
 
-		cm->setData(cm->index(i, 0), QHostAddress(client.ip()).toString());
+		cm->setData(cm->index(i, 0), HostAddressPort(client.requestip(), client.requestport()).toString());
 		cm->setData(cm->index(i, 1), QString::fromStdString(sw.equipmentid()));
+		cm->setData(cm->index(i, 2), HostAddressPort(client.clientip(), client.clientport()).toString());
 	}
 }
 
@@ -354,51 +367,6 @@ QString BaseServiceWidget::getRunningStateStr() const
 					arg(E::valueToString(m_serviceData.sessionParams.softwareRunMode)).
 					arg(m_serviceData.sessionParams.currentSettingsProfile));
 }
-
-/*
-void BaseServiceWidget::updateClientsModel(const Network::ServiceClients& serviceClients)
-{
-	m_clientsTabModel->setRowCount(serviceClients.clients_size());
-
-	if (m_clientQuantityRowIndex != -1)
-	{
-//		stateTabModel()->setData(stateTabModel()->index(m_clientQuantityRowIndex, 1), serviceClients.clients_size());
-	}
-
-	for (int i = 0; i < serviceClients.clients_size(); i++)
-	{
-		const Network::ServiceClientInfo& ci = serviceClients.clients(i);
-		const Network::SoftwareInfo& si = ci.softwareinfo();
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 0),
-								   E::valueToString<E::SoftwareType>(si.softwaretype()));
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 1),
-								   QString("%1.%2.%3 (%4)")
-								   .arg(si.majorversion())
-								   .arg(si.minorversion())
-								   .arg(si.patchversion())
-								   .arg(QString::fromStdString(si.branchname())));
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 2), QString::fromStdString(si.equipmentid()));
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 3), QString::fromStdString(si.osusername()));
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 4), QHostAddress(ci.ip()).toString());
-
-		quint64 uptime = ci.uptime();
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 5), QDateTime::fromMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch() - uptime));
-
-		uptime /= 1000;
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 6), formatUptime(uptime));
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 7), si.pipelineid());
-
-		m_clientsTabModel->setData(m_clientsTabModel->index(i, 8), ci.replyquantity());
-	}
-}*/
 
 void BaseServiceWidget::askServiceState()
 {
@@ -425,6 +393,10 @@ void BaseServiceWidget::restartService()
 
 void BaseServiceWidget::serviceAckReceived(const UdpRequest udpRequest)
 {
+	qDebug() << "Service ACK received";
+
+	quint32 rqID = udpRequest.ID();
+
 	m_udpAckQuantity++;
 
 	switch (udpRequest.ID())
@@ -468,6 +440,8 @@ void BaseServiceWidget::serviceAckReceived(const UdpRequest udpRequest)
 
 void BaseServiceWidget::serviceAckTimeout()
 {
+	qDebug() << "Service ack TIMEOUT";
+
 	if (m_serviceData.serviceState() != E::ServiceState::Unavailable)
 	{
 		clearServiceData();
@@ -529,6 +503,12 @@ QString BaseServiceWidget::rqCtrlInfoStr(const RqCtrlSettings& rcs)
 	return str;
 }
 
+void BaseServiceWidget::closeEvent(QCloseEvent* event)
+{
+	Q_UNUSED(event);
+	m_srvTableModel->deleteSrvWidget(this);
+}
+
 void BaseServiceWidget::addGeneralTab()
 {
 	QWidget* generalTabWidget = new QWidget();
@@ -576,26 +556,17 @@ void BaseServiceWidget::addGeneralTab()
 
 void BaseServiceWidget::addClientsTab()
 {
-	QStringList columns;
-	columns << "Request IP";
-	columns << "EquipmentID";
-	columns << "Client IP";
-	columns << "Software";
-	columns << "Host";
-	columns << "Connection time";
-	columns << "Packet counter";
+	std::list<std::pair<QString, int>> columns;
 
-	// m_clientsTabModel->setHeaderData(0, Qt::Horizontal, );
-	// m_clientsTabModel->setHeaderData(1, Qt::Horizontal, "Version");
-	// m_clientsTabModel->setHeaderData(2, Qt::Horizontal, "Equipment ID");
-	// m_clientsTabModel->setHeaderData(3, Qt::Horizontal, "User");
-	// m_clientsTabModel->setHeaderData(4, Qt::Horizontal, "IPv4");
-	// m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "Connection uptime");
-	// m_clientsTabModel->setHeaderData(7, Qt::Horizontal, "Build");
-	// m_clientsTabModel->setHeaderData(8, Qt::Horizontal, "Packet counter");
+	columns.push_back({"Request IP", 120});
+	columns.push_back({"EquipmentID", 250});
+	columns.push_back({"Client IP", 120});
+	columns.push_back({"Software", 150});
+	columns.push_back({"Connection time", 100});
+	columns.push_back({"Packet counter", 100});
 
-	m_clientsModel = new QStandardItemModel(0, columns.size(), this);
-	QTableView* clientsTableView = createTableView(m_clientsModel, 150, columns);
+	m_clientsModel = new QStandardItemModel(0, TO_INT(columns.size()), this);
+	QTableView* clientsTableView = createTableView(m_clientsModel, columns);
 
 	addTab(clientsTableView, "Clients");
 }
@@ -606,7 +577,9 @@ void BaseServiceWidget::clearServiceData()
 	{
 		m_udpAckQuantity = 0;
 		m_serviceData.protoServiceInfo.set_servicestate(TO_INT(E::ServiceState::Unavailable));
+		m_serviceData.protoServiceInfo.clear_clients();
 		m_serviceData.buildInfo.clear();
+		m_serviceData.settings.reset();
 	}
 }
 
@@ -640,28 +613,30 @@ QTableView* BaseServiceWidget::addTabWithTableView(int defaultSectionSize, const
 	return tableView;
 }
 
-QTableView* BaseServiceWidget::createTableView(QStandardItemModel* model, int defaultSectionSize,
-													const QStringList& columns)
+QTableView* BaseServiceWidget::createTableView(	QStandardItemModel* model,
+												const std::list<std::pair<QString, int>>& columns)
 {
 	QTableView* tableView = new QTableView();
 
 	QHeaderView* hHeader = tableView->horizontalHeader();
 
-	if (columns.isEmpty() == false)
+	if (columns.empty() == false)
 	{
 		int index = 0;
 
-		for(const QString& column : columns)
+		for(const auto& [column, size] : columns)
 		{
-			model->setHeaderData(index++, Qt::Horizontal, column);
+			model->setHeaderData(index, Qt::Horizontal, column);
+			hHeader->resizeSection(index, size);
+			index++;
 		}
 	}
 	else
 	{
 		tableView->horizontalHeader()->hide();
+		hHeader->setDefaultSectionSize(200);
 	}
 
-	hHeader->setDefaultSectionSize(defaultSectionSize);
 	hHeader->setStretchLastSection(true);
 	hHeader->setHighlightSections(false);
 
@@ -674,7 +649,6 @@ QTableView* BaseServiceWidget::createTableView(QStandardItemModel* model, int de
 
 	tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	tableView->setSelectionMode(QAbstractItemView::SingleSelection);
-//	newTableView->setAlternatingRowColors(true);
 	tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	tableView->setModel(model);
@@ -682,33 +656,18 @@ QTableView* BaseServiceWidget::createTableView(QStandardItemModel* model, int de
 	return tableView;
 }
 
-/*
-void BaseServiceWidget::addClientsTab(bool showStateColumn)
+QTableView* BaseServiceWidget::createTableView(QStandardItemModel* model, int defaultSectionSize,
+	const QStringList& columns)
 {
-	QTableView* clientsTableView = addTabWithTableView(150, "Clients");
+	std::list<std::pair<QString, int>> cols;
 
-	m_clientsTabModel = new QStandardItemModel(0, 8, this);
-	clientsTableView->setModel(m_clientsTabModel);
-
-	if (showStateColumn == false)
+	for(const QString& col : columns)
 	{
-		clientsTableView->hideColumn(6);
+		cols.push_back({col, defaultSectionSize});
 	}
 
-	m_clientsTabModel->setHeaderData(0, Qt::Horizontal, "Software type");
-	m_clientsTabModel->setHeaderData(1, Qt::Horizontal, "Version");
-	m_clientsTabModel->setHeaderData(2, Qt::Horizontal, "Equipment ID");
-	m_clientsTabModel->setHeaderData(3, Qt::Horizontal, "User");
-	m_clientsTabModel->setHeaderData(4, Qt::Horizontal, "IPv4");
-	m_clientsTabModel->setHeaderData(5, Qt::Horizontal, "Connection time");
-	m_clientsTabModel->setHeaderData(6, Qt::Horizontal, "Connection uptime");
-	m_clientsTabModel->setHeaderData(7, Qt::Horizontal, "Build");
-	m_clientsTabModel->setHeaderData(8, Qt::Horizontal, "Packet counter");
-
-	clientsTableView->setColumnWidth(0, 200);
-	clientsTableView->setColumnWidth(2, 250);
-	clientsTableView->setColumnWidth(7, 100);
-}*/
+	return createTableView(model, cols);
+}
 
 HostAddressPort BaseServiceWidget::getWorkingClientRequestIp()
 {

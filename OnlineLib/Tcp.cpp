@@ -1052,11 +1052,6 @@ namespace Tcp
 
 		for(const Tcp::ConnectionState& state : m_connectionStates)
 		{
-/*			if (state.isConnected == false)
-			{
-				continue;
-			}*/
-
 			const SoftwareInfo& si = state.connectedSoftwareInfo;
 
 			if (E::contains<E::SoftwareType>(TO_INT(si.softwareType())) == false)
@@ -1066,17 +1061,21 @@ namespace Tcp
 
 			Network::ServiceClientInfo* clientInfo = srvClients->add_clients();
 
+			clientInfo->set_requestip(m_listenAddress.hostAddr().address32());
+			clientInfo->set_requestport(m_listenAddress.hostAddr().port());
+
+			clientInfo->set_clientip(state.peerAddr.address32());
+			clientInfo->set_clientport(state.peerAddr.port());
+
+			clientInfo->set_uptime(QDateTime::currentMSecsSinceEpoch() - state.startTime);
+			clientInfo->set_isactual(state.isActual);
+			clientInfo->set_replyquantity(state.replyCount);
+
 			Network::SoftwareInfo* newSoftwareInfo = new Network::SoftwareInfo();
 
 			si.serializeTo(newSoftwareInfo);
 
 			clientInfo->set_allocated_softwareinfo(newSoftwareInfo);
-
-			clientInfo->set_ip(state.peerAddr.address32());
-
-			clientInfo->set_uptime(QDateTime::currentMSecsSinceEpoch() - state.startTime);
-			clientInfo->set_isactual(state.isActual);
-			clientInfo->set_replyquantity(state.replyCount);
 		}
 
 		m_statesMutex.unlock();

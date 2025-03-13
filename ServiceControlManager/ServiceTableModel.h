@@ -18,6 +18,8 @@ struct Host
 	int availableServicesCount();
 };
 
+class BaseServiceWidget;
+
 class ServiceTableModel : public QAbstractTableModel
 {
 	Q_OBJECT
@@ -31,6 +33,8 @@ public:
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
 	void addAddress(const QString& connectionAddress);
+
+	void deleteSrvWidget(BaseServiceWidget* srvWidget);
 
 signals:
 	void serviceStateChanged(int row);
@@ -49,7 +53,7 @@ private:
 	void restartUdpSocketThread();
 
 	void setServiceState(quint32 ip, quint16 port, E::ServiceState state);
-	void getServiceState(quint32 ip, quint16 port, int& hostIndex, int& serviceIndex);
+	void getServiceState(quint32 ip, quint16 port, int* hostIndex, int* serviceIndex);
 
 	int hostsCount() const;
 	int serviceCount() const;
@@ -57,6 +61,7 @@ private:
 
 private:
 	std::vector<Host> m_hosts;
+	std::set<BaseServiceWidget*> m_srvWidgets;
 
 	SoftwareInfo m_softwareInfo;
 
