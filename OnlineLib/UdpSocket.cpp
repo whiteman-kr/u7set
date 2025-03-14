@@ -144,7 +144,7 @@ bool UdpRequest::writeData(google::protobuf::Message& protobufMessage)
 
 	if (m_rawDataSize + messageSize > MAX_DATAGRAM_SIZE)
 	{
-		assert(m_rawDataSize + messageSize <= MAX_DATAGRAM_SIZE);
+		Q_ASSERT(m_rawDataSize + messageSize <= MAX_DATAGRAM_SIZE);
 		return false;
 	}
 

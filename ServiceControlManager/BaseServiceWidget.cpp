@@ -166,30 +166,34 @@ void BaseServiceWidget::updateSrvStatus()
 {
 	E::ServiceState srvState = m_serviceData.serviceState();
 
+	//
+
+	m_srvStatusModel->setData(m_srvStatusModel->index(0, 0), "Connected to service");
+
 	if (srvState == E::ServiceState::Unavailable ||
 		srvState == E::ServiceState::Undefined)
 	{
-		m_srvStatusModel->setData(m_srvStatusModel->index(SS_ROW_CONNECTED, 1), "No");
+		m_srvStatusModel->setData(m_srvStatusModel->index(0, 1), "No");
 		m_srvStatusModel->setRowCount(1);
 		return;
 	}
 
-	m_srvStatusModel->setData(m_srvStatusModel->index(SS_ROW_CONNECTED, 1), "Yes");
+	m_srvStatusModel->setData(m_srvStatusModel->index(0, 1), "Yes");
 
-	m_srvStatusModel->setData(m_srvStatusModel->index(SS_ROW_UPTIME, 0), "Uptime");
-	m_srvStatusModel->setData(m_srvStatusModel->index(SS_ROW_RUNNING_STATE, 0), "Running state");
+	//
 
-	m_srvStatusModel->setData(m_srvStatusModel->index(SS_ROW_UPTIME, 1),
+	m_srvStatusModel->setData(m_srvStatusModel->index(1, 0), "Uptime");
+	m_srvStatusModel->setData(m_srvStatusModel->index(1, 1),
 							  formatUptime(m_serviceData.protoServiceInfo.uptime()));
-	QString runningStateStr;
+
+	//
+
+	m_srvStatusModel->setData(m_srvStatusModel->index(2, 0), "Running state");
 
 	switch (srvState)
 	{
 	case E::ServiceState::Work:
-		m_srvStatusModel->setData(m_srvStatusModel->index(SS_ROW_RUNNING_TIME, 0), "Runing time");
-		m_srvStatusModel->setData(m_srvStatusModel->index(SS_ROW_RUNNING_TIME, 1),
-								  formatUptime(m_serviceData.protoServiceInfo.serviceruntime()));
-		runningStateStr = getRunningStateStr();
+		m_srvStatusModel->setData(m_srvStatusModel->index(2, 1), getRunningStateStr());
 		break;
 
 	case E::ServiceState::Stopped:
@@ -197,57 +201,60 @@ void BaseServiceWidget::updateSrvStatus()
 	case E::ServiceState::Undefined:
 	case E::ServiceState::Starts:
 	case E::ServiceState::Stops:
-		runningStateStr = E::valueToString(srvState);
+		m_srvStatusModel->setData(m_srvStatusModel->index(2, 1), E::valueToString(srvState));
 		break;
 
 	default:
-		assert(false);
-		runningStateStr = tr("Unknown state");
+		Q_ASSERT(false);
+		m_srvStatusModel->setData(m_srvStatusModel->index(2, 1), tr("Unknown state"));
 		break;
 	}
 
-	m_srvStatusModel->setData(m_srvStatusModel->index(SS_ROW_RUNNING_STATE, 1), runningStateStr);
+	m_srvStatusModel->setData(m_srvStatusModel->index(3, 0), "Runing time");
+	m_srvStatusModel->setData(m_srvStatusModel->index(3, 1),
+							  formatUptime(m_serviceData.protoServiceInfo.serviceruntime()));
 
 	m_srvStatusModel->setRowCount(4);
+
+	updateColumnsWidth(m_srvStatusModel);
 }
 
 void BaseServiceWidget::updateBuildInfo()
 {
 	const OnlineLib::BuildInfo& b = m_serviceData.buildInfo;
 
-	QStandardItemModel* bim = m_buildInfoModel;
+	m_buildInfoModel->setData(m_buildInfoModel->index(0, 0), "Build status");
 
 	if (b.project.isEmpty())
 	{
-		bim->setRowCount(1);
-
-		bim->setData(bim->index(0, 0), "Build status");
-		bim->setData(bim->index(0, 1), "Not loaded");
+		m_buildInfoModel->setRowCount(1);
+		m_buildInfoModel->setData(m_buildInfoModel->index(0, 1), "Not loaded");
 		return;
 	}
 
-	bim->setRowCount(7);
+	m_buildInfoModel->setData(m_buildInfoModel->index(0, 1), "Loaded");
 
-	bim->setData(bim->index(0, 0), "Build status");
-	bim->setData(bim->index(0, 1), "Loaded");
+	m_buildInfoModel->setData(m_buildInfoModel->index(1, 0), "Project name");
+	m_buildInfoModel->setData(m_buildInfoModel->index(1, 1), b.project);
 
-	bim->setData(bim->index(1, 0), "Project name");
-	bim->setData(bim->index(1, 1), b.project);
+	m_buildInfoModel->setData(m_buildInfoModel->index(2, 0), "Build No");
+	m_buildInfoModel->setData(m_buildInfoModel->index(2, 1), b.buildNo);
 
-	bim->setData(bim->index(2, 0), "Build No");
-	bim->setData(bim->index(2, 1), b.buildNo);
+	m_buildInfoModel->setData(m_buildInfoModel->index(3, 0), "Build date");
+	m_buildInfoModel->setData(m_buildInfoModel->index(3, 1), b.dateTimeStr());
 
-	bim->setData(bim->index(3, 0), "Build date");
-	bim->setData(bim->index(3, 1), b.dateTimeStr());
+	m_buildInfoModel->setData(m_buildInfoModel->index(4, 0), "Changeset");
+	m_buildInfoModel->setData(m_buildInfoModel->index(4, 1), b.changeset);
 
-	bim->setData(bim->index(4, 0), "Changeset");
-	bim->setData(bim->index(4, 1), b.changeset);
+	m_buildInfoModel->setData(m_buildInfoModel->index(5, 0), "User name");
+	m_buildInfoModel->setData(m_buildInfoModel->index(5, 1), b.user);
 
-	bim->setData(bim->index(5, 0), "User name");
-	bim->setData(bim->index(5, 1), b.user);
+	m_buildInfoModel->setData(m_buildInfoModel->index(6, 0), "Workstation");
+	m_buildInfoModel->setData(m_buildInfoModel->index(6, 1), b.workstation);
 
-	bim->setData(bim->index(6, 0), "Workstation");
-	bim->setData(bim->index(6, 1), b.workstation);
+	m_buildInfoModel->setRowCount(7);
+
+	updateColumnsWidth(m_buildInfoModel);
 }
 
 void BaseServiceWidget::updateStatusBar()
@@ -296,33 +303,33 @@ void BaseServiceWidget::updateStatusBar()
 
 void BaseServiceWidget::updateBaseSettings()
 {
-	QStandardItemModel* sm = m_settingsModel;
-
 	if (m_serviceData.settings == nullptr)
 	{
-		sm->setRowCount(0);
+		m_settingsModel->setRowCount(0);
 		return;
 	}
 
 	const SoftwareInfo& swInfo = m_serviceData.swInfo;
 
-	sm->setData(sm->index(0, 0), "EquipementID");
-	sm->setData(sm->index(0, 1), swInfo.equipmentID());
+	m_settingsModel->setData(m_settingsModel->index(0, 0), "EquipementID");
+	m_settingsModel->setData(m_settingsModel->index(0, 1), swInfo.equipmentID());
 
-	sm->setData(sm->index(1, 0), "SoftwareType");
-	sm->setData(sm->index(1, 1), swInfo.softwareType());
+	m_settingsModel->setData(m_settingsModel->index(1, 0), "SoftwareType");
+	m_settingsModel->setData(m_settingsModel->index(1, 1), swInfo.softwareType());
 
-	sm->setData(sm->index(2, 0), "Host name");
-	sm->setData(sm->index(2, 1), swInfo.hostname());
+	m_settingsModel->setData(m_settingsModel->index(2, 0), "Host name");
+	m_settingsModel->setData(m_settingsModel->index(2, 1), swInfo.hostname());
 
-	sm->setData(sm->index(3, 0), "OS username");
-	sm->setData(sm->index(3, 1), swInfo.osUsername());
+	m_settingsModel->setData(m_settingsModel->index(3, 0), "OS username");
+	m_settingsModel->setData(m_settingsModel->index(3, 1), swInfo.osUsername());
 
 	int rowCount = 4;
 
 	rowCount = updateSettings(rowCount);
 
-	sm->setRowCount(rowCount);
+	m_settingsModel->setRowCount(rowCount);
+
+	updateColumnsWidth(m_settingsModel);
 }
 
 int BaseServiceWidget::updateSettings(int rowCount)
@@ -341,14 +348,10 @@ void BaseServiceWidget::updateClients()
 
 	cm->setRowCount(clientsCount);
 
-	// columns << "Request IP";
-	// columns << "EquipmentID";
-	// columns << "Client IP";
-	// columns << "Software";
-	// columns << "Host";
-	// columns << "Connection time";
-	// columns << "Packet counter";
-
+	if (clientsCount == 0)
+	{
+		return;
+	}
 
 	for(int i = 0; i < clientsCount; i++)
 	{
@@ -358,6 +361,33 @@ void BaseServiceWidget::updateClients()
 		cm->setData(cm->index(i, 0), HostAddressPort(client.requestip(), client.requestport()).toString());
 		cm->setData(cm->index(i, 1), QString::fromStdString(sw.equipmentid()));
 		cm->setData(cm->index(i, 2), HostAddressPort(client.clientip(), client.clientport()).toString());
+		cm->setData(cm->index(i, 3), E::valueToString(static_cast<E::SoftwareType>(sw.softwaretype())));
+		cm->setData(cm->index(i, 4), formatUptime(client.uptime() / 1000));
+		cm->setData(cm->index(i, 5), client.replyquantity());
+	}
+
+	updateColumnsWidth(m_clientsModel);
+}
+
+void BaseServiceWidget::updateColumnsWidth(QStandardItemModel* model)
+{
+	TEST_PTR_RETURN(model);
+
+	auto it = m_modelTableViewColumns.find(model);
+
+	if (it == m_modelTableViewColumns.end())
+	{
+		return;
+	}
+
+	QTableView* tableView = it->second.first;
+	const Columns& columns = it->second.second;
+
+	int index = 0;
+
+	for(const Column& column : columns)
+	{
+		tableView->setColumnWidth(index++, column.width);
 	}
 }
 
@@ -393,9 +423,7 @@ void BaseServiceWidget::restartService()
 
 void BaseServiceWidget::serviceAckReceived(const UdpRequest udpRequest)
 {
-	qDebug() << "Service ACK received";
-
-	quint32 rqID = udpRequest.ID();
+//	qDebug() << "Service ACK received";
 
 	m_udpAckQuantity++;
 
@@ -440,7 +468,7 @@ void BaseServiceWidget::serviceAckReceived(const UdpRequest udpRequest)
 
 void BaseServiceWidget::serviceAckTimeout()
 {
-	qDebug() << "Service ack TIMEOUT";
+//	qDebug() << "Service ack TIMEOUT";
 
 	if (m_serviceData.serviceState() != E::ServiceState::Unavailable)
 	{
@@ -515,28 +543,21 @@ void BaseServiceWidget::addGeneralTab()
 
 	//
 
-	m_srvStatusModel = new QStandardItemModel(1, 2, this);
-	m_srvStatusModel->setData(m_srvStatusModel->index(SS_ROW_CONNECTED, 0), "Connected to service");
-	m_srvStatusModel->setData(m_srvStatusModel->index(SS_ROW_CONNECTED, 1), "No");
-
-	QTableView* srvStateTableView = createTableView(m_srvStatusModel, 250);
+	m_srvStatusModel = new QStandardItemModel(0, TO_INT(propValueColumns.size()), this);
+	QTableView* srvStateTableView = createTableView(m_srvStatusModel, propValueColumns);
 
 	//
 
-	m_buildInfoModel = new QStandardItemModel(1, 2, this);
+	m_buildInfoModel = new QStandardItemModel(0, TO_INT(propValueColumns.size()), this);
 	m_buildInfoModel->setData(m_buildInfoModel->index(0, 0), "Build status");
 	m_buildInfoModel->setData(m_buildInfoModel->index(0, 1), "Not loaded");
 
-	QTableView* buildInfoTableView = createTableView(m_buildInfoModel, 250);
+	QTableView* buildInfoTableView = createTableView(m_buildInfoModel, propValueColumns);
 
 	//
 
-	QStringList columns;
-	columns << "Property";
-	columns << "Value";
-
-	m_settingsModel = new QStandardItemModel(0, columns.size(), this);
-	QTableView* settingsTableView = createTableView(m_settingsModel, 250, columns);
+	m_settingsModel = new QStandardItemModel(0, TO_INT(propValueColumns.size()), this);
+	QTableView* settingsTableView = createTableView(m_settingsModel, propValueColumns);
 
 	//
 
@@ -556,17 +577,8 @@ void BaseServiceWidget::addGeneralTab()
 
 void BaseServiceWidget::addClientsTab()
 {
-	std::list<std::pair<QString, int>> columns;
-
-	columns.push_back({"Request IP", 120});
-	columns.push_back({"EquipmentID", 250});
-	columns.push_back({"Client IP", 120});
-	columns.push_back({"Software", 150});
-	columns.push_back({"Connection time", 100});
-	columns.push_back({"Packet counter", 100});
-
-	m_clientsModel = new QStandardItemModel(0, TO_INT(columns.size()), this);
-	QTableView* clientsTableView = createTableView(m_clientsModel, columns);
+	m_clientsModel = new QStandardItemModel(0, TO_INT(clientTabColumns.size()), this);
+	QTableView* clientsTableView = createTableView(m_clientsModel, clientTabColumns);
 
 	addTab(clientsTableView, "Clients");
 }
@@ -580,6 +592,29 @@ void BaseServiceWidget::clearServiceData()
 		m_serviceData.protoServiceInfo.clear_clients();
 		m_serviceData.buildInfo.clear();
 		m_serviceData.settings.reset();
+	}
+}
+
+void BaseServiceWidget::onSectionResized(int index, int oldSize, int newSize)
+{
+	Q_UNUSED(oldSize);
+
+	QHeaderView* hHeader = qobject_cast<QHeaderView*>(QObject::sender());
+
+	TEST_PTR_RETURN(hHeader);
+
+	QTableView* tableView = qobject_cast<QTableView*>(hHeader->parent());
+
+	for(auto& [model, tableViewColumns] : m_modelTableViewColumns)
+	{
+		if (tableView == tableViewColumns.first)
+		{
+			if (index < tableViewColumns.second.size())
+			{
+				tableViewColumns.second[index].width = newSize;
+			}
+			break;
+		}
 	}
 }
 
@@ -613,21 +648,24 @@ QTableView* BaseServiceWidget::addTabWithTableView(int defaultSectionSize, const
 	return tableView;
 }
 
-QTableView* BaseServiceWidget::createTableView(	QStandardItemModel* model,
-												const std::list<std::pair<QString, int>>& columns)
+QTableView* BaseServiceWidget::createTableView(QStandardItemModel* model,
+												const Columns& columns)
 {
 	QTableView* tableView = new QTableView();
 
 	QHeaderView* hHeader = tableView->horizontalHeader();
 
+	hHeader->setSectionResizeMode(QHeaderView::Interactive);
+
+	connect(hHeader, &QHeaderView::sectionResized, this, &BaseServiceWidget::onSectionResized);
+
 	if (columns.empty() == false)
 	{
 		int index = 0;
 
-		for(const auto& [column, size] : columns)
+		for(const auto& [caption, width] : columns)
 		{
-			model->setHeaderData(index, Qt::Horizontal, column);
-			hHeader->resizeSection(index, size);
+			model->setHeaderData(index, Qt::Horizontal, caption);
 			index++;
 		}
 	}
@@ -653,20 +691,9 @@ QTableView* BaseServiceWidget::createTableView(	QStandardItemModel* model,
 
 	tableView->setModel(model);
 
+	m_modelTableViewColumns.insert({model, std::pair{tableView, columns}});
+
 	return tableView;
-}
-
-QTableView* BaseServiceWidget::createTableView(QStandardItemModel* model, int defaultSectionSize,
-	const QStringList& columns)
-{
-	std::list<std::pair<QString, int>> cols;
-
-	for(const QString& col : columns)
-	{
-		cols.push_back({col, defaultSectionSize});
-	}
-
-	return createTableView(model, cols);
 }
 
 HostAddressPort BaseServiceWidget::getWorkingClientRequestIp()

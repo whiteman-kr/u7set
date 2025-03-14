@@ -8,6 +8,14 @@
 
 class BaseServiceWidget : public QMainWindow
 {
+	struct Column
+	{
+		QString caption;
+		int width = 0;
+	};
+
+	using Columns = std::vector<Column>;
+
 	Q_OBJECT
 public:
 	explicit BaseServiceWidget(	ServiceTableModel* srvTableModel,
@@ -21,9 +29,7 @@ public:
 	QTableView* addTabWithTableView(int defaultSectionSize, const QString& label);
 
 	QTableView* createTableView(QStandardItemModel* model,
-								const std::list<std::pair<QString, int>>& columns);
-	QTableView* createTableView(QStandardItemModel* model, int defaultSectionSize,
-								const QStringList& columns = QStringList());
+								const Columns& columns);
 
 	HostAddressPort getWorkingClientRequestIp();
 
@@ -44,6 +50,8 @@ public slots:
 	virtual int updateSettings(int rowCount);
 
 	void updateClients();
+
+	void updateColumnsWidth(QStandardItemModel* model);
 
 	QString getRunningStateStr() const;
 
@@ -69,6 +77,8 @@ private:
 	void addClientsTab();
 
 	void clearServiceData();
+
+	void onSectionResized(int index, int oldSize, int newSize);
 
 protected:
 	UdpSocketThread* m_udpSocketThread = nullptr;
@@ -104,9 +114,21 @@ private:
 	QLabel* m_runningStatus = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
 
-	static const int SS_ROW_CONNECTED = 0;
-	static const int SS_ROW_UPTIME = 1;
-	static const int SS_ROW_RUNNING_STATE = 2;
-	static const int SS_ROW_RUNNING_TIME = 3;
-};
+	std::map<QStandardItemModel*, std::pair<QTableView*, Columns>> m_modelTableViewColumns;
 
+	inline static const Columns propValueColumns =
+	{
+		{"Property", 200},
+		{"Value", 300},
+	};
+
+	inline static const Columns clientTabColumns =
+	{
+		{"Request IP", 120},
+		{"EquipmentID", 300},
+		{"Client IP", 120},
+		{"Software", 150},
+		{"Connection time", 150},
+		{"Packet counter", 150},
+	};
+};

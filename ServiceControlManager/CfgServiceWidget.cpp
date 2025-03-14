@@ -88,11 +88,9 @@ void CfgServiceWidget::updateServiceParameters()
 
 int CfgServiceWidget::updateSettings(int rowCount)
 {
-	QStandardItemModel* sm = m_settingsModel;
-
 	if (m_serviceData.settings == nullptr)
 	{
-		sm->setRowCount(0);
+		m_settingsModel->setRowCount(0);
 		return 0;
 	}
 
@@ -100,25 +98,25 @@ int CfgServiceWidget::updateSettings(int rowCount)
 
 	TEST_PTR_RETURN_VALUE(st, 0);
 
-	sm->setData(sm->index(rowCount, 0), QStringLiteral("Check hostname"));
-	sm->setData(sm->index(rowCount, 1), st->checkHostname ? QStringLiteral("True") : QStringLiteral("False"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("Check hostname"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->checkHostname ? QStringLiteral("True") : QStringLiteral("False"));
 
 	rowCount++;
 
 	for(const RqCtrlSettings& rcs : st->rcSettings)
 	{
-		sm->setData(sm->index(rowCount, 0), QString("Request Controller %1").arg(rcs.ID()));
-		sm->setData(sm->index(rowCount, 1), rqCtrlInfoStr(rcs));
+		m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QString("Request Controller %1").arg(rcs.ID()));
+		m_settingsModel->setData(m_settingsModel->index(rowCount, 1), rqCtrlInfoStr(rcs));
 		rowCount++;
 	}
 
-	sm->setData(sm->index(rowCount, 0), QStringLiteral("Auto load build path"));
-	sm->setData(sm->index(rowCount, 1), QString::fromStdString(m_serviceData.protoServiceInfo.autoloadbuildpath()));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("Auto load build path"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), QString::fromStdString(m_serviceData.protoServiceInfo.autoloadbuildpath()));
 
 	rowCount++;
 
-	sm->setData(sm->index(rowCount, 0), QStringLiteral("Work directory"));
-	sm->setData(sm->index(rowCount, 1), QString::fromStdString(m_serviceData.protoServiceInfo.workdirectory()));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("Work directory"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), QString::fromStdString(m_serviceData.protoServiceInfo.workdirectory()));
 
 	rowCount++;
 
