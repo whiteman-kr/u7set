@@ -454,13 +454,25 @@ endif()
 
 target_compile_definitions(${TARGET} PRIVATE QTKEYCHAIN_NO_EXPORT)
 
-#
 # Copy PostgreSQL DLLs (libpq.dll and its' dependencies)
 # These dlls are not copied by default.
 #
 copy_libpq_dll(${TARGET})
 
-# --
+add_custom_command(
+	TARGET ${TARGET}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pg
+)
+
+# Copy readme for project backup/restore feature
+#
+add_custom_command(TARGET ${TARGET} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${TARGET}>/pg
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/pg/readme.txt $<TARGET_FILE_DIR:${TARGET}>/pg
+    COMMENT "Copying readme.txt to the binary output directory in pg"
+)
+
 # Generation scripting help
 # Find for Doxygen here as add_subdirectory works with CMake 3.27+ only
 #
