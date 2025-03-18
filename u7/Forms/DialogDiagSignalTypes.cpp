@@ -1,6 +1,6 @@
 #include "DialogDiagSignalTypes.h"
 #include "../UtilsLib/Ui/UiTools.h"
-#include "Settings.h"
+#include "AppSettings.h"
 
 #include <UiLib/PropertyEditor.h>
 #include <UiLib/StandardColors.h>
@@ -1079,7 +1079,7 @@ void DialogDiagSignalTypes::setPropertyEditorObjects()
 		objects.push_back(dst);
 	}
 
-	m_diagSignalTypesPropertyEditor->setExpertMode(theSettings.isExpertMode());
+	m_diagSignalTypesPropertyEditor->setExpertMode(AppSettings::isExpertModeCached());
 	m_diagSignalTypesPropertyEditor->setReadOnly(readOnly);
 	m_diagSignalTypesPropertyEditor->setObjects(objects);
 

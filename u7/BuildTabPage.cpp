@@ -1,5 +1,6 @@
 #include "BuildTabPage.h"
 #include "../Builder/Builder.h"
+#include "AppSettings.h"
 #include "GlobalMessanger.h"
 #include "Settings.h"
 
@@ -198,7 +199,7 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_runSimTestsOnBuild =
 		createBuildOptionComboBox(Db::ProjectProperty::RunSimTestsOnBuild,
 								  tr("Inherit: Inherit value from the project setting\nTrue: %1\nFalse: Do not tun tests")
-								  .arg(Db::ProjectProperty::RunSimTestsOnBuild),
+									  .arg(Db::ProjectProperty::RunSimTestsOnBuild),
 								  m_settingsWidget);
 
 	// --
@@ -434,6 +435,9 @@ void BuildTabPage::build()
 
 	GlobalMessanger::instance().fireBuildStarted();
 
+	AppSettings appSettings;
+	appSettings.load();
+
 	m_builder->start(db()->host(),
 					 db()->port(),
 					 db()->serverUsername(),
@@ -441,8 +445,8 @@ void BuildTabPage::build()
 					 db()->currentProject().projectName(),
 					 db()->currentUser().username(),
 					 db()->currentUser().password(),
-					 theSettings.buildOutputPath(),
-					 theSettings.isExpertMode(),
+					 appSettings.buildOutputPath(),
+					 appSettings.isExpertMode(),
 					 buildOptions);
 
 	return;
@@ -712,8 +716,11 @@ void BuildTabPage::getProjectBuildPath(QString* buildCurrentPath, QString* build
 	buildCurrentPath->clear();
 	buildLastPath->clear();
 
+	AppSettings appSettings;
+	appSettings.load();
+
 	QString buildBasePath =
-		QDir::fromNativeSeparators(QStringLiteral("%1/%2").arg(theSettings.buildOutputPath()).arg(db()->currentProject().projectName()));
+		QDir::fromNativeSeparators(QStringLiteral("%1/%2").arg(appSettings.buildOutputPath()).arg(db()->currentProject().projectName()));
 
 	// Current build path (/build)
 	//

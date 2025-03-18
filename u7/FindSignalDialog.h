@@ -134,5 +134,7 @@ private:
 	int m_currentUserId = -1;
 	bool m_currentUserIsAdmin = false;
 	bool m_shouldReopen = true;
+
+	bool m_isExpertMode = false;
 };
 

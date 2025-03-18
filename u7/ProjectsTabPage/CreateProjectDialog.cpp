@@ -1,9 +1,9 @@
 #include "CreateProjectDialog.h"
-#include "ui_CreateProjectDialog.h"
 #include "PasswordService.h"
+#include "ui_CreateProjectDialog.h"
 
 
-CreateProjectDialog::CreateProjectDialog(QWidget *parent) :
+CreateProjectDialog::CreateProjectDialog(QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::CreateProjectDialog)
 {
@@ -42,7 +42,10 @@ void CreateProjectDialog::on_okButton_clicked()
 
 	if (projectName.count(QRegularExpression("[A-Za-z_0-9]")) != projectName.size())
 	{
-		QMessageBox::critical(this, qApp->applicationName(), QString("The project name contains illegal characters: %1").arg(projectName.remove(QRegularExpression("[A-Za-z_0-9]"))));
+		QMessageBox::critical(
+			this,
+			qApp->applicationName(),
+			QString("The project name contains illegal characters: %1").arg(projectName.remove(QRegularExpression("[A-Za-z_0-9]"))));
 		return;
 	}
 

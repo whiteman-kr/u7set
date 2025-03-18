@@ -1,8 +1,8 @@
 #include "SignalHistoryDialog.h"
 #include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
+#include "AppSettings.h"
 #include "AppSignalPropertyManager.h"
-#include "Settings.h"
 
 SignalHistoryDialog::SignalHistoryDialog(DbController* db, const AppSignal& s, QWidget* parent) :
 	QDialog(parent),
@@ -17,6 +17,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* db, const AppSignal& s, Q
 
 	m_db->getSignalHistory(signalID, &signalChanges, this);
 
+	// clang-format off
 	QVector<std::pair<QString, std::function<QVariant (DbChangeset&)>>> changesetColumnDescription =
 	{
 		{"Changeset", [](DbChangeset& c) { return c.changeset(); }},
@@ -24,6 +25,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* db, const AppSignal& s, Q
 		{"Date", [](DbChangeset& c) { return c.date().toString("dd MMM yyyy HH:mm:ss"); }},
 		{"Comment", [](DbChangeset& c) { return c.comment();}},
 	};
+	// clang-format on
 
 	int changesetColumnCount = static_cast<int>(changesetColumnDescription.size());
 
@@ -77,7 +79,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* db, const AppSignal& s, Q
 	std::vector<AppSignal> signalInstances;
 	signalInstances.reserve(signalChanges.size());
 
-	std::vector<int> signalIds = { signalID };
+	std::vector<int> signalIds = {signalID};
 	std::vector<AppSignal> signalInstance;
 
 	int row = 0;
@@ -106,7 +108,10 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* db, const AppSignal& s, Q
 		row++;
 	}
 
-	bool isExpert = theSettings.isExpertMode();
+	AppSettings appSettings;
+	appSettings.load();
+
+	bool isExpert = appSettings.isExpertMode();
 
 	// Signal instances details
 	//
@@ -156,5 +161,3 @@ void SignalHistoryDialog::closeEvent(QCloseEvent* event)
 
 	QDialog::closeEvent(event);
 }
-
-

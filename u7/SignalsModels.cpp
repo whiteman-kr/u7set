@@ -2,7 +2,7 @@
 #include "AppSignalSetProvider.h"
 #include "AppSignalPropertyManager.h"
 #include "SignalsTabPage.h"
-#include "Settings.h"
+#include "AppSettings.h"
 #include "../UtilsLib/WUtils.h"
 
 // -------------------------------------------------------------------------------------------------------
@@ -109,7 +109,7 @@ QVariant SignalsModel::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		QVariant value = m_propManager->value(signal, col, theSettings.isExpertMode());
+		QVariant value = m_propManager->value(signal, col, AppSettings::isExpertModeCached());
 
 		if (value.isValid() == true &&
 			m_propManager->dependsOnPrecision(col) == true &&
@@ -160,7 +160,7 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 		AppSignal s(*ls);
 
-		m_propManager->setValue(&s, index.column(), value, theSettings.isExpertMode());
+		m_propManager->setValue(&s, index.column(), value, AppSettings::isExpertModeCached());
 
 		// This should be done by SignalsDelegate::setModelData
 		Q_ASSERT(false);
@@ -553,7 +553,7 @@ QWidget* SignalsTablePropEditor::createEditor(QWidget* parent, const QStyleOptio
 		return nullptr;
 	}
 
-	bool isExpert = theSettings.isExpertMode();
+	bool isExpert = AppSettings::isExpertModeCached();
 
 	E::PropertyBehaviourType behaviour = m_propManager->getBehaviour(*s, col);
 
@@ -692,7 +692,7 @@ void SignalsTablePropEditor::setEditorData(QWidget* editor, const QModelIndex& i
 
 	TEST_PTR_RETURN(s);
 
-	bool isExpert = theSettings.isExpertMode();
+	bool isExpert = AppSettings::isExpertModeCached();
 
 	if (m_propManager->isEnumProperty(col))
 	{
@@ -768,7 +768,7 @@ void SignalsTablePropEditor::setModelData(QWidget* editor, QAbstractItemModel* m
 
 	AppSignal s(*ls);
 
-	bool isExpert = theSettings.isExpertMode();
+	bool isExpert = AppSettings::isExpertModeCached();
 
 	// Set Enum property value
 	//

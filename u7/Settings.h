@@ -4,27 +4,6 @@ using maptype = QMap<QString, int>;
 Q_DECLARE_METATYPE(maptype)
 
 
-struct DatabaseConnectionParam
-{
-	QChar m_address[256];
-	qint32 m_port;
-	QChar m_login[256];
-	QChar m_password[256];
-
-	QString address() const;
-	void setAddress(QString str);
-
-	int port() const;
-	void setPort(int port);
-
-	QString login() const;
-	void setLogin(QString str);
-
-	QString password() const;
-	void setPassword(QString str);
-};
-
-
 class Settings
 {
 public:
@@ -39,27 +18,9 @@ public:
 	void writeUserScope() const;
 	void loadUserScope();
 
-	void writeSystemScope() const;
-	void loadSystemScope();
-
 	// Properties
 	//
 public:
-	QString serverHost() const;
-	void setServerHost(const QString& value);
-
-	int serverPort() const;
-	void setServerPort(int value);
-
-	QString serverUsername() const;
-	void setServerUsername(const QString& value);
-
-	QString serverPassword() const;
-	void setServerPassword(const QString& value);
-
-	const QString& buildOutputPath() const;
-	void setBuildOutputPath(const QString& value);
-
 	const QStringList& loginCompleter() const;
 	QStringList& loginCompleter();
 
@@ -68,9 +29,6 @@ public:
 	void setDebugMode(bool value);
 	bool debugMode() const;
 	bool isDebugMode() const;
-
-	bool isExpertMode() const;
-	void setExpertMode(bool value);
 
 	bool isInfoMode() const;
 	bool infoMode() const;
@@ -85,12 +43,11 @@ public:
 	// Data
 	//
 public:
-
 	// MainWindow settings -- user scope
 	//
 	QPoint m_mainWindowPos;
 	QByteArray m_mainWindowGeometry;
-	QByteArray m_mainWindowState;		// Toolbars/dock's
+	QByteArray m_mainWindowState; // Toolbars/dock's
 
 	// LoginDialog settings -- user scope
 	//
@@ -109,17 +66,17 @@ public:
 	//
 	QByteArray m_buildTabPageSplitterState;
 
-    // Text Editor options
-    //
-    QPoint m_DialogTextEditorWindowPos;
-    QByteArray m_DialogTextEditorWindowGeometry;
+	// Text Editor options
+	//
+	QPoint m_DialogTextEditorWindowPos;
+	QByteArray m_DialogTextEditorWindowGeometry;
 
 	// Connection editor
 	//
 	QPoint m_connectionEditorWindowPos;
 	QByteArray m_connectionEditorWindowGeometry;
-    QByteArray m_connectionEditorSplitterState;
-    int m_connectionEditorPeSplitterPosition = 0;
+	QByteArray m_connectionEditorSplitterState;
+	int m_connectionEditorPeSplitterPosition = 0;
 	int m_connectionEditorSortColumn = 0;
 	Qt::SortOrder m_connectionEditorSortOrder = Qt::AscendingOrder;
 	QStringList m_connectionEditorMasks;
@@ -174,9 +131,6 @@ public:
 
 	// Configurator properties
 	//
-	QString m_configuratorSerialPort;
-	bool m_configuratorShowDebugInfo = false;
-	bool m_configuratorVerify = true;
 	QByteArray m_UploadTabPageLeftSplitterState;
 	QByteArray m_UploadTabPageRightSplitterState;
 
@@ -186,18 +140,12 @@ public:
 	QByteArray m_dialogMetrologyConnectionGeometry;
 
 private:
-	DatabaseConnectionParam m_databaseConnection{};
-	QString m_buildOutputPath;
-	bool m_expertMode = false;
-
 	QStringList m_loginCompleter;
 
 	bool m_debugMode = false;
 	bool m_infoMode = false;
-	int m_buildWarningLevel = 0;		// 0 is Show All Warnings
+	int m_buildWarningLevel = 0; // 0 is Show All Warnings
 	QStringList m_buildSerachCompleter;
 };
 
 extern Settings theSettings;
-
-

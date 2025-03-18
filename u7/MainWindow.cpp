@@ -1,13 +1,12 @@
 #include "MainWindow.h"
-#include "../UtilsLib/Ui/UiTools.h"
 #include "../Builder/LogicModuleSet.h"
-#include <UiLib/DialogAbout.h>
-#include <LicenseLib/AppLicenser.h>
+#include "../UtilsLib/Ui/UiTools.h"
 #include "./EquipmentEditor/EquipmentTabPage.h"
 #include "./Forms/DialogDiagSignalTypes.h"
 #include "./Forms/FileHistoryDialog.h"
 #include "./Forms/PendingChangesDialog.h"
 #include "./Forms/ProjectPropertiesForm.h"
+#include "./ProjectsTabPage/ProjectsTabPage.h"
 #include "./SchemaEditor/EditSchemaWidget.h"
 #include "./SchemaEditor/SchemasTabPage.h"
 #include "./Simulator/SimProfileEditor.h"
@@ -15,6 +14,7 @@
 #include "BuildTabPage.h"
 #include "CentralWidget.h"
 #include "DialogAfbLibraryCheck.h"
+#include "DialogAppSignalLists.h"
 #include "DialogBusEditor.h"
 #include "DialogConnections.h"
 #include "DialogMatsUsersEditor.h"
@@ -26,7 +26,6 @@
 #include "Forms/DialogProjectDiff.h"
 #include "GlobalMessanger.h"
 #include "ProjectDefaults.h"
-#include "ProjectsTabPage.h"
 #include "Reports/SchemasReport.h"
 #include "Settings.h"
 #include "SignalsTabPage.h"
@@ -34,7 +33,8 @@
 #include "TestsTabPage.h"
 #include "UploadTabPage.h"
 #include "UserManagementDialog.h"
-#include "DialogAppSignalLists.h"
+#include <LicenseLib/AppLicenser.h>
+#include <UiLib/DialogAbout.h>
 
 MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	QMainWindow{parent},
@@ -55,7 +55,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	// Create Menus, ToolBars, StatusBar
 	//
 	createActions();
-    createMenus();
+	createMenus();
 	createToolBars();
 	createStatusBar();
 
@@ -69,15 +69,16 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	// Add main tab pages
 	//
-	m_projectsTab = new ProjectsTabPage{
-					dbController(),
-					[this](){ return preCloseConditions(); },
-					nullptr};
+	m_projectsTab = new ProjectsTabPage{dbController(),
+										[this]()
+										{
+											return preCloseConditions();
+										},
+										nullptr};
 
 	m_equipmentTab = new EquipmentTabPage(dbController(), nullptr);
-	m_signalsTab = new SignalsTabPage(AppSignalSetProvider::getInstance(),
-									  AppSignalPropertyManager::getInstance(),
-									  dbController(), nullptr);
+	m_signalsTab =
+		new SignalsTabPage(AppSignalSetProvider::getInstance(), AppSignalPropertyManager::getInstance(), dbController(), nullptr);
 
 	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
 	m_filesTabPage->setWindowTitle(tr("Files"));
@@ -89,7 +90,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	connect(getCentralWidget(), &QTabWidget::currentChanged, m_signalsTab, &SignalsTabPage::onTabPageChanged);
 
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
-	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
+	getCentralWidget()->removeTab(m_filesTabPageIndex); // It will be added in projectOpened slot if required
 
 	m_schemaTabPage = new SchemasTabPage{db(), m_signalSetProvider, m_statusBarSchemaLayerLabel, m_statusBarSchemaZoomLabel, this};
 	getCentralWidget()->addTabPage(m_schemaTabPage, tr("Schemas"));
@@ -151,14 +152,13 @@ void MainWindow::closeEvent(QCloseEvent* e)
 
 	// Check if any schema or test is not saved
 	//
-	if (bool canBeClosed = preCloseConditions();
-		canBeClosed == false)
+	if (bool canBeClosed = preCloseConditions(); canBeClosed == false)
 	{
 		e->ignore();
 	}
 	else
 	{
-		saveWindowState();		// Save windows state and accept event to close app
+		saveWindowState(); // Save windows state and accept event to close app
 
 		e->accept();
 		qApp->closeAllWindows();
@@ -171,44 +171,39 @@ void MainWindow::showEvent(QShowEvent*)
 {
 	// Ensure widget is visible
 	//
-	QRect screenRect  = this->screen()->availableGeometry();
+	QRect screenRect = this->screen()->availableGeometry();
 	QRect intersectRect = screenRect.intersected(frameGeometry());
 
-	if (isMaximized() == false &&
-		(intersectRect.width() < size().width() ||
-		 intersectRect.height() < size().height()))
+	if (isMaximized() == false && (intersectRect.width() < size().width() || intersectRect.height() < size().height()))
 	{
 		move(screenRect.topLeft());
 	}
 
-	if (isMaximized() == false &&
-		(frameGeometry().width() > screenRect.width() ||
-		 frameGeometry().height() > screenRect.height()))
+	if (isMaximized() == false && (frameGeometry().width() > screenRect.width() || frameGeometry().height() > screenRect.height()))
 	{
-		resize(static_cast<int>(screenRect.width() * 0.7),
-			   static_cast<int>(screenRect.height() * 0.7));
+		resize(static_cast<int>(screenRect.width() * 0.7), static_cast<int>(screenRect.height() * 0.7));
 	}
 
-//#ifdef Q_OS_WINDOWS
-//	m_taskBarButton = new QWinTaskbarButton(this);
-//	m_taskBarButton->setWindow(windowHandle());
-//#endif
+	// #ifdef Q_OS_WINDOWS
+	//	m_taskBarButton = new QWinTaskbarButton(this);
+	//	m_taskBarButton->setWindow(windowHandle());
+	// #endif
 	return;
 }
 
 void MainWindow::timerEvent(QTimerEvent* event)
 {
-//#ifdef Q_OS_WINDOWS
-//	if (m_buildTabPage->isBuildRunning() == true && m_taskBarButton != nullptr)
-//	{
-//		m_taskBarButton->progress()->setValue(m_buildTabPage->progress());
-//	}
-//#endif
+	// #ifdef Q_OS_WINDOWS
+	//	if (m_buildTabPage->isBuildRunning() == true && m_taskBarButton != nullptr)
+	//	{
+	//		m_taskBarButton->progress()->setValue(m_buildTabPage->progress());
+	//	}
+	// #endif
 
 	if (event->timerId() == m_visibleTimerId && isVisible() == true)
 	{
 		killTimer(m_visibleTimerId);
-		
+
 		// Refresh project list only once
 		//
 		Q_ASSERT(m_projectsTab);
@@ -243,8 +238,7 @@ bool MainWindow::preCloseConditions()
 		return true;
 	}
 
-	if (m_schemaTabPage == nullptr ||
-		m_testsTabPage == nullptr)
+	if (m_schemaTabPage == nullptr || m_testsTabPage == nullptr)
 	{
 		assert(m_schemaTabPage);
 		assert(m_testsTabPage);
@@ -256,8 +250,7 @@ bool MainWindow::preCloseConditions()
 
 	bool satisfies = true;
 
-	if (int nu = (unsavedSchemas ? 2 : 0 ) | (unsavedTests ? 1 : 0);
-		nu != 0)
+	if (int nu = (unsavedSchemas ? 2 : 0) | (unsavedTests ? 1 : 0); nu != 0)
 	{
 		QString message;
 
@@ -288,8 +281,8 @@ bool MainWindow::preCloseConditions()
 			break;
 
 		case QMessageBox::SaveAll:
-			m_schemaTabPage->saveUnsavedSchemas();	// It will reset modified flag
-			m_testsTabPage->saveUnsavedTests();			// It will reset modified flag
+			m_schemaTabPage->saveUnsavedSchemas(); // It will reset modified flag
+			m_testsTabPage->saveUnsavedTests();    // It will reset modified flag
 			satisfies = true;
 			break;
 
@@ -383,9 +376,9 @@ void MainWindow::createActions()
 	connect(m_subsystemListEditorAction, &QAction::triggered, this, &MainWindow::runSubsystemListEditor);
 
 	m_connectionsEditorAction = new QAction(tr("Connections..."), this);
-    m_connectionsEditorAction->setStatusTip(tr("Run Connections Editor"));
-    m_connectionsEditorAction->setEnabled(false);
-    connect(m_connectionsEditorAction, &QAction::triggered, this, &MainWindow::runConnectionsEditor);
+	m_connectionsEditorAction->setStatusTip(tr("Run Connections Editor"));
+	m_connectionsEditorAction->setEnabled(false);
+	connect(m_connectionsEditorAction, &QAction::triggered, this, &MainWindow::runConnectionsEditor);
 
 	m_diagSignalTypesEditorAction = new QAction(tr("Diagnostics Signal Types..."), this);
 	m_diagSignalTypesEditorAction->setStatusTip(tr("Run Diagnostics Signal Types Editor"));
@@ -429,12 +422,12 @@ void MainWindow::createActions()
 
 	m_aboutQtAction = new QAction(tr("About Qt..."), this);
 	m_aboutQtAction->setStatusTip(tr("Show Qt information"));
-	//m_pAboutAction->setEnabled(true);
+	// m_pAboutAction->setEnabled(true);
 	connect(m_aboutQtAction, &QAction::triggered, this, &MainWindow::showAboutQt);
 
 	m_aboutAction = new QAction(tr("About u7..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
-	//m_pAboutAction->setEnabled(true);
+	// m_pAboutAction->setEnabled(true);
 	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
 
 	m_debugAction = new QAction(tr("Debug Mode"), this);
@@ -452,10 +445,34 @@ void MainWindow::createActions()
 	bks << QKeySequence(Qt::Key_F7);
 	m_startBuildAction->setShortcuts(bks);
 	connect(m_startBuildAction, &QAction::triggered, this, &MainWindow::startBuild);
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, [this](){m_startBuildAction->setEnabled(false);});
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, [this](){m_startBuildAction->setEnabled(true);});
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_startBuildAction->setEnabled(true);});
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_startBuildAction->setEnabled(false);});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::buildStarted,
+			this,
+			[this]()
+			{
+				m_startBuildAction->setEnabled(false);
+			});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::buildFinished,
+			this,
+			[this]()
+			{
+				m_startBuildAction->setEnabled(true);
+			});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectOpened,
+			this,
+			[this]()
+			{
+				m_startBuildAction->setEnabled(true);
+			});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectClosed,
+			this,
+			[this]()
+			{
+				m_startBuildAction->setEnabled(false);
+			});
 	addAction(m_startBuildAction);
 
 
@@ -463,34 +480,94 @@ void MainWindow::createActions()
 	m_projectHistoryAction->setStatusTip(tr("Show project history"));
 	m_projectHistoryAction->setEnabled(false);
 	connect(m_projectHistoryAction, &QAction::triggered, this, &MainWindow::projectHistory);
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectHistoryAction->setEnabled(true);});
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectHistoryAction->setEnabled(false);});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectOpened,
+			this,
+			[this]()
+			{
+				m_projectHistoryAction->setEnabled(true);
+			});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectClosed,
+			this,
+			[this]()
+			{
+				m_projectHistoryAction->setEnabled(false);
+			});
 	addAction(m_projectHistoryAction);
 
 	m_projectPropertiesAction = new QAction(tr("Project Properties..."), this);
 	m_projectPropertiesAction->setEnabled(false);
 	connect(m_projectPropertiesAction, &QAction::triggered, this, &MainWindow::projectProperties);
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectPropertiesAction->setEnabled(true);});
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectPropertiesAction->setEnabled(false);});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectOpened,
+			this,
+			[this]()
+			{
+				m_projectPropertiesAction->setEnabled(true);
+			});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectClosed,
+			this,
+			[this]()
+			{
+				m_projectPropertiesAction->setEnabled(false);
+			});
 
 	m_projectDifferenceAction = new QAction(tr("Project Diff..."), this);
 	m_projectDifferenceAction->setEnabled(false);
 	connect(m_projectDifferenceAction, &QAction::triggered, this, &MainWindow::projectDifference);
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectDifferenceAction->setEnabled(true);});
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectDifferenceAction->setEnabled(false);});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectOpened,
+			this,
+			[this]()
+			{
+				m_projectDifferenceAction->setEnabled(true);
+			});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectClosed,
+			this,
+			[this]()
+			{
+				m_projectDifferenceAction->setEnabled(false);
+			});
 
 	m_schemasAlbumAction = new QAction(tr("Create Schemas Albums..."), this);
 	m_schemasAlbumAction->setStatusTip(tr("Create PDF albums with all project schemas"));
 	m_schemasAlbumAction->setEnabled(false);
 	connect(m_schemasAlbumAction, &QAction::triggered, this, &MainWindow::createSchemasAlbums);
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_schemasAlbumAction->setEnabled(true);});
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_schemasAlbumAction->setEnabled(false);});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectOpened,
+			this,
+			[this]()
+			{
+				m_schemasAlbumAction->setEnabled(true);
+			});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectClosed,
+			this,
+			[this]()
+			{
+				m_schemasAlbumAction->setEnabled(false);
+			});
 
 	m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
 	m_pendingChangesAction->setEnabled(false);
 	connect(m_pendingChangesAction, &QAction::triggered, this, &MainWindow::pendingChanges);
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_pendingChangesAction->setEnabled(true);});
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_pendingChangesAction->setEnabled(false);});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectOpened,
+			this,
+			[this]()
+			{
+				m_pendingChangesAction->setEnabled(true);
+			});
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectClosed,
+			this,
+			[this]()
+			{
+				m_pendingChangesAction->setEnabled(false);
+			});
 
 	// Locator
 	//
@@ -500,19 +577,23 @@ void MainWindow::createActions()
 	m_locatorAction->setShortcut(QKeySequence{Qt::CTRL | Qt::Key_K});
 	m_locatorAction->setShortcutContext(Qt::ApplicationShortcut);
 
-	connect(m_locatorAction, &QAction::triggered,
-			[this](){
+	connect(m_locatorAction,
+			&QAction::triggered,
+			[this]()
+			{
 				m_locatorEditControl->setFocus();
 			});
 
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened,
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectOpened,
 			[this]()
 			{
 				m_locatorAction->setEnabled(true);
 				m_locatorEditControl->setEnabled(true);
 			});
 
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed,
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::projectClosed,
 			[this]()
 			{
 				m_locatorAction->setEnabled(false);
@@ -544,7 +625,7 @@ void MainWindow::createMenus()
 
 	// Project
 	//
-	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
+	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project")); // Alt+P now switching to the Projects tab page, don't use &
 	pProjectMenu->addAction(m_projectHistoryAction);
 	pProjectMenu->addAction(m_pendingChangesAction);
 	pProjectMenu->addAction(m_projectDifferenceAction);
@@ -574,7 +655,10 @@ void MainWindow::createMenus()
 
 	pToolsMenu->addAction(m_updateUfbsAfbs);
 
-	if (theSettings.isExpertMode() == true)
+	AppSettings appSettings;
+	appSettings.load();
+
+	if (appSettings.isExpertMode() == true)
 	{
 		pToolsMenu->addAction(m_AfbLibraryCheck);
 	}
@@ -620,9 +704,7 @@ void MainWindow::createMenus()
 	return;
 }
 
-void MainWindow::createToolBars()
-{
-}
+void MainWindow::createToolBars() {}
 
 void MainWindow::createStatusBar()
 {
@@ -669,18 +751,20 @@ CentralWidget* MainWindow::getCentralWidget()
 
 void MainWindow::onMiniDumpCreated(QString dumpFilePath, bool result)
 {
-    QString s;
+	QString s;
 
-    if (result == false)
-    {
-        s = QObject::tr("Application has been crashed!\nColld not save crash dump file:\n%1.").arg(dumpFilePath);
-    }
-    else
-    {
-        s = QObject::tr("Application has been crashed!\nA crash dump has been created:\n%1\nPlease send this file and program execulable file to support.").arg(dumpFilePath);
-    }
+	if (result == false)
+	{
+		s = QObject::tr("Application has been crashed!\nColld not save crash dump file:\n%1.").arg(dumpFilePath);
+	}
+	else
+	{
+		s = QObject::tr("Application has been crashed!\nA crash dump has been created:\n%1\nPlease send this file and program execulable "
+						"file to support.")
+				.arg(dumpFilePath);
+	}
 
-    QMessageBox::critical(this, qAppName(), s);
+	QMessageBox::critical(this, qAppName(), s);
 }
 
 void MainWindow::currentTabChanged(int /*tabIndex*/)
@@ -702,29 +786,30 @@ void MainWindow::userManagement()
 {
 	UserManagementDialog d(this, dbController());
 
-	if (d.exec() == QDialog::Accepted)
-	{
-	}
+	if (d.exec() == QDialog::Accepted) {}
 
 	return;
 }
 
 void MainWindow::showSettings()
 {
+	AppSettings appSettings;
+	appSettings.load();
+
 	DialogSettings d(this);
-	d.setSettings(theSettings);
+	d.setSettings(appSettings);
 
 	int result = d.exec();
 
 	if (result == QDialog::Accepted)
 	{
-		theSettings = d.settings();
-		theSettings.writeSystemScope();
+		appSettings = d.settings();
+		appSettings.save();
 
-		dbController()->setHost(theSettings.serverHost());
-		dbController()->setPort(theSettings.serverPort());
-		dbController()->setServerUsername(theSettings.serverUsername());
-		dbController()->setServerPassword(theSettings.serverPassword());
+		dbController()->setHost(appSettings.serverHost());
+		dbController()->setPort(appSettings.serverPort());
+		dbController()->setServerUsername(appSettings.serverUsername());
+		dbController()->setServerPassword(appSettings.serverPassword());
 
 		return;
 	}
@@ -740,9 +825,9 @@ void MainWindow::showShortcuts()
 		m_dialogShortcuts->show();
 
 		auto f = [this]() -> void
-			{
-				m_dialogShortcuts = nullptr;
-			};
+		{
+			m_dialogShortcuts = nullptr;
+		};
 
 		connect(m_dialogShortcuts, &DialogShortcuts::dialogClosed, this, f);
 	}
@@ -756,53 +841,54 @@ void MainWindow::showShortcuts()
 
 void MainWindow::showRpctUserManual()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.6_FSC_ RPCT_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/docs/D11.6_FSC_ RPCT_User_Manual.pdf", this);
 }
 
 void MainWindow::showRpctInstallManual()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Installing and configuring RPCT.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/docs/Installing and configuring RPCT.pdf", this);
 }
 
 void MainWindow::showRpctQuickStart()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/RPCT Quick Start Guide.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/docs/RPCT Quick Start Guide.pdf", this);
 }
 
 void MainWindow::showRpctUserManualAppendixA()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/docs/Appendixes/D11.6 RPCT User Manual Appendix A Warnings and Errors List.pdf",
+					 this);
 }
 
 void MainWindow::showRpctUserManualAppendixB()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/Appendixes/D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() +
+						 "/docs/Appendixes/D11.6 RPCT User Manual Appendix B Build Directory and Output Bitstream File Description.pdf",
+					 this);
 }
 
 void MainWindow::showAfblReference()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.5_AFBL_RM.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/docs/D11.5_AFBL_RM.pdf", this);
 }
 
 void MainWindow::showScriptHelp()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/scripthelp/index.html", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/scripthelp/index.html", this);
 }
 
 void MainWindow::showMatsUserManual()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_RPCT_MATS_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/docs/D11.8_RPCT_MATS_User_Manual.pdf", this);
 }
 
 void MainWindow::showTuningUserManual()
 {
-	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
+	UiTools::openPdf(QApplication::applicationDirPath() + "/docs/D11.9_FSC_Tuning_User_Manual.pdf", this);
 }
 
 
-void MainWindow::runConfigurator()
-{
-}
+void MainWindow::runConfigurator() {}
 
 void MainWindow::runSubsystemListEditor()
 {
@@ -817,19 +903,19 @@ void MainWindow::runSubsystemListEditor()
 
 void MainWindow::runConnectionsEditor()
 {
-    if (dbController()->isProjectOpened() == false)
-    {
-        return;
-    }
-
-    if (theDialogConnections == nullptr)
+	if (dbController()->isProjectOpened() == false)
 	{
-        theDialogConnections = new DialogConnections(dbController(), this);
-        theDialogConnections->show();
+		return;
+	}
+
+	if (theDialogConnections == nullptr)
+	{
+		theDialogConnections = new DialogConnections(dbController(), this);
+		theDialogConnections->show();
 	}
 	else
 	{
-        theDialogConnections->activateWindow();
+		theDialogConnections->activateWindow();
 	}
 	UiTools::adjustDialogPlacement(theDialogConnections);
 }
@@ -949,11 +1035,11 @@ void MainWindow::updateUfbsAfbsBusses()
 	DbFileTree filesTree;
 	db()->getFileListTree(&filesTree, DbDir::UfblDir, "%", true, this);
 
-	std::vector<DbFileInfo>	ufbSchemaFileInfos = filesTree.toVectorIf(
+	std::vector<DbFileInfo> ufbSchemaFileInfos = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
 		{
 			return file.fileName().endsWith(QLatin1String(".") + File::UfbFileExtension, Qt::CaseInsensitive) == true &&
-				file.isFolder() == false;
+				   file.isFolder() == false;
 		});
 
 	for (const DbFileInfo& f : ufbSchemaFileInfos)
@@ -969,11 +1055,11 @@ void MainWindow::updateUfbsAfbsBusses()
 	filesTree.clear();
 	db()->getFileListTree(&filesTree, DbDir::AppLogicDir, "%", true, this);
 
-	std::vector<DbFileInfo>	alSchemaFileInfos = filesTree.toVectorIf(
+	std::vector<DbFileInfo> alSchemaFileInfos = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
 		{
 			return file.fileName().endsWith(QLatin1String(".") + File::AlFileExtension, Qt::CaseInsensitive) == true &&
-				file.isFolder() == false;
+				   file.isFolder() == false;
 		});
 
 	for (const DbFileInfo& f : alSchemaFileInfos)
@@ -990,7 +1076,8 @@ void MainWindow::updateUfbsAfbsBusses()
 
 		mbError.setIcon(QMessageBox::Critical);
 		mbError.setText(tr("Update AFBs/UFBs/Busses error."));
-		mbError.setInformativeText("There are some checked out Application Logic and/or UFB schemas. CheckIn these files and repeat operation.");
+		mbError.setInformativeText(
+			"There are some checked out Application Logic and/or UFB schemas. CheckIn these files and repeat operation.");
 		mbError.setDetailedText(checkedOutFiles.join(QChar::LineSeparator));
 
 		mbError.exec();
@@ -1002,7 +1089,11 @@ void MainWindow::updateUfbsAfbsBusses()
 	LogicModuleSet logicModuleSet;
 	int totalUpdatedAfbs = 0;
 
-	QProgressDialog progress("Updating AFBs/Bussses on UFB schemas...", "Abort", 0, static_cast<int>(ufbSchemaFileInfos.size() + alSchemaFileInfos.size()), this);
+	QProgressDialog progress("Updating AFBs/Bussses on UFB schemas...",
+							 "Abort",
+							 0,
+							 static_cast<int>(ufbSchemaFileInfos.size() + alSchemaFileInfos.size()),
+							 this);
 	progress.setWindowModality(Qt::WindowModal);
 	int progressIndicator = 0;
 
@@ -1191,9 +1282,9 @@ void MainWindow::updateUfbsAfbsBusses()
 			}
 
 			updateDetails << tr("%1: %2, updated %3 item(s)")
-								.arg(schema->isUfbSchema() ? "UFB" : "AL")
-								.arg(schema->schemaId())
-								.arg(thisSchemaUpdatedCount);
+								 .arg(schema->isUfbSchema() ? "UFB" : "AL")
+								 .arg(schema->schemaId())
+								 .arg(thisSchemaUpdatedCount);
 		}
 
 		if (static_cast<size_t>(progressIndicator) != allFiles.size())
@@ -1248,7 +1339,8 @@ void MainWindow::afbLibraryCheck()
 void MainWindow::showAbout()
 {
 	QString text = "Supported project database version: " + QString::number(DbController::databaseVersion()) + "<br><br>";
-	text += qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and MATS software configuration.";
+	text += qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its "
+									  "compilation, visualization design and MATS software configuration.";
 
 	LicenseLib::AppLicenser appLicenser;
 	UiLib::DialogAbout::show(this,
@@ -1402,7 +1494,7 @@ void MainWindow::projectOpened(DbProject project)
 
 	m_usersAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
-    m_connectionsEditorAction->setEnabled(true);
+	m_connectionsEditorAction->setEnabled(true);
 	m_diagSignalTypesEditorAction->setEnabled(true);
 	m_appSignalListsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
@@ -1416,7 +1508,10 @@ void MainWindow::projectOpened(DbProject project)
 	//
 	assert(m_statusBarConnectionState != nullptr);
 
-	m_statusBarConnectionState->setText(tr("Opened: %1:%2").arg(theSettings.serverHost()).arg(theSettings.serverPort()));
+	AppSettings appSettings;
+	appSettings.load();
+
+	m_statusBarConnectionState->setText(tr("Opened: %1:%2").arg(appSettings.serverHost()).arg(appSettings.serverPort()));
 
 	// Show and hide FilesTabPage
 	//
@@ -1442,7 +1537,7 @@ void MainWindow::projectClosed()
 
 	m_usersAction->setEnabled(false);
 	m_subsystemListEditorAction->setEnabled(false);
-    m_connectionsEditorAction->setEnabled(false);
+	m_connectionsEditorAction->setEnabled(false);
 	m_diagSignalTypesEditorAction->setEnabled(false);
 	m_appSignalListsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
@@ -1477,22 +1572,22 @@ void MainWindow::projectClosed()
 
 void MainWindow::buildStarted()
 {
-//#ifdef Q_OS_WINDOWS
-//	Q_ASSERT(m_taskBarButton);
+	// #ifdef Q_OS_WINDOWS
+	//	Q_ASSERT(m_taskBarButton);
 
-//	m_taskBarButton->progress()->setRange(0, 100);
-//	m_taskBarButton->progress()->show();
+	//	m_taskBarButton->progress()->setRange(0, 100);
+	//	m_taskBarButton->progress()->show();
 
-//	m_timerId = startTimer(50);
-//#endif
+	//	m_timerId = startTimer(50);
+	// #endif
 }
 
 void MainWindow::buildFinished(int /*errorCount*/)
 {
-//#ifdef Q_OS_WINDOWS
-//	m_taskBarButton->progress()->hide();
-//	killTimer(m_timerId);
-//#endif
+	// #ifdef Q_OS_WINDOWS
+	//	m_taskBarButton->progress()->hide();
+	//	killTimer(m_timerId);
+	// #endif
 }
 
 
@@ -1507,4 +1602,3 @@ DbController* MainWindow::db()
 	assert(m_dbController != nullptr);
 	return m_dbController;
 }
-

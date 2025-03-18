@@ -1,11 +1,11 @@
 #include "SchemasReport.h"
+#include "AppSettings.h"
 #include "DialogSchemasReport.h"
-#include "Settings.h"
 
 #include "../UtilsLib/Ui/UiTools.h"
 #include <ReportLib/ReportSchemaView.h>
-#include <VFrame30/SchemaDetails.h>
 #include <UiLib/DialogProgress.h>
+#include <VFrame30/SchemaDetails.h>
 
 using namespace ReportLib;
 using namespace Builder;
@@ -52,12 +52,8 @@ void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSigna
 
 	// Show dialog with report options
 	//
-	DialogSchemasReport d(path,
-						  schemaTypesParams,
-						  options,
-						  db,
-						  parent);
-	
+	DialogSchemasReport d(path, schemaTypesParams, options, db, parent);
+
 	int result = d.exec();
 
 	if (d.optionsApplied() == true)
@@ -69,24 +65,26 @@ void SchemasAlbumGenerator::createSchemasAlbums(DbController* db, const AppSigna
 		{
 			param.save(db);
 		}
-		
+
 		options = d.options();
 		options.save(db);
 
 		path = d.path();
 		QSettings{}.setValue("SchemaEditor/Export/AlbumPath", path);
-
 	}
 
 	if (result != QDialog::Accepted)
 	{
 		return;
 	}
-	
-	SchemasReportGeneratorThread r(theSettings.serverHost(),
-								   theSettings.serverPort(),
-								   theSettings.serverUsername(),
-								   theSettings.serverPassword(),
+
+	AppSettings appSettings;
+	appSettings.load();
+
+	SchemasReportGeneratorThread r(appSettings.serverHost(),
+								   appSettings.serverPort(),
+								   appSettings.serverUsername(),
+								   appSettings.serverPassword(),
 								   db->currentProject().projectName(),
 								   db->currentUser().username(),
 								   db->currentUser().password(),
@@ -109,10 +107,10 @@ SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& server
 														   const QString& projectName,
 														   const QString& userName,
 														   const QString& userPassword,
-														   const AppSignalSet *signalSet,
-														   QWidget *parent,
+														   const AppSignalSet* signalSet,
+														   QWidget* parent,
 														   const Builder::SchemasReportOptions& options,
-														   const std::vector<SchemaTypesParams>& schemaTypesParams):
+														   const std::vector<SchemaTypesParams>& schemaTypesParams) :
 	m_serverIp(serverIp),
 	m_serverPort(serverPort),
 	m_serverUserName(serverUserName),
@@ -125,7 +123,6 @@ SchemasReportGeneratorThread::SchemasReportGeneratorThread(const QString& server
 	m_options(options),
 	m_schemaTypesParams(schemaTypesParams)
 {
-
 }
 
 void SchemasReportGeneratorThread::exportSchemasToMultiplePdf(const QString& pdfPath, const std::vector<DbFileInfo>& files)
@@ -147,9 +144,7 @@ void SchemasReportGeneratorThread::exportAllSchemasToAlbum(const QString& pdfPat
 	run(TaskType::ExportAllSchemasToAlbum, pdfPath, {});
 }
 
-void SchemasReportGeneratorThread::run(TaskType task,
-									   const QString& filePath,
-									   const std::vector<DbFileInfo>& files)
+void SchemasReportGeneratorThread::run(TaskType task, const QString& filePath, const std::vector<DbFileInfo>& files)
 {
 	// Create View
 
@@ -186,7 +181,7 @@ void SchemasReportGeneratorThread::run(TaskType task,
 
 	worker->moveToThread(thread);
 
-	switch(task)
+	switch (task)
 	{
 	case TaskType::ExportFilesToMultiplePdf:
 		{
@@ -200,34 +195,41 @@ void SchemasReportGeneratorThread::run(TaskType task,
 		break;
 	case TaskType::ExportAllSchemasToAlbum:
 		{
-			Q_ASSERT(files.empty() == true);	// No files should be here
+			Q_ASSERT(files.empty() == true);                                     // No files should be here
 			QObject::connect(thread, &QThread::started, worker, &SchemasReportGenerator::exportSchemasToAlbums);
 		}
 		break;
 	}
 
-	QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
+	QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater); // Schedule thread deleting
 
-	QObject::connect(&dialogProgress, &UiLib::DialogProgress::getProgress, worker, &SchemasReportGenerator::progressRequested, Qt::DirectConnection);
+	QObject::connect(&dialogProgress,
+					 &UiLib::DialogProgress::getProgress,
+					 worker,
+					 &SchemasReportGenerator::progressRequested,
+					 Qt::DirectConnection);
 	QObject::connect(&dialogProgress, &UiLib::DialogProgress::cancelClicked, worker, &SchemasReportGenerator::stop, Qt::DirectConnection);
 
 	QObject::connect(worker, &SchemasReportGenerator::progressChanged, &dialogProgress, &UiLib::DialogProgress::setProgressSingle);
 
 	//  Schedule objects deleting
 
-	QObject::connect(worker, &SchemasReportGenerator::finished, worker, [thread, &dialogProgress, worker, schemaView](const QString& errorMessage)
-	{
-		thread->quit();
+	QObject::connect(worker,
+					 &SchemasReportGenerator::finished,
+					 worker,
+					 [thread, &dialogProgress, worker, schemaView](const QString& errorMessage)
+					 {
+						 thread->quit();
 
-		if (errorMessage.isEmpty() == false)
-		{
-			dialogProgress.setErrorMessage(errorMessage);
-		}
+						 if (errorMessage.isEmpty() == false)
+						 {
+							 dialogProgress.setErrorMessage(errorMessage);
+						 }
 
-		dialogProgress.exit();
+						 dialogProgress.exit();
 
-		worker->deleteLater();
-	});
+						 worker->deleteLater();
+					 });
 
 	// Start thread
 
@@ -239,7 +241,9 @@ void SchemasReportGeneratorThread::run(TaskType task,
 	{
 		if (task == TaskType::ExportFilesToSinglePdf)
 		{
-			if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you wish to open it?")) == QMessageBox::Yes)
+			if (QMessageBox::question(m_parent,
+									  qAppName(),
+									  QObject::tr("Album generating has been finished.\n\nDo you wish to open it?")) == QMessageBox::Yes)
 			{
 				UiTools::openPdf(filePath, m_parent);
 			}
@@ -248,7 +252,11 @@ void SchemasReportGeneratorThread::run(TaskType task,
 		{
 			if (task == TaskType::ExportFilesToMultiplePdf || task == TaskType::ExportAllSchemasToAlbum)
 			{
-				if (QMessageBox::question(m_parent, qAppName(), QObject::tr("Album generating has been finished.\n\nDo you wish to open the containing folder?")) == QMessageBox::Yes)
+				if (QMessageBox::question(
+						m_parent,
+						qAppName(),
+						QObject::tr("Album generating has been finished.\n\nDo you wish to open the containing folder?")) ==
+					QMessageBox::Yes)
 				{
 					QUrl url = QUrl::fromLocalFile(filePath);
 					QDesktopServices::openUrl(url);
@@ -263,4 +271,3 @@ void SchemasReportGeneratorThread::run(TaskType task,
 
 	return;
 }
-
