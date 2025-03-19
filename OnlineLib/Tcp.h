@@ -113,7 +113,7 @@ namespace Tcp
 
 		QString socketDescription() const;
 
-		virtual void getClientsList(Network::ServiceClients* srvClients) const;
+		virtual void getClientsList(Network::ServiceInfo* srvInfo) const;
 
 	signals:
 		void socketDisconnected(const SocketWorker* socketWorker);
@@ -308,7 +308,7 @@ namespace Tcp
 		bool sendReply(google::protobuf::Message& protobufMessage);
 		bool sendReply(const char* replyData, quint32 replyDataSize);
 
-		void getClientsList(Network::ServiceClients* srvClients) const override;
+		void getClientsList(Network::ServiceInfo* srvInfo) const override;
 		void sendClientList();
 
 		void initConnectionNo();
@@ -417,7 +417,7 @@ namespace Tcp
 
 		virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr);
 
-		void getClientsList(Network::ServiceClients* srvClients) const;
+		void getClientsList(Network::ServiceInfo* srvInfo) const;
 
 	signals:
 		void connectedClientsListChanged(std::list<ConnectionState> listOfClientStates);
@@ -477,7 +477,7 @@ namespace Tcp
 
 		virtual ~ListenerThread();
 
-		void getClientsList(Network::ServiceClients* srvClients) const;
+		void getClientsList(Network::ServiceInfo* srvInfo) const;
 
 	private:
 		ListenerWorker* m_listenerWorker = nullptr;

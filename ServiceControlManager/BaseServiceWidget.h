@@ -108,7 +108,7 @@ private:
 	QAction* m_restartServiceButton = nullptr;
 
 	QTimer* m_timer = nullptr;
-	UdpClientSocket* m_baseClientSocket = nullptr;
+	UdpClientSocket* m_udpSocket = nullptr;
 	QLabel* m_connectionStateStatus = nullptr;
 	QLabel* m_uptimeStatus = nullptr;
 	QLabel* m_runningStatus = nullptr;

@@ -367,11 +367,6 @@ message ServiceClientInfo
 	required SoftwareInfo softwareInfo = 8;
 }
 
-message ServiceClients
-{
-	repeated ServiceClientInfo clients = 1;
-}
-
 message ServiceInfo
 {
     required SoftwareInfo softwareInfo = 1;
@@ -386,7 +381,7 @@ message ServiceInfo
 
 	optional Proto.BuildInfo buildInfo = 7;
 
-	optional ServiceClients clients = 8;
+	repeated ServiceClientInfo clients = 8;
 
 	// CfgService specific
 	//

@@ -212,9 +212,9 @@ namespace Tcp
 		return m_socketDescription;
 	}
 
-	void SocketWorker::getClientsList(Network::ServiceClients* srvClients) const
+	void SocketWorker::getClientsList(Network::ServiceInfo* srvInfo) const
 	{
-		Q_UNUSED(srvClients);
+		Q_UNUSED(srvInfo);
 		return;
 	}
 
@@ -1044,9 +1044,9 @@ namespace Tcp
 		return true;
 	}
 
-	void Server::getClientsList(Network::ServiceClients* srvClients) const
+	void Server::getClientsList(Network::ServiceInfo* srvInfo) const
 	{
-		TEST_PTR_RETURN(srvClients)
+		TEST_PTR_RETURN(srvInfo)
 
 		m_statesMutex.lock();
 
@@ -1059,7 +1059,7 @@ namespace Tcp
 				continue;
 			}
 
-			Network::ServiceClientInfo* clientInfo = srvClients->add_clients();
+			Network::ServiceClientInfo* clientInfo = srvInfo->add_clients();
 
 			clientInfo->set_requestip(m_listenAddress.hostAddr().address32());
 			clientInfo->set_requestport(m_listenAddress.hostAddr().port());
@@ -1402,13 +1402,13 @@ namespace Tcp
 		}
 	}
 
-	void ListenerWorker::getClientsList(Network::ServiceClients* srvClients) const
+	void ListenerWorker::getClientsList(Network::ServiceInfo* srvInfo) const
 	{
 		m_runningServersMutex.lock();
 
 		for (const auto& [server, thread] : m_runningServers)
 		{
-			server->getClientsList(srvClients);
+			server->getClientsList(srvInfo);
 		}
 
 		m_runningServersMutex.unlock();
@@ -1583,9 +1583,9 @@ namespace Tcp
 	{
 	}
 
-	void ListenerThread::getClientsList(Network::ServiceClients* srvClients) const
+	void ListenerThread::getClientsList(Network::ServiceInfo* srvInfo) const
 	{
-		m_listenerWorker->getClientsList(srvClients);
+		m_listenerWorker->getClientsList(srvInfo);
 	}
 
 	// -------------------------------------------------------------------------------------

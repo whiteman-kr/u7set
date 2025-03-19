@@ -56,12 +56,12 @@ BaseServiceWidget::BaseServiceWidget(	ServiceTableModel* srvTableModel,
 
 	m_udpSocketThread = new UdpSocketThread();
 
-	m_baseClientSocket = new UdpClientSocket(QHostAddress(udpIp), udpPort);
+	m_udpSocket = new UdpClientSocket(QHostAddress(udpIp), udpPort);
 
-	connect(m_baseClientSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceWidget::serviceAckTimeout);
-	connect(m_baseClientSocket, &UdpClientSocket::ackReceived, this, &BaseServiceWidget::serviceAckReceived);
+	connect(m_udpSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceWidget::serviceAckTimeout);
+	connect(m_udpSocket, &UdpClientSocket::ackReceived, this, &BaseServiceWidget::serviceAckReceived);
 
-	m_udpSocketThread->addWorker(m_baseClientSocket);
+	m_udpSocketThread->addWorker(m_udpSocket);
 	m_udpSocketThread->start();
 
 	//
@@ -363,7 +363,7 @@ void BaseServiceWidget::updateClients()
 		cm->setData(cm->index(i, 2), HostAddressPort(client.clientip(), client.clientport()).toString());
 		cm->setData(cm->index(i, 3), E::valueToString(static_cast<E::SoftwareType>(sw.softwaretype())));
 		cm->setData(cm->index(i, 4), formatUptime(client.uptime() / 1000));
-		cm->setData(cm->index(i, 5), client.replyquantity());
+		cm->setData(cm->index(i, 5), static_cast<qint64>(client.replyquantity()));
 	}
 
 	updateColumnsWidth(m_clientsModel);
@@ -400,9 +400,9 @@ QString BaseServiceWidget::getRunningStateStr() const
 
 void BaseServiceWidget::askServiceState()
 {
-	if (!m_baseClientSocket->isWaitingForAck())
+	if (!m_udpSocket->isWaitingForAck())
 	{
-		m_baseClientSocket->sendRequest(RQID_SERVICE_GET_INFO);
+		m_udpSocket->sendRequest(RQID_SERVICE_GET_INFO);
 	}
 }
 
@@ -479,8 +479,17 @@ void BaseServiceWidget::serviceAckTimeout()
 
 void BaseServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 {
-	Q_UNUSED(ip);
-	Q_UNUSED(port);
+	m_tcpClientSocket = new TcpConfigServiceClient(softwareInfo(), HostAddressPort(ip, port));
+	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
+
+//	connect(m_tcpClientSocket, &TcpConfigServiceClient::serviceStateLoaded, this, &CfgServiceWidget::updateSrvStatus);
+//	connect(m_tcpClientSocket, &TcpConfigServiceClient::clientsLoaded, this, &CfgServiceWidget::updateClientsInfo);
+	//	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
+//	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &CfgServiceWidget::updateServiceParameters);
+
+//	connect(m_tcpClientSocket, &TcpConfigServiceClient::socketDisconnected, this, &CfgServiceWidget::clearServiceData);
+
+	m_tcpClientThread->start();
 }
 
 void BaseServiceWidget::dropTcpConnection()
@@ -715,10 +724,10 @@ void BaseServiceWidget::sendCommand(int command)
 	{
 		return;
 	}
-	if (m_baseClientSocket->isWaitingForAck())
+	if (m_udpSocket->isWaitingForAck())
 	{
 		QMessageBox::critical(this, tr("Command send error"), tr("Socket is waiting for ack, repeat your command later."));
 		return;
 	}
-	m_baseClientSocket->sendRequest(command);
+	m_udpSocket->sendRequest(command);
 }

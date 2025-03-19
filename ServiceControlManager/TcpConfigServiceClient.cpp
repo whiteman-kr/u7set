@@ -8,7 +8,6 @@ TcpConfigServiceClient::TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
 {
 }
 
-
 TcpConfigServiceClient::TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
 											   const HostAddressPort& serverAddressPort1,
 											   const HostAddressPort& serverAddressPort2) :
@@ -16,23 +15,19 @@ TcpConfigServiceClient::TcpConfigServiceClient(const SoftwareInfo& softwareInfo,
 {
 }
 
-
 TcpConfigServiceClient::~TcpConfigServiceClient()
 {
 }
-
 
 void TcpConfigServiceClient::onClientThreadStarted()
 {
 
 }
 
-
 void TcpConfigServiceClient::onClientThreadFinished()
 {
 
 }
-
 
 void TcpConfigServiceClient::onConnection()
 {
@@ -47,7 +42,6 @@ void TcpConfigServiceClient::onConnection()
 	updateState();
 }
 
-
 void TcpConfigServiceClient::onDisconnection()
 {
 	if (m_updateStatesTimer != nullptr)
@@ -61,12 +55,10 @@ void TcpConfigServiceClient::onDisconnection()
 	emit socketDisconnected();
 }
 
-
 void TcpConfigServiceClient::onReplyTimeout()
 {
 
 }
-
 
 void TcpConfigServiceClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
@@ -145,7 +137,6 @@ void TcpConfigServiceClient::onGetConfigurationServiceLoadedBuildInfoReply(const
 	sendRequest(CFGS_GET_SETTINGS);
 }
 
-
 void TcpConfigServiceClient::onGetConfigurationServiceSettingsReply(const char* replyData, quint32 replyDataSize)
 {
 	Network::ConfigurationServiceSettings message;
@@ -166,7 +157,6 @@ void TcpConfigServiceClient::onGetConfigurationServiceSettingsReply(const char* 
 	emit settingsLoaded();
 }
 
-
 void TcpConfigServiceClient::updateState()
 {
 	if (isClearToSendRequest())
@@ -174,4 +164,3 @@ void TcpConfigServiceClient::updateState()
 		sendRequest(CFGS_GET_SERVICE_STATE);
 	}
 }
-
