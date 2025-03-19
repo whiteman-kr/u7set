@@ -740,15 +740,12 @@ DbController* ProjectDiffGenerator::db()
 
 void ProjectDiffGenerator::compareProject()
 {
-	AppSettings appSettings;
-	appSettings.load();
-
 	db()->disableProgress();
 
-	db()->setHost(appSettings.serverHost());
-	db()->setPort(appSettings.serverPort());
-	db()->setServerUsername(appSettings.serverUsername());
-	db()->setServerPassword(appSettings.serverPassword());
+	db()->setHost(theAppSettings.serverHost());
+	db()->setPort(theAppSettings.serverPort());
+	db()->setServerUsername(theAppSettings.serverUsername());
+	db()->setServerPassword(theAppSettings.serverPassword());
 
 	bool ok = db()->openProject(m_projectName, m_userName, m_userPassword, nullptr);
 	if (ok == false)

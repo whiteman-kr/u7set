@@ -33,14 +33,11 @@ SignalPropertiesDialog::SignalPropertiesDialog(const std::vector<AppSignal*>& si
 	createSignalsProps();
 
 	// Dialog controls creation
-	AppSettings appSettings;
-	appSettings.load();
-
 	QVBoxLayout* vl = new QVBoxLayout;
 
 	m_propertyEditor = new IdePropertyEditor(this, m_signalSetProvider->dbController());
 
-	m_propertyEditor->setExpertMode(appSettings.isExpertMode());
+	m_propertyEditor->setExpertMode(theAppSettings.isExpertMode());
 	m_propertyEditor->setObjects(m_signalsProps);
 	m_propertyEditor->autoAdjustSplitterPosition();
 
@@ -92,7 +89,7 @@ bool SignalPropertiesDialog::isValid() const
 
 void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 {
-	bool expertMode = AppSettings::isExpertModeCached();
+	bool expertMode = theAppSettings.isExpertMode();
 
 	signal.setInOutType(E::SignalInOutType::Internal);
 	signal.setByteOrder(E::ByteOrder::BigEndian);
@@ -451,7 +448,7 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	}
 
 	QSettings settings;
-	bool expertMode = AppSettings::isExpertModeCached();
+	bool expertMode = theAppSettings.isExpertMode();
 
 	AppSignalPropertyManager& manager = *AppSignalPropertyManager::getInstance();
 
@@ -535,7 +532,7 @@ void SignalPropertiesDialog::uppercaseAppSignalIDs()
 
 void SignalPropertiesDialog::createSignalsProps()
 {
-	bool expertMode = AppSettings::isExpertModeCached();
+	bool expertMode = theAppSettings.isExpertMode();
 
 	for (AppSignal* s : m_signalsToEdit)
 	{

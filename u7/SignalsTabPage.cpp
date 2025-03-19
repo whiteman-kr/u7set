@@ -936,7 +936,7 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 		if (signalType == SignalsTabPage::FILTER_ST_ANY ||
 			m_signalSetProvider->signalPropertyManager().isHiddenFor(static_cast<E::SignalType>(signalType),
 																	 i,
-																	 AppSettings::isExpertModeCached()) == false)
+																	 theAppSettings.isExpertMode()) == false)
 		{
 			bool hidden = m_signalsColumnVisibilityController->getColumnVisibility(i) == false;
 			m_signalsView->setColumnHidden(i, hidden);

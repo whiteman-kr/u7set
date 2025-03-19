@@ -91,10 +91,8 @@ int main(int argc, char* argv[])
 
 		// Read settings
 		//
+		theAppSettings.load();
 		theSettings.load();
-
-		AppSettings appSettings;
-		appSettings.load();
 
 		// Init TrendLib resources
 		//
@@ -106,10 +104,10 @@ int main(int argc, char* argv[])
 
 		dbController.disableProgress();
 
-		dbController.setHost(appSettings.serverHost());
-		dbController.setPort(appSettings.serverPort());
-		dbController.setServerUsername(appSettings.serverUsername());
-		dbController.setServerPassword(appSettings.serverPassword());
+		dbController.setHost(theAppSettings.serverHost());
+		dbController.setPort(theAppSettings.serverPort());
+		dbController.setServerUsername(theAppSettings.serverUsername());
+		dbController.setServerPassword(theAppSettings.serverPassword());
 
 		// --
 		//

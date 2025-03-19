@@ -109,12 +109,8 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent) :
 
 	// m_busPropertyEditor
 
-	AppSettings appSettings;
-	appSettings.load();
-
-
 	m_busPropertyEditor = new ExtWidgets::PropertyEditor(this);
-	m_busPropertyEditor->setExpertMode(appSettings.isExpertMode());
+	m_busPropertyEditor->setExpertMode(theAppSettings.isExpertMode());
 
 	connect(m_busPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogBusEditor::onBusPropertiesChanged);
 

@@ -655,10 +655,7 @@ void MainWindow::createMenus()
 
 	pToolsMenu->addAction(m_updateUfbsAfbs);
 
-	AppSettings appSettings;
-	appSettings.load();
-
-	if (appSettings.isExpertMode() == true)
+	if (theAppSettings.isExpertMode() == true)
 	{
 		pToolsMenu->addAction(m_AfbLibraryCheck);
 	}
@@ -793,23 +790,20 @@ void MainWindow::userManagement()
 
 void MainWindow::showSettings()
 {
-	AppSettings appSettings;
-	appSettings.load();
-
 	DialogSettings d(this);
-	d.setSettings(appSettings);
+	d.setSettings(theAppSettings);
 
 	int result = d.exec();
 
 	if (result == QDialog::Accepted)
 	{
-		appSettings = d.settings();
-		appSettings.save();
+		theAppSettings = d.settings();
+		theAppSettings.save();
 
-		dbController()->setHost(appSettings.serverHost());
-		dbController()->setPort(appSettings.serverPort());
-		dbController()->setServerUsername(appSettings.serverUsername());
-		dbController()->setServerPassword(appSettings.serverPassword());
+		dbController()->setHost(theAppSettings.serverHost());
+		dbController()->setPort(theAppSettings.serverPort());
+		dbController()->setServerUsername(theAppSettings.serverUsername());
+		dbController()->setServerPassword(theAppSettings.serverPassword());
 
 		return;
 	}
@@ -1508,10 +1502,7 @@ void MainWindow::projectOpened(DbProject project)
 	//
 	assert(m_statusBarConnectionState != nullptr);
 
-	AppSettings appSettings;
-	appSettings.load();
-
-	m_statusBarConnectionState->setText(tr("Opened: %1:%2").arg(appSettings.serverHost()).arg(appSettings.serverPort()));
+	m_statusBarConnectionState->setText(tr("Opened: %1:%2").arg(theAppSettings.serverHost()).arg(theAppSettings.serverPort()));
 
 	// Show and hide FilesTabPage
 	//

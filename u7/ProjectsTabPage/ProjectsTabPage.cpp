@@ -233,11 +233,8 @@ void ProjectsTabPage::refreshProjectList()
 
 void ProjectsTabPage::updateUiState(bool isOpened)
 {
-	AppSettings appSettings;
-	appSettings.load();
-
-	bool backupIsPossible = appSettings.pgDumpCommand().isEmpty() == false;
-	bool restoreIsPossible = appSettings.psqlCommand().isEmpty() == false;
+	bool backupIsPossible = theAppSettings.pgDumpCommand().isEmpty() == false;
+	bool restoreIsPossible = theAppSettings.psqlCommand().isEmpty() == false;
 
 	bool isClosed = !isOpened;
 	bool selected = m_projectTable && m_projectTable->selectedItems().isEmpty() == false;
@@ -267,19 +264,16 @@ void ProjectsTabPage::updateUiState(bool isOpened)
 
 void ProjectsTabPage::createProject()
 {
-	AppSettings appSettings;
-	appSettings.load();
-
 	// Use different DbController as during cretion project it can be opened and closed,
 	// and it must not emit any siganls to existing UI.
 	//
 	DbController dbc;
 
 	dbc.enableProgress();
-	dbc.setHost(appSettings.serverHost());
-	dbc.setPort(appSettings.serverPort());
-	dbc.setServerUsername(appSettings.serverUsername());
-	dbc.setServerPassword(appSettings.serverPassword());
+	dbc.setHost(theAppSettings.serverHost());
+	dbc.setPort(theAppSettings.serverPort());
+	dbc.setServerUsername(theAppSettings.serverUsername());
+	dbc.setServerPassword(theAppSettings.serverPassword());
 
 	CreateProjectDialog dialog(this);
 
@@ -471,16 +465,13 @@ void ProjectsTabPage::backupProject()
 
 	QString db = "u7_" + project;
 
-	AppSettings appSettings;
-	appSettings.load();
-
 	ProjectBackup backuper;
-	ProjectBackup::Server server{appSettings.serverHost(),
-								 appSettings.serverPort(),
-								 appSettings.serverUsername(),
-								 appSettings.serverPassword()};
+	ProjectBackup::Server server{theAppSettings.serverHost(),
+								 theAppSettings.serverPort(),
+								 theAppSettings.serverUsername(),
+								 theAppSettings.serverPassword()};
 
-	backuper.setBackupExecutable(appSettings.pgDumpCommand());
+	backuper.setBackupExecutable(theAppSettings.pgDumpCommand());
 
 	if (backuper.canBackup() == false)
 	{
@@ -489,7 +480,7 @@ void ProjectsTabPage::backupProject()
 
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save Backup As"),
-													QString{"%1.backup"}.arg(db),
+													QString{"%1.sqlbackup"}.arg(db),
 													tr("Backup files (*.sqlbackup);;All files (*.*)"));
 	if (fileName.isEmpty() == true)
 	{
@@ -513,7 +504,20 @@ void ProjectsTabPage::backupProject()
 	}
 	else
 	{
-		QMessageBox::information(this, tr("Backup"), tr("Backup completed successfully."));
+		QMessageBox mb{this};
+		mb.setIcon(QMessageBox::Icon::Information);
+		mb.setText(tr("Backup completed successfully."));
+		mb.addButton(QMessageBox::Ok);
+		auto button = mb.addButton(tr("Open Folder"), QMessageBox::ActionRole);
+
+		connect(button,
+				&QPushButton::clicked,
+				[fileName]()
+				{
+					QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(fileName).absolutePath()));
+				});
+
+		mb.exec();
 	}
 
 	return;
@@ -521,16 +525,13 @@ void ProjectsTabPage::backupProject()
 
 void ProjectsTabPage::restoreProject()
 {
-	AppSettings appSettings;
-	appSettings.load();
-
 	ProjectBackup restorer;
-	restorer.setRestoreExecutable(appSettings.psqlCommand());
+	restorer.setRestoreExecutable(theAppSettings.psqlCommand());
 
-	ProjectBackup::Server server{appSettings.serverHost(),
-								 appSettings.serverPort(),
-								 appSettings.serverUsername(),
-								 appSettings.serverPassword()};
+	ProjectBackup::Server server{theAppSettings.serverHost(),
+								 theAppSettings.serverPort(),
+								 theAppSettings.serverUsername(),
+								 theAppSettings.serverPassword()};
 
 	if (restorer.canRestore() == false)
 	{

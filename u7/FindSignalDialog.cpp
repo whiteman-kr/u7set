@@ -34,10 +34,7 @@ FindSignalDialog::FindSignalDialog(QTableView* parent) :
 	m_replaceableSignalQuantityBlinkTimer(new QTimer(this)),
 	m_regExp4Id(AppSignal::IDENTIFICATORS_VALIDATOR)
 {
-	AppSettings appSettings;
-	appSettings.load();
-
-	m_isExpertMode = appSettings.isExpertMode();
+	m_isExpertMode = theAppSettings.isExpertMode();
 
 	m_currentUserId = m_signalSetProvider->currentUserID();
 	m_currentUserIsAdmin = m_signalSetProvider->currentUserIsAdmin();

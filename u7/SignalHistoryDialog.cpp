@@ -108,10 +108,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* db, const AppSignal& s, Q
 		row++;
 	}
 
-	AppSettings appSettings;
-	appSettings.load();
-
-	bool isExpert = appSettings.isExpertMode();
+	bool isExpert = theAppSettings.isExpertMode();
 
 	// Signal instances details
 	//

@@ -1190,10 +1190,10 @@ void EquipmentTabPage::setProperties()
 		}
 	}
 
-	m_propertyEditor->setExpertMode(isPresetMode() || AppSettings::isExpertModeCached());
+	m_propertyEditor->setExpertMode(isPresetMode() || theAppSettings.isExpertMode());
 	m_propertyEditor->setReadOnly(checkedOutList.isEmpty() == true);
 
-	m_propertyTable->setExpertMode(isPresetMode() || AppSettings::isExpertModeCached());
+	m_propertyTable->setExpertMode(isPresetMode() || theAppSettings.isExpertMode());
 	m_propertyTable->setReadOnly(checkedOutList.isEmpty() == true);
 
 	// Set objects to the PropertyEditor

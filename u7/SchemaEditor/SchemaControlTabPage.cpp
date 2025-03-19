@@ -4734,13 +4734,10 @@ void SchemaControlTabPage::exportToPdf()
 		}
 	}
 
-	AppSettings appSettings;
-	appSettings.load();
-
-	SchemasReportGeneratorThread r(appSettings.serverHost(),
-								   appSettings.serverPort(),
-								   appSettings.serverUsername(),
-								   appSettings.serverPassword(),
+	SchemasReportGeneratorThread r(theAppSettings.serverHost(),
+								   theAppSettings.serverPort(),
+								   theAppSettings.serverUsername(),
+								   theAppSettings.serverPassword(),
 								   db()->currentProject().projectName(),
 								   db()->currentUser().username(),
 								   db()->currentUser().password(),

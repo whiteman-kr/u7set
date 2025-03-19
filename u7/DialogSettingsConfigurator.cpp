@@ -12,9 +12,6 @@ DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget* parent) :
 	setWindowFlags(windowFlags() & (~Qt::WindowContextHelpButtonHint));
 	setSizeGripEnabled(true);
 
-	AppSettings appSettings;
-	appSettings.load();
-
 	// Enumerate all com ports
 	//
 	QList<QSerialPortInfo> ports = QSerialPortInfo::availablePorts();
@@ -40,7 +37,7 @@ DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget* parent) :
 			QString port = pi.systemLocation();
 			ui->serialPortCombo->addItem(port);
 
-			if (port == appSettings.configuratorSerialPort())
+			if (port == theAppSettings.configuratorSerialPort())
 			{
 				serialPortFound = true;
 				ui->serialPortCombo->setCurrentText(port);
@@ -50,12 +47,12 @@ DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget* parent) :
 		if (serialPortFound == false)
 		{
 			ui->serialPortCombo->setCurrentIndex(0);
-			appSettings.configuratorSerialPort() = ports[0].systemLocation();
+			theAppSettings.configuratorSerialPort() = ports[0].systemLocation();
 		}
 	}
 
-	ui->showDebugInfo->setChecked(appSettings.configuratorShowDebugInfo());
-	ui->verifyData->setChecked(appSettings.configuratorVerify());
+	ui->showDebugInfo->setChecked(theAppSettings.configuratorShowDebugInfo());
+	ui->verifyData->setChecked(theAppSettings.configuratorVerify());
 
 	return;
 }
@@ -67,12 +64,9 @@ DialogSettingsConfigurator::~DialogSettingsConfigurator()
 
 void DialogSettingsConfigurator::on_DialogSettingsConfigurator_accepted()
 {
-	AppSettings appSettings;
-	appSettings.load();
+	theAppSettings.setConfiguratorSerialPort(ui->serialPortCombo->currentText());
+	theAppSettings.setConfiguratorShowDebugInfo((ui->showDebugInfo->checkState() == Qt::Checked));
+	theAppSettings.setConfiguratorVerify((ui->verifyData->checkState() == Qt::Checked));
 
-	appSettings.setConfiguratorSerialPort(ui->serialPortCombo->currentText());
-	appSettings.setConfiguratorShowDebugInfo((ui->showDebugInfo->checkState() == Qt::Checked));
-	appSettings.setConfiguratorVerify((ui->verifyData->checkState() == Qt::Checked));
-
-	appSettings.save();
+	theAppSettings.save();
 }

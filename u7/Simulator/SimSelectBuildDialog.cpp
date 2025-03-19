@@ -34,10 +34,7 @@ SimSelectBuildDialog::~SimSelectBuildDialog()
 
 QString SimSelectBuildDialog::buildsPath()
 {
-	AppSettings appSettings;
-	appSettings.load();
-
-	QString buildSearchPath = appSettings.buildOutputPath() + QDir::separator() + m_projectName;
+	QString buildSearchPath = theAppSettings.buildOutputPath() + QDir::separator() + m_projectName;
 	return buildSearchPath;
 }
 

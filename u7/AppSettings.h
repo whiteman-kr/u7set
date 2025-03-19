@@ -47,8 +47,6 @@ public:
 	const QString& buildOutputPath() const;
 	void setBuildOutputPath(const QString& value);
 
-	static bool isExpertModeCached();
-
 	bool isExpertMode() const;
 	void setExpertMode(bool value);
 
@@ -72,8 +70,6 @@ private:
 	QString m_buildOutputPath;
 
 	bool m_expertMode = false;
-	static bool m_expertModeCached;
-
 	QString m_pgDumpCommand;
 	QString m_psqlCommand;
 
@@ -83,3 +79,5 @@ private:
 	bool m_configuratorShowDebugInfo = false;
 	bool m_configuratorVerify = true;
 };
+
+extern AppSettings theAppSettings;

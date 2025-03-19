@@ -478,11 +478,8 @@ void DialogAppSignalLists::setPropertyEditorObjects()
 		return;
 	}
 
-	AppSettings appSettings;
-	appSettings.load();
-
 	bool readOnly = false;
-	bool isExpertMode = appSettings.isExpertMode();
+	bool isExpertMode = theAppSettings.isExpertMode();
 
 	QList<std::shared_ptr<PropertyObject>> objects;
 

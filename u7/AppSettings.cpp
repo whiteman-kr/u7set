@@ -3,6 +3,7 @@
 
 #include "../Tools/qtkeychain/keychain.h"
 
+AppSettings theAppSettings;
 
 //
 //	DatabaseConnectionParam
@@ -73,9 +74,6 @@ void DatabaseConnectionParam::setPassword(QString str)
 		m_password[i] = str.constData()[i];
 	}
 }
-
-bool AppSettings::m_expertModeCached = false;
-
 
 AppSettings::AppSettings() :
 #ifdef Q_OS_LINUX
@@ -148,24 +146,22 @@ void AppSettings::load()
 	m_buildOutputPath = s.value("m_buildOutputPath", m_buildOutputPath).toString();
 	m_expertMode = s.value("Main/m_expertMode", false).toBool();
 
-	m_pgDumpCommand = s.value("m_pgDumpCommand", "AUTODTECT").toString();
-	m_psqlCommand = s.value("m_psqlCommand", "AUTODTECT").toString();
+	m_configuratorSerialPort = s.value("m_configuratorSerialPort", m_configuratorSerialPort).toString();
+	m_configuratorShowDebugInfo = s.value("m_configuratorShowDebugInfo", m_configuratorShowDebugInfo).toBool();
+	m_configuratorVerify = s.value("m_configuratorVerify", m_configuratorVerify).toBool();
 
-	if (m_pgDumpCommand == "AUTODTECT")
+	m_pgDumpCommand = s.value("m_pgDumpCommand").toString();
+	m_psqlCommand = s.value("m_psqlCommand").toString();
+
+	if (m_pgDumpCommand.isEmpty() == true)
 	{
 		m_pgDumpCommand = ProjectBackup::autoDetectExecutable("pg_dump");
 	}
 
-	if (m_psqlCommand == "AUTODTECT")
+	if (m_psqlCommand.isEmpty() == true)
 	{
 		m_psqlCommand = ProjectBackup::autoDetectExecutable("psql");
 	}
-
-	m_expertModeCached = m_expertMode;
-
-	m_configuratorSerialPort = s.value("m_configuratorSerialPort", m_configuratorSerialPort).toString();
-	m_configuratorShowDebugInfo = s.value("m_configuratorShowDebugInfo", m_configuratorShowDebugInfo).toBool();
-	m_configuratorVerify = s.value("m_configuratorVerify", m_configuratorVerify).toBool();
 
 	return;
 }
@@ -236,8 +232,6 @@ void AppSettings::save() const
 	s.setValue("m_pgDumpCommand", m_pgDumpCommand);
 	s.setValue("m_psqlCommand", m_psqlCommand);
 
-	m_expertModeCached = m_expertMode;
-
 	s.setValue("m_configuratorSerialPort", m_configuratorSerialPort);
 	s.setValue("m_configuratorShowDebugInfo", m_configuratorShowDebugInfo);
 	s.setValue("m_configuratorVerify", m_configuratorVerify);
@@ -292,11 +286,6 @@ const QString& AppSettings::buildOutputPath() const
 void AppSettings::setBuildOutputPath(const QString& value)
 {
 	m_buildOutputPath = value;
-}
-
-bool AppSettings::isExpertModeCached()
-{
-	return m_expertModeCached;
 }
 
 bool AppSettings::isExpertMode() const

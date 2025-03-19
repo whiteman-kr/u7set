@@ -435,9 +435,6 @@ void BuildTabPage::build()
 
 	GlobalMessanger::instance().fireBuildStarted();
 
-	AppSettings appSettings;
-	appSettings.load();
-
 	m_builder->start(db()->host(),
 					 db()->port(),
 					 db()->serverUsername(),
@@ -445,8 +442,8 @@ void BuildTabPage::build()
 					 db()->currentProject().projectName(),
 					 db()->currentUser().username(),
 					 db()->currentUser().password(),
-					 appSettings.buildOutputPath(),
-					 appSettings.isExpertMode(),
+					 theAppSettings.buildOutputPath(),
+					 theAppSettings.isExpertMode(),
 					 buildOptions);
 
 	return;
@@ -716,11 +713,8 @@ void BuildTabPage::getProjectBuildPath(QString* buildCurrentPath, QString* build
 	buildCurrentPath->clear();
 	buildLastPath->clear();
 
-	AppSettings appSettings;
-	appSettings.load();
-
 	QString buildBasePath =
-		QDir::fromNativeSeparators(QStringLiteral("%1/%2").arg(appSettings.buildOutputPath()).arg(db()->currentProject().projectName()));
+		QDir::fromNativeSeparators(QStringLiteral("%1/%2").arg(theAppSettings.buildOutputPath()).arg(db()->currentProject().projectName()));
 
 	// Current build path (/build)
 	//

@@ -1079,7 +1079,7 @@ void DialogDiagSignalTypes::setPropertyEditorObjects()
 		objects.push_back(dst);
 	}
 
-	m_diagSignalTypesPropertyEditor->setExpertMode(AppSettings::isExpertModeCached());
+	m_diagSignalTypesPropertyEditor->setExpertMode(theAppSettings.isExpertMode());
 	m_diagSignalTypesPropertyEditor->setReadOnly(readOnly);
 	m_diagSignalTypesPropertyEditor->setObjects(objects);
 

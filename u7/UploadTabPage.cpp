@@ -150,10 +150,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_pReadToFileButton = new QPushButton(tr("&Read to File"));
 	pButtonsLayout->addWidget(m_pReadToFileButton);
 
-	AppSettings appSettings;
-	appSettings.load();
-
-	if (appSettings.isExpertMode() == true)
+	if (theAppSettings.isExpertMode() == true)
 	{
 		m_pEraseButton = new QPushButton(tr("&Erase"));
 		pButtonsLayout->addWidget(m_pEraseButton);
@@ -165,7 +162,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_pSettingsButton = new QPushButton(tr("&Settings..."));
 	pButtonsLayout->addWidget(m_pSettingsButton);
 
-	if (appSettings.isExpertMode() == true)
+	if (theAppSettings.isExpertMode() == true)
 	{
 		QString mconfPath = QApplication::applicationDirPath() + "/mconf.exe";
 		if (QFile::exists(mconfPath) == true)
@@ -247,10 +244,10 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
 
-	m_pConfigurator = new Configurator(appSettings.configuratorSerialPort(), &m_outputLog);
+	m_pConfigurator = new Configurator(theAppSettings.configuratorSerialPort(), &m_outputLog);
 	m_pConfigurationThread = new QThread(this);
 
-	m_pConfigurator->setVerify(appSettings.configuratorVerify());
+	m_pConfigurator->setVerify(theAppSettings.configuratorVerify());
 
 	connect(this, &UploadTabPage::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 
@@ -276,9 +273,9 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_pConfigurationThread->start();
 
-	emit setCommunicationSettings(appSettings.configuratorSerialPort(),
-								  appSettings.configuratorShowDebugInfo(),
-								  appSettings.configuratorVerify());
+	emit setCommunicationSettings(theAppSettings.configuratorSerialPort(),
+								  theAppSettings.configuratorShowDebugInfo(),
+								  theAppSettings.configuratorVerify());
 
 	// Start Timer
 	//
@@ -323,16 +320,13 @@ void UploadTabPage::refreshProjectBuilds()
 		return;
 	}
 
-	AppSettings appSettings;
-	appSettings.load();
-
 	QString projectName = dbController()->currentProject().projectName();
 	if (projectName.isEmpty() == true)
 	{
 		return;
 	}
 
-	m_buildSearchPath = QString("%1%2%3").arg(appSettings.buildOutputPath()).arg(QDir::separator()).arg(projectName);
+	m_buildSearchPath = QString("%1%2%3").arg(theAppSettings.buildOutputPath()).arg(QDir::separator()).arg(projectName);
 
 	// Get builds list
 
@@ -597,10 +591,7 @@ void UploadTabPage::upload()
 
 void UploadTabPage::erase()
 {
-	AppSettings appSettings;
-	appSettings.load();
-
-	if (appSettings.isExpertMode() == false)
+	if (theAppSettings.isExpertMode() == false)
 	{
 		return;
 	}
@@ -661,12 +652,9 @@ void UploadTabPage::settings()
 		return;
 	}
 
-	AppSettings appSettings;
-	appSettings.load();
-
-	emit setCommunicationSettings(appSettings.configuratorSerialPort(),
-								  appSettings.configuratorShowDebugInfo(),
-								  appSettings.configuratorVerify());
+	emit setCommunicationSettings(theAppSettings.configuratorSerialPort(),
+								  theAppSettings.configuratorShowDebugInfo(),
+								  theAppSettings.configuratorVerify());
 }
 
 void UploadTabPage::mconf()
