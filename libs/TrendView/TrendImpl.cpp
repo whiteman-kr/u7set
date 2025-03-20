@@ -227,7 +227,7 @@ namespace TrendLib
 
 		if (analogs.empty() == true && lastDiscreteRect.isEmpty() == false)
 		{
-			// Draw backgorund in switched color, it is just nice to separate discretes from empty area
+			// Draw background in switched color, it is just nice to separate discretes from empty area
 			//
 			QRectF blankArea(lastDiscreteRect.bottomLeft(), insideRect.bottomRight());
 
@@ -337,7 +337,7 @@ namespace TrendLib
 			TimeStamp ct = TimeStamp{startGrid.timeStamp + i * timeGridInterval};
 			double x = TrendScale::timeToScaledPixel(ct, insideRect, startTimeStamp, duration);
 
-			// Make sure that x is proper alligned for nice look of cosmetic pen
+			// Make sure that x is proper aligned for nice look of cosmetic pen
 			//
 			x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;
 
@@ -977,7 +977,7 @@ namespace TrendLib
 			drawText(painter, text, textRect, drawParam, Qt::AlignHCenter | Qt::AlignVCenter | Qt::TextDontClip);
 		}
 
-		// Draw grid values for the rest of signlas
+		// Draw grid values for the rest of signals
 		//
 		for (size_t i = 1; i < analogs.size(); i++)
 		{
@@ -1127,9 +1127,9 @@ namespace TrendLib
 					 Qt::SolidLine);
 		painter->setPen(linePen);
 
-		const int recomendedSize = 8192 * 2;
+		const int recommendedSize = 8192 * 2;
 		std::vector<QPointF> lines;
-		lines.reserve(recomendedSize);
+		lines.reserve(recommendedSize);
 
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
@@ -1140,9 +1140,9 @@ namespace TrendLib
 		double yPos0 = signalRect.bottom() - textBoundSize.height() / 2.0;
 		double yPos1 = signalRect.top() + textBoundSize.height() * 1.1;
 		yPos0 =
-			static_cast<double>(static_cast<int>(yPos0 * dpiY)) / dpiY; // Make sure that Y is proper alligned for nice look of cosmetic pen
+			static_cast<double>(static_cast<int>(yPos0 * dpiY)) / dpiY; // Make sure that Y is proper aligned for nice look of cosmetic pen
 		yPos1 =
-			static_cast<double>(static_cast<int>(yPos1 * dpiY)) / dpiY; // Make sure that Y is proper alligned for nice look of cosmetic pen
+			static_cast<double>(static_cast<int>(yPos1 * dpiY)) / dpiY; // Make sure that Y is proper aligned for nice look of cosmetic pen
 
 		double rectLeft = signalRect.left();
 		double rectRight = signalRect.right();
@@ -1176,7 +1176,7 @@ namespace TrendLib
 					}
 
 					double x = TrendScale::timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
-					// x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Make sure that X is proper alligned for nice look
+					// x = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX;		// Make sure that X is proper aligned for nice look
 					// of cosmetic pen
 
 					double y = (state.value == 0) ? yPos0 : yPos1;
@@ -1231,7 +1231,7 @@ namespace TrendLib
 					}
 				} // for (const TrendStateItem& state : record.states)
 
-				if (lines.size() >= recomendedSize)
+				if (lines.size() >= recommendedSize)
 				{
 					drawPolyline(painter, lines, signalRect);
 
@@ -1310,9 +1310,9 @@ namespace TrendLib
 					 (signal.lineWeight() <= 1.0) ? drawParam.cosmeticPenWidth() : signal.lineWeight() / drawParam.realDpiY());
 		painter->setPen(linePen);
 
-		const int recomendedSize = 8192 * 2;
+		const int recommendedSize = 8192 * 2;
 		std::vector<QPointF> lines;
-		lines.reserve(recomendedSize);
+		lines.reserve(recommendedSize);
 
 		TimeStamp startTimeStamp = drawParam.startTimeStamp();
 		qint64 duration = drawParam.duration();
@@ -1419,7 +1419,7 @@ namespace TrendLib
 					}
 				} // for (const TrendStateItem& state : record.states)
 
-				if (lines.size() >= recomendedSize)
+				if (lines.size() >= recommendedSize)
 				{
 					drawPolyline(painter, lines, signalRect);
 					QPointF lastPoint = lines.back();
@@ -1579,7 +1579,7 @@ namespace TrendLib
 						prevRulerX += timeStampBoundSize.width() / 2.0;
 					}
 
-					double xx = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX; // Ajust x to look nice (not blurred)
+					double xx = static_cast<double>(static_cast<int>(x * dpiX)) / dpiX; // Adjust x to look nice (not blurred)
 					if (ruler.timeStamp() > finishLaneTime)
 					{
 						xx = trendAreaRect.right();
@@ -1590,7 +1590,7 @@ namespace TrendLib
 					}
 
 					double y = laneRect.top() + (trendAreaRect.top() - laneRect.top()) / 2.0;
-					y = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY; // Ajust x to look nice (not blurred)
+					y = static_cast<double>(static_cast<int>(y * dpiY)) / dpiY; // Adjust x to look nice (not blurred)
 
 					if (prevRulerX < xx)
 					{
@@ -1698,11 +1698,35 @@ namespace TrendLib
 						QString str;
 						if (state.isValid() == false)
 						{
+							// State is not available
+							//
 							str = "?";
 						}
 						else
 						{
 							str = TrendScale::scaleValueText(state.value, drawParam.scaleType(), trendSignal);
+
+							// Add flags text
+							//
+							if (state.isValidFlag() == false)
+							{
+								str += " NV";
+							}
+
+							if (state.isSimulatedFlag() == true)
+							{
+								str += " SIM";
+							}
+
+							if (state.isBlockedFlag() == true)
+							{
+								str += " BL";
+							}
+
+							if (state.isMismatchFlag() == true)
+							{
+								str += " MIS";
+							}
 						}
 
 						double vertCoef = (highLimit - lowLimit) / signalRect.height();
@@ -1856,7 +1880,7 @@ namespace TrendLib
 				auto stateIt = std::lower_bound(states.begin(),
 												states.end(),
 												fakeState,
-												[&rulerTime, &timeType](const TrendStateItem& state, const TrendStateItem& /*fakseState*/)
+												[&rulerTime, &timeType](const TrendStateItem& state, const TrendStateItem& /*fakeState*/)
 												{
 													return state.getTime(timeType) < rulerTime;
 												});
@@ -1995,7 +2019,7 @@ namespace TrendLib
 				signalRect.setBottom(insideRect.bottom());
 			}
 
-			// Save calcultaed rect to TrendSignal
+			// Save calculated rect to TrendSignal
 			//
 			ts.setTempDrawRect(signalRect);
 		}
@@ -2019,7 +2043,7 @@ namespace TrendLib
 					signalRect.setBottom(insideRect.bottom());
 				}
 
-				// Save calcultaed rect to TrendSignal
+				// Save calculated rect to TrendSignal
 				//
 				ts.setTempDrawRect(signalRect);
 			}
@@ -2042,7 +2066,7 @@ namespace TrendLib
 
 			for (TrendSignalParam& ts : *analogs)
 			{
-				// Save calcultaed rect to TrendSignal
+				// Save calculated rect to TrendSignal
 				//
 				ts.setTempDrawRect(signalRect);
 			}
@@ -2136,7 +2160,7 @@ namespace TrendLib
 			}
 		}
 
-		// Ajust inside rect to dpiX, so it will look pretty while drawing it with cosmetic pen
+		// Adjust inside rect to dpiX, so it will look pretty while drawing it with cosmetic pen
 		//
 		double dpiX = drawParam.realDpiX();
 		double dpiY = drawParam.realDpiY();
@@ -2338,7 +2362,7 @@ namespace TrendLib
 		// --
 		//
 		*outLaneIndex = -1;
-		return MouseOn::Outside; // Can be frame beetween lanes
+		return MouseOn::Outside; // Can be frame between lanes
 	}
 
 	void TrendImpl::drawText(QPainter* painter,
@@ -2356,13 +2380,13 @@ namespace TrendLib
 
 		painter->save();
 
-		auto wordlTransform = painter->worldTransform();
+		auto worldTransform = painter->worldTransform();
 		QTransform scaleTransform{1.0 / drawParam.devicePixelRatio(),
-								  wordlTransform.m12(),
-								  wordlTransform.m21(),
+								  worldTransform.m12(),
+								  worldTransform.m21(),
 								  1.0 / drawParam.devicePixelRatio(),
-								  wordlTransform.dx(),
-								  wordlTransform.dy()};
+								  worldTransform.dx(),
+								  worldTransform.dy()};
 		painter->setWorldTransform(scaleTransform);
 
 		// Set font
@@ -2400,13 +2424,13 @@ namespace TrendLib
 	QSizeF TrendImpl::calcTextSize(QPainter* painter, const QString& str, const TrendParam& drawParam)
 	{
 		painter->save();
-		auto wordlTransform = painter->worldTransform();
+		auto worldTransform = painter->worldTransform();
 		QTransform scaleTransform{1.0 / drawParam.devicePixelRatio(),
-								  wordlTransform.m12(),
-								  wordlTransform.m21(),
+								  worldTransform.m12(),
+								  worldTransform.m21(),
 								  1.0 / drawParam.devicePixelRatio(),
-								  wordlTransform.dx(),
-								  wordlTransform.dy()};
+								  worldTransform.dx(),
+								  worldTransform.dy()};
 		painter->setWorldTransform(scaleTransform);
 
 		// Set font

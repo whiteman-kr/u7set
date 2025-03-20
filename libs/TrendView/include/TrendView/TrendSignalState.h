@@ -74,6 +74,13 @@ namespace TrendLib
 				return TimeStamp{this->local};
 			}
 		}
+
+		// See AppSignalStateFlags
+		//
+		bool isValidFlag() const { return (flags & 0x00000001) ? true : false; }
+		bool isSimulatedFlag() const { return (flags & 0x00000004) ? true : false; }
+		bool isBlockedFlag() const { return (flags & 0x00000008) ? true : false; }
+		bool isMismatchFlag() const { return (flags & 0x00000010) ? true : false; }
 	};
 #pragma pack(pop)
 
