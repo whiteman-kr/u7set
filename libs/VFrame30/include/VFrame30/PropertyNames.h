@@ -83,8 +83,11 @@ namespace VFrame30
 		inline static const QString imageId{"ImageID"};
 		inline static const QString image{"Image"};
 		inline static const QString images{"Images"};
-		inline static const QString svg{"Svg"};
 		inline static const QString currentImageId{"CurrentImageID"};
+
+		inline static const QString svg{"Svg"};
+		inline static const QString svgScaleFactor{"SvgScaleFactor"};
+		inline static const QString svgScaleFactorDescription{"Multiplier for SVG image size."};
 
 		inline static const QString orientation{"Orientation"};
 		

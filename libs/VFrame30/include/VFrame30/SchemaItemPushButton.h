@@ -1,6 +1,6 @@
 #pragma once
-#include <VFrame30/SchemaItemControl.h>
 #include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemControl.h>
 
 namespace VFrame30
 {
@@ -106,7 +106,8 @@ namespace VFrame30
 			}
 		}
 
-		// Function enables or disables widget with <b>ObjectName</b> specified in <b>objectName</b> parameter depending on signal with <b>signalId</b> identifier
+		// Function enables or disables widget with <b>ObjectName</b> specified in <b>objectName</b> parameter depending on signal 
+		// with <b>signalId</b> identifier
 		//
 		function enableControlBySignal(objectName, signalId)
 		{
@@ -163,10 +164,15 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		/// \brief SVG image content
+		Q_PROPERTY(QString svg READ svg WRITE setSvg)
+
+		/// \brief SVG image scale factor (applied only if an SVG image is set)
+		Q_PROPERTY(double svgScaleFactor READ svgScaleFactor WRITE setSvgScaleFactor)
+
 	public:
 		SchemaItemPushButton(void);
 		explicit SchemaItemPushButton(SchemaUnit unit);
-		virtual ~SchemaItemPushButton(void);
 
 		// Draw Functions
 		//
@@ -201,6 +207,12 @@ namespace VFrame30
 	public:
 		const QString& text() const;
 		void setText(QString value);
+
+		const QString& svg() const;
+		void setSvg(QString value);
+
+		double svgScaleFactor() const;
+		void setSvgScaleFactor(double value);
 
 		bool isCheckable() const;
 		void setCheckable(bool value);
@@ -239,6 +251,10 @@ namespace VFrame30
 
 	private:
 		QString m_text = {"Button"};
+
+		QString m_svg;
+		double m_svgScaleFactor = 0.9;
+		mutable bool m_svgChanged = false;
 
 		bool m_checkable = false;
 		bool m_checkedDefault = false;
@@ -301,7 +317,8 @@ namespace VFrame30
 
 		/// \brief This property holds whether the button is pressed down
 		///
-		/// If this property is true, the button is pressed down. The signals pressed() and clicked() are not emitted if you set this property to true. The default is false.
+		/// If this property is true, the button is pressed down. The signals pressed() and clicked() are not emitted if you set this
+		/// property to true. The default is false.
 		Q_PROPERTY(bool down READ someBoolProperty WRITE setSomeBoolProperty)
 
 		/// \brief This property holds the text shown on the button
@@ -312,7 +329,8 @@ namespace VFrame30
 
 		/*! \brief This property holds the widget's style sheet
 
-		The style sheet contains a textual description of customizations to the widget's style, as described in the <a href="https://doc.qt.io/qt-6/stylesheet.html">Qt Style Sheets</a> document.
+		The style sheet contains a textual description of customizations to the widget's style, as described in the <a
+		href="https://doc.qt.io/qt-6/stylesheet.html">Qt Style Sheets</a> document.
 
 		<b>Example</b>
 
@@ -341,13 +359,13 @@ namespace VFrame30
 
 		// Empty property getters and setters
 
-		bool someBoolProperty() const {return false;}
-		void setSomeBoolProperty(bool value) {Q_UNUSED(value);}
+		bool someBoolProperty() const { return false; }
+		void setSomeBoolProperty(bool value) { Q_UNUSED(value); }
 
-		int someIntProperty() const {return 0;}
-		void setSomeIntProperty(int value) {Q_UNUSED(value);}
+		int someIntProperty() const { return 0; }
+		void setSomeIntProperty(int value) { Q_UNUSED(value); }
 
-		QString someStringProperty() const {return {}; }
-		void setSomeStringProperty(QString value) {Q_UNUSED(value);}
+		QString someStringProperty() const { return {}; }
+		void setSomeStringProperty(QString value) { Q_UNUSED(value); }
 	};
-}
+} // namespace VFrame30
