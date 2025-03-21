@@ -166,9 +166,11 @@ namespace VFrame30
 
 		/// \brief SVG image content
 		Q_PROPERTY(QString svg READ svg WRITE setSvg)
+		Q_PROPERTY(QString Svg READ svg WRITE setSvg)
 
 		/// \brief SVG image scale factor (applied only if an SVG image is set)
 		Q_PROPERTY(double svgScaleFactor READ svgScaleFactor WRITE setSvgScaleFactor)
+		Q_PROPERTY(double SvgScaleFactor READ svgScaleFactor WRITE setSvgScaleFactor)
 
 	public:
 		SchemaItemPushButton(void);
