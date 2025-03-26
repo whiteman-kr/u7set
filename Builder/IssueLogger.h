@@ -613,6 +613,8 @@ namespace Builder
 		void errEQP6301(QString equipmentId, QString property, int lineNumber, QString message);                                  // Script property evaluation error.
 		void errEQP6302(QString schemaId, QString property, int lineNumber, QString message);                                     // Schema script property evaluation error.
 		void errEQP6303(QString schemaId, QString schemaItem, QUuid itemUuid, QString property, int lineNumber, QString message); // SchemaItem script property evaluation error.
+		
+		void errEQP6310(QString equipmentId, QString property, int lineNumber, QString message); // Script execution error - device.
 
 		// VDU related issues
 		//

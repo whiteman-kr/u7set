@@ -9536,6 +9536,32 @@ namespace Builder
 				  .arg(message));
 	}
 
+	/// IssueCode: EQP6310
+	///
+	/// IssueType: Error
+	///
+	/// Title: Script property %1.%2 execution error at line %3: %4
+	///
+	/// Parameters:
+	///		%1 EquipmentID
+	///		%2 Property
+	///		%3 Line
+	///		%4 Execution error
+	///
+	/// Description:
+	///		Failed to execute script for the device equipment.
+	///
+	void IssueLogger::errEQP6310(QString equipmentId, QString property, int lineNumber, QString message)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6310,
+				  tr("Script property %1.%2 execution error at line %3: %4")
+					.arg(equipmentId)
+					.arg(property)
+					.arg(lineNumber)
+					.arg(message));
+	}
+
 	/// IssueCode: EQP6400
 	///
 	/// IssueType: Error

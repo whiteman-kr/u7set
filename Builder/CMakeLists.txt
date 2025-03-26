@@ -156,6 +156,8 @@ qt_add_library(${TARGET} STATIC
 	SoftwareSettingsGetter.h
 	SubsystemStorage.cpp
 	SubsystemStorage.h
+	TaskGetEquipment.cpp
+	TaskGetEquipment.h
 	TestClientCfgGenerator.cpp
 	TestClientCfgGenerator.h
 	TestSuiteCfgGenerator.cpp

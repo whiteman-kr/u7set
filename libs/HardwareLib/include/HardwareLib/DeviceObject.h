@@ -1,12 +1,15 @@
 #pragma once
 
 #include <CommonLib/DebugInstCounter.h>
-#include <unordered_map>
+#include <array>
 #include <functional>
 #include <memory>
-#include <array>
+#include <unordered_map>
+#include <vector>
+
 
 class DbFileInfo;
+
 
 namespace Hardware
 {
@@ -55,11 +58,10 @@ namespace Hardware
 	// DeviceObject
 	//
 	//
-	class DeviceObject :
-		public PropertyObject,
-		public Proto::ObjectSerialization<DeviceObject>,
-		public DebugInstCounter<DeviceObject>,
-		public std::enable_shared_from_this<DeviceObject>
+	class DeviceObject : public PropertyObject,
+						 public Proto::ObjectSerialization<DeviceObject>,
+						 public DebugInstCounter<DeviceObject>,
+						 public std::enable_shared_from_this<DeviceObject>
 	{
 		Q_OBJECT
 
@@ -80,7 +82,7 @@ namespace Hardware
 
 		// Serialization
 		//
-		friend Proto::ObjectSerialization<DeviceObject>;	// for call CreateObject from Proto::ObjectSerialization
+		friend Proto::ObjectSerialization<DeviceObject>; // for call CreateObject from Proto::ObjectSerialization
 	protected:
 		// Implementing Proto::ObjectSerialization<DeviceObject>::SaveData, LoadData
 		//
@@ -115,7 +117,6 @@ namespace Hardware
 		// Protected methods
 		//
 	protected:
-
 		// Get all signals, including signals from child items
 		//
 		void getAllAppSignalsRecursive(std::vector<std::shared_ptr<DeviceAppSignal>>* deviceSignals) const;
@@ -174,18 +175,16 @@ namespace Hardware
 		[[nodiscard]] std::shared_ptr<Hardware::Software> toSoftware();
 
 	private:
-		template <typename DT>
+		template<typename DT>
 		[[nodiscard]] std::shared_ptr<const DT> toType() const
 		{
-			std::shared_ptr<const DT> result = std::dynamic_pointer_cast<const DT>(shared_from_this());
-			return result;
+			return std::dynamic_pointer_cast<const DT>(shared_from_this());
 		}
 
-		template <typename DT>
+		template<typename DT>
 		[[nodiscard]] std::shared_ptr<DT> toType()
 		{
-			std::shared_ptr<DT> result = std::dynamic_pointer_cast<DT>(shared_from_this());
-			return result;
+			return std::dynamic_pointer_cast<DT>(shared_from_this());
 		}
 
 	public:
@@ -216,7 +215,7 @@ namespace Hardware
 		[[nodiscard]] const std::shared_ptr<DeviceObject>& child(int index) const;
 		[[nodiscard]] std::shared_ptr<DeviceObject> child(const QUuid& uuid) const;
 		[[nodiscard]] std::shared_ptr<DeviceObject> childByPresetUuid(const QUuid& presetObjectUuid) const;
-		
+
 		[[nodiscard]] std::shared_ptr<DeviceObject> childByEquipmentId(const QString& id);
 		[[nodiscard]] std::shared_ptr<const DeviceObject> childByEquipmentId(const QString& id) const;
 
@@ -246,13 +245,16 @@ namespace Hardware
 		[[nodiscard]] QString equipmentIdTemplate() const;
 		void setEquipmentIdTemplate(const QString& value);
 
-		[[nodiscard]] QString equipmentId() const;			// This unwinds equipmentIdTemplate
+		[[nodiscard]] QString equipmentId() const; // This unwinds equipmentIdTemplate
 
 		[[nodiscard]] QString caption() const;
 		void setCaption(QString value);
 
 		[[nodiscard]] QString childRestriction() const;
 		void setChildRestriction(QString value);
+
+		[[nodiscard]] QString preBuildScript() const;
+		void setPreBuildScript(QString value);
 
 		[[nodiscard]] QString specificPropertiesStruct() const;
 		void setSpecificPropertiesStruct(QString value);
@@ -269,14 +271,16 @@ namespace Hardware
 		void setTags(const QStringList& tags);
 		void setTags(const QString& tags);
 
-		[[nodiscard]] QString details() const;		// JSON short description, uuid, equipmentId, caption, place, etc
+		[[nodiscard]] QString details() const; // JSON short description, uuid, equipmentId, caption, place, etc
 
 		// Preset
 		//
 		[[nodiscard]] bool isPreset() const;
-private:
+
+	private:
 		void setPreset(bool isPreset);
-public:
+
+	public:
 		[[nodiscard]] bool presetRoot() const;
 		void setPresetRoot(bool value);
 
@@ -312,45 +316,44 @@ public:
 		QString m_equipmentId;
 		QString m_caption;
 
-		QString m_childRestriction;			// Restriction script for child items
-		QString m_specificPropertiesStruct;	// Description of the Object's specific properties
+		QString m_childRestriction;               // Restriction script for child items
+		QString m_preBuildScript;                 // Script to run before build
+
+		QString m_specificPropertiesStruct;       // Description of the Object's specific properties
 
 		int m_place = -1;
 
-		std::unordered_map<Hash, QString> m_tags;	// Tags for this object, key is a tag hash, value is a tag value.
+		std::unordered_map<Hash, QString> m_tags; // Tags for this object, key is a tag hash, value is a tag value.
 
 	private:
 		// Preset Data
 		//
-		bool m_preset = false;				// It is preset or part of it
-		bool m_presetRoot = false;			// This object is preset root
-		int m_presetVersion = 0;			// If this object is presetRoot, then this field contains preset version
-		QString m_presetName;				// PresetName, if it is preset
-		QUuid m_presetObjectUuid;			// In configuration this field has uuid of the PRESET object from which it was constructed
-											// In preset edit mode this field has the same value with m_uuid
+		bool m_preset = false;                   // It is preset or part of it
+		bool m_presetRoot = false;               // This object is preset root
+		int m_presetVersion = 0;                 // If this object is presetRoot, then this field contains preset version
+		QString m_presetName;                    // PresetName, if it is preset
+		QUuid m_presetObjectUuid;                // In configuration this field has uuid of the PRESET object from which it was constructed
+												 // In preset edit mode this field has the same value with m_uuid
 		QStringList m_presetProtectedProperties; // Properties that cannot be update from preset
 
-		std::shared_ptr<DbFileInfo> m_data;	// Application-specific value associated with the specified item (DbFileInfo)
+		std::shared_ptr<DbFileInfo> m_data;      // Application-specific value associated with the specified item (DbFileInfo)
 	};
 
 
 	// Walk through equipment tree
 	//
-	void equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren, std::function<void(Hardware::DeviceObject* device)> processAfterChildren);
+	void equipmentWalker(Hardware::DeviceObject* currentDevice,
+						 std::function<void(Hardware::DeviceObject* device)> processBeforeChildren,
+						 std::function<void(Hardware::DeviceObject* device)> processAfterChildren);
 	void equipmentWalker(Hardware::DeviceObject* currentDevice, std::function<void(Hardware::DeviceObject* device)> processBeforeChildren);
 
-	void SerializeEquipmentFromXml(const QString &filePath, std::shared_ptr<DeviceRoot>& deviceRoot);
+	void SerializeEquipmentFromXml(const QString& filePath, std::shared_ptr<DeviceRoot>& deviceRoot);
 
-	QString expandDeviceSignalTemplate(const Hardware::DeviceObject& startDeviceObject,
-									   const QString& templateStr,
-									   QString* errMsg);
+	QString expandDeviceSignalTemplate(const Hardware::DeviceObject& startDeviceObject, const QString& templateStr, QString* errMsg);
 
-	QString expandDeviceObjectMacro(const Hardware::DeviceObject& startDeviceObject,
-									const QString& macroStr,
-									QString* errMsg);
+	QString expandDeviceObjectMacro(const Hardware::DeviceObject& startDeviceObject, const QString& macroStr, QString* errMsg);
 
 	const Hardware::DeviceObject* getParentDeviceObjectOfType(const Hardware::DeviceObject& startObject,
 															  const QString& parentObjectType,
 															  QString* errMsg);
-}
-
+} // namespace Hardware
