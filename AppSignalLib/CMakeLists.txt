@@ -34,6 +34,8 @@ qt_add_library(${TARGET} STATIC
 	RecentUsed.h
 	SimpleAppSignalState.cpp
 	SimpleAppSignalState.h
+	TuningDataStorage.cpp
+	TuningDataStorage.h
 	TuningSignalState.cpp
 	TuningSignalState.h
 	TuningValue.cpp

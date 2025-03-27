@@ -2,6 +2,7 @@
 #include "../UtilsLib/XmlHelper.h"
 #include "../UtilsLib/Crc.h"
 #include "../UtilsLib/WUtils.h"
+#include "AppSignal.h"
 #include "TuningDataStorage.h"
 
 

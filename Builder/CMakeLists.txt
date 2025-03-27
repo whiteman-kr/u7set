@@ -21,8 +21,6 @@ endif (MSVC)
 set(TARGET Builder)
 
 qt_add_library(${TARGET} STATIC
-	../lib/TuningDataStorage.cpp
-	../lib/TuningDataStorage.h
 	../Metrology/MetrologyConnection.cpp
 	../Metrology/MetrologyConnection.h
 	../Metrology/MetrologySignal.cpp
