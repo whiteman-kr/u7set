@@ -106,7 +106,7 @@ namespace VFrame30
 			}
 		}
 
-		// Function enables or disables widget with <b>ObjectName</b> specified in <b>objectName</b> parameter depending on signal 
+		// Function enables or disables widget with <b>ObjectName</b> specified in <b>objectName</b> parameter depending on signal
 		// with <b>signalId</b> identifier
 		//
 		function enableControlBySignal(objectName, signalId)
@@ -163,14 +163,6 @@ namespace VFrame30
 	class SchemaItemPushButton final : public SchemaItemControl
 	{
 		Q_OBJECT
-
-		/// \brief SVG image content
-		Q_PROPERTY(QString svg READ svg WRITE setSvg)
-		Q_PROPERTY(QString Svg READ svg WRITE setSvg)
-
-		/// \brief SVG image scale factor (applied only if an SVG image is set)
-		Q_PROPERTY(double svgScaleFactor READ svgScaleFactor WRITE setSvgScaleFactor)
-		Q_PROPERTY(double SvgScaleFactor READ svgScaleFactor WRITE setSvgScaleFactor)
 
 	public:
 		SchemaItemPushButton(void);
@@ -329,6 +321,14 @@ namespace VFrame30
 		/// \brief This property holds whether the widget is enabled
 		Q_PROPERTY(bool enabled READ someBoolProperty WRITE setSomeBoolProperty)
 
+		/// \brief SVG image content
+		Q_PROPERTY(QString svg READ someStringProperty WRITE setSomeStringProperty)
+		Q_PROPERTY(QString Svg READ someStringProperty WRITE setSomeStringProperty)
+
+		/// \brief SVG image scale factor (applied only if an SVG image is set)
+		Q_PROPERTY(double svgScaleFactor READ someDoubleProperty WRITE setSomeDoubleProperty)
+		Q_PROPERTY(double SvgScaleFactor READ someDoubleProperty WRITE setSomeDoubleProperty)
+
 		/*! \brief This property holds the widget's style sheet
 
 		The style sheet contains a textual description of customizations to the widget's style, as described in the <a
@@ -367,7 +367,48 @@ namespace VFrame30
 		int someIntProperty() const { return 0; }
 		void setSomeIntProperty(int value) { Q_UNUSED(value); }
 
+		double someDoubleProperty() const { return 0; }
+		void setSomeDoubleProperty(double value) { Q_UNUSED(value); }
+
 		QString someStringProperty() const { return {}; }
 		void setSomeStringProperty(QString value) { Q_UNUSED(value); }
+	};
+
+
+	// Subclass control to filter mouse input events for schema editor.
+	// This is really used instead of QPushButton in SchemaItemPushButton.
+	//
+	class QEditorPushButton : public QPushButton
+	{
+		Q_OBJECT
+
+		/// \brief SVG image content
+		Q_PROPERTY(QString svg READ svg WRITE setSvg)
+		Q_PROPERTY(QString Svg READ svg WRITE setSvg)
+
+		/// \brief SVG image scale factor (applied only if an SVG image is set)
+		Q_PROPERTY(double svgScaleFactor READ svgScaleFactor WRITE setSvgScaleFactor)
+		Q_PROPERTY(double SvgScaleFactor READ svgScaleFactor WRITE setSvgScaleFactor)
+
+	public:
+		explicit QEditorPushButton(QString text, QWidget* parent, bool editMode);
+
+	protected:
+		virtual void resizeEvent(QResizeEvent* event) override;
+
+	public:
+		QString svg();
+		void setSvg(QString svg);
+		void setSvg(QString svg, double scaleFactor);
+
+		double svgScaleFactor();
+		void setSvgScaleFactor(double value);
+
+	public:
+		bool m_editMode = true;
+
+	private:
+		QString m_svg;
+		double m_svgScaleFactor = 0.9;
 	};
 } // namespace VFrame30

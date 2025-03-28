@@ -17,65 +17,12 @@ namespace
 
 		return pixmap;
 	}
-
-	// Subclass control to filter mouse input events for schema editor.
-	//
-	class QEditorPushButton : public QPushButton
-	{
-	public:
-		QEditorPushButton(QString text, QWidget* parent, bool editMode) :
-			QPushButton{text, parent},
-			m_editMode(editMode)
-		{
-			if (m_editMode == true)
-			{
-				setMouseTracking(false);
-				setAttribute(Qt::WA_TransparentForMouseEvents);
-			}
-		}
-
-	protected:
-		virtual void resizeEvent(QResizeEvent* event) override
-		{
-			QPushButton::resizeEvent(event);
-			setSvg(m_svg, m_svgScaleFactor);
-			return;
-		}
-
-	public:
-		void setSvg(QString svg, double scaleFactor)
-		{
-			m_svg = svg;
-			m_svgScaleFactor = scaleFactor;
-
-			if (m_svg.isEmpty() == true)
-			{
-				setIcon(QIcon{});
-			}
-			else
-			{
-				QSize imageSize = size() * m_svgScaleFactor;
-
-				QPixmap pixmap = svgToPixmap(m_svg.toUtf8(), imageSize);
-				setIcon(QIcon{pixmap});
-				setIconSize(imageSize);
-			}
-		};
-
-	public:
-		bool m_editMode = true;
-
-	private:
-		QString m_svg;
-		double m_svgScaleFactor = 0.9;
-	};
-
-
 } // namespace
 
 
 namespace VFrame30
 {
+
 	SchemaItemPushButton::SchemaItemPushButton(void) :
 		SchemaItemPushButton(SchemaUnit::Inch)
 	{
@@ -798,5 +745,67 @@ namespace VFrame30
 
 		DrawHelper::drawText(p, font, schema->unit(), m_text, r, Qt::AlignCenter | Qt::AlignHCenter);
 		return;
+	}
+
+	//
+	// QEditorPushButton
+	//
+	QEditorPushButton::QEditorPushButton(QString text, QWidget* parent, bool editMode) :
+		QPushButton{text, parent},
+		m_editMode(editMode)
+	{
+		if (m_editMode == true)
+		{
+			setMouseTracking(false);
+			setAttribute(Qt::WA_TransparentForMouseEvents);
+		}
+	}
+
+	void QEditorPushButton::resizeEvent(QResizeEvent* event)
+	{
+		QPushButton::resizeEvent(event);
+		setSvg(m_svg, m_svgScaleFactor);
+		return;
+	}
+
+	QString QEditorPushButton::svg()
+	{
+		return m_svg;
+	}
+
+	void QEditorPushButton::setSvg(QString svg)
+	{
+		m_svg = svg;
+		setSvg(m_svg, m_svgScaleFactor);
+	}
+
+	void QEditorPushButton::setSvg(QString svg, double scaleFactor)
+	{
+		m_svg = svg;
+		m_svgScaleFactor = std::clamp(scaleFactor, 0.01, 5.0);
+
+		if (m_svg.isEmpty() == true)
+		{
+			setIcon(QIcon{});
+		}
+		else
+		{
+			QSize imageSize = size() * m_svgScaleFactor;
+
+			QPixmap pixmap = svgToPixmap(m_svg.toUtf8(), imageSize);
+			setIcon(QIcon{pixmap});
+			setIconSize(imageSize);
+		}
+	};
+
+	double QEditorPushButton::svgScaleFactor()
+	{
+		return m_svgScaleFactor;
+	}
+
+	void QEditorPushButton::setSvgScaleFactor(double value)
+	{
+		m_svgScaleFactor = value;
+		setSvg(m_svg, m_svgScaleFactor);
 	}
 } // namespace VFrame30
