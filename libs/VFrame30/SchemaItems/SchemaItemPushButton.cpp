@@ -1,13 +1,32 @@
-#include <VFrame30/ClientSchemaView.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/SchemaItemPushButton.h>
-#include <VFrame30/TuningController.h>
 
 namespace
 {
 	QPixmap svgToPixmap(const QByteArray& svgData, QSize size)
 	{
 		QSvgRenderer renderer(svgData);
+
+		QSize originalSize = renderer.defaultSize();
+		if (originalSize.isEmpty())
+		{
+			originalSize = size;
+		}
+
+		// Calculate aspect ratio for SVG
+		//
+		double aspectRatio = static_cast<double>(originalSize.width()) / originalSize.height();
+
+		// Adjust size to maintain aspect ratio
+		//
+		if (size.width() / aspectRatio <= size.height())
+		{
+			size.setHeight(static_cast<int>(size.width() / aspectRatio));
+		}
+		else
+		{
+			size.setWidth(static_cast<int>(size.height() * aspectRatio));
+		}
 
 		QPixmap pixmap{size};
 		pixmap.fill(Qt::transparent); // Transparent background
