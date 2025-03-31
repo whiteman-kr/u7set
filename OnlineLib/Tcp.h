@@ -277,7 +277,7 @@ namespace Tcp
 
 		// ServerDerivedClass::getNewInstance(const ListenAddress& listenAddr) must be implemented as:
 		// {
-		//		Tcp::Server* newServer = new ServerDerivedClass();
+		//		Tcp::Server* newServer = new TcpSrvInfoServer(m_localSoftwareInfo, m_socketDescription);
 		//		newServer->setListenAddress(listenAddr);
 		//		return newServer;
 		// }

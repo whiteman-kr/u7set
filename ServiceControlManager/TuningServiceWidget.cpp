@@ -131,10 +131,10 @@ void TuningServiceWidget::updateStateInfo()
 			}
 		}
 
-		if (m_tcpClientSocket == nullptr)
+/*		if (m_tcpClientSocket == nullptr)
 		{
 			createTcpConnection(workingIp.address32(), workingIp.port());
-		}
+		}*/
 	}
 
 	auto tuningSettings = std::dynamic_pointer_cast<TuningServiceSettings>(m_serviceData.settings);
@@ -162,7 +162,7 @@ void TuningServiceWidget::updateStateInfo()
 	m_settingsTabModel->setData(m_settingsTabModel->index(7, 1), ch.tuningSimIP.addressStr());
 }
 
-void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)
+/*void TuningServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 {
 	m_tcpClientSocket = new TcpTuningServiceClient(softwareInfo(), HostAddressPort(ip, port));
 	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
@@ -194,7 +194,7 @@ void TuningServiceWidget::dropTcpConnection()
 		m_tcpClientSocket = nullptr;	// Should be deleted on m_tcpClientThread->quitAndWait();
 	}
 }
-
+*/
 void TuningServiceWidget::updateClientsInfo()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->clientsIsReady() == false)

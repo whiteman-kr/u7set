@@ -1083,11 +1083,11 @@ namespace Tcp
 
 	void Server::sendClientList()
 	{
-		Network::ServiceClients srvClients;
+		Network::ServiceInfo srvInfo;
 
-		getClientsList(&srvClients);
+		getClientsList(&srvInfo);
 
-		sendReply(srvClients);
+		sendReply(srvInfo);
 	}
 
 	void Server::initConnectionNo()

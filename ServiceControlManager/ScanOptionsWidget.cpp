@@ -188,7 +188,7 @@ void SubnetChecker::checkNextHost()
 		QHostAddress ip(m_ip);
 
 		qint64 sent = m_socket->writeDatagram((char*)&m_requestHeader, sizeof(m_requestHeader),
-											  ip, sInfo.port);
+											  ip, sInfo.udpPort);
 		if (sent == -1)
 		{
 			if (m_socket->error() == QAbstractSocket::NetworkError)

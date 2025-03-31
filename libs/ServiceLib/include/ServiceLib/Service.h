@@ -8,9 +8,9 @@
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/BuildInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/Tcp.h"
 
 #include "CommandLineParser.h"
-
 
 namespace Network
 {
@@ -20,20 +20,21 @@ namespace Network
 struct ServiceInfo
 {
 	E::SoftwareType softwareType = E::SoftwareType::Unknown;
-	quint16 port = 0;
+	quint16 udpPort = 0;
+	quint16 tcpPort = 0;
 	QString name;
 	QString shortName;
 };
 
 inline const std::vector<ServiceInfo> servicesInfo =
 {
-	{ E::SoftwareType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv" },
-	{ E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
-	{ E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
-	{ E::SoftwareType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
-	{ E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
-	{ E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
-	{ E::SoftwareType::GatewayService, PORT_GATEWAY_SERVICE, "Gateway Service", "GatewaySrv" },
+	{ E::SoftwareType::BaseService, PORT_BASE_SERVICE, PORT_TCP_BASE_SERVICE, "Base Service", "BaseSrv" },
+	{ E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, PORT_TCP_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
+	{ E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, PORT_TCP_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
+	{ E::SoftwareType::TuningService, PORT_TUNING_SERVICE, PORT_TCP_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
+	{ E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, PORT_TCP_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
+	{ E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, PORT_TCP_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
+	{ E::SoftwareType::GatewayService, PORT_GATEWAY_SERVICE, PORT_TCP_GATEWAY_SERVICE, "Gateway Service", "GatewaySrv" },
 };
 
 class Service;
@@ -240,6 +241,13 @@ public:
 	static QString getServiceInstanceName(const QString& serviceName, const QString& instanceID);
 	static QString getServiceInstanceName(const QString& serviceName, int argc, char* argv[]);
 
+	void getServiceInfo(Network::ServiceInfo& servicesInfo, bool shortInfo);
+
+	std::shared_ptr<CircularLogger> logger();
+
+	void startServiceWorkerThread();
+	void stopServiceWorkerThread();
+
 signals:
 	void ackBaseRequest(UdpRequest request);
 
@@ -250,13 +258,8 @@ private slots:
 	void onBaseRequest(UdpRequest request);
 
 private:
-	void startServiceWorkerThread();
-	void stopServiceWorkerThread();
-
-	void startBaseRequestSocketThread();
+	void startSrvInfoThreads();
 	void stopBaseRequestSocketThread();
-
-	void getServiceInfo(Network::ServiceInfo& servicesInfo, bool shortInfo);
 
 private:
 	QMutex m_mutex;
@@ -273,7 +276,8 @@ private:
 	ServiceWorker* m_serviceWorker = nullptr;
 
 	SimpleThread* m_serviceWorkerThread = nullptr;
-	UdpSocketThread* m_baseRequestSocketThread = nullptr;
+	UdpSocketThread* m_udpSrvInfoThread = nullptr;
+	Tcp::ListenerThread* m_tcpSrvInfoThread = nullptr;
 
 	bool m_mainFunctionNeedRestart = false;
 	bool m_mainFunctionStopped = false;

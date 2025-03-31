@@ -80,8 +80,8 @@ public slots:
 	void forgetWidget();
 
 protected:
-	void createTcpConnection(quint32 ip, quint16 port) override;
-	void dropTcpConnection() override;
+//	void createTcpConnection(quint32 ip, quint16 port) override;
+//	void dropTcpConnection() override;
 
 private:
 	QStandardItemModel* m_parametersTabModel = nullptr;

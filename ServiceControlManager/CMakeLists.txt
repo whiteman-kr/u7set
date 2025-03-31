@@ -33,14 +33,14 @@ add_executable(${TARGET} WIN32
 	ScanOptionsWidget.cpp
 	ScanOptionsWidget.h
 	ScmMain.cpp
+	ScmServiceClient.cpp
+	ScmServiceClient.h
 	ScmTcpAppDataClient.cpp
 	ScmTcpAppDataClient.h
 	ServiceData.cpp
 	ServiceData.h
 	ServiceTableModel.cpp
 	ServiceTableModel.h
-	TcpConfigServiceClient.cpp
-	TcpConfigServiceClient.h
 	TcpTuningServiceClient.cpp
 	TcpTuningServiceClient.h
 	TuningServiceWidget.cpp

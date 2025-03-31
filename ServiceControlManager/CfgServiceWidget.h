@@ -1,7 +1,7 @@
 #pragma once
 
 class QStandardItemModel;
-class TcpConfigServiceClient;
+class ScmServiceClient;
 
 #include "../OnlineLib/Tcp.h"
 #include "BaseServiceWidget.h"
@@ -18,21 +18,13 @@ public:
 	~CfgServiceWidget();
 
 public slots:
-	void updateStateInfo();
-	void updateClientsInfo();
-	void updateServiceParameters();
-
 	int updateSettings(int rowCount) override;
 
 	void clearServiceData();
 
-protected:
-	void createTcpConnection(quint32 ip, quint16 port) override;
-	void dropTcpConnection() override;
-
 private:
 	QStandardItemModel* m_settingsTabModel = nullptr;
 	QStandardItemModel* m_parametersTabModel = nullptr;
-	TcpConfigServiceClient* m_tcpClientSocket = nullptr;
+	ScmServiceClient* m_tcpClientSocket = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
 };

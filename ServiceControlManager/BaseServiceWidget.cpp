@@ -54,23 +54,13 @@ BaseServiceWidget::BaseServiceWidget(	ServiceTableModel* srvTableModel,
 
 	//
 
-	m_udpSocketThread = new UdpSocketThread();
-
-	m_udpSocket = new UdpClientSocket(QHostAddress(udpIp), udpPort);
-
-	connect(m_udpSocket, &UdpClientSocket::ackTimeout, this, &BaseServiceWidget::serviceAckTimeout);
-	connect(m_udpSocket, &UdpClientSocket::ackReceived, this, &BaseServiceWidget::serviceAckReceived);
-
-	m_udpSocketThread->addWorker(m_udpSocket);
-	m_udpSocketThread->start();
+	createTcpConnection(m_serviceData.swInfo.softwareType(), udpIp);
 
 	//
 
 	m_timer = new QTimer(this);
-	connect(m_timer, &QTimer::timeout, this, &BaseServiceWidget::askServiceState);
 	m_timer->start(500);
 
-	askServiceState();
 	updateSrvStatus();
 }
 
@@ -84,6 +74,8 @@ BaseServiceWidget::~BaseServiceWidget()
 		delete m_udpSocketThread;
 		m_udpSocketThread = nullptr;
 	}
+
+	dropTcpConnection();
 
 	saveWindowPosition(this, QString("Service_%1_%2").arg(QHostAddress(m_udpIp).toString()).arg(m_udpPort));
 }
@@ -342,9 +334,9 @@ void BaseServiceWidget::updateClients()
 {
 	QStandardItemModel* cm = m_clientsModel;
 
-	const Network::ServiceClients& clients = m_serviceData.protoServiceInfo.clients();
+	const Network::ServiceInfo& srvInfo = m_serviceData.protoServiceInfo;
 
-	int clientsCount = clients.clients_size();
+	int clientsCount = srvInfo.clients_size();
 
 	cm->setRowCount(clientsCount);
 
@@ -355,7 +347,7 @@ void BaseServiceWidget::updateClients()
 
 	for(int i = 0; i < clientsCount; i++)
 	{
-		const Network::ServiceClientInfo& client = clients.clients(i);
+		const Network::ServiceClientInfo& client = srvInfo.clients(i);
 		const Network::SoftwareInfo& sw = client.softwareinfo();
 
 		cm->setData(cm->index(i, 0), HostAddressPort(client.requestip(), client.requestport()).toString());
@@ -398,102 +390,62 @@ QString BaseServiceWidget::getRunningStateStr() const
 					arg(m_serviceData.sessionParams.currentSettingsProfile));
 }
 
-void BaseServiceWidget::askServiceState()
-{
-	if (!m_udpSocket->isWaitingForAck())
-	{
-		m_udpSocket->sendRequest(RQID_SERVICE_GET_INFO);
-	}
-}
-
 void BaseServiceWidget::startService()
 {
-	sendCommand(RQID_SERVICE_START);
+	enqueueRequest(RQID_SERVICE_START);
 }
 
 void BaseServiceWidget::stopService()
 {
-	sendCommand(RQID_SERVICE_STOP);
+	enqueueRequest(RQID_SERVICE_STOP);
 }
 
 void BaseServiceWidget::restartService()
 {
-	sendCommand(RQID_SERVICE_RESTART);
+	enqueueRequest(RQID_SERVICE_RESTART);
 }
 
-void BaseServiceWidget::serviceAckReceived(const UdpRequest udpRequest)
+void BaseServiceWidget::createTcpConnection(E::SoftwareType swType, quint32 ip)
 {
-//	qDebug() << "Service ACK received";
+	auto it = std::find_if(servicesInfo.begin(),
+						   servicesInfo.end(),
+						   [swType](const ServiceInfo& si)
+						   {
+							   return si.softwareType == swType;
+						   });
 
-	m_udpAckQuantity++;
-
-	switch (udpRequest.ID())
+	if (it == servicesInfo.end())
 	{
-	case RQID_SERVICE_GET_INFO:
-		{
-			Network::ServiceInfo newServiceState;
-
-			bool result = newServiceState.ParseFromArray(udpRequest.data(),
-														 static_cast<int>(udpRequest.dataSize()));
-
-			if (result == false)
-			{
-				return;
-			}
-
-			E::ServiceState oldState = m_serviceData.serviceState();
-			E::ServiceState newState = static_cast<E::ServiceState>(newServiceState.servicestate());
-
-			if (newState != E::ServiceState::Work && oldState == E::ServiceState::Work)
-			{
-				emit invalidateServiceData();
-			}
-
-			m_serviceData.protoServiceInfo = newServiceState;
-			m_serviceData.parseProtoServiceInfo();
-
-			updateSrvStatusWidgets();
-		}
-		break;
-
-	case RQID_SERVICE_START:
-	case RQID_SERVICE_STOP:
-	case RQID_SERVICE_RESTART:
-		break;
-
-	default:
-		qDebug() << "Unknown packet ID";
+		Q_ASSERT(false);
+		return;
 	}
-}
 
-void BaseServiceWidget::serviceAckTimeout()
-{
-//	qDebug() << "Service ack TIMEOUT";
+	quint16 tcpPort = it->tcpPort;
 
-	if (m_serviceData.serviceState() != E::ServiceState::Unavailable)
-	{
-		clearServiceData();
-		updateSrvStatusWidgets();
-	}
-}
+	m_scmSrvClient = new ScmServiceClient(softwareInfo(), HostAddressPort(ip, tcpPort));
+	m_scmSrvClientThread = new SimpleThread(m_scmSrvClient);
 
-void BaseServiceWidget::createTcpConnection(quint32 ip, quint16 port)
-{
-	m_tcpClientSocket = new TcpConfigServiceClient(softwareInfo(), HostAddressPort(ip, port));
-	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
+	connect(m_scmSrvClient, &ScmServiceClient::serviceInfoUpdated, this, &BaseServiceWidget::onServiceInfoUpdated);
 
-//	connect(m_tcpClientSocket, &TcpConfigServiceClient::serviceStateLoaded, this, &CfgServiceWidget::updateSrvStatus);
 //	connect(m_tcpClientSocket, &TcpConfigServiceClient::clientsLoaded, this, &CfgServiceWidget::updateClientsInfo);
 	//	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
 //	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &CfgServiceWidget::updateServiceParameters);
 
 //	connect(m_tcpClientSocket, &TcpConfigServiceClient::socketDisconnected, this, &CfgServiceWidget::clearServiceData);
 
-	m_tcpClientThread->start();
+	m_scmSrvClientThread->start();
 }
 
 void BaseServiceWidget::dropTcpConnection()
 {
+	if (m_scmSrvClientThread != nullptr)
+	{
+		m_scmSrvClientThread->quitAndWait();
+		delete m_scmSrvClientThread;
+		m_scmSrvClientThread = nullptr;
+	}
+
+	m_scmSrvClient = nullptr;
 }
 
 QString BaseServiceWidget::rqCtrlInfoStr(const RqCtrlSettings& rcs)
@@ -601,6 +553,14 @@ void BaseServiceWidget::clearServiceData()
 		m_serviceData.protoServiceInfo.clear_clients();
 		m_serviceData.buildInfo.clear();
 		m_serviceData.settings.reset();
+	}
+}
+
+void BaseServiceWidget::enqueueRequest(int request)
+{
+	if (m_scmSrvClient != nullptr)
+	{
+		m_scmSrvClient->enqueueRequest(request);
 	}
 }
 
@@ -715,6 +675,22 @@ HostAddressPort BaseServiceWidget::getWorkingClientRequestIp()
 	return m_serviceData.clientRequestIPs[0];
 }
 
+void BaseServiceWidget::onServiceInfoUpdated(Network::ServiceInfo newSrvInfo)
+{
+	E::ServiceState oldState = m_serviceData.serviceState();
+	E::ServiceState newState = static_cast<E::ServiceState>(newSrvInfo.servicestate());
+
+	if (newState != E::ServiceState::Work && oldState == E::ServiceState::Work)
+	{
+		emit invalidateServiceData();
+	}
+
+	m_serviceData.protoServiceInfo.Swap(&newSrvInfo);
+	m_serviceData.parseProtoServiceInfo();
+
+	updateSrvStatusWidgets();
+}
+
 void BaseServiceWidget::sendCommand(int command)
 {
 	E::ServiceState state = m_serviceData.serviceState();
@@ -724,10 +700,9 @@ void BaseServiceWidget::sendCommand(int command)
 	{
 		return;
 	}
-	if (m_udpSocket->isWaitingForAck())
+
+	if (m_scmSrvClient != nullptr)
 	{
-		QMessageBox::critical(this, tr("Command send error"), tr("Socket is waiting for ack, repeat your command later."));
-		return;
+		m_scmSrvClient->enqueueRequest(command);
 	}
-	m_udpSocket->sendRequest(command);
 }

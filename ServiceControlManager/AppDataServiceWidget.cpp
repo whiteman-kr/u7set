@@ -649,10 +649,10 @@ void AppDataServiceWidget::updateStateInfo()
 		}
 	}
 
-	if (m_tcpClientSocket == nullptr)
+/*	if (m_tcpClientSocket == nullptr)
 	{
 		createTcpConnection(workingIp.address32(), workingIp.port());
-	}
+	}*/
 }
 
 void AppDataServiceWidget::updateSourceInfo()
@@ -791,7 +791,7 @@ void AppDataServiceWidget::forgetWidget()
 	m_appDataSourceWidgetList.removeAll(widget);
 }
 
-void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
+/*void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
 {
 	m_tcpClientSocket = new TcpAppDataClient(softwareInfo(), HostAddressPort(ip, port));
 	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
@@ -836,7 +836,7 @@ void AppDataServiceWidget::dropTcpConnection()
 	}
 
 	m_tcpClientSocket = nullptr;
-}
+}*/
 
 SignalStateModel::SignalStateModel(QObject* parent) :
 	QAbstractTableModel(parent),

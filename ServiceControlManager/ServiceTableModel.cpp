@@ -26,7 +26,7 @@ Host::Host()
 
 		sd.type = si.softwareType;
 		sd.serviceName = si.name;
-		sd.port = si.port;
+		sd.port = si.udpPort;
 
 		sd.protoServiceInfo.mutable_softwareinfo()->set_softwaretype(si.softwareType);
 	}
@@ -53,7 +53,7 @@ ServiceTableModel::ServiceTableModel(const SoftwareInfo& softwareInfo, QWidget *
 			continue;
 
 		}
-		m_serviceColumn.emplace(si.port, serviceColumn);
+		m_serviceColumn.emplace(si.udpPort, serviceColumn);
 		serviceColumn++;
 	}
 

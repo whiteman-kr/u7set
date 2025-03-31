@@ -490,7 +490,7 @@ void TcpAppDataClient::getNextStatePart()
 
 void TcpAppDataClient::onGetClientList(const char *replyData, quint32 replyDataSize)
 {
-	bool result = m_serviceClientsMessage.ParseFromArray(replyData, replyDataSize);
+/*	bool result = m_serviceClientsMessage.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)
 	{
@@ -499,7 +499,7 @@ void TcpAppDataClient::onGetClientList(const char *replyData, quint32 replyDataS
 	}
 
 	m_clientsIsReady = true;
-	emit clientsLoaded();
+	emit clientsLoaded();*/
 }
 
 

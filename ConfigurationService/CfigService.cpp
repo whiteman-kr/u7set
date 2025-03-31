@@ -38,7 +38,7 @@ void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& se
 
 	if (m_cfgServerThread != nullptr)
 	{
-		m_cfgServerThread->getClientsList(serviceInfo.mutable_clients());
+		m_cfgServerThread->getClientsList(&serviceInfo);
 	}
 }
 

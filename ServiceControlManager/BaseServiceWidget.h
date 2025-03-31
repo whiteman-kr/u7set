@@ -5,6 +5,7 @@
 #include "../OnlineLib/UdpSocket.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "ServiceTableModel.h"
+#include "ScmServiceClient.h"
 
 class BaseServiceWidget : public QMainWindow
 {
@@ -35,6 +36,8 @@ public:
 
 	const SoftwareInfo& softwareInfo() { return m_softwareInfo; }
 
+	virtual void onServiceInfoUpdated(Network::ServiceInfo srvInfo);
+
 signals:
 	void invalidateServiceData();
 
@@ -55,18 +58,13 @@ public slots:
 
 	QString getRunningStateStr() const;
 
-	void askServiceState();
-
 	void startService();
 	void stopService();
 	void restartService();
 
-	void serviceAckReceived(const UdpRequest udpRequest);
-	void serviceAckTimeout();
-
 protected:
-	virtual void createTcpConnection(quint32 ip, quint16 port);
-	virtual void dropTcpConnection();
+	void createTcpConnection(E::SoftwareType swType, quint32 ip);
+	void dropTcpConnection();
 
 	QString rqCtrlInfoStr(const RqCtrlSettings& rcs);
 
@@ -77,6 +75,8 @@ private:
 	void addClientsTab();
 
 	void clearServiceData();
+
+	void enqueueRequest(int request);
 
 	void onSectionResized(int index, int oldSize, int newSize);
 
@@ -108,11 +108,13 @@ private:
 	QAction* m_restartServiceButton = nullptr;
 
 	QTimer* m_timer = nullptr;
-	UdpClientSocket* m_udpSocket = nullptr;
 	QLabel* m_connectionStateStatus = nullptr;
 	QLabel* m_uptimeStatus = nullptr;
 	QLabel* m_runningStatus = nullptr;
 	QTabWidget* m_tabWidget = nullptr;
+
+	ScmServiceClient* m_scmSrvClient = nullptr;
+	SimpleThread* m_scmSrvClientThread = nullptr;
 
 	std::map<QStandardItemModel*, std::pair<QTableView*, Columns>> m_modelTableViewColumns;
 
