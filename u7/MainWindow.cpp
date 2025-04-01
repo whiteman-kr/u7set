@@ -8,6 +8,7 @@
 #include "./Forms/ProjectPropertiesForm.h"
 #include "./ProjectsTabPage/ProjectsTabPage.h"
 #include "./SchemaEditor/EditSchemaWidget.h"
+#include "./SchemaEditor/F2KeyForSchemaItem.h"
 #include "./SchemaEditor/SchemasTabPage.h"
 #include "./Simulator/SimProfileEditor.h"
 #include "AppSignalSetProvider.h"
@@ -35,6 +36,7 @@
 #include "UserManagementDialog.h"
 #include <LicenseLib/AppLicenser.h>
 #include <UiLib/DialogAbout.h>
+
 
 MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	QMainWindow{parent},
@@ -1015,7 +1017,7 @@ void MainWindow::updateUfbsAfbsBusses()
 	// Get Busses
 	//
 	std::vector<AppSignalLib::Bus> busses;
-	bool ok = EditSchemaWidget::loadBusses(dbController(), &busses, this);
+	bool ok = F2KeyForSchemaItem::loadBusses(dbController(), &busses, this);
 
 	if (ok == false)
 	{

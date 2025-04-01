@@ -140,6 +140,8 @@ set (U7_SOURCES
 	./SchemaEditor/EditSchemaView.h
 	./SchemaEditor/EditSchemaWidget.cpp
 	./SchemaEditor/EditSchemaWidget.h
+	./SchemaEditor/F2KeyForSchemaItem.cpp
+	./SchemaEditor/F2KeyForSchemaItem.h
 	./SchemaEditor/SchemaControlTabPage.cpp
 	./SchemaEditor/SchemaControlTabPage.h
 	./SchemaEditor/SchemaItemPropertiesDialog.cpp

@@ -2853,7 +2853,7 @@ void SchemaControlTabPage::openFile(const DbFileInfo& file)
 
 	if (vf == nullptr)
 	{
-		Q_ASSERT(vf != nullptr);
+		QMessageBox::critical(this, tr("Error"), tr("File %1 cannot be read or is corrupted.").arg(out[0]->fileName()));
 		return;
 	}
 
