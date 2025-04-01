@@ -255,7 +255,7 @@ private slots:
 	void onServiceWork();
 	void onServiceStopped();
 
-	void onBaseRequest(UdpRequest request);
+	void onGetSrvShortInfoRequest(UdpRequest request);
 
 private:
 	void startSrvInfoThreads();

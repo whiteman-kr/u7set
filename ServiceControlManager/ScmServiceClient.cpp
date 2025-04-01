@@ -21,34 +21,25 @@ ScmServiceClient::~ScmServiceClient()
 
 void ScmServiceClient::onClientThreadStarted()
 {
+	connect(this, &ScmServiceClient::requestEnqueued, this, &ScmServiceClient::sendSrvGetInfoRequest);
 
+	m_timer = new QTimer;
+	connect(m_timer, &QTimer::timeout, this, &ScmServiceClient::sendSrvGetInfoRequest);
+	m_timer->start(500);
 }
 
 void ScmServiceClient::onClientThreadFinished()
 {
-
+	delete m_timer;
 }
 
 void ScmServiceClient::onConnection()
 {
-	if (m_timer == nullptr)
-	{
-		m_timer = new QTimer(this);
-		connect(m_timer, &QTimer::timeout, this, &ScmServiceClient::updateSrvInfo);
-	}
-
-	m_timer->start(500);
-
-	updateSrvInfo();
+	sendSrvGetInfoRequest();
 }
 
 void ScmServiceClient::onDisconnection()
 {
-	if (m_timer != nullptr)
-	{
-		m_timer->stop();
-	}
-
 	emit socketDisconnected();
 }
 
@@ -62,11 +53,13 @@ void ScmServiceClient::processReply(quint32 requestID, const char* replyData, qu
 	{
 	case RQID_SERVICE_GET_INFO:
 		onGetServiceInfo(replyData, replyDataSize);
+		checkRequestQueue();
 		break;
 
 	case RQID_SERVICE_START:
 	case RQID_SERVICE_STOP:
 	case RQID_SERVICE_RESTART:
+		sendSrvGetInfoRequest();
 		break;
 
 	default:
@@ -76,15 +69,7 @@ void ScmServiceClient::processReply(quint32 requestID, const char* replyData, qu
 
 void ScmServiceClient::onGetServiceInfo(const char* replyData, quint32 replyDataSize)
 {
-	bool result = m_srvInfo.ParseFromArray(replyData, replyDataSize);
-
-	if (result == false)
-	{
-		assert(false);
-		return;
-	}
-
-	emit serviceInfoUpdated(m_srvInfo);
+	emit serviceInfoUpdated(QByteArray(replyData, replyDataSize));
 }
 
 void ScmServiceClient::enqueueRequest(int requestID)
@@ -94,12 +79,42 @@ void ScmServiceClient::enqueueRequest(int requestID)
 	m_requestQueue.push(requestID);
 
 	m_requestQueueMutex.unlock();
+
+	emit requestEnqueued();
 }
 
-void ScmServiceClient::updateSrvInfo()
+void ScmServiceClient::checkRequestQueue()
+{
+	bool queueEmpty = false;
+
+	m_requestQueueMutex.lock();
+
+	queueEmpty = m_requestQueue.empty();
+
+	m_requestQueueMutex.unlock();
+
+	if (queueEmpty == false)
+	{
+		sendSrvGetInfoRequest();
+	}
+}
+
+void ScmServiceClient::sendSrvGetInfoRequest()
 {
 	if (isClearToSendRequest())
 	{
-		sendRequest(RQID_SERVICE_GET_INFO);
+		int request = RQID_SERVICE_GET_INFO;
+
+		m_requestQueueMutex.lock();
+
+		if (m_requestQueue.empty() == false)
+		{
+			request = m_requestQueue.front();
+			m_requestQueue.pop();
+		}
+
+		m_requestQueueMutex.unlock();
+
+		sendRequest(request);
 	}
 }

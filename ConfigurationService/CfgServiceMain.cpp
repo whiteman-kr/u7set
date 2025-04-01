@@ -1,4 +1,4 @@
-#include "CfigService.h"
+#include "CfgService.h"
 #include <ServiceLib/ServiceStarter.h>
 #include "version.h"
 

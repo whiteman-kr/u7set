@@ -31,9 +31,11 @@ public:
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
 	void enqueueRequest(int requestID);
+	void checkRequestQueue();
 
 signals:
-	void serviceInfoUpdated(Network::ServiceInfo srvInfo);
+	void serviceInfoUpdated(QByteArray replyData);
+	void requestEnqueued();
 
 	void serviceStateLoaded();
 	void clientsLoaded();
@@ -43,7 +45,7 @@ signals:
 	void socketDisconnected();
 
 private slots:
-	void updateSrvInfo();
+	void sendSrvGetInfoRequest();
 
 private:
 	void onGetServiceInfo(const char* replyData, quint32 replyDataSize);

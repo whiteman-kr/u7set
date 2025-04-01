@@ -11,11 +11,12 @@
 #include <QTimer>
 #include <QSettings>
 
-ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *parent) :
+ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget* parent) :
 	QDialog(parent),
 	m_serviceModel(serviceModel)
 {
 	setWindowTitle(tr("Scan settings"));
+
 	QRegularExpression re("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:[12]?[0-9]|3[0-2]?)?)\\b");
 	QRegularExpressionValidator* rev = new QRegularExpressionValidator(re, this);
 	m_addressEdit = new QLineEdit(this);
@@ -27,6 +28,7 @@ ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *p
 	QComboBox* addressCombo = new QComboBox(this);
 
 	QList<QNetworkInterface> interfaceList = QNetworkInterface::allInterfaces();
+
 	for (int i = 0; i < interfaceList.count(); i++)
 	{
 		QList<QNetworkAddressEntry> addressList = interfaceList[i].addressEntries();

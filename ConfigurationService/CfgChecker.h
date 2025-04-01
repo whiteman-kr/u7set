@@ -24,7 +24,7 @@ public:
 	bool checkBuild(const QString& buildDirectoryPath);
 
 	int checkNewBuildAttemptQuantity() const { return m_checkNewBuildCounter; }
-	E::ConfigCheckerState checkNewBuildStage() const { return m_state; }
+	E::ConfigCheckerState cfgCheckerState() const { return m_state; }
 
 signals:
 	void buildPathChanged(QString newBuildPath);

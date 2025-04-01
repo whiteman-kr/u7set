@@ -22,7 +22,7 @@ public:
 	explicit BaseServiceWidget(	ServiceTableModel* srvTableModel,
 								const SoftwareInfo& softwareInfo,
 								const ServiceData& service,
-								quint32 udpIp, quint16 udpPort,
+								quint32 ip, quint16 tcpPort,
 								QWidget* parent = nullptr);
 	virtual ~BaseServiceWidget();
 
@@ -36,7 +36,7 @@ public:
 
 	const SoftwareInfo& softwareInfo() { return m_softwareInfo; }
 
-	virtual void onServiceInfoUpdated(Network::ServiceInfo srvInfo);
+	virtual void onServiceInfoUpdated(QByteArray replyData);
 
 signals:
 	void invalidateServiceData();
@@ -45,7 +45,10 @@ public slots:
 	void updateSrvStatusWidgets();
 	void updateWindowTitle();
 	void updateSrvControlButtons();
-	void updateSrvStatus();
+
+	void updateBaseSrvStatus();
+	virtual int updateSrvStatus(int rowCount);
+
 	void updateBuildInfo();
 	void updateStatusBar();
 
@@ -63,7 +66,7 @@ public slots:
 	void restartService();
 
 protected:
-	void createTcpConnection(E::SoftwareType swType, quint32 ip);
+	void createTcpConnection(quint32 ip, quint16 tcpPort);
 	void dropTcpConnection();
 
 	QString rqCtrlInfoStr(const RqCtrlSettings& rcs);
@@ -83,8 +86,8 @@ private:
 protected:
 	UdpSocketThread* m_udpSocketThread = nullptr;
 
-	quint32 m_udpIp = 0;
-	quint16 m_udpPort = 0;
+	quint32 m_ip = 0;
+	quint16 m_tcpPort = 0;
 
 	ServiceData m_serviceData;
 	SoftwareInfo m_softwareInfo;

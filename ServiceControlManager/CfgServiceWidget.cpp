@@ -5,27 +5,34 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 
-CfgServiceWidget::CfgServiceWidget(	ServiceTableModel* srvTableModel,
-									const SoftwareInfo& softwareInfo,
-									const ServiceData& service,
-									quint32 udpIp, quint16 udpPort,
-									QWidget *parent) :
-	BaseServiceWidget(srvTableModel, softwareInfo, service, udpIp, udpPort, parent)
+CfgServiceWidget::CfgServiceWidget(ServiceTableModel* srvTableModel,
+	const SoftwareInfo& softwareInfo,
+	const ServiceData& service,
+	quint32 ip, quint16 tcpPort,
+	QWidget *parent) :
+	BaseServiceWidget(srvTableModel, softwareInfo, service, ip, tcpPort, parent)
 {
 }
 
 CfgServiceWidget::~CfgServiceWidget()
 {
-	dropTcpConnection();
 }
 
+int CfgServiceWidget::updateSrvStatus(int rowCount)
+{
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 0), QStringLiteral("CfgCheckerState"));
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1),
+							  E::valueToString(static_cast<E::ConfigCheckerState>(m_serviceData.protoServiceInfo.cfgcheckerstate())));
+	rowCount++;
+
+	return rowCount;
+}
 
 int CfgServiceWidget::updateSettings(int rowCount)
 {
 	if (m_serviceData.settings == nullptr)
 	{
-		m_settingsModel->setRowCount(0);
-		return 0;
+		return rowCount;
 	}
 
 	std::shared_ptr<CfgServiceSettings> st = std::dynamic_pointer_cast<CfgServiceSettings>(m_serviceData.settings);
@@ -56,40 +63,3 @@ int CfgServiceWidget::updateSettings(int rowCount)
 
 	return rowCount;
 }
-
-void CfgServiceWidget::clearServiceData()
-{
-//	clientsTabModel()->setRowCount(0);
-
-	// for (int i = 0; i < m_settingsTabModel->rowCount(); i++)
-	// {
-	// 	m_parametersTabModel->setData(m_parametersTabModel->index(i, 1), "???");
-	// }
-}
-/*
-void CfgServiceWidget::createTcpConnection(quint32 ip, quint16 port)
-{
-	m_tcpClientSocket = new ScmServiceClient(softwareInfo(), HostAddressPort(ip, port));
-	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
-
-	connect(m_tcpClientSocket, &ScmServiceClient::serviceStateLoaded, this, &CfgServiceWidget::updateSrvStatus);
-	connect(m_tcpClientSocket, &ScmServiceClient::clientsLoaded, this, &CfgServiceWidget::updateClientsInfo);
-//	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
-	connect(m_tcpClientSocket, &ScmServiceClient::settingsLoaded, this, &CfgServiceWidget::updateServiceParameters);
-
-	connect(m_tcpClientSocket, &ScmServiceClient::socketDisconnected, this, &CfgServiceWidget::clearServiceData);
-
-	m_tcpClientThread->start();
-}
-
-void CfgServiceWidget::dropTcpConnection()
-{
-	if (m_tcpClientThread != nullptr)
-	{
-		m_tcpClientThread->quitAndWait();
-		delete m_tcpClientThread;
-		m_tcpClientThread = nullptr;
-	}
-
-	m_tcpClientSocket = nullptr;
-}*/

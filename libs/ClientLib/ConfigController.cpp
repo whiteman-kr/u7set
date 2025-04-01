@@ -4,9 +4,8 @@
 
 #include <ClientLib/ConfigController.h>
 #include <CommonLib/HostAddressPort.h>
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 #include <QDomNode>
-
 
 namespace ClientLib
 {

@@ -17,11 +17,11 @@ set(TARGET CfgSrv)
 add_executable(${TARGET}
 	CfgChecker.cpp
 	CfgChecker.h
-	CfgControlServer.cpp
-	CfgControlServer.h
+	CfgServer.cpp
+	CfgServer.h
+	CfgService.cpp
+	CfgService.h
 	CfgServiceMain.cpp
-	CfigService.cpp
-	CfigService.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

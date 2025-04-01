@@ -518,7 +518,7 @@ void Service::onServiceStopped()
 	m_state = E::ServiceState::Stopped;
 }
 
-void Service::onBaseRequest(UdpRequest request)
+void Service::onGetSrvShortInfoRequest(UdpRequest request)
 {
 	UdpRequest ack;
 
@@ -534,14 +534,6 @@ void Service::onBaseRequest(UdpRequest request)
 		{
 			Network::ServiceInfo si;
 			getServiceInfo(si, true);
-			ack.writeData(si);
-		}
-		break;
-
-	case RQID_SERVICE_GET_INFO:
-		{
-			Network::ServiceInfo si;
-			getServiceInfo(si, false);
 			ack.writeData(si);
 		}
 		break;
@@ -576,7 +568,7 @@ void Service::startSrvInfoThreads()
 
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo.udpPort, m_logger);
 
-	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onBaseRequest);
+	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onGetSrvShortInfoRequest);
 	connect(this, &Service::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
 
 	m_udpSrvInfoThread = new UdpSocketThread(serverSocket);

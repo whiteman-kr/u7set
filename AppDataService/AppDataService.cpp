@@ -1,4 +1,4 @@
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"

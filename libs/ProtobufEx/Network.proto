@@ -387,8 +387,11 @@ message ServiceInfo
 	//
 	optional string autoloadBuildPath = 20;
 	optional string workDirectory = 21;
+	optional int32 cfgCheckerState = 22;
 
+	// AppDataService specific
 	//
+	repeated AppDataSourceState appDataSrcState;
 }
 
 message GetServiceInfoReply

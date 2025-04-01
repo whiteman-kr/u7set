@@ -1,4 +1,5 @@
-#include "CfigService.h"
+#include "CfgService.h"
+#include "CfgServer.h"
 #include <CommonLib/ConstStrings.h>
 #include "CfgChecker.h"
 #include "CfgControlServer.h"
@@ -35,6 +36,15 @@ void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& se
 	serviceInfo.set_settingsxml(xmlString.toStdString());
 	serviceInfo.set_autoloadbuildpath(m_autoloadBuildPath.toStdString());
 	serviceInfo.set_workdirectory(m_workDirectory.toStdString());
+
+	if (m_cfgCheckerWorker != nullptr)
+	{
+		serviceInfo.set_cfgcheckerstate(TO_INT(m_cfgCheckerWorker->cfgCheckerState()));
+	}
+	else
+	{
+		serviceInfo.set_cfgcheckerstate(TO_INT(E::ConfigCheckerState::Unknown));
+	}
 
 	if (m_cfgServerThread != nullptr)
 	{
@@ -189,15 +199,13 @@ void ConfigurationServiceWorker::shutdown()
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
 
-	CfgControlServer* cfgControlServer = new CfgControlServer(softwareInfo(),
-															  m_autoloadBuildPath,
-															  m_workDirectory,
-															  buildPath,
-															  sessionParams(),
-															  m_cfgServiceSettings.clients,
-															  m_cfgServiceSettings.checkHostname,
-															  *m_cfgCheckerWorker,
-															  logger());
+	CfgServer* cfgServer = new CfgServer(softwareInfo(),
+										 sessionParams(),
+										 buildPath,
+										 m_cfgServiceSettings.clients,
+										 m_cfgServiceSettings.checkHostname,
+										 logger());
+
 	std::vector<Tcp::ListenAddress> listenAddrs;
 
 	for(const RqCtrlSettings& rcs: m_cfgServiceSettings.rcSettings)
@@ -208,7 +216,7 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 		}
 	}
 
-	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgControlServer, logger());
+	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger());
 
 	m_cfgServerThread->start();
 }

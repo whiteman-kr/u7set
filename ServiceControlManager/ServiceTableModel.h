@@ -27,9 +27,9 @@ public:
 	explicit ServiceTableModel(const SoftwareInfo& softwareInfo, QWidget* parent = 0);
 	~ServiceTableModel();
 
-	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const;
-	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
 	void addAddress(const QString& connectionAddress);
@@ -52,8 +52,8 @@ private:
 	void finishtUdpSocketThread();
 	void restartUdpSocketThread();
 
-	void setServiceState(quint32 ip, quint16 port, E::ServiceState state);
-	void getServiceState(quint32 ip, quint16 port, int* hostIndex, int* serviceIndex);
+	void setServiceState(quint32 ip, quint16 udpPort, E::ServiceState state);
+	void getServiceState(quint32 ip, quint16 udpPort, int* hostIndex, int* serviceIndex);
 
 	int hostsCount() const;
 	int serviceCount() const;

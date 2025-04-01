@@ -39,17 +39,20 @@ void TcpSrvInfoServer::processRequest(quint32 requestID, const char* requestData
 	case RQID_SERVICE_START:
 		LOG_MSG(m_service.logger(), QString("Service START request from SCM (%1).").arg(peerAddr().addressPortStr()));
 		m_service.startServiceWorkerThread();
+		sendReply();
 		break;
 
 	case RQID_SERVICE_STOP:
 		LOG_MSG(m_service.logger(), QString("Service STOP request from SCM (%1).").arg(peerAddr().addressPortStr()));
 		m_service.stopServiceWorkerThread();
+		sendReply();
 		break;
 
 	case RQID_SERVICE_RESTART:
 		LOG_MSG(m_service.logger(), QString("Service RESTART request from SCM (%1).").arg(peerAddr().addressPortStr()));
 		m_service.stopServiceWorkerThread();
 		m_service.startServiceWorkerThread();
+		sendReply();
 		break;
 
 	default:

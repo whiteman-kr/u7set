@@ -268,7 +268,7 @@ signals:
 	void receiveRequest(UdpRequest request);
 
 public slots:
-	void sendAck(UdpRequest m_request);
+	void sendAck(UdpRequest request);
 
 private slots:
 	void onTimer();

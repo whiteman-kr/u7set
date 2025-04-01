@@ -10,7 +10,8 @@ struct ServiceData
 	E::SoftwareType type = E::SoftwareType::Unknown;
 	QString serviceName;
 
-	quint16 port = 0;
+	quint16 udpPort = 0;
+	quint16 tcpPort = 0;
 
 	Network::ServiceInfo protoServiceInfo;
 

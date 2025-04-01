@@ -8,9 +8,9 @@
 TuningServiceWidget::TuningServiceWidget(ServiceTableModel* srvTableModel,
 										const SoftwareInfo& softwareInfo,
 										const ServiceData& service,
-										quint32 udpIp, quint16 udpPort,
+										quint32 ip, quint16 tcpPort,
 										QWidget* parent) :
-	BaseServiceWidget(srvTableModel, softwareInfo, service, udpIp, udpPort, parent)
+	BaseServiceWidget(srvTableModel, softwareInfo, service, ip, tcpPort, parent)
 {
 	//----------------------------------------------------------------------------------------------------
 //	addClientsTab();

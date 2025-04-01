@@ -446,9 +446,9 @@ void DataSourcesStateModel::reloadList()
 AppDataServiceWidget::AppDataServiceWidget(ServiceTableModel* srvTableModel,
 											const SoftwareInfo& softwareInfo,
 											const ServiceData& service,
-											quint32 udpIp, quint16 udpPort,
-											QWidget *parent) :
-	BaseServiceWidget(srvTableModel, softwareInfo, service, udpIp, udpPort, parent),
+											quint32 ip, quint16 tcpPort,
+											QWidget* parent) :
+	BaseServiceWidget(srvTableModel, softwareInfo, service, ip, tcpPort, parent),
 	m_tcpClientSocket(nullptr),
 	m_tcpClientThread(nullptr)
 {

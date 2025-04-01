@@ -74,7 +74,7 @@ public:
 	AppDataServiceWidget(ServiceTableModel* srvTableModel,
 						 const SoftwareInfo& softwareInfo,
 						 const ServiceData& service,
-						 quint32 udpIp, quint16 udpPort,
+						 quint32 ip, quint16 tcpPort,
 						 QWidget *parent = nullptr);
 	~AppDataServiceWidget();
 

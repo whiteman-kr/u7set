@@ -94,33 +94,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 MainWindow::~MainWindow()
 {
-	// for (int i = 0; i < m_widgets.count(); i++)
-	// {
-	// 	m_widgets[i]->deleteLater();
-	// }
 }
-
-// void MainWindow::openConnectionInfo(QString text)
-// {
-// 	for (int i = 0; i < m_widgets.count(); i++)
-// 	{
-// 		if (m_widgets[i]->windowTitle() == text)
-// 		{
-// 			m_widgets[i]->showNormal();
-// 			m_widgets[i]->raise();
-// 			m_widgets[i]->activateWindow();
-// 			return;
-// 		}
-// 	}
-
-// 	QWidget* w = new QWidget;
-// 	w->setWindowTitle(text);
-// 	w->showMaximized();
-// 	w->showNormal();
-// 	w->raise();
-// 	w->activateWindow();
-// 	m_widgets.append(w);
-// }
 
 void MainWindow::closeEvent(QCloseEvent *)
 {

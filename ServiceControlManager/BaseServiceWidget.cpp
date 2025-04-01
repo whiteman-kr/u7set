@@ -3,15 +3,15 @@
 #include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
 
-BaseServiceWidget::BaseServiceWidget(	ServiceTableModel* srvTableModel,
-										const SoftwareInfo& softwareInfo,
-										const ServiceData& serviceData,
-										quint32 udpIp, quint16 udpPort,
-										QWidget* parent) :
+BaseServiceWidget::BaseServiceWidget(ServiceTableModel* srvTableModel,
+	const SoftwareInfo& softwareInfo,
+	const ServiceData& serviceData,
+	quint32 ip, quint16 tcpPort,
+	QWidget* parent) :
 	QMainWindow(parent),
 	m_srvTableModel(srvTableModel),
-	m_udpIp(udpIp),
-	m_udpPort(udpPort),
+	m_ip(ip),
+	m_tcpPort(tcpPort),
 	m_serviceData(serviceData),
 	m_softwareInfo(softwareInfo)
 {
@@ -47,21 +47,21 @@ BaseServiceWidget::BaseServiceWidget(	ServiceTableModel* srvTableModel,
 
 	//
 
-	setWindowPosition(this, QString("Service_%1_%2").arg(QHostAddress(udpIp).toString()).arg(udpPort));
+	setWindowPosition(this, QString("Service_%1_%2").arg(QHostAddress(ip).toString()).arg(m_tcpPort));
 
 	addGeneralTab();
 	addClientsTab();
 
 	//
 
-	createTcpConnection(m_serviceData.swInfo.softwareType(), udpIp);
+	createTcpConnection(ip, tcpPort);
 
 	//
 
 	m_timer = new QTimer(this);
 	m_timer->start(500);
 
-	updateSrvStatus();
+	updateSrvStatusWidgets();
 }
 
 BaseServiceWidget::~BaseServiceWidget()
@@ -77,14 +77,14 @@ BaseServiceWidget::~BaseServiceWidget()
 
 	dropTcpConnection();
 
-	saveWindowPosition(this, QString("Service_%1_%2").arg(QHostAddress(m_udpIp).toString()).arg(m_udpPort));
+	saveWindowPosition(this, QString("Service_%1_%2").arg(QHostAddress(m_ip).toString()).arg(m_tcpPort));
 }
 
 void BaseServiceWidget::updateSrvStatusWidgets()
 {
 	updateWindowTitle();
 	updateSrvControlButtons();
-	updateSrvStatus();
+	updateBaseSrvStatus();
 	updateBuildInfo();
 	updateStatusBar();
 	updateBaseSettings();
@@ -113,8 +113,8 @@ void BaseServiceWidget::updateWindowTitle()
 						   arg(softwareInfo.minorversion()).
 						   arg(softwareInfo.patchversion()).
 						   arg(QString::fromStdString(softwareInfo.equipmentid())).
-						   arg(QHostAddress(m_udpIp).toString()).
-						   arg(m_udpPort));
+						   arg(QHostAddress(m_ip).toString()).
+						   arg(m_tcpPort));
 		}
 		break;
 
@@ -154,7 +154,7 @@ void BaseServiceWidget::updateSrvControlButtons()
 	}
 }
 
-void BaseServiceWidget::updateSrvStatus()
+void BaseServiceWidget::updateBaseSrvStatus()
 {
 	E::ServiceState srvState = m_serviceData.serviceState();
 
@@ -206,9 +206,18 @@ void BaseServiceWidget::updateSrvStatus()
 	m_srvStatusModel->setData(m_srvStatusModel->index(3, 1),
 							  formatUptime(m_serviceData.protoServiceInfo.serviceruntime()));
 
-	m_srvStatusModel->setRowCount(4);
+	int rowCount = 4;
+
+	rowCount = updateSrvStatus(rowCount);
+
+	m_srvStatusModel->setRowCount(rowCount);
 
 	updateColumnsWidth(m_srvStatusModel);
+}
+
+int BaseServiceWidget::updateSrvStatus(int rowCount)
+{
+	return rowCount;
 }
 
 void BaseServiceWidget::updateBuildInfo()
@@ -295,7 +304,12 @@ void BaseServiceWidget::updateStatusBar()
 
 void BaseServiceWidget::updateBaseSettings()
 {
-	if (m_serviceData.settings == nullptr)
+	E::ServiceState srvState = m_serviceData.serviceState();
+
+	if (m_serviceData.settings == nullptr ||
+		srvState == E::ServiceState::Unavailable ||
+		srvState == E::ServiceState::Undefined ||
+		srvState == E::ServiceState::Stopped)
 	{
 		m_settingsModel->setRowCount(0);
 		return;
@@ -326,8 +340,7 @@ void BaseServiceWidget::updateBaseSettings()
 
 int BaseServiceWidget::updateSettings(int rowCount)
 {
-	Q_UNUSED(rowCount);
-	return 0;
+	return rowCount;
 }
 
 void BaseServiceWidget::updateClients()
@@ -405,33 +418,12 @@ void BaseServiceWidget::restartService()
 	enqueueRequest(RQID_SERVICE_RESTART);
 }
 
-void BaseServiceWidget::createTcpConnection(E::SoftwareType swType, quint32 ip)
+void BaseServiceWidget::createTcpConnection(quint32 ip, quint16 tcpPort)
 {
-	auto it = std::find_if(servicesInfo.begin(),
-						   servicesInfo.end(),
-						   [swType](const ServiceInfo& si)
-						   {
-							   return si.softwareType == swType;
-						   });
-
-	if (it == servicesInfo.end())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	quint16 tcpPort = it->tcpPort;
-
 	m_scmSrvClient = new ScmServiceClient(softwareInfo(), HostAddressPort(ip, tcpPort));
 	m_scmSrvClientThread = new SimpleThread(m_scmSrvClient);
 
 	connect(m_scmSrvClient, &ScmServiceClient::serviceInfoUpdated, this, &BaseServiceWidget::onServiceInfoUpdated);
-
-//	connect(m_tcpClientSocket, &TcpConfigServiceClient::clientsLoaded, this, &CfgServiceWidget::updateClientsInfo);
-	//	connect(m_tcpClientSocket, &TcpConfigServiceClient::buildInfoLoaded, this, &ConfigurationServiceWidget::updateBuildInfo);
-//	connect(m_tcpClientSocket, &TcpConfigServiceClient::settingsLoaded, this, &CfgServiceWidget::updateServiceParameters);
-
-//	connect(m_tcpClientSocket, &TcpConfigServiceClient::socketDisconnected, this, &CfgServiceWidget::clearServiceData);
 
 	m_scmSrvClientThread->start();
 }
@@ -525,11 +517,11 @@ void BaseServiceWidget::addGeneralTab()
 	QVBoxLayout* vBoxLayout = new QVBoxLayout(generalTabWidget);
 
 	vBoxLayout->addWidget(new QLabel("Service status"));
-	vBoxLayout->addWidget(srvStateTableView, 20);
+	vBoxLayout->addWidget(srvStateTableView, 30);
 	vBoxLayout->addWidget(new QLabel("Build Information"));
 	vBoxLayout->addWidget(buildInfoTableView, 30);
 	vBoxLayout->addWidget(new QLabel("Service Settings"));
-	vBoxLayout->addWidget(settingsTableView, 50);
+	vBoxLayout->addWidget(settingsTableView, 40);
 
 	generalTabWidget->setLayout(vBoxLayout);
 
@@ -669,14 +661,24 @@ HostAddressPort BaseServiceWidget::getWorkingClientRequestIp()
 {
 	if (m_serviceData.clientRequestIPs.empty())
 	{
-		return HostAddressPort(m_udpIp, m_udpPort);
+		return HostAddressPort(m_ip, m_tcpPort);
 	}
 
 	return m_serviceData.clientRequestIPs[0];
 }
 
-void BaseServiceWidget::onServiceInfoUpdated(Network::ServiceInfo newSrvInfo)
+void BaseServiceWidget::onServiceInfoUpdated(QByteArray replyData)
 {
+	Network::ServiceInfo newSrvInfo;
+
+	bool result = newSrvInfo.ParseFromArray(replyData.constData(), replyData.size());
+
+	if (result == false)
+	{
+		assert(false);
+		return;
+	}
+
 	E::ServiceState oldState = m_serviceData.serviceState();
 	E::ServiceState newState = static_cast<E::ServiceState>(newSrvInfo.servicestate());
 

@@ -26,7 +26,8 @@ Host::Host()
 
 		sd.type = si.softwareType;
 		sd.serviceName = si.name;
-		sd.port = si.udpPort;
+		sd.udpPort = si.udpPort;
+		sd.tcpPort = si.tcpPort;
 
 		sd.protoServiceInfo.mutable_softwareinfo()->set_softwaretype(si.softwareType);
 	}
@@ -105,13 +106,15 @@ ServiceTableModel::~ServiceTableModel()
 	finishtUdpSocketThread();
 }
 
-int ServiceTableModel::rowCount(const QModelIndex&) const
+int ServiceTableModel::rowCount(const QModelIndex& parent) const
 {
+	Q_UNUSED(parent);
 	return hostsCount();
 }
 
-int ServiceTableModel::columnCount(const QModelIndex&) const
+int ServiceTableModel::columnCount(const QModelIndex& parent) const
 {
+	Q_UNUSED(parent);
 	return serviceCount();
 }
 
@@ -208,7 +211,7 @@ QVariant ServiceTableModel::headerData(int section, Qt::Orientation orientation,
 	return QVariant();
 }
 
-void ServiceTableModel::addAddress(const QString &connectionAddress)
+void ServiceTableModel::addAddress(const QString& connectionAddress)
 {
 	QHostAddress ha(connectionAddress);
 
@@ -263,78 +266,72 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 
 	switch (rqID)
 	{
-	case RQID_SERVICE_GET_INFO:
-		Q_ASSERT(false);
-		break;
-
 	case RQID_SERVICE_GET_SHORT_INFO:
-	{
-		quint32 ip = socket->serverAddress().toIPv4Address();
-
-		int hostIndex = -1;
-		int serviceIndex = -1;
-
-		getServiceState(ip, socket->port(), &hostIndex, &serviceIndex);
-
-		Network::ServiceInfo newServiceInfo;
-
-		if (newServiceInfo.ParseFromArray(udpRequest.data(),
-										  static_cast<int>(udpRequest.dataSize())) == false)
 		{
-			qDebug() << Q_FUNC_INFO << "newServiceInfo.ParseFromArray failed";
-			Q_ASSERT(false);
-			return;
-		}
+			quint32 ip = socket->serverAddress().toIPv4Address();
 
-		if (hostIndex == -1)
-		{
-			const QHostAddress& sa = socket->serverAddress();
+			int hostIndex = -1;
+			int serviceIndex = -1;
 
-			if (sa.protocol() != QAbstractSocket::IPv4Protocol)
+			getServiceState(ip, socket->port(), &hostIndex, &serviceIndex);
+
+			Network::ServiceInfo newServiceInfo;
+
+			if (newServiceInfo.ParseFromArray(udpRequest.data(),
+											  static_cast<int>(udpRequest.dataSize())) == false)
 			{
+				qDebug() << Q_FUNC_INFO << "newServiceInfo.ParseFromArray failed";
+				Q_ASSERT(false);
 				return;
 			}
 
-			Host hi;
+			if (hostIndex == -1)
+			{
+				const QHostAddress& sa = socket->serverAddress();
 
-			hi.hostIP = sa.toIPv4Address();
+				if (sa.protocol() != QAbstractSocket::IPv4Protocol)
+				{
+					return;
+				}
 
-			ServiceData& sd = hi.servicesData[serviceIndex];
-			sd.protoServiceInfo = newServiceInfo;
+				Host hi;
+
+				hi.hostIP = sa.toIPv4Address();
+
+				ServiceData& sd = hi.servicesData[serviceIndex];
+				sd.protoServiceInfo = newServiceInfo;
+				sd.parseProtoServiceInfo();
+
+				beginInsertRows(QModelIndex(), hostsCount(), hostsCount());
+
+				m_hosts.push_back(hi);
+
+				endInsertRows();
+
+				restartUdpSocketThread();
+
+				return;
+			}
+
+			ServiceData& sd = m_hosts[hostIndex].servicesData[serviceIndex];
+			Network::ServiceInfo& info = sd.protoServiceInfo;
+
+			if (info.servicestate() != newServiceInfo.servicestate())
+			{
+				info = newServiceInfo;
+				emit serviceStateChanged(hostIndex);
+			}
+			else
+			{
+				info = newServiceInfo;
+			}
+
 			sd.parseProtoServiceInfo();
-
-			beginInsertRows(QModelIndex(), hostsCount(), hostsCount());
-
-			m_hosts.push_back(hi);
-
-			endInsertRows();
-
-			restartUdpSocketThread();
-
-			return;
+			QModelIndex changedIndex = index(hostIndex, serviceIndex);
+			emit dataChanged(changedIndex, changedIndex);
 		}
-
-		ServiceData& sd = m_hosts[hostIndex].servicesData[serviceIndex];
-		Network::ServiceInfo& info = sd.protoServiceInfo;
-
-		if (info.servicestate() != newServiceInfo.servicestate())
-		{
-			info = newServiceInfo;
-			emit serviceStateChanged(hostIndex);
-		}
-		else
-		{
-			info = newServiceInfo;
-		}
-
-		sd.parseProtoServiceInfo();
-		QModelIndex changedIndex = index(hostIndex, serviceIndex);
-		emit dataChanged(changedIndex, changedIndex);
-	}
-	case RQID_SERVICE_START:
-	case RQID_SERVICE_STOP:
-	case RQID_SERVICE_RESTART:
 		break;
+
 	default:
 		qDebug() << "Unknown packet ID";
 	}
@@ -452,15 +449,15 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 	switch (serviceSoftwareType)
 	{
 	case E::SoftwareType::ConfigurationService:
-		srvWidget = new CfgServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
+		srvWidget = new CfgServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.tcpPort, m_parentWidget);
 		break;
 
 	case E::SoftwareType::AppDataService:
-		srvWidget = new AppDataServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
+		srvWidget = new AppDataServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.tcpPort, m_parentWidget);
 		break;
 
 	case E::SoftwareType::TuningService:
-		srvWidget = new TuningServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.port, m_parentWidget);
+		srvWidget = new TuningServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.tcpPort, m_parentWidget);
 		break;
 
 	case E::SoftwareType::ArchiveService:
@@ -501,7 +498,7 @@ void ServiceTableModel::startUdpSocketThread()
 
 			Q_ASSERT(clientSocket == nullptr);
 
-			clientSocket = new UdpClientSocket(QHostAddress(host.hostIP), sd.port);
+			clientSocket = new UdpClientSocket(QHostAddress(host.hostIP), sd.udpPort);
 
 			connect(clientSocket, &UdpClientSocket::ackTimeout, this, &ServiceTableModel::serviceNotAck);
 			connect(clientSocket, &UdpClientSocket::ackReceived, this, &ServiceTableModel::serviceAckReceived);
@@ -541,7 +538,7 @@ void ServiceTableModel::restartUdpSocketThread()
 	startUdpSocketThread();
 }
 
-void ServiceTableModel::setServiceState(quint32 ip, quint16 port, E::ServiceState state)
+void ServiceTableModel::setServiceState(quint32 ip, quint16 udpPort, E::ServiceState state)
 {
 	int hostIndex = 0;
 
@@ -557,7 +554,7 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, E::ServiceStat
 
 		for(ServiceData& sd : host.servicesData)
 		{
-			if (sd.port != port)
+			if (sd.udpPort != udpPort)
 			{
 				sdIndex++;
 				continue;
@@ -577,7 +574,7 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, E::ServiceStat
 		}
 	}
 
-	int sdIndex = serviceColumn(port);
+	int sdIndex = serviceColumn(udpPort);
 
 	if (sdIndex == -1)
 	{
@@ -600,13 +597,13 @@ void ServiceTableModel::setServiceState(quint32 ip, quint16 port, E::ServiceStat
 	emit serviceStateChanged(hostsCount() - 1);
 }
 
-void ServiceTableModel::getServiceState(quint32 ip, quint16 port, int* hostIndex, int* serviceIndex)
+void ServiceTableModel::getServiceState(quint32 ip, quint16 udpPort, int* hostIndex, int* serviceIndex)
 {
 	TEST_PTR_RETURN(hostIndex);
 	TEST_PTR_RETURN(serviceIndex);
 
 	*hostIndex = 0;
-	*serviceIndex = serviceColumn(port);
+	*serviceIndex = serviceColumn(udpPort);
 
 	for(Host& host : m_hosts)
 	{
@@ -629,9 +626,9 @@ int ServiceTableModel::serviceCount() const
 	return TO_INT(servicesInfo.size() - 1);
 }
 
-int ServiceTableModel::serviceColumn(quint16 port) const
+int ServiceTableModel::serviceColumn(quint16 udpPort) const
 {
-	auto it = m_serviceColumn.find(port);
+	auto it = m_serviceColumn.find(udpPort);
 
 	if (it == m_serviceColumn.end())
 	{

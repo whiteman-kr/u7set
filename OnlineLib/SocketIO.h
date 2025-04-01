@@ -174,17 +174,7 @@ const quint16 NO_ACK_BLOCK_TYPE = 0;		// block type value if block didn't ack
 
 #pragma pack(pop)
 
-
 const quint32 TCP_CLIENT_ALIVE = 0xFEDC;
-
-// ConfigurationService specific request IDs
-//
-const quint32	CFGS_GET_SERVICE_STATE = 0x1100,
-				CFGS_GET_CLIENT_LIST = 0x1101,
-				CFGS_GET_LOADED_BUILD_INFO = 0x1102,
-				CFGS_GET_SETTINGS = 0x1103,
-				CFGS_GET_LOG = 0x1104;						// Could be couple diferent queries
-
 
 // AppSignal Param/State Communication, Port PORT_APP_DATA_SERVICE_CLIENT_REQUEST
 //

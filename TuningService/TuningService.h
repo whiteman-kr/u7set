@@ -2,7 +2,7 @@
 
 #include <ServiceLib/Service.h>
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
 #include "TuningSourceThread.h"

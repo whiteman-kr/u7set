@@ -15,8 +15,8 @@ qt_add_library(${TARGET} STATIC
 	AcquiredDiagSignal.h
 	BuildInfo.cpp
 	BuildInfo.h
-	CfgServerLoader.cpp
-	CfgServerLoader.h
+	CfgLoader.cpp
+	CfgLoader.h
 	CircularLogger.cpp
 	CircularLogger.h
 	DataSource.cpp
