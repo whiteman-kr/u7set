@@ -1406,9 +1406,9 @@ namespace Tcp
 	{
 		m_runningServersMutex.lock();
 
-		for (const auto& [server, thread] : m_runningServers)
+		if (m_runningServers.empty() == false)
 		{
-			server->getClientsList(srvInfo);
+			m_runningServers.begin()->first->getClientsList(srvInfo);
 		}
 
 		m_runningServersMutex.unlock();

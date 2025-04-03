@@ -624,7 +624,7 @@ void processPackets(AppDataReceiver& receiver, int threadNumber)
 			continue;
 		}
 
-		AppDataSource* source = it->first;;
+		AppDataSource* source = it->first;
 		bool requireBufferProcessing = it->second;
 
 		requireProcessing.erase(it);

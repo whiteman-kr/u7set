@@ -30,6 +30,9 @@ Tcp::Server* CfgServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
 										 m_checkClientHostname,
 										 log());
 	newServer->setListenAddress(listenAddr);
+
+	qDebug() << "Create CfgServer instance";
+
 	return newServer;
 }
 

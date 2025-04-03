@@ -652,16 +652,11 @@ bool CfgLoader::readConfigurationXml()
 		return false;
 	}
 
-	while(xmlReader.readNextStartElement() == false)
+	while(xmlReader.findElement(XmlElement::FILE) != false)
 	{
-		if (xmlReader.name() != XmlElement::FILE)
-		{
-			break;
-		}
-
 		CfgFileInfo cfgFileInfo;
 
-		cfgFileInfo.readFromXml(xmlReader);
+		cfgFileInfo.readFromXml(xmlReader, false);
 
 		m_cfgFilesInfo.insert(cfgFileInfo.pathFileName, cfgFileInfo);
 

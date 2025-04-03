@@ -6,17 +6,10 @@
 #include "../OnlineLib/SoftwareInfo.h"
 #include "ServiceTableModel.h"
 #include "ScmServiceClient.h"
+#include "Columns.h"
 
 class BaseServiceWidget : public QMainWindow
 {
-	struct Column
-	{
-		QString caption;
-		int width = 0;
-	};
-
-	using Columns = std::vector<Column>;
-
 	Q_OBJECT
 public:
 	explicit BaseServiceWidget(	ServiceTableModel* srvTableModel,
@@ -26,10 +19,12 @@ public:
 								QWidget* parent = nullptr);
 	virtual ~BaseServiceWidget();
 
+	virtual void initWidget() = 0;
+
 	int addTab(QWidget* page, const QString& label);
 	QTableView* addTabWithTableView(int defaultSectionSize, const QString& label);
 
-	QTableView* createTableView(QStandardItemModel* model,
+	QTableView* createTableView(QAbstractItemModel* model,
 								const Columns& columns);
 
 	HostAddressPort getWorkingClientRequestIp();
@@ -37,6 +32,8 @@ public:
 	const SoftwareInfo& softwareInfo() { return m_softwareInfo; }
 
 	virtual void onServiceInfoUpdated(QByteArray replyData);
+
+	virtual void updateDerivedWidgets(const Network::ServiceInfo& srvInfo);
 
 signals:
 	void invalidateServiceData();
@@ -66,6 +63,9 @@ public slots:
 	void restartService();
 
 protected:
+	void addGeneralTab();
+	void addClientsTab();
+
 	void createTcpConnection(quint32 ip, quint16 tcpPort);
 	void dropTcpConnection();
 
@@ -74,9 +74,6 @@ protected:
 	void closeEvent(QCloseEvent *event) override;
 
 private:
-	void addGeneralTab();
-	void addClientsTab();
-
 	void clearServiceData();
 
 	void enqueueRequest(int request);
@@ -119,21 +116,5 @@ private:
 	ScmServiceClient* m_scmSrvClient = nullptr;
 	SimpleThread* m_scmSrvClientThread = nullptr;
 
-	std::map<QStandardItemModel*, std::pair<QTableView*, Columns>> m_modelTableViewColumns;
-
-	inline static const Columns propValueColumns =
-	{
-		{"Property", 200},
-		{"Value", 300},
-	};
-
-	inline static const Columns clientTabColumns =
-	{
-		{"Request IP", 120},
-		{"EquipmentID", 300},
-		{"Client IP", 120},
-		{"Software", 150},
-		{"Connection time", 150},
-		{"Packet counter", 150},
-	};
+	std::map<QAbstractItemModel*, std::pair<QTableView*, Columns>> m_modelTableViewColumns;
 };

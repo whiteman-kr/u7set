@@ -115,6 +115,12 @@ TuningServiceWidget::~TuningServiceWidget()
 	dropTcpConnection();
 }
 
+void TuningServiceWidget::initWidget()
+{
+	addGeneralTab();
+	addClientsTab();
+}
+
 void TuningServiceWidget::updateStateInfo()
 {
 	if (m_serviceData.serviceState() == E::ServiceState::Work)

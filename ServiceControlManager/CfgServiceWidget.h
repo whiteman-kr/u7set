@@ -17,6 +17,8 @@ public:
 					 QWidget* parent = 0);
 	virtual ~CfgServiceWidget();
 
+	virtual void initWidget() override;
+
 public slots:
 	int updateSrvStatus(int rowCount) override;
 	int updateSettings(int rowCount) override;

@@ -60,6 +60,8 @@ public:
 						QWidget* parent = 0);
 	~TuningServiceWidget();
 
+	virtual void initWidget() override;
+
 signals:
 	void newTcpClientSocket(TcpTuningServiceClient* tcpClientSocket);
 	void clearTcpClientSocket();

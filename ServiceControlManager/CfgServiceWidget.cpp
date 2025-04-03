@@ -18,6 +18,12 @@ CfgServiceWidget::~CfgServiceWidget()
 {
 }
 
+void CfgServiceWidget::initWidget()
+{
+	addGeneralTab();
+	addClientsTab();
+}
+
 int CfgServiceWidget::updateSrvStatus(int rowCount)
 {
 	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 0), QStringLiteral("CfgCheckerState"));

@@ -5,7 +5,9 @@
 #include "../OnlineLib/Tcp.h"
 #include "BaseServiceWidget.h"
 
+#include "AppDataSourcesModel.h"
 
+/*
 class QTableView;
 class TcpAppDataClient;
 class SimpleThread;
@@ -65,7 +67,7 @@ public slots:
 
 private:
 	TcpAppDataClient* m_clientSocket;
-};
+};*/
 
 class AppDataServiceWidget : public BaseServiceWidget
 {
@@ -78,12 +80,16 @@ public:
 						 QWidget *parent = nullptr);
 	~AppDataServiceWidget();
 
+	virtual void initWidget() override;
+
+	virtual void updateDerivedWidgets(const Network::ServiceInfo& srvInfo) override;
+
 signals:
-	void newTcpClientSocket(TcpAppDataClient* tcpClientSocket);
-	void clearTcpClientSocket();
+/*	void newTcpClientSocket(TcpAppDataClient* tcpClientSocket);
+	void clearTcpClientSocket();*/
 
 public slots:
-	void updateSrvStatus();
+/*	void updateSrvStatus();
 
 	void updateStateInfo();
 
@@ -101,14 +107,20 @@ public slots:
 
 	void onAppDataSourceDoubleClicked(const QModelIndex &index);
 
-	void forgetWidget();
+	void forgetWidget();*/
 
 protected:
-//	void createTcpConnection(quint32 ip, quint16 port) override;
-//	void dropTcpConnection() override;
 
 private:
-	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
+	void addAppDataSourcesTab();
+
+	virtual int updateSettings(int rowCount) override;
+
+private:
+	AppDataSourcesModel* m_sourcesModel = nullptr;
+	QTableView* m_sourcesView = nullptr;
+
+/*	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
 	SignalStateModel* m_signalStateModel = nullptr;
 	QStandardItemModel* m_parametersTabModel = nullptr;
 	QStandardItemModel* m_settingsTabModel = nullptr;
@@ -119,5 +131,5 @@ private:
 	TcpAppDataClient* m_tcpClientSocket;
 	SimpleThread* m_tcpClientThread;
 
-	QList<AppDataSourceWidget*> m_appDataSourceWidgetList;
+	QList<AppDataSourceWidget*> m_appDataSourceWidgetList;*/
 };

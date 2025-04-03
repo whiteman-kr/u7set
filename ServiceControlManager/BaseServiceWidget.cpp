@@ -49,9 +49,6 @@ BaseServiceWidget::BaseServiceWidget(ServiceTableModel* srvTableModel,
 
 	setWindowPosition(this, QString("Service_%1_%2").arg(QHostAddress(ip).toString()).arg(m_tcpPort));
 
-	addGeneralTab();
-	addClientsTab();
-
 	//
 
 	createTcpConnection(ip, tcpPort);
@@ -61,7 +58,7 @@ BaseServiceWidget::BaseServiceWidget(ServiceTableModel* srvTableModel,
 	m_timer = new QTimer(this);
 	m_timer->start(500);
 
-	updateSrvStatusWidgets();
+//	updateSrvStatusWidgets();
 }
 
 BaseServiceWidget::~BaseServiceWidget()
@@ -329,7 +326,10 @@ void BaseServiceWidget::updateBaseSettings()
 	m_settingsModel->setData(m_settingsModel->index(3, 0), "OS username");
 	m_settingsModel->setData(m_settingsModel->index(3, 1), swInfo.osUsername());
 
-	int rowCount = 4;
+	m_settingsModel->setData(m_settingsModel->index(4, 0), "Settings profile");
+	m_settingsModel->setData(m_settingsModel->index(4, 1), m_serviceData.settings->profile);
+
+	int rowCount = 5;
 
 	rowCount = updateSettings(rowCount);
 
@@ -345,6 +345,11 @@ int BaseServiceWidget::updateSettings(int rowCount)
 
 void BaseServiceWidget::updateClients()
 {
+	if (m_clientsModel == nullptr)
+	{
+		return;
+	}
+
 	QStandardItemModel* cm = m_clientsModel;
 
 	const Network::ServiceInfo& srvInfo = m_serviceData.protoServiceInfo;
@@ -418,6 +423,68 @@ void BaseServiceWidget::restartService()
 	enqueueRequest(RQID_SERVICE_RESTART);
 }
 
+void BaseServiceWidget::addGeneralTab()
+{
+	QWidget* generalTabWidget = new QWidget();
+
+	//
+
+	static const Columns propValueColumns =
+	{
+		{"Property", 200},
+		{"Value", 300},
+	};
+
+	m_srvStatusModel = new QStandardItemModel(0, TO_INT(propValueColumns.size()), this);
+	QTableView* srvStateTableView = createTableView(m_srvStatusModel, propValueColumns);
+
+	//
+
+	m_buildInfoModel = new QStandardItemModel(0, TO_INT(propValueColumns.size()), this);
+	m_buildInfoModel->setData(m_buildInfoModel->index(0, 0), "Build status");
+	m_buildInfoModel->setData(m_buildInfoModel->index(0, 1), "Not loaded");
+
+	QTableView* buildInfoTableView = createTableView(m_buildInfoModel, propValueColumns);
+
+	//
+
+	m_settingsModel = new QStandardItemModel(0, TO_INT(propValueColumns.size()), this);
+	QTableView* settingsTableView = createTableView(m_settingsModel, propValueColumns);
+
+	//
+
+	QVBoxLayout* vBoxLayout = new QVBoxLayout(generalTabWidget);
+
+	vBoxLayout->addWidget(new QLabel("Service status"));
+	vBoxLayout->addWidget(srvStateTableView, 25);
+	vBoxLayout->addWidget(new QLabel("Build Information"));
+	vBoxLayout->addWidget(buildInfoTableView, 25);
+	vBoxLayout->addWidget(new QLabel("Service Settings"));
+	vBoxLayout->addWidget(settingsTableView, 50);
+
+	generalTabWidget->setLayout(vBoxLayout);
+
+	addTab(generalTabWidget, "General");
+}
+
+void BaseServiceWidget::addClientsTab()
+{
+	static const Columns clientTabColumns =
+	{
+		{"Request IP", 170},
+		{"EquipmentID", 350},
+		{"Client IP", 170},
+		{"Software", 150},
+		{"Connection time", 150},
+		{"Packet counter", 150},
+	};
+
+	m_clientsModel = new QStandardItemModel(0, TO_INT(clientTabColumns.size()), this);
+	QTableView* clientsTableView = createTableView(m_clientsModel, clientTabColumns);
+
+	addTab(clientsTableView, "Clients");
+}
+
 void BaseServiceWidget::createTcpConnection(quint32 ip, quint16 tcpPort)
 {
 	m_scmSrvClient = new ScmServiceClient(softwareInfo(), HostAddressPort(ip, tcpPort));
@@ -488,52 +555,6 @@ void BaseServiceWidget::closeEvent(QCloseEvent* event)
 {
 	Q_UNUSED(event);
 	m_srvTableModel->deleteSrvWidget(this);
-}
-
-void BaseServiceWidget::addGeneralTab()
-{
-	QWidget* generalTabWidget = new QWidget();
-
-	//
-
-	m_srvStatusModel = new QStandardItemModel(0, TO_INT(propValueColumns.size()), this);
-	QTableView* srvStateTableView = createTableView(m_srvStatusModel, propValueColumns);
-
-	//
-
-	m_buildInfoModel = new QStandardItemModel(0, TO_INT(propValueColumns.size()), this);
-	m_buildInfoModel->setData(m_buildInfoModel->index(0, 0), "Build status");
-	m_buildInfoModel->setData(m_buildInfoModel->index(0, 1), "Not loaded");
-
-	QTableView* buildInfoTableView = createTableView(m_buildInfoModel, propValueColumns);
-
-	//
-
-	m_settingsModel = new QStandardItemModel(0, TO_INT(propValueColumns.size()), this);
-	QTableView* settingsTableView = createTableView(m_settingsModel, propValueColumns);
-
-	//
-
-	QVBoxLayout* vBoxLayout = new QVBoxLayout(generalTabWidget);
-
-	vBoxLayout->addWidget(new QLabel("Service status"));
-	vBoxLayout->addWidget(srvStateTableView, 30);
-	vBoxLayout->addWidget(new QLabel("Build Information"));
-	vBoxLayout->addWidget(buildInfoTableView, 30);
-	vBoxLayout->addWidget(new QLabel("Service Settings"));
-	vBoxLayout->addWidget(settingsTableView, 40);
-
-	generalTabWidget->setLayout(vBoxLayout);
-
-	addTab(generalTabWidget, "General");
-}
-
-void BaseServiceWidget::addClientsTab()
-{
-	m_clientsModel = new QStandardItemModel(0, TO_INT(clientTabColumns.size()), this);
-	QTableView* clientsTableView = createTableView(m_clientsModel, clientTabColumns);
-
-	addTab(clientsTableView, "Clients");
 }
 
 void BaseServiceWidget::clearServiceData()
@@ -609,7 +630,7 @@ QTableView* BaseServiceWidget::addTabWithTableView(int defaultSectionSize, const
 	return tableView;
 }
 
-QTableView* BaseServiceWidget::createTableView(QStandardItemModel* model,
+QTableView* BaseServiceWidget::createTableView(QAbstractItemModel* model,
 												const Columns& columns)
 {
 	QTableView* tableView = new QTableView();
@@ -691,6 +712,13 @@ void BaseServiceWidget::onServiceInfoUpdated(QByteArray replyData)
 	m_serviceData.parseProtoServiceInfo();
 
 	updateSrvStatusWidgets();
+
+	updateDerivedWidgets(newSrvInfo);
+}
+
+void BaseServiceWidget::updateDerivedWidgets(const Network::ServiceInfo& srvInfo)
+{
+	Q_UNUSED(srvInfo);
 }
 
 void BaseServiceWidget::sendCommand(int command)

@@ -524,8 +524,6 @@ void Service::onGetSrvShortInfoRequest(UdpRequest request)
 
 	ack.initAck(request);
 
-	HostAddressPort ha(request.address().toIPv4Address(), request.port());
-
 	quint32 rqID = request.ID();
 
 	switch(rqID)

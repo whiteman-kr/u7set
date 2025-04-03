@@ -153,6 +153,15 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_errornonmonotonicplanttime(m_errorNonmonotonicPlantTime);
 	proto->set_errorplanttimeformat(m_errorPlantTimeFormat);
 
+	const LanControllerInfo& lci = lanControllersInfo()[0];
+
+	if (lci.isValid())
+	{
+		proto->set_lancontrollerid(lci.equipmentID.toStdString());
+		proto->set_lancontrollerip(lci.appDataIP32());
+		proto->set_lancontrollerport(lci.appDataPort);
+	}
+
 	return true;
 }
 

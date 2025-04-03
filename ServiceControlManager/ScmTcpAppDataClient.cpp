@@ -502,7 +502,6 @@ void TcpAppDataClient::onGetClientList(const char *replyData, quint32 replyDataS
 	emit clientsLoaded();*/
 }
 
-
 void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize)
 {
 	bool result = m_getSignalStateReply.ParseFromArray(replyData, replyDataSize);

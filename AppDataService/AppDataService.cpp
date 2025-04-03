@@ -42,6 +42,31 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::AppDataService, m_curSettingsProfile);
 
 	serviceInfo.set_settingsxml(xmlString.toStdString());
+
+	serviceInfo.set_cfgserviceip1(cfgServiceIP1().address32());
+	serviceInfo.set_cfgserviceport1(cfgServiceIP1().port());
+
+	serviceInfo.set_cfgserviceip2(cfgServiceIP2().address32());
+	serviceInfo.set_cfgserviceport2(cfgServiceIP2().port());
+
+	if (m_tcpAppDataServerThread != nullptr)
+	{
+		m_tcpAppDataServerThread->getClientsList(&serviceInfo);
+	}
+
+	if (m_rtTrendsServerThread != nullptr)
+	{
+		m_rtTrendsServerThread->getClientsList(&serviceInfo);
+	}
+
+	for(const AppDataSource* ads : m_appDataSources)
+	{
+		TEST_PTR_CONTINUE(ads);
+
+		Network::AppDataSourceState* state = serviceInfo.add_appdatasourcesstates();
+
+		ads->getState(state);
+	}
 }
 
 bool AppDataServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const
@@ -337,6 +362,14 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	//
 	clearConfiguration();
 
+	bool res = readBuildInfo(configurationXmlData);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger(), QString("Error reading BuildInfo from configurationXmlData"));
+		return;
+	}
+
 	const AppDataServiceSettings* typedSettingsPtr = dynamic_cast<const AppDataServiceSettings*>(currentSettingsProfile.get());
 
 	if (typedSettingsPtr == nullptr)
@@ -344,6 +377,9 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 		DEBUG_LOG_MSG(logger(), "Settings casting error!");
 		return;
 	}
+
+	setCfgServiceID1(typedSettingsPtr->cfgServiceID1);
+	setCfgServiceID2(typedSettingsPtr->cfgServiceID2);
 
 	// making modificable local copy of settings
 	//

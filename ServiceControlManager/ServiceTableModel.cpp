@@ -39,7 +39,7 @@ Host::Host()
 //
 // --------------------------------------------------------------------------------------
 
-ServiceTableModel::ServiceTableModel(const SoftwareInfo& softwareInfo, QWidget *parent) :
+ServiceTableModel::ServiceTableModel(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QAbstractTableModel(parent),
 	m_parentWidget(parent),
 	m_softwareInfo(softwareInfo),
@@ -450,6 +450,7 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 	{
 	case E::SoftwareType::ConfigurationService:
 		srvWidget = new CfgServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.tcpPort, m_parentWidget);
+
 		break;
 
 	case E::SoftwareType::AppDataService:
@@ -472,6 +473,8 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 	{
 		return;
 	}
+
+	srvWidget->initWidget();
 
 	m_srvWidgets.insert(srvWidget);
 

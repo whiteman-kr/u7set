@@ -7,6 +7,7 @@
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 
+/*
 const int DSC_EQUIPMENT_ID = 0,
 DSC_DATA_ID = 1,
 DSC_IP = 2,
@@ -441,21 +442,17 @@ void DataSourcesStateModel::reloadList()
 	}
 
 	endResetModel();
-}
+}*/
 
 AppDataServiceWidget::AppDataServiceWidget(ServiceTableModel* srvTableModel,
 											const SoftwareInfo& softwareInfo,
 											const ServiceData& service,
 											quint32 ip, quint16 tcpPort,
 											QWidget* parent) :
-	BaseServiceWidget(srvTableModel, softwareInfo, service, ip, tcpPort, parent),
-	m_tcpClientSocket(nullptr),
-	m_tcpClientThread(nullptr)
+	BaseServiceWidget(srvTableModel, softwareInfo, service, ip, tcpPort, parent)
 {
-//	setClientQuantityRowIndexOnStateTab(5);
-
 	// Data Sources
-	m_dataSourcesStateModel = new DataSourcesStateModel(this);
+/*	m_dataSourcesStateModel = new DataSourcesStateModel(this);
 	m_dataSourcesView = addTabWithTableView(100, tr("AppData Sources"));;
 	m_dataSourcesView->setModel(m_dataSourcesStateModel);
 
@@ -536,27 +533,43 @@ AppDataServiceWidget::AppDataServiceWidget(ServiceTableModel* srvTableModel,
 	}
 
 	// Log
-	addTab(new QTableView(this), tr("Log"));
+	addTab(new QTableView(this), tr("Log")); */
 }
 
 AppDataServiceWidget::~AppDataServiceWidget()
 {
-	for (auto* widget : m_appDataSourceWidgetList)
-	{
-		widget->deleteLater();
-	}
-	m_appDataSourceWidgetList.clear();
-	dropTcpConnection();
+	// for (auto* widget : m_appDataSourceWidgetList)
+	// {
+	// 	widget->deleteLater();
+	// }
+	// m_appDataSourceWidgetList.clear();
+	// dropTcpConnection();
 }
 
-void AppDataServiceWidget::updateSrvStatus()
+void AppDataServiceWidget::initWidget()
+{
+	addGeneralTab();
+	addClientsTab();
+	addAppDataSourcesTab();
+}
+
+void AppDataServiceWidget::updateDerivedWidgets(const Network::ServiceInfo& srvInfo)
+{
+	if (m_sourcesModel != nullptr)
+	{
+		m_sourcesModel->updateData(srvInfo);
+		m_sourcesView->update();
+	}
+}
+
+/*void AppDataServiceWidget::updateSrvStatus()
 {
 	if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 	{
 		assert(false);
 		return;
 	}
-/*	stateTabModel()->setData(stateTabModel()->index(6, 1), m_tcpClientSocket->configServiceConnectionState());
+	stateTabModel()->setData(stateTabModel()->index(6, 1), m_tcpClientSocket->configServiceConnectionState());
 	stateTabModel()->setData(stateTabModel()->index(7, 1), m_tcpClientSocket->archiveServiceConnectionState());
 
 	auto state = m_tcpClientSocket->serviceState().appdatareceivestate();
@@ -572,7 +585,7 @@ void AppDataServiceWidget::updateSrvStatus()
 	stateTabModel()->setData(stateTabModel()->index(14, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
 	stateTabModel()->setData(stateTabModel()->index(15, 1), static_cast<qint64>(state.errrupframecrc()));
 
-	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errnotexpectedsimpacket()));*/
+	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errnotexpectedsimpacket()));
 
 	auto appDataSettings = std::dynamic_pointer_cast<AppDataServiceSettings>(m_serviceData.settings);
 
@@ -609,7 +622,7 @@ void AppDataServiceWidget::updateStateInfo()
 {
 	if (m_serviceData.protoServiceInfo.servicestate() == E::ServiceState::Work)
 	{
-/*		stateTabModel()->setData(stateTabModel()->index(5, 0), "Connected client quantity");
+		stateTabModel()->setData(stateTabModel()->index(5, 0), "Connected client quantity");
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");
 		stateTabModel()->setData(stateTabModel()->index(7, 0), "Connected to ArchiveService");
 
@@ -634,7 +647,7 @@ void AppDataServiceWidget::updateStateInfo()
 		else
 		{
 			updateSrvStatus();
-		}*/
+		}
 	}
 
 	HostAddressPort workingIp = getWorkingClientRequestIp();
@@ -649,10 +662,10 @@ void AppDataServiceWidget::updateStateInfo()
 		}
 	}
 
-/*	if (m_tcpClientSocket == nullptr)
+	if (m_tcpClientSocket == nullptr)
 	{
 		createTcpConnection(workingIp.address32(), workingIp.port());
-	}*/
+	}
 }
 
 void AppDataServiceWidget::updateSourceInfo()
@@ -789,54 +802,82 @@ void AppDataServiceWidget::forgetWidget()
 	AppDataSourceWidget *widget = dynamic_cast<AppDataSourceWidget*>(sender());
 	TEST_PTR_RETURN(widget);
 	m_appDataSourceWidgetList.removeAll(widget);
+} */
+
+void AppDataServiceWidget::addAppDataSourcesTab()
+{
+	m_sourcesModel = new AppDataSourcesModel(this);
+	m_sourcesView = createTableView(m_sourcesModel, m_sourcesModel->columns());
+
+	m_sourcesView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	addTab(m_sourcesView, "AppData sources");
 }
 
-/*void AppDataServiceWidget::createTcpConnection(quint32 ip, quint16 port)
+int AppDataServiceWidget::updateSettings(int rowCount)
 {
-	m_tcpClientSocket = new TcpAppDataClient(softwareInfo(), HostAddressPort(ip, port));
-	m_tcpClientThread = new SimpleThread(m_tcpClientSocket);
-
-	m_dataSourcesStateModel->setClient(m_tcpClientSocket);
-	m_signalStateModel->setClient(m_tcpClientSocket);
-
-	connect(m_tcpClientSocket, &TcpAppDataClient::dataSourcesInfoLoaded, m_dataSourcesStateModel, &DataSourcesStateModel::reloadList);
-	connect(m_tcpClientSocket, &TcpAppDataClient::dataSoursesStateUpdated, this, &AppDataServiceWidget::updateSourceStateColumns);
-	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, m_dataSourcesStateModel, &DataSourcesStateModel::invalidateData);
-
-	connect(m_tcpClientSocket, &TcpAppDataClient::appSignalListLoaded, m_signalStateModel, &SignalStateModel::reloadList);
-	connect(m_tcpClientSocket, &TcpAppDataClient::appSignalsStateUpdated, this, &AppDataServiceWidget::updateSignalStateColumns);
-	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, m_signalStateModel, &SignalStateModel::invalidateData);
-
-	connect(m_tcpClientSocket, &TcpAppDataClient::clientsLoaded, this, &AppDataServiceWidget::updateClientsInfo);
-//	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, [this](){ clientsTabModel()->removeRows(0, clientsTabModel()->rowCount()); });
-
-	connect(m_tcpClientSocket, &TcpAppDataClient::stateLoaded, this, &AppDataServiceWidget::updateSrvStatus);
-
-	connect(m_tcpClientSocket, &TcpAppDataClient::settingsLoaded, this, &AppDataServiceWidget::updateServiceParameters);
-
-	connect(m_tcpClientSocket, &TcpAppDataClient::socketDisconnected, this, &AppDataServiceWidget::clearServiceData);
-
-	m_tcpClientThread->start();
-
-	emit newTcpClientSocket(m_tcpClientSocket);
-}
-
-void AppDataServiceWidget::dropTcpConnection()
-{
-	emit clearTcpClientSocket();
-
-	m_dataSourcesStateModel->setClient(nullptr);
-	m_signalStateModel->setClient(nullptr);
-
-	if (m_tcpClientThread != nullptr)
+	if (m_serviceData.settings == nullptr)
 	{
-		m_tcpClientThread->quitAndWait();
-		delete m_tcpClientThread;
-		m_tcpClientThread = nullptr;
+		return rowCount;
 	}
 
-	m_tcpClientSocket = nullptr;
-}*/
+	std::shared_ptr<AppDataServiceSettings> st = std::dynamic_pointer_cast<AppDataServiceSettings>(m_serviceData.settings);
+	const Network::ServiceInfo& protoInfo = m_serviceData.protoServiceInfo;
+
+	TEST_PTR_RETURN_VALUE(st, 0);
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("CfgServiceEquipmentID1"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->cfgServiceID1);
+
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("CfgServiceIP1"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
+							 st->cfgServiceID1.isEmpty() ? Separator::EMPTY_STR :
+							 HostAddressPort(protoInfo.cfgserviceip1(), protoInfo.cfgserviceport1()).toString());
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("CfgServiceEquipmentID2"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->cfgServiceID2);
+
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("CfgServiceIP2"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
+							 st->cfgServiceID2.isEmpty() ? Separator::EMPTY_STR :
+							 HostAddressPort(protoInfo.cfgserviceip2(), protoInfo.cfgserviceport2()).toString());
+	rowCount++;
+
+	for(const RqCtrlSettings& rcs : st->rcSettings)
+	{
+		m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QString("Request Controller %1").arg(rcs.ID()));
+		m_settingsModel->setData(m_settingsModel->index(rowCount, 1), rqCtrlInfoStr(rcs));
+		rowCount++;
+	}
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("AppDataReceivingIP"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
+							 QString("%1, Netmask = %2").arg(st->appDataReceivingIP.toString()).arg(st->appDataReceivingNetmask.toString()));
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("ArchiveServiceEquipmentID"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->archServiceID);
+
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("ArchiveServiceIP"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->archServiceIP.toString());
+
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("AutoArchiveInterval (min)"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->autoArchiveInterval);
+
+	rowCount++;
+
+	return rowCount;
+}
+/*
 
 SignalStateModel::SignalStateModel(QObject* parent) :
 	QAbstractTableModel(parent),
@@ -978,3 +1019,4 @@ void SignalStateModel::reloadList()
 	beginResetModel();
 	endResetModel();
 }
+*/

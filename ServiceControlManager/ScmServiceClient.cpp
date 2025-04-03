@@ -26,6 +26,8 @@ void ScmServiceClient::onClientThreadStarted()
 	m_timer = new QTimer;
 	connect(m_timer, &QTimer::timeout, this, &ScmServiceClient::sendSrvGetInfoRequest);
 	m_timer->start(500);
+
+	sendSrvGetInfoRequest();
 }
 
 void ScmServiceClient::onClientThreadFinished()

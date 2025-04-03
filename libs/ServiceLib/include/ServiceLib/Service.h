@@ -100,6 +100,12 @@ public:
 	HostAddressPort cfgServiceIP1() const { return m_cfgServiceIP1; }
 	HostAddressPort cfgServiceIP2() const { return m_cfgServiceIP2; }
 
+	QString cfgServiceID1() const { return m_cfgServiceID1; }
+	void setCfgServiceID1(const QString& cfgSrvID1) { m_cfgServiceID1 = cfgSrvID1; }
+
+	QString cfgServiceID2() const { return m_cfgServiceID2; }
+	void setCfgServiceID2(const QString& cfgSrvID2) { m_cfgServiceID2 = cfgSrvID2; }
+
 	bool clearSettings();								// clear all service settings
 
 	CircularLoggerShared logger() const { return m_logger; }
@@ -187,9 +193,11 @@ private:
 private:
 	QString m_equipmentID;
 
+	QString m_cfgServiceID1;
 	QString m_cfgServiceIP1Str;
 	HostAddressPort m_cfgServiceIP1;
 
+	QString m_cfgServiceID2;
 	QString m_cfgServiceIP2Str;
 	HostAddressPort m_cfgServiceIP2;
 

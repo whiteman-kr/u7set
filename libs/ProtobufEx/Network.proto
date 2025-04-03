@@ -249,6 +249,10 @@ message AppDataSourceState
 	optional int64 errorDuplicatePlantTime = 21 [default = 0];
 	optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
 	optional int64 errorPlantTimeFormat = 23 [default = 0];
+
+	optional string lanControllerID = 24;
+	optional uint32 lanControllerIP = 25;
+	optional uint32 lanControllerPort = 26;
 }
 
 // Getting Diagnostic Data Sources states
@@ -389,9 +393,17 @@ message ServiceInfo
 	optional string workDirectory = 21;
 	optional int32 cfgCheckerState = 22;
 
-	// AppDataService specific
+	// Common service settings
 	//
-	repeated AppDataSourceState appDataSrcState;
+	optional uint32 cfgServiceIP1 = 30;
+	optional uint32 cfgServicePort1 = 31;
+
+	optional uint32 cfgServiceIP2 = 32;
+	optional uint32 cfgServicePort2 = 33;
+
+	//
+
+	repeated AppDataSourceState appDataSourcesStates = 47;
 }
 
 message GetServiceInfoReply
