@@ -310,9 +310,9 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
             highValidRange = signalA.highValidRange();
             lowValidRange = signalA.lowValidRange();
 
-            // max valid range distanse from engineering units range is -5%...+5%
+            // max valid range distanse from engineering units range is -25%...+25%
             //
-            let dist = (highPhysicalRange - lowPhysicalRange) * 0.05;
+            let dist = (highPhysicalRange - lowPhysicalRange) * 0.25;
 
             let lowestValidRange = (lowPhysicalRange - dist) * k1 + k2;
             let highestValidRange = (highPhysicalRange + dist) * k1 + k2;
