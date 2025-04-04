@@ -34,7 +34,7 @@ namespace
 		}
 #endif
 		result.ParseFromArray(uncompressed.constData(), uncompressed.size());
-#if 0
+#ifdef QT_DEBUG
 		qDebug() << workplaceId;
 		qDebug() << "Parsed workplace id: " << QString::fromStdString(result.machine_id());
 		qDebug() << "Parsed workplace id: " << QString::fromStdString(result.hardware_id());
@@ -160,39 +160,34 @@ namespace LicenseLib
 
 		if (lhs.machine_id().empty() == false || rhs.machine_id().empty() == false)
 		{
-			matches += (lhs.machine_id() == rhs.machine_id());
+			QString l = QString::fromStdString(lhs.machine_id()).toLower();
+			QString r = QString::fromStdString(rhs.machine_id()).toLower();
+			matches += (l == r);
 		}
 
 		if (lhs.hardware_id().empty() == false || rhs.hardware_id().empty() == false)
 		{
-			matches += (lhs.hardware_id() == rhs.hardware_id());
+			QString l = QString::fromStdString(lhs.hardware_id()).toLower();
+			QString r = QString::fromStdString(rhs.hardware_id()).toLower();
+			matches += (l == r);
 		}
 
 		if (lhs.cpu().empty() == false || rhs.cpu().empty() == false)
 		{
-			matches += (lhs.cpu() == rhs.cpu());
+			QString l = QString::fromStdString(lhs.cpu()).toLower();
+			QString r = QString::fromStdString(rhs.cpu()).toLower();
+			matches += (l == r);
 		}
 
-		QStringList lhsMacs = QString::fromStdString(lhs.macs()).split(" ");
-		QStringList rhsMacs = QString::fromStdString(rhs.macs()).split(" ");
+		QStringList lhsMacs = QString::fromStdString(lhs.macs()).toLower().split(" ");
+		QStringList rhsMacs = QString::fromStdString(rhs.macs()).toLower().split(" ");
 
-		bool macMatched = false;
-		for (const QString& lm : lhsMacs)
-		{
-			for (const QString& rm : rhsMacs)
-			{
-				if (lm == rm)
-				{
-					macMatched = true;
-					break;
-				}
-			}
-
-			if (macMatched == true)
-			{
-				break;
-			}
-		}
+		bool macMatched = std::any_of(lhsMacs.begin(),
+									  lhsMacs.end(),
+									  [&](const QString& leftmac)
+									  {
+										  return rhsMacs.contains(leftmac);
+									  });
 
 		matches += macMatched;
 		return (matches >= expectedMatches) ? ValidationResult::Valid : ValidationResult::Invalid;

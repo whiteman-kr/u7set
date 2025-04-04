@@ -21,8 +21,6 @@ endif (MSVC)
 set(TARGET Builder)
 
 qt_add_library(${TARGET} STATIC
-	../lib/TuningDataStorage.cpp
-	../lib/TuningDataStorage.h
 	../Metrology/MetrologyConnection.cpp
 	../Metrology/MetrologyConnection.h
 	../Metrology/MetrologySignal.cpp
@@ -156,6 +154,8 @@ qt_add_library(${TARGET} STATIC
 	SoftwareSettingsGetter.h
 	SubsystemStorage.cpp
 	SubsystemStorage.h
+	TaskGetEquipment.cpp
+	TaskGetEquipment.h
 	TestClientCfgGenerator.cpp
 	TestClientCfgGenerator.h
 	TestSuiteCfgGenerator.cpp

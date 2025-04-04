@@ -8,6 +8,7 @@ cmake_minimum_required(VERSION 3.16)
 #	U7SET_RELEASE_TYPE
 #
 include(cmake/version.cmake)
+include(cmake/compiler.cmake)
 
 # Emit error if VCPKG_ROOT is not set
 #
@@ -19,6 +20,9 @@ if (UNIX)
 	set(VCPKG_TARGET_TRIPLET "x64-linux")
 endif()
 
+#
+# VCPKG
+#
 set(VCPKG_ROOT $ENV{VCPKG_ROOT})
 include(${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
 
@@ -44,13 +48,13 @@ include(CTest)
 set(QT_VERSION "6.8.1")
 
 find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
-find_package(PostgreSQL REQUIRED)
-find_package(Boost REQUIRED COMPONENTS graph)
-find_package(Threads REQUIRED)
-find_package(Protobuf CONFIG REQUIRED)
 find_package(asio CONFIG REQUIRED)
+find_package(Boost REQUIRED COMPONENTS graph)
 find_package(GTest CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
+find_package(PostgreSQL REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
+find_package(Threads REQUIRED)
 
 if (WIN32)
 	find_package(Qt6 REQUIRED COMPONENTS AxContainer) # Metrology

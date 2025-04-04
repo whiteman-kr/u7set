@@ -4,7 +4,7 @@
 
 #include "../AppSignalLib/Bus.h"
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../lib/TuningDataStorage.h"
+#include "../AppSignalLib/TuningDataStorage.h"
 
 #include "DiagSignalTypesStorage.h"
 

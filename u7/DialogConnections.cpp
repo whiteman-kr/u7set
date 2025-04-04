@@ -1,4 +1,5 @@
 #include "DialogConnections.h"
+#include "AppSettings.h"
 #include "Settings.h"
 #include <UiLib/PropertyEditor.h>
 #include <UiLib/StandardColors.h>
@@ -6,10 +7,10 @@
 
 DialogConnections* theDialogConnections = nullptr;
 
-DialogConnections::DialogConnections(DbController* db, QWidget* parent)
-	: QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
-	  m_db(db),
-	  m_connections(db)
+DialogConnections::DialogConnections(DbController* db, QWidget* parent) :
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
+	m_db(db),
+	m_connections(db)
 {
 	assert(m_db);
 
@@ -91,14 +92,14 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 	buttonsLayout->addWidget(m_btnReport);
 	buttonsLayout->addWidget(m_btnClose);
 
-	connect (m_btnAdd, &QPushButton::clicked, this, &DialogConnections::onAdd);
-	connect (m_btnRemove, &QPushButton::clicked, this, &DialogConnections::onRemove);
-	connect (m_btnCheckOut, &QPushButton::clicked, this, &DialogConnections::onCheckOut);
-	connect (m_btnCheckIn, &QPushButton::clicked, this, &DialogConnections::onCheckIn);
-	connect (m_btnUndo, &QPushButton::clicked, this, &DialogConnections::onUndo);
-	connect (m_btnRefresh, &QPushButton::clicked, this, &DialogConnections::onRefresh);
-	connect (m_btnReport, &QPushButton::clicked, this, &DialogConnections::onReport);
-	connect (m_btnClose, &QPushButton::clicked, this, &DialogConnections::close);
+	connect(m_btnAdd, &QPushButton::clicked, this, &DialogConnections::onAdd);
+	connect(m_btnRemove, &QPushButton::clicked, this, &DialogConnections::onRemove);
+	connect(m_btnCheckOut, &QPushButton::clicked, this, &DialogConnections::onCheckOut);
+	connect(m_btnCheckIn, &QPushButton::clicked, this, &DialogConnections::onCheckIn);
+	connect(m_btnUndo, &QPushButton::clicked, this, &DialogConnections::onUndo);
+	connect(m_btnRefresh, &QPushButton::clicked, this, &DialogConnections::onRefresh);
+	connect(m_btnReport, &QPushButton::clicked, this, &DialogConnections::onReport);
+	connect(m_btnClose, &QPushButton::clicked, this, &DialogConnections::close);
 
 	mainLayout->addLayout(maskLayout);
 	mainLayout->addWidget(m_splitter);
@@ -126,8 +127,13 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 	m_completer->setCaseSensitivity(Qt::CaseInsensitive);
 	m_mask->setCompleter(m_completer);
 
-    connect(m_mask, &QLineEdit::textEdited, [this](){m_completer->complete();});
-	connect(m_completer, static_cast<void(QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_mask, &QLineEdit::setText);
+	connect(m_mask,
+			&QLineEdit::textEdited,
+			[this]()
+			{
+				m_completer->complete();
+			});
+	connect(m_completer, static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::highlighted), m_mask, &QLineEdit::setText);
 
 	// Popup menu
 	//
@@ -194,7 +200,9 @@ DialogConnections::DialogConnections(DbController* db, QWidget* parent)
 
 	if (xmlConnections.count() > 0)
 	{
-		QMessageBox::warning(parent, tr("Connections Editor"), tr("%1 connections have been imported from deprecated file Connections.xml.").arg(xmlConnections.count()));
+		QMessageBox::warning(parent,
+							 tr("Connections Editor"),
+							 tr("%1 connections have been imported from deprecated file Connections.xml.").arg(xmlConnections.count()));
 
 		for (int i = 0; i < xmlConnections.count(); i++)
 		{
@@ -357,13 +365,17 @@ bool DialogConnections::addConnection(std::shared_ptr<Hardware::Connection> conn
 
 	if (foundPort1 != nullptr)
 	{
-		QMessageBox::critical(this, tr("Connections Editor"), tr("Connection with port %1 already exists.").arg(connection->port1EquipmentID()));
+		QMessageBox::critical(this,
+							  tr("Connections Editor"),
+							  tr("Connection with port %1 already exists.").arg(connection->port1EquipmentID()));
 		return false;
 	}
 
 	if (foundPort2 != nullptr)
 	{
-		QMessageBox::critical(this, tr("Connections Editor"), tr("Connection with port %1 already exists.").arg(connection->port2EquipmentID()));
+		QMessageBox::critical(this,
+							  tr("Connections Editor"),
+							  tr("Connection with port %1 already exists.").arg(connection->port2EquipmentID()));
 		return false;
 	}
 
@@ -427,7 +439,6 @@ bool DialogConnections::pasteConnection(std::shared_ptr<Hardware::Connection> co
 	item->setSelected(true);
 
 	return true;
-
 }
 
 void DialogConnections::fillConnectionsList()
@@ -491,6 +502,7 @@ void DialogConnections::setPropertyEditorObjects()
 	}
 
 	bool readOnly = false;
+	bool expertMode = theAppSettings.isExpertMode();
 
 	QList<std::shared_ptr<PropertyObject>> objects;
 
@@ -513,7 +525,7 @@ void DialogConnections::setPropertyEditorObjects()
 		objects.push_back(connection);
 	}
 
-	m_connectionPropertyEditor->setExpertMode(theSettings.isExpertMode());
+	m_connectionPropertyEditor->setExpertMode(expertMode);
 	m_connectionPropertyEditor->setReadOnly(readOnly);
 	m_connectionPropertyEditor->setObjects(objects);
 
@@ -638,7 +650,11 @@ void DialogConnections::onRemove()
 		return;
 	}
 
-	auto mbResult = QMessageBox::warning(this, tr("Connections Editor"), tr("Are you sure you want to remove selected connections?"), QMessageBox::Yes, QMessageBox::No);
+	auto mbResult = QMessageBox::warning(this,
+										 tr("Connections Editor"),
+										 tr("Are you sure you want to remove selected connections?"),
+										 QMessageBox::Yes,
+										 QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;
@@ -748,7 +764,7 @@ void DialogConnections::onPaste()
 {
 	QClipboard* clipboard = QApplication::clipboard();
 
-	const QMimeData *mimeData = clipboard->mimeData();
+	const QMimeData* mimeData = clipboard->mimeData();
 	if (mimeData->hasFormat(Hardware::Connection::mimeType) == false)
 	{
 		return;
@@ -802,7 +818,6 @@ void DialogConnections::onPaste()
 	setPropertyEditorObjects();
 
 	return;
-
 }
 
 void DialogConnections::onCheckOut()
@@ -846,9 +861,8 @@ void DialogConnections::onCheckIn()
 	}
 
 	bool ok = false;
-	QString comment = QInputDialog::getText(this, tr("Connections Editor"),
-											tr("Please enter the comment:"), QLineEdit::Normal,
-											tr("comment"), &ok);
+	QString comment =
+		QInputDialog::getText(this, tr("Connections Editor"), tr("Please enter the comment:"), QLineEdit::Normal, tr("comment"), &ok);
 
 	if (ok == false)
 	{
@@ -911,14 +925,18 @@ void DialogConnections::onCheckIn()
 
 void DialogConnections::onUndo()
 {
-	QList <QTreeWidgetItem*> selectedItems = m_connectionsTree->selectedItems();
+	QList<QTreeWidgetItem*> selectedItems = m_connectionsTree->selectedItems();
 
 	if (selectedItems.isEmpty() == true)
 	{
 		return;
 	}
 
-	auto mbResult = QMessageBox::warning(this, tr("Connections Editor"), tr("Are you sure you want to undo changes on selected connections?"), QMessageBox::Yes, QMessageBox::No);
+	auto mbResult = QMessageBox::warning(this,
+										 tr("Connections Editor"),
+										 tr("Are you sure you want to undo changes on selected connections?"),
+										 QMessageBox::Yes,
+										 QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;
@@ -1031,9 +1049,8 @@ void DialogConnections::reject()
 void DialogConnections::onReport()
 {
 	static QString path{"."};
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Export"),
-													path + QDir::separator(),
-													tr("Text files (*.txt);; All files (*.*)"));
+	QString fileName =
+		QFileDialog::getSaveFileName(this, tr("Export"), path + QDir::separator(), tr("Text files (*.txt);; All files (*.*)"));
 
 	if (fileName.isNull() == true)
 	{
@@ -1060,7 +1077,6 @@ void DialogConnections::onReport()
 	textStream << tr("User Name:\t") << m_db->currentUser().username() << "\r\n";
 
 	textStream << "\r\n";
-
 
 
 	textStream << tr("Generated at:\t") << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss") << "\r\n";
@@ -1094,29 +1110,29 @@ void DialogConnections::onReport()
 
 		if (connection->port1EnableSerial() == true)
 		{
-			textStream << tr("Port 1 Serial mode: ") << Hardware::Connection::serialModeStr(connection->port1SerialMode()) <<"\r\n";
-			textStream << tr("Port 2 Enable duplex: ") << (connection->port1EnableDuplex() ? "Yes" : "No") <<"\r\n";
+			textStream << tr("Port 1 Serial mode: ") << Hardware::Connection::serialModeStr(connection->port1SerialMode()) << "\r\n";
+			textStream << tr("Port 2 Enable duplex: ") << (connection->port1EnableDuplex() ? "Yes" : "No") << "\r\n";
 		}
 
 		if (connection->port2EnableSerial() == true)
 		{
-			textStream << tr("Port 2 Serial mode: ") << Hardware::Connection::serialModeStr(connection->port2SerialMode()) <<"\r\n";
-			textStream << tr("Port 2 Enable duplex: ") << (connection->port2EnableDuplex() ? "Yes" : "No") <<"\r\n";
+			textStream << tr("Port 2 Serial mode: ") << Hardware::Connection::serialModeStr(connection->port2SerialMode()) << "\r\n";
+			textStream << tr("Port 2 Enable duplex: ") << (connection->port2EnableDuplex() ? "Yes" : "No") << "\r\n";
 		}
 
 		if (connection->manualSettings() == true)
 		{
 			textStream << tr("\r\nManual settings:\r\n");
-			textStream << tr("Port1 start address: ") << connection->port1ManualTxStartAddress()<<"\r\n";
-			textStream << tr("Port1 TX words quantity: ") << connection->port1ManualTxWordsQuantity()<<"\r\n";
-			textStream << tr("Port1 RX words quantity: ") << connection->port1ManualRxWordsQuantity()<<"\r\n";
+			textStream << tr("Port1 start address: ") << connection->port1ManualTxStartAddress() << "\r\n";
+			textStream << tr("Port1 TX words quantity: ") << connection->port1ManualTxWordsQuantity() << "\r\n";
+			textStream << tr("Port1 RX words quantity: ") << connection->port1ManualRxWordsQuantity() << "\r\n";
 
-			textStream << tr("Port2 start address: ") << connection->port2ManualTxStartAddress()<<"\r\n";
-			textStream << tr("Port2 TX words quantity: ") << connection->port2ManualTxWordsQuantity()<<"\r\n";
-			textStream << tr("Port2 RX words quantity: ") << connection->port2ManualRxWordsQuantity()<<"\r\n";
+			textStream << tr("Port2 start address: ") << connection->port2ManualTxStartAddress() << "\r\n";
+			textStream << tr("Port2 TX words quantity: ") << connection->port2ManualTxWordsQuantity() << "\r\n";
+			textStream << tr("Port2 RX words quantity: ") << connection->port2ManualRxWordsQuantity() << "\r\n";
 		}
 
-		textStream<<"\r\n";
+		textStream << "\r\n";
 	}
 
 	textStream.flush();
@@ -1154,7 +1170,7 @@ void DialogConnections::onRemoveShortcut()
 	onRemove();
 }
 
-void DialogConnections::onCustomContextMenuRequested(const QPoint &pos)
+void DialogConnections::onCustomContextMenuRequested(const QPoint& pos)
 {
 	Q_UNUSED(pos);
 
@@ -1272,6 +1288,3 @@ void DialogConnections::updateButtonsEnableState()
 
 	return;
 }
-
-
-

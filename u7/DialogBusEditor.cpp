@@ -1,4 +1,5 @@
 #include "DialogBusEditor.h"
+#include "AppSettings.h"
 #include "Settings.h"
 
 #include <UiLib/PropertyEditor.h>
@@ -11,8 +12,8 @@
 
 DialogBusEditor* theDialogBusEditor = nullptr;
 
-DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
-	: QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
+DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent) :
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
 	m_busses(db),
 	m_db(db)
 {
@@ -35,9 +36,27 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	m_addSignalDiscreteAction = new QAction("Discrete signal", this);
 	m_addSignalBusAction = new QAction("Bus signal", this);
 
-	connect(m_addSignalAnalogAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Analog);});
-	connect(m_addSignalDiscreteAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Discrete);});
-	connect(m_addSignalBusAction, &QAction::triggered, this, [this](){emit onSignalCreate(E::SignalType::Bus);});
+	connect(m_addSignalAnalogAction,
+			&QAction::triggered,
+			this,
+			[this]()
+			{
+				emit onSignalCreate(E::SignalType::Analog);
+			});
+	connect(m_addSignalDiscreteAction,
+			&QAction::triggered,
+			this,
+			[this]()
+			{
+				emit onSignalCreate(E::SignalType::Discrete);
+			});
+	connect(m_addSignalBusAction,
+			&QAction::triggered,
+			this,
+			[this]()
+			{
+				emit onSignalCreate(E::SignalType::Bus);
+			});
 
 	m_addSignalMenu->addAction(m_addSignalAnalogAction);
 	m_addSignalMenu->addAction(m_addSignalDiscreteAction);
@@ -91,7 +110,7 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	// m_busPropertyEditor
 
 	m_busPropertyEditor = new ExtWidgets::PropertyEditor(this);
-	m_busPropertyEditor->setExpertMode(theSettings.isExpertMode());
+	m_busPropertyEditor->setExpertMode(theAppSettings.isExpertMode());
 
 	connect(m_busPropertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &DialogBusEditor::onBusPropertiesChanged);
 
@@ -135,11 +154,11 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	m_btnSignalUp = new QPushButton(tr("Move Up"));
 	m_btnSignalDown = new QPushButton(tr("Move Down"));
 
-	connect (m_btnSignalAdd, &QPushButton::clicked, this, &DialogBusEditor::onSignalAdd);
-	connect (m_btnSignalEdit, &QPushButton::clicked, this, &DialogBusEditor::onSignalEdit);
-	connect (m_btnSignalRemove, &QPushButton::clicked, this, &DialogBusEditor::onSignalRemove);
-	connect (m_btnSignalUp, &QPushButton::clicked, this, &DialogBusEditor::onSignalUp);
-	connect (m_btnSignalDown, &QPushButton::clicked, this, &DialogBusEditor::onSignalDown);
+	connect(m_btnSignalAdd, &QPushButton::clicked, this, &DialogBusEditor::onSignalAdd);
+	connect(m_btnSignalEdit, &QPushButton::clicked, this, &DialogBusEditor::onSignalEdit);
+	connect(m_btnSignalRemove, &QPushButton::clicked, this, &DialogBusEditor::onSignalRemove);
+	connect(m_btnSignalUp, &QPushButton::clicked, this, &DialogBusEditor::onSignalUp);
+	connect(m_btnSignalDown, &QPushButton::clicked, this, &DialogBusEditor::onSignalDown);
 
 	signalsButtonsLayout->addWidget(m_btnSignalAdd);
 	signalsButtonsLayout->addWidget(m_btnSignalEdit);
@@ -165,7 +184,7 @@ DialogBusEditor::DialogBusEditor(DbController* db, QWidget* parent)
 	rightButtonsLayout->addStretch();
 	rightButtonsLayout->addWidget(m_btnClose);
 
-	connect (m_btnClose, &QPushButton::clicked, this, &DialogBusEditor::close);
+	connect(m_btnClose, &QPushButton::clicked, this, &DialogBusEditor::close);
 
 	// Left side
 	//
@@ -375,9 +394,12 @@ void DialogBusEditor::onAdd()
 
 	bool ok = false;
 
-	QString busTypeId = QInputDialog::getText(this, tr("Add Bus"),
-										 tr("Enter bus type ID:"), QLineEdit::Normal,
-										 tr("BUSTYPEID_%1").arg(QString::number(m_db->nextCounterValue()).rightJustified(4, '0')), &ok);
+	QString busTypeId = QInputDialog::getText(this,
+											  tr("Add Bus"),
+											  tr("Enter bus type ID:"),
+											  QLineEdit::Normal,
+											  tr("BUSTYPEID_%1").arg(QString::number(m_db->nextCounterValue()).rightJustified(4, '0')),
+											  &ok);
 
 	if (ok == false || busTypeId.isEmpty() == true)
 	{
@@ -402,7 +424,8 @@ void DialogBusEditor::onRemove()
 		return;
 	}
 
-	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected busses?"), QMessageBox::Yes, QMessageBox::No);
+	auto mbResult =
+		QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected busses?"), QMessageBox::Yes, QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;
@@ -472,9 +495,8 @@ void DialogBusEditor::onClone()
 
 	bool ok = false;
 
-	QString busTypeId = QInputDialog::getText(this, tr("Clone Bus"),
-										 tr("Enter bus type ID:"), QLineEdit::Normal,
-										 cloneBus->busTypeId() + " (clone)", &ok);
+	QString busTypeId =
+		QInputDialog::getText(this, tr("Clone Bus"), tr("Enter bus type ID:"), QLineEdit::Normal, cloneBus->busTypeId() + " (clone)", &ok);
 
 	if (ok == false || busTypeId.isEmpty() == true)
 	{
@@ -485,7 +507,6 @@ void DialogBusEditor::onClone()
 	cloneBus->setBusTypeId(busTypeId);
 
 	addBus(cloneBus);
-
 }
 
 void DialogBusEditor::onCopy()
@@ -556,7 +577,7 @@ void DialogBusEditor::onPaste()
 {
 	QClipboard* clipboard = QApplication::clipboard();
 
-	const QMimeData *mimeData = clipboard->mimeData();
+	const QMimeData* mimeData = clipboard->mimeData();
 	if (mimeData->hasFormat(AppSignalLib::Bus::mimeType) == false)
 	{
 		return;
@@ -602,7 +623,6 @@ void DialogBusEditor::onPaste()
 	addBus(busses);
 
 	return;
-
 }
 
 void DialogBusEditor::onCheckOut()
@@ -646,9 +666,7 @@ void DialogBusEditor::onCheckIn()
 	}
 
 	bool ok = false;
-	QString comment = QInputDialog::getText(this, qAppName(),
-											tr("Please enter the comment:"), QLineEdit::Normal,
-											tr("comment"), &ok);
+	QString comment = QInputDialog::getText(this, qAppName(), tr("Please enter the comment:"), QLineEdit::Normal, tr("comment"), &ok);
 
 	if (ok == false)
 	{
@@ -711,14 +729,18 @@ void DialogBusEditor::onCheckIn()
 
 void DialogBusEditor::onUndo()
 {
-	QList <QTreeWidgetItem*> selectedItems = m_busTree->selectedItems();
+	QList<QTreeWidgetItem*> selectedItems = m_busTree->selectedItems();
 
 	if (selectedItems.isEmpty() == true)
 	{
 		return;
 	}
 
-	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to undo changes on selected busses?"), QMessageBox::Yes, QMessageBox::No);
+	auto mbResult = QMessageBox::warning(this,
+										 qAppName(),
+										 tr("Are you sure you want to undo changes on selected busses?"),
+										 QMessageBox::Yes,
+										 QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;
@@ -860,9 +882,7 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 	bool ok = false;
 	QString defaultSignalId = QString("sid_%1").arg(bus->busSignals().size());
 
-	QString signalId = QInputDialog::getText(this, tr("Add Signal"),
-												  tr("Enter SignalID:"), QLineEdit::Normal,
-												  defaultSignalId, &ok);
+	QString signalId = QInputDialog::getText(this, tr("Add Signal"), tr("Enter SignalID:"), QLineEdit::Normal, defaultSignalId, &ok);
 	signalId = signalId.trimmed();
 
 	if (ok == false || signalId.isEmpty() == true)
@@ -991,7 +1011,9 @@ void DialogBusEditor::onSignalEdit()
 			{
 				if (editIndex != j && busSignals[j].signalId() == editSignal->signalId())
 				{
-					QMessageBox::critical(this, qAppName(), tr("A signal with SignalID '%1' already exists!").arg(busSignals[j].signalId()));
+					QMessageBox::critical(this,
+										  qAppName(),
+										  tr("A signal with SignalID '%1' already exists!").arg(busSignals[j].signalId()));
 					duplicateSignalIds = true;
 					break;
 				}
@@ -1033,7 +1055,8 @@ void DialogBusEditor::onSignalRemove()
 		return;
 	}
 
-	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected signals?"), QMessageBox::Yes, QMessageBox::No);
+	auto mbResult =
+		QMessageBox::warning(this, qAppName(), tr("Are you sure you want to remove selected signals?"), QMessageBox::Yes, QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;
@@ -1210,10 +1233,12 @@ bool DialogBusEditor::checkBusNames()
 
 			if (busI->busTypeId() == busJ->busTypeId())
 			{
-				QMessageBox::StandardButton result = QMessageBox::warning(this, qAppName(),
-																		  tr("Busses with duplicated ID found! Are you sure you want to continue?"),
-																		  QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape,
-																		  QMessageBox::StandardButton::Yes);
+				QMessageBox::StandardButton result =
+					QMessageBox::warning(this,
+										 qAppName(),
+										 tr("Busses with duplicated ID found! Are you sure you want to continue?"),
+										 QMessageBox::StandardButton::No | QMessageBox::Default | QMessageBox::Escape,
+										 QMessageBox::StandardButton::Yes);
 				if (result == QMessageBox::StandardButton::Yes)
 				{
 					return true;
@@ -1229,9 +1254,9 @@ bool DialogBusEditor::checkBusNames()
 	return true;
 }
 
-void DialogBusEditor::keyPressEvent(QKeyEvent *evt)
+void DialogBusEditor::keyPressEvent(QKeyEvent* evt)
 {
-	if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
+	if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return)
 	{
 		return;
 	}
@@ -1416,7 +1441,6 @@ void DialogBusEditor::fillBusProperties()
 	m_busPropertyEditor->setObjects(busObjects);
 
 	return;
-
 }
 
 void DialogBusEditor::fillBusSignals()

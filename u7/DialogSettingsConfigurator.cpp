@@ -1,8 +1,9 @@
 #include "DialogSettingsConfigurator.h"
+#include "AppSettings.h"
 #include "ui_DialogSettingsConfigurator.h"
-#include "Settings.h"
 
-DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget *parent) :
+
+DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::DialogSettingsConfigurator)
 {
@@ -29,7 +30,6 @@ DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget *parent) :
 	//
 	if (ports.size() != 0)
 	{
-
 		bool serialPortFound = false;
 
 		for (const QSerialPortInfo& pi : ports)
@@ -37,7 +37,7 @@ DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget *parent) :
 			QString port = pi.systemLocation();
 			ui->serialPortCombo->addItem(port);
 
-			if (port == theSettings.m_configuratorSerialPort)
+			if (port == theAppSettings.configuratorSerialPort())
 			{
 				serialPortFound = true;
 				ui->serialPortCombo->setCurrentText(port);
@@ -47,14 +47,14 @@ DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget *parent) :
 		if (serialPortFound == false)
 		{
 			ui->serialPortCombo->setCurrentIndex(0);
-			theSettings.m_configuratorSerialPort = ports[0].systemLocation();
+			theAppSettings.configuratorSerialPort() = ports[0].systemLocation();
 		}
 	}
 
-	ui->showDebugInfo->setChecked(theSettings.m_configuratorShowDebugInfo);
-	ui->verifyData->setChecked(theSettings.m_configuratorVerify);
+	ui->showDebugInfo->setChecked(theAppSettings.configuratorShowDebugInfo());
+	ui->verifyData->setChecked(theAppSettings.configuratorVerify());
 
-
+	return;
 }
 
 DialogSettingsConfigurator::~DialogSettingsConfigurator()
@@ -64,9 +64,9 @@ DialogSettingsConfigurator::~DialogSettingsConfigurator()
 
 void DialogSettingsConfigurator::on_DialogSettingsConfigurator_accepted()
 {
-	theSettings.m_configuratorSerialPort = ui->serialPortCombo->currentText();
-	theSettings.m_configuratorShowDebugInfo = (ui->showDebugInfo->checkState() == Qt::Checked);
-	theSettings.m_configuratorVerify = (ui->verifyData->checkState() == Qt::Checked);
+	theAppSettings.setConfiguratorSerialPort(ui->serialPortCombo->currentText());
+	theAppSettings.setConfiguratorShowDebugInfo((ui->showDebugInfo->checkState() == Qt::Checked));
+	theAppSettings.setConfiguratorVerify((ui->verifyData->checkState() == Qt::Checked));
 
-	theSettings.writeSystemScope();
+	theAppSettings.save();
 }

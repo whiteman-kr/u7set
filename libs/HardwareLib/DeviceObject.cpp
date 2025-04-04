@@ -1,59 +1,57 @@
 #ifndef HARDWARE_LIB_DOMAIN
-#error Do not include this file in the project! Link HardwareLib instead.
+	#error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
 #include "DeviceObjectFactory.h"
-#include <ProtoCommonHelper.h>
 #include <CommonLib/ConstStrings.h>
+#include <ProtoCommonHelper.h>
 
 #include <HardwareLib/DeviceObject.h>
 #include <HardwareLib/PropertyNames.h>
 #include <HardwareLib/ScriptDeviceObject.h>
 
+#include <HardwareLib/DeviceAppSignal.h>
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/DeviceRack.h>
 #include <HardwareLib/DeviceRoot.h>
 #include <HardwareLib/DeviceSystem.h>
-#include <HardwareLib/DeviceRack.h>
-#include <HardwareLib/DeviceChassis.h>
-#include <HardwareLib/DeviceModule.h>
-#include <HardwareLib/DeviceController.h>
-#include <HardwareLib/DeviceAppSignal.h>
 #include <HardwareLib/DiagSignal.h>
-#include <HardwareLib/Workstation.h>
 #include <HardwareLib/Software.h>
+#include <HardwareLib/Workstation.h>
 
 #include <QtConcurrent>
 
 namespace Hardware
 {
-	const std::array<QString, 10> DeviceObjectExtensions =
-		{
-			".hrt",			// DeviceRoot
-			".hsm",			// DeviceSystem
-			".hrk",			// DeviceRack
-			".hcs",			// DeviceChassis
-			".hmd",			// DeviceModule
-			".hws",			// Workstation
-			".hsw",			// Software
-			".hcr",			// DeviceController
-			".hds",			// DeviceAppSignal
-			".hsd",			// DiagSignal
-		};
+	const std::array<QString, 10> DeviceObjectExtensions = {
+		".hrt",        // DeviceRoot
+		".hsm",        // DeviceSystem
+		".hrk",        // DeviceRack
+		".hcs",        // DeviceChassis
+		".hmd",        // DeviceModule
+		".hws",        // Workstation
+		".hsw",        // Software
+		".hcr",        // DeviceController
+		".hds",        // DeviceAppSignal
+		".hsd",        // DiagSignal
+	};
 
-	extern const std::array<QString, 10> DeviceTypeNames =
-		{
-			"Root",			// DeviceRoot
-			"System",		// DeviceSystem
-			"Rack",			// DeviceRack
-			"Chassis",		// DeviceChassis
-			"Module",		// DeviceModule
-			"Workstation",	// Workstation
-			"Software",		// Software
-			"Controller",	// DeviceController
-			"AppSignal",	// DeviceAppSignal
-			"DiagSignal",	// DiagSignal
-		};
+	extern const std::array<QString, 10> DeviceTypeNames = {
+		"Root",        // DeviceRoot
+		"System",      // DeviceSystem
+		"Rack",        // DeviceRack
+		"Chassis",     // DeviceChassis
+		"Module",      // DeviceModule
+		"Workstation", // Workstation
+		"Software",    // Software
+		"Controller",  // DeviceController
+		"AppSignal",   // DeviceAppSignal
+		"DiagSignal",  // DiagSignal
+	};
 
-	
+
 	//
 	//
 	// DeviceObject
@@ -63,6 +61,8 @@ namespace Hardware
 		PropertyObject(parent),
 		m_deviceType(deviceType)
 	{
+		// clang-format off
+
 		ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::excludeFromBuild, true, DeviceObject::excludeFromBuild, DeviceObject::setExcludeFromBuild)
 			->setUpdateFromPreset(false);
 
@@ -78,8 +78,14 @@ namespace Hardware
 		auto captionProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::caption, true, DeviceObject::caption, DeviceObject::setCaption);
 
 		auto childRestrProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::childRestriction, true, DeviceObject::childRestriction, DeviceObject::setChildRestriction);
+		childRestrProp->setCategory(PropertyNames::categoryScripts);
 		childRestrProp->setExpert(true);
 		childRestrProp->setIsScript(true);
+
+		auto preBuildProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::preBuildScript, true, DeviceObject::preBuildScript, DeviceObject::setPreBuildScript);
+		preBuildProp->setCategory(PropertyNames::categoryScripts);
+		preBuildProp->setDescription(PropertyNames::preBuildScriptDescription);
+		preBuildProp->setIsScript(true);
 
 		ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::place, true, DeviceObject::place, DeviceObject::setPlace);
 
@@ -100,6 +106,7 @@ namespace Hardware
 		childRestrProp->setUpdateFromPreset(true);
 		specificProp->setUpdateFromPreset(true);
 
+		// clang-format on
 		return;
 	}
 
@@ -127,7 +134,12 @@ namespace Hardware
 
 			// Sort properties by caption
 			//
-			std::sort(props.begin(), props.end(), [](const auto& p1, const auto& p2) { return p1->caption() < p2->caption(); });
+			std::sort(props.begin(),
+					  props.end(),
+					  [](const auto& p1, const auto& p2)
+					  {
+						  return p1->caption() < p2->caption();
+					  });
 
 			for (const auto& p : props)
 			{
@@ -140,19 +152,19 @@ namespace Hardware
 			// Sort children by place + caption
 			//
 			auto children = m_children;
-			std::sort(children.begin(), children.end(),
-			[](const auto& ch1, const auto& ch2)
-			{
-				if (ch1->place() != ch2->place())
-				{
-					return ch1->place() < ch2->place();
-
-				}
-				else
-				{
-					return ch1->caption() < ch2->caption();
-				}
-			});
+			std::sort(children.begin(),
+					  children.end(),
+					  [](const auto& ch1, const auto& ch2)
+					  {
+						  if (ch1->place() != ch2->place())
+						  {
+							  return ch1->place() < ch2->place();
+						  }
+						  else
+						  {
+							  return ch1->caption() < ch2->caption();
+						  }
+					  });
 
 			for (const auto& child : children)
 			{
@@ -200,6 +212,8 @@ namespace Hardware
 		{
 			Proto::Write(mutableDeviceObject->mutable_childrestriction(), m_childRestriction);
 		}
+
+		mutableDeviceObject->set_prebuildscript(m_preBuildScript.toStdString());
 
 		if (m_specificPropertiesStruct.isEmpty() == false)
 		{
@@ -297,6 +311,8 @@ namespace Hardware
 			m_childRestriction.clear();
 		}
 
+		m_preBuildScript = QString::fromStdString(deviceobject.prebuildscript());
+
 		m_specificPropertiesStruct = QString::fromStdString(deviceobject.specific_properties_struct());
 		parseSpecificPropertiesStruct(m_specificPropertiesStruct);
 
@@ -318,13 +334,14 @@ namespace Hardware
 		//
 		std::vector<std::shared_ptr<Property>> specificProps = PropertyObject::specificProperties();
 
-		for (const ::Proto::Property& p :  deviceobject.properties())
+		for (const ::Proto::Property& p : deviceobject.properties())
 		{
-			auto it = std::find_if(specificProps.begin(), specificProps.end(),
-				[p](const std::shared_ptr<Property>& dp)
-				{
-					return dp->caption().toStdString() == p.name();
-				});
+			auto it = std::find_if(specificProps.begin(),
+								   specificProps.end(),
+								   [p](const std::shared_ptr<Property>& dp)
+								   {
+									   return dp->caption().toStdString() == p.name();
+								   });
 
 			if (it == specificProps.end())
 			{
@@ -334,7 +351,7 @@ namespace Hardware
 			{
 				Property* property = it->get();
 
-				Q_ASSERT(property->specific() == true);	// it's suppose to be specific property;
+				Q_ASSERT(property->specific() == true); // it's suppose to be specific property;
 
 				bool loadOk = Proto::loadProperty(p, property);
 
@@ -516,7 +533,6 @@ namespace Hardware
 	}
 
 
-
 	// Get all signals, including signals from child items
 	//
 	void DeviceObject::getAllAppSignalsRecursive(std::vector<std::shared_ptr<DeviceAppSignal>>* deviceSignals) const
@@ -620,7 +636,7 @@ namespace Hardware
 		return deviceType() == DeviceType::AppSignal;
 	}
 
-	bool DeviceObject::isDiagSignal() const 
+	bool DeviceObject::isDiagSignal() const
 	{
 		return deviceType() == DeviceType::DiagSignal;
 	}
@@ -743,8 +759,7 @@ namespace Hardware
 			{
 				return deviceObject->toController().get();
 			}
-		}
-		while(deviceObject != nullptr);
+		} while (deviceObject != nullptr);
 
 		return nullptr;
 	}
@@ -766,8 +781,7 @@ namespace Hardware
 			{
 				return deviceObject->toModule();
 			}
-		}
-		while(deviceObject != nullptr);
+		} while (deviceObject != nullptr);
 
 		return nullptr;
 	}
@@ -789,8 +803,7 @@ namespace Hardware
 			{
 				return deviceObject->toModule().get();
 			}
-		}
-		while(deviceObject != nullptr);
+		} while (deviceObject != nullptr);
 
 		return nullptr;
 	}
@@ -812,8 +825,7 @@ namespace Hardware
 			{
 				return deviceObject->toSoftware().get();
 			}
-		}
-		while(deviceObject != nullptr);
+		} while (deviceObject != nullptr);
 
 		return nullptr;
 	}
@@ -835,8 +847,7 @@ namespace Hardware
 			{
 				return deviceObject->toWorkstation().get();
 			}
-		}
-		while(deviceObject != nullptr);
+		} while (deviceObject != nullptr);
 
 		return nullptr;
 	}
@@ -858,8 +869,7 @@ namespace Hardware
 			}
 
 			deviceObject = deviceObject->parent();
-		}
-		while(deviceObject != nullptr);
+		} while (deviceObject != nullptr);
 
 		return nullptr;
 	}
@@ -893,8 +903,7 @@ namespace Hardware
 			{
 				return deviceObject->toRack().get();
 			}
-		}
-		while(deviceObject != nullptr);
+		} while (deviceObject != nullptr);
 
 		return nullptr;
 	}
@@ -916,8 +925,7 @@ namespace Hardware
 			{
 				return deviceObject->toSystem().get();
 			}
-		}
-		while(deviceObject != nullptr);
+		} while (deviceObject != nullptr);
 
 		return nullptr;
 	}
@@ -939,8 +947,7 @@ namespace Hardware
 			{
 				return deviceObject->toRoot().get();
 			}
-		}
-		while(deviceObject != nullptr);
+		} while (deviceObject != nullptr);
 
 		return nullptr;
 	}
@@ -1090,27 +1097,22 @@ namespace Hardware
 	}
 	bool DeviceObject::canAddChild(const DeviceType childType) const
 	{
-		if (childType == DeviceType::Software &&
-			deviceType() != DeviceType::Workstation &&
-			deviceType() != DeviceType::Root)
+		if (childType == DeviceType::Software && deviceType() != DeviceType::Workstation && deviceType() != DeviceType::Root)
 		{
 			return false;
 		}
 
 		if (deviceType() == DeviceType::Software)
 		{
-			return childType == DeviceType::Controller ||
-				   childType == DeviceType::DiagSignal;
+			return childType == DeviceType::Controller || childType == DeviceType::DiagSignal;
 		}
 
 		if (deviceType() == DeviceType::Workstation)
 		{
-			return childType == DeviceType::Software ||
-				   childType == DeviceType::DiagSignal;
+			return childType == DeviceType::Software || childType == DeviceType::DiagSignal;
 		}
 
-		if (deviceType() == DeviceType::AppSignal &&
-			childType == DeviceType::DiagSignal)
+		if (deviceType() == DeviceType::AppSignal && childType == DeviceType::DiagSignal)
 		{
 			return false;
 		}
@@ -1120,8 +1122,7 @@ namespace Hardware
 			return false;
 		}
 
-		if (childType == DeviceType::Workstation &&
-			deviceType() > DeviceType::Module)
+		if (childType == DeviceType::Workstation && deviceType() > DeviceType::Module)
 		{
 			return false;
 		}
@@ -1158,10 +1159,12 @@ namespace Hardware
 
 	void DeviceObject::deleteChild(std::shared_ptr<DeviceObject> child)
 	{
-		auto found = std::find_if(m_children.begin(), m_children.end(), [child](decltype(m_children)::const_reference c)
-			{
-				return c == child;
-			});
+		auto found = std::find_if(m_children.begin(),
+								  m_children.end(),
+								  [child](decltype(m_children)::const_reference c)
+								  {
+									  return c == child;
+								  });
 
 		if (found == m_children.end())
 		{
@@ -1180,8 +1183,7 @@ namespace Hardware
 
 	bool DeviceObject::checkChild(std::shared_ptr<DeviceObject> child, QString* errorMessage)
 	{
-		if (child == nullptr ||
-			errorMessage == nullptr)
+		if (child == nullptr || errorMessage == nullptr)
 		{
 			Q_ASSERT(child);
 			Q_ASSERT(errorMessage);
@@ -1216,9 +1218,9 @@ namespace Hardware
 			qDebug() << "\tMessage: " << function.toString();
 
 			*errorMessage += tr("DeviceObject::childRestriction script evaluation error, object %1, error %2, line %3")
-							 .arg(equipmentId())
-							 .arg(function.toString())
-							 .arg(function.property("lineNumber").toInt());
+								 .arg(equipmentId())
+								 .arg(function.toString())
+								 .arg(function.property("lineNumber").toInt());
 			return false;
 		}
 
@@ -1352,7 +1354,17 @@ namespace Hardware
 
 	void DeviceObject::setChildRestriction(QString value)
 	{
-		m_childRestriction = value;
+		m_childRestriction = std::move(value);
+	}
+
+	QString DeviceObject::preBuildScript() const
+	{
+		return m_preBuildScript;
+	}
+
+	void DeviceObject::setPreBuildScript(QString value)
+	{
+		m_preBuildScript = std::move(value);
 	}
 
 	QString DeviceObject::specificPropertiesStruct() const
@@ -1408,7 +1420,7 @@ namespace Hardware
 	{
 		return tags().join(" ");
 	}
-	
+
 	void DeviceObject::setTags(const QStringList& tags)
 	{
 		m_tags.clear();
@@ -1439,18 +1451,18 @@ namespace Hardware
 		captionEscaped.replace(QLatin1String("\""), QLatin1String("\\\""));
 
 		QString json = QString(
-R"DELIM({
+						   R"DELIM({
 	"Uuid" : "%1",
 	"EquipmentID" : "%2",
 	"Caption" : "%3",
 	"Place" : %4,
 	"Type" : "%5"
 })DELIM")
-			.arg(uuid().toString())
-			.arg(equipmentIdTemplate())
-			.arg(captionEscaped)
-			.arg(place())
-			.arg(fileExtension());
+						   .arg(uuid().toString())
+						   .arg(equipmentIdTemplate())
+						   .arg(captionEscaped)
+						   .arg(place())
+						   .arg(fileExtension());
 
 		return json;
 	}
@@ -1475,7 +1487,11 @@ R"DELIM({
 			p = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetName, true, DeviceObject::presetName, DeviceObject::setPresetName);
 			p->setExpert(true);
 
-			p = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::presetProtectedProperties, true, DeviceObject::presetProtectedPropertiesStr, DeviceObject::setPresetProtectedPropertiesStr);
+			p = ADD_PROPERTY_GETTER_SETTER(QString,
+										   PropertyNames::presetProtectedProperties,
+										   true,
+										   DeviceObject::presetProtectedPropertiesStr,
+										   DeviceObject::setPresetProtectedPropertiesStr);
 			p->setExpert(true);
 			p->setUpdateFromPreset(false);
 			p->setDescription(PropertyNames::presetProtectedPropertiesDescription);
@@ -1500,7 +1516,11 @@ R"DELIM({
 
 		if (m_presetRoot == true)
 		{
-			Property* p = ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::presetVersion, true, DeviceObject::presetVersion, DeviceObject::setPresetVersion);
+			Property* p = ADD_PROPERTY_GETTER_SETTER(int,
+													 PropertyNames::presetVersion,
+													 true,
+													 DeviceObject::presetVersion,
+													 DeviceObject::setPresetVersion);
 			p->setUpdateFromPreset(true);
 			p->setExpert(true);
 		}
@@ -1552,7 +1572,7 @@ R"DELIM({
 		// Split by comma, semicolon, return or space, remove empty parts.
 		//
 		static const QRegularExpression re{QStringLiteral("[,;\\n\\r\\s]")};
-		m_presetProtectedProperties	= value.split(re, Qt::SkipEmptyParts);
+		m_presetProtectedProperties = value.split(re, Qt::SkipEmptyParts);
 	}
 
 	const QStringList& DeviceObject::presetProtectedProperties() const
@@ -1582,7 +1602,9 @@ R"DELIM({
 	}
 
 
-	void equipmentWalker(DeviceObject* currentDevice, std::function<void (DeviceObject*)> processBeforeChildren, std::function<void (DeviceObject*)> processAfterChildren)
+	void equipmentWalker(DeviceObject* currentDevice,
+						 std::function<void(DeviceObject*)> processBeforeChildren,
+						 std::function<void(DeviceObject*)> processAfterChildren)
 	{
 		if (currentDevice == nullptr)
 		{
@@ -1601,7 +1623,7 @@ R"DELIM({
 
 		int childrenCount = currentDevice->childrenCount();
 
-		for(int i = 0; i < childrenCount; i++)
+		for (int i = 0; i < childrenCount; i++)
 		{
 			Hardware::DeviceObject* device = currentDevice->child(i).get();
 
@@ -1614,7 +1636,7 @@ R"DELIM({
 		}
 	}
 
-	void equipmentWalker(DeviceObject* currentDevice, std::function<void (DeviceObject*)> processBeforeChildren)
+	void equipmentWalker(DeviceObject* currentDevice, std::function<void(DeviceObject*)> processBeforeChildren)
 	{
 		equipmentWalker(currentDevice, processBeforeChildren, nullptr);
 	}
@@ -1637,68 +1659,68 @@ R"DELIM({
 				switch (token)
 				{
 				case QXmlStreamReader::StartElement:
-				{
-					const QXmlStreamAttributes& attr = equipmentReader.attributes();
-					const QString classNameHash = attr.value("classNameHash").toString();
-					if (classNameHash.isEmpty())
 					{
-						qDebug() << "Attribute classNameHash of DeviceObject not found";
-						continue;
-					}
-					bool ok = false;
-					quint32 hash = classNameHash.toUInt(&ok, 16);
-					if (!ok)
-					{
-						qDebug() << QString("Could not interpret hash %s").arg(classNameHash);
-						continue;
-					}
-					std::shared_ptr<Hardware::DeviceObject> deviceObject = s_deviceObjectFactory.Create(hash);
-					if (deviceObject == nullptr)
-					{
-						qDebug() << QString("Unknown element %s found").arg(equipmentReader.name().toString());
-						continue;
-					}
-
-					if (deviceObject->isRoot() == true)
-					{
-						currentDevice = deviceObject;
-						deviceRoot = deviceObject->toRoot();
-						continue;
-					}
-
-					if (currentDevice == nullptr)
-					{
-						qDebug() << "DeviceRoot should be the root xml element";
-						return;
-					}
-
-					deviceObject->setSpecificPropertiesStruct(attr.value("SpecificProperties").toString());
-
-					for (auto p : deviceObject->properties())
-					{
-						Q_ASSERT(p);
-
-						if (p->readOnly() || p->caption() == QLatin1String("SpecificProperties"))
+						const QXmlStreamAttributes& attr = equipmentReader.attributes();
+						const QString classNameHash = attr.value("classNameHash").toString();
+						if (classNameHash.isEmpty())
 						{
+							qDebug() << "Attribute classNameHash of DeviceObject not found";
+							continue;
+						}
+						bool ok = false;
+						quint32 hash = classNameHash.toUInt(&ok, 16);
+						if (!ok)
+						{
+							qDebug() << QString("Could not interpret hash %s").arg(classNameHash);
+							continue;
+						}
+						std::shared_ptr<Hardware::DeviceObject> deviceObject = s_deviceObjectFactory.Create(hash);
+						if (deviceObject == nullptr)
+						{
+							qDebug() << QString("Unknown element %s found").arg(equipmentReader.name().toString());
 							continue;
 						}
 
-						QVariant tmp = QVariant::fromValue(attr.value(p->caption()).toString());
-						bool result = tmp.convert(p->value().metaType());
-						if (result == false)
+						if (deviceObject->isRoot() == true)
 						{
-							Q_ASSERT(tmp.canConvert(p->value().metaType()));
+							currentDevice = deviceObject;
+							deviceRoot = deviceObject->toRoot();
+							continue;
 						}
-						else
-						{
-							p->setValue(tmp);
-						}
-					}
 
-					currentDevice->addChild(deviceObject);
-					currentDevice = deviceObject;
-					break;
-				}
+						if (currentDevice == nullptr)
+						{
+							qDebug() << "DeviceRoot should be the root xml element";
+							return;
+						}
+
+						deviceObject->setSpecificPropertiesStruct(attr.value("SpecificProperties").toString());
+
+						for (auto p : deviceObject->properties())
+						{
+							Q_ASSERT(p);
+
+							if (p->readOnly() || p->caption() == QLatin1String("SpecificProperties"))
+							{
+								continue;
+							}
+
+							QVariant tmp = QVariant::fromValue(attr.value(p->caption()).toString());
+							bool result = tmp.convert(p->value().metaType());
+							if (result == false)
+							{
+								Q_ASSERT(tmp.canConvert(p->value().metaType()));
+							}
+							else
+							{
+								p->setValue(tmp);
+							}
+						}
+
+						currentDevice->addChild(deviceObject);
+						currentDevice = deviceObject;
+						break;
+					}
 				case QXmlStreamReader::EndElement:
 					if (currentDevice != nullptr && currentDevice->isRoot() == false)
 					{
@@ -1712,7 +1734,7 @@ R"DELIM({
 					}
 					else
 					{
-						return;	// Closing root element, nothing to read left
+						return; // Closing root element, nothing to read left
 					}
 					break;
 				default:
@@ -1726,9 +1748,7 @@ R"DELIM({
 		}
 	}
 
-	QString expandDeviceSignalTemplate(	const Hardware::DeviceObject& startDeviceObject,
-										const QString& templateStr,
-										QString* errMsg)
+	QString expandDeviceSignalTemplate(const Hardware::DeviceObject& startDeviceObject, const QString& templateStr, QString* errMsg)
 	{
 		if (errMsg == nullptr)
 		{
@@ -1758,8 +1778,9 @@ R"DELIM({
 
 			if (macroEndPos == -1)
 			{
-				*errMsg = QString("End of macro is not found in template %1 of device object %2. ").
-							arg(templateStr).arg(startDeviceObject.equipmentIdTemplate());
+				*errMsg = QString("End of macro is not found in template %1 of device object %2. ")
+							  .arg(templateStr)
+							  .arg(startDeviceObject.equipmentIdTemplate());
 				return QString();
 			}
 
@@ -1775,15 +1796,12 @@ R"DELIM({
 			resultStr += expandedMacroStr;
 
 			searchStartPos = macroEndPos + 1;
-		}
-		while(true);
+		} while (true);
 
 		return resultStr;
 	}
 
-	QString expandDeviceObjectMacro(const Hardware::DeviceObject& startDeviceObject,
-									const QString& macroStr,
-									QString* errMsg)
+	QString expandDeviceObjectMacro(const Hardware::DeviceObject& startDeviceObject, const QString& macroStr, QString* errMsg)
 	{
 		if (errMsg == nullptr)
 		{
@@ -1796,7 +1814,7 @@ R"DELIM({
 		const Hardware::DeviceObject* deviceObject = nullptr;
 		QString propertyCaption;
 
-		switch(macroFields.count())
+		switch (macroFields.count())
 		{
 		case 1:
 			{
@@ -1823,26 +1841,27 @@ R"DELIM({
 
 				if (deviceObject == nullptr)
 				{
-					*errMsg = QString("Macro expand error! Parent device object of type '%1' is not found for device object %2").
-									arg(parentObjectType).arg(startDeviceObject.equipmentIdTemplate());
+					*errMsg = QString("Macro expand error! Parent device object of type '%1' is not found for device object %2")
+								  .arg(parentObjectType)
+								  .arg(startDeviceObject.equipmentIdTemplate());
 					return QString();
 				}
-
 			}
 			break;
 
 		default:
-			*errMsg = QString("Unknown format of macro %1 in template of device signal %2").
-					arg(macroStr).arg(startDeviceObject.equipmentIdTemplate());
+			*errMsg = QString("Unknown format of macro %1 in template of device signal %2")
+						  .arg(macroStr)
+						  .arg(startDeviceObject.equipmentIdTemplate());
 			return QString();
 		}
 
 		if (deviceObject->propertyExists(propertyCaption) == false)
 		{
-			*errMsg = QString("Device signal %1 macro expand error! Property '%2' is not found in device object %3.").
-								arg(startDeviceObject.equipmentIdTemplate()).
-								arg(propertyCaption).
-								arg(deviceObject->equipmentIdTemplate());
+			*errMsg = QString("Device signal %1 macro expand error! Property '%2' is not found in device object %3.")
+						  .arg(startDeviceObject.equipmentIdTemplate())
+						  .arg(propertyCaption)
+						  .arg(deviceObject->equipmentIdTemplate());
 			return QString();
 		}
 
@@ -1861,24 +1880,25 @@ R"DELIM({
 			return nullptr;
 		}
 
-		static const std::map<QString, Hardware::DeviceType> objectTypes {
-				std::make_pair(QString("root"), Hardware::DeviceType::Root),
-				std::make_pair(QString("system"), Hardware::DeviceType::System),
-				std::make_pair(QString("rack"), Hardware::DeviceType::Rack),
-				std::make_pair(QString("chassis"), Hardware::DeviceType::Chassis),
-				std::make_pair(QString("module"), Hardware::DeviceType::Module),
-				std::make_pair(QString("workstation"), Hardware::DeviceType::Workstation),
-				std::make_pair(QString("software"), Hardware::DeviceType::Software),
-				std::make_pair(QString("controller"), Hardware::DeviceType::Controller),
-				std::make_pair(QString("signal"), Hardware::DeviceType::AppSignal),
+		static const std::map<QString, Hardware::DeviceType> objectTypes{
+			std::make_pair(QString("root"), Hardware::DeviceType::Root),
+			std::make_pair(QString("system"), Hardware::DeviceType::System),
+			std::make_pair(QString("rack"), Hardware::DeviceType::Rack),
+			std::make_pair(QString("chassis"), Hardware::DeviceType::Chassis),
+			std::make_pair(QString("module"), Hardware::DeviceType::Module),
+			std::make_pair(QString("workstation"), Hardware::DeviceType::Workstation),
+			std::make_pair(QString("software"), Hardware::DeviceType::Software),
+			std::make_pair(QString("controller"), Hardware::DeviceType::Controller),
+			std::make_pair(QString("signal"), Hardware::DeviceType::AppSignal),
 		};
 
 		std::map<QString, Hardware::DeviceType>::const_iterator it = objectTypes.find(parentObjectType.toLower());
 
 		if (it == objectTypes.end())
 		{
-			*errMsg = QString("Unknown object type '%1' in call of getParentObjectOfType(...) for device object %2").
-							arg(parentObjectType).arg(startObject.equipmentIdTemplate());
+			*errMsg = QString("Unknown object type '%1' in call of getParentObjectOfType(...) for device object %2")
+						  .arg(parentObjectType)
+						  .arg(startObject.equipmentIdTemplate());
 			return nullptr;
 		}
 
@@ -1899,9 +1919,8 @@ R"DELIM({
 			}
 
 			parent = parent->parent().get();
-		}
-		while(true);
+		} while (true);
 
 		return nullptr;
 	}
-}
+} // namespace Hardware

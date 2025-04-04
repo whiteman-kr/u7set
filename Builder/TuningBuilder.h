@@ -3,7 +3,7 @@
 #include <HardwareLib/DeviceObject.h>
 #include <HardwareLib/ModuleFirmware.h>
 
-#include "../lib/TuningDataStorage.h"
+#include "../AppSignalLib/TuningDataStorage.h"
 #include "IssueLogger.h"
 #include "LmDescriptionSet.h"
 #include "ModuleFirmwareWriter.h"

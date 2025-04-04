@@ -511,6 +511,7 @@ namespace Builder
 		void wrnALC5204(QString packedAndID, QString item1, QUuid item1Uuid, QString schema1,
 						QString item2, QUuid item2Uuid, QString schema2);				// Permanent const 0 on output of packed_and %1 (item %2, schema %3) due to const 0 on input (item %4, schema %5).
 		void errALC5205(QString appSignalID, QUuid itemUuid, QString schema);			// Software calculated signal %1 cannot be used in user application logic (schema %2).
+		void errALC5206(QString optoPortID, int txRawDataSize);							// OptoPort %1 tx raw data out of range (%2 words)
 
 		// firmware writing errors
 
@@ -613,6 +614,8 @@ namespace Builder
 		void errEQP6301(QString equipmentId, QString property, int lineNumber, QString message);                                  // Script property evaluation error.
 		void errEQP6302(QString schemaId, QString property, int lineNumber, QString message);                                     // Schema script property evaluation error.
 		void errEQP6303(QString schemaId, QString schemaItem, QUuid itemUuid, QString property, int lineNumber, QString message); // SchemaItem script property evaluation error.
+		
+		void errEQP6310(QString equipmentId, QString property, int lineNumber, QString message); // Script execution error - device.
 
 		// VDU related issues
 		//

@@ -19,7 +19,8 @@ namespace
 	constexpr qint64 ServiceConnectTimeoutMs = 15'000;
 
 	using CreateAdsControllerFunc = std::function<std::unique_ptr<::TestSuite::AdsInputController>(const ::TestSuite::ConfigSettings&)>;
-	using CreateTunControllerFunc = std::function<std::unique_ptr<::TestSuite::TunsOutputController>(const ::TestSuite::ConfigSettings&)>;
+	using CreateTunControllerFunc =
+		std::function<std::unique_ptr<::TestSuite::TunsOutputController>(const ::TestSuite::ConfigSettings&, QString username)>;
 
 
 	class MatsTestControlThread : public ::TestSuite::TestControlThread
@@ -139,7 +140,7 @@ namespace
 				return;
 			}
 
-			auto tuns = m_createTunOutputControllerFunc(m_configuration);
+			auto tuns = m_createTunOutputControllerFunc(m_configuration, m_controlParams.userName);
 			if (tuns == nullptr)
 			{
 				Q_ASSERT(tuns);
@@ -232,14 +233,15 @@ namespace TestSuite
 		//
 		CreateAdsControllerFunc createAdsControllerFunc = [this](const ::TestSuite::ConfigSettings& configuration)
 		{
-			auto ads = std::make_unique<::TestSuite::AdsInputController>(*m_runControlSignals, m_appLog.logFile());
+			auto ads = std::make_unique<::TestSuite::AdsInputController>(*m_appSignals, m_appLog.logFile());
 			ads->updateConnections(m_testSuite->softwareInfo(), configuration.appDataServices);
 			return ads;
 		};
 
-		CreateTunControllerFunc createTunControllerFunc = [this](const ::TestSuite::ConfigSettings& configuration)
+		CreateTunControllerFunc createTunControllerFunc = [this](const ::TestSuite::ConfigSettings& configuration, QString username)
 		{
 			auto tuns = std::make_unique<::TestSuite::TunsOutputController>(m_appLog.logFile());
+			tuns->setUserName(username);
 			tuns->updateConnections(m_testSuite->softwareInfo(),
 									configuration.tuningServices,
 									configuration.tuningSignalsFile,

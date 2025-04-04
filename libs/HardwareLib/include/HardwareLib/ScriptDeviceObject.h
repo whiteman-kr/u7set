@@ -1,6 +1,6 @@
 #pragma once
-#include <memory>
 #include <QUuid>
+#include <memory>
 
 namespace Hardware
 {
@@ -19,14 +19,14 @@ namespace Hardware
 
 	/// @brief The ScriptDeviceObject class represents a device object in the script.
 	/// @details Instances of this class allow access to the device object properties and its children.
-	/// 
+	///
 	class ScriptDeviceObject : public QObject
 	{
 		Q_OBJECT
 
 		/// @brief Device object identifier.
 		Q_PROPERTY(QString equipmentId READ equipmentId)
-		
+
 		/// @brief Device object caption.
 		Q_PROPERTY(QString caption READ caption)
 
@@ -81,7 +81,7 @@ namespace Hardware
 
 		/// @brief Cast object to ScriptDeviceAppSignal, return null if object is not AppSignal.
 		QJSValue toAppSignal();
-		
+
 
 		/// @brief Returns true if the object is a ScriptDeviceRoot object.
 		bool isRoot() const;
@@ -112,6 +112,10 @@ namespace Hardware
 
 		/// @brief Returns the value of the specified property.
 		QVariant propertyValue(const QString& caption) const;
+
+		/// @brief Sets the value of the specified property. Throws an exception if the property is not found.
+		/// @param value The value to set.
+		void setPropertyValue(QString property, QVariant value) const;
 
 		int propertyInt(const QString& caption) const;
 		bool propertyBool(const QString& caption) const;
@@ -271,4 +275,4 @@ namespace Hardware
 		Hardware::DeviceAppSignal* appSignal();
 	};
 
-}
+} // namespace Hardware

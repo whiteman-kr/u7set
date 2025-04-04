@@ -16,16 +16,17 @@ namespace
 	{
 #ifdef _WIN32
 		QProcess process;
-		process.start("wmic",
-					  QStringList{} << "csproduct"
-									<< "get"
-									<< "uuid");
+		QString program = "powershell";
+		QStringList arguments;
+		arguments << "-Command"
+				  << "Get-CimInstance -ClassName Win32_ComputerSystemProduct | Select-Object -ExpandProperty UUID";
+		process.start(program, arguments);
 		process.waitForFinished(3000);
 		QString output = process.readAllStandardOutput();
 		QStringList lines = output.split("\n", Qt::SkipEmptyParts);
-		if (lines.size() > 1)
+		if (lines.size() >= 1)
 		{
-			return lines[1].trimmed();
+			return lines[0].trimmed();
 		}
 #elif __linux__
 		QProcess process;
@@ -43,16 +44,17 @@ namespace
 	{
 #ifdef _WIN32
 		QProcess process;
-		process.start("wmic",
-					  QStringList{} << "cpu"
-									<< "get"
-									<< "name");
+		QString program = "powershell";
+		QStringList arguments;
+		arguments << "-Command"
+				  << "Get-CimInstance Win32_Processor | Select-Object -ExpandProperty Name";
+		process.start(program, arguments);
 		process.waitForFinished(3000);
 		QString output = process.readAllStandardOutput();
 		QStringList lines = output.split("\n", Qt::SkipEmptyParts);
-		if (lines.size() > 1)
+		if (lines.size() >= 1)
 		{
-			return lines[1].trimmed();
+			return lines[0].trimmed();
 		}
 #elif __linux__
 		QProcess process;

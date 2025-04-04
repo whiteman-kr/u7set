@@ -22,17 +22,150 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets Sql Network Qml Svg Serial
 qt_standard_project_setup()
 
 set (U7_SOURCES
+	./EditEngine/EditEngine.cpp
+	./EditEngine/EditEngine.h
+	./EditEngine/EditEngineAddItem.cpp
+	./EditEngine/EditEngineAddItem.h
+	./EditEngine/EditEngineApplyDefaultProperty.cpp
+	./EditEngine/EditEngineApplyDefaultProperty.h
+	./EditEngine/EditEngineBatch.cpp
+	./EditEngine/EditEngineBatch.h
+	./EditEngine/EditEngineDeleteItem.cpp
+	./EditEngine/EditEngineDeleteItem.h
+	./EditEngine/EditEngineMoveItem.cpp
+	./EditEngine/EditEngineMoveItem.h
+	./EditEngine/EditEngineNop.cpp
+	./EditEngine/EditEngineNop.h
+	./EditEngine/EditEngineSetObject.cpp
+	./EditEngine/EditEngineSetObject.h
+	./EditEngine/EditEngineSetOrder.cpp
+	./EditEngine/EditEngineSetOrder.h
+	./EditEngine/EditEngineSetPoints.cpp
+	./EditEngine/EditEngineSetPoints.h
+	./EditEngine/EditEngineSetProperty.cpp
+	./EditEngine/EditEngineSetProperty.h
+	./EditEngine/EditEngineSetSchemaProperty.cpp
+	./EditEngine/EditEngineSetSchemaProperty.h
+	./EquipmentEditor/DialogChoosePreset.cpp
+	./EquipmentEditor/DialogChoosePreset.h
+	./EquipmentEditor/DialogImportPreset.cpp
+	./EquipmentEditor/DialogImportPreset.h
+	./EquipmentEditor/EquipmentModel.cpp
+	./EquipmentEditor/EquipmentModel.h
+	./EquipmentEditor/EquipmentTabPage.cpp
+	./EquipmentEditor/EquipmentTabPage.h
+	./EquipmentEditor/EquipmentVcsDialog.cpp
+	./EquipmentEditor/EquipmentVcsDialog.h
+	./EquipmentEditor/EquipmentView.cpp
+	./EquipmentEditor/EquipmentView.h
+	./Forms/ChangesetDetailsDialog.cpp
+	./Forms/ChangesetDetailsDialog.h
+	./Forms/ChooseAfbDialog.cpp
+	./Forms/ChooseAfbDialog.h
+	./Forms/ChooseUfbDialog.cpp
+	./Forms/ChooseUfbDialog.h
+	./Forms/CompareDialog.cpp
+	./Forms/CompareDialog.h
+	./Forms/ComparePropertyObjectDialog.cpp
+	./Forms/ComparePropertyObjectDialog.h
+	./Forms/DialogDiagSignalTypes.cpp
+	./Forms/DialogDiagSignalTypes.h
+	./Forms/DialogProjectDiff.cpp
+	./Forms/DialogProjectDiff.h
+	./Forms/DialogUpdateFromPreset.cpp
+	./Forms/DialogUpdateFromPreset.h
+	./Forms/FileHistoryDialog.cpp
+	./Forms/FileHistoryDialog.h
+	./Forms/PendingChangesDialog.cpp
+	./Forms/PendingChangesDialog.h
+	./Forms/ProjectPropertiesForm.cpp
+	./Forms/ProjectPropertiesForm.h
+	./Forms/SelectChangesetDialog.cpp
+	./Forms/SelectChangesetDialog.h
 	./Legacy/TuningFilterEditor.cpp
 	./Legacy/TuningFilterEditor.h
+	./Locator/AppSignalLocatorProvider.cpp
+	./Locator/AppSignalLocatorProvider.h
+	./Locator/ConnectionLocatorProvider.cpp
+	./Locator/ConnectionLocatorProvider.h
+	./Locator/EquipmentLocatorProvider.cpp
+	./Locator/EquipmentLocatorProvider.h
+	./Locator/Locator.cpp
+	./Locator/Locator.h
+	./Locator/LocatorEditControl.cpp
+	./Locator/LocatorEditControl.h
+	./Locator/LocatorListWidget.cpp
+	./Locator/LocatorListWidget.h
+	./Locator/LocatorProvider.cpp
+	./Locator/LocatorProvider.h
+	./Locator/SchemaLocatorProvider.cpp
+	./Locator/SchemaLocatorProvider.h
+	./ProjectsTabPage/CreateProjectDialog.cpp
+	./ProjectsTabPage/CreateProjectDialog.h
+	./ProjectsTabPage/LoginDialog.cpp
+	./ProjectsTabPage/LoginDialog.h
+	./ProjectsTabPage/ProjectBackup.cpp
+	./ProjectsTabPage/ProjectBackup.h
+	./ProjectsTabPage/ProjectsTabPage.cpp
+	./ProjectsTabPage/ProjectsTabPage.h
+	./Reports/DialogReportPageSetup.cpp
+	./Reports/DialogReportPageSetup.h
+	./Reports/DialogSchemasExport.cpp
+	./Reports/DialogSchemasExport.h
+	./Reports/DialogSchemasReport.cpp
+	./Reports/DialogSchemasReport.h
+	./Reports/ProjectDiffReport.cpp
+	./Reports/ProjectDiffReport.h
+	./Reports/ReportPropertyEditor.cpp
+	./Reports/ReportPropertyEditor.h
+	./Reports/SchemasReport.cpp
+	./Reports/SchemasReport.h
+	./SchemaEditor/AutoFblItemConnection.cpp
+	./SchemaEditor/AutoFblItemConnection.h
+	./SchemaEditor/CreateSchemaDialog.cpp
+	./SchemaEditor/CreateSchemaDialog.h
+	./SchemaEditor/CreateSignalDialog.cpp
+	./SchemaEditor/CreateSignalDialog.h
+	./SchemaEditor/EditConnectionLine.cpp
+	./SchemaEditor/EditConnectionLine.h
+	./SchemaEditor/EditSchemaDiagStateProvider.cpp
+	./SchemaEditor/EditSchemaDiagStateProvider.h
+	./SchemaEditor/EditSchemaSignalProvider.cpp
+	./SchemaEditor/EditSchemaSignalProvider.h
+	./SchemaEditor/EditSchemaTabPage.cpp
+	./SchemaEditor/EditSchemaTabPage.h
+	./SchemaEditor/EditSchemaTypes.cpp
+	./SchemaEditor/EditSchemaTypes.h
+	./SchemaEditor/EditSchemaView.cpp
+	./SchemaEditor/EditSchemaView.h
+	./SchemaEditor/EditSchemaWidget.cpp
+	./SchemaEditor/EditSchemaWidget.h
+	./SchemaEditor/F2KeyForSchemaItem.cpp
+	./SchemaEditor/F2KeyForSchemaItem.h
+	./SchemaEditor/SchemaControlTabPage.cpp
+	./SchemaEditor/SchemaControlTabPage.h
+	./SchemaEditor/SchemaItemPropertiesDialog.cpp
+	./SchemaEditor/SchemaItemPropertiesDialog.h
+	./SchemaEditor/SchemaLayersDialog.cpp
+	./SchemaEditor/SchemaLayersDialog.h
+	./SchemaEditor/SchemaPropertiesDialog.cpp
+	./SchemaEditor/SchemaPropertiesDialog.h
+	./SchemaEditor/SchemasTabPage.cpp
+	./SchemaEditor/SchemasTabPage.h
+	./Simulator/SimProfileEditor.cpp
+	./Simulator/SimProfileEditor.h
+	./Simulator/SimSelectBuildDialog.cpp
+	./Simulator/SimSelectBuildDialog.h
 	./Ui/FilesTreeView.cpp
 	./Ui/FilesTreeView.h
 	./Ui/TextEditCompleter.cpp
 	./Ui/TextEditCompleter.h
-	diff_match_patch.h
 	AppSignalPropertyManager.cpp
 	AppSignalPropertyManager.h
 	AppSignalSetProvider.cpp
 	AppSignalSetProvider.h
+	AppSettings.cpp
+	AppSettings.h
 	BuildTabPage.cpp
 	BuildTabPage.h
 	BusStorage.cpp
@@ -43,8 +176,6 @@ set (U7_SOURCES
 	CheckInDialog.h
 	CheckinSignalsDialog.cpp
 	CheckinSignalsDialog.h
-	CreateProjectDialog.cpp
-	CreateProjectDialog.h
 	CreateSignalsDialog.cpp
 	CreateSignalsDialog.h
 	CreateUserDialogDialog.cpp
@@ -75,94 +206,17 @@ set (U7_SOURCES
 	DialogSubsystemListEditor.h
 	DialogTagsEditor.cpp
 	DialogTagsEditor.h
+	diff_match_patch.h
 	DlgMetrologyConnection.cpp
 	DlgMetrologyConnection.h
-	EditEngine/EditEngine.cpp
-	EditEngine/EditEngine.h
-	EditEngine/EditEngineAddItem.cpp
-	EditEngine/EditEngineAddItem.h
-	EditEngine/EditEngineApplyDefaultProperty.cpp
-	EditEngine/EditEngineApplyDefaultProperty.h
-	EditEngine/EditEngineBatch.cpp
-	EditEngine/EditEngineBatch.h
-	EditEngine/EditEngineDeleteItem.cpp
-	EditEngine/EditEngineDeleteItem.h
-	EditEngine/EditEngineMoveItem.cpp
-	EditEngine/EditEngineMoveItem.h
-	EditEngine/EditEngineNop.cpp
-	EditEngine/EditEngineNop.h
-	EditEngine/EditEngineSetObject.cpp
-	EditEngine/EditEngineSetObject.h
-	EditEngine/EditEngineSetOrder.cpp
-	EditEngine/EditEngineSetOrder.h
-	EditEngine/EditEngineSetPoints.cpp
-	EditEngine/EditEngineSetPoints.h
-	EditEngine/EditEngineSetProperty.cpp
-	EditEngine/EditEngineSetProperty.h
-	EditEngine/EditEngineSetSchemaProperty.cpp
-	EditEngine/EditEngineSetSchemaProperty.h
-	EquipmentEditor/DialogChoosePreset.cpp
-	EquipmentEditor/DialogChoosePreset.h
-	EquipmentEditor/DialogImportPreset.cpp
-	EquipmentEditor/DialogImportPreset.h
-	EquipmentEditor/EquipmentModel.cpp
-	EquipmentEditor/EquipmentModel.h
-	EquipmentEditor/EquipmentTabPage.cpp
-	EquipmentEditor/EquipmentTabPage.h
-	EquipmentEditor/EquipmentVcsDialog.cpp
-	EquipmentEditor/EquipmentVcsDialog.h
-	EquipmentEditor/EquipmentView.cpp
-	EquipmentEditor/EquipmentView.h
 	FilesTabPage.cpp
 	FilesTabPage.h
 	FindSignalDialog.cpp
 	FindSignalDialog.h
-	Forms/ChangesetDetailsDialog.cpp
-	Forms/ChangesetDetailsDialog.h
-	Forms/ChooseAfbDialog.cpp
-	Forms/ChooseAfbDialog.h
-	Forms/ChooseUfbDialog.cpp
-	Forms/ChooseUfbDialog.h
-	Forms/CompareDialog.cpp
-	Forms/CompareDialog.h
-	Forms/ComparePropertyObjectDialog.cpp
-	Forms/ComparePropertyObjectDialog.h
-	Forms/DialogDiagSignalTypes.cpp
-	Forms/DialogDiagSignalTypes.h
-	Forms/DialogProjectDiff.cpp
-	Forms/DialogProjectDiff.h
-	Forms/DialogUpdateFromPreset.cpp
-	Forms/DialogUpdateFromPreset.h
-	Forms/FileHistoryDialog.cpp
-	Forms/FileHistoryDialog.h
-	Forms/PendingChangesDialog.cpp
-	Forms/PendingChangesDialog.h
-	Forms/ProjectPropertiesForm.cpp
-	Forms/ProjectPropertiesForm.h
-	Forms/SelectChangesetDialog.cpp
-	Forms/SelectChangesetDialog.h
 	GlobalMessanger.cpp
 	GlobalMessanger.h
 	IdePropertyEditor.cpp
 	IdePropertyEditor.h
-	Locator/AppSignalLocatorProvider.cpp
-	Locator/AppSignalLocatorProvider.h
-	Locator/ConnectionLocatorProvider.cpp
-	Locator/ConnectionLocatorProvider.h
-	Locator/EquipmentLocatorProvider.cpp
-	Locator/EquipmentLocatorProvider.h
-	Locator/Locator.cpp
-	Locator/Locator.h
-	Locator/LocatorEditControl.cpp
-	Locator/LocatorEditControl.h
-	Locator/LocatorListWidget.cpp
-	Locator/LocatorListWidget.h
-	Locator/LocatorProvider.cpp
-	Locator/LocatorProvider.h
-	Locator/SchemaLocatorProvider.cpp
-	Locator/SchemaLocatorProvider.h
-	LoginDialog.cpp
-	LoginDialog.h
 	Main.cpp
 	MainTabPage.cpp
 	MainTabPage.h
@@ -172,50 +226,6 @@ set (U7_SOURCES
 	PasswordService.h
 	ProjectDefaults.cpp
 	ProjectDefaults.h
-	ProjectsTabPage.cpp
-	ProjectsTabPage.h
-	Reports/DialogReportPageSetup.cpp
-	Reports/DialogReportPageSetup.h
-	Reports/DialogSchemasExport.cpp
-	Reports/DialogSchemasExport.h
-	Reports/DialogSchemasReport.cpp
-	Reports/DialogSchemasReport.h
-	Reports/ProjectDiffReport.cpp
-	Reports/ProjectDiffReport.h
-	Reports/ReportPropertyEditor.cpp
-	Reports/ReportPropertyEditor.h
-	Reports/SchemasReport.cpp
-	Reports/SchemasReport.h
-	SchemaEditor/AutoFblItemConnection.cpp
-	SchemaEditor/AutoFblItemConnection.h
-	SchemaEditor/CreateSchemaDialog.cpp
-	SchemaEditor/CreateSchemaDialog.h
-	SchemaEditor/CreateSignalDialog.cpp
-	SchemaEditor/CreateSignalDialog.h
-	SchemaEditor/EditConnectionLine.cpp
-	SchemaEditor/EditConnectionLine.h
-	SchemaEditor/EditSchemaDiagStateProvider.cpp
-	SchemaEditor/EditSchemaDiagStateProvider.h
-	SchemaEditor/EditSchemaSignalProvider.cpp
-	SchemaEditor/EditSchemaSignalProvider.h
-	SchemaEditor/EditSchemaTabPage.cpp
-	SchemaEditor/EditSchemaTabPage.h
-	SchemaEditor/EditSchemaTypes.cpp
-	SchemaEditor/EditSchemaTypes.h
-	SchemaEditor/EditSchemaView.cpp
-	SchemaEditor/EditSchemaView.h
-	SchemaEditor/EditSchemaWidget.cpp
-	SchemaEditor/EditSchemaWidget.h
-	SchemaEditor/SchemaControlTabPage.cpp
-	SchemaEditor/SchemaControlTabPage.h
-	SchemaEditor/SchemaItemPropertiesDialog.cpp
-	SchemaEditor/SchemaItemPropertiesDialog.h
-	SchemaEditor/SchemaLayersDialog.cpp
-	SchemaEditor/SchemaLayersDialog.h
-	SchemaEditor/SchemaPropertiesDialog.cpp
-	SchemaEditor/SchemaPropertiesDialog.h
-	SchemaEditor/SchemasTabPage.cpp
-	SchemaEditor/SchemasTabPage.h
 	Settings.cpp
 	Settings.h
 	SignalHistoryDialog.cpp
@@ -226,10 +236,6 @@ set (U7_SOURCES
 	SignalsModels.h
 	SignalsTabPage.cpp
 	SignalsTabPage.h
-	Simulator/SimProfileEditor.cpp
-	Simulator/SimProfileEditor.h
-	Simulator/SimSelectBuildDialog.cpp
-	Simulator/SimSelectBuildDialog.h
 	SimulatorTabPage.cpp
 	SimulatorTabPage.h
 	SpecificPropertiesEditor.cpp
@@ -255,33 +261,33 @@ set (U7_RESOURCES
 )
 
 set (U7_FORMS
-	CreateProjectDialog.ui
+	./EquipmentEditor/DialogChoosePreset.ui
+	./EquipmentEditor/DialogImportPreset.ui
+	./EquipmentEditor/EquipmentVcsDialog.ui
+	./Forms/ChangesetDetailsDialog.ui
+	./Forms/ChooseAfbDialog.ui
+	./Forms/ChooseUfbDialog.ui
+	./Forms/CompareDialog.ui
+	./Forms/ComparePropertyObjectDialog.ui
+	./Forms/DialogProjectDiff.ui
+	./Forms/FileHistoryDialog.ui
+	./Forms/SelectChangesetDialog.ui
+	./ProjectsTabPage/CreateProjectDialog.ui
+	./ProjectsTabPage/LoginDialog.ui
+	./Reports/DialogSchemasExport.ui
+	./SchemaEditor/CreateSchemaDialog.ui
+	./SchemaEditor/SchemaItemPropertiesDialog.ui
+	./SchemaEditor/SchemaLayersDialog.ui
+	./SchemaEditor/SchemaPropertiesDialog.ui
+	./Simulator/SimSelectBuildDialog.ui
+	CheckInDialog.ui
 	CreateUserDialogDialog.ui
 	DialogSettings.ui
-	EquipmentEditor/DialogImportPreset.ui
-	Forms/DialogProjectDiff.ui
-	DialogTagsEditor.ui
-	LoginDialog.ui
-	Simulator/SimSelectBuildDialog.ui
-	UserManagementDialog.ui
-	CheckInDialog.ui
-	DialogSubsystemListEditor.ui
-	Forms/ChooseAfbDialog.ui
-	Reports/DialogSchemasExport.ui
-	EquipmentEditor/EquipmentVcsDialog.ui
-	SchemaEditor/CreateSchemaDialog.ui
-	SchemaEditor/SchemaLayersDialog.ui
-	SchemaEditor/SchemaPropertiesDialog.ui
-	SchemaEditor/SchemaItemPropertiesDialog.ui
-	EquipmentEditor/DialogChoosePreset.ui
 	DialogSettingsConfigurator.ui
-	Forms/ChooseUfbDialog.ui
-	Forms/SelectChangesetDialog.ui
-	Forms/FileHistoryDialog.ui
-	Forms/ChangesetDetailsDialog.ui
-	Forms/CompareDialog.ui
-	Forms/ComparePropertyObjectDialog.ui
+	DialogSubsystemListEditor.ui
+	DialogTagsEditor.ui
 	DialogTuningClients.ui
+	UserManagementDialog.ui
 )
 
 # Add icon
@@ -450,13 +456,25 @@ endif()
 
 target_compile_definitions(${TARGET} PRIVATE QTKEYCHAIN_NO_EXPORT)
 
-#
 # Copy PostgreSQL DLLs (libpq.dll and its' dependencies)
 # These dlls are not copied by default.
 #
 copy_libpq_dll(${TARGET})
 
-# --
+add_custom_command(
+	TARGET ${TARGET}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pg
+)
+
+# Copy readme for project backup/restore feature
+#
+add_custom_command(TARGET ${TARGET} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${TARGET}>/pg
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/pg/readme.txt $<TARGET_FILE_DIR:${TARGET}>/pg
+    COMMENT "Copying readme.txt to the binary output directory in pg"
+)
+
 # Generation scripting help
 # Find for Doxygen here as add_subdirectory works with CMake 3.27+ only
 #

@@ -2,7 +2,7 @@
 
 #include "FindSignalDialog.h"
 #include "SignalsTabPage.h"
-#include "Settings.h"
+#include "AppSettings.h"
 #include "AppSignalSetProvider.h"
 
 const QString FindSignalDialog::notUniqueMessage("No - not unique");
@@ -34,6 +34,8 @@ FindSignalDialog::FindSignalDialog(QTableView* parent) :
 	m_replaceableSignalQuantityBlinkTimer(new QTimer(this)),
 	m_regExp4Id(AppSignal::IDENTIFICATORS_VALIDATOR)
 {
+	m_isExpertMode = theAppSettings.isExpertMode();
+
 	m_currentUserId = m_signalSetProvider->currentUserID();
 	m_currentUserIsAdmin = m_signalSetProvider->currentUserIsAdmin();
 
@@ -393,7 +395,7 @@ QString FindSignalDialog::getProperty(const AppSignal& signal)
 		return QString();
 	}
 
-	return m_propManager->value(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, theSettings.isExpertMode()).toString();
+	return m_propManager->value(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, m_isExpertMode).toString();
 }
 
 void FindSignalDialog::setProperty(AppSignal& signal, const QString& value)
@@ -404,7 +406,7 @@ void FindSignalDialog::setProperty(AppSignal& signal, const QString& value)
 		return;
 	}
 
-	m_propManager->setValue(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, value, theSettings.isExpertMode());
+	m_propManager->setValue(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, value, m_isExpertMode);
 }
 
 int FindSignalDialog::getSignalId(int row)

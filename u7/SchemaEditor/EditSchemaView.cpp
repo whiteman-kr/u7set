@@ -32,8 +32,8 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, QWidget*
 	m_updateDuringBuildTimer = startTimer(50);
 }
 
-EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::shared_ptr<VFrame30::Schema> schema, QWidget* parent)
-	: VFrame30::SchemaViewWidget(schema, parent),
+EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::shared_ptr<VFrame30::Schema> schema, QWidget* parent) :
+	VFrame30::SchemaViewWidget(schema, parent),
 	m_activeLayer(0),
 	m_mouseState(MouseState::None),
 	m_diagStateProvider(),
@@ -44,7 +44,8 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::sha
 {
 	Q_ASSERT(signalSetProvider);
 
-	auto context = VFrame30::Context::create(&m_diagStateController, &m_appSignalController, nullptr/*m_tuningController*/, nullptr, nullptr);
+	auto context =
+		VFrame30::Context::create(&m_diagStateController, &m_appSignalController, nullptr /*m_tuningController*/, nullptr, nullptr);
 	schema->setContext(std::move(context));
 
 	// Timer for updates of WRN/ERR count
@@ -52,9 +53,7 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::sha
 	m_updateDuringBuildTimer = startTimer(50);
 }
 
-EditSchemaView::~EditSchemaView()
-{
-}
+EditSchemaView::~EditSchemaView() {}
 
 VFrame30::DrawMode EditSchemaView::drawMode() const
 {
@@ -71,8 +70,7 @@ void EditSchemaView::timerEvent(QTimerEvent* event)
 		//
 		Builder::BuildIssues::Counter schemaIssues = GlobalMessanger::instance().buildIssues().issueForSchema(schema()->schemaId());
 
-		if (schemaIssues.errors !=  m_lastSchemaIssues.errors ||
-			schemaIssues.warnings !=  m_lastSchemaIssues.warnings)
+		if (schemaIssues.errors != m_lastSchemaIssues.errors || schemaIssues.warnings != m_lastSchemaIssues.warnings)
 		{
 			m_lastSchemaIssues = schemaIssues;
 			update();
@@ -93,7 +91,7 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 	if (schema() != nullptr && theSettings.infoMode() == false)
 	{
 		QRect updateRect = paintEvent->rect();
-		updateRect.adjust(-logicalDpiX(), -logicalDpiY() / 4, logicalDpiX(), logicalDpiY() / 4);	// some space to draw pin names
+		updateRect.adjust(-logicalDpiX(), -logicalDpiY() / 4, logicalDpiX(), logicalDpiY() / 4); // some space to draw pin names
 
 		QPointF cls;
 		QPointF clf;
@@ -119,12 +117,12 @@ void EditSchemaView::paintEvent(QPaintEvent* paintEvent)
 		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom()));
 		drawParam.setInfoMode(theSettings.infoMode());
 
-		//QElapsedTimer et;
-		//et.start();
+		// QElapsedTimer et;
+		// et.start();
 
 		draw(drawParam, clipRect);
 
-		//qDebug() << "EditSchemaView::paintEvent, draw time " << et.elapsed() << "ms";
+		// qDebug() << "EditSchemaView::paintEvent, draw time " << et.elapsed() << "ms";
 	}
 
 	// Draw other -- selection, grid, outlines, rulers, etc
@@ -239,9 +237,7 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 		{
 			OutputMessageLevel issue = GlobalMessanger::instance().issueForSchemaItem(item->guid());
 
-			if ((issue == OutputMessageLevel::Warning0 ||
-				 issue == OutputMessageLevel::Warning1 ||
-				 issue == OutputMessageLevel::Warning2 ||
+			if ((issue == OutputMessageLevel::Warning0 || issue == OutputMessageLevel::Warning1 || issue == OutputMessageLevel::Warning2 ||
 				 issue == OutputMessageLevel::Error) &&
 				item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 			{
@@ -259,8 +255,7 @@ void EditSchemaView::drawEditConnectionLineOutline(VFrame30::CDrawParam* drawPar
 {
 	bool ctrlIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier);
 
-	if (ctrlIsPressed == true ||
-		m_doNotMoveConnectionLines == true)
+	if (ctrlIsPressed == true || m_doNotMoveConnectionLines == true)
 	{
 		return;
 	}
@@ -334,8 +329,7 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 	if (dynamic_cast<VFrame30::IPosConnection*>(m_newItem.get()) != nullptr)
 	{
-		if (mouseState() != MouseState::AddSchemaPosConnectionStartPoint &&
-			mouseState() != MouseState::AddSchemaPosConnectionNextPoint)
+		if (mouseState() != MouseState::AddSchemaPosConnectionStartPoint && mouseState() != MouseState::AddSchemaPosConnectionNextPoint)
 		{
 			return;
 		}
@@ -403,8 +397,7 @@ void EditSchemaView::drawSelectionArea(QPainter* p)
 
 void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 {
-	if (mouseState() != MouseState::Moving ||
-		m_selectedItems.empty() == true)
+	if (mouseState() != MouseState::Moving || m_selectedItems.empty() == true)
 	{
 		return;
 	}
@@ -416,15 +409,15 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	//
 	bool ctrlIsPressed = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
 
-	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
-		[xdif, ydif, ctrlIsPressed](SchemaItemPtr si)
-		{
-			if (si->isLocked() == false ||
-				(si->isLocked() == true && ctrlIsPressed == true))
-			{
-				si->moveItem(xdif, ydif);
-			}
-		});
+	std::for_each(m_selectedItems.begin(),
+				  m_selectedItems.end(),
+				  [xdif, ydif, ctrlIsPressed](SchemaItemPtr si)
+				  {
+					  if (si->isLocked() == false || (si->isLocked() == true && ctrlIsPressed == true))
+					  {
+						  si->moveItem(xdif, ydif);
+					  }
+				  });
 
 	// Draw outline
 	//
@@ -441,8 +434,7 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	{
 		SchemaItemPtr si = *it;
 
-		if ((si->isLocked() == true && ctrlIsPressed == false) ||
-			si->isLocked() == true)
+		if ((si->isLocked() == true && ctrlIsPressed == false) || si->isLocked() == true)
 		{
 			continue;
 		}
@@ -487,15 +479,15 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 
 	// Shift position back
 	//
-	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
-		[xdif, ydif, ctrlIsPressed](SchemaItemPtr si)
-		{
-			if (si->isLocked() == false ||
-				(si->isLocked() == true && ctrlIsPressed == true))
-			{
-				si->moveItem(-xdif, -ydif);
-			}
-		});
+	std::for_each(m_selectedItems.begin(),
+				  m_selectedItems.end(),
+				  [xdif, ydif, ctrlIsPressed](SchemaItemPtr si)
+				  {
+					  if (si->isLocked() == false || (si->isLocked() == true && ctrlIsPressed == true))
+					  {
+						  si->moveItem(-xdif, -ydif);
+					  }
+				  });
 
 	// Draw rulers by bounding rect
 	//
@@ -524,20 +516,14 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 
 void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 {
-	if (mouseState() != MouseState::SizingTopLeft &&
-		mouseState() != MouseState::SizingTop &&
-		mouseState() != MouseState::SizingTopRight &&
-		mouseState() != MouseState::SizingRight &&
-		mouseState() != MouseState::SizingBottomRight &&
-		mouseState() != MouseState::SizingBottom &&
-		mouseState() != MouseState::SizingBottomLeft &&
-		mouseState() != MouseState::SizingLeft)
+	if (mouseState() != MouseState::SizingTopLeft && mouseState() != MouseState::SizingTop && mouseState() != MouseState::SizingTopRight &&
+		mouseState() != MouseState::SizingRight && mouseState() != MouseState::SizingBottomRight &&
+		mouseState() != MouseState::SizingBottom && mouseState() != MouseState::SizingBottomLeft && mouseState() != MouseState::SizingLeft)
 	{
 		return;
 	}
 
-	if (m_editStartDocPt.isNull() == true ||
-		m_editEndDocPt.isNull() == true)
+	if (m_editStartDocPt.isNull() == true || m_editEndDocPt.isNull() == true)
 	{
 		assert(m_editStartDocPt.isNull() == false);
 		assert(m_editEndDocPt.isNull() == false);
@@ -665,14 +651,12 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 void EditSchemaView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 {
-	if (mouseState() != MouseState::MovingStartLinePoint &&
-		mouseState() != MouseState::MovingEndLinePoint)
+	if (mouseState() != MouseState::MovingStartLinePoint && mouseState() != MouseState::MovingEndLinePoint)
 	{
 		return;
 	}
 
-	if (m_editStartDocPt.isNull() == true ||
-		m_editEndDocPt.isNull() == true)
+	if (m_editStartDocPt.isNull() == true || m_editEndDocPt.isNull() == true)
 	{
 		assert(m_editStartDocPt.isNull() == false);
 		assert(m_editEndDocPt.isNull() == false);
@@ -758,8 +742,7 @@ void EditSchemaView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 
 void EditSchemaView::drawMovingEdgesOrVertexConnectionLine(VFrame30::CDrawParam* drawParam)
 {
-	if (mouseState() != MouseState::MovingHorizontalEdge &&
-		mouseState() != MouseState::MovingVerticalEdge &&
+	if (mouseState() != MouseState::MovingHorizontalEdge && mouseState() != MouseState::MovingVerticalEdge &&
 		mouseState() != MouseState::MovingConnectionLinePoint)
 	{
 		return;
@@ -873,7 +856,7 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 			switch (compareAction)
 			{
 			case CompareAction::Unmodified:
-				color = QColor(0, 0, 0, 0);			// Full transparent, as is
+				color = QColor(0, 0, 0, 0); // Full transparent, as is
 				break;
 			case CompareAction::Modified:
 				color = QColor(0, 0, 0xC0, 128);
@@ -888,8 +871,7 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 				assert(false);
 			}
 
-			if (compareAction != CompareAction::Unmodified &&
-				item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			if (compareAction != CompareAction::Unmodified && item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 			{
 				// Draw item issue
 				//
@@ -897,13 +879,12 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 			}
 		}
 	}
-
 }
 
 void EditSchemaView::drawAutoFblItemConnection(VFrame30::CDrawParam& drawParam)
 {
 	QPainter* painter = drawParam.painter();
-	
+
 	QPen pen{Qt::darkGray};
 	pen.setCosmetic(true);
 	pen.setStyle(Qt::PenStyle::DashLine);
@@ -913,8 +894,7 @@ void EditSchemaView::drawAutoFblItemConnection(VFrame30::CDrawParam& drawParam)
 
 	static const VFrame30::FontParam font{"Arial", 1.0 / 8.0, false, false};
 
-	for (auto lines = m_autoFblItemConnection.getPropositions();
-		 const auto& line : lines)
+	for (auto lines = m_autoFblItemConnection.getPropositions(); const auto& line : lines)
 	{
 		painter->drawLine(line.from, line.to);
 		painter->drawRect(line.addButtonRect);
@@ -929,14 +909,14 @@ void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 {
 	Q_ASSERT(p);
 
-//	if (m_mouseSelectionStartPoint.isNull() == false &&
-//		m_mouseSelectionEndPoint.isNull() == false)
-//	{
-//		// Don't draw grid if selection now,
-//		// just speed optimization
-//		//
-//		return;
-//	}
+	//	if (m_mouseSelectionStartPoint.isNull() == false &&
+	//		m_mouseSelectionEndPoint.isNull() == false)
+	//	{
+	//		// Don't draw grid if selection now,
+	//		// just speed optimization
+	//		//
+	//		return;
+	//	}
 
 	auto unit = schema()->unit();
 	double documentWidth = schema()->docWidth();
@@ -979,11 +959,9 @@ void EditSchemaView::drawGrid(QPainter* p, const QRectF& clipRect)
 	auto screen = this->screen();
 	assert(screen);
 
-	const double dpiX = (unit == SchemaUnit::Display) ?
-							(1.0) : (screen->physicalDotsPerInchX() * devicePixelRatioF());
+	const double dpiX = (unit == SchemaUnit::Display) ? (1.0) : (screen->physicalDotsPerInchX() * devicePixelRatioF());
 
-	const double dpiY = (unit == SchemaUnit::Display) ?
-							(1.0) : (screen->physicalDotsPerInchY() * devicePixelRatioF());
+	const double dpiY = (unit == SchemaUnit::Display) ? (1.0) : (screen->physicalDotsPerInchY() * devicePixelRatioF());
 
 	const double dpiXScale = gridSize * dpiX * scale;
 	const double dpiYScale = gridSize * dpiY * scale;
@@ -1046,14 +1024,13 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 	//
 	if (dynamic_cast<VFrame30::IPosRect*>(schemaItem) != nullptr)
 	{
-		VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(schemaItem) ;
+		VFrame30::IPosRect* itemPos = dynamic_cast<VFrame30::IPosRect*>(schemaItem);
 
 		// If inside the rect then SchemaItemAction.MoveItem
 		//
 		if (schemaItem->isIntersectPoint(point.x(), point.y()) == true)
 		{
-			if (schemaItem->isLocked() == false ||
-				(schemaItem->isLocked() == true && ctrlIsPressed == true))
+			if (schemaItem->isLocked() == false || (schemaItem->isLocked() == true && ctrlIsPressed == true))
 			{
 				return SchemaItemAction::MoveItem;
 			}
@@ -1074,12 +1051,11 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 		std::vector<std::pair<QRectF, SchemaItemAction>> barRects;
 		barRects.reserve(8);
- 
+
 		// If this is the rotatable item and the angle is not 0, for different rotation points deferent control bars.
 		// Attention, this code has duplication with PosRectRotatable::drawSelectionPrivate() method.
 		//
-		if (const auto rotatableItem = dynamic_cast<const VFrame30::PosRectRotatable*>(schemaItem);
-			rotatableItem != nullptr)
+		if (const auto rotatableItem = dynamic_cast<const VFrame30::PosRectRotatable*>(schemaItem); rotatableItem != nullptr)
 		{
 			auto controlBarArray = rotatableItem->controlBarRects(controlBarSize);
 			static_assert(controlBarArray.size() == 8);
@@ -1119,21 +1095,36 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 		}
 		else
 		{
-			barRects.emplace_back(QRectF{itemRectangle.left() - controlBarSize, itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize},
-								  SchemaItemAction::ChangeSizeTopLeft);
-			barRects.emplace_back(QRectF{itemRectangle.left() + itemRectangle.width() / 2 - controlBarSize / 2, itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize},
+			barRects.emplace_back(
+				QRectF{itemRectangle.left() - controlBarSize, itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize},
+				SchemaItemAction::ChangeSizeTopLeft);
+			barRects.emplace_back(QRectF{itemRectangle.left() + itemRectangle.width() / 2 - controlBarSize / 2,
+										 itemRectangle.top() - controlBarSize,
+										 controlBarSize,
+										 controlBarSize},
 								  SchemaItemAction::ChangeSizeTop);
 			barRects.emplace_back(QRectF{itemRectangle.right(), itemRectangle.top() - controlBarSize, controlBarSize, controlBarSize},
 								  SchemaItemAction::ChangeSizeTopRight);
-			barRects.emplace_back(QRectF{itemRectangle.right(), itemRectangle.top() + itemRectangle.height() / 2 - controlBarSize / 2, controlBarSize, controlBarSize},
+			barRects.emplace_back(QRectF{itemRectangle.right(),
+										 itemRectangle.top() + itemRectangle.height() / 2 - controlBarSize / 2,
+										 controlBarSize,
+										 controlBarSize},
 								  SchemaItemAction::ChangeSizeRight);
-			barRects.emplace_back(QRectF{itemRectangle.right(), itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize},
-								  SchemaItemAction::ChangeSizeBottomRight);
-			barRects.emplace_back(QRectF{itemRectangle.left() + itemRectangle.width() / 2 - controlBarSize / 2, itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize},
+			barRects.emplace_back(
+				QRectF{itemRectangle.right(), itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize},
+				SchemaItemAction::ChangeSizeBottomRight);
+			barRects.emplace_back(QRectF{itemRectangle.left() + itemRectangle.width() / 2 - controlBarSize / 2,
+										 itemRectangle.top() + itemRectangle.height(),
+										 controlBarSize,
+										 controlBarSize},
 								  SchemaItemAction::ChangeSizeBottom);
-			barRects.emplace_back(QRectF{itemRectangle.left() - controlBarSize, itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize},
-								  SchemaItemAction::ChangeSizeBottomLeft);
-			barRects.emplace_back(QRectF{itemRectangle.left() - controlBarSize, itemRectangle.top() + itemRectangle.height() / 2 - controlBarSize / 2, controlBarSize, controlBarSize},
+			barRects.emplace_back(
+				QRectF{itemRectangle.left() - controlBarSize, itemRectangle.top() + itemRectangle.height(), controlBarSize, controlBarSize},
+				SchemaItemAction::ChangeSizeBottomLeft);
+			barRects.emplace_back(QRectF{itemRectangle.left() - controlBarSize,
+										 itemRectangle.top() + itemRectangle.height() / 2 - controlBarSize / 2,
+										 controlBarSize,
+										 controlBarSize},
 								  SchemaItemAction::ChangeSizeLeft);
 		}
 
@@ -1141,7 +1132,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			rotatableItem != nullptr && rotatableItem->angle() != 0.0)
 		{
 			// Check BarRectangles with rotations
-			//  
+			//
 			auto rotatePoint = rotatableItem->rotationPointInDocPt();
 
 			QTransform transform;
@@ -1182,7 +1173,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 	if (dynamic_cast<VFrame30::IPosLine*>(schemaItem) != nullptr)
 	{
-		VFrame30::IPosLine* itemPos = dynamic_cast<VFrame30::IPosLine*>(schemaItem) ;
+		VFrame30::IPosLine* itemPos = dynamic_cast<VFrame30::IPosLine*>(schemaItem);
 
 		double x1 = itemPos->startXDocPt();
 		double y1 = itemPos->startYDocPt();
@@ -1190,7 +1181,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 		double y2 = itemPos->endYDocPt();
 
 		QRectF controlRectangles[2] = {QRectF{x1 - controlBarSize / 2, y1 - controlBarSize / 2, controlBarSize, controlBarSize},
-									   QRectF{x2 - controlBarSize / 2, y2 - controlBarSize/ 2, controlBarSize, controlBarSize}};
+									   QRectF{x2 - controlBarSize / 2, y2 - controlBarSize / 2, controlBarSize, controlBarSize}};
 
 		if (controlRectangles[0].contains(point) == true && schemaItem->isLocked() == false)
 		{
@@ -1204,8 +1195,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 		if (schemaItem->isIntersectPoint(point.x(), point.y()) == true)
 		{
-			if (schemaItem->isLocked() == false ||
-				(schemaItem->isLocked() == true && ctrlIsPressed == true))
+			if (schemaItem->isLocked() == false || (schemaItem->isLocked() == true && ctrlIsPressed == true))
 			{
 				return SchemaItemAction::MoveItem;
 			}
@@ -1226,7 +1216,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			return SchemaItemAction::NoAction;
 		}
 
-		VFrame30::PosConnectionImpl* itemPos = dynamic_cast<VFrame30::PosConnectionImpl*>(schemaItem) ;
+		VFrame30::PosConnectionImpl* itemPos = dynamic_cast<VFrame30::PosConnectionImpl*>(schemaItem);
 		std::list<VFrame30::SchemaPoint> points = itemPos->GetPointList();
 
 		int pointIndex = 0;
@@ -1270,8 +1260,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 				x1 -= controlBarSize / 4.0;
 				x2 += controlBarSize / 4.0;
 
-				if (point.x() >= x1 && point.x() <= x2 &&
-					point.y() >= y1 && point.y() <= y2)
+				if (point.x() >= x1 && point.x() <= x2 && point.y() >= y1 && point.y() <= y2)
 				{
 					*outMovingEdgePointIndex = pointIndex - 1;
 					return SchemaItemAction::MoveVerticalEdge;
@@ -1284,8 +1273,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 				y1 -= controlBarSize / 4.0;
 				y2 += controlBarSize / 4.0;
 
-				if (point.x() >= x1 && point.x() <= x2 &&
-					point.y() >= y1 && point.y() <= y2)
+				if (point.x() >= x1 && point.x() <= x2 && point.y() >= y1 && point.y() <= y2)
 				{
 					*outMovingEdgePointIndex = pointIndex - 1;
 					return SchemaItemAction::MoveHorizontalEdge;
@@ -1340,18 +1328,18 @@ QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, const VFrame30::
 	case MouseState::SizingTopLeft:
 		x1 += xdif;
 		y1 += ydif;
-		if (x2 - x1 < minWidth)		// x1
+		if (x2 - x1 < minWidth)  // x1
 		{
 			x1 = x2 - minWidth;
 		}
-		if (y2 - y1 < minHeight)	// y1
+		if (y2 - y1 < minHeight) // y1
 		{
 			y1 = y2 - minHeight;
 		}
 		break;
 	case MouseState::SizingTop:
 		y1 += ydif;
-		if (y2 - y1 < minHeight)	// y1
+		if (y2 - y1 < minHeight) // y1
 		{
 			y1 = y2 - minHeight;
 		}
@@ -1359,18 +1347,18 @@ QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, const VFrame30::
 	case MouseState::SizingTopRight:
 		x2 += xdif;
 		y1 += ydif;
-		if (x2 - x1 < minWidth)		// x2
+		if (x2 - x1 < minWidth)  // x2
 		{
 			x2 = x1 + minWidth;
 		}
-		if (y2 - y1 < minHeight)	// y1
+		if (y2 - y1 < minHeight) // y1
 		{
 			y1 = y2 - minHeight;
 		}
 		break;
 	case MouseState::SizingRight:
 		x2 += xdif;
-		if (x2 - x1 < minWidth)		// x2
+		if (x2 - x1 < minWidth) // x2
 		{
 			x2 = x1 + minWidth;
 		}
@@ -1378,18 +1366,18 @@ QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, const VFrame30::
 	case MouseState::SizingBottomRight:
 		x2 += xdif;
 		y2 += ydif;
-		if (x2 - x1 < minWidth)		// x2
+		if (x2 - x1 < minWidth)  // x2
 		{
 			x2 = x1 + minWidth;
 		}
-		if (y2 - y1 < minHeight)	// y2
+		if (y2 - y1 < minHeight) // y2
 		{
 			y2 = y1 + minHeight;
 		}
 		break;
 	case MouseState::SizingBottom:
 		y2 += ydif;
-		if (y2 - y1 < minHeight)	// y2
+		if (y2 - y1 < minHeight) // y2
 		{
 			y2 = y1 + minHeight;
 		}
@@ -1397,18 +1385,18 @@ QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, const VFrame30::
 	case MouseState::SizingBottomLeft:
 		x1 += xdif;
 		y2 += ydif;
-		if (x2 - x1 < minWidth)		// x1
+		if (x2 - x1 < minWidth)  // x1
 		{
 			x1 = x2 - minWidth;
 		}
-		if (y2 - y1 < minHeight)	// y2
+		if (y2 - y1 < minHeight) // y2
 		{
 			y2 = y1 + minHeight;
 		}
 		break;
 	case MouseState::SizingLeft:
 		x1 += xdif;
-		if (x2 - x1 < minWidth)		// x1
+		if (x2 - x1 < minWidth) // x1
 		{
 			x1 = x2 - minWidth;
 		}
@@ -1418,10 +1406,7 @@ QRectF EditSchemaView::sizingRectItem(double xdif, double ydif, const VFrame30::
 		break;
 	}
 
-	QRectF result(std::min(x1, x2),
-				  std::min(y1, y2),
-				  std::abs(x2 - x1),
-				  std::abs(y2 - y1));
+	QRectF result(std::min(x1, x2), std::min(y1, y2), std::abs(x2 - x1), std::abs(y2 - y1));
 
 	return result;
 }
@@ -1553,7 +1538,7 @@ void EditSchemaView::setSelectedItems(const std::list<SchemaItemPtr>& items)
 	//
 	m_selectedItems.clear();
 	m_selectedItems.insert(m_selectedItems.begin(), items.begin(), items.end());
-	
+
 	m_autoFblItemConnection.setItems(m_selectedItems);
 
 	emit selectionChanged();
@@ -1667,8 +1652,8 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 		assert(schema()->unit() == SchemaUnit::Display);
 		pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
 
-		pdfWriter.setResolution(72);	// 72 is from enum QPageLayout::Unit help,
-										// QPageLayout::Point	1	1/!!! 72th !!!! of an inch
+		pdfWriter.setResolution(72); // 72 is from enum QPageLayout::Unit help,
+									 // QPageLayout::Point	1	1/!!! 72th !!!! of an inch
 	}
 
 	pdfWriter.setPageSize(pageSize);
@@ -1680,12 +1665,14 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 	VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
 
 	drawParam.setInfoMode(infoMode);
+	drawParam.setControlBarSize(
+		CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), 100.0)); // Compare outlines depends on ControlBarSize
 	drawParam.setPdfMode(true);
 
 	// Calc size
 	//
-	int widthInPixel = schema()->GetDocumentWidth(pdfWriter.resolution(), 100.0);		// Export 100% zoom
-	int heightInPixel = schema()->GetDocumentHeight(pdfWriter.resolution(), 100.0);		// Export 100% zoom
+	int widthInPixel = schema()->GetDocumentWidth(pdfWriter.resolution(), 100.0);   // Export 100% zoom
+	int heightInPixel = schema()->GetDocumentHeight(pdfWriter.resolution(), 100.0); // Export 100% zoom
 
 	// Clear device
 	//
@@ -1694,7 +1681,7 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 
 	// Ajust QPainter
 	//
-	Ajust(&p, schema()->unit(), 0, 0, 100.0);			// Export 100% zoom
+	Ajust(&p, schema()->unit(), 0, 0, 100.0); // Export 100% zoom
 
 	// Draw Schema
 	//
@@ -1702,9 +1689,13 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 
 	schema()->Draw(&drawParam, clipRect);
 
+	if (m_compareWidget == true)
+	{
+		drawCompareOutlines(&drawParam, clipRect);
+	}
+
 	// Ending
 	//
 
 	return;
 }
-
