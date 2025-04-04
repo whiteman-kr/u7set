@@ -8007,6 +8007,26 @@ namespace Builder
 							 "in user application logic (schema %2).").arg(appSignalID).arg(schema)));
 	}
 
+	/// IssueCode: ALC5206
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   OptoPort %1 tx raw data out of range (%2 words)
+	///
+	/// Parameters:
+	///		%1 OptoPort EquipmentID
+	///		%2 tx raw data size
+	///
+	/// Description:
+	///		Tx raw data out of specified range
+	///
+	void IssueLogger::errALC5206(QString optoPortID, int txRawDataSize)
+	{
+		LOG_ERROR(IssueType::AlCompiler, 5205,
+				  QString(tr("OptoPort %1 tx raw data out of range (%2 words)").
+							arg(optoPortID).arg(txRawDataSize)));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning

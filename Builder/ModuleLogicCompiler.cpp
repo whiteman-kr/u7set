@@ -16257,6 +16257,8 @@ namespace Builder
 			default:
 				assert(false);
 			}
+
+			RETURN_IF_FALSE(result);
 		}
 
 		result &= copyOptoPortRawTxAnalogSignals(code, port);
@@ -16766,6 +16768,14 @@ namespace Builder
 			return true;
 		}
 
+		if (*rawDataOffset + moduleRawDataSize >= port->txRawDataSizeW())
+		{
+			// OptoPort %1 tx raw data out of range (%2 words)
+			//
+			m_log->errALC5206(port->equipmentID(), port->txRawDataSizeW());
+			return false;
+		}
+
 		ModuleRawDataDescription* desc = m_optoModuleStorage->getModuleRawDataDescription(module);
 
 		if (desc == nullptr)
@@ -16936,10 +16946,18 @@ namespace Builder
 			return true;
 		}
 
-		CodeItem cmd;
+		if (*rawDataOffset + portTxRawDataSizeW >= port->txRawDataSizeW())
+		{
+			// OptoPort %1 tx raw data out of range (%2 words)
+			//
+			m_log->errALC5206(port->equipmentID(), port->txRawDataSizeW());
+			return false;
+		}
 
 		int writeAddr = port->txBufAddress() + *rawDataOffset;
 		int writeSizeW = portTxRawDataSizeW;
+
+		CodeItem cmd;
 
 		cmd.movMem(writeAddr, portWithRxRawData->rxBufAddress() + Hardware::OptoPort::TX_DATA_ID_SIZE_W, writeSizeW);
 		cmd.setComment(QString("copying raw data received on port %1").arg(portWithRxRawData->equipmentID()));
@@ -16958,6 +16976,14 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(port, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(rawDataOffset, m_log);
 
+		if (*rawDataOffset >= port->txRawDataSizeW())
+		{
+			// OptoPort %1 tx raw data out of range (%2 words)
+			//
+			m_log->errALC5206(port->equipmentID(), port->txRawDataSizeW());
+			return false;
+		}
+
 		CodeItem cmd;
 
 		int writeAddr = port->txBufAddress() + *rawDataOffset;
@@ -16972,7 +16998,6 @@ namespace Builder
 		(*rawDataOffset)++;
 
 		return true;
-
 	}
 
 	bool ModuleLogicCompiler::copyOptoPortRawTxAnalogSignals(CodeSnippet* code, Hardware::OptoPortShared port)
