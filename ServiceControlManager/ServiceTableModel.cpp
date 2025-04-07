@@ -3,6 +3,7 @@
 #include "../OnlineLib/SocketIO.h"
 #include "AppDataServiceWidget.h"
 #include "CfgServiceWidget.h"
+#include "ArchiveServiceWidget.h"
 #include "TuningServiceWidget.h"
 
 // --------------------------------------------------------------------------------------
@@ -462,6 +463,9 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 		break;
 
 	case E::SoftwareType::ArchiveService:
+		srvWidget = new ArchiveServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.tcpPort, m_parentWidget);
+		break;
+
 	case E::SoftwareType::DiagDataService:
 	case E::SoftwareType::GatewayService:
 	default:

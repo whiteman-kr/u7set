@@ -75,9 +75,9 @@ class AppDataServiceWidget : public BaseServiceWidget
 public:
 	AppDataServiceWidget(ServiceTableModel* srvTableModel,
 						 const SoftwareInfo& softwareInfo,
-						 const ServiceData& service,
+						 const ServiceData& serviceData,
 						 quint32 ip, quint16 tcpPort,
-						 QWidget *parent = nullptr);
+						 QWidget* parent = nullptr);
 	~AppDataServiceWidget();
 
 	virtual void initWidget() override;

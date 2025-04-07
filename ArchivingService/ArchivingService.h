@@ -55,6 +55,7 @@ private slots:
 							  const BuildFileInfoArray buildFileInfoArray,
 							  SessionParams sessionParams,
 							  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
+	void onTimer1min();
 
 private:
 	QString m_overwriteArchiveLocation;
@@ -71,4 +72,6 @@ private:
 	Tcp::ListenerThread* m_tcpArchRequestsServerThread = nullptr;
 
 	Archive* m_archive = nullptr;
+
+	QTimer* m_timer = nullptr;
 };

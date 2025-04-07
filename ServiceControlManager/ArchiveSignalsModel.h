@@ -3,10 +3,10 @@
 #include "../AppDataService/AppDataSource.h"
 #include "Columns.h"
 
-class AppDataSourcesModel : public QAbstractTableModel
+class ArchiveSignalsModel : public QAbstractTableModel
 {
 public:
-	AppDataSourcesModel(QWidget* parent);
+	ArchiveSignalsModel(QWidget* parent);
 
 	const Columns& columns() const;
 

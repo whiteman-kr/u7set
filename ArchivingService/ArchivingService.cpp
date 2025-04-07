@@ -35,9 +35,44 @@ ServiceWorker* ArchivingService::createInstance() const
 
 void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::ArchiveService, m_serviceSettings);
+	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::AppDataService, m_serviceSettings);
 
 	serviceInfo.set_settingsxml(xmlString.toStdString());
+
+	serviceInfo.set_cfgserviceip1(cfgServiceIP1().address32());
+	serviceInfo.set_cfgserviceport1(cfgServiceIP1().port());
+
+	serviceInfo.set_cfgserviceip2(cfgServiceIP2().address32());
+	serviceInfo.set_cfgserviceport2(cfgServiceIP2().port());
+
+	if (m_tcpAppDataServerThread != nullptr)
+	{
+		m_tcpAppDataServerThread->getClientsList(&serviceInfo);
+	}
+
+	if (m_archive != nullptr)
+	{
+		int count = 500;
+
+		std::vector<std::pair<int, int>> recordsPerMin;
+		m_archive->getRecordsPerMin(&recordsPerMin, count);
+
+		count = TO_INT(recordsPerMin.size());
+
+		for(int i = 0; i < count; i++)
+		{
+			const ArchFile* archFile = m_archive->getArchFileByIndex(recordsPerMin[i].second);
+
+			TEST_PTR_CONTINUE(archFile);
+
+			Network::ArchSignalInfo* asi = serviceInfo.add_archsignalsinfo();
+
+			asi->set_appsignalid(archFile->appSignalID().toStdString());
+			asi->set_fineaperture(archFile->fineAperture());
+			asi->set_coarseaperture(archFile->coarseAperture());
+			asi->set_recordspermin(recordsPerMin[i].first);
+		}
+	}
 }
 
 bool ArchivingService::isReadOnlyArchive() const
@@ -140,10 +175,21 @@ void ArchivingService::startAllThreads()
 	}
 
 	startTcpArchRequestsServerThread();
+
+	if (m_timer == nullptr)
+	{
+		m_timer = new QTimer;
+	}
+
+	m_timer->start(60 * 1000);
+
+	connect(m_timer, &QTimer::timeout, this, &ArchivingService::onTimer1min);
 }
 
 void ArchivingService::stopAllThreads()
 {
+	DELETE_IF_NOT_NULL(m_timer);
+
 	stopTcpAppDataServerThread();
 	stopTcpArchiveRequestsServerThread();
 
@@ -281,6 +327,14 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 		return;
 	}
 
+	bool res = readBuildInfo(configurationXmlData);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger(), QString("Error reading BuildInfo from configurationXmlData"));
+		return;
+	}
+
 	ArchivingServiceSettings newServiceSettings = *typedSettingsPtr;
 
 	if (m_overwriteArchiveLocation.isEmpty() == false)
@@ -330,4 +384,10 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 
 	startAllThreads();
 }
+
+void ArchivingService::onTimer1min()
+{
+	m_archive->onTimer1min();
+}
+
 

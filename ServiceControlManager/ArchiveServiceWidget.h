@@ -1,17 +1,19 @@
 #pragma once
 
+#pragma once
+
 #include "BaseServiceWidget.h"
 
-class CfgServiceWidget : public BaseServiceWidget
+class ArchiveServiceWidget : public BaseServiceWidget
 {
 	Q_OBJECT
 public:
-	CfgServiceWidget(ServiceTableModel* srvTableModel,
+	ArchiveServiceWidget(ServiceTableModel* srvTableModel,
 					 const SoftwareInfo& softwareInfo,
 					 const ServiceData& serviceData,
 					 quint32 ip, quint16 tcpPort,
 					 QWidget* parent = 0);
-	virtual ~CfgServiceWidget();
+	virtual ~ArchiveServiceWidget();
 
 	virtual void initWidget() override;
 

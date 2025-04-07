@@ -445,11 +445,11 @@ void DataSourcesStateModel::reloadList()
 }*/
 
 AppDataServiceWidget::AppDataServiceWidget(ServiceTableModel* srvTableModel,
-											const SoftwareInfo& softwareInfo,
-											const ServiceData& service,
-											quint32 ip, quint16 tcpPort,
-											QWidget* parent) :
-	BaseServiceWidget(srvTableModel, softwareInfo, service, ip, tcpPort, parent)
+	const SoftwareInfo& softwareInfo,
+	const ServiceData& serviceData,
+	quint32 ip, quint16 tcpPort,
+	QWidget* parent) :
+	BaseServiceWidget(srvTableModel, softwareInfo, serviceData, ip, tcpPort, parent)
 {
 	// Data Sources
 /*	m_dataSourcesStateModel = new DataSourcesStateModel(this);
@@ -809,7 +809,7 @@ void AppDataServiceWidget::addAppDataSourcesTab()
 	m_sourcesModel = new AppDataSourcesModel(this);
 	m_sourcesView = createTableView(m_sourcesModel, m_sourcesModel->columns());
 
-	m_sourcesView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+//	connect(m_sourcesView, &QTableView::doubleClicked, this, &MyClass::onTableDoubleClicked);
 
 	addTab(m_sourcesView, "AppData sources");
 }
@@ -822,27 +822,28 @@ int AppDataServiceWidget::updateSettings(int rowCount)
 	}
 
 	std::shared_ptr<AppDataServiceSettings> st = std::dynamic_pointer_cast<AppDataServiceSettings>(m_serviceData.settings);
+
+	TEST_PTR_RETURN_VALUE(st, rowCount);
+
 	const Network::ServiceInfo& protoInfo = m_serviceData.protoServiceInfo;
 
-	TEST_PTR_RETURN_VALUE(st, 0);
-
-	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("CfgServiceEquipmentID1"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceEquipmentID1);
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->cfgServiceID1);
 
 	rowCount++;
 
-	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("CfgServiceIP1"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceIP1);
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
 							 st->cfgServiceID1.isEmpty() ? Separator::EMPTY_STR :
 							 HostAddressPort(protoInfo.cfgserviceip1(), protoInfo.cfgserviceport1()).toString());
 	rowCount++;
 
-	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("CfgServiceEquipmentID2"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceEquipmentID2);
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->cfgServiceID2);
 
 	rowCount++;
 
-	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("CfgServiceIP2"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceIP2);
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
 							 st->cfgServiceID2.isEmpty() ? Separator::EMPTY_STR :
 							 HostAddressPort(protoInfo.cfgserviceip2(), protoInfo.cfgserviceport2()).toString());

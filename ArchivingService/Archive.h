@@ -75,7 +75,7 @@ public:
 	QString getSignalID(Hash signalHash);
 	bool isSignalExists(Hash signalHash) const { return m_archFiles.contains(signalHash); }
 
-	int getFilesCount() const { return static_cast<int>(m_archFiles.count()); }
+	int getFilesCount() const { return TO_INT(m_archFiles.size()); }
 	void getSignalsHashes(QVector<Hash>* hashes);
 
 	void saveState(const SimpleAppSignalState& state);
@@ -88,7 +88,8 @@ public:
 	bool waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeconds);
 
 	ArchFile* getNextFileForFlushing(bool* flushAnyway);							// will be called from FileArchWriter
-	ArchFile* getArchFile(Hash signalHash) { return m_archFiles.value(signalHash, nullptr); }
+	ArchFile* getArchFile(Hash signalHash);
+	ArchFile* getArchFileByIndex(int index);
 
 	bool isMaintenanceRequired() { return m_isMaintenanceRequired.load(); }
 	void maintenanceIsStarted();
@@ -96,6 +97,9 @@ public:
 	qint64 getCurrentPartition();
 
 	static QString timeTypeStr(E::TimeType timeType);
+
+	void onTimer1min();
+	void getRecordsPerMin(std::vector<std::pair<int, int>>* recordsPerMin, int count);
 
 private:
 	bool loadArchInfoFile();
@@ -157,8 +161,11 @@ private:
 
 	//
 
-	QHash<Hash, ArchFile*> m_archFiles;
-	QVector<ArchFile*> m_archFilesArray;
+	std::map<Hash, ArchFile*> m_archFiles;
+	std::vector<ArchFile*> m_archFilesArray;
+
+	QMutex m_recordsPerMinMutex;
+	std::vector<std::pair<int, int>> m_recordsPerMin;		// std::pair<recordsPerMin, srchFileIndex>
 
 	QString m_archFullPath;
 

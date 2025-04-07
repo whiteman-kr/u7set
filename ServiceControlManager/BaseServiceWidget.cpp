@@ -641,7 +641,9 @@ QTableView* BaseServiceWidget::createTableView(QAbstractItemModel* model,
 
 	connect(hHeader, &QHeaderView::sectionResized, this, &BaseServiceWidget::onSectionResized);
 
-	if (columns.empty() == false)
+	int colCount = TO_INT(columns.size());
+
+	if (colCount > 0)
 	{
 		int index = 0;
 
@@ -670,8 +672,14 @@ QTableView* BaseServiceWidget::createTableView(QAbstractItemModel* model,
 	tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
 	tableView->setSelectionMode(QAbstractItemView::SingleSelection);
 	tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	tableView->setStyleSheet("QTableView::item:focus { outline: none; }");
 
 	tableView->setModel(model);
+
+	for(int i = 0; i < colCount; i++)
+	{
+		tableView->setColumnWidth(i, columns[i].width);
+	}
 
 	m_modelTableViewColumns.insert({model, std::pair{tableView, columns}});
 

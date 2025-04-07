@@ -7,10 +7,10 @@
 
 CfgServiceWidget::CfgServiceWidget(ServiceTableModel* srvTableModel,
 	const SoftwareInfo& softwareInfo,
-	const ServiceData& service,
+	const ServiceData& serviceData,
 	quint32 ip, quint16 tcpPort,
-	QWidget *parent) :
-	BaseServiceWidget(srvTableModel, softwareInfo, service, ip, tcpPort, parent)
+	QWidget* parent) :
+	BaseServiceWidget(srvTableModel, softwareInfo, serviceData, ip, tcpPort, parent)
 {
 }
 

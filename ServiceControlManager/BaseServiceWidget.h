@@ -98,6 +98,12 @@ protected:
 	QStandardItemModel* m_settingsModel = nullptr;
 	QStandardItemModel* m_clientsModel = nullptr;
 
+	inline static const QString m_cfgServiceEquipmentID1 = QStringLiteral("CfgServiceEquipmentID1");
+	inline static const QString m_cfgServiceEquipmentID2 = QStringLiteral("CfgServiceEquipmentID2");
+
+	inline static const QString m_cfgServiceIP1 = QStringLiteral("CfgServiceIP1");
+	inline static const QString m_cfgServiceIP2 = QStringLiteral("CfgServiceIP2");
+
 private:
 	ServiceTableModel* m_srvTableModel = nullptr;
 

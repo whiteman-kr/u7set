@@ -359,6 +359,15 @@ message SessionParams
 	optional int32 softwareRunMode = 2 [default = 0 /* E::SoftwareRunMode::Normal */];	// enum E::SoftwareRunMode values
 }
 
+message ArchSignalInfo
+{
+	required string appSignalID = 1;
+	required double fineAperture = 2;
+	required double coarseAperture = 3;
+	required bool apertureOverrided = 4;
+	required int32 recordsPerMin = 5;
+}
+
 message ServiceClientInfo
 {
 	required int32 requestIP = 1;
@@ -401,9 +410,13 @@ message ServiceInfo
 	optional uint32 cfgServiceIP2 = 32;
 	optional uint32 cfgServicePort2 = 33;
 
+	// AppDataService specific
 	//
+	repeated AppDataSourceState appDataSourcesStates = 40;
 
-	repeated AppDataSourceState appDataSourcesStates = 47;
+	// ArchiveService specific
+	//
+	repeated ArchSignalInfo archSignalsInfo = 50;
 }
 
 message GetServiceInfoReply

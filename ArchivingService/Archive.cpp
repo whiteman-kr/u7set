@@ -226,7 +226,7 @@ void Archive::finalizeRequest(quint32 requestID)
 
 QString Archive::getSignalID(Hash signalHash)
 {
-	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
+	ArchFile* archFile = getArchFile(signalHash);
 
 	if (archFile == nullptr)
 	{
@@ -241,13 +241,13 @@ void Archive::getSignalsHashes(QVector<Hash>* hashes)
 {
 	TEST_PTR_RETURN(hashes);
 
-	hashes->resize(m_archFiles.count());
+	hashes->resize(m_archFiles.size());
 
 	int i = 0;
 
-	for(ArchFile* archFile : m_archFiles)
+	for(const auto& [hash, archFile] : m_archFiles)
 	{
-		(*hashes)[i] = archFile->hash();
+		(*hashes)[i] = hash;
 		i++;
 	}
 }
@@ -260,7 +260,7 @@ void Archive::saveState(const SimpleAppSignalState& state)
 		return;
 	}
 
-	ArchFile* archFile = m_archFiles.value(state.hash, nullptr);
+	ArchFile* archFile = getArchFile(state.hash);
 
 	if (archFile == nullptr)
 	{
@@ -336,7 +336,7 @@ bool Archive::waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeco
 		return true;
 	}
 
-	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
+	ArchFile* archFile = getArchFile(signalHash);
 
 	TEST_PTR_RETURN_FALSE(archFile);
 
@@ -409,6 +409,21 @@ ArchFile* Archive::getNextFileForFlushing(bool* flushAnyway)
 	return archFile;
 }
 
+ArchFile* Archive::getArchFile(Hash signalHash)
+{
+	return getValueOrNullptr(m_archFiles, signalHash);
+}
+
+ArchFile* Archive::getArchFileByIndex(int index)
+{
+	if (index < 0 || index >= TO_INT(m_archFilesArray.size()))
+	{
+		return nullptr;
+	}
+
+	return m_archFilesArray[index];
+}
+
 void Archive::maintenanceIsStarted()
 {
 	assert(isMaintenanceRequired() == true);
@@ -453,6 +468,46 @@ QString Archive::timeTypeStr(E::TimeType timeType)
 	}
 
 	return QString("???");
+}
+
+void Archive::onTimer1min()
+{
+	int count = TO_INT(m_archFilesArray.size());
+
+	std::vector<std::pair<int, int>> recordsPerMin;
+
+	recordsPerMin.resize(count);
+
+	for(int i = 0; i < count; i++)
+	{
+		int recPerMin = m_archFilesArray[i]->onTimer1min();
+		recordsPerMin[i] = std::make_pair(recPerMin, i);
+	}
+
+	std::sort(	recordsPerMin.begin(),
+				recordsPerMin.end(),
+				[](std::pair<int, int>& a, std::pair<int, int>& b)
+				{
+				  return a.first > b.first;
+				});
+
+	QMutexLocker loker(&m_recordsPerMinMutex);
+
+	m_recordsPerMin.swap(recordsPerMin);
+}
+
+void Archive::getRecordsPerMin(std::vector<std::pair<int, int>>* recordsPerMin, int count)
+{
+	TEST_PTR_RETURN(recordsPerMin);
+
+	QMutexLocker loker(&m_recordsPerMinMutex);
+
+	count = count > TO_INT(m_recordsPerMin.size()) ? TO_INT(m_recordsPerMin.size()) : count;
+
+	recordsPerMin->resize(count);
+
+	std::copy(m_recordsPerMin.begin(), m_recordsPerMin.begin() + count,
+				recordsPerMin->begin());
 }
 
 bool Archive::loadArchInfoFile()
@@ -514,8 +569,14 @@ bool Archive::initArchFiles()
 
 	int signalsCount = archInfo.archsignal_size();
 
-	m_archFiles.reserve(static_cast<int>(signalsCount * 1.2));
 	m_archFilesArray.resize(signalsCount);
+	m_recordsPerMin.resize(signalsCount);
+
+	for(int i = 0; i < signalsCount; i++)
+	{
+		m_recordsPerMin[i] = std::make_pair(0, i);
+	}
+
 	m_regularFilesQueue.reserve(static_cast<int>(signalsCount * 1.2));
 
 	std::vector<std::vector<ArchFile*>> archFilesGroups;
@@ -528,7 +589,7 @@ bool Archive::initArchFiles()
 
 		ArchFile* archFile = new ArchFile(protoArchSignal, m_archFullPath, m_log);
 
-		m_archFiles.insert(archFile->hash(), archFile);
+		m_archFiles.emplace(archFile->hash(), archFile);
 
 		m_archFilesArray[i] = archFile;
 
@@ -947,11 +1008,11 @@ void Archive::clear()
 {
 	m_projectID.clear();
 
-	for(ArchFile* archFile : m_archFiles)
+	for(ArchFile* archFile : m_archFilesArray)
 	{
 		delete archFile;
 	}
 
-	m_archFiles.clear();
 	m_archFilesArray.clear();
+	m_archFiles.clear();
 }

@@ -1,29 +1,29 @@
-#include "AppDataSourcesModel.h"
+#include "ArchiveSignalsModel.h"
 #include "BaseServiceWidget.h"
 
-AppDataSourcesModel::AppDataSourcesModel(QWidget* parent) :
+ArchiveSignalsModel::ArchiveSignalsModel(QWidget* parent) :
 	QAbstractTableModel(parent)
 {
 }
 
-const Columns& AppDataSourcesModel::columns() const
+const Columns& ArchiveSignalsModel::columns() const
 {
 	return m_columns;
 }
 
-int AppDataSourcesModel::rowCount(const QModelIndex& parent) const
+int ArchiveSignalsModel::rowCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
 	return TO_INT(m_sources.size());
 }
 
-int AppDataSourcesModel::columnCount(const QModelIndex& parent) const
+int ArchiveSignalsModel::columnCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
 	return TO_INT(m_columns.size());
 }
 
-QVariant AppDataSourcesModel::data(const QModelIndex& index, int role) const
+QVariant ArchiveSignalsModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::CheckStateRole ||
 		role == Qt::DecorationRole ||
@@ -80,7 +80,7 @@ QVariant AppDataSourcesModel::data(const QModelIndex& index, int role) const
 	return QVariant("");
 }
 
-QVariant AppDataSourcesModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ArchiveSignalsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role == Qt::DisplayRole)
 	{
@@ -100,13 +100,13 @@ QVariant AppDataSourcesModel::headerData(int section, Qt::Orientation orientatio
 	return QAbstractTableModel::headerData(section, orientation, role);
 }
 
-Qt::ItemFlags AppDataSourcesModel::flags(const QModelIndex& index) const
+Qt::ItemFlags ArchiveSignalsModel::flags(const QModelIndex& index) const
 {
 	if (!index.isValid()) return Qt::NoItemFlags;
 	return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
-void AppDataSourcesModel::updateData(const Network::ServiceInfo& srvInfo)
+void ArchiveSignalsModel::updateData(const Network::ServiceInfo& srvInfo)
 {
 	int sourcesCount = srvInfo.appdatasourcesstates_size();
 

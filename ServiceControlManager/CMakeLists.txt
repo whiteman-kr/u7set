@@ -20,6 +20,8 @@ set (SCM_RESOURCES
 
 add_executable(${TARGET} WIN32
 	${SCM_RESOURCES}
+	ArchiveSignalsModel.cpp
+	ArchiveSignalsModel.h
 	AppDataServiceWidget.cpp
 	AppDataServiceWidget.h
 	AppDataSourceWidget.cpp
@@ -55,6 +57,7 @@ add_executable(${TARGET} WIN32
 	ServiceControlManager.qrc
 	translations/ServiceControlManager_ru.ts
 	translations/ServiceControlManager_uk.ts
+	ArchiveServiceWidget.h ArchiveServiceWidget.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE
