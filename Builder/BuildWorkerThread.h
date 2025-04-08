@@ -290,6 +290,9 @@ namespace Builder
 		BuildOptions buildOptions() const;
 		void setBuildOptions(BuildOptions value);
 
+		QStringList buildSchemaTags() const;
+		void setBuildSchemaTags(QStringList value);
+
 		bool isInterruptRequested();
 
 		int progress() const;
@@ -311,6 +314,8 @@ namespace Builder
 
 		bool m_expertMode = false;
 		BuildOptions m_buildOptions;
+
+		QStringList m_buildSchemaTags;       // Schema tags to build.
 
 		IssueLogger* m_log = nullptr;        // Probably it's better to make it as shared_ptr
 

@@ -6,9 +6,9 @@
 
 #define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO)
 
-// Warning2 - the least important warning
-// Warning1 - just warning
 // Warning0 - the most important warning
+// Warning1 - just warning
+// Warning2 - the least important warning
 //
 #define LOG_WARNING0(type, code, message)	writeWarning0(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO)
 #define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO)
@@ -243,6 +243,8 @@ namespace Builder
 		void errALP4023(QString schema, QString pinCaption, QUuid itemUuid);	// UFB schema has duplicate pins %1 (UFB schema %2).
 		void errALP4024(QString fileName, QString details);						// Schema details parsing error, filename %1, details string %2.
 		void errALP4025(QString schema);										// Duplicate SchemaIDs %1, all schemas (including Monitor, Tuning, etc) must have unique SchemaIDs.
+
+		void wrnALP4030(QString schemaId);                                      // Schema %1 skipped, tags do not match the build tags.
 
 		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);		// Bus Related
 		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);						// Bus Related

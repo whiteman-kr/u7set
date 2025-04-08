@@ -91,9 +91,9 @@ namespace Builder
 
 	struct Bush
 	{
-		QUuid outputPin;             // Output pin for this branch, can be the only
-		std::set<QUuid> inputPins;   // Input pins for this branch
-		std::map<QUuid, Link> links; // Links for this branch
+		QUuid outputPin;                          // Output pin for this branch, can be the only
+		std::set<QUuid> inputPins;                // Input pins for this branch
+		std::map<QUuid, Link> links;              // Links for this branch
 		std::map<QUuid, std::shared_ptr<VFrame30::FblItemRect>> fblItems;
 
 		VFrame30::FblItemRect* itemByPinGuid(QUuid pinId) const;
@@ -336,7 +336,7 @@ namespace Builder
 
 	public:
 		Parser() = delete;
-		explicit Parser(Builder::Context* context);
+		explicit Parser(Builder::Context* context, QStringList buildSchemaTags);
 
 	public:
 		bool parse();
@@ -407,6 +407,8 @@ namespace Builder
 		DbController* m_db = nullptr;
 		IssueLogger& m_log;
 		int m_changesetId = 0;
+
+		QStringList m_buildSchemaTags; // If empty, then build all schemas, otherwise only schemas with these tags
 
 		std::shared_ptr<AppLogicData> m_applicationData;
 		LmDescriptionSet* m_lmDescriptions = nullptr;

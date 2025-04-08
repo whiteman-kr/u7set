@@ -145,20 +145,28 @@ namespace VFrame30
 		bool updateAllSchemaItemUfb(const std::vector<std::shared_ptr<UfbSchema>>& ufbs, int* updatedItemCount, QString* errorMessage);
 		bool updateAllSchemaItemBusses(const std::vector<AppSignalLib::Bus>& busses, int* updatedItemCount, QString* errorMessage);
 
-		QStringList getSignalList() const;
-		virtual QStringList getLabels() const;
-		virtual std::vector<QUuid> getGuids() const;
+		[[nodiscard]] QStringList getSignalList() const;
+		[[nodiscard]] virtual QStringList getLabels() const;
+		[[nodiscard]] virtual std::vector<QUuid> getGuids() const;
 
 		/// Get all schema items tags
 		///
-		QStringList itemTags() const;
+		[[nodiscard]] QStringList itemTags() const;
 
-		virtual QString details(const QString& path) const; // form details JSON object (signal list)
+		/// Check if this schema has assigned tag
+		///
+		[[nodiscard]] bool hasTag(const QString& tag) const;
+
+		/// Check if this schema has assigned tags
+		///
+		[[nodiscard]] bool hasTag(const QStringList& tags) const;
+
+		[[nodiscard]] virtual QString details(const QString& path) const; // form details JSON object (signal list)
 
 		std::shared_ptr<SchemaItem> getItemById(const QUuid& id) const;
 
 		template<typename SchemaItemType>
-		bool hasSchemaItemType() const;
+		[[nodiscard]] bool hasSchemaItemType() const;
 
 		// Scripting
 		//

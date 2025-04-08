@@ -149,6 +149,7 @@ namespace Builder
 		Q_ASSERT(m_buildTasks.empty() == false);
 
 		m_context = std::make_unique<Context>(m_log, buildOutputPath(), expertMode(), buildOptions());
+		m_context->m_buildSchemaTags = m_buildSchemaTags;
 		Q_ASSERT(m_context->m_log);
 
 		m_totalProgress = 0;
@@ -996,7 +997,8 @@ namespace Builder
 	{
 		DbFileTree fileTree;
 
-		if (bool ok = m_context->m_db.getFileListTree(&fileTree, DbDir::SchemasDir, true, nullptr); ok == false)
+		bool loadOk = m_context->m_db.getFileListTree(&fileTree, DbDir::SchemasDir, true, nullptr);
+		if (loadOk == false)
 		{
 			m_context->m_log->errPDB2001(m_context->m_db.systemFileId(DbDir::SchemasDir), "", m_context->m_db.lastError());
 			return false;
@@ -1005,15 +1007,9 @@ namespace Builder
 		// --
 		//
 		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
-
-		QString strAlFileExtension{File::AlFileExtension};
-		QString strUfbFileExtension{File::UfbFileExtension};
-		QString strMvsFileExtension{File::MvsFileExtension};
-		QString strDvsFileExtension{File::DvsFileExtension};
-
+		std::set<QString> schemaIds;
 		bool success = true;
 
-		std::set<QString> schemaIds;
 		for (auto& [fileId, file] : files)
 		{
 			if (file->isFolder() == true)
@@ -1023,25 +1019,44 @@ namespace Builder
 
 			QString fileExt = file->extension();
 
-			if (fileExt.compare(strAlFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(strUfbFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(strMvsFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(strDvsFileExtension, Qt::CaseInsensitive) != 0)
+			if (fileExt.compare(File::AlFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(File::UfbFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(File::MvsFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(File::DvsFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(File::VduFileExtension, Qt::CaseInsensitive) != 0)
 			{
 				continue;
 			}
 
-			//--
-			//
 			VFrame30::SchemaDetails details;
+			bool parseDetailsOk = details.parseDetails(file->details());
 
-			if (bool ok = details.parseDetails(file->details()); ok == false)
+			if (parseDetailsOk == false)
 			{
 				m_context->m_log->errALP4024(file->fileName(), file->details());
 				continue;
 			}
 
-			if (schemaIds.count(details.m_schemaId) != 0)
+			// If m_buildSchemaTags is not empty then we need to build only specified schemas.
+			// Check that m_buildSchemaTags contains schemaId or schema tag.
+			//
+			if (m_buildSchemaTags.isEmpty() == false)
+			{
+				bool schemaIdIsATag = std::any_of(m_buildSchemaTags.begin(),
+												  m_buildSchemaTags.end(),
+												  [&details](const QString& tag)
+												  {
+													  return details.m_schemaId.compare(tag.trimmed(), Qt::CaseInsensitive) == 0;
+												  });
+				bool schemaHasTag = details.hasSchemaTag(m_buildSchemaTags);
+
+				if (schemaIdIsATag == false && schemaHasTag == false)
+				{
+					continue;
+				}
+			}
+
+			if (schemaIds.contains(details.m_schemaId) == true)
 			{
 				m_context->m_log->errALP4025(details.m_schemaId);
 				success = false;
@@ -1063,7 +1078,7 @@ namespace Builder
 			std::make_shared<AppLogicData>(*m_context->m_signalSet.get(), *m_context->m_lmDescriptions, *m_context->m_log);
 		int errorCount = m_context->m_log->errorCount();
 
-		Parser parser(m_context.get());
+		Parser parser(m_context.get(), m_buildSchemaTags);
 		parser.parse();
 
 		bool result = m_context->m_log->errorCount() == errorCount;
@@ -2632,6 +2647,16 @@ namespace Builder
 	void BuildWorkerThread::setBuildOptions(BuildOptions value)
 	{
 		m_buildOptions = value;
+	}
+
+	QStringList BuildWorkerThread::buildSchemaTags() const
+	{
+		return m_buildSchemaTags;
+	}
+
+	void BuildWorkerThread::setBuildSchemaTags(QStringList value)
+	{
+		m_buildSchemaTags = std::move(value);
 	}
 
 	bool BuildWorkerThread::isInterruptRequested()

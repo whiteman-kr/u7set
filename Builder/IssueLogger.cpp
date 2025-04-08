@@ -2705,6 +2705,24 @@ namespace Builder
 				  tr("Duplicate SchemaIDs %1, all schemas (including Monitor, Tuning, etc) must have unique SchemaIDs.").arg(schema));
 	}
 
+	/// IssueCode: ALP4030
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema %1 skipped, tags do not match the build tags.
+	///
+	/// Parameters:
+	///		%1 SchemaID
+	///
+	/// Description:
+	///		Schema skipped because its tags do not match the selected build tags.
+	///
+	void IssueLogger::wrnALP4030(QString schemaId)
+	{
+		QString message = tr("Schema %1 skipped, tags do not match the build tags.").arg(schemaId);
+		writeWarning0(issuePTypeToString(IssueType::AlParsing), 4030, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+	}
+
 
 	/// IssueCode: ALP4040
 	///

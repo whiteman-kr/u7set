@@ -444,7 +444,8 @@ void BuildTabPage::build()
 					 db()->currentUser().password(),
 					 theAppSettings.buildOutputPath(),
 					 theAppSettings.isExpertMode(),
-					 buildOptions);
+					 buildOptions,
+					 QStringList{});
 
 	return;
 }
