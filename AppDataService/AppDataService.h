@@ -18,6 +18,21 @@ namespace RtTrends
 	class ServerThread;
 }
 
+#pragma pack(push, 1)
+
+union RecordsPerMin
+{
+	struct
+	{
+		qint32 recordsCount;
+		qint32 dynamicStateIndex;
+	};
+
+	qint64 int64Value = 0;
+};
+
+#pragma pack(pop)
+
 class AppDataServiceWorker : public ServiceWorker
 {
 	Q_OBJECT
@@ -109,7 +124,7 @@ private:
 	void onGetDataSourcesInfo(UdpRequest& request);
 	void onGetDataSourcesState(UdpRequest& request);
 
-	void getRecordsPerMin(std::vector<std::pair<int, int>>* recordsPerMin, int count) const;
+	void getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin, int count) const;
 	void onTimer1min();
 
 private:
@@ -134,7 +149,8 @@ private:
 	DynamicAppSignalStates m_appSignalStates;
 
 	mutable QMutex m_recordsPerMinMutex;
-	std::vector<std::pair<int, int>> m_recordsPerMin;		// std::pair<recordsPerMin, srchFileIndex>
+
+	std::vector<RecordsPerMin> m_recordsPerMin;
 
 	std::vector<QString> m_acquiredAppSignalIDs;
 

@@ -71,14 +71,14 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 	{
 		int count = 500;
 
-		std::vector<std::pair<int, int>> recordsPerMin;
+		std::vector<RecordsPerMin> recordsPerMin;
 		getRecordsPerMin(&recordsPerMin, count);
 
 		count = TO_INT(recordsPerMin.size());
 
 		for(int i = 0; i < count; i++)
 		{
-			const DynamicAppSignalState* state = m_appSignalStates[recordsPerMin[i].second];
+			const DynamicAppSignalState* state = m_appSignalStates[recordsPerMin[i].dynamicStateIndex];
 
 			TEST_PTR_CONTINUE(state);
 
@@ -90,7 +90,7 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 			asi->set_coarseaperture(state->coarseAperture());
 			asi->set_absfineaperture(state->absFineAperture());
 			asi->set_abscoarseaperture(state->absCoarseAperture());
-			asi->set_recordspermin(recordsPerMin[i].first);
+			asi->set_recordspermin(recordsPerMin[i].recordsCount);
 			asi->set_apertureoverrided(state->apertureOverrided());
 		}
 	}
@@ -466,12 +466,11 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 	//
 
-	m_recordsPerMin.resize(signalCount);
+	m_recordsPerMin.clear();
 
-	for(int i = 0; i < signalCount; i++)
-	{
-		m_recordsPerMin[i] = std::make_pair(0, i);
-	}
+	RecordsPerMin r;
+
+	m_recordsPerMin.resize(signalCount, r);
 }
 
 void AppDataServiceWorker::buildAcuiredAppSignalIDs()
@@ -667,7 +666,7 @@ void AppDataServiceWorker::stopRtTrendsServerThread()
 	}
 }
 
-void AppDataServiceWorker::getRecordsPerMin(std::vector<std::pair<int, int>>* recordsPerMin, int count) const
+void AppDataServiceWorker::getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin, int count) const
 {
 	TEST_PTR_RETURN(recordsPerMin);
 
@@ -685,21 +684,24 @@ void AppDataServiceWorker::onTimer1min()
 {
 	int count = TO_INT(m_appSignalStates.size());
 
-	std::vector<std::pair<int, int>> recordsPerMin;
+	std::vector<RecordsPerMin> recordsPerMin;
 
 	recordsPerMin.resize(count);
 
+	RecordsPerMin r;
+
 	for(int i = 0; i < count; i++)
 	{
-		int recPerMin = m_appSignalStates[i]->onTimer1min();
-		recordsPerMin[i] = std::make_pair(recPerMin, i);
+		r.recordsCount = m_appSignalStates[i]->onTimer1min();
+		r.dynamicStateIndex = i;
+		recordsPerMin[i] = r;
 	}
 
 	std::sort(	recordsPerMin.begin(),
 				recordsPerMin.end(),
-				[](std::pair<int, int>& a, std::pair<int, int>& b)
+				[](const RecordsPerMin& a, const RecordsPerMin& b)
 				{
-					return a.first > b.first;
+					return a.recordsCount > b.recordsCount;
 				});
 
 	QMutexLocker loker(&m_recordsPerMinMutex);

@@ -1,6 +1,8 @@
 #include "ArchiveSignalsModel.h"
 #include "BaseServiceWidget.h"
 
+#include "../ArchivingService/ArchFileRecord.h"
+
 ArchiveSignalsModel::ArchiveSignalsModel(QWidget* parent) :
 	QAbstractTableModel(parent)
 {
@@ -52,10 +54,11 @@ QVariant ArchiveSignalsModel::data(const QModelIndex& index, int role) const
 		{
 		case 0:	return QString::fromStdString(asi.appsignalid());
 		case 1: return QString::number(asi.recordspermin());
-		case 2: return E::valueToString(static_cast<E::ApertureType>(asi.aperturetype()));
-		case 3: return QString::number(asi.coarseaperture());
-		case 4: return QString::number(asi.fineaperture());
-		case 5: return (asi.apertureoverrided() ? QStringLiteral("Yes") : QStringLiteral("No"));
+		case 2: return fineSize(asi.recordspermin() * sizeof(ArchFileRecord) * 60 *24);
+		case 3: return E::valueToString(static_cast<E::ApertureType>(asi.aperturetype()));
+		case 4: return QString::number(asi.coarseaperture());
+		case 5: return QString::number(asi.fineaperture());
+		case 6: return (asi.apertureoverrided() ? QStringLiteral("Yes") : QStringLiteral("No"));
 		}
 
 		return Separator::EMPTY_STR;
@@ -119,4 +122,28 @@ void ArchiveSignalsModel::updateData(const Network::ServiceInfo& srvInfo)
 	}
 
 	emit dataChanged(QModelIndex(), QModelIndex());
+}
+
+QString ArchiveSignalsModel::fineSize(qint64 size) const
+{
+	if (size > 1024 * 1024 * 1024)
+	{
+		return QString("%1 GBytes").arg(size / (1024.0 * 1024.0 * 1024.0), 0, 'f', 1);
+	}
+	else
+	{
+		if (size > 1024 * 1024)
+		{
+			return QString("%1 MBytes").arg(size / (1024.0 * 1024.0), 0, 'f', 1);
+		}
+		else
+		{
+			if (size > 1024)
+			{
+				return QString("%1 KBytes").arg(size / 1024.0, 0, 'f', 1);
+			}
+		}
+	}
+
+	return QString("%1 Bytes").arg(size);
 }

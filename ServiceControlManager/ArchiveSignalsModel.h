@@ -19,6 +19,8 @@ public:
 
 	void updateData(const Network::ServiceInfo& srvInfo);
 
+	QString fineSize(qint64 size) const;
+
 private:
 	std::vector<Network::ArchSignalInfo> m_archSignals;
 
@@ -26,6 +28,7 @@ private:
 	{
 		{"AppSignalID", 400},
 		{"Records per minute", 120},
+		{"Archive size per day", 120},
 		{"Aperture type", 120},
 		{"Coarse aperture", 120},
 		{"Fine aperture", 120},
