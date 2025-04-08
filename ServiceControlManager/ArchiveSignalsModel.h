@@ -20,18 +20,16 @@ public:
 	void updateData(const Network::ServiceInfo& srvInfo);
 
 private:
-	std::vector<Network::AppDataSourceState> m_sources;
+	std::vector<Network::ArchSignalInfo> m_archSignals;
 
 	inline static const Columns m_columns =
 	{
-		{"EquipmentID", 400},
-		{"Source IP", 180},
-		{"Receives data", 120},
-		{"Uptime", 120},
-		{"Receiving speed", 120},
-		{"Packet count", 120},
-		{"Lost packet count", 120},
-		{"Errors count", 120},
+		{"AppSignalID", 400},
+		{"Records per minute", 120},
+		{"Aperture type", 120},
+		{"Coarse aperture", 120},
+		{"Fine aperture", 120},
+		{"Aperture overrided", 120},
 	};
 };
 

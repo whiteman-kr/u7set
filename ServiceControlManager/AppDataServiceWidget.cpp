@@ -551,6 +551,7 @@ void AppDataServiceWidget::initWidget()
 	addGeneralTab();
 	addClientsTab();
 	addAppDataSourcesTab();
+	addArchiveSignalsTab();
 }
 
 void AppDataServiceWidget::updateDerivedWidgets(const Network::ServiceInfo& srvInfo)
@@ -559,6 +560,12 @@ void AppDataServiceWidget::updateDerivedWidgets(const Network::ServiceInfo& srvI
 	{
 		m_sourcesModel->updateData(srvInfo);
 		m_sourcesView->update();
+	}
+
+	if (m_archSignalsModel != nullptr)
+	{
+		m_archSignalsModel->updateData(srvInfo);
+		m_archSignalsView->update();
 	}
 }
 
@@ -812,6 +819,16 @@ void AppDataServiceWidget::addAppDataSourcesTab()
 //	connect(m_sourcesView, &QTableView::doubleClicked, this, &MyClass::onTableDoubleClicked);
 
 	addTab(m_sourcesView, "AppData sources");
+}
+
+void AppDataServiceWidget::addArchiveSignalsTab()
+{
+	m_archSignalsModel = new ArchiveSignalsModel(this);
+	m_archSignalsView = createTableView(m_archSignalsModel, m_archSignalsModel->columns());
+
+	//	connect(m_sourcesView, &QTableView::doubleClicked, this, &MyClass::onTableDoubleClicked);
+
+	addTab(m_archSignalsView, "TOP-500 archive signals");
 }
 
 int AppDataServiceWidget::updateSettings(int rowCount)

@@ -98,7 +98,6 @@ public:
 
 	static QString timeTypeStr(E::TimeType timeType);
 
-	void onTimer1min();
 	void getRecordsPerMin(std::vector<std::pair<int, int>>* recordsPerMin, int count);
 
 private:
@@ -163,9 +162,6 @@ private:
 
 	std::map<Hash, ArchFile*> m_archFiles;
 	std::vector<ArchFile*> m_archFilesArray;
-
-	QMutex m_recordsPerMinMutex;
-	std::vector<std::pair<int, int>> m_recordsPerMin;		// std::pair<recordsPerMin, srchFileIndex>
 
 	QString m_archFullPath;
 

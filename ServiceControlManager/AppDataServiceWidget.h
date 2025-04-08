@@ -6,6 +6,7 @@
 #include "BaseServiceWidget.h"
 
 #include "AppDataSourcesModel.h"
+#include "ArchiveSignalsModel.h"
 
 /*
 class QTableView;
@@ -84,41 +85,18 @@ public:
 
 	virtual void updateDerivedWidgets(const Network::ServiceInfo& srvInfo) override;
 
-signals:
-/*	void newTcpClientSocket(TcpAppDataClient* tcpClientSocket);
-	void clearTcpClientSocket();*/
-
-public slots:
-/*	void updateSrvStatus();
-
-	void updateStateInfo();
-
-	void updateSourceInfo();
-	void updateSourceStateColumns();
-
-	void updateSignalInfo();
-	void updateSignalStateColumns();
-
-	void updateClientsInfo();
-
-	void updateServiceParameters();
-
-	void clearServiceData();
-
-	void onAppDataSourceDoubleClicked(const QModelIndex &index);
-
-	void forgetWidget();*/
-
-protected:
-
 private:
 	void addAppDataSourcesTab();
+	void addArchiveSignalsTab();
 
 	virtual int updateSettings(int rowCount) override;
 
 private:
 	AppDataSourcesModel* m_sourcesModel = nullptr;
 	QTableView* m_sourcesView = nullptr;
+
+	ArchiveSignalsModel* m_archSignalsModel = nullptr;
+	QTableView* m_archSignalsView = nullptr;
 
 /*	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
 	SignalStateModel* m_signalStateModel = nullptr;

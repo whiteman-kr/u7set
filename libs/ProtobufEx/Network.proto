@@ -362,10 +362,13 @@ message SessionParams
 message ArchSignalInfo
 {
 	required string appSignalID = 1;
-	required double fineAperture = 2;
-	required double coarseAperture = 3;
-	required bool apertureOverrided = 4;
-	required int32 recordsPerMin = 5;
+	required int32 apertureType = 2;
+	required double fineAperture = 3;
+	required double coarseAperture = 4;
+	required double absFineAperture = 5;
+	required double absCoarseAperture = 6;
+	required bool apertureOverrided = 7;
+	required int32 recordsPerMin = 8;
 }
 
 message ServiceClientInfo
@@ -413,9 +416,6 @@ message ServiceInfo
 	// AppDataService specific
 	//
 	repeated AppDataSourceState appDataSourcesStates = 40;
-
-	// ArchiveService specific
-	//
 	repeated ArchSignalInfo archSignalsInfo = 50;
 }
 

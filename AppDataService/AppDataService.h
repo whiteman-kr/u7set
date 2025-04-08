@@ -109,7 +109,8 @@ private:
 	void onGetDataSourcesInfo(UdpRequest& request);
 	void onGetDataSourcesState(UdpRequest& request);
 
-	void onTimer();
+	void getRecordsPerMin(std::vector<std::pair<int, int>>* recordsPerMin, int count) const;
+	void onTimer1min();
 
 private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
@@ -120,6 +121,7 @@ private:
 	QString m_strCmdLineAppDataReceivingIP;
 	HostAddressPort m_cmdLineAppDataReceivingIP;
 	bool m_logRupTimeErrors = false;
+	QTimer* m_timer = nullptr;
 
 	CircularLoggerShared m_timeErrLog;
 
@@ -130,6 +132,9 @@ private:
 	AppDataSources m_appDataSources;
 
 	DynamicAppSignalStates m_appSignalStates;
+
+	mutable QMutex m_recordsPerMinMutex;
+	std::vector<std::pair<int, int>> m_recordsPerMin;		// std::pair<recordsPerMin, srchFileIndex>
 
 	std::vector<QString> m_acquiredAppSignalIDs;
 
@@ -143,4 +148,3 @@ private:
 
 	RtTrends::ServerThread* m_rtTrendsServerThread = nullptr;
 };
-

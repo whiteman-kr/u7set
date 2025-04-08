@@ -107,6 +107,18 @@ public:
 
 	const AppSignal* signal() const { return m_signal; }
 
+	E::ApertureType apertureType() const { return m_apertureType; }
+
+	double fineAperture() const { return m_fineAperture; }
+	double coarseAperture() const { return m_coarseAperture; }
+
+	double absFineAperture() const { return m_absFineAperture; }
+	double absCoarseAperture() const { return m_absCoarseAperture; }
+
+	bool apertureOverrided() const { return m_apertureOverrided; }
+
+	int onTimer1min();
+
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
 	bool getBit(const char* rupData, int rupDataSize, const Address16& addr, quint32& bit);
@@ -171,6 +183,9 @@ private:
 	bool m_overrideBelowLowLimitFlag = false;		// state of flag BelowLowLimit overrided by signal (set_flags used)
 
 	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
+	double m_coarseAperture = 0;
+	double m_fineAperture = 0;
+	bool m_apertureOverrided = false;
 
 	// for E::ApertureType::RangePercent and E::ApertureType::AbsValue
 	// m_absCoarseAperture and m_absFineAperture stored in abs EngineeringUnits
@@ -179,6 +194,8 @@ private:
 	//
 	double m_absCoarseAperture = 0;
 	double m_absFineAperture = 0;
+
+	std::atomic<int> m_statesSaved = 0;
 
 	bool m_enableTuning = false;
 	TuningValue m_tuningDefaultValue;
@@ -223,6 +240,7 @@ public:
 	int size() const { return m_size; }
 
 	DynamicAppSignalState* operator [] (int index);
+	const DynamicAppSignalState* operator [] (int index) const;
 
 	const DynamicAppSignalState* getStateByHash(Hash signalHash) const;
 	DynamicAppSignalState* getStateByHash(Hash signalHash);

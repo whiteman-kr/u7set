@@ -121,9 +121,6 @@ public:
 
 	QString appSignalID() const { return m_appSignalID; }
 
-	double fineAperture() const { return m_fineAperture; }
-	double coarseAperture() const { return m_coarseAperture; }
-
 	bool isAnalog() const { return m_isAnalog; }
 	bool isEmergency() const;
 
@@ -144,8 +141,6 @@ public:
 					 int* deletedCount,
 					 int* packedCount,
 					 const RunOverrideThread* thread);
-
-	int onTimer1min();
 
 private:
 	void startMaintenance();
@@ -177,8 +172,6 @@ private:
 	Hash m_hash = 0;
 	QString m_appSignalID;
 	bool m_isAnalog = false;
-	double m_fineAperture = 0;
-	double m_coarseAperture = 0;
 
 	//
 
@@ -189,8 +182,6 @@ private:
 	bool m_fileInMaintenance = false;
 
 	int m_statesCountAfterExpand = -1;
-
-	std::atomic<int> m_inMinuteSaved = 0;
 
 	//
 

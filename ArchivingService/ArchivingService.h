@@ -55,8 +55,6 @@ private slots:
 							  const BuildFileInfoArray buildFileInfoArray,
 							  SessionParams sessionParams,
 							  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
-	void onTimer1min();
-
 private:
 	QString m_overwriteArchiveLocation;
 	int m_minQueueSizeForFlushing = 0;

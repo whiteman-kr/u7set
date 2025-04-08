@@ -36,19 +36,21 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 	m_reverseLimits = (m_lowLimit > m_highLimit);
 
 	m_apertureType = signal->apertureType();
+	m_coarseAperture = signal->coarseAperture();
+	m_fineAperture = signal->fineAperture();
 
 	switch(m_apertureType)
 	{
 	case E::ApertureType::RangePercent:
-		m_absCoarseAperture = fabs(((m_highLimit - m_lowLimit) * signal->coarseAperture()) / 100.0);
-		m_absFineAperture = fabs(((m_highLimit - m_lowLimit) * signal->fineAperture()) / 100.0);
+		m_absCoarseAperture = fabs(((m_highLimit - m_lowLimit) * m_coarseAperture) / 100.0);
+		m_absFineAperture = fabs(((m_highLimit - m_lowLimit) * m_fineAperture) / 100.0);
 		break;
 
 	case E::ApertureType::ValuePercent:								// ex AdaptiveAperture
 		// no break - Ok!
 	case E::ApertureType::AbsValue:
-		m_absCoarseAperture = fabs(signal->coarseAperture());
-		m_absFineAperture = fabs(signal->fineAperture());
+		m_absCoarseAperture = fabs(m_coarseAperture);
+		m_absFineAperture = fabs(m_fineAperture);
 		break;
 
 	default:
@@ -149,6 +151,7 @@ void DynamicAppSignalState::setQueues(SimpleAppSignalStatesArchiveFlagQueue* sig
 									{															\
 										m_statesQueue->pushAutoPoint(state, m_archive, thread); \
 										pushedStatesCtr++;										\
+										m_statesSaved++;										\
 									}															\
 									if (m_hasRtSessions == true)								\
 									{															\
@@ -477,6 +480,7 @@ int DynamicAppSignalState::setStateParsed(const Times& time,
 	{
 		m_statesQueue->push(curState, m_archive, thread);
 		pushedStatesCtr++;
+		m_statesSaved++;
 
 		// update apertures stored states
 		//
@@ -728,6 +732,15 @@ void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& sta
 	releaseRtProcessingOwnership(thread);
 }
 
+int DynamicAppSignalState::onTimer1min()
+{
+	int inMinuteSaved = m_statesSaved;
+
+	m_statesSaved = 0;
+
+	return inMinuteSaved;
+}
+
 bool DynamicAppSignalState::getValue(const char* rupData, int rupDataSize, double& value)
 {
 	Q_UNUSED(rupDataSize);
@@ -940,6 +953,22 @@ void DynamicAppSignalStates::setSize(int size)
 }
 
 DynamicAppSignalState* DynamicAppSignalStates::operator [] (int index)
+{
+#ifdef QT_DEBUG
+
+	if (m_appSignalState == nullptr ||
+		index < 0  || index >= m_size)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+#endif
+
+	return m_appSignalState + index;
+}
+
+const DynamicAppSignalState* DynamicAppSignalStates::operator [] (int index) const
 {
 #ifdef QT_DEBUG
 

@@ -21,11 +21,6 @@ void ArchiveServiceWidget::initWidget()
 
 int ArchiveServiceWidget::updateSrvStatus(int rowCount)
 {
-/*	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 0), QStringLiteral("CfgCheckerState"));
-	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1),
-							  E::valueToString(static_cast<E::ConfigCheckerState>(m_serviceData.protoServiceInfo.cfgcheckerstate())));
-	rowCount++;*/
-
 	return rowCount;
 }
 

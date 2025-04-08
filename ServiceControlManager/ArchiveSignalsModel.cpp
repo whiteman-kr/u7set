@@ -14,7 +14,7 @@ const Columns& ArchiveSignalsModel::columns() const
 int ArchiveSignalsModel::rowCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
-	return TO_INT(m_sources.size());
+	return TO_INT(m_archSignals.size());
 }
 
 int ArchiveSignalsModel::columnCount(const QModelIndex& parent) const
@@ -38,7 +38,7 @@ QVariant ArchiveSignalsModel::data(const QModelIndex& index, int role) const
 	int row = index.row();
 	int column = index.column();
 
-	if (row < 0 || row >= TO_INT(m_sources.size()) ||
+	if (row < 0 || row >= TO_INT(m_archSignals.size()) ||
 		column < 0 || column >= TO_INT(m_columns.size()))
 	{
 		return QVariant(Separator::EMPTY_STR);
@@ -46,32 +46,16 @@ QVariant ArchiveSignalsModel::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::DisplayRole)
 	{
-		const Network::AppDataSourceState& st = m_sources[row];
+		const Network::ArchSignalInfo& asi = m_archSignals[row];
 
 		switch (column)
 		{
-		case 0:	return QString::fromStdString(st.lancontrollerid());
-		case 1: return HostAddressPort(st.lancontrollerip(), st.lancontrollerport()).toString();
-		case 2: return st.receivesdata() ? QStringLiteral("Yes") : QStringLiteral("No");
-		}
-
-		if (st.receivesdata())
-		{
-			switch (column)
-			{
-			case 3: return formatUptime(st.uptime());
-			case 4: return QString::number(st.datareceivingspeed());
-			case 5: return QString::number(st.receivedpacketcount());
-			case 6: return QString::number(st.lostpacketcount());
-			case 7: return QString::number(	st.errorprotocolversion() +
-											st.errorframesquantity() +
-											st.errorframeno() +
-											st.errorframecrc() +
-											st.errordataid() +
-											st.errorduplicateplanttime() +
-											st.errornonmonotonicplanttime() +
-											st.errorplanttimeformat());
-			}
+		case 0:	return QString::fromStdString(asi.appsignalid());
+		case 1: return QString::number(asi.recordspermin());
+		case 2: return E::valueToString(static_cast<E::ApertureType>(asi.aperturetype()));
+		case 3: return QString::number(asi.coarseaperture());
+		case 4: return QString::number(asi.fineaperture());
+		case 5: return (asi.apertureoverrided() ? QStringLiteral("Yes") : QStringLiteral("No"));
 		}
 
 		return Separator::EMPTY_STR;
@@ -108,20 +92,20 @@ Qt::ItemFlags ArchiveSignalsModel::flags(const QModelIndex& index) const
 
 void ArchiveSignalsModel::updateData(const Network::ServiceInfo& srvInfo)
 {
-	int sourcesCount = srvInfo.appdatasourcesstates_size();
+	int signalsCount = srvInfo.archsignalsinfo_size();
 
-	if (sourcesCount != TO_INT(m_sources.size()))
+	if (signalsCount != TO_INT(m_archSignals.size()))
 	{
-		if (sourcesCount > m_sources.size())
+		if (signalsCount > m_archSignals.size())
 		{
-			beginInsertRows(QModelIndex(), TO_INT(m_sources.size()), sourcesCount - 1);
-			m_sources.resize(sourcesCount);
+			beginInsertRows(QModelIndex(), TO_INT(m_archSignals.size()), signalsCount - 1);
+			m_archSignals.resize(signalsCount);
 			endInsertRows();
 		}
 		else
 		{
-			beginRemoveRows(QModelIndex(), TO_INT(m_sources.size()), sourcesCount - 1);
-			m_sources.resize(sourcesCount);
+			beginRemoveRows(QModelIndex(), TO_INT(m_archSignals.size()), signalsCount - 1);
+			m_archSignals.resize(signalsCount);
 			endRemoveRows();
 		}
 
@@ -129,9 +113,9 @@ void ArchiveSignalsModel::updateData(const Network::ServiceInfo& srvInfo)
 		endInsertColumns();
 	}
 
-	for(int i = 0; i< sourcesCount; i++)
+	for(int i = 0; i< signalsCount; i++)
 	{
-		m_sources[i] = srvInfo.appdatasourcesstates(i);
+		m_archSignals[i] = srvInfo.archsignalsinfo(i);
 	}
 
 	emit dataChanged(QModelIndex(), QModelIndex());

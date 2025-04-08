@@ -470,46 +470,6 @@ QString Archive::timeTypeStr(E::TimeType timeType)
 	return QString("???");
 }
 
-void Archive::onTimer1min()
-{
-	int count = TO_INT(m_archFilesArray.size());
-
-	std::vector<std::pair<int, int>> recordsPerMin;
-
-	recordsPerMin.resize(count);
-
-	for(int i = 0; i < count; i++)
-	{
-		int recPerMin = m_archFilesArray[i]->onTimer1min();
-		recordsPerMin[i] = std::make_pair(recPerMin, i);
-	}
-
-	std::sort(	recordsPerMin.begin(),
-				recordsPerMin.end(),
-				[](std::pair<int, int>& a, std::pair<int, int>& b)
-				{
-				  return a.first > b.first;
-				});
-
-	QMutexLocker loker(&m_recordsPerMinMutex);
-
-	m_recordsPerMin.swap(recordsPerMin);
-}
-
-void Archive::getRecordsPerMin(std::vector<std::pair<int, int>>* recordsPerMin, int count)
-{
-	TEST_PTR_RETURN(recordsPerMin);
-
-	QMutexLocker loker(&m_recordsPerMinMutex);
-
-	count = count > TO_INT(m_recordsPerMin.size()) ? TO_INT(m_recordsPerMin.size()) : count;
-
-	recordsPerMin->resize(count);
-
-	std::copy(m_recordsPerMin.begin(), m_recordsPerMin.begin() + count,
-				recordsPerMin->begin());
-}
-
 bool Archive::loadArchInfoFile()
 {
 	TEST_PTR_RETURN_FALSE(m_archInfoFileData);
@@ -570,12 +530,6 @@ bool Archive::initArchFiles()
 	int signalsCount = archInfo.archsignal_size();
 
 	m_archFilesArray.resize(signalsCount);
-	m_recordsPerMin.resize(signalsCount);
-
-	for(int i = 0; i < signalsCount; i++)
-	{
-		m_recordsPerMin[i] = std::make_pair(0, i);
-	}
 
 	m_regularFilesQueue.reserve(static_cast<int>(signalsCount * 1.2));
 

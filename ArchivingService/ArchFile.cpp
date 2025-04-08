@@ -470,8 +470,6 @@ ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, const QString& arch
 	m_hash = calcHash(m_appSignalID);
 	m_isAnalog = static_cast<E::SignalType>(protoArchSignal.signaltype()) == E::SignalType::Analog;
 	m_lastRecord.state.flags.valid = 0;
-	m_fineAperture = protoArchSignal.fineaperture();
-	m_coarseAperture = protoArchSignal.coarseaperture();
 
 	QString lastByteOfHash = (QString("%1").arg(static_cast<int>(m_hash & 0xFF), 2, 16, Latin1Char::ZERO)).toUpper();
 
@@ -515,13 +513,9 @@ bool ArchFile::pushState(const SimpleAppSignalState& state)
 		nvp.calcCRC16();
 
 		m_queue.push(nvp, thread);
-
-		m_inMinuteSaved++;
 	}
 
 	m_queue.push(s, thread);
-
-	m_inMinuteSaved++;
 
 	m_lastRecord = s;
 	m_lastRecordInitialized = true;
@@ -749,15 +743,6 @@ bool ArchFile::maintenance(qint64 currentPartition,
 	result = deleteOldPartitions(partitionsInfo, currentPartition, msLongTermPeriod, deletedCount, thread);
 
 	return result;
-}
-
-int ArchFile::onTimer1min()
-{
-	int inMinuteSaved = m_inMinuteSaved;
-
-	m_inMinuteSaved = 0;
-
-	return inMinuteSaved;
 }
 
 void ArchFile::startMaintenance()
