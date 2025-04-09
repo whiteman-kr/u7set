@@ -3292,7 +3292,7 @@ void TestsWidget::createActions()
 	connect(m_runCurrentTestsAction, &QAction::triggered, this, &TestsWidget::runTestCurrentFile);
 	testsToolbarActions.push_back(m_runCurrentTestsAction);
 
-	m_stopTestsAction = new QAction(QIcon(":/Images/Images/SimStop.svg"), tr("Stop Testing"), this);
+	m_stopTestsAction = new QAction(QIcon(":/SimulatorUi/Images/SimStop.svg"), tr("Stop Testing"), this);
 	m_stopTestsAction->setStatusTip(tr("Stop testing"));
 	m_stopTestsAction->setEnabled(false);
 	connect(m_stopTestsAction, &QAction::triggered, this, &TestsWidget::stopTests);
@@ -3302,7 +3302,7 @@ void TestsWidget::createActions()
 	separatorAction5->setSeparator(true);
 	testsToolbarActions.push_back(separatorAction5);
 
-	m_selectBuildAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("Select Build..."), this);
+	m_selectBuildAction = new QAction(QIcon(":/SimulatorUi/Images/SimOpen.svg"), tr("Select Build..."), this);
 	m_selectBuildAction->setStatusTip(tr("Select Build..."));
 	connect(m_selectBuildAction, &QAction::triggered, this, &TestsWidget::selectBuild);
 	testsToolbarActions.push_back(m_selectBuildAction);

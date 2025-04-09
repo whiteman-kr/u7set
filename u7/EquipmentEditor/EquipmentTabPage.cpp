@@ -365,14 +365,14 @@ void EquipmentTabPage::CreateActions()
 
 	m_addLogicSchemaToLm = new QAction(tr("Create AppLogic Schema..."), this);
 	m_addLogicSchemaToLm->setStatusTip(tr("Create Application Logic Schema for selected module"));
-	m_addLogicSchemaToLm->setIcon(QIcon{":/Images/Images/SimAppLogicSchemas.svg"});
+	m_addLogicSchemaToLm->setIcon(QIcon{":/SimulatorUi/Images/SimAppLogicSchemas.svg"});
 	m_addLogicSchemaToLm->setEnabled(false);
 	// m_addLogicSchemaToLm->setVisible(false);
 	connect(m_addLogicSchemaToLm, &QAction::triggered, m_equipmentView, &EquipmentView::addLogicSchemaToLm);
 
 	m_showLmsLogicSchemas = new QAction(tr("Show AppLogic Schemas..."), this);
 	m_showLmsLogicSchemas->setStatusTip(tr("Show Application Logic Schema for selected module"));
-	m_showLmsLogicSchemas->setIcon(QIcon{":/Images/Images/SimAppLogicSchemas.svg"});
+	m_showLmsLogicSchemas->setIcon(QIcon{":/SimulatorUi/Images/SimAppLogicSchemas.svg"});
 	m_showLmsLogicSchemas->setEnabled(false);
 	// m_showLmsLogicSchemas->setVisible(false);
 	connect(m_showLmsLogicSchemas, &QAction::triggered, m_equipmentView, &EquipmentView::showLogicSchemaForLm);
@@ -383,7 +383,7 @@ void EquipmentTabPage::CreateActions()
 
 	m_createConnection = new QAction(tr("Create Connection..."), this);
 	m_createConnection->setStatusTip(tr("Create connection for selected port(s)"));
-	m_createConnection->setIcon(QIcon{":/Images/Images/SimConnectionIcon.svg"});
+	m_createConnection->setIcon(QIcon{":/SimulatorUi/Images/SimConnectionIcon.svg"});
 	m_createConnection->setEnabled(false);
 	// m_addOptoConnection->setVisible(false);
 	connect(m_createConnection, &QAction::triggered, m_equipmentView, &EquipmentView::createConnection);
@@ -391,14 +391,14 @@ void EquipmentTabPage::CreateActions()
 
 	m_showObjectConnections = new QAction(tr("Show Object Connections..."), this);
 	m_showObjectConnections->setStatusTip(tr("Show module or opto-port connections"));
-	m_showObjectConnections->setIcon(QIcon{":/Images/Images/SimConnectionIcon.svg"});
+	m_showObjectConnections->setIcon(QIcon{":/SimulatorUi/Images/SimConnectionIcon.svg"});
 	m_showObjectConnections->setEnabled(false);
 	// m_showObjectConnections->setVisible(false);
 	connect(m_showObjectConnections, &QAction::triggered, m_equipmentView, &EquipmentView::showObjectConnections);
 
 	m_showConnections = new QAction(tr("Connections..."), this);
 	m_showConnections->setStatusTip(tr("Edit connections"));
-	m_showConnections->setIcon(QIcon{":/Images/Images/SimConnectionIcon.svg"});
+	m_showConnections->setIcon(QIcon{":/SimulatorUi/Images/SimConnectionIcon.svg"});
 	m_showConnections->setEnabled(true);
 	connect(m_showConnections, &QAction::triggered, this, &EquipmentTabPage::showConnections);
 

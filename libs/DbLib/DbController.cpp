@@ -1009,7 +1009,7 @@ bool DbController::getFileInfo(const std::vector<QString>* fullPathFileNames, st
 	//
 	emit signal_getFullPathFilesInfo(fullPathFileNames, out);
 
-	bool result = waitForComplete(parentWidget, tr("Geting files info"));
+	bool result = waitForComplete(parentWidget, tr("Getting files info"));
 	return result;
 }
 
