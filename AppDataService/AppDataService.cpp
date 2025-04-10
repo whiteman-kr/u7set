@@ -5,6 +5,7 @@
 #include "TcpArchiveClient.h"
 #include "RtTrendsServer.h"
 #include "AppDataReceiver.h"
+#include "ApertureFile.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -35,6 +36,28 @@ ServiceWorker* AppDataServiceWorker::createInstance() const
 	AppDataServiceWorker* newInstance = new AppDataServiceWorker(this);
 
 	return newInstance;
+}
+
+void AppDataServiceWorker::processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq)
+{
+	int aperturesSize = rq.aperturerecords().size();
+
+	if (aperturesSize == 0)
+	{
+		return;
+	}
+
+	for(int i = 0; i < aperturesSize; i++)
+	{
+		ApertureRecord ar;
+
+		ar.readFromProto(rq.aperturerecords(i));
+
+		m_appSignalStates.overrideAperture(ar);
+		m_apertureFile.updateAperture(ar);
+	}
+
+	m_apertureFile.save();
 }
 
 void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
@@ -466,6 +489,20 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 	//
 
+	m_apertureFile.clear();
+
+	if (m_apertureFile.load(cmdLineArg(0)) == false)
+	{
+		DEBUG_LOG_WRN(logger(), "Aperture.csv file NOT loded!");
+	}
+
+	for(const auto& [signalID, apertureRecord] : m_apertureFile.apertures())
+	{
+		m_appSignalStates.overrideAperture(apertureRecord);
+	}
+
+	//
+
 	m_recordsPerMin.clear();
 
 	RecordsPerMin r;
@@ -686,7 +723,7 @@ void AppDataServiceWorker::onTimer1min()
 
 	std::vector<RecordsPerMin> recordsPerMin;
 
-	recordsPerMin.resize(count);
+	recordsPerMin.reserve(count);
 
 	RecordsPerMin r;
 
@@ -694,7 +731,11 @@ void AppDataServiceWorker::onTimer1min()
 	{
 		r.recordsCount = m_appSignalStates[i]->onTimer1min();
 		r.dynamicStateIndex = i;
-		recordsPerMin[i] = r;
+
+		if (r.recordsCount > 1)
+		{
+			recordsPerMin.push_back(r);
+		}
 	}
 
 	std::sort(	recordsPerMin.begin(),

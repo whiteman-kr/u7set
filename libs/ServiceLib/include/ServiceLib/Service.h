@@ -93,6 +93,7 @@ public:
 	//
 	virtual ServiceWorker* createInstance() const = 0;
 
+	virtual void processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq);
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const = 0;
 
 	QString equipmentID() const { return m_equipmentID; }
@@ -154,6 +155,8 @@ public:
 	void clearBuildInfo();
 
 	bool readBuildInfo(const QByteArray& cfgXmlData);
+
+	const QString cmdLineArg(int index) const;
 
 signals:
 	void work();
@@ -249,6 +252,7 @@ public:
 	static QString getServiceInstanceName(const QString& serviceName, const QString& instanceID);
 	static QString getServiceInstanceName(const QString& serviceName, int argc, char* argv[]);
 
+	void processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq);
 	void getServiceInfo(Network::ServiceInfo& servicesInfo, bool shortInfo);
 
 	std::shared_ptr<CircularLogger> logger();

@@ -1,7 +1,6 @@
 #include "ScmServiceClient.h"
 #include "../OnlineLib/SocketIO.h"
 
-
 ScmServiceClient::ScmServiceClient(const SoftwareInfo& softwareInfo,
 											   const HostAddressPort& serverAddressPort) :
 	Tcp::Client(softwareInfo, serverAddressPort, "TcpConfigServiceClient")
@@ -26,6 +25,28 @@ void ScmServiceClient::onClientThreadStarted()
 	m_timer = new QTimer;
 	connect(m_timer, &QTimer::timeout, this, &ScmServiceClient::sendSrvGetInfoRequest);
 	m_timer->start(500);
+
+	std::vector<ApertureRecord> apertures;
+
+	DEBUG_STOP;
+
+	ApertureRecord ar;
+
+	ar.signalID = "#LM1_1_TO_30";
+	ar.apertureType = E::ApertureType::RangePercent;
+	ar.coarseAperture = 2;
+	ar.fineAperture = 1;
+
+	apertures.push_back(ar);
+
+	ar.signalID = "#LM1_1_TO_100";
+	ar.apertureType = E::ApertureType::RangePercent;
+	ar.coarseAperture = 3;
+	ar.fineAperture = 1.5;
+
+	apertures.push_back(ar);
+
+	overrideApertures(apertures);
 
 	sendSrvGetInfoRequest();
 }
@@ -101,6 +122,15 @@ void ScmServiceClient::checkRequestQueue()
 	}
 }
 
+void ScmServiceClient::overrideApertures(const std::vector<ApertureRecord>& apertures)
+{
+	m_apertureRecordsMutex.lock();
+
+	m_apertureRecords.insert(m_apertureRecords.end(), apertures.begin(), apertures.end());
+
+	m_apertureRecordsMutex.unlock();
+}
+
 void ScmServiceClient::sendSrvGetInfoRequest()
 {
 	if (isClearToSendRequest())
@@ -117,6 +147,26 @@ void ScmServiceClient::sendSrvGetInfoRequest()
 
 		m_requestQueueMutex.unlock();
 
-		sendRequest(request);
+		if (request != RQID_SERVICE_GET_INFO)
+		{
+			sendRequest(request);
+		}
+		else
+		{
+			Network::GetServiceInfoRequest r;
+
+			m_apertureRecordsMutex.lock();
+
+			for(const ApertureRecord& ar : m_apertureRecords)
+			{
+				Network::ApertureRecord* nar = r.add_aperturerecords();
+
+				ar.saveToProto(nar);
+			}
+
+			m_apertureRecordsMutex.unlock();
+
+			sendRequest(request, r);
+		}
 	}
 }

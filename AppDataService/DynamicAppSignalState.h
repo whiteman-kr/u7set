@@ -12,6 +12,8 @@ class AppSignalState;
 class AppSignals;
 class AppDataSource;
 
+struct ApertureRecord;
+
 struct DynamicAppSignalState
 {
 public:
@@ -115,6 +117,7 @@ public:
 	double absFineAperture() const { return m_absFineAperture; }
 	double absCoarseAperture() const { return m_absCoarseAperture; }
 
+	void overrideAperture(const ApertureRecord& ar);
 	bool apertureOverrided() const { return m_apertureOverrided; }
 
 	int onTimer1min();
@@ -136,6 +139,8 @@ private:
 	void sendAppSignalStateChangeToGateway(const SimpleAppSignalState& prevState,
 										   const SimpleAppSignalState& newState,
 										   const QThread* thread);
+
+	void setAperture(E::ApertureType type, double coarseAperture, double fineAperture);
 
 private:
 	SimpleAppSignalStatesArchiveFlagQueue* m_statesQueue = nullptr;
@@ -251,16 +256,17 @@ public:
 	void buidlHash2State();
 
 	bool getCurrentState(Hash hash, AppSignalState& state) const;
-//	bool getStoredState(Hash hash, AppSignalState& state) const;
 
 	void setAutoArchivingGroups(int autoArchivingGroupsCount);
 
 	void setGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
 	void resetGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
 
+	void overrideAperture(const ApertureRecord& ar);
+
 private:
 	DynamicAppSignalState* m_appSignalState = nullptr;
 	int m_size = 0;
 
-	QHash<Hash, DynamicAppSignalState*> m_hash2State;
+	std::map<Hash, DynamicAppSignalState*> m_hash2State;
 };

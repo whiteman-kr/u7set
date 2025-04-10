@@ -1,5 +1,6 @@
 #include "DynamicAppSignalState.h"
 #include "RtTrendsServer.h"
+#include "ApertureFile.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -35,32 +36,9 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 
 	m_reverseLimits = (m_lowLimit > m_highLimit);
 
-	m_apertureType = signal->apertureType();
-	m_coarseAperture = signal->coarseAperture();
-	m_fineAperture = signal->fineAperture();
-
-	switch(m_apertureType)
-	{
-	case E::ApertureType::RangePercent:
-		m_absCoarseAperture = fabs(((m_highLimit - m_lowLimit) * m_coarseAperture) / 100.0);
-		m_absFineAperture = fabs(((m_highLimit - m_lowLimit) * m_fineAperture) / 100.0);
-		break;
-
-	case E::ApertureType::ValuePercent:								// ex AdaptiveAperture
-		// no break - Ok!
-	case E::ApertureType::AbsValue:
-		m_absCoarseAperture = fabs(m_coarseAperture);
-		m_absFineAperture = fabs(m_fineAperture);
-		break;
-
-	default:
-		Q_ASSERT(false);
-	}
-
-	if (m_absFineAperture > m_absCoarseAperture)
-	{
-		std::swap(m_absFineAperture, m_absCoarseAperture);
-	}
+	setAperture(signal->apertureType(),
+				signal->coarseAperture(),
+				signal->fineAperture());
 
 	m_enableTuning = signal->enableTuning();
 	m_tuningDefaultValue = signal->tuningDefaultValue();
@@ -732,6 +710,15 @@ void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& sta
 	releaseRtProcessingOwnership(thread);
 }
 
+void DynamicAppSignalState::overrideAperture(const ApertureRecord& ar)
+{
+	Q_ASSERT(m_signalHash == calcHash(ar.signalID));
+
+	setAperture(ar.apertureType, ar.coarseAperture, ar.fineAperture);
+
+	m_apertureOverrided = true;
+}
+
 int DynamicAppSignalState::onTimer1min()
 {
 	int inMinuteSaved = m_statesSaved;
@@ -891,6 +878,35 @@ void DynamicAppSignalState::sendAppSignalStateChangeToGateway(const SimpleAppSig
 	m_gwStatesQueue->push(state, thread);
 }
 
+void DynamicAppSignalState::setAperture(E::ApertureType type, double coarseAperture, double fineAperture)
+{
+	m_apertureType = type;
+	m_coarseAperture = coarseAperture;
+	m_fineAperture = fineAperture;
+
+	switch(m_apertureType)
+	{
+	case E::ApertureType::RangePercent:
+		m_absCoarseAperture = fabs(((m_highLimit - m_lowLimit) * m_coarseAperture) / 100.0);
+		m_absFineAperture = fabs(((m_highLimit - m_lowLimit) * m_fineAperture) / 100.0);
+		break;
+
+	case E::ApertureType::ValuePercent:								// ex AdaptiveAperture
+		// no break - Ok!
+	case E::ApertureType::AbsValue:
+		m_absCoarseAperture = fabs(m_coarseAperture);
+		m_absFineAperture = fabs(m_fineAperture);
+		break;
+
+	default:
+		Q_ASSERT(false);
+	}
+
+	if (m_absFineAperture > m_absCoarseAperture)
+	{
+		std::swap(m_absFineAperture, m_absCoarseAperture);
+	}
+}
 
 void DynamicAppSignalState::setNewCurState(const SimpleAppSignalState& newCurState)
 {
@@ -986,12 +1002,12 @@ const DynamicAppSignalState* DynamicAppSignalStates::operator [] (int index) con
 
 const DynamicAppSignalState* DynamicAppSignalStates::getStateByHash(Hash signalHash) const
 {
-	return m_hash2State.value(signalHash, nullptr);
+	return getValueOrNullptr(m_hash2State, signalHash);
 }
 
 DynamicAppSignalState* DynamicAppSignalStates::getStateByHash(Hash signalHash)
 {
-	return m_hash2State.value(signalHash, nullptr);
+	return getValueOrNullptr(m_hash2State, signalHash);
 }
 
 const DynamicAppSignalState* DynamicAppSignalStates::getStateByID(const QString& signalID) const
@@ -1008,8 +1024,6 @@ void DynamicAppSignalStates::buidlHash2State()
 {
 	m_hash2State.clear();
 
-	m_hash2State.reserve(static_cast<int>(m_size * 1.3));
-
 	for(int i = 0; i < m_size; i++)
 	{
 		DynamicAppSignalState& state = m_appSignalState[i];
@@ -1022,25 +1036,25 @@ void DynamicAppSignalStates::buidlHash2State()
 		}
 		else
 		{
-			m_hash2State.insert(hash, &state);
+			m_hash2State.emplace(hash, &state);
 		}
 	}
 }
 
 bool DynamicAppSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
 {
-	if (m_hash2State.contains(hash))
+	const DynamicAppSignalState* stateEx = getValueOrNullptr(m_hash2State, hash);
+
+	if (stateEx == nullptr)
 	{
-		const DynamicAppSignalState* stateEx = m_hash2State[hash];
-
-		stateEx->current().copyTo(state);
-
-		Q_ASSERT(state.m_hash == hash);
-
-		return true;
+		return false;
 	}
 
-	return false;
+	stateEx->current().copyTo(state);
+
+	Q_ASSERT(state.m_hash == hash);
+
+	return true;
 }
 
 void DynamicAppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount)
@@ -1086,6 +1100,18 @@ void DynamicAppSignalStates::resetGatewayQueueMask(const std::set<Hash>& hashes,
 			st->resetGatewayQueueMask(mask);
 		}
 	}
+}
+
+void DynamicAppSignalStates::overrideAperture(const ApertureRecord& ar)
+{
+	DynamicAppSignalState* state = getValueOrNullptr(m_hash2State, calcHash(ar.signalID));
+
+	if (state == nullptr)
+	{
+		return;
+	}
+
+	state->overrideAperture(ar);
 }
 
 

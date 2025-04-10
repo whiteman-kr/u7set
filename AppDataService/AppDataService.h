@@ -8,7 +8,7 @@
 #include "RtTrendsServer.h"
 #include "DynamicAppSignalState.h"
 #include "AppDataSource.h"
-
+#include "ApertureFile.h"
 
 class TcpArchiveClient;
 class AppDataReceiver;
@@ -53,6 +53,8 @@ public:
 	~AppDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
+
+	virtual void processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq) override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 	bool isConnectedToConfigurationService(quint32 &ip, quint16 &port) const;
@@ -147,6 +149,8 @@ private:
 	AppDataSources m_appDataSources;
 
 	DynamicAppSignalStates m_appSignalStates;
+
+	ApertureFile m_apertureFile;
 
 	mutable QMutex m_recordsPerMinMutex;
 

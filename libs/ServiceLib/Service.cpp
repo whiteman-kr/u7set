@@ -123,6 +123,11 @@ Service* ServiceWorker::service()
 	return m_service;
 }
 
+void ServiceWorker::processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq)
+{
+	Q_UNUSED(rq);
+}
+
 void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
 	Q_UNUSED(serviceInfo);
@@ -276,6 +281,16 @@ bool ServiceWorker::readBuildInfo(const QByteArray& cfgXmlData)
 	return m_buildInfo.readFromXml(xmlReader);
 }
 
+const QString ServiceWorker::cmdLineArg(int index) const
+{
+	if (index < 0 || index >= m_cmdLineArgs.size())
+	{
+		return Separator::EMPTY_STR;
+	}
+
+	return m_cmdLineArgs[index];
+}
+
 bool ServiceWorker::processServiceSpecificCmdLineArgs()
 {
 	return true;		// return TRUE to continue service running
@@ -404,6 +419,17 @@ QString Service::getServiceInstanceName(const QString& serviceName, const QStrin
 QString Service::getServiceInstanceName(const QString& serviceName, int argc, char* argv[])
 {
 	return getServiceInstanceName(serviceName, getServiceInstanceID(argc, argv));
+}
+
+void Service::processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq)
+{
+	ServiceWorker* serviceWorker = m_serviceWorker;
+	if (serviceWorker == nullptr)
+	{
+		serviceWorker = &m_serviceWorkerFactory;
+	}
+
+	serviceWorker->processGetServiceInfoRequest(rq);
 }
 
 void Service::getServiceInfo(Network::ServiceInfo& serviceInfo, bool shortInfo)

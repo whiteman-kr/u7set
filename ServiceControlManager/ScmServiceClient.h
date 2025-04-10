@@ -2,6 +2,7 @@
 
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/SocketIO.h"
+#include "../OnlineLib/ApertureRecord.h"
 #include "../AppDataService/AppDataSource.h"
 
 class QTimer;
@@ -33,6 +34,8 @@ public:
 	void enqueueRequest(int requestID);
 	void checkRequestQueue();
 
+	void overrideApertures(const std::vector<ApertureRecord>& apertures);
+
 signals:
 	void serviceInfoUpdated(QByteArray replyData);
 	void requestEnqueued();
@@ -53,6 +56,9 @@ private:
 	QTimer* m_timer = nullptr;
 
 	Network::ServiceInfo m_srvInfo;
+
+	QMutex m_apertureRecordsMutex;
+	std::vector<ApertureRecord> m_apertureRecords;
 
 	QMutex m_requestQueueMutex;
 	std::queue<int> m_requestQueue;

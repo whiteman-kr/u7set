@@ -30,6 +30,13 @@ void TcpSrvInfoServer::processRequest(quint32 requestID, const char* requestData
 	{
 	case RQID_SERVICE_GET_INFO:
 		{
+			Network::GetServiceInfoRequest rq;
+
+			if (rq.ParseFromArray(requestData, requestDataSize) == true)
+			{
+				m_service.processGetServiceInfoRequest(rq);
+			}
+
 			Network::ServiceInfo srvInfo;
 			m_service.getServiceInfo(srvInfo, false);
 			sendReply(srvInfo);

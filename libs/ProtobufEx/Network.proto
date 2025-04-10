@@ -349,10 +349,6 @@ message IntroduceMyselfReply
 
 // Get Service Info
 //
-message GetServiceInfoRequest
-{
-}
-
 message SessionParams
 {
 	optional string currentSettingsProfile = 1;
@@ -369,6 +365,14 @@ message ArchSignalInfo
 	required double absCoarseAperture = 6;
 	required bool apertureOverrided = 7;
 	required int32 recordsPerMin = 8;
+}
+
+message ApertureRecord
+{
+	required string signalID = 1;
+	required int32 apertureType = 2;
+	required double coarseAperture = 3;
+	required double fineAperture = 4;
 }
 
 message ServiceClientInfo
@@ -419,10 +423,9 @@ message ServiceInfo
 	repeated ArchSignalInfo archSignalsInfo = 50;
 }
 
-message GetServiceInfoReply
+message GetServiceInfoRequest
 {
-    required int32 error = 1 [default = 0];
-    required ServiceInfo serviceInfo = 2;
+	repeated ApertureRecord apertureRecords = 1;
 }
 
 message ConfigurationServiceState
