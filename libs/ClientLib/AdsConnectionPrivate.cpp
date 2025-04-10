@@ -66,6 +66,14 @@ namespace ClientLib
 		return tcpSignalClient->serverAddressPort1();
 	}
 
+	const SoftwareEndpoint::AppDataService& AdsConnectionPrivate::Connection::server() const
+	{
+		Q_ASSERT(tcpSignalClient);
+		Q_ASSERT(tcpSignalRecents == nullptr || tcpSignalClient->serverAddressPort1() == tcpSignalRecents->serverAddressPort1());
+
+		return tcpSignalClient->server();
+	}
+
 	bool AdsConnectionPrivate::Connection::signalParamsLoaded() const
 	{
 		Q_ASSERT(tcpSignalClient);
@@ -113,7 +121,7 @@ namespace ClientLib
 																	  appDataServices.end(),
 																	  [&conn](const SoftwareEndpoint::AppDataService& ads)
 																	  {
-																		  return conn.address() == ads.address;
+																		  return conn.server() == ads;
 																	  });
 											  });
 

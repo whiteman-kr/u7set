@@ -36,7 +36,9 @@ namespace ClientLib
 			Connection& operator=(Connection&& src) = delete;
 
 			void stopAndDestroy();
+
 			HostAddressPort address() const;
+			const SoftwareEndpoint::AppDataService& server() const;
 
 			bool signalParamsLoaded() const;
 			bool signalStatesLoaded() const;

@@ -1,13 +1,11 @@
 #pragma once
 
-#include <QReadWriteLock>
-#include <queue>
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 
-#include <ClientLib/ITuningAuthorization.h>
 #include <ClientLib/IRecentAppSignals.h>
+#include <ClientLib/ITuningAuthorization.h>
 #include <ClientLib/ITuningLog.h>
 #include <ClientLib/ITuningSignalUpdater.h>
 #include <ClientLib/TuningSourceState.h>
@@ -73,7 +71,8 @@
 
 namespace ClientLib
 {
-	class TuningTcpClient : public Tcp::Client, public TcpClientStatistics
+	class TuningTcpClient : public Tcp::Client,
+							public TcpClientStatistics
 	{
 		Q_OBJECT
 
@@ -89,6 +88,7 @@ namespace ClientLib
 		virtual ~TuningTcpClient();
 
 	public:
+		const SoftwareEndpoint::TuningService& server() const;
 		Hash tuningServiceHash() const;
 
 		// Tuning sources
@@ -102,7 +102,8 @@ namespace ClientLib
 
 		// Searching signals
 		//
-		bool hasTuningSignals(const std::vector<Hash>& appSignalHashes) const;	// Returns true if client processes at least one of specified signals
+		bool hasTuningSignals(
+			const std::vector<Hash>& appSignalHashes) const; // Returns true if client processes at least one of specified signals
 		bool hasTuningSignal(Hash appSignalHash) const;
 
 		// Writing states
@@ -157,7 +158,8 @@ namespace ClientLib
 		void processApplyTuningSignals(const QByteArray& data);
 
 		[[nodiscard]] bool processTuningSignalsReadReply(const QByteArray& data);
-		[[nodiscard]] bool processTuningSignalStateMessage(const ::Network::TuningSignalState& stateMessage, std::vector<TuningSignalState>& arrivedStates);
+		[[nodiscard]] bool processTuningSignalStateMessage(const ::Network::TuningSignalState& stateMessage,
+														   std::vector<TuningSignalState>& arrivedStates);
 
 	signals:
 		void tuningSourcesInfoArrived();
@@ -172,7 +174,7 @@ namespace ClientLib
 
 		bool singleLmControlMode() const;
 
-		bool clientIsActive() const;	// Returns if this client is selected as active in connected TuningService
+		bool clientIsActive() const; // Returns if this client is selected as active in connected TuningService
 		QString activeClientId() const;
 		QString activeClientIp() const;
 
@@ -184,22 +186,22 @@ namespace ClientLib
 		void setLmStatusFlagMode(const TuningClientSettings::LmStatusFlagMode& mode);
 
 	public:
-		inline static const int MaxStateRequestCount = TDS_TUNING_MAX_READ_STATES / 4;  // 250 signals per TDS_TUNING_MAX_READ_STATES
-		inline static const int MaxStateWriteCount = TDS_TUNING_MAX_WRITE_RECORDS / 4;  // 250 signals per TDS_TUNING_MAX_WRITE_RECORDS
+		inline static const int MaxStateRequestCount = TDS_TUNING_MAX_READ_STATES / 4; // 250 signals per TDS_TUNING_MAX_READ_STATES
+		inline static const int MaxStateWriteCount = TDS_TUNING_MAX_WRITE_RECORDS / 4; // 250 signals per TDS_TUNING_MAX_WRITE_RECORDS
 
 	protected:
 		// Tuning sources
 		//
-		mutable QReadWriteLock m_tuningSourcesLock;				// For access to m_tuningSources, m_equipmentToSignalMap
-		std::map<Hash, TuningSource> m_tuningSources;		// Key is hash of EquipmentID
+		mutable QReadWriteLock m_tuningSourcesLock;   // For access to m_tuningSources, m_equipmentToSignalMap
+		std::map<Hash, TuningSource> m_tuningSources; // Key is hash of EquipmentID
 
 		// Tuning signals hashes
 		//
-		mutable QReadWriteLock m_signalHashesLock;			// For access to m_signalHashes and m_signalHashesSet
-		std::vector<Hash> m_signalHashes;					// SORTED Hash Vector for iterating all processed signals
-		std::unordered_set<Hash> m_signalHashesSet;			// Hash Table for fast checking if signal is processed by this client
-		
-		std::set<Hash> m_signalStatesSet;					// Signal hash is added here when signal state is received
+		mutable QReadWriteLock m_signalHashesLock;  // For access to m_signalHashes and m_signalHashesSet
+		std::vector<Hash> m_signalHashes;           // SORTED Hash Vector for iterating all processed signals
+		std::unordered_set<Hash> m_signalHashesSet; // Hash Table for fast checking if signal is processed by this client
+
+		std::set<Hash> m_signalStatesSet;           // Signal hash is added here when signal state is received
 
 	private:
 		// Data
@@ -207,6 +209,7 @@ namespace ClientLib
 		HasLogFile m_logFile;
 		ITuningLog* m_tuningLog = nullptr;
 
+		SoftwareEndpoint::TuningService m_serverSettings;
 		const Hash m_tuningServiceHash = UNDEFINED_HASH;
 
 		int m_requestInterval = 100;
@@ -216,12 +219,12 @@ namespace ClientLib
 
 		ITuningSignalUpdater& m_signalUpdater;
 		IRecentAppSignals& m_recentTuningSignals;
-		
+
 		ITuningAuthorization& m_tuningAuthorization;
 
 		// Write processing
 		//
-		std::mutex m_writeQueueMutex;				// For access to m_writeQueue
+		std::mutex m_writeQueueMutex; // For access to m_writeQueue
 		std::condition_variable m_writeQueueCondition;
 
 		std::queue<TuningWriteCommand> m_writeQueue;
@@ -244,33 +247,11 @@ namespace ClientLib
 
 		// Active client processing
 		//
-		mutable QReadWriteLock m_activeClientMutex;				// For access to m_activeClientId, m_activeClientIp, m_singleLmControlMode, m_currentClientIsActive
+		mutable QReadWriteLock
+			m_activeClientMutex; // For access to m_activeClientId, m_activeClientIp, m_singleLmControlMode, m_currentClientIsActive
 		QString m_activeClientId;
 		QString m_activeClientIp;
 		bool m_currentClientIsActive = false;
-
-		// Cached protobuf messages
-		//
-		//::Network::GetTuningSourcesStates m_getTuningSourcesStates;
-		//::Network::GetTuningSourcesStatesReply m_tuningSourcesStatesReply;
-
-		//::Network::GetTuningSourcesInfo m_getTuningSourcesInfo;
-		//::Network::GetTuningSourcesInfoReply m_tuningSourcesInfoReply;
-
-		//::Network::ChangeConrolledTuningSourceRequest m_activateTuningSource;
-		//::Network::ChangeConrolledTuningSourceReply m_activateTuningSourceReply;
-
-		//::Network::TuningSignalsRead m_readTuningSignals;
-		//::Network::TuningSignalsReadReply m_readTuningSignalsReply;
-
-		//::Network::GetTuningSignalsStateChangesRequest m_readChangedTuningSignals;
-		//::Network::GetTuningSignalsStateChangesReply m_readChangedTuningSignalsReply;
-
-		//::Network::TuningSignalsWrite m_writeTuningSignals;
-		//::Network::TuningSignalsWriteReply m_writeTuningSignalsReply;
-
-		//::Network::TuningSignalsApply m_applyTuningSignals;
-		//::Network::TuningSignalsApplyReply m_applyTuningSignalsReply;
 	};
 
-}
+} // namespace ClientLib
