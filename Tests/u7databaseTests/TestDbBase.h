@@ -1,8 +1,6 @@
 #ifndef TESTDBBASE_H
 #define TESTDBBASE_H
 
-#include <QTest>
-
 struct User
 {
 	QString username;

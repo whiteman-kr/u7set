@@ -1,6 +1,5 @@
 #pragma once
 #include "TestDbBase.h"
-#include <QTest>
 
 class UserTests : public TestDbBase
 {

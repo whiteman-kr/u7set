@@ -57,6 +57,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QFile>
 	<QSqlError>
 	<QSqlQuery>
+	<QTest>
 	<QThread>
 
 	<CommonLib/Types.h>
