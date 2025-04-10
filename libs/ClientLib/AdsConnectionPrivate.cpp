@@ -36,6 +36,19 @@ namespace ClientLib
 		return;
 	}
 
+	void AdsConnectionPrivate::Connection::closeConnection() 
+	{
+		if (tcpSignalClient != nullptr && tcpSignalClient->isConnected() == true)
+		{
+			tcpSignalClient->closeConnection();
+		}
+
+		if (tcpSignalRecents != nullptr && tcpSignalRecents->isConnected() == true)
+		{
+			tcpSignalRecents->closeConnection();
+		}
+	}
+
 	void AdsConnectionPrivate::Connection::stopAndDestroy()
 	{
 		if (tcpClientThread != nullptr)
@@ -130,6 +143,7 @@ namespace ClientLib
 
 			if (it != m_conns.end())
 			{
+				it->closeConnection();	// Force this connection to reconnect to receive signals again
 				continue;
 			}
 
