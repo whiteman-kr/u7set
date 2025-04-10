@@ -83,26 +83,46 @@ namespace ClientLib
 													bool autoApply,
 													TuningClientSettings::LmStatusFlagMode lmStatusFlagMode)
 	{
-		m_logFile.writeMessage("updateConnections()");
-
-		m_conns.clear();	// it will stop all connection threads and destroy them
-
-		for (const SoftwareEndpoint::TuningService& tuns : tuningServices)
+		m_logFile.writeMessage(QString{"updateConnections(), %1 TuningServices"}.arg(tuningServices.size()));
+		for (const auto& tuns : tuningServices)
 		{
-			auto it = std::find_if(m_conns.begin(), m_conns.end(), [&tuns](const Connection& c)
-								   {
-									   return c.address() == tuns.clientRequestAddress;
-								   });
+			m_logFile.writeMessage(
+				QString{"updateConnections(),    %1 - %2"}.arg(tuns.shortenId).arg(tuns.clientRequestAddress.toString()));
+		}
 
-			if (it != m_conns.end())
+		// Number of TuningServices has been changed or any address has been changed
+		//
+		bool connectionsChanged = (m_conns.size() != tuningServices.size()) ||
+								  std::any_of(m_conns.begin(),
+											  m_conns.end(),
+											  [&tuningServices](const Connection& conn)
+											  {
+												  return std::none_of(tuningServices.begin(),
+																	  tuningServices.end(),
+																	  [&conn](const SoftwareEndpoint::TuningService& tuns)
+																	  {
+																		  return conn.address() == tuns.clientRequestAddress;
+																	  });
+											  });
+
+		if (connectionsChanged == true)
+		{
+			m_conns.clear();
+
+			// Create connections
+			//
+			for (const SoftwareEndpoint::TuningService& tuns : tuningServices)
 			{
-				// Such connection already exists
-				//
-				continue;
+				m_conns.emplace_back(softwareInfo,
+									 tuns,
+									 autoApply,
+									 lmStatusFlagMode,
+									 m_tuningSignalUpdater,
+									 m_recentTuningSignals,
+									 m_tuningAuthorization,
+									 m_logFile.logFile(),
+									 m_tuningLog);
 			}
-
-			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalUpdater, m_recentTuningSignals, m_tuningAuthorization,
-								 m_logFile.logFile(), m_tuningLog);
 		}
 
 		return;

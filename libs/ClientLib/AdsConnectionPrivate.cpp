@@ -36,19 +36,6 @@ namespace ClientLib
 		return;
 	}
 
-	void AdsConnectionPrivate::Connection::closeConnection() 
-	{
-		if (tcpSignalClient != nullptr && tcpSignalClient->isConnected() == true)
-		{
-			tcpSignalClient->closeConnection();
-		}
-
-		if (tcpSignalRecents != nullptr && tcpSignalRecents->isConnected() == true)
-		{
-			tcpSignalRecents->closeConnection();
-		}
-	}
-
 	void AdsConnectionPrivate::Connection::stopAndDestroy()
 	{
 		if (tcpClientThread != nullptr)
@@ -115,39 +102,32 @@ namespace ClientLib
 
 		QWriteLocker locker{&m_connsMutex};
 
-		m_signalUpdater.reset();
-
-		// Remove connections that are not in the new configuration.
+		// Number of AppDataServices has been changed or any address has been changed
 		//
-		m_conns.remove_if(
-			[&appDataServices](const Connection& c)
-			{
-				return std::none_of(appDataServices.begin(),
-									appDataServices.end(),
-									[&c](const SoftwareEndpoint::AppDataService& ads)
-									{
-										return c.address() == ads.address;
-									});
-			});
+		bool connectionsChanged = (m_conns.size() != appDataServices.size()) ||
+								  std::any_of(m_conns.begin(),
+											  m_conns.end(),
+											  [&appDataServices](const Connection& conn)
+											  {
+												  return std::none_of(appDataServices.begin(),
+																	  appDataServices.end(),
+																	  [&conn](const SoftwareEndpoint::AppDataService& ads)
+																	  {
+																		  return conn.address() == ads.address;
+																	  });
+											  });
 
-		// Add new connections.
-		//
-		for (const auto& ads : appDataServices)
+		if (connectionsChanged == true)
 		{
-			auto it = std::find_if(m_conns.begin(),
-								   m_conns.end(),
-								   [&ads](const Connection& c)
-								   {
-									   return c.address() == ads.address;
-								   });
+			m_conns.clear();
+			m_signalUpdater.reset();
 
-			if (it != m_conns.end())
+			// Create connections
+			//
+			for (const auto& ads : appDataServices)
 			{
-				it->closeConnection();	// Force this connection to reconnect to receive signals again
-				continue;
+				m_conns.emplace_back(softwareInfo, ads, m_signalUpdater, m_recentAppSignals, m_logFile.logFile());
 			}
-
-			m_conns.emplace_back(softwareInfo, ads, m_signalUpdater, m_recentAppSignals, m_logFile.logFile());
 		}
 
 		return;

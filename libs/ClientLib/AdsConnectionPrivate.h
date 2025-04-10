@@ -35,7 +35,6 @@ namespace ClientLib
 			Connection& operator=(const Connection&) = delete;
 			Connection& operator=(Connection&& src) = delete;
 
-			void closeConnection();
 			void stopAndDestroy();
 			HostAddressPort address() const;
 
