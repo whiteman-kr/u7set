@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+#include <optional>
 
 class ProjectBackup final
 {
@@ -13,7 +13,7 @@ public:
 		QString password;
 	};
 
-	bool backup(QString db, QString fileName, const ProjectBackup::Server& server, QString& errorText) const;
+	bool backup(QString db, QString fileName, const ProjectBackup::Server& server, QString& errorText, std::atomic<bool>& abort) const;
 	bool restore(QString projectName, QString fileName, const ProjectBackup::Server& server, QString& errorText) const;
 
 	bool canBackup() const;

@@ -487,15 +487,60 @@ void ProjectsTabPage::backupProject()
 		return;
 	}
 
+	QString tempFileName = fileName + ".tmp";
+
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
 	QString error;
-	bool ok = backuper.backup(db, fileName, server, error);
+	std::atomic<bool> abort = false;
+
+	auto backupFunc = [&backuper, &error, &abort](QString db, QString fileName, const ProjectBackup::Server& server) -> bool
+	{
+		return backuper.backup(db, fileName, server, error, abort);
+	};
+
+	auto future = QtConcurrent::run(backupFunc, db, tempFileName, server);
+
+	{
+		QThread::msleep(200);
+
+		QProgressDialog progress("Backing up...", "Abort", 0, INT_MAX, this);
+		progress.setMinimumDuration(0);
+		progress.setWindowModality(Qt::WindowModal);
+
+		while (future.isFinished() == false)
+		{
+			QFile file{tempFileName};
+			if (file.open(QFile::ReadOnly) == true)
+			{
+				qint64 fileSize = file.size();
+				qint64 fileSizeMb = fileSize / (qint64)(1024 * 1024); // File size in megabytes.
+				qDebug() << fileSizeMb;
+				progress.setValue(fileSizeMb);
+				progress.setLabelText(QString("Backing up: %1 MB").arg(fileSizeMb));
+			}
+
+			for (int i = 0; i < 10; i++)
+			{
+				if (progress.wasCanceled() == true)
+				{
+					abort.store(true);
+				}
+
+				QApplication::processEvents();
+				QThread::msleep(10);
+			}
+		}
+	}
 
 	QApplication::restoreOverrideCursor();
 
-	if (ok == false)
+	if (future.result() == false)
 	{
+		// Delete tempFileName
+		//
+		QFile::remove(tempFileName);
+
 		QMessageBox mb{this};
 		mb.setIcon(QMessageBox::Icon::Critical);
 		mb.setText(tr("Backup failed."));
@@ -504,20 +549,32 @@ void ProjectsTabPage::backupProject()
 	}
 	else
 	{
-		QMessageBox mb{this};
-		mb.setIcon(QMessageBox::Icon::Information);
-		mb.setText(tr("Backup completed successfully."));
-		mb.addButton(QMessageBox::Ok);
-		auto button = mb.addButton(tr("Open Folder"), QMessageBox::ActionRole);
+		// Rename tempFileName to fileName
+		//
+		QFile::remove(fileName); // In case such file already exists.
+		bool renameOk = QFile::rename(tempFileName, fileName);
 
-		connect(button,
-				&QPushButton::clicked,
-				[fileName]()
-				{
-					QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(fileName).absolutePath()));
-				});
+		if (renameOk == false)
+		{
+			QMessageBox::critical(this, qAppName(), QString{"File %1 write error."}.arg(fileName));
+		}
+		else
+		{
+			QMessageBox mb{this};
+			mb.setIcon(QMessageBox::Icon::Information);
+			mb.setText(tr("Backup completed successfully."));
+			mb.addButton(QMessageBox::Ok);
+			auto button = mb.addButton(tr("Open Folder"), QMessageBox::ActionRole);
 
-		mb.exec();
+			connect(button,
+					&QPushButton::clicked,
+					[fileName]()
+					{
+						QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(fileName).absolutePath()));
+					});
+
+			mb.exec();
+		}
 	}
 
 	return;

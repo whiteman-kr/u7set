@@ -18,6 +18,7 @@ namespace
 
 	[[nodiscard]] ExecuteProcessResult executeProcess(QString executable,
 													  QStringList arguments,
+													  std::atomic<bool>& abort,
 													  const std::vector<EnvVariable>& envVariables = {})
 	{
 		QProcess process;
@@ -63,11 +64,24 @@ namespace
 				throw std::runtime_error(QString{"Failed to start %1 process."}.arg(executable).toStdString());
 			}
 
+			QTimer checkAbortTimer;
+			checkAbortTimer.start(100);
+
 			QEventLoop loop;
 			QObject::connect(&process, &QProcess::finished, &loop, &QEventLoop::quit);
+			QObject::connect(&checkAbortTimer,
+							 &QTimer::timeout,
+							 [&abort, &loop, &process]()
+							 {
+								 if (abort.load() == true)
+								 {
+									 process.terminate();
+									 loop.quit();
+								 }
+							 });
 			loop.exec(QEventLoop::ExcludeUserInputEvents);
 
-			int exitCode = process.exitCode();
+			int exitCode = abort.load() == true ? -3 : process.exitCode();
 
 			if (exitCode > 0)
 			{
@@ -83,6 +97,11 @@ namespace
 			if (exitCode == -2)
 			{
 				throw std::runtime_error(QString{"%1 cannot be started."}.arg(executable).toStdString());
+			}
+
+			if (exitCode == -3)
+			{
+				throw std::runtime_error(std::string{"Operation aborted."});
 			}
 		}
 		catch (std::exception& e)
@@ -103,7 +122,11 @@ namespace
 	}
 } // namespace
 
-bool ProjectBackup::backup(QString db, QString fileName, const ProjectBackup::Server& server, QString& errorText) const
+bool ProjectBackup::backup(QString db,
+						   QString fileName,
+						   const ProjectBackup::Server& server,
+						   QString& errorText,
+						   std::atomic<bool>& abort) const
 {
 	if (canBackup() == false)
 	{
@@ -127,7 +150,7 @@ bool ProjectBackup::backup(QString db, QString fileName, const ProjectBackup::Se
 	arguments << QString{"--exclude-table-data=public.build"};
 	arguments << QString{"--file=%1"}.arg(fileName);
 
-	auto result = executeProcess(m_pgDumpCommand, arguments, envVariables);
+	auto result = executeProcess(m_pgDumpCommand, arguments, abort, envVariables);
 	errorText = result.error;
 
 	return result.ok;
@@ -161,7 +184,8 @@ bool ProjectBackup::restore(QString projectName, QString fileName, const Project
 	arguments << QString{"--dbname=postgres"};
 	arguments << QString{"--command=CREATE DATABASE %1;"}.arg(dbName);
 
-	auto result = executeProcess(m_psqlCommand, arguments, envVariables);
+	std::atomic<bool> abort = false;
+	auto result = executeProcess(m_psqlCommand, arguments, abort, envVariables);
 	errorText = result.error;
 
 	if (result.ok == false)
@@ -184,7 +208,7 @@ bool ProjectBackup::restore(QString projectName, QString fileName, const Project
 	arguments << QString{"--set=ON_ERROR_STOP=1"};
 	arguments << QString{"--file=%1"}.arg(fileName);
 
-	result = executeProcess(m_psqlCommand, arguments, envVariables);
+	result = executeProcess(m_psqlCommand, arguments, abort, envVariables);
 
 	if (result.ok == false)
 	{
@@ -201,7 +225,7 @@ bool ProjectBackup::restore(QString projectName, QString fileName, const Project
 		arguments << QString{"--port=%1"}.arg(server.port);
 		arguments << QString{"--dbname=postgres"};
 		arguments << QString{"--command=DROP DATABASE %1;"}.arg(dbName);
-		[[maybe_unused]] auto dropResult = executeProcess(m_psqlCommand, arguments, envVariables);
+		[[maybe_unused]] auto dropResult = executeProcess(m_psqlCommand, arguments, abort, envVariables);
 		return false;
 	}
 
@@ -246,9 +270,11 @@ QString ProjectBackup::autoDetectExecutable(QString name)
 		name,
 	};
 
+	std::atomic<bool> abort = false;
+
 	for (const auto& path : paths)
 	{
-		auto r = executeProcess(path, QStringList() << "--version");
+		auto r = executeProcess(path, QStringList() << "--version", abort);
 		if (r.ok == true)
 		{
 			return QDir::toNativeSeparators(path);
@@ -277,7 +303,7 @@ QString ProjectBackup::autoDetectExecutable(QString name)
 
 	for (const auto& path : otherPaths)
 	{
-		auto r = executeProcess(path, QStringList() << "--version");
+		auto r = executeProcess(path, QStringList() << "--version", abort);
 		if (r.ok == true)
 		{
 			return QDir::toNativeSeparators(path);
@@ -290,7 +316,8 @@ QString ProjectBackup::autoDetectExecutable(QString name)
 
 std::optional<QString> ProjectBackup::executableOutput(const QString& executable, const QStringList& arguments)
 {
-	auto r = executeProcess(executable, arguments);
+	std::atomic<bool> abort = false;
+	auto r = executeProcess(executable, arguments, abort);
 
 	std::optional<QString> result;
 	if (r.ok == true)
