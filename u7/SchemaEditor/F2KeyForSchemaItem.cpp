@@ -1224,6 +1224,7 @@ void F2KeyForSchemaItem::f2KeyForValue(SchemaItemPtr item)
 	// Text
 	//
 	QLabel* textLabel = new QLabel("Text:", &d);
+	textLabel->setToolTip(VFrame30::PropertyNames::textValuePropDescription);
 
 	QPlainTextEdit* textEdit = new QPlainTextEdit(&d);
 	textEdit->setPlaceholderText(VFrame30::PropertyNames::textValuePropDescription);

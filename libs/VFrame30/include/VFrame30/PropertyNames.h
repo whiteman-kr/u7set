@@ -187,14 +187,18 @@ namespace VFrame30
 		inline static const QString textDiscrete0{"TextDiscrete0"};
 		inline static const QString textDiscrete1{"TextDiscrete1"};
 		inline static const QString textNonValid{"TextNonValid"};
-		inline static const QString textValuePropDescription{"$(value) Signal value\n"
-															 "$(caption) Signal caption\n"
-															 "$(signalid) SignalID (CustomSignalID)\n"
-															 "$(appsignalid) AppSignalID (#APPSIGNALID)\n"
-															 "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n"
-															 "$(units) Signal units\n"};
-		//"$(highlimit) High limit\n"
-		//"$(lowlimit) Low limit"};
+		inline static const QString textValuePropDescription{R"($(value) - Signal value
+$(value_[e/E]) - Signal value format as [-]9.9e[+|-]999/, lowercase/uppercase accordingly.
+$(value_f) - Signal value format as [-]9.9, same as  $(value).
+$(value_[g/G]) - Signal value format as 'e' or 'f', whichever is the most concise, lowercase/uppercase accordingly.
+$(value_[hex/HEX]) - Signal value shown in hex, precision determines the number of digits, lowercase/uppercase accordingly.
+$(value_[stag/STAG]) - Signal value formatted according to signal tag (view_linear - f/F, view_log10 or view_period - e/E).
+$(value_[itag/ITAG]) - Signal value formatted according to schema item tag (view_linear - f/F, view_log10 or view_period - e/E).
+$(caption) - Caption.
+$(signalid) - SignalID (CustomSignalID).
+$(appsignalid) - AppSignalID (#APPSIGANLID).
+$(equipmentid) - Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals).
+$(units) - Signal units.)"};
 
 		inline static const QString textVduItemValueDescription = R"(Text to display, may contain placeholders:
 Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
