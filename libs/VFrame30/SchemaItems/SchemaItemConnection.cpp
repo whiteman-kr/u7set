@@ -1,9 +1,10 @@
 #include <VFrame30/SchemaItemConnection.h>
-#include <VFrame30/SchemaItemSignal.h>
-#include <VFrame30/PropertyNames.h>
-#include <VFrame30/DrawParam.h>
-#include <VFrame30/Context.h>
+
 #include <VFrame30/AppSignalController.h>
+#include <VFrame30/Context.h>
+#include <VFrame30/DrawParam.h>
+#include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaItemSignal.h>
 
 
 namespace VFrame30
@@ -27,9 +28,7 @@ namespace VFrame30
 								 SchemaItemConnection::setConnectionIds);
 	}
 
-	SchemaItemConnection::~SchemaItemConnection()
-	{
-	}
+	SchemaItemConnection::~SchemaItemConnection() {}
 
 	bool SchemaItemConnection::SaveData(Proto::Envelope* message) const
 	{
@@ -96,8 +95,7 @@ namespace VFrame30
 		static const auto re = QRegularExpression("\\W+");
 		m_connectionIds = value.split(re, Qt::SkipEmptyParts);
 
-		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
-			heightDocPt() < minHeight)
+		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep); heightDocPt() < minHeight)
 		{
 			SetHeightInDocPt(minHeight);
 		}
@@ -114,8 +112,7 @@ namespace VFrame30
 	{
 		m_connectionIds = value;
 
-		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
-			heightDocPt() < minHeight)
+		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep); heightDocPt() < minHeight)
 		{
 			SetHeightInDocPt(minHeight);
 		}
@@ -148,16 +145,13 @@ namespace VFrame30
 		setPinCount(1);
 	}
 
-	SchemaItemTransmitter::~SchemaItemTransmitter()
-	{
-	}
+	SchemaItemTransmitter::~SchemaItemTransmitter() {}
 
 	bool SchemaItemTransmitter::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItemConnection::SaveData(message);
 
-		if (result == false ||
-			message->HasExtension(Proto::schemaitem) == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
 			assert(message->HasExtension(Proto::schemaitem));
@@ -225,8 +219,7 @@ namespace VFrame30
 		linePen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
 		p->setPen(linePen);
 
-		p->drawLine(drawParam->gridToDpi(r.right() - pinWidth, r.top()),
-					drawParam->gridToDpi(r.right() - pinWidth, r.bottom()));
+		p->drawLine(drawParam->gridToDpi(r.right() - pinWidth, r.top()), drawParam->gridToDpi(r.right() - pinWidth, r.bottom()));
 
 		// >>
 		//
@@ -234,7 +227,7 @@ namespace VFrame30
 		arrowRect.setLeft(r.right() - pinWidth);
 
 		p->setPen(textColor());
-		//DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
+		// DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
 		DrawHelper::drawText(p, m_font, itemUnit(), QChar(0x25BA), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		// Draw ConnectionID
@@ -260,7 +253,7 @@ namespace VFrame30
 		//
 		int pinCount = std::max(static_cast<int>(connectionIdsAsList().size()), inputsCount());
 
-		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double pinVertGap = VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 		double minHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
 		return minHeight;
@@ -281,7 +274,7 @@ namespace VFrame30
 							  "\n\tConnectionID: %1"
 							  "\n"
 							  "\nHint: Press F2 to edit ConnectionID")
-						.arg(connectionIds());
+						  .arg(connectionIds());
 
 		return str;
 	}
@@ -341,8 +334,7 @@ namespace VFrame30
 				addInput(i, E::SignalType::Discrete, QString("in_%1").arg(QString::number(i + 1)));
 			}
 
-			if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
-				heightDocPt() < minHeight)
+			if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep); heightDocPt() < minHeight)
 			{
 				SetHeightInDocPt(minHeight);
 			}
@@ -372,20 +364,20 @@ namespace VFrame30
 								 SchemaItemReceiver::showValidity,
 								 SchemaItemReceiver::setShowValidity);
 
-//		ADD_PROPERTY_GET_SET_CAT(bool,
-//								 PropertyNames::multiLine,
-//								 PropertyNames::appearanceCategory,
-//								 true,
-//								 SchemaItemReceiver::multiline,
-//								 SchemaItemReceiver::setMultiline);
+		//		ADD_PROPERTY_GET_SET_CAT(bool,
+		//								 PropertyNames::multiLine,
+		//								 PropertyNames::appearanceCategory,
+		//								 true,
+		//								 SchemaItemReceiver::multiline,
+		//								 SchemaItemReceiver::setMultiline);
 
-		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::appSignalId,
-								 PropertyNames::functionalCategory,
-								 true,
-								 SchemaItemReceiver::appSignalIds,
-								 SchemaItemReceiver::setAppSignalIds);
-		strIdProperty->setValidator(PropertyNames::appSignalIDsOrReferenceValidator);
+		auto strIdsProperty = ADD_PROPERTY_GET_SET_CAT(QString,
+													   PropertyNames::appSignalIDs,
+													   PropertyNames::functionalCategory,
+													   true,
+													   SchemaItemReceiver::appSignalIds,
+													   SchemaItemReceiver::setAppSignalIds);
+		strIdsProperty->setValidator(PropertyNames::appSignalIDsOrReferenceValidator);
 
 		ADD_PROPERTY_GET_SET_CAT(E::ColumnData,
 								 PropertyNames::dataType,
@@ -418,16 +410,13 @@ namespace VFrame30
 		setShowValidity(true);
 	}
 
-	SchemaItemReceiver::~SchemaItemReceiver()
-	{
-	}
+	SchemaItemReceiver::~SchemaItemReceiver() {}
 
 	bool SchemaItemReceiver::SaveData(Proto::Envelope* message) const
 	{
 		bool result = SchemaItemConnection::SaveData(message);
 
-		if (result == false ||
-			message->HasExtension(Proto::schemaitem) == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
 			assert(message->HasExtension(Proto::schemaitem));
@@ -439,7 +428,7 @@ namespace VFrame30
 		Proto::SchemaItemReceiver* receiver = message->MutableExtension(Proto::schemaitem)->mutable_receiveritem();
 
 		receiver->set_showvalidity(m_showValidity);
-//		receiver->set_multiline(m_multiline);
+		//		receiver->set_multiline(m_multiline);
 		receiver->set_appsignalids(appSignalIds().toStdString());
 		receiver->set_datatype(static_cast<int>(m_dataType));
 		receiver->set_precision(m_precision);
@@ -468,7 +457,7 @@ namespace VFrame30
 		const Proto::SchemaItemReceiver& receiver = message.GetExtension(Proto::schemaitem).receiveritem();
 
 		m_showValidity = receiver.showvalidity();
-//		m_multiline = receiver.multiline();
+		//		m_multiline = receiver.multiline();
 		setAppSignalIds(QString::fromStdString(receiver.appsignalids()));
 		m_dataType = static_cast<E::ColumnData>(receiver.datatype());
 		m_precision = receiver.precision();
@@ -519,8 +508,7 @@ namespace VFrame30
 
 		// Draw line and symbol >>
 		//
-		p->drawLine(drawParam->gridToDpi(r.left() + pinWidth, r.top()),
-					drawParam->gridToDpi(r.left() + pinWidth, r.bottom()));
+		p->drawLine(drawParam->gridToDpi(r.left() + pinWidth, r.top()), drawParam->gridToDpi(r.left() + pinWidth, r.bottom()));
 
 		// >>
 		//
@@ -529,7 +517,7 @@ namespace VFrame30
 
 		p->setPen(textColor());
 
-		//DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
+		// DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
 		DrawHelper::drawText(p, m_font, itemUnit(), QChar(0x25BA), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		r.setLeft(r.left() + pinWidth + m_font.drawSize() / 4.0);
@@ -571,7 +559,7 @@ namespace VFrame30
 
 			DrawHelper::drawText(p, m_font, itemUnit(), dataText, signalRect, Qt::AlignHCenter | Qt::AlignBottom);
 
-			textRow ++;
+			textRow++;
 		}
 
 		// Draw ConnectionIDs
@@ -583,7 +571,7 @@ namespace VFrame30
 			QRectF connIdRect = {r.left(), r.top() + lineHeight * textRow, r.width(), lineHeight};
 			DrawHelper::drawText(p, m_font, itemUnit(), connectionId, connIdRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
-			textRow ++;
+			textRow++;
 		}
 
 		return;
@@ -622,11 +610,9 @@ namespace VFrame30
 
 		// --
 		//
-		int pinCount = qBound(2,
-							  static_cast<int>(connectionIdsAsList().size() + appSignalIdsAsList().size()),
-							  256);
+		int pinCount = qBound(2, static_cast<int>(connectionIdsAsList().size() + appSignalIdsAsList().size()), 256);
 
-		double pinVertGap =	VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double pinVertGap = VFrame30::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 		double minHeight = VFrame30::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
 
 		return minHeight;
@@ -648,8 +634,8 @@ namespace VFrame30
 							  "\n\tAppSignalID: %2"
 							  "\n"
 							  "\nHint: Press F2 to edit AppSignalID and ConnectionID")
-						.arg(connectionIds())
-						.arg(appSignalIds());
+						  .arg(connectionIds())
+						  .arg(appSignalIds());
 
 		return str;
 	}
@@ -701,8 +687,7 @@ namespace VFrame30
 	{
 		m_appSignalIds = value;
 
-		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
-			heightDocPt() < minHeight)
+		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep); heightDocPt() < minHeight)
 		{
 			SetHeightInDocPt(minHeight);
 		}
@@ -729,15 +714,15 @@ namespace VFrame30
 		}
 	}
 
-//	bool SchemaItemReceiver::multiline() const
-//	{
-//		return m_multiline;
-//	}
+	//	bool SchemaItemReceiver::multiline() const
+	//	{
+	//		return m_multiline;
+	//	}
 
-//	void SchemaItemReceiver::setMultiline(bool value)
-//	{
-//		m_multiline = value;
-//	}
+	//	void SchemaItemReceiver::setMultiline(bool value)
+	//	{
+	//		m_multiline = value;
+	//	}
 
 	bool SchemaItemReceiver::isValidityPin(const QUuid& pinGuid) const
 	{
@@ -788,7 +773,7 @@ namespace VFrame30
 
 		if (outs.size() < 1 || outs.size() > 2)
 		{
-			assert(outs.size() >= 1 && outs.size() <=2);
+			assert(outs.size() >= 1 && outs.size() <= 2);
 			return false;
 		}
 
@@ -854,4 +839,4 @@ namespace VFrame30
 	}
 
 
-}
+} // namespace VFrame30

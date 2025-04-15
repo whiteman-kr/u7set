@@ -152,13 +152,31 @@ void F2KeyForSchemaItem::show(SchemaItemPtr schemaItem)
 
 	if (schemaItem->isType<VFrame30::SchemaItemReceiver>() == true)
 	{
-		f2KeyForReceiver(schemaItem, true);
+		auto schema = schemaItem->parentSchema();
+		assert(schema);
+
+		auto logicSchema = schema->toLogicSchema();
+		if (logicSchema == nullptr)
+		{
+			return;
+		}
+
+		f2KeyForReceiver(schemaItem, *logicSchema, true);
 		return;
 	}
 
 	if (schemaItem->isType<VFrame30::SchemaItemTransmitter>() == true)
 	{
-		f2KeyForTransmitter(schemaItem, true);
+		auto schema = schemaItem->parentSchema();
+		assert(schema);
+
+		auto logicSchema = schema->toLogicSchema();
+		if (logicSchema == nullptr)
+		{
+			return;
+		}
+
+		f2KeyForTransmitter(schemaItem, *logicSchema, true);
 		return;
 	}
 
@@ -225,7 +243,7 @@ void F2KeyForSchemaItem::show(SchemaItemPtr schemaItem)
 	return;
 }
 
-bool F2KeyForSchemaItem::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngine)
+bool F2KeyForSchemaItem::f2KeyForReceiver(SchemaItemPtr item, const VFrame30::LogicSchema& logicSchema, bool setViaEditEngine)
 {
 	if (item == nullptr)
 	{
@@ -256,15 +274,7 @@ bool F2KeyForSchemaItem::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEng
 		return false;
 	}
 
-	auto schema = item->parentSchema();
-	assert(schema);
-	auto logicSchema = schema->toLogicSchema();
-	if (logicSchema == nullptr)
-	{
-		return false;
-	}
-
-	QStringList connectionIds = connections.filterByMoudules(logicSchema->equipmentIdList());
+	QStringList connectionIds = connections.filterByMoudules(logicSchema.equipmentIdList());
 
 	// Show input dialog
 	//
@@ -347,7 +357,7 @@ bool F2KeyForSchemaItem::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEng
 				if (ok == true)
 				{
 					m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newConnectionId), item);
-					m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newAppSignalId), item);
+					m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newAppSignalId), item);
 
 					m_editEngine->endBatch();
 				}
@@ -366,7 +376,7 @@ bool F2KeyForSchemaItem::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEng
 	return false;
 }
 
-bool F2KeyForSchemaItem::f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEngine)
+bool F2KeyForSchemaItem::f2KeyForTransmitter(SchemaItemPtr item, const VFrame30::LogicSchema& logicSchema, bool setViaEditEngine)
 {
 	if (item == nullptr)
 	{
@@ -396,15 +406,7 @@ bool F2KeyForSchemaItem::f2KeyForTransmitter(SchemaItemPtr item, bool setViaEdit
 		return false;
 	}
 
-	auto schema = item->parentSchema();
-	assert(schema);
-	auto logicSchema = schema->toLogicSchema();
-	if (logicSchema == nullptr)
-	{
-		return false;
-	}
-
-	QStringList connectionIds = connections.filterByMoudules(logicSchema->equipmentIdList());
+	QStringList connectionIds = connections.filterByMoudules(logicSchema.equipmentIdList());
 
 	// Show input dialog
 	//

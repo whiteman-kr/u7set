@@ -247,7 +247,12 @@ std::vector<std::pair<QString, QString>> SignalPropertiesDialog::editApplication
 		i++;
 	}
 
-	signalSetProvider->saveSignals(editedSignals, parent);
+	bool saveOk = signalSetProvider->saveSignals(editedSignals, parent);
+	if (saveOk == false) 
+	{
+		// TODO: Report and return which specific signals were changed and which were not.
+		result.clear();
+	}
 
 	return result;
 }

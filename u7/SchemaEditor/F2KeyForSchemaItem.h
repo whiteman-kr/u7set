@@ -7,8 +7,9 @@ namespace EditEngine
 
 namespace VFrame30
 {
+	class LogicSchema;
 	class SchemaItem;
-}
+} // namespace VFrame30
 
 namespace AppSignalLib
 {
@@ -28,8 +29,8 @@ public:
 
 	void show(SchemaItemPtr schemaItem);
 
-	bool f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngine);
-	bool f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEngine);
+	bool f2KeyForReceiver(SchemaItemPtr item, const VFrame30::LogicSchema& logicSchema, bool setViaEditEngine);
+	bool f2KeyForTransmitter(SchemaItemPtr item, const VFrame30::LogicSchema& logicSchema, bool setViaEditEngine);
 
 	static bool loadBusses(DbController* db, std::vector<AppSignalLib::Bus>* out, QWidget* parentWidget);
 

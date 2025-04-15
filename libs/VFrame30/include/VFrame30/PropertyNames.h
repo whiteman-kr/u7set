@@ -2,13 +2,14 @@
 
 namespace VFrame30
 {
-
 	class PropertyNames
 	{
-	  public:
+	public:
 		PropertyNames() = delete;
 
-	  public:
+	public:
+		// clang-format off
+
 		inline static const QString schemaId{"SchemaID"};
 
 		inline static const QString top{"Top"};
@@ -171,10 +172,10 @@ namespace VFrame30
 		inline static const QString indicatorTrendScaleType{"ScaleType"};
 		inline static const QString indicatorTrendViewMode{"ViewMode"};
 
-		inline static const QString indicatorMargingLeft{"MarginLeft"};
-		inline static const QString indicatorMargingTop{"MarginTop"};
-		inline static const QString indicatorMargingRight{"MarginRight"};
-		inline static const QString indicatorMargingBottom{"MarginBottom"};
+		inline static const QString indicatorMarginLeft{"MarginLeft"};
+		inline static const QString indicatorMarginTop{"MarginTop"};
+		inline static const QString indicatorMarginRight{"MarginRight"};
+		inline static const QString indicatorMarginBottom{"MarginBottom"};
 		inline static const QString indicatorScaleType{"ScaleType"};
 
 		inline static const QString drawSetpoints{"DrawSetpoints"};
@@ -259,7 +260,6 @@ Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
 		inline static const QString appSignalIDsValidator{"^[#]?([A-Za-z\\d_]+((;[#]?)?\\r?(\\n[#]?)?))+$"};
 		inline static const QString appSignalIDsOrReferenceValidator{R"(^[#a-zA-Z0-9\$_\(\).;\n\r]*$)"};
 
-		inline static const QString appSignalId{"AppSignalID"};
 		inline static const QString appSignalIdValidator{"^[#]?[A-Za-z\\d_]+$"};
 		inline static const QString impactAppSignalIDs{"ImpactAppSignalIDs"};
 		inline static const QString connectionId{"ConnectionID"};
@@ -342,5 +342,7 @@ Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
 		inline static const QString scriptGlobalVariableSignals{"signals"};
 		inline static const QString scriptGlobalVariableEquipment{"equipment"};
 		inline static const QString scriptGlobalVariableLog{"log"};
+
+		// clang-format on
 	};
 } // namespace VFrame30
