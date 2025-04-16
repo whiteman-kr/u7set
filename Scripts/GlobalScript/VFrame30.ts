@@ -239,7 +239,7 @@ module VFrame30 {
 
 		precision: number;
 
-		analogFormat: E.AnalogFormat;
+		analogFormat: E.AnalogFormatCode;
 
 		columnCount: number;
 
