@@ -13,6 +13,11 @@ const Columns& ArchiveSignalsModel::columns() const
 	return m_columns;
 }
 
+int ArchiveSignalsModel::size() const
+{
+	return TO_INT(m_archSignals.size());
+}
+
 int ArchiveSignalsModel::rowCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
@@ -97,28 +102,83 @@ void ArchiveSignalsModel::updateData(const Network::ServiceInfo& srvInfo)
 {
 	int signalsCount = srvInfo.archsignalsinfo_size();
 
-	if (signalsCount != TO_INT(m_archSignals.size()))
+	int existSignalCount = TO_INT(m_archSignals.size());
+
+	auto copyArchSignals = [&]()
 	{
-		if (signalsCount > m_archSignals.size())
+		for(int i = 0; i < signalsCount; i++)
 		{
-			beginInsertRows(QModelIndex(), TO_INT(m_archSignals.size()), signalsCount - 1);
+			m_archSignals[i] = srvInfo.archsignalsinfo(i);
+		}
+
+		int firstIndex = -1;
+		int lastIndex = -1;
+		int prevRecordsPerMin = -1;
+
+		auto sortRange = [&]()
+		{
+			if (firstIndex !=-1 && lastIndex != -1 && firstIndex < lastIndex)
+			{
+				std::sort(m_archSignals.begin() + firstIndex,
+						  m_archSignals.begin() + lastIndex + 1,
+						  [](const Network::ArchSignalInfo& a, const Network::ArchSignalInfo& b)
+						  {
+							  return a.appsignalid() < b.appsignalid();
+						  });
+			}
+		};
+
+		// sorting signals with equal RecordsPerMin by AppSignalID
+		//
+		for(int i = 0; i < signalsCount; i++)
+		{
+			if (prevRecordsPerMin == -1)
+			{
+				prevRecordsPerMin = m_archSignals[i].recordspermin();
+				firstIndex = i;
+				lastIndex = i;
+				continue;
+			}
+
+			if (m_archSignals[i].recordspermin() == prevRecordsPerMin)
+			{
+				lastIndex = i;
+				continue;
+			}
+
+			sortRange();
+
+			prevRecordsPerMin = m_archSignals[i].recordspermin();
+			firstIndex = i;
+			lastIndex = i;
+		}
+
+		sortRange();
+	};
+
+	if (signalsCount != existSignalCount)
+	{
+		if (signalsCount > existSignalCount)
+		{
+			beginInsertRows(QModelIndex(), existSignalCount, signalsCount - 1);
 			m_archSignals.resize(signalsCount);
+			copyArchSignals();
 			endInsertRows();
 		}
 		else
 		{
-			beginRemoveRows(QModelIndex(), TO_INT(m_archSignals.size()), signalsCount - 1);
+			beginRemoveRows(QModelIndex(), signalsCount, existSignalCount - 1);
 			m_archSignals.resize(signalsCount);
+			copyArchSignals();
 			endRemoveRows();
 		}
 
 		beginInsertColumns(QModelIndex(), 0, TO_INT(m_columns.size()) - 1);
 		endInsertColumns();
 	}
-
-	for(int i = 0; i< signalsCount; i++)
+	else
 	{
-		m_archSignals[i] = srvInfo.archsignalsinfo(i);
+		copyArchSignals();
 	}
 
 	emit dataChanged(QModelIndex(), QModelIndex());
@@ -146,4 +206,9 @@ QString ArchiveSignalsModel::fineSize(qint64 size) const
 	}
 
 	return QString("%1 Bytes").arg(size);
+}
+
+const Network::ArchSignalInfo& ArchiveSignalsModel::at(int index)
+{
+	return m_archSignals[index];
 }

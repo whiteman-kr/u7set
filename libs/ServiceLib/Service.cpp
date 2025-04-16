@@ -357,6 +357,7 @@ void ServiceWorker::onThreadStarted()
 
 	loadCommonServicesSettings();
 	loadServiceSpecificSettings();
+
 	initialize();
 
 	emit work();
@@ -365,6 +366,7 @@ void ServiceWorker::onThreadStarted()
 void ServiceWorker::onThreadFinished()
 {
 	shutdown();
+
 	emit stopped();
 
 	DEBUG_LOG_MSG(m_logger, QString("%1::onThreadFinished(), instanceNo = %2").
@@ -396,12 +398,14 @@ void Service::start()
 
 	QThread::msleep(100);
 
-	startSrvInfoThreads();
+	startUdpSrvInfoThread();
+	startTcpSrvInfoThread();
 }
 
 void Service::stop()
 {
-	stopBaseRequestSocketThread();
+	stopTcpSrvInfoThread();
+	stopUdpSrvInfoThread();
 
 	stopServiceWorkerThread();
 }
@@ -424,6 +428,7 @@ QString Service::getServiceInstanceName(const QString& serviceName, int argc, ch
 void Service::processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq)
 {
 	ServiceWorker* serviceWorker = m_serviceWorker;
+
 	if (serviceWorker == nullptr)
 	{
 		serviceWorker = &m_serviceWorkerFactory;
@@ -435,6 +440,7 @@ void Service::processGetServiceInfoRequest(const Network::GetServiceInfoRequest&
 void Service::getServiceInfo(Network::ServiceInfo& serviceInfo, bool shortInfo)
 {
 	ServiceWorker* serviceWorker = m_serviceWorker;
+
 	if (serviceWorker == nullptr)
 	{
 		serviceWorker = &m_serviceWorkerFactory;
@@ -534,6 +540,26 @@ void Service::stopServiceWorkerThread()
 	m_state = E::ServiceState::Stopped;
 }
 
+const ServiceInfo* Service::getServiceInfo()
+{
+	E::SoftwareType swType = m_serviceWorkerFactory.softwareType();
+
+	auto it = std::find_if(	servicesInfo.begin(),
+						   servicesInfo.end(),
+						   [swType](const ServiceInfo& si)
+						   {
+							   return si.softwareType == swType;
+						   });
+
+	if (it == servicesInfo.end())
+	{
+		Q_ASSERT(false);
+		return nullptr;
+	}
+
+	return &(*it);
+}
+
 void Service::onServiceWork()
 {
 	m_state = E::ServiceState::Work;
@@ -571,26 +597,13 @@ void Service::onGetSrvShortInfoRequest(UdpRequest request)
 	emit ackBaseRequest(ack);
 }
 
-void Service::startSrvInfoThreads()
+void Service::startUdpSrvInfoThread()
 {
-	E::SoftwareType swType = m_serviceWorkerFactory.softwareType();
+	const ServiceInfo* sInfo = getServiceInfo();
 
-	auto it = std::find_if(	servicesInfo.begin(),
-							servicesInfo.end(),
-							[swType](const ServiceInfo& si)
-							{
-								return si.softwareType == swType;
-							});
+	TEST_PTR_RETURN(sInfo);
 
-	if (it == servicesInfo.end())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	const ServiceInfo& sInfo = *it;
-
-	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo.udpPort, m_logger);
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo->udpPort, m_logger);
 
 	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onGetSrvShortInfoRequest);
 	connect(this, &Service::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
@@ -598,25 +611,45 @@ void Service::startSrvInfoThreads()
 	m_udpSrvInfoThread = new UdpSocketThread(serverSocket);
 
 	m_udpSrvInfoThread->start();
+}
 
-	//
+void Service::stopUdpSrvInfoThread()
+{
+	if (m_udpSrvInfoThread != nullptr)
+	{
+		m_udpSrvInfoThread->quitAndWait();
+		delete m_udpSrvInfoThread;
+		m_udpSrvInfoThread = nullptr;
+	}
+}
+
+void Service::startTcpSrvInfoThread()
+{
+	const ServiceInfo* sInfo = Service::getServiceInfo();
+
+	TEST_PTR_RETURN(sInfo);
 
 	HostAddressPort listenAddr;
 
 	listenAddr.setSpecAddress(QHostAddress::AnyIPv4);
-	listenAddr.setPort(sInfo.tcpPort);
+	listenAddr.setPort(sInfo->tcpPort);
 
 	m_tcpSrvInfoThread = new Tcp::ListenerThread(listenAddr,
 												 E::SecurityLevel::Basic,
-												 new TcpSrvInfoServer(m_serviceWorker->softwareInfo(), "TcpSrvInfoServer", *this),
+												 new TcpSrvInfoServer(m_serviceWorkerFactory.softwareInfo(), "TcpSrvInfoServer", *this),
 												 m_logger);
 	m_tcpSrvInfoThread->start();
 }
 
-void Service::stopBaseRequestSocketThread()
+void Service::stopTcpSrvInfoThread()
 {
-	m_udpSrvInfoThread->quitAndWait();
-
-	delete m_udpSrvInfoThread;
+	if (m_tcpSrvInfoThread != nullptr)
+	{
+		m_tcpSrvInfoThread->quitAndWait();
+		delete m_tcpSrvInfoThread;
+		m_tcpSrvInfoThread = nullptr;
+	}
 }
+
+
 

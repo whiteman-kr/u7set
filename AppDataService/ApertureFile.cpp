@@ -42,7 +42,7 @@ bool ApertureFile::save()
 
 	QString fileData;
 
-	fileData.append(QString("%1;%2;%3;%3\n").
+	fileData.append(QString("%1;%2;%3;%4\n").
 						arg(SIGNAL_ID).arg(APERTURE_TYPE).arg(COARSE_APERTURE).arg(FINE_APERTURE));
 
 	for(const auto& [signalID, apertureRecord] : m_apertures)

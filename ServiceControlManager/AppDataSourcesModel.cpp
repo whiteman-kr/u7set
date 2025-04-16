@@ -109,29 +109,39 @@ Qt::ItemFlags AppDataSourcesModel::flags(const QModelIndex& index) const
 void AppDataSourcesModel::updateData(const Network::ServiceInfo& srvInfo)
 {
 	int sourcesCount = srvInfo.appdatasourcesstates_size();
+	int existSourcesCount = TO_INT(m_sources.size());
 
-	if (sourcesCount != TO_INT(m_sources.size()))
+	auto copySources = [&]()
 	{
-		if (sourcesCount > m_sources.size())
+		for(int i = 0; i< sourcesCount; i++)
 		{
-			beginInsertRows(QModelIndex(), TO_INT(m_sources.size()), sourcesCount - 1);
+			m_sources[i] = srvInfo.appdatasourcesstates(i);
+		}
+	};
+
+	if (sourcesCount != existSourcesCount)
+	{
+		if (sourcesCount > existSourcesCount)
+		{
+			beginInsertRows(QModelIndex(), existSourcesCount, sourcesCount - 1);
 			m_sources.resize(sourcesCount);
+			copySources();
 			endInsertRows();
 		}
 		else
 		{
-			beginRemoveRows(QModelIndex(), TO_INT(m_sources.size()), sourcesCount - 1);
+			beginRemoveRows(QModelIndex(), sourcesCount, existSourcesCount - 1);
 			m_sources.resize(sourcesCount);
+			copySources();
 			endRemoveRows();
 		}
 
 		beginInsertColumns(QModelIndex(), 0, TO_INT(m_columns.size()) - 1);
 		endInsertColumns();
 	}
-
-	for(int i = 0; i< sourcesCount; i++)
+	else
 	{
-		m_sources[i] = srvInfo.appdatasourcesstates(i);
+		copySources();
 	}
 
 	emit dataChanged(QModelIndex(), QModelIndex());

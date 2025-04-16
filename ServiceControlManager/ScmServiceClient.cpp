@@ -26,28 +26,6 @@ void ScmServiceClient::onClientThreadStarted()
 	connect(m_timer, &QTimer::timeout, this, &ScmServiceClient::sendSrvGetInfoRequest);
 	m_timer->start(500);
 
-	std::vector<ApertureRecord> apertures;
-
-	DEBUG_STOP;
-
-	ApertureRecord ar;
-
-	ar.signalID = "#LM1_1_TO_30";
-	ar.apertureType = E::ApertureType::RangePercent;
-	ar.coarseAperture = 2;
-	ar.fineAperture = 1;
-
-	apertures.push_back(ar);
-
-	ar.signalID = "#LM1_1_TO_100";
-	ar.apertureType = E::ApertureType::RangePercent;
-	ar.coarseAperture = 3;
-	ar.fineAperture = 1.5;
-
-	apertures.push_back(ar);
-
-	overrideApertures(apertures);
-
 	sendSrvGetInfoRequest();
 }
 

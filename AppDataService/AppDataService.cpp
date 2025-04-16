@@ -504,10 +504,6 @@ void AppDataServiceWorker::createAndInitSignalStates()
 	//
 
 	m_recordsPerMin.clear();
-
-	RecordsPerMin r;
-
-	m_recordsPerMin.resize(signalCount, r);
 }
 
 void AppDataServiceWorker::buildAcuiredAppSignalIDs()

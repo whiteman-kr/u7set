@@ -491,6 +491,7 @@ void BaseServiceWidget::createTcpConnection(quint32 ip, quint16 tcpPort)
 	m_scmSrvClientThread = new SimpleThread(m_scmSrvClient);
 
 	connect(m_scmSrvClient, &ScmServiceClient::serviceInfoUpdated, this, &BaseServiceWidget::onServiceInfoUpdated);
+	connect(m_scmSrvClient, &ScmServiceClient::socketDisconnected, this, &BaseServiceWidget::onScmServiceClientDisconnected);
 
 	m_scmSrvClientThread->start();
 }
@@ -505,6 +506,13 @@ void BaseServiceWidget::dropTcpConnection()
 	}
 
 	m_scmSrvClient = nullptr;
+}
+
+void BaseServiceWidget::onScmServiceClientDisconnected()
+{
+	clearServiceData();
+	updateSrvStatusWidgets();
+	clearDerivedWidgets();
 }
 
 QString BaseServiceWidget::rqCtrlInfoStr(const RqCtrlSettings& rcs)
@@ -727,6 +735,10 @@ void BaseServiceWidget::onServiceInfoUpdated(QByteArray replyData)
 void BaseServiceWidget::updateDerivedWidgets(const Network::ServiceInfo& srvInfo)
 {
 	Q_UNUSED(srvInfo);
+}
+
+void BaseServiceWidget::clearDerivedWidgets()
+{
 }
 
 void BaseServiceWidget::sendCommand(int command)

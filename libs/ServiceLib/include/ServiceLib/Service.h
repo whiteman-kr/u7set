@@ -260,6 +260,8 @@ public:
 	void startServiceWorkerThread();
 	void stopServiceWorkerThread();
 
+	const ServiceInfo* getServiceInfo();
+
 signals:
 	void ackBaseRequest(UdpRequest request);
 
@@ -270,8 +272,11 @@ private slots:
 	void onGetSrvShortInfoRequest(UdpRequest request);
 
 private:
-	void startSrvInfoThreads();
-	void stopBaseRequestSocketThread();
+	void startUdpSrvInfoThread();
+	void stopUdpSrvInfoThread();
+
+	void startTcpSrvInfoThread();
+	void stopTcpSrvInfoThread();
 
 private:
 	QMutex m_mutex;
@@ -288,6 +293,7 @@ private:
 	ServiceWorker* m_serviceWorker = nullptr;
 
 	SimpleThread* m_serviceWorkerThread = nullptr;
+
 	UdpSocketThread* m_udpSrvInfoThread = nullptr;
 	Tcp::ListenerThread* m_tcpSrvInfoThread = nullptr;
 

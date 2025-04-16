@@ -4,6 +4,10 @@
 #include "../UtilsLib/Ui/WidgetUtils.h"
 
 #include <QTableView>
+#include <QMenu>
+#include <QListWidget>
+#include <QLineEdit>
+#include <QComboBox>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 
@@ -556,6 +560,18 @@ void AppDataServiceWidget::initWidget()
 
 void AppDataServiceWidget::updateDerivedWidgets(const Network::ServiceInfo& srvInfo)
 {
+	updateModels(srvInfo);
+}
+
+void AppDataServiceWidget::clearDerivedWidgets()
+{
+	Network::ServiceInfo clearSrvInfo;
+
+	updateModels(clearSrvInfo);
+}
+
+void AppDataServiceWidget::updateModels(const Network::ServiceInfo& srvInfo)
+{
 	if (m_sourcesModel != nullptr)
 	{
 		m_sourcesModel->updateData(srvInfo);
@@ -826,7 +842,11 @@ void AppDataServiceWidget::addArchiveSignalsTab()
 	m_archSignalsModel = new ArchiveSignalsModel(this);
 	m_archSignalsView = createTableView(m_archSignalsModel, m_archSignalsModel->columns());
 
-	//	connect(m_sourcesView, &QTableView::doubleClicked, this, &MyClass::onTableDoubleClicked);
+	m_archSignalsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_archSignalsView->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(m_archSignalsView, &QTableView::customContextMenuRequested,
+			this, &AppDataServiceWidget::onCustomContextMenuRequested);
 
 	addTab(m_archSignalsView, "TOP-500 archive signals");
 }
@@ -895,6 +915,164 @@ int AppDataServiceWidget::updateSettings(int rowCount)
 
 	return rowCount;
 }
+
+void AppDataServiceWidget::onCustomContextMenuRequested(const QPoint& pos)
+{
+	m_selectedRows.clear();
+
+	QModelIndex index = m_archSignalsView->indexAt(pos);
+
+	if (index.isValid() == false)
+	{
+		return;
+	}
+
+	QModelIndexList selectedIndexes = m_archSignalsView->selectionModel()->selectedRows();
+
+	m_selectedRows.reserve(selectedIndexes.size());
+
+	for(const QModelIndex& indx : selectedIndexes)
+	{
+		m_selectedRows.push_back(indx.row());
+	}
+
+	QMenu menu;
+
+	QAction* changeAperturesAction = new QAction("Change aperture(s)",&menu);
+
+	menu.addAction(changeAperturesAction);
+
+	connect(changeAperturesAction, &QAction::triggered,
+			this, &AppDataServiceWidget::onChangeApertures);
+
+	menu.exec(m_archSignalsView->viewport()->mapToGlobal(pos));
+}
+
+void AppDataServiceWidget::onChangeApertures()
+{
+	QDialog dlg;
+
+	QGridLayout* gridLayout = new QGridLayout(&dlg);
+
+	//
+
+	QListWidget* signalsList = new QListWidget;
+
+	std::optional<int> apertureType;
+	std::optional<double> coarseAperture;
+	std::optional<double> fineAperture;
+
+	int index = 0;
+
+	for(int row : m_selectedRows)
+	{
+		const Network::ArchSignalInfo& asi = m_archSignalsModel->at(row);
+
+		signalsList->addItem(QString::fromStdString(asi.appsignalid()));
+
+		if (index == 0)
+		{
+			apertureType = asi.aperturetype();
+			coarseAperture = asi.coarseaperture();
+			fineAperture = asi.fineaperture();
+		}
+		else
+		{
+			if (apertureType.has_value() && apertureType.value() != asi.aperturetype())
+			{
+				apertureType.reset();
+			}
+
+			if (coarseAperture.has_value() && coarseAperture.value() != asi.coarseaperture())
+			{
+				coarseAperture.reset();
+			}
+
+			if (fineAperture.has_value() && fineAperture.value() != asi.fineaperture())
+			{
+				fineAperture.reset();
+			}
+		}
+
+		index++;
+	}
+
+	gridLayout->addWidget(signalsList, 0, 0, 1, 2);
+
+	//
+
+	gridLayout->addWidget(new QLabel("Aperture type"), 1, 0);
+
+	QComboBox* aperureTypeList = new QComboBox;
+
+	std::vector<std::pair<int, QString>> values = E::enumValues<E::ApertureType>();
+
+	if (apertureType.has_value() == false)
+	{
+		aperureTypeList->addItem(QString(), -1);
+		aperureTypeList->setCurrentText(QString());
+	}
+
+	for(const auto& [value, text] : values)
+	{
+		aperureTypeList->addItem(text, value);
+
+		if (apertureType.has_value() && apertureType.value() == value)
+		{
+			aperureTypeList->setCurrentText(text);
+		}
+	}
+
+	gridLayout->addWidget(aperureTypeList, 1, 1);
+
+	//
+
+	gridLayout->addWidget(new QLabel("Coarse aperture"), 2, 0);
+
+	QLineEdit* coarseApertureEdit = new QLineEdit;
+
+	if (coarseAperture.has_value())
+	{
+		coarseApertureEdit->setText(QString::number(coarseAperture.value()));
+	}
+
+	gridLayout->addWidget(coarseApertureEdit, 2, 1);
+
+	//
+
+	gridLayout->addWidget(new QLabel("Fine aperture"), 3, 0);
+
+	QLineEdit* fineApertureEdit = new QLineEdit;
+
+	if (fineAperture.has_value())
+	{
+		fineApertureEdit->setText(QString::number(fineAperture.value()));
+	}
+
+	gridLayout->addWidget(fineApertureEdit, 3, 1);
+
+	//
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+	gridLayout->addWidget(buttonBox, 4, 0, 1, 2);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+
+	//
+
+	dlg.setLayout(gridLayout);
+	dlg.resize(500, 400);
+
+	int result = dlg.exec();
+
+	if (result == QDialog::Accepted)
+	{
+
+	}
+}
+
 /*
 
 SignalStateModel::SignalStateModel(QObject* parent) :

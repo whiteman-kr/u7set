@@ -84,12 +84,18 @@ public:
 	virtual void initWidget() override;
 
 	virtual void updateDerivedWidgets(const Network::ServiceInfo& srvInfo) override;
+	virtual void clearDerivedWidgets() override;
 
 private:
+	void updateModels(const Network::ServiceInfo& srvInfo);
+
 	void addAppDataSourcesTab();
 	void addArchiveSignalsTab();
 
 	virtual int updateSettings(int rowCount) override;
+
+	void onCustomContextMenuRequested(const QPoint &pos);
+	void onChangeApertures();
 
 private:
 	AppDataSourcesModel* m_sourcesModel = nullptr;
@@ -97,6 +103,7 @@ private:
 
 	ArchiveSignalsModel* m_archSignalsModel = nullptr;
 	QTableView* m_archSignalsView = nullptr;
+	std::vector<int> m_selectedRows;
 
 /*	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
 	SignalStateModel* m_signalStateModel = nullptr;

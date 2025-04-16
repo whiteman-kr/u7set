@@ -34,6 +34,7 @@ public:
 	virtual void onServiceInfoUpdated(QByteArray replyData);
 
 	virtual void updateDerivedWidgets(const Network::ServiceInfo& srvInfo);
+	virtual void clearDerivedWidgets();
 
 signals:
 	void invalidateServiceData();
@@ -68,6 +69,7 @@ protected:
 
 	void createTcpConnection(quint32 ip, quint16 tcpPort);
 	void dropTcpConnection();
+	void onScmServiceClientDisconnected();
 
 	QString rqCtrlInfoStr(const RqCtrlSettings& rcs);
 

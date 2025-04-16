@@ -242,7 +242,7 @@ public:
 
 	void setSize(int size);
 
-	int size() const { return m_size; }
+	int size() const { return TO_INT(m_appSignalState.size()); }
 
 	DynamicAppSignalState* operator [] (int index);
 	const DynamicAppSignalState* operator [] (int index) const;
@@ -265,8 +265,6 @@ public:
 	void overrideAperture(const ApertureRecord& ar);
 
 private:
-	DynamicAppSignalState* m_appSignalState = nullptr;
-	int m_size = 0;
-
-	std::map<Hash, DynamicAppSignalState*> m_hash2State;
+	std::vector<DynamicAppSignalState*> m_appSignalState;
+	std::map<Hash, DynamicAppSignalState*> m_hash2State;		// calcHash(AppSignalID) => DynamicAppSignalState*
 };

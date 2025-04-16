@@ -949,9 +949,10 @@ void DynamicAppSignalStates::clear()
 {
 	m_hash2State.clear();
 
-	DELETE_ARRAY_IF_NOT_NULL(m_appSignalState);
+	std::for_each(m_appSignalState.begin(), m_appSignalState.end(),
+				  [](DynamicAppSignalState* s) { DELETE_IF_NOT_NULL(s)});
 
-	m_size = 0;
+	m_appSignalState.clear();
 }
 
 void DynamicAppSignalStates::setSize(int size)
@@ -964,40 +965,22 @@ void DynamicAppSignalStates::setSize(int size)
 		return;
 	}
 
-	m_appSignalState = new DynamicAppSignalState[size];
-	m_size = size;
+	m_appSignalState.resize(size);
+
+	for(int i = 0; i < size; i++)
+	{
+		m_appSignalState[i] = new DynamicAppSignalState;
+	}
 }
 
 DynamicAppSignalState* DynamicAppSignalStates::operator [] (int index)
 {
-#ifdef QT_DEBUG
-
-	if (m_appSignalState == nullptr ||
-		index < 0  || index >= m_size)
-	{
-		assert(false);
-		return nullptr;
-	}
-
-#endif
-
-	return m_appSignalState + index;
+	return m_appSignalState[index];
 }
 
 const DynamicAppSignalState* DynamicAppSignalStates::operator [] (int index) const
 {
-#ifdef QT_DEBUG
-
-	if (m_appSignalState == nullptr ||
-		index < 0  || index >= m_size)
-	{
-		assert(false);
-		return nullptr;
-	}
-
-#endif
-
-	return m_appSignalState + index;
+	return m_appSignalState[index];
 }
 
 const DynamicAppSignalState* DynamicAppSignalStates::getStateByHash(Hash signalHash) const
@@ -1024,11 +1007,13 @@ void DynamicAppSignalStates::buidlHash2State()
 {
 	m_hash2State.clear();
 
-	for(int i = 0; i < m_size; i++)
-	{
-		DynamicAppSignalState& state = m_appSignalState[i];
+	int size = TO_INT(m_appSignalState.size());
 
-		Hash hash = state.hash();
+	for(int i = 0; i < size; i++)
+	{
+		DynamicAppSignalState* state = m_appSignalState[i];
+
+		Hash hash = state->hash();
 
 		if (m_hash2State.contains(hash) == true)
 		{
@@ -1036,7 +1021,7 @@ void DynamicAppSignalStates::buidlHash2State()
 		}
 		else
 		{
-			m_hash2State.emplace(hash, &state);
+			m_hash2State.emplace(hash, state);
 		}
 	}
 }
@@ -1066,11 +1051,13 @@ void DynamicAppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount
 
 	int count = 0;
 
-	for(int i = 0; i < m_size; i++)
+	int size = TO_INT(m_appSignalState.size());
+
+	for(int i = 0; i < size; i++)
 	{
-		if (m_appSignalState[i].archive() == true)
+		if (m_appSignalState[i]->archive() == true)
 		{
-			m_appSignalState[i].setAutoArchivingGroup(count % autoArchivingGroupsCount);
+			m_appSignalState[i]->setAutoArchivingGroup(count % autoArchivingGroupsCount);
 			count++;
 		}
 	}

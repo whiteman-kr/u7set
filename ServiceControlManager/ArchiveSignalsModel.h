@@ -10,6 +10,8 @@ public:
 
 	const Columns& columns() const;
 
+	int size() const;
+
 	virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
@@ -20,6 +22,8 @@ public:
 	void updateData(const Network::ServiceInfo& srvInfo);
 
 	QString fineSize(qint64 size) const;
+
+	const Network::ArchSignalInfo& at(int index);
 
 private:
 	std::vector<Network::ArchSignalInfo> m_archSignals;
