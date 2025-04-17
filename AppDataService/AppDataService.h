@@ -126,8 +126,11 @@ private:
 	void onGetDataSourcesInfo(UdpRequest& request);
 	void onGetDataSourcesState(UdpRequest& request);
 
-	void getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin, int count) const;
-	void onTimer1min();
+	void getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,
+						  int count, double* updateStatus) const;
+
+	void restartArchSignalsTimer();
+	void onArchSignalsTimer();
 
 private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
@@ -138,7 +141,11 @@ private:
 	QString m_strCmdLineAppDataReceivingIP;
 	HostAddressPort m_cmdLineAppDataReceivingIP;
 	bool m_logRupTimeErrors = false;
-	QTimer* m_timer = nullptr;
+
+	QTimer* m_archSignalsUpdateTimer = nullptr;
+	qint64 m_archSignalsTimerStartMs = 0;
+
+	const qint64 ARCH_SIGNALS_UPDATE_INTERVAL = 60 * 1000;
 
 	CircularLoggerShared m_timeErrLog;
 

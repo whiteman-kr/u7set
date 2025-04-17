@@ -98,7 +98,7 @@ bool ApertureFile::loadFile(const QString& fileName)
 	{
 		if (str == fileData.constFirst())
 		{
-			QStringList fields = str.split(Separator::NEW_LINE);
+			QStringList fields = str.split(Separator::SEMICOLON, Qt::SkipEmptyParts);
 
 			if (fields.size() != 4)
 			{

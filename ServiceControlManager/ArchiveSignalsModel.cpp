@@ -34,13 +34,11 @@ QVariant ArchiveSignalsModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::CheckStateRole ||
 		role == Qt::DecorationRole ||
-		role == Qt::EditRole)
+		role == Qt::EditRole ||
+		role == Qt::FontRole)
 	{
 		return QVariant();
 	}
-
-	Q_UNUSED(index);
-	Q_UNUSED(role);
 
 	int row = index.row();
 	int column = index.column();
@@ -51,10 +49,20 @@ QVariant ArchiveSignalsModel::data(const QModelIndex& index, int role) const
 		return QVariant(Separator::EMPTY_STR);
 	}
 
+	const Network::ArchSignalInfo& asi = m_archSignals[row];
+
+	if (role == Qt::BackgroundRole)
+	{
+		if (asi.apertureoverrided())
+		{
+			return YELLOW_BRUSH ;
+		}
+
+		return QVariant();
+	}
+
 	if (role == Qt::DisplayRole)
 	{
-		const Network::ArchSignalInfo& asi = m_archSignals[row];
-
 		switch (column)
 		{
 		case 0:	return QString::fromStdString(asi.appsignalid());
@@ -63,7 +71,11 @@ QVariant ArchiveSignalsModel::data(const QModelIndex& index, int role) const
 		case 3: return E::valueToString(static_cast<E::ApertureType>(asi.aperturetype()));
 		case 4: return QString::number(asi.coarseaperture());
 		case 5: return QString::number(asi.fineaperture());
-		case 6: return (asi.apertureoverrided() ? QStringLiteral("Yes") : QStringLiteral("No"));
+		case 6: return QString::number(asi.abscoarseaperture());
+		case 7: return QString::number(asi.absfineaperture());
+		case 8: return QString::number(asi.lowengineeringunits());
+		case 9: return QString::number(asi.highengineeringunits());
+		case 10: return (asi.apertureoverrided() ? QStringLiteral("Yes") : QStringLiteral("No"));
 		}
 
 		return Separator::EMPTY_STR;

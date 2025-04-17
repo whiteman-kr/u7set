@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QAbstractTableModel>
+#include <QProgressBar>
 #include "../AppDataService/AppDataSource.h"
 #include "../OnlineLib/Tcp.h"
 #include "BaseServiceWidget.h"
@@ -103,6 +104,7 @@ private:
 
 	ArchiveSignalsModel* m_archSignalsModel = nullptr;
 	QTableView* m_archSignalsView = nullptr;
+	QProgressBar* m_archSignalsProgressBar = nullptr;
 	std::vector<int> m_selectedRows;
 
 /*	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;

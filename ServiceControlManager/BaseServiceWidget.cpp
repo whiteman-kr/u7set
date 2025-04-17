@@ -741,6 +741,14 @@ void BaseServiceWidget::clearDerivedWidgets()
 {
 }
 
+void BaseServiceWidget::overrideApertures(const std::vector<ApertureRecord>& apertures)
+{
+	if (m_scmSrvClient != nullptr)
+	{
+		m_scmSrvClient->overrideApertures(apertures);
+	}
+}
+
 void BaseServiceWidget::sendCommand(int command)
 {
 	E::ServiceState state = m_serviceData.serviceState();

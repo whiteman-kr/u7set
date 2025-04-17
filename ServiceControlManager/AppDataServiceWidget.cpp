@@ -582,6 +582,7 @@ void AppDataServiceWidget::updateModels(const Network::ServiceInfo& srvInfo)
 	{
 		m_archSignalsModel->updateData(srvInfo);
 		m_archSignalsView->update();
+		m_archSignalsProgressBar->setValue(srvInfo.archsignalsupdateprogress());
 	}
 }
 
@@ -839,6 +840,10 @@ void AppDataServiceWidget::addAppDataSourcesTab()
 
 void AppDataServiceWidget::addArchiveSignalsTab()
 {
+	QWidget* archSignalsWidget = new QWidget;
+
+	//
+
 	m_archSignalsModel = new ArchiveSignalsModel(this);
 	m_archSignalsView = createTableView(m_archSignalsModel, m_archSignalsModel->columns());
 
@@ -848,7 +853,37 @@ void AppDataServiceWidget::addArchiveSignalsTab()
 	connect(m_archSignalsView, &QTableView::customContextMenuRequested,
 			this, &AppDataServiceWidget::onCustomContextMenuRequested);
 
-	addTab(m_archSignalsView, "TOP-500 archive signals");
+	//
+
+	m_archSignalsProgressBar = new QProgressBar;
+
+	m_archSignalsProgressBar->setRange(0, 100);
+	m_archSignalsProgressBar->setStyleSheet(R"(
+									QProgressBar {
+										border: 2px solid grey;
+										border-radius: 5px;
+										text-align: center;
+										background-color: #eee;
+									}
+
+									QProgressBar::chunk {
+										background-color: #3498db;
+										width: 10px;  /* ширина одного блока */
+										margin: 1px;  /* расстояние между блоками */
+									})");
+
+	m_archSignalsProgressBar->setFixedHeight(15);
+
+	//
+
+	QVBoxLayout* vBoxLayout = new QVBoxLayout;
+
+	vBoxLayout->addWidget(m_archSignalsView);
+	vBoxLayout->addWidget(m_archSignalsProgressBar);
+
+	archSignalsWidget->setLayout(vBoxLayout);
+
+	addTab(archSignalsWidget, "TOP-500 archive signals");
 }
 
 int AppDataServiceWidget::updateSettings(int rowCount)
@@ -954,10 +989,11 @@ void AppDataServiceWidget::onChangeApertures()
 
 	QGridLayout* gridLayout = new QGridLayout(&dlg);
 
-	//
+	// init dialog parameters
 
 	QListWidget* signalsList = new QListWidget;
 
+	QStringList appSignalIDs;
 	std::optional<int> apertureType;
 	std::optional<double> coarseAperture;
 	std::optional<double> fineAperture;
@@ -968,7 +1004,11 @@ void AppDataServiceWidget::onChangeApertures()
 	{
 		const Network::ArchSignalInfo& asi = m_archSignalsModel->at(row);
 
-		signalsList->addItem(QString::fromStdString(asi.appsignalid()));
+		QString appSignalID = QString::fromStdString(asi.appsignalid());
+
+		appSignalIDs.append(appSignalID);
+
+		signalsList->addItem(appSignalID);
 
 		if (index == 0)
 		{
@@ -997,33 +1037,35 @@ void AppDataServiceWidget::onChangeApertures()
 		index++;
 	}
 
+	// create dialog layout
+
 	gridLayout->addWidget(signalsList, 0, 0, 1, 2);
 
 	//
 
 	gridLayout->addWidget(new QLabel("Aperture type"), 1, 0);
 
-	QComboBox* aperureTypeList = new QComboBox;
+	QComboBox* apertureTypeList = new QComboBox;
 
 	std::vector<std::pair<int, QString>> values = E::enumValues<E::ApertureType>();
 
 	if (apertureType.has_value() == false)
 	{
-		aperureTypeList->addItem(QString(), -1);
-		aperureTypeList->setCurrentText(QString());
+		apertureTypeList->addItem(QString(), -1);
+		apertureTypeList->setCurrentText(QString());
 	}
 
 	for(const auto& [value, text] : values)
 	{
-		aperureTypeList->addItem(text, value);
+		apertureTypeList->addItem(text, value);
 
 		if (apertureType.has_value() && apertureType.value() == value)
 		{
-			aperureTypeList->setCurrentText(text);
+			apertureTypeList->setCurrentText(text);
 		}
 	}
 
-	gridLayout->addWidget(aperureTypeList, 1, 1);
+	gridLayout->addWidget(apertureTypeList, 1, 1);
 
 	//
 
@@ -1051,14 +1093,93 @@ void AppDataServiceWidget::onChangeApertures()
 
 	gridLayout->addWidget(fineApertureEdit, 3, 1);
 
-	//
+	// create dialog
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
 	gridLayout->addWidget(buttonBox, 4, 0, 1, 2);
 
-	connect(buttonBox, &QDialogButtonBox::accepted, &dlg, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
+
+	E::ApertureType resultApertureType = E::ApertureType::RangePercent;
+	double resultCoarseAperture = 0;
+	double resultFineAperture = 0;
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &dlg, [&]()
+	{
+		QString errStr;
+		bool ok = false;
+
+		// check aperture type
+
+		QString valueStr = apertureTypeList->currentText();
+
+		resultApertureType = E::stringToValue<E::ApertureType>(valueStr, &ok);
+
+		if (ok == false)
+		{
+			errStr.append("The ApertureType don't set.\n\n");
+		}
+
+		// check coarse aperture
+
+		valueStr = coarseApertureEdit->text();
+
+		resultCoarseAperture = valueStr.toDouble(&ok);
+
+		if (ok == false)
+		{
+			errStr.append("The CoarseAperture don't set.\n\n");
+		}
+		else
+		{
+			resultCoarseAperture = abs(resultCoarseAperture);
+			coarseApertureEdit->setText(QString::number(resultCoarseAperture));
+
+			if (resultCoarseAperture == 0)
+			{
+				errStr.append("The CoarseAperture can't be 0.\n\n");
+			}
+		}
+
+		// check fine aperture
+
+		valueStr = fineApertureEdit->text();
+
+		resultFineAperture = valueStr.toDouble(&ok);
+
+		if (ok == false)
+		{
+			errStr.append("The FineAperture don't set.\n\n");
+		}
+		else
+		{
+			resultFineAperture = abs(resultFineAperture);
+			fineApertureEdit->setText(QString::number(resultFineAperture));
+
+			if (resultFineAperture == 0)
+			{
+				errStr.append("The FineAperture can't be 0.\n\n");
+			}
+		}
+
+		//
+
+		if (errStr.isEmpty() && resultCoarseAperture <= resultFineAperture)
+		{
+			errStr.append("The CoarseAperture should be greate than the FineAperture.\n\n");
+		}
+
+		//
+
+		if (errStr.isEmpty() == false)
+		{
+			QMessageBox::critical(&dlg, "Error", errStr);
+			return;
+		}
+
+		dlg.accept();
+	});
 
 	//
 
@@ -1067,10 +1188,31 @@ void AppDataServiceWidget::onChangeApertures()
 
 	int result = dlg.exec();
 
-	if (result == QDialog::Accepted)
+	if (result == QDialog::Rejected)
 	{
+		return;
+	}
+
+	//
+
+	std::vector<ApertureRecord> apertures;
+
+	apertures.reserve(appSignalIDs.size());
+
+	for(const QString& appSignalID : appSignalIDs)
+	{
+		ApertureRecord ar;
+
+		ar.signalID = appSignalID;
+		ar.apertureType = resultApertureType;
+		ar.coarseAperture = resultCoarseAperture;
+		ar.fineAperture = resultFineAperture;
+
+		apertures.push_back(ar);
 
 	}
+
+	overrideApertures(apertures);
 }
 
 /*

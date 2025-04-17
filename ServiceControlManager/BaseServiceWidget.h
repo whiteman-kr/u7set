@@ -36,6 +36,8 @@ public:
 	virtual void updateDerivedWidgets(const Network::ServiceInfo& srvInfo);
 	virtual void clearDerivedWidgets();
 
+	void overrideApertures(const std::vector<ApertureRecord>& apertures);
+
 signals:
 	void invalidateServiceData();
 

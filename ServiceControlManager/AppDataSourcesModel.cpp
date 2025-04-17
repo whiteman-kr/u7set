@@ -44,10 +44,20 @@ QVariant AppDataSourcesModel::data(const QModelIndex& index, int role) const
 		return QVariant(Separator::EMPTY_STR);
 	}
 
+	const Network::AppDataSourceState& st = m_sources[row];
+
+	if (role == Qt::BackgroundRole)
+	{
+		if (m_sourcesErrorCount[row] > 0)
+		{
+			return YELLOW_BRUSH ;
+		}
+
+		return QVariant();
+	}
+
 	if (role == Qt::DisplayRole)
 	{
-		const Network::AppDataSourceState& st = m_sources[row];
-
 		switch (column)
 		{
 		case 0:	return QString::fromStdString(st.lancontrollerid());
@@ -63,14 +73,7 @@ QVariant AppDataSourcesModel::data(const QModelIndex& index, int role) const
 			case 4: return QString::number(st.datareceivingspeed());
 			case 5: return QString::number(st.receivedpacketcount());
 			case 6: return QString::number(st.lostpacketcount());
-			case 7: return QString::number(	st.errorprotocolversion() +
-											st.errorframesquantity() +
-											st.errorframeno() +
-											st.errorframecrc() +
-											st.errordataid() +
-											st.errorduplicateplanttime() +
-											st.errornonmonotonicplanttime() +
-											st.errorplanttimeformat());
+			case 7: return QString::number(m_sourcesErrorCount[row]);
 			}
 		}
 
@@ -113,9 +116,18 @@ void AppDataSourcesModel::updateData(const Network::ServiceInfo& srvInfo)
 
 	auto copySources = [&]()
 	{
-		for(int i = 0; i< sourcesCount; i++)
+		for(int i = 0; i < sourcesCount; i++)
 		{
-			m_sources[i] = srvInfo.appdatasourcesstates(i);
+			const Network::AppDataSourceState& st = srvInfo.appdatasourcesstates(i);
+			m_sources[i] = st;
+			m_sourcesErrorCount[i] = st.errorprotocolversion() +
+									 st.errorframesquantity() +
+									 st.errorframeno() +
+									 st.errorframecrc() +
+									 st.errordataid() +
+									 st.errorduplicateplanttime() +
+									 st.errornonmonotonicplanttime() +
+									 st.errorplanttimeformat();
 		}
 	};
 
@@ -125,6 +137,7 @@ void AppDataSourcesModel::updateData(const Network::ServiceInfo& srvInfo)
 		{
 			beginInsertRows(QModelIndex(), existSourcesCount, sourcesCount - 1);
 			m_sources.resize(sourcesCount);
+			m_sourcesErrorCount.resize(sourcesCount);
 			copySources();
 			endInsertRows();
 		}
@@ -132,6 +145,7 @@ void AppDataSourcesModel::updateData(const Network::ServiceInfo& srvInfo)
 		{
 			beginRemoveRows(QModelIndex(), sourcesCount, existSourcesCount - 1);
 			m_sources.resize(sourcesCount);
+			m_sourcesErrorCount.resize(sourcesCount);
 			copySources();
 			endRemoveRows();
 		}

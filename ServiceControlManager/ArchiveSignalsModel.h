@@ -30,13 +30,19 @@ private:
 
 	inline static const Columns m_columns =
 	{
-		{"AppSignalID", 400},
-		{"Records per minute", 120},
-		{"Archive size per day", 120},
-		{"Aperture type", 120},
-		{"Coarse aperture", 120},
-		{"Fine aperture", 120},
-		{"Aperture overrided", 120},
+		{"AppSignalID", 400},						// 0
+		{"Records per minute", 120},				// 1
+		{"Archive size per day", 120},				// 2
+		{"Aperture type", 120},						// 3
+		{"Coarse aperture", 120},					// 4
+		{"Fine aperture", 120},						// 5
+		{"Abs coarse aperture", 120},				// 6
+		{"Abs fine aperture", 120},					// 7
+		{"Low limit", 120},							// 8
+		{"High limit", 120},						// 9
+		{"Aperture overrided", 120},				// 10
 	};
+
+	inline static const QBrush YELLOW_BRUSH = QBrush(QColor(255, 255, 127));
 };
 

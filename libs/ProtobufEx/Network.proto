@@ -365,6 +365,8 @@ message ArchSignalInfo
 	required double absCoarseAperture = 6;
 	required bool apertureOverrided = 7;
 	required int32 recordsPerMin = 8;
+	required double highEngineeringUnits = 9;
+	required double lowEngineeringUnits = 10;
 }
 
 message ApertureRecord
@@ -420,7 +422,9 @@ message ServiceInfo
 	// AppDataService specific
 	//
 	repeated AppDataSourceState appDataSourcesStates = 40;
-	repeated ArchSignalInfo archSignalsInfo = 50;
+
+	optional double archSignalsUpdateProgress = 50 [default = 0];
+	repeated ArchSignalInfo archSignalsInfo = 51;
 }
 
 message GetServiceInfoRequest

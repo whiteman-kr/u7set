@@ -21,6 +21,7 @@ public:
 
 private:
 	std::vector<Network::AppDataSourceState> m_sources;
+	std::vector<int> m_sourcesErrorCount;
 
 	inline static const Columns m_columns =
 	{
@@ -33,5 +34,7 @@ private:
 		{"Lost packet count", 120},
 		{"Errors count", 120},
 	};
+
+	inline static const QBrush YELLOW_BRUSH = QBrush(QColor(255, 255, 127));
 };
 

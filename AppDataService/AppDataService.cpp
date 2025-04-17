@@ -58,6 +58,14 @@ void AppDataServiceWorker::processGetServiceInfoRequest(const Network::GetServic
 	}
 
 	m_apertureFile.save();
+
+	restartArchSignalsTimer();
+
+	m_recordsPerMinMutex.lock();
+
+	m_recordsPerMin.clear();
+
+	m_recordsPerMinMutex.unlock();
 }
 
 void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
@@ -95,7 +103,11 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 		int count = 500;
 
 		std::vector<RecordsPerMin> recordsPerMin;
-		getRecordsPerMin(&recordsPerMin, count);
+		double updateStatus;
+
+		getRecordsPerMin(&recordsPerMin, count, &updateStatus);
+
+		serviceInfo.set_archsignalsupdateprogress(updateStatus);
 
 		count = TO_INT(recordsPerMin.size());
 
@@ -108,13 +120,15 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 			Network::ArchSignalInfo* asi = serviceInfo.add_archsignalsinfo();
 
 			asi->set_appsignalid(state->appSignalID().toStdString());
-			asi->set_fineaperture(state->fineAperture());
 			asi->set_aperturetype(TO_INT(state->apertureType()));
 			asi->set_coarseaperture(state->coarseAperture());
-			asi->set_absfineaperture(state->absFineAperture());
+			asi->set_fineaperture(state->fineAperture());
 			asi->set_abscoarseaperture(state->absCoarseAperture());
+			asi->set_absfineaperture(state->absFineAperture());
 			asi->set_recordspermin(recordsPerMin[i].recordsCount);
 			asi->set_apertureoverrided(state->apertureOverrided());
+			asi->set_lowengineeringunits(state->lowEngineeringUnits());
+			asi->set_highengineeringunits(state->highEngineeringUnits());
 		}
 	}
 }
@@ -546,23 +560,18 @@ void AppDataServiceWorker::applyNewConfiguration()
 	runTcpAppDataServer();
 	runRtTrendsServerThread();
 
-	if (m_timer == nullptr)
-	{
-		m_timer = new QTimer;
-	}
+	restartArchSignalsTimer();
 
-	m_timer->start(60 * 1000);
-
-	connect(m_timer, &QTimer::timeout, this, &AppDataServiceWorker::onTimer1min);
+	connect(m_archSignalsUpdateTimer, &QTimer::timeout, this, &AppDataServiceWorker::onArchSignalsTimer);
 }
 
 void AppDataServiceWorker::clearConfiguration()
 {
-	if (m_timer != nullptr)
+	if (m_archSignalsUpdateTimer != nullptr)
 	{
-		m_timer->stop();
-		delete m_timer;
-		m_timer = nullptr;
+		m_archSignalsUpdateTimer->stop();
+		delete m_archSignalsUpdateTimer;
+		m_archSignalsUpdateTimer = nullptr;
 	}
 
 	// free all resources allocated in onConfigurationReady
@@ -699,9 +708,34 @@ void AppDataServiceWorker::stopRtTrendsServerThread()
 	}
 }
 
-void AppDataServiceWorker::getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin, int count) const
+void AppDataServiceWorker::getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,
+											int count, double* updateStatus) const
 {
 	TEST_PTR_RETURN(recordsPerMin);
+	TEST_PTR_RETURN(updateStatus);
+
+	if (m_archSignalsUpdateTimer == nullptr)
+	{
+		*updateStatus = 0;
+	}
+	else
+	{
+		qint64 dt = QDateTime::currentMSecsSinceEpoch() - m_archSignalsTimerStartMs;
+
+		if (dt < 0)
+		{
+			dt = 0;
+		}
+		else
+		{
+			if (dt > ARCH_SIGNALS_UPDATE_INTERVAL)
+			{
+				dt = ARCH_SIGNALS_UPDATE_INTERVAL;
+			}
+		}
+
+		*updateStatus = static_cast<double>(dt) / ARCH_SIGNALS_UPDATE_INTERVAL * 100.0;
+	}
 
 	QMutexLocker loker(&m_recordsPerMinMutex);
 
@@ -713,8 +747,21 @@ void AppDataServiceWorker::getRecordsPerMin(std::vector<RecordsPerMin>* recordsP
 			  recordsPerMin->begin());
 }
 
-void AppDataServiceWorker::onTimer1min()
+void AppDataServiceWorker::restartArchSignalsTimer()
 {
+	if (m_archSignalsUpdateTimer == nullptr)
+	{
+		m_archSignalsUpdateTimer = new QTimer;
+	}
+
+	m_archSignalsUpdateTimer->start(ARCH_SIGNALS_UPDATE_INTERVAL);
+	m_archSignalsTimerStartMs = QDateTime::currentMSecsSinceEpoch();
+}
+
+void AppDataServiceWorker::onArchSignalsTimer()
+{
+	m_archSignalsTimerStartMs = QDateTime::currentMSecsSinceEpoch();
+
 	int count = TO_INT(m_appSignalStates.size());
 
 	std::vector<RecordsPerMin> recordsPerMin;

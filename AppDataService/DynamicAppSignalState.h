@@ -117,6 +117,9 @@ public:
 	double absFineAperture() const { return m_absFineAperture; }
 	double absCoarseAperture() const { return m_absCoarseAperture; }
 
+	double lowEngineeringUnits() const { return m_lowLimit; }
+	double highEngineeringUnits() const { return m_highLimit; }
+
 	void overrideAperture(const ApertureRecord& ar);
 	bool apertureOverrided() const { return m_apertureOverrided; }
 

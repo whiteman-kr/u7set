@@ -142,6 +142,8 @@ void ScmServiceClient::sendSrvGetInfoRequest()
 				ar.saveToProto(nar);
 			}
 
+			m_apertureRecords.clear();
+
 			m_apertureRecordsMutex.unlock();
 
 			sendRequest(request, r);
