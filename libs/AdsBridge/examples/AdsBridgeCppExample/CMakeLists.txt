@@ -1,25 +1,22 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.21)
 
-project(AdsBridgeExampleCpp
-	LANGUAGES CXX 
-	DESCRIPTION "AppDataService Bridge Example"
-	HOMEPAGE_URL "radiy.com")
+project(AdsBridgeCppExample
+	LANGUAGES CXX C
+	DESCRIPTION "AppDataServiceBridge Example"
+	HOMEPAGE_URL "radiy.com"
+)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
+find_package(AdsBridge REQUIRED)
 
-set(TARGET AdsBridgeCppExampleCpp)
-
-add_executable(${TARGET}
+add_executable(AdsBridgeCppExample
 	src/main.cpp
 )
 
-# Set the path to the AdsBridge library used for the standalone build.
-#
-set(ADS_BRIDGE_INLCUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
-set(ADS_BRIDGE_BIN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../lib)
+target_compile_features(AdsBridgeCppExample PUBLIC cxx_std_20)
+	
+set_target_properties(AdsBridgeCppExample PROPERTIES
+	CXX_STANDARD_REQUIRED ON
+	CXX_EXTENSIONS OFF
+)
 
-target_include_directories(${TARGET} PRIVATE ${ADS_BRIDGE_INLCUDE_DIR})
-target_link_directories(${TARGET} PRIVATE ${ADS_BRIDGE_BIN_DIR})
-target_link_libraries(${TARGET} PRIVATE AdsBridge)
+target_link_libraries(AdsBridgeCppExample PRIVATE Radiy::AdsBridge)
