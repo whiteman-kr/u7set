@@ -567,6 +567,8 @@ void AppDataServiceWidget::clearDerivedWidgets()
 {
 	Network::ServiceInfo clearSrvInfo;
 
+	clearSrvInfo.set_archsignalsupdated(true);
+
 	updateModels(clearSrvInfo);
 }
 
@@ -578,10 +580,14 @@ void AppDataServiceWidget::updateModels(const Network::ServiceInfo& srvInfo)
 		m_sourcesView->update();
 	}
 
-	if (m_archSignalsModel != nullptr)
+	if (m_archSignalsModel != nullptr )
 	{
-		m_archSignalsModel->updateData(srvInfo);
-		m_archSignalsView->update();
+		if (srvInfo.archsignalsupdated() == true)
+		{
+			m_archSignalsModel->updateData(srvInfo);
+			//		m_archSignalsView->update();
+		}
+
 		m_archSignalsProgressBar->setValue(srvInfo.archsignalsupdateprogress());
 	}
 }

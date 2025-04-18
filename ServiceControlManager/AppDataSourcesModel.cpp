@@ -158,5 +158,5 @@ void AppDataSourcesModel::updateData(const Network::ServiceInfo& srvInfo)
 		copySources();
 	}
 
-	emit dataChanged(QModelIndex(), QModelIndex());
+//	emit dataChanged(QModelIndex(), QModelIndex());
 }

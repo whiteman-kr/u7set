@@ -425,6 +425,7 @@ message ServiceInfo
 
 	optional double archSignalsUpdateProgress = 50 [default = 0];
 	repeated ArchSignalInfo archSignalsInfo = 51;
+	optional bool archSignalsUpdated = 52 [default = false];
 }
 
 message GetServiceInfoRequest

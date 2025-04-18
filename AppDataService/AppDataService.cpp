@@ -59,13 +59,9 @@ void AppDataServiceWorker::processGetServiceInfoRequest(const Network::GetServic
 
 	m_apertureFile.save();
 
-	restartArchSignalsTimer();
+	m_updateArchSignalsAnyway = true;
 
-	m_recordsPerMinMutex.lock();
-
-	m_recordsPerMin.clear();
-
-	m_recordsPerMinMutex.unlock();
+	emit restartArchSignalsTimer();
 }
 
 void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
@@ -107,28 +103,50 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 
 		getRecordsPerMin(&recordsPerMin, count, &updateStatus);
 
-		serviceInfo.set_archsignalsupdateprogress(updateStatus);
-
 		count = TO_INT(recordsPerMin.size());
 
-		for(int i = 0; i < count; i++)
+		serviceInfo.set_archsignalsupdateprogress(updateStatus);
+
+		bool archSignalsUpdated = m_updateArchSignalsAnyway;
+
+		m_updateArchSignalsAnyway = false;
+
+		if (m_cachedRecordsPerMin != recordsPerMin)
 		{
-			const DynamicAppSignalState* state = m_appSignalStates[recordsPerMin[i].dynamicStateIndex];
+			archSignalsUpdated = true;
+			m_cachedRecordsPerMin = recordsPerMin;
+		}
 
-			TEST_PTR_CONTINUE(state);
+		if ((m_archSignalsRequestCtr % 25) == 0)
+		{
+			archSignalsUpdated = true;
+		}
 
-			Network::ArchSignalInfo* asi = serviceInfo.add_archsignalsinfo();
+		m_archSignalsRequestCtr++;
 
-			asi->set_appsignalid(state->appSignalID().toStdString());
-			asi->set_aperturetype(TO_INT(state->apertureType()));
-			asi->set_coarseaperture(state->coarseAperture());
-			asi->set_fineaperture(state->fineAperture());
-			asi->set_abscoarseaperture(state->absCoarseAperture());
-			asi->set_absfineaperture(state->absFineAperture());
-			asi->set_recordspermin(recordsPerMin[i].recordsCount);
-			asi->set_apertureoverrided(state->apertureOverrided());
-			asi->set_lowengineeringunits(state->lowEngineeringUnits());
-			asi->set_highengineeringunits(state->highEngineeringUnits());
+		serviceInfo.set_archsignalsupdated(archSignalsUpdated);
+
+		if (archSignalsUpdated == true)
+		{
+			for(int i = 0; i < count; i++)
+			{
+				const DynamicAppSignalState* state = m_appSignalStates[recordsPerMin[i].dynamicStateIndex];
+
+				TEST_PTR_CONTINUE(state);
+
+				Network::ArchSignalInfo* asi = serviceInfo.add_archsignalsinfo();
+
+				asi->set_appsignalid(state->appSignalID().toStdString());
+				asi->set_aperturetype(TO_INT(state->apertureType()));
+				asi->set_coarseaperture(state->coarseAperture());
+				asi->set_fineaperture(state->fineAperture());
+				asi->set_abscoarseaperture(state->absCoarseAperture());
+				asi->set_absfineaperture(state->absFineAperture());
+				asi->set_recordspermin(recordsPerMin[i].recordsCount);
+				asi->set_apertureoverrided(state->apertureOverrided());
+				asi->set_lowengineeringunits(state->lowEngineeringUnits());
+				asi->set_highengineeringunits(state->highEngineeringUnits());
+			}
 		}
 	}
 }
@@ -250,6 +268,8 @@ void AppDataServiceWorker::initialize()
 	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker is started");
 
 	runCfgLoaderThread();
+
+	connect(this, &AppDataServiceWorker::restartArchSignalsTimer, this, &AppDataServiceWorker::onRestartArchSignalsTimer);
 }
 
 void AppDataServiceWorker::shutdown()
@@ -560,7 +580,7 @@ void AppDataServiceWorker::applyNewConfiguration()
 	runTcpAppDataServer();
 	runRtTrendsServerThread();
 
-	restartArchSignalsTimer();
+	onRestartArchSignalsTimer();
 
 	connect(m_archSignalsUpdateTimer, &QTimer::timeout, this, &AppDataServiceWorker::onArchSignalsTimer);
 }
@@ -739,15 +759,44 @@ void AppDataServiceWorker::getRecordsPerMin(std::vector<RecordsPerMin>* recordsP
 
 	QMutexLocker loker(&m_recordsPerMinMutex);
 
-	count = count > TO_INT(m_recordsPerMin.size()) ? TO_INT(m_recordsPerMin.size()) : count;
+	int recordsPerMinSize = TO_INT(m_recordsPerMin.size());
 
-	recordsPerMin->resize(count);
+	if (recordsPerMinSize == 0)
+	{
+		recordsPerMin->clear();
+		return;
+	}
 
-	std::copy(m_recordsPerMin.begin(), m_recordsPerMin.begin() + count,
-			  recordsPerMin->begin());
+	if (count >= recordsPerMinSize)
+	{
+		recordsPerMin->resize(recordsPerMinSize);
+
+		std::copy(m_recordsPerMin.begin(), m_recordsPerMin.begin() + recordsPerMinSize,
+				  recordsPerMin->begin());
+	}
+	else
+	{
+		std::vector<RecordsPerMin> addVector;
+
+		for(int i = count; i < recordsPerMinSize; i++)
+		{
+			if (m_recordsPerMin[i].overrided)
+			{
+				addVector.push_back(m_recordsPerMin[i]);
+			}
+		}
+
+		recordsPerMin->resize(count + addVector.size());
+
+		std::copy(m_recordsPerMin.begin(), m_recordsPerMin.begin() + count,
+				  recordsPerMin->begin());
+
+		std::copy(addVector.begin(), addVector.end(),
+				  recordsPerMin->begin() + count);
+	}
 }
 
-void AppDataServiceWorker::restartArchSignalsTimer()
+void AppDataServiceWorker::onRestartArchSignalsTimer()
 {
 	if (m_archSignalsUpdateTimer == nullptr)
 	{
@@ -774,6 +823,7 @@ void AppDataServiceWorker::onArchSignalsTimer()
 	{
 		r.recordsCount = m_appSignalStates[i]->onTimer1min();
 		r.dynamicStateIndex = i;
+		r.overrided = m_appSignalStates[i]->apertureOverrided();
 
 		if (r.recordsCount > 1)
 		{

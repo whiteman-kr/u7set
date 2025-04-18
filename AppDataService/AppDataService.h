@@ -25,13 +25,19 @@ union RecordsPerMin
 	struct
 	{
 		qint32 recordsCount;
-		qint32 dynamicStateIndex;
+		qint32 dynamicStateIndex : 31;
+		qint32 overrided : 1;
 	};
 
 	qint64 int64Value = 0;
 };
 
 #pragma pack(pop)
+
+inline bool operator == (const RecordsPerMin& a, const RecordsPerMin& b)
+{
+	return a.int64Value == b.int64Value;
+}
 
 class AppDataServiceWorker : public ServiceWorker
 {
@@ -79,6 +85,9 @@ public:
 
 	const std::vector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
 	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.size()); }
+
+signals:
+	void restartArchSignalsTimer();
 
 private:
 	virtual void initServiceSpecificCmdLineArgs() override;
@@ -129,7 +138,7 @@ private:
 	void getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,
 						  int count, double* updateStatus) const;
 
-	void restartArchSignalsTimer();
+	void onRestartArchSignalsTimer();
 	void onArchSignalsTimer();
 
 private:
@@ -160,8 +169,10 @@ private:
 	ApertureFile m_apertureFile;
 
 	mutable QMutex m_recordsPerMinMutex;
-
 	std::vector<RecordsPerMin> m_recordsPerMin;
+	mutable std::vector<RecordsPerMin> m_cachedRecordsPerMin;
+	mutable int m_archSignalsRequestCtr = 0;
+	mutable bool m_updateArchSignalsAnyway = false;
 
 	std::vector<QString> m_acquiredAppSignalIDs;
 

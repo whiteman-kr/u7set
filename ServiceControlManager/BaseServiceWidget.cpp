@@ -728,7 +728,6 @@ void BaseServiceWidget::onServiceInfoUpdated(QByteArray replyData)
 	m_serviceData.parseProtoServiceInfo();
 
 	updateSrvStatusWidgets();
-
 	updateDerivedWidgets(newSrvInfo);
 }
 
