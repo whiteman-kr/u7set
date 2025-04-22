@@ -4,7 +4,7 @@
 		<Category>Converter</Category>
 		<OpCode>28</OpCode>
 		<InternalUse>false</InternalUse>
-		<MinWidth>36</MinWidth>
+		<MinWidth>26</MinWidth>
 	</Properties>
 	<Inputs>
 		<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="2" Size="32"/>
