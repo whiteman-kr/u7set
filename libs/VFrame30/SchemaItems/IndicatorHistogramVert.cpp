@@ -10,15 +10,26 @@
 
 namespace VFrame30
 {
-	void CustomSetPoint::propertyDemand(const QString&)
+	void CustomSetPoint::propertyDemand(const QString& prop)
 	{
 		// clang-format off
 
 		// Common category
 		//
-		ADD_PROPERTY_GETTER_SETTER(E::IndicatorColorSource, PropertyNames::indicatorColorSource, true, CustomSetPoint::colorSource, CustomSetPoint::setColorSource);
-		ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::color, true, CustomSetPoint::color, CustomSetPoint::setColor);
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::indicatorOutputAppSignalId, true, CustomSetPoint::outputAppSignalId, CustomSetPoint::setOutputAppSignalId);
+		if (prop.isEmpty() == true || prop == PropertyNames::indicatorColorSource)
+		{
+			ADD_PROPERTY_GETTER_SETTER(E::IndicatorColorSource, PropertyNames::indicatorColorSource, true, CustomSetPoint::colorSource, CustomSetPoint::setColorSource);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::color)
+		{
+			ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::color, true, CustomSetPoint::color, CustomSetPoint::setColor);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::indicatorOutputAppSignalId)
+		{
+			ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::indicatorOutputAppSignalId, true, CustomSetPoint::outputAppSignalId, CustomSetPoint::setOutputAppSignalId);
+		}
 
 		// clang-format on
 		return;

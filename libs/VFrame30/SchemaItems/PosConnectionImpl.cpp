@@ -25,26 +25,28 @@ namespace VFrame30
 		}
 		else
 		{
-			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 1 : 3;		// 1 for mm, 3 for inches
+			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 1 : 3; // 1 for mm, 3 for inches
 		}
 
-		Property* p = nullptr;
+		if (prop.isEmpty() == true || prop == PropertyNames::left)
+		{
+			auto p = addProperty<double, PosConnectionImpl, &PosConnectionImpl::left, &PosConnectionImpl::setLeft>(
+				PropertyNames::left,
+				PropertyNames::positionAndSizeCategory,
+				true);
+			p->setPrecision(precision);
+			p->setViewOrder(0);
+		}
 
-		p = addProperty<double, PosConnectionImpl, &PosConnectionImpl::left, &PosConnectionImpl::setLeft>(PropertyNames::left, PropertyNames::positionAndSizeCategory, true);
-		p->setPrecision(precision);
-		p->setViewOrder(0);
-
-		p = addProperty<double, PosConnectionImpl, &PosConnectionImpl::top, &PosConnectionImpl::setTop>(PropertyNames::top, PropertyNames::positionAndSizeCategory, true);
-		p->setPrecision(precision);
-		p->setViewOrder(1);
-
-		//p = addProperty<double, PosRectImpl, &PosConnectionImpl::width, &PosConnectionImpl::setWidth>(PropertyNames::width, PropertyNames::positionAndSizeCategory, true);
-		//p->setPrecision(precision);
-		//p->setViewOrder(2);
-
-		//p = addProperty<double, PosRectImpl, &PosConnectionImpl::height, &PosConnectionImpl::setHeight>(PropertyNames::height, PropertyNames::positionAndSizeCategory, true);
-		//p->setPrecision(precision);
-		//p->setViewOrder(3);
+		if (prop.isEmpty() == true || prop == PropertyNames::top)
+		{
+			auto p = addProperty<double, PosConnectionImpl, &PosConnectionImpl::top, &PosConnectionImpl::setTop>(
+				PropertyNames::top,
+				PropertyNames::positionAndSizeCategory,
+				true);
+			p->setPrecision(precision);
+			p->setViewOrder(1);
+		}
 
 		return;
 	}

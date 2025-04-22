@@ -13,20 +13,35 @@ namespace VFrame30
 	//
 	// IndicatorTrendSignalParam
 	//
-	void IndicatorTrendSignalParam::propertyDemand(const QString&)
+	void IndicatorTrendSignalParam::propertyDemand(const QString& prop)
 	{
-		ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::color, true, IndicatorTrendSignalParam::color, IndicatorTrendSignalParam::setColor)
-				->setCategory(PropertyNames::indicatorSettings);
+		// clang-format off
 
-		ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::lineWeight, true, IndicatorTrendSignalParam::lineWeight, IndicatorTrendSignalParam::setLineWeight)
+		if (prop.isEmpty() == true || prop == PropertyNames::color)
+		{
+			ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::color, true, IndicatorTrendSignalParam::color, IndicatorTrendSignalParam::setColor)
 				->setCategory(PropertyNames::indicatorSettings);
+		}
 
-		ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::lowLimit, true, IndicatorTrendSignalParam::lowLimit, IndicatorTrendSignalParam::setLowLimit)
+		if (prop.isEmpty() == true || prop == PropertyNames::lineWeight)
+		{
+			ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::lineWeight, true, IndicatorTrendSignalParam::lineWeight, IndicatorTrendSignalParam::setLineWeight)
 				->setCategory(PropertyNames::indicatorSettings);
+		}
 
-		ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::highLimit, true, IndicatorTrendSignalParam::highLimit, IndicatorTrendSignalParam::setHighLimit)
+		if (prop.isEmpty() == true || prop == PropertyNames::lowLimit)
+		{
+			ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::lowLimit, true, IndicatorTrendSignalParam::lowLimit, IndicatorTrendSignalParam::setLowLimit)
 				->setCategory(PropertyNames::indicatorSettings);
+		}
 
+		if (prop.isEmpty() == true || prop == PropertyNames::highLimit)
+		{
+			ADD_PROPERTY_GETTER_SETTER(double, PropertyNames::highLimit, true, IndicatorTrendSignalParam::highLimit, IndicatorTrendSignalParam::setHighLimit)
+				->setCategory(PropertyNames::indicatorSettings);
+		}
+
+		// clang-format on
 		return;
 	}
 

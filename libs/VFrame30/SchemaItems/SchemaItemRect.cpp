@@ -42,115 +42,93 @@ namespace VFrame30
 	{
 		PosRectRotatable::propertyDemand(prop);
 
-		ADD_PROPERTY_GET_SET_CAT(double,
-								 PropertyNames::lineWeight,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 SchemaItemRect::weight,
-								 SchemaItemRect::setWeight);
+		// clang-format off
 
-		ADD_PROPERTY_GET_SET_CAT(QColor,
-								 PropertyNames::lineColor,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 SchemaItemRect::lineColor,
-								 SchemaItemRect::setLineColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor,
-								 PropertyNames::fillColor,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 SchemaItemRect::fillColor,
-								 SchemaItemRect::setFillColor);
+		if (prop.isEmpty() == true || prop == PropertyNames::lineWeight)
+		{
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemRect::weight, SchemaItemRect::setWeight);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(bool,
-								 PropertyNames::fill,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 SchemaItemRect::fill,
-								 SchemaItemRect::setFill);
-		ADD_PROPERTY_GET_SET_CAT(bool,
-								 PropertyNames::drawRect,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 SchemaItemRect::drawRect,
-								 SchemaItemRect::setDrawRect);
+		if (prop.isEmpty() == true || prop == PropertyNames::lineColor)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemRect::lineColor, SchemaItemRect::setLineColor);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(E::LineStyle,
-								 PropertyNames::lineStyle,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 SchemaItemRect::lineStyle,
-								 SchemaItemRect::setLineStyle);
+		if (prop.isEmpty() == true || prop == PropertyNames::fillColor)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemRect::fillColor, SchemaItemRect::setFillColor);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::fill)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fill, PropertyNames::appearanceCategory, true, SchemaItemRect::fill, SchemaItemRect::setFill);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::drawRect)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemRect::drawRect, SchemaItemRect::setDrawRect);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::lineStyle)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::LineStyle, PropertyNames::lineStyle, PropertyNames::appearanceCategory, true, SchemaItemRect::lineStyle, SchemaItemRect::setLineStyle);
+		}
 
 		// Text Category Properties
 		//
-		ADD_PROPERTY_GET_SET_CAT(E::TextFormat,
-								 PropertyNames::textFormat,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemRect::textFormat,
-								 SchemaItemRect::setTextFormat)
-			->setDescription(PropertyNames::textFormatDescription);
+		if (prop.isEmpty() == true || prop == PropertyNames::textFormat)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::TextFormat, PropertyNames::textFormat, PropertyNames::textCategory, true, SchemaItemRect::textFormat, SchemaItemRect::setTextFormat)
+				->setDescription(PropertyNames::textFormatDescription);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(QColor,
-								 PropertyNames::textColor,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemRect::textColor,
-								 SchemaItemRect::setTextColor);
+		if (prop.isEmpty() == true || prop == PropertyNames::textColor)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, SchemaItemRect::textColor, SchemaItemRect::setTextColor);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::text,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemRect::text,
-								 SchemaItemRect::setText)
-			->setEssential(true);
-		ADD_PROPERTY_GET_SET_CAT(bool,
-								 PropertyNames::wordWrap,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemRect::wordWrap,
-								 SchemaItemRect::setWordWrap);
+		if (prop.isEmpty() == true || prop == PropertyNames::text)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::textCategory, true, SchemaItemRect::text, SchemaItemRect::setText)
+				->setEssential(true);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign,
-								 PropertyNames::alignHorz,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemRect::horzAlign,
-								 SchemaItemRect::setHorzAlign);
-		ADD_PROPERTY_GET_SET_CAT(E::VertAlign,
-								 PropertyNames::alignVert,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemRect::vertAlign,
-								 SchemaItemRect::setVertAlign);
+		if (prop.isEmpty() == true || prop == PropertyNames::wordWrap)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::wordWrap, PropertyNames::textCategory, true, SchemaItemRect::wordWrap, SchemaItemRect::setWordWrap);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(QString,
-								 PropertyNames::fontName,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemRect::getFontName,
-								 SchemaItemRect::setFontName);
-		ADD_PROPERTY_GET_SET_CAT(double,
-								 PropertyNames::fontSize,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemRect::getFontSize,
-								 SchemaItemRect::setFontSize);
-		ADD_PROPERTY_GET_SET_CAT(bool,
-								 PropertyNames::fontBold,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemRect::getFontBold,
-								 SchemaItemRect::setFontBold);
-		ADD_PROPERTY_GET_SET_CAT(bool,
-								 PropertyNames::fontItalic,
-								 PropertyNames::textCategory,
-								 true,
-								 SchemaItemRect::getFontItalic,
-								 SchemaItemRect::setFontItalic);
+		if (prop.isEmpty() == true || prop == PropertyNames::alignHorz)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemRect::horzAlign, SchemaItemRect::setHorzAlign);
+		}
 
+		if (prop.isEmpty() == true || prop == PropertyNames::alignVert)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemRect::vertAlign, SchemaItemRect::setVertAlign);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::fontName)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::textCategory, true, SchemaItemRect::getFontName, SchemaItemRect::setFontName);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::fontSize)
+		{
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::textCategory, true, SchemaItemRect::getFontSize, SchemaItemRect::setFontSize);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::fontBold)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemRect::getFontBold, SchemaItemRect::setFontBold);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::fontItalic)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true, SchemaItemRect::getFontItalic, SchemaItemRect::setFontItalic);
+		}
+
+		// clang-format on
 		return;
 	}
 

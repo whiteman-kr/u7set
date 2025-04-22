@@ -25,26 +25,52 @@ namespace VFrame30
 	{
 		PosLineImpl::propertyDemand(prop);
 
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemLine::weight, SchemaItemLine::setWeight);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemLine::lineColor, SchemaItemLine::setLineColor);
+		// clang-format off
 
-		ADD_PROPERTY_GET_SET_CAT(E::LineStyle, PropertyNames::lineStyle, PropertyNames::appearanceCategory, true, SchemaItemLine::lineStyle, SchemaItemLine::setLineStyle);
-		ADD_PROPERTY_GET_SET_CAT(E::LineStyleCap, PropertyNames::lineStyleCap, PropertyNames::appearanceCategory, true, SchemaItemLine::lineStyleCap, SchemaItemLine::setLineStyleCap);
+		if (prop.isEmpty() == true || prop == PropertyNames::lineWeight)
+		{
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemLine::weight, SchemaItemLine::setWeight);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(E::LineCap, PropertyNames::lineCapStart, PropertyNames::appearanceCategory, true, SchemaItemLine::lineCapStart, SchemaItemLine::setLineCapStart);
-		ADD_PROPERTY_GET_SET_CAT(E::LineCap, PropertyNames::lineCapEnd, PropertyNames::appearanceCategory, true, SchemaItemLine::lineCapEnd, SchemaItemLine::setLineCapEnd);
-		
+		if (prop.isEmpty() == true || prop == PropertyNames::lineColor)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemLine::lineColor, SchemaItemLine::setLineColor);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::lineStyle)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::LineStyle, PropertyNames::lineStyle, PropertyNames::appearanceCategory, true, SchemaItemLine::lineStyle, SchemaItemLine::setLineStyle);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::lineStyleCap)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::LineStyleCap, PropertyNames::lineStyleCap, PropertyNames::appearanceCategory, true, SchemaItemLine::lineStyleCap, SchemaItemLine::setLineStyleCap);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::lineCapStart)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::LineCap, PropertyNames::lineCapStart, PropertyNames::appearanceCategory, true, SchemaItemLine::lineCapStart, SchemaItemLine::setLineCapStart);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::lineCapEnd)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::LineCap, PropertyNames::lineCapEnd, PropertyNames::appearanceCategory, true, SchemaItemLine::lineCapEnd, SchemaItemLine::setLineCapEnd);
+		}
+
 		// lineCapFactor is not visible in the properties, but it is saved in the file
-		// It is obsoloete and replaced by lineCapSize
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineCapFactor, PropertyNames::appearanceCategory, false, SchemaItemLine::lineCapFactor, SchemaItemLine::setLineCapFactor);
+		// It is obsolete and replaced by lineCapSize
+		//
+		if (prop.isEmpty() == true || prop == PropertyNames::lineCapFactor)
+		{
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineCapFactor, PropertyNames::appearanceCategory, false, SchemaItemLine::lineCapFactor, SchemaItemLine::setLineCapFactor);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(double,
-								 PropertyNames::lineCapSize,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 SchemaItemLine::lineCapSize,
-								 SchemaItemLine::setLineCapSize);
+		if (prop.isEmpty() == true || prop == PropertyNames::lineCapSize)
+		{
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineCapSize, PropertyNames::appearanceCategory, true, SchemaItemLine::lineCapSize, SchemaItemLine::setLineCapSize);
+		}
 
+		// clang-format on
 		return;
 	}
 

@@ -29,26 +29,44 @@ namespace VFrame30
 		}
 		else
 		{
-			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 1 : 3;		// 1 for mm, 3 for inches
+			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 1 : 3; // 1 for mm, 3 for inches
 		}
 
-		Property* p = nullptr;
+		if (prop.isEmpty() == true || prop == PropertyNames::left)
+		{
+			auto p = addProperty<double, PosLineImpl, &PosLineImpl::left, &PosLineImpl::setLeft>(PropertyNames::left,
+																								 PropertyNames::positionAndSizeCategory,
+																								 true);
+			p->setPrecision(precision);
+			p->setViewOrder(0);
+		}
 
-		p = addProperty<double, PosLineImpl, &PosLineImpl::left, &PosLineImpl::setLeft>(PropertyNames::left, PropertyNames::positionAndSizeCategory, true);
-		p->setPrecision(precision);
-		p->setViewOrder(0);
+		if (prop.isEmpty() == true || prop == PropertyNames::top)
+		{
+			auto p = addProperty<double, PosLineImpl, &PosLineImpl::top, &PosLineImpl::setTop>(PropertyNames::top,
+																							   PropertyNames::positionAndSizeCategory,
+																							   true);
+			p->setPrecision(precision);
+			p->setViewOrder(1);
+		}
 
-		p = addProperty<double, PosLineImpl, &PosLineImpl::top, &PosLineImpl::setTop>(PropertyNames::top, PropertyNames::positionAndSizeCategory, true);
-		p->setPrecision(precision);
-		p->setViewOrder(1);
+		if (prop.isEmpty() == true || prop == PropertyNames::width)
+		{
+			auto p = addProperty<double, PosLineImpl, &PosLineImpl::width, &PosLineImpl::setWidth>(PropertyNames::width,
+																								   PropertyNames::positionAndSizeCategory,
+																								   true);
+			p->setPrecision(precision);
+			p->setViewOrder(2);
+		}
 
-		p = addProperty<double, PosLineImpl, &PosLineImpl::width, &PosLineImpl::setWidth>(PropertyNames::width, PropertyNames::positionAndSizeCategory, true);
-		p->setPrecision(precision);
-		p->setViewOrder(2);
-
-		p = addProperty<double, PosLineImpl, &PosLineImpl::height, &PosLineImpl::setHeight>(PropertyNames::height, PropertyNames::positionAndSizeCategory, true);
-		p->setPrecision(precision);
-		p->setViewOrder(3);
+		if (prop.isEmpty() == true || prop == PropertyNames::height)
+		{
+			auto p = addProperty<double, PosLineImpl, &PosLineImpl::height, &PosLineImpl::setHeight>(PropertyNames::height,
+																									 PropertyNames::positionAndSizeCategory,
+																									 true);
+			p->setPrecision(precision);
+			p->setViewOrder(3);
+		}
 
 		return;
 	}
