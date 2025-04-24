@@ -259,7 +259,7 @@ namespace VFrame30
 		// Draw columns text and divider
 		//
 
-		// If there is no column just draw identififers
+		// If there is no column just draw identifiers
 		//
 		if (columnCount() == 0)
 		{
@@ -2082,12 +2082,12 @@ namespace VFrame30
 		m_columns.resize(2);
 
 		Column& c0 = m_columns[0];
-		c0.width = 80;
-		c0.data = E::ColumnData::AppSignalID;
+		c0.width = 75;
+		c0.data = E::ColumnData::Caption;
 		c0.horzAlign = E::HorzAlign::AlignLeft;
 
 		Column& c1 = m_columns[1];
-		c1.width = 20;
+		c1.width = 25;
 		c1.data = E::ColumnData::State;
 		c1.horzAlign = E::HorzAlign::AlignHCenter;
 
@@ -2185,13 +2185,13 @@ namespace VFrame30
 		m_columns.resize(2);
 
 		Column& c0 = m_columns[0];
-		c0.width = 20;
+		c0.width = 25;
 		c0.data = E::ColumnData::State;
 		c0.horzAlign = E::HorzAlign::AlignHCenter;
 
 		Column& c1 = m_columns[1];
-		c1.width = 80;
-		c1.data = E::ColumnData::AppSignalID;
+		c1.width = 75;
+		c1.data = E::ColumnData::Caption;
 		c1.horzAlign = E::HorzAlign::AlignLeft;
 
 		createColumnProperties();
