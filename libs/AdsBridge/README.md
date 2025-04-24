@@ -10,7 +10,7 @@ The layout follows the de-facto standard for CMake export packages.
 ```
 dev/
 |-- bin/                           # Helper executables & runtime DLLs
-|-- examples/AdsBridgeCppExample/  # Minimal C++ "Hello AdsBridge" project
+|-- examples/AdsBridgeExample/     # Minimal C++ "Hello AdsBridge" project
 |-- include/AdsBridge/             # Public headers
 |-- lib/                           # Static (.a/.lib)
 +-- share/
@@ -25,14 +25,14 @@ dev/
 ### Windows - one-liner
 
 ```pwsh
-cd examples/AdsBridgeCppExample
+cd examples/AdsBridgeExample
 build.bat
 ```
 
 ### Cross-platform - manual commands
 
 ```bat
-cd examples/AdsBridgeCppExample
+cd examples/AdsBridgeExample
 cmake -B ./build -DCMAKE_PREFIX_PATH="../../"
 cmake --build ./build
 ```

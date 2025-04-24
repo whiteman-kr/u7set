@@ -7,5 +7,5 @@ cmake --version &&^
 cmake -S . -B ./build -G Ninja -DCMAKE_C_COMPILER="cl" -DCMAKE_CXX_COMPILER="cl" -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=%QT_BIN_DIR% -DBIN_OUT_DIR=%BIN_OUT_DIR% &&^
 cmake --build ./build  &&^
 cmake --install ./build --prefix %INSTALL_OUT_DIR%  &&^
-cmake -S %INSTALL_OUT_DIR%/examples/AdsBridgeCppExample -B ./TestAdsBridgeBuild -DCMAKE_PREFIX_PATH="%INSTALL_OUT_DIR%" &&^
+cmake -S %INSTALL_OUT_DIR%/examples/AdsBridgeExample -B ./TestAdsBridgeBuild -DCMAKE_PREFIX_PATH="%INSTALL_OUT_DIR%" &&^
 cmake --build ./TestAdsBridgeBuild

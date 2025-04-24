@@ -21,7 +21,7 @@ class AdsBridge:
 
     def init(self, argc: int, argv: list[str], equipmentId: str, isQtApplication: bool) -> bool:
         '''This function initializes the AdsBridge library and starts the message loop if the application is not Qt-based.'''
-        c_AdsInit = self.ads_lib.AdsInitPrivate
+        c_AdsInit = self.ads_lib.AdsInit
         c_AdsInit.argtypes = [ctypes.c_int, ctypes.POINTER(
             ctypes.c_char_p), ctypes.c_char_p, ctypes.c_bool]
         c_AdsInit.restype = ctypes.c_bool
@@ -98,7 +98,7 @@ class AdsBridge:
         self.ads_lib.AdsSetLogHandler(_func)
 
     def setLogLevel(self, level: MatsLogLevel) -> None:
-        '''This function sets the log level that will be used by the AdsBridge library to filter log messages. The log level determines the severity of the log messages that will be logged. The available log levels are defined in the MatsLogLevel enum. By default, the log level is set to LOG_LEVEL_WARNING.'''
+        '''This function sets the log level that will be used by the AdsBridge library to filter log messages. The log level determines the severity of the log messages that will be logged. The available log levels are defined in the MatsLogLevel enum. By default, the log level is set to MATS_LOG_LEVEL_WARNING.'''
         c_AdsSetLogLevel = self.ads_lib.AdsSetLogLevel
 
         c_AdsSetLogLevel.argtypes = [ctypes.c_int]

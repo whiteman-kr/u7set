@@ -22,6 +22,13 @@ namespace
 	QByteArray g_lastLoadedConfiguration;
 } // namespace
 
+#define ADSB_API_VERSION 0x00000001 ///< API version of the AdsBridge library.
+
+uint32_t AdsGetInterfaceVersion(void)
+{
+	return ADSB_API_VERSION;
+}
+
 void AdsSetLogHandler(MatsLogHandler handler)
 {
 	AdsBridge::LogFile::g_logHandler = handler;
@@ -36,13 +43,13 @@ void AdsTestLogHandler(enum MatsLogLevel level, const char* message)
 {
 	switch (level)
 	{
-	case LOG_LEVEL_DEBUG:
+	case MATS_LOG_LEVEL_DEBUG:
 		g_log.writeMessage(message);
 		break;
-	case LOG_LEVEL_WARNING:
+	case MATS_LOG_LEVEL_WARNING:
 		g_log.writeWarning(message);
 		break;
-	case LOG_LEVEL_ERROR:
+	case MATS_LOG_LEVEL_ERROR:
 		g_log.writeError(message);
 		break;
 	default:
@@ -52,7 +59,7 @@ void AdsTestLogHandler(enum MatsLogLevel level, const char* message)
 	return;
 }
 
-bool AdsInitPrivate(int argc, char** argv, const char* equipmentId, bool isQtApplication)
+bool AdsInit(int argc, char** argv, const char* equipmentId, bool isQtApplication)
 {
 	g_log.writeMessage("AdsInit()");
 
@@ -181,9 +188,9 @@ size_t AdsGetTcpConnectionCount()
 	return g_adsBridge.connectionCount();
 }
 
-bool AdsGetTcpConnectionStatuses(struct AdsConnectionStatus* out, size_t count)
+bool AdsGetTcpConnectionStatusesPrivate1(size_t structSize, struct AdsConnectionStatus* out, size_t count)
 {
-	return g_adsBridge.connectionStatus(out, sizeof(AdsConnectionStatus), count);
+	return g_adsBridge.connectionStatus(structSize, out, count);
 }
 
 bool AdsSignalParamsLoaded()
@@ -206,14 +213,14 @@ bool AdsGetSignalList(MatsSignalHash* out, size_t count)
 	return g_adsBridge.signalList(out, count);
 }
 
-bool AdsGetSignalParams(const MatsSignalHash* signalHashes, MatsAppSignalParam* out, size_t count)
+size_t AdsGetSignalParamsPrivate1(size_t structSize, const MatsSignalHash* signalHashes, MatsAppSignalParam* out, size_t count)
 {
-	return g_adsBridge.signalParams(signalHashes, out, count);
+	return g_adsBridge.signalParams(structSize, signalHashes, out, count);
 }
 
-bool AdsGetSignalStates(const MatsSignalHash* signalHashes, MatsAppSignalState* out, size_t count)
+size_t AdsGetSignalStatesPrivate1(size_t structSize, const MatsSignalHash* signalHashes, MatsAppSignalState* out, size_t count)
 {
-	return g_adsBridge.signalStates(signalHashes, out, count);
+	return g_adsBridge.signalStates(structSize, signalHashes, out, count);
 }
 
 MatsSignalHash AdsCalcHash(const char* string)

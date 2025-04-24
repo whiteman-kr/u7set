@@ -24,7 +24,7 @@ target_sources(
 		./include/AdsBridge/AdsBridge.def
 		./include/AdsBridge/AdsBridge.h
 		./include/AdsBridge/Common.h
-		./include/AdsBridge/SelfTest.h
+		
 		./src/AdsBridge.cpp
 		./src/AdsBridgeFacade.cpp
 		./src/AdsBridgeLogFile.cpp

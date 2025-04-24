@@ -11,14 +11,14 @@ This example demonstrates how to build the AdsBridge C++ project using CMake.
 ### Windows - one-liner
 
 ```pwsh
-cd examples/AdsBridgeCppExample
+cd examples/AdsBridgeExample
 build.bat
 ```
 
 ### Cross-platform - manual commands
 
 ```bat
-cd examples/AdsBridgeCppExample
+cd examples/AdsBridgeExample
 cmake -B ./build -DCMAKE_PREFIX_PATH="../../"
 cmake --build ./build
 ```

@@ -51,11 +51,11 @@ namespace AdsBridge
 		size_t signalCount() const;
 		bool signalList(MatsSignalHash* out, size_t count);
 
-		bool signalParams(const MatsSignalHash* signalHashes, MatsAppSignalParam* out, size_t count);
-		bool signalStates(const MatsSignalHash* signalHashes, MatsAppSignalState* out, size_t count);
+		size_t signalParams(size_t structSize, const MatsSignalHash* signalHashes, MatsAppSignalParam* out, size_t count);
+		size_t signalStates(size_t structSize, const MatsSignalHash* signalHashes, MatsAppSignalState* out, size_t count);
 
 		size_t connectionCount() const;
-		bool connectionStatus(struct AdsConnectionStatus* out, size_t structSize, size_t count) const;
+		bool connectionStatus(size_t structSize, struct AdsConnectionStatus* out, size_t count) const;
 
 	private:
 		ILogFile* m_log = nullptr;

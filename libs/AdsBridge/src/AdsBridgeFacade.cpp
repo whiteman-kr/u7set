@@ -209,25 +209,31 @@ namespace AdsBridge
 		return true;
 	}
 
-	bool AdsBridgeFacade::signalParams(const MatsSignalHash* signalHashes, MatsAppSignalParam* out, size_t count)
+	size_t AdsBridgeFacade::signalParams(size_t structSize, const MatsSignalHash* signalHashes, MatsAppSignalParam* out, size_t count)
 	{
 		static_assert(sizeof(MatsSignalHash) == sizeof(Hash));
+
+		if (structSize != sizeof(MatsAppSignalParam))
+		{
+			m_log->writeError("AdsBridgeFacade::signalParams(), structSize is invalid.");
+			return 0;
+		}
 
 		if (signalHashes == nullptr)
 		{
 			m_log->writeError("AdsBridgeFacade::signalParams(), signalHashes is nullptr.");
-			return false;
+			return 0;
 		}
 
 		if (out == nullptr)
 		{
 			m_log->writeError("AdsBridgeFacade::signalParams(), out is nullptr.");
-			return false;
+			return 0;
 		}
 
 		std::memset(out, 0, sizeof(MatsAppSignalParam) * count);
 
-		bool result = true;
+		int result = 0;
 
 		for (const auto& h : std::span{signalHashes, count})
 		{
@@ -244,6 +250,8 @@ namespace AdsBridge
 			}
 			else
 			{
+				result++;
+
 				outSignal.appSignalId = getStringConstPointer(signalParam.appSignalId());
 				outSignal.customSignalId = getStringConstPointer(signalParam.customSignalId());
 
@@ -270,25 +278,31 @@ namespace AdsBridge
 		return result;
 	}
 
-	bool AdsBridgeFacade::signalStates(const MatsSignalHash* signalHashes, MatsAppSignalState* out, size_t count)
+	size_t AdsBridgeFacade::signalStates(size_t structSize, const MatsSignalHash* signalHashes, MatsAppSignalState* out, size_t count)
 	{
 		static_assert(sizeof(MatsSignalHash) == sizeof(Hash));
+
+		if (structSize != sizeof(MatsAppSignalState))
+		{
+			m_log->writeError("AdsBridgeFacade::signalStates(), structSize is invalid.");
+			return 0;
+		}
 
 		if (signalHashes == nullptr)
 		{
 			m_log->writeError("AdsBridgeFacade::signalStates(), signalHashes is nullptr.");
-			return false;
+			return 0;
 		}
 
 		if (out == nullptr)
 		{
 			m_log->writeError("AdsBridgeFacade::signalStates(), out is nullptr.");
-			return false;
+			return 0;
 		}
 
 		std::memset(out, 0, sizeof(MatsAppSignalState) * count);
 
-		bool result = true;
+		int result = 0;
 
 		for (const auto& h : std::span{signalHashes, count})
 		{
@@ -305,6 +319,7 @@ namespace AdsBridge
 			}
 			else
 			{
+				result++;
 				// plantTime is need to be corrected by TZ and DST, as it's in local time.
 				//
 				auto localTimeCorrection = QDateTime::currentDateTime().offsetFromUtc() * 1000;
@@ -325,17 +340,17 @@ namespace AdsBridge
 		return TcpClientStatistics::statistics().size();
 	}
 
-	bool AdsBridgeFacade::connectionStatus(struct AdsConnectionStatus* out, size_t structSize, size_t count) const
+	bool AdsBridgeFacade::connectionStatus(size_t structSize, struct AdsConnectionStatus* out, size_t count) const
 	{
-		if (out == nullptr)
-		{
-			m_log->writeError("AdsBridgeFacade::connectionStatus(), out is nullptr.");
-			return false;
-		}
-
 		if (structSize != sizeof(AdsConnectionStatus))
 		{
 			m_log->writeError("AdsBridgeFacade::connectionStatus(), structSize is invalid.");
+			return false;
+		}
+
+		if (out == nullptr)
+		{
+			m_log->writeError("AdsBridgeFacade::connectionStatus(), out is nullptr.");
 			return false;
 		}
 
