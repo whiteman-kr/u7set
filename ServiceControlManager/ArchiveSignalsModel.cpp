@@ -63,19 +63,46 @@ QVariant ArchiveSignalsModel::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::DisplayRole)
 	{
-		switch (column)
+		E::SignalType st = static_cast<E::SignalType>(asi.signaltype());
+
+		switch(st)
 		{
-		case 0:	return QString::fromStdString(asi.appsignalid());
-		case 1: return QString::number(asi.recordspermin());
-		case 2: return fineSize(asi.recordspermin() * sizeof(ArchFileRecord) * 60 *24);
-		case 3: return E::valueToString(static_cast<E::ApertureType>(asi.aperturetype()));
-		case 4: return QString::number(asi.coarseaperture());
-		case 5: return QString::number(asi.fineaperture());
-		case 6: return QString::number(asi.abscoarseaperture());
-		case 7: return QString::number(asi.absfineaperture());
-		case 8: return QString::number(asi.lowengineeringunits());
-		case 9: return QString::number(asi.highengineeringunits());
-		case 10: return (asi.apertureoverrided() ? QStringLiteral("Yes") : QStringLiteral("No"));
+		case E::Discrete:
+			switch (column)
+			{
+			case 0:	return QString::fromStdString(asi.appsignalid());
+			case 1: return E::valueToString(st);
+			case 2: return QString::number(asi.recordspermin());
+			case 3: return fineSize(asi.recordspermin() * sizeof(ArchFileRecord) * 60 *24);
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+			case 10: return Separator::EMPTY_STR;
+			case 11: return (asi.apertureoverrided() ? QStringLiteral("Yes") : QStringLiteral("No"));
+			}
+
+		case E::Analog:
+			switch (column)
+			{
+			case 0:	return QString::fromStdString(asi.appsignalid());
+			case 1: return E::valueToString(st);
+			case 2: return QString::number(asi.recordspermin());
+			case 3: return fineSize(asi.recordspermin() * sizeof(ArchFileRecord) * 60 *24);
+			case 4: return E::valueToString(static_cast<E::ApertureType>(asi.aperturetype()));
+			case 5: return QString::number(asi.coarseaperture());
+			case 6: return QString::number(asi.fineaperture());
+			case 7: return QString::number(asi.abscoarseaperture());
+			case 8: return QString::number(asi.absfineaperture());
+			case 9: return QString::number(asi.lowengineeringunits());
+			case 10: return QString::number(asi.highengineeringunits());
+			case 11: return (asi.apertureoverrided() ? QStringLiteral("Yes") : QStringLiteral("No"));
+			}
+
+		default:
+			;
 		}
 
 		return Separator::EMPTY_STR;

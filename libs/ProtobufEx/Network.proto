@@ -367,6 +367,7 @@ message ArchSignalInfo
 	required int32 recordsPerMin = 8;
 	required double highEngineeringUnits = 9;
 	required double lowEngineeringUnits = 10;
+	required int32 signalType = 11;
 }
 
 message ApertureRecord

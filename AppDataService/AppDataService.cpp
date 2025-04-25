@@ -95,60 +95,7 @@ void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceI
 		ads->getState(state);
 	}
 
-	{
-		int count = 500;
-
-		std::vector<RecordsPerMin> recordsPerMin;
-		double updateStatus;
-
-		getRecordsPerMin(&recordsPerMin, count, &updateStatus);
-
-		count = TO_INT(recordsPerMin.size());
-
-		serviceInfo.set_archsignalsupdateprogress(updateStatus);
-
-		bool archSignalsUpdated = m_updateArchSignalsAnyway;
-
-		m_updateArchSignalsAnyway = false;
-
-		if (m_cachedRecordsPerMin != recordsPerMin)
-		{
-			archSignalsUpdated = true;
-			m_cachedRecordsPerMin = recordsPerMin;
-		}
-
-		if ((m_archSignalsRequestCtr % 25) == 0)
-		{
-			archSignalsUpdated = true;
-		}
-
-		m_archSignalsRequestCtr++;
-
-		serviceInfo.set_archsignalsupdated(archSignalsUpdated);
-
-		if (archSignalsUpdated == true)
-		{
-			for(int i = 0; i < count; i++)
-			{
-				const DynamicAppSignalState* state = m_appSignalStates[recordsPerMin[i].dynamicStateIndex];
-
-				TEST_PTR_CONTINUE(state);
-
-				Network::ArchSignalInfo* asi = serviceInfo.add_archsignalsinfo();
-
-				asi->set_appsignalid(state->appSignalID().toStdString());
-				asi->set_aperturetype(TO_INT(state->apertureType()));
-				asi->set_coarseaperture(state->coarseAperture());
-				asi->set_fineaperture(state->fineAperture());
-				asi->set_abscoarseaperture(state->absCoarseAperture());
-				asi->set_absfineaperture(state->absFineAperture());
-				asi->set_recordspermin(recordsPerMin[i].recordsCount);
-				asi->set_apertureoverrided(state->apertureOverrided());
-				asi->set_lowengineeringunits(state->lowEngineeringUnits());
-				asi->set_highengineeringunits(state->highEngineeringUnits());
-			}
-		}
-	}
+	copyArchSignalsInfo(serviceInfo);
 }
 
 bool AppDataServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const
@@ -805,6 +752,8 @@ void AppDataServiceWorker::onRestartArchSignalsTimer()
 
 	m_archSignalsUpdateTimer->start(ARCH_SIGNALS_UPDATE_INTERVAL);
 	m_archSignalsTimerStartMs = QDateTime::currentMSecsSinceEpoch();
+
+//	m_appSignalStates.clearStatesSavedCounters();
 }
 
 void AppDataServiceWorker::onArchSignalsTimer()
@@ -821,11 +770,11 @@ void AppDataServiceWorker::onArchSignalsTimer()
 
 	for(int i = 0; i < count; i++)
 	{
-		r.recordsCount = m_appSignalStates[i]->onTimer1min();
+		r.recordsCount = m_appSignalStates[i]->onArchSignalsTimer();
 		r.dynamicStateIndex = i;
 		r.overrided = m_appSignalStates[i]->apertureOverrided();
 
-		if (r.recordsCount > 1)
+		if (r.recordsCount > 1 || r.overrided)
 		{
 			recordsPerMin.push_back(r);
 		}
@@ -841,4 +790,61 @@ void AppDataServiceWorker::onArchSignalsTimer()
 	QMutexLocker loker(&m_recordsPerMinMutex);
 
 	m_recordsPerMin.swap(recordsPerMin);
+}
+
+void AppDataServiceWorker::copyArchSignalsInfo(Network::ServiceInfo& serviceInfo) const
+{
+	int count = 500;
+
+	std::vector<RecordsPerMin> recordsPerMin;
+	double updateStatus = 0;
+
+	getRecordsPerMin(&recordsPerMin, count, &updateStatus);
+
+	count = TO_INT(recordsPerMin.size());
+
+	serviceInfo.set_archsignalsupdateprogress(updateStatus);
+
+	bool archSignalsUpdated = m_updateArchSignalsAnyway;
+
+	m_updateArchSignalsAnyway = false;
+
+	if (m_cachedRecordsPerMin != recordsPerMin)
+	{
+		archSignalsUpdated = true;
+		m_cachedRecordsPerMin = recordsPerMin;
+	}
+
+	if ((m_archSignalsRequestCtr % 25) == 0)
+	{
+		archSignalsUpdated = true;
+	}
+
+	m_archSignalsRequestCtr++;
+
+	serviceInfo.set_archsignalsupdated(archSignalsUpdated);
+
+	if (archSignalsUpdated == true)
+	{
+		for(int i = 0; i < count; i++)
+		{
+			const DynamicAppSignalState* state = m_appSignalStates[recordsPerMin[i].dynamicStateIndex];
+
+			TEST_PTR_CONTINUE(state);
+
+			Network::ArchSignalInfo* asi = serviceInfo.add_archsignalsinfo();
+
+			asi->set_appsignalid(state->appSignalID().toStdString());
+			asi->set_aperturetype(TO_INT(state->apertureType()));
+			asi->set_coarseaperture(state->coarseAperture());
+			asi->set_fineaperture(state->fineAperture());
+			asi->set_abscoarseaperture(state->absCoarseAperture());
+			asi->set_absfineaperture(state->absFineAperture());
+			asi->set_recordspermin(recordsPerMin[i].recordsCount);
+			asi->set_apertureoverrided(state->apertureOverrided());
+			asi->set_lowengineeringunits(state->lowEngineeringUnits());
+			asi->set_highengineeringunits(state->highEngineeringUnits());
+			asi->set_signaltype(TO_INT(state->signalType()));
+		}
+	}
 }

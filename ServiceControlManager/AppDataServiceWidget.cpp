@@ -991,15 +991,12 @@ void AppDataServiceWidget::onCustomContextMenuRequested(const QPoint& pos)
 
 void AppDataServiceWidget::onChangeApertures()
 {
-	QDialog dlg;
-
-	QGridLayout* gridLayout = new QGridLayout(&dlg);
-
 	// init dialog parameters
 
 	QListWidget* signalsList = new QListWidget;
 
 	QStringList appSignalIDs;
+	QStringList discreteAppSignalIDs;
 	std::optional<int> apertureType;
 	std::optional<double> coarseAperture;
 	std::optional<double> fineAperture;
@@ -1011,6 +1008,12 @@ void AppDataServiceWidget::onChangeApertures()
 		const Network::ArchSignalInfo& asi = m_archSignalsModel->at(row);
 
 		QString appSignalID = QString::fromStdString(asi.appsignalid());
+
+		if (asi.signaltype() == TO_INT(E::SignalType::Discrete))
+		{
+			discreteAppSignalIDs.append(appSignalID);
+			continue;
+		}
 
 		appSignalIDs.append(appSignalID);
 
@@ -1042,6 +1045,42 @@ void AppDataServiceWidget::onChangeApertures()
 
 		index++;
 	}
+
+	if (discreteAppSignalIDs.isEmpty() == false)
+	{
+		QString msg;
+
+		msg.append("It is not possible to change the aperture of discrete signal(s):\n\n");
+
+		int rest = 0;
+
+		if (discreteAppSignalIDs.size() > 5)
+		{
+			rest = discreteAppSignalIDs.size() - 5;
+			discreteAppSignalIDs.remove(5, rest);
+		}
+
+		msg.append(discreteAppSignalIDs.join(Separator::NEW_LINE));
+
+		if (rest > 0)
+		{
+			msg.append(QString("\n\nand %1 more signal(s)").arg(rest));
+		}
+
+		if (QMessageBox::warning(this, "Warning", msg, QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Cancel)
+		{
+			return;
+		}
+	}
+
+	if (appSignalIDs.isEmpty())
+	{
+		return;
+	}
+
+	QDialog dlg;
+
+	QGridLayout* gridLayout = new QGridLayout(&dlg);
 
 	// create dialog layout
 

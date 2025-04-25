@@ -141,6 +141,8 @@ private:
 	void onRestartArchSignalsTimer();
 	void onArchSignalsTimer();
 
+	void copyArchSignalsInfo(Network::ServiceInfo& serviceInfo) const;
+
 private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 

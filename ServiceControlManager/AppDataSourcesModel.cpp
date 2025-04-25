@@ -120,6 +120,17 @@ void AppDataSourcesModel::updateData(const Network::ServiceInfo& srvInfo)
 		{
 			const Network::AppDataSourceState& st = srvInfo.appdatasourcesstates(i);
 			m_sources[i] = st;
+		}
+
+		std::sort(m_sources.begin(), m_sources.end(), [&](	const Network::AppDataSourceState& a,
+															const Network::AppDataSourceState& b)
+					{
+						return a.lancontrollerid() < b.lancontrollerid();
+					});
+
+		for(int i = 0; i < sourcesCount; i++)
+		{
+			const Network::AppDataSourceState& st = m_sources[i];
 			m_sourcesErrorCount[i] = st.errorprotocolversion() +
 									 st.errorframesquantity() +
 									 st.errorframeno() +

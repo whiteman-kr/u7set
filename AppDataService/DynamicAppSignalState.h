@@ -110,6 +110,7 @@ public:
 	const AppSignal* signal() const { return m_signal; }
 
 	E::ApertureType apertureType() const { return m_apertureType; }
+	E::SignalType signalType() const { return m_signalType; }
 
 	double fineAperture() const { return m_fineAperture; }
 	double coarseAperture() const { return m_coarseAperture; }
@@ -123,7 +124,8 @@ public:
 	void overrideAperture(const ApertureRecord& ar);
 	bool apertureOverrided() const { return m_apertureOverrided; }
 
-	int onTimer1min();
+	int onArchSignalsTimer();
+	inline void clearStatesSavedCounter() { m_statesSaved = 0; }
 
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
@@ -266,6 +268,7 @@ public:
 	void resetGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
 
 	void overrideAperture(const ApertureRecord& ar);
+	void clearStatesSavedCounters();
 
 private:
 	std::vector<DynamicAppSignalState*> m_appSignalState;

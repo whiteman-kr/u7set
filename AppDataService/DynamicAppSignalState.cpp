@@ -719,7 +719,7 @@ void DynamicAppSignalState::overrideAperture(const ApertureRecord& ar)
 	m_apertureOverrided = true;
 }
 
-int DynamicAppSignalState::onTimer1min()
+int DynamicAppSignalState::onArchSignalsTimer()
 {
 	int inMinuteSaved = m_statesSaved;
 
@@ -1099,6 +1099,15 @@ void DynamicAppSignalStates::overrideAperture(const ApertureRecord& ar)
 	}
 
 	state->overrideAperture(ar);
+}
+
+void DynamicAppSignalStates::clearStatesSavedCounters()
+{
+	for(DynamicAppSignalState* ds : m_appSignalState)
+	{
+		TEST_PTR_CONTINUE(ds);
+		ds->clearStatesSavedCounter();
+	}
 }
 
 

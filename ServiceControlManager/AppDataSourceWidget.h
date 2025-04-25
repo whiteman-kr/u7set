@@ -16,6 +16,7 @@ public:
 
 	quint64 id() { return m_id; }
 	QString equipmentId() { return m_equipmentId; }
+
 signals:
 	void forgetMe();
 
