@@ -32,9 +32,6 @@ QVariant AppDataSourcesModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 	}
 
-	Q_UNUSED(index);
-	Q_UNUSED(role);
-
 	int row = index.row();
 	int column = index.column();
 
@@ -169,5 +166,16 @@ void AppDataSourcesModel::updateData(const Network::ServiceInfo& srvInfo)
 		copySources();
 	}
 
-//	emit dataChanged(QModelIndex(), QModelIndex());
+	emit dataChanged(QModelIndex(), QModelIndex());
+}
+
+QString AppDataSourcesModel::getSourceLanControllerID(int index)
+{
+	if (index < 0 || index >= m_sources.size())
+	{
+		Q_ASSERT(false);
+		return Separator::EMPTY_STR;
+	}
+
+	return QString::fromStdString(m_sources[index].lancontrollerid());
 }

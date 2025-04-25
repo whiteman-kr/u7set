@@ -225,34 +225,43 @@ message AppDataSourceState
 {
 	optional uint64 id = 1 [default = 0];				// unique id
 	optional string lmEquipmentID = 2;
+	optional string lmCaption = 3;
+	optional int32 moduleType = 4 [default = 0];
+	optional string modulePresetName = 5;
+	optional int32 moduleWorkcycleMcs = 6 [default = 0];
+	optional int32 rupProtocolVersion = 7 [default = 0];
+	optional string subsystemID = 8;
+	optional int32 subsystemKey = 9 [default = 0];
+	optional int32 lmNumber = 10 [default = 0];
+	optional string subsystemChannel = 11;
 
-	optional bool dataProcessingEnabled = 3 [default = false];
-	optional bool receivesData = 4 [default = false];
-	optional int64 uptime = 5 [default = 0];					// time from start of data receiving
-	optional uint32 receivedDataID = 6 [default = 0];
-	optional int64 lmTime = 7 [default = 0];
-	optional uint32 rupFrameNumerator = 8 [default = 0];
+	optional string lanControllerID = 15;
+	optional uint32 lanControllerIP = 16;
+	optional uint32 lanControllerPort = 17;
 
-	optional double dataReceivingSpeed = 9 [default = 0];	    // bytes/sec
-	optional int64 receivedDataSize = 10 [default = 0];
-	optional int64 receivedFramesCount = 11 [default = 0];
-	optional int64 receivedPacketCount = 12 [default = 0];
-	optional int64 lostPacketCount = 13 [default = 0];
-	optional int32 signalStatesQueueCurSize = 14 [default = 0];
-	optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+	optional bool dataProcessingEnabled = 20 [default = false];
+	optional bool receivesData = 21 [default = false];
+	optional int64 uptime = 22 [default = 0];					// time from start of data receiving
+	optional uint32 receivedDataID = 23 [default = 0];
+	optional int64 lmTime = 24 [default = 0];
+	optional uint32 rupFrameNumerator = 25 [default = 0];
 
-	optional int64 errorProtocolVersion = 16 [default = 0];
-	optional int64 errorFramesQuantity = 17 [default = 0];
-	optional int64 errorFrameNo = 18 [default = 0];
-	optional int64 errorFrameCRC = 19 [default = 0];
-	optional int64 errorDataID = 20 [default = 0];
-	optional int64 errorDuplicatePlantTime = 21 [default = 0];
-	optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
-	optional int64 errorPlantTimeFormat = 23 [default = 0];
+	optional double dataReceivingSpeed = 30 [default = 0];	    // bytes/sec
+	optional int64 receivedDataSize = 31 [default = 0];
+	optional int64 receivedFramesCount = 32 [default = 0];
+	optional int64 receivedPacketCount = 33 [default = 0];
+	optional int64 lostPacketCount = 34 [default = 0];
+	optional int32 signalStatesQueueCurSize = 35 [default = 0];
+	optional int32 signalStatesQueueCurMaxSize = 36 [default = 0];
 
-	optional string lanControllerID = 24;
-	optional uint32 lanControllerIP = 25;
-	optional uint32 lanControllerPort = 26;
+	optional int64 errorProtocolVersion = 50 [default = 0];
+	optional int64 errorFramesQuantity = 51 [default = 0];
+	optional int64 errorFrameNo = 52 [default = 0];
+	optional int64 errorFrameCRC = 53 [default = 0];
+	optional int64 errorDataID = 54 [default = 0];
+	optional int64 errorDuplicatePlantTime = 55 [default = 0];
+	optional int64 errorNonmonotonicPlantTime = 56 [default = 0];
+	optional int64 errorPlantTimeFormat = 57 [default = 0];
 }
 
 // Getting Diagnostic Data Sources states

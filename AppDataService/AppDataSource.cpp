@@ -127,6 +127,25 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 
 	proto->set_id(m_id);
 	proto->set_lmequipmentid(m_moduleEquipmentID.toStdString());
+	proto->set_lmcaption(m_moduleCaption.toStdString());
+	proto->set_moduletype(m_moduleType);
+	proto->set_modulepresetname(m_modulePresetName.toStdString());
+	proto->set_moduleworkcyclemcs(m_moduleWorkcycle_mcs);
+	proto->set_rupprotocolversion(m_lanControllersInfo.rupVersion());
+	proto->set_subsystemid(m_subsystemID.toStdString());
+	proto->set_subsystemkey(m_subsystemKey);
+	proto->set_lmnumber(m_lmNumber);
+	proto->set_subsystemchannel(m_subsystemChannel.toStdString());
+
+	const LanControllerInfo& lci = lanControllersInfo()[0];
+
+	if (lci.isValid())
+	{
+		proto->set_lancontrollerid(lci.equipmentID.toStdString());
+		proto->set_lancontrollerip(lci.appDataIP32());
+		proto->set_lancontrollerport(lci.appDataPort);
+	}
+
 	proto->set_dataprocessingenabled(m_dataProcessingEnabled);
 	proto->set_receivesdata(m_receivesData);
 	proto->set_uptime(m_uptime);
@@ -152,15 +171,6 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_errorduplicateplanttime(m_errorDuplicatePlantTime);
 	proto->set_errornonmonotonicplanttime(m_errorNonmonotonicPlantTime);
 	proto->set_errorplanttimeformat(m_errorPlantTimeFormat);
-
-	const LanControllerInfo& lci = lanControllersInfo()[0];
-
-	if (lci.isValid())
-	{
-		proto->set_lancontrollerid(lci.equipmentID.toStdString());
-		proto->set_lancontrollerip(lci.appDataIP32());
-		proto->set_lancontrollerport(lci.appDataPort);
-	}
 
 	return true;
 }

@@ -58,6 +58,7 @@ add_executable(${TARGET} WIN32
 	translations/ServiceControlManager_ru.ts
 	translations/ServiceControlManager_uk.ts
 	ArchiveServiceWidget.h ArchiveServiceWidget.cpp
+	DataSourceInfoModel.h DataSourceInfoModel.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE

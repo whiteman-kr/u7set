@@ -8,6 +8,7 @@
 
 #include "AppDataSourcesModel.h"
 #include "ArchiveSignalsModel.h"
+#include "AppDataSourceWidget.h"
 
 /*
 class QTableView;
@@ -95,6 +96,7 @@ private:
 
 	virtual int updateSettings(int rowCount) override;
 
+	void onSourceDoubleClicked(const QModelIndex& index);
 	void onCustomContextMenuRequested(const QPoint &pos);
 	void onChangeApertures();
 
@@ -106,6 +108,8 @@ private:
 	QTableView* m_archSignalsView = nullptr;
 	QProgressBar* m_archSignalsProgressBar = nullptr;
 	std::vector<int> m_selectedRows;
+
+	std::map<QString, AppDataSourceWidget*> m_sourceWidgets;
 
 /*	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
 	SignalStateModel* m_signalStateModel = nullptr;

@@ -577,7 +577,23 @@ void AppDataServiceWidget::updateModels(const Network::ServiceInfo& srvInfo)
 	if (m_sourcesModel != nullptr)
 	{
 		m_sourcesModel->updateData(srvInfo);
-		m_sourcesView->update();
+	}
+
+	if (m_sourceWidgets.size() > 0)
+	{
+		int srcCount = srvInfo.appdatasourcesstates_size();
+
+		for(int i = 0; i < srcCount; i++)
+		{
+			const Network::AppDataSourceState& dsState = srvInfo.appdatasourcesstates(i);
+
+			AppDataSourceWidget* w = getValueOrNullptr(m_sourceWidgets, QString::fromStdString(dsState.lancontrollerid()));
+
+			if (w != nullptr)
+			{
+				w->updateData(dsState);
+			}
+		}
 	}
 
 	if (m_archSignalsModel != nullptr )
@@ -585,7 +601,6 @@ void AppDataServiceWidget::updateModels(const Network::ServiceInfo& srvInfo)
 		if (srvInfo.archsignalsupdated() == true)
 		{
 			m_archSignalsModel->updateData(srvInfo);
-			//		m_archSignalsView->update();
 		}
 
 		m_archSignalsProgressBar->setValue(srvInfo.archsignalsupdateprogress());
@@ -839,7 +854,7 @@ void AppDataServiceWidget::addAppDataSourcesTab()
 	m_sourcesModel = new AppDataSourcesModel(this);
 	m_sourcesView = createTableView(m_sourcesModel, m_sourcesModel->columns());
 
-//	connect(m_sourcesView, &QTableView::doubleClicked, this, &MyClass::onTableDoubleClicked);
+	connect(m_sourcesView, &QTableView::doubleClicked, this, &AppDataServiceWidget::onSourceDoubleClicked);
 
 	addTab(m_sourcesView, "AppData sources");
 }
@@ -955,6 +970,28 @@ int AppDataServiceWidget::updateSettings(int rowCount)
 	rowCount++;
 
 	return rowCount;
+}
+
+void AppDataServiceWidget::onSourceDoubleClicked(const QModelIndex& index)
+{
+	int row = index.row();
+
+	QString lanControllerID = m_sourcesModel->getSourceLanControllerID(row);
+
+	AppDataSourceWidget* srcWidget = getValueOrNullptr(m_sourceWidgets, lanControllerID);
+
+	if (srcWidget == nullptr)
+	{
+		srcWidget = new AppDataSourceWidget(lanControllerID, this);
+
+		m_sourceWidgets.emplace(lanControllerID, srcWidget);
+
+		srcWidget->show();
+	}
+	else
+	{
+		srcWidget->activateWindow();
+	}
 }
 
 void AppDataServiceWidget::onCustomContextMenuRequested(const QPoint& pos)

@@ -19,6 +19,8 @@ public:
 
 	void updateData(const Network::ServiceInfo& srvInfo);
 
+	QString getSourceLanControllerID(int index);
+
 private:
 	std::vector<Network::AppDataSourceState> m_sources;
 	std::vector<int> m_sourcesErrorCount;

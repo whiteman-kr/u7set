@@ -753,7 +753,7 @@ void AppDataServiceWorker::onRestartArchSignalsTimer()
 	m_archSignalsUpdateTimer->start(ARCH_SIGNALS_UPDATE_INTERVAL);
 	m_archSignalsTimerStartMs = QDateTime::currentMSecsSinceEpoch();
 
-//	m_appSignalStates.clearStatesSavedCounters();
+	m_appSignalStates.clearStatesSavedCounters();
 }
 
 void AppDataServiceWorker::onArchSignalsTimer()
