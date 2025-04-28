@@ -1742,6 +1742,8 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 	// Look for deteled items (in target)
 	//
+	std::vector<QByteArray> deletedItems;
+
 	for (const auto& sourceLayer : sourceSchema->layers())
 	{
 		for (const SchemaItemPtr& sourceItem : sourceLayer->items())
@@ -1768,7 +1770,9 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 				{
 					if (targetLayer->guid() == sourceLayer->guid())
 					{
-						targetLayer->pushBackItem(sourceItem);
+						QByteArray ba;
+						sourceItem->saveToByteArray(&ba);
+						deletedItems.push_back(std::move(ba));
 						layerFound = true;
 						break;
 					}
@@ -1778,7 +1782,7 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 			}
 		}
 	}
-
+	
 	if (schemaDiffTable->rowCount() > 0 || schemaItemsDiffTable->rowCount() > 0 || itemsTables.empty() == false)
 	{
 		addHeaderTableItem(headerTable, fileName, E::valueToString<E::VcsItemAction>(targetFile->action()), targetFile);
@@ -1791,6 +1795,13 @@ void ProjectDiffGenerator::compareSchemas(const QString& fileName,
 
 		auto reportSchema =
 			ReportSchema::create(tr("Schema: %1, %2\n").arg(schemaId).arg(changesetString(targetFile)), {}, targetSchema, itemsActions);
+
+		for (const auto& ba : deletedItems) 
+		{
+			SchemaItemPtr si = VFrame30::SchemaItem::Create(ba);
+			Q_ASSERT(si);
+			reportSchema->schema()->activeLayer()->pushBackItem(si);
+		}
 
 		section->addSchema(reportSchema);
 		section->setTag(targetSchema->caption());
