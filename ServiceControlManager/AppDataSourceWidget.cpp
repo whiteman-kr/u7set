@@ -338,31 +338,24 @@ AppDataSourceWidget::AppDataSourceWidget(const QString& lanControllerID, QWidget
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	QHBoxLayout* hl = new QHBoxLayout();
-	m_splitter = new QSplitter(this);
-	hl->addWidget(m_splitter);
-	setLayout(hl);
-
 	// Source info
 	//
-	m_infoTable = new QTableView(this);
-	m_infoModel = new DataSourceInfoModel;
+	m_infoTable = new QTableView;
 
-	initTable(m_infoTable, m_infoModel);
+	initTable(m_infoTable, &m_infoModel);
 
-/*	// Source state
+	// Source state
 	//
-	m_stateTable = new QTableView(this);
-	m_stateModel = new QStandardItemModel(static_cast<int>(dynamicPropertiesFieldList.size()), 2, this);
+	m_stateTable = new QTableView;
 
-	int i = 0;
-	for (const auto& field : dynamicPropertiesFieldList)
-	{
-		m_stateModel->setData(m_stateModel->index(i, 0), field.fieldName);
-		i++;
-	}
+	initTable(m_stateTable, &m_stateModel);
 
-//	initTable(m_stateTable, m_stateModel);*/
+	//
+
+	QHBoxLayout* hl = new QHBoxLayout();
+	hl->addWidget(m_infoTable);
+	hl->addWidget(m_stateTable);
+	setLayout(hl);
 
 	setWindowTitle("AppDataSource " + m_lanControllerID);
 
@@ -370,22 +363,24 @@ AppDataSourceWidget::AppDataSourceWidget(const QString& lanControllerID, QWidget
 
 	QSettings settings;
 
-	m_splitter->restoreState(settings.value(APP_DATA_SRC_WIDGET_KEY + m_lanControllerID + SPLITTER_STATE_KEY, m_splitter->saveState()).toByteArray());
 	m_infoTable->setColumnWidth(0, settings.value(APP_DATA_SRC_WIDGET_KEY + m_lanControllerID + INFO_COLUMN_WIDTH_KEY, m_infoTable->columnWidth(0)).toInt());
-//	m_stateTable->setColumnWidth(0, settings.value(APP_DATA_SRC_WIDGET_KEY + m_lanControllerID + STATE_COLUMN_WIDTH_KEY, m_stateTable->columnWidth(0)).toInt());
+	m_stateTable->setColumnWidth(0, settings.value(APP_DATA_SRC_WIDGET_KEY + m_lanControllerID + STATE_COLUMN_WIDTH_KEY, m_stateTable->columnWidth(0)).toInt());
 }
 
 AppDataSourceWidget::~AppDataSourceWidget()
 {
-	emit forgetMe();
+	emit forgetMe(m_lanControllerID);
 }
 
 void AppDataSourceWidget::updateData(const Network::AppDataSourceState& state)
 {
-	if (m_infoModel != nullptr)
+/*	if (m_infoModel != nullptr)
 	{
 		m_infoModel->updateData(state);
-	}
+	}*/
+
+	m_infoModel.updateData(state);
+	m_stateModel.updateData(state);
 }
 
 void AppDataSourceWidget::closeEvent(QCloseEvent *event)
@@ -394,9 +389,8 @@ void AppDataSourceWidget::closeEvent(QCloseEvent *event)
 
 	QSettings settings;
 
-	settings.setValue(APP_DATA_SRC_WIDGET_KEY + m_lanControllerID + SPLITTER_STATE_KEY, m_splitter->saveState());
 	settings.setValue(APP_DATA_SRC_WIDGET_KEY + m_lanControllerID + INFO_COLUMN_WIDTH_KEY, m_infoTable->columnWidth(0));
-//	settings.setValue(APP_DATA_SRC_WIDGET_KEY + m_lanControllerID + STATE_COLUMN_WIDTH_KEY, m_stateTable->columnWidth(0));
+	settings.setValue(APP_DATA_SRC_WIDGET_KEY + m_lanControllerID + STATE_COLUMN_WIDTH_KEY, m_stateTable->columnWidth(0));
 
 	QWidget::closeEvent(event);
 }
@@ -409,17 +403,11 @@ void AppDataSourceWidget::initTable(QTableView* table, QAbstractTableModel* mode
 	table->horizontalHeader()->setStretchLastSection(true);
 	table->horizontalHeader()->setHighlightSections(false);
 
-	model->setHeaderData(0, Qt::Horizontal, "Property");
-	model->setHeaderData(1, Qt::Horizontal, "Value");
-
 	table->setSelectionBehavior(QAbstractItemView::SelectRows);
 	table->setSelectionMode(QAbstractItemView::SingleSelection);
-	table->setAlternatingRowColors(true);
 	table->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	table->setColumnWidth(0, 200);
+	table->setColumnWidth(0, 300);
 
 	table->setModel(model);
-
-	m_splitter->addWidget(table);
 }

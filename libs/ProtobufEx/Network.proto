@@ -234,6 +234,9 @@ message AppDataSourceState
 	optional int32 subsystemKey = 9 [default = 0];
 	optional int32 lmNumber = 10 [default = 0];
 	optional string subsystemChannel = 11;
+	optional uint32 expectedDataID = 12 [default = 0];
+	optional int32 dataFramesQuantity = 13  [default = 0];
+	optional int32 dataSizeBytes = 14  [default = 0];
 
 	optional string lanControllerID = 15;
 	optional uint32 lanControllerIP = 16;

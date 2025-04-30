@@ -3,6 +3,7 @@
 #include <QWidget>
 
 #include "DataSourceInfoModel.h"
+#include "DataSourceStateModel.h"
 
 class QTableView;
 class QStandardItemModel;
@@ -18,7 +19,7 @@ public:
 	void updateData(const Network::AppDataSourceState& state);
 
 signals:
-	void forgetMe();
+	void forgetMe(QString dataSoureID);
 
 protected:
 	void closeEvent(QCloseEvent* event);
@@ -30,15 +31,12 @@ private:
 	QString m_lanControllerID;
 
 	QTableView* m_infoTable = nullptr;
-	DataSourceInfoModel* m_infoModel = nullptr;
+	DataSourceInfoModel m_infoModel;
 
 	QTableView* m_stateTable = nullptr;
-	QStandardItemModel* m_stateModel = nullptr;
-
-	QSplitter* m_splitter = nullptr;
+	DataSourceStateModel m_stateModel;
 
 	inline static const QString APP_DATA_SRC_WIDGET_KEY = QString("AppDataSourceWidget/");
-	inline static const QString SPLITTER_STATE_KEY = QString("/splitterState");
 	inline static const QString INFO_COLUMN_WIDTH_KEY = QString("/infoColumnWidth");
 	inline static const QString STATE_COLUMN_WIDTH_KEY = QString("/stateColumnWidth");
 };

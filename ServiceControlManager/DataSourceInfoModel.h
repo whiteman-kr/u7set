@@ -8,6 +8,7 @@ public:
 	virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
+	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
 	void updateData(const Network::AppDataSourceState& state);
@@ -22,17 +23,16 @@ private:
 			QString("Module type"),							// 2
 			QString("Module preset name"),					// 3
 			QString("Module workcycle, mcs"),				// 4
-			QString("RUP protocol version"),				// 5
-			QString("Subsystem ID"),						// 6
-			QString("Subsystem key"),						// 7
-			QString("LM number"),							// 8
-			QString("Subsystem channel"),					// 9
-			QString("Lan controller ID"),					// 10
-			QString("Lan controller IP"),					// 11
-			QString("Lan controller data type"),			// 12
-			QString("Expected DataUID"),					// 13
-			QString("Data frames quantity"),				// 14
-			QString("Data size, bytes"),					// 15
+			QString("Subsystem ID"),						// 5
+			QString("Subsystem key"),						// 6
+			QString("LM number"),							// 7
+			QString("Subsystem channel"),					// 8
+			QString("RUP protocol version"),				// 9
+			QString("Expected DataUID"),					// 10
+			QString("Data frames quantity"),				// 11
+			QString("Data size, bytes"),					// 12
+			QString("Lan controller ID"),					// 13
+			QString("Lan controller IP"),					// 14
 	};
 };
 

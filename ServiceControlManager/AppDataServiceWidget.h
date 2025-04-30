@@ -88,6 +88,9 @@ public:
 	virtual void updateDerivedWidgets(const Network::ServiceInfo& srvInfo) override;
 	virtual void clearDerivedWidgets() override;
 
+private slots:
+	void forgetWidget(QString dataSourceID);
+
 private:
 	void updateModels(const Network::ServiceInfo& srvInfo);
 

@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <cmath>
 #include <set>
+#include <QTimeZone>
 
 #define ASSERT_RESULT_FALSE_BREAK	Q_ASSERT(false); \
 									result = false; \
@@ -179,6 +180,17 @@ inline QString formatTime_YYYY_MM_DD(int year, int month, int day, int hour, int
 	return QString("%1.%2.%3 %4:%5:%6.%7").
 			arg(year).arg(month, 2, 10, zero).arg(day, 2, 10, zero).
 			arg(hour, 2, 10, zero).arg(minute, 2, 10, zero).arg(second, 2, 10, zero).arg(millisecond, 3, 10, zero);
+}
+
+inline QString formatTime_YYYY_MM_DD(qint64 timeMs)
+{
+	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, QTimeZone::UTC);
+
+	QDate d = dt.date();
+	QTime t = dt.time();
+
+	return formatTime_YYYY_MM_DD(d.year(), d.month(), d.day(),
+								 t.hour(), t.minute(), t.second(), t.msec());
 }
 
 class PrintElapsedTime

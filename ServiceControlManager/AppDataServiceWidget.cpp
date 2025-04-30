@@ -572,6 +572,11 @@ void AppDataServiceWidget::clearDerivedWidgets()
 	updateModels(clearSrvInfo);
 }
 
+void AppDataServiceWidget::forgetWidget(QString dataSourceID)
+{
+	m_sourceWidgets.erase(dataSourceID);
+}
+
 void AppDataServiceWidget::updateModels(const Network::ServiceInfo& srvInfo)
 {
 	if (m_sourcesModel != nullptr)
@@ -842,12 +847,7 @@ void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index
 	connect(newWidget, &AppDataSourceWidget::forgetMe, this, &AppDataServiceWidget::forgetWidget);
 }
 
-void AppDataServiceWidget::forgetWidget()
-{
-	AppDataSourceWidget *widget = dynamic_cast<AppDataSourceWidget*>(sender());
-	TEST_PTR_RETURN(widget);
-	m_appDataSourceWidgetList.removeAll(widget);
-} */
+*/
 
 void AppDataServiceWidget::addAppDataSourcesTab()
 {
@@ -987,6 +987,8 @@ void AppDataServiceWidget::onSourceDoubleClicked(const QModelIndex& index)
 		m_sourceWidgets.emplace(lanControllerID, srcWidget);
 
 		srcWidget->show();
+
+		connect(srcWidget, &AppDataSourceWidget::forgetMe, this, &AppDataServiceWidget::forgetWidget);
 	}
 	else
 	{

@@ -136,6 +136,9 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_subsystemkey(m_subsystemKey);
 	proto->set_lmnumber(m_lmNumber);
 	proto->set_subsystemchannel(m_subsystemChannel.toStdString());
+	proto->set_expecteddataid(rupAppDataUID());
+	proto->set_dataframesquantity(appDataFramesQuantity());
+	proto->set_datasizebytes(appDataSizeBytes());
 
 	const LanControllerInfo& lci = lanControllersInfo()[0];
 

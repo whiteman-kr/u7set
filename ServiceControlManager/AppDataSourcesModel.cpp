@@ -27,7 +27,8 @@ QVariant AppDataSourcesModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::CheckStateRole ||
 		role == Qt::DecorationRole ||
-		role == Qt::EditRole)
+		role == Qt::EditRole ||
+		role == Qt::FontRole)
 	{
 		return QVariant();
 	}
