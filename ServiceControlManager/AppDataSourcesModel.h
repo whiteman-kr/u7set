@@ -36,7 +36,5 @@ private:
 		{"Lost packet count", 120},
 		{"Errors count", 120},
 	};
-
-	inline static const QBrush YELLOW_BRUSH = QBrush(QColor(255, 255, 127));
 };
 

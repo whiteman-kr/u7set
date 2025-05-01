@@ -1,9 +1,15 @@
 #include "DataSourceStateModel.h"
 #include <CommonLib/HostAddressPort.h>
 #include "../UtilsLib/WUtils.h"
+#include "Brush.h"
 
 DataSourceStateModel::DataSourceStateModel()
 {
+	m_valueTime.resize(m_rows.size(), std::make_pair(0, 0));
+	m_curTime = QDateTime::currentMSecsSinceEpoch();
+
+	connect(&m_timer1s, &QTimer::timeout, this, &DataSourceStateModel::onTimer1s);
+	m_timer1s.start(1000);
 }
 
 int DataSourceStateModel::rowCount(const QModelIndex& parent) const
@@ -37,7 +43,7 @@ QVariant DataSourceStateModel::data(const QModelIndex& index, int role) const
 		role == Qt::EditRole ||
 		role == Qt::FontRole)
 	{
-		return QVariant();
+		return m_cleanVariant;
 	}
 
 	int row = index.row();
@@ -49,6 +55,44 @@ QVariant DataSourceStateModel::data(const QModelIndex& index, int role) const
 		return QVariant(Separator::EMPTY_STR);
 	}
 
+	if (role == Qt::BackgroundRole)
+	{
+		if (column == 0)
+		{
+			return QVariant();
+		}
+
+		switch (row)
+		{
+		case 0:	return (m_state.receivesdata() ? m_cleanVariant : YELLOW_BRUSH);
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 9:
+			return m_cleanVariant;
+
+		case ROW_SS_QUEUE_CUR_SIZE: return m_state.signalstatesqueuecursize() > 10 ? YELLOW_BRUSH : m_cleanVariant ;
+
+		case ROW_RECEIVED_DATA_UID: return m_state.receivesdata() && m_state.receiveddataid() != m_state.expecteddataid() ? YELLOW_BRUSH : m_cleanVariant;
+
+		case ROW_LOST_PACKET_COUINT:
+		case ROW_ERR_PROTOCOL_VERSION:
+		case ROW_ERR_FRAMES_QUANTITY:
+		case ROW_ERR_FRAME_NO:
+		case ROW_ERR_FRAME_CRC:
+		case ROW_ERR_DATA_UID:
+		case ROW_ERR_DUP_PLANT_TIME:
+		case ROW_ERR_NONMONO_PLANT_TIME:
+		case ROW_ERR_PLANT_TIME_FORMAT:
+			return valueChanged(row, m_state.receivesdata()) ? YELLOW_BRUSH : m_cleanVariant;
+		}
+
+		return m_cleanVariant;
+	}
+
 	if (role == Qt::DisplayRole)
 	{
 		if (column == 0)
@@ -56,11 +100,21 @@ QVariant DataSourceStateModel::data(const QModelIndex& index, int role) const
 			return m_rows[row];
 		}
 
+		if (m_state.receivesdata() == false)
+		{
+			if (row == 0)
+			{
+				return "No";
+			}
+
+			return m_cleanVariant;
+		}
+
 		switch (row)
 		{
-		case 0:	return (m_state.receivesdata() ? "Yes" : "No");
+		case 0:	return "Yes";
 		case 1: return formatUptime(m_state.uptime());
-		case 2: return formatTime_YYYY_MM_DD(m_state.lmtime());
+		case 2: return formatTime_DD_MM_YYYY(m_state.lmtime());
 		case 3: return m_state.rupframenumerator();
 		case 4: return m_state.datareceivingspeed();
 		case 5: return m_state.receivedframescount();
@@ -81,12 +135,62 @@ QVariant DataSourceStateModel::data(const QModelIndex& index, int role) const
 		}
 	}
 
-	return Separator::EMPTY_STR;
+	return m_cleanVariant;
 }
 
 void DataSourceStateModel::updateData(const Network::AppDataSourceState& state)
 {
 	m_state = state;
 
+	m_curTime = QDateTime::currentMSecsSinceEpoch();
+
+	updateValueTime(ROW_LOST_PACKET_COUINT, m_state.lostpacketcount());
+	updateValueTime(ROW_ERR_PROTOCOL_VERSION, m_state.errorprotocolversion());
+	updateValueTime(ROW_ERR_FRAMES_QUANTITY, m_state.errorframesquantity());
+	updateValueTime(ROW_ERR_FRAME_NO, m_state.errorframeno());
+	updateValueTime(ROW_ERR_FRAME_CRC, m_state.errorframecrc());
+	updateValueTime(ROW_ERR_DATA_UID, m_state.errordataid());
+	updateValueTime(ROW_ERR_DUP_PLANT_TIME, m_state.errorduplicateplanttime());
+	updateValueTime(ROW_ERR_NONMONO_PLANT_TIME, m_state.errornonmonotonicplanttime());
+	updateValueTime(ROW_ERR_PLANT_TIME_FORMAT, m_state.errorplanttimeformat());
+
 	emit dataChanged(index(0, 1), index(TO_INT(m_rows.size()) - 1, 1));
+}
+
+void DataSourceStateModel::updateValueTime(int row, qint64 value)
+{
+	if (row < 0 || row >= m_valueTime.size())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	if (value > 0 && m_valueTime[row].first != value)
+	{
+		m_valueTime[row].first = value;
+		m_valueTime[row].second = m_curTime;
+	}
+}
+
+bool DataSourceStateModel::valueChanged(int row, bool receivesData) const
+{
+	if (row < 0 || row >= m_valueTime.size())
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	if (!receivesData)
+	{
+		return false;
+	}
+
+	qint64 dt = m_curTime - m_valueTime[row].second;
+
+	return dt < (30 * 1000);	// 30 sec
+}
+
+void DataSourceStateModel::onTimer1s()
+{
+	m_curTime = QDateTime::currentMSecsSinceEpoch();
 }

@@ -32,6 +32,7 @@ add_executable(${TARGET} WIN32
 	ArchiveSignalsModel.h
 	BaseServiceWidget.cpp
 	BaseServiceWidget.h
+	Brush.h
 	CfgServiceWidget.cpp
 	CfgServiceWidget.h
 	Columns.cpp

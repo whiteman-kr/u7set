@@ -1,5 +1,6 @@
 #include "AppDataSourcesModel.h"
 #include "BaseServiceWidget.h"
+#include "Brush.h"
 
 AppDataSourcesModel::AppDataSourcesModel(QWidget* parent) :
 	QAbstractTableModel(parent)

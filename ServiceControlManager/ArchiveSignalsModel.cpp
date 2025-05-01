@@ -1,5 +1,6 @@
 #include "ArchiveSignalsModel.h"
 #include "BaseServiceWidget.h"
+#include "Brush.h"
 
 #include "../ArchivingService/ArchFileRecord.h"
 

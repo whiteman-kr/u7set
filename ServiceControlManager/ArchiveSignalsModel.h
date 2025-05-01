@@ -43,7 +43,5 @@ private:
 		{"High limit", 120},						// 10
 		{"Aperture overrided", 120},				// 11
 	};
-
-	inline static const QBrush YELLOW_BRUSH = QBrush(QColor(255, 255, 127));
 };
 

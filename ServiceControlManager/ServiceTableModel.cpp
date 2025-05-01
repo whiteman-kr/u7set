@@ -81,9 +81,12 @@ ServiceTableModel::~ServiceTableModel()
 {
 	m_timer.stop();
 
-	for(BaseServiceWidget* srvWidget : m_srvWidgets)
+	for(auto& [srvWidget, pair] : m_srvWidgets)
 	{
-		DELETE_IF_NOT_NULL(srvWidget);
+		if (srvWidget != nullptr)
+		{
+			delete srvWidget;
+		}
 	}
 
 	m_srvWidgets.clear();
@@ -441,29 +444,45 @@ void ServiceTableModel::setServiceInformation(quint32 ip, quint16 port, Network:
 
 void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 {
-	ServiceData& sd = m_hosts[index.row()].servicesData[index.column()];
+	int hostRow = index.row();
+
+	quint32 hostIP = m_hosts[hostRow].hostIP;
+
+	ServiceData& sd = m_hosts[hostRow].servicesData[index.column()];
 
 	E::SoftwareType serviceSoftwareType = static_cast<E::SoftwareType>(sd.protoServiceInfo.softwareinfo().softwaretype());
 
 	BaseServiceWidget* srvWidget = nullptr;
 
+	for(const auto& [widget, pair] : m_srvWidgets)
+	{
+		quint32 ip = pair.first;
+		E::SoftwareType stype = pair.second;
+
+		if (ip == hostIP && stype == serviceSoftwareType)
+		{
+			widget->activateWindow();
+			return;
+		}
+	}
+
 	switch (serviceSoftwareType)
 	{
 	case E::SoftwareType::ConfigurationService:
-		srvWidget = new CfgServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.tcpPort, m_parentWidget);
+		srvWidget = new CfgServiceWidget(this, m_softwareInfo, sd, hostIP, sd.tcpPort, m_parentWidget);
 
 		break;
 
 	case E::SoftwareType::AppDataService:
-		srvWidget = new AppDataServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.tcpPort, m_parentWidget);
+		srvWidget = new AppDataServiceWidget(this, m_softwareInfo, sd, hostIP, sd.tcpPort, m_parentWidget);
 		break;
 
 	case E::SoftwareType::TuningService:
-		srvWidget = new TuningServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.tcpPort, m_parentWidget);
+		srvWidget = new TuningServiceWidget(this, m_softwareInfo, sd, hostIP, sd.tcpPort, m_parentWidget);
 		break;
 
 	case E::SoftwareType::ArchiveService:
-		srvWidget = new ArchiveServiceWidget(this, m_softwareInfo, sd, m_hosts[index.row()].hostIP, sd.tcpPort, m_parentWidget);
+		srvWidget = new ArchiveServiceWidget(this, m_softwareInfo, sd, hostIP, sd.tcpPort, m_parentWidget);
 		break;
 
 	case E::SoftwareType::DiagDataService:
@@ -480,7 +499,7 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 
 	srvWidget->initWidget();
 
-	m_srvWidgets.insert(srvWidget);
+	m_srvWidgets.emplace(srvWidget, std::make_pair(hostIP, serviceSoftwareType));
 
 	srvWidget->showNormal();
 	srvWidget->raise();

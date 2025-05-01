@@ -61,7 +61,7 @@ private:
 
 private:
 	std::vector<Host> m_hosts;
-	std::set<BaseServiceWidget*> m_srvWidgets;
+	std::map<BaseServiceWidget*, std::pair<quint32, E::SoftwareType>> m_srvWidgets;
 
 	SoftwareInfo m_softwareInfo;
 
