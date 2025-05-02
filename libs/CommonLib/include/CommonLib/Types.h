@@ -1008,6 +1008,7 @@ const char* const DataFormatStr[] =
 };
 
 #define TO_INT(value) (static_cast<int>(value))
+#define TO_INT64(value) (static_cast<qint64>(value))
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
 
 template <typename EnumType>
