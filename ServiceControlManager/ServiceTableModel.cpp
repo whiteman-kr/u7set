@@ -461,6 +461,7 @@ void ServiceTableModel::openServiceStatusWidget(const QModelIndex& index)
 
 		if (ip == hostIP && stype == serviceSoftwareType)
 		{
+			widget->showNormal();
 			widget->activateWindow();
 			return;
 		}

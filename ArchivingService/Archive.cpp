@@ -7,6 +7,7 @@
 #include <ArchSignal.pb.h>
 #include <QDir>
 #include <QStandardPaths>
+#include <QStorageInfo>
 
 // ----------------------------------------------------------------------------------------------------------------------
 //
@@ -123,6 +124,8 @@ Archive::Archive(const QString& projectID,					// Read only archive constructor
 	m_archInfoFileData->swap(archFileInfoData);
 
 	m_archFullPath = QDir::fromNativeSeparators(readOnlyArchFullPath);
+
+	updateDiskFreeSpace();
 }
 
 Archive::~Archive()
@@ -144,6 +147,8 @@ void Archive::start()
 			return;
 		}
 	}
+
+	updateDiskFreeSpace();
 
 	if (initArchFiles() == false)
 	{
@@ -260,6 +265,8 @@ void Archive::saveState(const SimpleAppSignalState& state)
 		return;
 	}
 
+	m_savedDataSizeCounter += sizeof(ArchFileRecord);
+
 	ArchFile* archFile = getArchFile(state.hash);
 
 	if (archFile == nullptr)
@@ -275,6 +282,25 @@ void Archive::saveState(const SimpleAppSignalState& state)
 		appendEmergencyFile(archFile);
 	}
 }
+
+void Archive::updateSavedDataSizePerMin()
+{
+	m_savedDataSizePerMin.store(m_savedDataSizeCounter);
+	m_savedDataSizeCounter = 0;
+
+	updateDiskFreeSpace();
+}
+
+qint64 Archive::getSavedDataSizePerMin()
+{
+	return m_savedDataSizePerMin;
+}
+
+qint64 Archive::getDiskFreeSpace() const
+{
+	return m_diskFreeSpace;
+}
+
 
 bool Archive::shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* thread)
 {
@@ -806,6 +832,13 @@ void Archive::writeArchFilesInfoFile(const std::vector<std::vector<ArchFile*>>& 
 	}
 
 	infoFile.close();
+}
+
+void Archive::updateDiskFreeSpace()
+{
+	QStorageInfo si(m_archFullPath);
+
+	m_diskFreeSpace = si.bytesAvailable();
 }
 
 quint32 Archive::getNewRequestID()

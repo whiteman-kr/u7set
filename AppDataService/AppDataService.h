@@ -153,6 +153,8 @@ private:
 	HostAddressPort m_cmdLineAppDataReceivingIP;
 	bool m_logRupTimeErrors = false;
 
+	mutable QMutex m_startStopMutex;
+
 	QTimer* m_archSignalsUpdateTimer = nullptr;
 	qint64 m_archSignalsTimerStartMs = 0;
 

@@ -48,6 +48,8 @@ private:
 	void startTcpArchRequestsServerThread();
 	void stopTcpArchiveRequestsServerThread();
 
+	void onTimer1min();
+
 	void logFileLoadResult(bool loadOk, const QString& fileName);
 
 private slots:
@@ -63,6 +65,8 @@ private:
 	ArchivingServiceSettings m_serviceSettings;
 	OnlineLib::BuildInfo m_buildInfo;
 	QByteArray m_archInfoFileData;
+
+	mutable QMutex m_startStopMutex;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 

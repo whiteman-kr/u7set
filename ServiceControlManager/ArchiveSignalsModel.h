@@ -21,8 +21,6 @@ public:
 
 	void updateData(const Network::ServiceInfo& srvInfo);
 
-	QString fineSize(qint64 size) const;
-
 	const Network::ArchSignalInfo& at(int index);
 
 private:

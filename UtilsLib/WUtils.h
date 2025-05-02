@@ -384,6 +384,30 @@ std::map<KEY, VALUE>::iterator findOrInsertKey(std::map<KEY, VALUE>& map, const 
 	return it;
 }
 
+inline QString fineSize(qint64 size)
+{
+	if (size > 1024 * 1024 * 1024)
+	{
+		return QString("%1 GBytes").arg(size / (1024.0 * 1024.0 * 1024.0), 0, 'f', 1);
+	}
+	else
+	{
+		if (size > 1024 * 1024)
+		{
+			return QString("%1 MBytes").arg(size / (1024.0 * 1024.0), 0, 'f', 1);
+		}
+		else
+		{
+			if (size > 1024)
+			{
+				return QString("%1 KBytes").arg(size / 1024.0, 0, 'f', 1);
+			}
+		}
+	}
+
+	return QString("%1 Bytes").arg(size);
+}
+
 #define ROUND_TO(value, roundTo)	(((value + roundTo - 1) / roundTo) * roundTo)
 
 const std::size_t CACHE_LINE_SIZE = 64;				// 64 bytes on x86-64

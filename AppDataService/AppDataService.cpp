@@ -66,6 +66,8 @@ void AppDataServiceWorker::processGetServiceInfoRequest(const Network::GetServic
 
 void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
+	QMutexLocker l(&m_startStopMutex);
+
 	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::AppDataService, m_curSettingsProfile);
 
 	serviceInfo.set_settingsxml(xmlString.toStdString());
@@ -515,6 +517,8 @@ void AppDataServiceWorker::prepareAppDataSources()
 
 void AppDataServiceWorker::applyNewConfiguration()
 {
+	QMutexLocker l(&m_startStopMutex);
+
 	m_autoArchivingGroupsCount = m_curSettingsProfile.autoArchiveInterval * 60;
 
 	createTimeErrLog();
@@ -534,6 +538,8 @@ void AppDataServiceWorker::applyNewConfiguration()
 
 void AppDataServiceWorker::clearConfiguration()
 {
+	QMutexLocker l(&m_startStopMutex);
+
 	if (m_archSignalsUpdateTimer != nullptr)
 	{
 		m_archSignalsUpdateTimer->stop();

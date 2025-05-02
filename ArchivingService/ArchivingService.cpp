@@ -35,6 +35,8 @@ ServiceWorker* ArchivingService::createInstance() const
 
 void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
+	QMutexLocker l(&m_startStopMutex);
+
 	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::AppDataService, m_serviceSettings);
 
 	serviceInfo.set_settingsxml(xmlString.toStdString());
@@ -48,6 +50,12 @@ void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo)
 	if (m_tcpAppDataServerThread != nullptr)
 	{
 		m_tcpAppDataServerThread->getClientsList(&serviceInfo);
+	}
+
+	if (m_archive != nullptr)
+	{
+		serviceInfo.set_saveddatasizepermin(m_archive->getSavedDataSizePerMin());
+		serviceInfo.set_diskfreespace(m_archive->getDiskFreeSpace());
 	}
 }
 
@@ -138,6 +146,8 @@ void ArchivingService::stopCfgLoaderThread()
 
 void ArchivingService::startAllThreads()
 {
+	QMutexLocker l(&m_startStopMutex);
+
 	startArchive();
 
 	if (m_archive->isWorkable() == false)
@@ -150,11 +160,23 @@ void ArchivingService::startAllThreads()
 		startTcpAppDataServerThread();
 	}
 
+	if (m_timer == nullptr)
+	{
+		m_timer = new QTimer;
+
+		connect(m_timer, &QTimer::timeout, this, &ArchivingService::onTimer1min);
+
+		m_timer->start(60 * 1000);
+
+	}
+
 	startTcpArchRequestsServerThread();
 }
 
 void ArchivingService::stopAllThreads()
 {
+	QMutexLocker l(&m_startStopMutex);
+
 	DELETE_IF_NOT_NULL(m_timer);
 
 	stopTcpAppDataServerThread();
@@ -262,6 +284,14 @@ void ArchivingService::stopTcpArchiveRequestsServerThread()
 		m_tcpArchRequestsServerThread->quitAndWait();
 		delete m_tcpArchRequestsServerThread;
 		m_tcpArchRequestsServerThread = nullptr;
+	}
+}
+
+void ArchivingService::onTimer1min()
+{
+	if (m_archive != nullptr)
+	{
+		m_archive->updateSavedDataSizePerMin();;
 	}
 }
 

@@ -224,30 +224,6 @@ void ArchiveSignalsModel::updateData(const Network::ServiceInfo& srvInfo)
 	emit dataChanged(QModelIndex(), QModelIndex());
 }
 
-QString ArchiveSignalsModel::fineSize(qint64 size) const
-{
-	if (size > 1024 * 1024 * 1024)
-	{
-		return QString("%1 GBytes").arg(size / (1024.0 * 1024.0 * 1024.0), 0, 'f', 1);
-	}
-	else
-	{
-		if (size > 1024 * 1024)
-		{
-			return QString("%1 MBytes").arg(size / (1024.0 * 1024.0), 0, 'f', 1);
-		}
-		else
-		{
-			if (size > 1024)
-			{
-				return QString("%1 KBytes").arg(size / 1024.0, 0, 'f', 1);
-			}
-		}
-	}
-
-	return QString("%1 Bytes").arg(size);
-}
-
 const Network::ArchSignalInfo& ArchiveSignalsModel::at(int index)
 {
 	return m_archSignals[index];

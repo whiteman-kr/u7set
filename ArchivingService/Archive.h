@@ -80,6 +80,10 @@ public:
 
 	void saveState(const SimpleAppSignalState& state);
 
+	void updateSavedDataSizePerMin();
+	qint64 getSavedDataSizePerMin();
+	qint64 getDiskFreeSpace() const;
+
 	bool shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* thread);
 
 	// flushing controlling functions (public)
@@ -110,6 +114,8 @@ private:
 	bool saveArchInfoProtoFile() const;
 
 	void writeArchFilesInfoFile(const std::vector<std::vector<ArchFile *>>& archFilesGroups);
+
+	void updateDiskFreeSpace();
 
 	quint32 getNewRequestID();
 
@@ -147,6 +153,10 @@ private:
 	CircularLoggerShared m_log;
 
 	bool m_isWorkable = false;
+
+	std::atomic<qint64> m_savedDataSizeCounter = { 0 };
+	std::atomic<qint64> m_savedDataSizePerMin = { 0 };
+	std::atomic<qint64> m_diskFreeSpace = { 0 };
 
 	//
 

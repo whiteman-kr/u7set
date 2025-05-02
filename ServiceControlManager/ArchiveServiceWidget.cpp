@@ -1,4 +1,5 @@
 #include "ArchiveServiceWidget.h"
+#include "Brush.h"
 
 ArchiveServiceWidget::ArchiveServiceWidget(ServiceTableModel* srvTableModel,
 	const SoftwareInfo& softwareInfo,
@@ -21,6 +22,41 @@ void ArchiveServiceWidget::initWidget()
 
 int ArchiveServiceWidget::updateSrvStatus(int rowCount)
 {
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 0), "Saved data size per minute");
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1), fineSize(m_serviceData.protoServiceInfo.saveddatasizepermin()));
+
+	rowCount++;
+
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 0), "Disk free space");
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1), fineSize(m_serviceData.protoServiceInfo.diskfreespace()));
+
+	rowCount++;
+
+	qint64 archiveTimeMinutes = m_serviceData.protoServiceInfo.diskfreespace() /
+								m_serviceData.protoServiceInfo.saveddatasizepermin();
+
+	qint64 days = archiveTimeMinutes / (24 * 60);
+	qint64 hours = (archiveTimeMinutes % (24 * 60)) / 60;
+
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 0), "Expected archive time");
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1), QString("%1 days %2 hours").arg(days).arg(hours));
+
+	QStandardItem* item = m_srvStatusModel->itemFromIndex(m_srvStatusModel->index(rowCount, 1));
+
+	if (item != nullptr)
+	{
+		if (days < 10)
+		{
+			item->setData(YELLOW_BRUSH, Qt::BackgroundRole);
+		}
+		else
+		{
+			item->setData(QVariant(), Qt::BackgroundRole);
+		}
+	}
+
+	rowCount++;
+
 	return rowCount;
 }
 
