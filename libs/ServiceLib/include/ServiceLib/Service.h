@@ -193,6 +193,9 @@ private:
 
 	friend class ServiceStarter;
 
+protected:
+	OnlineLib::BuildInfo m_buildInfo;
+
 private:
 	QString m_equipmentID;
 
@@ -205,7 +208,6 @@ private:
 	HostAddressPort m_cfgServiceIP2;
 
 	SoftwareInfo m_softwareInfo;
-	OnlineLib::BuildInfo m_buildInfo;
 
 	SoftwareSettingsSet m_softwareSettingsSet;
 

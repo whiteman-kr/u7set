@@ -58,6 +58,8 @@ add_executable(${TARGET} WIN32
 	TcpTuningServiceClient.h
 	TuningServiceWidget.cpp
 	TuningServiceWidget.h
+	TuningSourcesModel.cpp
+	TuningSourcesModel.h
 	TuningSourceWidget.cpp
 	TuningSourceWidget.h
 

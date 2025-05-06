@@ -74,6 +74,7 @@ protected:
 	void onScmServiceClientDisconnected();
 
 	QString rqCtrlInfoStr(const RqCtrlSettings& rcs);
+	QString clientRequestIpInfoStr(E::SecurityLevel sLevel, const HostAddressPort ip, QHostAddress netmask);
 
 	void closeEvent(QCloseEvent *event) override;
 

@@ -160,8 +160,6 @@ int AppDataServiceWidget::updateSettings(int rowCount)
 
 	TEST_PTR_RETURN_VALUE(st, rowCount);
 
-	const Network::ServiceInfo& protoInfo = m_serviceData.protoServiceInfo;
-
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceEquipmentID1);
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->cfgServiceID1);
 
@@ -170,7 +168,7 @@ int AppDataServiceWidget::updateSettings(int rowCount)
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceIP1);
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
 							 st->cfgServiceID1.isEmpty() ? Separator::EMPTY_STR :
-							 HostAddressPort(protoInfo.cfgserviceip1(), protoInfo.cfgserviceport1()).toString());
+							 st->cfgServiceIP1.toString());
 	rowCount++;
 
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceEquipmentID2);
@@ -181,7 +179,7 @@ int AppDataServiceWidget::updateSettings(int rowCount)
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceIP2);
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
 							 st->cfgServiceID2.isEmpty() ? Separator::EMPTY_STR :
-							 HostAddressPort(protoInfo.cfgserviceip2(), protoInfo.cfgserviceport2()).toString());
+							 st->cfgServiceIP2.toString());
 	rowCount++;
 
 	for(const RqCtrlSettings& rcs : st->rcSettings)

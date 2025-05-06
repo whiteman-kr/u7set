@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include "BaseServiceWidget.h"
 
 class ArchiveServiceWidget : public BaseServiceWidget

@@ -134,11 +134,11 @@ namespace Tuning
 
 		std::set<std::pair<QString, QString>> m_controlledLans;			// pair: <LM EquipmentID, LAN EquipmentID>
 
+		mutable QMutex m_startStopMutex;
+
 		CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
-
-		mutable QMutex m_mainMutex;
 
 		std::vector<TuningSocketListenerThread*> m_socketListenerThreads;
 

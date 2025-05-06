@@ -559,6 +559,19 @@ QString BaseServiceWidget::rqCtrlInfoStr(const RqCtrlSettings& rcs)
 	return str;
 }
 
+QString BaseServiceWidget::clientRequestIpInfoStr(E::SecurityLevel level, const HostAddressPort ip, QHostAddress netmask)
+{
+	QString str;
+
+	str += QString("Security = %1").arg(E::valueToString(level));
+	str += Separator::COMMA_SPACE;
+	str += QString("IP = %1").arg(ip.toString());
+	str += Separator::COMMA_SPACE;
+	str += QString("Netmask = %1").arg(netmask.toString());
+
+	return str;
+}
+
 void BaseServiceWidget::closeEvent(QCloseEvent* event)
 {
 	Q_UNUSED(event);

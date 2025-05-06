@@ -32,27 +32,35 @@ int ArchiveServiceWidget::updateSrvStatus(int rowCount)
 
 	rowCount++;
 
-	qint64 archiveTimeMinutes = m_serviceData.protoServiceInfo.diskfreespace() /
-								m_serviceData.protoServiceInfo.saveddatasizepermin();
-
-	qint64 days = archiveTimeMinutes / (24 * 60);
-	qint64 hours = (archiveTimeMinutes % (24 * 60)) / 60;
-
 	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 0), "Expected archive time");
-	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1), QString("%1 days %2 hours").arg(days).arg(hours));
 
-	QStandardItem* item = m_srvStatusModel->itemFromIndex(m_srvStatusModel->index(rowCount, 1));
-
-	if (item != nullptr)
+	if (m_serviceData.protoServiceInfo.saveddatasizepermin() > 0)
 	{
-		if (days < 10)
+		qint64 archiveTimeMinutes = m_serviceData.protoServiceInfo.diskfreespace() /
+									m_serviceData.protoServiceInfo.saveddatasizepermin();
+
+		qint64 days = archiveTimeMinutes / (24 * 60);
+		qint64 hours = (archiveTimeMinutes % (24 * 60)) / 60;
+
+		m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1), QString("%1 days %2 hours").arg(days).arg(hours));
+
+		QStandardItem* item = m_srvStatusModel->itemFromIndex(m_srvStatusModel->index(rowCount, 1));
+
+		if (item != nullptr)
 		{
-			item->setData(YELLOW_BRUSH, Qt::BackgroundRole);
+			if (days < 10)
+			{
+				item->setData(YELLOW_BRUSH, Qt::BackgroundRole);
+			}
+			else
+			{
+				item->setData(QVariant(), Qt::BackgroundRole);
+			}
 		}
-		else
-		{
-			item->setData(QVariant(), Qt::BackgroundRole);
-		}
+	}
+	else
+	{
+		m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1), Separator::EMPTY_STR);
 	}
 
 	rowCount++;
@@ -71,8 +79,6 @@ int ArchiveServiceWidget::updateSettings(int rowCount)
 
 	TEST_PTR_RETURN_VALUE(st, rowCount);
 
-	const Network::ServiceInfo& protoInfo = m_serviceData.protoServiceInfo;
-
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceEquipmentID1);
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->cfgServiceID1);
 
@@ -81,7 +87,7 @@ int ArchiveServiceWidget::updateSettings(int rowCount)
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceIP1);
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
 							 st->cfgServiceID1.isEmpty() ? Separator::EMPTY_STR :
-								 HostAddressPort(protoInfo.cfgserviceip1(), protoInfo.cfgserviceport1()).toString());
+							 st->cfgServiceIP1.toString());
 	rowCount++;
 
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceEquipmentID2);
@@ -92,7 +98,7 @@ int ArchiveServiceWidget::updateSettings(int rowCount)
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceIP2);
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
 							 st->cfgServiceID2.isEmpty() ? Separator::EMPTY_STR :
-								 HostAddressPort(protoInfo.cfgserviceip2(), protoInfo.cfgserviceport2()).toString());
+							 st->cfgServiceIP2.toString());
 	rowCount++;
 
 	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("AppDataReceivingIP"));

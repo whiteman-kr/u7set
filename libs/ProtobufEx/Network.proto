@@ -267,6 +267,12 @@ message AppDataSourceState
 	optional int64 errorPlantTimeFormat = 57 [default = 0];
 }
 
+message TuningSourceInfo
+{
+	optional DataSourceInfo tuningSourceInfo = 1;
+	optional TuningSourceState tuningSourceState = 2;
+};
+
 // Getting Diagnostic Data Sources states
 //
 message DiagDataSourceState
@@ -444,6 +450,10 @@ message ServiceInfo
 	//
 	optional int64 savedDataSizePerMin = 60 [default = 0];
 	optional int64 diskFreeSpace = 61 [default = 0];
+
+	// TuningServiceSpecific
+	//
+	repeated TuningSourceInfo tuningSourcesInfo = 70;
 }
 
 message GetServiceInfoRequest
@@ -489,7 +499,7 @@ message GetTuningSourcesInfoReply
 
     optional bool singleLmControlMode = 3 [default = true];
     optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
-                                                                    // else - empty string
+														// else - empty string
     optional string activeClientIP = 5;				    // similar to activeClientID
 }
 

@@ -63,7 +63,6 @@ private:
 	QString m_readOnlyArchivePath;
 
 	ArchivingServiceSettings m_serviceSettings;
-	OnlineLib::BuildInfo m_buildInfo;
 	QByteArray m_archInfoFileData;
 
 	mutable QMutex m_startStopMutex;

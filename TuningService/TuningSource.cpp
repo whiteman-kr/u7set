@@ -129,14 +129,14 @@ namespace Tuning
 
 		for(const TuningSource& source : *this)
 		{
-			m_id2Source.insert(source.moduleEquipmentID(), index);
+			m_id2Source.emplace(source.moduleEquipmentID(), index);
 			index++;
 		}
 	}
 
 	const TuningSource* TuningSources::getSourceByID(const QString& sourceID) const
 	{
-		int index = m_id2Source.value(sourceID, -1);
+		int index = getValueOrDefault(m_id2Source, sourceID, -1);
 
 		if (index >= 0)
 		{
@@ -168,5 +168,17 @@ namespace Tuning
 		}
 
 		return count;
+	}
+
+	void TuningSources::getTuningSourcesInfo(Network::ServiceInfo* srvInfo) const
+	{
+		TEST_PTR_RETURN(srvInfo);
+
+		for(const TuningSource& ts : *this)
+		{
+			Network::TuningSourceInfo* tsi = srvInfo->add_tuningsourcesinfo();
+
+			ts.saveToProto(tsi->mutable_tuningsourceinfo());
+		}
 	}
 }
