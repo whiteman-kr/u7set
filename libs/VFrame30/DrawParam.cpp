@@ -662,7 +662,7 @@ namespace VFrame30
 			return drawText(painter, font, unit, str, rect, flags);
 		}
 #endif
-		QRgb textColor = painter->pen().color().rgba();                   // Text color is taken from the current pen.
+		QRgb textColor = painter->pen().color().rgba();                  // Text color is taken from the current pen.
 
 		const double reduceZoom = (dpiY > 120) ? 300 : 600;              // Kind of HiDpi Screen?
 		const double sizeReduceFactor = (zoom > reduceZoom) ? 0.5 : 1.0; // It makes images smaller depending on zoom.
@@ -749,6 +749,10 @@ namespace VFrame30
 			if (pixmapBytes < 3'000'000)                                                                // up to 3Mb per image.
 			{
 				cache.insert(cacheItemHash, cacheItem, pixmapBytes);
+			}
+			else
+			{
+				delete cacheItem;                                                                       // Too big image, do not cache it.
 			}
 		}
 
@@ -919,9 +923,16 @@ namespace VFrame30
 
 		// Add to cache new item, cache only images not greater then specified size.
 		//
-		if (newCacheItem == true && cacheItem->image.sizeInBytes() < 37'000'000)
+		if (newCacheItem == true)
 		{
-			cache.insert(cacheItemHash, cacheItem, cacheItem->image.sizeInBytes());
+			if (cacheItem->image.sizeInBytes() < 37'000'000)
+			{
+				cache.insert(cacheItemHash, cacheItem, cacheItem->image.sizeInBytes());
+			}
+			else
+			{
+				delete cacheItem; // Too big image, do not cache it.
+			}
 		}
 
 #if 0

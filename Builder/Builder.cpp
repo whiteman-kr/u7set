@@ -11,9 +11,7 @@ namespace Builder
 		return;
 	}
 
-	void shutdown()
-	{
-	}
+	void shutdown() {}
 
 	Builder::Builder(BuildIssues* buildIssues, QObject* parent) :
 		QObject(parent),
@@ -48,15 +46,17 @@ namespace Builder
 						QString projectUserPassword,
 						QString buildPath,
 						bool expertMode,
-						BuildOptions buildOptions)
+						BuildOptions buildOptions,
+						QStringList schemaTags)
 	{
-		qDebug() << "Build started\n" <<
-					"\tdatabaseAddress: " << databaseAddress << "\n" <<
-					"\tdatabasePort: " << databasePort << "\n" <<
-					"\tdatabaseUserName: " << databaseUserName << "\n" <<
-					"\tProjectName: " << projectName << "\n" <<
-					"\tprojectUserName: " << projectUserName << "\n" <<
-		            "\tbuildPath: " << buildPath << "\n";
+		qDebug() << "Build started";
+		qDebug() << "\tdatabaseAddress: " << databaseAddress;
+		qDebug() << "\tdatabasePort: " << databasePort;
+		qDebug() << "\tdatabaseUserName: " << databaseUserName;
+		qDebug() << "\tProjectName: " << projectName;
+		qDebug() << "\tprojectUserName: " << projectUserName;
+		qDebug() << "\tbuildPath: " << buildPath;
+		qDebug() << "\tschemaTags: " << schemaTags;
 
 		if (isRunning() == true)
 		{
@@ -73,6 +73,7 @@ namespace Builder
 		m_thread->setBuildOutputPath(buildPath);
 		m_thread->setExpertMode(expertMode);
 		m_thread->setBuildOptions(buildOptions);
+		m_thread->setBuildSchemaTags(schemaTags);
 
 		m_log.clear();
 
@@ -91,7 +92,7 @@ namespace Builder
 		}
 
 		m_thread->requestInterruption();
-		bool result = m_thread->wait(180000);		// Wait for a couple minutes.
+		bool result = m_thread->wait(180000); // Wait for a couple minutes.
 
 		if (result == false)
 		{
@@ -128,6 +129,4 @@ namespace Builder
 	{
 		emit finished(m_log.errorCount());
 	}
-}
-
-
+} // namespace Builder

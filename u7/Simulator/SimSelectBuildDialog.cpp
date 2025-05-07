@@ -1,10 +1,8 @@
 #include "SimSelectBuildDialog.h"
+#include "../AppSettings.h"
 #include "ui_SimSelectBuildDialog.h"
-#include "../Settings.h"
 
-SimSelectBuildDialog::SimSelectBuildDialog(QString currentProject,
-										   QString buildPath,
-										   QWidget* parent) :
+SimSelectBuildDialog::SimSelectBuildDialog(QString currentProject, QString buildPath, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::SimSelectBuildDialog),
 	m_projectName(currentProject.toLower())
@@ -36,7 +34,7 @@ SimSelectBuildDialog::~SimSelectBuildDialog()
 
 QString SimSelectBuildDialog::buildsPath()
 {
-	QString buildSearchPath = theSettings.buildOutputPath() + QDir::separator() + m_projectName;
+	QString buildSearchPath = theAppSettings.buildOutputPath() + QDir::separator() + m_projectName;
 	return buildSearchPath;
 }
 

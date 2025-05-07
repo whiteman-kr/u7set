@@ -51,52 +51,75 @@ namespace VFrame30
 	{
 		PosRectImpl::propertyDemand(prop);
 
-		ADD_PROPERTY_GET_SET_CAT(double,
-								 PropertyNames::lineWeight,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 FblItemRect::weight,
-								 FblItemRect::setWeight);
+		if (prop.isEmpty() == true || prop == PropertyNames::lineWeight)
+		{
+			addProperty<double, FblItemRect, &FblItemRect::weight, &FblItemRect::setWeight>(PropertyNames::lineWeight,
+																							PropertyNames::appearanceCategory,
+																							true);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(QColor,
-								 PropertyNames::lineColor,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 FblItemRect::lineColor,
-								 FblItemRect::setLineColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor,
-								 PropertyNames::fillColor,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 FblItemRect::fillColor,
-								 FblItemRect::setFillColor);
+		if (prop.isEmpty() == true || prop == PropertyNames::lineColor)
+		{
+			addProperty<QColor, FblItemRect, &FblItemRect::lineColor, &FblItemRect::setLineColor>(PropertyNames::lineColor,
+																								  PropertyNames::appearanceCategory,
+																								  true);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(QColor,
-								 PropertyNames::textColor,
-								 PropertyNames::textCategory,
-								 true,
-								 FblItemRect::textColor,
-								 FblItemRect::setTextColor);
+		if (prop.isEmpty() == true || prop == PropertyNames::fillColor)
+		{
+			addProperty<QColor, FblItemRect, &FblItemRect::fillColor, &FblItemRect::setFillColor>(PropertyNames::fillColor,
+																								  PropertyNames::appearanceCategory,
+																								  true);
+		}
 
-		addProperty<QString, FblItemRect, &FblItemRect::getFontName, &FblItemRect::setFontName>(PropertyNames::fontName,
-																								PropertyNames::appearanceCategory,
-																								true);
-		addProperty<double, FblItemRect, &FblItemRect::getFontSize, &FblItemRect::setFontSize>(PropertyNames::fontSize,
-																							   PropertyNames::appearanceCategory,
-																							   true);
-		addProperty<bool, FblItemRect, &FblItemRect::getFontBold, &FblItemRect::setFontBold>(PropertyNames::fontBold,
-																							 PropertyNames::appearanceCategory,
-																							 true);
-		addProperty<bool, FblItemRect, &FblItemRect::getFontItalic, &FblItemRect::setFontItalic>(PropertyNames::fontItalic,
+		if (prop.isEmpty() == true || prop == PropertyNames::textColor)
+		{
+			addProperty<QColor, FblItemRect, &FblItemRect::textColor, &FblItemRect::setTextColor>(PropertyNames::textColor,
+																								  PropertyNames::appearanceCategory,
+																								  true);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::fontName)
+		{
+			addProperty<QString, FblItemRect, &FblItemRect::getFontName, &FblItemRect::setFontName>(PropertyNames::fontName,
+																									PropertyNames::appearanceCategory,
+																									true);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::fontSize)
+		{
+			addProperty<double, FblItemRect, &FblItemRect::getFontSize, &FblItemRect::setFontSize>(PropertyNames::fontSize,
+																								   PropertyNames::appearanceCategory,
+																								   true);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::fontBold)
+		{
+			addProperty<bool, FblItemRect, &FblItemRect::getFontBold, &FblItemRect::setFontBold>(PropertyNames::fontBold,
 																								 PropertyNames::appearanceCategory,
 																								 true);
+		}
 
-		addProperty<QString, FblItemRect, &FblItemRect::userText, &FblItemRect::setUserText>(PropertyNames::userText,
-																							 PropertyNames::textCategory,
-																							 true);
-		addProperty<E::TextPos, FblItemRect, &FblItemRect::userTextPos, &FblItemRect::setUserTextPos>(PropertyNames::userTextPos,
-																									  PropertyNames::textCategory,
-																									  true);
+		if (prop.isEmpty() == true || prop == PropertyNames::fontItalic)
+		{
+			addProperty<bool, FblItemRect, &FblItemRect::getFontItalic, &FblItemRect::setFontItalic>(PropertyNames::fontItalic,
+																									 PropertyNames::appearanceCategory,
+																									 true);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::userText)
+		{
+			addProperty<QString, FblItemRect, &FblItemRect::userText, &FblItemRect::setUserText>(PropertyNames::userText,
+																								 PropertyNames::textCategory,
+																								 true);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::userTextPos)
+		{
+			addProperty<E::TextPos, FblItemRect, &FblItemRect::userTextPos, &FblItemRect::setUserTextPos>(PropertyNames::userTextPos,
+																										  PropertyNames::textCategory,
+																										  true);
+		}
 
 		return;
 	}

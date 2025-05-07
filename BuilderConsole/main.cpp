@@ -1,13 +1,14 @@
 #include <QCoreApplication>
 #include <QDomDocument>
 #include <QFile>
+#include <QRegularExpression>
 #include <QXmlStreamWriter>
 #include <iostream>
 
 #include "../Builder/Builder.h"
-#include <google/protobuf/message_lite.h>
 #include "../version.h"
 #include "BuildTask.h"
+#include <google/protobuf/message_lite.h>
 
 #include <DbLib/DbController.h>
 #include <HardwareLib/HardwareLibrary.h>
@@ -57,6 +58,9 @@ void createTemplateFile(const QString& fileName)
 	writer.writeComment("Build result path, default current directory");
 	writer.writeTextElement("BuildOutputPath", "");
 
+	writer.writeComment("SchemaID or schema tags to build. If empty, all schemas will be built.");
+	writer.writeTextElement("BuildSchemaTags", "");
+
 	writer.writeEndElement(); // ConsoleBuilderArguments
 	writer.writeEndDocument();
 
@@ -81,8 +85,7 @@ void showHelp()
 	// Show help
 	//
 	std::cout << "BuilderConsole is a command-line tool that builds RPCT projects." << std::endl;
-	std::cout << std::endl
-			  << "Command line parameters:" << std::endl;
+	std::cout << std::endl << "Command line parameters:" << std::endl;
 	std::cout << "\tBuilderConsole <FileName.xml> - run build task with arguments taken from <FileName.xml> file" << std::endl;
 	std::cout << "or" << std::endl;
 	std::cout << "\tBuilderConsole [/create <FileName.xml>] - create arguments template in <FileName.xml> file" << std::endl;
@@ -273,7 +276,13 @@ int startBuild(QString buildArgsFileName)
 		return 1;
 	}
 
-	// Some inititializations
+	// BuildSchemaTags, split by coma or any kind of space
+	//
+	QString buildSchemaTagsStr;
+	ok = getArgumentFromXml(docElem, "BuildSchemaTags", &buildSchemaTagsStr);
+	auto buildSchemaTags = buildSchemaTagsStr.split(QRegularExpression("[,\\s]+"), Qt::SkipEmptyParts);
+
+	// Some initializations
 	//
 	VFrame30::init();
 	Hardware::init();
@@ -293,6 +302,7 @@ int startBuild(QString buildArgsFileName)
 	{
 		buildTask->setBuildOutputPath(buildPath);
 	}
+	buildTask->setBuildSchemaTags(buildSchemaTags);
 
 	// This will cause the application to exit when
 	// the buildTask signals finished.
@@ -331,11 +341,8 @@ int main(int argc, char* argv[])
 	a.setOrganizationName(Manufacturer::RADIY);
 	a.setOrganizationDomain(Manufacturer::SITE);
 
-	a.setApplicationVersion(QString("%1.%2.%3 (%4)")
-								.arg(U7SET_MAJOR_VERSION)
-								.arg(U7SET_MINOR_VERSION)
-								.arg(U7SET_PATCH_VERSION)
-								.arg(U7SET_BRANCH_NAME));
+	a.setApplicationVersion(
+		QString("%1.%2.%3 (%4)").arg(U7SET_MAJOR_VERSION).arg(U7SET_MINOR_VERSION).arg(U7SET_PATCH_VERSION).arg(U7SET_BRANCH_NAME));
 
 	QStringList args = a.arguments();
 

@@ -1,4 +1,5 @@
 #include <VFrame30/SchemaItemValue.h>
+
 #include <VFrame30/AppSignalController.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/MacrosExpander.h>
@@ -46,37 +47,93 @@ namespace VFrame30
 	{
 		PosRectRotatable::propertyDemand(prop);
 
+		// clang-format off
+
 		// Functional
 		//
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemValue::signalIdsString, SchemaItemValue::setSignalIdsString);
-		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemValue::signalSource, SchemaItemValue::setSignalSource);
+		if (prop.isEmpty() == true || prop == PropertyNames::appSignalIDs)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemValue::signalIdsString, SchemaItemValue::setSignalIdsString);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::signalSource)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemValue::signalSource, SchemaItemValue::setSignalSource);
+		}
 
 		// Appearance
 		//
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemValue::lineWeight, SchemaItemValue::setLineWeight);
+		if (prop.isEmpty() == true || prop == PropertyNames::lineWeight)
+		{
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemValue::lineWeight, SchemaItemValue::setLineWeight);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemValue::lineColor, SchemaItemValue::setLineColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemValue::fillColor, SchemaItemValue::setFillColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::appearanceCategory, true, SchemaItemValue::textColor, SchemaItemValue::setTextColor);
+		if (prop.isEmpty() == true || prop == PropertyNames::lineColor)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemValue::lineColor, SchemaItemValue::setLineColor);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemValue::drawRect, SchemaItemValue::setDrawRect);
+		if (prop.isEmpty() == true || prop == PropertyNames::fillColor)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemValue::fillColor, SchemaItemValue::setFillColor);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::textColor)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::appearanceCategory, true, SchemaItemValue::textColor, SchemaItemValue::setTextColor);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::drawRect)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemValue::drawRect, SchemaItemValue::setDrawRect);
+		}
 
 		// Text Category Properties
 		//
-		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemValue::horzAlign, SchemaItemValue::setHorzAlign);
-		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemValue::vertAlign, SchemaItemValue::setVertAlign);
+		if (prop.isEmpty() == true || prop == PropertyNames::alignHorz)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemValue::horzAlign, SchemaItemValue::setHorzAlign);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::textCategory, true, SchemaItemValue::getFontName, SchemaItemValue::setFontName);
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::textCategory, true, SchemaItemValue::getFontSize, SchemaItemValue::setFontSize);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemValue::getFontBold, SchemaItemValue::setFontBold);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true, SchemaItemValue::getFontItalic, SchemaItemValue::setFontItalic);
+		if (prop.isEmpty() == true || prop == PropertyNames::alignVert)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemValue::vertAlign, SchemaItemValue::setVertAlign);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::functionalCategory, true, SchemaItemValue::text, SchemaItemValue::setText)
-			->setDescription(PropertyNames::textValuePropDescription);
+		if (prop.isEmpty() == true || prop == PropertyNames::fontName)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::fontName, PropertyNames::textCategory, true, SchemaItemValue::getFontName, SchemaItemValue::setFontName);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::functionalCategory, true, SchemaItemValue::precision, SchemaItemValue::setPrecision)
-			->setDescription(PropertyNames::precisionPropText);
+		if (prop.isEmpty() == true || prop == PropertyNames::fontSize)
+		{
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fontSize, PropertyNames::textCategory, true, SchemaItemValue::getFontSize, SchemaItemValue::setFontSize);
+		}
 
+		if (prop.isEmpty() == true || prop == PropertyNames::fontBold)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemValue::getFontBold, SchemaItemValue::setFontBold);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::fontItalic)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true, SchemaItemValue::getFontItalic, SchemaItemValue::setFontItalic);
+		}
+
+
+		if (prop.isEmpty() == true || prop == PropertyNames::text)
+		{
+			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::functionalCategory, true, SchemaItemValue::text, SchemaItemValue::setText)
+				->setDescription(PropertyNames::textValuePropDescription);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::precision)
+		{
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::functionalCategory, true, SchemaItemValue::precision, SchemaItemValue::setPrecision)
+				->setDescription(PropertyNames::precisionPropText);
+		}
+
+		// clang-format on
 		return;
 	}
 
@@ -85,8 +142,7 @@ namespace VFrame30
 	bool SchemaItemValue::SaveData(Proto::Envelope* message) const
 	{
 		bool result = PosRectRotatable::SaveData(message);
-		if (result == false ||
-			message->HasExtension(Proto::schemaitem) == false)
+		if (result == false || message->HasExtension(Proto::schemaitem) == false)
 		{
 			assert(result);
 			assert(message->HasExtension(Proto::schemaitem));
@@ -175,7 +231,8 @@ namespace VFrame30
 	//
 	void SchemaItemValue::draw(CDrawParam* drawParam) const
 	{
-		return drawRotated(drawParam, [drawParam, this]()
+		return drawRotated(drawParam,
+						   [drawParam, this]()
 						   {
 							   return drawPrivate(drawParam);
 						   });
@@ -228,7 +285,8 @@ namespace VFrame30
 
 	void SchemaItemValue::drawHighlight(CDrawParam* drawParam) const
 	{
-		return drawRotated(drawParam, [drawParam, this]()
+		return drawRotated(drawParam,
+						   [drawParam, this]()
 						   {
 							   return drawHighlightPrivate(drawParam);
 						   });
@@ -255,7 +313,7 @@ namespace VFrame30
 			QRectF highlightRect = boundingRectInDocPt(drawParam);
 			drawHighlightRect(drawParam, highlightRect);
 		}
-			
+
 
 		return;
 	}
@@ -303,8 +361,7 @@ namespace VFrame30
 
 			QString signalId;
 
-			if (auto signalIdList = signalIds(context);
-				signalIdList.empty() == false)
+			if (auto signalIdList = signalIds(context); signalIdList.empty() == false)
 			{
 				signalId = signalIdList.front();
 
@@ -341,12 +398,7 @@ namespace VFrame30
 #ifdef VFRAME30_CACHE_DRAW_TEXT
 		if (drawParam->pdfMode() == true)
 		{
-			DrawHelper::drawText(painter,
-								 m_font,
-								 itemUnit(),
-								 text,
-								 rect,
-								 static_cast<int>(horzAlign()) | static_cast<int>(vertAlign()));
+			DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, static_cast<int>(horzAlign()) | static_cast<int>(vertAlign()));
 		}
 		else
 		{
@@ -359,12 +411,7 @@ namespace VFrame30
 									  drawParam->schemaView()->zoom());
 		}
 #else
-		DrawHelper::drawText(painter,
-							 m_font,
-							 itemUnit(),
-							 text,
-							 rect,
-							 static_cast<int>(horzAlign()) | static_cast<int>(vertAlign()));
+		DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, static_cast<int>(horzAlign()) | static_cast<int>(vertAlign()));
 #endif
 
 		return;
@@ -384,7 +431,7 @@ namespace VFrame30
 			return result;
 		}
 
-		thread_local const QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9]+"); // Search for $([SomeText])
+		thread_local const QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9_]+"); // Search for $([SomeText])
 
 		qsizetype index = 0;
 		while (index < result.size())
@@ -414,14 +461,80 @@ namespace VFrame30
 			{
 				if (macro.compare(QLatin1String("value"), Qt::CaseInsensitive) == 0)
 				{
-					if (signalState.isValid() == true)
-					{
-						replaceText = formatNumber(signalState.m_value, signal);
-					}
-					else
-					{
-						replaceText = QStringLiteral("?");
-					}
+					replaceText = signalState.isValid() ? formatNumber(signalState.m_value, analogFormat(), signal) : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_e"), Qt::CaseSensitive) == 0)
+				{
+					replaceText =
+						signalState.isValid() ? formatNumber(signalState.m_value, E::AnalogFormat::e_9e, signal) : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_E"), Qt::CaseSensitive) == 0)
+				{
+					replaceText =
+						signalState.isValid() ? formatNumber(signalState.m_value, E::AnalogFormat::E_9E, signal) : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_f"), Qt::CaseSensitive) == 0)
+				{
+					replaceText =
+						signalState.isValid() ? formatNumber(signalState.m_value, E::AnalogFormat::f_9, signal) : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_g"), Qt::CaseSensitive) == 0)
+				{
+					replaceText =
+						signalState.isValid() ? formatNumber(signalState.m_value, E::AnalogFormat::g_9_or_9e, signal) : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_G"), Qt::CaseSensitive) == 0)
+				{
+					replaceText =
+						signalState.isValid() ? formatNumber(signalState.m_value, E::AnalogFormat::G_9_or_9E, signal) : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_hex"), Qt::CaseSensitive) == 0)
+				{
+					replaceText = signalState.isValid() ? formatNumberHex(signalState.m_value, signal) : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_HEX"), Qt::CaseSensitive) == 0)
+				{
+					replaceText = signalState.isValid() ? formatNumberHex(signalState.m_value, signal).toUpper() : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_stag"), Qt::CaseSensitive) == 0)
+				{
+					replaceText = signalState.isValid() ? formatNumberTag(signalState.m_value, signal, signal) : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_STAG"), Qt::CaseSensitive) == 0)
+				{
+					replaceText =
+						signalState.isValid() ? formatNumberTag(signalState.m_value, signal, signal).toUpper() : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_itag"), Qt::CaseSensitive) == 0)
+				{
+					replaceText = signalState.isValid() ? formatNumberTag(signalState.m_value, signal, *this) : QStringLiteral("?");
+					break;
+				}
+
+				if (macro.compare(QLatin1String("value_ITAG"), Qt::CaseSensitive) == 0)
+				{
+					replaceText =
+						signalState.isValid() ? formatNumberTag(signalState.m_value, signal, *this).toUpper() : QStringLiteral("?");
 					break;
 				}
 
@@ -449,18 +562,6 @@ namespace VFrame30
 					break;
 				}
 
-				//				if (macro.compare(QLatin1String("highlimit"), Qt::CaseInsensitive) == 0)
-				//				{
-				//					replaceText = formatNumber(signal.highValidRange(), signal);
-				//					break;
-				//				}
-
-				//				if (macro.compare(QLatin1String("lowlimit"), Qt::CaseInsensitive) == 0)
-				//				{
-				//					replaceText = formatNumber(signal.lowValidRange(), signal);
-				//					break;
-				//				}
-
 				if (macro.compare(QLatin1String("units"), Qt::CaseInsensitive) == 0)
 				{
 					replaceText = signal.units();
@@ -481,14 +582,14 @@ namespace VFrame30
 			}
 		}
 
-		// Expand all other macroses
+		// Expand all other macros
 		//
 		result = MacrosExpander::parse(result, context, &session, this);
 
 		return result;
 	}
 
-	QString SchemaItemValue::formatNumber(double value, const AppSignalParam& signal) const
+	QString SchemaItemValue::formatNumber(double value, E::AnalogFormat analogFormat, const AppSignalParam& signal) const
 	{
 		if (signal.isDiscrete() == true)
 		{
@@ -503,15 +604,27 @@ namespace VFrame30
 			p = signal.precision();
 		}
 
-		return QString::number(value, static_cast<char>(analogFormat()), p);
+		return QString::number(value, static_cast<char>(analogFormat), p);
 	}
 
-	bool SchemaItemValue::getSignalState(QString appSignalId, const Context* context, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
+	QString SchemaItemValue::formatNumberHex(double value, const AppSignalParam& signal) const
 	{
-		if (context == nullptr ||
-			signalParam == nullptr ||
-			appSignalState == nullptr ||
-			tuningSignalState == nullptr)
+		int width = m_precision;
+		if (width == -1)
+		{
+			width = signal.precision();
+		}
+
+		return QString{"%1"}.arg(static_cast<int>(value), width, 16, QChar{'0'});
+	}
+
+	bool SchemaItemValue::getSignalState(QString appSignalId,
+										 const Context* context,
+										 AppSignalParam* signalParam,
+										 AppSignalState* appSignalState,
+										 TuningSignalState* tuningSignalState) const
+	{
+		if (context == nullptr || signalParam == nullptr || appSignalState == nullptr || tuningSignalState == nullptr)
 		{
 			Q_ASSERT(context);
 			Q_ASSERT(signalParam);
@@ -525,10 +638,7 @@ namespace VFrame30
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (auto appSignalController = context->appSignalController();
-				appSignalController == nullptr)
-			{
-			}
+			if (auto appSignalController = context->appSignalController(); appSignalController == nullptr) {}
 			else
 			{
 				if (appSignalId.startsWith('@') == true)
@@ -542,9 +652,7 @@ namespace VFrame30
 			break;
 
 		case E::SignalSource::TuningService:
-			if (context->tuningController() == nullptr)
-			{
-			}
+			if (context->tuningController() == nullptr) {}
 			else
 			{
 				*signalParam = context->tuningController()->signalParam(appSignalId, &ok);
@@ -622,9 +730,7 @@ namespace VFrame30
 
 		// Expand variables in AppSignalIDs in Monitor or Simulator modes.
 		//
-		if (context != nullptr &&
-			context->viewVariables() != nullptr &&
-			context->appSignalController() != nullptr)
+		if (context != nullptr && context->viewVariables() != nullptr && context->appSignalController() != nullptr)
 		{
 			resultList = MacrosExpander::parse(resultList, context, nullptr, this);
 
@@ -658,9 +764,7 @@ namespace VFrame30
 
 		// Expand variables in AppSignalIDs in MonitorMode, if applicable
 		//
-		if (context != nullptr &&
-			context->viewVariables() != nullptr &&
-			context->appSignalController() != nullptr)
+		if (context != nullptr && context->viewVariables() != nullptr && context->appSignalController() != nullptr)
 		{
 			resultList = MacrosExpander::parse(resultList, context, nullptr, this);
 

@@ -15,16 +15,18 @@
 #include "GatewayServiceCfgGenerator.h"
 #include "LogicModulesInfoWriter.h"
 #include "MetrologyCfgGenerator.h"
+#include "ModulesReportGenerator.h"
 #include "MonitorCfgGenerator.h"
 #include "Parser.h"
 #include "SchemasReportGenerator.h"
 #include "ScriptChecker.h"
 #include "SoftwareCfgGenerator.h"
+#include "TaskGetEquipment.h"
 #include "TestClientCfgGenerator.h"
 #include "TestSuiteCfgGenerator.h"
+#include "TuningBuilder.h"
 #include "TuningClientCfgGenerator.h"
 #include "TuningServiceCfgGenerator.h"
-#include "ModulesReportGenerator.h"
 
 #include "./Vdu/VduConfigFile.h"
 #include "./Vdu/VduFontGenerator.h"
@@ -36,30 +38,42 @@ namespace
 		OutputLog* m_log = nullptr;
 
 	public:
-		SimLogger(OutputLog* log) : m_log(log) {}
+		SimLogger(OutputLog* log) :
+			m_log(log)
+		{
+		}
 
 		virtual bool writeAlert(const QString& text, const QString& /*tag*/ = {}) override
 		{
-			m_log->writeError(text); return true;
+			m_log->writeError(text);
+			return true;
 		};
-		virtual bool writeError(const QString& text, const QString & /*tag*/ = {}) override
+
+		virtual bool writeError(const QString& text, const QString& /*tag*/ = {}) override
 		{
-			m_log->writeError(text); return true;
+			m_log->writeError(text);
+			return true;
 		};
-		virtual bool writeWarning(const QString& text, const QString & /*tag*/ = {}) override
+
+		virtual bool writeWarning(const QString& text, const QString& /*tag*/ = {}) override
 		{
-			m_log->writeWarning0(text); return true;
+			m_log->writeWarning0(text);
+			return true;
 		};
-		virtual bool writeMessage(const QString& text, const QString & /*tag*/ = {}) override
+
+		virtual bool writeMessage(const QString& text, const QString& /*tag*/ = {}) override
 		{
-			m_log->writeMessage(text); return true;
+			m_log->writeMessage(text);
+			return true;
 		};
-		virtual bool writeText(const QString& text, const QString & /*tag*/ = {}) override
+
+		virtual bool writeText(const QString& text, const QString& /*tag*/ = {}) override
 		{
-			m_log->writeMessage(text); return true;
+			m_log->writeMessage(text);
+			return true;
 		};
 	};
-}
+} // namespace
 
 
 namespace Builder
@@ -135,6 +149,7 @@ namespace Builder
 		Q_ASSERT(m_buildTasks.empty() == false);
 
 		m_context = std::make_unique<Context>(m_log, buildOutputPath(), expertMode(), buildOptions());
+		m_context->m_buildSchemaTags = m_buildSchemaTags;
 		Q_ASSERT(m_context->m_log);
 
 		m_totalProgress = 0;
@@ -207,9 +222,7 @@ namespace Builder
 				strResult = taskOk ? tr("Ok") : tr("FAILED");
 			}
 
-			QString str = tr("TASK: %1: %2")
-							.arg(task.name)
-							.arg(strResult);
+			QString str = tr("TASK: %1: %2").arg(task.name).arg(strResult);
 
 			if (task.result.has_value() == false)
 			{
@@ -247,7 +260,7 @@ namespace Builder
 			// The build was cancelled.
 			//
 			m_context->m_log->errCMN0016();
-			m_context->m_log->clear();		// Log can contain thousands of messages, if it some kind of "same ids" error
+			m_context->m_log->clear(); // Log can contain thousands of messages, if it some kind of "same ids" error
 		}
 
 		// Display build time
@@ -346,10 +359,10 @@ namespace Builder
 			return false;
 		}
 
-		//int to_do_there_are_two_places_in_build_checking_checked_out_objects;
+		// int to_do_there_are_two_places_in_build_checking_checked_out_objects;
 
-		//int checkedOutCount = 0;
-		//ok = m_context->m_db.isAnyCheckedOut(&checkedOutCount);
+		// int checkedOutCount = 0;
+		// ok = m_context->m_db.isAnyCheckedOut(&checkedOutCount);
 
 		return ok;
 	}
@@ -393,7 +406,8 @@ namespace Builder
 	bool BuildWorkerThread::taskStartBuildResultWriter()
 	{
 		m_context->m_buildResultWriter = std::make_shared<BuildResultWriter>();
-		bool ok = m_context->m_buildResultWriter->start(buildOutputPath(), &m_context->m_db, m_context->m_log, 0 /* Load correct ChangesetID */);
+		bool ok =
+			m_context->m_buildResultWriter->start(buildOutputPath(), &m_context->m_db, m_context->m_log, 0 /* Load correct ChangesetID */);
 
 		const OnlineLib::BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
 		m_context->m_buildResultWriter->firmwareWriter()->setProjectInfo(bi.project, bi.user, bi.id, bi.changeset);
@@ -403,129 +417,8 @@ namespace Builder
 
 	bool BuildWorkerThread::taskGetEquipment()
 	{
-		std::shared_ptr<Hardware::DeviceRoot> deviceRoot = std::make_shared<Hardware::DeviceRoot>();
-
-		int rootFileId = m_context->m_db.systemFileId(DbDir::HardwareConfigurationDir);
-		auto fio = std::make_shared<DbFileInfo>(rootFileId);
-
-		deviceRoot->setData(fio);
-
-		if (bool ok = getEquipment(deviceRoot.get());
-			ok == false)
-		{
-			return false;
-		}
-
-		if (QThread::currentThread()->isInterruptionRequested() == true)
-		{
-			return true;
-		}
-
-		//
-		// Remove excluded devices, DeviceObject::isExcludedBromBuild()
-		//
-		LOG_MESSAGE(m_context->m_log, tr("Removing excluded devices"));
-
-		if (bool ok = removeExcludedDevices(deviceRoot.get());
-			ok == false)
-		{
-			return false;
-		}
-		else
-		{
-			LOG_MESSAGE(m_context->m_log, tr("Ok"));
-		}
-
-		//
-		// Expand Devices StrId
-		//
-		LOG_MESSAGE(m_context->m_log, tr("Expanding devices StrIds"));
-
-		if (bool ok = expandDeviceStrId(deviceRoot.get());
-			ok == false)
-		{
-			return false;
-		}
-
-		LOG_MESSAGE(m_context->m_log, tr("Ok"));
-
-		m_context->m_equipmentSet = std::make_shared<Hardware::EquipmentSet>(deviceRoot);
-
-		deviceRoot.reset();		// Use equipmentSet.root() instead
-
-		//
-		// Checking for identical UUIDs and StrIDs
-		//
-		LOG_MESSAGE(m_context->m_log, tr("Checking for identical UUIDs and StrIDs"));
-
-		if (bool ok = checkUuidAndStrId(m_context->m_equipmentSet->root().get());
-			ok == false)
-		{
-			return false;
-		}
-
-		//
-		// Check child restrictions
-		//
-		if (bool ok = checkChildRestrictions(m_context->m_equipmentSet->root());
-			ok == false)
-		{
-			return false;
-		}
-
-		// Creating equipment file for Monitor: Filter out all AppSignal and DiagSignals objects (leave Root, System, Rack, Chassis,
-		// Modules, Controllers, Workstation, Software.
-		//
-		{
-			LOG_MESSAGE(m_context->m_log, tr("Creating Monitor equipment file"));
-
-			Proto::Envelope message;
-			auto predicate = [](const Hardware::DeviceObject& device) -> bool
-				{
-					if (device.isAppSignal() == true || device.isDiagSignal() == true)
-					{
-						return false;
-					}
-
-					return true;
-				};
-
-			// Save data to proto-structure.
-			//
-			bool saveOk = m_context->m_equipmentSet->root()->SaveObjectTreeIf(&message, predicate);
-			if (saveOk == false)
-			{
-				m_log->errINT1000("Failed to serialize Monitor Equipment data to proto-structure.");
-				return false;
-			}
-
-			// Save proto-structure to byte array.
-			//
-			QByteArray data;
-			saveOk = Hardware::DeviceObject::saveToByteArray(&data, message, Proto::ProtoCompress::Always);
-
-			if (saveOk == false)
-			{
-				m_log->errINT1000("Failed to serialize Monitor Equipment data from proto-structure to byte array.");
-				return false;
-			}
-
-			// Save byte array to a build file.
-			//
-			auto filePtr = m_context->m_buildResultWriter->addFile(Directory::COMMON, File::MONITOR_EQUIPMENT, CfgFileId::MONITOR_EQUIPMENT, "", data);
-			if (filePtr == nullptr)
-			{
-				// addFile has already logged the error.
-				//
-				return false;
-			}
-		}
-
-		// Done
-		//
-		LOG_MESSAGE(m_context->m_log, tr("Ok"));
-
-		return true;
+		TaskGetEquipment taskGetEquipment{*m_context};
+		return taskGetEquipment.doIt();
 	}
 
 	bool BuildWorkerThread::taskCheckPresetVersions()
@@ -575,15 +468,14 @@ namespace Builder
 
 		// Parse files to DeviceObject
 		//
-		std::map<QString, int> presetNameToVersion;						// Key is presetName, value is presetVersion
+		std::map<QString, int> presetNameToVersion; // Key is presetName, value is presetVersion
 
 		std::vector<std::shared_ptr<Hardware::DeviceObject>> presets;
 		presets.reserve(presetLatestFiles.size());
 
 		for (std::shared_ptr<DbFile>& file : presetLatestFiles)
 		{
-			if (file->deleted() == true ||
-				(file->state() == E::VcsState::CheckedOut && file->action() == E::VcsItemAction::Deleted))
+			if (file->deleted() == true || (file->state() == E::VcsState::CheckedOut && file->action() == E::VcsItemAction::Deleted))
 			{
 				continue;
 			}
@@ -605,7 +497,7 @@ namespace Builder
 			presetNameToVersion[d->presetName()] = d->presetVersion();
 		}
 
-		presetLatestFiles.clear();	//Just free memory
+		presetLatestFiles.clear(); // Just free memory
 
 		if (QThread::currentThread()->isInterruptionRequested() == true)
 		{
@@ -618,53 +510,53 @@ namespace Builder
 		std::shared_ptr<Hardware::DeviceObject> root = m_context->m_equipmentSet->root();
 
 		std::function<void(std::shared_ptr<Hardware::DeviceObject>&)> checkFunction =
-				[&checkFunction, &presetNameToVersion, &result, mismatchIsWarning, log](std::shared_ptr<Hardware::DeviceObject>& device) ->void
+			[&checkFunction, &presetNameToVersion, &result, mismatchIsWarning, log](std::shared_ptr<Hardware::DeviceObject>& device) -> void
+		{
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return;
+			}
+
+			if (device->isPreset() == true && device->presetRoot() == true)
+			{
+				auto it = presetNameToVersion.find(device->presetName());
+				if (it != presetNameToVersion.end())
 				{
-					if (QThread::currentThread()->isInterruptionRequested() == true)
-					{
-						return;
-					}
+					int presetVersion = it->second; // Actual preset version from presets
 
-					if (device->isPreset() == true && device->presetRoot() == true)
+					if (device->presetVersion() != presetVersion)
 					{
-						auto it = presetNameToVersion.find(device->presetName());
-						if (it != presetNameToVersion.end())
+						// PresetDevice in Equipment and Preset itself have different versions
+						//
+						if (mismatchIsWarning == true)
 						{
-							int presetVersion = it->second;		// Actual preset version from presets
-
-							if (device->presetVersion() != presetVersion)
-							{
-								// PresetDevice in Equipment and Preset itself have different versions
-								//
-								if (mismatchIsWarning == true)
-								{
-									log->wrnCFG3101(device->equipmentIdTemplate(), device->presetVersion(), device->caption(), presetVersion);
-								}
-								else
-								{
-									log->errCFG3100(device->equipmentIdTemplate(), device->presetVersion(), device->caption(), presetVersion);
-									result = false;
-								}
-							}
+							log->wrnCFG3101(device->equipmentIdTemplate(), device->presetVersion(), device->caption(), presetVersion);
 						}
 						else
 						{
-							// Such preset was not found in $root$/HP
-							// That is not an error, it really can happen
-							//
+							log->errCFG3100(device->equipmentIdTemplate(), device->presetVersion(), device->caption(), presetVersion);
+							result = false;
 						}
 					}
+				}
+				else
+				{
+					// Such preset was not found in $root$/HP
+					// That is not an error, it really can happen
+					//
+				}
+			}
 
-					for (auto child : device->children())
-					{
-						if (QThread::currentThread()->isInterruptionRequested() == true)
-						{
-							return;
-						}
+			for (auto child : device->children())
+			{
+				if (QThread::currentThread()->isInterruptionRequested() == true)
+				{
+					return;
+				}
 
-						checkFunction(child);
-					}
-				};
+				checkFunction(child);
+			}
+		};
 
 		checkFunction(root);
 
@@ -681,7 +573,7 @@ namespace Builder
 
 		bool checkResult = true;
 
-		std::function<void (Hardware::DeviceObject*)> checkActuatorID = [this, &checkResult](Hardware::DeviceObject* device)
+		std::function<void(Hardware::DeviceObject*)> checkActuatorID = [this, &checkResult](Hardware::DeviceObject* device)
 		{
 			TEST_PTR_RETURN(device);
 
@@ -723,8 +615,10 @@ namespace Builder
 				const Hardware::DeviceModule* dev1 = it->second;
 
 				m_context->m_log->errEQP6022(actuatorID,
-											 dev1->equipmentIdTemplate(), dev1->uuid(),
-											 device->equipmentIdTemplate(), device->uuid(),
+											 dev1->equipmentIdTemplate(),
+											 dev1->uuid(),
+											 device->equipmentIdTemplate(),
+											 device->uuid(),
 											 EquipmentPropNames::ACTUATOR_ID);
 				checkResult = false;
 				return;
@@ -775,8 +669,7 @@ namespace Builder
 
 		for (const std::shared_ptr<DbFile>& f : files)
 		{
-			if (f->deleted() == true ||
-				f->action() == E::VcsItemAction::Deleted)
+			if (f->deleted() == true || f->action() == E::VcsItemAction::Deleted)
 			{
 				continue;
 			}
@@ -849,8 +742,7 @@ namespace Builder
 
 		QString errorCode;
 
-		if (bool ok = m_context->m_subsystems->load(&m_context->m_db, errorCode);
-			ok == false)
+		if (bool ok = m_context->m_subsystems->load(&m_context->m_db, errorCode); ok == false)
 		{
 			LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("Can't load subsystems file"));
 			if (errorCode.isEmpty() == false)
@@ -907,7 +799,7 @@ namespace Builder
 			Hardware::DeviceModule::FamilyType moduleFamily = Hardware::DeviceModule::FamilyType::OTHER;
 			int moduleVersion = -1;
 			QString LmDescriptionFile;
-			std::map<int, QString> lmNumbers;		// lmNumber -> lmEquipmentID
+			std::map<int, QString> lmNumbers; // lmNumber -> lmEquipmentID
 
 			for (const Hardware::DeviceModule* lm : m_context->m_fscModules)
 			{
@@ -960,7 +852,7 @@ namespace Builder
 				//
 				if (moduleFamily == Hardware::DeviceModule::FamilyType::OTHER)
 				{
-					moduleFamily = lm->moduleFamily();			// Init start value
+					moduleFamily = lm->moduleFamily(); // Init start value
 				}
 				else
 				{
@@ -976,7 +868,7 @@ namespace Builder
 				//
 				if (moduleVersion == -1)
 				{
-					moduleVersion = lm->moduleVersion();			// Init start value
+					moduleVersion = lm->moduleVersion(); // Init start value
 				}
 				else
 				{
@@ -999,7 +891,7 @@ namespace Builder
 
 				if (LmDescriptionFile.isEmpty() == true)
 				{
-					LmDescriptionFile = LmDescriptionFileProp->value().toString();	// Init start value
+					LmDescriptionFile = LmDescriptionFileProp->value().toString(); // Init start value
 				}
 				else
 				{
@@ -1027,8 +919,7 @@ namespace Builder
 
 		QString errorMessage;
 
-		if (bool ok = m_context->m_connections->load(&errorMessage);
-			ok == false)
+		if (bool ok = m_context->m_connections->load(&errorMessage); ok == false)
 		{
 			LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("Can't load connections file: "));
 			if (errorMessage.isEmpty() == false)
@@ -1106,8 +997,8 @@ namespace Builder
 	{
 		DbFileTree fileTree;
 
-		if (bool ok = m_context->m_db.getFileListTree(&fileTree, DbDir::SchemasDir, true, nullptr);
-			ok == false)
+		bool loadOk = m_context->m_db.getFileListTree(&fileTree, DbDir::SchemasDir, true, nullptr);
+		if (loadOk == false)
 		{
 			m_context->m_log->errPDB2001(m_context->m_db.systemFileId(DbDir::SchemasDir), "", m_context->m_db.lastError());
 			return false;
@@ -1116,15 +1007,9 @@ namespace Builder
 		// --
 		//
 		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
-
-		QString strAlFileExtension{File::AlFileExtension};
-		QString strUfbFileExtension{File::UfbFileExtension};
-		QString strMvsFileExtension{File::MvsFileExtension};
-		QString strDvsFileExtension{File::DvsFileExtension};
-
+		std::set<QString> schemaIds;
 		bool success = true;
 
-		std::set<QString> schemaIds;
 		for (auto& [fileId, file] : files)
 		{
 			if (file->isFolder() == true)
@@ -1134,26 +1019,44 @@ namespace Builder
 
 			QString fileExt = file->extension();
 
-			if (fileExt.compare(strAlFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(strUfbFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(strMvsFileExtension, Qt::CaseInsensitive) != 0 &&
-				fileExt.compare(strDvsFileExtension, Qt::CaseInsensitive) != 0)
+			if (fileExt.compare(File::AlFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(File::UfbFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(File::MvsFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(File::DvsFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(File::VduFileExtension, Qt::CaseInsensitive) != 0)
 			{
 				continue;
 			}
 
-			//--
-			//
 			VFrame30::SchemaDetails details;
+			bool parseDetailsOk = details.parseDetails(file->details());
 
-			if (bool ok = details.parseDetails(file->details());
-				ok == false)
+			if (parseDetailsOk == false)
 			{
 				m_context->m_log->errALP4024(file->fileName(), file->details());
 				continue;
 			}
 
-			if (schemaIds.count(details.m_schemaId) != 0)
+			// If m_buildSchemaTags is not empty then we need to build only specified schemas.
+			// Check that m_buildSchemaTags contains schemaId or schema tag.
+			//
+			if (m_buildSchemaTags.isEmpty() == false)
+			{
+				bool schemaIdIsATag = std::any_of(m_buildSchemaTags.begin(),
+												  m_buildSchemaTags.end(),
+												  [&details](const QString& tag)
+												  {
+													  return details.m_schemaId.compare(tag.trimmed(), Qt::CaseInsensitive) == 0;
+												  });
+				bool schemaHasTag = details.hasSchemaTag(m_buildSchemaTags);
+
+				if (schemaIdIsATag == false && schemaHasTag == false)
+				{
+					continue;
+				}
+			}
+
+			if (schemaIds.contains(details.m_schemaId) == true)
 			{
 				m_context->m_log->errALP4025(details.m_schemaId);
 				success = false;
@@ -1171,10 +1074,11 @@ namespace Builder
 	{
 		assert(m_context->m_lmDescriptions);
 
-		m_context->m_appLogicData = std::make_shared<AppLogicData>(*m_context->m_signalSet.get(), *m_context->m_lmDescriptions, *m_context->m_log);
+		m_context->m_appLogicData =
+			std::make_shared<AppLogicData>(*m_context->m_signalSet.get(), *m_context->m_lmDescriptions, *m_context->m_log);
 		int errorCount = m_context->m_log->errorCount();
 
-		Parser parser(m_context.get());
+		Parser parser(m_context.get(), m_buildSchemaTags);
 		parser.parse();
 
 		bool result = m_context->m_log->errorCount() == errorCount;
@@ -1186,14 +1090,14 @@ namespace Builder
 	{
 		Q_ASSERT(m_context->m_buildResultWriter);
 
-		for (QStringList lmFiles = m_context->m_lmDescriptions->fileList();
-			 QString fileName : lmFiles)
+		for (QStringList lmFiles = m_context->m_lmDescriptions->fileList(); QString fileName : lmFiles)
 		{
 			auto file = m_context->m_lmDescriptions->rowFile(fileName);
 
 			if (file.second == false)
 			{
-				m_context->m_log->errINT1000(tr("File %1 present in LmDescriptionSet but cannot be found it's raw version. ") + Q_FUNC_INFO);
+				m_context->m_log->errINT1000(tr("File %1 present in LmDescriptionSet but cannot be found it's raw version. ") +
+											 Q_FUNC_INFO);
 				return false;
 			}
 
@@ -1215,8 +1119,7 @@ namespace Builder
 
 		DbFileTree fileTree;
 
-		if (bool ok = m_context->m_db.getFileListTree(&fileTree, DbDir::TestsDir, true, nullptr);
-			ok == false)
+		if (bool ok = m_context->m_db.getFileListTree(&fileTree, DbDir::TestsDir, true, nullptr); ok == false)
 		{
 			m_context->m_log->errPDB2001(m_context->m_db.systemFileId(DbDir::TestsDir), "", m_context->m_db.lastError());
 			return false;
@@ -1277,8 +1180,7 @@ namespace Builder
 				continue;
 			}
 
-			if (QString fileExt = fileInfo->extension();
-				fileExt.compare(javaScriptFileExtension, Qt::CaseInsensitive) != 0)
+			if (QString fileExt = fileInfo->extension(); fileExt.compare(javaScriptFileExtension, Qt::CaseInsensitive) != 0)
 			{
 				continue;
 			}
@@ -1299,8 +1201,7 @@ namespace Builder
 				QString fullFileName = "/Tests" + fileTree.filePath(file->fileId()) + "/" + file->fileName();
 				fullFileName.replace("//", "/");
 
-				if (bool evaluateResult = ScriptChecker::checkFile(file->data(), fullFileName, *m_context->m_log);
-					evaluateResult == false)
+				if (bool evaluateResult = ScriptChecker::checkFile(file->data(), fullFileName, *m_context->m_log); evaluateResult == false)
 				{
 					filesResult = false;
 					continue;
@@ -1309,7 +1210,10 @@ namespace Builder
 
 			// Add file to output.
 			//
-			if (BuildFile* buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId), file->fileName(), file->data(), false);
+			if (BuildFile* buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS + fileTree.filePath(fileId),
+																			   file->fileName(),
+																			   file->data(),
+																			   false);
 				buildFile == nullptr)
 			{
 				Q_ASSERT(buildFile);
@@ -1362,13 +1266,9 @@ namespace Builder
 				outputPath.truncate(outputPath.length() - 1);
 			}
 
-			QString buildDir = QString("%1/%2/build")
-								   .arg(outputPath)
-								   .arg(m_context->m_db.currentProject().projectName());
+			QString buildDir = QString("%1/%2/build").arg(outputPath).arg(m_context->m_db.currentProject().projectName());
 
-			QString scriptDir = QString("%1/%2")
-									.arg(buildDir)
-									.arg(Directory::TESTS + fileTree.filePath(fileId));
+			QString scriptDir = QString("%1/%2").arg(buildDir).arg(Directory::TESTS + fileTree.filePath(fileId));
 
 			// Windows script
 			//
@@ -1380,9 +1280,7 @@ namespace Builder
 
 			// Linux script
 			//
-			QString runScriptLinux = tr(runScriptLinuxTemplate.toLocal8Bit())
-										 .arg(buildDir)
-										 .arg(scriptDir + "/" + file->fileName());
+			QString runScriptLinux = tr(runScriptLinuxTemplate.toLocal8Bit()).arg(buildDir).arg(scriptDir + "/" + file->fileName());
 
 			linuxScript.push_back(runScriptLinux);
 		}
@@ -1397,7 +1295,8 @@ namespace Builder
 		windowsScript.append(windowsScriptEnd);
 		linuxScript.append(linuxScriptEnd);
 
-		BuildFile* buildFile = m_context->m_buildResultWriter->addFile(Directory::TESTS, "RunAllProjectTests.bat", windowsScript.join('\n'), false);
+		BuildFile* buildFile =
+			m_context->m_buildResultWriter->addFile(Directory::TESTS, "RunAllProjectTests.bat", windowsScript.join('\n'), false);
 		if (buildFile == nullptr)
 		{
 			Q_ASSERT(buildFile);
@@ -1545,7 +1444,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		for(const auto& [h, mlc] : m_context->m_moduleLogicCompilers)
+		for (const auto& [h, mlc] : m_context->m_moduleLogicCompilers)
 		{
 			TEST_PTR_CONTINUE(mlc);
 			result &= mlc->writeVduAppSignalsInfoFile();
@@ -1583,7 +1482,7 @@ namespace Builder
 									  projectUserName(),
 									  projectUserPassword(),
 									  {},
-									  QString()/*data will be saved to output buffers*/,
+									  QString() /*data will be saved to output buffers*/,
 									  true, /*generateToOutputData*/
 									  options,
 									  SchemasReportGenerator::defaultFileTypesParams(&m_context->m_db));
@@ -1595,29 +1494,32 @@ namespace Builder
 		worker.moveToThread(thread);
 
 		QObject::connect(thread, &QThread::started, &worker, &SchemasReportGenerator::exportSchemasToAlbums);
-		QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);	// Schedule thread deleting
+		QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater); // Schedule thread deleting
 
 		std::atomic<bool> threadComplete = false;
 
-		QObject::connect(&worker, &SchemasReportGenerator::finished, &worker, [thread, &threadComplete, this](const QString& errorMessage)
-		{
-			if (errorMessage.isEmpty() == false)
-			{
-				m_log->writeError(errorMessage);
-			}
+		QObject::connect(&worker,
+						 &SchemasReportGenerator::finished,
+						 &worker,
+						 [thread, &threadComplete, this](const QString& errorMessage)
+						 {
+							 if (errorMessage.isEmpty() == false)
+							 {
+								 m_log->writeError(errorMessage);
+							 }
 
-			thread->quit();
+							 thread->quit();
 
-			thread->deleteLater();
+							 thread->deleteLater();
 
-			threadComplete = true;
-		});
+							 threadComplete = true;
+						 });
 
 		// Start thread
 		//
 		thread->start();
 
-		while(threadComplete == false)
+		while (threadComplete == false)
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -1650,84 +1552,9 @@ namespace Builder
 		return ok;
 	}
 
-	bool BuildWorkerThread::getEquipment(Hardware::DeviceObject* parent)
-	{
-		assert(m_context->m_db.isProjectOpened() == true);
-		assert(parent != nullptr);
-
-		if (QThread::currentThread()->isInterruptionRequested() == true)
-		{
-			return false;
-		}
-
-		// --
-		//
-		std::vector<DbFileInfo> files;
-		bool ok = false;
-
-		// --
-		//
-		int parentFileId = -1;
-
-		if (const DbFileInfo* parentFileInfo = parent->data();
-			parentFileInfo == nullptr)
-		{
-			Q_ASSERT(parentFileInfo);
-			return false;
-		}
-		else
-		{
-			parentFileId = parentFileInfo->fileId();
-		}
-
-		// Get file list with checked out files,
-		//
-		ok = m_context->m_db.getFileList(&files, parentFileId, true, nullptr);
-
-		if (ok == false)
-		{
-			LOG_ERROR_OBSOLETE(m_context->m_log, Builder::IssueType::NotDefined, tr("Cannot get equipment file list"));
-			return false;
-		}
-
-		parent->deleteAllChildren();
-
-		for (DbFileInfo& fi : files)
-		{
-			if (QThread::currentThread()->isInterruptionRequested() == true)
-			{
-				break;
-			}
-
-			if (fi.action() == E::VcsItemAction::Deleted)		// File is deleted
-			{
-				continue;
-			}
-
-			LOG_MESSAGE(m_context->m_log, tr("Getting equipment object, file id: %1, details: %2").arg(fi.fileId()).arg(fi.details()));
-
-			std::shared_ptr<Hardware::DeviceObject> device;
-			ok = m_context->m_db.getDeviceTreeLatestVersion(fi, &device, nullptr);
-
-			if (ok == false ||
-				device.get() == nullptr)
-			{
-				LOG_ERROR_OBSOLETE(m_context->m_log, "", tr("Failed to load equipment, file id: %1").arg(fi.fileId()));
-				continue;
-			}
-
-			parent->addChild(device);
-		}
-
-		LOG_MESSAGE(m_context->m_log, tr("Ok"));
-
-		return true;
-	}
-
 	void BuildWorkerThread::findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const
 	{
-		if (object == nullptr ||
-			out == nullptr)
+		if (object == nullptr || out == nullptr)
 		{
 			assert(object);
 			assert(out);
@@ -1757,10 +1584,11 @@ namespace Builder
 		return;
 	}
 
-	void BuildWorkerThread::findModulesByFamily(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out, Hardware::DeviceModule::FamilyType family) const
+	void BuildWorkerThread::findModulesByFamily(Hardware::DeviceObject* object,
+												std::vector<Hardware::DeviceModule*>* out,
+												Hardware::DeviceModule::FamilyType family) const
 	{
-		if (object == nullptr ||
-			out == nullptr)
+		if (object == nullptr || out == nullptr)
 		{
 			assert(object);
 			assert(out);
@@ -1788,219 +1616,6 @@ namespace Builder
 		}
 
 		return;
-	}
-
-	bool BuildWorkerThread::removeExcludedDevices(Hardware::DeviceObject* parent)
-	{
-		if (parent == nullptr)
-		{
-			assert(parent != nullptr);
-			return false;
-		}
-
-		// Remove excluded devices
-		//
-		std::list<std::shared_ptr<Hardware::DeviceObject>> toDelete;
-		for (auto child : parent->children())
-		{
-			if (child->excludeFromBuild() == true)
-			{
-				toDelete.push_back(child);
-			}
-		}
-
-		// Sort is for better log readability.
-		//
-		toDelete.sort(
-			[](const auto& lhs, const auto& rhs)
-			{
-				return lhs->equipmentId() < rhs->equipmentId();
-			});
-
-		for (auto child : toDelete)
-		{
-			m_log->wrnCFG3102(child->equipmentId()); // Device '%1' is excluded from build.
-			parent->deleteChild(child);
-		}
-
-		// Recursively check children.
-		//
-		for (auto child : parent->children())
-		{
-			removeExcludedDevices(child.get());
-		}
-
-		return true;
-	}
-
-	bool BuildWorkerThread::expandDeviceStrId(Hardware::DeviceObject* device)
-	{
-		if (device == nullptr)
-		{
-			assert(device != nullptr);
-			return false;
-		}
-
-		device->expandEquipmentId();
-
-		return true;
-	}
-
-	bool BuildWorkerThread::checkUuidAndStrId(Hardware::DeviceObject* root)
-	{
-		if (root == nullptr)
-		{
-			assert(root);
-			return false;
-		}
-
-		std::map<QUuid, Hardware::DeviceObject*> uuidMap;
-		std::map<QString, Hardware::DeviceObject*> strIdMap;
-
-		// Recursive function
-		//
-		bool ok = checkUuidAndStrIdWorker(root, uuidMap, strIdMap);
-
-		return ok;
-	}
-
-
-
-	bool BuildWorkerThread::checkUuidAndStrIdWorker(Hardware::DeviceObject* device,
-									 std::map<QUuid, Hardware::DeviceObject*>& uuidMap,
-									 std::map<QString, Hardware::DeviceObject*>& strIdMap)
-	{
-		if (device == nullptr)
-		{
-			assert(device);
-			return false;
-		}
-
-		if (QThread::currentThread()->isInterruptionRequested() == true)
-		{
-			return false;
-		}
-
-		// Check for the same Uuid and StrID
-		//
-		auto foundSameUuid = uuidMap.find(device->uuid());
-		auto foundSameStrId = strIdMap.find(device->equipmentIdTemplate());
-
-		bool ok = true;
-
-		if (foundSameUuid != uuidMap.end())
-		{
-			// Two or more equipment objects have the same Uuid '%1' (Object1 '%2', Object2 '%3').
-			//
-			m_context->m_log->errEQP6002(device->uuid(), device->equipmentId(), foundSameUuid->second->equipmentId());
-			ok = false;
-		}
-		else
-		{
-			uuidMap[device->uuid()] = device;
-		}
-
-		if (foundSameStrId != strIdMap.end())
-		{
-			// Two or more equipment objects have the same StrID '%1'.
-			//
-			m_context->m_log->errEQP6001(device->equipmentId(), device->uuid(), foundSameStrId->second->uuid()) ;
-			ok = false;
-		}
-		else
-		{
-			strIdMap[device->equipmentIdTemplate()] = device;
-		}
-
-
-		if (device->isModule())
-		{
-			Hardware::DeviceModule* module = (Hardware::DeviceModule*)device;
-
-			if (module->moduleFamily() == Hardware::DeviceModule::FamilyType::LM && module->place() != 0)
-			{
-				m_context->m_log->errEQP6009(module->equipmentIdTemplate(), module->uuid());
-				ok = false;
-				return ok;
-			}
-		}
-
-		// Check property Place, must not be -1
-		//
-		if (device->place() < 0 && device->isRoot() == false)
-		{
-			// Property Place is less then 0 (Equipment object '%1').
-			//
-			m_context->m_log->errEQP6000(device->equipmentIdTemplate(), device->uuid());
-			ok = false;
-		}
-
-		// --
-		//
-		int childCount = device->childrenCount();
-
-		for (int i = 0; i < childCount; i++)
-		{
-			ok &= checkUuidAndStrIdWorker(device->child(i).get(), uuidMap, strIdMap);
-		}
-
-		return ok;
-	}
-
-
-	bool BuildWorkerThread::checkChildRestrictions(std::shared_ptr<Hardware::DeviceObject> root)
-	{
-		if (root == nullptr)
-		{
-			assert(root);
-			return false;
-		}
-
-		// Recursive function
-		//
-		bool ok = checkChildRestrictionsWorker(root);
-
-		return ok;
-	}
-
-	bool BuildWorkerThread::checkChildRestrictionsWorker(std::shared_ptr<Hardware::DeviceObject> device)
-	{
-		assert(device != nullptr);
-
-		QString errorMessage;
-
-		int childrenCount = device->childrenCount();
-
-		for (int i = 0; i < childrenCount; i++)
-		{
-			auto child = device->child(i);
-
-			if (child == nullptr)
-			{
-				assert(child);
-				return false;
-			}
-
-			bool allowed = device->checkChild(child, &errorMessage);
-
-			if (allowed == false)
-			{
-				if (errorMessage.isEmpty() == false)
-				{
-					m_context->m_log->errINT1001(errorMessage);
-				}
-
-				m_context->m_log->errEQP6008(device->equipmentId(), child->equipmentId(), child->place());
-				return false;
-			}
-
-			if (checkChildRestrictionsWorker(child) == false)
-			{
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	bool BuildWorkerThread::loadSignals(SignalSet* signalSet, Hardware::EquipmentSet* equipment)
@@ -2047,8 +1662,7 @@ namespace Builder
 
 	bool BuildWorkerThread::loadLogicModuleDescription(Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions)
 	{
-		if (logicModule == nullptr ||
-			lmDescriptions == nullptr)
+		if (logicModule == nullptr || lmDescriptions == nullptr)
 		{
 			assert(logicModule);
 			assert(lmDescriptions);
@@ -2242,10 +1856,9 @@ namespace Builder
 		//
 
 		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, QString("Software settings generation for profile: %1").
-							arg(SettingsProfile::DEFAULT));
+		LOG_MESSAGE(m_log, QString("Software settings generation for profile: %1").arg(SettingsProfile::DEFAULT));
 
-		for(auto& p : m_context->m_software)
+		for (auto& p : m_context->m_software)
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
@@ -2254,7 +1867,7 @@ namespace Builder
 
 			Hardware::Software* software = p.second;
 
-			if (software == nullptr	|| software->isSoftware() == false)
+			if (software == nullptr || software->isSoftware() == false)
 			{
 				Q_ASSERT(false);
 				LOG_INTERNAL_ERROR(m_log);
@@ -2264,7 +1877,7 @@ namespace Builder
 
 			std::shared_ptr<SoftwareCfgGenerator> swCfgGen;
 
-			switch(software->softwareType())
+			switch (software->softwareType())
 			{
 			case E::SoftwareType::AppDataService:
 				swCfgGen = std::make_shared<AppDataServiceCfgGenerator>(context, software);
@@ -2334,27 +1947,26 @@ namespace Builder
 
 		QStringList profileIDs = context->m_simProfiles.profiles();
 
-		for(const QString& profileID : profileIDs)
+		for (const QString& profileID : profileIDs)
 		{
 			if (profileID.isEmpty() == true || profileID == SettingsProfile::DEFAULT)
 			{
 				continue;
 			}
 
-			LOG_MESSAGE(m_log, QString("Software settings generation for profile: %1").
-								arg(profileID));
+			LOG_MESSAGE(m_log, QString("Software settings generation for profile: %1").arg(profileID));
 
 			Sim::Profile& profile = context->m_simProfiles.profile(profileID);
 
 			QStringList profileEquipmentIDs = profile.equipment();
 
-			for(const QString& profileEquipmentID : profileEquipmentIDs)
+			for (const QString& profileEquipmentID : profileEquipmentIDs)
 			{
 				std::shared_ptr<Hardware::DeviceObject> deviceObject = context->m_equipmentSet->deviceObject(profileEquipmentID);
 
 				if (deviceObject == nullptr)
 				{
-					Q_ASSERT(false);	// this error should be detected early in checkProfiles()
+					Q_ASSERT(false); // this error should be detected early in checkProfiles()
 					result = false;
 					break;
 				}
@@ -2373,7 +1985,7 @@ namespace Builder
 
 			BREAK_IF_FALSE(result);
 
-			for(auto p : swCfgGens)
+			for (auto p : swCfgGens)
 			{
 				result &= p.second->createSettingsProfile(profileID);
 			}
@@ -2395,22 +2007,22 @@ namespace Builder
 		softwareXml.setAutoFormatting(true);
 		softwareXml.writeStartDocument();
 
-		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS);	// <SoftwareItems>
+		softwareXml.writeStartElement(XmlElement::SOFTWARE_ITEMS); // <SoftwareItems>
 
-		for(auto& p : swCfgGens)
+		for (auto& p : swCfgGens)
 		{
 			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
 
 			// Writing settings of current software to Software.xml
 			//
-			swCfgGen->writeSoftwareSection(softwareXml, false);		// <Software>
+			swCfgGen->writeSoftwareSection(softwareXml, false); // <Software>
 
 			result &= swCfgGen->getSettingsXml(softwareXml);
 
-			softwareXml.writeEndElement();							// </Software>
+			softwareXml.writeEndElement();                      // </Software>
 		}
 
-		softwareXml.writeEndElement();								// </SoftwareItems>
+		softwareXml.writeEndElement();                          // </SoftwareItems>
 
 		context->m_buildResultWriter->addFile(Directory::COMMON, File::SOFTWARE_XML, softwareXmlData);
 
@@ -2418,7 +2030,7 @@ namespace Builder
 		// Software items configuration generation
 		//
 
-		for(auto& p : swCfgGens)
+		for (auto& p : swCfgGens)
 		{
 			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
 
@@ -2428,20 +2040,18 @@ namespace Builder
 
 			// First step of software configuration generation
 			//
-			LOG_MESSAGE(m_log, QString(tr("Configuration generation for software item (step 1): %1")).
-						arg(swCfgGen->equipmentID()));
+			LOG_MESSAGE(m_log, QString(tr("Configuration generation for software item (step 1): %1")).arg(swCfgGen->equipmentID()));
 
 			result &= swCfgGen->generateConfigurationStep1();
 		}
 
-		for(auto& p : swCfgGens)
+		for (auto& p : swCfgGens)
 		{
 			std::shared_ptr<SoftwareCfgGenerator> swCfgGen = p.second;
 
 			// Second step of software configuration generation
 			//
-			LOG_MESSAGE(m_log, QString(tr("Configuration generation for software item (step 2): %1")).
-						arg(swCfgGen->equipmentID()));
+			LOG_MESSAGE(m_log, QString(tr("Configuration generation for software item (step 2): %1")).arg(swCfgGen->equipmentID()));
 
 			result &= swCfgGen->generateConfigurationStep2();
 		}
@@ -2470,13 +2080,13 @@ namespace Builder
 
 		QStringList profileIDs = context->m_simProfiles.profiles();
 
-		for(const QString& profileID : profileIDs)
+		for (const QString& profileID : profileIDs)
 		{
 			Sim::Profile& profile = context->m_simProfiles.profile(profileID);
 
 			QStringList profileEquipmentIDs = profile.equipment();
 
-			for(const QString& profileEquipmentID : profileEquipmentIDs)
+			for (const QString& profileEquipmentID : profileEquipmentIDs)
 			{
 				std::shared_ptr<Hardware::DeviceObject> deviceObject = context->m_equipmentSet->deviceObject(profileEquipmentID);
 
@@ -2484,14 +2094,14 @@ namespace Builder
 				{
 					// Equipment object %1 is not found (Settings profile - %2).
 					//
-					m_log->errCFG3044(profileEquipmentID,profileID);
+					m_log->errCFG3044(profileEquipmentID, profileID);
 					result = false;
 					continue;
 				}
 
 				const Sim::ProfileProperties& pp = profile.properties(profileEquipmentID);
 
-				for(auto p : pp.properties)
+				for (auto p : pp.properties)
 				{
 					QString propertyName = p.first;
 
@@ -2571,7 +2181,14 @@ namespace Builder
 				continue;
 			}
 
-			moduleFirmware.addLogicModuleInfo(lm->equipmentId(), subsysID, lmNumber, subsystemChannel, lm->moduleFamily(), lm->customModuleFamily(), lm->moduleVersion(), lm->moduleType());
+			moduleFirmware.addLogicModuleInfo(lm->equipmentId(),
+											  subsysID,
+											  lmNumber,
+											  subsystemChannel,
+											  lm->moduleFamily(),
+											  lm->customModuleFamily(),
+											  lm->moduleVersion(),
+											  lm->moduleType());
 		}
 
 		return true;
@@ -2588,7 +2205,7 @@ namespace Builder
 
 		TEST_PTR_RETURN_FALSE(log);
 
-		const std::vector<Hardware::DeviceModule *>& fscModules = m_context->m_fscModules;
+		const std::vector<Hardware::DeviceModule*>& fscModules = m_context->m_fscModules;
 		std::map<QString, quint64>& lmsUniqueIDs = m_context->m_lmsUniqueIDs;
 
 		lmsUniqueIDs.clear();
@@ -2610,11 +2227,11 @@ namespace Builder
 				continue;
 			}
 
-			if (lm->isLogicModule() == false && lm->isVdu() == false) 
+			if (lm->isLogicModule() == false && lm->isVdu() == false)
 			{
 				continue;
 			}
-			
+
 			QString subsysID = lm->propertyValue(EquipmentPropNames::SUBSYSTEM_ID).toString();
 			if (subsysID.isEmpty())
 			{
@@ -2653,7 +2270,11 @@ namespace Builder
 				quint64 uniqueID = firmwareWriter->uniqueID(subsysID, uartId, lmNumber, &ok);
 				if (ok == false)
 				{
-					log->errINT1001(tr("UniqueID is not found for Subsystem='%1', UartID='%2', LmNumber='%3'. ").arg(subsysID).arg(uartId).arg(lmNumber) + Q_FUNC_INFO);
+					log->errINT1001(tr("UniqueID is not found for Subsystem='%1', UartID='%2', LmNumber='%3'. ")
+										.arg(subsysID)
+										.arg(uartId)
+										.arg(lmNumber) +
+									Q_FUNC_INFO);
 					result = false;
 					continue;
 				}
@@ -2670,7 +2291,7 @@ namespace Builder
 			}
 
 			auto lmDescriptionPtr = m_context->m_lmDescriptions->get(lm);
-			if (lmDescriptionPtr == nullptr) 
+			if (lmDescriptionPtr == nullptr)
 			{
 				log->errINT1001(tr("LM Description is not found for LM='%1' ").arg(lm->equipmentId()) + Q_FUNC_INFO);
 				result = false;
@@ -2679,7 +2300,7 @@ namespace Builder
 
 			firmwareWriter->setGenericUniqueId(subsysID, lmNumber, genericUniqueId, *lmDescriptionPtr);
 
-			lmsUniqueIDs.insert({ lm->equipmentIdTemplate(), genericUniqueId });
+			lmsUniqueIDs.insert({lm->equipmentIdTemplate(), genericUniqueId});
 		}
 
 		if (result == false)
@@ -2731,32 +2352,32 @@ namespace Builder
 
 		bool result = true;
 
-		equipmentWalker(equipment->root().get(), [context, &result](Hardware::DeviceObject* currentDevice)
-			{
-				if (currentDevice == nullptr)
-				{
-					Q_ASSERT(false);
-					result = false;
-					return;
-				}
+		equipmentWalker(equipment->root().get(),
+						[context, &result](Hardware::DeviceObject* currentDevice)
+						{
+							if (currentDevice == nullptr)
+							{
+								Q_ASSERT(false);
+								result = false;
+								return;
+							}
 
-				if (currentDevice->isSoftware() == false)
-				{
-					return;
-				}
+							if (currentDevice->isSoftware() == false)
+							{
+								return;
+							}
 
-				Hardware::Software* software = currentDevice->toSoftware().get();
+							Hardware::Software* software = currentDevice->toSoftware().get();
 
-				if (software == nullptr)
-				{
-					Q_ASSERT(false);
-					result = false;
-					return;
-				}
+							if (software == nullptr)
+							{
+								Q_ASSERT(false);
+								result = false;
+								return;
+							}
 
-				context->m_software.insert( { software->equipmentId(), software} );
-			}
-		);
+							context->m_software.insert({software->equipmentId(), software});
+						});
 
 		if (result == true)
 		{
@@ -2774,7 +2395,8 @@ namespace Builder
 	{
 		Q_ASSERT(m_context);
 
-		if (bool runSimTests = BuildOptions::makeDecision(m_context->m_projectProperties.runSimTestsOnBuild(), m_context->m_buildOptions.runSimTestsOnBuild);
+		if (bool runSimTests = BuildOptions::makeDecision(m_context->m_projectProperties.runSimTestsOnBuild(),
+														  m_context->m_buildOptions.runSimTestsOnBuild);
 			runSimTests == false)
 		{
 			return true;
@@ -2804,13 +2426,12 @@ namespace Builder
 
 		std::vector<DbFileInfo> fileInfos = scriptFilesTree.toVector(true);
 
-		std::erase_if(fileInfos, [](const DbFileInfo& fi)
+		std::erase_if(fileInfos,
+					  [](const DbFileInfo& fi)
 					  {
 						  bool checkedOutAndDeleted = fi.state() == E::VcsState::CheckedOut && fi.action() == E::VcsItemAction::Deleted;
 
-						  return fi.isFolder() ||
-								 fi.fileName().endsWith(".js") == false ||
-								 fi.deleted() == true ||
+						  return fi.isFolder() || fi.fileName().endsWith(".js") == false || fi.deleted() == true ||
 								 checkedOutAndDeleted == true;
 					  });
 
@@ -2902,15 +2523,14 @@ namespace Builder
 			return false;
 		}
 
-		qint64 timeout100msTimer = timeout < 0 ?
-									36000000 :	// Some big number (around 1000h)
-									timeout / 100 + 1;
+		qint64 timeout100msTimer = timeout < 0 ? 36000000 : // Some big number (around 1000h)
+												 timeout / 100 + 1;
 
-		for (qint64 wtm = 0; wtm < timeout100msTimer; wtm ++)
+		for (qint64 wtm = 0; wtm < timeout100msTimer; wtm++)
 		{
 			if (QThread::currentThread()->isInterruptionRequested() == true)
 			{
-				return false;	// simulator.stopScript(); will be called on destruct of simulator.
+				return false; // simulator.stopScript(); will be called on destruct of simulator.
 			}
 
 			ok = simulator.waitScript(100);
@@ -3029,6 +2649,16 @@ namespace Builder
 		m_buildOptions = value;
 	}
 
+	QStringList BuildWorkerThread::buildSchemaTags() const
+	{
+		return m_buildSchemaTags;
+	}
+
+	void BuildWorkerThread::setBuildSchemaTags(QStringList value)
+	{
+		m_buildSchemaTags = std::move(value);
+	}
+
 	bool BuildWorkerThread::isInterruptRequested()
 	{
 		return QThread::currentThread()->isInterruptionRequested();
@@ -3045,4 +2675,4 @@ namespace Builder
 			return 0;
 		}
 	}
-}
+} // namespace Builder

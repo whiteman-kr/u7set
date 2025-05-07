@@ -2,13 +2,14 @@
 
 namespace VFrame30
 {
-
 	class PropertyNames
 	{
-	  public:
+	public:
 		PropertyNames() = delete;
 
-	  public:
+	public:
+		// clang-format off
+
 		inline static const QString schemaId{"SchemaID"};
 
 		inline static const QString top{"Top"};
@@ -22,6 +23,7 @@ namespace VFrame30
 		inline static const QString acceptClick{"AcceptClick"};
 		inline static const QString clickScript{"ClickScript"};
 		inline static const QString preDrawScript{"PreDrawScript"};
+		inline static const QString preDrawScriptDefault{"(function(schemaItem) {\n})"};
 		inline static const QString onShowScript{"OnShowScript"};
 		inline static const QString commented{"Commented"};
 		inline static const QString objectName{"ObjectName"};
@@ -83,8 +85,11 @@ namespace VFrame30
 		inline static const QString imageId{"ImageID"};
 		inline static const QString image{"Image"};
 		inline static const QString images{"Images"};
-		inline static const QString svg{"Svg"};
 		inline static const QString currentImageId{"CurrentImageID"};
+
+		inline static const QString svg{"Svg"};
+		inline static const QString svgScaleFactor{"SvgScaleFactor"};
+		inline static const QString svgScaleFactorDescription{"Multiplier for SVG image size."};
 
 		inline static const QString orientation{"Orientation"};
 		
@@ -167,10 +172,10 @@ namespace VFrame30
 		inline static const QString indicatorTrendScaleType{"ScaleType"};
 		inline static const QString indicatorTrendViewMode{"ViewMode"};
 
-		inline static const QString indicatorMargingLeft{"MarginLeft"};
-		inline static const QString indicatorMargingTop{"MarginTop"};
-		inline static const QString indicatorMargingRight{"MarginRight"};
-		inline static const QString indicatorMargingBottom{"MarginBottom"};
+		inline static const QString indicatorMarginLeft{"MarginLeft"};
+		inline static const QString indicatorMarginTop{"MarginTop"};
+		inline static const QString indicatorMarginRight{"MarginRight"};
+		inline static const QString indicatorMarginBottom{"MarginBottom"};
 		inline static const QString indicatorScaleType{"ScaleType"};
 
 		inline static const QString drawSetpoints{"DrawSetpoints"};
@@ -183,29 +188,33 @@ namespace VFrame30
 		inline static const QString textDiscrete0{"TextDiscrete0"};
 		inline static const QString textDiscrete1{"TextDiscrete1"};
 		inline static const QString textNonValid{"TextNonValid"};
-		inline static const QString textValuePropDescription{"$(value) Signal value\n"
-															 "$(caption) Signal caption\n"
-															 "$(signalid) SignalID (CustomSignalID)\n"
-															 "$(appsignalid) AppSignalID (#APPSIGNALID)\n"
-															 "$(equipmentid) Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)\n"
-															 "$(units) Signal units\n"};
-		//"$(highlimit) High limit\n"
-		//"$(lowlimit) Low limit"};
+		inline static const QString textValuePropDescription{R"($(value) - Signal value
+$(value_[e/E]) - Signal value format as [-]9.9e[+|-]999/, lowercase/uppercase accordingly.
+$(value_f) - Signal value format as [-]9.9, same as  $(value).
+$(value_[g/G]) - Signal value format as 'e' or 'f', whichever is the most concise, lowercase/uppercase accordingly.
+$(value_[hex/HEX]) - Signal value shown in hex, precision determines the number of digits, lowercase/uppercase accordingly.
+$(value_[stag/STAG]) - Signal value formatted according to signal tag (view_linear - f/F, view_log10 or view_period - e/E).
+$(value_[itag/ITAG]) - Signal value formatted according to schema item tag (view_linear - f/F, view_log10 or view_period - e/E).
+$(caption) - Caption.
+$(signalid) - SignalID (CustomSignalID).
+$(appsignalid) - AppSignalID (#APPSIGANLID).
+$(equipmentid) - Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals).
+$(units) - Signal units.)"};
 
-		inline static const QString textVduItemValueDescription = R"($Text to display, may contain placeholders:\n
-Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"\n
-%% - Percent\n
-%i - CustomAppSignalID\n
-%c - Signal caption\n
-%v - Signal value\n
-%V - Signal value + unit\n
-%s - +/- signal value\n
-%S - +/- signal value + unit\n
-%u - unit\n
-%e - Value in exponential form (1.0e-11)\n
-%E - Value in exponential form (1.0E-11)\n
-%X - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009abc).\n
-%X - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009ABC).$)";
+		inline static const QString textVduItemValueDescription = R"(Text to display, may contain placeholders:
+Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"
+%% - Percent
+%i - CustomAppSignalID
+%c - Signal caption
+%v - Signal value
+%V - Signal value + units
+%s - +/- signal value
+%S - +/- signal value + units
+%u - units
+%e - Value in exponential form (1.0e-11)
+%E - Value in exponential form (1.0E-11)
+%X - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009abc).
+%X - Value in HEX (only for integer signal type). m_precision plays the role of the number of zeros to add (00009ABC).)";
 
 		inline static const QString userText{"UserText"};
 		inline static const QString userTextPos{"UserTextPos"};
@@ -251,7 +260,6 @@ Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"\n
 		inline static const QString appSignalIDsValidator{"^[#]?([A-Za-z\\d_]+((;[#]?)?\\r?(\\n[#]?)?))+$"};
 		inline static const QString appSignalIDsOrReferenceValidator{R"(^[#a-zA-Z0-9\$_\(\).;\n\r]*$)"};
 
-		inline static const QString appSignalId{"AppSignalID"};
 		inline static const QString appSignalIdValidator{"^[#]?[A-Za-z\\d_]+$"};
 		inline static const QString impactAppSignalIDs{"ImpactAppSignalIDs"};
 		inline static const QString connectionId{"ConnectionID"};
@@ -334,5 +342,7 @@ Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"\n
 		inline static const QString scriptGlobalVariableSignals{"signals"};
 		inline static const QString scriptGlobalVariableEquipment{"equipment"};
 		inline static const QString scriptGlobalVariableLog{"log"};
+
+		// clang-format on
 	};
 } // namespace VFrame30

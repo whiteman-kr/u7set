@@ -153,7 +153,7 @@ namespace TestSuite
 			}
 #endif
 			RunScriptError allowResult = runScriptFunction(m_scriptInfo.allowFunction);
-			if (allowResult == RunScriptError::Success)
+			if (allowResult != RunScriptError::Success)
 			{
 				allowLocal = false;
 			}

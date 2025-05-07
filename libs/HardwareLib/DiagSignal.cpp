@@ -17,80 +17,131 @@ namespace Hardware
 
 	void DiagSignal::propertyDemand(const QString& prop)
 	{
+		// clang-format off
+
 		DeviceObject::propertyDemand(prop);
 
 		// Category DiagSignal
 		//
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::isReflection, PropertyNames::categoryDiagSignal, true, DiagSignal::isReflection, DiagSignal::setIsReflection)
-			->setUpdateFromPreset(true)
-			.setReadOnly(true)
-			.setViewOrder(100);
-
-		if (isReflection() == true)
+		if (prop.isEmpty() == true || prop == PropertyNames::isReflection)
 		{
-			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::reflectedSignalId, PropertyNames::categoryDiagSignal, true, DiagSignal::reflectedSignalId, DiagSignal::setReflectedSignalId)
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::isReflection, PropertyNames::categoryDiagSignal, true, DiagSignal::isReflection, DiagSignal::setIsReflection)
 				->setUpdateFromPreset(true)
-				.setViewOrder(101);
+				.setReadOnly(true)
+				.setViewOrder(100);
 		}
 
-		ADD_PROPERTY_GET_SET_CAT(E::DiagLevel, PropertyNames::level, PropertyNames::categoryDiagSignal, true, DiagSignal::level, DiagSignal::setLevel)
-			->setUpdateFromPreset(true)
-			.setViewOrder(102);
+		if (prop.isEmpty() == true || prop == PropertyNames::reflectedSignalId)
+		{
+			if (isReflection() == true)
+			{
+				ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::reflectedSignalId, PropertyNames::categoryDiagSignal, true, DiagSignal::reflectedSignalId, DiagSignal::setReflectedSignalId)
+					->setUpdateFromPreset(true)
+					.setViewOrder(101);
+			}
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::level)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::DiagLevel, PropertyNames::level, PropertyNames::categoryDiagSignal, true, DiagSignal::level, DiagSignal::setLevel)
+				->setUpdateFromPreset(true)
+				.setViewOrder(102);
+		}
 
 		if (isReflection() == false)
 		{
-			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::diagSignalTypeId, PropertyNames::categoryDiagSignal, true, DiagSignal::signalTypeId, DiagSignal::setSignalTypeId)
-				->setUpdateFromPreset(true)
-				.setViewOrder(103);
+			if (prop.isEmpty() == true || prop == PropertyNames::diagSignalTypeId)
+			{
+				ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::diagSignalTypeId, PropertyNames::categoryDiagSignal, true, DiagSignal::signalTypeId, DiagSignal::setSignalTypeId)
+					->setUpdateFromPreset(true)
+					.setViewOrder(103);
+			}
 
-			ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::validitySignalId, PropertyNames::categoryDiagSignal, true, DiagSignal::validitySignalId, DiagSignal::setValiditySignalId)
-				->setUpdateFromPreset(true)
-				.setViewOrder(104);
+			if (prop.isEmpty() == true || prop == PropertyNames::validitySignalId)
+			{
+				ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::validitySignalId, PropertyNames::categoryDiagSignal, true, DiagSignal::validitySignalId, DiagSignal::setValiditySignalId)
+					->setUpdateFromPreset(true)
+					.setViewOrder(104);
+			}
 
 			// Category data
 			//
-			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueOffset, PropertyNames::categoryData, true, DiagSignal::valueOffset, DiagSignal::setValueOffset)
-				->setUpdateFromPreset(true)
-				.setViewOrder(200);
+			if (prop.isEmpty() == true || prop == PropertyNames::valueOffset)
+			{
+				ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueOffset, PropertyNames::categoryData, true, DiagSignal::valueOffset, DiagSignal::setValueOffset)
+					->setUpdateFromPreset(true)
+					.setViewOrder(200);
+			}
 
-			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBit, PropertyNames::categoryData, true, DiagSignal::valueBit, DiagSignal::setValueBit)
-				->setUpdateFromPreset(true)
-				.setViewOrder(201);
+			if (prop.isEmpty() == true || prop == PropertyNames::valueBit)
+			{
+				ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBit, PropertyNames::categoryData, true, DiagSignal::valueBit, DiagSignal::setValueBit)
+					->setUpdateFromPreset(true)
+					.setViewOrder(201);
+			}
 
-			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBitSize, PropertyNames::categoryData, true, DiagSignal::valueBitSize, DiagSignal::setValueBitSize)
-				->setUpdateFromPreset(true)
-				.setDescription(PropertyNames::valueBitSizeDescription)
-				.setViewOrder(202);
+			if (prop.isEmpty() == true || prop == PropertyNames::valueBitSize)
+			{
+				ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::valueBitSize, PropertyNames::categoryData, true, DiagSignal::valueBitSize, DiagSignal::setValueBitSize)
+					->setUpdateFromPreset(true)
+					.setDescription(PropertyNames::valueBitSizeDescription)
+					.setViewOrder(202);
+			}
 
-			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::discreteContainerSize, PropertyNames::categoryData, true, DiagSignal::discreteContainerSize, DiagSignal::setDiscreteContainerSize)
-				->setUpdateFromPreset(true)
-				.setDescription(PropertyNames::discreteContainerSizeDescription)
-				.setViewOrder(203);
+			if (prop.isEmpty() == true || prop == PropertyNames::discreteContainerSize)
+			{
+				ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::discreteContainerSize, PropertyNames::categoryData, true, DiagSignal::discreteContainerSize, DiagSignal::setDiscreteContainerSize)
+					->setUpdateFromPreset(true)
+					.setDescription(PropertyNames::discreteContainerSizeDescription)
+					.setViewOrder(203);
+			}
 		}
 
 		// Category MATS
 		//
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::logChanges, PropertyNames::categoryMats, true, DiagSignal::logChanges, DiagSignal::setLogChanges)
-			->setViewOrder(300);
+		if (prop.isEmpty() == true || prop == PropertyNames::logChanges)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::logChanges, PropertyNames::categoryMats, true, DiagSignal::logChanges, DiagSignal::setLogChanges)
+				->setViewOrder(300);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::archive, PropertyNames::categoryMats, true, DiagSignal::archive, DiagSignal::setArchive)
-			->setViewOrder(301);
+		if (prop.isEmpty() == true || prop == PropertyNames::archive)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::archive, PropertyNames::categoryMats, true, DiagSignal::archive, DiagSignal::setArchive)
+				->setViewOrder(301);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::reserved, PropertyNames::categoryMats, true, DiagSignal::reserved, DiagSignal::setReserved)
-			->setViewOrder(302);
+		if (prop.isEmpty() == true || prop == PropertyNames::reserved)
+		{
+			ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::reserved, PropertyNames::categoryMats, true, DiagSignal::reserved, DiagSignal::setReserved)
+				->setViewOrder(302);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(E::ApertureType, PropertyNames::apertureType, PropertyNames::categoryMats, true, DiagSignal::apertureType, DiagSignal::setApertureType)
-			->setViewOrder(400);
+		if (prop.isEmpty() == true || prop == PropertyNames::apertureType)
+		{
+			ADD_PROPERTY_GET_SET_CAT(E::ApertureType, PropertyNames::apertureType, PropertyNames::categoryMats, true, DiagSignal::apertureType, DiagSignal::setApertureType)
+				->setViewOrder(400);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fineAperture, PropertyNames::categoryMats, true, DiagSignal::fineAperture, DiagSignal::setFineAperture)
-			->setViewOrder(401);
+		if (prop.isEmpty() == true || prop == PropertyNames::fineAperture)
+		{
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::fineAperture, PropertyNames::categoryMats, true, DiagSignal::fineAperture, DiagSignal::setFineAperture)
+				->setViewOrder(401);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::coarseAperture, PropertyNames::categoryMats, true, DiagSignal::coarseAperture, DiagSignal::setCoarseAperture)
-			->setViewOrder(402);
+		if (prop.isEmpty() == true || prop == PropertyNames::coarseAperture)
+		{
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::coarseAperture, PropertyNames::categoryMats, true, DiagSignal::coarseAperture, DiagSignal::setCoarseAperture)
+				->setViewOrder(402);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::decimalPlaces, PropertyNames::categoryMats, true, DiagSignal::decimalPlaces, DiagSignal::setDecimalPlaces)
-			->setViewOrder(403);
+		if (prop.isEmpty() == true || prop == PropertyNames::decimalPlaces)
+		{
+			ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::decimalPlaces, PropertyNames::categoryMats, true, DiagSignal::decimalPlaces, DiagSignal::setDecimalPlaces)
+				->setViewOrder(403);
+		}
 
+		// clang-format on
 		return;
 	}
 

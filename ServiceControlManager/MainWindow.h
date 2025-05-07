@@ -17,7 +17,6 @@ public:
     ~MainWindow();
 
 private:
-    QSystemTrayIcon *m_trayIcon;
     QVector<QWidget*> m_widgets;
     ServiceTableModel* m_serviceModel;
     QTableView* m_serviceTable;
@@ -29,10 +28,10 @@ protected:
 
 public slots:
     void openEditor();
-    void trayIconActivated(QSystemTrayIcon::ActivationReason);
     void switchLanguage(QAction* selectedAction);
     void connectionClicked(QAction* selectedAction);
     void scanNetwork();
     void removeHost();
+	void aboutScm();
 };
 

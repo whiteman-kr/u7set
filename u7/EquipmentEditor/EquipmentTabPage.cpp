@@ -1,16 +1,16 @@
 #include "EquipmentTabPage.h"
+#include "../AppSettings.h"
 #include "../DialogConnections.h"
 #include "../EquipmentEditor/DialogImportPreset.h"
 #include "../Forms/ComparePropertyObjectDialog.h"
 #include "../Forms/DialogDiagSignalTypes.h"
-#include "../Settings.h"
 #include "EquipmentModel.h"
 #include "EquipmentVcsDialog.h"
 #include "EquipmentView.h"
 #include "IdePropertyEditor.h"
 
-#include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/DeviceController.h>
+#include <HardwareLib/DeviceModule.h>
 #include <HardwareLib/PropertyNames.h>
 
 //
@@ -135,7 +135,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_diagSignalTypesAction);
 
-	//m_toolBar->addAction(m_pendingChangesAction);		// Not implemented, removed to be consistent with User Manual
+	// m_toolBar->addAction(m_pendingChangesAction);		// Not implemented, removed to be consistent with User Manual
 
 	//
 	// Layouts
@@ -146,7 +146,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	margins.setTop(0);
 	layout->setContentsMargins(margins);
 
-	layout->setMenuBar(m_toolBar);						// Set ToolBar here as menu, so no gaps and margins
+	layout->setMenuBar(m_toolBar); // Set ToolBar here as menu, so no gaps and margins
 	layout->addWidget(m_splitter);
 
 	setLayout(layout);
@@ -174,7 +174,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	connect(m_equipmentView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
 
-	//connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
+	// connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
 	connect(m_equipmentView, &EquipmentView::updateState, this, &EquipmentTabPage::setActionState);
 
 	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
@@ -255,7 +255,8 @@ void EquipmentTabPage::CreateActions()
 	connect(m_addControllerAction, &QAction::triggered, m_equipmentView, &EquipmentView::addController);
 
 	m_addAppSignalAction = new QAction(tr("AppSignal Port"), this);
-	m_addAppSignalAction->setStatusTip(tr("Add application signal port to the configuration, AppSignal can be created from this equipment AppSignal Port ..."));
+	m_addAppSignalAction->setStatusTip(
+		tr("Add application signal port to the configuration, AppSignal can be created from this equipment AppSignal Port ..."));
 	m_addAppSignalAction->setEnabled(false);
 	connect(m_addAppSignalAction, &QAction::triggered, m_equipmentView, &EquipmentView::addAppSignalPort);
 
@@ -339,7 +340,7 @@ void EquipmentTabPage::CreateActions()
 	m_createInOutsToSignals = new QAction(tr("Create In/Outs AppSignals"), this);
 	m_createInOutsToSignals->setStatusTip(tr("Add inputs/outputs to application logic signals..."));
 	m_createInOutsToSignals->setEnabled(false);
-	//m_inOutsToSignals->setVisible(false);
+	// m_inOutsToSignals->setVisible(false);
 	connect(m_createInOutsToSignals, &QAction::triggered, m_equipmentView, QOverload<>::of(&EquipmentView::createInOutsToSignals));
 
 	m_createInternalAppSignal = new QAction(tr("Create Internal AppSignal"), this);
@@ -350,7 +351,13 @@ void EquipmentTabPage::CreateActions()
 	m_showAppSignals = new QAction(tr("Show AppSignals"), this);
 	m_showAppSignals->setStatusTip(tr("Show application signals for object and all its children"));
 	m_showAppSignals->setEnabled(false);
-	connect(m_showAppSignals, &QAction::triggered, m_equipmentView, [ev = m_equipmentView](){ ev->showAppSignals(false, false); });
+	connect(m_showAppSignals,
+			&QAction::triggered,
+			m_equipmentView,
+			[ev = m_equipmentView]()
+			{
+				ev->showAppSignals(false, false);
+			});
 
 	//-----------------------------------
 	m_separatorSchemaLogic = new QAction(tr("Application Logic"), this);
@@ -358,16 +365,16 @@ void EquipmentTabPage::CreateActions()
 
 	m_addLogicSchemaToLm = new QAction(tr("Create AppLogic Schema..."), this);
 	m_addLogicSchemaToLm->setStatusTip(tr("Create Application Logic Schema for selected module"));
-	m_addLogicSchemaToLm->setIcon(QIcon{":/Images/Images/SimAppLogicSchemas.svg"});
+	m_addLogicSchemaToLm->setIcon(QIcon{":/SimulatorUi/Images/SimAppLogicSchemas.svg"});
 	m_addLogicSchemaToLm->setEnabled(false);
-	//m_addLogicSchemaToLm->setVisible(false);
+	// m_addLogicSchemaToLm->setVisible(false);
 	connect(m_addLogicSchemaToLm, &QAction::triggered, m_equipmentView, &EquipmentView::addLogicSchemaToLm);
 
 	m_showLmsLogicSchemas = new QAction(tr("Show AppLogic Schemas..."), this);
 	m_showLmsLogicSchemas->setStatusTip(tr("Show Application Logic Schema for selected module"));
-	m_showLmsLogicSchemas->setIcon(QIcon{":/Images/Images/SimAppLogicSchemas.svg"});
+	m_showLmsLogicSchemas->setIcon(QIcon{":/SimulatorUi/Images/SimAppLogicSchemas.svg"});
 	m_showLmsLogicSchemas->setEnabled(false);
-	//m_showLmsLogicSchemas->setVisible(false);
+	// m_showLmsLogicSchemas->setVisible(false);
 	connect(m_showLmsLogicSchemas, &QAction::triggered, m_equipmentView, &EquipmentView::showLogicSchemaForLm);
 
 	//-----------------------------------
@@ -376,22 +383,22 @@ void EquipmentTabPage::CreateActions()
 
 	m_createConnection = new QAction(tr("Create Connection..."), this);
 	m_createConnection->setStatusTip(tr("Create connection for selected port(s)"));
-	m_createConnection->setIcon(QIcon{":/Images/Images/SimConnectionIcon.svg"});
+	m_createConnection->setIcon(QIcon{":/SimulatorUi/Images/SimConnectionIcon.svg"});
 	m_createConnection->setEnabled(false);
-	//m_addOptoConnection->setVisible(false);
+	// m_addOptoConnection->setVisible(false);
 	connect(m_createConnection, &QAction::triggered, m_equipmentView, &EquipmentView::createConnection);
 
 
 	m_showObjectConnections = new QAction(tr("Show Object Connections..."), this);
 	m_showObjectConnections->setStatusTip(tr("Show module or opto-port connections"));
-	m_showObjectConnections->setIcon(QIcon{":/Images/Images/SimConnectionIcon.svg"});
+	m_showObjectConnections->setIcon(QIcon{":/SimulatorUi/Images/SimConnectionIcon.svg"});
 	m_showObjectConnections->setEnabled(false);
-	//m_showObjectConnections->setVisible(false);
+	// m_showObjectConnections->setVisible(false);
 	connect(m_showObjectConnections, &QAction::triggered, m_equipmentView, &EquipmentView::showObjectConnections);
 
 	m_showConnections = new QAction(tr("Connections..."), this);
 	m_showConnections->setStatusTip(tr("Edit connections"));
-	m_showConnections->setIcon(QIcon{":/Images/Images/SimConnectionIcon.svg"});
+	m_showConnections->setIcon(QIcon{":/SimulatorUi/Images/SimConnectionIcon.svg"});
 	m_showConnections->setEnabled(true);
 	connect(m_showConnections, &QAction::triggered, this, &EquipmentTabPage::showConnections);
 
@@ -441,9 +448,11 @@ void EquipmentTabPage::CreateActions()
 	m_checkInAction->setIcon(QIcon{":/Images/Images/SchemaCheckIn.svg"});
 	m_checkInAction->setEnabled(false);
 	connect(m_checkInAction, &QAction::triggered, m_equipmentView, &EquipmentView::checkInSelectedDevices);
-	
+
 	m_undoChangesRecursivelyAction = new QAction(tr("Undo Tree Changes..."), this);
-	m_undoChangesRecursivelyAction->setStatusTip(tr("Roll back all modifications made to this object and its child objects, if any, reverting them to their previous state. Object is removed if it was not checked in before."));
+	m_undoChangesRecursivelyAction->setStatusTip(
+		tr("Roll back all modifications made to this object and its child objects, if any, reverting them to their previous state. Object "
+		   "is removed if it was not checked in before."));
 	m_undoChangesRecursivelyAction->setIcon(QIcon{":/Images/Images/SchemaUndoTree.svg"});
 	m_undoChangesRecursivelyAction->setEnabled(false);
 	connect(m_undoChangesRecursivelyAction, &QAction::triggered, m_equipmentView, &EquipmentView::undoChangesRecursively);
@@ -486,10 +495,10 @@ void EquipmentTabPage::CreateActions()
 	connect(m_switchModeAction, &QAction::triggered, m_equipmentModel, &EquipmentModel::switchMode);
 	connect(m_switchModeAction, &QAction::triggered, this, &EquipmentTabPage::modeSwitched);
 
-    m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
+	m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
 	m_pendingChangesAction->setStatusTip(tr("Show pending changes"));
 	m_pendingChangesAction->setEnabled(true);
-	//connect(m_pendingChangesAction, &QAction::triggered, m_equipmentModel, &EquipmentModel::pendingChanges);
+	// connect(m_pendingChangesAction, &QAction::triggered, m_equipmentModel, &EquipmentModel::pendingChanges);
 	connect(m_pendingChangesAction, &QAction::triggered, this, &EquipmentTabPage::pendingChanges);
 
 	//-----------------------------------
@@ -557,7 +566,9 @@ void EquipmentTabPage::selectionChanged(const QItemSelection& /*selected*/, cons
 	return;
 }
 
-void EquipmentTabPage::modelDataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/, const QVector<int>& /*roles = QVector<int>()*/)
+void EquipmentTabPage::modelDataChanged(const QModelIndex& /*topLeft*/,
+										const QModelIndex& /*bottomRight*/,
+										const QVector<int>& /*roles = QVector<int>()*/)
 {
 	return setActionState();
 }
@@ -608,9 +619,9 @@ void EquipmentTabPage::setActionState()
 	// about does parent have any checked out files
 	//
 	m_checkInAction->setEnabled(true);
-	m_deleteObjectAction->setEnabled(true);		// Allow to TRY to delete always. Even part of preset in editConfigurationMode,
-												// It can be useful to delete preset with all it's children, especially if it was
-												// just created, the it will remove from the DB all records.
+	m_deleteObjectAction->setEnabled(true); // Allow to TRY to delete always. Even part of preset in editConfigurationMode,
+											// It can be useful to delete preset with all it's children, especially if it was
+											// just created, the it will remove from the DB all records.
 
 	if (isPresetMode() == true)
 	{
@@ -640,7 +651,8 @@ void EquipmentTabPage::setActionState()
 	m_addSoftwareAction->setEnabled(false);
 
 	m_checkOutAction->setEnabled(false);
-	//m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there is no information
+	// m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there
+	// is no information
 	m_undoChangesRecursivelyAction->setEnabled(false);
 	m_undoChangesAction->setEnabled(false);
 	m_historyAction->setEnabled(false);
@@ -689,8 +701,7 @@ void EquipmentTabPage::setActionState()
 
 	// Add inputs/outputs to signals
 	//
-	if (isConfigurationMode() == true &&
-		selectedIndexList.size() == 1)
+	if (isConfigurationMode() == true && selectedIndexList.size() == 1)
 	{
 		// Allow to add signals for all module
 		//
@@ -721,9 +732,8 @@ void EquipmentTabPage::setActionState()
 		}
 	}
 
-	if (m_createInOutsToSignals->isEnabled() == false &&		// Could be already enabled in prev condition
-		isConfigurationMode() == true &&
-		selectedIndexList.isEmpty() == false)
+	if (m_createInOutsToSignals->isEnabled() == false && // Could be already enabled in prev condition
+		isConfigurationMode() == true && selectedIndexList.isEmpty() == false)
 	{
 		// Allow to add selected signals
 		//
@@ -798,8 +808,7 @@ void EquipmentTabPage::setActionState()
 
 	// Add Opto Connection with TWO selected Opto Ports
 	//
-	if (isConfigurationMode() == true &&
-		selectedIndexList.size() == 1)
+	if (isConfigurationMode() == true && selectedIndexList.size() == 1)
 	{
 		auto controller1 = m_equipmentModel->deviceObject(selectedIndexList.front())->toController();
 
@@ -832,8 +841,7 @@ void EquipmentTabPage::setActionState()
 		}
 	}
 
-	if (isConfigurationMode() == true &&
-		selectedIndexList.size() == 2)
+	if (isConfigurationMode() == true && selectedIndexList.size() == 2)
 	{
 		auto controller1 = m_equipmentModel->deviceObject(selectedIndexList.front())->toController();
 		auto controller2 = m_equipmentModel->deviceObject(selectedIndexList.back())->toController();
@@ -863,8 +871,7 @@ void EquipmentTabPage::setActionState()
 					id2.replace(id2.size() - 2, 2, QLatin1String("##"));
 				}
 
-				if (id1.endsWith("_OPTOPORT##") == true &&
-					id2.endsWith("_OPTOPORT##") == true)
+				if (id1.endsWith("_OPTOPORT##") == true && id2.endsWith("_OPTOPORT##") == true)
 				{
 					m_createConnection->setEnabled(true);
 					m_createConnection->setVisible(true);
@@ -875,8 +882,7 @@ void EquipmentTabPage::setActionState()
 
 	// Show opto connections for selected LM/OCM or selected opto port
 	//
-	if (isConfigurationMode() == true &&
-		selectedIndexList.size() > 0)
+	if (isConfigurationMode() == true && selectedIndexList.size() > 0)
 	{
 		m_showObjectConnections->setEnabled(true);
 		m_showObjectConnections->setVisible(true);
@@ -906,9 +912,7 @@ void EquipmentTabPage::setActionState()
 			auto device = m_equipmentModel->deviceObject(sli);
 			assert(device);
 
-			if (device == nullptr ||
-				device->isPreset() != true ||
-				device->presetRoot() != true)
+			if (device == nullptr || device->isPreset() != true || device->presetRoot() != true)
 			{
 				selectedArePresetRoots = false;
 				break;
@@ -944,14 +948,13 @@ void EquipmentTabPage::setActionState()
 
 		// Don't need to go further
 		//
-		if (canAnyBeCheckedIn == true &&
-			canAnyBeCheckedOut == true )
+		if (canAnyBeCheckedIn == true && canAnyBeCheckedOut == true)
 		{
 			break;
 		}
 	}
 
-	//m_checkInAction->setEnabled(canAnyBeCheckedIn);
+	// m_checkInAction->setEnabled(canAnyBeCheckedIn);
 	m_checkOutAction->setEnabled(canAnyBeCheckedOut);
 	m_undoChangesRecursivelyAction->setEnabled(selectedIndexList.size() == 1);
 	m_undoChangesAction->setEnabled(canAnyBeCheckedIn);
@@ -998,7 +1001,7 @@ void EquipmentTabPage::setActionState()
 			m_addPresetRackAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Rack));
 			m_addPresetChassisAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Chassis));
 			m_addPresetModuleAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Module));
-			m_addPresetControllerAction ->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Controller));
+			m_addPresetControllerAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Controller));
 			m_addPresetWorkstationAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Workstation));
 			m_addPresetSoftwareAction->setEnabled(selectedObject->canAddChild(Hardware::DeviceType::Software));
 		}
@@ -1022,8 +1025,7 @@ void EquipmentTabPage::setActionState()
 	//
 	if (selectedIndexList.empty() == false)
 	{
-
-		bool allowCopyToClipboard = true;	// allow copy if all selected objects are the same type
+		bool allowCopyToClipboard = true; // allow copy if all selected objects are the same type
 
 		auto firstSelectedDevice = m_equipmentModel->deviceObject(selectedIndexList.first());
 		Q_ASSERT(firstSelectedDevice);
@@ -1053,9 +1055,7 @@ void EquipmentTabPage::setActionState()
 
 			// In ConfigurationMode it is possible to copy only root items of preset items
 			//
-			if (isConfigurationMode() == true &&
-				device->isPreset() == true &&
-				device->presetRoot() == false)
+			if (isConfigurationMode() == true && device->isPreset() == true && device->presetRoot() == false)
 			{
 				allowCopyToClipboard = false;
 				break;
@@ -1099,7 +1099,6 @@ void EquipmentTabPage::modeSwitched()
 		m_switchModeAction->setText(tr("Switch to Preset"));
 
 		m_updateFromPresetAction->setEnabled(true);
-
 	}
 
 	setActionState();
@@ -1136,19 +1135,19 @@ void EquipmentTabPage::modeSwitched()
 
 void EquipmentTabPage::showConnections()
 {
-    if (dbController()->isProjectOpened() == false)
-    {
-        return;
-    }
-
-    if (theDialogConnections == nullptr)
+	if (dbController()->isProjectOpened() == false)
 	{
-        theDialogConnections = new DialogConnections(dbController(), this);
-        theDialogConnections->show();
+		return;
+	}
+
+	if (theDialogConnections == nullptr)
+	{
+		theDialogConnections = new DialogConnections(dbController(), this);
+		theDialogConnections->show();
 	}
 	else
 	{
-        theDialogConnections->activateWindow();
+		theDialogConnections->activateWindow();
 	}
 
 	return;
@@ -1170,8 +1169,8 @@ void EquipmentTabPage::setProperties()
 		return;
 	}
 
-    QList<std::shared_ptr<PropertyObject>> checkedInList;
-    QList<std::shared_ptr<PropertyObject>> checkedOutList;
+	QList<std::shared_ptr<PropertyObject>> checkedInList;
+	QList<std::shared_ptr<PropertyObject>> checkedOutList;
 
 	for (QModelIndex& mi : selectedIndexList)
 	{
@@ -1191,10 +1190,10 @@ void EquipmentTabPage::setProperties()
 		}
 	}
 
-	m_propertyEditor->setExpertMode(isPresetMode() || theSettings.isExpertMode());
+	m_propertyEditor->setExpertMode(isPresetMode() || theAppSettings.isExpertMode());
 	m_propertyEditor->setReadOnly(checkedOutList.isEmpty() == true);
 
-	m_propertyTable->setExpertMode(isPresetMode() || theSettings.isExpertMode());
+	m_propertyTable->setExpertMode(isPresetMode() || theAppSettings.isExpertMode());
 	m_propertyTable->setReadOnly(checkedOutList.isEmpty() == true);
 
 	// Set objects to the PropertyEditor
@@ -1260,7 +1259,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 		files.push_back(file);
 	}
 
-	//qDebug() << "Update Properties in the Database";
+	// qDebug() << "Update Properties in the Database";
 
 	bool ok = dbController()->setWorkcopy(files, this);
 
@@ -1515,9 +1514,7 @@ void EquipmentTabPage::exportPreset()
 	{
 		auto device = m_equipmentModel->deviceObject(mi);
 
-		if (device == nullptr ||
-			device->isPreset() != true ||
-			device->presetRoot() != true)
+		if (device == nullptr || device->isPreset() != true || device->presetRoot() != true)
 		{
 			assert(device);
 			assert(false);
@@ -1528,9 +1525,7 @@ void EquipmentTabPage::exportPreset()
 		{
 			int presetVersion = device->propertyValue(Hardware::PropertyNames::presetVersion).toInt();
 
-			firstDeviceName = QString{"%1_v%2.u7devp"}
-								.arg(device->caption())
-								.arg(presetVersion);
+			firstDeviceName = QString{"%1_v%2.u7devp"}.arg(device->caption()).arg(presetVersion);
 		}
 
 		allObjectsArePresetRoots &= device->presetRoot() && device->isPreset();
@@ -1611,7 +1606,7 @@ void EquipmentTabPage::exportPreset()
 		compressedMessage.mutable_description()->operator=(*descriptionMessage);
 		compressedMessage.set_compressedthis(compressedData.toStdString());
 
-        std::fstream output(std::filesystem::path(fileName.toStdWString()), std::ios::out | std::ios::binary);
+		std::fstream output(std::filesystem::path(fileName.toStdWString()), std::ios::out | std::ios::binary);
 
 		if (output.is_open() == false || output.bad() == true)
 		{
@@ -1633,10 +1628,7 @@ void EquipmentTabPage::exportPreset()
 void EquipmentTabPage::importPreset()
 {
 	static QString path{"."};
-	QString fileName = QFileDialog::getOpenFileName(this,
-													tr("Open Device Preset"),
-													path,
-													tr("Device Presets (*.u7devp);;All Files (*.*)"));
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open Device Preset"), path, tr("Device Presets (*.u7devp);;All Files (*.*)"));
 
 	if (fileName.isEmpty() == true)
 	{
@@ -1644,9 +1636,7 @@ void EquipmentTabPage::importPreset()
 	}
 	path = QFileInfo(fileName).path(); // store path for next time
 
-	// --
-	//
-    std::fstream input(std::filesystem::path(fileName.toStdWString()), std::ios::in | std::ios::binary);
+	std::fstream input(std::filesystem::path(fileName.toStdWString()), std::ios::in | std::ios::binary);
 	if (input.is_open() == false || input.bad() == true)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Load file %1 error.").arg(fileName));
@@ -1670,7 +1660,8 @@ void EquipmentTabPage::importPreset()
 
 	if (fileMessage.has_compressedthis() == true)
 	{
-		QByteArray compressedData = QByteArray::fromRawData(fileMessage.compressedthis().data(), static_cast<int>(fileMessage.compressedthis().size()));
+		QByteArray compressedData =
+			QByteArray::fromRawData(fileMessage.compressedthis().data(), static_cast<int>(fileMessage.compressedthis().size()));
 		QByteArray uncompressedData = qUncompress(compressedData);
 		message.ParseFromArray(uncompressedData.constData(), static_cast<int>(uncompressedData.size()));
 	}

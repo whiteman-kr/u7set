@@ -2,7 +2,7 @@
 #include "../UtilsLib/Ui/WidgetUtils.h"
 #include "../UtilsLib/WUtils.h"
 #include "SignalPropertiesDialog.h"
-#include "Settings.h"
+#include "AppSettings.h"
 
 SignalPropertiesDialog::SignalPropertiesDialog(const std::vector<AppSignal*>& signalsToEdit,
 											   bool readOnly, bool isExistSignals, QWidget* parent) :
@@ -33,12 +33,11 @@ SignalPropertiesDialog::SignalPropertiesDialog(const std::vector<AppSignal*>& si
 	createSignalsProps();
 
 	// Dialog controls creation
-
 	QVBoxLayout* vl = new QVBoxLayout;
 
 	m_propertyEditor = new IdePropertyEditor(this, m_signalSetProvider->dbController());
 
-	m_propertyEditor->setExpertMode(theSettings.isExpertMode());
+	m_propertyEditor->setExpertMode(theAppSettings.isExpertMode());
 	m_propertyEditor->setObjects(m_signalsProps);
 	m_propertyEditor->autoAdjustSplitterPosition();
 
@@ -90,6 +89,8 @@ bool SignalPropertiesDialog::isValid() const
 
 void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 {
+	bool expertMode = theAppSettings.isExpertMode();
+
 	signal.setInOutType(E::SignalInOutType::Internal);
 	signal.setByteOrder(E::ByteOrder::BigEndian);
 	signal.setDataSizeByType(signal.signalType(), signal.analogSignalFormat());
@@ -97,7 +98,7 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 
 	AppSignalPropertyManager* propManager = AppSignalPropertyManager::getInstance();
 
-	auto setter = [&signal, &propManager](const QString& name, QVariant value)
+	auto setter = [&signal, &propManager, expertMode](const QString& name, QVariant value)
 	{
 		int index = propManager->propertyIndex(name);
 		if (index == -1)
@@ -107,7 +108,7 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 
 		if (propManager->getBehaviour(signal, index) == E::PropertyBehaviourType::Write)
 		{
-			propManager->setValue(&signal, index, value, theSettings.isExpertMode());
+			propManager->setValue(&signal, index, value, expertMode);
 		}
 	};
 
@@ -147,7 +148,7 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 			continue;
 		}
 
-		QVariant propertyManagerValue = propManager->value(&signal, i, theSettings.isExpertMode());
+		QVariant propertyManagerValue = propManager->value(&signal, i, expertMode);
 		QMetaType type = propertyManagerValue.metaType();
 
 		if (type.id() == QMetaType::QString && propertyManagerValue.toString().isEmpty() == false)
@@ -157,7 +158,7 @@ void SignalPropertiesDialog::initNewSignal(AppSignal& signal)
 
 		if (value.canConvert(type) && value.convert(type))
 		{
-			propManager->setValue(&signal, i, value, theSettings.isExpertMode());
+			propManager->setValue(&signal, i, value, expertMode);
 		}
 	}
 
@@ -246,7 +247,12 @@ std::vector<std::pair<QString, QString>> SignalPropertiesDialog::editApplication
 		i++;
 	}
 
-	signalSetProvider->saveSignals(editedSignals, parent);
+	bool saveOk = signalSetProvider->saveSignals(editedSignals, parent);
+	if (saveOk == false) 
+	{
+		// TODO: Report and return which specific signals were changed and which were not.
+		result.clear();
+	}
 
 	return result;
 }
@@ -447,6 +453,7 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 	}
 
 	QSettings settings;
+	bool expertMode = theAppSettings.isExpertMode();
 
 	AppSignalPropertyManager& manager = *AppSignalPropertyManager::getInstance();
 
@@ -456,14 +463,14 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 
 	for (int i = 0; i < manager.count(); i++)
 	{
-		if (manager.isHidden(manager.getBehaviour(signal, i), theSettings.isExpertMode()))
+		if (manager.isHidden(manager.getBehaviour(signal, i), expertMode))
 		{
 			continue;
 		}
 
 		QString propName = manager.name(i);
 
-		settings.setValue(propKeyPrefix + propName, manager.value(&signal, i, theSettings.isExpertMode()));
+		settings.setValue(propKeyPrefix + propName, manager.value(&signal, i, expertMode));
 	}
 }
 
@@ -530,7 +537,7 @@ void SignalPropertiesDialog::uppercaseAppSignalIDs()
 
 void SignalPropertiesDialog::createSignalsProps()
 {
-	bool expertMode = theSettings.isExpertMode();
+	bool expertMode = theAppSettings.isExpertMode();
 
 	for (AppSignal* s : m_signalsToEdit)
 	{

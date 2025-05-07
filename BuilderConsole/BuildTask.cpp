@@ -21,7 +21,8 @@ void BuildTask::start()
 					m_projectUserPassword,
 					m_buildOutputPath,
 					false,
-					buildOptions);
+					buildOptions,
+					m_buildSchemaTags);
 
 	return;
 }
@@ -81,3 +82,7 @@ void BuildTask::setBuildOutputPath(QString value)
 	m_buildOutputPath = value;
 }
 
+void BuildTask::setBuildSchemaTags(QStringList value)
+{
+	m_buildSchemaTags = std::move(value);
+}

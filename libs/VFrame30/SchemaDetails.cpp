@@ -20,7 +20,7 @@ namespace VFrame30
 		parseDetails(details);
 	}
 
-	bool SchemaDetails::operator< (const SchemaDetails& b) const
+	bool SchemaDetails::operator<(const SchemaDetails& b) const
 	{
 		return this->m_schemaId < b.m_schemaId;
 	}
@@ -61,8 +61,7 @@ namespace VFrame30
 				{
 					// Items on LogicSchemas
 					//
-					if (const auto* associations = dynamic_cast<const IMatsSchemaItemAssociations*>(item.get());
-						associations != nullptr)
+					if (const auto* associations = dynamic_cast<const IMatsSchemaItemAssociations*>(item.get()); associations != nullptr)
 					{
 						for (const auto& connectionId : associations->associatedConnectionIds())
 						{
@@ -75,17 +74,14 @@ namespace VFrame30
 						}
 					}
 
-					if (const SchemaItemAfb* afb = item->toType<SchemaItemAfb>();
-						afb != nullptr && afb->isPackedLogic() == true)
+					if (const SchemaItemAfb* afb = item->toType<SchemaItemAfb>(); afb != nullptr && afb->isPackedLogic() == true)
 					{
 						packedLogicIds << afb->packedLogicId();
 					}
 
 					// Items on all other schemas
 					//
-					if (const SchemaItemIndicator* ii = item->toType<SchemaItemIndicator>();
-						ii != nullptr &&
-						ii->isTrend() == true)
+					if (const SchemaItemIndicator* ii = item->toType<SchemaItemIndicator>(); ii != nullptr && ii->isTrend() == true)
 					{
 						realTimeTrends.emplace_back(ii->guid(),
 													ii->trendSamplePeriod(),
@@ -216,7 +212,7 @@ namespace VFrame30
 
 		if (jsonDoc.isObject() == false)
 		{
-			assert(jsonDoc.isObject());		// have a look at json doc, it is supposed to be an object
+			assert(jsonDoc.isObject()); // have a look at json doc, it is supposed to be an object
 			qDebug() << Q_FUNC_INFO << " json is supposed to be object";
 
 			*this = {};
@@ -228,8 +224,7 @@ namespace VFrame30
 		QJsonValue version = jsonObject.value(QLatin1String("Version"));
 		int versionInt = version.toInt(-1);
 
-		if (versionInt == -1 ||
-			version.type() != QJsonValue::Double)
+		if (versionInt == -1 || version.type() != QJsonValue::Double)
 		{
 			*this = {};
 			return false;
@@ -369,7 +364,12 @@ namespace VFrame30
 					m_guids.clear();
 
 					QStringList guidList = jsonObject.value(QLatin1String("ItemGuids")).toVariant().toStringList();
-					std::for_each(guidList.begin(), guidList.end(), [this](const QString& str) {	m_guids.insert(QUuid(str)); });
+					std::for_each(guidList.begin(),
+								  guidList.end(),
+								  [this](const QString& str)
+								  {
+									  m_guids.insert(QUuid(str));
+								  });
 				}
 
 				// m_trendsIndicators
@@ -597,8 +597,7 @@ namespace VFrame30
 
 		QUuid textAsUuid(searchText);
 
-		if (textAsUuid.isNull() == false &&
-			m_guids.find(textAsUuid) != m_guids.end())
+		if (textAsUuid.isNull() == false && m_guids.find(textAsUuid) != m_guids.end())
 		{
 			return true;
 		}
@@ -613,20 +612,17 @@ namespace VFrame30
 
 	bool SchemaDetails::hasSchemaTag(const QString& tag) const
 	{
-		return m_schemaTags.find(tag.trimmed().toLower()) != m_schemaTags.end();
+		return m_schemaTags.contains(tag.trimmed().toLower());
 	}
 
 	bool SchemaDetails::hasSchemaTag(const QStringList& tags) const
 	{
-		for (const QString& tag : tags)
-		{
-			if (m_schemaTags.find(tag.trimmed().toLower()) != m_schemaTags.end())
-			{
-				return true;
-			}
-		}
-
-		return false;
+		return std::any_of(tags.begin(),
+						   tags.end(),
+						   [this](const QString& tag)
+						   {
+							   return m_schemaTags.contains(tag.trimmed().toLower());
+						   });
 	}
 
 	const std::set<QString>& SchemaDetails::schemaTags() const
@@ -861,8 +857,7 @@ namespace VFrame30
 	{
 		std::shared_ptr<SchemaDetails> result;
 
-		if (auto it = m_details.find(schemaId);
-			it != m_details.end())
+		if (auto it = m_details.find(schemaId); it != m_details.end())
 		{
 			result = it->second;
 		}

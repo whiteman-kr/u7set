@@ -33,51 +33,109 @@ namespace Hardware
 	{
 		DeviceObject::propertyDemand(prop);
 
-		auto typeProp = addProperty<E::SignalType, DeviceAppSignal, &DeviceAppSignal::signalType, &DeviceAppSignal::setSignalType>(PropertyNames::type, QLatin1String(), true);
-		auto functionProp = addProperty<E::SignalFunction, DeviceAppSignal, &DeviceAppSignal::function, &DeviceAppSignal::setFunction>(PropertyNames::function, QLatin1String(), true);
-		auto byteOrderProp = addProperty<E::ByteOrder, DeviceAppSignal, &DeviceAppSignal::byteOrder, &DeviceAppSignal::setByteOrder>(PropertyNames::byteOrder, QLatin1String(), true);
-		auto formatProp = addProperty<E::DataFormat, DeviceAppSignal, &DeviceAppSignal::format, &DeviceAppSignal::setFormat>(PropertyNames::format, QLatin1String(), true);
-		auto memoryAreaProp = addProperty<E::MemoryArea, DeviceAppSignal, &DeviceAppSignal::memoryArea, &DeviceAppSignal::setMemoryArea>(PropertyNames::memoryArea, QLatin1String(), true);
+		if (prop.isEmpty() == true || prop == PropertyNames::type)
+		{
+			auto typeProp = addProperty<E::SignalType, DeviceAppSignal, &DeviceAppSignal::signalType, &DeviceAppSignal::setSignalType>(
+				PropertyNames::type,
+				QLatin1String(),
+				true);
+			typeProp->setUpdateFromPreset(true);
+			typeProp->setExpert(isPreset());
+		}
 
-		auto sizeProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::size, &DeviceAppSignal::setSize>(PropertyNames::size, QLatin1String(), true);
+		if (prop.isEmpty() == true || prop == PropertyNames::function)
+		{
+			auto functionProp = addProperty<E::SignalFunction, DeviceAppSignal, &DeviceAppSignal::function, &DeviceAppSignal::setFunction>(
+				PropertyNames::function,
+				QLatin1String(),
+				true);
+			functionProp->setUpdateFromPreset(true);
+			functionProp->setExpert(isPreset());
+		}
 
-		auto valueOffsetProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::valueOffset, &DeviceAppSignal::setValueOffset>(PropertyNames::valueOffset, QLatin1String(), true);
-		auto valueBitProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::valueBit, &DeviceAppSignal::setValueBit>(PropertyNames::valueBit, QLatin1String(), true);
+		if (prop.isEmpty() == true || prop == PropertyNames::byteOrder)
+		{
+			auto byteOrderProp = addProperty<E::ByteOrder, DeviceAppSignal, &DeviceAppSignal::byteOrder, &DeviceAppSignal::setByteOrder>(
+				PropertyNames::byteOrder,
+				QLatin1String(),
+				true);
+			byteOrderProp->setUpdateFromPreset(true);
+			byteOrderProp->setExpert(isPreset());
+		}
 
-		auto validitySignalId = addProperty<QString, DeviceAppSignal, &DeviceAppSignal::validitySignalId, &DeviceAppSignal::setValiditySignalId>(PropertyNames::validitySignalId, QLatin1String(), true);
+		if (prop.isEmpty() == true || prop == PropertyNames::format)
+		{
+			auto formatProp =
+				addProperty<E::DataFormat, DeviceAppSignal, &DeviceAppSignal::format, &DeviceAppSignal::setFormat>(PropertyNames::format,
+																												   QLatin1String(),
+																												   true);
+			formatProp->setUpdateFromPreset(true);
+			formatProp->setExpert(isPreset());
+		}
 
-		auto signalSpecPropsStructProp = addProperty<QString, DeviceAppSignal, &DeviceAppSignal::signalSpecPropsStruct, &DeviceAppSignal::setSignalSpecPropsStruct>(PropertyNames::signalSpecificProperties, PropertyNames::categoryAppSignal, true);
+		if (prop.isEmpty() == true || prop == PropertyNames::memoryArea)
+		{
+			auto memoryAreaProp =
+				addProperty<E::MemoryArea, DeviceAppSignal, &DeviceAppSignal::memoryArea, &DeviceAppSignal::setMemoryArea>(
+					PropertyNames::memoryArea,
+					QLatin1String(),
+					true);
+			memoryAreaProp->setUpdateFromPreset(true);
+			memoryAreaProp->setExpert(isPreset());
+		}
 
-		typeProp->setUpdateFromPreset(true);
-		typeProp->setExpert(isPreset());
+		if (prop.isEmpty() == true || prop == PropertyNames::size)
+		{
+			auto sizeProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::size, &DeviceAppSignal::setSize>(PropertyNames::size,
+																												 QLatin1String(),
+																												 true);
+			sizeProp->setUpdateFromPreset(true);
+			sizeProp->setExpert(isPreset());
+		}
 
-		functionProp->setUpdateFromPreset(true);
-		functionProp->setExpert(isPreset());
+		if (prop.isEmpty() == true || prop == PropertyNames::valueOffset)
+		{
+			auto valueOffsetProp = addProperty<int, DeviceAppSignal, &DeviceAppSignal::valueOffset, &DeviceAppSignal::setValueOffset>(
+				PropertyNames::valueOffset,
+				QLatin1String(),
+				true);
+			valueOffsetProp->setUpdateFromPreset(true);
+			valueOffsetProp->setExpert(isPreset());
+		}
 
-		byteOrderProp->setUpdateFromPreset(true);
-		byteOrderProp->setExpert(isPreset());
+		if (prop.isEmpty() == true || prop == PropertyNames::valueBit)
+		{
+			auto valueBitProp =
+				addProperty<int, DeviceAppSignal, &DeviceAppSignal::valueBit, &DeviceAppSignal::setValueBit>(PropertyNames::valueBit,
+																											 QLatin1String(),
+																											 true);
+			valueBitProp->setUpdateFromPreset(true);
+			valueBitProp->setExpert(isPreset());
+		}
 
-		formatProp->setUpdateFromPreset(true);
-		formatProp->setExpert(isPreset());
+		if (prop.isEmpty() == true || prop == PropertyNames::validitySignalId)
+		{
+			auto validitySignalId =
+				addProperty<QString, DeviceAppSignal, &DeviceAppSignal::validitySignalId, &DeviceAppSignal::setValiditySignalId>(
+					PropertyNames::validitySignalId,
+					QLatin1String(),
+					true);
+			validitySignalId->setUpdateFromPreset(true);
+			validitySignalId->setExpert(isPreset());
+		}
 
-		memoryAreaProp->setUpdateFromPreset(true);
-		memoryAreaProp->setExpert(isPreset());
+		if (prop.isEmpty() == true || prop == PropertyNames::signalSpecificProperties)
+		{
+			auto signalSpecPropsStructProp =
+				addProperty<QString, DeviceAppSignal, &DeviceAppSignal::signalSpecPropsStruct, &DeviceAppSignal::setSignalSpecPropsStruct>(
+					PropertyNames::signalSpecificProperties,
+					PropertyNames::categoryAppSignal,
+					true);
 
-		sizeProp->setUpdateFromPreset(true);
-		sizeProp->setExpert(isPreset());
-
-		validitySignalId->setUpdateFromPreset(true);
-		validitySignalId->setExpert(isPreset());
-
-		valueOffsetProp->setUpdateFromPreset(true);
-		valueOffsetProp->setExpert(isPreset());
-
-		valueBitProp->setUpdateFromPreset(true);
-		valueBitProp->setExpert(isPreset());
-
-		signalSpecPropsStructProp->setUpdateFromPreset(true);
-		signalSpecPropsStructProp->setExpert(isPreset());
-		signalSpecPropsStructProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
+			signalSpecPropsStructProp->setUpdateFromPreset(true);
+			signalSpecPropsStructProp->setExpert(isPreset());
+			signalSpecPropsStructProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
+		}
 
 		return;
 	}

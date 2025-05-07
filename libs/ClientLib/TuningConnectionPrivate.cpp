@@ -1,11 +1,11 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "TuningConnectionPrivate.h"
-#include "TuningTcpClient.h"
-#include <ClientLib/TuningSignalManager.h>
 #include "../UtilsLib/SimpleThread.h"
+#include "TuningTcpClient.h"
+
 
 namespace ClientLib
 {
@@ -20,7 +20,8 @@ namespace ClientLib
 													ILogFile* logFile,
 													ITuningLog* tuningLog)
 	{
-		tcpTuningClient = new TuningTcpClient{softwareInfo, tuns, signalUpdater, recentTuningSignals, tuningAuthorization, logFile, tuningLog};
+		tcpTuningClient =
+			new TuningTcpClient{softwareInfo, tuns, signalUpdater, recentTuningSignals, tuningAuthorization, logFile, tuningLog};
 		tcpTuningClient->setServers(tuns.clientRequestAddress, tuns.clientRequestAddress, true);
 		tcpTuningClient->setAutoApply(autoApply);
 		tcpTuningClient->setLmStatusFlagMode(lmStatusFlagMode);
@@ -56,6 +57,12 @@ namespace ClientLib
 		return tcpTuningClient->serverAddressPort1();
 	}
 
+	const SoftwareEndpoint::TuningService& TuningConnectionPrivate::Connection::server() const
+	{
+		Q_ASSERT(tcpTuningClient);
+		return tcpTuningClient->server();
+	}
+
 	bool TuningConnectionPrivate::Connection::signalStatesLoaded() const
 	{
 		Q_ASSERT(tcpTuningClient);
@@ -83,26 +90,46 @@ namespace ClientLib
 													bool autoApply,
 													TuningClientSettings::LmStatusFlagMode lmStatusFlagMode)
 	{
-		m_logFile.writeMessage("updateConnections()");
-
-		m_conns.clear();	// it will stop all connection threads and destroy them
-
-		for (const SoftwareEndpoint::TuningService& tuns : tuningServices)
+		m_logFile.writeMessage(QString{"updateConnections(), %1 TuningServices"}.arg(tuningServices.size()));
+		for (const auto& tuns : tuningServices)
 		{
-			auto it = std::find_if(m_conns.begin(), m_conns.end(), [&tuns](const Connection& c)
-								   {
-									   return c.address() == tuns.clientRequestAddress;
-								   });
+			m_logFile.writeMessage(
+				QString{"updateConnections(),    %1 - %2"}.arg(tuns.shortenId).arg(tuns.clientRequestAddress.toString()));
+		}
 
-			if (it != m_conns.end())
+		// Number of TuningServices has been changed or any address has been changed
+		//
+		bool connectionsChanged = (m_conns.size() != tuningServices.size()) ||
+								  std::any_of(m_conns.begin(),
+											  m_conns.end(),
+											  [&tuningServices](const Connection& conn)
+											  {
+												  return std::none_of(tuningServices.begin(),
+																	  tuningServices.end(),
+																	  [&conn](const SoftwareEndpoint::TuningService& tuns)
+																	  {
+																		  return conn.server() == tuns;
+																	  });
+											  });
+
+		if (connectionsChanged == true)
+		{
+			m_conns.clear();
+
+			// Create connections
+			//
+			for (const SoftwareEndpoint::TuningService& tuns : tuningServices)
 			{
-				// Such connection already exists
-				//
-				continue;
+				m_conns.emplace_back(softwareInfo,
+									 tuns,
+									 autoApply,
+									 lmStatusFlagMode,
+									 m_tuningSignalUpdater,
+									 m_recentTuningSignals,
+									 m_tuningAuthorization,
+									 m_logFile.logFile(),
+									 m_tuningLog);
 			}
-
-			m_conns.emplace_back(softwareInfo, tuns, autoApply, lmStatusFlagMode, m_tuningSignalUpdater, m_recentTuningSignals, m_tuningAuthorization,
-								 m_logFile.logFile(), m_tuningLog);
 		}
 
 		return;
@@ -159,8 +186,7 @@ namespace ClientLib
 
 		for (const Connection& c : m_conns)
 		{
-			if (c.tcpTuningClient->isConnected() == true &&
-				c.tcpTuningClient->singleLmControlMode() == true &&
+			if (c.tcpTuningClient->isConnected() == true && c.tcpTuningClient->singleLmControlMode() == true &&
 				c.tcpTuningClient->hasTuningSource(sourceHash) == true)
 			{
 				connectedCount++;
@@ -176,8 +202,7 @@ namespace ClientLib
 
 		for (const Connection& c : m_conns)
 		{
-			if (c.tcpTuningClient->isConnected() == true &&
-				c.tcpTuningClient->singleLmControlMode() == true &&
+			if (c.tcpTuningClient->isConnected() == true && c.tcpTuningClient->singleLmControlMode() == true &&
 				c.tcpTuningClient->hasTuningSource(sourceHash) == true)
 			{
 				if (c.tcpTuningClient->activeTuningSource() == sourceHash)
@@ -196,8 +221,7 @@ namespace ClientLib
 
 		for (const Connection& c : m_conns)
 		{
-			if (c.tcpTuningClient->isConnected() == true &&
-				c.tcpTuningClient->singleLmControlMode() == true &&
+			if (c.tcpTuningClient->isConnected() == true && c.tcpTuningClient->singleLmControlMode() == true &&
 				c.tcpTuningClient->hasTuningSource(sourceHash) == true)
 			{
 				bool sourceActive = c.tcpTuningClient->activeTuningSource() == sourceHash;
@@ -252,8 +276,7 @@ namespace ClientLib
 
 		for (const Connection& c : m_conns)
 		{
-			if (c.tcpTuningClient->isConnected() == true &&
-				c.tcpTuningClient->singleLmControlMode() == true &&
+			if (c.tcpTuningClient->isConnected() == true && c.tcpTuningClient->singleLmControlMode() == true &&
 				c.tcpTuningClient->clientIsActive() == false)
 			{
 				if (c.tcpTuningClient->hasTuningSource(sourceHash) == true)
@@ -297,7 +320,8 @@ namespace ClientLib
 					return false;
 				}
 
-				TuningSignalState state = m_tuningSignalManager.state(command.appSignalHash, c.tcpTuningClient->tuningServiceHash(), &found);
+				TuningSignalState state =
+					m_tuningSignalManager.state(command.appSignalHash, c.tcpTuningClient->tuningServiceHash(), &found);
 				if (found == false)
 				{
 					Q_ASSERT(false);
@@ -306,14 +330,12 @@ namespace ClientLib
 
 				if (state.limitsUnbalance(param) == true)
 				{
-					m_logFile.writeAlert(tr("writeTuningSignal(), There is limits mismatch in signal '%1'. Operation is disabled.").arg(param.customSignalId()));
+					m_logFile.writeAlert(tr("writeTuningSignal(), There is limits mismatch in signal '%1'. Operation is disabled.")
+											 .arg(param.customSignalId()));
 					continue;
 				}
 
-				if (found == true &&
-					state.valid() == true &&
-					state.controlIsEnabled() == true &&
-					state.writingIsEnabled() == true)
+				if (found == true && state.valid() == true && state.controlIsEnabled() == true && state.writingIsEnabled() == true)
 				{
 					m_tuningLog->write(param, state.value(), command.value);
 
@@ -350,14 +372,12 @@ namespace ClientLib
 		//
 		auto valueType = value.metaType().id();
 
-		if (valueType != QMetaType::Bool &&
-			valueType != QMetaType::Int &&
-			valueType != QMetaType::Double)
+		if (valueType != QMetaType::Bool && valueType != QMetaType::Int && valueType != QMetaType::Double)
 		{
 			m_logFile.writeError(tr("writeTuningSignal(%1, %2) - Unsupported value type (%3), type must be bool, integer or double.")
-								 .arg(appSignalId)
-								 .arg(value.toString())
-								 .arg(value.metaType().name()));
+									 .arg(appSignalId)
+									 .arg(value.toString())
+									 .arg(value.metaType().name()));
 			return false;
 		}
 
@@ -389,8 +409,8 @@ namespace ClientLib
 				if (valueType == QMetaType::Bool)
 				{
 					m_logFile.writeWarning(tr("writeTuningSignal(%1, %2) - type bool is implicitly converted to SignedInt32.")
-										   .arg(appSignalId)
-										   .arg(value.toString()));
+											   .arg(appSignalId)
+											   .arg(value.toString()));
 
 					value = value.toBool() == false ? static_cast<int>(0) : static_cast<int>(1);
 					break;
@@ -407,8 +427,8 @@ namespace ClientLib
 						valueDouble < std::numeric_limits<qint32>::min() || valueDouble > std::numeric_limits<qint32>::max())
 					{
 						m_logFile.writeError(tr("writeTuningSignal(%1, %2) - value is out of range of type SignedInt32.")
-											 .arg(appSignalId)
-											 .arg(value.toString()));
+												 .arg(appSignalId)
+												 .arg(value.toString()));
 						return false;
 					}
 
@@ -422,8 +442,8 @@ namespace ClientLib
 				if (valueType == QMetaType::Bool)
 				{
 					m_logFile.writeWarning(tr("writeTuningSignal(%1, %2) - type bool is implicitly converted to Float32.")
-										   .arg(appSignalId)
-										   .arg(value.toString()));
+											   .arg(appSignalId)
+											   .arg(value.toString()));
 
 					value = value.toBool() == false ? static_cast<float>(0) : static_cast<float>(1);
 					break;
@@ -437,13 +457,12 @@ namespace ClientLib
 
 				if (valueType == QMetaType::Double)
 				{
-					if (double valueDouble = value.toDouble();
-						valueDouble < static_cast<double>(std::numeric_limits<float>::lowest()) ||
-						valueDouble > static_cast<double>(std::numeric_limits<float>::max()))
+					if (double valueDouble = value.toDouble(); valueDouble < static_cast<double>(std::numeric_limits<float>::lowest()) ||
+															   valueDouble > static_cast<double>(std::numeric_limits<float>::max()))
 					{
 						m_logFile.writeError(tr("writeTuningSignal(%1, %2) - value is out of range of type Float32.")
-											 .arg(appSignalId)
-											 .arg(value.toString()));
+												 .arg(appSignalId)
+												 .arg(value.toString()));
 						return false;
 					}
 
@@ -471,10 +490,10 @@ namespace ClientLib
 			if (tuningValue < appSignal.tuningLowBound() || tuningValue > appSignal.tuningHighBound())
 			{
 				m_logFile.writeError(tr("writeTuningSignal(%1, %2) - value is out tuning of range [%3, %4].")
-									 .arg(appSignalId)
-									 .arg(value.toString())
-									 .arg(appSignal.tuningLowBound().toString())
-									 .arg(appSignal.tuningHighBound().toString()));
+										 .arg(appSignalId)
+										 .arg(value.toString())
+										 .arg(appSignal.tuningLowBound().toString())
+										 .arg(appSignal.tuningHighBound().toString()));
 				return false;
 			}
 		}
@@ -484,7 +503,12 @@ namespace ClientLib
 
 	bool TuningConnectionPrivate::signalStatesLoaded() const
 	{
-		return std::all_of(m_conns.begin(), m_conns.end(), [](const Connection& c) { return c.signalStatesLoaded(); });
+		return std::all_of(m_conns.begin(),
+						   m_conns.end(),
+						   [](const Connection& c)
+						   {
+							   return c.signalStatesLoaded();
+						   });
 	}
 
 	void TuningConnectionPrivate::applyTuningSignals(const std::vector<Hash>& signalHashes)
@@ -504,7 +528,6 @@ namespace ClientLib
 		{
 			c.tcpTuningClient->applyTuningSignals();
 		}
-
 	}
 
-}	// namespace
+} // namespace ClientLib

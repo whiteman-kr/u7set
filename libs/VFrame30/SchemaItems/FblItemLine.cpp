@@ -26,9 +26,26 @@ namespace VFrame30
 	{
 		PosConnectionImpl::propertyDemand(prop);
 
-		addProperty<double, FblItemLine, &FblItemLine::weight, &FblItemLine::setWeight>(PropertyNames::lineWeight, PropertyNames::appearanceCategory, true);
-		addProperty<QColor, FblItemLine, &FblItemLine::lineColor, &FblItemLine::setLineColor>(PropertyNames::lineColor, PropertyNames::appearanceCategory, true);
-		addProperty<E::LineStyle, FblItemLine, &FblItemLine::lineStyle, &FblItemLine::setLineStyle>(PropertyNames::lineStyle, PropertyNames::appearanceCategory, true);
+		if (prop.isEmpty() == true || prop == PropertyNames::lineWeight)
+		{
+			addProperty<double, FblItemLine, &FblItemLine::weight, &FblItemLine::setWeight>(PropertyNames::lineWeight,
+																							PropertyNames::appearanceCategory,
+																							true);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::lineColor)
+		{
+			addProperty<QColor, FblItemLine, &FblItemLine::lineColor, &FblItemLine::setLineColor>(PropertyNames::lineColor,
+																								  PropertyNames::appearanceCategory,
+																								  true);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::lineStyle)
+		{
+			addProperty<E::LineStyle, FblItemLine, &FblItemLine::lineStyle, &FblItemLine::setLineStyle>(PropertyNames::lineStyle,
+																										PropertyNames::appearanceCategory,
+																										true);
+		}
 
 		return;
 	}

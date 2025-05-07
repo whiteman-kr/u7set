@@ -14,9 +14,8 @@ namespace VFrame30
 	SchemaItemSignal::SchemaItemSignal(void) :
 		SchemaItemSignal(SchemaUnit::Inch)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
-		//
+		// This constructor is used during serialization of this object type.
+		// All fields are initialized as part of the serialization process.
 	}
 
 	SchemaItemSignal::SchemaItemSignal(SchemaUnit unit) :
@@ -40,7 +39,8 @@ namespace VFrame30
 			true);
 		addProperty<int, SchemaItemSignal, &SchemaItemSignal::precision, &SchemaItemSignal::setPrecision>(PropertyNames::precision,
 																										  PropertyNames::monitorCategory,
-																										  true);
+																										  true)
+			->setDescription(PropertyNames::precisionPropText);
 		addProperty<E::AnalogFormat, SchemaItemSignal, &SchemaItemSignal::analogFormat, &SchemaItemSignal::setAnalogFormat>(
 			PropertyNames::analogFormat,
 			PropertyNames::monitorCategory,
@@ -259,7 +259,7 @@ namespace VFrame30
 		// Draw columns text and divider
 		//
 
-		// If there is no column just draw identififers
+		// If there is no column just draw identifiers
 		//
 		if (columnCount() == 0)
 		{
@@ -439,7 +439,8 @@ namespace VFrame30
 					{
 						if (signal.isAnalog())
 						{
-							text = QString::number(signalState.m_value, static_cast<char>(analogFormat), precision);
+							int usePrecision = precision == -1 ? signal.precision() : precision;
+							text = QString::number(signalState.m_value, static_cast<char>(analogFormat), usePrecision);
 						}
 						else
 						{
@@ -468,7 +469,8 @@ namespace VFrame30
 					{
 						if (impactSignal.isAnalog())
 						{
-							text = QString::number(impactSignalState.m_value, static_cast<char>(analogFormat), precision);
+							int usePrecision = precision == -1 ? impactSignal.precision() : precision;
+							text = QString::number(impactSignalState.m_value, static_cast<char>(analogFormat), usePrecision);
 						}
 						else
 						{
@@ -751,7 +753,7 @@ namespace VFrame30
 		};
 
 		std::vector<CellDrawParam> cells;
-		cells.reserve(m_columns.size() * lineCount); // It will be expanded more if is singleline and has [impact]states
+		cells.reserve(m_columns.size() * lineCount); // It will be expanded more if is single-line and has [impact]states
 
 		for (int row = 0; row < static_cast<int>(lineCount); row++)
 		{
@@ -1032,7 +1034,7 @@ namespace VFrame30
 
 		// Get AppSignal
 		//
-		QString appSignalId = appSignalIds(); // One signal is here as it is singlechannel item
+		QString appSignalId = appSignalIds(); // One signal is here as it is single-channel item
 
 		AppSignalParam signal;
 		signal.setAppSignalId(appSignalId);
@@ -1603,7 +1605,7 @@ namespace VFrame30
 
 	void SchemaItemSignal::setPrecision(int value)
 	{
-		m_precision = qBound(0, value, 12);
+		m_precision = qBound(-1, value, 12);
 	}
 
 	E::AnalogFormat SchemaItemSignal::analogFormat() const
@@ -2070,9 +2072,8 @@ namespace VFrame30
 	//
 	SchemaItemInput::SchemaItemInput(void)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
-		//
+		// This constructor is used during serialization of this object type.
+		// All fields are initialized as part of the serialization process.
 	}
 
 	SchemaItemInput::SchemaItemInput(SchemaUnit unit) :
@@ -2081,12 +2082,12 @@ namespace VFrame30
 		m_columns.resize(2);
 
 		Column& c0 = m_columns[0];
-		c0.width = 80;
-		c0.data = E::ColumnData::AppSignalID;
+		c0.width = 75;
+		c0.data = E::ColumnData::Caption;
 		c0.horzAlign = E::HorzAlign::AlignLeft;
 
 		Column& c1 = m_columns[1];
-		c1.width = 20;
+		c1.width = 25;
 		c1.data = E::ColumnData::State;
 		c1.horzAlign = E::HorzAlign::AlignHCenter;
 
@@ -2174,9 +2175,8 @@ namespace VFrame30
 	//
 	SchemaItemOutput::SchemaItemOutput(void)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
-		//
+		// This constructor is used during serialization of this object type.
+		// All fields are initialized as part of the serialization process.
 	}
 
 	SchemaItemOutput::SchemaItemOutput(SchemaUnit unit) :
@@ -2185,13 +2185,13 @@ namespace VFrame30
 		m_columns.resize(2);
 
 		Column& c0 = m_columns[0];
-		c0.width = 20;
+		c0.width = 25;
 		c0.data = E::ColumnData::State;
 		c0.horzAlign = E::HorzAlign::AlignHCenter;
 
 		Column& c1 = m_columns[1];
-		c1.width = 80;
-		c1.data = E::ColumnData::AppSignalID;
+		c1.width = 75;
+		c1.data = E::ColumnData::Caption;
 		c1.horzAlign = E::HorzAlign::AlignLeft;
 
 		createColumnProperties();
@@ -2278,9 +2278,8 @@ namespace VFrame30
 	//
 	SchemaItemInOut::SchemaItemInOut(void)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
-		//
+		// This constructor is used during serialization of this object type.
+		// All fields are initialized as part of the serialization process.
 	}
 
 	SchemaItemInOut::SchemaItemInOut(SchemaUnit unit) :

@@ -12,9 +12,17 @@
 #include <CommonLib/ConstStrings.h>
 #include "version.h"
 
-const char* const semaphoreString = "ServiceControlManagerSemaphore";
-const char* const sharedMemoryString = "ServiceControlManagerSharedMemory";
-
+// Visual Leak Detector
+//
+#if defined(Q_OS_WIN) && defined(QT_DEBUG)
+#if __has_include("C:/Program Files (x86)/Visual Leak Detector/include/vld.h")
+#include "C:/Program Files (x86)/Visual Leak Detector/include/vld.h"
+#else
+#if __has_include("D:/Program Files (x86)/Visual Leak Detector/include/vld.h")
+#include "D:/Program Files (x86)/Visual Leak Detector/include/vld.h"
+#endif
+#endif
+#endif // Visual Leak Detector
 
 int main(int argc, char *argv[])
 {
@@ -29,51 +37,6 @@ int main(int argc, char *argv[])
 									arg(U7SET_MINOR_VERSION).
 									arg(U7SET_PATCH_VERSION).
 									arg(U7SET_BRANCH_NAME));
-
-	QSystemSemaphore semaphore(semaphoreString, 1);
-	bool isAlreadyRunning = false;
-	semaphore.acquire();
-
-	// For Linux: Clearing memory if previosly program crashed (pointer counter should be actual after releasing QSharedMemory)
-	{
-		QSharedMemory sharedMemory(sharedMemoryString);
-		sharedMemory.attach();
-	}
-
-	QSharedMemory sharedMemory(sharedMemoryString);
-	if (sharedMemory.attach())
-	{
-		isAlreadyRunning = true;
-	}
-	else
-	{
-		sharedMemory.create(1);
-		isAlreadyRunning = false;
-	}
-
-	semaphore.release();
-
-	if (isAlreadyRunning)
-	{
-		QMessageBox::information(nullptr, "Attention", "Another instance of ServiceControlManager is already running, check tray please");
-		return 0;
-	}
-
-    bool closeToTray = false;
-    QString trayParam = "--tray";
-    for (int i = 0; i < argc; i++)
-    {
-        if (argv[i] == trayParam)
-        {
-            closeToTray = true;
-            break;
-        }
-    }
-
-    if (closeToTray)
-    {
-		app.setQuitOnLastWindowClosed(false);
-    }
 
 	app.setWindowIcon(QIcon(":/images/SearchComputer.png"));
 
@@ -110,8 +73,6 @@ int main(int argc, char *argv[])
 
 	mainWindow->showMaximized();
 
-	atexit(google::protobuf::ShutdownProtobufLibrary);
-
 	int result = app.exec();
 
 	delete mainWindow;
@@ -119,6 +80,8 @@ int main(int argc, char *argv[])
 	DELETE_IF_NOT_NULL(qtTranslator);
 	DELETE_IF_NOT_NULL(qtbaseTranslator);
 	DELETE_IF_NOT_NULL(appTranslator);
+
+	google::protobuf::ShutdownProtobufLibrary();
 
 	return result;
 }

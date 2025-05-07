@@ -1124,6 +1124,22 @@ namespace VFrame30
 		return tags.values();
 	}
 
+	bool Schema::hasTag(const QString& tag) const
+	{
+		return m_tags.contains(tag.trimmed(), Qt::CaseInsensitive);
+	}
+
+	bool Schema::hasTag(const QStringList& tags) const
+	{
+		bool has = std::any_of(tags.begin(),
+							   tags.end(),
+							   [this](const QString& tag)
+							   {
+								   return m_tags.contains(tag.trimmed(), Qt::CaseInsensitive);
+							   });
+		return has;
+	}
+
 	QString Schema::details(const QString& path) const
 	{
 		return SchemaDetails::getDetailsString(this, path);

@@ -120,6 +120,7 @@ windows_build_job:
     - "git log -1"
     - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2022_64"
     - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR\\bin\\release"
+    - $Env:INSTALL_OUT_DIR="$Env:CI_PROJECT_DIR\\dev"
 #Build Project
     - "# ----------------------------------------------"
     - "#               Build Project"
@@ -183,6 +184,8 @@ windows_build_job:
   artifacts:
     name: "u7set-win-x64-${CI_MAJOR_VERSION}.${CI_MINOR_VERSION}.${CI_PATCH_VERSION}-p${CI_PIPELINE_ID}-${CI_RELEASE_TYPE}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
     paths:
+      - dev/**/*
+      - bin/*.exe
       - bin/*.exe
       - bin/release/*.exe
       - bin/release/*.dll
@@ -199,7 +202,6 @@ windows_build_job:
       - bin/release/scripthelp/search/*.*
       - bin/release/docs/*.pdf
       - bin/release/docs/Appendixes/*.pdf
-      - bin/release/dev/**/*
       - bin/release/ftdi/**/*
       - bin/release/license/**/*
 

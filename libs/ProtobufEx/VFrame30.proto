@@ -804,6 +804,9 @@ message SchemaItemPushButton
 	optional int32 autoRepeatDelay = 5;
 	optional int32 autoRepeatInterval = 6;
 
+	optional string svg = 10;
+	optional double svgScaleFactor = 11 [default = 0.9];
+
     optional string scriptAfterCreate = 21;
 	optional string scriptClicked = 22;
 	optional string scriptPressed = 23;

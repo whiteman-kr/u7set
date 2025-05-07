@@ -11,12 +11,20 @@ namespace VFrame30
 	{
 		PosRectImpl::propertyDemand(prop);
 
-		ADD_PROPERTY_GET_SET_CAT(VFrame30::RotationPoint, PropertyNames::rotationPoint, PropertyNames::positionAndSizeCategory, true, PosRectRotatable::rotationPoint, PosRectRotatable::setRotationPoint)
-			->setDescription(PropertyNames::rotationPointDescription);
+		// clang-format off
+		if (prop.isEmpty() == true || prop == PropertyNames::rotationPoint)
+		{
+			ADD_PROPERTY_GET_SET_CAT(VFrame30::RotationPoint, PropertyNames::rotationPoint, PropertyNames::positionAndSizeCategory, true, PosRectRotatable::rotationPoint, PosRectRotatable::setRotationPoint)
+				->setDescription(PropertyNames::rotationPointDescription);
+		}
 
-		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::angle, PropertyNames::positionAndSizeCategory, true, PosRectRotatable::angle, PosRectRotatable::setAngle)
-			->setDescription(PropertyNames::angleDescription);
-		
+		if (prop.isEmpty() == true || prop == PropertyNames::angle)
+		{
+			ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::angle, PropertyNames::positionAndSizeCategory, true, PosRectRotatable::angle, PosRectRotatable::setAngle)
+				->setDescription(PropertyNames::angleDescription);
+		}
+
+		// clang-format on
 		return;
 	}
 

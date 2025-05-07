@@ -22,6 +22,14 @@ module E {
 		G_9_or_9E = 'G'		/**< G_9_or_9E = 'G' (0x47/71) Use E or f format, whichever is the most concise*/
 	}
 
+	export enum AnalogFormatCode {
+		e_9e = 101,			/**< e_9e = 'e' (0x65/101) Format as [-]9.9e[+|-]999*/
+		E_9E = 69,			/**< E_9E = 'E' (0x45/69) Format as [-]9.9E[+|-]999*/
+		f_9 = 102,			/**< f_9 = 'f' (0x66/102) Format as [-]9.9*/
+		g_9_or_9e = 103,	/**< g_9_or_9e = 'g' (0x67/103) Use 'e' or 'f' format, whichever is the most concise*/
+		G_9_or_9E = 71		/**< G_9_or_9E = 'G' (0x47/71) Use E or f format, whichever is the most concise*/
+	}
+
 	export enum ColumnData {
 		AppSignalID = 0,			/**< AppSignalID = 0*/
 		CustomSignalID = 1,			/**< CustomSignalID = 1*/

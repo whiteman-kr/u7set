@@ -1,38 +1,51 @@
-#include <VFrame30/SchemaItemPushButton.h>
-#include <VFrame30/ClientSchemaView.h>
-#include <VFrame30/TuningController.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/SchemaItemPushButton.h>
 
 namespace
 {
-	// Subclass control to filter mouse input events for schema editor.
-	//
-	class QEditorPushButton : public QPushButton
+	QPixmap svgToPixmap(const QByteArray& svgData, QSize size)
 	{
-	public:
-		QEditorPushButton(QString text, QWidget* parent, bool editMode) :
-			QPushButton{text, parent},
-			m_editMode(editMode)
+		QSvgRenderer renderer(svgData);
+
+		QSize originalSize = renderer.defaultSize();
+		if (originalSize.isEmpty())
 		{
-			if (m_editMode == true)
-			{
-				setMouseTracking(false);
-				setAttribute(Qt::WA_TransparentForMouseEvents);
-			}
+			originalSize = size;
 		}
 
-	public:
-		bool m_editMode = true;
-	};
+		// Calculate aspect ratio for SVG
+		//
+		double aspectRatio = static_cast<double>(originalSize.width()) / originalSize.height();
+
+		// Adjust size to maintain aspect ratio
+		//
+		if (size.width() / aspectRatio <= size.height())
+		{
+			size.setHeight(static_cast<int>(size.width() / aspectRatio));
+		}
+		else
+		{
+			size.setWidth(static_cast<int>(size.height() * aspectRatio));
+		}
+
+		QPixmap pixmap{size};
+		pixmap.fill(Qt::transparent); // Transparent background
+
+		QPainter painter(&pixmap);
+		renderer.render(&painter);
+
+		return pixmap;
+	}
 } // namespace
 
 
 namespace VFrame30
 {
+
 	SchemaItemPushButton::SchemaItemPushButton(void) :
 		SchemaItemPushButton(SchemaUnit::Inch)
 	{
-		// This contructor can be call in case of loading this object
+		// This constructor can be call in case of loading this object
 		//
 	}
 
@@ -43,47 +56,116 @@ namespace VFrame30
 
 		Property* p = nullptr;
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::controlCategory, true, SchemaItemPushButton::text, SchemaItemPushButton::setText);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::text,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemPushButton::text,
+									 SchemaItemPushButton::setText);
 		p->setDescription(PropertyNames::pushButtonPropText);
 
-		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::checkable, PropertyNames::controlCategory, true, SchemaItemPushButton::isCheckable, SchemaItemPushButton::setCheckable);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::svg,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemPushButton::svg,
+									 SchemaItemPushButton::setSvg);
+		p->setSpecificEditor(E::PropertySpecificEditor::Svg);
+
+		p = ADD_PROPERTY_GET_SET_CAT(double,
+									 PropertyNames::svgScaleFactor,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemPushButton::svgScaleFactor,
+									 SchemaItemPushButton::setSvgScaleFactor);
+		p->setDescription(PropertyNames::svgScaleFactorDescription);
+
+		p = ADD_PROPERTY_GET_SET_CAT(bool,
+									 PropertyNames::checkable,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemPushButton::isCheckable,
+									 SchemaItemPushButton::setCheckable);
 		p->setDescription(PropertyNames::pushButtonPropCheckable);
 
-		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::checkedDefault, PropertyNames::controlCategory, true, SchemaItemPushButton::checkedDefault, SchemaItemPushButton::setCheckedDefault);
+		p = ADD_PROPERTY_GET_SET_CAT(bool,
+									 PropertyNames::checkedDefault,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemPushButton::checkedDefault,
+									 SchemaItemPushButton::setCheckedDefault);
 		p->setDescription(PropertyNames::pushButtonPropCheckedDefault);
 
-		p = ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::autoRepeat, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeat, SchemaItemPushButton::setAutoRepeat);
+		p = ADD_PROPERTY_GET_SET_CAT(bool,
+									 PropertyNames::autoRepeat,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemPushButton::autoRepeat,
+									 SchemaItemPushButton::setAutoRepeat);
 		p->setDescription(PropertyNames::pushButtonPropAutoRepeat);
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::autoRepeatDelay, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeatDelay, SchemaItemPushButton::setAutoRepeatDelay);
+
+		p = ADD_PROPERTY_GET_SET_CAT(int,
+									 PropertyNames::autoRepeatDelay,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemPushButton::autoRepeatDelay,
+									 SchemaItemPushButton::setAutoRepeatDelay);
 		p->setDescription(PropertyNames::pushButtonPropAutoRepeatDelay);
-		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::autoRepeatInterval, PropertyNames::controlCategory, true, SchemaItemPushButton::autoRepeatInterval, SchemaItemPushButton::setAutoRepeatInterval);
+
+		p = ADD_PROPERTY_GET_SET_CAT(int,
+									 PropertyNames::autoRepeatInterval,
+									 PropertyNames::controlCategory,
+									 true,
+									 SchemaItemPushButton::autoRepeatInterval,
+									 SchemaItemPushButton::setAutoRepeatInterval);
 		p->setDescription(PropertyNames::pushButtonPropAutoRepeatInterval);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::afterCreate, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptAfterCreate, SchemaItemPushButton::setScriptAfterCreate);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::afterCreate,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemPushButton::scriptAfterCreate,
+									 SchemaItemPushButton::setScriptAfterCreate);
 		p->setDescription(PropertyNames::widgetPropAfterCreate);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::clicked, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptClicked, SchemaItemPushButton::setScriptClicked);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::clicked,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemPushButton::scriptClicked,
+									 SchemaItemPushButton::setScriptClicked);
 		p->setDescription(PropertyNames::pushButtonPropClicked);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::pressed, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptPressed, SchemaItemPushButton::setScriptPressed);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::pressed,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemPushButton::scriptPressed,
+									 SchemaItemPushButton::setScriptPressed);
 		p->setDescription(PropertyNames::pushButtonPropPressed);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::released, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptReleased, SchemaItemPushButton::setScriptReleased);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::released,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemPushButton::scriptReleased,
+									 SchemaItemPushButton::setScriptReleased);
 		p->setDescription(PropertyNames::pushButtonPropReleased);
 		p->setIsScript(true);
 
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toggled, PropertyNames::scriptsCategory, true, SchemaItemPushButton::scriptToggled, SchemaItemPushButton::setScriptToggled);
+		p = ADD_PROPERTY_GET_SET_CAT(QString,
+									 PropertyNames::toggled,
+									 PropertyNames::scriptsCategory,
+									 true,
+									 SchemaItemPushButton::scriptToggled,
+									 SchemaItemPushButton::setScriptToggled);
 		p->setDescription(PropertyNames::pushButtonPropToggled);
 		p->setIsScript(true);
 
 		return;
-	}
-
-	SchemaItemPushButton::~SchemaItemPushButton(void)
-	{
 	}
 
 	void SchemaItemPushButton::draw(CDrawParam* drawParam) const
@@ -114,7 +196,7 @@ namespace VFrame30
 
 		assert(schemaItemMessage->has_posrectimpl());
 		assert(schemaItemMessage->has_control());
-		
+
 		// --
 		//
 		Proto::SchemaItemPushButton* pushButtonMessage = schemaItemMessage->mutable_pushbutton();
@@ -127,6 +209,9 @@ namespace VFrame30
 		pushButtonMessage->set_autorepeat(m_autoRepeat);
 		pushButtonMessage->set_autorepeatdelay(m_autoRepeatDelay);
 		pushButtonMessage->set_autorepeatinterval(m_autoRepeatInterval);
+
+		pushButtonMessage->set_svg(m_svg.toStdString());
+		pushButtonMessage->set_svgscalefactor(m_svgScaleFactor);
 
 		pushButtonMessage->set_scriptaftercreate(m_scriptAfterCreate.toStdString());
 		pushButtonMessage->set_scriptclicked(m_scriptClicked.toStdString());
@@ -156,7 +241,8 @@ namespace VFrame30
 
 		const Proto::SchemaItemPushButton& pushButtonMessagemessage = message.GetExtension(Proto::schemaitem).pushbutton();
 
-		setText(QString::fromStdString(pushButtonMessagemessage.text()));							// Text setters can have some string optimization for default values
+		setText(
+			QString::fromStdString(pushButtonMessagemessage.text())); // Text setters can have some string optimization for default values
 
 		m_checkable = pushButtonMessagemessage.checkable();
 		m_checkedDefault = pushButtonMessagemessage.checkeddefault();
@@ -165,11 +251,16 @@ namespace VFrame30
 		m_autoRepeatDelay = pushButtonMessagemessage.autorepeatdelay();
 		m_autoRepeatInterval = pushButtonMessagemessage.autorepeatinterval();
 
-		setScriptAfterCreate(QString::fromStdString(pushButtonMessagemessage.scriptaftercreate()));	// Text setters can have some string optimization for default values
-		setScriptClicked(QString::fromStdString(pushButtonMessagemessage.scriptclicked()));			// Text setters can have some string optimization for default values
-		setScriptPressed(QString::fromStdString(pushButtonMessagemessage.scriptpressed()));			// Text setters can have some string optimization for default values
-		setScriptReleased(QString::fromStdString(pushButtonMessagemessage.scriptreleased()));		// Text setters can have some string optimization for default values
-		setScriptToggled(QString::fromStdString(pushButtonMessagemessage.scripttoggled()));			// Text setters can have some string optimization for default values
+		setSvg(QString::fromStdString(pushButtonMessagemessage.svg()));
+		setSvgScaleFactor(pushButtonMessagemessage.svgscalefactor());
+
+		// Text setters can have some string optimization for default values
+		//
+		setScriptAfterCreate(QString::fromStdString(pushButtonMessagemessage.scriptaftercreate()));
+		setScriptClicked(QString::fromStdString(pushButtonMessagemessage.scriptclicked()));
+		setScriptPressed(QString::fromStdString(pushButtonMessagemessage.scriptpressed()));
+		setScriptReleased(QString::fromStdString(pushButtonMessagemessage.scriptreleased()));
+		setScriptToggled(QString::fromStdString(pushButtonMessagemessage.scripttoggled()));
 
 		return true;
 	}
@@ -193,26 +284,22 @@ namespace VFrame30
 		{
 			// Connect slots only if it has any sense
 			//
-			if (scriptClicked().isEmpty() == false &&
-				scriptClicked() != PropertyNames::pushButtonDefaultEventScript)
+			if (scriptClicked().isEmpty() == false && scriptClicked() != PropertyNames::pushButtonDefaultEventScript)
 			{
 				connect(control, &QPushButton::clicked, this, &SchemaItemPushButton::clicked);
 			}
 
-			if (scriptPressed().isEmpty() == false &&
-				scriptPressed() != PropertyNames::pushButtonDefaultEventScript)
+			if (scriptPressed().isEmpty() == false && scriptPressed() != PropertyNames::pushButtonDefaultEventScript)
 			{
 				connect(control, &QPushButton::pressed, this, &SchemaItemPushButton::pressed);
 			}
 
-			if (scriptReleased().isEmpty() == false &&
-				scriptReleased() != PropertyNames::pushButtonDefaultEventScript)
+			if (scriptReleased().isEmpty() == false && scriptReleased() != PropertyNames::pushButtonDefaultEventScript)
 			{
 				connect(control, &QPushButton::released, this, &SchemaItemPushButton::released);
 			}
 
-			if (scriptToggled().isEmpty() == false &&
-				scriptToggled() != PropertyNames::pushButtonDefaultEventScript)
+			if (scriptToggled().isEmpty() == false && scriptToggled() != PropertyNames::pushButtonDefaultEventScript)
 			{
 				connect(control, &QPushButton::toggled, this, &SchemaItemPushButton::toggled);
 			}
@@ -230,7 +317,7 @@ namespace VFrame30
 	//
 	void SchemaItemPushButton::updateWidgetProperties(QWidget* widget, bool editMode) const
 	{
-		QPushButton* control = dynamic_cast<QPushButton*>(widget);
+		auto control = dynamic_cast<QEditorPushButton*>(widget);
 
 		if (control == nullptr)
 		{
@@ -242,10 +329,8 @@ namespace VFrame30
 
 		bool updateRequired = false;
 
-		if (control->text() != text() ||
-			control->isCheckable() != isCheckable() ||
-			control->autoRepeat() != autoRepeat() ||
-			control->autoRepeatDelay() != autoRepeatDelay() ||
+		if (control->text() != text() || m_svgChanged == true || control->isCheckable() != isCheckable() ||
+			control->autoRepeat() != autoRepeat() || control->autoRepeatDelay() != autoRepeatDelay() ||
 			control->autoRepeatInterval() != autoRepeatInterval())
 		{
 			updateRequired = true;
@@ -262,6 +347,9 @@ namespace VFrame30
 			control->setAutoRepeatInterval(autoRepeatInterval());
 
 			control->setUpdatesEnabled(true);
+
+			control->setSvg(m_svg, m_svgScaleFactor);
+			m_svgChanged = false;
 		}
 
 		return;
@@ -279,7 +367,7 @@ namespace VFrame30
 		}
 
 		if (m_scriptAfterCreate.trimmed().isEmpty() == true ||
-			m_scriptAfterCreate == PropertyNames::pushButtonDefaultEventScript)	// Suppose Default script does nothing, just return
+			m_scriptAfterCreate == PropertyNames::pushButtonDefaultEventScript) // Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -290,8 +378,7 @@ namespace VFrame30
 		{
 			m_jsAfterCreate = evaluateScript("AfterCreate", pushButtonWidget, m_scriptAfterCreate);
 
-			if (m_jsAfterCreate.isError() == true ||
-				m_jsAfterCreate.isNull() == true)
+			if (m_jsAfterCreate.isError() == true || m_jsAfterCreate.isNull() == true)
 			{
 				return;
 			}
@@ -307,7 +394,7 @@ namespace VFrame30
 	void SchemaItemPushButton::clicked(bool /*checked*/)
 	{
 		if (m_scriptClicked.isEmpty() == true ||
-			m_scriptClicked == PropertyNames::pushButtonDefaultEventScript)		// Suppose Default script does nothing, just return
+			m_scriptClicked == PropertyNames::pushButtonDefaultEventScript) // Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -325,8 +412,7 @@ namespace VFrame30
 		{
 			m_jsClicked = evaluateScript("Clicked", senderWidget, m_scriptClicked);
 
-			if (m_jsClicked.isError() == true ||
-				m_jsClicked.isNull() == true)
+			if (m_jsClicked.isError() == true || m_jsClicked.isNull() == true)
 			{
 				return;
 			}
@@ -342,7 +428,7 @@ namespace VFrame30
 	void SchemaItemPushButton::pressed()
 	{
 		if (m_scriptPressed.isEmpty() == true ||
-			m_scriptPressed == PropertyNames::pushButtonDefaultEventScript)		// Suppose Default script does nothing, just return
+			m_scriptPressed == PropertyNames::pushButtonDefaultEventScript) // Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -360,8 +446,7 @@ namespace VFrame30
 		{
 			m_jsPressed = evaluateScript("Pressed", senderWidget, m_scriptPressed);
 
-			if (m_jsPressed.isError() == true ||
-				m_jsPressed.isNull() == true)
+			if (m_jsPressed.isError() == true || m_jsPressed.isNull() == true)
 			{
 				return;
 			}
@@ -377,7 +462,7 @@ namespace VFrame30
 	void SchemaItemPushButton::released()
 	{
 		if (m_scriptReleased.isEmpty() == true ||
-			m_scriptReleased == PropertyNames::pushButtonDefaultEventScript)		// Suppose Default script does nothing, just return
+			m_scriptReleased == PropertyNames::pushButtonDefaultEventScript) // Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -395,8 +480,7 @@ namespace VFrame30
 		{
 			m_jsReleased = evaluateScript("Released", senderWidget, m_scriptReleased);
 
-			if (m_jsReleased.isError() == true ||
-				m_jsReleased.isNull() == true)
+			if (m_jsReleased.isError() == true || m_jsReleased.isNull() == true)
 			{
 				return;
 			}
@@ -412,7 +496,7 @@ namespace VFrame30
 	void SchemaItemPushButton::toggled(bool /*checked*/)
 	{
 		if (m_scriptToggled.isEmpty() == true ||
-			m_scriptToggled == PropertyNames::pushButtonDefaultEventScript)		// Suppose Default script does nothing, just return
+			m_scriptToggled == PropertyNames::pushButtonDefaultEventScript) // Suppose Default script does nothing, just return
 		{
 			return;
 		}
@@ -430,8 +514,7 @@ namespace VFrame30
 		{
 			m_jsToggled = evaluateScript("Toggled", senderWidget, m_scriptToggled);
 
-			if (m_jsToggled.isError() == true ||
-				m_jsToggled.isNull() == true)
+			if (m_jsToggled.isError() == true || m_jsToggled.isNull() == true)
 			{
 				return;
 			}
@@ -446,7 +529,11 @@ namespace VFrame30
 
 	void SchemaItemPushButton::runEventScript(QString scriptName, QJSValue& evaluatedJs, QPushButton* buttonWidget, bool allowMessageBox)
 	{
-		return SchemaItemControl::runEventScript<QPushButton>(evaluatedJs, allowMessageBox, scriptName, buttonWidget, buttonWidget->isChecked());
+		return SchemaItemControl::runEventScript<QPushButton>(evaluatedJs,
+															  allowMessageBox,
+															  scriptName,
+															  buttonWidget,
+															  buttonWidget->isChecked());
 	}
 
 	// Properties and Data
@@ -459,6 +546,28 @@ namespace VFrame30
 	void SchemaItemPushButton::setText(QString value)
 	{
 		m_text = std::move(value);
+	}
+
+	const QString& SchemaItemPushButton::svg() const
+	{
+		return m_svg;
+	}
+
+	void SchemaItemPushButton::setSvg(QString value)
+	{
+		m_svg = std::move(value);
+		m_svgChanged = true;
+	}
+
+	double SchemaItemPushButton::svgScaleFactor() const
+	{
+		return m_svgScaleFactor;
+	}
+
+	void SchemaItemPushButton::setSvgScaleFactor(double value)
+	{
+		m_svgScaleFactor = std::clamp(value, 0.01, 5.0);
+		m_svgChanged = true;
 	}
 
 	bool SchemaItemPushButton::isCheckable() const
@@ -629,7 +738,7 @@ namespace VFrame30
 
 		p->drawRoundedRect(r, 5.0, 5.0, Qt::RelativeSize);
 
-		//p->drawRect(r);
+		// p->drawRect(r);
 
 		// Draw text
 		//
@@ -644,7 +753,7 @@ namespace VFrame30
 			font.setSize(12.0, schema->unit());
 			break;
 		case SchemaUnit::Inch:
-			font.setSize(1.0 / 8.0, schema->unit());		// 1/8"
+			font.setSize(1.0 / 8.0, schema->unit()); // 1/8"
 			break;
 		case SchemaUnit::Millimeter:
 			font.setSize(mm2in(3), schema->unit());
@@ -653,13 +762,69 @@ namespace VFrame30
 			assert(false);
 		}
 
-		DrawHelper::drawText(p,
-							 font,
-							 schema->unit(),
-							 m_text,
-							 r,
-							 Qt::AlignCenter | Qt::AlignHCenter);
+		DrawHelper::drawText(p, font, schema->unit(), m_text, r, Qt::AlignCenter | Qt::AlignHCenter);
 		return;
 	}
-}
 
+	//
+	// QEditorPushButton
+	//
+	QEditorPushButton::QEditorPushButton(QString text, QWidget* parent, bool editMode) :
+		QPushButton{text, parent},
+		m_editMode(editMode)
+	{
+		if (m_editMode == true)
+		{
+			setMouseTracking(false);
+			setAttribute(Qt::WA_TransparentForMouseEvents);
+		}
+	}
+
+	void QEditorPushButton::resizeEvent(QResizeEvent* event)
+	{
+		QPushButton::resizeEvent(event);
+		setSvg(m_svg, m_svgScaleFactor);
+		return;
+	}
+
+	QString QEditorPushButton::svg()
+	{
+		return m_svg;
+	}
+
+	void QEditorPushButton::setSvg(QString svg)
+	{
+		m_svg = svg;
+		setSvg(m_svg, m_svgScaleFactor);
+	}
+
+	void QEditorPushButton::setSvg(QString svg, double scaleFactor)
+	{
+		m_svg = svg;
+		m_svgScaleFactor = std::clamp(scaleFactor, 0.01, 5.0);
+
+		if (m_svg.isEmpty() == true)
+		{
+			setIcon(QIcon{});
+		}
+		else
+		{
+			QSize imageSize = size() * m_svgScaleFactor;
+
+			QPixmap pixmap = svgToPixmap(m_svg.toUtf8(), imageSize);
+			setIcon(QIcon{pixmap});
+			setIconSize(imageSize);
+		}
+	};
+
+	double QEditorPushButton::svgScaleFactor()
+	{
+		return m_svgScaleFactor;
+	}
+
+	void QEditorPushButton::setSvgScaleFactor(double value)
+	{
+		m_svgScaleFactor = value;
+		setSvg(m_svg, m_svgScaleFactor);
+	}
+} // namespace VFrame30

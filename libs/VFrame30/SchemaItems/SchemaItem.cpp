@@ -24,53 +24,87 @@ namespace VFrame30
 
 	SchemaItem::~SchemaItem() {}
 
-	void SchemaItem::propertyDemand(const QString& /*prop*/)
+	void SchemaItem::propertyDemand(const QString& prop)
 	{
-		addProperty<QUuid, SchemaItem, &SchemaItem::guid, nullptr>(PropertyNames::guid, PropertyNames::functionalCategory, true)
-			->setExpert(true);
+		if (prop.isEmpty() == true || prop == PropertyNames::guid)
+		{
+			addProperty<QUuid, SchemaItem, &SchemaItem::guid, nullptr>(PropertyNames::guid, PropertyNames::functionalCategory, true)
+				->setExpert(true);
+		}
 
-		addProperty<bool, SchemaItem, &SchemaItem::commented, &SchemaItem::setCommented>(PropertyNames::commented,
-																						 PropertyNames::functionalCategory,
+		if (prop.isEmpty() == true || prop == PropertyNames::commented)
+		{
+			addProperty<bool, SchemaItem, &SchemaItem::commented, &SchemaItem::setCommented>(PropertyNames::commented,
+																							 PropertyNames::functionalCategory,
+																							 true);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::locked)
+		{
+			addProperty<bool, SchemaItem, &SchemaItem::isLocked, &SchemaItem::setLocked>(PropertyNames::locked,
+																						 PropertyNames::commonCategory,
 																						 true);
-		addProperty<bool, SchemaItem, &SchemaItem::isLocked, &SchemaItem::setLocked>(PropertyNames::locked,
-																					 PropertyNames::commonCategory,
-																					 true);
+		}
 
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::tags, true, SchemaItem::tagsAsString, SchemaItem::setTags)
-			->setSpecificEditor(E::PropertySpecificEditor::Tags);
+		if (prop.isEmpty() == true || prop == PropertyNames::tags)
+		{
+			ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::tags, true, SchemaItem::tagsAsString, SchemaItem::setTags)
+				->setSpecificEditor(E::PropertySpecificEditor::Tags);
+		}
 
-		addProperty<QString, SchemaItem, &SchemaItem::label, nullptr>(PropertyNames::label, PropertyNames::functionalCategory, true);
-		addProperty<E::TextPos, SchemaItem, &SchemaItem::labelPos, &FblItemRect::setLabelPos>(PropertyNames::labelPos,
-																							  PropertyNames::functionalCategory,
-																							  true);
+		if (prop.isEmpty() == true || prop == PropertyNames::label)
+		{
+			addProperty<QString, SchemaItem, &SchemaItem::label, nullptr>(PropertyNames::label, PropertyNames::functionalCategory, true);
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::labelPos)
+		{
+			addProperty<E::TextPos, SchemaItem, &SchemaItem::labelPos, &FblItemRect::setLabelPos>(PropertyNames::labelPos,
+																								  PropertyNames::functionalCategory,
+																								  true);
+		}
 
 		bool isSchemaItemControl = qobject_cast<SchemaItemControl*>(this) != nullptr; // Some properties are hidden for SchemaItemControl
 
-		addProperty<bool, SchemaItem, &SchemaItem::acceptClick, &SchemaItem::setAcceptClick>(PropertyNames::acceptClick,
-																							 PropertyNames::scriptsCategory,
-																							 !isSchemaItemControl);
-		auto clickScriptProp =
-			addProperty<QString, SchemaItem, &SchemaItem::clickScript, &SchemaItem::setClickScript>(PropertyNames::clickScript,
-																									PropertyNames::scriptsCategory,
-																									!isSchemaItemControl);
-		clickScriptProp->setIsScript(true);
+		if (prop.isEmpty() == true || prop == PropertyNames::acceptClick)
+		{
+			addProperty<bool, SchemaItem, &SchemaItem::acceptClick, &SchemaItem::setAcceptClick>(PropertyNames::acceptClick,
+																								 PropertyNames::scriptsCategory,
+																								 !isSchemaItemControl);
+		}
 
-		addProperty<QString>(
-			PropertyNames::objectName,
-			PropertyNames::scriptsCategory,
-			true,
-			[this]()
-			{
-				return this->objectName();
-			},
-			[this](QString value)
-			{
-				this->setObjectName(value);
-			});
+		if (prop.isEmpty() == true || prop == PropertyNames::clickScript)
+		{
+			auto p = addProperty<QString, SchemaItem, &SchemaItem::clickScript, &SchemaItem::setClickScript>(PropertyNames::clickScript,
+																											 PropertyNames::scriptsCategory,
+																											 !isSchemaItemControl);
+			p->setIsScript(true);
+		}
 
-		addProperty<QString, SchemaItem, &SchemaItem::preDrawScript, &SchemaItem::setPreDrawScript>(PropertyNames::preDrawScript,
-																									PropertyNames::scriptsCategory,
-																									true);
+		if (prop.isEmpty() == true || prop == PropertyNames::objectName)
+		{
+			addProperty<QString>(
+				PropertyNames::objectName,
+				PropertyNames::scriptsCategory,
+				true,
+				[this]()
+				{
+					return this->objectName();
+				},
+				[this](QString value)
+				{
+					this->setObjectName(value);
+				});
+		}
+
+		if (prop.isEmpty() == true || prop == PropertyNames::preDrawScript)
+		{
+			auto p =
+				addProperty<QString, SchemaItem, &SchemaItem::preDrawScript, &SchemaItem::setPreDrawScript>(PropertyNames::preDrawScript,
+																											PropertyNames::scriptsCategory,
+																											true);
+			p->setIsScript(true);
+		}
 
 		return;
 	}

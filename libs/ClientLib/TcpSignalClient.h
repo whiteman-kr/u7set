@@ -1,10 +1,6 @@
 #pragma once
 
-#include <unordered_set>
-#include <QReadWriteLock>
-
-
-#include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/SoftwareEndpoint.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 
@@ -14,14 +10,14 @@
 namespace ClientLib
 {
 	inline const int RequestTimeIntervalMs = 20;
-	
+
 	// Number of signals requested by ADS_GET_APP_SIGNAL_STATE.
-	// Assume RequestTimeIntervalMs is 20ms, then we have about 50 requests per second, 
+	// Assume RequestTimeIntervalMs is 20ms, then we have about 50 requests per second,
 	// for 100K signals with 250 signals per request, full update will take approximately 8 seconds.
 	// 250 signals * (1'000ms / RequestTimeIntervalMs) rps = 12500 signals per seconds.
 	// 100'000 / 12500 = 8 signals per second.
 	//
-	inline const int MaxStateRequestCount = ADS_GET_APP_SIGNAL_STATE_MAX / 8;  // 250 signals per ADS_GET_APP_SIGNAL_STATE
+	inline const int MaxStateRequestCount = ADS_GET_APP_SIGNAL_STATE_MAX / 8; // 250 signals per ADS_GET_APP_SIGNAL_STATE
 
 	//
 	//		ADS_GET_APP_SIGNAL_LIST_START
@@ -30,7 +26,7 @@ namespace ClientLib
 	//				|
 	//		ADS_GET_APP_SIGNAL_PARAM
 	//				|
-	//		ADS_GET_APP_SIGNAL_STATE_CHANGES <----+	
+	//		ADS_GET_APP_SIGNAL_STATE_CHANGES <----+
 	//              |                             |
 	//              ?---------------------------->|
 	//              | pending states?             |
@@ -39,7 +35,9 @@ namespace ClientLib
 	//				|						      |
 	//				+-----------------------------+
 	//
-	class TcpSignalClient : public Tcp::Client, public TcpClientStatistics, public HasLogFile
+	class TcpSignalClient : public Tcp::Client,
+							public TcpClientStatistics,
+							public HasLogFile
 	{
 		Q_OBJECT
 
@@ -84,6 +82,8 @@ namespace ClientLib
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
 
+		const SoftwareEndpoint::AppDataService& server() const;
+
 	private:
 		void reset();
 		void checkTimeDiscrepancy(qint64 serverUtcTimeMs, qint64 serverLocalTimeMs);
@@ -95,12 +95,12 @@ namespace ClientLib
 	private:
 		std::atomic<bool> m_signalParamsLoaded{false};
 		std::atomic<bool> m_signalStatesLoaded{false};
-		
+
 		// Cache protobuf messages
 		//
 		std::vector<Hash> m_signalList;
-		std::set<Hash> m_busSignalHashes;		// Bus signal hash set. These hashes are later removed from m_signalList
-		std::set<Hash> m_signalStatesSet;		// Signal hash is added here when signal state is received
+		std::set<Hash> m_busSignalHashes; // Bus signal hash set. These hashes are later removed from m_signalList
+		std::set<Hash> m_signalStatesSet; // Signal hash is added here when signal state is received
 
 		int m_lastSignalParamStartIndex = 0;
 
@@ -108,7 +108,7 @@ namespace ClientLib
 
 		// Check that the server and client time is the same.
 		//
-		QDate m_timeDiscrepancyCheckDate;  // When was the last time the time discrepancy was checked?
+		QDate m_timeDiscrepancyCheckDate; // When was the last time the time discrepancy was checked?
 	};
 
-}
+} // namespace ClientLib

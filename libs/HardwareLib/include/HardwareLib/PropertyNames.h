@@ -15,6 +15,24 @@ namespace Hardware
 		inline static const QString equipmentId = QStringLiteral("EquipmentID");
 		inline static const QString caption = QStringLiteral("Caption");
 		inline static const QString childRestriction = QStringLiteral("ChildRestriction");
+		inline static const QString preBuildScript = QStringLiteral("PreBuildScript");
+		inline static const QString preBuildScriptDescription = QStringLiteral(R"(<pre>(function(device, equipment) {
+    // Input parameters:
+    //      device: ScriptDeviceObject
+    //      equipment: ScriptEquipment
+
+    // -- Example: Copying a property value from another device --
+
+    // Retrieve device System by EquipmentID: SYSTEMID
+    const system = equipment.find("SYSTEMID"); // system: ScriptDeviceObject
+
+    // Extract the property value from the system
+    const globalScript = system.propertyValue("MonitorGlobalScript");
+
+    // Assign the extracted property value to the current device
+    device.setPropertyValue("GlobalScript", globalScript);
+})</pre> )");
+
 		inline static const QString place = QStringLiteral("Place");
 		inline static const QString specificProperties = QStringLiteral("SpecificProperties");
 		inline static const QString signalSpecificProperties = QStringLiteral("SignalSpecificProperties");
@@ -100,6 +118,7 @@ namespace Hardware
 		inline static const QString categoryData = QStringLiteral("Data");
 		inline static const QString categoryMats = QStringLiteral("MATS");
 		inline static const QString categoryDiagnostics = QStringLiteral("Diagnostics");
+		inline static const QString categoryScripts = QStringLiteral("Scripts");
 
 		inline static const QString globalScript = QStringLiteral("GlobalScript");
 	};

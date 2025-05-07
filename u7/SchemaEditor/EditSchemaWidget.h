@@ -3,10 +3,8 @@
 #include <VFrame30/BaseSchemaWidget.h>
 #include <VFrame30/LogicSchema.h>
 #include <VFrame30/SchemaItem.h>
-#include <VFrame30/SchemaItemBus.h>
 #include <VFrame30/UfbSchema.h>
 
-#include "./EditEngine/EditEngine.h"
 #include "CreateSignalDialog.h"
 #include "EditConnectionLine.h"
 #include "EditSchemaTypes.h"
@@ -24,6 +22,15 @@ class EditSchemaTabPage;
 class SchemaFindDialog;
 class AppSignalSetProvider;
 
+namespace EditEngine
+{
+	class EditEngine;
+}
+
+namespace VFrame30
+{
+	class SchemaItemBus;
+}
 
 //
 // SchemaItemsClipboard
@@ -154,9 +161,6 @@ protected:
 	bool loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out);
 
 public:
-	static bool loadBusses(DbController* db, std::vector<AppSignalLib::Bus>* out, QWidget* parentWidget);
-
-public:
 	void resetAction();
 	void clearSelection();
 
@@ -194,16 +198,6 @@ protected slots:
 	void escapeKey();
 
 	void f2Key();
-	void f2KeyForRect(SchemaItemPtr item);
-	bool f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngine);
-	bool f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEngine);
-	void f2KeyForConst(SchemaItemPtr item);
-	void f2KeyForSignal(SchemaItemPtr item);
-	void f2KeyForLoopback(SchemaItemPtr item);
-	void f2KeyForValue(SchemaItemPtr item);
-	void f2KeyForImageValue(SchemaItemPtr item);
-	void f2KeyForBus(SchemaItemPtr item);
-	void f2KeyForAfb(SchemaItemPtr item);
 
 	void deleteKey();
 
@@ -392,8 +386,6 @@ private:
 	// --
 	//
 	bool m_ctrlWasPressed = false;
-
-	static QString m_lastUsedLoopbackId;
 
 	QString m_initialSchemaId;
 

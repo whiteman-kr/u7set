@@ -7,16 +7,34 @@
 #define ADSB_ADS_BRIDGE_H
 
 #include "Common.h"
-#include "SelfTest.h"
 
 // MSVC NOTE: Use lib.exe to create import library for dll:
 //		lib.exe /DEF:AdsBridge.def /OUT:AdsBridge.lib /MACHINE:X64
 //
 
+/// @cond DOXYGEN_IGNORE
+#ifdef __cplusplus
+	#define ADSB_INLINE inline        // C++
+#else
+	#define ADSB_INLINE static inline // C
+#endif
+/// @endcond
+
+/* \cond INTERNAL */
+bool AdsGetTcpConnectionStatusesPrivate1(size_t structSize, struct AdsConnectionStatus* out, size_t count);
+size_t AdsGetSignalParamsPrivate1(size_t structSize, const MatsSignalHash* signalHashes, struct MatsAppSignalParam* out, size_t count);
+size_t AdsGetSignalStatesPrivate1(size_t structSize, const MatsSignalHash* signalHashes, struct MatsAppSignalState* out, size_t count);
+/* \endcond */
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
+	/**
+	 * \brief Gets the API version of the AdsBridge library (returns 0x00000002 for now).
+	 */
+	uint32_t AdsGetInterfaceVersion(void);
 
 	/**
 	 * \brief Sets the log handler for the AdsBridge library.
@@ -33,7 +51,7 @@ extern "C"
 	 *
 	 * This function sets the log level that will be used by the AdsBridge library to filter log messages. The log level determines the
 	 * severity of the log messages that will be logged. The available log levels are defined in the MatsLogLevel enum. By default, the log
-	 * level is set to LOG_LEVEL_WARNING. This function can be called before AdsInit().
+	 * level is set to MATS_LOG_LEVEL_WARNING. This function can be called before AdsInit().
 	 *
 	 * \param level The log level to set.
 	 */
@@ -49,10 +67,6 @@ extern "C"
 	 */
 	void AdsTestLogHandler(enum MatsLogLevel level, const char* message);
 
-	/// @cond
-	bool AdsInitPrivate(int argc, char** argv, const char* equipmentId, bool isQtApplication);
-	/// @endcond
-
 	/**
 	 * \brief Initializes the AdsBridge library.
 	 *
@@ -63,12 +77,7 @@ extern "C"
 	 * \param equipmentId The ID of the equipment instance.
 	 * \param isQtApplication True if the application is Qt-based, false otherwise.
 	 */
-	inline bool AdsInit(int argc, char** argv, const char* equipmentId, bool isQtApplication)
-	{
-		// Test structure size, fields and alignment.
-		//
-		return AdsSelfTest() && AdsInitPrivate(argc, argv, equipmentId, isQtApplication);
-	}
+	bool AdsInit(int argc, char** argv, const char* equipmentId, bool isQtApplication);
 
 	/**
 	 * \brief Shuts down the AdsBridge library.
@@ -162,11 +171,15 @@ extern "C"
 	 *
 	 * This function returns the connection statuses of the AppDataService(s).
 	 *
-	 * \param out The array of connection statuses to fill, must be allocated by caller.
+	 * \param out The array of connection statuses to fill, must be allocated by caller, AdsConnectionStatus::size must be set to
+	 * sizeof(AdsConnectionStatus).
 	 * \param count The number of connection statuses to get.
 	 * \return True if the connection statuses were successfully retrieved, false otherwise.
 	 */
-	bool AdsGetTcpConnectionStatuses(struct AdsConnectionStatus* out, size_t count);
+	ADSB_INLINE bool AdsGetTcpConnectionStatuses(struct AdsConnectionStatus* out, size_t count)
+	{
+		return AdsGetTcpConnectionStatusesPrivate1(sizeof(struct AdsConnectionStatus), out, count);
+	}
 
 	/**
 	 * \brief Checks if the signal parameters are loaded.
@@ -212,11 +225,15 @@ extern "C"
 	 * This function returns the parameters of the specified signals.
 	 *
 	 * \param signalHashes The array of signal hashes to get the parameters for.
-	 * \param out The array of signal parameters to fill, must be allocated by caller.
+	 * \param out The array of signal parameters to fill, must be allocated by caller. If signal is not found, the corresponding signal
+	 * will be filled with zeros.
 	 * \param count The number of signal parameters to get.
-	 * \return True if all signal parameters were successfully retrieved, false otherwise.
+	 * \return 0 if error, otherwise the number of successfully retrieved signal parameters.
 	 */
-	bool AdsGetSignalParams(const MatsSignalHash* signalHashes, struct MatsAppSignalParam* out, size_t count);
+	ADSB_INLINE size_t AdsGetSignalParams(const MatsSignalHash* signalHashes, struct MatsAppSignalParam* out, size_t count)
+	{
+		return AdsGetSignalParamsPrivate1(sizeof(struct MatsAppSignalParam), signalHashes, out, count);
+	}
 
 	/**
 	 * \brief Gets the states of the specified signals.
@@ -224,11 +241,15 @@ extern "C"
 	 * This function returns the states of the specified signals.
 	 *
 	 * \param signalHashes The array of signal hashes to get the states for.
-	 * \param out The array of signal states to fill, must be allocated by caller.
+	 * \param out The array of signal states to fill, must be allocated by caller. If signal is not found, the corresponding signal
+	 * will be filled with zeros.
 	 * \param count The number of signal states to get.
-	 * \return True if all signal states were successfully retrieved, false otherwise.
+	 * \return 0 if error, otherwise the number of successfully retrieved signal states.
 	 */
-	bool AdsGetSignalStates(const MatsSignalHash* signalHashes, struct MatsAppSignalState* out, size_t count);
+	ADSB_INLINE size_t AdsGetSignalStates(const MatsSignalHash* signalHashes, struct MatsAppSignalState* out, size_t count)
+	{
+		return AdsGetSignalStatesPrivate1(sizeof(struct MatsAppSignalState), signalHashes, out, count);
+	}
 
 	/**
 	 * \brief Calculates the hash value of the specified string.

@@ -1009,7 +1009,7 @@ bool DbController::getFileInfo(const std::vector<QString>* fullPathFileNames, st
 	//
 	emit signal_getFullPathFilesInfo(fullPathFileNames, out);
 
-	bool result = waitForComplete(parentWidget, tr("Geting files info"));
+	bool result = waitForComplete(parentWidget, tr("Getting files info"));
 	return result;
 }
 
@@ -2778,11 +2778,11 @@ bool DbController::getTags(std::vector<DbTag>* tags)
 												   {"diagnostics", "Diagnostics Schema"},
 												   {"ufb", "UFB Schema"},
 												   {"wiring", "Wiring Schema"},
-												   {"in", "Input Signal"},
-												   {"out", "Output Signal"},
-												   {"view_linear", "Signal with Linear Grid"},
-												   {"view_log10", "Signal with Logarithmic Grid"},
-												   {"view_period", "Signal with Reactor Period Grid"}};
+												   {AppSignalTags::in, "Input Signal"},
+												   {AppSignalTags::out, "Output Signal"},
+												   {AppSignalTags::view_linear, "Signal with Linear Grid"},
+												   {AppSignalTags::view_log10, " Signal with Logarithmic Grid "},
+												   {AppSignalTags::view_period, " Signal with Reactor Period Grid "}};
 
 	std::vector<DbFileInfo> fileList;
 

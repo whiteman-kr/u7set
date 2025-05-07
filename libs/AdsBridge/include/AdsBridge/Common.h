@@ -20,9 +20,9 @@ extern "C"
 	 */
 	enum MatsLogLevel
 	{
-		LOG_LEVEL_DEBUG,   ///< Debug log level.
-		LOG_LEVEL_WARNING, ///< Warning log level.
-		LOG_LEVEL_ERROR    ///< Error log level.
+		MATS_LOG_LEVEL_DEBUG,   ///< Debug log level.
+		MATS_LOG_LEVEL_WARNING, ///< Warning log level.
+		MATS_LOG_LEVEL_ERROR    ///< Error log level.
 	};
 
 	/// @brief Connection results for MatsConnectionStatus.
@@ -46,6 +46,7 @@ extern "C"
 	 */
 	typedef void (*MatsLogHandler)(enum MatsLogLevel level, const char* message);
 
+#pragma pack(push, 8) // Ensure 8-byte alignment
 	/**
 	 * @struct AdsConnectionStatus
 	 * @brief Represents the status of an AppDataService TCP connection.
@@ -67,6 +68,12 @@ extern "C"
 		size_t requestCount;                           ///< Number of requests.
 		size_t replyCount;                             ///< Number of replies.
 	};
+#pragma pack(pop)                                      // Restore previous packing alignment
+
+	/// @cond DOXYGEN_IGNORE
+	typedef struct AdsConnectionStatus AdsConnectionStatus;
+	/// @endcond
+
 
 	/**
 	 * @brief Represents a timestamp. The timestamp is a 64-bit unsigned integer that represents the number of milliseconds since the epoch.
@@ -109,7 +116,7 @@ extern "C"
 		MATS_SIGNAL_BUS       ///< Represents a bus signal type.
 	};
 
-	// clang-format off
+							  // clang-format off
 #define MATS_FLAG_VALID				0x00000001	///< Flag mask to indicate that the signal value is valid.
 #define MATS_FLAG_STATE_AVAILABLE	0x00000002	///< Flag mask to indicate that the signal state is available (AppDataService receives signal state from the Logic Module).
 #define MATS_FLAG_SIMULATED			0x00000004	///< Flag mask to indicate that the AFB sim_lock is applied with the specified flag.
@@ -121,6 +128,7 @@ extern "C"
 #define MATS_FLAG_TUNING_DEFAULT	0x00000100	///< Flag mask to indicate that the tunable signal has current value equal to the default tuning value.
 	// clang-format on
 
+#pragma pack(push, 8) // Ensure 8-byte alignment
 	/**
 	 * @struct MatsAppSignalParam
 	 * @brief Represents the parameters of an application signal.
@@ -147,7 +155,14 @@ extern "C"
 
 		bool tuning;                        ///< Indicates if the signal is used for tuning.
 	};
+#pragma pack(pop)                           // Restore previous packing alignment
 
+	/// @cond DOXYGEN_IGNORE
+	typedef struct MatsAppSignalParam MatsAppSignalParam;
+	/// @endcond
+
+
+#pragma pack(push, 8) // Ensure 8-byte alignment
 	/**
 	 * @struct MatsAppSignalState
 	 * @brief Represents the state of an application signal.
@@ -160,7 +175,17 @@ extern "C"
 
 		double value;             ///< The value of the signal.
 		uint32_t flags;           ///< The flags associated with the signal. Use MATS_FLAG_XXX.
+
+		uint32_t reserve1;        ///< Reserved for future use.
+		uint32_t reserve2;        ///< Reserved for future use.
+		uint32_t reserve3;        ///< Reserved for future use.
 	};
+#pragma pack(pop)                 // Restore previous packing alignment
+
+	/// @cond DOXYGEN_IGNORE
+	typedef struct MatsAppSignalState MatsAppSignalState;
+	/// @endcond
+
 
 #ifdef __cplusplus
 } // extern "C"

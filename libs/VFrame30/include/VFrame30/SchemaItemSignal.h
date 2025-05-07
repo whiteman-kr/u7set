@@ -1,8 +1,8 @@
 #pragma once
 
 #include <VFrame30/DrawParam.h>
-#include <VFrame30/IMatsSchemaItemAssociations.h>
 #include <VFrame30/FblItemRect.h>
+#include <VFrame30/IMatsSchemaItemAssociations.h>
 
 namespace VFrame30
 {
@@ -37,7 +37,8 @@ namespace VFrame30
 		})
 		\endcode
 	*/
-	class SchemaItemSignal : public FblItemRect, public IMatsSchemaItemAssociations
+	class SchemaItemSignal : public FblItemRect,
+							 public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
@@ -49,11 +50,13 @@ namespace VFrame30
 		Q_PROPERTY(QStringList appSignalIDs READ appSignalIdList)
 		Q_PROPERTY(QStringList AppSignalIDs READ appSignalIdList)
 
-		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>impactSignalIDs.length</b> to get number of identifiers.
+		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use
+		/// <b>impactSignalIDs.length</b> to get number of identifiers.
 		Q_PROPERTY(QStringList impactSignalIDs READ impactAppSignalIdList)
 		Q_PROPERTY(QStringList ImpactSignalIDs READ impactAppSignalIdList)
 
-		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use <b>impactAppSignalIDs.length</b> to get number of identifiers.
+		/// \brief Impact application signal identifiers array. Impact signal is usually related to AppSignalID in some or other way. Use
+		/// <b>impactAppSignalIDs.length</b> to get number of identifiers.
 		Q_PROPERTY(QStringList impactAppSignalIDs READ impactAppSignalIdList)
 		Q_PROPERTY(QStringList ImpactAppSignalIDs READ impactAppSignalIdList)
 
@@ -122,10 +125,7 @@ namespace VFrame30
 			{
 			}
 
-			bool operator<(const Cell& that) const
-			{
-				return this->id < that.id;
-			}
+			bool operator<(const Cell& that) const { return this->id < that.id; }
 		};
 
 		// Serialization
@@ -265,7 +265,8 @@ namespace VFrame30
 		/// \brief Returns data type associated with the cell.
 		E::ColumnData cellData(int row, int column) const;
 
-		/// \brief Returns AppSignalID associated with the cell. <b>Note:</b> the result can be value one of \ref appSignalIDs or \ref impactSignalIDs
+		/// \brief Returns AppSignalID associated with the cell. <b>Note:</b> the result can be value one of \ref appSignalIDs or \ref
+		/// impactSignalIDs
 		QString cellAppSignalID(int row, int column) const;
 
 		/// \brief Returns overriden (set with setCellText) cell text.
@@ -294,7 +295,7 @@ namespace VFrame30
 
 		bool m_multiLine = true; // Show multichannel signals in multi/single line
 
-		int m_precision = 2;
+		int m_precision = -1;    // -1 - Take precision from the SignalParam
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
 
 		QString m_customText;

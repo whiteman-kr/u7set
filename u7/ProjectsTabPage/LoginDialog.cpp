@@ -1,8 +1,8 @@
 #include "LoginDialog.h"
+#include "../Settings.h"
 #include "ui_LoginDialog.h"
-#include "Settings.h"
 
-LoginDialog::LoginDialog(const QStringList& loginCompleterList, QWidget *parent) :
+LoginDialog::LoginDialog(const QStringList& loginCompleterList, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::LoginDialog)
 {

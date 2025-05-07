@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QObject>
 #include "../Builder/Builder.h"
 
 
@@ -34,6 +33,7 @@ public:
 	void setProjectUserName(QString value);
 	void setProjectUserPassword(QString value);
 	void setBuildOutputPath(QString value);
+	void setBuildSchemaTags(QStringList value);
 
 	// Data
 	//
@@ -48,6 +48,5 @@ private:
 	QString m_projectUserName{"Administrator"};
 	QString m_projectUserPassword{"Password"};
 	QString m_buildOutputPath{"."};
+	QStringList m_buildSchemaTags; // Schema tags to build, if empty then build all schemas
 };
-
-

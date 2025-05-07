@@ -2705,6 +2705,24 @@ namespace Builder
 				  tr("Duplicate SchemaIDs %1, all schemas (including Monitor, Tuning, etc) must have unique SchemaIDs.").arg(schema));
 	}
 
+	/// IssueCode: ALP4030
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema %1 skipped, tags do not match the build tags.
+	///
+	/// Parameters:
+	///		%1 SchemaID
+	///
+	/// Description:
+	///		Schema skipped because its tags do not match the selected build tags.
+	///
+	void IssueLogger::wrnALP4030(QString schemaId)
+	{
+		QString message = tr("Schema %1 skipped, tags do not match the build tags.").arg(schemaId);
+		writeWarning0(issuePTypeToString(IssueType::AlParsing), 4030, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+	}
+
 
 	/// IssueCode: ALP4040
 	///
@@ -8007,6 +8025,26 @@ namespace Builder
 							 "in user application logic (schema %2).").arg(appSignalID).arg(schema)));
 	}
 
+	/// IssueCode: ALC5206
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   OptoPort %1 tx raw data out of range (%2 words)
+	///
+	/// Parameters:
+	///		%1 OptoPort EquipmentID
+	///		%2 tx raw data size
+	///
+	/// Description:
+	///		Tx raw data out of specified range
+	///
+	void IssueLogger::errALC5206(QString optoPortID, int txRawDataSize)
+	{
+		LOG_ERROR(IssueType::AlCompiler, 5205,
+				  QString(tr("OptoPort %1 tx raw data out of range (%2 words)").
+							arg(optoPortID).arg(txRawDataSize)));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning
@@ -9534,6 +9572,32 @@ namespace Builder
 				  .arg(property)
 				  .arg(lineNumber)
 				  .arg(message));
+	}
+
+	/// IssueCode: EQP6310
+	///
+	/// IssueType: Error
+	///
+	/// Title: Script property %1.%2 execution error at line %3: %4
+	///
+	/// Parameters:
+	///		%1 EquipmentID
+	///		%2 Property
+	///		%3 Line
+	///		%4 Execution error
+	///
+	/// Description:
+	///		Failed to execute script for the device equipment.
+	///
+	void IssueLogger::errEQP6310(QString equipmentId, QString property, int lineNumber, QString message)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6310,
+				  tr("Script property %1.%2 execution error at line %3: %4")
+					.arg(equipmentId)
+					.arg(property)
+					.arg(lineNumber)
+					.arg(message));
 	}
 
 	/// IssueCode: EQP6400

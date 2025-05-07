@@ -1,17 +1,17 @@
 #ifndef HARDWARE_LIB_DOMAIN
-#error Do not include this file in the project! Link HardwareLib instead.
+	#error Do not include this file in the project! Link HardwareLib instead.
 #endif
 
-#include <HardwareLib/ScriptDeviceObject.h>
-#include <HardwareLib/DeviceSystem.h>
-#include <HardwareLib/DeviceRack.h>
-#include <HardwareLib/DeviceChassis.h>
-#include <HardwareLib/DeviceModule.h>
-#include <HardwareLib/DeviceController.h>
-#include <HardwareLib/Workstation.h>
-#include <HardwareLib/Software.h>
 #include <HardwareLib/DeviceAppSignal.h>
+#include <HardwareLib/DeviceChassis.h>
+#include <HardwareLib/DeviceController.h>
+#include <HardwareLib/DeviceModule.h>
+#include <HardwareLib/DeviceRack.h>
+#include <HardwareLib/DeviceSystem.h>
 #include <HardwareLib/DiagSignal.h>
+#include <HardwareLib/ScriptDeviceObject.h>
+#include <HardwareLib/Software.h>
+#include <HardwareLib/Workstation.h>
 
 namespace Hardware
 {
@@ -60,9 +60,7 @@ namespace Hardware
 
 		if (index < 0 || index >= m_deviceObject->childrenCount())
 		{
-			engine->throwError(tr("ScriptDeviceObject %1 does not have child with index %2")
-							   .arg(m_deviceObject->equipmentId())
-							   .arg(index));
+			engine->throwError(tr("ScriptDeviceObject %1 does not have child with index %2").arg(m_deviceObject->equipmentId()).arg(index));
 			return {};
 		}
 
@@ -98,7 +96,9 @@ namespace Hardware
 
 		if (m_deviceObject->isSystem() == false)
 		{
-			engine->throwError(tr("Cannot construct ScriptDeviceSystem from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			engine->throwError(tr("Cannot construct ScriptDeviceSystem from %1 (%2)")
+								   .arg(m_deviceObject->equipmentId())
+								   .arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -117,7 +117,9 @@ namespace Hardware
 
 		if (m_deviceObject->isRack() == false)
 		{
-			engine->throwError(tr("Cannot construct ScriptDeviceRack from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			engine->throwError(tr("Cannot construct ScriptDeviceRack from %1 (%2)")
+								   .arg(m_deviceObject->equipmentId())
+								   .arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -136,7 +138,9 @@ namespace Hardware
 
 		if (m_deviceObject->isChassis() == false)
 		{
-			engine->throwError(tr("Cannot construct ScriptDeviceChassis from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			engine->throwError(tr("Cannot construct ScriptDeviceChassis from %1 (%2)")
+								   .arg(m_deviceObject->equipmentId())
+								   .arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -155,7 +159,9 @@ namespace Hardware
 
 		if (m_deviceObject->isModule() == false)
 		{
-			engine->throwError(tr("Cannot construct ScriptDeviceModule from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			engine->throwError(tr("Cannot construct ScriptDeviceModule from %1 (%2)")
+								   .arg(m_deviceObject->equipmentId())
+								   .arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -174,7 +180,9 @@ namespace Hardware
 
 		if (m_deviceObject->isController() == false)
 		{
-			engine->throwError(tr("Cannot construct ScriptDeviceController from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			engine->throwError(tr("Cannot construct ScriptDeviceController from %1 (%2)")
+								   .arg(m_deviceObject->equipmentId())
+								   .arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -193,7 +201,9 @@ namespace Hardware
 
 		if (m_deviceObject->isWorkstation() == false)
 		{
-			engine->throwError(tr("Cannot construct ScriptDeviceWorkstation from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			engine->throwError(tr("Cannot construct ScriptDeviceWorkstation from %1 (%2)")
+								   .arg(m_deviceObject->equipmentId())
+								   .arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -212,7 +222,9 @@ namespace Hardware
 
 		if (m_deviceObject->isSoftware() == false)
 		{
-			engine->throwError(tr("Cannot construct ScriptDeviceSoftware from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			engine->throwError(tr("Cannot construct ScriptDeviceSoftware from %1 (%2)")
+								   .arg(m_deviceObject->equipmentId())
+								   .arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -231,7 +243,9 @@ namespace Hardware
 
 		if (m_deviceObject->isAppSignal() == false)
 		{
-			engine->throwError(tr("Cannot construct ScriptDeviceAppSignal from %1 (%2)").arg(m_deviceObject->equipmentId()).arg(m_deviceObject->metaObject()->className()));
+			engine->throwError(tr("Cannot construct ScriptDeviceAppSignal from %1 (%2)")
+								   .arg(m_deviceObject->equipmentId())
+								   .arg(m_deviceObject->metaObject()->className()));
 			return {};
 		}
 
@@ -289,6 +303,41 @@ namespace Hardware
 		return m_deviceObject->propertyValue(caption);
 	}
 
+	void ScriptDeviceObject::setPropertyValue(QString property, QVariant value) const
+	{
+		try
+		{
+			if (value.isNull() == true)
+			{
+				throw QString{"Property %1 cannot be set to null value."}.arg(property);
+			}
+
+			// Sets the value of the specified property. Throws an exception if the property is not found.
+			//
+			auto p = m_deviceObject->propertyByCaption(property);
+			if (p == nullptr)
+			{
+				throw QString{"Property %1 not found in device object %2."}.arg(property).arg(m_deviceObject->equipmentId());
+			}
+
+			p->setValue(value);
+		}
+		catch (QString error)
+		{
+			// Throw JavaScript error
+			//
+			auto engine = qjsEngine(this);
+			assert(engine);
+
+			if (engine != nullptr)
+			{
+				engine->throwError(error);
+			}
+		}
+
+		return;
+	}
+
 	int ScriptDeviceObject::propertyInt(const QString& caption) const
 	{
 		return propertyValue(caption).toInt();
@@ -320,9 +369,9 @@ namespace Hardware
 		if (ok == false)
 		{
 			engine->throwError(tr("Device %1 cannot convert property %2 to IP address (value %3).")
-							   .arg(m_deviceObject->equipmentId())
-							   .arg(caption)
-							   .arg(s));
+								   .arg(m_deviceObject->equipmentId())
+								   .arg(caption)
+								   .arg(s));
 			return 0;
 		}
 
@@ -629,7 +678,8 @@ namespace Hardware
 	//
 	// Workstation
 	//
-	ScriptDeviceWorkstation::ScriptDeviceWorkstation(std::shared_ptr<Hardware::Workstation> deviceWorkstation, QObject* parent /*= nullptr*/) :
+	ScriptDeviceWorkstation::ScriptDeviceWorkstation(std::shared_ptr<Hardware::Workstation> deviceWorkstation,
+													 QObject* parent /*= nullptr*/) :
 		ScriptDeviceObject(deviceWorkstation, parent)
 	{
 		assert(deviceWorkstation);
@@ -782,4 +832,4 @@ namespace Hardware
 	}
 
 
-}
+} // namespace Hardware

@@ -1,5 +1,4 @@
 #pragma once
-#include <QTest>
 
 class DbControllerHardwareConfigurationTests : public QObject
 {

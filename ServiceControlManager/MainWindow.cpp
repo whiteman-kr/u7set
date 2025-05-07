@@ -16,10 +16,10 @@
 #include "../OnlineLib/UdpSocket.h"
 #include <functional>
 #include <QHeaderView>
+#include <UiLib/DialogAbout.h>
 
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
-	m_trayIcon(new QSystemTrayIcon(this)),
 	m_serviceModel(new ServiceTableModel(softwareInfo, this)),
 	m_serviceTable(new QTableView(this))
 {
@@ -34,49 +34,39 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	m_serviceTable->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
-	m_trayIcon->setIcon(windowIcon());
-	m_trayIcon->show();
-	connect(m_trayIcon, &QSystemTrayIcon::activated, this, &MainWindow::trayIconActivated);
-
-	QMenu *contextMenu = new QMenu(this);
-	QToolBar *toolBar = addToolBar(tr("Main actions"));
-
-	contextMenu->addAction(tr("Open service status window"), this, SLOT(openEditor()));
-	contextMenu->addSeparator();
-
 	// Manage Connections
+	//
 	QMenu* menu = menuBar()->addMenu(tr("Connections"));
-	QAction* scanNetworkAction = menu->addAction(tr("Scan network..."), this, SLOT(scanNetwork()));
-	menu->addSeparator();
-	toolBar->addAction(scanNetworkAction);
-	contextMenu->addAction(scanNetworkAction);
-	contextMenu->addSeparator();
+	menu->addAction(tr("Scan network..."), this, SLOT(scanNetwork()));
 
 	menu->addSeparator();
-	toolBar->addAction(menu->addAction(tr("Remove host"), this, SLOT(removeHost())));
-	toolBar->addSeparator();
 
 	menu->addSeparator();
-	QAction* exitAction = menu->addAction(tr("Exit"), qApp, SLOT(quit()));
-	toolBar->addAction(exitAction);
+	menu->addAction(tr("Remove host"), this, SLOT(removeHost()));
+
+	menu->addSeparator();
+	menu->addAction(tr("Exit"), qApp, SLOT(quit()));
 
 	//Languages
-	QActionGroup *languageActionGroup = new QActionGroup(this);
+	//
+	QActionGroup* languageActionGroup = new QActionGroup(this);
 	connect(languageActionGroup, &QActionGroup::triggered, this, &MainWindow::switchLanguage);
 
 	QString qmPath = ":/translations";
 	QDir dir(qmPath);
 	QStringList fileNames = dir.entryList(QStringList("ServiceControlManager_*.qm"));
+
 	if (!fileNames.isEmpty())
 	{
 		menu = menuBar()->addMenu(tr("&Language"));
-		contextMenu->addMenu(menu);
 		QAction *action = new QAction("1 English", this);
 		action->setCheckable(true);
 		action->setData("en");
 		menu->addAction(action);
 		languageActionGroup->addAction(action);
+
 		QSettings settings;
+
 		if ("en" == settings.value("locale", QLocale::system().name()).toString().left(2))
 		{
 			action->setChecked(true);
@@ -106,15 +96,10 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	}
 
 	// Help
-	menu = menuBar()->addMenu(tr("&Help"));
-	menu->addAction(tr("About &Qt"), qApp, SLOT(aboutQt()));
 	//
-
-	contextMenu->addAction(exitAction);
-
-	m_trayIcon->setContextMenu(contextMenu);
-
-	//resize(serviceTable->maximumViewportSize());
+	menu = menuBar()->addMenu(tr("&?"));
+	menu->addAction(tr("About &Qt..."), qApp, SLOT(aboutQt()));
+	menu->addAction(tr("About &Service Control Manager..."), this, SLOT(aboutScm()));
 }
 
 MainWindow::~MainWindow()
@@ -137,6 +122,7 @@ void MainWindow::openConnectionInfo(QString text)
 			return;
 		}
 	}
+
 	QWidget* w = new QWidget;
 	w->setWindowTitle(text);
 	w->showMaximized();
@@ -160,21 +146,6 @@ void MainWindow::openEditor()
 	showMaximized();
 	raise();
 	activateWindow();
-}
-
-void MainWindow::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
-{
-	switch (reason)
-	{
-		case QSystemTrayIcon::Context:
-			m_trayIcon->contextMenu()->show();
-			break;
-		case QSystemTrayIcon::Trigger:
-			openEditor();
-			break;
-		default:
-			break;
-	}
 }
 
 void MainWindow::switchLanguage(QAction* selectedAction)
@@ -243,4 +214,16 @@ void MainWindow::removeHost()
 	{
 		m_serviceModel->removeHost(row);
 	}
+}
+
+void MainWindow::aboutScm()
+{
+	QString text;
+
+	text += qApp->applicationName() + " provides tools for check RPCT services state.";
+
+	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png",
+							 qApp->organizationName(), QString(), QDate(), QUuid(), QString());
+
+
 }

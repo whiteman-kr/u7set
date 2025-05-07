@@ -180,11 +180,10 @@ namespace Builder
 
 		// --
 		//
-		DbFileTree filesTree;									// Filed in loadAllSchemas
+		DbFileTree filesTree; // Filed in loadAllSchemas
 		int schemaFileId = db.systemFileId(DbDir::SchemasDir);
 
-		if (bool ok = db.getFileListTree(&filesTree, schemaFileId, "%", true, nullptr);
-			ok == false)
+		if (bool ok = db.getFileListTree(&filesTree, schemaFileId, "%", true, nullptr); ok == false)
 		{
 			log->errPDB2001(schemaFileId, "%", db.lastError());
 			return false;
@@ -192,39 +191,40 @@ namespace Builder
 
 		// Remove all marked as deleted files
 		//
-		filesTree.removeIf([](const DbFileInfo& f)
+		filesTree.removeIf(
+			[](const DbFileInfo& f)
 			{
 				return f.action() == E::VcsItemAction::Deleted;
 			});
 
 		// Remove all unsupported files and marked for deleting
 		//
-		std::vector<DbFileInfo> files = filesTree.toVectorIf([](const DbFileInfo& f)
-						{
-							return  (f.action() != E::VcsItemAction::Deleted) &&
-									(f.isFolder() == false) &&
-									(f.fileName().endsWith(QLatin1String(".") + File::AlFileExtension, Qt::CaseInsensitive) ||
-									 f.fileName().endsWith(QLatin1String(".") + File::MvsFileExtension, Qt::CaseInsensitive) ||
-									 f.fileName().endsWith(QLatin1String(".") + File::DvsFileExtension, Qt::CaseInsensitive) ||
-									 f.fileName().endsWith(QLatin1String(".") + File::UfbFileExtension, Qt::CaseInsensitive) ||
-									 f.fileName().endsWith(QLatin1String(".") + File::TvsFileExtension, Qt::CaseInsensitive) ||
-									 f.fileName().endsWith(QLatin1String(".") + File::VduFileExtension, Qt::CaseInsensitive));
-						});
+		std::vector<DbFileInfo> files = filesTree.toVectorIf(
+			[](const DbFileInfo& f)
+			{
+				return (f.action() != E::VcsItemAction::Deleted) && (f.isFolder() == false) &&
+					   (f.fileName().endsWith(QLatin1String(".") + File::AlFileExtension, Qt::CaseInsensitive) ||
+						f.fileName().endsWith(QLatin1String(".") + File::MvsFileExtension, Qt::CaseInsensitive) ||
+						f.fileName().endsWith(QLatin1String(".") + File::DvsFileExtension, Qt::CaseInsensitive) ||
+						f.fileName().endsWith(QLatin1String(".") + File::UfbFileExtension, Qt::CaseInsensitive) ||
+						f.fileName().endsWith(QLatin1String(".") + File::TvsFileExtension, Qt::CaseInsensitive) ||
+						f.fileName().endsWith(QLatin1String(".") + File::VduFileExtension, Qt::CaseInsensitive));
+			});
 
 		// Multithreaded load all schemas
 		//
 		struct FileSchemaStruct
 		{
 			std::shared_ptr<DbFile> file;
-			std::shared_ptr<VFrame30::Schema> schema;		// This param my be nullptr if schema does not have any SchemaItemFrame
+			std::shared_ptr<VFrame30::Schema> schema;  // This param my be nullptr if schema does not have any SchemaItemFrame
 		};
 
-		std::map<QString, FileSchemaStruct> schemaMap;		// Key is SchemaID
-		QMutex schemasMutex;	// Used only in loading schemas, when concurency is possible
+		std::map<QString, FileSchemaStruct> schemaMap; // Key is SchemaID
+		QMutex schemasMutex;                           // Used only in loading schemas, when concurency is possible
 
 		// --
 		//
-		std::atomic_bool returnResult = true;		// returnResult is used in multithreaded schema load, that's why it is atomic
+		std::atomic_bool returnResult = true; // returnResult is used in multithreaded schema load, that's why it is atomic
 		std::atomic_bool interruptRequest = false;
 
 		std::vector<QFuture<bool>> loadSchemaTasks;
@@ -247,8 +247,7 @@ namespace Builder
 			//
 			std::shared_ptr<DbFile> fileLatestVersion;
 
-			if (bool ok  = db.getLatestVersion(f, &fileLatestVersion, nullptr);
-				ok == false || fileLatestVersion.get() == nullptr)
+			if (bool ok = db.getLatestVersion(f, &fileLatestVersion, nullptr); ok == false || fileLatestVersion.get() == nullptr)
 			{
 				log->errPDB2002(f.fileId(), f.fileName(), db.lastError());
 				returnResult = false;
@@ -258,7 +257,7 @@ namespace Builder
 			// Read schema files
 			//
 			auto task = QtConcurrent::run(
-				[fileLatestVersion, log, &returnResult, &interruptRequest, &schemaMap, &schemasMutex]() -> bool
+				[fileLatestVersion, log, &returnResult, &interruptRequest, &schemaMap, &schemasMutex, context]() -> bool
 				{
 					if (interruptRequest == true)
 					{
@@ -275,9 +274,20 @@ namespace Builder
 						return false;
 					}
 
-					if (schema->excludeFromBuild() == false)
+					// Check if schema excluded by Builder options (SchemaTags)
+					//
+					bool schemaIdIsATag = std::any_of(context->m_buildSchemaTags.begin(),
+													  context->m_buildSchemaTags.end(),
+													  [&schema](const QString& tag)
+													  {
+														  return schema->schemaId().compare(tag.trimmed(), Qt::CaseInsensitive) == 0;
+													  });
+
+					auto hasTag = context->m_buildSchemaTags.isEmpty() || schemaIdIsATag || schema->hasTag(context->m_buildSchemaTags);
+
+					if (hasTag == true && schema->excludeFromBuild() == false)
 					{
-						QMutexLocker locker(&schemasMutex);	// Mutex used only here, as only here concurrent access to schemas is possible
+						QMutexLocker locker(&schemasMutex); // Mutex used only here, as only here concurrent access to schemas is possible
 						schemaMap[schema->schemaId()] = FileSchemaStruct{fileLatestVersion, schema};
 					}
 
@@ -304,7 +314,7 @@ namespace Builder
 
 			if (allFinished == true)
 			{
-				break;	// THE EXIT FROM DO/WHILE LOOP!
+				break; // THE EXIT FROM DO/WHILE LOOP!
 			}
 			else
 			{
@@ -316,7 +326,7 @@ namespace Builder
 		} while (true);
 
 		// Add AppSignalIDs to packed logic output items.
-		//  
+		//
 		for (auto& [schemaId, fileSchema] : schemaMap)
 		{
 			std::shared_ptr<DbFile>& file = fileSchema.file;
@@ -334,7 +344,7 @@ namespace Builder
 
 			for (auto& layer : schema->layers())
 			{
-				if (layer->compile() == false) 
+				if (layer->compile() == false)
 				{
 					continue;
 				}
@@ -347,7 +357,7 @@ namespace Builder
 						continue;
 					}
 
-					// This is a packed logic item, it is an output counterpart if it does not have any inputs 
+					// This is a packed logic item, it is an output counterpart if it does not have any inputs
 					// (on schema, in the parser and compiler they are added, but on schema not).
 					//
 					if (schemaItemAfb->inputsCount() != 0)
@@ -370,16 +380,14 @@ namespace Builder
 					{
 						for (const auto& srcItem : src.sources)
 						{
-							QString someId = srcItem.appSignalID.isEmpty() == false ?
-												 srcItem.appSignalID :
-												 srcItem.sourceItemLabelOut;
+							QString someId = srcItem.appSignalID.isEmpty() == false ? srcItem.appSignalID : srcItem.sourceItemLabelOut;
 
 							appSignalIds.insert(someId);
 						}
 					}
 
 					// Join set to a string.
-					// 
+					//
 					QStringList appSignalIdsList;
 					for (const QString& appSignalId : appSignalIds)
 					{
@@ -410,17 +418,17 @@ namespace Builder
 		bool schemaItemFrameWasProcessed = false;
 
 		auto findPanelSchemaFunc = [&schemaMap](QString panelSchemaId)
+		{
+			if (auto panelSchemaIt = schemaMap.find(panelSchemaId); panelSchemaIt != schemaMap.end())
 			{
-				if (auto panelSchemaIt = schemaMap.find(panelSchemaId);
-					panelSchemaIt != schemaMap.end())
-				{
-					return panelSchemaIt->second.schema;
-				}
+				return panelSchemaIt->second.schema;
+			}
 
-				return std::shared_ptr<VFrame30::Schema>{};
-			};
+			return std::shared_ptr<VFrame30::Schema>{};
+		};
 
-		auto joinSchemasFunc = [context, log, findPanelSchemaFunc, &schemaItemFrameWasProcessed](auto schema, QString panelSchemaId, Qt::Edge edge)
+		auto joinSchemasFunc =
+			[context, log, findPanelSchemaFunc, &schemaItemFrameWasProcessed](auto schema, QString panelSchemaId, Qt::Edge edge)
 		{
 			if (panelSchemaId.isEmpty() == false)
 			{
@@ -429,7 +437,7 @@ namespace Builder
 				if (panelSchema == nullptr)
 				{
 					// Schema % 1 has join to unknown schema % 2, check properties Join(Left / Top / Right / Bottom)SchemaID for schema % 1.
-					// 
+					//
 					log->errALP4080(schema->schemaId(), panelSchemaId);
 					return false;
 				}
@@ -444,7 +452,7 @@ namespace Builder
 			return true;
 		};
 
-		std::map<QString, VFrame30::SchemaDetailsSet> schemaDetails;	//	Key is subDir for schema
+		std::map<QString, VFrame30::SchemaDetailsSet> schemaDetails; //	Key is subDir for schema
 
 		for (auto& [schemaId, fileSchema] : schemaMap)
 		{
@@ -490,8 +498,7 @@ namespace Builder
 			//
 			// Check all script on schemas
 			//
-			if (bool checkScriptResult = ScriptChecker::checkSchema(schema.get(), *log);
-				checkScriptResult == false)
+			if (bool checkScriptResult = ScriptChecker::checkSchema(schema.get(), *log); checkScriptResult == false)
 			{
 				returnResult = false;
 			}
@@ -510,7 +517,8 @@ namespace Builder
 				file->setData(std::move(ba));
 			}
 
-			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schemaTags.join(";"), file->data(), false);
+			if (bool ok = context->m_buildResultWriter
+							  ->addFile(subDir, file->fileName(), schema->schemaId(), schemaTags.join(";"), file->data(), false);
 				ok == false)
 			{
 				continue;
@@ -525,7 +533,9 @@ namespace Builder
 			//
 			if (generateExtraDebugIno == true)
 			{
-				bool writeScriptOk = writeSchemaScriptProperties(schema.get(), subDir + "/Scripts/" + schema->schemaId(), context->m_buildResultWriter.get());
+				bool writeScriptOk = writeSchemaScriptProperties(schema.get(),
+																 subDir + "/Scripts/" + schema->schemaId(),
+																 context->m_buildResultWriter.get());
 
 				if (writeScriptOk == false)
 				{
@@ -538,8 +548,7 @@ namespace Builder
 			//
 			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
 
-			if (bool parseOk = schemaFile->details.parseDetails(schema->details(filesTree.filePath(file->fileId())));
-				parseOk == false)
+			if (bool parseOk = schemaFile->details.parseDetails(schema->details(filesTree.filePath(file->fileId()))); parseOk == false)
 			{
 				log->errINT1001(tr("Parse schema details error."), schema->schemaId());
 				returnResult = false;
@@ -557,12 +566,11 @@ namespace Builder
 		//		Schemas.ufb/SchemaDetails.pbuf
 		//		...
 		//
-		for (const auto&[subDir, sds] : schemaDetails)
+		for (const auto& [subDir, sds] : schemaDetails)
 		{
 			QByteArray fileData;
 
-			if (bool ok = sds.saveToByteArray(&fileData);
-				ok == false)
+			if (bool ok = sds.saveToByteArray(&fileData); ok == false)
 			{
 				continue;
 			}
@@ -577,15 +585,15 @@ namespace Builder
 			// Get all VDU schemas
 			//
 			auto isVduSchema = [](const auto& pair)
-				{
-					return pair.second.schema->isVduSchema();
-				};
+			{
+				return pair.second.schema->isVduSchema();
+			};
 
 			auto transformToVduSchema = [](const auto& pair)
-				{
-					Q_ASSERT(pair.second.schema->isVduSchema());
-					return static_cast<VFrame30::VduSchema*>(pair.second.schema.get());
-				};
+			{
+				Q_ASSERT(pair.second.schema->isVduSchema());
+				return static_cast<VFrame30::VduSchema*>(pair.second.schema.get());
+			};
 
 			std::vector<VFrame30::VduSchema*> vduSchemas;
 			vduSchemas.reserve(schemaMap.size());
@@ -595,7 +603,7 @@ namespace Builder
 				vduSchemas.push_back(vduSchema);
 			}
 
-			// Generate VDU schema in SVDU binary format. 
+			// Generate VDU schema in SVDU binary format.
 			// context has all VDU devices.
 			//
 			bool genVduSchemasOk = VduSchemaGenerator::generateVduSchemas(vduSchemas, *context);
@@ -639,9 +647,8 @@ namespace Builder
 							{
 								fileName += QString("%1 - %2")
 												.arg(QString(item->metaObject()->className()).remove(QStringLiteral("VFrame30::")))
-												.arg(item->guid().toString())
-											+ "." + property->caption()
-											+ ".js";
+												.arg(item->guid().toString()) +
+											"." + property->caption() + ".js";
 							}
 
 							BuildFile* file = buildResultWriter->addFile(dir, fileName, property->value().toString());

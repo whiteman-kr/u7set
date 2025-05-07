@@ -104,7 +104,6 @@ namespace Builder
 		constexpr const QUuid itherUuid{0x77223344, 0x9988, 0x1122, 0x23, 0x11, 0x11, 0x11, 0x11, 0x12, 0x13, 0x00};
 
 		return m_horzVertLinks.IsPinOnLink(pt, itherUuid);
-
 	}
 
 	VFrame30::FblItemRect* Bush::itemByPinGuid(QUuid pinId) const
@@ -3001,7 +3000,6 @@ namespace Builder
 				result = false;
 				continue;
 			}
-
 		}
 
 		return result;
@@ -3083,11 +3081,12 @@ namespace Builder
 	//		ApplicationLogicBuilder
 	//
 	// ------------------------------------------------------------------------
-	Parser::Parser(Builder::Context* context) :
+	Parser::Parser(Builder::Context* context, QStringList buildSchemaTags) :
 		m_context(context),
 		m_db(&context->m_db),
 		m_log(*context->m_log),
 		m_changesetId(context->m_lastChangesetId),
+		m_buildSchemaTags(std::move(buildSchemaTags)),
 		m_applicationData(context->m_appLogicData),
 		m_lmDescriptions(context->m_lmDescriptions.get()),
 		m_equipmentSet(context->m_equipmentSet.get()),
@@ -3123,6 +3122,33 @@ namespace Builder
 		if (bool ok = loadUfbFiles(db(), &ufbs); ok == false)
 		{
 			return ok;
+		}
+
+		// Filter out UFB schemas by schema tags
+		//
+		if (m_buildSchemaTags.isEmpty() == false)
+		{
+			std::erase_if(ufbs,
+						  [this](const auto& schema)
+						  {
+							  bool schemaIdIsATag =
+								  std::any_of(m_buildSchemaTags.begin(),
+											  m_buildSchemaTags.end(),
+											  [&schema](const QString& tag)
+											  {
+												  return schema->schemaId().compare(tag.trimmed(), Qt::CaseInsensitive) == 0;
+											  });
+							  bool hasTag = schema->hasTag(m_buildSchemaTags);
+							  if (hasTag == false && schemaIdIsATag == false)
+							  {
+								  m_log.wrnALP4030(schema->schemaId());
+								  return true;  // Skip schema
+							  }
+							  else
+							  {
+								  return false; // Leave this schema in ufbs
+							  }
+						  });
 		}
 
 		// Check if some LmDescriptionFiles were not loaded
@@ -3239,6 +3265,33 @@ namespace Builder
 		if (ok == false)
 		{
 			return ok;
+		}
+
+		// Filter out application logic schemas by schema tags or schemaId.
+		//
+		if (m_buildSchemaTags.isEmpty() == false)
+		{
+			std::erase_if(schemas,
+						  [this](const auto& schema)
+						  {
+							  bool schemaIdIsATag =
+								  std::any_of(m_buildSchemaTags.begin(),
+											  m_buildSchemaTags.end(),
+											  [&schema](const QString& tag)
+											  {
+												  return schema->schemaId().compare(tag.trimmed(), Qt::CaseInsensitive) == 0;
+											  });
+							  bool hasTag = schema->hasTag(m_buildSchemaTags);
+							  if (hasTag == false && schemaIdIsATag == false)
+							  {
+								  m_log.wrnALP4030(schema->schemaId());
+								  return true;  // Skip schema
+							  }
+							  else
+							  {
+								  return false; // Leave this schema in ufbs
+							  }
+						  });
 		}
 
 		if (schemas.empty() == true)
@@ -3418,7 +3471,7 @@ namespace Builder
 		// Connect packed logic items.
 		// Items are coupled by SchemaItemAfb::packedLogicId().
 		// The source items have input(s), the output part must have the only item.
-		// These inputs are transfered to the output item, then the source items are removed.
+		// These inputs are transferred to the output item, then the source items are removed.
 		//
 		ok = m_applicationData->resolvePackedLogicAfbs();
 		if (ok == false)
@@ -3695,7 +3748,6 @@ namespace Builder
 				QThread::msleep(30);
 			}
 		} while (true);
-
 
 		for (auto& task : loadSchemaTasks)
 		{
@@ -4003,8 +4055,7 @@ namespace Builder
 				Hardware::DeviceModule* module = device->toModule().get();
 				Q_ASSERT(module);
 
-				if (module != nullptr &&
-					module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM &&
+				if (module != nullptr && module->moduleFamily() != Hardware::DeviceModule::FamilyType::LM &&
 					module->moduleFamily() != Hardware::DeviceModule::FamilyType::BVB &&
 					module->moduleFamily() != Hardware::DeviceModule::FamilyType::VDU)
 				{

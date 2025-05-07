@@ -1,8 +1,9 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "TcpSignalClient.h"
+
 
 namespace
 {
@@ -19,7 +20,7 @@ namespace
 
 	thread_local ::Network::GetAppSignalStateRequest tl_getSignalStateRequest;
 	thread_local ::Network::GetAppSignalStateReply tl_getSignalStateReply;
-}
+} // namespace
 
 namespace ClientLib
 {
@@ -36,16 +37,18 @@ namespace ClientLib
 		setObjectName("TcpSignalClient " + adsInfo.equipmentId);
 
 		Q_ASSERT(this->logFile());
-		writeMessage(QString("TcpSignalClient::TcpSignalClient() %1, %2").arg(adsInfo.equipmentId).arg(serverAddressPort1().addressPortStr()));
+		writeMessage(
+			QString("TcpSignalClient::TcpSignalClient() %1, %2").arg(adsInfo.equipmentId).arg(serverAddressPort1().addressPortStr()));
 
 		auto logger = std::make_shared<CircularLogger>(logFile, QString("TSC %1").arg(adsInfo.shortenId));
 		setLogger(logger);
 
-		connect(this, &Tcp::Client::signal_wrongServerID,
-			[this](const QString& errorMessage)
-			{
-				writeError(errorMessage);
-			});
+		connect(this,
+				&Tcp::Client::signal_wrongServerID,
+				[this](const QString& errorMessage)
+				{
+					writeError(errorMessage);
+				});
 
 		return;
 	}
@@ -215,8 +218,7 @@ namespace ClientLib
 		writeMessage(QString("-- partCount: %1").arg(tl_getSignalListStartReply.partcount()));
 		writeMessage(QString("-- itemsPerPart: %1").arg(tl_getSignalListStartReply.itemsperpart()));
 
-		if (tl_getSignalListStartReply.totalitemcount() == 0 ||
-			tl_getSignalListStartReply.partcount() == 0)
+		if (tl_getSignalListStartReply.totalitemcount() == 0 || tl_getSignalListStartReply.partcount() == 0)
 		{
 			// There is no signals, useless but can be
 			//
@@ -346,12 +348,14 @@ namespace ClientLib
 			//
 			for (const Hash& busHash : m_busSignalHashes)
 			{
-				std::erase_if(m_signalList, [busHash](Hash hash) {
-								   return hash == busHash;
-					});
+				std::erase_if(m_signalList,
+							  [busHash](Hash hash)
+							  {
+								  return hash == busHash;
+							  });
 			}
 
-			resetToGetState(true);	// END OF RECEIVING SIGNALS PARAMS,
+			resetToGetState(true); // END OF RECEIVING SIGNALS PARAMS,
 			// Here the new loop starts!!!
 			return;
 		}
@@ -435,8 +439,7 @@ namespace ClientLib
 
 	void TcpSignalClient::processSignalStateChanges(const QByteArray& data)
 	{
-		if (bool ok = tl_getSignalStateChangesReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
-			ok == false)
+		if (bool ok = tl_getSignalStateChangesReply.ParseFromArray(data.constData(), static_cast<int>(data.size())); ok == false)
 		{
 			Q_ASSERT(ok);
 			resetToGetState(true);
@@ -482,11 +485,11 @@ namespace ClientLib
 
 			if (m_signalStatesSet.contains(state.hash()) == false)
 			{
-				m_signalStatesSet.insert(state.hash());	// Mark signal as received at least once
-				
+				m_signalStatesSet.insert(state.hash()); // Mark signal as received at least once
+
 				if (m_signalStatesSet.size() == m_signalList.size())
 				{
-					m_signalStatesLoaded.store(true);	// Notify that states of all signals are received
+					m_signalStatesLoaded.store(true);   // Notify that states of all signals are received
 				}
 			}
 		}
@@ -537,8 +540,7 @@ namespace ClientLib
 
 	void TcpSignalClient::processSignalState(const QByteArray& data)
 	{
-		if (bool ok = tl_getSignalStateReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
-			ok == false)
+		if (bool ok = tl_getSignalStateReply.ParseFromArray(data.constData(), static_cast<int>(data.size())); ok == false)
 		{
 			Q_ASSERT(ok);
 			resetToGetState(true);
@@ -567,11 +569,11 @@ namespace ClientLib
 
 			if (m_signalStatesSet.contains(state.hash()) == false)
 			{
-				m_signalStatesSet.insert(state.hash());	// Mark signal as received at least once
-				
+				m_signalStatesSet.insert(state.hash()); // Mark signal as received at least once
+
 				if (m_signalStatesSet.size() == m_signalList.size())
 				{
-					m_signalStatesLoaded.store(true);	// Notify that states of all signals are received
+					m_signalStatesLoaded.store(true);   // Notify that states of all signals are received
 				}
 			}
 		}
@@ -592,6 +594,11 @@ namespace ClientLib
 		return m_signalStatesLoaded.load();
 	}
 
+	const SoftwareEndpoint::AppDataService& TcpSignalClient::server() const
+	{
+		return m_serverSettings;
+	}
+
 	void TcpSignalClient::reset()
 	{
 		m_signalList.clear();
@@ -609,7 +616,7 @@ namespace ClientLib
 		// 1. UTC time is different?
 		//
 		{
-			const qint64 limitMs = static_cast<qint64>(3 * 1'000) * 60;  // 3 minutes.
+			const qint64 limitMs = static_cast<qint64>(3 * 1'000) * 60; // 3 minutes.
 			const qint64 utcTimeDiscrepancy = std::abs(serverUtcTimeMs - QDateTime::currentDateTime().toMSecsSinceEpoch());
 
 			if (utcTimeDiscrepancy > limitMs)
@@ -618,9 +625,9 @@ namespace ClientLib
 				auto serverUtcDateTime = QDateTime::fromMSecsSinceEpoch(serverUtcTimeMs, QTimeZone::UTC);
 
 				writeWarning(QString("UTC time discrepancy detected (%1 seconds). Client UTC time %2, server UTC time %3.")
-							 .arg(utcTimeDiscrepancy / 1000)
-							 .arg(clientUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
-							 .arg(serverUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
+								 .arg(utcTimeDiscrepancy / 1000)
+								 .arg(clientUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
+								 .arg(serverUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
 			}
 			else
 			{
@@ -635,7 +642,7 @@ namespace ClientLib
 			const qint64 clientUtcMs = clientCurrentTimeLocal.toMSecsSinceEpoch();
 			clientCurrentTimeLocal.setTimeZone(QTimeZone::UTC);
 			const qint64 clientLocalMs = clientCurrentTimeLocal.toMSecsSinceEpoch();
-			
+
 			const qint64 clientTimeZoneDiff = clientLocalMs - clientUtcMs;
 
 			qint64 timeZoneDiff = std::abs(serverTimeZoneDiff - clientTimeZoneDiff);
@@ -646,12 +653,12 @@ namespace ClientLib
 				auto serverLocalDateTime = QDateTime::fromMSecsSinceEpoch(serverLocalTimeMs, QTimeZone::UTC);
 
 				writeWarning(QString("TimeZone discrepancy detected. Client local time %1, server local time %2.")
-							 .arg(clientLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
-							 .arg(serverLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
+								 .arg(clientLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
+								 .arg(serverLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
 			}
 		}
 
 		return;
 	}
 
-}
+} // namespace ClientLib

@@ -146,8 +146,8 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
             ];
 
             res = true;
-
-            for(propName of propsToCheck)
+            
+            for(const propName of propsToCheck)
             {
                 let propValueA = signalA.propertyValue(propName);
 
@@ -208,7 +208,7 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
 
             res = true;
 
-            for(cmpParams of propsToCompare)
+            for(const cmpParams of propsToCompare)
             {
                 let prop1Name = cmpParams[0];
                 let cmpMode = cmpParams[1];
@@ -310,9 +310,9 @@ function generate_aim4ph_sr(confFirmware, module, LMNumber, frame, log, signalSe
             highValidRange = signalA.highValidRange();
             lowValidRange = signalA.lowValidRange();
 
-            // max valid range distanse from engineering units range is -5%...+5%
+            // max valid range distanse from engineering units range is -25%...+25%
             //
-            let dist = (highPhysicalRange - lowPhysicalRange) * 0.05;
+            let dist = (highPhysicalRange - lowPhysicalRange) * 0.25;
 
             let lowestValidRange = (lowPhysicalRange - dist) * k1 + k2;
             let highestValidRange = (highPhysicalRange + dist) * k1 + k2;

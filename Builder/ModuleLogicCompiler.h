@@ -6,7 +6,7 @@
 
 #include <CommonLib/HashedVector.h>
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../lib/TuningDataStorage.h"
+#include "../AppSignalLib/TuningDataStorage.h"
 
 #include "BuildResultWriter.h"
 #include "ConnectionStorage.h"

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM11_SR90" DescriptionNumber="90" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.2">
+<LogicModule Name="LM11_SR90" DescriptionNumber="90" ConfigurationScriptFile="ConfigScript.js" Version="1.2">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>

@@ -6,7 +6,7 @@
 #include "./Forms/ComparePropertyObjectDialog.h"
 
 #include "SignalsTabPage.h"
-#include "Settings.h"
+#include "AppSettings.h"
 #include "SignalPropertiesDialog.h"
 #include "AppSignalSetProvider.h"
 #include "UndoSignalsDialog.h"
@@ -934,7 +934,9 @@ void SignalsTabPage::changeSignalTypeFilter(int selectedType)
 	for (int i = 0; i < m_signalsModel->columnCount(); i++)
 	{
 		if (signalType == SignalsTabPage::FILTER_ST_ANY ||
-			m_signalSetProvider->signalPropertyManager().isHiddenFor(static_cast<E::SignalType>(signalType), i, theSettings.isExpertMode()) == false)
+			m_signalSetProvider->signalPropertyManager().isHiddenFor(static_cast<E::SignalType>(signalType),
+																	 i,
+																	 theAppSettings.isExpertMode()) == false)
 		{
 			bool hidden = m_signalsColumnVisibilityController->getColumnVisibility(i) == false;
 			m_signalsView->setColumnHidden(i, hidden);

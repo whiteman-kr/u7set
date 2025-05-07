@@ -245,10 +245,9 @@ namespace ReportLib
 		return signalType(::calcHash(appSignalId), found);
 	}
 
-	QString ReportAppSignalProvider::equipmentToAppSignalId(const QString& /*equipmentId*/) const
+	QString ReportAppSignalProvider::equipmentToAppSignalId(const QString& equipmentId) const
 	{
-		Q_ASSERT(false);	// todo
-		return {};
+		return equipmentId;
 	}
 
 	std::vector<std::shared_ptr<Comparator>> ReportAppSignalProvider::setpointsByInputSignalId(const QString& appSignalId) const

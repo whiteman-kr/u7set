@@ -25,13 +25,13 @@ namespace
 		const char* logLevelString = nullptr;
 		switch (level)
 		{
-		case LOG_LEVEL_DEBUG:
+		case MATS_LOG_LEVEL_DEBUG:
 			logLevelString = "DBG: ";
 			break;
-		case LOG_LEVEL_WARNING:
+		case MATS_LOG_LEVEL_WARNING:
 			logLevelString = "WRN: ";
 			break;
-		case LOG_LEVEL_ERROR:
+		case MATS_LOG_LEVEL_ERROR:
 			logLevelString = "ERR: ";
 			break;
 		default:
@@ -45,7 +45,7 @@ namespace
 
 	// Test log handler saves received data to these globals.
 	//
-	MatsLogLevel g_testLogHandlerLevel = LOG_LEVEL_ERROR;
+	MatsLogLevel g_testLogHandlerLevel = MATS_LOG_LEVEL_ERROR;
 	std::string g_testLogHandlerMessage;
 
 	extern "C" void testLogHandler(MatsLogLevel level, const char* message)
@@ -64,7 +64,7 @@ protected:
 		AdsInit(0, nullptr, g_equipmentId, false);
 
 		AdsSetLogHandler(&logHandler);
-		AdsSetLogLevel(LOG_LEVEL_DEBUG);
+		AdsSetLogLevel(MATS_LOG_LEVEL_DEBUG);
 
 		return;
 	}
@@ -83,55 +83,61 @@ protected:
 		{.equipmentId = "SYSTEMID_CLIENTTEST_WS02_ADS", .address = {"127.0.0.1"}, .port = 13326}};
 };
 
+TEST_F(AdsBridgeTests, ApiVersion)
+{
+	EXPECT_EQ(::AdsGetInterfaceVersion(), 0x00000001);
+	return;
+}
+
 TEST_F(AdsBridgeTests, LogHandler)
 {
 	AdsSetLogHandler(&testLogHandler);
-	AdsSetLogLevel(LOG_LEVEL_DEBUG);
+	AdsSetLogLevel(MATS_LOG_LEVEL_DEBUG);
 
-	AdsTestLogHandler(LOG_LEVEL_DEBUG, "Test debug message");
-	EXPECT_EQ(g_testLogHandlerLevel, LOG_LEVEL_DEBUG);
+	AdsTestLogHandler(MATS_LOG_LEVEL_DEBUG, "Test debug message");
+	EXPECT_EQ(g_testLogHandlerLevel, MATS_LOG_LEVEL_DEBUG);
 	EXPECT_EQ(g_testLogHandlerMessage, "Test debug message");
 
-	AdsTestLogHandler(LOG_LEVEL_WARNING, "Test warning message");
-	EXPECT_EQ(g_testLogHandlerLevel, LOG_LEVEL_WARNING);
+	AdsTestLogHandler(MATS_LOG_LEVEL_WARNING, "Test warning message");
+	EXPECT_EQ(g_testLogHandlerLevel, MATS_LOG_LEVEL_WARNING);
 	EXPECT_EQ(g_testLogHandlerMessage, "Test warning message");
 
-	AdsTestLogHandler(LOG_LEVEL_ERROR, "Test error message");
-	EXPECT_EQ(g_testLogHandlerLevel, LOG_LEVEL_ERROR);
+	AdsTestLogHandler(MATS_LOG_LEVEL_ERROR, "Test error message");
+	EXPECT_EQ(g_testLogHandlerLevel, MATS_LOG_LEVEL_ERROR);
 	EXPECT_EQ(g_testLogHandlerMessage, "Test error message");
 
 	// Test AdsSetLogLevel
 	//
-	AdsSetLogLevel(LOG_LEVEL_WARNING); // Debug messages should not be logged.
+	AdsSetLogLevel(MATS_LOG_LEVEL_WARNING); // Debug messages should not be logged.
 
-	g_testLogHandlerLevel = LOG_LEVEL_ERROR;
+	g_testLogHandlerLevel = MATS_LOG_LEVEL_ERROR;
 	g_testLogHandlerMessage.clear();
 
-	AdsTestLogHandler(LOG_LEVEL_DEBUG, "Test debug message");
-	EXPECT_EQ(g_testLogHandlerLevel, LOG_LEVEL_ERROR);
+	AdsTestLogHandler(MATS_LOG_LEVEL_DEBUG, "Test debug message");
+	EXPECT_EQ(g_testLogHandlerLevel, MATS_LOG_LEVEL_ERROR);
 	EXPECT_EQ(g_testLogHandlerMessage, "");
 
-	AdsTestLogHandler(LOG_LEVEL_WARNING, "Test warning message");
-	EXPECT_EQ(g_testLogHandlerLevel, LOG_LEVEL_WARNING);
+	AdsTestLogHandler(MATS_LOG_LEVEL_WARNING, "Test warning message");
+	EXPECT_EQ(g_testLogHandlerLevel, MATS_LOG_LEVEL_WARNING);
 	EXPECT_EQ(g_testLogHandlerMessage, "Test warning message");
 
 	// --
 	//
-	AdsSetLogLevel(LOG_LEVEL_ERROR); // Debug and Warning messages should not be logged.
+	AdsSetLogLevel(MATS_LOG_LEVEL_ERROR); // Debug and Warning messages should not be logged.
 
-	g_testLogHandlerLevel = LOG_LEVEL_ERROR;
+	g_testLogHandlerLevel = MATS_LOG_LEVEL_ERROR;
 	g_testLogHandlerMessage.clear();
 
-	AdsTestLogHandler(LOG_LEVEL_DEBUG, "Test debug message");
-	EXPECT_EQ(g_testLogHandlerLevel, LOG_LEVEL_ERROR);
+	AdsTestLogHandler(MATS_LOG_LEVEL_DEBUG, "Test debug message");
+	EXPECT_EQ(g_testLogHandlerLevel, MATS_LOG_LEVEL_ERROR);
 	EXPECT_EQ(g_testLogHandlerMessage, "");
 
-	AdsTestLogHandler(LOG_LEVEL_WARNING, "Test warning message");
-	EXPECT_EQ(g_testLogHandlerLevel, LOG_LEVEL_ERROR);
+	AdsTestLogHandler(MATS_LOG_LEVEL_WARNING, "Test warning message");
+	EXPECT_EQ(g_testLogHandlerLevel, MATS_LOG_LEVEL_ERROR);
 	EXPECT_EQ(g_testLogHandlerMessage, "");
 
-	AdsTestLogHandler(LOG_LEVEL_ERROR, "Test error message");
-	EXPECT_EQ(g_testLogHandlerLevel, LOG_LEVEL_ERROR);
+	AdsTestLogHandler(MATS_LOG_LEVEL_ERROR, "Test error message");
+	EXPECT_EQ(g_testLogHandlerLevel, MATS_LOG_LEVEL_ERROR);
 	EXPECT_EQ(g_testLogHandlerMessage, "Test error message");
 
 	return;

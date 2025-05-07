@@ -1,4 +1,5 @@
 #include "UploadTabPage.h"
+#include "AppSettings.h"
 #include "DialogSettingsConfigurator.h"
 #include "GlobalMessanger.h"
 #include "Settings.h"
@@ -13,7 +14,7 @@ using namespace ModuleConfiguratorLib;
 //
 //
 UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
-	MainTabPage(dbcontroller, parent)//,
+	MainTabPage(dbcontroller, parent)
 {
 	assert(dbcontroller != nullptr);
 
@@ -26,7 +27,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	QWidget* pConfigurationWidget = new QWidget();
 
-	QVBoxLayout *pConfigurationLayout = new QVBoxLayout(pConfigurationWidget);
+	QVBoxLayout* pConfigurationLayout = new QVBoxLayout(pConfigurationWidget);
 
 	// Create Build list widget
 
@@ -69,7 +70,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	QWidget* pSubsystemWidget = new QWidget();
 
-	QVBoxLayout *pSubsystemLayout = new QVBoxLayout(pSubsystemWidget);
+	QVBoxLayout* pSubsystemLayout = new QVBoxLayout(pSubsystemWidget);
 
 	// Create Subsystems list widget
 
@@ -90,7 +91,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	QWidget* pUartWidget = new QWidget();
 
-	QVBoxLayout *pUartLayout = new QVBoxLayout(pUartWidget);
+	QVBoxLayout* pUartLayout = new QVBoxLayout(pUartWidget);
 
 	// Create UART list widget
 
@@ -125,9 +126,9 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	pUartLayout->addLayout(bl);
 
-	//pSubsystemUartLayout->addStretch();
+	// pSubsystemUartLayout->addStretch();
 
-	//Left Splitter
+	// Left Splitter
 	//
 	m_pLeftSplitter = new QSplitter(Qt::Vertical);
 
@@ -149,7 +150,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_pReadToFileButton = new QPushButton(tr("&Read to File"));
 	pButtonsLayout->addWidget(m_pReadToFileButton);
 
-	if (theSettings.isExpertMode() == true)
+	if (theAppSettings.isExpertMode() == true)
 	{
 		m_pEraseButton = new QPushButton(tr("&Erase"));
 		pButtonsLayout->addWidget(m_pEraseButton);
@@ -161,7 +162,7 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_pSettingsButton = new QPushButton(tr("&Settings..."));
 	pButtonsLayout->addWidget(m_pSettingsButton);
 
-	if (theSettings.isExpertMode() == true)
+	if (theAppSettings.isExpertMode() == true)
 	{
 		QString mconfPath = QApplication::applicationDirPath() + "/mconf.exe";
 		if (QFile::exists(mconfPath) == true)
@@ -243,10 +244,10 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
 
-	m_pConfigurator = new Configurator(theSettings.m_configuratorSerialPort, &m_outputLog);
+	m_pConfigurator = new Configurator(theAppSettings.configuratorSerialPort(), &m_outputLog);
 	m_pConfigurationThread = new QThread(this);
 
-	m_pConfigurator->setVerify(theSettings.m_configuratorVerify);
+	m_pConfigurator->setVerify(theAppSettings.configuratorVerify());
 
 	connect(this, &UploadTabPage::setCommunicationSettings, m_pConfigurator, &Configurator::setSettings);
 
@@ -272,7 +273,9 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	m_pConfigurationThread->start();
 
-	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
+	emit setCommunicationSettings(theAppSettings.configuratorSerialPort(),
+								  theAppSettings.configuratorShowDebugInfo(),
+								  theAppSettings.configuratorVerify());
 
 	// Start Timer
 	//
@@ -323,13 +326,13 @@ void UploadTabPage::refreshProjectBuilds()
 		return;
 	}
 
-	m_buildSearchPath = QString("%1%2%3").arg(theSettings.buildOutputPath()).arg(QDir::separator()).arg(projectName);
+	m_buildSearchPath = QString("%1%2%3").arg(theAppSettings.buildOutputPath()).arg(QDir::separator()).arg(projectName);
 
 	// Get builds list
 
 	std::vector<std::pair<QString, QDateTime>> builds;
 
-	QStringList buildList = QDir(m_buildSearchPath).entryList(QStringList("build*"), QDir::Dirs|QDir::NoSymLinks);
+	QStringList buildList = QDir(m_buildSearchPath).entryList(QStringList("build*"), QDir::Dirs | QDir::NoSymLinks);
 
 	for (const QString& build : buildList)
 	{
@@ -347,11 +350,13 @@ void UploadTabPage::refreshProjectBuilds()
 
 	// Sort builds by time, latest build - first.
 	//
-	std::sort(builds.begin(), builds.end(), [](const auto& a, const auto& b)
+	std::sort(builds.begin(),
+			  builds.end(),
+			  [](const auto& a, const auto& b)
 			  {
 				  const QString& build1 = a.first;
 				  const QString& build2 = b.first;
-					
+
 				  bool hasNumber1 = build1.contains('-');
 				  bool hasNumber2 = build2.contains('-');
 
@@ -410,9 +415,10 @@ void UploadTabPage::refreshProjectBuilds()
 		{
 			m_pBuildTree->resizeColumnToContents(i);
 		}
-		m_pBuildTree->setColumnWidth(static_cast<int>(BuildColumns::Name), m_pBuildTree->columnWidth(static_cast<int>(BuildColumns::Name)) + 20);
-		m_pBuildTree->setColumnWidth(static_cast<int>(BuildColumns::Date), m_pBuildTree->columnWidth(static_cast<int>(BuildColumns::Date)) + 20);
-
+		m_pBuildTree->setColumnWidth(static_cast<int>(BuildColumns::Name),
+									 m_pBuildTree->columnWidth(static_cast<int>(BuildColumns::Name)) + 20);
+		m_pBuildTree->setColumnWidth(static_cast<int>(BuildColumns::Date),
+									 m_pBuildTree->columnWidth(static_cast<int>(BuildColumns::Date)) + 20);
 	}
 
 	// Refresh binary file
@@ -554,9 +560,8 @@ void UploadTabPage::read()
 		m_outputLog.writeMessage(tr("Reading firmware to file %1...").arg(fileName));
 
 		emit readFirmware(fileName, {});
-
 	}
-	catch(QString message)
+	catch (QString message)
 	{
 		m_outputLog.writeError(message);
 		return;
@@ -577,7 +582,7 @@ void UploadTabPage::upload()
 	{
 		emit uploadFirmware(&m_firmware, subsysId, {});
 	}
-	catch(QString message)
+	catch (QString message)
 	{
 		m_outputLog.writeError(message);
 		return;
@@ -586,7 +591,7 @@ void UploadTabPage::upload()
 
 void UploadTabPage::erase()
 {
-	if (theSettings.isExpertMode() == false)
+	if (theAppSettings.isExpertMode() == false)
 	{
 		return;
 	}
@@ -611,16 +616,15 @@ void UploadTabPage::erase()
 
 		// Read
 		//
-		//disableControls();
+		// disableControls();
 
 		emit eraseFlashMemory(0, {});
 	}
-	catch(QString message)
+	catch (QString message)
 	{
 		m_outputLog.writeError(message);
 		return;
 	}
-
 }
 
 void UploadTabPage::cancel()
@@ -648,7 +652,9 @@ void UploadTabPage::settings()
 		return;
 	}
 
-	emit setCommunicationSettings(theSettings.m_configuratorSerialPort, theSettings.m_configuratorShowDebugInfo, theSettings.m_configuratorVerify);
+	emit setCommunicationSettings(theAppSettings.configuratorSerialPort(),
+								  theAppSettings.configuratorShowDebugInfo(),
+								  theAppSettings.configuratorVerify());
 }
 
 void UploadTabPage::mconf()
@@ -688,7 +694,6 @@ void UploadTabPage::disableControls()
 	m_pSettingsButton->setEnabled(enable);
 	m_pCancelButton->setEnabled(!enable);
 	m_pClearLogButton->setEnabled(enable);
-
 }
 
 void UploadTabPage::enableControls()
@@ -728,10 +733,7 @@ void UploadTabPage::enableControls()
 	}
 }
 
-void UploadTabPage::communicationReadFinished()
-{
-
-}
+void UploadTabPage::communicationReadFinished() {}
 
 void UploadTabPage::writeLog(const OutputLogItem& logItem)
 {
@@ -819,8 +821,7 @@ void UploadTabPage::refreshBinaryFile()
 		return;
 	}
 
-	QStringList binaryFiles = QDir(buildPath).entryList(QStringList() << "*.bts",
-									 QDir::Files| QDir::NoSymLinks);
+	QStringList binaryFiles = QDir(buildPath).entryList(QStringList() << "*.bts", QDir::Files | QDir::NoSymLinks);
 
 	// Must be only one binary file
 
@@ -846,7 +847,7 @@ void UploadTabPage::refreshBinaryFile()
 
 	if (m_currentFilePath == filePath && m_currentFileModifiedTime == QFileInfo(filePath).lastModified())
 	{
-		return;	// File is the same, do not read it
+		return; // File is the same, do not read it
 	}
 
 	clearSubsystemsUartData();
@@ -896,7 +897,7 @@ bool UploadTabPage::readBuildInfo(const QString& buildPath, OnlineLib::BuildInfo
 
 	QXmlStreamReader xmlReader(data);
 
-	while(xmlReader.atEnd() == false)
+	while (xmlReader.atEnd() == false)
 	{
 		if (xmlReader.readNextStartElement() == false)
 		{
@@ -931,12 +932,13 @@ bool UploadTabPage::readBuildInfo(const QString& buildPath, OnlineLib::BuildInfo
 
 	if (buildInfoFound == false || buildResultFound == false)
 	{
-		return false;	// Required sections were not found in build.xml
+		return false; // Required sections were not found in build.xml
 	}
 
 	// Check if .bts file exists
 
-	QString buildOutputFileName = QString("%1/%2-%3.bts").arg(buildPath).arg(buildInfo->project).arg(QString::number(buildInfo->id).rightJustified(6, '0'));
+	QString buildOutputFileName =
+		QString("%1/%2-%3.bts").arg(buildPath).arg(buildInfo->project).arg(QString::number(buildInfo->id).rightJustified(6, '0'));
 
 	QFile buildOutput(buildOutputFileName);
 

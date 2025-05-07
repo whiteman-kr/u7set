@@ -1,9 +1,11 @@
 #pragma once
 
+#include <CommonLib/ConstStrings.h>
 #include <VFrame30/FontParam.h>
 #include <VFrame30/IMatsSchemaItemAssociations.h>
-#include <VFrame30/Session.h>
 #include <VFrame30/PosRectRotatable.h>
+#include <VFrame30/Session.h>
+
 
 class QPen;
 class QBrush;
@@ -21,8 +23,8 @@ namespace VFrame30
 
 		This item is used to display signal values.
 
-		Information displayed by this item is fully customizable by scripts. Script code can receive signal parameters and states from data services,
-		set text, colors, font size to any values depending on customers requirements.
+		Information displayed by this item is fully customizable by scripts. Script code can receive signal parameters and states from data
+	   services, set text, colors, font size to any values depending on customers requirements.
 
 		Signal identifiers set to the schema item are stored in <b>SignalIDs</b> array property.
 
@@ -175,19 +177,19 @@ namespace VFrame30
 		Q_PROPERTY(double Angle READ angle WRITE setAngle)
 
 		/**
-		* @brief Rotation point of the item.
-		*
-		* This property represents the rotation point of the item. The rotation point is the
-		* point around which the item is rotated when the rotation transformation (property Angle) is applied.
-		* Setting this property allows to specify a custom rotation point for the item.
-		*
-		* Possible values for this property are:
-		* - RotationPoint::TopLeft (0)
-		* - RotationPoint::TopRight (1)
-		* - RotationPoint::BottomRight (2)
-		* - RotationPoint::BottomLeft (3)
-		* - RotationPoint::Center (4)
-		*/
+		 * @brief Rotation point of the item.
+		 *
+		 * This property represents the rotation point of the item. The rotation point is the
+		 * point around which the item is rotated when the rotation transformation (property Angle) is applied.
+		 * Setting this property allows to specify a custom rotation point for the item.
+		 *
+		 * Possible values for this property are:
+		 * - RotationPoint::TopLeft (0)
+		 * - RotationPoint::TopRight (1)
+		 * - RotationPoint::BottomRight (2)
+		 * - RotationPoint::BottomLeft (3)
+		 * - RotationPoint::Center (4)
+		 */
 		Q_PROPERTY(RotationPoint rotationPoint READ rotationPoint WRITE setRotationPoint)
 		Q_PROPERTY(RotationPoint RotationPoint READ rotationPoint WRITE setRotationPoint)
 
@@ -218,10 +220,50 @@ namespace VFrame30
 		void initDrawingResources() const;
 		void drawText(CDrawParam* drawParam, const Context* context, const QRectF& rect) const;
 
-		bool getSignalState(QString appSignalId, const Context* context, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		bool getSignalState(QString appSignalId,
+							const Context* context,
+							AppSignalParam* signalParam,
+							AppSignalState* appSignalState,
+							TuningSignalState* tuningSignalState) const;
 
-		QString parseText(QString text, const Context* context, const Session& session, const AppSignalParam& signal, const AppSignalState& signalState) const;
-		QString formatNumber(double value, const AppSignalParam& signal) const;
+		QString parseText(QString text,
+						  const Context* context,
+						  const Session& session,
+						  const AppSignalParam& signal,
+						  const AppSignalState& signalState) const;
+
+		QString formatNumber(double value, E::AnalogFormat analogFormat, const AppSignalParam& signal) const;
+		QString formatNumberHex(double value, const AppSignalParam& signal) const;
+
+		QString formatNumberTag(double value, const AppSignalParam& signal, const auto& item) const
+		{
+			enum class DisplayType
+			{
+				Linear,
+				Exp
+			};
+
+			DisplayType type = DisplayType::Linear;
+
+			if (item.hasTag(::AppSignalTags::view_linear) == true)
+			{
+				type = DisplayType::Linear;
+			}
+			else if (item.hasTag(::AppSignalTags::view_log10) == true || item.hasTag(::AppSignalTags::view_period) == true)
+			{
+				type = DisplayType::Exp;
+			}
+
+			switch (type)
+			{
+			case DisplayType::Linear:
+				return formatNumber(value, E::AnalogFormat::f_9, signal);
+			case DisplayType::Exp:
+				return formatNumber(value, E::AnalogFormat::e_9e, signal);
+			};
+
+			return "?";
+		}
 
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
@@ -230,7 +272,6 @@ namespace VFrame30
 		// Java Script invocable specific for SchemaItemValue
 		//
 	public:
-
 		// IMatsSchemaItemAssociations implementation.
 		//
 	public:
@@ -300,18 +341,28 @@ namespace VFrame30
 		E::HorzAlign m_horzAlign = E::HorzAlign::AlignHCenter;
 		E::VertAlign m_vertAlign = E::VertAlign::AlignVCenter;
 		FontParam m_font;
-		bool m_drawRect = false;       // Rect is visible, thickness 0 is possible
+		bool m_drawRect = false; // Rect is visible, thickness 0 is possible
 
-		QString m_text = {"$(value)"}; // $(value)			: signal value
-									   // $(caption)		: caption
-									   // $(signalid)		: SignalID (CustomSignalID)
-									   // $(appsignalid)	: AppSignalID (#APPSIGANLID)
-									   // $(equipmentid)	: Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals)
-									   // $(highlimit)		: High limit
-									   // $(lowlimit)		: Low limit
-									   // $(units)			: Signal units
+		// clang-format off
+		QString m_text = {"$(value)"};
+					// $(value) - Signal value
+					// $(value_[stag/STAG]) - Signal value formatted according to signal tag (view_linear - f/F, view_log10 or view_period - e/E).
+					// $(value_[itag/ITAG]) - Signal value formatted according to item tag (view_linear - f/F, view_log10 or view_period - e/E).
+					// $(value_[e/E]) - Signal value format as [-]9.9e[+|-]999/, lowercase/uppercase accordingly.
+					// $(value_f) - Signal value format as [-]9.9, same as  $(value).
+					// $(value_[g/G]) - Signal value format as 'e' or 'f', whichever is the most concise, lowercase/uppercase accordingly.
+					// $(value_hex) - Signal value shown in hex; precision determines the number of digits.
+					// $(value_HEX) - Signal value shown in HEX; precision determines the number of digits.
+					// $(caption) - Caption.
+					// $(signalid) - SignalID (CustomSignalID).
+					// $(appsignalid) - AppSignalID (#APPSIGANLID).
+					// $(equipmentid) - Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals).
+					// $(units) - Signal units.
+		// clang-format on
 
-		int m_precision = -1;          // decimal places, -1 means take value from Signal
+		int m_precision = -1; // decimal places, -1 means take value from Signal
+
+		// Not used
 		E::AnalogFormat m_analogFormat = E::AnalogFormat::f_9;
 
 		// Drawing resources

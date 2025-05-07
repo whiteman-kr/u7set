@@ -97,8 +97,6 @@ namespace TestSuite
 			m_outputController->shutdown();
 		}
 
-		m_scriptProvider = nullptr;
-
 		{
 			QMutexLocker l(&m_statusMutex);
 			m_status.reset();

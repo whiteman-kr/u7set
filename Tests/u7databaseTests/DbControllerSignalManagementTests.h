@@ -1,5 +1,4 @@
 #pragma once
-#include <QTest>
 
 
 #define OPEN_DATABASE()		QSqlDatabase db; \

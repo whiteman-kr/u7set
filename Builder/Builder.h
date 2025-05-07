@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IssueLogger.h"
 #include "BuildOptions.h"
+#include "IssueLogger.h"
 
 namespace Builder
 {
@@ -28,11 +28,12 @@ namespace Builder
 				   QString projectUserPassword,
 				   QString buildPath,
 				   bool expertMode,
-				   BuildOptions buildOptions);
+				   BuildOptions buildOptions,
+				   QStringList schemaTags);
 		bool stop();
 		bool isRunning() const;
 
-		int progress() const;	// return 0 - 100
+		int progress() const; // returns 0 - 100
 
 		IssueLogger& log();
 
@@ -41,14 +42,12 @@ namespace Builder
 
 	signals:
 		void started();
-		void finished(int errorCount);			// Finished or canceled (if canceled errorCount > 0)
+		void finished(int errorCount);   // Finished or canceled (if canceled errorCount > 0)
 
-		void progressChanged(int value);		// Always from 0 to 100
+		void progressChanged(int value); // Always from 0 to 100
 
 	private:
 		BuildWorkerThread* m_thread = nullptr;
 		IssueLogger m_log;
 	};
-}
-
-
+} // namespace Builder

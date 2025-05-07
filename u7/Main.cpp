@@ -2,7 +2,6 @@
 #include "../UtilsLib/CrashExceptionHandler.h"
 #include "../version.h"
 
-
 #include <CommonLib/Times.h>
 #include <HardwareLib/HardwareLibrary.h>
 #include <LicenseLib/AppLicenser.h>
@@ -11,9 +10,11 @@
 
 #include <google/protobuf/message_lite.h>
 
+#include "AppSettings.h"
 #include "GlobalMessanger.h"
 #include "MainWindow.h"
 #include "Settings.h"
+
 
 // Visual Leak Detector
 //
@@ -90,6 +91,7 @@ int main(int argc, char* argv[])
 
 		// Read settings
 		//
+		theAppSettings.load();
 		theSettings.load();
 
 		// Init TrendLib resources
@@ -102,10 +104,10 @@ int main(int argc, char* argv[])
 
 		dbController.disableProgress();
 
-		dbController.setHost(theSettings.serverHost());
-		dbController.setPort(theSettings.serverPort());
-		dbController.setServerUsername(theSettings.serverUsername());
-		dbController.setServerPassword(theSettings.serverPassword());
+		dbController.setHost(theAppSettings.serverHost());
+		dbController.setPort(theAppSettings.serverPort());
+		dbController.setServerUsername(theAppSettings.serverUsername());
+		dbController.setServerPassword(theAppSettings.serverPassword());
 
 		// --
 		//

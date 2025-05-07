@@ -1,6 +1,7 @@
 #include "DialogAppSignalLists.h"
 #include "../Builder/AppSignalListStorage.h"
 #include "Settings.h"
+#include "AppSettings.h"
 
 #include "../UtilsLib/Ui/UiTools.h"
 #include "IdePropertyEditor.h"
@@ -478,6 +479,7 @@ void DialogAppSignalLists::setPropertyEditorObjects()
 	}
 
 	bool readOnly = false;
+	bool isExpertMode = theAppSettings.isExpertMode();
 
 	QList<std::shared_ptr<PropertyObject>> objects;
 
@@ -507,7 +509,7 @@ void DialogAppSignalLists::setPropertyEditorObjects()
 		}
 	}
 
-	m_listPropertyEditor->setExpertMode(theSettings.isExpertMode());
+	m_listPropertyEditor->setExpertMode(isExpertMode);
 	m_listPropertyEditor->setReadOnly(readOnly);
 	m_listPropertyEditor->setObjects(objects);
 

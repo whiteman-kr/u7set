@@ -5,11 +5,11 @@
 #include "../OnlineLib/Tcp.h"
 #include "../UtilsLib/ILogFile.h"
 
+#include <ClientLib/IRecentAppSignals.h>
 #include <ClientLib/ITuningAuthorization.h>
 #include <ClientLib/ITuningConnection.h>
-#include <ClientLib/IRecentAppSignals.h>
-#include <ClientLib/ITuningSignalUpdater.h>
 #include <ClientLib/ITuningLog.h>
+#include <ClientLib/ITuningSignalUpdater.h>
 #include <ClientLib/TuningSourceState.h>
 #include <ClientLib/TuningWriteCommand.h>
 
@@ -19,7 +19,8 @@ namespace ClientLib
 {
 	class TuningTcpClient;
 
-	class TuningConnectionPrivate : public QObject, public ITuningConnection
+	class TuningConnectionPrivate : public QObject,
+									public ITuningConnection
 	{
 		Q_OBJECT
 
@@ -43,7 +44,9 @@ namespace ClientLib
 			Connection& operator=(Connection&& src) = delete;
 
 			void stopAndDestroy();
+
 			HostAddressPort address() const;
+			const SoftwareEndpoint::TuningService& server() const;
 
 			bool signalStatesLoaded() const;
 
@@ -131,5 +134,4 @@ namespace ClientLib
 		ITuningAuthorization& m_tuningAuthorization;
 		ITuningLog* m_tuningLog = nullptr;
 	};
-}
-
+} // namespace ClientLib

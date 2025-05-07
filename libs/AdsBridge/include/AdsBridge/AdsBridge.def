@@ -1,10 +1,12 @@
 LIBRARY AdsBridge
 EXPORTS
+	AdsGetInterfaceVersion
+
 	AdsSetLogHandler
 	AdsSetLogLevel
 	AdsTestLogHandler
 
-	AdsInitPrivate
+	AdsInit
 	AdsShutdown
 
 	AdsGetSoftwareId
@@ -18,15 +20,15 @@ EXPORTS
 	AdsCloseConnection
 
 	AdsGetTcpConnectionCount
-	AdsGetTcpConnectionStatuses
+	AdsGetTcpConnectionStatusesPrivate1
 
 	AdsSignalParamsLoaded
 	AdsSignalStatesLoaded
 
 	AdsGetSignalCount
 	AdsGetSignalList
-	AdsGetSignalParams
-	AdsGetSignalStates
+	AdsGetSignalParamsPrivate1
+	AdsGetSignalStatesPrivate1
 
 	AdsCalcHash
 

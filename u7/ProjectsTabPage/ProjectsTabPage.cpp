@@ -1,13 +1,13 @@
 #include "ProjectsTabPage.h"
+#include "../AppSettings.h"
+#include "../GlobalMessanger.h"
+#include "../Settings.h"
 #include "CreateProjectDialog.h"
 #include "LoginDialog.h"
-#include "Settings.h"
-#include "GlobalMessanger.h"
+#include "ProjectBackup.h"
 
 
-ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller,
-								 std::function<bool(void)> preCloseConditionsCallback,
-								 QWidget* parent) :
+ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller, std::function<bool(void)> preCloseConditionsCallback, QWidget* parent) :
 	MainTabPage(dbcontroller, parent),
 	m_preCloseConditionsCallback(std::move(preCloseConditionsCallback))
 {
@@ -51,6 +51,8 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller,
 	m_newProjectButton = new QPushButton{tr("New Project...")};
 	m_openProjectButton = new QPushButton{tr("Open Project")};
 	m_closeProjectButton = new QPushButton{tr("Close Project")};
+	m_backupProjectButton = new QPushButton{tr("Backup")};
+	m_restoreProjectButton = new QPushButton{tr("Restore...")};
 	m_cloneProjectButton = new QPushButton{tr("Clone...")};
 	m_deleteProjectButton = new QPushButton{tr("Delete Project")};
 	m_refreshProjectListButton = new QPushButton{tr("Refresh")};
@@ -63,8 +65,13 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller,
 	connect(m_newProjectButton, &QPushButton::clicked, this, &ProjectsTabPage::createProject);
 	connect(m_openProjectButton, &QPushButton::clicked, this, &ProjectsTabPage::openProject);
 	connect(m_closeProjectButton, &QPushButton::clicked, this, &ProjectsTabPage::closeProject);
+
+	connect(m_backupProjectButton, &QPushButton::clicked, this, &ProjectsTabPage::backupProject);
+	connect(m_restoreProjectButton, &QPushButton::clicked, this, &ProjectsTabPage::restoreProject);
+
 	connect(m_cloneProjectButton, &QPushButton::clicked, this, &ProjectsTabPage::cloneProject);
 	connect(m_deleteProjectButton, &QPushButton::clicked, this, &ProjectsTabPage::deleteProject);
+
 	connect(m_refreshProjectListButton, &QPushButton::clicked, this, &ProjectsTabPage::refreshProjectList);
 
 	// Actions
@@ -78,16 +85,17 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller,
 	m_closeProjectAction = new QAction{tr("Close Project"), this};
 	connect(m_closeProjectAction, &QAction::triggered, this, &ProjectsTabPage::closeProject);
 
+	m_backupProjectAction = new QAction{tr("Backup"), this};
+	connect(m_backupProjectAction, &QAction::triggered, this, &ProjectsTabPage::backupProject);
+
+	m_restoreProjectAction = new QAction{tr("Restore..."), this};
+	connect(m_restoreProjectAction, &QAction::triggered, this, &ProjectsTabPage::restoreProject);
+
 	m_cloneProjectAction = new QAction{tr("Clone Project"), this};
 	connect(m_cloneProjectAction, &QAction::triggered, this, &ProjectsTabPage::cloneProject);
 
 	m_deleteProjectAction = new QAction{tr("Delete Project"), this};
 	connect(m_deleteProjectAction, &QAction::triggered, this, &ProjectsTabPage::deleteProject);
-
-	m_openProjectAction->setEnabled(false);
-	m_closeProjectAction->setEnabled(false);
-	m_cloneProjectAction->setEnabled(false);
-	m_deleteProjectAction->setEnabled(false);
 
 	m_refreshAction = new QAction{tr("Refresh"), this};
 	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
@@ -112,6 +120,8 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller,
 	pRightLayout->addWidget(m_closeProjectButton);
 	pRightLayout->addWidget(m_refreshProjectListButton);
 	pRightLayout->addStretch();
+	pRightLayout->addWidget(m_backupProjectButton);
+	pRightLayout->addWidget(m_restoreProjectButton);
 	pRightLayout->addWidget(m_cloneProjectButton);
 	pRightLayout->addWidget(m_deleteProjectButton);
 
@@ -128,6 +138,8 @@ ProjectsTabPage::ProjectsTabPage(DbController* dbcontroller,
 	connect(dbController(), &DbController::projectOpened, this, &ProjectsTabPage::projectOpened);
 	connect(dbController(), &DbController::projectClosed, this, &ProjectsTabPage::projectClosed);
 
+	updateUiState(false);
+
 	return;
 }
 
@@ -137,7 +149,7 @@ void ProjectsTabPage::resizeEvent(QResizeEvent* event)
 
 	assert(m_projectTable);
 
-	// Set ProjectTable colums width
+	// Set ProjectTable columns width
 	//
 	m_projectTable->setColumnWidth(0, static_cast<int>(m_projectTable->size().width() * 0.30));
 	m_projectTable->setColumnWidth(1, static_cast<int>(m_projectTable->size().width() * 0.60));
@@ -148,20 +160,7 @@ void ProjectsTabPage::resizeEvent(QResizeEvent* event)
 void ProjectsTabPage::projectOpened(DbProject project)
 {
 	refreshProjectList();
-
-	m_newProjectButton->setEnabled(false);
-	m_openProjectButton->setEnabled(false);
-	m_closeProjectButton->setEnabled(true);
-	m_cloneProjectButton->setEnabled(false);
-	m_deleteProjectButton->setEnabled(false);
-
-	m_refreshProjectListButton->setEnabled(true);
-
-	m_newProjectAction->setEnabled(false);
-	m_openProjectAction->setEnabled(false);
-	m_closeProjectAction->setEnabled(true);
-	m_cloneProjectAction->setEnabled(false);
-	m_deleteProjectAction->setEnabled(false);
+	updateUiState(true);
 
 	GlobalMessanger::instance().fireProjectOpened(project);
 	return;
@@ -170,20 +169,7 @@ void ProjectsTabPage::projectOpened(DbProject project)
 void ProjectsTabPage::projectClosed()
 {
 	refreshProjectList();
-
-	m_newProjectButton->setEnabled(true);
-	m_openProjectButton->setEnabled(true);
-	m_closeProjectButton->setEnabled(false);
-	m_cloneProjectButton->setEnabled(true);
-	m_deleteProjectButton->setEnabled(true);
-
-	m_refreshProjectListButton->setEnabled(true);
-
-	m_newProjectAction->setEnabled(true);
-	m_openProjectAction->setEnabled(true);
-	m_closeProjectAction->setEnabled(false);
-	m_cloneProjectAction->setEnabled(true);
-	m_deleteProjectAction->setEnabled(true);
+	updateUiState(false);
 
 	GlobalMessanger::instance().fireProjectClosed();
 	return;
@@ -245,6 +231,37 @@ void ProjectsTabPage::refreshProjectList()
 	return;
 }
 
+void ProjectsTabPage::updateUiState(bool isOpened)
+{
+	bool backupIsPossible = theAppSettings.pgDumpCommand().isEmpty() == false;
+	bool restoreIsPossible = theAppSettings.psqlCommand().isEmpty() == false;
+
+	bool isClosed = !isOpened;
+	bool selected = m_projectTable && m_projectTable->selectedItems().isEmpty() == false;
+
+	m_newProjectButton->setEnabled(isClosed);
+	m_openProjectButton->setEnabled(isClosed && selected);
+	m_closeProjectButton->setEnabled(isOpened);
+
+	m_backupProjectButton->setEnabled(isClosed && backupIsPossible && selected);
+	m_restoreProjectButton->setEnabled(isClosed && restoreIsPossible);
+
+	m_cloneProjectButton->setEnabled(isClosed && selected);
+	m_deleteProjectButton->setEnabled(isClosed && selected);
+
+	m_refreshProjectListButton->setEnabled(true);
+
+	m_newProjectAction->setEnabled(isClosed);
+	m_openProjectAction->setEnabled(isClosed && selected);
+	m_closeProjectAction->setEnabled(isOpened);
+	m_backupProjectAction->setEnabled(isClosed && backupIsPossible && selected);
+	m_restoreProjectAction->setEnabled(isClosed && restoreIsPossible);
+	m_cloneProjectAction->setEnabled(isClosed && selected);
+	m_deleteProjectAction->setEnabled(isClosed && selected);
+
+	return;
+}
+
 void ProjectsTabPage::createProject()
 {
 	// Use different DbController as during cretion project it can be opened and closed,
@@ -253,10 +270,10 @@ void ProjectsTabPage::createProject()
 	DbController dbc;
 
 	dbc.enableProgress();
-	dbc.setHost(theSettings.serverHost());
-	dbc.setPort(theSettings.serverPort());
-	dbc.setServerUsername(theSettings.serverUsername());
-	dbc.setServerPassword(theSettings.serverPassword());
+	dbc.setHost(theAppSettings.serverHost());
+	dbc.setPort(theAppSettings.serverPort());
+	dbc.setServerUsername(theAppSettings.serverUsername());
+	dbc.setServerPassword(theAppSettings.serverPassword());
 
 	CreateProjectDialog dialog(this);
 
@@ -271,9 +288,9 @@ void ProjectsTabPage::createProject()
 		dbc.getProjectList(&projects, this);
 
 		auto findPredicate = [&projectName](const DbProject& p) -> bool
-			{
-				return p.projectName().compare(projectName, Qt::CaseInsensitive) == 0;
-			};
+		{
+			return p.projectName().compare(projectName, Qt::CaseInsensitive) == 0;
+		};
 
 		auto findResult = std::find_if(projects.begin(), projects.end(), findPredicate);
 
@@ -281,8 +298,7 @@ void ProjectsTabPage::createProject()
 		{
 			// Add project
 			//
-			if (bool result = dbc.createProject(projectName, administratorPassword, this);
-				result == true)
+			if (bool result = dbc.createProject(projectName, administratorPassword, this); result == true)
 			{
 				bool upgradeOk = dbc.upgradeProject(projectName, administratorPassword, true, this);
 
@@ -331,7 +347,7 @@ void ProjectsTabPage::openProject()
 		return;
 	}
 
-	if (dbController()->isProjectOpened() == true &&  dbController()->currentProject().projectName() == projectName)
+	if (dbController()->isProjectOpened() == true && dbController()->currentProject().projectName() == projectName)
 	{
 		QMessageBox::information(this, tr("Open project"), tr("Project %1 is already open.").arg(projectName));
 		return;
@@ -350,9 +366,10 @@ void ProjectsTabPage::openProject()
 		QMessageBox mb(this);
 
 		mb.setText(tr("You cannot open this project."));
-		mb.setInformativeText(tr("The project database version (%1) is higher than the supported project version %2.\n\nPlease update software.")
-							  .arg(projectVersion)
-							  .arg(DbController::databaseVersion()));
+		mb.setInformativeText(
+			tr("The project database version (%1) is higher than the supported project version %2.\n\nPlease update software.")
+				.arg(projectVersion)
+				.arg(DbController::databaseVersion()));
 		mb.setFixedSize(mb.minimumSizeHint());
 		mb.exec();
 		return;
@@ -361,22 +378,24 @@ void ProjectsTabPage::openProject()
 	if (projectVersion < DbController::databaseVersion())
 	{
 		QMessageBox mb{this};
-		
+
 		mb.setTextFormat(Qt::RichText);
-		mb.setText(tr("<font color='red'>Do you want to upgrade the project to the version %1?</font>").arg(DbController::databaseVersion()));
+		mb.setText(
+			tr("<font color='red'>Do you want to upgrade the project to the version %1?</font>").arg(DbController::databaseVersion()));
 		mb.setInformativeText(tr("The project database version (%1) is lower than the supported version %2.")
-			.arg(projectVersion)
-			.arg(DbController::databaseVersion()));
-		mb.setDetailedText(tr("During the upgrade to a newer version a project database backup will be created, it will have a name like u7upgrade%1_%2_[date_and_time_of_upgrade].\n\nThe database administrator can restore the backup by renaming it to u7_[new_name].")
-			.arg(projectVersion)
-			.arg(projectName));
-		
+								  .arg(projectVersion)
+								  .arg(DbController::databaseVersion()));
+		mb.setDetailedText(tr("During the upgrade to a newer version a project database backup will be created, it will have a name like "
+							  "u7upgrade%1_%2_[date_and_time_of_upgrade].\n\nThe database administrator can restore the backup by renaming "
+							  "it to u7_[new_name].")
+							   .arg(projectVersion)
+							   .arg(projectName));
+
 		mb.setIcon(QMessageBox::Warning);
 		mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
 		mb.setDefaultButton(QMessageBox::Cancel);
 
-		if (int result = mb.exec();
-			result == QMessageBox::Cancel)
+		if (int result = mb.exec(); result == QMessageBox::Cancel)
 		{
 			return;
 		}
@@ -386,10 +405,12 @@ void ProjectsTabPage::openProject()
 		bool ok = false;
 
 		QString password = QInputDialog::getText(this,
-			tr("Upgrade project"),
-			tr("Please, enter <b>Administrator</b>'s password for project %1:").arg(projectName),
-			QLineEdit::Password,
-			QString(), &ok, Qt::MSWindowsFixedSizeDialogHint);
+												 tr("Upgrade project"),
+												 tr("Please, enter <b>Administrator</b>'s password for project %1:").arg(projectName),
+												 QLineEdit::Password,
+												 QString(),
+												 &ok,
+												 Qt::MSWindowsFixedSizeDialogHint);
 
 		if (ok == false)
 		{
@@ -423,9 +444,275 @@ void ProjectsTabPage::openProject()
 		{
 			exitLoginLoop = true;
 		}
-	}
-	while (exitLoginLoop == false);
+	} while (exitLoginLoop == false);
 
+	return;
+}
+
+void ProjectsTabPage::backupProject()
+{
+	QList<QTableWidgetItem*> selectedItems = m_projectTable->selectedItems();
+	if (selectedItems.size() == 0 || selectedItems[0]->column() != 0)
+	{
+		return;
+	}
+
+	QString project = selectedItems[0]->text();
+	if (project.isEmpty())
+	{
+		return;
+	}
+
+	QString db = "u7_" + project;
+
+	ProjectBackup backuper;
+	ProjectBackup::Server server{theAppSettings.serverHost(),
+								 theAppSettings.serverPort(),
+								 theAppSettings.serverUsername(),
+								 theAppSettings.serverPassword()};
+
+	backuper.setBackupExecutable(theAppSettings.pgDumpCommand());
+
+	if (backuper.canBackup() == false)
+	{
+		return;
+	}
+
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save Backup As"),
+													QString{"%1.sqlbackup"}.arg(db),
+													tr("Backup files (*.sqlbackup);;All files (*.*)"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QString tempFileName = fileName + ".tmp";
+
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+
+	QString error;
+	std::atomic<bool> abort = false;
+
+	auto backupFunc = [&backuper, &error, &abort](QString db, QString fileName, const ProjectBackup::Server& server) -> bool
+	{
+		return backuper.backup(db, fileName, server, error, abort);
+	};
+
+	auto future = QtConcurrent::run(backupFunc, db, tempFileName, server);
+
+	{
+		QThread::msleep(200);
+
+		QProgressDialog progress("Backing up...", "Abort", 0, INT_MAX, this);
+		progress.setMinimumDuration(0);
+		progress.setWindowModality(Qt::WindowModal);
+
+		while (future.isFinished() == false)
+		{
+			QFile file{tempFileName};
+			if (file.open(QFile::ReadOnly) == true)
+			{
+				qint64 fileSize = file.size();
+				qint64 fileSizeMb = fileSize / (qint64)(1024 * 1024); // File size in megabytes.
+				qDebug() << fileSizeMb;
+				progress.setValue(fileSizeMb);
+				progress.setLabelText(QString("Backing up: %1 MB").arg(fileSizeMb));
+			}
+
+			for (int i = 0; i < 10; i++)
+			{
+				if (progress.wasCanceled() == true)
+				{
+					abort.store(true);
+				}
+
+				QApplication::processEvents();
+				QThread::msleep(10);
+			}
+		}
+	}
+
+	QApplication::restoreOverrideCursor();
+
+	if (future.result() == false)
+	{
+		// Delete tempFileName
+		//
+		QFile::remove(tempFileName);
+
+		QMessageBox mb{this};
+		mb.setIcon(QMessageBox::Icon::Critical);
+		mb.setText(tr("Backup failed."));
+		mb.setInformativeText(error.left(511));
+		mb.exec();
+	}
+	else
+	{
+		// Rename tempFileName to fileName
+		//
+		QFile::remove(fileName); // In case such file already exists.
+		bool renameOk = QFile::rename(tempFileName, fileName);
+
+		if (renameOk == false)
+		{
+			QMessageBox::critical(this, qAppName(), QString{"File %1 write error."}.arg(fileName));
+		}
+		else
+		{
+			QMessageBox mb{this};
+			mb.setIcon(QMessageBox::Icon::Information);
+			mb.setText(tr("Backup completed successfully."));
+			mb.addButton(QMessageBox::Ok);
+			auto button = mb.addButton(tr("Open Folder"), QMessageBox::ActionRole);
+
+			connect(button,
+					&QPushButton::clicked,
+					[fileName]()
+					{
+						QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(fileName).absolutePath()));
+					});
+
+			mb.exec();
+		}
+	}
+
+	return;
+}
+
+void ProjectsTabPage::restoreProject()
+{
+	ProjectBackup restorer;
+	restorer.setRestoreExecutable(theAppSettings.psqlCommand());
+
+	ProjectBackup::Server server{theAppSettings.serverHost(),
+								 theAppSettings.serverPort(),
+								 theAppSettings.serverUsername(),
+								 theAppSettings.serverPassword()};
+
+	if (restorer.canRestore() == false)
+	{
+		return;
+	}
+
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), {}, tr("Backup files (*.sqlbackup);;All files (*.*)"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QString supposedProjectName = QFileInfo(fileName).baseName();
+	if (supposedProjectName.startsWith("u7_", Qt::CaseInsensitive) == true)
+	{
+		supposedProjectName.remove(0, 3);
+	}
+
+	// Ask name for the restored database
+	//
+	std::vector<DbProject> projects;
+	bool result = dbController()->getProjectList(&projects, this);
+
+	if (result == false)
+	{
+		QMessageBox::critical(this, tr("Restore project"), tr("Failed to get project list."));
+		return;
+	}
+
+	QString projectName;
+
+	while (true)
+	{
+		bool projectNameOk = false;
+		projectName = QInputDialog::getText(this,
+											tr("Restore project"),
+											tr("Please, enter project name:"),
+											QLineEdit::Normal,
+											supposedProjectName,
+											&projectNameOk);
+
+		if (projectNameOk == false)
+		{
+			// User pressed Cancel.
+			//
+			return;
+		}
+
+		projectName = projectName.trimmed();
+
+		if (projectName.isEmpty() == true)
+		{
+			QMessageBox::critical(this, tr("u7"), tr("Project name cannot be empty!"));
+			supposedProjectName = projectName;
+			continue;
+		}
+
+		if (projectName.size() > 40)
+		{
+			QMessageBox::critical(this, qApp->applicationName(), tr("The project name is limited to 40 characters."));
+			supposedProjectName = projectName;
+			continue;
+		}
+
+		if (projectName.count(QRegularExpression("[A-Za-z_0-9]")) != projectName.size())
+		{
+			QMessageBox::critical(
+				this,
+				qApp->applicationName(),
+				QString("The project name contains illegal characters: %1").arg(projectName.remove(QRegularExpression("[A-Za-z_0-9]"))));
+
+			supposedProjectName = projectName;
+			continue;
+		}
+
+		// Check if project with such name already exists
+		//
+		bool alreadyExists = std::any_of(projects.begin(),
+										 projects.end(),
+										 [&projectName](const DbProject& p) -> bool
+										 {
+											 return p.projectName().compare(projectName, Qt::CaseInsensitive) == 0;
+										 });
+
+		if (alreadyExists == true)
+		{
+			QMessageBox mb{this};
+			mb.setIcon(QMessageBox::Icon::Critical);
+			mb.setText(tr("Project %1 already exists.").arg(projectName));
+			mb.setInformativeText(tr("Please, enter another project name."));
+			mb.exec();
+			supposedProjectName = projectName;
+			continue;
+		}
+
+		// Ok
+		//
+		break;
+	}
+
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+
+	QString error;
+	bool ok = restorer.restore(projectName, fileName, server, error);
+
+	QApplication::restoreOverrideCursor();
+
+	if (ok == false)
+	{
+		QMessageBox mb{this};
+		mb.setIcon(QMessageBox::Icon::Critical);
+		mb.setText(tr("Restore failed."));
+		mb.setInformativeText(error.left(511));
+		mb.exec();
+	}
+	else
+	{
+		QMessageBox mb{QMessageBox::Icon::Information, qAppName(), tr("Restore completed successfully."), QMessageBox::Ok, this};
+		mb.setInformativeText(tr("<b>NOTE! Check the project and restore it manually if it was not restored correctly.</b>"));
+		mb.exec();
+	}
+
+	refreshProjectList();
+	selectProject(projectName);
 	return;
 }
 
@@ -439,8 +726,7 @@ void ProjectsTabPage::closeProject()
 
 	assert(m_preCloseConditionsCallback);
 
-	if (bool canBeClosed = m_preCloseConditionsCallback();
-		canBeClosed == true)
+	if (m_preCloseConditionsCallback() == true)
 	{
 		dbController()->closeProject(this);
 	}
@@ -475,10 +761,11 @@ void ProjectsTabPage::cloneProject()
 	bool ok = false;
 
 	QString password = QInputDialog::getText(this,
-		tr("Clone project"),
-		tr("Please, enter <b>Administrator</b>'s password for project <b>%1</b>:").arg(projectName),
-		QLineEdit::Password,
-		QString(), &ok);
+											 tr("Clone project"),
+											 tr("Please, enter <b>Administrator</b>'s password for project <b>%1</b>:").arg(projectName),
+											 QLineEdit::Password,
+											 QString(),
+											 &ok);
 
 	if (ok == false)
 	{
@@ -494,10 +781,11 @@ void ProjectsTabPage::cloneProject()
 	// GetNewProject name and description
 	//
 	QString newProjectName = QInputDialog::getText(this,
-		tr("Clone project"),
-		tr("Please, enter new project name:"),
-		QLineEdit::Normal,
-		"cloned_" + projectName, &ok);
+												   tr("Clone project"),
+												   tr("Please, enter new project name:"),
+												   QLineEdit::Normal,
+												   "cloned_" + projectName,
+												   &ok);
 
 	if (ok == false)
 	{
@@ -518,7 +806,6 @@ void ProjectsTabPage::cloneProject()
 
 	refreshProjectList();
 	return;
-
 }
 
 void ProjectsTabPage::deleteProject()
@@ -561,10 +848,11 @@ void ProjectsTabPage::deleteProject()
 	bool ok = false;
 
 	QString password = QInputDialog::getText(this,
-		tr("Delete project"),
-		tr("Please, enter <b>Administrator</b>'s password for project <b>%1</b>:").arg(projectName),
-		QLineEdit::Password,
-		QString(), &ok);
+											 tr("Delete project"),
+											 tr("Please, enter <b>Administrator</b>'s password for project <b>%1</b>:").arg(projectName),
+											 QLineEdit::Password,
+											 QString(),
+											 &ok);
 
 	if (ok == false)
 	{
@@ -596,8 +884,7 @@ void ProjectsTabPage::selectProject(const QString& projectName)
 		QTableWidgetItem* item = m_projectTable->item(i, 0);
 		assert(item != nullptr);
 
-		if (item != nullptr &&
-			item->text().toLower() == lcProjectName)
+		if (item != nullptr && item->text().toLower() == lcProjectName)
 		{
 			m_projectTable->setCurrentCell(i, 0);
 			break;
@@ -616,6 +903,9 @@ void ProjectsTabPage::projectsContextMenuRequested(const QPoint& pos)
 	menu.addAction(m_newProjectAction);
 	menu.addAction(m_openProjectAction);
 	menu.addAction(m_closeProjectAction);
+	menu.addSeparator();
+	menu.addAction(m_backupProjectAction);
+	menu.addAction(m_restoreProjectAction);
 	menu.addSeparator();
 	menu.addAction(m_cloneProjectAction);
 	menu.addAction(m_deleteProjectAction);
@@ -640,37 +930,7 @@ void ProjectsTabPage::projectTableSelectionChanged()
 		return;
 	}
 
-	if (dbController()->isProjectOpened())
-	{
-		// Can just close the project, it was set in projectOpened slot
-		//
-		return;
-	}
-
-	// Project is closed, so we can open project if the list has selected row
-	//
-	QList<QTableWidgetItem*> selectedItems = m_projectTable->selectedItems();
-
-	if (selectedItems.isEmpty() == false)
-	{
-		m_openProjectButton->setEnabled(true);
-		m_cloneProjectButton->setEnabled(true);
-		m_deleteProjectButton->setEnabled(true);
-
-		m_openProjectAction->setEnabled(true);
-		m_cloneProjectAction->setEnabled(true);
-		m_deleteProjectAction->setEnabled(true);
-	}
-	else
-	{
-		m_openProjectButton->setEnabled(false);
-		m_cloneProjectButton->setEnabled(false);
-		m_deleteProjectButton->setEnabled(false);
-
-		m_openProjectAction->setEnabled(true);
-		m_cloneProjectAction->setEnabled(true);
-		m_deleteProjectAction->setEnabled(true);
-	}
+	updateUiState(dbController()->isProjectOpened());
 
 	return;
 }

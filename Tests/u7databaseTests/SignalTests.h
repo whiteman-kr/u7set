@@ -1,5 +1,4 @@
 #pragma once
-#include <QTest>
 #include "TestDbBase.h"
 
 class SignalTests : public TestDbBase

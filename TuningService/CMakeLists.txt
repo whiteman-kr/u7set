@@ -15,8 +15,6 @@ qt_standard_project_setup()
 set(TARGET TuningSrv)
 
 add_executable(${TARGET}
-	../lib/TuningDataStorage.cpp
-	../lib/TuningDataStorage.h
 	TcpTuningServer.cpp
 	TcpTuningServer.h
 	TuningClientContext.cpp

@@ -809,6 +809,15 @@ namespace AppSignalPropNames
 	inline const QString MISPRINT_highEngineeringUnitsCaption("HighEngeneeringUnits");
 }
 
+namespace AppSignalTags
+{
+	inline const QString in = QStringLiteral("in");
+	inline const QString out = QStringLiteral("out");
+	inline const QString view_linear = QStringLiteral("view_linear");
+	inline const QString view_log10 = QStringLiteral("view_log10");
+	inline const QString view_period = QStringLiteral("view_period");
+} // namespace AppSignalTags
+
 namespace AppSignalDefaultSpecPropStruct
 {
 	inline const QString INPUT_ANALOG(
