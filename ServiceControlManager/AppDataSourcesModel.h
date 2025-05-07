@@ -23,7 +23,7 @@ public:
 
 private:
 	std::vector<Network::AppDataSourceState> m_sources;
-	std::vector<int> m_sourcesErrorCount;
+	std::vector<qint64> m_sourcesErrorCount;
 
 	inline static const Columns m_columns =
 	{
