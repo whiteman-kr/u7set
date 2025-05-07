@@ -99,10 +99,12 @@ bool parseCmdLine(int argc, char* argv[], RequestParams* rp)
 
 			ts << QString("signals = All\n");
 			ts << QString("destLocation = D:/Temp\n");
+			ts << QString("checkonly = false\n");
 
 			f.close();
 
 			print << QString("\nFile saved: %1\n\n").arg(fileName);
+			return false;
 		}
 
 		if (cmdLineParams[1].toLower().startsWith("-f"))
@@ -124,7 +126,7 @@ bool parseCmdLine(int argc, char* argv[], RequestParams* rp)
 
 			if (sl.size() < 2)
 			{
-				print << QString("\nSet archive file after -d= !1\n\n");
+				print << QString("\nSet archive file after -d= !\n\n");
 				return false;
 			}
 

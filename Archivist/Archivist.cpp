@@ -18,6 +18,7 @@ void Archivist::printRequestParams()
 			 arg(m_reqParams.end.toString("hh:mm:ss dd.MM.yyyy"));
 	print << QString("Signals filter:\t\t%1\n").arg(m_reqParams.signalsList.join(" "));
 	print << QString("Copy location:\t\t%1\n").arg(m_reqParams.destLocation);
+	print << QString("Check only:\t\t%1\n").arg(m_reqParams.checkonly);
 
 	print.newLine();
 }
