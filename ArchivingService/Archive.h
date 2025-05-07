@@ -75,10 +75,14 @@ public:
 	QString getSignalID(Hash signalHash);
 	bool isSignalExists(Hash signalHash) const { return m_archFiles.contains(signalHash); }
 
-	int getFilesCount() const { return static_cast<int>(m_archFiles.count()); }
+	int getFilesCount() const { return TO_INT(m_archFiles.size()); }
 	void getSignalsHashes(QVector<Hash>* hashes);
 
 	void saveState(const SimpleAppSignalState& state);
+
+	void updateSavedDataSizePerMin();
+	qint64 getSavedDataSizePerMin();
+	qint64 getDiskFreeSpace() const;
 
 	bool shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* thread);
 
@@ -88,7 +92,8 @@ public:
 	bool waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeconds);
 
 	ArchFile* getNextFileForFlushing(bool* flushAnyway);							// will be called from FileArchWriter
-	ArchFile* getArchFile(Hash signalHash) { return m_archFiles.value(signalHash, nullptr); }
+	ArchFile* getArchFile(Hash signalHash);
+	ArchFile* getArchFileByIndex(int index);
 
 	bool isMaintenanceRequired() { return m_isMaintenanceRequired.load(); }
 	void maintenanceIsStarted();
@@ -96,6 +101,8 @@ public:
 	qint64 getCurrentPartition();
 
 	static QString timeTypeStr(E::TimeType timeType);
+
+	void getRecordsPerMin(std::vector<std::pair<int, int>>* recordsPerMin, int count);
 
 private:
 	bool loadArchInfoFile();
@@ -107,6 +114,8 @@ private:
 	bool saveArchInfoProtoFile() const;
 
 	void writeArchFilesInfoFile(const std::vector<std::vector<ArchFile *>>& archFilesGroups);
+
+	void updateDiskFreeSpace();
 
 	quint32 getNewRequestID();
 
@@ -145,6 +154,10 @@ private:
 
 	bool m_isWorkable = false;
 
+	std::atomic<qint64> m_savedDataSizeCounter = { 0 };
+	std::atomic<qint64> m_savedDataSizePerMin = { 0 };
+	std::atomic<qint64> m_diskFreeSpace = { 0 };
+
 	//
 
 	std::atomic<qint64> m_currentPartition = { -1 };
@@ -157,8 +170,8 @@ private:
 
 	//
 
-	QHash<Hash, ArchFile*> m_archFiles;
-	QVector<ArchFile*> m_archFilesArray;
+	std::map<Hash, ArchFile*> m_archFiles;
+	std::vector<ArchFile*> m_archFilesArray;
 
 	QString m_archFullPath;
 

@@ -31,7 +31,7 @@ public:
 
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
-	const Network::ServiceClients& clients() { return m_serviceClientsMessage; }
+//	const Network::ServiceClients& clients() { return m_serviceClientsMessage; }
 	bool clientsIsReady() { return m_clientsIsReady; }
 	bool stateIsReady() { return m_stateIsReady; }
 	bool settingsIsReady() { return m_settingsIsReady; }
@@ -102,7 +102,7 @@ private:
 
 	// reused protobuf messages
 	//
-	Network::ServiceClients m_serviceClientsMessage;
+//	Network::ServiceClients m_serviceClientsMessage;
 
 	Network::ServiceSettings m_getServiceSettings;
 

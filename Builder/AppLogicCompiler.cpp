@@ -808,10 +808,10 @@ namespace Builder
 		str = QString("-- Project:\t%1").arg(bi.project);
 		list.append(str);
 
-		str = QString("-- Build No:\t%1").arg(bi.id);
+		str = QString("-- Build No:\t%1").arg(bi.buildNo);
 		list.append(str);
 
-		str = QString("-- Build date:\t%1").arg(bi.dateStr());
+		str = QString("-- Build date:\t%1").arg(bi.dateTimeStr());
 		list.append(str);
 
 		str = QString("-- User:\t%1").arg(bi.user);
@@ -990,10 +990,10 @@ namespace Builder
 		str = QString("-- Project:\t%1").arg(bi.project);
 		list.append(str);
 
-		str = QString("-- Build No:\t%1").arg(bi.id);
+		str = QString("-- Build No:\t%1").arg(bi.buildNo);
 		list.append(str);
 
-		str = QString("-- Build date:\t%1").arg(bi.dateStr());
+		str = QString("-- Build date:\t%1").arg(bi.dateTimeStr());
 		list.append(str);
 
 		str = QString("-- User:\t%1").arg(bi.user);

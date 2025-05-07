@@ -24,25 +24,42 @@ add_executable(${TARGET} WIN32
 	AppDataServiceWidget.h
 	AppDataSourceWidget.cpp
 	AppDataSourceWidget.h
-	BaseServiceStateWidget.cpp
-	BaseServiceStateWidget.h
-	ConfigurationServiceWidget.cpp
-	ConfigurationServiceWidget.h
+	AppDataSourcesModel.cpp
+	AppDataSourcesModel.h
+	ArchiveServiceWidget.cpp
+	ArchiveServiceWidget.h
+	ArchiveSignalsModel.cpp
+	ArchiveSignalsModel.h
+	BaseServiceWidget.cpp
+	BaseServiceWidget.h
+	Brush.h
+	CfgServiceWidget.cpp
+	CfgServiceWidget.h
+	Columns.cpp
+	Columns.h
+	DataSourceInfoModel.cpp
+	DataSourceInfoModel.h
+	DataSourceStateModel.cpp
+	DataSourceStateModel.h
 	MainWindow.cpp
 	MainWindow.h
 	ScanOptionsWidget.cpp
 	ScanOptionsWidget.h
 	ScmMain.cpp
+	ScmServiceClient.cpp
+	ScmServiceClient.h
 	ScmTcpAppDataClient.cpp
 	ScmTcpAppDataClient.h
+	ServiceData.cpp
+	ServiceData.h
 	ServiceTableModel.cpp
 	ServiceTableModel.h
-	TcpConfigServiceClient.cpp
-	TcpConfigServiceClient.h
 	TcpTuningServiceClient.cpp
 	TcpTuningServiceClient.h
 	TuningServiceWidget.cpp
 	TuningServiceWidget.h
+	TuningSourcesModel.cpp
+	TuningSourcesModel.h
 	TuningSourceWidget.cpp
 	TuningSourceWidget.h
 
@@ -88,6 +105,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QHeaderView>
 	<QHostAddress>
 	<QHBoxLayout>
+	<QMainWindow>
 	<QMap>
 	<QMessageBox>
 	<QMetaClassInfo>
@@ -110,6 +128,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QThread>
 	<QTimer>
 	<QToolBar>
+	<QTranslator>
 	<QtGlobal>
 	<QtNetwork/QHostAddress>
 	<QUdpSocket>
@@ -119,6 +138,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 
+	<CommonLib/ConstStrings.h>
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
 

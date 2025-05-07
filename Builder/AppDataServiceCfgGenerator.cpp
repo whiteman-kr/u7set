@@ -84,7 +84,7 @@ namespace Builder
 		extXml.setAutoFormatting(true);
 		extXml.writeStartDocument();
 		extXml.writeStartElement(XmlElement::APP_SIGNALS);
-		extXml.writeIntAttribute(XmlAttribute::BUILD_ID, resultWriter->buildInfo().id);
+		extXml.writeIntAttribute(XmlAttribute::BUILD_ID, resultWriter->buildInfo().buildNo);
 		extXml.writeStartElement(XmlElement::SIGNALS);
 
 		int signalCount = 0;
@@ -286,7 +286,7 @@ namespace Builder
 		azpzXml.setAutoFormatting(true);
 		azpzXml.writeStartDocument();
 		azpzXml.writeStartElement(XmlElement::APP_SIGNALS);
-		azpzXml.writeIntAttribute(XmlAttribute::BUILD_ID, m_buildResultWriter->buildInfo().id);
+		azpzXml.writeIntAttribute(XmlAttribute::BUILD_ID, m_buildResultWriter->buildInfo().buildNo);
 		azpzXml.writeStartElement(XmlElement::SIGNALS);
 		azpzXml.writeIntAttribute(XmlAttribute::COUNT, TO_INT(m_acquiredAppSignals.size()));
 

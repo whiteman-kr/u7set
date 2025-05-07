@@ -40,9 +40,31 @@ namespace Tuning
 
 	void TuningServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 	{
+		QMutexLocker l(&m_startStopMutex);
+
 		QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::TuningService, m_serviceSettings);
 
 		serviceInfo.set_settingsxml(xmlString.toStdString());
+
+		if (m_tcpTuningServerThread != nullptr)
+		{
+			m_tcpTuningServerThread->getClientsList(&serviceInfo);
+		}
+
+		m_tuningSources.getTuningSourcesInfo(&serviceInfo);
+
+		int srcCount = serviceInfo.tuningsourcesinfostate_size();
+
+		for(int i = 0; i < srcCount; i++)
+		{
+			const Network::DataSourceInfo& dsi = serviceInfo.tuningsourcesinfostate(i).info();
+
+			TuningSourceThreadShared thread = getValueOrNullptr(m_sourceThreads, QString::fromStdString(dsi.moduleequipmentid()));
+
+			TEST_PTR_CONTINUE(thread);
+
+			thread->getSourceState(serviceInfo.mutable_tuningsourcesinfostate(i)->mutable_state());
+		}
 	}
 
 	void TuningServiceWorker::initServiceSpecificCmdLineArgs()
@@ -135,7 +157,7 @@ namespace Tuning
 			return E::NetworkError::SingleLmControlDisabled;
 		}
 
-		AUTO_LOCK(m_mainMutex);							// !!!!
+		AUTO_LOCK(m_startStopMutex);							// !!!!
 
 		stopSourcesListenerThreads();
 
@@ -172,7 +194,7 @@ namespace Tuning
 			return true;
 		}
 
-		AUTO_LOCK(m_mainMutex);
+		AUTO_LOCK(m_startStopMutex);
 
 		if (m_serviceSettings.singleLmControl == true)
 		{
@@ -198,7 +220,7 @@ namespace Tuning
 			return true;
 		}
 
-		AUTO_LOCK(m_mainMutex);
+		AUTO_LOCK(m_startStopMutex);
 
 		if (m_serviceSettings.singleLmControl == true)
 		{
@@ -225,7 +247,7 @@ namespace Tuning
 			return true;
 		}
 
-		AUTO_LOCK(m_mainMutex);
+		AUTO_LOCK(m_startStopMutex);
 
 		if (m_serviceSettings.singleLmControl == true)
 		{
@@ -245,11 +267,11 @@ namespace Tuning
 	{
 		QString clientID;
 
-		m_mainMutex.lock();
+		m_startStopMutex.lock();
 
 		clientID = m_activeClientInfo.equipmentID();
 
-		m_mainMutex.unlock();
+		m_startStopMutex.unlock();
 
 		return clientID;
 	}
@@ -258,11 +280,11 @@ namespace Tuning
 	{
 		QString clientIP;
 
-		m_mainMutex.lock();
+		m_startStopMutex.lock();
 
 		clientIP = m_activeClientIP;
 
-		m_mainMutex.unlock();
+		m_startStopMutex.unlock();
 
 		return clientIP;
 	}
@@ -391,30 +413,28 @@ namespace Tuning
 	{
 		DEBUG_LOG_MSG(logger(), QString("Clear current configuration"));
 
+		m_startStopMutex.lock();
+
 		stopTcpTuningServerThread();
-
-		m_mainMutex.lock();
-
 		stopSourcesListenerThreads();
 		stopTuningSourceThreads();
 		clearServiceMaps();
 
-		m_mainMutex.unlock();
+		m_startStopMutex.unlock();
 	}
 
 	void TuningServiceWorker::applyNewConfiguration(const TuningSources& newSources)
 	{
 		DEBUG_LOG_MSG(logger(), QString("Apply new configuration"));
 
-		m_mainMutex.lock();
+		m_startStopMutex.lock();
 
 		buildServiceMaps(newSources);
 		runTuningSourceThreads();
 		runSourcesListenerThreads();
-
-		m_mainMutex.unlock();
-
 		runTcpTuningServerThread();
+
+		m_startStopMutex.unlock();
 	}
 
 	void TuningServiceWorker::buildServiceMaps(const TuningSources& newSources)
@@ -834,6 +854,9 @@ namespace Tuning
 			DEBUG_LOG_MSG(logger(), QString("Configuration reading success"));
 
 			clearConfiguration();
+
+			m_buildInfo = m_cfgLoaderThread->buildInfo();;
+
 			applyNewConfiguration(newSources);
 		}
 	}

@@ -1,119 +1,54 @@
 #pragma once
 
 #include <QAbstractTableModel>
+#include <QProgressBar>
 #include "../AppDataService/AppDataSource.h"
 #include "../OnlineLib/Tcp.h"
-#include "BaseServiceStateWidget.h"
+#include "BaseServiceWidget.h"
 
+#include "AppDataSourcesModel.h"
+#include "ArchiveSignalsModel.h"
+#include "AppDataSourceWidget.h"
 
-class QTableView;
-class TcpAppDataClient;
-class SimpleThread;
-class QActionGroup;
-class AppDataSourceWidget;
-
-class DataSourcesStateModel : public QAbstractTableModel
+class AppDataServiceWidget : public BaseServiceWidget
 {
 	Q_OBJECT
 public:
-	explicit DataSourcesStateModel(QObject *parent = nullptr);
-	~DataSourcesStateModel();
-
-	int rowCount(const QModelIndex &parent = QModelIndex()) const;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const;
-	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-
-	void updateData(int firstRow, int lastRow, int firstColumn, int lastColumn);
-	void updateData(const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-	void setClient(TcpAppDataClient* clientSocket);
-
-	const OnlineLib::DataSource& getDataSource(int row) const;
-
-	void updateStates();
-
-public slots:
-	void invalidateData();
-	void reloadList();
-
-private:
-	TcpAppDataClient* m_clientSocket;
-	std::vector<std::pair<OnlineLib::DataSource, Network::AppDataSourceState>> m_dataSources;
-};
-
-class SignalStateModel : public QAbstractTableModel
-{
-	Q_OBJECT
-public:
-	explicit SignalStateModel(QObject *parent = nullptr);
-	~SignalStateModel();
-
-	int rowCount(const QModelIndex &parent = QModelIndex()) const;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const;
-	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
-	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
-
-	void updateData(int firstRow, int lastRow, int firstColumn, int lastColumn);
-	void updateData(const QModelIndex& topLeft, const QModelIndex& bottomRight);
-
-	void setClient(TcpAppDataClient* clientSocket) { m_clientSocket = clientSocket; }
-
-public slots:
-	void invalidateData();
-	void reloadList();
-
-private:
-	TcpAppDataClient* m_clientSocket;
-};
-
-class AppDataServiceWidget : public BaseServiceStateWidget
-{
-	Q_OBJECT
-public:
-	AppDataServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent = nullptr);
+	AppDataServiceWidget(ServiceTableModel* srvTableModel,
+						 const SoftwareInfo& softwareInfo,
+						 const ServiceData& serviceData,
+						 quint32 ip, quint16 tcpPort,
+						 QWidget* parent = nullptr);
 	~AppDataServiceWidget();
 
-signals:
-	void newTcpClientSocket(TcpAppDataClient* tcpClientSocket);
-	void clearTcpClientSocket();
+	virtual void initWidget() override;
 
-public slots:
-	void updateServiceState();
+	virtual void updateDerivedWidgets(const Network::ServiceInfo& srvInfo) override;
+	virtual void clearDerivedWidgets() override;
 
-	void updateStateInfo();
-
-	void updateSourceInfo();
-	void updateSourceStateColumns();
-
-	void updateSignalInfo();
-	void updateSignalStateColumns();
-
-	void updateClientsInfo();
-
-	void updateServiceParameters();
-
-	void clearServiceData();
-
-	void onAppDataSourceDoubleClicked(const QModelIndex &index);
-
-	void forgetWidget();
-
-protected:
-	void createTcpConnection(quint32 ip, quint16 port) override;
-	void dropTcpConnection() override;
+private slots:
+	void forgetWidget(QString dataSourceID);
 
 private:
-	DataSourcesStateModel* m_dataSourcesStateModel = nullptr;
-	SignalStateModel* m_signalStateModel = nullptr;
-	QStandardItemModel* m_parametersTabModel = nullptr;
-	QStandardItemModel* m_settingsTabModel = nullptr;
+	void updateModels(const Network::ServiceInfo& srvInfo);
 
-	QTableView* m_dataSourcesView = nullptr;
-	QTableView* m_signalsView = nullptr;
+	void addAppDataSourcesTab();
+	void addArchiveSignalsTab();
 
-	TcpAppDataClient* m_tcpClientSocket;
-	SimpleThread* m_tcpClientThread;
+	virtual int updateSettings(int rowCount) override;
 
-	QList<AppDataSourceWidget*> m_appDataSourceWidgetList;
+	void onSourceDoubleClicked(const QModelIndex& index);
+	void onCustomContextMenuRequested(const QPoint &pos);
+	void onChangeApertures();
+
+private:
+	AppDataSourcesModel* m_sourcesModel = nullptr;
+	QTableView* m_sourcesView = nullptr;
+
+	ArchiveSignalsModel* m_archSignalsModel = nullptr;
+	QTableView* m_archSignalsView = nullptr;
+	QProgressBar* m_archSignalsProgressBar = nullptr;
+	std::vector<int> m_selectedRows;
+
+	std::map<QString, AppDataSourceWidget*> m_sourceWidgets;
 };

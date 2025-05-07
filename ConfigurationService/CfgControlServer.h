@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 
 // ------------------------------------------------------------------------------------
 //
@@ -8,41 +8,25 @@
 //
 // ------------------------------------------------------------------------------------
 
-class CfgCheckerWorker;
+// class CfgCheckerWorker;
 
-class CfgControlServer : public CfgServer
-{
-	Q_OBJECT
+// class CfgControlServer : public CfgServer
+// {
+// 	Q_OBJECT
 
-public:
-	CfgControlServer(const SoftwareInfo& softwareInfo,
-					 const QString& autoloadBuildPath,
-					 const QString& workDirectory,
-					 const QString& buildPath,
-					 const SessionParams& sessionParams,
-					 const std::list<CfgServiceSettings::ClientInfo>& clients,
-					 bool checkClientHostname,
-					 const CfgCheckerWorker& checkerWorker,
-					 std::shared_ptr<CircularLogger> logger);
+// public:
+// 	CfgControlServer(const SoftwareInfo& softwareInfo,
+// 					 const SessionParams& sessionParams,
+// 					 const QString& buildPath,
+// 					 const std::list<CfgServiceSettings::ClientInfo>& clients,
+// 					 bool checkClientHostname,
+// 					 std::shared_ptr<CircularLogger> logger);
 
-	virtual Tcp::Server* getNewInstance(const Tcp::ListenAddress& listenAddr) override;
+// 	//virtual Tcp::Server* getNewInstance(const Tcp::ListenAddress& listenAddr) override;
 
-	void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override final;
+// //	void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override final;
 
-private:
-	Tcp::SetConnectionResult checkClient(const QString& clientEquipmentID, const QString& clientHostname) const override;
+// private:
+// 	Tcp::SetConnectionResult checkClient(const QString& clientEquipmentID, const QString& clientHostname) const override;
 
-	void sendServiceState();
-	void sendLoadedBuildInfo();
-	void sendSettings();
-	void sendServiceLog();
-
-	const CfgCheckerWorker& m_checkerWorker;
-	QString m_equipmentID;
-	QString m_autoloadBuildPath;
-	QString m_workDirectory;
-	std::list<CfgServiceSettings::ClientInfo> m_knownClients;
-	bool m_checkClientHostname = false;
-
-	SessionParams m_sessionParams;
-};
+// };

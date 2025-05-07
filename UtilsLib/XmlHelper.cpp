@@ -299,9 +299,19 @@ bool XmlReadHelper::readNextStartElement()
 	return m_xmlReader->readNextStartElement();
 }
 
+QXmlStreamReader::TokenType XmlReadHelper::readNext()
+{
+	return m_xmlReader->readNext();
+}
+
 void XmlReadHelper::skipCurrentElement()
 {
 	m_xmlReader->skipCurrentElement();
+}
+
+QXmlStreamReader::TokenType XmlReadHelper::tokenType()
+{
+	return m_xmlReader->tokenType();
 }
 
 QString XmlReadHelper::name()

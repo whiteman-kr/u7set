@@ -2,7 +2,7 @@
 
 // This class is designed to receive signals from CfgSrv
 
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 
 #include "Options.h"
 

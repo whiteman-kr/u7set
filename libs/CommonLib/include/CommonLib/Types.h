@@ -317,6 +317,18 @@ public:
 	};
 	Q_ENUM(SoftwareType)
 
+	enum ServiceState
+	{
+		Undefined,			// this states used by 'Service Control Manager' only
+		Unavailable,
+
+		Starts,
+		Work,
+		Stopped,
+		Stops
+	};
+	Q_ENUM(ServiceState)
+
 	// OutputMode
 	//
 	enum OutputMode
@@ -996,6 +1008,7 @@ const char* const DataFormatStr[] =
 };
 
 #define TO_INT(value) (static_cast<int>(value))
+#define TO_INT64(value) (static_cast<qint64>(value))
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
 
 template <typename EnumType>

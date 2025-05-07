@@ -21,7 +21,6 @@ namespace google
 	}
 }
 
-
 struct RequestHeader
 {
 	quint32 id;
@@ -88,8 +87,8 @@ public:
 	friend class UdpServerSocket;
 
 private:
-	char* rawData() { return m_rawData; }				// return pointer on request header
-	RequestHeader* header() { return reinterpret_cast<RequestHeader*>(m_rawData); }
+	char* rawData() { return m_rawData; }
+	RequestHeader* header() { return reinterpret_cast<RequestHeader*>(m_rawData); }	// return pointer on request header
 	char* data() { return m_rawData + sizeof(RequestHeader); }						// return pointer on request data after header
 
 	char* writeDataPtr() { return m_rawData + sizeof(RequestHeader) + m_writeDataIndex; }	// pointer for write request data
@@ -269,7 +268,7 @@ signals:
 	void receiveRequest(UdpRequest request);
 
 public slots:
-	void sendAck(UdpRequest m_request);
+	void sendAck(UdpRequest request);
 
 private slots:
 	void onTimer();

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ServiceLib/Service.h>
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../GatewayLib/GatewayDescription.h"
 #include "GatewayHandler.h"

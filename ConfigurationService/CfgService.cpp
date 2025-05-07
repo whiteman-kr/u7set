@@ -1,4 +1,5 @@
-#include "ConfigurationService.h"
+#include "CfgService.h"
+#include "CfgServer.h"
 #include <CommonLib/ConstStrings.h>
 #include "CfgChecker.h"
 #include "CfgControlServer.h"
@@ -33,11 +34,28 @@ void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& se
 	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::ConfigurationService, m_cfgServiceSettings);
 
 	serviceInfo.set_settingsxml(xmlString.toStdString());
+	serviceInfo.set_autoloadbuildpath(m_autoloadBuildPath.toStdString());
+	serviceInfo.set_workdirectory(m_workDirectory.toStdString());
+
+	if (m_cfgCheckerWorker != nullptr)
+	{
+		serviceInfo.set_cfgcheckerstate(TO_INT(m_cfgCheckerWorker->cfgCheckerState()));
+	}
+	else
+	{
+		serviceInfo.set_cfgcheckerstate(TO_INT(E::ConfigCheckerState::Unknown));
+	}
+
+	if (m_cfgServerThread != nullptr)
+	{
+		m_cfgServerThread->getClientsList(&serviceInfo);
+	}
 }
 
 void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
 {
 	stopCfgServerThread();
+	clearBuildInfo();
 
 	emit renameWorkBuildToBackupExcept(newBuildPath);
 
@@ -107,7 +125,15 @@ bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath
 
 	cfgXmlFile.close();
 
-	bool res = softwareSettingsSet().readFromXml(cfgXmlData);
+	bool res = readBuildInfo(cfgXmlData);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger(), QString("Error reading BuildInfo from file: %1").arg(File::CONFIGURATION_XML));
+		return false;
+	}
+
+	res = softwareSettingsSet().readFromXml(cfgXmlData);
 
 	if (res == false)
 	{
@@ -173,15 +199,12 @@ void ConfigurationServiceWorker::shutdown()
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
 
-	CfgControlServer* cfgControlServer = new CfgControlServer(softwareInfo(),
-															  m_autoloadBuildPath,
-															  m_workDirectory,
-															  buildPath,
-															  sessionParams(),
-															  m_cfgServiceSettings.clients,
-															  m_cfgServiceSettings.checkHostname,
-															  *m_cfgCheckerWorker,
-															  logger());
+	CfgServer* cfgServer = new CfgServer(softwareInfo(),
+										 sessionParams(),
+										 buildPath,
+										 m_cfgServiceSettings.clients,
+										 m_cfgServiceSettings.checkHostname,
+										 logger());
 
 	std::vector<Tcp::ListenAddress> listenAddrs;
 
@@ -193,7 +216,7 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 		}
 	}
 
-	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgControlServer, logger());
+	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger());
 
 	m_cfgServerThread->start();
 }
@@ -210,7 +233,6 @@ void ConfigurationServiceWorker::stopCfgServerThread()
 	}
 }
 
-
 void ConfigurationServiceWorker::startCfgCheckerThread()
 {
 	m_cfgCheckerWorker = new CfgCheckerWorker(equipmentID(), m_workDirectory, m_autoloadBuildPath, 3 * 1000, logger());
@@ -223,7 +245,6 @@ void ConfigurationServiceWorker::startCfgCheckerThread()
 	connect(this, &ConfigurationServiceWorker::renameWorkBuildToBackupExcept, m_cfgCheckerWorker, &CfgCheckerWorker::renameWorkToBackup);
 }
 
-
 void ConfigurationServiceWorker::stopCfgCheckerThread()
 {
 	assert(m_cfgCheckerThread != nullptr);
@@ -234,7 +255,6 @@ void ConfigurationServiceWorker::stopCfgCheckerThread()
 	m_cfgCheckerWorker = nullptr;
 }
 
-
 void ConfigurationServiceWorker::startUdpThreads()
 {
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::Any, PORT_CONFIGURATION_SERVICE_INFO, logger());
@@ -243,7 +263,6 @@ void ConfigurationServiceWorker::startUdpThreads()
 
 	m_infoSocketThread->start();
 }
-
 
 void ConfigurationServiceWorker::stopUdpThreads()
 {

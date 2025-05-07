@@ -1132,8 +1132,8 @@ namespace Builder
 		QString comments;
 
 		comments += commStart + " Project: " + b.project + "\n";
-		comments += commStart + " BuildNo: " + QString::number(b.id) + "\n";
-		comments += commStart + " Date: " + b.dateStr() + "\n";
+		comments += commStart + " BuildNo: " + QString::number(b.buildNo) + "\n";
+		comments += commStart + " Date: " + b.dateTimeStr() + "\n";
 		comments += commStart + " Changeset: " + QString::number(b.changeset) + "\n";
 		comments += commStart + " User: " + b.user + "\n";
 		comments += commStart + " Workstation: " + b.workstation + "\n\n";

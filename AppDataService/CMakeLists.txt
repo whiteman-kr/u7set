@@ -15,6 +15,8 @@ qt_standard_project_setup()
 set(TARGET AppDataSrv)
 
 add_executable(${TARGET}
+	ApertureFile.cpp
+	ApertureFile.h
 	AppDataReceiver.cpp
 	AppDataReceiver.h
 	AppDataService.cpp

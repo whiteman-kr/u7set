@@ -113,6 +113,8 @@ namespace Tcp
 
 		QString socketDescription() const;
 
+		virtual void getClientsList(Network::ServiceInfo* srvInfo) const;
+
 	signals:
 		void socketDisconnected(const SocketWorker* socketWorker);
 		void closeConnectionSignal();
@@ -275,7 +277,7 @@ namespace Tcp
 
 		// ServerDerivedClass::getNewInstance(const ListenAddress& listenAddr) must be implemented as:
 		// {
-		//		Tcp::Server* newServer = new ServerDerivedClass();
+		//		Tcp::Server* newServer = new TcpSrvInfoServer(m_localSoftwareInfo, m_socketDescription);
 		//		newServer->setListenAddress(listenAddr);
 		//		return newServer;
 		// }
@@ -306,6 +308,7 @@ namespace Tcp
 		bool sendReply(google::protobuf::Message& protobufMessage);
 		bool sendReply(const char* replyData, quint32 replyDataSize);
 
+		void getClientsList(Network::ServiceInfo* srvInfo) const override;
 		void sendClientList();
 
 		void initConnectionNo();
@@ -361,7 +364,7 @@ namespace Tcp
 
 		char* m_protobufBuffer = nullptr;
 
-		QMutex m_statesMutex;
+		mutable QMutex m_statesMutex;
 	};
 
 	// -------------------------------------------------------------------------------------
@@ -414,6 +417,8 @@ namespace Tcp
 
 		virtual void onStartListening(const HostAddressPort& addr, bool startOk, const QString& errStr);
 
+		void getClientsList(Network::ServiceInfo* srvInfo) const;
+
 	signals:
 		void connectedClientsListChanged(std::list<ConnectionState> listOfClientStates);
 
@@ -438,6 +443,7 @@ namespace Tcp
 
 		Server* m_serverInstance = nullptr;
 
+		mutable QMutex m_runningServersMutex;
 		std::map<const SocketWorker*, SimpleThread*> m_runningServers;
 
 		friend class ListenerSocket;
@@ -471,8 +477,10 @@ namespace Tcp
 
 		virtual ~ListenerThread();
 
-	private:
+		void getClientsList(Network::ServiceInfo* srvInfo) const;
 
+	private:
+		ListenerWorker* m_listenerWorker = nullptr;
 	};
 
 	// -------------------------------------------------------------------------------------

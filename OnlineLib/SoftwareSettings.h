@@ -60,6 +60,8 @@ public:
 	void setRtTrendsRequestIP(const HostAddressPort& addrPort);
 	bool hasRtTrendsRequestIP() const;
 
+	quint32 propsMask() const;
+
 	//
 
 	void clear();

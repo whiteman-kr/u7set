@@ -2,7 +2,7 @@
 
 #include <ServiceLib/Service.h>
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
 #include "TuningSourceThread.h"
@@ -134,11 +134,11 @@ namespace Tuning
 
 		std::set<std::pair<QString, QString>> m_controlledLans;			// pair: <LM EquipmentID, LAN EquipmentID>
 
+		mutable QMutex m_startStopMutex;
+
 		CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
-
-		mutable QMutex m_mainMutex;
 
 		std::vector<TuningSocketListenerThread*> m_socketListenerThreads;
 

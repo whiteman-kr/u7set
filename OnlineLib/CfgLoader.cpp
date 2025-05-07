@@ -2,10 +2,10 @@
 #error Do not include this file in the project! Link OnlineLib instead.
 #endif
 
-#include "CfgServerLoader.h"
+#include "CfgLoader.h"
 #include "CircularLogger.h"
+#include "../UtilsLib/XmlHelper.h"
 #include <CommonLib/ConstStrings.h>
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -26,143 +26,6 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 
 		m_typesRegistered = true;
 	}
-}
-
-// -------------------------------------------------------------------------------------
-//
-// CfgServer class implementation
-//
-// -------------------------------------------------------------------------------------
-
-CfgServer::CfgServer(const QString& buildFolder,
-					 const SoftwareInfo& softwareInfo,
-					 const SessionParams& sessionParams,
-					 CircularLoggerShared logger) :
-	Tcp::FileServer(buildFolder, softwareInfo, logger, "CfgServer"),
-	m_sessionParams(sessionParams)
-{
-}
-
-Tcp::Server* CfgServer::getNewInstance(const Tcp::ListenAddress& listenAddr)
-{
-	CfgServer* newServer =  new CfgServer(m_rootFolder, localSoftwareInfo(), m_sessionParams, log());
-	newServer->setListenAddress(listenAddr);
-	return newServer;
-}
-
-void CfgServer::processSuccessorRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
-{
-	Q_UNUSED(requestData);
-	Q_UNUSED(requestDataSize);
-
-	switch(requestID)
-	{
-	case RQID_GET_SESSION_PARAMS:
-		processGetSessionParamsRequest();
-		break;
-
-	default:
-		logError(QString("unknown request ID = %1 (ignored)").arg(requestID));
-	}
-}
-
-void CfgServer::onServerThreadStarted()
-{
-	m_buildXmlPathFileName = m_rootFolder + "/build.xml";
-
-	readBuildXml();
-}
-
-void CfgServer::onServerThreadFinished()
-{
-}
-
-void CfgServer::readBuildXml()
-{
-	QDir dir(m_buildXmlPathFileName);
-
-	if (dir.exists(m_buildXmlPathFileName) == false)
-	{
-		m_errorCode = ErrorCode::BuildNotFound;
-		logError(QString("file %1 not found!").arg(m_buildXmlPathFileName));
-		return;
-	}
-
-	QFile buildXml(m_buildXmlPathFileName);
-
-	if (buildXml.open(QIODevice::ReadOnly) == false)
-	{
-		m_errorCode = ErrorCode::BuildCantRead;
-		return;
-	}
-
-	QByteArray data = buildXml.readAll();
-
-	buildXml.close();
-
-	if (data.isEmpty())
-	{
-		m_errorCode = ErrorCode::BuildCantRead;
-		return;
-	}
-
-	QXmlStreamReader xmlReader(data);
-
-	while(xmlReader.atEnd() == false)
-	{
-		if (xmlReader.readNextStartElement() == false)
-		{
-			continue;
-		}
-
-		if (xmlReader.name() == QLatin1String("BuildInfo"))
-		{
-			m_buildInfo.readFromXml(xmlReader);
-			continue;
-		}
-
-		// find "file" element
-		//
-		if (xmlReader.name() != QLatin1String("File"))
-		{
-			continue;
-		}
-
-		OnlineLib::BuildFileInfo bfi;
-
-		bfi.readFromXml(xmlReader);
-
-		m_buildFileInfo.emplace(bfi.pathFileName, bfi);
-	}
-
-	logMessage(QString("file %1 has been read").arg(m_buildXmlPathFileName));
-}
-
-bool CfgServer::checkFile(QString& pathFileName, QByteArray& fileData)
-{
-	if (m_buildFileInfo.contains(pathFileName) == false)
-	{
-		return false;
-	}
-
-	QString fileMd5 = m_buildFileInfo[pathFileName].md5;
-	QString calculatedMd5 = QCryptographicHash::hash(fileData, QCryptographicHash::Md5).toHex();
-
-	if (fileMd5 != calculatedMd5)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-void CfgServer::processGetSessionParamsRequest()
-{
-	Network::SessionParams sp;
-
-	m_sessionParams.saveTo(&sp);
-
-	sendReply(sp);
 }
 
 // -------------------------------------------------------------------------------------
@@ -618,7 +481,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 
 				logMessage(Separator::EMPTY_STR);
 				logMessage(QString("loading configuration: project %1, buildNo %2, build date %3...").
-								arg(m_buildInfo.project).arg(m_buildInfo.id).arg(m_buildInfo.dateStr()));
+								arg(m_buildInfo.project).arg(m_buildInfo.buildNo).arg(m_buildInfo.dateTimeStr()));
 				logMessage(Separator::EMPTY_STR);
 
 				BuildFileInfoArray bfiArray;
@@ -759,9 +622,19 @@ bool CfgLoader::readConfigurationXml()
 	cfi.md5 = Md5Hash::hashStr(fileData);
 	cfi.fileData.swap(fileData);
 
-	bool result = m_settingsSet.readFromXml(cfi.fileData);
+	XmlReadHelper xmlReader(cfi.fileData);
 
-	if (result == false)
+	bool res = m_buildInfo.readFromXml(xmlReader);
+
+	if (res == false)
+	{
+		logError(QString("can't read <BuildInfo> section in file %1!").arg(m_configurationXmlPathFileName));
+		return false;
+	}
+
+	res = m_settingsSet.readFromXml(xmlReader);
+
+	if (res == false)
 	{
 		logError("reading software settings set - FAILED!");
 		return false;
@@ -771,37 +644,25 @@ bool CfgLoader::readConfigurationXml()
 	//
 	m_cfgFilesInfo.insert(cfi.pathFileName, cfi);
 
-	QXmlStreamReader xmlReader(cfi.fileData);
+	res = xmlReader.findElement(XmlElement::FILES);
 
-	while(xmlReader.atEnd() == false)
+	if (res == false)
 	{
-		if (xmlReader.readNextStartElement() == false)
+		logError(QString("can't read <Files> section in file %1!").arg(m_configurationXmlPathFileName));
+		return false;
+	}
+
+	while(xmlReader.findElement(XmlElement::FILE) != false)
+	{
+		CfgFileInfo cfgFileInfo;
+
+		cfgFileInfo.readFromXml(xmlReader, false);
+
+		m_cfgFilesInfo.insert(cfgFileInfo.pathFileName, cfgFileInfo);
+
+		if (cfgFileInfo.ID.isEmpty() == false)
 		{
-			continue;
-		}
-
-		if (xmlReader.name() == QLatin1String("BuildInfo"))
-		{
-			m_buildInfo.readFromXml(xmlReader);
-			continue;
-		}
-
-		// find "file" element
-		//
-		if (xmlReader.name() != QLatin1String("File"))
-		{
-			continue;
-		}
-
-		CfgFileInfo xcfi;
-
-		xcfi.readFromXml(xmlReader);
-
-		m_cfgFilesInfo.insert(xcfi.pathFileName, xcfi);
-
-		if (xcfi.ID.isEmpty() == false)
-		{
-			m_fileIDPathMap.emplace(xcfi.ID, xcfi.pathFileName);
+			m_fileIDPathMap.emplace(cfgFileInfo.ID, cfgFileInfo.pathFileName);
 		}
 	}
 

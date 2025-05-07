@@ -141,6 +141,7 @@ public:
 					 int* deletedCount,
 					 int* packedCount,
 					 const RunOverrideThread* thread);
+
 private:
 	void startMaintenance();
 	void stopMaintenance();

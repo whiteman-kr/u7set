@@ -4,9 +4,8 @@
 
 #include <ClientLib/ConfigController.h>
 #include <CommonLib/HostAddressPort.h>
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 #include <QDomNode>
-
 
 namespace ClientLib
 {
@@ -278,9 +277,9 @@ namespace ClientLib
 			return false;
 		}
 
-		if (buildInfoNode.nodeName() != "BuildInfo")
+		if (buildInfoNode.nodeName() != XmlElement::BUILD_INFO)
 		{
-			Q_ASSERT(buildInfoNode.nodeName() == "BuildInfo");
+			Q_ASSERT(buildInfoNode.nodeName() == XmlElement::BUILD_INFO);
 			return false;
 		}
 
@@ -365,7 +364,8 @@ namespace ClientLib
 
 			// BuildInfo node
 			//
-			QDomNodeList buildInfoNodes = configElement.elementsByTagName("BuildInfo");
+			QDomNodeList buildInfoNodes = configElement.elementsByTagName(XmlElement::BUILD_INFO);
+
 			if (buildInfoNodes.size() != 1)
 			{
 				m_logFile.writeError("Parse Configuration.xml error, node BuildInfo is missing.");

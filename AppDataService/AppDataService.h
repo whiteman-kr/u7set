@@ -1,14 +1,14 @@
 #pragma once
 
 #include <ServiceLib/Service.h>
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
 #include "RtTrendsServer.h"
 #include "DynamicAppSignalState.h"
 #include "AppDataSource.h"
-
+#include "ApertureFile.h"
 
 class TcpArchiveClient;
 class AppDataReceiver;
@@ -16,6 +16,27 @@ class AppDataReceiver;
 namespace RtTrends
 {
 	class ServerThread;
+}
+
+#pragma pack(push, 1)
+
+union RecordsPerMin
+{
+	struct
+	{
+		qint32 recordsCount;
+		qint32 dynamicStateIndex : 31;
+		qint32 overrided : 1;
+	};
+
+	qint64 int64Value = 0;
+};
+
+#pragma pack(pop)
+
+inline bool operator == (const RecordsPerMin& a, const RecordsPerMin& b)
+{
+	return a.int64Value == b.int64Value;
 }
 
 class AppDataServiceWorker : public ServiceWorker
@@ -38,6 +59,8 @@ public:
 	~AppDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
+
+	virtual void processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq) override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 	bool isConnectedToConfigurationService(quint32 &ip, quint16 &port) const;
@@ -62,6 +85,9 @@ public:
 
 	const std::vector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
 	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.size()); }
+
+signals:
+	void restartArchSignalsTimer();
 
 private:
 	virtual void initServiceSpecificCmdLineArgs() override;
@@ -109,7 +135,13 @@ private:
 	void onGetDataSourcesInfo(UdpRequest& request);
 	void onGetDataSourcesState(UdpRequest& request);
 
-	void onTimer();
+	void getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,
+						  int count, double* updateStatus) const;
+
+	void onRestartArchSignalsTimer();
+	void onArchSignalsTimer();
+
+	void copyArchSignalsInfo(Network::ServiceInfo& serviceInfo) const;
 
 private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
@@ -121,6 +153,13 @@ private:
 	HostAddressPort m_cmdLineAppDataReceivingIP;
 	bool m_logRupTimeErrors = false;
 
+	mutable QMutex m_startStopMutex;
+
+	QTimer* m_archSignalsUpdateTimer = nullptr;
+	qint64 m_archSignalsTimerStartMs = 0;
+
+	const qint64 ARCH_SIGNALS_UPDATE_INTERVAL = 60 * 1000;
+
 	CircularLoggerShared m_timeErrLog;
 
 	int m_autoArchivingGroupsCount = 0;
@@ -130,6 +169,14 @@ private:
 	AppDataSources m_appDataSources;
 
 	DynamicAppSignalStates m_appSignalStates;
+
+	ApertureFile m_apertureFile;
+
+	mutable QMutex m_recordsPerMinMutex;
+	std::vector<RecordsPerMin> m_recordsPerMin;
+	mutable std::vector<RecordsPerMin> m_cachedRecordsPerMin;
+	mutable int m_archSignalsRequestCtr = 0;
+	mutable bool m_updateArchSignalsAnyway = false;
 
 	std::vector<QString> m_acquiredAppSignalIDs;
 
@@ -143,4 +190,3 @@ private:
 
 	RtTrends::ServerThread* m_rtTrendsServerThread = nullptr;
 };
-

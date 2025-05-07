@@ -6,44 +6,35 @@
 #include "../OnlineLib/UdpSocket.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareInfo.h"
+#include "../OnlineLib/BuildInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/Tcp.h"
 
 #include "CommandLineParser.h"
-
 
 namespace Network
 {
 	class ServiceInfo;
 }
 
-enum ServiceState
-{
-	Stopped,
-	Starts,
-	Work,
-	Stops,
-
-	Undefined,			// this states used by 'Service Control Manager' only
-	Unavailable,
-};
-
 struct ServiceInfo
 {
 	E::SoftwareType softwareType = E::SoftwareType::Unknown;
-	quint16 port = 0;
+	quint16 udpPort = 0;
+	quint16 tcpPort = 0;
 	QString name;
 	QString shortName;
 };
 
 inline const std::vector<ServiceInfo> servicesInfo =
 {
-	{ E::SoftwareType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv" },
-	{ E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
-	{ E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
-	{ E::SoftwareType::TuningService, PORT_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
-	{ E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
-	{ E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
-	{ E::SoftwareType::GatewayService, PORT_GATEWAY_SERVICE, "Gateway Service", "GatewaySrv" },
+	{ E::SoftwareType::BaseService, PORT_BASE_SERVICE, PORT_TCP_BASE_SERVICE, "Base Service", "BaseSrv" },
+	{ E::SoftwareType::ConfigurationService, PORT_CONFIGURATION_SERVICE, PORT_TCP_CONFIGURATION_SERVICE, "Configuration Service", "CfgSrv" },
+	{ E::SoftwareType::AppDataService, PORT_APP_DATA_SERVICE, PORT_TCP_APP_DATA_SERVICE, "Application Data Service", "AppDataSrv" },
+	{ E::SoftwareType::TuningService, PORT_TUNING_SERVICE, PORT_TCP_TUNING_SERVICE, "Tuning Service", "TuningSrv" },
+	{ E::SoftwareType::ArchiveService, PORT_ARCHIVING_SERVICE, PORT_TCP_ARCHIVING_SERVICE, "Data Archiving Service", "DataArchSrv" },
+	{ E::SoftwareType::DiagDataService, PORT_DIAG_DATA_SERVICE, PORT_TCP_DIAG_DATA_SERVICE, "Diagnostics Data Service", "DiagDataSrv" },
+	{ E::SoftwareType::GatewayService, PORT_GATEWAY_SERVICE, PORT_TCP_GATEWAY_SERVICE, "Gateway Service", "GatewaySrv" },
 };
 
 class Service;
@@ -102,12 +93,19 @@ public:
 	//
 	virtual ServiceWorker* createInstance() const = 0;
 
+	virtual void processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq);
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const = 0;
 
 	QString equipmentID() const { return m_equipmentID; }
 
 	HostAddressPort cfgServiceIP1() const { return m_cfgServiceIP1; }
 	HostAddressPort cfgServiceIP2() const { return m_cfgServiceIP2; }
+
+	QString cfgServiceID1() const { return m_cfgServiceID1; }
+	void setCfgServiceID1(const QString& cfgSrvID1) { m_cfgServiceID1 = cfgSrvID1; }
+
+	QString cfgServiceID2() const { return m_cfgServiceID2; }
+	void setCfgServiceID2(const QString& cfgSrvID2) { m_cfgServiceID2 = cfgSrvID2; }
 
 	bool clearSettings();								// clear all service settings
 
@@ -152,6 +150,14 @@ public:
 
 	int thisInstanceNo() const { return m_thisInstanceNo; }
 
+	void setBuildInfo(const OnlineLib::BuildInfo& buildInfo);
+	OnlineLib::BuildInfo buildInfo() const;
+	void clearBuildInfo();
+
+	bool readBuildInfo(const QByteArray& cfgXmlData);
+
+	const QString cmdLineArg(int index) const;
+
 signals:
 	void work();
 	void stopped();
@@ -187,12 +193,17 @@ private:
 
 	friend class ServiceStarter;
 
+protected:
+	OnlineLib::BuildInfo m_buildInfo;
+
 private:
 	QString m_equipmentID;
 
+	QString m_cfgServiceID1;
 	QString m_cfgServiceIP1Str;
 	HostAddressPort m_cfgServiceIP1;
 
+	QString m_cfgServiceID2;
 	QString m_cfgServiceIP2Str;
 	HostAddressPort m_cfgServiceIP2;
 
@@ -243,6 +254,16 @@ public:
 	static QString getServiceInstanceName(const QString& serviceName, const QString& instanceID);
 	static QString getServiceInstanceName(const QString& serviceName, int argc, char* argv[]);
 
+	void processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq);
+	void getServiceInfo(Network::ServiceInfo& servicesInfo, bool shortInfo);
+
+	std::shared_ptr<CircularLogger> logger();
+
+	void startServiceWorkerThread();
+	void stopServiceWorkerThread();
+
+	const ServiceInfo* getServiceInfo();
+
 signals:
 	void ackBaseRequest(UdpRequest request);
 
@@ -250,16 +271,14 @@ private slots:
 	void onServiceWork();
 	void onServiceStopped();
 
-	void onBaseRequest(UdpRequest request);
+	void onGetSrvShortInfoRequest(UdpRequest request);
 
 private:
-	void startServiceWorkerThread();
-	void stopServiceWorkerThread();
+	void startUdpSrvInfoThread();
+	void stopUdpSrvInfoThread();
 
-	void startBaseRequestSocketThread();
-	void stopBaseRequestSocketThread();
-
-	void getServiceInfo(Network::ServiceInfo& servicesInfo);
+	void startTcpSrvInfoThread();
+	void stopTcpSrvInfoThread();
 
 private:
 	QMutex m_mutex;
@@ -270,13 +289,15 @@ private:
 	qint64 m_serviceStartTime = 0;
 	qint64 m_serviceWorkerStartTime = 0;
 
-	ServiceState m_state = ServiceState::Stopped;
+	E::ServiceState m_state = E::ServiceState::Stopped;
 
 	ServiceWorker& m_serviceWorkerFactory;
 	ServiceWorker* m_serviceWorker = nullptr;
 
 	SimpleThread* m_serviceWorkerThread = nullptr;
-	UdpSocketThread* m_baseRequestSocketThread = nullptr;
+
+	UdpSocketThread* m_udpSrvInfoThread = nullptr;
+	Tcp::ListenerThread* m_tcpSrvInfoThread = nullptr;
 
 	bool m_mainFunctionNeedRestart = false;
 	bool m_mainFunctionStopped = false;

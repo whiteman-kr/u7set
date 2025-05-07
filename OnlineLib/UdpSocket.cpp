@@ -144,7 +144,7 @@ bool UdpRequest::writeData(google::protobuf::Message& protobufMessage)
 
 	if (m_rawDataSize + messageSize > MAX_DATAGRAM_SIZE)
 	{
-		assert(m_rawDataSize + messageSize <= MAX_DATAGRAM_SIZE);
+		Q_ASSERT(m_rawDataSize + messageSize <= MAX_DATAGRAM_SIZE);
 		return false;
 	}
 
@@ -584,7 +584,7 @@ void UdpServerSocket::sendAck(UdpRequest request)
 
 	if (sent == -1)
 	{
-		assert(false);
+		Q_ASSERT(false);
 	}
 }
 
@@ -615,7 +615,6 @@ void UdpServerSocket::onSocketReadyRead()
 
 	emit receiveRequest(m_request);
 }
-
 
 void UdpServerSocket::onThreadStarted()
 {

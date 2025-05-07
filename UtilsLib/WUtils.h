@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <cmath>
 #include <set>
+#include <QTimeZone>
 
 #define ASSERT_RESULT_FALSE_BREAK	Q_ASSERT(false); \
 									result = false; \
@@ -181,6 +182,39 @@ inline QString formatTime_YYYY_MM_DD(int year, int month, int day, int hour, int
 			arg(hour, 2, 10, zero).arg(minute, 2, 10, zero).arg(second, 2, 10, zero).arg(millisecond, 3, 10, zero);
 }
 
+inline QString formatTime_YYYY_MM_DD(qint64 timeMs)
+{
+	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, QTimeZone::UTC);
+
+	QDate d = dt.date();
+	QTime t = dt.time();
+
+	return formatTime_YYYY_MM_DD(d.year(), d.month(), d.day(),
+								 t.hour(), t.minute(), t.second(), t.msec());
+}
+
+// Format time to string:  31.12.2025 06:24:59.239
+//
+inline QString formatTime_DD_MM_YYYY(int year, int month, int day, int hour, int minute, int second, int millisecond)
+{
+	QChar zero = QLatin1Char('0');
+
+	return QString("%1.%2.%3 %4:%5:%6.%7").
+		arg(day, 2, 10, zero).arg(month, 2, 10, zero).arg(year).
+		arg(hour, 2, 10, zero).arg(minute, 2, 10, zero).arg(second, 2, 10, zero).arg(millisecond, 3, 10, zero);
+}
+
+inline QString formatTime_DD_MM_YYYY(qint64 timeMs)
+{
+	QDateTime dt = QDateTime::fromMSecsSinceEpoch(timeMs, QTimeZone::UTC);
+
+	QDate d = dt.date();
+	QTime t = dt.time();
+
+	return formatTime_DD_MM_YYYY(d.year(), d.month(), d.day(),
+								 t.hour(), t.minute(), t.second(), t.msec());
+}
+
 class PrintElapsedTime
 {
 public:
@@ -350,14 +384,33 @@ std::map<KEY, VALUE>::iterator findOrInsertKey(std::map<KEY, VALUE>& map, const 
 	return it;
 }
 
+inline QString fineSize(qint64 size)
+{
+	if (size > 1024 * 1024 * 1024)
+	{
+		return QString("%1 GBytes").arg(size / (1024.0 * 1024.0 * 1024.0), 0, 'f', 1);
+	}
+	else
+	{
+		if (size > 1024 * 1024)
+		{
+			return QString("%1 MBytes").arg(size / (1024.0 * 1024.0), 0, 'f', 1);
+		}
+		else
+		{
+			if (size > 1024)
+			{
+				return QString("%1 KBytes").arg(size / 1024.0, 0, 'f', 1);
+			}
+		}
+	}
+
+	return QString("%1 Bytes").arg(size);
+}
+
 #define ROUND_TO(value, roundTo)	(((value + roundTo - 1) / roundTo) * roundTo)
 
-#ifdef __cpp_lib_hardware_interference_size
-	const std::size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
-#else
-	// 64 bytes on x86-64
-	const std::size_t CACHE_LINE_SIZE = 64;
-#endif
+const std::size_t CACHE_LINE_SIZE = 64;				// 64 bytes on x86-64
 
 //#define ROUND_TO_CACHE_LINE_SIZE(size)	(((size + CACHE_LINE_SIZE - 1) / CACHE_LINE_SIZE) * CACHE_LINE_SIZE)
 

@@ -11,11 +11,12 @@
 #include <QTimer>
 #include <QSettings>
 
-ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *parent) :
+ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget* parent) :
 	QDialog(parent),
 	m_serviceModel(serviceModel)
 {
 	setWindowTitle(tr("Scan settings"));
+
 	QRegularExpression re("\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:/(?:[12]?[0-9]|3[0-2]?)?)\\b");
 	QRegularExpressionValidator* rev = new QRegularExpressionValidator(re, this);
 	m_addressEdit = new QLineEdit(this);
@@ -27,6 +28,7 @@ ScanOptionsWidget::ScanOptionsWidget(ServiceTableModel* serviceModel, QWidget *p
 	QComboBox* addressCombo = new QComboBox(this);
 
 	QList<QNetworkInterface> interfaceList = QNetworkInterface::allInterfaces();
+
 	for (int i = 0; i < interfaceList.count(); i++)
 	{
 		QList<QNetworkAddressEntry> addressList = interfaceList[i].addressEntries();
@@ -168,7 +170,7 @@ void SubnetChecker::startChecking()
 	m_requestHeader.version = 0;
 	m_requestHeader.no = 1;
 	m_requestHeader.errorCode = RQERROR_OK;
-	m_requestHeader.id = RQID_SERVICE_GET_INFO;
+	m_requestHeader.id = RQID_SERVICE_GET_SHORT_INFO;
 	m_requestHeader.dataSize = 0;
 
 	m_sendPacketTimer = new QTimer(this);
@@ -188,7 +190,7 @@ void SubnetChecker::checkNextHost()
 		QHostAddress ip(m_ip);
 
 		qint64 sent = m_socket->writeDatagram((char*)&m_requestHeader, sizeof(m_requestHeader),
-											  ip, sInfo.port);
+											  ip, sInfo.udpPort);
 		if (sent == -1)
 		{
 			if (m_socket->error() == QAbstractSocket::NetworkError)

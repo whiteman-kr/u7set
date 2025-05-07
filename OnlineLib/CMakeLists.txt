@@ -13,10 +13,12 @@ set(TARGET OnlineLib)
 qt_add_library(${TARGET} STATIC
 	AcquiredDiagSignal.cpp
 	AcquiredDiagSignal.h
+	ApertureRecord.cpp
+	ApertureRecord.h
 	BuildInfo.cpp
 	BuildInfo.h
-	CfgServerLoader.cpp
-	CfgServerLoader.h
+	CfgLoader.cpp
+	CfgLoader.h
 	CircularLogger.cpp
 	CircularLogger.h
 	DataSource.cpp

@@ -239,6 +239,7 @@ namespace XmlElement
 	inline const QString SETTINGS("Settings");
 	inline const QString CLIENTS("Clients");
 	inline const QString CLIENT("Client");
+	inline const QString BUILD_INFO("BuildInfo");
 
 	inline const QString CFG_SERVICE1("CfgService1");
 	inline const QString CFG_SERVICE2("CfgService2");
@@ -316,6 +317,11 @@ namespace XmlElement
 
 	inline const QString REQUEST_CONTROLLERS("RequestControllers");
 	inline const QString REQUEST_CONTROLLER("RequestController");
+
+	inline const QString BUILD_RESULT("BuildResult");
+	inline const QString BUILD("Build");
+	inline const QString FILES("Files");
+	inline const QString FILE("File");
 }
 
 namespace XmlAttribute
@@ -338,6 +344,18 @@ namespace XmlAttribute
 	inline const QString WORKSTATION_EQUIPMENT_ID("WorkstationEquipmentID");
 	inline const QString LM_EQUIPMENT_ID("LmEquipmentID");
 	inline const QString PROPS_MASK("PropsMask");
+
+	inline const QString PROJECT("Project");
+	inline const QString DATE("Date");
+	inline const QString CHANGESET("Changeset");
+	inline const QString USER("User");
+	inline const QString WORKSTATION("Workstation");
+	inline const QString NAME("Name");
+	inline const QString TAG("Tag");
+	inline const QString COMPRESSED("Compressed");
+	inline const QString SIZE("Size");
+	inline const QString MD5("MD5");
+	inline const QString ERRORS("Errors");
 
 	inline const QString DATA_ID("DataID");
 	inline const QString HEX_DATA_ID("HexDataID");
@@ -714,6 +732,8 @@ namespace Separator
 	inline const QString CR_LF("\r\n");
 	inline const QString UNDERSCORE("_");
 	inline const QString DOUBLE_QUOTES("\"");
+	inline const QString YES("Yes");
+	inline const QString NO("No");
 }
 
 namespace FormatStr
