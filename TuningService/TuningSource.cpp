@@ -176,9 +176,9 @@ namespace Tuning
 
 		for(const TuningSource& ts : *this)
 		{
-			Network::TuningSourceInfo* tsi = srvInfo->add_tuningsourcesinfo();
+			Network::TuningSourceInfoState* tsi = srvInfo->add_tuningsourcesinfostate();
 
-			ts.saveToProto(tsi->mutable_tuningsourceinfo());
+			ts.saveToProto(tsi->mutable_info());
 		}
 	}
 }

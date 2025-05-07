@@ -732,6 +732,8 @@ namespace Separator
 	inline const QString CR_LF("\r\n");
 	inline const QString UNDERSCORE("_");
 	inline const QString DOUBLE_QUOTES("\"");
+	inline const QString YES("Yes");
+	inline const QString NO("No");
 }
 
 namespace FormatStr

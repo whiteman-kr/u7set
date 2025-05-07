@@ -267,10 +267,10 @@ message AppDataSourceState
 	optional int64 errorPlantTimeFormat = 57 [default = 0];
 }
 
-message TuningSourceInfo
+message TuningSourceInfoState
 {
-	optional DataSourceInfo tuningSourceInfo = 1;
-	optional TuningSourceState tuningSourceState = 2;
+	optional DataSourceInfo info = 1;
+	optional TuningSourceState state = 2;
 };
 
 // Getting Diagnostic Data Sources states
@@ -453,7 +453,7 @@ message ServiceInfo
 
 	// TuningServiceSpecific
 	//
-	repeated TuningSourceInfo tuningSourcesInfo = 70;
+	repeated TuningSourceInfoState tuningSourcesInfoState = 70;
 }
 
 message GetServiceInfoRequest

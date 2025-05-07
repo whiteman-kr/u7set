@@ -737,7 +737,7 @@ void BaseServiceWidget::onServiceInfoUpdated(QByteArray replyData)
 		emit invalidateServiceData();
 	}
 
-	m_serviceData.protoServiceInfo.Swap(&newSrvInfo);
+	m_serviceData.protoServiceInfo = newSrvInfo;
 	m_serviceData.parseProtoServiceInfo();
 
 	updateSrvStatusWidgets();

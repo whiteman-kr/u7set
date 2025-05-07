@@ -1705,7 +1705,7 @@ namespace Tuning
 		handler->incErrReplySize();
 	}
 
-	void TuningSourceThreadWorker::getSourceState(Network::GetTuningSourcesStatesReply* reply)
+	void TuningSourceThreadWorker::getSourceState(Network::GetTuningSourcesStatesReply* reply) const
 	{
 		TEST_PTR_RETURN(reply);
 
@@ -1720,6 +1720,20 @@ namespace Tuning
 			TEST_PTR_CONTINUE(newTss);
 
 			handler->state().saveToProto(newTss);
+		}
+	}
+
+	void TuningSourceThreadWorker::getSourceState(Network::TuningSourceState* proto) const
+	{
+		TEST_PTR_RETURN(proto);
+
+		AUTO_LOCK(m_handlersMutex);
+
+		for(auto handler : m_handlers)
+		{
+			TEST_PTR_CONTINUE(handler);
+
+			handler->state().saveToProto(proto);
 		}
 	}
 
@@ -2291,11 +2305,18 @@ namespace Tuning
 		m_worker->incErrReplySize(channelIP);
 	}
 
-	void TuningSourceThread::getSourceState(Network::GetTuningSourcesStatesReply* reply)
+	void TuningSourceThread::getSourceState(Network::GetTuningSourcesStatesReply* reply) const
 	{
 		TEST_PTR_RETURN(m_worker);
 
 		m_worker->getSourceState(reply);
+	}
+
+	void TuningSourceThread::getSourceState(Network::TuningSourceState* proto) const
+	{
+		TEST_PTR_RETURN(m_worker);
+
+		m_worker->getSourceState(proto);
 	}
 
 	void TuningSourceThread::readSignalState(Network::TuningSignalState* tss) const

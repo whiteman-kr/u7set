@@ -52,6 +52,19 @@ namespace Tuning
 		}
 
 		m_tuningSources.getTuningSourcesInfo(&serviceInfo);
+
+		int srcCount = serviceInfo.tuningsourcesinfostate_size();
+
+		for(int i = 0; i < srcCount; i++)
+		{
+			const Network::DataSourceInfo& dsi = serviceInfo.tuningsourcesinfostate(i).info();
+
+			TuningSourceThreadShared thread = getValueOrNullptr(m_sourceThreads, QString::fromStdString(dsi.moduleequipmentid()));
+
+			TEST_PTR_CONTINUE(thread);
+
+			thread->getSourceState(serviceInfo.mutable_tuningsourcesinfostate(i)->mutable_state());
+		}
 	}
 
 	void TuningServiceWorker::initServiceSpecificCmdLineArgs()

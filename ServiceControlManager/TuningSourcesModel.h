@@ -19,22 +19,22 @@ public:
 
 	void updateData(const Network::ServiceInfo& srvInfo);
 
-//	QString getSourceLanControllerID(int index);
-
 private:
-	std::vector<Network::TuningSourceInfo> m_sources;
+	std::vector<Network::TuningSourceInfoState> m_sources;
 	std::vector<int> m_sourcesErrorCount;
 
 	inline static const Columns m_columns =
 	{
-		{"EquipmentID", 400},
-		{"Source IP", 180},
-		{"Receives data", 120},
-		{"Uptime", 120},
-		{"Receiving speed", 120},
-		{"Packet count", 120},
-		{"Lost packet count", 120},
-		{"Errors count", 120},
+		{"EquipmentID", 400},					// 1
+		{"Source IP", 180},						// 2
+		{"Is reply", 140},						// 3
+		{"Request count", 140},					// 4
+		{"No Ack count", 140},					// 5
+		{"Control is active", 140},				// 6
+		{"Writing disabled", 140},				// 7
+		{"Has unapplied params", 140},			// 8
+		{"Set SOR", 140},						// 9
+		{"Errors count", 140},					// 10
 	};
 };
 
