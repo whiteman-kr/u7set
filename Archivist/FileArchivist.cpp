@@ -94,8 +94,6 @@ bool FileArchivist::scanArchive()
 
 	int signalCount = m_archInfo.archsignal_size();
 
-	QChar ZERO('0');
-
 	QDir dr;
 
 	dr.setNameFilters(QStringList() << "*.sta" << "*.lta");
@@ -264,7 +262,10 @@ bool FileArchivist::scanArchive()
 		print.newLine();
 	}
 
-	print << QString("Expected size to copy: %1\n\n").arg(sizeStr(m_expectedSize));
+	if (m_reqParams.checkonly == false)
+	{
+		print << QString("Expected size to copy: %1\n\n").arg(sizeStr(m_expectedSize));
+	}
 
 	m_archInfo.Clear();
 
@@ -299,6 +300,8 @@ bool FileArchivist::checkArchive()
 	}
 
 	t1.join();
+
+	print << QString("\rChecked: 100%  ");
 	// t2.join();
 	// t3.join();
 	// t4.join();

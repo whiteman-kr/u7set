@@ -265,6 +265,11 @@ void Archive::saveState(const SimpleAppSignalState& state)
 		return;
 	}
 
+	if (state.time.system.timeStamp == 0)
+	{
+		return;
+	}
+
 	m_savedDataSizeCounter += sizeof(ArchFileRecord);
 
 	ArchFile* archFile = getArchFile(state.hash);
