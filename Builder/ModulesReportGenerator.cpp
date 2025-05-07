@@ -123,8 +123,8 @@ namespace Builder
 		bool result = true;
 
 		file.append(QString(" Project: %1").arg(m_context->m_buildResultWriter->buildInfo().project));
-		file.append(QString(" BildNo:  %1").arg(m_context->m_buildResultWriter->buildInfo().id));
-		file.append(QString(" Date:    %1").arg(m_context->m_buildResultWriter->buildInfo().dateStr()));
+		file.append(QString(" BildNo:  %1").arg(m_context->m_buildResultWriter->buildInfo().buildNo));
+		file.append(QString(" Date:    %1").arg(m_context->m_buildResultWriter->buildInfo().dateTimeStr()));
 		file.append(QString(" User:    %1").arg(m_context->m_buildResultWriter->buildInfo().user));
 		file.append(QString(" Host:    %1").arg(m_context->m_buildResultWriter->buildInfo().workstation));
 		file.append(Separator::EMPTY_STR);

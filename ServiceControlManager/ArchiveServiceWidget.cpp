@@ -1,0 +1,143 @@
+#include "ArchiveServiceWidget.h"
+#include "Brush.h"
+
+ArchiveServiceWidget::ArchiveServiceWidget(ServiceTableModel* srvTableModel,
+	const SoftwareInfo& softwareInfo,
+	const ServiceData& serviceData,
+	quint32 ip, quint16 tcpPort,
+	QWidget* parent) :
+	BaseServiceWidget(srvTableModel, softwareInfo, serviceData, ip, tcpPort, parent)
+{
+}
+
+ArchiveServiceWidget::~ArchiveServiceWidget()
+{
+}
+
+void ArchiveServiceWidget::initWidget()
+{
+	addGeneralTab();
+	addClientsTab();
+}
+
+int ArchiveServiceWidget::updateSrvStatus(int rowCount)
+{
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 0), "Saved data size per minute");
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1), fineSize(m_serviceData.protoServiceInfo.saveddatasizepermin()));
+
+	rowCount++;
+
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 0), "Disk free space");
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1), fineSize(m_serviceData.protoServiceInfo.diskfreespace()));
+
+	rowCount++;
+
+	m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 0), "Expected archive time");
+
+	if (m_serviceData.protoServiceInfo.saveddatasizepermin() > 0)
+	{
+		qint64 archiveTimeMinutes = m_serviceData.protoServiceInfo.diskfreespace() /
+									m_serviceData.protoServiceInfo.saveddatasizepermin();
+
+		qint64 days = archiveTimeMinutes / (24 * 60);
+		qint64 hours = (archiveTimeMinutes % (24 * 60)) / 60;
+
+		m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1), QString("%1 days %2 hours").arg(days).arg(hours));
+
+		QStandardItem* item = m_srvStatusModel->itemFromIndex(m_srvStatusModel->index(rowCount, 1));
+
+		if (item != nullptr)
+		{
+			if (days < 10)
+			{
+				item->setData(YELLOW_BRUSH, Qt::BackgroundRole);
+			}
+			else
+			{
+				item->setData(QVariant(), Qt::BackgroundRole);
+			}
+		}
+	}
+	else
+	{
+		m_srvStatusModel->setData(m_srvStatusModel->index(rowCount, 1), Separator::EMPTY_STR);
+	}
+
+	rowCount++;
+
+	return rowCount;
+}
+
+int ArchiveServiceWidget::updateSettings(int rowCount)
+{
+	if (m_serviceData.settings == nullptr)
+	{
+		return rowCount;
+	}
+
+	std::shared_ptr<ArchivingServiceSettings> st = std::dynamic_pointer_cast<ArchivingServiceSettings>(m_serviceData.settings);
+
+	TEST_PTR_RETURN_VALUE(st, rowCount);
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceEquipmentID1);
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->cfgServiceID1);
+
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceIP1);
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
+							 st->cfgServiceID1.isEmpty() ? Separator::EMPTY_STR :
+							 st->cfgServiceIP1.toString());
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceEquipmentID2);
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->cfgServiceID2);
+
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), m_cfgServiceIP2);
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
+							 st->cfgServiceID2.isEmpty() ? Separator::EMPTY_STR :
+							 st->cfgServiceIP2.toString());
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("AppDataReceivingIP"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
+							 QString("%1, Netmask = %2").
+							 arg(st->appDataReceivingIP.toString()).arg(st->appDataReceivingNetmask.toString()));
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("DiagDataReceivingIP"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
+							 QString("%1, Netmask = %2").
+							 arg(st->diagDataReceivingIP.toString()).arg(st->diagDataReceivingNetmask.toString()));
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("ClientRequestIP"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1),
+							 QString("%1, Netmask = %2").
+							 arg(st->clientRequestIP.toString()).arg(st->clientRequestNetmask.toString()));
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("SecurityLevel"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), E::valueToString(st->securityLevel));
+
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("ShortTermArchivePeriod (days)"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->shortTermArchivePeriod);
+
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("LongTermArchivePeriod (days)"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->longTermArchivePeriod);
+
+	rowCount++;
+
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 0), QStringLiteral("ArchiveLocation"));
+	m_settingsModel->setData(m_settingsModel->index(rowCount, 1), st->archiveLocation);
+
+	rowCount++;
+
+	return rowCount;
+}

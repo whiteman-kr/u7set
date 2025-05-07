@@ -530,6 +530,11 @@ bool RqCtrlSettings::hasRtTrendsRequestIP() const
 	return (m_propsMask & PROP_RT_TRENDS_REQUEST_IP) != 0;
 }
 
+quint32 RqCtrlSettings::propsMask() const
+{
+	return m_propsMask;
+}
+
 void RqCtrlSettings::clear()
 {
 	m_propsMask = 0;

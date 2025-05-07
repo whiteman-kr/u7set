@@ -1,92 +1,34 @@
-#ifndef TUNINGSERVICEWIDGET_H
-#define TUNINGSERVICEWIDGET_H
+#pragma once
 
-#include "BaseServiceStateWidget.h"
+#include "BaseServiceWidget.h"
+#include "TuningSourcesModel.h"
 
-class QStandardItemModel;
-class TcpTuningServiceClient;
-
-static const QStringList tuningSourceStaticFieldsHeaderLabels {
-	QStringLiteral("EquipmentId"),
-	QStringLiteral("LanEquipmentId"),
-	QStringLiteral("Caption"),
-	QStringLiteral("Ip"),
-	QStringLiteral("Port"),
-	QStringLiteral("Channel"),
-	QStringLiteral("SubsystemID"),
-	QStringLiteral("Subsystem"),
-	QStringLiteral("LmNumber")
-};
-
-
-static const QStringList tuningSourceDynamicFieldsHeaderLabels {
-	QStringLiteral("IsReply"),
-	QStringLiteral("ControlIsActive"),
-	QStringLiteral("SetSOR"),
-	QStringLiteral("RequestCount"),
-	QStringLiteral("ReplyCount"),
-};
-
-static const QStringList tuningSignalsStaticFieldsHeaderLabels {
-	QStringLiteral("Custom AppSignal ID"),
-	QStringLiteral("Equipment ID"),
-	QStringLiteral("App Signal ID"),
-	QStringLiteral("Caption"),
-	QStringLiteral("Units"),
-	QStringLiteral("Type"),
-	QStringLiteral("Default"),
-};
-
-static const QStringList tuningSignalsDynamicFieldsHeaderLabels {
-	QStringLiteral("Value"),
-	QStringLiteral("LowLimit"),
-	QStringLiteral("HighLimit"),
-	QStringLiteral("Valid"),
-	QStringLiteral("Underflow"),
-	QStringLiteral("Overflow"),
-};
-
-class QStandardItemModel;
-class TuningSourceWidget;
-
-class TuningServiceWidget : public BaseServiceStateWidget
+class TuningServiceWidget : public BaseServiceWidget
 {
 	Q_OBJECT
 public:
-	TuningServiceWidget(const SoftwareInfo& softwareInfo, const ServiceData& service, quint32 udpIp, quint16 udpPort, QWidget *parent = 0);
-	~TuningServiceWidget();
+	TuningServiceWidget(ServiceTableModel* srvTableModel,
+					 const SoftwareInfo& softwareInfo,
+					 const ServiceData& serviceData,
+					 quint32 ip, quint16 tcpPort,
+					 QWidget* parent = 0);
+	virtual ~TuningServiceWidget();
 
-signals:
-	void newTcpClientSocket(TcpTuningServiceClient* tcpClientSocket);
-	void clearTcpClientSocket();
+	virtual void initWidget() override;
+
+	virtual void updateDerivedWidgets(const Network::ServiceInfo& srvInfo) override;
+	virtual void clearDerivedWidgets() override;
 
 public slots:
-	void updateStateInfo();
-	void updateClientsInfo();
-	void updateServiceParameters();
-	void reloadTuningSourcesList();
-	void updateTuningSourcesState();
-	void reloadTuningSignalsList();
-	void updateTuningSignalsState();
-
-	void clearServiceData();
-
-	void onTuningSourceDoubleClicked(const QModelIndex &index);
-
-	void forgetWidget();
-
-protected:
-	void createTcpConnection(quint32 ip, quint16 port) override;
-	void dropTcpConnection() override;
+	int updateSrvStatus(int rowCount) override;
+	int updateSettings(int rowCount) override;
 
 private:
-	QStandardItemModel* m_parametersTabModel = nullptr;
-	QStandardItemModel* m_settingsTabModel = nullptr;
-	QStandardItemModel* m_tuningSourcesTabModel = nullptr;
-	QStandardItemModel* m_tuningSignalsTabModel = nullptr;
-	TcpTuningServiceClient* m_tcpClientSocket = nullptr;
-	SimpleThread* m_tcpClientThread = nullptr;
-	QList<TuningSourceWidget*> m_tuningSourceWidgetList;
-};
+	void addTuningSourcesTab();
 
-#endif // TUNINGSERVICEWIDGET_H
+	void updateModels(const Network::ServiceInfo& srvInfo);
+
+private:
+	TuningSourcesModel* m_sourcesModel = nullptr;
+	QTableView* m_sourcesView = nullptr;
+};

@@ -12,6 +12,8 @@ class AppSignalState;
 class AppSignals;
 class AppDataSource;
 
+struct ApertureRecord;
+
 struct DynamicAppSignalState
 {
 public:
@@ -107,6 +109,24 @@ public:
 
 	const AppSignal* signal() const { return m_signal; }
 
+	E::ApertureType apertureType() const { return m_apertureType; }
+	E::SignalType signalType() const { return m_signalType; }
+
+	double fineAperture() const { return m_fineAperture; }
+	double coarseAperture() const { return m_coarseAperture; }
+
+	double absFineAperture() const { return m_absFineAperture; }
+	double absCoarseAperture() const { return m_absCoarseAperture; }
+
+	double lowEngineeringUnits() const { return m_lowLimit; }
+	double highEngineeringUnits() const { return m_highLimit; }
+
+	void overrideAperture(const ApertureRecord& ar);
+	bool apertureOverrided() const { return m_apertureOverrided; }
+
+	int onArchSignalsTimer();
+	inline void clearStatesSavedCounter() { m_statesSaved = 0; }
+
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
 	bool getBit(const char* rupData, int rupDataSize, const Address16& addr, quint32& bit);
@@ -124,6 +144,8 @@ private:
 	void sendAppSignalStateChangeToGateway(const SimpleAppSignalState& prevState,
 										   const SimpleAppSignalState& newState,
 										   const QThread* thread);
+
+	void setAperture(E::ApertureType type, double coarseAperture, double fineAperture);
 
 private:
 	SimpleAppSignalStatesArchiveFlagQueue* m_statesQueue = nullptr;
@@ -171,6 +193,9 @@ private:
 	bool m_overrideBelowLowLimitFlag = false;		// state of flag BelowLowLimit overrided by signal (set_flags used)
 
 	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
+	double m_coarseAperture = 0;
+	double m_fineAperture = 0;
+	bool m_apertureOverrided = false;
 
 	// for E::ApertureType::RangePercent and E::ApertureType::AbsValue
 	// m_absCoarseAperture and m_absFineAperture stored in abs EngineeringUnits
@@ -179,6 +204,8 @@ private:
 	//
 	double m_absCoarseAperture = 0;
 	double m_absFineAperture = 0;
+
+	std::atomic<int> m_statesSaved = 0;
 
 	bool m_enableTuning = false;
 	TuningValue m_tuningDefaultValue;
@@ -220,9 +247,10 @@ public:
 
 	void setSize(int size);
 
-	int size() const { return m_size; }
+	int size() const { return TO_INT(m_appSignalState.size()); }
 
 	DynamicAppSignalState* operator [] (int index);
+	const DynamicAppSignalState* operator [] (int index) const;
 
 	const DynamicAppSignalState* getStateByHash(Hash signalHash) const;
 	DynamicAppSignalState* getStateByHash(Hash signalHash);
@@ -233,16 +261,16 @@ public:
 	void buidlHash2State();
 
 	bool getCurrentState(Hash hash, AppSignalState& state) const;
-//	bool getStoredState(Hash hash, AppSignalState& state) const;
 
 	void setAutoArchivingGroups(int autoArchivingGroupsCount);
 
 	void setGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
 	void resetGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
 
-private:
-	DynamicAppSignalState* m_appSignalState = nullptr;
-	int m_size = 0;
+	void overrideAperture(const ApertureRecord& ar);
+	void clearStatesSavedCounters();
 
-	QHash<Hash, DynamicAppSignalState*> m_hash2State;
+private:
+	std::vector<DynamicAppSignalState*> m_appSignalState;
+	std::map<Hash, DynamicAppSignalState*> m_hash2State;		// calcHash(AppSignalID) => DynamicAppSignalState*
 };

@@ -37,7 +37,7 @@ public:
 	const QVector<AppSignal>& signalParams() { return m_signalParams; }
 	const QVector<AppSignalState>& signalStates() { return m_states; }
 
-	const Network::ServiceClients& clients() { return m_serviceClientsMessage; }
+//	const Network::ServiceClient& clients() { return m_serviceClientsMessage; }
 	bool clientsIsReady() { return m_clientsIsReady; }
 	bool stateIsReady() { return m_stateIsReady; }
 	bool settingsIsReady() { return m_settingsIsReady; }
@@ -108,7 +108,7 @@ private:
 
 	// reused protobuf messages
 	//
-	Network::ServiceClients m_serviceClientsMessage;
+//	Network::ServiceClients m_serviceClientsMessage;
 
 	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
 

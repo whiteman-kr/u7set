@@ -762,7 +762,7 @@ bool ProjectInfo::readFromXml(const QByteArray& fileData)
 
 	XmlReadHelper xml(fileData);
 
-	result = xml.findElement("BuildInfo");
+	result = xml.findElement(XmlElement::BUILD_INFO);
 	if (result == false)
 	{
 		return false;

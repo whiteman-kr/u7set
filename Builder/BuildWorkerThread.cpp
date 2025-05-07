@@ -410,7 +410,7 @@ namespace Builder
 			m_context->m_buildResultWriter->start(buildOutputPath(), &m_context->m_db, m_context->m_log, 0 /* Load correct ChangesetID */);
 
 		const OnlineLib::BuildInfo& bi = m_context->m_buildResultWriter->buildInfo();
-		m_context->m_buildResultWriter->firmwareWriter()->setProjectInfo(bi.project, bi.user, bi.id, bi.changeset);
+		m_context->m_buildResultWriter->firmwareWriter()->setProjectInfo(bi.project, bi.user, bi.buildNo, bi.changeset);
 
 		return ok;
 	}
@@ -1134,8 +1134,8 @@ namespace Builder
 
 		QStringList scriptHeader;
 		scriptHeader.append("Project: " + b.project);
-		scriptHeader.append("BuildNo: " + QString::number(b.id));
-		scriptHeader.append("Date: " + b.dateStr());
+		scriptHeader.append("BuildNo: " + QString::number(b.buildNo));
+		scriptHeader.append("Date: " + b.dateTimeStr());
 		scriptHeader.append("Changeset: " + QString::number(b.changeset));
 		scriptHeader.append("User: " + b.user);
 		scriptHeader.append("Workstation: " + b.workstation + "\n");

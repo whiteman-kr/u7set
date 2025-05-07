@@ -1,22 +1,12 @@
-#include "MainWindow.h"
-#include <QTableWidget>
-#include <QHBoxLayout>
-#include <QMenu>
-#include <QDir>
-#include <QSettings>
-#include <QTranslator>
-#include <QMessageBox>
-#include <QPushButton>
 #include <QMenuBar>
-#include <QToolBar>
 #include <QActionGroup>
-#include <QApplication>
-#include "ScanOptionsWidget.h"
-#include "ServiceTableModel.h"
-#include "../OnlineLib/UdpSocket.h"
-#include <functional>
-#include <QHeaderView>
+#include <QDir>
+#include <QTranslator>
 #include <UiLib/DialogAbout.h>
+
+#include "MainWindow.h"
+#include "ScanOptionsWidget.h"
+#include "../OnlineLib/UdpSocket.h"
 
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
@@ -30,7 +20,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	setCentralWidget(m_serviceTable);
 
 	m_serviceTable->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_serviceTable->fontMetrics().height() * 1.4 * 4));
-	m_serviceTable->horizontalHeader()->setDefaultSectionSize(250);
+	m_serviceTable->horizontalHeader()->setDefaultSectionSize(270);
 
 	m_serviceTable->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
@@ -104,32 +94,6 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 MainWindow::~MainWindow()
 {
-	for (int i = 0; i < m_widgets.count(); i++)
-	{
-		m_widgets[i]->deleteLater();
-	}
-}
-
-void MainWindow::openConnectionInfo(QString text)
-{
-	for (int i = 0; i < m_widgets.count(); i++)
-	{
-		if (m_widgets[i]->windowTitle() == text)
-		{
-			m_widgets[i]->showNormal();
-			m_widgets[i]->raise();
-			m_widgets[i]->activateWindow();
-			return;
-		}
-	}
-
-	QWidget* w = new QWidget;
-	w->setWindowTitle(text);
-	w->showMaximized();
-	w->showNormal();
-	w->raise();
-	w->activateWindow();
-	m_widgets.append(w);
 }
 
 void MainWindow::closeEvent(QCloseEvent *)
@@ -156,10 +120,10 @@ void MainWindow::switchLanguage(QAction* selectedAction)
 	settings.setValue("locale", locale);
 }
 
-void MainWindow::connectionClicked(QAction *selectedAction)
-{
-	openConnectionInfo(selectedAction->text());
-}
+// void MainWindow::connectionClicked(QAction* selectedAction)
+// {
+// 	openConnectionInfo(selectedAction->text());
+// }
 
 void MainWindow::scanNetwork()
 {
@@ -224,6 +188,4 @@ void MainWindow::aboutScm()
 
 	UiLib::DialogAbout::show(this, text, ":/Logo/RadiyLogo.png",
 							 qApp->organizationName(), QString(), QDate(), QUuid(), QString());
-
-
 }

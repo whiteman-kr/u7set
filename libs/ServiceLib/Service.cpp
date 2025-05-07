@@ -2,9 +2,13 @@
 #error Do not include this file in the project! Link ServiceLib instead.
 #endif
 
+#include <QXmlStreamReader>
+
 #include <ServiceLib/Service.h>
+#include <ServiceLib/TcpSrvInfoServer.h>
 #include "./qtservice/src/qtservice.h"
 #include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/XmlHelper.h"
 #include <CommonLib/ConstStrings.h>
 
 // -------------------------------------------------------------------------------------
@@ -117,6 +121,11 @@ Service* ServiceWorker::service()
 {
 	Q_ASSERT(m_service != nullptr);
 	return m_service;
+}
+
+void ServiceWorker::processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq)
+{
+	Q_UNUSED(rq);
 }
 
 void ServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
@@ -250,6 +259,38 @@ QString ServiceWorker::helpText() const
 	return m_cmdLineParser.helpText();
 }
 
+void ServiceWorker::setBuildInfo(const OnlineLib::BuildInfo& buildInfo)
+{
+	m_buildInfo = buildInfo;
+}
+
+OnlineLib::BuildInfo ServiceWorker::buildInfo() const
+{
+	return m_buildInfo;
+}
+
+void ServiceWorker::clearBuildInfo()
+{
+	m_buildInfo.clear();
+}
+
+bool ServiceWorker::readBuildInfo(const QByteArray& cfgXmlData)
+{
+	XmlReadHelper xmlReader(cfgXmlData);
+
+	return m_buildInfo.readFromXml(xmlReader);
+}
+
+const QString ServiceWorker::cmdLineArg(int index) const
+{
+	if (index < 0 || index >= m_cmdLineArgs.size())
+	{
+		return Separator::EMPTY_STR;
+	}
+
+	return m_cmdLineArgs[index];
+}
+
 bool ServiceWorker::processServiceSpecificCmdLineArgs()
 {
 	return true;		// return TRUE to continue service running
@@ -316,6 +357,7 @@ void ServiceWorker::onThreadStarted()
 
 	loadCommonServicesSettings();
 	loadServiceSpecificSettings();
+
 	initialize();
 
 	emit work();
@@ -324,6 +366,7 @@ void ServiceWorker::onThreadStarted()
 void ServiceWorker::onThreadFinished()
 {
 	shutdown();
+
 	emit stopped();
 
 	DEBUG_LOG_MSG(m_logger, QString("%1::onThreadFinished(), instanceNo = %2").
@@ -355,12 +398,14 @@ void Service::start()
 
 	QThread::msleep(100);
 
-	startBaseRequestSocketThread();
+	startUdpSrvInfoThread();
+	startTcpSrvInfoThread();
 }
 
 void Service::stop()
 {
-	stopBaseRequestSocketThread();
+	stopTcpSrvInfoThread();
+	stopUdpSrvInfoThread();
 
 	stopServiceWorkerThread();
 }
@@ -380,147 +425,22 @@ QString Service::getServiceInstanceName(const QString& serviceName, int argc, ch
 	return getServiceInstanceName(serviceName, getServiceInstanceID(argc, argv));
 }
 
-void Service::onServiceWork()
-{
-	m_state = ServiceState::Work;
-}
-
-void Service::onServiceStopped()
-{
-	m_state = ServiceState::Stopped;
-}
-
-void Service::onBaseRequest(UdpRequest request)
-{
-	UdpRequest ack;
-
-	ack.initAck(request);
-
-	HostAddressPort ha(request.address().toIPv4Address(), request.port());
-
-	switch(request.ID())
-	{
-		case RQID_SERVICE_GET_INFO:
-		{
-			Network::ServiceInfo si;
-			getServiceInfo(si);
-			ack.writeData(si);
-			break;
-		}
-
-		case RQID_SERVICE_START:
-			LOG_MSG(m_logger, QString("Service START request from SCM (%1).").arg(ha.addressStr()));
-			startServiceWorkerThread();
-			break;
-
-		case RQID_SERVICE_STOP:
-			LOG_MSG(m_logger, QString("Service STOP request from SCM (%1).").arg(ha.addressStr()));
-			stopServiceWorkerThread();
-			break;
-
-		case RQID_SERVICE_RESTART:
-			LOG_MSG(m_logger, QString("Service RESTART request from SCM (%1).").arg(ha.addressStr()));
-			stopServiceWorkerThread();
-			startServiceWorkerThread();
-			break;
-
-		default:
-			Q_ASSERT(false);
-			ack.setErrorCode(RQERROR_UNKNOWN_REQUEST);
-			break;
-	}
-
-	emit ackBaseRequest(ack);
-}
-
-void Service::startServiceWorkerThread()
-{
-	QMutexLocker locker(&m_mutex);
-
-	if (m_serviceWorkerThread != nullptr)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	if (m_state != ServiceState::Stopped)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_serviceWorkerStartTime = QDateTime::currentMSecsSinceEpoch();
-
-	m_state = ServiceState::Starts;
-
-	m_serviceWorker = m_serviceWorkerFactory.createInstance();
-
-	m_serviceWorker->setService(this);
-
-	connect(m_serviceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
-	connect(m_serviceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
-
-	m_serviceWorkerThread = new SimpleThread(m_serviceWorker);
-	m_serviceWorkerThread->start();
-}
-
-void Service::stopServiceWorkerThread()
-{
-	QMutexLocker locker(&m_mutex);
-
-	if (m_serviceWorkerThread == nullptr)
-	{
-		return;
-	}
-
-	m_state = ServiceState::Stops;
-
-	m_serviceWorkerThread->quit();
-	m_serviceWorkerThread->wait();
-
-	delete m_serviceWorkerThread;
-
-	m_serviceWorkerThread = nullptr;
-	m_serviceWorker = nullptr;
-
-	m_state = ServiceState::Stopped;
-}
-
-void Service::startBaseRequestSocketThread()
-{
-	E::SoftwareType swType = m_serviceWorkerFactory.softwareType();
-
-	auto it = std::find_if(	servicesInfo.begin(),
-							servicesInfo.end(),
-							[swType](const ServiceInfo& si)
-							{
-								return si.softwareType == swType;
-							});
-
-	Q_ASSERT(it != servicesInfo.end());
-
-	const ServiceInfo& sInfo = *it;
-
-	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo.port, m_logger);
-
-	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onBaseRequest);
-	connect(this, &Service::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
-
-	m_baseRequestSocketThread = new UdpSocketThread(serverSocket);
-
-	m_baseRequestSocketThread->start();
-}
-
-void Service::stopBaseRequestSocketThread()
-{
-	m_baseRequestSocketThread->quitAndWait();
-
-	delete m_baseRequestSocketThread;
-}
-
-void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
+void Service::processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq)
 {
 	ServiceWorker* serviceWorker = m_serviceWorker;
+
+	if (serviceWorker == nullptr)
+	{
+		serviceWorker = &m_serviceWorkerFactory;
+	}
+
+	serviceWorker->processGetServiceInfoRequest(rq);
+}
+
+void Service::getServiceInfo(Network::ServiceInfo& serviceInfo, bool shortInfo)
+{
+	ServiceWorker* serviceWorker = m_serviceWorker;
+
 	if (serviceWorker == nullptr)
 	{
 		serviceWorker = &m_serviceWorkerFactory;
@@ -543,12 +463,16 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 
 	serviceInfo.set_allocated_sessionparams(sp);
 
-	if (m_serviceWorker != nullptr)
+	if (shortInfo == false)
 	{
-		m_serviceWorker->getServiceSpecificInfo(serviceInfo);
+		if (m_serviceWorker != nullptr)
+		{
+			m_serviceWorker->buildInfo().saveToProto(serviceInfo.mutable_buildinfo());
+			m_serviceWorker->getServiceSpecificInfo(serviceInfo);
+		}
 	}
 
-	if (m_state != ServiceState::Stopped)
+	if (m_state != E::ServiceState::Stopped)
 	{
 		serviceInfo.set_serviceruntime((QDateTime::currentMSecsSinceEpoch() - m_serviceWorkerStartTime) / 1000);
 	}
@@ -557,3 +481,175 @@ void Service::getServiceInfo(Network::ServiceInfo& serviceInfo)
 		serviceInfo.set_serviceruntime(0);
 	}
 }
+
+std::shared_ptr<CircularLogger> Service::logger()
+{
+	return m_logger;
+}
+
+void Service::startServiceWorkerThread()
+{
+	QMutexLocker locker(&m_mutex);
+
+	if (m_serviceWorkerThread != nullptr)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	if (m_state != E::ServiceState::Stopped)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_serviceWorkerStartTime = QDateTime::currentMSecsSinceEpoch();
+
+	m_state = E::ServiceState::Starts;
+
+	m_serviceWorker = m_serviceWorkerFactory.createInstance();
+
+	m_serviceWorker->setService(this);
+
+	connect(m_serviceWorker, &ServiceWorker::work, this, &Service::onServiceWork);
+	connect(m_serviceWorker, &ServiceWorker::stopped, this, &Service::onServiceStopped);
+
+	m_serviceWorkerThread = new SimpleThread(m_serviceWorker);
+	m_serviceWorkerThread->start();
+}
+
+void Service::stopServiceWorkerThread()
+{
+	QMutexLocker locker(&m_mutex);
+
+	if (m_serviceWorkerThread == nullptr)
+	{
+		return;
+	}
+
+	m_state = E::ServiceState::Stops;
+
+	m_serviceWorkerThread->quit();
+	m_serviceWorkerThread->wait();
+
+	delete m_serviceWorkerThread;
+
+	m_serviceWorkerThread = nullptr;
+	m_serviceWorker = nullptr;
+
+	m_state = E::ServiceState::Stopped;
+}
+
+const ServiceInfo* Service::getServiceInfo()
+{
+	E::SoftwareType swType = m_serviceWorkerFactory.softwareType();
+
+	auto it = std::find_if(	servicesInfo.begin(),
+						   servicesInfo.end(),
+						   [swType](const ServiceInfo& si)
+						   {
+							   return si.softwareType == swType;
+						   });
+
+	if (it == servicesInfo.end())
+	{
+		Q_ASSERT(false);
+		return nullptr;
+	}
+
+	return &(*it);
+}
+
+void Service::onServiceWork()
+{
+	m_state = E::ServiceState::Work;
+}
+
+void Service::onServiceStopped()
+{
+	m_state = E::ServiceState::Stopped;
+}
+
+void Service::onGetSrvShortInfoRequest(UdpRequest request)
+{
+	UdpRequest ack;
+
+	ack.initAck(request);
+
+	quint32 rqID = request.ID();
+
+	switch(rqID)
+	{
+	case RQID_SERVICE_GET_SHORT_INFO:
+		{
+			Network::ServiceInfo si;
+			getServiceInfo(si, true);
+			ack.writeData(si);
+		}
+		break;
+
+	default:
+		Q_ASSERT(false);
+		ack.setErrorCode(RQERROR_UNKNOWN_REQUEST);
+		break;
+	}
+
+	emit ackBaseRequest(ack);
+}
+
+void Service::startUdpSrvInfoThread()
+{
+	const ServiceInfo* sInfo = getServiceInfo();
+
+	TEST_PTR_RETURN(sInfo);
+
+	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo->udpPort, m_logger);
+
+	connect(serverSocket, &UdpServerSocket::receiveRequest, this, &Service::onGetSrvShortInfoRequest);
+	connect(this, &Service::ackBaseRequest, serverSocket, &UdpServerSocket::sendAck);
+
+	m_udpSrvInfoThread = new UdpSocketThread(serverSocket);
+
+	m_udpSrvInfoThread->start();
+}
+
+void Service::stopUdpSrvInfoThread()
+{
+	if (m_udpSrvInfoThread != nullptr)
+	{
+		m_udpSrvInfoThread->quitAndWait();
+		delete m_udpSrvInfoThread;
+		m_udpSrvInfoThread = nullptr;
+	}
+}
+
+void Service::startTcpSrvInfoThread()
+{
+	const ServiceInfo* sInfo = Service::getServiceInfo();
+
+	TEST_PTR_RETURN(sInfo);
+
+	HostAddressPort listenAddr;
+
+	listenAddr.setSpecAddress(QHostAddress::AnyIPv4);
+	listenAddr.setPort(sInfo->tcpPort);
+
+	m_tcpSrvInfoThread = new Tcp::ListenerThread(listenAddr,
+												 E::SecurityLevel::Basic,
+												 new TcpSrvInfoServer(m_serviceWorkerFactory.softwareInfo(), "TcpSrvInfoServer", *this),
+												 m_logger);
+	m_tcpSrvInfoThread->start();
+}
+
+void Service::stopTcpSrvInfoThread()
+{
+	if (m_tcpSrvInfoThread != nullptr)
+	{
+		m_tcpSrvInfoThread->quitAndWait();
+		delete m_tcpSrvInfoThread;
+		m_tcpSrvInfoThread = nullptr;
+	}
+}
+
+
+

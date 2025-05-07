@@ -1,12 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
-#include <QSystemTrayIcon>
-
-#include "../OnlineLib/Tcp.h"
-
-class ServiceTableModel;
-class QTableView;
+#include "ServiceTableModel.h"
 
 class MainWindow : public QMainWindow
 {
@@ -17,11 +12,8 @@ public:
     ~MainWindow();
 
 private:
-    QVector<QWidget*> m_widgets;
     ServiceTableModel* m_serviceModel;
     QTableView* m_serviceTable;
-
-    void openConnectionInfo(QString text);
 
 protected:
 	void closeEvent(QCloseEvent *event);
@@ -29,9 +21,7 @@ protected:
 public slots:
     void openEditor();
     void switchLanguage(QAction* selectedAction);
-    void connectionClicked(QAction* selectedAction);
     void scanNetwork();
     void removeHost();
 	void aboutScm();
 };
-

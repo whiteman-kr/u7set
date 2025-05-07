@@ -3,6 +3,7 @@ syntax = "proto2";
 package Network;
 
 import "AppSignal.proto";
+import "BuildInfo.proto";
 
 // Get signal list
 // 1. Request GetSignalListStartRequest, wait for reply GetSignalListStartReply
@@ -224,31 +225,53 @@ message AppDataSourceState
 {
 	optional uint64 id = 1 [default = 0];				// unique id
 	optional string lmEquipmentID = 2;
+	optional string lmCaption = 3;
+	optional int32 moduleType = 4 [default = 0];
+	optional string modulePresetName = 5;
+	optional int32 moduleWorkcycleMcs = 6 [default = 0];
+	optional int32 rupProtocolVersion = 7 [default = 0];
+	optional string subsystemID = 8;
+	optional int32 subsystemKey = 9 [default = 0];
+	optional int32 lmNumber = 10 [default = 0];
+	optional string subsystemChannel = 11;
+	optional uint32 expectedDataID = 12 [default = 0];
+	optional int32 dataFramesQuantity = 13  [default = 0];
+	optional int32 dataSizeBytes = 14  [default = 0];
 
-	optional bool dataProcessingEnabled = 3 [default = false];
-	optional bool receivesData = 4 [default = false];
-	optional int64 uptime = 5 [default = 0];					// time from start of data receiving
-	optional uint32 receivedDataID = 6 [default = 0];
-	optional int64 lmTime = 7 [default = 0];
-	optional uint32 rupFrameNumerator = 8 [default = 0];
+	optional string lanControllerID = 15;
+	optional uint32 lanControllerIP = 16;
+	optional uint32 lanControllerPort = 17;
 
-	optional double dataReceivingSpeed = 9 [default = 0];	    // bytes/sec
-	optional int64 receivedDataSize = 10 [default = 0];
-	optional int64 receivedFramesCount = 11 [default = 0];
-	optional int64 receivedPacketCount = 12 [default = 0];
-	optional int64 lostPacketCount = 13 [default = 0];
-	optional int32 signalStatesQueueCurSize = 14 [default = 0];
-	optional int32 signalStatesQueueCurMaxSize = 15 [default = 0];
+	optional bool dataProcessingEnabled = 20 [default = false];
+	optional bool receivesData = 21 [default = false];
+	optional int64 uptime = 22 [default = 0];					// time from start of data receiving
+	optional uint32 receivedDataID = 23 [default = 0];
+	optional int64 lmTime = 24 [default = 0];
+	optional uint32 rupFrameNumerator = 25 [default = 0];
 
-	optional int64 errorProtocolVersion = 16 [default = 0];
-	optional int64 errorFramesQuantity = 17 [default = 0];
-	optional int64 errorFrameNo = 18 [default = 0];
-	optional int64 errorFrameCRC = 19 [default = 0];
-	optional int64 errorDataID = 20 [default = 0];
-	optional int64 errorDuplicatePlantTime = 21 [default = 0];
-	optional int64 errorNonmonotonicPlantTime = 22 [default = 0];
-	optional int64 errorPlantTimeFormat = 23 [default = 0];
+	optional double dataReceivingSpeed = 30 [default = 0];	    // bytes/sec
+	optional int64 receivedDataSize = 31 [default = 0];
+	optional int64 receivedFramesCount = 32 [default = 0];
+	optional int64 receivedPacketCount = 33 [default = 0];
+	optional int64 lostPacketCount = 34 [default = 0];
+	optional int32 signalStatesQueueCurSize = 35 [default = 0];
+	optional int32 signalStatesQueueCurMaxSize = 36 [default = 0];
+
+	optional int64 errorProtocolVersion = 50 [default = 0];
+	optional int64 errorFramesQuantity = 51 [default = 0];
+	optional int64 errorFrameNo = 52 [default = 0];
+	optional int64 errorFrameCRC = 53 [default = 0];
+	optional int64 errorDataID = 54 [default = 0];
+	optional int64 errorDuplicatePlantTime = 55 [default = 0];
+	optional int64 errorNonmonotonicPlantTime = 56 [default = 0];
+	optional int64 errorPlantTimeFormat = 57 [default = 0];
 }
+
+message TuningSourceInfoState
+{
+	optional DataSourceInfo info = 1;
+	optional TuningSourceState state = 2;
+};
 
 // Getting Diagnostic Data Sources states
 //
@@ -344,14 +367,45 @@ message IntroduceMyselfReply
 
 // Get Service Info
 //
-message GetServiceInfoRequest
-{
-}
-
 message SessionParams
 {
 	optional string currentSettingsProfile = 1;
 	optional int32 softwareRunMode = 2 [default = 0 /* E::SoftwareRunMode::Normal */];	// enum E::SoftwareRunMode values
+}
+
+message ArchSignalInfo
+{
+	required string appSignalID = 1;
+	required int32 apertureType = 2;
+	required double fineAperture = 3;
+	required double coarseAperture = 4;
+	required double absFineAperture = 5;
+	required double absCoarseAperture = 6;
+	required bool apertureOverrided = 7;
+	required int32 recordsPerMin = 8;
+	required double highEngineeringUnits = 9;
+	required double lowEngineeringUnits = 10;
+	required int32 signalType = 11;
+}
+
+message ApertureRecord
+{
+	required string signalID = 1;
+	required int32 apertureType = 2;
+	required double coarseAperture = 3;
+	required double fineAperture = 4;
+}
+
+message ServiceClientInfo
+{
+	required int32 requestIP = 1;
+	required int32 requestPort = 2;
+	required int32 clientIP = 3;
+	required int32 clientPort = 4;
+	required int64 uptime = 5;
+	required bool isActual = 6;
+	required int64 replyQuantity = 7;
+	required SoftwareInfo softwareInfo = 8;
 }
 
 message ServiceInfo
@@ -365,12 +419,46 @@ message ServiceInfo
 	optional SessionParams sessionParams = 5;
 
 	optional string settingsXml = 6;					// current service settings XML
+
+	optional Proto.BuildInfo buildInfo = 7;
+
+	repeated ServiceClientInfo clients = 8;
+
+	// CfgService specific
+	//
+	optional string autoloadBuildPath = 20;
+	optional string workDirectory = 21;
+	optional int32 cfgCheckerState = 22;
+
+	// Common service settings
+	//
+	optional uint32 cfgServiceIP1 = 30;
+	optional uint32 cfgServicePort1 = 31;
+
+	optional uint32 cfgServiceIP2 = 32;
+	optional uint32 cfgServicePort2 = 33;
+
+	// AppDataService specific
+	//
+	repeated AppDataSourceState appDataSourcesStates = 40;
+
+	optional double archSignalsUpdateProgress = 50 [default = 0];
+	repeated ArchSignalInfo archSignalsInfo = 51;
+	optional bool archSignalsUpdated = 52 [default = false];
+
+	// ArchiveService
+	//
+	optional int64 savedDataSizePerMin = 60 [default = 0];
+	optional int64 diskFreeSpace = 61 [default = 0];
+
+	// TuningServiceSpecific
+	//
+	repeated TuningSourceInfoState tuningSourcesInfoState = 70;
 }
 
-message GetServiceInfoReply
+message GetServiceInfoRequest
 {
-    required int32 error = 1 [default = 0];
-    required ServiceInfo serviceInfo = 2;
+	repeated ApertureRecord apertureRecords = 1;
 }
 
 message ConfigurationServiceState
@@ -378,31 +466,6 @@ message ConfigurationServiceState
     required string currentBuildDirectory = 1;
     required int32 checkBuildAttemptQuantity = 2;
     required int32 buildCheckerState = 3;
-}
-
-message ServiceClientInfo
-{
-    required int32 ip = 3;
-    required int64 uptime = 5;
-    required bool isActual = 6;
-    required int64 replyQuantity = 7;
-    required SoftwareInfo softwareInfo = 11;
-}
-
-message ServiceClients
-{
-    repeated ServiceClientInfo clients = 1;
-}
-
-message BuildInfo
-{
-    required string project = 1;
-    required int32 id = 2 [default = -1];
-	//required bool release = 3 [default = false];	Obsolete
-    required int64 date = 4;
-    required int32 changeset = 5 [default = 0];
-    required string user = 6;
-    required string workstation = 7;
 }
 
 message ConfigurationServiceSettings
@@ -436,7 +499,7 @@ message GetTuningSourcesInfoReply
 
     optional bool singleLmControlMode = 3 [default = true];
     optional string activeClientID = 4;				    // if singleLmControlMode == true then EquipmentID of activeClient
-                                                                    // else - empty string
+														// else - empty string
     optional string activeClientIP = 5;				    // similar to activeClientID
 }
 

@@ -1,41 +1,24 @@
 #pragma once
 
 #include <QAbstractTableModel>
-#include <ServiceLib/Service.h>
-#include "../OnlineLib/UdpSocket.h"
 
+#include "ServiceData.h"
 
 // For QueuedConnection (scan network)
+//
 Q_DECLARE_METATYPE(Network::ServiceInfo)
 
-
-class UdpClientSocket;
-
-struct ServiceData
+struct Host
 {
-	Network::ServiceInfo information;
+	quint32 hostIP = 0;
+	std::vector<ServiceData> servicesData;
 
-	std::vector<HostAddressPort> clientRequestIPs;
+	Host();
 
-	SessionParams sessionParams;
-	std::shared_ptr<SoftwareSettings> settings;
-	E::SoftwareType type = E::SoftwareType::Unknown;
-
-	UdpClientSocket* clientSocket = nullptr;
-	QWidget* statusWidget = nullptr;
-
-	ServiceData();
-	bool parseServiceInfo();
-	void fillClientRequestIPs(const std::vector<RqCtrlSettings>& rcSettings);
+	int availableServicesCount();
 };
 
-struct HostInfo
-{
-	QVector<ServiceData> servicesData;
-	quint32 ip = 0;
-
-	HostInfo();
-};
+class BaseServiceWidget;
 
 class ServiceTableModel : public QAbstractTableModel
 {
@@ -44,43 +27,49 @@ public:
 	explicit ServiceTableModel(const SoftwareInfo& softwareInfo, QWidget* parent = 0);
 	~ServiceTableModel();
 
-	int rowCount(const QModelIndex &parent = QModelIndex()) const ;
-	int columnCount(const QModelIndex &parent = QModelIndex()) const;
-	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
+	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;
 
-	void addAddress(QString connectionAddress);
+	void addAddress(const QString& connectionAddress);
+
+	void deleteSrvWidget(BaseServiceWidget* srvWidget);
 
 signals:
 	void serviceStateChanged(int row);
 
 public slots:
 	void serviceAckReceived(const UdpRequest udpRequest);
-	void serviceNotFound();
+	void serviceNotAck();
 	void checkServiceStates();
-
 	void removeHost(int row);
+	void setServiceInformation(quint32 ip, quint16 port, Network::ServiceInfo sInfo);
 	void openServiceStatusWidget(const QModelIndex& index);
 
-	void setServiceInformation(quint32 ip, quint16 port, Network::ServiceInfo sInfo);
-
 private:
-	QVector<HostInfo> m_hostsInfo;
-	SoftwareInfo m_softwareInfo;
-	bool m_freezeUpdate;
-
-	QWidget* m_parrentWidget = nullptr;
-
-	QTimer m_timer;
-
-	UdpSocketThread* m_socketThread = nullptr;
-
 	void startUdpSocketThread();
 	void finishtUdpSocketThread();
 	void restartUdpSocketThread();
 
-	void setServiceState(quint32 ip, quint16 port, ServiceState state);
-	void getServiceState(quint32 ip, quint16 port, int& hostIndex, int& portIndex);
-	void checkForDeletingSocket(UdpClientSocket* socket);
-	int hostsInfoCount() const;
+	void setServiceState(quint32 ip, quint16 udpPort, E::ServiceState state);
+	void getServiceState(quint32 ip, quint16 udpPort, int* hostIndex, int* serviceIndex);
+
+	int hostsCount() const;
+	int serviceCount() const;
+	int serviceColumn(quint16 port) const;
+
+private:
+	std::vector<Host> m_hosts;
+	std::map<BaseServiceWidget*, std::pair<quint32, E::SoftwareType>> m_srvWidgets;
+
+	SoftwareInfo m_softwareInfo;
+
+	std::map<quint16, int> m_serviceColumn;
+
+	QWidget* m_parentWidget = nullptr;
+
+	QTimer m_timer;
+
+	UdpSocketThread* m_socketThread = nullptr;
 };

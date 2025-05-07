@@ -14,7 +14,9 @@ qt_add_library(${TARGET} STATIC
 	./include/ServiceLib/CommandLineParser.h
 	./include/ServiceLib/Service.h
 	./include/ServiceLib/ServiceStarter.h
+	./include/ServiceLib/TcpSrvInfoServer.h
 	CommandLineParser.cpp
+	TcpSrvInfoServer.cpp
 	Service.cpp
 	ServiceStarter.cpp
 )
@@ -36,6 +38,9 @@ if(UNIX)
 endif(UNIX)
 
 target_precompile_headers(${TARGET} PRIVATE
+	<QObject>
+	<QXmlStreamReader>
+
 	<CommonLib/Types.h>
 	<Network.pb.h>
 )

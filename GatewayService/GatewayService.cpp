@@ -1,6 +1,6 @@
 #include "GatewayService.h"
 
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 
 // -------------------------------------------------------------------------------
 //

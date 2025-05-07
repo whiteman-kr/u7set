@@ -122,19 +122,19 @@ bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 	QByteArray xmlFileData = buildXmlFile.readAll();
 	XmlReadHelper xml(xmlFileData);
 
-	if (xml.findElement("Build") == false)
+	if (xml.findElement(XmlElement::BUILD_INFO) == false)
 	{
 		return false;
 	}
 
-	if (xml.findElement("Files") == false)
+	if (xml.findElement(XmlElement::FILES) == false)
 	{
 		return false;
 	}
 
 	int fileCount = 0;
 
-	if (xml.readIntAttribute("Count", &fileCount) == false)
+	if (xml.readIntAttribute(XmlAttribute::COUNT, &fileCount) == false)
 	{
 		return false;
 	}
@@ -143,7 +143,7 @@ bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 
 	for(int count = 0; count < fileCount; count++)
 	{
-		if(xml.findElement("File") == false)
+		if(xml.findElement(XmlElement::FILE) == false)
 		{
 			return false;
 		}
@@ -152,12 +152,12 @@ bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 		int fileSize = 0;
 		QString fileMd5Hash = "";
 
-		if (xml.readStringAttribute("Name", &fileName) == false)
+		if (xml.readStringAttribute(XmlAttribute::NAME, &fileName) == false)
 		{
 			return false;
 		}
 
-		if (xml.readIntAttribute("Size", &fileSize) == false)
+		if (xml.readIntAttribute(XmlAttribute::SIZE, &fileSize) == false)
 		{
 			return false;
 		}
@@ -187,7 +187,7 @@ bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 			result = false;
 		}
 
-		if (xml.readStringAttribute("MD5", &fileMd5Hash) == false)
+		if (xml.readStringAttribute(XmlAttribute::MD5, &fileMd5Hash) == false)
 		{
 			return false;
 		}
@@ -206,14 +206,14 @@ bool CfgCheckerWorker::checkBuild(const QString& buildDirectoryPath)
 		}
 	}
 
-	if (xml.findElement("BuildResult") == false)
+	if (xml.findElement(XmlElement::BUILD_RESULT) == false)
 	{
 		return false;
 	}
 
 	int errors = 0;
 
-	if (xml.readIntAttribute("Errors", &errors) == false)
+	if (xml.readIntAttribute(XmlAttribute::ERRORS, &errors) == false)
 	{
 		return false;
 	}

@@ -7,6 +7,7 @@
 #include <ArchSignal.pb.h>
 #include <QDir>
 #include <QStandardPaths>
+#include <QStorageInfo>
 
 // ----------------------------------------------------------------------------------------------------------------------
 //
@@ -123,6 +124,8 @@ Archive::Archive(const QString& projectID,					// Read only archive constructor
 	m_archInfoFileData->swap(archFileInfoData);
 
 	m_archFullPath = QDir::fromNativeSeparators(readOnlyArchFullPath);
+
+	updateDiskFreeSpace();
 }
 
 Archive::~Archive()
@@ -144,6 +147,8 @@ void Archive::start()
 			return;
 		}
 	}
+
+	updateDiskFreeSpace();
 
 	if (initArchFiles() == false)
 	{
@@ -226,7 +231,7 @@ void Archive::finalizeRequest(quint32 requestID)
 
 QString Archive::getSignalID(Hash signalHash)
 {
-	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
+	ArchFile* archFile = getArchFile(signalHash);
 
 	if (archFile == nullptr)
 	{
@@ -241,13 +246,13 @@ void Archive::getSignalsHashes(QVector<Hash>* hashes)
 {
 	TEST_PTR_RETURN(hashes);
 
-	hashes->resize(m_archFiles.count());
+	hashes->resize(m_archFiles.size());
 
 	int i = 0;
 
-	for(ArchFile* archFile : m_archFiles)
+	for(const auto& [hash, archFile] : m_archFiles)
 	{
-		(*hashes)[i] = archFile->hash();
+		(*hashes)[i] = hash;
 		i++;
 	}
 }
@@ -260,7 +265,9 @@ void Archive::saveState(const SimpleAppSignalState& state)
 		return;
 	}
 
-	ArchFile* archFile = m_archFiles.value(state.hash, nullptr);
+	m_savedDataSizeCounter += sizeof(ArchFileRecord);
+
+	ArchFile* archFile = getArchFile(state.hash);
 
 	if (archFile == nullptr)
 	{
@@ -275,6 +282,25 @@ void Archive::saveState(const SimpleAppSignalState& state)
 		appendEmergencyFile(archFile);
 	}
 }
+
+void Archive::updateSavedDataSizePerMin()
+{
+	m_savedDataSizePerMin.store(m_savedDataSizeCounter);
+	m_savedDataSizeCounter = 0;
+
+	updateDiskFreeSpace();
+}
+
+qint64 Archive::getSavedDataSizePerMin()
+{
+	return m_savedDataSizePerMin;
+}
+
+qint64 Archive::getDiskFreeSpace() const
+{
+	return m_diskFreeSpace;
+}
+
 
 bool Archive::shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* thread)
 {
@@ -336,7 +362,7 @@ bool Archive::waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeco
 		return true;
 	}
 
-	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
+	ArchFile* archFile = getArchFile(signalHash);
 
 	TEST_PTR_RETURN_FALSE(archFile);
 
@@ -407,6 +433,21 @@ ArchFile* Archive::getNextFileForFlushing(bool* flushAnyway)
 	archFile = getNextRegularFile();
 
 	return archFile;
+}
+
+ArchFile* Archive::getArchFile(Hash signalHash)
+{
+	return getValueOrNullptr(m_archFiles, signalHash);
+}
+
+ArchFile* Archive::getArchFileByIndex(int index)
+{
+	if (index < 0 || index >= TO_INT(m_archFilesArray.size()))
+	{
+		return nullptr;
+	}
+
+	return m_archFilesArray[index];
 }
 
 void Archive::maintenanceIsStarted()
@@ -514,8 +555,8 @@ bool Archive::initArchFiles()
 
 	int signalsCount = archInfo.archsignal_size();
 
-	m_archFiles.reserve(static_cast<int>(signalsCount * 1.2));
 	m_archFilesArray.resize(signalsCount);
+
 	m_regularFilesQueue.reserve(static_cast<int>(signalsCount * 1.2));
 
 	std::vector<std::vector<ArchFile*>> archFilesGroups;
@@ -528,7 +569,7 @@ bool Archive::initArchFiles()
 
 		ArchFile* archFile = new ArchFile(protoArchSignal, m_archFullPath, m_log);
 
-		m_archFiles.insert(archFile->hash(), archFile);
+		m_archFiles.emplace(archFile->hash(), archFile);
 
 		m_archFilesArray[i] = archFile;
 
@@ -793,6 +834,13 @@ void Archive::writeArchFilesInfoFile(const std::vector<std::vector<ArchFile*>>& 
 	infoFile.close();
 }
 
+void Archive::updateDiskFreeSpace()
+{
+	QStorageInfo si(m_archFullPath);
+
+	m_diskFreeSpace = si.bytesAvailable();
+}
+
 quint32 Archive::getNewRequestID()
 {
 	return m_nextRequestID.fetch_add(1);
@@ -947,11 +995,11 @@ void Archive::clear()
 {
 	m_projectID.clear();
 
-	for(ArchFile* archFile : m_archFiles)
+	for(ArchFile* archFile : m_archFilesArray)
 	{
 		delete archFile;
 	}
 
-	m_archFiles.clear();
 	m_archFilesArray.clear();
+	m_archFiles.clear();
 }

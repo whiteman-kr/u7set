@@ -44,7 +44,9 @@ namespace Tuning
 
 		int getSignalsCount() const;
 
+		void getTuningSourcesInfo(Network::ServiceInfo* srvInfo) const;
+
 	private:
-		QHash<QString, int> m_id2Source;
+		std::map<QString, int> m_id2Source;
 	};
 }

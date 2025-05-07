@@ -212,6 +212,12 @@ namespace Tcp
 		return m_socketDescription;
 	}
 
+	void SocketWorker::getClientsList(Network::ServiceInfo* srvInfo) const
+	{
+		Q_UNUSED(srvInfo);
+		return;
+	}
+
 	void SocketWorker::createSocket()
 	{
 		AUTO_LOCK(m_mutex)
@@ -1038,19 +1044,14 @@ namespace Tcp
 		return true;
 	}
 
-	void Server::sendClientList()
+	void Server::getClientsList(Network::ServiceInfo* srvInfo) const
 	{
-		Network::ServiceClients message;
+		TEST_PTR_RETURN(srvInfo)
 
 		m_statesMutex.lock();
 
 		for(const Tcp::ConnectionState& state : m_connectionStates)
 		{
-			if (state.isConnected == false)
-			{
-				continue;
-			}
-
 			const SoftwareInfo& si = state.connectedSoftwareInfo;
 
 			if (E::contains<E::SoftwareType>(TO_INT(si.softwareType())) == false)
@@ -1058,24 +1059,35 @@ namespace Tcp
 				continue;
 			}
 
-			Network::ServiceClientInfo* clientInfo = message.add_clients();
+			Network::ServiceClientInfo* clientInfo = srvInfo->add_clients();
+
+			clientInfo->set_requestip(m_listenAddress.hostAddr().address32());
+			clientInfo->set_requestport(m_listenAddress.hostAddr().port());
+
+			clientInfo->set_clientip(state.peerAddr.address32());
+			clientInfo->set_clientport(state.peerAddr.port());
+
+			clientInfo->set_uptime(QDateTime::currentMSecsSinceEpoch() - state.startTime);
+			clientInfo->set_isactual(state.isActual);
+			clientInfo->set_replyquantity(state.replyCount);
 
 			Network::SoftwareInfo* newSoftwareInfo = new Network::SoftwareInfo();
 
 			si.serializeTo(newSoftwareInfo);
 
 			clientInfo->set_allocated_softwareinfo(newSoftwareInfo);
-
-			clientInfo->set_ip(state.peerAddr.address32());
-
-			clientInfo->set_uptime(QDateTime::currentMSecsSinceEpoch() - state.startTime);
-			clientInfo->set_isactual(state.isActual);
-			clientInfo->set_replyquantity(state.replyCount);
 		}
 
 		m_statesMutex.unlock();
+	}
 
-		sendReply(message);
+	void Server::sendClientList()
+	{
+		Network::ServiceInfo srvInfo;
+
+		getClientsList(&srvInfo);
+
+		sendReply(srvInfo);
 	}
 
 	void Server::initConnectionNo()
@@ -1362,6 +1374,9 @@ namespace Tcp
 
 		// close all conection threads
 		//
+
+		m_runningServersMutex.lock();
+
 		for(auto const& [worker, thread]: m_runningServers)
 		{
 			thread->quit();
@@ -1369,6 +1384,8 @@ namespace Tcp
 		}
 
 		m_runningServers.clear();
+
+		m_runningServersMutex.unlock();
 
 		delete m_serverInstance;
 	}
@@ -1383,6 +1400,18 @@ namespace Tcp
 		{
 			m_serverInstance->logError(QString("error on start listening %1 - %2").arg(addr.addressPortStr(), errStr));
 		}
+	}
+
+	void ListenerWorker::getClientsList(Network::ServiceInfo* srvInfo) const
+	{
+		m_runningServersMutex.lock();
+
+		if (m_runningServers.empty() == false)
+		{
+			m_runningServers.begin()->first->getClientsList(srvInfo);
+		}
+
+		m_runningServersMutex.unlock();
 	}
 
 	void ListenerWorker::onThreadStarted()
@@ -1453,7 +1482,11 @@ namespace Tcp
 
 		SimpleThread* newThread = new SimpleThread(newServerInstance);
 
+		m_runningServersMutex.lock();
+
 		m_runningServers.emplace(newServerInstance, newThread);
+
+		m_runningServersMutex.unlock();
 
 		newThread->start();
 
@@ -1467,15 +1500,20 @@ namespace Tcp
 
 	void ListenerWorker::onServerDisconnected(const SocketWorker* server)
 	{
+		m_runningServersMutex.lock();
+
 		SimpleThread* thread = getValueOrNullptr(m_runningServers, server);
 
 		if (thread == nullptr)
 		{
 			Q_ASSERT(false);
+			m_runningServersMutex.unlock();
 			return;
 		}
 
 		m_runningServers.erase(server);
+
+		m_runningServersMutex.unlock();
 
 		thread->quit();
 		delete thread;
@@ -1487,10 +1525,14 @@ namespace Tcp
 	{
 		std::list<ConnectionState> clientsInfo;
 
+		m_runningServersMutex.lock();
+
 		for (const auto& [server, thread] : m_runningServers)
 		{
 			clientsInfo.push_back(server->getConnectionState());
 		}
+
+		m_runningServersMutex.unlock();
 
 		emit connectedClientsListChanged(clientsInfo);
 	}
@@ -1504,33 +1546,46 @@ namespace Tcp
 	ListenerThread::ListenerThread(const HostAddressPort& listenAddress,
 									E::SecurityLevel securityLevel,
 									Server* server,
-									CircularLoggerShared logger) :
-		SimpleThread(new ListenerWorker(std::vector<ListenAddress>{ListenAddress(server->softwareEquipmentID(), listenAddress, securityLevel)},
-										  server, logger))
+									CircularLoggerShared logger)
 	{
+		m_listenerWorker = new ListenerWorker(std::vector<ListenAddress>{ListenAddress(server->softwareEquipmentID(), listenAddress, securityLevel)},
+											  server, logger);
+		addWorker(m_listenerWorker);
 	}
 
 	ListenerThread::ListenerThread(const ListenAddress& listenAddress,
 									Server* server,
-									CircularLoggerShared logger) :
-		SimpleThread(new ListenerWorker(std::vector<ListenAddress>{listenAddress}, server, logger))
+									CircularLoggerShared logger)
 	{
+		m_listenerWorker = new ListenerWorker(std::vector<ListenAddress>{listenAddress}, server, logger);
+
+		addWorker(m_listenerWorker);
 	}
 
 	ListenerThread::ListenerThread(const std::vector<ListenAddress>& listenAddresses,
 									Server* server,
-									CircularLoggerShared logger) :
-		SimpleThread(new ListenerWorker(listenAddresses, server, logger))
+									CircularLoggerShared logger)
 	{
+		m_listenerWorker = new ListenerWorker(listenAddresses, server, logger);
+
+		addWorker(m_listenerWorker);
 	}
 
 	ListenerThread::ListenerThread(ListenerWorker* listener) :
-		SimpleThread(listener)
+		SimpleThread()
 	{
+		m_listenerWorker = listener;
+
+		addWorker(m_listenerWorker);
 	}
 
 	ListenerThread::~ListenerThread()
 	{
+	}
+
+	void ListenerThread::getClientsList(Network::ServiceInfo* srvInfo) const
+	{
+		m_listenerWorker->getClientsList(srvInfo);
 	}
 
 	// -------------------------------------------------------------------------------------

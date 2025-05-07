@@ -2,7 +2,7 @@
 
 #include <ServiceLib/Service.h>
 #include "../OnlineLib/DataSource.h"
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/OnlineDataSources.h"
 

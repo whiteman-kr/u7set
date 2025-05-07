@@ -1,10 +1,11 @@
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 
 #include "AppDataService.h"
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
 #include "RtTrendsServer.h"
 #include "AppDataReceiver.h"
+#include "ApertureFile.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -37,11 +38,66 @@ ServiceWorker* AppDataServiceWorker::createInstance() const
 	return newInstance;
 }
 
+void AppDataServiceWorker::processGetServiceInfoRequest(const Network::GetServiceInfoRequest& rq)
+{
+	int aperturesSize = rq.aperturerecords().size();
+
+	if (aperturesSize == 0)
+	{
+		return;
+	}
+
+	for(int i = 0; i < aperturesSize; i++)
+	{
+		ApertureRecord ar;
+
+		ar.readFromProto(rq.aperturerecords(i));
+
+		m_appSignalStates.overrideAperture(ar);
+		m_apertureFile.updateAperture(ar);
+	}
+
+	m_apertureFile.save();
+
+	m_updateArchSignalsAnyway = true;
+
+	emit restartArchSignalsTimer();
+}
+
 void AppDataServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
+	QMutexLocker l(&m_startStopMutex);
+
 	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::AppDataService, m_curSettingsProfile);
 
 	serviceInfo.set_settingsxml(xmlString.toStdString());
+
+	serviceInfo.set_cfgserviceip1(cfgServiceIP1().address32());
+	serviceInfo.set_cfgserviceport1(cfgServiceIP1().port());
+
+	serviceInfo.set_cfgserviceip2(cfgServiceIP2().address32());
+	serviceInfo.set_cfgserviceport2(cfgServiceIP2().port());
+
+	if (m_tcpAppDataServerThread != nullptr)
+	{
+		m_tcpAppDataServerThread->getClientsList(&serviceInfo);
+	}
+
+	if (m_rtTrendsServerThread != nullptr)
+	{
+		m_rtTrendsServerThread->getClientsList(&serviceInfo);
+	}
+
+	for(const AppDataSource* ads : m_appDataSources)
+	{
+		TEST_PTR_CONTINUE(ads);
+
+		Network::AppDataSourceState* state = serviceInfo.add_appdatasourcesstates();
+
+		ads->getState(state);
+	}
+
+	copyArchSignalsInfo(serviceInfo);
 }
 
 bool AppDataServiceWorker::isConnectedToConfigurationService(quint32& ip, quint16& port) const
@@ -156,130 +212,13 @@ void AppDataServiceWorker::loadServiceSpecificSettings()
 	DEBUG_LOG_MSG(logger(), "");
 }
 
-void AppDataServiceWorker::runAppDataReceiverThread()
-{
-	if (m_appDataReceiver != nullptr)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_appDataReceiver = new AppDataReceiver(m_curSettingsProfile.appDataReceivingIP,
-											m_appDataSources,
-											m_appSignalStates,
-											m_appDataProcessingThreadCount,
-											sessionParams().softwareRunMode,
-											logger());
-	m_appDataReceiver->start();
-}
-
-void AppDataServiceWorker::stopAppDataReceiverThread()
-{
-	if (m_appDataReceiver != nullptr)
-	{
-		m_appDataReceiver->quitAndWait();
-		delete m_appDataReceiver;
-		m_appDataReceiver = nullptr;
-	}
-}
-
-void AppDataServiceWorker::runTcpAppDataServer()
-{
-	assert(m_tcpAppDataServerThread == nullptr);
-
-	std::vector<Tcp::ListenAddress> listenAddrs;
-
-	for(const RqCtrlSettings& rcs :  m_curSettingsProfile.rcSettings)
-	{
-		if (rcs.enable() == true)
-		{
-			listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
-		}
-	 };
-
-	m_tcpAppDataServerThread = new TcpAppDataServerThread(softwareInfo(), listenAddrs, *this);
-	m_tcpAppDataServerThread->start();
-}
-
-void AppDataServiceWorker::stopTcpAppDataServer()
-{
-	if (m_tcpAppDataServerThread != nullptr)
-	{
-		m_tcpAppDataServerThread->quitAndWait(10000);
-		delete m_tcpAppDataServerThread;
-
-		m_tcpAppDataServerThread = nullptr;
-	}
-}
-
-void AppDataServiceWorker::runTcpArchiveClientThread()
-{
-	assert(m_tcpArchiveClientThread == nullptr);
-
-	if (m_curSettingsProfile.archServiceID.isEmpty() == true)
-	{
-		DEBUG_LOG_WRN(logger(), "ArchiveService is not assigned");
-		return;
-	}
-
-	m_tcpArchiveClientThread = new TcpArchiveClientThread(softwareInfo(),
-														  m_curSettingsProfile.archServiceIP,
-														  *this);
-	m_tcpArchiveClientThread->start();
-}
-
-void AppDataServiceWorker::stopTcpArchiveClientThread()
-{
-	if (m_tcpArchiveClientThread == nullptr)
-	{
-		return;
-	}
-
-	m_tcpArchiveClientThread->quitAndWait();
-
-	delete m_tcpArchiveClientThread;
-
-	m_tcpArchiveClientThread = nullptr;
-}
-
-void AppDataServiceWorker::runRtTrendsServerThread()
-{
-	assert(m_rtTrendsServerThread == nullptr);
-
-	std::vector<Tcp::ListenAddress> listenAddresses;
-
-	std::for_each(m_curSettingsProfile.rcSettings.begin(),
-				  m_curSettingsProfile.rcSettings.end(),
-				  [&listenAddresses](const RqCtrlSettings& rcs)
-				  {
-					if (rcs.enable() == true)
-					{
-						listenAddresses.emplace_back(rcs.equipmentID(), rcs.rtTrendsRequestIP(), rcs.securityLevel());
-					}
-				  });
-
-	m_rtTrendsServerThread = new RtTrends::ServerThread(listenAddresses,
-														*this);
-
-	m_rtTrendsServerThread->start();
-}
-
-void AppDataServiceWorker::stopRtTrendsServerThread()
-{
-	if (m_rtTrendsServerThread != nullptr)
-	{
-		m_rtTrendsServerThread->quitAndWait(10000);
-		delete m_rtTrendsServerThread;
-
-		m_rtTrendsServerThread = nullptr;
-	}
-}
-
 void AppDataServiceWorker::initialize()
 {
 	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker is started");
 
 	runCfgLoaderThread();
+
+	connect(this, &AppDataServiceWorker::restartArchSignalsTimer, this, &AppDataServiceWorker::onRestartArchSignalsTimer);
 }
 
 void AppDataServiceWorker::shutdown()
@@ -337,6 +276,14 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	//
 	clearConfiguration();
 
+	bool res = readBuildInfo(configurationXmlData);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger(), QString("Error reading BuildInfo from configurationXmlData"));
+		return;
+	}
+
 	const AppDataServiceSettings* typedSettingsPtr = dynamic_cast<const AppDataServiceSettings*>(currentSettingsProfile.get());
 
 	if (typedSettingsPtr == nullptr)
@@ -344,6 +291,9 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 		DEBUG_LOG_MSG(logger(), "Settings casting error!");
 		return;
 	}
+
+	setCfgServiceID1(typedSettingsPtr->cfgServiceID1);
+	setCfgServiceID2(typedSettingsPtr->cfgServiceID2);
 
 	// making modificable local copy of settings
 	//
@@ -519,6 +469,24 @@ void AppDataServiceWorker::createAndInitSignalStates()
 	m_appSignalStates.buidlHash2State();
 
 	m_appSignalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);
+
+	//
+
+	m_apertureFile.clear();
+
+	if (m_apertureFile.load(cmdLineArg(0)) == false)
+	{
+		DEBUG_LOG_WRN(logger(), "Aperture.csv file NOT loded!");
+	}
+
+	for(const auto& [signalID, apertureRecord] : m_apertureFile.apertures())
+	{
+		m_appSignalStates.overrideAperture(apertureRecord);
+	}
+
+	//
+
+	m_recordsPerMin.clear();
 }
 
 void AppDataServiceWorker::buildAcuiredAppSignalIDs()
@@ -549,6 +517,8 @@ void AppDataServiceWorker::prepareAppDataSources()
 
 void AppDataServiceWorker::applyNewConfiguration()
 {
+	QMutexLocker l(&m_startStopMutex);
+
 	m_autoArchivingGroupsCount = m_curSettingsProfile.autoArchiveInterval * 60;
 
 	createTimeErrLog();
@@ -560,10 +530,23 @@ void AppDataServiceWorker::applyNewConfiguration()
 	runTcpArchiveClientThread();
 	runTcpAppDataServer();
 	runRtTrendsServerThread();
+
+	onRestartArchSignalsTimer();
+
+	connect(m_archSignalsUpdateTimer, &QTimer::timeout, this, &AppDataServiceWorker::onArchSignalsTimer);
 }
 
 void AppDataServiceWorker::clearConfiguration()
 {
+	QMutexLocker l(&m_startStopMutex);
+
+	if (m_archSignalsUpdateTimer != nullptr)
+	{
+		m_archSignalsUpdateTimer->stop();
+		delete m_archSignalsUpdateTimer;
+		m_archSignalsUpdateTimer = nullptr;
+	}
+
 	// free all resources allocated in onConfigurationReady
 	//
 	stopRtTrendsServerThread();
@@ -579,3 +562,295 @@ void AppDataServiceWorker::clearConfiguration()
 	m_acquiredAppSignalIDs.clear();
 }
 
+void AppDataServiceWorker::runAppDataReceiverThread()
+{
+	if (m_appDataReceiver != nullptr)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_appDataReceiver = new AppDataReceiver(m_curSettingsProfile.appDataReceivingIP,
+											m_appDataSources,
+											m_appSignalStates,
+											m_appDataProcessingThreadCount,
+											sessionParams().softwareRunMode,
+											logger());
+	m_appDataReceiver->start();
+}
+
+void AppDataServiceWorker::stopAppDataReceiverThread()
+{
+	if (m_appDataReceiver != nullptr)
+	{
+		m_appDataReceiver->quitAndWait();
+		delete m_appDataReceiver;
+		m_appDataReceiver = nullptr;
+	}
+}
+
+void AppDataServiceWorker::runTcpAppDataServer()
+{
+	assert(m_tcpAppDataServerThread == nullptr);
+
+	std::vector<Tcp::ListenAddress> listenAddrs;
+
+	for(const RqCtrlSettings& rcs :  m_curSettingsProfile.rcSettings)
+	{
+		if (rcs.enable() == true)
+		{
+			listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
+		}
+	 };
+
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(softwareInfo(), listenAddrs, *this);
+	m_tcpAppDataServerThread->start();
+}
+
+void AppDataServiceWorker::stopTcpAppDataServer()
+{
+	if (m_tcpAppDataServerThread != nullptr)
+	{
+		m_tcpAppDataServerThread->quitAndWait(10000);
+		delete m_tcpAppDataServerThread;
+
+		m_tcpAppDataServerThread = nullptr;
+	}
+}
+
+void AppDataServiceWorker::runTcpArchiveClientThread()
+{
+	assert(m_tcpArchiveClientThread == nullptr);
+
+	if (m_curSettingsProfile.archServiceID.isEmpty() == true)
+	{
+		DEBUG_LOG_WRN(logger(), "ArchiveService is not assigned");
+		return;
+	}
+
+	m_tcpArchiveClientThread = new TcpArchiveClientThread(softwareInfo(),
+														  m_curSettingsProfile.archServiceIP,
+														  *this);
+	m_tcpArchiveClientThread->start();
+}
+
+void AppDataServiceWorker::stopTcpArchiveClientThread()
+{
+	if (m_tcpArchiveClientThread == nullptr)
+	{
+		return;
+	}
+
+	m_tcpArchiveClientThread->quitAndWait();
+
+	delete m_tcpArchiveClientThread;
+
+	m_tcpArchiveClientThread = nullptr;
+}
+
+void AppDataServiceWorker::runRtTrendsServerThread()
+{
+	assert(m_rtTrendsServerThread == nullptr);
+
+	std::vector<Tcp::ListenAddress> listenAddresses;
+
+	std::for_each(m_curSettingsProfile.rcSettings.begin(),
+				  m_curSettingsProfile.rcSettings.end(),
+				  [&listenAddresses](const RqCtrlSettings& rcs)
+				  {
+					if (rcs.enable() == true)
+					{
+						listenAddresses.emplace_back(rcs.equipmentID(), rcs.rtTrendsRequestIP(), rcs.securityLevel());
+					}
+				  });
+
+	m_rtTrendsServerThread = new RtTrends::ServerThread(listenAddresses,
+														*this);
+
+	m_rtTrendsServerThread->start();
+}
+
+void AppDataServiceWorker::stopRtTrendsServerThread()
+{
+	if (m_rtTrendsServerThread != nullptr)
+	{
+		m_rtTrendsServerThread->quitAndWait(10000);
+		delete m_rtTrendsServerThread;
+
+		m_rtTrendsServerThread = nullptr;
+	}
+}
+
+void AppDataServiceWorker::getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,
+											int count, double* updateStatus) const
+{
+	TEST_PTR_RETURN(recordsPerMin);
+	TEST_PTR_RETURN(updateStatus);
+
+	if (m_archSignalsUpdateTimer == nullptr)
+	{
+		*updateStatus = 0;
+	}
+	else
+	{
+		qint64 dt = QDateTime::currentMSecsSinceEpoch() - m_archSignalsTimerStartMs;
+
+		if (dt < 0)
+		{
+			dt = 0;
+		}
+		else
+		{
+			if (dt > ARCH_SIGNALS_UPDATE_INTERVAL)
+			{
+				dt = ARCH_SIGNALS_UPDATE_INTERVAL;
+			}
+		}
+
+		*updateStatus = static_cast<double>(dt) / ARCH_SIGNALS_UPDATE_INTERVAL * 100.0;
+	}
+
+	QMutexLocker loker(&m_recordsPerMinMutex);
+
+	int recordsPerMinSize = TO_INT(m_recordsPerMin.size());
+
+	if (recordsPerMinSize == 0)
+	{
+		recordsPerMin->clear();
+		return;
+	}
+
+	if (count >= recordsPerMinSize)
+	{
+		recordsPerMin->resize(recordsPerMinSize);
+
+		std::copy(m_recordsPerMin.begin(), m_recordsPerMin.begin() + recordsPerMinSize,
+				  recordsPerMin->begin());
+	}
+	else
+	{
+		std::vector<RecordsPerMin> addVector;
+
+		for(int i = count; i < recordsPerMinSize; i++)
+		{
+			if (m_recordsPerMin[i].overrided)
+			{
+				addVector.push_back(m_recordsPerMin[i]);
+			}
+		}
+
+		recordsPerMin->resize(count + addVector.size());
+
+		std::copy(m_recordsPerMin.begin(), m_recordsPerMin.begin() + count,
+				  recordsPerMin->begin());
+
+		std::copy(addVector.begin(), addVector.end(),
+				  recordsPerMin->begin() + count);
+	}
+}
+
+void AppDataServiceWorker::onRestartArchSignalsTimer()
+{
+	if (m_archSignalsUpdateTimer == nullptr)
+	{
+		m_archSignalsUpdateTimer = new QTimer;
+	}
+
+	m_archSignalsUpdateTimer->start(ARCH_SIGNALS_UPDATE_INTERVAL);
+	m_archSignalsTimerStartMs = QDateTime::currentMSecsSinceEpoch();
+
+	m_appSignalStates.clearStatesSavedCounters();
+}
+
+void AppDataServiceWorker::onArchSignalsTimer()
+{
+	m_archSignalsTimerStartMs = QDateTime::currentMSecsSinceEpoch();
+
+	int count = TO_INT(m_appSignalStates.size());
+
+	std::vector<RecordsPerMin> recordsPerMin;
+
+	recordsPerMin.reserve(count);
+
+	RecordsPerMin r;
+
+	for(int i = 0; i < count; i++)
+	{
+		r.recordsCount = m_appSignalStates[i]->onArchSignalsTimer();
+		r.dynamicStateIndex = i;
+		r.overrided = m_appSignalStates[i]->apertureOverrided();
+
+		if (r.recordsCount > 1 || r.overrided)
+		{
+			recordsPerMin.push_back(r);
+		}
+	}
+
+	std::sort(	recordsPerMin.begin(),
+				recordsPerMin.end(),
+				[](const RecordsPerMin& a, const RecordsPerMin& b)
+				{
+					return a.recordsCount > b.recordsCount;
+				});
+
+	QMutexLocker loker(&m_recordsPerMinMutex);
+
+	m_recordsPerMin.swap(recordsPerMin);
+}
+
+void AppDataServiceWorker::copyArchSignalsInfo(Network::ServiceInfo& serviceInfo) const
+{
+	int count = 500;
+
+	std::vector<RecordsPerMin> recordsPerMin;
+	double updateStatus = 0;
+
+	getRecordsPerMin(&recordsPerMin, count, &updateStatus);
+
+	count = TO_INT(recordsPerMin.size());
+
+	serviceInfo.set_archsignalsupdateprogress(updateStatus);
+
+	bool archSignalsUpdated = m_updateArchSignalsAnyway;
+
+	m_updateArchSignalsAnyway = false;
+
+	if (m_cachedRecordsPerMin != recordsPerMin)
+	{
+		archSignalsUpdated = true;
+		m_cachedRecordsPerMin = recordsPerMin;
+	}
+
+	if ((m_archSignalsRequestCtr % 25) == 0)
+	{
+		archSignalsUpdated = true;
+	}
+
+	m_archSignalsRequestCtr++;
+
+	serviceInfo.set_archsignalsupdated(archSignalsUpdated);
+
+	if (archSignalsUpdated == true)
+	{
+		for(int i = 0; i < count; i++)
+		{
+			const DynamicAppSignalState* state = m_appSignalStates[recordsPerMin[i].dynamicStateIndex];
+
+			TEST_PTR_CONTINUE(state);
+
+			Network::ArchSignalInfo* asi = serviceInfo.add_archsignalsinfo();
+
+			asi->set_appsignalid(state->appSignalID().toStdString());
+			asi->set_aperturetype(TO_INT(state->apertureType()));
+			asi->set_coarseaperture(state->coarseAperture());
+			asi->set_fineaperture(state->fineAperture());
+			asi->set_abscoarseaperture(state->absCoarseAperture());
+			asi->set_absfineaperture(state->absFineAperture());
+			asi->set_recordspermin(recordsPerMin[i].recordsCount);
+			asi->set_apertureoverrided(state->apertureOverrided());
+			asi->set_lowengineeringunits(state->lowEngineeringUnits());
+			asi->set_highengineeringunits(state->highEngineeringUnits());
+			asi->set_signaltype(TO_INT(state->signalType()));
+		}
+	}
+}

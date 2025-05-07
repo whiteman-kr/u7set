@@ -297,6 +297,7 @@ namespace OnlineLib
 		{
 			return false;
 		}
+
 		result &= m_lanControllersInfo.readFromXml(xml);
 
 		QString signalsStr;

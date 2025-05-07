@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ServiceLib/Service.h>
-#include "../OnlineLib/CfgServerLoader.h"
+#include "../OnlineLib/CfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
 #include "Archive.h"
@@ -48,6 +48,8 @@ private:
 	void startTcpArchRequestsServerThread();
 	void stopTcpArchiveRequestsServerThread();
 
+	void onTimer1min();
+
 	void logFileLoadResult(bool loadOk, const QString& fileName);
 
 private slots:
@@ -55,15 +57,15 @@ private slots:
 							  const BuildFileInfoArray buildFileInfoArray,
 							  SessionParams sessionParams,
 							  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
-
 private:
 	QString m_overwriteArchiveLocation;
 	int m_minQueueSizeForFlushing = 0;
 	QString m_readOnlyArchivePath;
 
 	ArchivingServiceSettings m_serviceSettings;
-	OnlineLib::BuildInfo m_buildInfo;
 	QByteArray m_archInfoFileData;
+
+	mutable QMutex m_startStopMutex;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
@@ -71,4 +73,6 @@ private:
 	Tcp::ListenerThread* m_tcpArchRequestsServerThread = nullptr;
 
 	Archive* m_archive = nullptr;
+
+	QTimer* m_timer = nullptr;
 };

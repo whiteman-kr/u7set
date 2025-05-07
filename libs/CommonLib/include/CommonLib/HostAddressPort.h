@@ -33,6 +33,7 @@ public:
 	void setAddress(const Q_IPV6ADDR& ip6Addr);
 	void setAddress(const sockaddr* sockaddr);
 	bool setAddress(const QString& address);
+	void setSpecAddress(QHostAddress::SpecialAddress specAddr);
 	void setPort(quint16 port);
 	void setPort(int port);
 
@@ -189,6 +190,11 @@ inline void HostAddressPort::setAddress(const sockaddr* sockaddr)
 inline bool HostAddressPort::setAddress(const QString& address)
 {
 	return m_hostAddress.setAddress(address);
+}
+
+inline void HostAddressPort::setSpecAddress(QHostAddress::SpecialAddress specAddr)
+{
+	m_hostAddress.setAddress(specAddr);
 }
 
 inline void HostAddressPort::setPort(quint16 port)
