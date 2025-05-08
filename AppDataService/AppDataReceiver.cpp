@@ -457,6 +457,15 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 
 		AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
 
+		// DEBUG_STOP
+
+		if (source->moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
+		{
+			qDebug() << C_STR(simFrame.rupFrame.header.timeStamp.rawToString(true));
+		}
+
+		//
+
 		if (source != nullptr)
 		{
 			if (crcOk == true)
@@ -625,6 +634,7 @@ void processPackets(AppDataReceiver& receiver, int threadNumber)
 		}
 
 		AppDataSource* source = it->first;
+
 		bool requireBufferProcessing = it->second;
 
 		requireProcessing.erase(it);
