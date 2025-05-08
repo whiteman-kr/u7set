@@ -53,12 +53,12 @@ CONFIG(release, debug|release): unix:QMAKE_CXXFLAGS += -DNDEBUG
 
 # UtilsLib
 #
-LIBS += -lUtilsLib
+#LIBS += -lUtilsLib
 
 # AppSignalLib
 #
-LIBS += -lAppSignalLib
+#LIBS += -lAppSignalLib
 
 # CommonLib
 #
-LIBS += -lCommonLib
+#LIBS += -lCommonLib

@@ -22,8 +22,6 @@ AppDataSource::AppDataSource(const OnlineLib::DataSource& dataSource) :
 	initParsingBuffers(appDataFramesQuantity());
 
 	m_acquiredSignalsCount = static_cast<int>(m_appSignals.size());
-
-	m_workcycle_ms = moduleWorkcycle_ms();
 }
 
 // Contructor for object NOT really used for packet receiving.
@@ -275,53 +273,9 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	m_receivedPacketCount++;
 
-	const Rup::Header& header = readBuffer.frame0Header();
-
-	bool disableTimeCorrection = false;
-
-	if (m_rupFrameNumerator != -1 &&
-		((m_rupFrameNumerator + 1) & 0xFFFF) != header.numerator)
-	{
-		if (header.numerator > m_rupFrameNumerator)
-		{
-			m_lostPacketCount += header.numerator - m_rupFrameNumerator - 1;
-		}
-		else
-		{
-			m_lostPacketCount += 0xFFFF - m_rupFrameNumerator + header.numerator - 1;
-		}
-
-		disableTimeCorrection = true;		// no sequential packets, disable time correction
-	}
-
-	m_rupFrameNumerator = header.numerator;
-
-	qint64 timeWithoutCorrection = readBuffer.frame0ServerTime;
-	qint64 dt = timeWithoutCorrection - m_lastPacketServerTime;
-
-	if (dt == 0)
-	{
-		// always do correction
-		//
-		m_lastPacketServerTime += 1;
-	}
-	else
-	{
-		if (disableTimeCorrection == true ||
-			dt > 50 ||
-			dt <= (m_workcycle_ms + 1))
-		{
-			// NO time correction
-			//
-			m_lastPacketServerTime = timeWithoutCorrection;
-		}
-		else
-		{
-			// time correction
-			//
-			m_lastPacketServerTime += m_workcycle_ms;
-		}
-	}
+	// sets m_lastPacketServerTime with corrections
+	//
+	timeCorrection(readBuffer);
 
 	if (m_firstPacketServerTime == 0)
 	{
@@ -331,6 +285,8 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	//
 
 	QDateTime plantTime;
+
+	const Rup::Header& header = readBuffer.frame0Header();
 
 	const Rup::TimeStamp& timeStamp = header.timeStamp;
 

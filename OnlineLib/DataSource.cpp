@@ -291,6 +291,8 @@ namespace OnlineLib
 		result &= xml.readUInt64Attribute(XmlAttribute::MODULE_UNIQUE_ID, &m_moduleUniqueID);
 		result &= xml.readIntAttribute(XmlAttribute::MODULE_WORKCYCLE_MCS, &m_moduleWorkcycle_mcs);
 
+		m_workcycle_ms = moduleWorkcycle_ms();
+
 		if (xml.findElement(XmlElement::LAN_CONTROLLERS) == false)
 		{
 			return false;
@@ -654,6 +656,58 @@ namespace OnlineLib
 		Q_UNUSED(thread);
 
 		return true;
+	}
+
+	void DataSourceOnline::timeCorrection(const ParsingBuffer& readBuffer)
+	{
+		const Rup::Header& header = readBuffer.frame0Header();
+
+		qint64 headerNumerator = header.numerator;
+
+		// packet Numerator checking
+
+		qint64 dN = 0;
+
+		if (headerNumerator < m_rupFrameNumerator)
+		{
+			dN = 65536 + headerNumerator - m_rupFrameNumerator;
+		}
+		else
+		{
+			dN = headerNumerator - m_rupFrameNumerator;
+		}
+
+		m_lostPacketCount += dN - 1;
+
+		qint64 frame0ServerTime = readBuffer.frame0ServerTime;
+
+		if (m_rupFrameNumerator == -1 || m_lastPacketServerTime == 0 || dN > 10)
+		{
+			// no time correction
+			//
+			m_rupFrameNumerator = headerNumerator;
+			m_lastPacketServerTime = frame0ServerTime;
+			return;
+		}
+
+		m_rupFrameNumerator = headerNumerator;
+
+		// packet SystemTime checking
+
+		qint64 dT = 0;
+
+		dT = frame0ServerTime - m_lastPacketServerTime;
+
+		static const qint64 MAX_TIME_ERROR = static_cast<qint64>(m_workcycle_ms * 0.2);
+
+		if (dT >  dN * m_workcycle_ms + MAX_TIME_ERROR)
+		{
+			m_lastPacketServerTime += dN * m_workcycle_ms;
+		}
+		else
+		{
+			m_lastPacketServerTime = frame0ServerTime;
+		}
 	}
 
 	void DataSourceOnline::checkPlantTime(const Rup::TimeStamp& plantTimeStamp)

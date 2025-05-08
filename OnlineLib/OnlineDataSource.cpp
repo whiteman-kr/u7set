@@ -164,8 +164,6 @@ BaseOnlineDataSource::BaseOnlineDataSource(const DataSource& dataSource, E::LanC
 	default:
 		Q_ASSERT(false);		// mixed LanControllerType is not allowed here!
 	}
-
-	m_workcycle_ms = moduleWorkcycle_ms();
 }
 
 BaseOnlineDataSource::~BaseOnlineDataSource()

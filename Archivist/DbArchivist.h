@@ -5,7 +5,7 @@
 class DbArchivist : public Archivist
 {
 public:
-	DbArchivist(int argc, char* argv[]);
+	DbArchivist(const RequestParams& rp);
 
-	void copyArchive() override;
+	bool copyArchive() override;
 };

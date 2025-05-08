@@ -42,8 +42,8 @@ struct ArchFileRecord
 
 	//
 
-	static const qint64 TIME_MAX_VALUE;
-	static const qint64 TIME_MIN_VALUE;
+	inline static const qint64 TIME_MAX_VALUE = (static_cast<qint64>(2200 - 1970) * 365 * 24 * 60 * 60 * 1000);		// Year 2200 in milliseconds
+	inline static const qint64 TIME_MIN_VALUE = (static_cast<qint64>(2000 - 1970) * 365 * 24 * 60 * 60 * 1000);		// Year 2000 in milliseconds;
 
 	static const int SIZE;
 };

@@ -490,6 +490,8 @@ void TcpAppDataClient::getNextStatePart()
 
 void TcpAppDataClient::onGetClientList(const char *replyData, quint32 replyDataSize)
 {
+	Q_UNUSED(replyData);
+	Q_UNUSED(replyDataSize);
 /*	bool result = m_serviceClientsMessage.ParseFromArray(replyData, replyDataSize);
 
 	if (result == false)

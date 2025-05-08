@@ -6,9 +6,6 @@
 //
 // -----------------------------------------------------------------------------------------------------------------------
 
-const qint64 ArchFileRecord::TIME_MAX_VALUE = (static_cast<qint64>(2200 - 1970) * 365 * 24 * 60 * 60 * 1000);		// Year 2200 in milliseconds
-const qint64 ArchFileRecord::TIME_MIN_VALUE = (static_cast<qint64>(2000 - 1970) * 365 * 24 * 60 * 60 * 1000);		// Year 2000 in milliseconds
-
 const int ArchFileRecord::SIZE = sizeof(ArchFileRecord);
 
 bool ArchFileRecord::isNotCorrupted() const

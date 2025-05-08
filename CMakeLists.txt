@@ -184,6 +184,7 @@ add_subdirectory(GatewayService)
 add_subdirectory(DiagDataService)
 
 add_subdirectory(TestSuiteConsole)
+add_subdirectory(Archivist)
 
 # Do not compile these projects if code coverage is on.
 #
