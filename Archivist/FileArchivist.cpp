@@ -301,7 +301,7 @@ bool FileArchivist::checkArchive()
 
 	t1.join();
 
-	print << QString("\rChecked: 100%  ");
+	print << QString("\rChecked: 100%   ");
 	// t2.join();
 	// t3.join();
 	// t4.join();
