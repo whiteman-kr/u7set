@@ -461,7 +461,7 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 
 		if (source->moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
 		{
-			qDebug() << C_STR(simFrame.rupFrame.header.timeStamp.rawToString(true));
+			DEBUG_LOG_MSG(m_log, simFrame.rupFrame.header.timeStamp.rawToString(true));
 		}
 
 		//
