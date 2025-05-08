@@ -154,7 +154,7 @@ namespace OnlineLib
 	class DataSourceOnline : public DataSource
 	{
 	private:
-		static const int APP_DATA_SOURCE_TIMEOUT = 500;
+		static const int APP_DATA_SOURCE_TIMEOUT = 2000;
 
 	protected:
 

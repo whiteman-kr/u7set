@@ -459,10 +459,10 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 
 		// DEBUG_STOP
 
-		if (source->moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
+/*		if (source->moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
 		{
 			DEBUG_LOG_MSG(m_log, simFrame.rupFrame.header.timeStamp.rawToString(true));
-		}
+		}*/
 
 		//
 
