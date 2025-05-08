@@ -72,6 +72,8 @@ void DialogSettings::setSettings(const MonitorAppSettings::Data& value)
 	ui->checkShowLogo->setChecked(m_settings.showLogo);
 	ui->checkShowItemsLabels->setChecked(m_settings.showItemsLabels);
 	ui->checkSingleInstance->setChecked(m_settings.singleInstance);
+	ui->noDiskLog->setChecked(m_settings.noDiskLog);
+
 	ui->windowCaptionEdit->setText(m_settings.windowCaption);
 
 	for (int i = 0; i < ui->zoomModeComboBox->count(); i++)
@@ -243,6 +245,7 @@ std::optional<MonitorAppSettings::Data> DialogSettings::parseData()
 	data.windowCaption = ui->windowCaptionEdit->text();
 
 	data.singleInstance = ui->checkSingleInstance->isChecked();
+	data.noDiskLog = ui->noDiskLog->isChecked();
 
 	data.language = language;
 

@@ -28,6 +28,8 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 	m_schemaManager{m_configController, m_signalManager},
 	m_dialogAlert{this}
 {
+	m_LogFile.setNoDiskLog(MonitorAppSettings::instance().get().noDiskLog);
+
 	// Init translator
 	//
 	m_translator.addLanguage("en", "English");
@@ -1020,6 +1022,8 @@ void MonitorMainWindow::showSettings()
 		// Set application name so all message boxes will have correct caption.
 		//
 		qApp->setApplicationName(MonitorAppSettings::instance().windowCaption());
+
+		m_LogFile.setNoDiskLog(MonitorAppSettings::instance().noDiskLog());
 
 		return;
 	}

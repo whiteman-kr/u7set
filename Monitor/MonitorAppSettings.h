@@ -32,6 +32,7 @@ public:
 		VFrame30::ZoomMode zoomMode = VFrame30::ZoomMode::Manual;
 
 		bool singleInstance = false;
+		bool noDiskLog = false;
 	};
 
 	// Public methods
@@ -81,6 +82,7 @@ public:
 	VFrame30::ZoomMode zoomMode() const;
 
 	bool singleInstance() const;
+	bool noDiskLog() const;
 
 private:
 	mutable QMutex m_mutex;

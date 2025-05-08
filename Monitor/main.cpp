@@ -39,7 +39,16 @@ int main(int argc, char* argv[])
 
 	if (arguments.size() > 1)
 	{
-		settingsFileName = arguments[1];
+		for (int i = 1; i < arguments.size(); i++)
+		{
+			if (arguments[i].startsWith('-') == true) // Skip '-' options
+			{
+				continue;
+			}
+			
+			settingsFileName = arguments[i];
+			break;
+		}
 	}
 
 	if (settingsFileName.isEmpty() == false && QFile::exists(settingsFileName) == false)
@@ -65,6 +74,16 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 	}
+
+	// No-Disk-Log option
+	//
+	if (arguments.contains("--no-disk-log", Qt::CaseInsensitive) == true)
+	{
+		auto data = MonitorAppSettings::instance().get();
+		data.noDiskLog = true;
+		MonitorAppSettings::instance().set(data);
+	}
+
 
 	// Set application name again, as new app caption could be assign via settings.
 	// Set application name so all message boxes will have correct caption.

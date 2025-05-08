@@ -64,6 +64,7 @@ void MonitorAppSettings::save(QSettings& settings) const
 	settings.setValue("MonitorAppSettings/showItemsLabels", data.showItemsLabels);
 	settings.setValue("MonitorAppSettings/singleInstance", data.singleInstance);
 	settings.setValue("MonitorAppSettings/zoomMode", static_cast<int>(data.zoomMode));
+	settings.setValue("MonitorAppSettings/noDiskLog", data.noDiskLog);
 
 	return;
 }
@@ -89,6 +90,7 @@ void MonitorAppSettings::load(const QSettings& settings)
 
 	data.zoomMode = static_cast<VFrame30::ZoomMode>(settings.value("MonitorAppSettings/zoomMode", 
 																		 static_cast<int>(VFrame30::ZoomMode::Manual)).toInt());
+	data.noDiskLog = settings.value("MonitorAppSettings/noDiskLog", false).toBool();
 
 	set(data);
 }
@@ -196,4 +198,10 @@ bool MonitorAppSettings::singleInstance() const
 {
 	QMutexLocker l(&m_mutex);
 	return m_data.singleInstance;
+}
+
+bool MonitorAppSettings::noDiskLog() const 
+{
+	QMutexLocker l(&m_mutex);
+	return m_data.noDiskLog;
 }

@@ -319,10 +319,31 @@ namespace Log
 		  m_sessionHash(sessionHash),
 		  m_sessionHashString(QString::number(sessionHash, 16).rightJustified(16, '0'))
 	{
+		// Initialize path
+		//
+		if (m_path.isEmpty() == true)
+		{
+			QString localAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+			m_path = QDir::toNativeSeparators(localAppDataPath);
+		}
+
+		if (QDir().exists(m_path) == false)
+		{
+			if (QDir().mkpath(m_path) == false)
+			{
+				QString errorString = tr("LogFileWorker: can't create path %1").arg(m_path);
+				emit writeFailure(errorString);
+				
+				m_path.clear();
+			}
+		}
+
+		m_maxQueueSize = std::clamp(QSettings().value("m_maxQueueSize", 1000).toInt(), 1000, 10000);
 	}
 
 	LogFileWorker::~LogFileWorker()
 	{
+		QSettings().setValue("m_maxQueueSize", m_maxQueueSize);
 		qDebug() << "LogFileWorker::~LogFileWorker, ThreadId " << QThread::currentThreadId();
     }
 
@@ -420,25 +441,24 @@ namespace Log
         return m_loadInProgress;
     }
 
+	bool LogFileWorker::noDiskLog() const 
+	{
+		return m_noDiskLog;
+	}
+
+	void LogFileWorker::setNoDiskLog(bool value) 
+	{
+		m_noDiskLog = value;
+	}
+
+	std::vector<LogFileRecord> LogFileWorker::queue() const 
+	{
+		QMutexLocker l(&m_queueMutex);
+		return m_queue;
+	}
+
 	void LogFileWorker::onThreadStarted()
 	{
-		// Initialize path
-		//
-		if (m_path.isEmpty() == true)
-		{
-			QString localAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-			m_path = QDir::toNativeSeparators(localAppDataPath);
-		}
-
-		if (QDir().exists(m_path) == false)
-		{
-			if (QDir().mkpath(m_path) == false)
-			{
-				QString errorString = tr("LogFileWorker: can't create path %1").arg(m_path);
-				emit writeFailure(errorString);
-			}
-		}
-
 		// Start timer
 		//
 		m_timer = new QTimer(this);
@@ -451,7 +471,6 @@ namespace Log
 		QDir dir(m_path);
 
 		QStringList filters;
-
 		filters << QString("%1_????.log").arg(m_logName);
 
 		QStringList existingFiles = dir.entryList(filters, QDir::Files, QDir::Name);
@@ -761,21 +780,27 @@ namespace Log
 			assert(errorString);
 			return false;
 		}
-
+		
 		errorString->clear();
 
-
+		// Keep maximum queue size
+		//
 		m_queueMutex.lock();
-        std::vector<LogFileRecord> queueCopy{std::move(m_queue)};
-		m_queue = {};
-		m_queue.reserve(64);
+		while (m_queue.size() > m_maxQueueSize)
+		{
+			m_queue.pop_back();
+		}
 		m_queueMutex.unlock();
 
-		if (queueCopy.empty() == true)
+		// In no-disk mode, just do nothing
+		//
+		if (m_noDiskLog == true)
 		{
 			return true;
 		}
 
+		// Write queue to the disk
+		//
 		QString fileName = getCurrentFileName();
 
 		// Try to lock log file for writing
@@ -783,7 +808,6 @@ namespace Log
 		bool alreadyLocked = false;
 
 		bool lok = lockShared(true, &alreadyLocked);
-
 		if (lok == false)
 		{
 			*errorString = tr("Error locking log file %1 by QSharedMemory.").arg(fileName);
@@ -792,22 +816,28 @@ namespace Log
 
 		if (alreadyLocked == true)
 		{
-			const int maxLogQueueSize = 1000;
-
-			if (queueCopy.size() > maxLogQueueSize)
-			{
-				*errorString = tr("Log file %1 is locked by another instance and queue size exceeds maximum, queue cleared.").arg(fileName);
-				return false;
-			}
-			else
-			{
-				return true;
-			}
+			return true;
 		}
 
 		// Create unlocker pointer
 		//
-		std::shared_ptr<int> unlockerPtr(nullptr, [&](int *) { lockShared(false, nullptr); });
+		std::shared_ptr<int> unlockerPtr(nullptr,
+										 [&](int*)
+										 {
+											 lockShared(false, nullptr);
+										 });
+
+		// Create the queue copy and empty it
+		//
+		m_queueMutex.lock();
+		std::vector<LogFileRecord> queueCopy{std::move(m_queue)};
+		m_queue = {};
+		m_queue.reserve(64);
+		m_queueMutex.unlock();
+		if (queueCopy.empty() == true)
+		{
+			return true;
+		}
 
 		// Check current file size and switch to the next file if needed
 		//
@@ -824,7 +854,6 @@ namespace Log
 				fileName = getCurrentFileName();
 			}
 		}
-
 
 #ifdef LOGFILE_USE_HEADER
 		// Read current file information
@@ -1890,7 +1919,15 @@ namespace Log
 		m_logPathLabel = new QLabel();
 		m_logPathLabel->setTextFormat(Qt::RichText);
 		m_logPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
-		m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getCurrentFileName()));
+
+		if (m_worker->noDiskLog() == true) 
+		{
+			m_logPathLabel->setText(tr("Log file writing is disabled"));
+		}
+		else
+		{
+			m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getCurrentFileName()));
+		}
 		connect(m_logPathLabel, &QLabel::linkActivated, this, &LogFileDialog::onLinkActivated);
 
 		bottomLayout->addWidget(m_logPathLabel);
@@ -1944,11 +1981,35 @@ namespace Log
 		bool autoScroll = s.value("LogFileDialog/autoScroll", true).toBool();
 		m_autoScroll->setChecked(autoScroll);
 
-		// Read existing log
+		if (m_worker->noDiskLog() == true) 
+		{
+			// Output the queue
+			//
+			auto queue = m_worker->queue();
+			std::shared_ptr<LogFileChunk> chunk = std::make_shared<LogFileChunk>();
+			chunk->reserve(queue.size());
+			for (const auto& rec : queue)
+			{
+				chunk->push_back(rec);
+			}
+			m_model.appendChunk(chunk);
 
-        m_worker->load(true/*currentSessionOnly*/);
+            for (int i = 0; i < m_table->horizontalHeader()->count() - 1; i++)
+			{
+				m_table->resizeColumnToContents(i);
+			}
 
-		enableControls(false);
+			m_table->scrollToBottom();
+			
+			enableControls(true);
+		}
+		else
+		{
+			// Read existing log
+			//
+			m_worker->load(true /*currentSessionOnly*/);
+			enableControls(false);
+		}
 	}
 
 	LogFileDialog::~LogFileDialog()
@@ -2301,7 +2362,14 @@ namespace Log
             }
         }
 
-		m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getCurrentFileName()));
+		if (m_worker->noDiskLog() == true)
+		{
+			m_logPathLabel->setText(tr("Log file writing is disabled"));
+		}
+		else
+		{
+			m_logPathLabel->setText(tr("File: <a href=\"%1\">%1</a>").arg(m_worker->getCurrentFileName()));
+		}
 
         m_counterLabel->setText(tr("Total records: %1, Errors: %2, Warnings: %3").arg(m_proxyModel.rowCount()).arg(m_proxyModel.errorCount()).arg(m_proxyModel.warningCount()));
 
@@ -2682,6 +2750,14 @@ namespace Log
 		return m_logFileWorker->getLogPath();
 	}
 
+	void LogFile::setNoDiskLog(bool value) 
+	{
+		if (m_logFileWorker == nullptr)
+		{
+			return;
+		}
+		m_logFileWorker->setNoDiskLog(value);
+	}
 
 	void LogFile::onFlushFailure(QString errorString)
 	{

@@ -81,6 +81,13 @@ namespace Log
 
         bool loadInProgress() const;
 
+		// Control functions
+		//
+		bool noDiskLog() const;
+		void setNoDiskLog(bool value);
+
+		std::vector<LogFileRecord> queue() const;	// Get unwritten queue records, used in no-disk mode
+
 	protected:
 		virtual void onThreadStarted();
 		virtual void onThreadFinished();
@@ -111,23 +118,26 @@ namespace Log
 	private:
 		QTimer* m_timer = nullptr;
 
-		QMutex m_queueMutex;
+		mutable QMutex m_queueMutex;
 		std::vector<LogFileRecord> m_queue;
 
 		QString m_logName;
 		QString m_path;
-		int m_maxFileSize;
-		int m_maxFilesCount;
 
-        bool m_loadInProgress = false;
-        bool m_cancelLoad = false;
-
-		int m_currentFileNumber = 0;
+		int m_maxFileSize = 0;
+		int m_maxFilesCount = 0;
+		int m_maxQueueSize = 1000;
 
 		quint64 m_sessionHash = 0;
 		QString m_sessionHashString;
 
 		const int m_serviceStringLength = 80;
+
+		std::atomic<int> m_currentFileNumber = 0;
+
+		std::atomic<bool> m_loadInProgress = false;
+        std::atomic<bool> m_cancelLoad = false;
+		std::atomic<bool> m_noDiskLog = false;
 
         QMutex m_loadLogMutex;						// Locks m_loadedChunks for reading data from log files
         std::queue<std::shared_ptr<LogFileChunk>> m_loadedChunks;   // A queue contains chunks loaded from log files
@@ -367,6 +377,8 @@ namespace Log
 
 		QString getCurrentFileName() const;
 		QString getLogPath() const;
+		
+		void setNoDiskLog(bool value);
 
 	signals:
 		void writeFailure(QString errorString);
