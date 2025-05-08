@@ -274,7 +274,7 @@ TEST_F(RtDataProviderTests, discreteData)
 			auto state = states0.front();
 			states0.pop_front();
 
-			qDebug() << "0 " << state.plant << " " << state.value;
+			qDebug() << "0 " << state.plant << " " << state.value << " " << state.isValidFlag();
 
 			if (lastState0.plant == 0)
 			{
@@ -299,7 +299,7 @@ TEST_F(RtDataProviderTests, discreteData)
 			auto state = states1.front();
 			states1.pop_front();
 
-			qDebug() << "1 " << state.plant << " " << state.value;
+			qDebug() << "1 " << state.plant << " " << state.value << " " << state.isValidFlag();
 
 			if (lastState1.plant == 0)
 			{
