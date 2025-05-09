@@ -479,8 +479,11 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 
 			prevModTime = serverTime;
 
-			DEBUG_LOG_MSG(m_log, QString("serverTime = %1, plantTime = %2:%3 %4").
-					arg(serverTime).arg(reverseUint16(simFrame.rupFrame.header.timeStamp.second)).
+			DEBUG_LOG_MSG(m_log, QString("pkt = %1, serverTime = %2 (dt = %3), plantTime = %4:%5 %6").
+					arg(reverseUint16(simFrame.rupFrame.header.numerator)).
+					arg(serverTime).
+					arg(diff).
+					arg(reverseUint16(simFrame.rupFrame.header.timeStamp.second)).
 					arg(reverseUint16(simFrame.rupFrame.header.timeStamp.millisecond)).
 					arg(diff > 7  || diff < 3? "!!!!!" : ""));
 		}

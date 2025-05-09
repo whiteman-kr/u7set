@@ -661,7 +661,7 @@ namespace OnlineLib
 		return true;
 	}
 
-	void DataSourceOnline::timeCorrection(const ParsingBuffer& readBuffer)
+	void DataSourceOnline::timeCorrection(const ParsingBuffer& readBuffer, QString& logStr)
 	{
 		const Rup::Header& header = readBuffer.frame0Header();
 
@@ -705,6 +705,14 @@ namespace OnlineLib
 
 		if (dT >  dN * m_workcycle_ms + MAX_TIME_ERROR)
 		{
+			logStr = QString("correction: pkt = %1, lastServTime = %2, frame0ServTime = %3, dT = %4, dN = %5, correctedTime %6").
+					 arg(headerNumerator).
+					 arg(m_lastPacketServerTime).
+					 arg(frame0ServerTime).
+					 arg(dT).
+					 arg(dN).
+					 arg(m_lastPacketServerTime + dN * m_workcycle_ms);
+
 			m_lastPacketServerTime += dN * m_workcycle_ms;
 		}
 		else
