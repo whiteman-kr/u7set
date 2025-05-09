@@ -705,13 +705,16 @@ namespace OnlineLib
 
 		if (dT >  dN * m_workcycle_ms + MAX_TIME_ERROR)
 		{
-			logStr = QString("correction: pkt = %1, lastServTime = %2, frame0ServTime = %3, dT = %4, dN = %5, correctedTime %6").
-					 arg(headerNumerator).
-					 arg(m_lastPacketServerTime).
-					 arg(frame0ServerTime).
-					 arg(dT).
-					 arg(dN).
-					 arg(m_lastPacketServerTime + dN * m_workcycle_ms);
+			if (moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
+			{
+				logStr = QString("correction: pkt = %1, lastServTime = %2, frame0ServTime = %3, dT = %4, dN = %5, correctedTime %6").
+						 arg(headerNumerator).
+						 arg(m_lastPacketServerTime).
+						 arg(frame0ServerTime).
+						 arg(dT).
+						 arg(dN).
+						 arg(m_lastPacketServerTime + dN * m_workcycle_ms);
+			}
 
 			m_lastPacketServerTime += dN * m_workcycle_ms;
 		}
