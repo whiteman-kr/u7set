@@ -1432,11 +1432,6 @@ void QtServiceBase::processCommand(int /*code*/)
     \sa QtServiceBase, QtServiceController
 */
 
-const QString QtService::ARG_INSTALL("-i");
-const QString QtService::ARG_UNINSTALL("-u");
-const QString QtService::ARG_TERMINATE("-t");
-const QString QtService::ARG_INSTANCE_ID("-inst");
-
 /*!
     \fn QtService::QtService(int argc, char **argv, const QString &name)
 
@@ -1531,6 +1526,31 @@ QString getServiceInstanceID(const QStringList& serviceArgs)
 	return QString();
 }
 
+QString getServiceEquipmentID(const QStringList& serviceArgs)
+{
+	for(QString arg : serviceArgs)
+	{
+		if (arg.trimmed().toLower().startsWith(QtService::ARG_EQUIPMENT_ID) == false)
+		{
+			continue;
+		}
+
+		// parse: -id=InstanceID
+
+		QStringList vl = arg.split("=");
+
+		if (vl.count() != 2)
+		{
+			continue;
+		}
+
+		return vl[1].trimmed();
+	}
+
+	return QString();
+}
+
+
 QString getServiceInstanceID(int argc, char* argv[])
 {
 	QStringList args;
@@ -1547,6 +1567,24 @@ QString getServiceInstanceID(int argc, char* argv[])
 	}
 
 	return getServiceInstanceID(args);
+}
+
+QString getServiceEquipmentID(int argc, char* argv[])
+{
+	QStringList args;
+
+	for(int i = 0; i < argc; i++)
+	{
+		if (argv[i] == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		args.append(QString(argv[i]));
+	}
+
+	return getServiceEquipmentID(args);
 }
 
 

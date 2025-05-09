@@ -154,7 +154,7 @@ namespace OnlineLib
 	class DataSourceOnline : public DataSource
 	{
 	private:
-		static const int APP_DATA_SOURCE_TIMEOUT = 2000;
+		static const int APP_DATA_SOURCE_TIMEOUT = 1000;
 
 	protected:
 
@@ -198,7 +198,7 @@ namespace OnlineLib
 						  quint32 expectedDataUID,
 						  const QThread* thread);
 
-		bool updateStatistics_500ms(int oneSecond);
+		bool updateStatistics_500ms(int oneSecond, QString& logStr);
 
 		// Functions used by data processing thread
 		//

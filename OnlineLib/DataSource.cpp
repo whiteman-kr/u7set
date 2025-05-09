@@ -588,7 +588,7 @@ namespace OnlineLib
 		}
 	}
 
-	bool DataSourceOnline::updateStatistics_500ms(int oneSecond)
+	bool DataSourceOnline::updateStatistics_500ms(int oneSecond, QString& logStr)
 	{
 		bool invalidateSignals = false;
 
@@ -602,6 +602,9 @@ namespace OnlineLib
 			if (m_receivesData == true)
 			{
 				invalidateSignals = true;
+
+				logStr = QString("Source %1 timeout! nowTime = %2, lastTime = %3 (diff = %4)").
+						 arg(moduleEquipmentID()).arg(now).arg(m_lastPacketServerTime).arg(now - m_lastPacketServerTime);
 			}
 
 			m_receivesData = false;

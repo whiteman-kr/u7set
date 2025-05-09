@@ -11,7 +11,7 @@ class AppDataReceiver;
 class AppDataSource : public OnlineLib::DataSourceOnline
 {
 public:
-	AppDataSource(const OnlineLib::DataSource& dataSource);
+	AppDataSource(const OnlineLib::DataSource& dataSource, CircularLoggerShared logger);
 	AppDataSource(const Network::DataSourceInfo& proto);
 	virtual ~AppDataSource();
 
@@ -61,6 +61,8 @@ private:
 	virtual quint32 getExpectedDataUID() const override { return m_cachedAppDataUID; }
 
 private:
+	CircularLoggerShared m_log;
+
 	std::mutex* m_statesProcessigRequiredMutex = nullptr;
 	std::condition_variable* m_statesProcessingRequiredCondition = nullptr;
 	std::queue<AppDataSource*>* m_statesProcessingRequired = nullptr;

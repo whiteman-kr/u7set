@@ -9,7 +9,8 @@
 //
 // -------------------------------------------------------------------------------
 
-AppDataSource::AppDataSource(const OnlineLib::DataSource& dataSource) :
+AppDataSource::AppDataSource(const OnlineLib::DataSource& dataSource, CircularLoggerShared logger) :
+	m_log(logger),
 	m_signalStatesQueue(3),
 	m_gatewaySignalStatesQueue(3)
 {
@@ -253,7 +254,7 @@ void AppDataSource::invalidateSignals(const QThread* thread)
 
 	wakeupStatesProcessingThread();
 
-	qDebug() << "Invalidate";
+	DEBUG_LOG_WRN(m_log, "Invalidate signals");
 }
 
 bool AppDataSource::statesQueueIsEmpty(QThread* thread) const
@@ -504,7 +505,7 @@ bool AppDataSources::init(const QString& profile,
 
 			if (appDataSource == nullptr)
 			{
-				appDataSource = new AppDataSource(dataSource);
+				appDataSource = new AppDataSource(dataSource, logger);
 
 				m_sources.push_back(appDataSource);
 

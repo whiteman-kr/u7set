@@ -187,10 +187,11 @@ private:
 class QtService : public QtServiceBase
 {
 public:
-	static const QString ARG_INSTALL;
-	static const QString ARG_UNINSTALL;
-	static const QString ARG_TERMINATE;
-	static const QString ARG_INSTANCE_ID;
+	inline static const QString ARG_INSTALL = QString("-i");
+	inline static const QString ARG_UNINSTALL = QString("-u");
+	inline static const QString ARG_TERMINATE = QString("-t");
+	inline static const QString ARG_INSTANCE_ID = QString("-inst");
+	inline static const QString ARG_EQUIPMENT_ID = QString("-id");
 
 public:
 	QtService(int argc,
@@ -213,34 +214,8 @@ private:
 QString getServiceInstanceID(const QStringList& serviceArgs);
 QString getServiceInstanceID(int argc, char* argv[]);
 
-/*template <typename Application>
-class QtService : public QtServiceBase
-{
-public:
-    QtService(int argc, char **argv, const QString &name)
-        : QtServiceBase(argc, argv, name), app(0)
-    {  }
-    ~QtService()
-    {
-    }
-
-protected:
-    Application *application() const
-    { return app; }
-
-    virtual void createApplication(int &argc, char **argv)
-    {
-        app = new Application(argc, argv);
-        QCoreApplication *a = app;
-        Q_UNUSED(a);
-    }
-
-    virtual int executeApplication()
-    { return Application::exec(); }
-
-private:
-    Application *app;
-};*/
+QString getServiceEquipmentID(const QStringList& serviceArgs);
+QString getServiceEquipmentID(int argc, char* argv[]);
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QtServiceBase::ServiceFlags)
 

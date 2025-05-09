@@ -253,7 +253,14 @@ void AppDataReceiver::updateDataSourcesStatistics()
 	{
 		TEST_PTR_CONTINUE(source);
 
-		bool invalidateSignals = source->updateStatistics_500ms(m_1second);
+		QString logStr;
+
+		bool invalidateSignals = source->updateStatistics_500ms(m_1second, logStr);
+
+		if (logStr.isEmpty() == false)
+		{
+			DEBUG_LOG_WRN(m_log, logStr);
+		}
 
 		if (invalidateSignals == true)
 		{
