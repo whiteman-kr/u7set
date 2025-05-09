@@ -400,6 +400,8 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 	bool crcOk = false;
 	quint32 sourceIP = 0;
 
+	qint64 prevModTime = -1;
+
 	do
 	{
 		if (bytesReceived == sizeof(Rup::Frame))
@@ -466,10 +468,22 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 
 		// DEBUG_STOP
 
-/*		if (source->moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
+		if (source->moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
 		{
-			DEBUG_LOG_MSG(m_log, simFrame.rupFrame.header.timeStamp.rawToString(true));
-		}*/
+			int diff = 0;
+
+			if (prevModTime != -1)
+			{
+				diff = serverTime - prevModTime;
+			}
+
+			prevModTime = serverTime;
+
+			DEBUG_LOG_MSG(m_log, QString("serverTime = %1, plantTime = %2:%3 %4").
+					arg(serverTime).arg(reverseUint16(simFrame.rupFrame.header.timeStamp.second)).
+					arg(reverseUint16(simFrame.rupFrame.header.timeStamp.millisecond)).
+					arg(diff > 7  || diff < 3? "!!!!!" : ""));
+		}
 
 		//
 
