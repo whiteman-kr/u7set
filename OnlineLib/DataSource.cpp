@@ -684,7 +684,11 @@ namespace OnlineLib
 
 		qint64 frame0ServerTime = readBuffer.frame0ServerTime;
 
-		if (m_rupFrameNumerator == -1 || m_lastPacketServerTime == 0 || dN > 10)
+		qint64 dT = 0;
+
+		dT = frame0ServerTime - m_lastPacketServerTime;
+
+		if (m_rupFrameNumerator == -1 || m_lastPacketServerTime == 0 || dN > 10 || dT > 50)
 		{
 			// no time correction
 			//
@@ -697,13 +701,9 @@ namespace OnlineLib
 
 		// packet SystemTime checking
 
-		qint64 dT = 0;
+		static const qint64 MAX_TIME_ERROR = static_cast<qint64>(m_workcycle_ms * 0.4);
 
-		dT = frame0ServerTime - m_lastPacketServerTime;
-
-		static const qint64 MAX_TIME_ERROR = static_cast<qint64>(m_workcycle_ms * 0.2);
-
-		if (dT >  dN * m_workcycle_ms + MAX_TIME_ERROR)
+		if (dT > dN * m_workcycle_ms + MAX_TIME_ERROR)
 		{
 			if (moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
 			{
@@ -713,10 +713,10 @@ namespace OnlineLib
 						 arg(frame0ServerTime).
 						 arg(dT).
 						 arg(dN).
-						 arg(m_lastPacketServerTime + dN * m_workcycle_ms);
+						 arg(m_lastPacketServerTime + dN * m_workcycle_ms + 1);
 			}
 
-			m_lastPacketServerTime += dN * m_workcycle_ms;
+			m_lastPacketServerTime += dN * m_workcycle_ms + 1;
 		}
 		else
 		{

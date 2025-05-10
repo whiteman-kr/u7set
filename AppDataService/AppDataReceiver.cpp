@@ -371,6 +371,8 @@ void AppDataReceiver::startReceive()
 										std::placeholders::_2));
 }
 
+qint64 prevModTime = -1;
+
 void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceived)
 {
 	qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
@@ -399,8 +401,6 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 	bool isValidFrame = false;
 	bool crcOk = false;
 	quint32 sourceIP = 0;
-
-	qint64 prevModTime = -1;
 
 	do
 	{
