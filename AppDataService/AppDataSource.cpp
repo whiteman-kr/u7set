@@ -276,14 +276,7 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 	// sets m_lastPacketServerTime with corrections
 	//
-	QString logStr;
-
-	timeCorrection(readBuffer, logStr);
-
-	if (logStr.isEmpty() == false)
-	{
-		DEBUG_LOG_WRN(m_log, logStr);
-	}
+	timeCorrection(readBuffer);
 
 	if (m_firstPacketServerTime == 0)
 	{

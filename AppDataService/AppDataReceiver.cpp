@@ -371,7 +371,7 @@ void AppDataReceiver::startReceive()
 										std::placeholders::_2));
 }
 
-qint64 prevModTime = -1;
+// qint64 prevModTime = -1;
 
 void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceived)
 {
@@ -466,9 +466,7 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 
 		AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
 
-		// DEBUG_STOP
-
-		if (source->moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
+/*		if (source->moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
 		{
 			int diff = 0;
 
@@ -486,9 +484,7 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 					arg(reverseUint16(simFrame.rupFrame.header.timeStamp.second)).
 					arg(reverseUint16(simFrame.rupFrame.header.timeStamp.millisecond)).
 					arg(diff > 7  || diff < 3? "!!!!!" : ""));
-		}
-
-		//
+		} */
 
 		if (source != nullptr)
 		{

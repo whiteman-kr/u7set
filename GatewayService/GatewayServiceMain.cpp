@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 
 	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(logger, QString(), getServiceInstanceID(argc, argv));
+	LOGGER_INIT(logger, QString(), getServiceEquipmentID(argc, argv));
 
 	logger->setLogCodeInfo(false);
 

@@ -661,7 +661,7 @@ namespace OnlineLib
 		return true;
 	}
 
-	void DataSourceOnline::timeCorrection(const ParsingBuffer& readBuffer, QString& logStr)
+	void DataSourceOnline::timeCorrection(const ParsingBuffer& readBuffer)
 	{
 		const Rup::Header& header = readBuffer.frame0Header();
 
@@ -705,7 +705,7 @@ namespace OnlineLib
 
 		if (dT > dN * m_workcycle_ms + MAX_TIME_ERROR)
 		{
-			if (moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
+/*			if (moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
 			{
 				logStr = QString("correction: pkt = %1, lastServTime = %2, frame0ServTime = %3, dT = %4, dN = %5, correctedTime %6").
 						 arg(headerNumerator).
@@ -714,7 +714,7 @@ namespace OnlineLib
 						 arg(dT).
 						 arg(dN).
 						 arg(m_lastPacketServerTime + dN * m_workcycle_ms + 1);
-			}
+			}*/
 
 			m_lastPacketServerTime += dN * m_workcycle_ms + 1;
 		}

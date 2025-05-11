@@ -205,7 +205,7 @@ namespace OnlineLib
 		bool parseNextBuffer(const QThread* thread);
 		virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread);
 
-		void timeCorrection(const ParsingBuffer& readBuffer, QString& logStr);
+		void timeCorrection(const ParsingBuffer& readBuffer);
 
 		void checkPlantTime(const Rup::TimeStamp& plantTimeStamp);
 

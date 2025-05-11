@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
 	CircularLoggerShared tuningLog = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(tuningLog, QString("Tuning"), getServiceInstanceID(argc, argv));
+	LOGGER_INIT(tuningLog, QString("Tuning"), getServiceEquipmentID(argc, argv));
 
 	tuningLog->setLogCodeInfo(false);
 
