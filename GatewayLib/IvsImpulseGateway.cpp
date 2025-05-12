@@ -406,7 +406,7 @@ namespace Gateway
 							   arg(sl->listNo(), 3, 10, Latin1Char::ZERO).
 							   arg(m_listsVersion, 3, 10, Latin1Char::ZERO);
 
-			File& file = m_files.emplace_back(m_gatewayType, m_gatewayID, fileName);
+			File& file = m_files.emplace_back(m_gatewayType, gatewayID(), fileName);
 
 			result &= generateSignalListFile(*sl, file, signalSet, log);
 		}
@@ -444,7 +444,7 @@ namespace Gateway
 				if (s->isAnalog() == false)
 				{
 					log.logError(QString("signal '%1' is not Analog (GatewayID = %2, ListNo = %3)").
-								 arg(signalID).arg(m_gatewayID).arg(signalList.listNo()));
+								 arg(signalID).arg(gatewayID()).arg(signalList.listNo()));
 					res = false;
 				}
 				else
@@ -476,7 +476,7 @@ namespace Gateway
 				if (s->isDiscrete() == false)
 				{
 					log.logError(QString("signal '%1' is not Discrete (GatewayID = %2, ListNo = %3)").
-								 arg(signalID).arg(m_gatewayID).arg(signalList.listNo()));
+								 arg(signalID).arg(gatewayID()).arg(signalList.listNo()));
 					res = false;
 				}
 				else

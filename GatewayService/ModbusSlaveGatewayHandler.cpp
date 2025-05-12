@@ -272,9 +272,16 @@ namespace Gateway
 
 		int copyRegCount = regsCount;
 
-		if (regsStartAddr + copyRegCount > m_registers.size())
+		if (regsStartAddr > m_registers.size())
 		{
-			copyRegCount = static_cast<int>(m_registers.size()) - regsStartAddr;
+			copyRegCount = 0;
+		}
+		else
+		{
+			if (regsStartAddr + copyRegCount > m_registers.size())
+			{
+				copyRegCount = static_cast<int>(m_registers.size()) - regsStartAddr;
+			}
 		}
 
 		int copyDestSizeBytes = copyRegCount * REGISTER_SIZE_BYTES;

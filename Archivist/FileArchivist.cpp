@@ -200,12 +200,6 @@ bool FileArchivist::scanArchive()
 
 			cfi.pathFileName = QDir::toNativeSeparators(path + QString("/%1").arg(fileName));
 
-			// if (cfi.pathFileName != QString("D:\\Archive\\archive_tests-archive\\SYSTEMID_RACK01_WS00_ARCHS\\66\\SYSTEMID_RACK01_FSCC02_MD00_PI_MSECOND\\2025_02_05_00_00.sta"))
-			// {
-			// 	DEBUG_STOP;
-			// 	continue;
-			// }
-
 			cfi.fileName = fileName;
 			cfi.appSignalID = appSignalID;
 			cfi.groupID = groupID;
@@ -342,12 +336,6 @@ void FileArchivist::checkThreadProc()
 		m_fileInfoIndex++;
 
 		m_processingMutex.unlock();
-
-		// if (cfi.pathFileName != "D:\\Archive\\archive_tests-archive\\SYSTEMID_RACK01_WS00_ARCHS\\66\\SYSTEMID_RACK01_FSCC02_MD00_PI_MSECOND\\2025_02_05_00_00.sta")
-		// {
-		// 	DEBUG_STOP;
-		// 	continue;
-		// }
 
 		errs << QString("File: %1").arg(cfi.pathFileName);
 
@@ -696,20 +684,6 @@ void FileArchivist::copyThreadProc()
 
 			res = copyFile(cfi.pathFileName, toPath, cfi.startPos, cfi.endPos, buf, BUF_SIZE);
 		}
-
-		//
-
-		// DEBUG_STOP;
-
-		// std::random_device rd;
-		// qint32 r = rd();
-
-		// if (r < 100)
-		// {
-		// 	res = false;
-		// }
-
-		//
 
 		if (res == false)
 		{

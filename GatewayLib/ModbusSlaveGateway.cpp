@@ -859,10 +859,10 @@ namespace Gateway
 
 		QStringList fd;
 
-		fd.append("ModbusTcpSlave gateway signals list");
+		fd.append("ModbusSlave gateway signals list");
 		fd.append("");
-		fd.append(QString("GatewayID:   %1").arg(m_gatewayID));
-		fd.append(QString("Description: %1 ").arg(m_gatewayDescription));
+		fd.append(QString("GatewayID:   %1").arg(gatewayID()));
+		fd.append(QString("Description: %1 ").arg(gatewayDescription()));
 		fd.append("");
 
 		static const QString line("--------------------------------------------------------------------------------------------------------------");
@@ -895,7 +895,7 @@ namespace Gateway
 
 		fd.append(line);
 
-		File& file = m_files.emplace_back(m_gatewayType, m_gatewayID, "ModbusSignals.txt");
+		File& file = m_files.emplace_back(m_gatewayType, gatewayID(), "ModbusSignals.txt");
 
 		QByteArray fileData = fd.join("\n").toUtf8();
 

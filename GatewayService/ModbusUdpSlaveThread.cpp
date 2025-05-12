@@ -224,10 +224,35 @@ namespace Modbus
 													m_recvFromEndpoint,
 													bind(&UdpSlaveThread::onReceiveData, this,
 															std::placeholders::_1, std::placeholders::_2));
+
+//		error_code e;
+//		onReceiveData(e, 17);
 	}
 
 	void UdpSlaveThread::onReceiveData(const error_code& error, size_t bytesReceived)
 	{
+		// DEBUG_STOP
+
+/*		m_tempBuffer[0] = 0x3a;
+		m_tempBuffer[1] = 0x30;
+		m_tempBuffer[2] = 0x32;
+		m_tempBuffer[3] = 0x30;
+		m_tempBuffer[4] = 0x33;
+		m_tempBuffer[5] = 0x30;
+		m_tempBuffer[6] = 0x30;
+		m_tempBuffer[7] = 0x30;
+		m_tempBuffer[8] = 0x30;
+		m_tempBuffer[9] = 0x30;
+		m_tempBuffer[10] = 0x30;
+		m_tempBuffer[11] = 0x36;
+		m_tempBuffer[12] = 0x36;
+		m_tempBuffer[13] = 0x36;
+		m_tempBuffer[14] = 0x42;
+		m_tempBuffer[15] = 0x0d;
+		m_tempBuffer[16] = 0x0a;*/
+
+		//
+
 		if (exitIfStopRequested() == true)
 		{
 			return;

@@ -60,7 +60,7 @@ namespace Gateway
 			SendEvents,
 			IncludeAppSignalID,
 
-			// ModbusTcpSlave specific settings
+			// ModbusSlave specific settings
 
 			ModbusDeviceID,
 			SignalsFormat,
@@ -300,12 +300,6 @@ namespace Gateway
 
 	protected:
 		E::GatewayType m_gatewayType = E::GatewayType::Unknown;
-		QString m_gatewayID;
-		QString m_gatewayDescription;
-		bool m_enable = true;
-		bool m_uniqSignalsInAllLists = false;
-
-//		SettingsValues m_settingsValues;
 
 		SignalLists m_signalLists;
 		std::vector<File> m_files;
@@ -321,7 +315,7 @@ namespace Gateway
 		void append(GatewayShared gw);
 		void replaceLast(GatewayShared gw);
 		GatewayShared last();
-		bool isUniqGatewayID(const QString& gwID) const;
+		bool isUniqGatewayID(const QString& gwID, GatewayShared excludeGw) const;
 
 		std::vector<GatewayShared>::iterator begin();
 		std::vector<GatewayShared>::iterator end();

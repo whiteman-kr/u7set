@@ -466,22 +466,44 @@ namespace Gateway
 
 	QString Gateway::gatewayID() const
 	{
-		return m_gatewayID;
+		const SettingValue& sv = getSettingValue(E::Setting::GatewayID);
+
+		Q_ASSERT(sv.isValid());
+
+		return sv.value.toString();
 	}
 
 	QString Gateway::gatewayDescription() const
 	{
-		return m_gatewayDescription;
+		const SettingValue& sv = getSettingValue(E::Setting::GatewayDescription);
+
+		Q_ASSERT(sv.isValid());
+
+		return sv.value.toString();
 	}
 
 	bool Gateway::enable() const
 	{
-		return m_enable;
+		const SettingValue& sv = getSettingValue(E::Setting::Enable);
+
+		if (sv.isValid() == false)
+		{
+			return true;
+		}
+
+		return sv.value.toBool();
 	}
 
 	bool Gateway::uniqSignalsInAllLists() const
 	{
-		return m_uniqSignalsInAllLists;
+		const SettingValue& sv = getSettingValue(E::Setting::UniqSignalsInAllLists);
+
+		if (sv.isValid() == false)
+		{
+			return false;
+		}
+
+		return sv.value.toBool();
 	}
 
 	int Gateway::signalListsCount() const
@@ -519,6 +541,12 @@ namespace Gateway
 			break;
 
 		case E::Setting::GatewayID:
+		case E::Setting::GatewayDescription:
+		case E::Setting::Enable:
+		case E::Setting::UniqSignalsInAllLists:
+			break;
+
+/*		case E::Setting::GatewayID:
 			m_gatewayID = sv.value.toString();
 			break;
 
@@ -532,7 +560,7 @@ namespace Gateway
 
 		case E::Setting::UniqSignalsInAllLists:
 			m_uniqSignalsInAllLists = sv.value.toBool();
-			break;
+			break;*/
 		}
 
 		return pr;
@@ -582,10 +610,10 @@ namespace Gateway
 		xml.writeStartElement(XmlElement::GATEWAY);
 
 		xml.writeEnumKeyAttribute<E::GatewayType>(XmlAttribute::GATEWAY_TYPE, m_gatewayType);
-		xml.writeStringAttribute(XmlAttribute::GATEWAY_ID, m_gatewayID);
-		xml.writeStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, m_gatewayDescription);
-		xml.writeBoolAttribute(XmlAttribute::ENABLE, m_enable);
-		xml.writeBoolAttribute(XmlAttribute::UNIQ_SIGNALS_IN_ALL_LISTS, m_uniqSignalsInAllLists);
+		xml.writeStringAttribute(XmlAttribute::GATEWAY_ID, gatewayID());
+		xml.writeStringAttribute(XmlAttribute::GATEWAY_DESCRIPTION, gatewayDescription());
+		xml.writeBoolAttribute(XmlAttribute::ENABLE, enable());
+		xml.writeBoolAttribute(XmlAttribute::UNIQ_SIGNALS_IN_ALL_LISTS, uniqSignalsInAllLists());
 
 		writeSettingsToXml(xml);
 		writeSignalListsToXml(xml);
@@ -742,10 +770,15 @@ namespace Gateway
 		return m_gateways.back();
 	}
 
-	bool Gateways::isUniqGatewayID(const QString& gwID) const
+	bool Gateways::isUniqGatewayID(const QString& gwID, GatewayShared excludeGw) const
 	{
 		for(const GatewayShared& gw : m_gateways)
 		{
+			if (excludeGw == gw)
+			{
+				continue;
+			}
+
 			if (gw->gatewayID() == gwID)
 			{
 				return false;

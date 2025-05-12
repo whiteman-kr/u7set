@@ -88,12 +88,12 @@ namespace Gateway
 		{ E::Setting::DataType,					E::SettingType::String	},
 		{ E::Setting::IncludeAppSignalID,		E::SettingType::Bool	},
 
-		// ModbusTcpSlave gateway specific settings
+		// ModbusSlave gateway specific settings
 		//
 		{ E::Setting::ModbusDeviceID,			E::SettingType::Int		},
 		{ E::Setting::ModbusMode,				E::SettingType::String	},
 
-		// ModbusTcpSlave signal lists specific settings
+		// ModbusSlave signal lists specific settings
 		//
 		{ E::Setting::SignalsFormat,			E::SettingType::String	},
 	};
@@ -230,18 +230,26 @@ namespace Gateway
 						signalLists.back()->checkAndApplySettings(0, m_log);
 					}
 				}
+
+				ParseResult pr = ParseResult::Ok;
+
+				ParseLineResult plr;
+
+				plr.lineNo = lineNo;
+
+				pr = finalizeGatewaySection(plr);
 			}
 			break;
 
 		case E::Section::Gateway:
 			{
-				GatewayShared gwLast = m_gateways->last();
+				ParseResult pr = ParseResult::Ok;
 
-				if (gwLast != nullptr)
-				{
-					m_gateways->last()->checkAndApplySettings(0, m_log);
-					gwLast->generateRequiredFiles(m_appSignalSet, m_log);
-				}
+				ParseLineResult plr;
+
+				plr.lineNo = lineNo;
+
+				pr = finalizeGatewaySection(plr);
 			}
 			break;
 
@@ -396,7 +404,7 @@ namespace Gateway
 			else
 			{
 				if (plr.setting == E::Setting::GatewayID &&
-					m_gateways->isUniqGatewayID(plr.value.toString()) == false)
+					m_gateways->isUniqGatewayID(plr.value.toString(), gw) == false)
 				{
 					m_log.logError(plr.lineNo, QString("GatewayID should be unique"));
 					return ParseResult::CriticalError;

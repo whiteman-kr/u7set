@@ -252,7 +252,6 @@ namespace Gateway
 				}
 				break;
 
-
 			default:
 				Q_ASSERT(false);
 				result = false;
