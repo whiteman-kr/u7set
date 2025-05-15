@@ -50,6 +50,7 @@ set(QT_VERSION "6.8.1")
 find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
 find_package(asio CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS graph)
+find_package(gRPC CONFIG)
 find_package(GTest CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(PostgreSQL REQUIRED)
@@ -86,15 +87,6 @@ endif()
 
 option(CODE_COVERAGE "Code coverage (Linux only)" OFF)
 include(./cmake/codecoverage.cmake)
-
-# AddressSanitizer
-#
-option(ADDRESS_SANITIZER "Address Sanitizer" OFF)
-
-if(ADDRESS_SANITIZER)
-	add_compile_options(-fsanitize=address)
-	add_link_options(-fsanitize=address)
-endif()
 
 # UndfineBehaviorSanitizer
 #
@@ -145,7 +137,6 @@ else()
 endif()
 message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 message("Code coverage: " ${CODE_COVERAGE})
-message("AddressSanitizer: " ${ADDRESS_SANITIZER})
 message("UBSanitizer: " ${UB_SANITIZER})
 message("Update translations: " ${UPDATE_TRANSLATIONS})
 message("CMake executable:  ${CMAKE_COMMAND}")

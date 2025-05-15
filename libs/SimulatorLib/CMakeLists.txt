@@ -8,6 +8,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Xml Qml Core Concurrent Network)
+find_package(gRPC CONFIG REQUIRED)
 
 if (MSVC)
   # MSVC warning suppressions
@@ -171,6 +172,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
+target_link_libraries(${TARGET} PUBLIC gRPC::grpc gRPC::grpc++)
 target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ClientLib TrendView)
 
 target_compile_definitions(${TARGET} PRIVATE SIMULATOR_LIBRARY)
