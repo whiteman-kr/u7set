@@ -1,4 +1,4 @@
-#include "../version.h"
+#include "../../version.h"
 #include "SimPropertyStorage.h"
 
 #include <CommonLib/ConstStrings.h>

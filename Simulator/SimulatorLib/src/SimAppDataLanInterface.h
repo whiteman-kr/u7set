@@ -4,8 +4,6 @@
 
 namespace Sim
 {
-	class Simulator;
-
 	class AppDataLanInterface : public LanInterface
 	{
 		Q_OBJECT

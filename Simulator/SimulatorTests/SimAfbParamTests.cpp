@@ -5,8 +5,8 @@
 #include <QTest>
 
 #include "SimAfbParamTests.h"
-#include "../../libs/SimulatorLib/SimAfb.h"
-#include "../../libs/SimulatorLib/SimException.h"
+#include "../SimulatorLib/src/SimAfb.h"
+#include "../SimulatorLib/src/SimException.h"
 
 #include <HardwareLib/LmDescription.h>
 

@@ -7,7 +7,6 @@
 namespace Sim
 {
 	class SimulatorPrivate;
-	class AppDataTransmitterThread;
 
 	class AppDataTransmitter : public QObject
 	{

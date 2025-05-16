@@ -1,4 +1,5 @@
 #include "SimTuningRecord.h"
+#include <SimulatorLib/SimRam.h>
 
 namespace Sim
 {

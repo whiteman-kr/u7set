@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(SimulatorConsole LANGUAGES CXX)
 
-include(../cmake/vld.cmake)
+include(../../cmake/vld.cmake)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -27,9 +27,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	
 	<ProtoSerialization.h>
 	
-	"../AppSignalLib/AppSignal.h"
-	"../AppSignalLib/AppSignalParam.h"
-	"../AppSignalLib/AppSignalState.h"
+	"../../AppSignalLib/AppSignal.h"
+	"../../AppSignalLib/AppSignalParam.h"
+	"../../AppSignalLib/AppSignalState.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)

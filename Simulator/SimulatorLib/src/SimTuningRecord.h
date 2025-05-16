@@ -1,9 +1,8 @@
 #pragma once
 
-#include <SimulatorLib/SimRam.h>
-
 namespace Sim
 {
+	class Ram;
 
 	struct TuningRecord
 	{

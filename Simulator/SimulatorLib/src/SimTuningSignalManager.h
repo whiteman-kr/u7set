@@ -1,6 +1,4 @@
-#ifndef SIMTUNSIGNALMANGER_H
-#define SIMTUNSIGNALMANGER_H
-
+#pragma once
 #include <ClientLib/TuningSignalManager.h>
 #include "SimScopedLog.h"
 
@@ -20,5 +18,3 @@ namespace Sim
 	};
 
 }
-
-#endif // SIMTUNSIGNALMANGER_H

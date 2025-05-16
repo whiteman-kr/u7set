@@ -161,7 +161,7 @@ add_subdirectory(GatewayLib)
 
 add_subdirectory(libs)
 
-add_subdirectory(SimulatorConsole)
+add_subdirectory(Simulator)
 
 add_subdirectory(Builder)
 add_subdirectory(BuilderConsole)
@@ -181,7 +181,6 @@ add_subdirectory(Archivist)
 #
 if(NOT CODE_COVERAGE)
     add_subdirectory(u7)
-	add_subdirectory(Simulator)
 	add_subdirectory(TestSuite)
 	add_subdirectory(mconf)	
 	add_subdirectory(./Tools/qtkeychain)

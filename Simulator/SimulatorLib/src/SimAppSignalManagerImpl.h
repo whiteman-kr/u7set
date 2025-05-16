@@ -1,10 +1,9 @@
 #pragma once
 
 #include "../AppSignalLib/IAppSignalManager.h"
-#include <TrendView/TrendSignalState.h>
-
-#include "SimOverrideSignalsImpl.h"
 #include "SimScopedLog.h"
+#include <SimulatorLib/SimRam.h>
+#include <TrendView/TrendSignalState.h>
 
 
 namespace Sim
@@ -31,7 +30,8 @@ namespace Sim
 	//	AppSignalManagerImpl
 	//
 	//
-	class AppSignalManagerImpl final : public QObject, public IAppSignalManager
+	class AppSignalManagerImpl final : public QObject,
+									   public IAppSignalManager
 	{
 		Q_OBJECT
 
@@ -60,7 +60,7 @@ namespace Sim
 		Hash customToAppSignal(Hash customSignalHash) const;
 
 		AppSignalState signalState(const QString& appSignalId, bool* found, bool applyOverride) const;
-		AppSignalState signalState(Hash signalHash, bool* found, bool applyOverride) const;			// <<<< GETTING STATE CODE HERE
+		AppSignalState signalState(Hash signalHash, bool* found, bool applyOverride) const; // <<<< GETTING STATE CODE HERE
 
 		bool getUpdateForRam(const QString& equipmentId, Sim::Ram* ram) const;
 
@@ -95,8 +95,14 @@ namespace Sim
 
 		virtual void signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const override;
 		virtual void signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const override;
-		virtual void signalState(std::span<const Hash> appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const override;
-		virtual void signalState(std::span<const QString> appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const override;
+		virtual void signalState(std::span<const Hash> appSignalHashes,
+								 Hash dataServerHash,
+								 std::vector<AppSignalState>* result,
+								 int* found) const override;
+		virtual void signalState(std::span<const QString> appSignalIds,
+								 const QString& dataServerId,
+								 std::vector<AppSignalState>* result,
+								 int* found) const override;
 
 		virtual QStringList signalTags(Hash signalHash) const override;
 		virtual QStringList signalTags(const QString& appSignalId) const override;
@@ -133,7 +139,8 @@ namespace Sim
 
 		mutable QReadWriteLock m_signalParamLock{QReadWriteLock::Recursive};
 		std::unordered_map<Hash, AppSignalParam> m_signalParams;
-		std::unordered_map<Hash, AppSignal>	m_signalParamsExt;        // Except AppSignalParam, we need Signal as it has more information (like offset in memory)
+		std::unordered_map<Hash, AppSignal>
+			m_signalParamsExt; // Except AppSignalParam, we need Signal as it has more information (like offset in memory)
 		std::unordered_map<Hash, Hash> m_customToAppSignalId;
 		std::unordered_map<QString, QString> m_signalIdByEquipmentId; // Key is EquipmentId - value is AppSignalID
 		std::unordered_map<QString, QStringList> m_tagToAppSignals;   // Key is tag - value is list of AppSignalIDs with this tag
@@ -142,9 +149,10 @@ namespace Sim
 		// SimRuntime data
 		//
 		mutable QReadWriteLock m_ramLock{QReadWriteLock::Recursive};
-		std::map<Hash, Ram> m_ram;									// key is hash EquipmentID
-		std::map<Hash, Times> m_ramTimes;							// RAM memory update time - key is hash EquipmentID
-		std::unordered_map<Hash, FlagsReadStruct> m_flagsStruct;	// Signal has a set of flags, which are signals itself, this structure contains addressed for such flag signals
+		std::map<Hash, Ram> m_ram;        // key is hash EquipmentID
+		std::map<Hash, Times> m_ramTimes; // RAM memory update time - key is hash EquipmentID
+		std::unordered_map<Hash, FlagsReadStruct>
+			m_flagsStruct; // Signal has a set of flags, which are signals itself, this structure contains addressed for such flag signals
 
 		// Realtime trends data
 		//
@@ -162,7 +170,7 @@ namespace Sim
 		struct Trend
 		{
 			QString trendId;
-			QDateTime lastAccess;		// If data was not fetched for some time this trend will be removed
+			QDateTime lastAccess; // If data was not fetched for some time this trend will be removed
 			std::vector<TrendSignal> trendSignals;
 		};
 
@@ -229,20 +237,20 @@ namespace Sim
 		// Script Interface
 		//
 	public slots:
-		/// \brief Returns AppSignalParam structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
-		QJSValue signalParam(QString signalId) const;		// Returns AppSignalParam
-		QJSValue signalParam(Hash signalHash) const;		// Returns AppSignalParam
+		/// \brief Returns AppSignalParam structure of signal specified by <b>signalId</b>. If error occurs, the return value is
+		/// <b>undefined</b>.
+		QJSValue signalParam(QString signalId) const; // Returns AppSignalParam
+		QJSValue signalParam(Hash signalHash) const;  // Returns AppSignalParam
 
-		/// \brief Returns AppSignalState structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
-		QJSValue signalState(QString signalId) const;		// Returns AppSignalState
-		QJSValue signalState(Hash signalHash) const;		// Returns AppSignalState
+		/// \brief Returns AppSignalState structure of signal specified by <b>signalId</b>. If error occurs, the return value is
+		/// <b>undefined</b>.
+		QJSValue signalState(QString signalId) const; // Returns AppSignalState
+		QJSValue signalState(Hash signalHash) const;  // Returns AppSignalState
 
-		// Data
+													  // Data
 		//
 	private:
 		const IAppSignalManager* m_appSignalManager = nullptr;
 	};
 
-}
-
-
+} // namespace Sim
