@@ -18,7 +18,7 @@
             "inheritEnvironments": [ "msvc_x64" ],
             "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
             "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
-            "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DVCPKG_TARGET_TRIPLET=x64-windows-asan -DVCPKG_OVERLAY_TRIPLETS=\"${projectDir}/cmake/vcpkg_triplets\"",
+            "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
             "buildCommandArgs": "",
             "ctestCommandArgs": "",
             "variables": [

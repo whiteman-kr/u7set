@@ -1,13 +1,14 @@
 #pragma once
 
 #include <thread>
-#include <asio.hpp>
 #include <QtTypes>
 #include "../OnlineLib/CircularLogger.h"
 #include "ModbusProtocol.h"
 #include "ModbusSlaveGatewayHandler.h"
 
-using namespace asio;
+#include <asio/ip/udp.hpp>
+#include <asio/steady_timer.hpp>
+
 using namespace asio::ip;
 
 namespace Gateway
