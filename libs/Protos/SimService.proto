@@ -1,0 +1,222 @@
+syntax = "proto2";
+
+import "AppSignal.proto";
+
+package RpctGrpc;
+
+
+enum SimulatorState
+{
+    STATE_STOPPED = 0;
+    STATE_RUNNING = 1;
+    STATE_PAUSED = 2;
+}
+
+
+//
+// Ping
+//
+message PingRequest
+{
+    optional bytes payload = 2;
+}
+
+message PongReply
+{
+    optional bytes payload = 2;
+}
+
+//
+// GetStatus
+//
+message GetStatusRequest
+{
+}
+
+message GetStatusReply
+{
+    optional string project = 3;
+    optional SimulatorState state = 4;
+    optional int64 leftTimeMcs = 10;  // Do not use this; it does not represent any meaningful value.
+    optional int64 durationMcs = 11;  // Do not use this; it does not represent any meaningful value.
+}
+
+//
+// CommandStart
+//
+message CommandStartRequest
+{
+    repeated string logicModules = 2;   // Run simulation for these modules, empty means run for all LMs
+    optional int64 durationMcs = 3;     // Simulate microseconds, -1 - Run simulation till pause or stop.
+    optional double speedFactor = 4;    // Speed multiplier: 0.1 means ten times slower, 1.0 means simulate in real time.
+}
+
+message CommandStartReply
+{
+    optional SimulatorState state = 4;
+}
+
+//
+// CommandPause
+//
+message CommandPauseRequest
+{
+}
+
+message CommandPauseReply
+{
+    optional SimulatorState state = 4;
+}
+
+//
+// CommandStop
+//
+message CommandStopRequest
+{
+}
+
+message CommandStopReply
+{
+    optional SimulatorState state = 4;
+}
+
+//
+// GetModule
+//
+enum ModuleFlagId
+{
+    // LogicModule flags
+    //
+    MF_LM_BOOL_FAULT = 2;                // ReadOnly
+    MF_LM_BOOL_POWER_ON = 3;
+    MF_LM_BOOL_ARMING_KEY = 10;
+    MF_LM_BOOL_TUNING_KEY = 11;
+    MF_LM_BOOL_SOR_IS_SET = 20;          // ReadOnly
+    MF_LM_BOOL_SOR_SET_SWITCH_1 = 21;
+    MF_LM_BOOL_SOR_SET_SWITCH_2 = 22;
+    MF_LM_BOOL_SOR_SET_SWITCH_3 = 23;
+    MF_LM_BOOL_SOR_RESET = 27;           // WriteOnly, only setting `true` has sense.
+}
+
+message ModuleFlagValue
+{
+    oneof ValueOneOf
+    {
+        bool boolValue = 1;
+        double doubleValue = 2;
+        int32 int32Value = 3;
+        int64 int64Value = 4;
+    }
+}
+
+message ModuleFlagPair
+{
+    optional ModuleFlagId id = 1;
+    optional ModuleFlagValue value = 2;
+}
+
+message GetModuleRequest
+{
+    repeated string equipmentId = 2;
+}
+
+message GetModuleReply
+{
+    repeated ModuleState modules = 2;
+}
+
+message ModuleState
+{
+    optional string equipmentId = 2;
+    map<int32, ModuleFlagValue> flags = 4;
+    oneof ModuleOneOf
+    {
+        LogicModule logicModule = 3;
+    }
+}
+
+message LogicModule
+{
+    optional string subsystemId = 3;
+    optional int32 lmNumber = 7;
+    optional int32 channel = 8;         // 0 - A, 1 - B, 2 - C, 3 - D
+} 
+
+//
+// GetSignalList
+//
+message GetSignalListRequest
+{
+}
+
+message GetSignalListReply
+{
+    repeated string signalIds = 2;
+}
+
+//
+// GetSignalParam
+//
+message GetSignalParamRequest
+{
+    repeated fixed64 signalHashes = 2; // If empty then get all signals.
+}
+
+message GetSignalParamReply
+{
+    optional uint32 totalSize = 1;             // How many signal params totally will be transfered.
+    optional uint32 replySignalIndex = 2;      // Start index for this reply
+    repeated Proto.AppSignal signalParams = 7;
+}
+
+//
+// SetModuleFlag
+//
+message SetModuleFlagRequest
+{
+    optional string equipmentId = 2;
+    repeated ModuleFlagPair flags = 3;
+}
+
+message SetModuleFlagReply
+{
+    optional ModuleFlagValue updatedValue = 2; // The new value to update, can be empty if error happens or flag cannot be read.
+}
+
+//
+// GetSignalState
+//
+message GetSignalStateRequest
+{
+    repeated fixed64 signalHashes = 2;
+}
+
+message GetSignalStateReply
+{
+    repeated Proto.AppSignalState states = 2;
+}
+
+//
+// SimService -- This service is used to communicate with the simulator.
+//
+service SimService 
+{
+    rpc Ping(PingRequest) returns (PongReply) {}
+
+    rpc GetStatus(GetStatusRequest) returns (GetStatusReply) {}
+    rpc CommandStart(CommandStartRequest) returns (CommandStartReply) {}
+    rpc CommandPause(CommandPauseRequest) returns (CommandPauseReply) {}
+    rpc CommandStop(CommandStopRequest) returns (CommandStopReply) {}
+
+    rpc GetModule(GetModuleRequest) returns (GetModuleReply) {}
+    rpc SetModuleFlag(SetModuleFlagRequest) returns (SetModuleFlagReply) {}
+
+    rpc GetSignalList(GetSignalListRequest) returns (GetSignalListReply) {}
+    rpc GetSignalParam(GetSignalParamRequest) returns (stream GetSignalParamReply) {}
+    rpc GetSignalState(GetSignalStateRequest) returns (GetSignalStateReply) {}
+
+
+    // TODO:
+    //  OverrideSignalValue
+    //  TakeSnapshots/ApplySnapshot
+}

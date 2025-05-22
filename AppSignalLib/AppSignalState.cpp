@@ -97,7 +97,7 @@ bool AppSignalState::isTuningDefault() const
 	return m_flags.tuningDefault;
 }
 
-void AppSignalState::save(Proto::AppSignalState* protoState)
+void AppSignalState::save(Proto::AppSignalState* protoState) const
 {
 	if (protoState == nullptr)
 	{

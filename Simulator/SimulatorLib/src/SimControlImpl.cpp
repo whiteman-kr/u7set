@@ -1,6 +1,6 @@
 #include "SimControlImpl.h"
-#include "SimulatorPrivate.h"
 #include "SimLogicModuleImpl.h"
+#include "SimulatorPrivate.h"
 
 
 namespace Sim
@@ -10,7 +10,9 @@ namespace Sim
 	{
 	}
 
-	QFuture<bool> SimControlRunStruct::start(std::chrono::microseconds time, const QDateTime& currentDateTime, std::condition_variable& cvFinished)
+	QFuture<bool> SimControlRunStruct::start(std::chrono::microseconds time,
+											 const QDateTime& currentDateTime,
+											 std::condition_variable& cvFinished)
 	{
 		bool reset = m_lastStartTime == 0us;
 
@@ -64,8 +66,7 @@ namespace Sim
 	{
 		requestInterruption();
 
-		if (bool ok = wait(10000);
-			ok == false)
+		if (bool ok = wait(10000); ok == false)
 		{
 			m_log.writeError("Thread forced to terminate.");
 			setTerminationEnabled(true);
@@ -84,7 +85,7 @@ namespace Sim
 
 		m_controlDataConditionVariable.notify_one();
 
-		// Wait when simulation thread exit form simulation loop (Sim::ControlImpl::processRun).
+		// Wait when simulation thread exit from simulation loop (Sim::ControlImpl::processRun).
 		//
 		m_insideProcessRun.wait(true);
 
@@ -119,7 +120,8 @@ namespace Sim
 
 		if (state() == SimControlState::Run)
 		{
-			m_log.writeWarning(tr("Adding module to simulation while simulation running will not take effect till simulation is restarted."));
+			m_log.writeWarning(
+				tr("Adding module to simulation while simulation running will not take effect till simulation is restarted."));
 		}
 
 		int addedModuleCount = 0;
@@ -136,7 +138,7 @@ namespace Sim
 			}
 
 			lms.emplace_back(lm);
-			addedModuleCount ++;
+			addedModuleCount++;
 		}
 
 		// set list
@@ -150,11 +152,12 @@ namespace Sim
 			{
 				// Check if such lm already present in simulation list
 				//
-				auto presentIt = std::find_if(m_controlData.m_lms.begin(), m_controlData.m_lms.end(),
-				[&scrs](auto& lm)
-				{
-					return lm.m_lm->equipmentId() == scrs.m_lm->equipmentId();
-				});
+				auto presentIt = std::find_if(m_controlData.m_lms.begin(),
+											  m_controlData.m_lms.end(),
+											  [&scrs](auto& lm)
+											  {
+												  return lm.m_lm->equipmentId() == scrs.m_lm->equipmentId();
+											  });
 
 				if (presentIt == m_controlData.m_lms.end())
 				{
@@ -164,21 +167,19 @@ namespace Sim
 
 			// Remove LMs
 			//
-			m_controlData.m_lms.erase(
-				std::remove_if(m_controlData.m_lms.begin(),
-							   m_controlData.m_lms.end(),
-							   [&lms](SimControlRunStruct& lm) -> bool
-							   {
-									QString id = lm.equipmentId();
-									return find_if(lms.begin(),
-												   lms.end(),
-												   [&id](SimControlRunStruct& lm)
-												   {
-														return lm.equipmentId() == id;
-												   }) == lms.end();
-							   }
-						),
-				m_controlData.m_lms.end());
+			m_controlData.m_lms.erase(std::remove_if(m_controlData.m_lms.begin(),
+													 m_controlData.m_lms.end(),
+													 [&lms](SimControlRunStruct& lm) -> bool
+													 {
+														 QString id = lm.equipmentId();
+														 return find_if(lms.begin(),
+																		lms.end(),
+																		[&id](SimControlRunStruct& lm)
+																		{
+																			return lm.equipmentId() == id;
+																		}) == lms.end();
+													 }),
+									  m_controlData.m_lms.end());
 		}
 
 		m_controlDataConditionVariable.notify_one();
@@ -202,11 +203,13 @@ namespace Sim
 
 		for (QString id : equipmentIds)
 		{
-			m_controlData.m_lms.erase(
-						std::remove_if(m_controlData.m_lms.begin(),
-									   m_controlData.m_lms.end(),
-									   [&id](auto& lm)	{ return lm.equipmentId() == id; }),
-						m_controlData.m_lms.end());
+			m_controlData.m_lms.erase(std::remove_if(m_controlData.m_lms.begin(),
+													 m_controlData.m_lms.end(),
+													 [&id](auto& lm)
+													 {
+														 return lm.equipmentId() == id;
+													 }),
+									  m_controlData.m_lms.end());
 		}
 
 		m_controlDataConditionVariable.notify_one();
@@ -232,7 +235,7 @@ namespace Sim
 
 			ControlStatus cs{m_controlData};
 
-			locker.unlock();		// Unlock before emitting signal
+			locker.unlock(); // Unlock before emitting signal
 			m_controlDataConditionVariable.notify_one();
 
 			emit stateChanged(cs.m_state);
@@ -263,8 +266,9 @@ namespace Sim
 
 				for (SimControlRunStruct& cs : m_controlData.m_lms)
 				{
-					cs.m_lastStartTime = 0us;	// it will make LM to reset() before running cycle
-					m_simulator->overrideSignals().requestToResetOverrideScripts(cs.equipmentId());	// It will reset all scripts, clear global variables, etc
+					cs.m_lastStartTime = 0us; // it will make LM to reset() before running cycle
+					m_simulator->overrideSignals().requestToResetOverrideScripts(
+						cs.equipmentId());    // It will reset all scripts, clear global variables, etc
 
 					// It sets nonvalid point to realtime trends
 					//
@@ -295,7 +299,7 @@ namespace Sim
 
 		ControlStatus cs{m_controlData};
 
-		locker.unlock();		// Unlock before emitting signal
+		locker.unlock(); // Unlock before emitting signal
 
 		m_controlDataConditionVariable.notify_one();
 
@@ -440,7 +444,10 @@ namespace Sim
 				std::unique_lock locker(m_controlDataMutex);
 				m_controlDataConditionVariable.wait_for(locker,
 														std::chrono::milliseconds{1000},
-														[currentState, this](){ return m_controlData.m_state != currentState; });
+														[currentState, this]()
+														{
+															return m_controlData.m_state != currentState;
+														});
 
 				currentState = m_controlData.m_state;
 			}
@@ -451,7 +458,7 @@ namespace Sim
 
 				// !!! processRun() blocks until state() is changed or time expired
 				//
-				bool ok = processRun();	// Blocks here
+				bool ok = processRun(); // Blocks here
 
 				if (ok == false)
 				{
@@ -474,11 +481,11 @@ namespace Sim
 		using namespace std::chrono;
 
 		bool result = true;
-		ControlData cd = controlData();						// Initialize local data with actual simulation ControlData
+		ControlData cd = controlData(); // Initialize local data with actual simulation ControlData
 
 		// Get simulation LogicModules
 		//
-		std::vector<SimControlRunStruct>& lms = cd.m_lms;   // Referense to the !local! variable cd
+		std::vector<SimControlRunStruct>& lms = cd.m_lms; // Referense to the !local! variable cd
 
 		if (lms.empty() == true)
 		{
@@ -501,8 +508,8 @@ namespace Sim
 				continue;
 			}
 
-			minimulLmWorkcycle = std::min(minimulLmWorkcycle,
-										  std::chrono::microseconds{simLm->lmDescription().logicUnit().m_cycleDuration});
+			minimulLmWorkcycle =
+				std::min(minimulLmWorkcycle, std::chrono::microseconds{simLm->lmDescription().logicUnit().m_cycleDuration});
 		}
 
 		if (result == false)
@@ -512,12 +519,13 @@ namespace Sim
 
 		// --
 		//
-        QElapsedTimer perfmanceTimer;
+		QElapsedTimer perfmanceTimer;
 		perfmanceTimer.start();
 
 		microseconds perfmonaceStartedAt = cd.m_currentTime;
 		qint64 timeStatusUpdateCounter = 0;
-		QDateTime currentDateTime = QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
+		QDateTime currentDateTime =
+			QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
 
 		auto finishTime = cd.m_sliceStartTime + cd.m_duration;
 
@@ -593,7 +601,7 @@ namespace Sim
 						lm.m_task = lm.start(cd.m_currentTime, currentDateTime, someLmFinishedSimulation);
 					}
 				}
-			}	// for (SimControlRunStruct& lm : lms)
+			} // for (SimControlRunStruct& lm : lms)
 
 			// Calculate minimum possible time
 			//
@@ -605,13 +613,12 @@ namespace Sim
 					continue;
 				}
 
-				if (minPossibleTime == 0us)	// First init
+				if (minPossibleTime == 0us) // First init
 				{
 					minPossibleTime = lm.m_possibleToAdvanceTo;
 				}
 
-				if (microseconds lmpt = lm.m_possibleToAdvanceTo;
-					lmpt < minPossibleTime)
+				if (microseconds lmpt = lm.m_possibleToAdvanceTo; lmpt < minPossibleTime)
 				{
 					minPossibleTime = lmpt;
 				}
@@ -645,7 +652,7 @@ namespace Sim
 
 					if (ahead > 5us)
 					{
-						if (ahead > 100ms)		// sleep no more then 100ms.
+						if (ahead > 100ms) // sleep no more then 100ms.
 						{
 							ahead = 100ms;
 						}
@@ -658,10 +665,12 @@ namespace Sim
 				// Assign new currentTime
 				//
 				cd.m_currentTime = minPossibleTime;
-				currentDateTime = QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
+				currentDateTime =
+					QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
 
-				if (std::abs(perfmanceTimer.elapsed() - timeStatusUpdateCounter) >= 125)	// Update every ~125 ms, perfmanceTimer can be restarted,
-				{																			// so std::abs() was added.
+				if (std::abs(perfmanceTimer.elapsed() - timeStatusUpdateCounter) >=
+					125) // Update every ~125 ms, perfmanceTimer can be restarted,
+				{        // so std::abs() was added.
 					// Emit this information signal every 125 ms, we don't need to send it every cycle
 					//
 					timeStatusUpdateCounter = perfmanceTimer.elapsed();
@@ -670,7 +679,8 @@ namespace Sim
 			}
 			else
 			{
-				if (allLmsArePoweredOff == true && std::abs(perfmanceTimer.elapsed() - timeStatusUpdateCounter) >= 125)	// Update every ~125 ms
+				if (allLmsArePoweredOff == true &&
+					std::abs(perfmanceTimer.elapsed() - timeStatusUpdateCounter) >= 125) // Update every ~125 ms
 				{
 					// Emit this information signal every 100 ms, we don't need to send it every cycle
 					//
@@ -681,11 +691,10 @@ namespace Sim
 
 			if (state() != SimControlState::Run)
 			{
-				break;		// Usually exit point from do-while loop
+				break; // Usually exit point from do-while loop
 			}
 
-			if (cd.m_duration == 0us ||
-				(cd.m_duration > 0us && cd.m_currentTime >= finishTime))
+			if (cd.m_duration == 0us || (cd.m_duration > 0us && cd.m_currentTime >= finishTime))
 			{
 				// Simulation time is time up, set PAUSE mode
 				//
@@ -705,19 +714,24 @@ namespace Sim
 					//
 					std::unique_lock fakeLock{fakeMutex};
 
-//					someLmFinishedSimulation.wait_for(fakeLock, minimulLmWorkcycle, [&lms](){
-//						return std::any_of(lms.begin(), lms.end(), [](SimControlRunStruct& lm)
-//						{
-//							return  lm.m_task.has_value() == true &&
-//									lm.m_task.value().isFinished() == true &&
-//									lm->isPowerOff() == false;
-//						});
-//					});
+					//	someLmFinishedSimulation.wait_for(fakeLock, minimulLmWorkcycle, [&lms](){
+					//		return std::any_of(lms.begin(), lms.end(), [](SimControlRunStruct& lm)
+					//		{
+					//			return  lm.m_task.has_value() == true &&
+					//					lm.m_task.value().isFinished() == true &&
+					//					lm->isPowerOff() == false;
+					//		});
+					//	});
 
-					someLmFinishedSimulation.wait_for(fakeLock, minimulLmWorkcycle, [](){ return true; });
+					someLmFinishedSimulation.wait_for(fakeLock,
+													  minimulLmWorkcycle,
+													  []()
+													  {
+														  return true;
+													  });
 
 					hadWait = true;
-					break;      // At least one LM has finished the work
+					break; // At least one LM has finished the work
 				}
 			}
 
@@ -743,8 +757,7 @@ namespace Sim
 			{
 				QThread::usleep(static_cast<unsigned long>(minimulLmWorkcycle.count()));
 			}
-		}
-		while (true);	// Run always till state is triggered to STOP or PAUSE
+		} while (true); // Run always till state is triggered to STOP or PAUSE
 
 		// Wait everything to finish
 		//
@@ -760,12 +773,12 @@ namespace Sim
 		// Update current time and last time in m_controlData
 		//
 		updateControlData(cd);
-		emit statusUpdate(ControlStatus{controlData()});	// Don't use cd! As it has not updated m_state
+		emit statusUpdate(ControlStatus{controlData()}); // Don't use cd! As it has not updated m_state
 
-        if (state() == SimControlState::Run)
-        {
-            pause();
-        }
+		if (state() == SimControlState::Run)
+		{
+			pause();
+		}
 
 		// Some debug info
 		//
@@ -774,21 +787,20 @@ namespace Sim
 		microseconds perfmonaceFinishedAt = cd.m_currentTime;
 		microseconds simulatedDiff = perfmonaceFinishedAt - perfmonaceStartedAt;
 
-		double perfRation = static_cast<double>(simulatedDiff.count()) /
-							static_cast<double>(elapsedUsecs.count());
+		double perfRation = static_cast<double>(simulatedDiff.count()) / static_cast<double>(elapsedUsecs.count());
 
 		QString logMessage = tr("Simulation time for %1ms, is %2ms physical time, ratio is %3")
-								.arg(simulatedDiff.count() / 1000)
-								.arg(elapsedUsecs.count() / 1000)
-								.arg(perfRation);
+								 .arg(simulatedDiff.count() / 1000)
+								 .arg(elapsedUsecs.count() / 1000)
+								 .arg(perfRation);
 
-//		if (unlockTimer() == true)
-//		{
-//			qDebug() << logMessage;
-//		}
+		//		if (unlockTimer() == true)
+		//		{
+		//			qDebug() << logMessage;
+		//		}
 		m_log.writeDebug(logMessage);
 
 		return result;
 	}
 
-}
+} // namespace Sim

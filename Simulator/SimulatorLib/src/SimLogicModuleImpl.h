@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SimEeprom.h"
 #include "SimDeviceEmulator.h"
+#include "SimEeprom.h"
 
 #include <HardwareLib/LmDescription.h>
 #include <HardwareLib/LogicModulesInfo.h>
@@ -68,8 +68,10 @@ namespace Sim
 		std::unordered_map<int, size_t> offsetToCommand() const;
 		const DeviceCommand& offsetToCommand(int offset) const;
 
-		[[nodiscard]] const Ram& ram() const;	// This RAM access is not protected by any mutex, use it only when no concurrent thread is accessing it!
-		[[nodiscard]] Ram& mutableRam();		// This RAM access is not protected by any mutex, use it only when no concurrent thread is accessing it!
+		[[nodiscard]] const Ram& ram()
+			const; // This RAM access is not protected by any mutex, use it only when no concurrent thread is accessing it!
+		[[nodiscard]] Ram& mutableRam(); // This RAM access is not protected by any mutex, use it only when no concurrent thread is
+										 // accessing it!
 
 		[[nodiscard]] RuntimeMode runtimeMode() const;
 		[[nodiscard]] DeviceState deviceState() const;
@@ -94,7 +96,7 @@ namespace Sim
 		[[nodiscard]] bool sorSetSwitch3() const;
 		void setSorSetSwitch3(bool value);
 
-		[[nodiscard]] bool testSorResetSwitch(bool newValue);
+		bool testSorResetSwitch(bool newValue);
 
 	private:
 		SimulatorPrivate* m_simulator = nullptr;
@@ -117,8 +119,7 @@ namespace Sim
 		//
 		std::vector<DeviceCommand> m_commands;
 
-		std::unordered_map<int, size_t> m_offsetToCommand;		// key: command offset, value: index in m_commands
+		std::unordered_map<int, size_t> m_offsetToCommand; // key: command offset, value: index in m_commands
 	};
 
-}
-
+} // namespace Sim

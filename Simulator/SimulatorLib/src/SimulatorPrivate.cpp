@@ -1,14 +1,12 @@
 #include "SimulatorPrivate.h"
-#include "SimScriptRamAddress.h"
-#include "SimScriptLogicModule.h"
-#include "SimScriptSignal.h"
-#include "SimScriptDevUtils.h"
 #include "SimScopedLog.h"
+#include "SimScriptDevUtils.h"
+#include "SimScriptLogicModule.h"
+#include "SimScriptRamAddress.h"
+#include "SimScriptSignal.h"
 
-#include <SimulatorLib/SimDeviceState.h>
-
-#include <HardwareLib/ModuleFirmware.h>
 #include <HardwareLib/LogicModulesInfo.h>
+#include <HardwareLib/ModuleFirmware.h>
 
 namespace Sim
 {
@@ -30,7 +28,7 @@ namespace Sim
 		qRegisterMetaType<Sim::SimControlState>("SimControlState");
 		qRegisterMetaType<Sim::ControlStatus>("ControlStatus");
 		qRegisterMetaType<Sim::CyclePhase>("CyclePhase");
-		//qRegisterMetaType<Sim::DeviceState>("DeviceState");
+		// qRegisterMetaType<Sim::DeviceState>("DeviceState");
 
 		qRegisterMetaType<Sim::RamAddress>("RamAddress");
 		qRegisterMetaType<Sim::ScriptSignal>("ScriptSignal");
@@ -49,7 +47,7 @@ namespace Sim
 
 	bool SimulatorPrivate::load(QString buildPath)
 	{
-		clear();	// Clear must be run in this thread
+		clear(); // Clear must be run in this thread
 
 		// Run load in separated thread, it'll allow to process messages, like timer events
 		// for displaying output log
@@ -70,11 +68,19 @@ namespace Sim
 
 		if (result == true)
 		{
+			std::lock_guard locker{m_buildPathMutex};
 			m_buildPath = buildPath;
 		}
 		else
 		{
 			clearImpl();
+		}
+
+		if (result == true)
+		{
+			// Should be run in this thread.
+			//
+			m_service.setEnabled(m_software.enabled());
 		}
 
 		emit projectUpdated();
@@ -148,8 +154,21 @@ namespace Sim
 
 	void SimulatorPrivate::clearImpl()
 	{
+		// Stops simulation if any.
+		//
 		m_controlImpl.reset();
-		m_buildPath.clear();
+
+		{
+			// Empty m_buildPath indicates that project is not loaded
+			//
+			std::lock_guard locker{m_buildPathMutex};
+			m_buildPath.clear();
+		}
+
+		// Stop service, so it will not access not protected members during project load.
+		//
+		m_service.setEnabled(false);
+
 		m_firmwares.clear();
 		m_lmDescriptions.clear();
 		m_subsystems.clear();
@@ -164,10 +183,6 @@ namespace Sim
 
 	bool SimulatorPrivate::loadFunc(QString buildPath)
 	{
-		clearImpl();
-
-		// --
-		//
 		buildPath = QDir::fromNativeSeparators(buildPath);
 		if (buildPath.endsWith(QChar('/')) == false)
 		{
@@ -191,7 +206,6 @@ namespace Sim
 
 			if (ok == false)
 			{
-				clearImpl();
 				return false;
 			}
 		}
@@ -209,7 +223,6 @@ namespace Sim
 				if (ok == false)
 				{
 					m_log.writeError(QObject::tr("Open simulator profiles file error. File %1").arg(profilesFileName));
-					clearImpl();
 					return false;
 				}
 
@@ -218,10 +231,8 @@ namespace Sim
 
 				if (ok == false)
 				{
-					m_log.writeError(QObject::tr("Load simulator profiles file error. File %1. Error %2")
-									 .arg(profilesFileName)
-									 .arg(errorMessage));
-					clearImpl();
+					m_log.writeError(
+						QObject::tr("Load simulator profiles file error. File %1. Error %2").arg(profilesFileName).arg(errorMessage));
 					return false;
 				}
 			}
@@ -237,7 +248,6 @@ namespace Sim
 		bool ok = loadFirmwares(buildPath);
 		if (ok == false)
 		{
-			clearImpl();
 			return false;
 		}
 
@@ -246,8 +256,7 @@ namespace Sim
 		{
 			m_log.writeWarning(QObject::tr("Bitstream file does not contain any subsystem."));
 			m_log.writeWarning(QObject::tr("Nothing to load or simulate."));
-			clearImpl();
-			return true;	// Project is empty, is not an error
+			return true; // Project is empty, is not an error
 		}
 
 		// Load LogicModules Descriptions
@@ -255,7 +264,6 @@ namespace Sim
 		ok = loadLmDescriptions(buildPath);
 		if (ok == false)
 		{
-			clearImpl();
 			return false;
 		}
 
@@ -271,7 +279,6 @@ namespace Sim
 			if (ok == false)
 			{
 				m_log.writeError(tr("Load file %1 error: %2").arg(lmsInfoFileName).arg(loadLmsInfoErrorMessage));
-				clearImpl();
 				return false;
 			}
 		}
@@ -281,7 +288,6 @@ namespace Sim
 		ok = loadConnectionsInfo(buildPath);
 		if (ok == false)
 		{
-			clearImpl();
 			return false;
 		}
 
@@ -295,7 +301,6 @@ namespace Sim
 			if (ok == false)
 			{
 				m_log.writeError(QObject::tr("Subsystem %1 in not found in bitstream file.").arg(subsystemId));
-				clearImpl();
 				return false;
 			}
 
@@ -325,7 +330,6 @@ namespace Sim
 			if (m_subsystems.count(subsystemId) > 0)
 			{
 				m_log.writeError(QObject::tr("Subsystem %1 already exists.").arg(subsystemId));
-				clearImpl();
 				return false;
 			}
 
@@ -354,7 +358,6 @@ namespace Sim
 			{
 				// Error must be reported in Subsystem::load
 				//
-				clearImpl();
 				return false;
 			}
 		}
@@ -364,11 +367,10 @@ namespace Sim
 		ok = loadAppSignals(buildPath);
 		if (ok == false)
 		{
-			clearImpl();
 			return false;
 		}
 
-		// Update overriden signals
+		// Update overridden signals
 		//
 		overrideSignals().updateSignals();
 
@@ -430,8 +432,7 @@ namespace Sim
 			return false;
 		}
 
-		if (bool ok = dir.cd("LmDescriptions");
-			ok == false)
+		if (bool ok = dir.cd("LmDescriptions"); ok == false)
 		{
 			m_log.writeError(QObject::tr("Path %1/LmDescriptions does not exist").arg(buildPath));
 			return false;
@@ -453,11 +454,9 @@ namespace Sim
 
 			QFile file(fileName);
 
-			if (bool ok = file.open(QIODevice::ReadOnly | QIODevice::Text);
-				ok == false)
+			if (bool ok = file.open(QIODevice::ReadOnly | QIODevice::Text); ok == false)
 			{
-				m_log.writeError(QObject::tr("Open file error: %1")
-								 .arg(file.errorString()));
+				m_log.writeError(QObject::tr("Open file error: %1").arg(file.errorString()));
 				return false;
 			}
 
@@ -466,12 +465,9 @@ namespace Sim
 			QString errorMessage;
 			std::shared_ptr<LmDescription> lmDescription = std::make_shared<LmDescription>();
 
-			if (bool ok = lmDescription->load(xmlData, &errorMessage);
-				ok == false)
+			if (bool ok = lmDescription->load(xmlData, &errorMessage); ok == false)
 			{
-				m_log.writeError(QObject::tr("Loading file %1 error: %2")
-								 .arg(fileName)
-								 .arg(errorMessage));
+				m_log.writeError(QObject::tr("Loading file %1 error: %2").arg(fileName).arg(errorMessage));
 				return false;
 			}
 
@@ -531,11 +527,13 @@ namespace Sim
 
 	bool SimulatorPrivate::isLoaded() const
 	{
+		std::lock_guard locker{m_buildPathMutex};
 		return m_buildPath.isEmpty() == false;
 	}
 
 	QString SimulatorPrivate::buildPath() const
 	{
+		std::lock_guard locker{m_buildPathMutex};
 		return m_buildPath;
 	}
 
@@ -602,7 +600,7 @@ namespace Sim
 	std::vector<std::shared_ptr<LogicModuleImpl>> SimulatorPrivate::logicModules() const
 	{
 		std::vector<std::shared_ptr<LogicModuleImpl>> result;
-		result.reserve(m_subsystems.size() * 10);			// Just some number
+		result.reserve(m_subsystems.size() * 10); // Just some number
 
 		for (const auto& [key, ss] : m_subsystems)
 		{
@@ -695,6 +693,16 @@ namespace Sim
 		return m_profiles;
 	}
 
+	Sim::Service& SimulatorPrivate::service()
+	{
+		return m_service;
+	}
+
+	const Sim::Service& SimulatorPrivate::service() const
+	{
+		return m_service;
+	}
+
 	bool SimulatorPrivate::setCurrentProfile(QString profileName)
 	{
 		if (profileName.isEmpty() == true)
@@ -744,4 +752,4 @@ namespace Sim
 		return m_controlPublic;
 	}
 
-}
+} // namespace Sim

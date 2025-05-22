@@ -8,7 +8,6 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Xml Qml Core Concurrent Network)
-find_package(gRPC CONFIG REQUIRED)
 
 if (MSVC)
   # MSVC warning suppressions
@@ -26,6 +25,7 @@ qt_add_library(${TARGET} STATIC
 	./src/SimAppDataLanInterface.h
 	./src/SimAppDataTransmitter.cpp
 	./src/SimAppDataTransmitter.h
+	./src/SimAppSignalManager.cpp
 	./src/SimAppSignalManagerImpl.cpp
 	./src/SimAppSignalManagerImpl.h
 	./src/SimCommandProcessor.cpp
@@ -33,12 +33,16 @@ qt_add_library(${TARGET} STATIC
 	./src/SimCommandProcessor_LM5_LM6.cpp
 	./src/SimCommandProcessor_LM5_LM6.h
 	./src/SimConnections.cpp
+	./src/SimConnectionsImpl.cpp
+	./src/SimConnectionsImpl.h
 	./src/SimConsoleLogFile.cpp
+	./src/SimControl.cpp
 	./src/SimControlImpl.cpp
 	./src/SimControlImpl.h
-	./src/SimControl.cpp
+	./src/SimControlStatus.cpp
 	./src/SimDeviceEmulator.cpp
 	./src/SimDeviceEmulator.h
+	./src/SimDeviceState.cpp
 	./src/SimDiagDataLanInterface.cpp
 	./src/SimDiagDataLanInterface.h
 	./src/SimEeprom.cpp
@@ -49,8 +53,10 @@ qt_add_library(${TARGET} STATIC
 	./src/SimLanInterface.h
 	./src/SimLans.cpp
 	./src/SimLans.h
+	./src/SimLogicModule.cpp
 	./src/SimLogicModuleImpl.cpp
 	./src/SimLogicModuleImpl.h
+	./src/SimOverrideSignals.cpp
 	./src/SimOverrideSignalsImpl.cpp
 	./src/SimOverrideSignalsImpl.h
 	./src/SimProfiles.cpp
@@ -71,8 +77,11 @@ qt_add_library(${TARGET} STATIC
 	./src/SimScriptSignal.h
 	./src/SimScriptSimulator.cpp
 	./src/SimScriptSimulator.h
+	./src/SimService.cpp
+	./src/SimSoftware.cpp
 	./src/SimSoftwareImpl.cpp
 	./src/SimSoftwareImpl.h
+	./src/SimSubsystem.cpp
 	./src/SimSubsystemImpl.cpp
 	./src/SimSubsystemImpl.h
 	./src/SimTestObserver.cpp
@@ -90,33 +99,24 @@ qt_add_library(${TARGET} STATIC
 	./src/SimulatorPrivate.h
 	./src/SoftwareXmlReader.cpp
 	./src/SoftwareXmlReader.h
-	
-	./src/SimConnectionsImpl.h
-	./src/SimConnectionsImpl.cpp
-	./src/SimControlStatus.cpp
-	./src/SimDeviceState.cpp
-	./src/SimSoftware.cpp
-	./src/SimLogicModule.cpp
-	./src/SimSubsystem.cpp
-	./src/SimOverrideSignals.cpp
-	./src/SimAppSignalManager.cpp
 
-	./include/SimulatorLib/SimScriptItem.h
+	./include/SimulatorLib/SimAppSignalManager.h
 	./include/SimulatorLib/SimConnections.h
+	./include/SimulatorLib/SimConsoleLogFile.h
 	./include/SimulatorLib/SimControl.h
 	./include/SimulatorLib/SimControlStatus.h
-	./include/SimulatorLib/SimDeviceState.h
-	./include/SimulatorLib/Simulator.h
-	./include/SimulatorLib/SimSoftware.h
-	./include/SimulatorLib/SimLogicModule.h
 	./include/SimulatorLib/SimDeviceCommand.h
-	./include/SimulatorLib/SimSubsystem.h
-	./include/SimulatorLib/SimOverrideSignals.h
+	./include/SimulatorLib/SimDeviceState.h
+	./include/SimulatorLib/SimLogicModule.h
 	./include/SimulatorLib/SimOverrideRamRecord.h
-	./include/SimulatorLib/SimAppSignalManager.h
-	./include/SimulatorLib/SimRam.h
+	./include/SimulatorLib/SimOverrideSignals.h
 	./include/SimulatorLib/SimProfiles.h
-	./include/SimulatorLib/SimConsoleLogFile.h
+	./include/SimulatorLib/SimRam.h
+	./include/SimulatorLib/SimScriptItem.h
+	./include/SimulatorLib/SimService.h
+	./include/SimulatorLib/SimSoftware.h
+	./include/SimulatorLib/SimSubsystem.h
+	./include/SimulatorLib/Simulator.h
 
 	SimulatorLib.qrc
 )
@@ -172,8 +172,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
-target_link_libraries(${TARGET} PUBLIC gRPC::grpc gRPC::grpc++)
-target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ClientLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ClientLib TrendView SimulatorGrpc)
 
 target_compile_definitions(${TARGET} PRIVATE SIMULATOR_LIBRARY)
 

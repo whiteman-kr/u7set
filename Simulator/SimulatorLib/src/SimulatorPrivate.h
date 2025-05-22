@@ -9,6 +9,7 @@
 #include <SimulatorLib/SimControl.h>
 #include <SimulatorLib/SimOverrideSignals.h>
 #include <SimulatorLib/SimProfiles.h>
+#include <SimulatorLib/SimService.h>
 #include <SimulatorLib/SimSoftware.h>
 
 #include "SimAppSignalManagerImpl.h"
@@ -122,8 +123,11 @@ namespace Sim
 		[[nodiscard]] Sim::SoftwareImpl& software();
 		[[nodiscard]] const Sim::SoftwareImpl& software() const;
 
-		[[nodiscard]] Sim::Software& softwarePublic();				// Public API for Software
-		[[nodiscard]] const Sim::Software& softwarePublic() const;	// Public API for Software
+		[[nodiscard]] Sim::Software& softwarePublic();             // Public API for Software
+		[[nodiscard]] const Sim::Software& softwarePublic() const; // Public API for Software
+
+		[[nodiscard]] Sim::Service& service();
+		[[nodiscard]] const Sim::Service& service() const;
 
 		[[nodiscard]] Sim::Profiles& profiles();
 		[[nodiscard]] const Sim::Profiles& profiles() const;
@@ -141,8 +145,16 @@ namespace Sim
 	private:
 		mutable ScopedLog m_log;
 
+		mutable QMutex m_buildPathMutex; // buildPath is an indicator that project is loaded and ready to use. isProjectLoaded() can be
+										 // called from different threads.
 		QString m_buildPath;
-		Hardware::ModuleFirmwareStorage m_firmwares;                        // Loaded bts file
+
+		// Services must be stopped before all other parts, but immediately after m_buildPath. If the project is not loaded, we cannot
+		// perform many operations.
+		//
+		Sim::Service m_service{*this};
+
+		Hardware::ModuleFirmwareStorage m_firmwares;                        // Loaded bts file, SUGGETSION: CAS?
 
 		Sim::ConnectionsImpl m_connectionsImpl;                             // Implementation of connections.
 		Sim::Connections m_connectionsPublic{m_connectionsImpl, this};      // Connections, the public part, takes m_connectionsImpl.

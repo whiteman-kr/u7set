@@ -200,6 +200,16 @@ namespace Sim
 		return m_impl->softwarePublic();
 	}
 
+	Sim::Service& Simulator::service()
+	{
+		return m_impl->service();
+	}
+
+	const Sim::Service& Simulator::service() const
+	{
+		return m_impl->service();
+	}
+
 	Sim::Profiles& Simulator::profiles()
 	{
 		return m_impl->profiles();

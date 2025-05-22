@@ -239,6 +239,15 @@ namespace SimUi
 		return m_simulator->software();
 	}
 
+	Sim::Service& SimIdeSimulator::service() 
+	{
+		return m_simulator->service();
+	}
+	const Sim::Service& SimIdeSimulator::service() const 
+	{
+		return m_simulator->service();
+	}
+
 	Sim::Profiles& SimIdeSimulator::profiles()
 	{
 		return m_simulator->profiles();

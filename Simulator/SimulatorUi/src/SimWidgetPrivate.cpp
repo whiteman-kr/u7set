@@ -15,6 +15,7 @@
 #include <SchemaClientLib/DialogSignalSearch.h>
 #include <SimulatorLib/SimControl.h>
 #include <SimulatorLib/SimLogicModule.h>
+#include <SimulatorLib/SimService.h>
 #include <SimulatorLib/SimSoftware.h>
 #include <SimulatorUi/SimWidget.h>
 #include <UiLib/TabWidgetEx.h>
@@ -403,7 +404,7 @@ namespace SimUi
 										 tr("Allow LogicModules' Application Data transmitting to AppDataSrv"),
 										 this};
 			m_allowLanComm->setCheckable(true);
-			m_allowLanComm->setChecked(m_simulator->software().enabled());
+			m_allowLanComm->setChecked(m_simulator->software().enabled() && m_simulator->service().enabled());
 			connect(m_allowLanComm, &QAction::toggled, this, &SimWidgetPrivate::allowLanCommToggled);
 		}
 		else
@@ -929,6 +930,7 @@ namespace SimUi
 		// Update profile combo box
 		//
 		{
+			m_allowLanComm->setEnabled(projectIsLoaded);
 			m_profilesComboBox->setEnabled(m_simulator->isStopped() == true && projectIsLoaded == true);
 
 			bool hasLastSelected = false;
@@ -1168,6 +1170,7 @@ namespace SimUi
 	void SimWidgetPrivate::allowLanCommToggled(bool state)
 	{
 		m_simulator->software().setEnabled(state);
+		m_simulator->service().setEnabled(state);
 		return;
 	}
 

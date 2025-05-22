@@ -21,6 +21,7 @@
 namespace Sim
 {
 	class SimulatorPrivate;
+	class Service;
 
 	class Simulator : public QObject
 	{
@@ -98,6 +99,9 @@ namespace Sim
 
 		[[nodiscard]] Sim::Software& software();
 		[[nodiscard]] const Sim::Software& software() const;
+
+		[[nodiscard]] Sim::Service& service();
+		[[nodiscard]] const Sim::Service& service() const;
 
 		[[nodiscard]] Sim::Profiles& profiles();
 		[[nodiscard]] const Sim::Profiles& profiles() const;

@@ -537,7 +537,7 @@ namespace AppSignalLists
 		return;
 	}
 
-	void DialogSignalListEditor::onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
+	void DialogSignalListEditor::onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> /*objects*/)
 	{
 		// update tree items
 		//

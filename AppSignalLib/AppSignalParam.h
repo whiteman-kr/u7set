@@ -15,7 +15,7 @@ namespace Proto
 
 struct AppSignalParamMimeType
 {
-	static const char* value;	// = "application/x-appsignalparam";	Data in format ::Proto::AppSiagnalParamSet
+	static const char* value; // = "application/x-appsignalparam";	Data in format ::Proto::AppSiagnalParamSet
 };
 
 
@@ -23,8 +23,8 @@ struct AppSignalParamMimeType
 	\ingroup groupParamsStates
 	\brief Describes signal parameters in Monitor and TuningClient applications.
 
-	AppSignalParam class describes signal parameters in Monitor and TuningClient applications. This state is received from ApplicationDataService by Monitor or
-	from TuningService by Monitor or TuningClient.
+	AppSignalParam class describes signal parameters in Monitor and TuningClient applications. This state is received from
+   ApplicationDataService by Monitor or from TuningService by Monitor or TuningClient.
 
 	\ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class accessed by global <b>signals</b> object is used for
 	requesting signal parameters from Application Data Service.
@@ -33,7 +33,8 @@ struct AppSignalParamMimeType
 	requesting signal parameters from Tuning Service.
 
 	\warning
-	TuningController is always available in TuningClient. In Monitor it is available only in non-safety projects when Tuning function is enabled.
+	TuningController is always available in TuningClient. In Monitor it is available only in non-safety projects when Tuning function is
+   enabled.
 
 	\n
 	\warning
@@ -97,8 +98,8 @@ class AppSignalParam
 	Q_PROPERTY(QString customAppSignalID READ customSignalId)
 	Q_PROPERTY(QString CustomAppSignalID READ customSignalId)
 
-	Q_PROPERTY(QString customSignalID READ customSignalId)	// same as CustomAppSignalID, for compatibility
-	Q_PROPERTY(QString CustomSignalID READ customSignalId)	// same as CustomAppSignalID, for compatibility
+	Q_PROPERTY(QString customSignalID READ customSignalId) // same as CustomAppSignalID, for compatibility
+	Q_PROPERTY(QString CustomSignalID READ customSignalId) // same as CustomAppSignalID, for compatibility
 
 	/// \brief Signal Caption
 	Q_PROPERTY(QString caption READ caption)
@@ -191,21 +192,20 @@ class AppSignalParam
 	Q_PROPERTY(bool IsReserved READ isReserved)
 
 public:
-	AppSignalParam(const AppSignal& signal);
+	AppSignalParam(const ::AppSignal& signal);
 
 	// Shallow copy.
 	//
 	AppSignalParam();
-	
+
 	AppSignalParam(const AppSignalParam&);
 	AppSignalParam(AppSignalParam&&) noexcept;
 
 	AppSignalParam& operator=(const AppSignalParam&);
 	AppSignalParam& operator=(AppSignalParam&&) noexcept;
 
-
 	bool load(const Proto::AppSignal& message);
-	void load(const AppSignal& signal);
+	void load(const ::AppSignal& signal);
 	void save(::Proto::AppSignal* message) const;
 
 	// Make a deep copy of the AppSignalParam.
@@ -331,7 +331,7 @@ public:
 public:
 	/// @brief Check if signal has specified tag
 	Q_INVOKABLE bool hasTag(const QString& tag) const;
-	
+
 	/// @brief Get specific property value by name
 	Q_INVOKABLE QVariant specificPropertyValue(const QString& propertyName) const;
 
@@ -349,11 +349,11 @@ private:
 		PrivateData();
 		~PrivateData();
 
-		bool load(const Proto::AppSignal& message);
-		void load(const AppSignal& signal);
+		bool load(const ::Proto::AppSignal& message);
+		void load(const ::AppSignal& signal);
 		void save(::Proto::AppSignal* message) const;
 
-		Hash m_hash = UNDEFINED_HASH;				// Hash from m_appSignalId
+		Hash m_hash = UNDEFINED_HASH; // Hash from m_appSignalId
 		QString m_appSignalId;
 		QString m_customSignalId;
 		QString m_caption;
@@ -373,16 +373,16 @@ private:
 		double m_lowEngineeringUnits = 0;
 		double m_highEngineeringUnits = 100;
 
-		double m_electricLowLimit = 0;									// low electric value for input range
-		double m_electricHighLimit = 0;									// high electric value for input range
-		E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
-		E::SensorType m_sensorType = E::SensorType::NoSensor;			// electric sensor type for input range (was created for m_inputUnitID)
+		double m_electricLowLimit = 0;                              // low electric value for input range
+		double m_electricHighLimit = 0;                             // high electric value for input range
+		E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;   // electric unit for input range (mA, mV, Ohm, V ....)
+		E::SensorType m_sensorType = E::SensorType::NoSensor;       // electric sensor type for input range (was created for m_inputUnitID)
 
-		double m_outputLowLimit = 0;									// low physical value for output range
-		double m_outputHighLimit = 0;									// high physical value for output range
-		int m_outputUnitId = NO_UNIT_ID;								// physical unit for output range (kg, mm, Pa ...)
-		E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
-		E::SensorType m_outputSensorType = E::SensorType::NoSensor;		// electric sensor type for output range (was created for m_outputMode)
+		double m_outputLowLimit = 0;                                // low physical value for output range
+		double m_outputHighLimit = 0;                               // high physical value for output range
+		int m_outputUnitId = NO_UNIT_ID;                            // physical unit for output range (kg, mm, Pa ...)
+		E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;  // output electric range (or mode ref. OutputModeStr[])
+		E::SensorType m_outputSensorType = E::SensorType::NoSensor; // electric sensor type for output range (was created for m_outputMode)
 
 		int m_precision = 2;
 		double m_coarseAperture = 1;
@@ -399,7 +399,7 @@ private:
 
 		QString m_specPropStruct;
 		QByteArray m_specPropValues;
-		
+
 		std::unique_ptr<::AppSignalSpecPropValues> m_specificPropertyValues;
 
 		std::set<QString> m_tags;

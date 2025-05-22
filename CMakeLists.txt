@@ -50,7 +50,6 @@ set(QT_VERSION "6.8.1")
 find_package(Qt6 ${QT_VERSION} REQUIRED COMPONENTS Charts Concurrent Core DBus Gui LinguistTools Network PrintSupport Qml SerialPort Sql Svg Test Widgets Xml)
 find_package(asio CONFIG REQUIRED)
 find_package(Boost REQUIRED COMPONENTS graph)
-find_package(gRPC CONFIG)
 find_package(GTest CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(PostgreSQL REQUIRED)
@@ -154,32 +153,34 @@ message("-----------------------------------------")
 
 # Add projects.
 #
-add_subdirectory(UtilsLib)
 add_subdirectory(AppSignalLib)
-add_subdirectory(OnlineLib)
 add_subdirectory(GatewayLib)
+add_subdirectory(OnlineLib)
+add_subdirectory(UtilsLib)
 
 add_subdirectory(libs)
-
 add_subdirectory(Simulator)
 
 add_subdirectory(Builder)
 add_subdirectory(BuilderConsole)
 
-add_subdirectory(ServiceControlManager)
-add_subdirectory(ConfigurationService)
 add_subdirectory(AppDataService)
 add_subdirectory(ArchivingService)
-add_subdirectory(TuningService)
-add_subdirectory(GatewayService)
+add_subdirectory(ConfigurationService)
 add_subdirectory(DiagDataService)
+add_subdirectory(ServiceControlManager)
+add_subdirectory(TuningService)
 
 add_subdirectory(TestSuiteConsole)
-add_subdirectory(Archivist)
+
+add_subdirectory(Tests)
 
 # Do not compile these projects if code coverage is on.
 #
 if(NOT CODE_COVERAGE)
+	add_subdirectory(GatewayService)
+	add_subdirectory(Archivist)
+
     add_subdirectory(u7)
 	add_subdirectory(TestSuite)
 	add_subdirectory(mconf)	
@@ -190,12 +191,10 @@ if(NOT CODE_COVERAGE)
 	add_subdirectory(TuningClient)
 	add_subdirectory(Diagnostics)
 	add_subdirectory(Metrology)
-endif()
 
-add_subdirectory(Tests)
-
-if (BUILD_LICENSER)
-	add_subdirectory(./Tools/Licenser)
+	if (BUILD_LICENSER)
+		add_subdirectory(./Tools/Licenser)
+	endif()
 endif()
 
 # Create install target.

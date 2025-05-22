@@ -38,17 +38,17 @@ namespace Sim
 	{
 		// Keep this struct simple, it should copy fast enough
 		//
-		std::vector<SimControlRunStruct> m_lms;			// LMs added to simulation
+		std::vector<SimControlRunStruct> m_lms;           // LMs added to simulation
 		SimControlState m_state = SimControlState::Stop;
 
-		std::chrono::microseconds m_startTime = 0us;		// When simulation was started, computer time
-		std::chrono::microseconds m_sliceStartTime = 0us;	// When simulation was started for current 'slice' (duration)
-		std::chrono::microseconds m_currentTime = 0us;		// Current time in simulation
+		std::chrono::microseconds m_startTime = 0us;      // When simulation was started, computer time
+		std::chrono::microseconds m_sliceStartTime = 0us; // When simulation was started for current 'slice' (duration)
+		std::chrono::microseconds m_currentTime = 0us;    // Current time in simulation
 
-		std::chrono::microseconds m_duration{0};		// Simulation is started for this time
-														// if time < 0 then no time limit
-                                                        // if time == 0 then run one cycle (NO, IT WILL RESET IF ON PAUSE MODE)
-														// if time > 0 then run this time
+		std::chrono::microseconds m_duration{0};          // Simulation is started for this time
+														  // if time < 0 then no time limit
+														  // if time == 0 then run one cycle (NO, IT WILL RESET IF ON PAUSE MODE)
+														  // if time > 0 then run this time
 
 		QDateTime currentTime() const
 		{
@@ -102,6 +102,8 @@ namespace Sim
 		SimulatorPrivate* m_simulator = nullptr;
 		ScopedLog m_log;
 
+		// m_speedFactor is a multiplier, 0.1 - run ten times slower, 1.0 - try to simulate realtime.
+		//
 		std::atomic<double> m_speedFactor;
 
 		// m_insideProcessRun indicates that simulation thread now in the function processRun(),
@@ -112,7 +114,7 @@ namespace Sim
 		// Start of access only with mutex
 		// \/ \/ \/ \/ \/
 		mutable std::recursive_mutex m_controlDataMutex;
-		mutable std::condition_variable_any m_controlDataConditionVariable;		// notify_one every time m_controlData is changed
+		mutable std::condition_variable_any m_controlDataConditionVariable; // notify_one every time m_controlData is changed
 
 		ControlData m_controlData;
 		// /\ /\ /\ /\ /\
@@ -120,6 +122,4 @@ namespace Sim
 		//
 	};
 
-}
-
-
+} // namespace Sim

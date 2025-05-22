@@ -1,7 +1,7 @@
 #pragma once
-#include "../AppSignalLib/AppSignalParam.h"
+//#include "../AppSignalLib/AppSignalParam.h"  // This must be included via precompiled header!!!
+#include "../AppSignalLib/ISignalManager.h"
 #include "../AppSignalLib/TuningValue.h"
-#include "../AppSignalLib/ITuningSignalManager.h"
 
 namespace TuningFilters
 {

@@ -72,6 +72,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	<CommonLib/PropertyObject.h>
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
+
+	"../../AppSignalLib/AppSignalParam.h"
+	"../../AppSignalLib/AppSignalState.h"
+	"../../AppSignalLib/TuningValue.h"
 )
 
 target_compile_definitions(${TARGET} PRIVATE UI_LIB_DOMAIN)
