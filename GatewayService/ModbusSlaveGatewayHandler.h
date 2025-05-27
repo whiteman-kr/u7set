@@ -1,6 +1,6 @@
 #pragma once
 
-#include <asio.hpp>
+#include <asio/error_code.hpp>
 
 #include "../GatewayLib/ModbusSlaveGateway.h"
 

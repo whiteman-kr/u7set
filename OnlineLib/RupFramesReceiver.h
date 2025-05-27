@@ -8,8 +8,9 @@
 #include "../UtilsLib/WUtils.h"
 #include <CommonLib/HostAddressPort.h>
 
-#include <asio.hpp>
-
+#include <asio/io_context.hpp>
+#include <asio/ip/udp.hpp>
+#include <asio/steady_timer.hpp>
 
 using namespace asio;
 using namespace asio::ip;
