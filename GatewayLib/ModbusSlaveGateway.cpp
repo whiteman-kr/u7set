@@ -263,7 +263,16 @@ namespace Gateway
 
 		appendSignalID(lineNo, signalID, log);
 
-		m_signalAddrs.emplace(hash, addr);
+		auto it = m_signalAddrs.find(hash);
+
+		if (it == m_signalAddrs.end())
+		{
+			m_signalAddrs.emplace(hash, std::vector<Address16>{addr});
+		}
+		else
+		{
+			it->second.emplace_back(addr);
+		}
 
 		return ParseResult::Ok;
 	}
@@ -317,9 +326,9 @@ namespace Gateway
 		return m_modbusFormat;
 	}
 
-	Address16 ModbusSignalList::getAddress(Hash hash) const
+	std::vector<Address16> ModbusSignalList::getAddress(Hash hash) const
 	{
-		return getValueOrDefault(m_signalAddrs, hash, Address16());
+		return getValueOrDefault(m_signalAddrs, hash, std::vector<Address16>{});
 	}
 
 	bool ModbusSignalList::isConst(Hash h, double* constValue) const
@@ -752,101 +761,104 @@ namespace Gateway
 
 				// existsSignals.insert(hash);
 
-				Address16 addr16 = mbsl->getAddress(hash);
+				std::vector<Address16> addrs16 = mbsl->getAddress(hash);
 
-				if (addr16.isValid() == false)
+				for(const Address16& addr16 : addrs16)
 				{
-					log.logError(QString("invalid modbus address of signal %1"));
-					result = false;
-					continue;
-				}
-
-				// auto it = m_modbusSignals.find(addr16);
-
-				// if (it != m_modbusSignals.end())
-				// {
-				// 	const ModbusSignal& mbs = it->second;
-				// 	log.logError(QString("signal %1 address %2 is not unique (already assigned to %3)").
-				// 								arg(signalID).arg(addr16.toString()).arg(mbs.signalID));
-				// 	result = false;
-				// 	continue;
-				// }
-
-				int regsCount = format.registersCount();
-
-				if (regsCount == 0)
-				{
-					log.logError(QString("undefined register count for modbus signal %1").arg(signalID));
-					result = false;
-					continue;
-				}
-
-				for(int i = 0; i < regsCount; i++)
-				{
-					if (format.isDiscrete() == true)
+					if (addr16.isValid() == false)
 					{
-						if (analogRegs.contains(addr16.offset() + i))
+						log.logError(QString("invalid modbus address of signal %1"));
+						result = false;
+						continue;
+					}
+
+					// auto it = m_modbusSignals.find(addr16);
+
+					// if (it != m_modbusSignals.end())
+					// {
+					// 	const ModbusSignal& mbs = it->second;
+					// 	log.logError(QString("signal %1 address %2 is not unique (already assigned to %3)").
+					// 								arg(signalID).arg(addr16.toString()).arg(mbs.signalID));
+					// 	result = false;
+					// 	continue;
+					// }
+
+					int regsCount = format.registersCount();
+
+					if (regsCount == 0)
+					{
+						log.logError(QString("undefined register count for modbus signal %1").arg(signalID));
+						result = false;
+						continue;
+					}
+
+					for(int i = 0; i < regsCount; i++)
+					{
+						if (format.isDiscrete() == true)
 						{
-							log.logError(QString("discrete signal %1 register %2 used by analog signal").
-											arg(signalID).arg(addr16.offset() + i));
-							result = false;
-						}
-						else
-						{
-							if (discreteAddrs.contains(addr16.bitAddress()) == true)
+							if (analogRegs.contains(addr16.offset() + i))
 							{
-								if (mbsl->isUniqueSignalsInList() == true)
-								{
-									log.logError(QString("duplicate address %1 of discrete signal %2").
-														 arg(addr16.bitAddress()).arg(signalID));
-									result = false;
-								}
+								log.logError(QString("discrete signal %1 register %2 used by analog signal").
+												arg(signalID).arg(addr16.offset() + i));
+								result = false;
 							}
 							else
 							{
-								discreteRegs.emplace(addr16.offset() + i);
-								discreteAddrs.emplace(addr16.bitAddress());
+								if (discreteAddrs.contains(addr16.bitAddress()) == true)
+								{
+									if (mbsl->isUniqueSignalsInList() == true)
+									{
+										log.logError(QString("duplicate address %1 of discrete signal %2").
+															 arg(addr16.bitAddress()).arg(signalID));
+										result = false;
+									}
+								}
+								else
+								{
+									discreteRegs.emplace(addr16.offset() + i);
+									discreteAddrs.emplace(addr16.bitAddress());
+								}
 							}
-						}
-					}
-					else
-					{
-						if (discreteRegs.contains(addr16.offset() + i))
-						{
-							log.logError(QString("analog signal %1 register %2 used by discrete signals").
-										 arg(signalID).arg(addr16.offset() + i));
-							result = false;
 						}
 						else
 						{
-							if (analogRegs.contains(addr16.offset() + i) == true)
+							if (discreteRegs.contains(addr16.offset() + i))
 							{
-								if (mbsl->isUniqueSignalsInList() == true)
-								{
-									log.logError(QString("analog signal %1 register %2 used by another analog signal").
-												 arg(signalID).arg(addr16.offset() + i));
-									result = false;
-								}
+								log.logError(QString("analog signal %1 register %2 used by discrete signals").
+											 arg(signalID).arg(addr16.offset() + i));
+								result = false;
 							}
 							else
 							{
-								analogRegs.emplace(addr16.offset() + i);
+								if (analogRegs.contains(addr16.offset() + i) == true)
+								{
+									if (mbsl->isUniqueSignalsInList() == true)
+									{
+										log.logError(QString("analog signal %1 register %2 used by another analog signal").
+													 arg(signalID).arg(addr16.offset() + i));
+										result = false;
+									}
+								}
+								else
+								{
+									analogRegs.emplace(addr16.offset() + i);
+								}
 							}
 						}
 					}
+
+					double constValue = 0;
+
+					ModbusSignal mbSignal;
+
+					mbSignal.signalID = signalID;
+					mbSignal.addr = addr16;
+					mbSignal.format = format;
+					mbSignal.isConst = mbsl->isConst(hash, &constValue);
+					mbSignal.constValue = constValue;
+
+					m_modbusSignals.emplace(mbSignal.addr, mbSignal);
 				}
-
-				double constValue = 0;
-
-				ModbusSignal mbSignal;
-
-				mbSignal.signalID = signalID;
-				mbSignal.addr = addr16;
-				mbSignal.format = format;
-				mbSignal.isConst = mbsl->isConst(hash, &constValue);
-				mbSignal.constValue = constValue;
-
-				m_modbusSignals.emplace(mbSignal.addr, mbSignal);
 			}
 		}
 

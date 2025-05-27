@@ -800,7 +800,7 @@ void AppDataServiceWorker::onArchSignalsTimer()
 
 void AppDataServiceWorker::copyArchSignalsInfo(Network::ServiceInfo& serviceInfo) const
 {
-	int count = 500;
+	int count = 1000;
 
 	std::vector<RecordsPerMin> recordsPerMin;
 	double updateStatus = 0;

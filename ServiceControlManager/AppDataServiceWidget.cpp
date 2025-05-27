@@ -146,7 +146,7 @@ void AppDataServiceWidget::addArchiveSignalsTab()
 
 	archSignalsWidget->setLayout(vBoxLayout);
 
-	addTab(archSignalsWidget, "TOP-500 archive signals");
+	addTab(archSignalsWidget, "TOP-1000 archive signals");
 }
 
 int AppDataServiceWidget::updateSettings(int rowCount)

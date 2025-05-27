@@ -35,7 +35,7 @@ namespace Gateway
 		void initConstValues(const std::map<Hash, double>& constValues);
 
 		ModbusFormat modbusFormat() const;
-		Address16 getAddress(Hash hash) const;
+		std::vector<Address16> getAddress(Hash hash) const;
 
 		bool isConst(Hash h, double* constValue) const;
 
@@ -50,7 +50,7 @@ namespace Gateway
 	private:
 		ModbusFormat m_modbusFormat;
 
-		std::map<Hash, Address16> m_signalAddrs;		// calcHash(AppSignalID) => Address16
+		std::map<Hash, std::vector<Address16>> m_signalAddrs;		// calcHash(AppSignalID) => Address16
 		std::map<Hash, double> m_constValues;			// calcHash(AppSignalID) => const value
 	};
 

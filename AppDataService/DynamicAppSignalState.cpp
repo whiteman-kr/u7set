@@ -455,7 +455,11 @@ int DynamicAppSignalState::setStateParsed(const Times& time,
 	{
 		m_statesQueue->push(curState, m_archive, thread);
 		pushedStatesCtr++;
-		m_statesSaved++;
+
+		if (m_archive == true)
+		{
+			m_statesSaved++;
+		}
 
 		// update apertures stored states
 		//
