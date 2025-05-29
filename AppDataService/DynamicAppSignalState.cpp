@@ -36,9 +36,14 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 
 	m_reverseLimits = (m_lowLimit > m_highLimit);
 
-	setAperture(signal->apertureType(),
-				signal->coarseAperture(),
-				signal->fineAperture());
+	m_defaultApertureType = signal->apertureType();
+	m_defaultCoarseAperture = signal->coarseAperture();
+	m_defaultFineAperture =	signal->fineAperture();
+	m_apertureOverrided = false;
+
+	setAperture(m_defaultApertureType,
+				m_defaultCoarseAperture,
+				m_defaultFineAperture);
 
 	m_enableTuning = signal->enableTuning();
 	m_tuningDefaultValue = signal->tuningDefaultValue();
@@ -715,9 +720,22 @@ void DynamicAppSignalState::overrideAperture(const ApertureRecord& ar)
 {
 	Q_ASSERT(m_signalHash == calcHash(ar.signalID));
 
-	setAperture(ar.apertureType, ar.coarseAperture, ar.fineAperture);
+	if (m_signalType != E::SignalType::Analog)
+	{
+		Q_ASSERT(false);
+		return;
+	}
 
-	m_apertureOverrided = true;
+	if (ar.setDefault == true)
+	{
+		setAperture(m_defaultApertureType, m_defaultCoarseAperture, m_defaultFineAperture);
+		m_apertureOverrided = false;
+	}
+	else
+	{
+		setAperture(ar.apertureType, ar.coarseAperture, ar.fineAperture);
+		m_apertureOverrided = true;
+	}
 }
 
 int DynamicAppSignalState::onArchSignalsTimer()
@@ -1090,7 +1108,7 @@ void DynamicAppSignalStates::resetGatewayQueueMask(const std::set<Hash>& hashes,
 	}
 }
 
-void DynamicAppSignalStates::overrideAperture(const ApertureRecord& ar)
+void DynamicAppSignalStates::overrideAperture(const ApertureRecord& ar, QString& logMsg)
 {
 	DynamicAppSignalState* state = getValueOrNullptr(m_hash2State, calcHash(ar.signalID));
 
@@ -1099,7 +1117,25 @@ void DynamicAppSignalStates::overrideAperture(const ApertureRecord& ar)
 		return;
 	}
 
+	if (state->signalType() != E::SignalType::Analog)
+	{
+		logMsg.clear();
+		return;
+	}
+
 	state->overrideAperture(ar);
+
+	if (ar.setDefault == true)
+	{
+		logMsg = QString("Set default aperture of %1: ").arg(state->appSignalID());
+	}
+	else
+	{
+		logMsg = QString("Aperture override of %1: ").arg(state->appSignalID());
+	}
+
+	logMsg += QString("type = %1, coarse = %2, fine = %3").
+			 arg(E::valueToString(state->apertureType())).arg(state->coarseAperture()).arg(state->fineAperture());
 }
 
 void DynamicAppSignalStates::clearStatesSavedCounters()

@@ -47,13 +47,21 @@ void AppDataServiceWorker::processGetServiceInfoRequest(const Network::GetServic
 		return;
 	}
 
+	QString logMsg;
+
 	for(int i = 0; i < aperturesSize; i++)
 	{
 		ApertureRecord ar;
 
 		ar.readFromProto(rq.aperturerecords(i));
 
-		m_appSignalStates.overrideAperture(ar);
+		m_appSignalStates.overrideAperture(ar, logMsg);
+
+		if (logMsg.isEmpty() == false)
+		{
+			DEBUG_LOG_MSG(logger(), logMsg);
+		}
+
 		m_apertureFile.updateAperture(ar);
 	}
 
@@ -479,9 +487,17 @@ void AppDataServiceWorker::createAndInitSignalStates()
 		DEBUG_LOG_WRN(logger(), "Aperture.csv file NOT loded!");
 	}
 
-	for(const auto& [signalID, apertureRecord] : m_apertureFile.apertures())
+	QString logMsg;
+
+	for(const auto& [signalID, ar] : m_apertureFile.apertures())
 	{
-		m_appSignalStates.overrideAperture(apertureRecord);
+
+		m_appSignalStates.overrideAperture(ar, logMsg);
+
+		if (logMsg.isEmpty() == false)
+		{
+			DEBUG_LOG_MSG(logger(), logMsg);
+		}
 	}
 
 	//

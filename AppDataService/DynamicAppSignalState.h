@@ -192,6 +192,10 @@ private:
 	bool m_overrideAboveHighLimitFlag = false;		// state of flag AboveHighLimit overrided by signal (set_flags used)
 	bool m_overrideBelowLowLimitFlag = false;		// state of flag BelowLowLimit overrided by signal (set_flags used)
 
+	E::ApertureType m_defaultApertureType = E::ApertureType::RangePercent;
+	double m_defaultCoarseAperture = 0;
+	double m_defaultFineAperture = 0;
+
 	E::ApertureType m_apertureType = E::ApertureType::RangePercent;
 	double m_coarseAperture = 0;
 	double m_fineAperture = 0;
@@ -267,7 +271,7 @@ public:
 	void setGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
 	void resetGatewayQueueMask(const std::set<Hash>& hashes, quint32 mask);
 
-	void overrideAperture(const ApertureRecord& ar);
+	void overrideAperture(const ApertureRecord& ar, QString& logMsg);
 	void clearStatesSavedCounters();
 
 private:

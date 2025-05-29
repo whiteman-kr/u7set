@@ -8,6 +8,7 @@
 #include <QListWidget>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QCheckBox>
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 
@@ -417,11 +418,19 @@ void AppDataServiceWidget::onChangeApertures()
 
 	gridLayout->addWidget(fineApertureEdit, 3, 1);
 
+	//
+
+	gridLayout->addWidget(new QLabel("Set default apertures"), 4, 0);
+
+	QCheckBox* setDefaultCheck = new QCheckBox;
+
+	gridLayout->addWidget(setDefaultCheck, 4, 1);
+
 	// create dialog
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-	gridLayout->addWidget(buttonBox, 4, 0, 1, 2);
+	gridLayout->addWidget(buttonBox, 5, 0, 1, 2);
 
 	connect(buttonBox, &QDialogButtonBox::rejected, &dlg, &QDialog::reject);
 
@@ -429,10 +438,25 @@ void AppDataServiceWidget::onChangeApertures()
 	double resultCoarseAperture = 0;
 	double resultFineAperture = 0;
 
+	connect(setDefaultCheck, &QCheckBox::checkStateChanged, &dlg, [&](Qt::CheckState state)
+	{
+		bool enabled = (state != Qt::Checked);
+
+		apertureTypeList->setEnabled(enabled);
+		coarseApertureEdit->setEnabled(enabled);
+		fineApertureEdit->setEnabled(enabled);
+	});
+
 	connect(buttonBox, &QDialogButtonBox::accepted, &dlg, [&]()
 	{
 		QString errStr;
 		bool ok = false;
+
+		if (setDefaultCheck->isChecked() == true)
+		{
+			dlg.accept();			// no checks required
+			return;
+		}
 
 		// check aperture type
 
@@ -519,6 +543,8 @@ void AppDataServiceWidget::onChangeApertures()
 
 	//
 
+	bool setDefault = setDefaultCheck->isChecked();
+
 	std::vector<ApertureRecord> apertures;
 
 	apertures.reserve(appSignalIDs.size());
@@ -531,9 +557,9 @@ void AppDataServiceWidget::onChangeApertures()
 		ar.apertureType = resultApertureType;
 		ar.coarseAperture = resultCoarseAperture;
 		ar.fineAperture = resultFineAperture;
+		ar.setDefault = setDefault;
 
 		apertures.push_back(ar);
-
 	}
 
 	overrideApertures(apertures);

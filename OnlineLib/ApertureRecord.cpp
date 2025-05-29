@@ -34,6 +34,7 @@ void ApertureRecord::fromString(const QString& str)
 	signalID = fields[0];
 	coarseAperture = fields[2].toDouble();
 	fineAperture = fields[3].toDouble();
+	setDefault = false;
 }
 
 void ApertureRecord::saveToProto(Network::ApertureRecord* ar) const
@@ -44,6 +45,7 @@ void ApertureRecord::saveToProto(Network::ApertureRecord* ar) const
 	ar->set_aperturetype(TO_INT(apertureType));
 	ar->set_coarseaperture(coarseAperture);
 	ar->set_fineaperture(fineAperture);
+	ar->set_setdefault(setDefault);
 }
 
 void ApertureRecord::readFromProto(const Network::ApertureRecord& ar)
@@ -52,5 +54,6 @@ void ApertureRecord::readFromProto(const Network::ApertureRecord& ar)
 	apertureType = static_cast<E::ApertureType>(ar.aperturetype());
 	coarseAperture = ar.coarseaperture();
 	fineAperture = ar.fineaperture();
+	setDefault = ar.setdefault();
 }
 

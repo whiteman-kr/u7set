@@ -394,6 +394,7 @@ message ApertureRecord
 	required int32 apertureType = 2;
 	required double coarseAperture = 3;
 	required double fineAperture = 4;
+	required bool setDefault = 5;
 }
 
 message ServiceClientInfo

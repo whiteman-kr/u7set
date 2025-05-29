@@ -8,6 +8,7 @@ struct ApertureRecord
 	E::ApertureType apertureType = E::ApertureType::RangePercent;
 	double coarseAperture = 0;
 	double fineAperture = 0;
+	bool setDefault = false;
 
 	QString toString() const;
 	void fromString(const QString& str);

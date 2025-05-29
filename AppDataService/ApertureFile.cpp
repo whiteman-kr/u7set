@@ -71,6 +71,12 @@ void ApertureFile::updateAperture(const ApertureRecord& ar)
 {
 	auto it = m_apertures.find(ar.signalID);
 
+	if (ar.setDefault == true)
+	{
+		m_apertures.erase(it);
+		return;
+	}
+
 	if (it == m_apertures.end())
 	{
 		m_apertures.emplace(ar.signalID, ar);
