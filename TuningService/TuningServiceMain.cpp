@@ -1,9 +1,17 @@
 #include <ServiceLib/ServiceStarter.h>
 #include "TuningService.h"
 #include "version.h"
+#include "../UtilsLib/CrashExceptionHandler.h"
 
 int main(int argc, char *argv[])
 {
+	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::TUNING_SERVICE);
+
+#if defined (Q_OS_WIN)
+	CrashExceptionHandler cdh(equipmentID);
+	cdh.EnableDumping(10);
+#endif
+
 	QCoreApplication app(argc, argv);
 
 	app.setApplicationName(Manufacturer::TUNING_SERVICE);
@@ -18,13 +26,13 @@ int main(int argc, char *argv[])
 
 	CircularLoggerShared logger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(logger, QString(), getServiceInstanceID(argc, argv));
+	LOGGER_INIT(logger, QString(), equipmentID);
 
 	logger->setLogCodeInfo(false);
 
 	CircularLoggerShared tuningLog = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(tuningLog, QString("Tuning"), getServiceEquipmentID(argc, argv));
+	LOGGER_INIT(tuningLog, QString("Tuning"), equipmentID);
 
 	tuningLog->setLogCodeInfo(false);
 

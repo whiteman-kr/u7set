@@ -214,8 +214,8 @@ private:
 QString getServiceInstanceID(const QStringList& serviceArgs);
 QString getServiceInstanceID(int argc, char* argv[]);
 
-QString getServiceEquipmentID(const QStringList& serviceArgs);
-QString getServiceEquipmentID(int argc, char* argv[]);
+QString getServiceEquipmentID(const QStringList& serviceArgs, const QString& softwareName);
+QString getServiceEquipmentID(int argc, char* argv[], const QString& softwareName);
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(QtServiceBase::ServiceFlags)
 

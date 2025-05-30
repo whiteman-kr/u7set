@@ -1,12 +1,16 @@
 #include "MetrologyMainWindow.h"
 #include "Options.h"
-
 #include <UiLib/OverrideWindows11Style.h>
-
 #include "version.h"
+#include "../UtilsLib/CrashExceptionHandler.h"
 
 int main(int argc, char* argv[])
 {
+#if defined (Q_OS_WIN)
+	CrashExceptionHandler cdh;
+	cdh.EnableDumping(10);
+#endif
+
 	QApplication app(argc, argv);
 
 	// Override Windows11 style, the current implementation does not look well.

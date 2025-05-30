@@ -6,10 +6,8 @@
 
 #if defined (Q_OS_WIN)
 
-CrashExceptionHandler* CrashExceptionHandler::pThis = nullptr;
-
-CrashExceptionHandler::CrashExceptionHandler():
-    QObject()
+CrashExceptionHandler::CrashExceptionHandler(const QString& equipmentID):
+	QObject()
 {
     if (pThis != nullptr)
     {
@@ -20,6 +18,8 @@ CrashExceptionHandler::CrashExceptionHandler():
     }
 
     pThis = this;
+
+	m_equipmentID = equipmentID;
 
     SetUnhandledExceptionFilter(TopLevelExceptionHandler);
     //EnableDumping(10);
@@ -61,7 +61,19 @@ bool CrashExceptionHandler::EnableDumping(DWORD dumpCount)
 
 void CrashExceptionHandler::CreateMiniDump(EXCEPTION_POINTERS* pep)
 {
-	QString dumpFileName = QCoreApplication::instance()->applicationName() + "_" + QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss") + ".dmp";
+	QString dumpFileName;
+
+	if (m_equipmentID.isEmpty() == true)
+	{
+		dumpFileName = QCoreApplication::instance()->applicationName() + "_" +
+					   QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss") + ".dmp";
+	}
+	else
+	{
+		dumpFileName = QCoreApplication::instance()->applicationName() + "_" +
+					   m_equipmentID + "_" +
+					   QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss") + ".dmp";
+	}
 
 	QString dumpPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 

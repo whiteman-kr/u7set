@@ -1,9 +1,17 @@
 #include <ServiceLib/ServiceStarter.h>
 #include "DiagDataService.h"
 #include "version.h"
+#include "../UtilsLib/CrashExceptionHandler.h"
 
 int main(int argc, char *argv[])
 {
+	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::DIAGNOSTIC_DATA_SERVICE);
+
+#if defined (Q_OS_WIN)
+	CrashExceptionHandler cdh(equipmentID);
+	cdh.EnableDumping(10);
+#endif
+
 	QCoreApplication app(argc, argv);
 
 	app.setApplicationName(Manufacturer::DIAGNOSTIC_DATA_SERVICE);
@@ -18,7 +26,7 @@ int main(int argc, char *argv[])
 
 	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(logger, QString(), getServiceEquipmentID(argc, argv));
+	LOGGER_INIT(logger, QString(), equipmentID);
 
 	logger->setLogCodeInfo(false);
 

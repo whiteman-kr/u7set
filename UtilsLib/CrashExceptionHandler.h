@@ -14,7 +14,7 @@ class CrashExceptionHandler : public QObject
     Q_OBJECT
 
 public:
-    CrashExceptionHandler();
+	CrashExceptionHandler(const QString& equipmentID = QString());
 
     bool EnableDumping(DWORD dumpCount);
 
@@ -26,7 +26,8 @@ private:
     void CreateMiniDump(EXCEPTION_POINTERS* pep);
 
 private:
-    static CrashExceptionHandler* pThis;
+	inline static QString m_equipmentID;
+	inline static CrashExceptionHandler* pThis = nullptr;
 };
 
 #endif

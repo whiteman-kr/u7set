@@ -1,11 +1,19 @@
 #include "CfgService.h"
 #include <ServiceLib/ServiceStarter.h>
 #include "version.h"
+#include "../UtilsLib/CrashExceptionHandler.h"
 
 #define CIRCULAR_LOGGER_PTR_ASSERTING
 
 int main(int argc, char** argv)
 {
+	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::CONFIGURATION_SERVICE);
+
+#if defined (Q_OS_WIN)
+	CrashExceptionHandler cdh(equipmentID);
+	cdh.EnableDumping(10);
+#endif
+
 	QCoreApplication app(argc, argv);
 
 	app.setApplicationName(Manufacturer::CONFIGURATION_SERVICE);
@@ -20,7 +28,7 @@ int main(int argc, char** argv)
 
 	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(logger, QString(), getServiceEquipmentID(argc, argv));
+	LOGGER_INIT(logger, QString(), equipmentID);
 
 	logger->setLogCodeInfo(false);
 

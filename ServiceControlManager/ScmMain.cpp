@@ -3,6 +3,7 @@
 #include "MainWindow.h"
 #include "version.h"
 #include "../UtilsLib/WUtils.h"
+#include "../UtilsLib/CrashExceptionHandler.h"
 
 // Visual Leak Detector
 //
@@ -18,6 +19,11 @@
 
 int main(int argc, char *argv[])
 {
+#if defined (Q_OS_WIN)
+	CrashExceptionHandler cdh;
+	cdh.EnableDumping(10);
+#endif
+
 	QApplication app(argc, argv);
 
 	app.setApplicationName(Manufacturer::SERVICE_CONTROL_MANAGER);
