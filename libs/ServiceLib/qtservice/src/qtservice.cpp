@@ -43,6 +43,8 @@
 #include <QCoreApplication>
 #include <stdio.h>
 #include <QTimer>
+#include <QSettings>
+#include <CommonLib/ConstStrings.h>
 
 #ifdef _MSC_VER
 	#pragma warning(push)
@@ -1526,7 +1528,7 @@ QString getServiceInstanceID(const QStringList& serviceArgs)
 	return QString();
 }
 
-QString getServiceEquipmentID(const QStringList& serviceArgs)
+QString getServiceEquipmentID(const QStringList& serviceArgs, const QString& softwareName)
 {
 	for(QString arg : serviceArgs)
 	{
@@ -1547,9 +1549,10 @@ QString getServiceEquipmentID(const QStringList& serviceArgs)
 		return vl[1].trimmed();
 	}
 
-	return QString();
-}
+	QSettings serviceSettings(QSettings::SystemScope, Manufacturer::RADIY, softwareName);
 
+	return serviceSettings.value(SoftwareSetting::EQUIPMENT_ID, QString()).toString();
+}
 
 QString getServiceInstanceID(int argc, char* argv[])
 {
@@ -1569,7 +1572,7 @@ QString getServiceInstanceID(int argc, char* argv[])
 	return getServiceInstanceID(args);
 }
 
-QString getServiceEquipmentID(int argc, char* argv[])
+QString getServiceEquipmentID(int argc, char* argv[], const QString& softwareName)
 {
 	QStringList args;
 
@@ -1584,9 +1587,5 @@ QString getServiceEquipmentID(int argc, char* argv[])
 		args.append(QString(argv[i]));
 	}
 
-	return getServiceEquipmentID(args);
+	return getServiceEquipmentID(args, softwareName);
 }
-
-
-
-

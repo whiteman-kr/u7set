@@ -4,18 +4,12 @@
 #include <QCoreApplication>
 #include <QFile>
 #include <QDir>
-
 #include "Print.h"
-
-// #ifdef _WIN32
-// #include <windows.h>
-// #include <cstdio>
-// #endif
-
 #include "Archivist.h"
 #include "FileArchivist.h"
 #include "DbArchivist.h"
 #include "ArchUtils.h"
+#include "../UtilsLib/CrashExceptionHandler.h"
 
 bool parseCmdLine(int argc, char* argv[], RequestParams* rp);
 bool parseCfgFile(const QString& cfgFileName, RequestParams* rp);
@@ -23,6 +17,11 @@ bool parseSignalsList(QString signalsListStr, QStringList* signalsList);	// copy
 
 int main(int argc, char* argv[])
 {
+#if defined (Q_OS_WIN)
+	CrashExceptionHandler cdh;
+	cdh.EnableDumping(10);
+#endif
+
 	QCoreApplication app(argc, argv);
 
 	RequestParams rp;

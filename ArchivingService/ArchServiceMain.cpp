@@ -2,6 +2,7 @@
 #include "ArchivingService.h"
 #include "../UtilsLib/WUtils.h"
 #include "version.h"
+#include "../UtilsLib/CrashExceptionHandler.h"
 
 // To increase time that system waiting to the service shutting down, change value:
 //
@@ -10,6 +11,13 @@
 
 int main(int argc, char *argv[])
 {
+	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::ARCHIVING_SERVICE);
+
+#if defined (Q_OS_WIN)
+	CrashExceptionHandler cdh(equipmentID);
+	cdh.EnableDumping(10);
+#endif
+
 	QCoreApplication app(argc, argv);
 
 	app.setApplicationName(Manufacturer::ARCHIVING_SERVICE);
@@ -24,7 +32,7 @@ int main(int argc, char *argv[])
 
 	std::shared_ptr<CircularLogger> logger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(logger, QString(), getServiceEquipmentID(argc, argv));
+	LOGGER_INIT(logger, QString(), equipmentID);
 
 	logger->setLogCodeInfo(false);
 
