@@ -170,7 +170,7 @@ Component.prototype.installVCRedist = function()
 
         bld = parseInt(elements[elements.length-1]);
 
-        if (bld < 32532)
+        if (bld < 35112)
         {
             doInstall = true;
         }
