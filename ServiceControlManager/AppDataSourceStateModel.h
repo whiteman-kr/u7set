@@ -1,9 +1,9 @@
 #pragma once
 
-class DataSourceStateModel : public QAbstractTableModel
+class AppDataSourceStateModel : public QAbstractTableModel
 {
 public:
-	DataSourceStateModel();
+	AppDataSourceStateModel();
 
 	virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;

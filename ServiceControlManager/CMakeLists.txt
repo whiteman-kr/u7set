@@ -39,8 +39,8 @@ add_executable(${TARGET} WIN32
 	Columns.h
 	DataSourceInfoModel.cpp
 	DataSourceInfoModel.h
-	DataSourceStateModel.cpp
-	DataSourceStateModel.h
+	AppDataSourceStateModel.cpp
+	AppDataSourceStateModel.h
 	MainWindow.cpp
 	MainWindow.h
 	ScanOptionsWidget.cpp
@@ -60,6 +60,8 @@ add_executable(${TARGET} WIN32
 	TuningServiceWidget.h
 	TuningSourcesModel.cpp
 	TuningSourcesModel.h
+	TuningSourceStateModel.cpp
+	TuningSourceStateModel.h
 	TuningSourceWidget.cpp
 	TuningSourceWidget.h
 

@@ -2,6 +2,7 @@
 
 #include "BaseServiceWidget.h"
 #include "TuningSourcesModel.h"
+#include "TuningSourceWidget.h"
 
 class TuningServiceWidget : public BaseServiceWidget
 {
@@ -23,12 +24,19 @@ public slots:
 	int updateSrvStatus(int rowCount) override;
 	int updateSettings(int rowCount) override;
 
+private slots:
+	void forgetWidget(QString dataSourceID);
+
 private:
 	void addTuningSourcesTab();
+
+	void onSourceDoubleClicked(const QModelIndex& index);
 
 	void updateModels(const Network::ServiceInfo& srvInfo);
 
 private:
 	TuningSourcesModel* m_sourcesModel = nullptr;
 	QTableView* m_sourcesView = nullptr;
+
+	std::map<QString, TuningSourceWidget*> m_sourceWidgets;
 };

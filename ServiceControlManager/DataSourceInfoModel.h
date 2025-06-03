@@ -12,9 +12,24 @@ public:
 	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
 	void updateData(const Network::AppDataSourceState& state);
+	void updateData(const Network::TuningSourceInfoState& infoState);
 
 private:
-	Network::AppDataSourceState m_state;
+	QString m_moduleEqupmentID;
+	QString m_moduleCaption;
+	QString m_moduleType;
+	QString m_modulePresetName;
+	int m_moduleWorkcycleMcs = 0;
+	QString m_subsystemID;
+	int m_subsystemKey = 0;
+	int m_lmNumber = 0;
+	QString m_subsystemChannel;
+	int m_rupProtocolVersion = 0;
+	QString m_expectedDataID = 0;
+	int m_dataFramesQuantity = 0;
+	int m_dataSizeBytes = 0;
+	QString m_lanControllerID;
+	QString m_lanControllerIP;
 
 	inline static const std::vector<QString> m_rows =
 		{

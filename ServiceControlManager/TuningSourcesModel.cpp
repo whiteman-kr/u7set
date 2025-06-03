@@ -208,3 +208,14 @@ void TuningSourcesModel::updateData(const Network::ServiceInfo& srvInfo)
 
 	emit dataChanged(QModelIndex(), QModelIndex());
 }
+
+QString TuningSourcesModel::getSourceEquipmentID(int index)
+{
+	if (index < 0 || index >= m_sources.size())
+	{
+		Q_ASSERT(false);
+		return Separator::EMPTY_STR;
+	}
+
+	return QString::fromStdString(m_sources[index].info().moduleequipmentid());
+}

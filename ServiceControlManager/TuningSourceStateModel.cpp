@@ -1,30 +1,30 @@
-#include "DataSourceStateModel.h"
+#include "TuningSourceStateModel.h"
 #include <CommonLib/HostAddressPort.h>
 #include "../UtilsLib/WUtils.h"
 #include "Brush.h"
 
-DataSourceStateModel::DataSourceStateModel()
+TuningSourceStateModel::TuningSourceStateModel()
 {
 	m_valueTime.resize(m_rows.size(), std::make_pair(0, 0));
 	m_curTime = QDateTime::currentMSecsSinceEpoch();
 
-	connect(&m_timer1s, &QTimer::timeout, this, &DataSourceStateModel::onTimer1s);
+	connect(&m_timer1s, &QTimer::timeout, this, &TuningSourceStateModel::onTimer1s);
 	m_timer1s.start(1000);
 }
 
-int DataSourceStateModel::rowCount(const QModelIndex& parent) const
+int TuningSourceStateModel::rowCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
 	return TO_INT(m_rows.size());
 }
 
-int DataSourceStateModel::columnCount(const QModelIndex& parent) const
+int TuningSourceStateModel::columnCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
 	return 2;
 }
 
-QVariant DataSourceStateModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant TuningSourceStateModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
 	{
@@ -36,7 +36,7 @@ QVariant DataSourceStateModel::headerData(int section, Qt::Orientation orientati
 	return QVariant();
 }
 
-QVariant DataSourceStateModel::data(const QModelIndex& index, int role) const
+QVariant TuningSourceStateModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::CheckStateRole ||
 		role == Qt::DecorationRole ||
@@ -100,7 +100,7 @@ QVariant DataSourceStateModel::data(const QModelIndex& index, int role) const
 			return m_rows[row];
 		}
 
-		if (m_state.receivesdata() == false)
+/*		if (m_state.receivesdata() == false)
 		{
 			if (row == 0)
 			{
@@ -132,13 +132,13 @@ QVariant DataSourceStateModel::data(const QModelIndex& index, int role) const
 		case 16: return TO_INT64(m_state.errorduplicateplanttime());
 		case 17: return TO_INT64(m_state.errornonmonotonicplanttime());
 		case 18: return TO_INT64(m_state.errorplanttimeformat());
-		}
+		}*/
 	}
 
 	return m_cleanVariant;
 }
 
-void DataSourceStateModel::updateData(const Network::AppDataSourceState& state)
+void TuningSourceStateModel::updateData(const Network::TuningSourceInfoState& state)
 {
 	m_state = state;
 
@@ -157,7 +157,7 @@ void DataSourceStateModel::updateData(const Network::AppDataSourceState& state)
 	emit dataChanged(index(0, 1), index(TO_INT(m_rows.size()) - 1, 1));
 }
 
-void DataSourceStateModel::updateValueTime(int row, qint64 value)
+void TuningSourceStateModel::updateValueTime(int row, qint64 value)
 {
 	if (row < 0 || row >= m_valueTime.size())
 	{
@@ -172,7 +172,7 @@ void DataSourceStateModel::updateValueTime(int row, qint64 value)
 	}
 }
 
-bool DataSourceStateModel::valueChanged(int row, bool receivesData) const
+bool TuningSourceStateModel::valueChanged(int row, bool receivesData) const
 {
 	if (row < 0 || row >= m_valueTime.size())
 	{
@@ -190,7 +190,7 @@ bool DataSourceStateModel::valueChanged(int row, bool receivesData) const
 	return dt < (30 * 1000);	// 30 sec
 }
 
-void DataSourceStateModel::onTimer1s()
+void TuningSourceStateModel::onTimer1s()
 {
 	m_curTime = QDateTime::currentMSecsSinceEpoch();
 }

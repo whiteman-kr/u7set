@@ -89,15 +89,45 @@ int TuningServiceWidget::updateSettings(int rowCount)
 	return rowCount;
 }
 
+void TuningServiceWidget::forgetWidget(QString dataSourceID)
+{
+	m_sourceWidgets.erase(dataSourceID);
+}
+
 void TuningServiceWidget::addTuningSourcesTab()
 {
 	m_sourcesModel = new TuningSourcesModel(this);
 	m_sourcesView = createTableView(m_sourcesModel, m_sourcesModel->columns());
 
-	// connect(m_sourcesView, &QTableView::doubleClicked, this, &TuningSourcesModel::onSourceDoubleClicked);
+	connect(m_sourcesView, &QTableView::doubleClicked, this, &TuningServiceWidget::onSourceDoubleClicked);
 
 	addTab(m_sourcesView, "Tuning sources");
 }
+
+void TuningServiceWidget::onSourceDoubleClicked(const QModelIndex& index)
+{
+	int row = index.row();
+
+	QString sourceEquipmentID = m_sourcesModel->getSourceEquipmentID(row);
+
+	TuningSourceWidget* srcWidget = getValueOrNullptr(m_sourceWidgets, sourceEquipmentID);
+
+	if (srcWidget == nullptr)
+	{
+		srcWidget = new TuningSourceWidget(sourceEquipmentID, this);
+
+		m_sourceWidgets.emplace(sourceEquipmentID, srcWidget);
+
+		srcWidget->show();
+
+		connect(srcWidget, &TuningSourceWidget::forgetMe, this, &TuningServiceWidget::forgetWidget);
+	}
+	else
+	{
+		srcWidget->activateWindow();
+	}
+}
+
 
 void TuningServiceWidget::updateModels(const Network::ServiceInfo& srvInfo)
 {
@@ -105,4 +135,23 @@ void TuningServiceWidget::updateModels(const Network::ServiceInfo& srvInfo)
 	{
 		m_sourcesModel->updateData(srvInfo);
 	}
+
+	if (m_sourceWidgets.size() > 0)
+	{
+		int srcCount = srvInfo.tuningsourcesinfostate_size();
+
+		for(int i = 0; i < srcCount; i++)
+		{
+			const Network::TuningSourceInfoState& infoState = srvInfo.tuningsourcesinfostate(i);
+
+			TuningSourceWidget* w = getValueOrNullptr(m_sourceWidgets,
+										QString::fromStdString(infoState.info().moduleequipmentid()));
+
+			if (w != nullptr)
+			{
+				w->updateData(infoState);
+			}
+		}
+	}
+
 }

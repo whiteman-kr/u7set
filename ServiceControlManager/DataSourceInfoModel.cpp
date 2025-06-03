@@ -1,5 +1,6 @@
 #include "DataSourceInfoModel.h"
 #include <CommonLib/HostAddressPort.h>
+#include <HardwareLib/DataProtocols.h>
 
 DataSourceInfoModel::DataSourceInfoModel()
 {
@@ -57,41 +58,80 @@ QVariant DataSourceInfoModel::data(const QModelIndex& index, int role) const
 
 		switch (row)
 		{
-		case 0:	return QString::fromStdString(m_state.lmequipmentid());
-		case 1: return QString::fromStdString(m_state.lmcaption());
-		case 2: return QString("0x%1  (%2)").arg(QString("%1").arg(m_state.moduletype(), 4, 16, Latin1Char::ZERO).toUpper()).
-											arg(m_state.moduletype());
-		case 3: return QString::fromStdString(m_state.modulepresetname());
-		case 4: return m_state.moduleworkcyclemcs();
-		case 5: return QString::fromStdString(m_state.subsystemid());
-		case 6: return m_state.subsystemkey();
-		case 7: return m_state.lmnumber();
-		case 8: return QString::fromStdString(m_state.subsystemchannel());
-		case 9: return m_state.rupprotocolversion();
-		case 10: return QString("0x%1  (%2)").arg(QString("%1").arg(m_state.expecteddataid(), 8, 16, Latin1Char::ZERO).toUpper()).
-											arg(m_state.expecteddataid());
-		case 11: return m_state.dataframesquantity();
-		case 12: return m_state.datasizebytes();
-		case 13: return QString::fromStdString(m_state.lancontrollerid());
-		case 14: return HostAddressPort(m_state.lancontrollerip(), m_state.lancontrollerport()).toString();
+		case 0:	return m_moduleEqupmentID;
+		case 1: return m_moduleCaption;
+		case 2: return m_moduleType;
+		case 3: return m_modulePresetName;
+		case 4: return m_moduleWorkcycleMcs;
+		case 5: return m_subsystemID;
+		case 6: return m_subsystemKey;
+		case 7: return m_lmNumber;
+		case 8: return m_subsystemChannel;
+		case 9: return m_rupProtocolVersion;
+		case 10: return m_expectedDataID;
+		case 11: return m_dataFramesQuantity;
+		case 12: return m_dataSizeBytes;
+		case 13: return m_lanControllerID;
+		case 14: return m_lanControllerIP;
 		}
-
-	/*	QString("Module EquipmentID"),					// 0
-
-			QString("Expected DataUID"),					// 12
-			QString("Data frames quantity"),				// 13
-			QString("Data size, bytes"),					// 14*/
-
 
 		return Separator::EMPTY_STR;
 	}
 
-	return QVariant("");
+	return QVariant(Separator::EMPTY_STR);
 }
 
 void DataSourceInfoModel::updateData(const Network::AppDataSourceState& state)
 {
-	m_state = state;
+	m_moduleEqupmentID = QString::fromStdString(state.lmequipmentid());
+	m_moduleCaption = QString::fromStdString(state.lmcaption());
+	m_moduleType = QString("0x%1  (%2)").arg(QString("%1").arg(state.moduletype(), 4, 16, Latin1Char::ZERO).toUpper()).
+															arg(state.moduletype());
+	m_modulePresetName = QString::fromStdString(state.modulepresetname());
+	m_moduleWorkcycleMcs = state.moduleworkcyclemcs();
+	m_subsystemID = QString::fromStdString(state.subsystemid());
+	m_subsystemKey = state.subsystemkey();
+	m_lmNumber = state.lmnumber();
+	m_subsystemChannel = QString::fromStdString(state.subsystemchannel());
+	m_rupProtocolVersion = state.rupprotocolversion();
+	m_expectedDataID = QString("0x%1  (%2)").arg(QString("%1").arg(state.expecteddataid(), 8, 16, Latin1Char::ZERO).toUpper()).
+																arg(state.expecteddataid());
+	m_dataFramesQuantity = state.dataframesquantity();
+	m_dataSizeBytes = state.datasizebytes();
+	m_lanControllerID = QString::fromStdString(state.lancontrollerid());
+	m_lanControllerIP = HostAddressPort(state.lancontrollerip(), state.lancontrollerport()).toString();
+
+	emit dataChanged(index(0, 1), index(TO_INT(m_rows.size()) - 1, 1));
+}
+
+void DataSourceInfoModel::updateData(const Network::TuningSourceInfoState& infoState)
+{
+	const Network::DataSourceInfo& info = infoState.info();
+
+	m_moduleEqupmentID = QString::fromStdString(info.moduleequipmentid());
+	m_moduleCaption = QString::fromStdString(info.modulecaption());
+	m_moduleType = QString("0x%1  (%2)").arg(QString("%1").arg(info.moduletype(), 4, 16, Latin1Char::ZERO).toUpper()).
+			   arg(info.moduletype());
+	m_modulePresetName = QString::fromStdString(info.modulepresetname());
+	m_moduleWorkcycleMcs = info.workcycle_mcs();
+	m_subsystemID = QString::fromStdString(info.subsystemid());
+	m_subsystemKey = info.subsystemkey();
+	m_lmNumber = info.lmnumber();
+	m_subsystemChannel = QString::fromStdString(info.subsystemchannel());
+
+	if (info.lancontrollerinfo_size() > 0)
+	{
+		const Network::LanControllerInfo& lci = info.lancontrollerinfo(0);
+
+		m_rupProtocolVersion = info.rupprotocolversion();
+
+		m_expectedDataID = QString("0x%1  (%2)").arg(QString("%1").arg(lci.ruptuningdatauid(), 8, 16, Latin1Char::ZERO).toUpper()).
+						   arg(lci.ruptuningdatauid());
+		m_dataFramesQuantity = 1;
+		m_dataSizeBytes = sizeof(Rup::Data);
+		m_lanControllerID = QString::fromStdString(lci.equipmentid());
+		m_lanControllerIP = QString("%1:%2").arg(QString::fromStdString(lci.tuningip())).arg(lci.tuningport());
+	}
 
 	emit dataChanged(index(0, 1), index(TO_INT(m_rows.size()) - 1, 1));
 }

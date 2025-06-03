@@ -356,6 +356,9 @@ namespace OnlineLib
 
 		proto->clear_lancontrollerinfo();
 
+		proto->set_rupprotocolversion(m_lanControllersInfo.rupVersion());
+		proto->set_fotipprotocolversion(m_lanControllersInfo.fotipVersion());
+
 		for (const LanControllerInfo& lci : m_lanControllersInfo())
 		{
 			Network::LanControllerInfo* protoLci = proto->add_lancontrollerinfo();
@@ -385,6 +388,9 @@ namespace OnlineLib
 		m_moduleWorkcycle_mcs = proto.workcycle_mcs();
 
 		m_lanControllersInfo.clear();
+
+		m_lanControllersInfo.setRupVersion(proto.rupprotocolversion());
+		m_lanControllersInfo.setFotipVersion(proto.fotipprotocolversion());
 
 		int count = proto.lancontrollerinfo_size();
 

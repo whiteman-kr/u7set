@@ -2,49 +2,42 @@
 
 #include <QWidget>
 
+#include "DataSourceInfoModel.h"
+#include "TuningSourceStateModel.h"
+
 class QTableView;
 class QStandardItemModel;
-class TcpTuningServiceClient;
 class QSplitter;
 
 class TuningSourceWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningSourceWidget(quint64 id, QString equipmentId, QString controllerEquipmentId, int controllerIndex, QWidget *parent = nullptr);
+	TuningSourceWidget(const QString& equipmentID, QWidget* parent);
 	~TuningSourceWidget();
 
-	quint64 id() const { return m_id; }
-	const QString& equipmentId() const { return m_equipmentId; }
-	const QString& controllerEquipmentId() const { return m_controllerEquipmentId; }
-signals:
-	void forgetMe();
+	void updateData(const Network::TuningSourceInfoState& state);
 
-public slots:
-	void updateStateFields();
-	void setClientSocket(TcpTuningServiceClient* tcpClientSocket);
-	void unsetClientSocket();
+signals:
+	void forgetMe(QString dataSoureID);
 
 protected:
 	void closeEvent(QCloseEvent* event);
 
 private:
-	void initTable(QTableView* table, QStandardItemModel* model);
+	void initTable(QTableView* table, QAbstractTableModel* model);
 
 private:
+	QString m_equipmentID;
+
 	QTableView* m_infoTable = nullptr;
-	QStandardItemModel* m_infoModel = nullptr;
+	DataSourceInfoModel m_infoModel;
 
 	QTableView* m_stateTable = nullptr;
-	QStandardItemModel* m_stateModel = nullptr;
+	TuningSourceStateModel m_stateModel;
 
-	QSplitter* m_splitter = nullptr;
-
-	TcpTuningServiceClient* m_tcpClientSocket = nullptr;
-	quint64 m_id;
-
-	QString m_equipmentId;
-	QString m_controllerEquipmentId;
-	int m_controllerIndex = 0;
+	inline static const QString TUNING_SRC_WIDGET_KEY = QString("TuningSourceWidget/");
+	inline static const QString INFO_COLUMN_WIDTH_KEY = QString("/infoColumnWidth");
+	inline static const QString STATE_COLUMN_WIDTH_KEY = QString("/stateColumnWidth");
 };
 

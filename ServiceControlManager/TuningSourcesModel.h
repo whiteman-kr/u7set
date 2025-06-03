@@ -19,6 +19,8 @@ public:
 
 	void updateData(const Network::ServiceInfo& srvInfo);
 
+	QString getSourceEquipmentID(int index);
+
 private:
 	std::vector<Network::TuningSourceInfoState> m_sources;
 	std::vector<qint64> m_sourcesErrorCount;

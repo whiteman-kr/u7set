@@ -1245,7 +1245,9 @@ namespace Tuning
 		if (rupHeader.timeStamp.isValid(false) == false)
 		{
 			m_state.errTimeStamp++;
-			DEBUG_LOG_WRN(m_logger, QString("Error time stamp: %1").arg(rupHeader.timeStamp.rawToString(false)));
+			DEBUG_LOG_WRN(m_logger, QString("Error time stamp: source IP = %1, time = %2").
+											arg(sourceIP().toString()).
+											arg(rupHeader.timeStamp.rawToString(false)));
 		}
 
 		if (rupHeader.flags.tuningData != 1 ||

@@ -191,6 +191,9 @@ message DataSourceInfo
 	optional int32 acquiredSignalsCount = 13 [default = 0];
 	optional uint32 expectedDataUID = 14 [default = 0];
 	optional int32 workcycle_mcs = 15 [default = 0];
+
+	optional int32 rupProtocolVersion = 16 [default = 0];
+	optional int32 fotipProtocolVersion = 17 [default = 0];
 }
 
 message GetDataSourcesInfoRequest

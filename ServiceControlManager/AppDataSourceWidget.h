@@ -3,7 +3,7 @@
 #include <QWidget>
 
 #include "DataSourceInfoModel.h"
-#include "DataSourceStateModel.h"
+#include "AppDataSourceStateModel.h"
 
 class QTableView;
 class QStandardItemModel;
@@ -34,7 +34,7 @@ private:
 	DataSourceInfoModel m_infoModel;
 
 	QTableView* m_stateTable = nullptr;
-	DataSourceStateModel m_stateModel;
+	AppDataSourceStateModel m_stateModel;
 
 	inline static const QString APP_DATA_SRC_WIDGET_KEY = QString("AppDataSourceWidget/");
 	inline static const QString INFO_COLUMN_WIDTH_KEY = QString("/infoColumnWidth");
