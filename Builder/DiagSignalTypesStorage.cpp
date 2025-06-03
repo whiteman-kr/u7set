@@ -86,26 +86,25 @@ bool DiagSignalTypesStorage::load(QString* errorMessage)
 		return true;
 	}
 
-	std::vector<std::shared_ptr<DbFile>> files;
-	ok = m_db->getLatestVersion(fileList, &files, nullptr);
-
-	if (ok == false)
+	for (const auto& fi : fileList)
 	{
-		*errorMessage = m_db->lastError();
-		return false;
-	}
-
-	for (const auto& f : files)
-	{
-		if ((f->deleted() == true || f->action() == E::VcsItemAction::Deleted) && 
-			f->state() == E::VcsState::CheckedIn)
+		if ((fi.deleted() == true || fi.action() == E::VcsItemAction::Deleted) && 
+			fi.state() == E::VcsState::CheckedIn)
 		{
 			continue;
 		}
 
+		std::shared_ptr<DbFile> f;
+		ok = m_db->getLatestVersion(fi, &f, nullptr);
+		if (ok == false)
+		{
+			*errorMessage = m_db->lastError();
+			return false;
+		}
+
 		auto diagSignalType = Hardware::DiagSignalTypeObject::Create(f->data());
 
-		setFileInfo(diagSignalType->uuid(), *f);
+		setFileInfo(diagSignalType->uuid(), fi);
 		add(diagSignalType->uuid(), diagSignalType);
 	}
 

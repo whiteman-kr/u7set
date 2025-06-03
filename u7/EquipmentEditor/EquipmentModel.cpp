@@ -722,6 +722,23 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 	std::vector<DbFileInfo> checkedOutFiles;
 	dbController()->getCheckedOutFiles(&files, &checkedOutFiles, nullptr);
 
+	// Filter all files items that were checked-out by other users unless current user is an administrator
+	//
+	checkedOutFiles.erase(std::remove_if(checkedOutFiles.begin(),
+										 checkedOutFiles.end(),
+										 [this](const DbFileInfo& fi)
+										 {
+											 return fi.userId() != m_dbController->currentUser().userId() &&
+													m_dbController->currentUser().isAdminstrator() == false;
+										 }),
+						  checkedOutFiles.end());
+
+	if (checkedOutFiles.empty() == true) 
+	{
+		QMessageBox::information(m_parentWidget, qAppName(), tr("No objects found to check-in by current user."));
+		return;
+	}
+
 	// Check in
 	//
 	std::vector<DbFileInfo> checkedInFiles;
@@ -820,7 +837,7 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 
 		if (freshFileIt == freshFiles.end())
 		{
-			assert(false);
+			//assert(false);	Normal situation. This file was not marked for checked-out, because its state was not E::VcsState::CheckedIn
 			continue;
 		}
 		else

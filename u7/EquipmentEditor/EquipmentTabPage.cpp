@@ -1180,11 +1180,11 @@ void EquipmentTabPage::setProperties()
 		const DbFileInfo* deviceFileInfo = device->data();
 		assert(deviceFileInfo);
 
-		if (deviceFileInfo->state() == E::VcsState::CheckedOut)
+		if (deviceFileInfo->state() == E::VcsState::CheckedOut && deviceFileInfo->userId() == db()->currentUser().userId())
 		{
 			checkedOutList << device;
 		}
-		else
+		else 
 		{
 			checkedInList << device;
 		}

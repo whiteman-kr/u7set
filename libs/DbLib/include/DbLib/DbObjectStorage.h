@@ -67,7 +67,7 @@ public:
 
 		// Decrease all indexes in the map that are bigger than deleted
 		//
-		for (auto i : m_objectsMap)
+		for (const auto& i : m_objectsMap)
 		{
 			const QUuid& decUuid = i.first;
 			size_t decIndex = i.second;

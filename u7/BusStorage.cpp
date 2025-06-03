@@ -36,26 +36,15 @@ bool BusStorage::load(QString* errorMessage)
 		return true;
 	}
 
-	// Get Busses latest version from the DB
-	//
-	std::vector<std::shared_ptr<DbFile>> files;
-
-	ok = m_db->getLatestVersion(fileList, &files, nullptr);
-	if (ok == false)
-	{
-		*errorMessage = m_db->lastError();
-		return false;
-	}
-
 	// Parse files, create actual Busses
 	//
 	std::vector<AppSignalLib::Bus> busses;
-	busses.reserve(files.size());
+	busses.reserve(fileList.size());
 
-	for (const std::shared_ptr<DbFile>& f : files)
+	for (const DbFileInfo& fi : fileList)
 	{
-		if ((f->deleted() == true || f->action() == E::VcsItemAction::Deleted) && 
-			f->state() == E::VcsState::CheckedIn)
+		if ((fi.deleted() == true || fi.action() == E::VcsItemAction::Deleted) && 
+			fi.state() == E::VcsState::CheckedIn)
 		{
 			continue;
 		}
@@ -64,6 +53,16 @@ bool BusStorage::load(QString* errorMessage)
 
 		QString loadBusErrorMessage;
 
+		// Load file contents
+		//
+		std::shared_ptr<DbFile> f;
+		ok = m_db->getLatestVersion(fi, &f, nullptr);
+		if (ok == false)
+		{
+			*errorMessage = m_db->lastError();
+			return false;
+		}
+		
 		ok = bus->Load(f->data());
 		if (ok == false)
 		{
@@ -71,9 +70,9 @@ bool BusStorage::load(QString* errorMessage)
 			return false;
 		}
 
-		setFileInfo(bus->uuid(), *f);
+		setFileInfo(bus->uuid(), fi);
 
-		bus->setFileName(f->fileName());
+		bus->setFileName(fi.fileName());
 
 		add(bus->uuid(), bus);
 	}

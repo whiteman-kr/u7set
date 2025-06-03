@@ -95,25 +95,24 @@ namespace Builder
 			return true;
 		}
 
-		// Get Busses latest version from the DB
+		// Get AppSignalLists latest version from the DB
 		//
-		std::vector<std::shared_ptr<DbFile>> files;
-
-		ok = m_db->getLatestVersion(fileList, &files, nullptr);
-		if (ok == false)
+		for (const DbFileInfo& fi : fileList)
 		{
-			*errorMessage = m_db->lastError();
-			return false;
-		}
-
-		for (const std::shared_ptr<DbFile>& f : files)
-		{
-			if ((f->deleted() == true || f->action() == E::VcsItemAction::Deleted) && f->state() == E::VcsState::CheckedIn)
+			if ((fi.deleted() == true || fi.action() == E::VcsItemAction::Deleted) && fi.state() == E::VcsState::CheckedIn)
 			{
 				continue;
 			}
 
 			std::shared_ptr<AppSignalLists::AppSignalList> list = std::make_shared<AppSignalLists::AppSignalList>();
+
+			std::shared_ptr<DbFile> f;
+			ok = m_db->getLatestVersion(fi, &f, nullptr);
+			if (ok == false)
+			{
+				*errorMessage = m_db->lastError();
+				return false;
+			}
 
 			Proto::Envelope envelope;
 			if (envelope.ParseFromArray(f->data().constData(), static_cast<int>(f->data().size())) == false)
@@ -129,7 +128,7 @@ namespace Builder
 				return false;
 			}
 
-			setFileInfo(list->uuid(), *f);
+			setFileInfo(list->uuid(), fi);
 
 			add(list->uuid(), list);
 		}
