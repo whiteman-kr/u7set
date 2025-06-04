@@ -267,7 +267,7 @@ namespace Builder
 				return false;
 			}
 
-			setFileInfo(c->uuid(), *file);
+			setFileInfo(c->uuid(), fi);
 			add(c->uuid(), c);
 		}
 

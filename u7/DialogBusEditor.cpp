@@ -683,6 +683,11 @@ void DialogBusEditor::onCheckIn()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
+		if (m_busses.fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdminstrator() == false)
+		{
+			continue;
+		}
+
 		bool fileWasRemoved = false;
 		QString errorMessage;
 
@@ -749,6 +754,11 @@ void DialogBusEditor::onUndo()
 	for (auto item : selectedItems)
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
+
+		if (m_busses.fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdminstrator() == false)
+		{
+			continue;
+		}
 
 		bool fileRemoved = false;
 		QString errorMessage;
@@ -974,8 +984,11 @@ void DialogBusEditor::onSignalEdit()
 		editSignalsPointers.push_back(bs);
 	}
 
-	bool readOnly = m_busses.fileInfo(uuid).state() != E::VcsState::CheckedOut;
 
+	auto fi = m_busses.fileInfo(bus->uuid());
+
+	bool readOnly = fi.state() != E::VcsState::CheckedOut || fi.userId() != m_db->currentUser().userId();
+	
 	m_propEditorDialog->setReadOnly(readOnly);
 	m_propEditorDialog->setObjects(editSignalsPointers);
 
@@ -1399,9 +1412,7 @@ void DialogBusEditor::fillBusProperties()
 		return;
 	}
 
-	int checkedInCount = 0;
-	int checkedOutCount = 0;
-
+	bool readOnly = false;
 	QList<std::shared_ptr<PropertyObject>> busObjects;
 
 	for (QTreeWidgetItem* item : selectedItems)
@@ -1425,17 +1436,13 @@ void DialogBusEditor::fillBusProperties()
 
 		busObjects.push_back(bus);
 
-		if (m_busses.fileInfo(bus->uuid()).state() == E::VcsState::CheckedOut)
+		auto fi = m_busses.fileInfo(bus->uuid());
+
+		if (fi.state() != E::VcsState::CheckedOut || fi.userId() != m_db->currentUser().userId())
 		{
-			checkedOutCount++;
-		}
-		else
-		{
-			checkedInCount++;
+			readOnly = true;
 		}
 	}
-
-	bool readOnly = checkedInCount != 0 || checkedOutCount < selectedItems.size();
 
 	m_busPropertyEditor->setReadOnly(readOnly);
 	m_busPropertyEditor->setObjects(busObjects);
@@ -1539,10 +1546,11 @@ void DialogBusEditor::updateButtonsEnableState()
 {
 	int checkedInCount = 0;
 	int checkedOutCount = 0;
+	int editableBusCount = 0;
 
 	QList<QTreeWidgetItem*> selectedBusItems = m_busTree->selectedItems();
 
-	qsizetype selectedBusCount = selectedBusItems.size();
+	qsizetype selectedCount = selectedBusItems.size();
 
 	for (auto item : selectedBusItems)
 	{
@@ -1550,13 +1558,26 @@ void DialogBusEditor::updateButtonsEnableState()
 
 		const std::shared_ptr<AppSignalLib::Bus> bus = m_busses.get(uuid);
 
-		if (m_busses.fileInfo(bus->uuid()).state() == E::VcsState::CheckedOut)
+		auto fi = m_busses.fileInfo(bus->uuid());
+
+		if (fi.state() == E::VcsState::CheckedOut && fi.userId() == m_db->currentUser().userId())
 		{
-			checkedOutCount++;
+			editableBusCount++;
+		}
+
+		if (fi.state() == E::VcsState::CheckedIn)
+		{
+			checkedInCount++;
 		}
 		else
 		{
-			checkedInCount++;
+			if (fi.state() == E::VcsState::CheckedOut)
+			{
+				if (fi.userId() == m_db->currentUser().userId() || m_db->currentUser().isAdminstrator() == true)
+				{
+					checkedOutCount++;
+				}
+			}
 		}
 	}
 
@@ -1566,35 +1587,38 @@ void DialogBusEditor::updateButtonsEnableState()
 
 	// --
 	//
-	m_removeAction->setEnabled(selectedBusCount > 0);
-	m_cloneAction->setEnabled(selectedBusCount == 1);
+	m_removeAction->setEnabled(selectedCount > 0 && selectedCount == checkedInCount + checkedOutCount);
+	m_cloneAction->setEnabled(selectedCount == 1);
 
-	m_buttonCheckOut->setEnabled(selectedBusCount > 0 && checkedInCount > 0);
-	m_checkOutAction->setEnabled(selectedBusCount > 0 && checkedInCount > 0);
+	m_buttonCheckOut->setEnabled(selectedCount > 0 && checkedInCount > 0);
+	m_checkOutAction->setEnabled(selectedCount > 0 && checkedInCount > 0);
 
-	m_buttonCheckIn->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
-	m_checkInAction->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
+	m_buttonCheckIn->setEnabled(selectedCount > 0 && checkedOutCount > 0);
+	m_checkInAction->setEnabled(selectedCount > 0 && checkedOutCount > 0);
 
-	m_buttonUndo->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
-	m_undoAction->setEnabled(selectedBusCount > 0 && checkedOutCount > 0);
+	m_buttonUndo->setEnabled(selectedCount > 0 && checkedOutCount > 0);
+	m_undoAction->setEnabled(selectedCount > 0 && checkedOutCount > 0);
 
 	// --
 	//
-	m_btnSignalAdd->setEnabled(checkedOutCount == 1);
-	m_signalAddAction->setEnabled(checkedOutCount == 1);
-	m_signalAddSubmenuAction->setEnabled(checkedOutCount == 1);
+	bool signalCanAdded = selectedCount == 1 && editableBusCount == 1;
+	bool signalCanEdited = selectedCount == 1 && editableBusCount == 1 && selectedSignalCount > 0;
 
-	m_btnSignalEdit->setEnabled(checkedOutCount == 1 && selectedSignalCount > 0);
-	m_signalEditAction->setEnabled(checkedOutCount == 1 && selectedSignalCount > 0);
+	m_btnSignalAdd->setEnabled(signalCanAdded);
+	m_signalAddAction->setEnabled(signalCanAdded);
+	m_signalAddSubmenuAction->setEnabled(signalCanAdded);
 
-	m_btnSignalRemove->setEnabled(checkedOutCount == 1 && selectedSignalCount > 0);
-	m_signalRemoveAction->setEnabled(checkedOutCount == 1 && selectedSignalCount > 0);
+	m_btnSignalEdit->setEnabled(signalCanEdited);
+	m_signalEditAction->setEnabled(signalCanEdited);
 
-	m_btnSignalUp->setEnabled(checkedOutCount == 1 && selectedSignalCount > 0);
-	m_signalUpAction->setEnabled(checkedOutCount == 1 && selectedSignalCount > 0);
+	m_btnSignalRemove->setEnabled(signalCanEdited);
+	m_signalRemoveAction->setEnabled(signalCanEdited);
 
-	m_btnSignalDown->setEnabled(checkedOutCount == 1 && selectedSignalCount > 0);
-	m_signalDownAction->setEnabled(checkedOutCount == 1 && selectedSignalCount > 0);
+	m_btnSignalUp->setEnabled(signalCanEdited);
+	m_signalUpAction->setEnabled(signalCanEdited);
+
+	m_btnSignalDown->setEnabled(signalCanEdited);
+	m_signalDownAction->setEnabled(signalCanEdited);
 
 	return;
 }

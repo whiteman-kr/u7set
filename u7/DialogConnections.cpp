@@ -517,7 +517,9 @@ void DialogConnections::setPropertyEditorObjects()
 			return;
 		}
 
-		if (m_connections.fileInfo(connection->uuid()).state() != E::VcsState::CheckedOut)
+		auto fi = m_connections.fileInfo(connection->uuid());
+
+		if (fi.state() != E::VcsState::CheckedOut || fi.userId() != m_db->currentUser().userId())
 		{
 			readOnly = true;
 		}
@@ -879,6 +881,11 @@ void DialogConnections::onCheckIn()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
+		if (m_connections.fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdminstrator() == false)
+		{
+			continue;
+		}
+
 		bool fileWasRemoved = false;
 		QString errorMessage;
 
@@ -945,6 +952,11 @@ void DialogConnections::onUndo()
 	for (auto item : selectedItems)
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
+
+		if (m_connections.fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdminstrator() == false)
+		{
+			continue;
+		}
 
 		bool fileRemoved = false;
 		QString errorMessage;
@@ -1262,18 +1274,26 @@ void DialogConnections::updateButtonsEnableState()
 			return;
 		}
 
-		if (m_connections.fileInfo(connection->uuid()).state() == E::VcsState::CheckedOut)
-		{
-			checkedOutCount++;
-		}
-		else
+		auto fi = m_connections.fileInfo(connection->uuid());
+
+		if (fi.state() == E::VcsState::CheckedIn)
 		{
 			checkedInCount++;
 		}
+		else
+		{
+			if (fi.state() == E::VcsState::CheckedOut)
+			{
+				if (fi.userId() == m_db->currentUser().userId() || m_db->currentUser().isAdminstrator() == true)
+				{
+					checkedOutCount++;
+				}
+			}
+		}
 	}
-
-	m_btnRemove->setEnabled(selectedCount > 0);
-	m_removeAction->setEnabled(selectedCount > 0);
+	
+	m_btnRemove->setEnabled(selectedCount > 0 && selectedCount == checkedInCount + checkedOutCount);
+	m_removeAction->setEnabled(selectedCount > 0 && selectedCount == checkedInCount + checkedOutCount);
 
 	m_copyAction->setEnabled(selectedCount > 0);
 
