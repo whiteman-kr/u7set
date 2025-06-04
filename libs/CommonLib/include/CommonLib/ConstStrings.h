@@ -735,6 +735,7 @@ namespace Separator
 	inline const QString DOUBLE_QUOTES("\"");
 	inline const QString YES("Yes");
 	inline const QString NO("No");
+	inline const QString QUESTIONS("???");
 }
 
 namespace FormatStr

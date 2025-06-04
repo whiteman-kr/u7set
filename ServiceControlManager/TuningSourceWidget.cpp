@@ -35,7 +35,7 @@ TuningSourceWidget::TuningSourceWidget(const QString& equipmentID, QWidget* pare
 	hl->addWidget(m_stateTable);
 	setLayout(hl);
 
-	setWindowTitle("AppDataSource " + m_equipmentID);
+	setWindowTitle("TuningSource " + m_equipmentID);
 
 	setWindowPosition(this, TUNING_SRC_WIDGET_KEY + m_equipmentID);
 

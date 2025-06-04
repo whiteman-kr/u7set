@@ -29,101 +29,46 @@ private:
 
 	inline static const QVariant m_cleanVariant;
 
-	// Tuning Source channel identification
-	//
-	//
-	optional bool isReply = 10 [default = false];
-	optional int64 requestCount = 11 [default = 0];
-	optional int64 replyCount = 12 [default = 0];
-	optional int32 commandQueueSize = 13 [default = 0];
-	optional bool controlIsActive = 14 [default = false];
-	optional bool setSOR = 15 [default = false];
-	optional bool writingDisabled = 16 [default = false];
-	optional bool hasUnappliedParams = 17 [default = false];
-
-	// Tuning Source processing errors
-	//
-	optional int64 errUntimelyReplay = 70 [default = 0];
-	optional int64 errSent = 71 [default = 0];
-	optional int64 errPartialSent = 72 [default = 0];
-	optional int64 errReplySize = 73 [default = 0];
-	optional int64 errNoReply = 74 [default = 0];
-	optional int64 errTuningFrameUpdate = 75 [default = 0];
-
-	// errors in reply RupFrameHeader
-	//
-	optional int64 errRupProtocolVersion = 50 [default = 0];
-	optional int64 errRupFrameSize = 51 [default = 0];
-	optional int64 errRupNonTuningData = 52 [default = 0];
-	optional int64 errRupModuleType = 53 [default = 0];
-	optional int64 errRupFramesQuantity = 54 [default = 0];
-	optional int64 errRupFrameNumber = 55 [default = 0];
-	optional int64 errRupCRC = 56 [default = 0];
-
-	// errors in reply FotipHeader
-	//
-	optional int64 errFotipProtocolVersion = 60 [default = 0];
-	optional int64 errFotipUniqueID = 61 [default = 0];
-	optional int64 errFotipLmNumber = 62 [default = 0];
-	optional int64 errFotipSubsystemCode = 63 [default = 0];
-	optional int64 errFotipOperationCode = 64 [default = 0];
-	optional int64 errFotipFrameSize = 65 [default = 0];
-	optional int64 errFotipRomSize = 66 [default = 0];
-	optional int64 errFotipRomFrameSize = 67 [default = 0];
-	optional int64 errAnalogLowBoundCheck = 68 [default = 0];
-	optional int64 errAnalogHighBoundCheck = 69 [default = 0];
-
-
-	// flags reported by LM in reply FotipHeader.flags
-	//
-	optional int64 fotipFlagBoundsCheckSuccess = 30 [default = 0];
-	optional int64 fotipFlagWriteSuccess = 31 [default = 0];
-	optional int64 fotipFlagDataTypeErr = 32 [default = 0];
-	optional int64 fotipFlagOpCodeErr = 33 [default = 0];
-	optional int64 fotipFlagStartAddrErr = 34 [default = 0];
-	optional int64 fotipFlagRomSizeErr = 35 [default = 0];
-	optional int64 fotipFlagRomFrameSizeErr = 36 [default = 0];
-	optional int64 fotipFlagFrameSizeErr = 37 [default = 0];
-	optional int64 fotipFlagProtocolVersionErr = 38 [default = 0];
-	optional int64 fotipFlagSubsystemKeyErr = 39 [default = 0];
-	optional int64 fotipFlagUniueIDErr = 40 [default = 0];
-	optional int64 fotipFlagOffsetErr = 41 [default = 0];
-	optional int64 fotipFlagApplySuccess = 42 [default = 0];
-	optional int64 fotipFlagSetSOR = 43 [default = 0];
-	optional int64 fotipFlagWritingDisabled = 44 [default = 0];
-	optional uint64 fotipProcessingNumerator = 45 [default = 0];
-
 	inline static const std::vector<QString> m_rows =
 	{
-			QString("Source reply"),						// 0
-			QString("LM time"),								// 1
-			QString("Request count"),						// 2
-			QString("Reply count"),							// 3
-			QString("Control is active"),					// 4
-			QString("Set SOR"),								// 5
-			QString("Writing disabled"),					// 6
-			QString("Has unapplied params"),				// 7
-			QString("Received DataUID"),					// 8
-			QString("Error RUP protocol version"),			// 9
-			QString("Error frames quantity"),				// 10
-			QString("Error frame No"),						// 11
-			QString("Error frame CRC"),						// 12
-			QString("Error DataUID"),						// 13
-			QString("Error duplicate plant time"),			// 14
-			QString("Error non-monotonic plant time"),		// 15
-			QString("Error plant time format"),				// 16
+			QString("Source reply"),							// 0
+			QString("LM time"),									// 1
+			QString("Received DataUID"),						// 2
+			QString("Request count"),							// 3
+			QString("Reply count"),								// 4
+			QString("Control is active"),						// 5
+			QString("Set SOR"),									// 6
+			QString("Writing disabled"),						// 7
+			QString("Has unapplied params"),					// 8
+			QString("FOTIP bounds check success"),				// 9
+			QString("FOTIP write success"),						// 10
+			QString("FOTIP apply success"),						// 11
+			QString("Error untimely reply"),					// 12
+			QString("Error sent"),								// 13
+			QString("Error partial sent"),						// 14
+			QString("Error reply size"),						// 15
+			QString("Error no reply"),							// 16
+			QString("Error tuning frame update"),				// 17
+			QString("Error RUP protocol version"),				// 18
+			QString("Error RUP frame size"),					// 19
+			QString("Error RUP no tuning data"),				// 20
+			QString("Error RUP module type"),					// 21
+			QString("Error RUP frames quantity"),				// 22
+			QString("Error RUP frame No"),						// 23
+			QString("Error RUP frame CRC"),						// 24
+			QString("Error RUP DataUID"),						// 25
+			QString("Error RUP duplicate plant time"),			// 26
+			QString("Error RUP non-monotonic plant time"),		// 27
+			QString("Error RUP plant time format"),				// 28
+			QString("Error FOTIP protocol version"),			// 29
+			QString("Error FOTIP data UID"),					// 30
+			QString("Error FOTIP LM number"),					// 31
+			QString("Error FOTIP subsystem code"),				// 32
+			QString("Error FOTIP operation code"),				// 33
+			QString("Error FOTIP tuning frame size"),			// 34
+			QString("Error FOTIP tuning ROM size"),				// 35
+			QString("Error FOTIP tuning ROM frame size"),		// 36
+			QString("Error FOTIP analog low bound check"),		// 37
+			QString("Error FOTIP analog high bound check"),		// 38
 	};
-
-	inline static const int ROW_LOST_PACKET_COUINT = 7;
-	inline static const int ROW_SS_QUEUE_CUR_SIZE = 8;
-	inline static const int ROW_RECEIVED_DATA_UID = 10;
-	inline static const int ROW_ERR_PROTOCOL_VERSION = 11;
-	inline static const int ROW_ERR_FRAMES_QUANTITY = 12;
-	inline static const int ROW_ERR_FRAME_NO = 13;
-	inline static const int ROW_ERR_FRAME_CRC = 14;
-	inline static const int ROW_ERR_DATA_UID = 15;
-	inline static const int ROW_ERR_DUP_PLANT_TIME = 16;
-	inline static const int ROW_ERR_NONMONO_PLANT_TIME = 17;
-	inline static const int ROW_ERR_PLANT_TIME_FORMAT = 18;
 };
-
