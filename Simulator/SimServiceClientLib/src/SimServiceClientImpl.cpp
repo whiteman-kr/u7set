@@ -268,10 +268,10 @@ namespace Sim
 		}
 
 		QStringList signalIds;
-		signalIds.reserve(reply.signalids_size());
+		signalIds.reserve(reply.appsignalids_size());
 
-		std::transform(reply.signalids().cbegin(),
-					   reply.signalids().cend(),
+		std::transform(reply.appsignalids().cbegin(),
+					   reply.appsignalids().cend(),
 					   std::back_inserter(signalIds),
 					   [](const auto& sid)
 					   {
@@ -369,5 +369,99 @@ namespace Sim
 					   });
 
 		return result;
+	}
+
+	tl::expected<void, QStringList> SimServiceClientImpl::OverrideSignals(
+		const std::vector<SimServiceClient::OverrideSignalPair>& overrideSignals)
+	{
+		grpc::ClientContext context;
+		RpctGrpc::OverrideSignalRequest request;
+		RpctGrpc::OverrideSignalReply reply;
+
+		for (const SimServiceClient::OverrideSignalPair& s : overrideSignals)
+		{
+			auto protoSignal = request.add_appsignals();
+			protoSignal->set_appsignalid(s.appSignalId.toStdString());
+
+			std::visit(
+				[protoSignal](auto&& value)
+				{
+					using T = std::decay_t<decltype(value)>;
+					if constexpr (std::is_same_v<T, bool>)
+					{
+						protoSignal->set_boolvalue(value);
+					}
+					else if constexpr (std::is_same_v<T, double>)
+					{
+						protoSignal->set_doublevalue(value);
+					}
+					else if constexpr (std::is_same_v<T, int32_t>)
+					{
+						protoSignal->set_int32value(value);
+					}
+					else if constexpr (std::is_same_v<T, QString>)
+					{
+						protoSignal->set_script(value.toStdString());
+					}
+				},
+				s.value);
+		}
+
+		grpc::Status status = m_stub->OverrideSignal(&context, request, &reply);
+		if (status.ok() == false)
+		{
+			return tl::unexpected{QStringList{} << formatErrorMessage(status)};
+		}
+
+		// Processing reply.
+		//
+		QStringList errors;
+		errors.reserve(reply.errors_size());
+
+		std::transform(reply.errors().cbegin(),
+					   reply.errors().cend(),
+					   std::back_inserter(errors),
+					   [](const auto& protoError)
+					   {
+						   return QString::fromStdString(protoError.appsignalid()) + ": " + QString::fromStdString(protoError.error());
+					   });
+
+		if (errors.isEmpty() == false)
+		{
+			return tl::unexpected{errors};
+		}
+
+		return {};
+	}
+
+	tl::expected<QStringList, QString> SimServiceClientImpl::RemoveOverrideSignals(const QStringList& appSignalIds)
+	{
+		grpc::ClientContext context;
+		RpctGrpc::RemoveOverrideSignalRequest request;
+		RpctGrpc::RemoveOverrideSignalReply reply;
+
+		for (const auto& appSignalId : appSignalIds)
+		{
+			*request.add_appsignalids() = appSignalId.toStdString();
+		}
+
+		grpc::Status status = m_stub->RemoveOverrideSignal(&context, request, &reply);
+		if (status.ok() == false)
+		{
+			return tl::unexpected{formatErrorMessage(status)};
+		}
+
+		QStringList currentlyOverriddenSignals;
+		currentlyOverriddenSignals.reserve(reply.overriddenappsignalids_size());
+
+		std::transform(reply.overriddenappsignalids().cbegin(),
+					   reply.overriddenappsignalids().cend(),
+					   std::back_inserter(currentlyOverriddenSignals),
+					   [](const auto& appSignalId)
+					   {
+						   return QString::fromStdString(appSignalId);
+					   });
+
+		return currentlyOverriddenSignals;
 	}
 } // namespace Sim

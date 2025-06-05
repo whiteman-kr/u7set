@@ -36,6 +36,10 @@ struct Actions
 		std::cout << "\n";
 		std::cout << "  lm_status <LMID>                    Print LogicModule status.\n";
 		lm_set_flags_help();
+		std::cout << "\n";
+		override_signal_help();
+		remove_override_help();
+		get_overridden_signals_help();
 		return;
 	}
 
@@ -385,6 +389,180 @@ struct Actions
 		lm_set_flags_help();
 		return;
 	}
+
+	static void override_signal_help()
+	{
+		std::cout << "  override_signal <#ID> <TYPE> <VALUE>   Override signal value.\n";
+		std::cout << "      Type:\n";
+		std::cout << "          bool    for discretes, value 0/1 \n";
+		std::cout << "          float   for floating point value\n";
+		std::cout << "          double  for floating point value\n";
+		std::cout << "          int32   for signed int 32-bit\n";
+		std::cout << "          script  override by script, value can be any, predefined script will be used.\n";
+	}
+
+	static void override_signal(Sim::SimServiceClient& client, const QStringList& args)
+	{
+		if (args.size() < 4)
+		{
+			override_signal_help();
+			return;
+		}
+
+		QString appSignalId = args[1];
+		QString type = args[2];
+		QString valueStr = args[3];
+
+		Sim::SimServiceClient::OverrideValueT value;
+
+		if (type == "bool")
+		{
+			value.emplace<bool>(valueStr == "0" ? false : true);
+		}
+		else if (type == "float")
+		{
+			bool ok = false;
+			float f = valueStr.toFloat(&ok);
+
+			if (ok == false)
+			{
+				std::cout << "Floating point format error\n";
+				return;
+			}
+
+			value.emplace<double>(f); // double covers float
+		}
+		else if (type == "double")
+		{
+			bool ok = false;
+			double d = valueStr.toDouble(&ok);
+
+			if (ok == false)
+			{
+				std::cout << "Floating point format error\n";
+				return;
+			}
+
+			value.emplace<double>(d); // double covers float
+		}
+		else if (type == "int32")
+		{
+			bool ok = false;
+			int32_t i = static_cast<int32_t>(valueStr.toInt(&ok));
+
+			if (ok == false)
+			{
+				std::cout << "32bit signed integer format error\n";
+				return;
+			}
+
+			value.emplace<int32_t>(i); // double covers float
+		}
+		else if (type == "script")
+		{
+			static const QString script = R"(
+// Square for Discrete
+let counter = 0;
+
+(function(lastValue, workcycle)
+{
+	const lowTime = 300;
+	const highTime = 200;
+
+	counter --;
+	let result = lastValue;
+
+	if (counter <= 0)
+	{
+		if (lastValue === 0)
+		{
+			counter = highTime / 5;
+			result = 1;
+		}
+		else
+		{
+			counter = lowTime / 5;
+			result = 0;
+		}
+	}
+	return result;
+})
+)";
+			value.emplace<QString>(script);
+		}
+		else
+		{
+			std::cout << "Unknown type: " << type.toStdString() << "\n";
+			return;
+		}
+
+		Sim::SimServiceClient::OverrideSignalPair osp;
+		osp.appSignalId = appSignalId;
+		osp.value = value;
+
+		std::vector<Sim::SimServiceClient::OverrideSignalPair> overrideSignals;
+		overrideSignals.push_back(osp);
+
+		auto result = client.OverrideSignals(overrideSignals);
+
+		if (result.has_value() == false)
+		{
+			std::cout << "OverrideSignals error: " << result.error().join("\n").toStdString() << "\n";
+			return;
+		}
+
+		return;
+	}
+
+	static void remove_override_help() { std::cout << "  remove_override <#ID1> ... [#IDN]      Remove overridden signal(s).\n"; }
+
+	static void remove_override(Sim::SimServiceClient& client, const QStringList& args)
+	{
+		if (args.size() < 2)
+		{
+			remove_override_help();
+			return;
+		}
+
+
+		QStringList appSignals = args;
+		appSignals.removeFirst();
+
+		auto result = client.RemoveOverrideSignals(appSignals);
+
+		if (result.has_value() == false)
+		{
+			std::cout << "RemoveOverrideSignals error: " << result.error().toStdString() << "\n";
+			return;
+		}
+
+		std::cout << "Ok" << "\n";
+		std::cout << "CurrentlyOverriddenSignals:" << "\n";
+
+		for (const QString& appSignalId : result.value())
+		{
+			std::cout << appSignalId.toStdString() << "\n";
+		}
+
+		return;
+	}
+
+	static void get_overridden_signals_help() { std::cout << "  get_overridden_signals                   Get all overridden signals.\n"; }
+
+	static void get_overridden_signals(Sim::SimServiceClient& client, [[maybe_unused]] const QStringList& args)
+	{
+		auto result = client.GetOverriddenSignals();
+		if (result.has_value() == false)
+		{
+			std::cout << "GetOverriddenSignals error: " << result.error().toStdString() << "\n";
+			return;
+		}
+
+		for (const QString& appSignalId : result.value())
+		{
+			std::cout << appSignalId.toStdString() << "\n";
+		}
+	}
 };
 
 using ActionFunc = std::function<void(Sim::SimServiceClient& client, const QStringList& args)>;
@@ -406,6 +584,10 @@ const std::map<QString, ActionFunc> actions = {
 
 	{QString("lm_status"), Actions::lm_status},
 	{QString("lm_set_flag"), Actions::lm_set_flag},
+
+	{QString("override_signal"), Actions::override_signal},
+	{QString("remove_override"), Actions::remove_override},
+	{QString("get_overridden_signals"), Actions::get_overridden_signals},
 };
 
 

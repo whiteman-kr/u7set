@@ -93,6 +93,14 @@ namespace Sim
 									const RpctGrpc::GetSignalStateRequest* request,
 									RpctGrpc::GetSignalStateReply* response) override;
 
+		grpc::Status OverrideSignal(::grpc::ServerContext* context,
+									const ::RpctGrpc::OverrideSignalRequest* request,
+									::RpctGrpc::OverrideSignalReply* response) override;
+
+		grpc::Status RemoveOverrideSignal(::grpc::ServerContext* context,
+										  const ::RpctGrpc::RemoveOverrideSignalRequest* request,
+										  ::RpctGrpc::RemoveOverrideSignalReply* response) override;
+
 	private:
 		SimulatorPrivate& m_simulator;
 		mutable ScopedLog m_log;
@@ -164,6 +172,11 @@ namespace Sim
 								   const RpctGrpc::PingRequest* request,
 								   RpctGrpc::PongReply* response)
 	{
+		if (request->payload().size() > 2048)
+		{
+			return grpc::Status(grpc::StatusCode::INVALID_ARGUMENT, "Payload too large");
+		}
+
 		response->set_payload(request->payload());
 		return ::grpc::Status::OK;
 	}
@@ -214,6 +227,7 @@ namespace Sim
 					   });
 		m_simulator.control().setRunList(modules);
 
+		m_simulator.control().setSpeedFactor(request->speedfactor());
 		m_simulator.control().startSimulation(std::chrono::microseconds{request->durationmcs()});
 
 		auto state = getProtoControlState(m_simulator.control().state());
@@ -370,17 +384,17 @@ namespace Sim
 
 			case ::RpctGrpc::MF_LM_BOOL_SOR_SET_SWITCH_2:
 				module->setSorSetSwitch2(f.value().boolvalue());
-				response->mutable_updatedvalue()->set_boolvalue(module->sorSetSwitch1());
+				response->mutable_updatedvalue()->set_boolvalue(module->sorSetSwitch2());
 				break;
 
 			case ::RpctGrpc::MF_LM_BOOL_SOR_SET_SWITCH_3:
 				module->setSorSetSwitch3(f.value().boolvalue());
-				response->mutable_updatedvalue()->set_boolvalue(module->sorSetSwitch2());
+				response->mutable_updatedvalue()->set_boolvalue(module->sorSetSwitch3());
 				break;
 
 			case ::RpctGrpc::MF_LM_BOOL_SOR_RESET:
 				module->testSorResetSwitch(f.value().boolvalue());
-				response->mutable_updatedvalue()->set_boolvalue(module->sorSetSwitch3());
+				response->mutable_updatedvalue()->set_boolvalue(false);
 				break;
 
 			default:
@@ -397,7 +411,7 @@ namespace Sim
 	{
 		const auto allSignals = m_simulator.appSignalManager().signalList();
 
-		auto ms = response->mutable_signalids();
+		auto ms = response->mutable_appsignalids();
 		ms->Reserve(static_cast<int>(allSignals.size()));
 
 		for (const auto& signalParam : allSignals)
@@ -504,7 +518,7 @@ namespace Sim
 		// Save states to the reply.
 		//
 		auto protoStates = response->mutable_states();
-		protoStates->Reserve(request->signalhashes_size());
+		protoStates->Reserve(states.size());
 
 		for (const ::AppSignalState& state : states)
 		{
@@ -517,6 +531,131 @@ namespace Sim
 		return grpc::Status::OK;
 	}
 
+	grpc::Status ServiceImpl::OverrideSignal([[maybe_unused]] ::grpc::ServerContext* context,
+											 const ::RpctGrpc::OverrideSignalRequest* request,
+											 ::RpctGrpc::OverrideSignalReply* response)
+	{
+		// Add signals to override if they were noy yet.
+		//
+		{
+			QStringList appSignalIds;
+			appSignalIds.reserve(request->appsignals_size());
+			std::transform(request->appsignals().begin(),
+						   request->appsignals().end(),
+						   std::back_inserter(appSignalIds),
+						   [](const auto& protoAppSignal)
+						   {
+							   return QString::fromStdString(protoAppSignal.appsignalid());
+						   });
+
+			QStringList alreadyOverriddenSignals = m_simulator.overrideSignals().overrideSignalIds();
+			std::unordered_set<QString> alreadyOverriddenSignalSet{alreadyOverriddenSignals.begin(), alreadyOverriddenSignals.end()};
+
+			QStringList signalsToAdd;
+			std::copy_if(appSignalIds.cbegin(),
+						 appSignalIds.cend(),
+						 std::back_inserter(signalsToAdd),
+						 [&alreadyOverriddenSignalSet](const QString& appSignalId)
+						 {
+							 return alreadyOverriddenSignalSet.contains(appSignalId) == false;
+						 });
+
+			int added = m_simulator.overrideSignals().addSignals(signalsToAdd);
+			if (added != signalsToAdd.size())
+			{
+				// Error, to form an error we need to understand which signal was not added.
+				//
+				QStringList currentSignals = m_simulator.overrideSignals().overrideSignalIds();
+				std::unordered_set<QString> currentSet{currentSignals.begin(), currentSignals.end()};
+
+				for (const QString& signalId : signalsToAdd)
+				{
+					if (currentSet.contains(signalId) == false)
+					{
+						auto* error = response->mutable_errors()->Add();
+						error->set_appsignalid(signalId.toStdString());
+						error->set_error("Failed to add signal");
+					}
+				}
+			}
+		}
+
+		// Overriding signal values.
+		//
+		{
+			std::vector<Sim::OverrideSetValueData> overrides;
+			overrides.reserve(request->appsignals_size());
+
+			for (const auto& protoAppSignal : request->appsignals())
+			{
+				QString appSignalId = QString::fromStdString(protoAppSignal.appsignalid());
+				QVariant value;
+
+				auto method = Sim::OverrideSignalMethod::Value;
+
+				switch (protoAppSignal.ValueOneOf_case())
+				{
+				case ::RpctGrpc::OverrideSignal::ValueOneOfCase::kBoolValue:
+					value.setValue<int>(protoAppSignal.boolvalue());
+					break;
+				case ::RpctGrpc::OverrideSignal::ValueOneOfCase::kDoubleValue:
+					value.setValue<double>(protoAppSignal.doublevalue());
+					break;
+				case ::RpctGrpc::OverrideSignal::ValueOneOfCase::kInt32Value:
+					value.setValue<int>(protoAppSignal.int32value());
+					break;
+				case ::RpctGrpc::OverrideSignal::ValueOneOfCase::kScript:
+					value = QString::fromStdString(protoAppSignal.script());
+					method = Sim::OverrideSignalMethod::Script;
+					break;
+				case ::RpctGrpc::OverrideSignal::ValueOneOfCase::VALUEONEOF_NOT_SET:
+					{
+						auto r = response->mutable_errors()->Add();
+						r->set_appsignalid(protoAppSignal.appsignalid());
+						r->set_error("Override data not provided");
+					}
+					break;
+				}
+
+				if (value.isNull() == false)
+				{
+					overrides.emplace_back(appSignalId, method, value);
+				}
+			}
+
+			m_simulator.overrideSignals().setValues(overrides);
+		}
+
+		// Response is already formed by processing case VALUEONEOF_NOT_SET.
+		//
+
+		return grpc::Status::OK;
+	}
+
+	grpc::Status ServiceImpl::RemoveOverrideSignal(::grpc::ServerContext* context,
+												   const ::RpctGrpc::RemoveOverrideSignalRequest* request,
+												   ::RpctGrpc::RemoveOverrideSignalReply* response)
+	{
+		QStringList appSignalIds;
+		appSignalIds.reserve(request->appsignalids_size());
+
+		std::transform(request->appsignalids().cbegin(),
+					   request->appsignalids().cend(),
+					   std::back_inserter(appSignalIds),
+					   [](const auto& appSignalId)
+					   {
+						   return QString::fromStdString(appSignalId);
+					   });
+
+		m_simulator.overrideSignals().removeSignals(appSignalIds);
+
+		for (const auto& current = m_simulator.overrideSignals().overrideSignalIds(); const QString& appSignalId : current)
+		{
+			response->add_overriddenappsignalids(appSignalId.toStdString());
+		}
+
+		return grpc::Status::OK;
+	}
 
 	//
 	//

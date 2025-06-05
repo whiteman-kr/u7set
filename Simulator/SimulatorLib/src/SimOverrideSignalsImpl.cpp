@@ -1,8 +1,8 @@
 #include "SimOverrideSignalsImpl.h"
 #include "SimulatorPrivate.h"
 
-#include <Simulator.pb.h>
 #include <ProtoCommonHelper.h>
+#include <Simulator.pb.h>
 
 #include <SimulatorLib/SimRam.h>
 
@@ -24,7 +24,7 @@ namespace Sim
 	{
 		{
 			QWriteLocker locker(&m_lock);
-			m_changesCounter ++;
+			m_changesCounter++;
 
 			m_signals.clear();
 		}
@@ -55,12 +55,12 @@ namespace Sim
 
 			{
 				QWriteLocker locker(&m_lock);
-				m_changesCounter ++;
+				m_changesCounter++;
 
-				auto[it, ok] = m_signals.emplace(id, *sp);
+				auto [it, ok] = m_signals.emplace(id, *sp);
 				if (ok == false)
 				{
-					m_log.writeWarning(QString("Signal %1 aldready added to override list.").arg(id));
+					m_log.writeWarning(QString("Signal %1 already added to override list.").arg(id));
 					continue;
 				}
 				else
@@ -71,7 +71,7 @@ namespace Sim
 					//
 					int maxIndex = m_signals.begin()->second.index();
 
-					for (const auto&[sid, s] : m_signals)
+					for (const auto& [sid, s] : m_signals)
 					{
 						Q_UNUSED(sid);
 						maxIndex = std::max(maxIndex, s.index());
@@ -107,12 +107,12 @@ namespace Sim
 
 		{
 			QWriteLocker locker(&m_lock);
-			m_changesCounter ++;
+			m_changesCounter++;
 
-			auto[it, ok] = m_signals.emplace(appSignalId, *sp);
+			auto [it, ok] = m_signals.emplace(appSignalId, *sp);
 			if (ok == false)
 			{
-				m_log.writeWarning(QString("Signal %1 aldready added to override list.").arg(appSignalId));
+				m_log.writeWarning(QString("Signal %1 already added to override list.").arg(appSignalId));
 				return false;
 			}
 			else
@@ -151,7 +151,8 @@ namespace Sim
 			QWriteLocker locker(&m_lock);
 			m_changesCounter++;
 
-			std::erase_if(m_signals, [&appSignalIds](const auto& item)
+			std::erase_if(m_signals,
+						  [&appSignalIds](const auto& item)
 						  {
 							  auto const& [key, value] = item;
 							  return appSignalIds.contains(key) == true;
@@ -174,10 +175,9 @@ namespace Sim
 
 		{
 			QWriteLocker locker(&m_lock);
-			m_changesCounter ++;
+			m_changesCounter++;
 
-			if (auto it = m_signals.find(appSignalId);
-				it != m_signals.end() && it->second.enabled() != enable)
+			if (auto it = m_signals.find(appSignalId); it != m_signals.end() && it->second.enabled() != enable)
 			{
 				it->second.setEnabled(enable);
 				changed = true;
@@ -231,7 +231,7 @@ namespace Sim
 
 	void OverrideSignalsImpl::updateSignals()
 	{
-		std::vector<OverrideSignalParam> existingSignals =  overrideSignals();
+		std::vector<OverrideSignalParam> existingSignals = overrideSignals();
 
 		std::vector<OverrideSignalParam> newSignals;
 		newSignals.reserve(existingSignals.size());
@@ -254,7 +254,7 @@ namespace Sim
 		//
 		{
 			QWriteLocker locker(&m_lock);
-			m_changesCounter ++;
+			m_changesCounter++;
 
 			m_signals.clear();
 
@@ -278,16 +278,14 @@ namespace Sim
 
 			for (auto& [appSignalId, osp] : m_signals)
 			{
-				if (osp.method() != Sim::OverrideSignalMethod::Script ||
-					osp.lmEquipmentId() != lmEquipmentId)
+				if (osp.method() != Sim::OverrideSignalMethod::Script || osp.lmEquipmentId() != lmEquipmentId)
 				{
 					continue;
 				}
 
 				bool expected = true;
-				if (osp.m_scriptValueRequiresReset.compare_exchange_strong(expected, false) == true ||
-				    osp.m_scriptValue == nullptr ||
-				    osp.m_scriptEngine == nullptr)
+				if (osp.m_scriptValueRequiresReset.compare_exchange_strong(expected, false) == true || osp.m_scriptValue == nullptr ||
+					osp.m_scriptEngine == nullptr)
 				{
 					osp.m_scriptValue = std::make_unique<QJSValue>();
 					osp.m_scriptEngine = std::make_unique<QJSEngine>();
@@ -295,7 +293,8 @@ namespace Sim
 
 					// Create global variable "signals"
 					//
-					QJSValue appSignalManager = osp.m_scriptEngine->newQObject(new ScriptAppSignalManager{&m_simulator->appSignalManager(), osp.m_scriptEngine.get()});
+					QJSValue appSignalManager = osp.m_scriptEngine->newQObject(
+						new ScriptAppSignalManager{&m_simulator->appSignalManager(), osp.m_scriptEngine.get()});
 					osp.m_scriptEngine->globalObject().setProperty("signals", appSignalManager);
 
 					// Evaluate override script
@@ -305,9 +304,9 @@ namespace Sim
 					if (osp.m_scriptValue->isError() == true)
 					{
 						QString errorMessage = tr("Override script evaluate error, signal %1, line %2, message %3")
-											   .arg(appSignalId)
-						                       .arg(osp.m_scriptValue->property("lineNumber").toInt())
-						                       .arg(osp.m_scriptValue->toString());
+												   .arg(appSignalId)
+												   .arg(osp.m_scriptValue->property("lineNumber").toInt())
+												   .arg(osp.m_scriptValue->toString());
 
 						m_log.writeError(errorMessage);
 
@@ -340,10 +339,10 @@ namespace Sim
 				if (result.isError() == true)
 				{
 					osp.setScriptError(tr("Override script uncaught exception, signal %1, line %2")
-										.arg(appSignalId)
-										.arg(result.property("lineNumber").toInt()));
+										   .arg(appSignalId)
+										   .arg(result.property("lineNumber").toInt()));
 
-					//writeWaning(osp.scriptError());
+					// writeWaning(osp.scriptError());
 
 					qDebug() << "Script running uncaught exception at line " << result.property("lineNumber").toInt();
 					qDebug() << "\tAppSignalID: " << appSignalId;
@@ -355,10 +354,9 @@ namespace Sim
 
 				if (result.isNumber() == false)
 				{
-					osp.setScriptError(tr("Override script returned not floating point value, signal %1.")
-									   .arg(appSignalId));
+					osp.setScriptError(tr("Override script returned not floating point value, signal %1.").arg(appSignalId));
 
-					//writeWaning(osp.scriptError());
+					// writeWaning(osp.scriptError());
 					continue;
 				}
 
@@ -377,7 +375,7 @@ namespace Sim
 
 			if (appSignalIds.isEmpty() == false)
 			{
-				m_changesCounter ++;
+				m_changesCounter++;
 			}
 		}
 
@@ -405,7 +403,7 @@ namespace Sim
 
 	bool OverrideSignalsImpl::saveWorkspace(QString fileName) const
 	{
-        std::fstream output(std::filesystem::path(fileName.toStdWString()), std::ios::out | std::ios::binary);
+		std::fstream output(std::filesystem::path(fileName.toStdWString()), std::ios::out | std::ios::binary);
 		if (output.is_open() == false || output.bad() == true)
 		{
 			return false;
@@ -437,7 +435,7 @@ namespace Sim
 	{
 		clear();
 
-        std::fstream input(std::filesystem::path(fileName.toStdWString()), std::ios::in | std::ios::binary);
+		std::fstream input(std::filesystem::path(fileName.toStdWString()), std::ios::in | std::ios::binary);
 		if (input.is_open() == false || input.bad() == true)
 		{
 			return false;
@@ -468,16 +466,14 @@ namespace Sim
 
 	void OverrideSignalsImpl::updateRamOverrideData(const QString& lmEquipmentId, Ram& ram) const
 	{
-		if (int cs = changesCounter();
-			ram.overrideSignalsLastCounter(cs) == cs)
+		if (int cs = changesCounter(); ram.overrideSignalsLastCounter(cs) == cs)
 		{
 			// Data has not been changed since the last update.
 			//
 			return;
 		}
 
-		for (std::vector<RamArea*> memoryAreas = ram.memoryAreas();
-			 RamArea* ramArea : memoryAreas)
+		for (std::vector<RamArea*> memoryAreas = ram.memoryAreas(); RamArea * ramArea : memoryAreas)
 		{
 			Q_ASSERT(ramArea);
 
@@ -521,7 +517,7 @@ namespace Sim
 
 		result.reserve(m_signals.size());
 
-		for (auto[appSignalId, ovSignalParam] :  m_signals)
+		for (auto [appSignalId, ovSignalParam] : m_signals)
 		{
 			result.push_back(ovSignalParam);
 		}
@@ -537,7 +533,7 @@ namespace Sim
 
 		result.reserve(static_cast<int>(m_signals.size()));
 
-		for (auto[appSignalId, ovSignalParam] :  m_signals)
+		for (auto [appSignalId, ovSignalParam] : m_signals)
 		{
 			Q_UNUSED(ovSignalParam);
 			result.push_back(appSignalId);
@@ -562,9 +558,9 @@ namespace Sim
 		if (ramAreaInfo.size() > 0x10000)
 		{
 			m_log.writeError(tr("RamArea (offset %1) in LogicModule %2 seems too big (%3)")
-							 .arg(ramAreaInfo.offset())
-							 .arg(lmEquipmentId)
-							 .arg(ramAreaInfo.size()));
+								 .arg(ramAreaInfo.offset())
+								 .arg(lmEquipmentId)
+								 .arg(ramAreaInfo.size()));
 			return result;
 		}
 
@@ -572,11 +568,11 @@ namespace Sim
 		//
 		QReadLocker locker(&m_lock);
 
-		for (const auto&[appSignalId, osp] : m_signals)
+		for (const auto& [appSignalId, osp] : m_signals)
 		{
-			if (osp.enabled() == false ||				// Signal is not enabled to override
-				(static_cast<int>(osp.ramAccess()) & static_cast<int>(ramAccess)) == 0 ||			// Signal is not in this RAM Area
-				osp.lmEquipmentId() != lmEquipmentId)		// Signal is not in this LM
+			if (osp.enabled() == false ||                                                 // Signal is not enabled to override
+				(static_cast<int>(osp.ramAccess()) & static_cast<int>(ramAccess)) == 0 || // Signal is not in this RAM Area
+				osp.lmEquipmentId() != lmEquipmentId)                                     // Signal is not in this LM
 			{
 				continue;
 			}
@@ -584,8 +580,7 @@ namespace Sim
 			int dataSizeW = osp.dataSizeW();
 			int offsetW = osp.address().offset();
 
-			if (offsetW < static_cast<int>(ramAreaInfo.offset()) ||
-				offsetW >= static_cast<int>(ramAreaInfo.offset() + ramAreaInfo.size()))
+			if (offsetW < static_cast<int>(ramAreaInfo.offset()) || offsetW >= static_cast<int>(ramAreaInfo.offset() + ramAreaInfo.size()))
 			{
 				// Signal is not in this RamArea
 				// dataSizeW is not taken into checks, as we suppose that signal can be in only area
@@ -598,7 +593,7 @@ namespace Sim
 				result.resize(ramAreaInfo.size());
 			}
 
-			offsetW -= ramAreaInfo.offset();	// Make it 0-based
+			offsetW -= ramAreaInfo.offset(); // Make it 0-based
 
 			if (offsetW < 0 || offsetW + dataSizeW > std::ssize(result))
 			{
@@ -616,4 +611,4 @@ namespace Sim
 		return result;
 	}
 
-}
+} // namespace Sim

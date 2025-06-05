@@ -32,6 +32,9 @@ namespace Sim
 		tl::expected<std::vector<::AppSignalParam>, QString> GetSignalParam(std::span<const Hash> signalHashes);
 		tl::expected<std::vector<::AppSignalState>, QString> GetSignalState(std::span<const Hash> signalHashes);
 
+		tl::expected<void, QStringList> OverrideSignals(const std::vector<SimServiceClient::OverrideSignalPair>& overrideSignals);
+		[[nodiscard]] tl::expected<QStringList, QString> RemoveOverrideSignals(const QStringList& appSignalIds);
+
 	private:
 		const std::shared_ptr<::grpc::Channel> m_channel;
 		std::unique_ptr<RpctGrpc::SimService::Stub> m_stub;

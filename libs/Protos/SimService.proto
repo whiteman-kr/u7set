@@ -151,7 +151,7 @@ message GetSignalListRequest
 
 message GetSignalListReply
 {
-    repeated string signalIds = 2;
+    repeated string appSignalIds = 2;
 }
 
 //
@@ -196,6 +196,50 @@ message GetSignalStateReply
     repeated Proto.AppSignalState states = 2;
 }
 
+// 
+// OverrideSignal
+//
+message OverrideSignal
+{
+    optional string appSignalId = 2;
+    oneof ValueOneOf
+    {
+        bool boolValue = 3;      // Discrete
+        double doubleValue = 4;  // Analog double or float
+        int32 int32Value = 5;    // Analog int32
+        string script = 7;       // Script to execute
+    }
+}
+
+message OverrideSignalRequest
+{
+    repeated OverrideSignal appSignals = 2;      // Signals to override
+}
+
+message OverrideSignalResult
+{
+    optional string appSignalId = 2;
+    optional string error = 3;
+}
+
+message OverrideSignalReply
+{
+    repeated OverrideSignalResult errors = 2; // Only errors if any.
+}
+
+//
+// RemoveOverrideSignal
+//
+message RemoveOverrideSignalRequest
+{
+    repeated string appSignalIds = 2; // Sent empty if need just reply which contains list of overridden signals.
+}
+
+message RemoveOverrideSignalReply
+{
+    repeated string overriddenAppSignalIds = 2;
+}
+
 //
 // SimService -- This service is used to communicate with the simulator.
 //
@@ -215,8 +259,10 @@ service SimService
     rpc GetSignalParam(GetSignalParamRequest) returns (stream GetSignalParamReply) {}
     rpc GetSignalState(GetSignalStateRequest) returns (GetSignalStateReply) {}
 
+    rpc OverrideSignal(OverrideSignalRequest) returns (OverrideSignalReply) {}
+    rpc RemoveOverrideSignal(RemoveOverrideSignalRequest) returns (RemoveOverrideSignalReply) {}
+    //rpc DisableOverrideSignal(DisableOverrideSignalRequest) returns (DisableOverrideSignalReply) {}
 
     // TODO:
-    //  OverrideSignalValue
     //  TakeSnapshots/ApplySnapshot
 }

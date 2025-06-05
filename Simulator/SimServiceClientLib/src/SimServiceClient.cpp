@@ -85,4 +85,20 @@ namespace Sim
 	{
 		return m_impl->GetSignalState(signalHashes);
 	}
+
+	tl::expected<void, QStringList> SimServiceClient::OverrideSignals(
+		const std::vector<Sim::SimServiceClient::OverrideSignalPair>& overrideSignals)
+	{
+		return m_impl->OverrideSignals(overrideSignals);
+	}
+
+	tl::expected<QStringList, QString> SimServiceClient::RemoveOverrideSignals(const QStringList& appSignalIds)
+	{
+		return m_impl->RemoveOverrideSignals(appSignalIds);
+	}
+
+	tl::expected<QStringList, QString> SimServiceClient::GetOverriddenSignals()
+	{
+		return m_impl->RemoveOverrideSignals({});
+	}
 } // namespace Sim
