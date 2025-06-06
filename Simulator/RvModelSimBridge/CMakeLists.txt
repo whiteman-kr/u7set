@@ -20,8 +20,7 @@ add_executable(${TARGET}
 	RvModelSimBridgeMain.cpp
 	ModelLinkThread.cpp
 	ModelLinkThread.h
-	ModelLinkPacket.h
-)
+	ModelLinkPacket.h)
 
 target_precompile_headers(${TARGET} PRIVATE
 	# C includes, must be before c++ includes

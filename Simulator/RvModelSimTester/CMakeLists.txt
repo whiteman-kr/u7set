@@ -16,8 +16,16 @@ set(TARGET RvModelSimTester)
 
 set (TC_SOURCES
 	main.cpp
-	RvModelSimTester.cpp
-	RvModelSimTester.h
+    RWToolBox.cpp
+    RWToolBox.h
+	DialogSettings.cpp
+	DialogSettings.h
+	SimControlModule.cpp
+	SimControlModule.h
+	LogModule.h
+	LogModule.cpp
+	MainWindow.cpp
+	MainWindow.h
 )
 
 set (TC_RESOURCES
@@ -26,12 +34,10 @@ set (TC_RESOURCES
 )
 
 set (TC_FORMS
-	RvModelSimTester.ui
-#	SwitchFiltersPageOptions.ui
-#	TuningSignalInfo.ui
+	
 )
 
-add_executable(${TARGET}
+add_executable(${TARGET} WIN32
 	${TC_FORMS}
 	${TC_SOURCES}
 	${TC_RESOURCES}
@@ -66,40 +72,15 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	# Qt includes
 	#
-	<QAbstractSocket>
+
 	<QApplication>
-	<QCommandLineParser>
-	<QCoreApplication>
-	<QDebug>
-	<QDateTime>
-	<QElapsedTimer>
-	<QEventLoop>
-	<QFile>
-	<QFileInfo>
-	<QHash>
-	<QHostAddress>
-	<QMap>
-	<QMetaClassInfo>
-	<QMetaEnum>
-	<QMetaObject>
-	<QMutex>
-	<QMutexLocker>
-	<QObject>
-	<QQueue>
-	<QSettings>
-	<QString>
-	<QStringList>
-	<QTextStream>
-	<QThread>
-	<QTimer>
-	<QtGlobal>
-	<QtNetwork/QHostAddress>
-	<QUdpSocket>
-	<QUuid>
-	<QVariant>
-	<QVector>
-	<QXmlStreamReader>
-	<QXmlStreamWriter>
+	<QHBoxLayout>
+	<QLabel>
+	<QMenuBar>
+	<QPushButton>
+	<QStatusBar>
+	<QVBoxLayout>
+	<QWidget>
 
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
