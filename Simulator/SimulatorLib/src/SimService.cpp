@@ -105,6 +105,10 @@ namespace Sim
 										  const ::RpctGrpc::RemoveOverrideSignalRequest* request,
 										  ::RpctGrpc::RemoveOverrideSignalReply* response) override;
 
+		grpc::Status DisableOverrideSignal(::grpc::ServerContext* context,
+										   const ::RpctGrpc::DisableOverrideSignalRequest* request,
+										   ::RpctGrpc::DisableOverrideSignalReply* response) override;
+
 	private:
 		SimulatorPrivate& m_simulator;
 		mutable ScopedLog m_log;
@@ -685,6 +689,34 @@ namespace Sim
 		for (const auto& current = m_simulator.overrideSignals().overrideSignalIds(); const QString& appSignalId : current)
 		{
 			response->add_overriddenappsignalids(appSignalId.toStdString());
+		}
+
+		return grpc::Status::OK;
+	}
+
+	grpc::Status ServiceImpl::DisableOverrideSignal([[maybe_unused]] ::grpc::ServerContext* context,
+													const ::RpctGrpc::DisableOverrideSignalRequest* request,
+													::RpctGrpc::DisableOverrideSignalReply* response)
+	{
+		for (const auto& pair : request->signalpairs())
+		{
+			QString appSignalId = QString::fromStdString(pair.appsignalid());
+			bool disable = pair.disable();
+
+			m_simulator.overrideSignals().setEnable(appSignalId, !disable);
+		}
+
+		// Forming response.
+		// Always return all overridden signals.
+		//
+		response->Clear();
+
+		auto currentSignals = m_simulator.overrideSignals().overrideSignals();
+		for (auto const& os : currentSignals)
+		{
+			auto pair = response->add_signalpairs();
+			pair->set_appsignalid(os.appSignalId().toStdString());
+			pair->set_disable(!os.enabled());
 		}
 
 		return grpc::Status::OK;

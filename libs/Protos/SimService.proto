@@ -253,6 +253,27 @@ message RemoveOverrideSignalReply
 }
 
 //
+// DisableOverrideSignal
+//
+message DisableOverrideSignalPair
+{
+    optional bool disable = 2;
+    optional string appSignalId = 5;
+}
+
+message DisableOverrideSignalRequest
+{
+    repeated DisableOverrideSignalPair signalPairs = 5;
+}
+
+message DisableOverrideSignalReply
+{
+    // Always returns ALL overridden Signals.
+    //
+    repeated DisableOverrideSignalPair signalPairs = 5;
+}
+
+//
 // SimService -- This service is used to communicate with the simulator.
 //
 service SimService 
@@ -274,7 +295,7 @@ service SimService
 
     rpc OverrideSignal(OverrideSignalRequest) returns (OverrideSignalReply) {}
     rpc RemoveOverrideSignal(RemoveOverrideSignalRequest) returns (RemoveOverrideSignalReply) {}
-    //rpc DisableOverrideSignal(DisableOverrideSignalRequest) returns (DisableOverrideSignalReply) {}
+    rpc DisableOverrideSignal(DisableOverrideSignalRequest) returns (DisableOverrideSignalReply) {}
 
     // TODO:
     //  TakeSnapshots/ApplySnapshot

@@ -488,4 +488,36 @@ namespace Sim
 
 		return currentlyOverriddenSignals;
 	}
+
+	tl::expected<std::vector<std::pair<QString, bool>>, QString> SimServiceClientImpl::DisableOverrideSignals(
+		const QStringList& appSignalIds,
+		bool disable)
+	{
+		grpc::ClientContext context;
+		RpctGrpc::DisableOverrideSignalRequest request;
+		RpctGrpc::DisableOverrideSignalReply reply;
+
+		for (const auto& appSignalId : appSignalIds)
+		{
+			auto pair = request.add_signalpairs();
+			pair->set_appsignalid(appSignalId.toStdString());
+			pair->set_disable(disable);
+		}
+
+		grpc::Status status = m_stub->DisableOverrideSignal(&context, request, &reply);
+		if (status.ok() == false)
+		{
+			return tl::unexpected{formatErrorMessage(status)};
+		}
+
+		std::vector<std::pair<QString, bool>> result;
+		result.reserve(static_cast<size_t>(reply.signalpairs_size()));
+
+		for (const auto& pair : reply.signalpairs())
+		{
+			result.emplace_back(QString::fromStdString(pair.appsignalid()), pair.disable());
+		}
+
+		return result;
+	}
 } // namespace Sim

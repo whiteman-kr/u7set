@@ -144,6 +144,8 @@ namespace Sim
 
 		[[nodiscard]] tl::expected<QStringList, QString> RemoveOverrideSignals(const QStringList& appSignalIds);
 		[[nodiscard]] tl::expected<QStringList, QString> GetOverriddenSignals();
+		[[nodiscard]] tl::expected<std::vector<std::pair<QString, bool>>, QString> DisableOverrideSignals(const QStringList& appSignalIds,
+																										  bool disable);
 
 	private:
 		std::shared_ptr<SimServiceClientImpl> m_impl;

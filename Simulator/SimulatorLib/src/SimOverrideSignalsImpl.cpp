@@ -511,13 +511,12 @@ namespace Sim
 
 	std::vector<OverrideSignalParam> OverrideSignalsImpl::overrideSignals() const
 	{
-		std::vector<OverrideSignalParam> result;
-
 		QReadLocker rl(&m_lock);
 
+		std::vector<OverrideSignalParam> result;
 		result.reserve(m_signals.size());
 
-		for (auto [appSignalId, ovSignalParam] : m_signals)
+		for (const auto& [appSignalId, ovSignalParam] : m_signals)
 		{
 			result.push_back(ovSignalParam);
 		}

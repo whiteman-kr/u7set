@@ -13,8 +13,8 @@ namespace Sim
 		~SimServiceClientImpl();
 
 	public:
-		SimServiceClient::ChannelState channelState();
-		bool connected();
+		[[nodiscard]] SimServiceClient::ChannelState channelState();
+		[[nodiscard]] bool connected();
 
 		tl::expected<QByteArray, QString> Ping(const QByteArray& data);
 
@@ -25,16 +25,15 @@ namespace Sim
 
 		tl::expected<std::vector<Sim::SimServiceModule>, QString> GetModuleList();
 		tl::expected<std::vector<Sim::SimServiceModule>, QString> GetModule(const QStringList& equipmentIds);
-		[[nodiscard]] tl::expected<::RpctGrpc::SetModuleFlagReply, QString> SetModuleFlag(const QString& equipmentId,
-																						  int32_t flagId,
-																						  bool value);
+		tl::expected<::RpctGrpc::SetModuleFlagReply, QString> SetModuleFlag(const QString& equipmentId, int32_t flagId, bool value);
 
 		tl::expected<QStringList, QString> GetSignalList();
 		tl::expected<std::vector<::AppSignalParam>, QString> GetSignalParam(std::span<const Hash> signalHashes);
 		tl::expected<std::vector<::AppSignalState>, QString> GetSignalState(std::span<const Hash> signalHashes);
 
 		tl::expected<void, QStringList> OverrideSignals(const std::vector<SimServiceClient::OverrideSignalPair>& overrideSignals);
-		[[nodiscard]] tl::expected<QStringList, QString> RemoveOverrideSignals(const QStringList& appSignalIds);
+		tl::expected<QStringList, QString> RemoveOverrideSignals(const QStringList& appSignalIds);
+		tl::expected<std::vector<std::pair<QString, bool>>, QString> DisableOverrideSignals(const QStringList& appSignalIds, bool disable);
 
 	private:
 		const std::shared_ptr<::grpc::Channel> m_channel;

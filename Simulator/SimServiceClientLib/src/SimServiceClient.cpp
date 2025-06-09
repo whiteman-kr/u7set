@@ -106,4 +106,10 @@ namespace Sim
 	{
 		return m_impl->RemoveOverrideSignals({});
 	}
+
+	tl::expected<std::vector<std::pair<QString, bool>>, QString> SimServiceClient::DisableOverrideSignals(const QStringList& appSignalIds,
+																										  bool disable)
+	{
+		return m_impl->DisableOverrideSignals(appSignalIds, disable);
+	}
 } // namespace Sim
