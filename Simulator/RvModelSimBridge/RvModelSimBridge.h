@@ -5,7 +5,7 @@
 #include <ServiceLib/Service.h>
 
 class UdpModelLinkThread;
-class SimulatorLinkThread;
+class SimLinkThread;
 
 class ModelSimBridgeWorker : public ServiceWorker
 {
@@ -32,8 +32,6 @@ private:
 	virtual void initServiceSpecificCmdLineArgs() override;
 	virtual void loadServiceSpecificSettings() override;
 
-	void clear();
-
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
@@ -51,6 +49,9 @@ private:
 	QString m_modelIP;
 	int m_modelPort = 0;
 
+	QString m_simIP;
+	int m_simPort = 0;
+
 	UdpModelLinkThread* m_udpModelLinkThread = nullptr;
-	//SimulatorLinkThread* m_simulatorLinkThread = nullptr;
+	SimLinkThread* m_simLinkThread = nullptr;
 };

@@ -1,6 +1,7 @@
 #include "../UtilsLib/WUtils.h"
 #include "RvModelSimBridge.h"
 #include "ModelLinkThread.h"
+#include "SimLinkThread.h"
 
 
 // -------------------------------------------------------------------------------------
@@ -28,7 +29,6 @@ ModelSimBridgeWorker::ModelSimBridgeWorker(const ModelSimBridgeWorker* worker) :
 
 ModelSimBridgeWorker::~ModelSimBridgeWorker()
 {
-	clear();
 }
 
 ServiceWorker* ModelSimBridgeWorker::createInstance() const
@@ -92,24 +92,42 @@ void ModelSimBridgeWorker::initServiceSpecificCmdLineArgs()
 					   QString("IP-address that receives packets from the model (default - 127.0.0.1)."),
 					   "127.0.0.1");
 
-	addValueCmdLineArg("modelPort",
-					   "modelPort",
-					   QString("IP-address that receives packets from the model (default - 9999)."),
-					   "9999");
+	addValueCmdLineArg("modelPort", "modelPort", QString("Port that receives packets from the model (default - 9999)."), "9999");
+
+	addValueCmdLineArg("simIP",
+					   "simIP",
+					   QString("IP-address of the Simulator (default - 127.0.0.1)."),
+					   "127.0.0.1");
+
+	addValueCmdLineArg("simPort", "simPort", QString("Port that is used to connect to the Simulator (default - 50051)."), "50051");
 }
 
 void ModelSimBridgeWorker::loadServiceSpecificSettings()
 {
+	bool ok = false;
+
 	m_modelIP = getSettingValue("modelIP");
 	if (m_modelIP.isEmpty() == true)
 	{
 		m_modelIP = "127.0.0.1";
 	}
-	bool ok = false;
+
 	m_modelPort = getSettingValue("modelPort").toInt(&ok);
 	if (ok == false)
 	{
 		m_modelPort = 9999;
+	}
+
+	m_simIP = getSettingValue("simIP");
+	if (m_simIP.isEmpty() == true)
+	{
+		m_simIP = "127.0.0.1";
+	}
+
+	m_simPort = getSettingValue("simPort").toInt(&ok);
+	if (ok == false)
+	{
+		m_simPort = 50051;
 	}
 
 	DEBUG_LOG_MSG(logger(), "");
@@ -120,22 +138,35 @@ void ModelSimBridgeWorker::loadServiceSpecificSettings()
 
 	DEBUG_LOG_MSG(logger(), QString(tr("modelIP = %1")).arg(m_modelIP));
 	DEBUG_LOG_MSG(logger(), QString(tr("modelPort = %1")).arg(m_modelPort));
+	DEBUG_LOG_MSG(logger(), QString(tr("simIP = %1")).arg(m_simIP));
+	DEBUG_LOG_MSG(logger(), QString(tr("simPort = %1")).arg(m_simPort));
 	DEBUG_LOG_MSG(logger(), "");
-}
-
-void ModelSimBridgeWorker::clear()
-{
-	//m_tuningSources.clear();
 }
 
 void ModelSimBridgeWorker::initialize()
 {
 	runUdpModelLinkThread();
+	runSimulatorLinkThread();
+
+	connect(m_udpModelLinkThread,
+			&UdpModelLinkThread::requestsArrived,
+			[this]()
+			{
+				m_simLinkThread->pushRequests(m_udpModelLinkThread->popAllRequests());
+			});
+
+	connect(m_simLinkThread,
+			&SimLinkThread::repliesReady,
+			[this]()
+			{
+				m_udpModelLinkThread->pushReplies(m_simLinkThread->popAllReplies());
+			});
 }
 
 void ModelSimBridgeWorker::shutdown()
 {
-	//stopUdpModelLinkThread();
+	stopUdpModelLinkThread();
+	stopSimulatorLinkThread();
 }
 
 void ModelSimBridgeWorker::runUdpModelLinkThread()
@@ -164,48 +195,24 @@ void ModelSimBridgeWorker::stopUdpModelLinkThread()
 
 void ModelSimBridgeWorker::runSimulatorLinkThread()
 {
-	/*
-	if (m_sourceThreads.size() == 0)
-	{
-		DEBUG_LOG_MSG(logger(), QString("Tuning sources workers is not running. Listener thread is not run also."));
-		return;
-	}
+	Q_ASSERT(m_simLinkThread == nullptr);
 
-	// create and run TuningSocketListenerThread
-	//
-	Q_ASSERT(m_socketListenerThreads.size() == 0);
+	HostAddressPort addr{m_simIP, m_simPort};
 
-	for (int channel = CHANNEL_1; channel < TuningServiceSettings::CHANNELS_COUNT; channel++)
-	{
-		const TuningServiceSettings::ChannelSettings& ch = m_serviceSettings.channelSettings[channel];
+	SimLink* simLink = new SimLink(addr, logger());
 
-		if (isSourceHandlerExistsForChannel(channel) == false)
-		{
-			DEBUG_LOG_MSG(logger(),
-						  QString("No tuning sources found for channel %1. Therefore Listener of IP %2 will not be run.")
-							  .arg(channel + 1)
-							  .arg(ch.tuningDataIP.addressPortStr()));
-			continue;
-		}
-
-		CONTINUE_IF_FALSE(ch.enable);
-
-		auto thread = new TuningSocketListenerThread(*this, ch.tuningDataIP, channel, isSimulationMode(), logger());
-		m_socketListenerThreads.push_back(thread);
-
-		thread->start();
-	}*/
+	m_simLinkThread = new SimLinkThread(simLink);
+	m_simLinkThread->start();
 }
 
 void ModelSimBridgeWorker::stopSimulatorLinkThread()
 {
-	/* stop and delete TuningSocketListenerThread
-	//
-	for (auto thread : m_socketListenerThreads)
+	if (m_simLinkThread != nullptr)
 	{
-		thread->quitAndWait();
-		delete thread;
-	}
+		m_simLinkThread->quitAndWait();
+		delete m_simLinkThread;
+		m_simLinkThread = nullptr;
 
-	m_socketListenerThreads.clear();*/
+		DEBUG_LOG_MSG(logger(), QString("SimLinkThread stoped"));
+	}
 }

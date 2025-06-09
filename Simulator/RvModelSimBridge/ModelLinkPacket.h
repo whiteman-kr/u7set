@@ -5,9 +5,9 @@
 #include <stdint.h>
 
 #define SGW_MARKER 0x1643
-#define SGW_VERSION 1
+#define SGW_VERSION_1 1
 
-namespace ModelLink
+namespace RvUdpSim
 {
 
 #pragma pack(push, 4)
@@ -108,42 +108,9 @@ namespace ModelLink
 	struct SignalState
 	{
 		Hash hash;
-		uint64_t time;
+		qint64 time;
 		union SignalValue value;
 		union SignalFlags flags;
-	};
-
-	// Request to read signal states
-	//
-	struct SignalReadRequest
-	{
-		int16_t count; // Number of signals to read 1..READ_SIGNALS_MAX_COUNT
-					   // Hash hash[count];                // Signal hashes
-	};
-
-	// Response to request for reading signal states
-	//
-	struct SignalReadReply
-	{
-		int16_t count; // Number of responses 1..READ_SIGNALS_MAX_COUNT
-					   // struct SignalState state[count];        // Signal states
-	};
-
-	// Request to write signal states
-	//
-	struct SignalWriteRequest
-	{
-		int16_t count; // Number of signals to write 1..WRITE_SIGNALS_MAX_COUNT
-					   // Hash hash[count];                // Signal hashes
-					   // union SignalValue value[count];        // Signal values
-	};
-
-	// Response to signal write
-	//
-	struct SignalWriteReply
-	{
-		int16_t count;                      // Number of signals 1..WRITE_SIGNALS_MAX_COUNT
-											// enum ErrorCode errorCode[count];      // Error codes
 	};
 
 	struct SimulatorSaveSnapshotRequest
@@ -175,9 +142,9 @@ namespace ModelLink
 	};
 
 	//
-	// UDP packet for SimulatorModelBridge exchange
+	// UDP packet header for SimulatorModelBridge exchange
 	//
-	struct SimulatorBridgePacket
+	struct SimulatorBridgePacketHeader_v1
 	{
 		// Packet header
 		//
@@ -227,5 +194,56 @@ namespace ModelLink
 		// uint16_t crc16;
 	};
 
+	using SimulatorBridgePacketHeader = SimulatorBridgePacketHeader_v1;
+
 #pragma pack(pop)
-} // namespace ModelLink
+
+	struct SignalsReadRequest
+	{
+		// UDP structure:
+		// int16_t count; // Number of signals to read 1..READ_SIGNALS_MAX_COUNT
+		// Hash hash[count];                // Signal hashes
+		std::vector<Hash> hashes;
+	};
+
+	struct SignalsReadReply
+	{
+		// UDP structure:
+		// int16_t count; // Number of responses 1..READ_SIGNALS_MAX_COUNT
+		// struct SignalState state[count];        // Signal states
+		std::vector<SignalState> states;
+	};
+
+	struct SignalsWriteRequest
+	{
+		// UDP structure:
+		// int16_t count; // Number of signals to write 1..WRITE_SIGNALS_MAX_COUNT
+		// Hash hash[count];                // Signal hashes
+		// union SignalValue value[count];        // Signal values
+		std::vector<Hash> hashes;
+		std::vector<SignalValue> values;
+	};
+
+	struct SignalsWriteReply
+	{
+		// UDP structure:
+		// int16_t count; // Number of signals 1..WRITE_SIGNALS_MAX_COUNT
+		// enum ErrorCode errorCode[count];      // Error codes
+		std::vector<ErrorCode> errorCodes;
+	};
+
+	struct SimRequest
+	{
+		int type;
+		std::optional<SignalsReadRequest> readRequest;
+		std::optional<SignalsWriteRequest> writeRequest;
+	};
+
+	struct SimReply
+	{
+		int type;
+		std::optional<SimulatorStateReply> stateReply;
+		std::optional<SignalsReadReply> readReply;
+		std::optional<SignalsWriteReply> writeReply;
+	};
+} // namespace SimService
