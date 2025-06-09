@@ -34,6 +34,7 @@ struct Actions
 		std::cout << "  get_signal_param [#ID1 #IDN]        Get signal parameters. Without arguments, all signals are returned." << "\n";
 		std::cout << "  get_signal_state <#ID1> ... [#IDN]  Get signal states." << "\n";
 		std::cout << "\n";
+		std::cout << "  get_module_list                     Get all modules.\n";
 		std::cout << "  lm_status <LMID>                    Print LogicModule status.\n";
 		lm_set_flags_help();
 		std::cout << "\n";
@@ -239,6 +240,26 @@ struct Actions
 				}
 			}
 		}
+
+		return;
+	}
+
+	static void get_module_list(Sim::SimServiceClient& client, [[maybe_unused]] const QStringList& args)
+	{
+		auto result = client.GetModuleList();
+		if (result.has_value() == false)
+		{
+			std::cout << result.error().toStdString() << "\n";
+			return;
+		}
+
+		const auto& modules = result.value();
+		for (const auto& module : modules)
+		{
+			std::cout << module.equipmentId().toStdString() << ", IsLogicModule: " << module.isLogicModule() << "\n";
+		}
+
+		std::cout << modules.size() << " module(s)." << "\n";
 
 		return;
 	}
@@ -582,6 +603,7 @@ const std::map<QString, ActionFunc> actions = {
 	{QString("get_signal_param"), Actions::get_signal_param},
 	{QString("get_signal_state"), Actions::get_signal_state},
 
+	{QString("get_module_list"), Actions::get_module_list},
 	{QString("lm_status"), Actions::lm_status},
 	{QString("lm_set_flag"), Actions::lm_set_flag},
 

@@ -12,6 +12,55 @@ enum SimulatorState
     STATE_PAUSED = 2;
 }
 
+enum ModuleFlagId
+{
+    // LogicModule flags
+    //
+    MF_LM_BOOL_FAULT = 2;                // ReadOnly
+    MF_LM_BOOL_POWER_ON = 3;
+    MF_LM_BOOL_ARMING_KEY = 10;
+    MF_LM_BOOL_TUNING_KEY = 11;
+    MF_LM_BOOL_SOR_IS_SET = 20;          // ReadOnly
+    MF_LM_BOOL_SOR_SET_SWITCH_1 = 21;
+    MF_LM_BOOL_SOR_SET_SWITCH_2 = 22;
+    MF_LM_BOOL_SOR_SET_SWITCH_3 = 23;
+    MF_LM_BOOL_SOR_RESET = 27;           // WriteOnly, only setting `true` has sense.
+}
+
+message ModuleFlagValue
+{
+    oneof ValueOneOf
+    {
+        bool boolValue = 1;
+        double doubleValue = 2;
+        int32 int32Value = 3;
+        int64 int64Value = 4;
+    }
+}
+
+message ModuleFlagPair
+{
+    optional ModuleFlagId id = 1;
+    optional ModuleFlagValue value = 2;
+}
+
+message ModuleState
+{
+    optional string equipmentId = 2;
+    map<int32, ModuleFlagValue> flags = 4;
+    oneof ModuleOneOf
+    {
+        LogicModule logicModule = 3;
+    }
+}
+
+message LogicModule
+{
+    optional string subsystemId = 3;
+    optional int32 lmNumber = 7;
+    optional int32 channel = 8;         // 0 - A, 1 - B, 2 - C, 3 - D
+} 
+
 
 //
 // Ping
@@ -81,40 +130,20 @@ message CommandStopReply
 }
 
 //
+// GetModuleList
+//
+message GetModuleListRequest
+{
+}
+
+message GetModuleListReply
+{
+    repeated ModuleState modules = 2;
+}
+
+//
 // GetModule
 //
-enum ModuleFlagId
-{
-    // LogicModule flags
-    //
-    MF_LM_BOOL_FAULT = 2;                // ReadOnly
-    MF_LM_BOOL_POWER_ON = 3;
-    MF_LM_BOOL_ARMING_KEY = 10;
-    MF_LM_BOOL_TUNING_KEY = 11;
-    MF_LM_BOOL_SOR_IS_SET = 20;          // ReadOnly
-    MF_LM_BOOL_SOR_SET_SWITCH_1 = 21;
-    MF_LM_BOOL_SOR_SET_SWITCH_2 = 22;
-    MF_LM_BOOL_SOR_SET_SWITCH_3 = 23;
-    MF_LM_BOOL_SOR_RESET = 27;           // WriteOnly, only setting `true` has sense.
-}
-
-message ModuleFlagValue
-{
-    oneof ValueOneOf
-    {
-        bool boolValue = 1;
-        double doubleValue = 2;
-        int32 int32Value = 3;
-        int64 int64Value = 4;
-    }
-}
-
-message ModuleFlagPair
-{
-    optional ModuleFlagId id = 1;
-    optional ModuleFlagValue value = 2;
-}
-
 message GetModuleRequest
 {
     repeated string equipmentId = 2;
@@ -124,23 +153,6 @@ message GetModuleReply
 {
     repeated ModuleState modules = 2;
 }
-
-message ModuleState
-{
-    optional string equipmentId = 2;
-    map<int32, ModuleFlagValue> flags = 4;
-    oneof ModuleOneOf
-    {
-        LogicModule logicModule = 3;
-    }
-}
-
-message LogicModule
-{
-    optional string subsystemId = 3;
-    optional int32 lmNumber = 7;
-    optional int32 channel = 8;         // 0 - A, 1 - B, 2 - C, 3 - D
-} 
 
 //
 // GetSignalList
@@ -252,6 +264,7 @@ service SimService
     rpc CommandPause(CommandPauseRequest) returns (CommandPauseReply) {}
     rpc CommandStop(CommandStopRequest) returns (CommandStopReply) {}
 
+    rpc GetModuleList(GetModuleListRequest) returns (GetModuleListReply) {}
     rpc GetModule(GetModuleRequest) returns (GetModuleReply) {}
     rpc SetModuleFlag(SetModuleFlagRequest) returns (SetModuleFlagReply) {}
 

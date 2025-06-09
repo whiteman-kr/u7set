@@ -49,7 +49,12 @@ namespace Sim
 		return m_impl->CommandStop();
 	}
 
-	[[nodiscard]] tl::expected<std::vector<Sim::SimServiceModule>, QString> SimServiceClient::GetModule(const QStringList& equipmentIds)
+	tl::expected<std::vector<Sim::SimServiceModule>, QString> SimServiceClient::GetModuleList()
+	{
+		return m_impl->GetModuleList();
+	}
+
+	tl::expected<std::vector<Sim::SimServiceModule>, QString> SimServiceClient::GetModule(const QStringList& equipmentIds)
 	{
 		return m_impl->GetModule(equipmentIds);
 	}

@@ -131,6 +131,7 @@ namespace Sim
 		tl::expected<SimServiceClient::State, QString> CommandPause();
 		tl::expected<SimServiceClient::State, QString> CommandStop();
 
+		[[nodiscard]] tl::expected<std::vector<Sim::SimServiceModule>, QString> GetModuleList();
 		[[nodiscard]] tl::expected<std::vector<Sim::SimServiceModule>, QString> GetModule(const QStringList& equipmentIds);
 		tl::expected<void, QString> SetModuleFlag(const QString& equipmentId, int32_t flagId, bool value);
 

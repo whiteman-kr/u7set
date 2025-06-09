@@ -73,6 +73,10 @@ namespace Sim
 								 const ::RpctGrpc::CommandStopRequest* request,
 								 ::RpctGrpc::CommandStopReply* response) override;
 
+		grpc::Status GetModuleList(::grpc::ServerContext* context,
+								   const ::RpctGrpc::GetModuleListRequest* request,
+								   ::RpctGrpc::GetModuleListReply* response) override;
+
 		grpc::Status GetModule(::grpc::ServerContext* context,
 							   const ::RpctGrpc::GetModuleRequest* request,
 							   ::RpctGrpc::GetModuleReply* response) override;
@@ -280,6 +284,49 @@ namespace Sim
 		return grpc::Status::OK;
 	}
 
+	static void fillProtoModuleState(::RpctGrpc::ModuleState& protoModuleState, const LogicModuleImpl& lm)
+	{
+		protoModuleState.set_equipmentid(lm.equipmentId().toStdString());
+
+		auto addBoolFlagFunc = [&protoModuleState](::RpctGrpc::ModuleFlagId flagId, bool value)
+		{
+			::RpctGrpc::ModuleFlagValue protoValue{};
+			protoValue.set_boolvalue(value);
+			protoModuleState.mutable_flags()->emplace(static_cast<int32_t>(flagId), std::move(protoValue));
+		};
+
+		addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_FAULT, lm.runtimeMode() == Sim::RuntimeMode::FaultedMode);
+		addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_POWER_ON, !lm.isPowerOff());
+		addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_ARMING_KEY, lm.armingKey());
+		addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_TUNING_KEY, lm.tuningKey());
+		addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_SOR_IS_SET, lm.sorIsSet());
+		addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_SOR_SET_SWITCH_1, lm.sorSetSwitch1());
+		addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_SOR_SET_SWITCH_2, lm.sorSetSwitch2());
+		addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_SOR_SET_SWITCH_3, lm.sorSetSwitch3());
+
+		// Fill message oneof ModuleOneOf -> LogicModule
+		//
+		::RpctGrpc::LogicModule* protoLm = protoModuleState.mutable_logicmodule();
+		protoLm->set_subsystemid(lm.logicModuleExtraInfo().subsystemID.toStdString());
+		protoLm->set_lmnumber(lm.lmNumber());
+		protoLm->set_channel(static_cast<int32_t>(lm.channel()));
+
+		return;
+	}
+
+	grpc::Status ServiceImpl::GetModuleList([[maybe_unused]] ::grpc::ServerContext* context,
+											[[maybe_unused]] const ::RpctGrpc::GetModuleListRequest* request,
+											::RpctGrpc::GetModuleListReply* response)
+	{
+		for (const auto& lm : m_simulator.logicModules())
+		{
+			assert(lm);
+			fillProtoModuleState(*response->add_modules(), *lm);
+		}
+
+		return grpc::Status::OK;
+	}
+
 	grpc::Status ServiceImpl::GetModule([[maybe_unused]] ::grpc::ServerContext* context,
 										const ::RpctGrpc::GetModuleRequest* request,
 										::RpctGrpc::GetModuleReply* response)
@@ -298,6 +345,7 @@ namespace Sim
 
 		// Format response.
 		//
+		int index = 0;
 		for (const auto& lm : modules)
 		{
 			::RpctGrpc::ModuleState* protoModuleState = response->add_modules();
@@ -306,31 +354,16 @@ namespace Sim
 			{
 				// Fill message ModuleState.
 				//
-				protoModuleState->set_equipmentid(lm->equipmentId().toStdString());
-
-				auto addBoolFlagFunc = [protoModuleState](::RpctGrpc::ModuleFlagId flagId, bool value)
-				{
-					::RpctGrpc::ModuleFlagValue protoValue{};
-					protoValue.set_boolvalue(value);
-					protoModuleState->mutable_flags()->emplace(static_cast<int32_t>(flagId), std::move(protoValue));
-				};
-
-				addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_FAULT, lm->runtimeMode() == Sim::RuntimeMode::FaultedMode);
-				addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_POWER_ON, !lm->isPowerOff());
-				addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_ARMING_KEY, lm->armingKey());
-				addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_TUNING_KEY, lm->tuningKey());
-				addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_SOR_IS_SET, lm->sorIsSet());
-				addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_SOR_SET_SWITCH_1, lm->sorSetSwitch1());
-				addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_SOR_SET_SWITCH_2, lm->sorSetSwitch2());
-				addBoolFlagFunc(::RpctGrpc::ModuleFlagId::MF_LM_BOOL_SOR_SET_SWITCH_3, lm->sorSetSwitch3());
-
-				// Fill message oneof ModuleOneOf -> LogicModule
-				//
-				::RpctGrpc::LogicModule* protoLm = protoModuleState->mutable_logicmodule();
-				protoLm->set_subsystemid(lm->logicModuleExtraInfo().subsystemID.toStdString());
-				protoLm->set_lmnumber(lm->lmNumber());
-				protoLm->set_channel(static_cast<int32_t>(lm->channel()));
+				fillProtoModuleState(*protoModuleState, *lm);
 			}
+			else
+			{
+				// Module not found, just set module's equipment id.
+				//
+				protoModuleState->set_equipmentid(request->equipmentid()[index]);
+			}
+
+			index++;
 		}
 
 		return grpc::Status::OK;
@@ -518,7 +551,7 @@ namespace Sim
 		// Save states to the reply.
 		//
 		auto protoStates = response->mutable_states();
-		protoStates->Reserve(states.size());
+		protoStates->Reserve(static_cast<int>(states.size()));
 
 		for (const ::AppSignalState& state : states)
 		{
@@ -632,7 +665,7 @@ namespace Sim
 		return grpc::Status::OK;
 	}
 
-	grpc::Status ServiceImpl::RemoveOverrideSignal(::grpc::ServerContext* context,
+	grpc::Status ServiceImpl::RemoveOverrideSignal([[maybe_unused]] ::grpc::ServerContext* context,
 												   const ::RpctGrpc::RemoveOverrideSignalRequest* request,
 												   ::RpctGrpc::RemoveOverrideSignalReply* response)
 	{

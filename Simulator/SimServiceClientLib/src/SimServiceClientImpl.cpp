@@ -197,6 +197,30 @@ namespace Sim
 		return state;
 	}
 
+	tl::expected<std::vector<Sim::SimServiceModule>, QString> SimServiceClientImpl::GetModuleList()
+	{
+		grpc::ClientContext context;
+		RpctGrpc::GetModuleListRequest request;
+		RpctGrpc::GetModuleListReply reply;
+
+		grpc::Status status = m_stub->GetModuleList(&context, request, &reply);
+		if (status.ok() == false)
+		{
+			return tl::unexpected{formatErrorMessage(status)};
+		}
+
+		std::vector<Sim::SimServiceModule> result;
+		result.reserve(reply.modules_size());
+
+		for (const auto moduleData : reply.modules())
+		{
+			SimServiceModule module{shared_from_this(), std::make_shared<::RpctGrpc::ModuleState>(std::move(moduleData))};
+			result.emplace_back(std::move(module));
+		}
+
+		return result;
+	}
+
 	tl::expected<std::vector<Sim::SimServiceModule>, QString> SimServiceClientImpl::GetModule(const QStringList& equipmentIds)
 	{
 		grpc::ClientContext context;
