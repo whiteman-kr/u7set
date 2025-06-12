@@ -7,7 +7,7 @@ class QLineEdit;
 
 class DialogSettings : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
 	explicit DialogSettings(QDialog* parent = nullptr);
 
@@ -19,10 +19,10 @@ private slots:
 	void accept() override;
 
 private:
-    QLineEdit* ipEdit = nullptr;
-	QLineEdit* portInEdit = nullptr;
-	QLineEdit* portOutEdit = nullptr;
+	QLineEdit* ipEdit = nullptr;
+	QLineEdit* portRemoteEdit = nullptr;
+	QLineEdit* portLocalEdit = nullptr;
 	QLabel* statusLabel = nullptr;
 
-    const QString settingsFile = "settings.ini";
+	const QString settingsFile = "settings.ini";
 };

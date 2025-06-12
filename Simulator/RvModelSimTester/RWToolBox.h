@@ -4,23 +4,29 @@
 
 class QLineEdit;
 class QPushButton;
+class QCompleter;
+class QStringListModel;
 
 class RWToolBox : public QWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit RWToolBox(QWidget* parent = nullptr);
+	explicit RWToolBox(QWidget* parent = nullptr);
 
 signals:
-	void readAction(const QString& action);
-	void writeAction(const QString& action);
+	void requestRead(const QString& sygnalID);
+	void requestWrite(const QString& sygnalID, const QString& value);
+
 private slots:
-    void onReadClicked();
-    void onWriteClicked();
+	void onReadClicked();
+	void onWriteClicked();
 
 private:
-    QLineEdit* signalIdEdit;
-    QLineEdit* writeValueEdit;
-    QPushButton* readButton;
-    QPushButton* writeButton;
+	QLineEdit* signalIdEdit;
+	QLineEdit* writeValueEdit;
+	QPushButton* readButton;
+	QPushButton* writeButton;
+
+	QCompleter* signalIdCompleter;
+	QStringListModel* signalIdModel;
 };

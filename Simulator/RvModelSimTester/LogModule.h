@@ -1,8 +1,9 @@
 #pragma once
 
-#include <QTextEdit>
 #include <QStringList>
+#include <QTextEdit>
 #include <QWidget>
+#include <QPushButton>
 
 class LogModule : public QWidget
 {
@@ -16,5 +17,8 @@ public slots:
 private:
 	QTextEdit* m_logLabel = nullptr;
 	QStringList actionLog;
+	QPushButton* clearButton = nullptr;
+
 	void updateLogLabel();
+	void clearLog();
 };

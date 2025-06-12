@@ -18,6 +18,8 @@ set (TC_SOURCES
 	main.cpp
     RWToolBox.cpp
     RWToolBox.h
+	AppSettings.h
+	AppSettings.cpp
 	DialogSettings.cpp
 	DialogSettings.h
 	SimControlModule.cpp
@@ -26,6 +28,10 @@ set (TC_SOURCES
 	LogModule.cpp
 	MainWindow.cpp
 	MainWindow.h
+	SimTestUDPThread.h
+	SimTestUDPThread.cpp
+	SimModelPackets.cpp
+	SimModelPackets.h
 )
 
 set (TC_RESOURCES
@@ -56,20 +62,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<cassert>
 	<cstdint>
 
-	# C++ includes
-	#
-	<algorithm>
-	<atomic>
-	<functional>
-	<iostream>
-	<limits>
-	<list>
-	<map>
-	<memory>
-	<vector>
-	<set>
-	<type_traits>
-
 	# Qt includes
 	#
 
@@ -81,20 +73,21 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QStatusBar>
 	<QVBoxLayout>
 	<QWidget>
+	<QThread>
+    <QUdpSocket>
+	<QHostAddress>
 
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
+
+	"../../UtilsLib/Crc.h"
 	
-	<ProtoSerialization.h>
-	<Network.pb.h>
-	
-	"../../AppSignalLib/AppSignal.h"
 )
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Xml)
-target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib OnlineLib HardwareLib ServiceLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib UtilsLib)
 
 # Link Visaul Leak Detector
 #

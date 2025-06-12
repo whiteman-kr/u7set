@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include "SimModelPackets.h"
 class QPushButton;
 class QLabel;
 
@@ -14,11 +15,16 @@ public:
 signals:
 	void simStatusChanged(const QString& status);
 	void simAction(const QString& action);
+	void simControlMode(const QString& mode);
+
+public slots: 
+	void onSimStateReady(int errorCode, int stateCode);
 
 private slots:
 	void onStartClicked();
 	void onStopClicked();
 	void onPauseClicked();
+	
 
 private:
 	QPushButton* startButton = nullptr;

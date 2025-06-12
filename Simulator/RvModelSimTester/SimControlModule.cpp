@@ -1,12 +1,14 @@
 #include "SimControlModule.h"
-#include <QDebug>
+
+#include <QFormLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QPushButton>
-#include <QGroupBox>
 #include <QLineEdit>
-#include <QFormLayout>
+#include <QPushButton>
 #include <QVBoxLayout>
+
+#include "SimModelPackets.h"
 
 
 SimControlModule::SimControlModule(QWidget* parent) :
@@ -16,7 +18,7 @@ SimControlModule::SimControlModule(QWidget* parent) :
 	startButton = new QPushButton("Start sim", this);
 	stopButton = new QPushButton("Stop sim", this);
 	pauseButton = new QPushButton("Pause", this);
-	statusBar = new QLabel("Mode: Run", this);
+	statusBar = new QLabel("Mode: ???", this);
 	statusBar->setFrameStyle(QFrame::Panel | QFrame::Sunken);
 	statusBar->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
@@ -36,27 +38,39 @@ SimControlModule::SimControlModule(QWidget* parent) :
 	mainLayout->addStretch();
 
 	setLayout(mainLayout);
-	
+
+	resize(350, 240);
 
 	connect(startButton, &QPushButton::clicked, this, &SimControlModule::onStartClicked);
 	connect(stopButton, &QPushButton::clicked, this, &SimControlModule::onStopClicked);
 	connect(pauseButton, &QPushButton::clicked, this, &SimControlModule::onPauseClicked);
 }
 
+void SimControlModule::onSimStateReady(int errorCode, int stateCode)
+{
+	if (errorCode == Success) {
+		statusBar->setText(QString("Mode: %1").arg(simStateToString(static_cast<SimulatorStateCode>(stateCode))));
+	}
+	else {
+		statusBar->setText(QString("Error: %1").arg(errorCodeToString(static_cast<ErrorCode>(errorCode))));
+	}
+	
+}
+
 void SimControlModule::onStartClicked()
 {
-	statusBar->setText("Mode: Run");
+	simControlMode("Start");
 	emit simAction("Start sim button pressed (Run)");
 }
 
 void SimControlModule::onStopClicked()
 {
-	statusBar->setText("Mode: Stop");
+	simControlMode("Stop");
 	emit simAction("Stop sim button pressed (Stop)");
 }
 
 void SimControlModule::onPauseClicked()
 {
-	statusBar->setText("Mode: Pause");
+	simControlMode("Pause");
 	emit simAction("Pause button pressed (Pause)");
 }
