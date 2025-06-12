@@ -150,6 +150,7 @@ void SimLink::timerEvent(QTimerEvent* event)
 		case SGW_COMMAND_START:
 		case SGW_COMMAND_STOP:
 		case SGW_COMMAND_PAUSE:
+		case SGW_COMMAND_RESUME:
 			{
 				reply.stateReply = processSimulatorControl(request.type);
 			}
