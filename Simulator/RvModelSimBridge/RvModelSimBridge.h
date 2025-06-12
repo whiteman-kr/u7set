@@ -46,11 +46,12 @@ private:
 
 	mutable QMutex m_startStopMutex;
 
-	QString m_modelIP;
-	int m_modelPort = 0;
+	QString m_modelIP = "0.0.0.0";
+	int m_modelRequestPort = 9999;
+	int m_modelReplyPort = 9998;
 
-	QString m_simIP;
-	int m_simPort = 0;
+	QString m_simIP = "127.0.0.1";
+	int m_simPort = 50051;
 
 	UdpModelLinkThread* m_udpModelLinkThread = nullptr;
 	SimLinkThread* m_simLinkThread = nullptr;

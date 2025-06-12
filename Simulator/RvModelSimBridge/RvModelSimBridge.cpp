@@ -89,45 +89,59 @@ void ModelSimBridgeWorker::initServiceSpecificCmdLineArgs()
 
 	addValueCmdLineArg("modelIP",
 					   "modelIP",
-					   QString("IP-address that receives packets from the model (default - 127.0.0.1)."),
-					   "127.0.0.1");
+					   QString("IP-address that receives packets from the model (default - any address, %1).").arg(m_modelIP),
+					   m_modelIP);
 
-	addValueCmdLineArg("modelPort", "modelPort", QString("Port that receives packets from the model (default - 9999)."), "9999");
+	addValueCmdLineArg("requestPort",
+					   "requestPort",
+					   QString("Port that receives packets from the model (default - %1).").arg(m_modelRequestPort),
+					   QString::number(m_modelRequestPort));
 
-	addValueCmdLineArg("simIP",
-					   "simIP",
-					   QString("IP-address of the Simulator (default - 127.0.0.1)."),
-					   "127.0.0.1");
+	addValueCmdLineArg("replyPort",
+					   "replyPort",
+					   QString("Port to which replies are sent to the model (default - %1).").arg(m_modelReplyPort),
+					   QString::number(m_modelReplyPort));
 
-	addValueCmdLineArg("simPort", "simPort", QString("Port that is used to connect to the Simulator (default - 50051)."), "50051");
+	addValueCmdLineArg("simIP", "simIP", QString("IP-address of the Simulator (default - %1).").arg(m_simIP), m_simIP);
+
+	addValueCmdLineArg("simPort",
+					   "simPort",
+					   QString("Port that is used to connect to the Simulator (default - %1).").arg(m_simPort),
+					   QString::number(m_simPort));
 }
 
 void ModelSimBridgeWorker::loadServiceSpecificSettings()
 {
 	bool ok = false;
 
-	m_modelIP = getSettingValue("modelIP");
-	if (m_modelIP.isEmpty() == true)
+	QString strValue = getSettingValue("modelIP");
+	if (strValue.isEmpty() == false)
 	{
-		m_modelIP = "127.0.0.1";
+		m_modelIP = strValue;
 	}
 
-	m_modelPort = getSettingValue("modelPort").toInt(&ok);
-	if (ok == false)
+	int intValue = getSettingValue("requestPort").toInt(&ok);
+	if (ok == true)
 	{
-		m_modelPort = 9999;
+		m_modelRequestPort = intValue;
 	}
 
-	m_simIP = getSettingValue("simIP");
-	if (m_simIP.isEmpty() == true)
+	intValue = getSettingValue("replyPort").toInt(&ok);
+	if (ok == true)
 	{
-		m_simIP = "127.0.0.1";
+		m_modelReplyPort = intValue;
 	}
 
-	m_simPort = getSettingValue("simPort").toInt(&ok);
-	if (ok == false)
+	strValue = getSettingValue("simIP");
+	if (strValue.isEmpty() == false)
 	{
-		m_simPort = 50051;
+		m_simIP = strValue;
+	}
+
+	intValue = getSettingValue("simPort").toInt(&ok);
+	if (ok == true)
+	{
+		m_simPort = intValue;
 	}
 
 	DEBUG_LOG_MSG(logger(), "");
@@ -137,7 +151,8 @@ void ModelSimBridgeWorker::loadServiceSpecificSettings()
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SoftwareSetting::CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStrIfSet()));
 
 	DEBUG_LOG_MSG(logger(), QString(tr("modelIP = %1")).arg(m_modelIP));
-	DEBUG_LOG_MSG(logger(), QString(tr("modelPort = %1")).arg(m_modelPort));
+	DEBUG_LOG_MSG(logger(), QString(tr("requestPort = %1")).arg(m_modelRequestPort));
+	DEBUG_LOG_MSG(logger(), QString(tr("replyPort = %1")).arg(m_modelReplyPort));
 	DEBUG_LOG_MSG(logger(), QString(tr("simIP = %1")).arg(m_simIP));
 	DEBUG_LOG_MSG(logger(), QString(tr("simPort = %1")).arg(m_simPort));
 	DEBUG_LOG_MSG(logger(), "");
@@ -173,9 +188,9 @@ void ModelSimBridgeWorker::runUdpModelLinkThread()
 {
 	Q_ASSERT(m_udpModelLinkThread == nullptr);
 
-	HostAddressPort addr{m_modelIP, m_modelPort};
+	HostAddressPort listenAddr{m_modelIP, m_modelRequestPort};
 
-	UdpModelLink* udpModelLink = new UdpModelLink(addr, logger());
+	UdpModelLink* udpModelLink = new UdpModelLink(listenAddr, m_modelReplyPort, logger());
 
 	m_udpModelLinkThread = new UdpModelLinkThread(udpModelLink);
 	m_udpModelLinkThread->start();

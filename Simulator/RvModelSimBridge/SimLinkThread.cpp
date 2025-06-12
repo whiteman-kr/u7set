@@ -67,6 +67,26 @@ void SimLink::onThreadFinished()
 				  QString(tr("Simulator Communication thread is finished with Simulator address %1.")).arg(m_simIP.addressPortStr()));
 }
 
+void SimLink::initTimer()
+{
+	Q_ASSERT(m_timer == nullptr);
+
+	m_timer = new QBasicTimer();
+
+	m_timer->start(1, Qt::PreciseTimer, this);
+}
+
+void SimLink::shutdownTimer()
+{
+	TEST_PTR_RETURN(m_timer);
+
+	m_timer->stop();
+
+	delete m_timer;
+
+	m_timer = nullptr;
+}
+
 void SimLink::timerEvent(QTimerEvent* event)
 {
 	TEST_PTR_RETURN(m_timer);
@@ -104,36 +124,45 @@ void SimLink::timerEvent(QTimerEvent* event)
 
 		l.unlock();
 
+		SimReply reply = {.type = request.type, .addressTo = request.addressFrom};
+
 		// Process the request
 		//
 		switch (request.type)
 		{
-		case SGW_COMMAND_GET_STATE:
-			{
-				auto reply = processGetState();
-				QMutexLocker wl(&m_lock);
-				m_replies.push(std::move(reply));
-			}
-			break;
 		case SGW_SIGNAL_READ:
 			{
 				Q_ASSERT(request.readRequest.has_value());
-
-				auto reply = processSignalsRead(request.readRequest.value());
-				QMutexLocker wl(&m_lock);
-				m_replies.push(std::move(reply));
+				reply.readReply = processSignalsRead(request.readRequest.value());
 			}
 			break;
 		case SGW_SIGNAL_WRITE:
 			{
 				Q_ASSERT(request.writeRequest.has_value());
-
-				auto reply = processSignalsWrite(request.writeRequest.value());
-				QMutexLocker wl(&m_lock);
-				m_replies.push(std::move(reply));
+				reply.writeReply = processSignalsWrite(request.writeRequest.value());
 			}
 			break;
+		case SGW_COMMAND_GET_STATE:
+			{
+				reply.stateReply = processGetState();
+			}
+			break;
+		case SGW_COMMAND_START:
+		case SGW_COMMAND_STOP:
+		case SGW_COMMAND_PAUSE:
+			{
+				reply.stateReply = processSimulatorControl(request.type);
+			}
+			break;
+		default:
+			Q_ASSERT(false);
+			DEBUG_LOG_ERR(m_logger, QString(tr("SimLink: unknown request type: %1.")).arg(request.type));
+			
+			continue;
 		}
+
+		QMutexLocker wl(&m_lock);
+		m_replies.push(std::move(reply));
 
 	} while (count < 100);
 
@@ -147,79 +176,7 @@ void SimLink::timerEvent(QTimerEvent* event)
 	}
 }
 
-void SimLink::initTimer()
-{
-	Q_ASSERT(m_timer == nullptr);
-
-	m_timer = new QBasicTimer();
-
-	m_timer->start(1, Qt::PreciseTimer, this);
-}
-
-void SimLink::shutdownTimer()
-{
-	TEST_PTR_RETURN(m_timer);
-
-	m_timer->stop();
-
-	delete m_timer;
-
-	m_timer = nullptr;
-}
-
-SimReply SimLink::processGetState()
-{
-	SimReply reply;
-	reply.type = SGW_COMMAND_GET_STATE;
-
-	QByteArray payload = "Hello, World!";
-	auto pingResult = m_client->Ping(payload);
-
-	if (pingResult.has_value() == false)
-	{
-		reply.stateReply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
-	}
-	else
-	{
-		if (payload != pingResult)
-		{
-			reply.stateReply = {RvUdpSim::Success, RvUdpSim::Unavailable};
-		}
-		else
-		{
-			auto status = m_client->GetStatus();
-			if (status.has_value() == false)
-			{
-				reply.stateReply = {RvUdpSim::Success, RvUdpSim::Unavailable};
-			}
-			else
-			{
-				reply.stateReply = {RvUdpSim::Success, RvUdpSim::Unavailable};
-
-				switch(status->state)
-				{
-
-				case Sim::SimServiceClient::STATE_STOPPED:
-					reply.stateReply = {RvUdpSim::Success, RvUdpSim::Stopped};
-					break;
-				case Sim::SimServiceClient::STATE_RUNNING:
-					reply.stateReply = {RvUdpSim::Success, RvUdpSim::Running};
-					break;
-				case Sim::SimServiceClient::STATE_PAUSED:
-					reply.stateReply = {RvUdpSim::Success, RvUdpSim::Paused};
-					break;
-				default:
-					Q_ASSERT(false);
-					reply.stateReply = {RvUdpSim::Success, RvUdpSim::Unavailable};
-				}
-			}
-		}
-	}
-
-	return reply;
-}
-
-SimReply SimLink::processSignalsRead(const SignalsReadRequest& request)
+SignalsReadReply SimLink::processSignalsRead(const SignalsReadRequest& request)
 {
 	std::vector<SignalState> replyStates;
 	auto result = m_client->GetSignalState(request.hashes);
@@ -246,13 +203,11 @@ SimReply SimLink::processSignalsRead(const SignalsReadRequest& request)
 		}
 	}
 
-	SimReply reply;
-	reply.type = SGW_SIGNAL_READ;
-	reply.readReply = {replyStates};
+	SignalsReadReply reply = {replyStates};
 	return reply;
 }
 
-SimReply SimLink::processSignalsWrite(const SignalsWriteRequest& request)
+SignalsWriteReply SimLink::processSignalsWrite(const SignalsWriteRequest& request)
 {
 	std::vector<ErrorCode> errorCodes;
 	errorCodes.resize(request.values.size());
@@ -262,7 +217,6 @@ SimReply SimLink::processSignalsWrite(const SignalsWriteRequest& request)
 	auto signalParams = m_client->GetSignalParam(request.hashes);
 	if (signalParams.has_value() == false)
 	{
-		Q_ASSERT(false);
 		std::fill(errorCodes.begin(), errorCodes.end(), ErrorCode::SignalNotFound);
 	}
 	else
@@ -297,36 +251,118 @@ SimReply SimLink::processSignalsWrite(const SignalsWriteRequest& request)
 		}
 	}
 
-	std::vector<SignalState> replyStates;
-	auto result = m_client->GetSignalState(request.hashes);
+	SignalsWriteReply reply = {.errorCodes = errorCodes};
+	return reply;
+}
 
-	if (result.has_value() == false)
+SimulatorStateReply SimLink::processGetState()
+{
+	SimulatorStateReply reply;
+
+	QByteArray payload = "Hello, World!";
+	auto pingResult = m_client->Ping(payload);
+
+	if (pingResult.has_value() == false)
 	{
-		replyStates.reserve(request.hashes.size());
-		for (int i = 0; i < request.hashes.size(); i++)
-		{
-			replyStates.push_back({.hash = request.hashes[i], .time = 0, .value = 0, .flags = {.all = 0}});
-		}
+		reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
 	}
 	else
 	{
-		const std::vector<::AppSignalState>& states = result.value();
-		for (const ::AppSignalState& state : states)
+		if (payload != pingResult)
 		{
-			SignalState st = {.hash = state.hash(),
-							  .time = state.time().local.timeStamp,
-							  .value = {.fValue = (float)state.value()},
-							  .flags = {.all = state.m_flags.all & 0xffff}};
+			reply = {RvUdpSim::Success, RvUdpSim::Unavailable};
+		}
+		else
+		{
+			auto status = m_client->GetStatus();
+			if (status.has_value() == false)
+			{
+				reply = {RvUdpSim::Success, RvUdpSim::Unavailable};
+			}
+			else
+			{
+				reply = {RvUdpSim::Success, RvUdpSim::Unavailable};
 
-			replyStates.push_back(st);
+				switch (status->state)
+				{
+				case Sim::SimServiceClient::STATE_STOPPED:
+					reply = {RvUdpSim::Success, RvUdpSim::Stopped};
+					break;
+				case Sim::SimServiceClient::STATE_RUNNING:
+					reply = {RvUdpSim::Success, RvUdpSim::Running};
+					break;
+				case Sim::SimServiceClient::STATE_PAUSED:
+					reply = {RvUdpSim::Success, RvUdpSim::Paused};
+					break;
+				default:
+					Q_ASSERT(false);
+					reply = {RvUdpSim::Success, RvUdpSim::Unavailable};
+				}
+			}
 		}
 	}
 
-	SimReply reply;
-	reply.type = SGW_SIGNAL_WRITE;
-	reply.writeReply = {.errorCodes = errorCodes};
 	return reply;
 }
+
+SimulatorStateReply SimLink::processSimulatorControl(int command)
+{
+	SimulatorStateReply reply;
+
+	switch(command)
+	{
+	case SGW_COMMAND_START:
+	case SGW_COMMAND_RESUME:
+		{
+			auto status = m_client->CommandStart();
+			if (status.has_value() == false)
+			{
+				reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
+			}
+			else
+			{
+				reply = {RvUdpSim::Success, RvUdpSim::Running};
+			}
+		}
+		break;
+	case SGW_COMMAND_STOP:
+		{
+			auto status = m_client->CommandStop();
+			if (status.has_value() == false)
+			{
+				reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
+			}
+			else
+			{
+				reply = {RvUdpSim::Success, RvUdpSim::Stopped};
+			}
+		}
+		break;
+	case SGW_COMMAND_PAUSE:
+		{
+			auto status = m_client->CommandPause();
+			if (status.has_value() == false)
+			{
+				reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
+			}
+			else
+			{
+				reply = {RvUdpSim::Success, RvUdpSim::Paused};
+			}
+		}
+		break;
+	default:
+		Q_ASSERT(false);
+		reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
+	}
+
+	return reply;
+} 
+// ----------------------------------------------------------------------------------
+//
+// SimLinkThread class implementation
+//
+// ----------------------------------------------------------------------------------
 
 SimLinkThread::SimLinkThread(SimLink* worker) :
 	m_worker(worker)

@@ -1,20 +1,20 @@
 #pragma once
 
+#include <CommonLib/HostAddressPort.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#define SGW_MARKER 0x1643
-#define SGW_VERSION_1 1
-
 namespace RvUdpSim
 {
-
 #pragma pack(push, 4)
 
-//
-// Description of the exchange protocol for the SimulatorModelBridge program
-//
+	//
+	// Description of the exchange protocol for the SimulatorModelBridge program
+	//
+
+#define SGW_MARKER 0x1643
+#define SGW_VERSION_1 1
 
 // Maximum number of signals to be read/written
 //
@@ -235,6 +235,7 @@ namespace RvUdpSim
 	struct SimRequest
 	{
 		int type;
+		HostAddressPort addressFrom;
 		std::optional<SignalsReadRequest> readRequest;
 		std::optional<SignalsWriteRequest> writeRequest;
 	};
@@ -242,8 +243,9 @@ namespace RvUdpSim
 	struct SimReply
 	{
 		int type;
+		HostAddressPort addressTo;
 		std::optional<SimulatorStateReply> stateReply;
 		std::optional<SignalsReadReply> readReply;
 		std::optional<SignalsWriteReply> writeReply;
 	};
-} // namespace SimService
+} // namespace RvUdpSim
