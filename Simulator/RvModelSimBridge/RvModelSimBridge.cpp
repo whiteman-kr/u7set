@@ -190,7 +190,7 @@ void ModelSimBridgeWorker::runUdpModelLinkThread()
 
 	HostAddressPort listenAddr{m_modelIP, m_modelRequestPort};
 
-	UdpModelLink* udpModelLink = new UdpModelLink(listenAddr, m_modelReplyPort, logger());
+	UdpModelLink* udpModelLink = new UdpModelLink(listenAddr, m_modelReplyPort, logger(), m_simLog);
 
 	m_udpModelLinkThread = new UdpModelLinkThread(udpModelLink);
 	m_udpModelLinkThread->start();
@@ -214,7 +214,7 @@ void ModelSimBridgeWorker::runSimulatorLinkThread()
 
 	HostAddressPort addr{m_simIP, m_simPort};
 
-	SimLink* simLink = new SimLink(addr, logger());
+	SimLink* simLink = new SimLink(addr, logger(), m_simLog);
 
 	m_simLinkThread = new SimLinkThread(simLink);
 	m_simLinkThread->start();

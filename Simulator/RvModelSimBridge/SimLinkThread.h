@@ -21,7 +21,7 @@ class SimLink : public SimpleThreadWorker
 {
 	Q_OBJECT
 public:
-	SimLink(const HostAddressPort& simIP, std::shared_ptr<CircularLogger> logger);
+	SimLink(const HostAddressPort& simIP, std::shared_ptr<CircularLogger> appLogger, std::shared_ptr<CircularLogger> simLogger);
 	~SimLink();
 
 	void pushRequests(std::queue<RvUdpSim::SimRequest>& requests);
@@ -46,7 +46,8 @@ private:
 private:
 	HostAddressPort m_simIP;
 
-	std::shared_ptr<CircularLogger> m_logger;
+	std::shared_ptr<CircularLogger> m_appLogger;
+	std::shared_ptr<CircularLogger> m_simLogger;
 
 	//
 	std::unique_ptr<Sim::SimServiceClient> m_client;

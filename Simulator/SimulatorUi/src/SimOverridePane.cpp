@@ -655,7 +655,7 @@ namespace SimUi
 			{
 				// Signot is not in the list, nothing critical, but how it happened?
 				//
-				assert(false);
+				//assert(false); // Possibly, signal was removed from override list by Simulator bridge - assert removed
 				continue;
 			}
 

@@ -17,15 +17,16 @@ using namespace RvUdpSim;
 //
 // -------------------------------------------------------------------------
 
-SimLink::SimLink(const HostAddressPort& simIP, std::shared_ptr<CircularLogger> logger) :
+SimLink::SimLink(const HostAddressPort& simIP, std::shared_ptr<CircularLogger> appLogger, std::shared_ptr<CircularLogger> simLogger) :
 	m_simIP(simIP),
-	m_logger(logger)
+	m_appLogger(appLogger),
+	m_simLogger(simLogger)
 {
 }
 
 SimLink::~SimLink() {}
 
-void SimLink::pushRequests(std::queue<RvUdpSim::SimRequest>& requests) 
+void SimLink::pushRequests(std::queue<RvUdpSim::SimRequest>& requests)
 {
 	QMutexLocker l(&m_lock);
 
@@ -49,7 +50,7 @@ std::queue<RvUdpSim::SimReply> SimLink::popAllReplies()
 
 void SimLink::onThreadStarted()
 {
-	DEBUG_LOG_MSG(m_logger,
+	DEBUG_LOG_MSG(m_appLogger,
 				  QString(tr("Simulator Communication thread is started with Simulator address %1.")).arg(m_simIP.addressPortStr()));
 
 	m_client = std::make_unique<Sim::SimServiceClient>(m_simIP.toString());
@@ -63,7 +64,7 @@ void SimLink::onThreadFinished()
 
 	m_client.reset();
 
-	DEBUG_LOG_MSG(m_logger,
+	DEBUG_LOG_MSG(m_appLogger,
 				  QString(tr("Simulator Communication thread is finished with Simulator address %1.")).arg(m_simIP.addressPortStr()));
 }
 
@@ -99,13 +100,13 @@ void SimLink::timerEvent(QTimerEvent* event)
 	// Socket is created
 	//
 	int count = 0;
-	
+
 	do
 	{
 		count++;
-		
+
 		QMutexLocker l(&m_lock);
-		if (m_requests.empty() == true) 
+		if (m_requests.empty() == true)
 		{
 			break;
 		}
@@ -117,7 +118,7 @@ void SimLink::timerEvent(QTimerEvent* event)
 
 		// Limit reply queue suze to 100 items
 		//
-		while (m_replies.size() > 100) 
+		while (m_replies.size() > 100)
 		{
 			m_replies.pop();
 		}
@@ -157,8 +158,8 @@ void SimLink::timerEvent(QTimerEvent* event)
 			break;
 		default:
 			Q_ASSERT(false);
-			DEBUG_LOG_ERR(m_logger, QString(tr("SimLink: unknown request type: %1.")).arg(request.type));
-			
+			DEBUG_LOG_ERR(m_appLogger, QString(tr("SimLink: unknown request type: %1.")).arg(request.type));
+
 			continue;
 		}
 
@@ -179,33 +180,80 @@ void SimLink::timerEvent(QTimerEvent* event)
 
 SignalsReadReply SimLink::processSignalsRead(const SignalsReadRequest& request)
 {
+	// Fill reply with empty states
+	//
 	std::vector<SignalState> replyStates;
-	auto result = m_client->GetSignalState(request.hashes);
+	replyStates.reserve(request.hashes.size());
 
-	if (result.has_value() == false)
+	for (int i = 0; i < request.hashes.size(); i++)
 	{
-		replyStates.reserve(request.hashes.size());
-		for (int i = 0; i < request.hashes.size(); i++)
+		replyStates.push_back({.hash = request.hashes[i], .time = 0, .value = 0, .flags = {.all = 0}});
+	}
+
+	//
+	auto allParams = m_client->GetSignalParam(request.hashes);
+	auto allStates = m_client->GetSignalState(request.hashes);
+
+	if (allParams.has_value() == false || allStates.has_value() == false)
+	{
+		DEBUG_LOG_MSG(m_simLogger, tr("Read signals (%1 hashes): no connection to Simulator.").arg(request.hashes.size()));
+		return {replyStates};
+	}
+
+	const std::vector<::AppSignalParam>& params = allParams.value();
+	const std::vector<::AppSignalState>& states = allStates.value();
+
+	if (params.size() != states.size() || params.size() != request.hashes.size())
+	{
+		DEBUG_LOG_MSG(m_simLogger,
+					  tr("Read signals (%1 hashes): result size mismatch (%2 params, %3 states).")
+						  .arg(request.hashes.size())
+						  .arg(params.size())
+						  .arg(states.size()));
+		return {replyStates};
+	}
+
+	for (std::size_t i = 0; i < params.size(); ++i)
+	{
+		const auto& param = params[i];
+		const auto& state = states[i];
+
+		if (param.appSignalId().isEmpty() == true)
 		{
+			DEBUG_LOG_MSG(m_simLogger, tr("Read signal: hash = '%1': signal not found.").arg(request.hashes[i]));
 			replyStates.push_back({.hash = request.hashes[i], .time = 0, .value = 0, .flags = {.all = 0}});
+			continue;
 		}
-	}
-	else
-	{
-		const std::vector<::AppSignalState>& states = result.value();
-		for (const ::AppSignalState& state : states)
+
+		SignalValue sv = {0};
+		if (param.isDiscrete())
 		{
-			SignalState st = {.hash = state.hash(),
-							  .time = state.time().local.timeStamp,
-							  .value{.fValue = (float)state.value()}, // Check the type!!!
-							  .flags = {.all = state.m_flags.all & 0xffff}};
-
-			replyStates.push_back(st);
+			sv.bValue = state.value() == 0 ? 0 : 1;
 		}
+		else
+		{
+			if (param.isAnalog())
+			{
+				if (param.analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+				{
+					sv.fValue = state.value();
+				}
+				else
+				{
+					sv.iValue = state.value();
+				}
+			}
+		}
+
+		// Write the result state
+		//
+		replyStates[i] = {.hash = state.hash(),
+						  .time = state.time().local.timeStamp,
+						  .value = sv,
+						  .flags = {.all = static_cast<unsigned short>(state.m_flags.all & 0xffff)}};
 	}
 
-	SignalsReadReply reply = {replyStates};
-	return reply;
+	return {replyStates};
 }
 
 SignalsWriteReply SimLink::processSignalsWrite(const SignalsWriteRequest& request)
@@ -213,42 +261,94 @@ SignalsWriteReply SimLink::processSignalsWrite(const SignalsWriteRequest& reques
 	std::vector<ErrorCode> errorCodes;
 	errorCodes.resize(request.values.size());
 
-	std::vector<Sim::SimServiceClient::OverrideSignalPair> overrideSignals;
-
-	auto signalParams = m_client->GetSignalParam(request.hashes);
-	if (signalParams.has_value() == false)
+	for (int i = 0; i < request.hashes.size(); i++)
 	{
-		std::fill(errorCodes.begin(), errorCodes.end(), ErrorCode::SignalNotFound);
-	}
-	else
-	{
-		const std::vector<::AppSignalParam>& params = signalParams.value();
+		Hash hash = request.hashes[i];
 
-		if (params.size() != request.values.size())
+		std::vector<Sim::SimServiceClient::OverrideSignalPair> overrideSignals;
+
+		std::vector<Hash> h;
+		h.push_back(hash);
+
+		auto signalParam = m_client->GetSignalParam(h);
+		if (signalParam.has_value() == false)
 		{
-			Q_ASSERT(false);
-			std::fill(errorCodes.begin(), errorCodes.end(), ErrorCode::SignalNotFound);
+			DEBUG_LOG_MSG(m_simLogger, tr("Override signal: hash = '%1': no connection to Simulator.").arg(hash));
+			errorCodes[i] = ErrorCode::NoConnection;
+			continue;
+		}
+
+		const ::AppSignalParam& asp = signalParam.value()[0];
+		if (asp.appSignalId().isEmpty() == true)
+		{
+			DEBUG_LOG_MSG(m_simLogger, tr("Override signal: hash = '%1': signal not found.").arg(hash));
+			errorCodes[i] = ErrorCode::SignalNotFound;
+			continue;
+		}
+
+		Sim::SimServiceClient::OverrideSignalPair osp;
+		osp.appSignalId = asp.appSignalId();
+
+		if (asp.isDiscrete())
+		{
+			bool bValue = request.values[i].bValue;
+			
+			osp.value = bValue;
+			DEBUG_LOG_MSG(m_simLogger, tr("Override signal: id = '%1', bValue = '%2'").arg(asp.appSignalId()).arg(bValue));
 		}
 		else
 		{
-			int i = 0;
-			for (const ::AppSignalParam& sp : params)
+			if (asp.isAnalog() == true)
 			{
-				Sim::SimServiceClient::OverrideSignalPair osp;
-				osp.appSignalId = sp.appSignalId();
-				osp.value = request.values[i++].fValue; // Check the type!!!
-				overrideSignals.push_back(osp);
-			}
+				if (asp.analogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+				{
+					double fValue = request.values[i].fValue;
+					if (fValue < asp.lowEngineeringUnits() || fValue > asp.highEngineeringUnits())
+					{
+						DEBUG_LOG_MSG(m_simLogger,
+									  tr("Override signal: id = '%1', fValue = '%2' is out of range (%3..%4)")
+										  .arg(asp.appSignalId())
+										  .arg(fValue)
+										  .arg(asp.lowEngineeringUnits())
+										  .arg(asp.highEngineeringUnits()));
+						errorCodes[i] = ErrorCode::OutOfRange;
+						continue;
+					}
 
-			auto result = m_client->OverrideSignals(overrideSignals);
-			if (result.has_value() == false)
-			{
-				std::fill(errorCodes.begin(), errorCodes.end(), ErrorCode::SignalNotFound);
+					osp.value = fValue;
+					DEBUG_LOG_MSG(m_simLogger, tr("Override signal: id = '%1', fValue = '%2'").arg(asp.appSignalId()).arg(fValue));
+				}
+				else
+				{
+					int iValue = request.values[i].iValue;
+					if (iValue < asp.lowEngineeringUnits() || iValue > asp.highEngineeringUnits())
+					{
+						DEBUG_LOG_MSG(m_simLogger,
+									  tr("Override signal: id = '%1', iValue = '%2' is out of range (%3..%4)")
+										  .arg(asp.appSignalId())
+										  .arg(iValue)
+										  .arg(asp.lowEngineeringUnits())
+										  .arg(asp.highEngineeringUnits()));
+						errorCodes[i] = ErrorCode::OutOfRange;
+						continue;
+					}
+
+					osp.value = iValue;
+					DEBUG_LOG_MSG(m_simLogger, tr("Override signal: id = '%1', iValue = '%2'").arg(asp.appSignalId()).arg(iValue));
+				}
 			}
-			else
-			{
-				std::fill(errorCodes.begin(), errorCodes.end(), ErrorCode::Success);
-			}
+		}
+
+		overrideSignals.push_back(osp);
+
+		auto result = m_client->OverrideSignals(overrideSignals);
+		if (result.has_value() == false)
+		{
+			errorCodes[i] = ErrorCode::CannotWrite;
+		}
+		else
+		{
+			errorCodes[i] = ErrorCode::Success;
 		}
 	}
 
@@ -310,7 +410,7 @@ SimulatorStateReply SimLink::processSimulatorControl(int command)
 {
 	SimulatorStateReply reply;
 
-	switch(command)
+	switch (command)
 	{
 	case SGW_COMMAND_START:
 	case SGW_COMMAND_RESUME:
@@ -318,6 +418,7 @@ SimulatorStateReply SimLink::processSimulatorControl(int command)
 			auto status = m_client->CommandStart();
 			if (status.has_value() == false)
 			{
+				DEBUG_LOG_ERR(m_appLogger, tr("CommandStart error: %1").arg(QString::fromUtf8(status.error().toStdString())));
 				reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
 			}
 			else
@@ -328,15 +429,42 @@ SimulatorStateReply SimLink::processSimulatorControl(int command)
 		break;
 	case SGW_COMMAND_STOP:
 		{
+			// Get all overrides
+			//
+			auto overridenSignals = m_client->GetOverriddenSignals();
+			if (overridenSignals.has_value() == false)
+			{
+				DEBUG_LOG_ERR(m_appLogger,
+							  tr("GetOverriddenSignals error: %1").arg(QString::fromUtf8(overridenSignals.error().toStdString())));
+				reply = {RvUdpSim::ErrorCode::NoConnection, RvUdpSim::SimulatorStateCode::Unavailable};
+			}
+			else
+			{
+				// Remove all overrides
+				//
+				auto removeOverrides = m_client->RemoveOverrideSignals(overridenSignals.value());
+				if (removeOverrides.has_value() == false)
+				{
+					DEBUG_LOG_ERR(m_appLogger,
+								  tr("RemoveOverrideSignals error: %1").arg(QString::fromUtf8(removeOverrides.error().toStdString())));
+					reply = {RvUdpSim::ErrorCode::NoConnection, RvUdpSim::SimulatorStateCode::Unavailable};
+				}
+			}
+
+			// Stop the simulator
+			//
 			auto status = m_client->CommandStop();
 			if (status.has_value() == false)
 			{
+				DEBUG_LOG_ERR(m_appLogger, tr("CommandStop error: %1").arg(QString::fromUtf8(status.error().toStdString())));
 				reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
 			}
 			else
 			{
 				reply = {RvUdpSim::Success, RvUdpSim::Stopped};
 			}
+
+
 		}
 		break;
 	case SGW_COMMAND_PAUSE:
@@ -344,6 +472,7 @@ SimulatorStateReply SimLink::processSimulatorControl(int command)
 			auto status = m_client->CommandPause();
 			if (status.has_value() == false)
 			{
+				DEBUG_LOG_ERR(m_appLogger, tr("CommandPause error: %1").arg(QString::fromUtf8(status.error().toStdString())));
 				reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
 			}
 			else
@@ -358,7 +487,7 @@ SimulatorStateReply SimLink::processSimulatorControl(int command)
 	}
 
 	return reply;
-} 
+}
 // ----------------------------------------------------------------------------------
 //
 // SimLinkThread class implementation
@@ -369,7 +498,7 @@ SimLinkThread::SimLinkThread(SimLink* worker) :
 	m_worker(worker)
 {
 	addWorker(worker);
-	
+
 	connect(m_worker,
 			&SimLink::repliesReady,
 			this,

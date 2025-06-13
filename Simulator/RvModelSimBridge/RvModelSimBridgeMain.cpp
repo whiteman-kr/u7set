@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 
 	CircularLoggerShared simLogger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(simLogger, "ModelSimBridgeCommands", getServiceInstanceID(argcExt, argvExt));
+	LOGGER_INIT(simLogger, "RvModelSimBridgeSignals", getServiceInstanceID(argcExt, argvExt));
 
 	SoftwareInfo si(E::SoftwareType::BaseService, "");
 

@@ -23,7 +23,10 @@ class UdpModelLink : public SimpleThreadWorker
 {
 	Q_OBJECT
 public:
-	UdpModelLink(const HostAddressPort& listenAddress, int replyPort, std::shared_ptr<CircularLogger> logger);
+	UdpModelLink(const HostAddressPort& listenAddress,
+				 int replyPort,
+				 std::shared_ptr<CircularLogger> appLogger,
+				 std::shared_ptr<CircularLogger> simLogger);
 	~UdpModelLink();
 
 	std::queue<RvUdpSim::SimRequest> popAllRequests();
@@ -57,7 +60,8 @@ private:
 	HostAddressPort m_listenAddress;
 	int m_replyPort = 0;
 
-	std::shared_ptr<CircularLogger> m_logger;
+	std::shared_ptr<CircularLogger> m_appLogger;
+	std::shared_ptr<CircularLogger> m_simLogger;
 
 	//
 

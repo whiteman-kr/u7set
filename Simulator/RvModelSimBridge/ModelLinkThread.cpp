@@ -17,10 +17,14 @@ using namespace RvUdpSim;
 //
 // -------------------------------------------------------------------------
 
-UdpModelLink::UdpModelLink(const HostAddressPort& listenAddress, int replyPort, std::shared_ptr<CircularLogger> logger) :
+UdpModelLink::UdpModelLink(const HostAddressPort& listenAddress,
+						   int replyPort,
+						   std::shared_ptr<CircularLogger> appLogger,
+						   std::shared_ptr<CircularLogger> simLogger) :
 	m_listenAddress(listenAddress),
 	m_replyPort(replyPort),
-	m_logger(logger)
+	m_appLogger(appLogger),
+	m_simLogger(simLogger)
 {
 }
 
@@ -50,7 +54,7 @@ void UdpModelLink::pushReplies(std::queue<RvUdpSim::SimReply>& replies)
 
 void UdpModelLink::onThreadStarted()
 {
-	DEBUG_LOG_MSG(m_logger, QString(tr("Model Link listening thread is started on address %1.")).arg(m_listenAddress.addressPortStr()));
+	DEBUG_LOG_MSG(m_appLogger, QString(tr("Model Link listening thread is started on address %1.")).arg(m_listenAddress.addressPortStr()));
 
 	initTimer();
 }
@@ -61,7 +65,7 @@ void UdpModelLink::onThreadFinished()
 
 	closeSocket();
 
-	DEBUG_LOG_MSG(m_logger, QString(tr("Model Link listening thread is finished on address %1.")).arg(m_listenAddress.addressPortStr()));
+	DEBUG_LOG_MSG(m_appLogger, QString(tr("Model Link listening thread is finished on address %1.")).arg(m_listenAddress.addressPortStr()));
 }
 
 void UdpModelLink::timerEvent(QTimerEvent* event)
@@ -141,7 +145,8 @@ void UdpModelLink::createSocket()
 			&QUdpSocket::errorOccurred,
 			[this](QAbstractSocket::SocketError socketError)
 			{
-				DEBUG_LOG_ERR(m_logger, QString("Socket error - (%1) %2").arg(static_cast<int>(socketError)).arg(m_socket->errorString()));
+				DEBUG_LOG_ERR(m_appLogger,
+							  QString("Socket error - (%1) %2").arg(static_cast<int>(socketError)).arg(m_socket->errorString()));
 			});
 
 	connect(m_socket, &QUdpSocket::readyRead, this, &UdpModelLink::onReadyRead, Qt::DirectConnection);
@@ -155,7 +160,7 @@ void UdpModelLink::createSocket()
 
 		// successful binding
 		//
-		DEBUG_LOG_MSG(m_logger,
+		DEBUG_LOG_MSG(m_appLogger,
 					  QString(tr("Model Link listening socket is created and bound to %1 (OS defined receive buffur size - %2 bytes))"))
 						  .arg(m_listenAddress.addressPortStr())
 						  .arg(osRecvBufSize.toInt()));
@@ -168,14 +173,14 @@ void UdpModelLink::createSocket()
 
 			QVariant currentBufSize = m_socket->socketOption(QAbstractSocket::ReceiveBufferSizeSocketOption);
 
-			DEBUG_LOG_MSG(m_logger, (QString("UdpModelLink: new receive buffer size is set - %1 bytes").arg(currentBufSize.toInt())));
+			DEBUG_LOG_MSG(m_appLogger, (QString("UdpModelLink: new receive buffer size is set - %1 bytes").arg(currentBufSize.toInt())));
 
 			if (newRecvBufSize.toInt() != currentBufSize.toInt())
 			{
 				qDebug() << "";
-				DEBUG_LOG_WRN(m_logger, QString("WARNING!!! Receive buffer size is not changed to required size."));
-				DEBUG_LOG_MSG(m_logger, QString("Try change value of registry key (create if key is not exist)"));
-				DEBUG_LOG_MSG(m_logger,
+				DEBUG_LOG_WRN(m_appLogger, QString("WARNING!!! Receive buffer size is not changed to required size."));
+				DEBUG_LOG_MSG(m_appLogger, QString("Try change value of registry key (create if key is not exist)"));
+				DEBUG_LOG_MSG(m_appLogger,
 							  QString("HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services\\AFD\\Parameters\\DefaultReceiveWindow"));
 				qDebug() << "";
 			}
@@ -205,7 +210,7 @@ void UdpModelLink::createSocket()
 	}
 	else
 	{
-		DEBUG_LOG_ERR(m_logger, QString(tr("Model Link listening socket error binding to %1")).arg(m_listenAddress.addressPortStr()));
+		DEBUG_LOG_ERR(m_appLogger, QString(tr("Model Link listening socket error binding to %1")).arg(m_listenAddress.addressPortStr()));
 
 		// error binding
 		//
@@ -248,7 +253,7 @@ bool UdpModelLink::readSocket()
 	qint64 size = m_socket->pendingDatagramSize();
 	if (size == -1)
 	{
-		DEBUG_LOG_ERR(m_logger, tr("Model Link socket pending datagram size: %1").arg(size));
+		DEBUG_LOG_ERR(m_appLogger, tr("Model Link socket pending datagram size: %1").arg(size));
 
 		closeSocket(); // why hasPendingDatagrams returns TRUE?
 		return false;
@@ -256,7 +261,7 @@ bool UdpModelLink::readSocket()
 
 	if (size == 0)
 	{
-		DEBUG_LOG_ERR(m_logger, tr("Empty datagram has arrived (size = %1), discarded.").arg(size));
+		DEBUG_LOG_ERR(m_appLogger, tr("Empty datagram has arrived (size = %1), discarded.").arg(size));
 
 		size = m_socket->readDatagram(m_requestBuffer, 0);
 		return true;
@@ -273,7 +278,7 @@ bool UdpModelLink::readSocket()
 	size = m_socket->readDatagram(m_requestBuffer, m_requestBufferSize, &sourceIP, &sourcePort);
 	if (size == -1)
 	{
-		DEBUG_LOG_ERR(m_logger, tr("Model Link socket read datagram error: size: %1").arg(size));
+		DEBUG_LOG_ERR(m_appLogger, tr("Model Link socket read datagram error: size: %1").arg(size));
 
 		m_errReadSocket++;
 		closeSocket();
@@ -293,7 +298,7 @@ bool UdpModelLink::readSocket()
 		if (packet->marker != SGW_MARKER)
 		{
 			m_errRequestMarker++;
-			DEBUG_LOG_ERR(m_logger, tr("Model Link packet received: marker: %1 (expected %2):").arg(packet->marker).arg(SGW_MARKER));
+			DEBUG_LOG_ERR(m_appLogger, tr("Model Link packet received: marker: %1 (expected %2):").arg(packet->marker).arg(SGW_MARKER));
 			packetOk = false;
 		}
 
@@ -302,7 +307,7 @@ bool UdpModelLink::readSocket()
 		if (size != packet->size)
 		{
 			m_errRequestSize++;
-			DEBUG_LOG_ERR(m_logger,
+			DEBUG_LOG_ERR(m_appLogger,
 						  tr("Model Link packet received: size: %1 (expected %2), version: %3, type: %4: Wrong size!")
 							  .arg(size)
 							  .arg(packet->size)
@@ -318,7 +323,7 @@ bool UdpModelLink::readSocket()
 		if (crc != packetCrc)
 		{
 			m_errCrc++;
-			DEBUG_LOG_ERR(m_logger,
+			DEBUG_LOG_ERR(m_appLogger,
 						  tr("Model Link packet received: size: %1, version: %2, type: %3: Wrong CRC!")
 							  .arg(packet->size)
 							  .arg(packet->packetVersion)
@@ -347,7 +352,7 @@ bool UdpModelLink::readSocket()
 			default:
 				m_errVersion++;
 				Q_ASSERT(false);
-				DEBUG_LOG_ERR(m_logger,
+				DEBUG_LOG_ERR(m_appLogger,
 							  tr("Model Link packet received: size: %1, version: %2, type: %3: Unsupported version!")
 								  .arg(packet->size)
 								  .arg(packet->packetVersion)
@@ -357,7 +362,7 @@ bool UdpModelLink::readSocket()
 	}
 	else
 	{
-		DEBUG_LOG_ERR(m_logger, tr("Unknown UDP packet size: %1 bytes").arg(size));
+		DEBUG_LOG_ERR(m_appLogger, tr("Unknown UDP packet size: %1 bytes").arg(size));
 	}
 
 	return true;
@@ -396,14 +401,14 @@ bool UdpModelLink::writeSocket()
 		int result = m_socket->writeDatagram(m_replyBuffer, size, QHostAddress(reply.addressTo.address32()), m_replyPort);
 		if (result == -1)
 		{
-			DEBUG_LOG_ERR(m_logger, tr("UdpModelLink::writeSocket(): error sending data."));
+			DEBUG_LOG_ERR(m_appLogger, tr("UdpModelLink::writeSocket(): error sending data."));
 			m_errWriteSocket++;
 		}
 		else
 		{
 			if (result < size)
 			{
-				DEBUG_LOG_ERR(m_logger,
+				DEBUG_LOG_ERR(m_appLogger,
 							  tr("UdpModelLink::writeSocket(): no all data was sent: %1 bytes, expected: %2.").arg(result).arg(size));
 				m_errReplySize++;
 			}
@@ -444,13 +449,26 @@ bool UdpModelLink::processModelPacket_V1(const SimulatorBridgePacketHeader_v1* p
 			int16_t count = *reinterpret_cast<const int16_t*>(data);       // Number of signals to read 1..READ_SIGNALS_MAX_COUNT
 			data += sizeof(int16_t);
 
-			Q_ASSERT(count <= READ_SIGNALS_MAX_COUNT);
+			if (count > READ_SIGNALS_MAX_COUNT)
+			{
+				Q_ASSERT(count <= READ_SIGNALS_MAX_COUNT);
+				count = std::clamp<int16_t>(count, 0, READ_SIGNALS_MAX_COUNT);
+			}
 
-			for (int i = 0; i < count && i <= READ_SIGNALS_MAX_COUNT; i++) // Signal hashes
+			for (int i = 0; i < count; i++) // Signal hashes
 			{
 				Hash hash = *reinterpret_cast<const Hash*>(data);
-				rr.hashes.push_back(hash);
 				data += sizeof(Hash);
+				
+				if (hash == 0 || hash == UNDEFINED_HASH) 
+				{
+					Q_ASSERT(false);
+					DEBUG_LOG_ERR(m_appLogger, tr("SGW_SIGNAL_READ: invalid hash arrived: %1.").arg(hash));
+				}
+				else
+				{
+					rr.hashes.push_back(hash);
+				}
 			}
 
 			r.readRequest = rr;
@@ -463,17 +481,37 @@ bool UdpModelLink::processModelPacket_V1(const SimulatorBridgePacketHeader_v1* p
 			int16_t count = *reinterpret_cast<const int16_t*>(data);        // Number of signals to read 1..WRITE_SIGNALS_MAX_COUNT
 			data += sizeof(int16_t);
 
-			Q_ASSERT(count <= WRITE_SIGNALS_MAX_COUNT);
-
-			for (int i = 0; i < count && i <= WRITE_SIGNALS_MAX_COUNT; i++) // Signal hashes and Values
+			if (count > WRITE_SIGNALS_MAX_COUNT) 
 			{
-				Hash hash = *reinterpret_cast<const Hash*>(data);
-				rw.hashes.push_back(hash);
-				data += sizeof(Hash);
+				Q_ASSERT(count <= WRITE_SIGNALS_MAX_COUNT);
+				count = std::clamp<int16_t>(count, 0, WRITE_SIGNALS_MAX_COUNT);
+			}
 
-				SignalValue sv = *(reinterpret_cast<const SignalValue*>(data));
-				rw.values.push_back(sv);
-				data += sizeof(SignalValue);
+			const Hash *hashData = reinterpret_cast<const Hash*>(data);
+			data += sizeof(Hash) * count;
+
+			const SignalValue* signalValueData = reinterpret_cast<const SignalValue*>(data);
+			data += sizeof(SignalValue) * count;
+
+
+			for (int i = 0; i < count; i++) // Signal hashes and Values
+			{
+				Hash hash = *hashData;
+				hashData++;
+
+				SignalValue sv = *signalValueData;
+				signalValueData++;
+
+				if (hash == 0 || hash == UNDEFINED_HASH)
+				{
+					Q_ASSERT(false);
+					DEBUG_LOG_ERR(m_appLogger, tr("SGW_SIGNAL_WRITE: invalid hash arrived: %1.").arg(hash));
+				}
+				else 
+				{
+					rw.hashes.push_back(hash);
+					rw.values.push_back(sv);
+				}
 			}
 
 			r.writeRequest = rw;
@@ -491,7 +529,7 @@ bool UdpModelLink::processModelPacket_V1(const SimulatorBridgePacketHeader_v1* p
 		break;
 
 	default:
-		DEBUG_LOG_ERR(m_logger, tr("UdpModelLink::processModelPacket: unknown packet type (%1)").arg(packet->packetType));
+		DEBUG_LOG_ERR(m_appLogger, tr("UdpModelLink::processModelPacket: unknown packet type (%1)").arg(packet->packetType));
 		return false;
 	}
 
@@ -590,7 +628,7 @@ bool UdpModelLink::prepareReplyPacket(const RvUdpSim::SimReply& reply, qint64& s
 		break;
 	default:
 		Q_ASSERT(false);
-		DEBUG_LOG_ERR(m_logger, tr("UdpModelLink::prepareReplyPacket: unknown reply type (%1)").arg(reply.type));
+		DEBUG_LOG_ERR(m_appLogger, tr("UdpModelLink::prepareReplyPacket: unknown reply type (%1)").arg(reply.type));
 
 		return false;
 	}
