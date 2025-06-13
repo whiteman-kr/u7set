@@ -32,6 +32,8 @@ set (TC_SOURCES
 	SimTestUDPThread.cpp
 	SimModelPackets.cpp
 	SimModelPackets.h
+	RWMultyToolBox.cpp
+	RWMultyToolBox.h
 )
 
 set (TC_RESOURCES

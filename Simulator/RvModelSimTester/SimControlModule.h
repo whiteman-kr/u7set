@@ -24,11 +24,13 @@ private slots:
 	void onStartClicked();
 	void onStopClicked();
 	void onPauseClicked();
+	void onResumeClicked();
 	
 
 private:
 	QPushButton* startButton = nullptr;
 	QPushButton* stopButton = nullptr;
 	QPushButton* pauseButton = nullptr;
+	QPushButton* resumeButton = nullptr;
 	QLabel* statusBar = nullptr;
 };

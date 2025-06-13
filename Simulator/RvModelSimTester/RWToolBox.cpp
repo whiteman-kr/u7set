@@ -13,7 +13,7 @@
 RWToolBox::RWToolBox(QWidget* parent) :
 	QWidget(parent)
 {
-	QGroupBox* box = new QGroupBox("R/W Read and Write Tool", this);
+	QGroupBox* box = new QGroupBox("", this);
 
 	signalIdEdit = new QLineEdit(this);
 

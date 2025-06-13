@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QWidget>
+#include <QRadioButton>
 
 class MainWindow : public QWidget
 {
@@ -17,4 +18,10 @@ private:
 	void setupMenu();
 
 	QWidget* serverStateVisible = nullptr;
+	QRadioButton* analogBtn = nullptr;
+	QRadioButton* boolBtn = nullptr;
+	QRadioButton* discreteBtn = nullptr;
+	void saveValueTypeSelection();
+	void loadValueTypeSelection();
+	
 };

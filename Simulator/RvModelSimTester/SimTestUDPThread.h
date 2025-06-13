@@ -1,6 +1,7 @@
 #pragma once
 
 #include "AppSettings.h"
+#include "SimModelPackets.h"
 
 #include <QHostAddress>
 #include <QJsonObject>
@@ -26,6 +27,7 @@ public slots:
 	void createTimer();
 
 	void setShowServerState(bool enable);
+	void setValueType(SignalType type);
 
 
 private slots:
@@ -36,6 +38,7 @@ private:
 	QByteArray createRequestRead(const QString& signalID);
 	QByteArray createRequestWrite(const QString& signalID, const QString& value);
 	void timerEvent(QTimerEvent* event) override;
+	SignalType m_valueType = SignalType::AnalogFloat;
 
 signals:
 	void resultReady(const QString& message);
@@ -48,6 +51,7 @@ private:
 	QBasicTimer m_timer;
 
 	bool m_showServerState = true;
+	QString m_pendingSignalID;
 };
 
 class SimTestUDPController : public QObject
@@ -61,6 +65,7 @@ public:
 
 public slots:
 	void setShowServerState(bool enable);
+	
 
 signals:
 	void resultReady(const QString& action);
@@ -72,4 +77,5 @@ signals:
 	void showServerStateChanged(bool enable);
 
 	void simStateReady(int errorCode, int stateCode);
+	void setValueType(SignalType type);
 };
