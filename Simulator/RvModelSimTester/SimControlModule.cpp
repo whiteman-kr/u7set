@@ -8,8 +8,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-#include "SimModelPackets.h"
-
+#include "PacketsMessages.h"
 
 SimControlModule::SimControlModule(QWidget* parent) :
 	QWidget(parent)
@@ -51,7 +50,7 @@ SimControlModule::SimControlModule(QWidget* parent) :
 
 void SimControlModule::onSimStateReady(int errorCode, int stateCode)
 {
-	if (errorCode == Success) {
+	if (errorCode == ErrorCode::Success) {
 		statusBar->setText(QString("Mode: %1").arg(simStateToString(static_cast<SimulatorStateCode>(stateCode))));
 	}
 	else {

@@ -1,15 +1,11 @@
 #pragma once
 
-#include <QUdpSocket>
 #include <queue>
-#include <vector>
 
-#include "../../AppSignalLib/TuningDataStorage.h"
 #include "../../OnlineLib/CircularLogger.h"
-#include "../../OnlineLib/SoftwareSettings.h"
 #include "../../UtilsLib/SimpleThread.h"
-#include "ModelLinkPacket.h"
 
+#include "ModelLinkPacket.h"
 
 // ----------------------------------------------------------------------------------
 //
@@ -29,8 +25,8 @@ public:
 				 std::shared_ptr<CircularLogger> simLogger);
 	~UdpModelLink();
 
-	std::queue<RvUdpSim::SimRequest> popAllRequests();
-	void pushReplies(std::queue<RvUdpSim::SimReply>& replies);
+	std::queue<SimRequest> popAllRequests();
+	void pushReplies(std::queue<SimReply>& replies);
 
 private:
 	void onThreadStarted() override;
@@ -46,9 +42,9 @@ private:
 	bool writeSocket();
 
 private:
-	bool processModelPacket_V1(const RvUdpSim::SimulatorBridgePacketHeader_v1* packet, const HostAddressPort& address);
+	bool processModelPacket_V1(const SimulatorBridgePacket* packet, const HostAddressPort& address);
 
-	bool prepareReplyPacket(const RvUdpSim::SimReply& reply, qint64& size);
+	bool prepareReplyPacket(const SimReply& reply, qint64& size);
 
 private slots:
 	void onReadyRead();
@@ -87,8 +83,8 @@ private:
 
 
 	QMutex m_mutex;
-	std::queue<RvUdpSim::SimRequest> m_requests;
-	std::queue<RvUdpSim::SimReply> m_replies;
+	std::queue<SimRequest> m_requests;
+	std::queue<SimReply> m_replies;
 };
 
 class UdpModelLinkThread : public SimpleThread
@@ -97,8 +93,8 @@ class UdpModelLinkThread : public SimpleThread
 public:
 	UdpModelLinkThread(UdpModelLink* worker);
 
-	std::queue<RvUdpSim::SimRequest> popAllRequests();
-	void pushReplies(std::queue<RvUdpSim::SimReply> replies);
+	std::queue<SimRequest> popAllRequests();
+	void pushReplies(std::queue<SimReply> replies);
 
 signals:
 	void requestsArrived();

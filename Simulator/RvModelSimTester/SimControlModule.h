@@ -1,10 +1,8 @@
 #pragma once
 
 #include <QWidget>
-#include "SimModelPackets.h"
 class QPushButton;
 class QLabel;
-
 
 class SimControlModule : public QWidget
 {

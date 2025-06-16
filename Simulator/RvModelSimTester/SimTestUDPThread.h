@@ -1,16 +1,13 @@
 #pragma once
 
 #include "AppSettings.h"
-#include "SimModelPackets.h"
+#include "../RvModelSimShared/SimModelPackets.h"
 
 #include <QHostAddress>
-#include <QJsonObject>
 #include <QObject>
 #include <QThread>
 #include <QUdpSocket>
 #include <QBasicTimer>
-
-
 
 class SimTestUDPWorker : public QObject
 {

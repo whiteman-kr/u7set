@@ -4,7 +4,6 @@
 #include "RWMultyToolBox.h"
 #include "RWToolBox.h"
 #include "SimControlModule.h"
-#include "SimModelPackets.h"
 #include "SimTestUDPThread.h"
 
 #include <QGroupBox>

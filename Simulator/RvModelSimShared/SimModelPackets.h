@@ -4,32 +4,16 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define SGW_MARKER 0x1643
-#define SGW_VERSION 1
-
-//extern const int16_t crc16tab[];
-//
-//// Hash calculation
-////
-//typedef uint64_t Hash;
-//typedef uint32_t Hash32;
-//#define UNDEFINED_HASH 0x0000000000000000ULL
-//
-//// CRC16 calculation function (x^16 + x^12 + x^2 + 1)
-////
-//uint16_t calcCrc16(const void* buf, int len);
-//
-//// Hash function for Latin ASCII/UTF-8 characters
-////
-//Hash calcHash(const char* str);
-
 #pragma pack(push, 4)
 
 //
-// Protocol description for SimulatorModelBridge exchange
+// Description of the exchange protocol for the SimulatorModelBridge program
 //
 
-// Maximum number of signals to read/write
+#define SGW_MARKER 0x1643
+#define SGW_VERSION 1
+
+// Maximum number of signals that can be read/written
 //
 #define READ_SIGNALS_MAX_COUNT 32
 #define WRITE_SIGNALS_MAX_COUNT 32
@@ -38,8 +22,8 @@
 
 // Packet types
 //
-#define SGW_SIGNAL_READ 1               // Request and response for reading signals
-#define SGW_SIGNAL_WRITE 2              // Request and response for writing signals
+#define SGW_SIGNAL_READ 1               // Request and reply for reading signals
+#define SGW_SIGNAL_WRITE 2              // Request and reply for writing signals
 
 #define SGW_COMMAND_GET_STATE 10        // Get simulator state
 #define SGW_COMMAND_START 11            // Start simulator
@@ -47,8 +31,8 @@
 #define SGW_COMMAND_PAUSE 13            // Pause simulator
 #define SGW_COMMAND_RESUME 14           // Resume simulator
 
-#define SGW_COMMAND_SAVE_SNAPSHOT 20    // Save simulator snapshot
-#define SGW_COMMAND_RESTORE_SNAPSHOT 21 // Restore simulator snapshot
+#define SGW_COMMAND_SAVE_SNAPSHOT 20    // Save simulator state snapshot
+#define SGW_COMMAND_RESTORE_SNAPSHOT 21 // Restore simulator state snapshot
 
 // Signal types
 //
@@ -76,28 +60,28 @@ union SignalFlags
 	{
 		// flag bits
 		//
-		uint16_t valid : 1;          //	0 - signal is invalid, 1 - valid
-		uint16_t stateAvailable : 1; //	1 - signal value is simulated by the simulator, 0 - not available
+		uint16_t valid : 1;          // 0 - signal is invalid, 1 - valid
+		uint16_t stateAvailable : 1; // 1 - signal value is simulated by the simulator, 0 - not available
 
-		uint16_t simulated : 1;      //	2	1 - signal is simulated
-		uint16_t blocked : 1;        //	3	1 - signal is blocked
-		uint16_t mismatch : 1;       //	4	1 - signal is inconsistent between channels
+		uint16_t simulated : 1;      // 2  1 - signal is simulated
+		uint16_t blocked : 1;        // 3  1 - signal is blocked
+		uint16_t mismatch : 1;       // 4  1 - signal mismatch between channels
 
-		uint16_t aboveHighLimit : 1; //	5	1 - signal value is above upper range
-		uint16_t belowLowLimit : 1;  //	6	1 - signal value is below lower range
+		uint16_t aboveHighLimit : 1; // 5  1 - signal value is above upper range
+		uint16_t belowLowLimit : 1;  // 6  1 - signal value is below lower range
 
 		// reserved bits
 		//
-		uint16_t _bit7 : 1;  //  7	reserved
-		uint16_t _bit8 : 1;  //  8,	reserved
+		uint16_t _bit7 : 1;  // 7  reserved
+		uint16_t _bit8 : 1;  // 8  reserved
 
-		uint16_t _bit9 : 1;  //	9
-		uint16_t _bit10 : 1; //	10
-		uint16_t _bit11 : 1; //	11
-		uint16_t _bit12 : 1; //	12
-		uint16_t _bit13 : 1; //	13
-		uint16_t _bit14 : 1; //	14
-		uint16_t _bit15 : 1; //	15
+		uint16_t _bit9 : 1;  // 9
+		uint16_t _bit10 : 1; // 10
+		uint16_t _bit11 : 1; // 11
+		uint16_t _bit12 : 1; // 12
+		uint16_t _bit13 : 1; // 13
+		uint16_t _bit14 : 1; // 14
+		uint16_t _bit15 : 1; // 15
 	} bits;
 
 	uint16_t all;
@@ -108,18 +92,13 @@ union SignalFlags
 enum ErrorCode
 {
 	Success,
-	NoConnection,     // no connection to simulator program
+	NoConnection,     // no connection to the simulator program
 	SnapshotNotFound, // simulator snapshot not found during restore
 
 	SignalNotFound,   // signal not found during read/write
-	OutOfRange,       // signal value is out of allowed range
-	CannotWrite,      // cannot write value (e.g., signal is constant)
+	OutOfRange,       // signal value is out of allowable range
+	CannotWrite,      // unable to write signal value (e.g., constant signal)
 };
-
-// Convert error code to string
-//
-const char* errorCodeToString(enum ErrorCode code);
-
 
 // Signal state
 //
@@ -139,12 +118,12 @@ struct SignalReadRequest
 	// Hash hash[count];                // Signal hashes
 };
 
-// Response to signal state read request
+// Reply to signal state read request
 //
 struct SignalReadReply
 {
 	int16_t count; // Number of responses 1..READ_SIGNALS_MAX_COUNT
-	// struct SignalState state[count];        // Signal states
+	// struct SignalState state[count]; // Signal states
 };
 
 // Request to write signal states
@@ -153,15 +132,15 @@ struct SignalWriteRequest
 {
 	int16_t count; // Number of signals to write 1..WRITE_SIGNALS_MAX_COUNT
 	// Hash hash[count];                // Signal hashes
-	// union SignalValue value[count];        // Signal values
+	// union SignalValue value[count]; // Signal values
 };
 
-// Response to signal state write request
+// Reply to signal state write
 //
 struct SignalWriteReply
 {
 	int16_t count; // Number of signals 1..WRITE_SIGNALS_MAX_COUNT
-	// enum ErrorCode errorCode[count];      // Error codes
+	// enum ErrorCode errorCode[count]; // Error codes
 };
 
 struct SimulatorSaveSnapshotRequest
@@ -184,20 +163,16 @@ enum SimulatorStateCode
 	Paused
 };
 
-// Convert simulator state code to string
-//
-const char* simStateToString(enum SimulatorStateCode code);
-
-// Simulator control responses
+// Replies to simulator control
 //
 struct SimulatorStateReply
 {
 	enum ErrorCode errorCode;      // Error code
-	enum SimulatorStateCode state; // current simulator state
+	enum SimulatorStateCode state; // Current simulator state
 };
 
 //
-// UDP packet for SimulatorModelBridge exchange
+// UDP exchange packet for SimulatorModelBridge
 //
 struct SimulatorBridgePacket
 {
@@ -217,12 +192,12 @@ struct SimulatorBridgePacket
 	// 1) Signal reading: SGW_SIGNAL_READ
 	//
 	// SignalReadRequest readRequest;   // Request
-	// SignalReadReply readReply;       // Response
+	// SignalReadReply readReply;       // Reply
 
 	// 2) Signal writing: SGW_SIGNAL_WRITE
 	//
 	// SignalWriteRequest writeRequest; // Request
-	// SignalWriteReply writeReply;     // Response
+	// SignalWriteReply writeReply;     // Reply
 
 	// 3) Simulator control:
 	//
@@ -234,17 +209,17 @@ struct SimulatorBridgePacket
 	// SGW_COMMAND_PAUSE - no additional data
 	// SGW_COMMAND_RESUME - no additional data
 	//
-	// SimulatorStateReply simulatorStateReply;         // Response
+	// SimulatorStateReply simulatorStateReply; // Reply
 
 
 	// 4) Saving and restoring simulator state:
 	//
 	// Requests:
 	//
-	// SimulatorSaveSnapshotRequest snapshotRequest;    // Request
-	// SimulatorRestoreSnapshotRequest snapshotReply;   // Request
+	// SimulatorSaveSnapshotRequest snapshotRequest;  // Request
+	// SimulatorRestoreSnapshotRequest snapshotReply; // Request
 	//
-	// SimulatorStateReply simulatorStateReply;         // Response
+	// SimulatorStateReply simulatorStateReply;       // Reply
 	//
 
 	// uint16_t crc16;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QWidget>
-#include "SimModelPackets.h"
+#include "../RvModelSimShared/SimModelPackets.h"
 
 class QTableWidget;
 

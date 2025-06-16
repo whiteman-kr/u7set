@@ -1,10 +1,8 @@
 #include "SimTestUDPThread.h"
-#include "SimModelPackets.h"
+#include "PacketsMessages.h"
 
 #include <QBasicTimer>
 #include <QDebug>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QNetworkDatagram>
 #include <QSettings>
 #include <QVariant>
@@ -23,13 +21,13 @@ void SimTestUDPWorker::getStat()
 	QByteArray data = createRequestState(SGW_COMMAND_GET_STATE);
 
 	int result = m_socket->writeDatagram(data.data(), data.size(), QHostAddress{m_settings.ip}, m_settings.portRemote);
-	if (result == -1 and m_showServerState)
+	if (result == -1 && m_showServerState)
 	{
 		emit resultReady("getStat error in que");
 	}
 	else
 	{
-		if (result != data.size() and m_showServerState)
+		if (result != data.size() && m_showServerState)
 		{
 			emit resultReady("getStat error size don't match");
 		}

@@ -30,10 +30,10 @@ set (TC_SOURCES
 	MainWindow.h
 	SimTestUDPThread.h
 	SimTestUDPThread.cpp
-	SimModelPackets.cpp
-	SimModelPackets.h
 	RWMultyToolBox.cpp
 	RWMultyToolBox.h
+	PacketsMessages.cpp
+	PacketsMessages.h
 )
 
 set (TC_RESOURCES

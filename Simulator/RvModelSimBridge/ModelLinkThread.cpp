@@ -9,8 +9,6 @@
 
 #include "ModelLinkThread.h"
 
-using namespace RvUdpSim;
-
 // -------------------------------------------------------------------------
 //
 //	TuningSocketListener class implementaton
@@ -30,9 +28,9 @@ UdpModelLink::UdpModelLink(const HostAddressPort& listenAddress,
 
 UdpModelLink::~UdpModelLink() {}
 
-std::queue<RvUdpSim::SimRequest> UdpModelLink::popAllRequests()
+std::queue<SimRequest> UdpModelLink::popAllRequests()
 {
-	std::queue<RvUdpSim::SimRequest> result;
+	std::queue<SimRequest> result;
 
 	QMutexLocker l(&m_mutex);
 	result = std::move(m_requests);
@@ -41,7 +39,7 @@ std::queue<RvUdpSim::SimRequest> UdpModelLink::popAllRequests()
 	return result;
 }
 
-void UdpModelLink::pushReplies(std::queue<RvUdpSim::SimReply>& replies)
+void UdpModelLink::pushReplies(std::queue<SimReply>& replies)
 {
 	QMutexLocker l(&m_mutex);
 
@@ -285,10 +283,10 @@ bool UdpModelLink::readSocket()
 		return false;
 	}
 
-	if (size >= sizeof(SimulatorBridgePacketHeader) + sizeof(int16_t))
+	if (size >= sizeof(SimulatorBridgePacket) + sizeof(int16_t))
 	{
 		// memcpy(m_requestBuffer, datagram.data().constData(), size);
-		SimulatorBridgePacketHeader* packet = reinterpret_cast<SimulatorBridgePacketHeader*>(m_requestBuffer);
+		SimulatorBridgePacket* packet = reinterpret_cast<SimulatorBridgePacket*>(m_requestBuffer);
 
 		// sourceIP = datagram.senderAddress();
 		// sourcePort = datagram.senderPort();
@@ -344,7 +342,7 @@ bool UdpModelLink::readSocket()
 			//
 			switch (packet->packetVersion)
 			{
-			case SGW_VERSION_1:
+			case SGW_VERSION:
 				{
 					processModelPacket_V1(packet, {sourceIP.toIPv4Address(), sourcePort});
 					break;
@@ -418,7 +416,7 @@ bool UdpModelLink::writeSocket()
 	return true;
 }
 
-bool UdpModelLink::processModelPacket_V1(const SimulatorBridgePacketHeader_v1* packet, const HostAddressPort& address)
+bool UdpModelLink::processModelPacket_V1(const SimulatorBridgePacket* packet, const HostAddressPort& address)
 {
 	if (packet == nullptr)
 	{
@@ -438,13 +436,13 @@ bool UdpModelLink::processModelPacket_V1(const SimulatorBridgePacketHeader_v1* p
 	};
 
 	const char* data = reinterpret_cast<const char*>(packet);
-	data += sizeof(SimulatorBridgePacketHeader_v1);
+	data += sizeof(SimulatorBridgePacket);
 
 	switch (packet->packetType)
 	{
 	case SGW_SIGNAL_READ:
 		{
-			SignalsReadRequest rr;
+			SignalReadRequestRef rr;
 
 			int16_t count = *reinterpret_cast<const int16_t*>(data);       // Number of signals to read 1..READ_SIGNALS_MAX_COUNT
 			data += sizeof(int16_t);
@@ -476,7 +474,7 @@ bool UdpModelLink::processModelPacket_V1(const SimulatorBridgePacketHeader_v1* p
 		break;
 	case SGW_SIGNAL_WRITE:
 		{
-			SignalsWriteRequest rw;
+			SignalWriteRequestRef rw;
 
 			int16_t count = *reinterpret_cast<const int16_t*>(data);        // Number of signals to read 1..WRITE_SIGNALS_MAX_COUNT
 			data += sizeof(int16_t);
@@ -539,15 +537,15 @@ bool UdpModelLink::processModelPacket_V1(const SimulatorBridgePacketHeader_v1* p
 	return true;
 }
 
-bool UdpModelLink::prepareReplyPacket(const RvUdpSim::SimReply& reply, qint64& size)
+bool UdpModelLink::prepareReplyPacket(const SimReply& reply, qint64& size)
 {
-	SimulatorBridgePacketHeader* header = reinterpret_cast<SimulatorBridgePacketHeader*>(m_replyBuffer);
+	SimulatorBridgePacket* header = reinterpret_cast<SimulatorBridgePacket*>(m_replyBuffer);
 	header->marker = SGW_MARKER;
-	header->packetVersion = SGW_VERSION_1;
+	header->packetVersion = SGW_VERSION;
 	header->reserve0 = 0;
 	header->packetType = reply.type;
 
-	char* data = m_replyBuffer + sizeof(SimulatorBridgePacketHeader);
+	char* data = m_replyBuffer + sizeof(SimulatorBridgePacket);
 
 	// the reply
 	//
@@ -576,7 +574,7 @@ bool UdpModelLink::prepareReplyPacket(const RvUdpSim::SimReply& reply, qint64& s
 
 			// Size
 			//
-			size = sizeof(SimulatorBridgePacketHeader) + sizeof(int16_t) + sizeof(SignalState) * (*count) + sizeof(uint16_t);
+			size = sizeof(SimulatorBridgePacket) + sizeof(int16_t) + sizeof(SignalState) * (*count) + sizeof(uint16_t);
 		}
 		break;
 	case SGW_SIGNAL_WRITE:
@@ -602,7 +600,7 @@ bool UdpModelLink::prepareReplyPacket(const RvUdpSim::SimReply& reply, qint64& s
 
 			// Size
 			//
-			size = sizeof(SimulatorBridgePacketHeader) + sizeof(int16_t) + sizeof(ErrorCode) * (*count) + sizeof(uint16_t);
+			size = sizeof(SimulatorBridgePacket) + sizeof(int16_t) + sizeof(ErrorCode) * (*count) + sizeof(uint16_t);
 		}
 		break;
 	case SGW_COMMAND_GET_STATE:
@@ -623,7 +621,7 @@ bool UdpModelLink::prepareReplyPacket(const RvUdpSim::SimReply& reply, qint64& s
 
 			// Size
 			//
-			size = sizeof(SimulatorBridgePacketHeader) + sizeof(ErrorCode) + sizeof(SimulatorStateCode) + sizeof(uint16_t);
+			size = sizeof(SimulatorBridgePacket) + sizeof(ErrorCode) + sizeof(SimulatorStateCode) + sizeof(uint16_t);
 		}
 		break;
 	default:
@@ -681,12 +679,12 @@ UdpModelLinkThread::UdpModelLinkThread(UdpModelLink* worker) :
 			});
 }
 
-std::queue<RvUdpSim::SimRequest> UdpModelLinkThread::popAllRequests()
+std::queue<SimRequest> UdpModelLinkThread::popAllRequests()
 {
 	return m_worker->popAllRequests();
 }
 
-void UdpModelLinkThread::pushReplies(std::queue<RvUdpSim::SimReply> replies)
+void UdpModelLinkThread::pushReplies(std::queue<SimReply> replies)
 {
 	m_worker->pushReplies(replies);
 }

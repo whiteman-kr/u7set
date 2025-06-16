@@ -9,8 +9,6 @@
 #include "ModelLinkPacket.h"
 #include "SimLinkThread.h"
 
-using namespace RvUdpSim;
-
 // -------------------------------------------------------------------------
 //
 //	SimLink class implementaton
@@ -26,7 +24,7 @@ SimLink::SimLink(const HostAddressPort& simIP, std::shared_ptr<CircularLogger> a
 
 SimLink::~SimLink() {}
 
-void SimLink::pushRequests(std::queue<RvUdpSim::SimRequest>& requests)
+void SimLink::pushRequests(std::queue<SimRequest>& requests)
 {
 	QMutexLocker l(&m_lock);
 
@@ -37,9 +35,9 @@ void SimLink::pushRequests(std::queue<RvUdpSim::SimRequest>& requests)
 	}
 }
 
-std::queue<RvUdpSim::SimReply> SimLink::popAllReplies()
+std::queue<SimReply> SimLink::popAllReplies()
 {
-	std::queue<RvUdpSim::SimReply> result;
+	std::queue<SimReply> result;
 
 	QMutexLocker l(&m_lock);
 	result = std::move(m_replies);
@@ -178,7 +176,7 @@ void SimLink::timerEvent(QTimerEvent* event)
 	}
 }
 
-SignalsReadReply SimLink::processSignalsRead(const SignalsReadRequest& request)
+SignalReadReplyRef SimLink::processSignalsRead(const SignalReadRequestRef& request)
 {
 	// Fill reply with empty states
 	//
@@ -248,7 +246,7 @@ SignalsReadReply SimLink::processSignalsRead(const SignalsReadRequest& request)
 		// Write the result state
 		//
 		replyStates[i] = {.hash = state.hash(),
-						  .time = state.time().local.timeStamp,
+						  .time = static_cast<uint64_t>(state.time().local.timeStamp),
 						  .value = sv,
 						  .flags = {.all = static_cast<unsigned short>(state.m_flags.all & 0xffff)}};
 	}
@@ -256,7 +254,7 @@ SignalsReadReply SimLink::processSignalsRead(const SignalsReadRequest& request)
 	return {replyStates};
 }
 
-SignalsWriteReply SimLink::processSignalsWrite(const SignalsWriteRequest& request)
+SignalWriteReplyRef SimLink::processSignalsWrite(const SignalWriteRequestRef& request)
 {
 	std::vector<ErrorCode> errorCodes;
 	errorCodes.resize(request.values.size());
@@ -352,7 +350,7 @@ SignalsWriteReply SimLink::processSignalsWrite(const SignalsWriteRequest& reques
 		}
 	}
 
-	SignalsWriteReply reply = {.errorCodes = errorCodes};
+	SignalWriteReplyRef reply = {.errorCodes = errorCodes};
 	return reply;
 }
 
@@ -365,39 +363,39 @@ SimulatorStateReply SimLink::processGetState()
 
 	if (pingResult.has_value() == false)
 	{
-		reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
+		reply = {ErrorCode::NoConnection, SimulatorStateCode::Unavailable};
 	}
 	else
 	{
 		if (payload != pingResult)
 		{
-			reply = {RvUdpSim::Success, RvUdpSim::Unavailable};
+			reply = {ErrorCode::Success, Unavailable};
 		}
 		else
 		{
 			auto status = m_client->GetStatus();
 			if (status.has_value() == false)
 			{
-				reply = {RvUdpSim::Success, RvUdpSim::Unavailable};
+				reply = {ErrorCode::Success, SimulatorStateCode::Unavailable};
 			}
 			else
 			{
-				reply = {RvUdpSim::Success, RvUdpSim::Unavailable};
+				reply = {ErrorCode::Success, SimulatorStateCode::Unavailable};
 
 				switch (status->state)
 				{
 				case Sim::SimServiceClient::STATE_STOPPED:
-					reply = {RvUdpSim::Success, RvUdpSim::Stopped};
+					reply = {ErrorCode::Success, SimulatorStateCode::Stopped};
 					break;
 				case Sim::SimServiceClient::STATE_RUNNING:
-					reply = {RvUdpSim::Success, RvUdpSim::Running};
+					reply = {ErrorCode::Success, SimulatorStateCode::Running};
 					break;
 				case Sim::SimServiceClient::STATE_PAUSED:
-					reply = {RvUdpSim::Success, RvUdpSim::Paused};
+					reply = {ErrorCode::Success, SimulatorStateCode::Paused};
 					break;
 				default:
 					Q_ASSERT(false);
-					reply = {RvUdpSim::Success, RvUdpSim::Unavailable};
+					reply = {ErrorCode::Success, SimulatorStateCode::Unavailable};
 				}
 			}
 		}
@@ -419,11 +417,11 @@ SimulatorStateReply SimLink::processSimulatorControl(int command)
 			if (status.has_value() == false)
 			{
 				DEBUG_LOG_ERR(m_appLogger, tr("CommandStart error: %1").arg(QString::fromUtf8(status.error().toStdString())));
-				reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
+				reply = {ErrorCode::NoConnection, SimulatorStateCode::Unavailable};
 			}
 			else
 			{
-				reply = {RvUdpSim::Success, RvUdpSim::Running};
+				reply = {ErrorCode::Success, SimulatorStateCode::Running};
 			}
 		}
 		break;
@@ -436,7 +434,7 @@ SimulatorStateReply SimLink::processSimulatorControl(int command)
 			{
 				DEBUG_LOG_ERR(m_appLogger,
 							  tr("GetOverriddenSignals error: %1").arg(QString::fromUtf8(overridenSignals.error().toStdString())));
-				reply = {RvUdpSim::ErrorCode::NoConnection, RvUdpSim::SimulatorStateCode::Unavailable};
+				reply = {ErrorCode::NoConnection, SimulatorStateCode::Unavailable};
 			}
 			else
 			{
@@ -447,7 +445,7 @@ SimulatorStateReply SimLink::processSimulatorControl(int command)
 				{
 					DEBUG_LOG_ERR(m_appLogger,
 								  tr("RemoveOverrideSignals error: %1").arg(QString::fromUtf8(removeOverrides.error().toStdString())));
-					reply = {RvUdpSim::ErrorCode::NoConnection, RvUdpSim::SimulatorStateCode::Unavailable};
+					reply = {ErrorCode::NoConnection, SimulatorStateCode::Unavailable};
 				}
 			}
 
@@ -457,11 +455,11 @@ SimulatorStateReply SimLink::processSimulatorControl(int command)
 			if (status.has_value() == false)
 			{
 				DEBUG_LOG_ERR(m_appLogger, tr("CommandStop error: %1").arg(QString::fromUtf8(status.error().toStdString())));
-				reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
+				reply = {ErrorCode::NoConnection, SimulatorStateCode::Unavailable};
 			}
 			else
 			{
-				reply = {RvUdpSim::Success, RvUdpSim::Stopped};
+				reply = {ErrorCode::Success, SimulatorStateCode::Stopped};
 			}
 
 
@@ -473,17 +471,17 @@ SimulatorStateReply SimLink::processSimulatorControl(int command)
 			if (status.has_value() == false)
 			{
 				DEBUG_LOG_ERR(m_appLogger, tr("CommandPause error: %1").arg(QString::fromUtf8(status.error().toStdString())));
-				reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
+				reply = {ErrorCode::NoConnection, SimulatorStateCode::Unavailable};
 			}
 			else
 			{
-				reply = {RvUdpSim::Success, RvUdpSim::Paused};
+				reply = {ErrorCode::Success, SimulatorStateCode::Paused};
 			}
 		}
 		break;
 	default:
 		Q_ASSERT(false);
-		reply = {RvUdpSim::NoConnection, RvUdpSim::Unavailable};
+		reply = {ErrorCode::NoConnection, SimulatorStateCode::Unavailable};
 	}
 
 	return reply;
@@ -508,12 +506,12 @@ SimLinkThread::SimLinkThread(SimLink* worker) :
 			});
 }
 
-void SimLinkThread::pushRequests(std::queue<RvUdpSim::SimRequest> requests)
+void SimLinkThread::pushRequests(std::queue<SimRequest> requests)
 {
 	m_worker->pushRequests(requests);
 }
 
-std::queue<RvUdpSim::SimReply> SimLinkThread::popAllReplies()
+std::queue<SimReply> SimLinkThread::popAllReplies()
 {
 	return m_worker->popAllReplies();
 }

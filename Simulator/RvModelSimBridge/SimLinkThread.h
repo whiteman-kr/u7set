@@ -1,15 +1,13 @@
 #pragma once
 
-// #include <QUdpSocket>
 #include <queue>
-#include <vector>
 #include <QReadLocker>
 
 #include "../../OnlineLib/CircularLogger.h"
-#include "../../OnlineLib/SoftwareSettings.h"
 #include "../../UtilsLib/SimpleThread.h"
 
 #include <SimServiceClientLib/SimServiceClient.h>
+#include "ModelLinkPacket.h"
 
 // ----------------------------------------------------------------------------------
 //
@@ -24,8 +22,8 @@ public:
 	SimLink(const HostAddressPort& simIP, std::shared_ptr<CircularLogger> appLogger, std::shared_ptr<CircularLogger> simLogger);
 	~SimLink();
 
-	void pushRequests(std::queue<RvUdpSim::SimRequest>& requests);
-	std::queue<RvUdpSim::SimReply> popAllReplies();
+	void pushRequests(std::queue<SimRequest>& requests);
+	std::queue<SimReply> popAllReplies();
 
 signals:
 	void repliesReady();
@@ -38,10 +36,10 @@ private:
 	void shutdownTimer();
 	void timerEvent(QTimerEvent* event) override;
 
-	RvUdpSim::SignalsReadReply processSignalsRead(const RvUdpSim::SignalsReadRequest& request);
-	RvUdpSim::SignalsWriteReply processSignalsWrite(const RvUdpSim::SignalsWriteRequest& request);
-	RvUdpSim::SimulatorStateReply processGetState();
-	RvUdpSim::SimulatorStateReply processSimulatorControl(int command);
+	SignalReadReplyRef processSignalsRead(const SignalReadRequestRef& request);
+	SignalWriteReplyRef processSignalsWrite(const SignalWriteRequestRef& request);
+	SimulatorStateReply processGetState();
+	SimulatorStateReply processSimulatorControl(int command);
 
 private:
 	HostAddressPort m_simIP;
@@ -53,8 +51,8 @@ private:
 	std::unique_ptr<Sim::SimServiceClient> m_client;
 
 	QMutex m_lock;  // m_requests and m_replies lock
-	std::queue<RvUdpSim::SimRequest> m_requests;
-	std::queue<RvUdpSim::SimReply> m_replies;
+	std::queue<SimRequest> m_requests;
+	std::queue<SimReply> m_replies;
 
 	QBasicTimer* m_timer = nullptr;
 };
@@ -71,8 +69,8 @@ class SimLinkThread : public SimpleThread
 public:
 	SimLinkThread(SimLink* worker);
 	
-	void pushRequests(std::queue<RvUdpSim::SimRequest> requests);
-	std::queue<RvUdpSim::SimReply> popAllReplies();
+	void pushRequests(std::queue<SimRequest> requests);
+	std::queue<SimReply> popAllReplies();
 
 signals:
 	void repliesReady();
