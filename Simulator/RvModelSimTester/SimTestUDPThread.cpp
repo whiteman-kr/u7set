@@ -271,16 +271,17 @@ void SimTestUDPWorker::onReadyRead()
 					if (counter > 1)
 					{
 						// If multiple, extract correct signalID from string
-						QStringList ids = m_pendingSignalID.split('\n', Qt::SkipEmptyParts);
+						QStringList ids = m_pendingSignalID.split('|', Qt::SkipEmptyParts);
 						if (i < ids.size())
+						{
 							signalIdStr = ids[i];
+						}
 					}
-					else
-					{
-						signalIdStr = m_pendingSignalID;
-					}
+					
 					state++; // chack state
-
+					if (signalIdStr.contains("|")) {
+						continue;
+					}
 					resultLog += QString("Read signal %1:\n").arg(signalIdStr);
 					resultLog += QString("Value=%1, Hash=%2, Time=%3, Flags={valid: %4, stateAvailable: %5, simulated: %6, blocked: %7, "
 										 "mismatch: %8, aboveHighLimit: %9, belowLowLimit: %10}\n")
@@ -295,8 +296,9 @@ void SimTestUDPWorker::onReadyRead()
 									 .arg(state->flags.bits.aboveHighLimit)
 									 .arg(state->flags.bits.belowLowLimit);
 
-					emit resultReady(resultLog);
+					
 				}
+				emit resultReady(resultLog);
 
 				break;
 			}
@@ -394,15 +396,15 @@ QByteArray SimTestUDPWorker::createRequestState(int dataType)
 QByteArray SimTestUDPWorker::createRequestRead(const QString& signalID)
 {
 	QByteArray result;
-	bool isMultypleSignals = signalID.contains('\n');
+	bool isMultypleSignals = signalID.contains('|');
 	int signalCount = 1;
 
 	if (isMultypleSignals)
 	{
-		signalCount = signalID.count('\n') + 1;
+		signalCount = signalID.count('|') + 1;
 	}
 
-	int size = sizeof(SimulatorBridgePacket) + sizeof(int16_t) * signalCount + sizeof(Hash) * signalCount + sizeof(int16_t) /*crc*/;
+	int size = sizeof(SimulatorBridgePacket) + sizeof(int16_t) + sizeof(Hash) * signalCount + sizeof(int16_t) /*crc*/;
 
 	result.resize(size);
 	result.fill(0);
@@ -445,7 +447,7 @@ QByteArray SimTestUDPWorker::createRequestRead(const QString& signalID)
 
 	if (isMultypleSignals)
 	{
-		QStringList signalIDs = signalID.split('\n', Qt::SkipEmptyParts);
+		QStringList signalIDs = signalID.split('|', Qt::SkipEmptyParts);
 
 		for (const QString& id : signalIDs)
 		{
@@ -473,12 +475,12 @@ QByteArray SimTestUDPWorker::createRequestWrite(const QString& signalID, const Q
 {
 	QByteArray result;
 
-	bool isMultypleSignals = signalID.contains('\n');
+	bool isMultypleSignals = signalID.contains('|');
 	int signalCount = 1;
 
 	if (isMultypleSignals)
 	{
-		signalCount = signalID.count('\n') + 1;
+		signalCount = signalID.count('|') + 1;
 	}
 
 	int size = sizeof(SimulatorBridgePacket) + sizeof(int16_t) + sizeof(Hash) * signalCount + sizeof(SignalValue) * signalCount +
@@ -523,7 +525,7 @@ QByteArray SimTestUDPWorker::createRequestWrite(const QString& signalID, const Q
 
 	if (isMultypleSignals)
 	{
-		QStringList signalIDList = signalID.split('\n', Qt::SkipEmptyParts);
+		QStringList signalIDList = signalID.split('|', Qt::SkipEmptyParts);
 		for (const QString& id : signalIDList)
 		{
 			Hash* signalIDHash = reinterpret_cast<Hash*>(data);
@@ -541,7 +543,7 @@ QByteArray SimTestUDPWorker::createRequestWrite(const QString& signalID, const Q
 	// SignalValue v;
 	if (isMultypleSignals)
 	{
-		QStringList valueList = value.split('\n', Qt::SkipEmptyParts);
+		QStringList valueList = value.split('|', Qt::SkipEmptyParts);
 		for (const QString& valueNumber : valueList)
 		{
 			SignalValue* valueData = reinterpret_cast<SignalValue*>(data);

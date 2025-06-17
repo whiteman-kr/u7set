@@ -20,4 +20,5 @@ signals:
 private:
 	QTableWidget* tableWidget;
 	SignalType m_valueType = SignalType::AnalogFloat;
+	int filledRowCount() const;
 };

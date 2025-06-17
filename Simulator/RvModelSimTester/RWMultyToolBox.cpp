@@ -32,17 +32,18 @@ RWMultyToolBox::RWMultyToolBox(QWidget* parent) :
 			[this]()
 			{
 				QString* idList = new QString;
-				for (int row = 0; row < tableWidget->rowCount(); ++row)
+				for (int row = 0; row < filledRowCount(); ++row)
 				{
 					auto* idItem = tableWidget->item(row, 0);
 					if (idItem && !idItem->text().isEmpty())
 					{
-						idList->append(idItem->text() + "\n");
+						idList->append(idItem->text() + "|");
 					}
 				}
-				if (!idList->isEmpty() && idList->endsWith('\n'))
+				if (!idList->isEmpty() && idList->endsWith('|'))
 					idList->chop(1);
 				emit requestRead(*idList);
+				return;
 			});
 
 	connect(writeBtn,
@@ -52,21 +53,22 @@ RWMultyToolBox::RWMultyToolBox(QWidget* parent) :
 			{
 				QString* idList = new QString;
 				QString* valueList = new QString;
-				for (int row = 0; row < tableWidget->rowCount(); ++row)
+				for (int row = 0; row < filledRowCount(); ++row)
 				{
 					auto* idItem = tableWidget->item(row, 0);
 					auto* valueItem = tableWidget->item(row, 1);
 					if (idItem && valueItem && !idItem->text().isEmpty())
 					{
-						idList->append(idItem->text() + "\n");
-						valueList->append(valueItem->text() + "\n");
+						idList->append(idItem->text() + "|");
+						valueList->append(valueItem->text() + "|");
 					}
 				}
-				if (!idList->isEmpty() && idList->endsWith('\n'))
+				if (!idList->isEmpty() && idList->endsWith('|'))
 					idList->chop(1);
-				if (!valueList->isEmpty() && valueList->endsWith('\n'))
+				if (!valueList->isEmpty() && valueList->endsWith('|'))
 					valueList->chop(1);
 				emit requestWrite(*idList, *valueList);
+				return;
 			});
 
 	connect(autoFillBtn,
@@ -136,6 +138,7 @@ RWMultyToolBox::RWMultyToolBox(QWidget* parent) :
 						}
 					}
 				}
+				return;
 			});
 
 	QHBoxLayout* buttonLayout = new QHBoxLayout;
@@ -156,4 +159,19 @@ void RWMultyToolBox::setValueType(SignalType type)
 	{
 		m_valueType = type;
 	}
+}
+
+int RWMultyToolBox::filledRowCount() const
+{
+	int count = 0;
+	for (int row = 0; row < tableWidget->rowCount(); ++row)
+	{
+		auto* idItem = tableWidget->item(row, 0);
+		auto* valueItem = tableWidget->item(row, 1);
+		if (idItem && valueItem && !idItem->text().isEmpty() && !valueItem->text().isEmpty())
+		{
+			++count;
+		}
+	}
+	return count;
 }
