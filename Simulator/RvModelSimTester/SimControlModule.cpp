@@ -40,8 +40,6 @@ SimControlModule::SimControlModule(QWidget* parent) :
 
 	setLayout(mainLayout);
 
-	resize(350, 240);
-
 	connect(startButton, &QPushButton::clicked, this, &SimControlModule::onStartClicked);
 	connect(stopButton, &QPushButton::clicked, this, &SimControlModule::onStopClicked);
 	connect(pauseButton, &QPushButton::clicked, this, &SimControlModule::onPauseClicked);

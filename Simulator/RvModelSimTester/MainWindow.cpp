@@ -57,7 +57,7 @@ void MainWindow::setupUi()
 	// Load saved selection
 	loadValueTypeSelection();
 
-
+	// Chack buttons
 	QHBoxLayout* buttonLayout = new QHBoxLayout;
 	buttonLayout->addWidget(analogBtn);
 	buttonLayout->addWidget(boolBtn);
@@ -96,7 +96,7 @@ void MainWindow::setupUi()
 	mainLayout->setMenuBar(menuBar);
 	mainLayout->addWidget(rwGroup);
 	mainLayout->addWidget(simGroup);
-	mainLayout->addWidget(logGroup, 1); // logBox max space
+	mainLayout->addWidget(logGroup, 1);
 	setLayout(mainLayout);
 
 
@@ -160,8 +160,8 @@ void MainWindow::setupUi()
 
 	// Name and size
 	setWindowTitle("Simulation Tester");
-	resize(480, 420);
-	setMinimumSize(430, 370);
+	resize(890, 660);
+	setMinimumSize(660, 580);
 }
 
 MainWindow::~MainWindow()

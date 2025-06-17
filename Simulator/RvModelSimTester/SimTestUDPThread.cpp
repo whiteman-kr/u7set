@@ -8,7 +8,6 @@
 #include <QVariant>
 
 
-
 SimTestUDPWorker::SimTestUDPWorker(QObject* parent) :
 	QObject(parent)
 {
@@ -299,7 +298,6 @@ void SimTestUDPWorker::onReadyRead()
 					emit resultReady(resultLog);
 				}
 
-
 				break;
 			}
 		case SGW_SIGNAL_WRITE:
@@ -559,7 +557,7 @@ QByteArray SimTestUDPWorker::createRequestWrite(const QString& signalID, const Q
 			{
 				valueData->fValue = valueNumber.toFloat();
 			}
-			
+
 			data += sizeof(SignalValue);
 		}
 	}

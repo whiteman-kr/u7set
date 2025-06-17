@@ -61,8 +61,6 @@ RWToolBox::RWToolBox(QWidget* parent) :
 	mainLayout->addStretch();
 	setLayout(mainLayout);
 
-	resize(350, 160);
-
 	connect(signalIdEdit,
 			&QLineEdit::editingFinished,
 			[this]()
