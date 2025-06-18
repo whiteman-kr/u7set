@@ -2,7 +2,6 @@
 
 #include "AppSettings.h"
 #include "../RvModelSimShared/SimModelPackets.h"
-#include "../RvModelSimShared/SimModelHash.h"
 
 #include <QHostAddress>
 #include <QObject>

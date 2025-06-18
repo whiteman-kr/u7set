@@ -15,7 +15,7 @@ LogModule::LogModule(QWidget* parent) :
 	mainLayout->addWidget(clearButton);
 	setLayout(mainLayout);
 
-	logAction("Initialized: Run");
+	logAction("Initialized: Wainting to response");
 }
 
 // log max 100 actions

@@ -21,4 +21,16 @@ private:
 	QTableWidget* tableWidget;
 	SignalType m_valueType = SignalType::AnalogFloat;
 	int filledRowCount() const;
+
+	struct SignalDef
+	{
+		SignalType type;
+		QString pattern;
+		int start;
+		int end;
+	};
+	std::vector<SignalDef> signalDefs;
+	void loadSignalFromCSV(const QString& filename);
+	void setDefaultSignalDefs();
+	void saveSignalToCSV(const QString& filename) const;
 };

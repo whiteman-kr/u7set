@@ -81,8 +81,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
-
-	"../RvModelSimShared/SimModelHash.h"
+	"../../UtilsLib/Crc.h"
 	
 )
 

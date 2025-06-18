@@ -7,6 +7,9 @@
 #include <QSettings>
 #include <QVariant>
 
+#include <CommonLib/Hash.h>
+#include "../../UtilsLib/Crc.h"
+
 
 SimTestUDPWorker::SimTestUDPWorker(QObject* parent) :
 	QObject(parent)
@@ -102,6 +105,7 @@ void SimTestUDPWorker::read(const QString& signalID)
 void SimTestUDPWorker::write(const QString& signalID, const QString& value)
 {
 	QByteArray data = createRequestWrite(signalID, value);
+	m_pendingSignalID = signalID;
 	int result = m_socket->writeDatagram(data.data(), data.size(), QHostAddress{m_settings.ip}, m_settings.portRemote);
 	if (result == -1)
 	{
@@ -277,15 +281,33 @@ void SimTestUDPWorker::onReadyRead()
 							signalIdStr = ids[i];
 						}
 					}
+
 					
-					state++; // chack state
-					if (signalIdStr.contains("|")) {
+					if (signalIdStr.contains("|"))
+					{
 						continue;
 					}
+
+					double resiveValue = 0;
+					switch (m_valueType)
+					{
+					case SignalType::AnalogFloat:
+						resiveValue = state->value.fValue;
+						break;
+					case SignalType::AnalogInt32:
+						resiveValue = state->value.iValue;
+						break;
+					case SignalType::Discrete:
+						resiveValue = state->value.bValue;
+						break;
+					default:
+						Q_ASSERT(false);
+					}
+
 					resultLog += QString("Read signal %1:\n").arg(signalIdStr);
 					resultLog += QString("Value=%1, Hash=%2, Time=%3, Flags={valid: %4, stateAvailable: %5, simulated: %6, blocked: %7, "
 										 "mismatch: %8, aboveHighLimit: %9, belowLowLimit: %10}\n")
-									 .arg(state->value.fValue)
+									 .arg(resiveValue)
 									 .arg(state->hash)
 									 .arg(state->time)
 									 .arg(state->flags.bits.valid)
@@ -295,8 +317,7 @@ void SimTestUDPWorker::onReadyRead()
 									 .arg(state->flags.bits.mismatch)
 									 .arg(state->flags.bits.aboveHighLimit)
 									 .arg(state->flags.bits.belowLowLimit);
-
-					
+					state++; // chack state
 				}
 				emit resultReady(resultLog);
 
@@ -331,24 +352,42 @@ void SimTestUDPWorker::onReadyRead()
 				ptr += sizeof(ErrorCode);
 				for (int i = 0; i < counter; ++i)
 				{
-					emit resultReady(QString("Write result: ErrorCode = %1.").arg(errorCodeToString(*errorCode)));
-					errorCode++; // chack error
-				}
-				break;
-			}
-		}
-		int16_t crc = *reinterpret_cast<const int16_t*>(data.constData() + data.size() - sizeof(int16_t));
+					if (*errorCode == Success)
+					{
+						emit resultReady(QString("Write result: ErrorCode = %1.").arg(errorCodeToString(*errorCode)));
+					}
+					else
+					{
+						QString signalIdStr = m_pendingSignalID;
+						if (counter > 1)
+						{
+							// If multiple, extract correct signalID from string
+							QStringList ids = m_pendingSignalID.split('|', Qt::SkipEmptyParts);
+							if (i < ids.size())
+							{
+								signalIdStr = ids[i];
+							}
 
-		// Test datagram
-		emit resultReady(QString("Datagram arrived: marker=%1, version=%2, size=%3, type=%4, crc=%5")
-							 .arg(packet->marker)
-							 .arg(packet->packetVersion)
-							 .arg(packet->size)
-							 .arg(packet->packetType)
-							 .arg(crc));
+							emit resultReady(
+								QString("Sygnal %1 write error: ErrorCode = %2.").arg(signalIdStr).arg(errorCodeToString(*errorCode)));
+						}
+
+						errorCode++; // chack error
+					}
+				}
+			}
+			int16_t crc = *reinterpret_cast<const int16_t*>(data.constData() + data.size() - sizeof(int16_t));
+
+			// Test datagram
+			emit resultReady(QString("Datagram arrived: marker=%1, version=%2, size=%3, type=%4, crc=%5")
+								 .arg(packet->marker)
+								 .arg(packet->packetVersion)
+								 .arg(packet->size)
+								 .arg(packet->packetType)
+								 .arg(crc));
+		}
 	}
 }
-
 
 QByteArray SimTestUDPWorker::createRequestState(int dataType)
 {
