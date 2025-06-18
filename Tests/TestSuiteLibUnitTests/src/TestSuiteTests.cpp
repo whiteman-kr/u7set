@@ -505,6 +505,7 @@ TEST_F(TestSuiteUnitTest, ScriptFuncStartForMs)
 		return false;
 	}
 })";
+	// clang-format on
 
 	MockScriptProvider scriptProvider;
 	EXPECT_CALL(scriptProvider, getGloablScript()).Times(AtLeast(0));
@@ -547,6 +548,7 @@ TEST_F(TestSuiteUnitTest, ScriptCheckProperties)
 	assert(ctrl.projectName === "TEST_PROJECT", "ProjectName is not 'TEST_PROJECT', but " + ctrl.projectName);
 	assert(ctrl.buildNo === 111, "BuildNo is not 111, but " + ctrl.buildNo);
 })";
+	// clang-format on
 
 	MockScriptProvider scriptProvider;
 	EXPECT_CALL(scriptProvider, getGloablScript()).Times(AtLeast(0)).WillRepeatedly(Return(GlobalScript));

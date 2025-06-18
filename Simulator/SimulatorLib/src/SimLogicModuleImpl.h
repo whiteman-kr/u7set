@@ -17,6 +17,8 @@ namespace Sim
 	{
 		Q_OBJECT
 
+		friend class Snapshot;
+
 	public:
 		LogicModuleImpl(SimulatorPrivate* simulator);
 		virtual ~LogicModuleImpl();
@@ -63,15 +65,19 @@ namespace Sim
 
 		std::chrono::microseconds cycleDuration() const;
 
+		const Eeprom& tuningEeprom() const;
+		const Eeprom& confEeprom() const;
+		const Eeprom& appLogicEeprom() const;
+
 		const std::vector<DeviceCommand>& appCommands() const;
 
 		std::unordered_map<int, size_t> offsetToCommand() const;
 		const DeviceCommand& offsetToCommand(int offset) const;
 
-		[[nodiscard]] const Ram& ram()
-			const; // This RAM access is not protected by any mutex, use it only when no concurrent thread is accessing it!
-		[[nodiscard]] Ram& mutableRam(); // This RAM access is not protected by any mutex, use it only when no concurrent thread is
-										 // accessing it!
+		[[nodiscard]] const Ram& ram() const; // This RAM access is not protected by any mutex, use it only when no concurrent
+											  // thread is accessing it!
+		[[nodiscard]] Ram& mutableRam();      // This RAM access is not protected by any mutex, use it only when no concurrent thread is
+											  // accessing it!
 
 		[[nodiscard]] RuntimeMode runtimeMode() const;
 		[[nodiscard]] DeviceState deviceState() const;

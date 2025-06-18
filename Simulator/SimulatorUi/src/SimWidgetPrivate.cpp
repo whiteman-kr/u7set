@@ -284,6 +284,15 @@ namespace SimUi
 
 		// --
 		//
+
+		m_takeSnapshotAction = new QAction{tr("Take Snapshot"), this};
+		connect(m_takeSnapshotAction, &QAction::triggered, this, &SimWidgetPrivate::takeSnapshot);
+
+		m_applySnapshotAction = new QAction{tr("Apply Snapshot"), this};
+		connect(m_applySnapshotAction, &QAction::triggered, this, &SimWidgetPrivate::applySnapshot);
+
+		// --
+		//
 		m_simulationTimeEdit = new QLineEdit{this};
 		m_simulationTimeEdit->setPlaceholderText("Infinite");
 		m_simulationTimeEdit->setClearButtonEnabled(false);
@@ -500,6 +509,10 @@ namespace SimUi
 		m_toolBar->addAction(m_closeProjectAction);
 		m_toolBar->addAction(m_refreshProjectAction);
 		m_toolBar->addAction(m_addWindowAction);
+
+		m_toolBar->addSeparator();
+		m_toolBar->addAction(m_takeSnapshotAction);
+		m_toolBar->addAction(m_applySnapshotAction);
 
 		m_toolBar->addSeparator();
 		m_toolBar->addWidget(m_simulationTimeEdit);
@@ -914,6 +927,13 @@ namespace SimUi
 			m_addWindowAction->setEnabled(projectIsLoaded);
 		}
 
+		// Snapshot
+		//
+		{
+			m_takeSnapshotAction->setEnabled(m_simulator->isPaused() || m_simulator->isRunning());
+			m_applySnapshotAction->setEnabled(m_simulator->isLoaded());
+		}
+
 		// Run, Pause, Stop
 		//
 		{
@@ -1326,6 +1346,59 @@ namespace SimUi
 		widget->setWindowTitle(tr("Simulator"));
 
 		widget->show();
+
+		return;
+	}
+
+	void SimWidgetPrivate::takeSnapshot()
+	{
+		QString snapshotId = "SNAPSHOTID";
+
+		auto data = m_simulator->control().takeSnapshot(snapshotId);
+		if (data.isEmpty() == true)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Snapshot failed. See the application log for details."));
+			return;
+		}
+
+		// Save data to file with name snapshotId.u7snap
+		//
+		QFile file{QString("%1.u7snap").arg(snapshotId)};
+
+		if (file.open(QIODevice::WriteOnly) == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Failed to save snapshot file."));
+			return;
+		}
+
+		auto written = file.write(data);
+		file.close();
+
+		if (written != data.size())
+		{
+			QMessageBox::critical(this, qAppName(), tr("Disk write error, file %1.").arg(file.fileName()));
+			return;
+		}
+	}
+
+	void SimWidgetPrivate::applySnapshot()
+	{
+		QString snapshotId = "SNAPSHOTID";
+
+		QFile file{snapshotId + ".u7snap"};
+		if (file.open(QIODevice::ReadOnly) == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Failed to open snapshot file."));
+			return;
+		}
+
+		bool ok = m_simulator->control().applySnapshot(file.readAll());
+
+		if (ok == false)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Failed to apply snapshot."));
+			return;
+		}
 
 		return;
 	}

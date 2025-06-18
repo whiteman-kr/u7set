@@ -14,8 +14,13 @@ class SimRamTests;
 
 namespace Sim
 {
+	class Snapshot;
+
+
 	class RamAreaInfo
 	{
+		friend class Snapshot;
+
 	public:
 		RamAreaInfo() = default;
 		RamAreaInfo(const RamAreaInfo&) = default;
@@ -51,6 +56,8 @@ namespace Sim
 
 	class RamArea final : public RamAreaInfo
 	{
+		friend class Snapshot;
+
 	public:
 		RamArea(bool clearOnStartCycle);
 		RamArea(const RamArea&) = default;
@@ -283,6 +290,7 @@ namespace Sim
 	class Ram
 	{
 		friend class SimRamTests;
+		friend class Snapshot;
 
 	public:
 		Ram() = default;

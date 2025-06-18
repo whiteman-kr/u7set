@@ -38,15 +38,14 @@ namespace Sim
 	{
 	public:
 		explicit Eeprom(UartId uartId = UartId::Undefined);
-		virtual ~Eeprom() = default;
 
 		// Access
 		//
 	public:
 		bool init(const Hardware::ModuleFirmwareData& data);
 		bool fill(char fillWith);
-		bool reset();					// Set data with FFs
-		void clear();					// Clear buffer and reset size
+		bool reset(); // Set data with FFs
+		void clear(); // Clear buffer and reset size
 
 		bool parseAllocationFrame(int maxConfigurationCount);
 
@@ -62,9 +61,6 @@ namespace Sim
 		float getFloat(int frameIndex, int wordOffset);
 		double getDouble(int frameIndex, int wordOffset);
 
-		template <typename TYPE>
-		TYPE getData(int eepromOffset);
-
 		// Properties
 		//
 	public:
@@ -79,10 +75,12 @@ namespace Sim
 		//
 		quint16 subsystemKey() const;
 		quint16 buildNo() const;
-		quint16 configrationsCount() const;
+		quint16 configurationCount() const;
 
 		int configFrameIndex(int LmNumber) const;
 		int configFramesCount(int LmNumber) const;
+
+		quint32 crc32(bool excludeBuildNo) const;
 
 		// Data here
 		//
@@ -99,14 +97,13 @@ namespace Sim
 	private:
 		// Data from parsed allocation frame
 		//
-		quint16	m_subsystemKey = 0;
-		quint16	m_buildNo = 0;
-		quint16	m_configrationsCount = 0;
+		quint16 m_subsystemKey = 0;
+		quint16 m_buildNo = 0;
+		quint16 m_configurationCount = 0;
 		std::vector<int> m_configFrameIndexes;
 
 		// Service channel frame [3.1.1.3.2.1	Service Information]
 		//
 		std::vector<ChannelServiceFrame> m_channelServiceInfo;
 	};
-}
-
+} // namespace Sim

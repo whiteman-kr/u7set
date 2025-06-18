@@ -345,11 +345,6 @@ quint32 CRC32(quint32 initialValue, const char* buffer, int len, bool finishCalc
 	return (finishCalc ? crc ^ 0xFFFFFFFF : crc);
 }
 
-quint32 CRC32(const char* buffer, int len)
-{
-	return CRC32(CRC32_INITIAL_VALUE, buffer, len, true);
-}
-
 quint32 CRC32(quint32 initialValue, const QString& str, bool finishCalc)
 {
 	std::string stdStr = str.toStdString();

@@ -411,11 +411,11 @@ namespace Sim
 
 		std::vector<OverrideSignalParam> osignals = overrideSignals();
 
-		::Proto::SimOverrideSignalWorkspace message;
+		::ProtoSim::SimOverrideSignalWorkspace message;
 
 		for (const OverrideSignalParam& osp : osignals)
 		{
-			::Proto::SimOverrideSignal* signalMessage = message.add_overridesignals();
+			::ProtoSim::SimOverrideSignal* signalMessage = message.add_overridesignals();
 
 			signalMessage->set_enabled(osp.enabled());
 			signalMessage->set_index(osp.index());
@@ -441,9 +441,9 @@ namespace Sim
 			return false;
 		}
 
-		::Proto::SimOverrideSignalWorkspace message;
+		::ProtoSim::SimOverrideSignalWorkspace message;
 
-		bool result = ParseFromIstream(message, input);
+		bool result = Proto::ParseFromIstream(message, input);
 		if (result == false)
 		{
 			return false;

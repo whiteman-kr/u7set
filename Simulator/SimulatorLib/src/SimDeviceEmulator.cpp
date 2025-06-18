@@ -1091,16 +1091,16 @@ namespace Sim
 			result = false;
 		}
 
-		if (m_tuningEeprom.configrationsCount() != m_confEeprom.configrationsCount() ||
-			m_tuningEeprom.configrationsCount() != m_appLogicEeprom.configrationsCount())
+		if (m_tuningEeprom.configurationCount() != m_confEeprom.configurationCount() ||
+			m_tuningEeprom.configurationCount() != m_appLogicEeprom.configurationCount())
 		{
-			QString str = tr("EEPROMs EEPROMs have different configrationsCount: \n"
-						  "\ttuningEeprom.configrationsCount: %1\n"
-						  "\tconfEeprom.configrationsCount: %2\n"
-						  "\tappLogicEeprom.configrationsCount: %3")
-							.arg(m_tuningEeprom.configrationsCount())
-							.arg(m_confEeprom.configrationsCount())
-							.arg(m_appLogicEeprom.configrationsCount());
+			QString str = tr("EEPROMs EEPROMs have different configurationCount: \n"
+							 "\ttuningEeprom.configurationCount: %1\n"
+							 "\tconfEeprom.configurationCount: %2\n"
+							 "\tappLogicEeprom.configurationCount: %3")
+							  .arg(m_tuningEeprom.configurationCount())
+							  .arg(m_confEeprom.configurationCount())
+							  .arg(m_appLogicEeprom.configurationCount());
 			m_log.writeError(str);
 			result = false;
 		}

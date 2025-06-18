@@ -23,6 +23,7 @@
 #endif
 
 class SimCommandTest_LM5_LM6;
+class Snapshot;
 
 // class DeviceEmulator has function DeviceEmulator::fault
 // this is convenient call of this func
@@ -114,7 +115,8 @@ namespace Sim
 	{
 		Q_OBJECT
 
-		friend SimCommandTest_LM5_LM6;
+		friend class SimCommandTest_LM5_LM6;
+		friend class Snapshot;
 
 	public:
 		explicit DeviceEmulator(SimulatorPrivate* simulator);

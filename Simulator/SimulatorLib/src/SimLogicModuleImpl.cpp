@@ -18,10 +18,10 @@ namespace Sim
 	}
 
 	bool LogicModuleImpl::load(const Hardware::LogicModuleInfo& lmInfo,
-						   const LmDescription& lmDescription,
-						   const Hardware::ModuleFirmware& firmware,
-						   const ConnectionsImpl& connections,
-						   const LogicModulesInfo& logicModulesExtraInfo)
+							   const LmDescription& lmDescription,
+							   const Hardware::ModuleFirmware& firmware,
+							   const ConnectionsImpl& connections,
+							   const LogicModulesInfo& logicModulesExtraInfo)
 	{
 		m_log.setOutputScope(QString("LM %1").arg(lmInfo.equipmentId));
 
@@ -88,10 +88,10 @@ namespace Sim
 	}
 
 	QFuture<bool> LogicModuleImpl::asyncRunCycle(std::chrono::microseconds currentTime,
-											 const QDateTime& currentDateTime,
-											 qint64 workcycle,
-											 bool reset,
-											 std::condition_variable& cvFinished)
+												 const QDateTime& currentDateTime,
+												 qint64 workcycle,
+												 bool reset,
+												 std::condition_variable& cvFinished)
 	{
 		if (reset == true)
 		{
@@ -201,6 +201,21 @@ namespace Sim
 		return std::chrono::microseconds{m_lmDescription.logicUnit().m_cycleDuration};
 	}
 
+	const Eeprom& LogicModuleImpl::tuningEeprom() const
+	{
+		return m_tuningEeprom;
+	}
+
+	const Eeprom& LogicModuleImpl::confEeprom() const
+	{
+		return m_confEeprom;
+	}
+
+	const Eeprom& LogicModuleImpl::appLogicEeprom() const
+	{
+		return m_appLogicEeprom;
+	}
+
 	const std::vector<DeviceCommand>& LogicModuleImpl::appCommands() const
 	{
 		return m_commands;
@@ -262,10 +277,10 @@ namespace Sim
 		else
 		{
 			m_device.reset();
-//			if (isPowerOff() == true)
-//			{
-//				m_device.reset();
-//			}
+			// if (isPowerOff() == true)
+			// {
+			// 	m_device.reset();
+			// }
 		}
 	}
 
@@ -328,4 +343,4 @@ namespace Sim
 	{
 		return m_device.testSorResetSwitch(newValue);
 	}
-}
+} // namespace Sim

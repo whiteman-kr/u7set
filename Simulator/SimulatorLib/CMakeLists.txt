@@ -78,6 +78,8 @@ qt_add_library(${TARGET} STATIC
 	./src/SimScriptSimulator.cpp
 	./src/SimScriptSimulator.h
 	./src/SimService.cpp
+	./src/SimSnapshot.cpp
+	./src/SimSnapshot.h
 	./src/SimSoftware.cpp
 	./src/SimSoftwareImpl.cpp
 	./src/SimSoftwareImpl.h
@@ -176,6 +178,7 @@ target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib Ap
 
 target_compile_definitions(${TARGET} PRIVATE SIMULATOR_LIBRARY)
 
+target_include_directories(${TARGET} PRIVATE ${CMAKE_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/include)

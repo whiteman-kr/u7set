@@ -1,5 +1,6 @@
 #include "SimControlImpl.h"
 #include "SimLogicModuleImpl.h"
+#include "SimSnapshot.h"
 #include "SimulatorPrivate.h"
 
 
@@ -133,7 +134,7 @@ namespace Sim
 			std::shared_ptr<LogicModuleImpl> lm = m_simulator->logicModule(id);
 			if (lm == nullptr)
 			{
-				m_log.writeError(QString("Module %1 not found or it does not have simultion ability.").arg(id));
+				m_log.writeError(QString("Module %1 not found or it does not have simulation ability.").arg(id));
 				continue;
 			}
 
@@ -225,6 +226,15 @@ namespace Sim
 
 		std::unique_lock locker(m_controlDataMutex);
 
+		if (m_snapshotId.isEmpty() == false)
+		{
+			// Taking snapshot is in progress, cannot start.
+			//
+			assert(m_controlData.m_state == SimControlState::Pause);
+			m_log.writeError("A snapshot is currently in progress. The simulation cannot be started at this time.");
+			return false;
+		}
+
 		if (m_controlData.m_lms.empty() == true)
 		{
 			// Nothing to run
@@ -235,7 +245,7 @@ namespace Sim
 
 			ControlStatus cs{m_controlData};
 
-			locker.unlock(); // Unlock before emitting signal
+			locker.unlock(); // Unlock before emitting signal, but mutex is not guarantee to be unlocked, it is recursive.
 			m_controlDataConditionVariable.notify_one();
 
 			emit stateChanged(cs.m_state);
@@ -299,7 +309,7 @@ namespace Sim
 
 		ControlStatus cs{m_controlData};
 
-		locker.unlock(); // Unlock before emitting signal
+		locker.unlock(); // Unlock before emitting signal, but mutex is not guarantee to be unlocked, it is recursive.
 
 		m_controlDataConditionVariable.notify_one();
 
@@ -312,20 +322,20 @@ namespace Sim
 	void ControlImpl::pause()
 	{
 		std::chrono::microseconds leftTime{0};
-		ControlStatus cs;
+		ControlStatus copy;
 
 		{
 			std::lock_guard locker(m_controlDataMutex);
 			m_controlData.m_state = SimControlState::Pause;
 
 			leftTime = (m_controlData.m_sliceStartTime + m_controlData.m_duration) - m_controlData.m_currentTime;
-			cs = ControlStatus{m_controlData};
+			copy = ControlStatus{m_controlData};
 		}
 
 		m_controlDataConditionVariable.notify_one();
 
-		emit stateChanged(cs.m_state);
-		emit statusUpdate(cs);
+		emit stateChanged(copy.m_state);
+		emit statusUpdate(copy);
 
 		m_log.writeDebug(tr("Pause, left time %1, us").arg(leftTime.count()));
 		return;
@@ -338,6 +348,16 @@ namespace Sim
 		ControlStatus cs;
 		{
 			std::lock_guard locker(m_controlDataMutex);
+
+			if (m_snapshotId.isEmpty() == false)
+			{
+				// Taking snapshot is in progress, cannot stop now.
+				//
+				assert(m_controlData.m_state == SimControlState::Pause);
+				m_log.writeError("A snapshot is currently in progress. The simulation cannot be stopped at this time.");
+				return;
+			}
+
 			m_controlData.m_state = SimControlState::Stop;
 
 			leftTime = (m_controlData.m_sliceStartTime + m_controlData.m_duration) - m_controlData.m_currentTime;
@@ -357,6 +377,91 @@ namespace Sim
 
 		m_log.writeDebug(tr("Stop, left cycle %1").arg(leftTime.count()));
 		return;
+	}
+
+	QByteArray ControlImpl::pauseAndTakeSnapshot(const QString& snapshotId)
+	{
+		if (snapshotId.isEmpty() == true)
+		{
+			m_log.writeError("Snapshot identifier is empty.");
+			return {};
+		}
+
+		std::chrono::microseconds leftTime{0};
+		ControlStatus copy;
+
+		{
+			std::lock_guard locker{m_controlDataMutex};
+
+			{
+				std::lock_guard lockerData{m_snapshotDataMutex};
+
+				// if m_snapshot.first.isEmpty() == false then snapshot is done, but data yet were not fetched.
+				//
+				if (m_snapshotId.isEmpty() == false || m_snapshot.first.isEmpty() == false)
+				{
+					m_log.writeError("Cannot take snapshot: another snapshot operation is already in progress.");
+					return {};
+				}
+			}
+
+			if (m_controlData.m_state == SimControlState::Stop)
+			{
+				m_log.writeError("Snapshot failed: simulation is not running.");
+				return {};
+			}
+
+			m_controlData.m_state = SimControlState::Pause;
+
+			leftTime = (m_controlData.m_sliceStartTime + m_controlData.m_duration) - m_controlData.m_currentTime;
+			copy = ControlStatus{m_controlData};
+
+			// While m_snapshotId is not cleared, the system remains in a paused state.
+			//
+			m_snapshotId = snapshotId;
+		}
+
+		m_controlDataConditionVariable.notify_one();
+
+		QByteArray resultData;
+		{
+			std::unique_lock lock{m_snapshotDataMutex};
+			m_snapshotCv.wait(lock,
+							  [this]()
+							  {
+								  return m_snapshot.first.isEmpty() == false;
+							  });
+
+			assert(snapshotId == m_snapshot.first);
+			resultData = std::move(m_snapshot.second);
+			m_snapshot = {};
+		}
+
+		m_log.writeDebug(tr("PauseAndTakeSnapshot, left time %1, us").arg(leftTime.count()));
+
+		emit stateChanged(copy.m_state);
+		emit statusUpdate(copy);
+
+		// Simulator is left paused, user is responsible to resume it if needed.
+		//
+		return resultData;
+	}
+
+	bool ControlImpl::applySnapshot(const QByteArray& data)
+	{
+		Snapshot snapshot{m_log.logInterface()};
+		bool ok = snapshot.apply(data, *m_simulator);
+
+		// Update UI.
+		//
+		m_controlDataMutex.lock();
+		ControlStatus copy{m_controlData};
+		m_controlDataMutex.unlock();
+
+		emit stateChanged(copy.m_state);
+		emit statusUpdate(copy);
+
+		return ok;
 	}
 
 	ControlData ControlImpl::controlData() const
@@ -433,23 +538,40 @@ namespace Sim
 			return;
 		}
 
+		SimControlState currentState{};
 		while (isInterruptionRequested() == false)
 		{
-			SimControlState currentState = state();
-
-			if (currentState == SimControlState::Stop || currentState == SimControlState::Pause)
 			{
-				// Have some rest
-				//
-				std::unique_lock locker(m_controlDataMutex);
-				m_controlDataConditionVariable.wait_for(locker,
-														std::chrono::milliseconds{1000},
-														[currentState, this]()
-														{
-															return m_controlData.m_state != currentState;
-														});
-
+				std::unique_lock locker{m_controlDataMutex};
 				currentState = m_controlData.m_state;
+
+				if (currentState == SimControlState::Pause && m_snapshotId.isEmpty() == false)
+				{
+					// Take snapshot
+					//
+					QByteArray snapshotData = takeSnapshot(m_snapshotId);
+
+					std::scoped_lock lock{m_snapshotDataMutex};
+					m_snapshot = std::make_pair(m_snapshotId, std::move(snapshotData));
+					m_snapshotCv.notify_all();
+
+					m_snapshotId.clear();
+				}
+
+				if (currentState == SimControlState::Stop || currentState == SimControlState::Pause)
+				{
+					// Wait for new command or command to take a snapshot (m_snapshotId.isEmpty() == false)
+					//
+					m_controlDataConditionVariable.wait_for(locker,
+															std::chrono::milliseconds{1000},
+															[currentState, this]()
+															{
+																return m_controlData.m_state != currentState ||
+																	   m_snapshotId.isEmpty() == false;
+															});
+
+					currentState = m_controlData.m_state;
+				}
 			}
 
 			if (currentState == SimControlState::Run)
@@ -459,7 +581,6 @@ namespace Sim
 				// !!! processRun() blocks until state() is changed or time expired
 				//
 				bool ok = processRun(); // Blocks here
-
 				if (ok == false)
 				{
 					// Some error in simulation, stop the simulation
@@ -468,7 +589,7 @@ namespace Sim
 				}
 
 				m_insideProcessRun.store(false);
-				m_insideProcessRun.notify_one();
+				m_insideProcessRun.notify_all();
 			}
 		} // while
 
@@ -485,7 +606,7 @@ namespace Sim
 
 		// Get simulation LogicModules
 		//
-		std::vector<SimControlRunStruct>& lms = cd.m_lms; // Referense to the !local! variable cd
+		std::vector<SimControlRunStruct>& lms = cd.m_lms; // Reference to the !local! variable cd
 
 		if (lms.empty() == true)
 		{
@@ -494,7 +615,7 @@ namespace Sim
 			return false;
 		}
 
-		std::chrono::microseconds minimulLmWorkcycle{5000};
+		std::chrono::microseconds minimumLmWorkcycle{5000};
 
 		for (const SimControlRunStruct& lm : lms)
 		{
@@ -508,8 +629,8 @@ namespace Sim
 				continue;
 			}
 
-			minimulLmWorkcycle =
-				std::min(minimulLmWorkcycle, std::chrono::microseconds{simLm->lmDescription().logicUnit().m_cycleDuration});
+			minimumLmWorkcycle =
+				std::min(minimumLmWorkcycle, std::chrono::microseconds{simLm->lmDescription().logicUnit().m_cycleDuration});
 		}
 
 		if (result == false)
@@ -519,10 +640,10 @@ namespace Sim
 
 		// --
 		//
-		QElapsedTimer perfmanceTimer;
-		perfmanceTimer.start();
+		QElapsedTimer performanceTimer;
+		performanceTimer.start();
 
-		microseconds perfmonaceStartedAt = cd.m_currentTime;
+		microseconds performanceStartedAt = cd.m_currentTime;
 		qint64 timeStatusUpdateCounter = 0;
 		QDateTime currentDateTime =
 			QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
@@ -542,8 +663,8 @@ namespace Sim
 			}
 
 			// Get data from fiber optic channels (LM, OCM)
-			// No concurrent run is required, perfomance measurements show that in
-			// concurent mode it it much slower then this code
+			// No concurrent run is required, performance measurements show that in
+			// concurrent mode it it much slower then this code
 			//
 			bool allLmsArePoweredOff = true;
 
@@ -566,7 +687,7 @@ namespace Sim
 				}
 			}
 
-			// Check if workcylce finished on lms then fetch data
+			// Check if workcycle finished on lms then fetch data
 			// Start new workcycle on finished lms
 			//
 			for (SimControlRunStruct& lm : lms)
@@ -638,17 +759,17 @@ namespace Sim
 				if (currentSpeedFactor != speedFactor())
 				{
 					currentSpeedFactor = speedFactor();
-					perfmanceTimer.restart();
-					perfmonaceStartedAt = cd.m_currentTime;
+					performanceTimer.restart();
+					performanceStartedAt = cd.m_currentTime;
 				}
 
 				if (currentSpeedFactor < 128.0)
 				{
 					// If current simulation is ahead of physical time, pause it a little bit
 					//
-					microseconds timeEllapsed{perfmanceTimer.elapsed() * static_cast<unsigned long long>(1000.0 * currentSpeedFactor)};
-					microseconds simulatedTime = cd.m_currentTime - perfmonaceStartedAt;
-					microseconds ahead = simulatedTime - timeEllapsed;
+					microseconds timeElapsed{performanceTimer.elapsed() * static_cast<unsigned long long>(1000.0 * currentSpeedFactor)};
+					microseconds simulatedTime = cd.m_currentTime - performanceStartedAt;
+					microseconds ahead = simulatedTime - timeElapsed;
 
 					if (ahead > 5us)
 					{
@@ -668,23 +789,23 @@ namespace Sim
 				currentDateTime =
 					QDateTime::fromMSecsSinceEpoch(std::chrono::duration_cast<std::chrono::milliseconds>(cd.m_currentTime).count());
 
-				if (std::abs(perfmanceTimer.elapsed() - timeStatusUpdateCounter) >=
-					125) // Update every ~125 ms, perfmanceTimer can be restarted,
+				if (std::abs(performanceTimer.elapsed() - timeStatusUpdateCounter) >=
+					125) // Update every ~125 ms, performanceTimer can be restarted,
 				{        // so std::abs() was added.
 					// Emit this information signal every 125 ms, we don't need to send it every cycle
 					//
-					timeStatusUpdateCounter = perfmanceTimer.elapsed();
+					timeStatusUpdateCounter = performanceTimer.elapsed();
 					emit statusUpdate(ControlStatus{cd});
 				}
 			}
 			else
 			{
 				if (allLmsArePoweredOff == true &&
-					std::abs(perfmanceTimer.elapsed() - timeStatusUpdateCounter) >= 125) // Update every ~125 ms
+					std::abs(performanceTimer.elapsed() - timeStatusUpdateCounter) >= 125) // Update every ~125 ms
 				{
 					// Emit this information signal every 100 ms, we don't need to send it every cycle
 					//
-					timeStatusUpdateCounter = perfmanceTimer.elapsed();
+					timeStatusUpdateCounter = performanceTimer.elapsed();
 					emit statusUpdate(ControlStatus{cd});
 				}
 			}
@@ -710,11 +831,11 @@ namespace Sim
 				if (lm.m_task.has_value() == true && lm->isPowerOff() == false)
 				{
 					// There is at least one lm which is running simulation right now.
-					// WAIT for at least shortest workcyle time.
+					// WAIT for at least shortest workcycle time.
 					//
 					std::unique_lock fakeLock{fakeMutex};
 
-					//	someLmFinishedSimulation.wait_for(fakeLock, minimulLmWorkcycle, [&lms](){
+					//	someLmFinishedSimulation.wait_for(fakeLock, minimumLmWorkcycle, [&lms](){
 					//		return std::any_of(lms.begin(), lms.end(), [](SimControlRunStruct& lm)
 					//		{
 					//			return  lm.m_task.has_value() == true &&
@@ -724,7 +845,7 @@ namespace Sim
 					//	});
 
 					someLmFinishedSimulation.wait_for(fakeLock,
-													  minimulLmWorkcycle,
+													  minimumLmWorkcycle,
 													  []()
 													  {
 														  return true;
@@ -742,20 +863,16 @@ namespace Sim
 
 			// If all lms are switched off then sleep for one workcycle
 			//
-			allLmsArePoweredOff = true;
-
-			for (SimControlRunStruct& lm : lms)
-			{
-				if (lm->isPowerOff() == false)
-				{
-					allLmsArePoweredOff = false;
-					break;
-				}
-			}
+			allLmsArePoweredOff = std::all_of(lms.begin(),
+											  lms.end(),
+											  [](auto& lm)
+											  {
+												  return lm->isPowerOff();
+											  });
 
 			if (allLmsArePoweredOff == true)
 			{
-				QThread::usleep(static_cast<unsigned long>(minimulLmWorkcycle.count()));
+				QThread::usleep(static_cast<unsigned long>(minimumLmWorkcycle.count()));
 			}
 		} while (true); // Run always till state is triggered to STOP or PAUSE
 
@@ -782,10 +899,10 @@ namespace Sim
 
 		// Some debug info
 		//
-		microseconds elapsedUsecs{perfmanceTimer.elapsed() * 1000};
+		microseconds elapsedUsecs{performanceTimer.elapsed() * 1000};
 
-		microseconds perfmonaceFinishedAt = cd.m_currentTime;
-		microseconds simulatedDiff = perfmonaceFinishedAt - perfmonaceStartedAt;
+		microseconds performanceFinishedAt = cd.m_currentTime;
+		microseconds simulatedDiff = performanceFinishedAt - performanceStartedAt;
 
 		double perfRation = static_cast<double>(simulatedDiff.count()) / static_cast<double>(elapsedUsecs.count());
 
@@ -801,6 +918,14 @@ namespace Sim
 		m_log.writeDebug(logMessage);
 
 		return result;
+	}
+
+	QByteArray ControlImpl::takeSnapshot(const QString& snapshotId)
+	{
+		assert(state() == SimControlState::Pause);
+
+		Snapshot snapshot{m_log.logInterface()};
+		return snapshot.take(snapshotId, *m_simulator);
 	}
 
 } // namespace Sim

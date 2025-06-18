@@ -94,6 +94,9 @@ namespace SimUi
 
 		void addNewWindow();
 
+		void takeSnapshot();
+		void applySnapshot();
+
 		void openLogicModuleTabPage(QString lmEquipmentId);
 		void openCodeTabPage(QString lmEquipmentId);
 		void openConnectionTabPage(QString connectionId);
@@ -146,6 +149,9 @@ namespace SimUi
 		QAction* m_refreshProjectAction = nullptr;
 
 		QAction* m_addWindowAction = nullptr;
+
+		QAction* m_takeSnapshotAction = nullptr;
+		QAction* m_applySnapshotAction = nullptr;
 
 		QLocale m_simulationTimeLocale{QLocale::C};
 		QDoubleValidator m_simulationTimeEditValidator;

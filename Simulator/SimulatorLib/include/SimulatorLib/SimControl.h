@@ -27,6 +27,10 @@ namespace Sim
 		void pause();
 		void stop();
 
+		QByteArray takeSnapshot(const QString& snapshotId);
+		bool applySnapshot(const QByteArray& data);
+
+	public:
 		ControlStatus status() const;
 
 		SimControlState state() const;

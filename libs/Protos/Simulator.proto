@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package Proto;
+package ProtoSim;
 
 import "Common.proto";
 
@@ -9,16 +9,114 @@ import "Common.proto";
 message SimOverrideSignal
 {
     optional bool enabled = 2;
-	optional int32 index = 3;
+    optional int32 index = 3;
 
     optional string appSignalId = 10;
-	optional int32 overrideMethod = 30;
+    optional int32 overrideMethod = 30;
 
-    optional qvariant overrideValue = 40;
-	optional string overrideScript = 50;		// if method == OverrideSignalMethod::Script
+    optional Proto.qvariant overrideValue = 40;
+    optional string overrideScript = 50;		// if method == OverrideSignalMethod::Script
 }
 
 message SimOverrideSignalWorkspace
 {
     repeated SimOverrideSignal overrideSignals = 2;
+}
+
+//
+// Snapshot
+//
+
+message OverrideRamRecord
+{
+    optional uint32 mask = 2;
+    optional uint32 data = 3;
+}
+
+message SnapshotLmRamArea
+{
+    // RamAreaInfo
+    //
+    optional string name = 5;
+    optional int32 access = 7; // E::LogicModuleRamAccess
+    optional uint64 offset = 9;
+    optional uint64 size = 10;
+
+    // RamArea
+    //
+	optional bool clearOnStartCycle = 20;					// Clear memory area on start of work cycle
+    optional bytes data = 25;
+    repeated OverrideRamRecord overrideData = 28;
+}
+
+// Sim::Ram
+//
+message SnapshotLmRam
+{
+    repeated SnapshotLmRamArea memoryAreas = 5; 
+    optional int32 overrideSignalsLastCounter = 7;
+}
+
+// Sim::LogicUnitData
+//
+message SnapshotLogicUnitData 
+{
+}
+
+// Sim::ConnectionImpl
+//
+message SnapshotConnection
+{
+    optional bool m_enable = 2;
+}
+
+message AfbComponentInstance
+{
+    optional int32 m_instanceNo = 2;
+    repeated uint64 params = 5;
+}
+
+message AfbComponent
+{
+    repeated AfbComponentInstance instances = 2;
+}
+
+// Sim::LogicModule + Sim::DeviceEmulator
+//
+message SnapshotLogicModule
+{
+    optional int64 lastStartTime = 8;
+    optional int64 possibleToAdvanceTo = 9;
+    optional int64 cyclesCounter = 11;
+
+    optional string equipmentId = 14;
+
+    optional fixed32 tuningEepromCrc = 15;
+    optional fixed32 confEepromCrc = 16;
+    optional fixed32 appLogicEepromCrc = 17;
+
+    optional int32 runtimeMode = 26; // enum Sim::RuntimeMode
+    optional int32 deviceState2 = 27; // enum Sim::DeviceState
+
+    optional SnapshotLmRam ram = 50;
+    optional SnapshotLogicUnitData logicUnit = 55;
+    repeated SnapshotConnection connections = 60;
+
+    repeated AfbComponent afbs = 70;
+
+    optional bool armingKey = 80;
+    optional bool tuningKey = 81;
+    optional SnapshotLmRamArea m_tuningRamArea = 90;
+
+    optional bool sorIsSet = 100;
+    optional bool sorSetSwitch1 = 111;
+    optional bool sorSetSwitch2 = 112;
+    optional bool sorSetSwitch3 = 113;
+}
+
+message Snapshot
+{
+    optional string snapshotId = 2;
+    optional string projectName = 3;
+    repeated SnapshotLogicModule logicModules = 10;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "SimDeviceEmulator.h"
+#include "SimScopedLog.h"
+
 #include <SimulatorLib/SimControlStatus.h>
 
 
@@ -78,6 +79,10 @@ namespace Sim
 		void pause();
 		void stop();
 
+		QByteArray pauseAndTakeSnapshot(const QString& snapshotId);
+		bool applySnapshot(const QByteArray& data);
+
+	public:
 		ControlData controlData() const;
 		void updateControlData(const ControlData& cd);
 
@@ -98,6 +103,8 @@ namespace Sim
 		virtual void run() override;
 		bool processRun();
 
+		QByteArray takeSnapshot(const QString& snapshotId);
+
 	private:
 		SimulatorPrivate* m_simulator = nullptr;
 		ScopedLog m_log;
@@ -117,9 +124,21 @@ namespace Sim
 		mutable std::condition_variable_any m_controlDataConditionVariable; // notify_one every time m_controlData is changed
 
 		ControlData m_controlData;
+
+		QString m_snapshotId; // Setting this variable triggers a snapshot. Once the snapshot is taken, the variable is cleared.
+							  // m_snapshotId is under m_controlDataMutex because we need seamless transition from pause to taking snapshot.
 		// /\ /\ /\ /\ /\
 		// End of Access only with mutex
 		//
+
+		// When snapshot is ready it is saved to m_snapshot.
+		//
+		std::mutex m_snapshotDataMutex;            // This mutex can be locked inside m_controlDataMutex or just alone.
+		std::condition_variable m_snapshotCv;
+		std::pair<QString, QByteArray> m_snapshot; // If snapshotData is empty, an error occurred. However, snapshotId must always be set
+												   // upon finish, regardless of whether there was an error.
+
+		friend class Snapshot;
 	};
 
 } // namespace Sim

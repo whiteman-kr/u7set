@@ -1,10 +1,28 @@
 #include "SimEeprom.h"
 
 #include <HardwareLib/ModuleFirmware.h>
+#include <UtilsLib/Crc.h>
+
+namespace
+{
+	template<typename TYPE>
+	TYPE getData(const QByteArray& data, int eepromOffset)
+	{
+		// eepromOffset - in bytes
+		//
+		if (eepromOffset < 0 || eepromOffset > static_cast<int>(data.size() - sizeof(TYPE)))
+		{
+			assert(eepromOffset >= 0 && static_cast<qsizetype>(eepromOffset - sizeof(TYPE)) <= data.size());
+			return 0;
+		}
+
+		TYPE result = qFromBigEndian<TYPE>(data.constData() + eepromOffset);
+		return result;
+	}
+} // namespace
 
 namespace Sim
 {
-
 	Eeprom::Eeprom(UartId uartId) :
 		m_uartId(uartId)
 	{
@@ -55,9 +73,9 @@ namespace Sim
 	{
 		quint16 cfgMarker = getWord(1, 0);
 		quint16 cfgVersion = getWord(1, 1);
-		quint16	subsystemKey = getWord(1, 2);
-		quint16	buildNo = getWord(1, 3);
-		quint16	configrationsCount = getWord(1, 7);
+		quint16 subsystemKey = getWord(1, 2);
+		quint16 buildNo = getWord(1, 3);
+		quint16 configurationCount = getWord(1, 7);
 
 		if (cfgMarker != 0xca70)
 		{
@@ -75,9 +93,9 @@ namespace Sim
 
 		m_subsystemKey = subsystemKey;
 		m_buildNo = buildNo;
-		m_configrationsCount = configrationsCount;
+		m_configurationCount = configurationCount;
 
-		if (m_configrationsCount > maxConfigurationCount)
+		if (m_configurationCount > maxConfigurationCount)
 		{
 			return false;
 		}
@@ -129,10 +147,7 @@ namespace Sim
 
 	quint16 Eeprom::getWord(int frameIndex, int wordOffset)
 	{
-		if (wordOffset < 0 ||
-			wordOffset > frameSize() - 2 ||
-			frameIndex < 0  ||
-			frameIndex > frameCount())
+		if (wordOffset < 0 || wordOffset > frameSize() - 2 || frameIndex < 0 || frameIndex > frameCount())
 		{
 			assert(false);
 			return 0;
@@ -140,27 +155,24 @@ namespace Sim
 
 		int eepromOffset = frameSize() * frameIndex + wordOffset * 2;
 
-		return getData<quint16>(eepromOffset);
+		return getData<quint16>(m_data, eepromOffset);
 	}
 
 	qint32 Eeprom::getSint32(int /*frameIndex*/, int /*wordOffset*/)
 	{
-		assert(false);	// To Do
+		assert(false); // To Do
 		return 0;
 	}
 
 	quint32 Eeprom::getUint32(int /*frameIndex*/, int /*wordOffset*/)
 	{
-		assert(false);	// To Do
+		assert(false); // To Do
 		return 0;
 	}
 
 	quint64 Eeprom::getUint64(int frameIndex, int wordOffset)
 	{
-		if (wordOffset < 0 ||
-			wordOffset > frameSize() - 9 ||
-			frameIndex < 0  ||
-			frameIndex > frameCount())
+		if (wordOffset < 0 || wordOffset > frameSize() - 9 || frameIndex < 0 || frameIndex > frameCount())
 		{
 			assert(false);
 			return 0;
@@ -168,35 +180,19 @@ namespace Sim
 
 		int eepromOffset = frameSize() * frameIndex + wordOffset * 2;
 
-		return getData<quint64>(eepromOffset);
+		return getData<quint64>(m_data, eepromOffset);
 	}
 
 	float Eeprom::getFloat(int /*frameIndex*/, int /*wordOffset*/)
 	{
-		assert(false);	// To Do
+		assert(false); // To Do
 		return 0;
 	}
 
 	double Eeprom::getDouble(int /*frameIndex*/, int /*wordOffset*/)
 	{
-		assert(false);	// To Do
+		assert(false); // To Do
 		return 0;
-	}
-
-	template <typename TYPE>
-	TYPE Eeprom::getData(int eepromOffset)
-	{
-		// eepromOffset - in bytes
-		//
-		if (eepromOffset < 0 || eepromOffset > static_cast<int>(m_data.size() - sizeof(TYPE)))
-		{
-			assert(eepromOffset >= 0 &&
-				   static_cast<qsizetype>(eepromOffset - sizeof(TYPE)) <= m_data.size());
-			return 0;
-		}
-
-		TYPE result = qFromBigEndian<TYPE>(m_data.constData() + eepromOffset);
-		return result;
 	}
 
 	UartId Eeprom::uartId() const
@@ -234,9 +230,9 @@ namespace Sim
 		return m_buildNo;
 	}
 
-	quint16 Eeprom::configrationsCount() const
+	quint16 Eeprom::configurationCount() const
 	{
-		return m_configrationsCount;
+		return m_configurationCount;
 	}
 
 	int Eeprom::configFrameIndex(int LmNumber) const
@@ -245,11 +241,10 @@ namespace Sim
 		//
 		LmNumber--;
 
-		if (LmNumber < 0 ||
-			LmNumber >= static_cast<int>(m_configFrameIndexes.size()))
+		if (LmNumber < 0 || LmNumber >= static_cast<int>(m_configFrameIndexes.size()))
 		{
 			assert(false);
-			return 0;		// Configuration cannot start form frame 0
+			return 0; // Configuration cannot start form frame 0
 		}
 
 		return m_configFrameIndexes[LmNumber];
@@ -261,13 +256,59 @@ namespace Sim
 		//
 		LmNumber--;
 
-		if (LmNumber < 0 ||
-			LmNumber >= static_cast<int>(m_channelServiceInfo.size()))
+		if (LmNumber < 0 || LmNumber >= static_cast<int>(m_channelServiceInfo.size()))
 		{
 			assert(false);
-			return 0;		// Configuration cannot start form frame 0
+			return 0; // Configuration cannot start form frame 0
 		}
 
 		return m_channelServiceInfo[LmNumber].frameCount;
 	}
-}
+
+	quint32 Eeprom::crc32(bool excludeBuildNo) const
+	{
+		// Assume that build no always in frame 1, offset 3 in 16-words, takes 16 bit.
+		//
+
+		if (excludeBuildNo == false)
+		{
+			return CRC32(m_data.constData(), m_data.size());
+		}
+
+		std::vector<char> dataWithMaskedBuildNo{m_data.cbegin(), m_data.cend()};
+
+		// checkBuildNo - just for debugging, we can observe it.
+		//
+		try
+		{
+			size_t buildNoOffsetInBytes = frameSize() * 1 /*frameIndex*/ + 3 /*wordOffset*/ * 2;
+
+			[[maybe_unused]] quint16 checkBuildNo =
+				(dataWithMaskedBuildNo.at(buildNoOffsetInBytes + 0) << 8) | dataWithMaskedBuildNo.at(buildNoOffsetInBytes + 1);
+
+			// Mask BuildNo.
+			//
+			dataWithMaskedBuildNo.at(buildNoOffsetInBytes + 0) = 0;
+			dataWithMaskedBuildNo.at(buildNoOffsetInBytes + 1) = 0;
+
+			// Mask CRC64 of the 1st frame.
+			//
+			size_t crcOffset = frameSize() * 2 - 8;
+			dataWithMaskedBuildNo.at(crcOffset + 0) = 0;
+			dataWithMaskedBuildNo.at(crcOffset + 1) = 0;
+			dataWithMaskedBuildNo.at(crcOffset + 2) = 0;
+			dataWithMaskedBuildNo.at(crcOffset + 3) = 0;
+			dataWithMaskedBuildNo.at(crcOffset + 4) = 0;
+			dataWithMaskedBuildNo.at(crcOffset + 5) = 0;
+			dataWithMaskedBuildNo.at(crcOffset + 6) = 0;
+			dataWithMaskedBuildNo.at(crcOffset + 7) = 0;
+		}
+		catch (const std::out_of_range&)
+		{
+			assert(false);
+			return 0;
+		}
+
+		return CRC32(dataWithMaskedBuildNo.data(), dataWithMaskedBuildNo.size());
+	}
+} // namespace Sim

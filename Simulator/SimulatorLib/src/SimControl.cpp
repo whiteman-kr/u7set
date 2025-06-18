@@ -41,6 +41,16 @@ namespace Sim
 		return m_impl.stop();
 	}
 
+	QByteArray Control::takeSnapshot(const QString& snapshotId)
+	{
+		return m_impl.pauseAndTakeSnapshot(snapshotId);
+	}
+
+	bool Control::applySnapshot(const QByteArray& data)
+	{
+		return m_impl.applySnapshot(data);
+	}
+
 	ControlStatus Control::status() const
 	{
 		return ControlStatus{m_impl.controlData()};
