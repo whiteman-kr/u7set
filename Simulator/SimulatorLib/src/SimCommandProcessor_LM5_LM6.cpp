@@ -3945,7 +3945,7 @@ namespace Sim
 				qint64 inputValue = dataParam->signedIntValue();
 				inputValue <<= 16;
 
-				qint64 prevValue = prevValueParam ? prevValueParam->signedInt64Value() : 0;	// First cycle prevValue is 0
+				qint64 prevValue = prevValueParam ? prevValueParam->int64Value() : 0;	// First cycle prevValue is 0
 				qint64 n = time / m_cycleDurationMs;
 				qint64 resultExt = prevValue + inputValue / n - prevValue / n;
 
@@ -4580,7 +4580,7 @@ namespace Sim
 				wideResult /= 32768;
 				wideResult += k2->signedIntValue();
 
-				result.setSignedInt64Value(wideResult);
+				result.setInt64Value(wideResult);
 				result.convertSInt64ToSInt32();
 				result.setOpIndex(o_si_fp_result);
 

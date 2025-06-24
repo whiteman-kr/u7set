@@ -8,6 +8,9 @@ class SimAfbParamTests;
 
 namespace Sim
 {
+	class Snapshot;
+
+
 	class AfbComponent final
 	{
 	public:
@@ -40,6 +43,8 @@ namespace Sim
 
 	class AfbComponentParam final
 	{
+		friend class Snapshot;
+
 	public:
 		AfbComponentParam();
 		AfbComponentParam(const AfbComponentParam& that) noexcept = default;
@@ -56,20 +61,23 @@ namespace Sim
 		[[nodiscard]] quint16 wordValue() const noexcept;
 		void setWordValue(quint16 value) noexcept;
 
-		[[nodiscard]] quint32 dwordValue() const  noexcept;
-		void setDwordValue(quint32 value)  noexcept;
+		[[nodiscard]] quint32 dwordValue() const noexcept;
+		void setDwordValue(quint32 value) noexcept;
 
 		[[nodiscard]] float floatValue() const noexcept;
 		void setFloatValue(float value) noexcept;
 
-		[[nodiscard]] double doubleValue() const  noexcept;
+		[[nodiscard]] double doubleValue() const noexcept;
 		void setDoubleValue(double value) noexcept;
 
 		[[nodiscard]] qint32 signedIntValue() const noexcept;
 		void setSignedIntValue(qint32 value) noexcept;
 
-		[[nodiscard]] qint64 signedInt64Value() const noexcept;
-		void setSignedInt64Value(qint64 value) noexcept;
+		[[nodiscard]] qint64 int64Value() const noexcept;
+		void setInt64Value(qint64 value) noexcept;
+
+		[[nodiscard]] quint64 uint64Value() const noexcept;
+		void setUint64Value(quint64 value) noexcept;
 
 		// --
 		//
@@ -107,7 +115,7 @@ namespace Sim
 		void convertWordToFloat();
 		void convertWordToSignedInt();
 
-		// --
+		// clang-format off
 		//
 		void resetMathFlags() noexcept
 		{
@@ -187,7 +195,9 @@ namespace Sim
 		template<typename T>
 		T dataToType() const
 		{
-			static_assert(sizeof(T) <= 8);	// 8 is the size of m_data (bytes)
+			static_assert(sizeof(T) <= sizeof(m_data));	// 8 is the size of m_data (bytes)
+			static_assert(std::is_trivially_copyable_v<T>, "T must be trivially copyable");
+
 			T value;
 			std::memcpy(&value, m_data.data(), sizeof(value));
 			return value;
@@ -196,10 +206,14 @@ namespace Sim
 		template<typename T>
 		void setDataToType(T value)
 		{
-			static_assert(sizeof(T) <= 8);	// 8 is the size of m_data (bytes)
+			static_assert(sizeof(T) <= sizeof(m_data)); // 8 is the size of m_data (bytes)
+			static_assert(std::is_trivially_copyable_v<T>, "T must be trivially copyable");
+
 			std::fill(m_data.begin(), m_data.end(), '\0');
 			std::memcpy(m_data.data(), &value, sizeof(value));
 		}
+
+		// clang-format on
 
 		// Math operations flags
 		//
@@ -219,6 +233,8 @@ namespace Sim
 	//
 	class AfbComponentInstance
 	{
+		friend class Snapshot;
+
 	public:
 		AfbComponentInstance(const std::shared_ptr<const Afb::AfbComponent>& afbComp, quint16 instanceNo);
 
@@ -242,8 +258,8 @@ namespace Sim
 		std::shared_ptr<const Afb::AfbComponent> m_afbComp;
 		quint16 m_instanceNo = 0;
 
-		std::array<AfbComponentParam, 64> m_params_a;		// Index is AfbComponentParam.opIndex()
-		quint16 m_versionOpIndex = 0xFFFF;					// Optimisation: cache versionOpIndex so no acces in param(...) for it.
+		std::array<AfbComponentParam, 64> m_params_a; // Index is AfbComponentParam.opIndex()
+		quint16 m_versionOpIndex = 0xFFFF;            // Optimization: cache versionOpIndex so no acces in param(...) for it.
 	};
 
 
@@ -251,12 +267,14 @@ namespace Sim
 	//
 	class ModelComponent
 	{
+		friend class Snapshot;
+
 	public:
 		ModelComponent() = default;
 		ModelComponent(std::shared_ptr<const Afb::AfbComponent> afbComp);
 
 	public:
-		bool init();	// Create a number of instances
+		bool init(); // Create a number of instances
 		void resetState();
 
 		[[nodiscard]] bool isNull() const;
@@ -266,13 +284,15 @@ namespace Sim
 		[[nodiscard]] AfbComponentInstance* instance(quint16 instance) noexcept;
 
 	private:
-		std::vector<AfbComponentInstance> m_instances;			// Index is instNo
+		std::vector<AfbComponentInstance> m_instances; // Index is instNo
 		std::shared_ptr<const Afb::AfbComponent> m_afbComp;
 	};
 
 
 	class AfbComponentSet
 	{
+		friend class Snapshot;
+
 	public:
 		AfbComponentSet();
 
@@ -286,8 +306,8 @@ namespace Sim
 		[[nodiscard]] AfbComponentInstance* componentInstance(int componentOpCode, int instance) noexcept;
 
 	private:
-		std::vector<ModelComponent> m_components;		// Index is opcode of AFB
+		std::vector<ModelComponent> m_components; // Index is opcode of AFB
 
 		friend SimAfbParamTests;
 	};
-}
+} // namespace Sim

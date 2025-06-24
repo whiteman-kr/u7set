@@ -9,6 +9,7 @@ namespace Sim
 {
 	class ConnectionImpl;
 	class ConnectionPort;
+	class Snapshot;
 
 	using ConnectionImplPtr = std::shared_ptr<Sim::ConnectionImpl>;
 	using ConnectionPortPtr = std::shared_ptr<Sim::ConnectionPort>;
@@ -19,8 +20,8 @@ namespace Sim
 	//
 	struct ConnectionData
 	{
-		std::vector<char> m_data;					// Raw data from LM memory
-		std::chrono::microseconds m_sentTime{0};	// When packet was "sent". If 0 then buffer is not valid
+		std::vector<char> m_data;                // Raw data from LM memory
+		std::chrono::microseconds m_sentTime{0}; // When packet was "sent". If 0 then buffer is not valid
 
 		int sizeBytes() const;
 		int sizeWords() const;
@@ -40,25 +41,19 @@ namespace Sim
 		}
 
 	public:
-		const ::ConnectionPortInfo& portInfo() const
-		{
-			return m_portInfo;
-		}
+		const ::ConnectionPortInfo& portInfo() const { return m_portInfo; }
 
-		Hash lmIdHash() const
-		{
-			return m_lmIdHash;
-		}
+		Hash lmIdHash() const { return m_lmIdHash; }
 
-		// writeValidityBit was moved here as optimisation, this is very convenient place 
+		// writeValidityBit was moved here as optimisation, this is very convenient place
 		// to store memory area for this bit.
 		//
 		bool writeValidityBit(Ram& ram, quint16 value)
 		{
 			if (m_receiveValidityBitMemoryArea == Ram::InvalidHandle)
 			{
-				m_receiveValidityBitMemoryArea = ram.memoryAreaHandle(E::LogicModuleRamAccess::Read,
-																	  m_portInfo.rxValiditySignalAbsAddr.offset());
+				m_receiveValidityBitMemoryArea =
+					ram.memoryAreaHandle(E::LogicModuleRamAccess::Read, m_portInfo.rxValiditySignalAbsAddr.offset());
 
 				if (m_receiveValidityBitMemoryArea == Ram::InvalidHandle)
 				{
@@ -93,6 +88,8 @@ namespace Sim
 	//
 	class ConnectionImpl
 	{
+		friend class Snapshot;
+
 	public:
 		ConnectionImpl(const ::ConnectionInfo& buildConnection);
 
@@ -103,9 +100,7 @@ namespace Sim
 		const Sim::ConnectionPort* portForLmRawPtr(Hash logicModuleIdHash) const;
 		Sim::ConnectionPort* portForLmRawPtr(Hash logicModuleIdHash);
 
-		bool sendData(int portNo,
-					  std::vector<char>* data,
-					  std::chrono::microseconds currentTime);
+		bool sendData(int portNo, std::vector<char>* data, std::chrono::microseconds currentTime);
 
 		bool receiveData(int portNo,
 						 std::vector<char>* data,
@@ -141,16 +136,16 @@ namespace Sim
 		QMutex m_dataMutexPort1;
 		ConnectionData m_port1sentData;
 
-		std::vector<char> m_port1receiveBuffer;		// Receive buffer for port 1, accessed only by DeviceEmulator, in single thread
-		std::vector<char> m_port1sendBuffer;		// Send buffer for port 1, accessed only by DeviceEmulator, in single thread
+		std::vector<char> m_port1receiveBuffer; // Receive buffer for port 1, accessed only by DeviceEmulator, in single thread
+		std::vector<char> m_port1sendBuffer;    // Send buffer for port 1, accessed only by DeviceEmulator, in single thread
 
 		// Data sent by port 2, protected with a mutex
 		//
 		QMutex m_dataMutexPort2;
 		ConnectionData m_port2sentData;
 
-		std::vector<char> m_port2receiveBuffer;		// Receive buffer for port 2, accessed only by DeviceEmulator, in single thread
-		std::vector<char> m_port2sendBuffer;		// Send buffer for port 2, accessed only by DeviceEmulator, in single thread
+		std::vector<char> m_port2receiveBuffer; // Receive buffer for port 2, accessed only by DeviceEmulator, in single thread
+		std::vector<char> m_port2sendBuffer;    // Send buffer for port 2, accessed only by DeviceEmulator, in single thread
 	};
 
 
@@ -183,11 +178,9 @@ namespace Sim
 		::ConnectionsInfo m_buildConnections;
 
 		std::vector<ConnectionImplPtr> m_connections;
-		std::map<Hash, ConnectionImplPtr> m_connectionMap;				// ConnectionID to connection
-		std::multimap<Hash, ConnectionImplPtr> m_lmToConnection;		// LM to connections
-		std::map<Hash, ConnectionImplPtr> m_portToConnection;			// PortID to connection
+		std::map<Hash, ConnectionImplPtr> m_connectionMap;       // ConnectionID to connection
+		std::multimap<Hash, ConnectionImplPtr> m_lmToConnection; // LM to connections
+		std::map<Hash, ConnectionImplPtr> m_portToConnection;    // PortID to connection
 	};
 
-}
-
-
+} // namespace Sim

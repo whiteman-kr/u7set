@@ -63,22 +63,27 @@ message SnapshotLogicUnitData
 {
 }
 
-// Sim::ConnectionImpl
-//
-message SnapshotConnection
+message AfbComponentParam
 {
-    optional bool m_enable = 2;
+    optional uint64 data = 2 [default = 0xFFFFFFFFFFFFFFFF];
+    optional uint32 paramOpIndex = 6 [default = 0xFFFF];
 }
 
 message AfbComponentInstance
 {
-    optional int32 m_instanceNo = 2;
-    repeated uint64 params = 5;
+    optional int32 instanceNo = 2;
+    optional int32 versionOpIndex = 10;
+    repeated AfbComponentParam params = 5;
 }
 
 message AfbComponent
 {
     repeated AfbComponentInstance instances = 2;
+}
+
+message AfbComponentSet
+{
+    repeated AfbComponent afbs = 2;
 }
 
 // Sim::LogicModule + Sim::DeviceEmulator
@@ -99,10 +104,7 @@ message SnapshotLogicModule
     optional int32 deviceState2 = 27; // enum Sim::DeviceState
 
     optional SnapshotLmRam ram = 50;
-    optional SnapshotLogicUnitData logicUnit = 55;
-    repeated SnapshotConnection connections = 60;
-
-    repeated AfbComponent afbs = 70;
+    optional AfbComponentSet afbSet = 70;
 
     optional bool armingKey = 80;
     optional bool tuningKey = 81;
@@ -114,9 +116,41 @@ message SnapshotLogicModule
     optional bool sorSetSwitch3 = 113;
 }
 
+// Sim::ConnectionImpl
+//
+message SnapshotConnectionData
+{
+    optional bytes data = 2;				// Raw data from LM memory
+    optional int64 sentTime = 3;			// When packet was "sent". If 0 then buffer is not valid
+}
+
+message SnapshotConnectionImpl
+{
+    optional string id = 2;
+
+    optional bool enable = 4;
+    optional bool timeout = 5;
+
+    optional string port1EquipmentId = 7;
+    optional string port2EquipmentId = 8;
+
+    // Port 1 data
+    //
+    optional SnapshotConnectionData port1sentData = 10;
+    optional bytes port1receiveBuffer = 11;
+    optional bytes port1sendBuffer = 12;
+
+    // Port 2 data
+    //
+    optional SnapshotConnectionData port2sentData = 20;
+    optional bytes port2receiveBuffer = 21;
+    optional bytes port2sendBuffer = 22;
+}
+
 message Snapshot
 {
     optional string snapshotId = 2;
     optional string projectName = 3;
     repeated SnapshotLogicModule logicModules = 10;
+    repeated SnapshotConnectionImpl connections = 20;
 }

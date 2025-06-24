@@ -4,6 +4,7 @@
 
 #include <Simulator.pb.h>
 
+
 namespace Sim
 {
 	Snapshot::Snapshot(ILogFile* logFile) :
@@ -14,6 +15,9 @@ namespace Sim
 	QByteArray Snapshot::take(QString snapshotId, SimulatorPrivate& simulator)
 	{
 		m_log.writeMessage("Taking snapshot " + snapshotId);
+
+		QElapsedTimer timer;
+		timer.start();
 
 		// This lock ensures that no simulations can be started.
 		// It may block all other threads that use 'control' while the snapshot is being taken.
@@ -35,6 +39,10 @@ namespace Sim
 		protoSnapshot.set_snapshotid(snapshotId.toStdString());
 		protoSnapshot.set_projectname(simulator.projectName().toStdString());
 
+		// Save LMs.
+		//
+		protoSnapshot.mutable_logicmodules()->Reserve(static_cast<int>(cd.m_lms.size()));
+
 		for (SimControlRunStruct& lm : cd.m_lms)
 		{
 			auto protoLm = protoSnapshot.add_logicmodules();
@@ -46,21 +54,37 @@ namespace Sim
 			}
 		}
 
+		// Save connections.
+		//
+		bool saveConnOk = saveConnections(protoSnapshot, simulator.connections());
+		if (saveConnOk == false)
+		{
+			m_log.writeMessage("Error saving connections.");
+			return {};
+		}
+
 		// Serialize protoSnapshot to QByteArray
 		//
-		std::string serialized;
-		if (protoSnapshot.SerializeToString(&serialized) == false)
+		QByteArray snapshotData;
+		snapshotData.resizeForOverwrite(protoSnapshot.ByteSizeLong());
+
+		if (protoSnapshot.SerializeToArray(snapshotData.data(), snapshotData.size()) == false)
 		{
 			m_log.writeMessage("Error snapshot proto-serialization.");
 			return {};
 		}
 
-		return QByteArray::fromStdString(serialized);
+		m_log.writeMessage(QString("Snapshot %1 taken in %2 ms").arg(snapshotId).arg(timer.elapsed()));
+
+		return snapshotData;
 	}
 
 	bool Snapshot::apply(const QByteArray& snapshot, SimulatorPrivate& simulator)
 	{
 		m_log.writeMessage("Applying snapshot.");
+
+		QElapsedTimer timer;
+		timer.start();
 
 		auto& control = simulator.control();
 		std::lock_guard locker{control.m_controlDataMutex};
@@ -135,7 +159,48 @@ namespace Sim
 			return false;
 		}
 
-		m_log.writeMessage(QString{"Snapshot %1 restored"}.arg(snapshotId));
+		auto timeElapsed = timer.elapsed();
+
+		m_log.writeMessage(QString{"Snapshot %1 restored in %2 ms"}.arg(snapshotId).arg(timeElapsed));
+		return true;
+	}
+
+	bool Snapshot::saveLogicModuleAfbs(::ProtoSim::AfbComponentSet& protoAfbSet, const Sim::AfbComponentSet& afbSet)
+	{
+		protoAfbSet.mutable_afbs()->Reserve(static_cast<int>(afbSet.m_components.size()));
+
+		for (const auto& afb : afbSet.m_components)
+		{
+			auto protoAfb = protoAfbSet.add_afbs();
+			protoAfb->mutable_instances()->Reserve(static_cast<int>(afb.m_instances.size()));
+
+			for (const auto& afbInstance : afb.m_instances)
+			{
+				auto protoInstance = protoAfb->add_instances();
+				protoInstance->set_instanceno(afbInstance.m_instanceNo);
+				protoInstance->set_versionopindex(afbInstance.m_versionOpIndex);
+
+				protoInstance->mutable_params()->Reserve(static_cast<int>(afbInstance.m_params_a.size()));
+
+				for (const auto& afbParam : afbInstance.m_params_a)
+				{
+					auto protoAfbParam = protoInstance->add_params();
+
+					// Do not save default values, it reduces file size several times.
+					//
+					if (auto data = afbParam.uint64Value(); data != std::numeric_limits<quint64>::max())
+					{
+						protoAfbParam->set_data(data);
+					}
+
+					if (afbParam.m_paramOpIndex != 0xFFFF)
+					{
+						protoAfbParam->set_paramopindex(afbParam.m_paramOpIndex);
+					}
+				}
+			}
+		}
+
 		return true;
 	}
 
@@ -195,10 +260,14 @@ namespace Sim
 			return false;
 		}
 
+		ok = saveLogicModuleAfbs(*protoLm.mutable_afbset(), lm->m_device.m_afbComponents);
+		if (ok == false)
+		{
+			return false;
+		}
+
 		// optional SnapshotLogicUnitData m_logicUnit = 25;
 		// repeated SnapshotConnection m_connections = 30;
-
-		// repeated AfbComponent afbs = 40;
 
 		// Tuning
 		//
@@ -212,6 +281,68 @@ namespace Sim
 		protoLm.set_sorsetswitch1(lm->sorSetSwitch1());
 		protoLm.set_sorsetswitch2(lm->sorSetSwitch2());
 		protoLm.set_sorsetswitch3(lm->sorSetSwitch3());
+
+		return true;
+	}
+
+	bool Snapshot::saveConnections(::ProtoSim::Snapshot& protoSnapshot, const Sim::ConnectionsImpl& connections)
+	{
+		auto allConnections = connections.connections();
+
+		auto protoConnections = protoSnapshot.mutable_connections();
+		protoConnections->Reserve(static_cast<int>(allConnections.size()));
+
+		for (const auto& conn : allConnections)
+		{
+			auto protoConn = protoConnections->Add();
+
+			protoConn->set_id(conn->connectionId().toStdString());
+
+			protoConn->set_enable(conn->enabled());
+			protoConn->set_timeout(conn->timeout());
+
+			for (const auto& port : conn->ports())
+			{
+				if (port.portInfo().portNo == 1)
+				{
+					protoConn->set_port1equipmentid(port.portInfo().equipmentID.toStdString());
+					continue;
+				}
+
+				if (port.portInfo().portNo == 2)
+				{
+					protoConn->set_port2equipmentid(port.portInfo().equipmentID.toStdString());
+					continue;
+				}
+
+				m_log.writeError(QString{"Wrong port number, it can be internal error, ConnectionID %1, Port %2"}
+									 .arg(conn->connectionId())
+									 .arg(port.portInfo().portNo));
+				return false;
+			}
+
+			// Set port1 data
+			//
+			{
+				auto proPort1SentData = protoConn->mutable_port1sentdata();
+				proPort1SentData->set_data(conn->m_port1sentData.m_data.data(), conn->m_port1sentData.m_data.size());
+				proPort1SentData->set_senttime(conn->m_port1sentData.m_sentTime.count());
+
+				protoConn->set_port1receivebuffer(conn->m_port1receiveBuffer.data(), conn->m_port1receiveBuffer.size());
+				protoConn->set_port1sendbuffer(conn->m_port1sendBuffer.data(), conn->m_port1sendBuffer.size());
+			}
+
+			// Set port2 data
+			//
+			{
+				auto proPort2SentData = protoConn->mutable_port2sentdata();
+				proPort2SentData->set_data(conn->m_port2sentData.m_data.data(), conn->m_port2sentData.m_data.size());
+				proPort2SentData->set_senttime(conn->m_port2sentData.m_sentTime.count());
+
+				protoConn->set_port2receivebuffer(conn->m_port2receiveBuffer.data(), conn->m_port2receiveBuffer.size());
+				protoConn->set_port2sendbuffer(conn->m_port2sendBuffer.data(), conn->m_port2sendBuffer.size());
+			}
+		}
 
 		return true;
 	}
@@ -262,9 +393,94 @@ namespace Sim
 			return false;
 		}
 
+		// Restore AppSignalManager state.
+		//
 		ok = restoreAppSignalManager(simulator);
+		if (ok == false)
+		{
+			m_log.writeError("Failed to restore AppSignalManager state from snapshot.");
+			return false;
+		}
+
+		// Restore Connections.
+		//
+		auto currentTime = simulator.control().controlData().m_currentTime;
+		ok = restoreConnections(protoSnapshot, simulator.connections(), currentTime);
+		if (ok == false)
+		{
+			m_log.writeError("Failed to restore connections from snapshot.");
+			return false;
+		}
 
 		return ok;
+	}
+
+	bool Snapshot::restoreLogicModuleAfbs(const ::ProtoSim::AfbComponentSet& protoAfbSet, Sim::AfbComponentSet& afbSet)
+	{
+		if (protoAfbSet.afbs_size() != afbSet.m_components.size())
+		{
+			m_log.writeError(QString{"AfbComponentSet size mismatch, LM has %1, snapshot has %2 AfbComponents."}
+								 .arg(afbSet.m_components.size())
+								 .arg(protoAfbSet.afbs_size()));
+			return false;
+		}
+
+		auto restoreAfbParamFunc = [](const ::ProtoSim::AfbComponentParam& protoAfbParam, Sim::AfbComponentParam& afbParam)
+		{
+			afbParam.setUint64Value(protoAfbParam.data());
+			afbParam.m_paramOpIndex = protoAfbParam.paramopindex();
+		};
+
+		for (size_t compIndex = 0; compIndex < protoAfbSet.afbs_size(); ++compIndex)
+		{
+			auto& protoAfb = protoAfbSet.afbs(static_cast<int>(compIndex));
+			auto& afbComponent = afbSet.m_components[compIndex];
+
+			if (protoAfb.instances_size() != afbComponent.m_instances.size())
+			{
+				m_log.writeError(QString{"AfbComponent %1 has %2 instances, snapshot has %3 instances."}
+									 .arg(compIndex)
+									 .arg(afbComponent.m_instances.size())
+									 .arg(protoAfb.instances_size()));
+				return false;
+			}
+
+			for (size_t instanceIndex = 0; instanceIndex < protoAfb.instances_size(); ++instanceIndex)
+			{
+				auto& protoInstance = protoAfb.instances(static_cast<int>(instanceIndex));
+				auto& afbInstance = afbComponent.m_instances[instanceIndex];
+
+				if (protoInstance.instanceno() != afbInstance.m_instanceNo)
+				{
+					m_log.writeError(QString{"AfbComponent %1 instance %2 has instance number mismatch, actual: %3, expected: %4."}
+										 .arg(compIndex)
+										 .arg(instanceIndex)
+										 .arg(afbInstance.m_instanceNo)
+										 .arg(protoInstance.instanceno()));
+					return false;
+				}
+
+				if (protoInstance.params_size() != afbInstance.m_params_a.size())
+				{
+					m_log.writeError(QString{"AfbComponent %1 instance %2 has parameters size mismatch, actual: %3, expected: %4."}
+										 .arg(compIndex)
+										 .arg(instanceIndex)
+										 .arg(afbInstance.m_params_a.size())
+										 .arg(protoInstance.params_size()));
+					return false;
+				}
+
+				assert(afbInstance.m_versionOpIndex == protoInstance.versionopindex());
+
+				for (size_t paramIndex = 0; paramIndex < protoInstance.params_size(); ++paramIndex)
+				{
+					auto& afbParam = afbInstance.m_params_a[paramIndex];
+					restoreAfbParamFunc(protoInstance.params(static_cast<int>(paramIndex)), afbParam);
+				}
+			}
+		}
+
+		return true;
 	}
 
 	bool Snapshot::restoreLogicModuleRam(const ::ProtoSim::SnapshotLmRam& protoRam, Sim::Ram& ram)
@@ -375,6 +591,13 @@ namespace Sim
 			return false;
 		}
 
+		ok = restoreLogicModuleAfbs(protoLm.afbset(), lm->m_device.m_afbComponents);
+		if (ok == false)
+		{
+			m_log.writeError(QString{"Restoring LogicModule AfbComponentSet failed, LM: %1"}.arg(lm->equipmentId()));
+			return false;
+		}
+
 		// Restore external keys.
 		//
 		lm->setArmingKey(protoLm.armingkey());
@@ -404,6 +627,74 @@ namespace Sim
 		for (auto& lm : control.m_controlData.m_lms)
 		{
 			simulator.appSignalManager().setData(lm.equipmentId(), lm->ram(), plantTime, localTime, systemTime);
+		}
+
+		return true;
+	}
+	bool Snapshot::restoreConnections(const ::ProtoSim::Snapshot& protoSnapshot,
+									  Sim::ConnectionsImpl& connections,
+									  std::chrono::microseconds currentTime)
+	{
+		for (const auto& protoConn : protoSnapshot.connections())
+		{
+			auto connectionId = QString::fromStdString(protoConn.id());
+			m_log.writeMessage(QString{"Restoring connection %1..."}.arg(connectionId));
+
+			auto conn = connections.connection(connectionId);
+			if (conn == nullptr)
+			{
+				m_log.writeError(QString{"Connection %1 does not exist."}.arg(connectionId));
+				return false;
+			}
+
+			conn->setEnabled(protoConn.enable());
+			conn->m_timeout.store(protoConn.timeout());
+
+			// Check ports.
+			//
+			auto ports = conn->ports();
+
+			if (auto port1EquipmentId = QString::fromStdString(protoConn.port1equipmentid()); port1EquipmentId.isEmpty() == false)
+			{
+				bool present = std::any_of(ports.begin(),
+										   ports.end(),
+										   [&port1EquipmentId](const Sim::ConnectionPort& port)
+										   {
+											   return port.portInfo().equipmentID == port1EquipmentId;
+										   });
+				if (present == false)
+				{
+					m_log.writeError(QString{"Connection %1 port1 %2 mismatch."}.arg(connectionId).arg(port1EquipmentId));
+					return false;
+				}
+			}
+
+			if (auto port2EquipmentId = QString::fromStdString(protoConn.port2equipmentid()); port2EquipmentId.isEmpty() == false)
+			{
+				bool present = std::any_of(ports.begin(),
+										   ports.end(),
+										   [&port2EquipmentId](const Sim::ConnectionPort& port)
+										   {
+											   return port.portInfo().equipmentID == port2EquipmentId;
+										   });
+				if (present == false)
+				{
+					m_log.writeError(QString{"Connection %1 port2 %2 mismatch."}.arg(connectionId).arg(port2EquipmentId));
+					return false;
+				}
+			}
+
+			// Restore port data.
+			//
+			conn->m_port1sentData.m_data.assign(protoConn.port1sentdata().data().begin(), protoConn.port1sentdata().data().end());
+			conn->m_port1sentData.m_sentTime = currentTime; // Even though sent time is stored, set current time to avoid timeout.
+			conn->m_port1receiveBuffer.assign(protoConn.port1receivebuffer().begin(), protoConn.port1receivebuffer().end());
+			conn->m_port1sendBuffer.assign(protoConn.port1sendbuffer().begin(), protoConn.port1sendbuffer().end());
+
+			conn->m_port2sentData.m_data.assign(protoConn.port2sentdata().data().begin(), protoConn.port2sentdata().data().end());
+			conn->m_port2sentData.m_sentTime = currentTime; // Even though sent time is stored, set current time to avoid timeout.
+			conn->m_port2receiveBuffer.assign(protoConn.port2receivebuffer().begin(), protoConn.port2receivebuffer().end());
+			conn->m_port2sendBuffer.assign(protoConn.port2sendbuffer().begin(), protoConn.port2sendbuffer().end());
 		}
 
 		return true;

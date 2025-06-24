@@ -28,6 +28,7 @@
 #include <QDir>
 #include <QDockWidget>
 #include <QDragEnterEvent>
+#include <QFileDialog>
 #include <QLineEdit>
 #include <QMimeData>
 #include <QVBoxLayout>
@@ -284,11 +285,10 @@ namespace SimUi
 
 		// --
 		//
-
-		m_takeSnapshotAction = new QAction{tr("Take Snapshot"), this};
+		m_takeSnapshotAction = new QAction{QIcon(":/SimulatorUi/Images/SimTakeSnapshot.svg"), tr("Take Snapshot"), this};
 		connect(m_takeSnapshotAction, &QAction::triggered, this, &SimWidgetPrivate::takeSnapshot);
 
-		m_applySnapshotAction = new QAction{tr("Apply Snapshot"), this};
+		m_applySnapshotAction = new QAction{QIcon(":/SimulatorUi/Images/SimApplySnapshot.svg"), tr("Apply Snapshot"), this};
 		connect(m_applySnapshotAction, &QAction::triggered, this, &SimWidgetPrivate::applySnapshot);
 
 		// --
@@ -638,6 +638,10 @@ namespace SimUi
 
 	void SimWidgetPrivate::timerEvent([[maybe_unused]] QTimerEvent* event)
 	{
+		// Put any other timer events here, if needed, before checking for project updates.
+		// Checking project uses `return` for control flow, so it should be the last in this function.
+		// `return` instead of throw is used to avoid outputting error message in debug output.
+		//
 		if (m_slaveWindow == false && m_simulator->isLoaded() == true)
 		{
 			Q_ASSERT(m_notificationPanel);
@@ -692,7 +696,8 @@ namespace SimUi
 							{
 								// Build has not been changed.
 								//
-								throw 0;
+								// throw 0; - commented out to avoid outputting error message in debug output.
+								return;
 							}
 						}
 						else
@@ -931,7 +936,7 @@ namespace SimUi
 		//
 		{
 			m_takeSnapshotAction->setEnabled(m_simulator->isPaused() || m_simulator->isRunning());
-			m_applySnapshotAction->setEnabled(m_simulator->isLoaded());
+			m_applySnapshotAction->setEnabled(m_simulator->isLoaded() && m_simulator->isStopped());
 		}
 
 		// Run, Pause, Stop
@@ -1352,7 +1357,27 @@ namespace SimUi
 
 	void SimWidgetPrivate::takeSnapshot()
 	{
-		QString snapshotId = "SNAPSHOTID";
+		static QString lastUsed = m_simulator->projectName();
+		static QString lastProject = m_simulator->projectName();
+
+		if (lastProject != m_simulator->projectName())
+		{
+			lastUsed = m_simulator->projectName();
+			lastProject = m_simulator->projectName();
+		}
+
+		QString fileName = QFileDialog::getSaveFileName(this,
+														tr("Save Snapshot"),
+														QString("%1.u7snap").arg(lastUsed),
+														tr("Snapshot files (*.u7snap);;All Files (*.*)"));
+		if (fileName.isEmpty() == true)
+		{
+			return;
+		}
+
+		QFileInfo fileInfo{fileName};
+		QString snapshotId = fileInfo.completeBaseName();
+		lastUsed = snapshotId;
 
 		auto data = m_simulator->control().takeSnapshot(snapshotId);
 		if (data.isEmpty() == true)
@@ -1363,7 +1388,7 @@ namespace SimUi
 
 		// Save data to file with name snapshotId.u7snap
 		//
-		QFile file{QString("%1.u7snap").arg(snapshotId)};
+		QFile file{fileName};
 
 		if (file.open(QIODevice::WriteOnly) == false)
 		{
@@ -1383,9 +1408,16 @@ namespace SimUi
 
 	void SimWidgetPrivate::applySnapshot()
 	{
-		QString snapshotId = "SNAPSHOTID";
+		QString fileName = QFileDialog::getOpenFileName(this,
+														tr("Open Snapshot"),
+														QString("%1.u7snap").arg(m_simulator->projectName()),
+														tr("Snapshot files (*.u7snap);;All Files (*.*)"));
+		if (fileName.isEmpty() == true)
+		{
+			return;
+		}
 
-		QFile file{snapshotId + ".u7snap"};
+		QFile file{fileName};
 		if (file.open(QIODevice::ReadOnly) == false)
 		{
 			QMessageBox::critical(this, qAppName(), tr("Failed to open snapshot file."));

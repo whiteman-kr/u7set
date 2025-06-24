@@ -22,6 +22,8 @@
         <file>Images/SimSnapshot.svg</file>
         <file>Images/SimStop.svg</file>
         <file>Images/SimTrends.svg</file>
+        <file>Images/SimTakeSnapshot.svg</file>
+        <file>Images/SimApplySnapshot.svg</file>
     </qresource>
     <qresource prefix="/SimulatorUi">
         <file>Templates/DiscreteSeries.js</file>

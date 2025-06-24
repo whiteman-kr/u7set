@@ -25,33 +25,33 @@ namespace Sim
 		m_buildConnection(buildConnection)
 	{
 		auto portPrepare = [this](ConnectionPort& cp)
+		{
+			// Preallocate buffers for sending and receiving
+			//
 			{
-				// Preallocate buffers for sending and receiving
-				//
+				std::vector<char>* portReceiveBuffer = getPortReceiveBuffer(cp.portInfo().portNo);
+				if (portReceiveBuffer == nullptr)
 				{
-					std::vector<char>* portReceiveBuffer = getPortReceiveBuffer(cp.portInfo().portNo);
-					if (portReceiveBuffer == nullptr)
-					{
-						assert(portReceiveBuffer);
-					}
-					else
-					{
-						portReceiveBuffer->resize(cp.portInfo().rxDataSizeW * 2);
-					}
+					assert(portReceiveBuffer);
 				}
+				else
+				{
+					portReceiveBuffer->resize(cp.portInfo().rxDataSizeW * 2);
+				}
+			}
 
+			{
+				std::vector<char>* portSendBuffer = getPortSendBuffer(cp.portInfo().portNo);
+				if (portSendBuffer == nullptr)
 				{
-					std::vector<char>* portSendBuffer = getPortSendBuffer(cp.portInfo().portNo);
-					if (portSendBuffer == nullptr)
-					{
-						assert(portSendBuffer);
-					}
-					else
-					{
-						portSendBuffer->resize(cp.portInfo().txDataSizeW * 2);
-					}
+					assert(portSendBuffer);
 				}
-			};
+				else
+				{
+					portSendBuffer->resize(cp.portInfo().txDataSizeW * 2);
+				}
+			}
+		};
 
 		Q_ASSERT(m_buildConnection.ports.size() <= 2);
 
@@ -114,9 +114,7 @@ namespace Sim
 		return result;
 	}
 
-	bool ConnectionImpl::sendData(int portNo,
-							  std::vector<char>* data,
-							  std::chrono::microseconds currentTime)
+	bool ConnectionImpl::sendData(int portNo, std::vector<char>* data, std::chrono::microseconds currentTime)
 	{
 		if (data == nullptr)
 		{
@@ -149,10 +147,10 @@ namespace Sim
 	}
 
 	bool ConnectionImpl::receiveData(int portNo,
-								 std::vector<char>* data,
-								 std::chrono::microseconds currentTime,
-								 std::chrono::microseconds timeout,
-								 bool* timeoutHappend)
+									 std::vector<char>* data,
+									 std::chrono::microseconds currentTime,
+									 std::chrono::microseconds timeout,
+									 bool* timeoutHappend)
 	{
 		if (data == nullptr || timeoutHappend == nullptr)
 		{
@@ -187,7 +185,8 @@ namespace Sim
 
 				if (currentTime - m_port2sentData.m_sentTime > timeout)
 				{
-					//qDebug() << "ConnectionImpl::receiveData: port2 from timeout " << (currentTime - m_port2sentData.m_sentTime).count() / 1000;
+					// qDebug() << "ConnectionImpl::receiveData: port2 from timeout " << (currentTime - m_port2sentData.m_sentTime).count()
+					// / 1000;
 
 					data->clear();
 					*timeoutHappend = true;
@@ -203,7 +202,7 @@ namespace Sim
 						data->swap(m_port2sentData.m_data);
 
 						m_port2sentData.m_data.clear();
-						m_port2sentData.m_sentTime = currentTime;		// timeout will be counted from this moment
+						m_port2sentData.m_sentTime = currentTime; // timeout will be counted from this moment
 
 						m_timeout.store(false);
 					}
@@ -224,7 +223,8 @@ namespace Sim
 
 				if (currentTime - m_port1sentData.m_sentTime > timeout)
 				{
-					//qDebug() << "ConnectionImpl::receiveData: port1 from timeout " << (currentTime - m_port1sentData.m_sentTime).count() / 1000;
+					// qDebug() << "ConnectionImpl::receiveData: port1 from timeout " << (currentTime - m_port1sentData.m_sentTime).count()
+					// / 1000;
 
 					data->clear();
 					*timeoutHappend = true;
@@ -240,7 +240,7 @@ namespace Sim
 						data->swap(m_port1sentData.m_data);
 
 						m_port1sentData.m_data.clear();
-						m_port1sentData.m_sentTime = currentTime;		// timeout will be counted from this moment
+						m_port1sentData.m_sentTime = currentTime; // timeout will be counted from this moment
 
 						m_timeout.store(false);
 					}
@@ -439,4 +439,4 @@ namespace Sim
 	{
 		return enableConnection(connectionId, !disable);
 	}
-}
+} // namespace Sim

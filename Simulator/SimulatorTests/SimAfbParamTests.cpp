@@ -94,11 +94,11 @@ void SimAfbParamTests::afbComponentParamTest()
 	p.setDoubleValue(900.0);
 	QCOMPARE(p.doubleValue(), 900);
 
-	p.setSignedInt64Value(std::numeric_limits<qint64>::max());
-	QCOMPARE(p.signedInt64Value(), std::numeric_limits<qint64>::max());
+	p.setInt64Value(std::numeric_limits<qint64>::max());
+	QCOMPARE(p.int64Value(), std::numeric_limits<qint64>::max());
 
-	p.setSignedInt64Value(std::numeric_limits<qint64>::lowest());
-	QCOMPARE(p.signedInt64Value(), std::numeric_limits<qint64>::lowest());
+	p.setInt64Value(std::numeric_limits<qint64>::lowest());
+	QCOMPARE(p.int64Value(), std::numeric_limits<qint64>::lowest());
 
 	QCOMPARE(p.opIndex(), OpIndex);
 
@@ -964,7 +964,7 @@ void SimAfbParamTests::convertSInt32ToSInt64()
 		p.setSignedIntValue(0);
 		p.convertSInt32ToSInt64();
 
-		QVERIFY(p.signedInt64Value() == 0);
+		QVERIFY(p.int64Value() == 0);
 	}
 
 	{
@@ -973,7 +973,7 @@ void SimAfbParamTests::convertSInt32ToSInt64()
 		p.setSignedIntValue(std::numeric_limits<qint32>::max());
 		p.convertSInt32ToSInt64();
 
-		QVERIFY(p.signedInt64Value() == std::numeric_limits<qint32>::max());
+		QVERIFY(p.int64Value() == std::numeric_limits<qint32>::max());
 	}
 
 	{
@@ -982,7 +982,7 @@ void SimAfbParamTests::convertSInt32ToSInt64()
 		p.setSignedIntValue(std::numeric_limits<qint32>::min());
 		p.convertSInt32ToSInt64();
 
-		QVERIFY(p.signedInt64Value() == std::numeric_limits<qint32>::min());
+		QVERIFY(p.int64Value() == std::numeric_limits<qint32>::min());
 	}
 
 	return;
@@ -993,7 +993,7 @@ void SimAfbParamTests::convertSInt64ToSInt32()
 	{
 		Sim::AfbComponentParam p;
 
-		p.setSignedInt64Value(0);
+		p.setInt64Value(0);
 		p.convertSInt64ToSInt32();
 
 		QVERIFY(p.signedIntValue() == 0);
@@ -1003,7 +1003,7 @@ void SimAfbParamTests::convertSInt64ToSInt32()
 	{
 		Sim::AfbComponentParam p;
 
-		p.setSignedInt64Value(std::numeric_limits<qint32>::max());
+		p.setInt64Value(std::numeric_limits<qint32>::max());
 		p.convertSInt64ToSInt32();
 
 		QVERIFY(p.signedIntValue() == std::numeric_limits<qint32>::max());
@@ -1013,8 +1013,8 @@ void SimAfbParamTests::convertSInt64ToSInt32()
 	{
 		Sim::AfbComponentParam p;
 
-		p.setSignedInt64Value(std::numeric_limits<qint32>::max());
-		p.setSignedInt64Value(p.signedInt64Value() + 1);
+		p.setInt64Value(std::numeric_limits<qint32>::max());
+		p.setInt64Value(p.int64Value() + 1);
 		p.convertSInt64ToSInt32();
 
 		QVERIFY(p.signedIntValue() == std::numeric_limits<qint32>::max());
@@ -1024,8 +1024,8 @@ void SimAfbParamTests::convertSInt64ToSInt32()
 	{
 		Sim::AfbComponentParam p;
 
-		p.setSignedInt64Value(std::numeric_limits<qint32>::min());
-		p.setSignedInt64Value(p.signedInt64Value() - 1);
+		p.setInt64Value(std::numeric_limits<qint32>::min());
+		p.setInt64Value(p.int64Value() - 1);
 		p.convertSInt64ToSInt32();
 
 		QVERIFY(p.signedIntValue() == std::numeric_limits<qint32>::min());
