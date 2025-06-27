@@ -1,4 +1,4 @@
-#include "CsvEditorDialog.h"
+#include "CSVEditorDialog.h"
 #include <QFile>
 #include <QMessageBox>
 #include <QTextStream>
