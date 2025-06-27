@@ -34,6 +34,8 @@ set (TC_SOURCES
 	RWMultyToolBox.h
 	PacketsMessages.cpp
 	PacketsMessages.h
+	CSVEditorDialog.cpp
+	CSVEditorDialog.h
 )
 
 set (TC_RESOURCES

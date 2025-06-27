@@ -12,6 +12,7 @@ public:
 	explicit RWMultyToolBox(QWidget* parent = nullptr);
 	void setValueType(SignalType type);
 	SignalType valueType() const { return m_valueType; }
+	void updateSignalFromCSV(const QString& filename);
 
 signals:
 	void requestRead(const QString& signalId);

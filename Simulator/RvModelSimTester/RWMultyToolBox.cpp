@@ -1,12 +1,12 @@
 #include "RWMultyToolBox.h"
 
+#include <QFile>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QPushButton>
+#include <QSettings>
 #include <QTableWidget>
 #include <QVBoxLayout>
-#include <QSettings>
-#include <QFile>
 #include <random>
 
 
@@ -101,8 +101,16 @@ RWMultyToolBox::RWMultyToolBox(QWidget* parent) :
 						valueItem->setText("");
 				}
 
+				auto it = std::find_if(signalDefs.begin(),
+									   signalDefs.end(),
+									   [this](const SignalDef& def)
+									   {
+										   return def.type == m_valueType;
+									   });
+				const SignalDef& def = *it;
+
 				// Auto-fill the table with random values
-				for (int row = 0; row < tableWidget->rowCount(); ++row)
+				for (int row = 0; row < tableWidget->rowCount() && row < def.end; ++row)
 				{
 					auto* idItem = tableWidget->item(row, 0);
 					auto* valueItem = tableWidget->item(row, 1);
@@ -113,49 +121,75 @@ RWMultyToolBox::RWMultyToolBox(QWidget* parent) :
 					int channel = (row) % 32 + 1; // 01-32
 					QChar ab = (gen() % 2 == 0) ? 'A' : 'B';
 
-					
-					auto it = std::find_if(signalDefs.begin(),
-										   signalDefs.end(),
-										   [this](const SignalDef& def)
-										   {
-											   return def.type == m_valueType;
-										   });
 
-					if (it == signalDefs.end())
-						continue;
-
-					const SignalDef& def = *it;
+					QString signalId = def.pattern;
 
 					if (m_valueType == SignalType::Discrete)
 					{
-						QString signalId = def.pattern;
+						if (signalId.contains('|'))
+						{
+							QStringList ids;
+							ids = signalId.split('|', Qt::SkipEmptyParts);
+							if (!ids.isEmpty())
+							{
+								int idx = gen() % ids.size();
+								signalId = ids[idx];
+							}
+						}
 						if (signalId.contains("%1"))
+						{
 							signalId = signalId.arg(channel, 2, 10, QChar('0'));
+						}
+						if (signalId.contains("%2"))
+						{
+							signalId = signalId.arg(ab);
+						}
 						idItem->setText(signalId);
 						valueItem->setText((gen() % 2 == 0) ? "true" : "false");
 					}
 					else if (m_valueType == SignalType::AnalogInt32)
 					{
-						QStringList ids = def.pattern.split('|', Qt::SkipEmptyParts);
-						for (int i = 0; i < ids.size() && row < tableWidget->rowCount(); ++i, ++row)
+						if (signalId.contains('|'))
 						{
-							auto* idItem2 = tableWidget->item(row, 0);
-							auto* valueItem2 = tableWidget->item(row, 1);
-							if (idItem2 && valueItem2)
+							QStringList ids = signalId.split('|', Qt::SkipEmptyParts);
+							if (!ids.isEmpty())
 							{
-								idItem2->setText(ids[i]);
-								valueItem2->setText(QString::number(distInt(gen)));
+								int idx = gen() % ids.size();
+								signalId = ids[idx];
 							}
 						}
-						return;
+						if (signalId.contains("%1"))
+						{
+							signalId = signalId.arg(channel, 2, 10, QChar('0'));
+						}
+						if (signalId.contains("%2"))
+						{
+							signalId = signalId.arg(ab);
+						}
+						idItem->setText(signalId);
+						valueItem->setText(QString::number(distInt(gen)));
 					}
 					else if (m_valueType == SignalType::AnalogFloat)
 					{
-						QString signalId = def.pattern;
+
+						if (signalId.contains('|'))
+						{
+							QStringList ids;
+							ids = signalId.split('|', Qt::SkipEmptyParts);
+							if (!ids.isEmpty())
+							{
+								int idx = gen() % ids.size();
+								signalId=ids[idx];
+							}
+						}
 						if (signalId.contains("%1"))
+						{
 							signalId = signalId.arg(channel, 2, 10, QChar('0'));
+						}
 						if (signalId.contains("%2"))
+						{
 							signalId = signalId.arg(ab);
+						}
 						idItem->setText(signalId);
 						valueItem->setText(QString::number(distFloat(gen), 'f', 2));
 					}
@@ -273,4 +307,9 @@ void RWMultyToolBox::saveSignalToCSV(const QString& filename) const
 		out << typeChar << ";" << def.pattern << ";" << def.start << ";" << def.end << "\n";
 	}
 	file.close();
+}
+
+void RWMultyToolBox::updateSignalFromCSV(const QString& filename)
+{
+	loadSignalFromCSV(filename);
 }

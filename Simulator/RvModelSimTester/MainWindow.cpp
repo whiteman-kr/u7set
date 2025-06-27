@@ -5,6 +5,7 @@
 #include "RWToolBox.h"
 #include "SimControlModule.h"
 #include "SimTestUDPThread.h"
+#include "CSVEditorDialog.h"
 
 #include <QGroupBox>
 #include <QMenuBar>
@@ -34,6 +35,7 @@ void MainWindow::setupUi()
 	showServerStateAction->setChecked(true);
 	showServerStateAction->setToolTip("Toggle continuous server state pinging");
 
+	QAction* editCsvAction = menu->addAction("Edit Signal CSV...");
 	QAction* openMenuAction = menu->addAction("Settings..");
 
 	// Create UDP thread
@@ -104,6 +106,24 @@ void MainWindow::setupUi()
 	connect(showServerStateAction, &QAction::toggled, this, &MainWindow::serverState);
 	connect(showServerStateAction, &QAction::toggled, controller, &SimTestUDPController::setShowServerState);
 
+	connect(editCsvAction,
+			&QAction::triggered,
+			this,
+			[this, rwMultiToolBox]()
+			{
+				CsvEditorDialog* dlg = new CsvEditorDialog("signals.csv", this);
+
+				connect(dlg,
+						&CsvEditorDialog::csvSaved,
+						this,
+						[rwMultiToolBox](const QString& path)
+						{
+							rwMultiToolBox->updateSignalFromCSV(path);
+							// Optionally: update table view or notify user
+						});
+
+				dlg->exec();
+			});
 	connect(openMenuAction,
 			&QAction::triggered,
 			this,
