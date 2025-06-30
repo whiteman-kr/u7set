@@ -1,5 +1,5 @@
-#include <SimulatorLib/SimControl.h>
 #include "SimControlImpl.h"
+#include <SimulatorLib/SimControl.h>
 
 namespace Sim
 {
@@ -43,12 +43,14 @@ namespace Sim
 
 	QByteArray Control::takeSnapshot(const QString& snapshotId)
 	{
-		return m_impl.pauseAndTakeSnapshot(snapshotId);
+		QString errorMessage; // We can ignore it, as function will report errors through log.
+		return m_impl.pauseAndTakeSnapshot(snapshotId, errorMessage);
 	}
 
 	bool Control::applySnapshot(const QByteArray& data)
 	{
-		return m_impl.applySnapshot(data);
+		QString errorMessage; // We can ignore it, as function will report errors through log.
+		return m_impl.applySnapshot(data, errorMessage);
 	}
 
 	ControlStatus Control::status() const

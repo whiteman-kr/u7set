@@ -1379,7 +1379,10 @@ namespace SimUi
 		QString snapshotId = fileInfo.completeBaseName();
 		lastUsed = snapshotId;
 
+		QApplication::setOverrideCursor(Qt::WaitCursor);
 		auto data = m_simulator->control().takeSnapshot(snapshotId);
+		QApplication::restoreOverrideCursor();
+
 		if (data.isEmpty() == true)
 		{
 			QMessageBox::critical(this, qAppName(), tr("Snapshot failed. See the application log for details."));
@@ -1424,7 +1427,9 @@ namespace SimUi
 			return;
 		}
 
+		QApplication::setOverrideCursor(Qt::WaitCursor);
 		bool ok = m_simulator->control().applySnapshot(file.readAll());
+		QApplication::restoreOverrideCursor();
 
 		if (ok == false)
 		{

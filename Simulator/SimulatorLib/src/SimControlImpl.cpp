@@ -3,6 +3,74 @@
 #include "SimSnapshot.h"
 #include "SimulatorPrivate.h"
 
+namespace
+{
+	class LogErrorInterceptor : public ILogFile
+	{
+		ILogFile* m_logFile{};
+		QStringList m_errors;
+
+	public:
+		LogErrorInterceptor(ILogFile* logFile) :
+			m_logFile{logFile}
+		{
+		}
+
+		const QStringList& getErrors() const { return m_errors; }
+
+		bool writeAlert(const QString& text, const QString& tag = {}) override
+		{
+			if (m_logFile != nullptr)
+			{
+				m_errors.push_back(text);
+				return m_logFile->writeAlert(text, tag);
+			}
+
+			return false;
+		}
+
+		bool writeError(const QString& text, const QString& tag = {}) override
+		{
+			if (m_logFile != nullptr)
+			{
+				m_errors.push_back(text);
+				return m_logFile->writeError(text, tag);
+			}
+
+			return false;
+		}
+
+		bool writeWarning(const QString& text, const QString& tag = {}) override
+		{
+			if (m_logFile != nullptr)
+			{
+				return m_logFile->writeWarning(text, tag);
+			}
+
+			return false;
+		}
+
+		bool writeMessage(const QString& text, const QString& tag = {}) override
+		{
+			if (m_logFile != nullptr)
+			{
+				return m_logFile->writeMessage(text, tag);
+			}
+
+			return false;
+		}
+
+		bool writeText(const QString& text, const QString& tag = {}) override
+		{
+			if (m_logFile != nullptr)
+			{
+				return m_logFile->writeText(text, tag);
+			}
+
+			return false;
+		}
+	};
+} // namespace
 
 namespace Sim
 {
@@ -379,11 +447,12 @@ namespace Sim
 		return;
 	}
 
-	QByteArray ControlImpl::pauseAndTakeSnapshot(const QString& snapshotId)
+	QByteArray ControlImpl::pauseAndTakeSnapshot(const QString& snapshotId, QString& outErrorMessage)
 	{
 		if (snapshotId.isEmpty() == true)
 		{
-			m_log.writeError("Snapshot identifier is empty.");
+			outErrorMessage = "Snapshot identifier is empty.";
+			m_log.writeError(outErrorMessage);
 			return {};
 		}
 
@@ -400,14 +469,16 @@ namespace Sim
 				//
 				if (m_snapshotId.isEmpty() == false || m_snapshot.first.isEmpty() == false)
 				{
-					m_log.writeError("Cannot take snapshot: another snapshot operation is already in progress.");
+					outErrorMessage = "Cannot take snapshot: another snapshot operation is already in progress.";
+					m_log.writeError(outErrorMessage);
 					return {};
 				}
 			}
 
 			if (m_controlData.m_state == SimControlState::Stop)
 			{
-				m_log.writeError("Snapshot failed: simulation is not running.");
+				outErrorMessage = "Snapshot failed: simulation is not running.";
+				m_log.writeError(outErrorMessage);
 				return {};
 			}
 
@@ -435,6 +506,13 @@ namespace Sim
 			assert(snapshotId == m_snapshot.first);
 			resultData = std::move(m_snapshot.second);
 			m_snapshot = {};
+
+			if (resultData.isEmpty() == true)
+			{
+				outErrorMessage = "Snapshot failed: no data in snapshot.";
+				m_log.writeError(outErrorMessage);
+				return {};
+			}
 		}
 
 		m_log.writeDebug(tr("PauseAndTakeSnapshot, left time %1, us").arg(leftTime.count()));
@@ -447,10 +525,17 @@ namespace Sim
 		return resultData;
 	}
 
-	bool ControlImpl::applySnapshot(const QByteArray& data)
+	bool ControlImpl::applySnapshot(const QByteArray& data, QString& outErrorMessage)
 	{
-		Snapshot snapshot{m_log.logInterface()};
-		bool ok = snapshot.apply(data, *m_simulator);
+		LogErrorInterceptor log{m_log.logInterface()};
+		bool ok = false;
+
+		{
+			Snapshot snapshot{&log};
+			ok = snapshot.apply(data, *m_simulator);
+		}
+
+		outErrorMessage = log.getErrors().join("\n");
 
 		// Update UI.
 		//

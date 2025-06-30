@@ -35,6 +35,9 @@ namespace Sim
 		tl::expected<QStringList, QString> RemoveOverrideSignals(const QStringList& appSignalIds);
 		tl::expected<std::vector<std::pair<QString, bool>>, QString> DisableOverrideSignals(const QStringList& appSignalIds, bool disable);
 
+		tl::expected<QByteArray, QString> TakeSnapshot(const QString& snapshotId);
+		tl::expected<void, QString> ApplySnapshot(const QByteArray& snapshotData);
+
 	private:
 		const std::shared_ptr<::grpc::Channel> m_channel;
 		std::unique_ptr<RpctGrpc::SimService::Stub> m_stub;

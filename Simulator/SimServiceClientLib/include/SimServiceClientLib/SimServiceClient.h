@@ -147,6 +147,9 @@ namespace Sim
 		[[nodiscard]] tl::expected<std::vector<std::pair<QString, bool>>, QString> DisableOverrideSignals(const QStringList& appSignalIds,
 																										  bool disable);
 
+		[[nodiscard]] tl::expected<QByteArray, QString> TakeSnapshot(const QString& snapshotId);
+		[[nodiscard]] tl::expected<void, QString> ApplySnapshot(const QByteArray& snapshotData);
+
 	private:
 		std::shared_ptr<SimServiceClientImpl> m_impl;
 	};

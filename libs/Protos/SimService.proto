@@ -274,6 +274,36 @@ message DisableOverrideSignalReply
 }
 
 //
+// TakeSnapshot
+//
+message TakeSnapshotRequest
+{
+    optional string snapshotId = 2;     // SnapshotID to take.
+}
+
+message TakeSnapshotReply
+{
+    optional string snapshotId = 2;     // SnapshotID which was taken.
+    optional uint32 totalSize = 3;      // Total size of the snapshot data.
+    optional bytes snapshotData = 5;    // The chunk of snapshot data.
+    optional string error = 10;         // Error if any.
+}
+
+//
+// ApplySnapshot
+//
+message ApplySnapshotRequest
+{
+    optional uint32 totalSize = 3;      // Total size of the snapshot data.
+    optional bytes snapshotData = 4;    // Snapshot data to apply, can be empty if snapshotId is set.
+}
+
+message ApplySnapshotReply
+{
+    optional string error = 3;          // Error if any.
+}
+
+//
 // SimService -- This service is used to communicate with the simulator.
 //
 service SimService 
@@ -297,6 +327,11 @@ service SimService
     rpc RemoveOverrideSignal(RemoveOverrideSignalRequest) returns (RemoveOverrideSignalReply) {}
     rpc DisableOverrideSignal(DisableOverrideSignalRequest) returns (DisableOverrideSignalReply) {}
 
-    // TODO:
-    //  TakeSnapshots/ApplySnapshot
+    // Take snapshot, and return a snapshot as a data stream.
+    //
+    rpc TakeSnapshot(TakeSnapshotRequest) returns (stream TakeSnapshotReply) {}
+
+    // Apply snapshot, Transfer snapshot data as a data stream.
+    //
+    rpc ApplySnapshot(stream ApplySnapshotRequest) returns (ApplySnapshotReply) {}
 }

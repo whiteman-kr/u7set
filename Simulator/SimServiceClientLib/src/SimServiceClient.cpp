@@ -112,4 +112,14 @@ namespace Sim
 	{
 		return m_impl->DisableOverrideSignals(appSignalIds, disable);
 	}
+
+	tl::expected<QByteArray, QString> SimServiceClient::TakeSnapshot(const QString& snapshotId)
+	{
+		return m_impl->TakeSnapshot(snapshotId);
+	}
+
+	tl::expected<void, QString> SimServiceClient::ApplySnapshot(const QByteArray& snapshotData)
+	{
+		return m_impl->ApplySnapshot(snapshotData);
+	}
 } // namespace Sim

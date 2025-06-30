@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.16)
-
 project(SimServiceClientLib LANGUAGES CXX)
 
 set(TARGET SimServiceClientExample)
 
 add_executable(${TARGET}
+	Actions.cpp
+	Actions.hpp
 	main.cpp
 )
 

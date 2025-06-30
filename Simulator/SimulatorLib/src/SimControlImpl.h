@@ -79,8 +79,8 @@ namespace Sim
 		void pause();
 		void stop();
 
-		QByteArray pauseAndTakeSnapshot(const QString& snapshotId);
-		bool applySnapshot(const QByteArray& data);
+		QByteArray pauseAndTakeSnapshot(const QString& snapshotId, QString& outErrorMessage);
+		bool applySnapshot(const QByteArray& data, QString& outErrorMessage);
 
 	public:
 		ControlData controlData() const;

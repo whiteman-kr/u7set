@@ -520,4 +520,97 @@ namespace Sim
 
 		return result;
 	}
+
+	tl::expected<QByteArray, QString> SimServiceClientImpl::TakeSnapshot(const QString& snapshotId)
+	{
+		grpc::ClientContext context;
+		RpctGrpc::TakeSnapshotRequest request;
+		RpctGrpc::TakeSnapshotReply reply;
+
+		auto deadline = std::chrono::system_clock::now() + RequestTimeOuts * 2; // Taking snapshot can take a while.
+		context.set_deadline(deadline);
+
+		request.set_snapshotid(snapshotId.toStdString());
+
+		QByteArray result;
+		auto reader = m_stub->TakeSnapshot(&context, request);
+
+		while (reader->Read(&reply) != false)
+		{
+			if (reply.error().empty() == false)
+			{
+				return tl::unexpected{QString::fromStdString(reply.error())};
+			}
+
+			if (result.isEmpty() == true)
+			{
+				result.reserve(static_cast<int>(reply.totalsize()));
+			}
+
+			result.append(reply.snapshotdata().data(), reply.snapshotdata().size());
+		}
+
+		grpc::Status status = reader->Finish();
+		if (status.ok() == false)
+		{
+			return tl::unexpected{formatErrorMessage(status)};
+		}
+
+		return result;
+	}
+
+	tl::expected<void, QString> SimServiceClientImpl::ApplySnapshot(const QByteArray& snapshotData)
+	{
+		grpc::ClientContext context;
+		RpctGrpc::ApplySnapshotRequest request;
+		RpctGrpc::ApplySnapshotReply reply;
+
+		auto deadline = std::chrono::system_clock::now() + RequestTimeOuts * 2; // Applying snapshot can take a while.
+		context.set_deadline(deadline);
+
+		qsizetype totalSize = snapshotData.size();
+		qsizetype offset = 0;
+		constexpr qsizetype chunkSize = 1024 * 512;                             // 512 KB
+
+		auto writer = m_stub->ApplySnapshot(&context, &reply);
+
+		while (offset < totalSize)
+		{
+			qsizetype remaining = totalSize - offset;
+			qsizetype size = std::min(chunkSize, remaining);
+
+			request.Clear();
+			request.set_totalsize(totalSize);
+			request.set_snapshotdata(snapshotData.constData() + offset, static_cast<int>(size));
+
+			bool writeOk = writer->Write(request);
+			if (writeOk == false)
+			{
+				return tl::unexpected{QString{"Failed to write snapshot data to server."}};
+			}
+
+			offset += size;
+		}
+
+		// Signal end of writes before calling Finish
+		//
+		bool writesDoneOk = writer->WritesDone();
+		if (writesDoneOk == false)
+		{
+			return tl::unexpected{QString{"Failed to finish writing snapshot data to server."}};
+		}
+
+		auto status = writer->Finish();
+		if (status.ok() == false)
+		{
+			return tl::unexpected{formatErrorMessage(status)};
+		}
+
+		if (reply.error().empty() == false)
+		{
+			return tl::unexpected{QString::fromStdString(reply.error())};
+		}
+
+		return {};
+	}
 } // namespace Sim

@@ -109,6 +109,14 @@ namespace Sim
 										   const ::RpctGrpc::DisableOverrideSignalRequest* request,
 										   ::RpctGrpc::DisableOverrideSignalReply* response) override;
 
+		grpc::Status TakeSnapshot(::grpc::ServerContext* context,
+								  const ::RpctGrpc::TakeSnapshotRequest* request,
+								  ::grpc::ServerWriter<::RpctGrpc::TakeSnapshotReply>* writer) override;
+
+		grpc::Status ApplySnapshot(::grpc::ServerContext* context,
+								   ::grpc::ServerReader<::RpctGrpc::ApplySnapshotRequest>* reader,
+								   ::RpctGrpc::ApplySnapshotReply* response) override;
+
 	private:
 		SimulatorPrivate& m_simulator;
 		mutable ScopedLog m_log;
@@ -665,7 +673,6 @@ namespace Sim
 
 		// Response is already formed by processing case VALUEONEOF_NOT_SET.
 		//
-
 		return grpc::Status::OK;
 	}
 
@@ -717,6 +724,90 @@ namespace Sim
 			auto pair = response->add_signalpairs();
 			pair->set_appsignalid(os.appSignalId().toStdString());
 			pair->set_disable(!os.enabled());
+		}
+
+		return grpc::Status::OK;
+	}
+
+	// Take snapshot, and return a snapshot as a data stream.
+	//
+	grpc::Status ServiceImpl::TakeSnapshot([[maybe_unused]] ::grpc::ServerContext* context,
+										   const ::RpctGrpc::TakeSnapshotRequest* request,
+										   ::grpc::ServerWriter<::RpctGrpc::TakeSnapshotReply>* writer)
+	{
+		auto snapshotId = QString::fromStdString(request->snapshotid());
+		QString errorMessage;
+		QByteArray snapshotData = m_simulator.control().pauseAndTakeSnapshot(snapshotId, errorMessage);
+
+		if (snapshotData.isEmpty() == true)
+		{
+			::RpctGrpc::TakeSnapshotReply reply;
+			reply.set_snapshotid(request->snapshotid());
+			reply.set_totalsize(snapshotData.size());
+			reply.set_error(errorMessage.toStdString());
+			writer->Write(reply);
+			return grpc::Status::OK;
+		}
+
+		// Send snapshot data in chunks.
+		//
+		constexpr int ChunkSize = 1024 * 512; // 512 KB
+		const int totalChunks = (snapshotData.size() + ChunkSize - 1) / ChunkSize;
+
+		for (int chunk = 0; chunk < totalChunks; ++chunk)
+		{
+			if (context->IsCancelled() == true)
+			{
+				return grpc::Status(grpc::StatusCode::CANCELLED, "Client cancelled");
+			}
+
+			::RpctGrpc::TakeSnapshotReply reply;
+			reply.set_snapshotid(request->snapshotid());
+
+			qsizetype start = chunk * ChunkSize;
+			qsizetype end = std::min(start + ChunkSize, snapshotData.size());
+			reply.set_snapshotdata(snapshotData.constData() + start, end - start);
+
+			writer->Write(reply);
+		}
+
+		return grpc::Status::OK;
+	}
+
+	// Apply snapshot, Transfer snapshot data as a data stream.
+	//
+	grpc::Status ServiceImpl::ApplySnapshot([[maybe_unused]] ::grpc::ServerContext* context,
+											::grpc::ServerReader<::RpctGrpc::ApplySnapshotRequest>* reader,
+											::RpctGrpc::ApplySnapshotReply* response)
+	{
+		QByteArray snapshotData;
+
+		::RpctGrpc::ApplySnapshotRequest request;
+
+		while (reader->Read(&request) == true)
+		{
+			if (context->IsCancelled() == true)
+			{
+				return grpc::Status(grpc::StatusCode::CANCELLED, "Client cancelled");
+			}
+
+			if (snapshotData.isEmpty() == true)
+			{
+				snapshotData.reserve(request.totalsize());
+			}
+
+			const std::string& data = request.snapshotdata();
+			snapshotData.append(data.data(), static_cast<qsizetype>(data.size()));
+		}
+
+		// Apply snapshot
+		//
+		QString errorMessage;
+		bool ok = m_simulator.control().applySnapshot(snapshotData, errorMessage);
+
+		if (ok == false)
+		{
+			response->set_error(errorMessage.toStdString());
 		}
 
 		return grpc::Status::OK;
