@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include "version.h"
-#include <CommonLib\ConstStrings.h>
+#include <CommonLib/ConstStrings.h>
 #include <QApplication>
 
 
