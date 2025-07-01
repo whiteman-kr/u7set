@@ -1,10 +1,10 @@
 #pragma once
 
 #include <QDialog>
-#include <QPushButton>
-#include <QTextEdit>
-#include <QFormLayout>
-#include <QHBoxLayout>
+
+class QPushButton;
+class QTextEdit;
+class QHBoxLayout;
 
 class CsvEditorDialog : public QDialog
 {
@@ -20,9 +20,9 @@ private slots:
 	void onSave();
 
 private:
-	QString m_csvFile;
-	QTextEdit* m_textEdit;
-	QHBoxLayout* buttonsLayout;
-	QPushButton* m_saveBtn;
-	QPushButton* m_newFileBtn;
+	QString m_csvFile = nullptr;
+	QTextEdit* m_textEdit = nullptr;
+	QHBoxLayout* m_buttonsLayout = nullptr;
+	QPushButton* m_saveBtn = nullptr;
+	QPushButton* m_newFileBtn = nullptr;
 };

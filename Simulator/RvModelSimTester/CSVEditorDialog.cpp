@@ -1,27 +1,29 @@
-#include "CSVEditorDialog.h"
+#include "CsvEditorDialog.h"
 #include <QFile>
 #include <QMessageBox>
 #include <QTextStream>
+#include <QHBoxLayout>
+#include <QFormLayout>
+#include <QTextEdit>
 
 CsvEditorDialog::CsvEditorDialog(const QString& csvFile, QWidget* parent) :
 	QDialog(parent),
 	m_csvFile(csvFile)
 {
-	setWindowTitle("Edit signals.csv");
+	setWindowTitle(tr("Edit CSV File"));
 	m_textEdit = new QTextEdit(this);
-	m_newFileBtn = new QPushButton("New Signals", this);
-	m_saveBtn = new QPushButton("Save", this);
+	m_newFileBtn = new QPushButton(tr("New Signals"), this);
+	m_saveBtn = new QPushButton(tr("Save"), this);
 
-	QHBoxLayout* buttonsLayout = new QHBoxLayout;
-	buttonsLayout->addStretch();
-	buttonsLayout->addWidget(m_newFileBtn);
-	buttonsLayout->addWidget(m_saveBtn);
+	QHBoxLayout* m_buttonsLayout = new QHBoxLayout;
+	m_buttonsLayout->addStretch();
+	m_buttonsLayout->addWidget(m_newFileBtn);
+	m_buttonsLayout->addWidget(m_saveBtn);
 
 	QFormLayout* layout = new QFormLayout(this);
-	
+
 	layout->addWidget(m_textEdit);
-	//layout->addStretch();
-	layout->addRow(buttonsLayout);
+	layout->addRow(m_buttonsLayout);
 	setLayout(layout);
 
 	// Load CSV
@@ -39,13 +41,14 @@ CsvEditorDialog::CsvEditorDialog(const QString& csvFile, QWidget* parent) :
 	setMinimumSize(450, 250);
 }
 
-void CsvEditorDialog::onNewFile() {
+void CsvEditorDialog::onNewFile()
+{
 	m_textEdit->clear();
 	const QString placeholder = "<SygnalID%1_or_%1%2>";
-    QString templateText = "TYPE;ID;[Start];[END]\n"
-                       "D;#SygnalID;1;32\n"
-                       "I;#SygnalID|#SygnalID;0;0\n"
-                       "F;#SygnalID;1;32";
+	QString templateText = "TYPE;ID;[Start];[END]\n"
+						   "D;#SygnalID;1;32\n"
+						   "I;#SygnalID|#SygnalID;0;0\n"
+						   "F;#SygnalID;1;32";
 
 	templateText.replace("SygnalID", placeholder);
 	m_textEdit->setPlainText(templateText);
@@ -65,6 +68,6 @@ void CsvEditorDialog::onSave()
 	}
 	else
 	{
-		QMessageBox::warning(this, "Error", "Could not save file!");
+		QMessageBox::warning(this, tr("Error"), tr("Could not save file!"));
 	}
 }

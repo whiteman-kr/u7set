@@ -2,7 +2,7 @@
 #include <QSettings>
 
 AppSettings AppSettings::load() {
-	QSettings settings(settingsFile, QSettings::IniFormat);
+	QSettings settings( QSettings::UserScope);
 	AppSettings result;
 
 	settings.beginGroup("Network");
@@ -16,7 +16,7 @@ AppSettings AppSettings::load() {
 
 void AppSettings::save()
 {
-	QSettings settings(settingsFile, QSettings::IniFormat);
+	QSettings settings(QSettings::UserScope);
 
 	settings.beginGroup("Network");
 	settings.setValue("IP", ip);

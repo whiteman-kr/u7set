@@ -30,12 +30,12 @@ set (TC_SOURCES
 	MainWindow.h
 	SimTestUDPThread.h
 	SimTestUDPThread.cpp
-	RWMultyToolBox.cpp
-	RWMultyToolBox.h
+	RWMultiToolBox.cpp
+	RWMultiToolBox.h
 	PacketsMessages.cpp
 	PacketsMessages.h
-	CSVEditorDialog.cpp
-	CSVEditorDialog.h
+	CsvEditorDialog.cpp
+	CsvEditorDialog.h
 )
 
 set (TC_RESOURCES
@@ -92,8 +92,7 @@ target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generate
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Xml)
 target_link_libraries(${TARGET} PRIVATE CommonLib UtilsLib)
 
-# Link Visaul Leak Detector
-#
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
 	target_link_libraries(${TARGET} PRIVATE vld.lib)
 endif()

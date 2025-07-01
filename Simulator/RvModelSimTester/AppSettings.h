@@ -1,17 +1,14 @@
 #pragma once
 
-#include <QString> 
+#include <QString>
 
-struct AppSettings{
-
+struct AppSettings
+{
 	static AppSettings load();
 	void save();
-	
-	
-	QString ip;
-	int portRemote;
-	int portLocal;
 
-	static inline const QString settingsFile = "settings.ini";
+
+	QString ip = nullptr;
+	int portRemote = 0;
+	int portLocal = 0;
 };
-

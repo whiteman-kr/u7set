@@ -1,4 +1,6 @@
 #include "LogModule.h"
+#include <QPushButton>
+#include <QTextEdit>
 #include <QVBoxLayout>
 
 LogModule::LogModule(QWidget* parent) :
@@ -7,7 +9,7 @@ LogModule::LogModule(QWidget* parent) :
 	m_logLabel = new QTextEdit(this);
 	m_logLabel->setMinimumHeight(60);
 
-	QPushButton* clearButton = new QPushButton("Clear Log", this);
+	QPushButton* clearButton = new QPushButton(tr("Clear Log"), this);
 	connect(clearButton, &QPushButton::clicked, this, &LogModule::clearLog);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout;
@@ -15,35 +17,35 @@ LogModule::LogModule(QWidget* parent) :
 	mainLayout->addWidget(clearButton);
 	setLayout(mainLayout);
 
-	logAction("Initialized: Wainting to response");
+	logAction(tr("Initialized: Waiting for a response"));
 }
 
 // log max 100 actions
 void LogModule::logAction(const QString& action)
 {
-	int size = actionLog.size();
+	int size = m_actionLog.size();
 	if (size >= 2)
 	{
-		if (actionLog.at(size - 1) == action || actionLog.at(size - 2) == action)
+		if (m_actionLog.at(size - 1) == action || m_actionLog.at(size - 2) == action)
 			return;
 	}
 
-	actionLog << action;
+	m_actionLog << action;
 	if (size > 100)
 	{
-		actionLog.removeFirst();
+		m_actionLog.removeFirst();
 	}
 	updateLogLabel();
 }
 
 void LogModule::updateLogLabel()
 {
-	m_logLabel->setText(actionLog.join("\n"));
+	m_logLabel->setText(m_actionLog.join("\n"));
 	m_logLabel->moveCursor(QTextCursor::End);
 }
 
 void LogModule::clearLog()
 {
-	actionLog.clear();
+	m_actionLog.clear();
 	updateLogLabel();
 }

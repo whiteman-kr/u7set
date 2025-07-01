@@ -22,11 +22,11 @@ private slots:
 	void onWriteClicked();
 
 private:
-	QLineEdit* signalIdEdit;
-	QLineEdit* writeValueEdit;
-	QPushButton* readButton;
-	QPushButton* writeButton;
+	QLineEdit* m_signalIdEdit = nullptr;
+	QLineEdit* m_writeValueEdit = nullptr;
+	QPushButton* m_readButton = nullptr;
+	QPushButton* m_writeButton = nullptr;
 
-	QCompleter* signalIdCompleter;
-	QStringListModel* signalIdModel;
+	QCompleter* m_signalIdCompleter = nullptr;
+	QStringListModel* m_signalIdModel = nullptr;
 };

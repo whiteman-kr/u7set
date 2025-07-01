@@ -25,13 +25,13 @@ void SimTestUDPWorker::getStat()
 	int result = m_socket->writeDatagram(data.data(), data.size(), QHostAddress{m_settings.ip}, m_settings.portRemote);
 	if (result == -1 && m_showServerState)
 	{
-		emit resultReady("getStat error in que");
+		emit resultReady(tr("getStat error in queue"));
 	}
 	else
 	{
 		if (result != data.size() && m_showServerState)
 		{
-			emit resultReady("getStat error size don't match");
+			emit resultReady(tr("getStat error size don't match"));
 		}
 	}
 }
@@ -58,7 +58,7 @@ void SimTestUDPWorker::onSimControlMode(const QString& mode)
 	}
 	else
 	{
-		emit resultReady(QString("Unknown mode: %1 ").arg(mode));
+		emit resultReady(QString(tr("Unknown mode: %1 ")).arg(mode));
 		return;
 	}
 
@@ -67,17 +67,17 @@ void SimTestUDPWorker::onSimControlMode(const QString& mode)
 	int result = m_socket->writeDatagram(data.data(), data.size(), QHostAddress{m_settings.ip}, m_settings.portRemote);
 	if (result == -1)
 	{
-		emit resultReady(QString("simControlMode : %1 error in que").arg(dataType));
+		emit resultReady(QString(tr("simControlMode : %1 error in queue")).arg(dataType));
 	}
 	else
 	{
 		if (result != data.size())
 		{
-			emit resultReady(QString("simControlMode : %1 error size don't match").arg(dataType));
+			emit resultReady(QString(tr("simControlMode : %1 error size don't match")).arg(dataType));
 		}
 		else
 		{
-			emit resultReady(QString("simControlMode : %1 sent successfully").arg(dataType));
+			emit resultReady(QString(tr("simControlMode : %1 sent successfully")).arg(dataType));
 		}
 	}
 }
@@ -91,13 +91,13 @@ void SimTestUDPWorker::read(const QString& signalID)
 
 	if (result == -1)
 	{
-		emit resultReady("read error");
+		emit resultReady(tr("read error"));
 	}
 	else
 	{
 		if (result != data.size())
 		{
-			emit resultReady("read error size don't match");
+			emit resultReady(tr("read error size don't match"));
 		}
 	}
 }
@@ -109,13 +109,13 @@ void SimTestUDPWorker::write(const QString& signalID, const QString& value)
 	int result = m_socket->writeDatagram(data.data(), data.size(), QHostAddress{m_settings.ip}, m_settings.portRemote);
 	if (result == -1)
 	{
-		emit resultReady("write error in que");
+		emit resultReady(tr("write error in queue"));
 	}
 	else
 	{
 		if (result != data.size())
 		{
-			emit resultReady("write error size don't match");
+			emit resultReady(tr("write error size don't match"));
 		}
 	}
 }
@@ -156,7 +156,7 @@ void SimTestUDPWorker::onReadyRead()
 		{
 			if (m_showServerState)
 			{
-				emit resultReady(QString("Datagram size is too small (%1): expected at least %2 bytes")
+				emit resultReady(QString(tr("Datagram size is too small (%1): expected at least %2 bytes"))
 									 .arg(data.size())
 									 .arg(sizeof(SimulatorBridgePacket)));
 			}
@@ -169,44 +169,29 @@ void SimTestUDPWorker::onReadyRead()
 		const SimulatorBridgePacket* packet = reinterpret_cast<const SimulatorBridgePacket*>(ptr);
 		ptr += sizeof(SimulatorBridgePacket);
 
-		/*
-		int16_t marker = *reinterpret_cast<const int16_t*>(ptr);
-		ptr += sizeof(int16_t);
-
-		int16_t pv = *reinterpret_cast<const int16_t*>(ptr);
-		ptr += sizeof(int16_t);
-
-		ptr += sizeof(int16_t); // reserved
-
-		int16_t pSize = *reinterpret_cast<const int16_t*>(ptr);
-		ptr += sizeof(int16_t);
-
-		int16_t packetType = *reinterpret_cast<const int16_t*>(ptr);
-		ptr += sizeof(int16_t);*/
-
-		// chack size
+		// check size
 		//
 		bool sizeOk = (data.size() == packet->size);
-		if (!sizeOk)
+		if (sizeOk == false)
 		{
-			if (m_showServerState)
+			if (m_showServerState == true)
 			{
-				emit resultReady(QString("Datagram size mismatch: expected %1, got %2").arg(packet->size).arg(data.size()));
+				emit resultReady(QString(tr("Datagram size mismatch: expected %1, got %2")).arg(packet->size).arg(data.size()));
 			}
 			return;
 		}
 
-		// chack crc
+		// check crc
 		//
 		int16_t receivedCrc = *reinterpret_cast<const int16_t*>(data.constData() + data.size() - sizeof(int16_t));
-		int16_t calculatedCrc = calcCrc16(data.constData(), data.size() - sizeof(int16_t));
+		int16_t calculatedCrc = calcCrc16(data.constData(), static_cast<int>(data.size() - sizeof(int16_t)));
 		bool crcOk = (receivedCrc == calculatedCrc);
 
-		if (!crcOk)
+		if (crcOk == false)
 		{
-			if (m_showServerState)
+			if (m_showServerState == true)
 			{
-				emit resultReady(QString("Datagram CRC mismatch: expected %1, calculated %2").arg(receivedCrc).arg(calculatedCrc));
+				emit resultReady(QString(tr("Datagram CRC mismatch: expected %1, calculated %2")).arg(receivedCrc).arg(calculatedCrc));
 			}
 			return;
 		}
@@ -224,7 +209,7 @@ void SimTestUDPWorker::onReadyRead()
 				if (packet->size != expectedReplySize)
 				{
 					emit resultReady(
-						QString("SGW_COMMAND_GET_STATE: packet size is wrong (%1), expected: %2").arg(packet->size).arg(expectedReplySize));
+						QString(tr("SGW_COMMAND_GET_STATE: packet size is wrong (%1), expected: %2")).arg(packet->size).arg(expectedReplySize));
 					break;
 				}
 
@@ -234,7 +219,7 @@ void SimTestUDPWorker::onReadyRead()
 				SimulatorStateCode state = *reinterpret_cast<const SimulatorStateCode*>(ptr);
 				ptr += sizeof(SimulatorStateCode);
 
-				emit resultReady(QString("Received: ErrorCode=%1, SimulatorStateCode=%2").arg(errorCodeToString(errorCode)).arg(state));
+				emit resultReady(QString(tr("Received: ErrorCode=%1, SimulatorStateCode=%2")).arg(errorCodeToString(errorCode)).arg(state));
 
 				emit simStateReady(errorCode, state);
 
@@ -248,7 +233,7 @@ void SimTestUDPWorker::onReadyRead()
 				int16_t counter = *reinterpret_cast<const int16_t*>(ptr);
 				if (counter == 0)
 				{
-					emit resultReady(QString("SGW_SIGNAL_READ: wrong number of signals (%1), expected: 1").arg(counter));
+					emit resultReady(QString(tr("SGW_SIGNAL_READ: wrong number of signals (%1), expected: 1")).arg(counter));
 					break;
 				}
 				ptr += sizeof(int16_t);
@@ -259,7 +244,7 @@ void SimTestUDPWorker::onReadyRead()
 				if (packet->size != expectedReplySize)
 				{
 					emit resultReady(
-						QString("SGW_SIGNAL_READ: packet size is wrong (%1), expected: %2").arg(packet->size).arg(expectedReplySize));
+						QString(tr("SGW_SIGNAL_READ: packet size is wrong (%1), expected: %2")).arg(packet->size).arg(expectedReplySize));
 					break;
 				}
 
@@ -283,7 +268,7 @@ void SimTestUDPWorker::onReadyRead()
 					}
 
 					
-					if (signalIdStr.contains("|"))
+					if (signalIdStr.contains("|") == true)
 					{
 						continue;
 					}
@@ -304,9 +289,9 @@ void SimTestUDPWorker::onReadyRead()
 						Q_ASSERT(false);
 					}
 
-					resultLog += QString("Read signal %1:\n").arg(signalIdStr);
-					resultLog += QString("Value=%1, Hash=%2, Time=%3, Flags={valid: %4, stateAvailable: %5, simulated: %6, blocked: %7, "
-										 "mismatch: %8, aboveHighLimit: %9, belowLowLimit: %10}\n")
+					resultLog += QString(tr("Read signal %1:\n")).arg(signalIdStr);
+					resultLog += QString(tr("Value=%1, Hash=%2, Time=%3, Flags={valid: %4, stateAvailable: %5, simulated: %6, blocked: %7, "
+										 "mismatch: %8, aboveHighLimit: %9, belowLowLimit: %10}\n"))
 									 .arg(resiveValue)
 									 .arg(state->hash)
 									 .arg(state->time)
@@ -317,7 +302,7 @@ void SimTestUDPWorker::onReadyRead()
 									 .arg(state->flags.bits.mismatch)
 									 .arg(state->flags.bits.aboveHighLimit)
 									 .arg(state->flags.bits.belowLowLimit);
-					state++; // chack state
+					state++; // check state
 				}
 				emit resultReady(resultLog);
 
@@ -330,7 +315,7 @@ void SimTestUDPWorker::onReadyRead()
 				int16_t counter = *reinterpret_cast<const int16_t*>(ptr);
 				if (counter == 0)
 				{
-					emit resultReady(QString("SGW_SIGNAL_WRITE: wrong number of signals (%1), expected: 1").arg(counter));
+					emit resultReady(QString(tr("SGW_SIGNAL_WRITE: wrong number of signals (%1), expected: 1")).arg(counter));
 					break;
 				}
 				ptr += sizeof(int16_t);
@@ -341,7 +326,7 @@ void SimTestUDPWorker::onReadyRead()
 				if (packet->size != expectedReplySize)
 				{
 					emit resultReady(
-						QString("SGW_SIGNAL_WRITE: packet size is wrong (%1), expected: %2").arg(packet->size).arg(expectedReplySize));
+						QString(tr("SGW_SIGNAL_WRITE: packet size is wrong (%1), expected: %2")).arg(packet->size).arg(expectedReplySize));
 					break;
 				}
 
@@ -354,7 +339,7 @@ void SimTestUDPWorker::onReadyRead()
 				{
 					if (*errorCode == Success)
 					{
-						emit resultReady(QString("Write result: ErrorCode = %1.").arg(errorCodeToString(*errorCode)));
+						emit resultReady(QString(tr("Write result: ErrorCode = %1.")).arg(errorCodeToString(*errorCode)));
 					}
 					else
 					{
@@ -369,17 +354,17 @@ void SimTestUDPWorker::onReadyRead()
 							}
 
 							emit resultReady(
-								QString("Sygnal %1 write error: ErrorCode = %2.").arg(signalIdStr).arg(errorCodeToString(*errorCode)));
+								QString(tr("Signal %1 write error: ErrorCode = %2.")).arg(signalIdStr).arg(errorCodeToString(*errorCode)));
 						}
 
-						errorCode++; // chack error
+						errorCode++; // check error
 					}
 				}
 			}
 			int16_t crc = *reinterpret_cast<const int16_t*>(data.constData() + data.size() - sizeof(int16_t));
 
 			// Test datagram
-			emit resultReady(QString("Datagram arrived: marker=%1, version=%2, size=%3, type=%4, crc=%5")
+			emit resultReady(QString(tr("Datagram arrived: marker=%1, version=%2, size=%3, type=%4, crc=%5"))
 								 .arg(packet->marker)
 								 .arg(packet->packetVersion)
 								 .arg(packet->size)
@@ -393,7 +378,6 @@ QByteArray SimTestUDPWorker::createRequestState(int dataType)
 {
 	QByteArray result;
 
-	// int size = sizeof(int16_t) * 5 + sizeof(int16_t);
 	int size = sizeof(SimulatorBridgePacket) + sizeof(int16_t) /*crc*/;
 
 	result.resize(size);
@@ -404,27 +388,6 @@ QByteArray SimTestUDPWorker::createRequestState(int dataType)
 	packet->packetVersion = SGW_VERSION;
 	packet->size = size;
 	packet->packetType = dataType;
-
-	/*
-
-	int16_t* marker = reinterpret_cast<int16_t*>(data);
-	*marker = SGW_MARKER;
-	data += sizeof(int16_t);
-
-	int16_t* pv = reinterpret_cast<int16_t*>(data);
-	*pv = SGW_VERSION;
-	data += sizeof(int16_t);
-
-	data += sizeof(int16_t); // reserved
-
-	int16_t* pSize = reinterpret_cast<int16_t*>(data);
-	*pSize = size;
-	data += sizeof(int16_t);
-
-	int16_t* packetType = reinterpret_cast<int16_t*>(data);
-	*packetType = dataType;
-	data += sizeof(int16_t);*/
-
 
 	int16_t* crc = reinterpret_cast<int16_t*>(result.data() + size - sizeof(int16_t));
 	*crc = calcCrc16(result.data(), size - sizeof(int16_t));
@@ -438,7 +401,7 @@ QByteArray SimTestUDPWorker::createRequestRead(const QString& signalID)
 	bool isMultypleSignals = signalID.contains('|');
 	int signalCount = 1;
 
-	if (isMultypleSignals)
+	if (isMultypleSignals ==true)
 	{
 		signalCount = signalID.count('|') + 1;
 	}
@@ -457,34 +420,13 @@ QByteArray SimTestUDPWorker::createRequestRead(const QString& signalID)
 	packet->packetType = SGW_SIGNAL_READ;
 	data += sizeof(SimulatorBridgePacket);
 
-	/*
-	char* data = result.data();
-
-	int16_t* marker = reinterpret_cast<int16_t*>(data);
-	*marker = SGW_MARKER;
-	data += sizeof(int16_t);
-
-	int16_t* pv = reinterpret_cast<int16_t*>(data);
-	*pv = SGW_VERSION;
-	data += sizeof(int16_t);
-
-	data += sizeof(int16_t); // reserved
-
-	int16_t* pSize = reinterpret_cast<int16_t*>(data);
-	*pSize = size;
-	data += sizeof(int16_t);
-
-	int16_t* packetType = reinterpret_cast<int16_t*>(data);
-	*packetType = SGW_SIGNAL_READ;
-	data += sizeof(int16_t);*/
-
 	int16_t* signalIDCount = reinterpret_cast<int16_t*>(data);
 	*signalIDCount = signalCount;
 	data += sizeof(int16_t);
 
 	// Calculate hash
-
-	if (isMultypleSignals)
+	//
+	if (isMultypleSignals == true)
 	{
 		QStringList signalIDs = signalID.split('|', Qt::SkipEmptyParts);
 
@@ -517,7 +459,7 @@ QByteArray SimTestUDPWorker::createRequestWrite(const QString& signalID, const Q
 	bool isMultypleSignals = signalID.contains('|');
 	int signalCount = 1;
 
-	if (isMultypleSignals)
+	if (isMultypleSignals == true)
 	{
 		signalCount = signalID.count('|') + 1;
 	}
@@ -537,32 +479,11 @@ QByteArray SimTestUDPWorker::createRequestWrite(const QString& signalID, const Q
 	packet->packetType = SGW_SIGNAL_WRITE;
 	data += sizeof(SimulatorBridgePacket);
 
-	/*	int16_t* marker = reinterpret_cast<int16_t*>(data);
-		*marker = SGW_MARKER;
-		data += sizeof(int16_t);
-
-		int16_t* pv = reinterpret_cast<int16_t*>(data);
-		*pv = SGW_VERSION;
-		data += sizeof(int16_t);
-
-		data += sizeof(int16_t); // reserved
-
-
-		int16_t* pSize = reinterpret_cast<int16_t*>(data);
-		*pSize = size;
-		data += sizeof(int16_t);
-
-
-		int16_t* packetType = reinterpret_cast<int16_t*>(data);
-		*packetType = SGW_SIGNAL_WRITE;
-		data += sizeof(int16_t);*/
-
 	int16_t* signalIDCount = reinterpret_cast<int16_t*>(data);
 	*signalIDCount = signalCount;
 	data += sizeof(int16_t);
 
-
-	if (isMultypleSignals)
+	if (isMultypleSignals == true)
 	{
 		QStringList signalIDList = signalID.split('|', Qt::SkipEmptyParts);
 		for (const QString& id : signalIDList)
@@ -580,7 +501,8 @@ QByteArray SimTestUDPWorker::createRequestWrite(const QString& signalID, const Q
 	}
 
 	// SignalValue v;
-	if (isMultypleSignals)
+	//
+	if (isMultypleSignals == true)
 	{
 		QStringList valueList = value.split('|', Qt::SkipEmptyParts);
 		for (const QString& valueNumber : valueList)
@@ -618,6 +540,7 @@ QByteArray SimTestUDPWorker::createRequestWrite(const QString& signalID, const Q
 			valueData->fValue = value.toFloat();
 		}
 		//*valueData = v;
+		//
 		data += sizeof(SignalValue);
 	}
 
@@ -628,7 +551,7 @@ QByteArray SimTestUDPWorker::createRequestWrite(const QString& signalID, const Q
 	return result;
 }
 
-void SimTestUDPWorker::timerEvent(QTimerEvent* event)
+void SimTestUDPWorker::timerEvent(QTimerEvent* /*event*/)
 {
 	getStat();
 }
@@ -641,8 +564,8 @@ void SimTestUDPWorker::setValueType(SignalType type)
 SimTestUDPController::SimTestUDPController()
 {
 	SimTestUDPWorker* worker = new SimTestUDPWorker;
-	worker->moveToThread(&workerThread);
-	connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater);
+	worker->moveToThread(&m_workerThread);
+	connect(&m_workerThread, &QThread::finished, worker, &QObject::deleteLater);
 
 	connect(this, &SimTestUDPController::operateGetStat, worker, &SimTestUDPWorker::getStat);
 	connect(this, &SimTestUDPController::operateRead, worker, &SimTestUDPWorker::read);
@@ -659,13 +582,13 @@ SimTestUDPController::SimTestUDPController()
 
 	connect(this, &SimTestUDPController::setValueType, worker, &SimTestUDPWorker::setValueType);
 
-	workerThread.start();
+	m_workerThread.start();
 }
 
 SimTestUDPController::~SimTestUDPController()
 {
-	workerThread.quit();
-	workerThread.wait();
+	m_workerThread.quit();
+	m_workerThread.wait();
 }
 
 void SimTestUDPController::setShowServerState(bool enable)

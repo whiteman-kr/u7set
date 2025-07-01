@@ -1,7 +1,9 @@
 #pragma once
 
 #include <QWidget>
-#include <QRadioButton>
+
+class RWMultiToolBox;
+class QRadioButton;
 
 class MainWindow : public QWidget
 {
@@ -15,13 +17,12 @@ signals:
 
 private:
 	void setupUi();
-	void setupMenu();
-
-	QWidget* serverStateVisible = nullptr;
-	QRadioButton* analogBtn = nullptr;
-	QRadioButton* boolBtn = nullptr;
-	QRadioButton* discreteBtn = nullptr;
 	void saveValueTypeSelection();
 	void loadValueTypeSelection();
-	
+	void onEditCsvActionTriggered(RWMultiToolBox* rwMultiToolBox);
+
+private:
+	QRadioButton* m_analogBtn = nullptr;
+	QRadioButton* m_boolBtn = nullptr;
+	QRadioButton* m_discreteBtn = nullptr;
 };

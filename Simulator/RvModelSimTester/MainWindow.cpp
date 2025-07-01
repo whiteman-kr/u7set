@@ -1,11 +1,11 @@
 #include "MainWindow.h"
+#include "CSVEditorDialog.h"
 #include "DialogSettings.h"
 #include "LogModule.h"
-#include "RWMultyToolBox.h"
+#include "RWMultiToolBox.h"
 #include "RWToolBox.h"
 #include "SimControlModule.h"
 #include "SimTestUDPThread.h"
-#include "CSVEditorDialog.h"
 
 #include <QGroupBox>
 #include <QMenuBar>
@@ -14,60 +14,59 @@
 #include <QTabWidget>
 #include <QVBoxLayout>
 
+
 MainWindow::MainWindow(QWidget* parent) :
 	QWidget(parent)
 {
 	setupUi();
-
 	// Load settings size
-	QSettings settings("Geo", "SimulationTester");
-	restoreGeometry(settings.value("MainWindow/geometry").toByteArray());
+	restoreGeometry(QSettings().value("MainWindow/geometry").toByteArray());
 }
 
 void MainWindow::setupUi()
 {
 	// Create main window
 	QMenuBar* menuBar = new QMenuBar(this);
-	QMenu* menu = menuBar->addMenu("Menu");
+	QMenu* menu = menuBar->addMenu(tr("Menu"));
 
-	QAction* showServerStateAction = menu->addAction("Ping Server State Continiously");
+	QAction* showServerStateAction = menu->addAction(tr("Ping Server State Continuously"));
 	showServerStateAction->setCheckable(true);
 	showServerStateAction->setChecked(true);
-	showServerStateAction->setToolTip("Toggle continuous server state pinging");
+	showServerStateAction->setToolTip(tr("Toggle continuous server state pinging"));
 
-	QAction* editCsvAction = menu->addAction("Edit Signal CSV...");
-	QAction* openMenuAction = menu->addAction("Settings..");
+	QAction* editCsvAction = menu->addAction(tr("Edit Signal CSV..."));
+	QAction* openMenuAction = menu->addAction(tr("Settings.."));
 
 	// Create UDP thread
 	SimTestUDPController* controller = new SimTestUDPController();
 
 	// Create r/wToolBox
 	RWToolBox* rwToolBox = new RWToolBox(this);
-	RWMultyToolBox* rwMultiToolBox = new RWMultyToolBox(this);
+	RWMultiToolBox* rwMultiToolBox = new RWMultiToolBox(this);
 
 	// Create a QTabWidget for read/write toolboxes
 	QTabWidget* rwTabWidget = new QTabWidget(this);
-	rwTabWidget->addTab(rwToolBox, "Single Read/Write");
-	rwTabWidget->addTab(rwMultiToolBox, "Multi Read/Write");
+	rwTabWidget->addTab(rwToolBox, tr("Single Read/Write"));
+	rwTabWidget->addTab(rwMultiToolBox, tr("Multi Read/Write"));
 
 
 	// Create buttons for different value types
-	analogBtn = new QRadioButton("Analog Values", this);
-	boolBtn = new QRadioButton("Bool Values", this);
-	discreteBtn = new QRadioButton("Float Values", this);
+	m_analogBtn = new QRadioButton(tr("Analog Values"), this);
+	m_boolBtn = new QRadioButton(tr("Bool Values"), this);
+	m_discreteBtn = new QRadioButton(tr("Float Values"), this);
 
 	// Load saved selection
 	loadValueTypeSelection();
 
-	// Chack buttons
+	// Check buttons
 	QHBoxLayout* buttonLayout = new QHBoxLayout;
-	buttonLayout->addWidget(analogBtn);
-	buttonLayout->addWidget(boolBtn);
-	buttonLayout->addWidget(discreteBtn);
+	buttonLayout->addWidget(m_analogBtn);
+	buttonLayout->addWidget(m_boolBtn);
+	buttonLayout->addWidget(m_discreteBtn);
 
 
 	// GroupBox for RWToolBox and RWMultyToolBox
-	QGroupBox* rwGroup = new QGroupBox("Read/Write Toolbox", this);
+	QGroupBox* rwGroup = new QGroupBox(tr("Read/Write Toolbox"), this);
 	QVBoxLayout* rwLayout = new QVBoxLayout;
 	rwLayout->addWidget(rwTabWidget);
 	rwLayout->addLayout(buttonLayout);
@@ -77,7 +76,7 @@ void MainWindow::setupUi()
 	SimControlModule* simControl = new SimControlModule(this);
 
 	// GroupBox for SimControl
-	QGroupBox* simGroup = new QGroupBox("Simulation Control Action", this);
+	QGroupBox* simGroup = new QGroupBox(tr("Simulation Control Action"), this);
 	QVBoxLayout* simLayout = new QVBoxLayout;
 	simLayout->addWidget(simControl);
 	simGroup->setLayout(simLayout);
@@ -86,7 +85,7 @@ void MainWindow::setupUi()
 	LogModule* actionLog = new LogModule(this);
 
 	// GroupBox for LogModule
-	QGroupBox* logGroup = new QGroupBox("Simulation Log", this);
+	QGroupBox* logGroup = new QGroupBox(tr("Simulation Log"), this);
 	QVBoxLayout* logLayout = new QVBoxLayout;
 	logLayout->addWidget(actionLog);
 	logGroup->setLayout(logLayout);
@@ -102,7 +101,7 @@ void MainWindow::setupUi()
 	setLayout(mainLayout);
 
 
-	// All conections
+	// All connections
 	connect(showServerStateAction, &QAction::toggled, this, &MainWindow::serverState);
 	connect(showServerStateAction, &QAction::toggled, controller, &SimTestUDPController::setShowServerState);
 
@@ -111,19 +110,9 @@ void MainWindow::setupUi()
 			this,
 			[this, rwMultiToolBox]()
 			{
-				CsvEditorDialog* dlg = new CsvEditorDialog("signals.csv", this);
-
-				connect(dlg,
-						&CsvEditorDialog::csvSaved,
-						this,
-						[rwMultiToolBox](const QString& path)
-						{
-							rwMultiToolBox->updateSignalFromCSV(path);
-							// Optionally: update table view or notify user
-						});
-
-				dlg->exec();
+				onEditCsvActionTriggered(rwMultiToolBox);
 			});
+
 	connect(openMenuAction,
 			&QAction::triggered,
 			this,
@@ -144,21 +133,23 @@ void MainWindow::setupUi()
 	connect(rwToolBox, &RWToolBox::requestRead, controller, &SimTestUDPController::operateRead);
 	connect(rwToolBox, &RWToolBox::requestWrite, controller, &SimTestUDPController::operateWrite);
 
-	connect(analogBtn,
+	connect(m_analogBtn,
 			&QRadioButton::clicked,
 			[rwMultiToolBox, controller]()
 			{
 				rwMultiToolBox->setValueType(SignalType::AnalogInt32);
 				controller->setValueType(SignalType::AnalogInt32);
 			});
-	connect(boolBtn,
+
+	connect(m_boolBtn,
 			&QRadioButton::clicked,
 			[rwMultiToolBox, controller]()
 			{
 				rwMultiToolBox->setValueType(SignalType::Discrete);
 				controller->setValueType(SignalType::Discrete);
 			});
-	connect(discreteBtn,
+
+	connect(m_discreteBtn,
 			&QRadioButton::clicked,
 			[rwMultiToolBox, controller]()
 			{
@@ -166,20 +157,20 @@ void MainWindow::setupUi()
 				controller->setValueType(SignalType::AnalogFloat);
 			});
 
-	connect(rwMultiToolBox, &RWMultyToolBox::requestRead, controller, &SimTestUDPController::operateRead);
-	connect(rwMultiToolBox, &RWMultyToolBox::requestWrite, controller, &SimTestUDPController::operateWrite);
+	connect(rwMultiToolBox, &RWMultiToolBox::requestRead, controller, &SimTestUDPController::operateRead);
+	connect(rwMultiToolBox, &RWMultiToolBox::requestWrite, controller, &SimTestUDPController::operateWrite);
 
 
 	auto saveSelection = [this]()
 	{
 		saveValueTypeSelection();
 	};
-	connect(analogBtn, &QRadioButton::toggled, this, saveSelection);
-	connect(boolBtn, &QRadioButton::toggled, this, saveSelection);
-	connect(discreteBtn, &QRadioButton::toggled, this, saveSelection);
+	connect(m_analogBtn, &QRadioButton::toggled, this, saveSelection);
+	connect(m_boolBtn, &QRadioButton::toggled, this, saveSelection);
+	connect(m_discreteBtn, &QRadioButton::toggled, this, saveSelection);
 
 	// Name and size
-	setWindowTitle("Simulation Tester");
+	setWindowTitle(tr("Simulation Tester"));
 	resize(890, 660);
 	setMinimumSize(660, 580);
 }
@@ -187,40 +178,61 @@ void MainWindow::setupUi()
 MainWindow::~MainWindow()
 {
 	// Save window size
-	QSettings settings("Geo", "SimulationTester");
+	QSettings settings;
 	settings.setValue("MainWindow/geometry", saveGeometry());
 }
 
- void MainWindow::saveValueTypeSelection()
+void MainWindow::saveValueTypeSelection()
 {
-	QSettings settings("Geo", "SimulationTester");
+	QSettings settings;
 	int selected = 0;
-	if (analogBtn->isChecked())
+	if (m_analogBtn->isChecked())
+	{
 		selected = 0;
-	else if (boolBtn->isChecked())
+	}
+	else if (m_boolBtn->isChecked())
+	{
 		selected = 1;
-	else if (discreteBtn->isChecked())
+	}
+	else if (m_discreteBtn->isChecked())
+	{
 		selected = 2;
+	}
 	settings.setValue("MainWindow/valueTypeSelection", selected);
 }
 
 void MainWindow::loadValueTypeSelection()
 {
-	QSettings settings("Geo", "SimulationTester");
+	QSettings settings;
 	int selected = settings.value("MainWindow/valueTypeSelection", 0).toInt();
 	switch (selected)
 	{
 	case 0:
-		analogBtn->setChecked(true);
+		m_analogBtn->setChecked(true);
 		break;
 	case 1:
-		boolBtn->setChecked(true);
+		m_boolBtn->setChecked(true);
 		break;
 	case 2:
-		discreteBtn->setChecked(true);
+		m_discreteBtn->setChecked(true);
 		break;
 	default:
-		analogBtn->setChecked(true);
+		m_analogBtn->setChecked(true);
 		break;
 	}
+}
+
+void MainWindow::onEditCsvActionTriggered(RWMultiToolBox* rwMultiToolBox)
+{
+	CsvEditorDialog* dlg = new CsvEditorDialog(RWMultiToolBox::m_signalsFileName, this);
+
+	connect(dlg,
+			&CsvEditorDialog::csvSaved,
+			this,
+			[rwMultiToolBox](const QString& path)
+			{
+				rwMultiToolBox->updateSignalFromCSV(path);
+			});
+
+	dlg->exec();
 }

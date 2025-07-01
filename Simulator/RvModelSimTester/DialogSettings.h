@@ -19,10 +19,8 @@ private slots:
 	void accept() override;
 
 private:
-	QLineEdit* ipEdit = nullptr;
-	QLineEdit* portRemoteEdit = nullptr;
-	QLineEdit* portLocalEdit = nullptr;
-	QLabel* statusLabel = nullptr;
-
-	const QString settingsFile = "settings.ini";
+	QLineEdit* m_ipEdit = nullptr;
+	QLineEdit* m_portRemoteEdit = nullptr;
+	QLineEdit* m_portLocalEdit = nullptr;
+	QLabel* m_statusLabel = nullptr;
 };

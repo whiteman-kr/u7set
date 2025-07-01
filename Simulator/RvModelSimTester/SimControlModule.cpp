@@ -1,10 +1,8 @@
 #include "SimControlModule.h"
 
-#include <QFormLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
 
@@ -14,22 +12,22 @@ SimControlModule::SimControlModule(QWidget* parent) :
 	QWidget(parent)
 {
 	QGroupBox* box = new QGroupBox("", this);
-	startButton = new QPushButton("Start sim", this);
-	stopButton = new QPushButton("Stop sim", this);
-	pauseButton = new QPushButton("Pause", this);
-	resumeButton = new QPushButton("Resume", this);
-	statusBar = new QLabel("Mode: ???", this);
-	statusBar->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-	statusBar->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+	m_startButton = new QPushButton(tr("Start Sim"), this);
+	m_stopButton = new QPushButton(tr("Stop Sim"), this);
+	m_pauseButton = new QPushButton(tr("Pause"), this);
+	m_resumeButton = new QPushButton(tr("Resume"), this);
+	m_statusBar = new QLabel(tr("Mode: ???"), this);
+	m_statusBar->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+	m_statusBar->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
 
 	QHBoxLayout* layout = new QHBoxLayout;
-	layout->addWidget(startButton);
-	layout->addWidget(stopButton);
-	layout->addWidget(pauseButton);
-	layout->addWidget(resumeButton);
+	layout->addWidget(m_startButton);
+	layout->addWidget(m_stopButton);
+	layout->addWidget(m_pauseButton);
+	layout->addWidget(m_resumeButton);
 	layout->addStretch();
-	layout->addWidget(statusBar);
+	layout->addWidget(m_statusBar);
 	layout->addStretch();
 
 	box->setLayout(layout);
@@ -40,43 +38,44 @@ SimControlModule::SimControlModule(QWidget* parent) :
 
 	setLayout(mainLayout);
 
-	connect(startButton, &QPushButton::clicked, this, &SimControlModule::onStartClicked);
-	connect(stopButton, &QPushButton::clicked, this, &SimControlModule::onStopClicked);
-	connect(pauseButton, &QPushButton::clicked, this, &SimControlModule::onPauseClicked);
-	connect(resumeButton, &QPushButton::clicked, this, &SimControlModule::onResumeClicked);
+	connect(m_startButton, &QPushButton::clicked, this, &SimControlModule::onStartClicked);
+	connect(m_stopButton, &QPushButton::clicked, this, &SimControlModule::onStopClicked);
+	connect(m_pauseButton, &QPushButton::clicked, this, &SimControlModule::onPauseClicked);
+	connect(m_resumeButton, &QPushButton::clicked, this, &SimControlModule::onResumeClicked);
 }
 
 void SimControlModule::onSimStateReady(int errorCode, int stateCode)
 {
-	if (errorCode == ErrorCode::Success) {
-		statusBar->setText(QString("Mode: %1").arg(simStateToString(static_cast<SimulatorStateCode>(stateCode))));
+	if (errorCode == ErrorCode::Success)
+	{
+		m_statusBar->setText(QString(tr("Mode: %1")).arg(simStateToString(static_cast<SimulatorStateCode>(stateCode))));
 	}
-	else {
-		statusBar->setText(QString("Error: %1").arg(errorCodeToString(static_cast<ErrorCode>(errorCode))));
+	else
+	{
+		m_statusBar->setText(QString(tr("Error: %1")).arg(errorCodeToString(static_cast<ErrorCode>(errorCode))));
 	}
-	
 }
 
 void SimControlModule::onStartClicked()
 {
 	simControlMode("Start");
-	emit simAction("Start sim button pressed");
+	emit simAction(tr("Start sim button pressed"));
 }
 
 void SimControlModule::onStopClicked()
 {
 	simControlMode("Stop");
-	emit simAction("Stop sim button pressed");
+	emit simAction(tr("Stop sim button pressed"));
 }
 
 void SimControlModule::onPauseClicked()
 {
 	simControlMode("Pause");
-	emit simAction("Pause button pressed ");
+	emit simAction(tr("Pause button pressed "));
 }
 
 void SimControlModule::onResumeClicked()
 {
 	simControlMode("Resume");
-	emit simAction("Resume button pressed");
+	emit simAction(tr("Resume button pressed"));
 }

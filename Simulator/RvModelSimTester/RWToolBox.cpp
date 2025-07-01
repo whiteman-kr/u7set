@@ -1,8 +1,8 @@
 #include "RWToolBox.h"
+
 #include <QCompleter>
 #include <QFormLayout>
 #include <QGroupBox>
-#include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QSettings>
@@ -15,44 +15,44 @@ RWToolBox::RWToolBox(QWidget* parent) :
 {
 	QGroupBox* box = new QGroupBox("", this);
 
-	signalIdEdit = new QLineEdit(this);
+	m_signalIdEdit = new QLineEdit(this);
 
 
-	readButton = new QPushButton("Read", this);
-	writeValueEdit = new QLineEdit(this);
-	writeButton = new QPushButton("Write", this);
+	m_readButton = new QPushButton(tr("Read"), this);
+	m_writeValueEdit = new QLineEdit(this);
+	m_writeButton = new QPushButton(tr("Write"), this);
 
 	QFormLayout* formLayout = new QFormLayout;
-	formLayout->addRow("Signal ID:", signalIdEdit);
+	formLayout->addRow(tr("Signal ID:"), m_signalIdEdit);
 
 
 	QString lastSignalId = "#SYSTEMID_RACKID_CH01_MD02_CTRLIN_IN01A";
-	signalIdModel = new QStringListModel(this);
-	signalIdModel->setStringList({lastSignalId});
+	m_signalIdModel = new QStringListModel(this);
+	m_signalIdModel->setStringList({lastSignalId});
 
 	QSettings settings;
 	QString lastSaved = settings.value("lastSignalId").toString();
 	if (!lastSaved.isEmpty())
 	{
-		signalIdModel->setStringList({lastSaved});
+		m_signalIdModel->setStringList({lastSaved});
 	}
 
-	signalIdCompleter = new QCompleter(signalIdModel, this);
-	signalIdCompleter->setCompletionMode(QCompleter::InlineCompletion);
-	signalIdCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-	signalIdEdit->setCompleter(signalIdCompleter);
+	m_signalIdCompleter = new QCompleter(m_signalIdModel, this);
+	m_signalIdCompleter->setCompletionMode(QCompleter::InlineCompletion);
+	m_signalIdCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	m_signalIdEdit->setCompleter(m_signalIdCompleter);
 
 
 	QHBoxLayout* readLayout = new QHBoxLayout;
 	readLayout->addStretch();
-	readLayout->addWidget(readButton);
+	readLayout->addWidget(m_readButton);
 	formLayout->addRow("", readLayout);
 
 
 	QHBoxLayout* writeLayout = new QHBoxLayout;
-	writeLayout->addWidget(writeValueEdit);
-	writeLayout->addWidget(writeButton);
-	formLayout->addRow("Value:", writeLayout);
+	writeLayout->addWidget(m_writeValueEdit);
+	writeLayout->addWidget(m_writeButton);
+	formLayout->addRow(tr("Value:"), writeLayout);
 
 	box->setLayout(formLayout);
 
@@ -61,33 +61,33 @@ RWToolBox::RWToolBox(QWidget* parent) :
 	mainLayout->addStretch();
 	setLayout(mainLayout);
 
-	connect(signalIdEdit,
+	connect(m_signalIdEdit,
 			&QLineEdit::editingFinished,
 			[this]()
 			{
-				QString currentText = signalIdEdit->text();
-				if (!currentText.isEmpty())
+				QString currentText = m_signalIdEdit->text();
+				if (currentText.isEmpty() == false)
 				{
 					QSettings settings;
 					settings.setValue("lastSignalId", currentText);
 
-					signalIdModel->setStringList({currentText});
+					m_signalIdModel->setStringList({currentText});
 				}
 			});
 
-	connect(readButton, &QPushButton::clicked, this, &RWToolBox::onReadClicked);
-	connect(writeButton, &QPushButton::clicked, this, &RWToolBox::onWriteClicked);
+	connect(m_readButton, &QPushButton::clicked, this, &RWToolBox::onReadClicked);
+	connect(m_writeButton, &QPushButton::clicked, this, &RWToolBox::onWriteClicked);
 }
 
 void RWToolBox::onReadClicked()
 {
-	QString signalId = signalIdEdit->text();
+	QString signalId = m_signalIdEdit->text();
 	requestRead(signalId);
 }
 
 void RWToolBox::onWriteClicked()
 {
-	QString signalId = signalIdEdit->text();
-	QString value = writeValueEdit->text();
+	QString signalId = m_signalIdEdit->text();
+	QString value = m_writeValueEdit->text();
 	requestWrite(signalId, value);
 }
