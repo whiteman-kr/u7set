@@ -105,6 +105,14 @@ option(UPDATE_TRANSLATIONS "Update Translations" OFF)
 #
 option(ALLOW_FTDI "Allow FTDI" OFF)
 
+# Allow RV Module - RAES NTC
+#
+option(RV_MODEL "RV Model" OFF)
+
+if (DEFINED ENV{CI_RV_MODEL})
+	set(RV_MODEL ON)
+endif()
+
 # Build Licenser
 #
 option(BUILD_LICENSER "Build Licenser" OFF)
@@ -149,6 +157,7 @@ message("VCPKG_ROOT: ${VCPKG_ROOT}")
 message("Allow FTDI: ${ALLOW_FTDI}")
 message("Build Licenser: ${BUILD_LICENSER}")
 message("Small Unit Tests: ${BUILD_SMALL_TESTS}")
+message("RV Model: ${RV_MODEL}")
 message("-----------------------------------------")
 
 # Add projects.

@@ -1,10 +1,10 @@
 variables:
   GIT_DEPTH: "1"
 
-  # Version. Set to the desired release type "Default" or "Stable"
+  # Version. Set to the desired release type "Default" or "Stable"/
   #
-  CI_RELEASE_TYPE: "Default"    # Set to the desired release type "Default" or "Stable"
-  CI_MAJOR_VERSION: "11"        # Odd is for development, even is for release
+  CI_RELEASE_TYPE: "Default"    # Set to the desired release type "Default" or "Stable".
+  CI_MAJOR_VERSION: "11"        # Odd is for development, even is for release.
   CI_MINOR_VERSION: "0"
   CI_PATCH_VERSION: "0"         # Path version for Default release is ignored and set to pipeline id.
 
@@ -16,6 +16,8 @@ variables:
   PGPASSWORD: "P2ssw0rd"
 
   CTEST_OUTPUT_ON_FAILURE: "1"
+  
+  CI_RV_MODEL: "1"              # Build RV Model projects (RAES NTC), comment out to disable.
 
 stages:
   - prepare

@@ -37,4 +37,6 @@ target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)
 
-add_subdirectory(example)
+if(RV_MODEL)
+	add_subdirectory(example)
+endif()
