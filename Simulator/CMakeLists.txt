@@ -1,41 +1,21 @@
-cmake_minimum_required(VERSION 3.16)
-
-project(Simulator LANGUAGES CXX)
-
-include(../cmake/vld.cmake)
-
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-#set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../lib/Ui ${CMAKE_CURRENT_SOURCE_DIR}/../libs/SchemaClientLib)
-
-find_package(Qt6 REQUIRED COMPONENTS Gui Widgets)
-qt_standard_project_setup()
-
-# Add icon
 #
-if (MSVC)
-	set (WINDOWS_RESOURCES ./WinResources/WinResources.rc)
-endif (MSVC)
-
-set(TARGET Simulator)
-
-add_executable(${TARGET} WIN32
-	./src/Main.cpp
-	./src/SimPropertyStorage.cpp
-	./src/SimPropertyStorage.h
-
-	${WINDOWS_RESOURCES}
-)
-
-target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
-
-target_link_libraries(${TARGET} PRIVATE Qt6::Widgets)
-target_link_libraries(${TARGET} PRIVATE CommonLib LicenseLib HardwareLib VFrame30 SimulatorUi)
-
-# Link Visaul Leak Detector
+# Simulator related projects
 #
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(${TARGET} PRIVATE vld.lib)
+
+add_subdirectory(SimServiceClientLib)
+add_subdirectory(SimulatorConsole)
+add_subdirectory(SimulatorLib)
+add_subdirectory(SimulatorTests)
+
+# Add the SimulatorUi project only if code coverage is not enabled
+# mosth likely this is a test build, so we don't need the UI
+#
+if(NOT CODE_COVERAGE)
+	add_subdirectory(Simulator)
+	add_subdirectory(SimulatorUi)
+
+	if(RV_MODEL)
+		add_subdirectory(RvModelSimBridge)
+		add_subdirectory(RvModelSimTester)
+	endif()
 endif()

@@ -3,7 +3,7 @@
 #include <QDialog>
 #include <vector>
 
-// #include "../AppSignalLib/AppSignalParam.h" // This must be included viar precompiled header
+// #include "../AppSignalLib/AppSignalParam.h" // This must be included via precompiled header
 #include "../AppSignalLib/TuningValue.h"
 
 class QPushButton;

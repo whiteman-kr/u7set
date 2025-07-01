@@ -138,7 +138,7 @@ class AppSignalState
 	[[nodiscard]] bool isOutOfLimits() const; //  isAboveHighLimit() || isBelowLowLimit()
 	[[nodiscard]] bool isTuningDefault() const;
 
-	void save(Proto::AppSignalState* protoState);
+	void save(Proto::AppSignalState* protoState) const;
 	Hash load(const Proto::AppSignalState& protoState);
 
 	[[nodiscard]] bool hasSameValue(const AppSignalState& b) const;

@@ -9441,7 +9441,14 @@ namespace Builder
 	///
 	void IssueLogger::errEQP6222(QString listId, QString listCaption)
 	{
-		LOG_ERROR(IssueType::Equipment, 6222, tr("Application signal list ID %1 (%2) is not unique.").arg(listId));
+		if (listCaption.isEmpty() == true)
+		{
+			LOG_ERROR(IssueType::Equipment, 6222, tr("Application Signal List ID '%1' is not unique.").arg(listId));
+		}
+		else
+		{
+			LOG_ERROR(IssueType::Equipment, 6222, tr("ApplicationSignal List ID '%1' ('%2') is not unique.").arg(listId).arg(listCaption));
+		}
 	}
 
 	/// IssueCode: EQP6251

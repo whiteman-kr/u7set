@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "../AppSignalLib/AppSignalState.h"
+// #include "../AppSignalLib/AppSignalState.h" // This must be included via precompiled header
 
 class ISignalManager
 {

@@ -1722,8 +1722,6 @@ namespace VFrame30
 	{
 		if (columnIndex < 0 || columnIndex >= static_cast<int>(m_columns.size()))
 		{
-			assert(columnIndex >= 0);
-			assert(columnIndex < static_cast<int>(m_columns.size()));
 			return;
 		}
 

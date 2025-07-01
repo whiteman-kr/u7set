@@ -146,7 +146,7 @@ TEST_OUTPUT_FILE="Builder.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # Simulator
-TEST_DIR="./build/libs/SimulatorLib/CMakeFiles/SimulatorLib.dir"
+TEST_DIR="./build/Simulator/SimulatorLib/CMakeFiles/SimulatorLib.dir"
 TEST_OUTPUT_FILE="SimulatorLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 

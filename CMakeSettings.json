@@ -18,16 +18,9 @@
             "inheritEnvironments": [ "msvc_x64" ],
             "buildRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}",
             "installRoot": "${projectDir}\\..\\build-${projectDirName}-vc-${name}\\install",
-            "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64",
+            "cmakeCommandArgs": "-DCMAKE_PREFIX_PATH=C:\\Qt\\6.8.1\\msvc2022_64 -DCMAKE_CXX_FLAGS=\"/fsanitize=address /EHsc\" -DCMAKE_C_FLAGS=\"/fsanitize=address /EHsc\"",
             "buildCommandArgs": "",
-            "ctestCommandArgs": "",
-            "variables": [
-                {
-                    "name": "ADDRESS_SANITIZER",
-                    "value": "True",
-                    "type": "BOOL"
-                }
-            ]
+            "ctestCommandArgs": ""
         },
         {
             "name": "Debug-UpdateTranslations",

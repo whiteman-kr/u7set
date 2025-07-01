@@ -1,0 +1,337 @@
+syntax = "proto2";
+
+import "AppSignal.proto";
+
+package RpctGrpc;
+
+
+enum SimulatorState
+{
+    STATE_STOPPED = 0;
+    STATE_RUNNING = 1;
+    STATE_PAUSED = 2;
+}
+
+enum ModuleFlagId
+{
+    // LogicModule flags
+    //
+    MF_LM_BOOL_FAULT = 2;                // ReadOnly
+    MF_LM_BOOL_POWER_ON = 3;
+    MF_LM_BOOL_ARMING_KEY = 10;
+    MF_LM_BOOL_TUNING_KEY = 11;
+    MF_LM_BOOL_SOR_IS_SET = 20;          // ReadOnly
+    MF_LM_BOOL_SOR_SET_SWITCH_1 = 21;
+    MF_LM_BOOL_SOR_SET_SWITCH_2 = 22;
+    MF_LM_BOOL_SOR_SET_SWITCH_3 = 23;
+    MF_LM_BOOL_SOR_RESET = 27;           // WriteOnly, only setting `true` has sense.
+}
+
+message ModuleFlagValue
+{
+    oneof ValueOneOf
+    {
+        bool boolValue = 1;
+        double doubleValue = 2;
+        int32 int32Value = 3;
+        int64 int64Value = 4;
+    }
+}
+
+message ModuleFlagPair
+{
+    optional ModuleFlagId id = 1;
+    optional ModuleFlagValue value = 2;
+}
+
+message ModuleState
+{
+    optional string equipmentId = 2;
+    map<int32, ModuleFlagValue> flags = 4;
+    oneof ModuleOneOf
+    {
+        LogicModule logicModule = 3;
+    }
+}
+
+message LogicModule
+{
+    optional string subsystemId = 3;
+    optional int32 lmNumber = 7;
+    optional int32 channel = 8;         // 0 - A, 1 - B, 2 - C, 3 - D
+} 
+
+
+//
+// Ping
+//
+message PingRequest
+{
+    optional bytes payload = 2;
+}
+
+message PongReply
+{
+    optional bytes payload = 2;
+}
+
+//
+// GetStatus
+//
+message GetStatusRequest
+{
+}
+
+message GetStatusReply
+{
+    optional string project = 3;
+    optional SimulatorState state = 4;
+    optional int64 leftTimeMcs = 10;  // Do not use this; it does not represent any meaningful value.
+    optional int64 durationMcs = 11;  // Do not use this; it does not represent any meaningful value.
+}
+
+//
+// CommandStart
+//
+message CommandStartRequest
+{
+    repeated string logicModules = 2;   // Run simulation for these modules, empty means run for all LMs
+    optional int64 durationMcs = 3;     // Simulate microseconds, -1 - Run simulation till pause or stop.
+    optional double speedFactor = 4;    // Speed multiplier: 0.1 means ten times slower, 1.0 means simulate in real time.
+}
+
+message CommandStartReply
+{
+    optional SimulatorState state = 4;
+}
+
+//
+// CommandPause
+//
+message CommandPauseRequest
+{
+}
+
+message CommandPauseReply
+{
+    optional SimulatorState state = 4;
+}
+
+//
+// CommandStop
+//
+message CommandStopRequest
+{
+}
+
+message CommandStopReply
+{
+    optional SimulatorState state = 4;
+}
+
+//
+// GetModuleList
+//
+message GetModuleListRequest
+{
+}
+
+message GetModuleListReply
+{
+    repeated ModuleState modules = 2;
+}
+
+//
+// GetModule
+//
+message GetModuleRequest
+{
+    repeated string equipmentId = 2;
+}
+
+message GetModuleReply
+{
+    repeated ModuleState modules = 2;
+}
+
+//
+// GetSignalList
+//
+message GetSignalListRequest
+{
+}
+
+message GetSignalListReply
+{
+    repeated string appSignalIds = 2;
+}
+
+//
+// GetSignalParam
+//
+message GetSignalParamRequest
+{
+    repeated fixed64 signalHashes = 2; // If empty then get all signals.
+}
+
+message GetSignalParamReply
+{
+    optional uint32 totalSize = 1;             // How many signal params totally will be transfered.
+    optional uint32 replySignalIndex = 2;      // Start index for this reply
+    repeated Proto.AppSignal signalParams = 7;
+}
+
+//
+// SetModuleFlag
+//
+message SetModuleFlagRequest
+{
+    optional string equipmentId = 2;
+    repeated ModuleFlagPair flags = 3;
+}
+
+message SetModuleFlagReply
+{
+    optional ModuleFlagValue updatedValue = 2; // The new value to update, can be empty if error happens or flag cannot be read.
+}
+
+//
+// GetSignalState
+//
+message GetSignalStateRequest
+{
+    repeated fixed64 signalHashes = 2;
+}
+
+message GetSignalStateReply
+{
+    repeated Proto.AppSignalState states = 2;
+}
+
+// 
+// OverrideSignal
+//
+message OverrideSignal
+{
+    optional string appSignalId = 2;
+    oneof ValueOneOf
+    {
+        bool boolValue = 3;      // Discrete
+        double doubleValue = 4;  // Analog double or float
+        int32 int32Value = 5;    // Analog int32
+        string script = 7;       // Script to execute
+    }
+}
+
+message OverrideSignalRequest
+{
+    repeated OverrideSignal appSignals = 2;      // Signals to override
+}
+
+message OverrideSignalResult
+{
+    optional string appSignalId = 2;
+    optional string error = 3;
+}
+
+message OverrideSignalReply
+{
+    repeated OverrideSignalResult errors = 2; // Only errors if any.
+}
+
+//
+// RemoveOverrideSignal
+//
+message RemoveOverrideSignalRequest
+{
+    repeated string appSignalIds = 2; // Sent empty if need just reply which contains list of overridden signals.
+}
+
+message RemoveOverrideSignalReply
+{
+    repeated string overriddenAppSignalIds = 2;
+}
+
+//
+// DisableOverrideSignal
+//
+message DisableOverrideSignalPair
+{
+    optional bool disable = 2;
+    optional string appSignalId = 5;
+}
+
+message DisableOverrideSignalRequest
+{
+    repeated DisableOverrideSignalPair signalPairs = 5;
+}
+
+message DisableOverrideSignalReply
+{
+    // Always returns ALL overridden Signals.
+    //
+    repeated DisableOverrideSignalPair signalPairs = 5;
+}
+
+//
+// TakeSnapshot
+//
+message TakeSnapshotRequest
+{
+    optional string snapshotId = 2;     // SnapshotID to take.
+}
+
+message TakeSnapshotReply
+{
+    optional string snapshotId = 2;     // SnapshotID which was taken.
+    optional uint32 totalSize = 3;      // Total size of the snapshot data.
+    optional bytes snapshotData = 5;    // The chunk of snapshot data.
+    optional string error = 10;         // Error if any.
+}
+
+//
+// ApplySnapshot
+//
+message ApplySnapshotRequest
+{
+    optional uint32 totalSize = 3;      // Total size of the snapshot data.
+    optional bytes snapshotData = 4;    // Snapshot data to apply, can be empty if snapshotId is set.
+}
+
+message ApplySnapshotReply
+{
+    optional string error = 3;          // Error if any.
+}
+
+//
+// SimService -- This service is used to communicate with the simulator.
+//
+service SimService 
+{
+    rpc Ping(PingRequest) returns (PongReply) {}
+
+    rpc GetStatus(GetStatusRequest) returns (GetStatusReply) {}
+    rpc CommandStart(CommandStartRequest) returns (CommandStartReply) {}
+    rpc CommandPause(CommandPauseRequest) returns (CommandPauseReply) {}
+    rpc CommandStop(CommandStopRequest) returns (CommandStopReply) {}
+
+    rpc GetModuleList(GetModuleListRequest) returns (GetModuleListReply) {}
+    rpc GetModule(GetModuleRequest) returns (GetModuleReply) {}
+    rpc SetModuleFlag(SetModuleFlagRequest) returns (SetModuleFlagReply) {}
+
+    rpc GetSignalList(GetSignalListRequest) returns (GetSignalListReply) {}
+    rpc GetSignalParam(GetSignalParamRequest) returns (stream GetSignalParamReply) {}
+    rpc GetSignalState(GetSignalStateRequest) returns (GetSignalStateReply) {}
+
+    rpc OverrideSignal(OverrideSignalRequest) returns (OverrideSignalReply) {}
+    rpc RemoveOverrideSignal(RemoveOverrideSignalRequest) returns (RemoveOverrideSignalReply) {}
+    rpc DisableOverrideSignal(DisableOverrideSignalRequest) returns (DisableOverrideSignalReply) {}
+
+    // Take snapshot, and return a snapshot as a data stream.
+    //
+    rpc TakeSnapshot(TakeSnapshotRequest) returns (stream TakeSnapshotReply) {}
+
+    // Apply snapshot, Transfer snapshot data as a data stream.
+    //
+    rpc ApplySnapshot(stream ApplySnapshotRequest) returns (ApplySnapshotReply) {}
+}

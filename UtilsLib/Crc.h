@@ -47,13 +47,17 @@ const quint32 CRC32_INITIAL_VALUE = 0xFFFFFFFF;
 
 quint32 CRC32(quint32 initialValue, const char* buffer, int len, bool finishCalc);
 
-quint32 CRC32(const char* buffer, int len);
+template<std::integral LenType>
+quint32 CRC32(const char* buffer, LenType len)
+{
+	return CRC32(CRC32_INITIAL_VALUE, buffer, static_cast<int>(len), true);
+}
 
 quint32 CRC32(quint32 initialValue, const QString& str, bool finishCalc);
 
 quint32 CRC32(quint32 initialValue, int value, bool finishCalc);
 
-// CRC16 implementation acording to CCITT standards (x^16 + x^12 + x^2 + 1)
+// CRC16 implementation according to CCITT standards (x^16 + x^12 + x^2 + 1)
 //
 quint16 calcCrc16(const void* buf, int len);
 

@@ -87,15 +87,6 @@ endif()
 option(CODE_COVERAGE "Code coverage (Linux only)" OFF)
 include(./cmake/codecoverage.cmake)
 
-# AddressSanitizer
-#
-option(ADDRESS_SANITIZER "Address Sanitizer" OFF)
-
-if(ADDRESS_SANITIZER)
-	add_compile_options(-fsanitize=address)
-	add_link_options(-fsanitize=address)
-endif()
-
 # UndfineBehaviorSanitizer
 #
 option(UB_SANITIZER "UB Sanitizer" OFF)
@@ -113,6 +104,14 @@ option(UPDATE_TRANSLATIONS "Update Translations" OFF)
 # Allow usage FTDI functions - is used for getting module configurator serial number.
 #
 option(ALLOW_FTDI "Allow FTDI" OFF)
+
+# Allow RV Module - RAES NTC
+#
+option(RV_MODEL "RV Model" OFF)
+
+if (DEFINED ENV{CI_RV_MODEL})
+	set(RV_MODEL ON)
+endif()
 
 # Build Licenser
 #
@@ -145,7 +144,6 @@ else()
 endif()
 message("Build output dir set to: " ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 message("Code coverage: " ${CODE_COVERAGE})
-message("AddressSanitizer: " ${ADDRESS_SANITIZER})
 message("UBSanitizer: " ${UB_SANITIZER})
 message("Update translations: " ${UPDATE_TRANSLATIONS})
 message("CMake executable:  ${CMAKE_COMMAND}")
@@ -159,38 +157,40 @@ message("VCPKG_ROOT: ${VCPKG_ROOT}")
 message("Allow FTDI: ${ALLOW_FTDI}")
 message("Build Licenser: ${BUILD_LICENSER}")
 message("Small Unit Tests: ${BUILD_SMALL_TESTS}")
+message("RV Model: ${RV_MODEL}")
 message("-----------------------------------------")
 
 # Add projects.
 #
-add_subdirectory(UtilsLib)
 add_subdirectory(AppSignalLib)
-add_subdirectory(OnlineLib)
 add_subdirectory(GatewayLib)
+add_subdirectory(OnlineLib)
+add_subdirectory(UtilsLib)
 
 add_subdirectory(libs)
-
-add_subdirectory(SimulatorConsole)
+add_subdirectory(Simulator)
 
 add_subdirectory(Builder)
 add_subdirectory(BuilderConsole)
 
-add_subdirectory(ServiceControlManager)
-add_subdirectory(ConfigurationService)
 add_subdirectory(AppDataService)
 add_subdirectory(ArchivingService)
-add_subdirectory(TuningService)
-add_subdirectory(GatewayService)
+add_subdirectory(ConfigurationService)
 add_subdirectory(DiagDataService)
+add_subdirectory(ServiceControlManager)
+add_subdirectory(TuningService)
 
 add_subdirectory(TestSuiteConsole)
-add_subdirectory(Archivist)
+
+add_subdirectory(Tests)
 
 # Do not compile these projects if code coverage is on.
 #
 if(NOT CODE_COVERAGE)
+	add_subdirectory(GatewayService)
+	add_subdirectory(Archivist)
+
     add_subdirectory(u7)
-	add_subdirectory(Simulator)
 	add_subdirectory(TestSuite)
 	add_subdirectory(mconf)	
 	add_subdirectory(./Tools/qtkeychain)
@@ -200,12 +200,10 @@ if(NOT CODE_COVERAGE)
 	add_subdirectory(TuningClient)
 	add_subdirectory(Diagnostics)
 	add_subdirectory(Metrology)
-endif()
 
-add_subdirectory(Tests)
-
-if (BUILD_LICENSER)
-	add_subdirectory(./Tools/Licenser)
+	if (BUILD_LICENSER)
+		add_subdirectory(./Tools/Licenser)
+	endif()
 endif()
 
 # Create install target.

@@ -1,12 +1,12 @@
 #ifndef APP_SIGNAL_LIB_DOMAIN
-#error Do not include this file in the project! Link AppSignalLib instead.
+	#error Do not include this file in the project! Link AppSignalLib instead.
 #endif
 
 #include "AppSignalParam.h"
 #include "AppSignal.h"
 #include "AppSignalSpecPropValues.h"
 
-const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// Data in format ::Proto::AppSignalParamSet
+const char* AppSignalParamMimeType::value = "application/x-appsignalparam"; // Data in format ::Proto::AppSignalParamSet
 
 
 // -------------------------------------------------------------------------------------------------
@@ -18,6 +18,11 @@ const char* AppSignalParamMimeType::value ="application/x-appsignalparam";		// D
 AppSignalParam::PrivateData::PrivateData() = default;
 AppSignalParam::PrivateData::~PrivateData() = default;
 
+AppSignalParam::AppSignalParam(const ::AppSignal& signal)
+{
+	load(signal);
+}
+
 AppSignalParam::AppSignalParam() = default;
 
 AppSignalParam::AppSignalParam(const AppSignalParam&) = default;
@@ -26,10 +31,6 @@ AppSignalParam::AppSignalParam(AppSignalParam&&) noexcept = default;
 AppSignalParam& AppSignalParam::operator=(const AppSignalParam&) = default;
 AppSignalParam& AppSignalParam::operator=(AppSignalParam&&) noexcept = default;
 
-AppSignalParam::AppSignalParam(const AppSignal& signal)
-{
-	load(signal);
-}
 
 bool AppSignalParam::load(const ::Proto::AppSignal& message)
 {
@@ -37,7 +38,7 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 	return m_data->load(message);
 }
 
-void AppSignalParam::load(const AppSignal& s)
+void AppSignalParam::load(const ::AppSignal& s)
 {
 	detach();
 	return m_data->load(s);
@@ -566,7 +567,7 @@ void AppSignalParam::detach()
 
 bool AppSignalParam::PrivateData::load(const ::Proto::AppSignal& message)
 {
-	AppSignal s;
+	::AppSignal s;
 
 	s.loadFromProto(message);
 	s.cacheSpecPropValues();
@@ -578,7 +579,7 @@ bool AppSignalParam::PrivateData::load(const ::Proto::AppSignal& message)
 	return true;
 }
 
-void AppSignalParam::PrivateData::load(const AppSignal& s)
+void AppSignalParam::PrivateData::load(const ::AppSignal& s)
 {
 	m_appSignalId = s.appSignalID();
 
@@ -611,7 +612,7 @@ void AppSignalParam::PrivateData::load(const AppSignal& s)
 	m_fineAperture = s.fineAperture();
 	m_filteringTime = s.filteringTime();
 	m_spreadTolerance = s.spreadTolerance();
-	
+
 	m_enableTuning = s.enableTuning();
 	m_endpoint = s.isEndpoint();
 	m_inverted = s.invertSignal();

@@ -5,26 +5,25 @@
 #include "../AppSignalLib/RecentUsed.h"
 #include "../UtilsLib/ILogFile.h"
 
-#include "ISignalDataServer.h"
 #include "IAppSignalUpdater.h"
 #include "IRecentAppSignals.h"
+#include "ISignalDataServer.h"
 
+#include <QReadWriteLock>
 #include <map>
-#include <set>
 #include <memory>
-#include <vector>
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
-#include <QReadWriteLock>
+#include <vector>
 
 namespace ClientLib
 {
-	class AppSignalManager :
-			public QObject,
-			public IAppSignalManager,
-			public IAppSignalUpdater,
-			public IRecentAppSignals,
-			public ISignalDataServer
+	class AppSignalManager : public QObject,
+							 public IAppSignalManager,
+							 public IAppSignalUpdater,
+							 public IRecentAppSignals,
+							 public ISignalDataServer
 	{
 		Q_OBJECT
 
@@ -46,7 +45,10 @@ namespace ClientLib
 
 		virtual void invalidateSignalStates(Qt::HANDLE sourceThreadId) override;
 
-		virtual void setState(const QString& appSignalId, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
+		virtual void setState(const QString& appSignalId,
+							  const AppSignalState& state,
+							  Hash dataServerHash,
+							  Qt::HANDLE sourceThreadId) override;
 		virtual void setState(Hash signalHash, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
 		virtual void setState(std::span<const AppSignalState> states, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
 
@@ -75,44 +77,50 @@ namespace ClientLib
 
 		// IAppSignalManager implementation - AppSignals
 		//
-		virtual std::vector<Hash> signalHashes() const override final;
+		std::vector<Hash> signalHashes() const override final;
 
-		virtual int signalsCount() const override final;
-		virtual std::vector<AppSignalParam> signalList() const override final;
+		int signalsCount() const override final;
+		std::vector<AppSignalParam> signalList() const override final;
 
-		virtual bool signalExists(Hash hash) const override;
-		virtual bool signalExists(const QString& appSignalId) const override final;
-		virtual bool signalsExist(const QStringList& signalIds) const override final;
+		bool signalExists(Hash hash) const override;
+		bool signalExists(const QString& appSignalId) const override final;
+		bool signalsExist(const QStringList& signalIds) const override final;
 
-		virtual AppSignalParam signalParam(Hash signalHash, bool* found) const override final;
-		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override final;
+		AppSignalParam signalParam(Hash signalHash, bool* found) const override final;
+		AppSignalParam signalParam(const QString& appSignalId, bool* found) const override final;
 
-		virtual AppSignalState signalState(Hash signalHash, bool* found) const override final;
-		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override final;
-		virtual AppSignalState signalState(Hash signalHash, Hash dataServerHash, bool* found) const override final;
-		virtual AppSignalState signalState(const QString& appSignalId, const QString& dataServerId, bool* found) const override final;
+		AppSignalState signalState(Hash signalHash, bool* found) const override final;
+		AppSignalState signalState(const QString& appSignalId, bool* found) const override final;
+		AppSignalState signalState(Hash signalHash, Hash dataServerHash, bool* found) const override final;
+		AppSignalState signalState(const QString& appSignalId, const QString& dataServerId, bool* found) const override final;
 
-		virtual void signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const override final;
-		virtual void signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const override final;
-		virtual void signalState(std::span<const Hash> appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const override final;
-		virtual void signalState(std::span<const QString> appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const override final;
+		void signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const override final;
+		void signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const override final;
+		void signalState(std::span<const Hash> appSignalHashes,
+						 Hash dataServerHash,
+						 std::vector<AppSignalState>* result,
+						 int* found) const override final;
+		void signalState(std::span<const QString> appSignalIds,
+						 const QString& dataServerId,
+						 std::vector<AppSignalState>* result,
+						 int* found) const override final;
 
-		virtual QStringList signalTags(Hash signalHash) const override final;
-		virtual QStringList signalTags(const QString& appSignalId) const override final;
+		QStringList signalTags(Hash signalHash) const override final;
+		QStringList signalTags(const QString& appSignalId) const override final;
 
-		virtual bool signalHasTag(Hash signalHash, const QString& tag) const override final;
-		virtual bool signalHasTag(const QString& appSignalId, const QString& tag) const override final;
+		bool signalHasTag(Hash signalHash, const QString& tag) const override final;
+		bool signalHasTag(const QString& appSignalId, const QString& tag) const override final;
 
-		virtual QStringList signalIdsByTag(const QString& tag) const override final;
+		QStringList signalIdsByTag(const QString& tag) const override final;
 
-		virtual E::SignalType signalType(Hash signalHash, bool* found) const override final;
-		virtual E::SignalType signalType(const QString& appSignalId, bool* found) const override final;
+		E::SignalType signalType(Hash signalHash, bool* found) const override final;
+		E::SignalType signalType(const QString& appSignalId, bool* found) const override final;
 
-		virtual QString equipmentToAppSignalId(const QString& equipmentId) const override final;
+		QString equipmentToAppSignalId(const QString& equipmentId) const override final;
 
 		// IAppSignalManager implementation - Setpoints
 		//
-		virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override final;
+		std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override final;
 
 		//
 		// ISignalDataServer implementation
@@ -120,12 +128,12 @@ namespace ClientLib
 
 		/// Get AppDataService EquipmentIDs list by AppSignalID.
 		///
-		virtual QStringList dataServiceIds(const QString& appSignalId) const override;
+		QStringList dataServiceIds(const QString& appSignalId) const override;
 
 		/// Return true if AppDataService contains signal.
 		///
-		virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& appSignalId) const override;
-		virtual bool dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const override;
+		bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& appSignalId) const override;
+		bool dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const override;
 
 		/// Extension, not part of ISignalDataServer, at least yet.
 		///
@@ -133,11 +141,11 @@ namespace ClientLib
 
 		/// Get all signals for the specified DataServiceID (AppDataService or DiagDataService).
 		///
-		virtual std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const override;
+		std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const override;
 
 		// Tags
 		//
-		virtual QStringList tags() const override final;
+		QStringList tags() const override final;
 
 		// Extension
 		//
@@ -150,7 +158,7 @@ namespace ClientLib
 			AppSignalState state{};
 			Hash dataServerHash{UNDEFINED_HASH};
 			Qt::HANDLE sourceThreadId{};
-			std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{};	// State last time received or updated
+			std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{}; // State last time received or updated
 		};
 
 		std::vector<SourceState> signalStateAllSources(const QString& appSignalId) const;
@@ -162,7 +170,7 @@ namespace ClientLib
 		struct Sources
 		{
 			size_t size = 0;
-			std::array<SourceState, 4> sources{};	// 4 maximum possible channels of getting signal (2 regular, 2 recent)
+			std::array<SourceState, 4> sources{}; // 4 maximum possible channels of getting signal (2 regular, 2 recent)
 
 			void set(const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId);
 			void invalidateSource(Qt::HANDLE sourceThreadId);
@@ -175,11 +183,12 @@ namespace ClientLib
 		HasLogFile m_logFile;
 
 		mutable QReadWriteLock m_paramsLocker;
-		std::unordered_map<Hash, const AppSignalParam, VoidHasher<Hash>> m_signalParams;	// Key is hash from AppSignalID
-		std::unordered_map<QString, QString> m_signalParamByEquipmentId;			// Key is EquipmentId - value is AppSignalID
-		std::unordered_map<QString, QStringList> m_tagToAppSignals;					// Key is tag - value is list of AppSignalIDs with this tag
-		std::set<QString> m_tags;													// All tags for received AppSignals
-		std::map<QString, std::unordered_set<Hash>> m_appDataServiceToSignalHashList;// Key is AppDataServiceID, value is AppSignals received via this AppDataService
+		std::unordered_map<Hash, const AppSignalParam, VoidHasher<Hash>> m_signalParams; // Key is hash from AppSignalID
+		std::unordered_map<QString, QString> m_signalParamByEquipmentId;                 // Key is EquipmentId - value is AppSignalID
+		std::unordered_map<QString, QStringList> m_tagToAppSignals; // Key is tag - value is list of AppSignalIDs with this tag
+		std::set<QString> m_tags;                                   // All tags for received AppSignals
+		std::map<QString, std::unordered_set<Hash>>
+			m_appDataServiceToSignalHashList; // Key is AppDataServiceID, value is AppSignals received via this AppDataService
 
 		mutable QReadWriteLock m_statesLocker;
 		std::unordered_map<Hash, Sources, VoidHasher<Hash>> m_states;
@@ -190,8 +199,9 @@ namespace ClientLib
 		//
 		ComparatorSet m_setpoints;
 
-		mutable QMutex m_recentUsedMutex;	// It cannot be read/write locker, as every fetch the time insede RecentUsed is reset (what is write operation).
+		mutable QMutex m_recentUsedMutex; // It cannot be read/write locker, as every fetch the time insede RecentUsed is reset (what is
+										  // write operation).
 		AppSignalLib::RecentUsed m_recentUsed;
 	};
 
-}
+} // namespace ClientLib
