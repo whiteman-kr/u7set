@@ -1,5 +1,4 @@
 #pragma once
-
 #include <QDialog>
 
 class QPushButton;
@@ -20,7 +19,7 @@ private slots:
 	void onSave();
 
 private:
-	QString m_csvFile = nullptr;
+	QString m_csvFile;
 	QTextEdit* m_textEdit = nullptr;
 	QHBoxLayout* m_buttonsLayout = nullptr;
 	QPushButton* m_saveBtn = nullptr;

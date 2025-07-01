@@ -1,5 +1,5 @@
 #include "MainWindow.h"
-#include "CSVEditorDialog.h"
+#include "CsvEditorDialog.h"
 #include "DialogSettings.h"
 #include "LogModule.h"
 #include "RWMultiToolBox.h"

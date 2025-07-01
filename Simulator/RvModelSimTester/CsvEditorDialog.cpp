@@ -26,7 +26,7 @@ CsvEditorDialog::CsvEditorDialog(const QString& csvFile, QWidget* parent) :
 	layout->addRow(m_buttonsLayout);
 	setLayout(layout);
 
-	// Load CSV
+	// Load CSV file
 	QFile file(m_csvFile);
 	if (file.open(QIODevice::ReadOnly | QIODevice::Text))
 	{

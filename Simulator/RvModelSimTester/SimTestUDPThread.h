@@ -51,7 +51,7 @@ private:
 	QBasicTimer m_timer;
 
 	QUdpSocket* m_socket = nullptr;
-	QString m_pendingSignalID = nullptr;
+	QString m_pendingSignalID;
 	SignalType m_valueType = SignalType::AnalogFloat;
 
 	bool m_showServerState = true;
