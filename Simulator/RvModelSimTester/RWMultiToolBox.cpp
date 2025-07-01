@@ -9,13 +9,16 @@
 #include <QVBoxLayout>
 #include <random>
 
-#define MAX_ROW_COUNT 32
+namespace
+{
+	const int MaxRowCount = 32; 
+}
 
 
 RWMultiToolBox::RWMultiToolBox(QWidget* parent) :
 	QWidget(parent)
 {
-	m_tableWidget = new QTableWidget(MAX_ROW_COUNT, 2, this); // 2 columns: Signal ID, Value
+	m_tableWidget = new QTableWidget(MaxRowCount, 2, this); // 2 columns: Signal ID, Value
 	m_tableWidget->setHorizontalHeaderLabels({"Signal ID", "Value"});
 	m_tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
@@ -33,33 +36,15 @@ RWMultiToolBox::RWMultiToolBox(QWidget* parent) :
 	}
 
 	// Create Read and Write buttons
-	QPushButton* readBtn = new QPushButton("Read All", this);
-	QPushButton* writeBtn = new QPushButton("Write All", this);
-	QPushButton* autoFillBtn = new QPushButton("Auto Fill", this);
+	QPushButton* readBtn = new QPushButton(tr("Read All"), this);
+	QPushButton* writeBtn = new QPushButton(tr("Write All"), this);
+	QPushButton* autoFillBtn = new QPushButton(tr("Auto Fill"), this);
 
-	connect(readBtn,
-			&QPushButton::clicked,
-			this,
-			[this]()
-			{
-				onReadButtonClicked();
-			});
+	connect(readBtn, &QPushButton::clicked, this, &RWMultiToolBox::onReadButtonClicked);
 
-	connect(writeBtn,
-			&QPushButton::clicked,
-			this,
-			[this]()
-			{
-				onWriteButtonClicked();
-			});
+	connect(writeBtn, &QPushButton::clicked, this, &RWMultiToolBox::onWriteButtonClicked);
 
-	connect(autoFillBtn,
-			&QPushButton::clicked,
-			this,
-			[this]()
-			{
-				onAutoFillButtonClicked();
-			});
+	connect(autoFillBtn, &QPushButton::clicked, this, &RWMultiToolBox::onAutoFillButtonClicked);
 
 	QHBoxLayout* buttonLayout = new QHBoxLayout;
 	buttonLayout->addWidget(readBtn);
@@ -142,12 +127,12 @@ void RWMultiToolBox::setDefaultSignalDefinition()
 {
 	m_signalDefs.clear();
 
-	m_signalDefs.emplace_back(SignalType::Discrete, "#SYSTEMID_RACKID_CH01_MD04_CTRLIN_IN%1VALID", 1, MAX_ROW_COUNT);
+	m_signalDefs.emplace_back(SignalType::Discrete, "#SYSTEMID_RACKID_CH01_MD04_CTRLIN_IN%1VALID", 1, MaxRowCount);
 	m_signalDefs.emplace_back(SignalType::AnalogInt32,
 							  "#SYSTEMID_RACKID_CH01_MD02_PI_SERIALNO|#SYSTEMID_RACKID_CH01_MD04_PI_SERIALNO",
 							  0,
 							  0);
-	m_signalDefs.emplace_back(SignalType::AnalogFloat, "#SYSTEMID_RACKID_CH01_MD02_CTRLIN_IN%1%2", 1, MAX_ROW_COUNT);
+	m_signalDefs.emplace_back(SignalType::AnalogFloat, "#SYSTEMID_RACKID_CH01_MD02_CTRLIN_IN%1%2", 1, MaxRowCount);
 }
 
 void RWMultiToolBox::saveSignalToCSV(const QString& filename) const
@@ -260,7 +245,7 @@ void RWMultiToolBox::onAutoFillButtonClicked()
 		if (!idItem || !valueItem)
 			continue;
 
-		int channel = (row) % MAX_ROW_COUNT + 1; // 01-MAX_ROW_COUNT
+		int channel = (row) % MaxRowCount + 1; // 01-MaxRowCount
 		QChar ab = (gen() % 2 == 0) ? 'A' : 'B';
 
 
