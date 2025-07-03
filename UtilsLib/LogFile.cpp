@@ -54,13 +54,6 @@ namespace Log
 	{
 		const int MAX_STR_LEN = 1024;
 
-		static thread_local std::string str;
-
-		if (str.capacity() < MAX_STR_LEN)
-		{
-			str.reserve(MAX_STR_LEN);
-		}
-
 		const char* bufEnd = buf + bufSize;
 
 		const char* ptr = buf;
@@ -88,11 +81,6 @@ namespace Log
 		ptr++;
 
 		bufLength = bufEnd - ptr;
-		if (bufLength > MAX_STR_LEN)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
 
 		// Time
 		//
@@ -175,11 +163,6 @@ namespace Log
 		ptr++;
 
 		bufLength = bufEnd - ptr;
-		if (bufLength > MAX_STR_LEN)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
 
 		// Skip one tab
 		//
@@ -194,11 +177,6 @@ namespace Log
 		ptr++;
 
 		bufLength = bufEnd - ptr;
-		if (bufLength > MAX_STR_LEN)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
 
 		// Type
 		//
@@ -219,48 +197,51 @@ namespace Log
             qint64 strLen = ptrEnd - ptr;
 			if (strLen > MAX_STR_LEN)
 			{
-				Q_ASSERT(false);
-				return false;
-			}
+				// This string is too long, cut it
+				//
+				strLen = MAX_STR_LEN;
+				
+				text.assign(ptr, strLen);
 
-			text.assign(ptr, strLen);
+				for (int i = 0; i < 3; i++) 
+				{
+					text[strLen - 3 + i] = '.';
+				}
+			}
+			else
+			{
+				text.assign(ptr, strLen - 1 /*remove last \n*/);
+			}
 			replaceStringInPlace(text, "\\n", "\n");
+			
 			return true;
 		}
 
-        qint64 strLen = ptrEnd - ptr;
-		if (strLen > MAX_STR_LEN)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
-		str.assign(ptr, strLen);
-
-        if (*str.c_str() == messageTypeFirstLetter[Error])
+        if (*ptr == messageTypeFirstLetter[Error])
 		{
 			type = MessageType::Error;
 		}
 		else
 		{
-            if (*str.c_str() == messageTypeFirstLetter[Warning])
+			if (*ptr == messageTypeFirstLetter[Warning])
             {
 				type = MessageType::Warning;
 			}
 			else
 			{
-                if (*str.c_str() == messageTypeFirstLetter[Message])
+				if (*ptr == messageTypeFirstLetter[Message])
                 {
 					type = MessageType::Message;
 				}
 				else
 				{
-                    if (*str.c_str() == messageTypeFirstLetter[Alert])
+					if (*ptr == messageTypeFirstLetter[Alert])
 					{
 						type = MessageType::Alert;
 					}
 					else
 					{
-                        if (*str.c_str() == messageTypeFirstLetter[Data])
+						if (*ptr == messageTypeFirstLetter[Data])
 						{
 							type = MessageType::Data;
 						}
@@ -280,11 +261,6 @@ namespace Log
 		ptr++;
 
 		bufLength = bufEnd - ptr;
-		if (bufLength > MAX_STR_LEN)
-		{
-			Q_ASSERT(false);
-			return false;
-		}
 
 		// Text until end-of-line
 		//
@@ -297,14 +273,25 @@ namespace Log
 			return false;
 		}
 
-		strLen = ptrEnd - ptr;
+		qint64 strLen = ptrEnd - ptr;
 		if (strLen > MAX_STR_LEN)
 		{
-			Q_ASSERT(false);
-			return false;
+			// This string is too long, cut it
+			//
+			strLen = MAX_STR_LEN;
+			text.assign(ptr, strLen);
+
+			for (int i = 0; i < 3; i++)
+			{
+				text[strLen - 3 + i] = '.';
+			}
 		}
-		text.assign(ptr, strLen - 1/*remove last \n*/);
+		else
+		{
+			text.assign(ptr, strLen - 1 /*remove last \n*/);
+		}
 		replaceStringInPlace(text, "\\n", "\n");
+
 		return true;
 	}
 
