@@ -307,8 +307,8 @@ function generate_mps24(confFirmware, module, LMNumber, frame, log, signalSet, o
 				var mV_Raw_Mul_8=22;
 				var mV_Raw_Mul_32=23;
 				
-				var highLimitMax = 0;
-				var lowLimitMax = 0;
+				var highValidRangeMax = 0;
+				var lowValidRangeMin = 0;
 			
 				var decimalPlaces = signal.propertyValue("DecimalPlaces");
 
