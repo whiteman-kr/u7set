@@ -1009,7 +1009,7 @@ namespace VFrame30
 		m_globalScript = value + QChar::LineFeed;
 		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again.
 
-		std::ignore = jsEngine(); // jsEngine() prepares global script and calls execOnConfigurationArrived.
+		std::ignore = jsEngine(); // jsEngine() prepares global script and calls exec OnConfigurationArrived.
 
 		return;
 	}
@@ -1024,16 +1024,19 @@ namespace VFrame30
 
 		if (m_jsEngineGlobalsWereCreated == false)
 		{
+			// execOnConfigurationArrived - can call view.setScript(), which will call this function and to prevent recursion
+			// we set m_jsEngineGlobalsWereCreated to true here, in the beginning of update.
+			//
+			m_jsEngineGlobalsWereCreated = true;
+
+			// --
+			//
 			updateScriptGlobalVars(m_jsEngine);
 
 			// Evaluate global script
 			//
 			reEvaluateGlobalScript();
 			execOnConfigurationArrived();
-
-			// --
-			//
-			m_jsEngineGlobalsWereCreated = true;
 		}
 
 		return &m_jsEngine;
