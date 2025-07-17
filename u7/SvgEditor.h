@@ -5,7 +5,7 @@
 
 namespace UiLib
 {
-	class CodeEditor;
+	class CodeEditorWidget;
 }
 
 class SvgWidget : public QWidget
@@ -58,7 +58,7 @@ private slots:
 	void onStretchCheckClicked(bool checked);
 
 private:
-	UiLib::CodeEditor* m_textEdit = nullptr;
+	UiLib::CodeEditorWidget* m_textEdit = nullptr;
 
 	QSplitter* m_topSplitter = nullptr;
 	SvgWidget m_svgWidget;

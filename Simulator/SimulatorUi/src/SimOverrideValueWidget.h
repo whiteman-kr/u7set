@@ -13,7 +13,7 @@ class QTabWidget;
 
 namespace UiLib
 {
-	class CodeEditor;
+	class CodeEditorWidget;
 }
 
 namespace SimOverrideUI
@@ -142,7 +142,7 @@ namespace SimOverrideUI
 		QPushButton* m_saveScriptButton = nullptr;
 
 		QLabel* m_scriptLabel = nullptr;
-		UiLib::CodeEditor* m_scriptEdit = nullptr;
+		UiLib::CodeEditorWidget* m_scriptEdit = nullptr;
 
 		QDialogButtonBox* m_buttonBox = nullptr;
 

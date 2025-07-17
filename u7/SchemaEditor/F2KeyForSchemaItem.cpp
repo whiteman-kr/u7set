@@ -1245,7 +1245,7 @@ void F2KeyForSchemaItem::f2KeyForValue(SchemaItemPtr item)
 	//
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
-	auto preDrawScriptEdit = new UiLib::CodeEditor(&d);
+	auto preDrawScriptEdit = new UiLib::CodeEditorWidget(&d);
 	UiLib::JsHighlighter::createJsHighlighter(preDrawScriptEdit);
 
 	preDrawScriptEdit->setText(preDrawScript);
@@ -1409,7 +1409,7 @@ void F2KeyForSchemaItem::f2KeyForImageValue(SchemaItemPtr item)
 	//
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
-	auto preDrawScriptEdit = new UiLib::CodeEditor(&d);
+	auto preDrawScriptEdit = new UiLib::CodeEditorWidget(&d);
 	UiLib::JsHighlighter::createJsHighlighter(preDrawScriptEdit);
 
 	preDrawScriptEdit->setText(preDrawScript);
@@ -1771,9 +1771,9 @@ void F2KeyForSchemaItem::f2KeyForVduValue(SchemaItemPtr item)
 
 		auto edit = new EditType{&d};
 
-		// Check if template argument EditType is ::UiLib::CodeEditor, then call createJsHighlighter
+		// Check if template argument EditType is ::UiLib::CodeEditorWidget, then call createJsHighlighter
 		//
-		if constexpr (std::is_same_v<EditType, UiLib::CodeEditor>)
+		if constexpr (std::is_same_v<EditType, UiLib::CodeEditorWidget>)
 		{
 			edit->setText(property->value().toString());
 			UiLib::JsHighlighter::createJsHighlighter(edit);
@@ -1806,7 +1806,7 @@ void F2KeyForSchemaItem::f2KeyForVduValue(SchemaItemPtr item)
 	auto textEdit =
 		createControlsFunc.operator()<QPlainTextEdit>(VFrame30::PropertyNames::text, VFrame30::PropertyNames::textVduItemValueDescription);
 
-	auto preDrawScriptEdit = createControlsFunc.operator()<UiLib::CodeEditor>(VFrame30::PropertyNames::preDrawScript, "");
+	auto preDrawScriptEdit = createControlsFunc.operator()<UiLib::CodeEditorWidget>(VFrame30::PropertyNames::preDrawScript, "");
 
 	// --
 	//
@@ -1911,9 +1911,9 @@ void F2KeyForSchemaItem::f2KeyForVduRect(SchemaItemPtr item)
 
 		auto edit = new EditType{&d};
 
-		// Check if template argument EditType is ::UiLib::CodeEditor, then call createJsHighlighter
+		// Check if template argument EditType is ::UiLib::CodeEditorWidget, then call createJsHighlighter
 		//
-		if constexpr (std::is_same_v<EditType, UiLib::CodeEditor>)
+		if constexpr (std::is_same_v<EditType, UiLib::CodeEditorWidget>)
 		{
 			edit->setText(property->value().toString());
 			UiLib::JsHighlighter::createJsHighlighter(edit);
@@ -1943,8 +1943,8 @@ void F2KeyForSchemaItem::f2KeyForVduRect(SchemaItemPtr item)
 	};
 
 	auto textEdit = createControlsFunc.operator()<QPlainTextEdit>(VFrame30::PropertyNames::text, "");
-	auto clickScriptEdit = createControlsFunc.operator()<UiLib::CodeEditor>(VFrame30::PropertyNames::clickScript, "");
-	auto preDrawEdit = createControlsFunc.operator()<UiLib::CodeEditor>(VFrame30::PropertyNames::preDrawScript, "");
+	auto clickScriptEdit = createControlsFunc.operator()<UiLib::CodeEditorWidget>(VFrame30::PropertyNames::clickScript, "");
+	auto preDrawEdit = createControlsFunc.operator()<UiLib::CodeEditorWidget>(VFrame30::PropertyNames::preDrawScript, "");
 
 	// --
 	//
@@ -2050,9 +2050,9 @@ void F2KeyForSchemaItem::f2KeyForVduImageValue(SchemaItemPtr item)
 
 		auto edit = new EditType{&d};
 
-		// Check if template argument EditType is ::UiLib::CodeEditor, then call createJsHighlighter
+		// Check if template argument EditType is ::UiLib::CodeEditorWidget, then call createJsHighlighter
 		//
-		if constexpr (std::is_same_v<EditType, UiLib::CodeEditor>)
+		if constexpr (std::is_same_v<EditType, UiLib::CodeEditorWidget>)
 		{
 			edit->setText(property->value().toString());
 			UiLib::JsHighlighter::createJsHighlighter(edit);
@@ -2082,8 +2082,8 @@ void F2KeyForSchemaItem::f2KeyForVduImageValue(SchemaItemPtr item)
 	};
 
 	auto appSignalIdsEdit = createControlsFunc.operator()<QPlainTextEdit>(VFrame30::PropertyNames::appSignalIDs, "");
-	auto clickScriptEdit = createControlsFunc.operator()<UiLib::CodeEditor>(VFrame30::PropertyNames::clickScript, "");
-	auto preDrawScriptEdit = createControlsFunc.operator()<UiLib::CodeEditor>(VFrame30::PropertyNames::preDrawScript, "");
+	auto clickScriptEdit = createControlsFunc.operator()<UiLib::CodeEditorWidget>(VFrame30::PropertyNames::clickScript, "");
+	auto preDrawScriptEdit = createControlsFunc.operator()<UiLib::CodeEditorWidget>(VFrame30::PropertyNames::preDrawScript, "");
 
 	// --
 	//
@@ -2189,7 +2189,7 @@ void F2KeyForSchemaItem::f2KeyForPushButton(SchemaItemPtr item)
 	QSplitter* splitter = new QSplitter(Qt::Vertical, &d);
 	splitter->setChildrenCollapsible(false);
 
-	auto createScriptControls = [&d, splitter, item](QString propertyName, QString defaultScript) -> UiLib::CodeEditor*
+	auto createScriptControls = [&d, splitter, item](QString propertyName, QString defaultScript) -> UiLib::CodeEditorWidget*
 	{
 		auto property = item->propertyByCaption(propertyName);
 		if (property == nullptr)
@@ -2198,7 +2198,7 @@ void F2KeyForSchemaItem::f2KeyForPushButton(SchemaItemPtr item)
 			return nullptr;
 		}
 
-		auto edit = new UiLib::CodeEditor(&d);
+		auto edit = new UiLib::CodeEditorWidget(&d);
 		UiLib::JsHighlighter::createJsHighlighter(edit);
 
 #if defined(Q_OS_WIN)
@@ -2329,7 +2329,7 @@ void F2KeyForSchemaItem::f2KeyForLineEdit(SchemaItemPtr item)
 	QSplitter* splitter = new QSplitter(Qt::Vertical, &d);
 	splitter->setChildrenCollapsible(false);
 
-	auto createScriptControls = [&d, splitter, editItem](QString propertyName, QString defaultScript) -> UiLib::CodeEditor*
+	auto createScriptControls = [&d, splitter, editItem](QString propertyName, QString defaultScript) -> UiLib::CodeEditorWidget*
 	{
 		auto property = editItem->propertyByCaption(propertyName);
 		if (property == nullptr)
@@ -2338,7 +2338,7 @@ void F2KeyForSchemaItem::f2KeyForLineEdit(SchemaItemPtr item)
 			return nullptr;
 		}
 
-		auto edit = new UiLib::CodeEditor(&d);
+		auto edit = new UiLib::CodeEditorWidget(&d);
 		UiLib::JsHighlighter::createJsHighlighter(edit);
 
 #if defined(Q_OS_WIN)

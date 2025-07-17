@@ -8,6 +8,8 @@
 	#include <QAbstractItemModelTester>
 #endif
 
+using namespace UiLib;
+
 //
 // TestsFileTreeModel
 //
@@ -40,7 +42,9 @@ QString TestsFileTreeModel::customColumnName(Columns column) const
 //
 
 
-TestTabPageDocument::TestTabPageDocument(const QString& fileName, IdeCodeEditor* codeEditor, QTreeWidgetItem* openFilesTreeWidgetItem):
+TestTabPageDocument::TestTabPageDocument(const QString& fileName,
+										 UiLib::CodeEditor* codeEditor,
+										 QTreeWidgetItem* openFilesTreeWidgetItem) :
 	m_fileName(fileName),
 	m_codeEditor(codeEditor),
 	m_openFilesTreeWidgetItem(openFilesTreeWidgetItem)
@@ -68,7 +72,7 @@ void TestTabPageDocument::setModified(bool value)
 	m_modified = value;
 }
 
-IdeCodeEditor* TestTabPageDocument::codeEditor() const
+UiLib::CodeEditor* TestTabPageDocument::codeEditor() const
 {
 	return m_codeEditor;
 }
@@ -1298,10 +1302,10 @@ void TestsWidget::openFile()
 
 	// Create document
 
-	IdeCodeEditor* codeEditor = new IdeCodeEditor(CodeType::JavaScript, this);
+	CodeEditor* codeEditor = new CodeEditor(CodeEditor::CodeType::JavaScript, this);
 	codeEditor->setText(dbFile->data());
 	codeEditor->setReadOnly(readOnly);
-	connect(codeEditor, &IdeCodeEditor::customContextMenuAboutToBeShown, this, &TestsWidget::setCodeEditorActionsState, Qt::DirectConnection);
+	connect(codeEditor, &CodeEditor::customContextMenuAboutToBeShown, this, &TestsWidget::setCodeEditorActionsState, Qt::DirectConnection);
 
 	if (m_documentSeparatorAction1 == nullptr)
 	{
@@ -1327,11 +1331,11 @@ void TestsWidget::openFile()
 
 	codeEditor->setCustomMenuActions(customMenuActions);
 
-	connect(codeEditor, &IdeCodeEditor::textChanged, this, &TestsWidget::textChanged);
-    connect(codeEditor, &IdeCodeEditor::cursorPositionChangedTo, this, &TestsWidget::cursorPositionChanged);
-	connect(codeEditor, &IdeCodeEditor::closeKeyPressed, this, &TestsWidget::onCloseKeyPressed);
-	connect(codeEditor, &IdeCodeEditor::saveKeyPressed, this, &TestsWidget::onSaveKeyPressed);
-	connect(codeEditor, &IdeCodeEditor::ctrlTabKeyPressed, this, &TestsWidget::onCtrlTabKeyPressed);
+	connect(codeEditor, &CodeEditor::textChanged, this, &TestsWidget::textChanged);
+    connect(codeEditor, &CodeEditor::cursorPositionChangedTo, this, &TestsWidget::cursorPositionChanged);
+	connect(codeEditor, &CodeEditor::closeKeyPressed, this, &TestsWidget::onCloseKeyPressed);
+	connect(codeEditor, &CodeEditor::saveKeyPressed, this, &TestsWidget::onSaveKeyPressed);
+	connect(codeEditor, &CodeEditor::ctrlTabKeyPressed, this, &TestsWidget::onCtrlTabKeyPressed);
 	m_editorLayout->addWidget(codeEditor);
 
 	m_openDocumentsCombo->blockSignals(true);
@@ -1512,7 +1516,7 @@ void TestsWidget::checkOutSelectedFiles()
 			document.setFileName(fi.fileName());
 			document.setModified(false);
 
-			IdeCodeEditor* codeEditor = document.codeEditor();
+			CodeEditor* codeEditor = document.codeEditor();
 			if (codeEditor == nullptr)
 			{
 				Q_ASSERT(codeEditor);
@@ -1579,7 +1583,7 @@ void TestsWidget::undoChangesSelectedFiles()
 
 			TestTabPageDocument& document = m_openDocuments.at(f->fileId());
 
-			IdeCodeEditor* codeEditor = document.codeEditor();
+			CodeEditor* codeEditor = document.codeEditor();
 			if (codeEditor == nullptr)
 			{
 				Q_ASSERT(codeEditor);
@@ -1971,7 +1975,7 @@ void TestsWidget::onGoToLine()
 		return;
 	}
 
-	IdeCodeEditor* codeEditor = document.codeEditor();
+	CodeEditor* codeEditor = document.codeEditor();
 	if (codeEditor == nullptr)
 	{
 		Q_ASSERT(codeEditor);
@@ -2415,7 +2419,7 @@ void TestsWidget::checkOutDocument(std::vector<int> fileIds)
 		document.setFileName(fi.fileName());
 		document.setModified(false);
 
-		IdeCodeEditor* codeEditor = document.codeEditor();
+		CodeEditor* codeEditor = document.codeEditor();
 		if (codeEditor == nullptr)
 		{
 			Q_ASSERT(codeEditor);
@@ -2479,7 +2483,7 @@ void TestsWidget::undoChangesDocument(std::vector<int> fileIds)
 			document.setFileName(fi.fileName());
 			document.setModified(false);
 
-			IdeCodeEditor* codeEditor = document.codeEditor();
+			CodeEditor* codeEditor = document.codeEditor();
 			if (codeEditor == nullptr)
 			{
 				Q_ASSERT(codeEditor);
@@ -2515,7 +2519,7 @@ void TestsWidget::setCurrentDocument(int fileId)
 		int docFileId = it.first;
 		TestTabPageDocument& document = it.second;
 
-		IdeCodeEditor* codeEditor = document.codeEditor();
+		CodeEditor* codeEditor = document.codeEditor();
 		if (codeEditor == nullptr)
 		{
 			Q_ASSERT(codeEditor);
@@ -2535,7 +2539,7 @@ void TestsWidget::setCurrentDocument(int fileId)
 		int docFileId = it.first;
 		TestTabPageDocument& document = it.second;
 
-		IdeCodeEditor* codeEditor = document.codeEditor();
+		CodeEditor* codeEditor = document.codeEditor();
 		if (codeEditor == nullptr)
 		{
 			Q_ASSERT(codeEditor);
@@ -2611,7 +2615,7 @@ void TestsWidget::setDocumentReadOnly(int fileId, bool readOnly)
 
 	TestTabPageDocument& document = m_openDocuments.at(fileId);
 
-	IdeCodeEditor* codeEditor = document.codeEditor();
+	CodeEditor* codeEditor = document.codeEditor();
 	if (codeEditor == nullptr)
 	{
 		Q_ASSERT(codeEditor);
@@ -3730,7 +3734,7 @@ void TestsWidget::saveDocument(int fileId)
 		return;
 	}
 
-	IdeCodeEditor* codeEditor = document.codeEditor();
+	CodeEditor* codeEditor = document.codeEditor();
 	if (codeEditor == nullptr)
 	{
 		Q_ASSERT(codeEditor);
@@ -3789,7 +3793,7 @@ void TestsWidget::closeDocument(int fileId, bool force)
 
 	TestTabPageDocument& document = m_openDocuments.at(fileId);
 
-	IdeCodeEditor* codeEditor = document.codeEditor();
+	CodeEditor* codeEditor = document.codeEditor();
 	if (codeEditor == nullptr)
 	{
 		Q_ASSERT(codeEditor);
@@ -3902,7 +3906,7 @@ void TestsWidget::closeAllDocuments()
 {
 	for (auto& it : m_openDocuments)
 	{
-		IdeCodeEditor* codeEditor =  it.second.codeEditor();
+		CodeEditor* codeEditor =  it.second.codeEditor();
 		if (codeEditor == nullptr)
 		{
 			Q_ASSERT(codeEditor);

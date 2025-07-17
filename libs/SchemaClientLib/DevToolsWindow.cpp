@@ -56,6 +56,17 @@ namespace SchemaClientLib
 		if (DevToolsWindow::instance == nullptr)
 		{
 			DevToolsWindow::instance = new DevToolsWindow(settings, viewVariables, schemaStats, scriptVariables, globalScript, additionalTabs, parent);
+
+			QSettings s{};
+
+			auto pos = s.value(qAppName() + "/DevToolsWindow/pos", QPoint(400, 200)).toPoint();
+			auto geometry = s.value(qAppName() + "/DevToolsWindow/geometry").toByteArray();
+			auto state = s.value(qAppName() + "/DevToolsWindow/state").toByteArray();
+
+			static_cast<QMainWindow*>(DevToolsWindow::instance)->move(pos);
+			static_cast<QMainWindow*>(DevToolsWindow::instance)->restoreGeometry(geometry);
+			static_cast<QMainWindow*>(DevToolsWindow::instance)->restoreState(state);
+
 		}
 
 		static_cast<QMainWindow*>(DevToolsWindow::instance)->show();
@@ -63,7 +74,12 @@ namespace SchemaClientLib
 
 	void DevToolsWindow::closeEvent(QCloseEvent* event)
 	{
-		QSettings{}.setValue(qAppName() + "/DevToolsWindow/CurrentIndex", devToolsWidget->currentIndex());
+		QSettings s{};
+		
+		s.setValue(qAppName() + "/DevToolsWindow/CurrentIndex", devToolsWidget->currentIndex());
+		s.setValue(qAppName() + "/DevToolsWindow/pos", pos());
+		s.setValue(qAppName() + "/DevToolsWindow/geometry", saveGeometry());
+		s.setValue(qAppName() + "/DevToolsWindow/state", saveState());
 
 		deleteLater();
 		event->accept();

@@ -1,10 +1,14 @@
 #include <UiLib/CodeEditor.h>
 
+#include <QCompleter>
+#include <QCheckBox>
+#include <QStringListModel>
+
 namespace UiLib
 {
 	// ------------------------------------------------------------------------------------------
 	//
-	CodeEditor::CodeEditor(QWidget* parent) :
+	CodeEditorWidget::CodeEditorWidget(QWidget* parent) :
 		QPlainTextEdit(parent)
 	{
 		// m_tabSymbol.fill(QChar::Space, 4);
@@ -12,9 +16,9 @@ namespace UiLib
 
 		m_lineNumberArea = new LineNumberArea(this);
 
-		connect(this, &CodeEditor::blockCountChanged, this, &CodeEditor::updateLineNumberAreaWidth);
-		connect(this, &CodeEditor::updateRequest, this, &CodeEditor::updateLineNumberArea);
-		connect(this, &CodeEditor::cursorPositionChanged, this, &CodeEditor::onCursorPositionChanged);
+		connect(this, &CodeEditorWidget::blockCountChanged, this, &CodeEditorWidget::updateLineNumberAreaWidth);
+		connect(this, &CodeEditorWidget::updateRequest, this, &CodeEditorWidget::updateLineNumberArea);
+		connect(this, &CodeEditorWidget::cursorPositionChanged, this, &CodeEditorWidget::onCursorPositionChanged);
 
 		updateLineNumberAreaWidth();
 
@@ -38,12 +42,12 @@ namespace UiLib
 		installEventFilter(this);
 	}
 
-	QString CodeEditor::text() const
+	QString CodeEditorWidget::text() const
 	{
 		return toPlainText();
 	}
 
-	void CodeEditor::setText(const QString& text)
+	void CodeEditorWidget::setText(const QString& text)
 	{
 		setPlainText(QString());
 
@@ -64,22 +68,22 @@ namespace UiLib
 		updateLineNumberAreaWidth();
 	}
 
-	bool CodeEditor::autoIdent() const
+	bool CodeEditorWidget::autoIdent() const
 	{
 		return m_autoIndent;
 	}
 
-	void CodeEditor::setAutoIndent(bool autoIdent)
+	void CodeEditorWidget::setAutoIndent(bool autoIdent)
 	{
 		m_autoIndent = autoIdent;
 	}
 
-	void CodeEditor::setCustomMenuActions(QList<QAction*> actions)
+	void CodeEditorWidget::setCustomMenuActions(QList<QAction*> actions)
 	{
 		m_customMenuActions = actions;
 	}
 
-	void CodeEditor::setFont(const QFont& f)
+	void CodeEditorWidget::setFont(const QFont& f)
 	{
 		QPlainTextEdit::setFont(f);
 
@@ -91,37 +95,37 @@ namespace UiLib
 		updateLineNumberAreaWidth();
 	}
 
-	void CodeEditor::setHighlighter(UiLib::Highlighter* highlighter)
+	void CodeEditorWidget::setHighlighter(UiLib::Highlighter* highlighter)
 	{
 		m_highlighter = highlighter;
 	}
 
-	bool CodeEditor::isModified() const
+	bool CodeEditorWidget::isModified() const
 	{
 		return document()->isModified();
 	}
 
-	void CodeEditor::setModified(bool value)
+	void CodeEditorWidget::setModified(bool value)
 	{
 		document()->setModified(value);
 	}
 
-	void CodeEditor::setCaretLineVisible(bool visible)
+	void CodeEditorWidget::setCaretLineVisible(bool visible)
 	{
 		m_caretLineVisible = visible;
 	}
 
-	void CodeEditor::setCaretLineBackgroundColor(QColor color)
+	void CodeEditorWidget::setCaretLineBackgroundColor(QColor color)
 	{
 		m_caretLineColor = color;
 	}
 
-	void CodeEditor::setCaretWidth(int w)
+	void CodeEditorWidget::setCaretWidth(int w)
 	{
 		setCursorWidth(w);
 	}
 
-	void CodeEditor::setTabWidth(int w)
+	void CodeEditorWidget::setTabWidth(int w)
 	{
 		m_tabWidth = w;
 
@@ -129,7 +133,7 @@ namespace UiLib
 		setTabStopDistance(fm.horizontalAdvance(' ') * m_tabWidth);
 	}
 
-	void CodeEditor::getCursorPosition(int* line, int* index) const
+	void CodeEditorWidget::getCursorPosition(int* line, int* index) const
 	{
 		if (line == nullptr || index == nullptr)
 		{
@@ -143,7 +147,7 @@ namespace UiLib
 		return;
 	}
 
-	void CodeEditor::setCurrentLine(int line)
+	void CodeEditorWidget::setCurrentLine(int line)
 	{
 		if (line > lines())
 		{
@@ -161,32 +165,32 @@ namespace UiLib
 						   });
 	}
 
-	int CodeEditor::lines() const
+	int CodeEditorWidget::lines() const
 	{
 		return document()->lineCount();
 	}
 
-	bool CodeEditor::lineNumberAreaVisible() const
+	bool CodeEditorWidget::lineNumberAreaVisible() const
 	{
 		return m_lineNumberAreaVisible;
 	}
 
-	void CodeEditor::setLineNumberAreaVisible(bool visible)
+	void CodeEditorWidget::setLineNumberAreaVisible(bool visible)
 	{
 		m_lineNumberAreaVisible = visible;
 	}
 
-	int CodeEditor::lineNumberOffset() const
+	int CodeEditorWidget::lineNumberOffset() const
 	{
 		return m_lineNumberOffset;
 	}
 
-	void CodeEditor::setLineNumberOffset(int offset)
+	void CodeEditorWidget::setLineNumberOffset(int offset)
 	{
 		m_lineNumberOffset = offset;
 	}
 
-	int CodeEditor::getLineNumberAreaWidth()
+	int CodeEditorWidget::getLineNumberAreaWidth()
 	{
 		if (m_customLineNumberAreaWidth != -1)
 		{
@@ -211,37 +215,37 @@ namespace UiLib
 		return space;
 	}
 
-	int CodeEditor::customLineNumberAreaWidth()
+	int CodeEditorWidget::customLineNumberAreaWidth()
 	{
 		return m_customLineNumberAreaWidth;
 	}
 
-	void CodeEditor::setCustomLineNumberAreaWidth(int width)
+	void CodeEditorWidget::setCustomLineNumberAreaWidth(int width)
 	{
 		m_customLineNumberAreaWidth = width;
 	}
 
-	QColor CodeEditor::lineNumberAreaBackgroundColor() const
+	QColor CodeEditorWidget::lineNumberAreaBackgroundColor() const
 	{
 		return m_lineNumberAreaBackgroundColor;
 	}
 
-	void CodeEditor::setLineNumberAreaBackgroundColor(const QColor& color)
+	void CodeEditorWidget::setLineNumberAreaBackgroundColor(const QColor& color)
 	{
 		m_lineNumberAreaBackgroundColor = color;
 	}
 
-	QColor CodeEditor::lineNumberAreaForegroundColor() const
+	QColor CodeEditorWidget::lineNumberAreaForegroundColor() const
 	{
 		return m_lineNumberAreaForegroundColor;
 	}
 
-	void CodeEditor::setLineNumberAreaForegroundColor(const QColor& color)
+	void CodeEditorWidget::setLineNumberAreaForegroundColor(const QColor& color)
 	{
 		m_lineNumberAreaForegroundColor = color;
 	}
 
-	bool CodeEditor::findFirst(const QString& text, bool caseSensitive, bool whole)
+	bool CodeEditorWidget::findFirst(const QString& text, bool caseSensitive, bool whole)
 	{
 		moveCursor(QTextCursor::Start);
 
@@ -252,7 +256,7 @@ namespace UiLib
 		return findNext();
 	}
 
-	bool CodeEditor::findNext()
+	bool CodeEditorWidget::findNext()
 	{
 		QTextDocument::FindFlags f = {};
 		if (m_findContext.caseSensitive == true)
@@ -267,18 +271,17 @@ namespace UiLib
 		return find(m_findContext.text, f);
 	}
 
-	bool CodeEditor::hasSelectedText() const
+	bool CodeEditorWidget::hasSelectedText() const
 	{
 		return textCursor().hasSelection();
 	}
 
-	QString CodeEditor::selectedText() const
+	QString CodeEditorWidget::selectedText() const
 	{
 		return textCursor().selectedText();
 	}
 
-
-	void CodeEditor::replace(const QString& text)
+	void CodeEditorWidget::replace(const QString& text)
 	{
 		QTextCursor cursor = textCursor();
 
@@ -317,7 +320,7 @@ namespace UiLib
 		setTextCursor(cursor);
 	}
 
-	void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent* event)
+	void CodeEditorWidget::lineNumberAreaPaintEvent(QPaintEvent* event)
 	{
 		QPainter painter(m_lineNumberArea);
 		painter.fillRect(event->rect(), lineNumberAreaBackgroundColor());
@@ -348,7 +351,7 @@ namespace UiLib
 		}
 	}
 
-	bool CodeEditor::processAutoIdent(QKeyEvent* e)
+	bool CodeEditorWidget::processAutoIdent(QKeyEvent* e)
 	{
 		QString documentContents = document()->toPlainText();
 
@@ -453,7 +456,7 @@ namespace UiLib
 
 	// Add, remove or toggle line prefix. Operation is specified by operationCode : -1 - remove, 1 - add, 0 - toggle
 	//
-	bool CodeEditor::processPrefix(const QString& prefix, int operationCode)
+	bool CodeEditorWidget::processPrefix(const QString& prefix, int operationCode)
 	{
 		QTextCursor c = textCursor();
 		int position = c.position();
@@ -562,7 +565,7 @@ namespace UiLib
 		return true;
 	}
 
-	bool CodeEditor::eventFilter(QObject* object, QEvent* event)
+	bool CodeEditorWidget::eventFilter(QObject* object, QEvent* event)
 	{
 		if (object == this && event->type() == QEvent::KeyPress)
 		{
@@ -588,7 +591,7 @@ namespace UiLib
 		return false;
 	}
 
-	void CodeEditor::keyPressEvent(QKeyEvent* e)
+	void CodeEditorWidget::keyPressEvent(QKeyEvent* e)
 	{
 		bool keyEventProcessed = false;
 
@@ -625,7 +628,7 @@ namespace UiLib
 		}
 	}
 
-	void CodeEditor::resizeEvent(QResizeEvent* e)
+	void CodeEditorWidget::resizeEvent(QResizeEvent* e)
 	{
 		QPlainTextEdit::resizeEvent(e);
 
@@ -633,7 +636,7 @@ namespace UiLib
 		m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), getLineNumberAreaWidth(), cr.height()));
 	}
 
-	void CodeEditor::contextMenuEvent(QContextMenuEvent* e)
+	void CodeEditorWidget::contextMenuEvent(QContextMenuEvent* e)
 	{
 		QMenu* menu = createStandardContextMenu();
 
@@ -647,7 +650,7 @@ namespace UiLib
 		menu->exec(e->globalPos());
 	}
 
-	void CodeEditor::paintEvent(QPaintEvent* event)
+	void CodeEditorWidget::paintEvent(QPaintEvent* event)
 	{
 		if (m_highlighter != nullptr)
 		{
@@ -669,7 +672,7 @@ namespace UiLib
 		QPlainTextEdit::paintEvent(event);
 	}
 
-	void CodeEditor::updateHighlighter()
+	void CodeEditorWidget::updateHighlighter()
 	{
 		if (m_highlighter == nullptr)
 		{
@@ -712,7 +715,7 @@ namespace UiLib
 		}
 	}
 
-	void CodeEditor::highlightCurrentLine()
+	void CodeEditorWidget::highlightCurrentLine()
 	{
 		// highlight Current Line
 		//
@@ -732,7 +735,7 @@ namespace UiLib
 		setExtraSelections(extraSelections);
 	}
 
-	void CodeEditor::saveCursorHistory()
+	void CodeEditorWidget::saveCursorHistory()
 	{
 		// Process cursor position history
 		//
@@ -769,7 +772,7 @@ namespace UiLib
 		m_lastCursorPosition = cursorPosition;
 	}
 
-	void CodeEditor::goBack()
+	void CodeEditorWidget::goBack()
 	{
 		// Pop the top element from the "back" history stack (if it's not empty).
 		//
@@ -806,7 +809,7 @@ namespace UiLib
 		m_cursorForwardHistory.push(backPos);
 	}
 
-	void CodeEditor::goForward()
+	void CodeEditorWidget::goForward()
 	{
 		// Pop the top element from the "forward" history stack (if it's not empty).
 		//
@@ -843,12 +846,12 @@ namespace UiLib
 		m_cursorBackwardHistory.push(forwardPos);
 	}
 
-	void CodeEditor::updateLineNumberAreaWidth()
+	void CodeEditorWidget::updateLineNumberAreaWidth()
 	{
 		setViewportMargins(getLineNumberAreaWidth(), 0, 0, 0);
 	}
 
-	void CodeEditor::updateLineNumberArea(const QRect& rect, int dy)
+	void CodeEditorWidget::updateLineNumberArea(const QRect& rect, int dy)
 	{
 		if (dy)
 		{
@@ -865,7 +868,7 @@ namespace UiLib
 		}
 	}
 
-	void CodeEditor::onCursorPositionChanged()
+	void CodeEditorWidget::onCursorPositionChanged()
 	{
 		saveCursorHistory();
 
@@ -875,7 +878,7 @@ namespace UiLib
 	//
 	// ------------------------------------------------------------------------------------------
 	//
-	LineNumberArea::LineNumberArea(CodeEditor* editor) :
+	LineNumberArea::LineNumberArea(CodeEditorWidget* editor) :
 		QWidget(editor),
 		m_codeEditor(editor)
 	{
@@ -917,7 +920,7 @@ namespace UiLib
 	//
 	// ------------------------------------------------------------------------------------------
 	//
-	void JsHighlighter::createJsHighlighter(CodeEditor* codeEditor)
+	void JsHighlighter::createJsHighlighter(CodeEditorWidget* codeEditor)
 	{
 		JsHighlighter* h = new JsHighlighter(codeEditor->document());
 		h->initializeFormat();
@@ -1033,7 +1036,7 @@ namespace UiLib
 	//
 	// ------------------------------------------------------------------------------------------
 	//
-	void XmlHighlighter::createXmlHighlighter(CodeEditor* codeEditor)
+	void XmlHighlighter::createXmlHighlighter(CodeEditorWidget* codeEditor)
 	{
 		XmlHighlighter* h = new XmlHighlighter(codeEditor->document());
 		h->initializeFormat();
@@ -1090,4 +1093,487 @@ namespace UiLib
 			m_highlightingRules.append(rule);
 		}
 	}
+
+	//
+	// DialogFindReplace
+	//
+
+	bool DialogFindReplace::m_caseSensitive = false;
+
+	DialogFindReplace::DialogFindReplace(QWidget* parent) :
+		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+	{
+		// Edit
+
+		QLabel* labelFind = new QLabel("Find What:", this);
+		QLabel* labelReplace = new QLabel("Replace Width:", this);
+
+		m_findEdit = new QLineEdit(this);
+		m_replaceEdit = new QLineEdit(this);
+
+		// Completers
+		//
+		QSettings s{};
+		m_findCompleterData = s.value(qAppName() + "/IdePropertyEditor/findCompleter").toStringList();
+		m_replaceCompleterData = s.value("IdePropertyEditor/replaceCompleter").toStringList();
+
+		m_findCompleter = new QCompleter(m_findCompleterData, this);
+		m_findCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+		m_findEdit->setCompleter(m_findCompleter);
+		connect(m_findEdit,
+				&QLineEdit::textEdited,
+				[this]()
+				{
+					m_findCompleter->complete();
+				});
+		connect(m_findCompleter,
+				static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::highlighted),
+				m_findEdit,
+				&QLineEdit::setText);
+
+		m_replaceCompleter = new QCompleter(m_replaceCompleterData, this);
+		m_replaceCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+		m_replaceEdit->setCompleter(m_replaceCompleter);
+		connect(m_replaceEdit,
+				&QLineEdit::textEdited,
+				[this]()
+				{
+					m_replaceCompleter->complete();
+				});
+		connect(m_replaceCompleter,
+				static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::highlighted),
+				m_replaceEdit,
+				&QLineEdit::setText);
+
+		// Buttons
+
+		m_findButton = new QPushButton(tr("Find"), this);
+		m_replaceButton = new QPushButton(tr("Replace"), this);
+		m_replaceAllButton = new QPushButton(tr("Replace All"), this);
+
+		connect(m_findButton, &QPushButton::clicked, this, &DialogFindReplace::onFind);
+		connect(m_replaceButton, &QPushButton::clicked, this, &DialogFindReplace::onReplace);
+		connect(m_replaceAllButton, &QPushButton::clicked, this, &DialogFindReplace::onReplaceAllButton);
+
+		// Replace menu
+
+		m_replaceSelectedAction = new QAction("Process Selected Text", this);
+		connect(m_replaceSelectedAction,
+				&QAction::triggered,
+				[this]()
+				{
+					onReplaceAll(true /*selectedOnly*/);
+				});
+		m_replaceMenu.addAction(m_replaceSelectedAction);
+
+		m_replaceAllAction = new QAction("Process All Text", this);
+		connect(m_replaceAllAction,
+				&QAction::triggered,
+				[this]()
+				{
+					onReplaceAll(false /*selectedOnly*/);
+				});
+		m_replaceMenu.addAction(m_replaceAllAction);
+
+		m_caseSensitiveCheck = new QCheckBox(tr("Case Sensitive"));
+		m_caseSensitiveCheck->setChecked(m_caseSensitive);
+
+		// Layout
+
+		QGridLayout* gridLayout = new QGridLayout();
+		gridLayout->addWidget(labelFind, 0, 0);
+		gridLayout->addWidget(m_findEdit, 0, 1);
+
+		gridLayout->addWidget(labelReplace, 1, 0);
+		gridLayout->addWidget(m_replaceEdit, 1, 1);
+
+		QHBoxLayout* buttonsLayout = new QHBoxLayout();
+		buttonsLayout->addWidget(m_caseSensitiveCheck);
+		buttonsLayout->addStretch();
+		buttonsLayout->addWidget(m_findButton);
+		buttonsLayout->addWidget(m_replaceButton);
+		buttonsLayout->addWidget(m_replaceAllButton);
+
+		QVBoxLayout* vl = new QVBoxLayout();
+		vl->addLayout(gridLayout);
+		vl->addLayout(buttonsLayout);
+
+		setLayout(vl);
+
+		setMinimumWidth(400);
+		setMinimumHeight(100);
+	}
+
+	DialogFindReplace::~DialogFindReplace()
+	{
+		m_caseSensitive = m_caseSensitiveCheck->isChecked();
+	}
+
+	void DialogFindReplace::onFind()
+	{
+		QString text = m_findEdit->text();
+		if (text.isEmpty() == true)
+		{
+			return;
+		}
+
+		saveCompleters();
+
+		emit findFirst(text, m_caseSensitiveCheck->isChecked());
+	}
+
+	void DialogFindReplace::onReplace()
+	{
+		QString textFind = m_findEdit->text();
+		if (textFind.isEmpty() == true)
+		{
+			return;
+		}
+
+		QString textReplace = m_replaceEdit->text();
+		if (textReplace.isEmpty() == true)
+		{
+			return;
+		}
+
+		saveCompleters();
+
+		emit replace(textFind, textReplace, m_caseSensitiveCheck->isChecked());
+	}
+
+	void DialogFindReplace::onReplaceAllButton()
+	{
+		bool hasSelection = false;
+
+		emit hasSelectedText(&hasSelection);
+
+		if (hasSelection == true)
+		{
+			m_replaceMenu.popup(QCursor::pos());
+		}
+		else
+		{
+			onReplaceAll(false /*selectedOnly*/);
+		}
+	}
+
+	void DialogFindReplace::onReplaceAll(bool selectedOnly)
+	{
+		QString textFind = m_findEdit->text();
+		if (textFind.isEmpty() == true)
+		{
+			return;
+		}
+
+		QString textReplace = m_replaceEdit->text();
+		if (textReplace.isEmpty() == true)
+		{
+			return;
+		}
+
+		saveCompleters();
+
+		emit replaceAll(textFind, textReplace, selectedOnly, m_caseSensitiveCheck->isChecked());
+	}
+
+	void DialogFindReplace::saveCompleters()
+	{
+		QString findText = m_findEdit->text();
+
+		if (findText.isEmpty() == false && m_findCompleterData.contains(findText) == false)
+		{
+			m_findCompleterData.append(findText);
+
+			QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_findCompleter->model());
+			if (completerModel != nullptr)
+			{
+				completerModel->setStringList(m_findCompleterData);
+			}
+		}
+
+		while (m_findCompleterData.size() > 100)
+		{
+			m_findCompleterData.pop_front();
+		}
+
+		//
+
+		QString replaceText = m_replaceEdit->text();
+
+		if (replaceText.isEmpty() == false && m_replaceCompleterData.contains(replaceText) == false)
+		{
+			m_replaceCompleterData.append(replaceText);
+
+			QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_replaceCompleter->model());
+			if (completerModel != nullptr)
+			{
+				completerModel->setStringList(m_replaceCompleterData);
+			}
+		}
+
+		while (m_replaceCompleterData.size() > 100)
+		{
+			m_replaceCompleterData.pop_front();
+		}
+
+		QSettings s{};
+		s.setValue(qAppName() + "/IdePropertyEditor/findCompleter", m_findCompleterData);
+		s.setValue(qAppName() + "/IdePropertyEditor/replaceCompleter", m_replaceCompleterData);
+	}
+
+	//
+	// CodeEditor
+	//
+
+	CodeEditor::CodeEditor(CodeType codeType, QWidget* parent) :
+		CodeEditorWidget(parent),
+		m_parent(parent),
+		m_codeType(codeType)
+	{
+		setCaretLineVisible(true);
+		setCaretLineBackgroundColor(0xf0f0f0);
+
+		installEventFilter(this);
+
+		// Set up default font
+		//
+#if defined(Q_OS_WIN)
+		QFont f = QFont("Consolas", 11);
+#else
+		QFont f = QFont("Courier");
+#endif
+		setFont(f);
+
+		// Set up lexer
+		//
+
+		if (m_codeType == CodeType::JavaScript)
+		{
+			UiLib::JsHighlighter::createJsHighlighter(this);
+		}
+
+		if (m_codeType == CodeType::Xml)
+		{
+			UiLib::XmlHighlighter::createXmlHighlighter(this);
+		}
+
+		// Set up margins
+
+		if (codeType == CodeType::JavaScript || codeType == CodeType::Xml)
+		{
+			setLineNumberAreaForegroundColor(QColor(0xc0c0c0));
+			setLineNumberAreaBackgroundColor(QColor(0xf0f0f0));
+		}
+		else
+		{
+			setLineNumberAreaVisible(false);
+		}
+
+		//
+
+		connect(this, &QPlainTextEdit::cursorPositionChanged, this, &CodeEditor::onCursorPositionChanged);
+	}
+
+	CodeEditor::~CodeEditor() {}
+
+	void CodeEditor::onFind(QString findText, bool caseSensitive)
+	{
+		bool result = false;
+
+		if (m_findText.isEmpty() == false && m_findText == findText && caseSensitive == m_findCaseSensitive)
+		{
+			result = findNext();
+		}
+		else
+		{
+			if (findText.isEmpty() == true)
+			{
+				return;
+			}
+
+			m_findText = findText;
+
+			m_findCaseSensitive = caseSensitive;
+
+			result = findFirst(findText, caseSensitive, false /*whole*/);
+		}
+
+		if (result == false)
+		{
+			if (QMessageBox::question(
+					this,
+					qAppName(),
+					tr("Search has reached the end of the document. Do you want to start searching from the beginning?")) ==
+				QMessageBox::Yes)
+			{
+				findFirst(findText, caseSensitive, false /*whole*/);
+			}
+		}
+	}
+
+	void CodeEditor::onReplace(QString findText, QString replaceText, bool caseSensitive)
+	{
+		if (findText.isEmpty() || replaceText.isEmpty())
+		{
+			return;
+		}
+
+		if (hasSelectedText() && selectedText() == findText)
+		{
+			replace(replaceText);
+			return;
+		}
+
+		if (findText == m_findText)
+		{
+			if (findNext() == false)
+			{
+				QMessageBox::information(this, qAppName(), tr("Text was not found."));
+				return;
+			}
+		}
+		else
+		{
+			m_findText = findText;
+
+			if (findFirst(findText, caseSensitive, false /*whole*/) == false)
+			{
+				QMessageBox::information(this, qAppName(), tr("Text was not found."));
+				return;
+			}
+		}
+
+		replace(replaceText);
+	}
+
+
+	void CodeEditor::onReplaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive)
+	{
+		if (findText.isEmpty() || replaceText.isEmpty())
+		{
+			return;
+		}
+
+		QString st;
+
+		if (selectedOnly == true)
+		{
+			st = selectedText();
+		}
+		else
+		{
+			st = text();
+		}
+
+		qsizetype counter = st.count(findText, caseSensitive == true ? Qt::CaseSensitive : Qt::CaseInsensitive);
+
+		if (counter == 0)
+		{
+			QMessageBox::information(this, qAppName(), tr("Text was not found."));
+			return;
+		}
+
+		st.replace(findText, replaceText, caseSensitive == true ? Qt::CaseSensitive : Qt::CaseInsensitive);
+
+		if (selectedOnly == true)
+		{
+			replace(st);
+		}
+		else
+		{
+			setText(st);
+
+			setModified(true);
+		}
+
+		QMessageBox::information(this, qAppName(), tr("%1 replacements occured.").arg(counter));
+	}
+
+	void CodeEditor::onHasSelectedText(bool* result)
+	{
+		if (result == nullptr)
+		{
+			Q_ASSERT(result);
+			return;
+		}
+
+		*result = hasSelectedText();
+		return;
+	}
+
+	bool CodeEditor::eventFilter(QObject* obj, QEvent* event)
+	{
+		if (event->type() == QEvent::KeyPress)
+		{
+			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+
+			if (keyEvent->key() == Qt::Key_Escape)
+			{
+				emit escapePressed();
+				return true;
+			}
+
+			if (obj == this)
+			{
+				if ((keyEvent->key() == Qt::Key_F && (keyEvent->modifiers() & Qt::ControlModifier)) ||
+					(keyEvent->key() == Qt::Key_F3 && m_findText.isEmpty() == true))
+				{
+					if (m_findReplace == nullptr)
+					{
+						m_findReplace = new DialogFindReplace(this);
+
+						connect(m_findReplace, &DialogFindReplace::findFirst, this, &CodeEditor::onFind);
+						connect(m_findReplace, &DialogFindReplace::replace, this, &CodeEditor::onReplace);
+						connect(m_findReplace, &DialogFindReplace::replaceAll, this, &CodeEditor::onReplaceAll);
+						connect(m_findReplace,
+								&DialogFindReplace::hasSelectedText,
+								this,
+								&CodeEditor::onHasSelectedText,
+								Qt::DirectConnection);
+					}
+
+					m_findReplace->show();
+
+					return true;
+				}
+
+				if (keyEvent->key() == Qt::Key_F3)
+				{
+					onFind(m_findText, m_findCaseSensitive);
+					return true;
+				}
+
+				if (keyEvent->key() == Qt::Key_Tab && (keyEvent->modifiers() & Qt::ControlModifier) &&
+					hasSelectedText() == false) // When text is selected, Ctrl+Tab removes tab ident level
+				{
+					emit ctrlTabKeyPressed();
+					return true;
+				}
+
+				if (keyEvent->key() == Qt::Key_S && (keyEvent->modifiers() & Qt::ControlModifier))
+				{
+					emit saveKeyPressed();
+				}
+
+				if (keyEvent->key() == Qt::Key_W && (keyEvent->modifiers() & Qt::ControlModifier))
+				{
+					emit closeKeyPressed();
+				}
+			}
+		}
+
+		// pass the event on to the parent class
+		return CodeEditorWidget::eventFilter(obj, event);
+	}
+
+	void CodeEditor::onCursorPositionChanged()
+	{
+		int line = 0;
+		int index = 0;
+
+		getCursorPosition(&line, &index);
+
+		emit cursorPositionChangedTo(line, index);
+	}
+
 } // namespace UiLib

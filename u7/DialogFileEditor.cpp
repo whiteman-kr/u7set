@@ -1,7 +1,8 @@
 #include "DialogFileEditor.h"
-#include "IdePropertyEditor.h"
 #include "Settings.h"
+#include <UiLib/CodeEditor.h>
 
+using namespace UiLib;
 
 DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, DbController* pDbController, bool readOnly, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
@@ -17,23 +18,23 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 
     QString ext = QFileInfo(fileName).suffix();
 
-	CodeType codeType = CodeType::Unknown;
+	CodeEditor::CodeType codeType = CodeEditor::CodeType::Unknown;
 
 	if (ext == tr("js"))
 	{
-		codeType = CodeType::JavaScript;
+		codeType = CodeEditor::CodeType::JavaScript;
 	}
 	else
 	{
 		if (ext == tr("afb") || ext == tr("xml") || ext == tr("xsd"))
 		{
-			codeType = CodeType::Xml;
+			codeType = CodeEditor::CodeType::Xml;
 		}
 	}
 
-	m_editor = new IdeCodeEditor(codeType, this);
+	m_editor = new CodeEditor(codeType, this);
 
-	connect(m_editor, &IdeCodeEditor::escapePressed, this, &QDialog::reject);
+	connect(m_editor, &CodeEditor::escapePressed, this, &QDialog::reject);
 
 	if (m_editor == nullptr)
 	{

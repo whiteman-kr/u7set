@@ -4,7 +4,7 @@
 
 namespace UiLib
 {
-	class CodeEditor;
+	class CodeEditorWidget;
 }
 
 class ReportPropertyEditor : public ExtWidgets::PropertyTextEditor
@@ -35,7 +35,7 @@ private slots:
 
 
 private:
-    UiLib::CodeEditor* m_textEdit = nullptr;
+	UiLib::CodeEditorWidget* m_textEdit = nullptr;
     QTreeWidget* m_treeWidget = nullptr;
 
     QSplitter* m_topSplitter = nullptr;

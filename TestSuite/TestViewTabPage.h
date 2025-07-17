@@ -4,7 +4,7 @@
 
 namespace UiLib
 {
-	class CodeEditor;
+	class CodeEditorWidget;
 }
 
 class TestViewTabPage : public QWidget
@@ -20,7 +20,7 @@ public:
 
 
 private:
-	UiLib::CodeEditor* m_codeEditor = nullptr;
+	UiLib::CodeEditorWidget* m_codeEditor = nullptr;
 
 	TestSuite::TestScript m_script;
 };

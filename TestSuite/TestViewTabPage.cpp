@@ -7,7 +7,7 @@ TestViewTabPage::TestViewTabPage(const TestSuite::TestScript& script, QWidget* p
 {
 	// Create code editor
 	//
-	m_codeEditor = new UiLib::CodeEditor(this);
+	m_codeEditor = new UiLib::CodeEditorWidget(this);
 	m_codeEditor->setText(m_script.script());
 	m_codeEditor->setReadOnly(true);
 	m_codeEditor->setCaretLineVisible(true);

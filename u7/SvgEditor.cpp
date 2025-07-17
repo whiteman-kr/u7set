@@ -102,7 +102,7 @@ SvgEditor::SvgEditor(QWidget* parent):
 
 	// TextEditor
 	//
-    m_textEdit = new UiLib::CodeEditor(this);
+	m_textEdit = new UiLib::CodeEditorWidget(this);
 
 #if defined(Q_OS_WIN)
 		QFont f = QFont("Consolas", 11);
@@ -114,7 +114,7 @@ SvgEditor::SvgEditor(QWidget* parent):
 
 	UiLib::XmlHighlighter::createXmlHighlighter(m_textEdit);
 
-    connect(m_textEdit, &UiLib::CodeEditor::textChanged, this, &SvgEditor::onTextChanged);
+    connect(m_textEdit, &UiLib::CodeEditorWidget::textChanged, this, &SvgEditor::onTextChanged);
 
 	// Top Layout
 	//

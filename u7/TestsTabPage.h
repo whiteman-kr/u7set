@@ -7,6 +7,10 @@
 #include "IdePropertyEditor.h"
 #include "MainTabPage.h"
 
+namespace UiLib
+{
+	class CodeEditor;
+}
 
 class TestsFileTreeModel : public FileTreeModel
 {
@@ -26,7 +30,7 @@ private:
 	TestTabPageDocument() = delete;
 
 public:
-	TestTabPageDocument(const QString& fileName, IdeCodeEditor* codeEditor, QTreeWidgetItem* openFilesTreeWidgetItem);
+	TestTabPageDocument(const QString& fileName, UiLib::CodeEditor* codeEditor, QTreeWidgetItem* openFilesTreeWidgetItem);
 
 public:
 	QString fileName() const;
@@ -35,13 +39,13 @@ public:
 	bool modified() const;
 	void setModified(bool value);
 
-	IdeCodeEditor* codeEditor() const;
+	UiLib::CodeEditor* codeEditor() const;
 
 	QTreeWidgetItem* openFilesTreeWidgetItem() const;
 
 private:
 	QString m_fileName;
-	IdeCodeEditor* m_codeEditor = nullptr;
+	UiLib::CodeEditor* m_codeEditor = nullptr;
 	bool m_modified = false;
 	QTreeWidgetItem* m_openFilesTreeWidgetItem = nullptr;
 };

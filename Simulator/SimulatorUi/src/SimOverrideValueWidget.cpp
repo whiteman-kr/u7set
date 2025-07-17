@@ -411,7 +411,7 @@ namespace SimOverrideUI
 
 		m_scriptLabel = new QLabel(tr("Override Value Script:"));
 
-		m_scriptEdit = new UiLib::CodeEditor(this);
+		m_scriptEdit = new UiLib::CodeEditorWidget(this);
 #if defined(Q_OS_WIN)
 		QFont f = QFont("Consolas");
 #else

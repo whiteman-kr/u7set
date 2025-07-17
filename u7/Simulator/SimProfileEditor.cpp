@@ -91,7 +91,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent) 
 	// Create Text Editor
 	//
 
-	m_textEdit = new UiLib::CodeEditor(this);
+	m_textEdit = new UiLib::CodeEditorWidget(this);
 
 #if defined(Q_OS_WIN)
 	QFont f = QFont("Consolas");
@@ -103,7 +103,7 @@ SimProfileEditor::SimProfileEditor(DbController* dbController, QWidget* parent) 
 
 	UiLib::JsHighlighter::createJsHighlighter(m_textEdit);
 
-	connect(m_textEdit, &UiLib::CodeEditor::textChanged, this, &SimProfileEditor::textChanged);
+	connect(m_textEdit, &UiLib::CodeEditorWidget::textChanged, this, &SimProfileEditor::textChanged);
 
 	// Buttons
 	//

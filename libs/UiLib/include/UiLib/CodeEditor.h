@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QCompleter>
 #include <QMenu>
 #include <QPlainTextEdit>
 #include <QRegularExpression>
@@ -12,19 +13,15 @@ namespace UiLib
 {
 	class Highlighter;
 
-	struct FindContext
-	{
-		QString text;
-		bool caseSensitive = false;
-		bool wholeWord = false;
-	};
-
-	class CodeEditor : public QPlainTextEdit
+	//
+	// CodeEditorWidget is a basic widget for displaying/editing code, displaying line numbers, searching
+	//
+	class CodeEditorWidget : public QPlainTextEdit
 	{
 		Q_OBJECT
 
 	public:
-		CodeEditor(QWidget* parent = nullptr);
+		CodeEditorWidget(QWidget* parent = nullptr);
 
 		QString text() const;
 		void setText(const QString& text);
@@ -120,6 +117,14 @@ namespace UiLib
 		void onCursorPositionChanged();
 
 	private:
+		struct FindContext
+		{
+			QString text;
+			bool caseSensitive = false;
+			bool wholeWord = false;
+		};
+
+	private:
 		QWidget* m_lineNumberArea = nullptr;
 		Highlighter* m_highlighter = nullptr;
 
@@ -157,14 +162,14 @@ namespace UiLib
 	class LineNumberArea : public QWidget
 	{
 	public:
-		LineNumberArea(CodeEditor* editor);
+		LineNumberArea(CodeEditorWidget* editor);
 
 	private:
 		void paintEvent(QPaintEvent* event) override;
 		QSize sizeHint() const override;
 
 	private:
-		CodeEditor* m_codeEditor = nullptr;
+		CodeEditorWidget* m_codeEditor = nullptr;
 	};
 
 	class Highlighter : public QSyntaxHighlighter
@@ -193,7 +198,7 @@ namespace UiLib
 	class JsHighlighter : public Highlighter
 	{
 	public:
-		static void createJsHighlighter(CodeEditor* codeEditor);
+		static void createJsHighlighter(CodeEditorWidget* codeEditor);
 
 	private:
 		JsHighlighter(QTextDocument* parent);
@@ -209,7 +214,7 @@ namespace UiLib
 	class XmlHighlighter : public Highlighter
 	{
 	public:
-		static void createXmlHighlighter(CodeEditor* codeEditor);
+		static void createXmlHighlighter(CodeEditorWidget* codeEditor);
 
 	private:
 		XmlHighlighter(QTextDocument* parent);
@@ -217,4 +222,102 @@ namespace UiLib
 	private:
 		virtual void initializeFormat() override;
 	};
+
+	//
+	// DialogFindReplace
+	//
+	class DialogFindReplace : public QDialog
+	{
+		Q_OBJECT
+	public:
+		DialogFindReplace(QWidget* parent);
+		~DialogFindReplace();
+
+	signals:
+		void findFirst(QString findText, bool caseSensitive);
+		void replace(QString findText, QString text, bool caseSensitive);
+		void replaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive);
+
+		void hasSelectedText(bool* result); // Use Qt::DirectConnection for this
+
+	private slots:
+		void onFind();
+		void onReplace();
+		void onReplaceAllButton();
+		void onReplaceAll(bool selectedOnly);
+
+	private:
+		void saveCompleters();
+
+	private:
+		QLineEdit* m_findEdit = nullptr;
+		QLineEdit* m_replaceEdit = nullptr;
+
+		QPushButton* m_findButton = nullptr;
+		QPushButton* m_replaceButton = nullptr;
+		QPushButton* m_replaceAllButton = nullptr;
+
+		QCompleter* m_findCompleter = nullptr;
+		QCompleter* m_replaceCompleter = nullptr;
+
+		QStringList m_findCompleterData;
+		QStringList m_replaceCompleterData;
+
+		QCheckBox* m_caseSensitiveCheck = nullptr;
+		static bool m_caseSensitive;
+
+		QMenu m_replaceMenu;
+		QAction* m_replaceSelectedAction = nullptr;
+		QAction* m_replaceAllAction = nullptr;
+	};
+
+	//
+	// CodeEditor contains more features than CodeEditorWidget like built-in find-and-replace dialog and extra signals
+	//
+	class CodeEditor : public CodeEditorWidget
+	{
+		Q_OBJECT
+
+	public:
+		enum class CodeType
+		{
+			JavaScript,
+			Xml,
+			Unknown
+		};
+
+	public:
+		CodeEditor(CodeType codeType, QWidget* parent);
+		~CodeEditor();
+
+	public slots:
+		void onFind(QString findText, bool caseSensitive);
+		void onReplace(QString findText, QString replaceText, bool caseSensitive);
+		void onReplaceAll(QString findText, QString replaceText, bool selectedOnly, bool caseSensitive);
+		void onHasSelectedText(bool* result);
+
+	signals:
+		void cursorPositionChangedTo(int line, int index);
+		void saveKeyPressed();
+		void closeKeyPressed();
+		void ctrlTabKeyPressed();
+		void escapePressed();
+
+	private:
+		bool eventFilter(QObject* obj, QEvent* event) override;
+
+	private slots:
+		void onCursorPositionChanged();
+
+	private:
+		QWidget* m_parent = nullptr;
+
+		CodeType m_codeType = CodeType::Unknown;
+
+		DialogFindReplace* m_findReplace = nullptr;
+
+		bool m_findCaseSensitive = false;
+		QString m_findText;
+	};
+
 } // namespace UiLib

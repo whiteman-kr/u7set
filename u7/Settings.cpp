@@ -115,9 +115,6 @@ void Settings::writeUserScope() const
 	s.setValue("SchemaItemPropertiesDialog/GroupByCategory", m_schemaItemPropertiesGroupByCategory);
 	s.setValue("SchemaItemPropertiesDialog/Geometry", m_schemaItemPropertiesGeometry);
 
-	s.setValue("IdePropertyEditor/findCompleter", m_findCompleter);
-	s.setValue("IdePropertyEditor/replaceCompleter", m_replaceCompleter);
-
 	s.setValue("m_infoMode", m_infoMode);
 
 	s.setValue("UploadTabPage/LeftSplitter/state", m_UploadTabPageLeftSplitterState);
@@ -226,10 +223,6 @@ void Settings::loadUserScope()
 	m_schemaItemPropertiesGroupByCategory =
 		s.value("SchemaItemPropertiesDialog/GroupByCategory", m_schemaItemPropertiesGroupByCategory).toBool();
 	m_schemaItemPropertiesGeometry = s.value("SchemaItemPropertiesDialog/Geometry").toByteArray();
-
-	//
-	m_findCompleter = s.value("IdePropertyEditor/findCompleter").toStringList();
-	m_replaceCompleter = s.value("IdePropertyEditor/replaceCompleter").toStringList();
 
 	m_infoMode = s.value("m_infoMode").toBool();
 

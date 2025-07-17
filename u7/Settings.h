@@ -124,11 +124,6 @@ public:
 	//
 	bool m_findSchemaItemCaseSensitive = false;
 
-	// Find/Replace Dialog in IdeCodeEditor
-	//
-	QStringList m_findCompleter;
-	QStringList m_replaceCompleter;
-
 	// Configurator properties
 	//
 	QByteArray m_UploadTabPageLeftSplitterState;

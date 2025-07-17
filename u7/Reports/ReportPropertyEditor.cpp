@@ -14,7 +14,7 @@ ReportPropertyEditor::ReportPropertyEditor(QWidget* parent):
 
     // TextEditor
     //
-    m_textEdit = new UiLib::CodeEditor(this);
+	m_textEdit = new UiLib::CodeEditorWidget(this);
 
 #if defined(Q_OS_WIN)
         QFont f = QFont("Consolas", 11);
@@ -26,7 +26,7 @@ ReportPropertyEditor::ReportPropertyEditor(QWidget* parent):
 
     UiLib::XmlHighlighter::createXmlHighlighter(m_textEdit);
 
-    connect(m_textEdit, &UiLib::CodeEditor::textChanged, this, &ReportPropertyEditor::onTextChanged);
+    connect(m_textEdit, &UiLib::CodeEditorWidget::textChanged, this, &ReportPropertyEditor::onTextChanged);
 
     // TreeWidget
     m_treeWidget = new QTreeWidget();

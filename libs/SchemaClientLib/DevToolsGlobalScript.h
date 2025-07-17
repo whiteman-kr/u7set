@@ -2,6 +2,11 @@
 
 #include <SchemaClientLib/IDevTools.h>
 
+namespace UiLib
+{
+	class CodeEditor;
+}
+
 namespace SchemaClientLib
 {
 	class DevToolsGlobalScript : public QWidget
@@ -18,7 +23,7 @@ namespace SchemaClientLib
 	private:
 		IDevToolsGlobalScript& m_provider;
 
-		QTextEdit* m_textWidget = nullptr;
+		UiLib::CodeEditor* m_codeEditor = nullptr;
 
 		QPushButton* m_refreshButton = nullptr;
 		QPushButton* m_applyButton = nullptr;

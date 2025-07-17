@@ -3,7 +3,7 @@
 
 namespace UiLib
 {
-	class CodeEditor;
+	class CodeEditorWidget;
 }
 
 class SimProfileEditor : public QDialog
@@ -43,7 +43,7 @@ private:
 
 	DbController* m_db = nullptr;
 
-    UiLib::CodeEditor* m_textEdit = nullptr;
+    UiLib::CodeEditorWidget* m_textEdit = nullptr;
 
 	static SimProfileEditor* m_simProfileEditor;
 	static const QString m_exampleText;
