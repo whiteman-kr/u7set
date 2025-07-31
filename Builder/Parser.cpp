@@ -2573,7 +2573,7 @@ namespace Builder
 
 			if (result == false)
 			{
-				// To avaoid interanl error we need to return here
+				// To avoid internal error we need to return here
 				//
 				return false;
 			}
@@ -3465,7 +3465,9 @@ namespace Builder
 		ok = m_applicationData->expandUfbs();
 		if (ok == false)
 		{
-			result = false;
+			// Return here to avoid further internal errors.
+			//
+			return false;
 		}
 
 		// Connect packed logic items.
