@@ -1,5 +1,5 @@
-#include <VFrame30/SchemaManager.h>
 #include <VFrame30/LogicSchema.h>
+#include <VFrame30/SchemaManager.h>
 
 namespace VFrame30
 {
@@ -32,8 +32,7 @@ namespace VFrame30
 			if (schema->schemaId() != schemaId)
 			{
 				qDebug() << "Requested schema is not loaded one, "
-						 << " Requsted SchemaID: " << schemaId
-						 << ", Loaded SchemaID: " << schema->schemaId();
+						 << " Requested SchemaID: " << schemaId << ", Loaded SchemaID: " << schema->schemaId();
 
 				return {};
 			}
@@ -51,7 +50,7 @@ namespace VFrame30
 		}
 
 		// Set context to the newly created schema, this should be the only place for setting context
-		// for cleints.
+		// for clients.
 		//
 		schema->setContext(std::move(context));
 
@@ -60,31 +59,31 @@ namespace VFrame30
 
 	int SchemaManager::schemaCount() const
 	{
-		Q_ASSERT(false);		// "Must be implemented in derived class";
+		qDebug() << "SchemaManager::schemaCount, must be implemented in derived class";
 		return 0;
 	}
 
 	std::shared_ptr<VFrame30::Schema> SchemaManager::schemaByIndex(int /*schemaIndex*/, std::shared_ptr<Context> /*context*/)
 	{
-		Q_ASSERT(false);		// "Must be implemented in derived class";
+		qDebug() << "SchemaManager::schemaByIndex, must be implemented in derived class";
 		return {};
 	}
 
 	QString SchemaManager::schemaCaptionById(const QString& /*schemaId*/) const
 	{
-		Q_ASSERT(false);		// "Must be implemented in derived class";
+		qDebug() << "SchemaManager::schemaCaptionById, must be implemented in derived class";
 		return {};
 	}
 
 	QString SchemaManager::schemaCaptionByIndex(int /*schemaIndex*/) const
 	{
-		Q_ASSERT(false);		// "Must be implemented in derived class";
+		qDebug() << "SchemaManager::schemaCaptionByIndex, must be implemented in derived class";
 		return {};
 	}
 
 	QString SchemaManager::schemaIdByIndex(int /*schemaIndex*/) const
 	{
-		Q_ASSERT(false);		// "Must be implemented in derived class";
+		qDebug() << "SchemaManager::schemaIdByIndex, must be implemented in derived class";
 		return {};
 	}
 
@@ -106,7 +105,7 @@ namespace VFrame30
 		return {};
 	}
 
-	// Load schema, must be overriden to perform loading schema appropriate to client.
+	// Load schema, must be overridden to perform loading schema appropriate to client.
 	//
 	std::shared_ptr<VFrame30::Schema> SchemaManager::loadSchema(const QString& schemaId)
 	{
@@ -115,4 +114,4 @@ namespace VFrame30
 		return std::shared_ptr<VFrame30::Schema>();
 	}
 
-}
+} // namespace VFrame30

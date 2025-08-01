@@ -1,11 +1,12 @@
 #pragma once
 
-#include <VFrame30/Schema.h>
 #include <TrendView/ITrendDataProvider.h>
+#include <VFrame30/Schema.h>
 
 namespace VFrame30
 {
-	class SchemaManager : public QObject, public TrendLib::ITrendDataProvider
+	class SchemaManager : public QObject,
+						  public TrendLib::ITrendDataProvider
 	{
 		Q_OBJECT
 
@@ -55,6 +56,4 @@ namespace VFrame30
 	private:
 	};
 
-}
-
-
+} // namespace VFrame30
