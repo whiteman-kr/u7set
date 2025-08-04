@@ -241,6 +241,9 @@ public:
 	bool archive() const { return m_archive; }
 	void setArchive(bool archive) { m_archive = archive; }
 
+	bool log() const { return m_log; }
+	void setLog(bool log) { m_log = log; }
+
 	bool isArchived() const { return m_archive; }
 
 	int decimalPlaces() const { return m_decimalPlaces; }
@@ -494,6 +497,7 @@ private:
 
 	bool m_acquire = true;
 	bool m_archive = true;
+	bool m_log = false;
 	bool m_invertSignal = false;
 	bool m_reserved = false;
 

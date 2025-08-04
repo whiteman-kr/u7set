@@ -637,6 +637,11 @@ void AppSignalProperties::initProperties(bool savePropertyDescription)
 	propArchive->setCategory(categoryOnlineMonitoringSystem);
 	propArchive->setViewOrder(20);
 
+	auto propLog = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::LOG,
+														 true, AppSignal::log, AppSignal::setLog, m_signal);
+	propLog->setCategory(categoryOnlineMonitoringSystem);
+	propLog->setViewOrder(21);
+
 	auto propReserved = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, AppSignalPropNames::RESERVED, true, AppSignal::reserved, AppSignal::setReserved, m_signal);
 	propReserved->setCategory(categoryOnlineMonitoringSystem);
 	propReserved->setViewOrder(25);

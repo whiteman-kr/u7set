@@ -758,6 +758,7 @@ void AppSignal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 
 	protoData->set_acquire(m_acquire);
 	protoData->set_archive(m_archive);
+	protoData->set_log(m_log);
 	protoData->set_decimalplaces(m_decimalPlaces);
 	protoData->set_coarseaperture(m_coarseAperture);
 	protoData->set_fineaperture(m_fineAperture);
@@ -818,6 +819,7 @@ void AppSignal::loadProtoData(const char* protoDataPtr, int protoDataSize)
 
 	m_acquire = protoData.acquire();
 	m_archive = protoData.archive();
+	m_log = protoData.log();
 	m_decimalPlaces = protoData.decimalplaces();
 	m_coarseAperture = protoData.coarseaperture();
 	m_fineAperture = protoData.fineaperture();
@@ -1039,6 +1041,7 @@ void AppSignal::writeToXml(XmlWriteHelper& xml) const
 	xml.writeBoolAttribute(AppSignalPropNames::INVERT_SIGNAL, m_invertSignal);
 	xml.writeBoolAttribute(AppSignalPropNames::ACQUIRE, m_acquire);
 	xml.writeBoolAttribute(AppSignalPropNames::ARCHIVE, m_archive);
+	xml.writeBoolAttribute(AppSignalPropNames::LOG, m_log);
 	xml.writeBoolAttribute(AppSignalPropNames::RESERVED, m_reserved);
 
 	xml.writeEnumKeyValueAttribute(AppSignalPropNames::APERTURE_TYPE, m_apertureType);
@@ -1157,6 +1160,7 @@ bool AppSignal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readBoolAttribute(AppSignalPropNames::INVERT_SIGNAL, &m_invertSignal);
 	result &= xml.readBoolAttribute(AppSignalPropNames::ACQUIRE, &m_acquire);
 	result &= xml.readBoolAttribute(AppSignalPropNames::ARCHIVE, &m_archive);
+	result &= xml.readBoolAttribute(AppSignalPropNames::LOG, &m_log);
 	result &= xml.readBoolAttribute(AppSignalPropNames::RESERVED, &m_reserved);
 
 	m_apertureType = E::ApertureType::RangePercent;
@@ -1341,7 +1345,7 @@ void AppSignal::saveToProto(Proto::AppSignal* s) const
 	s->set_coarseaperture(m_coarseAperture);
 	s->set_fineaperture(m_fineAperture);
 	s->set_aperturetype(TO_INT(m_apertureType));
-	s->set_acquire(m_acquire);
+	s->set_log(m_log);
 
 	// Signal fields from database
 
@@ -1562,6 +1566,7 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 	m_coarseAperture = s.coarseaperture();
 	m_fineAperture = s.fineaperture();
 	m_apertureType = static_cast<E::ApertureType>(s.aperturetype());
+	m_log = s.log();
 
 	// Signal fields from database
 

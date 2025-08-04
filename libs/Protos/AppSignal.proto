@@ -110,6 +110,8 @@ message AppSignal
 	//optional bool obsolete_adaptiveAperture = 86 [default = false];
 	optional int32 apertureType = 86 [default = 0 /* E::ApertureType::RangePercent */];
 
+	optional bool log = 87 [default = false];
+
     // Signal specific properties
 
     optional string specPropStruct = 90;
@@ -172,6 +174,8 @@ message ProtoAppSignalData
 	optional bool reserved = 24 [default = false];
 
 	optional int32 swCalcFunction = 25 [default = 0 /* E::SoftwareCalcFunction::None */];
+
+	optional bool log = 26 [default = false];
 }
 
 // Data structs

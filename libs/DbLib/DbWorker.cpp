@@ -458,6 +458,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0428.sql", "Upgrade to version 428, I/O modules configuration scripts update to support library enums"},
 	{":/DatabaseUpgrade/Upgrade0429.sql", "Upgrade to version 429, VDU Configuration script calculates the Master PIN code"},
 	{":/DatabaseUpgrade/Upgrade0430.sql", "Upgrade to version 430, Fixed an issue where it was impossible to get file info for files checked out by other users."},
+	{":/DatabaseUpgrade/Upgrade0431.sql", "Upgrade to version 431, SignalPropertyBehavior.csv file updating" },
 };
 
 int DbWorker::counter = 0;

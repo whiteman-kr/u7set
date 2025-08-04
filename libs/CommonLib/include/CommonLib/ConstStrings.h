@@ -798,6 +798,7 @@ namespace AppSignalPropNames
     inline const QString INPUT_RANGE("InputRange");
 	inline const QString ACQUIRE("Acquire");
 	inline const QString ARCHIVE("Archive");
+	inline const QString LOG("Log");
 	inline const QString RESERVED("Reserved");
 	inline const QString DECIMAL_PLACES("DecimalPlaces");
 	inline const QString COARSE_APERTURE("CoarseAperture");

@@ -37,3 +37,4 @@ InvertSignal			; False			; Hide		; Hide		; Hide			; Hide				; Write		; Write			;
 ApertureType			; False			; Write		; Write		; Write			; Write				; Hide		; Hide			; Hide			; Hide				; Hide		; Hide		; Hide          ; Hide
 Reserved			; False			; Write		; Write		; Write			; Hide				; Write		; Write			; Write			; Hide				; Write		; Write		; Write         ; Hide
 SoftwareCalcFunction		; False			; Hide		; Hide		; Hide			; Write				; Hide          ; Hide                  ; Hide                  ; Write                         ; Hide          ; Hide          ; Hide          ; Write
+Log				; False			; Hide		; Hide		; Hide			; Hide				; Write		; Write			; Write			; Write				; Hide		; Hide		; Hide          ; Hide
