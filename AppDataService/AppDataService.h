@@ -9,6 +9,7 @@
 #include "DynamicAppSignalState.h"
 #include "AppDataSource.h"
 #include "ApertureFile.h"
+#include "DiscretesLog.h"
 
 class TcpArchiveClient;
 class AppDataReceiver;
@@ -169,6 +170,7 @@ private:
 	AppDataSources m_appDataSources;
 
 	DynamicAppSignalStates m_appSignalStates;
+	DiscretesLog m_discretesLog;
 
 	ApertureFile m_apertureFile;
 

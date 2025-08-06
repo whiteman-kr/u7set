@@ -40,15 +40,15 @@ AppDataSource::~AppDataSource()
 }
 
 void AppDataSource::prepare(const AppSignals& appSignals,
-							DynamicAppSignalStates* signalStates,
-							int autoArchivingGroupsCount,
-							CircularLoggerShared timeErrLog)
+	DynamicAppSignalStates* signalStates,
+	DiscretesLog* discretesLog,
+	int autoArchivingGroupsCount,
+	CircularLoggerShared timeErrLog)
 {
-	if (signalStates == nullptr)
-	{
-		assert(false);
-		return;
-	}
+	TEST_PTR_RETURN(signalStates);
+	TEST_PTR_RETURN(discretesLog);
+
+	m_discretesLog = discretesLog;
 
 	setTimeErrLog(timeErrLog);
 
@@ -58,6 +58,8 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 	m_signalStates.clear();
 	m_signalStates.reserve(sourceAssociatedSignals.size());
+
+	int discretesCount = 0;
 
 	for(const QString& signalID : sourceAssociatedSignals)
 	{
@@ -82,11 +84,16 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 			continue;
 		}
 
+		if (signal->isDiscrete())
+		{
+			discretesCount++;
+		}
+
 		DynamicAppSignalState* dynState = signalStates->getStateByID(signal->appSignalID());
 
 		TEST_PTR_CONTINUE(dynState);
 
-		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue);
+		dynState->setQueues(&m_signalStatesQueue, &m_gatewaySignalStatesQueue, &m_logStatesQueue);
 
 		if (signal->isSwCalculated() == false)
 		{
@@ -99,6 +106,8 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 			it->second.emplace_back(dynState);
 		}
 	}
+
+	m_logStatesQueue.reserve(discretesCount * 2);
 
 	m_acquiredSignalsCount = TO_INT(m_signalStates.size());
 
@@ -333,6 +342,8 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	m_simFlagsCount = 0;
 	m_mismatchFlagsCount = 0;
 
+	Q_ASSERT(m_logStatesQueue.empty());
+
 	for(DynamicAppSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
@@ -392,7 +403,14 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 		wakeupStatesProcessingThread();
 	}
 
-	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
+	if (m_logStatesQueue.empty() == false && m_discretesLog != nullptr)
+	{
+		m_discretesLog->pushStates(m_logStatesQueue);
+		m_logStatesQueue.clear();
+	}
+
+	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize,
+								 &m_signalStatesQueueSize, thread);
 
 	readBuffer.prepareToWriting();
 

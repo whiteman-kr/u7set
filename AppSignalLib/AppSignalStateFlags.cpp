@@ -92,6 +92,11 @@ bool AppSignalStateFlags::hasAutoPointReasonOnly() const
 			(archivingReasons & MASK_AUTO_POINT_REASONE) != 0;
 }
 
+bool AppSignalStateFlags::hasLogReason() const
+{
+	return (all & MASK_LOG_REASONS) != 0;
+}
+
 void AppSignalStateFlags::updateArchivingReasonFlags(const AppSignalStateFlags& prevFlags)
 {
 	quint32 changedFlags = all ^ prevFlags.all;

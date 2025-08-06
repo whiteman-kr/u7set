@@ -59,7 +59,7 @@ inline void SimpleMutex::lock(const QThread* currentThread)
 	{
 		const QThread* expectedOwner = nullptr;
 
-		result = m_currentOwner.compare_exchange_strong(expectedOwner, currentThread);
+		result = m_currentOwner.compare_exchange_strong(expectedOwner, currentThread, std::memory_order_seq_cst);
 
 		if (result == false)
 		{
@@ -78,7 +78,7 @@ inline bool SimpleMutex::tryLock(const QThread* currentThread)
 {
 	const QThread* expectedOwner = nullptr;
 
-	return m_currentOwner.compare_exchange_strong(expectedOwner, currentThread);
+	return m_currentOwner.compare_exchange_strong(expectedOwner, currentThread, std::memory_order_seq_cst);
 }
 
 inline void SimpleMutex::unlock()
@@ -90,7 +90,7 @@ inline void SimpleMutex::unlock(const QThread* currentThread)
 {
 	const QThread* expectedOwner = currentThread;
 
-	bool result = m_currentOwner.compare_exchange_strong(expectedOwner, nullptr);
+	bool result = m_currentOwner.compare_exchange_strong(expectedOwner, nullptr, std::memory_order_seq_cst);
 
 	assert(result == true);
 

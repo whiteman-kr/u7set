@@ -50,7 +50,8 @@ public:
 	void setSignalParams(const AppSignal* signal, const AppSignals& appSignals);
 
 	void setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
-				   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue);
+				   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue,
+				   std::vector<SimpleAppSignalState>* logQueue);
 
 	int setStateRaw(AppDataSource& source,
 					const Times& time,
@@ -150,6 +151,7 @@ private:
 private:
 	SimpleAppSignalStatesArchiveFlagQueue* m_statesQueue = nullptr;
 	GatewayAppSignalStatesQueue* m_gwStatesQueue = nullptr;
+	std::vector<SimpleAppSignalState>* m_logQueue = nullptr;
 
 	struct FlagSignalParceInfo
 	{
@@ -185,6 +187,7 @@ private:
 	int m_dataSize = 1;
 
 	bool m_archive = false;
+	bool m_log = false;
 
 	double m_lowLimit = 0;
 	double m_highLimit = 0;

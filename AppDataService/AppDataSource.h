@@ -5,6 +5,7 @@
 #include "../OnlineLib/DataSource.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "DynamicAppSignalState.h"
+#include "DiscretesLog.h"
 
 class AppDataReceiver;
 
@@ -17,6 +18,7 @@ public:
 
 	void prepare(const AppSignals& appSignals,
 				 DynamicAppSignalStates* signalStates,
+				 DiscretesLog* discretesLog,
 				 int autoArchivingGroupsCount,
 				 CircularLoggerShared timeErrLog);
 
@@ -67,6 +69,8 @@ private:
 	std::condition_variable* m_statesProcessingRequiredCondition = nullptr;
 	std::queue<AppDataSource*>* m_statesProcessingRequired = nullptr;
 
+	DiscretesLog* m_discretesLog = nullptr;
+
 	// states of source aquired signals, excluding software calculated signals
 	//
 	std::vector<DynamicAppSignalState*> m_signalStates;
@@ -83,6 +87,7 @@ private:
 
 	SimpleAppSignalStatesArchiveFlagQueue m_signalStatesQueue;
 	GatewayAppSignalStatesQueue m_gatewaySignalStatesQueue;
+	std::vector<SimpleAppSignalState> m_logStatesQueue;
 
 	int m_signalStatesQueueSize = 0;
 	int m_signalStatesQueueCurSize = 0;

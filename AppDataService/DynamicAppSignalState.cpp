@@ -30,6 +30,7 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 	m_swCalcFunction = signal->swCalcFunction();
 
 	m_archive = signal->archive();
+	m_log = signal->log();
 
 	m_lowLimit = signal->lowEngineeringUnits();
 	m_highLimit = signal->highEngineeringUnits();
@@ -117,7 +118,7 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 }
 
 void DynamicAppSignalState::setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
-			   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue)
+	GatewayAppSignalStatesQueue* gatewaySignalStatesQueue, std::vector<SimpleAppSignalState>* logQueue)
 {
 	Q_ASSERT(signalStatesQueue != nullptr);
 	Q_ASSERT(gatewaySignalStatesQueue != nullptr);
@@ -127,6 +128,7 @@ void DynamicAppSignalState::setQueues(SimpleAppSignalStatesArchiveFlagQueue* sig
 
 	m_statesQueue = signalStatesQueue;
 	m_gwStatesQueue = gatewaySignalStatesQueue;
+	m_logQueue = logQueue;
 }
 
 #define PUSH_AUTO_POINT(state)	{																\
@@ -453,6 +455,11 @@ int DynamicAppSignalState::setStateParsed(const Times& time,
 	}
 
 	curState.flags.updateArchivingReasonFlags(prevState.flags);
+
+	if (m_log == true && curState.flags.hasLogReason() == true)
+	{
+		m_logQueue->emplace_back(curState);
+	}
 
 	bool hasArchivingReason = curState.flags.hasArchivingReason();
 

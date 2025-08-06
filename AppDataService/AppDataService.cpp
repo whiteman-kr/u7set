@@ -527,7 +527,8 @@ void AppDataServiceWorker::prepareAppDataSources()
 	{
 		TEST_PTR_CONTINUE(appDataSource);
 
-		appDataSource->prepare(m_appSignals, &m_appSignalStates, m_autoArchivingGroupsCount, m_timeErrLog);
+		appDataSource->prepare(m_appSignals, &m_appSignalStates, &m_discretesLog,
+							   m_autoArchivingGroupsCount, m_timeErrLog);
 	}
 }
 
@@ -540,6 +541,9 @@ void AppDataServiceWorker::applyNewConfiguration()
 	createTimeErrLog();
 	createAndInitSignalStates();
 	buildAcuiredAppSignalIDs();
+
+	m_discretesLog.start(logger());
+
 	prepareAppDataSources();
 
 	runAppDataReceiverThread();
@@ -565,6 +569,8 @@ void AppDataServiceWorker::clearConfiguration()
 
 	// free all resources allocated in onConfigurationReady
 	//
+	m_discretesLog.stop();
+
 	stopRtTrendsServerThread();
 	stopTcpArchiveClientThread();
 	stopTcpAppDataServer();
