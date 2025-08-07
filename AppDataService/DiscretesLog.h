@@ -7,12 +7,13 @@
 #include "../OnlineLib/CircularLogger.h"
 
 class QSqlDatabase;
+class QSqlQuery;
 
-class DiscretesLog
+class DiscretesLogWriter
 {
 public:
-	DiscretesLog();
-	virtual ~DiscretesLog();
+	DiscretesLogWriter();
+	virtual ~DiscretesLogWriter();
 
 	void start(CircularLoggerShared logger);
 	void stop();
@@ -25,12 +26,15 @@ private:
 	bool openDatabase(QSqlDatabase& db);
 	void closeDatabase(QSqlDatabase& db);
 	bool checkAndCreateTables(QSqlDatabase& db);
+	void processLogQueue(QSqlDatabase& db);
+	bool execQuery(QSqlQuery& q, const QString& qStr);
 
 private:
 	CircularLoggerShared m_log;
 
 	SimpleMutex m_logQueueMutex;
 	std::queue<SimpleAppSignalState> m_logQueue;
+	QString m_requestStr;
 
 	std::mutex m_processingRequiredConditionMutex;
 	std::condition_variable m_processingRequiredCondition;

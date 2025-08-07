@@ -39,8 +39,6 @@ add_executable(${TARGET}
 	TcpArchiveClient.h
 )
 
-#target_include_directories(${TARGET} PRIVATE ${Qt6Sql_INCLUDE_DIRS})
-
 target_precompile_headers(${TARGET} PRIVATE
 	# C includes, must be before c++ includes
 	#
@@ -85,7 +83,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QObject>
 	<QQueue>
 	<QSettings>
-	#<QSqlDatabase>
 	<QSqlError>
 	<QSqlQuery>
 	<QString>

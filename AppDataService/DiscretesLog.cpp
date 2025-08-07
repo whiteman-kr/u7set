@@ -6,24 +6,24 @@
 #include "DiscretesLog.h"
 #include "../UtilsLib/WUtils.h"
 
-DiscretesLog::DiscretesLog()
+DiscretesLogWriter::DiscretesLogWriter()
 {
 }
 
-DiscretesLog::~DiscretesLog()
+DiscretesLogWriter::~DiscretesLogWriter()
 {
 }
 
-void DiscretesLog::start(CircularLoggerShared logger)
+void DiscretesLogWriter::start(CircularLoggerShared logger)
 {
 	m_log = logger;
 
 	m_quitRequested = false;
 
-	m_thread = std::thread(&DiscretesLog::run, this);
+	m_thread = std::thread(&DiscretesLogWriter::run, this);
 }
 
-void DiscretesLog::stop()
+void DiscretesLogWriter::stop()
 {
 	if (m_thread.joinable() == false)
 	{
@@ -37,7 +37,7 @@ void DiscretesLog::stop()
 	m_thread.join();
 }
 
-void DiscretesLog::pushStates(const std::vector<SimpleAppSignalState>& logStates)
+void DiscretesLogWriter::pushStates(const std::vector<SimpleAppSignalState>& logStates)
 {
 	m_logQueueMutex.lock();
 
@@ -51,9 +51,9 @@ void DiscretesLog::pushStates(const std::vector<SimpleAppSignalState>& logStates
 	m_processingRequiredCondition.notify_one();
 }
 
-void DiscretesLog::run()
+void DiscretesLogWriter::run()
 {
-	DEBUG_LOG_WRN(m_log, "DiscretesLog started");
+	DEBUG_LOG_WRN(m_log, "DiscretesLog: started");
 
 	QSqlDatabase db;
 
@@ -83,16 +83,18 @@ void DiscretesLog::run()
 		}
 
 		ul.unlock();
+
+		processLogQueue(db);
 	}
 
 	closeDatabase(db);
 
-	DEBUG_LOG_WRN(m_log, "DiscretesLog finished");
+	DEBUG_LOG_WRN(m_log, "DiscretesLog: finished");
 }
 
-bool DiscretesLog::openDatabase(QSqlDatabase& db)
+bool DiscretesLogWriter::openDatabase(QSqlDatabase& db)
 {
-	db = QSqlDatabase::addDatabase("QSQLITE");
+	db = QSqlDatabase::addDatabase("QSQLITE", "DiscretesLogWriter");
 
 	QString appDataLoacation =  QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 
@@ -100,7 +102,7 @@ bool DiscretesLog::openDatabase(QSqlDatabase& db)
 
 	if (db.open() == true)
 	{
-		DEBUG_LOG_MSG(m_log, QString("DiscretesLog database %1 opened").arg(db.databaseName()));
+		DEBUG_LOG_MSG(m_log, QString("DiscretesLog: database %1 opened").arg(db.databaseName()));
 
 		bool res = checkAndCreateTables(db);
 
@@ -111,13 +113,13 @@ bool DiscretesLog::openDatabase(QSqlDatabase& db)
 	}
 	else
 	{
-		DEBUG_LOG_ERR(m_log, "DiscretesLog database NOT opened");
+		DEBUG_LOG_ERR(m_log, "DiscretesLog: ERROR database not opened");
 	}
 
 	return db.isOpen();
 }
 
-void DiscretesLog::closeDatabase(QSqlDatabase& db)
+void DiscretesLogWriter::closeDatabase(QSqlDatabase& db)
 {
 	if (db.isOpen() == true)
 	{
@@ -125,20 +127,27 @@ void DiscretesLog::closeDatabase(QSqlDatabase& db)
 	}
 }
 
-bool DiscretesLog::checkAndCreateTables(QSqlDatabase& db)
+bool DiscretesLogWriter::checkAndCreateTables(QSqlDatabase& db)
 {
+	QSqlQuery q(db);
+
+	if (execQuery(q, "PRAGMA journal_mode=WAL;") == false)
+	{
+		Q_ASSERT(false);
+		DEBUG_LOG_ERR(m_log, "DiscretesLog: ERROR set journal_mode");
+		return false;
+	}
+
 	if (db.tables().contains("Version") == false)
 	{
-		QSqlQuery q(db);
-
-		if (q.exec("CREATE TABLE IF NOT EXISTS Version (VersionNo INTEGER, CreationDate TEXT)") == false)
+		if (execQuery(q, "CREATE TABLE IF NOT EXISTS Version (VersionNo INTEGER, CreationDate TEXT)") == false)
 		{
-			DEBUG_LOG_ERR(m_log, "Error create Version table");
+			DEBUG_LOG_ERR(m_log, "DiscretesLog: ERROR create Version table");
 			return false;
 		}
 		else
 		{
-			DEBUG_LOG_MSG(m_log, "Version table created");
+			DEBUG_LOG_MSG(m_log, "DiscretesLog: Version table created");
 		}
 
 		const int VERSION_NO = 1;
@@ -146,32 +155,32 @@ bool DiscretesLog::checkAndCreateTables(QSqlDatabase& db)
 		QDateTime localTime = QDateTime::currentDateTime();
 		localTime.setTimeZone(QTimeZone::UTC);
 
-		if (q.exec(QString("INSERT INTO Version(VersionNo, CreationDate) VALUES (%1, '%2')").
+		if (execQuery(q, QString("INSERT INTO Version(VersionNo, CreationDate) VALUES (%1, '%2')").
 						arg(VERSION_NO).
 						arg(formatTime_YYYY_MM_DD(localTime.toMSecsSinceEpoch()))) == true)
 		{
-			DEBUG_LOG_MSG(m_log, QString("DiscretesLog database version set to %1").arg(VERSION_NO));
+			DEBUG_LOG_MSG(m_log, QString("DiscretesLog: database version set to %1").arg(VERSION_NO));
 		}
 		else
 		{
-			DEBUG_LOG_ERR(m_log, "Error set DiscretesLog database version!");
+			DEBUG_LOG_ERR(m_log, "DiscretesLog: ERROR set database version!");
 			return false;
 		}
 	}
 
-	QSqlQuery q(db);
-
-	if (q.exec("SELECT MAX(VersionNo) FROM Version") == false)
+	if (execQuery(q, "SELECT MAX(VersionNo) FROM Version") == false)
 	{
-		DEBUG_LOG_ERR(m_log, "Error get DiscretesLog database version!");
+		DEBUG_LOG_ERR(m_log, "DiscretesLog: ERROR get database version!");
 		return false;
 	}
 
-	q.next();
+	bool res = q.next();
 
-	m_dbVersion = q.value("VersionNo").toInt();
+	Q_ASSERT(res == true);
 
-	DEBUG_LOG_MSG(m_log, QString("DiscretesLog database version = %1").arg(m_dbVersion));
+	m_dbVersion = q.value(0).toInt();
+
+	DEBUG_LOG_MSG(m_log, QString("DiscretesLog: database version = %1").arg(m_dbVersion));
 
 	//
 
@@ -181,28 +190,113 @@ bool DiscretesLog::checkAndCreateTables(QSqlDatabase& db)
 						CREATE TABLE IF NOT EXISTS DiscretesLog (
 								id INTEGER PRIMARY KEY AUTOINCREMENT,
 								recordTime INTEGER,
+
+								plantTime INTEGER,
+								systemTime INTEGER,
+								localTime INTEGER,
 								hash INTEGER,
 								value INTEGER,
-								plantTime INTEGER,
-								serverTime INTEGER,
-								acknowleged INTEGER,
-								ackTime INTEGER,
-								ackSource TEXT)
+								flags INTEGER,
+
+								acknowleged INTEGER DEFAULT 0,
+								ackTime INTEGER DEFAULT NULL,
+								ackSource TEXT DEFAULT NULL,
+								ackUser TEXT DEFAULT NULL)
 					)";
 
-		if (q.exec(s) == false)
+		if (execQuery(q, s) == false)
 		{
-			DEBUG_LOG_ERR(m_log, "Error create DiscretesLog table");
+			DEBUG_LOG_ERR(m_log, "DiscretesLog: ERROR create DiscretesLog table");
 			return false;
 		}
 		else
 		{
-			DEBUG_LOG_MSG(m_log, "DiscretesLog table created");
+			DEBUG_LOG_MSG(m_log, "DiscretesLog: DiscretesLog table created");
 		}
 	}
 
 	return true;
 }
 
+void DiscretesLogWriter::processLogQueue(QSqlDatabase& db)
+{
+	m_requestStr.clear();
 
+	QSqlQuery q(db);
 
+	m_logQueueMutex.lock();
+
+	qint64 recordTime = 0;
+	bool firstRecord = false;
+
+	while(m_logQueue.empty() == false)
+	{
+		if (m_requestStr.isEmpty())
+		{
+			m_requestStr = QStringLiteral("INSERT INTO DiscretesLog (recordTime, plantTime, systemTime, localTime, hash, value, flags) VALUES ");
+
+			QDateTime curTime = QDateTime::currentDateTime();
+			curTime.setTimeZone(QTimeZone::UTC);
+			recordTime = curTime.toMSecsSinceEpoch();
+			firstRecord = true;
+		}
+
+		if (firstRecord == false)
+		{
+			m_requestStr.append(QStringLiteral(", "));
+		}
+		else
+		{
+			firstRecord = false;
+		}
+
+		const SimpleAppSignalState& s = m_logQueue.front();
+
+		m_requestStr.append(QString("(%1, %2, %3, %4, %5, %6)").
+										arg(recordTime).
+										arg(s.plantTime()).
+										arg(s.systemTime()).
+										arg(s.localTime()).
+										arg(s.hash).
+										arg(s.value == 0.0 ? 0 : 1).
+										arg(s.flags.all));
+		m_logQueue.pop();
+
+		if (m_requestStr.length() >= 950000)
+		{
+			m_logQueueMutex.unlock();
+
+			execQuery(q, m_requestStr);
+
+			m_requestStr.clear();
+
+			m_logQueueMutex.lock();
+		}
+	}
+
+	m_logQueueMutex.unlock();
+
+	if (m_requestStr.isEmpty() == false)
+	{
+		execQuery(q, m_requestStr);
+
+		m_requestStr.clear();
+	}
+}
+
+bool DiscretesLogWriter::execQuery(QSqlQuery& q, const QString& qStr)
+{
+	if (q.exec(qStr) == false)
+	{
+		QSqlError err = q.lastError();
+
+		DEBUG_LOG_ERR(m_log, QString("DiscretesLog: query '%1' exec ERROR - '%2'").
+							 arg(qStr).arg(err.text()));
+
+		Q_ASSERT(false);
+
+		return false;
+	}
+
+	return true;
+}

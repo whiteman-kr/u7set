@@ -170,7 +170,7 @@ private:
 	AppDataSources m_appDataSources;
 
 	DynamicAppSignalStates m_appSignalStates;
-	DiscretesLog m_discretesLog;
+	DiscretesLogWriter m_discretesLogWriter;
 
 	ApertureFile m_apertureFile;
 
