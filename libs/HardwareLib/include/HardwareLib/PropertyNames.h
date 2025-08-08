@@ -121,5 +121,7 @@ namespace Hardware
 		inline static const QString categoryScripts = QStringLiteral("Scripts");
 
 		inline static const QString globalScript = QStringLiteral("GlobalScript");
+
+		inline static const QString startupLogo = QStringLiteral("StartupLogo");
 	};
 } // namespace Hardware

@@ -437,9 +437,7 @@ namespace Builder
 		//
 		for (const Hardware::DeviceModule* vdu : context.m_fscModules | std::views::filter(isVduModule))
 		{
-			Q_ASSERT(vdu);
-
-			LOG_MESSAGE_REF(log, QString("Generating GloablScript for VDU %1.").arg(vdu->equipmentId()));
+			LOG_MESSAGE_REF(log, QString("Generating GlobalScript for VDU %1.").arg(vdu->equipmentId()));
 
 			auto globalScriptProp = vdu->propertyByCaption(Hardware::PropertyNames::globalScript);
 			if (globalScriptProp == nullptr)
@@ -476,6 +474,56 @@ namespace Builder
 			}
 
 			addedFile = context.m_buildResultWriter->addFile(vduDir, File::VDU_GLOBAL_SCRIPT_LBC, globalScriptBytecode, false);
+			result &= addedFile != nullptr;
+		}
+
+		// Writing StartupLogo.bmp
+		//
+		for (const Hardware::DeviceModule* vdu : context.m_fscModules | std::views::filter(isVduModule))
+		{
+			LOG_MESSAGE_REF(log, QString("Generating StartupLogo for VDU %1.").arg(vdu->equipmentId()));
+
+			auto startupLogoProp = vdu->propertyByCaption(Hardware::PropertyNames::startupLogo);
+			if (startupLogoProp == nullptr)
+			{
+				log.errCFG3000(Hardware::PropertyNames::startupLogo, vdu->equipmentId());
+				result = false;
+				continue;
+			}
+
+			QString startupLogoDbFileName = startupLogoProp->value().toString().trimmed();
+
+			// Get file from database.
+			//
+			DbFileInfo fileInfo;
+			bool dbOk = context.m_db.getFileInfo(startupLogoDbFileName, &fileInfo, nullptr);
+			if (dbOk == false || fileInfo.deleted() == true)
+			{
+				log.errPDB2007(startupLogoDbFileName, vdu->equipmentId(), Hardware::PropertyNames::startupLogo);
+				result = false;
+				continue;
+			}
+
+			std::shared_ptr<DbFile> out;
+			dbOk = context.m_db.getLatestVersion(fileInfo, &out, nullptr);
+
+			if (dbOk == false)
+			{
+				log.errPDB2002(fileInfo.fileId(), startupLogoDbFileName, context.m_db.lastError());
+				result = false;
+				continue;
+			}
+
+			// Write file to the output.
+			//
+			auto vduDir = vduDirFunc(*vdu, log);
+			if (vduDir.isEmpty() == true)
+			{
+				result = false;
+				continue;
+			}
+
+			auto addedFile = context.m_buildResultWriter->addFile(vduDir, File::VDU_STARTUP_LOGO, out->data(), false);
 			result &= addedFile != nullptr;
 		}
 

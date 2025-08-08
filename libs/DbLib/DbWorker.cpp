@@ -454,11 +454,12 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0424.sql", "Upgrade to version 424, Fixing typos in TIM, TIM and WAIM presets scripts logs"},
 	{":/DatabaseUpgrade/Upgrade0425.sql", "Upgrade to version 425, Added Request Controllers to CfgService preset, modification of AppDataService preset"},
 	{":/DatabaseUpgrade/Upgrade0426.sql", "Upgrade to version 426, Module configuration script is ConfigScript.js, added extra info to LM descriptions"},
-	{":/DatabaseUpgrade/Upgrade0427.sql", "Upgrade to version 427, Property SoftwareImplemented added to some AfbComponets"},
+	{":/DatabaseUpgrade/Upgrade0427.sql", "Upgrade to version 427, Property SoftwareImplemented added to some AfbComponents"},
 	{":/DatabaseUpgrade/Upgrade0428.sql", "Upgrade to version 428, I/O modules configuration scripts update to support library enums"},
 	{":/DatabaseUpgrade/Upgrade0429.sql", "Upgrade to version 429, VDU Configuration script calculates the Master PIN code"},
 	{":/DatabaseUpgrade/Upgrade0430.sql", "Upgrade to version 430, Fixed an issue where it was impossible to get file info for files checked out by other users."},
 	{":/DatabaseUpgrade/Upgrade0431.sql", "Upgrade to version 431, SignalPropertyBehavior.csv file updating" },
+	{":/DatabaseUpgrade/Upgrade0432.sql", "Upgrade to version 432, VDU-1 renamed to RVDU, Added property StartupLogo" },
 };
 
 int DbWorker::counter = 0;
