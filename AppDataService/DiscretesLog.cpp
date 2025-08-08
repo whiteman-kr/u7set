@@ -1,3 +1,6 @@
+#include <algorithm>
+#include <chrono>
+
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -14,8 +17,9 @@ DiscretesLogWriter::~DiscretesLogWriter()
 {
 }
 
-void DiscretesLogWriter::start(CircularLoggerShared logger)
+void DiscretesLogWriter::start(int logTimeHours, CircularLoggerShared logger)
 {
+	m_logTimeHours = std::clamp(logTimeHours, 1, 10 * 24);
 	m_log = logger;
 
 	m_quitRequested = false;
@@ -39,6 +43,11 @@ void DiscretesLogWriter::stop()
 
 void DiscretesLogWriter::pushStates(const std::vector<SimpleAppSignalState>& logStates)
 {
+	if (m_dbIsWorkable == false)
+	{
+		return;
+	}
+
 	m_logQueueMutex.lock();
 
 	for(const SimpleAppSignalState& logState : logStates)
@@ -59,20 +68,25 @@ void DiscretesLogWriter::run()
 
 	openDatabase(db);
 
+	deleteLogOldRecords(db);
+
 	std::unique_lock ul(m_processingRequiredConditionMutex, std::defer_lock);
 
 	while(true)
 	{
 		ul.lock();
 
-		m_processingRequiredCondition.wait(ul, [this]() -> bool
-						   {
+		m_processingRequiredCondition.wait_for(
+							ul,
+							std::crono::milliseconds(ONE_HOUR_MS),
+							[this]() -> bool
+							{
 								m_logQueueMutex.lock();
 								bool logQueueEmpty = m_logQueue.empty();
 								m_logQueueMutex.unlock();
 
-								return m_quitRequested || logQueueEmpty == false;
-						   });
+								return m_timeout || m_quitRequested || logQueueEmpty == false;
+							});
 
 		// here ul is LOCKED!
 
@@ -84,6 +98,12 @@ void DiscretesLogWriter::run()
 
 		ul.unlock();
 
+		if (m_timeout == true)
+		{
+			m_timeout = false;
+			deleteLogOldRecords(db);
+		}
+
 		processLogQueue(db);
 	}
 
@@ -94,6 +114,8 @@ void DiscretesLogWriter::run()
 
 bool DiscretesLogWriter::openDatabase(QSqlDatabase& db)
 {
+	m_dbIsWorkable = false;
+
 	db = QSqlDatabase::addDatabase("QSQLITE", "DiscretesLogWriter");
 
 	QString appDataLoacation =  QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
@@ -114,9 +136,12 @@ bool DiscretesLogWriter::openDatabase(QSqlDatabase& db)
 	else
 	{
 		DEBUG_LOG_ERR(m_log, "DiscretesLog: ERROR database not opened");
+		return false;
 	}
 
-	return db.isOpen();
+	m_dbIsWorkable = true;
+
+	return m_dbIsWorkable;
 }
 
 void DiscretesLogWriter::closeDatabase(QSqlDatabase& db)
@@ -220,6 +245,12 @@ bool DiscretesLogWriter::checkAndCreateTables(QSqlDatabase& db)
 
 void DiscretesLogWriter::processLogQueue(QSqlDatabase& db)
 {
+	if (m_dbIsWorkable == false)
+	{
+		clearLogQueue();
+		return;
+	}
+
 	m_requestStr.clear();
 
 	QSqlQuery q(db);
@@ -235,9 +266,7 @@ void DiscretesLogWriter::processLogQueue(QSqlDatabase& db)
 		{
 			m_requestStr = QStringLiteral("INSERT INTO DiscretesLog (recordTime, plantTime, systemTime, localTime, hash, value, flags) VALUES ");
 
-			QDateTime curTime = QDateTime::currentDateTime();
-			curTime.setTimeZone(QTimeZone::UTC);
-			recordTime = curTime.toMSecsSinceEpoch();
+			recordTime = QDateTime::currentMSecsSinceEpoch();
 			firstRecord = true;
 		}
 
@@ -252,7 +281,7 @@ void DiscretesLogWriter::processLogQueue(QSqlDatabase& db)
 
 		const SimpleAppSignalState& s = m_logQueue.front();
 
-		m_requestStr.append(QString("(%1, %2, %3, %4, %5, %6)").
+		m_requestStr.append(QString("(%1, %2, %3, %4, %5, %6, %7)").
 										arg(recordTime).
 										arg(s.plantTime()).
 										arg(s.systemTime()).
@@ -299,4 +328,40 @@ bool DiscretesLogWriter::execQuery(QSqlQuery& q, const QString& qStr)
 	}
 
 	return true;
+}
+
+void DiscretesLogWriter::deleteLogOldRecords(QSqlDatabase& db)
+{
+	if (m_dbIsWorkable == false)
+	{
+		return;
+	}
+
+	qint64 recordTime = QDateTime::currentMSecsSinceEpoch();
+
+	recordTime -= m_logTimeHours * ONE_HOUR_MS;
+
+	QSqlQuery q(db);
+
+	execQuery(q, QString("DELETE FROM DiscretesLog WHERE recordTime < %1").arg(recordTime));
+
+	DEBUG_LOG_MSG(m_log, QString("DiscretesLog: delete %1 old records").arg(q.numRowsAffected()));
+}
+
+void DiscretesLogWriter::clearLogQueue()
+{
+	m_logQueueMutex.lock();
+
+	while(m_logQueue.empty() == false)
+	{
+		m_logQueue.pop();
+	}
+
+	m_logQueueMutex.unlock();
+}
+
+void DiscretesLogWriter::onTimer()
+{
+	m_timeout = true;
+	m_processingRequiredCondition.notify_one();
 }

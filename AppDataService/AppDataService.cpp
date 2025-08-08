@@ -542,7 +542,7 @@ void AppDataServiceWorker::applyNewConfiguration()
 	createAndInitSignalStates();
 	buildAcuiredAppSignalIDs();
 
-	m_discretesLogWriter.start(logger());
+	m_discretesLogWriter.start(1, logger());
 
 	prepareAppDataSources();
 
