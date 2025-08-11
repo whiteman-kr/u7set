@@ -1,4 +1,5 @@
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/u7_vld.h>
 
 #include "LicenserMainWindow.h"
 #include "version.h"
@@ -7,6 +8,8 @@
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	QApplication app(argc, argv);
 
 	QCoreApplication::setOrganizationName(Manufacturer::RADIY);

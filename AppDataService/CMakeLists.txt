@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(AppDataSrv LANGUAGES CXX)
 
-include(../cmake/vld.cmake)
-
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -114,8 +112,6 @@ target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generate
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
 target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib)
-
-message(STATUS "Qt6Sql_INCLUDE_DIRS = ${Qt6Sql_INCLUDE_DIRS}")
 
 # Link Visaul Leak Detector
 #

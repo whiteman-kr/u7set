@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(mconf LANGUAGES CXX)
 
-include(../cmake/vld.cmake)
-
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -58,9 +56,4 @@ target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generate
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Sql Qt6::Network Qt6::Xml Qt6::Widgets Qt6::Gui Qt6::SerialPort Qt6::Qml)
 target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib HardwareLib ModuleConfiguratorLib UiLib LicenseLib BuildCompLib)
 
-# Link Visaul Leak Detector
-#
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()
 

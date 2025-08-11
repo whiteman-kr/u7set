@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(TuningClient LANGUAGES CXX)
 
-include(../cmake/vld.cmake)
 include(../cmake/translations.cmake)
 
 set(CMAKE_AUTOUIC ON)
@@ -109,9 +108,3 @@ add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql Qt6::Network Qt6::Qml Qt6::Xml Qt6::Svg Qt6::PrintSupport)
 target_link_libraries(${TARGET} PRIVATE CommonLib UtilsLib AppSignalLib OnlineLib VFrame30 ClientLib SchemaClientLib TuningLib)
-
-# Link Visaul Leak Detector
-#
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()

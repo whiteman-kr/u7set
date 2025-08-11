@@ -1,9 +1,12 @@
 #include "RvModelSimBridge.h"
 #include "version.h"
+#include <CommonLib/u7_vld.h>
 #include <ServiceLib/ServiceStarter.h>
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	// Add extra options to command-line params
 	//
 	char argID[] = "-id=ID";

@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(Diagnostics LANGUAGES CXX)
 
-include(../cmake/vld.cmake)
 include(../cmake/translations.cmake)
 
 set(CMAKE_AUTOUIC ON)
@@ -121,9 +120,4 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Net
 target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib DiagStateLib OnlineLib TrendView 
 	VFrame30 ClientLib SchemaClientLib DiagClientLib UiLib)
 
-# Link Visaul Leak Detector
-#
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()
 

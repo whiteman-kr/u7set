@@ -1,11 +1,14 @@
 #include "MetrologyMainWindow.h"
 #include "Options.h"
+#include <CommonLib/u7_vld.h>
 #include <UiLib/OverrideWindows11Style.h>
 #include "version.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 #if defined (Q_OS_WIN)
 	CrashExceptionHandler cdh;
 	cdh.EnableDumping(10);

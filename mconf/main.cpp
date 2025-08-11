@@ -2,6 +2,7 @@
 #include "version.h"
 
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/u7_vld.h>
 #include <LicenseLib/AppLicenser.h>
 #include <UiLib/OverrideWindows11Style.h>
 
@@ -13,6 +14,8 @@ Q_DECLARE_METATYPE(std::vector<quint8>)
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	QApplication a(argc, argv);
 
 	// Override Windows11 style, the current implementation does not look well.

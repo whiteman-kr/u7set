@@ -12,6 +12,7 @@
 
 #include <google/protobuf/message_lite.h>
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/u7_vld.h>
 
 #include <SimulatorLib/SimConsoleLogFile.h>
 #include <SimulatorLib/Simulator.h>
@@ -176,6 +177,8 @@ public:
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	ProtobufLibShutdowner pbLibShutdowner;
 	Q_UNUSED(pbLibShutdowner);
 

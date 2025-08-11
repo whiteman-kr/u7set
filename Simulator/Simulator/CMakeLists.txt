@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(Simulator LANGUAGES CXX)
 
-include(../../cmake/vld.cmake)
-
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -33,9 +31,3 @@ target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generate
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Widgets)
 target_link_libraries(${TARGET} PRIVATE CommonLib LicenseLib HardwareLib VFrame30 SimulatorUi)
-
-# Link Visaul Leak Detector
-#
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()

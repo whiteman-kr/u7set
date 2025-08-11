@@ -1,6 +1,7 @@
 #include "AppConfigSettings.h"
 #include "TestSuiteMainWindow.h"
 #include "version.h"
+#include <CommonLib/u7_vld.h>
 #include <UiLib/OverrideWindows11Style.h>
 #include <google/protobuf/message_lite.h>
 
@@ -20,6 +21,8 @@ struct TestSuiteSharedData
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	QApplication a(argc, argv);
 
 	UiLib::OverrideWindows11Style(a, argc, argv);

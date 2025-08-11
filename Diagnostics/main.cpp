@@ -4,6 +4,7 @@
 #include "version.h"
 
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/u7_vld.h>
 #include <HardwareLib/HardwareLibrary.h>
 #include <UiLib/OverrideWindows11Style.h>
 #include <VFrame30/VFrame30Library.h>
@@ -11,6 +12,8 @@
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	QApplication a(argc, argv);
 
 	UiLib::OverrideWindows11Style(a, argc, argv);

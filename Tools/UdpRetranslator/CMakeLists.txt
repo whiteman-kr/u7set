@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(UdpRtr LANGUAGES CXX)
 
-include(../../cmake/vld.cmake)
-
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -98,8 +96,3 @@ include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/includ
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network)
 target_link_libraries(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/npcap/Lib/x64/wpcap.lib)
 
-# Link Visaul Leak Detector
-
-#if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-#	target_link_libraries(${TARGET} PRIVATE vld.lib)
-#endif()
