@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(Metrology LANGUAGES CXX)
 
-include(../cmake/vld.cmake)
-
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -163,12 +161,4 @@ if (MSVC)
 
 	add_custom_command(TARGET ${TARGET} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${DLL_COPY_FILE_LIST} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endif()
-
-
-# Link Visual Leak Detector
-#
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()
-
 

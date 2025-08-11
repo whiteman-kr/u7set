@@ -3,6 +3,7 @@
 #include "MonitorMainWindow.h"
 #include "version.h"
 
+#include <CommonLib/u7_vld.h>
 #include <HardwareLib/HardwareLibrary.h>
 #include <UiLib/OverrideWindows11Style.h>
 #include <VFrame30/VFrame30Library.h>
@@ -10,6 +11,8 @@
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	QApplication a(argc, argv);
 
 	// Override Windows11 style, the current implementation does not look well.
@@ -45,7 +48,7 @@ int main(int argc, char* argv[])
 			{
 				continue;
 			}
-			
+
 			settingsFileName = arguments[i];
 			break;
 		}

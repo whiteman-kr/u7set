@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(Licenser LANGUAGES CXX)
 
-include(../../cmake/vld.cmake)
 include(../../cmake/translations.cmake)
 
 set(CMAKE_AUTOUIC ON)

@@ -1,22 +1,14 @@
+#include <CommonLib/u7_vld.h>
 #include <ServiceLib/ServiceStarter.h>
 #include "GatewayService.h"
 #include "version.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
 
-// Visual Leak Detector
-//
-#if defined(Q_OS_WIN) && defined(QT_DEBUG)
-#if __has_include("C:/Program Files (x86)/Visual Leak Detector/include/vld.h")
-#include "C:/Program Files (x86)/Visual Leak Detector/include/vld.h"
-#else
-#if __has_include("D:/Program Files (x86)/Visual Leak Detector/include/vld.h")
-#include "D:/Program Files (x86)/Visual Leak Detector/include/vld.h"
-#endif
-#endif
-#endif // Visual Leak Detector
 
 int main(int argc, char *argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::GATEWAY_SERVICE);
 
 #if defined (Q_OS_WIN)

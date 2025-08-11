@@ -1,3 +1,4 @@
+#include <CommonLib/u7_vld.h>
 #include <ServiceLib/ServiceStarter.h>
 #include "TuningService.h"
 #include "version.h"
@@ -5,6 +6,8 @@
 
 int main(int argc, char *argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::TUNING_SERVICE);
 
 #if defined (Q_OS_WIN)

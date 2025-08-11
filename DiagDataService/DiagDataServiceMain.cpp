@@ -1,3 +1,4 @@
+#include <CommonLib/u7_vld.h>
 #include <ServiceLib/ServiceStarter.h>
 #include "DiagDataService.h"
 #include "version.h"
@@ -5,6 +6,8 @@
 
 int main(int argc, char *argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::DIAGNOSTIC_DATA_SERVICE);
 
 #if defined (Q_OS_WIN)

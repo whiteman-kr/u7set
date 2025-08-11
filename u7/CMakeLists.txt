@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(u7 LANGUAGES CXX)
 
-include(../cmake/vld.cmake)
 include(../cmake/copy_libpq_dll.cmake)
 
 set(CMAKE_AUTOUIC ON)
@@ -447,12 +446,6 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Sql
 target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib DbLib OnlineLib
 	TrendView SimulatorUi qt6keychain Builder VFrame30 ReportLib AppSignalLists SchemaClientLib ModuleConfiguratorLib 
 	TuningLib UiLib LicenseLib BuildCompLib)
-
-# Link Visaul Leak Detector
-#
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()
 
 target_compile_definitions(${TARGET} PRIVATE QTKEYCHAIN_NO_EXPORT)
 

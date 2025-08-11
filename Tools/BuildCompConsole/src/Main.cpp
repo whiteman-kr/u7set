@@ -1,5 +1,6 @@
 #include <BuildCompLib/BuildComp.h>
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/u7_vld.h>
 
 #include "version.h"
 
@@ -105,6 +106,8 @@ void printResultDetails(const BuildCompLib::CompareResult& result)
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 #ifdef _WIN32
 	enableAnsiEscapeCodes();
 #endif

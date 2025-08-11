@@ -2,6 +2,7 @@
 #include "SimPropertyStorage.h"
 
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/u7_vld.h>
 #include <HardwareLib/HardwareLibrary.h>
 #include <LicenseLib/AppLicenser.h>
 #include <SimulatorLib/SimConsoleLogFile.h>
@@ -16,24 +17,23 @@
 #include <google/protobuf/message_lite.h>
 
 
-// Visual Leak Detector
-//
-#if defined(Q_OS_WIN) && defined(QT_DEBUG)
-	#if __has_include("C:/Program Files (x86)/Visual Leak Detector/include/vld.h")
-		#include "C:/Program Files (x86)/Visual Leak Detector/include/vld.h"
-	#else
-		#if __has_include("D:/Program Files (x86)/Visual Leak Detector/include/vld.h")
-			#include "D:/Program Files (x86)/Visual Leak Detector/include/vld.h"
-		#endif
-	#endif
-#endif // Visual Leak Detector
-
 
 QString getProjectPath(QWidget* parent)
 {
 	QString lastPath = QSettings{}.value("LastPath").toString();
 
+	// QFileDialog::getExistingDirectory emit a false positive memory leak warning
+	//
+#ifdef VLD_IS_INCLUDED
+	VLDDisable();
+#endif // VLD_IS_INCLUDED
+
 	lastPath = QFileDialog::getExistingDirectory(parent, QObject::tr("Open Build"), lastPath);
+
+#ifdef VLD_IS_INCLUDED
+	VLDEnable();
+#endif // VLD_IS_INCLUDED
+
 	if (lastPath.isEmpty() == false)
 	{
 		QSettings{}.setValue("LastPath", lastPath);
@@ -42,9 +42,10 @@ QString getProjectPath(QWidget* parent)
 	return lastPath;
 }
 
-
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	int result = 0;
 
 	{

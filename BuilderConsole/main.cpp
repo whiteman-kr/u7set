@@ -10,6 +10,7 @@
 #include "BuildTask.h"
 #include <google/protobuf/message_lite.h>
 
+#include <CommonLib/u7_vld.h>
 #include <DbLib/DbController.h>
 #include <HardwareLib/HardwareLibrary.h>
 #include <VFrame30/VFrame30Library.h>
@@ -331,6 +332,8 @@ int startBuild(QString buildArgsFileName)
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
+
 	originalMessageHandler = qInstallMessageHandler(messageOutputHandler);
 
 	QCoreApplication a(argc, argv);

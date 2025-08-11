@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(TestSuite LANGUAGES CXX)
 
-include(../cmake/vld.cmake)
 include(../cmake/translations.cmake)
 
 set(CMAKE_AUTOUIC ON)
@@ -64,11 +63,5 @@ add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Network Qt6::Qml Qt6::Sql Qt6::Xml Qt6::Test)
 target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib OnlineLib ClientLib SchemaClientLib TestSuiteLib ReportLib UiLib)
-
-# Link Visaul Leak Detector
-#
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

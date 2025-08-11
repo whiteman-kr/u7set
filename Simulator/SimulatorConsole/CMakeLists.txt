@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(SimulatorConsole LANGUAGES CXX)
 
-include(../../cmake/vld.cmake)
-
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -34,11 +32,5 @@ target_precompile_headers(${TARGET} PRIVATE
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Xml Qt6::Qml Qt6::Core Qt6::Concurrent Qt6::Network)
 target_link_libraries(${TARGET} PRIVATE ProtobufEx SimulatorLib)
-
-# Link Visaul Leak Detector
-#
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND MSVC)
-	 target_link_libraries(${TARGET} PRIVATE vld.lib)
-endif()
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

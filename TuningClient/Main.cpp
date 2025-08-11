@@ -1,5 +1,6 @@
 #include "Main.h"
 
+#include <CommonLib/u7_vld.h>
 #include <ClientLib/TuningUserManager.h>
 #include <VFrame30/VFrame30Library.h>
 #include <UiLib/OverrideWindows11Style.h>
@@ -141,6 +142,7 @@ ScriptTuningClientApplication theApp;
 
 int main(int argc, char* argv[])
 {
+	Vld::setVldReportFilterHook();
 
 #if defined (Q_OS_WIN)
 	// Set writing minidumps handler
