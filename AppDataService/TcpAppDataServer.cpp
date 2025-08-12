@@ -1,5 +1,6 @@
 #include "TcpAppDataServer.h"
 #include "AppDataService.h"
+#include "DiscretesLog.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -17,6 +18,7 @@ TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
 
 TcpAppDataServer::~TcpAppDataServer()
 {
+	DELETE_IF_NOT_NULL(m_dlReader);
 }
 
 void TcpAppDataServer::onServerThreadStarted()
@@ -56,6 +58,7 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 
 	case ADS_GET_APP_SIGNAL_LIST_START:
 		onGetAppSignalListStartRequest();
+		//onGetDiscretesLog();
 		break;
 
 	case ADS_GET_APP_SIGNAL_LIST_NEXT:
@@ -96,6 +99,10 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 
 	case ADS_GET_SETTINGS:
 		onGetSettings();
+		break;
+
+	case ADS_GET_DISCRETES_LOG:
+		onGetDiscretesLog();
 		break;
 
 	default:
@@ -597,6 +604,14 @@ void TcpAppDataServer::onGetSettings()
 	tl_getServiceSettings.set_configip2(m_appDataService.cfgServiceIP1().addressPortStr().toStdString());
 
 	sendReply(tl_getServiceSettings);
+}
+
+void TcpAppDataServer::onGetDiscretesLog()
+{
+	if (m_dlReader == nullptr)
+	{
+		m_dlReader = new DiscretesLogReader(m_appDataService.logger());
+	}
 }
 
 int TcpAppDataServer::getSignalListPartCount(int signalCount)

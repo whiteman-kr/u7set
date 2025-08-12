@@ -486,6 +486,27 @@ message ServiceSettings
     required string configIP2 = 3;
 }
 
+message DiscretesLogRecord
+{
+	required int64 recordID = 1 [default = 0];
+	required int64 recordTime = 2 [default = 0];
+	required int64 plantTime = 3 [default = 0];
+	required int64 systemTime = 4 [default = 0];
+	required int64 localTime = 5 [default = 0];
+	required uint64 signalHash = 6 [default = 0];
+	required double value = 7 [default = 0];
+	required uint32 flags = 8 [default = 0];
+	optional bool acknowledged = 9 [default = false];
+	optional int64 ackTime = 10 [default = 0];
+	optional string ackSource = 11;
+	optional string ackUser = 12;
+}
+
+message GetDiscretesLogReply
+{
+	optional int32 pendingRecordsCount = 1 [default = 0];
+	repeated DiscretesLogRecord discretesLogRecord = 2;
+}
 
 // TuningService requests and replies
 //

@@ -7,6 +7,7 @@
 class TcpAppDataServerThread;
 class AppDataServiceWorker;
 class AppDataReceiver;
+class DiscretesLogReader;
 
 // -------------------------------------------------------------------------------
 //
@@ -49,6 +50,8 @@ private:
 
 	void onGetSettings();
 
+	void onGetDiscretesLog();
+
 	// helper functions
 	//
 	int getSignalListPartCount(int signalCount);
@@ -60,6 +63,8 @@ private:
 
 	SimpleAppSignalStatesQueueShared m_signalStatesQueue;
 	GatewayAppSignalStatesQueueShared m_gatewaySignalStatesQueue;
+
+	DiscretesLogReader* m_dlReader = nullptr;
 
 	// precalculated variables
 	//
