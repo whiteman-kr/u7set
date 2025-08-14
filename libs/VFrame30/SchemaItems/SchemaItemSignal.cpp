@@ -755,6 +755,8 @@ namespace VFrame30
 		std::vector<CellDrawParam> cells;
 		cells.reserve(m_columns.size() * lineCount); // It will be expanded more if is single-line and has [impact]states
 
+		int columnCount = 0;
+
 		for (int row = 0; row < static_cast<int>(lineCount); row++)
 		{
 			double cellTop = rect.top() + drawParam->gridToDpiY(row * columntHeight); // rect.top() already aligned to dpi
@@ -776,12 +778,15 @@ namespace VFrame30
 				double cellLeft = rect.left() + startOffset; // startOffset accumulates columnWidth, which is already aligned to dpi
 
 				double columnWidth = rect.width() * (column.width / 100.0);
+				bool drawToTheEndOfItem = false;
+
 				if (columnIndex == m_columns.size() - 1 || cellLeft + columnWidth > rect.right())
 				{
 					// if this is the last column, give all rest width to it
 					// Or if column width is more than the item rectangle.
 					//
 					columnWidth = rect.right() - cellLeft;
+					drawToTheEndOfItem = true;
 				}
 				else
 				{
@@ -836,12 +841,31 @@ namespace VFrame30
 							}
 						}
 
+
 						double subCellLeft = cellLeft + subColumnWidth * f;
+
+						bool isThisTheLastSubColumn = (f == ids.size() - 1);
+						double thisSubColumnWidth = subColumnWidth;
+
+						if (drawToTheEndOfItem == true && isThisTheLastSubColumn == true)
+						{
+							thisSubColumnWidth = rect.right() - subCellLeft; // Use all rest width of the column
+						}
+						else
+						{
+							if (isThisTheLastSubColumn == true)
+							{
+								// Draw to the end of cell (which is splitted to subcells).
+								//
+								thisSubColumnWidth = columnWidth - subColumnWidth * f;
+							}
+						}
+
 						double cellTextIndent = drawParam->gridToDpiY(m_font.drawSize() / 8.0);
 
 						cells.emplace_back(row,
 										   cellColumnIndex,
-										   QRectF{subCellLeft, cellTop, subColumnWidth, cellHeight},
+										   QRectF{subCellLeft, cellTop, thisSubColumnWidth, cellHeight},
 										   text,
 										   cellFillColor(row, cellColumnIndex),
 										   cellTextColor(row, cellColumnIndex),
@@ -902,6 +926,8 @@ namespace VFrame30
 					break;
 				}
 			}
+
+			columnCount = std::max(columnCount, cellColumnIndex);
 		}
 
 		// Fill rects
@@ -985,9 +1011,9 @@ namespace VFrame30
 		//  Draw vertical dividers
 		//
 		for (const CellDrawParam& cell : cells | std::views::filter(
-													 [this](const CellDrawParam& cell)
+													 [this, columnCount](const CellDrawParam& cell)
 													 {
-														 return cell.row == 0 && cell.column != (m_columns.size() - 1);
+														 return cell.row == 0 && cell.column != (columnCount - 1);
 													 }))
 		{
 			double x = cell.rect.right();
