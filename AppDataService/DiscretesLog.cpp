@@ -691,7 +691,7 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 	if (execQuery(q, QString("SELECT id, recordTime, "
 									"plantTime, systemTime, localTime, hash, value, flags, "
 									"acknowledged, ackTime, ackSource, ackUser "
-									"FROM DiscretesLog WHERE id > %1").arg(m_lastRecordID)) == false)
+									"FROM DiscretesLog WHERE id > %1 ORDER BY id").arg(m_lastRecordID)) == false)
 	{
 		return;
 	}
