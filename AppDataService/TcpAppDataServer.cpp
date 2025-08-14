@@ -18,7 +18,7 @@ TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
 
 TcpAppDataServer::~TcpAppDataServer()
 {
-	DELETE_IF_NOT_NULL(m_dlReader);
+	deleteDiscretesLogReader();
 }
 
 void TcpAppDataServer::onServerThreadStarted()
@@ -58,7 +58,6 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 
 	case ADS_GET_APP_SIGNAL_LIST_START:
 		onGetAppSignalListStartRequest();
-		//onGetDiscretesLog();
 		break;
 
 	case ADS_GET_APP_SIGNAL_LIST_NEXT:
@@ -374,12 +373,12 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 
 	tl_sentGetAppSignalStateReplyCount++;
 
-	if ((tl_sentGetAppSignalStateReplyCount % 100) == 0)
+/*	if ((tl_sentGetAppSignalStateReplyCount % 100) == 0)
 	{
 		qDebug() << C_STR(QString("Send %1 get states replies to %2").
 						  arg(tl_sentGetAppSignalStateReplyCount).
 						  arg(connectedSoftwareInfo().equipmentID()));
-	}
+	}*/
 }
 
 void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize)
@@ -451,12 +450,12 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 
 	tl_sentGetAppSignalStateChangesReplyCount++;
 
-	if ((tl_sentGetAppSignalStateChangesReplyCount % 100) == 0)
+/*	if ((tl_sentGetAppSignalStateChangesReplyCount % 100) == 0)
 	{
 		qDebug() << C_STR(QString("Send %1 states changes replies to %2").
 						  arg(tl_sentGetAppSignalStateChangesReplyCount).
 						  arg(connectedSoftwareInfo().equipmentID()));
-	}
+	} */
 }
 
 void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize)
@@ -545,12 +544,12 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 
 	tl_sentGatewayGetAppSignalStateChangesReplyCount++;
 
-	if ((tl_sentGatewayGetAppSignalStateChangesReplyCount % 100) == 0)
+/*	if ((tl_sentGatewayGetAppSignalStateChangesReplyCount % 100) == 0)
 	{
 		qDebug() << C_STR(QString("Send %1 gateway states changes replies to %2").
 						  arg(tl_sentGatewayGetAppSignalStateChangesReplyCount).
 						  arg(connectedSoftwareInfo().equipmentID()));
-	}
+	} */
 }
 
 void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
@@ -608,10 +607,13 @@ void TcpAppDataServer::onGetSettings()
 
 void TcpAppDataServer::onGetDiscretesLog()
 {
-	if (m_dlReader == nullptr)
-	{
-		m_dlReader = new DiscretesLogReader(m_appDataService.logger());
-	}
+	createDiscretesLogReader();
+
+	Network::GetDiscretesLogReply r;
+
+	m_dlReader->getDiscretesLog(&r);
+
+	sendReply(r);
 }
 
 int TcpAppDataServer::getSignalListPartCount(int signalCount)
@@ -632,6 +634,28 @@ void TcpAppDataServer::getServerTimes(qint64* utc, qint64* local)
 	currentTimeLocal.setTimeZone(TIME_ZONE_UTC);
 
 	*local = currentTimeLocal.toMSecsSinceEpoch();
+}
+
+void TcpAppDataServer::createDiscretesLogReader()
+{
+	if (m_dlReader == nullptr)
+	{
+		m_dlReader = new DiscretesLogReader(m_appDataService.logger());
+
+		m_appDataService.registerDiscretesLogReader(m_dlReader);
+	}
+}
+
+void TcpAppDataServer::deleteDiscretesLogReader()
+{
+	if (m_dlReader != nullptr)
+	{
+		m_appDataService.unregisterDiscretesLogReader(m_dlReader);
+
+		delete m_dlReader;
+
+		m_dlReader = nullptr;
+	}
 }
 
 // -------------------------------------------------------------------------------

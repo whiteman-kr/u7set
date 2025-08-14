@@ -550,6 +550,11 @@ int DynamicAppSignalState::setUnavailable(const Times& time,
 
 	curState.flags.updateArchivingReasonFlags(prevState.flags);
 
+	if (m_log == true && curState.flags.hasLogReason() == true)
+	{
+		m_logQueue->emplace_back(curState);
+	}
+
 	statesQueue.push(curState, m_archive, thread);
 	pushedStatesCount++;
 

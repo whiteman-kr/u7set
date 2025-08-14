@@ -191,6 +191,16 @@ void AppDataServiceWorker::fillAppDataReceiveState(Network::AppDataReceiveState*
 	}
 }
 
+void AppDataServiceWorker::registerDiscretesLogReader(DiscretesLogReader* reader)
+{
+	m_discretesLogWriter.registerLogReader(reader);
+}
+
+void AppDataServiceWorker::unregisterDiscretesLogReader(DiscretesLogReader* reader)
+{
+	m_discretesLogWriter.unregisterLogReader(reader);
+}
+
 void AppDataServiceWorker::initServiceSpecificCmdLineArgs()
 {
 	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
@@ -542,7 +552,7 @@ void AppDataServiceWorker::applyNewConfiguration()
 	createAndInitSignalStates();
 	buildAcuiredAppSignalIDs();
 
-	m_discretesLogWriter.start(1, logger());
+	m_discretesLogWriter.start(m_curSettingsProfile.discretesLogHours, logger());
 
 	prepareAppDataSources();
 

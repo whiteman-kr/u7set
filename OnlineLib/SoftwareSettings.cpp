@@ -813,6 +813,7 @@ bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml) const
 	xml.writeHostAddress(EquipmentPropNames::APP_DATA_RECEIVING_NETMASK, appDataReceivingNetmask);
 
 	xml.writeIntElement(EquipmentPropNames::AUTO_ARCHIVE_INTERVAL, autoArchiveInterval);
+	xml.writeIntElement(EquipmentPropNames::DISCRETES_LOG_HOURS, discretesLogHours);
 
 	xml.writeStringElement(EquipmentPropNames::ARCH_SERVICE_ID, archServiceID);
 	xml.writeHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,
@@ -846,6 +847,7 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddress(EquipmentPropNames::APP_DATA_RECEIVING_NETMASK, &appDataReceivingNetmask);
 
 	result &= xml.readIntElement(EquipmentPropNames::AUTO_ARCHIVE_INTERVAL, &autoArchiveInterval, true);
+	result &= xml.readIntElement(EquipmentPropNames::DISCRETES_LOG_HOURS, &discretesLogHours, true);
 
 	result &= xml.readStringElement(EquipmentPropNames::ARCH_SERVICE_ID, &archServiceID, true);
 	result &= xml.readHostAddressPort(EquipmentPropNames::ARCH_SERVICE_IP,

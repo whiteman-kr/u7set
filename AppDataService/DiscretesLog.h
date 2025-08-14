@@ -12,56 +12,31 @@
 class QSqlDatabase;
 class QSqlQuery;
 
-class DiscretesLogWriter
+class DiscretesLog
 {
 public:
-	DiscretesLogWriter();
-	virtual ~DiscretesLogWriter();
+	DiscretesLog(bool isWriter);
+	virtual ~DiscretesLog();
 
-	void start(int logTimeHours, CircularLoggerShared logger);
-	void stop();
+protected:
+	void setLogger(CircularLoggerShared logger);
 
-	void pushStates(const std::vector<SimpleAppSignalState>& logStates);
+	virtual bool openDatabase() = 0;
+	virtual void closeDatabase();
 
-	static QString databaseName();
-
-private:
-	void run();
-
-	bool openDatabase();
-	void closeDatabase();
-	bool checkAndCreateTables();
-	void processLogQueue();
 	bool execQuery(QSqlQuery& q, const QString& qStr);
-	void deleteLogOldRecords();
-	qint64 getFreePagesCount();
 
-	void clearLogQueue();
+	bool getDbVersion();
 
-private:
-	int m_logTimeHours = 1;
+	QString getWriterReader() const;
+
+protected:
+	bool m_isWriter = false;
 	CircularLoggerShared m_log;
 
-	SimpleMutex m_logQueueMutex;
-	std::queue<SimpleAppSignalState> m_logQueue;
-	QString m_requestStr;
-
-	std::mutex m_processingRequiredConditionMutex;
-	std::condition_variable m_processingRequiredCondition;
-
-	std::atomic<bool> m_quitRequested = false;
-
-	static inline QString m_databaseName;
 	QSqlDatabase* m_db = nullptr;
 	bool m_dbIsWorkable = false;
 	int m_dbVersion = -1;
-
-	std::thread m_thread;
-
-	//const int ONE_HOUR_MS = 60 * 60 * 1000;
-	const int ONE_HOUR_MS = 60 * 1000;
-
-	qint64 m_deleteLastTime = 0;
 };
 
 struct DiscretesLogRecord
@@ -83,27 +58,81 @@ struct DiscretesLogRecord
 	void loadFromProto(const Network::DiscretesLogRecord& dlr);
 };
 
-class DiscretesLogReader
+class DiscretesLogReader : private DiscretesLog
 {
 public:
 	DiscretesLogReader(CircularLoggerShared log);
 	virtual ~DiscretesLogReader();
 
-	bool openDatabase();
+	virtual bool openDatabase() override;
 	void getDiscretesLog(Network::GetDiscretesLogReply* reply);
 
-private:
-	bool execQuery(QSqlQuery& q, const QString& qStr);
+	void setLogChanged();
 
 private:
 	CircularLoggerShared m_log;
 
 	static inline int m_instance = 0;
 
-	QSqlDatabase* m_db = nullptr;
-	bool m_dbIsWorkable = false;
+	std::atomic<bool> m_logChanged = true;		// true - is important!
 
 	qint64 m_lastRecordID = 0;
 
 	std::queue<DiscretesLogRecord> m_logRecords;
+};
+
+class DiscretesLogWriter : private DiscretesLog
+{
+public:
+	DiscretesLogWriter();
+	virtual ~DiscretesLogWriter();
+
+	void start(int logTimeHours, CircularLoggerShared logger);
+	void stop();
+
+	void pushStates(const std::vector<SimpleAppSignalState>& logStates);
+
+	void registerLogReader(DiscretesLogReader* reader);
+	void unregisterLogReader(DiscretesLogReader* reader);
+
+	static QString databaseName();
+
+private:
+	void run();
+
+	virtual bool openDatabase() override;
+
+	bool checkAndCreateTables();
+	void processLogQueue();
+	void deleteLogOldRecords();
+	qint64 getFreePagesCount();
+
+	void clearLogQueue();
+
+	void notifyReaders();
+	void clearReaders();
+
+private:
+	int m_logTimeHours = 1;
+
+	SimpleMutex m_logQueueMutex;
+	std::queue<SimpleAppSignalState> m_logQueue;
+	QString m_requestStr;
+
+	std::mutex m_processingRequiredConditionMutex;
+	std::condition_variable m_processingRequiredCondition;
+
+	std::atomic<bool> m_quitRequested = false;
+
+	static inline QString m_databaseName;
+
+	std::thread m_thread;
+
+	const int ONE_HOUR_MS = 60 * 60 * 1000;
+
+	qint64 m_deleteLastTime = 0;
+
+	//
+	SimpleMutex m_readersMutex;
+	std::set<DiscretesLogReader*> m_readers;
 };

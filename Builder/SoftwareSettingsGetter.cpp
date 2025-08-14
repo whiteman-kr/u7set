@@ -967,6 +967,10 @@ bool AppDataServiceSettingsGetter::readSettings(const Builder::Context* context,
 
 	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::AUTO_ARCHIVE_INTERVAL,
 										   &autoArchiveInterval, log);
+
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::DISCRETES_LOG_HOURS,
+										   &discretesLogHours, log);
+
 	return result;
 }
 

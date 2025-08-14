@@ -1,18 +1,4 @@
----------------------------------------------------------------------------
---
--- Automaicaly generated file by file2pgsql, version 1.0
--- Host: bv, User: bv, Date: 05.03.2018 16:45:39
--- FileName: ads.hsw
---
----------------------------------------------------------------------------
-
-SELECT * FROM public.delete_file_on_update(1, '$root$/HP/ads.hsw/device-61a08ae4-bd2a-466a-b483-1ce358fb5af2.hcr', 'Delete file device-61a08ae4-bd2a-466a-b483-1ce358fb5af2.hcr');
-
-
-SELECT * FROM public.delete_file_on_update(1, '$root$/HP/ads.hsw/device-b8de8ecf-f95d-4604-94df-8ac36e4537ed.hcr', 'Delete file device-b8de8ecf-f95d-4604-94df-8ac36e4537ed.hcr');
-
-
-
+-- Removed ads.hsw update
 
 ---------------------------------------------------------------------------
 --

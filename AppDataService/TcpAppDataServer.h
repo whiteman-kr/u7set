@@ -58,6 +58,9 @@ private:
 
 	void getServerTimes(qint64* utc, qint64* local);
 
+	void createDiscretesLogReader();
+	void deleteDiscretesLogReader();
+
 private:
 	AppDataServiceWorker& m_appDataService;
 

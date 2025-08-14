@@ -138,6 +138,7 @@ namespace EquipmentPropNames
 	inline const QString ARCH_SERVICE_IP("ArchiveServiceIP");
 	inline const QString ARCH_SERVICE_PORT("ArchiveServicePort");
 	inline const QString AUTO_ARCHIVE_INTERVAL("AutoArchiveInterval");
+	inline const QString DISCRETES_LOG_HOURS("DiscretesLogHours");
 	inline const QString REQUEST_CONTROLLER_SUFFIX("_RC");
 
 	// DiagDataService properties

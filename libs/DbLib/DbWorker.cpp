@@ -460,6 +460,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0430.sql", "Upgrade to version 430, Fixed an issue where it was impossible to get file info for files checked out by other users."},
 	{":/DatabaseUpgrade/Upgrade0431.sql", "Upgrade to version 431, SignalPropertyBehavior.csv file updating" },
 	{":/DatabaseUpgrade/Upgrade0432.sql", "Upgrade to version 432, VDU-1 renamed to RVDU, Added property StartupLogo" },
+	{":/DatabaseUpgrade/Upgrade0433.sql", "Upgrade to version 433, Added property DiscretesLogHours to ApplicationDataService" },
 };
 
 int DbWorker::counter = 0;

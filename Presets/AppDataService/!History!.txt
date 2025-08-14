@@ -3,5 +3,6 @@ ADS
 	17.01.2023	Version: 2	Application Data Service_v2.u7devp	RPCT-3357: Property SecurityLevel has SSL=2
 	28.05.2024	Version: 3	Application Data Service_v3.u7devp	RPCT-3895: Added Request Controllers to AppDataService preset
 	20.09.2024	Version: 4	Application Data Service_v4.u7devp	Changed order of request controllers properties ClientRequestPort and ClientRequestNetmask
+	13.08.2025	Version: 5	Application Data Service_v5.u7devp	RPCT-4044: Added property DiscretesLogHours
 
 

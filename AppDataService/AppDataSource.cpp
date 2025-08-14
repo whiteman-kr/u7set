@@ -240,6 +240,8 @@ void AppDataSource::invalidateSignals(const QThread* thread)
 {
 	int pushedStatesCount = 0;
 
+	Q_ASSERT(m_logStatesQueue.empty() == true);
+
 	for(DynamicAppSignalState* signalState : m_signalStates)
 	{
 		TEST_PTR_CONTINUE(signalState);
@@ -261,9 +263,15 @@ void AppDataSource::invalidateSignals(const QThread* thread)
 		}
 	}
 
+	if (m_logStatesQueue.empty() == false && m_discretesLog != nullptr)
+	{
+		m_discretesLog->pushStates(m_logStatesQueue);
+		m_logStatesQueue.clear();
+	}
+
 	wakeupStatesProcessingThread();
 
-	DEBUG_LOG_WRN(m_log, "Invalidate signals");
+	DEBUG_LOG_WRN(m_log, QString("Invalidate signals %1").arg(moduleEquipmentID()));
 }
 
 bool AppDataSource::statesQueueIsEmpty(QThread* thread) const

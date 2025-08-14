@@ -596,6 +596,8 @@ namespace OnlineLib
 
 	bool DataSourceOnline::updateStatistics_500ms(int oneSecond, QString& logStr)
 	{
+		Q_UNUSED(logStr);
+
 		bool invalidateSignals = false;
 
 		qint64 now = QDateTime::currentMSecsSinceEpoch();
@@ -609,8 +611,8 @@ namespace OnlineLib
 			{
 				invalidateSignals = true;
 
-				logStr = QString("Source %1 timeout! nowTime = %2, lastTime = %3 (diff = %4)").
-						 arg(moduleEquipmentID()).arg(now).arg(m_lastPacketServerTime).arg(now - m_lastPacketServerTime);
+				// logStr = QString("Source %1 timeout! nowTime = %2, lastTime = %3 (diff = %4)").
+				// 		 arg(moduleEquipmentID()).arg(now).arg(m_lastPacketServerTime).arg(now - m_lastPacketServerTime);
 			}
 
 			m_receivesData = false;

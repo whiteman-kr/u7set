@@ -87,6 +87,9 @@ public:
 	const std::vector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
 	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.size()); }
 
+	void registerDiscretesLogReader(DiscretesLogReader* reader);
+	void unregisterDiscretesLogReader(DiscretesLogReader* reader);
+
 signals:
 	void restartArchSignalsTimer();
 

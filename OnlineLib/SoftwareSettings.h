@@ -257,6 +257,8 @@ public:
 	QString archServiceID;
 	HostAddressPort archServiceIP;
 
+	int discretesLogHours = 1;
+
 	std::vector<RqCtrlSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
 
 	RqCtrlSettings getRequestControllerSettings(const QString& rcEquipmentID);
