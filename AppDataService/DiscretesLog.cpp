@@ -171,6 +171,8 @@ void DiscretesLogWriter::registerLogReader(DiscretesLogReader* reader)
 
 	m_readers.insert(reader);
 
+	reader->setLogChanged();
+
 	m_readersMutex.unlock();
 }
 
@@ -486,6 +488,8 @@ void DiscretesLogWriter::deleteLogOldRecords()
 	qint64 freePagesCount = getFreePagesCount();
 
 	DEBUG_LOG_MSG(m_log, QString("DiscretesLogWriter: database free pages count - %1").arg(freePagesCount));
+
+	notifyReaders();
 }
 
 qint64 DiscretesLogWriter::getFreePagesCount()
@@ -683,6 +687,7 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 	if (m_logChanged == false)
 	{
 		reply->set_pendingrecordscount(TO_INT(m_logRecords.size()));
+		reply->set_logfirstrecordid(m_firstRecordID);
 		return;
 	}
 
@@ -754,6 +759,18 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 	}
 
 	reply->set_pendingrecordscount(TO_INT(m_logRecords.size()));
+
+	//
+
+	execQuery(q, QString("SELECT MIN(id) FROM DiscretesLog"));
+
+	if (q.next() == true)
+	{
+		m_firstRecordID = q.value(0).toLongLong();
+		reply->set_logfirstrecordid(m_firstRecordID);
+	}
+
+	//
 
 	m_logChanged = false;
 }

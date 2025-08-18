@@ -76,6 +76,7 @@ private:
 
 	std::atomic<bool> m_logChanged = true;		// true - is important!
 
+	qint64 m_firstRecordID = 0;
 	qint64 m_lastRecordID = 0;
 
 	std::queue<DiscretesLogRecord> m_logRecords;

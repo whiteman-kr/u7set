@@ -505,7 +505,8 @@ message DiscretesLogRecord
 message GetDiscretesLogReply
 {
 	optional int32 pendingRecordsCount = 1 [default = 0];
-	repeated DiscretesLogRecord discretesLogRecord = 2;
+	optional int64 logFirstRecordID = 2 [default = 0];
+	repeated DiscretesLogRecord discretesLogRecord = 3;
 }
 
 // TuningService requests and replies
