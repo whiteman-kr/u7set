@@ -3,9 +3,7 @@
 
 namespace ClientLib
 {
-	ClientTranslator::ClientTranslator()
-	{
-	}
+	ClientTranslator::ClientTranslator() {}
 
 	ClientTranslator::~ClientTranslator()
 	{
@@ -92,7 +90,7 @@ namespace ClientLib
 			QTranslator* translator = new QTranslator();
 			m_translators.push_back(translator);
 
-			if(translator->load(fileName) == true)
+			if (translator->load(fileName) == true)
 			{
 				ok &= qApp->installTranslator(translator);
 			}
@@ -105,4 +103,4 @@ namespace ClientLib
 
 		return ok;
 	}
-}
+} // namespace ClientLib

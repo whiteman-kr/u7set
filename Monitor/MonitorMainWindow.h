@@ -1,10 +1,10 @@
 #pragma once
 
 #include "./DevTools/DevToolsGlobalScript.h"
+#include "./DevTools/DevToolsSchemaStats.h"
 #include "./DevTools/DevToolsScriptVariables.h"
 #include "./DevTools/DevToolsSettings.h"
 #include "./DevTools/DevToolsViewVariables.h"
-#include "./DevTools/DevToolsSchemaStats.h"
 
 #include "MonitorAppSignalListSet.h"
 #include "MonitorCentralWidget.h"
@@ -41,6 +41,7 @@ class MonitorToolBar;
 class QLabel;
 class QComboBox;
 class SelectSchemaWidget;
+class SignalLogButton;
 
 
 class MonitorMainWindow : public QMainWindow
@@ -118,6 +119,9 @@ public slots:
 
 	void slot_trends();
 
+	void slot_signalLog();
+	void slot_updateSignalLogText();
+
 	void slot_signalSnapshot();
 	void slot_signalSnapshot(QStringList signalsList);
 	void slot_signalSnapshotByMask(QStringList masks);
@@ -172,8 +176,8 @@ public:
 	ITuningAuthorization& tuningAuthorization();
 	const ITuningAuthorization& tuningAuthorization() const;
 
-	MonitorAppSignalListSet&  appSignalListSet();
-	const MonitorAppSignalListSet&  appSignalListSet() const;
+	MonitorAppSignalListSet& appSignalListSet();
+	const MonitorAppSignalListSet& appSignalListSet() const;
 
 protected:
 	// Data
@@ -260,6 +264,7 @@ private:
 	QDockWidget* m_schemaListDock = nullptr;
 
 	SelectSchemaWidget* m_selectSchemaWidget = nullptr;
+	SignalLogButton* m_signalLogButton = nullptr;
 
 	// Status bar
 	//
@@ -276,6 +281,8 @@ private:
 
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
+
+	qint64 m_signalLogLastUpdate = -1;
 
 	// Translator
 	//

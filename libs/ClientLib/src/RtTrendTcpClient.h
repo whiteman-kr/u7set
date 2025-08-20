@@ -24,7 +24,8 @@ namespace ClientLib
 	//            |															|
 	//            +---------------------------------------------------------+
 	//
-	class RtTrendTcpClient : public Tcp::Client, public TcpClientStatistics
+	class RtTrendTcpClient : public Tcp::Client,
+							 public TcpClientStatistics
 	{
 		Q_OBJECT
 
@@ -95,11 +96,11 @@ namespace ClientLib
 		std::set<QString> m_signalSet;
 
 	private:
-		std::set<Hash> m_trackedSignals;		// Currently tracked signals by AppDataService
+		std::set<Hash> m_trackedSignals; // Currently tracked signals by AppDataService
 
 		// Statistics and state variables
 		//
 		mutable QMutex m_statMutex;
 		RtTrendConnectionStatistics m_stat;
 	};
-}
+} // namespace ClientLib

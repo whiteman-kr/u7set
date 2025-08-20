@@ -30,44 +30,47 @@ qt_add_library(${TARGET} STATIC
 	./include/ClientLib/RtDataProvider.h
 	./include/ClientLib/RtTrendConnectionStatistics.h
 	./include/ClientLib/ScriptTestObserver.h
+	./include/ClientLib/SignalLog.h
 	./include/ClientLib/TuningConnection.h
 	./include/ClientLib/TuningLog.h
 	./include/ClientLib/TuningSignalManager.h
 	./include/ClientLib/TuningSourceState.h
 	./include/ClientLib/TuningUserManager.h
 	./include/ClientLib/TuningWriteCommand.h
-	AdsConnection.cpp
-	AdsConnectionPrivate.cpp
-	AdsConnectionPrivate.h
-	AdsSourceStateConnection.cpp
-	AdsSourceStateConnectionPrivate.cpp
-	AdsSourceStateConnectionPrivate.h
-	AppDataSourceState.cpp
-	AppSignalManager.cpp
-	ClientTranslator.cpp
-	ConfigController.cpp
-	RtDataProvider.cpp
-	RtDataProviderPrivate.cpp
-	RtDataProviderPrivate.h
-	RtTrendTcpClient.h
-	RtTrendTcpClient.cpp
-	ScriptTestObserver.cpp
-	TcpAppSourcesState.h
-	TcpAppSourcesState.cpp
-	TcpSignalClient.cpp
-	TcpSignalClient.h
-	TcpSignalRecents.h
-	TcpSignalRecents.cpp
-	TuningConnection.cpp
-	TuningConnectionPrivate.cpp
-	TuningConnectionPrivate.h
-	TuningLog.cpp
-	TuningSignalManager.cpp
-	TuningSourceState.cpp
-	TuningTcpClient.cpp
-	TuningTcpClient.h
-	TuningUserManager.cpp
-	TuningWriteCommand.cpp
+	
+	./src/AdsConnection.cpp
+	./src/AdsConnectionPrivate.cpp
+	./src/AdsConnectionPrivate.h
+	./src/AdsSourceStateConnection.cpp
+	./src/AdsSourceStateConnectionPrivate.cpp
+	./src/AdsSourceStateConnectionPrivate.h
+	./src/AppDataSourceState.cpp
+	./src/AppSignalManager.cpp
+	./src/ClientTranslator.cpp
+	./src/ConfigController.cpp
+	./src/RtDataProvider.cpp
+	./src/RtDataProviderPrivate.cpp
+	./src/RtDataProviderPrivate.h
+	./src/RtTrendTcpClient.cpp
+	./src/RtTrendTcpClient.h
+	./src/ScriptTestObserver.cpp
+	./src/SignalLog.cpp
+	./src/TcpAppSourcesState.cpp
+	./src/TcpAppSourcesState.h
+	./src/TcpSignalClient.cpp
+	./src/TcpSignalClient.h
+	./src/TcpSignalRecents.cpp
+	./src/TcpSignalRecents.h
+	./src/TuningConnection.cpp
+	./src/TuningConnectionPrivate.cpp
+	./src/TuningConnectionPrivate.h
+	./src/TuningLog.cpp
+	./src/TuningSignalManager.cpp
+	./src/TuningSourceState.cpp
+	./src/TuningTcpClient.cpp
+	./src/TuningTcpClient.h
+	./src/TuningUserManager.cpp
+	./src/TuningWriteCommand.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE

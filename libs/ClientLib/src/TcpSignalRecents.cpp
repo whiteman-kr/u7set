@@ -1,5 +1,5 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "TcpSignalRecents.h"
@@ -30,11 +30,12 @@ namespace ClientLib
 		auto logger = std::make_shared<CircularLogger>(logFile, QString("TSR %1").arg(adsInfo.shortenId));
 		setLogger(logger);
 
-		connect(this, &Tcp::Client::signal_wrongServerID,
-			[this](const QString& errorMessage)
-			{
-				writeError(errorMessage);
-			});
+		connect(this,
+				&Tcp::Client::signal_wrongServerID,
+				[this](const QString& errorMessage)
+				{
+					writeError(errorMessage);
+				});
 
 		return;
 	}
@@ -54,7 +55,7 @@ namespace ClientLib
 	{
 		writeMessage("TcpSignalRecents::onClientThreadFinished()");
 
-		//theSignals.reset();	!signal reset moved to AdsConnection::configurationArrived
+		// theSignals.reset();	!signal reset moved to AdsConnection::configurationArrived
 	}
 
 	void TcpSignalRecents::onConnection()
@@ -92,7 +93,6 @@ namespace ClientLib
 
 		switch (requestID)
 		{
-
 		case ADS_GET_APP_SIGNAL_STATE:
 			processSignalState(data);
 			break;
@@ -186,4 +186,4 @@ namespace ClientLib
 		return;
 	}
 
-}
+} // namespace ClientLib

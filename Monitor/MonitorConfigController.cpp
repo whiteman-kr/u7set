@@ -54,6 +54,12 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		config.tuningSessionTimeout = 0;
 	}
 
+	// SignalLog
+	//
+	config.signalLogEnable = settings.signalLogEnable;
+	config.signalLogTagCritical = settings.signalLogTagCritical;
+	config.signalLogTagWarning = settings.signalLogTagWarning;
+
 	//--
 	//
 	auto getScriptFunc = [this](const QString& scriptFileName) -> QString

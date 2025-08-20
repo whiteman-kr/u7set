@@ -38,6 +38,12 @@ struct MonitorConfigSettings
 	QStringList tuningUserAccounts;
 	int tuningSessionTimeout = 0;
 
+	// SignalLog
+	//
+	bool signalLogEnable = false;
+	QString signalLogTagCritical;
+	QString signalLogTagWarning;
+
 	// Equipment
 	// 
 	std::shared_ptr<Hardware::DeviceObject> equipment;

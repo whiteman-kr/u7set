@@ -1,5 +1,5 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include "TcpAppSourcesState.h"
@@ -10,7 +10,9 @@ namespace ClientLib
 	//
 	// TcpAppSourcesState
 	//
-	TcpAppSourcesState::TcpAppSourcesState(const SoftwareInfo& softwareInfo, const SoftwareEndpoint::AppDataService& ads, ILogFile* logFile) :
+	TcpAppSourcesState::TcpAppSourcesState(const SoftwareInfo& softwareInfo,
+										   const SoftwareEndpoint::AppDataService& ads,
+										   ILogFile* logFile) :
 		Tcp::Client(softwareInfo, ads.address, ads.address, "TcpAppSourcesState", ads.equipmentId),
 		TcpClientStatistics(this),
 		m_logFile(logFile, "TcpAppSourcesState")
@@ -20,11 +22,12 @@ namespace ClientLib
 		setObjectName("TcpSourcesStateClient");
 		qDebug() << "TcpSourcesStateClient::TcpSourcesStateClient(...)";
 
-		connect(this, &Tcp::Client::signal_wrongServerID,
-			[this](const QString& errorMessage)
-			{
-				m_logFile.writeError(errorMessage);
-			});
+		connect(this,
+				&Tcp::Client::signal_wrongServerID,
+				[this](const QString& errorMessage)
+				{
+					m_logFile.writeError(errorMessage);
+				});
 
 		return;
 	}
@@ -192,7 +195,6 @@ namespace ClientLib
 		}
 
 		sendRequest(ADS_GET_APP_DATA_SOURCES_INFO);
-
 	}
 
 	void TcpAppSourcesState::processAppDataSourcesInfo(const QByteArray& data)
@@ -209,10 +211,10 @@ namespace ClientLib
 		if (m_getDataSourcesInfoReply.error() != static_cast<int>(E::NetworkError::Success))
 		{
 			qDebug() << tr("TcpAppDataSourcesStateClient::m_getDataSourcesInfoReply, error received: %1")
-						.arg(E::valueToString(static_cast<E::NetworkError>(m_getDataSourcesInfoReply.error())));
+							.arg(E::valueToString(static_cast<E::NetworkError>(m_getDataSourcesInfoReply.error())));
 
 			m_logFile.writeError(QString("m_getDataSourcesInfoReply, error received: %1")
-								 .arg(E::valueToString(static_cast<E::NetworkError>(m_getDataSourcesInfoReply.error()))));
+									 .arg(E::valueToString(static_cast<E::NetworkError>(m_getDataSourcesInfoReply.error()))));
 
 			resetToGetAppDataSourcesInfo();
 			return;
@@ -308,4 +310,4 @@ namespace ClientLib
 		return;
 	}
 
-}
+} // namespace ClientLib

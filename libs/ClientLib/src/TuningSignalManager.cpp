@@ -1,16 +1,16 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include <ClientLib/TuningSignalManager.h>
 #include <AppSignal.pb.h>
+#include <ClientLib/TuningSignalManager.h>
 
 #define ANY_HASH UNDEFINED_HASH
 
 namespace ClientLib
 {
 	//
-	//TuningSignalManager
+	// TuningSignalManager
 	//
 	TuningSignalManager::TuningSignalManager(const QString& clientEquipmentId, ILogFile* logFile, QObject* parent) :
 		QObject(parent),
@@ -20,9 +20,7 @@ namespace ClientLib
 	{
 	}
 
-	TuningSignalManager::~TuningSignalManager()
-	{
-	}
+	TuningSignalManager::~TuningSignalManager() {}
 
 	bool TuningSignalManager::load(const QByteArray& data)
 	{
@@ -75,8 +73,7 @@ namespace ClientLib
 			//
 			const QString& appSignalId = appSignalParam.appSignalId();
 
-			for (const auto& tags = appSignalParam.tags();
-				 const QString & tag : tags)
+			for (const auto& tags = appSignalParam.tags(); const QString& tag : tags)
 			{
 				QStringList& l = tagToAppSignals[tag];
 
@@ -152,8 +149,11 @@ namespace ClientLib
 	bool TuningSignalManager::signalsExist(const QStringList& signalIds) const
 	{
 		QReadLocker rl(&m_signalsLock);
-		return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
-			return m_signals.contains(::calcHash(appSignalId));
+		return std::all_of(signalIds.begin(),
+						   signalIds.end(),
+						   [this](const QString& appSignalId)
+						   {
+							   return m_signals.contains(::calcHash(appSignalId));
 						   });
 	}
 
@@ -348,13 +348,17 @@ namespace ClientLib
 		return state(appSignalId, tuningServiceHash, found);
 	}
 
-	void TuningSignalManager::queuedState(const std::vector<Hash>& appSignalHashes, std::vector<TuningSignalState>* result, int* found) const
+	void TuningSignalManager::queuedState(const std::vector<Hash>& appSignalHashes,
+										  std::vector<TuningSignalState>* result,
+										  int* found) const
 	{
 		m_recentEnabled = false;
 		return state(appSignalHashes, result, found);
 	}
 
-	void TuningSignalManager::queuedState(const std::vector<QString>& appSignalIds, std::vector<TuningSignalState>* result, int* found) const
+	void TuningSignalManager::queuedState(const std::vector<QString>& appSignalIds,
+										  std::vector<TuningSignalState>* result,
+										  int* found) const
 	{
 		m_recentEnabled = false;
 		return state(appSignalIds, result, found);
@@ -487,7 +491,8 @@ namespace ClientLib
 						{
 							currentSources.setAsApplied(tuningServiceHash);
 
-							unsuccessfulWrites.push_back({currentSources.getUnappliedValue(), arrivedState.hash(), arrivedState.writeErrorCode()});
+							unsuccessfulWrites.push_back(
+								{currentSources.getUnappliedValue(), arrivedState.hash(), arrivedState.writeErrorCode()});
 						}
 					}
 
@@ -495,7 +500,7 @@ namespace ClientLib
 					//
 					if (currentSources.isValueUnapplied() == false)
 					{
-						//qDebug() << "-Unapplied: " << arrivedState.hash();
+						// qDebug() << "-Unapplied: " << arrivedState.hash();
 						m_unappliedStates.erase(arrivedState.hash());
 
 						if (m_unappliedStates.empty() == true)
@@ -527,12 +532,11 @@ namespace ClientLib
 			}
 
 			m_logFile.writeAlert(tr("TuningSignalManager::setStates(), Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
-								 .arg(u.value.toString())
-								 .arg(param.customSignalId())
-								 .arg(param.caption())
-								 .arg(param.lmEquipmentId())
-								 .arg(E::valueToString(static_cast<E::NetworkError>(u.writeErrorCode)))
-			);
+									 .arg(u.value.toString())
+									 .arg(param.customSignalId())
+									 .arg(param.caption())
+									 .arg(param.lmEquipmentId())
+									 .arg(E::valueToString(static_cast<E::NetworkError>(u.writeErrorCode))));
 		}
 
 
@@ -542,7 +546,12 @@ namespace ClientLib
 	bool TuningSignalManager::waitForAllApplied(std::chrono::milliseconds timeout) const
 	{
 		std::unique_lock l(m_statesMutex);
-		return m_allStatesApplied.wait_for(l, timeout, [this]() { return m_unappliedStates.empty() == true; });
+		return m_allStatesApplied.wait_for(l,
+										   timeout,
+										   [this]()
+										   {
+											   return m_unappliedStates.empty() == true;
+										   });
 	}
 
 	void TuningSignalManager::notifySignalParamsUpdated()
@@ -581,7 +590,8 @@ namespace ClientLib
 			result = m_recentUsed.hashes();
 		}
 
-		std::erase_if(result, [&dataServiceId, this](Hash hash)
+		std::erase_if(result,
+					  [&dataServiceId, this](Hash hash)
 					  {
 						  return !this->dataServiceHasSignal(::calcHash(dataServiceId), hash);
 					  });
@@ -626,19 +636,18 @@ namespace ClientLib
 
 			if (sources.isValueUnapplied() == true)
 			{
-				//qDebug() << "+Unapplied: " << hash;
+				// qDebug() << "+Unapplied: " << hash;
 				m_unappliedStates.insert(hash);
 			}
 			else
 			{
 				if (m_unappliedStates.contains(hash))
 				{
-					//qDebug() << "Undo Unapplied: " << hash;
+					// qDebug() << "Undo Unapplied: " << hash;
 					m_unappliedStates.erase(hash);
 				}
 			}
 		}
-
 	}
 
 	TuningValue TuningSignalManager::unappliedValue(Hash hash) const
@@ -708,7 +717,7 @@ namespace ClientLib
 			emptyState = &sources.back();
 		}
 
-		*emptyState = SourceState{state, tuningServiceHash, std::chrono::system_clock::now(), false/*isUnapplied*/};
+		*emptyState = SourceState{state, tuningServiceHash, std::chrono::system_clock::now(), false /*isUnapplied*/};
 
 		return;
 	}
@@ -764,18 +773,16 @@ namespace ClientLib
 
 			if (sourceState.state.valid() == true)
 			{
-				if (stateAvailable == nullptr ||
-					stateAvailable->state.m_successfulReadTime < sourceState.state.m_successfulReadTime)
+				if (stateAvailable == nullptr || stateAvailable->state.m_successfulReadTime < sourceState.state.m_successfulReadTime)
 				{
-					stateAvailable = &sourceState;	// the first state with state available flag
+					stateAvailable = &sourceState; // the first state with state available flag
 				}
 			}
 			else
 			{
 				// sourceState.state.valid() == false
 				//
-				if (stateNewest == nullptr ||
-					stateNewest->lastUpdateTime < sourceState.lastUpdateTime)
+				if (stateNewest == nullptr || stateNewest->lastUpdateTime < sourceState.lastUpdateTime)
 				{
 					stateNewest = &sourceState;
 				}

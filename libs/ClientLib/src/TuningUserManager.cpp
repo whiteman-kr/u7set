@@ -5,8 +5,11 @@
 #include <ClientLib/TuningUserManager.h>
 
 #ifdef Q_OS_WIN
-#include <windows.h>
+// clang-format off
+// The order of these includes is important!
+	#include <windows.h>
 	#include <lm.h>
+// clang-format on
 #endif
 
 namespace ClientLib
@@ -20,7 +23,7 @@ namespace ClientLib
 		bool result = false;
 
 #ifdef Q_OS_WIN
-			HANDLE phToken=NULL;
+		HANDLE phToken = NULL;
 
 		if (LogonUser(reinterpret_cast<LPCWSTR>(userName.data()),
 					  0,
@@ -34,7 +37,7 @@ namespace ClientLib
 
 		if (phToken != nullptr)
 		{
-				CloseHandle (phToken);
+			CloseHandle(phToken);
 		}
 #endif
 
@@ -383,7 +386,6 @@ namespace ClientLib
 
 		for (const QString& user : m_tuningUserManager.tuningUserAccounts())
 		{
-
 			bool userIsEnabled = true;
 			for (const auto& matsUser : m_tuningUserManager.matsUsers())
 			{
@@ -445,9 +447,9 @@ namespace ClientLib
 			return;
 		}
 
-		m_lastUser =  m_userCombo->currentText();
+		m_lastUser = m_userCombo->currentText();
 		m_password = m_passwordEdit->text();
 
 		QDialog::accept();
 	}
-}
+} // namespace ClientLib

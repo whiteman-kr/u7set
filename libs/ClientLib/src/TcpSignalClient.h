@@ -9,6 +9,8 @@
 
 namespace ClientLib
 {
+	class SignalLog;
+
 	inline const int RequestTimeIntervalMs = 20;
 
 	// Number of signals requested by ADS_GET_APP_SIGNAL_STATE.
@@ -19,22 +21,31 @@ namespace ClientLib
 	//
 	inline const int MaxStateRequestCount = ADS_GET_APP_SIGNAL_STATE_MAX / 8; // 250 signals per ADS_GET_APP_SIGNAL_STATE
 
+	// clang-format off
+	// 
+	// Workflow of the TcpSignalClient:
 	//
-	//		ADS_GET_APP_SIGNAL_LIST_START
-	//				|
-	//		ADS_GET_APP_SIGNAL_LIST_NEXT
-	//				|
-	//		ADS_GET_APP_SIGNAL_PARAM
-	//				|
-	//		ADS_GET_APP_SIGNAL_STATE_CHANGES <----+
-	//              |                             |
-	//              ?---------------------------->|
-	//              | pending states?             |
-	//              |                             |
-	//		ADS_GET_APP_SIGNAL_STATE              |				Request MaxStateRequestCount (250) signals.
-	//				|						      |
-	//				+-----------------------------+
+	//                 ADS_GET_APP_SIGNAL_LIST_START
+	//                         |
+	//                 ADS_GET_APP_SIGNAL_LIST_NEXT
+	//                         |
+	//                 ADS_GET_APP_SIGNAL_PARAM
+	//                         |
+	//                 ADS_GET_APP_SIGNAL_STATE_CHANGES <----+
+	//                         |                             |
+	//          pending states ?---------------------------->|
+	//                         |                             |
+	//                 ADS_GET_APP_SIGNAL_STATE              |    Request MaxStateRequestCount (250) signals.
+	//                         |                             |
+	//    discrete log allowed ?---------------------------->|
+	//                         |                             |
+	//                 ADS_GET_DISCRETES_LOG                 |
+	//                         |                             |
+	//                         +-----------------------------+
 	//
+	// clang-format on
+
+
 	class TcpSignalClient : public Tcp::Client,
 							public TcpClientStatistics,
 							public HasLogFile
@@ -45,6 +56,7 @@ namespace ClientLib
 		TcpSignalClient(const SoftwareInfo& softwareInfo,
 						const SoftwareEndpoint::AppDataService& adsInfo,
 						IAppSignalUpdater& signalUpdater,
+						SignalLog& signalLog,
 						ILogFile* logFile);
 		virtual ~TcpSignalClient();
 
@@ -78,6 +90,9 @@ namespace ClientLib
 		void requestSignalState(int startIndex);
 		void processSignalState(const QByteArray& data);
 
+		void requestSignalLog();
+		void processSignalLog(const QByteArray& data);
+
 	public:
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
@@ -95,6 +110,8 @@ namespace ClientLib
 	private:
 		std::atomic<bool> m_signalParamsLoaded{false};
 		std::atomic<bool> m_signalStatesLoaded{false};
+
+		SignalLog& m_signalLog;
 
 		// Cache protobuf messages
 		//

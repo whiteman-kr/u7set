@@ -1709,9 +1709,19 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeEndElement();			// </TuningSecurity>
 
+	// <SignalLog>
+	//
+	xml.writeStartElement(XmlElement::SIGNAL_LOG);
+
+	xml.writeBoolAttribute(EquipmentPropNames::ENABLE, signalLogEnable);
+	xml.writeStringAttribute(XmlElement::SIGNAL_LOG_ATTRIBUTE_TAG_CRITICAL, signalLogTagCritical.trimmed());
+	xml.writeStringAttribute(XmlElement::SIGNAL_LOG_ATTRIBUTE_TAG_WARNING, signalLogTagWarning.trimmed());
+
+	xml.writeEndElement(); // </SignalLog>
+
 	// --
 	//
-	writeEndSettings(xml);;			// </Settings>
+	writeEndSettings(xml);			// </Settings>
 
 	return true;
 }
@@ -1872,6 +1882,16 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 			result &= xml.readBoolAttribute(EquipmentPropNames::TUNING_LOGIN, &tuningLogin);
 			result &= xml.readStringAttribute(EquipmentPropNames::TUNING_USER_ACCOUNTS, &tuningUserAccounts);
 			result &= xml.readIntAttribute(EquipmentPropNames::TUNING_SESSION_TIMEOUT, &tuningSessionTimeout);
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		if (xml.name() == XmlElement::SIGNAL_LOG)
+		{
+			result &= xml.readBoolAttribute(EquipmentPropNames::ENABLE, &signalLogEnable);
+			result &= xml.readStringAttribute(XmlElement::SIGNAL_LOG_ATTRIBUTE_TAG_CRITICAL, &signalLogTagCritical);
+			result &= xml.readStringAttribute(XmlElement::SIGNAL_LOG_ATTRIBUTE_TAG_WARNING, &signalLogTagWarning);
 
 			xml.skipCurrentElement();
 			continue;

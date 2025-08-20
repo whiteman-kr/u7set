@@ -1,9 +1,9 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include <ClientLib/AdsSourceStateConnection.h>
 #include "AdsSourceStateConnectionPrivate.h"
+#include <ClientLib/AdsSourceStateConnection.h>
 
 namespace ClientLib
 {
@@ -15,7 +15,8 @@ namespace ClientLib
 
 	AdsSourceStateConnection::~AdsSourceStateConnection() = default;
 
-	void AdsSourceStateConnection::updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataService)
+	void AdsSourceStateConnection::updateConnections(const SoftwareInfo& softwareInfo,
+													 const std::vector<SoftwareEndpoint::AppDataService>& appDataService)
 	{
 		return m_pimpl->updateConnections(softwareInfo, appDataService);
 	}
@@ -29,4 +30,4 @@ namespace ClientLib
 	{
 		return m_pimpl->appDataSourceStates();
 	}
-}
+} // namespace ClientLib

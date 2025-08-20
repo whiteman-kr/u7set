@@ -74,7 +74,9 @@ void ScriptTestObserver::setInitiator(int initialExpectationId)
 	bool result = m_observer->setInitiator(initialExpectationId);
 	if (result == false)
 	{
-		reportError(tr("ScriptTestObserver::setInitiator() Initiator was not set, wrong initialExpectationId %1.").arg(initialExpectationId), true);
+		reportError(
+			tr("ScriptTestObserver::setInitiator() Initiator was not set, wrong initialExpectationId %1.").arg(initialExpectationId),
+			true);
 	}
 
 	return;
@@ -85,7 +87,8 @@ int ScriptTestObserver::addEqualExpectation(QString appSignalId, double expected
 	int result = m_observer->addEqualExpectation(appSignalId, expectedValue, tolerance);
 	if (result == ITestObserver::InvalidExpectationId)
 	{
-		reportError(tr("ScriptTestObserver::addEqualExpectation() Expectation was not added, check appSignalId %1.").arg(appSignalId), true);
+		reportError(tr("ScriptTestObserver::addEqualExpectation() Expectation was not added, check appSignalId %1.").arg(appSignalId),
+					true);
 	}
 
 	return result;
@@ -96,7 +99,8 @@ int ScriptTestObserver::addGreaterExpectation(QString appSignalId, double thresh
 	int result = m_observer->addGreaterExpectation(appSignalId, threshold);
 	if (result == ITestObserver::InvalidExpectationId)
 	{
-		reportError(tr("ScriptTestObserver::addGreaterExpectation() Expectation was not added, check appSignalId %1.").arg(appSignalId), true);
+		reportError(tr("ScriptTestObserver::addGreaterExpectation() Expectation was not added, check appSignalId %1.").arg(appSignalId),
+					true);
 	}
 
 	return result;

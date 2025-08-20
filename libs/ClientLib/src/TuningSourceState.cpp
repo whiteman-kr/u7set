@@ -1,5 +1,5 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include <ClientLib/TuningSourceState.h>
@@ -8,13 +8,11 @@ namespace ClientLib
 {
 
 	//
-	//TuningSource
+	// TuningSource
 	//
-	TuningSource::TuningSource()
-	{
-	}
+	TuningSource::TuningSource() {}
 
-	TuningSource::TuningSource(const ::Network::DataSourceInfo& info):
+	TuningSource::TuningSource(const ::Network::DataSourceInfo& info) :
 		TuningSource()
 	{
 		m_info = info;
@@ -125,7 +123,6 @@ namespace ClientLib
 		auto it = m_controllerToStateMap.find(controllerHash);
 		if (it == m_controllerToStateMap.end())
 		{
-
 			// Insert a new state to array of states
 			//
 			m_states.push_back(newState);
@@ -157,8 +154,7 @@ namespace ClientLib
 
 			// Every 5 seconds modify previous state
 			//
-			if (m_previousStates.find(channel) == m_previousStates.end() ||
-				m_temporaryStates.find(channel) == m_temporaryStates.end())
+			if (m_previousStates.find(channel) == m_previousStates.end() || m_temporaryStates.find(channel) == m_temporaryStates.end())
 			{
 				Q_ASSERT(false);
 				return;
@@ -277,15 +273,15 @@ namespace ClientLib
 		// errors reported by LM in reply FotipHeader.flags
 		//
 
-		//if (state.fotipflagboundschecksuccess() > m_previousState.fotipflagboundschecksuccess())
+		// if (state.fotipflagboundschecksuccess() > m_previousState.fotipflagboundschecksuccess())
 		//{
-		//result++;
-		//}
+		// result++;
+		// }
 
-		//if (state.fotipflagwritesuccess() > m_previousState.fotipflagwritesuccess())
+		// if (state.fotipflagwritesuccess() > m_previousState.fotipflagwritesuccess())
 		//{
 		//	result++;
-		//}
+		// }
 
 		if (currentState.fotipflagdatatypeerr() > previousState.fotipflagdatatypeerr())
 		{
@@ -337,10 +333,10 @@ namespace ClientLib
 			result++;
 		}
 
-		//if (state.fotipflagapplysuccess() > m_previousState.fotipflagapplysuccess())
+		// if (state.fotipflagapplysuccess() > m_previousState.fotipflagapplysuccess())
 		//{
-		//result++;
-		//}
+		// result++;
+		// }
 
 
 		// General errors
@@ -373,4 +369,4 @@ namespace ClientLib
 		}
 	}
 
-}
+} // namespace ClientLib

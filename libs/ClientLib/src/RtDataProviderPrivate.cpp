@@ -12,7 +12,7 @@ namespace ClientLib
 	{
 		Q_ASSERT(m_logFile);
 		m_logFile->writeMessage(QString("TrendRtConn::TrendRtConn, server %1 (%2), address %3.")
-								.arg(m_server.equipmentId, m_server.shortenId, m_server.realtimeAddress.toString()));
+									.arg(m_server.equipmentId, m_server.shortenId, m_server.realtimeAddress.toString()));
 
 		// --
 		//
@@ -88,7 +88,7 @@ namespace ClientLib
 	}
 
 	void RtDataProviderPrivate::createConnections(const SoftwareInfo& softwareInfo,
-										   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
+												  const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
 	{
 		Q_ASSERT(QThread::currentThread() == this->thread());
 
@@ -109,7 +109,7 @@ namespace ClientLib
 	}
 
 	void RtDataProviderPrivate::updateConnections(const SoftwareInfo& softwareInfo,
-										   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
+												  const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
 	{
 		Q_ASSERT(QThread::currentThread() == this->thread());
 

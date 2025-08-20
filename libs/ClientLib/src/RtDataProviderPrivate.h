@@ -73,10 +73,8 @@ namespace ClientLib
 
 	public:
 		void clear();
-		void createConnections(const SoftwareInfo& softwareInfo,
-							   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
-		void updateConnections(const SoftwareInfo& softwareInfo,
-							   const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
+		void createConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
+		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
 
 		bool setData(E::RtTrendsSamplePeriod samplePeriod, const QStringList& trendSignals);
 		void setSamplePeriod(E::RtTrendsSamplePeriod samplePeriod);

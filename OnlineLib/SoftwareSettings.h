@@ -515,6 +515,10 @@ public:
 	QString tuningUserAccounts;
 	int tuningSessionTimeout = 0;
 
+	bool signalLogEnable = false;
+	QString signalLogTagCritical;
+	QString signalLogTagWarning;
+
 private:
 	// these methods should be call by SoftwareSettingsSet only
 	//
