@@ -138,12 +138,12 @@ bool ServiceWorker::clearSettings()
 	return m_cmdLineParser.clearSettings();
 }
 
-QString ServiceWorker::getSettingValue(const QString& settingName)
+QString ServiceWorker::getSettingValue(const QString& settingName) const
 {
 	return m_cmdLineParser.getSettingValue(settingName);
 }
 
-bool ServiceWorker::getBoolSettingValue(const QString& settingName)
+bool ServiceWorker::getBoolSettingValue(const QString& settingName) const
 {
 	QString valueStr = getSettingValue(settingName);
 

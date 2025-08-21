@@ -104,19 +104,17 @@ QString DiscretesLog::getWriterReader() const
 DiscretesLogWriter::DiscretesLogWriter() :
 	DiscretesLog(true)
 {
-	if (m_databaseName.isEmpty())
-	{
-		m_databaseName = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-						 "/DiscretesLog.sqlite";
-	}
 }
 
 DiscretesLogWriter::~DiscretesLogWriter()
 {
 }
 
-void DiscretesLogWriter::start(int logTimeHours, CircularLoggerShared logger)
+void DiscretesLogWriter::start(const QString& equipmentID, int logTimeHours, CircularLoggerShared logger)
 {
+	m_databaseName = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
+					 QString("/DiscretesLog_%1.sqlite").arg(equipmentID);
+
 	m_logTimeHours = std::clamp(logTimeHours, 1, 10 * 24);
 
 	setLogger(logger);

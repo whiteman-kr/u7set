@@ -336,7 +336,6 @@ QString CommandLineParser::getSettingValue(const QString& settingName) const
 		return QString();
 	}
 
-
 	return it2->second.valueStr;
 }
 

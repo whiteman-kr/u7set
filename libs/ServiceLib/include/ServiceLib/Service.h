@@ -111,8 +111,8 @@ public:
 
 	CircularLoggerShared logger() const { return m_logger; }
 
-	QString getSettingValue(const QString& settingName);
-	bool getBoolSettingValue(const QString& settingName);
+	QString getSettingValue(const QString& settingName) const;
+	bool getBoolSettingValue(const QString& settingName) const;
 
 	QStringList getSoftwareInfo() const;
 

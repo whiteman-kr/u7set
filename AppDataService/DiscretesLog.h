@@ -88,7 +88,7 @@ public:
 	DiscretesLogWriter();
 	virtual ~DiscretesLogWriter();
 
-	void start(int logTimeHours, CircularLoggerShared logger);
+	void start(const QString& equipmentID, int logTimeHours, CircularLoggerShared logger);
 	void stop();
 
 	void pushStates(const std::vector<SimpleAppSignalState>& logStates);
