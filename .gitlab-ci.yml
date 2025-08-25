@@ -12,7 +12,7 @@ variables:
   #
   QT_VERSION: "6.8.1"
   COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v433"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v433"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v434"
   PGPASSWORD: "P2ssw0rd"
 
   CTEST_OUTPUT_ON_FAILURE: "1"

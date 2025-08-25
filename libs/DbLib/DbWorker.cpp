@@ -461,6 +461,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0431.sql", "Upgrade to version 431, SignalPropertyBehavior.csv file updating" },
 	{":/DatabaseUpgrade/Upgrade0432.sql", "Upgrade to version 432, VDU-1 renamed to RVDU, Added property StartupLogo" },
 	{":/DatabaseUpgrade/Upgrade0433.sql", "Upgrade to version 433, Added property DiscretesLogHours to ApplicationDataService" },
+	{":/DatabaseUpgrade/Upgrade0434.sql", "Upgrade to version 434, Added SignalLog properties to Monitor preset" },
 };
 
 int DbWorker::counter = 0;
