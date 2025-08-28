@@ -129,6 +129,14 @@ protected:
 public:
 	QString profile;
 	QString hostname;
+
+public:
+	enum class LmStatusFlagMode
+	{
+		None,
+		SOR,
+		AccessKey
+	};
 };
 
 class SoftwareSettingsSet
@@ -519,6 +527,8 @@ public:
 	QString signalLogTagCritical;
 	QString signalLogTagWarning;
 
+	LmStatusFlagMode statusFlagFunction = LmStatusFlagMode::None;
+
 private:
 	// these methods should be call by SoftwareSettingsSet only
 	//
@@ -594,13 +604,6 @@ public:
 	bool showSchemas = true;
 	bool showSchemasList = true;
 	bool showSchemasTabs = true;
-
-	enum class LmStatusFlagMode
-	{
-		None,
-		SOR,
-		AccessKey
-	};
 
 	LmStatusFlagMode statusFlagFunction = LmStatusFlagMode::None;
 

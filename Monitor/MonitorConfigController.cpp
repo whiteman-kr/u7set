@@ -60,6 +60,10 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 	config.signalLogTagCritical = settings.signalLogTagCritical;
 	config.signalLogTagWarning = settings.signalLogTagWarning;
 
+	// Appearance
+	//
+	config.statusFlagFunction = settings.statusFlagFunction;
+
 	//--
 	//
 	auto getScriptFunc = [this](const QString& scriptFileName) -> QString

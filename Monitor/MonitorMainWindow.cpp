@@ -1623,7 +1623,7 @@ void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configur
 	m_tuningConnection.updateConnections(m_configController.softwareInfo(),
 										 configuration.tuningServices,
 										 true /*autoApply*/,
-										 TuningClientSettings::LmStatusFlagMode::None);
+										 configuration.statusFlagFunction);
 
 	m_signalManager.setSetpoints(m_configController.setpoints());
 
