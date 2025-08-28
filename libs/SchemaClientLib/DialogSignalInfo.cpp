@@ -2164,8 +2164,7 @@ void DialogSignalInfo::updateTuningSignalState()
 
 	// Enable/disable controls
 
-	bool controlEnabled = tuningSignalState.valid() == true && tuningSignalState.controlIsEnabled() == true; // &&
-	// tuningSignalState.writingIsEnabled() == true;	// This flag is not always used! ???
+	bool controlEnabled = tuningSignalState.writingIsEnabled() == true;
 
 	if (m_tuningAuthorization.enabled() == true)
 	{
