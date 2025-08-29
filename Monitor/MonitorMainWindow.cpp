@@ -1434,7 +1434,14 @@ void MonitorMainWindow::slot_trends()
 
 void MonitorMainWindow::slot_signalLog()
 {
-	SignalLogDialog::createDialog(m_adsConnection.signalLog(), this);
+	SignalLogDialog::createDialog(m_adsConnection.signalLog(),
+								  m_signalManager,
+								  &m_appSignalListSet,
+								  configController().configInfo().project,
+								  configController().configInfo().softwareEquipmentId,
+								  configController().configuration().signalLogTagCritical,
+								  configController().configuration().signalLogTagWarning,
+								  this);
 	return;
 }
 
@@ -1623,7 +1630,7 @@ void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configur
 	m_tuningConnection.updateConnections(m_configController.softwareInfo(),
 										 configuration.tuningServices,
 										 true /*autoApply*/,
-										 TuningClientSettings::LmStatusFlagMode::None);
+										 configuration.statusFlagFunction);
 
 	m_signalManager.setSetpoints(m_configController.setpoints());
 

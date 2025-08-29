@@ -120,7 +120,7 @@ namespace ReportLib
 							   const std::vector<int>& columnWidths,
 							   const std::vector<int>& selectedRows,
 							   const QPageLayout& pageLayout);
-		~TableViewReportPrivate() = default;
+		~TableViewReportPrivate();
 
 		void printTable();
 		void exportTable(const QString& fileName);

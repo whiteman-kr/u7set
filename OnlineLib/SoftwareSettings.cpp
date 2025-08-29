@@ -1719,6 +1719,12 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeEndElement(); // </SignalLog>
 
+	// <Appearance>
+	//
+	xml.writeStartElement(XmlElement::APPEARANCE);
+	xml.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, static_cast<int>(statusFlagFunction));
+	xml.writeEndElement(); // </Appearance>
+
 	// --
 	//
 	writeEndSettings(xml);			// </Settings>
@@ -1895,6 +1901,17 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 			xml.skipCurrentElement();
 			continue;
+		}
+
+		if (xml.name() == XmlElement::APPEARANCE)
+		{
+			int value = 0;
+			bool resultStatusFlagFunction = xml.readIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, &value);
+			if (resultStatusFlagFunction == true)
+			{
+				statusFlagFunction = static_cast<LmStatusFlagMode>(value);
+			}
+			result &= resultStatusFlagFunction;
 		}
 
 		// Unknown element

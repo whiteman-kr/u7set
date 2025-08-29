@@ -356,6 +356,27 @@ namespace SchemaClientLib
 
 	void SchemaListTreeWidget::slot_doubleClicked(const QModelIndex&)
 	{
+		emitOpenSchema();
+		return;
+	}
+
+
+	void SchemaListTreeWidget::keyPressEvent(QKeyEvent* e)
+	{
+		if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return)
+		{
+			emitOpenSchema();
+
+			e->accept();
+			return;
+		}
+
+		QTreeWidget::keyPressEvent(e);
+		return;
+	}
+
+	void SchemaListTreeWidget::emitOpenSchema()
+	{
 		SortableSchemaTreeWidgetItem* si = dynamic_cast<SortableSchemaTreeWidgetItem*>(currentItem());
 		assert(si);
 
@@ -369,8 +390,6 @@ namespace SchemaClientLib
 				return;
 			}
 		}
-
-		return;
 	}
 
 	QString SchemaListTreeWidget::filter() const

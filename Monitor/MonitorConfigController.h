@@ -47,6 +47,10 @@ struct MonitorConfigSettings
 	// Equipment
 	// 
 	std::shared_ptr<Hardware::DeviceObject> equipment;
+
+	// Appearance
+	//
+	TuningClientSettings::LmStatusFlagMode statusFlagFunction = TuningClientSettings::LmStatusFlagMode::None;
 };
 
 

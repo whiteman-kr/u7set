@@ -7,3 +7,5 @@ Monitor
 	07.06.2024	Version: 7	Monitor_v7.u7devp		RPCT-3895: Update ADS connection to link to ADS Receive Controller (no actual preset update, changed only preset version)
 	20.06.2024	Version: 8	Monitor_v8.u7devp		RPCT-3875: Add AppSignalLists properties
 	18.08.2025	Version: 9	Monitor_v9.u7devp		RPCT-4054: Added properties SignalLog*.
+	28.08.2025	Version: 10	Monitor_v10.u7devp		RPCT-4057: Added property StatusFlagFunction like in TuningClient
+
