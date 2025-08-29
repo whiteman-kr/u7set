@@ -215,7 +215,7 @@ const CalibratorLimit CalibratorLimits[] =
 	{ CalibratorType::Calys75,	CalibratorMode::SourceMode,		0,	  24,	CalibratorUnit::mA,			3,	0.018,	0.0083	,"SOUR:FUNC CURR\r\nSOUR:CURR:RANG 24mA"},			// 0.018% +- 2 microA - i.e.  2 microA * 100% / 24 mA = 0.008%
 	{ CalibratorType::Calys75,	CalibratorMode::SourceMode,		0, 10000,	CalibratorUnit::Hz,			0,	0.000,	0.000	,"SOUR:FUNC FREQ\r\nSOUR:FREQ:RANG 10KHZ"},			//
 	{ CalibratorType::Calys75,	CalibratorMode::SourceMode,		0,	 400,	CalibratorUnit::OhmLow,		2,	0.014,	0.0075	,"SOUR:FUNC RES\r\nSOUR:RES:RANG 400,10mA"},		// 0.014% +- 30 mOhm - i.e.  30 mOhm * 100% / 400 Ohm = 0.0075%
-	{ CalibratorType::Calys75,	CalibratorMode::SourceMode,		0,  4000,	CalibratorUnit::OhmHigh,	1,	0.014,	0.0075	,"SOUR:FUNC RES\r\nSOUR:RES:RANG 4000,10mA"},		// 0.014% +- 300 mOhm - i.e.  300 mOhm * 100% / 4000 Ohm = 0.0075%
+	{ CalibratorType::Calys75,	CalibratorMode::SourceMode,		0,  4000,	CalibratorUnit::OhmHigh,	1,	0.014,	0.0075	,"SOUR:FUNC RES\r\nSOUR:RES:RANG 4000,1mA"},		// 0.014% +- 300 mOhm - i.e.  300 mOhm * 100% / 4000 Ohm = 0.0075%
 
 	// KEITHLEY-6221
 	//
