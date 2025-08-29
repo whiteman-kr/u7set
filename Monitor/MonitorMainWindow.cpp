@@ -1434,7 +1434,14 @@ void MonitorMainWindow::slot_trends()
 
 void MonitorMainWindow::slot_signalLog()
 {
-	SignalLogDialog::createDialog(m_adsConnection.signalLog(), this);
+	SignalLogDialog::createDialog(m_adsConnection.signalLog(),
+								  m_signalManager,
+								  &m_appSignalListSet,
+								  configController().configInfo().project,
+								  configController().configInfo().softwareEquipmentId,
+								  configController().configuration().signalLogTagCritical,
+								  configController().configuration().signalLogTagWarning,
+								  this);
 	return;
 }
 
