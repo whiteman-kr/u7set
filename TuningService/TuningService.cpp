@@ -16,7 +16,7 @@ namespace Tuning
 											 char** argv,
 											 CircularLoggerShared logger,
 											 CircularLoggerShared tuningLog) :
-		ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
+		ServiceWorker(softwareInfo, serviceName, argc, argv, logger, "TuningServiceWorker"),
 		m_tuningLog(tuningLog)
 	{
 	}

@@ -10,7 +10,7 @@
 
 TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
 								   AppDataServiceWorker& appDataService) :
-	Tcp::Server(softwareInfo, "AppDataServer"),
+	Tcp::Server(softwareInfo, "TcpAppDataServer"),
 	m_appDataService(appDataService)
 {
 	setObjectName("TcpAppDataServer");
@@ -668,7 +668,7 @@ TcpAppDataServerThread::TcpAppDataServerThread(const SoftwareInfo& softwareInfo,
 											   const std::vector<Tcp::ListenAddress>& listenAddresses,
 											   AppDataServiceWorker& appDataServiceWorker) :
 	Tcp::ListenerThread(listenAddresses,  new TcpAppDataServer(softwareInfo, appDataServiceWorker),
-					  appDataServiceWorker.logger())
+					  appDataServiceWorker.logger(), "TcpAppDataServerListener")
 {
 }
 

@@ -187,7 +187,8 @@ quint32 UdpRequest::readDword()
 
 bool UdpSocket::metaTypesRegistered = false;
 
-UdpSocket::UdpSocket() :
+UdpSocket::UdpSocket(const QString& workerName) :
+	SimpleThreadWorker(workerName.isEmpty() ? "UdpSocket" : workerName),
 	m_socket(this),
 	m_timer(this)
 {
@@ -560,6 +561,7 @@ qint64 UdpClientRequestHandler::lastRequestTime() const
 // -----------------------------------------------------------------------------
 
 UdpServerSocket::UdpServerSocket(const QHostAddress &bindToAddress, quint16 port, std::shared_ptr<CircularLogger> logger) :
+	UdpSocket("UdpServerSocket"),
 	m_bindToAddress(bindToAddress),
 	m_port(port),
 	m_logger(logger)

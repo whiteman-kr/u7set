@@ -772,7 +772,7 @@ namespace Gateway
 	{
 		TEST_PTR_RETURN(client);
 
-		for(auto worker : m_workerList)
+		for(auto worker : m_workers)
 		{
 			SimpleThread::connect(client,
 								  &AppDataServiceClient::sendStateChanges,

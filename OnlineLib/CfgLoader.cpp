@@ -871,7 +871,7 @@ void CfgLoaderThread::quit()
 		return;
 	}
 
-	m_thread->quit();
+	m_thread->quitAndWait();
 }
 
 void CfgLoaderThread::quitAndWait()

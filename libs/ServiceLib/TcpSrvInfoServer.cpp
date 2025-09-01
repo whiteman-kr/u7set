@@ -11,7 +11,6 @@ TcpSrvInfoServer::TcpSrvInfoServer(const SoftwareInfo& sotwareInfo,
 
 TcpSrvInfoServer::~TcpSrvInfoServer()
 {
-
 }
 
 Tcp::Server* TcpSrvInfoServer::getNewInstance(const Tcp::ListenAddress& listenAddr)

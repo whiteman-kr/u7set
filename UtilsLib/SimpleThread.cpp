@@ -10,16 +10,51 @@
 //
 // -------------------------------------------------------------------------------------
 
+SimpleThreadWorker::SimpleThreadWorker(const QString& workerName) :
+	m_workerName(workerName)
+{
+//	qDebug() << "Worker" << m_workerName << "created";
+}
+
+SimpleThreadWorker::~SimpleThreadWorker()
+{
+//	qDebug() << "Worker" << m_workerName << "deleted";
+}
+
+void SimpleThreadWorker::setWorkerName(const QString& workerName)
+{
+	m_workerName = workerName;
+}
+
+QString SimpleThreadWorker::workerName() const
+{
+	return m_workerName;
+}
+
+void SimpleThreadWorker::onThreadStarted()
+{
+}
+
+void SimpleThreadWorker::onThreadFinished()
+{
+
+}
+
 void SimpleThreadWorker::slot_onThreadStarted()
 {
 	onThreadStarted();
 }
 
-
 void SimpleThreadWorker::slot_onThreadFinished()
 {
 	onThreadFinished();
-	deleteLater();
+	m_thread->workerFinished(this);
+}
+
+void SimpleThreadWorker::setThread(SimpleThread* thread)
+{
+	Q_ASSERT(thread != nullptr && m_thread == nullptr);
+	m_thread = thread;
 }
 
 // -------------------------------------------------------------------------------------
@@ -28,97 +63,62 @@ void SimpleThreadWorker::slot_onThreadFinished()
 //
 // -------------------------------------------------------------------------------------
 
-SimpleThread::SimpleThread()
+SimpleThread::SimpleThread(const QString& threadName) :
+	m_threadName(threadName)
 {
 }
 
-SimpleThread::SimpleThread(SimpleThreadWorker* worker)
+SimpleThread::SimpleThread(SimpleThreadWorker* worker, const QString& threadName) :
+	m_threadName(threadName)
 {
 	addWorker(worker);
 }
 
 SimpleThread::~SimpleThread()
 {
-	m_thread.quit();
-	m_thread.wait();
-
-	foreach(SimpleThreadWorker* worker, m_workerList)
-	{
-		if (worker == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-	}
 }
 
 void SimpleThread::addWorker(SimpleThreadWorker* worker)
 {
-	if (m_thread.isRunning() == true)
+	if (worker == nullptr ||
+		m_workers.contains(worker))
 	{
-		// All workers should be added before the thread is started
-		//
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
-	if (worker == nullptr)
-	{
-		assert(false);
-		return;
-	}
+	m_workers.insert(worker);
+}
 
-	m_workerList.append(worker);
+void SimpleThread::setPriority(QThread::Priority priority)
+{
+	m_thread.setPriority(priority);
 }
 
 void SimpleThread::start()
 {
-	foreach(SimpleThreadWorker* worker, m_workerList)
+	for(SimpleThreadWorker* worker : m_workers)
 	{
-		if (worker == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
+		worker->setThread(this);
 		worker->moveToThread(&m_thread);
 
 		connect(&m_thread, &QThread::started, worker, &SimpleThreadWorker::slot_onThreadStarted);
-		connect(&m_thread, &QThread::finished, worker, &SimpleThreadWorker::slot_onThreadFinished);
+		connect(&m_thread, &QThread::finished, worker, &SimpleThreadWorker::deleteLater);
+		connect(this, &SimpleThread::quitRequested, worker, &SimpleThreadWorker::slot_onThreadFinished, Qt::QueuedConnection);
 	}
-
-	beforeStart();
 
 	m_thread.start();
 }
 
-void SimpleThread::quit()
-{
-	beforeQuit();
-
-	foreach(SimpleThreadWorker* worker, m_workerList)
-	{
-		if (worker == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		worker->requestQuit();
-	}
-
-	m_thread.quit();
-}
-
-bool SimpleThread::wait(unsigned long time)
-{
-	return m_thread.wait(time);
-}
-
 bool SimpleThread::quitAndWait(unsigned long time)
 {
-	quit();
+	emit quitRequested();
 	return wait(time);
+}
+
+bool SimpleThread::isInterruptionRequested() const
+{
+	return m_thread.isInterruptionRequested();
 }
 
 bool SimpleThread::isRunning() const
@@ -131,12 +131,47 @@ bool SimpleThread::isFinished() const
 	return m_thread.isFinished();
 }
 
-void SimpleThread::beforeStart()
+bool SimpleThread::wait(unsigned long time)
 {
+	QElapsedTimer tm;
+
+	tm.start();
+
+	bool finishedOk = false;
+
+	while(tm.elapsed() < time)
+	{
+		if (m_finishedWorkersCount < static_cast<int>(m_workers.size()))
+		{
+			QThread::currentThread()->msleep(1);
+			continue;
+		}
+
+		finishedOk = true;
+		break;
+	}
+
+	Q_ASSERT(finishedOk == true);
+
+	m_thread.quit();
+	finishedOk = m_thread.wait(time);
+
+	Q_ASSERT(finishedOk == true);
+
+	return finishedOk;
 }
 
-void SimpleThread::beforeQuit()
+void SimpleThread::workerFinished(SimpleThreadWorker* worker)
 {
+	if (worker == nullptr || m_workers.contains(worker) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+//	qDebug() << "Worker " << worker->workerName() << "finished";
+
+	m_finishedWorkersCount++;
 }
 
 // -------------------------------------------------------------------------------------

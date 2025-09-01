@@ -19,6 +19,7 @@ CfgCheckerWorker::CfgCheckerWorker(const QString& serviceEquipmentID,
 								   const QString& autoloadBuildFolder,
 								   int checkNewBuildInterval,
 								   std::shared_ptr<CircularLogger> logger) :
+	SimpleThreadWorker("CfgCheckerWorker"),
 	m_serviceEquipmentID(serviceEquipmentID),
 	m_workFolder(workFolder),
 	m_autoloadBuildFolder(autoloadBuildFolder),

@@ -1593,6 +1593,7 @@ namespace Tuning
 														E::SoftwareRunMode swRunMode,
 														CircularLoggerShared logger,
 														CircularLoggerShared tuningLog) :
+		SimpleThreadWorker("TuningSourceThreadWorker_" + source.moduleEquipmentID()),
 		m_service(service),
 		m_source(source),
 		m_swRunMode(swRunMode),
@@ -2390,6 +2391,7 @@ namespace Tuning
 											   int channel,
 											   bool simulationMode,
 											   std::shared_ptr<CircularLogger> logger) :
+		SimpleThreadWorker("TuningSocketListener"),
 		m_service(service),
 		m_listenIP(listenIP),
 		m_channel(channel),
