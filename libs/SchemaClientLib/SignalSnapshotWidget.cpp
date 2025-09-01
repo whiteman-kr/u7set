@@ -329,9 +329,7 @@ namespace SchemaClientLib
 
 		m_editTags->setText(tags.join(' '));
 
-		m_storeTags = false;
-
-		tagsChanged();
+		tagsChanged(false /*addToCompleter*/);
 	}
 
 	void SignalSnapshotWidget::resetSignalsType()
@@ -614,9 +612,7 @@ namespace SchemaClientLib
 
 	void SignalSnapshotWidget::editTagsReturnPressed()
 	{
-		m_storeTags = true;
-
-		tagsChanged();
+		tagsChanged(true /*addToCompleter*/);
 
 		fillSignals();
 	}
@@ -744,9 +740,7 @@ namespace SchemaClientLib
 		{
 			m_editTags->setText(te.text());
 
-			m_storeTags = true;
-
-			tagsChanged();
+			tagsChanged(true /*addToCompleter*/);
 
 			fillSignals();
 		}
@@ -1333,33 +1327,36 @@ namespace SchemaClientLib
 		m_model.setMasks(masks);
 	}
 
-	void SignalSnapshotWidget::tagsChanged()
+	void SignalSnapshotWidget::tagsChanged(bool addToCompleter)
 	{
 		QString tagsText = m_editTags->text().trimmed();
 		tagsText.replace(' ', ';');
 
 		QStringList tags;
 
-		if (m_storeTags == true && tagsText.isEmpty() == false)
+		if (tagsText.isEmpty() == false)
 		{
 			tags = tagsText.split(';', Qt::SkipEmptyParts);
 
-			for (const QString& tag : tags)
+			if (addToCompleter == true)
 			{
-				// Save filter history
-				//
-				if (m_storedTags.contains(tag) == false)
+				for (const QString& tag : tags)
 				{
-					m_storedTags.append(tag);
-
-					QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_tagsCompleter->model());
-					if (completerModel == nullptr)
+					// Save filter history
+					//
+					if (m_storedTags.contains(tag) == false)
 					{
-						Q_ASSERT(completerModel);
-						return;
-					}
+						m_storedTags.append(tag);
 
-					completerModel->setStringList(m_storedTags);
+						QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_tagsCompleter->model());
+						if (completerModel == nullptr)
+						{
+							Q_ASSERT(completerModel);
+							return;
+						}
+
+						completerModel->setStringList(m_storedTags);
+					}
 				}
 			}
 		}
