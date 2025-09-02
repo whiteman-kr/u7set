@@ -13,12 +13,12 @@
 SimpleThreadWorker::SimpleThreadWorker(const QString& workerName) :
 	m_workerName(workerName)
 {
-//	qDebug() << "Worker" << m_workerName << "created";
+	// qDebug() << "Worker" << m_workerName << "created";
 }
 
 SimpleThreadWorker::~SimpleThreadWorker()
 {
-//	qDebug() << "Worker" << m_workerName << "deleted";
+	// qDebug() << "Worker" << m_workerName << "deleted";
 }
 
 void SimpleThreadWorker::setWorkerName(const QString& workerName)
@@ -113,7 +113,32 @@ void SimpleThread::start()
 bool SimpleThread::quitAndWait(unsigned long time)
 {
 	emit quitRequested();
-	return wait(time);
+
+	bool finishedOk = false;
+
+	std::unique_lock ul(m_finishCondVarMutex, std::defer_lock);
+
+	ul.lock();
+
+	finishedOk = m_finishCondVar.wait_for(
+		ul,
+		std::chrono::milliseconds(time),
+		[this]() -> bool
+		{
+			return m_finishedWorkersCount == static_cast<int>(m_workers.size());
+		});
+
+	ul.unlock();
+
+	Q_ASSERT(finishedOk = true);
+
+	m_thread.quit();
+
+	finishedOk = m_thread.wait(3000);
+
+	Q_ASSERT(finishedOk == true);
+
+	return finishedOk;
 }
 
 bool SimpleThread::isInterruptionRequested() const
@@ -131,36 +156,6 @@ bool SimpleThread::isFinished() const
 	return m_thread.isFinished();
 }
 
-bool SimpleThread::wait(unsigned long time)
-{
-	QElapsedTimer tm;
-
-	tm.start();
-
-	bool finishedOk = false;
-
-	while(tm.elapsed() < time)
-	{
-		if (m_finishedWorkersCount < static_cast<int>(m_workers.size()))
-		{
-			QThread::currentThread()->msleep(1);
-			continue;
-		}
-
-		finishedOk = true;
-		break;
-	}
-
-	Q_ASSERT(finishedOk == true);
-
-	m_thread.quit();
-	finishedOk = m_thread.wait(time);
-
-	Q_ASSERT(finishedOk == true);
-
-	return finishedOk;
-}
-
 void SimpleThread::workerFinished(SimpleThreadWorker* worker)
 {
 	if (worker == nullptr || m_workers.contains(worker) == false)
@@ -169,9 +164,15 @@ void SimpleThread::workerFinished(SimpleThreadWorker* worker)
 		return;
 	}
 
-//	qDebug() << "Worker " << worker->workerName() << "finished";
+	// qDebug() << "Worker " << worker->workerName() << "finished";
+
+	m_finishCondVarMutex.lock();
 
 	m_finishedWorkersCount++;
+
+	m_finishCondVarMutex.unlock();
+
+	m_finishCondVar.notify_one();
 }
 
 // -------------------------------------------------------------------------------------

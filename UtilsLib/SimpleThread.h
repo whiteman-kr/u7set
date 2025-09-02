@@ -62,9 +62,6 @@ signals:
 	void quitRequested();
 
 private:
-	void quit();
-	bool wait(unsigned long time = ULONG_MAX);
-
 	void workerFinished(SimpleThreadWorker* worker);
 
 protected:
@@ -72,7 +69,10 @@ protected:
 
 	QThread m_thread;
 	std::unordered_set<SimpleThreadWorker*> m_workers;
-	std::atomic<int> m_finishedWorkersCount = 0;
+
+	std::mutex m_finishCondVarMutex;
+	std::condition_variable m_finishCondVar;
+	int m_finishedWorkersCount = 0;
 
 	friend class SimpleThreadWorker;
 };
