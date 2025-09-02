@@ -1572,9 +1572,9 @@ QString OT::MeasureViewParamCaption(OT::MeasureViewParam param)
 	switch (param)
 	{
 		case OT::mwo_Font:					caption = QT_TRANSLATE_NOOP("Options", "Font of measurements list");											break;
-		case OT::mwo_ColorNoError:			caption = QT_TRANSLATE_NOOP("Options", "Color measurement that has not error");									break;
-		case OT::mwo_ColorErrorOfLimit:		caption = QT_TRANSLATE_NOOP("Options", "Color measurement over limit error");									break;
-		case OT::mwo_ColorErrorOfControl:	caption = QT_TRANSLATE_NOOP("Options", "Color measurement over control error");									break;
+		case OT::mwo_ColorNoError:			caption = QT_TRANSLATE_NOOP("Options", "Color of measurement that has not error");									break;
+		case OT::mwo_ColorErrorOfLimit:		caption = QT_TRANSLATE_NOOP("Options", "Color of measurement over limit error");									break;
+		case OT::mwo_ColorErrorOfControl:	caption = QT_TRANSLATE_NOOP("Options", "Color of measurement over control error");									break;
 		case OT::mwo_ShowNoValid:			caption = QT_TRANSLATE_NOOP("Options", "Show measuring value if signal is not valid");							break;
 		case OT::mwo_PrecesionByCalibrator:	caption = QT_TRANSLATE_NOOP("Options", "Show accuracy for measure value and nominal value from calibrator");	break;
 
@@ -2054,6 +2054,7 @@ QString OT::LanguageTypeCaptionEn(OT::LanguageType type)
 	{
 		case OT::English:	caption = "English";	break;
 		case OT::Russian:	caption = "Russian";	break;
+		case OT::Ukrainian:	caption = "Ukrainian";	break;
 
 		default:
 			Q_ASSERT(0);
@@ -2073,6 +2074,7 @@ QString OT::LanguageTypeCaptionTr(OT::LanguageType type)
 	{
 		case OT::English:	caption = QObject::tr("English");	break;
 		case OT::Russian:	caption = QObject::tr("Russian");	break;
+		case OT::Ukrainian:	caption = QObject::tr("Ukrainian");	break;
 
 		default:
 			Q_ASSERT(0);
