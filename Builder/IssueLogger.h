@@ -514,6 +514,7 @@ namespace Builder
 						QString item2, QUuid item2Uuid, QString schema2);				// Permanent const 0 on output of packed_and %1 (item %2, schema %3) due to const 0 on input (item %4, schema %5).
 		void errALC5205(QString appSignalID, QUuid itemUuid, QString schema);			// Software calculated signal %1 cannot be used in user application logic (schema %2).
 		void errALC5206(QString optoPortID, int txRawDataSize);							// OptoPort %1 tx raw data out of range (%2 words)
+		void wrnALC5207(QString signalID);												// Tuning signal %1 is unused.
 
 		// firmware writing errors
 

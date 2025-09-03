@@ -2031,7 +2031,7 @@ namespace Builder
 
 		// fill m_ualSignals by Input and Tuning Acquired signals
 		//
-		for(const auto& [appSignalID, appSignal] : m_moduleSignals)
+		for(const auto& [appSignalIdHash, appSignal] : m_moduleSignals)
 		{
 			TEST_PTR_CONTINUE(appSignal);
 
@@ -2046,7 +2046,8 @@ namespace Builder
 				continue;
 			}
 
-			if (appSignal->enableTuning() == true)
+			if (appSignal->enableTuning() == true &&
+				m_ualItemsSignals.contains(appSignalIdHash) == true)
 			{
 				Q_ASSERT(appSignal->isInternal() == true || appSignal->isOutput() == true);
 				m_ualSignals.createSignal(appSignal);
@@ -5224,7 +5225,8 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(signal);
 
-			if (signal->enableTuning() == false)
+			if (signal->enableTuning() == false ||
+				m_ualItemsSignals.contains(calcHash(signal->appSignalID())) == false)
 			{
 				continue;
 			}
@@ -5618,7 +5620,7 @@ namespace Builder
 		//	+ discrete
 		//	+ internal
 		//	+ tunable
-		//	+ no matter used in UAL or not
+		//	+ used in UAL
 
 		QVector<AppSignal*> tuningSignals;
 
@@ -5630,11 +5632,16 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(s);
 
+			if (m_ualItemsSignals.contains(calcHash(s->appSignalID())) == false)
+			{
+				continue;
+			}
+
 			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
 
 			if (ualSignal == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -5947,7 +5954,7 @@ namespace Builder
 		//	+ discrete
 		//	+ internal
 		//	+ tunable
-		//	+ no matter used in UAL or not
+		//	+ used in UAL
 
 		QVector<AppSignal*> tuningSignals;
 
@@ -5959,11 +5966,16 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(s);
 
+			if (m_ualItemsSignals.contains(calcHash(s->appSignalID())) == false)
+			{
+				continue;
+			}
+
 			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
 
 			if (ualSignal == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -17359,7 +17371,14 @@ namespace Builder
 				s->isSwCalculated() == false &&
 				m_ualSignals.contains(s->appSignalID()) == false)
 			{
-				m_log->wrnALC5148(s->appSignalID());
+				if (s->enableTuning() == false)
+				{
+					m_log->wrnALC5148(s->appSignalID());
+				}
+				else
+				{
+					m_log->wrnALC5207(s->appSignalID());
+				}
 			}
 		}
 
