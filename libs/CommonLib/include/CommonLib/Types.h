@@ -1,10 +1,10 @@
 #pragma once
 
-#include <type_traits>
-#include <cassert>
-#include <QMetaObject>
 #include <QMetaEnum>
+#include <QMetaObject>
 #include <QObject>
+#include <cassert>
+#include <type_traits>
 
 /*! \brief Contains enumerations used in RPCT*/
 class E : public QObject
@@ -32,10 +32,10 @@ public:
 	 */
 	enum HorzAlign
 	{
-		AlignLeft = Qt::AlignLeft,			/**< AlignLeft = 0x01*/
-		AlignRight = Qt::AlignRight,		/**< AlignRight = 0x02*/
-		AlignHCenter = Qt::AlignHCenter,	/**< AlignHCenter = 0x04*/
-		AlignJustify = Qt::AlignJustify		/**< AlignJustify = 0x08*/
+		AlignLeft = Qt::AlignLeft,       /**< AlignLeft = 0x01*/
+		AlignRight = Qt::AlignRight,     /**< AlignRight = 0x02*/
+		AlignHCenter = Qt::AlignHCenter, /**< AlignHCenter = 0x04*/
+		AlignJustify = Qt::AlignJustify  /**< AlignJustify = 0x08*/
 	};
 	Q_ENUM(HorzAlign)
 
@@ -54,10 +54,10 @@ public:
 	 */
 	enum VertAlign
 	{
-		AlignTop = Qt::AlignTop,				/**< AlignTop = 0x20*/
-		AlignBottom = Qt::AlignBottom,			/**< AlignBottom = 0x40*/
-		AlignVCenter = Qt::AlignVCenter,		/**< AlignVCenter = 0x80*/
-		AlignBaseline = Qt::AlignBaseline		/**< AlignBaseline = 0x100*/
+		AlignTop = Qt::AlignTop,          /**< AlignTop = 0x20*/
+		AlignBottom = Qt::AlignBottom,    /**< AlignBottom = 0x40*/
+		AlignVCenter = Qt::AlignVCenter,  /**< AlignVCenter = 0x80*/
+		AlignBaseline = Qt::AlignBaseline /**< AlignBaseline = 0x100*/
 	};
 	Q_ENUM(VertAlign)
 
@@ -66,12 +66,12 @@ public:
 	 */
 	enum LineStyle
 	{
-		NoPen = Qt::NoPen,						/**< NoPen = 0. No line at all, for example rect fills but does not draw any boundary line.*/
-		SolidLine = Qt::SolidLine,				/**< SolidLine = 1. A plain line.*/
-		DashLine = Qt::DashLine,				/**< DashLine = 2. Dashes separated by a few pixels.*/
-		DotLine = Qt::DotLine,					/**< DotLine = 3. Dots separated by a few pixels.*/
-		DashDotLine = Qt::DashDotLine,			/**< DashDotLine = 4. Alternate dots and dashes.*/
-		DashDotDotLine = Qt::DashDotDotLine,	/**< DashDotDotLine = 5. One dash, two dots, one dash, two dots.*/
+		NoPen = Qt::NoPen,                   /**< NoPen = 0. No line at all, for example rect fills but does not draw any boundary line.*/
+		SolidLine = Qt::SolidLine,           /**< SolidLine = 1. A plain line.*/
+		DashLine = Qt::DashLine,             /**< DashLine = 2. Dashes separated by a few pixels.*/
+		DotLine = Qt::DotLine,               /**< DotLine = 3. Dots separated by a few pixels.*/
+		DashDotLine = Qt::DashDotLine,       /**< DashDotLine = 4. Alternate dots and dashes.*/
+		DashDotDotLine = Qt::DashDotDotLine, /**< DashDotDotLine = 5. One dash, two dots, one dash, two dots.*/
 	};
 	Q_ENUM(LineStyle)
 
@@ -79,11 +79,11 @@ public:
 	 */
 	enum LineCap
 	{
-		NoCap = 0,							/**< NoCap = 0. No cap is drawn. */
-		BarCap = 1,							/**< BarCap = 1. A filled bar at the line end. LineCapFactor can be applied.*/
-		CircleCap = 2,						/**< CircleCap = 2. A filled circle at the line end. LineCapFactor can be applied.*/
-		Arrow1Cap = 3,						/**< Arrow1Cap = 3. An arrow at the line end. LineCapFactor can be applied.*/
-		Arrow2Cap = 4,						/**< Arrow2Cap = 4. An arrow at the line end. LineCapFactor can be applied.*/
+		NoCap = 0,     /**< NoCap = 0. No cap is drawn. */
+		BarCap = 1,    /**< BarCap = 1. A filled bar at the line end. LineCapFactor can be applied.*/
+		CircleCap = 2, /**< CircleCap = 2. A filled circle at the line end. LineCapFactor can be applied.*/
+		Arrow1Cap = 3, /**< Arrow1Cap = 3. An arrow at the line end. LineCapFactor can be applied.*/
+		Arrow2Cap = 4, /**< Arrow2Cap = 4. An arrow at the line end. LineCapFactor can be applied.*/
 	};
 	Q_ENUM(LineCap)
 
@@ -91,9 +91,10 @@ public:
 	 */
 	enum LineStyleCap
 	{
-		FlatCap = Qt::FlatCap,					/**< FlatCap = 0. A square line end that does not cover the end point of the line.*/
-		SquareCap = Qt::SquareCap,				/**< SquareCap = 16. A square line end that covers the end point and extends beyond it by half the line width.*/
-		RoundCap = Qt::RoundCap,				/**< RoundCap = 32. A rounded line end.*/
+		FlatCap = Qt::FlatCap, /**< FlatCap = 0. A square line end that does not cover the end point of the line.*/
+		SquareCap =
+			Qt::SquareCap, /**< SquareCap = 16. A square line end that covers the end point and extends beyond it by half the line width.*/
+		RoundCap = Qt::RoundCap, /**< RoundCap = 32. A rounded line end.*/
 	};
 	Q_ENUM(LineStyleCap)
 
@@ -126,7 +127,7 @@ public:
 	//
 	enum class VcsState
 	{
-		CheckedIn,					// File has no any action, it's normal state
+		CheckedIn, // File has no any action, it's normal state
 		CheckedOut
 	};
 	Q_ENUM(VcsState)
@@ -135,10 +136,10 @@ public:
 	//
 	enum class VcsItemAction
 	{
-		Unknown = 0,		// Don't change values, they are stored in DB
-		Added = 1,			// Don't change values, they are stored in DB
-		Modified = 2,		// Don't change values, they are stored in DB
-		Deleted = 3			// Don't change values, they are stored in DB
+		Unknown = 0,  // Don't change values, they are stored in DB
+		Added = 1,    // Don't change values, they are stored in DB
+		Modified = 2, // Don't change values, they are stored in DB
+		Deleted = 3   // Don't change values, they are stored in DB
 	};
 	Q_ENUM(VcsItemAction)
 
@@ -148,11 +149,11 @@ public:
 	 */
 	enum class AnalogFormat
 	{
-		e_9e = 'e',			/**< e_9e = 'e' (0x65/101) Format as [-]9.9e[+|-]999*/
-		E_9E = 'E',			/**< E_9E = 'E' (0x45/69) Format as [-]9.9E[+|-]999*/
-		f_9 = 'f',			/**< f_9 = 'f' (0x66/102) Format as [-]9.9*/
-		g_9_or_9e = 'g',	/**< g_9_or_9e = 'g' (0x67/103) Use 'e' or 'f' format, whichever is the most concise*/
-		G_9_or_9E = 'G'		/**< G_9_or_9E = 'G' (0x47/71) Use E or f format, whichever is the most concise*/
+		e_9e = 'e',      /**< e_9e = 'e' (0x65/101) Format as [-]9.9e[+|-]999*/
+		E_9E = 'E',      /**< E_9E = 'E' (0x45/69) Format as [-]9.9E[+|-]999*/
+		f_9 = 'f',       /**< f_9 = 'f' (0x66/102) Format as [-]9.9*/
+		g_9_or_9e = 'g', /**< g_9_or_9e = 'g' (0x67/103) Use 'e' or 'f' format, whichever is the most concise*/
+		G_9_or_9E = 'G'  /**< G_9_or_9E = 'G' (0x47/71) Use E or f format, whichever is the most concise*/
 	};
 	Q_ENUM(AnalogFormat)
 
@@ -172,15 +173,15 @@ public:
 	 */
 	enum class ColumnData
 	{
-		AppSignalID = 0,			/**< AppSignalID = 0*/
-		CustomSignalID = 1,			/**< CustomSignalID = 1*/
-		Caption = 2,				/**< Caption = 2*/
-		State = 3,					/**< State = 3*/
-		ImpactAppSignalID = 32,		/**< ImpactAppSignalID = 32*/
-		ImpactCustomSignalID = 33,	/**< ImpactCustomSignalID = 33*/
-		ImpactCaption = 34,			/**< ImpactCaption = 34*/
-		ImpactState = 35,			/**< ImpactState = 35*/
-		CustomText = 64				/**< CustomText = 64*/
+		AppSignalID = 0,           /**< AppSignalID = 0*/
+		CustomSignalID = 1,        /**< CustomSignalID = 1*/
+		Caption = 2,               /**< Caption = 2*/
+		State = 3,                 /**< State = 3*/
+		ImpactAppSignalID = 32,    /**< ImpactAppSignalID = 32*/
+		ImpactCustomSignalID = 33, /**< ImpactCustomSignalID = 33*/
+		ImpactCaption = 34,        /**< ImpactCaption = 34*/
+		ImpactState = 35,          /**< ImpactState = 35*/
+		CustomText = 64            /**< CustomText = 64*/
 	};
 	Q_ENUM(ColumnData)
 
@@ -188,9 +189,9 @@ public:
 	//
 	enum SignalType
 	{
-		Analog,			//	0
-		Discrete,		//	1
-		Bus				//  2
+		Analog,   // 0
+		Discrete, // 1
+		Bus       // 2
 	};
 	Q_ENUM(SignalType)
 
@@ -198,11 +199,11 @@ public:
 	{
 		Discrete,
 		Mixed
-		//AnalogFloat32 ???
-		//AnalogSigneInt32 ???
-		//AnalogUnsignedInt32 ???
-		//AnalogSigneInt16 ???
-		//AnalogUnsignedInt16 ???
+		// AnalogFloat32 ???
+		// AnalogSigneInt32 ???
+		// AnalogUnsignedInt32 ???
+		// AnalogSigneInt16 ???
+		// AnalogUnsignedInt16 ???
 	};
 	Q_ENUM(BusDataFormat)
 
@@ -210,11 +211,11 @@ public:
 	//
 	enum class SignalFunction
 	{
-		Input,					// physical input, application logic signal
-		Output,					// physical output, application logic signal
-		Validity,				// input/output validity, application logic signal
-		Diagnostics,			// Diagnostics signal
-		SoftwareCalculated		// Software calculated signal
+		Input,             // physical input, application logic signal
+		Output,            // physical output, application logic signal
+		Validity,          // input/output validity, application logic signal
+		Diagnostics,       // Diagnostics signal
+		SoftwareCalculated // Software calculated signal
 	};
 	Q_ENUM(SignalFunction)
 
@@ -224,7 +225,7 @@ public:
 	{
 		LittleEndian,
 		BigEndian,
-		NoEndian				// Direct write/read byte order is not applicable
+		NoEndian // Direct write/read byte order is not applicable
 	};
 	Q_ENUM(ByteOrder)
 
@@ -241,10 +242,12 @@ public:
 
 	// AnalogAppSignalFormat
 	//
+	/** \brief This enum type defines format of analog application signal.
+	 */
 	enum class AnalogAppSignalFormat
 	{
-		SignedInt32 = static_cast<int>(E::DataFormat::SignedInt),
-		Float32 = static_cast<int>(E::DataFormat::Float)
+		SignedInt32 = static_cast<int>(E::DataFormat::SignedInt), /**< SignedInt32 = 1 (0x01) 32-bit signed integer*/
+		Float32 = static_cast<int>(E::DataFormat::Float)          /**< Float32 = 2 (0x02) 32-bit floating point*/
 	};
 	Q_ENUM(AnalogAppSignalFormat)
 
@@ -252,10 +255,10 @@ public:
 	//
 	enum class ApertureType
 	{
-		RangePercent,			// Aperture is a percent of range from LowEngineeringUnits to HighEngineeringUnits
-		ValuePercent,			// Aperture is a percent of current signal value,
-								// corresponds to obsolete property AdaptiveAperture == true
-		AbsValue,				// Aperture is an absolute value in engineering units
+		RangePercent, // Aperture is a percent of range from LowEngineeringUnits to HighEngineeringUnits
+		ValuePercent, // Aperture is a percent of current signal value,
+					  // corresponds to obsolete property AdaptiveAperture == true
+		AbsValue,     // Aperture is an absolute value in engineering units
 	};
 	Q_ENUM(ApertureType)
 
@@ -274,7 +277,7 @@ public:
 	enum class LogicModuleRamAccess
 	{
 		Undefined = 0x00,
-		Read  = 0x01,
+		Read = 0x01,
 		Write = 0x02,
 		ReadWrite = 0x03
 	};
@@ -319,7 +322,7 @@ public:
 
 	enum ServiceState
 	{
-		Undefined,			// this states used by 'Service Control Manager' only
+		Undefined, // this states used by 'Service Control Manager' only
 		Unavailable,
 
 		Starts,
@@ -390,17 +393,17 @@ public:
 
 		// for platform module
 
-        mV_Type_B = 14,
-        mV_Type_E = 15,
-        mV_Type_J = 16,
-        mV_Type_K = 17,
-        mV_Type_N = 18,
-        mV_Type_R = 19,
-        mV_Type_S = 20,
-        mV_Type_T = 21,
+		mV_Type_B = 14,
+		mV_Type_E = 15,
+		mV_Type_J = 16,
+		mV_Type_K = 17,
+		mV_Type_N = 18,
+		mV_Type_R = 19,
+		mV_Type_S = 20,
+		mV_Type_T = 21,
 
-        mV_Raw_Mul_8 = 22,
-        mV_Raw_Mul_32 = 23,
+		mV_Raw_Mul_8 = 22,
+		mV_Raw_Mul_32 = 23,
 
 		Ohm_Ni50_W1617 = 24,
 		Ohm_Ni100_W1617 = 25,
@@ -493,16 +496,16 @@ public:
 	enum class TimeType
 	{
 		Plant,
-		System,				// server time UTC+0
-		Local,				// server local time
+		System, // server time UTC+0
+		Local,  // server local time
 		ArchiveId
 	};
 	Q_ENUM(TimeType)
 
 	enum class TuningSignalType
 	{
-		AnalogFloat = 0,				// Don't change this values without TuningDataStorage.h/cpp code review
-		AnalogInt32 = 1,				// This values used as indexes in arrays!
+		AnalogFloat = 0, // Don't change this values without TuningDataStorage.h/cpp code review
+		AnalogInt32 = 1, // This values used as indexes in arrays!
 		Discrete = 2
 	};
 	Q_ENUM(TuningSignalType)
@@ -561,7 +564,7 @@ public:
 		Svg,
 		Tags,
 		MatsUsers,
-        Report,
+		Report,
 		ChooseFileDialog,
 		ChooseDirectoryDialog,
 		TuningUi
@@ -648,7 +651,12 @@ public:
 	//
 	enum class ValueViewType
 	{
-		Dec, Hex, Bin32, Bin64, Exp, Count
+		Dec,
+		Hex,
+		Bin32,
+		Bin64,
+		Exp,
+		Count
 	};
 	Q_ENUM(ValueViewType)
 
@@ -664,26 +672,29 @@ public:
 
 	// SchemaItemIndicator Type
 	//
-	enum class IndicatorType	// MUST BE SEQUENTIAL, AS VALUE IS A VECTOR INDEX
+	enum class IndicatorType // MUST BE SEQUENTIAL, AS VALUE IS A VECTOR INDEX
 	{
 		HistogramVert,
 		ArrowIndicator,
 		Trend,
-		//CustomDraw
-		// !!!! COUNT IS DEFINED IN THE NEXT FUNCTION IndicatorTypeCount !!!
+		// CustomDraw
+		//  !!!! COUNT IS DEFINED IN THE NEXT FUNCTION IndicatorTypeCount !!!
 	};
 	Q_ENUM(IndicatorType)
 
 	static const size_t IndicatorTypeCount = 3;
 
+
+	/** \brief This enum type defines comparison types for setpoints.
+	 */
 	enum class CmpType
 	{
-		Equal,
-		Greate,
-		Less,
-		NotEqual,
-		GreateEqual,
-		LessEqual,
+		Equal,        /**< Equal = 0*/
+		Greater,      /**< Greater = 1*/
+		Less,         /**< Less = 2*/
+		NotEqual,     /**< NotEqual = 3*/
+		GreaterEqual, /**< GreaterEqual = 4*/
+		LessEqual,    /**< LessEqual = 5*/
 	};
 	Q_ENUM(CmpType)
 
@@ -733,7 +744,7 @@ public:
 		UnknownTuningClientID,
 		UnknownSignalHash,
 		InternalError,
-		ArchiveError,								// for detail information check archError field
+		ArchiveError, // for detail information check archError field
 		WrongTuningValueType,
 		TuningValueOutOfRange,
 		SingleLmControlDisabled,
@@ -741,7 +752,7 @@ public:
 		ClientIsNotActive,
 		TuningNoReply,
 		TuningValueCorrupted,
-		TuningCommandDenied,						// for ex. tuning command Apply denied for TestSute client
+		TuningCommandDenied, // for ex. tuning command Apply denied for TestSute client
 		UnknownMatsUser,
 		DisabledMatsUser,
 		NoSignalsAllowedToControl,
@@ -758,7 +769,7 @@ public:
 		Discrete
 	};
 	Q_ENUM(DiagSignalType)
-	
+
 	enum class DiagLevel
 	{
 		Message = 0,
@@ -773,7 +784,7 @@ public:
 	{
 		LittleEndian,
 		BigEndian,
-		WordBE_ByteLE	// Words are BigEndian, Bytes in word are LittleEndian
+		WordBE_ByteLE // Words are BigEndian, Bytes in word are LittleEndian
 	};
 	Q_ENUM(DiagByteOrder)
 
@@ -787,7 +798,7 @@ public:
 	Q_ENUM(DiagAnalogFormat)
 
 public:
-	template <typename ENUM_TYPE>
+	template<typename ENUM_TYPE>
 	static QMetaEnum metaEnum()
 	{
 		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
@@ -798,7 +809,7 @@ public:
 
 	// Convert enum value (not index) to QString
 	//
-	template <typename ENUM_TYPE>
+	template<typename ENUM_TYPE>
 	static QString valueToString(int value)
 	{
 		static_assert(std::is_enum<ENUM_TYPE>::value);
@@ -816,7 +827,7 @@ public:
 
 	// Convert enum value (not index) to QString
 	//
-	template <typename ENUM_TYPE>
+	template<typename ENUM_TYPE>
 	static QString valueToString(ENUM_TYPE value)
 	{
 		static_assert(std::is_enum<ENUM_TYPE>::value);
@@ -834,7 +845,7 @@ public:
 
 	// Convert QString to enum value (not index)
 	//
-	template <typename ENUM_TYPE>
+	template<typename ENUM_TYPE>
 	static std::pair<ENUM_TYPE, bool> stringToValue(const QString& str)
 	{
 		bool ok = false;
@@ -843,7 +854,7 @@ public:
 		return {resultVal, ok};
 	}
 
-	template <typename ENUM_TYPE>
+	template<typename ENUM_TYPE>
 	static ENUM_TYPE stringToValue(const QString& str, bool* ok)
 	{
 		static_assert(std::is_enum<ENUM_TYPE>::value);
@@ -870,7 +881,7 @@ public:
 
 		if (ok == nullptr)
 		{
-			assert(false);		// key is not found!
+			assert(false); // key is not found!
 		}
 		else
 		{
@@ -882,7 +893,7 @@ public:
 
 	// Get list of enum values and assigned String
 	//
-	template <typename ENUM_TYPE>
+	template<typename ENUM_TYPE>
 	static std::vector<std::pair<int, QString>> enumValues()
 	{
 		static_assert(std::is_enum<ENUM_TYPE>::value);
@@ -904,7 +915,7 @@ public:
 
 	// Get map of enum values and assigned String
 	//
-	template <typename ENUM_TYPE>
+	template<typename ENUM_TYPE>
 	static std::map<int, QString> enumValuesMap()
 	{
 		static_assert(std::is_enum<ENUM_TYPE>::value);
@@ -926,7 +937,7 @@ public:
 
 	// Get list of enum keys converted to QString
 	//
-	template <typename ENUM_TYPE>
+	template<typename ENUM_TYPE>
 	static QStringList enumKeyStrings()
 	{
 		static_assert(std::is_enum<ENUM_TYPE>::value);
@@ -948,7 +959,7 @@ public:
 
 	// Check if enum containes value
 	//
-	template <typename ENUM_TYPE>
+	template<typename ENUM_TYPE>
 	static bool contains(int value)
 	{
 		static_assert(std::is_enum<ENUM_TYPE>::value);
@@ -969,7 +980,7 @@ public:
 
 	// Builds array of all enum values
 	//
-	template <typename ENUM_TYPE>
+	template<typename ENUM_TYPE>
 	static std::vector<ENUM_TYPE> values()
 	{
 		static_assert(std::is_enum<ENUM_TYPE>::value);
@@ -1000,8 +1011,7 @@ int getSamplePeriodCounter(E::RtTrendsSamplePeriod period, int lmWorkcycle_ms);
 
 typedef QPair<QString, QString> StringPair;
 
-const char* const DataFormatStr[] =
-{
+const char* const DataFormatStr[] = {
 	"Unsigned Int",
 	"Signed Int",
 	"Float",
@@ -1011,7 +1021,7 @@ const char* const DataFormatStr[] =
 #define TO_INT64(value) (static_cast<qint64>(value))
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
 
-template <typename EnumType>
+template<typename EnumType>
 EnumType IntToEnum(int value)
 {
 	return static_cast<EnumType>(value);
@@ -1024,49 +1034,46 @@ enum class OutputMessageLevel
 {
 	Message,
 	Success,
-	Warning2,		// The least important warning
-	Warning1,		// Just warning
-	Warning0,		// The most important warning
+	Warning2, // The least important warning
+	Warning1, // Just warning
+	Warning0, // The most important warning
 	Error
 };
 
 
-const int	WORD_SIZE = 16,
-			DWORD_SIZE = 32,
+const int WORD_SIZE = 16, DWORD_SIZE = 32,
 
-			FLOAT32_SIZE = 32,
-			SIGNED_INT32_SIZE = 32,
+		  FLOAT32_SIZE = 32, SIGNED_INT32_SIZE = 32,
 
-			DISCRETE_SIZE = 1;
+		  DISCRETE_SIZE = 1;
 
-const int	ANALOG_SIZE_W = 2;
+const int ANALOG_SIZE_W = 2;
 
-const int	WORD_SIZE_IN_BYTES = 2;				// WORD size in bytes
+const int WORD_SIZE_IN_BYTES = 2; // WORD size in bytes
 
-const int	SIZE_1BIT = 1;
-const int	SIZE_8BIT = 8;
-const int	SIZE_16BIT = 16;
-const int	SIZE_32BIT = 32;
+const int SIZE_1BIT = 1;
+const int SIZE_8BIT = 8;
+const int SIZE_16BIT = 16;
+const int SIZE_32BIT = 32;
 
-const int	SIZE_1WORD = 1;
-const int	SIZE_2WORD = 2;
+const int SIZE_1WORD = 1;
+const int SIZE_2WORD = 2;
 
-const int	CHANNEL_1 = 0;
-const int	CHANNEL_2 = 1;
-const int	CHANNEL_3 = 2;
-const int	CHANNEL_4 = 3;
+const int CHANNEL_1 = 0;
+const int CHANNEL_2 = 1;
+const int CHANNEL_3 = 2;
+const int CHANNEL_4 = 3;
 
-const int	MIN_CHANNEL_COUNT = 1;
-const int	MAX_CHANNEL_COUNT = static_cast<int>(E::values<E::Channel>().size());
+const int MIN_CHANNEL_COUNT = 1;
+const int MAX_CHANNEL_COUNT = static_cast<int>(E::values<E::Channel>().size());
 
 // SchemaUnit
 //
 enum class SchemaUnit
 {
-	Display,			// display pixels
-	Millimeter,			// mm
-	Inch				// inches
+	Display,    // display pixels
+	Millimeter, // mm
+	Inch        // inches
 };
 
 Q_DECLARE_METATYPE(SchemaUnit)
-

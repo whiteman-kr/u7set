@@ -775,7 +775,7 @@ TEST(AppSignalManagerTests, equipmentToAppSignalId)
 	return;
 }
 
-TEST(AppSignalManagerTests, setpointsByInputSignalId)
+TEST(AppSignalManagerTests, setpointsByInput)
 {
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
@@ -815,8 +815,8 @@ TEST(AppSignalManagerTests, setpointsByInputSignalId)
 
 	sm.setSetpoints(cs);
 
-	auto sp1_comparators = sm.setpointsByInputSignalId(sp1.appSignalId());
-	auto sp2_comparators = sm.setpointsByInputSignalId(sp2.appSignalId());
+	auto sp1_comparators = sm.setpointsByInput(sp1.appSignalId());
+	auto sp2_comparators = sm.setpointsByInput(sp2.appSignalId());
 
 	ASSERT_EQ(sp1_comparators.size(), 2);
 	ASSERT_TRUE((sp1_comparators[0]->label() == "cmp_sp1_1" && sp1_comparators[1]->label() == "cmp_sp1_2") ||

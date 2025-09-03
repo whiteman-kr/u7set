@@ -119,7 +119,8 @@ namespace Sim
 
 		// Implementing IAppSignalManager - Setpoints/Comparators
 		//
-		virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
+		[[nodiscard]] virtual std::vector<std::shared_ptr<Comparator>> setpointsByInput(const QString& appSignalId) const override;
+		[[nodiscard]] virtual std::shared_ptr<Comparator> setpointByOutput(const QString& appSignalId) const override final;
 
 		// Tags
 		//

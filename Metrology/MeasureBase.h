@@ -434,7 +434,7 @@ namespace Measure
 		QString m_outputAppSignalID;
 
 		Metrology::CmpValueType m_cmpValueType = Metrology::CmpValueType::NoCmpValueType;
-		E::CmpType m_cmpType = E::CmpType::Greate;
+		E::CmpType m_cmpType = E::CmpType::Greater;
 	};
 
 	// ==============================================================================================

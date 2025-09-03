@@ -1,5 +1,5 @@
-#include <VFrame30/AppSignalController.h>
 #include "../AppSignalLib/ComparatorSet.h"
+#include <VFrame30/AppSignalController.h>
 
 namespace VFrame30
 {
@@ -78,9 +78,14 @@ namespace VFrame30
 		return signalHasTag(::calcHash(appSignalId), tag);
 	}
 
-	std::vector<std::shared_ptr<Comparator>> AppSignalController::setpointsByInputSignalId(const QString& appSignalId) const
+	std::vector<std::shared_ptr<Comparator>> AppSignalController::setpointsByInput(const QString& appSignalId) const
 	{
-		return m_appSignalManager.setpointsByInputSignalId(appSignalId);
+		return m_appSignalManager.setpointsByInput(appSignalId);
+	}
+
+	std::shared_ptr<Comparator> AppSignalController::setpointsByOutput(const QString& appSignalId) const
+	{
+		return m_appSignalManager.setpointByOutput(appSignalId);
 	}
 
 	IAppSignalManager& AppSignalController::appSignalManager()
@@ -176,7 +181,7 @@ namespace VFrame30
 			Q_ASSERT(engine);
 			return result;
 		}
-		
+
 		result = engine->toScriptValue(s);
 		return result;
 	}
@@ -222,9 +227,7 @@ namespace VFrame30
 		bool ok = false;
 		E::SignalType type = m_appSignalManager.signalType(::calcHash(signalId), &ok);
 
-		return ok ?
-				   (type == E::SignalType::Discrete) :
-				   false;
+		return ok ? (type == E::SignalType::Discrete) : false;
 	}
 
 	bool ScriptAppSignalController::isAnalog(QString signalId) const
@@ -232,9 +235,7 @@ namespace VFrame30
 		bool ok = false;
 		E::SignalType type = m_appSignalManager.signalType(::calcHash(signalId), &ok);
 
-		return ok ?
-					(type == E::SignalType::Analog) :
-					false;
+		return ok ? (type == E::SignalType::Analog) : false;
 	}
 
 	int ScriptAppSignalController::precision(QString signalId) const
@@ -251,4 +252,47 @@ namespace VFrame30
 		return m_appSignalManager.signalIdsByTag(tag);
 	}
 
-}
+	QJSValueList ScriptAppSignalController::setpointsByInput(QString signalId) const
+	{
+		QJSValueList result;
+
+		QJSEngine* engine = qjsEngine(this);
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return result;
+		}
+
+		std::vector<std::shared_ptr<Comparator>> setpoints = m_appSignalManager.setpointsByInput(signalId);
+		result.reserve(setpoints.size());
+
+		for (const auto& sp : setpoints)
+		{
+			result.push_back(engine->toScriptValue(*sp));
+		}
+
+		return result;
+	}
+
+	QJSValue ScriptAppSignalController::setpointByOutput(QString signalId) const
+	{
+		QJSValue result;
+
+		QJSEngine* engine = qjsEngine(this);
+		if (engine == nullptr)
+		{
+			Q_ASSERT(engine);
+			return result;
+		}
+
+		std::shared_ptr<Comparator> sp = m_appSignalManager.setpointByOutput(signalId);
+		if (sp != nullptr)
+		{
+			assert(sp->output().appSignalID() == signalId);
+			result = engine->toScriptValue(*sp);
+		}
+
+		return result;
+	}
+
+} // namespace VFrame30

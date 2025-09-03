@@ -3790,7 +3790,7 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	return docPoint;
 }
 
-void EditSchemaWidget::movePosConnectionEndPoint(SchemaItemPtr schemaItem, EditConnectionLine* ecl, QPointF toPoint)
+void EditSchemaWidget::movePosConnectionEndPoint([[maybe_unused]] SchemaItemPtr schemaItem, EditConnectionLine* ecl, QPointF toPoint)
 {
 	assert(schemaItem);
 	assert(ecl);

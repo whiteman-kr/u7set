@@ -511,7 +511,7 @@ void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
 	return;
 }
 
-void DiagSchemaWidget::signalInfo(QString appSignalId)
+void DiagSchemaWidget::signalInfo(QString /*appSignalId*/)
 {
 	// TODO: DiagSignalInfo::showDialog
 	//MonitorSignalInfo::showDialog(appSignalId,
