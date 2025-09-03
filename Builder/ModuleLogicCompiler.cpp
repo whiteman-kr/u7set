@@ -2046,11 +2046,15 @@ namespace Builder
 				continue;
 			}
 
-			if (appSignal->enableTuning() == true &&
-				m_ualItemsSignals.contains(appSignalIdHash) == true)
+			if (appSignal->enableTuning() == true)
 			{
 				Q_ASSERT(appSignal->isInternal() == true || appSignal->isOutput() == true);
 				m_ualSignals.createSignal(appSignal);
+
+				if (m_ualItemsSignals.contains(appSignalIdHash) == false)
+				{
+					m_unusedTuningSignals.insert(appSignalIdHash);
+				}
 				continue;
 			}
 		}
@@ -5225,8 +5229,7 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(signal);
 
-			if (signal->enableTuning() == false ||
-				m_ualItemsSignals.contains(calcHash(signal->appSignalID())) == false)
+			if (signal->enableTuning() == false)
 			{
 				continue;
 			}
@@ -5620,7 +5623,7 @@ namespace Builder
 		//	+ discrete
 		//	+ internal
 		//	+ tunable
-		//	+ used in UAL
+		//	+ no matter used in UAL
 
 		QVector<AppSignal*> tuningSignals;
 
@@ -5631,11 +5634,6 @@ namespace Builder
 		for(AppSignal* s : tuningSignals)
 		{
 			TEST_PTR_CONTINUE(s);
-
-			if (m_ualItemsSignals.contains(calcHash(s->appSignalID())) == false)
-			{
-				continue;
-			}
 
 			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
 
@@ -5954,7 +5952,7 @@ namespace Builder
 		//	+ discrete
 		//	+ internal
 		//	+ tunable
-		//	+ used in UAL
+		//	+ no matter used in UAL
 
 		QVector<AppSignal*> tuningSignals;
 
@@ -5965,11 +5963,6 @@ namespace Builder
 		for(AppSignal* s : tuningSignals)
 		{
 			TEST_PTR_CONTINUE(s);
-
-			if (m_ualItemsSignals.contains(calcHash(s->appSignalID())) == false)
-			{
-				continue;
-			}
 
 			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
 
@@ -17368,14 +17361,15 @@ namespace Builder
 
 			if (s->isInternal() == true &&
 				s->reserved() == false &&
-				s->isSwCalculated() == false &&
-				m_ualSignals.contains(s->appSignalID()) == false)
+				s->isSwCalculated() == false)
 			{
-				if (s->enableTuning() == false)
+				if (m_ualSignals.contains(s->appSignalID()) == false)
 				{
 					m_log->wrnALC5148(s->appSignalID());
 				}
-				else
+
+				if (s->enableTuning() == true &&
+					m_unusedTuningSignals.contains(calcHash(s->appSignalID())) == true)
 				{
 					m_log->wrnALC5207(s->appSignalID());
 				}
