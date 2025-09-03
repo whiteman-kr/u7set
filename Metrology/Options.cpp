@@ -2102,6 +2102,60 @@ QString OT::LanguageParamCaption(OT::LanguageParam param)
 	return qApp->translate("Options", caption.toUtf8());
 }
 
+// Language initialization
+// Ovcharenko 02.09.25 "addition of the Ukrainian language"
+// -------------------------------------------------------------------------------------------------------------------
+
+void Options::loadTranslators() const
+{
+	//
+
+	static const std::map<OT::LanguageType, QString> langMap = {{OT::LanguageType::English, "en"},
+																{OT::LanguageType::Russian, "ru"},
+																{OT::LanguageType::Ukrainian, "uk"}};
+
+	OT::LanguageType langType = theOptions.language().languageType();
+
+	static QTranslator translatorMetrology;
+	static QTranslator translatorUiLib;
+
+	if (langMap.find(langType) != langMap.end() && langType != OT::LanguageType::English)
+	{
+		QString suffix = langMap.at(langType);
+
+		QString metrologyFile = QApplication::applicationDirPath() + "/translations/Metrology_" + suffix + ".qm";
+		if (translatorMetrology.load(metrologyFile))
+		{
+			qApp->installTranslator(&translatorMetrology);
+		}
+		else
+		{
+			QMessageBox::warning(nullptr,
+								 QObject::tr("Language load error"),
+								 QString("Didn't load Metrology language file:\n%1").arg(metrologyFile));
+		}
+
+		if (langType != OT::LanguageType::Russian)
+		{
+			QString uiLibFile = QApplication::applicationDirPath() + "/translations/UiLib_" + suffix + ".qm";
+			if (translatorUiLib.load(uiLibFile))
+			{
+				qApp->installTranslator(&translatorUiLib);
+			}
+			else
+			{
+				QMessageBox::warning(nullptr,
+									 QObject::tr("Language load error"),
+									 QString("Didn't load UiLib language file:\n%1").arg(uiLibFile));
+			}
+		}
+	}
+	else
+	{
+		qDebug() << "Using default English, no translator loaded.";
+	}
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------

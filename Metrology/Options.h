@@ -1311,6 +1311,8 @@ public:
 	LanguageOption& language() { return m_language; }
 	void setLanguage(const LanguageOption& language) { m_language = language; }
 
+	void loadTranslators() const;
+	
 	//
 	//
 	void load();
