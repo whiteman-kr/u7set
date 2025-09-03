@@ -98,4 +98,4 @@ namespace ClientLib
 	{
 		return m_previousState;
 	}
-}
+} // namespace ClientLib

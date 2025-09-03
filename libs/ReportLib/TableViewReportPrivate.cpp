@@ -457,6 +457,17 @@ namespace ReportLib
 		m_selectedRows(selectedRows)
 	{
 	}
+
+	TableViewReportPrivate::~TableViewReportPrivate()
+	{
+		if (m_worker != nullptr)	
+		{
+			// Worker is deleted by desctructor in case if Worker thread was not executed.
+			// If it was executed, worker is deleted by own thread.
+			delete m_worker;
+			m_worker = nullptr;
+		}
+	}
 	
 	void TableViewReportPrivate::printTable()
 	{
@@ -724,6 +735,7 @@ namespace ReportLib
 							 dialogProgress.exit();
 
 							 m_worker->deleteLater();
+							 m_worker = nullptr;	// Worker will not be deleted by desctructor of TableViewReportPrivate as it lives on own thread
 						 });
 
 		// Start thread

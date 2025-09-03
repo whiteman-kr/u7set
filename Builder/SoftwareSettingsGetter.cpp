@@ -1931,6 +1931,23 @@ bool MonitorSettingsGetter::readSettings(const Builder::Context* context,
 	result = readTuningServiceSettings(context, software);
 	RETURN_IF_FALSE(result);
 
+	// SignalLog
+	//
+	result &= DeviceHelper::getBoolProperty(software, "SignalLogEnable", &signalLogEnable, log);
+	result &= DeviceHelper::getStrProperty(software, "SignalLogTagCritical", &signalLogTagCritical, log);
+	result &= DeviceHelper::getStrProperty(software, "SignalLogTagWarning", &signalLogTagWarning, log);
+
+	//
+	// statusFlagFunction
+	//
+
+	int value = 0;
+	result &= DeviceHelper::getIntProperty(software, EquipmentPropNames::STATUS_FLAG_FUNCTION, &value, log);
+	if (result == true)
+	{
+		statusFlagFunction = static_cast<TuningClientSettings::LmStatusFlagMode>(value);
+	}
+
 	return result;
 }
 

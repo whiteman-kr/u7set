@@ -34,7 +34,7 @@ DialogSetpointDetails::DialogSetpointDetails(QWidget* parent, IAppSignalManager*
 
 	switch (c->cmpType())
 	{
-	case E::CmpType::Greate:
+	case E::CmpType::Greater:
 		s += tr("Type: <b>&gt; (Greater)</b><br>");
 		break;
 	case E::CmpType::Less:
@@ -46,7 +46,7 @@ DialogSetpointDetails::DialogSetpointDetails(QWidget* parent, IAppSignalManager*
 	case E::CmpType::NotEqual:
 		s += tr("Type: <b>&lt;&gt; (Not Equal)</b><br>");
 		break;
-	case E::CmpType::GreateEqual:
+	case E::CmpType::GreaterEqual:
 		s += tr("Type: <b>&gt;= (Greater or Equal)</b><br>");
 		break;
 	case E::CmpType::LessEqual:
@@ -1766,7 +1766,7 @@ void DialogSignalInfo::fillSetpoints()
 	columns << tr("Schema");
 	ui->treeSetpoints->setHeaderLabels(columns);
 
-	m_setpoints = m_appSignalManager->setpointsByInputSignalId(m_signal.appSignalId());
+	m_setpoints = m_appSignalManager->setpointsByInput(m_signal.appSignalId());
 
 	for (int i = 0; i < m_setpoints.size(); i++)
 	{
@@ -1810,7 +1810,7 @@ void DialogSignalInfo::fillSetpoints()
 
 		switch (c->cmpType())
 		{
-		case E::CmpType::Greate:
+		case E::CmpType::Greater:
 			item->setText(static_cast<int>(SetpointsColumns::Type), ">");
 			break;
 		case E::CmpType::Equal:
@@ -1822,7 +1822,7 @@ void DialogSignalInfo::fillSetpoints()
 		case E::CmpType::NotEqual:
 			item->setText(static_cast<int>(SetpointsColumns::Type), "<>");
 			break;
-		case E::CmpType::GreateEqual:
+		case E::CmpType::GreaterEqual:
 			item->setText(static_cast<int>(SetpointsColumns::Type), ">=");
 			break;
 		case E::CmpType::LessEqual:
@@ -2164,8 +2164,7 @@ void DialogSignalInfo::updateTuningSignalState()
 
 	// Enable/disable controls
 
-	bool controlEnabled = tuningSignalState.valid() == true && tuningSignalState.controlIsEnabled() == true; // &&
-	// tuningSignalState.writingIsEnabled() == true;	// This flag is not always used! ???
+	bool controlEnabled = tuningSignalState.writingIsEnabled() == true;
 
 	if (m_tuningAuthorization.enabled() == true)
 	{

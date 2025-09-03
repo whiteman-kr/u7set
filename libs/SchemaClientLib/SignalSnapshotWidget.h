@@ -134,7 +134,7 @@ namespace SchemaClientLib
 		void updateTableItems();
 
 		void maskChanged(bool addToCompleter);
-		void tagsChanged();
+		void tagsChanged(bool addToCompleter);
 
 	signals:
 		void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
@@ -196,7 +196,6 @@ namespace SchemaClientLib
 		bool m_storeType = true;
 		bool m_storeRole = true;
 		bool m_storeMaskData = true;
-		bool m_storeTags = true;
 
 		static inline SnapshotSignalType m_storedType{SnapshotSignalType::Any};
 		static inline SnapshotSignalRole m_storedRole{SnapshotSignalRole::Any};

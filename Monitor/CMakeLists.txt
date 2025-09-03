@@ -77,6 +77,8 @@ set (MONITOR_SOURCES
 	ScriptMonitorApplication.h
 	SelectSchemaWidget.cpp
 	SelectSchemaWidget.h
+	SignalLogDialog.cpp
+	SignalLogDialog.h
 	Trend/ArchiveTrendTcpClient.cpp
 	Trend/ArchiveTrendTcpClient.h
 	Trend/MonitorTrendArchiveConnections.cpp

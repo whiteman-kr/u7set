@@ -2,8 +2,8 @@
 	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include <ClientLib/TuningConnection.h>
 #include "TuningConnectionPrivate.h"
+#include <ClientLib/TuningConnection.h>
 
 namespace ClientLib
 {

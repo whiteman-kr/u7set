@@ -6,9 +6,13 @@ namespace ClientLib
 	// TuningLog
 	//
 
-	TuningLog::TuningLog(ITuningAuthorization& tuningAuthorization, const QString& logName, const QString& path, int maxFileSize, int maxFilesCount)
-		: m_logFile(logName, path, maxFileSize, maxFilesCount, false/*addAppInfoOnStart*/),
-		  m_tuningAuthorization(tuningAuthorization)
+	TuningLog::TuningLog(ITuningAuthorization& tuningAuthorization,
+						 const QString& logName,
+						 const QString& path,
+						 int maxFileSize,
+						 int maxFilesCount) :
+		m_logFile(logName, path, maxFileSize, maxFilesCount, false /*addAppInfoOnStart*/),
+		m_tuningAuthorization(tuningAuthorization)
 	{
 	}
 
@@ -43,7 +47,7 @@ namespace ClientLib
 
 		if (userName.isEmpty() == true)
 		{
-			l <<  QObject::tr("UnknownUser");
+			l << QObject::tr("UnknownUser");
 		}
 		else
 		{
@@ -57,17 +61,17 @@ namespace ClientLib
 
 	void TuningLog::viewTuningLog(QWidget* parent)
 	{
-        QStringList headers;
-        headers.reserve(6);
+		QStringList headers;
+		headers.reserve(6);
 
-		headers.emplace_back( QObject::tr("User"));
-		headers.emplace_back( QObject::tr("EquipmentID/Message"));
-		headers.emplace_back( QObject::tr("CustomAppSignalID"));
-		headers.emplace_back( QObject::tr("Old Value"));
-		headers.emplace_back( QObject::tr("New Value"));
-        headers.emplace_back(QString());
+		headers.emplace_back(QObject::tr("User"));
+		headers.emplace_back(QObject::tr("EquipmentID/Message"));
+		headers.emplace_back(QObject::tr("CustomAppSignalID"));
+		headers.emplace_back(QObject::tr("Old Value"));
+		headers.emplace_back(QObject::tr("New Value"));
+		headers.emplace_back(QString());
 
-		m_logFile.view(parent, false/*showType*/, true/*headerVisible*/, headers);
+		m_logFile.view(parent, false /*showType*/, true /*headerVisible*/, headers);
 	}
 
 	bool TuningLogStub::write(const AppSignalParam& /*asp*/, const TuningValue& /*oldValue*/, const TuningValue& /*newValue*/)
@@ -80,8 +84,5 @@ namespace ClientLib
 		return true;
 	}
 
-	void TuningLogStub::viewTuningLog(QWidget* /*parent*/)
-	{
-
-	}
-}
+	void TuningLogStub::viewTuningLog(QWidget* /*parent*/) {}
+} // namespace ClientLib

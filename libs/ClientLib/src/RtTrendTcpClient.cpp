@@ -8,7 +8,7 @@ namespace
 
 	thread_local Network::RtTrendsGetStateChangesRequest tl_stateChangesRequest;
 	thread_local Network::RtTrendsGetStateChangesReply tl_stateChangesReply;
-}
+} // namespace
 
 
 namespace ClientLib
@@ -30,11 +30,12 @@ namespace ClientLib
 		m_logFile.writeMessage("RtTrendTcpClient::RtTrendTcpClient(), address " + serverAddressPort.toString());
 		qDebug() << "RtTrendTcpClient::RtTrendTcpClient(...), address " << serverAddressPort.toString();
 
-		connect(this, &Tcp::Client::signal_wrongServerID,
-			[this](const QString& errorMessage)
-			{
-				m_logFile.writeError(errorMessage);
-			});
+		connect(this,
+				&Tcp::Client::signal_wrongServerID,
+				[this](const QString& errorMessage)
+				{
+					m_logFile.writeError(errorMessage);
+				});
 
 		return;
 	}
@@ -255,7 +256,8 @@ namespace ClientLib
 		if (error != 0)
 		{
 			emit requestError(QString::fromStdString(tl_managementReply.errorstring()));
-			m_logFile.writeError(QString("processTrendManagement, error received ") + QString::fromStdString(tl_managementReply.errorstring()));
+			m_logFile.writeError(QString("processTrendManagement, error received ") +
+								 QString::fromStdString(tl_managementReply.errorstring()));
 
 			closeConnection();
 			return;
@@ -316,12 +318,12 @@ namespace ClientLib
 		std::shared_ptr<TrendLib::RealtimeData> realtimeData = std::make_shared<TrendLib::RealtimeData>();
 		std::map<Hash, TrendLib::RealtimeDataChunk> realtimeDataBySignals;
 
-		TrendLib::TrendStateItem minState{};	// Initialized by zeroes
-		TrendLib::TrendStateItem maxState{};	// Initialized by zeroes
+		TrendLib::TrendStateItem minState{}; // Initialized by zeroes
+		TrendLib::TrendStateItem maxState{}; // Initialized by zeroes
 
 		int stateCount = tl_stateChangesReply.signalstates_size();
 
-		//qDebug() << "RtTrendTcpClient::processTrendStateChanges: Received states  " << stateCount;
+		// qDebug() << "RtTrendTcpClient::processTrendStateChanges: Received states  " << stateCount;
 
 		for (int i = 0; i < stateCount; i++)
 		{
@@ -368,7 +370,8 @@ namespace ClientLib
 			realtimeData->signalData.push_back(std::move(chunk));
 		}
 
-		// signal dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState);
+		// signal dataReady(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem
+		// maxState);
 		//
 		if (realtimeData->signalData.empty() == false)
 		{
@@ -421,7 +424,7 @@ namespace ClientLib
 	void RtTrendTcpClient::incStatRequestCount()
 	{
 		m_statMutex.lock();
-		m_stat.requestCount ++;
+		m_stat.requestCount++;
 		m_statMutex.unlock();
 		return;
 	}
@@ -429,8 +432,8 @@ namespace ClientLib
 	void RtTrendTcpClient::incStatReplyCount()
 	{
 		m_statMutex.lock();
-		m_stat.replyCount ++;
+		m_stat.replyCount++;
 		m_statMutex.unlock();
 		return;
 	}
-}
+} // namespace ClientLib

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <map>
+#include <vector>
 
 #include <QReadWriteLock>
 
@@ -21,7 +21,8 @@ namespace ClientLib
 	//				|						   |	Repeat it
 	//				+--------------------------+
 	//
-	class TcpAppSourcesState : public Tcp::Client, public TcpClientStatistics
+	class TcpAppSourcesState : public Tcp::Client,
+							   public TcpClientStatistics
 	{
 		Q_OBJECT
 
@@ -32,6 +33,7 @@ namespace ClientLib
 		std::vector<ClientLib::AppDataSourceState> appDataSourceStates() const;
 
 		int sourceErrorCount();
+
 	public:
 		virtual void onClientThreadStarted() override;
 		virtual void onClientThreadFinished() override;
@@ -59,8 +61,8 @@ namespace ClientLib
 	private:
 		int m_requestPeriod = 100;
 
-		mutable QReadWriteLock m_appDataSourceStatesLock;	// For access to m_appDataSourceStates
-		std::map<quint64, AppDataSourceState> m_appDataSourceStates;	// Key is source unique id
+		mutable QReadWriteLock m_appDataSourceStatesLock;            // For access to m_appDataSourceStates
+		std::map<quint64, AppDataSourceState> m_appDataSourceStates; // Key is source unique id
 
 		// Cache protobuf messages
 		//
@@ -68,4 +70,4 @@ namespace ClientLib
 		::Network::GetAppDataSourcesStatesReply m_getAppDataSourcesStateReply;
 	};
 
-}
+} // namespace ClientLib

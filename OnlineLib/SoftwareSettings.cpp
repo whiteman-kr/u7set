@@ -1709,9 +1709,25 @@ bool MonitorSettings::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeEndElement();			// </TuningSecurity>
 
+	// <SignalLog>
+	//
+	xml.writeStartElement(XmlElement::SIGNAL_LOG);
+
+	xml.writeBoolAttribute(EquipmentPropNames::ENABLE, signalLogEnable);
+	xml.writeStringAttribute(XmlElement::SIGNAL_LOG_ATTRIBUTE_TAG_CRITICAL, signalLogTagCritical.trimmed());
+	xml.writeStringAttribute(XmlElement::SIGNAL_LOG_ATTRIBUTE_TAG_WARNING, signalLogTagWarning.trimmed());
+
+	xml.writeEndElement(); // </SignalLog>
+
+	// <Appearance>
+	//
+	xml.writeStartElement(XmlElement::APPEARANCE);
+	xml.writeIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, static_cast<int>(statusFlagFunction));
+	xml.writeEndElement(); // </Appearance>
+
 	// --
 	//
-	writeEndSettings(xml);;			// </Settings>
+	writeEndSettings(xml);			// </Settings>
 
 	return true;
 }
@@ -1875,6 +1891,27 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 
 			xml.skipCurrentElement();
 			continue;
+		}
+
+		if (xml.name() == XmlElement::SIGNAL_LOG)
+		{
+			result &= xml.readBoolAttribute(EquipmentPropNames::ENABLE, &signalLogEnable);
+			result &= xml.readStringAttribute(XmlElement::SIGNAL_LOG_ATTRIBUTE_TAG_CRITICAL, &signalLogTagCritical);
+			result &= xml.readStringAttribute(XmlElement::SIGNAL_LOG_ATTRIBUTE_TAG_WARNING, &signalLogTagWarning);
+
+			xml.skipCurrentElement();
+			continue;
+		}
+
+		if (xml.name() == XmlElement::APPEARANCE)
+		{
+			int value = 0;
+			bool resultStatusFlagFunction = xml.readIntAttribute(EquipmentPropNames::STATUS_FLAG_FUNCTION, &value);
+			if (resultStatusFlagFunction == true)
+			{
+				statusFlagFunction = static_cast<LmStatusFlagMode>(value);
+			}
+			result &= resultStatusFlagFunction;
 		}
 
 		// Unknown element

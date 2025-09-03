@@ -272,6 +272,10 @@ namespace XmlElement
 
 	inline const QString APP_DATA_SERVICES("AppDataServices");
 
+	inline const QString SIGNAL_LOG("SignalLog");
+	inline const QString SIGNAL_LOG_ATTRIBUTE_TAG_CRITICAL("TagCritical");
+	inline const QString SIGNAL_LOG_ATTRIBUTE_TAG_WARNING("TagWarning");
+
 	inline const QString TUNING_SECURITY("TuningSecurity");
 	
 	inline const QString TESTING_SETTINGS("TestingSettings");

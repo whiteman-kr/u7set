@@ -3,6 +3,9 @@
 #endif
 
 #include "TcpSignalClient.h"
+#include "../AppSignalLib/DiscretesLogRecord.h"
+
+#include <ClientLib/SignalLog.h>
 
 
 namespace
@@ -20,6 +23,8 @@ namespace
 
 	thread_local ::Network::GetAppSignalStateRequest tl_getSignalStateRequest;
 	thread_local ::Network::GetAppSignalStateReply tl_getSignalStateReply;
+
+	thread_local ::Network::GetDiscretesLogReply tl_getDiscretesLogReply;
 } // namespace
 
 namespace ClientLib
@@ -27,12 +32,14 @@ namespace ClientLib
 	TcpSignalClient::TcpSignalClient(const SoftwareInfo& softwareInfo,
 									 const SoftwareEndpoint::AppDataService& adsInfo,
 									 IAppSignalUpdater& signalUpdater,
+									 SignalLog& signalLog,
 									 ILogFile* logFile) :
 		Tcp::Client(softwareInfo, adsInfo.address, "TcpSignalClient", adsInfo.equipmentId),
 		TcpClientStatistics(this),
 		HasLogFile(logFile, QString("ADS ") + adsInfo.shortenId),
 		m_serverSettings(adsInfo),
-		m_signalUpdater(signalUpdater)
+		m_signalUpdater(signalUpdater),
+		m_signalLog(signalLog)
 	{
 		setObjectName("TcpSignalClient " + adsInfo.equipmentId);
 
@@ -131,6 +138,10 @@ namespace ClientLib
 
 		case ADS_GET_APP_SIGNAL_STATE:
 			processSignalState(data);
+			break;
+
+		case ADS_GET_DISCRETES_LOG:
+			processSignalLog(data);
 			break;
 
 		default:
@@ -579,6 +590,55 @@ namespace ClientLib
 		}
 
 		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
+
+		requestSignalLog();
+		return;
+	}
+
+	void TcpSignalClient::requestSignalLog()
+	{
+		Q_ASSERT(isClearToSendRequest());
+
+		if (m_signalLog.enabled() == true)
+		{
+			sendRequest(ADS_GET_DISCRETES_LOG);
+		}
+		else
+		{
+			resetToGetState(false);
+		}
+
+		return;
+	}
+
+	void TcpSignalClient::processSignalLog(const QByteArray& data)
+	{
+		bool ok = tl_getDiscretesLogReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+		if (ok == false)
+		{
+			Q_ASSERT(ok);
+			resetToGetState(false);
+			return;
+		}
+
+#if 0
+		int pendingRecordsCount = tl_getDiscretesLogReply.pendingrecordscount();
+#endif
+
+		std::vector<DiscretesLogRecord> records;
+
+		std::transform(tl_getDiscretesLogReply.discreteslogrecord().begin(),
+					   tl_getDiscretesLogReply.discreteslogrecord().end(),
+					   std::back_inserter(records),
+					   [](const Network::DiscretesLogRecord& logRecord)
+					   {
+						   DiscretesLogRecord record;
+						   record.loadFromProto(logRecord);
+						   return record;
+					   });
+
+		m_signalLog.add(m_serverSettings.equipmentId, records);
+		m_signalLog.deleteUpTo(m_serverSettings.equipmentId, tl_getDiscretesLogReply.logfirstrecordid());
 
 		resetToGetState(false);
 		return;

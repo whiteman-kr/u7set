@@ -193,9 +193,14 @@ namespace Sim
 		return m_impl.equipmentToAppSignalId(equipmentId);
 	}
 
-	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& appSignalId) const
+	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInput(const QString& appSignalId) const
 	{
-		return m_impl.setpointsByInputSignalId(appSignalId);
+		return m_impl.setpointsByInput(appSignalId);
+	}
+
+	std::shared_ptr<Comparator> AppSignalManager::setpointByOutput(const QString& appSignalId) const
+	{
+		return m_impl.setpointByOutput(appSignalId);
 	}
 
 	QStringList AppSignalManager::tags() const

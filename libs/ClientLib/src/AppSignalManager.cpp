@@ -1,5 +1,5 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
 #include <ClientLib/AppSignalManager.h>
@@ -41,7 +41,7 @@ namespace ClientLib
 			m_states.clear();
 		}
 
-		m_setpoints.clear();	// m_setpoints is threadself itslef
+		m_setpoints.clear(); // m_setpoints is threadself itslef
 
 		// --
 		//
@@ -81,7 +81,7 @@ namespace ClientLib
 	{
 		QWriteLocker wl(&m_statesLocker);
 
-		for (auto&[signalHash, source] : m_states)
+		for (auto& [signalHash, source] : m_states)
 		{
 			source.invalidateSource(sourceThreadId);
 		}
@@ -185,7 +185,7 @@ namespace ClientLib
 		}
 
 		filterByDataService(appDataServiceId, result);
-	
+
 		return result;
 	}
 
@@ -257,9 +257,12 @@ namespace ClientLib
 	bool AppSignalManager::signalsExist(const QStringList& signalIds) const
 	{
 		QReadLocker rl(&m_paramsLocker);
-		return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
-			return m_signalParams.contains(::calcHash(appSignalId));
-		});
+		return std::all_of(signalIds.begin(),
+						   signalIds.end(),
+						   [this](const QString& appSignalId)
+						   {
+							   return m_signalParams.contains(::calcHash(appSignalId));
+						   });
 	}
 
 	AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
@@ -365,7 +368,10 @@ namespace ClientLib
 		return signalState(appSignalIds, {}, result, found);
 	}
 
-	void AppSignalManager::signalState(std::span<const Hash> appSignalHashes, Hash dataServerHash, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManager::signalState(std::span<const Hash> appSignalHashes,
+									   Hash dataServerHash,
+									   std::vector<AppSignalState>* result,
+									   int* found) const
 	{
 		if (result == nullptr)
 		{
@@ -398,7 +404,7 @@ namespace ClientLib
 						result->push_back(foundState->second.getForDataServer(dataServerHash));
 					}
 
-					foundCount ++;
+					foundCount++;
 				}
 				else
 				{
@@ -420,7 +426,10 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::signalState(std::span<const QString> appSignalIds, const QString& dataServerId, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManager::signalState(std::span<const QString> appSignalIds,
+									   const QString& dataServerId,
+									   std::vector<AppSignalState>* result,
+									   int* found) const
 	{
 		std::vector<Hash> appSignalHashes;
 		appSignalHashes.reserve(appSignalIds.size());
@@ -442,8 +451,7 @@ namespace ClientLib
 
 		QReadLocker rl(&m_paramsLocker);
 
-		if (auto it = m_signalParams.find(signalHash);
-			it != m_signalParams.end())
+		if (auto it = m_signalParams.find(signalHash); it != m_signalParams.end())
 		{
 			result = it->second.tagStringList();
 		}
@@ -480,9 +488,7 @@ namespace ClientLib
 			*found = (result != m_signalParams.end());
 		}
 
-		return result == m_signalParams.end() ?
-					E::SignalType::Discrete :
-					result->second.type();
+		return result == m_signalParams.end() ? E::SignalType::Discrete : result->second.type();
 	}
 
 	QStringList AppSignalManager::signalIdsByTag(const QString& tag) const
@@ -522,19 +528,14 @@ namespace ClientLib
 		return result;
 	}
 
-	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& appSignalId) const
+	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInput(const QString& appSignalId) const
 	{
-		std::vector<std::shared_ptr<Comparator>> comparators = m_setpoints.getByInputSignalID(appSignalId);
+		return m_setpoints.getByInputSignalID(appSignalId);
+	}
 
-		std::vector<std::shared_ptr<Comparator>> result;
-		result.reserve(comparators.size());
-
-		for (const auto& c : comparators)
-		{
-			result.push_back(c);
-		}
-
-		return result;
+	std::shared_ptr<Comparator> AppSignalManager::setpointByOutput(const QString& appSignalId) const
+	{
+		return m_setpoints.getByOutputSignalID(appSignalId);
 	}
 
 	/// Get AppDataService EquipmentIDs list by AppSignalID.
@@ -593,9 +594,11 @@ namespace ClientLib
 
 		// Filter all signals which are not belong to serviceEquipmentId.
 		//
-		std::erase_if(inOutSignalHashes, [&sh](Hash hash) {
-			return sh.contains(hash) == false;
-		});
+		std::erase_if(inOutSignalHashes,
+					  [&sh](Hash hash)
+					  {
+						  return sh.contains(hash) == false;
+					  });
 
 		return;
 	}
@@ -737,18 +740,16 @@ namespace ClientLib
 
 			if (sourceState.state.isStateAvailable() == true)
 			{
-				if (stateAvailable == nullptr ||
-					stateAvailable->state.time().plant < sourceState.state.time().plant)
+				if (stateAvailable == nullptr || stateAvailable->state.time().plant < sourceState.state.time().plant)
 				{
-					stateAvailable = &sourceState;	// the first state with state available flag
+					stateAvailable = &sourceState; // the first state with state available flag
 				}
 			}
 			else
 			{
 				// sourceState.state.isStateAvailable() == false
 				//
-				if (stateNewest == nullptr ||
-					stateNewest->lastUpdateTime < sourceState.lastUpdateTime)
+				if (stateNewest == nullptr || stateNewest->lastUpdateTime < sourceState.lastUpdateTime)
 				{
 					stateNewest = &sourceState;
 				}
@@ -786,18 +787,16 @@ namespace ClientLib
 
 			if (sourceState.state.isStateAvailable() == true)
 			{
-				if (stateAvailable == nullptr ||
-					stateAvailable->state.time().plant < sourceState.state.time().plant)
+				if (stateAvailable == nullptr || stateAvailable->state.time().plant < sourceState.state.time().plant)
 				{
-					stateAvailable = &sourceState;	// the first state with state available flag
+					stateAvailable = &sourceState; // the first state with state available flag
 				}
 			}
 			else
 			{
 				// sourceState.state.isStateAvailable() == false
 				//
-				if (stateNewest == nullptr ||
-					stateNewest->lastUpdateTime < sourceState.lastUpdateTime)
+				if (stateNewest == nullptr || stateNewest->lastUpdateTime < sourceState.lastUpdateTime)
 				{
 					stateNewest = &sourceState;
 				}
@@ -818,4 +817,4 @@ namespace ClientLib
 		return NotValidState;
 	}
 
-}
+} // namespace ClientLib

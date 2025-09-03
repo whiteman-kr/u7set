@@ -1,10 +1,10 @@
 #ifndef CLIENT_LIB_DOMAIN
-#error Do not include this file in the project! Link ClientLib instead.
+	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
+#include "../OnlineLib/CfgLoader.h"
 #include <ClientLib/ConfigController.h>
 #include <CommonLib/HostAddressPort.h>
-#include "../OnlineLib/CfgLoader.h"
 #include <QDomNode>
 
 namespace ClientLib
@@ -14,7 +14,10 @@ namespace ClientLib
 	{
 	}
 
-	ConfigController::ConfigController(const SoftwareInfo& softwareInfo, const HostAddressPort& address1, const HostAddressPort& address2, ILogFile* logFile) :
+	ConfigController::ConfigController(const SoftwareInfo& softwareInfo,
+									   const HostAddressPort& address1,
+									   const HostAddressPort& address2,
+									   ILogFile* logFile) :
 		QObject{nullptr},
 		m_logFile{logFile, "ConfigController"},
 		m_softwareInfo{softwareInfo}
@@ -34,7 +37,10 @@ namespace ClientLib
 
 		connect(m_cfgLoaderThread.get(), &CfgLoaderThread::signal_configurationReady, this, &ConfigController::slot_configurationReady);
 
-		auto logFunc = [this](QString errMsg) { m_logFile.writeError(errMsg); };
+		auto logFunc = [this](QString errMsg)
+		{
+			m_logFile.writeError(errMsg);
+		};
 
 		connect(m_cfgLoaderThread.get(), &CfgLoaderThread::signal_unknownClientID, this, &ConfigController::error);
 		connect(m_cfgLoaderThread.get(), &CfgLoaderThread::signal_unknownClientID, logFunc);
@@ -129,7 +135,9 @@ namespace ClientLib
 		return m_logFile.logFile();
 	}
 
-	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const MonitorSettings& /*settings*/, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/,
+											   const MonitorSettings& /*settings*/,
+											   const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -137,7 +145,9 @@ namespace ClientLib
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const DiagnosticsSettings& /*settings*/, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/,
+											   const DiagnosticsSettings& /*settings*/,
+											   const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -145,7 +155,9 @@ namespace ClientLib
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TuningClientSettings& /*settings*/, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/,
+											   const TuningClientSettings& /*settings*/,
+											   const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -153,7 +165,9 @@ namespace ClientLib
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TestClientSettings& /*settings*/, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/,
+											   const TestClientSettings& /*settings*/,
+											   const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -161,7 +175,9 @@ namespace ClientLib
 		return false;
 	}
 
-	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/, const TestSuiteSettings& /*settings*/, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
+	bool ConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& /*conf*/,
+											   const TestSuiteSettings& /*settings*/,
+											   const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 	{
 		// Reimplement in the derviced class
 		//
@@ -177,8 +193,7 @@ namespace ClientLib
 
 		int result = 0;
 
-		if (bool ok = m_appInstanceSharedMemory.create(MaxInstanceCount * sizeof(qint64));
-			ok == true)
+		if (bool ok = m_appInstanceSharedMemory.create(MaxInstanceCount * sizeof(qint64)); ok == true)
 		{
 			// Shared memory just created, initialize it
 			//
@@ -203,7 +218,7 @@ namespace ClientLib
 			if (ok == false)
 			{
 				m_logFile.writeAlert(tr("Cannot create or attach to shared memory to determine software instance no. Error: %1")
-									 .arg(m_appInstanceSharedMemory.errorString()));
+										 .arg(m_appInstanceSharedMemory.errorString()));
 
 				// Set some Application Instance No, take random 127 high slots.
 				//
@@ -236,7 +251,8 @@ namespace ClientLib
 
 				if (result == -1)
 				{
-					m_logFile.writeAlert(tr("Cannot create or attach to shared memory to determine software instance no, there is no free slots."));
+					m_logFile.writeAlert(
+						tr("Cannot create or attach to shared memory to determine software instance no, there is no free slots."));
 
 					// Set random Application Instance No, take random 127 high slots.
 					//
@@ -308,14 +324,13 @@ namespace ClientLib
 
 		out->softwareEquipmentId = softwareElement.attribute(EquipmentPropNames::EQUIPMENT_ID);
 
-		if (int softwareType = softwareElement.attribute("Type").toInt();
-			softwareType != m_softwareInfo.softwareType())
+		if (int softwareType = softwareElement.attribute("Type").toInt(); softwareType != m_softwareInfo.softwareType())
 		{
 			// The received file has different type then expected,
 			//
 			m_logFile.writeError(QString("Parse configuarion error, received wrong softaware type, expected %1, received %2")
-								 .arg(softwareType)
-								 .arg(m_softwareInfo.softwareType()));
+									 .arg(softwareType)
+									 .arg(m_softwareInfo.softwareType()));
 			return false;
 		}
 
@@ -350,10 +365,10 @@ namespace ClientLib
 
 		if (pr.errorMessage.isEmpty() == false)
 		{
-			m_logFile.writeError(QString("Parse Configuration.xml error, %1, line %2, column %3").
-								 arg(pr.errorMessage).
-								 arg(pr.errorLine).
-								 arg(pr.errorColumn));
+			m_logFile.writeError(QString("Parse Configuration.xml error, %1, line %2, column %3")
+									 .arg(pr.errorMessage)
+									 .arg(pr.errorLine)
+									 .arg(pr.errorColumn));
 			return;
 		}
 		else
@@ -398,18 +413,18 @@ namespace ClientLib
 
 		// Call specific updateConfiguration
 		//
-		auto callUpdateFunc = [this, &conf, &buildFileInfoArray] <typename T> (const T* settings)
+		auto callUpdateFunc = [this, &conf, &buildFileInfoArray]<typename T>(const T* settings)
+		{
+			if (settings != nullptr)
 			{
-				if (settings != nullptr)
-				{
-					updateConfiguration(conf, *settings, buildFileInfoArray);
-				}
-			};
+				updateConfiguration(conf, *settings, buildFileInfoArray);
+			}
+		};
 
 		switch (m_softwareInfo.softwareType())
 		{
-		using enum E::SoftwareType;
-		
+			using enum E::SoftwareType;
+
 		case Monitor:
 			callUpdateFunc(dynamic_cast<const MonitorSettings*>(curSettingsProfile.get()));
 			return;
@@ -459,4 +474,4 @@ namespace ClientLib
 		return m_appInstanceNo;
 	}
 
-}
+} // namespace ClientLib

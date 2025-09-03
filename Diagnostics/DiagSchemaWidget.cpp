@@ -280,9 +280,9 @@ void DiagSchemaWidget::contextMenuRequested(const QPoint& /*pos*/)
 	return;
 }
 
-void DiagSchemaWidget::signalContextMenu(QStringList appSignals,
-											QStringList impactSignals,
-											QStringList loopbacks,
+void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
+											QStringList /*impactSignals*/,
+											QStringList /*loopbacks*/,
 											const QList<QMenu*>& /*customMenu*/)
 {
 	//appSignals.sort();
@@ -511,7 +511,7 @@ void DiagSchemaWidget::signalContextMenu(QStringList appSignals,
 	return;
 }
 
-void DiagSchemaWidget::signalInfo(QString appSignalId)
+void DiagSchemaWidget::signalInfo(QString /*appSignalId*/)
 {
 	// TODO: DiagSignalInfo::showDialog
 	//MonitorSignalInfo::showDialog(appSignalId,

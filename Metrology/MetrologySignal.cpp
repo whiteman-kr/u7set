@@ -1210,7 +1210,7 @@ namespace Metrology
 
 		switch (cmpType())
 		{
-			case E::CmpType::Greate:	typeStr = QChar(0x25B2);	break;
+			case E::CmpType::Greater:	typeStr = QChar(0x25B2);	break;
 			case E::CmpType::Less:		typeStr = QChar(0x25BC);	break;
 
 			default:
@@ -1267,7 +1267,7 @@ namespace Metrology
 					switch (cmpType())
 					{
 						case E::CmpType::Less:		deviation = hysteresisValue;	break;
-						case E::CmpType::Greate:	deviation -= hysteresisValue;	break;
+						case E::CmpType::Greater:	deviation -= hysteresisValue;	break;
 
 						default:
 							deviation = 0;
@@ -1463,7 +1463,7 @@ namespace Metrology
 			switch (cmpType())
 			{
 				case E::CmpType::Less:		value.insert(0, "+ "); break;
-				case E::CmpType::Greate:	value.insert(0, "- "); break;
+				case E::CmpType::Greater:	value.insert(0, "- "); break;
 
 				default:
 					value.insert(0, "  ");

@@ -234,7 +234,7 @@ namespace ReportLib
 	//	return {};
 	//}
 
-	//std::vector<std::shared_ptr<Comparator>> ReportAppSignalProvider::setpointsByInputSignalId(const QString& appSignalId) const
+	//std::vector<std::shared_ptr<Comparator>> ReportAppSignalProvider::setpointsByInput(const QString& appSignalId) const
 	//{
 	//	// No simulation of this function in edit schema mode
 	//	//

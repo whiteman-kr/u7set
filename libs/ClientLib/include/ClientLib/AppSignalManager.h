@@ -10,12 +10,11 @@
 #include "ISignalDataServer.h"
 
 #include <QReadWriteLock>
-#include <map>
 #include <memory>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
-#include <vector>
+
 
 namespace ClientLib
 {
@@ -120,7 +119,8 @@ namespace ClientLib
 
 		// IAppSignalManager implementation - Setpoints
 		//
-		std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override final;
+		[[nodiscard]] std::vector<std::shared_ptr<Comparator>> setpointsByInput(const QString& appSignalId) const override final;
+		[[nodiscard]] std::shared_ptr<Comparator> setpointByOutput(const QString& appSignalId) const override final;
 
 		//
 		// ISignalDataServer implementation

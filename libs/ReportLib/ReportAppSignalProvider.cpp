@@ -6,11 +6,12 @@ namespace ReportLib
 {
 	//
 	//
-	// ReportSchemaAppSignalProvider - this calss is used to provide app signals for drawing schemas, showing and getting signal ids, description, preciosion, etc...
+	// ReportSchemaAppSignalProvider - this class is used to provide app signals for drawing schemas, showing and getting signal ids,
+	// description, precision, etc...
 	//
 	//
 
-	ReportAppSignalProvider::ReportAppSignalProvider(const AppSignalSet *signalSet) :
+	ReportAppSignalProvider::ReportAppSignalProvider(const AppSignalSet* signalSet) :
 		m_signalSet(signalSet)
 	{
 		Q_ASSERT(signalSet);
@@ -56,9 +57,12 @@ namespace ReportLib
 
 	bool ReportAppSignalProvider::signalsExist(const QStringList& signalIds) const
 	{
-		return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
-			return m_signalSet->contains(appSignalId);
-		});
+		return std::all_of(signalIds.begin(),
+						   signalIds.end(),
+						   [this](const QString& appSignalId)
+						   {
+							   return m_signalSet->contains(appSignalId);
+						   });
 	}
 
 	AppSignalParam ReportAppSignalProvider::signalParam(Hash signalHash, bool* found) const
@@ -132,7 +136,6 @@ namespace ReportLib
 	AppSignalState ReportAppSignalProvider::signalState(const QString& appSignalId, const QString& /*dataServerId*/, bool* found) const
 	{
 		return signalState(appSignalId, found);
-
 	}
 
 	void ReportAppSignalProvider::signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const
@@ -177,12 +180,18 @@ namespace ReportLib
 		return;
 	}
 
-	void ReportAppSignalProvider::signalState(std::span<const Hash> appSignalHashes, Hash /*dataServerHash*/, std::vector<AppSignalState>* result, int* found) const
+	void ReportAppSignalProvider::signalState(std::span<const Hash> appSignalHashes,
+											  Hash /*dataServerHash*/,
+											  std::vector<AppSignalState>* result,
+											  int* found) const
 	{
 		signalState(appSignalHashes, result, found);
 	}
 
-	void ReportAppSignalProvider::signalState(std::span<const QString> appSignalIds, const QString& /*dataServerId*/, std::vector<AppSignalState>* result, int* found) const
+	void ReportAppSignalProvider::signalState(std::span<const QString> appSignalIds,
+											  const QString& /*dataServerId*/,
+											  std::vector<AppSignalState>* result,
+											  int* found) const
 	{
 		signalState(appSignalIds, result, found);
 	}
@@ -228,7 +237,7 @@ namespace ReportLib
 	{
 		Q_UNUSED(signalHash);
 		Q_UNUSED(found);
-		Q_ASSERT(false);	// to do
+		Q_ASSERT(false); // to do
 		return E::SignalType::Analog;
 	}
 
@@ -250,7 +259,15 @@ namespace ReportLib
 		return equipmentId;
 	}
 
-	std::vector<std::shared_ptr<Comparator>> ReportAppSignalProvider::setpointsByInputSignalId(const QString& appSignalId) const
+	std::vector<std::shared_ptr<Comparator>> ReportAppSignalProvider::setpointsByInput(const QString& appSignalId) const
+	{
+		// No simulation of this function in edit schema mode
+		//
+		Q_UNUSED(appSignalId);
+		return {};
+	}
+
+	std::shared_ptr<Comparator> ReportAppSignalProvider::setpointByOutput(const QString& appSignalId) const
 	{
 		// No simulation of this function in edit schema mode
 		//
@@ -265,4 +282,4 @@ namespace ReportLib
 		return {};
 	}
 
-}
+} // namespace ReportLib

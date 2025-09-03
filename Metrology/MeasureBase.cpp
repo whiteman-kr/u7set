@@ -2328,7 +2328,7 @@ namespace Measure
 		m_outputAppSignalID.clear();
 
 		m_cmpValueType = Metrology::CmpValueType::NoCmpValueType;
-		m_cmpType = E::CmpType::Greate;
+		m_cmpType = E::CmpType::Greater;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -2637,7 +2637,7 @@ namespace Measure
 
 		switch (m_cmpType)
 		{
-			case E::CmpType::Greate:	typeStr = QChar(0x25B2);	break;
+			case E::CmpType::Greater:	typeStr = QChar(0x25B2);	break;
 			case E::CmpType::Less:		typeStr = QChar(0x25BC);	break;
 
 			default:
@@ -2670,8 +2670,8 @@ namespace Measure
 
 				switch (cmpType)		// inversion
 				{
-					case E::CmpType::Less:		m_cmpType = E::CmpType::Greate;	break;
-					case E::CmpType::Greate:	m_cmpType = E::CmpType::Less;	break;
+					case E::CmpType::Less:		m_cmpType = E::CmpType::Greater;	break;
+					case E::CmpType::Greater:	m_cmpType = E::CmpType::Less;	break;
 
 					default:			// for metrology only Great of Less
 						break;

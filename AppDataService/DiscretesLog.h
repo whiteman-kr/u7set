@@ -4,9 +4,9 @@
 
 #include <Network.pb.h>
 
+#include "../AppSignalLib/DiscretesLogRecord.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "../UtilsLib/SimpleMutex.h"
-#include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/CircularLogger.h"
 
 class QSqlDatabase;
@@ -37,25 +37,6 @@ protected:
 	QSqlDatabase* m_db = nullptr;
 	bool m_dbIsWorkable = false;
 	int m_dbVersion = -1;
-};
-
-struct DiscretesLogRecord
-{
-	qint64 recordID;
-	qint64 recordTime;
-	qint64 plantTime;
-	qint64 systemTime;
-	qint64 localTime;
-	Hash signalHash;
-	double value;
-	quint32 flags;
-	bool acknowledged;
-	qint64 ackTime;
-	QString ackSource;
-	QString ackUser;
-
-	void saveToProto(Network::DiscretesLogRecord* dlr);
-	void loadFromProto(const Network::DiscretesLogRecord& dlr);
 };
 
 class DiscretesLogReader : private DiscretesLog

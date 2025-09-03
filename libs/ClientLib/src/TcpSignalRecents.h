@@ -15,7 +15,9 @@
 namespace ClientLib
 {
 
-	class TcpSignalRecents : public Tcp::Client, public TcpClientStatistics, public HasLogFile
+	class TcpSignalRecents : public Tcp::Client,
+							 public TcpClientStatistics,
+							 public HasLogFile
 	{
 		Q_OBJECT
 
@@ -46,4 +48,4 @@ namespace ClientLib
 		IAppSignalUpdater& m_signalUpdater;
 	};
 
-}
+} // namespace ClientLib

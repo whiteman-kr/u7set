@@ -29,6 +29,10 @@ namespace SchemaClientLib
 		void fillList();
 		void slot_doubleClicked(const QModelIndex& /*index*/);
 
+	private:
+		void keyPressEvent(QKeyEvent* e) override;
+		void emitOpenSchema();
+
 	signals:
 		void openSchemaRequest(QString schemaId, QStringList highlightIds);
 

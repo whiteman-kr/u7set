@@ -2934,7 +2934,7 @@ namespace Builder
 		return result;
 	}
 
-	bool AppLogicData::writeToOutput(QString buildPath,
+	bool AppLogicData::writeToOutput(QString /*buildPath*/,
 									 BuildResultWriter& buildResultWriter,
 									 const std::vector<Hardware::DeviceModule*>& fscModules)
 	{

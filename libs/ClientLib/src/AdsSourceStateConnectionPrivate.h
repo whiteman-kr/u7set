@@ -1,11 +1,11 @@
 #pragma once
 
-#include <vector>
 #include <list>
+#include <vector>
 
+#include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../UtilsLib/ILogFile.h"
-#include "../OnlineLib/SoftwareInfo.h"
 #include <ClientLib/AppDataSourceState.h>
 
 class SimpleThread;
@@ -23,9 +23,7 @@ namespace ClientLib
 	private:
 		struct Connection
 		{
-			Connection(const SoftwareInfo& softwareInfo,
-					   const SoftwareEndpoint::AppDataService& ads,
-					   ILogFile* logFile);
+			Connection(const SoftwareInfo& softwareInfo, const SoftwareEndpoint::AppDataService& ads, ILogFile* logFile);
 			Connection(const Connection&) = delete;
 			Connection(Connection&& src) = delete;
 			~Connection();
@@ -65,4 +63,4 @@ namespace ClientLib
 		std::list<Connection> m_conns;
 	};
 
-}
+} // namespace ClientLib

@@ -3,10 +3,11 @@
 #include "../OnlineLib/SoftwareEndpoint.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/TcpConnectionState.h"
-
 #include "../UtilsLib/ILogFile.h"
+
 #include "IAppSignalUpdater.h"
 #include "IRecentAppSignals.h"
+#include "SignalLog.h"
 
 
 namespace ClientLib
@@ -38,6 +39,9 @@ namespace ClientLib
 
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
+
+		SignalLog& signalLog();
+		const SignalLog& signalLog() const;
 
 		// --
 		//

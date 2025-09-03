@@ -1,5 +1,5 @@
 #ifndef APP_SIGNAL_LIB_DOMAIN
-#error Do not include this file in the project! Link AppSignalLib instead.
+	#error Do not include this file in the project! Link AppSignalLib instead.
 #endif
 
 #include "ComparatorSet.h"
@@ -255,10 +255,6 @@ void Comparator::dump() const
 //
 // ------------------------------------------------------------------------------------------------
 
-LmComparatorSet::LmComparatorSet()
-{
-}
-
 LmComparatorSet::LmComparatorSet(const QString& lmID, std::shared_ptr<Comparator> comparator)
 {
 	if (lmID.isEmpty() == true || comparator == nullptr)
@@ -268,10 +264,6 @@ LmComparatorSet::LmComparatorSet(const QString& lmID, std::shared_ptr<Comparator
 
 	m_lmID = lmID;
 	m_comparatorList.push_back(comparator);
-}
-
-LmComparatorSet::~LmComparatorSet()
-{
 }
 
 void LmComparatorSet::clear()
@@ -291,7 +283,7 @@ void LmComparatorSet::append(std::shared_ptr<Comparator> comparator)
 	m_comparatorList.push_back(comparator);
 }
 
-QString	LmComparatorSet::lmID() const
+QString LmComparatorSet::lmID() const
 {
 	return m_lmID;
 }
@@ -301,7 +293,7 @@ void LmComparatorSet::setLmID(const QString& lmEquipmentID)
 	m_lmID = lmEquipmentID;
 }
 
-const std::vector<std::shared_ptr<Comparator> >& LmComparatorSet::comparators() const
+const std::vector<std::shared_ptr<Comparator>>& LmComparatorSet::comparators() const
 {
 	return m_comparatorList;
 }
@@ -311,10 +303,6 @@ const std::vector<std::shared_ptr<Comparator> >& LmComparatorSet::comparators() 
 //	ComparatorSet class implementation
 //
 // ------------------------------------------------------------------------------------------------
-
-ComparatorSet::ComparatorSet()
-{
-}
 
 ComparatorSet::ComparatorSet(const ComparatorSet& src)
 {
@@ -328,48 +316,51 @@ ComparatorSet::ComparatorSet(ComparatorSet&& src) noexcept
 	return;
 }
 
-ComparatorSet::~ComparatorSet()
+ComparatorSet& ComparatorSet::operator=(const ComparatorSet& src)
 {
-}
-
-ComparatorSet& ComparatorSet::operator= (const ComparatorSet& src)
-{
-	decltype(m_bySignal) bySignal;
+	decltype(m_byInputSignal) byInputSignal;
+	decltype(m_byOutputSignal) byOutputSignal;
 	decltype(m_byLm) byLm;
 
 	{
 		QMutexLocker l(&src.m_mutex);
-		bySignal = src.m_bySignal;
+		byInputSignal = src.m_byInputSignal;
+		byOutputSignal = src.m_byOutputSignal;
 		byLm = src.m_byLm;
 	}
 
 	{
 		QMutexLocker l(&m_mutex);
-		m_bySignal = std::move(bySignal);
+		m_byInputSignal = std::move(byInputSignal);
+		m_byOutputSignal = std::move(byOutputSignal);
 		m_byLm = std::move(byLm);
 	}
 
 	return *this;
 }
 
-ComparatorSet& ComparatorSet::operator= (ComparatorSet&& src) noexcept
+ComparatorSet& ComparatorSet::operator=(ComparatorSet&& src) noexcept
 {
-	decltype(m_bySignal) bySignal;
+	decltype(m_byInputSignal) byInputSignal;
+	decltype(m_byOutputSignal) byOutputSignal;
 	decltype(m_byLm) byLm;
 
 	{
 		QMutexLocker l(&src.m_mutex);
 
-		bySignal = std::move(src.m_bySignal);
+		byInputSignal = std::move(src.m_byInputSignal);
+		byOutputSignal = std::move(src.m_byOutputSignal);
 		byLm = std::move(src.m_byLm);
 
-		src.m_bySignal = {};
+		src.m_byInputSignal = {};
+		src.m_byOutputSignal = {};
 		src.m_byLm = {};
 	}
 
 	{
 		QMutexLocker l(&m_mutex);
-		m_bySignal = std::move(bySignal);
+		m_byInputSignal = std::move(byInputSignal);
+		m_byOutputSignal = std::move(byOutputSignal);
 		m_byLm = std::move(byLm);
 	}
 
@@ -381,9 +372,9 @@ void ComparatorSet::dump() const
 	QMutexLocker l(&m_mutex);
 
 	qDebug() << "------------------ComparatorSet Dump---------------------";
-	qDebug() << "Comparators: " << m_bySignal.size();
+	qDebug() << "Comparators: " << m_byInputSignal.size();
 
-	for (const auto& bs : m_bySignal)
+	for (const auto& bs : m_byInputSignal)
 	{
 		qDebug() << "Comparators for signal: " << bs.size();
 		for (const std::shared_ptr<Comparator>& c : bs)
@@ -400,7 +391,8 @@ void ComparatorSet::clear()
 	QMutexLocker l(&m_mutex);
 
 	m_byLm.clear();
-	m_bySignal.clear();
+	m_byInputSignal.clear();
+	m_byOutputSignal.clear();
 
 	return;
 }
@@ -426,22 +418,28 @@ void ComparatorSet::insert(const QString& lmID, std::shared_ptr<Comparator> comp
 
 	// insert by appSignalID of input signal
 	//
-	if(m_bySignal.contains(comparator->input().appSignalID()) == false)
+	if (m_byInputSignal.contains(comparator->input().appSignalID()) == false)
 	{
 		std::vector<std::shared_ptr<Comparator>> comparatorVector;
 		comparatorVector.reserve(4);
 		comparatorVector.push_back(comparator);
 
-		m_bySignal.insert(comparator->input().appSignalID(), comparatorVector);
+		m_byInputSignal.insert(comparator->input().appSignalID(), comparatorVector);
 	}
 	else
 	{
-		m_bySignal[comparator->input().appSignalID()].push_back(comparator);
+		m_byInputSignal[comparator->input().appSignalID()].push_back(comparator);
 	}
+
+	// insert by appSignalID of output signal
+	//
+	Q_ASSERT(comparator->output().isConst() == false);
+	Q_ASSERT(comparator->output().appSignalID().isEmpty() == false);
+	m_byOutputSignal[comparator->output().appSignalID()] = comparator;
 
 	// insert by EquipmentID of LM
 	//
-	if(m_byLm.contains(lmID) == false)
+	if (m_byLm.contains(lmID) == false)
 	{
 		std::shared_ptr<LmComparatorSet> lmComparatorSet = std::make_shared<LmComparatorSet>(lmID, comparator);
 
@@ -457,14 +455,19 @@ QStringList ComparatorSet::inputSignalIDs() const
 {
 	QMutexLocker l(&m_mutex);
 
-	return static_cast<QStringList>(m_bySignal.keys());
+	return static_cast<QStringList>(m_byInputSignal.keys());
 }
 
 std::vector<std::shared_ptr<Comparator>> ComparatorSet::getByInputSignalID(const QString& appSignalID) const
 {
 	QMutexLocker l(&m_mutex);
+	return m_byInputSignal.value(appSignalID);
+}
 
-	return m_bySignal.value(appSignalID);
+std::shared_ptr<Comparator> ComparatorSet::getByOutputSignalID(const QString& appSignalID) const
+{
+	QMutexLocker l(&m_mutex);
+	return m_byOutputSignal.value(appSignalID);
 }
 
 QStringList ComparatorSet::lmIDs() const
@@ -506,9 +509,9 @@ void ComparatorSet::serializeTo(Proto::ComparatorSet* set) const
 
 		::Proto::LmComparatorSet* protoLmComparatorSet = set->add_lmcomparatorset();
 
-		protoLmComparatorSet->set_lmequipmentid(lmComparatorSet->lmID().toStdString());			// set equipmentID of LM in proto message
+		protoLmComparatorSet->set_lmequipmentid(lmComparatorSet->lmID().toStdString());      // set equipmentID of LM in proto message
 
-		for (const std::shared_ptr<Comparator>& comparator : lmComparatorSet->comparators())	// get all comparator of LM
+		for (const std::shared_ptr<Comparator>& comparator : lmComparatorSet->comparators()) // get all comparator of LM
 		{
 			if (comparator == nullptr)
 			{
@@ -527,7 +530,7 @@ bool ComparatorSet::serializeFrom(const Proto::ComparatorSet& set)
 {
 	int lmcount = set.lmcomparatorset_size();
 
-	for(int lm = 0; lm < lmcount; lm++)
+	for (int lm = 0; lm < lmcount; lm++)
 	{
 		const Proto::LmComparatorSet& protoLmComparatorSet = set.lmcomparatorset(lm);
 
@@ -542,14 +545,13 @@ bool ComparatorSet::serializeFrom(const Proto::ComparatorSet& set)
 		// get all comparator of LM
 		//
 		int cmpcount = protoLmComparatorSet.comparator_size();
-		for(int c = 0; c < cmpcount; c++)
+		for (int c = 0; c < cmpcount; c++)
 		{
 			const Proto::Comparator& protoComparator = protoLmComparatorSet.comparator(c);
 
 			std::shared_ptr<Comparator> pComparator = std::make_shared<Comparator>();
 
-			if (bool ok = pComparator->serializeFrom(protoComparator);
-				ok == true)
+			if (bool ok = pComparator->serializeFrom(protoComparator); ok == true)
 			{
 				insert(lmID, pComparator);
 			}
@@ -576,4 +578,3 @@ bool ComparatorSet::serializeFrom(const QByteArray& fileData)
 	bool ok = serializeFrom(protoComparatorSet);
 	return ok;
 }
-

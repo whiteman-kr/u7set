@@ -1,9 +1,10 @@
 #pragma once
 
 #include "ISignalManager.h"
-#include <span>
-#include <vector>
+
 #include <memory>
+#include <span>
+
 
 // #include "AppSignalParam.h" -- Commented out to speed up compilation
 // #include "AppSignalState.h" -- Commented out to speed up compilation
@@ -50,7 +51,8 @@ public:
 
 	// Setpoints
 	//
-	[[nodiscard]] virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const = 0;
+	[[nodiscard]] virtual std::vector<std::shared_ptr<Comparator>> setpointsByInput(const QString& appSignalId) const = 0;
+	[[nodiscard]] virtual std::shared_ptr<Comparator> setpointByOutput(const QString& appSignalId) const = 0;
 
 	// Tags
 	//

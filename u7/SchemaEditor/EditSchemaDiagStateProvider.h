@@ -52,7 +52,7 @@ public:
 //
 //	// Setpoints
 //	//
-//	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const override;
+//	virtual std::vector<std::shared_ptr<Comparator>> setpointsByInput(const QString& appSignalId) const override;
 //
 //	// Tags
 //	//
