@@ -1,7 +1,10 @@
 #pragma once
 
-#include "../AppSignalLib/IAppSignalManager.h"
 #include "SimScopedLog.h"
+
+#include "../AppSignalLib/ComparatorSet.h"
+#include "../AppSignalLib/IAppSignalManager.h"
+
 #include <SimulatorLib/SimRam.h>
 #include <TrendView/TrendSignalState.h>
 
@@ -47,6 +50,7 @@ namespace Sim
 		void resetRam();
 
 		bool load(QString fileName);
+		bool loadComparators(QString fileName);
 
 		void setData(const QString& equipmentId, const Sim::Ram& ram, TimeStamp plantTime, TimeStamp localTime, TimeStamp systemTime);
 		std::shared_ptr<TrendLib::RealtimeData> trendData(const QString& trendId,
@@ -177,6 +181,10 @@ namespace Sim
 
 		mutable QMutex m_trendMutex;
 		std::list<Trend> m_trends;
+
+		// ComparatorSet is threadsafe itself
+		//
+		ComparatorSet m_setpoints;
 	};
 
 

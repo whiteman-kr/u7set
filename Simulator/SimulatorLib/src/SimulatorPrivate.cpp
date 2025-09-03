@@ -370,6 +370,14 @@ namespace Sim
 			return false;
 		}
 
+		// Load ComparatorSet
+		//
+		ok = loadComparatorSet(buildPath);
+		if (ok == false)
+		{
+			return false;
+		}
+
 		// Update overridden signals
 		//
 		overrideSignals().updateSignals();
@@ -512,6 +520,27 @@ namespace Sim
 		m_log.writeMessage(tr("Loading %1").arg(fileName));
 
 		bool ok = m_appSignalManager.load(fileName);
+		if (ok == false)
+		{
+			m_log.writeError(tr("File loading error, file name %1.").arg(fileName));
+		}
+
+		return ok;
+	}
+
+	bool SimulatorPrivate::loadComparatorSet(QString buildPath)
+	{
+		QString fileName = QDir::fromNativeSeparators(buildPath);
+		if (fileName.endsWith(QChar('/')) == false)
+		{
+			fileName.append(QChar('/'));
+		}
+
+		fileName += QString(Directory::COMMON) + "/" + QString(File::COMPARATORS_SET);
+
+		m_log.writeMessage(tr("Loading %1").arg(fileName));
+
+		bool ok = m_appSignalManager.loadComparators(fileName);
 		if (ok == false)
 		{
 			m_log.writeError(tr("File loading error, file name %1.").arg(fileName));
