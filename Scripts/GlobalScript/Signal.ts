@@ -1,6 +1,7 @@
 "use strict";
 
 module Signal {
+
 	export interface TuningValue {
 	}
 
@@ -45,7 +46,7 @@ module Signal {
 		isEndpoint: boolean;
 		isInverted: boolean;
 		isReserved: boolean;
-		
+
 		// Functions
 		//
 		hasTag(tag: string): boolean;
@@ -79,6 +80,52 @@ module Signal {
 		tuningDefault: boolean;
 	}
 
+	export interface ComparatorSignal {
+		/** isConst, true - constant signal, false - application signal */
+		isConst: boolean;
+
+		/** Value of constant signal if isConst == true */
+		constValue: number;
+
+		/** AppSignalID, ID of application signal if isConst == false */
+		appSignalId: string;
+
+		/** isAcquired, true - signal is acquired, false - signal is not acquired */
+		isAcquired: boolean;
+	}
+
+	export interface Comparator {
+		/** cmpType, type of comparison */
+		cmpType: E.CmpType;
+
+		/** inAnalogSignalFormat, format of input analog signals */
+		inAnalogSignalFormat: E.AnalogAppSignalFormat;
+
+		/** Input signal */
+		input: ComparatorSignal;
+
+		/** Compare to signal (if any) */
+		compare: ComparatorSignal;
+
+		/** Hysteresis signal (if any) */
+		hysteresis: ComparatorSignal;
+
+		/** Output signal */
+		output: ComparatorSignal;
+
+		/** SchemaItem label of comparator */
+		label: string;
+
+		/** number of decimal places for constant values (visualization only) */
+		precision: number;
+
+		/** SchemaID of comparator */
+		schemaId: string;
+
+		/** SchemaItem UUID of comparator */
+		schemaItemUuid: any;
+	}
+
 	export interface AppSignalController {
 		signalsCount(): number;
 
@@ -89,10 +136,10 @@ module Signal {
 
 		signalState(signalId: string): AppSignalState;
 		signalState(signalHash: number): AppSignalState;
-		signalStates(signalIds : Array<string>) : Array<AppSignalState>;
+		signalStates(signalIds: Array<string>): Array<AppSignalState>;
 
 		signalExists(signalId: string): boolean;
-		signalsExist(signalIds: Array<string>) : boolean;
+		signalsExist(signalIds: Array<string>): boolean;
 
 		isDiscrete(signalId: string): boolean;
 		isAnalog(signalId: string): boolean;
@@ -100,15 +147,28 @@ module Signal {
 		precision(signalId: string): number;
 
 		signalIdsByTag(tag: string): Array<string>;
+
+		/** 
+		* Returns list of Comparator (setpoint comparators) assigned to the signal specified by signalId. 
+		* @param signalId - The ID of the signal to retrieve comparators for.
+		* @returns Array of Comparator objects.
+		*/
+		setpointsByInput(signalId: string): Array<Comparator>;
+
+		/** 
+		* Returns Comparator (setpoint comparator) assigned where `signalId` is an output signal. 
+		* @param signalId - The ID of the signal to check.
+		*/
+		setpointByOutput(signalId: string): Comparator;
 	}
 
 	export interface TuningController {
 		signalParam(appSignalId: string): AppSignalParam;
 		signalState(appSignalId: string): TuningSignalState;
-		signalStates(appSignalIds : Array<string>) : Array<TuningSignalState>;
+		signalStates(appSignalIds: Array<string>): Array<TuningSignalState>;
 
 		signalExists(appSignalId: string): boolean;
-		signalsExist(appSignalIds: Array<string>) : boolean;
+		signalsExist(appSignalIds: Array<string>): boolean;
 
 		isDiscrete(appSignalId: string): boolean;
 		isAnalog(appSignalId: string): boolean;
@@ -119,7 +179,7 @@ module Signal {
 
 		writeValue(appSignalId: string, value: number): boolean;
 		apply(): void;
-		
+
 		isLoggedIn(): boolean;
 
 		userName(): string;

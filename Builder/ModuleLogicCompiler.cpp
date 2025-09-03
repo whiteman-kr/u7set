@@ -14722,13 +14722,13 @@ namespace Builder
 					case 1:
 					case 5:			cmp->setCmpType(E::CmpType::Equal);			break;
 					case 2:
-					case 6:			cmp->setCmpType(E::CmpType::Greate);		break;
+					case 6:			cmp->setCmpType(E::CmpType::Greater);		break;
 					case 3:
 					case 7:			cmp->setCmpType(E::CmpType::Less);			break;
 					case 4:
 					case 8:			cmp->setCmpType(E::CmpType::NotEqual);		break;
 					case 9:
-					case 11:		cmp->setCmpType(E::CmpType::GreateEqual);	break;
+					case 11:		cmp->setCmpType(E::CmpType::GreaterEqual);	break;
 					case 10:
 					case 12:		cmp->setCmpType(E::CmpType::LessEqual);		break;
 
@@ -14891,7 +14891,7 @@ namespace Builder
 		}
 
 		if (	cmp->cmpType() == E::CmpType::Equal || cmp->cmpType() == E::CmpType::NotEqual ||
-				cmp->cmpType() == E::CmpType::GreateEqual || cmp->cmpType() == E::CmpType::LessEqual)
+				cmp->cmpType() == E::CmpType::GreaterEqual || cmp->cmpType() == E::CmpType::LessEqual)
 		{
 			if (cmp->inAnalogSignalFormat() == E::AnalogAppSignalFormat::Float32)
 			{

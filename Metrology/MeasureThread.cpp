@@ -810,7 +810,7 @@ void MeasureThread::measureCompratorsInSeries()
 								switch (comparatorEx->cmpType())
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;	break;	// becomes higher than the set point (if the set point is Less)
-									case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
+									case E::CmpType::Greater:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
 
 									default:
 										break;
@@ -823,7 +823,7 @@ void MeasureThread::measureCompratorsInSeries()
 								switch (comparatorEx->cmpType())
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal - deltaVal;	break;	// becomes higher than the hysteresis (if the hysteresis is Less)
-									case E::CmpType::Greate:	engineeringVal = compareVal + deltaVal;	break;	// falls below the hysteresis (if the hysteresis for Greate)
+									case E::CmpType::Greater:	engineeringVal = compareVal + deltaVal;	break;	// falls below the hysteresis (if the hysteresis for Greate)
 
 									default:
 										break;
@@ -1018,7 +1018,7 @@ void MeasureThread::measureCompratorsInSeries()
 
 								switch (comparatorEx->cmpType())
 								{
-									case E::CmpType::Greate:
+									case E::CmpType::Greater:
 
 										stepUp = !(reverseEngineeringLimits ^ ioParam.isNegativeRange());
 
@@ -1044,7 +1044,7 @@ void MeasureThread::measureCompratorsInSeries()
 
 								switch (comparatorEx->cmpType())
 								{
-									case E::CmpType::Greate:
+									case E::CmpType::Greater:
 
 										stepUp = reverseEngineeringLimits ^ ioParam.isNegativeRange();
 
@@ -1354,7 +1354,7 @@ void MeasureThread::measureCompratorsInParallel()
 								switch (comparatorEx->cmpType())
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;	break;	// becomes higher than the set point (if the set point is Less)
-									case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
+									case E::CmpType::Greater:	engineeringVal = compareVal - deltaVal;	break;	// falls below the set point (if the set point for Greate)
 
 									default:
 										continue;
@@ -1367,7 +1367,7 @@ void MeasureThread::measureCompratorsInParallel()
 								switch (comparatorEx->cmpType())
 								{
 									case E::CmpType::Less:		engineeringVal = compareVal - deltaVal;	break;	// becomes higher than the hysteresis (if the hysteresis is Less)
-									case E::CmpType::Greate:	engineeringVal = compareVal + deltaVal;	break;	// falls below the hysteresis (if the hysteresis for Greate)
+									case E::CmpType::Greater:	engineeringVal = compareVal + deltaVal;	break;	// falls below the hysteresis (if the hysteresis for Greate)
 
 									default:
 										continue;
@@ -1687,7 +1687,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 								switch (comparatorEx->cmpType())
 								{
-									case E::CmpType::Greate:
+									case E::CmpType::Greater:
 
 										stepUp = !(reverseEngineeringLimits ^ m_activeIoParamList[ch].isNegativeRange());
 
@@ -1713,7 +1713,7 @@ void MeasureThread::measureCompratorsInParallel()
 
 								switch (comparatorEx->cmpType())
 								{
-									case E::CmpType::Greate:
+									case E::CmpType::Greater:
 
 										stepUp = reverseEngineeringLimits ^ m_activeIoParamList[ch].isNegativeRange();
 

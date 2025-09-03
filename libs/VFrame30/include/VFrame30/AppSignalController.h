@@ -2,8 +2,8 @@
 
 #include "../AppSignalLib/IAppSignalManager.h"
 
-#include <QObject>
 #include <QJSValue>
+#include <QObject>
 
 class AppSignalParam;
 class AppSignalState;
@@ -42,7 +42,8 @@ namespace VFrame30
 
 		// Setpoints AKA Comparators
 		//
-		[[nodiscard]] std::vector<std::shared_ptr<Comparator>> setpointsByInputSignalId(const QString& appSignalId) const;
+		[[nodiscard]] std::vector<std::shared_ptr<Comparator>> setpointsByInput(const QString& appSignalId) const;
+		[[nodiscard]] std::shared_ptr<Comparator> setpointsByOutput(const QString& appSignalId) const;
 
 	public:
 		[[nodiscard]] IAppSignalManager& appSignalManager();
@@ -132,22 +133,27 @@ namespace VFrame30
 		/// \brief Returns total signals count in the database.
 		int signalsCount() const;
 
-		/// \brief Returns AppSignalParam structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
-		QJSValue signalParam(QString signalId) const;		// Returns AppSignalParam
-		QJSValue signalParam(Hash signalHash) const;		// Returns AppSignalParam
+		/// \brief Returns AppSignalParam structure of signal specified by <b>signalId</b>. If error occurs, the return value is
+		/// <b>undefined</b>.
+		QJSValue signalParam(QString signalId) const; // Returns AppSignalParam
+		QJSValue signalParam(Hash signalHash) const;  // Returns AppSignalParam
 
-		/// \brief Returns AppSignalID for specified EquipmentID, note: EquipmentID must start from symbol @, and such conversion is possible for input/output signals and impossible for internal LogicModule signals (returns an empty string).
+		/// \brief Returns AppSignalID for specified EquipmentID, note: EquipmentID must start from symbol @, and such conversion is
+		/// possible for input/output signals and impossible for internal LogicModule signals (returns an empty string).
 		QString equipmentToAppSignalId(QString equipmentId) const;
 
 		// This version was before the typo was fixed, left for script compatibility.
+		// DO NOT MODIFY OR REMOVE IT.
 		QString equipmentToAppSiganlId(QString equipmentId) const;
 
-		/// \brief Returns AppSignalState structure of signal specified by <b>signalId</b>. If error occurs, the return value is <b>undefined</b>.
-		QJSValue signalState(QString signalId) const;		// Returns AppSignalState
-		QJSValue signalState(Hash signalHash) const;		// Returns AppSignalState
+		/// \brief Returns AppSignalState structure of signal specified by <b>signalId</b>. If error occurs, the return value is
+		/// <b>undefined</b>.
+		QJSValue signalState(QString signalId) const; // Returns AppSignalState
+		QJSValue signalState(Hash signalHash) const;  // Returns AppSignalState
 
-		/// \brief Returns an array of AppSignalState structures of signals specified by <b>signalIds</b>. If signal is not found, then the <b>stateAvailable</b> is false.
-		QJSValueList signalStates(QStringList signalIds) const;	// Returns AppSignalState
+		/// \brief Returns an array of AppSignalState structures of signals specified by <b>signalIds</b>. If signal is not found, then the
+		/// <b>stateAvailable</b> is false.
+		QJSValueList signalStates(QStringList signalIds) const; // Returns AppSignalState
 
 		/// \brief Returns <b>true</b> if signal specified by <b>signalId</b> is exist.
 		bool signalExists(QString signalId) const;
@@ -167,11 +173,16 @@ namespace VFrame30
 		/// \brief Returns list of AppSignalIDs with specified <b>tag</b>.
 		QStringList signalIdsByTag(QString tag) const;
 
+		/// \brief Returns list of Comparator (setpoint comparators) assigned to the signal specified by <b>signalId</b>.
+		QJSValueList setpointsByInput(QString signalId) const;
+
+		/// \brief Returns Comparator (setpoint comparator) assigned where <b>signalId</b> is an output signal.
+		QJSValue setpointByOutput(QString signalId) const;
+
 		// Data
 		//
 	private:
 		const IAppSignalManager& m_appSignalManager;
 	};
 
-}
-
+} // namespace VFrame30

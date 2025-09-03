@@ -2717,7 +2717,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 						initComparatorSignals(comparatorEx.get());
 
-						comparatorEx->setCmpType(E::CmpType::Greate);
+						comparatorEx->setCmpType(E::CmpType::Greater);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
 
 						signalComparatorList.push_back(comparatorEx);
@@ -2733,7 +2733,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 						initComparatorSignals(comparatorEx.get());
 
-						comparatorEx->setCmpType(E::CmpType::Greate);
+						comparatorEx->setCmpType(E::CmpType::Greater);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Up);
 
 						signalComparatorList.push_back(comparatorEx);
@@ -2752,14 +2752,14 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 					break;
 
-				case E::CmpType::GreateEqual:
+				case E::CmpType::GreaterEqual:
 					{
 						// Greate
 						//
 						comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
 
 						initComparatorSignals(comparatorEx.get());
-						comparatorEx->setCmpType(E::CmpType::Greate);
+						comparatorEx->setCmpType(E::CmpType::Greater);
 						signalComparatorList.push_back(comparatorEx);
 
 						// Equal - Up
@@ -2779,7 +2779,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 						initComparatorSignals(comparatorEx.get());
 
-						comparatorEx->setCmpType(E::CmpType::Greate);
+						comparatorEx->setCmpType(E::CmpType::Greater);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
 
 						signalComparatorList.push_back(comparatorEx);
@@ -2814,7 +2814,7 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 						initComparatorSignals(comparatorEx.get());
 
-						comparatorEx->setCmpType(E::CmpType::Greate);
+						comparatorEx->setCmpType(E::CmpType::Greater);
 						comparatorEx->setDeviation(Metrology::ComparatorEx::DeviationType::Down);
 
 						signalComparatorList.push_back(comparatorEx);

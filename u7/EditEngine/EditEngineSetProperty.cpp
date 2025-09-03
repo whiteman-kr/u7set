@@ -103,7 +103,7 @@ namespace EditEngine
 	void SetPropertyCommand::setProperty(const QString& propertyName,
 										 const QVariant& value,
 										 const SchemaItemPtr& item,
-										 std::shared_ptr<VFrame30::Schema> schema,
+										 [[maybe_unused]] std::shared_ptr<VFrame30::Schema> schema,
 										 EditSchemaView* schemaView)
 	{
 		assert(item);

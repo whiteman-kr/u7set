@@ -528,19 +528,14 @@ namespace ClientLib
 		return result;
 	}
 
-	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInputSignalId(const QString& appSignalId) const
+	std::vector<std::shared_ptr<Comparator>> AppSignalManager::setpointsByInput(const QString& appSignalId) const
 	{
-		std::vector<std::shared_ptr<Comparator>> comparators = m_setpoints.getByInputSignalID(appSignalId);
+		return m_setpoints.getByInputSignalID(appSignalId);
+	}
 
-		std::vector<std::shared_ptr<Comparator>> result;
-		result.reserve(comparators.size());
-
-		for (const auto& c : comparators)
-		{
-			result.push_back(c);
-		}
-
-		return result;
+	std::shared_ptr<Comparator> AppSignalManager::setpointByOutput(const QString& appSignalId) const
+	{
+		return m_setpoints.getByOutputSignalID(appSignalId);
 	}
 
 	/// Get AppDataService EquipmentIDs list by AppSignalID.

@@ -513,7 +513,7 @@ namespace VFrame30
 		//return QString::number(value, static_cast<char>(analogFormat()), p);
 	}
 
-	bool SchemaItemDiagValue::getSignalState(QString appSignalId, const Context* context, HardwareLib::DiagSignal* signalParam) const
+	bool SchemaItemDiagValue::getSignalState(QString /*appSignalId*/, const Context* context, HardwareLib::DiagSignal* signalParam) const
 	{
 		if (context == nullptr ||
 			signalParam == nullptr /*||

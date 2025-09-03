@@ -241,7 +241,15 @@ QString EditSchemaAppSignalProvider::equipmentToAppSignalId(const QString& /*equ
 	return {};
 }
 
-std::vector<std::shared_ptr<Comparator>> EditSchemaAppSignalProvider::setpointsByInputSignalId(const QString& appSignalId) const
+std::vector<std::shared_ptr<Comparator>> EditSchemaAppSignalProvider::setpointsByInput(const QString& appSignalId) const
+{
+	// No simulation of this function in edit schema mode
+	//
+	Q_UNUSED(appSignalId);
+	return {};
+}
+
+std::shared_ptr<Comparator> EditSchemaAppSignalProvider::setpointByOutput(const QString& appSignalId) const
 {
 	// No simulation of this function in edit schema mode
 	//

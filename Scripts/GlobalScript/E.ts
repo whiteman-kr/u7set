@@ -30,6 +30,26 @@ module E {
 		G_9_or_9E = 71		/**< G_9_or_9E = 'G' (0x47/71) Use E or f format, whichever is the most concise*/
 	}
 
+	export enum DataFormat {
+		UnsignedInt = 0,
+		SignedInt = 1,
+		Float = 2
+	};
+
+	export enum AnalogAppSignalFormat {
+		SignedInt32 = E.DataFormat.SignedInt,	/**< SignedInt32 = 1 (0x01) 32-bit signed integer*/
+		Float32 = E.DataFormat.Float,			/**< Float32 = 2 (0x02) 32-bit floating point*/
+	};
+
+	export enum CmpType {
+		Equal = 0,			/**< Equal = 0*/
+		Greater = 1,		/**< Greater = 1*/
+		Less = 2,			/**< Less = 2*/
+		NotEqual = 3,		/**< NotEqual = 3*/
+		GreaterEqual = 4,	/**< GreaterEqual = 4*/
+		LessEqual = 5		/**< LessEqual = 5*/
+	}
+
 	export enum ColumnData {
 		AppSignalID = 0,			/**< AppSignalID = 0*/
 		CustomSignalID = 1,			/**< CustomSignalID = 1*/
@@ -84,8 +104,7 @@ module E {
 		AlignBaseline = 0x100	/**< AlignBaseline = 0x100*/
 	}
 
-	export enum SoftwareType
-	{
+	export enum SoftwareType {
 		Unknown = 8000,
 		BaseService = 8999,
 		Monitor = 9000,
@@ -103,8 +122,7 @@ module E {
 		Diagnostics = 9012
 	};
 
-	export enum DeviceType
-	{
+	export enum DeviceType {
 		Root,
 		System,
 		Rack,
