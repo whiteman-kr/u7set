@@ -138,7 +138,7 @@ void ArchivingService::stopCfgLoaderThread()
 {
 	if (m_cfgLoaderThread != nullptr)
 	{
-		m_cfgLoaderThread->quit();
+		m_cfgLoaderThread->quitAndWait();
 
 		delete m_cfgLoaderThread;
 	}

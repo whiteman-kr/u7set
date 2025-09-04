@@ -861,19 +861,6 @@ void CfgLoaderThread::start()
 	m_thread->start();
 }
 
-void CfgLoaderThread::quit()
-{
-	AUTO_LOCK(m_mutex);
-
-	if (m_thread == nullptr || m_cfgLoader == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_thread->quitAndWait();
-}
-
 void CfgLoaderThread::quitAndWait()
 {
 	AUTO_LOCK(m_mutex);

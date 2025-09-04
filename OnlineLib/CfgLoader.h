@@ -250,7 +250,6 @@ public:
 	virtual ~CfgLoaderThread();
 
 	void start();
-	void quit();
 	void quitAndWait();
 
 	void enableDownloadConfiguration();

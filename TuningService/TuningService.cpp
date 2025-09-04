@@ -404,7 +404,7 @@ namespace Tuning
 			return;
 		}
 
-		m_cfgLoaderThread->quit();
+		m_cfgLoaderThread->quitAndWait();
 
 		delete m_cfgLoaderThread;
 	}
