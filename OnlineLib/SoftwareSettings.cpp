@@ -1912,6 +1912,9 @@ bool MonitorSettings::readFromXml(XmlReadHelper& xml)
 				statusFlagFunction = static_cast<LmStatusFlagMode>(value);
 			}
 			result &= resultStatusFlagFunction;
+
+			xml.skipCurrentElement();
+			continue;
 		}
 
 		// Unknown element
