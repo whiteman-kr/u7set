@@ -141,22 +141,8 @@ add_executable(${TARGET} WIN32
 )
 
 
-# Ovcharenko 01.09.25 "addition of the Ukrainian language"
-
-#set(TS_FILES
-#    ${CMAKE_CURRENT_SOURCE_DIR}/languages/Metrology_ru.ts
-#    ${CMAKE_CURRENT_SOURCE_DIR}/languages/Metrology_uk.ts
-#)
-
-#qt_add_translation(QM_FILES ${TS_FILES})
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-#target_sources(Metrology PRIVATE ${QM_FILES})
-
-#add_custom_command(TARGET Metrology POST_BUILD
-#    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:Metrology>/translations
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${QM_FILES} $<TARGET_FILE_DIR:Metrology>/translations
-#)
 
 # Reuse precompiled headers from SchemaClientLib
 #
