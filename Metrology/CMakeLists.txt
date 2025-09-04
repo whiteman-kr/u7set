@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 
 project(Metrology LANGUAGES CXX)
 
+include(../cmake/translations.cmake)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -136,8 +138,11 @@ add_executable(${TARGET} WIN32
 	${METROLOGY_FORMS}
 	${METROLOGY_SOURCES}
 	${METROLOGY_RESOURCES}
-	languages/Metrology_ru.ts
 )
+
+
+add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
 
 # Reuse precompiled headers from SchemaClientLib
 #

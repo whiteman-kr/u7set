@@ -5,6 +5,8 @@
 #include "version.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
 
+
+
 int main(int argc, char* argv[])
 {
 	Vld::setVldReportFilterHook();
@@ -30,21 +32,8 @@ int main(int argc, char* argv[])
 
 	// select language
 	//
-	QTranslator translator;
 
-	if (theOptions.language().languageType() == OT::LanguageType::Russian)
-	{
-		if (translator.load(QString(":%1/%2").arg(LANGUAGE_OPTIONS_DIR, LANGUAGE_OPTIONS_FILE_RU)) == true)
-		{
-			qApp->installTranslator(&translator);
-		}
-		else
-		{
-			QString languageFilePath = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/" + LANGUAGE_OPTIONS_FILE_RU;
-			QMessageBox::critical(nullptr, "Russian language", QString("Didn't load russian language:\n%1").arg(languageFilePath));
-			theOptions.language().setLanguageType(OT::LanguageType::English);
-		}
-	}
+	theOptions.loadTranslators();
 
 	// one instance of the application
 	//
@@ -78,4 +67,5 @@ int main(int argc, char* argv[])
 	return result;
 }
 
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
