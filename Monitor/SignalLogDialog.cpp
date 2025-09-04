@@ -64,7 +64,7 @@ namespace
 //
 // SignalLogSorter
 //
-SignalLogSorter::SignalLogSorter(int column, SignalLogModel* model, IAppSignalManager* appSignalManager) :
+SignalLogSorter::SignalLogSorter(int column, const SignalLogModel* model, const IAppSignalManager* appSignalManager) :
 	m_column(column),
 	m_model(model),
 	m_appSignalManager(appSignalManager)
@@ -263,11 +263,7 @@ bool SignalLogSorter::sortFunction(int index1, int index2) const
 		return index1 < index2;
 	}
 
-	if (v1.userType() != v2.userType())
-	{
-		Q_ASSERT(false);
-		return index1 < index2;
-	}
+	Q_ASSERT(v1.userType() != v2.userType());
 
 	switch (v1.userType())
 	{
@@ -299,8 +295,8 @@ bool SignalLogSorter::sortFunction(int index1, int index2) const
 // SignalLogModel
 //
 SignalLogModel::SignalLogModel(const ClientLib::SignalLog& signalLog,
-							   IAppSignalManager* appSignalManager,
-							   AppSignalLists::AppSignalListSet* appSignalListSet,
+							   const IAppSignalManager* appSignalManager,
+							   const AppSignalLists::AppSignalListSet* appSignalListSet,
 							   const QString& signalLogTagCritical,
 							   const QString& signalLogTagWarning,
 							   QObject* parent) :
@@ -341,6 +337,9 @@ SignalLogModel::SignalLogModel(const ClientLib::SignalLog& signalLog,
 	m_columnsNames << QObject::tr("AckTime");
 	m_columnsNames << QObject::tr("AckSource");
 	m_columnsNames << QObject::tr("AckUser");
+
+	Q_ASSERT(m_columnsNames.size() == static_cast<qsizetype>(SignalLogColumns::ColumnCount));
+
 	return;
 }
 
@@ -412,9 +411,9 @@ QString SignalLogModel::appSignalList() const
 	return m_listId;
 }
 
-void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64 updateCounter)
+void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>&& records, qint64 updateCounter)
 {
-	m_records.swap(records);
+	m_records = std::move(records);
 	m_updateCounter = updateCounter;
 
 	fillRecords(false /*resetSelection*/);
@@ -447,7 +446,7 @@ void SignalLogModel::fillRecords(bool resetSelection)
 		m_maxInitialRecordID = -1;
 	}
 
-	std::vector<int> filteredRecords;
+	std::vector<size_t> filteredRecords;
 	filteredRecords.reserve(m_records.size());
 
 	// Get hashes list filtered by signal list
@@ -466,9 +465,7 @@ void SignalLogModel::fillRecords(bool resetSelection)
 
 	// Fill records
 	//
-	int count = static_cast<int>(m_records.size());
-
-	for (int recordIndex = 0; recordIndex < count; recordIndex++)
+	for (size_t recordIndex = 0, count = m_records.size(); recordIndex < count; recordIndex++)
 	{
 		const DiscretesLogRecord& r = m_records[recordIndex];
 
@@ -533,7 +530,11 @@ void SignalLogModel::fillRecords(bool resetSelection)
 				{
 					// Process wildcard
 					//
-					QRegularExpression rx(QRegularExpression::wildcardToRegularExpression(mask.trimmed()));
+					static QRegularExpression rx;
+					if (rx.pattern() != QRegularExpression::wildcardToRegularExpression(mask.trimmed()))
+					{
+						rx = QRegularExpression{QRegularExpression::wildcardToRegularExpression(mask.trimmed())};
+					}
 
 					for (const QString& strId : strIdList)
 					{
@@ -648,7 +649,7 @@ const DiscretesLogRecord& SignalLogModel::filteredRecord(int index) const
 		return err;
 	}
 
-	return record(m_filteredRecords[index]);
+	return record(static_cast<int>(m_filteredRecords[index]));
 }
 
 void SignalLogModel::sort(int column, Qt::SortOrder sortOrder)
@@ -660,15 +661,11 @@ void SignalLogModel::sort(int column, Qt::SortOrder sortOrder)
 
 	int sortColumn = column;
 
+	std::stable_sort(m_filteredRecords.begin(), m_filteredRecords.end(), SignalLogSorter(sortColumn, this, m_appSignalManager));
 
 	if (sortOrder == Qt::DescendingOrder)
 	{
-		std::sort(m_filteredRecords.begin(), m_filteredRecords.end(), SignalLogSorter(sortColumn, this, m_appSignalManager));
 		std::reverse(std::begin(m_filteredRecords), std::end(m_filteredRecords));
-	}
-	else if (sortOrder == Qt::AscendingOrder)
-	{
-		std::sort(m_filteredRecords.begin(), m_filteredRecords.end(), SignalLogSorter(sortColumn, this, m_appSignalManager));
 	}
 
 	emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
@@ -693,7 +690,7 @@ AppSignalParam SignalLogModel::signalParam(int rowIndex, bool* found)
 
 	*found = true;
 
-	int ri = m_filteredRecords[rowIndex];
+	size_t ri = m_filteredRecords[rowIndex];
 
 	return m_appSignalManager->signalParam(m_records[ri].signalHash, found);
 }
@@ -738,7 +735,7 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::DisplayRole)
 	{
-		int recordIndex = m_filteredRecords[row];
+		size_t recordIndex = m_filteredRecords[row];
 
 		if (recordIndex < 0 || recordIndex >= m_records.size())
 		{
@@ -931,7 +928,7 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::ForegroundRole)
 	{
-		int recordIndex = m_filteredRecords[row];
+		size_t recordIndex = m_filteredRecords[row];
 		const DiscretesLogRecord& rec = m_records[recordIndex];
 		bool found = false;
 		const AppSignalParam& s = m_appSignalManager->signalParam(rec.signalHash, &found);
@@ -1055,8 +1052,8 @@ void SignalLogTableView::mouseMoveEvent(QMouseEvent* event)
 // SignalLogWidget
 //
 SignalLogWidget::SignalLogWidget(const ClientLib::SignalLog& signalLog,
-								 IAppSignalManager* appSignalManager,
-								 AppSignalLists::AppSignalListSet* appSignalListSet,
+								 const IAppSignalManager* appSignalManager,
+								 const AppSignalLists::AppSignalListSet* appSignalListSet,
 								 const QString& projectName,
 								 const QString& equipmentId,
 								 const QString& signalLogTagCritical,
@@ -1860,7 +1857,7 @@ void SignalLogWidget::updateRecords()
 	// Place new data to the model
 	//
 	auto [rec, counter] = m_signalLog.getRecords();
-	m_model.setRecords(rec, counter);
+	m_model.setRecords(std::move(rec), counter);
 
 	// Select rows with recordID bigger than was on dialog show
 	//
@@ -2008,7 +2005,7 @@ SignalLogDialog* SignalLogDialog::s_instance = nullptr;
 
 SignalLogDialog::SignalLogDialog(const ClientLib::SignalLog& signalLog,
 								 ClientLib::AppSignalManager& appSignalManager,
-								 AppSignalLists::AppSignalListSet* appSignalListSet,
+								 const AppSignalLists::AppSignalListSet* appSignalListSet,
 								 const QString& projectName,
 								 const QString& equipmentId,
 								 const QString& signalLogTagCritical,
@@ -2049,7 +2046,7 @@ SignalLogDialog::~SignalLogDialog()
 
 SignalLogDialog* SignalLogDialog::createDialog(const ClientLib::SignalLog& signalLog,
 											   ClientLib::AppSignalManager& appSignalManager,
-											   AppSignalLists::AppSignalListSet* appSignalListSet,
+											   const AppSignalLists::AppSignalListSet* appSignalListSet,
 											   const QString& projectName,
 											   const QString& equipmentId,
 											   const QString& signalLogTagCritical,

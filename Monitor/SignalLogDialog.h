@@ -68,7 +68,7 @@ enum class SignalLogMaskType
 class SignalLogSorter
 {
 public:
-	SignalLogSorter(int column, SignalLogModel* model, IAppSignalManager* appSignalManager);
+	SignalLogSorter(int column, const SignalLogModel* model, const IAppSignalManager* appSignalManager);
 
 	bool operator()(int index1, int index2) const { return sortFunction(index1, index2); }
 
@@ -77,8 +77,8 @@ public:
 private:
 	int m_column = -1;
 
-	SignalLogModel* m_model = nullptr;
-	IAppSignalManager* m_appSignalManager = nullptr;
+	const SignalLogModel* m_model = nullptr;
+	const IAppSignalManager* m_appSignalManager = nullptr;
 };
 
 //
@@ -88,8 +88,8 @@ class SignalLogModel : public QAbstractTableModel
 {
 public:
 	SignalLogModel(const ClientLib::SignalLog& signalLog,
-				   IAppSignalManager* appSignalManager,
-				   AppSignalLists::AppSignalListSet* appSignalListSet,
+				   const IAppSignalManager* appSignalManager,
+				   const AppSignalLists::AppSignalListSet* appSignalListSet,
 				   const QString& signalLogTagCritical,
 				   const QString& signalLogTagWarning,
 				   QObject* parent);
@@ -100,7 +100,7 @@ public:
 	QStringList columnsNames() const;
 
 	qint64 updateCounter() const;
-	
+
 	qint64 maxInitialRecordID() const;
 	void resetMaxInitialRecordID();
 
@@ -119,7 +119,7 @@ public:
 	void setAppSignalList(const QString& listId);
 	QString appSignalList() const;
 
-	void setRecords(std::vector<DiscretesLogRecord>& records, qint64 updateCounter);
+	void setRecords(std::vector<DiscretesLogRecord>&& records, qint64 updateCounter);
 	void fillRecords(bool resetSelection);
 
 	int recordsCount() const;
@@ -142,8 +142,8 @@ protected:
 
 private:
 	const ClientLib::SignalLog& m_signalLog;
-	IAppSignalManager* m_appSignalManager = nullptr;
-	AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
+	const IAppSignalManager* m_appSignalManager = nullptr;
+	const AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 
 	QStringList m_columnsNames;
 
@@ -153,9 +153,9 @@ private:
 	qint64 m_updateCounter = 0;
 
 	bool m_initMaxInitialRecordID = true;
-	qint64 m_maxInitialRecordID = -1;		// This is the max record ID at the dialog showing. Further record IDs are selected after adding
+	qint64 m_maxInitialRecordID = -1; // This is the max record ID at the dialog showing. Further record IDs are selected after adding
 
-	std::vector<int> m_filteredRecords;
+	std::vector<size_t> m_filteredRecords;
 
 	QString m_signalLogTagCritical;
 	QString m_signalLogTagWarning;
@@ -214,8 +214,8 @@ class SignalLogWidget : public QWidget
 
 public:
 	SignalLogWidget(const ClientLib::SignalLog& signalLog,
-					IAppSignalManager* appSignalManager,
-					AppSignalLists::AppSignalListSet* appSignalListSet,
+					const IAppSignalManager* appSignalManager,
+					const AppSignalLists::AppSignalListSet* appSignalListSet,
 					const QString& projectName,
 					const QString& equipmentId,
 					const QString& signalLogTagCritical,
@@ -269,8 +269,8 @@ signals:
 
 private:
 	const ClientLib::SignalLog& m_signalLog;
-	IAppSignalManager* m_appSignalManager = nullptr;
-	AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
+	const IAppSignalManager* m_appSignalManager = nullptr;
+	const AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 	SignalLogModel m_model;
 
 	// Ui
@@ -320,7 +320,7 @@ class SignalLogDialog : public QDialog
 private:
 	explicit SignalLogDialog(const ClientLib::SignalLog& signalLog,
 							 ClientLib::AppSignalManager& appSignalManager,
-							 AppSignalLists::AppSignalListSet* appSignalListSet,
+							 const AppSignalLists::AppSignalListSet* appSignalListSet,
 							 const QString& projectName,
 							 const QString& equipmentId,
 							 const QString& signalLogTagCritical,
@@ -332,7 +332,7 @@ public:
 
 	static SignalLogDialog* createDialog(const ClientLib::SignalLog& signalLog,
 										 ClientLib::AppSignalManager& appSignalManager,
-										 AppSignalLists::AppSignalListSet* appSignalListSet,
+										 const AppSignalLists::AppSignalListSet* appSignalListSet,
 										 const QString& projectName,
 										 const QString& equipmentId,
 										 const QString& signalLogTagCritical,
