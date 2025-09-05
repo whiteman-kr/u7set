@@ -11,5 +11,9 @@ namespace StandardColors
 	static constexpr QRgb ExcludedFromBuildForeground{qRgb(0xA0, 0xA0, 0xA0)};
 
 	static constexpr QRgb LogWarningForeground{qRgb(0xF8, 0x72, 0x17)};
+	static constexpr QRgb LogWarningForegroundDark{qRgb(0xD8, 0x52, 0x07)};
+
 	static constexpr QRgb LogErrorForeground{qRgb(0xFF, 0x00, 0x00)}; 
+	static constexpr QRgb LogErrorForegroundDark{qRgb(0xE0, 0x33, 0x33)}; 
+	
 }

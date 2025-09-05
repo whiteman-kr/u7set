@@ -4,6 +4,7 @@
 
 #include "LogFile.h"
 #include "./Ui/UiTools.h"
+#include "../libs/UiLib/include/UiLib/StandardColors.h"
 
 //#define LOGFILE_USE_HEADER	// Uncomment this to use header
 
@@ -1416,20 +1417,20 @@ namespace Log
 		case MessageType::Alert:
 			if (selected == true)
 			{
-				return QBrush{qRgb(0xFF, 0x00, 0x00)};
+				return QBrush{StandardColors::LogErrorForeground};
 			}
 			else
 			{
-				return QBrush{qRgb(0xE0, 0x33, 0x33)};
+				return QBrush{StandardColors::LogErrorForegroundDark};
 			}
 		case MessageType::Warning:
 			if (selected == true)
 			{
-				return QBrush{qRgb(0xD8, 0x52, 0x07)};
+				return QBrush{StandardColors::LogWarningForegroundDark};
 			}
 			else
 			{
-				return QBrush{qRgb(0xF8, 0x72, 0x17)};
+				return QBrush{StandardColors::LogWarningForeground};
 			}
 		default:
 			return {};

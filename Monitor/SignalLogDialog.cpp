@@ -59,237 +59,350 @@ namespace
 		ReportLib::ReportFont textFont{"Arial", 12};
 		mainSection.addText(" \n", {textFont, Qt::AlignLeft});
 	}
-} // namespace
 
-//
-// SignalLogSorter
-//
-SignalLogSorter::SignalLogSorter(int column, const SignalLogModel* model, const IAppSignalManager* appSignalManager) :
-	m_column(column),
-	m_model(model),
-	m_appSignalManager(appSignalManager)
-{
-}
-
-bool SignalLogSorter::sortFunction(int index1, int index2) const
-{
-	if (m_model == nullptr)
+	//
+	// SignalLogSorter
+	//
+	class SignalLogSorter
 	{
-		Q_ASSERT(m_model);
-		return false;
+	public:
+		SignalLogSorter(int column, const SignalLogModel* model, const IAppSignalManager* appSignalManager);
+
+		bool operator()(const RecordKey& key1, const RecordKey& key2) const { return sortFunction(key1, key2); }
+
+		bool sortFunction(const RecordKey& key1, const RecordKey& key2) const;
+
+	private:
+		int m_column = -1;
+
+		const SignalLogModel* m_model = nullptr;
+		const IAppSignalManager* m_appSignalManager = nullptr;
+	};
+
+	//
+	// SignalLogSorter
+	//
+	SignalLogSorter::SignalLogSorter(int column, const SignalLogModel* model, const IAppSignalManager* appSignalManager) :
+		m_column(column),
+		m_model(model),
+		m_appSignalManager(appSignalManager)
+	{
 	}
 
-	if (index1 < 0 || index2 < 0 || index1 >= m_model->recordsCount() || index2 >= m_model->recordsCount())
+	bool SignalLogSorter::sortFunction(const RecordKey& key1, const RecordKey& key2) const
 	{
-		Q_ASSERT(false);
-		return index1 < index2;
-	}
-
-	const DiscretesLogRecord& rec1 = m_model->record(index1);
-	const DiscretesLogRecord& rec2 = m_model->record(index2);
-
-	bool found = false;
-	const AppSignalParam& s1 = m_appSignalManager->signalParam(rec1.signalHash, &found);
-	if (found == false)
-	{
-		return index1 < index2;
-	}
-
-	const AppSignalParam& s2 = m_appSignalManager->signalParam(rec2.signalHash, &found);
-	if (found == false)
-	{
-		return index1 < index2;
-	}
-
-	QVariant v1;
-	QVariant v2;
-
-	AppSignalStateFlags flags1 = {.all = rec1.flags};
-	AppSignalStateFlags flags2 = {.all = rec2.flags};
-
-	switch (static_cast<SignalLogColumns>(m_column))
-	{
-	case SignalLogColumns::SignalID:
-		v1 = s1.customSignalId();
-		v2 = s2.customSignalId();
-		break;
-	case SignalLogColumns::EquipmentID:
-		v1 = s1.equipmentId();
-		v2 = s2.equipmentId();
-		break;
-	case SignalLogColumns::LmEquipmentID:
-		v1 = s1.lmEquipmentId();
-		v2 = s2.lmEquipmentId();
-		break;
-	case SignalLogColumns::AppSignalID:
-		v1 = s1.appSignalId();
-		v2 = s2.appSignalId();
-		break;
-	case SignalLogColumns::Caption:
-		v1 = s1.caption();
-		v2 = s2.caption();
-		break;
-	case SignalLogColumns::Units:
-		v1 = s1.units();
-		v2 = s2.units();
-		break;
-	case SignalLogColumns::Type:
-		if (s1.isDiscrete() == true && s2.isDiscrete() == true)
+		if (m_model == nullptr)
 		{
-			v1 = static_cast<int>(s1.inOutType());
-			v2 = static_cast<int>(s2.inOutType());
+			Q_ASSERT(m_model);
+			return false;
+		}
+
+		const DiscretesLogRecord& rec1 = m_model->record(key1);
+		const DiscretesLogRecord& rec2 = m_model->record(key2);
+
+		QVariant v1;
+		QVariant v2;
+
+		AppSignalStateFlags flags1 = {.all = rec1.flags};
+		AppSignalStateFlags flags2 = {.all = rec2.flags};
+
+		bool compareSignalParams = false;
+
+		switch (static_cast<SignalLogColumns>(m_column))
+		{
+		case SignalLogColumns::RecordTime:
+			v1 = rec1.recordTime;
+			v2 = rec2.recordTime;
 			break;
-		}
-
-		if (s1.type() == s2.type())
-		{
-			if (s1.analogSignalFormat() == s2.analogSignalFormat())
-			{
-				v1 = static_cast<int>(s1.inOutType());
-				v2 = static_cast<int>(s2.inOutType());
-			}
-			else
-			{
-				v1 = static_cast<int>(s1.analogSignalFormat());
-				v2 = static_cast<int>(s2.analogSignalFormat());
-			}
-		}
-		else
-		{
-			v1 = static_cast<int>(s1.type());
-			v2 = static_cast<int>(s2.type());
-		}
-		break;
-	case SignalLogColumns::Tags:
-		v1 = s1.tagStringList().join(' ');
-		v2 = s2.tagStringList().join(' ');
-		break;
-	case SignalLogColumns::RecordTime:
-		v1 = rec1.recordTime;
-		v2 = rec2.recordTime;
-		break;
-	case SignalLogColumns::SystemTime:
-		v1 = rec1.systemTime;
-		v2 = rec2.systemTime;
-		break;
-	case SignalLogColumns::LocalTime:
-		v1 = rec1.localTime;
-		v2 = rec2.localTime;
-		break;
-	case SignalLogColumns::PlantTime:
-		v1 = rec1.plantTime;
-		v2 = rec2.plantTime;
-		break;
-	case SignalLogColumns::Value:
-		if (flags1.valid != flags2.valid)
-		{
+		case SignalLogColumns::SystemTime:
+			v1 = rec1.systemTime;
+			v2 = rec2.systemTime;
+			break;
+		case SignalLogColumns::LocalTime:
+			v1 = rec1.localTime;
+			v2 = rec2.localTime;
+			break;
+		case SignalLogColumns::PlantTime:
+			v1 = rec1.plantTime;
+			v2 = rec2.plantTime;
+			break;
+		case SignalLogColumns::Valid:
 			v1 = flags1.valid;
 			v2 = flags2.valid;
-		}
-		else
-		{
-			if (flags1.stateAvailable != flags2.stateAvailable)
+			break;
+		case SignalLogColumns::StateAvailable:
+			v1 = flags1.stateAvailable;
+			v2 = flags2.stateAvailable;
+			break;
+		case SignalLogColumns::Simulated:
+			v1 = flags1.simulated;
+			v2 = flags2.simulated;
+			break;
+		case SignalLogColumns::Blocked:
+			v1 = flags1.blocked;
+			v2 = flags2.blocked;
+			break;
+		case SignalLogColumns::Mismatch:
+			v1 = flags1.mismatch;
+			v2 = flags2.mismatch;
+			break;
+		case SignalLogColumns::OutOfLimits:
+			if (flags1.belowLowLimit == flags2.belowLowLimit)
 			{
-				v1 = flags1.stateAvailable;
-				v2 = flags2.stateAvailable;
+				v1 = flags1.aboveHighLimit;
+				v2 = flags2.aboveHighLimit;
 			}
 			else
 			{
-				if (s1.isAnalog() == s2.isAnalog())
+				v1 = flags1.belowLowLimit;
+				v2 = flags2.belowLowLimit;
+			}
+			break;
+
+		case SignalLogColumns::Acknowledged:
+			v1 = rec1.acknowledged;
+			v2 = rec2.acknowledged;
+			break;
+		case SignalLogColumns::AckSource:
+			v1 = rec1.ackSource;
+			v2 = rec2.ackSource;
+			break;
+		case SignalLogColumns::AckTime:
+			v1 = rec1.ackTime;
+			v2 = rec2.ackTime;
+			break;
+		case SignalLogColumns::AckUser:
+			v1 = rec1.ackUser;
+			v2 = rec2.ackUser;
+			break;
+
+		default:
+			compareSignalParams = true;
+		}
+
+		if (compareSignalParams == true)
+		{
+			bool found = false;
+			const AppSignalParam& s1 = m_appSignalManager->signalParam(rec1.signalHash, &found);
+			const AppSignalParam& s2 = m_appSignalManager->signalParam(rec2.signalHash, &found);
+
+			switch (static_cast<SignalLogColumns>(m_column))
+			{
+			case SignalLogColumns::CustomAppSignalID:
+				v1 = s1.customSignalId();
+				v2 = s2.customSignalId();
+				break;
+			case SignalLogColumns::EquipmentID:
+				v1 = s1.equipmentId();
+				v2 = s2.equipmentId();
+				break;
+			case SignalLogColumns::LmEquipmentID:
+				v1 = s1.lmEquipmentId();
+				v2 = s2.lmEquipmentId();
+				break;
+			case SignalLogColumns::AppSignalID:
+				v1 = s1.appSignalId();
+				v2 = s2.appSignalId();
+				break;
+			case SignalLogColumns::Caption:
+				v1 = s1.caption();
+				v2 = s2.caption();
+				break;
+			case SignalLogColumns::Units:
+				v1 = s1.units();
+				v2 = s2.units();
+				break;
+			case SignalLogColumns::Type:
+				if (s1.isDiscrete() == true && s2.isDiscrete() == true)
 				{
-					v1 = rec1.value;
-					v2 = rec2.value;
+					v1 = static_cast<int>(s1.inOutType());
+					v2 = static_cast<int>(s2.inOutType());
+					break;
+				}
+
+				if (s1.type() == s2.type())
+				{
+					if (s1.analogSignalFormat() == s2.analogSignalFormat())
+					{
+						v1 = static_cast<int>(s1.inOutType());
+						v2 = static_cast<int>(s2.inOutType());
+					}
+					else
+					{
+						v1 = static_cast<int>(s1.analogSignalFormat());
+						v2 = static_cast<int>(s2.analogSignalFormat());
+					}
 				}
 				else
 				{
-					v1 = s1.isAnalog();
-					v2 = s2.isAnalog();
+					v1 = static_cast<int>(s1.type());
+					v2 = static_cast<int>(s2.type());
 				}
+				break;
+			case SignalLogColumns::Tags:
+				v1 = s1.tagStringList().join(' ');
+				v2 = s2.tagStringList().join(' ');
+				break;
+			case SignalLogColumns::Value:
+				if (flags1.valid != flags2.valid)
+				{
+					v1 = flags1.valid;
+					v2 = flags2.valid;
+				}
+				else
+				{
+					if (flags1.stateAvailable != flags2.stateAvailable)
+					{
+						v1 = flags1.stateAvailable;
+						v2 = flags2.stateAvailable;
+					}
+					else
+					{
+						if (s1.isAnalog() == s2.isAnalog())
+						{
+							v1 = rec1.value;
+							v2 = rec2.value;
+						}
+						else
+						{
+							v1 = s1.isAnalog();
+							v2 = s2.isAnalog();
+						}
+					}
+				}
+				break;
+
+			default:
+				Q_ASSERT(false);
+				return rec1.recordTime < rec2.recordTime;
 			}
 		}
-		break;
-	case SignalLogColumns::Valid:
-		v1 = flags1.valid;
-		v2 = flags2.valid;
-		break;
-	case SignalLogColumns::StateAvailable:
-		v1 = flags1.stateAvailable;
-		v2 = flags2.stateAvailable;
-		break;
-	case SignalLogColumns::Simulated:
-		v1 = flags1.simulated;
-		v2 = flags2.simulated;
-		break;
-	case SignalLogColumns::Blocked:
-		v1 = flags1.blocked;
-		v2 = flags2.blocked;
-		break;
-	case SignalLogColumns::Mismatch:
-		v1 = flags1.mismatch;
-		v2 = flags2.mismatch;
-		break;
-	case SignalLogColumns::OutOfLimits:
-		if (flags1.belowLowLimit == flags2.belowLowLimit)
+
+		Q_ASSERT(v1.userType() != v2.userType());
+
+		switch (v1.userType())
 		{
-			v1 = flags1.aboveHighLimit;
-			v2 = flags2.aboveHighLimit;
+		case QMetaType::Bool:
+			return v1.toBool() < v2.toBool();
+		case QMetaType::QString:
+			return v1.toString() < v2.toString();
+		case QMetaType::Int:
+			return v1.toInt() < v2.toInt();
+		case QMetaType::UInt:
+			return v1.toUInt() < v2.toUInt();
+		case QMetaType::LongLong:
+			return v1.toLongLong() < v2.toLongLong();
+		case QMetaType::ULongLong:
+			return v1.toULongLong() < v2.toULongLong();
+		case QMetaType::Float:
+			return v1.toFloat() < v2.toFloat();
+		case QMetaType::Double:
+			return v1.toDouble() < v2.toDouble();
+		default:
+			break;
+		}
+
+		Q_ASSERT(false);
+		return rec1.recordTime < rec2.recordTime;
+	}
+
+	class LogSelectionControlDelegate : public QStyledItemDelegate
+	{
+	public:
+		LogSelectionControlDelegate(QObject* parent,
+									SignalLogModel* model,
+									const QString& signalLogTagCritical,
+									const QString& signalLogTagWarning);
+		void initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const override;
+
+	private:
+		SignalLogModel* m_model = nullptr;
+		
+		QString m_signalLogTagCritical;
+		QString m_signalLogTagWarning;
+	};
+
+	//
+	// LogSelectionControlDelegate
+	//
+	LogSelectionControlDelegate::LogSelectionControlDelegate(QObject* parent,
+															 SignalLogModel* model,
+															 const QString& signalLogTagCritical,
+															 const QString& signalLogTagWarning) :
+		QStyledItemDelegate(parent),
+		m_model(model),
+		m_signalLogTagCritical(signalLogTagCritical),
+		m_signalLogTagWarning(signalLogTagWarning)
+	{
+	}
+
+	void LogSelectionControlDelegate::initStyleOption(QStyleOptionViewItem* option, const QModelIndex& index) const
+	{
+		QStyledItemDelegate::initStyleOption(option, index);
+
+		bool active = option->state & QStyle::State_Active;
+		bool selected = option->state & QStyle::State_Selected;
+
+		bool found = false;
+		const auto& asp = m_model->signalParam(index.row(), &found);
+
+		QBrush br;
+
+		if (asp.tagStringList().contains(m_signalLogTagCritical) == true)
+		{
+			if (selected == true)
+			{
+				br = QBrush{StandardColors::LogErrorForeground};
+			}
+			else
+			{
+				br = QBrush{StandardColors::LogErrorForegroundDark};
+			}
+		}
+		else if (asp.tagStringList().contains(m_signalLogTagWarning) == true)
+		{
+			if (selected == true)
+			{
+				br = QBrush{StandardColors::LogWarningForegroundDark};
+			}
+			else
+			{
+				br = QBrush{StandardColors::LogWarningForeground};
+			}
+		}
+		
+		option->palette.setColor(QPalette::Text, br.color());
+
+		// Set color for selected item (by default it is displayed by white)
+		//
+		if (selected == true)
+		{
+			if (br.style() == Qt::NoBrush && active == true)
+			{
+				// Use white color on selected items if control is active
+				//
+				option->palette.setColor(QPalette::HighlightedText, Qt::white);
+			}
+			else
+			{
+				option->palette.setColor(QPalette::HighlightedText, br.color());
+			}
+			if (active == true)
+			{
+				option->palette.setColor(QPalette::Highlight, qRgb(0x90, 0xc8, 0xf6));
+			}
+			else
+			{
+				option->palette.setColor(QPalette::Highlight, qRgb(0xe0, 0xe0, 0xe0));
+			}
 		}
 		else
 		{
-			v1 = flags1.belowLowLimit;
-			v2 = flags2.belowLowLimit;
+			option->palette.setColor(QPalette::Base, Qt::white);
 		}
-		break;
-
-	case SignalLogColumns::Acknowledged:
-		v1 = rec1.acknowledged;
-		v2 = rec2.acknowledged;
-		break;
-	case SignalLogColumns::AckSource:
-		v1 = rec1.ackSource;
-		v2 = rec2.ackSource;
-		break;
-	case SignalLogColumns::AckTime:
-		v1 = rec1.ackTime;
-		v2 = rec2.ackTime;
-		break;
-	case SignalLogColumns::AckUser:
-		v1 = rec1.ackUser;
-		v2 = rec2.ackUser;
-		break;
-
-	default:
-		Q_ASSERT(false);
-		return index1 < index2;
 	}
 
-	Q_ASSERT(v1.userType() != v2.userType());
-
-	switch (v1.userType())
-	{
-	case QMetaType::Bool:
-		return v1.toBool() < v2.toBool();
-	case QMetaType::QString:
-		return v1.toString() < v2.toString();
-	case QMetaType::Int:
-		return v1.toInt() < v2.toInt();
-	case QMetaType::UInt:
-		return v1.toUInt() < v2.toUInt();
-	case QMetaType::LongLong:
-		return v1.toLongLong() < v2.toLongLong();
-	case QMetaType::ULongLong:
-		return v1.toULongLong() < v2.toULongLong();
-	case QMetaType::Float:
-		return v1.toFloat() < v2.toFloat();
-	case QMetaType::Double:
-		return v1.toDouble() < v2.toDouble();
-	default:
-		break;
-	}
-
-	Q_ASSERT(false);
-	return index1 < index2;
-}
+} // namespace
 
 //
 // SignalLogModel
@@ -297,14 +410,10 @@ bool SignalLogSorter::sortFunction(int index1, int index2) const
 SignalLogModel::SignalLogModel(const ClientLib::SignalLog& signalLog,
 							   const IAppSignalManager* appSignalManager,
 							   const AppSignalLists::AppSignalListSet* appSignalListSet,
-							   const QString& signalLogTagCritical,
-							   const QString& signalLogTagWarning,
 							   QObject* parent) :
 	m_signalLog(signalLog),
 	m_appSignalManager(appSignalManager),
-	m_appSignalListSet(appSignalListSet),
-	m_signalLogTagCritical(signalLogTagCritical),
-	m_signalLogTagWarning(signalLogTagWarning)
+	m_appSignalListSet(appSignalListSet)
 {
 	Q_UNUSED(parent);
 
@@ -353,23 +462,20 @@ qint64 SignalLogModel::updateCounter() const
 	return m_updateCounter;
 }
 
-qint64 SignalLogModel::maxInitialRecordID() const
+qint64 SignalLogModel::maxInitialRecordTime() const
 {
-	return m_maxInitialRecordID;
+	return m_maxInitialRecordTime;
 }
 
-void SignalLogModel::resetMaxInitialRecordID()
+void SignalLogModel::resetMaxInitialRecordTime()
 {
-	m_maxInitialRecordID = -1;
+	m_maxInitialRecordTime = -1;
 
-	int count = rowCount();
-	for (int recordIndex = 0; recordIndex < count; recordIndex++)
+	for (const auto& [key, rec] : m_records)
 	{
-		const DiscretesLogRecord& r = m_records[recordIndex];
-
-		if (r.recordID > m_maxInitialRecordID)
+		if (rec.recordTime > m_maxInitialRecordTime)
 		{
-			m_maxInitialRecordID = r.recordID; // Update the max record ID on first records filling
+			m_maxInitialRecordTime = rec.recordTime; // Update the max record Time on first records filling
 		}
 	}
 }
@@ -403,33 +509,115 @@ void SignalLogModel::setTags(const QStringList& tags)
 
 void SignalLogModel::setAppSignalList(const QString& listId)
 {
-	m_listId = listId;
+	m_appSignallistID = listId;
+
+	if (m_appSignalListSet != nullptr)
+	{
+		if (m_appSignallistID.isEmpty() == true)
+		{
+			m_appSignalListHashes.clear();
+		}
+		else
+		{
+			std::shared_ptr<AppSignalLists::AppSignalList> list = m_appSignalListSet->get(m_appSignallistID);
+			if (list != nullptr)
+			{
+				m_appSignalListHashes = list->appListHashesCache();
+			}
+		}
+	}
 }
 
 QString SignalLogModel::appSignalList() const
 {
-	return m_listId;
+	return m_appSignallistID;
 }
 
-void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>&& records, qint64 updateCounter)
+void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64 updateCounter)
 {
-	m_records = std::move(records);
 	m_updateCounter = updateCounter;
 
-	fillRecords(false /*resetSelection*/);
+	std::unordered_set<RecordKey, RecordKey> newKeys;
+	newKeys.reserve(records.size());
+
+	{
+	// Add records that do not exist in the model
+	//
+		qsizetype prevRecordsCount = m_filteredRecords.size();
+
+		for (const auto& rec : records)
+		{
+			RecordKey key{rec};
+
+			newKeys.insert(key);
+
+			if (m_records.contains(key) == true)
+			{
+				continue;
+			}
+
+			if (m_initMaxInitialRecordTime == true && rec.recordTime > m_maxInitialRecordTime)
+			{
+				m_maxInitialRecordTime = rec.recordTime; // Update the max record time on first records filling
+			}
+
+			m_records.insert({key, rec});
+
+			if (filterRecord(rec) == true)
+			{
+				m_filteredRecords.push_back(key);
+			}
+		}
+
+		qsizetype addedRecordsCount = m_filteredRecords.size() - prevRecordsCount;
+		if (addedRecordsCount > 0)
+		{
+			beginInsertRows(QModelIndex(), prevRecordsCount, prevRecordsCount + addedRecordsCount - 1);
+			insertRows(prevRecordsCount, prevRecordsCount + addedRecordsCount - 1);
+			endInsertRows();
+		}
+
+		m_initMaxInitialRecordTime = false;
+	}
+
+	// Remove records that do not exist in new data
+	{
+		// Build a map with records needed to be removed
+		//
+		std::unordered_set<RecordKey, RecordKey> recordsToDelete;
+		for (const auto& [key, rec] : m_records)
+		{
+			if (newKeys.contains(key) == false)
+			{
+				recordsToDelete.insert(key);
+			}
+		}
+
+		// Remove records from the main map
+		//
+		for (const auto& key : recordsToDelete)
+		{
+			m_records.erase(key);
+		}
+
+		// Remove rows from filteded array and from the model
+		//
+		qsizetype count = m_filteredRecords.size();
+		for (qsizetype i = count - 1; i >= 0; i--)
+		{
+			if (recordsToDelete.contains(m_filteredRecords[i]) == true)
+			{
+				beginRemoveRows(QModelIndex(), i, i);
+				removeRows(i, 1);
+				m_filteredRecords.erase(m_filteredRecords.begin() + i);
+				endRemoveRows();
+			}
+		}
+	}
 }
 
 void SignalLogModel::fillRecords(bool resetSelection)
 {
-	/*
-	 * !!!!!!!!!!!!!!!!!!!!!!!!!
-	 * TODO: when acquiring will be implemented, records should be added with more advanced algorithm:
-	 * Deleted records should be removed from filteredRecords array and from the view, Added records
-	 * should be appended to the array according to filter, without full overwriting all items.
-	 * This will keep current selection and sort order.
-	 * !!!!!!!!!!!!!!!!!!!!!!!!!
-	 */
-
 	if (rowCount() > 0)
 	{
 		beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
@@ -442,170 +630,28 @@ void SignalLogModel::fillRecords(bool resetSelection)
 
 	if (resetSelection == true)
 	{
-		m_initMaxInitialRecordID = true;
-		m_maxInitialRecordID = -1;
+		m_initMaxInitialRecordTime = true;
+		m_maxInitialRecordTime = -1;
 	}
 
-	std::vector<size_t> filteredRecords;
+	std::vector<RecordKey> filteredRecords;
 	filteredRecords.reserve(m_records.size());
-
-	// Get hashes list filtered by signal list
-	//
-	bool filterByAppSignalList = m_appSignalListSet != nullptr && m_listId.isEmpty() == false;
-
-	std::set<Hash> appSignalListHashes;
-	if (filterByAppSignalList == true)
-	{
-		std::shared_ptr<AppSignalLists::AppSignalList> list = m_appSignalListSet->get(m_listId);
-		if (list != nullptr)
-		{
-			appSignalListHashes = list->appListHashesCache();
-		}
-	}
 
 	// Fill records
 	//
-	for (size_t recordIndex = 0, count = m_records.size(); recordIndex < count; recordIndex++)
+	for (const auto& [key, rec]: m_records)
 	{
-		const DiscretesLogRecord& r = m_records[recordIndex];
-
-		if (m_initMaxInitialRecordID == true && r.recordID > m_maxInitialRecordID)
+		if (m_initMaxInitialRecordTime == true && rec.recordTime > m_maxInitialRecordTime)
 		{
-			m_maxInitialRecordID = r.recordID; // Update the max record ID on first records filling
+			m_maxInitialRecordTime = rec.recordTime; // Update the max record time on first records filling
 		}
 
-		// Filter by signal list
-		//
-		if (filterByAppSignalList == true && appSignalListHashes.contains(r.signalHash) == false)
+		if (filterRecord(rec) == false)
 		{
 			continue;
 		}
 
-		// Filter by Mask
-		//
-		if (m_masks.isEmpty() == false)
-		{
-			bool found = false;
-			const AppSignalParam& asp = m_appSignalManager->signalParam(r.signalHash, &found);
-			if (found == false)
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			bool result = false;
-			QStringList strIdList;
-
-			// Select what to analyze
-			//
-			switch (m_maskType)
-			{
-			case SignalLogMaskType::All:
-				strIdList << asp.appSignalId().trimmed();
-				strIdList << asp.customSignalId().trimmed();
-				strIdList << asp.equipmentId().trimmed();
-				strIdList << asp.lmEquipmentId().trimmed();
-				break;
-
-			case SignalLogMaskType::AppSignalId:
-				strIdList << asp.appSignalId().trimmed();
-				break;
-
-			case SignalLogMaskType::CustomAppSignalId:
-				strIdList << asp.customSignalId().trimmed();
-				break;
-
-			case SignalLogMaskType::EquipmentId:
-				strIdList << asp.equipmentId().trimmed();
-				break;
-
-			case SignalLogMaskType::LmEquipmentId:
-				strIdList << asp.lmEquipmentId().trimmed();
-				break;
-			}
-
-			for (const QString& mask : m_masks)
-			{
-				if (mask.contains('*') == true || mask.contains('?') == true)
-				{
-					// Process wildcard
-					//
-					static QRegularExpression rx;
-					if (rx.pattern() != QRegularExpression::wildcardToRegularExpression(mask.trimmed()))
-					{
-						rx = QRegularExpression{QRegularExpression::wildcardToRegularExpression(mask.trimmed())};
-					}
-
-					for (const QString& strId : strIdList)
-					{
-						if (rx.match(strId).hasMatch())
-						{
-							result = true;
-							break;
-						}
-					}
-				}
-				else
-				{
-					// Process substring
-					//
-					for (const QString& strId : strIdList)
-					{
-						if (strId.contains(mask, Qt::CaseInsensitive) == true)
-						{
-							result = true;
-							break;
-						}
-					}
-				}
-
-				if (result == true)
-				{
-					// Mask matches
-					//
-					break;
-				}
-			}
-
-			if (result == false)
-			{
-				// Mask does not match
-				//
-				continue;
-			}
-		}
-
-		// Filter by tags
-		//
-		if (m_tags.isEmpty() == false)
-		{
-			bool found = false;
-			const AppSignalParam& asp = m_appSignalManager->signalParam(r.signalHash, &found);
-			if (found == false)
-			{
-				Q_ASSERT(false);
-				continue;
-			}
-
-			bool result = false;
-			const auto& signalTags = asp.tags();
-
-			for (const QString& tag : m_tags)
-			{
-				if (signalTags.contains(tag) == true)
-				{
-					result = true;
-					break;
-				}
-			}
-
-			if (result == false)
-			{
-				continue;
-			}
-		}
-
-		filteredRecords.push_back(recordIndex);
+		filteredRecords.push_back(key);
 	}
 
 	if (filteredRecords.empty() == false)
@@ -618,7 +664,7 @@ void SignalLogModel::fillRecords(bool resetSelection)
 		endInsertRows();
 	}
 
-	m_initMaxInitialRecordID = false;
+	m_initMaxInitialRecordTime = false;
 
 	return;
 }
@@ -628,16 +674,17 @@ int SignalLogModel::recordsCount() const
 	return static_cast<int>(m_records.size());
 }
 
-const DiscretesLogRecord& SignalLogModel::record(int index) const
+const DiscretesLogRecord& SignalLogModel::record(const RecordKey& key) const
 {
-	if (index < 0 || index >= recordsCount())
+	auto it = m_records.find(key);
+	if (it == m_records.end())
 	{
 		Q_ASSERT(false);
 		static DiscretesLogRecord err;
 		return err;
 	}
 
-	return m_records[index];
+	return it->second;
 }
 
 const DiscretesLogRecord& SignalLogModel::filteredRecord(int index) const
@@ -649,7 +696,17 @@ const DiscretesLogRecord& SignalLogModel::filteredRecord(int index) const
 		return err;
 	}
 
-	return record(static_cast<int>(m_filteredRecords[index]));
+	const auto& recordKey = m_filteredRecords[index];
+
+	auto it = m_records.find(recordKey);
+	if (it == m_records.end())
+	{
+		Q_ASSERT(false);
+		static DiscretesLogRecord err;
+		return err;
+	}
+
+	return it->second;
 }
 
 void SignalLogModel::sort(int column, Qt::SortOrder sortOrder)
@@ -690,29 +747,17 @@ AppSignalParam SignalLogModel::signalParam(int rowIndex, bool* found)
 
 	*found = true;
 
-	size_t ri = m_filteredRecords[rowIndex];
+	const auto& recordKey = m_filteredRecords[rowIndex];
 
-	return m_appSignalManager->signalParam(m_records[ri].signalHash, found);
-}
+	auto it = m_records.find(recordKey);
+	if (it == m_records.end())
+	{
+		Q_ASSERT(false);
+		return AppSignalParam();
+	}
 
-E::AnalogFormat SignalLogModel::analogFormat() const
-{
-	return m_analogFormat;
-}
-
-void SignalLogModel::setAnalogFormat(E::AnalogFormat format)
-{
-	m_analogFormat = format;
-}
-
-int SignalLogModel::analogPrecision() const
-{
-	return m_analogPrecision;
-}
-
-void SignalLogModel::setAnalogPrecision(int precision)
-{
-	m_analogPrecision = precision;
+	const DiscretesLogRecord& rec = it->second;
+	return m_appSignalManager->signalParam(rec.signalHash, found);
 }
 
 QVariant SignalLogModel::data(const QModelIndex& index, int role) const
@@ -735,21 +780,16 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::DisplayRole)
 	{
-		size_t recordIndex = m_filteredRecords[row];
+		const auto& recordKey = m_filteredRecords[row];
 
-		if (recordIndex < 0 || recordIndex >= m_records.size())
+		auto it = m_records.find(recordKey);
+		if (it == m_records.end())
 		{
 			Q_ASSERT(false);
 			return QVariant();
 		}
 
-		// QString str = QString("Col: %1, row: %2").arg(col).arg(row);
-		// qDebug() << str;
-
-		//
-		// State
-		//
-		const DiscretesLogRecord& rec = m_records[recordIndex];
+		const DiscretesLogRecord& rec = it->second;
 
 		AppSignalStateFlags flags{.all = rec.flags};
 
@@ -761,15 +801,15 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 			}
 		case SignalLogColumns::SystemTime:
 			{
-				return QDateTime::fromMSecsSinceEpoch(rec.systemTime).toString("dd.MM.yyyy hh:mm:ss.zzz");
+				return QDateTime::fromMSecsSinceEpoch(rec.systemTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
 		case SignalLogColumns::LocalTime:
 			{
-				return QDateTime::fromMSecsSinceEpoch(rec.localTime).toString("dd.MM.yyyy hh:mm:ss.zzz");
+				return QDateTime::fromMSecsSinceEpoch(rec.localTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
 		case SignalLogColumns::PlantTime:
 			{
-				return QDateTime::fromMSecsSinceEpoch(rec.plantTime).toString("dd.MM.yyyy hh:mm:ss.zzz");
+				return QDateTime::fromMSecsSinceEpoch(rec.plantTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
 		case SignalLogColumns::Valid:
 			{
@@ -832,9 +872,9 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 				case E::SignalType::Analog:
 					valueResult = AppSignalState::toString(rec.value,
 														   E::ValueViewType::Dec,
-														   m_analogFormat,
+														   E::AnalogFormat::g_9_or_9e,
 														   s.analogSignalFormat(),
-														   m_analogPrecision == -1 ? s.precision() : m_analogPrecision);
+														   s.precision());
 					break;
 				case E::SignalType::Discrete:
 					valueResult = static_cast<int>(rec.value) == 0 ? "0" : "1";
@@ -861,7 +901,7 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 				return valueResult;
 			}
 
-		case SignalLogColumns::SignalID:
+		case SignalLogColumns::CustomAppSignalID:
 			{
 				return s.customSignalId();
 			}
@@ -926,23 +966,6 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 		}
 	}
 
-	if (role == Qt::ForegroundRole)
-	{
-		size_t recordIndex = m_filteredRecords[row];
-		const DiscretesLogRecord& rec = m_records[recordIndex];
-		bool found = false;
-		const AppSignalParam& s = m_appSignalManager->signalParam(rec.signalHash, &found);
-
-		if (s.tagStringList().contains(m_signalLogTagCritical) == true)
-		{
-			return QBrush(StandardColors::LogErrorForeground);
-		}
-		else if (s.tagStringList().contains(m_signalLogTagWarning) == true)
-		{
-			return QBrush(QColor(StandardColors::LogWarningForeground));
-		}
-	}
-
 	if (role == Qt::TextAlignmentRole && (columnIndex == SignalLogColumns::Value || columnIndex == SignalLogColumns::Valid ||
 										  columnIndex == SignalLogColumns::StateAvailable || columnIndex == SignalLogColumns::Simulated ||
 										  columnIndex == SignalLogColumns::Blocked || columnIndex == SignalLogColumns::Mismatch))
@@ -973,6 +996,140 @@ QVariant SignalLogModel::headerData(int section, Qt::Orientation orientation, in
 	}
 
 	return QVariant();
+}
+
+bool SignalLogModel::filterRecord(const DiscretesLogRecord& rec) const
+{ 
+	// Filter by signal list
+	//
+	if (m_appSignalListSet != nullptr && m_appSignallistID.isEmpty() == false && m_appSignalListHashes.contains(rec.signalHash) == false)
+	{
+		return false;
+	}
+
+	// Filter by Mask
+	//
+	if (m_masks.isEmpty() == false)
+	{
+		bool found = false;
+		const AppSignalParam& asp = m_appSignalManager->signalParam(rec.signalHash, &found);
+		if (found == false)
+		{
+			return false;
+		}
+
+		bool result = false;
+		QStringList strIdList;
+
+		// Select what to analyze
+		//
+		switch (m_maskType)
+		{
+		case SignalLogMaskType::All:
+			strIdList << asp.appSignalId().trimmed();
+			strIdList << asp.customSignalId().trimmed();
+			strIdList << asp.equipmentId().trimmed();
+			strIdList << asp.lmEquipmentId().trimmed();
+			break;
+
+		case SignalLogMaskType::AppSignalID:
+			strIdList << asp.appSignalId().trimmed();
+			break;
+
+		case SignalLogMaskType::CustomAppSignalID:
+			strIdList << asp.customSignalId().trimmed();
+			break;
+
+		case SignalLogMaskType::EquipmentID:
+			strIdList << asp.equipmentId().trimmed();
+			break;
+
+		case SignalLogMaskType::LmEquipmentID:
+			strIdList << asp.lmEquipmentId().trimmed();
+			break;
+		}
+
+		for (const QString& mask : m_masks)
+		{
+			if (mask.contains('*') == true || mask.contains('?') == true)
+			{
+				// Process wildcard
+				//
+				static QRegularExpression rx;
+				if (rx.pattern() != QRegularExpression::wildcardToRegularExpression(mask.trimmed()))
+				{
+					rx = QRegularExpression{QRegularExpression::wildcardToRegularExpression(mask.trimmed())};
+				}
+
+				for (const QString& strId : strIdList)
+				{
+					if (rx.match(strId).hasMatch())
+					{
+						result = true;
+						break;
+					}
+				}
+			}
+			else
+			{
+				// Process substring
+				//
+				for (const QString& strId : strIdList)
+				{
+					if (strId.contains(mask, Qt::CaseInsensitive) == true)
+					{
+						result = true;
+						break;
+					}
+				}
+			}
+
+			if (result == true)
+			{
+				// Mask matches
+				//
+				break;
+			}
+		}
+
+		if (result == false)
+		{
+			// Mask does not match
+			//
+			return false;
+		}
+	}
+
+	// Filter by tags
+	//
+	if (m_tags.isEmpty() == false)
+	{
+		bool found = false;
+		const AppSignalParam& asp = m_appSignalManager->signalParam(rec.signalHash, &found);
+		if (found == false)
+		{
+			return false;
+		}
+
+		bool result = false;
+		const auto& signalTags = asp.tags();
+
+		for (const QString& tag : m_tags)
+		{
+			if (signalTags.contains(tag) == true)
+			{
+				result = true;
+				break;
+			}
+		}
+
+		if (result == false)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 //
@@ -1065,7 +1222,10 @@ SignalLogWidget::SignalLogWidget(const ClientLib::SignalLog& signalLog,
 	m_appSignalListSet(appSignalListSet),
 	m_projectName(projectName),
 	m_equipmentId(equipmentId),
-	m_model(m_signalLog, m_appSignalManager, m_appSignalListSet, signalLogTagCritical, signalLogTagWarning, this)
+	m_model(m_signalLog, m_appSignalManager, m_appSignalListSet, this),
+	m_signalLogTagCritical(signalLogTagCritical),
+	m_signalLogTagWarning(signalLogTagWarning)
+	
 {
 	if (m_appSignalManager == nullptr)
 	{
@@ -1096,7 +1256,6 @@ SignalLogWidget::SignalLogWidget(const ClientLib::SignalLog& signalLog,
 	setWindowTitle(tr("Signals Log"));
 
 	createControls();
-	createMenus();
 
 	initRecordsView();
 	initFiltersView();
@@ -1272,23 +1431,9 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 	QStringList list;
 	list << s.appSignalId();
 
-	// Check analog format options
-
-	m_formatAutoSelect->setChecked(m_model.analogFormat() == E::AnalogFormat::g_9_or_9e ||
-								   m_model.analogFormat() == E::AnalogFormat::G_9_or_9E);
-	m_formatDecimal->setChecked(m_model.analogFormat() == E::AnalogFormat::f_9);
-	m_formatExponential->setChecked(m_model.analogFormat() == E::AnalogFormat::e_9e || m_model.analogFormat() == E::AnalogFormat::E_9E);
-
-	m_precisionDefault->setChecked(m_model.analogPrecision() == -1);
-
-	for (int i = 0; i < static_cast<int>(m_precisionActions.size()); i++)
-	{
-		m_precisionActions[i]->setChecked(m_model.analogPrecision() == i);
-	}
-
 	//
 
-	emit signalContextMenu(list, QList<QMenu*>() << &m_formatMenu);
+	emit signalContextMenu(list, QList<QMenu*>() << &m_signalMenu);
 }
 
 void SignalLogWidget::tableViewDoubleClicked(const QModelIndex& index)
@@ -1600,7 +1745,8 @@ void SignalLogWidget::createControls()
 
 	m_tableView = new SignalLogTableView();
 	connect(m_tableView, &QTableView::doubleClicked, this, &SignalLogWidget::tableViewDoubleClicked);
-
+	m_tableView->setItemDelegate(new LogSelectionControlDelegate(this, &m_model, m_signalLogTagCritical, m_signalLogTagWarning));
+	
 	// Main layout
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
@@ -1609,81 +1755,6 @@ void SignalLogWidget::createControls()
 	mainLayout->addWidget(m_tableView);
 
 	setLayout(mainLayout);
-
-	return;
-}
-
-void SignalLogWidget::createMenus()
-{
-	// Analog Format and precision
-
-	QMenu* menuFormat = m_formatMenu.addMenu(tr("Format"));
-
-	m_formatAutoSelect = new QAction(tr("Auto-select"), this);
-	m_formatAutoSelect->setCheckable(true);
-	connect(m_formatAutoSelect,
-			&QAction::triggered,
-			this,
-			[this]()
-			{
-				m_model.setAnalogFormat(E::AnalogFormat::g_9_or_9e);
-				updateTableItems();
-			});
-	menuFormat->addAction(m_formatAutoSelect);
-
-	m_formatDecimal = new QAction(tr("Decimal (as [-]9.9)"), this);
-	m_formatDecimal->setCheckable(true);
-	connect(m_formatDecimal,
-			&QAction::triggered,
-			this,
-			[this]()
-			{
-				m_model.setAnalogFormat(E::AnalogFormat::f_9);
-				updateTableItems();
-			});
-	menuFormat->addAction(m_formatDecimal);
-
-	m_formatExponential = new QAction(tr("Exponential (as [-]9.9e[+|-]999)"), this);
-	m_formatExponential->setCheckable(true);
-	connect(m_formatExponential,
-			&QAction::triggered,
-			this,
-			[this]()
-			{
-				m_model.setAnalogFormat(E::AnalogFormat::e_9e);
-				updateTableItems();
-			});
-	menuFormat->addAction(m_formatExponential);
-
-	menuFormat->addSeparator();
-
-	m_precisionDefault = new QAction(tr("Default"), this);
-	m_precisionDefault->setCheckable(true);
-	connect(m_precisionDefault,
-			&QAction::triggered,
-			this,
-			[this]()
-			{
-				m_model.setAnalogPrecision(-1);
-				updateTableItems();
-			});
-	menuFormat->addAction(m_precisionDefault);
-
-	for (int i = 0; i < 10; i++)
-	{
-		QAction* a = new QAction(tr(".%1").arg(QString().fill('0', i)), this);
-		a->setCheckable(true);
-		connect(a,
-				&QAction::triggered,
-				this,
-				[this, i]()
-				{
-					m_model.setAnalogPrecision(i);
-					updateTableItems();
-				});
-		m_precisionActions << a;
-		menuFormat->addAction(a);
-	}
 
 	return;
 }
@@ -1777,7 +1848,7 @@ void SignalLogWidget::initRecordsView()
 			this,
 			[this](const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 			{
-				m_model.resetMaxInitialRecordID();
+				m_model.resetMaxInitialRecordTime();
 			});
 
 	if (m_settings.horzHeader.isEmpty() == true || m_settings.horzHeaderCount != static_cast<int>(SignalLogColumns::ColumnCount))
@@ -1814,7 +1885,7 @@ void SignalLogWidget::fillAppSignalLists()
 	//
 	if (m_model.appSignalList().isEmpty() == false)
 	{
-		m_model.setAppSignalList(QString());
+		m_model.setAppSignalList({});
 		m_model.fillRecords(true /*resetSelection*/);
 	}
 
@@ -1857,17 +1928,17 @@ void SignalLogWidget::updateRecords()
 	// Place new data to the model
 	//
 	auto [rec, counter] = m_signalLog.getRecords();
-	m_model.setRecords(std::move(rec), counter);
+	m_model.setRecords(rec, counter);
 
-	// Select rows with recordID bigger than was on dialog show
+	// Select rows with recordTime bigger than was on dialog show
 	//
-	if (m_model.maxInitialRecordID() != -1)
+	if (m_model.maxInitialRecordTime() != -1)
 	{
 		int count = m_model.rowCount();
 		for (int i = 0; i < count; i++)
 		{
 			const auto& filteredRec = m_model.filteredRecord(i);
-			if (filteredRec.recordID > m_model.maxInitialRecordID())
+			if (filteredRec.recordTime > m_model.maxInitialRecordTime())
 			{
 				QModelIndex index = m_tableView->model()->index(i, 0); // Get index for the first column of the row
 				selectionModel->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
@@ -1881,7 +1952,10 @@ void SignalLogWidget::updateRecords()
 
 	// Scroll to bottom
 	//
-	m_tableView->scrollTo(m_model.index(m_model.rowCount() - 1, 0), QAbstractItemView::EnsureVisible);
+	if (m_buttonFixate->isChecked() == false)
+	{
+		m_tableView->scrollTo(m_model.index(m_model.rowCount() - 1, 0), QAbstractItemView::EnsureVisible);
+	}
 
 	// Resize columns to fit text
 	//
