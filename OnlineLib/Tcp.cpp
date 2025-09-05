@@ -257,6 +257,7 @@ namespace Tcp
 			m_socket->close();
 			delete m_socket;
 			m_socket = nullptr;
+			qDebug() << "Socket deleted";
 		}
 	}
 
@@ -282,6 +283,7 @@ namespace Tcp
 
 	void SocketWorker::onThreadFinished()
 	{
+		qDebug() << "SocketWorker::onThreadFinished()";
 		m_timeoutTimer.stop();
 
 		deleteSocket();
