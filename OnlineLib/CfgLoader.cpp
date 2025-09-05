@@ -843,10 +843,8 @@ CfgLoaderThread::CfgLoaderThread(	const SoftwareInfo& softwareInfo,
 CfgLoaderThread::~CfgLoaderThread()
 {
 	AUTO_LOCK(m_mutex);
-
-	shutdownThread(nullptr);
+	shutdownThread();
 }
-
 
 void CfgLoaderThread::start()
 {
@@ -867,7 +865,7 @@ void CfgLoaderThread::quitAndWait()
 
 	if (m_thread == nullptr || m_cfgLoader == nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -960,19 +958,11 @@ void CfgLoaderThread::setConnectionParams(const SoftwareInfo& softwareInfo,
 	m_server2 = serverAddressPort2;
 	m_enableDownloadCfg = enableDownloadConfiguration;
 
-	bool restartThread = false;
+	AUTO_LOCK(m_mutex);
 
-	m_mutex.lock();
-
-	shutdownThread(&restartThread);
+	shutdownThread();
 	initThread();
-
-	m_mutex.unlock();
-
-	if (restartThread == true)
-	{
-		start();
-	}
+	start();
 }
 
 SessionParams CfgLoaderThread::sessionParams() const
@@ -989,8 +979,8 @@ SessionParams CfgLoaderThread::sessionParams() const
 
 void CfgLoaderThread::initThread()
 {
-	assert(m_cfgLoader == nullptr);
-	assert(m_thread == nullptr);
+	Q_ASSERT(m_cfgLoader == nullptr);
+	Q_ASSERT(m_thread == nullptr);
 
 	m_thread = new SimpleThread;
 
@@ -1011,31 +1001,21 @@ void CfgLoaderThread::initThread()
 	connect(m_cfgLoader, &CfgLoader::signal_fileReady, this, &CfgLoaderThread::signal_fileReady);
 }
 
-void CfgLoaderThread::shutdownThread(bool* restartThread)
+void CfgLoaderThread::shutdownThread()
 {
 	// restartThread can be == nullptr
 
-	if (m_thread != nullptr)
+	if (m_thread == nullptr)
 	{
-		bool threadIsRunning = m_thread->isRunning();
-
-		if (threadIsRunning == true)
-		{
-			m_thread->quitAndWait();			// m_cfgLoader will be deleted here
-		}
-
-		delete m_thread;
-
-		m_thread = nullptr;
-		m_cfgLoader = nullptr;
-
-		if (restartThread != nullptr)
-		{
-			*restartThread = threadIsRunning;
-		}
+		return;
 	}
-	else
-	{
-		assert(false);
-	}
+
+	m_thread->quitAndWait();			// m_cfgLoader will be deleted here
+
+	qDebug() << "CfgLoaderThread quited";
+
+	delete m_thread;
+
+	m_thread = nullptr;
+	m_cfgLoader = nullptr;
 }

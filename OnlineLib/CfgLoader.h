@@ -298,7 +298,7 @@ signals:
 
 private:
 	void initThread();
-	void shutdownThread(bool* restartThread);
+	void shutdownThread();
 
 private:
 	SoftwareInfo m_softwareInfo;
