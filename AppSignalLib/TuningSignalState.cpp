@@ -1,4 +1,5 @@
 #include "TuningSignalState.h"
+#include <QTimeZone>
 
 //
 // TuningSignalState
@@ -117,7 +118,7 @@ QDateTime TuningSignalState::unsuccessfulWriteTime() const
 
 QDateTime TuningSignalState::lmTime() const
 {
-	return QDateTime::fromMSecsSinceEpoch(m_lmTime);
+	return QDateTime::fromMSecsSinceEpoch(m_lmTime, QTimeZone::UTC);
 }
 
 bool TuningSignalState::setState(const ::Network::TuningSignalState& message)

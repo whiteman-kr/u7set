@@ -150,3 +150,18 @@ struct Times
 		*this = {};
 	}
 };
+
+// Time to string formatting function
+//
+inline QString timeToString(const QDateTime& time)
+{
+	if (time.isNull() == true || time.toMSecsSinceEpoch() == 0)
+	{
+		return "Not Available";
+	}
+	if (time.isValid() == false)
+	{
+		return time.toString("dd.MM.yyyy hh:mm:ss.zzz (Invalid)");
+	}
+	return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+}
