@@ -23,6 +23,8 @@ protected:
 	virtual void onThreadStarted();
 	virtual void onThreadFinished();
 
+	void printFunction(const QString& func);
+
 private slots:
 	void slot_onThreadStarted();
 	void slot_onThreadFinished();
@@ -36,6 +38,9 @@ private:
 
 	friend class SimpleThread;
 };
+
+#define PRINT_FUNC printFunction(__func__);
+
 
 class SimpleThread : public QObject
 {
@@ -128,4 +133,3 @@ public:
 protected:
 	std::atomic_bool m_quitRequested{false};
 };
-

@@ -224,6 +224,8 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_mutex)
 
+		PRINT_FUNC;
+
 		deleteSocket();
 
 		m_socket = new QSslSocket;
@@ -250,6 +252,8 @@ namespace Tcp
 
 	void SocketWorker::deleteSocket()
 	{
+		PRINT_FUNC;
+
 		AUTO_LOCK(m_mutex);
 
 		if (m_socket != nullptr)
@@ -257,7 +261,8 @@ namespace Tcp
 			m_socket->close();
 			delete m_socket;
 			m_socket = nullptr;
-			qDebug() << "Socket deleted";
+
+			qDebug() << "m_socket == nullptr";
 		}
 	}
 
@@ -275,6 +280,8 @@ namespace Tcp
 
 	void SocketWorker::onThreadStarted()
 	{
+		PRINT_FUNC;
+
 		createSocket();
 
 		connect(&m_timeoutTimer, &QTimer::timeout, this, &SocketWorker::onTimeoutTimer);
@@ -283,7 +290,8 @@ namespace Tcp
 
 	void SocketWorker::onThreadFinished()
 	{
-		qDebug() << "SocketWorker::onThreadFinished()";
+		PRINT_FUNC;
+
 		m_timeoutTimer.stop();
 
 		deleteSocket();

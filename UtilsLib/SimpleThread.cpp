@@ -3,6 +3,7 @@
 #endif
 
 #include "SimpleThread.h"
+#include "../UtilsLib/WUtils.h"
 
 // -------------------------------------------------------------------------------------
 //
@@ -37,7 +38,11 @@ void SimpleThreadWorker::onThreadStarted()
 
 void SimpleThreadWorker::onThreadFinished()
 {
+}
 
+void SimpleThreadWorker::printFunction(const QString& func)
+{
+	qDebug() << C_STR(workerName() + "::" + func);
 }
 
 void SimpleThreadWorker::slot_onThreadStarted()
@@ -213,5 +218,4 @@ bool WaitForSignalHelper::wait(int milliseconds)
 
 	return !m_timeout;
 }
-
 
