@@ -110,7 +110,7 @@ QVariant PendingChangesModel::data(const QModelIndex& index, int role /*= Qt::Di
 
 					if (parseError.error != QJsonParseError::NoError)
 					{
-						qDebug() << "file details pasing error: " << parseError.errorString();
+						qDebug() << "file details parsing error: " << parseError.errorString();
 						return {};
 					}
 
@@ -454,7 +454,13 @@ void PendingChangesDialog::checkIn()
 	//
 	if (checkInFiles.empty() == false)
 	{
+		// Save opened and unsaved schemas first.
+		//
+		GlobalMessanger::instance().fireSaveUnsavedSchemas();
+
 		db()->checkIn(checkInFiles, comment, this);
+
+		GlobalMessanger::instance().fireRefreshSchemas();
 	}
 
 	// CheckIn signals

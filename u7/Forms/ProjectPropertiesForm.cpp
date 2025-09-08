@@ -33,7 +33,7 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 	if (auto prop = propertyObject->propertyByCaption(Db::ProjectProperty::Description);
 		prop != nullptr)
 	{
-		prop->setReadOnly(!db->currentUser().isAdminstrator());
+		prop->setReadOnly(!db->currentUser().isAdministrator());
 	}
 	else
 	{
@@ -48,7 +48,7 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 		prop != nullptr)
 	{
 		safetyProjectOldValue = prop->value().toBool();
-		prop->setReadOnly(!db->currentUser().isAdminstrator());
+		prop->setReadOnly(!db->currentUser().isAdministrator());
 	}
 	else
 	{
@@ -60,7 +60,7 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 	if (auto prop = propertyObject->propertyByCaption(Db::ProjectProperty::SuppressWarnings);
 		prop != nullptr)
 	{
-		prop->setReadOnly(!db->currentUser().isAdminstrator());
+		prop->setReadOnly(!db->currentUser().isAdministrator());
 	}
 	else
 	{
@@ -75,7 +75,7 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 		prop != nullptr)
 	{
 		uppercaseAppSignalIdOldValue = prop->value().toBool();
-		prop->setReadOnly(!db->currentUser().isAdminstrator());
+		prop->setReadOnly(!db->currentUser().isAdministrator());
 	}
 	else
 	{

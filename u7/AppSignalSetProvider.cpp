@@ -66,7 +66,7 @@ void AppSignalSetProvider::onProjectOpened()
 	m_signalSet.clear();
 
 	m_currentUserID = m_db->currentUser().userId();
-	m_currentUserIsAdmin = m_db->currentUser().isAdminstrator();
+	m_currentUserIsAdmin = m_db->currentUser().isAdministrator();
 
 	loadUsers();
 	reloadPropertiesBehaviour();

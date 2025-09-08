@@ -2207,7 +2207,7 @@ void SchemaFileView::selectionChanged(const QItemSelection& selected, const QIte
 	// --
 	//
 	int currentUserId = dbc()->currentUser().userId();
-	bool currentUserIsAdmin = dbc()->currentUser().isAdminstrator();
+	bool currentUserIsAdmin = dbc()->currentUser().isAdministrator();
 
 	bool hasDeletePossibility = false;
 	bool hasMovePossibility = false;
@@ -2402,6 +2402,13 @@ SchemaControlTabPage::SchemaControlTabPage(DbController* db, AppSignalSetProvide
 	connect(m_filesView->m_behaviorAction, &QAction::triggered, this, &SchemaControlTabPage::showBehaviorEditor);
 
 	connect(&m_filesView->filesModel(), &SchemaListModel::tagsChanged, this, &SchemaControlTabPage::schemaTagsChanged);
+
+	connect(&GlobalMessanger::instance(),
+			&GlobalMessanger::saveUnsavedSchemas,
+			this,
+			&SchemaControlTabPage::saveUnsavedSchemas,
+			Qt::ConnectionType::DirectConnection);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::refreshSchemas, this, &SchemaControlTabPage::refresh);
 
 	// --
 	//
@@ -2614,6 +2621,60 @@ void SchemaControlTabPage::refresh()
 	{
 		m_filesView->refreshFiles();
 	}
+
+	std::vector<int> openedFileIds;
+	openedFileIds.reserve(m_openedFiles.size());
+	std::transform(m_openedFiles.begin(),
+				   m_openedFiles.end(),
+				   std::back_inserter(openedFileIds),
+				   [](EditSchemaTabPage* e)
+				   {
+					   return e->fileInfo().fileId();
+				   });
+
+	std::vector<DbFileInfo> openedFileInfos;
+	db()->getFileInfo(&openedFileIds, &openedFileInfos, this);
+
+	// Set read-only to file if it is open
+	//
+	for (auto editWidget : m_openedFiles)
+	{
+		if (editWidget->readOnly() == true)
+		{
+			// If schema is already read-only then it has some reason, do not change it.
+			//
+			continue;
+		}
+
+		auto it = std::find_if(openedFileInfos.begin(),
+							   openedFileInfos.end(),
+							   [editWidget](const DbFileInfo& fi)
+							   {
+								   return fi.fileId() == editWidget->fileInfo().fileId();
+							   });
+
+		if (it != openedFileInfos.end())
+		{
+			const DbFileInfo& fi = *it;
+
+			bool checkedOut = (fi.state() == E::VcsState::CheckedOut &&
+							   (fi.userId() == dbc()->currentUser().userId() || dbc()->currentUser().isAdministrator() == true));
+
+			if (checkedOut == false) // We know that tab page in state read-write (see 'if' in the top of the loop).
+			{
+				editWidget->setReadOnly(true);
+				editWidget->setFileInfo(fi);
+			}
+		}
+		else
+		{
+			// File was deleted?
+			//
+			editWidget->setReadOnly(true);
+		}
+	}
+
+	m_filesView->selectionChanged({}, {}); // To update actions
 
 	return;
 }
@@ -4028,7 +4089,7 @@ void SchemaControlTabPage::checkInFiles()
 			continue;
 		}
 
-		if (file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true)
+		if (file->userId() == db()->currentUser().userId() || db()->currentUser().isAdministrator() == true)
 		{
 			checkInFiles.push_back(*file);
 		}
@@ -4100,7 +4161,7 @@ void SchemaControlTabPage::checkInFiles()
 									  }),
 					   checkInFiles.end());
 
-	// Set readonly to file if it is open
+	// Set read-only to file if it is open
 	//
 	for (auto editWidget : m_openedFiles)
 	{
@@ -4139,7 +4200,7 @@ void SchemaControlTabPage::undoChangesFiles()
 	for (const std::shared_ptr<DbFileInfo>& fi : selectedFiles)
 	{
 		if (fi->state() == E::VcsState::CheckedOut &&
-			(fi->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true))
+			(fi->userId() == db()->currentUser().userId() || db()->currentUser().isAdministrator() == true))
 		{
 			undoFiles.push_back(*fi);
 		}
@@ -4781,7 +4842,7 @@ void SchemaControlTabPage::showFileProperties()
 		}
 
 		if (file->state() == E::VcsState::CheckedOut &&
-			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true))
+			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdministrator() == true))
 		{
 			readOnly = false;
 		}
@@ -4927,7 +4988,7 @@ void SchemaControlTabPage::showFileProperties()
 		for (auto [file, schema] : schemas)
 		{
 			if (file->state() != E::VcsState::CheckedOut ||
-				(file->userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
+				(file->userId() != db()->currentUser().userId() && db()->currentUser().isAdministrator() == false))
 			{
 				continue;
 			}

@@ -252,7 +252,7 @@ void FilesTabPage::setActionState()
 		}
 
 		if (file->state() == E::VcsState::CheckedOut &&
-			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
+			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdministrator())
 			&& file->action() != E::VcsItemAction::Deleted)
 		{
 			m_deleteFileAction->setEnabled(true);
@@ -271,7 +271,7 @@ void FilesTabPage::setActionState()
 		assert(file);
 
 		if (file->state() == E::VcsState::CheckedOut &&
-			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+			(file->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdministrator()))
 		{
 			canAnyBeCheckedIn = true;
 		}

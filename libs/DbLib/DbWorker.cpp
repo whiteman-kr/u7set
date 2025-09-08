@@ -2355,7 +2355,7 @@ void DbWorker::slot_createUser(DbUser user)
 		return;
 	}
 
-	if (currentUser().isAdminstrator() == false)
+	if (currentUser().isAdministrator() == false)
 	{
 		emitError(db, tr("Current user does not have administrator privileges."));
 		return;
@@ -2423,7 +2423,7 @@ void DbWorker::slot_updateUser(DbUser user)
 		return;
 	}
 
-	if (currentUser().username() != user.username() && currentUser().isAdminstrator() == false)
+	if (currentUser().username() != user.username() && currentUser().isAdministrator() == false)
 	{
 		assert(false);
 		emitError(db, tr("Only administrators can change other users' details."));

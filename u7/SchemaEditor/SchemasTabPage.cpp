@@ -299,9 +299,16 @@ void SchemasTabPage::restoreSession()
 			continue;
 		}
 
+		bool allowedToEdit = f.state() == E::VcsState::CheckedOut &&
+							 (f.userId() == db()->currentUser().userId() || db()->currentUser().isAdministrator() == true);
+
 		if (ss.readOnly == true)
 		{
 			m_controlTabPage->viewFile(f, ss.changesetId);
+		}
+		else if (allowedToEdit == false)
+		{
+			m_controlTabPage->viewFile(f, f.changeset()); // Latest changeset
 		}
 		else
 		{

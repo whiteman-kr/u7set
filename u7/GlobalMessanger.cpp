@@ -6,13 +6,11 @@ GlobalMessanger* GlobalMessanger::m_instance = nullptr;
 GlobalMessanger::GlobalMessanger() :
 	QObject()
 {
-
-static int CompareDataTypeId = -1;
+	static int CompareDataTypeId = -1;
 	if (CompareDataTypeId == -1)
 	{
-		CompareDataTypeId= qRegisterMetaType<CompareData>();
+		CompareDataTypeId = qRegisterMetaType<CompareData>();
 	}
-
 }
 
 GlobalMessanger& GlobalMessanger::instance()
@@ -61,6 +59,16 @@ void GlobalMessanger::fireOpenSchema(const DbFileInfo& file)
 void GlobalMessanger::fireViewSchema(const DbFileInfo& file)
 {
 	emit viewSchema(file);
+}
+
+void GlobalMessanger::fireSaveUnsavedSchemas()
+{
+	emit saveUnsavedSchemas();
+}
+
+void GlobalMessanger::fireRefreshSchemas()
+{
+	emit refreshSchemas();
 }
 
 void GlobalMessanger::fireBuildStarted()

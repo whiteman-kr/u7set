@@ -58,6 +58,9 @@ public:
 	void fireOpenSchema(const DbFileInfo& file);
 	void fireViewSchema(const DbFileInfo& file);
 
+	void fireSaveUnsavedSchemas();
+	void fireRefreshSchemas(); // Refresh SchemaControlTabPage and any other opened schema. Used after checkIn/checkOut/UndoPendingChanges
+
 	// Build
 	//
 	void fireBuildStarted();
@@ -95,6 +98,9 @@ signals:
 
 	void openSchema(const DbFileInfo& file);
 	void viewSchema(const DbFileInfo& file);
+
+	void saveUnsavedSchemas();
+	void refreshSchemas(); // Refresh SchemaControlTabPage and any other opened schema. Used after checkIn/checkOut/UndoPendingChanges
 
 	//--
 	//

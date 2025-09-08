@@ -1275,7 +1275,7 @@ void TestsWidget::openFile()
 	// Load file
 
 	bool readOnly = f->state() != E::VcsState::CheckedOut ||
-					  (db()->currentUser().isAdminstrator() == false
+					  (db()->currentUser().isAdministrator() == false
 					   && db()->currentUser().userId() != f->userId());
 
 	std::shared_ptr<DbFile> dbFile;
@@ -2040,7 +2040,7 @@ void TestsWidget::openFilesMenuRequested(const QPoint& pos)
 		}
 
 		if (fi.state() == E::VcsState::CheckedOut &&
-			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
+			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdministrator()))
 		{
 			m_checkInOpenDocumentAction->setEnabled(true);
 			m_undoChangesOpenDocumentAction->setEnabled(true);
@@ -2090,7 +2090,7 @@ void TestsWidget::checkInOpenFile()
 		}
 
 		if (fi.state() == E::VcsState::CheckedOut &&
-			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
+			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdministrator()))
 		{
 			fileIds.push_back(fileId);
 		}
@@ -2155,7 +2155,7 @@ void TestsWidget::undoChangesOpenFile()
 		}
 
 		if (fi.state() == E::VcsState::CheckedOut &&
-			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
+			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdministrator()))
 		{
 			fileIds.push_back(fileId);
 		}
@@ -3482,7 +3482,7 @@ void TestsWidget::setTestsTreeActionsState()
 		}
 
 		if (file->state() == E::VcsState::CheckedOut &&
-			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
+			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdministrator()))
 		{
 			canAnyBeCheckedIn = true;
 		}
@@ -3534,7 +3534,7 @@ void TestsWidget::setTestsTreeActionsState()
 		}
 
 		if (file->state() == E::VcsState::CheckedOut &&
-			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator())
+			(file->userId() == db()->currentUser().userId() || db()->currentUser().isAdministrator())
 			/*&& file->action() != E::VcsItemAction::Deleted*/)
 		{
 			m_deleteFileAction->setEnabled(true);
@@ -3583,7 +3583,7 @@ void TestsWidget::setCodeEditorActionsState()
 	}
 
 	if (fi.state() == E::VcsState::CheckedOut &&
-		(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
+		(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdministrator()))
 	{
 		m_checkInCurrentDocumentAction->setEnabled(true);
 		m_undoChangesCurrentDocumentAction->setEnabled(true);

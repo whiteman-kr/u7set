@@ -936,7 +936,7 @@ void EquipmentTabPage::setActionState()
 		Q_ASSERT(fileInfo);
 
 		if (fileInfo->state() == E::VcsState::CheckedOut &&
-			(fileInfo->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator()))
+			(fileInfo->userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdministrator()))
 		{
 			canAnyBeCheckedIn = true;
 		}
