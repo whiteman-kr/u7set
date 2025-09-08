@@ -2053,6 +2053,7 @@ QString OT::LanguageTypeCaptionEn(OT::LanguageType type)
 	switch (type)
 	{
 		case OT::English:	caption = "English";	break;
+		case OT::Bulgarian:	caption = "Bulgarian";	break;
 		case OT::Russian:	caption = "Russian";	break;
 		case OT::Ukrainian:	caption = "Ukrainian";	break;
 
@@ -2073,6 +2074,7 @@ QString OT::LanguageTypeCaptionTr(OT::LanguageType type)
 	switch (type)
 	{
 		case OT::English:	caption = QObject::tr("English");	break;
+		case OT::Bulgarian:	caption = QObject::tr("Bulgarian");	break;
 		case OT::Russian:	caption = QObject::tr("Russian");	break;
 		case OT::Ukrainian:	caption = QObject::tr("Ukrainian");	break;
 
@@ -2111,6 +2113,7 @@ void Options::loadTranslators() const
 	//
 
 	static const std::map<OT::LanguageType, QString> langMap = {{OT::LanguageType::English, "en"},
+																{OT::LanguageType::Bulgarian, "bg"},
 																{OT::LanguageType::Russian, "ru"},
 																{OT::LanguageType::Ukrainian, "uk"}};
 
@@ -2123,7 +2126,7 @@ void Options::loadTranslators() const
 	{
 		QString suffix = langMap.at(langType);
 
-		QString metrologyFile = QApplication::applicationDirPath() + "/translations/Metrology_" + suffix + ".qm";
+		QString metrologyFile = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/Metrology_" + suffix + ".qm";
 		if (translatorMetrology.load(metrologyFile))
 		{
 			qApp->installTranslator(&translatorMetrology);
@@ -2137,7 +2140,7 @@ void Options::loadTranslators() const
 
 		if (langType != OT::LanguageType::Russian)
 		{
-			QString uiLibFile = QApplication::applicationDirPath() + "/translations/UiLib_" + suffix + ".qm";
+			QString uiLibFile = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/UiLib_" + suffix + ".qm";
 			if (translatorUiLib.load(uiLibFile))
 			{
 				qApp->installTranslator(&translatorUiLib);

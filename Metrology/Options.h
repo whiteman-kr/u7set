@@ -710,12 +710,13 @@ namespace OT
 	enum LanguageType
 	{
 		English	= 0,
-		Russian	= 1,
-		Ukrainian = 2,
+		Bulgarian = 1,
+		Russian	= 2,
+		Ukrainian = 3,
 	};
 	Q_ENUM_NS(LanguageType)
 
-	const int LanguageTypeCount = 3;
+	const int LanguageTypeCount = 4;
 
 	#define ERR_LANGUAGE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= OT::LanguageTypeCount)
 
@@ -1200,8 +1201,6 @@ private:
 // ----------------------------------------------------------------------------------------------
 
 #define LANGUAGE_OPTIONS_DIR		"/translations"
-#define LANGUAGE_OPTIONS_FILE_RU	"Metrology_ru.qm"
-#define LANGUAGE_OPTIONS_FILE_UK	"Metrology_uk.qm"
 
 // ----------------------------------------------------------------------------------------------
 

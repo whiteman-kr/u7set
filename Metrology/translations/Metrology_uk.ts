@@ -3598,7 +3598,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
 <context>
     <name>MetrologyMain</name>
     <message>
-        <location filename="../MetrologyMain.cpp" line="81"/>
+        <location filename="../MetrologyMain.cpp" line="44"/>
         <source>The application is already running!</source>
         <translation>Застосунок уже запущено!</translation>
     </message>
@@ -3675,7 +3675,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <location filename="../Options.cpp" line="1717"/>
         <location filename="../Options.cpp" line="1815"/>
         <location filename="../Options.cpp" line="1972"/>
-        <location filename="../Options.cpp" line="2099"/>
+        <location filename="../Options.cpp" line="2101"/>
         <source>Unknown</source>
         <translation>Не визначено</translation>
     </message>
@@ -3983,7 +3983,7 @@ Do you want to repeat the preparation process in order to switch the comparator 
         <translation>Шлях для резервних копій</translation>
     </message>
     <message>
-        <location filename="../Options.cpp" line="2095"/>
+        <location filename="../Options.cpp" line="2097"/>
         <source>Language</source>
         <translation>Мова</translation>
     </message>
@@ -4553,7 +4553,7 @@ Do you want to create new connection now?</source>
         <location filename="../Options.cpp" line="468"/>
         <location filename="../Options.cpp" line="1172"/>
         <location filename="../Options.cpp" line="1991"/>
-        <location filename="../Options.cpp" line="2081"/>
+        <location filename="../Options.cpp" line="2083"/>
         <source>Unknown</source>
         <translation>Не визначено</translation>
     </message>
@@ -4650,23 +4650,28 @@ Do you want to create new connection now?</source>
         <translation>Детальний фізичний</translation>
     </message>
     <message>
-        <location filename="../Options.cpp" line="2075"/>
+        <location filename="../Options.cpp" line="2076"/>
         <source>English</source>
-        <translation>Англійська</translation>
+        <translation>English</translation>
     </message>
     <message>
-        <location filename="../Options.cpp" line="2076"/>
+        <location filename="../Options.cpp" line="2077"/>
+        <source>Bulgarian</source>
+        <translation>Български</translation>
+    </message>
+    <message>
+        <location filename="../Options.cpp" line="2078"/>
         <source>Russian</source>
         <translation>Російська</translation>
     </message>
     <message>
-        <location filename="../Options.cpp" line="2077"/>
+        <location filename="../Options.cpp" line="2079"/>
         <source>Ukrainian</source>
         <translation>Українська</translation>
     </message>
     <message>
-        <location filename="../MetrologyMain.cpp" line="56"/>
-        <location filename="../MetrologyMain.cpp" line="66"/>
+        <location filename="../Options.cpp" line="2137"/>
+        <location filename="../Options.cpp" line="2151"/>
         <source>Language load error</source>
         <translation>Помилка завантаження мови</translation>
     </message>
