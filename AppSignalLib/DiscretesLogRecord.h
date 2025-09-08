@@ -7,16 +7,16 @@ namespace Network
 
 struct DiscretesLogRecord
 {
-	qint64 recordID;
-	qint64 recordTime;
-	qint64 plantTime;
-	qint64 systemTime;
-	qint64 localTime;
-	Hash signalHash;
-	double value;
-	quint32 flags;
-	bool acknowledged;
-	qint64 ackTime;
+	qint64 recordID = 0;
+	qint64 recordTime = 0;
+	qint64 plantTime = 0;
+	qint64 systemTime = 0;
+	qint64 localTime = 0;
+	Hash signalHash = UNDEFINED_HASH;
+	double value = 0;
+	quint32 flags = 0;
+	bool acknowledged = false;
+	qint64 ackTime = 0;
 	QString ackSource;
 	QString ackUser;
 

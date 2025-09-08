@@ -683,7 +683,7 @@ void DialogBusEditor::onCheckIn()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		if (m_busses.fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdminstrator() == false)
+		if (m_busses.fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdministrator() == false)
 		{
 			continue;
 		}
@@ -755,7 +755,7 @@ void DialogBusEditor::onUndo()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		if (m_busses.fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdminstrator() == false)
+		if (m_busses.fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdministrator() == false)
 		{
 			continue;
 		}
@@ -1573,7 +1573,7 @@ void DialogBusEditor::updateButtonsEnableState()
 		{
 			if (fi.state() == E::VcsState::CheckedOut)
 			{
-				if (fi.userId() == m_db->currentUser().userId() || m_db->currentUser().isAdminstrator() == true)
+				if (fi.userId() == m_db->currentUser().userId() || m_db->currentUser().isAdministrator() == true)
 				{
 					checkedOutCount++;
 				}

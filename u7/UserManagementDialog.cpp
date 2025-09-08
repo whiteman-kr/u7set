@@ -82,7 +82,7 @@ void UserManagementDialog::setUserControls(const DbUser& user)
 	ui->oldPasswordEdit->clear();
 	ui->newPasswordEdit->clear();
 	ui->passwordConfirmationEdit->clear();
-	ui->isAdministrator->setChecked(user.isAdminstrator());
+	ui->isAdministrator->setChecked(user.isAdministrator());
 	ui->isReadonly->setChecked(user.isReadonly());
 	ui->isDisabled->setChecked(user.isDisabled());
 
@@ -122,9 +122,9 @@ DbController* UserManagementDialog::dbController()
 
 void UserManagementDialog::on_createUserButton_clicked()
 {
-	if (m_currentUser.isAdminstrator() == false)
+	if (m_currentUser.isAdministrator() == false)
 	{
-		assert(m_currentUser.isAdminstrator());
+		assert(m_currentUser.isAdministrator());
 		return;
 	}
 
@@ -167,17 +167,17 @@ void UserManagementDialog::on_userChanged(const QString & username)
 	}
 
 	setUserControls(*user);
-	enableUserControls(m_currentUser.username() == username || m_currentUser.isAdminstrator());
+	enableUserControls(m_currentUser.username() == username || m_currentUser.isAdministrator());
 
-	// User with name "Administartor" can't change own Administartor field or disable himself
+	// User with name "Administrator" can't change Administrator's field or disable himself
 	//
-	if (m_currentUser.isAdminstrator() && m_currentUser.userId() == 1 && username == m_currentUser.username())
+	if (m_currentUser.isAdministrator() && m_currentUser.userId() == 1 && username == m_currentUser.username())
 	{
 		ui->isReadonly->setEnabled(false);
 		ui->isDisabled->setEnabled(false);
 	}
 
-	if (m_currentUser.isAdminstrator() == false)
+	if (m_currentUser.isAdministrator() == false)
 	{
 		ui->isDisabled->setEnabled(false);
 	}
@@ -186,7 +186,7 @@ void UserManagementDialog::on_userChanged(const QString & username)
 	{
 		ui->oldPasswordEdit->setEnabled(true);
 	}
-	else if (m_currentUser.isAdminstrator())
+	else if (m_currentUser.isAdministrator())
 	{
 		ui->oldPasswordEdit->setEnabled(false);
 	}
@@ -198,8 +198,8 @@ void UserManagementDialog::on_userChanged(const QString & username)
 	}
 	else
 	{
-		ui->isReadonly->setEnabled(m_currentUser.isAdminstrator());
-		ui->isDisabled->setEnabled(m_currentUser.isAdminstrator());
+		ui->isReadonly->setEnabled(m_currentUser.isAdministrator());
+		ui->isDisabled->setEnabled(m_currentUser.isAdministrator());
 	}
 
 	if (m_currentUser.username() == "Administrator" || m_currentUser.username() == username)
@@ -217,7 +217,7 @@ void UserManagementDialog::on_userChanged(const QString & username)
 		ui->lastNameEdit->setEnabled(false);
 	}
 
-	if (m_currentUser.isAdminstrator() == true)
+	if (m_currentUser.isAdministrator() == true)
 	{
 		ui->createUserButton->setEnabled(true);
 	}
@@ -350,7 +350,7 @@ void UserManagementDialog::applyChanges(const QString& username)
 
 	// Check password if user who change record is administrator
 	//
-	if (m_currentUser.isAdminstrator() &&
+	if (m_currentUser.isAdministrator() &&
 		m_currentUser.username() != username &&
 		oldPassword.isEmpty() == true &&
 		newPassword.isEmpty() == false &&
@@ -405,7 +405,7 @@ void UserManagementDialog::on_buttonBox_clicked(QAbstractButton* button)
 
 		QString username = si[0]->text().trimmed();
 
-		if (dbController()->currentUser().isAdminstrator() || dbController()->currentUser().username() == username)
+		if (dbController()->currentUser().isAdministrator() || dbController()->currentUser().username() == username)
 		{
 			applyChanges(username);
 			//fillUserList(username);

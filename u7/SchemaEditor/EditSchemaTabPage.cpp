@@ -460,7 +460,7 @@ void EditSchemaTabPage::modifiedChanged(bool /*modified*/)
 void EditSchemaTabPage::checkInFile()
 {
 	if (readOnly() == true || fileInfo().state() != E::VcsState::CheckedOut ||
-		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
+		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdministrator() == false))
 	{
 		return;
 	}
@@ -703,7 +703,7 @@ bool EditSchemaTabPage::saveWorkcopy()
 	file->setDetails(schema()->details(QString{})); // Details must be set here, as file rename will spoils them
 													// Ignore path here
 
-	// Save workcopy
+	// Save work-copy
 	//
 	if (bool result = db()->setWorkcopy(file, this); result == false)
 	{
@@ -761,7 +761,7 @@ void EditSchemaTabPage::getCurrentWorkcopy()
 void EditSchemaTabPage::setCurrentWorkcopy()
 {
 	if (readOnly() == true || fileInfo().state() != E::VcsState::CheckedOut ||
-		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
+		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdministrator() == false))
 	{
 		Q_ASSERT(fileInfo().userId() == db()->currentUser().userId());
 		return;

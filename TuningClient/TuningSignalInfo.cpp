@@ -125,11 +125,11 @@ void TuningSignalInfo::updateInfo()
 
 		writeErrorCodes.push_back(E::valueToString(static_cast<E::NetworkError>(clientState.writeErrorCode())));
 
-		lmTimes.push_back(clientState.lmTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-		successfulReadTimes.push_back(clientState.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-		writeRequestTimes.push_back(clientState.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-		successfulWriteTimes.push_back(clientState.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-		unsuccessfulWriteTimes.push_back(clientState.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+		lmTimes.push_back(::timeToString(clientState.lmTime()));
+		successfulReadTimes.push_back(::timeToString(clientState.successfulReadTime()));
+		writeRequestTimes.push_back(::timeToString(clientState.writeRequestTime()));
+		successfulWriteTimes.push_back(::timeToString(clientState.successfulWriteTime()));
+		unsuccessfulWriteTimes.push_back(::timeToString(clientState.unsuccessfulWriteTime()));
 	}
 
 
@@ -159,11 +159,11 @@ void TuningSignalInfo::updateInfo()
 
 		writeErrorCodes.push_back(E::valueToString(static_cast<E::NetworkError>(managerState.writeErrorCode())));
 
-		lmTimes.push_back(managerState.lmTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-		successfulReadTimes.push_back(managerState.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-		writeRequestTimes.push_back(managerState.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-		successfulWriteTimes.push_back(managerState.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-		unsuccessfulWriteTimes.push_back(managerState.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+		lmTimes.push_back(::timeToString(managerState.lmTime()));
+		successfulReadTimes.push_back(::timeToString(managerState.successfulReadTime()));
+		writeRequestTimes.push_back(::timeToString(managerState.writeRequestTime()));
+		successfulWriteTimes.push_back(::timeToString(managerState.successfulWriteTime()));
+		unsuccessfulWriteTimes.push_back(::timeToString(managerState.unsuccessfulWriteTime()));
 	}
 
 

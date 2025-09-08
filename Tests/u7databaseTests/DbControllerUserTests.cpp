@@ -342,7 +342,7 @@ void DbControllerUserTests::getUserListTest()
 				QVERIFY2 (buff.firstName() == buffQuery.firstName(), qPrintable("Error: function getUserList returned wrong output (wrong firstName)"));
 				QVERIFY2 (buff.lastName() == buffQuery.lastName(), qPrintable("Error: function getUserList returned wrong output (wrong lastName)"));
 				QVERIFY2 (buff.date().toString() == buffQuery.date().toString(), qPrintable("Error: function getUserList returned wrong output (wrong date)"));
-				QVERIFY2 (buff.isAdminstrator() == buffQuery.isAdminstrator(), qPrintable("Error: function getUserList returned wrong output (wrong administrator flag)"));
+				QVERIFY2 (buff.isAdministrator() == buffQuery.isAdministrator(), qPrintable("Error: function getUserList returned wrong output (wrong administrator flag)"));
 				QVERIFY2 (buff.isDisabled() == buffQuery.isDisabled(), qPrintable("Error: function getUserList returned wrong output (wrong disabled flag)"));
 				QVERIFY2 (buff.isReadonly() == buffQuery.isReadonly(), qPrintable("Error: function getUserList returned wrong output (wrong readonly flag)"));
 				userExist = true;

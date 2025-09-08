@@ -412,7 +412,7 @@ void DbUser::setNewPassword(const QString& value)
 }
 
 
-bool DbUser::isAdminstrator() const
+bool DbUser::isAdministrator() const
 {
 	return m_administrator;
 }

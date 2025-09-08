@@ -122,7 +122,7 @@ namespace Metrology
 				m_enableEditBase = false;
 			}
 
-			m_userIsAdmin = m_dbController->currentUser().isAdminstrator();
+			m_userIsAdmin = m_dbController->currentUser().isAdministrator();
 
 			// user of file
 			//

@@ -265,7 +265,7 @@ public:
 	[[nodiscard]] const QString& newPassword() const;
 	void setNewPassword(const QString& value);
 
-	[[nodiscard]] bool isAdminstrator() const;
+	[[nodiscard]] bool isAdministrator() const;
 	void setAdministrator(bool value);
 
 	[[nodiscard]] bool isReadonly() const;

@@ -729,7 +729,7 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 										 [this](const DbFileInfo& fi)
 										 {
 											 return fi.userId() != m_dbController->currentUser().userId() &&
-													m_dbController->currentUser().isAdminstrator() == false;
+													m_dbController->currentUser().isAdministrator() == false;
 										 }),
 						  checkedOutFiles.end());
 
@@ -909,7 +909,7 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undoRowList)
 		Q_ASSERT(fileInfo);
 
 		if (fileInfo->state() == E::VcsState::CheckedOut &&
-			(fileInfo->userId() == currentUser.userId() || currentUser.isAdminstrator() == true))
+			(fileInfo->userId() == currentUser.userId() || currentUser.isAdministrator() == true))
 		{
 			files.push_back(*fileInfo);
 			checkedOutList.push_back(index);

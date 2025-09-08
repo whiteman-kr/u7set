@@ -2,6 +2,7 @@
 
 #include "../../AppSignalLib/DiscretesLogRecord.h"
 #include <SchemaClientLib/DragDropHelper.h>
+#include <CommonLib/Hash.h>
 
 namespace AppSignalLists
 {
@@ -19,7 +20,7 @@ class SignalLogModel;
 
 enum class SignalLogColumns
 {
-	SignalID = 0, // Signal Param Columns
+	CustomAppSignalID = 0, // Signal Param Columns
 	EquipmentID,
 	LmEquipmentID,
 	AppSignalID,
@@ -50,35 +51,35 @@ enum class SignalLogColumns
 	ColumnCount
 };
 
-// Q_DECLARE_METATYPE(SchemaClientLib::SignalLogColumns);
-
 enum class SignalLogMaskType
 {
 	All = 0,
-	AppSignalId,
-	CustomAppSignalId,
-	EquipmentId,
-	LmEquipmentId,
+	AppSignalID,
+	CustomAppSignalID,
+	EquipmentID,
+	LmEquipmentID,
 	Count
 };
 
-//
-// SignalLogSorter
-//
-class SignalLogSorter
+struct RecordKey
 {
-public:
-	SignalLogSorter(int column, const SignalLogModel* model, const IAppSignalManager* appSignalManager);
+	std::size_t operator()(const RecordKey& p) const { return ::calcHash(&p, sizeof(RecordKey)); }
+	bool operator==(const RecordKey& p) const { return p.recordTime == recordTime && p.signalHash == signalHash; }
 
-	bool operator()(int index1, int index2) const { return sortFunction(index1, index2); }
+	RecordKey() :
+		recordTime(0),
+		signalHash(0)
+	{
+	}
 
-	bool sortFunction(int index1, int index2) const;
+	RecordKey(const DiscretesLogRecord& rec) :
+		recordTime(rec.recordTime),
+		signalHash(rec.signalHash)
+	{
+	}
 
-private:
-	int m_column = -1;
-
-	const SignalLogModel* m_model = nullptr;
-	const IAppSignalManager* m_appSignalManager = nullptr;
+	qint64 recordTime;
+	Hash signalHash;
 };
 
 //
@@ -90,8 +91,6 @@ public:
 	SignalLogModel(const ClientLib::SignalLog& signalLog,
 				   const IAppSignalManager* appSignalManager,
 				   const AppSignalLists::AppSignalListSet* appSignalListSet,
-				   const QString& signalLogTagCritical,
-				   const QString& signalLogTagWarning,
 				   QObject* parent);
 
 public:
@@ -101,8 +100,8 @@ public:
 
 	qint64 updateCounter() const;
 
-	qint64 maxInitialRecordID() const;
-	void resetMaxInitialRecordID();
+	qint64 maxInitialRecordTime() const;
+	void resetMaxInitialRecordTime();
 
 	// Overrides
 
@@ -113,32 +112,28 @@ public:
 
 	void setMaskType(SignalLogMaskType type);
 	void setMasks(const QStringList& masks);
-
 	void setTags(const QStringList& tags);
 
 	void setAppSignalList(const QString& listId);
 	QString appSignalList() const;
 
-	void setRecords(std::vector<DiscretesLogRecord>&& records, qint64 updateCounter);
-	void fillRecords(bool resetSelection);
+	void setRecords(std::vector<DiscretesLogRecord>& records, qint64 updateCounter);	// Update the list when new records arrived or were removed
+	void fillRecords(bool resetSelection);	// Refill the list when user changed filter settings
 
 	int recordsCount() const;
-	const DiscretesLogRecord& record(int index) const;
+	const DiscretesLogRecord& record(const RecordKey& key) const;
 	const DiscretesLogRecord& filteredRecord(int index) const;
 
 	void sort(int column, Qt::SortOrder order) override;
 
 	AppSignalParam signalParam(int rowIndex, bool* found);
 
-	E::AnalogFormat analogFormat() const;
-	void setAnalogFormat(E::AnalogFormat format);
-
-	int analogPrecision() const;
-	void setAnalogPrecision(int precision);
-
 protected:
 	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+
+private:
+	bool filterRecord(const DiscretesLogRecord& rec) const;
 
 private:
 	const ClientLib::SignalLog& m_signalLog;
@@ -146,31 +141,26 @@ private:
 	const AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 
 	QStringList m_columnsNames;
-
+	
 	// Model data
 
-	std::vector<DiscretesLogRecord> m_records;
+	std::unordered_map<RecordKey, DiscretesLogRecord, RecordKey> m_records;
 	qint64 m_updateCounter = 0;
 
-	bool m_initMaxInitialRecordID = true;
-	qint64 m_maxInitialRecordID = -1; // This is the max record ID at the dialog showing. Further record IDs are selected after adding
+	bool m_initMaxInitialRecordTime = true;
+	qint64 m_maxInitialRecordTime = -1; // This is the max record Time at the dialog showing. Further record Times are selected after adding
 
-	std::vector<size_t> m_filteredRecords;
-
-	QString m_signalLogTagCritical;
-	QString m_signalLogTagWarning;
+	std::vector<RecordKey> m_filteredRecords;
 
 	// Filtering parameters
 
-	SignalLogMaskType m_maskType = SignalLogMaskType::CustomAppSignalId;
+	SignalLogMaskType m_maskType = SignalLogMaskType::CustomAppSignalID;
 	QStringList m_masks;
 	QStringList m_tags;
-	QString m_listId;
+	
+	QString m_appSignallistID;
+	std::set<Hash> m_appSignalListHashes;
 
-	// View params
-
-	E::AnalogFormat m_analogFormat = E::AnalogFormat::g_9_or_9e;
-	int m_analogPrecision = -1;
 };
 
 
@@ -251,7 +241,6 @@ private slots:
 
 private:
 	void createControls();
-	void createMenus();
 	void initFiltersView();
 	void initRecordsView();
 
@@ -285,19 +274,12 @@ private:
 
 	SignalLogTableView* m_tableView = nullptr;
 
-	QAction* m_formatAutoSelect = nullptr;
-	QAction* m_formatDecimal = nullptr;
-	QAction* m_formatExponential = nullptr;
-
-	QAction* m_precisionDefault = nullptr;
-	QList<QAction*> m_precisionActions;
-
 	QCompleter* m_maskCompleter = nullptr;
 	QCompleter* m_tagsCompleter = nullptr;
 
 	QPushButton* m_clearFilterButton = nullptr;
 
-	QMenu m_formatMenu;
+	QMenu m_signalMenu;
 
 	// Project Data
 	QString m_projectName;
@@ -311,6 +293,11 @@ private:
 	QString m_tagsHelp;
 
 	SignalLogDialogSettings m_settings;
+
+	// Color tags
+
+	QString m_signalLogTagCritical;
+	QString m_signalLogTagWarning;
 };
 
 class SignalLogDialog : public QDialog
