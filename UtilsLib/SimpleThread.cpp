@@ -42,7 +42,7 @@ void SimpleThreadWorker::onThreadFinished()
 
 void SimpleThreadWorker::printFunction(const QString& func)
 {
-	qDebug() << C_STR(workerName() + "::" + func);
+	qDebug() << C_STR(QString("%1::%2").arg(workerName()).arg(func));
 }
 
 void SimpleThreadWorker::slot_onThreadStarted()
