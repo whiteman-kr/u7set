@@ -47,8 +47,8 @@ class SimpleThread : public QObject
 	Q_OBJECT
 
 public:
-	SimpleThread(const QString& threadName = QString());
-	SimpleThread(SimpleThreadWorker* worker, const QString& threadName = QString());
+	SimpleThread();
+	SimpleThread(SimpleThreadWorker* worker);
 	virtual ~SimpleThread();
 
 public:

@@ -54,6 +54,7 @@ void SimpleThreadWorker::slot_onThreadFinished()
 {
 	onThreadFinished();
 	m_thread->workerFinished(this);
+	qDebug() << C_STR(QString("SimpleThreadWorker::slot_onThreadFinished worker finished %1").arg(workerName()));
 }
 
 void SimpleThreadWorker::setThread(SimpleThread* thread)
@@ -68,15 +69,17 @@ void SimpleThreadWorker::setThread(SimpleThread* thread)
 //
 // -------------------------------------------------------------------------------------
 
-SimpleThread::SimpleThread(const QString& threadName) :
-	m_threadName(threadName)
+SimpleThread::SimpleThread() :
+	m_threadName("SimpleThread:")
 {
 }
 
-SimpleThread::SimpleThread(SimpleThreadWorker* worker, const QString& threadName) :
-	m_threadName(threadName)
+SimpleThread::SimpleThread(SimpleThreadWorker* worker) :
+	m_threadName("SimpleThread:")
 {
 	addWorker(worker);
+
+	m_threadName += QString(" %1").arg(worker->workerName());
 }
 
 SimpleThread::~SimpleThread()
@@ -93,6 +96,8 @@ void SimpleThread::addWorker(SimpleThreadWorker* worker)
 	}
 
 	m_workers.insert(worker);
+
+	m_threadName += QString(" %1").arg(worker->workerName());
 }
 
 void SimpleThread::setPriority(QThread::Priority priority)
@@ -102,6 +107,8 @@ void SimpleThread::setPriority(QThread::Priority priority)
 
 void SimpleThread::start()
 {
+	qDebug() << C_STR(QString("%1 start").arg(m_threadName));
+
 	for(SimpleThreadWorker* worker : m_workers)
 	{
 		worker->setThread(this);
@@ -119,6 +126,8 @@ bool SimpleThread::quitAndWait(unsigned long time)
 {
 	emit quitRequested();
 
+	qDebug() << C_STR(QString("%1 quitAndWait").arg(m_threadName));
+
 	bool finishedOk = false;
 
 	std::unique_lock ul(m_finishCondVarMutex, std::defer_lock);
@@ -134,6 +143,8 @@ bool SimpleThread::quitAndWait(unsigned long time)
 		});
 
 	ul.unlock();
+
+	qDebug() << C_STR(QString("%1 workers finished %2").arg(m_threadName).arg(m_finishedWorkersCount));
 
 	Q_ASSERT(finishedOk = true);
 
@@ -168,8 +179,6 @@ void SimpleThread::workerFinished(SimpleThreadWorker* worker)
 		Q_ASSERT(false);
 		return;
 	}
-
-	// qDebug() << "Worker " << worker->workerName() << "finished";
 
 	m_finishCondVarMutex.lock();
 

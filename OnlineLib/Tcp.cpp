@@ -252,17 +252,15 @@ namespace Tcp
 
 	void SocketWorker::deleteSocket()
 	{
-		PRINT_FUNC;
-
 		AUTO_LOCK(m_mutex);
 
 		if (m_socket != nullptr)
 		{
+			PRINT_FUNC;
+
 			m_socket->close();
 			delete m_socket;
 			m_socket = nullptr;
-
-			qDebug() << "m_socket == nullptr";
 		}
 	}
 

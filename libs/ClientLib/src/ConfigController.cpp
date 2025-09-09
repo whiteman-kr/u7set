@@ -54,7 +54,7 @@ namespace ClientLib
 	ConfigController::~ConfigController()
 	{
 		releaseAppInstanceNo();
-		m_cfgLoaderThread->quitAndWait();
+		//m_cfgLoaderThread->quitAndWait();
 	}
 
 	void ConfigController::setConnectionParams(QString equipmentId, const HostAddressPort& address1, const HostAddressPort& address2)
