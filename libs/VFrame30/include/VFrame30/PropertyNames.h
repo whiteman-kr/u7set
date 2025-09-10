@@ -199,7 +199,9 @@ $(caption) - Caption.
 $(signalid) - SignalID (CustomSignalID).
 $(appsignalid) - AppSignalID (#APPSIGANLID).
 $(equipmentid) - Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals).
-$(units) - Signal units.)"};
+$(units) - Signal units.
+$(AppSignalParam.[property]) - AppSignal parameter, example: AppSignalParam.tuningDefaultValue.
+$(AppSignalState.[property]) - AppSignal state, example: AppSignalState.blocked.)"};
 
 		inline static const QString textVduItemValueDescription = R"(Text to display, may contain placeholders:
 Example: "Value %i: %E %u" -> "Value YCB10B23: 1.0E-11 kg"

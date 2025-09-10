@@ -358,6 +358,8 @@ namespace VFrame30
 					// $(appsignalid) - AppSignalID (#APPSIGANLID).
 					// $(equipmentid) - Signal EquipmentID (LM for internal signals, input/output equipment port for IO signals).
 					// $(units) - Signal units.
+					// $(AppSignalParam.[property]) - AppSignal parameter, example: AppSignalParam.tuningDefaultValue.
+					// $(AppSignalState.[property]) - AppSignal state, example: AppSignalState.blocked.
 		// clang-format on
 
 		int m_precision = -1; // decimal places, -1 means take value from Signal

@@ -431,7 +431,7 @@ namespace VFrame30
 			return result;
 		}
 
-		thread_local const QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9_]+"); // Search for $([SomeText])
+		thread_local const QRegularExpression reStartIndex("\\$\\([a-zA-Z0-9_.]+"); // Search for $([SomeText])
 
 		qsizetype index = 0;
 		while (index < result.size())
@@ -457,6 +457,7 @@ namespace VFrame30
 			// Get value string
 			//
 			std::optional<QString> replaceText;
+
 			do
 			{
 				if (macro.compare(QLatin1String("value"), Qt::CaseInsensitive) == 0)
@@ -567,6 +568,99 @@ namespace VFrame30
 					replaceText = signal.units();
 					break;
 				}
+
+				// Use "reflection" to get property value from one of the following objects:
+				//	AppSignalParam
+				//	AppSignalState
+				//
+				if (macro.startsWith("AppSignalParam.", Qt::CaseInsensitive) == true)
+				{
+					QString propertyName = macro.mid(15, -1); // 15 is length of "AppSignalParam."
+
+					const QMetaObject& mo = AppSignalParam::staticMetaObject;
+
+					if (int propertyIndex = mo.indexOfProperty(propertyName.toLatin1()); propertyIndex >= 0)
+					{
+						QMetaProperty prop = mo.property(propertyIndex);
+						QVariant value = prop.readOnGadget(&signal);
+						if (value.isValid() == true)
+						{
+							switch (value.metaType().id())
+							{
+							case QMetaType::QString:
+								replaceText = value.toString();
+								break;
+							case QMetaType::Double:
+								replaceText = formatNumber(value.toDouble(), analogFormat(), signal);
+								break;
+							case QMetaType::Float:
+								replaceText = formatNumber(static_cast<double>(value.toFloat()), analogFormat(), signal);
+								break;
+							case QMetaType::Int:
+							case QMetaType::UInt:
+							case QMetaType::Long:
+							case QMetaType::LongLong:
+							case QMetaType::Short:
+							case QMetaType::UShort:
+								replaceText = QString::number(value.toLongLong());
+								break;
+							}
+						}
+						else
+						{
+							replaceText = QStringLiteral("?");
+						}
+					}
+					else
+					{
+						replaceText = QStringLiteral("AppSignalParam.unk_prop");
+					}
+
+					break;
+				}
+
+				if (macro.startsWith("AppSignalState.", Qt::CaseInsensitive) == true)
+				{
+					QString propertyName = macro.mid(15, -1); // 15 is length of "AppSignalState."
+
+					const QMetaObject& mo = AppSignalState::staticMetaObject;
+					int propertyIndex = mo.indexOfProperty(propertyName.toLatin1());
+					if (propertyIndex < 0)
+					{
+						replaceText = QStringLiteral("AppSignalState.unk_prop");
+						break;
+					}
+
+					if (propertyName == "stateAvailable")
+					{
+						replaceText = QString::number(signalState.isStateAvailable());
+						break;
+					}
+
+					QMetaProperty prop = mo.property(propertyIndex);
+					QVariant value = prop.readOnGadget(&signalState);
+					if (value.isValid() == true)
+					{
+						switch (value.metaType().id())
+						{
+						case QMetaType::Double:
+							replaceText = signalState.isStateAvailable() ? formatNumber(signalState.m_value, analogFormat(), signal) :
+																		   QStringLiteral("?");
+							break;
+						case QMetaType::Bool:
+							replaceText = signalState.isStateAvailable() ? QString::number(value.toBool()) : QStringLiteral("?");
+							break;
+						default:
+							replaceText = QStringLiteral("unk_type");
+						}
+					}
+					else
+					{
+						replaceText = QStringLiteral("?");
+					}
+					break;
+				}
+
 			} while (false);
 
 			// Replace text in result
