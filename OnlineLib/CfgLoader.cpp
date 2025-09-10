@@ -835,6 +835,8 @@ CfgLoaderThread::CfgLoaderThread(	const SoftwareInfo& softwareInfo,
 	m_enableDownloadCfg(enableDownloadCfg),
 	m_logger(logger)
 {
+	qDebug() << "CfgLoaderThread::CfgLoaderThread";
+
 	AUTO_LOCK(m_mutex);
 
 	initThread();
@@ -844,6 +846,8 @@ CfgLoaderThread::~CfgLoaderThread()
 {
 	AUTO_LOCK(m_mutex);
 	shutdownThread();
+
+	qDebug() << "CfgLoaderThread::~CfgLoaderThread";
 }
 
 void CfgLoaderThread::start()

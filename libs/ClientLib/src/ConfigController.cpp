@@ -22,6 +22,8 @@ namespace ClientLib
 		m_logFile{logFile, "ConfigController"},
 		m_softwareInfo{softwareInfo}
 	{
+		qDebug() << "ConfigController::ConfigController";
+
 		m_appInstanceNo = acquireAppInstanceNo(E::valueToString(softwareInfo.softwareType()));
 
 		m_logFile.writeMessage(QString("Assigned InstanceNo is %1").arg(m_appInstanceNo));
@@ -54,6 +56,8 @@ namespace ClientLib
 	ConfigController::~ConfigController()
 	{
 		releaseAppInstanceNo();
+
+		qDebug() << "ConfigController::~ConfigController";
 		//m_cfgLoaderThread->quitAndWait();
 	}
 
