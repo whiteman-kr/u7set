@@ -442,6 +442,8 @@ linux_code_coverage_job:
     paths:
 #      - CodeCoverage/coverage.xml
       - CodeCoverage/Report/
+      - ./*.log
+      - ./*.out
 #    reports:
 #      coverage_report:
 #        coverage_format: cobertura
