@@ -394,8 +394,8 @@ linux_test_job:
   artifacts:
     name: "linux_test_job_logs.$CI_PIPELINE_ID"
     paths:
-      - ./*.log
-      - ./*.out
+      - bin/release/*.log
+      - bin/release/*.out
 
 
 linux_code_coverage_job:
@@ -447,8 +447,8 @@ linux_code_coverage_job:
     name: "coverage_report.$CI_PIPELINE_ID-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHA"
     paths:
       - CodeCoverage/Report/
-      - ./*.log
-      - ./*.out
+      - bin/debug/*.log
+      - bin/debug/*.out
 #      - CodeCoverage/coverage.xml
 #    reports:
 #      coverage_report:
