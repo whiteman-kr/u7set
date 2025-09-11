@@ -369,7 +369,7 @@ linux_test_job:
     - "sleep 6"
     - "jobs"
     - "./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
-	- "./UtilsTests"
+    - "./UtilsTests"
     - "./AdsBridgeTests --config=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --profile=linux_test_job"
     - "export QT_QPA_PLATFORM=offscreen"
     - "./TestSuiteConsole -settings=\"../../Tests/TestSuiteConsoleLinuxTest.xml\" -nosecurity"
