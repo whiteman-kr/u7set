@@ -390,6 +390,13 @@ linux_test_job:
 #    - "#               Run ROVT tests"
 #    - "# ----------------------------------------------"
 #    - "#&C:/ROVT/ROVT_C.exe /b:C:\\Temp\\build\\${SIMULATOR_PROJECT_NAME}\\build"
+ 
+  artifacts:
+    name: "linux_test_job_logs.$CI_PIPELINE_ID"
+    when: always   # <— keep artifacts even on failure
+    paths:
+      - ./*.log
+      - ./*.out
 
 
 linux_code_coverage_job:
@@ -439,11 +446,12 @@ linux_code_coverage_job:
   coverage: '/lines......: \d+\.\d+/'
   artifacts:
     name: "coverage_report.$CI_PIPELINE_ID-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHA"
+    when: always   # <— keep artifacts even on failure
     paths:
-#      - CodeCoverage/coverage.xml
       - CodeCoverage/Report/
       - ./*.log
       - ./*.out
+#      - CodeCoverage/coverage.xml
 #    reports:
 #      coverage_report:
 #        coverage_format: cobertura
