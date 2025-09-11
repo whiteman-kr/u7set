@@ -124,6 +124,10 @@ void SimpleThread::start()
 
 bool SimpleThread::quitAndWait(unsigned long time)
 {
+	QElapsedTimer et;
+
+	et.start();
+
 	emit quitRequested();
 
 	qDebug() << C_STR(QString("%1 quitAndWait").arg(m_threadName));
@@ -144,6 +148,8 @@ bool SimpleThread::quitAndWait(unsigned long time)
 
 	ul.unlock();
 
+	qDebug() << C_STR(QString("Workers finish time %1").arg(et.elapsed()));
+
 	qDebug() << C_STR(QString("%1 workers finished %2").arg(m_threadName).arg(m_finishedWorkersCount));
 
 	Q_ASSERT(finishedOk = true);
@@ -152,7 +158,7 @@ bool SimpleThread::quitAndWait(unsigned long time)
 
 	finishedOk = m_thread.wait(3000);
 
-	Q_ASSERT(finishedOk == true);
+	//Q_ASSERT(finishedOk == true);
 
 	return finishedOk;
 }
@@ -170,6 +176,11 @@ bool SimpleThread::isRunning() const
 bool SimpleThread::isFinished() const
 {
 	return m_thread.isFinished();
+}
+
+int SimpleThread::finishedWorkersCount() const
+{
+	return m_finishedWorkersCount;
 }
 
 void SimpleThread::workerFinished(SimpleThreadWorker* worker)

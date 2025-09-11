@@ -63,6 +63,8 @@ public:
 	bool isRunning() const;
 	bool isFinished() const;
 
+	int finishedWorkersCount() const;
+
 signals:
 	void quitRequested();
 
