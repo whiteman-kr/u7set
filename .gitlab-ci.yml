@@ -364,7 +364,7 @@ linux_test_job:
     - "./linux_test_job_systemid_clienttest_ws01_tuns2.sh < /dev/null > clienttest_ws01_tuns2.out 2>&1 &"
     - "./linux_test_job_systemid_clienttest_ws02_tuns.sh < /dev/null > clienttest_ws02_tuns.out 2>&1 &"
     - "./linux_test_job_systemid_clienttest_ws04_tuns.sh < /dev/null > clienttest_ws04_tuns.out 2>&1 &"
-    - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job -enable_lan -script=\"$CI_PROJECT_DIR/Tests/ClientTests/Scripts/TuningTests.js\" > SimulatorConsole.out 2>&1 &"
+    - "./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job -enable_lan -script=\"$CI_PROJECT_DIR/Tests/ClientTests/Scripts/TuningTests.js\" -speed_factor=x0.5 > SimulatorConsole.out 2>&1 &"
     - "sleep 6"
     - "jobs"
     - "./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
@@ -393,7 +393,6 @@ linux_test_job:
  
   artifacts:
     name: "linux_test_job_logs.$CI_PIPELINE_ID"
-    when: always   # <— keep artifacts even on failure
     paths:
       - ./*.log
       - ./*.out
@@ -446,7 +445,6 @@ linux_code_coverage_job:
   coverage: '/lines......: \d+\.\d+/'
   artifacts:
     name: "coverage_report.$CI_PIPELINE_ID-$CI_COMMIT_REF_SLUG-$CI_COMMIT_SHA"
-    when: always   # <— keep artifacts even on failure
     paths:
       - CodeCoverage/Report/
       - ./*.log

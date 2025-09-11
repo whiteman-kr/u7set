@@ -70,7 +70,7 @@ sleep 5
 ./linux_code_coverage_systemid_clienttest_ws02_tuns.sh < /dev/null > clienttest_ws02_tuns.out 2>&1 &
 ./linux_code_coverage_systemid_clienttest_ws04_tuns.sh < /dev/null > clienttest_ws04_tuns.out 2>&1 &
 
-./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -script=$CI_PROJECT_DIR/Tests/ClientTests/Scripts/TuningTests.js > SimulatorConsole.out 2>&1 &
+./SimulatorConsole -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_code_coverage -enable_lan -script=$CI_PROJECT_DIR/Tests/ClientTests/Scripts/TuningTests.js -speed_factor=x0.5 > SimulatorConsole.out 2>&1 &
 
 sleep 6
 
