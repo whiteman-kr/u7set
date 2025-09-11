@@ -53,6 +53,8 @@ namespace ClientLib
 
 	ConfigController::~ConfigController()
 	{
+		qDebug() << "ConfigController::~ConfigController()";
+
 		releaseAppInstanceNo();
 		m_cfgLoaderThread->quit();
 	}
@@ -195,6 +197,8 @@ namespace ClientLib
 
 		if (bool ok = m_appInstanceSharedMemory.create(MaxInstanceCount * sizeof(qint64)); ok == true)
 		{
+			qDebug() << "ConfigController::acquireAppInstanceNo(): Shared memory created, thread: " << QThread::currentThread();
+
 			// Shared memory just created, initialize it
 			//
 			std::lock_guard locker(m_appInstanceSharedMemory);
@@ -212,11 +216,17 @@ namespace ClientLib
 		{
 			if (m_appInstanceSharedMemory.error() == QSharedMemory::SharedMemoryError::AlreadyExists)
 			{
+				qDebug() << "ConfigController::acquireAppInstanceNo(): Shared memory already exists, try to attach, thread: "
+						 << QThread::currentThread();
+
 				ok = m_appInstanceSharedMemory.attach();
 			}
 
 			if (ok == false)
 			{
+				qDebug() << "ConfigController::acquireAppInstanceNo(): Cannot create or attach to shared memory, thread: "
+						 << QThread::currentThread() << ", error: " << m_appInstanceSharedMemory.errorString();
+
 				m_logFile.writeAlert(tr("Cannot create or attach to shared memory to determine software instance no. Error: %1")
 										 .arg(m_appInstanceSharedMemory.errorString()));
 
@@ -226,6 +236,8 @@ namespace ClientLib
 			}
 			else
 			{
+				qDebug() << "ConfigController::acquireAppInstanceNo(): Shared memory is attached, thread: " << QThread::currentThread();
+
 				// Get empty slot from the shared memory
 				//
 				Q_ASSERT(m_appInstanceSharedMemory.isAttached() == true);
@@ -266,6 +278,9 @@ namespace ClientLib
 
 	void ConfigController::releaseAppInstanceNo()
 	{
+		qDebug() << "ConfigController::releaseAppInstanceNo(): " << m_appInstanceNo << ", thread: " << QThread::currentThread()
+				 << ", isAttached: " << m_appInstanceSharedMemory.isAttached();
+
 		// Release application instance slot
 		//
 		if (m_appInstanceNo < 0 || m_appInstanceNo >= MaxInstanceCount)
