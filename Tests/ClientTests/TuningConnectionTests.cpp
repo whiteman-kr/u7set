@@ -283,7 +283,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 
 	ASSERT_EQ(connStates.size(), 1);
 
-	EXPECT_TRUE(connStates[0].isConnected);
+	ASSERT_TRUE(connStates[0].isConnected);
 
 	EXPECT_EQ(connStates[0].peerAddr, s_safeTuningServices[0].clientRequestAddress);
 
