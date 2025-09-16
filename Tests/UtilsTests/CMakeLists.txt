@@ -36,11 +36,16 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QDebug>
 	<QSignalSpy>
 
+	<CommonLib/Types.h>
+	<CommonLib/Hash.h>
+	<CommonLib/HostAddressPort.h>
+
+	"../../OnlineLib/SoftwareInfo.h"
 	"../../UtilsLib/SimpleThread.h"
 )
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest_main GTest::gmock)
-target_link_libraries(${TARGET} PRIVATE UtilsLib)
+target_link_libraries(${TARGET} PRIVATE UtilsLib ClientLib CommonLib OnlineLib)
 
 add_test(NAME ${TARGET} COMMAND UtilsTests "--gtest_filter=-SimpleThreadTests.*")
 

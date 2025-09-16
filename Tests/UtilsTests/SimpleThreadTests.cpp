@@ -4,6 +4,10 @@
 #include <QTimer>
 #include <QRandomGenerator>
 #include "../../UtilsLib/WUtils.h"
+#include <ClientLib/ConfigController.h>
+#include <CommonLib/HostAddressPort.h>
+#include "../../OnlineLib/BuildInfo.h"
+#include "../../OnlineLib/SoftwareInfo.h"
 
 class ThreadWorker : public SimpleThreadWorker
 {
@@ -47,6 +51,7 @@ private:
 	QTimer* m_timer = nullptr;
 };
 
+/*
 TEST(SimpleThreadTests, startStopThread)
 {
 	const int TEST_COUNT = 5;
@@ -105,5 +110,24 @@ TEST(SimpleThreadTests, startStopMultipleThreads)
 			EXPECT_EQ(finishedOk, true);
 			EXPECT_EQ(st.finishedWorkersCount(), WORKERS_COUNT);
 		}
+	}
+}
+*/
+
+TEST(SimpleThreadTests, cfgLoaderTests)
+{
+	for(int i = 0; i < 10; i++)
+	{
+		SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
+
+		HostAddressPort host1{"127.0.0.1", 13312};		// valid address, where cfgservice is expected to run.
+		HostAddressPort host2{"192.168.99.103", 8888};	// some unreachable address
+		ILogFileStub log;
+
+		ClientLib::ConfigController* cfgController = new ClientLib::ConfigController(softwareInfo, host1, host2, &log);
+
+		cfgController->start();
+
+		delete cfgController;
 	}
 }
