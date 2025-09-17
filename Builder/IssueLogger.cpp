@@ -8040,7 +8040,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5206(QString optoPortID, int txRawDataSize)
 	{
-		LOG_ERROR(IssueType::AlCompiler, 5205,
+		LOG_ERROR(IssueType::AlCompiler, 5206,
 				  QString(tr("OptoPort %1 tx raw data out of range (%2 words)").
 							arg(optoPortID).arg(txRawDataSize)));
 	}
