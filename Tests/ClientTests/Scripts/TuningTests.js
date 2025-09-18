@@ -75,9 +75,9 @@ function testStartTuning(sim)
 	lm.armingKey = true;
 	lm.tuningKey = true;
 
-	// Start simulation for 200 seconds
+	// Start simulation for 300 seconds
 	//
-	sim.startForMs(200 * 1000);	
+	sim.startForMs(300 * 1000);	
 
 	return;
 }

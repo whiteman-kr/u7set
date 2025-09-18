@@ -77,6 +77,7 @@ namespace Sim
 		bool loadLmDescriptions(QString buildPath);
 		bool loadConnectionsInfo(QString buildPath);
 		bool loadAppSignals(QString buildPath);
+		bool loadComparatorSet(QString buildPath);
 
 	signals:
 		void projectUpdated(); // Project was loaded or cleared

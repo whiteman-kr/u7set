@@ -16121,8 +16121,6 @@ namespace Builder
 			return true;
 		}
 
-		// m_alpCode_init(&m_resourcesUsageInfo.copyOptoConnectionsTxData);
-
 		for(Hardware::OptoModuleShared& module : modules)
 		{
 			if (module == nullptr)
@@ -16751,13 +16749,12 @@ namespace Builder
 		{
 			QString msg = QString("OptoPort %1 raw data copying, not found module on place %2.").
 					arg(port->equipmentID()).arg(place);
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+			LOG_INTERNAL_ERROR_MSG(m_log, msg);
 			return false;
 		}
 
 		return copyOptoPortTxModuleRawData(code, port, rawDataOffset, module);
 	}
-
 
 	bool ModuleLogicCompiler::copyOptoPortTxModuleRawData(CodeSnippet* code, Hardware::OptoPortShared port, int* rawDataOffset, const Hardware::DeviceModule* module)
 	{
@@ -16773,7 +16770,9 @@ namespace Builder
 			return true;
 		}
 
-		if (*rawDataOffset + moduleRawDataSize >= port->txRawDataSizeW())
+		// *rawDataOffset already include Hardware::OptoPort::TX_DATA_ID_SIZE_W
+		//
+		if (*rawDataOffset + moduleRawDataSize - Hardware::OptoPort::TX_DATA_ID_SIZE_W > port->txRawDataSizeW())
 		{
 			// OptoPort %1 tx raw data out of range (%2 words)
 			//
@@ -16951,7 +16950,9 @@ namespace Builder
 			return true;
 		}
 
-		if (*rawDataOffset + portTxRawDataSizeW >= port->txRawDataSizeW())
+		// *rawDataOffset already include Hardware::OptoPort::TX_DATA_ID_SIZE_W
+		//
+		if (*rawDataOffset + portTxRawDataSizeW - Hardware::OptoPort::TX_DATA_ID_SIZE_W > port->txRawDataSizeW())
 		{
 			// OptoPort %1 tx raw data out of range (%2 words)
 			//
@@ -16981,7 +16982,9 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(port, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(rawDataOffset, m_log);
 
-		if (*rawDataOffset >= port->txRawDataSizeW())
+		// *rawDataOffset already include Hardware::OptoPort::TX_DATA_ID_SIZE_W
+		//
+		if (*rawDataOffset + 1 - Hardware::OptoPort::TX_DATA_ID_SIZE_W > port->txRawDataSizeW())
 		{
 			// OptoPort %1 tx raw data out of range (%2 words)
 			//

@@ -782,12 +782,18 @@ namespace Sim
 
 		if (m_waitingConfirmationID.has_value() == false)
 		{
-			Q_ASSERT(false);
+			m_log.writeAlert(QString("Unexpected m_waitingConfirmationID does not have value for %1, confirmationID %2")
+								 .arg(m_lmEquipmentID)
+								 .arg(confirmationID));
+			//Q_ASSERT(false);
 			return false;
 		}
 
 		if (confirmationID != m_waitingConfirmationID)
 		{
+			m_log.writeAlert(QString("Unexpected confirmationID %1 from %2, expected %3").arg(confirmationID)
+								 .arg(m_lmEquipmentID)
+								 .arg(*m_waitingConfirmationID));
 			Q_ASSERT(false);
 			return false;
 		}

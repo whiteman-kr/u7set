@@ -710,11 +710,13 @@ namespace OT
 	enum LanguageType
 	{
 		English	= 0,
-		Russian	= 1,
+		Bulgarian = 1,
+		Russian	= 2,
+		Ukrainian = 3,
 	};
 	Q_ENUM_NS(LanguageType)
 
-	const int LanguageTypeCount = 2;
+	const int LanguageTypeCount = 4;
 
 	#define ERR_LANGUAGE_TYPE(type) (static_cast<int>(type) < 0 || static_cast<int>(type) >= OT::LanguageTypeCount)
 
@@ -812,7 +814,8 @@ private:
 
 	int m_measureType = Measure::Type::NoMeasureType;				// current, active ViewID
 
-	bool m_updateColumnView[Measure::TYPE_COUNT];					// determined the need to update the view after changing settings
+//	bool m_updateColumnView[Measure::TYPE_COUNT];              // determined the need to update the view after changing settings - Galytskyi code, warning C26495, Variable 'MeasureViewOption::m_updateColumnView' is uninitialized. Always initialize a member variable (type.6). u7set D:\u7set\Metrology\Options.cpp 1352
+	std::array<bool, Measure::TYPE_COUNT> m_updateColumnView{}; // Ovcharenko 29.08.25 without warning C26495
 
 	QFont m_font;
 	QFont m_fontBold;
@@ -1197,8 +1200,7 @@ private:
 
 // ----------------------------------------------------------------------------------------------
 
-#define LANGUAGE_OPTIONS_DIR		"/languages"
-#define LANGUAGE_OPTIONS_FILE_RU	"Metrology_ru.qm"
+#define LANGUAGE_OPTIONS_DIR		"/translations"
 
 // ----------------------------------------------------------------------------------------------
 
@@ -1308,6 +1310,8 @@ public:
 	LanguageOption& language() { return m_language; }
 	void setLanguage(const LanguageOption& language) { m_language = language; }
 
+	void loadTranslators() const;
+	
 	//
 	//
 	void load();

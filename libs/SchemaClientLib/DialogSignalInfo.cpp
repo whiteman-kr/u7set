@@ -2048,8 +2048,8 @@ void DialogSignalInfo::updateAppSignalState()
 	QDateTime localTime = appSignalState.m_time.local.toDateTime();
 	QDateTime plaitTime = appSignalState.m_time.plant.toDateTime();
 
-	ui->labelServerTime->setText(localTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	ui->labelPlantTime->setText(plaitTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	ui->labelServerTime->setText(::timeToString(localTime));
+	ui->labelPlantTime->setText(::timeToString(plaitTime));
 
 	ui->widgetFlags->updateControl(appSignalState.m_flags);
 
@@ -2154,11 +2154,11 @@ void DialogSignalInfo::updateTuningSignalState()
 		ui->labelValueTuning->setText(strValue);
 	}
 
-	ui->labelSuccessfulReadTime->setText(tuningSignalState.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	ui->labelWriteRequestTime->setText(tuningSignalState.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	ui->labelSuccessfulWriteTime->setText(tuningSignalState.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	ui->labelUnsuccessfulWriteTime->setText(tuningSignalState.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	ui->labelLmTime->setText(tuningSignalState.lmTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	ui->labelSuccessfulReadTime->setText(::timeToString(tuningSignalState.successfulReadTime()));
+	ui->labelWriteRequestTime->setText(::timeToString(tuningSignalState.writeRequestTime()));
+	ui->labelSuccessfulWriteTime->setText(::timeToString(tuningSignalState.successfulWriteTime()));
+	ui->labelUnsuccessfulWriteTime->setText(::timeToString(tuningSignalState.unsuccessfulWriteTime()));
+	ui->labelLmTime->setText(::timeToString(tuningSignalState.lmTime()));
 
 	ui->widgetTuningFlags->updateControl(tuningSignalState.m_flags);
 

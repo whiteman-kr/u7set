@@ -159,6 +159,7 @@ namespace Sim
 	{
 		resetSignalParam();
 		resetRam();
+		m_setpoints.clear();
 		return;
 	}
 
@@ -303,6 +304,21 @@ namespace Sim
 		}
 
 		return ok;
+	}
+
+	bool AppSignalManagerImpl::loadComparators(QString fileName)
+	{
+		QFile file(fileName);
+		bool ok = file.open(QIODevice::ReadOnly | QIODeviceBase::ExistingOnly);
+
+		if (ok == false)
+		{
+			m_log.writeError(QString("Cannot open file %1, error %2 ").arg(fileName).arg(file.errorString()));
+			return false;
+		}
+
+		QByteArray data = file.readAll();
+		return m_setpoints.serializeFrom(data);
 	}
 
 	void AppSignalManagerImpl::setData(const QString& equipmentId,
@@ -1093,14 +1109,14 @@ namespace Sim
 		return result;
 	}
 
-	std::vector<std::shared_ptr<Comparator>> AppSignalManagerImpl::setpointsByInput(const QString& /*appSignalId*/) const
+	std::vector<std::shared_ptr<Comparator>> AppSignalManagerImpl::setpointsByInput(const QString& appSignalId) const
 	{
-		return {};
+		return m_setpoints.getByInputSignalID(appSignalId);
 	}
 
-	std::shared_ptr<Comparator> AppSignalManagerImpl::setpointByOutput(const QString& /*appSignalId*/) const
+	std::shared_ptr<Comparator> AppSignalManagerImpl::setpointByOutput(const QString& appSignalId) const
 	{
-		return {};
+		return m_setpoints.getByOutputSignalID(appSignalId);
 	}
 
 	QStringList AppSignalManagerImpl::tags() const

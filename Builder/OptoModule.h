@@ -167,7 +167,7 @@ namespace Hardware
 		bool getRxSignalAbsAddress(const QString& appSignalID, SignalAddress16* addr) const;
 
 		bool parseRawDescription();
-		bool calculatePortRawDataSize();
+		bool calculatePortTxRawDataSize(int iteration);
 
 		quint16 linkID() const { return m_linkID; }
 		void setLinkID(quint16 linkID) { m_linkID = linkID; }
@@ -487,8 +487,6 @@ namespace Hardware
 	//
 	// --------------------------------------------------------------------------------------
 
-	//class Context;
-
 	class OptoModuleStorage : public QObject
 	{
 		Q_OBJECT
@@ -501,6 +499,8 @@ namespace Hardware
 			QString port2;
 			std::shared_ptr<Connection> connection;
 		};
+
+		static const int CALC_TX_RAW_DATA_SIZE_ITERATIONS = 32;
 
 	public:
 		OptoModuleStorage(Builder::Context* context);

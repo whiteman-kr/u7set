@@ -1572,9 +1572,9 @@ QString OT::MeasureViewParamCaption(OT::MeasureViewParam param)
 	switch (param)
 	{
 		case OT::mwo_Font:					caption = QT_TRANSLATE_NOOP("Options", "Font of measurements list");											break;
-		case OT::mwo_ColorNoError:			caption = QT_TRANSLATE_NOOP("Options", "Color measurement that has not error");									break;
-		case OT::mwo_ColorErrorOfLimit:		caption = QT_TRANSLATE_NOOP("Options", "Color measurement over limit error");									break;
-		case OT::mwo_ColorErrorOfControl:	caption = QT_TRANSLATE_NOOP("Options", "Color measurement over control error");									break;
+		case OT::mwo_ColorNoError:			caption = QT_TRANSLATE_NOOP("Options", "Color of measurement that has not error");									break;
+		case OT::mwo_ColorErrorOfLimit:		caption = QT_TRANSLATE_NOOP("Options", "Color of measurement over limit error");									break;
+		case OT::mwo_ColorErrorOfControl:	caption = QT_TRANSLATE_NOOP("Options", "Color of measurement over control error");									break;
 		case OT::mwo_ShowNoValid:			caption = QT_TRANSLATE_NOOP("Options", "Show measuring value if signal is not valid");							break;
 		case OT::mwo_PrecesionByCalibrator:	caption = QT_TRANSLATE_NOOP("Options", "Show accuracy for measure value and nominal value from calibrator");	break;
 
@@ -2053,7 +2053,9 @@ QString OT::LanguageTypeCaptionEn(OT::LanguageType type)
 	switch (type)
 	{
 		case OT::English:	caption = "English";	break;
+		case OT::Bulgarian:	caption = "Bulgarian";	break;
 		case OT::Russian:	caption = "Russian";	break;
+		case OT::Ukrainian:	caption = "Ukrainian";	break;
 
 		default:
 			Q_ASSERT(0);
@@ -2072,7 +2074,9 @@ QString OT::LanguageTypeCaptionTr(OT::LanguageType type)
 	switch (type)
 	{
 		case OT::English:	caption = QObject::tr("English");	break;
+		case OT::Bulgarian:	caption = QObject::tr("Bulgarian");	break;
 		case OT::Russian:	caption = QObject::tr("Russian");	break;
+		case OT::Ukrainian:	caption = QObject::tr("Ukrainian");	break;
 
 		default:
 			Q_ASSERT(0);
@@ -2098,6 +2102,61 @@ QString OT::LanguageParamCaption(OT::LanguageParam param)
 	}
 
 	return qApp->translate("Options", caption.toUtf8());
+}
+
+// Language initialization
+// Ovcharenko 02.09.25 "addition of the Ukrainian language"
+// -------------------------------------------------------------------------------------------------------------------
+
+void Options::loadTranslators() const
+{
+	//
+
+	static const std::map<OT::LanguageType, QString> langMap = {{OT::LanguageType::English, "en"},
+																{OT::LanguageType::Bulgarian, "bg"},
+																{OT::LanguageType::Russian, "ru"},
+																{OT::LanguageType::Ukrainian, "uk"}};
+
+	OT::LanguageType langType = theOptions.language().languageType();
+
+	static QTranslator translatorMetrology;
+	static QTranslator translatorUiLib;
+
+	if (langMap.find(langType) != langMap.end() && langType != OT::LanguageType::English)
+	{
+		QString suffix = langMap.at(langType);
+
+		QString metrologyFile = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/Metrology_" + suffix + ".qm";
+		if (translatorMetrology.load(metrologyFile))
+		{
+			qApp->installTranslator(&translatorMetrology);
+		}
+		else
+		{
+			QMessageBox::warning(nullptr,
+								 QObject::tr("Language load error"),
+								 QString("Didn't load Metrology language file:\n%1").arg(metrologyFile));
+		}
+
+		if (langType != OT::LanguageType::Russian)
+		{
+			QString uiLibFile = QApplication::applicationDirPath() + LANGUAGE_OPTIONS_DIR + "/UiLib_" + suffix + ".qm";
+			if (translatorUiLib.load(uiLibFile))
+			{
+				qApp->installTranslator(&translatorUiLib);
+			}
+			else
+			{
+				QMessageBox::warning(nullptr,
+									 QObject::tr("Language load error"),
+									 QString("Didn't load UiLib language file:\n%1").arg(uiLibFile));
+			}
+		}
+	}
+	else
+	{
+		qDebug() << "Using default English, no translator loaded.";
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

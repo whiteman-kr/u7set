@@ -1508,7 +1508,7 @@ void MainWindow::projectOpened(DbProject project)
 
 	// Show and hide FilesTabPage
 	//
-	if (db()->currentUser().isAdminstrator() == true)
+	if (db()->currentUser().isAdministrator() == true)
 	{
 		getCentralWidget()->insertTab(m_filesTabPageIndex, m_filesTabPage, m_filesTabPage->windowTitle());
 	}

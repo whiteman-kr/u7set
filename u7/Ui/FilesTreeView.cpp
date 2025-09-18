@@ -1294,7 +1294,7 @@ void FileTreeView::moveFile(int parentFileId)
 			continue;
 		}
 
-		if (db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId())
+		if (db()->currentUser().isAdministrator() == true || db()->currentUser().userId() == f->userId())
 		{
 			filesToMove.push_back(*f);
 		}
@@ -1597,7 +1597,7 @@ void FileTreeView::renameFile()
 		assert(f);
 
 
-		if (db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId())
+		if (db()->currentUser().isAdministrator() == true || db()->currentUser().userId() == f->userId())
 		{
 			files.push_back(*f);
 			indexes.push_back(mi);
@@ -1660,7 +1660,7 @@ void FileTreeView::deleteFile()
 		FileTreeModelItem* f = m_model->fileItem(mi);
 		assert(f);
 
-		if (db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId())
+		if (db()->currentUser().isAdministrator() == true || db()->currentUser().userId() == f->userId())
 		{
 			files.push_back(*f);
 		}
@@ -2174,7 +2174,7 @@ void FileTreeView::checkInFiles(QModelIndexList indexList)
 		}
 
 		if (f->state() == E::VcsState::CheckedOut &&
-			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
+			(db()->currentUser().isAdministrator() == true || db()->currentUser().userId() == f->userId()))
 		{
 			files.push_back(*f);
 		}
@@ -2249,7 +2249,7 @@ bool FileTreeView::undoChangesFiles(QModelIndexList indexList)
 		}
 
 		if (f->state() == E::VcsState::CheckedOut &&
-			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
+			(db()->currentUser().isAdministrator() == true || db()->currentUser().userId() == f->userId()))
 		{
 			files.push_back(*f);
 		}
@@ -2378,7 +2378,7 @@ void FileTreeView::runFileEditor(bool viewOnly)
 
 		if (viewOnly == true ||
 			(f->state() == E::VcsState::CheckedOut &&
-			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId())))
+			(db()->currentUser().isAdministrator() == true || db()->currentUser().userId() == f->userId())))
 		{
 			files.push_back(*f);
 		}
@@ -2454,7 +2454,7 @@ void FileTreeView::setWorkcopy()
 		assert(f);
 
 		if (f->state() == E::VcsState::CheckedOut &&
-			(db()->currentUser().isAdminstrator() == true || db()->currentUser().userId() == f->userId()))
+			(db()->currentUser().isAdministrator() == true || db()->currentUser().userId() == f->userId()))
 		{
 			files.push_back(*f);
 		}

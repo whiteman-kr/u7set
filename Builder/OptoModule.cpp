@@ -1245,8 +1245,13 @@ namespace Hardware
 		return true;
 	}
 
-	bool OptoPort::calculatePortRawDataSize()
+	bool OptoPort::calculatePortTxRawDataSize(int iteration)
 	{
+		if (txRawDataSizeWIsCalculated() == true)
+		{
+			return true;
+		}
+
 		const DeviceModule* lm = nullptr;
 
 		if (m_optoModule.isVdu() == true)
@@ -1264,16 +1269,15 @@ namespace Hardware
 
 		if (m_txRawDataSizeWCalculationStarted == true)
 		{
-			// cyclic call of this->calculatePortRawDataSize()
-			//
-			msg = QString("Can't calculate txRawDataSizeW for opto-port '%1'. Cyclic dependence.").arg(equipmentID());
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,  msg);
-			return false;
-		}
+			if (iteration == OptoModuleStorage::CALC_TX_RAW_DATA_SIZE_ITERATIONS)
+			{
+				// cyclic call of this->calculatePortRawDataSize()
+				//
+				msg = QString("Can't calculate txRawDataSizeW for opto-port '%1'. Cyclic dependence.").arg(equipmentID());
+				LOG_INTERNAL_ERROR_MSG(m_log, msg);
+			}
 
-		if (txRawDataSizeWIsCalculated() == true)
-		{
-			return true;
+			return false;
 		}
 
 		if (m_rawDataDescription.isEmpty() == true)
@@ -1285,7 +1289,7 @@ namespace Hardware
 		if (m_rawDataDescription.txRawDataSizeIsValid() == false)
 		{
 			msg = QString("Can't calculate txRawDataSizeW for opto-port '%1'. TX_RAW_DATA_SIZE item not found.").arg(equipmentID());
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,  msg);
+			LOG_INTERNAL_ERROR_MSG(m_log, msg);
 			return false;
 		}
 
@@ -1333,7 +1337,7 @@ namespace Hardware
 					if (moduleIsFound == false)
 					{
 						msg = QString("Module on place %1 is not found (opto port '%2' raw data description).").arg(item.modulePlace).arg(equipmentID());
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,  msg);
+						LOG_INTERNAL_ERROR_MSG(m_log, msg);
 						result = false;
 					}
 				}
@@ -1347,7 +1351,7 @@ namespace Hardware
 					if (portRxRawData == nullptr)
 					{
 						msg = QString("Port '%1' is not found (opto port '%2' raw data description).").arg(item.portEquipmentID).arg(equipmentID());
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,  msg);
+						LOG_INTERNAL_ERROR_MSG(m_log, msg);
 						result = false;
 						break;
 					}
@@ -1360,12 +1364,12 @@ namespace Hardware
 								arg(portRxRawData->linkedPortID()).
 								arg(portRxRawData->equipmentID()).
 								arg(equipmentID());
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,  msg);
+						LOG_INTERNAL_ERROR_MSG(m_log, msg);
 						result = false;
 						break;
 					}
 
-					bool res = portTxRawData->calculatePortRawDataSize();
+					bool res = portTxRawData->calculatePortTxRawDataSize(iteration);
 
 					if (res == true)
 					{
@@ -2962,11 +2966,30 @@ namespace Hardware
 
 		prepareLmsAccessibleConnections();
 
-		for(OptoPortShared& port : m_ports)
+		for(int iteration = 1; iteration <= CALC_TX_RAW_DATA_SIZE_ITERATIONS; iteration++)
 		{
-			TEST_PTR_CONTINUE(port);
+			bool res = true;
 
-			port->calculatePortRawDataSize();		// set m_txRawDataSizeW !
+			for(OptoPortShared& port : m_ports)
+			{
+				TEST_PTR_CONTINUE(port);
+
+				res &= port->calculatePortTxRawDataSize(iteration);		// set m_txRawDataSizeW !
+			}
+
+			if (res == true)
+			{
+				result &= res;
+
+				LOG_MESSAGE(m_log, QString("CalculatePortTxRawDataSize in %1 iteration(s)").arg(iteration));
+				break;
+			}
+
+			if (iteration == CALC_TX_RAW_DATA_SIZE_ITERATIONS)
+			{
+				result = false;
+				LOG_INTERNAL_ERROR_MSG(m_log, "Error in OptoModuleStorage::appendAndCheckConnections()");
+			}
 		}
 
 		return result;

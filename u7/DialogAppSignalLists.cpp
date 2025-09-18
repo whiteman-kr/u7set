@@ -897,7 +897,7 @@ void DialogAppSignalLists::onCheckIn()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		if (m_lists->fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdminstrator() == false)
+		if (m_lists->fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdministrator() == false)
 		{
 			continue;
 		}
@@ -969,7 +969,7 @@ void DialogAppSignalLists::onUndo()
 	{
 		QUuid uuid = item->data(0, Qt::UserRole).toUuid();
 
-		if (m_lists->fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdminstrator() == false)
+		if (m_lists->fileInfo(uuid).userId() != m_db->currentUser().userId() && m_db->currentUser().isAdministrator() == false)
 		{
 			continue;
 		}
@@ -1218,7 +1218,7 @@ void DialogAppSignalLists::updateButtonsEnableState()
 		{
 			if (fi.state() == E::VcsState::CheckedOut)
 			{
-				if (fi.userId() == m_db->currentUser().userId() || m_db->currentUser().isAdminstrator() == true)
+				if (fi.userId() == m_db->currentUser().userId() || m_db->currentUser().isAdministrator() == true)
 				{
 					checkedOutCount++;
 				}

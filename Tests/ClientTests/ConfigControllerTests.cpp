@@ -1,9 +1,9 @@
 // Functional tests for class ClientLib::Config controller
 // ConfigurationService must be ranning on localhost and default port
 //
-#include <ClientLib/ConfigController.h>
 #include "../../OnlineLib/BuildInfo.h"
 #include "ConnectionPorts.h"
+#include <ClientLib/ConfigController.h>
 
 namespace
 {
@@ -15,13 +15,20 @@ namespace
 		{
 		}
 
-		MonitorConfigControllerStub(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
+		MonitorConfigControllerStub(const SoftwareInfo& softwareInfo,
+									HostAddressPort address1,
+									HostAddressPort address2,
+									ILogFile* logFile) :
 			ClientLib::ConfigController{softwareInfo, address1, address2, logFile}
 		{
 		}
 
+		~MonitorConfigControllerStub() override { qDebug() << "MonitorConfigControllerStub::~MonitorConfigControllerStub()"; }
+
 	protected:
-		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files) override
+		virtual bool updateConfiguration(const ClientLib::ConfigurationInfo& conf,
+										 const MonitorSettings& settings,
+										 const std::vector<OnlineLib::BuildFileInfo>& files) override
 		{
 			std::list<std::tuple<QString, bool, QByteArray>> rf;
 			QString parsingError;
@@ -61,14 +68,15 @@ namespace
 		std::list<std::tuple<QString, bool, QByteArray>> readFiles;
 	};
 
-}
+} // namespace
 
 TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 {
 	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 
-	HostAddressPort host1{"127.0.0.1", g_connectionPorts.cfgService1.clientRequestPort};		// valid address, where cfgservice is expected to run.
-	HostAddressPort host2{"192.168.99.103", g_connectionPorts.cfgService2.clientRequestPort};	// some unreachable address
+	HostAddressPort host1{"127.0.0.1",
+						  g_connectionPorts.cfgService1.clientRequestPort}; // valid address, where cfgservice is expected to run.
+	HostAddressPort host2{"192.168.99.103", g_connectionPorts.cfgService2.clientRequestPort}; // some unreachable address
 	ILogFileStub log;
 
 	MonitorConfigControllerStub configController{softwareInfo, host1, host2, &log};
@@ -102,13 +110,15 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	EXPECT_TRUE(state.isConnected);
 	EXPECT_EQ(state.peerAddr.toStdString(), host1.toStdString());
 
-	ASSERT_FALSE(result.isEmpty());		// Should be "Ok"
+	ASSERT_FALSE(result.isEmpty()); // Should be "Ok"
 
 	EXPECT_TRUE(spy.isEmpty());
 
 	EXPECT_GE(configController.receivedConf.buildNo, 0);
 	EXPECT_EQ(configController.receivedConf.softwareEquipmentId, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
 	EXPECT_TRUE(configController.receivedConf.project.startsWith("test_simulator_v"));
+
+	qDebug() << "configController is successfully connected";
 
 	// Test MonitorSettings
 	//
@@ -137,6 +147,8 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	EXPECT_EQ(configController.receivedSettings.tuningLogin, true);
 	EXPECT_EQ(configController.receivedSettings.tuningUserAccounts, "TuningUser1;TuningUser2");
 	EXPECT_EQ(configController.receivedSettings.tuningSessionTimeout, 123);
+
+	qDebug() << "configController all MonitorSettings are checked";
 
 	// Test files
 	//
@@ -181,10 +193,14 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	EXPECT_TRUE(TuningSignalsDat);
 
 	EXPECT_FALSE(readFilesFromServer.empty());
-	for (const auto&[file, success, data] : readFilesFromServer)
+	for (const auto& [file, success, data] : readFilesFromServer)
 	{
 		EXPECT_TRUE(success) << file.toStdString();
 	}
+
+	qDebug() << "configController all files are checked";
+
+	qDebug() << "configController is about to destroy";
 
 	return;
 }

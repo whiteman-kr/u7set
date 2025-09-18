@@ -37,7 +37,7 @@ ServiceWorker* ModelSimBridgeWorker::createInstance() const
 	return newInstance;
 }
 
-void ModelSimBridgeWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
+void ModelSimBridgeWorker::getServiceSpecificInfo(Network::ServiceInfo& /*serviceInfo*/) const
 {
 	Q_UNUSED(serviceInfo);
 
