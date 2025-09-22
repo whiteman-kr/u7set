@@ -56,8 +56,8 @@ namespace LicenseLib
 	QByteArray RpctLicense::toRawData(QString privateKeyFileName, QString keyPassword, QString* errorMessage) const
 	{
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4996)
+	#pragma warning(push)
+	#pragma warning(disable : 4996)
 #endif // _MSC_VER
 		if (errorMessage == nullptr)
 		{
@@ -75,7 +75,7 @@ namespace LicenseLib
 			return compressed;
 		}
 
-		Proto::LicenseContainter container;
+		Proto::LicenseContainer container;
 		*container.mutable_rpct_license() = *m_data;
 
 		rawData.resize(container.ByteSizeLong());
@@ -145,7 +145,7 @@ namespace LicenseLib
 
 		return resultData;
 #ifdef _MSC_VER
-#pragma warning(pop)
+	#pragma warning(pop)
 #endif // _MSC_VER
 	}
 
@@ -173,8 +173,8 @@ namespace LicenseLib
 	RpctLicense RpctLicense::fromRawData(const QByteArray& data, const QByteArray& publicKeyData, QString* errorMessage)
 	{
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4996)
+	#pragma warning(push)
+	#pragma warning(disable : 4996)
 #endif // _MSC_VER
 
 		// Verify signature
@@ -264,7 +264,7 @@ namespace LicenseLib
 
 		QByteArray uncompressed = qUncompress(licenseData);
 
-		Proto::LicenseContainter container;
+		::Proto::LicenseContainer container;
 		parsed = container.ParseFromArray(uncompressed.constData(), uncompressed.size());
 
 		if (parsed == false || container.has_rpct_license() == false)
@@ -276,8 +276,20 @@ namespace LicenseLib
 		*result.m_data = container.rpct_license();
 		return result;
 #ifdef _MSC_VER
-#pragma warning(pop)
+	#pragma warning(pop)
 #endif // _MSC_VER
+	}
+
+	bool RpctLicense::revoked() const
+	{
+		Q_ASSERT(m_data);
+		return m_data->revoked();
+	}
+
+	void RpctLicense::setRevoked(bool value)
+	{
+		Q_ASSERT(m_data);
+		m_data->set_revoked(value);
 	}
 
 	QUuid RpctLicense::uuid() const

@@ -4,14 +4,14 @@ import "Common.proto";
 
 package Proto;
 
-message LicenseContainter
+message LicenseContainer
 {
 	optional License rpct_license = 3;	// License for RPCT
 }
 
 message LicenseBinary
 {
-	optional bytes rpct_license = 3;	// Serialized LicenseContainter
+	optional bytes rpct_license = 3;	// Serialized LicenseContainer
 	optional bytes signature = 10;		// Signature
 }
 
@@ -19,6 +19,7 @@ message License
 {
 	optional Uuid uuid = 1;				// Unique identifier of the license
 	optional string caption = 2;		// Name of the license - can be used for display purposes
+	optional bool revoked = 3;			// The license is disabled or revoked
 	
 	optional string organization = 10;	// Company/Organization name
 	optional string first_name = 11;	// First name of the license owner
@@ -58,10 +59,20 @@ message ModuleConfiguratorLicense
 
 message InternalWorkplaceId
 {
+	// These fields present only in versions 1+
+	//
+	optional int32 version = 1;
+
+	// These fields present only in version 0
+	//
 	optional string machine_id = 2;
 	optional string hardware_id = 3;
 	optional string cpu = 4;
 	optional string macs = 5;
+
+	// These fields present in versions 1+
+	//
+	optional fixed32 motherboard_info_hash = 10;
 
 	optional string os = 11;		// Stable name for OS, excludes version - statistics only
 	optional string host = 12;		// statistics only

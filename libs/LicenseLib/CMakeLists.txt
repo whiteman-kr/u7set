@@ -16,6 +16,9 @@ qt_add_library(${TARGET} STATIC
 	./include/LicenseLib/RpctLicense.h
 	./include/LicenseLib/RpctValidator.h
 	./src/AppLicenser.cpp
+	./src/Blacklist.cpp
+	./src/Blacklist.h
+	./src/BlacklistItem.h
 	./src/RpctLicense.cpp
 	./src/RpctValidator.cpp
 
@@ -23,6 +26,8 @@ qt_add_library(${TARGET} STATIC
 )
 
 target_precompile_headers(${TARGET} PRIVATE
+	"./src/BlacklistItem.h"
+
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
 )

@@ -20,6 +20,8 @@ namespace LicenseLib
 
 		static QString licensePath();                                  // Returns the path to the license file for the application
 		static QString workplaceId();                                  // Generates workplace id, which is used to identify the workplace
+		static QString workplaceIdV0();
+		static QString workplaceIdV1();
 
 		static bool showRestrictionMessageBox(QWidget* parent,
 											  LicenseLib::ValidationResult validationResult,
