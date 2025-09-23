@@ -794,7 +794,7 @@ namespace Sim
 			m_log.writeAlert(QString("Unexpected confirmationID %1 from %2, expected %3").arg(confirmationID)
 								 .arg(m_lmEquipmentID)
 								 .arg(*m_waitingConfirmationID));
-			Q_ASSERT(false);
+			//Q_ASSERT(false);
 			return false;
 		}
 
