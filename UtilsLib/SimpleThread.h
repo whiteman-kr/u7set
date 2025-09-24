@@ -77,6 +77,7 @@ protected:
 
 	QThread m_thread;
 	std::unordered_set<SimpleThreadWorker*> m_workers;
+	bool m_started = false;
 
 	std::mutex m_startCondVarMutex;
 	std::condition_variable m_startCondVar;

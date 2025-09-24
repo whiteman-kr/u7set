@@ -107,6 +107,14 @@ void SimpleThread::setPriority(QThread::Priority priority)
 
 void SimpleThread::start()
 {
+	if (m_started == true)
+	{
+		Q_ASSERT(m_started == false);
+		return;
+	}
+
+	m_started = true;
+
 	for(SimpleThreadWorker* worker : m_workers)
 	{
 		worker->setThread(this);
@@ -146,6 +154,12 @@ void SimpleThread::start()
 
 bool SimpleThread::quitAndWait(unsigned long time)
 {
+	if (m_started == false)
+	{
+		Q_ASSERT(m_started == true);
+		return true;
+	}
+
 	QElapsedTimer et;
 
 	et.start();
@@ -173,7 +187,7 @@ bool SimpleThread::quitAndWait(unsigned long time)
 	qDebug() << C_STR(QString("%1 finished %2 at %3 ms").
 					  arg(m_threadName).arg(m_finishedWorkersCount).arg(et.elapsed()));
 
-	Q_ASSERT(finishedOk = true);
+	Q_ASSERT(finishedOk == true);
 
 	m_thread.quit();
 
@@ -212,13 +226,11 @@ void SimpleThread::workerStarted(SimpleThreadWorker* worker)
 		return;
 	}
 
-	m_startCondVarMutex.lock();
+	std::lock_guard lg(m_startCondVarMutex);
 
 	m_startedWorkersCount++;
 
-	m_startCondVarMutex.unlock();
-
-	m_startCondVar.notify_one();
+	m_startCondVar.notify_all();
 }
 
 void SimpleThread::workerFinished(SimpleThreadWorker* worker)
@@ -229,13 +241,11 @@ void SimpleThread::workerFinished(SimpleThreadWorker* worker)
 		return;
 	}
 
-	m_finishCondVarMutex.lock();
+	std::lock_guard lg(m_finishCondVarMutex);
 
 	m_finishedWorkersCount++;
 
-	m_finishCondVarMutex.unlock();
-
-	m_finishCondVar.notify_one();
+	m_finishCondVar.notify_all();
 }
 
 // -------------------------------------------------------------------------------------
