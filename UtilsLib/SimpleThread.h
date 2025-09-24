@@ -69,6 +69,7 @@ signals:
 	void quitRequested();
 
 private:
+	void workerStarted(SimpleThreadWorker* worker);
 	void workerFinished(SimpleThreadWorker* worker);
 
 protected:
@@ -76,6 +77,10 @@ protected:
 
 	QThread m_thread;
 	std::unordered_set<SimpleThreadWorker*> m_workers;
+
+	std::mutex m_startCondVarMutex;
+	std::condition_variable m_startCondVar;
+	int m_startedWorkersCount = 0;
 
 	std::mutex m_finishCondVarMutex;
 	std::condition_variable m_finishCondVar;

@@ -39,7 +39,7 @@ ServiceWorker* ModelSimBridgeWorker::createInstance() const
 
 void ModelSimBridgeWorker::getServiceSpecificInfo(Network::ServiceInfo& /*serviceInfo*/) const
 {
-	Q_UNUSED(serviceInfo);
+//	Q_UNUSED(serviceInfo);
 
 	/*QMutexLocker l(&m_startStopMutex);
 

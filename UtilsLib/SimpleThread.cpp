@@ -47,7 +47,9 @@ void SimpleThreadWorker::printFunction(const QString& func)
 
 void SimpleThreadWorker::slot_onThreadStarted()
 {
+	qDebug() << C_STR(QString("SimpleThreadWorker::slot_onThreadStarted worker started %1").arg(workerName()));
 	onThreadStarted();
+	m_thread->workerStarted(this);
 }
 
 void SimpleThreadWorker::slot_onThreadFinished()
@@ -78,8 +80,6 @@ SimpleThread::SimpleThread(SimpleThreadWorker* worker) :
 	m_threadName("SimpleThread:")
 {
 	addWorker(worker);
-
-	m_threadName += QString(" %1").arg(worker->workerName());
 }
 
 SimpleThread::~SimpleThread()
@@ -107,8 +107,6 @@ void SimpleThread::setPriority(QThread::Priority priority)
 
 void SimpleThread::start()
 {
-	qDebug() << C_STR(QString("%1 start").arg(m_threadName));
-
 	for(SimpleThreadWorker* worker : m_workers)
 	{
 		worker->setThread(this);
@@ -120,6 +118,30 @@ void SimpleThread::start()
 	}
 
 	m_thread.start();
+
+	//
+
+	QElapsedTimer et;
+
+	et.start();
+
+	qDebug() << C_STR(QString("%1 start").arg(m_threadName));
+
+	std::unique_lock ul(m_startCondVarMutex, std::defer_lock);
+
+	ul.lock();
+
+	m_startCondVar.wait(
+		ul,
+		[this]() -> bool
+		{
+			return m_startedWorkersCount == static_cast<int>(m_workers.size());
+		});
+
+	ul.unlock();
+
+	qDebug() << C_STR(QString("%1 started %2 at %3 ms").
+					  arg(m_threadName).arg(m_startedWorkersCount).arg(et.elapsed()));
 }
 
 bool SimpleThread::quitAndWait(unsigned long time)
@@ -148,9 +170,8 @@ bool SimpleThread::quitAndWait(unsigned long time)
 
 	ul.unlock();
 
-	qDebug() << C_STR(QString("Workers finish time %1").arg(et.elapsed()));
-
-	qDebug() << C_STR(QString("%1 workers finished %2").arg(m_threadName).arg(m_finishedWorkersCount));
+	qDebug() << C_STR(QString("%1 finished %2 at %3 ms").
+					  arg(m_threadName).arg(m_finishedWorkersCount).arg(et.elapsed()));
 
 	Q_ASSERT(finishedOk = true);
 
@@ -181,6 +202,23 @@ bool SimpleThread::isFinished() const
 int SimpleThread::finishedWorkersCount() const
 {
 	return m_finishedWorkersCount;
+}
+
+void SimpleThread::workerStarted(SimpleThreadWorker* worker)
+{
+	if (worker == nullptr || m_workers.contains(worker) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_startCondVarMutex.lock();
+
+	m_startedWorkersCount++;
+
+	m_startCondVarMutex.unlock();
+
+	m_startCondVar.notify_one();
 }
 
 void SimpleThread::workerFinished(SimpleThreadWorker* worker)
