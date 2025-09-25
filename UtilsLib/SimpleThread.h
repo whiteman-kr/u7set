@@ -1,7 +1,7 @@
 #pragma once
 
+#include <set>
 #include <atomic>
-#include <unordered_set>
 
 #include <QEventLoop>
 #include <QThread>
@@ -16,7 +16,7 @@ public:
 	SimpleThreadWorker(const QString& workerName = QString());
 	virtual ~SimpleThreadWorker();
 
-	void setWorkerName(const QString& workerName);
+//	void setWorkerName(const QString& workerName);
 	QString workerName() const;
 
 protected:
@@ -31,16 +31,15 @@ private slots:
 
 private:
 	void setThread(SimpleThread* thread);
+	void log(const QString& str);
 
 private:
 	QString m_workerName;
 	SimpleThread* m_thread = nullptr;
+	bool m_finished = false;
 
 	friend class SimpleThread;
 };
-
-#define PRINT_FUNC printFunction(__func__);
-
 
 class SimpleThread : public QObject
 {
@@ -59,11 +58,9 @@ public:
 	void start();
 	bool quitAndWait(unsigned long time = ULONG_MAX);
 
-	bool isInterruptionRequested() const;
+//	bool isInterruptionRequested() const;
 	bool isRunning() const;
 	bool isFinished() const;
-
-	int finishedWorkersCount() const;
 
 signals:
 	void quitRequested();
@@ -72,20 +69,22 @@ private:
 	void workerStarted(SimpleThreadWorker* worker);
 	void workerFinished(SimpleThreadWorker* worker);
 
+	void log(const QString& str);
+
 protected:
 	QString m_threadName;
 
 	QThread m_thread;
-	std::unordered_set<SimpleThreadWorker*> m_workers;
-	bool m_started = false;
 
-	std::mutex m_startCondVarMutex;
-	std::condition_variable m_startCondVar;
-	int m_startedWorkersCount = 0;
+	std::mutex m_mutex;
 
-	std::mutex m_finishCondVarMutex;
-	std::condition_variable m_finishCondVar;
+	std::set<SimpleThreadWorker*> m_workers;
+	std::set<SimpleThreadWorker*> m_runningWorkers;
+	int m_runningWorkersCount = 0;
 	int m_finishedWorkersCount = 0;
+	std::atomic_bool m_started = false;
+
+	std::condition_variable m_condVar;
 
 	friend class SimpleThreadWorker;
 };
