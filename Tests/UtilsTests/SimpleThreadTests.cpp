@@ -1,133 +1,241 @@
 // Functional tests for class SimpleThread
 //
 
+#include <gtest/gtest.h>
+
+#include <atomic>
+#include <memory>
+
+#include <QObject>
 #include <QTimer>
-#include <QRandomGenerator>
-#include "../../UtilsLib/WUtils.h"
-#include <ClientLib/ConfigController.h>
-#include <CommonLib/HostAddressPort.h>
-#include "../../OnlineLib/BuildInfo.h"
-#include "../../OnlineLib/SoftwareInfo.h"
+#include <QThread>
 
-class ThreadWorker : public SimpleThreadWorker
+#include "SimpleThread.h"
+
+// Helper: loops through events and waits until cond() becomes true or timeout expires.
+//
+static bool waitUntil(const std::function<bool()>& cond, int timeoutMs = 3000, int pumpSliceMs = 5)
 {
+	QElapsedTimer t;
+	t.start();
+
+	while (!cond())
+	{
+		QCoreApplication::processEvents(QEventLoop::AllEvents, pumpSliceMs);
+
+		if (t.elapsed() >= timeoutMs)
+		{
+			return false;
+		}
+
+		QThread::msleep(1);
+	}
+
+	return true;
+}
+
+class TestWorker : public SimpleThreadWorker
+{
+	Q_OBJECT
 public:
-	ThreadWorker(const QString& workerName) :
-		SimpleThreadWorker(workerName)
+	explicit TestWorker(const QString& name, bool periodicWork = true, QObject* parent = nullptr)
+		: SimpleThreadWorker(name)
+		, m_periodic(periodicWork)
 	{
+		Q_UNUSED(parent);
 	}
 
-private:
-	void onTimer()
-	{
-		QThread::msleep(QRandomGenerator::global()->bounded(10));
-
-		//qDebug() << C_STR(QString("%1::onTimer").arg(workerName()));
-	}
+signals:
+	void startedSig();
+	void finishedSig();
 
 protected:
-	virtual void onThreadStarted()
+	void onThreadStarted() override
 	{
-		m_timer = new QTimer(this);
+		emit startedSig();
 
-		connect(m_timer, &QTimer::timeout, this, &ThreadWorker::onTimer);
-
-		int period = QRandomGenerator::global()->bounded(20);
-
-		m_timer->start(period);
-
-		qDebug() << C_STR(QString("%1 starts timer, period %2").arg(workerName()).arg(period));
+		if (m_periodic)
+		{
+			m_timer = new QTimer(this);
+			m_timer->setInterval(1);
+			connect(m_timer, &QTimer::timeout, this, [this]()
+					{
+						++m_ticks;
+					});
+			m_timer->start();
+		}
 	}
 
-	virtual void onThreadFinished()
+	void onThreadFinished() override
 	{
-		QThread::msleep(QRandomGenerator::global()->bounded(100));
+		emit finishedSig();
 
-		m_timer->stop();
-		delete m_timer;
+		if (m_timer != nullptr)
+		{
+			m_timer->stop();
+		}
 	}
 
 private:
-	QTimer* m_timer = nullptr;
+	QTimer* m_timer { nullptr };
+	bool m_periodic { true };
+	int  m_ticks { 0 };
 };
 
-/*
-TEST(SimpleThreadTests, startStopThread)
+TEST(SimpleThreadTests, SingleWorker_Lifecycle)
 {
-	const int TEST_COUNT = 5;
-	const int WORKERS_COUNT = 20;
+	SimpleThread th;
+	auto* w = new TestWorker("W1");
 
-	for(int r = 0; r < TEST_COUNT; r++)
-	{
-		SimpleThread st;
+	std::atomic<int> started { 0 };
+	std::atomic<int> finished { 0 };
+	std::atomic<int> destroyed { 0 };
 
-		for(int i = 0; i < WORKERS_COUNT; i++)
-		{
-			st.addWorker(new ThreadWorker(QString("ThreadWorker_%1").arg(i + 1)));
-		}
+	QObject::connect(w, &TestWorker::startedSig, [&started]()
+					 {
+						 ++started;
+					 });
+	QObject::connect(w, &TestWorker::finishedSig, [&finished]()
+					 {
+						 ++finished;
+					 });
+	QObject::connect(w, &QObject::destroyed, [&destroyed]()
+					 {
+						 ++destroyed;
+					 });
 
-		st.start();
+	th.addWorker(w);
+	th.start();
 
-		QThread::msleep(3000);
+	ASSERT_TRUE(waitUntil([&started]() { return started.load() >= 1; }));
 
-		bool finishedOk = st.quitAndWait(3000);
+	ASSERT_TRUE(th.quitAndWait(3000));
 
-		EXPECT_EQ(finishedOk, true);
-		EXPECT_EQ(st.finishedWorkersCount(), WORKERS_COUNT);
-	}
+	ASSERT_TRUE(waitUntil([&finished]() { return finished.load() >= 1; }));
+	ASSERT_TRUE(waitUntil([&destroyed]() { return destroyed.load() >= 1; }));
+
+	EXPECT_TRUE(th.isFinished());
+	EXPECT_FALSE(th.isRunning());
 }
 
-TEST(SimpleThreadTests, startStopMultipleThreads)
+TEST(SimpleThreadTests, MultipleWorkers_Lifecycle)
 {
-	const int TEST_COUNT = 10;
-	const int THREADS_COUNT = 5;
-	const int WORKERS_COUNT = 20;
+	SimpleThread th;
+	constexpr int N = 5;
 
-	for(int r = 0; r < TEST_COUNT; r++)
+	std::vector<TestWorker*> workers;
+	workers.reserve(N);
+
+	std::atomic<int> started { 0 };
+	std::atomic<int> finished { 0 };
+	std::atomic<int> destroyed { 0 };
+
+	for (int i = 0; i < N; ++i)
 	{
-		SimpleThread sts[THREADS_COUNT];
+		auto* w = new TestWorker(QString("W%1").arg(i + 1));
+		workers.push_back(w);
+		th.addWorker(w);
 
-		for(int t = 0; t < THREADS_COUNT; t++)
-		{
-			SimpleThread& st = sts[t];
-
-			for(int i = 0; i < WORKERS_COUNT; i++)
-			{
-				st.addWorker(new ThreadWorker(QString("ThreadWorker_%1").arg(i + 1)));
-			}
-
-			st.start();
-		}
-
-		QThread::msleep(3000);
-
-		for(int t = 0; t < THREADS_COUNT; t++)
-		{
-			SimpleThread& st = sts[t];
-
-			bool finishedOk = st.quitAndWait(3000);
-
-			EXPECT_EQ(finishedOk, true);
-			EXPECT_EQ(st.finishedWorkersCount(), WORKERS_COUNT);
-		}
+		QObject::connect(w, &TestWorker::startedSig, [&started]()
+						 {
+							 ++started;
+						 });
+		QObject::connect(w, &TestWorker::finishedSig, [&finished]()
+						 {
+							 ++finished;
+						 });
+		QObject::connect(w, &QObject::destroyed, [&destroyed]()
+						 {
+							 ++destroyed;
+						 });
 	}
-}
-*/
 
-TEST(SimpleThreadTests, cfgLoaderTests)
+	th.start();
+
+	ASSERT_TRUE(waitUntil([&started, N]() { return started.load() >= N; }));
+
+	ASSERT_TRUE(th.quitAndWait(3000));
+
+	ASSERT_TRUE(waitUntil([&finished, N]() { return finished.load() >= N; }));
+	ASSERT_TRUE(waitUntil([&destroyed, N]() { return destroyed.load() >= N; }));
+
+	EXPECT_TRUE(th.isFinished());
+	EXPECT_FALSE(th.isRunning());
+}
+
+TEST(SimpleThreadTests, ImmediateQuit_AfterStart)
 {
-	for(int i = 0; i < 10; i++)
-	{
-		SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
+	SimpleThread th;
 
-		HostAddressPort host1{"127.0.0.1", 13312};		// valid address, where cfgservice is expected to run.
-		HostAddressPort host2{"192.168.99.103", 8888};	// some unreachable address
-		ILogFileStub log;
+	auto* w1 = new TestWorker("W1", false);
+	auto* w2 = new TestWorker("W2", false);
+	auto* w3 = new TestWorker("W3", false);
+	auto* w4 = new TestWorker("W4", false);
+	auto* w5 = new TestWorker("W5", false);
 
-		ClientLib::ConfigController* cfgController = new ClientLib::ConfigController(softwareInfo, host1, host2, &log);
+	std::atomic<int> finished { 0 };
+	std::atomic<int> destroyed { 0 };
 
-		cfgController->start();
+	QObject::connect(w1, &TestWorker::finishedSig, [&finished]()
+					 {
+						 ++finished;
+					 });
+	QObject::connect(w1, &QObject::destroyed, [&destroyed]()
+					 {
+						 ++destroyed;
+					 });
 
-		delete cfgController;
-	}
+	QObject::connect(w2, &TestWorker::finishedSig, [&finished]()
+					 {
+						 ++finished;
+					 });
+	QObject::connect(w2, &QObject::destroyed, [&destroyed]()
+					 {
+						 ++destroyed;
+					 });
+
+	QObject::connect(w3, &TestWorker::finishedSig, [&finished]()
+					 {
+						 ++finished;
+					 });
+	QObject::connect(w3, &QObject::destroyed, [&destroyed]()
+					 {
+						 ++destroyed;
+					 });
+
+	QObject::connect(w4, &TestWorker::finishedSig, [&finished]()
+					 {
+						 ++finished;
+					 });
+	QObject::connect(w4, &QObject::destroyed, [&destroyed]()
+					 {
+						 ++destroyed;
+					 });
+
+	QObject::connect(w5, &TestWorker::finishedSig, [&finished]()
+					 {
+						 ++finished;
+					 });
+	QObject::connect(w5, &QObject::destroyed, [&destroyed]()
+					 {
+						 ++destroyed;
+					 });
+
+	th.addWorker(w1);
+	th.addWorker(w2);
+	th.addWorker(w3);
+	th.addWorker(w4);
+	th.addWorker(w5);
+
+	th.start(2);
+
+	ASSERT_TRUE(th.quitAndWait(3000));
+
+	ASSERT_TRUE(waitUntil([&finished]() { return finished.load() >= 5; }));
+	ASSERT_TRUE(waitUntil([&destroyed]() { return destroyed.load() >= 5; }));
+
+	EXPECT_TRUE(th.isFinished());
+	EXPECT_FALSE(th.isRunning());
 }
+
+#include "SimpleThreadTests.moc"

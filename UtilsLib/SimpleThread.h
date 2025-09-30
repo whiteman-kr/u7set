@@ -16,7 +16,6 @@ public:
 	SimpleThreadWorker(const QString& workerName = QString());
 	virtual ~SimpleThreadWorker();
 
-//	void setWorkerName(const QString& workerName);
 	QString workerName() const;
 
 protected:
@@ -36,14 +35,20 @@ private:
 private:
 	QString m_workerName;
 	SimpleThread* m_thread = nullptr;
-	bool m_finished = false;
+	std::atomic_bool m_finished = false;
 
 	friend class SimpleThread;
 };
 
+#define PRINT_FUNC printFunction(__func__);
+
 class SimpleThread : public QObject
 {
 	Q_OBJECT
+	Q_DISABLE_COPY_MOVE(SimpleThread)
+
+	static const unsigned long START_TIME_MS = 5000;
+	static const unsigned long STOP_TIME_MS = 5000;
 
 public:
 	SimpleThread();
@@ -55,10 +60,9 @@ public:
 
 	void setPriority(QThread::Priority priority);
 
-	void start();
-	bool quitAndWait(unsigned long time = ULONG_MAX);
+	void start(unsigned long time = START_TIME_MS);
+	bool quitAndWait(unsigned long time = STOP_TIME_MS);
 
-//	bool isInterruptionRequested() const;
 	bool isRunning() const;
 	bool isFinished() const;
 
@@ -80,7 +84,6 @@ protected:
 
 	std::set<SimpleThreadWorker*> m_workers;
 	std::set<SimpleThreadWorker*> m_runningWorkers;
-	int m_runningWorkersCount = 0;
 	int m_finishedWorkersCount = 0;
 	std::atomic_bool m_started = false;
 

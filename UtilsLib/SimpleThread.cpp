@@ -22,11 +22,6 @@ SimpleThreadWorker::~SimpleThreadWorker()
 	log(QString("Worker %1 deleted").arg(m_workerName));
 }
 
-/*void SimpleThreadWorker::setWorkerName(const QString& workerName)
-{
-	m_workerName = workerName;
-}*/
-
 QString SimpleThreadWorker::workerName() const
 {
 	return m_workerName;
@@ -42,7 +37,7 @@ void SimpleThreadWorker::onThreadFinished()
 
 void SimpleThreadWorker::printFunction(const QString& func)
 {
-	qDebug() << C_STR(QString("%1::%2").arg(workerName()).arg(func));
+	log(QString("%1::%2").arg(workerName()).arg(func));
 }
 
 void SimpleThreadWorker::slot_onThreadStarted()
@@ -56,11 +51,14 @@ void SimpleThreadWorker::slot_onThreadStarted()
 void SimpleThreadWorker::slot_onThreadFinished()
 {
 	Q_ASSERT(m_thread);
-	if (m_finished == true)
+
+	bool expected = false;
+
+	if (m_finished.compare_exchange_strong(expected, true) == false)
 	{
 		return;
 	}
-	m_finished = true;
+
 	log(QString("SimpleThreadWorker::slot_onThreadFinished worker finished %1").arg(workerName()));
 	onThreadFinished();
 	m_thread->workerFinished(this);
@@ -100,6 +98,16 @@ SimpleThread::~SimpleThread()
 	{
 		quitAndWait(3000);
 	}
+
+	if (!m_started)
+	{
+		std::lock_guard lg(m_mutex);
+		for (auto* w : m_workers)
+		{
+			delete w; // они в главном потоке, родителя нет
+		}
+		m_workers.clear();
+	}
 }
 
 void SimpleThread::addWorker(SimpleThreadWorker* worker)
@@ -112,6 +120,7 @@ void SimpleThread::addWorker(SimpleThreadWorker* worker)
 		worker->parent() != nullptr)
 	{
 		Q_ASSERT(false);
+		log(QString("%1 addWorker ERROR!").arg(m_threadName));
 		return;
 	}
 
@@ -125,25 +134,33 @@ void SimpleThread::setPriority(QThread::Priority priority)
 	m_thread.setPriority(priority);
 }
 
-void SimpleThread::start()
+void SimpleThread::start(unsigned long time)
 {
 	if (m_started.exchange(true))
 	{
-		Q_ASSERT(m_started == false);
 		return;
 	}
 
 	{
 		std::lock_guard lg(m_mutex);
 
+		if (m_workers.empty())
+		{
+			m_started = false;
+			log(QString("%1 NO workers!").arg(m_threadName));
+			Q_ASSERT(false);
+			return;
+		}
+
 		for(SimpleThreadWorker* worker : m_workers)
 		{
 			worker->setThread(this);
 			worker->moveToThread(&m_thread);
 
-			connect(&m_thread, &QThread::started, worker, &SimpleThreadWorker::slot_onThreadStarted, Qt::QueuedConnection);
-			connect(&m_thread, &QThread::finished, worker, &SimpleThreadWorker::deleteLater);
-			connect(this, &SimpleThread::quitRequested, worker, &SimpleThreadWorker::slot_onThreadFinished, Qt::QueuedConnection);
+			connect(&m_thread, &QThread::started, worker, &SimpleThreadWorker::slot_onThreadStarted,
+						static_cast<Qt::ConnectionType>(Qt::QueuedConnection | Qt::UniqueConnection));
+			connect(this, &SimpleThread::quitRequested, worker, &SimpleThreadWorker::slot_onThreadFinished,
+						static_cast<Qt::ConnectionType>(Qt::AutoConnection | Qt::UniqueConnection));
 		}
 	}
 
@@ -159,8 +176,9 @@ void SimpleThread::start()
 
 	std::unique_lock ul(m_mutex);
 
-	m_condVar.wait(
+	bool startOk = m_condVar.wait_for(
 		ul,
+		std::chrono::microseconds(time),
 		[this]() -> bool
 		{
 			return m_workers.empty();
@@ -168,15 +186,23 @@ void SimpleThread::start()
 
 	ul.unlock();
 
+	if (startOk == false)
+	{
+		log(QString("%1 NOT ALL workers started! pending %2 running %3").
+			arg(m_threadName).arg(m_workers.size()).arg(m_runningWorkers.size()));
+	}
+
 	log(QString("%1 started %2 at %3 ms").
-					  arg(m_threadName).arg(m_runningWorkersCount).arg(et.elapsed()));
+					  arg(m_threadName).arg(m_runningWorkers.size()).arg(et.elapsed()));
 }
 
 bool SimpleThread::quitAndWait(unsigned long time)
 {
+	Q_ASSERT(QThread::currentThread() != &m_thread);
+
 	if (m_started == false)
 	{
-		Q_ASSERT(m_started == true);
+		Q_ASSERT(false);
 		return true;
 	}
 
@@ -188,11 +214,11 @@ bool SimpleThread::quitAndWait(unsigned long time)
 
 	log(QString("%1 quitAndWait").arg(m_threadName));
 
-	bool finishedOk = false;
+	bool workersFinishedOk = false;
 
 	std::unique_lock ul(m_mutex);
 
-	finishedOk = m_condVar.wait_for(
+	workersFinishedOk = m_condVar.wait_for(
 		ul,
 		std::chrono::milliseconds(time),
 		[this]() -> bool
@@ -202,24 +228,22 @@ bool SimpleThread::quitAndWait(unsigned long time)
 
 	ul.unlock();
 
+	if (workersFinishedOk == false)
+	{
+		log(QString("%1 NOT ALL workers finished!").arg(m_threadName));
+	}
+
 	log(QString("%1 finished %2 at %3 ms").
 					  arg(m_threadName).arg(m_finishedWorkersCount).arg(et.elapsed()));
 
-	Q_ASSERT(finishedOk == true);
-
 	m_thread.quit();
 
-	finishedOk = m_thread.wait(3000);
+	bool threadFinishedOk = m_thread.wait(3000);
 
 	m_started = false;
 
-	return finishedOk;
+	return workersFinishedOk && threadFinishedOk;
 }
-
-/*bool SimpleThread::isInterruptionRequested() const
-{
-	return m_thread.isInterruptionRequested();
-}*/
 
 bool SimpleThread::isRunning() const
 {
@@ -244,7 +268,6 @@ void SimpleThread::workerStarted(SimpleThreadWorker* worker)
 
 		m_workers.erase(worker);
 		m_runningWorkers.insert(worker);
-		m_runningWorkersCount++;
 	}
 
 	m_condVar.notify_all();
@@ -252,23 +275,44 @@ void SimpleThread::workerStarted(SimpleThreadWorker* worker)
 
 void SimpleThread::workerFinished(SimpleThreadWorker* worker)
 {
+	if (worker == nullptr)
 	{
-		std::lock_guard lg(m_mutex);
-
-		if (worker == nullptr || m_runningWorkers.contains(worker) == false)
-		{
-			Q_ASSERT(false);
-			return;
-		}
-
-		m_runningWorkers.erase(worker);
-
-		m_runningWorkersCount--;
-		m_finishedWorkersCount++;
-
-		worker->deleteLater();
+		Q_ASSERT(false);
+		return;
 	}
 
+	std::unique_lock ul(m_mutex);
+
+	if (m_runningWorkers.contains(worker) == true)
+	{
+		m_runningWorkers.erase(worker);
+
+		m_finishedWorkersCount++;
+
+		ul.unlock();
+
+		worker->deleteLater();
+		m_condVar.notify_all();
+		return;
+	}
+
+	if (m_workers.contains(worker))
+	{
+		// worker not started
+		//
+		m_workers.erase(worker);
+
+		ul.unlock();
+
+		delete worker;
+		m_condVar.notify_all();
+		return;
+	}
+
+	// WTF?
+	//
+	Q_ASSERT(false);
+	ul.unlock();
 	m_condVar.notify_all();
 }
 
