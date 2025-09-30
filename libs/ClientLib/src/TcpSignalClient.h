@@ -93,6 +93,9 @@ namespace ClientLib
 		void requestSignalLog();
 		void processSignalLog(const QByteArray& data);
 
+		void requestAckSignalLog();
+		void processAckSignalLog(const QByteArray& data);
+
 	public:
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;

@@ -509,6 +509,15 @@ message GetDiscretesLogReply
 	repeated DiscretesLogRecord discretesLogRecord = 3;
 }
 
+message AckDiscretesLogRequest
+{
+	optional int64 ackUpToPlantTime = 3; // Acknowledged up to this plant time (inclusive)
+}
+
+message AckDiscretesLogReply
+{
+}
+
 // TuningService requests and replies
 //
 

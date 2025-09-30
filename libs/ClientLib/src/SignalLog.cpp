@@ -17,11 +17,18 @@ namespace ClientLib
 	public:
 		void clear()
 		{
-			std::lock_guard lock{m_mutex};
+			{
+				std::lock_guard lock{m_mutex};
 
-			m_recordsByAds.clear();
-			m_cachedPlainData.clear();
-			m_cacheUpdateCounter++;
+				m_recordsByAds.clear();
+				m_cachedPlainData.clear();
+				m_cacheUpdateCounter++;
+			}
+
+			{
+				std::lock_guard lock{m_ackMutex};
+				m_ackQueue = {};
+			}
 
 			return;
 		}
@@ -37,6 +44,34 @@ namespace ClientLib
 			}
 
 			return;
+		}
+
+		bool sendAckUpTo(TimeStamp plantTime)
+		{
+			std::lock_guard lock{m_ackMutex};
+
+			if (enabled() == false)
+			{
+				m_ackQueue = {};
+				return false;
+			}
+
+			m_ackQueue.push(plantTime);
+			return true;
+		}
+
+		std::optional<TimeStamp> getNextAckUpTo()
+		{
+			std::lock_guard lock{m_ackMutex};
+			if (m_ackQueue.empty() == true)
+			{
+				return std::nullopt;
+			}
+
+			TimeStamp plantTime = m_ackQueue.front();
+			m_ackQueue.pop();
+
+			return plantTime;
 		}
 
 		// Add records to the log.
@@ -148,6 +183,11 @@ namespace ClientLib
 
 		mutable std::vector<DiscretesLogRecord> m_cachedPlainData;
 		mutable qint64 m_cacheUpdateCounter{0};
+
+		// Acknowledge
+		//
+		mutable std::mutex m_ackMutex;
+		std::queue<TimeStamp> m_ackQueue; // Queue of plantTimes to acknowledge
 	};
 
 	//
@@ -174,6 +214,16 @@ namespace ClientLib
 	{
 		m_impl->setEnabled(enable);
 		return;
+	}
+
+	bool SignalLog::sendAckUpTo(TimeStamp plantTime)
+	{
+		return m_impl->sendAckUpTo(plantTime);
+	}
+
+	std::optional<TimeStamp> SignalLog::getNextAckUpTo()
+	{
+		return m_impl->getNextAckUpTo();
 	}
 
 	void SignalLog::add(const QString& adsId, std::span<const DiscretesLogRecord> records)

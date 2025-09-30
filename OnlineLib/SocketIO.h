@@ -211,6 +211,7 @@ const quint32 ADS_GET_STATE = 0x1600;
 const quint32 ADS_GET_SETTINGS = 0x1800;
 
 const quint32 ADS_GET_DISCRETES_LOG = 0x1900;
+const quint32 ADS_ACK_DISCRETES_LOG = 0x1901;
 
 // Tuning Sources info/state communication, Port PORT_TUNING_SERVICE_CLIENT_REQUEST
 //

@@ -41,12 +41,12 @@ namespace ClientLib
 		return m_pimpl->signalStatesLoaded();
 	}
 
-	SignalLog& AdsConnection::signalLog()
+	ClientLib::SignalLog& AdsConnection::signalLog()
 	{
 		return m_pimpl->signalLog();
 	}
 
-	const SignalLog& AdsConnection::signalLog() const
+	const ClientLib::SignalLog& AdsConnection::signalLog() const
 	{
 		return m_pimpl->signalLog();
 	}
