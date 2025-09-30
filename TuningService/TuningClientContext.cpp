@@ -368,7 +368,7 @@ namespace Tuning
 	{
 		Q_ASSERT(m_signalToSourceIdMap.find(state.signalHash) != m_signalToSourceIdMap.end());
 
-		AUTO_LOCK_BY_THREAD(m_queueMapMutex, thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_queueMapMutex);
 
 		for(auto& p : m_stateChangesQueueMap)
 		{

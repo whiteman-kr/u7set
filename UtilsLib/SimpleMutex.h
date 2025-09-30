@@ -4,11 +4,17 @@
 
 class SimpleMutex
 {
+	Q_DISABLE_COPY_MOVE(SimpleMutex)
+
 public:
-	SimpleMutex();
+	SimpleMutex()
+	{
+	}
 
 	void lock()	{ lock(getCurrentId()); }
-	bool tryLock() { tryLock(getCurrentId()); }
+
+	bool tryLock() { return tryLock(getCurrentId()); }
+
 	void unlock() { unlock(getCurrentId()); }
 
 private:
@@ -19,7 +25,7 @@ private:
 		quintptr owner = m_ownerID.load(std::memory_order_relaxed);
 		Q_ASSERT(owner != currentId);	//	SimpleMutex is not recursive!
 
-		quint64 spin = 0;
+		unsigned spin = 0;
 
 		for (;;)
 		{
@@ -36,6 +42,7 @@ private:
 
 			if (spin < 64)
 			{
+				_mm_pause();
 				continue;	// short active spin
 			}
 
@@ -50,7 +57,7 @@ private:
 		}
 	}
 
-	bool tryLock(quintptr currentId)
+	[[nodiscard]] bool tryLock(quintptr currentId)
 	{
 		Q_ASSERT(currentId != 0);
 
@@ -65,11 +72,14 @@ private:
 	{
 		Q_ASSERT(currentId != 0);
 
-		quintptr owner = m_ownerID.load(std::memory_order_relaxed);
+		quintptr expected = currentId;
 
-		Q_ASSERT(owner == currentId);	// Unlock from non-owner thread
+		bool ok = m_ownerID.compare_exchange_strong(
+			expected, 0,
+			std::memory_order_release,
+			std::memory_order_relaxed);
 
-		m_ownerID.store(0, std::memory_order_release);
+		Q_ASSERT(ok);		// Unlock from non-owner thread
 	}
 
 	static inline quintptr getCurrentId()
@@ -99,15 +109,6 @@ public:
 	{
 		Q_ASSERT(m_mutex != nullptr);
 		Q_ASSERT(m_id != 0);
-		m_mutex->lock(m_id);
-	}
-
-	SimpleMutexLocker(SimpleMutex* mutex, const QThread* thread) :
-		m_mutex(mutex)
-	{
-		Q_ASSERT(m_mutex != nullptr);
-		Q_ASSERT(thread != nullptr);
-		m_id = reinterpret_cast<quintptr>(thread->currentThreadId());
 		m_mutex->lock(m_id);
 	}
 
@@ -157,7 +158,7 @@ private:
 };
 
 
-#define AUTO_LOCK_BY_THREAD(simpleMutex, thread) SimpleMutexLocker __simpleMutexLocker(&simpleMutex, thread); Q_UNUSED(__simpleMutexLocker);
+// #define AUTO_LOCK_BY_THREAD(simpleMutex, thread) SimpleMutexLocker __simpleMutexLocker(&simpleMutex, thread); Q_UNUSED(__simpleMutexLocker);
 
 #define AUTO_LOCK_BY_CURRENT_THREAD(simpleMutex) SimpleMutexLocker __simpleMutexLocker(&simpleMutex); Q_UNUSED(__simpleMutexLocker);
 

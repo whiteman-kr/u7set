@@ -41,6 +41,8 @@ private:
 	friend class SimpleThread;
 };
 
+#define PRINT_FUNC printFunction(__func__);
+
 class SimpleThread : public QObject
 {
 	Q_OBJECT

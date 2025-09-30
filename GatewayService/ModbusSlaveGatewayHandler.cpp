@@ -286,13 +286,13 @@ namespace Gateway
 
 		int copyDestSizeBytes = copyRegCount * REGISTER_SIZE_BYTES;
 
-		m_regsMutex.lock(thread);
+		m_regsMutex.lock();
 
 		std::memcpy(reinterpret_cast<char*>(destBuffer),
 					reinterpret_cast<char*>(m_registers.data() + regsStartAddr),
 					copyDestSizeBytes);
 
-		m_regsMutex.unlock(thread);
+		m_regsMutex.unlock();
 
 		int fillDestSizeBytes  = (regsCount - copyRegCount) * REGISTER_SIZE_BYTES;
 
