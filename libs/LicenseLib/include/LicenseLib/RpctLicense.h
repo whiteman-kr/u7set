@@ -49,6 +49,9 @@ namespace LicenseLib
 		static RpctLicense fromRawData(const QByteArray& data, const QByteArray& publicKeyData, QString* errorMessage);
 
 	public:
+		bool revoked() const;
+		void setRevoked(bool value);
+
 		QUuid uuid() const;
 		void setUuid(const QUuid& value);
 

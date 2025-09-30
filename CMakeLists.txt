@@ -116,11 +116,11 @@ endif()
 # Build Licenser
 #
 option(BUILD_LICENSER "Build Licenser" OFF)
+option(BUILD_LICENSER_BLACKLIST_GENERATOR "Build Licenser Blacklist Generator" OFF)
 
-if (DEFINED ENV{CI_BUILD_LICENSER})
+if(DEFINED ENV{CI_BUILD_LICENSER})
 	set(BUILD_LICENSER ON)
 endif()
-
 
 # Build All Small Unit Tests
 #
@@ -203,6 +203,10 @@ if(NOT CODE_COVERAGE)
 
 	if (BUILD_LICENSER)
 		add_subdirectory(./Tools/Licenser)
+	endif()
+
+	if (BUILD_LICENSER_BLACKLIST_GENERATOR)
+		add_subdirectory(./Tools/LicenserBlacklistGenerator)
 	endif()
 endif()
 

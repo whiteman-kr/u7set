@@ -126,6 +126,9 @@ public:
 	static QString hashStr(const QByteArray& data) { return QString(QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex()); }
 };
 
+// This is a stable hash function for class names, it must not be changed!
+// It returns the same hash for "MyClass" and "Namespace::MyClass"
+//
 inline quint32 ClassNameHashCode(const std::string& className)
 {
 	assert(className.empty() == false);

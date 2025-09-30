@@ -3,6 +3,8 @@
 #include <LicenseLib/RpctLicense.h>
 #include <LicenseLib/RpctValidator.h>
 
+#include "Blacklist.h"
+
 #include <QDir>
 #include <QRegularExpression>
 
@@ -25,16 +27,8 @@ namespace
 			return result;
 		}
 
-#if 0 // It makes code much longer ((
-		char mask = 0x7;
-		for (qsizetype i = 0; i < uncompressed.size(); i++)
-		{
-			uncompressed[i] = uncompressed[i] ^ mask;
-			mask = mask >= 100 ? 0x7 : mask + 1;
-		}
-#endif
 		result.ParseFromArray(uncompressed.constData(), uncompressed.size());
-#ifdef QT_DEBUG
+#if 0
 		qDebug() << workplaceId;
 		qDebug() << "Parsed workplace id: " << QString::fromStdString(result.machine_id());
 		qDebug() << "Parsed workplace id: " << QString::fromStdString(result.hardware_id());
@@ -48,7 +42,8 @@ namespace
 namespace LicenseLib
 {
 	RpctValidator::RpctValidator() :
-		m_license{std::make_unique<RpctLicense>()}
+		m_license{std::make_unique<RpctLicense>()},
+		m_blacklist{std::make_unique<Blacklist>()}
 	{
 	}
 
@@ -112,17 +107,55 @@ namespace LicenseLib
 		return m_license->isNull() == false;
 	}
 
+	bool RpctValidator::isRevoked() const
+	{
+		if (m_license == nullptr)
+		{
+			Q_ASSERT(m_license);
+			return false;
+		}
+
+		return m_license->revoked();
+	}
+
+	ValidationResult RpctValidator::isBlacklisted() const
+	{
+		Q_ASSERT(m_license);
+		if (m_license == nullptr)
+		{
+			return ValidationResult::Invalid;
+		}
+
+		auto r = m_blacklist->check(m_license->uuid());
+		if (r.has_value() == true)
+		{
+			Q_ASSERT(r.value());
+			return ValidationResult::Valid;
+		}
+
+		switch (r.error())
+		{
+		case BlacklistReason::Revoked:
+			return ValidationResult::Revoked;
+		case BlacklistReason::Expired:
+			return ValidationResult::Expired;
+		default:
+			break;
+		}
+
+		return ValidationResult::Invalid;
+	}
+
 	ValidationResult RpctValidator::validateDate(const QDate& currentDate, const QDate& softwareReleaseDate) const
 	{
+		Q_ASSERT(m_license);
+
 #ifndef NDEBUG
 		if (AppLicenser::noLicenseCheck() == true)
 		{
 			return ValidationResult::Valid;
 		}
 #endif
-
-		Q_ASSERT(m_license);
-
 		if (m_license->isNull() == true)
 		{
 			return ValidationResult::NotFound;
@@ -147,50 +180,116 @@ namespace LicenseLib
 		if (AppLicenser::noLicenseCheck() == true)
 		{
 			return ValidationResult::Valid;
+			return ValidationResult::Invalid;
 		}
 #endif
 
 		// Decode workplaceId
 		//
-		Proto::InternalWorkplaceId lhs = parsedWorkplaceId(AppLicenser::workplaceId());
-		Proto::InternalWorkplaceId rhs = parsedWorkplaceId(m_license->workplaceId());
-
-		int matches = 0;
-		int expectedMatches = 2;
-
-		if (lhs.machine_id().empty() == false || rhs.machine_id().empty() == false)
+		Proto::InternalWorkplaceId lhs = parsedWorkplaceId(m_license->workplaceId());
+		Proto::InternalWorkplaceId rhs;
+		switch (lhs.version())
 		{
-			QString l = QString::fromStdString(lhs.machine_id()).toLower();
-			QString r = QString::fromStdString(rhs.machine_id()).toLower();
-			matches += (l == r);
+		case 0:
+			rhs = parsedWorkplaceId(AppLicenser::workplaceIdV0());
+			break;
+		case 1:
+			rhs = parsedWorkplaceId(AppLicenser::workplaceIdV1());
+			break;
+		default:
+			rhs = parsedWorkplaceId(AppLicenser::workplaceId());
 		}
 
-		if (lhs.hardware_id().empty() == false || rhs.hardware_id().empty() == false)
+		if (lhs.version() == 0)
 		{
-			QString l = QString::fromStdString(lhs.hardware_id()).toLower();
-			QString r = QString::fromStdString(rhs.hardware_id()).toLower();
-			matches += (l == r);
+			int matches = 0;
+			const int expectedMatches = 2;
+
+			if (lhs.machine_id().empty() == false || rhs.machine_id().empty() == false)
+			{
+				QString l = QString::fromStdString(lhs.machine_id()).toLower();
+				QString r = QString::fromStdString(rhs.machine_id()).toLower();
+				matches += (l == r);
+			}
+
+			if (lhs.hardware_id().empty() == false || rhs.hardware_id().empty() == false)
+			{
+				QString l = QString::fromStdString(lhs.hardware_id()).toLower();
+				QString r = QString::fromStdString(rhs.hardware_id()).toLower();
+				matches += (l == r);
+			}
+
+			if (lhs.cpu().empty() == false || rhs.cpu().empty() == false)
+			{
+				QString l = QString::fromStdString(lhs.cpu()).toLower();
+				QString r = QString::fromStdString(rhs.cpu()).toLower();
+				matches += (l == r);
+			}
+
+			QStringList lhsMacs = QString::fromStdString(lhs.macs()).toLower().split(" ");
+			QStringList rhsMacs = QString::fromStdString(rhs.macs()).toLower().split(" ");
+
+			bool macMatched = std::any_of(lhsMacs.begin(),
+										  lhsMacs.end(),
+										  [&](const QString& leftMac)
+										  {
+											  return rhsMacs.contains(leftMac);
+										  });
+
+			matches += macMatched;
+			return (matches >= expectedMatches) ? ValidationResult::Valid : ValidationResult::Invalid;
 		}
 
-		if (lhs.cpu().empty() == false || rhs.cpu().empty() == false)
+		if (lhs.version() == 1)
 		{
-			QString l = QString::fromStdString(lhs.cpu()).toLower();
-			QString r = QString::fromStdString(rhs.cpu()).toLower();
-			matches += (l == r);
+			double matches = 0;
+			constexpr double expectedMatches = 0.59;
+
+			if (lhs.motherboard_info_hash() == rhs.motherboard_info_hash())
+			{
+				matches += 0.5;
+			}
+
+			if (lhs.machine_id().empty() == false || rhs.machine_id().empty() == false)
+			{
+				QString l = QString::fromStdString(lhs.machine_id()).toLower();
+				QString r = QString::fromStdString(rhs.machine_id()).toLower();
+				matches += (l == r) ? 0.25 : 0.0;
+			}
+
+			if (lhs.hardware_id().empty() == false || rhs.hardware_id().empty() == false)
+			{
+				QString l = QString::fromStdString(lhs.hardware_id()).toLower();
+				QString r = QString::fromStdString(rhs.hardware_id()).toLower();
+				matches += (l == r) ? 0.25 : 0.0;
+			}
+
+			if (lhs.cpu().empty() == false || rhs.cpu().empty() == false)
+			{
+				QString l = QString::fromStdString(lhs.cpu()).toLower();
+				QString r = QString::fromStdString(rhs.cpu()).toLower();
+				matches += (l == r) ? 0.1 : 0.0;
+			}
+
+			QStringList lhsMacs = QString::fromStdString(lhs.macs()).toLower().split(" ");
+			QStringList rhsMacs = QString::fromStdString(rhs.macs()).toLower().split(" ");
+
+			bool macMatched = std::any_of(lhsMacs.begin(),
+										  lhsMacs.end(),
+										  [&](const QString& leftmac)
+										  {
+											  return rhsMacs.contains(leftmac);
+										  });
+
+			matches += macMatched ? 0.25 : 0.0;
+
+			// Check threshold of matches.
+			//
+			return (matches >= expectedMatches) ? ValidationResult::Valid : ValidationResult::Invalid;
 		}
 
-		QStringList lhsMacs = QString::fromStdString(lhs.macs()).toLower().split(" ");
-		QStringList rhsMacs = QString::fromStdString(rhs.macs()).toLower().split(" ");
-
-		bool macMatched = std::any_of(lhsMacs.begin(),
-									  lhsMacs.end(),
-									  [&](const QString& leftmac)
-									  {
-										  return rhsMacs.contains(leftmac);
-									  });
-
-		matches += macMatched;
-		return (matches >= expectedMatches) ? ValidationResult::Valid : ValidationResult::Invalid;
+		Q_ASSERT(false);
+		return ValidationResult::Invalid;
 	}
 
 	ValidationResult RpctValidator::validateAppU7() const
@@ -269,6 +368,24 @@ namespace LicenseLib
 	{
 		Q_ASSERT(m_license);
 		return *m_license;
+	}
+
+	QString RpctValidator::dumpWorkplaceId(const QString& workplaceId)
+	{
+		Proto::InternalWorkplaceId proto = parsedWorkplaceId(workplaceId);
+
+		QString result;
+		result += "Version: " + QString::number(proto.version()) + "\n";
+		result += "MachineId: " + QString::fromStdString(proto.machine_id()) + "\n";
+		result += "HardwareId: " + QString::fromStdString(proto.hardware_id()) + "\n";
+		result += "CPU: " + QString::fromStdString(proto.cpu()) + "\n";
+		result += "MACs: " + QString::fromStdString(proto.macs()) + "\n";
+		result += "MotherboardInfoHash: " + QString("0x%1").arg(proto.motherboard_info_hash(), 8, 16, QChar('0')) + "\n";
+
+		result += "OS: " + QString::fromStdString(proto.os()) + "\n";
+		result += "Host: " + QString::fromStdString(proto.host()) + "\n";
+
+		return result;
 	}
 
 } // namespace LicenseLib

@@ -19,6 +19,8 @@ variables:
   
   CI_RV_MODEL: "1"              # Build RV Model projects (RAES NTC), comment out to disable.
 
+  GIT_TERMINAL_PROMPT: "0"      # Prevent Git from ever prompting
+
 stages:
   - prepare
   - build
@@ -121,12 +123,13 @@ windows_build_job:
     - "git status"
     - "git log -1"
     - $Env:QT_BIN_DIR="C:\\Qt\\${Env:QT_VERSION}\\msvc2022_64"
-    - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR\\bin\\release"
+    - $Env:BIN_OUT_DIR="$Env:CI_PROJECT_DIR\bin\release"
     - $Env:INSTALL_OUT_DIR="$Env:CI_PROJECT_DIR\\dev"
 #Build Project
     - "# ----------------------------------------------"
     - "#               Build Project"
     - "# ----------------------------------------------"    
+    - "& './gitlab_ci_build_licenser.bat'"
     - "& './gitlab_ci_build.bat'"
 #Copy Qt DLLs to bin/release
     - "# ----------------------------------------------"

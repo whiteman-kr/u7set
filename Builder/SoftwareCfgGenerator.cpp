@@ -621,6 +621,7 @@ namespace Builder
 		Q_ASSERT(schema);
 		Q_ASSERT(buildResultWriter);
 
+		QString extension{schema->isVduSchema() ? ".lua" : ".js"};
 		bool result = true;
 
 		for (const auto& layer : schema->layers())
@@ -641,14 +642,14 @@ namespace Builder
 
 							if (item->label().isEmpty() == false)
 							{
-								fileName = item->label() + "." + property->caption() + ".js";
+								fileName = item->label() + "." + property->caption() + extension;
 							}
 							else
 							{
 								fileName += QString("%1 - %2")
 												.arg(QString(item->metaObject()->className()).remove(QStringLiteral("VFrame30::")))
 												.arg(item->guid().toString()) +
-											"." + property->caption() + ".js";
+											"." + property->caption() + extension;
 							}
 
 							BuildFile* file = buildResultWriter->addFile(dir, fileName, property->value().toString());
@@ -934,8 +935,8 @@ namespace Builder
 
 		// Expand schema and calc rectangles
 		//
-		QRectF schemaRect;		// New rect for existing items
-		QRectF panelRect;		// Rect to move panel items yo
+		QRectF schemaRect; // New rect for existing items
+		QRectF panelRect;  // Rect to move panel items yo
 
 		switch (edge)
 		{
@@ -992,7 +993,7 @@ namespace Builder
 		//
 		if (schemaRect.topLeft().isNull() == false)
 		{
-			for (const auto& layer :  schema->layers())
+			for (const auto& layer : schema->layers())
 			{
 				if (layer == nullptr)
 				{
@@ -1001,7 +1002,7 @@ namespace Builder
 					return false;
 				}
 
-				for (const SchemaItemPtr& item :  layer->items())
+				for (const SchemaItemPtr& item : layer->items())
 				{
 					if (item == nullptr)
 					{
@@ -1021,16 +1022,24 @@ namespace Builder
 		{
 			Q_ASSERT(panelLayer);
 
-			auto foundDestLayerIt = std::find_if(schema->layers().begin(), schema->layers().end(),
-												 [panelLayer](auto l) { return l->name() == panelLayer->name(); } );
+			auto foundDestLayerIt = std::find_if(schema->layers().begin(),
+												 schema->layers().end(),
+												 [panelLayer](auto l)
+												 {
+													 return l->name() == panelLayer->name();
+												 });
 
 			if (foundDestLayerIt == schema->layers().end())
 			{
 				// Source layer is not found in destination, copy to compile layer,
 				// if compile layer does not exists either, then copy to the first layer
 				//
-				foundDestLayerIt = std::find_if(schema->layers().begin(), schema->layers().end(),
-												[](auto l) { return l->compile(); } );
+				foundDestLayerIt = std::find_if(schema->layers().begin(),
+												schema->layers().end(),
+												[](auto l)
+												{
+													return l->compile();
+												});
 
 				if (foundDestLayerIt == schema->layers().end())
 				{
@@ -1056,8 +1065,7 @@ namespace Builder
 				//
 				Proto::Envelope savedItem;
 
-				if (bool saveOk = sourceItem->Save(&savedItem);
-					saveOk == false)
+				if (bool saveOk = sourceItem->Save(&savedItem); saveOk == false)
 				{
 					Q_ASSERT(saveOk);
 					return false;
@@ -1070,7 +1078,7 @@ namespace Builder
 					return false;
 				}
 
-				newItem->setNewGuid();		// generate new guids for item and its pins
+				newItem->setNewGuid(); // generate new guids for item and its pins
 
 				// From new label for SchemaItem: SchemaID_FblItemRectLabel
 				//
@@ -1495,7 +1503,9 @@ namespace Builder
 		//
 		for (const QString& user : tuningUserAccounts)
 		{
-			if (std::find_if(storage.users().begin(), storage.users().end(), [&user](const OnlineLib::MatsUser& matsUser)
+			if (std::find_if(storage.users().begin(),
+							 storage.users().end(),
+							 [&user](const OnlineLib::MatsUser& matsUser)
 							 {
 								 return matsUser.login() == user;
 							 }) == storage.users().end())
@@ -1512,7 +1522,8 @@ namespace Builder
 
 		// Write file
 		//
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), File::MATSUSERS_XML, CfgFileId::MATSUSERS, "", data);
+		BuildFile* buildFile =
+			m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), File::MATSUSERS_XML, CfgFileId::MATSUSERS, "", data);
 		if (buildFile == nullptr)
 		{
 			m_log->errCMN0012(File::MATSUSERS_XML);
@@ -1557,6 +1568,4 @@ namespace Builder
 
 		return result;
 	}
-}
-
-
+} // namespace Builder

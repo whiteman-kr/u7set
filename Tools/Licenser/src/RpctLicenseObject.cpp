@@ -1,10 +1,11 @@
 #include "RpctLicenseObject.h"
 
+#include <LicenseLib/RpctValidator.h>
+
 RpctLicenseObject::RpctLicenseObject(QObject* parent) :
 	PropertyObject{parent},
 	LicenseLib::RpctLicense{}
 {
-
 	QString categoryCommon = "1 Common";
 	QString categoryCustomer = "2 Customer";
 	QString categoryLicense = "3 License";
@@ -14,9 +15,13 @@ RpctLicenseObject::RpctLicenseObject(QObject* parent) :
 	QString categoryOther = "9 Other";
 
 	// --
-	Property* p = ADD_PROPERTY_GETTER(QUuid, "Uuid", true, LicenseLib::RpctLicense::uuid);
+	Property* p = ADD_PROPERTY_GETTER_SETTER(bool, "Revoked", true, LicenseLib::RpctLicense::revoked, LicenseLib::RpctLicense::setRevoked);
 	p->setCategory(categoryCommon);
 	p->setViewOrder(1);
+
+	p = ADD_PROPERTY_GETTER(QUuid, "Uuid", true, LicenseLib::RpctLicense::uuid);
+	p->setCategory(categoryCommon);
+	p->setViewOrder(2);
 
 #if 0
 	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, LicenseLib::RpctLicense::caption, LicenseLib::RpctLicense::setCaption);
@@ -145,6 +150,16 @@ RpctLicenseObject::RpctLicenseObject(QObject* parent) :
 	p = ADD_PROPERTY_GETTER(QDate, "IssueDate", true, LicenseLib::RpctLicense::issueDate);
 	p->setCategory(categoryOther);
 	p->setViewOrder(302);
+
+	p = ADD_PROPERTY_GETTER(QString,
+							"Dump",
+							true,
+							[this]()
+							{
+								return LicenseLib::RpctValidator::dumpWorkplaceId(workplaceId());
+							});
+	p->setCategory(categoryOther);
+	p->setViewOrder(303);
 
 	return;
 }
