@@ -1,34 +1,159 @@
 #pragma once
 
+#include <atomic>
+
 class SimpleMutex
 {
 public:
 	SimpleMutex();
 
-	void lock();
-	void lock(const QThread* currentThread);
-
-	bool tryLock();
-	bool tryLock(const QThread* currentThread);
-
-	void unlock();
-	void unlock(const QThread* currentThread);
+	void lock()	{ lock(getCurrentId()); }
+	bool tryLock() { tryLock(getCurrentId()); }
+	void unlock() { unlock(getCurrentId()); }
 
 private:
-	std::atomic<const QThread*> m_currentOwner = { nullptr };
+	void lock(quintptr currentId)
+	{
+		Q_ASSERT(currentId != 0);
+
+		quintptr owner = m_ownerID.load(std::memory_order_relaxed);
+		Q_ASSERT(owner != currentId);	//	SimpleMutex is not recursive!
+
+		quint64 spin = 0;
+
+		for (;;)
+		{
+			quintptr expected = 0;
+
+			if (m_ownerID.compare_exchange_weak(expected, currentId,
+												std::memory_order_acquire,   // success
+												std::memory_order_relaxed))  // failure
+			{
+				return;
+			}
+
+			spin++;
+
+			if (spin < 64)
+			{
+				continue;	// short active spin
+			}
+
+			if (spin < 256)
+			{
+				QThread::yieldCurrentThread();
+				continue;
+			}
+
+			QThread::msleep(1);
+			spin = 0;
+		}
+	}
+
+	bool tryLock(quintptr currentId)
+	{
+		Q_ASSERT(currentId != 0);
+
+		quintptr expected = 0;
+
+		return m_ownerID.compare_exchange_strong(expected, currentId,
+												std::memory_order_acquire,
+												std::memory_order_relaxed);
+	}
+
+	void unlock(quintptr currentId)
+	{
+		Q_ASSERT(currentId != 0);
+
+		quintptr owner = m_ownerID.load(std::memory_order_relaxed);
+
+		Q_ASSERT(owner == currentId);	// Unlock from non-owner thread
+
+		m_ownerID.store(0, std::memory_order_release);
+	}
+
+	static inline quintptr getCurrentId()
+	{
+		return reinterpret_cast<quintptr>(QThread::currentThreadId());
+	}
+
+private:
+	std::atomic<quintptr> m_ownerID { 0 };
+
+	friend class SimpleMutexLocker;
 };
 
 class SimpleMutexLocker
 {
 public:
-	SimpleMutexLocker(SimpleMutex* mutex);
-	SimpleMutexLocker(SimpleMutex* mutex, const QThread* currentThread);
+	explicit SimpleMutexLocker(SimpleMutex* mutex) :
+		m_mutex(mutex),
+		m_id(SimpleMutex::getCurrentId())
+	{
+		Q_ASSERT(m_mutex != nullptr);
+		m_mutex->lock(m_id);
+	}
 
-	~SimpleMutexLocker();
+	SimpleMutexLocker(SimpleMutex* mutex, quintptr id) :
+		m_mutex(mutex), m_id(id)
+	{
+		Q_ASSERT(m_mutex != nullptr);
+		Q_ASSERT(m_id != 0);
+		m_mutex->lock(m_id);
+	}
+
+	SimpleMutexLocker(SimpleMutex* mutex, const QThread* thread) :
+		m_mutex(mutex)
+	{
+		Q_ASSERT(m_mutex != nullptr);
+		Q_ASSERT(thread != nullptr);
+		m_id = reinterpret_cast<quintptr>(thread->currentThreadId());
+		m_mutex->lock(m_id);
+	}
+
+	SimpleMutexLocker(SimpleMutexLocker&& other) noexcept
+		: m_mutex(other.m_mutex), m_id(other.m_id)
+	{
+		other.m_mutex = nullptr;
+		other.m_id = 0;
+	}
+
+	SimpleMutexLocker(const SimpleMutexLocker&) = delete;
+
+	SimpleMutexLocker& operator=(SimpleMutexLocker&& other) noexcept
+	{
+		if (this != &other)
+		{
+			release();
+			m_mutex = other.m_mutex;
+			m_id = other.m_id;
+			other.m_mutex = nullptr;
+			other.m_id = 0;
+		}
+		return *this;
+	}
+
+	SimpleMutexLocker& operator=(const SimpleMutexLocker&) = delete;
+
+	~SimpleMutexLocker()
+	{
+		release();
+	}
 
 private:
-	SimpleMutex* m_simpleMutex;
-	const QThread* m_currentThread = nullptr;
+	void release()
+	{
+		if (m_mutex != nullptr && m_id != 0)
+		{
+			m_mutex->unlock(m_id);
+			m_mutex = nullptr;
+			m_id = 0;
+		}
+	}
+
+private:
+	SimpleMutex* m_mutex {nullptr};
+	quintptr m_id { 0 };
 };
 
 
@@ -36,107 +161,4 @@ private:
 
 #define AUTO_LOCK_BY_CURRENT_THREAD(simpleMutex) SimpleMutexLocker __simpleMutexLocker(&simpleMutex); Q_UNUSED(__simpleMutexLocker);
 
-// -------------------------------------------------------------------------------------
-//
-// SimpleMutex class implementation
-//
-// -------------------------------------------------------------------------------------
-
-inline SimpleMutex::SimpleMutex()
-{
-}
-
-inline void SimpleMutex::lock()
-{
-	lock(QThread::currentThread());
-}
-
-inline void SimpleMutex::lock(const QThread* currentThread)
-{
-	bool result = false;
-
-	do
-	{
-		const QThread* expectedOwner = nullptr;
-
-		result = m_currentOwner.compare_exchange_strong(expectedOwner, currentThread, std::memory_order_seq_cst);
-
-		if (result == false)
-		{
-			QThread::yieldCurrentThread();
-		}
-	}
-	while(result == false);
-}
-
-inline bool SimpleMutex::tryLock()
-{
-	return tryLock(QThread::currentThread());
-}
-
-inline bool SimpleMutex::tryLock(const QThread* currentThread)
-{
-	const QThread* expectedOwner = nullptr;
-
-	return m_currentOwner.compare_exchange_strong(expectedOwner, currentThread, std::memory_order_seq_cst);
-}
-
-inline void SimpleMutex::unlock()
-{
-	unlock(QThread::currentThread());
-}
-
-inline void SimpleMutex::unlock(const QThread* currentThread)
-{
-	const QThread* expectedOwner = currentThread;
-
-	bool result = m_currentOwner.compare_exchange_strong(expectedOwner, nullptr, std::memory_order_seq_cst);
-
-	assert(result == true);
-
-	Q_UNUSED(result);
-}
-
-// -------------------------------------------------------------------------------------
-//
-// SimpleMutexLocker class implementation
-//
-// -------------------------------------------------------------------------------------
-
-inline SimpleMutexLocker::SimpleMutexLocker(SimpleMutex* mutex) :
-	m_simpleMutex(mutex),
-	m_currentThread(QThread::currentThread())
-{
-	if (m_simpleMutex == nullptr || m_currentThread == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_simpleMutex->lock(m_currentThread);
-}
-
-inline SimpleMutexLocker::SimpleMutexLocker(SimpleMutex* mutex, const QThread* currentThread) :
-	m_simpleMutex(mutex),
-	m_currentThread(currentThread)
-{
-	if (m_simpleMutex == nullptr || m_currentThread == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_simpleMutex->lock(m_currentThread);
-}
-
-inline SimpleMutexLocker::~SimpleMutexLocker()
-{
-	if (m_simpleMutex == nullptr || m_currentThread == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_simpleMutex->unlock(m_currentThread);
-}
 
