@@ -849,6 +849,7 @@ namespace SchemaClientLib
 			maskLayout->setContentsMargins(0, 0, 0, 0);
 
 			m_editMask = new QLineEdit();
+			m_editMask->setPlaceholderText("Enter mask (\"*,?\") here");
 			connect(m_editMask, &QLineEdit::returnPressed, this, &SignalSnapshotWidget::editMaskReturnPressed);
 			maskLayout->addWidget(m_editMask);
 			m_editMask->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
@@ -906,6 +907,7 @@ namespace SchemaClientLib
 			tagsLayout->setContentsMargins(0, 0, 0, 0);
 
 			m_editTags = new QLineEdit();
+			m_editTags->setPlaceholderText("Signal tags space separated");
 			connect(m_editTags, &QLineEdit::returnPressed, this, &SignalSnapshotWidget::editTagsReturnPressed);
 			tagsLayout->addWidget(m_editTags);
 			m_editTags->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
@@ -943,7 +945,7 @@ namespace SchemaClientLib
 
 		exPrintLayout->addStretch();
 
-		m_clearFilterButton = new QPushButton(tr("Clear Filter"));
+		m_clearFilterButton = new QPushButton(tr("Reset Filter"));
 		m_clearFilterButton->setAutoDefault(false);
 		exPrintLayout->addWidget(m_clearFilterButton);
 		connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalSnapshotWidget::buttonClearFilterClicked);

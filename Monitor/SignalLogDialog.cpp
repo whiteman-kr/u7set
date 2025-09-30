@@ -1184,7 +1184,6 @@ void SignalLogTableView::mousePressEvent(QMouseEvent* event)
 	{
 		bool found = false;
 
-
 		AppSignalParam appSignalParam = logModel->signalParam(index.row(), &found);
 
 		if (found == true)
@@ -1208,7 +1207,7 @@ void SignalLogTableView::mouseMoveEvent(QMouseEvent* event)
 //
 // SignalLogWidget
 //
-SignalLogWidget::SignalLogWidget(const ClientLib::SignalLog& signalLog,
+SignalLogWidget::SignalLogWidget(ClientLib::SignalLog& signalLog,
 								 const IAppSignalManager* appSignalManager,
 								 const AppSignalLists::AppSignalListSet* appSignalListSet,
 								 const QString& projectName,
@@ -1411,27 +1410,50 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 {
 	Q_UNUSED(pos);
 
-	int row = m_tableView->currentIndex().row();
-	if (row == -1)
-	{
-		return;
-	}
-
-	int rowIndex = m_tableView->currentIndex().row();
-
-	bool found = false;
-
-	const AppSignalParam& s = m_model.signalParam(rowIndex, &found);
-
-	if (found == false)
-	{
-		return;
-	}
-
 	QStringList list;
-	list << s.appSignalId();
 
-	//
+	TimeStamp maxPlantTime = 0;
+
+	m_signalMenu.clear();
+
+	QModelIndexList rows = m_tableView->selectionModel()->selectedRows();
+
+	for (QModelIndex& index : rows)
+	{
+		bool found = false;
+
+		AppSignalParam appSignalParam = m_model.signalParam(index.row(), &found);
+		if (found == false) 
+		{
+			continue;
+		}
+
+		const auto& rec = m_model.filteredRecord(index.row());
+		if (rec.acknowledged == false && rec.plantTime > maxPlantTime) 
+		{
+			maxPlantTime = rec.plantTime;
+		}
+
+		const auto& appSignalID = appSignalParam.appSignalId();
+		if (list.contains(appSignalID) == false)
+		{
+			list << appSignalID;
+		}
+	}
+
+	if (maxPlantTime != 0) 
+	{
+		QAction* action = new QAction(
+			"Acknowledge up to " + QDateTime::fromMSecsSinceEpoch(maxPlantTime.timeStamp, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"),
+			&m_signalMenu);
+		connect(action,
+				&QAction::triggered,
+				[maxPlantTime, this]()
+				{
+					m_signalLog.sendAckUpTo(maxPlantTime);
+				});
+		m_signalMenu.addAction(action);
+	}
 
 	emit signalContextMenu(list, QList<QMenu*>() << &m_signalMenu);
 }
@@ -1637,6 +1659,31 @@ void SignalLogWidget::buttonClearFilterClicked()
 	m_model.fillRecords(true /*resetSelection*/);
 }
 
+void SignalLogWidget::buttonAckAllClicked()
+{
+	if (QMessageBox::warning(this,
+							 qAppName(),
+							 tr("Are you sure you want to acknowledge all signal events?"),
+							 QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+	{
+		return;
+	}
+
+	auto [records, index] = m_signalLog.getRecords();
+	
+	int count = static_cast<int>(records.size());
+	for (int i = count - 1; i >= 0; i--) 
+	{
+		if (records[i].acknowledged == false) 
+		{
+			m_signalLog.sendAckUpTo(records[i].plantTime);
+			break;
+		}
+	}
+
+	return;
+}
+
 void SignalLogWidget::createControls()
 {
 	// Filter layout
@@ -1654,6 +1701,7 @@ void SignalLogWidget::createControls()
 		maskLayout->addWidget(new QLabel(tr("Mask")));
 
 		m_editMask = new QLineEdit();
+		m_editMask->setPlaceholderText("Enter mask (\"*,?\") here");
 		connect(m_editMask, &QLineEdit::returnPressed, this, &SignalLogWidget::editMaskReturnPressed);
 		maskLayout->addWidget(m_editMask);
 		m_editMask->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
@@ -1686,12 +1734,13 @@ void SignalLogWidget::createControls()
 	//
 	{
 		QHBoxLayout* tagsLayout = new QHBoxLayout();
-		tagsLayout->setSpacing(0);
+		tagsLayout->setSpacing(5);
 		tagsLayout->setContentsMargins(0, 0, 0, 0);
 
 		tagsLayout->addWidget(new QLabel(tr("Tags")));
 
 		m_editTags = new QLineEdit();
+		m_editTags->setPlaceholderText("Signal tags space separated");
 		connect(m_editTags, &QLineEdit::returnPressed, this, &SignalLogWidget::editTagsReturnPressed);
 		tagsLayout->addWidget(m_editTags);
 		m_editTags->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
@@ -1720,10 +1769,15 @@ void SignalLogWidget::createControls()
 	connect(b, &QPushButton::clicked, this, &SignalLogWidget::buttonPrintClicked);
 	exPrintLayout->addWidget(b);
 
-	m_clearFilterButton = new QPushButton(tr("Clear Filter"));
+	m_clearFilterButton = new QPushButton(tr("Reset Filter"));
 	m_clearFilterButton->setAutoDefault(false);
 	exPrintLayout->addWidget(m_clearFilterButton);
 	connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalLogWidget::buttonClearFilterClicked);
+
+	m_ackButton = new QPushButton(tr("Acknowledge All"));
+	m_ackButton->setAutoDefault(false);
+	connect(m_ackButton, &QToolButton::clicked, this, &SignalLogWidget::buttonAckAllClicked);
+	exPrintLayout->addWidget(m_ackButton);
 
 	m_buttonFixate = new QPushButton(tr("Fixate"));
 	m_buttonFixate->setAutoDefault(false);
@@ -1734,11 +1788,11 @@ void SignalLogWidget::createControls()
 
 	filterLayout->setSpacing(4);
 
-	filterLayout->setColumnStretch(0, 0);
+	filterLayout->setColumnStretch(0, 1);
 	filterLayout->setColumnStretch(1, 0);
 	filterLayout->setColumnStretch(2, 0);
-	filterLayout->setColumnStretch(3, 0);
-	filterLayout->setColumnStretch(4, 5);
+	filterLayout->setColumnStretch(3, 1);
+	filterLayout->setColumnStretch(4, 2);
 	filterLayout->setColumnStretch(5, 0);
 
 	// Table
@@ -1861,7 +1915,6 @@ void SignalLogWidget::initRecordsView()
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Tags));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::SystemTime));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::LocalTime));
-		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::PlantTime));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Valid));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::StateAvailable));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Simulated));
@@ -2077,7 +2130,7 @@ void SignalLogWidget::tagsChanged()
 //
 SignalLogDialog* SignalLogDialog::s_instance = nullptr;
 
-SignalLogDialog::SignalLogDialog(const ClientLib::SignalLog& signalLog,
+SignalLogDialog::SignalLogDialog(ClientLib::SignalLog& signalLog,
 								 ClientLib::AppSignalManager& appSignalManager,
 								 const AppSignalLists::AppSignalListSet* appSignalListSet,
 								 const QString& projectName,
@@ -2118,7 +2171,7 @@ SignalLogDialog::~SignalLogDialog()
 	s_instance = nullptr;
 }
 
-SignalLogDialog* SignalLogDialog::createDialog(const ClientLib::SignalLog& signalLog,
+SignalLogDialog* SignalLogDialog::createDialog(ClientLib::SignalLog& signalLog,
 											   ClientLib::AppSignalManager& appSignalManager,
 											   const AppSignalLists::AppSignalListSet* appSignalListSet,
 											   const QString& projectName,

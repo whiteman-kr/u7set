@@ -203,7 +203,7 @@ class SignalLogWidget : public QWidget
 	Q_OBJECT
 
 public:
-	SignalLogWidget(const ClientLib::SignalLog& signalLog,
+	SignalLogWidget(ClientLib::SignalLog& signalLog,
 					const IAppSignalManager* appSignalManager,
 					const AppSignalLists::AppSignalListSet* appSignalListSet,
 					const QString& projectName,
@@ -238,6 +238,7 @@ private slots:
 	void buttonPrintClicked();
 	void buttonChooseTagsClicked();
 	void buttonClearFilterClicked();
+	void buttonAckAllClicked();
 
 private:
 	void createControls();
@@ -257,7 +258,7 @@ signals:
 	void signalInfo(QString appSignalId);
 
 private:
-	const ClientLib::SignalLog& m_signalLog;
+	ClientLib::SignalLog& m_signalLog;
 	const IAppSignalManager* m_appSignalManager = nullptr;
 	const AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 	SignalLogModel m_model;
@@ -278,6 +279,7 @@ private:
 	QCompleter* m_tagsCompleter = nullptr;
 
 	QPushButton* m_clearFilterButton = nullptr;
+	QPushButton* m_ackButton = nullptr;
 
 	QMenu m_signalMenu;
 
@@ -305,7 +307,7 @@ class SignalLogDialog : public QDialog
 	Q_OBJECT
 
 private:
-	explicit SignalLogDialog(const ClientLib::SignalLog& signalLog,
+	explicit SignalLogDialog(ClientLib::SignalLog& signalLog,
 							 ClientLib::AppSignalManager& appSignalManager,
 							 const AppSignalLists::AppSignalListSet* appSignalListSet,
 							 const QString& projectName,
@@ -317,7 +319,7 @@ private:
 public:
 	virtual ~SignalLogDialog();
 
-	static SignalLogDialog* createDialog(const ClientLib::SignalLog& signalLog,
+	static SignalLogDialog* createDialog(ClientLib::SignalLog& signalLog,
 										 ClientLib::AppSignalManager& appSignalManager,
 										 const AppSignalLists::AppSignalListSet* appSignalListSet,
 										 const QString& projectName,
@@ -335,7 +337,7 @@ private slots:
 	void signalInfo(QString appSignalId);
 
 private:
-	const ClientLib::SignalLog& m_signalLog;
+	ClientLib::SignalLog& m_signalLog;
 	ClientLib::AppSignalManager& m_appSignalManager;
 
 	SignalLogWidget* m_logWidget = nullptr;
