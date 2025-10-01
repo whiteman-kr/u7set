@@ -81,7 +81,7 @@ namespace SchemaClientLib
 			item->setText(0, std::get<0>(record));
 			item->setText(1, std::get<1>(record));
 			item->setText(2, std::get<2>(record));
-			item->setText(3, QString::number(std::get<3>(record)));
+			item->setText(3, DateTimeToString::stringDateTime(TimeStamp(std::get<3>(record)).toDateTime(), true /*with ms*/));
 		}
 
 		// Save text to m_lastStats in csv format (Module;Item;Action;Time).
@@ -91,7 +91,11 @@ namespace SchemaClientLib
 
 		for (const auto& record : statRecords)
 		{
-			m_lastStats += QString("%1;%2;%3;%4\n").arg(std::get<0>(record)).arg(std::get<1>(record)).arg(std::get<2>(record)).arg(std::get<3>(record));
+			m_lastStats += QString("%1;%2;%3;%4\n")
+							   .arg(std::get<0>(record))
+							   .arg(std::get<1>(record))
+							   .arg(std::get<2>(record))
+							   .arg(DateTimeToString::stringDateTime(TimeStamp(std::get<3>(record)).toDateTime(), true /*with ms*/));
 		}
 
 		return;

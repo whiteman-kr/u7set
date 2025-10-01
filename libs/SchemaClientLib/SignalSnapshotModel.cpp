@@ -765,17 +765,17 @@ namespace SchemaClientLib
 			case SnapshotColumns::SystemTime:
 				{
 					QDateTime time = state.m_time.systemToDateTime();
-					return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+					return DateTimeToString::stringDateTime(time, true /*with ms*/);
 				}
 			case SnapshotColumns::LocalTime:
 				{
 					QDateTime time = state.m_time.localToDateTime();
-					return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+					return DateTimeToString::stringDateTime(time, true /*with ms*/);
 				}
 			case SnapshotColumns::PlantTime:
 				{
 					QDateTime time = state.m_time.plantToDateTime();
-					return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+					return DateTimeToString::stringDateTime(time, true /*with ms*/);
 				}
 			case SnapshotColumns::Valid:
 				{

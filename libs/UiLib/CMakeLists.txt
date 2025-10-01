@@ -90,6 +90,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<CommonLib/PropertyObject.h>
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
+	<CommonLib/Times.h>
 )
 
 target_compile_definitions(${TARGET} PRIVATE UI_LIB_DOMAIN)

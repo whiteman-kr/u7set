@@ -106,6 +106,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_precompile_headers(${TARGET} PRIVATE
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
+	<CommonLib/Times.h>
 )
 
 target_precompile_headers(${TARGET} PUBLIC

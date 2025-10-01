@@ -211,7 +211,7 @@ namespace SchemaClientLib
 				item->setText(static_cast<int>(Columns::AddressPort), tr("%1").arg(stat.state.peerAddr.addressPortStr()));
 
 				QDateTime startTime = QDateTime::fromMSecsSinceEpoch(stat.state.startTime);
-				item->setText(static_cast<int>(Columns::StartTime), startTime.toString("dd/MM/yyyy HH:mm:ss"));
+				item->setText(static_cast<int>(Columns::StartTime), DateTimeToString::stringDateTime(startTime, false /*with no ms*/));
 
 				qint64 upTime = (QDateTime::currentMSecsSinceEpoch() - stat.state.startTime) / 1000;
 				qint64 s = upTime % 60;
