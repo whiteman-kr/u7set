@@ -1,13 +1,12 @@
 #include "DiagSchemaView.h"
-
-#include <VFrame30/DrawParam.h>
-#include <VFrame30/PropertyNames.h>
-#include <VFrame30/AppSignalController.h>
-
 #include "DiagnosticsAppSettings.h"
+#include "DiagnosticsMainWindow.h"
 #include "DiagnosticsSchemaManager.h"
 #include "Globals.h"
-#include "DiagnosticsMainWindow.h"
+
+#include <VFrame30/AppSignalController.h>
+#include <VFrame30/DrawParam.h>
+#include <VFrame30/PropertyNames.h>
 
 //
 // DiagSchemaView
@@ -27,8 +26,6 @@ DiagSchemaView::DiagSchemaView(DiagnosticsSchemaManager* schemaManager,
 
 	Q_ASSERT(schemaManager);
 
-	connect(&schemaManager->configController(), &DiagConfigController::configurationArrived, this, &DiagSchemaView::configurationArrived);
-
 	return;
 }
 
@@ -37,16 +34,30 @@ VFrame30::DrawMode DiagSchemaView::drawMode() const
 	return VFrame30::DrawMode::Monitor;
 }
 
+void DiagSchemaView::updateConfiguration(const DiagConfigSettings& configuration)
+{
+	qDebug() << "DiagSchemaView::configurationArrived()";
+
+	m_configurationId = configuration.configurationId;
+
+	// setMonitorBehavior(std::move(configuration.monitorBeahvior));
+
+	// This will update GlobalScripts and reevaluate them.
+	//
+	setGlobalScript(configuration.globalScript);
+
+	return;
+}
+
 void DiagSchemaView::paintEvent(QPaintEvent* event)
 {
 	// It is possible that arrived configuration was not yet applied, it can happen in the very beginning,
 	// as the first tab page is created by timer in DiagnosticsCentralWidget::timerEvent, see comment there for
 	// details.
 	//
-	if (int cid = diagSchemaManager()->configController().configurationId();
-		cid != m_configurationId)
+	if (int cid = diagSchemaManager()->configController().configurationId(); cid != m_configurationId)
 	{
-		configurationArrived(diagSchemaManager()->configController().configuration());
+		updateConfiguration(diagSchemaManager()->configController().configuration());
 	}
 
 	setInfoMode(DiagnosticsAppSettings::instance().showItemsLabels());
@@ -86,25 +97,6 @@ void DiagSchemaView::updateScriptGlobalVars(QJSEngine& engine)
 		engine.globalObject().setProperty(VFrame30::PropertyNames::scriptGlobalVariableSignals, jsSignals);
 	}
 
-	return;
-}
-
-void DiagSchemaView::configurationArrived(DiagConfigSettings configuration)
-{
-	qDebug() << "DiagSchemaView::configurationArrived()";
-
-	m_configurationId = configuration.configurationId;
-
-	// setMonitorBehavior(std::move(configuration.monitorBeahvior));
-
-	// This will update GlobalScripts and reevaluate them.
-	//
-	setGlobalScript(configuration.globalScript);
-
-	// updateConfiguration resets schema, which triggers after create scripts, which can require GlobalScript.
-	// At this point GlobalScript is considered evaluated.
-	//
-	diagSchemaManager()->updateConfiguration(configuration);
 	return;
 }
 

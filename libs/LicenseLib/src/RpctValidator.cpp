@@ -180,7 +180,6 @@ namespace LicenseLib
 		if (AppLicenser::noLicenseCheck() == true)
 		{
 			return ValidationResult::Valid;
-			return ValidationResult::Invalid;
 		}
 #endif
 

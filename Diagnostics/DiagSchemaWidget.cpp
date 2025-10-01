@@ -1,20 +1,19 @@
 #include "DiagSchemaWidget.h"
 #include "DiagSchemaView.h"
-#include "DiagnosticsSchemaManager.h"
 #include "DiagnosticsMainWindow.h"
+#include "DiagnosticsSchemaManager.h"
 #include "Globals.h"
 // #include "MonitorSignalInfo.h"
 
-#include <VFrame30/IMatsSchemaItemAssociations.h>
 #include <VFrame30/Context.h>
-
+#include <VFrame30/IMatsSchemaItemAssociations.h>
 
 
 namespace
 {
-	//class QSignalUpdateAction : public QAction
+	// class QSignalUpdateAction : public QAction
 	//{
-	//public:
+	// public:
 	//	explicit QSignalUpdateAction(const AppSignalParam& signalParam,
 	//								 const IAppSignalManager* signalManager,
 	//								 qsizetype maxIdSize,
@@ -34,7 +33,7 @@ namespace
 	//		return;
 	//	}
 
-	//protected:
+	// protected:
 	//	void timerEvent(QTimerEvent* /*event*/) override
 	//	{
 	//		setText(getActionText());
@@ -81,13 +80,13 @@ namespace
 	//		return str;
 	//	}
 
-	//public:
+	// public:
 	//	AppSignalParam signalParam() const
 	//	{
 	//		return m_signalParam;
 	//	}
 
-	//private:
+	// private:
 	//	const AppSignalParam m_signalParam;
 	//	const IAppSignalManager* m_signalManager{};
 
@@ -95,99 +94,99 @@ namespace
 	//	qsizetype m_maxCaptionSize{};
 	//};
 
-//	class QSchemaMenu : public QMenu
-//	{
-//	public:
-//		QSchemaMenu(QWidget* parent = nullptr) :
-//			QMenu{parent}
-//		{
-//#ifdef Q_OS_WIN
-//			QFont f;
-//			f.setFamily("Consolas");
-//			setFont(f);
-//#else
-//			// QFont f;
-//			// f.setFamily("DejaVu Sans Mono");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
-//			// f.setFamily("DejaVu Sans Mono Book");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
-//			// setFont(f);
-//			setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-//#endif
-//		}
-//
-//	protected:
-//		void mousePressEvent(QMouseEvent* event) override
-//		{
-//			m_dragSignalParam = {};
-//			m_dragStartPosition = {};
-//
-//			QSignalUpdateAction* dragAction = dynamic_cast<QSignalUpdateAction*>(activeAction());
-//
-//			if (event->button() == Qt::LeftButton && dragAction != nullptr)
-//			{
-//				m_dragStartPosition = event->pos();
-//				m_dragSignalParam = dragAction->signalParam();
-//			}
-//
-//			return QMenu::mousePressEvent(event);
-//		}
-//
-//		void mouseMoveEvent(QMouseEvent* event) override
-//		{
-//			if (m_dragSignalParam.customSignalId().isEmpty() == true)
-//			{
-//				QMenu::mouseMoveEvent(event);
-//				return;
-//			}
-//
-//			if (!(event->buttons() & Qt::LeftButton))
-//			{
-//				QMenu::mouseMoveEvent(event);
-//				return;
-//			}
-//
-//			if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
-//			{
-//				QMenu::mouseMoveEvent(event);
-//				return;
-//			}
-//
-//			// Save signals to protobuf.
-//			//
-//			::Proto::AppSignalSet protoSetMessage;
-//			m_dragSignalParam.save(protoSetMessage.add_appsignal());
-//
-//			QByteArray data;
-//			data.resize(static_cast<int>(protoSetMessage.ByteSizeLong()));
-//
-//			protoSetMessage.SerializeToArray(data.data(), static_cast<int>(protoSetMessage.ByteSizeLong()));
-//
-//			// --
-//			//
-//			if (data.isEmpty() == false)
-//			{
-//				QDrag* drag = new QDrag{this->parentWidget()};
-//				QMimeData* mimeData = new QMimeData;
-//
-//				mimeData->setData(AppSignalParamMimeType::value, data);
-//				drag->setMimeData(mimeData);
-//
-//				// Close this menu, if it is not closed then interface can freeze.
-//				//
-//				close();
-//				m_dragSignalParam = {};
-//
-//				drag->exec();
-//
-//				return;
-//			}
-//
-//			return;
-//		}
-//
-//	private:
-//		AppSignalParam m_dragSignalParam;
-//		QPoint m_dragStartPosition;
-//	};
+	//	class QSchemaMenu : public QMenu
+	//	{
+	//	public:
+	//		QSchemaMenu(QWidget* parent = nullptr) :
+	//			QMenu{parent}
+	//		{
+	// #ifdef Q_OS_WIN
+	//			QFont f;
+	//			f.setFamily("Consolas");
+	//			setFont(f);
+	// #else
+	//			// QFont f;
+	//			// f.setFamily("DejaVu Sans Mono");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
+	//			// f.setFamily("DejaVu Sans Mono Book");  // https://ianyepan.github.io/posts/system-default-monospace-fonts-pt1/
+	//			// setFont(f);
+	//			setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+	// #endif
+	//		}
+	//
+	//	protected:
+	//		void mousePressEvent(QMouseEvent* event) override
+	//		{
+	//			m_dragSignalParam = {};
+	//			m_dragStartPosition = {};
+	//
+	//			QSignalUpdateAction* dragAction = dynamic_cast<QSignalUpdateAction*>(activeAction());
+	//
+	//			if (event->button() == Qt::LeftButton && dragAction != nullptr)
+	//			{
+	//				m_dragStartPosition = event->pos();
+	//				m_dragSignalParam = dragAction->signalParam();
+	//			}
+	//
+	//			return QMenu::mousePressEvent(event);
+	//		}
+	//
+	//		void mouseMoveEvent(QMouseEvent* event) override
+	//		{
+	//			if (m_dragSignalParam.customSignalId().isEmpty() == true)
+	//			{
+	//				QMenu::mouseMoveEvent(event);
+	//				return;
+	//			}
+	//
+	//			if (!(event->buttons() & Qt::LeftButton))
+	//			{
+	//				QMenu::mouseMoveEvent(event);
+	//				return;
+	//			}
+	//
+	//			if ((event->pos() - m_dragStartPosition).manhattanLength() < QApplication::startDragDistance())
+	//			{
+	//				QMenu::mouseMoveEvent(event);
+	//				return;
+	//			}
+	//
+	//			// Save signals to protobuf.
+	//			//
+	//			::Proto::AppSignalSet protoSetMessage;
+	//			m_dragSignalParam.save(protoSetMessage.add_appsignal());
+	//
+	//			QByteArray data;
+	//			data.resize(static_cast<int>(protoSetMessage.ByteSizeLong()));
+	//
+	//			protoSetMessage.SerializeToArray(data.data(), static_cast<int>(protoSetMessage.ByteSizeLong()));
+	//
+	//			// --
+	//			//
+	//			if (data.isEmpty() == false)
+	//			{
+	//				QDrag* drag = new QDrag{this->parentWidget()};
+	//				QMimeData* mimeData = new QMimeData;
+	//
+	//				mimeData->setData(AppSignalParamMimeType::value, data);
+	//				drag->setMimeData(mimeData);
+	//
+	//				// Close this menu, if it is not closed then interface can freeze.
+	//				//
+	//				close();
+	//				m_dragSignalParam = {};
+	//
+	//				drag->exec();
+	//
+	//				return;
+	//			}
+	//
+	//			return;
+	//		}
+	//
+	//	private:
+	//		AppSignalParam m_dragSignalParam;
+	//		QPoint m_dragStartPosition;
+	//	};
 } // namespace
 
 
@@ -220,6 +219,8 @@ DiagSchemaWidget::DiagSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 	auto context = VFrame30::Context::create(clientSchemaView());
 	schema->setContext(std::move(context));
 
+	diagSchemaView()->updateConfiguration(schemaManager->configController().configuration());
+
 	return;
 }
 
@@ -228,27 +229,25 @@ DiagSchemaWidget::~DiagSchemaWidget()
 	qDebug() << Q_FUNC_INFO;
 }
 
-void DiagSchemaWidget::createActions()
-{
-}
+void DiagSchemaWidget::createActions() {}
 
 void DiagSchemaWidget::contextMenuRequested(const QPoint& /*pos*/)
 {
 	//// Reset highlights
 	////
-	//clientSchemaView()->setHighlightIds({});
+	// clientSchemaView()->setHighlightIds({});
 
 	//// Signals items
 	////
-	//std::vector<SchemaItemPtr> items = itemsUnderCursor(pos);
+	// std::vector<SchemaItemPtr> items = itemsUnderCursor(pos);
 
-	//QStringList signalList;
-	//QStringList impactSignalList;
-	//QStringList loopbacks;
+	// QStringList signalList;
+	// QStringList impactSignalList;
+	// QStringList loopbacks;
 
-	//auto context = VFrame30::Context::create(clientSchemaView());
+	// auto context = VFrame30::Context::create(clientSchemaView());
 
-	//for (const SchemaItemPtr& item : items)
+	// for (const SchemaItemPtr& item : items)
 	//{
 	//	auto schemaItemAssociations = dynamic_cast<const VFrame30::IMatsSchemaItemAssociations*>(item.get());
 	//	if (schemaItemAssociations == nullptr)
@@ -261,7 +260,7 @@ void DiagSchemaWidget::contextMenuRequested(const QPoint& /*pos*/)
 	//	loopbacks += schemaItemAssociations->associatedLoopbackIds();
 	//}
 
-	//if (signalList.isEmpty() == false || impactSignalList.isEmpty() == false || loopbacks.isEmpty() == false)
+	// if (signalList.isEmpty() == false || impactSignalList.isEmpty() == false || loopbacks.isEmpty() == false)
 	//{
 	//	auto f = [this](QString& s)
 	//	{
@@ -281,29 +280,29 @@ void DiagSchemaWidget::contextMenuRequested(const QPoint& /*pos*/)
 }
 
 void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
-											QStringList /*impactSignals*/,
-											QStringList /*loopbacks*/,
-											const QList<QMenu*>& /*customMenu*/)
+										 QStringList /*impactSignals*/,
+										 QStringList /*loopbacks*/,
+										 const QList<QMenu*>& /*customMenu*/)
 {
-	//appSignals.sort();
-	//appSignals.removeDuplicates();
+	// appSignals.sort();
+	// appSignals.removeDuplicates();
 
-	//impactSignals.sort();
-	//impactSignals.removeDuplicates();
+	// impactSignals.sort();
+	// impactSignals.removeDuplicates();
 
-	//loopbacks.sort();
-	//loopbacks.removeDuplicates();
+	// loopbacks.sort();
+	// loopbacks.removeDuplicates();
 
 	//// Compose menu
 	////
-	//QSchemaMenu menu{this};
+	// QSchemaMenu menu{this};
 
 	//// Schemas List
 	////
-	//QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
+	// QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
 
-	//std::set<QString> signalsSchemasSet;
-	//for (const QString& s : appSignals)
+	// std::set<QString> signalsSchemasSet;
+	// for (const QString& s : appSignals)
 	//{
 	//	QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s);
 
@@ -313,8 +312,8 @@ void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
 	//	}
 	//}
 
-	//std::set<QString> impactSignalsSchemasSet;
-	//for (const QString& s : impactSignals)
+	// std::set<QString> impactSignalsSchemasSet;
+	// for (const QString& s : impactSignals)
 	//{
 	//	QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s);
 
@@ -324,8 +323,8 @@ void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
 	//	}
 	//}
 
-	//std::set<QString> loopbackSchemas;
-	//for (const QString& l : loopbacks)
+	// std::set<QString> loopbackSchemas;
+	// for (const QString& l : loopbacks)
 	//{
 	//	QStringList schemaIds = schemaManager()->configController().schemasByLoopbackId(l);
 
@@ -337,13 +336,13 @@ void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
 
 	//// --
 	////
-	//if (signalsSchemasSet.empty() == true &&
+	// if (signalsSchemasSet.empty() == true &&
 	//	impactSignalsSchemasSet.empty() == true &&
 	//	loopbackSchemas.empty() == true)
 	//{
 	//	schemasSubMenu->setDisabled(true);
-	//}
-	//else
+	// }
+	// else
 	//{
 	//	for (const QString& schemaId : signalsSchemasSet)
 	//	{
@@ -404,26 +403,26 @@ void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
 
 	//// Custom menus
 	////
-	//if (customMenu.isEmpty() == false)
+	// if (customMenu.isEmpty() == false)
 	//{
 	//	for (auto cm : customMenu)
 	//	{
 	//		menu.addActions(cm->actions());
 	//	}
-	//}
+	// }
 
 	//// SignalInfo list
 	////
-	//QAction* appSignalSeparator = menu.addSeparator();
-	//appSignalSeparator->setText(tr("Signals"));
+	// QAction* appSignalSeparator = menu.addSeparator();
+	// appSignalSeparator->setText(tr("Signals"));
 
-	//std::list<AppSignalParam> appSignalParams;
-	//std::list<AppSignalParam> impactSignalsParams;
+	// std::list<AppSignalParam> appSignalParams;
+	// std::list<AppSignalParam> impactSignalsParams;
 
-	//qsizetype maxIdSize = 0;
-	//qsizetype maxCaptionSize = 0;
+	// qsizetype maxIdSize = 0;
+	// qsizetype maxCaptionSize = 0;
 
-	//for (const QString& s : appSignals)
+	// for (const QString& s : appSignals)
 	//{
 	//	bool ok = false;
 	//	AppSignalParam signal = signalManager()->signalParam(s, &ok);
@@ -444,7 +443,7 @@ void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
 	//	appSignalParams.push_back(std::move(signal));
 	//}
 
-	//for (const QString& s : impactSignals)
+	// for (const QString& s : impactSignals)
 	//{
 	//	bool ok = false;
 	//	AppSignalParam signal = signalManager()->signalParam(s, &ok);
@@ -467,7 +466,7 @@ void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
 
 	//// --
 	////
-	//for (const auto& signal : appSignalParams)
+	// for (const auto& signal : appSignalParams)
 	//{
 	//	auto signalAction = new QSignalUpdateAction{signal, signalManager(), maxIdSize, maxCaptionSize, &menu};
 	//	menu.addAction(signalAction);
@@ -482,7 +481,7 @@ void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
 
 	//// --
 	////
-	//if (impactSignalsParams.empty() == false)
+	// if (impactSignalsParams.empty() == false)
 	//{
 	//	if (appSignals.empty() == false)
 	//	{
@@ -506,7 +505,7 @@ void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
 
 	//// --
 	////
-	//menu.exec(QCursor::pos());
+	// menu.exec(QCursor::pos());
 
 	return;
 }
@@ -514,7 +513,7 @@ void DiagSchemaWidget::signalContextMenu(QStringList /*appSignals*/,
 void DiagSchemaWidget::signalInfo(QString /*appSignalId*/)
 {
 	// TODO: DiagSignalInfo::showDialog
-	//MonitorSignalInfo::showDialog(appSignalId,
+	// MonitorSignalInfo::showDialog(appSignalId,
 	//							  monitorAppSignalManager(),
 	//							  theApp.mainWindow()->tuningSignalManager(),
 	//							  theApp.mainWindow()->tuningConnection(),
@@ -538,17 +537,17 @@ const DiagSchemaView* DiagSchemaWidget::diagSchemaView() const
 	return result;
 }
 
-//IAppSignalManager* DiagSchemaWidget::signalManager()
+// IAppSignalManager* DiagSchemaWidget::signalManager()
 //{
 //	return monitorSchemaView()->appSignalController()->appSignalManager();
-//}
+// }
 
-//const IAppSignalManager* DiagSchemaWidget::signalManager() const
+// const IAppSignalManager* DiagSchemaWidget::signalManager() const
 //{
 //	return monitorSchemaView()->appSignalController()->appSignalManager();
-//}
+// }
 //
-//ClientLib::AppSignalManager* MonitorSchemaWidget::monitorAppSignalManager()
+// ClientLib::AppSignalManager* MonitorSchemaWidget::monitorAppSignalManager()
 //{
 //	IAppSignalManager* sm = signalManager();
 //
@@ -556,9 +555,9 @@ const DiagSchemaView* DiagSchemaWidget::diagSchemaView() const
 //	Q_ASSERT(msm);
 //
 //	return msm;
-//}
+// }
 //
-//const ClientLib::AppSignalManager* MonitorSchemaWidget::monitorAppSignalManager() const
+// const ClientLib::AppSignalManager* MonitorSchemaWidget::monitorAppSignalManager() const
 //{
 //	const IAppSignalManager* sm = signalManager();
 //
@@ -566,7 +565,7 @@ const DiagSchemaView* DiagSchemaWidget::diagSchemaView() const
 //	Q_ASSERT(msm);
 //
 //	return msm;
-//}
+// }
 
 DiagnosticsSchemaManager* DiagSchemaWidget::schemaManager()
 {
