@@ -9,7 +9,10 @@
 MonitorConfigSettings::~MonitorConfigSettings() = default;
 
 
-MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
+MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo,
+												 HostAddressPort address1,
+												 HostAddressPort address2,
+												 ILogFile* logFile) :
 	SchemaClientLib::SchemaClientConfigController{softwareInfo, address1, address2, logFile}
 {
 	qRegisterMetaType<MonitorConfigSettings>("MonitorConfigSettings");
@@ -17,7 +20,9 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 	return;
 }
 
-bool MonitorConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const MonitorSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& files)
+bool MonitorConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf,
+												  const MonitorSettings& settings,
+												  const std::vector<OnlineLib::BuildFileInfo>& files)
 {
 	// This method is called from the main thread.
 	//
@@ -71,8 +76,7 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		QString parsingError;
 		QByteArray ba;
 
-		if (bool ok = getFileBlocked(scriptFileName, &ba, &parsingError);
-			ok == true)
+		if (bool ok = getFileBlocked(scriptFileName, &ba, &parsingError); ok == true)
 		{
 			return QString{ba};
 		}
@@ -89,8 +93,7 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		QPixmap pixmap;
 		QByteArray ba;
 
-		if (bool ok = getFileBlockedById(fileId, &ba, nullptr);
-			ok == true)
+		if (bool ok = getFileBlockedById(fileId, &ba, nullptr); ok == true)
 		{
 			pixmap.loadFromData(ba);
 		}
@@ -131,8 +134,7 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		QByteArray data;
 		QString errorString;
 
-		if (bool result = getFileBlockedById(CfgFileId::COMPARATOR_SET, &data, &errorString);
-			result == false)
+		if (bool result = getFileBlockedById(CfgFileId::COMPARATOR_SET, &data, &errorString); result == false)
 		{
 			m_logFile.writeError(errorString);
 		}
@@ -140,8 +142,7 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		{
 			ComparatorSet setpoints;
 
-			if (bool readOk = setpoints.serializeFrom(data);
-				readOk == false)
+			if (bool readOk = setpoints.serializeFrom(data); readOk == false)
 			{
 				m_logFile.writeError(tr("Serialize set point list file error.") + QStringLiteral("\n"));
 			}
@@ -158,8 +159,7 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		QByteArray data;
 		QString errorString;
 
-		if (bool result = getFileBlockedById(CfgFileId::CLIENT_BEHAVIOR, &data, &errorString);
-			result == false)
+		if (bool result = getFileBlockedById(CfgFileId::CLIENT_BEHAVIOR, &data, &errorString); result == false)
 		{
 			m_logFile.writeError("Loading file CLIENT_BEHAVIOR error.");
 		}
@@ -193,7 +193,7 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 	{
 		QByteArray matsUsersData;
 		getFileBlockedById(CfgFileId::MATSUSERS, &matsUsersData, nullptr);
-		
+
 		QString errorString;
 		bool ok = config.matsUsers.loadFromByteArray(matsUsersData, errorString);
 		if (ok == false)
@@ -209,8 +209,7 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 		QByteArray data;
 		QString errorString;
 
-		if (bool result = getFileBlockedById(CfgFileId::MONITOR_EQUIPMENT, &data, &errorString);
-			result == false)
+		if (bool result = getFileBlockedById(CfgFileId::MONITOR_EQUIPMENT, &data, &errorString); result == false)
 		{
 			m_logFile.writeError("Loading file MONITOR_EQUIPMENT error.");
 		}
@@ -271,37 +270,38 @@ bool MonitorConfigController::updateConfiguration(const ClientLib::Configuration
 
 void MonitorConfigController::dump(const MonitorConfigSettings& config) const
 {
-	qDebug() << "StartSchemaID: " << config.startSchemaId;
+	qDebug() << "MonitorConfigController::dump:";
+	qDebug() << "\tStartSchemaID: " << config.startSchemaId;
 
 	// --
 	//
 	m_logFile.writeMessage(tr("AppDatService(s): %1.").arg(config.appDataServices.size()));
-	qDebug() << "AppDatService(s):";
+	qDebug() << "\tAppDatService(s):";
 
 	for (const auto& service : config.appDataServices)
 	{
-		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		qDebug() << "\t\tService: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
 		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
 	}
 
 	// --
 	//
 	m_logFile.writeMessage(tr("AppDataRealTimeService(s): %1.").arg(config.appDataRealTimeServices.size()));
-	qDebug() << "AppDataRealTimeService(s):";
+	qDebug() << "\tAppDataRealTimeService(s):";
 
 	for (const auto& service : config.appDataRealTimeServices)
 	{
-		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		qDebug() << "\t\tService: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
 		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
 	}
 
 	// --
 	//
 	m_logFile.writeMessage(tr("ArchiveService(s): %1.").arg(config.archiveServices.size()));
-	qDebug() << "ArchiveService(s):";
+	qDebug() << "\tArchiveService(s):";
 	for (const auto& service : config.archiveServices)
 	{
-		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		qDebug() << "\t\tService: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
 		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
 	}
 

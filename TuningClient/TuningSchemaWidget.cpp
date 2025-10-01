@@ -1,4 +1,9 @@
 #include "TuningSchemaWidget.h"
+#include "Main.h"
+#include "MainWindow.h"
+#include "TuningSchemaView.h"
+#include "TuningSignalInfo.h"
+
 #include <VFrame30/Context.h>
 #include <VFrame30/SchemaItemConnection.h>
 #include <VFrame30/SchemaItemImageValue.h>
@@ -7,10 +12,6 @@
 #include <VFrame30/SchemaItemSignal.h>
 #include <VFrame30/SchemaItemUfb.h>
 #include <VFrame30/SchemaItemValue.h>
-#include "Main.h"
-#include "MainWindow.h"
-#include "TuningSignalInfo.h"
-#include "TuningSchemaView.h"
 
 //
 // TuningSchemaWidget
@@ -33,6 +34,8 @@ TuningSchemaWidget::TuningSchemaWidget(TuningConfigController& configController,
 	//
 	Q_ASSERT(schema);
 	schema->setContext(VFrame30::Context::create(clientSchemaView()));
+
+	tuningSchemaView()->configurationArrived(m_configController.configuration());
 
 	schema->onShowEvent(clientSchemaView()->jsEngine(), clientSchemaView()->logFile());
 
@@ -61,44 +64,38 @@ void TuningSchemaWidget::contextMenuRequested(const QPoint& pos)
 
 	for (const SchemaItemPtr& item : items)
 	{
-		if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-			schemaItemSignal != nullptr)
+		if (auto schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()); schemaItemSignal != nullptr)
 		{
 			signalList.append(schemaItemSignal->appSignalIdList());
 			impactSignalList.append(schemaItemSignal->impactAppSignalIdList());
 			continue;
 		}
 
-		if (VFrame30::SchemaItemValue* schemaItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
-			schemaItem != nullptr)
+		if (auto schemaItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get()); schemaItem != nullptr)
 		{
 			signalList.append(schemaItem->signalIds(context.get()));
 			continue;
 		}
 
-		if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
-			schemaItem != nullptr)
+		if (auto schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get()); schemaItem != nullptr)
 		{
 			signalList.append(schemaItem->signalIds(context.get()));
 			continue;
 		}
 
-		if (VFrame30::SchemaItemIndicator* schemaItem = dynamic_cast<VFrame30::SchemaItemIndicator*>(item.get());
-			schemaItem != nullptr)
+		if (auto schemaItem = dynamic_cast<VFrame30::SchemaItemIndicator*>(item.get()); schemaItem != nullptr)
 		{
 			signalList.append(schemaItem->signalIds(context.get()));
 			continue;
 		}
 
-		if (VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
-			schemaItemReceiver != nullptr)
+		if (auto schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()); schemaItemReceiver != nullptr)
 		{
 			signalList.append(schemaItemReceiver->appSignalIdsAsList());
 			continue;
 		}
 
-		if (VFrame30::SchemaItemUfb* schemaItemUfb = dynamic_cast<VFrame30::SchemaItemUfb*>(item.get());
-			schemaItemUfb != nullptr)
+		if (auto schemaItemUfb = dynamic_cast<VFrame30::SchemaItemUfb*>(item.get()); schemaItemUfb != nullptr)
 		{
 			std::vector<std::shared_ptr<Property>> props = static_cast<const PropertyObject*>(schemaItemUfb)->specificProperties();
 
@@ -131,9 +128,9 @@ void TuningSchemaWidget::contextMenuRequested(const QPoint& pos)
 }
 
 void TuningSchemaWidget::signalContextMenu(QStringList appSignals,
-											QStringList impactSignals,
-											QStringList loopbacks,
-											const QList<QMenu*>& /*customMenu*/)
+										   QStringList impactSignals,
+										   QStringList loopbacks,
+										   const QList<QMenu*>& /*customMenu*/)
 {
 	appSignals.sort();
 	appSignals.removeDuplicates();
@@ -156,16 +153,16 @@ void TuningSchemaWidget::signalContextMenu(QStringList appSignals,
 	for (const QString& s : appSignals)
 	{
 		bool ok = false;
-		AppSignalParam signal =	theApp.mainWindow()->tuningSignalManager().signalParam(s, &ok);
+		AppSignalParam signal = theApp.mainWindow()->tuningSignalManager().signalParam(s, &ok);
 
 		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
 		QAction* a = menu.addAction(signalId);
 
 		auto f = [this, signal]() -> void
-				 {
-					signalInfo(signal.appSignalId());
-				 };
+		{
+			signalInfo(signal.appSignalId());
+		};
 
 		connect(a, &QAction::triggered, this, f);
 	}
@@ -182,16 +179,16 @@ void TuningSchemaWidget::signalContextMenu(QStringList appSignals,
 		{
 			bool ok = false;
 
-			AppSignalParam signal =	theApp.mainWindow()->tuningSignalManager().signalParam(s, &ok);
+			AppSignalParam signal = theApp.mainWindow()->tuningSignalManager().signalParam(s, &ok);
 
 			QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
 			QAction* a = menu.addAction(signalId);
 
 			auto f = [this, signal]() -> void
-					 {
-						signalInfo(signal.appSignalId());
-					 };
+			{
+				signalInfo(signal.appSignalId());
+			};
 
 			connect(a, &QAction::triggered, this, f);
 		}
@@ -216,4 +213,14 @@ void TuningSchemaWidget::signalInfo(QString appSignalId)
 	d->show();
 
 	return;
+}
+
+TuningSchemaView* TuningSchemaWidget::tuningSchemaView()
+{
+	return static_cast<TuningSchemaView*>(clientSchemaView());
+}
+
+const TuningSchemaView* TuningSchemaWidget::tuningSchemaView() const
+{
+	return static_cast<const TuningSchemaView*>(clientSchemaView());
 }

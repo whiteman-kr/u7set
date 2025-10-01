@@ -38,10 +38,7 @@ namespace
 		}
 
 	protected:
-		void timerEvent(QTimerEvent* /*event*/) override
-		{
-			setText(getActionText());
-		}
+		void timerEvent(QTimerEvent* /*event*/) override { setText(getActionText()); }
 
 		QString getActionText()
 		{
@@ -55,9 +52,8 @@ namespace
 			}
 			else
 			{
-				AppSignalState state = m_signalManager ?
-										   m_signalManager->signalState(m_signalParam.appSignalId(), nullptr) :
-										   AppSignalState{};
+				AppSignalState state =
+					m_signalManager ? m_signalManager->signalState(m_signalParam.appSignalId(), nullptr) : AppSignalState{};
 
 				QString stateText;
 				if (state.isValid() == false)
@@ -85,10 +81,7 @@ namespace
 		}
 
 	public:
-		AppSignalParam signalParam() const
-		{
-			return m_signalParam;
-		}
+		AppSignalParam signalParam() const { return m_signalParam; }
 
 	private:
 		const AppSignalParam m_signalParam;
@@ -223,6 +216,8 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 	auto context = VFrame30::Context::create(clientSchemaView());
 	schema->setContext(std::move(context));
 
+	monitorSchemaView()->updateConfiguration(schemaManager->configController().configuration());
+
 	return;
 }
 
@@ -231,9 +226,7 @@ MonitorSchemaWidget::~MonitorSchemaWidget()
 	qDebug() << Q_FUNC_INFO;
 }
 
-void MonitorSchemaWidget::createActions()
-{
-}
+void MonitorSchemaWidget::createActions() {}
 
 void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 {
@@ -312,8 +305,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	{
 		// Find by app signal id
 		//
-		for (QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s); 
-			 const QString& schemaId : schemaIds)
+		for (QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s); const QString& schemaId : schemaIds)
 		{
 			signalsSchemasSet.insert(schemaId);
 		}
@@ -329,7 +321,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 			equipmentIds.push_back(equipmentId);
 
 			for (QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(equipmentId);
-				 const QString & schemaId : schemaIds)
+				 const QString& schemaId : schemaIds)
 			{
 				signalsSchemasSet.insert(schemaId);
 			}
@@ -341,8 +333,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	{
 		// Find by app signal id
 		//
-		for (QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s);
-			 const QString& schemaId : schemaIds)
+		for (QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(s); const QString& schemaId : schemaIds)
 		{
 			impactSignalsSchemasSet.insert(schemaId);
 		}
@@ -358,7 +349,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 			equipmentIds.push_back(equipmentId);
 
 			for (QStringList schemaIds = schemaManager()->configController().schemasByAppSignalId(equipmentId);
-				 const QString & schemaId : schemaIds)
+				 const QString& schemaId : schemaIds)
 			{
 				impactSignalsSchemasSet.insert(schemaId);
 			}
@@ -385,9 +376,7 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 
 	// --
 	//
-	if (signalsSchemasSet.empty() == true &&
-		impactSignalsSchemasSet.empty() == true &&
-		loopbackSchemas.empty() == true)
+	if (signalsSchemasSet.empty() == true && impactSignalsSchemasSet.empty() == true && loopbackSchemas.empty() == true)
 	{
 		schemasSubMenu->setDisabled(true);
 	}

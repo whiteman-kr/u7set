@@ -1,8 +1,11 @@
-#ifndef TUNINGSCHEMAWIDGET_H
-#define TUNINGSCHEMAWIDGET_H
+#pragma once
+
+#include "TuningSchemaManager.h"
 
 #include <VFrame30/ClientSchemaWidget.h>
-#include "TuningSchemaManager.h"
+
+class TuningSchemaView;
+
 
 class TuningSchemaWidget : public VFrame30::ClientSchemaWidget
 {
@@ -21,14 +24,13 @@ public:
 	//
 public slots:
 	void contextMenuRequested(const QPoint& pos);
-	void signalContextMenu(QStringList appSignals,
-						   QStringList impactSignals,
-						   QStringList loopbacks,
-						   const QList<QMenu*>& customMenu);
+	void signalContextMenu(QStringList appSignals, QStringList impactSignals, QStringList loopbacks, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
+
+public:
+	TuningSchemaView* tuningSchemaView();
+	const TuningSchemaView* tuningSchemaView() const;
 
 private:
 	TuningConfigController& m_configController;
 };
-
-#endif // TUNINGSCHEMAWIDGET_H

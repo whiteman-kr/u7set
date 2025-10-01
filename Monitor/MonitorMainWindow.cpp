@@ -1620,7 +1620,9 @@ void MonitorMainWindow::slot_updateActions(bool schemaWidgetSelected)
 
 void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configuration)
 {
-	m_monitorCentralWidget.setStartSchemaId(configuration.startSchemaId);
+	qDebug() << "MonitorMainWindow::slot_configurationArrived()";
+
+	m_monitorCentralWidget.updateConfiguration(configuration);
 
 	// Update AppSignalManager with specific data
 	//
