@@ -611,7 +611,7 @@ void BaseOnlineDataSource::clearStatistics()
 
 bool BaseOnlineDataSource::moveToNextWriteBuffer(const QThread* thread)
 {
-	SimpleMutexLocker locker(&m_parsingBuffersMutex, thread);
+	SimpleMutexLocker locker(&m_parsingBuffersMutex);
 
 	m_parsingBuffers[m_writeBufferIndex]->readyToParsing = true;
 
@@ -629,7 +629,7 @@ bool BaseOnlineDataSource::moveToNextWriteBuffer(const QThread* thread)
 
 bool BaseOnlineDataSource::moveToNextReadBuffer(const QThread* thread)
 {
-	SimpleMutexLocker locker(&m_parsingBuffersMutex, thread);
+	SimpleMutexLocker locker(&m_parsingBuffersMutex);
 
 	if (m_parsingBuffers[m_readBufferIndex]->readyToParsing == true)
 	{

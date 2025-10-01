@@ -179,7 +179,7 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 
 		if (sourceToStatesProcessing != nullptr)
 		{
-			m_queuesMutex.lock(thisThread);
+			m_queuesMutex.lock();
 
 			while(ctr > 0)
 			{
@@ -213,11 +213,11 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 				}
 			}
 
-			m_queuesMutex.unlock(thisThread);
+			m_queuesMutex.unlock();
 
 			//
 
-			m_gatewayQueuesMutex.lock(thisThread);
+			m_gatewayQueuesMutex.lock();
 
 			while(ctr > 0)
 			{
@@ -246,7 +246,7 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 				}
 			}
 
-			m_gatewayQueuesMutex.unlock(thisThread);
+			m_gatewayQueuesMutex.unlock();
 		}
 	}
 

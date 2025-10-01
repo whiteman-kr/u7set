@@ -118,7 +118,7 @@ namespace Tuning
 
 		bool prevValid = m_state.valid;
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		m_state.valid = false;
 
@@ -130,7 +130,7 @@ namespace Tuning
 									   quint64 fotipProcessingNumerator,
 									   bool setSOR, bool writingDisabled)
 	{
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		bool prevValid = m_state.valid;
 		TuningValue prevValue = m_state.currentValue;
@@ -186,7 +186,7 @@ namespace Tuning
 	{
 		Q_ASSERT(m_state.readLowBound.type() == value.type());
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		m_state.readLowBound = value;
 		m_state.setSOR = setSOR;
@@ -197,7 +197,7 @@ namespace Tuning
 	{
 		Q_ASSERT(m_state.readHighBound.type() == value.type());
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		m_state.readHighBound = value;
 		m_state.setSOR = setSOR;
@@ -209,7 +209,7 @@ namespace Tuning
 		Q_ASSERT(writeCommandID != 0);
 		Q_ASSERT(QThread::currentThread() == m_thread);
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		m_state.writeCommandID = writeCommandID;
 		m_state.writeErrorCode = E::NetworkError::Success;
@@ -222,7 +222,7 @@ namespace Tuning
 	{
 		Q_ASSERT(QThread::currentThread() == m_thread);
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		if (writeCommandID == m_state.writeCommandID)
 		{
@@ -250,7 +250,7 @@ namespace Tuning
 		TEST_PTR_RETURN(tss);
 		TEST_PTR_RETURN(thread);
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		m_state.setSOR = setSOR;
 		m_state.writingDisabled = writingDisabled;

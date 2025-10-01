@@ -459,7 +459,7 @@ void FastThreadSafeQueue<T>::resize(int newSize)
 template <typename T>
 void FastThreadSafeQueue<T>::push(const T& item, const QThread* thread, int* curSize, int* curMaxSize)
 {
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	assert(m_pushIsBegan == false);
 	assert(m_popIsBegan == false);
@@ -506,7 +506,7 @@ bool FastThreadSafeQueue<T>::pop(T* item, const QThread* thread)
 		return false;
 	}
 
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	assert(m_pushIsBegan == false);
 	assert(m_popIsBegan == false);
@@ -533,7 +533,7 @@ bool FastThreadSafeQueue<T>::peekAt(int index, T* item, const QThread* thread)
 		return false;
 	}
 
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	if (index < 0 || index >= m_size)
 	{
@@ -553,7 +553,7 @@ bool FastThreadSafeQueue<T>::peekAt(int index, T* item, const QThread* thread)
 template <typename T>
 bool FastThreadSafeQueue<T>::isFull(const QThread* thread) const
 {
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	return m_size == m_queueSize;
 }
@@ -561,7 +561,7 @@ bool FastThreadSafeQueue<T>::isFull(const QThread* thread) const
 template <typename T>
 bool FastThreadSafeQueue<T>::isEmpty(const QThread* thread) const
 {
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	return m_size == 0;
 }
@@ -569,7 +569,7 @@ bool FastThreadSafeQueue<T>::isEmpty(const QThread* thread) const
 template <typename T>
 int FastThreadSafeQueue<T>::queueSize(const QThread* thread) const
 {
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	return m_queueSize;
 }
@@ -578,7 +578,7 @@ int FastThreadSafeQueue<T>::queueSize(const QThread* thread) const
 template <typename T>
 int FastThreadSafeQueue<T>::size(const QThread* thread) const
 {
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	return 	m_size;
 }
@@ -586,7 +586,7 @@ int FastThreadSafeQueue<T>::size(const QThread* thread) const
 template <typename T>
 int FastThreadSafeQueue<T>::maxSize(const QThread* thread) const
 {
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	return 	m_maxSize;
 }
@@ -648,14 +648,14 @@ void FastThreadSafeQueue<T>::completePush(const QThread* thread, int* curSize, i
 template <typename T>
 T* FastThreadSafeQueue<T>::beginPop(const QThread* thread)
 {
-	m_mutex.lock(thread);
+	m_mutex.lock();
 
 	assert(m_pushIsBegan == false);
 	assert(m_popIsBegan == false);
 
 	if (m_size == 0)
 	{
-		m_mutex.unlock(thread);
+		m_mutex.unlock();
 		return nullptr;
 	}
 
@@ -675,7 +675,7 @@ void FastThreadSafeQueue<T>::completePop(const QThread* thread)
 
 	m_popIsBegan = false;
 
-	m_mutex.unlock(thread);
+	m_mutex.unlock();
 }
 
 template <typename T>
@@ -695,7 +695,7 @@ bool FastThreadSafeQueue<T>::pushFromBuffer(T* buffer, int itemsInBuffer, const 
 		return true;
 	}
 
-	SimpleMutexLocker locker(&m_mutex, thread);
+	SimpleMutexLocker locker(&m_mutex);
 
 	Q_UNUSED(locker);
 
@@ -748,7 +748,7 @@ bool FastThreadSafeQueue<T>::popToBuffer(T* buffer, int bufferSizeInItems, int* 
 		return false;
 	}
 
-	SimpleMutexLocker locker(&m_mutex, thread);
+	SimpleMutexLocker locker(&m_mutex);
 
 	assert(m_pushIsBegan == false);
 	assert(m_popIsBegan == false);
@@ -802,7 +802,7 @@ bool FastThreadSafeQueue<T>::popToBuffer(T* buffer, int bufferSizeInItems, int* 
 template <typename T>
 void FastThreadSafeQueue<T>::nonDestructiveResize(int newQueueSize, const QThread* thread)
 {
-	SimpleMutexLocker locker(&m_mutex, thread);
+	SimpleMutexLocker locker(&m_mutex);
 
 	assert(m_pushIsBegan == false);
 	assert(m_popIsBegan == false);
@@ -873,7 +873,7 @@ void FastThreadSafeQueue<T>::nonDestructiveResize(int newQueueSize, const QThrea
 template <typename T>
 void FastThreadSafeQueue<T>::getSizes(int* curSize, int* curMaxSize, int* queueSize, const QThread* thread)
 {
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	if (curSize != nullptr)
 	{
@@ -894,7 +894,7 @@ void FastThreadSafeQueue<T>::getSizes(int* curSize, int* curMaxSize, int* queueS
 template <typename T>
 void FastThreadSafeQueue<T>::resetMaxSize(const QThread* thread)
 {
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 	m_maxSize = 0;
 }
 
@@ -919,7 +919,7 @@ int FastThreadSafeQueue<T>::checkQueueSize(int newSize) const
 template <typename T>
 void FastThreadSafeQueue<T>::clear(const QThread* thread)
 {
-	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	m_readIndex.reset();
 	m_writeIndex.reset();

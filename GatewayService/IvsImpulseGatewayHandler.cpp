@@ -165,11 +165,11 @@ namespace Gateway
 
 		for(IvsImpulseListInfoShared& list : m_lists)
 		{
-			list->stateChangesMutex.lock(thread);
+			list->stateChangesMutex.lock();
 
 			list->stateChangesToWrite.swap(list->stateChangesToRead);
 
-			list->stateChangesMutex.unlock(thread);
+			list->stateChangesMutex.unlock();
 		}
 	}
 
