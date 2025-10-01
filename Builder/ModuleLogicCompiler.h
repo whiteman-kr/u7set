@@ -1051,6 +1051,7 @@ namespace Builder
 		std::map<Address16, std::vector<NonPlatformAppSignal>> m_nonPlatformRegSignals;	// non platform chassis AppSignal regValueAddr => vector(AppSignal)
 
 		std::map<Hash, std::set<QUuid>> m_ualItemsSignals;		// Hash(appSignalID) => set of UalItem.guid (type Signal) with this appSignalID
+		std::set<Hash> m_unusedTuningSignals;
 
 		std::set<QString> m_signalsWithFlagsIDs;
 		std::set<const UalSignal*> m_signalsWithFlagsAndFlagSignals;

@@ -1,60 +1,96 @@
 #pragma once
 
+#include <set>
 #include <atomic>
 
 #include <QEventLoop>
 #include <QThread>
 
+class SimpleThread;
+
 class SimpleThreadWorker : public QObject
 {
 	Q_OBJECT
+
+public:
+	SimpleThreadWorker(const QString& workerName = QString());
+	virtual ~SimpleThreadWorker();
+
+	QString workerName() const;
+
+protected:
+	virtual void onThreadStarted();
+	virtual void onThreadFinished();
+
+	void printFunction(const QString& func);
 
 private slots:
 	void slot_onThreadStarted();
 	void slot_onThreadFinished();
 
-protected:
-	virtual void onThreadStarted() {}
-	virtual void onThreadFinished() {}
-
-	bool quitRequested() const { return m_quitRequested; }
-
-	void requestQuit() { m_quitRequested = true; }
+private:
+	void setThread(SimpleThread* thread);
+	void log(const QString& str);
 
 private:
-	bool m_quitRequested = false;
+	QString m_workerName;
+	SimpleThread* m_thread = nullptr;
+	std::atomic_bool m_finished = false;
 
 	friend class SimpleThread;
 };
 
+#define PRINT_FUNC printFunction(__func__);
+
 class SimpleThread : public QObject
 {
 	Q_OBJECT
+	Q_DISABLE_COPY_MOVE(SimpleThread)
 
-protected:
-	QThread m_thread;
-	QList<SimpleThreadWorker*> m_workerList;
+	static const unsigned long START_TIME_MS = 5000;
+	static const unsigned long STOP_TIME_MS = 5000;
 
 public:
 	SimpleThread();
 	SimpleThread(SimpleThreadWorker* worker);
+	virtual ~SimpleThread();
 
-	~SimpleThread();
-
+public:
 	void addWorker(SimpleThreadWorker* worker);
 
-	void start();
-	void quit();
-	bool wait(unsigned long time = ULONG_MAX);
-	bool quitAndWait(unsigned long time = ULONG_MAX);
+	void setPriority(QThread::Priority priority);
+
+	void start(unsigned long time = START_TIME_MS);
+	bool quitAndWait(unsigned long time = STOP_TIME_MS);
 
 	bool isRunning() const;
 	bool isFinished() const;
 
-	virtual void beforeStart();
-	virtual void beforeQuit();
-};
+signals:
+	void quitRequested();
 
+private:
+	void workerStarted(SimpleThreadWorker* worker);
+	void workerFinished(SimpleThreadWorker* worker);
+
+	void log(const QString& str);
+
+protected:
+	QString m_threadName;
+
+	QThread m_thread;
+
+	std::mutex m_mutex;
+
+	std::set<SimpleThreadWorker*> m_workers;
+	std::set<SimpleThreadWorker*> m_runningWorkers;
+	int m_finishedWorkersCount = 0;
+	std::atomic_bool m_started = false;
+
+	std::condition_variable m_condVar;
+
+	friend class SimpleThreadWorker;
+};
 
 class RunOverrideThread : public QThread
 {
@@ -70,7 +106,6 @@ public:
 private:
 	std::atomic<bool> m_quitRequested = { false };
 };
-
 
 class WaitForSignalHelper : public QObject
 {
@@ -108,4 +143,3 @@ public:
 protected:
 	std::atomic_bool m_quitRequested{false};
 };
-

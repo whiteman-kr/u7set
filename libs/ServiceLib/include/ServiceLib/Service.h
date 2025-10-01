@@ -56,7 +56,8 @@ public:
 				  const QString& serviceInstanceName,
 				  int argc,
 				  char** argv,
-				  CircularLoggerShared logger);
+				  CircularLoggerShared logger,
+				  const QString& workerName);
 
 protected:
 	// SECOND instance of ServiceWorker constructor

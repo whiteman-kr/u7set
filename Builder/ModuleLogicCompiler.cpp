@@ -2031,7 +2031,7 @@ namespace Builder
 
 		// fill m_ualSignals by Input and Tuning Acquired signals
 		//
-		for(const auto& [appSignalID, appSignal] : m_moduleSignals)
+		for(const auto& [appSignalIdHash, appSignal] : m_moduleSignals)
 		{
 			TEST_PTR_CONTINUE(appSignal);
 
@@ -2050,6 +2050,11 @@ namespace Builder
 			{
 				Q_ASSERT(appSignal->isInternal() == true || appSignal->isOutput() == true);
 				m_ualSignals.createSignal(appSignal);
+
+				if (m_ualItemsSignals.contains(appSignalIdHash) == false)
+				{
+					m_unusedTuningSignals.insert(appSignalIdHash);
+				}
 				continue;
 			}
 		}
@@ -5618,7 +5623,7 @@ namespace Builder
 		//	+ discrete
 		//	+ internal
 		//	+ tunable
-		//	+ no matter used in UAL or not
+		//	+ no matter used in UAL
 
 		QVector<AppSignal*> tuningSignals;
 
@@ -5634,7 +5639,7 @@ namespace Builder
 
 			if (ualSignal == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -5947,7 +5952,7 @@ namespace Builder
 		//	+ discrete
 		//	+ internal
 		//	+ tunable
-		//	+ no matter used in UAL or not
+		//	+ no matter used in UAL
 
 		QVector<AppSignal*> tuningSignals;
 
@@ -5963,7 +5968,7 @@ namespace Builder
 
 			if (ualSignal == nullptr)
 			{
-				assert(false);
+				Q_ASSERT(false);
 				continue;
 			}
 
@@ -17359,10 +17364,18 @@ namespace Builder
 
 			if (s->isInternal() == true &&
 				s->reserved() == false &&
-				s->isSwCalculated() == false &&
-				m_ualSignals.contains(s->appSignalID()) == false)
+				s->isSwCalculated() == false)
 			{
-				m_log->wrnALC5148(s->appSignalID());
+				if (m_ualSignals.contains(s->appSignalID()) == false)
+				{
+					m_log->wrnALC5148(s->appSignalID());
+				}
+
+				if (s->enableTuning() == true &&
+					m_unusedTuningSignals.contains(calcHash(s->appSignalID())) == true)
+				{
+					m_log->wrnALC5207(s->appSignalID());
+				}
 			}
 		}
 

@@ -12,6 +12,7 @@
 // ----------------------------------------------------------------------------------
 
 CircularLoggerWorker::CircularLoggerWorker(QString logPath, QString logName, int fileCount, int fileSizeInMB) :
+	SimpleThreadWorker("CircularLoggerWorker"),
 	m_logName(logName),
 	m_path(logPath),
 	m_fileCount(fileCount),

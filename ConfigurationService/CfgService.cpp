@@ -14,7 +14,7 @@ ConfigurationServiceWorker::ConfigurationServiceWorker(const SoftwareInfo& softw
 													   const QString& serviceName,
 													   int argc, char** argv,
 													   std::shared_ptr<CircularLogger> logger) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger)
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, "ConfigurationServiceWorker")
 {
 }
 
@@ -216,7 +216,7 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 		}
 	}
 
-	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger());
+	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger(), "CfgServerListener");
 
 	m_cfgServerThread->start();
 }
@@ -225,7 +225,7 @@ void ConfigurationServiceWorker::stopCfgServerThread()
 {
 	if (m_cfgServerThread != nullptr)
 	{
-		m_cfgServerThread->quit();
+		m_cfgServerThread->quitAndWait();
 
 		delete m_cfgServerThread;
 
@@ -249,7 +249,7 @@ void ConfigurationServiceWorker::stopCfgCheckerThread()
 {
 	assert(m_cfgCheckerThread != nullptr);
 
-	m_cfgCheckerThread->quit();
+	m_cfgCheckerThread->quitAndWait();
 	delete m_cfgCheckerThread;
 
 	m_cfgCheckerWorker = nullptr;

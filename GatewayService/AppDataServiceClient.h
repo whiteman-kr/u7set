@@ -73,6 +73,11 @@ namespace Gateway
 											   logger));
 		}
 
-		AppDataServiceClient* client() { return dynamic_cast<AppDataServiceClient*>(m_workerList[0]); }
+		AppDataServiceClient* client()
+		{
+			Q_ASSERT(m_workers.size() == 1);
+
+			return dynamic_cast<AppDataServiceClient*>(*m_workers.begin());
+		}
 	};
 }

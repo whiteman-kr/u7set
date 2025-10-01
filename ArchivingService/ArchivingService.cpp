@@ -14,7 +14,7 @@ ArchivingService::ArchivingService(const SoftwareInfo& softwareInfo,
 											   int argc,
 											   char** argv,
 											   CircularLoggerShared logger) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger)
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, "ArchivingService")
 {
 }
 
@@ -138,7 +138,7 @@ void ArchivingService::stopCfgLoaderThread()
 {
 	if (m_cfgLoaderThread != nullptr)
 	{
-		m_cfgLoaderThread->quit();
+		m_cfgLoaderThread->quitAndWait();
 
 		delete m_cfgLoaderThread;
 	}

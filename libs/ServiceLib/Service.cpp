@@ -23,7 +23,9 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 							 const QString& serviceName,
 							 int argc,
 							 char** argv,
-							 CircularLoggerShared logger) :
+							 CircularLoggerShared logger,
+							 const QString& workerName) :
+	SimpleThreadWorker(workerName),
 	m_softwareInfo(softwareInfo),
 	m_serviceName(serviceName),
 	m_argc(argc),
@@ -42,6 +44,7 @@ ServiceWorker::ServiceWorker(const SoftwareInfo& softwareInfo,
 }
 
 ServiceWorker::ServiceWorker(const ServiceWorker* prevInstance) :
+	SimpleThreadWorker(prevInstance->workerName()),
 	m_softwareInfo(prevInstance->softwareInfo()),
 	m_serviceName(prevInstance->serviceName()),
 	m_logger(prevInstance->logger()),
@@ -529,8 +532,7 @@ void Service::stopServiceWorkerThread()
 
 	m_state = E::ServiceState::Stops;
 
-	m_serviceWorkerThread->quit();
-	m_serviceWorkerThread->wait();
+	m_serviceWorkerThread->quitAndWait();
 
 	delete m_serviceWorkerThread;
 
@@ -637,7 +639,7 @@ void Service::startTcpSrvInfoThread()
 	m_tcpSrvInfoThread = new Tcp::ListenerThread(listenAddr,
 												 E::SecurityLevel::Basic,
 												 new TcpSrvInfoServer(m_serviceWorkerFactory.softwareInfo(), "TcpSrvInfoServer", *this),
-												 m_logger);
+												 m_logger, "TcpSrvInfoServerListener");
 	m_tcpSrvInfoThread->start();
 }
 

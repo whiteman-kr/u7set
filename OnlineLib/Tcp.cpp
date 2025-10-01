@@ -24,7 +24,9 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	SocketWorker::SocketWorker(const SoftwareInfo& softwareInfo, const QString& socketDescription) :
+	SocketWorker::SocketWorker(	const SoftwareInfo& softwareInfo,
+								const QString& socketDescription) :
+		SimpleThreadWorker(socketDescription),
 		m_localSoftwareInfo(softwareInfo),
 		m_socketDescription(socketDescription),
 		m_timeoutTimer(this)
@@ -222,6 +224,8 @@ namespace Tcp
 	{
 		AUTO_LOCK(m_mutex)
 
+		PRINT_FUNC;
+
 		deleteSocket();
 
 		m_socket = new QSslSocket;
@@ -252,6 +256,8 @@ namespace Tcp
 
 		if (m_socket != nullptr)
 		{
+			PRINT_FUNC;
+
 			m_socket->close();
 			delete m_socket;
 			m_socket = nullptr;
@@ -272,6 +278,8 @@ namespace Tcp
 
 	void SocketWorker::onThreadStarted()
 	{
+		PRINT_FUNC;
+
 		createSocket();
 
 		connect(&m_timeoutTimer, &QTimer::timeout, this, &SocketWorker::onTimeoutTimer);
@@ -280,6 +288,8 @@ namespace Tcp
 
 	void SocketWorker::onThreadFinished()
 	{
+		PRINT_FUNC;
+
 		m_timeoutTimer.stop();
 
 		deleteSocket();
@@ -848,7 +858,7 @@ namespace Tcp
 	int Server::m_staticConnNo = 1;
 
 	Server::Server(const SoftwareInfo& sotwareInfo,
-				   const QString& serverDescription) :
+		const QString& serverDescription) :
 		SocketWorker(sotwareInfo, serverDescription),
 		m_autoAckTimer(this)
 	{
@@ -1346,7 +1356,11 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-	ListenerWorker::ListenerWorker(const std::vector<ListenAddress>& listenAddresses, Server* server, CircularLoggerShared logger) :
+	ListenerWorker::ListenerWorker(	const std::vector<ListenAddress>& listenAddresses,
+									Server* server,
+									CircularLoggerShared logger,
+									const QString& workerName) :
+		SimpleThreadWorker(workerName.isEmpty() ? "Tcp::ListenerWorker" : workerName),
 		m_periodicTimer(this),
 		m_serverInstance(server)
 	{
@@ -1379,7 +1393,7 @@ namespace Tcp
 
 		for(auto const& [worker, thread]: m_runningServers)
 		{
-			thread->quit();
+			thread->quitAndWait();
 			delete thread;
 		}
 
@@ -1515,7 +1529,7 @@ namespace Tcp
 
 		m_runningServersMutex.unlock();
 
-		thread->quit();
+		thread->quitAndWait();
 		delete thread;
 
 		updateClientsList();
@@ -1546,27 +1560,30 @@ namespace Tcp
 	ListenerThread::ListenerThread(const HostAddressPort& listenAddress,
 									E::SecurityLevel securityLevel,
 									Server* server,
-									CircularLoggerShared logger)
+									CircularLoggerShared logger,
+									const QString& listenerWorkerName)
 	{
 		m_listenerWorker = new ListenerWorker(std::vector<ListenAddress>{ListenAddress(server->softwareEquipmentID(), listenAddress, securityLevel)},
-											  server, logger);
+											  server, logger, listenerWorkerName);
 		addWorker(m_listenerWorker);
 	}
 
 	ListenerThread::ListenerThread(const ListenAddress& listenAddress,
 									Server* server,
-									CircularLoggerShared logger)
+									CircularLoggerShared logger,
+									const QString& listenerWorkerName)
 	{
-		m_listenerWorker = new ListenerWorker(std::vector<ListenAddress>{listenAddress}, server, logger);
+		m_listenerWorker = new ListenerWorker(std::vector<ListenAddress>{listenAddress}, server, logger, listenerWorkerName);
 
 		addWorker(m_listenerWorker);
 	}
 
 	ListenerThread::ListenerThread(const std::vector<ListenAddress>& listenAddresses,
 									Server* server,
-									CircularLoggerShared logger)
+									CircularLoggerShared logger,
+									const QString& listenerWorkerName)
 	{
-		m_listenerWorker = new ListenerWorker(listenAddresses, server, logger);
+		m_listenerWorker = new ListenerWorker(listenAddresses, server, logger, listenerWorkerName);
 
 		addWorker(m_listenerWorker);
 	}

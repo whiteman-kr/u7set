@@ -16,7 +16,7 @@ namespace Tuning
 	TcpTuningServer::TcpTuningServer(TuningServiceWorker& service,
 									 const TuningSources& tuningSources,
 									 std::shared_ptr<CircularLogger> logger) :
-		Tcp::Server(service.softwareInfo(), "TuningServer"),
+		Tcp::Server(service.softwareInfo(), "TcpTuningServer"),
 		m_service(service),
 		m_tuningSources(tuningSources),
 		m_logger(logger)
@@ -831,7 +831,7 @@ namespace Tuning
 												 E::SecurityLevel securityLevel,
 												 TcpTuningServer* server,
 												 std::shared_ptr<CircularLogger> logger) :
-		Tcp::ListenerThread(listenAddress, securityLevel, server, logger)
+		Tcp::ListenerThread(listenAddress, securityLevel, server, logger, "TcpTuningServerThread")
 	{
 	}
 }

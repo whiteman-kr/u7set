@@ -22,6 +22,8 @@ namespace ClientLib
 		m_logFile{logFile, "ConfigController"},
 		m_softwareInfo{softwareInfo}
 	{
+		qDebug() << "ConfigController::ConfigController";
+
 		m_appInstanceNo = acquireAppInstanceNo(E::valueToString(softwareInfo.softwareType()));
 
 		m_logFile.writeMessage(QString("Assigned InstanceNo is %1").arg(m_appInstanceNo));
@@ -56,7 +58,9 @@ namespace ClientLib
 		qDebug() << "ConfigController::~ConfigController()";
 
 		releaseAppInstanceNo();
-		m_cfgLoaderThread->quit();
+
+		qDebug() << "ConfigController::~ConfigController";
+		//m_cfgLoaderThread->quitAndWait();
 	}
 
 	void ConfigController::setConnectionParams(QString equipmentId, const HostAddressPort& address1, const HostAddressPort& address2)

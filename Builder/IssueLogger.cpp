@@ -8045,6 +8045,25 @@ namespace Builder
 							arg(optoPortID).arg(txRawDataSize)));
 	}
 
+	/// IssueCode: ALC5207
+	///
+	/// IssueType: Warning
+	///
+	/// Title:	   Tuning signal %1 is unused.
+	///
+	/// Parameters:
+	///		%1 Signal ID
+	///
+	/// Description:
+	///		Tuning signal has been created but not used in UAL.
+	///
+	void IssueLogger::wrnALC5207(QString signalID)
+	{
+		LOG_WARNING2(IssueType::AlCompiler,
+				  5207,
+				  QString(tr("Tuning signal %1 is unused.")).arg(signalID));
+	}
+
 	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning

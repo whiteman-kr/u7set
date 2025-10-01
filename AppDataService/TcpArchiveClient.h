@@ -46,10 +46,6 @@ public:
 	Tcp::ConnectionState getConnectionState();
 
 private:
-
-	virtual void beforeQuit() override;
-
-private:
 	TcpArchiveClient* m_tcpArchiveClient = nullptr;
 	static Tcp::ConnectionState m_emptyState;
 };

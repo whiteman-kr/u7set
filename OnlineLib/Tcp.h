@@ -73,7 +73,8 @@ namespace Tcp
 		#pragma pack(pop)
 
 	public:
-		SocketWorker(const SoftwareInfo& softwareInfo, const QString& socketDescription);
+		SocketWorker(const SoftwareInfo& softwareInfo,
+					 const QString& socketDescription);
 		virtual ~SocketWorker();
 
 		bool isConnected() const;					// returns True if isSocketConnected() == True and
@@ -409,7 +410,11 @@ namespace Tcp
 		Q_OBJECT
 
 	public:
-		ListenerWorker(const std::vector<ListenAddress>& listenAddresses, Server* server, CircularLoggerShared logger);
+		ListenerWorker(const std::vector<ListenAddress>& listenAddresses,
+					   Server* server,
+					   CircularLoggerShared logger,
+					   const QString& workerName = QString());
+
 		virtual ~ListenerWorker();
 
 		virtual void onListenerThreadStarted() {}
@@ -463,15 +468,18 @@ namespace Tcp
 		ListenerThread(const HostAddressPort& listenAddress,
 					   E::SecurityLevel securityLevel,
 					   Server* server,
-					   CircularLoggerShared logger);
+					   CircularLoggerShared logger,
+					   const QString& listenerWorkerName = QString());
 
 		ListenerThread(const ListenAddress& listenAddress,
 					 Server* server,
-					 CircularLoggerShared logger);
+					 CircularLoggerShared logger,
+					 const QString& listenerWorkerName = QString());
 
 		ListenerThread(const std::vector<ListenAddress>& listenAddresses,
 					 Server* server,
-					 CircularLoggerShared logger);
+					 CircularLoggerShared logger,
+					 const QString& listenerWorkerName = QString());
 
 		ListenerThread(ListenerWorker* listener);
 

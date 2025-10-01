@@ -175,10 +175,3 @@ Tcp::ConnectionState TcpArchiveClientThread::getConnectionState()
 
 	return m_emptyState;
 }
-
-void TcpArchiveClientThread::beforeQuit()
-{
-	m_tcpArchiveClient = nullptr;
-}
-
-

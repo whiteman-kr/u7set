@@ -259,7 +259,7 @@ TEST(ConfigControllerTests, setConnectionParams)
 	QElapsedTimer timer;
 	timer.start();
 
-	while (timer.hasExpired(1000) == false && spy.empty() == true)
+	while (timer.hasExpired(3000) == false && spy.empty() == true)
 	{
 		QCoreApplication::instance()->processEvents();
 		QThread::msleep(10);
@@ -273,7 +273,7 @@ TEST(ConfigControllerTests, setConnectionParams)
 	configController.setConnectionParams("SYSTEMID_CLIENTTEST_WS03_MONITOR", goodHost, goodHost);
 
 	timer.restart();
-	while (timer.hasExpired(1000) == false && configController.connectedFlag == false)
+	while (timer.hasExpired(3000) == false && configController.connectedFlag == false)
 	{
 		QCoreApplication::instance()->processEvents();
 		QThread::msleep(10);

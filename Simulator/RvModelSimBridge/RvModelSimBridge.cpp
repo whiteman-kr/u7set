@@ -16,7 +16,7 @@ ModelSimBridgeWorker::ModelSimBridgeWorker(const SoftwareInfo& softwareInfo,
 										 char** argv,
 										 CircularLoggerShared logger,
 										 CircularLoggerShared simLog) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger, "ModelSimBridgeWorker"),
 	m_simLog(simLog)
 {
 }
@@ -39,6 +39,8 @@ ServiceWorker* ModelSimBridgeWorker::createInstance() const
 
 void ModelSimBridgeWorker::getServiceSpecificInfo(Network::ServiceInfo& /*serviceInfo*/) const
 {
+//	Q_UNUSED(serviceInfo);
+
 	/*QMutexLocker l(&m_startStopMutex);
 
 	QString xmlString = SoftwareSettingsSet::writeSettingsToXmlString(E::SoftwareType::TuningService, m_serviceSettings);

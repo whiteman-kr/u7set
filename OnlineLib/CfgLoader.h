@@ -250,7 +250,6 @@ public:
 	virtual ~CfgLoaderThread();
 
 	void start();
-	void quit();
 	void quitAndWait();
 
 	void enableDownloadConfiguration();
@@ -299,7 +298,7 @@ signals:
 
 private:
 	void initThread();
-	void shutdownThread(bool* restartThread);
+	void shutdownThread();
 
 private:
 	SoftwareInfo m_softwareInfo;

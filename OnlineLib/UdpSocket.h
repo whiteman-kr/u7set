@@ -110,7 +110,7 @@ private:
 class UdpSocket : public SimpleThreadWorker
 {
 public:
-	UdpSocket();
+	UdpSocket(const QString& workerName = QString());
 	virtual ~UdpSocket();
 
 protected:
