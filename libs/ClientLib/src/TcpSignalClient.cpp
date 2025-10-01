@@ -658,8 +658,10 @@ namespace ClientLib
 							 .arg(dt.toString("dd MMM yyyy hh:mm:ss.zzz"))
 							 .arg(m_serverSettings.equipmentId));
 
+			tl_ackDiscretesLogRequest.set_acksource(localSoftwareInfo().equipmentID().toStdString());
+			tl_ackDiscretesLogRequest.set_ackuser("User");	// ???
 			tl_ackDiscretesLogRequest.set_ackuptoplanttime(plantTimeToAck.value().timeStamp);
-			sendRequest(ADS_ACK_DISCRETES_LOG);
+			sendRequest(ADS_ACK_DISCRETES_LOG, tl_ackDiscretesLogRequest);
 		}
 		else
 		{

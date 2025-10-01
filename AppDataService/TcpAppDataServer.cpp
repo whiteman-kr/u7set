@@ -104,6 +104,10 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		onGetDiscretesLog();
 		break;
 
+	case ADS_ACK_DISCRETES_LOG:
+		onAckDiscretesLog(requestData, requestDataSize);
+		break;
+
 	default:
 		logError(QString("unknown request ID = %1 (ignored)").arg(requestID));
 	}
@@ -609,11 +613,32 @@ void TcpAppDataServer::onGetDiscretesLog()
 {
 	createDiscretesLogReader();
 
-	Network::GetDiscretesLogReply r;
+	thread_local Network::GetDiscretesLogReply tl_getDiscretesLogReply;
 
-	m_dlReader->getDiscretesLog(&r);
+	m_dlReader->getDiscretesLog(&tl_getDiscretesLogReply);
 
-	sendReply(r);
+	sendReply(tl_getDiscretesLogReply);
+}
+
+void TcpAppDataServer::onAckDiscretesLog(const char* requestData, quint32 requestDataSize)
+{
+	thread_local Network::AckDiscretesLogRequest tl_ackDiscretesLogRequest;
+	thread_local Network::AckDiscretesLogReply tl_ackDiscretesLogReply;
+
+	if (tl_ackDiscretesLogRequest.ParseFromArray(requestData, requestDataSize) == true)
+	{
+		m_appDataService.ackDiscretesLog(tl_ackDiscretesLogRequest);
+	}
+	else
+	{
+		Q_ASSERT(false);
+	}
+
+	tl_ackDiscretesLogReply.set_acksource(tl_ackDiscretesLogRequest.acksource());
+	tl_ackDiscretesLogReply.set_ackuser(tl_ackDiscretesLogRequest.ackuser());
+	tl_ackDiscretesLogReply.set_ackuptoplanttime(tl_ackDiscretesLogRequest.ackuptoplanttime());
+
+	sendReply(tl_ackDiscretesLogReply);
 }
 
 int TcpAppDataServer::getSignalListPartCount(int signalCount)

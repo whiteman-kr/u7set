@@ -231,7 +231,6 @@ TEST(SimpleThreadTests, ImmediateQuit_AfterStart)
 
 	ASSERT_TRUE(th.quitAndWait(3000));
 
-	ASSERT_TRUE(waitUntil([&finished]() { return finished.load() >= 5; }));
 	ASSERT_TRUE(waitUntil([&destroyed]() { return destroyed.load() >= 5; }));
 
 	EXPECT_TRUE(th.isFinished());

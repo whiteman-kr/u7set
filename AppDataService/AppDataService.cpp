@@ -201,6 +201,11 @@ void AppDataServiceWorker::unregisterDiscretesLogReader(DiscretesLogReader* read
 	m_discretesLogWriter.unregisterLogReader(reader);
 }
 
+void AppDataServiceWorker::ackDiscretesLog(const Network::AckDiscretesLogRequest& ackLogRequest)
+{
+	m_discretesLogWriter.ackDiscretesLog(ackLogRequest);
+}
+
 void AppDataServiceWorker::initServiceSpecificCmdLineArgs()
 {
 	addValueCmdLineArg(CmdLineArg::ID, SoftwareSetting::EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");

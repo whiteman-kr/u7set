@@ -89,6 +89,7 @@ public:
 
 	void registerDiscretesLogReader(DiscretesLogReader* reader);
 	void unregisterDiscretesLogReader(DiscretesLogReader* reader);
+	void ackDiscretesLog(const Network::AckDiscretesLogRequest& ackLogRequest);
 
 signals:
 	void restartArchSignalsTimer();

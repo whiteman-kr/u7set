@@ -511,11 +511,16 @@ message GetDiscretesLogReply
 
 message AckDiscretesLogRequest
 {
+	optional string ackSource = 1;
+	optional string ackUser = 2;
 	optional int64 ackUpToPlantTime = 3; // Acknowledged up to this plant time (inclusive)
 }
 
 message AckDiscretesLogReply
 {
+	optional string ackSource = 1;
+	optional string ackUser = 2;
+	optional int64 ackUpToPlantTime = 3; // Acknowledged up to this plant time (inclusive)
 }
 
 // TuningService requests and replies

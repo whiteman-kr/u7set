@@ -137,7 +137,7 @@ void DiscretesLogWriter::stop()
 
 	m_quitRequested = true;
 
-	m_processingRequiredCondition.notify_one();
+	m_condVar.notify_one();
 
 	m_thread.join();
 }
@@ -149,38 +149,45 @@ void DiscretesLogWriter::pushStates(const std::vector<SimpleAppSignalState>& log
 		return;
 	}
 
-	m_logQueueMutex.lock();
-
-	for(const SimpleAppSignalState& logState : logStates)
 	{
-		m_logQueue.push(logState);
+		std::lock_guard lock(m_condVarMutex);
+
+		for(const SimpleAppSignalState& logState : logStates)
+		{
+			m_logQueue.push(logState);
+		}
 	}
 
-	m_logQueueMutex.unlock();
-
-	m_processingRequiredCondition.notify_one();
+	m_condVar.notify_one();
 }
 
 void DiscretesLogWriter::registerLogReader(DiscretesLogReader* reader)
 {
-	m_readersMutex.lock();
+	std::lock_guard lock(m_readersMutex);
 
 	Q_ASSERT(m_readers.contains(reader) == false);
 
 	m_readers.insert(reader);
 
 	reader->setLogChanged();
-
-	m_readersMutex.unlock();
 }
 
 void DiscretesLogWriter::unregisterLogReader(DiscretesLogReader* reader)
 {
-	m_readersMutex.lock();
+	std::lock_guard lock(m_readersMutex);
 
 	m_readers.erase(reader);
+}
 
-	m_readersMutex.unlock();
+void DiscretesLogWriter::ackDiscretesLog(const Network::AckDiscretesLogRequest& ackRequest)
+{
+	{
+		std::lock_guard lock(m_condVarMutex);
+
+		m_ackRequestQueue.push(ackRequest);
+	}
+
+	m_condVar.notify_one();
 }
 
 QString DiscretesLogWriter::databaseName()
@@ -196,22 +203,33 @@ void DiscretesLogWriter::run()
 
 	deleteLogOldRecords();
 
-	std::unique_lock ul(m_processingRequiredConditionMutex, std::defer_lock);
+	std::unique_lock ul(m_condVarMutex, std::defer_lock);
+
+	bool logQueueEmpty = false;
+	std::optional<Network::AckDiscretesLogRequest> ackRequest;
 
 	while(true)
 	{
 		ul.lock();
 
-		bool signaled = m_processingRequiredCondition.wait_for(
+		bool signaled = m_condVar.wait_for(
 							ul,
 							std::chrono::milliseconds(ONE_HOUR_MS),
-							[this]() -> bool
+							[&]() -> bool
 							{
-								m_logQueueMutex.lock();
-								bool logQueueEmpty = m_logQueue.empty();
-								m_logQueueMutex.unlock();
+								logQueueEmpty = m_logQueue.empty();
 
-								return m_quitRequested || logQueueEmpty == false;
+								ackRequest.reset();
+
+								if (m_ackRequestQueue.empty() == false)
+								{
+									ackRequest = m_ackRequestQueue.front();
+									m_ackRequestQueue.pop();
+								}
+
+								return m_quitRequested ||
+									   logQueueEmpty == false ||
+									   ackRequest.has_value();
 							});
 
 		// here ul is LOCKED!
@@ -226,7 +244,16 @@ void DiscretesLogWriter::run()
 
 		if (signaled == true)
 		{
-			processLogQueue();
+			if (logQueueEmpty == false)
+			{
+				processLogQueue();
+			}
+
+			if (ackRequest.has_value() == true)
+			{
+				ackLog(ackRequest.value());
+				ackRequest.reset();
+			}
 		}
 
 		deleteLogOldRecords();
@@ -389,7 +416,7 @@ void DiscretesLogWriter::processLogQueue()
 
 	QSqlQuery q(*m_db);
 
-	m_logQueueMutex.lock();
+	m_condVarMutex.lock();
 
 	qint64 recordTime = 0;
 	bool firstRecord = false;
@@ -428,19 +455,19 @@ void DiscretesLogWriter::processLogQueue()
 
 		if (m_requestStr.length() >= 950000)
 		{
-			m_logQueueMutex.unlock();
+			m_condVarMutex.unlock();
 
 			execQuery(q, m_requestStr);
 
 			m_requestStr.clear();
 
-			m_logQueueMutex.lock();
+			m_condVarMutex.lock();
 
 			notifyReadersFlag = true;
 		}
 	}
 
-	m_logQueueMutex.unlock();
+	m_condVarMutex.unlock();
 
 	if (m_requestStr.isEmpty() == false)
 	{
@@ -455,6 +482,36 @@ void DiscretesLogWriter::processLogQueue()
 	{
 		notifyReaders();
 	}
+}
+
+void DiscretesLogWriter::ackLog(const Network::AckDiscretesLogRequest& ackRequest)
+{
+	TEST_PTR_RETURN(m_db);
+
+	if (m_dbIsWorkable == false)
+	{
+		return;
+	}
+
+	QString ackSource = QString::fromStdString(ackRequest.acksource());
+	QString ackUser = QString::fromStdString(ackRequest.ackuser());
+	qint64 ackUpToPlantTime = ackRequest.ackuptoplanttime();
+
+	QSqlQuery q(*m_db);
+
+	qint64 ackTime = QDateTime::currentMSecsSinceEpoch();
+
+	m_requestStr = QString("UPDATE DiscretesLog SET ackSource='%1', ackUser='%2', acknowledged=1, ackTime=%3 "
+						   "WHERE plantTime<=%4 and acknowledged=0").arg(ackSource).arg(ackUser).arg(ackTime).arg(ackUpToPlantTime);
+
+	execQuery(q, m_requestStr);
+
+
+	// if (notifyReadersFlag == true)
+	// {
+	// 	notifyReaders();
+	// }
+
 }
 
 void DiscretesLogWriter::deleteLogOldRecords()
@@ -509,14 +566,11 @@ qint64 DiscretesLogWriter::getFreePagesCount()
 }
 void DiscretesLogWriter::clearLogQueue()
 {
-	m_logQueueMutex.lock();
+	std::lock_guard lock(m_condVarMutex);
 
-	while(m_logQueue.empty() == false)
-	{
-		m_logQueue.pop();
-	}
+	std::queue<SimpleAppSignalState> empty;
 
-	m_logQueueMutex.unlock();
+	m_logQueue.swap(empty);
 }
 
 void DiscretesLogWriter::notifyReaders()

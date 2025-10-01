@@ -51,6 +51,7 @@ private:
 	void onGetSettings();
 
 	void onGetDiscretesLog();
+	void onAckDiscretesLog(const char* requestData, quint32 requestDataSize);
 
 	// helper functions
 	//

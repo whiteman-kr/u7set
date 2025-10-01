@@ -77,6 +77,8 @@ public:
 	void registerLogReader(DiscretesLogReader* reader);
 	void unregisterLogReader(DiscretesLogReader* reader);
 
+	void ackDiscretesLog(const Network::AckDiscretesLogRequest& ackRequest);
+
 	static QString databaseName();
 
 private:
@@ -86,6 +88,7 @@ private:
 
 	bool checkAndCreateTables();
 	void processLogQueue();
+	void ackLog(const Network::AckDiscretesLogRequest& ackRequest);
 	void deleteLogOldRecords();
 	qint64 getFreePagesCount();
 
@@ -97,12 +100,13 @@ private:
 private:
 	int m_logTimeHours = 1;
 
-	SimpleMutex m_logQueueMutex;
 	std::queue<SimpleAppSignalState> m_logQueue;
 	QString m_requestStr;
 
-	std::mutex m_processingRequiredConditionMutex;
-	std::condition_variable m_processingRequiredCondition;
+	std::queue<Network::AckDiscretesLogRequest> m_ackRequestQueue;
+
+	std::mutex m_condVarMutex;
+	std::condition_variable m_condVar;
 
 	std::atomic<bool> m_quitRequested = false;
 
@@ -115,6 +119,6 @@ private:
 	qint64 m_deleteLastTime = 0;
 
 	//
-	SimpleMutex m_readersMutex;
+	std::mutex m_readersMutex;
 	std::set<DiscretesLogReader*> m_readers;
 };
