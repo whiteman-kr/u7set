@@ -602,8 +602,8 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal,
 	// Setup time labels
 
 	QDateTime time = QDateTime::currentDateTime();
-	ui->labelServerTime->setText(DateTimeToString::stringDateTime(time, true /*with ms*/));
-	ui->labelPlantTime->setText(DateTimeToString::stringDateTime(time, true /*with ms*/));
+	ui->labelServerTime->setText(DateTimeToString::dateTime(time, true /*with ms*/));
+	ui->labelPlantTime->setText(DateTimeToString::dateTime(time, true /*with ms*/));
 
 	// Setup tree controls
 
@@ -1714,12 +1714,12 @@ void DialogSignalInfo::fillExtProperties()
 
 		itemGroup->addChild(new QTreeWidgetItem(
 			QStringList() << tr("created")
-						  << DateTimeToString::stringDateTime(signalExt.created(), true /*with ms*/)
+						  << DateTimeToString::dateTime(signalExt.created(), true /*with ms*/)
 		));
 		itemGroup->addChild(new QTreeWidgetItem(QStringList() << tr("deleted") << (signalExt.deleted() ? tr("Yes") : tr("No"))));
 		itemGroup->addChild(
 			new QTreeWidgetItem(QStringList() << tr("instanceCreated")
-						  << DateTimeToString::stringDateTime(signalExt.instanceCreated(), true /*with ms*/)));
+						  << DateTimeToString::dateTime(signalExt.instanceCreated(), true /*with ms*/)));
 		itemGroup->addChild(
 			new QTreeWidgetItem(QStringList() << tr("instanceAction") << E::valueToString<E::VcsItemAction>(signalExt.instanceAction())));
 
@@ -2052,8 +2052,8 @@ void DialogSignalInfo::updateAppSignalState()
 	QDateTime localTime = appSignalState.m_time.local.toDateTime();
 	QDateTime plaitTime = appSignalState.m_time.plant.toDateTime();
 
-	ui->labelServerTime->setText(DateTimeToString::stringDateTime(localTime, true /*with ms*/));
-	ui->labelPlantTime->setText(DateTimeToString::stringDateTime(plaitTime, true /*with ms*/));
+	ui->labelServerTime->setText(DateTimeToString::dateTime(localTime, true /*with ms*/));
+	ui->labelPlantTime->setText(DateTimeToString::dateTime(plaitTime, true /*with ms*/));
 
 	ui->widgetFlags->updateControl(appSignalState.m_flags);
 

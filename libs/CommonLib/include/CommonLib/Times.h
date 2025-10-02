@@ -167,133 +167,16 @@ inline QString timeToString(const QDateTime& time)
 	return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 }
 
-struct DateTimeFormat
+// Time to string formatting class
+//
+class DateTimeToString
 {
-	static QString forFileName() 
-	{ 
-		return "dd_MM_yyyy_HH_mm_ss"; 
-	}
+public:
+	static QString dateTime(const QDateTime& time, bool withMilliseconds = false, const QLocale* locale = &m_systemLocale);
+	static QString time(const QTime& time, bool withMilliseconds = false, const QLocale* locale = &m_systemLocale);
+	static QString date(const QDate& date, const QLocale* locale = &m_systemLocale);
+	static QString fileName(const QDateTime& time, const QLocale* locale = &m_systemLocale);
 
-	static QString dateTimeFormat(bool withMilliseconds = false,
-								  const QLocale& locale = QLocale::system(),
-								  QLocale::FormatType fmt = QLocale::ShortFormat)
-	{
-		QString dateFmt = locale.dateFormat(fmt);
-		QString timeFmt = locale.timeFormat(fmt);
-
-		if (withMilliseconds && timeFmt.contains('z') == false)
-		{
-			int idx = timeFmt.lastIndexOf('s');
-			if (idx != -1)
-			{
-				timeFmt.insert(idx + 1, ".zzz");
-			}
-			else
-			{
-				int apIdx = timeFmt.indexOf("AP");
-				if (apIdx == -1)
-				{
-					apIdx = timeFmt.indexOf("ap");
-				}
-
-				if (apIdx != -1)
-				{
-					timeFmt.insert(apIdx - 1, ".zzz ");
-				}
-				else
-				{
-					timeFmt.append(".zzz");
-				}
-			}
-		}
-
-		return dateFmt + " " + timeFmt;
-	}
-
-	static QString dateFormat(const QLocale& locale = QLocale::system(),
-								  QLocale::FormatType fmt = QLocale::ShortFormat)
-	{
-		QString dateFmt = locale.dateFormat(fmt);
-		return dateFmt;
-	}
-
-	static QString timeFormat(bool withMilliseconds = false,
-							  const QLocale& locale = QLocale::system(),
-							  QLocale::FormatType fmt = QLocale::ShortFormat)
-	{
-		QString timeFmt = locale.timeFormat(fmt);
-
-		if (withMilliseconds && timeFmt.contains('z') != false)
-		{
-			int idx = timeFmt.lastIndexOf('s');
-			if (idx != -1)
-			{
-				timeFmt.insert(idx + 1, ".zzz");
-			}
-			else
-			{
-				int apIdx = timeFmt.indexOf("AP");
-				if (apIdx == -1)
-				{
-					apIdx = timeFmt.indexOf("ap");
-				}
-
-				if (apIdx != -1)
-				{
-					timeFmt.insert(apIdx - 1, ".zzz");
-				}
-				else
-				{
-					timeFmt.append(".zzz");
-				}
-			}
-		}
-
-		return timeFmt;
-	}
+private:
+	inline static const QLocale m_systemLocale = QLocale::system();
 };
-
-
-
-namespace DateTimeToString
-{
-	inline QString stringDateTime(const QDateTime& time, bool withMilliseconds = false, const QLocale& locale = QLocale::system())
-	{
-		if (time.isValid() == false)
-		{
-			return QString();
-		}
-
-		return locale.toString(time, DateTimeFormat::dateTimeFormat(withMilliseconds, locale));
-	}
-
-	inline QString stringTime(const QTime& time, bool withMilliseconds = false, const QLocale& locale = QLocale::system())
-	{
-		if (time.isValid() == false)
-		{
-			return QString();
-		}
-
-		return locale.toString(time, DateTimeFormat::timeFormat(withMilliseconds, locale));
-	}
-
-	inline QString stringDate(const QDate& date, const QLocale& locale = QLocale::system())
-	{
-		if (date.isValid() == false)
-		{
-			return QString();
-		}
-
-		return locale.toString(date, DateTimeFormat::dateFormat(locale));
-	}
-
-	inline QString stringDateTimeToFile(const QDateTime& time, const QLocale& locale = QLocale::system())
-	{
-		if (time.isValid() == false)
-		{
-			return QString();
-		}
-
-		return locale.toString(time, DateTimeFormat::forFileName());
-	}
-} // namespace DateTimeToString

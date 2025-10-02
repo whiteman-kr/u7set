@@ -778,7 +778,7 @@ void TestSuiteMainWindow::saveTestLog()
 		return;
 	}
 
-	QString defaultFileName = QString("TestLog_%1.tsl").arg(DateTimeToString::stringDateTimeToFile(QDateTime::currentDateTime()));
+	QString defaultFileName = QString("TestLog_%1.tsl").arg(DateTimeToString::fileName(QDateTime::currentDateTime()));
 
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save Test Log"),

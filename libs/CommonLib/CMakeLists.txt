@@ -24,8 +24,16 @@ qt_add_library(${TARGET} STATIC
   ./include/CommonLib/u7_vld.h
   AfbParamValue.cpp
   PropertyObject.cpp
+  Times.cpp
   Types.cpp
   u7_vld.cpp
+)
+
+
+target_precompile_headers(${TARGET} PRIVATE
+	<QReadWriteLock>
+	<QReadLocker>
+	<QWriteLocker>
 )
 
 #target_precompile_headers(${TARGET} PUBLIC

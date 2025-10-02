@@ -229,7 +229,7 @@ namespace SchemaClientLib
 		tm.setTimeZone(TIME_ZONE_UTC);
 
 		tm.setMSecsSinceEpoch(adsState->state.uptime());
-		setDataItemText("Uptime", DateTimeToString::stringDateTime(tm, true /*with ms*/));
+		setDataItemText("Uptime", DateTimeToString::dateTime(tm, true /*with ms*/));
 
 		setDataItemNumber("ReceivedDataID", adsState->state.receiveddataid());
 		double datareceivingrate = adsState->state.datareceivingspeed();
@@ -241,7 +241,7 @@ namespace SchemaClientLib
 		setDataItemText("DataProcessingEnabled", adsState->state.dataprocessingenabled() ? "Yes" : "No");
 
 		tm.setMSecsSinceEpoch(adsState->state.lmtime());
-		setDataItemText("LmTime", DateTimeToString::stringDateTime(tm, true /*with ms*/));
+		setDataItemText("LmTime", DateTimeToString::dateTime(tm, true /*with ms*/));
 
 		setDataItemNumber("RupFrameNumerator", adsState->state.rupframenumerator());
 		setDataItemNumber("SignalStatesQueueCurSize", adsState->state.signalstatesqueuecursize());
@@ -456,7 +456,7 @@ namespace SchemaClientLib
 			tm.setTimeZone(TIME_ZONE_UTC);
 
 			tm.setMSecsSinceEpoch(adsState->state.lmtime());
-			item->setText(static_cast<int>(Columns::LmTime), DateTimeToString::stringDateTime(tm, true /*with ms*/));
+			item->setText(static_cast<int>(Columns::LmTime), DateTimeToString::dateTime(tm, true /*with ms*/));
 
 			item->setText(static_cast<int>(Columns::ReceivedPacketCount), QString::number(adsState->state.receivedpacketcount()));
 			double datareceivingrate = adsState->state.datareceivingspeed();
