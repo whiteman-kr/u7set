@@ -216,13 +216,15 @@ namespace ModuleConfiguratorLib
 
 		out << "First time configured: ";
 
-		out << "__Date: " + QDateTime().fromSecsSinceEpoch(static_cast<uint>(firstConfiguration.date)).toString();
+		out << "__Date: " +
+				   DateTimeToString::dateTime(QDateTime().fromSecsSinceEpoch(static_cast<uint>(firstConfiguration.date)), false /*with no ms*/);
 		out << "__Host: " + QString(firstConfiguration.host);
 		out << "__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString();
 		out << "__Configurator factory no: " + QString().setNum(firstConfiguration.configuratorFactoryNo);
 
 		out << "Last time configured: ";
-		out << "__Date: " + QDateTime().fromSecsSinceEpoch(static_cast<uint>(lastConfiguration.date)).toString();
+		out << "__Date: " + 
+			DateTimeToString::dateTime(QDateTime().fromSecsSinceEpoch(static_cast<uint>(lastConfiguration.date)), false /*with no ms*/);
 		out << "__Host: " + QString(lastConfiguration.host);
 		out << "__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString();
 		out << "__Configurator factory no: " + QString().setNum(lastConfiguration.configuratorFactoryNo);
@@ -286,7 +288,8 @@ namespace ModuleConfiguratorLib
 		out << "Configuration counter: " + QString().setNum(count);
 
 		out << "First time configured: ";
-		out << "__Date: " + QDateTime().fromSecsSinceEpoch(static_cast<uint>(firstConfiguration.date)).toString();
+		out << "__Date: " + DateTimeToString::dateTime(QDateTime().fromSecsSinceEpoch(static_cast<uint>(firstConfiguration.date)),
+													   false /*with no ms*/);
 		out << "__Host: " + QString(firstConfiguration.host);
 		out << "__User: " + QString(firstConfiguration.userName);
 		out << "__Build No: " + QString::number(firstConfiguration.buildNo).rightJustified(6, '0');
@@ -294,7 +297,8 @@ namespace ModuleConfiguratorLib
 		out << "__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString();
 
 		out << "Last time configured: ";
-		out << "__Date: " + QDateTime().fromSecsSinceEpoch(static_cast<uint>(lastConfiguration.date)).toString();
+		out << "__Date: " + DateTimeToString::dateTime(QDateTime().fromSecsSinceEpoch(static_cast<uint>(lastConfiguration.date)),
+													   false /*with no ms*/);
 		out << "__Host: " + QString(lastConfiguration.host);
 		out << "__User: " + QString(lastConfiguration.userName);
 		out << "__Build No: " + QString::number(lastConfiguration.buildNo).rightJustified(6, '0');

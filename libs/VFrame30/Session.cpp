@@ -61,14 +61,14 @@ namespace VFrame30
 
 	QString Session::date() const
 	{
-		QDateTime t = QDateTime::currentDateTime();
-		return t.toString("dd MMM yyyy");
+		QDate t = QDate::currentDate();
+		return DateTimeToString::date(t);
 	}
 
 	QString Session::time() const
 	{
-		QDateTime t = QDateTime::currentDateTime();
-		return t.toString("hh:mm");
+		QTime t = QTime::currentTime();
+		return DateTimeToString::time(t, false /*with no ms*/); // Should seconds be removed???
 	}
 
 }

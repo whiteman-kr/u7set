@@ -4,152 +4,150 @@
 
 #include <CommonLib/Times.h>
 
-struct DateTimeFormat
+
+QString DateTimeFormat::fileName(const QLocale* locale)
 {
-	static QString fileName() { return "dd_MM_yyyy_HH_mm_ss"; }
+	QString dateFmt = locale->dateFormat(QLocale::ShortFormat);
+	QString timeFmt = locale->timeFormat(QLocale::ShortFormat);
 
-	static QString dateTime(const QLocale& locale, bool withMilliseconds = false)
-	{
-		// Try to found data in cache
-		//
-		size_t hash = qHash(locale, withMilliseconds ? 1 : 0);
-		{
-			QReadLocker rl(&m_lock);
-			auto it = m_dateTimeCache.find(hash);
-			if (it != m_dateTimeCache.end())
-			{
-				return it->second; // Return value from map
-			}
-		}
+	dateFmt.replace(QRegularExpression("[^dMy]"), "_");
+	timeFmt.replace(QRegularExpression("[^hHmsaH]"), "_");
 
-		// No data found in cache
-		//
-		
-		QString dateFmt = locale.dateFormat(QLocale::ShortFormat);
-		QString timeFmt = locale.timeFormat(QLocale::ShortFormat);
+	return dateFmt + "_" + timeFmt;
+}
 
-		if (withMilliseconds && timeFmt.contains('z') == false)
-		{
-			int idx = timeFmt.lastIndexOf('s');
-			if (idx != -1)
-			{
-				timeFmt.insert(idx + 1, ".zzz");
-			}
-			else
-			{
-				int apIdx = timeFmt.indexOf("AP");
-				if (apIdx == -1)
-				{
-					apIdx = timeFmt.indexOf("ap");
-				}
-
-				if (apIdx != -1)
-				{
-					timeFmt.insert(apIdx - 1, ".zzz ");
-				}
-				else
-				{
-					timeFmt.append(".zzz");
-				}
-			}
-		}
-
-		QString result = dateFmt + " " + timeFmt;
-		{
-			QWriteLocker rl(&m_lock);
-			m_dateTimeCache[hash] = result;
-		}
-		
-		return result;
-	}
-
-	static QString date(const QLocale& locale)
-	{
-		// Try to found data in cache
-		//
-		size_t hash = qHash(locale);
-		{
-			QReadLocker rl(&m_lock);
-			auto it = m_dateCache.find(hash);
-			if (it != m_dateCache.end())
-			{
-				return it->second; // Return value from map
-			}
-		}
-
-		// No data found in cache
-		//
-
-		QString dateFmt = locale.dateFormat(QLocale::ShortFormat);
-		{
-			QWriteLocker rl(&m_lock);
-			m_dateCache[hash] = dateFmt;
-		}
-
-		return dateFmt;
-	}
-
-	static QString time(const QLocale& locale, bool withMilliseconds = false)
-	{
-		// Try to found data in cache
-		//
-		size_t hash = qHash(locale, withMilliseconds ? 1 : 0);
-
-		{
-			QReadLocker rl(&m_lock);
-			auto it = m_timeCache.find(hash);
-			if (it != m_timeCache.end())
-			{
-				return it->second; // Return value from map
-			}
-		}
-		
-		// No data found in cache
-		//
-		QString timeFmt = locale.timeFormat(QLocale::ShortFormat);
-
-		if (withMilliseconds && timeFmt.contains('z') != false)
-		{
-			int idx = timeFmt.lastIndexOf('s');
-			if (idx != -1)
-			{
-				timeFmt.insert(idx + 1, ".zzz");
-			}
-			else
-			{
-				int apIdx = timeFmt.indexOf("AP");
-				if (apIdx == -1)
-				{
-					apIdx = timeFmt.indexOf("ap");
-				}
-
-				if (apIdx != -1)
-				{
-					timeFmt.insert(apIdx - 1, ".zzz");
-				}
-				else
-				{
-					timeFmt.append(".zzz");
-				}
-			}
-		}
-
-		{
-			QWriteLocker rl(&m_lock);
-			m_timeCache[hash] = timeFmt;
-		}
-		return timeFmt;
-	}
-
-private:
-	// key is a hash of a locale, counted by qHash function with seed equal to useMilliseconds (0 or 1)
+QString DateTimeFormat::dateTime(bool withMilliseconds, const QLocale* locale)
+{
+	// Try to found data in cache
 	//
-	inline static QReadWriteLock m_lock;
-	inline static std::unordered_map<size_t, QString> m_dateCache;	
-	inline static std::unordered_map<size_t, QString> m_timeCache; 
-	inline static std::unordered_map<size_t, QString> m_dateTimeCache;
-};
+	size_t hash = qHash(m_systemLocale, withMilliseconds ? 1 : 0);
+	{
+		QReadLocker rl(&m_lock);
+		auto it = m_dateTimeCache.find(hash);
+		if (it != m_dateTimeCache.end())
+		{
+			return it->second; // Return value from map
+		}
+	}
 
+	// No data found in cache
+	//
+
+	QString dateFmt = m_systemLocale.dateFormat(QLocale::ShortFormat);
+	QString timeFmt = m_systemLocale.timeFormat(QLocale::ShortFormat);
+
+	if (withMilliseconds && timeFmt.contains('z') == false)
+	{
+		int idx = timeFmt.lastIndexOf('s');
+		if (idx != -1)
+		{
+			timeFmt.insert(idx + 1, ".zzz");
+		}
+		else
+		{
+			int apIdx = timeFmt.indexOf("AP");
+			if (apIdx == -1)
+			{
+				apIdx = timeFmt.indexOf("ap");
+			}
+
+			if (apIdx != -1)
+			{
+				timeFmt.insert(apIdx - 1, ".zzz ");
+			}
+			else
+			{
+				timeFmt.append(".zzz");
+			}
+		}
+	}
+
+	QString result = dateFmt + " " + timeFmt;
+	{
+		QWriteLocker rl(&m_lock);
+		m_dateTimeCache[hash] = result;
+	}
+
+	return result;
+}
+
+QString DateTimeFormat::date(const QLocale* locale)
+{
+	// Try to found data in cache
+	//
+	size_t hash = qHash(m_systemLocale);
+	{
+		QReadLocker rl(&m_lock);
+		auto it = m_dateCache.find(hash);
+		if (it != m_dateCache.end())
+		{
+			return it->second; // Return value from map
+		}
+	}
+
+	// No data found in cache
+	//
+
+	QString dateFmt = m_systemLocale.dateFormat(QLocale::ShortFormat);
+	{
+		QWriteLocker rl(&m_lock);
+		m_dateCache[hash] = dateFmt;
+	}
+
+	return dateFmt;
+}
+
+QString DateTimeFormat::time(bool withMilliseconds, const QLocale* locale)
+{
+	// Try to found data in cache
+	//
+	size_t hash = qHash(m_systemLocale, withMilliseconds ? 1 : 0);
+
+	{
+		QReadLocker rl(&m_lock);
+		auto it = m_timeCache.find(hash);
+		if (it != m_timeCache.end())
+		{
+			return it->second; // Return value from map
+		}
+	}
+
+	// No data found in cache
+	//
+	QString timeFmt = m_systemLocale.timeFormat(QLocale::ShortFormat);
+
+	if (withMilliseconds && timeFmt.contains('z') != false)
+	{
+		int idx = timeFmt.lastIndexOf('s');
+		if (idx != -1)
+		{
+			timeFmt.insert(idx + 1, ".zzz");
+		}
+		else
+		{
+			int apIdx = timeFmt.indexOf("AP");
+			if (apIdx == -1)
+			{
+				apIdx = timeFmt.indexOf("ap");
+			}
+
+			if (apIdx != -1)
+			{
+				timeFmt.insert(apIdx - 1, ".zzz");
+			}
+			else
+			{
+				timeFmt.append(".zzz");
+			}
+		}
+	}
+
+	{
+		QWriteLocker rl(&m_lock);
+		m_timeCache[hash] = timeFmt;
+	}
+	return timeFmt;
+};
 
 //
 // DateTimeToString
@@ -163,7 +161,7 @@ QString DateTimeToString::dateTime(const QDateTime& time, bool withMilliseconds,
 		return {"?"};
 	}
 
-	return locale->toString(time, DateTimeFormat::dateTime(*locale, withMilliseconds));
+	return locale->toString(time, DateTimeFormat::dateTime(withMilliseconds, locale));
 }
 
 QString DateTimeToString::time(const QTime& time, bool withMilliseconds, const QLocale* locale)
@@ -173,7 +171,7 @@ QString DateTimeToString::time(const QTime& time, bool withMilliseconds, const Q
 		return {"?"};
 	}
 
-	return locale->toString(time, DateTimeFormat::time(*locale, withMilliseconds));
+	return locale->toString(time, DateTimeFormat::time(withMilliseconds, locale));
 }
 
 QString DateTimeToString::date(const QDate& date, const QLocale* locale)
@@ -183,7 +181,7 @@ QString DateTimeToString::date(const QDate& date, const QLocale* locale)
 		return {"?"};
 	}
 
-	return locale->toString(date, DateTimeFormat::date(*locale));
+	return locale->toString(date, DateTimeFormat::date(locale));
 }
 
 QString DateTimeToString::fileName(const QDateTime& time, const QLocale* locale)
@@ -193,5 +191,5 @@ QString DateTimeToString::fileName(const QDateTime& time, const QLocale* locale)
 		return {"?"};
 	}
 
-	return locale->toString(time, DateTimeFormat::fileName());
+	return locale->toString(time, DateTimeFormat::fileName(locale));
 }

@@ -686,8 +686,8 @@ namespace ClientLib
 
 				writeWarning(QString("UTC time discrepancy detected (%1 seconds). Client UTC time %2, server UTC time %3.")
 								 .arg(utcTimeDiscrepancy / 1000)
-								 .arg(clientUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
-								 .arg(serverUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
+					.arg(DateTimeToString::dateTime(clientUtcDateTime, true /*with ms*/))
+					.arg(DateTimeToString::dateTime(serverUtcDateTime, true /*with ms*/)));
 			}
 			else
 			{
@@ -713,8 +713,8 @@ namespace ClientLib
 				auto serverLocalDateTime = QDateTime::fromMSecsSinceEpoch(serverLocalTimeMs, QTimeZone::UTC);
 
 				writeWarning(QString("TimeZone discrepancy detected. Client local time %1, server local time %2.")
-								 .arg(clientLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
-								 .arg(serverLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
+								 .arg(DateTimeToString::dateTime(clientLocalDateTime, true /*with ms*/))
+								 .arg(DateTimeToString::dateTime(serverLocalDateTime, true /*with ms*/)));
 			}
 		}
 

@@ -161,7 +161,7 @@ QVariant TrendPointsModel::data(const QModelIndex& index, int role) const
 				return QString("%1").arg(stateIndex);
 
 			case static_cast<int>(Columns::Time):
-				return stateItem.getTime(m_timeType).toDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz");
+				return DateTimeToString::dateTime(stateItem.getTime(m_timeType).toDateTime(), true /*with ms*/);
 
 			case static_cast<int>(Columns::Value):
 				if (stateItem.isValid() == false)

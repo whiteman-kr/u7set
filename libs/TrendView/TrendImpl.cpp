@@ -1553,7 +1553,7 @@ namespace TrendLib
 
 					// Draw ruler timestamp
 					//
-					QString text = ruler.timeStamp().toDateTime().toString(" hh:mm:ss.zzz ");
+					QString text = " " + DateTimeToString::dateTime(ruler.timeStamp().toDateTime(), true /*with ms*/) + " ";
 					QRectF textRect(x - timeStampBoundSize.width() / 2.0, rulerTextTop, timeStampBoundSize.width(), rulerTextHeight);
 
 					painter->fillRect(textRect, backgroundBrush);

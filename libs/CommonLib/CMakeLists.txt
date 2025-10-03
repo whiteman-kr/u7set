@@ -34,6 +34,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QReadWriteLock>
 	<QReadLocker>
 	<QWriteLocker>
+	<QRegularExpression>
 )
 
 #target_precompile_headers(${TARGET} PUBLIC

@@ -150,17 +150,17 @@ namespace ExtWidgets
 
 		if (type == qMetaTypeId<QDate>())
 		{
-			return value.toDate().toString("dd.MM.yyyy");
+			return DateTimeToString::date(value.toDate());
 		}
 
 		if (type == qMetaTypeId<QTime>())
 		{
-			return value.toTime().toString("hh::mm:ss");
+			return DateTimeToString::time(value.toTime(), false /*with no ms*/);
 		}
 
 		if (type == qMetaTypeId<QDateTime>())
 		{
-			return value.toDateTime().toString("dd.MM.yyyy hh::mm:ss");
+			return DateTimeToString::dateTime(value.toDateTime(), false /*with no ms*/);
 		}
 
 		char numberFormat = p->precision() > maxDecimalPlaces ? 'g' : 'f';
@@ -2050,7 +2050,7 @@ namespace ExtWidgets
 		switch (p->value().userType())
 		{
 		case QMetaType::QDate:
-			m_dateTimeEdit->setDisplayFormat("dd.MM.yyyy");
+			m_dateTimeEdit->setDisplayFormat(DateTimeFormat::date());
 			connect(m_dateTimeEdit,
 					&QDateTimeEdit::dateChanged,
 					this,
@@ -2060,7 +2060,7 @@ namespace ExtWidgets
 					});
 			break;
 		case QMetaType::QTime:
-			m_dateTimeEdit->setDisplayFormat("hh:mm:ss");
+			m_dateTimeEdit->setDisplayFormat(DateTimeFormat::time(false /*with no ms*/));
 			connect(m_dateTimeEdit,
 					&QDateTimeEdit::timeChanged,
 					this,
@@ -2070,7 +2070,7 @@ namespace ExtWidgets
 					});
 			break;
 		case QMetaType::QDateTime:
-			m_dateTimeEdit->setDisplayFormat("dd.MM.yyyy hh:mm:ss");
+			m_dateTimeEdit->setDisplayFormat(DateTimeFormat::dateTime(false /*with no ms*/));
 			connect(m_dateTimeEdit,
 					&QDateTimeEdit::dateTimeChanged,
 					this,

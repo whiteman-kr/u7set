@@ -190,7 +190,7 @@ namespace
 
 			if (reportsPath.contains("default") == true)
 			{
-				reportsPath.replace("default", QString("TestReport_%1").arg(QDateTime::currentDateTime().toString("ddMMyyyy_HHmmss")));
+				reportsPath.replace("default", QString("TestReport_%1").arg(DateTimeToString::fileName(QDateTime::currentDateTime())));
 			}
 
 			auto configData = m_configController.configData();

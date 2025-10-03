@@ -4,6 +4,7 @@
 #include <QTimeZone>
 #include <QMetaType>
 #include <QString>
+#include <QReadWriteLock>
 
 
 // Time literals converts to ms
@@ -166,6 +167,28 @@ inline QString timeToString(const QDateTime& time)
 	}
 	return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 }
+
+
+// Time formats
+// 
+class DateTimeFormat
+{
+public:
+	static QString fileName(const QLocale* locale = &m_systemLocale);
+	static QString dateTime(bool withMilliseconds = false, const QLocale* locale = &m_systemLocale);
+	static QString date(const QLocale* locale = &m_systemLocale);
+	static QString time(bool withMilliseconds = false, const QLocale* locale = &m_systemLocale);
+
+private:
+	// key is a hash of a locale, counted by qHash function with seed equal to useMilliseconds (0 or 1)
+	//
+	inline static QReadWriteLock m_lock;
+	inline static std::unordered_map<size_t, QString> m_dateCache;
+	inline static std::unordered_map<size_t, QString> m_timeCache;
+	inline static std::unordered_map<size_t, QString> m_dateTimeCache;
+
+	inline static const QLocale m_systemLocale = QLocale::system();
+};
 
 // Time to string formatting class
 //
