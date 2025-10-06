@@ -1,10 +1,14 @@
-#include "../OnlineLib/SoftwareSettings.h"
 #include "DiagConfigController.h"
 #include "DiagnosticsAppSettings.h"
 #include "Globals.h"
 
+#include "../OnlineLib/SoftwareSettings.h"
 
-DiagConfigController::DiagConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2, ILogFile* logFile) :
+
+DiagConfigController::DiagConfigController(const SoftwareInfo& softwareInfo,
+										   HostAddressPort address1,
+										   HostAddressPort address2,
+										   ILogFile* logFile) :
 	SchemaClientLib::SchemaClientConfigController{softwareInfo, address1, address2, logFile}
 {
 	qRegisterMetaType<DiagConfigSettings>("DiagConfigSettings");
@@ -12,7 +16,9 @@ DiagConfigController::DiagConfigController(const SoftwareInfo& softwareInfo, Hos
 	return;
 }
 
-bool DiagConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf, const DiagnosticsSettings& settings, const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
+bool DiagConfigController::updateConfiguration(const ClientLib::ConfigurationInfo& conf,
+											   const DiagnosticsSettings& settings,
+											   const std::vector<OnlineLib::BuildFileInfo>& /*files*/)
 {
 	DiagConfigSettings config{};
 
@@ -27,36 +33,34 @@ bool DiagConfigController::updateConfiguration(const ClientLib::ConfigurationInf
 	//--
 	//
 	auto getScriptFunc = [this](const QString& scriptFileName) -> QString
-		{
-			QString parsingError;
-			QByteArray ba;
+	{
+		QString parsingError;
+		QByteArray ba;
 
-			if (bool ok = getFileBlocked(scriptFileName, &ba, &parsingError);
-				ok == true)
-			{
-				return QString{ba};
-			}
-			else
-			{
-				return {};
-			}
-		};
+		if (bool ok = getFileBlocked(scriptFileName, &ba, &parsingError); ok == true)
+		{
+			return QString{ba};
+		}
+		else
+		{
+			return {};
+		}
+	};
 
 	// Get image file
 	//
 	auto getImageFunc = [this](const QString& fileId) -> QPixmap
+	{
+		QPixmap pixmap;
+		QByteArray ba;
+
+		if (bool ok = getFileBlockedById(fileId, &ba, nullptr); ok == true)
 		{
-			QPixmap pixmap;
-			QByteArray ba;
+			pixmap.loadFromData(ba);
+		}
 
-			if (bool ok = getFileBlockedById(fileId, &ba, nullptr);
-				ok == true)
-			{
-				pixmap.loadFromData(ba);
-			}
-
-			return pixmap;
-		};
+		return pixmap;
+	};
 
 	config.globalScript = getScriptFunc("/" + DiagnosticsAppSettings::instance().equipmentId() + "/GlobalScript.js");
 	config.logoImage = getImageFunc(CfgFileId::LOGO);
@@ -84,7 +88,7 @@ bool DiagConfigController::updateConfiguration(const ClientLib::ConfigurationInf
 	{
 		QWriteLocker locker(&m_configurationLock);
 		config.configurationId = s_configurationIdCounter++;
-		m_configuration = config;		// Cannot move config here as it is used later for `emit configurationArrived(config)`
+		m_configuration = config; // Cannot move config here as it is used later for `emit configurationArrived(config)`
 	}
 
 	// Emit signal to inform everybody about new configuration
@@ -97,37 +101,38 @@ bool DiagConfigController::updateConfiguration(const ClientLib::ConfigurationInf
 
 void DiagConfigController::dump(const DiagConfigSettings& config) const
 {
-	qDebug() << "StartSchemaID: " << config.startSchemaId;
+	qDebug() << "DiagConfigController::dump()";
+	qDebug() << "\tStartSchemaID: " << config.startSchemaId;
 
 	// --
 	//
 	m_logFile.writeMessage(tr("DiagDatService(s): %1.").arg(config.diagDataServices.size()));
-	qDebug() << "DiagDatService(s):";
+	qDebug() << "\tDiagDatService(s):";
 
 	for (const auto& service : config.diagDataServices)
 	{
-		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		qDebug() << "\t\tService: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
 		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
 	}
 
 	// --
 	//
 	m_logFile.writeMessage(tr("DiagDataRealTimeService(s): %1.").arg(config.diagDataRealTimeServices.size()));
-	qDebug() << "DiagDataRealTimeService(s):";
+	qDebug() << "\tDiagDataRealTimeService(s):";
 
 	for (const auto& service : config.diagDataRealTimeServices)
 	{
-		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		qDebug() << "\t\tService: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
 		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
 	}
 
 	// --
 	//
 	m_logFile.writeMessage(tr("ArchiveService(s): %1.").arg(config.archiveServices.size()));
-	qDebug() << "ArchiveService(s):";
+	qDebug() << "\tArchiveService(s):";
 	for (const auto& service : config.archiveServices)
 	{
-		qDebug() << "Service: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
+		qDebug() << "\t\tService: id, address: " << service.equipmentId << ", " << service.address.addressPortStr();
 		m_logFile.writeMessage(tr("Service: id, address: %1, %2.").arg(service.equipmentId).arg(service.address.addressPortStr()));
 	}
 

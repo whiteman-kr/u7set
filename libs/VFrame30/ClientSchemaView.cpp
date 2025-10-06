@@ -1,20 +1,18 @@
-#include <VFrame30/ClientSchemaView.h>
 #include <VFrame30/AppSignalController.h>
+#include <VFrame30/ClientSchemaView.h>
 #include <VFrame30/Context.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/PropertyNames.h>
 
-#include <HardwareLib/ScriptEquipment.h>
 #include <HardwareLib/DeviceRoot.h>
+#include <HardwareLib/ScriptEquipment.h>
 
 namespace VFrame30
 {
 	//
 	// ScriptSchemaView
 	//
-	ScriptSchemaView::ScriptSchemaView(ClientSchemaView* clientSchemaView,
-									   ISchemaViewHistory* schemaViewHistory,
-									   QObject* parent) :
+	ScriptSchemaView::ScriptSchemaView(ClientSchemaView* clientSchemaView, ISchemaViewHistory* schemaViewHistory, QObject* parent) :
 		QObject(parent),
 		m_clientSchemaView(clientSchemaView),
 		m_schemaViewHistory(schemaViewHistory)
@@ -270,7 +268,11 @@ namespace VFrame30
 		}
 	}
 
-	int ScriptSchemaView::messageBox(QString text, QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton, QMessageBox::Icon icon, QString details)
+	int ScriptSchemaView::messageBox(QString text,
+									 QMessageBox::StandardButtons buttons,
+									 QMessageBox::StandardButton defaultButton,
+									 QMessageBox::Icon icon,
+									 QString details)
 	{
 		if (m_clientSchemaView->scriptMessageBoxAllowed() == true)
 		{
@@ -398,9 +400,7 @@ namespace VFrame30
 		return;
 	}
 
-	ClientSchemaView::~ClientSchemaView()
-	{
-	}
+	ClientSchemaView::~ClientSchemaView() {}
 
 	void ClientSchemaView::paintEvent(QPaintEvent* paintEvent)
 	{
@@ -442,8 +442,10 @@ namespace VFrame30
 
 		VFrame30::CDrawParam drawParam(&p, this, schema()->gridSize(), schema()->pinGridStep(), schema()->unit());
 
-		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom())); // Is required for drawing highlights on items
-		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));                 // 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
+		drawParam.setControlBarSize(
+			CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), zoom())); // Is required for drawing highlights on items
+		drawParam.setBlinkPhase(
+			static_cast<bool>((QTime::currentTime().msec() / 250) % 2)); // 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
 		drawParam.setInfoMode(m_infoMode);
 
 		drawParam.setHighlightIds(highlightIds());
@@ -473,8 +475,7 @@ namespace VFrame30
 	{
 		// Is this a script timer event?
 		//
-		if (auto timerIt = m_scriptTimers.find(event->timerId());
-			timerIt != m_scriptTimers.end())
+		if (auto timerIt = m_scriptTimers.find(event->timerId()); timerIt != m_scriptTimers.end())
 		{
 			const auto& [qtTimerId, scriptTimerId] = *timerIt;
 
@@ -497,8 +498,7 @@ namespace VFrame30
 
 	void ClientSchemaView::mouseMoveEvent(QMouseEvent* event)
 	{
-		if (event->buttons().testFlag(Qt::LeftButton) == true &&
-			m_leftClickOverItem != nullptr)
+		if (event->buttons().testFlag(Qt::LeftButton) == true && m_leftClickOverItem != nullptr)
 		{
 			QPointF docPoint;
 
@@ -573,9 +573,7 @@ namespace VFrame30
 
 			for (const auto& item : layer->items() | std::views::reverse)
 			{
-				if (item->acceptClick() == true &&
-					item->isIntersectPoint(x, y) == true &&
-					item->clickScript().isEmpty() == false)
+				if (item->acceptClick() == true && item->isIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
 				{
 					// Remember this item
 					//
@@ -628,9 +626,7 @@ namespace VFrame30
 
 				for (const auto& item : layer->items() | std::views::reverse)
 				{
-					if (item == m_leftClickOverItem &&
-						item->acceptClick() == true &&
-						item->isIntersectPoint(x, y) == true &&
+					if (item == m_leftClickOverItem && item->acceptClick() == true && item->isIntersectPoint(x, y) == true &&
 						item->clickScript().isEmpty() == false)
 					{
 						// Run script
@@ -641,15 +637,13 @@ namespace VFrame30
 
 						setScriptMessageBoxAllowed(prev);
 
-						if (item->lastScriptError().isEmpty() == false &&
-							logController() != nullptr)
+						if (item->lastScriptError().isEmpty() == false && logController() != nullptr)
 						{
 							// Report script error to Monitor or TuningClient log
 							//
 							auto l = logController();
-							l->writeWarning(tr("SchemaItem %1, ClickEvent script error: %2")
-												.arg(item->label())
-												.arg(item->lastScriptError()));
+							l->writeWarning(
+								tr("SchemaItem %1, ClickEvent script error: %2").arg(item->label()).arg(item->lastScriptError()));
 						}
 
 						// --
@@ -757,8 +751,8 @@ namespace VFrame30
 			assert(schema()->unit() == SchemaUnit::Display);
 			pageSize = QPageSize(QSize(static_cast<int>(pageWidth), static_cast<int>(pageHeight)));
 
-			pdfWriter.setResolution(72);	// 72 is from enum QPageLayout::Unit help,
-			// QPageLayout::Point	1	1/!!! 72th !!!! of an inch
+			pdfWriter.setResolution(72); // 72 is from enum QPageLayout::Unit help,
+										 // QPageLayout::Point	1	1/!!! 72th !!!! of an inch
 		}
 
 		pdfWriter.setPageSize(pageSize);
@@ -774,8 +768,8 @@ namespace VFrame30
 
 		// Calc size
 		//
-		int widthInPixel = schema()->GetDocumentWidth(pdfWriter.resolution(), 100.0);		// Export 100% zoom
-		int heightInPixel = schema()->GetDocumentHeight(pdfWriter.resolution(), 100.0);		// Export 100% zoom
+		int widthInPixel = schema()->GetDocumentWidth(pdfWriter.resolution(), 100.0);   // Export 100% zoom
+		int heightInPixel = schema()->GetDocumentHeight(pdfWriter.resolution(), 100.0); // Export 100% zoom
 
 		// Clear device
 		//
@@ -784,7 +778,7 @@ namespace VFrame30
 
 		// Ajust QPainter
 		//
-		Ajust(&p, schema()->unit(), 0, 0, 100.0);			// Export 100% zoom
+		Ajust(&p, schema()->unit(), 0, 0, 100.0); // Export 100% zoom
 
 		// Draw Schema
 		//
@@ -822,10 +816,10 @@ namespace VFrame30
 
 		// Calc size
 		//
-		const int resolution = 300;	// Image resolution is 300 dpi
+		const int resolution = 300;                                         // Image resolution is 300 dpi
 
-		int widthInPixel = schema()->GetDocumentWidth(resolution, 100.0);		// Export 100% zoom
-		int heightInPixel = schema()->GetDocumentHeight(resolution, 100.0);		// Export 100% zoom
+		int widthInPixel = schema()->GetDocumentWidth(resolution, 100.0);   // Export 100% zoom
+		int heightInPixel = schema()->GetDocumentHeight(resolution, 100.0); // Export 100% zoom
 
 		// --
 		//
@@ -844,7 +838,7 @@ namespace VFrame30
 
 		// Ajust QPainter
 		//
-		Ajust(&p, schema()->unit(), 0, 0, (double)resolution / image.logicalDpiX() * 100.0);			// Export 100% zoom
+		Ajust(&p, schema()->unit(), 0, 0, (double)resolution / image.logicalDpiX() * 100.0); // Export 100% zoom
 
 		// Draw Schema
 		//
@@ -1009,7 +1003,7 @@ namespace VFrame30
 		m_globalScript = value + QChar::LineFeed;
 		m_jsEngineGlobalsWereCreated = false; // it will make jsEngine() to initialize global script vars again.
 
-		std::ignore = jsEngine(); // jsEngine() prepares global script and calls exec OnConfigurationArrived.
+		std::ignore = jsEngine();             // jsEngine() prepares global script and calls exec OnConfigurationArrived.
 
 		return;
 	}
@@ -1044,8 +1038,7 @@ namespace VFrame30
 
 	bool ClientSchemaView::runScript(QJSValue& evaluatedJs, QString where, bool reportError)
 	{
-		if (evaluatedJs.isUndefined() == true ||
-			evaluatedJs.isError() == true)
+		if (evaluatedJs.isUndefined() == true || evaluatedJs.isError() == true)
 		{
 			return false;
 		}
@@ -1110,7 +1103,10 @@ namespace VFrame30
 		return privateRunGlobalScriptEvent(*engine, functionName, arguments, funcIsOptional);
 	}
 
-	bool ClientSchemaView::privateRunGlobalScriptEvent(QJSEngine& engine, const QString& functionName, const QJSValueList& arguments, bool funcIsOptional)
+	bool ClientSchemaView::privateRunGlobalScriptEvent(QJSEngine& engine,
+													   const QString& functionName,
+													   const QJSValueList& arguments,
+													   bool funcIsOptional)
 	{
 		LogController* log = logController();
 
@@ -1190,13 +1186,14 @@ namespace VFrame30
 
 	bool ClientSchemaView::reEvaluateGlobalScript()
 	{
-		qDebug() << "ClientSchemaView::reEvaluateGlobalScript()";
+		qDebug() << "ClientSchemaView::reEvaluateGlobalScript(), SchemaID: " << (schema() ? schema()->schemaId() : QString("<null>"));
 
 		QJSValue result = m_jsEngine.evaluate(m_globalScript);
 
 		if (result.isError())
 		{
-			QString err = formatScriptError(result); // it will trace error, must not use any message boxes here, it lead to exception on paint device
+			QString err =
+				formatScriptError(result); // it will trace error, must not use any message boxes here, it lead to exception on paint device
 			logController()->writeError(tr("Evaluating GlobalScript error:") + err);
 		}
 

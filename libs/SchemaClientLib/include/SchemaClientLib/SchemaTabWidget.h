@@ -1,10 +1,11 @@
 #pragma once
 
+#include "ClientSchemaManager.h"
+#include <UiLib/TabWidgetEx.h>
 #include <VFrame30/ClientSchemaWidget.h>
 #include <VFrame30/Context.h>
 #include <VFrame30/MonitorSchema.h>
-#include <UiLib/TabWidgetEx.h>
-#include "ClientSchemaManager.h"
+
 #include <QFileDialog>
 
 
@@ -57,7 +58,8 @@ namespace SchemaClientLib
 		// Signals
 		//
 	signals:
-		void signal_tabPageChanged(bool schemaWidgetSelected); // Emitted to enable/disable QActions depend on current tab (schema/schemaList).
+		void signal_tabPageChanged(
+			bool schemaWidgetSelected); // Emitted to enable/disable QActions depend on current tab (schema/schemaList).
 		void signal_actionCloseTabUpdated(bool allowed);
 		void signal_schemaChanged(QString strId);
 		void signal_historyChanged(bool enableBack, bool enableForward);
@@ -68,8 +70,8 @@ namespace SchemaClientLib
 	// or is VFrame30::ClientSchemaWidget.
 	//
 	template<typename T>
-	concept ClientSchemaWidgetConcept = std::is_base_of<VFrame30::ClientSchemaWidget, T>::value ||
-										std::is_same<VFrame30::ClientSchemaWidget, T>::value;
+	concept ClientSchemaWidgetConcept =
+		std::is_base_of<VFrame30::ClientSchemaWidget, T>::value || std::is_same<VFrame30::ClientSchemaWidget, T>::value;
 
 
 	//
@@ -83,17 +85,12 @@ namespace SchemaClientLib
 		using CreateSchemaWidgetFunc = std::function<ClientSchemaWidgetType*(std::shared_ptr<VFrame30::Schema>, QWidget*)>;
 
 	public:
-		SchemaTabWidget(ClientSchemaManager* schemaManager,
-						CreateSchemaWidgetFunc createSchemaWidgetFunc,
-						QWidget* parent);
+		SchemaTabWidget(ClientSchemaManager* schemaManager, CreateSchemaWidgetFunc createSchemaWidgetFunc, QWidget* parent);
 
 	public:
 		void setVisibleTabBar(bool visible);
 
-		ClientSchemaWidgetType* currentTab()
-		{
-			return dynamic_cast<ClientSchemaWidgetType*>(currentWidget());
-		}
+		ClientSchemaWidgetType* currentTab() { return dynamic_cast<ClientSchemaWidgetType*>(currentWidget()); }
 
 	protected:
 		virtual void timerEvent(QTimerEvent* event) override;
@@ -156,8 +153,10 @@ namespace SchemaClientLib
 
 		// Data
 		//
-	private:
+	protected:
 		ClientSchemaManager* m_schemaManager = nullptr;
+
+	private:
 		CreateSchemaWidgetFunc m_createSchemaWidgetFunc;
 
 		QString m_startSchemaId;
@@ -253,6 +252,7 @@ namespace SchemaClientLib
 			{
 				// If schema is not found try to set StartSchemaID
 				//
+				qDebug() << "Schema " << schemaId << " not found, start schema " << startSchemaId() << " will be opened instead";
 				tabSchema = m_schemaManager->schema(startSchemaId(), dummyContext);
 			}
 		}
@@ -289,8 +289,7 @@ namespace SchemaClientLib
 		// so run onShowScript here, after setting view variables(!). Also onShowScript triggers
 		// running onConfigurationArrivedScript
 		//
-		schemaWidget->schema()->onShowEvent(schemaWidget->clientSchemaView()->jsEngine(),
-											schemaWidget->clientSchemaView()->logFile());
+		schemaWidget->schema()->onShowEvent(schemaWidget->clientSchemaView()->jsEngine(), schemaWidget->clientSchemaView()->logFile());
 
 		// --
 		//
@@ -378,11 +377,9 @@ namespace SchemaClientLib
 
 		// Set zoom for new tab
 		//
-		if (auto newTabWidget = dynamic_cast<ClientSchemaWidgetType*>(currentWidget());
-			newTabWidget != nullptr)
+		if (auto newTabWidget = dynamic_cast<ClientSchemaWidgetType*>(currentWidget()); newTabWidget != nullptr)
 		{
-			if (m_zoomMode == VFrame30::ZoomMode::Manual ||
-				m_zoomMode == VFrame30::ZoomMode::FitToScreen)
+			if (m_zoomMode == VFrame30::ZoomMode::Manual || m_zoomMode == VFrame30::ZoomMode::FitToScreen)
 			{
 				newTabWidget->clientSchemaView()->setZoom(0);
 			}
@@ -557,7 +554,9 @@ namespace SchemaClientLib
 			}
 			else
 			{
-				QMessageBox::critical(this, qAppName(), SchemaTabWidgetSignalSlot::tr("Wrong file '%1' format, expected '.png' or '.pdf'!").arg(fileName));
+				QMessageBox::critical(this,
+									  qAppName(),
+									  SchemaTabWidgetSignalSlot::tr("Wrong file '%1' format, expected '.png' or '.pdf'!").arg(fileName));
 				return;
 			}
 		}
@@ -595,7 +594,8 @@ namespace SchemaClientLib
 		{
 			// Hide close button to prevent blink
 			//
-			QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, tabBar());
+			QTabBar::ButtonPosition closeSide =
+				(QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, tabBar());
 			for (int i = 0; i < count(); i++)
 			{
 				QWidget* closeButton = tabBar()->tabButton(i, closeSide);
@@ -652,7 +652,8 @@ namespace SchemaClientLib
 			//
 			tabPage->setSchema(schemaToLoad, tabPage->clientSchemaView()->highlightIds(), true);
 
-			tabPage->clientSchemaView()->deleteControlWidgets(); // deleteControlWidgets after loading new schema, as it will delete old widgets and later they will be created
+			tabPage->clientSchemaView()->deleteControlWidgets(); // deleteControlWidgets after loading new schema, as it will delete old
+																 // widgets and later they will be created
 			tabPage->clientSchemaView()->updateControlWidgets(false);
 
 			tabPage->resetHistory();
@@ -719,8 +720,7 @@ namespace SchemaClientLib
 	template<ClientSchemaWidgetConcept ClientSchemaWidgetType>
 	void SchemaTabWidget<ClientSchemaWidgetType>::slot_schemaChanged(VFrame30::ClientSchemaWidget* tabWidget, VFrame30::Schema* schema)
 	{
-		if (tabWidget == nullptr ||
-			schema == nullptr)
+		if (tabWidget == nullptr || schema == nullptr)
 		{
 			Q_ASSERT(tabWidget);
 			Q_ASSERT(schema);
@@ -748,7 +748,8 @@ namespace SchemaClientLib
 
 		// Show/hide close button for inactive tab bar
 		//
-		QTabBar::ButtonPosition closeSide = (QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, this->tabBar());
+		QTabBar::ButtonPosition closeSide =
+			(QTabBar::ButtonPosition)style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition, 0, this->tabBar());
 
 		for (int i = 0; i < count(); i++)
 		{

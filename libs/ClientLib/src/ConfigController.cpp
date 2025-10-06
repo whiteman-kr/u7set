@@ -371,7 +371,7 @@ namespace ClientLib
 												   SessionParams /*sessionParams*/,
 												   std::shared_ptr<const SoftwareSettings> curSettingsProfile)
 	{
-		qDebug() << Q_FUNC_INFO;
+		qDebug() << "ConfigController::slot_configurationReady()";
 
 		ConfigurationInfo conf{};
 		bool result = true;
