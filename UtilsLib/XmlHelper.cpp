@@ -383,13 +383,13 @@ bool XmlReadHelper::readBoolAttribute(const QString& name, bool* value)
 
 	boolStr = boolStr.trimmed().toLower();
 
-	if (boolStr == "true")
+	if (boolStr == "true" || boolStr == "yes")
 	{
 		*value = true;
 	}
 	else
 	{
-		if (boolStr == "false")
+		if (boolStr == "false" || boolStr == "no")
 		{
 			*value = false;
 		}

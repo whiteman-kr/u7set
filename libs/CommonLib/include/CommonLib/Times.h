@@ -206,10 +206,10 @@ public:
 	static QString fileName(const QDateTime& time, const QLocale* locale = &m_systemLocale);
 	static QString date(const QDate& date, const QLocale* locale = &m_systemLocale);
 
-	static QString timeDuration(const QTime& time);
-	static QString timeDurationMs(const QTime& time);
-	static QString dateTimeDuration(const QDateTime& time);
-	static QString dateTimeDurationMs(const QDateTime& time);
+	static QString timeDuration(qint64 timeStamp);
+	static QString timeDurationMs(qint64 timeStamp);
+	static QString dateTimeDuration(qint64 timeStamp);
+	static QString dateTimeDurationMs(qint64 timeStamp);
 
 
 

@@ -234,7 +234,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			break;
 		case ArchiveColumns::Duration:
 			{
-				QString timeString = "00:00:00.000";
+				QString timeString = DateTimeToString::dateTimeDurationMs(0);
 				for (int prevRow = row - 1; prevRow >= 0; prevRow--)
 				{
 					// Find a previous state of this signal
@@ -253,8 +253,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 							ts.timeStamp *= -1;
 						}
 
-						auto dateTime = ts.toDateTime();
-						timeString = DateTimeToString::dateTimeDurationMs(dateTime);
+						timeString = DateTimeToString::dateTimeDurationMs(ts.timeStamp);
 
 						if (timeNegative == true) 
 						{

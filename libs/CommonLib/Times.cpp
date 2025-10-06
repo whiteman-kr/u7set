@@ -140,7 +140,7 @@ QString DateTimeFormat::time(bool withSeconds, bool withMilliseconds, const QLoc
 	// No data found in cache
 	//
 	QString timeFmt = locale->timeFormat(QLocale::ShortFormat);
-
+	
 	if (withSeconds == false)
 	{
 		timeFmt.remove(QRegularExpression("[:]?s{1,2}"));
@@ -272,49 +272,66 @@ QString DateTimeToString::date(const QDate& date, const QLocale* locale)
 	return locale->toString(date, DateTimeFormat::date(locale));
 }
 
-
-QString DateTimeToString::timeDuration(const QTime& time)
+QString DateTimeToString::timeDuration(qint64 timeStamp)
 {
-	if (time.isNull() == true)
-	{
-		return {"?"};
-	}
-	return time.toString("HHh MMm SSs");
+	int secs = static_cast<int>(timeStamp / 1_sec) % 60;
+	int mins = static_cast<int>(timeStamp / 1_min) % 60;
+	int hours = static_cast<int>(timeStamp / 1_hour);
+
+	return QString::asprintf("%02d:%02d:%02d", hours, mins, secs);
 }
 
-QString DateTimeToString::timeDurationMs(const QTime& time)
+QString DateTimeToString::timeDurationMs(qint64 timeStamp)
 {
-	if (time.isNull() == true)
-	{
-		return {"?"};
-	}
-	return time.toString("HHh MMm SSs ZZZms");
+	int msecs = static_cast<int>(timeStamp % 1000_ms);
+	int secs = static_cast<int>(timeStamp / 1_sec) % 60;
+	int mins = static_cast<int>(timeStamp / 1_min) % 60;
+	int hours = static_cast<int>(timeStamp / 1_hour);
+
+	return QString::asprintf("%02d:%02d:%02d.%03d", hours, mins, secs, msecs);
 }
-QString DateTimeToString::dateTimeDuration(const QDateTime& time)
+
+QString DateTimeToString::dateTimeDuration(qint64 timeStamp)
 {
-	if (time.isNull() == true)
+	int days = static_cast<int>(timeStamp / 1_day) % 24;
+	timeStamp -= days * 1_day;
+	int secs = static_cast<int>(timeStamp / 1_sec) % 60;
+	int mins = static_cast<int>(timeStamp / 1_min) % 60;
+	int hours = static_cast<int>(timeStamp / 1_hour) % 60;
+
+	QString distanceText;
+
+	if (days > 0)
 	{
-		return {"?"};
+		distanceText = QString::asprintf("%1dd, %02d:%02d:%02d", days, hours, mins, secs);
+	}
+	else
+	{
+		distanceText = QString::asprintf("%02d:%02d:%02d", hours, mins, secs);
 	}
 
-	if (time.date().day() == 0)
-	{
-		return time.toString("HHh MMm SSs");
-	}
-
-	return time.toString("DDd, HHh MMm SSs");
+	return distanceText;
 }
-QString DateTimeToString::dateTimeDurationMs(const QDateTime& time)
+
+QString DateTimeToString::dateTimeDurationMs(qint64 timeStamp)
 {
-	if (time.isNull() == true)
+	int days = static_cast<int>(timeStamp / 1_day) % 24;
+	timeStamp -= days * 1_day;
+	int msecs = static_cast<int>(timeStamp % 1000_ms);
+	int secs = static_cast<int>(timeStamp / 1_sec) % 60;
+	int mins = static_cast<int>(timeStamp / 1_min) % 60;
+	int hours = static_cast<int>(timeStamp / 1_hour) % 60;
+
+	QString distanceText;
+
+	if (days > 0)
 	{
-		return {"?"};
+		distanceText = QString::asprintf("%1dd, %02d:%02d:%02d.%03d", days, hours, mins, secs, msecs);
+	}
+	else
+	{
+		distanceText = QString::asprintf("%02d:%02d:%02d.%03d", hours, mins, secs, msecs);
 	}
 
-	if (time.date().day() == 0)
-	{
-		return time.toString("HHh MMm SSs ZZZms");
-	}
-
-	return time.toString("DDd, HHh MMm SSs ZZZms");
+	return distanceText;
 }
