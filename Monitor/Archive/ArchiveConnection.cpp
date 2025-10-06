@@ -129,10 +129,9 @@ void ArchiveConnection::slot_startRequest(ArchiveSource requestData)
 	{
 		slot_cancelRequest();
 	}
-
 	m_logFile.writeMessage(QString("requestData(), startTime %1, endTime %2, timeType %3, removePeriodicRecords %4, appSignals: %5")
-						   .arg(requestData.requestStartTime.toDateTime().toString())
-						   .arg(requestData.requestEndTime.toDateTime().toString())
+							   .arg(DateTimeToString::dateTimeSec(requestData.requestStartTime.toDateTime()))
+							   .arg(DateTimeToString::dateTimeSec(requestData.requestEndTime.toDateTime()))
 						   .arg(E::valueToString(requestData.timeType))
 						   .arg(requestData.removePeriodicRecords)
 						   .arg([](const auto &archSignals) -> QString

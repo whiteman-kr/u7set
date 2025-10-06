@@ -42,7 +42,7 @@ namespace
 	{
 		ReportLib::ReportFont marginFont{"Arial", 10};
 
-		report.addMarginItem({QObject::tr("Generated: %1").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss")),
+		report.addMarginItem({QObject::tr("Generated: %1").arg(DateTimeToString::dateTimeSec(QDateTime::currentDateTime())),
 							  -1,
 							  -1,
 							  {marginFont, Qt::AlignLeft | Qt::AlignTop}});
@@ -797,19 +797,19 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 		{
 		case SignalLogColumns::RecordTime:
 			{
-				return QDateTime::fromMSecsSinceEpoch(rec.recordTime).toString("dd.MM.yyyy hh:mm:ss.zzz");
+				return DateTimeToString::dateTimeMs(QDateTime::fromMSecsSinceEpoch(rec.recordTime));
 			}
 		case SignalLogColumns::SystemTime:
 			{
-				return QDateTime::fromMSecsSinceEpoch(rec.systemTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz");
+				return DateTimeToString::dateTimeMs(QDateTime::fromMSecsSinceEpoch(rec.systemTime, QTimeZone::UTC));
 			}
 		case SignalLogColumns::LocalTime:
 			{
-				return QDateTime::fromMSecsSinceEpoch(rec.localTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz");
+				return DateTimeToString::dateTimeMs(QDateTime::fromMSecsSinceEpoch(rec.localTime, QTimeZone::UTC));
 			}
 		case SignalLogColumns::PlantTime:
 			{
-				return QDateTime::fromMSecsSinceEpoch(rec.plantTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz");
+				return DateTimeToString::dateTimeMs(QDateTime::fromMSecsSinceEpoch(rec.plantTime, QTimeZone::UTC));
 			}
 		case SignalLogColumns::Valid:
 			{

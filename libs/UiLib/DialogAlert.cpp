@@ -135,7 +135,7 @@ namespace UiLib
 		text = text.toHtmlEscaped();
 
 		m_text += tr("<font size=\"4\" color=\"black\">%1</font><font size=\"4\" color=\"red\"> %2</font><br>")
-					  .arg(DateTimeToString::dateTime(time, true /*with ms*/))
+					  .arg(DateTimeToString::dateTimeMs(time))
 					  .arg(text);
 
 		m_textEdit->setHtml(m_text);

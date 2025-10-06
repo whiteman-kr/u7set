@@ -65,7 +65,7 @@ namespace TrendLib
 
 		QTimeEdit* timeEdit = new QTimeEdit(valueTime.time());
 		timeEdit->setTime(valueTime.time()); // Set one date more time to resolve qt bug https://bugreports.qt.io/browse/QTBUG-106075
-		timeEdit->setDisplayFormat("hh:mm:ss");
+		timeEdit->setDisplayFormat(DateTimeFormat::time(false));
 
 		QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
@@ -374,10 +374,8 @@ namespace TrendLib
 		//
 		p.setPen(QPen(Qt::darkGray, 0));
 
-		// QString minTimeText = TimeStamp(m_min).toDateTime().toString(QStringLiteral(" hh:mm:ss [dd.MM.yyyy] "));
+		QString minTimeText = TimeStamp(m_min).toDateTime().toString(" " + DateTimeFormat::time(false) +" [" +DateTimeFormat::date() + "] ");
 		QDateTime minDt = TimeStamp(m_min).toDateTime();
-		QString minTimeText = QStringLiteral(" ") + CUtils::dateTimeToStringTime(minDt, false) + QStringLiteral(" [") +
-							  CUtils::dateTimeToStringDate(minDt) + QStringLiteral("] ");
 
 		QRect minTextRect = sliderRc;
 		minTextRect.moveLeft(0);
@@ -386,11 +384,10 @@ namespace TrendLib
 
 		// Draw max text
 		//
-		// QString maxTimeText = TimeStamp(m_max).toDateTime().toString(QStringLiteral(" hh:mm:ss [dd.MM.yyyy] "));
+		QString maxTimeText =
+			TimeStamp(m_max).toDateTime().toString(" " + DateTimeFormat::time(false) + " [" + DateTimeFormat::date() + "] ");
 		QDateTime maxDt = TimeStamp(m_max).toDateTime();
-		QString maxTimeText = QStringLiteral(" ") + CUtils::dateTimeToStringTime(maxDt, false) + QStringLiteral(" [") +
-							  CUtils::dateTimeToStringDate(maxDt) + QStringLiteral("] ");
-
+	
 		QRect maxTextRect = sliderRc;
 		maxTextRect.moveRight(this->rect().width());
 
@@ -419,7 +416,8 @@ namespace TrendLib
 
 		QDateTime dateTime = TimeStamp(m_value).toDateTime();
 		// QString text = dateTime.toString(QStringLiteral("hh:mm:ss [dd.MM.yyyy]"));
-		QString text = CUtils::dateTimeToStringTime(dateTime, false) + QStringLiteral(" [") + CUtils::dateTimeToStringDate(dateTime) +
+		QString text = DateTimeToString::timeSec(dateTime.time()) + QStringLiteral(" [") +
+					   DateTimeToString::date(dateTime.date()) +
 					   QStringLiteral("]");
 
 		p.drawText(sliderRc, Qt::AlignCenter, text, &sliderRc);

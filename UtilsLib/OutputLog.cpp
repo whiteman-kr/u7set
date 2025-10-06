@@ -62,7 +62,7 @@ QString OutputLogItem::toText() const
 
 	QString result = QString("%1 | %2 | %3 | %4")
 				.arg(m_no, 4, 10, QChar('0'))
-				.arg(DateTimeToString::time(m_time.time(), true /*with ms*/))
+				.arg(DateTimeToString::timeMs(m_time.time()))
 				.arg(level)
 				.arg(m_message);
 
@@ -87,7 +87,7 @@ QString OutputLogItem::toHtml() const
 						 "<font face=\"%1\" size=\"4\" color=black>%4</font>")
 					 .arg(m_htmlFont)
 					 .arg(m_no, 4, 10, QChar('0'))
-					 .arg(DateTimeToString::time(m_time.time(), true /*with ms*/) + "   ")
+					 .arg(DateTimeToString::timeMs(m_time.time()) + "   ")
 					 .arg(m_message);
 		break;
 	case OutputMessageLevel::Success:
@@ -95,7 +95,7 @@ QString OutputLogItem::toHtml() const
 						 "<font face=\"%1\" size=\"4\" color=green>%4</font>")
 					 .arg(m_htmlFont)
 					 .arg(m_no, 4, 10, QChar('0'))
-					 .arg(DateTimeToString::time(m_time.time(), true /*with ms*/) + "   ")
+					 .arg(DateTimeToString::timeMs(m_time.time()) + "   ")
 					 .arg(m_message);
 		break;
 	case OutputMessageLevel::Warning0:
@@ -105,7 +105,7 @@ QString OutputLogItem::toHtml() const
 						 "<font face=\"%1\" size=\"4\" color=#F87217>WRN %4</font>")
 					 .arg(m_htmlFont)
 					 .arg(m_no, 4, 10, QChar('0'))
-					 .arg(DateTimeToString::time(m_time.time(), true /*with ms*/) + "   ")
+					 .arg(DateTimeToString::timeMs(m_time.time()) + "   ")
 					 .arg(m_message);
 		break;
 	case OutputMessageLevel::Error:
@@ -113,7 +113,7 @@ QString OutputLogItem::toHtml() const
 						 "<font face=\"%1\" size=\"4\" color=red>ERR %4</font>")
 					 .arg(m_htmlFont)
 					 .arg(m_no, 4, 10, QChar('0'))
-					 .arg(DateTimeToString::time(m_time.time(), true /*with ms*/) + "   ")
+					 .arg(DateTimeToString::timeMs(m_time.time()) + "   ")
 					 .arg(m_message);
 		break;
 
@@ -157,7 +157,7 @@ QString OutputLogItem::toCsv() const
 
 	result = QString("%1; %2; %3; %4; %5; %6; %7")
 				 .arg(m_no, 4, 10, QChar('0'))
-				 .arg(DateTimeToString::time(m_time.time(), true /*with ms*/))
+				 .arg(DateTimeToString::timeMs(m_time.time()))
 				 .arg(level)
 				 .arg(m_message)
 				 .arg(m_file)

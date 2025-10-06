@@ -155,12 +155,12 @@ namespace ExtWidgets
 
 		if (type == qMetaTypeId<QTime>())
 		{
-			return DateTimeToString::time(value.toTime(), false /*with no ms*/);
+			return DateTimeToString::timeSec(value.toTime());
 		}
 
 		if (type == qMetaTypeId<QDateTime>())
 		{
-			return DateTimeToString::dateTime(value.toDateTime(), false /*with no ms*/);
+			return DateTimeToString::dateTimeSec(value.toDateTime());
 		}
 
 		char numberFormat = p->precision() > maxDecimalPlaces ? 'g' : 'f';

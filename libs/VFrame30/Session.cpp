@@ -68,7 +68,7 @@ namespace VFrame30
 	QString Session::time() const
 	{
 		QTime t = QTime::currentTime();
-		return DateTimeToString::time(t, false /*with no ms*/); // Should seconds be removed???
+		return DateTimeToString::timeMin(t);
 	}
 
 }

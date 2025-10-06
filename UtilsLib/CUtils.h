@@ -88,7 +88,7 @@ public:
 
 		return true;
 	}
-
+	/*
 	static QString dateTimeToStringTime(const QDateTime& dt, bool milliseconds)
 	{
 		QTime tm = dt.time();
@@ -124,7 +124,7 @@ public:
 					.arg(date.year(), 4, 10, QChar('0'));
 
 		return result;
-	}
+	}*/
 };
 
 

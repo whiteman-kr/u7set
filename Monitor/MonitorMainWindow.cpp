@@ -313,7 +313,7 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 			QTime logoutTime(0, 0, 0);
 			logoutTime = logoutTime.addSecs(s);
 
-			m_loginUserTimeoutAction->setText(m_tuningUserManager.userName() + "\n" + logoutTime.toString("hh:mm:ss"));
+			m_loginUserTimeoutAction->setText(m_tuningUserManager.userName() + "\n" + DateTimeToString::timeSec(logoutTime));
 
 			if (s <= 0)
 			{
@@ -1341,8 +1341,8 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 		QMessageBox::critical(this,
 							  qAppName(),
 							  tr("Archive request Start Time (%1) should be earlier than End Time (%2).")
-								  .arg(startTime.toString("dd/MM/yyyy hh:mm:ss"))
-								  .arg(endTime.toString("dd/MM/yyyy hh:mm:ss")));
+								  .arg(DateTimeToString::dateTimeSec(startTime))
+								  .arg(DateTimeToString::dateTimeSec(endTime)));
 		return;
 	}
 

@@ -55,8 +55,8 @@ void ArchiveTcpClient2::cancelRequest()
 void ArchiveTcpClient2::setRequestData(const ArchiveSource& request)
 {
 	m_logFile.writeMessage(QString("requestData(), startTime %1, endTime %2, timeType %3, removePeriodicRecords %4, appSignals: %5")
-							.arg(request.requestStartTime.toDateTime().toString())
-							.arg(request.requestEndTime.toDateTime().toString())
+							.arg(DateTimeToString::dateTimeSec(request.requestStartTime.toDateTime()))
+							 .arg(DateTimeToString::dateTimeSec(request.requestEndTime.toDateTime()))
 							.arg(E::valueToString(request.timeType))
 							.arg(request.removePeriodicRecords)
 							.arg([](const auto& appSignals) -> QString
@@ -266,8 +266,8 @@ void ArchiveTcpClient2::requestStart()
 	m_startRequestTime.start();
 
 	m_logFile.writeMessage(QString("requestStart() sendRequest(ARCHS_GET_APP_SIGNALS_STATES_START), startTime %1, endTime %2, timeStamp %3, removePrioodicRecords %4, appSignals: %5")
-							.arg(m_requestData.startTime.toDateTime().toString())
-							.arg(m_requestData.endTime.toDateTime().toString())
+							.arg(DateTimeToString::dateTimeSec(m_requestData.startTime.toDateTime()))
+							.arg(DateTimeToString::dateTimeSec(m_requestData.endTime.toDateTime()))
 							.arg(E::valueToString(m_requestData.timeType))
 							.arg(m_requestData.removePrioodicRecords)
 							.arg(appSignlList.join(", "))

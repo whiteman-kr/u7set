@@ -254,14 +254,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 						}
 
 						auto dateTime = ts.toDateTime();
-						if (dateTime.daysTo(ts.toDateTime()) > 0)
-						{
-							timeString = dateTime.toString("dd/MM/yyyy HH:mm:ss.zzz");
-						}
-						else
-						{
-							timeString = dateTime.toString("HH:mm:ss.zzz");
-						}
+						timeString = DateTimeToString::dateTimeDurationMs(dateTime);
 
 						if (timeNegative == true) 
 						{
@@ -277,7 +270,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 		case ArchiveColumns::Time:
 			{
 				const TimeStamp& ts = m_cachedSignalState.appState.time(m_timeType);
-				result = ts.toDateTime().toString("dd/MM/yyyy HH:mm:ss.zzz");
+				result = DateTimeToString::dateTimeMs(ts.toDateTime());
 			}
 			break;
 		case ArchiveColumns::Server:
@@ -357,11 +350,11 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 						  .arg(getValueString(m_cachedSignalState.appState, signalParam))
 						  .arg(m_cachedSignalState.appState.m_value)
 						  .arg(QString::number(m_cachedSignalState.appState.m_flags.all, 2))
-						  .arg(m_cachedSignalState.appState.time(m_timeType).toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))
+						  .arg(DateTimeToString::dateTimeMs(m_cachedSignalState.appState.time(m_timeType).toDateTime()))
 						  .arg(E::valueToString<E::TimeType>(m_timeType))
-						  .arg(m_cachedSignalState.appState.time().system.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime: %12\n"
-						  .arg(m_cachedSignalState.appState.time().local.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime +0UTC: %13\n"
-						  .arg(m_cachedSignalState.appState.time().plant.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"PlantTime: %14"
+						  .arg(DateTimeToString::dateTimeMs(m_cachedSignalState.appState.time().system.toDateTime()))			//"ServerTime: %12\n"
+						  .arg(DateTimeToString::dateTimeMs(m_cachedSignalState.appState.time().local.toDateTime()))			//"ServerTime +0UTC: %13\n"
+						  .arg(DateTimeToString::dateTimeMs(m_cachedSignalState.appState.time().plant.toDateTime()))			//"PlantTime: %14"
 						  .arg(m_cachedSignalState.archiveServiceShortenId);
 
 

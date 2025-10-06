@@ -86,7 +86,7 @@ namespace TrendLib
 
 			drawText(painter, drawParam.project(), textRect, drawParam, Qt::AlignLeft | Qt::AlignVCenter);
 
-			QString dateTime = QLocale::system().toString(QDateTime::currentDateTime(), QLocale::ShortFormat);
+			QString dateTime = DateTimeToString::dateTimeSec(QDateTime::currentDateTime());
 			drawText(painter, dateTime, textRect, drawParam, Qt::AlignRight | Qt::AlignVCenter);
 
 #if 0
@@ -283,7 +283,9 @@ namespace TrendLib
 			5_sec,  10_sec, 15_sec, 20_sec,  30_sec,  1_min,   90_sec,   2_min,    5_min,       10_min, 15_min,
 			20_min, 30_min, 1_hour, 2_hours, 3_hours, 6_hours, 12_hours, 24_hours, 24_hours * 7};
 
-		QString estimatedString = (drawParam.duration() < 10_sec) ? "HH:MM:SS.XXX" : "HH:MM:SS";
+		//QString estimatedString =
+		//	(drawParam.duration() < 10_sec) ? DateTimeFormat::time(true /*with ms*/) : DateTimeFormat::time(false /*with no ms*/);
+		QString estimatedString = (drawParam.duration() < 10_sec) ? "HHh MMm SSs XXXms" : "HHh MMm SSs"; 
 		auto estimatedStringSize = calcTextSize(painter, estimatedString, drawParam);
 
 		double minTimeInterval = estimatedStringSize.width() * 1.2;
@@ -396,8 +398,23 @@ namespace TrendLib
 		for (const PosTimePair& p : timeGridPos)
 		{
 			QDateTime dateTime = p.timeStamp.toDateTime();
-			QString timeText = CUtils::dateTimeToStringTime(dateTime, timeGridInterval < 1_sec);
-			QString dateText = CUtils::dateTimeToStringDate(dateTime);
+
+			QTime dtime = dateTime.time();
+
+			//int todo_debug_ms = 1;
+
+			QString timeText;
+			if (timeGridInterval < 1_sec)
+			{
+				timeText = DateTimeToString::timeMs(dtime);
+			}
+			else
+			{
+				timeText = DateTimeToString::timeSec(dtime);
+			}
+
+			//QString timeText1 = CUtils::dateTimeToStringTime(dateTime, timeGridInterval < 1_sec);
+			QString dateText = DateTimeToString::date(dateTime.date());
 
 			QRectF timeTextRect(p.x - 2.0, insideRect.bottom(), 4.0, (laneRect.bottom() - insideRect.bottom()) / 2.0);
 			QRectF dateTextRect(p.x - 2.0, timeTextRect.bottom(), 4.0, (laneRect.bottom() - insideRect.bottom()) / 2.0);
@@ -1553,7 +1570,7 @@ namespace TrendLib
 
 					// Draw ruler timestamp
 					//
-					QString text = " " + DateTimeToString::dateTime(ruler.timeStamp().toDateTime(), true /*with ms*/) + " ";
+					QString text = " " + DateTimeToString::dateTimeMs(ruler.timeStamp().toDateTime()) + " ";
 					QRectF textRect(x - timeStampBoundSize.width() / 2.0, rulerTextTop, timeStampBoundSize.width(), rulerTextHeight);
 
 					painter->fillRect(textRect, backgroundBrush);
@@ -1610,14 +1627,12 @@ namespace TrendLib
 
 					QString distanceText;
 
+					/*distanceText = DateTimeToString::timeMs(TimeStamp(rulersDistance).toTime());
 					if (days > 0)
 					{
-						distanceText = QString::asprintf(" %1dd, %02d:%02d:%02d.%03d ", days, hours, mins, secs, msecs);
-					}
-					else
-					{
-						distanceText = QString::asprintf(" %02d:%02d:%02d.%03d ", hours, mins, secs, msecs);
-					}
+						distanceText = QString::asprintf(" %1dd, ", days) + distanceText;
+					}*/
+					distanceText = QString(" " + DateTimeToString::dateTimeDuration(TimeStamp(rulersDistance).toDateTime()) + " ");
 
 					QSizeF distanceTextBoundSize = calcTextSize(painter, distanceText, drawParam);
 

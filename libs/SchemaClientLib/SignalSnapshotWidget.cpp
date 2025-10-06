@@ -43,7 +43,7 @@ namespace
 
 		report.addMarginItem({
 			QObject::tr("Generated: %1")
-				.arg(DateTimeToString::dateTime(QDateTime::currentDateTime(), false /*with no ms*/)),
+				.arg(DateTimeToString::dateTimeSec(QDateTime::currentDateTime())),
 							  -1,
 							  -1,
 							  {marginFont, Qt::AlignLeft | Qt::AlignTop}});
