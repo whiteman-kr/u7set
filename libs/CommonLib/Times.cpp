@@ -23,7 +23,7 @@ QString DateTimeFormat::dateTime(bool withSeconds, bool withMilliseconds, const 
 	int seed = withSeconds + withMilliseconds;
 	size_t hash = qHash(locale, seed);
 	{
-		QReadLocker rl(&m_lock);
+		QReadLocker rl(&lock());
 		auto it = m_dateTimeCache.find(hash);
 		if (it != m_dateTimeCache.end())
 		{
@@ -88,7 +88,7 @@ QString DateTimeFormat::dateTime(bool withSeconds, bool withMilliseconds, const 
 
 	QString result = dateFmt + " " + timeFmt;
 	{
-		QWriteLocker rl(&m_lock);
+		QWriteLocker rl(&lock());
 		m_dateTimeCache[hash] = result;
 	}
 
@@ -101,7 +101,7 @@ QString DateTimeFormat::date(const QLocale* locale)
 	//
 	size_t hash = qHash(locale);
 	{
-		QReadLocker rl(&m_lock);
+		QReadLocker rl(&lock());
 		auto it = m_dateCache.find(hash);
 		if (it != m_dateCache.end())
 		{
@@ -114,7 +114,7 @@ QString DateTimeFormat::date(const QLocale* locale)
 
 	QString dateFmt = locale->dateFormat(QLocale::ShortFormat);
 	{
-		QWriteLocker rl(&m_lock);
+		QWriteLocker rl(&lock());
 		m_dateCache[hash] = dateFmt;
 	}
 
@@ -129,7 +129,7 @@ QString DateTimeFormat::time(bool withSeconds, bool withMilliseconds, const QLoc
 	size_t hash = qHash(locale, seed);
 
 	{
-		QReadLocker rl(&m_lock);
+		QReadLocker rl(&lock());
 		auto it = m_timeCache.find(hash);
 		if (it != m_timeCache.end())
 		{
@@ -194,7 +194,7 @@ QString DateTimeFormat::time(bool withSeconds, bool withMilliseconds, const QLoc
 	}
 
 	{
-		QWriteLocker rl(&m_lock);
+		QWriteLocker rl(&lock());
 		m_timeCache[hash] = timeFmt;
 	}
 	return timeFmt;

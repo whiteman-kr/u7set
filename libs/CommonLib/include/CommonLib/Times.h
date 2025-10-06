@@ -180,9 +180,15 @@ public:
 	static QString time(bool withSeconds = false, bool withMilliseconds = false, const QLocale* locale = &m_systemLocale);
 
 private:
+	static QReadWriteLock& lock()
+	{
+		static QReadWriteLock m_lock;
+		return m_lock;
+	}
+
+private:
 	// key is a hash of a locale, counted by qHash function with seed equal to useMilliseconds (0 or 1)
 	//
-	inline static QReadWriteLock m_lock;
 	inline static std::unordered_map<size_t, QString> m_dateCache;
 	inline static std::unordered_map<size_t, QString> m_timeCache;
 	inline static std::unordered_map<size_t, QString> m_dateTimeCache;
