@@ -50,13 +50,22 @@ bool DiscretesLog::execQuery(QSqlQuery& q, const QString& qStr)
 	{
 		QSqlError err = q.lastError();
 
-		DEBUG_LOG_ERR(m_log, QString("%1: query '%2' exec ERROR - '%3'").
-							 arg(getWriterReader()).
-							 arg(qStr).arg(err.text()));
+		QString errStr = QString("%1: query '%2' exec ERROR - '%3'").
+						 arg(getWriterReader()).
+						 arg(qStr).arg(err.text());
+
+		DEBUG_LOG_ERR(m_log, errStr);
 
 		Q_ASSERT(false);
 
 		return false;
+	}
+	else
+	{
+		DEBUG_LOG_MSG(m_log, QString("%1: query '%2' executed. RowsAffected = %3").
+							 arg(getWriterReader()).
+							 arg(qStr).arg(q.numRowsAffected()));
+
 	}
 
 	return true;
@@ -169,7 +178,7 @@ void DiscretesLogWriter::registerLogReader(DiscretesLogReader* reader)
 
 	m_readers.insert(reader);
 
-	reader->setLogChanged();
+	reader->setLogChanged(false);
 }
 
 void DiscretesLogWriter::unregisterLogReader(DiscretesLogReader* reader)
@@ -480,7 +489,7 @@ void DiscretesLogWriter::processLogQueue()
 
 	if (notifyReadersFlag == true)
 	{
-		notifyReaders();
+		notifyReaders(false);
 	}
 }
 
@@ -493,25 +502,19 @@ void DiscretesLogWriter::ackLog(const Network::AckDiscretesLogRequest& ackReques
 		return;
 	}
 
-	QString ackSource = QString::fromStdString(ackRequest.acksource());
-	QString ackUser = QString::fromStdString(ackRequest.ackuser());
+	// QString ackSource = QString::fromStdString(ackRequest.acksource());
+	// QString ackUser = QString::fromStdString(ackRequest.ackuser());
+	// qint64 ackTime = QDateTime::currentMSecsSinceEpoch();
+
 	qint64 ackUpToPlantTime = ackRequest.ackuptoplanttime();
 
 	QSqlQuery q(*m_db);
 
-	qint64 ackTime = QDateTime::currentMSecsSinceEpoch();
-
-	m_requestStr = QString("UPDATE DiscretesLog SET ackSource='%1', ackUser='%2', acknowledged=1, ackTime=%3 "
-						   "WHERE plantTime<=%4 and acknowledged=0").arg(ackSource).arg(ackUser).arg(ackTime).arg(ackUpToPlantTime);
+	m_requestStr = QString("DELETE FROM DiscretesLog WHERE plantTime<=%1").arg(ackUpToPlantTime);
 
 	execQuery(q, m_requestStr);
 
-
-	// if (notifyReadersFlag == true)
-	// {
-	// 	notifyReaders();
-	// }
-
+	notifyReaders(true);
 }
 
 void DiscretesLogWriter::deleteLogOldRecords()
@@ -544,7 +547,7 @@ void DiscretesLogWriter::deleteLogOldRecords()
 
 	DEBUG_LOG_MSG(m_log, QString("DiscretesLogWriter: database free pages count - %1").arg(freePagesCount));
 
-	notifyReaders();
+	notifyReaders(true);
 }
 
 qint64 DiscretesLogWriter::getFreePagesCount()
@@ -573,7 +576,7 @@ void DiscretesLogWriter::clearLogQueue()
 	m_logQueue.swap(empty);
 }
 
-void DiscretesLogWriter::notifyReaders()
+void DiscretesLogWriter::notifyReaders(bool logTruncated)
 {
 	m_readersMutex.lock();
 
@@ -581,7 +584,7 @@ void DiscretesLogWriter::notifyReaders()
 	{
 		TEST_PTR_CONTINUE(reader);
 
-		reader->setLogChanged();
+		reader->setLogChanged(logTruncated);
 	}
 
 	m_readersMutex.unlock();
@@ -779,18 +782,33 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 
 	if (q.next() == true)
 	{
-		m_firstRecordID = q.value(0).toLongLong();
-		reply->set_logfirstrecordid(m_firstRecordID);
+		if (q.value(0).isNull() == false)
+		{
+			m_firstRecordID = q.value(0).toLongLong();
+			reply->set_logfirstrecordid(m_firstRecordID);
+		}
+		else
+		{
+			// if table DiscretesLog is empty
+			//
+			execQuery(q, QString("SELECT IFNULL((SELECT seq FROM sqlite_sequence WHERE name='DiscretesLog'), 0) AS seqValue"));
+
+			if (q.next() == true)
+			{
+				m_firstRecordID = q.value(0).toLongLong();
+				reply->set_logfirstrecordid(m_firstRecordID);
+			}
+		}
 	}
 
 	//
 
 	m_logChanged = false;
+	m_logTruncated = false;
 }
 
-void DiscretesLogReader::setLogChanged()
+void DiscretesLogReader::setLogChanged(bool logTruncated)
 {
 	m_logChanged = true;
-
-	qDebug() << "DiscretsLog changed";
+	m_logTruncated = logTruncated;
 }

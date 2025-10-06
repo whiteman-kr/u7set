@@ -48,7 +48,7 @@ public:
 	virtual bool openDatabase() override;
 	void getDiscretesLog(Network::GetDiscretesLogReply* reply);
 
-	void setLogChanged();
+	void setLogChanged(bool logTruncated);
 
 private:
 	CircularLoggerShared m_log;
@@ -56,6 +56,7 @@ private:
 	static inline int m_instance = 0;
 
 	std::atomic<bool> m_logChanged = true;		// true - is important!
+	std::atomic<bool> m_logTruncated = false;
 
 	qint64 m_firstRecordID = 0;
 	qint64 m_lastRecordID = 0;
@@ -94,7 +95,7 @@ private:
 
 	void clearLogQueue();
 
-	void notifyReaders();
+	void notifyReaders(bool logTruncated);
 	void clearReaders();
 
 private:
