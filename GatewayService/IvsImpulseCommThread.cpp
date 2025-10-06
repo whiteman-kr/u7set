@@ -161,8 +161,6 @@ namespace Gateway
 
 	void IvsImpulseCommThreadWorker::sendStateChanges()
 	{
-		QThread* thread = QThread::currentThread();
-
 		IvsImpulseEventsPacket* packet = reinterpret_cast<IvsImpulseEventsPacket*>(m_sendBuffer);
 
 		for(IvsImpulseListInfoShared& li : m_lists)

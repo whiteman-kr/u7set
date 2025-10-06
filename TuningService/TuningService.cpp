@@ -356,9 +356,9 @@ namespace Tuning
 		clientContext->unregisterStateChangesQueue(tcpConnectionID);
 	}
 
-	void TuningServiceWorker::pushSignalStateChange(const TuningSignal::State& state, QThread* thread)
+	void TuningServiceWorker::pushSignalStateChange(const TuningSignal::State& state)
 	{
-		m_clientContextMap.pushSignalStateChange(state, thread);
+		m_clientContextMap.pushSignalStateChange(state);
 	}
 
 	TuningSignalsChangesQueue* TuningServiceWorker::getSignalChangesQueue(const QString& clientEquipmentID,

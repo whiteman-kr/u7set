@@ -112,8 +112,6 @@ void AppDataReceiver::run()
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").
 							arg(appDataReceivingIPStr()));
 
-	m_thisThread = QThread::currentThread();
-
 	StdThreadsGuard stg;
 
 	startProcessingThreads(stg);
@@ -492,7 +490,7 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 			{
 				source->pushRupFrame(sourceIP, serverTime,
 									 isSimFrame, simFrame.rupFrame,
-									 source->cachedAppDataUID(), m_thisThread);
+									 source->cachedAppDataUID());
 
 				requireBufferProcessing(source);
 			}
@@ -619,13 +617,13 @@ void processPackets(AppDataReceiver& receiver, int threadNumber)
 
 	DEBUG_LOG_MSG(log, QString("AppDataProcessingThread #%1 is started").arg(threadNumber));
 
-	QThread* thisThread = QThread::currentThread();
-
 	auto& waitConditionMutex = receiver.m_packetProcessigRequiredMutex;
 	auto& waitCondition = receiver.m_packetProcessingRequiredCondition;
 	auto& requireProcessing = receiver.m_packetProcessingRequired;
 
 	std::unique_lock ul(waitConditionMutex, std::defer_lock);
+
+	const QThread* thisThread = QThread::currentThread();
 
 	while(true)
 	{
@@ -665,11 +663,11 @@ void processPackets(AppDataReceiver& receiver, int threadNumber)
 		{
 			if (requireBufferProcessing == true)
 			{
-				source->parseNextBuffer(thisThread);
+				source->parseNextBuffer();
 			}
 			else
 			{
-				source->invalidateSignals(thisThread);
+				source->invalidateSignals();
 			}
 
 			source->releaseProcessingOwnership(thisThread);

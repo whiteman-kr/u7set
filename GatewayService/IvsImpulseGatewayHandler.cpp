@@ -161,8 +161,6 @@ namespace Gateway
 			}
 		}
 
-		QThread* thread = QThread::currentThread();
-
 		for(IvsImpulseListInfoShared& list : m_lists)
 		{
 			list->stateChangesMutex.lock();

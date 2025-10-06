@@ -201,8 +201,7 @@ void BaseOnlineDataSource::clearParsingBuffers()
 bool BaseOnlineDataSource::pushRupFrame(quint32 sourceIP,
 									qint64 serverTime,
 									bool isSimFrame,
-									Rup::Frame& rupFrame,
-									const QThread* thread)
+									Rup::Frame& rupFrame)
 {
 	Q_UNUSED(sourceIP);
 
@@ -220,7 +219,7 @@ bool BaseOnlineDataSource::pushRupFrame(quint32 sourceIP,
 
 	if (writeBuffer.readyToParsing == true)
 	{
-		if (moveToNextWriteBuffer(thread) == false)
+		if (moveToNextWriteBuffer() == false)
 		{
 			m_lostPacketCount++;
 			return true;
@@ -282,7 +281,7 @@ bool BaseOnlineDataSource::pushRupFrame(quint32 sourceIP,
 
 	if (readyToParsing == true)
 	{
-		moveToNextWriteBuffer(thread);
+		moveToNextWriteBuffer();
 	}
 
 	return readyToParsing;
@@ -332,25 +331,22 @@ bool BaseOnlineDataSource::updateStatistics_500ms(bool oneSecond)
 	return invalidateSignals;
 }
 
-bool BaseOnlineDataSource::parseNextBuffer(const QThread* thread)
+bool BaseOnlineDataSource::parseNextBuffer()
 {
-
-
 //	CHECK RUP FRAMES CRC!!!!
-
+//
 //	crcOk = simFrame.rupFrame.checkCRC64();
-
+//
 //	if (crcOk == false)
 //	{
 //		m_errRupFrameCRC++;
 //	}
 
-
 	int ctr = 0;
 
 	do
 	{
-		if (moveToNextReadBuffer(thread) == false)
+		if (moveToNextReadBuffer() == false)
 		{
 			break;
 		}
@@ -460,7 +456,7 @@ bool BaseOnlineDataSource::parseNextBuffer(const QThread* thread)
 		const char* rupData = readBuffer.rupData();
 		int rupDataSize = readBuffer.rupDataSize();
 
-		parseRupData(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize, thread);
+		parseRupData(m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize);
 
 		ctr++;
 	}
@@ -609,9 +605,9 @@ void BaseOnlineDataSource::clearStatistics()
 	m_lastPacketServerTime = 0;
 }
 
-bool BaseOnlineDataSource::moveToNextWriteBuffer(const QThread* thread)
+bool BaseOnlineDataSource::moveToNextWriteBuffer()
 {
-	SimpleMutexLocker locker(&m_parsingBuffersMutex);
+	SpinLockGuard locker(&m_parsingBuffersMutex);
 
 	m_parsingBuffers[m_writeBufferIndex]->readyToParsing = true;
 
@@ -627,9 +623,9 @@ bool BaseOnlineDataSource::moveToNextWriteBuffer(const QThread* thread)
 	return true;
 }
 
-bool BaseOnlineDataSource::moveToNextReadBuffer(const QThread* thread)
+bool BaseOnlineDataSource::moveToNextReadBuffer()
 {
-	SimpleMutexLocker locker(&m_parsingBuffersMutex);
+	SpinLockGuard locker(&m_parsingBuffersMutex);
 
 	if (m_parsingBuffers[m_readBufferIndex]->readyToParsing == true)
 	{

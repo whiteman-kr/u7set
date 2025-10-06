@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../OnlineLib/CircularLogger.h"
-#include "../UtilsLib/SimpleMutex.h"
+#include "../UtilsLib/SpinLock.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "DynamicAppSignalState.h"
 
@@ -30,7 +30,7 @@ private:
 	DynamicAppSignalStates& m_signalStates;
 	CircularLoggerShared m_log;
 
-	SimpleMutex m_queuesMutex;
+	SpinLock m_queuesMutex;
 
 	// queuePtr => pair<isArchiveQueue, queueDescription>
 	//
@@ -40,7 +40,7 @@ private:
 
 	const int GATEWAY_QUEUES_COUNT = sizeof(quint32);
 
-	SimpleMutex m_gatewayQueuesMutex;
+	SpinLock m_gatewayQueuesMutex;
 
 	struct GatewayQueueHashes
 	{

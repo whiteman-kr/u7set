@@ -45,23 +45,21 @@ public:
 	bool pushRupFrame(quint32 sourceIP,
 					  qint64 serverTime,
 					  bool isSimFrame,
-					  Rup::Frame& rupFrame,
-					  const QThread* thread);
+					  Rup::Frame& rupFrame);
 
 	bool updateStatistics_500ms(bool oneSecond);
 
 	// Functions used by data processing thread
 	//
-	bool parseNextBuffer(const QThread* thread);
+	bool parseNextBuffer();
 
 	virtual bool parseRupData(	const Times& time,
 								bool isSimPacket,
 								quint16 packetNo,
 								const char* rupData,
-								int rupDataSize,
-								const QThread* thread) = 0;
+								int rupDataSize) = 0;
 
-	virtual bool invalidateAllSignals(const QThread* thread) = 0;
+	virtual bool invalidateAllSignals() = 0;
 
 	void checkPlantTime(const Rup::TimeStamp& plantTimeStamp);
 
@@ -113,8 +111,8 @@ public:
 private:
 	void clearStatistics();
 
-	bool moveToNextWriteBuffer(const QThread* thread);
-	bool moveToNextReadBuffer(const QThread* thread);
+	bool moveToNextWriteBuffer();
+	bool moveToNextReadBuffer();
 
 protected:
 	E::LanControllerType m_sourceType = E::LanControllerType::Unknown;
@@ -178,7 +176,7 @@ protected:
 	QueueIndex m_writeBufferIndex = 0;		// modified by RupReceiver only in pushRupFrame
 	QueueIndex m_readBufferIndex = 0;		// modified only by parsing thread
 
-	SimpleMutex m_parsingBuffersMutex;		// locks only while m_writeBufferIndex and m_readBufferIndex modyfied
+	SpinLock m_parsingBuffersMutex;		// locks only while m_writeBufferIndex and m_readBufferIndex modyfied
 
 	// result variables
 
@@ -202,17 +200,16 @@ protected:
 		}
 	}
 
-	void pushSignalState(const SIGNAL_STATE& state, const QThread* thread)
+	void pushSignalState(const SIGNAL_STATE& state)
 	{
-		m_states.push(state, thread);
+		m_states.push(state);
 	}
 
 public:
-	int popStates(SIGNAL_STATE* signalStatesBuffer, int bufferSize, const QThread* thread)
+	int popStates(SIGNAL_STATE* signalStatesBuffer, int bufferSize)
 	{
 		Q_UNUSED(signalStatesBuffer);
 		Q_UNUSED(bufferSize);
-		Q_UNUSED(thread);
 		Q_ASSERT(false);			// to do
 		return 0;
 	}

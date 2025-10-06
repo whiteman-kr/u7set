@@ -20,10 +20,6 @@ private:
 
 	//
 
-	QThread* m_thisThread = nullptr;
-
-	//
-
 	qint64 m_totalFlushedStatesCount = 0;
 	qint64 m_prevFlushedStatesCount = 0;
 	qint64 m_flushTime = 0;

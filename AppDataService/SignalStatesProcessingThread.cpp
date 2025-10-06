@@ -134,8 +134,6 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 	auto& waitCondition = receiver.m_statesProcessingRequiredCondition;
 	auto& requireProcessing = receiver.m_statesProcessingRequired;
 
-	QThread* thisThread = QThread::currentThread();
-
 	SimpleAppSignalStateArchiveFlag state;
 	GatewayAppSignalStateQueueMask gwState;
 	bool haveStateToProcessing = false;
@@ -183,7 +181,7 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 
 			while(ctr > 0)
 			{
-				haveStateToProcessing = sourceToStatesProcessing->getSignalState(&state, thisThread);
+				haveStateToProcessing = sourceToStatesProcessing->getSignalState(&state);
 
 				if (haveStateToProcessing == false)
 				{
@@ -201,13 +199,13 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 						//
 						if (state.sendStateToArchive == true)
 						{
-							queue->push(state.state, thisThread);
+							queue->push(state.state);
 							ctr--;
 						}
 					}
 					else
 					{
-						queue->push(state.state, thisThread);
+						queue->push(state.state);
 						ctr--;
 					}
 				}
@@ -221,7 +219,7 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 
 			while(ctr > 0)
 			{
-				haveStateToProcessing = sourceToStatesProcessing->getGatewaySignalState(&gwState, thisThread);
+				haveStateToProcessing = sourceToStatesProcessing->getGatewaySignalState(&gwState);
 
 				if (haveStateToProcessing == false)
 				{
@@ -239,7 +237,7 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 
 						if (queue != nullptr)
 						{
-							queue->push(gwState, thisThread);
+							queue->push(gwState);
 							ctr--;
 						}
 					}

@@ -195,15 +195,14 @@ namespace OnlineLib
 						  qint64 serverTime,
 						  bool isSimFrame,
 						  Rup::Frame& rupFrame,
-						  quint32 expectedDataUID,
-						  const QThread* thread);
+						  quint32 expectedDataUID);
 
 		bool updateStatistics_500ms(int oneSecond, QString& logStr);
 
 		// Functions used by data processing thread
 		//
-		bool parseNextBuffer(const QThread* thread);
-		virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread);
+		bool parseNextBuffer();
+		virtual bool parseBuffer(ParsingBuffer& readBuffer);
 
 		void timeCorrection(const ParsingBuffer& readBuffer);
 
@@ -251,8 +250,8 @@ namespace OnlineLib
 	private:
 		void clearStatistics();
 
-		bool moveToNextWriteBuffer(const QThread* thread);
-		bool moveToNextReadBuffer(const QThread* thread);
+		bool moveToNextWriteBuffer();
+		bool moveToNextReadBuffer();
 
 	protected:
 		// static information
@@ -313,7 +312,7 @@ namespace OnlineLib
 		QueueIndex m_writeBufferIndex = 0;		// modified by packet Receiver only in pushRupFrame
 		QueueIndex m_readBufferIndex = 0;		// modified only by ProcessingThread
 
-		SimpleMutex m_parsingBuffersMutex;		// locks only while m_writeBufferIndex and m_readBufferIndex modyfied
+		SpinLock m_parsingBuffersMutex;		// locks only while m_writeBufferIndex and m_readBufferIndex modyfied
 
 		// result variables
 

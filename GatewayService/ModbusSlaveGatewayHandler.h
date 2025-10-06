@@ -59,7 +59,7 @@ namespace Gateway
 		int modbusDeviceID() const;
 
 		int getRegistersValues(int regsStartAddr, int regsCount,
-							   Modbus::RegisterValue* destBuffer, int maxRegsCount, QThread* thread);
+							   Modbus::RegisterValue* destBuffer, int maxRegsCount);
 
 		size_t tcpRequestProcessing(MbshProcData& mpd);
 		size_t asciiRequestProcessing(MbshProcData& mpd);
@@ -155,7 +155,7 @@ namespace Gateway
 
 		std::map<Hash, std::list<SignalState>> m_signalsStates;
 
-		SimpleMutex m_regsMutex;
+		SpinLock m_regsMutex;
 		std::vector<Modbus::RegisterValue> m_registers;		// modbus 16-bit registers
 															// values stored in required BE or LE byte order!
 

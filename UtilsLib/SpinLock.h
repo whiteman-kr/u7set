@@ -2,12 +2,12 @@
 
 #include <atomic>
 
-class SimpleMutex
+class SpinLock
 {
-	Q_DISABLE_COPY_MOVE(SimpleMutex)
+	Q_DISABLE_COPY_MOVE(SpinLock)
 
 public:
-	SimpleMutex()
+	SpinLock()
 	{
 	}
 
@@ -23,7 +23,7 @@ private:
 		Q_ASSERT(currentId != 0);
 
 		quintptr owner = m_ownerID.load(std::memory_order_relaxed);
-		Q_ASSERT(owner != currentId);	//	SimpleMutex is not recursive!
+		Q_ASSERT(owner != currentId);	//	SpinLock is not recursive!
 
 		unsigned spin = 0;
 
@@ -40,7 +40,7 @@ private:
 
 			spin++;
 
-			if (spin < 64)
+			if (spin < 128)
 			{
 				_mm_pause();
 				continue;	// short active spin
@@ -90,21 +90,21 @@ private:
 private:
 	std::atomic<quintptr> m_ownerID { 0 };
 
-	friend class SimpleMutexLocker;
+	friend class SpinLockGuard;
 };
 
-class SimpleMutexLocker
+class SpinLockGuard
 {
 public:
-	explicit SimpleMutexLocker(SimpleMutex* mutex) :
+	explicit SpinLockGuard(SpinLock* mutex) :
 		m_mutex(mutex),
-		m_id(SimpleMutex::getCurrentId())
+		m_id(SpinLock::getCurrentId())
 	{
 		Q_ASSERT(m_mutex != nullptr);
 		m_mutex->lock(m_id);
 	}
 
-	SimpleMutexLocker(SimpleMutex* mutex, quintptr id) :
+	SpinLockGuard(SpinLock* mutex, quintptr id) :
 		m_mutex(mutex), m_id(id)
 	{
 		Q_ASSERT(m_mutex != nullptr);
@@ -112,16 +112,16 @@ public:
 		m_mutex->lock(m_id);
 	}
 
-	SimpleMutexLocker(SimpleMutexLocker&& other) noexcept
+	SpinLockGuard(SpinLockGuard&& other) noexcept
 		: m_mutex(other.m_mutex), m_id(other.m_id)
 	{
 		other.m_mutex = nullptr;
 		other.m_id = 0;
 	}
 
-	SimpleMutexLocker(const SimpleMutexLocker&) = delete;
+	SpinLockGuard(const SpinLockGuard&) = delete;
 
-	SimpleMutexLocker& operator=(SimpleMutexLocker&& other) noexcept
+	SpinLockGuard& operator=(SpinLockGuard&& other) noexcept
 	{
 		if (this != &other)
 		{
@@ -134,9 +134,9 @@ public:
 		return *this;
 	}
 
-	SimpleMutexLocker& operator=(const SimpleMutexLocker&) = delete;
+	SpinLockGuard& operator=(const SpinLockGuard&) = delete;
 
-	~SimpleMutexLocker()
+	~SpinLockGuard()
 	{
 		release();
 	}
@@ -153,13 +153,8 @@ private:
 	}
 
 private:
-	SimpleMutex* m_mutex {nullptr};
+	SpinLock* m_mutex {nullptr};
 	quintptr m_id { 0 };
 };
 
-
-// #define AUTO_LOCK_BY_THREAD(simpleMutex, thread) SimpleMutexLocker __simpleMutexLocker(&simpleMutex, thread); Q_UNUSED(__simpleMutexLocker);
-
-#define AUTO_LOCK_BY_CURRENT_THREAD(simpleMutex) SimpleMutexLocker __simpleMutexLocker(&simpleMutex); Q_UNUSED(__simpleMutexLocker);
-
-
+#define AUTO_LOCK_BY_CURRENT_THREAD(simpleMutex) SpinLockGuard s_l_g(&simpleMutex); Q_UNUSED(s_l_g);

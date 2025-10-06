@@ -512,8 +512,7 @@ namespace OnlineLib
 										qint64 serverTime,
 										bool isSimFrame,
 										Rup::Frame& rupFrame,
-										quint32 expectedDataUID,
-										const QThread* thread)
+										quint32 expectedDataUID)
 	{
 		Q_UNUSED(sourceIP);
 
@@ -527,7 +526,7 @@ namespace OnlineLib
 
 		if (m_parsingBuffers[m_writeBufferIndex]->readyToParsing == true)
 		{
-			if (moveToNextWriteBuffer(thread) == false)
+			if (moveToNextWriteBuffer() == false)
 			{
 				m_lostPacketCount++;
 				return;
@@ -590,7 +589,7 @@ namespace OnlineLib
 
 		if (readyToParsing == true)
 		{
-			moveToNextWriteBuffer(thread);
+			moveToNextWriteBuffer();
 		}
 	}
 
@@ -642,18 +641,18 @@ namespace OnlineLib
 		return invalidateSignals;
 	}
 
-	bool DataSourceOnline::parseNextBuffer(const QThread* thread)
+	bool DataSourceOnline::parseNextBuffer()
 	{
 		int ctr = 0;
 
 		do
 		{
-			if (moveToNextReadBuffer(thread) == false)
+			if (moveToNextReadBuffer() == false)
 			{
 				break;
 			}
 
-			parseBuffer(*m_parsingBuffers[m_readBufferIndex], thread);
+			parseBuffer(*m_parsingBuffers[m_readBufferIndex]);
 
 			ctr++;
 		} while (ctr < 50);
@@ -661,11 +660,9 @@ namespace OnlineLib
 		return true;
 	}
 
-	bool DataSourceOnline::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread)
+	bool DataSourceOnline::parseBuffer(ParsingBuffer& readBuffer)
 	{
 		Q_UNUSED(readBuffer);
-		Q_UNUSED(thread);
-
 		return true;
 	}
 
@@ -840,9 +837,9 @@ namespace OnlineLib
 		m_lastPacketServerTime = 0;
 	}
 
-	bool DataSourceOnline::moveToNextWriteBuffer(const QThread* thread)
+	bool DataSourceOnline::moveToNextWriteBuffer()
 	{
-		SimpleMutexLocker locker(&m_parsingBuffersMutex);
+		SpinLockGuard locker(&m_parsingBuffersMutex);
 
 		m_parsingBuffers[m_writeBufferIndex]->readyToParsing = true;
 
@@ -858,9 +855,9 @@ namespace OnlineLib
 		return true;
 	}
 
-	bool DataSourceOnline::moveToNextReadBuffer(const QThread* thread)
+	bool DataSourceOnline::moveToNextReadBuffer()
 	{
-		SimpleMutexLocker locker(&m_parsingBuffersMutex);
+		SpinLockGuard locker(&m_parsingBuffersMutex);
 
 		if (m_parsingBuffers[m_readBufferIndex]->readyToParsing == true)
 		{
