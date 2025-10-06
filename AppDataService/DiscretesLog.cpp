@@ -62,10 +62,9 @@ bool DiscretesLog::execQuery(QSqlQuery& q, const QString& qStr)
 	}
 	else
 	{
-		DEBUG_LOG_MSG(m_log, QString("%1: query '%2' executed. RowsAffected = %3").
-							 arg(getWriterReader()).
-							 arg(qStr).arg(q.numRowsAffected()));
-
+		// DEBUG_LOG_MSG(m_log, QString("%1: query '%2' executed. RowsAffected = %3").
+		// 					 arg(getWriterReader()).
+		// 					 arg(qStr).arg(q.numRowsAffected()));
 	}
 
 	return true;
