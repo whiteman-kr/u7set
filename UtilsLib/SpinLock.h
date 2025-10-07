@@ -2,6 +2,10 @@
 
 #include <atomic>
 
+#if defined(Q_OS_WIN)
+#include <intrin.h>
+#endif
+
 class SpinLock
 {
 	Q_DISABLE_COPY_MOVE(SpinLock)
@@ -42,7 +46,13 @@ private:
 
 			if (spin < 128)
 			{
+#if defined(Q_CC_MSVC)
 				_mm_pause();
+#elif defined(Q_CC_GNU) || defined(Q_CC_CLANG)
+				__builtin_ia32_pause();
+#else
+				asm volatile("pause");
+#endif
 				continue;	// short active spin
 			}
 
