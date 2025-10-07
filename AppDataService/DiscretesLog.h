@@ -70,7 +70,7 @@ public:
 	DiscretesLogWriter();
 	virtual ~DiscretesLogWriter();
 
-	void start(const QString& equipmentID, int logTimeHours, CircularLoggerShared logger);
+	void start(const QString& project, const QString& equipmentID, int logTimeHours, CircularLoggerShared logger);
 	void stop();
 
 	void pushStates(const std::vector<SimpleAppSignalState>& logStates);
@@ -100,6 +100,7 @@ private:
 
 private:
 	int m_logTimeHours = 1;
+	std::atomic_bool m_started = false;
 
 	std::queue<SimpleAppSignalState> m_logQueue;
 	QString m_requestStr;

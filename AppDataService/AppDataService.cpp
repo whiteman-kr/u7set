@@ -557,7 +557,7 @@ void AppDataServiceWorker::applyNewConfiguration()
 	createAndInitSignalStates();
 	buildAcuiredAppSignalIDs();
 
-	m_discretesLogWriter.start(equipmentID(), m_curSettingsProfile.discretesLogHours, logger());
+	m_discretesLogWriter.start(buildInfo().project, equipmentID(), m_curSettingsProfile.discretesLogHours, logger());
 
 	prepareAppDataSources();
 

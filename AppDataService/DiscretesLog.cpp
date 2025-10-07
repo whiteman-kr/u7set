@@ -118,10 +118,12 @@ DiscretesLogWriter::~DiscretesLogWriter()
 {
 }
 
-void DiscretesLogWriter::start(const QString& equipmentID, int logTimeHours, CircularLoggerShared logger)
+void DiscretesLogWriter::start(const QString& project, const QString& equipmentID, int logTimeHours, CircularLoggerShared logger)
 {
+	m_started = false;
+
 	m_databaseName = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-					 QString("/DiscretesLog_%1.sqlite").arg(equipmentID);
+					 QString("/DiscretesLog_%1_%2.sqlite").arg(project).arg(equipmentID);
 
 	m_logTimeHours = std::clamp(logTimeHours, 1, 10 * 24);
 
@@ -132,6 +134,11 @@ void DiscretesLogWriter::start(const QString& equipmentID, int logTimeHours, Cir
 	clearReaders();
 
 	m_thread = std::thread(&DiscretesLogWriter::run, this);
+
+	while(!m_started)
+	{
+		QThread::msleep(5);
+	}
 }
 
 void DiscretesLogWriter::stop()
@@ -211,15 +218,15 @@ void DiscretesLogWriter::run()
 
 	deleteLogOldRecords();
 
-	std::unique_lock ul(m_condVarMutex, std::defer_lock);
+	std::unique_lock ul(m_condVarMutex);
+
+	m_started = true;
 
 	bool logQueueEmpty = false;
 	std::optional<Network::AckDiscretesLogRequest> ackRequest;
 
 	while(true)
 	{
-		ul.lock();
-
 		bool signaled = m_condVar.wait_for(
 							ul,
 							std::chrono::milliseconds(ONE_HOUR_MS),
@@ -265,6 +272,8 @@ void DiscretesLogWriter::run()
 		}
 
 		deleteLogOldRecords();
+
+		ul.lock();
 	}
 
 	closeDatabase();
@@ -386,7 +395,7 @@ bool DiscretesLogWriter::checkAndCreateTables()
 								plantTime INTEGER,
 								systemTime INTEGER,
 								localTime INTEGER,
-								hash INTEGER,
+								hash TEXT,
 								value INTEGER,
 								flags INTEGER,
 
@@ -451,12 +460,12 @@ void DiscretesLogWriter::processLogQueue()
 
 		const SimpleAppSignalState& s = m_logQueue.front();
 
-		m_requestStr.append(QString("(%1, %2, %3, %4, %5, %6, %7)").
+		m_requestStr.append(QString("(%1, %2, %3, %4, '%5', %6, %7)").
 										arg(recordTime).
 										arg(s.plantTime()).
 										arg(s.systemTime()).
 										arg(s.localTime()).
-										arg(s.hash).
+										arg(QString::number(s.hash)).
 										arg(s.value == 0.0 ? 0 : 1).
 										arg(s.flags.all));
 		m_logQueue.pop();
@@ -598,7 +607,6 @@ void DiscretesLogWriter::clearReaders()
 	m_readersMutex.unlock();
 }
 
-
 // ------------------------------------------------------------------------------------------
 //
 // DiscretesLogReader class implementation
@@ -608,9 +616,11 @@ void DiscretesLogWriter::clearReaders()
 DiscretesLogReader::DiscretesLogReader(CircularLoggerShared log) :
 	DiscretesLog(false)
 {
-	setLogger(log);
-
 	m_instance++;
+
+	DEBUG_LOG_MSG(log, QString("DiscretesLogReader_%1 created!").arg(m_instance));
+
+	setLogger(log);
 
 	openDatabase();
 }
@@ -799,6 +809,8 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 			}
 		}
 	}
+
+	qDebug() << "=========== Send Discretes log records" << reply->discreteslogrecord_size();
 
 	//
 

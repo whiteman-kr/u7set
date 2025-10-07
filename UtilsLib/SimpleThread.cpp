@@ -202,7 +202,7 @@ bool SimpleThread::quitAndWait(unsigned long time)
 
 	if (m_started == false)
 	{
-		Q_ASSERT(false);
+		log(QString("%1 NOT started!").arg(m_threadName));
 		return true;
 	}
 
