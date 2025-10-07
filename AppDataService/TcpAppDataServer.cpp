@@ -615,6 +615,8 @@ void TcpAppDataServer::onGetDiscretesLog()
 
 	thread_local Network::GetDiscretesLogReply tl_getDiscretesLogReply;
 
+	tl_getDiscretesLogReply.Clear();
+
 	m_dlReader->getDiscretesLog(&tl_getDiscretesLogReply);
 
 	sendReply(tl_getDiscretesLogReply);
@@ -633,6 +635,8 @@ void TcpAppDataServer::onAckDiscretesLog(const char* requestData, quint32 reques
 	{
 		Q_ASSERT(false);
 	}
+
+	tl_ackDiscretesLogReply.Clear();
 
 	tl_ackDiscretesLogReply.set_acksource(tl_ackDiscretesLogRequest.acksource());
 	tl_ackDiscretesLogReply.set_ackuser(tl_ackDiscretesLogRequest.ackuser());

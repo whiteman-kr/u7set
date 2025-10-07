@@ -504,9 +504,10 @@ message DiscretesLogRecord
 
 message GetDiscretesLogReply
 {
-	optional int32 pendingRecordsCount = 1 [default = 0];
-	optional int64 logFirstRecordID = 2 [default = 0];
-	repeated DiscretesLogRecord discretesLogRecord = 3;
+	optional bool logIsWorkable = 1 [default = false];
+	optional int32 pendingRecordsCount = 2 [default = 0];
+	optional int64 logFirstRecordID = 3 [default = 0];
+	repeated DiscretesLogRecord discretesLogRecord = 4;
 }
 
 message AckDiscretesLogRequest

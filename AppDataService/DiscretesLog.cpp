@@ -618,7 +618,7 @@ DiscretesLogReader::DiscretesLogReader(CircularLoggerShared log) :
 {
 	m_instance++;
 
-	DEBUG_LOG_MSG(log, QString("DiscretesLogReader_%1 created!").arg(m_instance));
+	DEBUG_LOG_MSG(log, QString("DiscretesLogReader_%1 created").arg(m_instance));
 
 	setLogger(log);
 
@@ -685,8 +685,11 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 
 	if (m_dbIsWorkable == false || m_db == nullptr)
 	{
+		reply->set_logisworkable(false);
 		return;
 	}
+
+	reply->set_logisworkable(true);
 
 	static const int MAX_RECORDS_COUNT = 5000;
 
@@ -804,13 +807,11 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 
 			if (q.next() == true)
 			{
-				m_firstRecordID = q.value(0).toLongLong();
+				m_firstRecordID = q.value(0).toLongLong() + 1;
 				reply->set_logfirstrecordid(m_firstRecordID);
 			}
 		}
 	}
-
-	qDebug() << "=========== Send Discretes log records" << reply->discreteslogrecord_size();
 
 	//
 
