@@ -644,7 +644,7 @@ TuningTableView::TuningTableView(const ClientLib::TuningUserManager& userManager
 
 }
 
-bool TuningTableView::editorActive()
+bool TuningTableView::editorActive() const
 {
 	return m_editorActive;
 }

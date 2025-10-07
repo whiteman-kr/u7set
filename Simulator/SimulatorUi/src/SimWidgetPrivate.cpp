@@ -873,8 +873,6 @@ namespace SimUi
 			currentTime = QDateTime::currentDateTime();
 		}
 
-		QLocale locale;
-
 #if 1
 		// IF UNCOMMENTING THIS CODE
 		// and if you want to show milliseconds,
@@ -885,8 +883,8 @@ namespace SimUi
 		// 05/17/2020 15:18:59.335
 
 		QString dateText = QString("%6 %7")
-							   .arg(locale.toString(currentTime.date(), QLocale::FormatType::ShortFormat))
-							   .arg(currentTime.toString(QStringLiteral("hh:mm:ss.zzz")));
+							   .arg(DateTimeToString::date(currentTime.date()))
+							   .arg(DateTimeToString::timeMs(currentTime.time()));
 
 		QString text = tr("%1d %2:%3:%4.%5\n%6")
 						   .arg(days, static_cast<int>(dateText.size() - 14), 10, QChar(' '))
@@ -900,8 +898,8 @@ namespace SimUi
 		// 05/17/2020 15:18:59
 
 		QString dateText = QString("%6 %7")
-							   .arg(locale.toString(currentTime.date(), QLocale::FormatType::ShortFormat))
-							   .arg(currentTime.toString(QStringLiteral("hh:mm:ss")));
+							   .arg(DateTimeToString::date(currentTime.date()))
+							   .arg(DateTimeToString::timeSec(currentTime.time()));
 
 		QString text = tr("%1d %2:%3:%4\n%6")
 						   .arg(days, static_cast<int>(dateText.size()) - 10, 10, QChar(' '))
