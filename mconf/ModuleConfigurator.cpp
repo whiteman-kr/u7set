@@ -245,7 +245,7 @@ ModuleConfigurator::ModuleConfigurator(QWidget* parent) :
 #ifdef U7SET_COMMIT_HASH
 	theLog.writeMessage(tr("Commit SHA: %1").arg(U7SET_COMMIT_HASH));
 	theLog.writeMessage(tr("Branch: %1").arg(U7SET_BRANCH_NAME));
-	theLog.writeMessage(tr("Build Date: %1").arg(U7SET_BUILD_DATE));
+	theLog.writeMessage(tr("Build Date: %1").arg(DateTimeToString::dateTimeSec(TimeStamp(U7SET_BUILD_DATE_SECONDS).toDateTime())));
 #else
 #endif
 

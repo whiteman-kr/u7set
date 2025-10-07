@@ -60,7 +60,7 @@ DialogImportPreset::DialogImportPreset(const Proto::ExportedDevicePreset2& messa
 		m_message->description().has_username() == true ? QString::fromStdString(m_message->description().username()) : tr("Unknown"));
 
 	ui->exportTimeLabel->setText(m_message->description().has_exporttime() == true ?
-									 QDateTime::fromSecsSinceEpoch(m_message->description().exporttime()).toString("dd/MM/yyyy HH:mm:ss") :
+									 DateTimeToString::dateTimeSec(QDateTime::fromSecsSinceEpoch(m_message->description().exporttime())) :
 									 tr("Unknown"));
 }
 

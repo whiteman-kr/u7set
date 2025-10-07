@@ -22,7 +22,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* db, const AppSignal& s, Q
 	{
 		{"Changeset", [](DbChangeset& c) { return c.changeset(); }},
 		{"User", [](DbChangeset& c) { return c.username(); }},
-		{"Date", [](DbChangeset& c) { return c.date().toString("dd MMM yyyy HH:mm:ss"); }},
+		{"Date", [](DbChangeset& c) { return DateTimeToString::dateTimeSec(c.date()); }},
 		{"Comment", [](DbChangeset& c) { return c.comment();}},
 	};
 	// clang-format on
