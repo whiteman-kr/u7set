@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <QtCore/QThread>
 
 #if defined(Q_OS_WIN)
 #include <intrin.h>
@@ -15,21 +16,35 @@ public:
 	{
 	}
 
-	void lock()	{ lock(getCurrentId()); }
-
-	bool tryLock() { return tryLock(getCurrentId()); }
-
-	void unlock() { unlock(getCurrentId()); }
-
-private:
-	void lock(quintptr currentId)
+	~SpinLock() noexcept
 	{
+		// The lock must not be held when the SpinLock object is destroyed.
+		//
+		const quintptr owner = m_ownerID.load(std::memory_order_relaxed);
+
+		if (owner != 0)
+		{
+			qFatal("SpinLock is locked on destruction");
+		}
+	}
+
+	void lock()
+	{
+		quintptr currentId = getCurrentId();
+
 		Q_ASSERT(currentId != 0);
 
 		quintptr owner = m_ownerID.load(std::memory_order_relaxed);
-		Q_ASSERT(owner != currentId);	//	SpinLock is not recursive!
+
+		if (owner == currentId)
+		{
+			qFatal("SpinLock is not recursive");
+		}
 
 		unsigned spin = 0;
+
+		constexpr unsigned SHORT_SPIN_CTR = 128;
+		constexpr unsigned YIELD_SPIN_CTR = 256;
 
 		for (;;)
 		{
@@ -44,19 +59,19 @@ private:
 
 			spin++;
 
-			if (spin < 128)
+			if (spin < SHORT_SPIN_CTR)
 			{
 #if defined(Q_CC_MSVC)
 				_mm_pause();
-#elif defined(Q_CC_GNU) || defined(Q_CC_CLANG)
+#elif (defined(Q_CC_GNU) || defined(Q_CC_CLANG)) && defined(Q_PROCESSOR_X86)
 				__builtin_ia32_pause();
 #else
-				asm volatile("pause");
+				QThread::yieldCurrentThread();
 #endif
 				continue;	// short active spin
 			}
 
-			if (spin < 256)
+			if (spin < YIELD_SPIN_CTR)
 			{
 				QThread::yieldCurrentThread();
 				continue;
@@ -67,29 +82,28 @@ private:
 		}
 	}
 
-	[[nodiscard]] bool tryLock(quintptr currentId)
+	[[nodiscard]] bool tryLock()
 	{
-		Q_ASSERT(currentId != 0);
+		quintptr currentId = getCurrentId();
 
 		quintptr expected = 0;
 
 		return m_ownerID.compare_exchange_strong(expected, currentId,
-												std::memory_order_acquire,
-												std::memory_order_relaxed);
+												 std::memory_order_acquire,
+												 std::memory_order_relaxed);
 	}
 
-	void unlock(quintptr currentId)
+	void unlock()
 	{
-		Q_ASSERT(currentId != 0);
+		quintptr expected = getCurrentId();
 
-		quintptr expected = currentId;
-
-		bool ok = m_ownerID.compare_exchange_strong(
+		if (m_ownerID.compare_exchange_strong(
 			expected, 0,
 			std::memory_order_release,
-			std::memory_order_relaxed);
-
-		Q_ASSERT(ok);		// Unlock from non-owner thread
+			std::memory_order_relaxed) == false)
+		{
+			qFatal("SpinLock::unlock() from non-owner thread");
+		}
 	}
 
 	static inline quintptr getCurrentId()
@@ -99,72 +113,34 @@ private:
 
 private:
 	std::atomic<quintptr> m_ownerID { 0 };
-
-	friend class SpinLockGuard;
 };
 
 class SpinLockGuard
 {
 public:
-	explicit SpinLockGuard(SpinLock* mutex) :
-		m_mutex(mutex),
-		m_id(SpinLock::getCurrentId())
+	explicit SpinLockGuard(SpinLock& spinLock) :
+		m_spinLock(spinLock)
 	{
-		Q_ASSERT(m_mutex != nullptr);
-		m_mutex->lock(m_id);
+		m_spinLock.lock();
 	}
 
-	SpinLockGuard(SpinLock* mutex, quintptr id) :
-		m_mutex(mutex), m_id(id)
-	{
-		Q_ASSERT(m_mutex != nullptr);
-		Q_ASSERT(m_id != 0);
-		m_mutex->lock(m_id);
-	}
-
-	SpinLockGuard(SpinLockGuard&& other) noexcept
-		: m_mutex(other.m_mutex), m_id(other.m_id)
-	{
-		other.m_mutex = nullptr;
-		other.m_id = 0;
-	}
-
+	// No copy or move allowed
 	SpinLockGuard(const SpinLockGuard&) = delete;
-
-	SpinLockGuard& operator=(SpinLockGuard&& other) noexcept
-	{
-		if (this != &other)
-		{
-			release();
-			m_mutex = other.m_mutex;
-			m_id = other.m_id;
-			other.m_mutex = nullptr;
-			other.m_id = 0;
-		}
-		return *this;
-	}
-
 	SpinLockGuard& operator=(const SpinLockGuard&) = delete;
+	SpinLockGuard(SpinLockGuard&&) = delete;
+	SpinLockGuard& operator=(SpinLockGuard&&) = delete;
 
-	~SpinLockGuard()
+	~SpinLockGuard() noexcept
 	{
-		release();
+		m_spinLock.unlock();
 	}
 
 private:
-	void release()
-	{
-		if (m_mutex != nullptr && m_id != 0)
-		{
-			m_mutex->unlock(m_id);
-			m_mutex = nullptr;
-			m_id = 0;
-		}
-	}
-
-private:
-	SpinLock* m_mutex {nullptr};
-	quintptr m_id { 0 };
+	SpinLock& m_spinLock;
 };
 
-#define AUTO_LOCK_BY_CURRENT_THREAD(simpleMutex) SpinLockGuard s_l_g(&simpleMutex); Q_UNUSED(s_l_g);
+#define SLG_CONCAT_IMPL(a, b) a##b
+#define SLG_CONCAT(a, b) SLG_CONCAT_IMPL(a,b)
+
+#define AUTO_LOCK_BY_CURRENT_THREAD(spinLock)  \
+			[[maybe_unused]] SpinLockGuard SLG_CONCAT(slg_, __LINE__)(spinLock)

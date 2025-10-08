@@ -695,7 +695,7 @@ bool FastThreadSafeQueue<T>::pushFromBuffer(T* buffer, int itemsInBuffer)
 		return true;
 	}
 
-	SpinLockGuard locker(&m_mutex);
+	SpinLockGuard locker(m_mutex);
 
 	Q_UNUSED(locker);
 
@@ -748,7 +748,7 @@ bool FastThreadSafeQueue<T>::popToBuffer(T* buffer, int bufferSizeInItems, int* 
 		return false;
 	}
 
-	SpinLockGuard locker(&m_mutex);
+	SpinLockGuard locker(m_mutex);
 
 	assert(m_pushIsBegan == false);
 	assert(m_popIsBegan == false);
@@ -802,7 +802,7 @@ bool FastThreadSafeQueue<T>::popToBuffer(T* buffer, int bufferSizeInItems, int* 
 template <typename T>
 void FastThreadSafeQueue<T>::nonDestructiveResize(int newQueueSize)
 {
-	SpinLockGuard locker(&m_mutex);
+	SpinLockGuard locker(m_mutex);
 
 	assert(m_pushIsBegan == false);
 	assert(m_popIsBegan == false);

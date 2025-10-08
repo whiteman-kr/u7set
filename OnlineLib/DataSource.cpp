@@ -839,7 +839,7 @@ namespace OnlineLib
 
 	bool DataSourceOnline::moveToNextWriteBuffer()
 	{
-		SpinLockGuard locker(&m_parsingBuffersMutex);
+		SpinLockGuard locker(m_parsingBuffersMutex);
 
 		m_parsingBuffers[m_writeBufferIndex]->readyToParsing = true;
 
@@ -857,7 +857,7 @@ namespace OnlineLib
 
 	bool DataSourceOnline::moveToNextReadBuffer()
 	{
-		SpinLockGuard locker(&m_parsingBuffersMutex);
+		SpinLockGuard locker(m_parsingBuffersMutex);
 
 		if (m_parsingBuffers[m_readBufferIndex]->readyToParsing == true)
 		{

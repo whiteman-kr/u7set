@@ -607,7 +607,7 @@ void BaseOnlineDataSource::clearStatistics()
 
 bool BaseOnlineDataSource::moveToNextWriteBuffer()
 {
-	SpinLockGuard locker(&m_parsingBuffersMutex);
+	SpinLockGuard locker(m_parsingBuffersMutex);
 
 	m_parsingBuffers[m_writeBufferIndex]->readyToParsing = true;
 
@@ -625,7 +625,7 @@ bool BaseOnlineDataSource::moveToNextWriteBuffer()
 
 bool BaseOnlineDataSource::moveToNextReadBuffer()
 {
-	SpinLockGuard locker(&m_parsingBuffersMutex);
+	SpinLockGuard locker(m_parsingBuffersMutex);
 
 	if (m_parsingBuffers[m_readBufferIndex]->readyToParsing == true)
 	{

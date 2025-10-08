@@ -27,7 +27,7 @@ namespace Gateway
 
 		bool hasStateChanges()
 		{
-			SpinLockGuard ml(&stateChangesMutex);
+			SpinLockGuard ml(stateChangesMutex);
 			return !stateChangesToRead.empty();
 		}
 	};
