@@ -6,6 +6,7 @@
 #include <ReportLib/ReportObject.h>
 #include <ReportLib/TableViewReportGenerator.h>
 #include <UiLib/ChooseItemsWidget.h>
+#include "../UtilsLib/Ui/UiTools.h"
 
 #include "Globals.h"
 #include "MonitorMainWindow.h"
@@ -159,10 +160,6 @@ namespace
 			}
 			break;
 
-		case SignalLogColumns::Acknowledged:
-			v1 = rec1.acknowledged;
-			v2 = rec2.acknowledged;
-			break;
 		case SignalLogColumns::AckSource:
 			v1 = rec1.ackSource;
 			v2 = rec2.ackSource;
@@ -207,10 +204,6 @@ namespace
 			case SignalLogColumns::Caption:
 				v1 = s1.caption();
 				v2 = s2.caption();
-				break;
-			case SignalLogColumns::Units:
-				v1 = s1.units();
-				v2 = s2.units();
 				break;
 			case SignalLogColumns::Type:
 				if (s1.isDiscrete() == true && s2.isDiscrete() == true)
@@ -433,7 +426,6 @@ SignalLogModel::SignalLogModel(const ClientLib::SignalLog& signalLog,
 	m_columnsNames << QObject::tr("Plant Time");
 
 	m_columnsNames << QObject::tr("Value");
-	m_columnsNames << QObject::tr("Units");
 
 	m_columnsNames << QObject::tr("Valid");
 	m_columnsNames << QObject::tr("StateAvailable");
@@ -442,7 +434,6 @@ SignalLogModel::SignalLogModel(const ClientLib::SignalLog& signalLog,
 	m_columnsNames << QObject::tr("Mismatch");
 	m_columnsNames << QObject::tr("OutOfLimits");
 
-	m_columnsNames << QObject::tr("Acknowledged");
 	m_columnsNames << QObject::tr("AckTime");
 	m_columnsNames << QObject::tr("AckSource");
 	m_columnsNames << QObject::tr("AckUser");
@@ -926,11 +917,6 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 				return s.caption();
 			}
 
-		case SignalLogColumns::Units:
-			{
-				return s.units();
-			}
-
 		case SignalLogColumns::Type:
 			{
 				// An array for translation
@@ -1249,11 +1235,6 @@ SignalLogWidget::SignalLogWidget(ClientLib::SignalLog& signalLog,
 
 	m_settings.restore();
 
-	setAttribute(Qt::WA_DeleteOnClose);
-	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
-
-	setWindowTitle(tr("Signals Log"));
-
 	createControls();
 
 	initRecordsView();
@@ -1419,6 +1400,7 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 	QModelIndexList rows = m_tableView->selectionModel()->selectedRows();
 
 	for (QModelIndex& index : rows)
+	if (index.isValid() == true)
 	{
 		bool found = false;
 
@@ -1450,9 +1432,19 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 				&QAction::triggered,
 				[maxPlantTime, this]()
 				{
+					if (warnAboutAckFiltered() == false) 
+					{
+						return;
+					}
+
 					m_signalLog.sendAckUpTo(maxPlantTime);
 				});
 		m_signalMenu.addAction(action);
+	}
+
+	if (list.isEmpty() == true) 
+	{
+		return;
 	}
 
 	emit signalContextMenu(list, QList<QMenu*>() << &m_signalMenu);
@@ -1661,12 +1653,22 @@ void SignalLogWidget::buttonClearFilterClicked()
 
 void SignalLogWidget::buttonAckAllClicked()
 {
-	if (QMessageBox::warning(this,
-							 qAppName(),
-							 tr("Are you sure you want to acknowledge all signal events?"),
-							 QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+	if (filterIsSet() == true) 
 	{
-		return;
+		if (warnAboutAckFiltered() == false)
+		{
+			return;
+		}
+	}
+	else
+	{
+		if (QMessageBox::warning(this,
+								 qAppName(),
+								 tr("Are you sure you want to acknowledge all signal events?"),
+								 QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+		{
+			return;
+		}
 	}
 
 	auto [records, index] = m_signalLog.getRecords();
@@ -1734,7 +1736,7 @@ void SignalLogWidget::createControls()
 	//
 	{
 		QHBoxLayout* tagsLayout = new QHBoxLayout();
-		tagsLayout->setSpacing(5);
+		tagsLayout->setSpacing(4);
 		tagsLayout->setContentsMargins(0, 0, 0, 0);
 
 		tagsLayout->addWidget(new QLabel(tr("Tags")));
@@ -1753,11 +1755,25 @@ void SignalLogWidget::createControls()
 		filterLayout->addLayout(tagsLayout, row, col++);
 	}
 
+	filterLayout->addWidget(new QWidget(this), row, col++);
+
+	m_clearFilterButton = new QPushButton(tr("Reset Filter"));
+	m_clearFilterButton->setAutoDefault(false);
+	filterLayout->addWidget(m_clearFilterButton, row, col++);
+	connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalLogWidget::buttonClearFilterClicked);
+
+	filterLayout->setSpacing(4);
+
+	filterLayout->setColumnStretch(0, 1);
+	filterLayout->setColumnStretch(1, 0);
+	filterLayout->setColumnStretch(2, 0);
+	filterLayout->setColumnStretch(3, 1);
+	filterLayout->setColumnStretch(4, 1);
+	filterLayout->setColumnStretch(5, 0);
+
 	// Export/Print/Fixate
 
 	QHBoxLayout* exPrintLayout = new QHBoxLayout();
-
-	exPrintLayout->addStretch();
 
 	QPushButton* b = new QPushButton(tr("Export..."));
 	b->setAutoDefault(false);
@@ -1769,12 +1785,9 @@ void SignalLogWidget::createControls()
 	connect(b, &QPushButton::clicked, this, &SignalLogWidget::buttonPrintClicked);
 	exPrintLayout->addWidget(b);
 
-	m_clearFilterButton = new QPushButton(tr("Reset Filter"));
-	m_clearFilterButton->setAutoDefault(false);
-	exPrintLayout->addWidget(m_clearFilterButton);
-	connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalLogWidget::buttonClearFilterClicked);
+	exPrintLayout->addStretch();
 
-	m_ackButton = new QPushButton(tr("Acknowledge All"));
+	m_ackButton = new QPushButton(tr("Ack All"));
 	m_ackButton->setAutoDefault(false);
 	connect(m_ackButton, &QToolButton::clicked, this, &SignalLogWidget::buttonAckAllClicked);
 	exPrintLayout->addWidget(m_ackButton);
@@ -1783,17 +1796,6 @@ void SignalLogWidget::createControls()
 	m_buttonFixate->setAutoDefault(false);
 	m_buttonFixate->setCheckable(true);
 	exPrintLayout->addWidget(m_buttonFixate);
-
-	filterLayout->addLayout(exPrintLayout, row, col++);
-
-	filterLayout->setSpacing(4);
-
-	filterLayout->setColumnStretch(0, 1);
-	filterLayout->setColumnStretch(1, 0);
-	filterLayout->setColumnStretch(2, 0);
-	filterLayout->setColumnStretch(3, 1);
-	filterLayout->setColumnStretch(4, 2);
-	filterLayout->setColumnStretch(5, 0);
 
 	// Table
 
@@ -1806,6 +1808,7 @@ void SignalLogWidget::createControls()
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 
 	mainLayout->addLayout(filterLayout);
+	mainLayout->addLayout(exPrintLayout);
 	mainLayout->addWidget(m_tableView);
 
 	setLayout(mainLayout);
@@ -1973,35 +1976,12 @@ void SignalLogWidget::updateRecords()
 		return;
 	}
 
-	QItemSelectionModel* selectionModel = m_tableView->selectionModel();
-	selectionModel->blockSignals(true);
-
 	bool modelWasEmpty = m_model.rowCount() == 0;
 
 	// Place new data to the model
 	//
 	auto [rec, counter] = m_signalLog.getRecords();
 	m_model.setRecords(rec, counter);
-
-	// Select rows with recordTime bigger than was on dialog show
-	//
-	if (m_model.maxInitialRecordTime() != -1)
-	{
-		int count = m_model.rowCount();
-		for (int i = 0; i < count; i++)
-		{
-			const auto& filteredRec = m_model.filteredRecord(i);
-			if (filteredRec.recordTime > m_model.maxInitialRecordTime())
-			{
-				QModelIndex index = m_tableView->model()->index(i, 0); // Get index for the first column of the row
-				selectionModel->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-			}
-		}
-	}
-
-	selectionModel->blockSignals(false);
-
-	QApplication::processEvents();
 
 	// Scroll to bottom
 	//
@@ -2124,6 +2104,28 @@ void SignalLogWidget::tagsChanged()
 	m_model.setTags(tags);
 }
 
+bool SignalLogWidget::filterIsSet() const 
+{
+	return m_editMask->text().isEmpty() == false || m_editTags->text().isEmpty() == false || m_signalListCombo->currentIndex() > 0;
+}
+
+bool SignalLogWidget::warnAboutAckFiltered()
+{
+	if (filterIsSet() == true)
+	{
+		if (QMessageBox::warning(this,
+								 qAppName(),
+								 tr("Warning!\n\nAn event filter is set. Events that are not displayed will also be "
+									"acknowledged.\n\nAre you sure you want to continue?"),
+								 QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
 
 //
 // SignalLogDialog
@@ -2145,7 +2147,7 @@ SignalLogDialog::SignalLogDialog(ClientLib::SignalLog& signalLog,
 	m_signalLogTagWarning{signalLogTagWarning}
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	setWindowTitle(tr("Signal Log"));
+	setWindowTitle(tr("Signals Log"));
 
 	setMinimumSize(400, 200);
 
@@ -2196,6 +2198,7 @@ SignalLogDialog* SignalLogDialog::createDialog(ClientLib::SignalLog& signalLog,
 	else
 	{
 		s_instance->raise(); // Bring to front
+		UiTools::ensureVisible(s_instance);
 	}
 
 	return s_instance;

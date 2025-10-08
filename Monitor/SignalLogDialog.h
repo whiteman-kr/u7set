@@ -34,7 +34,6 @@ enum class SignalLogColumns
 	PlantTime,
 
 	Value,
-	Units,
 
 	Valid,
 	StateAvailable,
@@ -43,7 +42,6 @@ enum class SignalLogColumns
 	Mismatch,
 	OutOfLimits,
 
-	Acknowledged,
 	AckTime,
 	AckSource,
 	AckUser,
@@ -252,6 +250,9 @@ private:
 
 	void maskChanged(bool addToCompleter);
 	void tagsChanged();
+
+	bool filterIsSet() const;
+	bool warnAboutAckFiltered();
 
 signals:
 	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);

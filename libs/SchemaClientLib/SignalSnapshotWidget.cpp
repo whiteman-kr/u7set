@@ -920,6 +920,18 @@ namespace SchemaClientLib
 			filterLayout->addLayout(tagsLayout, row, col++);
 		}
 
+		filterLayout->addWidget(new QWidget(this), row, col++);
+
+		QHBoxLayout* clearFilterLayout = new QHBoxLayout();
+		clearFilterLayout->addStretch();
+
+		m_clearFilterButton = new QPushButton(tr("Reset Filter"));
+		m_clearFilterButton->setAutoDefault(false);
+		clearFilterLayout->addWidget(m_clearFilterButton);
+		connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalSnapshotWidget::buttonClearFilterClicked);
+
+		filterLayout->addLayout(clearFilterLayout, row, col++);
+
 		filterLayout->setSpacing(4);
 
 		filterLayout->setColumnStretch(0, 0);
@@ -944,11 +956,6 @@ namespace SchemaClientLib
 		exPrintLayout->addWidget(b);
 
 		exPrintLayout->addStretch();
-
-		m_clearFilterButton = new QPushButton(tr("Reset Filter"));
-		m_clearFilterButton->setAutoDefault(false);
-		exPrintLayout->addWidget(m_clearFilterButton);
-		connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalSnapshotWidget::buttonClearFilterClicked);
 
 		m_buttonFixate = new QPushButton(tr("Fixate"));
 		m_buttonFixate->setAutoDefault(false);
