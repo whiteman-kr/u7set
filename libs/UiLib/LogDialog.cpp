@@ -5,6 +5,7 @@
 #include <QProcess>
 #include <QShortcut>
 #include <QScrollBar>
+#include <QDesktopServices>
 
 #include <UiLib/LogDialog.h>
 #include <UiLib/UiTools.h>

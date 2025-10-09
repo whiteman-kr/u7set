@@ -63,6 +63,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QDateTimeEdit>
 	<QDialog>
 	<QDialogButtonBox>
+	<QDesktopServices>
 	<QFile>
 	<QFileDialog>
 	<QFontDialog>
