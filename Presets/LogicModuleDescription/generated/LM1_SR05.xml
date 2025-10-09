@@ -15019,7 +15019,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="1" Size="16" />
@@ -15049,7 +15049,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="2" Size="32" />
@@ -15079,7 +15079,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32" />
@@ -15109,7 +15109,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="LittleEndian" DataFormat="UnsignedInt" OpIndex="1" Size="16" />
@@ -15139,7 +15139,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="LittleEndian" DataFormat="Float" OpIndex="2" Size="32" />
@@ -15169,7 +15169,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="LittleEndian" DataFormat="SignedInt" OpIndex="2" Size="32" />
@@ -15199,7 +15199,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="1" Size="16" />
@@ -15229,7 +15229,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32" />
@@ -15259,7 +15259,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>false</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="2" Size="32" />
@@ -15365,7 +15365,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="1" Size="16" />
@@ -15395,7 +15395,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>false</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32" />
@@ -15425,7 +15425,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="1" Size="16" />

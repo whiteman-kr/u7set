@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR05" DescriptionNumber="5" ConfigurationScriptFile="ConfigScript.js" Version="1.5" xmlns:xi="http://www.w3.org/2001/XInclude">
+<LogicModule Name="LM1_SF41" DescriptionNumber="41" ConfigurationScriptFile="ConfigScript.js" Version="1.9" xmlns:xi="http://www.w3.org/2001/XInclude">
 	<FlashMemory>
-		<AppLogicFrameCount>256</AppLogicFrameCount>
+		<AppLogicFrameCount>512</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
 		<AppLogicFrameSize>1024</AppLogicFrameSize>
 		<AppLogicUartID>257</AppLogicUartID>
 		<AppLogicWriteBitstream>true</AppLogicWriteBitstream>
-		<ConfigFrameCount>256</ConfigFrameCount>
+		<ConfigFrameCount>512</ConfigFrameCount>
 		<ConfigFramePayload>1016</ConfigFramePayload>
 		<ConfigFrameSize>1016</ConfigFrameSize>
 		<ConfigUartID>258</ConfigUartID>
 		<ConfigWriteBitstream>true</ConfigWriteBitstream>
-		<TuningFrameCount>256</TuningFrameCount>
+		<TuningFrameCount>512</TuningFrameCount>
 		<TuningFramePayload>1016</TuningFramePayload>
 		<TuningFrameSize>1024</TuningFrameSize>
 		<TuningUartID>260</TuningUartID>
@@ -22,7 +22,7 @@
 		<SingleConfigUniqueIDOffset>4</SingleConfigUniqueIDOffset>
 	</FlashMemory>
 	<Memory>
-		<CodeMemorySize>98304</CodeMemorySize>
+		<CodeMemorySize>131072</CodeMemorySize>
 		<AppMemorySize>65536</AppMemorySize>
 		<AppDataOffset>57782</AppDataOffset>
 		<AppDataSize>256</AppDataSize>
@@ -45,8 +45,8 @@
 	<LogicUnit>
 		<ClockFrequency>96000000</ClockFrequency>
 		<CycleDuration>5000</CycleDuration>
-		<IDRPhaseTime>500</IDRPhaseTime>
-		<ALPPhaseTime>3500</ALPPhaseTime>
+		<IDRPhaseTime>1000</IDRPhaseTime>
+		<ALPPhaseTime>2500</ALPPhaseTime>
 	</LogicUnit>
 	<OptoInterface>
 		<OptoPortCount>3</OptoPortCount>
@@ -56,13 +56,17 @@
 		<OptoPortDataSize>2560</OptoPortDataSize>
 		<SharedBuffer>false</SharedBuffer>
 	</OptoInterface>
-	<Lan RupVersion="5" FotipVersion="3">
+	<Lan RupVersion="5" FotipVersion="2">
 		<LanController>
-			<Type>TuningAndAppAndDiagData</Type>
+			<Type>Tuning</Type>
+			<Place>1</Place>
+		</LanController>
+		<LanController>
+			<Type>AppAndDiagData</Type>
 			<Place>2</Place>
 		</LanController>
 		<LanController>
-			<Type>TuningAndAppAndDiagData</Type>
+			<Type>AppAndDiagData</Type>
 			<Place>3</Place>
 		</LanController>
 	</Lan>

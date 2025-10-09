@@ -35,6 +35,8 @@ qt_add_library(${TARGET} STATIC
 	SpinLock.h
 	SimpleThread.cpp
 	SimpleThread.h
+	Ui/LogDialog.cpp
+	Ui/LogDialog.h
 	Ui/UiTools.cpp
 	Ui/UiTools.h
 	Ui/WidgetUtils.cpp
@@ -87,6 +89,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QScreen>
 	<QScrollBar>
 	<QSettings>
+	<QSharedMemory>
 	<QShortcut>
 	<QStandardItem>
 	<QStandardItemModel>
