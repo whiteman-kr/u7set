@@ -1,4 +1,8 @@
 #include "SignalLogDialog.h"
+#include "Globals.h"
+#include "MonitorMainWindow.h"
+#include "MonitorSignalInfo.h"
+
 #include "../../AppSignalLib/IAppSignalManager.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "../libs/UiLib/include/UiLib/StandardColors.h"
@@ -6,13 +10,10 @@
 #include <ClientLib/SignalLog.h>
 #include <ReportLib/ReportObject.h>
 #include <ReportLib/TableViewReportGenerator.h>
+#include <SchemaClientLib/DragDropHelper.h>
 #include <UiLib/ChooseItemsWidget.h>
 
-#include "Globals.h"
-#include "MonitorMainWindow.h"
-#include "MonitorSignalInfo.h"
 
-//
 // SignalLogReportGenerator
 //
 namespace
@@ -1151,6 +1152,19 @@ void SignalLogDialogSettings::store()
 
 // SignalLogTableView
 //
+class SignalLogTableView : public QTableView
+{
+protected:
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
+
+private:
+	AppSignalParam m_appSignalParam;
+	QPoint m_dragStartPosition;
+
+	SchemaClientLib::DragDropHelper m_dragDropHelper;
+};
+
 void SignalLogTableView::mousePressEvent(QMouseEvent* event)
 {
 	QTableView::mousePressEvent(event);

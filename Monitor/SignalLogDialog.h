@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../../AppSignalLib/DiscretesLogRecord.h"
-#include <CommonLib/Hash.h>
-#include <SchemaClientLib/DragDropHelper.h>
+
 
 namespace AppSignalLists
 {
@@ -17,6 +16,7 @@ namespace ClientLib
 
 class IAppSignalManager;
 class SignalLogModel;
+class SignalLogTableView;
 
 enum class SignalLogColumns
 {
@@ -183,21 +183,6 @@ struct SignalLogDialogSettings
 	void store();
 };
 
-//
-// SignalLogTableView
-//
-class SignalLogTableView : public QTableView
-{
-protected:
-	virtual void mousePressEvent(QMouseEvent* event) override;
-	virtual void mouseMoveEvent(QMouseEvent* event) override;
-
-private:
-	AppSignalParam m_appSignalParam;
-	QPoint m_dragStartPosition;
-
-	SchemaClientLib::DragDropHelper m_dragDropHelper;
-};
 
 //
 // SignalLogWidget

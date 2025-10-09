@@ -47,8 +47,6 @@ set (MONITOR_SOURCES
 	DevTools/DevToolsSettings.h	
 	DevTools/DevToolsViewVariables.cpp
 	DevTools/DevToolsViewVariables.h
-	DialogColumns.cpp
-	DialogColumns.h
 	DialogSettings.cpp
 	DialogSettings.h
 	Globals.cpp
@@ -103,7 +101,6 @@ endif (MSVC)
 set (MONITOR_FORMS
 	./Archive/DialogChooseArchiveSignals.ui
 	DialogSettings.ui
-	DialogColumns.ui
 )
 
 set(TARGET Monitor)

@@ -7,7 +7,6 @@
 #include <QSettings>
 #include <QVariant>
 
-#include <CommonLib/Hash.h>
 #include "../../UtilsLib/Crc.h"
 
 
