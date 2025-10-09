@@ -1,7 +1,7 @@
 #include "SimProfileEditor.h"
 #include "GlobalMessanger.h"
 
-#include "../../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include <SimulatorLib/SimProfiles.h>
 #include <UiLib/CodeEditor.h>
 

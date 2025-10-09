@@ -3,7 +3,7 @@
 #include "Settings.h"
 #include "AppSettings.h"
 
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include "IdePropertyEditor.h"
 #include "../libs/UiLib/include/UiLib/StandardColors.h"
 

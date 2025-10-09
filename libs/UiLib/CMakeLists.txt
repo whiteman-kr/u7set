@@ -29,6 +29,9 @@ qt_add_library(${TARGET} STATIC
 	./include/UiLib/StandardColors.h
 	./include/UiLib/TabWidgetEx.h
 	./include/UiLib/TagSelectorWidget.h
+	./include/UiLib/LogDialog.h
+	./include/UiLib/UiTools.h
+	./include/UiLib/WidgetUtils.h
 	ChooseItemsWidget.cpp
 	CodeEditor.cpp
 	DialogAbout.cpp
@@ -42,6 +45,9 @@ qt_add_library(${TARGET} STATIC
 	PropertyTableDialog.cpp
 	TabWidgetEx.cpp
 	TagSelectorWidget.cpp
+	LogDialog.cpp
+	UiTools.cpp
+	WidgetUtils.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -68,12 +74,14 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QMessageBox>
 	<QMouseEvent>
 	<QPainter>
+	<QProcess>
 	<QPlainTextEdit>
 	<QTextDocumentFragment>
 	<QProgressDialog>
 	<QPushButton>
 	<QSettings>
 	<QSplitter>
+	<QShortcut>
 	<QTableView>
 	<QTabWidget>
 	<QTextBrowser>

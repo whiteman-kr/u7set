@@ -5,7 +5,7 @@
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 
-#include "../../UtilsLib/LogFile.h"
+#include "../../../UtilsLib/LogFile.h"
 
 namespace Log
 {

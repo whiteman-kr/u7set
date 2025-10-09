@@ -1,7 +1,7 @@
 #include <TestSuiteLib/TestReport.h>
 #include <TestSuiteLib/TestLog.h>
 #include <ReportLib/ReportTemplate.h>
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 
 #include <QApplication>
 #include <QBuffer>

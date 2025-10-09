@@ -12,8 +12,8 @@
 // #include "../VFrame30/Schema.h"
 // #include "../lib/Ui/DialogSignalSearch.h"
 
-#include "../UtilsLib/Ui/UiTools.h"
-#include "../UtilsLib/Ui/LogDialog.h"
+#include <UiLib/UiTools.h>
+#include <UiLib/LogDialog.h>
 #include <UiLib/DialogAbout.h>
 // #include "../lib/Ui/SchemaListWidget.h"
 

@@ -1,5 +1,5 @@
 #include "DialogClientBehavior.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 
 #include <Behavior/ClientBehaviorStorage.h>
 #include <Behavior/MonitorBehavior.h>

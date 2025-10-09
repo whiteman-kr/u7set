@@ -1,8 +1,4 @@
-#ifndef UTILS_LIB_DOMAIN
-#error Do not include this file in the project! Link UtilsLib instead.
-#endif
-
-#include "UiTools.h"
+#include <UiLib/UiTools.h>
 
 #include <QIcon>
 #include <QStyle>

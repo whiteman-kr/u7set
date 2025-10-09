@@ -1,16 +1,14 @@
-#ifndef UTILS_LIB_DOMAIN
-#error Do not include this file in the project! Link UtilsLib instead.
-#endif
-
 #include <QComboBox>
 #include <QLabel>
 #include <QPushButton>
 #include <QDateTimeEdit>
+#include <QProcess>
+#include <QShortcut>
+#include <QScrollBar>
 
-#include "LogDialog.h"
-
-#include "UiTools.h"
-#include "../../libs/UiLib/include/UiLib/StandardColors.h"
+#include <UiLib/LogDialog.h>
+#include <UiLib/UiTools.h>
+#include <UiLib/StandardColors.h>
 
 namespace Log
 {

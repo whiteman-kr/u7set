@@ -1,5 +1,5 @@
 #include <ClientLib/TuningLog.h>
-#include "../UtilsLib/Ui/LogDialog.h"
+#include <UiLib/LogDialog.h>
 
 namespace ClientLib
 {

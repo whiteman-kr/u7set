@@ -1,11 +1,11 @@
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include <ClientLib/ClientTranslator.h>
 #include <ClientLib/TuningUserManager.h>
 #include <TestSuiteLib/TestReport.h>
 #include <UiLib/DialogAbout.h>
 #include <UiLib/TabWidgetEx.h>
-#include "../UtilsLib/Ui/LogDialog.h"
+#include <UiLib/LogDialog.h>
 
 #include "AppConfigSettings.h"
 #include "DialogDataSources.h"

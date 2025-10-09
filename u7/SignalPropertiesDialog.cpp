@@ -1,5 +1,5 @@
 #include <UiLib/PropertyEditor.h>
-#include "../UtilsLib/Ui/WidgetUtils.h"
+#include <UiLib/WidgetUtils.h>
 #include "../UtilsLib/WUtils.h"
 #include "SignalPropertiesDialog.h"
 #include "AppSettings.h"
