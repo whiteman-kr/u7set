@@ -9,6 +9,7 @@
 #include <UiLib/DialogAlert.h>
 #include <UiLib/DialogAbout.h>
 #include "../UtilsLib/LogFile.h"
+#include "../UtilsLib/Ui/LogDialog.h"
 #include "../UtilsLib/Ui/UiTools.h"
 #include "Settings.h"
 #include "DialogSettings.h"
@@ -1245,7 +1246,7 @@ void MainWindow::showStatistics()
 
 void MainWindow::showAppLog()
 {
-	m_logFile.view(this);
+	Log::LogFileDialog::view(m_logFile, this);
 }
 
 void MainWindow::showSignalsLog()

@@ -5,6 +5,7 @@
 #include <TestSuiteLib/TestReport.h>
 #include <UiLib/DialogAbout.h>
 #include <UiLib/TabWidgetEx.h>
+#include "../UtilsLib/Ui/LogDialog.h"
 
 #include "AppConfigSettings.h"
 #include "DialogDataSources.h"
@@ -1143,7 +1144,7 @@ void TestSuiteMainWindow::showDataSources()
 
 void TestSuiteMainWindow::showAppLog()
 {
-	m_appLog.view(this);
+	Log::LogFileDialog::view(m_appLog, this);
 }
 
 void TestSuiteMainWindow::showAboutQt()

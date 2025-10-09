@@ -1,4 +1,5 @@
 #include <ClientLib/TuningLog.h>
+#include "../UtilsLib/Ui/LogDialog.h"
 
 namespace ClientLib
 {
@@ -71,7 +72,7 @@ namespace ClientLib
 		headers.emplace_back(QObject::tr("New Value"));
 		headers.emplace_back(QString());
 
-		m_logFile.view(parent, false /*showType*/, true /*headerVisible*/, headers);
+		Log::LogFileDialog::view(m_logFile, parent, false /*showType*/, true /*headerVisible*/, headers);
 	}
 
 	bool TuningLogStub::write(const AppSignalParam& /*asp*/, const TuningValue& /*oldValue*/, const TuningValue& /*newValue*/)
