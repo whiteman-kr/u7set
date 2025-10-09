@@ -1,12 +1,12 @@
 #include "SignalLogDialog.h"
 #include "../../AppSignalLib/IAppSignalManager.h"
+#include "../UtilsLib/Ui/UiTools.h"
 #include "../libs/UiLib/include/UiLib/StandardColors.h"
 #include <AppSignalLists/SignalList.h>
 #include <ClientLib/SignalLog.h>
 #include <ReportLib/ReportObject.h>
 #include <ReportLib/TableViewReportGenerator.h>
 #include <UiLib/ChooseItemsWidget.h>
-#include "../UtilsLib/Ui/UiTools.h"
 
 #include "Globals.h"
 #include "MonitorMainWindow.h"
@@ -310,7 +310,7 @@ namespace
 
 	private:
 		SignalLogModel* m_model = nullptr;
-		
+
 		QString m_signalLogTagCritical;
 		QString m_signalLogTagWarning;
 	};
@@ -363,7 +363,7 @@ namespace
 				br = QBrush{StandardColors::LogWarningForeground};
 			}
 		}
-		
+
 		option->palette.setColor(QPalette::Text, br.color());
 
 		// Set color for selected item (by default it is displayed by white)
@@ -532,8 +532,8 @@ void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64
 	newKeys.reserve(records.size());
 
 	{
-	// Add records that do not exist in the model
-	//
+		// Add records that do not exist in the model
+		//
 		qsizetype prevRecordsCount = m_filteredRecords.size();
 
 		for (const auto& rec : records)
@@ -630,7 +630,7 @@ void SignalLogModel::fillRecords(bool resetSelection)
 
 	// Fill records
 	//
-	for (const auto& [key, rec]: m_records)
+	for (const auto& [key, rec] : m_records)
 	{
 		if (m_initMaxInitialRecordTime == true && rec.recordTime > m_maxInitialRecordTime)
 		{
@@ -985,7 +985,7 @@ QVariant SignalLogModel::headerData(int section, Qt::Orientation orientation, in
 }
 
 bool SignalLogModel::filterRecord(const DiscretesLogRecord& rec) const
-{ 
+{
 	// Filter by signal list
 	//
 	if (m_appSignalListSet != nullptr && m_appSignallistID.isEmpty() == false && m_appSignalListHashes.contains(rec.signalHash) == false)
@@ -1210,7 +1210,6 @@ SignalLogWidget::SignalLogWidget(ClientLib::SignalLog& signalLog,
 	m_model(m_signalLog, m_appSignalManager, m_appSignalListSet, this),
 	m_signalLogTagCritical(signalLogTagCritical),
 	m_signalLogTagWarning(signalLogTagWarning)
-	
 {
 	if (m_appSignalManager == nullptr)
 	{
@@ -1400,39 +1399,40 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 	QModelIndexList rows = m_tableView->selectionModel()->selectedRows();
 
 	for (QModelIndex& index : rows)
-	if (index.isValid() == true)
+		if (index.isValid() == true)
+		{
+			bool found = false;
+
+			AppSignalParam appSignalParam = m_model.signalParam(index.row(), &found);
+			if (found == false)
+			{
+				continue;
+			}
+
+			const auto& rec = m_model.filteredRecord(index.row());
+			if (rec.acknowledged == false && rec.plantTime > maxPlantTime)
+			{
+				maxPlantTime = rec.plantTime;
+			}
+
+			const auto& appSignalID = appSignalParam.appSignalId();
+			if (list.contains(appSignalID) == false)
+			{
+				list << appSignalID;
+			}
+		}
+
+	if (maxPlantTime != 0)
 	{
-		bool found = false;
-
-		AppSignalParam appSignalParam = m_model.signalParam(index.row(), &found);
-		if (found == false) 
-		{
-			continue;
-		}
-
-		const auto& rec = m_model.filteredRecord(index.row());
-		if (rec.acknowledged == false && rec.plantTime > maxPlantTime) 
-		{
-			maxPlantTime = rec.plantTime;
-		}
-
-		const auto& appSignalID = appSignalParam.appSignalId();
-		if (list.contains(appSignalID) == false)
-		{
-			list << appSignalID;
-		}
-	}
-
-	if (maxPlantTime != 0) 
-	{
-		QAction* action = new QAction(
-			"Acknowledge up to " + QDateTime::fromMSecsSinceEpoch(maxPlantTime.timeStamp, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"),
-			&m_signalMenu);
+		QAction* action =
+			new QAction("Acknowledge up to " +
+							QDateTime::fromMSecsSinceEpoch(maxPlantTime.timeStamp, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"),
+						&m_signalMenu);
 		connect(action,
 				&QAction::triggered,
 				[maxPlantTime, this]()
 				{
-					if (warnAboutAckFiltered() == false) 
+					if (warnAboutAckFiltered() == false)
 					{
 						return;
 					}
@@ -1442,7 +1442,7 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 		m_signalMenu.addAction(action);
 	}
 
-	if (list.isEmpty() == true) 
+	if (list.isEmpty() == true)
 	{
 		return;
 	}
@@ -1653,7 +1653,7 @@ void SignalLogWidget::buttonClearFilterClicked()
 
 void SignalLogWidget::buttonAckAllClicked()
 {
-	if (filterIsSet() == true) 
+	if (filterIsSet() == true)
 	{
 		if (warnAboutAckFiltered() == false)
 		{
@@ -1672,11 +1672,11 @@ void SignalLogWidget::buttonAckAllClicked()
 	}
 
 	auto [records, index] = m_signalLog.getRecords();
-	
+
 	int count = static_cast<int>(records.size());
-	for (int i = count - 1; i >= 0; i--) 
+	for (int i = count - 1; i >= 0; i--)
 	{
-		if (records[i].acknowledged == false) 
+		if (records[i].acknowledged == false)
 		{
 			m_signalLog.sendAckUpTo(records[i].plantTime);
 			break;
@@ -1802,7 +1802,7 @@ void SignalLogWidget::createControls()
 	m_tableView = new SignalLogTableView();
 	connect(m_tableView, &QTableView::doubleClicked, this, &SignalLogWidget::tableViewDoubleClicked);
 	m_tableView->setItemDelegate(new LogSelectionControlDelegate(this, &m_model, m_signalLogTagCritical, m_signalLogTagWarning));
-	
+
 	// Main layout
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
@@ -2104,7 +2104,7 @@ void SignalLogWidget::tagsChanged()
 	m_model.setTags(tags);
 }
 
-bool SignalLogWidget::filterIsSet() const 
+bool SignalLogWidget::filterIsSet() const
 {
 	return m_editMask->text().isEmpty() == false || m_editTags->text().isEmpty() == false || m_signalListCombo->currentIndex() > 0;
 }
