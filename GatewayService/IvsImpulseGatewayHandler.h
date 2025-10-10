@@ -20,14 +20,14 @@ namespace Gateway
 		std::map<Hash, std::vector<int>> hashToListIndexes;		// Hash(appSignalID) => indexes in signal list
 																// vector is required if same signal repeated in list several times
 
-		SimpleMutex stateChangesMutex;
+		SpinLock stateChangesMutex;
 
 		std::vector<GatewayAppSignalState> stateChangesToRead;
 		std::vector<GatewayAppSignalState> stateChangesToWrite;
 
 		bool hasStateChanges()
 		{
-			SimpleMutexLocker ml(&stateChangesMutex);
+			SpinLockGuard ml(stateChangesMutex);
 			return !stateChangesToRead.empty();
 		}
 	};

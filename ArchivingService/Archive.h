@@ -84,7 +84,7 @@ public:
 	qint64 getSavedDataSizePerMin();
 	qint64 getDiskFreeSpace() const;
 
-	bool shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* thread);
+	bool shutdown(ArchFileRecord* buffer, int bufferSize);
 
 	// flushing controlling functions (public)
 

@@ -28,7 +28,6 @@ namespace Tuning
 
 	void TcpTuningServer::onServerThreadStarted()
 	{
-		m_thread = QThread::currentThread();
 	}
 
 	void TcpTuningServer::onServerThreadFinished()
@@ -337,7 +336,7 @@ namespace Tuning
 
 			if (queue != nullptr)
 			{
-				m_tuningSignalsReadReply.set_pendingsignalsstatechanges(queue->size(m_thread));
+				m_tuningSignalsReadReply.set_pendingsignalsstatechanges(queue->size());
 			}
 			else
 			{
@@ -385,20 +384,20 @@ namespace Tuning
 
 		int count = 0;
 
-		while(queue->isEmpty(m_thread) == false && count < 10000)
+		while(queue->isEmpty() == false && count < 10000)
 		{
 			Network::TuningSignalState* protoState = m_getStateChangesReply.add_tuningsignalstate();
 
-			TuningSignal::State* state = queue->beginPop(m_thread);
+			TuningSignal::State* state = queue->beginPop();
 
 			state->saveToProto(protoState);
 
-			queue->completePop(m_thread);
+			queue->completePop();
 
 			count++;
 		}
 
-		m_getStateChangesReply.set_pendingsignalsstatechanges(queue->size(m_thread));
+		m_getStateChangesReply.set_pendingsignalsstatechanges(queue->size());
 		m_getStateChangesReply.set_error(TO_INT(E::NetworkError::Success));
 
 		sendReply(m_getStateChangesReply);

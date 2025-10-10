@@ -15,7 +15,7 @@ namespace RtTrends
 		SignalStatesQueue(Hash signalHash, int queueSize);
 
 		Hash signalHash() const { return m_signalHash; }
-		void push(const SimpleAppSignalState& state, const QThread* thread);
+		void push(const SimpleAppSignalState& state);
 
 		FastThreadSafeQueue<SimpleAppSignalState>& clientQueue() { return m_clientQueue; }
 
@@ -39,7 +39,7 @@ namespace RtTrends
 		bool appendSignal(Hash signalHash);
 		bool deleteSignal(Hash signalHash);
 
-		void pushSignalState(Hash signalHash, const SimpleAppSignalState& state, const QThread* thread);
+		void pushSignalState(Hash signalHash, const SimpleAppSignalState& state);
 
 		void getTrackedSignalHashes(QVector<Hash>* hashes);
 

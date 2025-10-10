@@ -33,8 +33,7 @@ public:
 			   bool flushAnyway,
 			   int minQueueSizeForFlushing,
 			   ArchFileRecord* buffer,
-			   int bufferSize,
-			   const QThread* thread);
+			   int bufferSize);
 
 	void setRequiredImmediatelyFlushing(bool b) { m_requiredImmediatelyFlushing.store(b); }
 	bool isRequiredImmediatelyFlushing() const { return m_requiredImmediatelyFlushing.load(); }
@@ -55,8 +54,7 @@ public:
 	void shutdown(qint64 curPartition,
 				  qint64* totalFlushedStatesCount,
 				  ArchFileRecord* buffer,
-				  int bufferSize,
-				  const QThread* thread);
+				  int bufferSize);
 
 	bool maintenance(qint64 currentPartition,
 					 qint64 msShortTermPeriod,
@@ -88,7 +86,7 @@ private:
 
 	QString getPartitionFileName(const ArchFilePartition::Info& pi);
 
-	void controlQueueSizeBeforePush(const QThread* thread);
+	void controlQueueSizeBeforePush();
 
 private:
 	CircularLoggerShared m_log;

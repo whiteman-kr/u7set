@@ -20,10 +20,9 @@ public:
 								bool isSimPacket,
 								quint16 packetNo,
 								const char* rupData,
-								int rupDataSize,
-								const QThread* thread) override;
+								int rupDataSize) override;
 
-	virtual bool invalidateAllSignals(const QThread* thread) override;
+	virtual bool invalidateAllSignals() override;
 
 	bool init(const std::map<Hash, Hardware::DiagSignalType>& diagSignalTypes,
 			  const ::Network::AcquiredDiagSignalsAndObjects& diagSignalsAndObjects);

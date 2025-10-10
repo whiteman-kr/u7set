@@ -6,7 +6,7 @@
 
 #include "../AppSignalLib/DiscretesLogRecord.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
-#include "../UtilsLib/SimpleMutex.h"
+#include "../UtilsLib/SpinLock.h"
 #include "../OnlineLib/CircularLogger.h"
 
 class QSqlDatabase;
@@ -97,7 +97,7 @@ private:
 private:
 	int m_logTimeHours = 1;
 
-	SimpleMutex m_logQueueMutex;
+	SpinLock m_logQueueMutex;
 	std::queue<SimpleAppSignalState> m_logQueue;
 	QString m_requestStr;
 
@@ -115,6 +115,6 @@ private:
 	qint64 m_deleteLastTime = 0;
 
 	//
-	SimpleMutex m_readersMutex;
+	SpinLock m_readersMutex;
 	std::set<DiscretesLogReader*> m_readers;
 };

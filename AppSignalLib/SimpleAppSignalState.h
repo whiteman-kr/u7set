@@ -77,8 +77,8 @@ class SimpleAppSignalStatesArchiveFlagQueue : public FastThreadSafeQueue<SimpleA
 public:
 	SimpleAppSignalStatesArchiveFlagQueue(int queueSize);
 
-	void push(const SimpleAppSignalState& state, bool sendStateToArchive, const QThread* thread);
-	void pushAutoPoint(const SimpleAppSignalState& state, bool sendStateToArchive, const QThread* thread);
+	void push(const SimpleAppSignalState& state, bool sendStateToArchive);
+	void pushAutoPoint(const SimpleAppSignalState& state, bool sendStateToArchive);
 };
 
 struct GatewayAppSignalState
