@@ -595,21 +595,47 @@ void SignalLogModel::setRecords(const std::vector<DiscretesLogRecord>& records, 
 		//
 		if (recordsToDelete.empty() == false)
 		{
-			layoutAboutToBeChanged();
-
 			qsizetype count = m_filteredRecords.size();
-			for (qsizetype i = count - 1; i >= 0; i--)
+			
+			int removeFirst = -1;
+
+			for (int i = 0; i < count; i++) 
 			{
-				if (recordsToDelete.contains(m_filteredRecords[i]) == true)
+				const auto& fr = m_filteredRecords[i];
+
+				bool deleteThisRecord = recordsToDelete.contains(fr) == true;
+
+				if (deleteThisRecord == true && removeFirst == -1) 
 				{
-					beginRemoveRows(QModelIndex(), i, i);
-					removeRows(i, 1);
-					m_filteredRecords.erase(m_filteredRecords.begin() + i);
+					removeFirst = i;	// Initiate new block to erase
+				}
+
+				int removeLast = -1;
+
+				if (deleteThisRecord == false) 
+				{
+					removeLast = i - 1;	// The previous item was the last in block to erase
+				}
+				if (i == count - 1) 
+				{
+					removeLast = i;	// The current (last) item is the last in block to erase
+				}
+
+				if (removeFirst != -1 && removeLast != -1)
+				{
+					beginRemoveRows(QModelIndex(), removeFirst, removeLast);
+
+					int numberOfDeletedRecords = removeLast - removeFirst + 1;
+					removeRows(removeFirst, numberOfDeletedRecords);
+					
+					m_filteredRecords.erase(m_filteredRecords.begin() + removeFirst, m_filteredRecords.begin() + removeFirst + numberOfDeletedRecords);
+					count -= numberOfDeletedRecords;
+
 					endRemoveRows();
+
+					removeFirst = -1;	// We are not in block to erase now
 				}
 			}
-
-			layoutChanged();
 		}
 	}
 }
@@ -1160,9 +1186,15 @@ void SignalLogDialogSettings::store()
 //
 class SignalLogTableView : public QTableView
 {
+	Q_OBJECT
 protected:
 	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
+	virtual void keyPressEvent(QKeyEvent* event) override;
+	virtual void wheelEvent(QWheelEvent* event) override;
+
+signals:
+	void turnOffAutoscroll();
 
 private:
 	AppSignalParam m_appSignalParam;
@@ -1209,6 +1241,27 @@ void SignalLogTableView::mouseMoveEvent(QMouseEvent* event)
 
 	return;
 }
+
+void SignalLogTableView::keyPressEvent(QKeyEvent* event)
+{
+	if (event->key() == Qt::Key_PageUp || event->key() == Qt::Key_PageDown || event->key() == Qt::Key_Home || event->key() == Qt::Key_End ||
+		event->key() == Qt::Key_Up || event->key() == Qt::Key_Down)
+	{
+		emit turnOffAutoscroll();
+	}
+
+	QTableView::keyPressEvent(event);
+	return;
+}
+
+void SignalLogTableView::wheelEvent(QWheelEvent* event)
+{
+	emit turnOffAutoscroll();
+
+	QTableView::wheelEvent(event);
+	return;
+}
+
 
 //
 // SignalLogWidget
@@ -1325,7 +1378,7 @@ void SignalLogWidget::keyPressEvent(QKeyEvent* event)
 
 void SignalLogWidget::timerEvent(QTimerEvent* event)
 {
-	if (event->timerId() == m_updateStateTimerId)
+	if (event->timerId() == m_updateStateTimerId && m_buttonPause->isChecked() == false)
 	{
 		updateRecords();
 	}
@@ -1419,6 +1472,7 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 	QModelIndexList rows = m_tableView->selectionModel()->selectedRows();
 
 	for (QModelIndex& index : rows)
+	{
 		if (index.isValid() == true)
 		{
 			bool found = false;
@@ -1441,6 +1495,7 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 				list << appSignalID;
 			}
 		}
+	}
 
 	if (maxPlantTime != 0)
 	{
@@ -1458,6 +1513,8 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 					}
 
 					m_signalLog.sendAckUpTo(maxPlantTime);
+
+					m_buttonPause->setChecked(false); // Resume
 				});
 		m_signalMenu.addAction(action);
 	}
@@ -1699,11 +1756,24 @@ void SignalLogWidget::buttonAckAllClicked()
 		if (records[i].acknowledged == false)
 		{
 			m_signalLog.sendAckUpTo(records[i].plantTime);
+			
+			m_buttonPause->setChecked(false); // Resume
+			
 			break;
 		}
 	}
 
+	
+
 	return;
+}
+
+void SignalLogWidget::turnOffAutoscroll()
+{
+	if (m_buttonAutoScroll->isChecked() == true)
+	{
+		m_buttonAutoScroll->setChecked(false);
+	}
 }
 
 void SignalLogWidget::createControls()
@@ -1775,12 +1845,12 @@ void SignalLogWidget::createControls()
 		filterLayout->addLayout(tagsLayout, row, col++);
 	}
 
-	filterLayout->addWidget(new QWidget(this), row, col++);
-
 	m_clearFilterButton = new QPushButton(tr("Reset Filter"));
 	m_clearFilterButton->setAutoDefault(false);
 	filterLayout->addWidget(m_clearFilterButton, row, col++);
 	connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalLogWidget::buttonClearFilterClicked);
+
+	filterLayout->addWidget(new QWidget(this), row, col++);
 
 	filterLayout->setSpacing(4);
 
@@ -1788,8 +1858,8 @@ void SignalLogWidget::createControls()
 	filterLayout->setColumnStretch(1, 0);
 	filterLayout->setColumnStretch(2, 0);
 	filterLayout->setColumnStretch(3, 1);
-	filterLayout->setColumnStretch(4, 1);
-	filterLayout->setColumnStretch(5, 0);
+	filterLayout->setColumnStretch(4, 0);
+	filterLayout->setColumnStretch(5, 1);
 
 	// Export/Print/Fixate
 
@@ -1812,15 +1882,41 @@ void SignalLogWidget::createControls()
 	connect(m_ackButton, &QToolButton::clicked, this, &SignalLogWidget::buttonAckAllClicked);
 	exPrintLayout->addWidget(m_ackButton);
 
-	m_buttonFixate = new QPushButton(tr("Fixate"));
-	m_buttonFixate->setAutoDefault(false);
-	m_buttonFixate->setCheckable(true);
-	exPrintLayout->addWidget(m_buttonFixate);
+	m_buttonPause = new QPushButton(tr("Pause"));
+	m_buttonPause->setAutoDefault(false);
+	m_buttonPause->setCheckable(true);
+	exPrintLayout->addWidget(m_buttonPause);
+	connect(m_buttonPause,
+			&QToolButton::clicked,
+			this,
+			[this]()
+			{
+				m_buttonPause->setText(m_buttonPause->isChecked() ? tr("Resume") : tr("Pause"));
+			});
+
+	m_buttonAutoScroll = new QToolButton(this);
+	m_buttonAutoScroll->setText("\u2193");
+	m_buttonAutoScroll->setCheckable(true);
+	m_buttonAutoScroll->setChecked(true);
+	exPrintLayout->addWidget(m_buttonAutoScroll);
 
 	// Table
 
 	m_tableView = new SignalLogTableView();
 	connect(m_tableView, &QTableView::doubleClicked, this, &SignalLogWidget::tableViewDoubleClicked);
+	connect(m_tableView->verticalScrollBar(),
+			&QScrollBar::sliderMoved,
+			[this]()
+			{
+				turnOffAutoscroll();
+			});
+	connect(m_tableView,
+			&SignalLogTableView::turnOffAutoscroll,
+			[this]()
+			{
+				turnOffAutoscroll();
+			});
+
 	m_tableView->setItemDelegate(new LogSelectionControlDelegate(this, &m_model, m_signalLogTagCritical, m_signalLogTagWarning));
 
 	// Main layout
@@ -2007,7 +2103,7 @@ void SignalLogWidget::updateRecords()
 
 	// Scroll to bottom if button is pressed and last record is different than previously arrived
 	//
-	if (rec.empty() == false && m_buttonFixate->isChecked() == false)
+	if (rec.empty() == false && m_buttonAutoScroll->isChecked() == true)
 	{
 		static RecordKey latestRecordKey;
 		const auto lastRecordKey = RecordKey(rec[rec.size() - 1]);
@@ -2297,3 +2393,5 @@ void SignalLogDialog::signalInfo(QString appSignalId)
 								  &theApp.mainWindow()->monitorCentralWidget());
 	return;
 }
+
+#include "SignalLogDialog.moc"
