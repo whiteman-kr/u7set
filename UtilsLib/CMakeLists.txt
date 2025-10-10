@@ -32,7 +32,7 @@ qt_add_library(${TARGET} STATIC
 	OutputLog.h
 	Queue.cpp
 	Queue.h
-	SimpleMutex.h
+	SpinLock.h
 	SimpleThread.cpp
 	SimpleThread.h
 	WUtils.h

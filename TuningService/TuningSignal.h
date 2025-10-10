@@ -2,7 +2,7 @@
 
 #include <HardwareLib/DataProtocols.h>
 
-#include "../UtilsLib/SimpleMutex.h"
+#include "../UtilsLib/SpinLock.h"
 #include "../UtilsLib/Queue.h"
 
 namespace Tuning
@@ -53,7 +53,7 @@ namespace Tuning
 		};
 
 	public:
-		void init(const AppSignal* s, int index, int tuningDataFrameSizeW, QThread* parentThread);
+		void init(const AppSignal* s, int index, int tuningDataFrameSizeW);
 
 		// static data getters
 		//
@@ -139,8 +139,6 @@ namespace Tuning
 
 		TuningValueType m_tuningValueType = TuningValueType::Discrete;
 
-		QThread* m_thread = nullptr;
-
 		// signal properties from RPCT Database
 		//
 		TuningValue m_lowBound;
@@ -149,7 +147,7 @@ namespace Tuning
 
 		// dynamic TuningSignal state
 		//
-		mutable SimpleMutex m_stateMutex;
+		mutable SpinLock m_stateMutex;
 		State m_state;
 	};
 

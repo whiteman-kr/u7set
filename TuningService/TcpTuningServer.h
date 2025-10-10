@@ -60,8 +60,6 @@ namespace Tuning
 
 		static quint64 m_staticTcpConnectionID;
 
-		QThread* m_thread = nullptr;
-
 		QString m_clientEquipmentID;
 		quint64 m_tcpConnectionID = 0;
 

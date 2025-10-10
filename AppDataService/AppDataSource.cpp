@@ -214,29 +214,29 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	m_errorPlantTimeFormat = proto.errorplanttimeformat();
 }
 
-bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread)
+bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state)
 {
 	TEST_PTR_RETURN_FALSE(state);
 
-	bool result = m_signalStatesQueue.pop(state, thread);
+	bool result = m_signalStatesQueue.pop(state);
 
-	m_signalStatesQueueCurSize = m_signalStatesQueue.size(thread);
+	m_signalStatesQueueCurSize = m_signalStatesQueue.size();
 
 	return result;
 }
 
-bool AppDataSource::getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState, const QThread* thread)
+bool AppDataSource::getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState)
 {
 	TEST_PTR_RETURN_FALSE(gwState);
 
-	bool result = m_gatewaySignalStatesQueue.pop(gwState, thread);
+	bool result = m_gatewaySignalStatesQueue.pop(gwState);
 
-	m_gatewaySignalStatesQueueCurSize = m_gatewaySignalStatesQueue.size(thread);
+	m_gatewaySignalStatesQueueCurSize = m_gatewaySignalStatesQueue.size();
 
 	return result;
 }
 
-void AppDataSource::invalidateSignals(const QThread* thread)
+void AppDataSource::invalidateSignals()
 {
 	int pushedStatesCount = 0;
 
@@ -246,7 +246,7 @@ void AppDataSource::invalidateSignals(const QThread* thread)
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		pushedStatesCount += signalState->setUnavailable(m_rupTimes, m_signalStatesQueue, thread);
+		pushedStatesCount += signalState->setUnavailable(m_rupTimes, m_signalStatesQueue);
 
 		if (pushedStatesCount >= 20)
 		{
@@ -259,7 +259,7 @@ void AppDataSource::invalidateSignals(const QThread* thread)
 	{
 		for(DynamicAppSignalState* swCalcSignalState : swCalcSignalsStates)
 		{
-			swCalcSignalState->setUnavailable(m_rupTimes, m_signalStatesQueue, thread);
+			swCalcSignalState->setUnavailable(m_rupTimes, m_signalStatesQueue);
 		}
 	}
 
@@ -274,12 +274,12 @@ void AppDataSource::invalidateSignals(const QThread* thread)
 	DEBUG_LOG_WRN(m_log, QString("Invalidate signals %1").arg(moduleEquipmentID()));
 }
 
-bool AppDataSource::statesQueueIsEmpty(QThread* thread) const
+bool AppDataSource::statesQueueIsEmpty() const
 {
-	return m_signalStatesQueue.isEmpty(thread);
+	return m_signalStatesQueue.isEmpty();
 }
 
-bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread)
+bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer)
 {
 	if (readBuffer.readyToParsing == false)
 	{
@@ -356,8 +356,9 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	{
 		TEST_PTR_CONTINUE(signalState);
 
-		pushedStatesCtr += signalState->setStateRaw(*this, m_rupTimes, isSimPacket, packetNo, rupData, rupDataSize,
-													autoArchivingGroup, thread);
+		pushedStatesCtr += signalState->setStateRaw(*this, m_rupTimes, isSimPacket, packetNo,
+													rupData, rupDataSize,
+													autoArchivingGroup);
 
 		if (pushedStatesCtr > 20)
 		{
@@ -402,7 +403,7 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 
 			swCalcSignalState->setStateParsed(m_rupTimes, packetNo,
 											  value, swCalcStateFlags,
-											  autoArchivingGroup, thread);
+											  autoArchivingGroup);
 		}
 	}
 
@@ -418,7 +419,7 @@ bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer, const QThread* thread
 	}
 
 	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize,
-								 &m_signalStatesQueueSize, thread);
+								 &m_signalStatesQueueSize);
 
 	readBuffer.prepareToWriting();
 

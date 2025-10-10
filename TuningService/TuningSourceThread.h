@@ -121,7 +121,7 @@ namespace Tuning
 		TuningValue tuningValue() const;
 
 	private:
-		mutable SimpleMutex m_mutex;
+		mutable SpinLock m_mutex;
 		TuningValue m_value;
 	};
 
@@ -443,8 +443,6 @@ namespace Tuning
 		int m_tuningDataOffsetW = 0;
 		int m_tuningDataFramePayloadW = 0;
 		int m_tuningDataFrameCount = 0;
-
-		QThread* m_thread = nullptr;
 
 		//
 

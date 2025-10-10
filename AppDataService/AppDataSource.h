@@ -29,26 +29,26 @@ public:
 	bool getState(Network::AppDataSourceState* proto) const;
 	void setState(const Network::AppDataSourceState& proto);
 
-	bool getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread);
-	bool getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState, const QThread* thread);
+	bool getSignalState(SimpleAppSignalStateArchiveFlag* state);
+	bool getGatewaySignalState(GatewayAppSignalStateQueueMask* gwState);
 
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 
 	int signalStatesQueueCurSize() const { return m_signalStatesQueueCurSize; }
 	int signalStatesQueueCurMaxSize() const { return m_signalStatesQueueCurMaxSize; }
 
-	void invalidateSignals(const QThread* thread);
+	void invalidateSignals();
 
 	quint32 cachedAppDataUID() const { return m_cachedAppDataUID; }
 
-	bool statesQueueIsEmpty(QThread* thread) const;
+	bool statesQueueIsEmpty() const;
 
 	void incBlockFlagsCount() { m_blockFlagsCount++; }
 	void incSimFlagsCount() { m_simFlagsCount++; }
 	void incMismatchFlagsCount() { m_mismatchFlagsCount++; }
 
 private:
-	virtual bool parseBuffer(ParsingBuffer& readBuffer, const QThread* thread) override;
+	virtual bool parseBuffer(ParsingBuffer& readBuffer) override;
 
 	void wakeupStatesProcessingThread();
 

@@ -89,8 +89,7 @@ void BaseOnlineDataSources::updateDataSourcesStatistics500ms(bool oneSecond)
 bool BaseOnlineDataSources::pushRupFrame(quint32 sourceIP,
 									 qint64 serverTime,
 									 bool isSimFrame,
-									 Rup::Frame& rupFrame,
-									 const QThread* thread)
+									 Rup::Frame& rupFrame)
 {
 	auto it = m_ipToSource.find(sourceIP);
 
@@ -101,7 +100,7 @@ bool BaseOnlineDataSources::pushRupFrame(quint32 sourceIP,
 
 	BaseOnlineDataSource* source = it->second;
 
-	bool readyToParsing = source->pushRupFrame(sourceIP, serverTime, isSimFrame, rupFrame, thread);
+	bool readyToParsing = source->pushRupFrame(sourceIP, serverTime, isSimFrame, rupFrame);
 
 	if (readyToParsing == true)
 	{
@@ -294,11 +293,11 @@ void BaseOnlineDataSources::processPackets(int threadNumber)
 		{
 			if (requireBufferProcessing == true)
 			{
-				sourceToProcessing->parseNextBuffer(thisThread);
+				sourceToProcessing->parseNextBuffer();
 			}
 			else
 			{
-				sourceToProcessing->invalidateAllSignals(thisThread);
+				sourceToProcessing->invalidateAllSignals();
 			}
 
 			sourceToProcessing->releaseProcessingOwnership(thisThread);

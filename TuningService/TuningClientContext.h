@@ -38,7 +38,7 @@ namespace Tuning
 		void registerStateChangesQueue(qint64 tcpConnectionID);
 		void unregisterStateChangesQueue(qint64 tcpConnectionID);
 
-		void pushSignalStateChange(const TuningSignal::State& state, QThread* thread);
+		void pushSignalStateChange(const TuningSignal::State& state);
 
 		TuningSignalsChangesQueue* getSignalChangesQueue(qint64 tcpConnectionID);
 
@@ -68,7 +68,7 @@ namespace Tuning
 
 		//
 
-		SimpleMutex m_queueMapMutex;
+		SpinLock m_queueMapMutex;
 		std::map<qint64, TuningSignalsChangesQueue*> m_stateChangesQueueMap;		// client tcpConnectionID => state changes queue
 	};
 
@@ -94,7 +94,7 @@ namespace Tuning
 
 		void clear();
 
-		void pushSignalStateChange(const TuningSignal::State& state, QThread* thread);
+		void pushSignalStateChange(const TuningSignal::State& state);
 
 	private:
 		std::map<QString, TuningClientContext*> m_clientsContextMap;		// clientEquipmentID => TuningClientContext*

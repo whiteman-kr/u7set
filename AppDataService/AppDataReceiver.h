@@ -95,8 +95,6 @@ private:
 	int m_processingThreadsCountFromSettings = 0;
 	CircularLoggerShared m_log;
 
-	const QThread* m_thisThread = nullptr;
-
 	//
 
 	HostAddressPort m_dataReceivingIP;

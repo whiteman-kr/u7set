@@ -134,13 +134,13 @@ void DynamicAppSignalState::setQueues(SimpleAppSignalStatesArchiveFlagQueue* sig
 #define PUSH_AUTO_POINT(state)	{																\
 									if (m_archive == true)										\
 									{															\
-										m_statesQueue->pushAutoPoint(state, m_archive, thread); \
+										m_statesQueue->pushAutoPoint(state, m_archive); \
 										pushedStatesCtr++;										\
 										m_statesSaved++;										\
 									}															\
 									if (m_hasRtSessions == true)								\
 									{															\
-										rtSessionsProcessing(state, true, thread);				\
+										rtSessionsProcessing(state, true);				\
 									}															\
 								}
 
@@ -150,8 +150,7 @@ int DynamicAppSignalState::setStateRaw(AppDataSource& source,
 									quint16 packetNo,
 									const char* rupData,
 									int rupDataSize,
-									int autoArchivingGroup,
-									const QThread* thread)
+									int autoArchivingGroup)
 {
 	double value = 0;
 	AppSignalStateFlags flags;
@@ -225,7 +224,7 @@ int DynamicAppSignalState::setStateRaw(AppDataSource& source,
 		return 0;
 	}
 
-	return setStateParsed(time, packetNo, value, flags, autoArchivingGroup, thread);
+	return setStateParsed(time, packetNo, value, flags, autoArchivingGroup);
 }
 
 // returns count of states pushed in statesQueue
@@ -234,8 +233,7 @@ int DynamicAppSignalState::setStateParsed(const Times& time,
 									quint16 packetNo,
 									double value,
 									AppSignalStateFlags flags,
-									int autoArchivingGroup,
-									const QThread* thread)
+									int autoArchivingGroup)
 {
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 	SimpleAppSignalState curState;
@@ -465,7 +463,7 @@ int DynamicAppSignalState::setStateParsed(const Times& time,
 
 	if (hasArchivingReason == true)
 	{
-		m_statesQueue->push(curState, m_archive, thread);
+		m_statesQueue->push(curState, m_archive);
 		pushedStatesCtr++;
 
 		if (m_archive == true)
@@ -494,7 +492,7 @@ int DynamicAppSignalState::setStateParsed(const Times& time,
 
 	if (m_gatewayQueueMask != 0 && hasGatewaySendReasone(curState.flags) == true)
 	{
-		sendAppSignalStateChangeToGateway(prevState, curState, thread);
+		sendAppSignalStateChangeToGateway(prevState, curState);
 		pushedStatesCtr++;
 	}
 
@@ -504,15 +502,14 @@ int DynamicAppSignalState::setStateParsed(const Times& time,
 
 	if (m_hasRtSessions == true)
 	{
-		rtSessionsProcessing(curState, hasArchivingReason, thread);
+		rtSessionsProcessing(curState, hasArchivingReason);
 	}
 
 	return pushedStatesCtr;
 }
 
 int DynamicAppSignalState::setUnavailable(const Times& time,
-			  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
-			  const QThread* thread)
+			  SimpleAppSignalStatesArchiveFlagQueue& statesQueue)
 {
 	int pushedStatesCount = 0;
 
@@ -530,12 +527,12 @@ int DynamicAppSignalState::setUnavailable(const Times& time,
 		// prevState is not stored, archive it
 		//
 
-		statesQueue.pushAutoPoint(prevState, m_archive, thread);
+		statesQueue.pushAutoPoint(prevState, m_archive);
 		pushedStatesCount++;
 
 		if (m_hasRtSessions == true)
 		{
-			rtSessionsProcessing(prevState, true, thread);
+			rtSessionsProcessing(prevState, true);
 		}
 
 		m_prevStateIsStored = true;
@@ -555,10 +552,10 @@ int DynamicAppSignalState::setUnavailable(const Times& time,
 		m_logQueue->emplace_back(curState);
 	}
 
-	statesQueue.push(curState, m_archive, thread);
+	statesQueue.push(curState, m_archive);
 	pushedStatesCount++;
 
-	sendAppSignalStateChangeToGateway(prevState, curState, thread);
+	sendAppSignalStateChangeToGateway(prevState, curState);
 
 	m_prevStateIsStored = true;
 
@@ -566,7 +563,7 @@ int DynamicAppSignalState::setUnavailable(const Times& time,
 
 	if (m_hasRtSessions == true)
 	{
-		rtSessionsProcessing(curState, true, thread);
+		rtSessionsProcessing(curState, true);
 	}
 
 	return pushedStatesCount;
@@ -701,9 +698,11 @@ void DynamicAppSignalState::setRtSessionSamplePeriodCounter(Hash signalHash,
 	releaseRtProcessingOwnership(rtProcessingOwner);
 }
 
-void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway, const QThread* thread)
+void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway)
 {
 	Q_ASSERT(m_hasRtSessions == true);
+
+	const QThread* thread = QThread::currentThread();
 
 	takeRtProcessingOwnership(thread);
 
@@ -711,7 +710,7 @@ void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& sta
 	{
 		if (pushAnyway == true)
 		{
-			session.session->pushSignalState(m_signalHash, state, thread);
+			session.session->pushSignalState(m_signalHash, state);
 			session.sampleCounter = 0;
 			continue;
 		}
@@ -720,7 +719,7 @@ void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& sta
 
 		if (session.sampleCounter >= session.samplePeriodCounter)
 		{
-			session.session->pushSignalState(m_signalHash, state, thread);
+			session.session->pushSignalState(m_signalHash, state);
 			session.sampleCounter = 0;
 		}
 	}
@@ -897,8 +896,7 @@ void DynamicAppSignalState::releaseRtProcessingOwnership(const QThread* currentP
 }
 
 void DynamicAppSignalState::sendAppSignalStateChangeToGateway(const SimpleAppSignalState& prevState,
-															  const SimpleAppSignalState& newState,
-															  const QThread* thread)
+															  const SimpleAppSignalState& newState)
 {
 	GatewayAppSignalStateQueueMask state;
 
@@ -906,7 +904,7 @@ void DynamicAppSignalState::sendAppSignalStateChangeToGateway(const SimpleAppSig
 	state.gwState.prevState = prevState;
 	state.gwState.curState = newState;
 
-	m_gwStatesQueue->push(state, thread);
+	m_gwStatesQueue->push(state);
 }
 
 void DynamicAppSignalState::setAperture(E::ApertureType type, double coarseAperture, double fineAperture)

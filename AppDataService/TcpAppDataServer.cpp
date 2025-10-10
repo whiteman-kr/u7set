@@ -364,10 +364,10 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 	tl_getAppSignalStateReply.set_servertimelocal(local);
 
 	tl_getAppSignalStateReply.set_statechangesqueuesize(m_signalStatesQueue != nullptr ?
-											m_signalStatesQueue->size(QThread::currentThread()) : 0);
+											m_signalStatesQueue->size() : 0);
 
 	tl_getAppSignalStateReply.set_gatewaystatechangesqueuesize(m_gatewaySignalStatesQueue != nullptr ?
-											m_gatewaySignalStatesQueue->size(QThread::currentThread()) : 0);
+											m_gatewaySignalStatesQueue->size() : 0);
 
 	sendReply(tl_getAppSignalStateReply);
 
@@ -409,15 +409,13 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 		return;
 	}
 
-	QThread* thisThread = QThread::currentThread();
-
 	SimpleAppSignalState state;
 
 	int pendingStatesCount = 0;
 
 	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
 	{
-		result = m_signalStatesQueue->pop(&state, thisThread);
+		result = m_signalStatesQueue->pop(&state);
 
 		if (result == false)
 		{
@@ -432,7 +430,7 @@ void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData
 		{
 			// on last iteration set pendingStatesCount to actual value
 			//
-			pendingStatesCount = m_signalStatesQueue->size(thisThread);
+			pendingStatesCount = m_signalStatesQueue->size();
 		}
 	}
 
@@ -511,15 +509,13 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 		return;
 	}
 
-	QThread* thisThread = QThread::currentThread();
-
 	GatewayAppSignalStateQueueMask state;
 
 	int pendingStatesCount = 0;
 
 	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
 	{
-		result = m_gatewaySignalStatesQueue->pop(&state, thisThread);
+		result = m_gatewaySignalStatesQueue->pop(&state);
 
 		if (result == false)
 		{
@@ -534,7 +530,7 @@ void TcpAppDataServer::onGatewayGetAppSignalStateChangesRequest(const char* requ
 		{
 			// on last iteration set pendingStatesCount to actual value
 			//
-			pendingStatesCount = m_gatewaySignalStatesQueue->size(thisThread);
+			pendingStatesCount = m_gatewaySignalStatesQueue->size();
 		}
 	}
 

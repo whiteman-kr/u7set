@@ -393,7 +393,7 @@ namespace Tuning
 
 	void TuningChannelHandler::pushReply(const RupFotip& reply)
 	{
-		m_replyQueue.push(reply, QThread::currentThread());
+		m_replyQueue.push(reply);
 	}
 
 	void TuningChannelHandler::incErrReplySize()
@@ -445,7 +445,7 @@ namespace Tuning
 
 		for(;;)
 		{
-			replyReceived = m_replyQueue.pop(&m_reply, QThread::currentThread());
+			replyReceived = m_replyQueue.pop(&m_reply);
 
 			if (replyReceived == true && m_fotipVersion >= Fotip::V3)
 			{
@@ -562,7 +562,7 @@ namespace Tuning
 
 			do
 			{
-				replyReceived = m_replyQueue.pop(&m_reply, QThread::currentThread());
+				replyReceived = m_replyQueue.pop(&m_reply);
 
 				if (replyReceived == true)
 				{
@@ -1649,8 +1649,6 @@ namespace Tuning
 
 	void TuningSourceThreadWorker::onThreadStarted()
 	{
-		m_thread = QThread::currentThread();
-
 		initTuningSignals();
 		initHandlers();
 		initTimer();
@@ -1987,7 +1985,7 @@ namespace Tuning
 
 					if (stateChanged == true)
 					{
-						m_service.pushSignalStateChange(ts.currentStateUnsafe(), m_thread);
+						m_service.pushSignalStateChange(ts.currentStateUnsafe());
 					}
 				}
 				break;
@@ -2059,7 +2057,7 @@ namespace Tuning
 
 			TuningSignal& ts = *m_tuningSignals[i].get();
 
-			ts.init(signal, i, td->tuningDataFramePayloadW(), m_thread);
+			ts.init(signal, i, td->tuningDataFramePayloadW());
 
 			int arrayIndex = ts.frameNo() / 3;
 
@@ -2173,8 +2171,6 @@ namespace Tuning
 
 	void TuningSourceThreadWorker::invalidateAllSignals()
 	{
-		Q_ASSERT(QThread::currentThread() == m_thread);
-
 		bool stateChanged = false;
 
 		for(TuningSignalShared& s : m_tuningSignals)
@@ -2183,7 +2179,7 @@ namespace Tuning
 
 			if (stateChanged == true)
 			{
-				m_service.pushSignalStateChange(s->currentStateUnsafe(), m_thread);
+				m_service.pushSignalStateChange(s->currentStateUnsafe());
 			}
 		}
 	}

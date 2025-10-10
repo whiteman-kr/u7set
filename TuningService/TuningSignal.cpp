@@ -46,12 +46,9 @@ namespace Tuning
 	//
 	// ----------------------------------------------------------------------------------
 
-	void TuningSignal::init(const AppSignal* s, int index, int tuningDataFrameSizeW, QThread* parentThread)
+	void TuningSignal::init(const AppSignal* s, int index, int tuningDataFrameSizeW)
 	{
 		TEST_PTR_RETURN(s);
-		TEST_PTR_RETURN(parentThread);
-
-		m_thread = parentThread;
 
 		m_appSignalID = s->appSignalID();
 
@@ -114,11 +111,9 @@ namespace Tuning
 
 	bool TuningSignal::invalidate()
 	{
-		Q_ASSERT(QThread::currentThread() == m_thread);
-
 		bool prevValid = m_state.valid;
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		m_state.valid = false;
 
@@ -130,7 +125,7 @@ namespace Tuning
 									   quint64 fotipProcessingNumerator,
 									   bool setSOR, bool writingDisabled)
 	{
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		bool prevValid = m_state.valid;
 		TuningValue prevValue = m_state.currentValue;
@@ -170,15 +165,11 @@ namespace Tuning
 
 	const TuningSignal::State& TuningSignal::currentStateUnsafe() const
 	{
-		Q_ASSERT(QThread::currentThread() == m_thread);
-
 		return m_state;
 	}
 
 	TuningValue TuningSignal::currentTuningValueUnsafe() const
 	{
-		Q_ASSERT(QThread::currentThread() == m_thread);
-
 		return m_state.currentValue;
 	}
 
@@ -186,7 +177,7 @@ namespace Tuning
 	{
 		Q_ASSERT(m_state.readLowBound.type() == value.type());
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		m_state.readLowBound = value;
 		m_state.setSOR = setSOR;
@@ -197,7 +188,7 @@ namespace Tuning
 	{
 		Q_ASSERT(m_state.readHighBound.type() == value.type());
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		m_state.readHighBound = value;
 		m_state.setSOR = setSOR;
@@ -207,9 +198,8 @@ namespace Tuning
 	void TuningSignal::initWriting(quint64 writeCommandID, const QString& clientID, qint64 time)
 	{
 		Q_ASSERT(writeCommandID != 0);
-		Q_ASSERT(QThread::currentThread() == m_thread);
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		m_state.writeCommandID = writeCommandID;
 		m_state.writeErrorCode = E::NetworkError::Success;
@@ -220,9 +210,7 @@ namespace Tuning
 
 	void TuningSignal::finalizeWriting(quint64 writeCommandID, E::NetworkError errCode, qint64 time)
 	{
-		Q_ASSERT(QThread::currentThread() == m_thread);
-
-		AUTO_LOCK_BY_THREAD(m_stateMutex, m_thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		if (writeCommandID == m_state.writeCommandID)
 		{
@@ -250,7 +238,7 @@ namespace Tuning
 		TEST_PTR_RETURN(tss);
 		TEST_PTR_RETURN(thread);
 
-		AUTO_LOCK_BY_THREAD(m_stateMutex, thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_stateMutex);
 
 		m_state.setSOR = setSOR;
 		m_state.writingDisabled = writingDisabled;

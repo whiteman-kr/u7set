@@ -35,8 +35,6 @@ void RupFramesReceiver::run(std::stop_token stopToken)
 	DEBUG_LOG_MSG(m_log, getLogStr(QString("thread started (receiving IP %1)").
 													arg(dataReceivingIPStr())));
 
-	m_thisThread = QThread::currentThread();
-
 	try
 	{
 		m_ioContext = new io_context;
@@ -243,7 +241,7 @@ void RupFramesReceiver::onRupFrameReceive(const error_code& error, size_t bytesR
 		m_rupFramesReceivedPerSecond++;
 		m_rupFramesCount++;
 
-		bool res = m_onlineDataSources.pushRupFrame(sourceIP, serverTime, isSimFrame, simFrame.rupFrame, m_thisThread);
+		bool res = m_onlineDataSources.pushRupFrame(sourceIP, serverTime, isSimFrame, simFrame.rupFrame);
 
 		if (res == false)
 		{

@@ -30,8 +30,6 @@ void ArchWriterThread::run()
 
 	m_buffer = new ArchFileRecord[ArchFile::QUEUE_MAX_SIZE];
 
-	m_thisThread = QThread::currentThread();
-
 	int filesCount = m_archive->getFilesCount();
 
 	int noFlushingExecuted = 0;
@@ -67,8 +65,7 @@ void ArchWriterThread::run()
 													   flushAnyway,
 													   m_archive->minQueueSizeForFlushing(),
 													   m_buffer,
-													   ArchFile::QUEUE_MAX_SIZE,
-													   m_thisThread);
+													   ArchFile::QUEUE_MAX_SIZE);
 
 			m_flushTime += m_timer.elapsed() - startTime;
 
@@ -89,7 +86,7 @@ void ArchWriterThread::run()
 		}
 	}
 
-	m_archive->shutdown(m_buffer, ArchFile::QUEUE_MAX_SIZE, m_thisThread);
+	m_archive->shutdown(m_buffer, ArchFile::QUEUE_MAX_SIZE);
 
 	delete [] m_buffer;
 	m_buffer = nullptr;
