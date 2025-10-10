@@ -1419,6 +1419,7 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 	QModelIndexList rows = m_tableView->selectionModel()->selectedRows();
 
 	for (QModelIndex& index : rows)
+	{
 		if (index.isValid() == true)
 		{
 			bool found = false;
@@ -1441,6 +1442,7 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 				list << appSignalID;
 			}
 		}
+	}
 
 	if (maxPlantTime != 0)
 	{
