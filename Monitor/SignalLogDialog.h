@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../../AppSignalLib/DiscretesLogRecord.h"
-#include <SchemaClientLib/DragDropHelper.h>
-#include <CommonLib/Hash.h>
+
 
 namespace AppSignalLists
 {
@@ -17,6 +16,7 @@ namespace ClientLib
 
 class IAppSignalManager;
 class SignalLogModel;
+class SignalLogTableView;
 
 enum class SignalLogColumns
 {
@@ -34,7 +34,6 @@ enum class SignalLogColumns
 	PlantTime,
 
 	Value,
-	Units,
 
 	Valid,
 	StateAvailable,
@@ -43,7 +42,6 @@ enum class SignalLogColumns
 	Mismatch,
 	OutOfLimits,
 
-	Acknowledged,
 	AckTime,
 	AckSource,
 	AckUser,
@@ -64,21 +62,27 @@ enum class SignalLogMaskType
 struct RecordKey
 {
 	std::size_t operator()(const RecordKey& p) const { return ::calcHash(&p, sizeof(RecordKey)); }
-	bool operator==(const RecordKey& p) const { return p.recordTime == recordTime && p.signalHash == signalHash; }
+	bool operator==(const RecordKey& p) const
+	{
+		return p.recordTime == recordTime && p.signalHash == signalHash && p.plantTime == plantTime;
+	}
 
 	RecordKey() :
 		recordTime(0),
+		plantTime(0),
 		signalHash(0)
 	{
 	}
 
-	RecordKey(const DiscretesLogRecord& rec) :
+	explicit RecordKey(const DiscretesLogRecord& rec) :
 		recordTime(rec.recordTime),
+		plantTime(rec.plantTime),
 		signalHash(rec.signalHash)
 	{
 	}
 
 	qint64 recordTime;
+	qint64 plantTime;
 	Hash signalHash;
 };
 
@@ -117,8 +121,9 @@ public:
 	void setAppSignalList(const QString& listId);
 	QString appSignalList() const;
 
-	void setRecords(std::vector<DiscretesLogRecord>& records, qint64 updateCounter);	// Update the list when new records arrived or were removed
-	void fillRecords(bool resetSelection);	// Refill the list when user changed filter settings
+	void setRecords(const std::vector<DiscretesLogRecord>& records,
+					qint64 updateCounter); // Update the list when new records arrived or were removed
+	void fillRecords(bool resetSelection); // Refill the list when user changed filter settings
 
 	int recordsCount() const;
 	const DiscretesLogRecord& record(const RecordKey& key) const;
@@ -141,7 +146,7 @@ private:
 	const AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 
 	QStringList m_columnsNames;
-	
+
 	// Model data
 
 	std::unordered_map<RecordKey, DiscretesLogRecord, RecordKey> m_records;
@@ -157,10 +162,9 @@ private:
 	SignalLogMaskType m_maskType = SignalLogMaskType::CustomAppSignalID;
 	QStringList m_masks;
 	QStringList m_tags;
-	
+
 	QString m_appSignallistID;
 	std::set<Hash> m_appSignalListHashes;
-
 };
 
 
@@ -179,21 +183,6 @@ struct SignalLogDialogSettings
 	void store();
 };
 
-//
-// SignalLogTableView
-//
-class SignalLogTableView : public QTableView
-{
-protected:
-	virtual void mousePressEvent(QMouseEvent* event) override;
-	virtual void mouseMoveEvent(QMouseEvent* event) override;
-
-private:
-	AppSignalParam m_appSignalParam;
-	QPoint m_dragStartPosition;
-
-	SchemaClientLib::DragDropHelper m_dragDropHelper;
-};
 
 //
 // SignalLogWidget
@@ -252,6 +241,9 @@ private:
 
 	void maskChanged(bool addToCompleter);
 	void tagsChanged();
+
+	bool filterIsSet() const;
+	bool warnAboutAckFiltered();
 
 signals:
 	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
