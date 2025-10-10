@@ -6,7 +6,7 @@
 #include "ScmTcpAppDataClient.h"
 #include <QHBoxLayout>
 #include <QSplitter>
-#include "../UtilsLib/Ui/WidgetUtils.h"
+#include <UiLib/WidgetUtils.h>
 
 TuningSourceWidget::TuningSourceWidget(const QString& equipmentID, QWidget* parent) :
 	QWidget(parent),

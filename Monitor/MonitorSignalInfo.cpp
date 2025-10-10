@@ -3,7 +3,7 @@
 #include "MonitorConfigController.h"
 #include "MonitorCentralWidget.h"
 
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 
 #include <ClientLib/AppSignalManager.h>
 

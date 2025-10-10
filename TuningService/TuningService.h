@@ -68,7 +68,7 @@ namespace Tuning
 		void registerSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
 		void unregisterSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
 
-		void pushSignalStateChange(const TuningSignal::State& state, QThread* thread);
+		void pushSignalStateChange(const TuningSignal::State& state);
 
 		TuningSignalsChangesQueue* getSignalChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID);
 

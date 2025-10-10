@@ -1,5 +1,5 @@
 #include "DialogDiagSignalTypes.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include "AppSettings.h"
 
 #include <UiLib/PropertyEditor.h>

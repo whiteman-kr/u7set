@@ -1,7 +1,7 @@
 #include "AppDataServiceWidget.h"
 #include "ScmTcpAppDataClient.h"
 #include "AppDataSourceWidget.h"
-#include "../UtilsLib/Ui/WidgetUtils.h"
+#include <UiLib/UiTools.h>
 
 #include <QTableView>
 #include <QMenu>

@@ -261,8 +261,7 @@ namespace Gateway
 	}
 
 	int ModbusSlaveHandler::getRegistersValues(int regsStartAddr, int regsCount,
-												RegisterValue* destBuffer, int maxRegsCount,
-												QThread* thread)
+												RegisterValue* destBuffer, int maxRegsCount)
 	{
 		if (maxRegsCount < regsCount)
 		{
@@ -286,13 +285,13 @@ namespace Gateway
 
 		int copyDestSizeBytes = copyRegCount * REGISTER_SIZE_BYTES;
 
-		m_regsMutex.lock(thread);
+		m_regsMutex.lock();
 
 		std::memcpy(reinterpret_cast<char*>(destBuffer),
 					reinterpret_cast<char*>(m_registers.data() + regsStartAddr),
 					copyDestSizeBytes);
 
-		m_regsMutex.unlock(thread);
+		m_regsMutex.unlock();
 
 		int fillDestSizeBytes  = (regsCount - copyRegCount) * REGISTER_SIZE_BYTES;
 
@@ -1141,8 +1140,7 @@ namespace Gateway
 		TcpFrame& reply = getTcpReplyRef(mpd);
 
 		int bytesCount = getRegistersValues(regsStartAddr, regsCount,
-											reply.msg.fn03Reply.regValues, FN03_MAX_REGS_COUNT,
-											QThread::currentThread());
+											reply.msg.fn03Reply.regValues, FN03_MAX_REGS_COUNT);
 		Q_ASSERT(bytesCount < 256);
 
 		// copy request header fields to reply
@@ -1205,8 +1203,7 @@ namespace Gateway
 		int regsCount = msg.fn03Request.regsCount;
 
 		int bytesCount = getRegistersValues(regsStartAddr, regsCount,
-											msg.fn03Reply.regValues, FN03_MAX_REGS_COUNT,
-											QThread::currentThread());
+											msg.fn03Reply.regValues, FN03_MAX_REGS_COUNT);
 
 		Q_ASSERT(bytesCount == regsCount * sizeof(RegisterValue));
 		Q_ASSERT(bytesCount <= 0xFF);

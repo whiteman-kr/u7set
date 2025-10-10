@@ -1,9 +1,9 @@
-#include "../UtilsLib/Ui/UiTools.h"
 #include <ReportLib/ReportPrinter.h>
 #include "TableViewReportPrivate.h"
 #include <ReportLib/Report.h>
 #include <ReportLib/TableViewReportGenerator.h>
 #include <UiLib/DialogProgress.h>
+#include <UiLib/UiTools.h>
 
 namespace ReportLib
 {

@@ -2,24 +2,29 @@
 #include "DiagnosticsAppSettings.h"
 #include "DiagnosticsCentralWidget.h"
 #include "DialogSettings.h"
-//#include "MonitorSchemaWidget.h"
-//#include "MonitorSchemaView.h"
-//#include "MonitorSignalSnapshot.h"
-//#include "./Archive/MonitorArchive.h"
-//#include "DialogDataSources.h"
-//#include "Globals.h"
-//#include "./Trend/MonitorTrends.h"
-//#include "../VFrame30/Schema.h"
-//#include "../lib/Ui/DialogSignalSearch.h"
-#include "../UtilsLib/Ui/UiTools.h"
+// #include "MonitorSchemaWidget.h"
+// #include "MonitorSchemaView.h"
+// #include "MonitorSignalSnapshot.h"
+// #include "./Archive/MonitorArchive.h"
+// #include "DialogDataSources.h"
+// #include "Globals.h"
+// #include "./Trend/MonitorTrends.h"
+// #include "../VFrame30/Schema.h"
+// #include "../lib/Ui/DialogSignalSearch.h"
+
+#include <UiLib/UiTools.h>
+#include <UiLib/LogDialog.h>
 #include <UiLib/DialogAbout.h>
-//#include "../lib/Ui/SchemaListWidget.h"
+// #include "../lib/Ui/SchemaListWidget.h"
 
 DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver, const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow{parent},
 	m_LogFile{qAppName(), QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + '/' + softwareInfo.equipmentID()},
 	m_instanceResolver{instanceResolver},
-	m_configController{softwareInfo, DiagnosticsAppSettings::instance().configuratorAddress1(), DiagnosticsAppSettings::instance().configuratorAddress2(), &m_LogFile},
+	m_configController{softwareInfo,
+					   DiagnosticsAppSettings::instance().configuratorAddress1(),
+					   DiagnosticsAppSettings::instance().configuratorAddress2(),
+					   &m_LogFile},
 	m_appSignalManager{&m_LogFile},
 	m_schemaManager{m_configController, m_signalDataServerStub},
 	m_dialogAlert(this)
@@ -39,7 +44,7 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UiLib_%1.qm").arg(l));
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UtilsLib_%1.qm").arg(l));
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/qt_%1.qm").arg(l));
-		//m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/AppSignalLists_%1.qm").arg(l));
+		// m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/AppSignalLists_%1.qm").arg(l));
 	}
 
 	if (DiagnosticsAppSettings::instance().language() != "en")
@@ -109,17 +114,20 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 
 	// --
 	//
-	connect(diagnosticsCentralWidget, &DiagnosticsCentralWidget::signal_actionCloseTabUpdated, this,
+	connect(diagnosticsCentralWidget,
+			&DiagnosticsCentralWidget::signal_actionCloseTabUpdated,
+			this,
 			[this](bool allowed)
-	{
-		Q_ASSERT(m_closeTabAction);
-		m_closeTabAction->setEnabled(DiagnosticsAppSettings::instance().showSchemasTabBar() && allowed);
-	});
+			{
+				Q_ASSERT(m_closeTabAction);
+				m_closeTabAction->setEnabled(DiagnosticsAppSettings::instance().showSchemasTabBar() && allowed);
+			});
 
 	connect(diagnosticsCentralWidget, &DiagnosticsCentralWidget::signal_historyChanged, this, &DiagnosticsMainWindow::slot_historyChanged);
 	connect(diagnosticsCentralWidget, &DiagnosticsCentralWidget::signal_tabPageChanged, this, &DiagnosticsMainWindow::slot_updateActions);
 
-	//connect(m_selectSchemaWidget, &SelectSchemaWidget::selectionChanged, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+	// connect(m_selectSchemaWidget, &SelectSchemaWidget::selectionChanged, monitorCentralWidget,
+	// &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
 	// --
 	//
@@ -136,20 +144,20 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 
 	//// Create SchemaList dock widget
 	////
-	//m_schemaListDock = new QDockWidget{tr("Schemas List"), this};
-	//m_schemaListDock->setObjectName("SchemaList");
-	//m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
-	//m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
+	// m_schemaListDock = new QDockWidget{tr("Schemas List"), this};
+	// m_schemaListDock->setObjectName("SchemaList");
+	// m_schemaListDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar);
+	// m_schemaListDock->setTitleBarWidget(new QWidget{});		// Hides title bar
 
-	//SchemaListWidget* schemaListWidget = new SchemaListWidget(
+	// SchemaListWidget* schemaListWidget = new SchemaListWidget(
 	//										 std::vector{SchemaListTreeColumns::SchemaID, SchemaListTreeColumns::Caption},
 	//										 false,
 	//										 m_schemaListDock);
-	//m_schemaListDock->setWidget(schemaListWidget);
+	// m_schemaListDock->setWidget(schemaListWidget);
 
-	//addDockWidget(Qt::LeftDockWidgetArea, m_schemaListDock);
+	// addDockWidget(Qt::LeftDockWidgetArea, m_schemaListDock);
 
-	//m_schemaListDock->setVisible(QSettings().value("m_schemaListAction.checked").toBool());
+	// m_schemaListDock->setVisible(QSettings().value("m_schemaListAction.checked").toBool());
 
 	//// --
 	////
@@ -157,9 +165,10 @@ DiagnosticsMainWindow::DiagnosticsMainWindow(InstanceResolver& instanceResolver,
 
 	//// SchemaListWidget
 	////
-	//connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, monitorCentralWidget, &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
+	// connect(schemaListWidget, &SchemaListWidget::openSchemaRequest, monitorCentralWidget,
+	// &MonitorCentralWidget::slot_selectSchemaForCurrentTab);
 
-	//connect(&m_configController, &MonitorConfigController::configurationUpdated,
+	// connect(&m_configController, &MonitorConfigController::configurationUpdated,
 	//		[this, schemaListWidget]()
 	//		{
 	//			schemaListWidget->setDetails(m_configController.schemasDetailsSet());
@@ -197,11 +206,9 @@ void DiagnosticsMainWindow::showEvent(QShowEvent*)
 	return;
 }
 
-bool DiagnosticsMainWindow::eventFilter(QObject *object, QEvent *event)
+bool DiagnosticsMainWindow::eventFilter(QObject* object, QEvent* event)
 {
-	if (object == m_statusBarLogAlerts &&
-		event->type() == QEvent::MouseButtonPress &&
-		m_statusBarLogAlerts->text().isEmpty() == false)
+	if (object == m_statusBarLogAlerts && event->type() == QEvent::MouseButtonPress && m_statusBarLogAlerts->text().isEmpty() == false)
 	{
 		showLog();
 	}
@@ -209,10 +216,10 @@ bool DiagnosticsMainWindow::eventFilter(QObject *object, QEvent *event)
 	return QWidget::eventFilter(object, event);
 }
 
-//void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals)
+// void MonitorMainWindow::showTrends(const std::vector<AppSignalParam>& appSignals)
 //{
 //	MonitorTrends::startTrendApp(m_appSignalManager, m_configController, appSignals, this);
-//}
+// }
 
 void DiagnosticsMainWindow::saveWindowState()
 {
@@ -345,8 +352,7 @@ void DiagnosticsMainWindow::createActions()
 	m_pExportAction = new QAction(tr("Export Schema..."), this);
 	m_pExportAction->setStatusTip(tr("Export current schema to a file"));
 	m_pExportAction->setEnabled(true);
-	m_pExportAction->setShortcuts(QList<QKeySequence>{}
-									 <<  QKeySequence{Qt::CTRL | Qt::Key_S});
+	m_pExportAction->setShortcuts(QList<QKeySequence>{} << QKeySequence{Qt::CTRL | Qt::Key_S});
 	connect(m_pExportAction, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_export);
 
 	m_pExitAction = new QAction(tr("Exit"), this);
@@ -362,28 +368,28 @@ void DiagnosticsMainWindow::createActions()
 	m_pStatisticsAction->setIcon(QIcon(":/Images/Images/NetworkConnections.svg"));
 	m_pStatisticsAction->setEnabled(true);
 	connect(m_pStatisticsAction, &QAction::triggered, this, &DiagnosticsMainWindow::showStatistics);
-//
-//	m_pDataSourcesAction = new QAction(tr("Data Sources..."), this);
-//	m_pDataSourcesAction->setStatusTip(tr("View Data Sources"));
-//	m_pDataSourcesAction->setIcon(QIcon(":/Images/Images/AppDataSources.svg"));
-//	m_pDataSourcesAction->setEnabled(true);
-//	connect(m_pDataSourcesAction, &QAction::triggered, this, &MonitorMainWindow::showDataSources);
+	//
+	//	m_pDataSourcesAction = new QAction(tr("Data Sources..."), this);
+	//	m_pDataSourcesAction->setStatusTip(tr("View Data Sources"));
+	//	m_pDataSourcesAction->setIcon(QIcon(":/Images/Images/AppDataSources.svg"));
+	//	m_pDataSourcesAction->setEnabled(true);
+	//	connect(m_pDataSourcesAction, &QAction::triggered, this, &MonitorMainWindow::showDataSources);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
 	m_pSettingsAction->setIcon(QIcon(":/Images/Images/Settings.svg"));
 	m_pSettingsAction->setEnabled(true);
 	connect(m_pSettingsAction, &QAction::triggered, this, &DiagnosticsMainWindow::showSettings);
-//
-//	m_manualMatsAction = new QAction(tr("MATS User Manual"), this);
-//	m_manualMatsAction->setStatusTip(tr("Show MATS User Manual"));
-//	connect(m_manualMatsAction, &QAction::triggered, this, &MonitorMainWindow::showMatsUserManual);
-//
-//	m_pDevToolsAction = new QAction(tr("DevTools..."), this);
-//	m_pDevToolsAction->setStatusTip(tr("Show software statistics"));
-//	m_pDevToolsAction->setEnabled(true);
-//	connect(m_pDevToolsAction, &QAction::triggered, this, &MonitorMainWindow::devTools);
-//
+	//
+	//	m_manualMatsAction = new QAction(tr("MATS User Manual"), this);
+	//	m_manualMatsAction->setStatusTip(tr("Show MATS User Manual"));
+	//	connect(m_manualMatsAction, &QAction::triggered, this, &MonitorMainWindow::showMatsUserManual);
+	//
+	//	m_pDevToolsAction = new QAction(tr("DevTools..."), this);
+	//	m_pDevToolsAction->setStatusTip(tr("Show software statistics"));
+	//	m_pDevToolsAction->setEnabled(true);
+	//	connect(m_pDevToolsAction, &QAction::triggered, this, &MonitorMainWindow::devTools);
+	//
 	m_pDebugAction = new QAction(tr("Debug..."), this);
 	m_pDebugAction->setStatusTip(tr("Perform some debug actions, developers tool."));
 	m_pDebugAction->setEnabled(true);
@@ -393,32 +399,32 @@ void DiagnosticsMainWindow::createActions()
 	m_pLogAction->setStatusTip(tr("Show application log"));
 	connect(m_pLogAction, &QAction::triggered, this, &DiagnosticsMainWindow::showLog);
 
-//    m_pTuningLogAction = new QAction(tr("Tuning Log..."), this);
-//    m_pTuningLogAction->setStatusTip(tr("Show tuning log"));
-//    connect(m_pTuningLogAction, &QAction::triggered, this, &MonitorMainWindow::showTuningLog);
-//    m_pTuningLogAction->setVisible(false);
-//
-    m_pAboutQtAction = new QAction(tr("About Qt..."), this);
+	//    m_pTuningLogAction = new QAction(tr("Tuning Log..."), this);
+	//    m_pTuningLogAction->setStatusTip(tr("Show tuning log"));
+	//    connect(m_pTuningLogAction, &QAction::triggered, this, &MonitorMainWindow::showTuningLog);
+	//    m_pTuningLogAction->setVisible(false);
+	//
+	m_pAboutQtAction = new QAction(tr("About Qt..."), this);
 	m_pAboutQtAction->setStatusTip(tr("Show Qt information"));
-	//m_pAboutAction->setEnabled(true);
+	// m_pAboutAction->setEnabled(true);
 	connect(m_pAboutQtAction, &QAction::triggered, this, &DiagnosticsMainWindow::showAboutQt);
 
 	m_pAboutAction = new QAction(tr("About Diagnostics..."), this);
 	m_pAboutAction->setStatusTip(tr("Show application information"));
 	m_pAboutAction->setIcon(QIcon(":/Images/Images/About.svg"));
-	//m_pAboutAction->setEnabled(true);
+	// m_pAboutAction->setEnabled(true);
 	connect(m_pAboutAction, &QAction::triggered, this, &DiagnosticsMainWindow::showAbout);
-//
-//	m_schemaListAction = new QAction(tr("Schemas"), this);
-//	m_schemaListAction->setStatusTip(tr("Open schema list page..."));
-//	m_schemaListAction->setIcon(QIcon(":/Images/Images/SchemaList.svg"));
-//	m_schemaListAction->setEnabled(true);
-//	m_schemaListAction->setCheckable(true);
-//	m_schemaListAction->setChecked(QSettings().value("m_schemaListAction.checked").toBool());
-//	m_schemaListAction->setShortcuts(QList<QKeySequence>{}
-//									 <<  QKeySequence{Qt::CTRL | Qt::Key_QuoteLeft}
-//									 <<  QKeySequence{Qt::CTRL | Qt::Key_AsciiTilde});
-//	connect(m_schemaListAction, &QAction::toggled, this, &MonitorMainWindow::schemaTreeListToggled);
+	//
+	//	m_schemaListAction = new QAction(tr("Schemas"), this);
+	//	m_schemaListAction->setStatusTip(tr("Open schema list page..."));
+	//	m_schemaListAction->setIcon(QIcon(":/Images/Images/SchemaList.svg"));
+	//	m_schemaListAction->setEnabled(true);
+	//	m_schemaListAction->setCheckable(true);
+	//	m_schemaListAction->setChecked(QSettings().value("m_schemaListAction.checked").toBool());
+	//	m_schemaListAction->setShortcuts(QList<QKeySequence>{}
+	//									 <<  QKeySequence{Qt::CTRL | Qt::Key_QuoteLeft}
+	//									 <<  QKeySequence{Qt::CTRL | Qt::Key_AsciiTilde});
+	//	connect(m_schemaListAction, &QAction::toggled, this, &MonitorMainWindow::schemaTreeListToggled);
 
 	m_newTabAction = new QAction(tr("New Tab"), this);
 	m_newTabAction->setStatusTip(tr("Open current schema in new tab page"));
@@ -480,40 +486,40 @@ void DiagnosticsMainWindow::createActions()
 	m_historyForward->setShortcut(QKeySequence::Forward);
 	connect(m_historyForward, &QAction::triggered, centralWidget(), &DiagnosticsCentralWidget::slot_historyForward);
 
-//	m_archiveAction = new QAction(tr("Archive"), this);
-//	m_archiveAction->setIcon(QIcon(":/Images/Images/Archive.svg"));
-//	m_archiveAction->setEnabled(true);
-//	m_archiveAction->setData(QVariant("IAmIndependentArchive"));	// This is required to find this action in MonitorToolBar for drag and drop
-//	connect(m_archiveAction, &QAction::triggered, this, QOverload<>::of(&MonitorMainWindow::slot_archive));
-//
-//	m_trendsAction = new QAction(tr("Trends"), this);
-//	m_trendsAction->setIcon(QIcon(":/Images/Images/Trends.svg"));
-//	m_trendsAction->setEnabled(true);
-//	m_trendsAction->setData(QVariant("IAmIndependentTrend"));	// This is required to find this action in MonitorToolBar for drag and drop
-//	connect(m_trendsAction, &QAction::triggered, this, &MonitorMainWindow::slot_trends);
-//
-//	m_signalSnapshotAction = new QAction(tr("Signals Snapshot"), this);
-//	m_signalSnapshotAction->setStatusTip(tr("View signals state in real time"));
-//	m_signalSnapshotAction->setIcon(QIcon(":/Images/Images/Snapshot.svg"));
-//	m_signalSnapshotAction->setEnabled(true);
-//	connect(m_signalSnapshotAction, &QAction::triggered, this, qOverload<>(&MonitorMainWindow::slot_signalSnapshot));
-//
-//	m_findSignalAction = new QAction(tr("Find Signal"), this);
-//	m_findSignalAction->setStatusTip(tr("Find signal by it's ID"));
-//	m_findSignalAction->setIcon(QIcon(":/Images/Images/FindSignal.svg"));
-//	m_findSignalAction->setEnabled(true);
-//	m_findSignalAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_F));
-//	connect(m_findSignalAction, &QAction::triggered, this, &MonitorMainWindow::slot_findSignal);
-//
-//	m_loginAction = new QAction(tr("Login"), this);
-//	m_loginAction->setToolTip(tr("Log in to change tunable values"));
-//	m_loginAction->setIcon(QIcon(":/Images/Images/KeyOff.svg"));
-//	m_loginAction->setEnabled(true);
-//	connect(m_loginAction, &QAction::triggered, this, &MonitorMainWindow::slot_login);
-//
-//	m_loginUserTimeoutAction = new QAction(tr("Logged Out"), this);
-//	m_loginUserTimeoutAction->setEnabled(false);
-//	connect(m_loginUserTimeoutAction, &QAction::triggered, this, &MonitorMainWindow::slot_reLogin);
+	//	m_archiveAction = new QAction(tr("Archive"), this);
+	//	m_archiveAction->setIcon(QIcon(":/Images/Images/Archive.svg"));
+	//	m_archiveAction->setEnabled(true);
+	//	m_archiveAction->setData(QVariant("IAmIndependentArchive"));	// This is required to find this action in MonitorToolBar for drag
+	//and drop 	connect(m_archiveAction, &QAction::triggered, this, QOverload<>::of(&MonitorMainWindow::slot_archive));
+	//
+	//	m_trendsAction = new QAction(tr("Trends"), this);
+	//	m_trendsAction->setIcon(QIcon(":/Images/Images/Trends.svg"));
+	//	m_trendsAction->setEnabled(true);
+	//	m_trendsAction->setData(QVariant("IAmIndependentTrend"));	// This is required to find this action in MonitorToolBar for drag and
+	//drop 	connect(m_trendsAction, &QAction::triggered, this, &MonitorMainWindow::slot_trends);
+	//
+	//	m_signalSnapshotAction = new QAction(tr("Signals Snapshot"), this);
+	//	m_signalSnapshotAction->setStatusTip(tr("View signals state in real time"));
+	//	m_signalSnapshotAction->setIcon(QIcon(":/Images/Images/Snapshot.svg"));
+	//	m_signalSnapshotAction->setEnabled(true);
+	//	connect(m_signalSnapshotAction, &QAction::triggered, this, qOverload<>(&MonitorMainWindow::slot_signalSnapshot));
+	//
+	//	m_findSignalAction = new QAction(tr("Find Signal"), this);
+	//	m_findSignalAction->setStatusTip(tr("Find signal by it's ID"));
+	//	m_findSignalAction->setIcon(QIcon(":/Images/Images/FindSignal.svg"));
+	//	m_findSignalAction->setEnabled(true);
+	//	m_findSignalAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_F));
+	//	connect(m_findSignalAction, &QAction::triggered, this, &MonitorMainWindow::slot_findSignal);
+	//
+	//	m_loginAction = new QAction(tr("Login"), this);
+	//	m_loginAction->setToolTip(tr("Log in to change tunable values"));
+	//	m_loginAction->setIcon(QIcon(":/Images/Images/KeyOff.svg"));
+	//	m_loginAction->setEnabled(true);
+	//	connect(m_loginAction, &QAction::triggered, this, &MonitorMainWindow::slot_login);
+	//
+	//	m_loginUserTimeoutAction = new QAction(tr("Logged Out"), this);
+	//	m_loginUserTimeoutAction->setEnabled(false);
+	//	connect(m_loginUserTimeoutAction, &QAction::triggered, this, &MonitorMainWindow::slot_reLogin);
 
 	return;
 }
@@ -532,7 +538,7 @@ void DiagnosticsMainWindow::createMenus()
 	//
 	QMenu* schemaMenu = menuBar()->addMenu(tr("&Schema"));
 
-//	schemaMenu->addAction(m_schemaListAction);
+	//	schemaMenu->addAction(m_schemaListAction);
 	schemaMenu->addAction(m_newTabAction);
 	schemaMenu->addAction(m_closeTabAction);
 
@@ -547,18 +553,18 @@ void DiagnosticsMainWindow::createMenus()
 	viewMenu->addSeparator();
 
 	viewMenu->addAction(m_historyForward);
-	viewMenu->addAction(m_historyBack );
+	viewMenu->addAction(m_historyBack);
 
 	// Tools
 	//
 	QMenu* toolsMenu = menuBar()->addMenu(tr("&Tools"));
 
-//	toolsMenu->addAction(m_archiveAction);
-//	toolsMenu->addAction(m_trendsAction);
-//
-//	toolsMenu->addSeparator();
-//	toolsMenu->addAction(m_signalSnapshotAction);
-//	toolsMenu->addAction(m_findSignalAction);
+	//	toolsMenu->addAction(m_archiveAction);
+	//	toolsMenu->addAction(m_trendsAction);
+	//
+	//	toolsMenu->addSeparator();
+	//	toolsMenu->addAction(m_signalSnapshotAction);
+	//	toolsMenu->addAction(m_findSignalAction);
 
 	toolsMenu->addSeparator();
 	toolsMenu->addAction(m_pSettingsAction);
@@ -568,7 +574,7 @@ void DiagnosticsMainWindow::createMenus()
 	menuBar()->addSeparator();
 	QMenu* helpMenu = menuBar()->addMenu(tr("&?"));
 
-//	helpMenu->addAction(m_pDataSourcesAction);
+	//	helpMenu->addAction(m_pDataSourcesAction);
 	helpMenu->addAction(m_pStatisticsAction);
 
 	helpMenu->addSeparator();
@@ -577,12 +583,12 @@ void DiagnosticsMainWindow::createMenus()
 //	helpMenu->addAction(m_pDevToolsAction);
 #ifdef QT_DEBUG
 	helpMenu->addAction(m_pDebugAction);
-#endif	// QT_DEBUG
+#endif // QT_DEBUG
 
-//	helpMenu->addSeparator();
-//
-//	helpMenu->addAction(m_manualMatsAction);
-//
+	   //	helpMenu->addSeparator();
+	//
+	//	helpMenu->addAction(m_manualMatsAction);
+	//
 	helpMenu->addSeparator();
 
 	helpMenu->addAction(m_pAboutQtAction);
@@ -596,7 +602,7 @@ void DiagnosticsMainWindow::createToolBars()
 	m_toolBar = new DiagnosticsToolBar(tr("ToolBar"), this);
 	m_toolBar->setObjectName("DiagnosticsMainToolBar");
 
-//	m_toolBar->addAction(m_schemaListAction);
+	//	m_toolBar->addAction(m_schemaListAction);
 	m_toolBar->addAction(m_newTabAction);
 
 	m_zoomToolBarSeparator = m_toolBar->addSeparator();
@@ -604,42 +610,42 @@ void DiagnosticsMainWindow::createToolBars()
 	m_toolBar->addAction(m_zoomOutAction);
 	m_toolBar->addAction(m_zoomToFitAction);
 
-//	m_toolBar->addSeparator();
-//	m_selectSchemaWidget = new SelectSchemaWidget(&m_configController, monitorCentralWidget());
-//	m_selectSchemaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-//	m_selectSchemaWidget->setMaximumWidth(1280);
-//	m_toolBar->addWidget(m_selectSchemaWidget);
-//
+	//	m_toolBar->addSeparator();
+	//	m_selectSchemaWidget = new SelectSchemaWidget(&m_configController, monitorCentralWidget());
+	//	m_selectSchemaWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	//	m_selectSchemaWidget->setMaximumWidth(1280);
+	//	m_toolBar->addWidget(m_selectSchemaWidget);
+	//
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_historyBack);
 	m_toolBar->addAction(m_historyForward);
 
 
-//	m_toolBar->addSeparator();
-//	m_toolBar->addAction(m_signalSnapshotAction);
-//	m_toolBar->addAction(m_findSignalAction);
-//
-//	m_toolBar->addSeparator();
-//	m_toolBar->addAction(m_archiveAction);
-//	m_toolBar->addAction(m_trendsAction);
-//
+	//	m_toolBar->addSeparator();
+	//	m_toolBar->addAction(m_signalSnapshotAction);
+	//	m_toolBar->addAction(m_findSignalAction);
+	//
+	//	m_toolBar->addSeparator();
+	//	m_toolBar->addAction(m_archiveAction);
+	//	m_toolBar->addAction(m_trendsAction);
+	//
 	// Spacer between actions and logo
 	//
 	m_spacer = new QWidget(this);
 	m_spacer->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 	m_toolBar->addWidget(m_spacer);
 
-//	// Login action and widget
-//	//
-//	m_toolBar->addAction(m_loginAction);
-//	m_loginAction->setVisible(false);
-//
-//	m_toolBar->addAction(m_loginUserTimeoutAction);
-//	m_loginUserTimeoutAction->setVisible(false);
-//
-//	m_logoSeparator = m_toolBar->addSeparator();
-//	m_logoSeparator->setVisible(false);
-//
+	//	// Login action and widget
+	//	//
+	//	m_toolBar->addAction(m_loginAction);
+	//	m_loginAction->setVisible(false);
+	//
+	//	m_toolBar->addAction(m_loginUserTimeoutAction);
+	//	m_loginUserTimeoutAction->setVisible(false);
+	//
+	//	m_logoSeparator = m_toolBar->addSeparator();
+	//	m_logoSeparator->setVisible(false);
+	//
 	// Create logo for toolbar
 	//
 	m_logoLabel = new QLabel(m_toolBar);
@@ -666,10 +672,10 @@ void DiagnosticsMainWindow::createStatusBar()
 	m_statusBarAppDataConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarAppDataConnection->setMinimumWidth(100);
 
-//	m_statusBarTuningConnection = new QLabel();
-//	m_statusBarTuningConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-//	m_statusBarTuningConnection->setMinimumWidth(100);
-//
+	//	m_statusBarTuningConnection = new QLabel();
+	//	m_statusBarTuningConnection->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+	//	m_statusBarTuningConnection->setMinimumWidth(100);
+	//
 	m_statusBarProjectInfo = new QLabel;
 	m_statusBarProjectInfo->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 	m_statusBarProjectInfo->setMinimumWidth(100);
@@ -685,7 +691,7 @@ void DiagnosticsMainWindow::createStatusBar()
 	statusBar()->addWidget(m_statusBarInfo, 1);
 	statusBar()->addPermanentWidget(m_statusBarConfigConnection, 0);
 	statusBar()->addPermanentWidget(m_statusBarAppDataConnection, 0);
-//	statusBar()->addPermanentWidget(m_statusBarTuningConnection, 0);
+	//	statusBar()->addPermanentWidget(m_statusBarTuningConnection, 0);
 	statusBar()->addPermanentWidget(m_statusBarProjectInfo, 0);
 	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
 
@@ -712,16 +718,14 @@ void DiagnosticsMainWindow::updateStatusBar()
 	//
 	Q_ASSERT(m_statusBarConfigConnection);
 	Q_ASSERT(m_statusBarAppDataConnection);
-//	Q_ASSERT(m_statusBarTuningConnection);
+	//	Q_ASSERT(m_statusBarTuningConnection);
 
 	// ConfigService connection
 	//
 	{
 		std::vector<Tcp::ConnectionState> confiConnState = {m_configController.getConnectionState()};
 
-		showSoftwareConnection(tr("CfgService"),
-							   confiConnState,
-							   m_statusBarConfigConnection);
+		showSoftwareConnection(tr("CfgService"), confiConnState, m_statusBarConfigConnection);
 	}
 
 	//// AppDataService connection
@@ -737,9 +741,7 @@ void DiagnosticsMainWindow::updateStatusBar()
 	{
 		auto configInfo = m_configController.configInfo();
 
-		QString text = tr(" Project: %1   Build: %2  ")
-					   .arg(configInfo.project)
-					   .arg(configInfo.buildNo);
+		QString text = tr(" Project: %1   Build: %2  ").arg(configInfo.project).arg(configInfo.buildNo);
 
 		m_statusBarProjectInfo->setText(text);
 	}
@@ -752,9 +754,7 @@ void DiagnosticsMainWindow::updateStatusBar()
 
 		assert(m_statusBarLogAlerts);
 
-		m_statusBarLogAlerts->setText(tr(" Log E: %1 W: %2 ")
-										.arg(m_logErrorsCounter)
-										.arg(m_logWarningsCounter));
+		m_statusBarLogAlerts->setText(tr(" Log E: %1 W: %2 ").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
 
 		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
 		{
@@ -799,15 +799,15 @@ void DiagnosticsMainWindow::showSoftwareConnection(const QString& caption,
 	{
 		if (state.isConnected == true)
 		{
-			statusOk ++;
+			statusOk++;
 		}
 
 		replyCount += state.replyCount;
 
 		toolTipText += QString("%1 %2 (%3)\n")
-							.arg(state.connectedSoftwareInfo.equipmentID())
-							.arg(state.peerAddr.addressPortStr())
-							.arg(state.isConnected ? tr("ok") : tr("down"));
+						   .arg(state.connectedSoftwareInfo.equipmentID())
+						   .arg(state.peerAddr.addressPortStr())
+						   .arg(state.isConnected ? tr("ok") : tr("down"));
 	}
 	toolTipText = toolTipText.trimmed();
 
@@ -818,18 +818,11 @@ void DiagnosticsMainWindow::showSoftwareConnection(const QString& caption,
 
 	if (connectionStates.size() <= 1)
 	{
-		statusText = tr("%1: %2 (Replies: %3)")
-					 .arg(caption)
-					 .arg(statusOk ? tr("ok") : tr("down"))
-					 .arg(replyCount);
+		statusText = tr("%1: %2 (Replies: %3)").arg(caption).arg(statusOk ? tr("ok") : tr("down")).arg(replyCount);
 	}
 	else
 	{
-		statusText = tr("%1: %2/%3 (Replies: %4)")
-					 .arg(caption)
-					 .arg(statusOk)
-					 .arg(connectionStates.size())
-					 .arg(replyCount);
+		statusText = tr("%1: %2/%3 (Replies: %4)").arg(caption).arg(statusOk).arg(connectionStates.size()).arg(replyCount);
 	}
 
 	label->setText(statusText);
@@ -842,7 +835,7 @@ void DiagnosticsMainWindow::exit()
 	close();
 }
 
-//void MonitorMainWindow::schemaTreeListToggled(bool checked)
+// void MonitorMainWindow::schemaTreeListToggled(bool checked)
 //{
 //	if (m_schemaListDock == nullptr)
 //	{
@@ -855,25 +848,25 @@ void DiagnosticsMainWindow::exit()
 //	QSettings().setValue("m_schemaListAction.checked", checked);
 //
 //	return;
-//}
+// }
 //
 void DiagnosticsMainWindow::showLog()
 {
-	m_LogFile.view(this);
+	Log::LogFileDialog::view(m_LogFile, this);
 }
 
-//void MonitorMainWindow::showTuningLog()
+// void MonitorMainWindow::showTuningLog()
 //{
 //	m_tuningLogFile.viewTuningLog(this);
-//}
+// }
 //
-//void MonitorMainWindow::showDataSources()
+// void MonitorMainWindow::showDataSources()
 //{
 //	DialogDataSources::create(m_configController,
 //							  m_tuningConnection,
 //							  &m_LogFile,
 //							  this);
-//}
+// }
 
 
 void DiagnosticsMainWindow::showSettings()
@@ -892,10 +885,8 @@ void DiagnosticsMainWindow::showSettings()
 
 		auto currentSettings = DiagnosticsAppSettings::instance().get();
 
-		if (currentSettings.equipmentId != d.settings().equipmentId ||
-			currentSettings.cfgSrvIpAddress1 != d.settings().cfgSrvIpAddress1 ||
-			currentSettings.cfgSrvPort1 != d.settings().cfgSrvPort1 ||
-			currentSettings.cfgSrvIpAddress2 != d.settings().cfgSrvIpAddress2 ||
+		if (currentSettings.equipmentId != d.settings().equipmentId || currentSettings.cfgSrvIpAddress1 != d.settings().cfgSrvIpAddress1 ||
+			currentSettings.cfgSrvPort1 != d.settings().cfgSrvPort1 || currentSettings.cfgSrvIpAddress2 != d.settings().cfgSrvIpAddress2 ||
 			currentSettings.cfgSrvPort2 != d.settings().cfgSrvPort2)
 		{
 			needReconnect = true;
@@ -931,7 +922,8 @@ void DiagnosticsMainWindow::showSettings()
 		//
 		if (reinitIntanceResolver == true)
 		{
-			m_instanceResolver.reinit(DiagnosticsAppSettings::instance().equipmentId(), DiagnosticsAppSettings::instance().singleInstance());
+			m_instanceResolver.reinit(DiagnosticsAppSettings::instance().equipmentId(),
+									  DiagnosticsAppSettings::instance().singleInstance());
 		}
 
 		setWindowTitle(DiagnosticsAppSettings::instance().windowCaption());
@@ -982,12 +974,12 @@ void DiagnosticsMainWindow::showAbout()
 	return;
 }
 
-//void MonitorMainWindow::showMatsUserManual()
+// void MonitorMainWindow::showMatsUserManual()
 //{
 //	UiTools::openPdf(QApplication::applicationDirPath()+"/docs/D11.8_FSC_MATS_User_Manual.pdf", this);
-//}
+// }
 //
-//void MonitorMainWindow::devTools()
+// void MonitorMainWindow::devTools()
 //{
 //	QDialog statsDialog{this};
 //
@@ -1026,15 +1018,15 @@ void DiagnosticsMainWindow::showAbout()
 //	statsDialog.exec();
 //
 //	return;
-//}
+// }
 //
 void DiagnosticsMainWindow::debug()
 {
 #ifdef QT_DEBUG
-#endif	// QT_DEBUG
+#endif // QT_DEBUG
 }
 //
-//void MonitorMainWindow::slot_archive()
+// void MonitorMainWindow::slot_archive()
 //{
 //	qDebug() << "";
 //	qDebug() << Q_FUNC_INFO;
@@ -1111,7 +1103,7 @@ void DiagnosticsMainWindow::debug()
 //	return;
 //}
 //
-//void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
+// void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTime, QDateTime endTime, int timeType)
 //{
 //	std::vector<AppSignalParam> appSignals;
 //	QStringList notFoundSignals;
@@ -1181,12 +1173,12 @@ void DiagnosticsMainWindow::debug()
 //		return;
 //	}
 //
-//	MonitorArchive::requestArchiveWithNewWidget(&m_appSignalManager, &configController(), appSignals, startTime, endTime, static_cast<E::TimeType>(timeType), this);
-//	return;
+//	MonitorArchive::requestArchiveWithNewWidget(&m_appSignalManager, &configController(), appSignals, startTime, endTime,
+//static_cast<E::TimeType>(timeType), this); 	return;
 //}
 
 
-//void MonitorMainWindow::slot_trends()
+// void MonitorMainWindow::slot_trends()
 //{
 //	// Get Trends list
 //	//
@@ -1258,9 +1250,9 @@ void DiagnosticsMainWindow::debug()
 //	}
 //
 //	return;
-//}
+// }
 //
-//void MonitorMainWindow::slot_signalSnapshot()
+// void MonitorMainWindow::slot_signalSnapshot()
 //{
 //	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(&m_configController,
 //																			   &m_appSignalManager,
@@ -1268,9 +1260,9 @@ void DiagnosticsMainWindow::debug()
 //	d->show();
 //
 //	return;
-//}
+// }
 //
-//void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
+// void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 //{
 //	MonitorDialogSignalSnapshot* d = MonitorDialogSignalSnapshot::createDialog(
 //										 &configController(),
@@ -1333,9 +1325,9 @@ void DiagnosticsMainWindow::debug()
 //	d->setSpecificSignals(specialSignals);
 //
 //	d->show();
-//}
+// }
 //
-//void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
+// void MonitorMainWindow::slot_signalSnapshotByMask(QStringList masks)
 //{
 //	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
 //													   &m_appSignalManager,
@@ -1346,9 +1338,9 @@ void DiagnosticsMainWindow::debug()
 //	d->setSignalsTags({});
 //
 //	d->show();
-//}
+// }
 //
-//void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
+// void MonitorMainWindow::slot_signalSnapshotByTag(QStringList tags)
 //{
 //	auto d = MonitorDialogSignalSnapshot::createDialog(&configController(),
 //													   &m_appSignalManager,
@@ -1359,9 +1351,9 @@ void DiagnosticsMainWindow::debug()
 //	d->setSignalsTags(tags);
 //
 //	d->show();
-//}
+// }
 //
-//void MonitorMainWindow::slot_findSignal()
+// void MonitorMainWindow::slot_findSignal()
 //{
 //	MonitorCentralWidget* cw = monitorCentralWidget();
 //	if (cw == nullptr)
@@ -1380,12 +1372,11 @@ void DiagnosticsMainWindow::debug()
 //	dsi->show();
 //
 //	return;
-//}
+// }
 
 void DiagnosticsMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
 {
-	if (m_historyBack == nullptr ||
-		m_historyForward == nullptr)
+	if (m_historyBack == nullptr || m_historyForward == nullptr)
 	{
 		Q_ASSERT(m_historyBack);
 		Q_ASSERT(m_historyForward);
@@ -1408,18 +1399,22 @@ void DiagnosticsMainWindow::slot_updateActions(bool schemaWidgetSelected)
 	m_historyBack->setEnabled(schemaWidgetSelected);
 	m_historyForward->setEnabled(schemaWidgetSelected);
 
-//	m_selectSchemaWidget->setEnabled(schemaWidgetSelected);
+	//	m_selectSchemaWidget->setEnabled(schemaWidgetSelected);
 
 	return;
 }
 
 void DiagnosticsMainWindow::slot_configurationArrived(DiagConfigSettings configuration)
 {
+	qDebug() << "MonitorMainWindow::slot_configurationArrived()";
+
+	centralWidget()->updateConfiguration(configuration);
+
 	// Update AppSignalManager with specific data
 	//
-	
-	//m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
-	//m_appSignalManager.setSetpoints(m_configController.setpoints());
+
+	// m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
+	// m_appSignalManager.setSetpoints(m_configController.setpoints());
 
 	m_logoImage = configuration.logoImage;
 
@@ -1430,10 +1425,7 @@ void DiagnosticsMainWindow::slot_configurationArrived(DiagConfigSettings configu
 
 void DiagnosticsMainWindow::slot_configurationError(QString error)
 {
-	QMessageBox::critical(this,
-						  qAppName(),
-						  tr("Configuration error: %1")
-							  .arg(error));
+	QMessageBox::critical(this, qAppName(), tr("Configuration error: %1").arg(error));
 	return;
 }
 
@@ -1464,7 +1456,7 @@ void DiagnosticsMainWindow::activateRequested()
 	return;
 }
 
-//void MonitorMainWindow::slot_login()
+// void MonitorMainWindow::slot_login()
 //{
 //	if (m_tuningUserManager.isLoggedIn() == true)
 //	{
@@ -1474,9 +1466,9 @@ void DiagnosticsMainWindow::activateRequested()
 //	{
 //		m_tuningUserManager.login(this);
 //	}
-//}
+// }
 //
-//void MonitorMainWindow::toggleSchemaTree()
+// void MonitorMainWindow::toggleSchemaTree()
 //{
 //	if (m_schemaListAction != nullptr)
 //	{
@@ -1484,9 +1476,9 @@ void DiagnosticsMainWindow::activateRequested()
 //	}
 //
 //	return;
-//}
+// }
 //
-//void MonitorMainWindow::setVisibleSchemaTree(bool visible)
+// void MonitorMainWindow::setVisibleSchemaTree(bool visible)
 //{
 //	if (m_schemaListAction != nullptr)
 //	{
@@ -1494,7 +1486,7 @@ void DiagnosticsMainWindow::activateRequested()
 //	}
 //
 //	return;
-//}
+// }
 //
 
 void DiagnosticsMainWindow::setVisibleTabBar(bool visible)
@@ -1528,8 +1520,7 @@ void DiagnosticsMainWindow::setVisibleToolBar(bool visible)
 
 void DiagnosticsMainWindow::setVisibleStatusBar(bool visible)
 {
-	if (auto sb = statusBar();
-		sb != nullptr)
+	if (auto sb = statusBar(); sb != nullptr)
 	{
 		sb->setVisible(visible);
 	}
@@ -1539,8 +1530,7 @@ void DiagnosticsMainWindow::setVisibleStatusBar(bool visible)
 
 void DiagnosticsMainWindow::setVisibleMenu(bool visible)
 {
-	if (auto m = menuBar();
-		m != nullptr)
+	if (auto m = menuBar(); m != nullptr)
 	{
 		m->setVisible(visible);
 	}
@@ -1606,184 +1596,183 @@ void DiagnosticsToolBar::addAction(QAction* action)
 
 void DiagnosticsToolBar::dragEnterEvent(QDragEnterEvent* /*event*/)
 {
-//	// Find Trend action
-//	//
-//	QWidget* trendActionWidget = nullptr;
-//	QWidget* archiveActionWidget = nullptr;
-//
-//	QList<QAction*> allActions = actions();
-//	for (QAction* a : allActions)
-//	{
-//		QVariant d = a->data();
-//
-//		if (d.isValid() &&
-//			d.typeId() == QMetaType::QString)
-//		{
-//			if (d.toString() == QLatin1String("IAmIndependentTrend"))
-//			{
-//				trendActionWidget = widgetForAction(a);
-//				trendActionWidget->setAcceptDrops(true);
-//			}
-//
-//			if (d.toString() == QLatin1String("IAmIndependentArchive"))
-//			{
-//				archiveActionWidget = widgetForAction(a);
-//				archiveActionWidget->setAcceptDrops(true);
-//			}
-//		}
-//	}
-//
-//	if (trendActionWidget != nullptr &&
-//		trendActionWidget->geometry().contains(event->position().toPoint()) &&
-//		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
-//	{
-//		event->acceptProposedAction();
-//	}
-//
-//	if (archiveActionWidget != nullptr &&
-//		archiveActionWidget->geometry().contains(event->position().toPoint()) &&
-//		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
-//	{
-//		event->acceptProposedAction();
-//	}
-//
+	//	// Find Trend action
+	//	//
+	//	QWidget* trendActionWidget = nullptr;
+	//	QWidget* archiveActionWidget = nullptr;
+	//
+	//	QList<QAction*> allActions = actions();
+	//	for (QAction* a : allActions)
+	//	{
+	//		QVariant d = a->data();
+	//
+	//		if (d.isValid() &&
+	//			d.typeId() == QMetaType::QString)
+	//		{
+	//			if (d.toString() == QLatin1String("IAmIndependentTrend"))
+	//			{
+	//				trendActionWidget = widgetForAction(a);
+	//				trendActionWidget->setAcceptDrops(true);
+	//			}
+	//
+	//			if (d.toString() == QLatin1String("IAmIndependentArchive"))
+	//			{
+	//				archiveActionWidget = widgetForAction(a);
+	//				archiveActionWidget->setAcceptDrops(true);
+	//			}
+	//		}
+	//	}
+	//
+	//	if (trendActionWidget != nullptr &&
+	//		trendActionWidget->geometry().contains(event->position().toPoint()) &&
+	//		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	//	{
+	//		event->acceptProposedAction();
+	//	}
+	//
+	//	if (archiveActionWidget != nullptr &&
+	//		archiveActionWidget->geometry().contains(event->position().toPoint()) &&
+	//		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	//	{
+	//		event->acceptProposedAction();
+	//	}
+	//
 	return;
 }
 
 void DiagnosticsToolBar::dropEvent(QDropEvent* /*event*/)
 {
-//	// Find Trend action
-//	//
-//	QWidget* trendActionWidget = nullptr;
-//	QAction* trendAction = nullptr;
-//
-//	QWidget* archiveActionWidget = nullptr;
-//	QAction* archiveAction = nullptr;
-//
-//	QList<QAction*> allActions = actions();
-//
-//	for (QAction* a : allActions)
-//	{
-//		QVariant d = a->data();
-//		if (d.isValid() &&
-//			d.typeId() == QMetaType::QString)
-//		{
-//			if (d.toString() == QLatin1String("IAmIndependentTrend"))
-//			{
-//				trendAction = a;
-//				trendActionWidget = widgetForAction(trendAction);
-//			}
-//
-//			if (d.toString() == QLatin1String("IAmIndependentArchive"))
-//			{
-//				archiveAction = a;
-//				archiveActionWidget = widgetForAction(archiveAction);
-//			}
-//		}
-//	}
-//
-//	if (trendAction != nullptr &&
-//		trendActionWidget != nullptr &&
-//		trendActionWidget->geometry().contains(event->position().toPoint()) &&
-//		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
-//	{
-//		// Lets assume parent isMaonitorMainWindow
-//		//
-//		MonitorMainWindow* m = dynamic_cast<MonitorMainWindow*>(this->parent());
-//		if (m == nullptr)
-//		{
-//			Q_ASSERT(m);
-//			return;
-//		}
-//
-//		// Load data from drag and drop
-//		//
-//		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
-//
-//		::Proto::AppSignalSet protoSetMessage;
-//		bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
-//
-//		if (ok == false)
-//		{
-//			event->acceptProposedAction();
-//			return;
-//		}
-//
-//		std::vector<AppSignalParam> appSignals;
-//		appSignals.reserve(protoSetMessage.appsignal_size());
-//
-//		// Parse data
-//		//
-//		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
-//		{
-//			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
-//
-//			AppSignalParam appSignalParam;
-//			ok = appSignalParam.load(appSignalMessage);
-//
-//			if (ok == true)
-//			{
-//				appSignals.push_back(appSignalParam);
-//			}
-//		}
-//
-//		if (appSignals.empty() == false)
-//		{
-//			m->showTrends(appSignals);
-//		}
-//	}
-//
-//	if (archiveAction != nullptr &&
-//		archiveActionWidget != nullptr &&
-//		archiveActionWidget->geometry().contains(event->position().toPoint()) &&
-//		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
-//	{
-//		// Lets assume parent isMonitorMainWindow
-//		//
-//		MonitorMainWindow* mainWindow = dynamic_cast<MonitorMainWindow*>(this->parent());
-//		if (mainWindow == nullptr)
-//		{
-//			Q_ASSERT(mainWindow);
-//			return;
-//		}
-//
-//		// Load data from drag and drop
-//		//
-//		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
-//
-//		::Proto::AppSignalSet protoSetMessage;
-//		bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
-//
-//		if (ok == false)
-//		{
-//			event->acceptProposedAction();
-//			return;
-//		}
-//
-//		std::vector<AppSignalParam> appSignals;
-//		appSignals.reserve(protoSetMessage.appsignal_size());
-//
-//		// Parse data
-//		//
-//		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
-//		{
-//			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
-//
-//			AppSignalParam appSignalParam;
-//			ok = appSignalParam.load(appSignalMessage);
-//
-//			if (ok == true)
-//			{
-//				appSignals.push_back(appSignalParam);
-//			}
-//		}
-//
-//		if (appSignals.empty() == false)
-//		{
-//			MonitorArchive::startNewWidget(&mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow);
-//		}
-//	}
+	//	// Find Trend action
+	//	//
+	//	QWidget* trendActionWidget = nullptr;
+	//	QAction* trendAction = nullptr;
+	//
+	//	QWidget* archiveActionWidget = nullptr;
+	//	QAction* archiveAction = nullptr;
+	//
+	//	QList<QAction*> allActions = actions();
+	//
+	//	for (QAction* a : allActions)
+	//	{
+	//		QVariant d = a->data();
+	//		if (d.isValid() &&
+	//			d.typeId() == QMetaType::QString)
+	//		{
+	//			if (d.toString() == QLatin1String("IAmIndependentTrend"))
+	//			{
+	//				trendAction = a;
+	//				trendActionWidget = widgetForAction(trendAction);
+	//			}
+	//
+	//			if (d.toString() == QLatin1String("IAmIndependentArchive"))
+	//			{
+	//				archiveAction = a;
+	//				archiveActionWidget = widgetForAction(archiveAction);
+	//			}
+	//		}
+	//	}
+	//
+	//	if (trendAction != nullptr &&
+	//		trendActionWidget != nullptr &&
+	//		trendActionWidget->geometry().contains(event->position().toPoint()) &&
+	//		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	//	{
+	//		// Lets assume parent isMaonitorMainWindow
+	//		//
+	//		MonitorMainWindow* m = dynamic_cast<MonitorMainWindow*>(this->parent());
+	//		if (m == nullptr)
+	//		{
+	//			Q_ASSERT(m);
+	//			return;
+	//		}
+	//
+	//		// Load data from drag and drop
+	//		//
+	//		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+	//
+	//		::Proto::AppSignalSet protoSetMessage;
+	//		bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+	//
+	//		if (ok == false)
+	//		{
+	//			event->acceptProposedAction();
+	//			return;
+	//		}
+	//
+	//		std::vector<AppSignalParam> appSignals;
+	//		appSignals.reserve(protoSetMessage.appsignal_size());
+	//
+	//		// Parse data
+	//		//
+	//		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	//		{
+	//			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+	//
+	//			AppSignalParam appSignalParam;
+	//			ok = appSignalParam.load(appSignalMessage);
+	//
+	//			if (ok == true)
+	//			{
+	//				appSignals.push_back(appSignalParam);
+	//			}
+	//		}
+	//
+	//		if (appSignals.empty() == false)
+	//		{
+	//			m->showTrends(appSignals);
+	//		}
+	//	}
+	//
+	//	if (archiveAction != nullptr &&
+	//		archiveActionWidget != nullptr &&
+	//		archiveActionWidget->geometry().contains(event->position().toPoint()) &&
+	//		event->mimeData()->hasFormat(AppSignalParamMimeType::value))
+	//	{
+	//		// Lets assume parent isMonitorMainWindow
+	//		//
+	//		MonitorMainWindow* mainWindow = dynamic_cast<MonitorMainWindow*>(this->parent());
+	//		if (mainWindow == nullptr)
+	//		{
+	//			Q_ASSERT(mainWindow);
+	//			return;
+	//		}
+	//
+	//		// Load data from drag and drop
+	//		//
+	//		QByteArray data = event->mimeData()->data(AppSignalParamMimeType::value);
+	//
+	//		::Proto::AppSignalSet protoSetMessage;
+	//		bool ok = protoSetMessage.ParseFromArray(data.constData(), static_cast<int>(data.size()));
+	//
+	//		if (ok == false)
+	//		{
+	//			event->acceptProposedAction();
+	//			return;
+	//		}
+	//
+	//		std::vector<AppSignalParam> appSignals;
+	//		appSignals.reserve(protoSetMessage.appsignal_size());
+	//
+	//		// Parse data
+	//		//
+	//		for (int i = 0; i < protoSetMessage.appsignal_size(); i++)
+	//		{
+	//			const ::Proto::AppSignal& appSignalMessage = protoSetMessage.appsignal(i);
+	//
+	//			AppSignalParam appSignalParam;
+	//			ok = appSignalParam.load(appSignalMessage);
+	//
+	//			if (ok == true)
+	//			{
+	//				appSignals.push_back(appSignalParam);
+	//			}
+	//		}
+	//
+	//		if (appSignals.empty() == false)
+	//		{
+	//			MonitorArchive::startNewWidget(&mainWindow->signalManager(), &mainWindow->configController(), appSignals, mainWindow);
+	//		}
+	//	}
 
 	return;
 }
-

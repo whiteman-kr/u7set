@@ -100,17 +100,17 @@ SimpleAppSignalStatesArchiveFlagQueue::SimpleAppSignalStatesArchiveFlagQueue(int
 {
 }
 
-void SimpleAppSignalStatesArchiveFlagQueue::push(const SimpleAppSignalState& state, bool sendStateToArchive, const QThread* thread)
+void SimpleAppSignalStatesArchiveFlagQueue::push(const SimpleAppSignalState& state, bool sendStateToArchive)
 {
 	SimpleAppSignalStateArchiveFlag st;
 
 	st.state = state;
 	st.sendStateToArchive = sendStateToArchive;
 
-	FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>::push(st, thread);
+	FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>::push(st);
 }
 
-void SimpleAppSignalStatesArchiveFlagQueue::pushAutoPoint(const SimpleAppSignalState& state, bool sendStateToArchive, const QThread* thread)
+void SimpleAppSignalStatesArchiveFlagQueue::pushAutoPoint(const SimpleAppSignalState& state, bool sendStateToArchive)
 {
 	SimpleAppSignalStateArchiveFlag st;
 
@@ -119,7 +119,7 @@ void SimpleAppSignalStatesArchiveFlagQueue::pushAutoPoint(const SimpleAppSignalS
 	st.state.packetNo = 0;			// auto state
 	st.sendStateToArchive = sendStateToArchive;
 
-	FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>::push(st, thread);
+	FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>::push(st);
 }
 
 // ---------------------------------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 #include "SignalHistoryDialog.h"
-#include "../UtilsLib/Ui/WidgetUtils.h"
+#include <UiLib/WidgetUtils.h>
 #include "../UtilsLib/WUtils.h"
 #include "AppSettings.h"
 #include "AppSignalPropertyManager.h"

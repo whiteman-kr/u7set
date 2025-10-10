@@ -5,9 +5,9 @@
 //		ArchiveModel
 //
 //
-ArchiveModel::ArchiveModel(QObject* parent)
+ArchiveModel::ArchiveModel(QObject* parent) :
+		QAbstractTableModel(parent)
 {
-	Q_UNUSED(parent);
 }
 
 int ArchiveModel::rowCount(const QModelIndex& /*parent*/) const

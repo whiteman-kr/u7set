@@ -161,8 +161,6 @@ namespace Gateway
 
 	void IvsImpulseCommThreadWorker::sendStateChanges()
 	{
-		QThread* thread = QThread::currentThread();
-
 		IvsImpulseEventsPacket* packet = reinterpret_cast<IvsImpulseEventsPacket*>(m_sendBuffer);
 
 		for(IvsImpulseListInfoShared& li : m_lists)
@@ -184,7 +182,7 @@ namespace Gateway
 
 			//
 
-			li->stateChangesMutex.lock(thread);
+			li->stateChangesMutex.lock();
 
 			int writtenParamCount = 0;
 			qint64 baseTime_ms = -1;
@@ -196,7 +194,7 @@ namespace Gateway
 													li->stateChangesToRead,
 													writtenParamCount);
 			li->stateChangesToRead.clear();
-			li->stateChangesMutex.unlock(thread);
+			li->stateChangesMutex.unlock();
 
 			baseTime_ms = convertTimeToUTC(baseTime_ms, m_gateway->timeType());
 

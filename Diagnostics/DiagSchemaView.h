@@ -1,11 +1,12 @@
 #pragma once
 
-#include <VFrame30/AppSignalController.h>
+#include "DiagConfigController.h"
+#include "DiagnosticsSchemaManager.h"
+#include "ScriptDiagnosticsApplication.h"
+
+// #include <VFrame30/AppSignalController.h>
 #include <VFrame30/ClientSchemaView.h>
 #include <VFrame30/ITimeStats.h>
-
-#include "DiagConfigController.h"
-#include "ScriptDiagnosticsApplication.h"
 
 
 namespace VFrame30
@@ -32,13 +33,13 @@ public:
 public:
 	virtual VFrame30::DrawMode drawMode() const override;
 
+	void updateConfiguration(const DiagConfigSettings& configuration);
+
 protected:
 	virtual void paintEvent(QPaintEvent* event) override;
 	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 
 public slots:
-	void configurationArrived(DiagConfigSettings configuration);
-
 	DiagnosticsSchemaManager* diagSchemaManager();
 	const DiagnosticsSchemaManager* diagSchemaManager() const;
 

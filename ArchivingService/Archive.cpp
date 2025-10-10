@@ -307,7 +307,7 @@ qint64 Archive::getDiskFreeSpace() const
 }
 
 
-bool Archive::shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* thread)
+bool Archive::shutdown(ArchFileRecord* buffer, int bufferSize)
 {
 	if (m_readOnlyArchive == true)
 	{
@@ -327,7 +327,7 @@ bool Archive::shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* th
 		}
 
 		qint64 curPartition = getCurrentPartition();
-		archFile->shutdown(curPartition, &totalFlushed, buffer, bufferSize, thread);
+		archFile->shutdown(curPartition, &totalFlushed, buffer, bufferSize);
 	}
 
 	DEBUG_LOG_MSG(m_log, QString("Archive is shutdowned."));

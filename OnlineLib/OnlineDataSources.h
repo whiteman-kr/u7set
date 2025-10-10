@@ -30,8 +30,7 @@ public:
 	bool pushRupFrame(	quint32 sourceIP,
 						qint64 serverTime,
 						bool isSimFrame,
-						Rup::Frame& rupFrame,
-						const QThread* thread);
+						Rup::Frame& rupFrame);
 protected:
 	bool append(BaseOnlineDataSource* onlineSource,
 				CircularLoggerShared logger);
@@ -130,7 +129,7 @@ private:
 	std::condition_variable_any m_distributionRequiredCondition;
 	std::queue<OnlineDataSource<SIGNAL_STATE>*> m_distributionRequiredSources;	//	queue of sources requires states queue processing
 
-	SimpleMutex m_statesQueuesMutex;
+	SpinLock m_statesQueuesMutex;
 	std::set<std::shared_ptr<FastThreadSafeQueue<SIGNAL_STATE>>> m_stateQueues;		// pairs <queue, description>
 };
 
@@ -185,8 +184,6 @@ void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::statesDistribution()
 
 	DEBUG_LOG_MSG(m_log, QString("Signal states distribution thread started"));
 
-	QThread* thisThread = QThread::currentThread();
-
 	std::unique_lock ul(m_distributionRequiredMutex, std::defer_lock);
 
 	const int SIGNAL_STATE_BUFFER_SIZE = 100;
@@ -235,7 +232,7 @@ void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::statesDistribution()
 
 		while(processingLoopCount < 20)
 		{
-			statesCount = sourceToDistribute->popStates(signalStatesBuffer, SIGNAL_STATE_BUFFER_SIZE, thisThread);
+			statesCount = sourceToDistribute->popStates(signalStatesBuffer, SIGNAL_STATE_BUFFER_SIZE);
 
 			if (statesCount == 0)
 			{
@@ -246,7 +243,7 @@ void OnlineDataSources<DATA_SOURCE, SIGNAL_STATE>::statesDistribution()
 
 			for(auto& queue : m_stateQueues)
 			{
-				queue->pushFromBuffer(signalStatesBuffer, statesCount, thisThread);
+				queue->pushFromBuffer(signalStatesBuffer, statesCount);
 			}
 
 			m_statesQueuesMutex.unlock();

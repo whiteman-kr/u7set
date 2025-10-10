@@ -1,10 +1,11 @@
 #include "../OnlineLib/TcpClientStatistics.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include <ClientLib/ClientTranslator.h>
 #include <ClientLib/TuningUserManager.h>
 #include <TestSuiteLib/TestReport.h>
 #include <UiLib/DialogAbout.h>
 #include <UiLib/TabWidgetEx.h>
+#include <UiLib/LogDialog.h>
 
 #include "AppConfigSettings.h"
 #include "DialogDataSources.h"
@@ -1143,7 +1144,7 @@ void TestSuiteMainWindow::showDataSources()
 
 void TestSuiteMainWindow::showAppLog()
 {
-	m_appLog.view(this);
+	Log::LogFileDialog::view(m_appLog, this);
 }
 
 void TestSuiteMainWindow::showAboutQt()

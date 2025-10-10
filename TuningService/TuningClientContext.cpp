@@ -364,11 +364,11 @@ namespace Tuning
 		m_stateChangesQueueMap.erase(it);
 	}
 
-	void TuningClientContext::pushSignalStateChange(const TuningSignal::State& state, QThread* thread)
+	void TuningClientContext::pushSignalStateChange(const TuningSignal::State& state)
 	{
 		Q_ASSERT(m_signalToSourceIdMap.find(state.signalHash) != m_signalToSourceIdMap.end());
 
-		AUTO_LOCK_BY_THREAD(m_queueMapMutex, thread);
+		AUTO_LOCK_BY_CURRENT_THREAD(m_queueMapMutex);
 
 		for(auto& p : m_stateChangesQueueMap)
 		{
@@ -376,7 +376,7 @@ namespace Tuning
 
 			TEST_PTR_CONTINUE(queue);
 
-			queue->push(state, thread);
+			queue->push(state);
 		}
 	}
 
@@ -599,7 +599,7 @@ namespace Tuning
 		m_clientsContextMap.clear();
 	}
 
-	void TuningClientContextMap::pushSignalStateChange(const TuningSignal::State& state, QThread* thread)
+	void TuningClientContextMap::pushSignalStateChange(const TuningSignal::State& state)
 	{
 		auto it = m_signalToClientContextMap.find(state.signalHash);
 
@@ -612,7 +612,7 @@ namespace Tuning
 
 		for(TuningClientContext* context : contexts)
 		{
-			context->pushSignalStateChange(state, thread);
+			context->pushSignalStateChange(state);
 		}
 	}
 

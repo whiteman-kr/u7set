@@ -1,6 +1,6 @@
 #include "BaseServiceWidget.h"
 
-#include "../UtilsLib/Ui/WidgetUtils.h"
+#include <UiLib/WidgetUtils.h>
 #include "../UtilsLib/WUtils.h"
 
 BaseServiceWidget::BaseServiceWidget(ServiceTableModel* srvTableModel,

@@ -142,7 +142,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
 
-	"../UtilsLib/Ui/WidgetUtils.h"
+	<UiLib/WidgetUtils.h>
 	
 	<Network.pb.h>
 

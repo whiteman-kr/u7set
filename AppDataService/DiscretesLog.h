@@ -11,7 +11,7 @@
 
 #include "../AppSignalLib/DiscretesLogRecord.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
-#include "../UtilsLib/SimpleMutex.h"
+#include "../UtilsLib/SpinLock.h"
 #include "../OnlineLib/CircularLogger.h"
 
 class QSqlDatabase;
@@ -127,6 +127,7 @@ private:
 	qint64 m_deleteLastTime = 0;
 
 	//
+
 	std::mutex m_readersMutex;
 	std::set<DiscretesLogReader*> m_readers;
 };

@@ -74,10 +74,6 @@ private:
 
 	//
 
-	const QThread* m_thisThread = nullptr;
-
-	//
-
 	io_context* m_ioContext = nullptr;
 	steady_timer* m_timer = nullptr;
 	udp::socket* m_socket = nullptr;

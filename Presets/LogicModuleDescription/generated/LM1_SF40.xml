@@ -8296,6 +8296,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
+    
     <AFB id="#cmp_fp_ls_v1" Caption="cmp_fp_ls" Version="1.9">
       <Properties>
         <Description>Comparator Block, less than single-precision floating-point comparison</Description>
@@ -8528,6 +8529,7 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
+    
     <AFB id="#cmp_si_eq_v1" Caption="cmp_si_eq" Version="1.8">
       <Properties>
         <Description>Comparator Block, equal 32-bit signed int comparison</Description>
@@ -11612,7 +11614,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt" OpIndex="1" Size="16" />
@@ -11642,7 +11644,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="2" Size="32" />
@@ -11672,7 +11674,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32" />
@@ -11702,7 +11704,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="LittleEndian" DataFormat="UnsignedInt" OpIndex="1" Size="16" />
@@ -11732,7 +11734,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="LittleEndian" DataFormat="Float" OpIndex="2" Size="32" />
@@ -11762,7 +11764,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="LittleEndian" DataFormat="SignedInt" OpIndex="2" Size="32" />
@@ -11792,7 +11794,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="1" Size="16" />
@@ -11822,7 +11824,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>true</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32" />
@@ -11852,7 +11854,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>false</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="2" Size="32" />
@@ -11958,7 +11960,7 @@
         <Category>Converter</Category>
         <OpCode>28</OpCode>
         <InternalUse>false</InternalUse>
-        <MinWidth>36</MinWidth>
+        <MinWidth>26</MinWidth>
       </Properties>
       <Inputs>
         <Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="SignedInt" OpIndex="2" Size="32" />

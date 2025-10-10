@@ -2,7 +2,7 @@
 #include "DialogSourceInfo.h"
 
 #include <ClientLib/TuningConnection.h>
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 
 
 namespace SchemaClientLib

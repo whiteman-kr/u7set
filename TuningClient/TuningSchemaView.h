@@ -1,5 +1,4 @@
-#ifndef TUNINGSCHEMAVIEW_H
-#define TUNINGSCHEMAVIEW_H
+#pragma once
 
 #include "ScriptTuningClientApplication.h"
 #include "TuningSchemaManager.h"
@@ -22,15 +21,14 @@ protected:
 	virtual void paintEvent(QPaintEvent* event) override;
 	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 
-private slots:
+public slots:
 	void configurationArrived(TuningClientConfigSettings configuration);
 
 	// Data
 	//
 private:
-	int m_configurationId = -1;		// Last set configuration
+	int m_configurationId = -1; // Last set configuration
 	TuningConfigController& m_configController;
 	ScriptTuningClientApplication m_app;
 };
 
-#endif // TUNINGSCHEMAVIEW_H

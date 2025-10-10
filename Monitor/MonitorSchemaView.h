@@ -10,7 +10,7 @@ namespace VFrame30
 	class ITimeStats;
 	class AppSignalController;
 	class TuningController;
-}
+} // namespace VFrame30
 
 class MonitorSchemaView : public VFrame30::ClientSchemaView
 {
@@ -29,14 +29,14 @@ public:
 public:
 	virtual VFrame30::DrawMode drawMode() const override;
 
+	void updateConfiguration(const MonitorConfigSettings& configuration);
+
 protected:
 	virtual void paintEvent(QPaintEvent* event) override;
-	
+
 	virtual void updateScriptGlobalVars(QJSEngine& engine) override;
 
 public slots:
-	void configurationArrived(MonitorConfigSettings configuration);
-
 	MonitorSchemaManager* monitorSchemaManager();
 	const MonitorSchemaManager* monitorSchemaManager() const;
 
@@ -46,6 +46,3 @@ private:
 	int m_configurationId = -1;
 	ScriptMonitorApplication m_app;
 };
-
-
-

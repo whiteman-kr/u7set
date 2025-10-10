@@ -2,7 +2,7 @@
 #include "AppSettings.h"
 #include "DialogSchemasReport.h"
 
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include <ReportLib/ReportSchemaView.h>
 #include <UiLib/DialogProgress.h>
 #include <VFrame30/SchemaDetails.h>

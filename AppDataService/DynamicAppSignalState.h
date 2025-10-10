@@ -59,19 +59,16 @@ public:
 					quint16 packetNo,
 					const char* rupData,
 					int rupDataSize,
-					int autoArchivingGroup,
-					const QThread* thread);
+					int autoArchivingGroup);
 
 	int setStateParsed(const Times& time,
 					   quint16 packetNo,
 					   double value,
 					   AppSignalStateFlags flags,
-					   int autoArchivingGroup,
-					   const QThread* thread);
+					   int autoArchivingGroup);
 
 	int setUnavailable(const Times& time,
-				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
-				  const QThread* thread);
+					   SimpleAppSignalStatesArchiveFlagQueue& statesQueue);
 
 	Hash hash() const;
 
@@ -106,7 +103,7 @@ public:
 						int sessionID,
 						int newSamplePeriodCounter);
 
-	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway, const QThread* thread);
+	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway);
 
 	const AppSignal* signal() const { return m_signal; }
 
@@ -143,8 +140,7 @@ private:
 	void releaseRtProcessingOwnership(const QThread* currentProcessingOwner);
 
 	void sendAppSignalStateChangeToGateway(const SimpleAppSignalState& prevState,
-										   const SimpleAppSignalState& newState,
-										   const QThread* thread);
+										   const SimpleAppSignalState& newState);
 
 	void setAperture(E::ApertureType type, double coarseAperture, double fineAperture);
 

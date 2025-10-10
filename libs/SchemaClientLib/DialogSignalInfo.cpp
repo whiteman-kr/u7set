@@ -1,6 +1,6 @@
 #include "../AppSignalLib/AppSignalSpecPropValues.h"
 #include "../AppSignalLib/ComparatorSet.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include "ui_DialogSignalInfo.h"
 #include <SchemaClientLib/DialogSignalInfo.h>
 #include <SchemaClientLib/DialogWriteTuningValues.h>

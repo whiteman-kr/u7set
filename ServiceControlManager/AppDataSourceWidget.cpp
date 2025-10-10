@@ -6,7 +6,7 @@
 #include "ScmTcpAppDataClient.h"
 #include <QHBoxLayout>
 #include <QSplitter>
-#include "../UtilsLib/Ui/WidgetUtils.h"
+#include <UiLib/UiTools.h>
 
 AppDataSourceWidget::AppDataSourceWidget(const QString& lanControllerID, QWidget* parent) :
 	QWidget(parent),

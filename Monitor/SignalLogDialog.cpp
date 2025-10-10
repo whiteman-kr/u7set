@@ -4,15 +4,14 @@
 #include "MonitorSignalInfo.h"
 
 #include "../../AppSignalLib/IAppSignalManager.h"
-#include "../UtilsLib/Ui/UiTools.h"
-#include "../libs/UiLib/include/UiLib/StandardColors.h"
 #include <AppSignalLists/SignalList.h>
 #include <ClientLib/SignalLog.h>
 #include <ReportLib/ReportObject.h>
 #include <ReportLib/TableViewReportGenerator.h>
 #include <SchemaClientLib/DragDropHelper.h>
 #include <UiLib/ChooseItemsWidget.h>
-
+#include <UiLib/UiTools.h>
+#include <UiLib/StandardColors.h>
 
 // SignalLogReportGenerator
 //
