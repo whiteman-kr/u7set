@@ -16,6 +16,7 @@
 	
 	let LMVersionPhase3 = 0;
 	let LMVersionPhase4 = 1;
+	let LMVersionPhase6 = 2;
 	
 	let LMPlace = 0;
 	let IOPlaceMin = 1;
@@ -77,9 +78,10 @@
 		{
 			continue;
 		}
-		if (childModule.moduleFamily === FamilyLM)
+		
+		if (childModule.propertyValue("ModuleFamily") === FamilyLM)
 		{
-			lmVersion = childModule.moduleVersion;
+			lmVersion = childModule.propertyValue("ModuleVersion");
 			break;
 		}
 	}
@@ -104,6 +106,7 @@
 			return false;
 		}
 	}
+
 	if (lmVersion === LMVersionPhase4)
 	{
 		// LM1-SF40-4PH
@@ -127,5 +130,28 @@
 		}
 	}
 	
+	if (lmVersion === LMVersionPhase6)
+	{
+		// LM1-SF41-6PH
+		//
+		if ((family === FamilyAIM && version === 1) ||	//AIM
+			(family === FamilyAOM && version === 1) ||	//AOM
+			(family === FamilyDIM && version === 0) ||	//DIM
+			(family === FamilyDOM && version === 0) ||	//DOM
+			(family === FamilyAIFM && version === 0) ||	//AIFM
+			(family === FamilyOCM && version === 1) ||	//OCM
+			(family === FamilyWAIM && version === 0) ||	//WAIM
+			(family === FamilyTIM && version === 0) ||	//TIM
+			(family === FamilyFIM && version === 0) ||	//FIM
+			(family === FamilyRIM && version === 0))	//RIM
+		{
+			return true; 
+		} 
+		else
+		{
+			return false;
+		}
+	}
+
 	return true;
 })
