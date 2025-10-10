@@ -1,6 +1,11 @@
 #pragma once
 
 #include <queue>
+#include <set>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <atomic>
 
 #include <Network.pb.h>
 
@@ -29,6 +34,9 @@ protected:
 	bool getDbVersion();
 
 	QString getWriterReader() const;
+
+	static QString hashToHex(Hash v);
+	static Hash hexToHash(const QString& s);
 
 protected:
 	bool m_isWriter = false;
@@ -91,7 +99,6 @@ private:
 	void processLogQueue();
 	void ackLog(const Network::AckDiscretesLogRequest& ackRequest);
 	void deleteLogOldRecords();
-	qint64 getFreePagesCount();
 
 	void clearLogQueue();
 
@@ -103,7 +110,6 @@ private:
 	std::atomic_bool m_started = false;
 
 	std::queue<SimpleAppSignalState> m_logQueue;
-	QString m_requestStr;
 
 	std::queue<Network::AckDiscretesLogRequest> m_ackRequestQueue;
 
@@ -116,7 +122,7 @@ private:
 
 	std::thread m_thread;
 
-	const int ONE_HOUR_MS = 60 * 60 * 1000;
+	const qint64 ONE_HOUR_MS = 3600LL * 1000LL;
 
 	qint64 m_deleteLastTime = 0;
 
