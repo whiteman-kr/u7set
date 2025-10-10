@@ -1,5 +1,5 @@
 #include "../AppSignalLib/TuningValue.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include <UiLib/PropertyEditor.h>
 
 namespace

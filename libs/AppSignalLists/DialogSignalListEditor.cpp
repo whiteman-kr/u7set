@@ -1,5 +1,5 @@
 #include "../../AppSignalLib/ISignalManager.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include <AppSignalLists/DialogSignalListEditor.h>
 #include <UiLib/PropertyEditor.h>
 

@@ -1,6 +1,6 @@
 #include "DialogDataSources.h"
 
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include <SchemaClientLib/AppDataSourcesWidget.h>
 #include <SchemaClientLib/TuningSourcesWidget.h>
 #include <TestSuiteLib/TestSuiteConfigController.h>

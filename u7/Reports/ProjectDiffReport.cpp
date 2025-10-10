@@ -2,7 +2,7 @@
 
 #include "../AppSignalLib/Bus.h"
 #include "../Builder/AppSignalProperties.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 
 #include <DbLib/DbControllerTools.h>
 #include <HardwareLib/Connection.h>

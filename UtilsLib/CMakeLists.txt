@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network Xml Widgets LinguistTools)
+find_package(Qt6 REQUIRED COMPONENTS Core Network Xml LinguistTools)
 
 set(TARGET UtilsLib)
 
@@ -35,10 +35,6 @@ qt_add_library(${TARGET} STATIC
 	SimpleMutex.h
 	SimpleThread.cpp
 	SimpleThread.h
-	Ui/UiTools.cpp
-	Ui/UiTools.h
-	Ui/WidgetUtils.cpp
-	Ui/WidgetUtils.h
 	WUtils.h
 	XmlHelper.cpp
 	XmlHelper.h
@@ -58,47 +54,27 @@ target_precompile_headers(${TARGET} PRIVATE
 	<vector>
 
 	<QAbstractItemModel>
-	<QAction>
-	<QApplication>
-	<QClipboard>
-	<QComboBox>
 	<QCoreApplication>
 	<QDateTime>
-	<QDateTimeEdit>
 	<QDebug>
-	<QDesktopServices>
 	<QDir>
 	<QDomDocument>
 	<QFile>
-	<QFileDialog>
-	<QHeaderView>
 	<QHostAddress>
-	<QKeyEvent>
-	<QLineEdit>
-	<QListView>
-	<QMessageBox>
 	<QMetaMethod>
 	<QMutex>
 	<QObject>
 	<QOperatingSystemVersion>
 	<QProcess>
-	<QPushButton>
 	<QRegularExpression>
-	<QScreen>
-	<QScrollBar>
 	<QSettings>
-	<QShortcut>
-	<QStandardItem>
-	<QStandardItemModel>
+	<QSharedMemory>
 	<QStandardPaths>
-	<QString>
-	<QTableView>
 	<QtEndian>
 	<QTextStream>
 	<QTimer>
 	<QUuid>
 	<QVariant>
-	<QVBoxLayout>
 	<QXmlStreamReader>
 	<QXmlStreamWriter>
 )
@@ -117,7 +93,7 @@ target_precompile_headers(${TARGET} PUBLIC
 #
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml Qt6::Widgets)
+target_link_libraries(${TARGET} PUBLIC Qt6::Core Qt6::Network Qt6::Xml)
 target_link_libraries(${TARGET} PUBLIC CommonLib)
 
 target_compile_definitions(${TARGET} PRIVATE UTILS_LIB_DOMAIN)

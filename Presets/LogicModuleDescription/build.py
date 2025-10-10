@@ -5,6 +5,7 @@ import xml.etree.ElementTree as ET
 # Define the input and output file names as pairs
 file_pairs = [
     ("LM1_SF40.templ", "LM1_SF40.templ_inst", "./generated/LM1_SF40.xml"),
+    ("LM1_SF41.templ", "LM1_SF41.templ_inst", "./generated/LM1_SF41.xml"),
     ("LM1_SR03.templ", "LM1_SR03.templ_inst", "./generated/LM1_SR03.xml"),    
     ("LM1_SR04.templ", "LM1_SR04.templ_inst", "./generated/LM1_SR04.xml"),    
     ("LM1_SR05.templ", "LM1_SR05.templ_inst", "./generated/LM1_SR05.xml"),

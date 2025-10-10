@@ -1,6 +1,6 @@
 #include <UiLib/DialogAlert.h>
 
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 
 namespace UiLib
 {

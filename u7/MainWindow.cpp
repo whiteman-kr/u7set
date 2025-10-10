@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include "../Builder/LogicModuleSet.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include "./EquipmentEditor/EquipmentTabPage.h"
 #include "./Forms/DialogDiagSignalTypes.h"
 #include "./Forms/FileHistoryDialog.h"

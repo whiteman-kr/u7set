@@ -1,5 +1,5 @@
 #include "DialogDataSources.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 
 
 void DialogDataSources::create(const MonitorConfigController& configController,

@@ -3,7 +3,7 @@
 #include <ReportLib/TableViewReportGenerator.h>
 #include "ReportPrinterPrivate.h"
 #include <UiLib/DialogProgress.h>
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 
 namespace ReportLib
 {

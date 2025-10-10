@@ -1,7 +1,7 @@
 #include <SchemaClientLib/AppDataSourcesWidget.h>
 #include "DialogSourceInfo.h"
 
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include <ClientLib/AdsSourceStateConnection.h>
 
 namespace SchemaClientLib

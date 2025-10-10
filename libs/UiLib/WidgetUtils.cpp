@@ -1,9 +1,5 @@
-#ifndef UTILS_LIB_DOMAIN
-#error Do not include this file in the project! Link UtilsLib instead.
-#endif
-
-#include "WidgetUtils.h"
-#include "../WUtils.h"
+#include <UiLib/WidgetUtils.h>
+#include "../../UtilsLib/WUtils.h"
 #include <CommonLib/ConstStrings.h>
 
 #include <QListView>

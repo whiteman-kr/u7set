@@ -2,7 +2,7 @@
 #include "SimWidgetPrivate.h"
 #include "ui_DialogSignalInfo.h"
 
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 
 #include <SimulatorLib/SimAppSignalManager.h>
 #include <SimulatorUi/SimIdeSimulator.h>

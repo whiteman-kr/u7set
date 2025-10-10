@@ -2,7 +2,7 @@
 
 #include <UiLib/DialogAbout.h>
 #include <CommonLib/ConstStrings.h>
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 
 #include "CalibratorBase.h"
 #include "Database.h"

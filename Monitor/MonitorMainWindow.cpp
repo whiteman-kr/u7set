@@ -1,5 +1,5 @@
 #include "MonitorMainWindow.h"
-#include "../UtilsLib/Ui/UiTools.h"
+#include <UiLib/UiTools.h>
 #include "./Archive/MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "DataSourcesWidget.h"
@@ -7,6 +7,7 @@
 #include "MonitorSignalSnapshot.h"
 #include "SelectSchemaWidget.h"
 #include "SignalLogDialog.h"
+#include <UiLib/LogDialog.h>
 
 #include <AppSignalLists/DialogSignalListEditor.h>
 #include <AppSignalLists/SignalListChecker.h>
@@ -1043,7 +1044,7 @@ void MonitorMainWindow::showAppSignalListEditor()
 
 void MonitorMainWindow::showLog()
 {
-	m_LogFile.view(this);
+	Log::LogFileDialog::view(m_LogFile, this);
 }
 
 void MonitorMainWindow::showTuningLog()
