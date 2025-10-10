@@ -44,6 +44,15 @@ struct SimpleAppSignalState
 	qint64 plantTime() const { return time.plant.timeStamp; }
 	qint64 systemTime() const { return time.system.timeStamp; }
 	qint64 localTime() const { return time.local.timeStamp; }
+
+	bool operator == (const SimpleAppSignalState& s2) const
+	{
+		return	hash == s2.hash &&
+				time == s2.time &&
+				flags.all == s2.flags.all &&
+				value == s2.value &&
+				packetNo == s2.packetNo;
+	}
 };
 
 class SimpleAppSignalStatesQueue : public QObject, public FastThreadSafeQueue<SimpleAppSignalState>

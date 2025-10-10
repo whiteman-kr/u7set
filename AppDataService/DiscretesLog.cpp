@@ -26,6 +26,59 @@ DiscretesLog::~DiscretesLog()
 {
 }
 
+bool DiscretesLog::readDiscretesLogRecord(const QSqlQuery& q, DiscretesLogRecord& r)
+{
+	if (q.isValid() == false)
+	{
+		return false;
+	}
+
+	constexpr int	COL_ID = 0,
+					COL_RECORD_TIME = 1,
+					COL_PLANT_TIME = 2,
+					COL_SYSTEM_TIME = 3,
+					COL_LOCAL_TIME = 4,
+					COL_HASH = 5,
+					COL_VALUE = 6,
+					COL_FLAGS = 7,
+					COL_ACKNOWLEDGED = 8,
+					COL_ACK_TIME = 9,
+					COL_ACK_SOURCE = 10,
+					COL_ACK_USER = 11;
+
+	r.recordID = q.value(COL_ID).toLongLong();
+	r.recordTime = q.value(COL_RECORD_TIME).toLongLong();
+	r.plantTime = q.value(COL_PLANT_TIME).toLongLong();
+	r.systemTime = q.value(COL_SYSTEM_TIME).toLongLong();
+	r.localTime = q.value(COL_LOCAL_TIME).toLongLong();
+	r.signalHash = hexToHash(q.value(COL_HASH).toString());
+	r.value = q.value(COL_VALUE).toDouble();
+	r.flags = q.value(COL_FLAGS).toUInt();
+	r.acknowledged = q.value(COL_ACKNOWLEDGED).toBool();
+	r.ackTime = q.value(COL_ACK_TIME).toLongLong();
+	r.ackSource = q.value(COL_ACK_SOURCE).toString();
+	r.ackUser = q.value(COL_ACK_USER).toString();
+
+	return true;
+}
+
+QString DiscretesLog::hashToHex(Hash v)
+{
+	QString s = QString::number(v, 16).toUpper();
+	return s.rightJustified(16, QChar('0'));
+}
+
+Hash DiscretesLog::hexToHash(const QString& s)
+{
+	bool ok = false;
+
+	Hash v = s.toULongLong(&ok, 16);
+
+	Q_ASSERT(ok);
+
+	return v;
+}
+
 void DiscretesLog::setLogger(CircularLoggerShared logger)
 {
 	TEST_PTR_RETURN(logger);
@@ -107,23 +160,6 @@ bool DiscretesLog::getDbVersion()
 QString DiscretesLog::getWriterReader() const
 {
 	return (m_isWriter == true ? QStringLiteral("DiscretesLogWriter") : QStringLiteral("DiscretesLogReader"));
-}
-
-QString DiscretesLog::hashToHex(Hash v)
-{
-	QString s = QString::number(v, 16).toUpper();
-	return s.rightJustified(16, QChar('0'));
-}
-
-Hash DiscretesLog::hexToHash(const QString& s)
-{
-	bool ok = false;
-
-	Hash v = s.toULongLong(&ok, 16);
-
-	Q_ASSERT(ok);
-
-	return v;
 }
 
 // ------------------------------------------------------------------------------------------
@@ -210,7 +246,7 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 
 	reply->set_logisworkable(true);
 
-	static const int MAX_RECORDS_COUNT = 5000;
+	constexpr int MAX_RECORDS_COUNT = 5000;
 
 	int protoRecordsCount = 0;
 
@@ -248,58 +284,38 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 		return;
 	}
 
-	static const int	COL_ID = 0,
-		COL_RECORD_TIME = 1,
-		COL_PLANT_TIME = 2,
-		COL_SYSTEM_TIME = 3,
-		COL_LOCAL_TIME = 4,
-		COL_HASH = 5,
-		COL_VALUE = 6,
-		COL_FLAGS = 7,
-		COL_ACKNOWLEDGED = 8,
-		COL_ACK_TIME = 9,
-		COL_ACK_SOURCE = 10,
-		COL_ACK_USER = 11;
 
 	DiscretesLogRecord r;
 
 	while(q.next() == true)
 	{
+		if (readDiscretesLogRecord(q, r) == false)
+		{
+			continue;
+		}
+
+		m_lastRecordID = r.recordID;
+
 		if (protoRecordsCount >= MAX_RECORDS_COUNT)
 		{
-			m_lastRecordID = r.recordID = q.value(COL_ID).toLongLong();
-			r.recordTime = q.value(COL_RECORD_TIME).toLongLong();
-			r.plantTime = q.value(COL_PLANT_TIME).toLongLong();
-			r.systemTime = q.value(COL_SYSTEM_TIME).toLongLong();
-			r.localTime = q.value(COL_LOCAL_TIME).toLongLong();
-			r.signalHash = hexToHash(q.value(COL_HASH).toString());
-			r.value = q.value(COL_VALUE).toDouble();
-			r.flags = q.value(COL_FLAGS).toUInt();
-			r.acknowledged = q.value(COL_ACKNOWLEDGED).toBool();
-			r.ackTime = q.value(COL_ACK_TIME).toLongLong();
-			r.ackSource = q.value(COL_ACK_SOURCE).toString();
-			r.ackUser = q.value(COL_ACK_USER).toString();
-
 			m_logRecords.push(r);
 		}
 		else
 		{
 			Network::DiscretesLogRecord* dlr = reply->add_discreteslogrecord();
 
-			m_lastRecordID = q.value(COL_ID).toLongLong();
-
-			dlr->set_recordid(m_lastRecordID);
-			dlr->set_recordtime(q.value(COL_RECORD_TIME).toLongLong());
-			dlr->set_planttime(q.value(COL_PLANT_TIME).toLongLong());
-			dlr->set_systemtime(q.value(COL_SYSTEM_TIME).toLongLong());
-			dlr->set_localtime(q.value(COL_LOCAL_TIME).toLongLong());
-			dlr->set_signalhash(hexToHash(q.value(COL_HASH).toString()));
-			dlr->set_value(q.value(COL_VALUE).toDouble());
-			dlr->set_flags(q.value(COL_FLAGS).toUInt());
-			dlr->set_acknowledged(q.value(COL_ACKNOWLEDGED).toBool());
-			dlr->set_acktime(q.value(COL_ACK_TIME).toLongLong());
-			dlr->set_acksource(q.value(COL_ACK_SOURCE).toString().toStdString());
-			dlr->set_ackuser(q.value(COL_ACK_USER).toString().toStdString());
+			dlr->set_recordid(r.recordID);
+			dlr->set_recordtime(r.recordTime);
+			dlr->set_planttime(r.plantTime);
+			dlr->set_systemtime(r.systemTime);
+			dlr->set_localtime(r.localTime);
+			dlr->set_signalhash(r.signalHash);
+			dlr->set_value(r.value);
+			dlr->set_flags(r.flags);
+			dlr->set_acknowledged(r.acknowledged);
+			dlr->set_acktime(r.ackTime);
+			dlr->set_acksource(r.ackSource.toStdString());
+			dlr->set_ackuser(r.ackUser.toStdString());
 
 			protoRecordsCount++;
 		}
@@ -447,6 +463,20 @@ void DiscretesLogWriter::ackDiscretesLog(const Network::AckDiscretesLogRequest& 
 	}
 
 	m_condVar.notify_one();
+}
+
+bool DiscretesLogWriter::clearLog()
+{
+	TEST_PTR_RETURN_FALSE(m_db);
+
+	if (m_dbIsWorkable == false)
+	{
+		return false;
+	}
+
+	QSqlQuery q(*m_db);
+
+	return execQuery(q, QString("DELETE FROM DiscretesLog"));
 }
 
 QString DiscretesLogWriter::databaseName()

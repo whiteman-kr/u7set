@@ -23,6 +23,11 @@ public:
 	DiscretesLog(bool isWriter);
 	virtual ~DiscretesLog();
 
+	static bool readDiscretesLogRecord(const QSqlQuery& q, DiscretesLogRecord& r);
+
+	static QString hashToHex(Hash v);
+	static Hash hexToHash(const QString& s);
+
 protected:
 	void setLogger(CircularLoggerShared logger);
 
@@ -34,9 +39,6 @@ protected:
 	bool getDbVersion();
 
 	QString getWriterReader() const;
-
-	static QString hashToHex(Hash v);
-	static Hash hexToHash(const QString& s);
 
 protected:
 	bool m_isWriter = false;
@@ -87,6 +89,8 @@ public:
 	void unregisterLogReader(DiscretesLogReader* reader);
 
 	void ackDiscretesLog(const Network::AckDiscretesLogRequest& ackRequest);
+
+	bool clearLog();
 
 	static QString databaseName();
 

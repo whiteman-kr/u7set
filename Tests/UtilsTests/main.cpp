@@ -1,10 +1,13 @@
 #include <gtest/gtest.h>
 #include <QCoreApplication>
+#include "Common.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
 #include <crtdbg.h>
 #endif
+
+std::shared_ptr<CircularLogger> logger;
 
 int main(int argc, char *argv[])
 {
@@ -29,6 +32,11 @@ int main(int argc, char *argv[])
 #endif
 
 	QCoreApplication app{argc, argv};
+
+	logger = std::make_shared<CircularLogger>();
+
+	LOGGER_INIT(logger, QString(), "UTILS_TESTS_LOOG");
+
 
 	::testing::InitGoogleTest(&argc, argv);
 
