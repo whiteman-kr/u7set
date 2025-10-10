@@ -228,6 +228,7 @@ private slots:
 	void buttonChooseTagsClicked();
 	void buttonClearFilterClicked();
 	void buttonAckAllClicked();
+	void turnOffAutoscroll();
 
 private:
 	void createControls();
@@ -263,7 +264,8 @@ private:
 	QLineEdit* m_editTags = nullptr;
 	QToolButton* m_buttonChooseTags = nullptr;
 
-	QPushButton* m_buttonFixate = nullptr;
+	QPushButton* m_buttonPause = nullptr;
+	QToolButton* m_buttonAutoScroll = nullptr;
 
 	SignalLogTableView* m_tableView = nullptr;
 
