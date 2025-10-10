@@ -14,11 +14,11 @@ namespace Log
 	//
 	// LogFileRecord parsing
 	//
-	QString LogFileRecord::toString(const LogFileRecord& r, const QString& sessionHashString)
+	QString LogFileRecord::toString(const LogFileRecord& r, const QString& sessionHashString, const QString& dateTimeFormat)
 	{
 		if (r.type == MessageType::Text)
 		{
-			return QString("%1\t%2\r\n").arg(sessionHashString).arg(QString::fromLocal8Bit(r.text.c_str()).replace('\n', "\\n"));
+			return QString("%1\t%2\n").arg(sessionHashString).arg(QString::fromLocal8Bit(r.text.c_str()).replace('\n', "\\n"));
 		}
 
 		size_t intType = static_cast<int>(r.type);
@@ -28,14 +28,17 @@ namespace Log
 			return QString();
 		}
 
-		return QString("%1\t%2\t\t%3\t%4\r\n")
+		return QString("%1\t%2\t\t%3\t%4\n")
 			.arg(sessionHashString)
-			.arg(QDateTime().fromMSecsSinceEpoch(r.time).toString(messageTimeFormat))
+			.arg(QDateTime().fromMSecsSinceEpoch(r.time).toString(dateTimeFormat))
 			.arg(messageTypeTextShort[intType])
 			.arg(QString::fromLocal8Bit(r.text.c_str()).replace('\n', "\\n"));
 	}
 
-	bool LogFileRecord::fromString(const char* buf, const qint64 bufSize, const quint64 currentSessionHash, LogFileRecord& r)
+	bool LogFileRecord::fromString(const char* buf,
+								   const qint64 bufSize,
+								   const quint64 currentSessionHash,
+								   LogFileRecord& r)
 	{
 		const int MAX_STR_LEN = 1024;
 
@@ -80,70 +83,7 @@ namespace Log
 		// Custom time parsing from messageTimeFormat("dd.MM.yyyy hh:mm:ss.zzz"), because
 		// time = QDateTime::fromString(str.c_str(), messageTimeFormat).toMSecsSinceEpoch() is very slow
 		//
-		do
-		{
-			r.time = 0;
-
-			const char* timePtr = ptr;
-
-			int dd = atoi(timePtr);
-
-			if (*(timePtr + 2) != '.')
-			{
-				break;
-			}
-			timePtr += 3;
-
-			int MM = atoi(timePtr);
-
-			if (*(timePtr + 2) != '.')
-			{
-				break;
-			}
-			timePtr += 3;
-
-			int yyyy = atoi(timePtr);
-
-			if (*(timePtr + 4) != ' ')
-			{
-				break;
-			}
-			timePtr += 5;
-
-			int hh = atoi(timePtr);
-
-			if (*(timePtr + 2) != ':')
-			{
-				break;
-			}
-			timePtr += 3;
-
-			int mm = atoi(timePtr);
-
-			if (*(timePtr + 2) != ':')
-			{
-				break;
-			}
-			timePtr += 3;
-
-			int ss = atoi(timePtr);
-
-			if (*(timePtr + 2) != '.')
-			{
-				break;
-			}
-			timePtr += 3;
-
-			int zzz = atoi(timePtr);
-
-			if (*(timePtr + 3) != '\t')
-			{
-				break;
-			}
-			// timePtr += 4;
-
-			r.time = QDateTime(QDate(yyyy, MM, dd), QTime(hh, mm, ss, zzz)).toMSecsSinceEpoch();
-		} while (false);
+		r.time = timeFromString(ptr);
 
 		ptr = ptrEnd;
 		ptr++;
@@ -290,6 +230,90 @@ namespace Log
 			pos += replace.length();
 		}
 	} 
+
+	qint64 LogFileRecord::timeFromString(const char* timePtr)
+	{
+		bool ampmHourFormat = *(timePtr + 2) == '/' && *(timePtr + 25) == 'M';	// Is time in AM/PM format?
+
+		char dateSeparator = ampmHourFormat ? '/' : '.';
+
+		int dd = atoi(timePtr);
+
+		if (*(timePtr + 2) != dateSeparator)
+		{
+			return 0;
+		}
+		timePtr += 3;
+
+		int MM = atoi(timePtr);
+
+		if (*(timePtr + 2) != dateSeparator)
+		{
+			return 0;
+		}
+		timePtr += 3;
+
+		int yyyy = atoi(timePtr);
+
+		if (*(timePtr + 4) != ' ')
+		{
+			return 0;
+		}
+		timePtr += 5;
+
+		int hh = atoi(timePtr);
+
+		if (*(timePtr + 2) != ':')
+		{
+			return 0;
+		}
+		timePtr += 3;
+
+		int mm = atoi(timePtr);
+
+		if (*(timePtr + 2) != ':')
+		{
+			return 0;
+		}
+		timePtr += 3;
+
+		int ss = atoi(timePtr);
+
+		if (*(timePtr + 2) != '.')
+		{
+			return 0;
+		}
+		timePtr += 3;
+
+		int zzz = atoi(timePtr);
+
+		if (ampmHourFormat == true)
+		{
+			timePtr += 4;
+			
+			hh = hh % 12; // 12 AM  - 0, 12 PM - 12
+			if (*timePtr == 'P')
+			{
+				hh += 12;
+			}
+
+			if (*(timePtr + 2) != '\t')
+			{
+				return 0;
+			}
+			// timePtr += 4;
+		}
+		else
+		{
+			if (*(timePtr + 3) != '\t')
+			{
+				return 0;
+			}
+			//timePtr += 3;
+		}
+
+		return QDateTime(QDate(yyyy, MM, dd), QTime(hh, mm, ss, zzz)).toMSecsSinceEpoch();
+	}
 	
 	//
 	// LogFileWorker
@@ -299,7 +323,12 @@ namespace Log
 		Q_OBJECT
 
 	public:
-		LogFileWorker(const QString& fileName, const QString& path, int maxFileSize, int maxFilesCount, quint64 sessionHash);
+		LogFileWorker(const QString& fileName,
+					  const QString& path,
+					  int maxFileSize,
+					  int maxFilesCount,
+					  quint64 sessionHash,
+					  QString dateTimeFormat);
 		virtual ~LogFileWorker();
 
 		// Writing functions
@@ -390,18 +419,26 @@ namespace Log
 		std::queue<std::shared_ptr<LogFileChunk>> m_loadedChunks; // A queue contains chunks loaded from log files
 
 		std::unique_ptr<QSharedMemory> m_sharedMemory;
+
+		QString m_dateTimeFormat;
 	};
 	
 	//
 	// LogFileWorker
 	//
-	LogFileWorker::LogFileWorker(const QString& logName, const QString& path, int maxFileSize, int maxFilesCount, quint64 sessionHash) :
+	LogFileWorker::LogFileWorker(const QString& logName,
+								 const QString& path,
+								 int maxFileSize,
+								 int maxFilesCount,
+								 quint64 sessionHash,
+								 QString dateTimeFormat) :
 		m_logName(logName),
 		m_path(path),
 		m_maxFileSize(maxFileSize),
 		m_maxFilesCount(maxFilesCount),
 		m_sessionHash(sessionHash),
-		m_sessionHashString(QString::number(sessionHash, 16).rightJustified(16, '0'))
+		m_sessionHashString(QString::number(sessionHash, 16).rightJustified(16, '0')),
+		m_dateTimeFormat(dateTimeFormat)
 	{
 		// Initialize path
 		//
@@ -977,7 +1014,7 @@ namespace Log
 		//
 		for (const LogFileRecord& record : queueCopy)
 		{
-			if (file.write(LogFileRecord::toString(record, m_sessionHashString).toLocal8Bit()) == -1)
+			if (file.write(LogFileRecord::toString(record, m_sessionHashString, m_dateTimeFormat).toLocal8Bit()) == -1)
 			{
 				*errorString = tr("Log file %1 write error: %2").arg(fileName).arg(file.errorString());
 				file.close();
@@ -1286,11 +1323,21 @@ namespace Log
 	//
 	LogFile::LogFile(const QString& logName, const QString& path, int maxFileSize, int maxFilesCount, bool addAppInfoOnStart)
 	{
+		QString systemFormat = QLocale().system().timeFormat(QLocale::ShortFormat);
+		if (systemFormat.contains("AP", Qt::CaseInsensitive) == true) 
+		{
+			m_dateTimeFormat = "dd/MM/yyyy hh:mm:ss.zzz AP";
+		}
+		else 
+		{
+			m_dateTimeFormat = "dd.MM.yyyy hh:mm:ss.zzz";
+		}
+
 		QUuid uuid = QUuid::createUuid();
 
 		Hash sessionHash = ::calcHash(uuid.toString());
 
-		m_worker = new LogFileWorker(logName, QDir::toNativeSeparators(path), maxFileSize, maxFilesCount, sessionHash);
+		m_worker = new LogFileWorker(logName, QDir::toNativeSeparators(path), maxFileSize, maxFilesCount, sessionHash, m_dateTimeFormat);
 
 		connect(m_worker, &LogFileWorker::loadChunkComplete, this, &LogFile::loadChunkComplete);
 		connect(m_worker, &LogFileWorker::loadComplete, this, &LogFile::loadComplete);
@@ -1472,6 +1519,11 @@ namespace Log
 	QString LogFile::sessionHashString() const
 	{
 		return m_worker->sessionHashString();
+	}
+
+	QString LogFile::dateTimeFormat() const
+	{
+		return m_dateTimeFormat;
 	}
 	
 	bool LogFile::noDiskLog() const 
