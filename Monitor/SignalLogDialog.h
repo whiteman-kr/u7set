@@ -121,7 +121,7 @@ public:
 	void setAppSignalList(const QString& listId);
 	QString appSignalList() const;
 
-	void setRecords(std::vector<DiscretesLogRecord>& records,
+	void setRecords(const std::vector<DiscretesLogRecord>& records,
 					qint64 updateCounter); // Update the list when new records arrived or were removed
 	void fillRecords(bool resetSelection); // Refill the list when user changed filter settings
 

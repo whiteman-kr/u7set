@@ -525,7 +525,7 @@ QString SignalLogModel::appSignalList() const
 	return m_appSignallistID;
 }
 
-void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64 updateCounter)
+void SignalLogModel::setRecords(const std::vector<DiscretesLogRecord>& records, qint64 updateCounter)
 {
 	m_updateCounter = updateCounter;
 
@@ -594,16 +594,23 @@ void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64
 
 		// Remove rows from filteded array and from the model
 		//
-		qsizetype count = m_filteredRecords.size();
-		for (qsizetype i = count - 1; i >= 0; i--)
+		if (recordsToDelete.empty() == false)
 		{
-			if (recordsToDelete.contains(m_filteredRecords[i]) == true)
+			layoutAboutToBeChanged();
+
+			qsizetype count = m_filteredRecords.size();
+			for (qsizetype i = count - 1; i >= 0; i--)
 			{
-				beginRemoveRows(QModelIndex(), i, i);
-				removeRows(i, 1);
-				m_filteredRecords.erase(m_filteredRecords.begin() + i);
-				endRemoveRows();
+				if (recordsToDelete.contains(m_filteredRecords[i]) == true)
+				{
+					beginRemoveRows(QModelIndex(), i, i);
+					removeRows(i, 1);
+					m_filteredRecords.erase(m_filteredRecords.begin() + i);
+					endRemoveRows();
+				}
 			}
+
+			layoutChanged();
 		}
 	}
 }
@@ -1997,11 +2004,20 @@ void SignalLogWidget::updateRecords()
 	auto [rec, counter] = m_signalLog.getRecords();
 	m_model.setRecords(rec, counter);
 
-	// Scroll to bottom
+	QApplication::processEvents();
+
+	// Scroll to bottom if button is pressed and last record is different than previously arrived
 	//
-	if (m_buttonFixate->isChecked() == false)
+	if (rec.empty() == false && m_buttonFixate->isChecked() == false)
 	{
-		m_tableView->scrollTo(m_model.index(m_model.rowCount() - 1, 0), QAbstractItemView::EnsureVisible);
+		static RecordKey latestRecordKey;
+		const auto lastRecordKey = RecordKey(rec[rec.size() - 1]);
+
+		if (latestRecordKey != lastRecordKey) 
+		{
+			latestRecordKey = lastRecordKey;
+			m_tableView->scrollTo(m_model.index(m_model.rowCount() - 1, 0), QAbstractItemView::EnsureVisible);
+		}
 	}
 
 	// Resize columns to fit text
