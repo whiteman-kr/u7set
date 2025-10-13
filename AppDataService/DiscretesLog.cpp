@@ -171,9 +171,9 @@ QString DiscretesLog::getWriterReader() const
 DiscretesLogReader::DiscretesLogReader(CircularLoggerShared log) :
 	DiscretesLog(false)
 {
-	m_instance++;
+	m_dbName = QString("DiscretesLogReader_%1").arg(QUuid::createUuid().toString(QUuid::Id128));
 
-	DEBUG_LOG_MSG(log, QString("DiscretesLogReader_%1 created").arg(m_instance));
+	DEBUG_LOG_MSG(log, QString("%1 created").arg(m_dbName));
 
 	setLogger(log);
 
@@ -189,7 +189,7 @@ bool DiscretesLogReader::openDatabase()
 {
 	m_dbIsWorkable = false;
 
-	m_db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE", QString("DiscretesLogReader_%1").arg(m_instance)));
+	m_db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE", m_dbName));
 
 	m_db->setDatabaseName(DiscretesLogWriter::databaseName());
 
@@ -276,14 +276,12 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 
 	QSqlQuery q(*m_db);
 
-	if (execQuery(q, QString("SELECT id, recordTime, "
-							 "plantTime, systemTime, localTime, hash, value, flags, "
-							 "acknowledged, ackTime, ackSource, ackUser "
-							 "FROM DiscretesLog WHERE id > %1 ORDER BY id").arg(m_lastRecordID)) == false)
+	constexpr int N = 10000;
+
+	if (selectLastNRecords(q, N) == false)
 	{
 		return;
 	}
-
 
 	DiscretesLogRecord r;
 
@@ -359,6 +357,24 @@ void DiscretesLogReader::setLogChanged(bool logTruncated)
 	m_logChanged = true;
 	m_logTruncated = logTruncated;
 }
+
+bool DiscretesLogReader::selectLastNRecords(QSqlQuery& q, int N)
+{
+	if (!q.prepare(
+			"SELECT id, recordTime, plantTime, systemTime, localTime, hash, value, flags, "
+			"acknowledged, ackTime, ackSource, ackUser "
+			"FROM DiscretesLog "
+			"WHERE id > (SELECT IFNULL(MAX(id) - ? + 1, 0) FROM DiscretesLog) "
+			"ORDER BY id"))
+	{
+		return false;
+	}
+
+	q.bindValue(0, N);
+
+	return q.exec();
+}
+
 
 // ------------------------------------------------------------------------------------------
 //

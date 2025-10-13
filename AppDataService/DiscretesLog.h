@@ -61,10 +61,10 @@ public:
 	void setLogChanged(bool logTruncated);
 
 private:
-	CircularLoggerShared m_log;
+	static bool selectLastNRecords(QSqlQuery& q, int N);
 
-	static inline int m_instance = 0;
-
+private:
+	QString m_dbName;
 	std::atomic<bool> m_logChanged = true;		// true - is important!
 	std::atomic<bool> m_logTruncated = false;
 
