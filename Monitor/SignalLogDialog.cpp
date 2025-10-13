@@ -271,7 +271,7 @@ namespace
 			}
 		}
 
-		Q_ASSERT(v1.userType() != v2.userType());
+		Q_ASSERT(v1.userType() == v2.userType());
 
 		switch (v1.userType())
 		{
@@ -531,9 +531,74 @@ void SignalLogModel::setRecords(const std::vector<DiscretesLogRecord>& records, 
 	std::unordered_set<RecordKey, RecordKey> newKeys;
 	newKeys.reserve(records.size());
 
+	// Remove records that do not exist in new data
 	{
-		// Add records that do not exist in the model
+		// Build a map with records needed to be removed
 		//
+		std::unordered_set<RecordKey, RecordKey> recordsToDelete;
+		for (const auto& [key, rec] : m_records)
+		{
+			if (newKeys.contains(key) == false)
+			{
+				recordsToDelete.insert(key);
+			}
+		}
+
+		// Remove records from the main map
+		//
+		for (const auto& key : recordsToDelete)
+		{
+			m_records.erase(key);
+		}
+
+		// Remove rows from filteded array and from the model
+		//
+		if (recordsToDelete.empty() == false)
+		{
+			qsizetype count = m_filteredRecords.size();
+			
+			int removeFirst = -1;
+			int removeLast = -1;
+
+			for (int i = 0; i < count; i++) 
+			{
+				const auto& fr = m_filteredRecords[i];
+
+				bool deleteThisRecord = recordsToDelete.contains(fr) == true;
+
+				if (deleteThisRecord == true && removeFirst == -1) 
+				{
+					removeFirst = i;	// Initiate new block to erase
+					removeLast = i;
+					continue;
+				}
+
+				if (deleteThisRecord == false) 
+				{
+					break;
+				}
+
+				removeLast++;
+			}
+
+			if (removeFirst != -1 && removeLast != -1)
+			{
+				beginRemoveRows(QModelIndex(), removeFirst, removeLast);
+
+				int numberOfDeletedRecords = removeLast - removeFirst + 1;
+				removeRows(removeFirst, numberOfDeletedRecords);
+
+				m_filteredRecords.erase(m_filteredRecords.begin() + removeFirst, m_filteredRecords.begin() + removeLast + 1);
+				count -= numberOfDeletedRecords;
+
+				endRemoveRows();
+			}
+		}
+	}
+
+	// Add records that do not exist in the model
+	//
+	{
 		qsizetype prevRecordsCount = m_filteredRecords.size();
 
 		for (const auto& rec : records)
@@ -569,74 +634,6 @@ void SignalLogModel::setRecords(const std::vector<DiscretesLogRecord>& records, 
 		}
 
 		m_initMaxInitialRecordTime = false;
-	}
-
-	// Remove records that do not exist in new data
-	{
-		// Build a map with records needed to be removed
-		//
-		std::unordered_set<RecordKey, RecordKey> recordsToDelete;
-		for (const auto& [key, rec] : m_records)
-		{
-			if (newKeys.contains(key) == false)
-			{
-				recordsToDelete.insert(key);
-			}
-		}
-
-		// Remove records from the main map
-		//
-		for (const auto& key : recordsToDelete)
-		{
-			m_records.erase(key);
-		}
-
-		// Remove rows from filteded array and from the model
-		//
-		if (recordsToDelete.empty() == false)
-		{
-			qsizetype count = m_filteredRecords.size();
-			
-			int removeFirst = -1;
-
-			for (int i = 0; i < count; i++) 
-			{
-				const auto& fr = m_filteredRecords[i];
-
-				bool deleteThisRecord = recordsToDelete.contains(fr) == true;
-
-				if (deleteThisRecord == true && removeFirst == -1) 
-				{
-					removeFirst = i;	// Initiate new block to erase
-				}
-
-				int removeLast = -1;
-
-				if (deleteThisRecord == false) 
-				{
-					removeLast = i - 1;	// The previous item was the last in block to erase
-				}
-				if (i == count - 1) 
-				{
-					removeLast = i;	// The current (last) item is the last in block to erase
-				}
-
-				if (removeFirst != -1 && removeLast != -1)
-				{
-					beginRemoveRows(QModelIndex(), removeFirst, removeLast);
-
-					int numberOfDeletedRecords = removeLast - removeFirst + 1;
-					removeRows(removeFirst, numberOfDeletedRecords);
-					
-					m_filteredRecords.erase(m_filteredRecords.begin() + removeFirst, m_filteredRecords.begin() + removeFirst + numberOfDeletedRecords);
-					count -= numberOfDeletedRecords;
-
-					endRemoveRows();
-
-					removeFirst = -1;	// We are not in block to erase now
-				}
-			}
-		}
 	}
 }
 
