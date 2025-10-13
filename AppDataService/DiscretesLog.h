@@ -62,6 +62,7 @@ public:
 
 private:
 	static bool selectLastNRecords(QSqlQuery& q, int N);
+	static bool selectNextAfterRecords(QSqlQuery& q, qint64 lastRecordId);
 
 private:
 	QString m_dbName;

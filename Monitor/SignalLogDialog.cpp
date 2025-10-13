@@ -693,6 +693,24 @@ void SignalLogModel::fillRecords(bool resetSelection)
 	return;
 }
 
+void SignalLogModel::removeUpTo(qint64 plantTime) 
+{
+	std::vector<DiscretesLogRecord> records;
+	records.reserve(m_records.size());
+
+	// Add records only with plantTime > time
+
+	for (const auto& [key, rec] : m_records)
+	{
+		if (rec.plantTime > plantTime)
+		{
+			records.push_back(rec);
+		}
+	}
+
+	setRecords(records, m_updateCounter);
+}
+
 int SignalLogModel::recordsCount() const
 {
 	return static_cast<int>(m_records.size());
@@ -1514,7 +1532,10 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 
 					m_signalLog.sendAckUpTo(maxPlantTime);
 
-					m_buttonPause->setChecked(false); // Resume
+					if (m_buttonPause->isChecked() == true)
+					{
+						m_model.removeUpTo(maxPlantTime.timeStamp);
+					}
 				});
 		m_signalMenu.addAction(action);
 	}
@@ -1757,7 +1778,10 @@ void SignalLogWidget::buttonAckAllClicked()
 		{
 			m_signalLog.sendAckUpTo(records[i].plantTime);
 			
-			m_buttonPause->setChecked(false); // Resume
+			if (m_buttonPause->isChecked() == true)
+			{
+				m_model.removeUpTo(records[i].plantTime);
+			}
 			
 			break;
 		}

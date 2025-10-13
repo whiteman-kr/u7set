@@ -278,9 +278,19 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 
 	constexpr int N = 10000;
 
-	if (selectLastNRecords(q, N) == false)
+	if (m_lastRecordID == 0)
 	{
-		return;
+		if (selectLastNRecords(q, N) == false)
+		{
+			return;
+		}
+	}
+	else
+	{
+		if (selectNextAfterRecords(q, m_lastRecordID) == false)
+		{
+			return;
+		}
 	}
 
 	DiscretesLogRecord r;
@@ -371,6 +381,22 @@ bool DiscretesLogReader::selectLastNRecords(QSqlQuery& q, int N)
 	}
 
 	q.bindValue(0, N);
+
+	return q.exec();
+}
+
+bool DiscretesLogReader::selectNextAfterRecords(QSqlQuery& q, qint64 lastRecordId)
+{
+	if (!q.prepare(
+			"SELECT id, recordTime, plantTime, systemTime, localTime, hash, value, flags, "
+			"acknowledged, ackTime, ackSource, ackUser "
+			"FROM DiscretesLog "
+			"WHERE id > ? ORDER BY id"))
+	{
+		return false;
+	}
+
+	q.bindValue(0, lastRecordId);
 
 	return q.exec();
 }
