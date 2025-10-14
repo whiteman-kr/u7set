@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <QCoreApplication>
 #include "Common.h"
+#include <CommonLib/ConstStrings.h>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -33,10 +34,13 @@ int main(int argc, char *argv[])
 
 	QCoreApplication app{argc, argv};
 
+	app.setOrganizationName(Manufacturer::RADIY);
+
 	logger = std::make_shared<CircularLogger>();
 
-	LOGGER_INIT(logger, QString(), "UTILS_TESTS_LOOG");
+	LOGGER_INIT(logger, QString(), "UTILS_TESTS_LOG");
 
+	logger->setLogCodeInfo(false);
 
 	::testing::InitGoogleTest(&argc, argv);
 

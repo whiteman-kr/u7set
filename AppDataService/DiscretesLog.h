@@ -9,13 +9,13 @@
 
 #include <Network.pb.h>
 
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
+
 #include "../AppSignalLib/DiscretesLogRecord.h"
 #include "../AppSignalLib/SimpleAppSignalState.h"
-#include "../UtilsLib/SpinLock.h"
 #include "../OnlineLib/CircularLogger.h"
-
-class QSqlDatabase;
-class QSqlQuery;
 
 class DiscretesLog
 {
@@ -44,12 +44,12 @@ protected:
 	bool m_isWriter = false;
 	CircularLoggerShared m_log;
 
-	QSqlDatabase* m_db = nullptr;
+	QSqlDatabase m_db;
 	bool m_dbIsWorkable = false;
 	int m_dbVersion = -1;
 };
 
-class DiscretesLogReader : private DiscretesLog
+class DiscretesLogReader : private DiscretesLog, public std::enable_shared_from_this<DiscretesLogReader>
 {
 public:
 	DiscretesLogReader(CircularLoggerShared log);
@@ -62,7 +62,7 @@ public:
 
 private:
 	static bool selectLastNRecords(QSqlQuery& q, int N);
-	static bool selectNextAfterRecords(QSqlQuery& q, qint64 lastRecordId);
+	static bool selectNextAfterNRecords(QSqlQuery& q, qint64 lastRecordId, int N);
 
 private:
 	QString m_dbName;
@@ -85,15 +85,22 @@ public:
 	void stop();
 
 	void pushStates(const std::vector<SimpleAppSignalState>& logStates);
+	bool logQueueIsEmpty() const;
 
-	void registerLogReader(DiscretesLogReader* reader);
-	void unregisterLogReader(DiscretesLogReader* reader);
+	void registerLogReader(const std::shared_ptr<DiscretesLogReader>& reader);
+	void unregisterLogReader(const std::shared_ptr<DiscretesLogReader>& reader);
 
 	void ackDiscretesLog(const Network::AckDiscretesLogRequest& ackRequest);
 
-	bool clearLog();
-
 	static QString databaseName();
+
+	// functions for testing purposes ONLY!
+	//
+	bool clearLog();
+	bool deleteDbFiles();
+	void waitWhileLogQueueIsEmpty();
+
+	//
 
 private:
 	void run();
@@ -115,10 +122,11 @@ private:
 	std::atomic_bool m_started = false;
 
 	std::queue<SimpleAppSignalState> m_logQueue;
+	bool m_logQueueIsEmpty = true;
 
 	std::queue<Network::AckDiscretesLogRequest> m_ackRequestQueue;
 
-	std::mutex m_condVarMutex;
+	mutable std::mutex m_condVarMutex;
 	std::condition_variable m_condVar;
 
 	std::atomic<bool> m_quitRequested = false;
@@ -134,5 +142,8 @@ private:
 	//
 
 	std::mutex m_readersMutex;
-	std::set<DiscretesLogReader*> m_readers;
+
+	using ReaderWPtr = std::weak_ptr<DiscretesLogReader>;
+
+	std::set<ReaderWPtr, std::owner_less<ReaderWPtr>> m_readers;
 };

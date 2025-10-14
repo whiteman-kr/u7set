@@ -12,6 +12,8 @@
 
 #include "Common.h"
 
+// ------------------------ DiscretesLogWriter tests ------------------------
+
 //
 // Helpers
 //
@@ -76,6 +78,21 @@ static SimpleAppSignalState makeState(	Hash h,
 	s.time.local = localTime;
 
 	return s;
+}
+
+static void makeStates(qint64 nowTime, int statesCount, std::vector<SimpleAppSignalState>& states)
+{
+	states.clear();
+	states.reserve(statesCount);
+
+	for(int i = 0; i < statesCount;  i++)
+	{
+		SimpleAppSignalState s = makeState(randomUint64(), i % 2, randomUint32(),
+										   nowTime + 3600 * 1000 + i * 5,
+										   nowTime + i * 5,
+										   nowTime + 3600 * 1000 + i * 5 + i % 4);
+		states.push_back(s);
+	}
 }
 
 //
@@ -217,4 +234,325 @@ TEST(DiscretesLogWriter, AckLog)
 	EXPECT_EQ(rows.size(), 0);
 
 	writer.stop();
+}
+
+// ------------------------ DiscretesLogReader tests ------------------------
+
+void insertRow(QSqlDatabase& db,
+	qint64 recordTime,
+	qint64 plantTime,
+	qint64 systemTime,
+	qint64 localTime,
+	const QString& hashHex,
+	int value,
+	quint32 flags,
+	bool acknowledged = false,
+	qint64 ackTime = 0,
+	const QString& ackSource = {},
+	const QString& ackUser = {})
+{
+	QSqlQuery q(db);
+
+	const char* sql =
+		"INSERT INTO DiscretesLog "
+		"(recordTime, plantTime, systemTime, localTime, hash, value, flags, "
+		" acknowledged, ackTime, ackSource, ackUser) "
+		"VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+	ASSERT_TRUE(q.prepare(sql))
+		<< q.lastError().text().toStdString();
+
+	q.bindValue(0, recordTime);
+	q.bindValue(1, plantTime);
+	q.bindValue(2, systemTime);
+	q.bindValue(3, localTime);
+	q.bindValue(4, hashHex);
+	q.bindValue(5, value);
+	q.bindValue(6, static_cast<qulonglong>(flags));
+	q.bindValue(7, acknowledged ? 1 : 0);
+	q.bindValue(8, ackTime == 0 ? QVariant() : QVariant(ackTime));
+	q.bindValue(9, ackSource.isEmpty() ? QVariant() : QVariant(ackSource));
+	q.bindValue(10, ackUser.isEmpty() ? QVariant() : QVariant(ackUser));
+
+	ASSERT_TRUE(q.exec())
+		<< q.lastError().text().toStdString();
+}
+
+qint64 countRows(QSqlDatabase& db)
+{
+	QSqlQuery q(db);
+
+	EXPECT_TRUE(q.exec("SELECT COUNT(*) FROM DiscretesLog"))
+		<< q.lastError().text().toStdString();
+
+	EXPECT_TRUE(q.next());
+
+	return q.value(0).toLongLong();
+}
+
+// ---------- fixture ----------
+
+class DiscretesLogReaderFixture : public ::testing::Test
+{
+protected:
+	void SetUp() override
+	{
+		// создаём валидную БД через writer (он создаёт файл и таблицы)
+
+		writer.start("TProject", "TEq1", 3, logger);
+
+		QThread::msleep(100);
+
+		writer.clearLog();
+
+		dbPath = DiscretesLogWriter::databaseName();
+
+		ASSERT_FALSE(dbPath.isEmpty());
+
+		// своё подключение для прямых вставок в тесте
+		connName = "GTestConn_" + QUuid::createUuid().toString(QUuid::Id128);
+
+		db = QSqlDatabase::addDatabase("QSQLITE", connName);
+		db.setDatabaseName(dbPath);
+
+		ASSERT_TRUE(db.open())
+			<< db.lastError().text().toStdString();
+
+		QSqlQuery q(db);
+
+		ASSERT_TRUE(q.exec("DELETE FROM DiscretesLog"))
+			<< q.lastError().text().toStdString();
+	}
+
+	void TearDown() override
+	{
+		writer.stop();
+
+		if (db.isValid())
+		{
+			const auto cn = db.connectionName();
+
+			if (db.isOpen())
+			{
+				db.close();
+			}
+
+			db = QSqlDatabase();
+
+			QSqlDatabase::removeDatabase(cn);
+		}
+
+		writer.deleteDbFiles();
+	}
+
+	DiscretesLogWriter writer;
+	QString dbPath;
+	QString connName;
+	QSqlDatabase db;
+};
+
+// ---------- tests ----------
+
+TEST_F(DiscretesLogReaderFixture, initialFetch_batchesAndPending)
+{
+	std::vector<SimpleAppSignalState> states;
+
+	qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+	makeStates(now, 11000, states);
+
+	writer.pushStates(states);
+
+	writer.waitWhileLogQueueIsEmpty();
+
+	EXPECT_EQ(countRows(db), 11000);
+
+	auto reader = std::make_shared<DiscretesLogReader>(logger);
+
+	writer.registerLogReader(reader);
+
+	//
+
+	Network::GetDiscretesLogReply r1;
+
+	reader->getDiscretesLog(&r1);
+
+	// first sample: maximum 5,000 + another 5,000 in the queue
+	//
+	EXPECT_EQ(r1.discreteslogrecord_size(), 5000);
+
+	EXPECT_EQ(r1.pendingrecordscount(), 5000);
+
+	EXPECT_TRUE(r1.has_logfirstrecordid());
+
+	EXPECT_EQ(r1.logfirstrecordid(), 1);
+
+	for (int i = 0; i < std::min(10, r1.discreteslogrecord_size()); ++i)
+	{
+		double v = r1.discreteslogrecord(i).value();
+
+		EXPECT_TRUE(v == 0.0 || v == 1.0);
+	}
+
+	Network::GetDiscretesLogReply r2;
+
+	reader->getDiscretesLog(&r2);
+
+	// remove the remaining 5000 from the internal queue
+	//
+	EXPECT_EQ(r2.discreteslogrecord_size(), 5000);
+
+	EXPECT_EQ(r2.pendingrecordscount(), 0);
+
+	//
+
+	now = QDateTime::currentMSecsSinceEpoch();
+
+	makeStates(now, 6789, states);
+
+	writer.pushStates(states);
+
+	writer.waitWhileLogQueueIsEmpty();
+
+	QThread::msleep(50);
+
+	Network::GetDiscretesLogReply r3;
+
+	reader->getDiscretesLog(&r3);
+
+	EXPECT_EQ(r3.discreteslogrecord_size(), 5000);
+
+	EXPECT_EQ(r3.pendingrecordscount(), 6789 - 5000);
+
+	//
+
+	Network::GetDiscretesLogReply r4;
+
+	reader->getDiscretesLog(&r4);
+
+	EXPECT_EQ(r4.discreteslogrecord_size(), 6789 - 5000);
+
+	EXPECT_EQ(r4.pendingrecordscount(), 0);
+
+	writer.unregisterLogReader(reader);
+}
+
+TEST_F(DiscretesLogReaderFixture, incrementalFetch_afterLastId)
+{
+	auto reader = std::make_shared<DiscretesLogReader>(logger);
+
+	// прогреваем reader, чтобы он запросил "последние N"
+	Network::GetDiscretesLogReply warmup;
+
+	reader->getDiscretesLog(&warmup);
+
+	EXPECT_TRUE(warmup.logisworkable());
+
+	const qint64 t0 = QDateTime::currentMSecsSinceEpoch();
+
+	for (int i = 0; i < 1200; ++i)
+	{
+		insertRow(
+			db,
+			t0,
+			t0 + i,
+			t0 + i,
+			t0 + i,
+			DiscretesLog::hashToHex(static_cast<Hash>(0x200000 + i)),
+			(i % 2),
+			static_cast<quint32>(i)
+			);
+	}
+
+	// новых записей немного; уведомляем, что лог не менял границы (без truncate)
+	reader->setLogChanged(false);
+
+	Network::GetDiscretesLogReply r;
+
+	reader->getDiscretesLog(&r);
+
+	EXPECT_EQ(r.discreteslogrecord_size(), 1200);
+
+	EXPECT_EQ(r.pendingrecordscount(), 0);
+}
+
+TEST_F(DiscretesLogReaderFixture, emptyTable_firstRecordIdFromSeq)
+{
+	qint64 seqBefore = 0;
+
+	{
+		QSqlQuery q(db);
+
+		ASSERT_TRUE(q.exec("SELECT IFNULL((SELECT seq FROM sqlite_sequence WHERE name='DiscretesLog'), 0)"))
+			<< q.lastError().text().toStdString();
+
+		ASSERT_TRUE(q.next());
+
+		seqBefore = q.value(0).toLongLong();
+	}
+
+	auto reader = std::make_shared<DiscretesLogReader>(logger);
+
+	Network::GetDiscretesLogReply r;
+
+	reader->getDiscretesLog(&r);
+
+	EXPECT_EQ(r.discreteslogrecord_size(), 0);
+
+	EXPECT_TRUE(r.has_logfirstrecordid());
+
+	EXPECT_EQ(r.logfirstrecordid(), seqBefore + 1);
+}
+
+TEST_F(DiscretesLogReaderFixture, truncate_recalculateFirstId)
+{
+	const qint64 now = QDateTime::currentMSecsSinceEpoch();
+
+	for (int i = 0; i < 10; ++i)
+	{
+		insertRow(
+			db,
+			now,
+			now + i,
+			now + i,
+			now + i,
+			DiscretesLog::hashToHex(static_cast<Hash>(0x3000 + i)),
+			(i % 2),
+			static_cast<quint32>(i)
+			);
+	}
+
+	EXPECT_EQ(countRows(db), 10);
+
+	auto reader = std::make_shared<DiscretesLogReader>(logger);
+
+	Network::GetDiscretesLogReply r0;
+
+	reader->getDiscretesLog(&r0);
+
+	EXPECT_GT(r0.discreteslogrecord_size(), 0);
+
+	{
+		QSqlQuery q(db);
+
+		ASSERT_TRUE(q.prepare("DELETE FROM DiscretesLog WHERE plantTime <= ?"))
+			<< q.lastError().text().toStdString();
+
+		q.bindValue(0, now + 4);
+
+		ASSERT_TRUE(q.exec())
+			<< q.lastError().text().toStdString();
+	}
+
+	// сообщаем, что лог "усох" (truncate)
+	reader->setLogChanged(true);
+
+	Network::GetDiscretesLogReply r1;
+
+	reader->getDiscretesLog(&r1);
+
+	EXPECT_TRUE(r1.has_logfirstrecordid());
+
+	// после частичного удаления таблица не пустая
+	EXPECT_GT(countRows(db), 0);
 }

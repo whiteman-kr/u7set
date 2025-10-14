@@ -61,6 +61,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../UtilsLib/SpinLock.h"
 )
 
+target_compile_definitions(${TARGET} PRIVATE UNDER_GTEST=1)
+
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest GTest::gmock Qt6::Sql)
 target_link_libraries(${TARGET} PRIVATE UtilsLib ClientLib CommonLib OnlineLib)
 

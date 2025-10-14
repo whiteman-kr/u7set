@@ -665,9 +665,14 @@ void TcpAppDataServer::createDiscretesLogReader()
 {
 	if (m_dlReader == nullptr)
 	{
-		m_dlReader = new DiscretesLogReader(m_appDataService.logger());
+		m_dlReader = std::make_shared<DiscretesLogReader>(m_appDataService.logger());
 
-		m_appDataService.registerDiscretesLogReader(m_dlReader);
+		auto writer = m_appDataService.discretesLogWriter();
+
+		if (writer)
+		{
+			writer->registerLogReader(m_dlReader);
+		}
 	}
 }
 
@@ -675,11 +680,14 @@ void TcpAppDataServer::deleteDiscretesLogReader()
 {
 	if (m_dlReader != nullptr)
 	{
-		m_appDataService.unregisterDiscretesLogReader(m_dlReader);
+		auto writer = m_appDataService.discretesLogWriter();
 
-		delete m_dlReader;
+		if (writer)
+		{
+			writer->unregisterLogReader(m_dlReader);
+		}
 
-		m_dlReader = nullptr;
+		m_dlReader.reset();
 	}
 }
 

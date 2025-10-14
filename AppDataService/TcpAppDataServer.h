@@ -68,7 +68,7 @@ private:
 	SimpleAppSignalStatesQueueShared m_signalStatesQueue;
 	GatewayAppSignalStatesQueueShared m_gatewaySignalStatesQueue;
 
-	DiscretesLogReader* m_dlReader = nullptr;
+	std::shared_ptr<DiscretesLogReader> m_dlReader;
 
 	// precalculated variables
 	//
