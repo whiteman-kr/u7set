@@ -453,24 +453,6 @@ qint64 SignalLogModel::updateCounter() const
 	return m_updateCounter;
 }
 
-qint64 SignalLogModel::maxInitialRecordTime() const
-{
-	return m_maxInitialRecordTime;
-}
-
-void SignalLogModel::resetMaxInitialRecordTime()
-{
-	m_maxInitialRecordTime = -1;
-
-	for (const auto& [key, rec] : m_records)
-	{
-		if (rec.recordTime > m_maxInitialRecordTime)
-		{
-			m_maxInitialRecordTime = rec.recordTime; // Update the max record Time on first records filling
-		}
-	}
-}
-
 int SignalLogModel::columnCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
@@ -524,19 +506,38 @@ QString SignalLogModel::appSignalList() const
 	return m_appSignallistID;
 }
 
-void SignalLogModel::setRecords(const std::vector<DiscretesLogRecord>& records, qint64 updateCounter)
+void SignalLogModel::clearRecords()
 {
-	m_updateCounter = updateCounter;
+	if (rowCount() > 0)
+	{
+		beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
+		m_recordsMap.clear();
+		m_filteredRecords.clear();
+		endRemoveRows();
+	}
+}
 
-	std::unordered_set<RecordKey, RecordKey> newKeys;
-	newKeys.reserve(records.size());
+void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& rrr, qint64 updateCounter)
+{
+	m_recordsVec = std::move(rrr);
+	m_updateCounter = updateCounter;
 
 	// Remove records that do not exist in new data
 	{
+		std::unordered_set<RecordKey, RecordKey> newKeys;
+		newKeys.reserve(m_recordsVec.size());
+		
+		for (const auto& rec : m_recordsVec)
+		{
+			RecordKey key{rec};
+			newKeys.insert(key);
+		}
+		
 		// Build a map with records needed to be removed
 		//
 		std::unordered_set<RecordKey, RecordKey> recordsToDelete;
-		for (const auto& [key, rec] : m_records)
+
+		for (const auto& [key, rec] : m_recordsMap)
 		{
 			if (newKeys.contains(key) == false)
 			{
@@ -548,19 +549,25 @@ void SignalLogModel::setRecords(const std::vector<DiscretesLogRecord>& records, 
 		//
 		for (const auto& key : recordsToDelete)
 		{
-			m_records.erase(key);
+			m_recordsMap.erase(key);
 		}
 
-		// Remove rows from filteded array and from the model
+		// Remove rows from filtered array and from the model
 		//
 		if (recordsToDelete.empty() == false)
 		{
-			qsizetype count = m_filteredRecords.size();
-			
-			int removeFirst = -1;
-			int removeLast = -1;
+		
+			auto removeRecords = [this](int removeFirst, int removeLast)
+			{
+				beginRemoveRows(QModelIndex(), removeFirst, removeLast);
+				m_filteredRecords.erase(m_filteredRecords.begin() + removeFirst, m_filteredRecords.begin() + removeLast + 1);
+				endRemoveRows();
+			};
 
-			for (int i = 0; i < count; i++) 
+			int removeFirst = -1;
+
+			qsizetype count = m_filteredRecords.size();
+			for (qsizetype i = 0; i < count; i++) 
 			{
 				const auto& fr = m_filteredRecords[i];
 
@@ -569,29 +576,21 @@ void SignalLogModel::setRecords(const std::vector<DiscretesLogRecord>& records, 
 				if (deleteThisRecord == true && removeFirst == -1) 
 				{
 					removeFirst = i;	// Initiate new block to erase
-					removeLast = i;
 					continue;
 				}
 
-				if (deleteThisRecord == false) 
+				if (deleteThisRecord == false && removeFirst != -1) 
 				{
-					break;
+					removeRecords(removeFirst, i - 1);		// Erase block
+					count = m_filteredRecords.size();
+					
+					removeFirst = -1;
 				}
-
-				removeLast++;
 			}
 
-			if (removeFirst != -1 && removeLast != -1)
+			if (removeFirst != -1)
 			{
-				beginRemoveRows(QModelIndex(), removeFirst, removeLast);
-
-				int numberOfDeletedRecords = removeLast - removeFirst + 1;
-				removeRows(removeFirst, numberOfDeletedRecords);
-
-				m_filteredRecords.erase(m_filteredRecords.begin() + removeFirst, m_filteredRecords.begin() + removeLast + 1);
-				count -= numberOfDeletedRecords;
-
-				endRemoveRows();
+				removeRecords(removeFirst, static_cast<int>(m_filteredRecords.size() - 1));
 			}
 		}
 	}
@@ -601,91 +600,39 @@ void SignalLogModel::setRecords(const std::vector<DiscretesLogRecord>& records, 
 	{
 		qsizetype prevRecordsCount = m_filteredRecords.size();
 
-		for (const auto& rec : records)
+		std::vector<RecordKey> newRecords;
+
+		for (const auto& rec : m_recordsVec)
 		{
 			RecordKey key{rec};
 
-			newKeys.insert(key);
-
-			if (m_records.contains(key) == true)
+			if (m_recordsMap.contains(key) == true)
 			{
 				continue;
 			}
 
-			if (m_initMaxInitialRecordTime == true && rec.recordTime > m_maxInitialRecordTime)
-			{
-				m_maxInitialRecordTime = rec.recordTime; // Update the max record time on first records filling
-			}
-
-			m_records.insert({key, rec});
+			m_recordsMap.insert({key, rec});
 
 			if (filterRecord(rec) == true)
 			{
-				m_filteredRecords.push_back(key);
+				newRecords.push_back(key);
 			}
 		}
 
-		qsizetype addedRecordsCount = m_filteredRecords.size() - prevRecordsCount;
+		qsizetype addedRecordsCount = newRecords.size();
 		if (addedRecordsCount > 0)
 		{
 			beginInsertRows(QModelIndex(), prevRecordsCount, prevRecordsCount + addedRecordsCount - 1);
-			insertRows(prevRecordsCount, prevRecordsCount + addedRecordsCount - 1);
+			m_filteredRecords.insert(m_filteredRecords.end(),  newRecords.begin(), newRecords.end());
 			endInsertRows();
 		}
-
-		m_initMaxInitialRecordTime = false;
 	}
 }
 
-void SignalLogModel::fillRecords(bool resetSelection)
+void SignalLogModel::fillRecords()
 {
-	if (rowCount() > 0)
-	{
-		beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
-		removeRows(0, rowCount());
-
-		m_filteredRecords.clear();
-
-		endRemoveRows();
-	}
-
-	if (resetSelection == true)
-	{
-		m_initMaxInitialRecordTime = true;
-		m_maxInitialRecordTime = -1;
-	}
-
-	std::vector<RecordKey> filteredRecords;
-	filteredRecords.reserve(m_records.size());
-
-	// Fill records
-	//
-	for (const auto& [key, rec] : m_records)
-	{
-		if (m_initMaxInitialRecordTime == true && rec.recordTime > m_maxInitialRecordTime)
-		{
-			m_maxInitialRecordTime = rec.recordTime; // Update the max record time on first records filling
-		}
-
-		if (filterRecord(rec) == false)
-		{
-			continue;
-		}
-
-		filteredRecords.push_back(key);
-	}
-
-	if (filteredRecords.empty() == false)
-	{
-		beginInsertRows(QModelIndex(), 0, static_cast<int>(filteredRecords.size()) - 1);
-
-		m_filteredRecords = std::move(filteredRecords);
-
-		insertRows(0, static_cast<int>(m_filteredRecords.size()));
-		endInsertRows();
-	}
-
-	m_initMaxInitialRecordTime = false;
+	clearRecords();
+	setRecords(m_recordsVec, m_updateCounter);
 
 	return;
 }
@@ -693,11 +640,11 @@ void SignalLogModel::fillRecords(bool resetSelection)
 void SignalLogModel::removeUpTo(qint64 plantTime) 
 {
 	std::vector<DiscretesLogRecord> records;
-	records.reserve(m_records.size());
+	records.reserve(m_recordsMap.size());
 
 	// Add records only with plantTime > time
 
-	for (const auto& [key, rec] : m_records)
+	for (const auto& [key, rec] : m_recordsMap)
 	{
 		if (rec.plantTime > plantTime)
 		{
@@ -710,13 +657,13 @@ void SignalLogModel::removeUpTo(qint64 plantTime)
 
 int SignalLogModel::recordsCount() const
 {
-	return static_cast<int>(m_records.size());
+	return static_cast<int>(m_recordsMap.size());
 }
 
 const DiscretesLogRecord& SignalLogModel::record(const RecordKey& key) const
 {
-	auto it = m_records.find(key);
-	if (it == m_records.end())
+	auto it = m_recordsMap.find(key);
+	if (it == m_recordsMap.end())
 	{
 		Q_ASSERT(false);
 		static DiscretesLogRecord err;
@@ -737,8 +684,8 @@ const DiscretesLogRecord& SignalLogModel::filteredRecord(int index) const
 
 	const auto& recordKey = m_filteredRecords[index];
 
-	auto it = m_records.find(recordKey);
-	if (it == m_records.end())
+	auto it = m_recordsMap.find(recordKey);
+	if (it == m_recordsMap.end())
 	{
 		Q_ASSERT(false);
 		static DiscretesLogRecord err;
@@ -788,8 +735,8 @@ AppSignalParam SignalLogModel::signalParam(int rowIndex, bool* found)
 
 	const auto& recordKey = m_filteredRecords[rowIndex];
 
-	auto it = m_records.find(recordKey);
-	if (it == m_records.end())
+	auto it = m_recordsMap.find(recordKey);
+	if (it == m_recordsMap.end())
 	{
 		Q_ASSERT(false);
 		return AppSignalParam();
@@ -821,8 +768,8 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 	{
 		const auto& recordKey = m_filteredRecords[row];
 
-		auto it = m_records.find(recordKey);
-		if (it == m_records.end())
+		auto it = m_recordsMap.find(recordKey);
+		if (it == m_recordsMap.end())
 		{
 			Q_ASSERT(false);
 			return QVariant();
@@ -1233,7 +1180,7 @@ void SignalLogTableView::mousePressEvent(QMouseEvent* event)
 
 	QModelIndexList rows = selectionModel()->selectedRows();
 
-	for (QModelIndex& index : rows)
+	for (const QModelIndex& index : rows)
 	{
 		bool found = false;
 
@@ -1393,9 +1340,14 @@ void SignalLogWidget::keyPressEvent(QKeyEvent* event)
 
 void SignalLogWidget::timerEvent(QTimerEvent* event)
 {
-	if (event->timerId() == m_updateStateTimerId && m_buttonPause->isChecked() == false)
+	if (event->timerId() == m_updateStateTimerId)
 	{
-		updateRecords();
+		if (m_buttonPause->isChecked() == false)
+		{
+			updateRecords();
+		}
+
+		emit updateStatus(m_model.recordsCount(), m_model.rowCount());
 	}
 }
 
@@ -1486,7 +1438,7 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 
 	QModelIndexList rows = m_tableView->selectionModel()->selectedRows();
 
-	for (QModelIndex& index : rows)
+	for (const QModelIndex& index : rows)
 	{
 		if (index.isValid() == true)
 		{
@@ -1583,14 +1535,14 @@ void SignalLogWidget::editMaskReturnPressed()
 {
 	maskChanged(true /*addToCompleter*/);
 
-	m_model.fillRecords(true /*resetSelection*/);
+	m_model.fillRecords();
 }
 
 void SignalLogWidget::editTagsReturnPressed()
 {
 	tagsChanged();
 
-	m_model.fillRecords(true /*resetSelection*/);
+	m_model.fillRecords();
 }
 
 void SignalLogWidget::maskTypeComboCurrentIndexChanged(int index)
@@ -1603,13 +1555,13 @@ void SignalLogWidget::maskTypeComboCurrentIndexChanged(int index)
 		return;
 	}
 
-	m_model.fillRecords(true /*resetSelection*/);
+	m_model.fillRecords();
 }
 
 void SignalLogWidget::signalListComboIndexChanged(int /*index*/)
 {
 	m_model.setAppSignalList(m_signalListCombo->currentData().toString());
-	m_model.fillRecords(true /*resetSelection*/);
+	m_model.fillRecords();
 }
 
 void SignalLogWidget::buttonExportClicked()
@@ -1706,7 +1658,7 @@ void SignalLogWidget::buttonChooseTagsClicked()
 
 		tagsChanged();
 
-		m_model.fillRecords(true /*resetSelection*/);
+		m_model.fillRecords();
 	}
 
 	QSettings().setValue("SignalLogWidget/tagsSelectorDialog/width", tagsSelectorDialog.width());
@@ -1743,7 +1695,7 @@ void SignalLogWidget::buttonClearFilterClicked()
 	m_model.setTags({});
 
 	//
-	m_model.fillRecords(true /*resetSelection*/);
+	m_model.fillRecords();
 }
 
 void SignalLogWidget::buttonAckAllClicked()
@@ -1948,6 +1900,8 @@ void SignalLogWidget::createControls()
 	mainLayout->addLayout(exPrintLayout);
 	mainLayout->addWidget(m_tableView);
 
+	mainLayout->setContentsMargins(5, 5, 5, 0);
+
 	setLayout(mainLayout);
 
 	return;
@@ -2037,14 +1991,6 @@ void SignalLogWidget::initRecordsView()
 	m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_tableView, &QTreeWidget::customContextMenuRequested, this, &SignalLogWidget::contextMenuRequested);
 
-	connect(m_tableView->selectionModel(),
-			&QItemSelectionModel::selectionChanged,
-			this,
-			[this](const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
-			{
-				m_model.resetMaxInitialRecordTime();
-			});
-
 	if (m_settings.horzHeader.isEmpty() == true || m_settings.horzHeaderCount != static_cast<int>(SignalLogColumns::ColumnCount))
 	{
 		// First time? Set what is should be hidden by default
@@ -2079,7 +2025,7 @@ void SignalLogWidget::fillAppSignalLists()
 	if (m_model.appSignalList().isEmpty() == false)
 	{
 		m_model.setAppSignalList({});
-		m_model.fillRecords(true /*resetSelection*/);
+		m_model.fillRecords();
 	}
 
 	// Refresh AppSignalLists combo
@@ -2117,28 +2063,31 @@ void SignalLogWidget::updateRecords()
 
 	// Place new data to the model
 	//
-	auto [rec, counter] = m_signalLog.getRecords();
-	m_model.setRecords(rec, counter);
+	{
+		auto [rec, counter] = m_signalLog.getRecords();
+		m_model.setRecords(rec, counter);
+	}
 
 	QApplication::processEvents();
 
 	// Scroll to bottom if button is pressed and last record is different than previously arrived
 	//
-	if (rec.empty() == false && m_buttonAutoScroll->isChecked() == true)
+	int rowCount = m_model.rowCount();
+	if (rowCount > 0 && m_buttonAutoScroll->isChecked() == true)
 	{
 		static RecordKey latestRecordKey;
-		const auto lastRecordKey = RecordKey(rec[rec.size() - 1]);
+		const auto lastRecordKey = RecordKey(m_model.filteredRecord(rowCount - 1));
 
 		if (latestRecordKey != lastRecordKey) 
 		{
 			latestRecordKey = lastRecordKey;
-			m_tableView->scrollTo(m_model.index(m_model.rowCount() - 1, 0), QAbstractItemView::EnsureVisible);
+			m_tableView->scrollTo(m_model.index(rowCount - 1, 0), QAbstractItemView::EnsureVisible);
 		}
 	}
 
 	// Resize columns to fit text
 	//
-	if (modelWasEmpty == true && m_model.rowCount() > 0)
+	if (rowCount > 0 && modelWasEmpty == true)
 	{
 		m_tableView->resizeColumnsToContents();
 	}
@@ -2308,9 +2257,27 @@ SignalLogDialog::SignalLogDialog(ClientLib::SignalLog& signalLog,
 	connect(m_logWidget, &SignalLogWidget::signalContextMenu, this, &SignalLogDialog::signalContextMenu);
 	connect(m_logWidget, &SignalLogWidget::signalInfo, this, &SignalLogDialog::signalInfo);
 
-	QHBoxLayout* mainLayout = new QHBoxLayout();
+	m_statusBar = new QStatusBar(this);
+
+	m_labelTotal = new QLabel(this);
+	m_labelFiltered = new QLabel(this);
+	m_statusBar->addPermanentWidget(m_labelTotal);
+	m_statusBar->addPermanentWidget(m_labelFiltered);
+
+	connect(m_logWidget,
+			&SignalLogWidget::updateStatus,
+			this,
+			[this](int totalCount, int filteredCount)
+			{
+				m_labelTotal->setText(tr("Total records: %1").arg(QString::number(totalCount).rightJustified(4, '0')));
+				m_labelFiltered->setText(tr("Filtered records: %1").arg(QString::number(filteredCount).rightJustified(4, '0')));
+		});
+
+	QVBoxLayout* mainLayout = new QVBoxLayout();
 	mainLayout->addWidget(m_logWidget);
+	mainLayout->addWidget(m_statusBar);
 	mainLayout->setContentsMargins(0, 0, 0, 0);
+	mainLayout->setSpacing(0);
 	setLayout(mainLayout);
 }
 

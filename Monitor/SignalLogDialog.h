@@ -104,9 +104,6 @@ public:
 
 	qint64 updateCounter() const;
 
-	qint64 maxInitialRecordTime() const;
-	void resetMaxInitialRecordTime();
-
 	// Overrides
 
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -121,9 +118,10 @@ public:
 	void setAppSignalList(const QString& listId);
 	QString appSignalList() const;
 
-	void setRecords(const std::vector<DiscretesLogRecord>& records,
+	void clearRecords();
+	void setRecords(std::vector<DiscretesLogRecord>& records,
 					qint64 updateCounter); // Update the list when new records arrived or were removed
-	void fillRecords(bool resetSelection); // Refill the list when user changed filter settings
+	void fillRecords();						// Refill the list when user changed filter settings
 	void removeUpTo(qint64 plantTime);     // Remove records up to plantTime
 
 	int recordsCount() const;
@@ -150,11 +148,10 @@ private:
 
 	// Model data
 
-	std::unordered_map<RecordKey, DiscretesLogRecord, RecordKey> m_records;
-	qint64 m_updateCounter = 0;
+	std::vector<DiscretesLogRecord> m_recordsVec;
+	std::unordered_map<RecordKey, DiscretesLogRecord, RecordKey> m_recordsMap;
 
-	bool m_initMaxInitialRecordTime = true;
-	qint64 m_maxInitialRecordTime = -1; // This is the max record Time at the dialog showing. Further record Times are selected after adding
+	qint64 m_updateCounter = 0;
 
 	std::vector<RecordKey> m_filteredRecords;
 
@@ -250,6 +247,7 @@ private:
 signals:
 	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
+	void updateStatus(int totalRecords, int filteredRecords);
 
 private:
 	ClientLib::SignalLog& m_signalLog;
@@ -337,6 +335,10 @@ private:
 
 	SignalLogWidget* m_logWidget = nullptr;
 	static SignalLogDialog* s_instance;
+
+	QStatusBar* m_statusBar = nullptr;
+	QLabel* m_labelTotal = nullptr;
+	QLabel* m_labelFiltered = nullptr;
 
 	const QString& m_signalLogTagCritical;
 	const QString& m_signalLogTagWarning;
