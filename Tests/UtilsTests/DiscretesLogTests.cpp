@@ -290,8 +290,6 @@ qint64 countRows(QSqlDatabase& db)
 	return q.value(0).toLongLong();
 }
 
-// ---------- fixture ----------
-
 class DiscretesLogReaderFixture : public ::testing::Test
 {
 protected:
@@ -350,8 +348,6 @@ protected:
 	QString connName;
 	QSqlDatabase db;
 };
-
-// ---------- tests ----------
 
 TEST_F(DiscretesLogReaderFixture, initialFetch_batchesAndPending)
 {
@@ -441,7 +437,6 @@ TEST_F(DiscretesLogReaderFixture, incrementalFetch_afterLastId)
 {
 	auto reader = std::make_shared<DiscretesLogReader>(logger);
 
-	// прогреваем reader, чтобы он запросил "последние N"
 	Network::GetDiscretesLogReply warmup;
 
 	reader->getDiscretesLog(&warmup);
@@ -464,7 +459,6 @@ TEST_F(DiscretesLogReaderFixture, incrementalFetch_afterLastId)
 			);
 	}
 
-	// новых записей немного; уведомляем, что лог не менял границы (без truncate)
 	reader->setLogChanged(false);
 
 	Network::GetDiscretesLogReply r;
@@ -544,7 +538,8 @@ TEST_F(DiscretesLogReaderFixture, truncate_recalculateFirstId)
 			<< q.lastError().text().toStdString();
 	}
 
-	// сообщаем, что лог "усох" (truncate)
+	// notify that log truncated
+	//
 	reader->setLogChanged(true);
 
 	Network::GetDiscretesLogReply r1;
@@ -553,6 +548,7 @@ TEST_F(DiscretesLogReaderFixture, truncate_recalculateFirstId)
 
 	EXPECT_TRUE(r1.has_logfirstrecordid());
 
-	// после частичного удаления таблица не пустая
+	// after partial truncate table is not empty
+	//
 	EXPECT_GT(countRows(db), 0);
 }
