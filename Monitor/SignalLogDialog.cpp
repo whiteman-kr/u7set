@@ -517,9 +517,9 @@ void SignalLogModel::clearRecords()
 	}
 }
 
-void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& rrr, qint64 updateCounter)
+void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64 updateCounter)
 {
-	m_recordsVec = std::move(rrr);
+	m_recordsVec = std::move(records);
 	m_updateCounter = updateCounter;
 
 	// Remove records that do not exist in new data
@@ -566,8 +566,8 @@ void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& rrr, qint64 upd
 
 			int removeFirst = -1;
 
-			qsizetype count = m_filteredRecords.size();
-			for (qsizetype i = 0; i < count; i++) 
+			int count = static_cast<int>(m_filteredRecords.size());
+			for (int i = 0; i < count; i++) 
 			{
 				const auto& fr = m_filteredRecords[i];
 
@@ -581,8 +581,14 @@ void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& rrr, qint64 upd
 
 				if (deleteThisRecord == false && removeFirst != -1) 
 				{
-					removeRecords(removeFirst, i - 1);		// Erase block
-					count = m_filteredRecords.size();
+					const int removeLast = i - 1;
+					const int numberToDelete = removeLast - removeFirst + 1;
+
+					removeRecords(removeFirst, removeLast); // Erase block
+					
+					count -= numberToDelete;				// Shift the loop to the beginning by number of deleted elements
+					i -= numberToDelete;
+					Q_ASSERT(m_filteredRecords.size() == count);
 					
 					removeFirst = -1;
 				}
@@ -591,6 +597,7 @@ void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& rrr, qint64 upd
 			if (removeFirst != -1)
 			{
 				removeRecords(removeFirst, static_cast<int>(m_filteredRecords.size() - 1));
+				Q_ASSERT(m_filteredRecords.empty() == true);
 			}
 		}
 	}
@@ -2269,8 +2276,8 @@ SignalLogDialog::SignalLogDialog(ClientLib::SignalLog& signalLog,
 			this,
 			[this](int totalCount, int filteredCount)
 			{
-				m_labelTotal->setText(tr("Total records: %1").arg(QString::number(totalCount).rightJustified(4, '0')));
-				m_labelFiltered->setText(tr("Filtered records: %1").arg(QString::number(filteredCount).rightJustified(4, '0')));
+				m_labelTotal->setText(tr("Total: %1").arg(QString::number(totalCount).rightJustified(4, '0')));
+				m_labelFiltered->setText(tr("Filtered: %1").arg(QString::number(filteredCount).rightJustified(4, '0')));
 		});
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
