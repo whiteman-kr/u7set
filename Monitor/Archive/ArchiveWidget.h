@@ -67,7 +67,6 @@ protected slots:
 	void requestFinished();
 
 private:
-	void exportData(bool exportSelected);
 	void printData(bool printSelected);
 
 	// Data

@@ -588,36 +588,77 @@ void ArchiveWidget::exportButton()
 		return;
 	}
 
-	if (m_view->selectionModel()->hasSelection() == true)
+	static QString path{"."};
+
+	QFileDialog dialog(
+			this,
+			tr("Save File"),
+			path + QDir::separator() + "untitled.pdf",
+			tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+		dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+		dialog.setFileMode(QFileDialog::ExistingFile);
+		dialog.setViewMode(QFileDialog::List);
+
+	// Create your checkbox
+	//
+	QCheckBox* customCheck = new QCheckBox("Export Selected Only", &dialog);
+	customCheck->setEnabled(m_view->selectionModel()->hasSelection() == true);
+
+	// Access the dialog's layout and insert the checkbox
+	//
+	QGridLayout* layout = qobject_cast<QGridLayout*>(dialog.layout());
+	if (layout)
 	{
-		QMenu menu;
+		int row = layout->rowCount();
+		layout->addWidget(customCheck, row, 0, 1, layout->columnCount());
+	}
 
-		QAction* all = new QAction(tr("Export All"), &menu);
-		menu.addAction(all);
-		connect(all,
-				&QAction::triggered,
-				this,
-				[this]()
-				{
-					exportData(false /*exportSelected*/);
-				});
+	// Execute dialog
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+	QStringList files = dialog.selectedFiles();
+	if (files.isEmpty())
+	{
+		return;
+	}
+	QString fileName = files[0];
+	path = QFileInfo(fileName).path(); // store path for next time
 
-		QAction* sel = new QAction(tr("Export Selected"), &menu);
-		connect(sel,
-				&QAction::triggered,
-				this,
-				[this]()
-				{
-					exportData(true /*exportSelected*/);
-				});
-		menu.addAction(sel);
-		
-		menu.exec(QCursor::pos());
+	bool exportSelected = customCheck->isChecked();
+
+	QFileInfo fileInfo(fileName);
+	QString extension = fileInfo.completeSuffix();
+
+	if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
+	{
+		QPageLayout pageLayout(QPageSize(QPageSize::A4),
+							   QPageLayout::Orientation::Portrait,
+							   QMarginsF(25, 20, 15, 20),
+							   QPageLayout::Unit::Millimeter);
+
+		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("ArchiveExportPageLayout", pageLayout);
+
+		ArchiveReportInfo ri(&m_source, m_projectName, m_softwareId);
+
+		ReportLib::TableViewReportGenerator generator(this, *m_view, ri, pageLayout, exportSelected);
+
+		generator.exportTable(fileName);
+
+		pageLayout = generator.pageLayout();
+		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "ArchiveExportPageLayout");
 	}
 	else
 	{
-		exportData(false /*exportSelected*/);
+		QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
 	}
+
+	return;
 }
 
 void ArchiveWidget::printButton()
@@ -764,52 +805,6 @@ void ArchiveWidget::requestFinished()
 {
 	updateUiState();
 	return;
-}
-
-void ArchiveWidget::exportData(bool exportSelected)
-{
-	static QString path{"."};
-	QString fileName = QFileDialog::getSaveFileName(
-		this,
-		tr("Save File"),
-		path + QDir::separator() + "untitled.pdf",
-		tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
-
-	if (fileName.isEmpty() == true)
-	{
-		return;
-	}
-	path = QFileInfo(fileName).path(); // store path for next time
-
-	QFileInfo fileInfo(fileName);
-	QString extension = fileInfo.completeSuffix();
-
-	if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
-	{
-		QPageLayout pageLayout(QPageSize(QPageSize::A4),
-							   QPageLayout::Orientation::Portrait,
-							   QMarginsF(25, 20, 15, 20),
-							   QPageLayout::Unit::Millimeter);
-
-		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("ArchiveExportPageLayout", pageLayout);
-
-		ArchiveReportInfo ri(&m_source, m_projectName, m_softwareId);
-
-		ReportLib::TableViewReportGenerator generator(this, *m_view, ri, pageLayout, exportSelected);
-		generator.exportTable(fileName);
-
-		pageLayout = generator.pageLayout();
-		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "ArchiveExportPageLayout");
-	}
-	else
-	{
-		QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
-		return;
-	}
 }
 
 void ArchiveWidget::printData(bool printSelected)

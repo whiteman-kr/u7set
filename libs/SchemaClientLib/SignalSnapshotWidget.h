@@ -136,7 +136,6 @@ namespace SchemaClientLib
 		void maskChanged(bool addToCompleter);
 		void tagsChanged(bool addToCompleter);
 
-		void exportData(bool exportSelected);
 		void printData(bool printSelected);
 
 	signals:

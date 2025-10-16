@@ -242,7 +242,6 @@ private:
 	bool filterIsSet() const;
 	bool warnAboutAckFiltered();
 
-	void exportData(bool exportSelected);
 	void printData(bool printSelected);
 
 signals:

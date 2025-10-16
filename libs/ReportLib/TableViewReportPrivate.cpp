@@ -271,7 +271,7 @@ namespace ReportLib
 		//
 		std::vector<int> rowsToProcess;
 		int rowCount = m_modelDataProvider.exportRowCount();
-		if (m_exportSelected == true) // If more than 1 row is selected - export only them, otherwise export all rows
+		if (m_exportSelected == true)
 		{
 			rowsToProcess = m_selectedRows;
 		}
@@ -388,15 +388,20 @@ namespace ReportLib
 
 		// Fill table
 		//
+		std::vector<int> rowsToProcess;
 		int rowCount = m_modelDataProvider.exportRowCount();
-		std::vector<int> rowsToProcess = m_selectedRows;
-		if (rowsToProcess.size() <= 1) // If more than 1 row is selected - export only them, otherwise export all rows
+		if (m_exportSelected == true)
+		{
+			rowsToProcess = m_selectedRows;
+		}
+		else
 		{
 			for (int row = 0; row < rowCount; row++)
 			{
 				rowsToProcess.push_back(row);
 			}
 		}
+
 		{
 			QMutexLocker l(&m_statisticsMutex);
 			m_statistics.maxValue = m_maxRows > 0 ? m_maxRows : static_cast<int>(rowsToProcess.size());
@@ -504,15 +509,20 @@ namespace ReportLib
 
 		// Fill table
 		//
+		std::vector<int> rowsToProcess;
 		int rowCount = m_modelDataProvider.exportRowCount();
-		std::vector<int> rowsToProcess = m_selectedRows;
-		if (rowsToProcess.size() <= 1) // If more than 1 row is selected - export only them, otherwise export all rows
+		if (m_exportSelected == true)
+		{
+			rowsToProcess = m_selectedRows;
+		}
+		else
 		{
 			for (int row = 0; row < rowCount; row++)
 			{
 				rowsToProcess.push_back(row);
 			}
 		}
+
 		{
 			QMutexLocker l(&m_statisticsMutex);
 			m_statistics.maxValue = m_maxRows > 0 ? m_maxRows : static_cast<int>(rowsToProcess.size());
