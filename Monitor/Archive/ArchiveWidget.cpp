@@ -253,6 +253,7 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 	setCentralWidget(m_view);
 
 	m_view->setWordWrap(false);
+	m_view->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 
 	// --
 	//
@@ -587,78 +588,69 @@ void ArchiveWidget::exportButton()
 		return;
 	}
 
-	static QString path{"."};
-	QString fileName = QFileDialog::getSaveFileName(this,
-													tr("Save File"),
-													path + QDir::separator() + "untitled.pdf",
-													tr("Portable Documnet Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
-	if (fileName.isEmpty() == true)
+	if (m_view->selectionModel()->hasSelection() == true)
 	{
-		return;
+		QMenu menu;
+
+		QAction* all = new QAction(tr("Export All"), &menu);
+		menu.addAction(all);
+		connect(all,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					exportData(false /*exportSelected*/);
+				});
+
+		QAction* sel = new QAction(tr("Export Selected"), &menu);
+		connect(sel,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					exportData(true /*exportSelected*/);
+				});
+		menu.addAction(sel);
+		
+		menu.exec(QCursor::pos());
 	}
-	path = QFileInfo(fileName).path(); // store path for next time
-
-	QFileInfo fileInfo(fileName);
-	QString extension = fileInfo.completeSuffix();
-
-	if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
-		extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
+	else
 	{
-		QPageLayout pageLayout(QPageSize(QPageSize::A4),
-							   QPageLayout::Orientation::Landscape,
-							   QMarginsF(25, 20, 15, 20),
-							   QPageLayout::Unit::Millimeter);
-
-		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("ArchiveExportPageLayout", pageLayout);
-
-		ArchiveReportInfo ri(&m_source, m_projectName, m_softwareId);
-		ReportLib::TableViewReportGenerator generator(this, *m_view, ri, pageLayout);
-		generator.exportTable(fileName);
-		pageLayout = generator.pageLayout();
-
-		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "ArchiveExportPageLayout");
-		return;
+		exportData(false /*exportSelected*/);
 	}
-
-	QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
-	return;
 }
 
 void ArchiveWidget::printButton()
 {
-	QPageLayout pageLayout(QPageSize(QPageSize::A4),
-						   QPageLayout::Orientation::Landscape,
-						   QMarginsF(10, 10, 10, 10),
-						   QPageLayout::Unit::Millimeter);
-
-	pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("ArchivePrintPageLayout", pageLayout);
-
-	ArchiveReportInfo ri(&m_source, m_projectName, m_softwareId);
-	ReportLib::TableViewReportGenerator generator(this, *m_view, ri, pageLayout);
-	generator.printTable();
-	pageLayout = generator.pageLayout();
-
-	ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "ArchivePrintPageLayout");
-
-	return;
-}
-
-void ArchiveWidget::updateOrCancelButton()
-{
-	if (m_updateButton->text() == tr("Update"))
+	if (m_view->selectionModel()->hasSelection() == true)
 	{
-		if (m_source.acceptedSignals.empty() == true)
-		{
-			QMessageBox::warning(this, qAppName(), tr("Select at least one signal to request archive data."));
-			return;
-		}
+		QMenu menu;
 
-		requestData();
+		QAction* all = new QAction(tr("Print All"), &menu);
+		menu.addAction(all);
+		connect(all,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					printData(false /*printSelected*/);
+				});
+
+		QAction* sel = new QAction(tr("Print Selected"), &menu);
+		connect(sel,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					printData(true /*printSelected*/);
+				});
+		menu.addAction(sel);
+		
+		menu.exec(QCursor::pos());
 	}
 	else
 	{
-		cancelRequest();
+		printData(false /*printSelected*/);
 	}
 	return;
 
@@ -772,4 +764,87 @@ void ArchiveWidget::requestFinished()
 {
 	updateUiState();
 	return;
+}
+
+void ArchiveWidget::exportData(bool exportSelected)
+{
+	static QString path{"."};
+	QString fileName = QFileDialog::getSaveFileName(
+		this,
+		tr("Save File"),
+		path + QDir::separator() + "untitled.pdf",
+		tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+	path = QFileInfo(fileName).path(); // store path for next time
+
+	QFileInfo fileInfo(fileName);
+	QString extension = fileInfo.completeSuffix();
+
+	if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
+	{
+		QPageLayout pageLayout(QPageSize(QPageSize::A4),
+							   QPageLayout::Orientation::Portrait,
+							   QMarginsF(25, 20, 15, 20),
+							   QPageLayout::Unit::Millimeter);
+
+		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("ArchiveExportPageLayout", pageLayout);
+
+		ArchiveReportInfo ri(&m_source, m_projectName, m_softwareId);
+
+		ReportLib::TableViewReportGenerator generator(this, *m_view, ri, pageLayout, exportSelected);
+		generator.exportTable(fileName);
+
+		pageLayout = generator.pageLayout();
+		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "ArchiveExportPageLayout");
+	}
+	else
+	{
+		QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
+		return;
+	}
+}
+
+void ArchiveWidget::printData(bool printSelected)
+{
+	QPageLayout pageLayout(QPageSize(QPageSize::A4),
+						   QPageLayout::Orientation::Landscape,
+						   QMarginsF(10, 10, 10, 10),
+						   QPageLayout::Unit::Millimeter);
+
+	pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("ArchivePrintPageLayout", pageLayout);
+
+	ArchiveReportInfo ri(&m_source, m_projectName, m_softwareId);
+	ReportLib::TableViewReportGenerator generator(this, *m_view, ri, pageLayout, printSelected);
+	generator.printTable();
+	pageLayout = generator.pageLayout();
+
+	ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "ArchivePrintPageLayout");
+
+	return;
+}
+
+void ArchiveWidget::updateOrCancelButton()
+{
+	if (m_updateButton->text() == tr("Update"))
+	{
+		if (m_source.acceptedSignals.empty() == true)
+		{
+			QMessageBox::warning(this, qAppName(), tr("Select at least one signal to request archive data."));
+			return;
+		}
+
+		requestData();
+	}
+	else
+	{
+		cancelRequest();
+	}
 }

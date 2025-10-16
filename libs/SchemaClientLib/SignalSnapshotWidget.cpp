@@ -652,70 +652,74 @@ namespace SchemaClientLib
 			return;
 		}
 
-		static QString path{"."};
-		QString fileName = QFileDialog::getSaveFileName(
-			this,
-			tr("Save File"),
-			path + QDir::separator() + "untitled.pdf",
-			tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
-
-		if (fileName.isEmpty() == true)
+		if (m_tableView->selectionModel()->hasSelection() == true)
 		{
-			return;
+			QMenu menu;
+
+			QAction* all = new QAction(tr("Export All"), &menu);
+			menu.addAction(all);
+			connect(all,
+					&QAction::triggered,
+					this,
+					[this]()
+					{
+						exportData(false /*exportSelected*/);
+					});
+
+			QAction* sel = new QAction(tr("Export Selected"), &menu);
+			connect(sel,
+					&QAction::triggered,
+					this,
+					[this]()
+					{
+						exportData(true /*exportSelected*/);
+					});
+			menu.addAction(sel);
+
+			menu.exec(QCursor::pos());
 		}
-		path = QFileInfo(fileName).path(); // store path for next time
-
-		QFileInfo fileInfo(fileName);
-		QString extension = fileInfo.completeSuffix();
-
-		if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
-			extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
-			extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
-			extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
-			extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
+		else
 		{
-			QPageLayout pageLayout(QPageSize(QPageSize::A4),
-								   QPageLayout::Orientation::Portrait,
-								   QMarginsF(25, 20, 15, 20),
-								   QPageLayout::Unit::Millimeter);
-
-			pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("SnapshotExportPageLayout", pageLayout);
-
-			SnapshotReportInfo ri(m_projectName, m_equipmentId);
-
-			ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout);
-			connect(this, &SignalSnapshotWidget::signalsUpdated, &generator, &ReportLib::TableViewReportGenerator::stop);
-			
-			generator.exportTable(fileName);
-			
-			pageLayout = generator.pageLayout();
-			ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SnapshotExportPageLayout");
-
-			return;
+			exportData(false /*exportSelected*/);
 		}
 
-		QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
 		return;
 	}
 
 	void SignalSnapshotWidget::buttonPrintClicked()
 	{
-		QPageLayout pageLayout(QPageSize(QPageSize::A4),
-							   QPageLayout::Orientation::Portrait,
-							   QMarginsF(10, 10, 10, 10),
-							   QPageLayout::Unit::Millimeter);
+		if (m_tableView->selectionModel()->hasSelection() == true)
+		{
+			QMenu menu;
 
-		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("SnapshotPrintPageLayout", pageLayout);
+			QAction* all = new QAction(tr("Print All"), &menu);
+			menu.addAction(all);
+			connect(all,
+					&QAction::triggered,
+					this,
+					[this]()
+					{
+						printData(false /*printSelected*/);
+					});
 
-		SnapshotReportInfo ri(m_projectName, m_equipmentId);
+			QAction* sel = new QAction(tr("Print Selected"), &menu);
+			connect(sel,
+					&QAction::triggered,
+					this,
+					[this]()
+					{
+						printData(true /*printSelected*/);
+					});
+			menu.addAction(sel);
 
-		ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout);
-		connect(this, &SignalSnapshotWidget::signalsUpdated, &generator, &ReportLib::TableViewReportGenerator::stop);
+			menu.exec(QCursor::pos());
+		}
+		else
+		{
+			printData(false /*printSelected*/);
+		}
 
-		generator.printTable();
-		
-		pageLayout = generator.pageLayout();
-		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SnapshotPrintPageLayout");
+		return;
 	}
 
 	void SignalSnapshotWidget::buttonChooseTagsClicked()
@@ -1372,4 +1376,74 @@ namespace SchemaClientLib
 
 		m_model.setTags(tags);
 	}
+
+	void SignalSnapshotWidget::exportData(bool exportSelected)
+	{
+		static QString path{"."};
+		QString fileName = QFileDialog::getSaveFileName(
+			this,
+			tr("Save File"),
+			path + QDir::separator() + "untitled.pdf",
+			tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+
+		if (fileName.isEmpty() == true)
+		{
+			return;
+		}
+		path = QFileInfo(fileName).path(); // store path for next time
+
+		QFileInfo fileInfo(fileName);
+		QString extension = fileInfo.completeSuffix();
+
+		if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
+			extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
+		{
+			QPageLayout pageLayout(QPageSize(QPageSize::A4),
+								   QPageLayout::Orientation::Portrait,
+								   QMarginsF(25, 20, 15, 20),
+								   QPageLayout::Unit::Millimeter);
+
+			pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("SnapshotExportPageLayout", pageLayout);
+
+			SnapshotReportInfo ri(m_projectName, m_equipmentId);
+
+			ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout, exportSelected);
+			connect(this, &SignalSnapshotWidget::signalsUpdated, &generator, &ReportLib::TableViewReportGenerator::stop);
+
+			generator.exportTable(fileName);
+
+			pageLayout = generator.pageLayout();
+			ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SnapshotExportPageLayout");
+		}
+		else
+		{
+			QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
+		}
+		
+		return;
+	}
+
+	void SignalSnapshotWidget::printData(bool printSelected) 
+	{
+		QPageLayout pageLayout(QPageSize(QPageSize::A4),
+							   QPageLayout::Orientation::Portrait,
+							   QMarginsF(10, 10, 10, 10),
+							   QPageLayout::Unit::Millimeter);
+
+		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("SnapshotPrintPageLayout", pageLayout);
+
+		SnapshotReportInfo ri(m_projectName, m_equipmentId);
+
+		ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout, printSelected);
+		connect(this, &SignalSnapshotWidget::signalsUpdated, &generator, &ReportLib::TableViewReportGenerator::stop);
+
+		generator.printTable();
+
+		pageLayout = generator.pageLayout();
+		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SnapshotPrintPageLayout");
+	}
+
 } // namespace SchemaClientLib
