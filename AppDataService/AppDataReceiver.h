@@ -10,9 +10,6 @@
 #include <asio/ip/udp.hpp>
 #include <asio/steady_timer.hpp>
 
-using namespace asio;
-using namespace asio::ip;
-
 //
 // AppDataReceiver is receives RUP datagrams and push it in AppDataSource's queues
 //
@@ -65,7 +62,7 @@ private:
 	virtual void run() override;
 
 	void startTimer500ms();
-	void onTimer500ms(const error_code& error);
+	void onTimer500ms(const asio::error_code& error);
 
 	void clearReceiverStatistics();
 	void updateReceiverStatistics();
@@ -75,7 +72,7 @@ private:
 	bool isSocketWorkable() const;
 	void closeSocket();
 	void startReceive();
-	void receivePackets(const error_code& error, std::size_t bytesReceived);
+	void receivePackets(const asio::error_code& error, std::size_t bytesReceived);
 
 	void requireBufferProcessing(AppDataSource* source);
 	void requireSignalsInvalidation(AppDataSource* source);
@@ -98,24 +95,25 @@ private:
 	//
 
 	HostAddressPort m_dataReceivingIP;
-	udp::endpoint m_appDataReceivingIP;
+	asio::ip::udp::endpoint m_appDataReceivingIP;
 
-	io_context* m_ioContext = nullptr;
-	steady_timer* m_timer = nullptr;
+	asio::io_context* m_ioContext = nullptr;
+	asio::steady_timer* m_timer = nullptr;
 	int m_1second = 0;
 
-	udp::socket* m_socket = nullptr;
+	asio::ip::udp::socket* m_socket = nullptr;
 	bool m_socketBound = false;
 	int m_noReceiveCtr = 0;
 	int m_socketErrorCtr = 0;
 
-	static const int RECV_BUFFER_SIZE = sizeof(Rup::SimFrame) + 1;
-
 	//
 
 	int m_writeIndex = 0;
-	udp::endpoint m_receiveFromIP[2];
-	char m_receiveBuffer[2][RECV_BUFFER_SIZE];
+	asio::ip::udp::endpoint m_receiveFromIP[2];
+
+	static constexpr std::size_t RECV_BUFFER_SIZE = std::max(sizeof(Rup::SimFrame), sizeof(Rup::Frame));
+
+	std::array<std::byte, RECV_BUFFER_SIZE> m_receiveBuffer[2];
 
 	//
 

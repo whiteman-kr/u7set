@@ -8,7 +8,6 @@
 //
 // ----------------------------------------------------------------------------
 
-
 namespace Rup
 {
 	inline const int V5 = 5;		// basic implementation of RUP protocol

@@ -1,4 +1,12 @@
+#include <type_traits>
+#include <cstddef>
+#include <cstring>
+
 #include "AppDataReceiver.h"
+
+using asio::ip::udp;
+using asio::io_context;
+using asio::steady_timer;
 
 StdThreadsGuard::StdThreadsGuard()
 {
@@ -52,7 +60,7 @@ AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 	m_isSimulationMode = (swRunMode == E::SoftwareRunMode::Simulation);
 
 	m_appDataReceivingIP = udp::endpoint(
-								ip::address::from_string(dataReceivingIP.addressStr().toStdString()),
+								asio::ip::address::from_string(dataReceivingIP.addressStr().toStdString()),
 								dataReceivingIP.port());
 
 	for(AppDataSource* appDataSource : appDataSources)
@@ -156,7 +164,7 @@ void AppDataReceiver::startTimer500ms()
 						   std::placeholders::_1));
 }
 
-void AppDataReceiver::onTimer500ms(const error_code& error)
+void AppDataReceiver::onTimer500ms(const asio::error_code& error)
 {
 	if (stopIfQuitRequested() == true)
 	{
@@ -280,7 +288,7 @@ bool AppDataReceiver::createAndBindSocket()
 
 	m_socket = new udp::socket(*m_ioContext);
 
-	error_code error;
+	asio::error_code error;
 
 	m_socket->open(asio::ip::udp::v4(), error);
 
@@ -362,16 +370,18 @@ void AppDataReceiver::startReceive()
 
 	m_writeIndex ^= 1;
 
-	m_socket->async_receive_from(asio::buffer(m_receiveBuffer[m_writeIndex], RECV_BUFFER_SIZE),
+	m_socket->async_receive_from(asio::buffer(m_receiveBuffer[m_writeIndex].data(), RECV_BUFFER_SIZE),
 									m_receiveFromIP[m_writeIndex],
 									bind(&AppDataReceiver::receivePackets, this,
 										std::placeholders::_1,
 										std::placeholders::_2));
 }
 
-// qint64 prevModTime = -1;
+static_assert(std::is_standard_layout_v<Rup::Frame>);
+static_assert(std::is_standard_layout_v<Rup::SimFrame>);
+static_assert(offsetof(Rup::SimFrame, rupFrame) == 0);
 
-void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceived)
+void AppDataReceiver::receivePackets(const asio::error_code& error, size_t bytesReceived)
 {
 	qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -388,114 +398,42 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 
 	m_noReceiveCtr = 0;
 
-	udp::endpoint receiveFromIP = m_receiveFromIP[m_writeIndex];
-	Rup::SimFrame& simFrame = *reinterpret_cast<Rup::SimFrame*>(m_receiveBuffer[m_writeIndex]);
+	const udp::endpoint receiveFromIP = m_receiveFromIP[m_writeIndex];
+	const std::byte* const rawData = m_receiveBuffer[m_writeIndex].data();
 
 	startReceive();
 
 	m_receivedPerSecond += static_cast<int>(bytesReceived);
 
-	bool isSimFrame = false;
-	bool isValidFrame = false;
 	bool crcOk = false;
 	quint32 sourceIP = 0;
 
-	do
+	if (bytesReceived == sizeof(Rup::Frame))
 	{
-		if (bytesReceived == sizeof(Rup::Frame))
-		{
-			sourceIP = receiveFromIP.address().to_v4().to_ulong();
-			isValidFrame = true;
-			break;
-		}
+		Rup::Frame rupFrame;
+		std::memcpy(&rupFrame, rawData, sizeof(rupFrame));
 
-		//
+		sourceIP = receiveFromIP.address().to_v4().to_ulong();
+		crcOk = rupFrame.checkCRC64();
 
-		if (bytesReceived == sizeof(Rup::SimFrame))
-		{
-			if (m_isSimulationMode == false)
-			{
-				m_errNotExpectedSimPacket++;
-
-				if ((m_errNotExpectedSimPacket % 1000) == 0)
-				{
-					qDebug() << C_STR(QString("Software is not in SIMULATION mode, %1 sim packets has been ignored.").
-									  arg(m_errNotExpectedSimPacket));
-				}
-
-				break;
-			}
-
-			quint16 simVersion = reverseUint16(simFrame.simVersion);
-
-			if (simVersion != 1)
-			{
-				m_errSimVersion++;
-				break;
-			}
-
-			sourceIP = reverseUint32(simFrame.sourceIP);
-
-			m_simFramesCount++;
-
-			isSimFrame = true;
-			isValidFrame = true;
-			break;
-		}
-
-		// received datagram  has unknown size, skip this datagram
-		//
-		m_errDatagramSize++;
-		break;
-	}
-	while(true);		// Its OK!
-
-	if (isValidFrame == true)
-	{
 		m_rupFramesReceivedPerSecond++;
 		m_rupFramesCount++;
 
-		crcOk = simFrame.rupFrame.checkCRC64();
-
-		if (crcOk == false)
-		{
-			m_errRupFrameCRC++;
-		}
-
 		AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
-
-/*		if (source->moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
-		{
-			int diff = 0;
-
-			if (prevModTime != -1)
-			{
-				diff = serverTime - prevModTime;
-			}
-
-			prevModTime = serverTime;
-
-			DEBUG_LOG_MSG(m_log, QString("pkt = %1, serverTime = %2 (dt = %3), plantTime = %4:%5 %6").
-					arg(reverseUint16(simFrame.rupFrame.header.numerator)).
-					arg(serverTime).
-					arg(diff).
-					arg(reverseUint16(simFrame.rupFrame.header.timeStamp.second)).
-					arg(reverseUint16(simFrame.rupFrame.header.timeStamp.millisecond)).
-					arg(diff > 7  || diff < 3? "!!!!!" : ""));
-		} */
 
 		if (source != nullptr)
 		{
 			if (crcOk == true)
 			{
 				source->pushRupFrame(sourceIP, serverTime,
-									 isSimFrame, simFrame.rupFrame,
+									 false, rupFrame,
 									 source->cachedAppDataUID());
 
 				requireBufferProcessing(source);
 			}
 			else
 			{
+				m_errRupFrameCRC++;
 				source->incErrorFrameCRC();
 			}
 		}
@@ -503,15 +441,83 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 		{
 			m_errUnknownAppDataSourceIP++;
 
-//			qDebug() << "Unknown IP" << C_STR(HostAddressPort(sourceIP, 0).addressStr());
-
 			if (m_unknownAppDataSourcesIP.contains(sourceIP) == false &&
 				m_unknownAppDataSourcesIP.size() < 500)
 			{
 				m_unknownAppDataSourcesIP.insert(sourceIP);
 			}
 		}
+
+		return;
 	}
+
+	if (bytesReceived == sizeof(Rup::SimFrame))
+	{
+		if (m_isSimulationMode == false)
+		{
+			m_errNotExpectedSimPacket++;
+
+			if ((m_errNotExpectedSimPacket % 1000) == 0)
+			{
+				qDebug() << C_STR(QString("Software is not in SIMULATION mode, %1 sim packets has been ignored.").
+								  arg(m_errNotExpectedSimPacket));
+			}
+		}
+		else
+		{
+			Rup::SimFrame simFrame;
+			std::memcpy(&simFrame, rawData, sizeof(simFrame));
+
+			if (reverseUint16(simFrame.simVersion) == 1)
+			{
+				sourceIP = reverseUint32(simFrame.sourceIP);
+				crcOk = simFrame.rupFrame.checkCRC64();
+
+				m_simFramesCount++;
+				m_rupFramesReceivedPerSecond++;
+				m_rupFramesCount++;
+
+				AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
+
+				if (source != nullptr)
+				{
+					if (crcOk == true)
+					{
+						source->pushRupFrame(sourceIP, serverTime,
+											 true, simFrame.rupFrame,
+											 source->cachedAppDataUID());
+
+						requireBufferProcessing(source);
+					}
+					else
+					{
+						m_errRupFrameCRC++;
+						source->incErrorFrameCRC();
+					}
+				}
+				else
+				{
+					m_errUnknownAppDataSourceIP++;
+
+					if (m_unknownAppDataSourcesIP.contains(sourceIP) == false &&
+						m_unknownAppDataSourcesIP.size() < 500)
+					{
+						m_unknownAppDataSourcesIP.insert(sourceIP);
+					}
+				}
+			}
+			else
+			{
+				m_errSimVersion++;
+			}
+		}
+
+		return;
+	}
+
+	// received datagram  has unknown size, skip this datagram
+	//
+	m_errDatagramSize++;
 }
 
 void AppDataReceiver::requireBufferProcessing(AppDataSource* source)
