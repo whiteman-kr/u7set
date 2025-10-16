@@ -42,10 +42,6 @@ enum class SignalLogColumns
 	Mismatch,
 	OutOfLimits,
 
-	AckTime,
-	AckSource,
-	AckUser,
-
 	ColumnCount
 };
 
@@ -127,12 +123,13 @@ public:
 	int recordsCount() const;
 	const DiscretesLogRecord& record(const RecordKey& key) const;
 	const DiscretesLogRecord& filteredRecord(int index) const;
+	const std::vector<RecordKey>& filteredRecords() const;
 
 	void sort(int column, Qt::SortOrder order) override;
 
 	AppSignalParam signalParam(int rowIndex, bool* found);
 
-protected:
+public:
 	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
@@ -227,6 +224,7 @@ private slots:
 	void buttonClearFilterClicked();
 	void buttonAckAllClicked();
 	void turnOffAutoscroll();
+	void copySelected();
 
 private:
 	void createControls();
@@ -243,6 +241,9 @@ private:
 
 	bool filterIsSet() const;
 	bool warnAboutAckFiltered();
+
+	void exportData(bool exportSelected);
+	void printData(bool printSelected);
 
 signals:
 	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
@@ -324,6 +325,7 @@ public:
 protected:
 	void showEvent(QShowEvent* event) override;
 	void closeEvent(QCloseEvent* event) override;
+	void reject() override;
 
 private slots:
 	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
