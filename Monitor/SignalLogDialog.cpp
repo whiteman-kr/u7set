@@ -192,36 +192,13 @@ namespace
 				v1 = s1.caption();
 				v2 = s2.caption();
 				break;
-			case SignalLogColumns::Type:
-				if (s1.isDiscrete() == true && s2.isDiscrete() == true)
-				{
-					v1 = static_cast<int>(s1.inOutType());
-					v2 = static_cast<int>(s2.inOutType());
-					break;
-				}
-
-				if (s1.type() == s2.type())
-				{
-					if (s1.analogSignalFormat() == s2.analogSignalFormat())
-					{
-						v1 = static_cast<int>(s1.inOutType());
-						v2 = static_cast<int>(s2.inOutType());
-					}
-					else
-					{
-						v1 = static_cast<int>(s1.analogSignalFormat());
-						v2 = static_cast<int>(s2.analogSignalFormat());
-					}
-				}
-				else
-				{
-					v1 = static_cast<int>(s1.type());
-					v2 = static_cast<int>(s2.type());
-				}
-				break;
 			case SignalLogColumns::Tags:
 				v1 = s1.tagStringList().join(' ');
 				v2 = s2.tagStringList().join(' ');
+				break;
+			case SignalLogColumns::Flags:
+				v1 = flags1.all;
+				v2 = flags2.all;
 				break;
 			case SignalLogColumns::Value:
 				if (flags1.valid != flags2.valid)
@@ -404,7 +381,6 @@ SignalLogModel::SignalLogModel(const ClientLib::SignalLog& signalLog,
 	m_columnsNames << QObject::tr("Lm Equipment ID");
 	m_columnsNames << QObject::tr("App Signal ID");
 	m_columnsNames << QObject::tr("Caption");
-	m_columnsNames << QObject::tr("Type");
 	m_columnsNames << QObject::tr("Tags");
 
 	m_columnsNames << QObject::tr("Record Time");
@@ -414,6 +390,7 @@ SignalLogModel::SignalLogModel(const ClientLib::SignalLog& signalLog,
 
 	m_columnsNames << QObject::tr("Value");
 
+	m_columnsNames << QObject::tr("Flags");
 	m_columnsNames << QObject::tr("Valid");
 	m_columnsNames << QObject::tr("StateAvailable");
 	m_columnsNames << QObject::tr("Simulated");
@@ -760,6 +737,10 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 			{
 				return QDateTime::fromMSecsSinceEpoch(rec.plantTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
+		case SignalLogColumns::Flags:
+			{
+				return flags.printShort();
+			}
 		case SignalLogColumns::Valid:
 			{
 				return (flags.valid == true) ? QObject::tr("yes") : QObject::tr("no");
@@ -814,27 +795,7 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 		{
 		case SignalLogColumns::Value:
 			{
-				QString valueResult;
-
-				switch (s.type())
-				{
-				case E::SignalType::Analog:
-					valueResult = AppSignalState::toString(rec.value,
-														   E::ValueViewType::Dec,
-														   E::AnalogFormat::g_9_or_9e,
-														   s.analogSignalFormat(),
-														   s.precision());
-					break;
-				case E::SignalType::Discrete:
-					valueResult = static_cast<int>(rec.value) == 0 ? "0" : "1";
-					break;
-				case E::SignalType::Bus:
-					valueResult = QObject::tr("Bus Type");
-					break;
-				default:
-					Q_ASSERT(false);
-				}
-
+				QString valueResult = static_cast<int>(rec.value) == 0 ? "0" : "1";
 				if (flags.valid == false)
 				{
 					if (flags.stateAvailable == true)
@@ -846,7 +807,6 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 						valueResult = QStringLiteral("?");
 					}
 				}
-
 				return valueResult;
 			}
 
@@ -875,29 +835,6 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 				return s.caption();
 			}
 
-		case SignalLogColumns::Type:
-			{
-				// An array for translation
-				QString signalProperties[] = {QObject::tr("Analog"), // E::SignalType
-											  QObject::tr("Discrete"),
-											  QObject::tr("Bus"),
-											  QObject::tr("Input"),  // E::SignalInOutType
-											  QObject::tr("Output"),
-											  QObject::tr("Internal")};
-				Q_UNUSED(signalProperties);
-
-				QString str = QObject::tr(E::valueToString<E::SignalType>(s.type()).toUtf8());
-				if (s.isAnalog() == true)
-				{
-					str = QString("%1 (%2)").arg(str).arg(
-						E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(s.analogSignalFormat())));
-				}
-
-				str = QString("%1, %2").arg(str).arg(QObject::tr(E::valueToString<E::SignalInOutType>(s.inOutType()).toUtf8()));
-
-				return str;
-			}
-
 		case SignalLogColumns::Tags:
 			{
 				return s.tagStringList().join(' ');
@@ -915,6 +852,76 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 										  columnIndex == SignalLogColumns::Blocked || columnIndex == SignalLogColumns::Mismatch))
 	{
 		return QVariant(Qt::AlignCenter);
+	}
+
+	if (role == Qt::ToolTipRole)
+	{
+		const auto& recordKey = m_filteredRecords[row];
+
+		auto it = m_recordsMap.find(recordKey);
+		if (it == m_recordsMap.end())
+		{
+			Q_ASSERT(false);
+			return QVariant();
+		}
+
+		const DiscretesLogRecord& rec = it->second;
+
+		AppSignalStateFlags flags{.all = rec.flags};
+
+		//
+		// Get signal now
+		//
+		bool found = false;
+		const AppSignalParam& signalParam = m_appSignalManager->signalParam(rec.signalHash, &found);
+		if (found == false)
+		{
+			if (columnIndex == SignalLogColumns::AppSignalID)
+			{
+				return {"?"};
+			}
+			return {};
+		}
+
+		QString valueResult = static_cast<int>(rec.value) == 0 ? "0" : "1";
+		if (flags.valid == false)
+		{
+			if (flags.stateAvailable == true)
+			{
+				valueResult = QString("? (%1)").arg(valueResult);
+			}
+			else
+			{
+				valueResult = QStringLiteral("?");
+			}
+		}
+
+		QString toolTip = tr("RecordID: %1\n"
+							 "SignalID: %2\n"
+							 "EquipmentID: %3\n"
+							 "LmEquipmentID: %4\n"
+							 "AppSignalID: %5\n"
+							 "Caption: %6\n"
+							 "Value: %7\n"
+							 "Flags: %8\n"
+							 "RecordTime: %9\n"
+							 "ServerTime: %10\n"
+							 "ServerTime +0UTC: %11\n"
+							 "PlantTime: %12")
+							  .arg(rec.recordID)
+							  .arg(signalParam.customSignalId())
+							  .arg(signalParam.equipmentId())
+							  .arg(signalParam.lmEquipmentId())
+							  .arg(signalParam.appSignalId())
+							  .arg(signalParam.caption())
+							  .arg(valueResult)
+							  .arg(flags.printShort() + "(" + QString::number(flags.all, 2) + ")")
+							  .arg(QDateTime::fromMSecsSinceEpoch(rec.recordTime).toString("dd.MM.yyyy hh:mm:ss.zzz"))
+							  .arg(QDateTime::fromMSecsSinceEpoch(rec.localTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"))
+							  .arg(QDateTime::fromMSecsSinceEpoch(rec.systemTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"))
+							  .arg(QDateTime::fromMSecsSinceEpoch(rec.plantTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"));
+
+		return toolTip;
 	}
 
 
@@ -1438,6 +1445,12 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 
 	if (maxPlantTime != 0)
 	{
+
+		if (m_tableView->selectionModel()->hasSelection() == true)
+		{
+			m_signalMenu.addSeparator();
+		}
+
 		QAction* action =
 			new QAction("Acknowledge up to " +
 							QDateTime::fromMSecsSinceEpoch(maxPlantTime.timeStamp, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"),
@@ -1464,6 +1477,14 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 	if (list.isEmpty() == true)
 	{
 		return;
+	}
+
+	const int maxSignalsCount = 16;
+	if (list.size() > maxSignalsCount) 
+	{
+		int extra = list.size() - maxSignalsCount;
+		list.resize(maxSignalsCount);
+		list.push_back(tr("...and %1 more signal(s)").arg(extra));
 	}
 
 	emit signalContextMenu(list, QList<QMenu*>() << &m_signalMenu);
@@ -1776,6 +1797,10 @@ void SignalLogWidget::copySelected()
 
 	for (int c = 0; c < columnsCount; c++)
 	{
+		if (m_tableView->horizontalHeader()->isSectionHidden(c) == true)
+		{
+			continue;
+		}
 		text.append(m_model.headerData(c, Qt::Horizontal, Qt::DisplayRole).toString() + '\t');
 	}
 	text.append('\n');
@@ -1784,6 +1809,10 @@ void SignalLogWidget::copySelected()
 	{
 		for (int c = 0; c < columnsCount; c++)
 		{
+			if (m_tableView->horizontalHeader()->isSectionHidden(c) == true)
+			{
+				continue;
+			}
 			text.append(m_model.data(m_model.index(si.row(), c), Qt::DisplayRole).toString() + '\t');
 		}
 		text.append('\n');
@@ -2028,10 +2057,10 @@ void SignalLogWidget::initRecordsView()
 		//
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::EquipmentID));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::LmEquipmentID));
-		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Type));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Tags));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::SystemTime));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::LocalTime));
+		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Flags));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Valid));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::StateAvailable));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Simulated));
@@ -2434,10 +2463,16 @@ void SignalLogDialog::signalContextMenu(const QStringList signalList, const QLis
 
 	for (const QString& s : signalList)
 	{
+		if (s.startsWith('#') == false) 
+		{
+			menu.addAction(s);
+			continue;
+		}
+
 		bool ok = false;
 		AppSignalParam signal = m_appSignalManager.signalParam(s, &ok);
 
-		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
+		QString signalId = ok ? QString("%1 | %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
 		auto f = [this, s]() -> void
 		{

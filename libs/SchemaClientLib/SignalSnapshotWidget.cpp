@@ -1242,6 +1242,7 @@ namespace SchemaClientLib
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::SystemTime));
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::LocalTime));
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::PlantTime));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Flags));
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Valid));
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::StateAvailable));
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Simulated));

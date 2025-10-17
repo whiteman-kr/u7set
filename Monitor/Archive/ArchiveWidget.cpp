@@ -265,6 +265,7 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 		// First time? Set what is should be hidden by deafult
 		//
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::AppSignalId));
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::Flags));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::Valid));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::StateAvailable));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::Simulated));

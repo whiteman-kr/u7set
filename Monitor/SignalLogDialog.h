@@ -25,7 +25,6 @@ enum class SignalLogColumns
 	LmEquipmentID,
 	AppSignalID,
 	Caption,
-	Type,
 	Tags,
 
 	RecordTime,
@@ -35,6 +34,7 @@ enum class SignalLogColumns
 
 	Value,
 
+	Flags,
 	Valid,
 	StateAvailable,
 	Simulated,
