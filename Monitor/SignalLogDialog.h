@@ -125,8 +125,6 @@ public:
 	const DiscretesLogRecord& filteredRecord(int index) const;
 	const std::vector<RecordKey>& filteredRecords() const;
 
-	void sort(int column, Qt::SortOrder order) override;
-
 	AppSignalParam signalParam(int rowIndex, bool* found);
 
 public:
@@ -171,9 +169,6 @@ struct SignalLogDialogSettings
 	QStringList maskList;
 	QStringList tagsList;
 
-	int sortColumn = 0;
-	Qt::SortOrder sortOrder = Qt::AscendingOrder;
-
 	void restore();
 	void store();
 };
@@ -213,7 +208,6 @@ private slots:
 
 	void contextMenuRequested(const QPoint& pos);
 	void tableViewDoubleClicked(const QModelIndex& index);
-	void sortIndicatorChanged(int column, Qt::SortOrder order);
 	void editMaskReturnPressed();
 	void editTagsReturnPressed();
 	void maskTypeComboCurrentIndexChanged(int index);
