@@ -46,16 +46,27 @@ target_precompile_headers(${TARGET} PRIVATE
 	# C++ includes
 	#
 	<algorithm>
+	<array>
 	<atomic>
+	<condition_variable>
 	<functional>
 	<iostream>
 	<limits>
 	<list>
 	<map>
 	<memory>
+	<mutex>
+	<queue>
 	<vector>
 	<set>
+	<thread>
 	<type_traits>
+	<unordered_map>
+	<unordered_set>
+
+	<asio/io_context.hpp>
+	<asio/ip/udp.hpp>
+	<asio/steady_timer.hpp>
 
 	# Qt includes
 	#

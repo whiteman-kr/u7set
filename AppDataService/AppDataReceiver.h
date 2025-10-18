@@ -1,14 +1,48 @@
 #pragma once
 
 #include <queue>
+#include <algorithm>
+#include <thread>
+#include <vector>
+#include <array>
+#include <map>
+#include <set>
+#include <atomic>
+#include <mutex>
+#include <condition_variable>
+#include <unordered_set>
+#include <unordered_map>
+
+#include <asio/io_context.hpp>
+#include <asio/ip/udp.hpp>
+#include <asio/steady_timer.hpp>
 
 #include "../OnlineLib/CircularLogger.h"
 #include "AppDataSource.h"
 #include "SignalStatesProcessingThread.h"
 
-#include <asio/io_context.hpp>
-#include <asio/ip/udp.hpp>
-#include <asio/steady_timer.hpp>
+enum class TaskFlags : quint32
+{
+	None = 0,
+	Invalidate = 1,
+	Parse = 2
+};
+
+inline constexpr TaskFlags operator|(TaskFlags a, TaskFlags b) noexcept
+{
+	return static_cast<TaskFlags>(static_cast<quint32>(a) | static_cast<quint32>(b));
+}
+
+inline constexpr TaskFlags& operator|=(TaskFlags& a, TaskFlags b) noexcept
+{
+	a = a | b;
+	return a;
+}
+
+inline constexpr bool has(TaskFlags a, TaskFlags b) noexcept
+{
+	return (static_cast<quint32>(a) & static_cast<quint32>(b)) != 0;
+}
 
 //
 // AppDataReceiver is receives RUP datagrams and push it in AppDataSource's queues
@@ -17,13 +51,18 @@
 class StdThreadsGuard
 {
 public:
-	StdThreadsGuard();
+	StdThreadsGuard() = default;
 	~StdThreadsGuard();
 
-	void append(std::thread& thread);
+	StdThreadsGuard(const StdThreadsGuard&) = delete;
+	StdThreadsGuard& operator=(const StdThreadsGuard&) = delete;
+	StdThreadsGuard(StdThreadsGuard&&) = delete;
+	StdThreadsGuard& operator=(StdThreadsGuard&&) = delete;
+
+	void append(std::thread&& thread);
 
 private:
-	std::map<std::size_t, std::thread> m_threads;
+	std::vector<std::thread> m_threads;
 };
 
 class AppDataReceiver : public RunOverrideThread
@@ -73,9 +112,12 @@ private:
 	void closeSocket();
 	void startReceive();
 	void receivePackets(const asio::error_code& error, std::size_t bytesReceived);
+	void collectUnknownSourcesIP(quint32 sourceIP);
 
 	void requireBufferProcessing(AppDataSource* source);
 	void requireSignalsInvalidation(AppDataSource* source);
+
+	void processPackets(int threadNumber);
 
 	void startProcessingThreads(StdThreadsGuard& stg);
 	void wakeupAllProcessingThreads();
@@ -97,14 +139,15 @@ private:
 	HostAddressPort m_dataReceivingIP;
 	asio::ip::udp::endpoint m_appDataReceivingIP;
 
-	asio::io_context* m_ioContext = nullptr;
-	asio::steady_timer* m_timer = nullptr;
-	int m_1second = 0;
+	asio::io_context m_ioContext;
 
-	asio::ip::udp::socket* m_socket = nullptr;
+	std::unique_ptr<asio::ip::udp::socket> m_socket;
 	bool m_socketBound = false;
 	int m_noReceiveCtr = 0;
 	int m_socketErrorCtr = 0;
+
+	std::unique_ptr<asio::steady_timer> m_timer;
+	int m_1second = 0;
 
 	//
 
@@ -117,17 +160,17 @@ private:
 
 	//
 
-	std::mutex m_packetProcessigRequiredMutex;
+	std::mutex m_packetProcessingRequiredMutex;
 	std::condition_variable m_packetProcessingRequiredCondition;
-	std::map<AppDataSource*, bool> m_packetProcessingRequired;		//	source => true	 require buffer processing
-																	//	source => false	 require signals invalidation
-	friend void processPackets(AppDataReceiver& receiver, int threadNumber);
 
+	std::queue<AppDataSource*> m_sourcesQueue;
+	std::unordered_set<AppDataSource*> m_enqueuedSources;
+	std::unordered_map<AppDataSource*, TaskFlags> m_sourceTaskFlags;
 	//
 
 	SignalStatesProcessingThread m_statesProcessingThread;
 
-	std::mutex m_statesProcessigRequiredMutex;
+	std::mutex m_statesProcessingRequiredMutex;
 	std::condition_variable m_statesProcessingRequiredCondition;
 	std::queue<AppDataSource*> m_statesProcessingRequired;		//	source requires states queue processing
 
@@ -161,4 +204,4 @@ private:
 	friend class SignalStatesProcessingThread;
 };
 
-void processPackets(AppDataReceiver& receiver, int threadNumber);
+
