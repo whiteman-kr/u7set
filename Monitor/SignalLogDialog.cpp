@@ -194,7 +194,6 @@ SignalLogModel::SignalLogModel(const ClientLib::SignalLog& signalLog,
 	m_columnsNames << QObject::tr("Simulated");
 	m_columnsNames << QObject::tr("Blocked");
 	m_columnsNames << QObject::tr("Mismatch");
-	m_columnsNames << QObject::tr("OutOfLimits");
 
 	Q_ASSERT(m_columnsNames.size() == static_cast<qsizetype>(SignalLogColumns::ColumnCount));
 
@@ -537,20 +536,6 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 		case SignalLogColumns::Mismatch:
 			{
 				return (flags.mismatch == true) ? QObject::tr("yes") : QObject::tr("no");
-			}
-		case SignalLogColumns::OutOfLimits:
-			{
-				QString resultString;
-
-				if (flags.belowLowLimit == true)
-				{
-					resultString += QStringLiteral("LOW ");
-				}
-				if (flags.aboveHighLimit == true)
-				{
-					resultString += QStringLiteral("HIGH ");
-				}
-				return resultString.trimmed();
 			}
 		}
 
@@ -1208,7 +1193,7 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 	{
 		if (m_tableView->selectionModel()->hasSelection() == true)
 		{
-			QAction* action = new QAction("Copy", &m_signalMenu);
+			QAction* action = new QAction(tr("Copy"), &m_signalMenu);
 			connect(action, &QAction::triggered, this, &SignalLogWidget::copySelected);
 			m_signalMenu.addAction(action);
 		}
@@ -1223,7 +1208,7 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 		}
 
 		QAction* action =
-			new QAction("Acknowledge up to " +
+			new QAction(tr("Acknowledge up to ") +
 							QDateTime::fromMSecsSinceEpoch(maxPlantTime.timeStamp, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"),
 						&m_signalMenu);
 		connect(action,
@@ -1337,12 +1322,12 @@ void SignalLogWidget::buttonExportClicked()
 					   path + QDir::separator() + "untitled.pdf",
 					   tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
 	dialog.setOption(QFileDialog::DontUseNativeDialog, true); 
-	dialog.setFileMode(QFileDialog::ExistingFile);
+	dialog.setFileMode(QFileDialog::AnyFile);
 	dialog.setViewMode(QFileDialog::List);
 
 	// Create your checkbox
 	//
-	QCheckBox* customCheck = new QCheckBox("Export Selected Only", &dialog);
+	QCheckBox* customCheck = new QCheckBox(tr("Export Selected Only"), &dialog);
 	customCheck->setEnabled(m_tableView->selectionModel()->hasSelection() == true);
 
 	// Access the dialog's layout and insert the checkbox
@@ -1599,7 +1584,7 @@ void SignalLogWidget::createControls()
 		filterLayout->addWidget(new QLabel(tr("Mask")));
 
 		m_editMask = new QLineEdit();
-		m_editMask->setPlaceholderText("Enter mask (\"*,?\") here");
+		m_editMask->setPlaceholderText(tr("Enter mask (\"*,?\") here"));
 		connect(m_editMask, &QLineEdit::returnPressed, this, &SignalLogWidget::editMaskReturnPressed);
 		filterLayout->addWidget(m_editMask, 1);
 		m_editMask->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -1640,7 +1625,7 @@ void SignalLogWidget::createControls()
 		filterLayout->addWidget(new QLabel(tr("Tags")));
 
 		m_editTags = new QLineEdit();
-		m_editTags->setPlaceholderText("Signal tags space separated");
+		m_editTags->setPlaceholderText(tr("Signal tags space separated"));
 		connect(m_editTags, &QLineEdit::returnPressed, this, &SignalLogWidget::editTagsReturnPressed);
 		filterLayout->addWidget(m_editTags, 1);
 		m_editTags->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
@@ -1830,7 +1815,6 @@ void SignalLogWidget::initRecordsView()
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Simulated));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Blocked));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Mismatch));
-		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::OutOfLimits));
 		
 		m_tableView->resizeColumnsToContents();
 	}

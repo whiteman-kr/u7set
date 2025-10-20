@@ -597,12 +597,12 @@ void ArchiveWidget::exportButton()
 			path + QDir::separator() + "untitled.pdf",
 			tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
 		dialog.setOption(QFileDialog::DontUseNativeDialog, true);
-		dialog.setFileMode(QFileDialog::ExistingFile);
+		dialog.setFileMode(QFileDialog::AnyFile);
 		dialog.setViewMode(QFileDialog::List);
 
 	// Create your checkbox
 	//
-	QCheckBox* customCheck = new QCheckBox("Export Selected Only", &dialog);
+	QCheckBox* customCheck = new QCheckBox(tr("Export Selected Only"), &dialog);
 	customCheck->setEnabled(m_view->selectionModel()->hasSelection() == true);
 
 	// Access the dialog's layout and insert the checkbox

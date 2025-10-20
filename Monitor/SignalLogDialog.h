@@ -40,7 +40,6 @@ enum class SignalLogColumns
 	Simulated,
 	Blocked,
 	Mismatch,
-	OutOfLimits,
 
 	ColumnCount
 };
