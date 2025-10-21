@@ -653,17 +653,44 @@ namespace SchemaClientLib
 		}
 
 		static QString path{"."};
-		QString fileName = QFileDialog::getSaveFileName(
+
+		QFileDialog dialog(
 			this,
 			tr("Save File"),
 			path + QDir::separator() + "untitled.pdf",
 			tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+		dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+		dialog.setFileMode(QFileDialog::AnyFile);
+		dialog.setViewMode(QFileDialog::List);
 
-		if (fileName.isEmpty() == true)
+		// Create your checkbox
+		//
+		QCheckBox* customCheck = new QCheckBox(tr("Export Selected Only"), &dialog);
+		customCheck->setEnabled(m_tableView->selectionModel()->hasSelection() == true);
+
+		// Access the dialog's layout and insert the checkbox
+		//
+		QGridLayout* layout = qobject_cast<QGridLayout*>(dialog.layout());
+		if (layout)
+		{
+			int row = layout->rowCount();
+			layout->addWidget(customCheck, row, 0, 1, layout->columnCount());
+		}
+
+		// Execute dialog
+		if (dialog.exec() != QDialog::Accepted)
 		{
 			return;
 		}
+		QStringList files = dialog.selectedFiles();
+		if (files.isEmpty())
+		{
+			return;
+		}
+		QString fileName = files[0];
 		path = QFileInfo(fileName).path(); // store path for next time
+
+		bool exportSelected = customCheck->isChecked();
 
 		QFileInfo fileInfo(fileName);
 		QString extension = fileInfo.completeSuffix();
@@ -683,39 +710,55 @@ namespace SchemaClientLib
 
 			SnapshotReportInfo ri(m_projectName, m_equipmentId);
 
-			ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout);
-			connect(this, &SignalSnapshotWidget::signalsUpdated, &generator, &ReportLib::TableViewReportGenerator::stop);
-			
+			ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout, exportSelected);
+
 			generator.exportTable(fileName);
-			
+
 			pageLayout = generator.pageLayout();
 			ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SnapshotExportPageLayout");
-
-			return;
+		}
+		else
+		{
+			QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
 		}
 
-		QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
 		return;
 	}
 
 	void SignalSnapshotWidget::buttonPrintClicked()
 	{
-		QPageLayout pageLayout(QPageSize(QPageSize::A4),
-							   QPageLayout::Orientation::Portrait,
-							   QMarginsF(10, 10, 10, 10),
-							   QPageLayout::Unit::Millimeter);
+		if (m_tableView->selectionModel()->hasSelection() == true)
+		{
+			QMenu menu;
 
-		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("SnapshotPrintPageLayout", pageLayout);
+			QAction* all = new QAction(tr("Print All"), &menu);
+			menu.addAction(all);
+			connect(all,
+					&QAction::triggered,
+					this,
+					[this]()
+					{
+						printData(false /*printSelected*/);
+					});
 
-		SnapshotReportInfo ri(m_projectName, m_equipmentId);
+			QAction* sel = new QAction(tr("Print Selected"), &menu);
+			connect(sel,
+					&QAction::triggered,
+					this,
+					[this]()
+					{
+						printData(true /*printSelected*/);
+					});
+			menu.addAction(sel);
 
-		ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout);
-		connect(this, &SignalSnapshotWidget::signalsUpdated, &generator, &ReportLib::TableViewReportGenerator::stop);
+			menu.exec(QCursor::pos());
+		}
+		else
+		{
+			printData(false /*printSelected*/);
+		}
 
-		generator.printTable();
-		
-		pageLayout = generator.pageLayout();
-		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SnapshotPrintPageLayout");
+		return;
 	}
 
 	void SignalSnapshotWidget::buttonChooseTagsClicked()
@@ -1199,6 +1242,7 @@ namespace SchemaClientLib
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::SystemTime));
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::LocalTime));
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::PlantTime));
+			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Flags));
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Valid));
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::StateAvailable));
 			m_tableView->hideColumn(static_cast<int>(SnapshotColumns::Simulated));
@@ -1372,4 +1416,25 @@ namespace SchemaClientLib
 
 		m_model.setTags(tags);
 	}
+
+	void SignalSnapshotWidget::printData(bool printSelected) 
+	{
+		QPageLayout pageLayout(QPageSize(QPageSize::A4),
+							   QPageLayout::Orientation::Portrait,
+							   QMarginsF(10, 10, 10, 10),
+							   QPageLayout::Unit::Millimeter);
+
+		pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("SnapshotPrintPageLayout", pageLayout);
+
+		SnapshotReportInfo ri(m_projectName, m_equipmentId);
+
+		ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout, printSelected);
+		connect(this, &SignalSnapshotWidget::signalsUpdated, &generator, &ReportLib::TableViewReportGenerator::stop);
+
+		generator.printTable();
+
+		pageLayout = generator.pageLayout();
+		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SnapshotPrintPageLayout");
+	}
+
 } // namespace SchemaClientLib

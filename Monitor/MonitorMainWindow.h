@@ -245,6 +245,8 @@ private:
 	QAction* m_trendsAction = nullptr;
 
 	QAction* m_signalSnapshotAction = nullptr;
+	QAction* m_signalLogAction = nullptr;
+	QAction* m_signalLogButtonAction = nullptr;
 	QAction* m_findSignalAction = nullptr;
 
 	QAction* m_loginAction = nullptr;

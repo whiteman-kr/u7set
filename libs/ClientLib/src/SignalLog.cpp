@@ -152,8 +152,8 @@ namespace ClientLib
 										m_cachedPlainData.end(),
 										[](const DiscretesLogRecord& a, const DiscretesLogRecord& b)
 										{
-											std::tuple av = std::make_tuple(a.plantTime, a.signalHash, a.value);
-											std::tuple bv = std::make_tuple(b.plantTime, b.signalHash, b.value);
+											std::tuple av = std::make_tuple(a.plantTime, a.signalHash, a.value, a.flags);
+											std::tuple bv = std::make_tuple(b.plantTime, b.signalHash, b.value, b.flags);
 											return av == bv;
 										});
 

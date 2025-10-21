@@ -39,7 +39,8 @@ namespace ReportLib
 							  const QTableView& table,
 							  const std::vector<int>& visibleColumns,
 							  const std::vector<int>& columnWidths,
-							  const std::vector<int>& selectedRows);
+							  const std::vector<int>& selectedRows,
+							  bool exportSelected);
 
 		void setFileName(const QString& fileName);
 		void setPrinterInfo(const QPrinterInfo& printerInfo);
@@ -66,6 +67,7 @@ namespace ReportLib
 	private:
 		bool createReport(const QString& fileName, QString& errorMsg);
 		bool createText(const QString& fileName, const QChar& separator, QString& errorMsg);
+		bool createHtml(const QString& fileName, QString& errorMsg);
 
 	public:
 		static const int m_maxReportStatesForPrint = 1000;
@@ -119,6 +121,7 @@ namespace ReportLib
 							   const std::vector<int>& visibleColumns,
 							   const std::vector<int>& columnWidths,
 							   const std::vector<int>& selectedRows,
+							   bool exportSelected,
 							   const QPageLayout& pageLayout);
 		~TableViewReportPrivate();
 
@@ -144,5 +147,6 @@ namespace ReportLib
 		const QTableView& m_table;
 		TableViewReportWorker* m_worker = nullptr;
 		std::vector<int> m_selectedRows;
+		bool m_exportSelected = false;
 	};
 } // namespace ReportLib

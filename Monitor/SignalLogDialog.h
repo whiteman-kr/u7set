@@ -25,7 +25,6 @@ enum class SignalLogColumns
 	LmEquipmentID,
 	AppSignalID,
 	Caption,
-	Type,
 	Tags,
 
 	RecordTime,
@@ -35,16 +34,12 @@ enum class SignalLogColumns
 
 	Value,
 
+	Flags,
 	Valid,
 	StateAvailable,
 	Simulated,
 	Blocked,
 	Mismatch,
-	OutOfLimits,
-
-	AckTime,
-	AckSource,
-	AckUser,
 
 	ColumnCount
 };
@@ -127,12 +122,11 @@ public:
 	int recordsCount() const;
 	const DiscretesLogRecord& record(const RecordKey& key) const;
 	const DiscretesLogRecord& filteredRecord(int index) const;
-
-	void sort(int column, Qt::SortOrder order) override;
+	const std::vector<RecordKey>& filteredRecords() const;
 
 	AppSignalParam signalParam(int rowIndex, bool* found);
 
-protected:
+public:
 	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
@@ -174,9 +168,6 @@ struct SignalLogDialogSettings
 	QStringList maskList;
 	QStringList tagsList;
 
-	int sortColumn = 0;
-	Qt::SortOrder sortOrder = Qt::AscendingOrder;
-
 	void restore();
 	void store();
 };
@@ -216,7 +207,6 @@ private slots:
 
 	void contextMenuRequested(const QPoint& pos);
 	void tableViewDoubleClicked(const QModelIndex& index);
-	void sortIndicatorChanged(int column, Qt::SortOrder order);
 	void editMaskReturnPressed();
 	void editTagsReturnPressed();
 	void maskTypeComboCurrentIndexChanged(int index);
@@ -227,6 +217,7 @@ private slots:
 	void buttonClearFilterClicked();
 	void buttonAckAllClicked();
 	void turnOffAutoscroll();
+	void copySelected();
 
 private:
 	void createControls();
@@ -243,6 +234,8 @@ private:
 
 	bool filterIsSet() const;
 	bool warnAboutAckFiltered();
+
+	void printData(bool printSelected);
 
 signals:
 	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
@@ -324,6 +317,7 @@ public:
 protected:
 	void showEvent(QShowEvent* event) override;
 	void closeEvent(QCloseEvent* event) override;
+	void reject() override;
 
 private slots:
 	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);

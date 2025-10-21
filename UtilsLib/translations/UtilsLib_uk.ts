@@ -4,50 +4,43 @@
 <context>
     <name>Log::DialogTimeFilter</name>
     <message>
-        <location filename="../LogFile.cpp" line="1598"/>
         <source>Time Filter</source>
-        <translation>Фільтр часу</translation>
+        <translation type="vanished">Фільтр часу</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1602"/>
         <source>Start Time:</source>
-        <translation>Початковий час:</translation>
+        <translation type="vanished">Початковий час:</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1607"/>
         <source>End Time:</source>
-        <translation>Кінцевий час:</translation>
+        <translation type="vanished">Кінцевий час:</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1627"/>
         <source>Set</source>
-        <translation>Встановити</translation>
+        <translation type="vanished">Встановити</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1631"/>
         <source>Reset</source>
-        <translation>Скинути</translation>
+        <translation type="vanished">Скинути</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1639"/>
         <source>Cancel</source>
-        <translation>Скасувати</translation>
+        <translation type="vanished">Скасувати</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1673"/>
         <source>Start Time should be earlier than End Time!</source>
-        <translation>Початковий час повинен бути меншим, ніж кінцевий!</translation>
+        <translation type="vanished">Початковий час повинен бути меншим, ніж кінцевий!</translation>
     </message>
 </context>
 <context>
     <name>Log::LogFile</name>
     <message>
-        <location filename="../LogFile.cpp" line="2536"/>
+        <location filename="../LogFile.cpp" line="1317"/>
         <source>Logging started:</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2537"/>
+        <location filename="../LogFile.cpp" line="1318"/>
         <source>-- SessionHash: %1</source>
         <translation></translation>
     </message>
@@ -55,234 +48,190 @@
 <context>
     <name>Log::LogFileDialog</name>
     <message>
-        <location filename="../LogFile.cpp" line="1741"/>
-        <location filename="../LogFile.cpp" line="2430"/>
         <source>Log View - %1</source>
-        <translation>Журнал - %1</translation>
+        <translation type="vanished">Журнал - %1</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1751"/>
         <source>Type:</source>
-        <translation>Тип:</translation>
+        <translation type="vanished">Тип:</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1754"/>
         <source>All Messages</source>
-        <translation>Всі повідомлення</translation>
+        <translation type="vanished">Всі повідомлення</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1755"/>
         <source>Errors</source>
-        <translation>Помилки</translation>
+        <translation type="vanished">Помилки</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1756"/>
         <source>Warnings</source>
-        <translation>Попередження</translation>
+        <translation type="vanished">Попередження</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1757"/>
         <source>Errors and Warnings</source>
-        <translation>Помилки та попередження</translation>
+        <translation type="vanished">Помилки та попередження</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1758"/>
         <source>Alerts</source>
-        <translation>Важливі повідомлення</translation>
+        <translation type="vanished">Важливі повідомлення</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1759"/>
         <source>Messages</source>
-        <translation>Повідомлення</translation>
+        <translation type="vanished">Повідомлення</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1760"/>
         <source>Text</source>
-        <translation>Текст</translation>
+        <translation type="vanished">Текст</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1769"/>
         <source>Time Filter</source>
-        <translation>Фільтр за часом</translation>
+        <translation type="vanished">Фільтр за часом</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1778"/>
         <source>Search/Filter Text</source>
-        <translation>Пошук/Фільтр</translation>
+        <translation type="vanished">Пошук/Фільтр</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1796"/>
         <source>Search &lt;F3&gt;</source>
-        <translation>Пошук &lt;F3&gt;</translation>
+        <translation type="vanished">Пошук &lt;F3&gt;</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1805"/>
         <source>Filter</source>
-        <translation>Фільтр</translation>
+        <translation type="vanished">Фільтр</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1815"/>
         <source>Prev Issue &lt;Shift+F6&gt;</source>
-        <translation>Попередній &lt;Shift+F6&gt;</translation>
+        <translation type="vanished">Попередній &lt;Shift+F6&gt;</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1822"/>
         <source>Next Issue &lt;F6&gt;</source>
-        <translation>Наступний &lt;F6&gt;</translation>
+        <translation type="vanished">Наступний &lt;F6&gt;</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1836"/>
         <source>All Sessions</source>
-        <translation>Всі сесії</translation>
+        <translation type="vanished">Всі сесії</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1844"/>
         <source>Auto Scroll</source>
-        <translation>Автопрокрутка</translation>
+        <translation type="vanished">Автопрокрутка</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1893"/>
-        <location filename="../LogFile.cpp" line="2259"/>
-        <location filename="../LogFile.cpp" line="2264"/>
-        <location filename="../LogFile.cpp" line="2304"/>
         <source>File: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;</source>
-        <translation>Файл &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;</translation>
+        <translation type="vanished">Файл &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1900"/>
         <source>Clear</source>
-        <translation>Очистити</translation>
+        <translation type="vanished">Очистити</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1904"/>
         <source>Load...</source>
-        <translation>Завантажити...</translation>
+        <translation type="vanished">Завантажити...</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1908"/>
         <source>Export...</source>
-        <translation>Експорт...</translation>
+        <translation type="vanished">Експорт...</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2013"/>
         <source>Issue was not found!</source>
-        <translation>Текст не знайдено!</translation>
+        <translation type="vanished">Текст не знайдено!</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2113"/>
-        <location filename="../LogFile.cpp" line="2137"/>
-        <location filename="../LogFile.cpp" line="2147"/>
-        <location filename="../LogFile.cpp" line="2239"/>
-        <location filename="../LogFile.cpp" line="2306"/>
-        <location filename="../LogFile.cpp" line="2422"/>
         <source>Total records: %1, Errors: %2, Warnings: %3</source>
-        <translation>Всього записів: %1, помилок: %2, попереджень: %3</translation>
+        <translation type="vanished">Всього записів: %1, помилок: %2, попереджень: %3</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2195"/>
         <source>Text was not found!</source>
-        <translation>Текст не знайдено!</translation>
+        <translation type="vanished">Текст не знайдено!</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2395"/>
         <source>Select File</source>
-        <translation>Обрати файл</translation>
+        <translation type="vanished">Обрати файл</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2438"/>
         <source>Save File</source>
-        <translation>Зберегти файл</translation>
+        <translation type="vanished">Зберегти файл</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2440"/>
         <source>Log files (*.log)</source>
-        <translation>Файли журналу (*.log)</translation>
+        <translation type="vanished">Файли журналу (*.log)</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2462"/>
         <source>No data to export!</source>
-        <translation>Немає даних для експорту!</translation>
+        <translation type="vanished">Немає даних для експорту!</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2469"/>
         <source>File creation error!</source>
-        <translation>Помилка створення файлу!</translation>
+        <translation type="vanished">Помилка створення файлу!</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="2480"/>
         <source>Export complete.</source>
-        <translation>Ескпорт завершено.</translation>
+        <translation type="vanished">Ескпорт завершено.</translation>
     </message>
 </context>
 <context>
     <name>Log::LogFileWorker</name>
     <message>
-        <location filename="../LogFile.cpp" line="437"/>
+        <location filename="../LogFile.cpp" line="418"/>
         <source>LogFileWorker: can&apos;t create path %1</source>
         <translation>LogFileWorker: неможливо створити шлях %1</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="509"/>
+        <location filename="../LogFile.cpp" line="612"/>
         <source>LogFileWorker: can&apos;t attach to QSharedMemory</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="517"/>
+        <location filename="../LogFile.cpp" line="620"/>
         <source>LogFileWorker: can&apos;t create QSharedMemory: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="666"/>
+        <location filename="../LogFile.cpp" line="769"/>
         <source>Application:	%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="670"/>
+        <location filename="../LogFile.cpp" line="773"/>
         <source>Start Time:	%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="674"/>
+        <location filename="../LogFile.cpp" line="777"/>
         <source>End Time:	%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="678"/>
+        <location filename="../LogFile.cpp" line="781"/>
         <source>Records Count:	%1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="789"/>
+        <location filename="../LogFile.cpp" line="897"/>
         <source>Error locking log file %1 by QSharedMemory.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="799"/>
-        <source>Log file %1 is locked by another instance and queue size exceeds maximum, queue cleared.</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../LogFile.cpp" line="849"/>
+        <location filename="../LogFile.cpp" line="962"/>
         <source>Log file %1 open error: %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="869"/>
+        <location filename="../LogFile.cpp" line="982"/>
         <source>Log file %1 write error: %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="905"/>
+        <location filename="../LogFile.cpp" line="1018"/>
         <source>LogFileWorker::switchToNextLogFile, file %1 does not exist.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="911"/>
+        <location filename="../LogFile.cpp" line="1024"/>
         <source>LogFileWorker::switchToNextLogFile, can&apos;t remove file %1.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="927"/>
+        <location filename="../LogFile.cpp" line="1040"/>
         <source>LogFileWorker::switchToNextLogFile, can&apos;t rename file %1 -&gt; %2.</source>
         <translation></translation>
     </message>
@@ -290,19 +239,16 @@
 <context>
     <name>Log::LogRecordModel</name>
     <message>
-        <location filename="../LogFile.cpp" line="1295"/>
         <source>Time</source>
-        <translation>Час</translation>
+        <translation type="vanished">Час</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1300"/>
         <source>Type</source>
-        <translation>Тип</translation>
+        <translation type="vanished">Тип</translation>
     </message>
     <message>
-        <location filename="../LogFile.cpp" line="1306"/>
         <source>Message</source>
-        <translation>Текст</translation>
+        <translation type="vanished">Текст</translation>
     </message>
 </context>
 <context>
@@ -322,9 +268,8 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="../Ui/UiTools.cpp" line="98"/>
         <source>File &apos;%1&apos; does not exist!</source>
-        <translation>Файл &apos;%1&apos; не знайдено!</translation>
+        <translation type="vanished">Файл &apos;%1&apos; не знайдено!</translation>
     </message>
 </context>
 </TS>

@@ -10,7 +10,8 @@ namespace ReportLib
 	TableViewReportGenerator::TableViewReportGenerator(QWidget* parent,
 													   const QTableView& table,
 													   const ITableViewReportInfo& reportInfo,
-													   const QPageLayout& pageLayout):
+													   const QPageLayout& pageLayout,
+													   bool exportSelected) :
 		QObject(parent)
 	{
 		std::vector<int> visibleColumns;
@@ -32,7 +33,8 @@ namespace ReportLib
 			selectedRows.push_back(ri.row());
 		}
 
-		m_impl = new TableViewReportPrivate(parent, reportInfo, table, visibleColumns, columnWidths, selectedRows, pageLayout);
+		m_impl =
+			new TableViewReportPrivate(parent, reportInfo, table, visibleColumns, columnWidths, selectedRows, exportSelected, pageLayout);
 	}
 
 	void TableViewReportGenerator::printTable()

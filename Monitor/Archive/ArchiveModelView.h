@@ -12,6 +12,7 @@ enum class ArchiveColumns
 
 	// Next are hidden by default in MonitorArchiveWidget::MonitorArchiveWidget!!!, cannot do it in ArchiveView constructor, don't know why(((
 	//
+	Flags,
 	Valid,
 	StateAvailable,
 	Simulated,

@@ -4,8 +4,8 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/SimProjectWidget.cpp" line="318"/>
         <location filename="../src/SimLogicModulePage.cpp" line="704"/>
+        <location filename="../src/SimProjectWidget.cpp" line="318"/>
         <source>Pause - </source>
         <translation type="unfinished"></translation>
     </message>
@@ -305,28 +305,28 @@
 <context>
     <name>SimUi::SimIdeSimulator</name>
     <message>
-        <location filename="../src/SimIdeSimulator.cpp" line="287"/>
+        <location filename="../src/SimIdeSimulator.cpp" line="296"/>
         <source>Load logic schema details file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimIdeSimulator.cpp" line="295"/>
+        <location filename="../src/SimIdeSimulator.cpp" line="304"/>
         <source>Project build does not contain any schemas, file %1 not exist.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimIdeSimulator.cpp" line="305"/>
-        <location filename="../src/SimIdeSimulator.cpp" line="345"/>
+        <location filename="../src/SimIdeSimulator.cpp" line="314"/>
+        <location filename="../src/SimIdeSimulator.cpp" line="354"/>
         <source>File loading error, file name %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimIdeSimulator.cpp" line="330"/>
+        <location filename="../src/SimIdeSimulator.cpp" line="339"/>
         <source>Load app signal list file: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimIdeSimulator.cpp" line="335"/>
+        <location filename="../src/SimIdeSimulator.cpp" line="344"/>
         <source>File %1 cannot be read.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -688,119 +688,175 @@
 <context>
     <name>SimUi::SimWidgetPrivate</name>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="142"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="156"/>
         <source>Schemas Control</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="233"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="249"/>
         <source>Cannot open file %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="253"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="269"/>
         <source>Open Build</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="257"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="273"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="261"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="277"/>
         <source>Refresh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="265"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="281"/>
         <source>Add Window</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="372"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="288"/>
+        <source>Take Snapshot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="291"/>
+        <source>Apply Snapshot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="396"/>
         <source>Run simulation for complete project</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="379"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="403"/>
         <source>Pause current simulation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="382"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="406"/>
         <source>Stop current simulation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="389"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="413"/>
         <source>Allow LogicModules&apos; Application Data transmitting to AppDataSrv</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="439"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="463"/>
         <source>Trends</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="445"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="469"/>
         <source>Find Signal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="451"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="475"/>
         <source>Show All Schemas</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="455"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="479"/>
         <source>Signals Snapshot</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="743"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="735"/>
+        <source>The current project build has been updated to #%1. &lt;a href=&apos;reload_project&apos;&gt;Reload Build&lt;/a&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="891"/>
         <source>%1d %2:%3:%4.%5
 %6</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="758"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="906"/>
         <source>%1d %2:%3:%4
 %6</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="947"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1103"/>
         <source>Profile %1 not found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="979"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1135"/>
         <source>Nothing to simulate, no LogicModules are found.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="1175"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1332"/>
         <source>Cannot open project for simulation. For details see Output window.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="1194"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1351"/>
         <source>Simulator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="1256"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1370"/>
+        <source>Save Snapshot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1372"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1417"/>
+        <source>Snapshot files (*.u7snap);;All Files (*.*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1388"/>
+        <source>Snapshot failed. See the application log for details.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1398"/>
+        <source>Failed to save snapshot file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1407"/>
+        <source>Disk write error, file %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1415"/>
+        <source>Open Snapshot</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1426"/>
+        <source>Failed to open snapshot file.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1436"/>
+        <source>Failed to apply snapshot.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1498"/>
         <source>Cannot find LogicModule %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="1338"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1580"/>
         <source>AppLogic Schemas</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/SimWidgetPrivate.cpp" line="1341"/>
+        <location filename="../src/SimWidgetPrivate.cpp" line="1583"/>
         <source>Application Logic Schemas
 [CTRL + `]</source>
         <translation type="unfinished"></translation>
