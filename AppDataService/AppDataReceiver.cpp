@@ -2,11 +2,43 @@
 #include <cstddef>
 #include <cstring>
 
+#ifdef _WIN32
+#include <Mstcpip.h>	// SIO_UDP_CONNRESET
+#endif
+
+#include <QThread>
+
 #include "AppDataReceiver.h"
 
 using asio::ip::udp;
 using asio::io_context;
 using asio::steady_timer;
+
+FastTimer::FastTimer(int resyncPeriodTicks)
+{
+	constexpr int MIN_PERIOD = 10;
+	constexpr int MAX_PERIOD = 240;
+
+	m_resyncPeriodTicks = std::clamp(resyncPeriodTicks, MIN_PERIOD, MAX_PERIOD);
+	m_baseTimeMs = QDateTime::currentMSecsSinceEpoch();
+	m_elapsedTimer.start();
+}
+
+void FastTimer::resyncTimer()
+{
+	if (++m_tickCtr >= m_resyncPeriodTicks)
+	{
+		const qint64 calculatedTime = m_baseTimeMs + m_elapsedTimer.elapsed();
+		const qint64 now = QDateTime::currentMSecsSinceEpoch();
+		m_correctionMs = now - calculatedTime;
+		m_tickCtr = 0;
+	}
+}
+
+qint64 FastTimer::nowMs() const
+{
+	return m_baseTimeMs + m_elapsedTimer.elapsed() + m_correctionMs;
+}
 
 StdThreadsGuard::~StdThreadsGuard()
 {
@@ -48,7 +80,7 @@ AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 	m_isSimulationMode = (swRunMode == E::SoftwareRunMode::Simulation);
 
 	m_appDataReceivingIP = udp::endpoint(
-								asio::ip::address::from_string(dataReceivingIP.addressStr().toStdString()),
+								asio::ip::make_address(dataReceivingIP.addressStr().toStdString()),
 								dataReceivingIP.port());
 
 	for(AppDataSource* appDataSource : appDataSources)
@@ -108,8 +140,9 @@ void AppDataReceiver::run()
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").
 							arg(appDataReceivingIPStr()));
 
-	StdThreadsGuard stg;
+	m_workGuard.emplace(asio::make_work_guard(m_ioContext));
 
+	StdThreadsGuard stg;
 	startProcessingThreads(stg);
 
 	try
@@ -125,9 +158,12 @@ void AppDataReceiver::run()
 		std::cout << e.what() << std::endl;
 	}
 
-	wakeupAllProcessingThreads();
-
+	cancelTimer();
 	closeSocket();
+	resetWorkGuard();
+
+
+	wakeupAllProcessingThreads();
 
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread finished (receiving IP %1)").
 							arg(appDataReceivingIPStr()));
@@ -146,6 +182,16 @@ void AppDataReceiver::startTimer500ms()
 						{
 							onTimer500ms(error);
 						});
+}
+
+void AppDataReceiver::cancelTimer()
+{
+	if (m_timer != nullptr)
+	{
+		asio::error_code ec;
+		m_timer->cancel(ec);
+		m_timer.reset();
+	}
 }
 
 void AppDataReceiver::onTimer500ms(const asio::error_code& error)
@@ -276,6 +322,11 @@ bool AppDataReceiver::createAndBindSocket()
 
 	if (!error)
 	{
+#ifdef _WIN32
+		DWORD bytes = 0; BOOL b = FALSE;
+		::WSAIoctl(m_socket->native_handle(), SIO_UDP_CONNRESET,
+				   &b, sizeof(b), nullptr, 0, &bytes, nullptr, nullptr);
+#endif
 		m_socketBound = false;
 
 		m_socket->set_option(asio::socket_base::reuse_address(true), error);
@@ -298,6 +349,7 @@ bool AppDataReceiver::createAndBindSocket()
 
 		if (!error)
 		{
+			m_socketErrorCtr = 0;
 			m_socketBound = true;
 
 			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver socket created and bound to %1").
@@ -369,7 +421,7 @@ static_assert(offsetof(Rup::SimFrame, rupFrame) == 0);
 
 void AppDataReceiver::receivePackets(const asio::error_code& error, size_t bytesReceived)
 {
-	qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
+	qint64 serverTime = currentMSecsSinceEpoch();
 
 	if (stopIfQuitRequested() == true)
 	{
@@ -669,6 +721,11 @@ bool AppDataReceiver::stopIfQuitRequested()
 {
 	if (isQuitRequested() == true)
 	{
+		cancelTimer();
+		closeSocket();
+
+		resetWorkGuard();
+
 		m_ioContext.stop();
 
 		wakeupAllProcessingThreads();
@@ -677,6 +734,15 @@ bool AppDataReceiver::stopIfQuitRequested()
 	}
 
 	return false;
+}
+
+void AppDataReceiver::resetWorkGuard()
+{
+	if (m_workGuard.has_value())
+	{
+		m_workGuard->reset();
+		m_workGuard.reset();
+	}
 }
 
 QString AppDataReceiver::appDataReceivingIPStr() const
@@ -705,5 +771,4 @@ void AppDataReceiver::trace_dt(const QString& portID)
 		m_prevPacketTime = curTime;
 	}
 }
-
 

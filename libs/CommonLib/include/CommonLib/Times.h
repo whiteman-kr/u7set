@@ -165,3 +165,12 @@ inline QString timeToString(const QDateTime& time)
 	}
 	return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 }
+
+[[nodiscard]] inline qint64 currentMSecsSinceEpoch() noexcept
+{
+	using namespace std::chrono;
+
+	const auto now = system_clock::now();
+	const auto ms  = time_point_cast<milliseconds>(now).time_since_epoch();
+	return ms.count();
+}

@@ -5,13 +5,12 @@
 #include <thread>
 #include <vector>
 #include <array>
-#include <map>
-#include <set>
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
 #include <unordered_set>
 #include <unordered_map>
+#include <optional>
 
 #include <asio/io_context.hpp>
 #include <asio/ip/udp.hpp>
@@ -20,6 +19,22 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "AppDataSource.h"
 #include "SignalStatesProcessingThread.h"
+
+class FastTimer
+{
+public:
+	FastTimer(int resyncPeriodTicks);
+
+	void resyncTimer();
+	qint64 nowMs() const;
+
+private:
+	qint64 m_baseTimeMs = 0;
+	QElapsedTimer m_elapsedTimer;
+	int m_tickCtr = 0;
+	int m_resyncPeriodTicks = 0;
+	qint64 m_correctionMs = 0;
+};
 
 enum class TaskFlags : quint32
 {
@@ -82,9 +97,7 @@ public:
 
 	void fillAppDataReceiveState(Network::AppDataReceiveState* adrs);
 
-	const AppDataSources& appDataSources() { return m_appDataSources; }
-
-	CircularLoggerShared log() { return m_log; }
+	CircularLoggerShared log() const { return m_log; }
 
 	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
 									   bool isArchivingQueue,
@@ -101,6 +114,7 @@ private:
 	virtual void run() override;
 
 	void startTimer500ms();
+	void cancelTimer();
 	void onTimer500ms(const asio::error_code& error);
 
 	void clearReceiverStatistics();
@@ -123,6 +137,7 @@ private:
 	void wakeupAllProcessingThreads();
 
 	bool stopIfQuitRequested();
+	void resetWorkGuard();
 
 	QString appDataReceivingIPStr() const;
 
@@ -139,6 +154,7 @@ private:
 	HostAddressPort m_dataReceivingIP;
 	asio::ip::udp::endpoint m_appDataReceivingIP;
 
+	std::optional<asio::executor_work_guard<asio::io_context::executor_type>> m_workGuard;
 	asio::io_context m_ioContext;
 
 	std::unique_ptr<asio::ip::udp::socket> m_socket;

@@ -49,6 +49,8 @@ target_precompile_headers(${TARGET} PRIVATE
 	<array>
 	<atomic>
 	<condition_variable>
+	<cstddef>
+	<cstring>
 	<functional>
 	<iostream>
 	<limits>
@@ -56,6 +58,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<map>
 	<memory>
 	<mutex>
+	<optional>
 	<queue>
 	<vector>
 	<set>
