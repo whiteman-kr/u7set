@@ -198,17 +198,17 @@
     <message>
         <location filename="../CalibratorManager.cpp" line="122"/>
         <source>set value</source>
-        <translation>зададена стойност</translation>
+        <translation>Зададена</translation>
     </message>
     <message>
         <location filename="../CalibratorManager.cpp" line="126"/>
         <source>Step down</source>
-        <translation>Стъпка надолу</translation>
+        <translation>Надолу</translation>
     </message>
     <message>
         <location filename="../CalibratorManager.cpp" line="127"/>
         <source>Step up</source>
-        <translation>Стъпка нагоре</translation>
+        <translation>Нагоре</translation>
     </message>
     <message>
         <location filename="../CalibratorManager.cpp" line="145"/>
