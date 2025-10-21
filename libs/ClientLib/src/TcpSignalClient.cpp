@@ -101,7 +101,7 @@ namespace ClientLib
 	{
 		writeMessage(QString("TcpSignalClient::onDisconnection() %1").arg(serverAddressPort1().addressPortStr()));
 
-		m_signalUpdater.invalidateSignalStates(QThread::currentThreadId());
+		m_signalUpdater.invalidateSignalStates(sourceId());
 
 		return;
 	}
@@ -505,7 +505,7 @@ namespace ClientLib
 			}
 		}
 
-		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
+		m_signalUpdater.setStates(states, ::calcHash(m_serverSettings.equipmentId), sourceId());
 
 		if (tl_getSignalStateChangesReply.pendingstatescount() >= ADS_GET_APP_SIGNAL_STATE_MAX)
 		{
@@ -587,7 +587,7 @@ namespace ClientLib
 			}
 		}
 
-		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
+		m_signalUpdater.setStates(states, ::calcHash(m_serverSettings.equipmentId), sourceId());
 
 		requestSignalLog();
 		return;
@@ -758,6 +758,11 @@ namespace ClientLib
 		}
 
 		return;
+	}
+
+	ClientLib::IAppSignalUpdater::SourceIdType TcpSignalClient::sourceId() const
+	{
+		return reinterpret_cast<ClientLib::IAppSignalUpdater::SourceIdType>(QThread::currentThreadId());
 	}
 
 } // namespace ClientLib

@@ -866,14 +866,7 @@ void CfgLoaderThread::start()
 void CfgLoaderThread::quitAndWait()
 {
 	AUTO_LOCK(m_mutex);
-
-	if (m_thread == nullptr || m_cfgLoader == nullptr)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_thread->quitAndWait();
+	shutdownThread();
 }
 
 void CfgLoaderThread::enableDownloadConfiguration()

@@ -72,7 +72,8 @@ namespace ClientLib
 	{
 		writeMessage("TcpSignalRecents::onDisconnection()");
 
-		m_signalUpdater.invalidateSignalStates(QThread::currentThreadId());
+		auto sourceId = reinterpret_cast<ClientLib::IAppSignalUpdater::SourceIdType>(QThread::currentThreadId());
+		m_signalUpdater.invalidateSignalStates(sourceId);
 		return;
 	}
 
@@ -165,12 +166,13 @@ namespace ClientLib
 			return;
 		}
 
-		int signalStateCount = s_getSignalStateReply.appsignalstates_size();
+		thread_local std::vector<AppSignalState> states;
+		states.clear();
 
-		std::vector<AppSignalState> states;
+		int signalStateCount = s_getSignalStateReply.appsignalstates_size();
 		states.reserve(signalStateCount);
 
-		// If signal is not present in that AppDataService, it will be skipped in the answear
+		// If signal is not present in that AppDataService, it will be skipped in the answer
 		//
 		for (int i = 0; i < signalStateCount; i++)
 		{
@@ -180,7 +182,8 @@ namespace ClientLib
 			states.emplace_back(protoState);
 		}
 
-		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
+		auto sourceId = reinterpret_cast<ClientLib::IAppSignalUpdater::SourceIdType>(QThread::currentThreadId());
+		m_signalUpdater.setStates(states, ::calcHash(m_serverSettings.equipmentId), sourceId);
 
 		requestSignalState();
 		return;

@@ -110,6 +110,8 @@ namespace ClientLib
 		SoftwareEndpoint::AppDataService m_serverSettings;
 		IAppSignalUpdater& m_signalUpdater;
 
+		ClientLib::IAppSignalUpdater::SourceIdType sourceId() const;
+
 	private:
 		std::atomic<bool> m_signalParamsLoaded{false};
 		std::atomic<bool> m_signalStatesLoaded{false};
