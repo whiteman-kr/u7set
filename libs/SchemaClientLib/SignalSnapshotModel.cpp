@@ -136,6 +136,10 @@ namespace SchemaClientLib
 				}
 			}
 			break;
+		case SnapshotColumns::Flags:
+			v1 = st1.m_flags.all;
+			v2 = st2.m_flags.all;
+			break;
 		case SnapshotColumns::Valid:
 			v1 = st1.m_flags.valid;
 			v2 = st2.m_flags.valid;
@@ -233,6 +237,7 @@ namespace SchemaClientLib
 		m_columnsNames << QObject::tr("Plant Time");
 		m_columnsNames << QObject::tr("Value");
 		m_columnsNames << QObject::tr("Units");
+		m_columnsNames << QObject::tr("Flags");
 		m_columnsNames << QObject::tr("Valid");
 		m_columnsNames << QObject::tr("StateAvailable");
 		m_columnsNames << QObject::tr("Simulated");
@@ -776,6 +781,10 @@ namespace SchemaClientLib
 				{
 					QDateTime time = state.m_time.plantToDateTime();
 					return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
+				}
+			case SnapshotColumns::Flags:
+				{
+					return state.m_flags.printShort();
 				}
 			case SnapshotColumns::Valid:
 				{

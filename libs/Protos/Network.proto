@@ -504,9 +504,24 @@ message DiscretesLogRecord
 
 message GetDiscretesLogReply
 {
-	optional int32 pendingRecordsCount = 1 [default = 0];
-	optional int64 logFirstRecordID = 2 [default = 0];
-	repeated DiscretesLogRecord discretesLogRecord = 3;
+	optional bool logIsWorkable = 1 [default = false];
+	optional int32 pendingRecordsCount = 2 [default = 0];
+	optional int64 logFirstRecordID = 3 [default = 0];
+	repeated DiscretesLogRecord discretesLogRecord = 4;
+}
+
+message AckDiscretesLogRequest
+{
+	optional string ackSource = 1;
+	optional string ackUser = 2;
+	optional int64 ackUpToPlantTime = 3; // Acknowledged up to this plant time (inclusive)
+}
+
+message AckDiscretesLogReply
+{
+	optional string ackSource = 1;
+	optional string ackUser = 2;
+	optional int64 ackUpToPlantTime = 3; // Acknowledged up to this plant time (inclusive)
 }
 
 // TuningService requests and replies

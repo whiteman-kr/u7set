@@ -117,8 +117,8 @@ protected:
 	virtual void registerMetaTypes();
 
 protected:
-	QUdpSocket m_socket;
-	QTimer m_timer;
+	QUdpSocket* m_socket = nullptr;
+	QTimer* m_timer = nullptr;
 
 	UdpRequest m_request;
 	UdpRequest m_ack;
@@ -190,7 +190,7 @@ private:
 	quint32 m_protocolVersion = 1;
 	quint64 m_clientID = 0;
 
-	int m_msTimeout = 100;
+	int m_msTimeout = 200;
 	int m_retryCount = 0;
 	int m_retryCtr = 0;
 	quint32 m_ackTimeoutCtr = 0;

@@ -18,7 +18,7 @@ public:
 
 	void prepare(const AppSignals& appSignals,
 				 DynamicAppSignalStates* signalStates,
-				 DiscretesLogWriter* discretesLog,
+				 std::shared_ptr<DiscretesLogWriter> discretesLog,
 				 int autoArchivingGroupsCount,
 				 CircularLoggerShared timeErrLog);
 
@@ -69,7 +69,7 @@ private:
 	std::condition_variable* m_statesProcessingRequiredCondition = nullptr;
 	std::queue<AppDataSource*>* m_statesProcessingRequired = nullptr;
 
-	DiscretesLogWriter* m_discretesLog = nullptr;
+	std::shared_ptr<DiscretesLogWriter> m_discretesLog;
 
 	// states of source aquired signals, excluding software calculated signals
 	//

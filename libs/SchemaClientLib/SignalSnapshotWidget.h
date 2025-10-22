@@ -136,6 +136,8 @@ namespace SchemaClientLib
 		void maskChanged(bool addToCompleter);
 		void tagsChanged(bool addToCompleter);
 
+		void printData(bool printSelected);
+
 	signals:
 		void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 		void signalInfo(QString appSignalId);

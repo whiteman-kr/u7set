@@ -191,14 +191,12 @@ void AppDataServiceWorker::fillAppDataReceiveState(Network::AppDataReceiveState*
 	}
 }
 
-void AppDataServiceWorker::registerDiscretesLogReader(DiscretesLogReader* reader)
+void AppDataServiceWorker::ackDiscretesLog(const Network::AckDiscretesLogRequest& ackLogRequest)
 {
-	m_discretesLogWriter.registerLogReader(reader);
-}
-
-void AppDataServiceWorker::unregisterDiscretesLogReader(DiscretesLogReader* reader)
-{
-	m_discretesLogWriter.unregisterLogReader(reader);
+	if (m_discretesLogWriter)
+	{
+		m_discretesLogWriter->ackDiscretesLog(ackLogRequest);
+	}
 }
 
 void AppDataServiceWorker::initServiceSpecificCmdLineArgs()
@@ -234,6 +232,8 @@ void AppDataServiceWorker::initialize()
 {
 	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker is started");
 
+	m_discretesLogWriter = std::make_shared<DiscretesLogWriter>();
+
 	runCfgLoaderThread();
 
 	connect(this, &AppDataServiceWorker::restartArchSignalsTimer, this, &AppDataServiceWorker::onRestartArchSignalsTimer);
@@ -244,6 +244,8 @@ void AppDataServiceWorker::shutdown()
 	clearConfiguration();
 
 	stopCfgLoaderThread();
+
+	m_discretesLogWriter.reset();
 
 	DEBUG_LOG_MSG(logger(), "AppDataServiceWorker finished");
 }
@@ -537,7 +539,7 @@ void AppDataServiceWorker::prepareAppDataSources()
 	{
 		TEST_PTR_CONTINUE(appDataSource);
 
-		appDataSource->prepare(m_appSignals, &m_appSignalStates, &m_discretesLogWriter,
+		appDataSource->prepare(m_appSignals, &m_appSignalStates, m_discretesLogWriter,
 							   m_autoArchivingGroupsCount, m_timeErrLog);
 	}
 }
@@ -552,7 +554,7 @@ void AppDataServiceWorker::applyNewConfiguration()
 	createAndInitSignalStates();
 	buildAcuiredAppSignalIDs();
 
-	m_discretesLogWriter.start(equipmentID(), m_curSettingsProfile.discretesLogHours, logger());
+	m_discretesLogWriter->start(buildInfo().project, equipmentID(), m_curSettingsProfile.discretesLogHours, logger());
 
 	prepareAppDataSources();
 
@@ -579,7 +581,7 @@ void AppDataServiceWorker::clearConfiguration()
 
 	// free all resources allocated in onConfigurationReady
 	//
-	m_discretesLogWriter.stop();
+	m_discretesLogWriter->stop();
 
 	stopRtTrendsServerThread();
 	stopTcpArchiveClientThread();

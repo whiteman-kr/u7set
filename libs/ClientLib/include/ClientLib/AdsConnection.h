@@ -40,8 +40,8 @@ namespace ClientLib
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
 
-		SignalLog& signalLog();
-		const SignalLog& signalLog() const;
+		ClientLib::SignalLog& signalLog();
+		const ClientLib::SignalLog& signalLog() const;
 
 		// --
 		//

@@ -56,15 +56,6 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::addSignal(const AppSignalParam& appSignal, const QString& appDataServiceId)
-	{
-		QWriteLocker wl(&m_paramsLocker);
-
-		addSignalPrivate(appSignal, appDataServiceId);
-
-		return;
-	}
-
 	void AppSignalManager::addSignals(std::span<const AppSignalParam> appSignals, const QString& appDataServiceId)
 	{
 		QWriteLocker wl(&m_paramsLocker);
@@ -77,7 +68,7 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::invalidateSignalStates(Qt::HANDLE sourceThreadId)
+	void AppSignalManager::invalidateSignalStates(SourceIdType sourceThreadId)
 	{
 		QWriteLocker wl(&m_statesLocker);
 
@@ -89,34 +80,14 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId)
-	{
-		Hash signalHash = ::calcHash(appSignalId);
-		return setState(signalHash, state, dataServerHash, sourceThreadId);
-	}
-
-	void AppSignalManager::setState(Hash signalHash, const AppSignalState& arrivedState, Hash dataServerHash, Qt::HANDLE sourceThreadId)
-	{
-		if (signalHash == 0)
-		{
-			assert(signalHash != 0);
-			return;
-		}
-
-		QWriteLocker wl(&m_statesLocker);
-
-		Sources& currentState = m_states[signalHash];
-		currentState.set(arrivedState, dataServerHash, sourceThreadId);
-
-		return;
-	}
-
-	void AppSignalManager::setState(std::span<const AppSignalState> states, Hash dataServerHash, Qt::HANDLE sourceThreadId)
+	void AppSignalManager::setStates(std::span<const AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId)
 	{
 		QWriteLocker wl(&m_statesLocker);
 
 		for (const AppSignalState& newState : states)
 		{
+			assert(newState.hash() != UNDEFINED_HASH);
+
 			Sources& currentStateAndSources = m_states[newState.hash()];
 			currentStateAndSources.set(newState, dataServerHash, sourceThreadId);
 		}
@@ -675,7 +646,7 @@ namespace ClientLib
 		return result;
 	}
 
-	void AppSignalManager::Sources::set(const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId)
+	void AppSignalManager::Sources::set(const AppSignalState& state, Hash dataServerHash, SourceIdType sourceThreadId)
 	{
 		SourceState* emptyState = nullptr;
 		for (SourceState& sourceState : sources)
@@ -687,7 +658,7 @@ namespace ClientLib
 				return;
 			}
 
-			if (sourceState.sourceThreadId == nullptr)
+			if (sourceState.sourceThreadId == 0)
 			{
 				emptyState = &sourceState;
 			}
@@ -695,7 +666,7 @@ namespace ClientLib
 
 		if (emptyState == nullptr)
 		{
-			// No emty space in sources
+			// No empty space in sources
 			//
 			Q_ASSERT(emptyState);
 
@@ -709,7 +680,7 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::Sources::invalidateSource(Qt::HANDLE sourceThreadId)
+	void AppSignalManager::Sources::invalidateSource(SourceIdType sourceThreadId)
 	{
 		for (SourceState& sourceState : sources)
 		{

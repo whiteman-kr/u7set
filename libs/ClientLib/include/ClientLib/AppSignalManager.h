@@ -39,17 +39,11 @@ namespace ClientLib
 		///
 		virtual void notifySignalParamsUpdated() override;
 
-		virtual void addSignal(const AppSignalParam& appSignal, const QString& appDataServiceId) override;
 		virtual void addSignals(std::span<const AppSignalParam> appSignals, const QString& appDataServiceId) override;
 
-		virtual void invalidateSignalStates(Qt::HANDLE sourceThreadId) override;
+		virtual void invalidateSignalStates(SourceIdType sourceThreadId) override;
 
-		virtual void setState(const QString& appSignalId,
-							  const AppSignalState& state,
-							  Hash dataServerHash,
-							  Qt::HANDLE sourceThreadId) override;
-		virtual void setState(Hash signalHash, const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
-		virtual void setState(std::span<const AppSignalState> states, Hash dataServerHash, Qt::HANDLE sourceThreadId) override;
+		virtual void setStates(std::span<const AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId) override;
 
 	private:
 		void addSignalPrivate(const AppSignalParam& appSignal, const QString& appDataServiceId);
@@ -157,7 +151,7 @@ namespace ClientLib
 		{
 			AppSignalState state{};
 			Hash dataServerHash{UNDEFINED_HASH};
-			Qt::HANDLE sourceThreadId{};
+			SourceIdType sourceThreadId{};
 			std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{}; // State last time received or updated
 		};
 
@@ -172,8 +166,8 @@ namespace ClientLib
 			size_t size = 0;
 			std::array<SourceState, 4> sources{}; // 4 maximum possible channels of getting signal (2 regular, 2 recent)
 
-			void set(const AppSignalState& state, Hash dataServerHash, Qt::HANDLE sourceThreadId);
-			void invalidateSource(Qt::HANDLE sourceThreadId);
+			void set(const AppSignalState& state, Hash dataServerHash, SourceIdType sourceThreadId);
+			void invalidateSource(SourceIdType sourceThreadId);
 
 			[[nodiscard]] const AppSignalState& get() const;
 			[[nodiscard]] const AppSignalState& getForDataServer(Hash dataServerHash) const;

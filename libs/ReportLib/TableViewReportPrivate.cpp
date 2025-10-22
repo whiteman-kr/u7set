@@ -96,14 +96,16 @@ namespace ReportLib
 												 const QTableView& table,
 												 const std::vector<int>& visibleColumns,
 												 const std::vector<int>& columnWidths,
-												 const std::vector<int>& selectedRows) :
+												 const std::vector<int>& selectedRows,
+												 bool exportSelected) :
 		m_reportInfo{reportInfo},
 		m_modelDataProvider(*table.model()),
 		m_visibleColumns(visibleColumns),
 		m_columnWidths(columnWidths),
 		m_selectedRows(selectedRows),
-		m_exportSelected(m_selectedRows.size() > 1)
+		m_exportSelected(m_selectedRows.size() > 0 ? exportSelected : false)
 	{
+		
 	}
 
 	void TableViewReportWorker::setFileName(const QString& fileName)
@@ -162,7 +164,14 @@ namespace ReportLib
 				}
 				else
 				{
-					errorMsg = tr("Unsupported file format!");
+					if (extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 || extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0)
+					{
+						createHtml(m_fileName, errorMsg);
+					}
+					else
+					{
+						errorMsg = tr("Unsupported file format!");
+					}
 				}
 			}
 		}
@@ -262,7 +271,7 @@ namespace ReportLib
 		//
 		std::vector<int> rowsToProcess;
 		int rowCount = m_modelDataProvider.exportRowCount();
-		if (m_exportSelected == true) // If more than 1 row is selected - export only them, otherwise export all rows
+		if (m_exportSelected == true)
 		{
 			rowsToProcess = m_selectedRows;
 		}
@@ -379,15 +388,20 @@ namespace ReportLib
 
 		// Fill table
 		//
+		std::vector<int> rowsToProcess;
 		int rowCount = m_modelDataProvider.exportRowCount();
-		std::vector<int> rowsToProcess = m_selectedRows;
-		if (rowsToProcess.size() <= 1) // If more than 1 row is selected - export only them, otherwise export all rows
+		if (m_exportSelected == true)
+		{
+			rowsToProcess = m_selectedRows;
+		}
+		else
 		{
 			for (int row = 0; row < rowCount; row++)
 			{
 				rowsToProcess.push_back(row);
 			}
 		}
+
 		{
 			QMutexLocker l(&m_statisticsMutex);
 			m_statistics.maxValue = m_maxRows > 0 ? m_maxRows : static_cast<int>(rowsToProcess.size());
@@ -439,6 +453,124 @@ namespace ReportLib
 		return true;
 	}
 
+
+	bool TableViewReportWorker::createHtml(const QString& fileName, QString& errorMsg)
+	{
+		if (fileName.isEmpty() == true)
+		{
+			Q_ASSERT(fileName.isEmpty() == false);
+			return false;
+		}
+
+		// --
+		//
+		QFile file(fileName);
+
+		bool ok = file.open(QIODevice::WriteOnly | QIODevice::Text);
+		if (ok == false)
+		{
+			errorMsg = QObject::tr("Cannot open file %1 for writing.").arg(fileName);
+			return false;
+		}
+
+		QTextStream out(&file);
+
+		out << "<!doctype html>\n";
+		out << "<html lang=\"en\">\n";
+		out << "<head>\n";
+		out << "  <meta charset=\"utf - 8\" />\n";
+		out << "  <title>CSV as HTML</title>\n";
+		out << "  <style>\n";
+		out << "    body { font-family: Arial, sans-serif; padding: 16px; }\n";
+		out << "    h1 { margin-bottom: 12px; }\n";
+		out << "    table { border-collapse: collapse; width: 100%; }\n ";
+		out << "    th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }\n";
+		out << "    th { background: #f0f0f0; }\n";
+		out << "  </style>\n";
+		out << "</head>\n";
+		out << "<body>\n";
+		out << "  <table>\n";
+		out << "    <thead>\n";
+		out << "      <tr>\n";
+		
+		// Fill header
+		//
+		{
+			QStringList columnsList = m_modelDataProvider.exportColumnsText();
+			for (int i = 0; i < m_visibleColumns.size(); i++)
+			{
+				out << "        <th>" << columnsList[m_visibleColumns[i]] << "</ th>\n";
+			}
+		}
+		
+		out << "      </tr>\n";
+		out << "    </thead>\n";
+		out << "    <tbody>\n ";
+
+		// Fill table
+		//
+		std::vector<int> rowsToProcess;
+		int rowCount = m_modelDataProvider.exportRowCount();
+		if (m_exportSelected == true)
+		{
+			rowsToProcess = m_selectedRows;
+		}
+		else
+		{
+			for (int row = 0; row < rowCount; row++)
+			{
+				rowsToProcess.push_back(row);
+			}
+		}
+
+		{
+			QMutexLocker l(&m_statisticsMutex);
+			m_statistics.maxValue = m_maxRows > 0 ? m_maxRows : static_cast<int>(rowsToProcess.size());
+			m_statistics.value = 0;
+		}
+
+		for (int row : rowsToProcess)
+		{
+			{
+				QMutexLocker l(&m_statisticsMutex);
+				if (m_statistics.value % 100 == 0)
+				{
+					m_statistics.text = tr("Processing data... %1/%2").arg(m_statistics.value + 1).arg(m_statistics.maxValue);
+				}
+				m_statistics.value++;
+
+				if (m_maxRows > 0 && m_statistics.value > m_maxRows)
+				{
+					break;
+				}
+			}
+
+			if (m_stop.load() == true)
+			{
+				errorMsg = QObject::tr("The process was interrupted.");
+				break;
+			}
+
+			QStringList rowsList = m_modelDataProvider.exportRowsText(row);
+
+			out << "      <tr>";
+			for (int i = 0; i < m_visibleColumns.size(); i++)
+			{
+				const QString& cellText = rowsList[m_visibleColumns[i]];
+				out << "<td> "<< cellText.toHtmlEscaped() << "</ td>";
+			}
+			out << "</ tr>\n ";
+		}
+		
+		out << "    </tbody>\n";
+		out << "  </table>\n";
+		out << "</body>\n";
+		out << "</html>\n";
+
+		return true;
+	}
+
+
 	//
 	// --------------------------------------------- ExportPrintPrivate --------------------------
 	//
@@ -448,13 +580,15 @@ namespace ReportLib
 												   const std::vector<int>& visibleColumns,
 												   const std::vector<int>& columnWidths,
 												   const std::vector<int>& selectedRows,
+												   bool exportSelected,
 												   const QPageLayout& pageLayout) :
 		QObject(parent),
 		m_parent(parent),
 		m_pageLayout(pageLayout),
 		m_table(table),
-		m_worker(new TableViewReportWorker(reportInfo, table, visibleColumns, columnWidths, selectedRows)),
-		m_selectedRows(selectedRows)
+		m_worker(new TableViewReportWorker(reportInfo, table, visibleColumns, columnWidths, selectedRows, exportSelected)),
+		m_selectedRows(selectedRows),
+		m_exportSelected(m_selectedRows.size() > 0 ? exportSelected : false)
 	{
 	}
 
@@ -473,7 +607,7 @@ namespace ReportLib
 	{
 		QPrintDialog dialog(m_parent);
 
-		if (m_selectedRows.size() > 1)
+		if (m_exportSelected == true)
 		{
 			dialog.setOption(QAbstractPrintDialog::PrintSelection);
 			dialog.setPrintRange(QAbstractPrintDialog::Selection);
@@ -532,7 +666,7 @@ namespace ReportLib
 		// Limit the row count
 		//
 		{
-			int rowCount = (m_selectedRows.size() > 1 && printer->printRange() == QPrinter::PrintRange::Selection) ?
+			int rowCount = (m_exportSelected == true && printer->printRange() == QPrinter::PrintRange::Selection) ?
 							   static_cast<int>(m_selectedRows.size()) :
 							   m_table.model()->rowCount();
 
@@ -573,13 +707,15 @@ namespace ReportLib
 		// Limit the row count
 		//
 		{
-			int rowCount = m_selectedRows.size() > 1 ? static_cast<int>(m_selectedRows.size()) : m_table.model()->rowCount();
+			int rowCount = m_exportSelected == true ? static_cast<int>(m_selectedRows.size()) : m_table.model()->rowCount();
 
 			QString extension = fileInfo.completeSuffix();
 			int maxRowCount = -1;
 
 			if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
-				extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0)
+				extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0 || 
+				extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
+				extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0)
 			{
 				maxRowCount = TableViewReportWorker::m_maxReportStatesForCsv;
 
@@ -611,7 +747,7 @@ namespace ReportLib
 							qAppName(),
 							QObject::tr("Warning!\n\nThe report is too large (%1 records ).\nOnly first %2 records will pe exported.\nTo "
 										"increase the "
-										"report size, export the data to the CSV or TXT format.\n\nDo you wish to continue the exporting?")
+										"report size, export the data to the CSV, TXT or HTML format.\n\nDo you wish to continue the exporting?")
 								.arg(rowCount)
 								.arg(maxRowCount),
 							QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)

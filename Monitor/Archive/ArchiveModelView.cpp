@@ -44,6 +44,9 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 	case ArchiveColumns::State:
 		return tr("State");
 
+	case ArchiveColumns::Flags:
+		return tr("Flags");
+
 	case ArchiveColumns::Valid:
 		return tr("Valid");
 
@@ -157,6 +160,11 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			else
 			{
 				result = getValueString(m_cachedSignalState.appState, sit->second);
+			}
+			break;
+		case ArchiveColumns::Flags:
+			{
+				result = m_cachedSignalState.appState.m_flags.printShort();
 			}
 			break;
 		case ArchiveColumns::Valid:
@@ -293,13 +301,10 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 	}
 
 	if (role == Qt::TextAlignmentRole &&
-		(column ==  static_cast<int>(ArchiveColumns::Row) ||
-		 column ==  static_cast<int>(ArchiveColumns::State) ||
-		 column ==  static_cast<int>(ArchiveColumns::Valid) ||
-		 column ==  static_cast<int>(ArchiveColumns::StateAvailable) ||
-		 column ==  static_cast<int>(ArchiveColumns::Simulated) ||
-		 column ==  static_cast<int>(ArchiveColumns::Blocked) ||
-		 column ==  static_cast<int>(ArchiveColumns::Mismatch)))
+		(column == static_cast<int>(ArchiveColumns::Row) || column == static_cast<int>(ArchiveColumns::State) ||
+		 column == static_cast<int>(ArchiveColumns::Valid) || column == static_cast<int>(ArchiveColumns::StateAvailable) ||
+		 column == static_cast<int>(ArchiveColumns::Simulated) || column == static_cast<int>(ArchiveColumns::Blocked) ||
+		 column == static_cast<int>(ArchiveColumns::Mismatch)))
 	{
 		return {Qt::AlignCenter};
 	}
@@ -337,32 +342,33 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			Q_ASSERT(false);
 		}
 
-		QString toolTip = tr("StateIndex: %1\n"
-								  "SignalID: %2\n"
-								  "AppSignalID: %3\n"
-								  "Caption: %4\n"
-								  "Type: %5\n"
-								  "Value: %6 (%7)\n"
-								  "Flags: %8\n"
-								  "Time: %9 (%10)\n"
-								  "ServerTime: %11\n"
-								  "ServerTime +0UTC: %12\n"
-								  "PlantTime: %13\n"
-								  "Server: %14")
-						  .arg(row + 1)
-						  .arg(signalParam.signalParam.customSignalId())
-						  .arg(signalParam.signalParam.appSignalId())
-						  .arg(signalParam.signalParam.caption())
-						  .arg(typeStr)
-						  .arg(getValueString(m_cachedSignalState.appState, signalParam))
-						  .arg(m_cachedSignalState.appState.m_value)
-						  .arg(QString::number(m_cachedSignalState.appState.m_flags.all, 2))
-						  .arg(m_cachedSignalState.appState.time(m_timeType).toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))
-						  .arg(E::valueToString<E::TimeType>(m_timeType))
-						  .arg(m_cachedSignalState.appState.time().system.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime: %12\n"
-						  .arg(m_cachedSignalState.appState.time().local.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"ServerTime +0UTC: %13\n"
-						  .arg(m_cachedSignalState.appState.time().plant.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))			//"PlantTime: %14"
-						  .arg(m_cachedSignalState.archiveServiceShortenId);
+		QString toolTip =
+			tr("StateIndex: %1\n"
+			   "SignalID: %2\n"
+			   "AppSignalID: %3\n"
+			   "Caption: %4\n"
+			   "Type: %5\n"
+			   "Value: %6 (%7)\n"
+			   "Flags: %8\n"
+			   "Time: %9 (%10)\n"
+			   "ServerTime: %11\n"
+			   "ServerTime +0UTC: %12\n"
+			   "PlantTime: %13\n"
+			   "Server: %14")
+				.arg(row + 1)
+				.arg(signalParam.signalParam.customSignalId())
+				.arg(signalParam.signalParam.appSignalId())
+				.arg(signalParam.signalParam.caption())
+				.arg(typeStr)
+				.arg(getValueString(m_cachedSignalState.appState, signalParam))
+				.arg(m_cachedSignalState.appState.m_value)
+				.arg(m_cachedSignalState.appState.m_flags.printShort() + "(" + QString::number(m_cachedSignalState.appState.m_flags.all, 2) + ")")
+				.arg(m_cachedSignalState.appState.time(m_timeType).toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz"))
+				.arg(E::valueToString<E::TimeType>(m_timeType))
+				.arg(m_cachedSignalState.appState.time().local.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz")) //"ServerTime: %12\n"
+				.arg(m_cachedSignalState.appState.time().system.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz")) //"ServerTime +0UTC: %13\n"
+				.arg(m_cachedSignalState.appState.time().plant.toDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz")) //"PlantTime: %14"
+				.arg(m_cachedSignalState.archiveServiceShortenId);
 
 
 		return toolTip;

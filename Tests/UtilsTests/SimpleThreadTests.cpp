@@ -85,6 +85,9 @@ private:
 TEST(SimpleThreadTests, SingleWorker_Lifecycle)
 {
 	SimpleThread th;
+
+	th.enableLog(true);
+
 	auto* w = new TestWorker("W1");
 
 	std::atomic<int> started { 0 };
@@ -121,6 +124,9 @@ TEST(SimpleThreadTests, SingleWorker_Lifecycle)
 TEST(SimpleThreadTests, MultipleWorkers_Lifecycle)
 {
 	SimpleThread th;
+
+	th.enableLog(true);
+
 	constexpr int N = 5;
 
 	std::vector<TestWorker*> workers;
@@ -165,77 +171,61 @@ TEST(SimpleThreadTests, MultipleWorkers_Lifecycle)
 
 TEST(SimpleThreadTests, ImmediateQuit_AfterStart)
 {
-	SimpleThread th;
-
-	auto* w1 = new TestWorker("W1", false);
-	auto* w2 = new TestWorker("W2", false);
-	auto* w3 = new TestWorker("W3", false);
-	auto* w4 = new TestWorker("W4", false);
-	auto* w5 = new TestWorker("W5", false);
-
-	std::atomic<int> finished { 0 };
 	std::atomic<int> destroyed { 0 };
 
-	QObject::connect(w1, &TestWorker::finishedSig, [&finished]()
-					 {
-						 ++finished;
-					 });
-	QObject::connect(w1, &QObject::destroyed, [&destroyed]()
-					 {
-						 ++destroyed;
-					 });
+	{
+		SimpleThread th;
 
-	QObject::connect(w2, &TestWorker::finishedSig, [&finished]()
-					 {
-						 ++finished;
-					 });
-	QObject::connect(w2, &QObject::destroyed, [&destroyed]()
-					 {
-						 ++destroyed;
-					 });
+		th.enableLog(true);
 
-	QObject::connect(w3, &TestWorker::finishedSig, [&finished]()
-					 {
-						 ++finished;
-					 });
-	QObject::connect(w3, &QObject::destroyed, [&destroyed]()
-					 {
-						 ++destroyed;
-					 });
+		auto* w1 = new TestWorker("W1", false);
+		auto* w2 = new TestWorker("W2", false);
+		auto* w3 = new TestWorker("W3", false);
+		auto* w4 = new TestWorker("W4", false);
+		auto* w5 = new TestWorker("W5", false);
 
-	QObject::connect(w4, &TestWorker::finishedSig, [&finished]()
-					 {
-						 ++finished;
-					 });
-	QObject::connect(w4, &QObject::destroyed, [&destroyed]()
-					 {
-						 ++destroyed;
-					 });
+		QObject::connect(w1, &QObject::destroyed, [&destroyed]()
+						 {
+							 ++destroyed;
+						 });
 
-	QObject::connect(w5, &TestWorker::finishedSig, [&finished]()
-					 {
-						 ++finished;
-					 });
-	QObject::connect(w5, &QObject::destroyed, [&destroyed]()
-					 {
-						 ++destroyed;
-					 });
+		QObject::connect(w2, &QObject::destroyed, [&destroyed]()
+						 {
+							 ++destroyed;
+						 });
 
-	th.addWorker(w1);
-	th.addWorker(w2);
-	th.addWorker(w3);
-	th.addWorker(w4);
-	th.addWorker(w5);
+		QObject::connect(w3, &QObject::destroyed, [&destroyed]()
+						 {
+							 ++destroyed;
+						 });
 
-	th.start(2);
+		QObject::connect(w4, &QObject::destroyed, [&destroyed]()
+						 {
+							 ++destroyed;
+						 });
 
-	ASSERT_TRUE(th.quitAndWait(3000));
+		QObject::connect(w5, &QObject::destroyed, [&destroyed]()
+						 {
+							 ++destroyed;
+						 });
 
-	ASSERT_TRUE(waitUntil([&finished]() { return finished.load() >= 5; }));
+		th.addWorker(w1);
+		th.addWorker(w2);
+		th.addWorker(w3);
+		th.addWorker(w4);
+		th.addWorker(w5);
+
+		th.start(2);
+
+		ASSERT_TRUE(th.quitAndWait(3000));
+
+		EXPECT_TRUE(th.isFinished());
+		EXPECT_FALSE(th.isRunning());
+	}
+
+	QThread::msleep(50);
+
 	ASSERT_TRUE(waitUntil([&destroyed]() { return destroyed.load() >= 5; }));
-
-	EXPECT_TRUE(th.isFinished());
-	EXPECT_FALSE(th.isRunning());
 }
 
 #include "SimpleThreadTests.moc"

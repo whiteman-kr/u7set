@@ -29,6 +29,12 @@ namespace ClientLib
 		bool enabled() const;
 		void setEnabled(bool enable);
 
+		/// Send an acknowledgment for all records `up to`, including plantTime.
+		///
+		bool sendAckUpTo(TimeStamp plantTime);
+
+		std::optional<TimeStamp> getNextAckUpTo();
+
 		/// Add records to the log.
 		///
 		void add(const QString& adsId, std::span<const DiscretesLogRecord> records);

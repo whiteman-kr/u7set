@@ -25,6 +25,9 @@ namespace
 	thread_local ::Network::GetAppSignalStateReply tl_getSignalStateReply;
 
 	thread_local ::Network::GetDiscretesLogReply tl_getDiscretesLogReply;
+
+	thread_local ::Network::AckDiscretesLogRequest tl_ackDiscretesLogRequest;
+	thread_local ::Network::AckDiscretesLogReply tl_ackDiscretesLogReply;
 } // namespace
 
 namespace ClientLib
@@ -98,7 +101,7 @@ namespace ClientLib
 	{
 		writeMessage(QString("TcpSignalClient::onDisconnection() %1").arg(serverAddressPort1().addressPortStr()));
 
-		m_signalUpdater.invalidateSignalStates(QThread::currentThreadId());
+		m_signalUpdater.invalidateSignalStates(sourceId());
 
 		return;
 	}
@@ -142,6 +145,10 @@ namespace ClientLib
 
 		case ADS_GET_DISCRETES_LOG:
 			processSignalLog(data);
+			break;
+
+		case ADS_ACK_DISCRETES_LOG:
+			processAckSignalLog(data);
 			break;
 
 		default:
@@ -192,7 +199,6 @@ namespace ClientLib
 
 	void TcpSignalClient::requestSignalListStart()
 	{
-		Q_ASSERT(isClearToSendRequest());
 		sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
 	}
 
@@ -254,8 +260,6 @@ namespace ClientLib
 
 	void TcpSignalClient::requestSignalListNext(int part)
 	{
-		Q_ASSERT(isClearToSendRequest());
-
 		// if all parts were requested then switch to next reply
 		//
 		if (part >= tl_getSignalListStartReply.partcount())
@@ -336,7 +340,6 @@ namespace ClientLib
 	//
 	void TcpSignalClient::requestSignalParam(int startIndex)
 	{
-		Q_ASSERT(isClearToSendRequest());
 		m_lastSignalParamStartIndex = startIndex;
 
 		if (startIndex == 0)
@@ -441,10 +444,7 @@ namespace ClientLib
 	//
 	void TcpSignalClient::requestSignalStateChanges()
 	{
-		Q_ASSERT(isClearToSendRequest());
-
 		sendRequest(ADS_GET_APP_SIGNAL_STATE_CHANGES, tl_getSignalStateChangesRequest);
-
 		return;
 	}
 
@@ -505,7 +505,7 @@ namespace ClientLib
 			}
 		}
 
-		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
+		m_signalUpdater.setStates(states, ::calcHash(m_serverSettings.equipmentId), sourceId());
 
 		if (tl_getSignalStateChangesReply.pendingstatescount() >= ADS_GET_APP_SIGNAL_STATE_MAX)
 		{
@@ -527,8 +527,6 @@ namespace ClientLib
 	//
 	void TcpSignalClient::requestSignalState(int startIndex)
 	{
-		Q_ASSERT(isClearToSendRequest());
-
 		if (startIndex >= std::ssize(m_signalList))
 		{
 			startIndex = 0;
@@ -589,7 +587,7 @@ namespace ClientLib
 			}
 		}
 
-		m_signalUpdater.setState(states, ::calcHash(m_serverSettings.equipmentId), QThread::currentThreadId());
+		m_signalUpdater.setStates(states, ::calcHash(m_serverSettings.equipmentId), sourceId());
 
 		requestSignalLog();
 		return;
@@ -597,8 +595,6 @@ namespace ClientLib
 
 	void TcpSignalClient::requestSignalLog()
 	{
-		Q_ASSERT(isClearToSendRequest());
-
 		if (m_signalLog.enabled() == true)
 		{
 			sendRequest(ADS_GET_DISCRETES_LOG);
@@ -626,6 +622,7 @@ namespace ClientLib
 #endif
 
 		std::vector<DiscretesLogRecord> records;
+		records.reserve(tl_getDiscretesLogReply.discreteslogrecord_size());
 
 		std::transform(tl_getDiscretesLogReply.discreteslogrecord().begin(),
 					   tl_getDiscretesLogReply.discreteslogrecord().end(),
@@ -640,6 +637,48 @@ namespace ClientLib
 		m_signalLog.add(m_serverSettings.equipmentId, records);
 		m_signalLog.deleteUpTo(m_serverSettings.equipmentId, tl_getDiscretesLogReply.logfirstrecordid());
 
+		requestAckSignalLog();
+		return;
+	}
+
+	void TcpSignalClient::requestAckSignalLog()
+	{
+		if (m_signalLog.enabled() == false)
+		{
+			resetToGetState(false);
+			return;
+		}
+
+		auto plantTimeToAck = m_signalLog.getNextAckUpTo();
+
+		if (plantTimeToAck.has_value() == true)
+		{
+			auto dt = plantTimeToAck.value().toDateTime();
+			writeMessage(QString("Acknowledging discrete logs up to plantTime %1, ADS %2.")
+							 .arg(dt.toString("dd MMM yyyy hh:mm:ss.zzz"))
+							 .arg(m_serverSettings.equipmentId));
+
+			tl_ackDiscretesLogRequest.set_acksource(localSoftwareInfo().equipmentID().toStdString());
+			tl_ackDiscretesLogRequest.set_ackuser("User");	// ???
+			tl_ackDiscretesLogRequest.set_ackuptoplanttime(plantTimeToAck.value().timeStamp);
+			sendRequest(ADS_ACK_DISCRETES_LOG, tl_ackDiscretesLogRequest);
+		}
+		else
+		{
+			resetToGetState(false);
+		}
+
+		return;
+	}
+
+	void TcpSignalClient::processAckSignalLog(const QByteArray& data)
+	{
+		// Ignore reply for now, nothing interesting there.
+		//
+		Q_UNUSED(data);
+
+		// Init new full cycle.
+		//
 		resetToGetState(false);
 		return;
 	}
@@ -719,6 +758,11 @@ namespace ClientLib
 		}
 
 		return;
+	}
+
+	ClientLib::IAppSignalUpdater::SourceIdType TcpSignalClient::sourceId() const
+	{
+		return reinterpret_cast<ClientLib::IAppSignalUpdater::SourceIdType>(QThread::currentThreadId());
 	}
 
 } // namespace ClientLib

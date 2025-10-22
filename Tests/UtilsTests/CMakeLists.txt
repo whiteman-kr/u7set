@@ -9,14 +9,20 @@ set(GOOGLETEST_DIR $ENV{GOOGLETEST_DIR})
 
 find_package(Threads REQUIRED)
 find_package(GTest REQUIRED)
-find_package(Qt6 REQUIRED COMPONENTS Test Core Network Qml Xml Concurrent Gui Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Test Core Network Qml Xml Concurrent Gui Widgets Sql)
 
 set(TARGET UtilsTests)
 
 add_executable(${TARGET}
+
+	Common.h
+	DiscretesLogTests.cpp
 	main.cpp
 	SimpleThreadTests.cpp
 	SpinLockTests.cpp
+
+	../../AppDataService/DiscretesLog.cpp
+	../../AppDataService/DiscretesLog.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -27,8 +33,11 @@ target_precompile_headers(${TARGET} PRIVATE
 	<list>
 	<ranges>
 	<mutex>
+	<random>
 	<tuple>
 	<condition_variable>
+	<chrono>
+	<type_traits>
 
 	<gtest/gtest.h>
 	<gmock/gmock.h>
@@ -37,17 +46,24 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QtGlobal>
 	<QDebug>
 	<QSignalSpy>
+	<QCoreApplication>
+	<QFileInfo>
+	<QVariant>
+	<QThread>
 
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
 	<CommonLib/HostAddressPort.h>
 
 	"../../OnlineLib/SoftwareInfo.h"
+	"../../OnlineLib/CircularLogger.h"
 	"../../UtilsLib/SimpleThread.h"
 	"../../UtilsLib/SpinLock.h"
 )
 
-target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest GTest::gmock)
+target_compile_definitions(${TARGET} PRIVATE UNDER_GTEST=1)
+
+target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest GTest::gmock Qt6::Sql)
 target_link_libraries(${TARGET} PRIVATE UtilsLib ClientLib CommonLib OnlineLib)
 
 #add_test(NAME ${TARGET} COMMAND UtilsTests "--gtest_filter=-SimpleThreadTests.*")

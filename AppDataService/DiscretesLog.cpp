@@ -1,10 +1,11 @@
 #include <algorithm>
 #include <chrono>
+#include <optional>
 
-#include <QSqlDatabase>
-#include <QSqlError>
-#include <QSqlQuery>
 #include <QStandardPaths>
+#include <QDir>
+#include <QUuid>
+#include <QThread>
 
 #include "DiscretesLog.h"
 #include "../UtilsLib/WUtils.h"
@@ -24,6 +25,62 @@ DiscretesLog::~DiscretesLog()
 {
 }
 
+bool DiscretesLog::readDiscretesLogRecord(const QSqlQuery& q, DiscretesLogRecord& r)
+{
+	if (q.isValid() == false)
+	{
+		return false;
+	}
+
+	constexpr int	COL_ID = 0,
+					COL_RECORD_TIME = 1,
+					COL_PLANT_TIME = 2,
+					COL_SYSTEM_TIME = 3,
+					COL_LOCAL_TIME = 4,
+					COL_HASH = 5,
+					COL_VALUE = 6,
+					COL_FLAGS = 7,
+					COL_ACKNOWLEDGED = 8,
+					COL_ACK_TIME = 9,
+					COL_ACK_SOURCE = 10,
+					COL_ACK_USER = 11;
+
+	r.recordID = q.value(COL_ID).toLongLong();
+	r.recordTime = q.value(COL_RECORD_TIME).toLongLong();
+	r.plantTime = q.value(COL_PLANT_TIME).toLongLong();
+	r.systemTime = q.value(COL_SYSTEM_TIME).toLongLong();
+	r.localTime = q.value(COL_LOCAL_TIME).toLongLong();
+	r.signalHash = hexToHash(q.value(COL_HASH).toString());
+	r.value = (q.value(COL_VALUE).toInt() == 0 ? 0.0 : 1.0);
+	r.flags = q.value(COL_FLAGS).toUInt();
+	r.acknowledged = q.value(COL_ACKNOWLEDGED).toBool();
+	r.ackTime = q.value(COL_ACK_TIME).toLongLong();
+	r.ackSource = q.value(COL_ACK_SOURCE).toString();
+	r.ackUser = q.value(COL_ACK_USER).toString();
+
+	return true;
+}
+
+QString DiscretesLog::hashToHex(Hash v)
+{
+	QString s = QString::number(v, 16).toUpper();
+	return s.rightJustified(16, QChar('0'));
+}
+
+Hash DiscretesLog::hexToHash(const QString& s)
+{
+	bool ok = false;
+
+	Hash v = s.toULongLong(&ok, 16);
+
+	if (!ok)
+	{
+		return 0;
+	}
+
+	return v;
+}
+
 void DiscretesLog::setLogger(CircularLoggerShared logger)
 {
 	TEST_PTR_RETURN(logger);
@@ -32,16 +89,21 @@ void DiscretesLog::setLogger(CircularLoggerShared logger)
 
 void DiscretesLog::closeDatabase()
 {
-	if (m_db != nullptr)
+	if (m_db.isValid())
 	{
-		if (m_db->isOpen() == true)
+		const auto connName = m_db.connectionName();
+
+		if (m_db.isOpen() == true)
 		{
-			m_db->close();
+			m_db.close();
 		}
 
-		delete m_db;
-		m_db = nullptr;
+		m_db = QSqlDatabase();           // clear m_db
+
+		QSqlDatabase::removeDatabase(connName);
 	}
+
+	m_dbIsWorkable = false;
 }
 
 bool DiscretesLog::execQuery(QSqlQuery& q, const QString& qStr)
@@ -50,13 +112,18 @@ bool DiscretesLog::execQuery(QSqlQuery& q, const QString& qStr)
 	{
 		QSqlError err = q.lastError();
 
-		DEBUG_LOG_ERR(m_log, QString("%1: query '%2' exec ERROR - '%3'").
-							 arg(getWriterReader()).
-							 arg(qStr).arg(err.text()));
+		QString errStr = QString("%1: query '%2' exec ERROR - '%3'").
+						 arg(getWriterReader()).
+						 arg(qStr).arg(err.text());
 
-		Q_ASSERT(false);
-
+		DEBUG_LOG_ERR(m_log, errStr);
 		return false;
+	}
+	else
+	{
+		// DEBUG_LOG_MSG(m_log, QString("%1: query '%2' executed. RowsAffected = %3").
+		// 					 arg(getWriterReader()).
+		// 					 arg(qStr).arg(q.numRowsAffected()));
 	}
 
 	return true;
@@ -64,9 +131,12 @@ bool DiscretesLog::execQuery(QSqlQuery& q, const QString& qStr)
 
 bool DiscretesLog::getDbVersion()
 {
-	TEST_PTR_RETURN_FALSE(m_db);
+	if (m_db.isValid() == false || m_db.isOpen() == false)
+	{
+		return false;
+	}
 
-	QSqlQuery q(*m_db);
+	QSqlQuery q(m_db);
 
 	if (execQuery(q, "SELECT MAX(VersionNo) FROM Version") == false)
 	{
@@ -97,6 +167,264 @@ QString DiscretesLog::getWriterReader() const
 
 // ------------------------------------------------------------------------------------------
 //
+// DiscretesLogReader class implementation
+//
+// ------------------------------------------------------------------------------------------
+
+DiscretesLogReader::DiscretesLogReader(CircularLoggerShared log) :
+	DiscretesLog(false)
+{
+	m_dbName = QString("DiscretesLogReader_%1").arg(QUuid::createUuid().toString(QUuid::Id128));
+
+	DEBUG_LOG_MSG(log, QString("%1 created").arg(m_dbName));
+
+	setLogger(log);
+
+	openDatabase();
+}
+
+DiscretesLogReader::~DiscretesLogReader()
+{
+	closeDatabase();
+}
+
+bool DiscretesLogReader::openDatabase()
+{
+	m_dbIsWorkable = false;
+
+	Q_ASSERT(DiscretesLogWriter::databaseName().isEmpty() == false);
+
+	m_db = QSqlDatabase::addDatabase("QSQLITE", m_dbName);
+
+	m_db.setDatabaseName(DiscretesLogWriter::databaseName());
+
+	if (m_db.open() == true)
+	{
+		DEBUG_LOG_MSG(m_log, QString("DiscretesLogReader: database %1 opened").arg(m_db.databaseName()));
+
+		if (m_db.tables().contains("Version") == false)
+		{
+			DEBUG_LOG_ERR(m_log, "DiscretesLogReader: ERROR table 'Version' doesn’t exist");
+			return false;
+		}
+
+		if (m_db.tables().contains("DiscretesLog") == false)
+		{
+			DEBUG_LOG_ERR(m_log, "DiscretesLogReader: ERROR table 'DiscretesLog' doesn’t exist");
+			return false;
+		}
+
+		QSqlQuery q(m_db);
+
+		if (execQuery(q, "PRAGMA busy_timeout = 3000") == false)
+		{
+			Q_ASSERT(false);
+			DEBUG_LOG_ERR(m_log, "DiscretesLogReader: ERROR set busy_timeout");
+			return false;
+		}
+
+		if (execQuery(q, "PRAGMA query_only = ON") == false)
+		{
+			Q_ASSERT(false);
+			DEBUG_LOG_ERR(m_log, "DiscretesLogReader: ERROR set query_only");
+			return false;
+		}
+
+		if (getDbVersion() == false)
+		{
+			return false;
+		}
+	}
+	else
+	{
+		DEBUG_LOG_ERR(m_log, "DiscretesLogReader: ERROR database not opened");
+		return false;
+	}
+
+	m_dbIsWorkable = true;
+
+	return m_dbIsWorkable;
+}
+
+void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
+{
+	TEST_PTR_RETURN(reply);
+
+	if (m_dbIsWorkable == false)
+	{
+		reply->set_logisworkable(false);
+		return;
+	}
+
+	reply->set_logisworkable(true);
+
+	constexpr int MAX_RECORDS_COUNT = 5000;
+
+	int protoRecordsCount = 0;
+
+	reply->set_pendingrecordscount(0);
+
+	while(m_logRecords.empty() == false)
+	{
+		Network::DiscretesLogRecord* dlr = reply->add_discreteslogrecord();
+
+		m_logRecords.front().saveToProto(dlr);
+		m_logRecords.pop();
+
+		protoRecordsCount++;
+
+		if (protoRecordsCount >= MAX_RECORDS_COUNT)
+		{
+			break;
+		}
+	}
+
+	if (m_logChanged == false)
+	{
+		reply->set_pendingrecordscount(TO_INT(m_logRecords.size()));
+		reply->set_logfirstrecordid(m_firstRecordID);
+		return;
+	}
+
+	{
+		QSqlQuery q(m_db);
+
+		q.setForwardOnly(true);
+
+		constexpr int N = 10000;
+
+		if (m_lastRecordID == 0)
+		{
+			if (selectLastNRecords(q, N) == false)
+			{
+				return;
+			}
+		}
+		else
+		{
+			if (selectNextAfterNRecords(q, m_lastRecordID, N) == false)
+			{
+				return;
+			}
+		}
+
+		DiscretesLogRecord r;
+
+		while(q.next() == true)
+		{
+			if (readDiscretesLogRecord(q, r) == false)
+			{
+				continue;
+			}
+
+			m_lastRecordID = r.recordID;
+
+			if (protoRecordsCount >= MAX_RECORDS_COUNT)
+			{
+				m_logRecords.push(r);
+			}
+			else
+			{
+				Network::DiscretesLogRecord* dlr = reply->add_discreteslogrecord();
+
+				dlr->set_recordid(r.recordID);
+				dlr->set_recordtime(r.recordTime);
+				dlr->set_planttime(r.plantTime);
+				dlr->set_systemtime(r.systemTime);
+				dlr->set_localtime(r.localTime);
+				dlr->set_signalhash(r.signalHash);
+				dlr->set_value(r.value);
+				dlr->set_flags(r.flags);
+				dlr->set_acknowledged(r.acknowledged);
+				dlr->set_acktime(r.ackTime);
+				dlr->set_acksource(r.ackSource.toStdString());
+				dlr->set_ackuser(r.ackUser.toStdString());
+
+				protoRecordsCount++;
+			}
+		}
+
+		q.finish();
+	}
+
+	reply->set_pendingrecordscount(TO_INT(m_logRecords.size()));
+
+	{
+		QSqlQuery q(m_db);
+
+		execQuery(q, QString("SELECT MIN(id) FROM DiscretesLog"));
+
+		if (q.next() == true)
+		{
+			if (q.value(0).isNull() == false)
+			{
+				m_firstRecordID = q.value(0).toLongLong();
+				reply->set_logfirstrecordid(m_firstRecordID);
+			}
+			else
+			{
+				// if table DiscretesLog is empty
+				//
+				execQuery(q, QString("SELECT IFNULL((SELECT seq FROM sqlite_sequence WHERE name='DiscretesLog'), 0) AS seqValue"));
+
+				if (q.next() == true)
+				{
+					m_firstRecordID = q.value(0).toLongLong() + 1;
+					reply->set_logfirstrecordid(m_firstRecordID);
+				}
+			}
+		}
+	}
+
+	//
+
+	m_logChanged = false;
+	m_logTruncated = false;
+}
+
+void DiscretesLogReader::setLogChanged(bool logTruncated)
+{
+	m_logChanged = true;
+	m_logTruncated = logTruncated;
+}
+
+bool DiscretesLogReader::selectLastNRecords(QSqlQuery& q, int N)
+{
+	if (!q.prepare(
+			"SELECT id, recordTime, plantTime, systemTime, localTime, hash, value, flags, "
+			"acknowledged, ackTime, ackSource, ackUser "
+			"FROM DiscretesLog "
+			"WHERE id >= (SELECT IFNULL(MAX(id) - ? + 1, 1) FROM DiscretesLog) "
+			"ORDER BY id"))
+	{
+		return false;
+	}
+
+	q.bindValue(0, N);
+
+	return q.exec();
+}
+
+bool DiscretesLogReader::selectNextAfterNRecords(QSqlQuery& q, qint64 lastRecordId, int N)
+{
+	if (!q.prepare(
+			"SELECT id, recordTime, plantTime, systemTime, localTime, hash, value, flags, "
+			"acknowledged, ackTime, ackSource, ackUser "
+			"FROM DiscretesLog "
+			"WHERE id > ? ORDER BY id LIMIT ?"))
+	{
+		return false;
+	}
+
+	q.bindValue(0, lastRecordId);
+	q.bindValue(1, N);
+
+	return q.exec();
+}
+
+
+// ------------------------------------------------------------------------------------------
+//
 // DiscretesLogWriter class implementation
 //
 // ------------------------------------------------------------------------------------------
@@ -108,12 +436,18 @@ DiscretesLogWriter::DiscretesLogWriter() :
 
 DiscretesLogWriter::~DiscretesLogWriter()
 {
+	stop();
 }
 
-void DiscretesLogWriter::start(const QString& equipmentID, int logTimeHours, CircularLoggerShared logger)
+void DiscretesLogWriter::start(const QString& project, const QString& equipmentID, int logTimeHours, CircularLoggerShared logger)
 {
-	m_databaseName = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) +
-					 QString("/DiscretesLog_%1.sqlite").arg(equipmentID);
+	m_started = false;
+
+	const QString baseDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
+	QDir().mkpath(baseDir);
+
+	m_databaseName = baseDir + QString("/DiscretesLog_%1_%2.sqlite").arg(project).arg(equipmentID);
 
 	m_logTimeHours = std::clamp(logTimeHours, 1, 10 * 24);
 
@@ -124,22 +458,28 @@ void DiscretesLogWriter::start(const QString& equipmentID, int logTimeHours, Cir
 	clearReaders();
 
 	m_thread = std::thread(&DiscretesLogWriter::run, this);
+
+	while(!m_started)
+	{
+		QThread::msleep(5);
+	}
 }
 
 void DiscretesLogWriter::stop()
 {
-	clearReaders();
-
-	if (m_thread.joinable() == false)
 	{
-		return;
+		std::lock_guard lg(m_condVarMutex);
+		m_quitRequested = true;
 	}
 
-	m_quitRequested = true;
+	m_condVar.notify_one();
 
-	m_processingRequiredCondition.notify_one();
+	if (m_thread.joinable())
+	{
+		m_thread.join();
+	}
 
-	m_thread.join();
+	clearReaders();
 }
 
 void DiscretesLogWriter::pushStates(const std::vector<SimpleAppSignalState>& logStates)
@@ -149,43 +489,146 @@ void DiscretesLogWriter::pushStates(const std::vector<SimpleAppSignalState>& log
 		return;
 	}
 
-	m_logQueueMutex.lock();
-
-	for(const SimpleAppSignalState& logState : logStates)
 	{
-		m_logQueue.push(logState);
+		std::lock_guard lock(m_condVarMutex);
+
+		for(const SimpleAppSignalState& logState : logStates)
+		{
+			m_logQueue.push(logState);
+		}
+
+		m_logQueueIsEmpty = false;
 	}
 
-	m_logQueueMutex.unlock();
-
-	m_processingRequiredCondition.notify_one();
+	m_condVar.notify_one();
 }
 
-void DiscretesLogWriter::registerLogReader(DiscretesLogReader* reader)
+bool DiscretesLogWriter::logQueueIsEmpty() const
 {
-	m_readersMutex.lock();
+	std::lock_guard lock(m_condVarMutex);
 
-	Q_ASSERT(m_readers.contains(reader) == false);
-
-	m_readers.insert(reader);
-
-	reader->setLogChanged();
-
-	m_readersMutex.unlock();
+	return m_logQueueIsEmpty;
 }
 
-void DiscretesLogWriter::unregisterLogReader(DiscretesLogReader* reader)
+void DiscretesLogWriter::registerLogReader(const std::shared_ptr<DiscretesLogReader>& reader)
 {
-	m_readersMutex.lock();
+	std::lock_guard lock(m_readersMutex);
 
-	m_readers.erase(reader);
+	auto [it, inserted] = m_readers.insert(ReaderWPtr{ reader });
 
-	m_readersMutex.unlock();
+	if (inserted)
+	{
+		reader->setLogChanged(false);
+	}
+}
+
+void DiscretesLogWriter::unregisterLogReader(const std::shared_ptr<DiscretesLogReader>& reader)
+{
+	std::lock_guard lock(m_readersMutex);
+
+	m_readers.erase(ReaderWPtr{ reader });
+}
+
+void DiscretesLogWriter::ackDiscretesLog(const Network::AckDiscretesLogRequest& ackRequest)
+{
+	{
+		std::lock_guard lock(m_condVarMutex);
+
+		m_ackRequestQueue.push(ackRequest);
+	}
+
+	m_condVar.notify_one();
 }
 
 QString DiscretesLogWriter::databaseName()
 {
 	return m_databaseName;
+}
+
+bool DiscretesLogWriter::clearLog()
+{
+#ifndef UNDER_GTEST
+	Q_ASSERT(false);			// for testing purposes ONLY!
+	return false;
+#else
+	if (m_dbIsWorkable == false)
+	{
+		return false;
+	}
+
+	QSqlQuery q(m_db);
+
+	bool ok = execQuery(q, QString("DELETE FROM DiscretesLog"));
+
+	ok &= execQuery(q, "SELECT seq FROM sqlite_sequence WHERE name='DiscretesLog'");
+
+	if (q.next() && !q.value(0).isNull())
+	{
+		ok &= execQuery(q, "UPDATE sqlite_sequence SET seq=0 WHERE name='DiscretesLog'");
+	}
+
+	return ok;
+#endif
+}
+
+// for testing purposes ONLY!
+//
+bool DiscretesLogWriter::deleteDbFiles()
+{
+#ifndef UNDER_GTEST
+	Q_ASSERT(false);			// for testing purposes ONLY!
+	return false;
+#else
+	if (m_databaseName.isEmpty())
+	{
+		return true;
+	}
+
+	QString pattern = m_databaseName;
+
+	pattern.replace(".sqlite", ".*");
+
+	QString dirPath = QFileInfo(pattern).path();
+	QString fileMask = QFileInfo(pattern).fileName();
+
+	QDir dir(dirPath);
+
+	if (!dir.exists())
+	{
+		return true;
+	}
+
+	const QFileInfoList files = dir.entryInfoList(
+		{ fileMask },
+		QDir::Files | QDir::NoSymLinks | QDir::NoDotAndDotDot,
+		QDir::NoSort
+		);
+
+	bool ok = true;
+
+	for (const QFileInfo& fi : files)
+	{
+		if (!QFile::remove(fi.absoluteFilePath()))
+		{
+			ok = false;
+		}
+	}
+
+	return ok;
+#endif
+}
+
+void DiscretesLogWriter::waitWhileLogQueueIsEmpty()
+{
+#ifndef UNDER_GTEST
+	Q_ASSERT(false);			// for testing purposes ONLY!
+	return;
+#else
+	while(logQueueIsEmpty() == false)
+	{
+		QThread::msleep(50);
+	}
+#endif
 }
 
 void DiscretesLogWriter::run()
@@ -196,22 +639,33 @@ void DiscretesLogWriter::run()
 
 	deleteLogOldRecords();
 
-	std::unique_lock ul(m_processingRequiredConditionMutex, std::defer_lock);
+	std::unique_lock ul(m_condVarMutex);
+
+	m_started = true;
+
+	bool logQueueEmpty = false;
+	std::optional<Network::AckDiscretesLogRequest> ackRequest;
 
 	while(true)
 	{
-		ul.lock();
-
-		bool signaled = m_processingRequiredCondition.wait_for(
+		bool signaled = m_condVar.wait_for(
 							ul,
 							std::chrono::milliseconds(ONE_HOUR_MS),
-							[this]() -> bool
+							[&]() -> bool
 							{
-								m_logQueueMutex.lock();
-								bool logQueueEmpty = m_logQueue.empty();
-								m_logQueueMutex.unlock();
+								logQueueEmpty = m_logQueue.empty();
 
-								return m_quitRequested || logQueueEmpty == false;
+								ackRequest.reset();
+
+								if (m_ackRequestQueue.empty() == false)
+								{
+									ackRequest = m_ackRequestQueue.front();
+									m_ackRequestQueue.pop();
+								}
+
+								return m_quitRequested ||
+									   logQueueEmpty == false ||
+									   ackRequest.has_value();
 							});
 
 		// here ul is LOCKED!
@@ -226,10 +680,21 @@ void DiscretesLogWriter::run()
 
 		if (signaled == true)
 		{
-			processLogQueue();
+			if (logQueueEmpty == false)
+			{
+				processLogQueue();
+			}
+
+			if (ackRequest.has_value() == true)
+			{
+				ackLog(ackRequest.value());
+				ackRequest.reset();
+			}
 		}
 
 		deleteLogOldRecords();
+
+		ul.lock();
 	}
 
 	closeDatabase();
@@ -241,13 +706,13 @@ bool DiscretesLogWriter::openDatabase()
 {
 	m_dbIsWorkable = false;
 
-	m_db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE", "DiscretesLogWriter"));
+	m_db = QSqlDatabase::addDatabase("QSQLITE", "DiscretesLogWriter");
 
-	m_db->setDatabaseName(m_databaseName);
+	m_db.setDatabaseName(m_databaseName);
 
-	if (m_db->open() == true)
+	if (m_db.open() == true)
 	{
-		DEBUG_LOG_MSG(m_log, QString("DiscretesLogWriter: database %1 opened").arg(m_db->databaseName()));
+		DEBUG_LOG_MSG(m_log, QString("DiscretesLogWriter: database %1 opened").arg(m_db.databaseName()));
 
 		bool res = checkAndCreateTables();
 
@@ -269,9 +734,7 @@ bool DiscretesLogWriter::openDatabase()
 
 bool DiscretesLogWriter::checkAndCreateTables()
 {
-	TEST_PTR_RETURN_FALSE(m_db);
-
-	QSqlQuery q(*m_db);
+	QSqlQuery q(m_db);
 
 	if (execQuery(q, "PRAGMA journal_mode=WAL") == false)
 	{
@@ -280,12 +743,18 @@ bool DiscretesLogWriter::checkAndCreateTables()
 		return false;
 	}
 
-	if (execQuery(q, "PRAGMA wal_autocheckpoint = 1024") == false)
+	if (execQuery(q, "PRAGMA wal_autocheckpoint = 256") == false)
 	{
 		Q_ASSERT(false);
 		DEBUG_LOG_ERR(m_log, "DiscretesLogWriter: ERROR set wal_autocheckpoint");
 		return false;
 
+	}
+
+	if (execQuery(q, QString("PRAGMA journal_size_limit = 262144")) == false)
+	{
+		DEBUG_LOG_ERR(m_log, QString("DiscretesLogWriter: error PRAGMA journal_size_limit"));
+		return false;
 	}
 
 	if (execQuery(q, "PRAGMA busy_timeout = 3000") == false)
@@ -304,7 +773,7 @@ bool DiscretesLogWriter::checkAndCreateTables()
 
 	}
 
-	if (m_db->tables().contains("Version") == false)
+	if (m_db.tables().contains("Version") == false)
 	{
 		if (execQuery(q, "CREATE TABLE IF NOT EXISTS Version (VersionNo INTEGER, CreationDate TEXT)") == false)
 		{
@@ -341,7 +810,7 @@ bool DiscretesLogWriter::checkAndCreateTables()
 
 	//
 
-	if (m_db->tables().contains("DiscretesLog") == false)
+	if (m_db.tables().contains("DiscretesLog") == false)
 	{
 		QString s = R"(
 						CREATE TABLE IF NOT EXISTS DiscretesLog (
@@ -351,7 +820,7 @@ bool DiscretesLogWriter::checkAndCreateTables()
 								plantTime INTEGER,
 								systemTime INTEGER,
 								localTime INTEGER,
-								hash INTEGER,
+								hash TEXT,
 								value INTEGER,
 								flags INTEGER,
 
@@ -372,95 +841,153 @@ bool DiscretesLogWriter::checkAndCreateTables()
 		}
 	}
 
+	if (execQuery(q, "CREATE INDEX IF NOT EXISTS idx_DiscretesLog_recordTime ON DiscretesLog(recordTime)") == false)
+	{
+		DEBUG_LOG_ERR(m_log, "DiscretesLogWriter: ERROR create idx_DiscretesLog_recordTime index");
+	}
+
+	if (execQuery(q, "CREATE INDEX IF NOT EXISTS idx_DiscretesLog_plantTime ON DiscretesLog(plantTime)") == false)
+	{
+		DEBUG_LOG_ERR(m_log, "DiscretesLogWriter: ERROR create idx_DiscretesLog_plantTime index");
+	}
+
 	return true;
 }
 
 void DiscretesLogWriter::processLogQueue()
 {
-	TEST_PTR_RETURN(m_db);
-
 	if (m_dbIsWorkable == false)
 	{
 		clearLogQueue();
 		return;
 	}
 
-	m_requestStr.clear();
+	std::queue<SimpleAppSignalState> localQueue;
 
-	QSqlQuery q(*m_db);
-
-	m_logQueueMutex.lock();
-
-	qint64 recordTime = 0;
-	bool firstRecord = false;
-	bool notifyReadersFlag = false;
-
-	while(m_logQueue.empty() == false)
 	{
-		if (m_requestStr.isEmpty())
-		{
-			m_requestStr = QStringLiteral("INSERT INTO DiscretesLog (recordTime, plantTime, systemTime, localTime, hash, value, flags) VALUES ");
+		std::lock_guard lock(m_condVarMutex);
 
-			recordTime = QDateTime::currentMSecsSinceEpoch();
-			firstRecord = true;
+		if (m_logQueue.empty())
+		{
+			return;
 		}
 
-		if (firstRecord == false)
+		m_logQueue.swap(localQueue);
+	}
+
+	QSqlQuery q(m_db);
+
+	if (!m_db.transaction())
+	{
+		DEBUG_LOG_ERR(m_log, "DiscretesLogWriter: ERROR begin transaction");
+		return;
+	}
+
+	const qint64 recordTime = QDateTime::currentMSecsSinceEpoch();
+
+	const QString insertSql =
+		QStringLiteral(	"INSERT INTO DiscretesLog "
+						"(recordTime, plantTime, systemTime, localTime, hash, value, flags) "
+						"VALUES (?, ?, ?, ?, ?, ?, ?)");
+
+	if (!q.prepare(insertSql))
+	{
+		DEBUG_LOG_ERR(m_log, QString("DiscretesLogWriter: ERROR prepare insert: %1").arg(q.lastError().text()));
+		m_db.rollback();
+		return;
+	}
+
+	int inserted = 0;
+	constexpr int BATCH_COMMIT = 3000;
+
+	while (!localQueue.empty())
+	{
+		const SimpleAppSignalState s = localQueue.front();
+		localQueue.pop();
+
+		q.bindValue(0, recordTime);
+		q.bindValue(1, s.plantTime());
+		q.bindValue(2, s.systemTime());
+		q.bindValue(3, s.localTime());
+		q.bindValue(4, hashToHex(s.hash));
+		q.bindValue(5, (s.value == 0.0 ? 0 : 1));
+		q.bindValue(6, s.flags.all);
+
+		if (!q.exec())
 		{
-			m_requestStr.append(QStringLiteral(", "));
+			DEBUG_LOG_ERR(m_log, QString("DiscretesLogWriter: INSERT failed: %1").arg(q.lastError().text()));
+			m_db.rollback();
+			return;
 		}
-		else
+
+		inserted++;
+
+		if ((inserted % BATCH_COMMIT) == 0)
 		{
-			firstRecord = false;
-		}
+			if (!m_db.commit())
+			{
+				DEBUG_LOG_ERR(m_log, "DiscretesLogWriter: ERROR mid-commit");
+				m_db.rollback();
+				return;
+			}
 
-		const SimpleAppSignalState& s = m_logQueue.front();
-
-		m_requestStr.append(QString("(%1, %2, %3, %4, %5, %6, %7)").
-										arg(recordTime).
-										arg(s.plantTime()).
-										arg(s.systemTime()).
-										arg(s.localTime()).
-										arg(s.hash).
-										arg(s.value == 0.0 ? 0 : 1).
-										arg(s.flags.all));
-		m_logQueue.pop();
-
-		if (m_requestStr.length() >= 950000)
-		{
-			m_logQueueMutex.unlock();
-
-			execQuery(q, m_requestStr);
-
-			m_requestStr.clear();
-
-			m_logQueueMutex.lock();
-
-			notifyReadersFlag = true;
+			if (!m_db.transaction())
+			{
+				DEBUG_LOG_ERR(m_log, "DiscretesLogWriter: ERROR begin next transaction");
+				return;
+			}
 		}
 	}
 
-	m_logQueueMutex.unlock();
-
-	if (m_requestStr.isEmpty() == false)
+	if (!m_db.commit())
 	{
-		execQuery(q, m_requestStr);
-
-		m_requestStr.clear();
-
-		notifyReadersFlag = true;
+		DEBUG_LOG_ERR(m_log, "DiscretesLogWriter: ERROR commit");
+		m_db.rollback();                        // ← ДОБАВИТЬ rollback
+		return;
 	}
 
-	if (notifyReadersFlag == true)
+	if (inserted > 0)
 	{
-		notifyReaders();
+		notifyReaders(false);
 	}
+
+	m_logQueueIsEmpty = true;
+}
+
+void DiscretesLogWriter::ackLog(const Network::AckDiscretesLogRequest& ackRequest)
+{
+	if (m_dbIsWorkable == false)
+	{
+		return;
+	}
+
+	// QString ackSource = QString::fromStdString(ackRequest.acksource());
+	// QString ackUser = QString::fromStdString(ackRequest.ackuser());
+	// qint64 ackTime = QDateTime::currentMSecsSinceEpoch();
+
+	qint64 ackUpToPlantTime = ackRequest.ackuptoplanttime();
+
+	QSqlQuery q(m_db);
+
+	if (!q.prepare("DELETE FROM DiscretesLog WHERE plantTime <= ?"))
+	{
+		DEBUG_LOG_ERR(m_log, QString("DiscretesLogWriter: ack prepare failed: %1").arg(q.lastError().text()));
+		return;
+	}
+
+	q.bindValue(0, ackUpToPlantTime);
+
+	if (q.exec() == false)
+	{
+		DEBUG_LOG_ERR(m_log, QString("DiscretesLogWriter: ack DELETE failed: %1").arg(q.lastError().text()));
+		return;
+	}
+
+	notifyReaders(true);
 }
 
 void DiscretesLogWriter::deleteLogOldRecords()
 {
-	TEST_PTR_RETURN(m_db);
-
 	if (m_dbIsWorkable == false)
 	{
 		return;
@@ -477,266 +1004,54 @@ void DiscretesLogWriter::deleteLogOldRecords()
 
 	qint64 recordTime = now - m_logTimeHours * ONE_HOUR_MS;
 
-	QSqlQuery q(*m_db);
+	QSqlQuery q(m_db);
 
-	execQuery(q, QString("DELETE FROM DiscretesLog WHERE recordTime < %1").arg(recordTime));
+	if (execQuery(q, QString("DELETE FROM DiscretesLog WHERE recordTime < %1").arg(recordTime)) == false)
+	{
+		DEBUG_LOG_ERR(m_log, QString("DiscretesLogWriter: error DELETE"));
+	}
 
 	DEBUG_LOG_MSG(m_log, QString("DiscretesLogWriter: delete %1 old records").arg(q.numRowsAffected()));
 
-	qint64 freePagesCount = getFreePagesCount();
-
-	DEBUG_LOG_MSG(m_log, QString("DiscretesLogWriter: database free pages count - %1").arg(freePagesCount));
-
-	notifyReaders();
-}
-
-qint64 DiscretesLogWriter::getFreePagesCount()
-{
-	TEST_PTR_RETURN_VALUE(m_db, 0);
-
-	QSqlQuery q(*m_db);
-
-	execQuery(q, "PRAGMA freelist_count");
-
-	if (q.next() == true)
+	if (execQuery(q, "PRAGMA wal_checkpoint(TRUNCATE)") == false)
 	{
-		return q.value(0).toLongLong();
+		DEBUG_LOG_ERR(m_log, QString("DiscretesLogWriter: error PRAGMA wal_checkpoint"));
 	}
 
-	Q_ASSERT(false);
-
-	return 0;
+	notifyReaders(true);
 }
+
 void DiscretesLogWriter::clearLogQueue()
 {
-	m_logQueueMutex.lock();
+	std::lock_guard lock(m_condVarMutex);
 
-	while(m_logQueue.empty() == false)
-	{
-		m_logQueue.pop();
-	}
+	std::queue<SimpleAppSignalState> empty;
 
-	m_logQueueMutex.unlock();
+	m_logQueue.swap(empty);
 }
 
-void DiscretesLogWriter::notifyReaders()
+void DiscretesLogWriter::notifyReaders(bool logTruncated)
 {
-	m_readersMutex.lock();
+	std::lock_guard lg(m_readersMutex);
 
-	for(DiscretesLogReader* reader : m_readers)
+	for (auto it = m_readers.begin(); it != m_readers.end(); )
 	{
-		TEST_PTR_CONTINUE(reader);
-
-		reader->setLogChanged();
+		if (auto sp = it->lock())
+		{
+			sp->setLogChanged(logTruncated);
+			++it;
+		}
+		else
+		{
+			it = m_readers.erase(it);
+		}
 	}
-
-	m_readersMutex.unlock();
 }
 
 void DiscretesLogWriter::clearReaders()
 {
-	m_readersMutex.lock();
+	std::lock_guard lg(m_readersMutex);
 
 	m_readers.clear();
-
-	m_readersMutex.unlock();
 }
 
-
-// ------------------------------------------------------------------------------------------
-//
-// DiscretesLogReader class implementation
-//
-// ------------------------------------------------------------------------------------------
-
-DiscretesLogReader::DiscretesLogReader(CircularLoggerShared log) :
-	DiscretesLog(false)
-{
-	setLogger(log);
-
-	m_instance++;
-
-	openDatabase();
-}
-
-DiscretesLogReader::~DiscretesLogReader()
-{
-	closeDatabase();
-}
-
-bool DiscretesLogReader::openDatabase()
-{
-	m_dbIsWorkable = false;
-
-	m_db = new QSqlDatabase(QSqlDatabase::addDatabase("QSQLITE", QString("DiscretesLogReader_%1").arg(m_instance)));
-
-	m_db->setDatabaseName(DiscretesLogWriter::databaseName());
-
-	if (m_db->open() == true)
-	{
-		DEBUG_LOG_MSG(m_log, QString("DiscretesLogReader: database %1 opened").arg(m_db->databaseName()));
-
-		if (m_db->tables().contains("Version") == false)
-		{
-			DEBUG_LOG_ERR(m_log, "DiscretesLogReader: ERROR table Varsion don't exist");
-			return false;
-		}
-
-		if (m_db->tables().contains("DiscretesLog") == false)
-		{
-			DEBUG_LOG_ERR(m_log, "DiscretesLogReader: ERROR table DiscretesLog don't exist");
-			return false;
-		}
-
-		QSqlQuery q(*m_db);
-
-		if (execQuery(q, "PRAGMA busy_timeout = 3000") == false)
-		{
-			Q_ASSERT(false);
-			DEBUG_LOG_ERR(m_log, "DiscretesLogReader: ERROR set busy_timeout");
-			return false;
-		}
-
-		if (getDbVersion() == false)
-		{
-			return false;
-		}
-	}
-	else
-	{
-		DEBUG_LOG_ERR(m_log, "DiscretesLogReader: ERROR database not opened");
-		return false;
-	}
-
-	m_dbIsWorkable = true;
-
-	return m_dbIsWorkable;
-}
-
-void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
-{
-	TEST_PTR_RETURN(reply);
-
-	if (m_dbIsWorkable == false || m_db == nullptr)
-	{
-		return;
-	}
-
-	static const int MAX_RECORDS_COUNT = 5000;
-
-	int protoRecordsCount = 0;
-
-	reply->set_pendingrecordscount(0);
-
-	while(m_logRecords.empty() == false)
-	{
-		Network::DiscretesLogRecord* dlr = reply->add_discreteslogrecord();
-
-		m_logRecords.front().saveToProto(dlr);
-		m_logRecords.pop();
-
-		protoRecordsCount++;
-
-		if (protoRecordsCount >= MAX_RECORDS_COUNT)
-		{
-			break;
-		}
-	}
-
-	if (m_logChanged == false)
-	{
-		reply->set_pendingrecordscount(TO_INT(m_logRecords.size()));
-		reply->set_logfirstrecordid(m_firstRecordID);
-		return;
-	}
-
-	QSqlQuery q(*m_db);
-
-	if (execQuery(q, QString("SELECT id, recordTime, "
-									"plantTime, systemTime, localTime, hash, value, flags, "
-									"acknowledged, ackTime, ackSource, ackUser "
-									"FROM DiscretesLog WHERE id > %1 ORDER BY id").arg(m_lastRecordID)) == false)
-	{
-		return;
-	}
-
-	static const int	COL_ID = 0,
-						COL_RECORD_TIME = 1,
-						COL_PLANT_TIME = 2,
-						COL_SYSTEM_TIME = 3,
-						COL_LOCAL_TIME = 4,
-						COL_HASH = 5,
-						COL_VALUE = 6,
-						COL_FLAGS = 7,
-						COL_ACKNOWLEDGED = 8,
-						COL_ACK_TIME = 9,
-						COL_ACK_SOURCE = 10,
-						COL_ACK_USER = 11;
-
-	DiscretesLogRecord r;
-
-	while(q.next() == true)
-	{
-		if (protoRecordsCount >= MAX_RECORDS_COUNT)
-		{
-			m_lastRecordID = r.recordID = q.value(COL_ID).toLongLong();
-			r.recordTime = q.value(COL_RECORD_TIME).toLongLong();
-			r.plantTime = q.value(COL_PLANT_TIME).toLongLong();
-			r.systemTime = q.value(COL_SYSTEM_TIME).toLongLong();
-			r.localTime = q.value(COL_LOCAL_TIME).toLongLong();
-			r.signalHash = q.value(COL_HASH).toULongLong();
-			r.value = q.value(COL_VALUE).toDouble();
-			r.flags = q.value(COL_FLAGS).toUInt();
-			r.acknowledged = q.value(COL_ACKNOWLEDGED).toBool();
-			r.ackTime = q.value(COL_ACK_TIME).toLongLong();
-			r.ackSource = q.value(COL_ACK_SOURCE).toString();
-			r.ackUser = q.value(COL_ACK_USER).toString();
-
-			m_logRecords.push(r);
-		}
-		else
-		{
-			Network::DiscretesLogRecord* dlr = reply->add_discreteslogrecord();
-
-			m_lastRecordID = q.value(COL_ID).toLongLong();
-
-			dlr->set_recordid(m_lastRecordID);
-			dlr->set_recordtime(q.value(COL_RECORD_TIME).toLongLong());
-			dlr->set_planttime(q.value(COL_PLANT_TIME).toLongLong());
-			dlr->set_systemtime(q.value(COL_SYSTEM_TIME).toLongLong());
-			dlr->set_localtime(q.value(COL_LOCAL_TIME).toLongLong());
-			dlr->set_signalhash(q.value(COL_HASH).toULongLong());
-			dlr->set_value(q.value(COL_VALUE).toDouble());
-			dlr->set_flags(q.value(COL_FLAGS).toUInt());
-			dlr->set_acknowledged(q.value(COL_ACKNOWLEDGED).toBool());
-			dlr->set_acktime(q.value(COL_ACK_TIME).toLongLong());
-			dlr->set_acksource(q.value(COL_ACK_SOURCE).toString().toStdString());
-			dlr->set_ackuser(q.value(COL_ACK_USER).toString().toStdString());
-
-			protoRecordsCount++;
-		}
-	}
-
-	reply->set_pendingrecordscount(TO_INT(m_logRecords.size()));
-
-	//
-
-	execQuery(q, QString("SELECT MIN(id) FROM DiscretesLog"));
-
-	if (q.next() == true)
-	{
-		m_firstRecordID = q.value(0).toLongLong();
-		reply->set_logfirstrecordid(m_firstRecordID);
-	}
-
-	//
-
-	m_logChanged = false;
-}
-
-void DiscretesLogReader::setLogChanged()
-{
-	m_logChanged = true;
-
-	qDebug() << "DiscretsLog changed";
-}

@@ -41,7 +41,7 @@ AppDataSource::~AppDataSource()
 
 void AppDataSource::prepare(const AppSignals& appSignals,
 	DynamicAppSignalStates* signalStates,
-	DiscretesLogWriter* discretesLog,
+	std::shared_ptr<DiscretesLogWriter> discretesLog,
 	int autoArchivingGroupsCount,
 	CircularLoggerShared timeErrLog)
 {
