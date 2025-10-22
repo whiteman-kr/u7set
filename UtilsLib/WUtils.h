@@ -6,6 +6,7 @@
 #include <cmath>
 #include <set>
 #include <map>
+#include <limits>
 #include <QTimeZone>
 
 #define ASSERT_RESULT_FALSE_BREAK	Q_ASSERT(false); \
@@ -237,7 +238,7 @@ private:
 
 inline quint16 __checkAndCastToQuint16(int value)
 {
-	Q_ASSERT(value >= std::numeric_limits<quint16>::lowest() && value <= std::numeric_limits<quint16>::max());
+	Q_ASSERT(value >= (std::numeric_limits<quint16>::lowest)() && value <= (std::numeric_limits<quint16>::max)());
 
 	return static_cast<quint16>(value);
 }
@@ -251,16 +252,16 @@ template <class T>
 	std::enable_if_t<std::is_same<T, float>::value, bool>	// check that T is type of float
 isFloatEquals(T v1, T v2)
 {
-	return std::nextafter(v1, std::numeric_limits<float>::lowest()) <= v2 &&
-							std::nextafter(v1, std::numeric_limits<float>::max()) >= v2;
+	return std::nextafter(v1, (std::numeric_limits<float>::lowest)()) <= v2 &&
+							std::nextafter(v1, (std::numeric_limits<float>::max)()) >= v2;
 }
 
 template <class T>
 	std::enable_if_t<std::is_same<T, double>::value, bool>	// check that T is type of double
 isDoubleEquals(T v1, T v2)
 {
-	return std::nextafter(v1, std::numeric_limits<double>::lowest()) <= v2 &&
-							std::nextafter(v1, std::numeric_limits<double_t>::max()) >= v2;
+	return std::nextafter(v1, (std::numeric_limits<double>::lowest)()) <= v2 &&
+							std::nextafter(v1, (std::numeric_limits<double_t>::max)()) >= v2;
 }
 
 using OptionalBool = std::optional<bool>;
@@ -341,14 +342,14 @@ inline QString boolToString(bool value)
 
 inline bool checkInt32Range(qint64 value)
 {
-	return	value <= std::numeric_limits<qint32>::max() &&
-			value >= std::numeric_limits<qint32>::lowest();
+	return	value <= (std::numeric_limits<qint32>::max)() &&
+			value >= (std::numeric_limits<qint32>::lowest)();
 }
 
 inline bool checkFloat32Range(double value)
 {
-	return	value <= std::numeric_limits<float>::max() &&
-			value >= std::numeric_limits<float>::lowest();
+	return	value <= (std::numeric_limits<float>::max)() &&
+			value >= (std::numeric_limits<float>::lowest)();
 }
 
 template <typename KEY, typename VALUE>
@@ -407,6 +408,11 @@ inline QString fineSize(qint64 size)
 	}
 
 	return QString("%1 Bytes").arg(size);
+}
+
+inline quintptr currentThreadId()
+{
+	return reinterpret_cast<quintptr>(QThread::currentThreadId());
 }
 
 #define ROUND_TO(value, roundTo)	(((value + roundTo - 1) / roundTo) * roundTo)

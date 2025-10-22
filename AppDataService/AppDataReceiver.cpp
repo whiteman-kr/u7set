@@ -14,32 +14,6 @@ using asio::ip::udp;
 using asio::io_context;
 using asio::steady_timer;
 
-FastTimer::FastTimer(int resyncPeriodTicks)
-{
-	constexpr int MIN_PERIOD = 10;
-	constexpr int MAX_PERIOD = 240;
-
-	m_resyncPeriodTicks = std::clamp(resyncPeriodTicks, MIN_PERIOD, MAX_PERIOD);
-	m_baseTimeMs = QDateTime::currentMSecsSinceEpoch();
-	m_elapsedTimer.start();
-}
-
-void FastTimer::resyncTimer()
-{
-	if (++m_tickCtr >= m_resyncPeriodTicks)
-	{
-		const qint64 calculatedTime = m_baseTimeMs + m_elapsedTimer.elapsed();
-		const qint64 now = QDateTime::currentMSecsSinceEpoch();
-		m_correctionMs = now - calculatedTime;
-		m_tickCtr = 0;
-	}
-}
-
-qint64 FastTimer::nowMs() const
-{
-	return m_baseTimeMs + m_elapsedTimer.elapsed() + m_correctionMs;
-}
-
 StdThreadsGuard::~StdThreadsGuard()
 {
 	for (std::thread& t : m_threads)
@@ -602,8 +576,6 @@ void AppDataReceiver::processPackets(int threadNumber)
 
 	std::unique_lock ul(waitConditionMutex, std::defer_lock);
 
-	const QThread* thisThread = QThread::currentThread();
-
 	while(true)
 	{
 		ul.lock();
@@ -648,7 +620,7 @@ void AppDataReceiver::processPackets(int threadNumber)
 
 		try
 		{
-			if (source->takeProcessingOwnership(thisThread) == true)
+			if (source->takeProcessingOwnership() == true)
 			{
 				if (has(sourceTaskFlags, TaskFlags::Parse))
 				{
@@ -660,7 +632,7 @@ void AppDataReceiver::processPackets(int threadNumber)
 					source->invalidateSignals();
 				}
 
-				source->releaseProcessingOwnership(thisThread);
+				source->releaseProcessingOwnership();
 			}
 			else
 			{

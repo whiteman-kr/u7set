@@ -20,22 +20,6 @@
 #include "AppDataSource.h"
 #include "SignalStatesProcessingThread.h"
 
-class FastTimer
-{
-public:
-	FastTimer(int resyncPeriodTicks);
-
-	void resyncTimer();
-	qint64 nowMs() const;
-
-private:
-	qint64 m_baseTimeMs = 0;
-	QElapsedTimer m_elapsedTimer;
-	int m_tickCtr = 0;
-	int m_resyncPeriodTicks = 0;
-	qint64 m_correctionMs = 0;
-};
-
 enum class TaskFlags : quint32
 {
 	None = 0,
