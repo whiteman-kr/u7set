@@ -367,33 +367,60 @@ bool MainWindow::createToolBars()
 		addToolBar(m_pMeasureTimeoutToolBar);
 
 		QLabel* pMeasureTimeoutLabel = new QLabel(m_pMeasureTimeoutToolBar);
-		QComboBox* pMeasureTimeoutList = new QComboBox(m_pMeasureTimeoutToolBar);
+		m_pMeasureTimeoutList = new QComboBox(m_pMeasureTimeoutToolBar);											// Ovcharenko 21.10.25 "different timeouts in different types"
 		QLabel* pMeasureTimeoutUnitLabel = new QLabel(m_pMeasureTimeoutToolBar);
 		QRegularExpression rx("^[0-9]*[.]{1}[0-9]*$");
 		QValidator* validator = new QRegularExpressionValidator(rx, m_pMeasureTimeoutToolBar);
 
 		m_pMeasureTimeoutToolBar->addWidget(pMeasureTimeoutLabel);
-		m_pMeasureTimeoutToolBar->addWidget(pMeasureTimeoutList);
+		m_pMeasureTimeoutToolBar->addWidget(m_pMeasureTimeoutList);													// Ovcharenko 21.10.25 "different timeouts in different types"
 		m_pMeasureTimeoutToolBar->addWidget(pMeasureTimeoutUnitLabel);
 
 		pMeasureTimeoutLabel->setText(tr(" Measure timeout "));
 		pMeasureTimeoutLabel->setEnabled(false);
 
-		pMeasureTimeoutList->setEditable(true);
-		pMeasureTimeoutList->setValidator(validator);
 
-		for(int t : Measure::Timeout)
+		m_pMeasureTimeoutList->setEditable(true);																	// Ovcharenko 21.10.25 "different timeouts in different types"
+		m_pMeasureTimeoutList->setValidator(validator);	
+		m_pMeasureTimeoutList->setMinimumWidth(45);
+
+		for (double	t : Measure::Timeout)																			// Ovcharenko 21.10.25 "changing<int> to<double> and adding 0.5 seconds"
 		{
-			pMeasureTimeoutList->addItem(QString::number(t, 'f', 1));
+			QString text;	
+			
+			if (t < 10.0)
+			{
+				text = QString::number(t, 'f', 1);
+			}
+			else
+			{
+				if (std::floor(t) == t)
+				{
+					text = QString::number(static_cast<int>(t));
+				}
+				else
+				{
+					text = QString::number(t, 'f', 1);
+				}
+			}
+
+			m_pMeasureTimeoutList->addItem(text);
 		}
 
 		m_measureTimeout = theOptions.toolBar().measureTimeout();
-		pMeasureTimeoutList->setCurrentText(QString::number(double(m_measureTimeout) / 1000, 'f', 1));
+		int timeoutMs = 1000;																						// Ovcharenko 21.10.25 "different timeouts in different types"
+		auto it = m_measureTimeouts.find(m_currentMeasureType);
+		if (it != m_measureTimeouts.end())						
+		{															
+			timeoutMs = it->second;										
+		}															
+		
+		m_pMeasureTimeoutList->setCurrentText(QString::number(double(timeoutMs) / 1000, 'f', 1));					// Ovcharenko 21.10.25 "different timeouts in different types"
 
 		pMeasureTimeoutUnitLabel->setText(tr(" sec."));
 		pMeasureTimeoutUnitLabel->setEnabled(false);
 
-		connect(pMeasureTimeoutList, &QComboBox::currentTextChanged, this, &MainWindow::setMeasureTimeout);
+		connect(m_pMeasureTimeoutList, &QComboBox::currentTextChanged, this, &MainWindow::setMeasureTimeout);		// Ovcharenko 21.10.25 "different timeouts in different types"
 	}
 
 
@@ -1101,6 +1128,19 @@ void MainWindow::setMeasureType(int measureType)
 	}
 
 	m_measureType = static_cast<Measure::Type>(measureType);
+	m_currentMeasureType = m_measureType;																			// Ovcharenko 21.10.25 "different timeouts in different types", update the new variable
+
+	if (m_pMeasureTimeoutList)																						
+	{
+		int timeoutMs = 1000;             
+		auto it = m_measureTimeouts.find(m_currentMeasureType);
+		if (it != m_measureTimeouts.end())
+		{
+			timeoutMs = it->second;
+		}
+
+		m_pMeasureTimeoutList->setCurrentText(QString::number(double(timeoutMs) / 1000, 'f', 1));
+	}
 
 	//
 	//
@@ -2052,7 +2092,11 @@ void MainWindow::aboutApp()
 
 void MainWindow::setMeasureTimeout(QString value)
 {
-	m_measureTimeout = static_cast<int>(value.toDouble() * 1000);
+
+	int timeoutMs = static_cast<int>(value.toDouble() * 1000);														// Ovcharenko 21.10.25 "different timeouts in different types", convert to milliseconds
+
+	m_measureTimeout = timeoutMs;
+	m_measureTimeouts[m_currentMeasureType] = timeoutMs;
 
 	//
 	//

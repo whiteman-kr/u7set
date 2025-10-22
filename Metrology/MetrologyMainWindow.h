@@ -67,6 +67,9 @@ private:
 
 	int						m_measureTimeout = 0;
 	Measure::Type			m_measureType = Measure::Type::NoMeasureType;
+	Measure::Type m_currentMeasureType = Measure::Type::NoMeasureType;												// Ovcharenko 21.10.25 "different timeouts in different types", currently selected type
+	std::map<Measure::Type, int> m_measureTimeouts;																	//
+
 	Measure::Kind			m_measureKind = Measure::Kind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;
 
@@ -144,7 +147,7 @@ private:
 	//
 	QComboBox*				m_pMeasureKindList = nullptr;
 	QComboBox*				m_pConnectionTypeList = nullptr;
-
+	QComboBox*				m_pMeasureTimeoutList = nullptr;														// Ovcharenko 21.10.25 "different timeouts in different types"
 	QComboBox*				m_pRackCombo = nullptr;
 	SelectSignalWidget*		m_pSelectSignalWidget = nullptr;
 
