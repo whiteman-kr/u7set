@@ -67,8 +67,7 @@ private:
 
 	int						m_measureTimeout = 0;
 	Measure::Type			m_measureType = Measure::Type::NoMeasureType;
-	Measure::Type m_currentMeasureType = Measure::Type::NoMeasureType;												// Ovcharenko 21.10.25 "different timeouts in different types", currently selected type
-	std::map<Measure::Type, int> m_measureTimeouts;																	//
+	std::map<Measure::Type, int> m_measureTimeouts;																	
 
 	Measure::Kind			m_measureKind = Measure::Kind::NoMeasureKind;
 	Metrology::ConnectionType m_connectionType = Metrology::ConnectionType::NoConnectionType;

@@ -661,8 +661,15 @@ public:
 
 public:
 
-	int measureTimeout() const { return m_measureTimeout; }
-	void setMeasureTimeout(int timeout) { m_measureTimeout = timeout; }
+	int measureTimeout(Measure::Type type) const
+	{
+		auto it = m_measureTimeouts.find(type);
+		return it != m_measureTimeouts.end() ? it->second : 1000;
+	}
+	void setMeasureTimeout(Measure::Type type, int timeout) 
+	{
+		m_measureTimeouts[type] = timeout; 
+	}
 
 	int measureKind() const { return m_measureKind; }
 	void setMeasureKind(int kind) { m_measureKind = kind; }
@@ -690,6 +697,7 @@ private:
 	int m_measureTimeout = 0;											// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
 	int m_measureKind = Measure::Kind::OneRack;							// measure kind: each channel separately - 0 or for all channels together - 1
 	int m_connectionType = Metrology::ConnectionType::Unused;			// selected type of connection
+	std::map<Measure::Type, int> m_measureTimeouts;
 
 	QString m_defaultRack;
 	QString m_defaultSignalId;
