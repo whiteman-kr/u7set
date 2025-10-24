@@ -136,7 +136,6 @@ void AppDataReceiver::run()
 	closeSocket();
 	resetWorkGuard();
 
-
 	wakeupAllProcessingThreads();
 
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread finished (receiving IP %1)").

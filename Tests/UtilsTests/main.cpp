@@ -9,6 +9,12 @@
 #endif
 
 std::shared_ptr<CircularLogger> logger;
+QString buildPath;
+QString profileName;
+
+QByteArray appDataService_configurationXml;
+
+bool loadAppDataServiceCfgXml();
 
 int main(int argc, char *argv[])
 {
@@ -36,6 +42,44 @@ int main(int argc, char *argv[])
 
 	app.setOrganizationName(Manufacturer::RADIY);
 
+	//
+
+	QStringList arguments = app.arguments();
+
+	for (const QString& a : arguments)
+	{
+		if (a.startsWith("-build=") == true)
+		{
+			buildPath = a;
+			buildPath.replace("-build=", "", Qt::CaseInsensitive);
+			continue;
+		}
+
+		if (a.startsWith("-profile=") == true)
+		{
+			profileName = a;
+			profileName.replace("-profile=", "", Qt::CaseInsensitive);
+			continue;
+		}
+	}
+
+	if (buildPath.isEmpty() == true || profileName.isEmpty() == true)
+	{
+		std::cout << "Warning: Build path and/or profile name are not specified, UtilsTests will fail.\n";
+		std::cout << "Use: ./UtilsTests [-build=build_dir] [-profile=profile_name]\n\n";
+		return 1;
+	}
+
+	//
+
+	if (!loadAppDataServiceCfgXml())
+	{
+		std::cout << "Error load AppDataService Configuration.xml file\n";
+		return 1;
+	}
+
+	//
+
 	logger = std::make_shared<CircularLogger>();
 
 	LOGGER_INIT(logger, QString(), "UTILS_TESTS_LOG");
@@ -45,4 +89,20 @@ int main(int argc, char *argv[])
 	::testing::InitGoogleTest(&argc, argv);
 
 	return RUN_ALL_TESTS();
+}
+
+bool loadAppDataServiceCfgXml()
+{
+	QString filePath = buildPath + "/SYSTEMID_RACK01_WS00_ADS/Configuration.xml";
+
+	QFile f(filePath);
+
+	if (!f.open(QIODeviceBase::ReadOnly))
+	{
+		return false;
+	}
+
+	appDataService_configurationXml = f.readAll();
+
+	return true;
 }

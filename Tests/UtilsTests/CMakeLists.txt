@@ -15,14 +15,16 @@ set(TARGET UtilsTests)
 
 add_executable(${TARGET}
 
+	AppDataReceiverTests.cpp
 	Common.h
 	DiscretesLogTests.cpp
 	main.cpp
+	RupFrameProducer.h
 	SimpleThreadTests.cpp
 	SpinLockTests.cpp
 
 	../../AppDataService/DiscretesLog.cpp
-	../../AppDataService/DiscretesLog.h
+	../../AppDataService/DiscretesLog.h	
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -64,7 +66,7 @@ target_precompile_headers(${TARGET} PRIVATE
 target_compile_definitions(${TARGET} PRIVATE UNDER_GTEST=1)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest GTest::gmock Qt6::Sql)
-target_link_libraries(${TARGET} PRIVATE UtilsLib ClientLib CommonLib OnlineLib)
+target_link_libraries(${TARGET} PRIVATE UtilsLib ClientLib CommonLib OnlineLib AppSignalLib)
 
 #add_test(NAME ${TARGET} COMMAND UtilsTests "--gtest_filter=-SimpleThreadTests.*")
 

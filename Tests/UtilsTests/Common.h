@@ -5,6 +5,10 @@
 #include "../../OnlineLib/CircularLogger.h"
 
 extern std::shared_ptr<CircularLogger> logger;
+extern QString buildPath;
+extern QString profileName;
+
+extern QByteArray appDataService_configurationXml;
 
 inline quint64 randomUint64()
 {
