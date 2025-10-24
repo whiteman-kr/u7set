@@ -1,8 +1,8 @@
-#include <VFrame30/IndicatorTrend.h>
 #include <VFrame30/AppSignalController.h>
 #include <VFrame30/ClientSchemaView.h>
 #include <VFrame30/Context.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/IndicatorTrend.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaItemIndicator.h>
 
@@ -142,33 +142,69 @@ namespace VFrame30
 	{
 		Property* p = nullptr;
 
-		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TrendViewMode, PropertyNames::indicatorTrendViewMode, true, IndicatorTrend::viewMode, IndicatorTrend::setViewMode);
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TrendViewMode,
+													   PropertyNames::indicatorTrendViewMode,
+													   true,
+													   IndicatorTrend::viewMode,
+													   IndicatorTrend::setViewMode);
 		p->setCategory(PropertyNames::indicatorSettings);
 
-		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TrendScaleType, PropertyNames::indicatorTrendScaleType, true, IndicatorTrend::scaleType, IndicatorTrend::setScaleType);
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TrendScaleType,
+													   PropertyNames::indicatorTrendScaleType,
+													   true,
+													   IndicatorTrend::scaleType,
+													   IndicatorTrend::setScaleType);
 		p->setCategory(PropertyNames::indicatorSettings);
 
-		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::indicatorTrendLaneCount, true, IndicatorTrend::laneCount, IndicatorTrend::setLaneCount);
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(int,
+													   PropertyNames::indicatorTrendLaneCount,
+													   true,
+													   IndicatorTrend::laneCount,
+													   IndicatorTrend::setLaneCount);
 		p->setCategory(PropertyNames::indicatorSettings);
 
-		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::indicatorTrendBackColor1st, true, IndicatorTrend::backColor1st, IndicatorTrend::setBackColor1st);
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(QColor,
+													   PropertyNames::indicatorTrendBackColor1st,
+													   true,
+													   IndicatorTrend::backColor1st,
+													   IndicatorTrend::setBackColor1st);
 		p->setCategory(PropertyNames::indicatorSettings);
 
-		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(QColor, PropertyNames::indicatorTrendBackColor2nd, true, IndicatorTrend::backColor2nd, IndicatorTrend::setBackColor2nd);
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(QColor,
+													   PropertyNames::indicatorTrendBackColor2nd,
+													   true,
+													   IndicatorTrend::backColor2nd,
+													   IndicatorTrend::setBackColor2nd);
 		p->setCategory(PropertyNames::indicatorSettings);
 
-		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::RtTrendsSamplePeriod, PropertyNames::indicatorTrendSamplePeriod, true, IndicatorTrend::samplePeriod, IndicatorTrend::setSamplePeriod);
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::RtTrendsSamplePeriod,
+													   PropertyNames::indicatorTrendSamplePeriod,
+													   true,
+													   IndicatorTrend::samplePeriod,
+													   IndicatorTrend::setSamplePeriod);
 		p->setCategory(PropertyNames::indicatorSettings);
 
-		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TimeType, PropertyNames::timeType, true, IndicatorTrend::timeType, IndicatorTrend::setTimeType);
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(E::TimeType,
+													   PropertyNames::timeType,
+													   true,
+													   IndicatorTrend::timeType,
+													   IndicatorTrend::setTimeType);
 		p->setCategory(PropertyNames::indicatorSettings);
 		p->setDescription(PropertyNames::timeTypeToolTip);
 
-		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::indicatorTrendRedrawInterval, true, IndicatorTrend::redrawInterval, IndicatorTrend::setRedrawInterval);
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(int,
+													   PropertyNames::indicatorTrendRedrawInterval,
+													   true,
+													   IndicatorTrend::redrawInterval,
+													   IndicatorTrend::setRedrawInterval);
 		p->setCategory(PropertyNames::indicatorSettings);
 		p->setDescription(PropertyNames::indicatorTrendRedrawIntervalToolTip);
 
-		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(int, PropertyNames::indicatorTrendLaneDuration, true, IndicatorTrend::durationSeconds, IndicatorTrend::setDurationSeconds);
+		p = propertyObject->ADD_PROPERTY_GETTER_SETTER(int,
+													   PropertyNames::indicatorTrendLaneDuration,
+													   true,
+													   IndicatorTrend::durationSeconds,
+													   IndicatorTrend::setDurationSeconds);
 		p->setCategory(PropertyNames::indicatorSettings);
 		p->setDescription(PropertyNames::indicatorTrendLaneDurationToolTip);
 
@@ -187,19 +223,19 @@ namespace VFrame30
 	{
 		m_itemUnit = unit;
 
-		if (message.has_indicatortrend() == false)						// Line to change 1
+		if (message.has_indicatortrend() == false) // Line to change 1
 		{
 			// It can be just added new item, default values are taken
 			//
 			return true;
 		}
 
-		const ::Proto::IndicatorTrend& m = message.indicatortrend();	// Line to change 2
+		const ::Proto::IndicatorTrend& m = message.indicatortrend(); // Line to change 2
 
 		m_samplePeriod = static_cast<E::RtTrendsSamplePeriod>(m.sampleperiod());
 		m_timeType = static_cast<E::TimeType>(m.timetype());
 		m_redrawInterval = m.redrawinterval();
-		m_trendParam.setLaneDuration(m.duration());						// Save/restore in ms
+		m_trendParam.setLaneDuration(m.duration());                  // Save/restore in ms
 
 		m_trendSignalParams.clear();
 		m_trendSignalParams.reserve(static_cast<size_t>(m.trendsignalparams_size()));
@@ -248,18 +284,18 @@ namespace VFrame30
 			return false;
 		}
 
-		auto m = message->mutable_indicatortrend();						// Line to change 1
+		auto m = message->mutable_indicatortrend(); // Line to change 1
 
 		m->set_viewmode(static_cast<int>(viewMode()));
 		m->set_scaletype(static_cast<int>(scaleType()));
 		m->set_lanecount(laneCount());
 		m->set_backcolor1st(backColor1st().rgba());
 		m->set_backcolor2nd(backColor2nd().rgba());
-				
+
 		m->set_sampleperiod(static_cast<int>(m_samplePeriod));
 		m->set_timetype(static_cast<int>(m_timeType));
 		m->set_redrawinterval(m_redrawInterval);
-		m->set_duration(m_trendParam.duration());						// Save/restore in ms
+		m->set_duration(m_trendParam.duration()); // Save/restore in ms
 
 		for (const auto& tsp : m_trendSignalParams)
 		{
@@ -274,8 +310,7 @@ namespace VFrame30
 	//
 	void IndicatorTrend::draw(CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const
 	{
-		if (drawParam == nullptr ||
-			schemaItem == nullptr)
+		if (drawParam == nullptr || schemaItem == nullptr)
 		{
 			Q_ASSERT(drawParam);
 			Q_ASSERT(schemaItem);
@@ -309,8 +344,9 @@ namespace VFrame30
 
 		if (m_itemUnit == SchemaUnit::Inch)
 		{
-			trendRect = {0, 0,
-						 boundingRect.width() * drawParam->realDpiX() * zoom,		// Zoom image so it will be well drawn on high zoom values
+			trendRect = {0,
+						 0,
+						 boundingRect.width() * drawParam->realDpiX() * zoom, // Zoom image so it will be well drawn on high zoom values
 						 boundingRect.height() * drawParam->realDpiY() * zoom};
 		}
 		else
@@ -341,12 +377,10 @@ namespace VFrame30
 
 		// Detect if image update is required
 		//
-		bool needRedraw = (m_redrawInterval < 250_ms) ||
-							  m_drawTimer.hasExpired(m_redrawInterval) ||
-							  drawParam->drawMode() == DrawMode::Editor;
+		bool needRedraw =
+			(m_redrawInterval < 250_ms) || m_drawTimer.hasExpired(m_redrawInterval) || drawParam->drawMode() == DrawMode::Editor;
 
-		if (m_image.width() != static_cast<int>(trendRect.width()) ||
-			m_image.height() != static_cast<int>(trendRect.height()))
+		if (m_image.width() != static_cast<int>(trendRect.width()) || m_image.height() != static_cast<int>(trendRect.height()))
 		{
 			needRedraw = true;
 
@@ -366,8 +400,7 @@ namespace VFrame30
 			QStringList itemSignalIds = schemaItem->signalIds();
 			QStringList trendSignalIds = m_trend.signalSet().trendSignalIds();
 
-			bool signalsAreTheSame = (itemSignalIds != trendSignalIds) ||
-									 m_updateSignalsTimer.hasExpired(10'000);
+			bool signalsAreTheSame = (itemSignalIds != trendSignalIds) || m_updateSignalsTimer.hasExpired(10'000);
 
 			if (signalsAreTheSame)
 			{
@@ -376,17 +409,18 @@ namespace VFrame30
 				const AppSignalController* appSignalController = context->appSignalController();
 				Q_ASSERT(appSignalController);
 
-				for (size_t index = 0;
-					 const QString& appSignalId : std::as_const(itemSignalIds))
+				for (size_t index = 0; const QString& appSignalId : std::as_const(itemSignalIds))
 				{
-					bool signalFound = false;
-
-					AppSignalParam appSignalParam = appSignalController->signalParam(appSignalId, &signalFound);
-					if (signalFound == false)
-					{
-						appSignalParam.setAppSignalId(appSignalId);
-						appSignalParam.setCustomSignalId(appSignalId);
-					}
+					auto appSignalParam = appSignalController->signalParam(appSignalId)
+											  .or_else(
+												  [&appSignalId]
+												  {
+													  std::optional<AppSignalParam> asp = AppSignalParam{};
+													  asp->setAppSignalId(appSignalId);
+													  asp->setCustomSignalId(appSignalId);
+													  return asp;
+												  })
+											  .value();
 
 					TrendLib::TrendSignalParam& trensSignalParam = signalParams.emplace_back(appSignalParam, TrendLib::ArchiveServer{});
 
@@ -418,11 +452,13 @@ namespace VFrame30
 			m_trend.setUuid(schemaItem->guid());
 
 			m_trendParam.signalDescriptionRect().clear();
-			m_trendParam.setDpi(m_image.dotsPerMeterX() / (1000.0 / 25.4), m_image.dotsPerMeterY() / (1000.0 / 25.4), m_image.devicePixelRatioF());
+			m_trendParam.setDpi(m_image.dotsPerMeterX() / (1000.0 / 25.4),
+								m_image.dotsPerMeterY() / (1000.0 / 25.4),
+								m_image.devicePixelRatioF());
 
 			m_trend.draw(&m_image, m_trendParam);
 
-			//qDebug() << "m_trend.draw " << drawTimer.elapsed() << " ms";
+			// qDebug() << "m_trend.draw " << drawTimer.elapsed() << " ms";
 		}
 
 		painter->drawImage(boundingRect, m_image);
@@ -533,4 +569,4 @@ namespace VFrame30
 	{
 		m_trendParam.setLaneDuration(value * 1000);
 	}
-}
+} // namespace VFrame30

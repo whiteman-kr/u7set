@@ -48,9 +48,11 @@ target_precompile_headers(${TARGET} PRIVATE
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
 	<CommonLib/PropertyObject.h>
-	
+
 	<Network.pb.h>
-	
+
+	<CommonLib/Hash.h>
+
 	"../../AppSignalLib/AppSignal.h"
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"

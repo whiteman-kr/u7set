@@ -14,9 +14,9 @@
 
 #include <QApplication>
 #include <QDrag>
+#include <QFontDatabase>
 #include <QMimeData>
 #include <QMouseEvent>
-#include <QFontDatabase>
 
 namespace
 {
@@ -57,8 +57,9 @@ namespace
 			}
 			else
 			{
-				AppSignalState state =
-					m_signalManager ? m_signalManager->signalState(m_signalParam.appSignalId(), nullptr) : AppSignalState{};
+				AppSignalState state = m_signalManager ?
+										   m_signalManager->signalState(m_signalParam.appSignalId()).value_or(AppSignalState{}) :
+										   AppSignalState{};
 
 				QString stateText;
 				if (state.isValid() == false)
@@ -386,12 +387,11 @@ namespace SimUi
 
 			// Find by equipment id of input or output
 			//
-			bool found = false;
-			auto signalParam = m_simulator->appSignalManager().signalParam(s, &found);
+			auto signalParam = m_simulator->appSignalManager().signalParam(s);
 
-			if (found == true && (signalParam.isInput() == true || signalParam.isOutput() == true))
+			if (signalParam.has_value() == true && (signalParam->isInput() == true || signalParam->isOutput() == true))
 			{
-				QString equipmentId = "@" + signalParam.equipmentId();
+				QString equipmentId = "@" + signalParam->equipmentId();
 				equipmentIds.push_back(equipmentId);
 
 				for (QStringList schemaIds = m_simulator->schemaDetails().schemasByAppSignalId(equipmentId);
@@ -414,12 +414,11 @@ namespace SimUi
 
 			// Find by equipment id of input or output
 			//
-			bool found = false;
-			auto signalParam = m_simulator->appSignalManager().signalParam(s, &found);
+			auto signalParam = m_simulator->appSignalManager().signalParam(s);
 
-			if (found == true && (signalParam.isInput() == true || signalParam.isOutput() == true))
+			if (signalParam.has_value() == true && (signalParam->isInput() == true || signalParam->isOutput() == true))
 			{
-				QString equipmentId = "@" + signalParam.equipmentId();
+				QString equipmentId = "@" + signalParam->equipmentId();
 				equipmentIds.push_back(equipmentId);
 
 				for (QStringList schemaIds = m_simulator->schemaDetails().schemasByAppSignalId(equipmentId);
@@ -530,44 +529,44 @@ namespace SimUi
 
 		for (const QString& s : appSignals)
 		{
-			bool ok = false;
-			AppSignalParam signal = m_simulator->appSignalManager().signalParam(s, &ok);
+			auto signal = m_simulator->appSignalManager().signalParam(s);
 
-			if (ok == false)
+			if (signal.has_value() == false)
 			{
-				signal.setAppSignalId(s);
-				signal.setCustomSignalId({});
+				signal = AppSignalParam{};
+				signal->setAppSignalId(s);
+				signal->setCustomSignalId({});
 
-				maxIdSize = std::max(maxIdSize, signal.appSignalId().size());
+				maxIdSize = std::max(maxIdSize, signal->appSignalId().size());
 			}
 			else
 			{
-				maxIdSize = std::max(maxIdSize, signal.customSignalId().size());
-				maxCaptionSize = std::max(maxCaptionSize, signal.caption().size());
+				maxIdSize = std::max(maxIdSize, signal->customSignalId().size());
+				maxCaptionSize = std::max(maxCaptionSize, signal->caption().size());
 			}
 
-			appSignalParams.push_back(std::move(signal));
+			appSignalParams.push_back(std::move(*signal));
 		}
 
 		for (const QString& s : impactSignals)
 		{
-			bool ok = false;
-			AppSignalParam signal = m_simulator->appSignalManager().signalParam(s, &ok);
+			auto signal = m_simulator->appSignalManager().signalParam(s);
 
-			if (ok == false)
+			if (signal.has_value() == false)
 			{
-				signal.setAppSignalId(s);
-				signal.setCustomSignalId({});
+				signal = AppSignalParam{};
+				signal->setAppSignalId(s);
+				signal->setCustomSignalId({});
 
-				maxIdSize = std::max(maxIdSize, signal.appSignalId().size());
+				maxIdSize = std::max(maxIdSize, signal->appSignalId().size());
 			}
 			else
 			{
-				maxIdSize = std::max(maxIdSize, signal.customSignalId().size());
-				maxCaptionSize = std::max(maxCaptionSize, signal.caption().size());
+				maxIdSize = std::max(maxIdSize, signal->customSignalId().size());
+				maxCaptionSize = std::max(maxCaptionSize, signal->caption().size());
 			}
 
-			impactSignalsParams.push_back(std::move(signal));
+			impactSignalsParams.push_back(std::move(*signal));
 		}
 
 		// --

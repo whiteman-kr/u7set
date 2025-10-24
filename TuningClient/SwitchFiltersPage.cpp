@@ -7,18 +7,18 @@
 #include "Settings.h"
 #include "SwitchFiltersPageOptions.h"
 
-FilterPushButton::FilterPushButton(const QString& filterId, const QString& caption, QWidget* parent):
+FilterPushButton::FilterPushButton(const QString& filterId, const QString& caption, QWidget* parent) :
 	QPushButton(caption, parent),
 	m_filterId(filterId)
 {
 }
 
-QString FilterPushButton::filterId() const 
+QString FilterPushButton::filterId() const
 {
 	return m_filterId;
 }
 
-void FilterPushButton::mousePressEvent(QMouseEvent *event)
+void FilterPushButton::mousePressEvent(QMouseEvent* event)
 {
 	Q_UNUSED(event);
 	emit clicked(m_filterId);
@@ -32,20 +32,20 @@ QString SwitchFiltersPage::tag_FilterButton = "FilterButtons";
 QString SwitchFiltersPage::tag_FilterSwitch = "FilterSwitches";
 
 SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
-					  ClientLib::TuningSignalManager& tuningSignalManager,
-					  TuningSignalListSet& appSignalLists,
-					  ClientLib::TuningUserManager& userManager,
-					  ClientLib::TuningConnection& tuningConnection,
-					  const TuningLib::TuningUiItem& uiItem,
-					  const TuningCountersManager& tuningCounters,
-					  QWidget* parent) :
+									 ClientLib::TuningSignalManager& tuningSignalManager,
+									 TuningSignalListSet& appSignalLists,
+									 ClientLib::TuningUserManager& userManager,
+									 ClientLib::TuningConnection& tuningConnection,
+									 const TuningLib::TuningUiItem& uiItem,
+									 const TuningCountersManager& tuningCounters,
+									 QWidget* parent) :
 	QWidget(parent),
 	m_configController(configController),
-    m_tuningSignalManager(tuningSignalManager),
+	m_tuningSignalManager(tuningSignalManager),
 	m_appSignalLists(appSignalLists),
 	m_userManager(userManager),
 	m_tuningConnection(tuningConnection),
-    m_workspaceUi(uiItem),
+	m_workspaceUi(uiItem),
 	m_tuningCounters(tuningCounters)
 {
 	m_mainLayout = new QVBoxLayout(this);
@@ -92,7 +92,7 @@ SwitchFiltersPage::SwitchFiltersPage(TuningConfigController& configController,
 
 	// Background Color
 
-	Q_ASSERT(m_workspaceUi.isTab() == true);	// This must be tab!
+	Q_ASSERT(m_workspaceUi.isTab() == true); // This must be tab!
 
 	if (m_workspaceUi.useColors() == true)
 	{
@@ -154,7 +154,8 @@ void SwitchFiltersPage::createControls()
 	{
 		if (tsc.singleLmControl == true)
 		{
-			m_promptLabel = new QLabel(tr("This tab should be used only with Multiple LM Control Mode of TuningServices. Disable \"SingleLMControl\" mode for all services."));
+			m_promptLabel = new QLabel(tr("This tab should be used only with Multiple LM Control Mode of TuningServices. Disable "
+										  "\"SingleLMControl\" mode for all services."));
 			m_promptLabel->setAlignment(Qt::AlignHCenter | Qt::AlignCenter);
 			m_mainLayout->addWidget(m_promptLabel);
 			return;
@@ -280,15 +281,17 @@ void SwitchFiltersPage::createControls()
 	{
 		auto& s = TuningClientAppSettings::instance().user();
 
-		m_vSplitter	= new QSplitter(Qt::Vertical);
+		m_vSplitter = new QSplitter(Qt::Vertical);
 		m_vSplitter->addWidget(m_filterButtonsWidget);
 		m_vSplitter->addWidget(m_filterTableWidget);
-		connect(m_vSplitter, &QSplitter::splitterMoved, [this, &s](int pos, int index)
-		{
-			Q_UNUSED(pos);
-			Q_UNUSED(index);
-			s.m_switchPresetsPageSplitterPosition = m_vSplitter->saveState();
-		});
+		connect(m_vSplitter,
+				&QSplitter::splitterMoved,
+				[this, &s](int pos, int index)
+				{
+					Q_UNUSED(pos);
+					Q_UNUSED(index);
+					s.m_switchPresetsPageSplitterPosition = m_vSplitter->saveState();
+				});
 		if (s.m_switchPresetsPageSplitterPosition.isEmpty() == false)
 		{
 			m_vSplitter->restoreState(s.m_switchPresetsPageSplitterPosition);
@@ -309,7 +312,10 @@ void SwitchFiltersPage::createControls()
 			}
 			else
 			{
-				m_promptLabel = new QLabel(tr("No filters to display.\nCreate filters that contain one of the following tags: '%1' or '%2'.").arg(tag_FilterButton).arg(tag_FilterSwitch));
+				m_promptLabel =
+					new QLabel(tr("No filters to display.\nCreate filters that contain one of the following tags: '%1' or '%2'.")
+								   .arg(tag_FilterButton)
+								   .arg(tag_FilterSwitch));
 				m_promptLabel->setAlignment(Qt::AlignHCenter | Qt::AlignCenter);
 
 				m_mainLayout->addWidget(m_promptLabel);
@@ -510,7 +516,7 @@ bool SwitchFiltersPage::changeFilterSignals(const QString& filterId)
 	int alertedCount = 0;
 
 	auto buttonList = m_appSignalLists.get(filterId);
-	if (buttonList == nullptr) 
+	if (buttonList == nullptr)
 	{
 		Q_ASSERT(buttonList);
 		return false;
@@ -528,7 +534,9 @@ bool SwitchFiltersPage::changeFilterSignals(const QString& filterId)
 
 	if (alertedCount == 0)
 	{
-		if (QMessageBox::warning(this, qAppName(), tr("Are you sure you want to switch ON  signals of the filter '%1'?").arg(buttonList->caption()),
+		if (QMessageBox::warning(this,
+								 qAppName(),
+								 tr("Are you sure you want to switch ON  signals of the filter '%1'?").arg(buttonList->caption()),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{
@@ -541,7 +549,9 @@ bool SwitchFiltersPage::changeFilterSignals(const QString& filterId)
 	{
 		if (alertedCount == discreteCount)
 		{
-			if (QMessageBox::warning(this, qAppName(), tr("Are you sure you want to switch OFF signals of the filter '%1'?").arg(buttonList->caption()),
+			if (QMessageBox::warning(this,
+									 qAppName(),
+									 tr("Are you sure you want to switch OFF signals of the filter '%1'?").arg(buttonList->caption()),
 									 QMessageBox::Yes | QMessageBox::No,
 									 QMessageBox::No) != QMessageBox::Yes)
 			{
@@ -553,10 +563,11 @@ bool SwitchFiltersPage::changeFilterSignals(const QString& filterId)
 		else
 		{
 			QMessageBox msgBox{this};
-			msgBox.setText(tr("Signals of the filter '%1' have different values. Please select the following action:").arg(buttonList->caption()));
+			msgBox.setText(
+				tr("Signals of the filter '%1' have different values. Please select the following action:").arg(buttonList->caption()));
 			QPushButton* saveTo0Button = msgBox.addButton(tr("Set All to 0"), QMessageBox::ActionRole);
 			QPushButton* saveTo1Button = msgBox.addButton(tr("Set All to 1"), QMessageBox::ActionRole);
-			/*QPushButton* saveTo2Button = */msgBox.addButton(tr("Set All to 2"), QMessageBox::ActionRole);
+			/*QPushButton* saveTo2Button = */ msgBox.addButton(tr("Set All to 2"), QMessageBox::ActionRole);
 
 			if (msgBox.clickedButton() == saveTo0Button)
 			{
@@ -586,15 +597,13 @@ bool SwitchFiltersPage::changeFilterSignals(const QString& filterId)
 
 	for (Hash hash : signalsHashes)
 	{
-		bool ok = false;
-
-		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
-		if (ok == false)
+		auto asp = m_tuningSignalManager.signalParam(hash);
+		if (asp.has_value() == false)
 		{
 			continue;
 		}
 
-		if (asp.tuningType() != TuningValueType::Discrete)
+		if (asp->tuningType() != TuningValueType::Discrete)
 		{
 			continue;
 		}
@@ -611,7 +620,7 @@ bool SwitchFiltersPage::changeFilterSignals(const QString& filterId)
 	{
 		m_tuningConnection.writeTuningSignals(commands);
 	}
-	
+
 	return true;
 }
 
@@ -622,7 +631,8 @@ void SwitchFiltersPage::apply()
 		return;
 	}
 
-	if (QMessageBox::warning(this, qAppName(),
+	if (QMessageBox::warning(this,
+							 qAppName(),
 							 tr("Are you sure you want apply the changes?"),
 							 QMessageBox::Yes | QMessageBox::No,
 							 QMessageBox::No) != QMessageBox::Yes)
@@ -634,8 +644,10 @@ void SwitchFiltersPage::apply()
 
 	if (m_tuningCounters.totalCounters().sorCounter > 0)
 	{
-		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!!!\n\nSOR Signal(s) are set in logic modules!\n\nIf you apply these changes, module can run into RUN SAFE STATE.\n\nAre you sure you STILL WANT TO APPLY the changes?"),
+		if (QMessageBox::warning(this,
+								 qAppName(),
+								 tr("Warning!!!\n\nSOR Signal(s) are set in logic modules!\n\nIf you apply these changes, module can run "
+									"into RUN SAFE STATE.\n\nAre you sure you STILL WANT TO APPLY the changes?"),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{
@@ -655,21 +667,20 @@ void SwitchFiltersPage::countDiscretes(const AppSignalLists::AppSignalList& list
 
 	for (const auto& hash : list.tuningListHashesCache())
 	{
-		bool ok = false;
-
-		AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
-		if (ok == false)
+		auto asp = m_tuningSignalManager.signalParam(hash);
+		if (asp.has_value() == false)
 		{
 			continue;
 		}
 
-		if (asp.tuningType() != TuningValueType::Discrete)
+		if (asp->tuningType() != TuningValueType::Discrete)
 		{
 			continue;
 		}
-		
+
 		total++;
 
+		bool ok = false;
 		const TuningSignalState state = m_tuningSignalManager.state(hash, &ok);
 		if (ok == true && state.valid() == true)
 		{
@@ -678,7 +689,7 @@ void SwitchFiltersPage::countDiscretes(const AppSignalLists::AppSignalList& list
 				writingEnabled++;
 			}
 
-			if (state.value().discreteValue() != 0) 
+			if (state.value().discreteValue() != 0)
 			{
 				alerted++;
 			}
@@ -686,7 +697,7 @@ void SwitchFiltersPage::countDiscretes(const AppSignalLists::AppSignalList& list
 	}
 }
 
-void SwitchFiltersPage::showEvent(QShowEvent *ev)
+void SwitchFiltersPage::showEvent(QShowEvent* ev)
 {
 	Q_UNUSED(ev);
 
@@ -754,7 +765,7 @@ void SwitchFiltersPage::onApply()
 
 void SwitchFiltersPage::onTimer()
 {
-	if  (isVisible() == false)
+	if (isVisible() == false)
 	{
 		return;
 	}
@@ -830,7 +841,6 @@ void SwitchFiltersPage::onTimer()
 				b->setDown(false);
 			}
 		}
-
 	}
 
 	// List

@@ -154,7 +154,7 @@ namespace VFrame30
 									 bool* isInverted);
 
 	protected:
-		void drawFullLineIds(const Context* context, CDrawParam* drawParam) const;
+		void drawFullLineIds(const Context& context, CDrawParam& drawParam) const;
 
 		void drawMultichannelValues(const Context* context, CDrawParam* drawParam, QPen& linePen) const;
 		void drawSinglechannelValues(const Context* context, CDrawParam* drawParam, QPen& linePen) const;

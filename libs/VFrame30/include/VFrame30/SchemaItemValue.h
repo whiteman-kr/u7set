@@ -221,10 +221,10 @@ namespace VFrame30
 		void drawText(CDrawParam* drawParam, const Context* context, const QRectF& rect) const;
 
 		bool getSignalState(QString appSignalId,
-							const Context* context,
-							AppSignalParam* signalParam,
-							AppSignalState* appSignalState,
-							TuningSignalState* tuningSignalState) const;
+							const Context& context,
+							AppSignalParam& signalParam,
+							AppSignalState& appSignalState,
+							TuningSignalState& tuningSignalState) const;
 
 		QString parseText(QString text,
 						  const Context* context,

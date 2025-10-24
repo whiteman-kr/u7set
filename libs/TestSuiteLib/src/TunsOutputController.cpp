@@ -130,13 +130,13 @@ namespace TestSuite
 
 	bool TunsOutputController::writeSignalValue(const QString& appSignalId, const QVariant& value)
 	{
-		bool found = false;
-		AppSignalParam asp = m_signalManager.signalParam(appSignalId, &found);
-		if (found == false)
+		auto asp = m_signalManager.signalParam(appSignalId);
+		if (asp.has_value() == false)
 		{
 			return false;
 		}
 
+		bool found = false;
 		TuningSignalState state = m_signalManager.state(appSignalId, &found);
 		if (found == false)
 		{
@@ -148,7 +148,7 @@ namespace TestSuite
 			return false;
 		}
 
-		m_signalManager.setUnappliedValue(::calcHash(appSignalId), TuningValue{asp.tuningType(), value.toDouble()});
+		m_signalManager.setUnappliedValue(::calcHash(appSignalId), TuningValue{asp->tuningType(), value.toDouble()});
 		return m_connection.writeTuningSignal(appSignalId, value);
 	}
 

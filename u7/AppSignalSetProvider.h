@@ -39,6 +39,9 @@ public:
 	AppSignal* getSignal(const QString& appSignalID);
 	const AppSignal* getSignal(const QString& appSignalID) const;
 
+	AppSignal* getSignalByHash(Hash appSignalIDHash);
+	const AppSignal* getSignalByHash(Hash appSignalIDHash) const;
+
 	AppSignal* getSignalByID(int signalID);
 
 	AppSignal* getSignalByIndex(int index);
@@ -66,14 +69,13 @@ public:
 
 	// Signal set modifications DbController calls
 	//
-	bool createNewSignals(const AppSignal& signalTemplate,
-						  int channelsCount, int signalsCount,
-						  std::vector<int>* addedSignalIDs);
+	bool createNewSignals(const AppSignal& signalTemplate, int channelsCount, int signalsCount, std::vector<int>* addedSignalIDs);
 
 	bool addSignals(E::SignalType signalType, std::vector<AppSignal>* newSignals, QWidget* parentWidget = nullptr);
 
 	bool autoAddSignals(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignals,
-						std::vector<AppSignal>* addedSignals, QWidget* parentWidget = nullptr);
+						std::vector<AppSignal>* addedSignals,
+						QWidget* parentWidget = nullptr);
 
 	std::vector<int> cloneSignals(const std::vector<int>& signalIDsToClone);
 
@@ -85,15 +87,13 @@ public:
 	bool checkoutSignals(const std::vector<AppSignal*>& appSignals, QString* message, std::vector<int>* checkedOutIDs = nullptr);
 	bool checkoutSignals(const std::vector<int>& appSignalIDs, QString* message, std::vector<int>* checkedOutIDs = nullptr);
 
-	bool checkinSignals(const std::vector<int>& signalIDs,
-						QString comment);
+	bool checkinSignals(const std::vector<int>& signalIDs, QString comment);
 
 	bool undoSignalsChanges(const std::vector<int>& signalIDs, QWidget* parentWidget = nullptr);
 	bool undoSignal(int id);
 	bool undoSignal(const AppSignal& s);
 
-	bool updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate,
-								QString* errMsg);
+	bool updateSignalsSpecProps(const std::vector<const Hardware::DeviceAppSignal*>& deviceSignalsToUpdate, QString* errMsg);
 
 	void deleteSignals(const std::vector<int>& signalIDs);
 
@@ -101,7 +101,7 @@ public:
 	bool isSafetyProject() const;
 
 signals:
-	void error(const QString& message);						// for throwing message boxes
+	void error(const QString& message); // for throwing message boxes
 
 	// for reloading entire signal model content or any signal count changes
 	//
@@ -135,7 +135,7 @@ private:
 
 	//
 
-	QString errorMessage(const ObjectState& state);	// Converts ObjectState to human readable text
+	QString errorMessage(const ObjectState& state); // Converts ObjectState to human readable text
 
 	// if no errors returns TRUE
 	// returns FALSE if errors presents
@@ -155,7 +155,7 @@ private:
 	int m_currentUserID = -1;
 	bool m_currentUserIsAdmin = false;
 
-	std::map<int, QString> m_users;				// userID => userName
+	std::map<int, QString> m_users; // userID => userName
 
 	AppSignalSet m_signalSet;
 
@@ -165,6 +165,5 @@ private:
 
 	QTimer m_signalsLoadTimer;
 	int m_middleVisibleSignalIndex = 0;
-	bool m_signalsLoading = false;				// true - signals loading in progress
+	bool m_signalsLoading = false; // true - signals loading in progress
 };
-

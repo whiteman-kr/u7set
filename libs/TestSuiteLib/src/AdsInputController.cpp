@@ -137,14 +137,14 @@ namespace TestSuite
 		return m_signalManager.signalExists(signalId);
 	}
 
-	AppSignalParam AdsInputController::signalParam(const QString& appSignalId, bool* found) const
+	std::optional<AppSignalParam> AdsInputController::signalParam(const QString& appSignalId) const
 	{
-		return m_signalManager.signalParam(appSignalId, found);
+		return m_signalManager.signalParam(appSignalId);
 	}
 
-	AppSignalState AdsInputController::signalState(const QString& appSignalId, bool* found) const
+	std::optional<AppSignalState> AdsInputController::signalState(const QString& appSignalId) const
 	{
-		return m_signalManager.signalState(appSignalId, found);
+		return m_signalManager.signalState(appSignalId);
 	}
 
 	bool AdsInputController::expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance) const
@@ -152,30 +152,28 @@ namespace TestSuite
 		QElapsedTimer timer;
 		timer.start();
 
-		AppSignalState state;
-
 		qint64 nsecs = static_cast<qint64>(timeoutMs) * 1'000'000;
 
 		do
 		{
-			bool found = false;
-			state = m_signalManager.signalState(appSignalId, &found);
-			if (found == false || state.isStateAvailable() == false || state.isValid() == false)
+			std::optional<AppSignalState> state = m_signalManager.signalState(appSignalId);
+
+			if (state.has_value() == false || state->isStateAvailable() == false || state->isValid() == false)
 			{
 				return false;
 			}
 
-			if (std::isnan(value) == true && std::isnan(state.value()) == true)
+			if (std::isnan(value) == true && std::isnan(state->value()) == true)
 			{
 				return true;
 			}
 
-			if (std::isinf(value) == true && std::isinf(state.value()) == true && std::signbit(value) == std::signbit(state.value()))
+			if (std::isinf(value) == true && std::isinf(state->value()) == true && std::signbit(value) == std::signbit(state->value()))
 			{
 				return true;
 			}
 
-			if (std::abs(state.value() - value) <= tolerance)
+			if (std::abs(state->value() - value) <= tolerance)
 			{
 				return true;
 			}

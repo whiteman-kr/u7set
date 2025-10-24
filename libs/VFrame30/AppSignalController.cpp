@@ -28,34 +28,29 @@ namespace VFrame30
 		return m_appSignalManager.signalExists(appSignalId);
 	}
 
-	AppSignalParam AppSignalController::signalParam(Hash signalHash, bool* found) const
+	std::optional<AppSignalParam> AppSignalController::signalParam(Hash signalHash) const
 	{
-		return m_appSignalManager.signalParam(signalHash, found);
+		return m_appSignalManager.signalParam(signalHash);
 	}
 
-	AppSignalParam AppSignalController::signalParam(const QString& appSignalId, bool* found) const
+	std::optional<AppSignalParam> AppSignalController::signalParam(const QString& appSignalId) const
 	{
-		return m_appSignalManager.signalParam(appSignalId, found);
+		return m_appSignalManager.signalParam(appSignalId);
 	}
 
-	AppSignalState AppSignalController::signalState(Hash signalHash, bool* found) const
+	std::optional<AppSignalState> AppSignalController::signalState(Hash signalHash) const
 	{
-		return m_appSignalManager.signalState(signalHash, found);
+		return m_appSignalManager.signalState(signalHash);
 	}
 
-	AppSignalState AppSignalController::signalState(const QString& appSignalId, bool* found) const
+	std::optional<AppSignalState> AppSignalController::signalState(const QString& appSignalId) const
 	{
-		return m_appSignalManager.signalState(appSignalId, found);
+		return m_appSignalManager.signalState(appSignalId);
 	}
 
-	void AppSignalController::signalState(const std::span<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalController::signalState(std::span<const Hash> appSignalHashes, std::vector<std::optional<AppSignalState>>* result) const
 	{
-		return m_appSignalManager.signalState(appSignalHashes, result, found);
-	}
-
-	void AppSignalController::signalState(const std::span<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const
-	{
-		return m_appSignalManager.signalState(appSignalIds, result, found);
+		return m_appSignalManager.signalState(appSignalHashes, result);
 	}
 
 	QStringList AppSignalController::signalTags(Hash signalHash) const
@@ -127,23 +122,20 @@ namespace VFrame30
 	{
 		QJSValue result;
 
-		bool ok = false;
-		AppSignalParam s = m_appSignalManager.signalParam(signalHash, &ok);
-
-		if (ok == false)
+		auto s = m_appSignalManager.signalParam(signalHash);
+		if (s.has_value() == false)
 		{
 			return result;
 		}
 
 		QJSEngine* engine = qjsEngine(this);
-
 		if (engine == nullptr)
 		{
 			Q_ASSERT(engine);
 			return result;
 		}
 
-		result = engine->toScriptValue(s);
+		result = engine->toScriptValue(s.value());
 		return result;
 	}
 
@@ -166,36 +158,27 @@ namespace VFrame30
 	{
 		QJSValue result;
 
-		bool ok = false;
-		AppSignalState s = m_appSignalManager.signalState(signalHash, &ok);
-
-		if (ok == false)
+		auto s = m_appSignalManager.signalState(signalHash);
+		if (s.has_value() == false)
 		{
 			return result;
 		}
 
 		QJSEngine* engine = qjsEngine(this);
-
 		if (engine == nullptr)
 		{
 			Q_ASSERT(engine);
 			return result;
 		}
 
-		result = engine->toScriptValue(s);
+		result = engine->toScriptValue(s.value());
 		return result;
 	}
 
 	QJSValueList ScriptAppSignalController::signalStates(QStringList signalIds) const
 	{
 		QJSValueList result;
-		std::vector<QString> appSignalIds{signalIds.begin(), signalIds.end()};
-		std::vector<AppSignalState> states;
 
-		m_appSignalManager.signalState(appSignalIds, &states, nullptr);
-
-		// --
-		//
 		QJSEngine* engine = qjsEngine(this);
 		if (engine == nullptr)
 		{
@@ -203,10 +186,23 @@ namespace VFrame30
 			return result;
 		}
 
+		std::vector<std::optional<AppSignalState>> states;
+		m_appSignalManager.signalState(signalIds, &states);
+
 		result.reserve(signalIds.size());
+		qsizetype index = 0;
 		for (const auto& state : states)
 		{
-			result.push_back(engine->toScriptValue(state));
+			if (state.has_value() == true)
+			{
+				result.push_back(engine->toScriptValue(state.value()));
+			}
+			else
+			{
+				result.push_back(engine->toScriptValue(AppSignalState{::calcHash(signalIds[index])}));
+			}
+
+			index++;
 		}
 
 		return result;
@@ -240,11 +236,8 @@ namespace VFrame30
 
 	int ScriptAppSignalController::precision(QString signalId) const
 	{
-		bool ok = false;
-
-		AppSignalParam asp = m_appSignalManager.signalParam(::calcHash(signalId), &ok);
-
-		return (ok == true && asp.isAnalog() == true) ? asp.precision() : 0;
+		auto asp = m_appSignalManager.signalParam(signalId);
+		return (asp.has_value() == true && asp->isAnalog() == true) ? asp->precision() : 0;
 	}
 
 	QStringList ScriptAppSignalController::signalIdsByTag(QString tag) const

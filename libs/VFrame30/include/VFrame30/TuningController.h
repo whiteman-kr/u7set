@@ -15,14 +15,16 @@ namespace VFrame30
 
 	/*! \class TuningController
 		\ingroup controllers
-		\brief This class is used to get tuning signals parameters and states, write tuning values and in Monitor and TuningClient applications
+		\brief This class is used to get tuning signals parameters and states, write tuning values and in Monitor and TuningClient
+	   applications
 
 		This class is used to get tuning signals parameters and states, write tuning values and in Monitor and TuningClient applications.
 		 It is accessed by global <b>tuning</b> object.
 
 		Information about signal parameters and states is requested from TuningService.
 
-		\warning TuningController is always available in TuningClient. In Monitor it is available only in non-safety projects when Tuning function is enabled.
+		\warning TuningController is always available in TuningClient. In Monitor it is available only in non-safety projects when Tuning
+	   function is enabled.
 
 		\n
 		\warning It is highly recommended to check function return values, because errors can occur. For example,
@@ -32,8 +34,8 @@ namespace VFrame30
 		\warning It is highly recommended to check value types and signals types matching:
 		- Boolean vaulues should be written only to discrete signals, and number values only to analog signals;
 		- Fractional numbers should be written only to signals with floating-point type;
-		- Numbers should be in the correct range. For example, if signal type is 32-bit integer, writing <b>23e+12</b> value will cause an error.
-		<br>
+		- Numbers should be in the correct range. For example, if signal type is 32-bit integer, writing <b>23e+12</b> value will cause an
+	   error. <br>
 
 		\n
 		<b>Example:</b>
@@ -98,18 +100,19 @@ namespace VFrame30
 						 QWidget* parent);
 
 	public:
-		AppSignalParam signalParam(const QString& appSignalId, bool* ok) const;
+		std::optional<AppSignalParam> signalParamNative(const QString& appSignalId) const;
 		TuningSignalState signalState(const QString& appSignalId, bool* ok) const;
 
 	public slots:
 		/// \brief Returns AppSignalParam structure or undefined if signal does not exist.
-		QVariant signalParam(const QString& appSignalId) const;	// If no signal with specified appSignalID found, QVariant is undefined
+		QVariant signalParam(const QString& appSignalId) const; // If no signal with specified appSignalID found, QVariant is undefined
 
 		/// \brief Returns TuningSignalState structure or undefined if signal does not exist.
-		QVariant signalState(const QString& appSignalId) const;	// If no signal with specified appSignalID found, QVariant is undefined
+		QVariant signalState(const QString& appSignalId) const; // If no signal with specified appSignalID found, QVariant is undefined
 
-		/// \brief Returns an array of TuningSignalState structures of signals specified by <b>signalIds</b>. If signal is not found, then the <b>stateAvailable</b> is false.
-		QJSValueList signalStates(QStringList appSignalIds) const;	// Returns TuningSignalState
+		/// \brief Returns an array of TuningSignalState structures of signals specified by <b>signalIds</b>. If signal is not found, then
+		/// the <b>stateAvailable</b> is false.
+		QJSValueList signalStates(QStringList appSignalIds) const; // Returns TuningSignalState
 
 		/// \brief Returns <b>true</b> if signal specified by <b>signalId</b> is exist.
 		bool signalExists(QString signalId) const;
@@ -129,19 +132,25 @@ namespace VFrame30
 		/// \brief Returns list of AppSignalIDs with specified <b>tag</b>.
 		QStringList signalIdsByTag(QString tag) const;
 
-		/// \brief Writes value of tuning signal. On success, returns true. Returns false if signal is not found, connection to TuningService is not established or value is out of range.
+		/// \brief Writes value of tuning signal. On success, returns true. Returns false if signal is not found, connection to
+		/// TuningService is not established or value is out of range.
 		bool writeValue(QString appSignalId, QVariant value);
 
-		/// \brief Writes value of tuning signal of boolean value. On success, returns true. Returns false if signal is not found, connection to TuningService is not established.
+		/// \brief Writes value of tuning signal of boolean value. On success, returns true. Returns false if signal is not found,
+		/// connection to TuningService is not established.
 		bool writeValueBool(QString appSignalId, bool value);
 
-		/// \brief Writes value of tuning signal of integer value. On success, returns true. Returns false if signal is not found, connection to TuningService is not established.
+		/// \brief Writes value of tuning signal of integer value. On success, returns true. Returns false if signal is not found,
+		/// connection to TuningService is not established.
 		bool writeValueInt(QString appSignalId, int value);
 
-		/// \brief Writes value of tuning signal of double value. On success, returns true. Returns false if signal is not found, connection to TuningService is not established.
+		/// \brief Writes value of tuning signal of double value. On success, returns true. Returns false if signal is not found, connection
+		/// to TuningService is not established.
 		bool writeValueDouble(QString appSignalId, double value);
 
-		/// \brief Copies written values from <b>Tuning Mode Tuning Values</b> area to <b>Run Mode Tuning Values</b> area. Should be used in TuningClient scripts only when <b>AutoApply</b> property is set to <b>false</b>. Monitor always applies values automatically. Returns false on authorization error.
+		/// \brief Copies written values from <b>Tuning Mode Tuning Values</b> area to <b>Run Mode Tuning Values</b> area. Should be used in
+		/// TuningClient scripts only when <b>AutoApply</b> property is set to <b>false</b>. Monitor always applies values automatically.
+		/// Returns false on authorization error.
 		bool apply();
 
 		/// \brief Returns true if tuning user authorization is enabled, otherwise returns false
@@ -150,10 +159,12 @@ namespace VFrame30
 		/// \brief Returns state of tuning user authorization. If tuning authorization is disabled, also returns true.
 		bool isLoggedIn() const;
 
-		/// \brief Returns name of authorized tuning user. If tuning authorization is disabled or user is not logged in, returns empty string.
+		/// \brief Returns name of authorized tuning user. If tuning authorization is disabled or user is not logged in, returns empty
+		/// string.
 		QString userName() const;
 
-		/// \brief Returns tags of authorized tuning user. If tuning authorization is disabled or user is not logged in, returns empty string.
+		/// \brief Returns tags of authorized tuning user. If tuning authorization is disabled or user is not logged in, returns empty
+		/// string.
 		QStringList userTags() const;
 
 	private:
@@ -163,4 +174,4 @@ namespace VFrame30
 		ITuningAuthorization& m_tuningAuthorization;
 	};
 
-}
+} // namespace VFrame30

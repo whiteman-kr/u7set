@@ -621,7 +621,7 @@ namespace VFrame30
 
 			if (context->appSignalController() != nullptr)
 			{
-				getSignalState(context.get(), &signalParam, &appSignalState, &tuningSignalState);
+				getSignalState(*context, signalParam, appSignalState, tuningSignalState);
 
 				std::vector<IndicatorSetpoint> signalSetpoints = comparators(drawParam, context.get(), appSignalId);
 
@@ -956,47 +956,48 @@ namespace VFrame30
 		return;
 	}
 
-	std::set<QString> IndicatorHistogramVert::getSignalTags(const Context* context, const QString& appSignalId) const
+	std::set<QString> IndicatorHistogramVert::getSignalTags(const Context& context, const QString& appSignalId) const
 	{
-		Q_ASSERT(context);
-
 		std::set<QString> result;
+
+		auto signalParam = getSignalParam(context, appSignalId);
+		if (signalParam.has_value() == false)
+		{
+			return result;
+		}
+
+		for (const QString& tag : signalParam->tags())
+		{
+			result.insert(tag);
+		}
+
+		return result;
+	}
+
+	std::optional<AppSignalParam> IndicatorHistogramVert::getSignalParam(const Context& context, const QString& appSignalId) const
+	{
+		std::optional<AppSignalParam> result;
+
+		if (context.appSignalController() != nullptr)
+		{
+			Q_ASSERT(context.appSignalController() != nullptr);
+			return result;
+		}
 
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (context->appSignalController() == nullptr)
+			if (context.appSignalController() != nullptr)
 			{
-				Q_ASSERT(context->appSignalController());
-			}
-			else
-			{
-				QStringList tags = context->appSignalController()->signalTags(appSignalId);
-				for (const QString& t : tags)
-				{
-					result.insert(t);
-				}
+				result = context.appSignalController()->signalParam(appSignalId);
 			}
 			break;
-
 		case E::SignalSource::TuningService:
-			if (context->tuningController() == nullptr) {}
-			else
+			if (context.tuningController() == nullptr)
 			{
-				AppSignalParam param;
-				param.setAppSignalId(appSignalId);
-
-				bool ok = getSignalParam(context, &param);
-				if (ok == true)
-				{
-					for (const QString& t : param.tags())
-					{
-						result.insert(t);
-					}
-				}
+				result = context.tuningController()->signalParamNative(appSignalId);
 			}
 			break;
-
 		default:
 			Q_ASSERT(false);
 		}
@@ -1004,38 +1005,61 @@ namespace VFrame30
 		return result;
 	}
 
-	bool IndicatorHistogramVert::getSignalParam(const Context* context, AppSignalParam* signalParam) const
+	bool IndicatorHistogramVert::getSignalState(const Context& context,
+												AppSignalParam& signalParam,
+												AppSignalState& appSignalState,
+												TuningSignalState& tuningSignalState) const
 	{
-		if (context == nullptr || signalParam == nullptr)
+		if (context.appSignalController() == nullptr)
 		{
-			Q_ASSERT(context);
-			Q_ASSERT(signalParam);
+			Q_ASSERT(context.appSignalController() != nullptr);
 			return false;
 		}
 
-		if (context->appSignalController() != nullptr)
-		{
-			Q_ASSERT(context->appSignalController() != nullptr);
-			return false;
-		}
-
-		bool ok = false;
+		bool ok = true;
 
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (context->appSignalController() == nullptr) {}
-			else
+			if (context.appSignalController() != nullptr)
 			{
-				*signalParam = context->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
+				auto signalPramOpt = context.appSignalController()->signalParam(signalParam.appSignalId());
+				if (signalPramOpt.has_value() == true)
+				{
+					signalParam = signalPramOpt.value();
+				}
+				else
+				{
+					ok = false;
+				}
+
+				// --
+				//
+				appSignalState = context.appSignalController()->signalState(signalParam.appSignalId()).value_or(AppSignalState{});
 			}
 			break;
 
 		case E::SignalSource::TuningService:
-			if (context->tuningController() == nullptr) {}
-			else
+			if (context.tuningController() != nullptr)
 			{
-				*signalParam = context->tuningController()->signalParam(signalParam->appSignalId(), &ok);
+				auto signalParamOpt = context.tuningController()->signalParamNative(signalParam.appSignalId());
+				if (signalParamOpt.has_value() == true)
+				{
+					signalParam = signalParamOpt.value();
+				}
+				else
+				{
+					ok = false;
+				}
+
+				// --
+				//
+				tuningSignalState = context.tuningController()->signalState(signalParam.appSignalId(), nullptr);
+
+				appSignalState.m_hash = signalParam.hash();
+				appSignalState.m_flags.valid = tuningSignalState.valid();
+				appSignalState.m_flags.stateAvailable = tuningSignalState.valid();
+				appSignalState.m_value = tuningSignalState.value().toDouble();
 			}
 			break;
 
@@ -1047,78 +1071,20 @@ namespace VFrame30
 		return ok;
 	}
 
-	bool IndicatorHistogramVert::getSignalState(const Context* context,
-												AppSignalParam* signalParam,
-												AppSignalState* appSignalState,
-												TuningSignalState* tuningSignalState) const
+	// Get signal value as double, if signal is not acquired or value is invalid, then return std::nullopt
+	//
+	std::optional<double> IndicatorHistogramVert::getSignalValue(const Context& context, const QString& appSignalId) const
 	{
-		if (context == nullptr || signalParam == nullptr || appSignalState == nullptr || tuningSignalState == nullptr)
-		{
-			Q_ASSERT(context);
-			Q_ASSERT(signalParam);
-			Q_ASSERT(appSignalState);
-			Q_ASSERT(tuningSignalState);
-			return false;
-		}
-
-		if (context->appSignalController() == nullptr)
-		{
-			Q_ASSERT(context->appSignalController() != nullptr);
-			return false;
-		}
-
-		bool ok = false;
-
-		switch (signalSource())
-		{
-		case E::SignalSource::AppDataService:
-			if (context->appSignalController() == nullptr) {}
-			else
-			{
-				*signalParam = context->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
-				*appSignalState = context->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
-			}
-			break;
-
-		case E::SignalSource::TuningService:
-			if (context->tuningController() == nullptr) {}
-			else
-			{
-				*signalParam = context->tuningController()->signalParam(signalParam->appSignalId(), &ok);
-				*tuningSignalState = context->tuningController()->signalState(signalParam->appSignalId(), nullptr);
-
-				appSignalState->m_hash = signalParam->hash();
-				appSignalState->m_flags.valid = tuningSignalState->valid();
-				appSignalState->m_value = tuningSignalState->value().toDouble();
-			}
-			break;
-
-		default:
-			Q_ASSERT(false);
-			ok = false;
-		}
-
-		return ok;
-	}
-
-	std::optional<double> IndicatorHistogramVert::getSignalState(const Context* context, const QString& appSignalId) const
-	{
-		if (context == nullptr)
-		{
-			Q_ASSERT(context);
-			return std::nullopt;
-		}
-
 		bool valid = false;
 		double value = -1;
 
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (context->appSignalController() == nullptr) {}
+			if (context.appSignalController() == nullptr) {}
 			else
 			{
-				AppSignalState state = context->appSignalController()->signalState(appSignalId, nullptr);
+				AppSignalState state = context.appSignalController()->signalState(appSignalId).value_or(AppSignalState{});
 
 				valid = state.isValid();
 				value = state.value();
@@ -1126,12 +1092,13 @@ namespace VFrame30
 			break;
 
 		case E::SignalSource::TuningService:
-			if (context->tuningController() == nullptr) {}
+			if (context.tuningController() == nullptr) {}
 			else
 			{
-				TuningSignalState state = context->tuningController()->signalState(appSignalId, nullptr);
+				bool ok = false;
+				TuningSignalState state = context.tuningController()->signalState(appSignalId, &ok);
 
-				valid = state.valid();
+				valid = ok && state.valid();
 				value = state.value().toDouble();
 			}
 			break;
@@ -1144,10 +1111,8 @@ namespace VFrame30
 		{
 			return std::nullopt;
 		}
-		else
-		{
-			return {value};
-		}
+
+		return {value};
 	}
 
 	std::vector<IndicatorSetpoint> IndicatorHistogramVert::comparators(CDrawParam* drawParam,
@@ -1253,7 +1218,7 @@ namespace VFrame30
 			}
 			else
 			{
-				comparatorValue = getSignalState(context, valueSignal.appSignalID());
+				comparatorValue = getSignalValue(*context, valueSignal.appSignalID());
 			}
 
 			if (comparatorValue.has_value() == true)
@@ -1265,7 +1230,7 @@ namespace VFrame30
 
 				if (stateSignal.isAcquired() == true)
 				{
-					alertedValue = getSignalState(context, stateSignal.appSignalID());
+					alertedValue = getSignalValue(*context, stateSignal.appSignalID());
 				}
 
 				// if setting outputs state is not valid it is also indicated as alerted
@@ -1419,7 +1384,7 @@ namespace VFrame30
 
 				if (output.isAcquired() == true)
 				{
-					auto signalTags = getSignalTags(context, output.appSignalID());
+					auto signalTags = getSignalTags(*context, output.appSignalID());
 
 					for (const QString& t : signalTags)
 					{

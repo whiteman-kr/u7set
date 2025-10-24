@@ -1,9 +1,9 @@
 #include "../AppSignalLib/AppSignalSpecPropValues.h"
 #include "../AppSignalLib/ComparatorSet.h"
-#include <UiLib/UiTools.h>
 #include "ui_DialogSignalInfo.h"
 #include <SchemaClientLib/DialogSignalInfo.h>
 #include <SchemaClientLib/DialogWriteTuningValues.h>
+#include <UiLib/UiTools.h>
 
 //
 //
@@ -56,19 +56,17 @@ DialogSetpointDetails::DialogSetpointDetails(QWidget* parent, IAppSignalManager*
 
 	// Input
 
-	bool ok = false;
-
-	AppSignalParam inputParam = m_appSignalManager->signalParam(c->input().appSignalID(), &ok);
-	if (ok == false)
+	auto inputParam = m_appSignalManager->signalParam(c->input().appSignalID());
+	if (inputParam.has_value() == false)
 	{
 		s += tr("Input signal: <b>%1</b><br>").arg(c->input().appSignalID());
 	}
 	else
 	{
 		s += tr("Input signal: <b>%1 (%2) - %3</b><br>")
-				 .arg(inputParam.appSignalId())
-				 .arg(inputParam.customSignalId())
-				 .arg(inputParam.caption());
+				 .arg(inputParam->appSignalId())
+				 .arg(inputParam->customSignalId())
+				 .arg(inputParam->caption());
 	}
 
 	// Compare To
@@ -79,34 +77,33 @@ DialogSetpointDetails::DialogSetpointDetails(QWidget* parent, IAppSignalManager*
 	}
 	else
 	{
-		AppSignalParam compareParam = m_appSignalManager->signalParam(c->compare().appSignalID(), &ok);
-		if (ok == false)
+		auto compareParam = m_appSignalManager->signalParam(c->compare().appSignalID());
+		if (compareParam.has_value() == false)
 		{
 			s += tr("Compare To: <b>%1</b><br>").arg(c->compare().appSignalID());
 		}
 		else
 		{
 			s += tr("Compare To: <b>%1 (%2) - %3</b><br>")
-					 .arg(compareParam.appSignalId())
-					 .arg(compareParam.customSignalId())
-					 .arg(compareParam.caption());
+					 .arg(compareParam->appSignalId())
+					 .arg(compareParam->customSignalId())
+					 .arg(compareParam->caption());
 		}
 	}
 
-
 	// Output
 
-	AppSignalParam outputParam = m_appSignalManager->signalParam(c->output().appSignalID(), &ok);
-	if (ok == false)
+	auto outputParam = m_appSignalManager->signalParam(c->output().appSignalID());
+	if (outputParam.has_value() == false)
 	{
 		s += tr("Output signal: <b>%1</b><br>").arg(c->output().appSignalID());
 	}
 	else
 	{
 		s += tr("Output signal: <b>%1 (%2) - %3</b><br>")
-				 .arg(outputParam.appSignalId())
-				 .arg(outputParam.customSignalId())
-				 .arg(outputParam.caption());
+				 .arg(outputParam->appSignalId())
+				 .arg(outputParam->customSignalId())
+				 .arg(outputParam->caption());
 	}
 
 	// Hysteresis
@@ -117,17 +114,17 @@ DialogSetpointDetails::DialogSetpointDetails(QWidget* parent, IAppSignalManager*
 	}
 	else
 	{
-		AppSignalParam hystParam = m_appSignalManager->signalParam(c->hysteresis().appSignalID(), &ok);
-		if (ok == false)
+		auto hystParam = m_appSignalManager->signalParam(c->hysteresis().appSignalID());
+		if (hystParam.has_value() == false)
 		{
 			s += tr("Hysteresis: <b>%1/b<br>").arg(c->hysteresis().appSignalID());
 		}
 		else
 		{
 			s += tr("Hysteresis: <b>%1 (%2) - %3</b><br>")
-					 .arg(hystParam.appSignalId())
-					 .arg(hystParam.customSignalId())
-					 .arg(hystParam.caption());
+					 .arg(hystParam->appSignalId())
+					 .arg(hystParam->customSignalId())
+					 .arg(hystParam->caption());
 		}
 	}
 
@@ -1784,12 +1781,10 @@ void DialogSignalInfo::fillSetpoints()
 		}
 		else
 		{
-			bool ok = false;
-
-			AppSignalParam paramCompareTo = m_appSignalManager->signalParam(c->compare().appSignalID(), &ok);
-			if (ok == true)
+			auto paramCompareTo = m_appSignalManager->signalParam(c->compare().appSignalID());
+			if (paramCompareTo.has_value() == true)
 			{
-				item->setText(static_cast<int>(SetpointsColumns::CompareTo), paramCompareTo.customSignalId());
+				item->setText(static_cast<int>(SetpointsColumns::CompareTo), paramCompareTo->customSignalId());
 
 				if (c->compare().isAcquired() == true)
 				{
@@ -1832,12 +1827,10 @@ void DialogSignalInfo::fillSetpoints()
 
 		// Output
 
-		bool ok = false;
-
-		AppSignalParam paramOutput = m_appSignalManager->signalParam(c->output().appSignalID(), &ok);
-		if (ok == true)
+		auto paramOutput = m_appSignalManager->signalParam(c->output().appSignalID());
+		if (paramOutput.has_value() == true)
 		{
-			item->setText(static_cast<int>(SetpointsColumns::Output), paramOutput.customSignalId());
+			item->setText(static_cast<int>(SetpointsColumns::Output), paramOutput->customSignalId());
 
 			if (c->output().isAcquired() == true)
 			{
@@ -1969,12 +1962,13 @@ void DialogSignalInfo::updateAppSignalState()
 	if (m_dataServiceId.isEmpty() == true)
 	{
 		// Latest server state
-		appSignalState = m_appSignalManager->signalState(m_signal.hash(), &ok);
+		appSignalState = m_appSignalManager->signalState(m_signal.hash()).value_or(AppSignalState{m_signal.hash()});
 	}
 	else
 	{
 		// Specific server state
-		appSignalState = m_appSignalManager->signalState(m_signal.hash(), ::calcHash(m_dataServiceId), &ok);
+		appSignalState =
+			m_appSignalManager->signalState(m_signal.hash(), ::calcHash(m_dataServiceId)).value_or(AppSignalState{m_signal.hash()});
 	}
 	if (ok == false)
 	{
@@ -2080,28 +2074,27 @@ void DialogSignalInfo::updateSetpoints()
 		{
 			const AppSignalParam& paramCompare = compareToData.value<AppSignalParam>();
 
-			bool ok = false;
-
-			AppSignalState stateCompare;
+			std::optional<AppSignalState> stateCompare;
 
 			if (m_dataServiceId.isEmpty() == true)
 			{
 				// Latest server state
-				stateCompare = m_appSignalManager->signalState(paramCompare.hash(), &ok);
+				stateCompare = m_appSignalManager->signalState(paramCompare.hash());
 			}
 			else
 			{
 				// Specific server state
-				stateCompare = m_appSignalManager->signalState(paramCompare.hash(), ::calcHash(m_dataServiceId), &ok);
+				stateCompare = m_appSignalManager->signalState(paramCompare.hash(), ::calcHash(m_dataServiceId));
 			}
-			if (ok == false)
+
+			if (stateCompare.has_value() == false)
 			{
 				item->setText(static_cast<int>(SetpointsColumns::CompareToValue), "?");
 			}
 			else
 			{
 				item->setText(static_cast<int>(SetpointsColumns::CompareToValue),
-							  appSignalStateText(paramCompare, stateCompare, E::ValueViewType::Dec, paramCompare.precision()));
+							  appSignalStateText(paramCompare, stateCompare.value(), E::ValueViewType::Dec, paramCompare.precision()));
 			}
 		}
 
@@ -2112,28 +2105,28 @@ void DialogSignalInfo::updateSetpoints()
 		{
 			const AppSignalParam& paramOutput = outputData.value<AppSignalParam>();
 
-			bool ok = false;
 
-			AppSignalState stateOutput;
+			std::optional<AppSignalState> stateOutput;
 
 			if (m_dataServiceId.isEmpty() == true)
 			{
 				// Latest server state
-				stateOutput = m_appSignalManager->signalState(paramOutput.hash(), &ok);
+				stateOutput = m_appSignalManager->signalState(paramOutput.hash());
 			}
 			else
 			{
 				// Specific server state
-				stateOutput = m_appSignalManager->signalState(paramOutput.hash(), ::calcHash(m_dataServiceId), &ok);
+				stateOutput = m_appSignalManager->signalState(paramOutput.hash(), ::calcHash(m_dataServiceId));
 			}
-			if (ok == false)
+
+			if (stateOutput.has_value() == false)
 			{
 				item->setText(static_cast<int>(SetpointsColumns::OutputValue), "?");
 			}
 			else
 			{
 				item->setText(static_cast<int>(SetpointsColumns::OutputValue),
-							  appSignalStateText(paramOutput, stateOutput, E::ValueViewType::Dec, paramOutput.precision()));
+							  appSignalStateText(paramOutput, stateOutput.value(), E::ValueViewType::Dec, paramOutput.precision()));
 			}
 		}
 	}

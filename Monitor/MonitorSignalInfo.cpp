@@ -1,13 +1,11 @@
 #include "MonitorSignalInfo.h"
-#include "ui_DialogSignalInfo.h"
-#include "MonitorConfigController.h"
 #include "MonitorCentralWidget.h"
+#include "MonitorConfigController.h"
+#include "ui_DialogSignalInfo.h"
 
 #include <UiLib/UiTools.h>
 
 #include <ClientLib/AppSignalManager.h>
-
-
 
 
 bool MonitorSignalInfo::showDialog(QString appSignalId,
@@ -23,12 +21,11 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 
 	if (appSignalId.startsWith('@') == true)
 	{
-		bool ok = true;
-		AppSignalParam s = appSignalManager.signalParamByEquipemntId(appSignalId, &ok);
+		auto s = appSignalManager.signalParamByEquipmentId(appSignalId);
 
-		if (ok == true)
+		if (s.has_value() == true)
 		{
-			appSignalId = s.appSignalId();
+			appSignalId = s->appSignalId();
 		}
 	}
 
@@ -43,14 +40,13 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 	}
 	else
 	{
-		bool ok = false;
-		AppSignalParam signal = appSignalManager.signalParam(appSignalId, &ok);
+		auto signal = appSignalManager.signalParam(appSignalId);
 
-		if (ok == true)
+		if (signal.has_value() == true)
 		{
 			bool tuningEnabled = configController->configurationTuningEnabled();
 
-			MonitorSignalInfo* msi = new MonitorSignalInfo(signal,
+			MonitorSignalInfo* msi = new MonitorSignalInfo(*signal,
 														   configController,
 														   appSignalManager,
 														   &appSignalManager,
@@ -60,7 +56,10 @@ bool MonitorSignalInfo::showDialog(QString appSignalId,
 														   tuningEnabled,
 														   centralWidget);
 
-			connect(&appSignalManager, &ClientLib::AppSignalManager::signalParamsUpdated, msi, &MonitorSignalInfo::onSignalParamAndUnitsArrived);
+			connect(&appSignalManager,
+					&ClientLib::AppSignalManager::signalParamsUpdated,
+					msi,
+					&MonitorSignalInfo::onSignalParamAndUnitsArrived);
 
 			msi->show();
 			msi->raise();
@@ -86,7 +85,7 @@ MonitorSignalInfo::MonitorSignalInfo(const AppSignalParam& signal,
 									 ITuningConnection& tuningConnection,
 									 ITuningAuthorization& tuningAuthorization,
 									 bool tuningEnabled,
-									 MonitorCentralWidget* centralWidget):
+									 MonitorCentralWidget* centralWidget) :
 	DialogSignalInfo(signal,
 					 &appSignalManager,
 					 signalDataServer,
@@ -117,23 +116,20 @@ void MonitorSignalInfo::onSignalParamAndUnitsArrived()
 
 	// Refresh signal param itself
 	//
-	bool ok = false;
+	auto newSignal = signalManager()->signalParam(signal().hash());
 
-	AppSignalParam newSignal = signalManager()->signalParam(signal().hash(), &ok);
-
-	if (ok == false)
+	if (newSignal.has_value() == false)
 	{
-		//Signal was deleted, keep its #appSignalId and Hash
+		// Signal was deleted, keep its #appSignalId and Hash
 		//
 		AppSignalParam oldSignal = signal();
 
-		newSignal = AppSignalParam();
-		newSignal.setAppSignalId(oldSignal.appSignalId());
-		newSignal.setHash(oldSignal.hash());
-
+		newSignal = AppSignalParam{};
+		newSignal->setAppSignalId(oldSignal.appSignalId());
+		newSignal->setHash(oldSignal.hash());
 	}
 
-	updateSignal(newSignal);
+	updateSignal(*newSignal);
 
 	return;
 }

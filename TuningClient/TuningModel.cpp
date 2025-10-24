@@ -37,7 +37,9 @@ int TuningModelHashSet::hashCount() const
 // TuningItemSorter
 //
 
-TuningModelSorter::TuningModelSorter(TuningModelColumns column, const TuningModel* model, ClientLib::TuningSignalManager& tuningSignalManager) :
+TuningModelSorter::TuningModelSorter(TuningModelColumns column,
+									 const TuningModel* model,
+									 ClientLib::TuningSignalManager& tuningSignalManager) :
 	m_column(column),
 	m_tuningSignalManager(tuningSignalManager),
 	m_model(model)
@@ -48,12 +50,6 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 {
 	QVariant v1;
 	QVariant v2;
-
-	static AppSignalParam asp1;
-	static AppSignalParam asp2;
-
-	static TuningSignalState tss1;
-	static TuningSignalState tss2;
 
 	int valueColumnIndex = 0;
 
@@ -69,20 +65,32 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		}
 	}
 
-	bool ok1 = false;
-	bool ok2 = false;
+	TuningSignalState tss1;
+	TuningSignalState tss2;
 
-	asp1 = m_tuningSignalManager.signalParam(set1.firstHash(), &ok1);
-	asp2 = m_tuningSignalManager.signalParam(set2.firstHash(), &ok2);
+	auto asp1 = m_tuningSignalManager.signalParam(set1.firstHash());
+	auto asp2 = m_tuningSignalManager.signalParam(set2.firstHash());
 
-	if (ok1 == true && set1.hash[valueColumnIndex] != UNDEFINED_HASH)
+	if (asp1.has_value() == true && set1.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
+		bool ok1 = false;
 		tss1 = m_tuningSignalManager.queuedState(set1.hash[valueColumnIndex], &ok1);
 	}
 
-	if (ok2 == true && set2.hash[valueColumnIndex] != UNDEFINED_HASH)
+	if (asp2.has_value() == true && set2.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
+		bool ok2 = false;
 		tss2 = m_tuningSignalManager.queuedState(set2.hash[valueColumnIndex], &ok2);
+	}
+
+	if (asp1.has_value() == false)
+	{
+		asp1 = AppSignalParam{};
+	}
+
+	if (asp2.has_value() == false)
+	{
+		asp2 = AppSignalParam{};
 	}
 
 	//
@@ -98,94 +106,94 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 	{
 	case TuningModelColumns::CustomAppSignalID:
 		{
-			v1 = asp1.customSignalId();
-			v2 = asp2.customSignalId();
+			v1 = asp1->customSignalId();
+			v2 = asp2->customSignalId();
 		}
 		break;
 	case TuningModelColumns::EquipmentID:
 		{
-			v1 = asp1.lmEquipmentId();
-			v2 = asp2.lmEquipmentId();
+			v1 = asp1->lmEquipmentId();
+			v2 = asp2->lmEquipmentId();
 		}
 		break;
 	case TuningModelColumns::AppSignalID:
 		{
-			v1 = asp1.appSignalId();
-			v2 = asp2.appSignalId();
+			v1 = asp1->appSignalId();
+			v2 = asp2->appSignalId();
 		}
 		break;
 	case TuningModelColumns::Caption:
 		{
-			v1 = asp1.caption();
-			v2 = asp2.caption();
+			v1 = asp1->caption();
+			v2 = asp2->caption();
 		}
 		break;
 	case TuningModelColumns::Units:
 		{
-			v1 = asp1.units();
-			v2 = asp2.units();
+			v1 = asp1->units();
+			v2 = asp2->units();
 		}
 		break;
 	case TuningModelColumns::Type:
 		{
-			v1 = static_cast<int>(asp1.tuningType());
-			v2 = static_cast<int>(asp2.tuningType());
+			v1 = static_cast<int>(asp1->tuningType());
+			v2 = static_cast<int>(asp2->tuningType());
 		}
 		break;
 
 	case TuningModelColumns::Default:
 		{
-			if (asp1.isAnalog() == asp2.isAnalog())
+			if (asp1->isAnalog() == asp2->isAnalog())
 			{
-				v1 = m_model->defaultValue(asp1).toDouble();
-				v2 = m_model->defaultValue(asp2).toDouble();
+				v1 = m_model->defaultValue(*asp1).toDouble();
+				v2 = m_model->defaultValue(*asp2).toDouble();
 			}
 			else
 			{
-				v1 = asp1.isAnalog();
-				v2 = asp2.isAnalog();
+				v1 = asp1->isAnalog();
+				v2 = asp2->isAnalog();
 			}
 		}
 		break;
 	case TuningModelColumns::ValueFirst:
 		{
-			if (asp1.isAnalog() == asp2.isAnalog())
+			if (asp1->isAnalog() == asp2->isAnalog())
 			{
 				v1 = tss1.value().toDouble();
 				v2 = tss2.value().toDouble();
 			}
 			else
 			{
-				v1 = asp1.isAnalog();
-				v2 = asp2.isAnalog();
+				v1 = asp1->isAnalog();
+				v2 = asp2->isAnalog();
 			}
 		}
 		break;
 	case TuningModelColumns::LowLimit:
 		{
-			if (asp1.isAnalog() == asp2.isAnalog())
+			if (asp1->isAnalog() == asp2->isAnalog())
 			{
-				v1 = asp1.tuningLowBound().toDouble();
-				v2 = asp2.tuningLowBound().toDouble();
+				v1 = asp1->tuningLowBound().toDouble();
+				v2 = asp2->tuningLowBound().toDouble();
 			}
 			else
 			{
-				v1 = asp1.isAnalog();
-				v2 = asp2.isAnalog();
+				v1 = asp1->isAnalog();
+				v2 = asp2->isAnalog();
 			}
 		}
 		break;
 	case TuningModelColumns::HighLimit:
 		{
-			if (asp1.isAnalog() == asp2.isAnalog())
+			if (asp1->isAnalog() == asp2->isAnalog())
 			{
-				v1 = asp1.tuningHighBound().toDouble();
-				v2 = asp2.tuningHighBound().toDouble();
+				v1 = asp1->tuningHighBound().toDouble();
+				v2 = asp2->tuningHighBound().toDouble();
 			}
 			else
 			{
-				v1 = asp1.isAnalog();
-				v2 = asp2.isAnalog();
+				v1 = asp1->isAnalog();
+				v2 = asp2->isAnalog();
 			}
 		}
 		break;
@@ -209,12 +217,12 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 	if (v1.userType() != v2.userType())
 	{
 		Q_ASSERT(false);
-		return asp1.customSignalId() < asp2.customSignalId();
+		return asp1->customSignalId() < asp2->customSignalId();
 	}
 
 	if (v1 == v2)
 	{
-		return asp1.customSignalId() < asp2.customSignalId();
+		return asp1->customSignalId() < asp2->customSignalId();
 	}
 
 	switch (v1.userType())
@@ -264,7 +272,7 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 	}
 
 	Q_ASSERT(false);
-	return asp1.customSignalId() < asp2.customSignalId();
+	return asp1->customSignalId() < asp2->customSignalId();
 }
 
 //
@@ -403,11 +411,8 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 			int hashChannel = -1;
 
-			bool ok = false;
-
-			AppSignalParam asp = m_tuningSignalManager.signalParam(hash, &ok);
-
-			QString appSignalId = asp.appSignalId();
+			auto asp = m_tuningSignalManager.signalParam(hash);
+			QString appSignalId = asp.has_value() ? asp->appSignalId() : QString{};
 
 			for (int c = 0; c < channelCount; c++)
 			{
@@ -810,12 +815,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 		// qDebug() << str;
 
 		Hash aspHash = hashSet.firstHash();
-
 		int hashCount = hashSet.hashCount();
 
-		bool ok = false;
-
-		const AppSignalParam asp = m_tuningSignalManager.signalParam(aspHash, &ok);
+		auto asp = m_tuningSignalManager.signalParam(aspHash);
+		if (asp.has_value() == false)
+		{
+			return QVariant();
+		}
 
 		int columnType = static_cast<int>(m_columnsTypes[col]);
 
@@ -823,56 +829,56 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 		{
 			if (hashCount > 1)
 			{
-				return tr("%1 [+%2]").arg(asp.customSignalId()).arg(hashCount - 1);
+				return tr("%1 [+%2]").arg(asp->customSignalId()).arg(hashCount - 1);
 			}
 
-			return asp.customSignalId();
+			return asp->customSignalId();
 		}
 
 		if (columnType == static_cast<int>(TuningModelColumns::EquipmentID))
 		{
 			if (hashCount > 1)
 			{
-				return tr("%1 [+%2]").arg(asp.lmEquipmentId()).arg(hashCount - 1);
+				return tr("%1 [+%2]").arg(asp->lmEquipmentId()).arg(hashCount - 1);
 			}
 
-			return asp.lmEquipmentId();
+			return asp->lmEquipmentId();
 		}
 
 		if (columnType == static_cast<int>(TuningModelColumns::AppSignalID))
 		{
 			if (hashCount > 1)
 			{
-				return tr("%1 [+%2]").arg(asp.appSignalId()).arg(hashCount - 1);
+				return tr("%1 [+%2]").arg(asp->appSignalId()).arg(hashCount - 1);
 			}
 
-			return asp.appSignalId();
+			return asp->appSignalId();
 		}
 
 		if (columnType == static_cast<int>(TuningModelColumns::Caption))
 		{
-			return asp.caption();
+			return asp->caption();
 		}
 
 		if (columnType == static_cast<int>(TuningModelColumns::Units))
 		{
-			return asp.units();
+			return asp->units();
 		}
 
 		if (columnType == static_cast<int>(TuningModelColumns::Type))
 		{
-			return asp.tuningDefaultValue().tuningValueTypeString();
+			return asp->tuningDefaultValue().tuningValueTypeString();
 		}
 
 		if (columnType == static_cast<int>(TuningModelColumns::Default))
 		{
-			if (asp.isAnalog())
+			if (asp->isAnalog())
 			{
-				return defaultValue(asp).toString(m_analogFormat, asp.precision());
+				return defaultValue(*asp).toString(m_analogFormat, asp->precision());
 			}
 			else
 			{
-				return defaultValue(asp).toString();
+				return defaultValue(*asp).toString();
 			}
 		}
 
@@ -896,6 +902,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				return QVariant();
 			}
 
+			bool ok = false;
 			const TuningSignalState tss = m_tuningSignalManager.state(tssHash, &ok);
 
 			if (tss.controlIsEnabled() == false)
@@ -908,7 +915,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				{
 					TuningValue newValue = m_tuningSignalManager.unappliedValue(tssHash);
 
-					if (asp.isAnalog() == false)
+					if (asp->isAnalog() == false)
 					{
 						QString valueString = tss.value().toString();
 
@@ -927,11 +934,11 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					}
 					else
 					{
-						QString valueString = tss.value().toString(m_analogFormat, asp.precision());
+						QString valueString = tss.value().toString(m_analogFormat, asp->precision());
 
 						if (m_tuningSignalManager.isUnapplied(tssHash) == true)
 						{
-							QString editValueString = newValue.toString(m_analogFormat, asp.precision());
+							QString editValueString = newValue.toString(m_analogFormat, asp->precision());
 							return QString("%1 => %2").arg(valueString).arg(editValueString);
 						}
 
@@ -968,24 +975,25 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 				continue;
 			}
 
+			bool ok = false;
 			const TuningSignalState tss = m_tuningSignalManager.state(tssHash, &ok);
 
 			if (columnType == static_cast<int>(TuningModelColumns::LowLimit))
 			{
-				if (asp.isAnalog())
+				if (asp->isAnalog())
 				{
-					if (tss.limitsUnbalance(asp) == true)
+					if (tss.limitsUnbalance(*asp) == true)
 					{
 						result = tr("Base %1, read %2")
-									 .arg(asp.tuningLowBound().toString(m_analogFormat, asp.precision()))
-									 .arg(tss.lowBound().toString(m_analogFormat, asp.precision()));
+									 .arg(asp->tuningLowBound().toString(m_analogFormat, asp->precision()))
+									 .arg(tss.lowBound().toString(m_analogFormat, asp->precision()));
 						break;
 					}
 					else
 					{
 						if (c == 0)
 						{
-							result = asp.tuningLowBound().toString(m_analogFormat, asp.precision());
+							result = asp->tuningLowBound().toString(m_analogFormat, asp->precision());
 						}
 					}
 				}
@@ -993,20 +1001,20 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 			if (columnType == static_cast<int>(TuningModelColumns::HighLimit))
 			{
-				if (asp.isAnalog())
+				if (asp->isAnalog())
 				{
-					if (tss.limitsUnbalance(asp) == true)
+					if (tss.limitsUnbalance(*asp) == true)
 					{
 						result = tr("Base %1, read %2")
-									 .arg(asp.tuningHighBound().toString(m_analogFormat, asp.precision()))
-									 .arg(tss.highBound().toString(m_analogFormat, asp.precision()));
+									 .arg(asp->tuningHighBound().toString(m_analogFormat, asp->precision()))
+									 .arg(tss.highBound().toString(m_analogFormat, asp->precision()));
 						break;
 					}
 					else
 					{
 						if (c == 0)
 						{
-							result = asp.tuningHighBound().toString(m_analogFormat, asp.precision());
+							result = asp->tuningHighBound().toString(m_analogFormat, asp->precision());
 						}
 					}
 				}

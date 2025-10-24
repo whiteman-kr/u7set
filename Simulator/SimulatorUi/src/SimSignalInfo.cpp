@@ -23,18 +23,14 @@ namespace SimUi
 		}
 		else
 		{
-			bool ok = false;
+			auto signal = simulator->appSignalManager().signalParam(appSignalId);
 
-			AppSignalParam signal = simulator->appSignalManager().signalParam(appSignalId, &ok);
-
-			if (ok == true)
+			if (signal.has_value() == true)
 			{
-				SimSignalInfo* msi = new SimSignalInfo(signal, simulator, simWidget);
+				SimSignalInfo* msi = new SimSignalInfo(signal.value(), simulator, simWidget);
 
 				connect(simulator, &SimIdeSimulator::projectUpdated, msi, &SimSignalInfo::onSignalParamAndUnitsArrived);
-
 				connect(simWidget, &SimWidgetPrivate::needCloseChildWindows, msi, &QDialog::accept);
-
 				connect(msi, &SimSignalInfo::openSchema, simWidget, &SimWidgetPrivate::openSchemaTabPage);
 
 				msi->show();
@@ -78,24 +74,22 @@ namespace SimUi
 
 	void SimSignalInfo::onSignalParamAndUnitsArrived()
 	{
-		// Refresh signal param inself
+		// Refresh signal param itself
+		//
+		auto newSignal = m_simulator->appSignalManager().signalParam(signal().hash());
 
-		bool ok = false;
-
-		AppSignalParam newSignal = m_simulator->appSignalManager().signalParam(signal().hash(), &ok);
-
-		if (ok == false)
+		if (newSignal.has_value() == false)
 		{
 			// Signal was deleted, keep its #appSignalId and Hash
 			//
 			AppSignalParam oldSignal = signal();
 
-			newSignal = AppSignalParam();
-			newSignal.setAppSignalId(oldSignal.appSignalId());
-			newSignal.setHash(oldSignal.hash());
+			newSignal = AppSignalParam{};
+			newSignal->setAppSignalId(oldSignal.appSignalId());
+			newSignal->setHash(oldSignal.hash());
 		}
 
-		updateSignal(newSignal);
+		updateSignal(newSignal.value());
 
 		return;
 	}

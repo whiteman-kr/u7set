@@ -237,13 +237,13 @@ namespace AdsBridge
 
 		for (const auto& h : std::span{signalHashes, count})
 		{
-			bool signalFound = false;
-			auto signalParam = m_signals->signalParam(h, &signalFound);
+			auto signalParam = m_signals->signalParam(h);
 
 			MatsAppSignalParam& outSignal = *out;
+			outSignal = MatsAppSignalParam{};
 			outSignal.hash = h;
 
-			if (signalFound == false)
+			if (signalParam.has_value() == false)
 			{
 				m_log->writeWarning(QString("AdsBridgeFacade::signalParams(), Signal not found: %1").arg(h));
 				result = false;
@@ -252,24 +252,24 @@ namespace AdsBridge
 			{
 				result++;
 
-				outSignal.appSignalId = getStringConstPointer(signalParam.appSignalId());
-				outSignal.customSignalId = getStringConstPointer(signalParam.customSignalId());
+				outSignal.appSignalId = getStringConstPointer(signalParam->appSignalId());
+				outSignal.customSignalId = getStringConstPointer(signalParam->customSignalId());
 
-				outSignal.caption = getStringConstPointer(signalParam.caption());
-				outSignal.equipmentId = getStringConstPointer(signalParam.equipmentId());
-				outSignal.lmEquipmentId = getStringConstPointer(signalParam.lmEquipmentId());
-				outSignal.units = getStringConstPointer(signalParam.units());
-				outSignal.tags = getStringConstPointer(signalParam.tagStringList().join(QChar(' ')));
+				outSignal.caption = getStringConstPointer(signalParam->caption());
+				outSignal.equipmentId = getStringConstPointer(signalParam->equipmentId());
+				outSignal.lmEquipmentId = getStringConstPointer(signalParam->lmEquipmentId());
+				outSignal.units = getStringConstPointer(signalParam->units());
+				outSignal.tags = getStringConstPointer(signalParam->tagStringList().join(QChar(' ')));
 
-				outSignal.channel = static_cast<MatsChannel>(signalParam.channel());
-				outSignal.inOutType = static_cast<MatsSignalInOutType>(signalParam.inOutType());
-				outSignal.type = static_cast<MatsSignalType>(signalParam.type());
-				outSignal.decimalPlaces = signalParam.precision();
+				outSignal.channel = static_cast<MatsChannel>(signalParam->channel());
+				outSignal.inOutType = static_cast<MatsSignalInOutType>(signalParam->inOutType());
+				outSignal.type = static_cast<MatsSignalType>(signalParam->type());
+				outSignal.decimalPlaces = signalParam->precision();
 
-				outSignal.lowValidRange = signalParam.lowValidRange();
-				outSignal.highValidRange = signalParam.highValidRange();
+				outSignal.lowValidRange = signalParam->lowValidRange();
+				outSignal.highValidRange = signalParam->highValidRange();
 
-				outSignal.tuning = signalParam.enableTuning();
+				outSignal.tuning = signalParam->enableTuning();
 			}
 
 			out++;
@@ -306,13 +306,13 @@ namespace AdsBridge
 
 		for (const auto& h : std::span{signalHashes, count})
 		{
-			bool signalFound = false;
-			auto signalState = m_signals->signalState(h, &signalFound);
+			auto signalState = m_signals->signalState(h);
 
 			MatsAppSignalState& outSignal = *out;
+			outSignal = MatsAppSignalState{};
 			outSignal.hash = h;
 
-			if (signalFound == false)
+			if (signalState.has_value() == false)
 			{
 				m_log->writeWarning(QString("AdsBridgeFacade::signalStates(), Signal not found: %1").arg(h));
 				result = false;
@@ -323,10 +323,11 @@ namespace AdsBridge
 				// plantTime is need to be corrected by TZ and DST, as it's in local time.
 				//
 				auto localTimeCorrection = QDateTime::currentDateTime().offsetFromUtc() * 1000;
-				outSignal.plantTime = signalState.m_time.plant.timeStamp ? signalState.m_time.plant.timeStamp - localTimeCorrection : 0ull;
-				outSignal.serverTime = signalState.m_time.system.timeStamp;
-				outSignal.value = signalState.m_value;
-				outSignal.flags = signalState.m_flags.all;
+				outSignal.plantTime =
+					signalState->m_time.plant.timeStamp ? signalState->m_time.plant.timeStamp - localTimeCorrection : 0ull;
+				outSignal.serverTime = signalState->m_time.system.timeStamp;
+				outSignal.value = signalState->m_value;
+				outSignal.flags = signalState->m_flags.all;
 			}
 
 			out++;
