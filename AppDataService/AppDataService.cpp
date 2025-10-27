@@ -6,6 +6,7 @@
 #include "RtTrendsServer.h"
 #include "AppDataReceiver.h"
 #include "ApertureFile.h"
+#include "AppDataSrvTools.h"
 
 // -------------------------------------------------------------------------------
 //
@@ -373,51 +374,12 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 bool AppDataServiceWorker::readAppDataSources(const QByteArray& fileData, const QString& profile)
 {
-	QVector<OnlineLib::DataSource> dataSources;
-
-	bool result = OnlineLib::DataSourcesXML<OnlineLib::DataSource>::readFromXml(fileData, &dataSources);
-
-	if (result == false)
-	{
-		DEBUG_LOG_ERR(logger(), QString("Error reading AppDataSources from XML-file"));
-		return false;
-	}
-
-	result = m_appDataSources.init(profile, dataSources, logger());
-
-	if (result == true)
-	{
-		DEBUG_LOG_MSG(logger(), QString("AppDataSources successfully loaded"));
-	}
-	else
-	{
-		DEBUG_LOG_ERR(logger(), QString("AppDataSources loading error!"));
-	}
-
-	return result;
+	return AppDataSrvTools::readAppDataSources(fileData, profile, m_appDataSources, logger());
 }
 
 bool AppDataServiceWorker::readAppSignals(const QByteArray& fileData)
 {
-	::Proto::AppSignalSet signalSet;
-
-	bool result = signalSet.ParseFromArray(fileData.constData(), static_cast<int>(fileData.size()));
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	int signalCount = signalSet.appsignal_size();
-
-	for(int i = 0; i < signalCount; i++)
-	{
-		const ::Proto::AppSignal& appSignal = signalSet.appsignal(i);
-
-		m_appSignals.insert(appSignal);
-	}
-
-	return true;
+	return AppDataSrvTools::readAppSignals(fileData, m_appSignals);
 }
 
 void AppDataServiceWorker::createTimeErrLog()
@@ -445,50 +407,7 @@ void AppDataServiceWorker::shutdownTimeErrLog()
 
 void AppDataServiceWorker::createAndInitSignalStates()
 {
-	m_appSignalStates.clear();
-
-	if (m_appSignals.isEmpty())
-	{
-		return;
-	}
-
-	int signalCount = 0;
-
-	for(AppSignal* signal : m_appSignals)
-	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isBus() == true)
-		{
-			continue;
-		}
-
-		signalCount++;
-	}
-
-	m_appSignalStates.setSize(signalCount);
-
-	int index = 0;
-
-	for(AppSignal* signal : m_appSignals)
-	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isBus() == true)
-		{
-			continue;
-		}
-
-		DynamicAppSignalState* signalState = m_appSignalStates[index];
-
-		signalState->setSignalParams(signal, m_appSignals);
-
-		index++;
-	}
-
-	m_appSignalStates.buidlHash2State();
-
-	m_appSignalStates.setAutoArchivingGroups(m_autoArchivingGroupsCount);
+	AppDataSrvTools::createAndInitSignalStates(m_appSignals, m_appSignalStates, m_autoArchivingGroupsCount);
 
 	//
 
@@ -699,7 +618,10 @@ void AppDataServiceWorker::runRtTrendsServerThread()
 				  });
 
 	m_rtTrendsServerThread = new RtTrends::ServerThread(listenAddresses,
-														*this);
+														softwareInfo(),
+														m_appDataSources,
+														m_appSignalStates,
+														logger());
 
 	m_rtTrendsServerThread->start();
 }

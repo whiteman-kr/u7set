@@ -220,6 +220,8 @@ message AppDataReceiveState
 	optional int64 errRupFrameCRC = 9 [default = 0];
 
 	optional int64 errNotExpectedSimPacket = 10 [default = 0];
+
+	optional int64 errNoAppData = 11 [default = 0];
 }
 
 // Getting Application Data Sources states

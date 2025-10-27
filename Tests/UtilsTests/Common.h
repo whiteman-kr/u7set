@@ -1,29 +1,28 @@
 #pragma once
 
-#include <random>
-
 #include "../../OnlineLib/CircularLogger.h"
+#include "../../OnlineLib/BuildInfo.h"
+#include "../../OnlineLib/SoftwareSettings.h"
+#include "../../AppDataService/AppDataSource.h"
+#include "../../AppSignalLib/AppSignal.h"
 
-extern std::shared_ptr<CircularLogger> logger;
+extern CircularLoggerShared logger;
+
 extern QString buildPath;
 extern QString profileName;
 
-extern QByteArray appDataService_configurationXml;
+extern OnlineLib::BuildInfo buildInfo;
+extern SoftwareSettingsSet settingsSet;
+extern AppDataServiceSettings appDataSrvSettings;
 
-inline quint64 randomUint64()
-{
-	static thread_local std::mt19937_64 gen{ std::random_device{}() };
+extern AppDataSources appDataSources;
+extern AppSignals appSignals;
 
-	std::uniform_int_distribution<quint64> dist(0, UINT64_MAX);
+extern DynamicAppSignalStates appSignalStates;
 
-	return dist(gen);
-}
+//
 
-inline quint32 randomUint32()
-{
-	static thread_local std::mt19937 gen{ std::random_device{}() };
-
-	std::uniform_int_distribution<quint32> dist(0, UINT32_MAX);
-
-	return dist(gen);
-}
+bool loadConfiguration();
+bool loadAppDataSources();
+bool loadAppSignals();
+void createAndInitSignalStates();

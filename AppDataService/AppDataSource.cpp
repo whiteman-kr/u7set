@@ -2,7 +2,6 @@
 
 #include "AppDataSource.h"
 
-
 // -------------------------------------------------------------------------------
 //
 // AppDataSource class implementation
@@ -592,14 +591,12 @@ AppDataSource* AppDataSources::getSignalSource(const QString& signalID)
 
 AppDataSource* AppDataSources::getSignalSource(Hash signalHash)
 {
-	auto it = m_signalToSource.find(signalHash);
+	return const_cast<AppDataSource*>(privateGetSignalSource(signalHash));
+}
 
-	if (it == m_signalToSource.end())
-	{
-		return nullptr;
-	}
-
-	return it->second;
+const AppDataSource* AppDataSources::getSignalSource(Hash signalHash) const
+{
+	return privateGetSignalSource(signalHash);
 }
 
 std::vector<AppDataSource*>::iterator AppDataSources::begin()
@@ -620,4 +617,16 @@ std::vector<AppDataSource*>::iterator AppDataSources::end()
 std::vector<AppDataSource*>::const_iterator AppDataSources::end() const
 {
 	return m_sources.end();
+}
+
+const AppDataSource* AppDataSources::privateGetSignalSource(Hash signalHash) const
+{
+	auto it = m_signalToSource.find(signalHash);
+
+	if (it == m_signalToSource.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
 }

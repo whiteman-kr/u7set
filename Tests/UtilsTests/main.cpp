@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include <QCoreApplication>
-#include "Common.h"
 #include <CommonLib/ConstStrings.h>
 
 #ifdef Q_OS_WIN
@@ -8,13 +7,7 @@
 #include <crtdbg.h>
 #endif
 
-std::shared_ptr<CircularLogger> logger;
-QString buildPath;
-QString profileName;
-
-QByteArray appDataService_configurationXml;
-
-bool loadAppDataServiceCfgXml();
+#include "Common.h"
 
 int main(int argc, char *argv[])
 {
@@ -44,6 +37,14 @@ int main(int argc, char *argv[])
 
 	//
 
+	logger = std::make_shared<CircularLogger>();
+
+	LOGGER_INIT(logger, QString(), "UTILS_TESTS_LOG");
+
+	logger->setLogCodeInfo(false);
+
+	//
+
 	QStringList arguments = app.arguments();
 
 	for (const QString& a : arguments)
@@ -65,44 +66,25 @@ int main(int argc, char *argv[])
 
 	if (buildPath.isEmpty() == true || profileName.isEmpty() == true)
 	{
-		std::cout << "Warning: Build path and/or profile name are not specified, UtilsTests will fail.\n";
-		std::cout << "Use: ./UtilsTests [-build=build_dir] [-profile=profile_name]\n\n";
+		DEBUG_LOG_ERR(logger, "Warning: Build path and/or profile name are not specified, UtilsTests will fail.\n");
+		DEBUG_LOG_WRN(logger, "Use: ./UtilsTests [-build=build_dir] [-profile=profile_name]\n\n");
 		return 1;
 	}
 
 	//
 
-	if (!loadAppDataServiceCfgXml())
+	if (!loadConfiguration() ||
+		!loadAppDataSources() ||
+		!loadAppSignals())
 	{
-		std::cout << "Error load AppDataService Configuration.xml file\n";
 		return 1;
 	}
 
+	createAndInitSignalStates();
+
 	//
-
-	logger = std::make_shared<CircularLogger>();
-
-	LOGGER_INIT(logger, QString(), "UTILS_TESTS_LOG");
-
-	logger->setLogCodeInfo(false);
 
 	::testing::InitGoogleTest(&argc, argv);
 
 	return RUN_ALL_TESTS();
-}
-
-bool loadAppDataServiceCfgXml()
-{
-	QString filePath = buildPath + "/SYSTEMID_RACK01_WS00_ADS/Configuration.xml";
-
-	QFile f(filePath);
-
-	if (!f.open(QIODeviceBase::ReadOnly))
-	{
-		return false;
-	}
-
-	appDataService_configurationXml = f.readAll();
-
-	return true;
 }

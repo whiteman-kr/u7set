@@ -12,6 +12,11 @@ namespace Rup
 {
 	inline const int V5 = 5;		// basic implementation of RUP protocol
 
+	constexpr quint16 APP_DATA = 0x01;
+	constexpr quint16 DIAG_DATA = 0x02;
+	constexpr quint16 TUNING_DATA = 0x04;
+	constexpr quint16 TEST_DATA = 0x08;
+
 	union Flags
 	{
 		struct

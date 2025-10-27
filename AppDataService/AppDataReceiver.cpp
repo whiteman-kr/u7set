@@ -84,6 +84,7 @@ void AppDataReceiver::fillAppDataReceiveState(Network::AppDataReceiveState* adrs
 	adrs->set_errunknownappdatasourceip(m_errUnknownAppDataSourceIP);
 	adrs->set_errrupframecrc(m_errRupFrameCRC);
 	adrs->set_errnotexpectedsimpacket(m_errNotExpectedSimPacket);
+	adrs->set_errnoappdata(m_errNoAppData);
 }
 
 void AppDataReceiver::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
@@ -425,6 +426,12 @@ void AppDataReceiver::receivePackets(const asio::error_code& error, size_t bytes
 		Rup::Frame rupFrame;
 		std::memcpy(&rupFrame, rawData, sizeof(rupFrame));
 
+		if ((reverseUint16(rupFrame.header.flags.all) ^ Rup::APP_DATA) != 0)
+		{
+			m_errNoAppData++;
+			return;
+		}
+
 		sourceIP = receiveFromIP.address().to_v4().to_ulong();
 
 		AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
@@ -474,6 +481,12 @@ void AppDataReceiver::receivePackets(const asio::error_code& error, size_t bytes
 
 		Rup::SimFrame simFrame;
 		std::memcpy(&simFrame, rawData, sizeof(simFrame));
+
+		if ((reverseUint16(simFrame.rupFrame.header.flags.all) ^ Rup::APP_DATA) != 0)
+		{
+			m_errNoAppData++;
+			return;
+		}
 
 		if (reverseUint16(simFrame.simVersion) != 1)
 		{

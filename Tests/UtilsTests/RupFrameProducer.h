@@ -55,7 +55,7 @@ public:
 
 		if (!m_running.compare_exchange_strong(expected, true))
 		{
-			return false; // уже запущен
+			return false;	// already running
 		}
 
 		try
@@ -80,7 +80,7 @@ public:
 
 		if (!m_running.compare_exchange_strong(expected, false))
 		{
-			return; // уже остановлен
+			return;			// already stoped
 		}
 
 		if (m_io)
@@ -162,70 +162,46 @@ private:
 
 	void sendOnePacket()
 	{
-		// Один «пакет» состоит из framesQuantity фреймов с одинаковым numerator
 		const quint16 numerator = nextPacketNumerator();
+
+		QDateTime now = QDateTime::currentDateTime();
 
 		for (int frameNo = 0; frameNo < m_framesQuantity; ++frameNo)
 		{
 			Rup::Frame frame{};
-			fillHeader(frame.header, frameNo, numerator);
+			fillHeader(now, frame.header, frameNo, numerator);
 			fillPayload(frame.data, frameNo, numerator);
 
-			// ВАЖНО: если твой receiver ожидает заголовок в сетевом порядке,
-			// и reverseBytes() делает host<->network, то раскомментируй строку ниже:
-			// frame.header.reverseBytes();
+			frame.header.reverseBytes();
 
-			// Отправляем как «сырые байты»
 			const char* data = reinterpret_cast<const char*>(&frame);
 			const std::size_t size = sizeof(Rup::Frame);
 
-			// Синхронной отправки достаточно (мы в IO-треде).
-			// Если хочешь асинхронно — делай async_send_to, но хранить буфер до completion.
 			asio::error_code ec;
 			m_socket->send_to(asio::buffer(data, size), m_endpoint, 0, ec);
-
-			if (ec)
-			{
-				// Здесь можно добавить лог/счётчики ошибок
-			}
 		}
 	}
 
-	void fillHeader(Rup::Header& h, int frameNo, quint16 numerator)
+	void fillHeader(const QDateTime& now, Rup::Header& h, int frameNo, quint16 numerator)
 	{
-		// Заполняй поля так, как потребляет твой потребитель.
-		// Ниже — разумные defaults; при необходимости — дополни.
-		h.frameSize       = static_cast<quint16>(sizeof(Rup::Frame)); // если у тебя иначе — выстави правильно
+		h.frameSize       = static_cast<quint16>(sizeof(Rup::Frame));
 		h.protocolVersion = m_protocolVersion;
 
-		h.flags           = {};           // если есть флаги — выстави
+		h.flags.all		  = Rup::APP_DATA;
 		h.dataId          = m_dataId;
 
-		h.moduleType      = 0;            // если нужно — задай
+		h.moduleType      = 0;
 		h.numerator       = static_cast<quint16>(numerator);
 		h.framesQuantity  = static_cast<quint16>(m_framesQuantity);
 		h.frameNumber     = static_cast<quint16>(frameNo);
 
-		// Таймстемп. Если у тебя есть готовый helper — используй его.
-		// Тут пример на текущем UTC.
-		using namespace std::chrono;
-		const auto now = time_point_cast<milliseconds>(system_clock::now());
-		const std::time_t t = system_clock::to_time_t(now);
-		const auto ms = static_cast<int>(now.time_since_epoch().count() % 1000);
-
-		std::tm tmUtc{};
-#if defined(_WIN32)
-		gmtime_s(&tmUtc, &t);
-#else
-		gmtime_r(&t, &tmUtc);
-#endif
-		h.timeStamp.year        = static_cast<quint16>(tmUtc.tm_year + 1900);
-		h.timeStamp.month       = static_cast<quint8>(tmUtc.tm_mon + 1);
-		h.timeStamp.day         = static_cast<quint8>(tmUtc.tm_mday);
-		h.timeStamp.hour        = static_cast<quint8>(tmUtc.tm_hour);
-		h.timeStamp.minute      = static_cast<quint8>(tmUtc.tm_min);
-		h.timeStamp.second      = static_cast<quint8>(tmUtc.tm_sec);
-		h.timeStamp.millisecond = static_cast<quint16>(ms);
+		h.timeStamp.year        = static_cast<quint16>(now.date().year());
+		h.timeStamp.month       = static_cast<quint8>(now.date().month());
+		h.timeStamp.day         = static_cast<quint8>(now.date().day());
+		h.timeStamp.hour        = static_cast<quint8>(now.time().hour());
+		h.timeStamp.minute      = static_cast<quint8>(now.time().minute());
+		h.timeStamp.second      = static_cast<quint8>(now.time().second());
+		h.timeStamp.millisecond = static_cast<quint16>(now.time().msec());
 	}
 
 	void fillPayload(Rup::Data& d, int frameNo, quint16 numerator)
@@ -236,13 +212,12 @@ private:
 			return;
 		}
 
-		// Payload по умолчанию — нули.
+		// default Payload - zeros
 		std::memset(&d, 0, sizeof(Rup::Data));
 	}
 
 	quint16 nextPacketNumerator()
 	{
-		// 16-битный счётчик с оборачиванием, поток — один (IO-тред), атомик не нужен.
 		const quint16 out = m_packetNumerator;
 		m_packetNumerator = static_cast<quint16>(m_packetNumerator + 1);
 		return out;

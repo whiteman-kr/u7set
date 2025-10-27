@@ -190,6 +190,7 @@ private:
 	std::atomic<qint64> m_errUnknownAppDataSourceIP = { 0 };
 	std::atomic<qint64> m_errRupFrameCRC = { 0 };
 	std::atomic<qint64> m_errNotExpectedSimPacket = { 0 };
+	std::atomic<qint64> m_errNoAppData = { 0 };
 
 	//
 

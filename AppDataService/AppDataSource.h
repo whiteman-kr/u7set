@@ -124,6 +124,7 @@ public:
 	AppDataSource* getSourceByIP(quint32 ip);
 	AppDataSource* getSignalSource(const QString& signalID);
 	AppDataSource* getSignalSource(Hash signalHash);
+	const AppDataSource* getSignalSource(Hash signalHash) const;
 
 	std::vector<AppDataSource*>::iterator begin();
 	std::vector<AppDataSource*>::const_iterator begin() const;
@@ -131,7 +132,8 @@ public:
 	std::vector<AppDataSource*>::iterator end();
 	std::vector<AppDataSource*>::const_iterator end() const;
 
-//	const std::map<QString, AppDataSource*>& sources() const;
+private:
+	const AppDataSource* privateGetSignalSource(Hash signalHash) const;
 
 private:
 	// dynamic AppDataSource objects owner!

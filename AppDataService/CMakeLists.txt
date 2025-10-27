@@ -23,6 +23,8 @@ add_executable(${TARGET}
 	AppDataServiceMain.cpp
 	AppDataSource.cpp
 	AppDataSource.h
+	AppDataSrvTools.cpp
+	AppDataSrvTools.h
 	DiscretesLog.cpp
 	DiscretesLog.h
 	DynamicAppSignalState.cpp

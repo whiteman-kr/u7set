@@ -16,6 +16,7 @@ set(TARGET UtilsTests)
 add_executable(${TARGET}
 
 	AppDataReceiverTests.cpp
+	Common.cpp
 	Common.h
 	DiscretesLogTests.cpp
 	main.cpp
@@ -23,8 +24,20 @@ add_executable(${TARGET}
 	SimpleThreadTests.cpp
 	SpinLockTests.cpp
 
+	../../AppDataService/AppDataReceiver.cpp
+	../../AppDataService/AppDataReceiver.h
+	../../AppDataService/AppDataSource.cpp
+	../../AppDataService/AppDataSource.h
+	../../AppDataService/AppDataSrvTools.cpp
+	../../AppDataService/AppDataSrvTools.h
 	../../AppDataService/DiscretesLog.cpp
-	../../AppDataService/DiscretesLog.h	
+	../../AppDataService/DiscretesLog.h
+	../../AppDataService/DynamicAppSignalState.cpp
+	../../AppDataService/DynamicAppSignalState.h
+	../../AppDataService/RtTrendsServer.cpp
+	../../AppDataService/RtTrendsServer.h
+	../../AppDataService/SignalStatesProcessingThread.cpp
+	../../AppDataService/SignalStatesProcessingThread.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -40,6 +53,10 @@ target_precompile_headers(${TARGET} PRIVATE
 	<condition_variable>
 	<chrono>
 	<type_traits>
+
+	<asio/io_context.hpp>
+	<asio/ip/udp.hpp>
+	<asio/steady_timer.hpp>
 
 	<gtest/gtest.h>
 	<gmock/gmock.h>

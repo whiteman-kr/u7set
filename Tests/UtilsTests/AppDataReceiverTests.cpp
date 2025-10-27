@@ -1,13 +1,17 @@
 #include "RupFrameProducer.h"
+#include "Common.h"
 #include "../../AppSignalLib/AppSignal.h"
 #include "../../AppDataService/AppDataReceiver.h"
 
-TEST(AppDataReceiverTests, hashToHex_Test)
+TEST(AppDataReceiverTests, ReceivePackets)
 {
-	// AppDataReceiver(const HostAddressPort& dataReceivingIP,
-	// 				AppDataSources& appDataSources,
-	// 				DynamicAppSignalStates& signalStates,
-	// 				int processingThreadsCount,
-	// 				E::SoftwareRunMode swRunMode,
-	// 				CircularLoggerShared log);
+/*	AppDataReceiver receiver(appDataSrvSettings.appDataReceivingIP,
+							appDataSources,
+							appSignalStates,
+							4,
+							E::SoftwareRunMode::Normal,
+							logger);
+	receiver.start();
+
+	receiver.quitAndWait();*/
 }
