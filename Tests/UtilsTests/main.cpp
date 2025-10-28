@@ -9,9 +9,31 @@
 
 #include "Common.h"
 
+class LoggerGuard
+{
+public:
+	LoggerGuard()
+	{
+		Q_ASSERT(logger == nullptr);
+		logger = std::make_shared<CircularLogger>();
+		LOGGER_INIT(logger, QString(), "UTILS_TESTS_LOG");
+		logger->setLogCodeInfo(false);
+	}
+
+	~LoggerGuard()
+	{
+		LOGGER_SHUTDOWN(logger);
+	}
+};
+
 int main(int argc, char *argv[])
 {
+	std::cout << "UtilsTests started\n";
+
 #ifdef Q_OS_WIN
+	SetConsoleOutputCP(CP_UTF8);
+	SetConsoleCP(CP_UTF8);
+
 	_set_error_mode(_OUT_TO_STDERR);
 
 	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
@@ -31,17 +53,17 @@ int main(int argc, char *argv[])
 	GTEST_FLAG_SET(death_test_style, "threadsafe");
 #endif
 
+	std::cout << "UtilsTests set options Ok\n";
+
 	QCoreApplication app{argc, argv};
 
 	app.setOrganizationName(Manufacturer::RADIY);
 
 	//
 
-	logger = std::make_shared<CircularLogger>();
+	LoggerGuard lg;
 
-	LOGGER_INIT(logger, QString(), "UTILS_TESTS_LOG");
-
-	logger->setLogCodeInfo(false);
+	std::cout << "UtilsTests logger created Ok\n";
 
 	//
 
@@ -64,12 +86,19 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	std::cout << "UtilsTests args parsed\n";
+
 	if (buildPath.isEmpty() == true || profileName.isEmpty() == true)
 	{
+		std::cout << "UtilsTests error args\n";
+
 		DEBUG_LOG_ERR(logger, "Build path and/or profile name are not specified, UtilsTests will fail.");
 		DEBUG_LOG_WRN(logger, "Use: ./UtilsTests [-build=build_dir] [-profile=profile_name]");
+
 		return 1;
 	}
+
+	std::cout << "UtilsTests args OK\n";
 
 	DEBUG_LOG_MSG(logger, QString("Build path:   %1").arg(buildPath));
 	DEBUG_LOG_MSG(logger, QString("Profile name: %1").arg(profileName));
@@ -80,10 +109,12 @@ int main(int argc, char *argv[])
 		!loadAppDataSources() ||
 		!loadAppSignals())
 	{
+		std::cout << "UtilsTests error load files\n";
+
 		return 1;
 	}
 
-	std::cout.flush();
+	std::cout << "UtilsTests files load Ok\n";
 
 	createAndInitSignalStates();
 
