@@ -66,10 +66,13 @@ int main(int argc, char *argv[])
 
 	if (buildPath.isEmpty() == true || profileName.isEmpty() == true)
 	{
-		DEBUG_LOG_ERR(logger, "Warning: Build path and/or profile name are not specified, UtilsTests will fail.\n");
-		DEBUG_LOG_WRN(logger, "Use: ./UtilsTests [-build=build_dir] [-profile=profile_name]\n\n");
+		DEBUG_LOG_ERR(logger, "Build path and/or profile name are not specified, UtilsTests will fail.");
+		DEBUG_LOG_WRN(logger, "Use: ./UtilsTests [-build=build_dir] [-profile=profile_name]");
 		return 1;
 	}
+
+	DEBUG_LOG_MSG(logger, QString("Build path:   %1").arg(buildPath));
+	DEBUG_LOG_MSG(logger, QString("Profile name: %1").arg(profileName));
 
 	//
 
@@ -79,6 +82,8 @@ int main(int argc, char *argv[])
 	{
 		return 1;
 	}
+
+	std::cout.flush();
 
 	createAndInitSignalStates();
 

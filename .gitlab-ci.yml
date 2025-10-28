@@ -11,7 +11,7 @@ variables:
   # Build and test data
   #
   QT_VERSION: "6.8.1"
-  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v435"
+  COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v436"
   SIMULATOR_PROJECT_NAME: "test_simulator_v435"
   PGPASSWORD: "P2ssw0rd"
 
@@ -253,7 +253,7 @@ windows_test_job:
     - "&$Env:CI_PROJECT_DIR/bin/release/MetrologyTests.exe"
     #- "&$Env:CI_PROJECT_DIR/bin/release/LicenseLibTests.exe"
     - "&$Env:CI_PROJECT_DIR/bin/release/u7databasetests.exe -config=\"$Env:CI_PROJECT_DIR/Tests/u7databasetestsArgs.xml\""
-    - "&$Env:CI_PROJECT_DIR/bin/release/UtilsTests.exe"
+    - "&$Env:CI_PROJECT_DIR/bin/release/UtilsTests.exe -build=/tmp/build/${COMPILER_TESTS_PROJECT_NAME}/build -profile=Local"
 
 #Run Builder test
     - "# ----------------------------------------------"
@@ -372,7 +372,7 @@ linux_test_job:
     - "sleep 6"
     - "jobs"
     - "./ClientTests -build=/tmp/build/${SIMULATOR_PROJECT_NAME}/build -profile=linux_test_job"
-    - "./UtilsTests"
+    - "./UtilsTests -build=/tmp/build/${COMPILER_TESTS_PROJECT_NAME}/build -profile=Local"
     - "./AdsBridgeTests --config=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE/Configuration.xml --profile=linux_test_job"
     - "export QT_QPA_PLATFORM=offscreen"
     - "./TestSuiteConsole -settings=\"../../Tests/TestSuiteConsoleLinuxTest.xml\" -nosecurity"

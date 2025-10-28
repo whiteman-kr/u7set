@@ -25,6 +25,7 @@ bool loadConfiguration()
 
 	if (!f.open(QIODeviceBase::ReadOnly))
 	{
+		DEBUG_LOG_ERR(logger, QString("Error read file: %1").arg(filePath));
 		return false;
 	}
 
@@ -40,6 +41,8 @@ bool loadConfiguration()
 		return false;
 	}
 
+	DEBUG_LOG_MSG(logger, "BuildInfo read Ok");
+
 	res = settingsSet.readFromXml(xmlReader);
 
 	if (res == false)
@@ -48,13 +51,17 @@ bool loadConfiguration()
 		return false;
 	}
 
+	DEBUG_LOG_MSG(logger, "SettingsSet read Ok");
+
 	std::shared_ptr<const AppDataServiceSettings> st = settingsSet.getSettingsProfile<AppDataServiceSettings>(profileName);
 
 	if (st == nullptr)
 	{
-		DEBUG_LOG_ERR(logger, "Error loading AppDataServiceSettings current profile!");
+		DEBUG_LOG_ERR(logger, QString("Error loading AppDataServiceSettings profile '%1'!").arg(profileName));
 		return false;
 	}
+
+	DEBUG_LOG_MSG(logger, QString("AppDataServiceSettings profile '%1' read Ok").arg(profileName));
 
 	appDataSrvSettings = *st.get();
 
@@ -69,12 +76,21 @@ bool loadAppDataSources()
 
 	if (!f.open(QIODeviceBase::ReadOnly))
 	{
+		DEBUG_LOG_ERR(logger, QString("Error read file: %1").arg(filePath));
 		return false;
 	}
 
 	QByteArray fileData = f.readAll();
 
 	bool res = AppDataSrvTools::readAppDataSources(fileData, profileName, appDataSources, logger);
+
+	if (res == false)
+	{
+		DEBUG_LOG_ERR(logger, "Error loading AppDataSources!");
+		return false;
+	}
+
+	DEBUG_LOG_MSG(logger, "AppDataSources read Ok");
 
 	return res;
 }
@@ -87,6 +103,7 @@ bool loadAppSignals()
 
 	if (!f.open(QIODeviceBase::ReadOnly))
 	{
+		DEBUG_LOG_ERR(logger, QString("Error read file: %1").arg(filePath));
 		return false;
 	}
 
@@ -101,6 +118,8 @@ bool loadAppSignals()
 		DEBUG_LOG_ERR(logger, "Error loading AppSignals!");
 		return false;
 	}
+
+	DEBUG_LOG_MSG(logger, "AppDataSignals read Ok");
 
 	return res;
 }
