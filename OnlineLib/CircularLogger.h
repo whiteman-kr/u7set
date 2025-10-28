@@ -110,6 +110,7 @@ private:
 
 	bool m_loggerInitialized = false;
 	bool m_logCodeInfo = true;
+	bool m_useStdOutput = true;
 };
 
 typedef std::shared_ptr<CircularLogger> CircularLoggerShared;

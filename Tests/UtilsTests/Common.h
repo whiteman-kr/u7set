@@ -22,6 +22,25 @@ extern DynamicAppSignalStates appSignalStates;
 
 //
 
+class LoggerGuard
+{
+public:
+	LoggerGuard()
+	{
+		Q_ASSERT(logger == nullptr);
+		logger = std::make_shared<CircularLogger>();
+		LOGGER_INIT(logger, QString(), "");
+		logger->setLogCodeInfo(false);
+	}
+
+	~LoggerGuard()
+	{
+		LOGGER_SHUTDOWN(logger);
+	}
+};
+
+bool isGTestDeathChild(const QStringList& args);
+
 bool loadConfiguration();
 bool loadAppDataSources();
 bool loadAppSignals();

@@ -9,27 +9,8 @@
 
 #include "Common.h"
 
-class LoggerGuard
-{
-public:
-	LoggerGuard()
-	{
-		Q_ASSERT(logger == nullptr);
-		logger = std::make_shared<CircularLogger>();
-		LOGGER_INIT(logger, QString(), "UTILS_TESTS_LOG");
-		logger->setLogCodeInfo(false);
-	}
-
-	~LoggerGuard()
-	{
-		LOGGER_SHUTDOWN(logger);
-	}
-};
-
 int main(int argc, char *argv[])
 {
-	std::cout << "UtilsTests started\n";
-
 #ifdef Q_OS_WIN
 	SetConsoleOutputCP(CP_UTF8);
 	SetConsoleCP(CP_UTF8);
@@ -53,8 +34,6 @@ int main(int argc, char *argv[])
 	GTEST_FLAG_SET(death_test_style, "threadsafe");
 #endif
 
-	std::cout << "UtilsTests set options Ok\n";
-
 	QCoreApplication app{argc, argv};
 
 	app.setOrganizationName(Manufacturer::RADIY);
@@ -63,11 +42,18 @@ int main(int argc, char *argv[])
 
 	LoggerGuard lg;
 
-	std::cout << "UtilsTests logger created Ok\n";
-
 	//
 
 	QStringList arguments = app.arguments();
+
+	if (isGTestDeathChild(arguments) == true)
+	{
+		::testing::InitGoogleTest(&argc, argv);
+
+		return RUN_ALL_TESTS();
+	}
+
+	//
 
 	for (const QString& a : arguments)
 	{
@@ -86,8 +72,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	std::cout << "UtilsTests args parsed\n";
-
 	if (buildPath.isEmpty() == true || profileName.isEmpty() == true)
 	{
 		std::cout << "UtilsTests error args\n";
@@ -98,8 +82,6 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	std::cout << "UtilsTests args OK\n";
-
 	DEBUG_LOG_MSG(logger, QString("Build path:   %1").arg(buildPath));
 	DEBUG_LOG_MSG(logger, QString("Profile name: %1").arg(profileName));
 
@@ -109,12 +91,8 @@ int main(int argc, char *argv[])
 		!loadAppDataSources() ||
 		!loadAppSignals())
 	{
-		std::cout << "UtilsTests error load files\n";
-
 		return 1;
 	}
-
-	std::cout << "UtilsTests files load Ok\n";
 
 	createAndInitSignalStates();
 

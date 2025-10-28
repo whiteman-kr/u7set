@@ -15,6 +15,19 @@ AppSignals appSignals;
 
 DynamicAppSignalStates appSignalStates;
 
+bool isGTestDeathChild(const QStringList& args)
+{
+	for(const QString& arg : args)
+	{
+		if (arg.startsWith("--gtest_internal_run_death_test="))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 //
 
 bool loadConfiguration()
