@@ -22,26 +22,21 @@ public:
 												int frameNo,
 												quint16 packetNumerator)>;
 
-	RupFrameProducer(const std::string& targetIp,
-					unsigned short targetPort,
-					quint16 protocolVersion,
-					quint32 dataId,
-					int framesQuantity,
-					int workcycleMs) :
-			m_targetIp(targetIp),
-			m_targetPort(targetPort),
-			m_protocolVersion(protocolVersion),
-			m_dataId(dataId),
-			m_framesQuantity(framesQuantity),
-			m_workcycleMs(workcycleMs)
+	RupFrameProducer(const HostAddressPort& targetIp,
+					const HostAddressPort& srcIp) :
+		m_targetIp(targetIp),
+		m_srcIp(srcIp)
 	{
-		Q_ASSERT(m_framesQuantity >= 1 && m_framesQuantity <= Rup::MAX_FRAME_COUNT);
-		Q_ASSERT(m_workcycleMs > 0);
 	}
 
 	~RupFrameProducer()
 	{
 		stop();
+	}
+
+	void setDataId(quint32 dataId)
+	{
+		m_dataId = dataId;
 	}
 
 	void setPayloadGenerator(PayloadGenerator gen)
@@ -99,12 +94,12 @@ public:
 	}
 
 private:
-	const std::string m_targetIp;
-	const unsigned short m_targetPort;
-	const quint16 m_protocolVersion;
-	const quint32 m_dataId;
-	const int m_framesQuantity;
-	const int m_workcycleMs;
+	HostAddressPort m_targetIp;
+	HostAddressPort m_srcIp;
+	quint16 m_protocolVersion = Rup::V5;
+	quint32 m_dataId = 0;
+	int m_framesQuantity = 1;
+	int m_workcycleMs = 0;
 
 	std::atomic<bool> m_running { false };
 	std::thread m_thread;
@@ -125,7 +120,9 @@ private:
 		asio::io_context& io = *m_io;
 
 		asio::ip::udp::resolver resolver(io);
-		auto results = resolver.resolve(asio::ip::udp::v4(), m_targetIp, std::to_string(m_targetPort));
+		auto results = resolver.resolve(asio::ip::udp::v4(),
+										m_targetIp.addressStr().toStdString(),
+										std::to_string(m_targetIp.port()));
 		m_endpoint = *results.begin();
 
 		m_socket = std::make_unique<asio::ip::udp::socket>(io);

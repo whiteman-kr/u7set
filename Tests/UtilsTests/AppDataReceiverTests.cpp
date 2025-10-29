@@ -5,7 +5,7 @@
 
 TEST(AppDataReceiverTests, ReceivePackets)
 {
-/*	AppDataReceiver receiver(appDataSrvSettings.appDataReceivingIP,
+	AppDataReceiver receiver(appDataSrvSettings.appDataReceivingIP,
 							appDataSources,
 							appSignalStates,
 							4,
@@ -13,5 +13,5 @@ TEST(AppDataReceiverTests, ReceivePackets)
 							logger);
 	receiver.start();
 
-	receiver.quitAndWait();*/
+	receiver.quitAndWait();
 }
