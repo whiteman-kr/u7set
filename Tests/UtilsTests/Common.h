@@ -45,3 +45,5 @@ bool loadConfiguration();
 bool loadAppDataSources();
 bool loadAppSignals();
 void createAndInitSignalStates();
+
+void logMsg(const QString& msg);

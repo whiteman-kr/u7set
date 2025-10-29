@@ -76,14 +76,14 @@ int main(int argc, char *argv[])
 	{
 		std::cout << "UtilsTests error args\n";
 
-		DEBUG_LOG_ERR(logger, "Build path and/or profile name are not specified, UtilsTests will fail.");
-		DEBUG_LOG_WRN(logger, "Use: ./UtilsTests [-build=build_dir] [-profile=profile_name]");
+		logMsg("Build path and/or profile name are not specified, UtilsTests will fail.");
+		logMsg("Use: ./UtilsTests [-build=build_dir] [-profile=profile_name]");
 
 		return 1;
 	}
 
-	DEBUG_LOG_MSG(logger, QString("Build path:   %1").arg(buildPath));
-	DEBUG_LOG_MSG(logger, QString("Profile name: %1").arg(profileName));
+	logMsg(QString("Build path:   %1").arg(buildPath));
+	logMsg(QString("Profile name: %1").arg(profileName));
 
 	//
 

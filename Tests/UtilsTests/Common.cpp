@@ -38,7 +38,7 @@ bool loadConfiguration()
 
 	if (!f.open(QIODeviceBase::ReadOnly))
 	{
-		DEBUG_LOG_ERR(logger, QString("Error read file: %1").arg(filePath));
+		logMsg(QString("Error read file: %1").arg(filePath));
 		return false;
 	}
 
@@ -50,21 +50,21 @@ bool loadConfiguration()
 
 	if (res == false)
 	{
-		DEBUG_LOG_ERR(logger, "Error read BuildInfo!");
+		logMsg("Error read BuildInfo!");
 		return false;
 	}
 
-	DEBUG_LOG_MSG(logger, "BuildInfo read Ok");
+	logMsg("BuildInfo read Ok");
 
 	res = settingsSet.readFromXml(xmlReader);
 
 	if (res == false)
 	{
-		DEBUG_LOG_ERR(logger, "Error read SettingsSet!");
+		logMsg("Error read SettingsSet!");
 		return false;
 	}
 
-	DEBUG_LOG_MSG(logger, "SettingsSet read Ok");
+	logMsg("SettingsSet read Ok");
 
 	std::shared_ptr<const AppDataServiceSettings> st = settingsSet.getSettingsProfile<AppDataServiceSettings>(profileName);
 
@@ -74,7 +74,7 @@ bool loadConfiguration()
 		return false;
 	}
 
-	DEBUG_LOG_MSG(logger, QString("AppDataServiceSettings profile '%1' read Ok").arg(profileName));
+	logMsg(QString("AppDataServiceSettings profile '%1' read Ok").arg(profileName));
 
 	appDataSrvSettings = *st.get();
 
@@ -89,7 +89,7 @@ bool loadAppDataSources()
 
 	if (!f.open(QIODeviceBase::ReadOnly))
 	{
-		DEBUG_LOG_ERR(logger, QString("Error read file: %1").arg(filePath));
+		logMsg(QString("Error read file: %1").arg(filePath));
 		return false;
 	}
 
@@ -99,11 +99,11 @@ bool loadAppDataSources()
 
 	if (res == false)
 	{
-		DEBUG_LOG_ERR(logger, "Error loading AppDataSources!");
+		logMsg("Error loading AppDataSources!");
 		return false;
 	}
 
-	DEBUG_LOG_MSG(logger, "AppDataSources read Ok");
+	logMsg("AppDataSources read Ok");
 
 	return res;
 }
@@ -116,7 +116,7 @@ bool loadAppSignals()
 
 	if (!f.open(QIODeviceBase::ReadOnly))
 	{
-		DEBUG_LOG_ERR(logger, QString("Error read file: %1").arg(filePath));
+		logMsg(QString("Error read file: %1").arg(filePath));
 		return false;
 	}
 
@@ -128,11 +128,11 @@ bool loadAppSignals()
 
 	if (res == false)
 	{
-		DEBUG_LOG_ERR(logger, "Error loading AppSignals!");
+		logMsg("Error loading AppSignals!");
 		return false;
 	}
 
-	DEBUG_LOG_MSG(logger, "AppDataSignals read Ok");
+	logMsg("AppDataSignals read Ok");
 
 	return res;
 }
@@ -140,4 +140,9 @@ bool loadAppSignals()
 void createAndInitSignalStates()
 {
 	AppDataSrvTools::createAndInitSignalStates(appSignals, appSignalStates, 4);
+}
+
+void logMsg(const QString& msg)
+{
+	std::cout << C_STR(QString("%1\n").arg(msg));
 }
