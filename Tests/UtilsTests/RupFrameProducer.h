@@ -7,6 +7,7 @@
 #include <functional>
 #include <vector>
 #include <chrono>
+#include <queue>
 
 #include <asio/io_context.hpp>
 #include <asio/ip/udp.hpp>
@@ -93,6 +94,17 @@ public:
 		m_io.reset();
 	}
 
+	void pushRupFrame(const Rup::Data& data)
+	{
+		std::lock_guard lg(m_queueMutex);
+
+		Rup::SimFrame sf;
+
+		memcpy(&sf.rupFrame.data, &data, sizeof(Rup::Data));
+
+		m_queue.emplace(false, sf);
+	}
+
 private:
 	HostAddressPort m_targetIp;
 	HostAddressPort m_srcIp;
@@ -107,11 +119,16 @@ private:
 	std::unique_ptr<asio::io_context> m_io;
 	std::unique_ptr<asio::ip::udp::socket> m_socket;
 	std::unique_ptr<asio::steady_timer> m_timer;
-	asio::ip::udp::endpoint m_endpoint;
+	std::unique_ptr<asio::steady_timer> m_fastTimer;
+
+	asio::ip::udp::endpoint m_targetEndpoint;
 
 	PayloadGenerator m_payloadGen;
 
 	quint16 m_packetNumerator = 0;
+
+	std::mutex m_queueMutex;
+	std::queue<std::pair<bool, Rup::SimFrame>> m_queue;
 
 private:
 	void runThread()
@@ -119,18 +136,16 @@ private:
 		m_io = std::make_unique<asio::io_context>();
 		asio::io_context& io = *m_io;
 
-		asio::ip::udp::resolver resolver(io);
-		auto results = resolver.resolve(asio::ip::udp::v4(),
-										m_targetIp.addressStr().toStdString(),
-										std::to_string(m_targetIp.port()));
-		m_endpoint = *results.begin();
+		m_targetEndpoint = asio::ip::udp::endpoint(asio::ip::make_address(m_targetIp.addressStr().toStdString()),
+												   m_targetIp.port());
 
 		m_socket = std::make_unique<asio::ip::udp::socket>(io);
 		m_socket->open(asio::ip::udp::v4());
 
 		m_timer = std::make_unique<asio::steady_timer>(io);
+		m_fastTimer = std::make_unique<asio::steady_timer>(io);
 
-		scheduleNextSend();
+		startFastTimer();
 
 		io.run();
 	}
@@ -157,6 +172,28 @@ private:
 							});
 	}
 
+	void startFastTimer()
+	{
+		using namespace std::chrono;
+
+		if (!m_running.load())
+		{
+			return;
+		}
+
+		m_fastTimer->expires_after(microseconds(500));
+		m_timer->async_wait([this](const asio::error_code& ec)
+							{
+								if (ec || !m_running.load())
+								{
+									return;
+								}
+
+								checkPacketsQueue();
+								startFastTimer();
+							});
+	}
+
 	void sendOnePacket()
 	{
 		const quint16 numerator = nextPacketNumerator();
@@ -166,8 +203,9 @@ private:
 		for (int frameNo = 0; frameNo < m_framesQuantity; ++frameNo)
 		{
 			Rup::Frame frame{};
-			fillHeader(now, frame.header, frameNo, numerator);
-			fillPayload(frame.data, frameNo, numerator);
+
+//			fillHeader(frame.header, frameNo, numerator);
+//			fillPayload(frame.data, frameNo, numerator);
 
 			frame.header.reverseBytes();
 
@@ -175,11 +213,11 @@ private:
 			const std::size_t size = sizeof(Rup::Frame);
 
 			asio::error_code ec;
-			m_socket->send_to(asio::buffer(data, size), m_endpoint, 0, ec);
+			m_socket->send_to(asio::buffer(data, size), m_targetEndpoint, 0, ec);
 		}
 	}
 
-	void fillHeader(const QDateTime& now, Rup::Header& h, int frameNo, quint16 numerator)
+	void fillHeader(Rup::Header& h, quint16 numerator, int frameNo, int framesQuantity)
 	{
 		h.frameSize       = static_cast<quint16>(sizeof(Rup::Frame));
 		h.protocolVersion = m_protocolVersion;
@@ -188,9 +226,11 @@ private:
 		h.dataId          = m_dataId;
 
 		h.moduleType      = 0;
-		h.numerator       = static_cast<quint16>(numerator);
-		h.framesQuantity  = static_cast<quint16>(m_framesQuantity);
+		h.numerator       = numerator;
+		h.framesQuantity  = static_cast<quint16>(framesQuantity);
 		h.frameNumber     = static_cast<quint16>(frameNo);
+
+		QDateTime now = QDateTime::currentDateTime();
 
 		h.timeStamp.year        = static_cast<quint16>(now.date().year());
 		h.timeStamp.month       = static_cast<quint8>(now.date().month());
@@ -218,5 +258,50 @@ private:
 		const quint16 out = m_packetNumerator;
 		m_packetNumerator = static_cast<quint16>(m_packetNumerator + 1);
 		return out;
+	}
+
+	void checkPacketsQueue()
+	{
+		m_queueMutex.lock();
+
+		while(m_queue.empty() == false)
+		{
+			std::pair<bool, Rup::SimFrame> p = m_queue.front();
+
+			m_queue.pop();
+
+			m_queueMutex.unlock();
+
+			bool isSimFrame = p.first;
+
+			Rup::SimFrame& f = p.second;
+
+			fillHeader(f.rupFrame.header, nextPacketNumerator(), 0, 1);
+
+			asio::error_code ec;
+
+			if (isSimFrame)
+			{
+				const char* data = reinterpret_cast<const char*>(&f);
+				const std::size_t size = sizeof(Rup::SimFrame);
+
+				m_socket->send_to(asio::buffer(data, size), m_targetEndpoint, 0, ec);
+
+				DEBUG_STOP;
+			}
+			else
+			{
+				const char* data = reinterpret_cast<const char*>(&f.rupFrame);
+				const std::size_t size = sizeof(Rup::Frame);
+
+				m_socket->send_to(asio::buffer(data, size), m_targetEndpoint, 0, ec);
+
+				DEBUG_STOP;
+			}
+
+			m_queueMutex.lock();
+		}
+
+		m_queueMutex.unlock();
 	}
 };

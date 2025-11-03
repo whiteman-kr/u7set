@@ -584,6 +584,19 @@ AppDataSource* AppDataSources::getSourceByIP(quint32 ip)
 	return it->second;
 }
 
+AppDataSource* AppDataSources::getSourceByEquipmentID(const QString& equipmentId)
+{
+	auto it = m_moduleToSource.find(equipmentId);
+
+	if (it == m_moduleToSource.end())
+	{
+		return nullptr;
+	}
+
+	return it->second;
+
+}
+
 AppDataSource* AppDataSources::getSignalSource(const QString& signalID)
 {
 	return getSignalSource(calcHash(signalID));

@@ -122,6 +122,8 @@ public:
 	void clear();
 
 	AppDataSource* getSourceByIP(quint32 ip);
+	AppDataSource* getSourceByEquipmentID(const QString& equipmentId);
+
 	AppDataSource* getSignalSource(const QString& signalID);
 	AppDataSource* getSignalSource(Hash signalHash);
 	const AppDataSource* getSignalSource(Hash signalHash) const;
