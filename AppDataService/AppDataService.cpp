@@ -562,6 +562,7 @@ void AppDataServiceWorker::applyNewConfiguration()
 	runTcpArchiveClientThread();
 	runTcpAppDataServer();
 	runRtTrendsServerThread();
+	runGrpcAppDataSrv();
 
 	onRestartArchSignalsTimer();
 
@@ -583,6 +584,7 @@ void AppDataServiceWorker::clearConfiguration()
 	//
 	m_discretesLogWriter->stop();
 
+	stopGrpcAppDataSrv();
 	stopRtTrendsServerThread();
 	stopTcpArchiveClientThread();
 	stopTcpAppDataServer();
@@ -715,8 +717,18 @@ void AppDataServiceWorker::stopRtTrendsServerThread()
 	}
 }
 
+void AppDataServiceWorker::runGrpcAppDataSrv()
+{
+	m_grpcAppDataSrv = std::make_unique<GrpcAppDataSrv>(m_curSettingsProfile, logger());
+}
+
+void AppDataServiceWorker::stopGrpcAppDataSrv()
+{
+	m_grpcAppDataSrv.reset();
+}
+
 void AppDataServiceWorker::getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,
-											int count, double* updateStatus) const
+	int count, double* updateStatus) const
 {
 	TEST_PTR_RETURN(recordsPerMin);
 	TEST_PTR_RETURN(updateStatus);

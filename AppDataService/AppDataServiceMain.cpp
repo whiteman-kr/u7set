@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	SoftwareInfo si(E::SoftwareType::AppDataService, "");
 
 	AppDataServiceWorker appDataServiceWorker(si,
-											  Service::getServiceInstanceName(Manufacturer::APPLICATION_DATA_SERVICE, argc, argv),
+											  ::Service::getServiceInstanceName(Manufacturer::APPLICATION_DATA_SERVICE, argc, argv),
 											  argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, appDataServiceWorker, logger);

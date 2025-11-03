@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+import "AppSignal.proto";
+
+package Grpc;
+
+//
+// GetAppSignalList
+//
+message GetAppSignalListRequest
+{
+}
+
+message GetAppSignalListReply
+{
+	repeated string appSignalIds = 1;
+}
+
+//
+// GetAppSignalParam
+//
+message GetAppSignalParamRequest
+{
+	repeated fixed64 signalHashes = 1; // If empty then get all signals.
+}
+
+message GetAppSignalParamReply
+{
+	optional uint32 totalSize = 1;				// How many signal params totally will be transfered.
+	optional uint32 replySignalIndex = 2;		// Start index for this reply
+	repeated Proto.AppSignal signalParams = 3;
+}
+
+service AppDataSrv
+{
+	rpc GetAppSignalList(GetAppSignalListRequest) returns (stream GetAppSignalListReply) {}
+	rpc GetAppSignalParam(GetAppSignalParamRequest) returns (stream GetAppSignalParamReply) {}
+}

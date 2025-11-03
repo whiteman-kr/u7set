@@ -7,6 +7,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+find_package(gRPC CONFIG REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core Network Widgets Qml Sql Xml)
 qt_standard_project_setup()
 
@@ -27,6 +28,8 @@ add_executable(${TARGET}
 	DiscretesLog.h
 	DynamicAppSignalState.cpp
 	DynamicAppSignalState.h
+	GrpcAppDataSrv.cpp
+	GrpcAppDataSrv.h
 	RtTrendsServer.cpp
 	RtTrendsServer.h
 	SignalStatesProcessingThread.cpp
@@ -109,9 +112,12 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../AppSignalLib/AppSignal.h"
 )
 
+include_directories(${Protobuf_INCLUDE_DIRS})
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6::Qml Qt6::Sql Qt6::Xml)
-target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib GrpcLib)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

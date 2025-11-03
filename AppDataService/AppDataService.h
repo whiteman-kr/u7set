@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ServiceLib/Service.h>
+
 #include "../OnlineLib/CfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "TcpAppDataServer.h"
@@ -10,6 +11,7 @@
 #include "AppDataSource.h"
 #include "ApertureFile.h"
 #include "DiscretesLog.h"
+#include "GrpcAppDataSrv.h"
 
 class TcpArchiveClient;
 class AppDataReceiver;
@@ -136,9 +138,12 @@ private:
 	void runRtTrendsServerThread();
 	void stopRtTrendsServerThread();
 
-	void onGetDataSourcesIDs(UdpRequest& request);
-	void onGetDataSourcesInfo(UdpRequest& request);
-	void onGetDataSourcesState(UdpRequest& request);
+	void runGrpcAppDataSrv();
+	void stopGrpcAppDataSrv();
+
+	// void onGetDataSourcesIDs(UdpRequest& request);
+	// void onGetDataSourcesInfo(UdpRequest& request);
+	// void onGetDataSourcesState(UdpRequest& request);
 
 	void getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,
 						  int count, double* updateStatus) const;
@@ -195,4 +200,6 @@ private:
 	TcpArchiveClientThread* m_tcpArchiveClientThread = nullptr;
 
 	RtTrends::ServerThread* m_rtTrendsServerThread = nullptr;
+
+	std::unique_ptr<GrpcAppDataSrv> m_grpcAppDataSrv;
 };
