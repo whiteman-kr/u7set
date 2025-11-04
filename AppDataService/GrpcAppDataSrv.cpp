@@ -1,4 +1,5 @@
 #include <chrono>
+#include <thread>
 #include <QStringList>
 
 #include "../OnlineLib/SoftwareSettings.h"
