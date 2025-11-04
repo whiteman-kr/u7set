@@ -1,9 +1,12 @@
 #pragma once
 
+#include <memory>
+#include <thread>
 #include <grpcpp/grpcpp.h>
 
 #include "../libs/GrpcLib/GrpcAppDataSrv.grpc.pb.h"
 
+#include "../AppSignalLib/AppSignal.h"
 #include "../OnlineLib/CircularLogger.h"
 
 class AppDataServiceSettings;
