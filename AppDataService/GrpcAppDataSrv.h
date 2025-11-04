@@ -6,27 +6,33 @@
 
 #include "../OnlineLib/CircularLogger.h"
 
-using namespace grpc;
-
 class AppDataServiceSettings;
 
 class GrpcAppDataSrv final : public Grpc::AppDataSrv::Service
 {
 public:
 	explicit GrpcAppDataSrv(const AppDataServiceSettings& settings,
+							const AppSignals& appSignals,
 							CircularLoggerShared log);
-	~GrpcAppDataSrv();
 
-	Status GetAppSignalList(ServerContext* context,
+	GrpcAppDataSrv(const GrpcAppDataSrv&) = delete;
+	GrpcAppDataSrv& operator=(const GrpcAppDataSrv&) = delete;
+	GrpcAppDataSrv(GrpcAppDataSrv&&) = delete;
+	GrpcAppDataSrv& operator=(GrpcAppDataSrv&&) = delete;
+
+	~GrpcAppDataSrv() noexcept;
+
+	grpc::Status GetAppSignalList(grpc::ServerContext* context,
 							 const Grpc::GetAppSignalListRequest* request,
-							 ServerWriter<Grpc::GetAppSignalListReply>* writer) override;
+							 grpc::ServerWriter<Grpc::GetAppSignalListReply>* writer) override;
 
-	Status GetAppSignalParam(ServerContext* context,
+	grpc::Status GetAppSignalParam(grpc::ServerContext* context,
 							 const Grpc::GetAppSignalParamRequest* request,
-							 ServerWriter<Grpc::GetAppSignalParamReply>* writer) override;
+							 grpc::ServerWriter<Grpc::GetAppSignalParamReply>* writer) override;
 
 private:
+	const AppSignals& m_appSignals;
 	CircularLoggerShared m_log;
-	std::unique_ptr<Server> m_server;
+	std::unique_ptr<grpc::Server> m_server;
 	std::jthread m_thread;
 };
