@@ -130,7 +130,7 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 {
 	DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread is started"));
 
-	auto& waitConditionMutex = receiver.m_statesProcessigRequiredMutex;
+	auto& waitConditionMutex = receiver.m_statesProcessingRequiredMutex;
 	auto& waitCondition = receiver.m_statesProcessingRequiredCondition;
 	auto& requireProcessing = receiver.m_statesProcessingRequired;
 

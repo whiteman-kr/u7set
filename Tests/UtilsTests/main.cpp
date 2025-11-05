@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include <QCoreApplication>
-#include "Common.h"
 #include <CommonLib/ConstStrings.h>
 
 #ifdef Q_OS_WIN
@@ -8,11 +7,14 @@
 #include <crtdbg.h>
 #endif
 
-std::shared_ptr<CircularLogger> logger;
+#include "Common.h"
 
 int main(int argc, char *argv[])
 {
 #ifdef Q_OS_WIN
+	SetConsoleOutputCP(CP_UTF8);
+	SetConsoleCP(CP_UTF8);
+
 	_set_error_mode(_OUT_TO_STDERR);
 
 	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
@@ -36,11 +38,65 @@ int main(int argc, char *argv[])
 
 	app.setOrganizationName(Manufacturer::RADIY);
 
-	logger = std::make_shared<CircularLogger>();
+	//
 
-	LOGGER_INIT(logger, QString(), "UTILS_TESTS_LOG");
+	LoggerGuard lg;
 
-	logger->setLogCodeInfo(false);
+	//
+
+	QStringList arguments = app.arguments();
+
+	if (isGTestDeathChild(arguments) == true)
+	{
+		::testing::InitGoogleTest(&argc, argv);
+
+		return RUN_ALL_TESTS();
+	}
+
+	//
+
+	for (const QString& a : arguments)
+	{
+		if (a.startsWith("-build=") == true)
+		{
+			buildPath = a;
+			buildPath.replace("-build=", "", Qt::CaseInsensitive);
+			continue;
+		}
+
+		if (a.startsWith("-profile=") == true)
+		{
+			profileName = a;
+			profileName.replace("-profile=", "", Qt::CaseInsensitive);
+			continue;
+		}
+	}
+
+	if (buildPath.isEmpty() == true || profileName.isEmpty() == true)
+	{
+		std::cout << "UtilsTests error args\n";
+
+		logMsg("Build path and/or profile name are not specified, UtilsTests will fail.");
+		logMsg("Use: ./UtilsTests [-build=build_dir] [-profile=profile_name]");
+
+		return 1;
+	}
+
+	logMsg(QString("Build path:   %1").arg(buildPath));
+	logMsg(QString("Profile name: %1").arg(profileName));
+
+	//
+
+	if (!loadConfiguration() ||
+		!loadAppDataSources() ||
+		!loadAppSignals())
+	{
+		return 1;
+	}
+
+	createAndInitSignalStates();
+
+	//
 
 	::testing::InitGoogleTest(&argc, argv);
 

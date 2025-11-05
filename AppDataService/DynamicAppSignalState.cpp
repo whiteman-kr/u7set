@@ -1073,10 +1073,7 @@ bool DynamicAppSignalStates::getCurrentState(Hash hash, AppSignalState& state) c
 
 void DynamicAppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount)
 {
-	if (autoArchivingGroupsCount <= 0)
-	{
-		return;
-	}
+	autoArchivingGroupsCount = std::max(autoArchivingGroupsCount, 4);
 
 	int count = 0;
 

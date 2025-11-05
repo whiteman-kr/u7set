@@ -24,6 +24,8 @@ add_executable(${TARGET}
 	AppDataServiceMain.cpp
 	AppDataSource.cpp
 	AppDataSource.h
+	AppDataSrvTools.cpp
+	AppDataSrvTools.h
 	DiscretesLog.cpp
 	DiscretesLog.h
 	DynamicAppSignalState.cpp
@@ -49,16 +51,30 @@ target_precompile_headers(${TARGET} PRIVATE
 	# C++ includes
 	#
 	<algorithm>
+	<array>
 	<atomic>
+	<condition_variable>
+	<cstddef>
+	<cstring>
 	<functional>
 	<iostream>
 	<limits>
 	<list>
 	<map>
 	<memory>
+	<mutex>
+	<optional>
+	<queue>
 	<vector>
 	<set>
+	<thread>
 	<type_traits>
+	<unordered_map>
+	<unordered_set>
+
+	<asio/io_context.hpp>
+	<asio/ip/udp.hpp>
+	<asio/steady_timer.hpp>
 
 	# Qt includes
 	#

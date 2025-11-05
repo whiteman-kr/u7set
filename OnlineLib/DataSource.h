@@ -147,14 +147,14 @@ namespace OnlineLib
 		QStringList m_tuningSignals;
 		QStringList m_swCalcSignals;
 
-		static QStringList m_emptyList;
+		inline static QStringList m_emptyList;
 	};
 
 
 	class DataSourceOnline : public DataSource
 	{
 	private:
-		static const int APP_DATA_SOURCE_TIMEOUT = 1000;
+		static constexpr int APP_DATA_SOURCE_TIMEOUT = 1000;
 
 	protected:
 
@@ -208,8 +208,8 @@ namespace OnlineLib
 
 		void checkPlantTime(const Rup::TimeStamp& plantTimeStamp);
 
-		bool takeProcessingOwnership(const QThread* processingThread);
-		bool releaseProcessingOwnership(const QThread* processingThread);
+		bool takeProcessingOwnership() noexcept;
+		bool releaseProcessingOwnership() noexcept;
 
 		//
 
@@ -301,11 +301,11 @@ namespace OnlineLib
 
 		//
 
-		std::atomic<const QThread*> m_processingOwner = {nullptr};
+		std::atomic<quintptr> m_processingOwner = {0};
 
 		//
 
-		static const int PARSING_BUFFERS_COUNT = 5;
+		static constexpr int PARSING_BUFFERS_COUNT = 5;
 
 		std::vector<ParsingBuffer*> m_parsingBuffers;
 

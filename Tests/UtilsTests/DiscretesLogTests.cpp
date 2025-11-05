@@ -99,7 +99,7 @@ static void makeStates(qint64 nowTime, int statesCount, std::vector<SimpleAppSig
 // Tests
 //
 
-TEST(DiscretesLog, hashToHex_Test)
+TEST(DiscretesLogTests, hashToHex_Test)
 {
 	EXPECT_EQ(DiscretesLog::hashToHex(0x0000000000000000ULL), "0000000000000000");
 	EXPECT_EQ(DiscretesLog::hashToHex(0xFFFFFFFFFFFFFFFFULL), "FFFFFFFFFFFFFFFF");
@@ -109,7 +109,7 @@ TEST(DiscretesLog, hashToHex_Test)
 	EXPECT_EQ(DiscretesLog::hashToHex(0xABCDEF0123456789ULL), "ABCDEF0123456789");
 }
 
-TEST(DiscretesLog, hexToHash)
+TEST(DiscretesLogTests, hexToHash)
 {
 	EXPECT_EQ(DiscretesLog::hexToHash("0000000000000000"), 0x0000000000000000ULL);
 	EXPECT_EQ(DiscretesLog::hexToHash("FFFFFFFFFFFFFFFF"), 0xFFFFFFFFFFFFFFFFULL);
@@ -119,7 +119,7 @@ TEST(DiscretesLog, hexToHash)
 	EXPECT_EQ(DiscretesLog::hexToHash("6789ABCDEF012345"), 0x6789ABCDEF012345ULL);
 }
 
-TEST(DiscretesLogWriter, StartStop_CreatesDatabaseFile)
+TEST(DiscretesLogWriterTests, StartStop_CreatesDatabaseFile)
 {
 	DiscretesLogWriter writer;
 
@@ -139,7 +139,7 @@ TEST(DiscretesLogWriter, StartStop_CreatesDatabaseFile)
 	writer.stop();
 }
 
-TEST(DiscretesLogWriter, InsertBatch)
+TEST(DiscretesLogWriterTests, InsertBatch)
 {
 	DiscretesLogWriter writer;
 
@@ -194,7 +194,7 @@ TEST(DiscretesLogWriter, InsertBatch)
 	writer.stop();
 }
 
-TEST(DiscretesLogWriter, AckLog)
+TEST(DiscretesLogWriterTests, AckLog)
 {
 	DiscretesLogWriter writer;
 

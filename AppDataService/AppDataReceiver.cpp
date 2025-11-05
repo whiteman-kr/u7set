@@ -1,32 +1,34 @@
+#include <type_traits>
+#include <cstddef>
+#include <cstring>
+
+#ifdef _WIN32
+#include <Mstcpip.h>	// SIO_UDP_CONNRESET
+#endif
+
+#include <QThread>
+
 #include "AppDataReceiver.h"
 
-StdThreadsGuard::StdThreadsGuard()
-{
-}
+using asio::ip::udp;
+using asio::io_context;
+using asio::steady_timer;
 
 StdThreadsGuard::~StdThreadsGuard()
 {
-	for(auto& p : m_threads)
+	for (std::thread& t : m_threads)
 	{
-		p.second.join();
+		if (t.joinable())
+		{
+			t.join();
+		}
 	}
 }
 
-void StdThreadsGuard::append(std::thread& thread)
+void StdThreadsGuard::append(std::thread&& thread)
 {
 	Q_ASSERT(thread.joinable() == true);
-
-	auto thread_id = std::hash<std::thread::id>{}(thread.get_id());
-
-	if (m_threads.contains(thread_id))
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	auto p = m_threads.insert({thread_id, std::move(thread)});
-
-	Q_ASSERT(p.first->second.joinable() == true);
+	m_threads.emplace_back(std::move(thread));
 }
 
 // -------------------------------------------------------------------------------
@@ -52,12 +54,12 @@ AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 	m_isSimulationMode = (swRunMode == E::SoftwareRunMode::Simulation);
 
 	m_appDataReceivingIP = udp::endpoint(
-								ip::address::from_string(dataReceivingIP.addressStr().toStdString()),
+								asio::ip::make_address(dataReceivingIP.addressStr().toStdString()),
 								dataReceivingIP.port());
 
 	for(AppDataSource* appDataSource : appDataSources)
 	{
-		appDataSource->setStatesProcessingThreadWakeupParams(&m_statesProcessigRequiredMutex,
+		appDataSource->setStatesProcessingThreadWakeupParams(&m_statesProcessingRequiredMutex,
 															 &m_statesProcessingRequiredCondition,
 															 &m_statesProcessingRequired);
 	}
@@ -82,6 +84,7 @@ void AppDataReceiver::fillAppDataReceiveState(Network::AppDataReceiveState* adrs
 	adrs->set_errunknownappdatasourceip(m_errUnknownAppDataSourceIP);
 	adrs->set_errrupframecrc(m_errRupFrameCRC);
 	adrs->set_errnotexpectedsimpacket(m_errNotExpectedSimPacket);
+	adrs->set_errnoappdata(m_errNoAppData);
 }
 
 void AppDataReceiver::registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue,
@@ -112,17 +115,17 @@ void AppDataReceiver::run()
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").
 							arg(appDataReceivingIPStr()));
 
-	StdThreadsGuard stg;
+	m_workGuard.emplace(asio::make_work_guard(m_ioContext));
 
+	StdThreadsGuard stg;
 	startProcessingThreads(stg);
 
 	try
 	{
-		m_ioContext = new io_context;
 		startTimer500ms();
 		createAndBindSocket();
 
-		m_ioContext->run();
+		m_ioContext.run();
 	}
 
 	catch (std::exception& e)
@@ -130,13 +133,11 @@ void AppDataReceiver::run()
 		std::cout << e.what() << std::endl;
 	}
 
-	wakeupAllProcessingThreads();
-
-	DELETE_IF_NOT_NULL(m_timer);
-
+	cancelTimer();
 	closeSocket();
+	resetWorkGuard();
 
-	DELETE_IF_NOT_NULL(m_ioContext);
+	wakeupAllProcessingThreads();
 
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread finished (receiving IP %1)").
 							arg(appDataReceivingIPStr()));
@@ -144,19 +145,30 @@ void AppDataReceiver::run()
 
 void AppDataReceiver::startTimer500ms()
 {
-	TEST_PTR_RETURN(m_ioContext);
-
 	if (m_timer == nullptr)
 	{
-		m_timer = new steady_timer(*m_ioContext);
+		m_timer = std::make_unique<steady_timer>(m_ioContext);
 	}
 
 	m_timer->expires_after(asio::chrono::milliseconds(500));
-	m_timer->async_wait(bind(&AppDataReceiver::onTimer500ms, this,
-						   std::placeholders::_1));
+
+	m_timer->async_wait([this](const asio::error_code& error)
+						{
+							onTimer500ms(error);
+						});
 }
 
-void AppDataReceiver::onTimer500ms(const error_code& error)
+void AppDataReceiver::cancelTimer()
+{
+	if (m_timer != nullptr)
+	{
+		asio::error_code ec;
+		m_timer->cancel(ec);
+		m_timer.reset();
+	}
+}
+
+void AppDataReceiver::onTimer500ms(const asio::error_code& error)
 {
 	if (stopIfQuitRequested() == true)
 	{
@@ -190,7 +202,7 @@ void AppDataReceiver::onTimer500ms(const error_code& error)
 	}
 	else
 	{
-		DELETE_IF_NOT_NULL(m_timer);
+		m_timer.reset();
 	}
 
 	m_1second ^= 1;
@@ -271,45 +283,51 @@ bool AppDataReceiver::createAndBindSocket()
 {
 	Q_ASSERT(isSocketWorkable() == false);
 
-	TEST_PTR_RETURN_FALSE(m_ioContext);
-
 	if (m_socket != nullptr)
 	{
 		closeSocket();
 	}
 
-	m_socket = new udp::socket(*m_ioContext);
+	m_socket = std::make_unique<udp::socket>(m_ioContext);
 
-	error_code error;
+	asio::error_code error;
 
-	m_socket->open(asio::ip::udp::v4(), error);
+	m_socket->open(udp::v4(), error);
 
 	if (!error)
 	{
+#ifdef _WIN32
+		DWORD bytes = 0; BOOL b = FALSE;
+		::WSAIoctl(m_socket->native_handle(), SIO_UDP_CONNRESET,
+				   &b, sizeof(b), nullptr, 0, &bytes, nullptr, nullptr);
+#endif
 		m_socketBound = false;
+
+		m_socket->set_option(asio::socket_base::reuse_address(true), error);
+
+		asio::socket_base::receive_buffer_size rxBufferSize(10 * 1024 * 1024);
+
+		m_socket->set_option(rxBufferSize, error);
+
+		if (error)
+		{
+			DEBUG_LOG_ERR(m_log, "AppDataReceiver error changing udp socket receive buffer size");
+		}
+
+		m_socket->get_option(rxBufferSize);
+
+		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver udp socket receive buffer size %1 bytes").
+							 arg(rxBufferSize.value()));
 
 		m_socket->bind(m_appDataReceivingIP, error);
 
 		if (!error)
 		{
+			m_socketErrorCtr = 0;
 			m_socketBound = true;
 
 			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver socket created and bound to %1").
 							arg(appDataReceivingIPStr()));
-
-			asio::socket_base::receive_buffer_size rxBufferSize(10 * 1024 * 1024);
-
-			m_socket->set_option(rxBufferSize, error);
-
-			if (error)
-			{
-				DEBUG_LOG_ERR(m_log, "AppDataReceiver error changing udp socket receive buffer size");
-			}
-
-			m_socket->get_option(rxBufferSize);
-
-			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver udp socket receive buffer size %1 bytes").
-										arg(rxBufferSize.value()));
 
 			startReceive();
 		}
@@ -344,9 +362,9 @@ void AppDataReceiver::closeSocket()
 {
 	if (m_socket != nullptr)
 	{
-		m_socket->close();
-		delete m_socket;
-		m_socket = nullptr;
+		asio::error_code error;
+		m_socket->close(error);
+		m_socket.reset();
 	}
 
 	m_socketBound = false;
@@ -362,18 +380,22 @@ void AppDataReceiver::startReceive()
 
 	m_writeIndex ^= 1;
 
-	m_socket->async_receive_from(asio::buffer(m_receiveBuffer[m_writeIndex], RECV_BUFFER_SIZE),
-									m_receiveFromIP[m_writeIndex],
-									bind(&AppDataReceiver::receivePackets, this,
-										std::placeholders::_1,
-										std::placeholders::_2));
+	m_socket->async_receive_from(
+		asio::buffer(m_receiveBuffer[m_writeIndex].data(), RECV_BUFFER_SIZE),
+		m_receiveFromIP[m_writeIndex],
+		[this](const asio::error_code& error, std::size_t n)
+		{
+			receivePackets(error, n);
+		});
 }
 
-// qint64 prevModTime = -1;
+static_assert(std::is_standard_layout_v<Rup::Frame>);
+static_assert(std::is_standard_layout_v<Rup::SimFrame>);
+static_assert(offsetof(Rup::SimFrame, rupFrame) == 0);
 
-void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceived)
+void AppDataReceiver::receivePackets(const asio::error_code& error, size_t bytesReceived)
 {
-	qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
+	qint64 serverTime = currentMSecsSinceEpoch();
 
 	if (stopIfQuitRequested() == true)
 	{
@@ -383,156 +405,274 @@ void AppDataReceiver::receivePackets(const error_code& error, size_t bytesReceiv
 	if (error)
 	{
 		m_socketErrorCtr++;
+		startReceive();
 		return;
 	}
 
 	m_noReceiveCtr = 0;
 
-	udp::endpoint receiveFromIP = m_receiveFromIP[m_writeIndex];
-	Rup::SimFrame& simFrame = *reinterpret_cast<Rup::SimFrame*>(m_receiveBuffer[m_writeIndex]);
+	const udp::endpoint receiveFromIP = m_receiveFromIP[m_writeIndex];
+	const std::byte* const rawData = m_receiveBuffer[m_writeIndex].data();
 
 	startReceive();
 
 	m_receivedPerSecond += static_cast<int>(bytesReceived);
 
-	bool isSimFrame = false;
-	bool isValidFrame = false;
 	bool crcOk = false;
 	quint32 sourceIP = 0;
 
-	do
+	if (bytesReceived == sizeof(Rup::Frame))
 	{
-		if (bytesReceived == sizeof(Rup::Frame))
+		Rup::Frame rupFrame;
+		std::memcpy(&rupFrame, rawData, sizeof(rupFrame));
+
+		if ((reverseUint16(rupFrame.header.flags.all) ^ Rup::APP_DATA) != 0)
 		{
-			sourceIP = receiveFromIP.address().to_v4().to_ulong();
-			isValidFrame = true;
-			break;
+			m_errNoAppData++;
+			return;
 		}
 
-		//
+		sourceIP = receiveFromIP.address().to_v4().to_ulong();
 
-		if (bytesReceived == sizeof(Rup::SimFrame))
+		AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
+
+		if (source == nullptr)
 		{
-			if (m_isSimulationMode == false)
-			{
-				m_errNotExpectedSimPacket++;
-
-				if ((m_errNotExpectedSimPacket % 1000) == 0)
-				{
-					qDebug() << C_STR(QString("Software is not in SIMULATION mode, %1 sim packets has been ignored.").
-									  arg(m_errNotExpectedSimPacket));
-				}
-
-				break;
-			}
-
-			quint16 simVersion = reverseUint16(simFrame.simVersion);
-
-			if (simVersion != 1)
-			{
-				m_errSimVersion++;
-				break;
-			}
-
-			sourceIP = reverseUint32(simFrame.sourceIP);
-
-			m_simFramesCount++;
-
-			isSimFrame = true;
-			isValidFrame = true;
-			break;
+			collectUnknownSourcesIP(sourceIP);
+			return;
 		}
 
-		// received datagram  has unknown size, skip this datagram
-		//
-		m_errDatagramSize++;
-		break;
+		m_rupFramesReceivedPerSecond++;
+		m_rupFramesCount++;
+
+		crcOk = rupFrame.checkCRC64();
+
+		if (crcOk == true)
+		{
+			source->pushRupFrame(sourceIP, serverTime,
+								 false, rupFrame,
+								 source->cachedAppDataUID());
+
+			requireBufferProcessing(source);
+		}
+		else
+		{
+			m_errRupFrameCRC++;
+			source->incErrorFrameCRC();
+		}
+
+		return;
 	}
-	while(true);		// Its OK!
 
-	if (isValidFrame == true)
+	if (bytesReceived == sizeof(Rup::SimFrame))
 	{
+		if (m_isSimulationMode == false)
+		{
+			m_errNotExpectedSimPacket++;
+
+			if ((m_errNotExpectedSimPacket % 1000) == 0)
+			{
+				qDebug() << C_STR(QString("Software is NOT in SIMULATION mode, %1 sim packets has been ignored.").
+								  arg(m_errNotExpectedSimPacket));
+			}
+
+			return;
+		}
+
+		Rup::SimFrame simFrame;
+		std::memcpy(&simFrame, rawData, sizeof(simFrame));
+
+		if ((reverseUint16(simFrame.rupFrame.header.flags.all) ^ Rup::APP_DATA) != 0)
+		{
+			m_errNoAppData++;
+			return;
+		}
+
+		if (reverseUint16(simFrame.simVersion) != 1)
+		{
+			m_errSimVersion++;
+			return;
+		}
+
+		sourceIP = reverseUint32(simFrame.sourceIP);
+
+		AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
+
+		if (source == nullptr)
+		{
+			collectUnknownSourcesIP(sourceIP);
+			return;
+		}
+
+		m_simFramesCount++;
 		m_rupFramesReceivedPerSecond++;
 		m_rupFramesCount++;
 
 		crcOk = simFrame.rupFrame.checkCRC64();
 
-		if (crcOk == false)
+		if (crcOk == true)
 		{
-			m_errRupFrameCRC++;
-		}
+			source->pushRupFrame(sourceIP, serverTime,
+								 true, simFrame.rupFrame,
+								 source->cachedAppDataUID());
 
-		AppDataSource* source = m_appDataSources.getSourceByIP(sourceIP);
-
-/*		if (source->moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
-		{
-			int diff = 0;
-
-			if (prevModTime != -1)
-			{
-				diff = serverTime - prevModTime;
-			}
-
-			prevModTime = serverTime;
-
-			DEBUG_LOG_MSG(m_log, QString("pkt = %1, serverTime = %2 (dt = %3), plantTime = %4:%5 %6").
-					arg(reverseUint16(simFrame.rupFrame.header.numerator)).
-					arg(serverTime).
-					arg(diff).
-					arg(reverseUint16(simFrame.rupFrame.header.timeStamp.second)).
-					arg(reverseUint16(simFrame.rupFrame.header.timeStamp.millisecond)).
-					arg(diff > 7  || diff < 3? "!!!!!" : ""));
-		} */
-
-		if (source != nullptr)
-		{
-			if (crcOk == true)
-			{
-				source->pushRupFrame(sourceIP, serverTime,
-									 isSimFrame, simFrame.rupFrame,
-									 source->cachedAppDataUID());
-
-				requireBufferProcessing(source);
-			}
-			else
-			{
-				source->incErrorFrameCRC();
-			}
+			requireBufferProcessing(source);
 		}
 		else
 		{
-			m_errUnknownAppDataSourceIP++;
-
-//			qDebug() << "Unknown IP" << C_STR(HostAddressPort(sourceIP, 0).addressStr());
-
-			if (m_unknownAppDataSourcesIP.contains(sourceIP) == false &&
-				m_unknownAppDataSourcesIP.size() < 500)
-			{
-				m_unknownAppDataSourcesIP.insert(sourceIP);
-			}
+			m_errRupFrameCRC++;
+			source->incErrorFrameCRC();
 		}
+
+		return;
+	}
+
+	// received datagram  has unknown size, skip this datagram
+	//
+	m_errDatagramSize++;
+}
+
+void AppDataReceiver::collectUnknownSourcesIP(quint32 sourceIP)
+{
+	m_errUnknownAppDataSourceIP++;
+
+	if (m_unknownAppDataSourcesIP.contains(sourceIP) == false &&
+		m_unknownAppDataSourcesIP.size() < 500)
+	{
+		m_unknownAppDataSourcesIP.insert(sourceIP);
 	}
 }
 
 void AppDataReceiver::requireBufferProcessing(AppDataSource* source)
 {
-	std::lock_guard lg(m_packetProcessigRequiredMutex);
-	m_packetProcessingRequired.insert({source, true});
+	{
+		std::lock_guard lg(m_packetProcessingRequiredMutex);
+
+		TaskFlags& f = m_sourceTaskFlags[source];
+
+		f |= TaskFlags::Parse;
+
+		if (m_enqueuedSources.insert(source).second == true)
+		{
+			m_sourcesQueue.push(source);
+		}
+	}
+
 	m_packetProcessingRequiredCondition.notify_one();
 }
 
 void AppDataReceiver::requireSignalsInvalidation(AppDataSource* source)
 {
-	std::lock_guard lg(m_packetProcessigRequiredMutex);
-	m_packetProcessingRequired.insert({source, false});
+	{
+		std::lock_guard lg(m_packetProcessingRequiredMutex);
+
+		TaskFlags& f = m_sourceTaskFlags[source];
+
+		f |= TaskFlags::Invalidate;
+
+		if (m_enqueuedSources.insert(source).second == true)
+		{
+			m_sourcesQueue.push(source);
+		}
+	}
+
 	m_packetProcessingRequiredCondition.notify_one();
+}
+
+void AppDataReceiver::processPackets(int threadNumber)
+{
+	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThread #%1 is started").arg(threadNumber));
+
+	auto& waitConditionMutex = m_packetProcessingRequiredMutex;
+	auto& waitCondition = m_packetProcessingRequiredCondition;
+
+	std::unique_lock ul(waitConditionMutex, std::defer_lock);
+
+	while(true)
+	{
+		ul.lock();
+
+		waitCondition.wait(ul, [this]() -> bool
+						   {
+							   return isQuitRequested() || !m_sourcesQueue.empty();
+						   });
+
+		// here ul is LOCKED!
+
+		if (isQuitRequested() == true)
+		{
+			ul.unlock();
+			break;
+		}
+
+		if (m_sourcesQueue.empty() == true)
+		{
+			ul.unlock();
+			continue;
+		}
+
+		AppDataSource* source = m_sourcesQueue.front();
+		m_sourcesQueue.pop();
+
+		TaskFlags sourceTaskFlags = TaskFlags::None;
+
+		auto it = m_sourceTaskFlags.find(source);
+
+		if (it != m_sourceTaskFlags.end())
+		{
+			sourceTaskFlags = it->second;
+			m_sourceTaskFlags.erase(it);
+		}
+
+		m_enqueuedSources.erase(source);
+
+		ul.unlock();
+
+		TEST_PTR_CONTINUE(source);
+
+		try
+		{
+			if (source->takeProcessingOwnership() == true)
+			{
+				if (has(sourceTaskFlags, TaskFlags::Parse))
+				{
+					source->parseNextBuffer();
+				}
+
+				if (has(sourceTaskFlags, TaskFlags::Invalidate))
+				{
+					source->invalidateSignals();
+				}
+
+				source->releaseProcessingOwnership();
+			}
+			else
+			{
+				// another thread already processing this source
+			}
+		}
+		catch (const std::exception& e)
+		{
+			DEBUG_LOG_ERR(m_log, QString("AppDataProcessingThread #%1: exception while processing source: %2").
+									arg(threadNumber).arg(e.what()));
+			continue;
+		}
+		catch (...)
+		{
+			DEBUG_LOG_ERR(m_log, QString("AppDataProcessingThread #%1: unknown exception while processing source").
+									arg(threadNumber));
+			continue;
+		}
+	}
+
+	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThread #%1 finished").arg(threadNumber));
 }
 
 void AppDataReceiver::startProcessingThreads(StdThreadsGuard& stg)
 {
-	int poolSize = m_processingThreadsCountFromSettings;
+	int idealThreadCount = std::max(QThread::idealThreadCount(), 1);
 
-	int idealThreadCount = QThread::idealThreadCount();
+	int poolSize = m_processingThreadsCountFromSettings;
 
 	if (poolSize <= 0 || poolSize > idealThreadCount)
 	{
@@ -541,9 +681,9 @@ void AppDataReceiver::startProcessingThreads(StdThreadsGuard& stg)
 
 	for(int i = 0; i < poolSize; i++)
 	{
-		std::thread t(&processPackets, std::ref(*this), i + 1);
+		std::thread t(&AppDataReceiver::processPackets, this, i + 1);
 
-		stg.append(t);
+		stg.append(std::move(t));
 	}
 
 	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThreadsPool started. Running threads count %1%2").
@@ -552,12 +692,11 @@ void AppDataReceiver::startProcessingThreads(StdThreadsGuard& stg)
 	std::thread t(&SignalStatesProcessingThread::processStates,
 				  &m_statesProcessingThread, std::ref(*this));
 
-	stg.append(t);
+	stg.append(std::move(t));
 }
 
 void AppDataReceiver::wakeupAllProcessingThreads()
 {
-	std::lock_guard lg(m_packetProcessigRequiredMutex);
 	m_packetProcessingRequiredCondition.notify_all();
 	m_statesProcessingRequiredCondition.notify_all();
 }
@@ -566,14 +705,12 @@ bool AppDataReceiver::stopIfQuitRequested()
 {
 	if (isQuitRequested() == true)
 	{
-		if (m_ioContext != nullptr)
-		{
-			m_ioContext->stop();
-		}
-		else
-		{
-			Q_ASSERT(false);
-		}
+		cancelTimer();
+		closeSocket();
+
+		resetWorkGuard();
+
+		m_ioContext.stop();
 
 		wakeupAllProcessingThreads();
 
@@ -581,6 +718,15 @@ bool AppDataReceiver::stopIfQuitRequested()
 	}
 
 	return false;
+}
+
+void AppDataReceiver::resetWorkGuard()
+{
+	if (m_workGuard.has_value())
+	{
+		m_workGuard->reset();
+		m_workGuard.reset();
+	}
 }
 
 QString AppDataReceiver::appDataReceivingIPStr() const
@@ -608,76 +754,5 @@ void AppDataReceiver::trace_dt(const QString& portID)
 
 		m_prevPacketTime = curTime;
 	}
-}
-
-
-void processPackets(AppDataReceiver& receiver, int threadNumber)
-{
-	CircularLoggerShared log = receiver.log();
-
-	DEBUG_LOG_MSG(log, QString("AppDataProcessingThread #%1 is started").arg(threadNumber));
-
-	auto& waitConditionMutex = receiver.m_packetProcessigRequiredMutex;
-	auto& waitCondition = receiver.m_packetProcessingRequiredCondition;
-	auto& requireProcessing = receiver.m_packetProcessingRequired;
-
-	std::unique_lock ul(waitConditionMutex, std::defer_lock);
-
-	const QThread* thisThread = QThread::currentThread();
-
-	while(true)
-	{
-		ul.lock();
-
-		waitCondition.wait(ul, [&receiver, &requireProcessing]() -> bool
-								{
-									return	receiver.isQuitRequested() ||
-											!requireProcessing.empty();
-								});
-
-		// here ul is LOCKED!
-
-		if (receiver.isQuitRequested() == true)
-		{
-			ul.unlock();
-			break;
-		}
-
-		auto it = requireProcessing.begin();
-
-		if (it == requireProcessing.end())
-		{
-			ul.unlock();
-			continue;
-		}
-
-		AppDataSource* source = it->first;
-
-		bool requireBufferProcessing = it->second;
-
-		requireProcessing.erase(it);
-
-		ul.unlock();
-
-		if (source->takeProcessingOwnership(thisThread) == true)
-		{
-			if (requireBufferProcessing == true)
-			{
-				source->parseNextBuffer();
-			}
-			else
-			{
-				source->invalidateSignals();
-			}
-
-			source->releaseProcessingOwnership(thisThread);
-		}
-		else
-		{
-			// another thread already processing this source
-		}
-	}
-
-	DEBUG_LOG_MSG(log, QString("AppDataProcessingThread #%1 finished").arg(threadNumber));
 }
 

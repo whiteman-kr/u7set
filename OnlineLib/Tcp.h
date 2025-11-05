@@ -8,6 +8,7 @@
 #include <QTcpServer>
 #include <QSslSocket>
 #include <QSslKey>
+#include <Network.pb.h>
 
 #include "../UtilsLib/SimpleThread.h"
 #include "../UtilsLib/WUtils.h"

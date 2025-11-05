@@ -10,8 +10,6 @@ namespace OnlineLib
 	//
 	// -----------------------------------------------------------------------------
 
-	QStringList DataSource::m_emptyList;
-
 	DataSource::DataSource() {}
 
 	DataSource::~DataSource() {}
@@ -524,6 +522,12 @@ namespace OnlineLib
 			return;
 		}
 
+		if (m_parsingBuffers.empty() == true)
+		{
+			Q_ASSERT(false);			// initParsingBuffers must be called first
+			return;
+		}
+
 		if (m_parsingBuffers[m_writeBufferIndex]->readyToParsing == true)
 		{
 			if (moveToNextWriteBuffer() == false)
@@ -710,17 +714,6 @@ namespace OnlineLib
 
 		if (dT > dN * m_workcycle_ms + MAX_TIME_ERROR)
 		{
-/*			if (moduleEquipmentID() == "SYSTEMID_CLIENTTEST_CH11_MD00")
-			{
-				logStr = QString("correction: pkt = %1, lastServTime = %2, frame0ServTime = %3, dT = %4, dN = %5, correctedTime %6").
-						 arg(headerNumerator).
-						 arg(m_lastPacketServerTime).
-						 arg(frame0ServerTime).
-						 arg(dT).
-						 arg(dN).
-						 arg(m_lastPacketServerTime + dN * m_workcycle_ms + 1);
-			}*/
-
 			m_lastPacketServerTime += dN * m_workcycle_ms + 1;
 		}
 		else
@@ -772,24 +765,44 @@ namespace OnlineLib
 		m_lastRupTimes = m_rupTimes;
 	}
 
-	bool DataSourceOnline::takeProcessingOwnership(const QThread* processingThread)
+	bool DataSourceOnline::takeProcessingOwnership() noexcept
 	{
-		const QThread* expected = nullptr;
+		const quintptr threadId = currentThreadId();
 
-		bool result = m_processingOwner.compare_exchange_strong(expected, processingThread);
+		if (threadId == 0)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		quintptr expected = 0;
+
+		bool result = m_processingOwner.compare_exchange_strong(expected, threadId,
+																std::memory_order_acquire,
+																std::memory_order_relaxed);
 
 		// if ownership has been taken by processingWorker - function returns TRUE
 		//
-		// result == FALSE is Ok, means that another thread is already take ownership
+		// result == false is OK: another thread already owns the processing slot
 
 		return result;
 	}
 
-	bool DataSourceOnline::releaseProcessingOwnership(const QThread* processingThread)
+	bool DataSourceOnline::releaseProcessingOwnership() noexcept
 	{
-		bool result = m_processingOwner.compare_exchange_strong(processingThread, nullptr);
+		quintptr expectedThreadId = currentThreadId();
 
-		assert(result == true); // releaseProcessingOwnership must be called by processingWorker == m_processingOwner only !!!
+		if (expectedThreadId == 0)
+		{
+			Q_ASSERT(false);
+			return false;
+		}
+
+		bool result = m_processingOwner.compare_exchange_strong(expectedThreadId, 0,
+																std::memory_order_release,
+																std::memory_order_relaxed);
+
+		Q_ASSERT(result == true); // releaseProcessingOwnership must be called by processingWorker == m_processingOwner only !!!
 
 		return result;
 	}
@@ -896,7 +909,12 @@ namespace OnlineLib
 
 	void DataSourceOnline::ParsingBuffer::allocate(int frmsCount)
 	{
-		Q_ASSERT(frmsCount > 0 && frmsCount <= Rup::MAX_FRAME_COUNT);
+		if (frmsCount < 1 || frmsCount > Rup::MAX_FRAME_COUNT)
+		{
+			Q_ASSERT(false);
+			framesQuantity = 0;
+			return;
+		}
 
 		clear();
 
@@ -911,16 +929,14 @@ namespace OnlineLib
 	bool DataSourceOnline::ParsingBuffer::copyRupFrame(int frameNo, qint64 serverTime, bool simFrame, const Rup::Frame& rupFrame)
 	{
 		Q_ASSERT(readyToParsing == false);
+		Q_ASSERT(sizeof(rupFramesHeaders[0]) == sizeof(rupFrame.header));
+		Q_ASSERT(sizeof(rupFramesData[0]) == sizeof(rupFrame.data));
 
 		// frameNo already checked!
-
-		Q_ASSERT(sizeof(rupFramesHeaders[0]) == sizeof(rupFrame.header));
-
+		//
 		// rupFrame.header already reversed!
 		//
 		memcpy(&rupFramesHeaders[frameNo], &rupFrame.header, sizeof(rupFrame.header));
-
-		Q_ASSERT(sizeof(rupFramesData[0]) == sizeof(rupFrame.data));
 
 		memcpy(&rupFramesData[frameNo], &rupFrame.data, sizeof(rupFrame.data));
 
