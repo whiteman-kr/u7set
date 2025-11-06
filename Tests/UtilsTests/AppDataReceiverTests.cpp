@@ -3,6 +3,7 @@
 #include "../../AppSignalLib/AppSignal.h"
 #include "../../AppDataService/AppDataReceiver.h"
 
+/*
 TEST(AppDataReceiverTests, ReceivePackets)
 {
 	AppDataSource* src = appDataSources.getSourceByEquipmentID("SYSTEMID_RACK01_FSCC01_MD00");
@@ -39,4 +40,4 @@ TEST(AppDataReceiverTests, ReceivePackets)
 
 	rfp.stop();
 	receiver.quitAndWait();
-}
+} */

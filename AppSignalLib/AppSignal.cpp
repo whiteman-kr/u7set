@@ -1727,25 +1727,8 @@ bool AppSignal::equalWithAppSignal(const AppSignal& s) const
 
 	res &= m_isEndpoint == s.m_isEndpoint;
 
-	// load state flags signals
+	res &= m_stateFlagsSignals == s.m_stateFlagsSignals;
 
-/*	m_stateFlagsSignals.clear();
-
-	int flagSignalsCount = calcParam.stateflagssignals_size();
-
-	for(int i = 0; i < flagSignalsCount; i++)
-	{
-		const Proto::StateFlagSignal& protoStateFlagSignal = calcParam.stateflagssignals(i);
-
-		E::AppSignalStateFlagType flagType = static_cast<E::AppSignalStateFlagType>(protoStateFlagSignal.flagtype());
-
-		assert(m_stateFlagsSignals.contains(flagType) == false);
-
-		m_stateFlagsSignals.emplace(flagType, QString::fromStdString(protoStateFlagSignal.flagsignalid()));
-	}*/
-
-	// Tags
-	//
 	res &= m_tags == s.m_tags;
 
 	return res;
