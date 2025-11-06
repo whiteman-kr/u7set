@@ -19,6 +19,7 @@ add_executable(${TARGET}
 	Common.cpp
 	Common.h
 	DiscretesLogTests.cpp
+	GrpcAppDataSrvTests.cpp
 	main.cpp
 	RupFrameProducer.h
 	SimpleThreadTests.cpp
@@ -34,10 +35,12 @@ add_executable(${TARGET}
 	../../AppDataService/DiscretesLog.h
 	../../AppDataService/DynamicAppSignalState.cpp
 	../../AppDataService/DynamicAppSignalState.h
+	../../AppDataService/GrpcAppDataSrv.cpp
+	../../AppDataService/GrpcAppDataSrv.h
 	../../AppDataService/RtTrendsServer.cpp
 	../../AppDataService/RtTrendsServer.h
 	../../AppDataService/SignalStatesProcessingThread.cpp
-	../../AppDataService/SignalStatesProcessingThread.h
+	../../AppDataService/SignalStatesProcessingThread.h	
 )
 
 target_precompile_headers(${TARGET} PRIVATE
@@ -80,10 +83,17 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../UtilsLib/SpinLock.h"
 )
 
+include_directories(${Protobuf_INCLUDE_DIRS})
+#include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+target_include_directories(${TARGET} PRIVATE
+	${CMAKE_BINARY_DIR}/libs/GrpcLib
+)
+
 target_compile_definitions(${TARGET} PRIVATE UNDER_GTEST=1)
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Test Threads::Threads GTest::gtest GTest::gmock Qt6::Sql)
-target_link_libraries(${TARGET} PRIVATE UtilsLib ClientLib CommonLib OnlineLib AppSignalLib)
+target_link_libraries(${TARGET} PRIVATE UtilsLib ClientLib CommonLib OnlineLib AppSignalLib GrpcLib)
 
 #add_test(NAME ${TARGET} COMMAND UtilsTests "--gtest_filter=-SimpleThreadTests.*")
 

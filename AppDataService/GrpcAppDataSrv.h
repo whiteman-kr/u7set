@@ -4,7 +4,7 @@
 #include <thread>
 #include <grpcpp/grpcpp.h>
 
-#include "../libs/GrpcLib/GrpcAppDataSrv.grpc.pb.h"
+#include <GrpcAppDataSrv.grpc.pb.h>
 
 #include "../AppSignalLib/AppSignal.h"
 #include "../OnlineLib/CircularLogger.h"
@@ -23,7 +23,7 @@ public:
 	GrpcAppDataSrv(GrpcAppDataSrv&&) = delete;
 	GrpcAppDataSrv& operator=(GrpcAppDataSrv&&) = delete;
 
-	~GrpcAppDataSrv() noexcept;
+	~GrpcAppDataSrv();
 
 	grpc::Status GetAppSignalList(grpc::ServerContext* context,
 							 const Grpc::GetAppSignalListRequest* request,

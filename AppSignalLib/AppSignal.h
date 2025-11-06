@@ -402,6 +402,8 @@ public:
 	void saveToProto(Proto::AppSignal* s) const;
 	void loadFromProto(const Proto::AppSignal &s);
 
+	bool equalWithAppSignal(const AppSignal& s) const;
+
 	void initCalculatedProperties();
 
 	bool addFlagSignalID(E::AppSignalStateFlagType flagType, const QString& appSignalID);
@@ -690,6 +692,8 @@ public:
 	const AppSignal* getSignalByID(const QString& appSignalID) const;		// rename => getByAppSignalID
 
 	const AppSignal* getSignalByHash(Hash hash) const;
+
+	const AppSignal* getSignalByIndex(int index) const;
 
 	bool isEmpty() const;
 	size_t count() const;

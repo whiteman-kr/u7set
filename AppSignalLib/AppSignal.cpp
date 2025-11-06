@@ -1640,6 +1640,117 @@ void AppSignal::loadFromProto(const Proto::AppSignal& s)
 	}
 }
 
+bool AppSignal::equalWithAppSignal(const AppSignal& s) const
+{
+	bool res = true;
+
+	// Signal identificators
+
+	res &= m_appSignalID == s.m_appSignalID;
+	res &= m_customAppSignalID == s.m_customAppSignalID;
+	res &= m_caption == s.m_caption;
+	res &= m_equipmentID == s.m_equipmentID;
+	res &= m_lmEquipmentID == s.m_lmEquipmentID;
+	res &= m_busTypeID == s.m_busTypeID;
+	res &= m_channel == s.m_channel;
+	res &= m_excludeFromBuild == s.m_excludeFromBuild;
+
+	res &= m_invertSignal == s.m_invertSignal;
+	res &= m_reserved == s.m_reserved;
+
+	// Signal type
+
+	res &= m_signalType == s.m_signalType;
+	res &= m_inOutType == s.m_inOutType;
+	res &= m_swCalcFunction == s.m_swCalcFunction;
+
+	// Signal format
+
+	res &= m_dataSize == s.m_dataSize;
+	res &= m_byteOrder == s.m_byteOrder;
+
+	// Analog signal properties
+
+	res &= m_analogSignalFormat == s.m_analogSignalFormat;
+	res &= m_unit == s.m_unit;
+
+	// Signal specific properties
+
+	res &= m_specPropStruct == s.m_specPropStruct;
+	res &= m_protoSpecPropValues == s.m_protoSpecPropValues;
+
+	// Tuning signal properties
+
+	res &= m_enableTuning == s.m_enableTuning;
+	res &= m_tuningDefaultValue == s.m_tuningDefaultValue;
+	res &= m_tuningLowBound == s.m_tuningLowBound;
+	res &= m_tuningHighBound == s.m_tuningHighBound;
+
+	//	Signal properties for MATS
+
+	res &= m_acquire == s.m_acquire;
+	res &= m_archive == s.m_archive;
+	res &= m_decimalPlaces == s.m_decimalPlaces;
+	res &= m_coarseAperture == s.m_coarseAperture;
+	res &= m_fineAperture == s.m_fineAperture;
+	res &= m_apertureType == s.m_apertureType;
+	res &= m_log == s.m_log;
+
+	// Signal fields from database
+
+	res &= m_ID == s.m_ID;
+	res &= m_signalGroupID == s.m_signalGroupID;
+	res &= m_signalInstanceID == s.m_signalInstanceID;
+	res &= m_changesetID == s.m_changesetID;
+	res &= m_checkedOut == s.m_checkedOut;
+	res &= m_userID == s.m_userID;
+	res &= m_createdMcs == s.m_createdMcs;
+	res &= m_deleted == s.m_deleted;
+	res &= m_instanceCreatedMcs == s.m_instanceCreatedMcs;
+	res &= m_instanceAction == s.m_instanceAction;
+
+	// Signal properties calculated in compile-time
+
+	res &= m_hash == s.m_hash;
+
+	res &= m_ioBufAddr == s.m_ioBufAddr;
+	res &= m_tuningAddr == s.m_tuningAddr;
+	res &= m_ualAddr == s.m_ualAddr;
+	res &= m_regBufAddr == s.m_regBufAddr;
+	res &= m_regValueAddr == s.m_regValueAddr;
+	res &= m_regValidityAddr == s.m_regValidityAddr;
+
+	res &= m_lmRamAccess == s.m_lmRamAccess;
+
+	res &= m_isConst == s.m_isConst;
+	res &= m_constValue == s.m_constValue;
+
+	res &= m_isEndpoint == s.m_isEndpoint;
+
+	// load state flags signals
+
+/*	m_stateFlagsSignals.clear();
+
+	int flagSignalsCount = calcParam.stateflagssignals_size();
+
+	for(int i = 0; i < flagSignalsCount; i++)
+	{
+		const Proto::StateFlagSignal& protoStateFlagSignal = calcParam.stateflagssignals(i);
+
+		E::AppSignalStateFlagType flagType = static_cast<E::AppSignalStateFlagType>(protoStateFlagSignal.flagtype());
+
+		assert(m_stateFlagsSignals.contains(flagType) == false);
+
+		m_stateFlagsSignals.emplace(flagType, QString::fromStdString(protoStateFlagSignal.flagsignalid()));
+	}*/
+
+	// Tags
+	//
+	res &= m_tags == s.m_tags;
+
+	return res;
+}
+
 void AppSignal::initCalculatedProperties()
 {
 	m_hash = calcHash(m_appSignalID);
@@ -2764,6 +2875,16 @@ const AppSignal* AppSignals::getSignalByHash(Hash hash) const
 	}
 
 	return it->second;
+}
+
+const AppSignal* AppSignals::getSignalByIndex(int index) const
+{
+	if (index < 0 || index >= static_cast<int>(m_signals.size()))
+	{
+		return nullptr;
+	}
+
+	return m_signals[index];
 }
 
 bool AppSignals::isEmpty() const

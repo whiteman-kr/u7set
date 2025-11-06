@@ -24,7 +24,7 @@ set_warning_level_1(${TARGET})
 
 target_link_libraries(${TARGET} PUBLIC gRPC::grpc++ Protos)
 
-target_include_directories(${TARGET} PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(${TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} INTERFACE ${CMAKE_BINARY_DIR})
 

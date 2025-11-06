@@ -70,7 +70,7 @@ GrpcAppDataSrv::GrpcAppDataSrv(	const AppDataServiceSettings& settings,
 							m_server.get()};
 }
 
-GrpcAppDataSrv::~GrpcAppDataSrv() noexcept
+GrpcAppDataSrv::~GrpcAppDataSrv()
 {
 	if (m_server != nullptr)
 	{
