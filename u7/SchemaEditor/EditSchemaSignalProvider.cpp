@@ -2,9 +2,8 @@
 #include "../AppSignalSetProvider.h"
 
 //
-//
-// EditSchemaSignalProvider - this calss is used to provide app signals for drawing schemas, showing and getting signal ids, description, preciosion, etc...
-//
+// EditSchemaSignalProvider - this class is used to provide app signals for drawing schemas, showing and getting signal ids, description,
+// preciosion, etc...
 //
 
 EditSchemaAppSignalProvider::EditSchemaAppSignalProvider(AppSignalSetProvider* signalSetProvider) :
@@ -46,99 +45,49 @@ bool EditSchemaAppSignalProvider::signalExists(Hash hash) const
 	return {};
 }
 
-bool EditSchemaAppSignalProvider::signalExists(const QString& appSignalId) const
-{
-	return m_signalSetProvider->signalExists(appSignalId);
-}
-
 bool EditSchemaAppSignalProvider::signalsExist(const QStringList& signalIds) const
 {
-	return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
-		return m_signalSetProvider->signalExists(appSignalId);
-	});
+	return std::all_of(signalIds.begin(),
+					   signalIds.end(),
+					   [this](const QString& appSignalId)
+					   {
+						   return m_signalSetProvider->signalExists(appSignalId);
+					   });
 }
 
-AppSignalParam EditSchemaAppSignalProvider::signalParam(Hash signalHash, bool* found) const
+std::optional<AppSignalParam> EditSchemaAppSignalProvider::signalParam(Hash signalHash) const
 {
-	// Unlikely this function required for schema editing
-	//
-	Q_UNUSED(signalHash);
-	Q_UNUSED(found);
-	Q_ASSERT(false);
-	return {};
+	const AppSignal* s = m_signalSetProvider->getSignalByHash(signalHash);
+	if (s == nullptr)
+	{
+		return std::nullopt;
+	}
+
+	return AppSignalParam{*s};
 }
 
-AppSignalParam EditSchemaAppSignalProvider::signalParam(const QString& appSignalId, bool* found) const
+std::optional<AppSignalState> EditSchemaAppSignalProvider::signalState(Hash signalHash) const
 {
-	AppSignalParam result;
-
-	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
-
-	if (found != nullptr)
+	AppSignal* s = m_signalSetProvider->getSignalByHash(signalHash);
+	if (s == nullptr)
 	{
-		*found = s != nullptr;
+		return std::nullopt;
 	}
 
-	if (s != nullptr)
-	{
-		result.load(*s);
-	}
+	std::optional<AppSignalState> result;
+	result->m_hash = signalHash;
+	result->m_flags.valid = 1;
 
 	return result;
 }
 
-AppSignalState EditSchemaAppSignalProvider::signalState(Hash signalHash, bool* found) const
+std::optional<AppSignalState> EditSchemaAppSignalProvider::signalState(Hash signalHash, Hash /*dataServerHash*/) const
 {
-	// Unlikely this function required for schema editing
-	//
-	Q_UNUSED(signalHash);
-	Q_UNUSED(found);
-	Q_ASSERT(false);
-	return {};
+	return signalState(signalHash);
 }
 
-AppSignalState EditSchemaAppSignalProvider::signalState(const QString& appSignalId, bool* found) const
-{
-	AppSignalState result;
-	result.m_hash = ::calcHash(appSignalId);
-
-	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
-	if (found != nullptr)
-	{
-		*found = s != nullptr;
-	}
-
-	if (s != nullptr)
-	{
-		result.m_flags.valid = 1;
-		result.m_value = 0;
-	}
-
-	return result;
-}
-
-AppSignalState EditSchemaAppSignalProvider::signalState(Hash signalHash, Hash /*dataServerHash*/, bool* found) const
-{
-	return signalState(signalHash, found);
-}
-
-AppSignalState EditSchemaAppSignalProvider::signalState(const QString& appSignalId, const QString& /*dataServerId*/, bool* found) const
-{
-	return signalState(appSignalId, found);
-}
-
-void EditSchemaAppSignalProvider::signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const
-{
-	// Unlikely this function required for schema editing
-	//
-	Q_UNUSED(appSignalHashes);
-	Q_UNUSED(result);
-	Q_UNUSED(found);
-	Q_ASSERT(false);
-	return;
-}
-
-void EditSchemaAppSignalProvider::signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const
+void EditSchemaAppSignalProvider::signalState(std::span<const Hash> appSignalHashes,
+											  std::vector<std::optional<AppSignalState>>* result) const
 {
 	if (result == nullptr)
 	{
@@ -146,51 +95,27 @@ void EditSchemaAppSignalProvider::signalState(std::span<const QString> appSignal
 		return;
 	}
 
-	if (found != nullptr)
-	{
-		*found = 0;
-	}
-
 	result->clear();
-	result->reserve(appSignalIds.size());
+	result->reserve(appSignalHashes.size());
 
-	for (const QString& id : appSignalIds)
+	for (const Hash& hash : appSignalHashes)
 	{
-		bool signalFound = false;
-
-		result->emplace_back(this->signalState(id, &signalFound));
-
-		if (signalFound && found != nullptr)
-		{
-			(*found)++;
-		}
+		result->emplace_back(signalState(hash));
 	}
 
 	return;
 }
 
-void EditSchemaAppSignalProvider::signalState(std::span<const Hash> appSignalHashes, Hash /*dataServerHash*/, std::vector<AppSignalState>* result, int* found) const
+void EditSchemaAppSignalProvider::signalState(std::span<const Hash> appSignalHashes,
+											  Hash /*dataServerHash*/,
+											  std::vector<std::optional<AppSignalState>>* result) const
 {
-	return signalState(appSignalHashes, result, found);
-}
-
-void EditSchemaAppSignalProvider::signalState(std::span<const QString> appSignalIds, const QString& /*dataServerId*/, std::vector<AppSignalState>* result, int* found) const
-{
-	return signalState(appSignalIds, result, found);
+	return signalState(appSignalHashes, result);
 }
 
 QStringList EditSchemaAppSignalProvider::signalTags(Hash signalHash) const
 {
-	// Unlikely this function required for schema editing
-	//
-	Q_UNUSED(signalHash);
-	Q_ASSERT(false);
-	return {};
-}
-
-QStringList EditSchemaAppSignalProvider::signalTags(const QString& appSignalId) const
-{
-	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignalByHash(signalHash);
 
 	if (s != nullptr)
 	{
@@ -202,25 +127,7 @@ QStringList EditSchemaAppSignalProvider::signalTags(const QString& appSignalId) 
 
 bool EditSchemaAppSignalProvider::signalHasTag(Hash signalHash, const QString& tag) const
 {
-	// Unlikely this function required for schema editing
-	//
-	Q_UNUSED(signalHash);
-	Q_UNUSED(tag);
-	Q_ASSERT(false);
-	return false;
-}
-
-bool EditSchemaAppSignalProvider::signalHasTag(const QString& appSignalId, const QString& tag) const
-{
-	return signalTags(appSignalId).contains(tag, Qt::CaseInsensitive);
-}
-
-E::SignalType EditSchemaAppSignalProvider::signalType(Hash signalHash, bool* found) const
-{
-	Q_UNUSED(signalHash);
-	Q_UNUSED(found);
-	Q_ASSERT(false);	// to do
-	return E::SignalType::Analog;
+	return signalTags(signalHash).contains(tag, Qt::CaseInsensitive);
 }
 
 QStringList EditSchemaAppSignalProvider::signalIdsByTag(const QString& /*tag*/) const
@@ -231,9 +138,21 @@ QStringList EditSchemaAppSignalProvider::signalIdsByTag(const QString& /*tag*/) 
 	return {};
 }
 
-E::SignalType EditSchemaAppSignalProvider::signalType(const QString& appSignalId, bool* found) const
+E::SignalType EditSchemaAppSignalProvider::signalType(Hash signalHash, bool* found) const
 {
-	return signalType(::calcHash(appSignalId), found);
+	AppSignal* s = m_signalSetProvider->getSignalByHash(signalHash);
+
+	if (found != nullptr)
+	{
+		*found = s != nullptr;
+	}
+
+	if (s != nullptr)
+	{
+		return s->signalType();
+	}
+
+	return {};
 }
 
 QString EditSchemaAppSignalProvider::equipmentToAppSignalId(const QString& /*equipmentId*/) const
@@ -273,53 +192,29 @@ EditSchemaTuningSignalProvider::EditSchemaTuningSignalProvider(AppSignalSetProvi
 
 bool EditSchemaTuningSignalProvider::signalExists(Hash hash) const
 {
-	// Unlikely this function required for schema editing
-	//
-	Q_UNUSED(hash);
-	Q_ASSERT(false);
-	return false;
-}
-
-bool EditSchemaTuningSignalProvider::signalExists(const QString& appSignalId) const
-{
-	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
+	AppSignal* s = m_signalSetProvider->getSignalByHash(hash);
 	return s != nullptr;
 }
 
 bool EditSchemaTuningSignalProvider::signalsExist(const QStringList& signalIds) const
 {
-	return std::all_of(signalIds.begin(), signalIds.end(), [this](const QString& appSignalId) {
-		return m_signalSetProvider->getSignal(appSignalId) != nullptr;
-	});
+	return std::all_of(signalIds.begin(),
+					   signalIds.end(),
+					   [this](const QString& appSignalId)
+					   {
+						   return m_signalSetProvider->getSignal(appSignalId) != nullptr;
+					   });
 }
 
-AppSignalParam EditSchemaTuningSignalProvider::signalParam(Hash hash, bool* found) const
+std::optional<AppSignalParam> EditSchemaTuningSignalProvider::signalParam(Hash hash) const
 {
-	// Unlikely this function required for schema editing
-	//
-	Q_UNUSED(hash);
-	Q_UNUSED(found);
-	Q_ASSERT(false);
-	return {};
-}
-
-AppSignalParam EditSchemaTuningSignalProvider::signalParam(const QString& appSignalId, bool* found) const
-{
-	AppSignalParam result;
-
-	AppSignal* s = m_signalSetProvider->getSignal(appSignalId);
-
-	if (found != nullptr)
+	AppSignal* s = m_signalSetProvider->getSignalByHash(hash);
+	if (s == nullptr)
 	{
-		*found = s != nullptr;
+		return std::nullopt;
 	}
 
-	if (s != nullptr)
-	{
-		result.load(*s);
-	}
-
-	return result;
+	return AppSignalParam(*s);
 }
 
 int EditSchemaTuningSignalProvider::signalsCount() const
@@ -342,7 +237,7 @@ std::vector<AppSignalParam> EditSchemaTuningSignalProvider::signalList() const
 	//
 	return {};
 }
-	
+
 TuningSignalState EditSchemaTuningSignalProvider::state(Hash hash, bool* found) const
 {
 	// Unlikely this function required for schema editing
@@ -402,13 +297,17 @@ TuningSignalState EditSchemaTuningSignalProvider::state(const QString& /*appSign
 	return {};
 }
 
-void EditSchemaTuningSignalProvider::state(std::span<const Hash> /*appSignalHashes*/, std::vector<TuningSignalState>* /*result*/, int* /*found*/) const
+void EditSchemaTuningSignalProvider::state(std::span<const Hash> /*appSignalHashes*/,
+										   std::vector<TuningSignalState>* /*result*/,
+										   int* /*found*/) const
 {
 	Q_ASSERT(false);
 	return;
 }
 
-void EditSchemaTuningSignalProvider::state(std::span<const QString> /*appSignalIds*/, std::vector<TuningSignalState>* /*result*/, int* /*found*/) const
+void EditSchemaTuningSignalProvider::state(std::span<const QString> /*appSignalIds*/,
+										   std::vector<TuningSignalState>* /*result*/,
+										   int* /*found*/) const
 {
 	Q_ASSERT(false);
 	return;

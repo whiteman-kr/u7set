@@ -362,20 +362,18 @@ namespace AppSignalLists
 			//
 			for (Hash hash : m_signalHashes)
 			{
-				bool ok = false;
-				const AppSignalParam& asp = m_appSignalManager.signalParam(hash, &ok);
-
-				if (ok == false)
+				auto asp = m_appSignalManager.signalParam(hash);
+				if (asp.has_value() == false)
 				{
 					continue;
 				}
 
-				if (signalType == SignalType::Analog && asp.isAnalog() == false)
+				if (signalType == SignalType::Analog && asp->isAnalog() == false)
 				{
 					continue;
 				}
 
-				if (signalType == SignalType::Discrete && asp.isAnalog() == true)
+				if (signalType == SignalType::Discrete && asp->isAnalog() == true)
 				{
 					continue;
 				}
@@ -384,12 +382,12 @@ namespace AppSignalLists
 				//
 				if (filterValue != FilterValueType::All && m_tuningSignalManager != nullptr)
 				{
-					if (asp.isDiscrete() == false)
+					if (asp->isDiscrete() == false)
 					{
 						continue;
 					}
 
-					ok = false;
+					bool ok = false;
 					const TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
 					if (ok == true)
@@ -419,10 +417,11 @@ namespace AppSignalLists
 					{
 					case FilterTextType::All:
 						{
-							if (asp.appSignalId().contains(filterText, Qt::CaseInsensitive) == true ||
-								asp.customSignalId().contains(filterText, Qt::CaseInsensitive) == true ||
-								asp.lmEquipmentId().contains(filterText, Qt::CaseInsensitive) == true ||
-								asp.caption().contains(filterText, Qt::CaseInsensitive) == true || asp.tags().contains(filterText) == true)
+							if (asp->appSignalId().contains(filterText, Qt::CaseInsensitive) == true ||
+								asp->customSignalId().contains(filterText, Qt::CaseInsensitive) == true ||
+								asp->lmEquipmentId().contains(filterText, Qt::CaseInsensitive) == true ||
+								asp->caption().contains(filterText, Qt::CaseInsensitive) == true ||
+								asp->tags().contains(filterText) == true)
 							{
 								filterResult = true;
 							}
@@ -430,7 +429,7 @@ namespace AppSignalLists
 						break;
 					case FilterTextType::AppSignalID:
 						{
-							if (asp.appSignalId().contains(filterText, Qt::CaseInsensitive) == true)
+							if (asp->appSignalId().contains(filterText, Qt::CaseInsensitive) == true)
 							{
 								filterResult = true;
 							}
@@ -438,7 +437,7 @@ namespace AppSignalLists
 						break;
 					case FilterTextType::CustomAppSignalID:
 						{
-							if (asp.customSignalId().contains(filterText, Qt::CaseInsensitive) == true)
+							if (asp->customSignalId().contains(filterText, Qt::CaseInsensitive) == true)
 							{
 								filterResult = true;
 							}
@@ -446,7 +445,7 @@ namespace AppSignalLists
 						break;
 					case FilterTextType::EquipmentID:
 						{
-							if (asp.lmEquipmentId().contains(filterText, Qt::CaseInsensitive) == true)
+							if (asp->lmEquipmentId().contains(filterText, Qt::CaseInsensitive) == true)
 							{
 								filterResult = true;
 							}
@@ -454,7 +453,7 @@ namespace AppSignalLists
 						break;
 					case FilterTextType::Caption:
 						{
-							if (asp.caption().contains(filterText, Qt::CaseInsensitive) == true)
+							if (asp->caption().contains(filterText, Qt::CaseInsensitive) == true)
 							{
 								filterResult = true;
 							}
@@ -462,7 +461,7 @@ namespace AppSignalLists
 						break;
 					case FilterTextType::Tag:
 						{
-							if (asp.tags().contains(filterText) == true)
+							if (asp->tags().contains(filterText) == true)
 							{
 								filterResult = true;
 							}
@@ -513,13 +512,13 @@ namespace AppSignalLists
 
 			const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 
-			bool ok = false;
-			AppSignalParam asp = m_appSignalManager.signalParam(item.appSignalHash(), &ok);
-			if (ok == false)
+			auto asp = m_appSignalManager.signalParam(item.appSignalHash());
+			if (asp.has_value() == false)
 			{
 				continue;
 			}
-			if (asp.enableTuning() == false)
+
+			if (asp->enableTuning() == false)
 			{
 				tunableSelected = false;
 			}
@@ -695,14 +694,13 @@ namespace AppSignalLists
 
 			const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 
-			bool ok = false;
-			AppSignalParam asp = m_appSignalManager.signalParam(item.appSignalHash(), &ok);
-			if (ok == false)
+			auto asp = m_appSignalManager.signalParam(item.appSignalHash());
+			if (asp.has_value() == false)
 			{
-				Q_ASSERT(false);
+				Q_ASSERT(asp.has_value());
 				return;
 			}
-			if (asp.enableTuning() == true)
+			if (asp->enableTuning() == true)
 			{
 				onSetValueClicked();
 				return;
@@ -798,12 +796,10 @@ namespace AppSignalLists
 				continue;
 			}
 
-			bool ok = false;
-
-			const AppSignalParam p = m_appSignalManager.signalParam(hash, &ok);
-			if (ok == false)
+			const auto p = m_appSignalManager.signalParam(hash);
+			if (p.has_value() == false)
 			{
-				Q_ASSERT(false);
+				Q_ASSERT(p.has_value());
 				return;
 			}
 			/*
@@ -822,7 +818,7 @@ namespace AppSignalLists
 
 			// Create value
 			*/
-			AppSignalListItem item(p.appSignalId());
+			AppSignalListItem item(p->appSignalId());
 			/*if (s.valid() == true)
 			{
 				ofv.setValue(s.value());
@@ -918,41 +914,40 @@ namespace AppSignalLists
 
 			const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 
-			bool ok = false;
-			AppSignalParam asp = m_appSignalManager.signalParam(item.appSignalHash(), &ok);
-			if (ok == false)
+			auto asp = m_appSignalManager.signalParam(item.appSignalHash());
+			if (asp.has_value() == false)
 			{
-				Q_ASSERT(false);
+				Q_ASSERT(asp.has_value());
 				return;
 			}
 
 			if (first == true)
 			{
-				lowLimit = asp.tuningLowBound();
-				highLimit = asp.tuningHighBound();
-				precision = asp.precision();
+				lowLimit = asp->tuningLowBound();
+				highLimit = asp->tuningHighBound();
+				precision = asp->precision();
 
 				if (item.hasValue() == true)
 				{
 					value = item.value();
 				}
-				value.setType(asp.tuningType());
+				value.setType(asp->tuningType());
 
-				defaultValue = asp.tuningDefaultValue();
+				defaultValue = asp->tuningDefaultValue();
 
 				first = false;
 			}
 			else
 			{
-				if (asp.tuningType() != value.type())
+				if (asp->tuningType() != value.type())
 				{
 					QMessageBox::warning(this, qAppName(), tr("Please select signals of same type (analog or discrete)."));
 					return;
 				}
 
-				if (asp.isAnalog() == true)
+				if (asp->isAnalog() == true)
 				{
-					if (lowLimit != asp.tuningLowBound() || highLimit != asp.tuningHighBound())
+					if (lowLimit != asp->tuningLowBound() || highLimit != asp->tuningHighBound())
 					{
 						QMessageBox::warning(this, qAppName(), tr("Selected signals have different input range."));
 						return;
@@ -966,7 +961,7 @@ namespace AppSignalLists
 						sameValue = false;
 					}
 				}
-				if (defaultValue != asp.tuningDefaultValue())
+				if (defaultValue != asp->tuningDefaultValue())
 				{
 					sameDefaultValue = false;
 				}
@@ -1179,9 +1174,8 @@ namespace AppSignalLists
 
 			// Get signal parameters from database
 
-			bool ok = false;
-			const AppSignalParam asp = m_appSignalManager.signalParam(hash, &ok);
-			if (ok == false)
+			auto asp = m_appSignalManager.signalParam(hash);
+			if (asp.has_value() == false)
 			{
 				notFoundSignals.push_back(appSignalId);
 				continue;
@@ -1192,7 +1186,7 @@ namespace AppSignalLists
 			std::optional<TuningValue> tv;
 			if (valueStr.isEmpty() == false)
 			{
-				TuningValue v(asp.tuningType());
+				TuningValue v(asp->tuningType());
 				bool valueOk = false;
 				v.fromString(valueStr, &valueOk);
 
@@ -1207,7 +1201,7 @@ namespace AppSignalLists
 			bool signalExists = m_appSignalList->itemExists(hash);
 			if (signalExists == false)
 			{
-				AppSignalListItem item(asp.appSignalId());
+				AppSignalListItem item(asp->appSignalId());
 				if (tv.has_value() == true)
 				{
 					item.setValue(tv.value());

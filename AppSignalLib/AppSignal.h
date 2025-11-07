@@ -619,6 +619,7 @@ public:
 
 	void removeSignals(const std::vector<int>& signalToRemoveIDs);
 
+	bool contains(Hash appSignalHash) const;
 	bool contains(const QString& appSignalID) const;
 	int count() const;
 	int size() const;

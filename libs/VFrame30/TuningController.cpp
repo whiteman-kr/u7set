@@ -1,9 +1,12 @@
-#include <VFrame30/TuningController.h>
 #include "../AppSignalLib/ITuningSignalManager.h"
+#include <VFrame30/TuningController.h>
 
 namespace VFrame30
 {
-	TuningController::TuningController(ITuningSignalManager& signalManager, ITuningConnection& tuningConnection, ITuningAuthorization& tuningAuthorization, QWidget* parent) :
+	TuningController::TuningController(ITuningSignalManager& signalManager,
+									   ITuningConnection& tuningConnection,
+									   ITuningAuthorization& tuningAuthorization,
+									   QWidget* parent) :
 		QObject(parent),
 		m_parent(parent),
 		m_signalManager(signalManager),
@@ -13,9 +16,9 @@ namespace VFrame30
 		return;
 	}
 
-	AppSignalParam TuningController::signalParam(const QString& appSignalId, bool* ok) const
+	std::optional<AppSignalParam> TuningController::signalParamNative(const QString& appSignalId) const
 	{
-		return m_signalManager.signalParam(appSignalId, ok);
+		return m_signalManager.signalParam(appSignalId);
 	}
 
 	TuningSignalState TuningController::signalState(const QString& appSignalId, bool* ok) const
@@ -25,15 +28,16 @@ namespace VFrame30
 
 	QVariant TuningController::signalParam(const QString& appSignalId) const
 	{
-		bool ok = true;
-		QVariant result = QVariant::fromValue(signalParam(appSignalId, &ok));
+		auto signalParam = signalParamNative(appSignalId);
 
-		if (ok == false)
+		if (signalParam.has_value() == false)
 		{
-			return QVariant();
+			return {};
 		}
-
-		return result;
+		else
+		{
+			return QVariant::fromValue(std::move(signalParam.value()));
+		}
 	}
 
 	QVariant TuningController::signalState(const QString& appSignalId) const
@@ -91,33 +95,20 @@ namespace VFrame30
 
 	bool TuningController::isDiscrete(QString signalId) const
 	{
-		bool ok = false;
-
-		AppSignalParam asp = m_signalManager.signalParam(::calcHash(signalId), &ok);
-
-		return ok ?
-					(asp.type() == E::SignalType::Discrete) :
-					false;
+		auto asp = m_signalManager.signalParam(::calcHash(signalId));
+		return asp.has_value() == true && asp->type() == E::SignalType::Discrete;
 	}
 
 	bool TuningController::isAnalog(QString signalId) const
 	{
-		bool ok = false;
-
-		AppSignalParam asp = m_signalManager.signalParam(::calcHash(signalId), &ok);
-
-		return ok ?
-					(asp.type() == E::SignalType::Analog) :
-					false;
+		auto asp = m_signalManager.signalParam(::calcHash(signalId));
+		return asp.has_value() == true && asp->type() == E::SignalType::Analog;
 	}
 
 	int TuningController::precision(QString signalId) const
 	{
-		bool ok = false;
-
-		AppSignalParam asp = m_signalManager.signalParam(::calcHash(signalId), &ok);
-
-		return (ok == true && asp.isAnalog() == true) ? asp.precision() : 0;
+		auto asp = m_signalManager.signalParam(::calcHash(signalId));
+		return (asp.has_value() == true && asp->isAnalog() == true) ? asp->precision() : 0;
 	}
 
 	QStringList TuningController::signalIdsByTag(QString tag) const
@@ -186,4 +177,4 @@ namespace VFrame30
 	{
 		return m_tuningAuthorization.userTags();
 	}
-}
+} // namespace VFrame30

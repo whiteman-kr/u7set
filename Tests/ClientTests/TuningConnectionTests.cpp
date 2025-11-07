@@ -1,8 +1,8 @@
-#include <ClientLib/TuningSignalManager.h>
+#include "ConnectionPorts.h"
 #include <ClientLib/IRecentAppSignals.h>
 #include <ClientLib/ITuningLog.h>
 #include <ClientLib/TuningConnection.h>
-#include "ConnectionPorts.h"
+#include <ClientLib/TuningSignalManager.h>
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -71,9 +71,7 @@ protected:
 		}
 	}
 
-	virtual void TearDown()
-	{
-	}
+	virtual void TearDown() {}
 
 	AppSignal asFloat;
 	AppSignal asInt;
@@ -81,34 +79,22 @@ protected:
 
 	Proto::AppSignalSet protoSignalSet;
 
-	inline static std::vector<SoftwareEndpoint::TuningService> s_tuningServices =
-	{
-		{
-			.equipmentId = "SYSTEMID_CLIENTTEST_WS01_TUNS",
-			.shortenId = "WS01_TUNS",
-			.clientRequestAddress = {"127.0.0.1", 13333},
-			.drivenSources = {},
-			.singleLmControl = false
-		},
-		{
-			.equipmentId = "SYSTEMID_CLIENTTEST_WS02_TUNS",
-			.shortenId = "WS02_TUNS",
-			.clientRequestAddress = {"127.0.0.1", 13334},
-			.drivenSources = {},
-			.singleLmControl = false
-		}
-	};
+	inline static std::vector<SoftwareEndpoint::TuningService> s_tuningServices = {{.equipmentId = "SYSTEMID_CLIENTTEST_WS01_TUNS",
+																					.shortenId = "WS01_TUNS",
+																					.clientRequestAddress = {"127.0.0.1", 13333},
+																					.drivenSources = {},
+																					.singleLmControl = false},
+																				   {.equipmentId = "SYSTEMID_CLIENTTEST_WS02_TUNS",
+																					.shortenId = "WS02_TUNS",
+																					.clientRequestAddress = {"127.0.0.1", 13334},
+																					.drivenSources = {},
+																					.singleLmControl = false}};
 
-	inline static std::vector<SoftwareEndpoint::TuningService> s_safeTuningServices =
-	{
-		{
-			.equipmentId = "SYSTEMID_CLIENTTEST_WS04_TUNS",
-			.shortenId = "WS04_TUNS",
-			.clientRequestAddress = {"127.0.0.1", 13335},
-			.drivenSources = {},
-			.singleLmControl = true
-		}
-	};
+	inline static std::vector<SoftwareEndpoint::TuningService> s_safeTuningServices = {{.equipmentId = "SYSTEMID_CLIENTTEST_WS04_TUNS",
+																						.shortenId = "WS04_TUNS",
+																						.clientRequestAddress = {"127.0.0.1", 13335},
+																						.drivenSources = {},
+																						.singleLmControl = true}};
 
 	inline static const SoftwareInfo s_softwareInfo = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS03_TUN"};
 	inline static const SoftwareInfo s_safeSoftwareInfoA = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS04_TUNA"};
@@ -116,15 +102,15 @@ protected:
 };
 
 
-class MockITuningSignalManager: public ITuningSignalManager
+class MockITuningSignalManager : public ITuningSignalManager
 {
 public:
 	MOCK_METHOD(bool, signalExists, (Hash hash), (const override));
 	MOCK_METHOD(bool, signalExists, (const QString& appSignalId), (const override));
 	MOCK_METHOD(bool, signalsExist, (const QStringList& signalIds), (const override));
 
-	MOCK_METHOD(AppSignalParam, signalParam, (Hash hash, bool* found), (const override));
-	MOCK_METHOD(AppSignalParam, signalParam, (const QString& appSignalId, bool* found), (const override));
+	MOCK_METHOD(std::optional<AppSignalParam>, signalParam, (Hash hash), (const override));
+	MOCK_METHOD(std::optional<AppSignalParam>, signalParam, (const QString& appSignalId), (const override));
 
 	MOCK_METHOD(int, signalsCount, (), (const override));
 	MOCK_METHOD(std::vector<Hash>, signalHashes, (), (const, override));
@@ -151,12 +137,8 @@ public:
 
 	MOCK_METHOD(void, invalidateSignalStates, (Hash tuningServiceHash), (override));
 
-	virtual void setState(const TuningSignalState& /*state*/, Hash /*tuningServiceHash*/) override
-	{
-	}
-	virtual void setStates(const std::vector<TuningSignalState>& /*states*/, Hash /* tuningServiceHash*/) override
-	{
-	}
+	virtual void setState(const TuningSignalState& /*state*/, Hash /*tuningServiceHash*/) override {}
+	virtual void setStates(const std::vector<TuningSignalState>& /*states*/, Hash /* tuningServiceHash*/) override {}
 
 	MOCK_METHOD(void, notifySignalParamsUpdated, (), (override));
 };
@@ -164,20 +146,10 @@ public:
 class IRecentAppSignalsStub : public ClientLib::IRecentAppSignals
 {
 public:
-	virtual void addRecentAppSignal(Hash /*h*/) override
-	{
-	}
-	virtual void addRecentAppSignals(std::span<const Hash> /*hashes*/) override
-	{
-	}
-	virtual std::vector<Hash> recentlyUsedAppSignals(const QString& /*appDataServivceId*/) override	
-	{
-		return {};
-	}
-	virtual bool hasRecentlyUsedAppSignals() override
-	{
-		return false;
-	}
+	virtual void addRecentAppSignal(Hash /*h*/) override {}
+	virtual void addRecentAppSignals(std::span<const Hash> /*hashes*/) override {}
+	virtual std::vector<Hash> recentlyUsedAppSignals(const QString& /*appDataServivceId*/) override { return {}; }
+	virtual bool hasRecentlyUsedAppSignals() override { return false; }
 };
 
 TEST_F(TuningConnectionTests, connect)
@@ -190,14 +162,13 @@ TEST_F(TuningConnectionTests, connect)
 	TuningAuthorizationStub tuningAuthorization;
 
 	EXPECT_CALL(signalUpdater, invalidateSignalStates(::calcHash(s_tuningServices[0].equipmentId)))
-			.Times(1);	// 1 times, when connection to TuningService is closed;
+		.Times(1); // 1 times, when connection to TuningService is closed;
 
 	EXPECT_CALL(signalUpdater, invalidateSignalStates(::calcHash(s_tuningServices[1].equipmentId)))
-			.Times(1);	// 1 times, when connection to TuningService is closed;
+		.Times(1); // 1 times, when connection to TuningService is closed;
 
 	std::vector<Hash> lmHashes = {::calcHash(QStringLiteral("SYSTEMID_CLIENTTEST_CH11_MD00"))};
-	EXPECT_CALL(signalUpdater, signalHashes(lmHashes))
-			.Times(2);
+	EXPECT_CALL(signalUpdater, signalHashes(lmHashes)).Times(2);
 
 	ClientLib::TuningLogStub tuningLog;
 
@@ -218,7 +189,12 @@ TEST_F(TuningConnectionTests, connect)
 			// Wait for several replies
 			//
 			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
-			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
+			if (std::all_of(connStates.begin(),
+							connStates.end(),
+							[](const auto& s)
+							{
+								return s.isConnected && s.replyCount > 4;
+							}))
 			{
 				break;
 			}
@@ -235,7 +211,6 @@ TEST_F(TuningConnectionTests, connect)
 
 		EXPECT_EQ(connStates[0].peerAddr, s_tuningServices[0].clientRequestAddress);
 		EXPECT_EQ(connStates[1].peerAddr, s_tuningServices[1].clientRequestAddress);
-
 	}
 
 	return;
@@ -269,7 +244,12 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 			// Wait for several replies
 			//
 			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
-			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
+			if (std::all_of(connStates.begin(),
+							connStates.end(),
+							[](const auto& s)
+							{
+								return s.isConnected && s.replyCount > 4;
+							}))
 			{
 				QThread::msleep(2000);
 				break;
@@ -338,7 +318,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 
 		EXPECT_EQ(st1.sourceid(), st2.sourceid());
 
-		EXPECT_FALSE(st1.isreply());	// Sources are not active, so isReply should be false
+		EXPECT_FALSE(st1.isreply()); // Sources are not active, so isReply should be false
 		EXPECT_FALSE(st2.isreply());
 	}
 
@@ -346,7 +326,7 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 
 	EXPECT_EQ(tc.tuningSourceStatesCount(lmHash), 1);
 
-	EXPECT_EQ(tc.activatedTuningSourceStatesCount(lmHash), 0);	// No sources are active
+	EXPECT_EQ(tc.activatedTuningSourceStatesCount(lmHash), 0); // No sources are active
 
 	EXPECT_TRUE(tc.activateTuningSource(lmHash, true));
 
@@ -382,13 +362,12 @@ TEST_F(TuningConnectionTests, tuningSourceInfo)
 		const ::Network::TuningSourceState& stp = si.previousState(::calcHash(si.controllerEquipmentId(0)));
 		EXPECT_FALSE(stp.isreply());
 
-		//Check that tuning sources have no errors
+		// Check that tuning sources have no errors
 
 		for (int i = 0; i < si.controllersCount(); i++)
 		{
 			EXPECT_EQ(si.getErrorsCount(i), 0);
 		}
-
 	}
 
 	EXPECT_TRUE(tc.activateTuningSource(lmHash, false));
@@ -463,7 +442,12 @@ TEST_F(TuningConnectionTests, activeClientInfo)
 			std::vector<Tcp::ConnectionState> connStatesB = tcB.tcpTuningConnStates();
 
 			connStatesA.insert(connStatesA.end(), connStatesB.begin(), connStatesB.end());
-			if (std::all_of(connStatesA.begin(), connStatesA.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
+			if (std::all_of(connStatesA.begin(),
+							connStatesA.end(),
+							[](const auto& s)
+							{
+								return s.isConnected && s.replyCount > 4;
+							}))
 			{
 				QThread::msleep(2000);
 				break;
@@ -523,8 +507,8 @@ TEST_F(TuningConnectionTests, activeClientInfo)
 			infoA = tcA.clientControlInfo();
 			infoB = tcB.clientControlInfo();
 
-			if(infoA.contains("active client is SYSTEMID_CLIENTTEST_WS04_TUNB") == true &&
-					infoB.contains("active client is SYSTEMID_CLIENTTEST_WS04_TUNB") == true)
+			if (infoA.contains("active client is SYSTEMID_CLIENTTEST_WS04_TUNB") == true &&
+				infoB.contains("active client is SYSTEMID_CLIENTTEST_WS04_TUNB") == true)
 			{
 				break;
 			}
@@ -576,7 +560,7 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 	// Create tuning connection to the service
 	//
 	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, tuningAuthorization, &logFile, &tuningLog};
-	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
+	tc.updateConnections(s_softwareInfo, s_tuningServices, false /*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
 
 	// Wait for connection established
 	//
@@ -592,7 +576,12 @@ TEST_F(TuningConnectionTests, writeAnalogSignals)
 			// Wait for several replies
 			//
 			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
-			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
+			if (std::all_of(connStates.begin(),
+							connStates.end(),
+							[](const auto& s)
+							{
+								return s.isConnected && s.replyCount > 4;
+							}))
 			{
 				break;
 			}
@@ -731,7 +720,7 @@ TEST_F(TuningConnectionTests, applyAnalogSignals)
 	// Create tuning connection to the service
 	//
 	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, tuningAuthorization, &logFile, &tuningLog};
-	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
+	tc.updateConnections(s_softwareInfo, s_tuningServices, false /*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
 
 	// Wait for connection established
 	//
@@ -747,7 +736,12 @@ TEST_F(TuningConnectionTests, applyAnalogSignals)
 			// Wait for several replies
 			//
 			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
-			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
+			if (std::all_of(connStates.begin(),
+							connStates.end(),
+							[](const auto& s)
+							{
+								return s.isConnected && s.replyCount > 4;
+							}))
 			{
 				break;
 			}
@@ -767,9 +761,7 @@ TEST_F(TuningConnectionTests, applyAnalogSignals)
 
 	// Apply changes
 	//
-	std::vector<Hash> hashes = {::calcHash(asFloat.appSignalID()),
-								::calcHash(asInt.appSignalID()),
-								::calcHash(asDiscrete.appSignalID())};
+	std::vector<Hash> hashes = {::calcHash(asFloat.appSignalID()), ::calcHash(asInt.appSignalID()), ::calcHash(asDiscrete.appSignalID())};
 	tc.applyTuningSignals(hashes);
 
 	// Wait for changes are applied
@@ -834,7 +826,7 @@ TEST_F(TuningConnectionTests, writeDiscreteSignals)
 	// Create tuning connection to the service
 	//
 	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, tuningAuthorization, &logFile, &tuningLog};
-	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::AccessKey);
+	tc.updateConnections(s_softwareInfo, s_tuningServices, false /*autoApply*/, TuningClientSettings::LmStatusFlagMode::AccessKey);
 
 	// Wait for connection established
 	//
@@ -850,7 +842,12 @@ TEST_F(TuningConnectionTests, writeDiscreteSignals)
 			// Wait for several replies
 			//
 			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
-			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
+			if (std::all_of(connStates.begin(),
+							connStates.end(),
+							[](const auto& s)
+							{
+								return s.isConnected && s.replyCount > 4;
+							}))
 			{
 				break;
 			}
@@ -938,7 +935,7 @@ TEST_F(TuningConnectionTests, applyDiscreteSignals)
 	// Create tuning connection to the service
 	//
 	ClientLib::TuningConnection tc{signalManager, signalManager, signalManager, tuningAuthorization, &logFile, &tuningLog};
-	tc.updateConnections(s_softwareInfo, s_tuningServices, false/*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
+	tc.updateConnections(s_softwareInfo, s_tuningServices, false /*autoApply*/, TuningClientSettings::LmStatusFlagMode::SOR);
 
 	// Wait for connection established
 	//
@@ -954,7 +951,12 @@ TEST_F(TuningConnectionTests, applyDiscreteSignals)
 			// Wait for several replies
 			//
 			std::vector<Tcp::ConnectionState> connStates = tc.tcpTuningConnStates();
-			if (std::all_of(connStates.begin(), connStates.end(), [](const auto& s) { return s.isConnected && s.replyCount > 4; }))
+			if (std::all_of(connStates.begin(),
+							connStates.end(),
+							[](const auto& s)
+							{
+								return s.isConnected && s.replyCount > 4;
+							}))
 			{
 				break;
 			}

@@ -1,4 +1,4 @@
-	#pragma once
+#pragma once
 
 #include "../AppSignalLib/ISignalManager.h"
 #include <AppSignalLists/SignalList.h>
@@ -11,7 +11,7 @@ namespace Builder
 	{
 	public:
 		AppSignalListStorage(DbController* db);
-		
+
 		using DbObjectStorage::get;
 		std::shared_ptr<AppSignalLists::AppSignalList> get(const QString& id, bool* ok = nullptr) const;
 
@@ -26,28 +26,23 @@ namespace Builder
 	public:
 		AppSignalListsProvider(const std::vector<AppSignal*>& signalsVector);
 
+	public:
+		using ISignalManager::signalExists;
+		using ISignalManager::signalParam;
+
 		virtual int signalsCount() const override;
 		virtual std::vector<Hash> signalHashes() const override;
 		virtual std::vector<AppSignalParam> signalList() const override;
 
 		virtual bool signalExists(Hash hash) const override;
-		virtual bool signalExists(const QString& appSignalId) const override;
 		virtual bool signalsExist(const QStringList& signalIds) const override;
 
-		virtual AppSignalParam signalParam(Hash signalHash, bool* found) const override;
-		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
+		virtual std::optional<AppSignalParam> signalParam(Hash signalHash) const override;
 
-		std::map<Hash, AppSignalParam>::const_iterator begin() const
-		{
-			return m_params.begin();
-		}
-
-		std::map<Hash, AppSignalParam>::const_iterator end() const
-		{
-			return m_params.end();
-		}
+		std::map<Hash, AppSignalParam>::const_iterator begin() const { return m_params.begin(); }
+		std::map<Hash, AppSignalParam>::const_iterator end() const { return m_params.end(); }
 
 	private:
-		std::map<Hash, AppSignalParam> m_params;	 // Hash from AppSignalID
+		std::map<Hash, AppSignalParam> m_params; // Hash from AppSignalID
 	};
-}
+} // namespace Builder

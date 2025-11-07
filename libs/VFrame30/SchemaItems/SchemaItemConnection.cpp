@@ -534,13 +534,29 @@ namespace VFrame30
 		int textRow = 0;
 		for (const QString& appSignalId : this->appSignalIdsAsList())
 		{
-			signal.setAppSignalId(appSignalId);
-			signalState.m_flags.valid = false;
-
 			if (context->appSignalController() != nullptr)
 			{
-				signal = context->appSignalController()->signalParam(appSignalId, nullptr);
-				signalState = context->appSignalController()->signalState(appSignalId, nullptr);
+				signal = context->appSignalController()
+							 ->signalParam(appSignalId)
+							 .or_else(
+								 [&appSignalId]
+								 {
+									 AppSignalParam sp;
+									 sp.setAppSignalId(appSignalId);
+									 return std::optional(sp);
+								 })
+							 .value();
+
+				signalState = context->appSignalController()
+								  ->signalState(appSignalId)
+								  .or_else(
+									  [&appSignalId]
+									  {
+										  AppSignalState state;
+										  state.m_flags.valid = false;
+										  return std::optional(state);
+									  })
+								  .value();
 			}
 
 			QRectF signalRect = {r.left(), r.top() + lineHeight * textRow, r.width(), lineHeight};

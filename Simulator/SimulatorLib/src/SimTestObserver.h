@@ -19,10 +19,13 @@ namespace Sim
 
 		virtual void fill(const IAppSignalManager& signalManager)
 		{
-			bool hasState = false;
-			AppSignalState state = signalManager.signalState(::calcHash(appSignalId), &hasState);
+			auto state = signalManager.signalState(::calcHash(appSignalId));
+			if (state.has_value() == false)
+			{
+				return;
+			}
 
-			if (hasState == false || state.isStateAvailable() == false)
+			if (state->isStateAvailable() == false)
 			{
 				return;
 			}
@@ -31,14 +34,14 @@ namespace Sim
 			//
 			if (states.empty() == true)
 			{
-				states.push_back(state);
+				states.push_back(*state);
 				return;
 			}
 
 			const auto& lastState = states.back();
-			if (lastState.value() != state.value() || lastState.m_flags.all != state.m_flags.all)
+			if (lastState.value() != state->value() || lastState.m_flags.all != state->m_flags.all)
 			{
-				states.push_back(state);
+				states.push_back(*state);
 			}
 
 			return;
@@ -55,9 +58,8 @@ namespace Sim
 		/// @brief Elapsed time in milliseconds until expectation was fulfilled, or -1 if the expectation conditions were not met.
 		int elapsedMs() const
 		{
-			return metConditions ?
-					   states.back().time(E::TimeType::Plant).timeStamp - states.front().time(E::TimeType::Plant).timeStamp :
-					   -1;
+			return metConditions ? states.back().time(E::TimeType::Plant).timeStamp - states.front().time(E::TimeType::Plant).timeStamp :
+								   -1;
 		}
 
 		virtual QString toString() const = 0;
@@ -127,10 +129,7 @@ namespace Sim
 			return states.back().value() > threshold;
 		}
 
-		virtual QString toString() const override
-		{
-			return QString("%1 > %2").arg(appSignalId).arg(threshold);
-		}
+		virtual QString toString() const override { return QString("%1 > %2").arg(appSignalId).arg(threshold); }
 	};
 
 	struct ToExpectationLess : ToExpectation
@@ -143,15 +142,9 @@ namespace Sim
 
 		double threshold{};
 
-		bool metPrivate() const override
-		{
-			return states.back().value() < threshold;
-		}
+		bool metPrivate() const override { return states.back().value() < threshold; }
 
-		virtual QString toString() const override
-		{
-			return QString("%1 < %2").arg(appSignalId).arg(threshold);
-		}
+		virtual QString toString() const override { return QString("%1 < %2").arg(appSignalId).arg(threshold); }
 	};
 
 

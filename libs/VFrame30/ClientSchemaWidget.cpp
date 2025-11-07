@@ -1,7 +1,7 @@
-#include <VFrame30/ClientSchemaWidget.h>
-#include <VFrame30/PropertyNames.h>
-#include <VFrame30/Context.h>
 #include <AppSignal.pb.h>
+#include <VFrame30/ClientSchemaWidget.h>
+#include <VFrame30/Context.h>
+#include <VFrame30/PropertyNames.h>
 
 namespace VFrame30
 {
@@ -21,7 +21,10 @@ namespace VFrame30
 	}
 
 
-	ClientSchemaWidget::ClientSchemaWidget(ClientSchemaView* schemaView, std::shared_ptr<VFrame30::Schema> schema, VFrame30::SchemaManager* schemaManager, QWidget* parent) :
+	ClientSchemaWidget::ClientSchemaWidget(ClientSchemaView* schemaView,
+										   std::shared_ptr<VFrame30::Schema> schema,
+										   VFrame30::SchemaManager* schemaManager,
+										   QWidget* parent) :
 		BaseSchemaWidget(schema, schemaView, parent),
 		m_schemaManager(schemaManager)
 	{
@@ -30,15 +33,20 @@ namespace VFrame30
 
 		// --
 		//
-		connect(this->schemaView(), &VFrame30::SchemaViewWidget::signal_schemaChanged, this,
-			[this](VFrame30::Schema* schema)
-			{
-				emit this->signal_schemaChanged(this, schema);
-			});
+		connect(this->schemaView(),
+				&VFrame30::SchemaViewWidget::signal_schemaChanged,
+				this,
+				[this](VFrame30::Schema* schema)
+				{
+					emit this->signal_schemaChanged(this, schema);
+				});
 
 		// --
 		//
-		connect(clientSchemaView(), &VFrame30::ClientSchemaView::signal_setSchema, this, [this](QString schemaId, QStringList highlightIds)
+		connect(clientSchemaView(),
+				&VFrame30::ClientSchemaView::signal_setSchema,
+				this,
+				[this](QString schemaId, QStringList highlightIds)
 				{
 					setSchema(schemaId, highlightIds, false);
 				});
@@ -54,7 +62,7 @@ namespace VFrame30
 		{
 			// Argument zoom() can be any in this case, as set zoom will scale to 100% or to FitToScreen.
 			//
-			setZoom(zoom(), false, -1 , -1);
+			setZoom(zoom(), false, -1, -1);
 		}
 
 		BaseSchemaWidget::resizeEvent(event);
@@ -169,17 +177,16 @@ namespace VFrame30
 
 		for (QString id : appSignalIds)
 		{
-			bool ok = false;
-			AppSignalParam signalParam = appSignalController->signalParam(id, &ok);
-			if (ok == false)
+			auto signalParam = appSignalController->signalParam(id);
+			if (signalParam.has_value() == false)
 			{
 				continue;
 			}
 
-			Q_ASSERT(signalParam.appSignalId() == id);
+			Q_ASSERT(signalParam->appSignalId() == id);
 
 			::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
-			signalParam.save(protoSignalMessage);
+			signalParam->save(protoSignalMessage);
 		}
 
 		if (protoSetMessage.appsignal_size() == 0)
@@ -240,7 +247,7 @@ namespace VFrame30
 
 	bool ClientSchemaWidget::canBackHistory() const
 	{
-		bool enableBack = m_backHistory.size() > 1;		// m_backHistory has at least 2 items
+		bool enableBack = m_backHistory.size() > 1; // m_backHistory has at least 2 items
 		return enableBack;
 	}
 
@@ -260,7 +267,7 @@ namespace VFrame30
 		SchemaHistoryItem currentView = m_backHistory.back();
 		m_backHistory.pop_back();
 
-		Q_ASSERT(currentView.m_schema->schemaId() == schemaId());	// Save current state
+		Q_ASSERT(currentView.m_schema->schemaId() == schemaId()); // Save current state
 		currentView = currentHistoryState();
 
 		m_forwardHistory.push_front(currentView);
@@ -363,7 +370,11 @@ namespace VFrame30
 
 	SchemaHistoryItem ClientSchemaWidget::currentHistoryState() const
 	{
-		SchemaHistoryItem hi{schemaSharedPtr(), clientSchemaView()->variables(), zoom(), horizontalScrollBar()->value(), verticalScrollBar()->value()};
+		SchemaHistoryItem hi{schemaSharedPtr(),
+							 clientSchemaView()->variables(),
+							 zoom(),
+							 horizontalScrollBar()->value(),
+							 verticalScrollBar()->value()};
 		return hi;
 	}
 
@@ -400,7 +411,7 @@ namespace VFrame30
 
 		if (canBackHistory() == false)
 		{
-			VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back();		// MUST BE REFERENCE!!!
+			VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back(); // MUST BE REFERENCE!!!
 			Q_ASSERT(currentHistoryItem.m_schema->schemaId() == this->schemaId());
 
 			currentHistoryItem = currentHistoryState();
@@ -419,12 +430,12 @@ namespace VFrame30
 		// --
 		//
 		BaseSchemaWidget::setSchema(schema, false);
-		
+
 		if (zoomMode() == VFrame30::ZoomMode::Manual || zoomMode() == VFrame30::ZoomMode::FitToScreen)
 		{
 			// Initially set zoom to "fit to screen".
 			//
-			setZoom(0, true);  // Zoom value 0 means adjust schema zoom to fit screen
+			setZoom(0, true); // Zoom value 0 means adjust schema zoom to fit screen
 		}
 
 		// --
@@ -493,7 +504,7 @@ namespace VFrame30
 	{
 		return m_zoomMode;
 	}
-	
+
 	void ClientSchemaWidget::setZoomMode(VFrame30::ZoomMode zoomMode, bool repaint)
 	{
 		Q_UNUSED(repaint);
@@ -522,4 +533,4 @@ namespace VFrame30
 		return v;
 	}
 
-}
+} // namespace VFrame30

@@ -312,14 +312,14 @@ namespace ClientLib
 
 				// Take state from client, NOT (!) from tuningSignalManager, to skip writing non-valid signals in multi-channel case.
 				//
-				bool found = false;
-				AppSignalParam param = m_tuningSignalManager.signalParam(command.appSignalHash, &found);
-				if (found == false)
+				auto param = m_tuningSignalManager.signalParam(command.appSignalHash);
+				if (param.has_value() == false)
 				{
-					Q_ASSERT(false);
+					Q_ASSERT(param.has_value());
 					return false;
 				}
 
+				bool found = false;
 				TuningSignalState state =
 					m_tuningSignalManager.state(command.appSignalHash, c.tcpTuningClient->tuningServiceHash(), &found);
 				if (found == false)
@@ -328,16 +328,16 @@ namespace ClientLib
 					return false;
 				}
 
-				if (state.limitsUnbalance(param) == true)
+				if (state.limitsUnbalance(*param) == true)
 				{
 					m_logFile.writeAlert(tr("writeTuningSignal(), There is limits mismatch in signal '%1'. Operation is disabled.")
-											 .arg(param.customSignalId()));
+											 .arg(param->customSignalId()));
 					continue;
 				}
 
 				if (found == true && state.valid() == true && state.controlIsEnabled() == true && state.writingIsEnabled() == true)
 				{
-					m_tuningLog->write(param, state.value(), command.value);
+					m_tuningLog->write(*param, state.value(), command.value);
 
 					commands.push_back({command.appSignalHash, command.value});
 				}
@@ -361,9 +361,8 @@ namespace ClientLib
 
 	bool TuningConnectionPrivate::writeTuningSignal(const QString& appSignalId, QVariant value)
 	{
-		bool ok = false;
-		AppSignalParam appSignal = m_tuningSignalManager.signalParam(appSignalId, &ok);
-		if (ok == false)
+		const auto appSignal = m_tuningSignalManager.signalParam(appSignalId);
+		if (appSignal.has_value() == false)
 		{
 			return false;
 		}
@@ -381,7 +380,7 @@ namespace ClientLib
 			return false;
 		}
 
-		TuningValueType tuningType = appSignal.tuningType();
+		TuningValueType tuningType = appSignal->tuningType();
 
 		switch (tuningType)
 		{
@@ -485,15 +484,15 @@ namespace ClientLib
 
 		// Check range for analog signal
 		//
-		if (appSignal.tuningType() != TuningValueType::Discrete)
+		if (appSignal->tuningType() != TuningValueType::Discrete)
 		{
-			if (tuningValue < appSignal.tuningLowBound() || tuningValue > appSignal.tuningHighBound())
+			if (tuningValue < appSignal->tuningLowBound() || tuningValue > appSignal->tuningHighBound())
 			{
 				m_logFile.writeError(tr("writeTuningSignal(%1, %2) - value is out tuning of range [%3, %4].")
 										 .arg(appSignalId)
 										 .arg(value.toString())
-										 .arg(appSignal.tuningLowBound().toString())
-										 .arg(appSignal.tuningHighBound().toString()));
+										 .arg(appSignal->tuningLowBound().toString())
+										 .arg(appSignal->tuningHighBound().toString()));
 				return false;
 			}
 		}

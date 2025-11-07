@@ -46,42 +46,28 @@ function assert(condition, message)
 
 		virtual bool signalExists(const QString& signalId) const override { return expectedStates.contains(signalId); }
 
-		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override
+		virtual std::optional<AppSignalParam> signalParam(const QString& appSignalId) const override
 		{
-			AppSignalParam result;
-
 			auto it = expectedStates.find(appSignalId);
-
-			if (found != nullptr)
-			{
-				*found = it != expectedStates.end();
-			}
-
 			if (it == expectedStates.end())
 			{
-				return result;
+				return std::nullopt;
 			}
 
+			AppSignalParam result;
 			result.setAppSignalId(appSignalId);
 			return result;
 		}
 
-		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override
+		virtual std::optional<AppSignalState> signalState(const QString& appSignalId) const override
 		{
-			AppSignalState result;
-
 			auto it = expectedStates.find(appSignalId);
 			if (it != expectedStates.end())
 			{
-				result = it->second;
+				return it->second;
 			}
 
-			if (found != nullptr)
-			{
-				*found = it != expectedStates.end();
-			}
-
-			return result;
+			return std::nullopt;
 		}
 
 		virtual bool expectSignalValue(QString appSignalId, qint64 /*timeoutMs*/, double value, double tolerance = 0) const override
@@ -163,8 +149,8 @@ function assert(condition, message)
 		MOCK_METHOD(bool, init, (qint64 timeoutMs), (override));
 		MOCK_METHOD(bool, shutdown, (), (override));
 		MOCK_METHOD(bool, signalExists, (const QString& signalId), (const, override));
-		MOCK_METHOD(AppSignalParam, signalParam, (const QString& appSignalId, bool* found), (const, override));
-		MOCK_METHOD(AppSignalState, signalState, (const QString& appSignalId, bool* found), (const, override));
+		MOCK_METHOD(std::optional<AppSignalParam>, signalParam, (const QString& appSignalId), (const, override));
+		MOCK_METHOD(std::optional<AppSignalState>, signalState, (const QString& appSignalId), (const, override));
 		MOCK_METHOD(bool, expectSignalValue, (QString appSignalId, qint64 timeoutMs, double value, double tolerance), (const, override));
 	};
 
@@ -590,7 +576,7 @@ TEST_F(TestSuiteUnitTest, InitCleanUpAreCalled)
 	EXPECT_CALL(testLog, writeMessage(_, _)).Times(AtLeast(0));
 	EXPECT_CALL(testLog, writeWarning(_, _)).Times(AtLeast(0));
 	EXPECT_CALL(testLog, writeText(_, _)).Times(AtLeast(0));
-	
+
 	EXPECT_CALL(testLog, writeWarning(QString("initTestCase"), _)).Times(1);
 	EXPECT_CALL(testLog, writeWarning(QString("cleanupTestCase"), _)).Times(1);
 

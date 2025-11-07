@@ -1,5 +1,5 @@
-#include <SimulatorLib/SimAppSignalManager.h>
 #include "SimAppSignalManagerImpl.h"
+#include <SimulatorLib/SimAppSignalManager.h>
 
 namespace Sim
 {
@@ -52,14 +52,14 @@ namespace Sim
 		return m_impl.customToAppSignal(customSignalHash);
 	}
 
-	AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found, bool applyOverride) const
+	std::optional<AppSignalState> AppSignalManager::signalState(const QString& appSignalId, bool applyOverride) const
 	{
-		return m_impl.signalState(appSignalId, found, applyOverride);
+		return m_impl.signalState(appSignalId, applyOverride);
 	}
 
-	AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found, bool applyOverride) const
+	std::optional<AppSignalState> AppSignalManager::signalState(Hash signalHash, bool applyOverride) const
 	{
-		return m_impl.signalState(signalHash, found, applyOverride);
+		return m_impl.signalState(signalHash, applyOverride);
 	}
 
 	bool AppSignalManager::getUpdateForRam(const QString& equipmentId, Sim::Ram* ram) const
@@ -87,70 +87,36 @@ namespace Sim
 		return m_impl.signalExists(hash);
 	}
 
-	bool AppSignalManager::signalExists(const QString& appSignalId) const
-	{
-		return m_impl.signalExists(appSignalId);
-	}
-
 	bool AppSignalManager::signalsExist(const QStringList& signalIds) const
 	{
 		return m_impl.signalsExist(signalIds);
 	}
 
-	AppSignalParam AppSignalManager::signalParam(Hash signalHash, bool* found) const
+	std::optional<AppSignalParam> AppSignalManager::signalParam(Hash signalHash) const
 	{
-		return m_impl.signalParam(signalHash, found);
+		return m_impl.signalParam(signalHash);
 	}
 
-	AppSignalParam AppSignalManager::signalParam(const QString& appSignalId, bool* found) const
+	std::optional<AppSignalState> AppSignalManager::signalState(Hash signalHash) const
 	{
-		return m_impl.signalParam(appSignalId, found);
+		return m_impl.signalState(signalHash);
 	}
 
-	AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
+	std::optional<AppSignalState> AppSignalManager::signalState(Hash signalHash, Hash dataServerHash) const
 	{
-		return m_impl.signalState(signalHash, found);
+		return m_impl.signalState(signalHash, dataServerHash);
 	}
 
-	AppSignalState AppSignalManager::signalState(const QString& appSignalId, bool* found) const
+	void AppSignalManager::signalState(std::span<const Hash> appSignalHashes, std::vector<std::optional<AppSignalState>>* result) const
 	{
-		return m_impl.signalState(appSignalId, found);
-	}
-
-	AppSignalState AppSignalManager::signalState(Hash signalHash, Hash dataServerHash, bool* found) const
-	{
-		return m_impl.signalState(signalHash, dataServerHash, found);
-	}
-
-	AppSignalState AppSignalManager::signalState(const QString& appSignalId, const QString& dataServerId, bool* found) const
-	{
-		return m_impl.signalState(appSignalId, dataServerId, found);
-	}
-
-	void AppSignalManager::signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const
-	{
-		m_impl.signalState(appSignalHashes, result, found);
-	}
-
-	void AppSignalManager::signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const
-	{
-		m_impl.signalState(appSignalIds, result, found);
+		m_impl.signalState(appSignalHashes, result);
 	}
 
 	void AppSignalManager::signalState(std::span<const Hash> appSignalHashes,
 									   Hash dataServerHash,
-									   std::vector<AppSignalState>* result,
-									   int* found) const
+									   std::vector<std::optional<AppSignalState>>* result) const
 	{
-		m_impl.signalState(appSignalHashes, dataServerHash, result, found);
-	}
-
-	void AppSignalManager::signalState(std::span<const QString> appSignalIds,
-									   const QString& dataServerId,
-									   std::vector<AppSignalState>* result,
-									   int* found) const
-	{
-		m_impl.signalState(appSignalIds, dataServerId, result, found);
+		m_impl.signalState(appSignalHashes, dataServerHash, result);
 	}
 
 	QStringList AppSignalManager::signalTags(Hash signalHash) const
@@ -158,19 +124,9 @@ namespace Sim
 		return m_impl.signalTags(signalHash);
 	}
 
-	QStringList AppSignalManager::signalTags(const QString& appSignalId) const
-	{
-		return m_impl.signalTags(appSignalId);
-	}
-
 	bool AppSignalManager::signalHasTag(Hash signalHash, const QString& tag) const
 	{
 		return m_impl.signalHasTag(signalHash, tag);
-	}
-
-	bool AppSignalManager::signalHasTag(const QString& appSignalId, const QString& tag) const
-	{
-		return m_impl.signalHasTag(appSignalId, tag);
 	}
 
 	QStringList AppSignalManager::signalIdsByTag(const QString& tag) const
@@ -181,11 +137,6 @@ namespace Sim
 	E::SignalType AppSignalManager::signalType(Hash signalHash, bool* found) const
 	{
 		return m_impl.signalType(signalHash, found);
-	}
-
-	E::SignalType AppSignalManager::signalType(const QString& appSignalId, bool* found) const
-	{
-		return m_impl.signalType(appSignalId, found);
 	}
 
 	QString AppSignalManager::equipmentToAppSignalId(const QString& equipmentId) const

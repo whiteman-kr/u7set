@@ -147,7 +147,7 @@ namespace SimUi
 
 				// get state without applied override.
 				//
-				AppSignalState state = m_simulator.appSignalManager().signalState(appSignalId, nullptr, false);
+				AppSignalState state = m_simulator.appSignalManager().signalState(appSignalId, false).value_or(AppSignalState{});
 				bool isAlreadyOverriden = m_simulator.overrideSignals().containsSignal(appSignalId);
 
 				signalIds << appSignalId;
@@ -655,7 +655,7 @@ namespace SimUi
 			{
 				// Signot is not in the list, nothing critical, but how it happened?
 				//
-				//assert(false); // Possibly, signal was removed from override list by Simulator bridge - assert removed
+				// assert(false); // Possibly, signal was removed from override list by Simulator bridge - assert removed
 				continue;
 			}
 
@@ -940,15 +940,15 @@ namespace SimUi
 					//
 					Hash appSignalIdHash = m_simulator.appSignalManager().customToAppSignal(::calcHash(signalId));
 
-					AppSignalParam appSignalParam = m_simulator.appSignalManager().signalParam(appSignalIdHash, &ok);
-					if (ok == false)
+					auto appSignalParam = m_simulator.appSignalManager().signalParam(appSignalIdHash);
+					if (appSignalParam.has_value() == false)
 					{
 						QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(signalId));
 						defaultText = signalId;
 						continue;
 					}
 
-					appSignalId = appSignalParam.appSignalId();
+					appSignalId = appSignalParam->appSignalId();
 				}
 
 				// If signal already added to simulation, just select it
@@ -961,7 +961,7 @@ namespace SimUi
 
 				// Get current signal value, and set it as default
 				//
-				AppSignalState state = m_simulator.appSignalManager().signalState(appSignalId, nullptr, false);
+				AppSignalState state = m_simulator.appSignalManager().signalState(appSignalId, false).value_or(AppSignalState{});
 
 				// Add signal to override list
 				//
@@ -1156,18 +1156,16 @@ namespace SimUi
 
 			for (const QString& appSignalId : m_dragAppSignalIds)
 			{
-				bool ok = false;
-
-				AppSignalParam signalParam = m_simulator.appSignalManager().signalParam(appSignalId, &ok);
-				if (ok == false)
+				auto signalParam = m_simulator.appSignalManager().signalParam(appSignalId);
+				if (signalParam.has_value() == false)
 				{
 					continue;
 				}
 
-				assert(signalParam.appSignalId() == appSignalId);
+				assert(signalParam->appSignalId() == appSignalId);
 
 				::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
-				signalParam.save(protoSignalMessage);
+				signalParam->save(protoSignalMessage);
 			}
 
 			QByteArray data;

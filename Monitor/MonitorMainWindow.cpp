@@ -1,5 +1,4 @@
 #include "MonitorMainWindow.h"
-#include <UiLib/UiTools.h>
 #include "./Archive/MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "DataSourcesWidget.h"
@@ -8,6 +7,7 @@
 #include "SelectSchemaWidget.h"
 #include "SignalLogDialog.h"
 #include <UiLib/LogDialog.h>
+#include <UiLib/UiTools.h>
 
 #include <AppSignalLists/DialogSignalListEditor.h>
 #include <AppSignalLists/SignalListChecker.h>
@@ -1296,12 +1296,11 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 
 	for (const QString& s : signalsList)
 	{
-		bool ok = false;
-		AppSignalParam asp = m_signalManager.signalParam(s, &ok);
+		auto asp = m_signalManager.signalParam(s);
 
-		if (ok == true)
+		if (asp.has_value() == true)
 		{
-			appSignals.push_back(asp);
+			appSignals.push_back(std::move(*asp));
 		}
 		else
 		{
@@ -1507,12 +1506,10 @@ void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 
 	for (const QString& appSignalId : signalsList)
 	{
-		bool found = false;
-
-		AppSignalParam asp = m_signalManager.signalParam(appSignalId, &found);
-		if (found == true)
+		auto asp = m_signalManager.signalParam(appSignalId);
+		if (asp.has_value() == true)
 		{
-			specialSignals.push_back(asp);
+			specialSignals.push_back(std::move(*asp));
 		}
 		else
 		{

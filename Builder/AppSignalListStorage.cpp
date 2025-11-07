@@ -12,14 +12,14 @@ namespace Builder
 	{
 	}
 
-	std::shared_ptr<AppSignalLists::AppSignalList> AppSignalListStorage::get(const QString& id, bool* ok) const 
+	std::shared_ptr<AppSignalLists::AppSignalList> AppSignalListStorage::get(const QString& id, bool* ok) const
 	{
 		for (auto it = begin(); it != end(); it++)
 		{
 			const AppSignalLists::AppSignalList* list = it->get();
 			if (list == nullptr)
 			{
-				if (ok != nullptr) 
+				if (ok != nullptr)
 				{
 					*ok = false;
 				}
@@ -27,9 +27,9 @@ namespace Builder
 				return nullptr;
 			}
 
-			if (list->id() == id) 
+			if (list->id() == id)
 			{
-				if (ok != nullptr) 
+				if (ok != nullptr)
 				{
 					*ok = true;
 				}
@@ -46,7 +46,7 @@ namespace Builder
 
 	// Returs pair of id and caption of the lists with the same id
 	//
-	std::vector<std::pair<QString, QString>> AppSignalListStorage::checkForSameIds() const 
+	std::vector<std::pair<QString, QString>> AppSignalListStorage::checkForSameIds() const
 	{
 		std::set<QString> ids;
 		std::vector<std::pair<QString, QString>> result;
@@ -67,7 +67,7 @@ namespace Builder
 
 		return result;
 	}
-	
+
 	bool AppSignalListStorage::load(QString* errorMessage)
 	{
 		if (m_db == nullptr || errorMessage == nullptr)
@@ -289,11 +289,6 @@ namespace Builder
 		return m_params.contains(hash);
 	}
 
-	bool AppSignalListsProvider::signalExists(const QString& appSignalId) const
-	{
-		return signalExists(::calcHash(appSignalId));
-	}
-
 	bool AppSignalListsProvider::signalsExist(const QStringList& signalIds) const
 	{
 		return std::all_of(signalIds.begin(),
@@ -304,27 +299,16 @@ namespace Builder
 						   });
 	}
 
-	AppSignalParam AppSignalListsProvider::signalParam(Hash signalHash, bool* found) const
+	std::optional<AppSignalParam> AppSignalListsProvider::signalParam(Hash signalHash) const
 	{
 		AppSignalParam result;
 
 		auto it = m_params.find(signalHash);
-
-		if (found != nullptr)
-		{
-			*found = it != m_params.end();
-		}
-
 		if (it != m_params.end())
 		{
 			result = it->second;
 		}
 
-		return result;
+		return std::nullopt;
 	}
-
-	AppSignalParam AppSignalListsProvider::signalParam(const QString& appSignalId, bool* found) const
-	{
-		return signalParam(::calcHash(appSignalId), found);
-	}
-}
+} // namespace Builder

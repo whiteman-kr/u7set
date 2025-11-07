@@ -20,8 +20,8 @@ namespace TestSuite
 		virtual bool shutdown() override;
 
 		virtual bool signalExists(const QString& signalId) const override;
-		virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
-		virtual AppSignalState signalState(const QString& appSignalId, bool* found) const override;
+		virtual std::optional<AppSignalParam> signalParam(const QString& appSignalId) const override;
+		virtual std::optional<AppSignalState> signalState(const QString& appSignalId) const override;
 
 		virtual bool expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance = 0) const override;
 

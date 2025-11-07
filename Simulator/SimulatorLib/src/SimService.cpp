@@ -471,8 +471,6 @@ namespace Sim
 											 const ::RpctGrpc::GetSignalParamRequest* request,
 											 ::grpc::ServerWriter<::RpctGrpc::GetSignalParamReply>* writer)
 	{
-		bool found = false;
-
 		::RpctGrpc::GetSignalParamReply reply;
 		uint32_t totalSize = 0;
 		uint32_t replyIndex = 0;
@@ -519,8 +517,8 @@ namespace Sim
 					return grpc::Status(grpc::StatusCode::CANCELLED, "Client cancelled");
 				}
 
-				AppSignalParam signalParam = m_simulator.appSignalManager().signalParam(static_cast<Hash>(hash), &found);
-				signalParam.save(reply.mutable_signalparams()->Add());
+				auto signalParam = m_simulator.appSignalManager().signalParam(static_cast<Hash>(hash));
+				signalParam.value_or(AppSignalParam{}).save(reply.mutable_signalparams()->Add());
 
 				if (reply.signalparams_size() >= MaxSignalParamCount)
 				{
@@ -554,23 +552,27 @@ namespace Sim
 		std::span<const Hash> hashes{reinterpret_cast<const Hash*>(request->signalhashes().data()),
 									 static_cast<size_t>(request->signalhashes_size())};
 #endif
-		thread_local std::vector<AppSignalState> states;
+		thread_local std::vector<std::optional<AppSignalState>> states;
 		states.clear();
-		int found = 0;
 
-		m_simulator.appSignalManager().signalState(hashes, &states, &found);
+		m_simulator.appSignalManager().signalState(hashes, &states);
 
 		// Save states to the reply.
 		//
 		auto protoStates = response->mutable_states();
 		protoStates->Reserve(static_cast<int>(states.size()));
 
-		for (const ::AppSignalState& state : states)
+		size_t index = 0;
+		for (const auto& state : states)
 		{
+			AppSignalState s = state.value_or(AppSignalState{hashes[index], Times{}, 0.0, AppSignalStateFlags{}});
+
 			::Proto::AppSignalState protoState;
-			state.save(&protoState);
+			s.save(&protoState);
 
 			protoStates->Add(std::move(protoState));
+
+			index++;
 		}
 
 		return grpc::Status::OK;

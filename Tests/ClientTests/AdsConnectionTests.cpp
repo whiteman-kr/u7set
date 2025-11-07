@@ -283,13 +283,12 @@ TEST_F(AdsConnectionTests, receivesState)
 	int stateChanges = 0;
 	while (timer.hasExpired(10000) == false && stateChanges < 3)
 	{
-		bool signalFound = false;
-		AppSignalState state = signalManager.signalState("#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK", &signalFound);
+		auto state = signalManager.signalState("#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK");
 
-		EXPECT_TRUE(signalFound);
+		ASSERT_TRUE(state.has_value());
 
-		stateChanges += (lastState == state.value()) ? 0 : 1;
-		lastState = state.value();
+		stateChanges += (lastState == state->value()) ? 0 : 1;
+		lastState = state->value();
 
 		QThread::yieldCurrentThread();
 	}
