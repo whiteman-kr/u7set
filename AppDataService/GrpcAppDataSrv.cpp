@@ -103,18 +103,22 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 	grpc::Status writeStatus;
 
-	auto writeReply = [context, writer](Grpc::GetAppSignalListReply& reply, grpc::Status& wrStatus) -> bool
+	auto writeReply = [this, context, writer](Grpc::GetAppSignalListReply& reply, grpc::Status& wrStatus) -> bool
 	{
 		wrStatus = grpc::Status::OK;
 
 		if (context->IsCancelled())
 		{
 			wrStatus = grpc::Status::CANCELLED;
+			DEBUG_LOG_MSG(m_log, "GetAppSignalList: context CANCELLED");
 			return false;
 		}
 
+		DEBUG_LOG_MSG(m_log, QString("GetAppSignalList: Write reply count = %1").arg(reply.appsignalids_size()));
+
 		if (writer->Write(reply) == false)
 		{
+			DEBUG_LOG_MSG(m_log, "GetAppSignalList: writer->Write returns FALSE");
 			return false;
 		}
 
@@ -169,7 +173,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 	grpc::Status writeStatus;
 
-	auto writeReply = [context, writer](Grpc::GetAppSignalParamReply& reply,
+	auto writeReply = [this, context, writer](Grpc::GetAppSignalParamReply& reply,
 										size_t totalCount, int index,
 										grpc::Status& wrStatus) -> bool
 	{
@@ -181,11 +185,15 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 		if (context->IsCancelled())
 		{
 			wrStatus = grpc::Status::CANCELLED;
+			DEBUG_LOG_MSG(m_log, "GetAppSignalParam: context CANCELLED");
 			return false;
 		}
 
+		DEBUG_LOG_MSG(m_log, QString("GetAppSignalParam: Write reply count = %1").arg(reply.signalparams_size()));
+
 		if (writer->Write(reply) == false)
 		{
+			DEBUG_LOG_MSG(m_log, "GetAppSignalParam: writer->Write returns FALSE");
 			return false;
 		}
 
@@ -197,6 +205,8 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 	if (request->signalhashes_size() == 0)
 	{
+		DEBUG_LOG_MSG(m_log, "GetAppSignalParam: signal hashes count 0");
+
 		for(const AppSignal* appSignal : m_appSignals)
 		{
 			appSignal->saveToProto(reply.add_signalparams());
@@ -229,6 +239,8 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 	}
 	else
 	{
+		DEBUG_LOG_MSG(m_log, QString("GetAppSignalParam: signal hashes count %1").arg(request->signalhashes_size()));
+
 		for(auto h : request->signalhashes())
 		{
 			Hash hash = static_cast<Hash>(h);

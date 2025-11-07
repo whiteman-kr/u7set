@@ -97,11 +97,15 @@ TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
 	std::unordered_set<std::string> got;
 	Grpc::GetAppSignalListReply reply;
 
+	DEBUG_LOG_MSG(logger, QString("AppSignals.count = %1").arg(appSignals.count()));
+
 	while (reader->Read(&reply))
 	{
+		DEBUG_LOG_MSG(logger, QString("Reply ids count: %1").arg(reply.appsignalids_size()));
 		for (const auto& id : reply.appsignalids())
 		{
 			got.insert(id);
+			DEBUG_LOG_MSG(logger, QString("ID: %1").arg(QString::fromStdString(id)));
 		}
 	}
 
@@ -156,6 +160,8 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_AllSignals)
 	std::vector<Proto::AppSignal> receivedParams;
 
 	receivedParams.reserve(appSignals.count());
+
+	DEBUG_LOG_MSG(logger, QString("AppSignals.count = %1").arg(appSignals.count()));
 
 	while (reader->Read(&reply))
 	{
