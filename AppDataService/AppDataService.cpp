@@ -641,7 +641,8 @@ void AppDataServiceWorker::stopRtTrendsServerThread()
 
 void AppDataServiceWorker::runGrpcAppDataSrv()
 {
-	m_grpcAppDataSrv = std::make_unique<GrpcAppDataSrv>(m_curSettingsProfile, m_appSignals, logger());
+	m_grpcAppDataSrv = std::make_unique<GrpcAppDataSrv>(m_curSettingsProfile, m_appSignals,
+														m_appSignalStates, logger());
 }
 
 void AppDataServiceWorker::stopGrpcAppDataSrv()

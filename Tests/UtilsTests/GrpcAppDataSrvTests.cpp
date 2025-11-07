@@ -14,8 +14,13 @@
 
 std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(std::unique_ptr<GrpcAppDataSrv>& outServer)
 {
+	DEBUG_LOG_MSG(logger, QString("TEST side: &appSignals=%1 count=%2")
+					  .arg(reinterpret_cast<quintptr>(&appSignals))
+					  .arg(appSignals.count()));
+
 	outServer = std::make_unique<GrpcAppDataSrv>(appDataSrvSettings,
 												 appSignals,
+												 appSignalStates,
 												 logger);
 
 	const std::string endpoint = (QString("%1:%2").

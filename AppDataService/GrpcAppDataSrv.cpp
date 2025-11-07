@@ -1,6 +1,8 @@
 #include <chrono>
 #include <QStringList>
 
+#include <CommonLib/Times.h>
+
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../UtilsLib/WUtils.h"
@@ -9,8 +11,10 @@
 
 GrpcAppDataSrv::GrpcAppDataSrv(	const AppDataServiceSettings& settings,
 								const AppSignals& appSignals,
+								const DynamicAppSignalStates& signalStates,
 								CircularLoggerShared log) :
 	m_appSignals(appSignals),
+	m_signalStates(signalStates),
 	m_log(log)
 {
 	grpc::ServerBuilder builder;
@@ -43,8 +47,8 @@ GrpcAppDataSrv::GrpcAppDataSrv(	const AppDataServiceSettings& settings,
 		return;
 	}
 
-	DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv started. Listening addresses: %1").
-						 arg(ips.join(", ")));
+	DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv started. Listening addresses: %1, appSignals count = %2").
+						 arg(ips.join(", ")).arg(m_appSignals.count()));
 
 	m_thread = std::jthread{[this](std::stop_token stoken, grpc::Server* server)
 							{
@@ -93,7 +97,17 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 										const Grpc::GetAppSignalListRequest* request,
 										grpc::ServerWriter<Grpc::GetAppSignalListReply>* writer)
 {
-	Q_UNUSED(request);
+	DEBUG_LOG_MSG(m_log, QString("GetAppSignalList: &m_appSignals=%1, count=%2")
+					  .arg(reinterpret_cast<quintptr>(&m_appSignals))
+					  .arg(m_appSignals.count()));
+
+	if (context == nullptr ||
+		request == nullptr ||
+		writer == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
 
 	Grpc::GetAppSignalListReply reply;
 
@@ -129,12 +143,15 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 	for(const AppSignal* appSignal : m_appSignals)
 	{
+		DEBUG_LOG_MSG(m_log, QString("GetAppSignalList: ID %1").arg(appSignal->appSignalID()));
+
 		*reply.add_appsignalids() = appSignal->appSignalID().toStdString();
 
 		ctr++;
 
 		if ((ctr & 0x3FFF) == 0 && context->IsCancelled())
 		{
+			DEBUG_LOG_MSG(m_log, "GetAppSignalList: context CANCELLED");
 			return grpc::Status::CANCELLED;
 		}
 
@@ -165,6 +182,14 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 										 const Grpc::GetAppSignalParamRequest* request,
 										 grpc::ServerWriter<Grpc::GetAppSignalParamReply>* writer)
 {
+	if (context == nullptr ||
+		request == nullptr ||
+		writer == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
 	Grpc::GetAppSignalParamReply reply;
 
 	constexpr int PARAMS_MAX_COUNT = 256;
@@ -276,4 +301,39 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 	return grpc::Status::OK;
 }
+
+grpc::Status GrpcAppDataSrv::GetAppSignalState([[maybe_unused]] grpc::ServerContext* context,
+											const Grpc::GetAppSignalStateRequest* request,
+											Grpc::GetAppSignalStateReply* reply)
+{
+	if (context == nullptr ||
+		request == nullptr ||
+		reply == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
+	if (request->signalhashes_size() > ADS_GET_APP_SIGNAL_STATE_MAX)
+	{
+		reply->set_error(TO_INT(E::NetworkError::RequestParamExceed));
+		return grpc::Status::OK;
+	}
+
+	reply->set_error(TO_INT(E::NetworkError::Success));
+
+	// optional int64 serverTimeUtc = 2 [default = 0];
+	// optional int64 serverTimeLocal = 3 [default = 0];
+
+	// optional int32 stateChangesQueueSize = 4  [default = 0];
+	// optional int32 gatewayStateChangesQueueSize = 5  [default = 0];
+
+	reply->set_servertimeutc(currentMSecsUTC());
+	reply->set_servertimelocal(currentMSecsLocal());
+
+
+
+	return grpc::Status::OK;
+}
+
 

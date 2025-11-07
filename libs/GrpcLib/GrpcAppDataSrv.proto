@@ -36,8 +36,30 @@ message GetAppSignalParamReply
 	repeated Proto.AppSignal signalParams = 3;
 }
 
+//
+// Geetting application signal states
+//
+message GetAppSignalStateRequest
+{
+	repeated uint64 signalHashes = 1;						// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+}
+
+message GetAppSignalStateReply
+{
+	optional int32 error = 1 [default = 0];
+
+	optional int64 serverTimeUtc = 2 [default = 0];
+	optional int64 serverTimeLocal = 3 [default = 0];
+
+	optional int32 stateChangesQueueSize = 4  [default = 0];
+	optional int32 gatewayStateChangesQueueSize = 5  [default = 0];
+
+	repeated Proto.AppSignalState appSignalStates = 6;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+}
+
 service AppDataSrv
 {
 	rpc GetAppSignalList(GetAppSignalListRequest) returns (stream GetAppSignalListReply) {}
 	rpc GetAppSignalParam(GetAppSignalParamRequest) returns (stream GetAppSignalParamReply) {}
+	rpc GetAppSignalState(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}
 }

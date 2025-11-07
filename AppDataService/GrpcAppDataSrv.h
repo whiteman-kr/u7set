@@ -8,6 +8,7 @@
 
 #include "../AppSignalLib/AppSignal.h"
 #include "../OnlineLib/CircularLogger.h"
+#include "DynamicAppSignalState.h"
 
 class AppDataServiceSettings;
 
@@ -16,6 +17,7 @@ class GrpcAppDataSrv final : public Grpc::AppDataSrv::Service
 public:
 	explicit GrpcAppDataSrv(const AppDataServiceSettings& settings,
 							const AppSignals& appSignals,
+							const DynamicAppSignalStates& signalStates,
 							CircularLoggerShared log);
 
 	GrpcAppDataSrv(const GrpcAppDataSrv&) = delete;
@@ -26,15 +28,20 @@ public:
 	~GrpcAppDataSrv();
 
 	grpc::Status GetAppSignalList(grpc::ServerContext* context,
-							 const Grpc::GetAppSignalListRequest* request,
-							 grpc::ServerWriter<Grpc::GetAppSignalListReply>* writer) override;
+								const Grpc::GetAppSignalListRequest* request,
+								grpc::ServerWriter<Grpc::GetAppSignalListReply>* writer) override;
 
 	grpc::Status GetAppSignalParam(grpc::ServerContext* context,
-							 const Grpc::GetAppSignalParamRequest* request,
-							 grpc::ServerWriter<Grpc::GetAppSignalParamReply>* writer) override;
+								const Grpc::GetAppSignalParamRequest* request,
+								grpc::ServerWriter<Grpc::GetAppSignalParamReply>* writer) override;
+
+	grpc::Status GetAppSignalState(grpc::ServerContext* context,
+								const Grpc::GetAppSignalStateRequest* request,
+								Grpc::GetAppSignalStateReply* reply) override;
 
 private:
 	const AppSignals& m_appSignals;
+	const DynamicAppSignalStates& m_signalStates;
 	CircularLoggerShared m_log;
 	std::unique_ptr<grpc::Server> m_server;
 	std::jthread m_thread;
