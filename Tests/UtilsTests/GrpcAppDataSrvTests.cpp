@@ -12,20 +12,19 @@
 
 #include "Common.h"
 
-std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(std::unique_ptr<GrpcAppDataSrv>& outServer)
+std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddressPort& listenIP,
+																std::unique_ptr<GrpcAppDataSrv>& outServer)
 {
 	DEBUG_LOG_MSG(logger, QString("TEST side: &appSignals=%1 count=%2")
 					  .arg(reinterpret_cast<quintptr>(&appSignals))
 					  .arg(appSignals.count()));
 
-	outServer = std::make_unique<GrpcAppDataSrv>(appDataSrvSettings,
+	outServer = std::make_unique<GrpcAppDataSrv>(listenIP,
 												 appSignals,
 												 appSignalStates,
 												 logger);
 
-	const std::string endpoint = (QString("%1:%2").
-								  arg(appDataSrvSettings.rcSettings[0].clientRequestIP().addressStr()).
-								  arg(PORT_APP_DATA_SERVICE_GRPC_CLIENT_REQUEST)).toStdString();
+	const std::string endpoint = listenIP.addressPortStr().toStdString();
 
 	auto channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
 	return Grpc::AppDataSrv::NewStub(channel);
@@ -65,7 +64,7 @@ bool checkReceivedParams(const std::vector<Proto::AppSignal>& recvParams)
 TEST(GrpcAppDataSrvTest, StartsAndStopsCleanly)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient(server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14000} , server);
 
 	grpc::ClientContext ctx;
 	Grpc::GetAppSignalListRequest req;
@@ -92,7 +91,7 @@ TEST(GrpcAppDataSrvTest, StartsAndStopsCleanly)
 TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient(server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14001}, server);
 
 	grpc::ClientContext ctx;
 	Grpc::GetAppSignalListRequest req;
@@ -152,7 +151,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
 TEST(GrpcAppDataSrvTest, GetAppSignalParam_AllSignals)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient(server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14002}, server);
 
 	grpc::ClientContext ctx;
 	Grpc::GetAppSignalParamRequest req;			// hashes size 0 - request ALL signal params
@@ -199,7 +198,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_AllSignals)
 TEST(GrpcAppDataSrvTest, GetAppSignalParam_ByHashes)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient(server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14003}, server);
 
 	std::vector<Hash> queryHashes;
 

@@ -9,7 +9,7 @@
 
 #include "GrpcAppDataSrv.h"
 
-GrpcAppDataSrv::GrpcAppDataSrv(	const AppDataServiceSettings& settings,
+GrpcAppDataSrv::GrpcAppDataSrv(	const std::vector<HostAddressPort>& listenIPs,
 								const AppSignals& appSignals,
 								const DynamicAppSignalStates& signalStates,
 								CircularLoggerShared log) :
@@ -17,61 +17,18 @@ GrpcAppDataSrv::GrpcAppDataSrv(	const AppDataServiceSettings& settings,
 	m_signalStates(signalStates),
 	m_log(log)
 {
-	grpc::ServerBuilder builder;
+	initService(listenIPs);
+}
 
-	builder.RegisterService(this);
-
-	QStringList ips;
-
-	for(const RqCtrlSettings& rcs : settings.rcSettings)
-	{
-		if (rcs.enable() == false)
-		{
-			continue;
-		}
-
-		QString ipPort = rcs.clientRequestIP().addressStr() + ":" + QString::number(PORT_APP_DATA_SERVICE_GRPC_CLIENT_REQUEST);
-
-		ips.append(ipPort);
-
-		int selectedPort = 0;
-
-		builder.AddListeningPort(ipPort.toStdString(), grpc::InsecureServerCredentials(), &selectedPort);
-	}
-
-	m_server = builder.BuildAndStart();
-
-	if (m_server == nullptr)
-	{
-		DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv NOT started!");
-		return;
-	}
-
-	DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv started. Listening addresses: %1, appSignals count = %2").
-						 arg(ips.join(", ")).arg(m_appSignals.count()));
-
-	m_thread = std::jthread{[this](std::stop_token stoken, grpc::Server* server)
-							{
-								std::stop_callback stop_cb{stoken,
-														   [server]()
-														   {
-															   server->Shutdown(std::chrono::system_clock::now() + std::chrono::seconds(5));
-														   }};
-								try
-								{
-									DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv in Wait state"));
-									server->Wait();		// unblocked by stop_token callback
-								}
-								catch (std::exception& e)
-								{
-									DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv thread exception: " + QString{e.what()});
-								}
-								catch (...)
-								{
-									DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv thread unknown exception");
-								}
-							},
-							m_server.get()};
+GrpcAppDataSrv::GrpcAppDataSrv( const HostAddressPort& listenIP,
+								const AppSignals& appSignals,
+								const DynamicAppSignalStates& signalStates,
+								CircularLoggerShared log) :
+	m_appSignals(appSignals),
+	m_signalStates(signalStates),
+	m_log(log)
+{
+	initService(std::vector<HostAddressPort>{listenIP});
 }
 
 GrpcAppDataSrv::~GrpcAppDataSrv()
@@ -331,9 +288,59 @@ grpc::Status GrpcAppDataSrv::GetAppSignalState([[maybe_unused]] grpc::ServerCont
 	reply->set_servertimeutc(currentMSecsUTC());
 	reply->set_servertimelocal(currentMSecsLocal());
 
-
-
 	return grpc::Status::OK;
 }
+
+void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
+{
+	QStringList ips;
+
+	grpc::ServerBuilder builder;
+
+	builder.RegisterService(this);
+
+	for(const HostAddressPort& ip : listenIPs)
+	{
+		QString ipStr = ip.addressPortStr();
+		ips.append(ipStr);
+		int selectedPort = 0;
+		builder.AddListeningPort(ipStr.toStdString(), grpc::InsecureServerCredentials(), &selectedPort);
+	}
+
+	m_server = builder.BuildAndStart();
+
+	if (m_server == nullptr)
+	{
+		DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv NOT started!");
+		return;
+	}
+
+	DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv started. Listening addresses: %1, appSignals count = %2").
+						 arg(ips.join(", ")).arg(m_appSignals.count()));
+
+	m_thread = std::jthread{[this](std::stop_token stoken, grpc::Server* server)
+							{
+								std::stop_callback stop_cb{stoken,
+														   [server]()
+														   {
+															   server->Shutdown(std::chrono::system_clock::now() + std::chrono::seconds(5));
+														   }};
+								try
+								{
+									DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv in Wait state"));
+									server->Wait();		// unblocked by stop_token callback
+								}
+								catch (std::exception& e)
+								{
+									DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv thread exception: " + QString{e.what()});
+								}
+								catch (...)
+								{
+									DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv thread unknown exception");
+								}
+							},
+							m_server.get()};
+}
+
 
 

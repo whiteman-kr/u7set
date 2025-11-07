@@ -6,6 +6,8 @@
 
 #include <GrpcAppDataSrv.grpc.pb.h>
 
+#include <CommonLib/HostAddressPort.h>
+
 #include "../AppSignalLib/AppSignal.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "DynamicAppSignalState.h"
@@ -15,7 +17,12 @@ class AppDataServiceSettings;
 class GrpcAppDataSrv final : public Grpc::AppDataSrv::Service
 {
 public:
-	explicit GrpcAppDataSrv(const AppDataServiceSettings& settings,
+	explicit GrpcAppDataSrv(const std::vector<HostAddressPort>& listenIPs,
+							const AppSignals& appSignals,
+							const DynamicAppSignalStates& signalStates,
+							CircularLoggerShared log);
+
+	explicit GrpcAppDataSrv(const HostAddressPort& listenIP,
 							const AppSignals& appSignals,
 							const DynamicAppSignalStates& signalStates,
 							CircularLoggerShared log);
@@ -39,6 +46,8 @@ public:
 								const Grpc::GetAppSignalStateRequest* request,
 								Grpc::GetAppSignalStateReply* reply) override;
 
+private:
+	void initService(const std::vector<HostAddressPort>& listenIPs);
 private:
 	const AppSignals& m_appSignals;
 	const DynamicAppSignalStates& m_signalStates;

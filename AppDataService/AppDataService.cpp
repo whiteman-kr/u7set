@@ -641,7 +641,23 @@ void AppDataServiceWorker::stopRtTrendsServerThread()
 
 void AppDataServiceWorker::runGrpcAppDataSrv()
 {
-	m_grpcAppDataSrv = std::make_unique<GrpcAppDataSrv>(m_curSettingsProfile, m_appSignals,
+	std::vector<HostAddressPort> listenIPs;
+
+	for(const RqCtrlSettings& rcs : m_curSettingsProfile.rcSettings)
+	{
+		if (rcs.enable() == false)
+		{
+			continue;
+		}
+
+		HostAddressPort ip = rcs.clientRequestIP();
+
+		ip.setPort(PORT_APP_DATA_SERVICE_GRPC_CLIENT_REQUEST);
+
+		listenIPs.emplace_back(ip);
+	}
+
+	m_grpcAppDataSrv = std::make_unique<GrpcAppDataSrv>(listenIPs, m_appSignals,
 														m_appSignalStates, logger());
 }
 
