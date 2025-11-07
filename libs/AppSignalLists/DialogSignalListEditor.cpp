@@ -1,7 +1,7 @@
 #include "../../AppSignalLib/ISignalManager.h"
-#include <UiLib/UiTools.h>
 #include <AppSignalLists/DialogSignalListEditor.h>
 #include <UiLib/PropertyEditor.h>
+#include <UiLib/UiTools.h>
 
 namespace AppSignalLists
 {
@@ -771,16 +771,20 @@ namespace AppSignalLists
 
 			for (Hash hash : allHashes)
 			{
-				bool found = false;
-				const AppSignalParam& asp = m_signalManager.signalParam(hash, &found);
+				auto asp = m_signalManager.signalParam(hash);
+				if (asp.has_value() == false)
+				{
+					assert(asp.has_value());
+					continue;
+				}
 
 				// Add filtered signals to the list
 				//
-				if (list->appSignalMatch(asp) == true)
+				if (list->appSignalMatch(*asp) == true)
 				{
 					appListHashesCache.insert(hash);
 
-					if (asp.enableTuning() == true)
+					if (asp->enableTuning() == true)
 					{
 						tuningListHashesCache.insert(hash);
 					}

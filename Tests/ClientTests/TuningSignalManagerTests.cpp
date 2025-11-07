@@ -46,9 +46,7 @@ protected:
 		return;
 	}
 
-	virtual void TearDown()
-	{
-	}
+	virtual void TearDown() {}
 
 	AppSignal as1;
 	AppSignal as2;
@@ -59,7 +57,6 @@ protected:
 	inline static const SoftwareInfo s_softwareInfo = {E::SoftwareType::TuningClient, "SYSTEMID_CLIENTTEST_WS01_TUN"};
 	inline static const QString s_tuningServiceId1 = "SYSTEMID_CLIENTTEST_WS01_TUNS";
 	inline static const QString s_tuningServiceId2 = "SYSTEMID_CLIENTTEST_WS02_TUNS";
-
 };
 
 
@@ -226,12 +223,11 @@ TEST_F(TuningSignalManagerTests, signalHashesByLms)
 	EXPECT_TRUE(ok);
 	EXPECT_EQ(tsm.signalsCount(), protoSignalSet.appsignal_size());
 
-	std::vector lms = {::calcHash(QString{"LM1"}),
-					   ::calcHash(QString{"NOLM"})};
+	std::vector lms = {::calcHash(QString{"LM1"}), ::calcHash(QString{"NOLM"})};
 
 	std::vector<Hash> appSignals = tsm.signalHashes(lms);
 
-	ASSERT_EQ(appSignals.size(), 2);		// 2 for LM1
+	ASSERT_EQ(appSignals.size(), 2); // 2 for LM1
 
 	Hash h1 = as1.hash();
 	Hash h2 = as2.hash();
@@ -250,15 +246,13 @@ TEST_F(TuningSignalManagerTests, appSignalParam)
 
 	EXPECT_TRUE(ok);
 
-	bool found = false;
+	auto asp = tsm.signalParam(as1.appSignalID());
+	ASSERT_TRUE(asp.has_value());
+	EXPECT_EQ(asp->appSignalId(), as1.appSignalID());
 
-	AppSignalParam asp = tsm.signalParam(as1.appSignalID(), &found);
-	EXPECT_EQ(found, true);
-	EXPECT_EQ(asp.appSignalId(), as1.appSignalID());
-
-	asp = tsm.signalParam(as2.appSignalID(), &found);
-	EXPECT_EQ(found, true);
-	EXPECT_EQ(asp.appSignalId(), as2.appSignalID());
+	asp = tsm.signalParam(as2.appSignalID());
+	ASSERT_TRUE(asp.has_value());
+	EXPECT_EQ(asp->appSignalId(), as2.appSignalID());
 
 	return;
 }
@@ -366,8 +360,12 @@ TEST_F(TuningSignalManagerTests, setUnappliedValue)
 
 	// Set states for the signal from two channels: valid and non-valid
 	//
-	TuningSignalState state_service1{as1.hash(), TuningSignalStateFlags{.valid = 1}, TuningValue{TuningValueType::Float, oldValue_twoChannels}};
-	TuningSignalState state_service2{as1.hash(), TuningSignalStateFlags{.valid = 0}, TuningValue{TuningValueType::Float, oldValue_twoChannels}};
+	TuningSignalState state_service1{as1.hash(),
+									 TuningSignalStateFlags{.valid = 1},
+									 TuningValue{TuningValueType::Float, oldValue_twoChannels}};
+	TuningSignalState state_service2{as1.hash(),
+									 TuningSignalStateFlags{.valid = 0},
+									 TuningValue{TuningValueType::Float, oldValue_twoChannels}};
 
 	tsm.setState(state_service1, ::calcHash(s_tuningServiceId1));
 	tsm.setState(state_service2, ::calcHash(s_tuningServiceId2));
@@ -498,14 +496,14 @@ TEST_F(TuningSignalManagerTests, signalIdsByTag)
 	EXPECT_TRUE(ok);
 	EXPECT_EQ(tsm.signalsCount(), protoSignalSet.appsignal_size());
 
-	QStringList sids =  tsm.signalIdsByTag("tag1");
+	QStringList sids = tsm.signalIdsByTag("tag1");
 	EXPECT_EQ(sids.size(), 1);
 	if (sids.isEmpty() == false)
 	{
 		EXPECT_EQ(sids[0], as1.appSignalID());
 	}
 
-	sids =  tsm.signalIdsByTag("tag2");
+	sids = tsm.signalIdsByTag("tag2");
 	EXPECT_EQ(sids.size(), 1);
 	if (sids.isEmpty() == false)
 	{

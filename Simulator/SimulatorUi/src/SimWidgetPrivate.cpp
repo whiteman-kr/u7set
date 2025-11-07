@@ -186,10 +186,8 @@ namespace SimUi
 
 		for (const QString& s : signalList)
 		{
-			bool ok = false;
-			AppSignalParam signal = m_appSignalController->signalParam(s, &ok);
-
-			QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
+			auto signal = m_appSignalController->signalParam(s);
+			QString signalId = signal.has_value() ? QString("%1 %2").arg(signal->customSignalId()).arg(signal->caption()) : s;
 
 			auto f = [this, s]() -> void
 			{

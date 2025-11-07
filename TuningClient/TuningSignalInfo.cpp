@@ -2,9 +2,9 @@
 #include "ui_TuningSignalInfo.h"
 
 #include "../AppSignalLib/TuningSignalState.h"
-#include <ClientLib/TuningSignalManager.h>
 #include <ClientLib/TuningConnection.h>
-#include "Settings.h"
+#include <ClientLib/TuningSignalManager.h>
+
 
 TuningSignalInfo::TuningSignalInfo(TuningConfigController& configController,
 								   const ClientLib::TuningSignalManager& signalManager,
@@ -26,8 +26,7 @@ TuningSignalInfo::TuningSignalInfo(TuningConfigController& configController,
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	bool found = false;
-	m_asp = m_signalManager.signalParam(m_appSignalHash, &found);
+	m_asp = m_signalManager.signalParam(m_appSignalHash).value_or(AppSignalParam{});
 
 	m_precision = m_asp.precision();
 
@@ -39,11 +38,11 @@ TuningSignalInfo::TuningSignalInfo(TuningConfigController& configController,
 	ui->m_lineLmEquipmentId->setText(m_asp.lmEquipmentId());
 
 	ui->editValue->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->editValue, &QLineEdit::customContextMenuRequested,  this, &TuningSignalInfo::onValueContextMenu);
+	connect(ui->editValue, &QLineEdit::customContextMenuRequested, this, &TuningSignalInfo::onValueContextMenu);
 
 	ui->treeProperties->setHeaderLabels(QStringList() << tr("Property") << tr("Value"));
 	ui->treeProperties->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,  this, &TuningSignalInfo::onPropertiesContextMenu);
+	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested, this, &TuningSignalInfo::onPropertiesContextMenu);
 
 	setWindowTitle(tr("%1 - %2").arg(m_asp.customSignalId()).arg(m_asp.caption()));
 
@@ -90,13 +89,11 @@ void TuningSignalInfo::updateInfo()
 	QStringList successfulWriteTimes;
 	QStringList unsuccessfulWriteTimes;
 
-	bool found = false;
-
 	// Fill the data received from TCP clients
 	//
-
 	for (const SoftwareEndpoint::TuningService& tuns : m_configController.configuration().clientSettings.tuningServices)
 	{
+		bool found = false;
 		const TuningSignalState clientState = m_signalManager.state(m_appSignalHash, ::calcHash(tuns.equipmentId), &found);
 		if (found == false)
 		{
@@ -135,6 +132,7 @@ void TuningSignalInfo::updateInfo()
 
 	// Fill the data that is received from ClientLib::TuningSignalManager
 
+	bool found = false;
 	TuningSignalState managerState = m_signalManager.state(m_appSignalHash, &found);
 	{
 		stateServices.push_back(tr("Common"));
@@ -166,11 +164,9 @@ void TuningSignalInfo::updateInfo()
 		unsuccessfulWriteTimes.push_back(::timeToString(managerState.unsuccessfulWriteTime()));
 	}
 
-
 	// Print data to the dialog
 	//
-
-	AppSignalParam asp = m_signalManager.signalParam(m_appSignalHash, &found);
+	AppSignalParam asp = m_signalManager.signalParam(m_appSignalHash).value_or(AppSignalParam{});
 	{
 		QString text;
 
@@ -231,7 +227,6 @@ void TuningSignalInfo::updateInfo()
 			ui->treeProperties->addTopLevelItem(new QTreeWidgetItem(QStringList() << p));
 		}
 		ui->treeProperties->resizeColumnToContents(0);
-
 	}
 
 	// Properties
@@ -261,7 +256,7 @@ void TuningSignalInfo::updateInfo()
 		}
 	}
 
-	propertiesValues.push_back(stateServices.join(" / "));	// Sources
+	propertiesValues.push_back(stateServices.join(" / ")); // Sources
 
 	propertiesValues.push_back(validStrings.join(" / "));
 	propertiesValues.push_back(outOfRangeStrings.join(" / "));
@@ -353,7 +348,10 @@ void TuningSignalInfo::onValueContextMenu()
 		QAction* a = new QAction(tr("Auto-select"), &menu);
 		a->setCheckable(true);
 		a->setChecked(m_analogFormat == E::AnalogFormat::g_9_or_9e || m_analogFormat == E::AnalogFormat::G_9_or_9E);
-		connect(a, &QAction::triggered, this, [this]()
+		connect(a,
+				&QAction::triggered,
+				this,
+				[this]()
 				{
 					m_analogFormat = E::AnalogFormat::g_9_or_9e;
 				});
@@ -362,7 +360,10 @@ void TuningSignalInfo::onValueContextMenu()
 		a = new QAction(tr("Decimal (as [-]9.9)"), &menu);
 		a->setCheckable(true);
 		a->setChecked(m_analogFormat == E::AnalogFormat::f_9);
-		connect(a, &QAction::triggered, this, [this]()
+		connect(a,
+				&QAction::triggered,
+				this,
+				[this]()
 				{
 					m_analogFormat = E::AnalogFormat::f_9;
 				});
@@ -371,7 +372,10 @@ void TuningSignalInfo::onValueContextMenu()
 		a = new QAction(tr("Exponential (as [-]9.9e[+|-]999)"), &menu);
 		a->setCheckable(true);
 		a->setChecked(m_analogFormat == E::AnalogFormat::e_9e || m_analogFormat == E::AnalogFormat::E_9E);
-		connect(a, &QAction::triggered, this, [this]()
+		connect(a,
+				&QAction::triggered,
+				this,
+				[this]()
 				{
 					m_analogFormat = E::AnalogFormat::e_9e;
 				});
@@ -391,10 +395,10 @@ void TuningSignalInfo::onValueContextMenu()
 	QAction* actionCopy = new QAction(tr("Copy"), &menu);
 
 	auto f = [this]() -> void
-			 {
-				QClipboard *clipboard = QApplication::clipboard();
-				clipboard->setText(ui->editValue->text());
-			};
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(ui->editValue->text());
+	};
 
 	connect(actionCopy, &QAction::triggered, this, f);
 
@@ -420,15 +424,15 @@ void TuningSignalInfo::onPropertiesContextMenu()
 	QAction* actionCopy = new QAction(tr("Copy"), &menu);
 
 	auto f = [this]() -> void
-			 {
-				QClipboard *clipboard = QApplication::clipboard();
-				QTreeWidgetItem* item = ui->treeProperties->currentItem();
-				if (item == nullptr)
-				{
-					return;
-				}
-				clipboard->setText(item->text(1));
-			};
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		QTreeWidgetItem* item = ui->treeProperties->currentItem();
+		if (item == nullptr)
+		{
+			return;
+		}
+		clipboard->setText(item->text(1));
+	};
 
 	connect(actionCopy, &QAction::triggered, this, f);
 

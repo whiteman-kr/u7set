@@ -378,14 +378,20 @@ namespace Sim
 						{
 							// Fetching appsignals states from ram is cause locking m_ramLock for read,
 							// so it is nested lock m_trendMutex -> m_trendMutex.
-							// Just keep it in mind and do not try to lock in other dirrection
+							// Just keep it in mind and do not try to lock in other direction
 							//
-							AppSignalState& addedState = ts.states.emplace_back(this->signalState(ts.appSignalHash, nullptr));
-
-							if (ts.states.size() > 3 && addedState.hasSameValue(ts.states[ts.states.size() - 2]) == true &&
-								addedState.hasSameValue(ts.states[ts.states.size() - 3]) == true)
+							auto addedState = this->signalState(ts.appSignalHash);
+							if (addedState.has_value() == false)
 							{
-								ts.states[ts.states.size() - 2] = addedState;
+								addedState = AppSignalState{ts.appSignalHash}; // Add nonvalid point
+							}
+
+							ts.states.emplace_back(*addedState);
+
+							if (ts.states.size() > 3 && addedState->hasSameValue(ts.states[ts.states.size() - 2]) == true &&
+								addedState->hasSameValue(ts.states[ts.states.size() - 3]) == true)
+							{
+								ts.states[ts.states.size() - 2] = addedState.value();
 								ts.states.resize(ts.states.size() - 1); // If last 3 points have the same value, then extend 2nt to 3rd;
 							}
 						}
@@ -567,12 +573,12 @@ namespace Sim
 		}
 	}
 
-	AppSignalState AppSignalManagerImpl::signalState(const QString& appSignalId, bool* found, bool applyOverride) const
+	std::optional<AppSignalState> AppSignalManagerImpl::signalState(const QString& appSignalId, bool applyOverride) const
 	{
-		return signalState(::calcHash(appSignalId), found, applyOverride);
+		return signalState(::calcHash(appSignalId), applyOverride);
 	}
 
-	AppSignalState AppSignalManagerImpl::signalState(Hash signalHash, bool* found, bool applyOverride) const
+	std::optional<AppSignalState> AppSignalManagerImpl::signalState(Hash signalHash, bool applyOverride) const
 	{
 		QString appSignalId;
 		QString logicModuleId;
@@ -595,14 +601,9 @@ namespace Sim
 
 			auto it = m_signalParamsExt.find(signalHash);
 
-			if (found != nullptr)
-			{
-				*found = it != m_signalParamsExt.end();
-			}
-
 			if (it == m_signalParamsExt.end())
 			{
-				return state;
+				return std::nullopt;
 			}
 
 			const AppSignal& s = it->second;
@@ -645,15 +646,11 @@ namespace Sim
 			// Get ram
 			//
 			auto ramIt = m_ram.find(logicModuleHash);
-
-			if (found != nullptr)
-			{
-				*found = (ramIt != m_ram.end());
-			}
-
 			if (ramIt == m_ram.end())
 			{
-				return state;
+				// No ram for this logic module
+				//
+				return std::nullopt;
 			}
 
 			const Ram& ram = ramIt->second;
@@ -783,7 +780,7 @@ namespace Sim
 					if (ok == false)
 					{
 						m_log.writeError(
-							QString("Get signal state error, AppSignlaId: %1, LogicModule %2").arg(appSignalId).arg(logicModuleId));
+							QString("Get signal state error, AppSignalId: %1, LogicModule %2").arg(appSignalId).arg(logicModuleId));
 					}
 					else
 					{
@@ -919,11 +916,6 @@ namespace Sim
 		return m_signalParams.contains(hash);
 	}
 
-	bool AppSignalManagerImpl::signalExists(const QString& appSignalId) const
-	{
-		return signalExists(::calcHash(appSignalId));
-	}
-
 	bool AppSignalManagerImpl::signalsExist(const QStringList& signalIds) const
 	{
 		QReadLocker rl(&m_signalParamLock);
@@ -936,52 +928,31 @@ namespace Sim
 						   });
 	}
 
-	AppSignalParam AppSignalManagerImpl::signalParam(Hash signalHash, bool* found) const
+	std::optional<AppSignalParam> AppSignalManagerImpl::signalParam(Hash signalHash) const
 	{
 		QReadLocker rl(&m_signalParamLock);
 
 		auto it = m_signalParams.find(signalHash);
 
-		if (found != nullptr)
-		{
-			*found = it != m_signalParams.end();
-		}
-
 		if (it == m_signalParams.end())
 		{
-			static const AppSignalParam dummy;
-			return dummy;
+			return std::nullopt;
 		}
 
 		return it->second;
 	}
 
-	AppSignalParam AppSignalManagerImpl::signalParam(const QString& appSignalId, bool* found) const
+	std::optional<AppSignalState> AppSignalManagerImpl::signalState(Hash signalHash) const
 	{
-		return signalParam(::calcHash(appSignalId), found);
+		return signalState(signalHash, true);
 	}
 
-	AppSignalState AppSignalManagerImpl::signalState(Hash signalHash, bool* found) const
+	std::optional<AppSignalState> AppSignalManagerImpl::signalState(Hash signalHash, Hash /*dataServerHash*/) const
 	{
-		return signalState(signalHash, found, true);
+		return signalState(signalHash, true);
 	}
 
-	AppSignalState AppSignalManagerImpl::signalState(const QString& appSignalId, bool* found) const
-	{
-		return signalState(::calcHash(appSignalId), found);
-	}
-
-	AppSignalState AppSignalManagerImpl::signalState(Hash signalHash, Hash /*dataServerHash*/, bool* found) const
-	{
-		return signalState(signalHash, found, true);
-	}
-
-	AppSignalState AppSignalManagerImpl::signalState(const QString& appSignalId, const QString& /*dataServerId*/, bool* found) const
-	{
-		return signalState(::calcHash(appSignalId), found);
-	}
-
-	void AppSignalManagerImpl::signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const
+	void AppSignalManagerImpl::signalState(std::span<const Hash> appSignalHashes, std::vector<std::optional<AppSignalState>>* result) const
 	{
 		// This function must be optimized, signalState every times locks/unlocks/locks/unlock...
 		//
@@ -994,54 +965,19 @@ namespace Sim
 		result->clear();
 		result->reserve(appSignalHashes.size());
 
-		int foundCount = 0;
-
 		for (Hash signalHash : appSignalHashes)
 		{
-			bool foundHash = false;
-			result->emplace_back(signalState(signalHash, &foundHash));
-
-			if (foundHash == true)
-			{
-				foundCount++;
-			}
-		}
-
-		if (found != nullptr)
-		{
-			*found = foundCount;
+			result->emplace_back(signalState(signalHash));
 		}
 
 		return;
 	}
 
-	void AppSignalManagerImpl::signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const
-	{
-		std::vector<Hash> appSignalHashes;
-		appSignalHashes.reserve(appSignalIds.size());
-
-		for (const QString& s : appSignalIds)
-		{
-			appSignalHashes.push_back(::calcHash(s));
-		}
-
-		return signalState(appSignalHashes, result, found);
-	}
-
 	void AppSignalManagerImpl::signalState(std::span<const Hash> appSignalHashes,
 										   Hash /*dataServerHash*/,
-										   std::vector<AppSignalState>* result,
-										   int* found) const
+										   std::vector<std::optional<AppSignalState>>* result) const
 	{
-		return signalState(appSignalHashes, result, found);
-	}
-
-	void AppSignalManagerImpl::signalState(std::span<const QString> appSignalIds,
-										   const QString& /*dataServerId*/,
-										   std::vector<AppSignalState>* result,
-										   int* found) const
-	{
-		return signalState(appSignalIds, result, found);
+		return signalState(appSignalHashes, result);
 	}
 
 	QStringList AppSignalManagerImpl::signalTags(Hash /*signalHash*/) const
@@ -1050,20 +986,10 @@ namespace Sim
 		return {};
 	}
 
-	QStringList AppSignalManagerImpl::signalTags(const QString& appSignalId) const
-	{
-		return signalTags(::calcHash(appSignalId));
-	}
-
 	bool AppSignalManagerImpl::signalHasTag(Hash /*signalHash*/, const QString& /*tag*/) const
 	{
 		Q_ASSERT(false); // TO DO
 		return {};
-	}
-
-	bool AppSignalManagerImpl::signalHasTag(const QString& appSignalId, const QString& tag) const
-	{
-		return signalHasTag(::calcHash(appSignalId), tag);
 	}
 
 	QStringList AppSignalManagerImpl::signalIdsByTag(const QString& tag) const
@@ -1087,11 +1013,6 @@ namespace Sim
 		Q_UNUSED(found);
 		Q_ASSERT(false); // TO DO
 		return {};
-	}
-
-	E::SignalType AppSignalManagerImpl::signalType(const QString& appSignalId, bool* found) const
-	{
-		return signalType(::calcHash(appSignalId), found);
 	}
 
 	QString AppSignalManagerImpl::equipmentToAppSignalId(const QString& equipmentId) const
@@ -1168,10 +1089,8 @@ namespace Sim
 			return {};
 		}
 
-		bool ok = false;
-		AppSignalParam s = m_appSignalManager->signalParam(signalHash, &ok);
-
-		if (ok == false)
+		auto s = m_appSignalManager->signalParam(signalHash);
+		if (s.has_value() == false)
 		{
 			return {};
 		}
@@ -1184,7 +1103,7 @@ namespace Sim
 			return {};
 		}
 
-		return engine->toScriptValue(s);
+		return engine->toScriptValue(s.value());
 	}
 
 	QJSValue ScriptAppSignalManager::signalState(QString signalId) const
@@ -1200,10 +1119,8 @@ namespace Sim
 			return {};
 		}
 
-		bool ok = false;
-		AppSignalState s = m_appSignalManager->signalState(signalHash, &ok);
-
-		if (ok == false)
+		auto s = m_appSignalManager->signalState(signalHash);
+		if (s.has_value() == false)
 		{
 			return {};
 		}
@@ -1216,6 +1133,6 @@ namespace Sim
 			return {};
 		}
 
-		return engine->toScriptValue(s);
+		return engine->toScriptValue(s.value());
 	}
 } // namespace Sim

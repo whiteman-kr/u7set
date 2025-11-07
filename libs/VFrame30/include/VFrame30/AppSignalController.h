@@ -5,6 +5,8 @@
 #include <QJSValue>
 #include <QObject>
 
+#include <ranges>
+
 class AppSignalParam;
 class AppSignalState;
 class Comparator;
@@ -26,14 +28,25 @@ namespace VFrame30
 		[[nodiscard]] bool signalExists(Hash hash) const;
 		[[nodiscard]] bool signalExists(const QString& appSignalId) const;
 
-		[[nodiscard]] AppSignalParam signalParam(Hash signalHash, bool* found) const;
-		[[nodiscard]] AppSignalParam signalParam(const QString& appSignalId, bool* found) const;
+		[[nodiscard]] std::optional<AppSignalParam> signalParam(Hash signalHash) const;
+		[[nodiscard]] std::optional<AppSignalParam> signalParam(const QString& appSignalId) const;
 
-		[[nodiscard]] AppSignalState signalState(Hash signalHash, bool* found) const;
-		[[nodiscard]] AppSignalState signalState(const QString& appSignalId, bool* found) const;
+		[[nodiscard]] std::optional<AppSignalState> signalState(Hash signalHash) const;
+		[[nodiscard]] std::optional<AppSignalState> signalState(const QString& appSignalId) const;
 
-		void signalState(const std::span<Hash>& appSignalHashes, std::vector<AppSignalState>* result, int* found) const;
-		void signalState(const std::span<QString>& appSignalIds, std::vector<AppSignalState>* result, int* found) const;
+		void signalState(std::span<const Hash> appSignalHashes, std::vector<std::optional<AppSignalState>>* result) const;
+
+		template<QStringRange Range>
+		void signalState(const Range& appSignalIds, std::vector<std::optional<AppSignalState>>* result) const
+		{
+			std::vector<Hash> hashes;
+			hashes.reserve(appSignalIds.size());
+			for (const QString& id : appSignalIds)
+			{
+				hashes.push_back(::calcHash(id));
+			}
+			return signalState(hashes, result);
+		}
 
 		[[nodiscard]] QStringList signalTags(Hash signalHash) const;
 		[[nodiscard]] QStringList signalTags(const QString& appSignalId) const;

@@ -527,10 +527,9 @@ namespace Sim
 	{
 		QJSValue result;
 
-		bool ok = false;
-		AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, &ok, true);
+		auto state = m_simulator->appSignalManager().signalState(appSignalId, true);
 
-		if (ok == false)
+		if (state.has_value() == false)
 		{
 			throwScriptException(this, tr("signalState(%1), signal not found.").arg(appSignalId));
 			result = -1;
@@ -544,22 +543,21 @@ namespace Sim
 			return result;
 		}
 
-		result = jsEngine->toScriptValue(state);
+		result = jsEngine->toScriptValue(*state);
 		return result;
 	}
 
 	double ScriptSimulator::signalValue(QString appSignalId)
 	{
-		bool ok = false;
-		AppSignalState state = m_simulator->appSignalManager().signalState(appSignalId, &ok, true);
+		auto state = m_simulator->appSignalManager().signalState(appSignalId, true);
 
-		if (ok == false)
+		if (state.has_value() == false)
 		{
 			throwScriptException(this, tr("signalValue(%1), signal not found.").arg(appSignalId));
 			return -1;
 		}
 
-		return state.value();
+		return state->value();
 	}
 
 	bool ScriptSimulator::overrideSignalValue(QString appSignalId, double value)
@@ -696,15 +694,13 @@ namespace Sim
 
 	AppSignalParam ScriptSimulator::signalParam(QString appSignalId)
 	{
-		bool ok = false;
-
-		AppSignalParam result = m_simulator->appSignalManager().signalParam(appSignalId, &ok);
-		if (ok == false)
+		auto result = m_simulator->appSignalManager().signalParam(appSignalId);
+		if (result.has_value() == false)
 		{
 			throwScriptException(this, tr("signalParam(%1), signal not found.").arg(appSignalId));
 		}
 
-		return result;
+		return *result;
 	}
 
 

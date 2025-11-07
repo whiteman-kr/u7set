@@ -2407,25 +2407,23 @@ namespace TuningFilters
 
 			for (size_t i = 0; i < allCount; i++)
 			{
-				bool ok = false;
-
-				AppSignalParam asp = objects.signalParam(allHashes[i], &ok);
-				if (ok == false)
+				auto asp = objects.signalParam(allHashes[i]);
+				if (asp.has_value() == false)
 				{
-					assert(false);
+					assert(asp.has_value());
 					return;
 				}
 
-				if (filter->match(asp) == false)
+				if (filter->match(asp.value()) == false)
 				{
 					continue;
 				}
 
-				signalsHashes.push_back(asp.hash());
+				signalsHashes.push_back(asp->hash());
 
 				if (filter->isSourceEquipment() == false) // Skip equipment filters
 				{
-					Hash aspEquipmentHash = ::calcHash(asp.lmEquipmentId());
+					Hash aspEquipmentHash = ::calcHash(asp->lmEquipmentId());
 					equipmentHashesMap[aspEquipmentHash] = 1;
 				}
 			}

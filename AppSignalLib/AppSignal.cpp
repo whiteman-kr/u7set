@@ -2471,9 +2471,14 @@ void AppSignalSet::removeSignals(const std::vector<int> &signalToRemoveIDs)
 	m_signals.swap(tempSignals);
 }
 
+bool AppSignalSet::contains(Hash appSignalHash) const
+{
+	return m_hashToIndex.contains(appSignalHash);
+}
+
 bool AppSignalSet::contains(const QString& appSignalID) const
 {
-	return m_hashToIndex.contains(calcHash(appSignalID.trimmed()));
+	return contains(calcHash(appSignalID.trimmed()));
 }
 
 int AppSignalSet::count() const

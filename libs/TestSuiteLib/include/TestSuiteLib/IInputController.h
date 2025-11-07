@@ -4,6 +4,7 @@
 #include <CommonLib/expected.hpp>
 
 #include <memory>
+#include <optional>
 
 
 namespace TestSuite
@@ -18,8 +19,8 @@ namespace TestSuite
 
 		[[nodiscard]] virtual bool signalExists(const QString& signalId) const = 0;
 
-		[[nodiscard]] virtual AppSignalParam signalParam(const QString& appSignalId, bool* found) const = 0;
-		[[nodiscard]] virtual AppSignalState signalState(const QString& appSignalId, bool* found) const = 0;
+		[[nodiscard]] virtual std::optional<AppSignalParam> signalParam(const QString& appSignalId) const = 0;
+		[[nodiscard]] virtual std::optional<AppSignalState> signalState(const QString& appSignalId) const = 0;
 
 		[[nodiscard]] virtual bool expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance = 0) const = 0;
 
@@ -36,26 +37,24 @@ namespace TestSuite
 
 		bool signalExists(const QString& /*signalId*/) const override { return false; }
 
-		AppSignalParam signalParam(const QString& /*appSignalId*/, bool* found) const override
+		std::optional<AppSignalParam> signalParam(const QString& appSignalId) const override
 		{
-			if (found != nullptr)
-			{
-				*found = false;
-			}
-			return {};
+			Q_UNUSED(appSignalId);
+			return std::nullopt;
 		}
 
-		AppSignalState signalState(const QString& /*appSignalId*/, bool* found) const override
+		std::optional<AppSignalState> signalState(const QString& appSignalId) const override
 		{
-			if (found != nullptr)
-			{
-				*found = false;
-			}
-			return {};
+			Q_UNUSED(appSignalId);
+			return std::nullopt;
 		}
 
-		bool expectSignalValue(QString /*appSignalId*/, qint64 /*timeoutMs*/, double /*value*/, double /*tolerance*/ = 0) const override
+		bool expectSignalValue(QString appSignalId, qint64 timeoutMs, double value, double tolerance = 0) const override
 		{
+			Q_UNUSED(appSignalId);
+			Q_UNUSED(timeoutMs);
+			Q_UNUSED(value);
+			Q_UNUSED(tolerance);
 			return false;
 		}
 

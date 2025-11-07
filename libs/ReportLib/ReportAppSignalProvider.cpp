@@ -43,16 +43,7 @@ namespace ReportLib
 
 	bool ReportAppSignalProvider::signalExists(Hash hash) const
 	{
-		// Unlikely this function required for schema editing
-		//
-		Q_UNUSED(hash);
-		Q_ASSERT(false);
-		return {};
-	}
-
-	bool ReportAppSignalProvider::signalExists(const QString& appSignalId) const
-	{
-		return m_signalSet->contains(appSignalId);
+		return m_signalSet->contains(hash);
 	}
 
 	bool ReportAppSignalProvider::signalsExist(const QStringList& signalIds) const
@@ -65,91 +56,40 @@ namespace ReportLib
 						   });
 	}
 
-	AppSignalParam ReportAppSignalProvider::signalParam(Hash signalHash, bool* found) const
+	std::optional<AppSignalParam> ReportAppSignalProvider::signalParam(Hash signalHash) const
 	{
-		// Unlikely this function required for schema editing
-		//
-		Q_UNUSED(signalHash);
-		Q_UNUSED(found);
-		Q_ASSERT(false);
-		return {};
-	}
+		auto signal = m_signalSet->getSignalByHash(signalHash);
 
-	AppSignalParam ReportAppSignalProvider::signalParam(const QString& appSignalId, bool* found) const
-	{
-		AppSignalParam result;
-
-		const AppSignal* s = m_signalSet->getSignal(appSignalId);
-
-		if (found != nullptr)
+		if (signal != nullptr)
 		{
-			*found = s != nullptr;
+			return AppSignalParam{*signal};
 		}
 
-		if (s != nullptr)
+		return std::nullopt;
+	}
+
+	std::optional<AppSignalState> ReportAppSignalProvider::signalState(Hash signalHash) const
+	{
+		bool exists = signalExists(signalHash);
+		if (exists == false)
 		{
-			result.load(*s);
+			return std::nullopt;
 		}
 
-		return result;
-	}
-
-	AppSignalState ReportAppSignalProvider::signalState(Hash signalHash, bool* found) const
-	{
-		// Unlikely this function required for schema editing
-		//
-		Q_UNUSED(signalHash);
-		Q_UNUSED(found);
-		Q_ASSERT(false);
-		return {};
-	}
-
-	AppSignalState ReportAppSignalProvider::signalState(const QString& appSignalId, bool* found) const
-	{
 		AppSignalState result;
-		result.m_hash = ::calcHash(appSignalId);
-
-		bool exists = signalExists(appSignalId);
-		if (found != nullptr)
-		{
-			*found = exists;
-		}
-
-		if (exists == true)
-		{
-			result.m_flags.valid = 1;
-			result.m_value = 0;
-
-			//		result.m_time.plant = TimeStamp{QDateTime::currentDateTime()};
-			//		result.m_time.local = result.m_time.plant;
-			//		result.m_time.system = TimeStamp{QDateTime::currentDateTimeUtc()};
-		}
+		result.m_flags.valid = 1;
+		result.m_value = 0;
 
 		return result;
 	}
 
-	AppSignalState ReportAppSignalProvider::signalState(Hash signalHash, Hash /*dataServerHash*/, bool* found) const
+	std::optional<AppSignalState> ReportAppSignalProvider::signalState(Hash signalHash, Hash /*dataServerHash*/) const
 	{
-		return signalState(signalHash, found);
+		return signalState(signalHash);
 	}
 
-	AppSignalState ReportAppSignalProvider::signalState(const QString& appSignalId, const QString& /*dataServerId*/, bool* found) const
-	{
-		return signalState(appSignalId, found);
-	}
-
-	void ReportAppSignalProvider::signalState(std::span<const Hash> appSignalHashes, std::vector<AppSignalState>* result, int* found) const
-	{
-		// Unlikely this function required for schema editing
-		//
-		Q_UNUSED(appSignalHashes);
-		Q_UNUSED(result);
-		Q_UNUSED(found);
-		Q_ASSERT(false);
-		return;
-	}
-
-	void ReportAppSignalProvider::signalState(std::span<const QString> appSignalIds, std::vector<AppSignalState>* result, int* found) const
+	void ReportAppSignalProvider::signalState(std::span<const Hash> appSignalHashes,
+											  std::vector<std::optional<AppSignalState>>* result) const
 	{
 		if (result == nullptr)
 		{
@@ -157,58 +97,30 @@ namespace ReportLib
 			return;
 		}
 
-		if (found != nullptr)
-		{
-			*found = 0;
-		}
-
 		result->clear();
-		result->reserve(appSignalIds.size());
+		result->reserve(appSignalHashes.size());
 
-		for (const QString& id : appSignalIds)
-		{
-			bool signalFound = false;
-
-			result->emplace_back(this->signalState(id, &signalFound));
-
-			if (signalFound && found != nullptr)
-			{
-				(*found)++;
-			}
-		}
+		std::transform(appSignalHashes.begin(),
+					   appSignalHashes.end(),
+					   std::back_inserter(*result),
+					   [this](Hash hash)
+					   {
+						   return signalState(hash);
+					   });
 
 		return;
 	}
 
 	void ReportAppSignalProvider::signalState(std::span<const Hash> appSignalHashes,
 											  Hash /*dataServerHash*/,
-											  std::vector<AppSignalState>* result,
-											  int* found) const
+											  std::vector<std::optional<AppSignalState>>* result) const
 	{
-		signalState(appSignalHashes, result, found);
+		return signalState(appSignalHashes, result);
 	}
-
-	void ReportAppSignalProvider::signalState(std::span<const QString> appSignalIds,
-											  const QString& /*dataServerId*/,
-											  std::vector<AppSignalState>* result,
-											  int* found) const
-	{
-		signalState(appSignalIds, result, found);
-	}
-
 
 	QStringList ReportAppSignalProvider::signalTags(Hash signalHash) const
 	{
-		// Unlikely this function required for schema editing
-		//
-		Q_UNUSED(signalHash);
-		Q_ASSERT(false);
-		return {};
-	}
-
-	QStringList ReportAppSignalProvider::signalTags(const QString& appSignalId) const
-	{
-		const AppSignal* s = m_signalSet->getSignal(appSignalId);
+		const AppSignal* s = m_signalSet->getSignalByHash(signalHash);
 
 		if (s != nullptr)
 		{
@@ -220,25 +132,7 @@ namespace ReportLib
 
 	bool ReportAppSignalProvider::signalHasTag(Hash signalHash, const QString& tag) const
 	{
-		// Unlikely this function required for schema editing
-		//
-		Q_UNUSED(signalHash);
-		Q_UNUSED(tag);
-		Q_ASSERT(false);
-		return false;
-	}
-
-	bool ReportAppSignalProvider::signalHasTag(const QString& appSignalId, const QString& tag) const
-	{
-		return signalTags(appSignalId).contains(tag, Qt::CaseInsensitive);
-	}
-
-	E::SignalType ReportAppSignalProvider::signalType(Hash signalHash, bool* found) const
-	{
-		Q_UNUSED(signalHash);
-		Q_UNUSED(found);
-		Q_ASSERT(false); // to do
-		return E::SignalType::Analog;
+		return signalTags(signalHash).contains(tag, Qt::CaseInsensitive);
 	}
 
 	QStringList ReportAppSignalProvider::signalIdsByTag(const QString& /*tag*/) const
@@ -249,9 +143,14 @@ namespace ReportLib
 		return {};
 	}
 
-	E::SignalType ReportAppSignalProvider::signalType(const QString& appSignalId, bool* found) const
+	E::SignalType ReportAppSignalProvider::signalType(Hash signalHash, bool* found) const
 	{
-		return signalType(::calcHash(appSignalId), found);
+		auto sp = signalParam(signalHash);
+		if (found != nullptr)
+		{
+			*found = sp.has_value();
+		}
+		return sp.has_value() ? sp->type() : E::SignalType::Analog;
 	}
 
 	QString ReportAppSignalProvider::equipmentToAppSignalId(const QString& equipmentId) const

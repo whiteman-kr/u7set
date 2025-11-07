@@ -288,19 +288,21 @@ namespace VFrame30
 
 		QString appSignalId = appSignalIds().isEmpty() ? QStringLiteral("#NOT_FOUND") : appSignalIds().first();
 
-		bool signalFound = false;
 		AppSignalParam signalParam;
 
 		if (appSignalController != nullptr)
 		{
-			signalParam = appSignalController->signalParam(appSignalId, &signalFound);
-		}
-
-		if (signalFound == false)
-		{
-			signalParam.setAppSignalId("#NOT_FOUND");
-			signalParam.setCustomSignalId("NOT_FOUND");
-			signalParam.setCaption("NOT_FOUND");
+			signalParam = appSignalController->signalParam(appSignalId)
+							  .or_else(
+								  []()
+								  {
+									  std::optional asp = AppSignalParam{};
+									  asp->setAppSignalId("#NOT_FOUND");
+									  asp->setCustomSignalId("NOT_FOUND");
+									  asp->setCaption("NOT_FOUND");
+									  return asp;
+								  })
+							  .value();
 		}
 
 		bool treatAsFloat = E::SignalType::Analog && signalParam.analogSignalFormat() == E::AnalogAppSignalFormat::Float32;

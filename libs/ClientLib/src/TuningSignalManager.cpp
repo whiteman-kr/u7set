@@ -140,12 +140,6 @@ namespace ClientLib
 		return m_signals.find(hash) != m_signals.end();
 	}
 
-	bool TuningSignalManager::signalExists(const QString& appSignalId) const
-	{
-		Hash hash = ::calcHash(appSignalId);
-		return TuningSignalManager::signalExists(hash);
-	}
-
 	bool TuningSignalManager::signalsExist(const QStringList& signalIds) const
 	{
 		QReadLocker rl(&m_signalsLock);
@@ -157,7 +151,7 @@ namespace ClientLib
 						   });
 	}
 
-	AppSignalParam TuningSignalManager::signalParam(Hash hash, bool* found) const
+	std::optional<AppSignalParam> TuningSignalManager::signalParam(Hash hash) const
 	{
 		QReadLocker rl(&m_signalsLock);
 
@@ -165,26 +159,10 @@ namespace ClientLib
 
 		if (result == m_signals.end())
 		{
-			if (found != nullptr)
-			{
-				*found = false;
-			}
-
-			return {};
-		}
-
-		if (found != nullptr)
-		{
-			*found = true;
+			return std::nullopt;
 		}
 
 		return result->second;
-	}
-
-	AppSignalParam TuningSignalManager::signalParam(const QString& appSignalId, bool* found) const
-	{
-		Hash signalHash = ::calcHash(appSignalId);
-		return signalParam(signalHash, found);
 	}
 
 	TuningSignalState TuningSignalManager::state(Hash hash, bool* found) const
@@ -523,19 +501,18 @@ namespace ClientLib
 		//
 		for (const UnsuccessfulWrite& u : unsuccessfulWrites)
 		{
-			bool paramFound = false;
-			AppSignalParam param = signalParam(u.appSignalHash, &paramFound);
-			if (paramFound == false)
+			auto param = signalParam(u.appSignalHash);
+			if (param.has_value() == false)
 			{
-				assert(false);
+				assert(param.has_value());
 				continue;
 			}
 
 			m_logFile.writeAlert(tr("TuningSignalManager::setStates(), Error writing value '%1' to signal '%2' (%3), logic module '%4': %5")
 									 .arg(u.value.toString())
-									 .arg(param.customSignalId())
-									 .arg(param.caption())
-									 .arg(param.lmEquipmentId())
+									 .arg(param->customSignalId())
+									 .arg(param->caption())
+									 .arg(param->lmEquipmentId())
 									 .arg(E::valueToString(static_cast<E::NetworkError>(u.writeErrorCode))));
 		}
 

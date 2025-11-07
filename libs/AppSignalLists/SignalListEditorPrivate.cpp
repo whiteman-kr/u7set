@@ -52,81 +52,90 @@ namespace
 		QVariant v1;
 		QVariant v2;
 
-		bool ok1 = false;
-		bool ok2 = false;
+		auto asp1 = m_signalManager.signalParam(hash1);
+		auto asp2 = m_signalManager.signalParam(hash2);
 
-		AppSignalParam asp1 = m_signalManager.signalParam(hash1, &ok1);
-		AppSignalParam asp2 = m_signalManager.signalParam(hash2, &ok2);
+		if (asp1.has_value() == false)
+		{
+			assert(asp1.has_value());
+			asp1 = AppSignalParam{};
+			asp1->setHash(hash1);
+		}
 
-		//
+		if (asp2.has_value() == false)
+		{
+			assert(asp2.has_value());
+			asp2 = AppSignalParam{};
+			asp2->setHash(hash2);
+		}
 
 		switch (m_column)
 		{
 		case SignalsModel::Columns::CustomAppSignalID:
-			v1 = asp1.customSignalId();
-			v2 = asp2.customSignalId();
+			v1 = asp1->customSignalId();
+			v2 = asp2->customSignalId();
 			break;
 
 		case SignalsModel::Columns::EquipmentID:
-			v1 = asp1.lmEquipmentId();
-			v2 = asp2.lmEquipmentId();
+			v1 = asp1->lmEquipmentId();
+			v2 = asp2->lmEquipmentId();
 			break;
 
 		case SignalsModel::Columns::AppSignalID:
-			v1 = asp1.appSignalId();
-			v2 = asp2.appSignalId();
+			v1 = asp1->appSignalId();
+			v2 = asp2->appSignalId();
 			break;
 
 		case SignalsModel::Columns::Caption:
-			v1 = asp1.caption();
-			v2 = asp2.caption();
+			v1 = asp1->caption();
+			v2 = asp2->caption();
 			break;
 
 		case SignalsModel::Columns::Units:
-			v1 = asp1.units();
-			v2 = asp2.units();
+			v1 = asp1->units();
+			v2 = asp2->units();
 			break;
 
 		case SignalsModel::Columns::Type:
-			v1 = static_cast<int>(asp1.tuningType());
-			v2 = static_cast<int>(asp2.tuningType());
+			v1 = static_cast<int>(asp1->tuningType());
+			v2 = static_cast<int>(asp2->tuningType());
 			break;
 
 		case SignalsModel::Columns::Default:
-			if (asp1.isAnalog() == asp2.isAnalog())
+			if (asp1->isAnalog() == asp2->isAnalog())
 			{
-				v1 = asp1.tuningDefaultValue().toDouble();
-				v2 = asp2.tuningDefaultValue().toDouble();
+				v1 = asp1->tuningDefaultValue().toDouble();
+				v2 = asp2->tuningDefaultValue().toDouble();
 			}
 			else
 			{
-				v1 = asp1.isAnalog();
-				v2 = asp2.isAnalog();
+				v1 = asp1->isAnalog();
+				v2 = asp2->isAnalog();
 			}
 			break;
 
 		case SignalsModel::Columns::LowLimit:
-			if (asp1.isAnalog() == asp2.isAnalog())
+			if (asp1->isAnalog() == asp2->isAnalog())
 			{
-				v1 = asp1.tuningLowBound().toDouble();
-				v2 = asp2.tuningLowBound().toDouble();
+				v1 = asp1->tuningLowBound().toDouble();
+				v2 = asp2->tuningLowBound().toDouble();
 			}
 			else
 			{
-				v1 = asp1.isAnalog();
-				v2 = asp2.isAnalog();
+				v1 = asp1->isAnalog();
+				v2 = asp2->isAnalog();
 			}
 			break;
 		case SignalsModel::Columns::HighLimit:
-			if (asp1.isAnalog() == asp2.isAnalog())
+			if (asp1->isAnalog() == asp2->isAnalog())
 			{
-				v1 = asp1.tuningHighBound().toDouble();
-				v2 = asp2.tuningHighBound().toDouble();
+				v1 = asp1->tuningHighBound().toDouble();
+				v2 = asp2->tuningHighBound().toDouble();
 			}
 			else
 			{
-				v1 = asp1.isAnalog();
-				v2 = asp2.isAnalog();
+				v1 = asp1->isAnalog();
+				v2 = asp2->isAnalog();
 			}
 			break;
 		default:
@@ -139,13 +148,13 @@ namespace
 		if (v1.userType() != v2.userType())
 		{
 			Q_ASSERT(false);
-			result = asp1.customSignalId() < asp2.customSignalId();
+			result = asp1->customSignalId() < asp2->customSignalId();
 		}
 		else
 		{
 			if (v1 == v2)
 			{
-				result = asp1.customSignalId() < asp2.customSignalId();
+				result = asp1->customSignalId() < asp2->customSignalId();
 			}
 			else
 			{
@@ -208,11 +217,22 @@ namespace
 		QVariant v1;
 		QVariant v2;
 
-		bool ok1 = false;
-		bool ok2 = false;
+		auto asp1 = m_signalManager.signalParam(hash1);
+		auto asp2 = m_signalManager.signalParam(hash2);
 
-		AppSignalParam asp1 = m_signalManager.signalParam(hash1, &ok1);
-		AppSignalParam asp2 = m_signalManager.signalParam(hash2, &ok2);
+		if (asp1.has_value() == false)
+		{
+			assert(asp1.has_value());
+			asp1 = AppSignalParam{};
+			asp1->setHash(hash1);
+		}
+
+		if (asp2.has_value() == false)
+		{
+			assert(asp2.has_value());
+			asp2 = AppSignalParam{};
+			asp2->setHash(hash2);
+		}
 
 		const AppSignalListItem& item1 = m_appSignalList->itemByHash(hash1);
 		const AppSignalListItem& item2 = m_appSignalList->itemByHash(hash2);
@@ -223,43 +243,43 @@ namespace
 		{
 		case AppSignalListModel::Columns::CustomAppSignalID:
 			{
-				v1 = asp1.customSignalId();
-				v2 = asp2.customSignalId();
+				v1 = asp1->customSignalId();
+				v2 = asp2->customSignalId();
 			}
 			break;
 
 		case AppSignalListModel::Columns::EquipmentID:
 			{
-				v1 = asp1.lmEquipmentId();
-				v2 = asp2.lmEquipmentId();
+				v1 = asp1->lmEquipmentId();
+				v2 = asp2->lmEquipmentId();
 			}
 			break;
 
 		case AppSignalListModel::Columns::AppSignalID:
 			{
-				v1 = asp1.appSignalId();
-				v2 = asp2.appSignalId();
+				v1 = asp1->appSignalId();
+				v2 = asp2->appSignalId();
 			}
 			break;
 
 		case AppSignalListModel::Columns::Caption:
 			{
-				v1 = asp1.caption();
-				v2 = asp2.caption();
+				v1 = asp1->caption();
+				v2 = asp2->caption();
 			}
 			break;
 
 		case AppSignalListModel::Columns::Units:
 			{
-				v1 = asp1.units();
-				v2 = asp2.units();
+				v1 = asp1->units();
+				v2 = asp2->units();
 			}
 			break;
 
 		case AppSignalListModel::Columns::Type:
 			{
-				v1 = static_cast<int>(asp1.tuningType());
-				v2 = static_cast<int>(asp2.tuningType());
+				v1 = static_cast<int>(asp1->tuningType());
+				v2 = static_cast<int>(asp2->tuningType());
 			}
 			break;
 
@@ -280,29 +300,29 @@ namespace
 
 		case AppSignalListModel::Columns::LowLimit:
 			{
-				if (asp1.isAnalog() == asp2.isAnalog())
+				if (asp1->isAnalog() == asp2->isAnalog())
 				{
-					v1 = asp1.tuningLowBound().toDouble();
-					v2 = asp2.tuningLowBound().toDouble();
+					v1 = asp1->tuningLowBound().toDouble();
+					v2 = asp2->tuningLowBound().toDouble();
 				}
 				else
 				{
-					v1 = asp1.isAnalog();
-					v2 = asp2.isAnalog();
+					v1 = asp1->isAnalog();
+					v2 = asp2->isAnalog();
 				}
 			}
 			break;
 		case AppSignalListModel::Columns::HighLimit:
 			{
-				if (asp1.isAnalog() == asp2.isAnalog())
+				if (asp1->isAnalog() == asp2->isAnalog())
 				{
-					v1 = asp1.tuningHighBound().toDouble();
-					v2 = asp2.tuningHighBound().toDouble();
+					v1 = asp1->tuningHighBound().toDouble();
+					v2 = asp2->tuningHighBound().toDouble();
 				}
 				else
 				{
-					v1 = asp1.isAnalog();
-					v2 = asp2.isAnalog();
+					v1 = asp1->isAnalog();
+					v2 = asp2->isAnalog();
 				}
 			}
 			break;
@@ -316,13 +336,13 @@ namespace
 		if (v1.userType() != v2.userType())
 		{
 			Q_ASSERT(false);
-			result = asp1.customSignalId() < asp2.customSignalId();
+			result = asp1->customSignalId() < asp2->customSignalId();
 		}
 		else
 		{
 			if (v1 == v2)
 			{
-				result = asp1.customSignalId() < asp2.customSignalId();
+				result = asp1->customSignalId() < asp2->customSignalId();
 			}
 			else
 			{
@@ -444,7 +464,7 @@ namespace AppSignalLists
 			Q_ASSERT(false);
 			return QString();
 		}
-	
+
 		switch (static_cast<Columns>(index))
 		{
 		case Columns::CustomAppSignalID:
@@ -534,71 +554,75 @@ namespace AppSignalLists
 			}
 
 			Hash aspHash = m_allHashes[row];
+			auto asp = m_signalManager.signalParam(aspHash);
 
-			bool ok = false;
-
-			const AppSignalParam asp = m_signalManager.signalParam(aspHash, &ok);
+			if (asp.has_value() == false)
+			{
+				assert(asp.has_value());
+				asp = AppSignalParam{};
+				asp->setHash(aspHash);
+			}
 
 			int columnType = col;
 
 			if (columnType == static_cast<int>(Columns::CustomAppSignalID))
 			{
-				return asp.customSignalId();
+				return asp->customSignalId();
 			}
 
 			if (columnType == static_cast<int>(Columns::EquipmentID))
 			{
-				return asp.equipmentId();
+				return asp->equipmentId();
 			}
 
 			if (columnType == static_cast<int>(Columns::AppSignalID))
 			{
-				return asp.appSignalId();
+				return asp->appSignalId();
 			}
 
 			if (columnType == static_cast<int>(Columns::Caption))
 			{
-				return asp.caption();
+				return asp->caption();
 			}
 
 			if (columnType == static_cast<int>(Columns::Units))
 			{
-				return asp.units();
+				return asp->units();
 			}
 
 			if (columnType == static_cast<int>(Columns::LowLimit))
 			{
-				if (asp.enableTuning() == true)
+				if (asp->enableTuning() == true)
 				{
-					return asp.tuningLowBound().toString();
+					return asp->tuningLowBound().toString();
 				}
 
-				return QString::number(asp.lowEngineeringUnits(), 'g', asp.precision());
+				return QString::number(asp->lowEngineeringUnits(), 'g', asp->precision());
 			}
 
 			if (columnType == static_cast<int>(Columns::HighLimit))
 			{
-				if (asp.enableTuning() == true)
+				if (asp->enableTuning() == true)
 				{
-					return asp.tuningHighBound().toString();
+					return asp->tuningHighBound().toString();
 				}
 
-				return QString::number(asp.highEngineeringUnits(), 'g', asp.precision());
+				return QString::number(asp->highEngineeringUnits(), 'g', asp->precision());
 			}
 
 			if (columnType == static_cast<int>(Columns::Type))
 			{
-				if (asp.isAnalog() == true)
+				if (asp->isAnalog() == true)
 				{
 					return "Analog";
 				}
 
-				if (asp.isDiscrete() == true)
+				if (asp->isDiscrete() == true)
 				{
 					return "Discrete";
 				}
 
-				if (asp.isBus() == true)
+				if (asp->isBus() == true)
 				{
 					return "Bus";
 				}
@@ -609,16 +633,16 @@ namespace AppSignalLists
 
 			if (columnType == static_cast<int>(Columns::Default))
 			{
-				if (asp.enableTuning() == true)
+				if (asp->enableTuning() == true)
 				{
-					if (asp.isAnalog())
+					if (asp->isAnalog())
 					{
-						return defaultValue(asp).toString(E::AnalogFormat::g_9_or_9e, asp.precision());
+						return defaultValue(asp.value()).toString(E::AnalogFormat::g_9_or_9e, asp->precision());
 					}
 
-					if (asp.isDiscrete() == true)
+					if (asp->isDiscrete() == true)
 					{
-						return defaultValue(asp).toString();
+						return defaultValue(asp.value()).toString();
 					}
 
 					Q_ASSERT(false);
@@ -804,7 +828,7 @@ namespace AppSignalLists
 		return QString();
 	}
 
-	
+
 	QString AppSignalListModel::columnText(int index) const
 	{
 		return QObject::tr(columnName(index).toUtf8());
@@ -872,81 +896,79 @@ namespace AppSignalLists
 			}
 
 			Hash hash = m_allHashes[row];
-
-			bool found = false;
-			const AppSignalParam asp = m_signalManager.signalParam(hash, &found);
+			auto asp = m_signalManager.signalParam(hash);
 
 			Columns columnType = m_columns[col];
 
 			if (columnType == Columns::AppSignalID)
 			{
-				if (found == false)
+				if (asp.has_value() == false)
 				{
 					const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 					return item.appSignalId();
 				}
 
-				return asp.appSignalId();
+				return asp->appSignalId();
 			}
 
-			if (found == false)
+			if (asp.has_value() == false)
 			{
 				return "?";
 			}
 
 			if (columnType == Columns::CustomAppSignalID)
 			{
-				return asp.customSignalId();
+				return asp->customSignalId();
 			}
 
 			if (columnType == Columns::EquipmentID)
 			{
-				return asp.equipmentId();
+				return asp->equipmentId();
 			}
 
 			if (columnType == Columns::Caption)
 			{
-				return asp.caption();
+				return asp->caption();
 			}
 
 			if (columnType == Columns::Units)
 			{
-				return asp.units();
+				return asp->units();
 			}
 
 			if (columnType == Columns::LowLimit)
 			{
-				if (asp.enableTuning() == true)
+				if (asp->enableTuning() == true)
 				{
-					return asp.tuningLowBound().toString();
+					return asp->tuningLowBound().toString();
 				}
 
-				return QString::number(asp.lowEngineeringUnits(), 'f', asp.precision());
+				return QString::number(asp->lowEngineeringUnits(), 'f', asp->precision());
 			}
 
 			if (columnType == Columns::HighLimit)
 			{
-				if (asp.enableTuning() == true)
+				if (asp->enableTuning() == true)
 				{
-					return asp.tuningHighBound().toString();
+					return asp->tuningHighBound().toString();
 				}
 
-				return QString::number(asp.highEngineeringUnits(), 'f', asp.precision());
+				return QString::number(asp->highEngineeringUnits(), 'f', asp->precision());
 			}
 
 			if (columnType == Columns::Type)
 			{
-				if (asp.isAnalog() == true)
+				if (asp->isAnalog() == true)
 				{
 					return "Analog";
 				}
 
-				if (asp.isDiscrete() == true)
+				if (asp->isDiscrete() == true)
 				{
 					return "Discrete";
 				}
 
-				if (asp.isBus() == true)
+				if (asp->isBus() == true)
 				{
 					return "Bus";
 				}
@@ -957,17 +979,17 @@ namespace AppSignalLists
 
 			if (columnType == Columns::Value)
 			{
-				if (asp.enableTuning() == true)
+				if (asp->enableTuning() == true)
 				{
 					const AppSignalListItem& item = m_appSignalList->itemByHash(hash);
 					if (item.hasValue() == true)
 					{
-						if (asp.isAnalog() == true)
+						if (asp->isAnalog() == true)
 						{
-							return item.value().toString(E::AnalogFormat::g_9_or_9e, asp.precision());
+							return item.value().toString(E::AnalogFormat::g_9_or_9e, asp->precision());
 						}
 
-						if (asp.isDiscrete())
+						if (asp->isDiscrete())
 						{
 							return item.value().toString();
 						}

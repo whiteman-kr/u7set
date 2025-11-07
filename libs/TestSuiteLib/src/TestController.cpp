@@ -121,10 +121,8 @@ namespace TestSuite
 			return {};
 		}
 
-		bool ok = false;
-		AppSignalState state = m_inputController->signalState(appSignalId, &ok);
-
-		if (ok == false)
+		auto state = m_inputController->signalState(appSignalId);
+		if (state.has_value() == false)
 		{
 			throwScriptException(this, tr("signalState(%1), signal not found.").arg(appSignalId));
 			return -1;
@@ -137,7 +135,7 @@ namespace TestSuite
 			return {};
 		}
 
-		return jsEngine->toScriptValue(state);
+		return jsEngine->toScriptValue(state.value());
 	}
 
 	double TestController::signalValue(QString appSignalId)
@@ -148,21 +146,19 @@ namespace TestSuite
 			return {};
 		}
 
-		bool ok = false;
-		AppSignalState state = m_inputController->signalState(appSignalId, &ok);
-
-		if (ok == false)
+		auto state = m_inputController->signalState(appSignalId);
+		if (state.has_value() == false)
 		{
 			throwScriptException(this, tr("signalValue(%1), signal not found.").arg(appSignalId));
 			return -1;
 		}
 
-		if (state.isStateAvailable() == false || state.isValid() == false)
+		if (state->isStateAvailable() == false || state->isValid() == false)
 		{
 			return std::numeric_limits<double>::quiet_NaN();
 		}
 
-		return state.value();
+		return state->value();
 	}
 
 	bool TestController::overrideSignalValue(QString appSignalId, QVariant value)
@@ -295,15 +291,14 @@ namespace TestSuite
 			return {};
 		}
 
-		bool ok = false;
-
-		AppSignalParam result = m_inputController->signalParam(appSignalId, &ok);
-		if (ok == false)
+		auto result = m_inputController->signalParam(appSignalId);
+		if (result.has_value() == false)
 		{
 			throwScriptException(this, tr("signalParam(%1), signal not found.").arg(appSignalId));
+			return {};
 		}
 
-		return result;
+		return result.value();
 	}
 
 	bool TestController::tuningSourceIsActive(QString lmEquipmentId)

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QObject>
-#include <CommonLib/Times.h>
 #include "AppSignalStateFlags.h"
+#include <CommonLib/Times.h>
+#include <QObject>
 
 namespace Proto
 {
@@ -15,7 +15,8 @@ namespace Proto
 	\brief Describes signal state in Monitor application
 
 	AppSignalState class describes signal state in Monitor application.	This state is received from ApplicationDataService.
-	\ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class accessed by global <b>signals</b> object is used for requesting signal states.
+	\ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class accessed by global <b>signals</b> object is used for
+   requesting signal states.
 
 	\warning
 	After requesting signal state it is highly recommended to check function return values, because errors can occur. For example,
@@ -112,14 +113,14 @@ class AppSignalState
 	Q_PROPERTY(bool tuningDefault READ isTuningDefault)
 	Q_PROPERTY(bool TuningDefault READ isTuningDefault)
 
-  public:
+public:
 	AppSignalState() = default;
 	AppSignalState(const AppSignalState&) = default;
 	AppSignalState(AppSignalState&&) = default;
 	AppSignalState(const Proto::AppSignalState& protoState);
 	~AppSignalState() = default;
 
-	AppSignalState(Hash hash, Times times, double value, AppSignalStateFlags flags);
+	AppSignalState(Hash hash, Times times = {}, double value = {}, AppSignalStateFlags flags = {});
 
 	AppSignalState& operator=(const AppSignalState& state) = default;
 
@@ -143,9 +144,13 @@ class AppSignalState
 
 	[[nodiscard]] bool hasSameValue(const AppSignalState& b) const;
 
-	[[nodiscard]] static QString toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, E::AnalogAppSignalFormat analogAppSignalFormat, int precision);
+	[[nodiscard]] static QString toString(double value,
+										  E::ValueViewType viewType,
+										  E::AnalogFormat analogFormat,
+										  E::AnalogAppSignalFormat analogAppSignalFormat,
+										  int precision);
 
-  public:
+public:
 	Hash m_hash = {0};
 	Times m_time{};
 	double m_value{};
@@ -155,4 +160,4 @@ class AppSignalState
 	static const quint32 INVALID = 0;
 };
 
- Q_DECLARE_METATYPE( ::AppSignalState )
+Q_DECLARE_METATYPE(::AppSignalState)

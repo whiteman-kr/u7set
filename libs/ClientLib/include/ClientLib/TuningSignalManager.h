@@ -23,11 +23,10 @@ namespace Proto
 
 namespace ClientLib
 {
-	class TuningSignalManager :
-		public QObject,
-		public ITuningSignalManager,
-		public ITuningSignalUpdater,
-		public IRecentAppSignals
+	class TuningSignalManager : public QObject,
+								public ITuningSignalManager,
+								public ITuningSignalUpdater,
+								public IRecentAppSignals
 	{
 		Q_OBJECT
 
@@ -45,12 +44,12 @@ namespace ClientLib
 		std::vector<Hash> signalHashes() const override;
 		std::vector<AppSignalParam> signalList() const override;
 
+		using ITuningSignalManager::signalExists;
 		bool signalExists(Hash hash) const override;
-		bool signalExists(const QString& appSignalId) const override;
 		bool signalsExist(const QStringList& signalIds) const override;
 
-		AppSignalParam signalParam(Hash hash, bool* found) const override;
-		AppSignalParam signalParam(const QString& appSignalId, bool* found) const override;
+		using ITuningSignalManager::signalParam;
+		std::optional<AppSignalParam> signalParam(Hash hash) const override;
 
 		// State requesting functions
 		//
@@ -122,12 +121,12 @@ namespace ClientLib
 		// Signals
 		//
 	signals:
-		void signalsLoaded();			// Emited when new signals loaded
+		void signalsLoaded(); // Emited when new signals loaded
 
 	public:
 		void setClientEquipmentId(const QString& clientEquipmentId);
 
-		// Data
+							  // Data
 		//
 	private:
 		Hash m_tuningClientHash = UNDEFINED_HASH; // cached client hash value
@@ -137,7 +136,7 @@ namespace ClientLib
 		{
 			TuningSignalState state{};
 			Hash tuningServiceHash{UNDEFINED_HASH};
-			std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{};	// State last time received or updated
+			std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{}; // State last time received or updated
 
 			bool isUnapplied = false;
 		};
@@ -145,7 +144,7 @@ namespace ClientLib
 		struct Sources
 		{
 			size_t size = 0;
-			std::array<SourceState, 2> sources{};	// 2 maximum possible channels of getting signal
+			std::array<SourceState, 2> sources{}; // 2 maximum possible channels of getting signal
 
 			TuningValue unappliedValue{};
 
@@ -160,33 +159,33 @@ namespace ClientLib
 			void setUnappliedValue(const TuningValue& value);
 			[[nodiscard]] const TuningValue& getUnappliedValue() const;
 
-			[[nodiscard]] bool isValueUnapplied() const;						// Any source is unapplied
-			[[nodiscard]] bool isValueUnapplied(Hash tuningServiceHash) const;	// Specified source is unapplied
+			[[nodiscard]] bool isValueUnapplied() const;                       // Any source is unapplied
+			[[nodiscard]] bool isValueUnapplied(Hash tuningServiceHash) const; // Specified source is unapplied
 
-			void setAsApplied(Hash tuningServiceHash);							// Set value as applied at specified source
+			void setAsApplied(Hash tuningServiceHash);                         // Set value as applied at specified source
 		};
 
 		// Objects storage
 		//
-		mutable QReadWriteLock m_signalsLock;							// For access to m_signals
+		mutable QReadWriteLock m_signalsLock;                       // For access to m_signals
 		std::unordered_map<Hash, const AppSignalParam> m_signals;
-		std::unordered_map<QString, QStringList> m_tagToAppSignals;		// Key is tag - value is list of AppSignalIDs with this tag
+		std::unordered_map<QString, QStringList> m_tagToAppSignals; // Key is tag - value is list of AppSignalIDs with this tag
 
 		// States storage
 		//
-		mutable std::mutex m_statesMutex;								// For access to m_states and m_unappliedStates
+		mutable std::mutex m_statesMutex; // For access to m_states and m_unappliedStates
 		mutable std::condition_variable m_allStatesApplied;
 
 		std::unordered_map<Hash, Sources, VoidHasher<Hash>> m_states;
 		std::set<Hash> m_unappliedStates;
 
-		//Recent Used
-		inline static const int MaxRecentCount = 250;  // Max 250 signals can be added to Recent storage to reduce network load
+		// Recent Used
+		inline static const int MaxRecentCount = 250; // Max 250 signals can be added to Recent storage to reduce network load
 		mutable bool m_recentEnabled = true;
-		mutable QMutex m_recentUsedMutex;	// It cannot be read/write locker, as every fetch the time insede RecentUsed is reset (what is write operation).
+		mutable QMutex m_recentUsedMutex; // It cannot be read/write locker, as every fetch the time insede RecentUsed is reset (what is
+										  // write operation).
 		AppSignalLib::RecentUsed m_recentUsed;
-
 	};
-}
+} // namespace ClientLib
 
 #endif // TUNINGSIGNALMANAGER_H

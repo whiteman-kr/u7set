@@ -152,16 +152,15 @@ void TuningSchemaWidget::signalContextMenu(QStringList appSignals,
 
 	for (const QString& s : appSignals)
 	{
-		bool ok = false;
-		AppSignalParam signal = theApp.mainWindow()->tuningSignalManager().signalParam(s, &ok);
+		auto signal = theApp.mainWindow()->tuningSignalManager().signalParam(s);
 
-		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
+		QString signalId = signal.has_value() ? QString("%1 %2").arg(signal->customSignalId()).arg(signal->caption()) : s;
 
 		QAction* a = menu.addAction(signalId);
 
-		auto f = [this, signal]() -> void
+		auto f = [this, s]() -> void
 		{
-			signalInfo(signal.appSignalId());
+			signalInfo(s);
 		};
 
 		connect(a, &QAction::triggered, this, f);
@@ -177,17 +176,15 @@ void TuningSchemaWidget::signalContextMenu(QStringList appSignals,
 
 		for (const QString& s : impactSignals)
 		{
-			bool ok = false;
+			auto signal = theApp.mainWindow()->tuningSignalManager().signalParam(s);
 
-			AppSignalParam signal = theApp.mainWindow()->tuningSignalManager().signalParam(s, &ok);
-
-			QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
+			QString signalId = signal.has_value() ? QString("%1 %2").arg(signal->customSignalId()).arg(signal->caption()) : s;
 
 			QAction* a = menu.addAction(signalId);
 
-			auto f = [this, signal]() -> void
+			auto f = [this, s]() -> void
 			{
-				signalInfo(signal.appSignalId());
+				signalInfo(s);
 			};
 
 			connect(a, &QAction::triggered, this, f);
