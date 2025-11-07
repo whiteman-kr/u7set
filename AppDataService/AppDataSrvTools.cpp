@@ -73,11 +73,9 @@ namespace AppDataSrvTools
 
 		int signalCount = 0;
 
-		for(AppSignal* signal : appSignals)
+		for(const AppSignal& signal : appSignals)
 		{
-			TEST_PTR_CONTINUE(signal);
-
-			if (signal->isBus() == true)
+			if (signal.isBus() == true)
 			{
 				continue;
 			}
@@ -89,11 +87,9 @@ namespace AppDataSrvTools
 
 		int index = 0;
 
-		for(AppSignal* signal : appSignals)
+		for(const AppSignal& signal : appSignals)
 		{
-			TEST_PTR_CONTINUE(signal);
-
-			if (signal->isBus() == true)
+			if (signal.isBus() == true)
 			{
 				continue;
 			}

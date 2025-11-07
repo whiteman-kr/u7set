@@ -246,7 +246,7 @@ void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint
 	{
 		Hash hash = tl_getAppSignalParamRequest.signalhashes(i);
 
-		const AppSignal* signal = m_appDataService.appSignals().getSignalByHash(hash);
+		const AppSignal* signal = m_appDataService.appSignals().getByHash(hash);
 
 		if (signal == nullptr)
 		{
@@ -290,7 +290,7 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 	{
 		Hash hash = tl_getAppSignalRequest.signalhashes(i);
 
-		const AppSignal* signal = m_appDataService.appSignals().getSignalByHash(hash);
+		const AppSignal* signal = m_appDataService.appSignals().getByHash(hash);
 
 		if (signal == nullptr)
 		{

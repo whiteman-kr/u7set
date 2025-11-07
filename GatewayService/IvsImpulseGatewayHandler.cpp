@@ -205,7 +205,7 @@ namespace Gateway
 
 			for(const QString& id : ids)
 			{
-				const AppSignal* s = m_appSignals.getSignalByID(id);
+				const AppSignal* s = m_appSignals.getByAppSignalID(id);
 
 				if (s != nullptr)
 				{

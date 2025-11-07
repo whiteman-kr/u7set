@@ -265,10 +265,7 @@ namespace RtTrends
 			ASSERT_RETURN_FALSE;
 		}
 
-		if (state->signal() != nullptr)
-		{
-			DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) append signal %2").arg(m_session->id()).arg(state->signal()->appSignalID()));
-		}
+		DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) append signal %2").arg(m_session->id()).arg(state->appSignalID()));
 
 		m_session->appendSignal(signalHash);
 
@@ -303,10 +300,7 @@ namespace RtTrends
 			ASSERT_RETURN_FALSE;
 		}
 
-		if (state->signal() != nullptr)
-		{
-			DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) remove signal %2").arg(m_session->id()).arg(state->signal()->appSignalID()));
-		}
+		DEBUG_LOG_MSG(m_log, QString("RtTrendsServer(%1) remove signal %2").arg(m_session->id()).arg(state->appSignalID()));
 
 		state->removeRtSession(signalHash, QThread::currentThread(), m_session);
 

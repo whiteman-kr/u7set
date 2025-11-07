@@ -441,13 +441,11 @@ void AppDataServiceWorker::buildAcuiredAppSignalIDs()
 	m_acquiredAppSignalIDs.clear();
 	m_acquiredAppSignalIDs.reserve(m_appSignals.count());
 
-	for(const AppSignal* signal : m_appSignals)
+	for(const AppSignal& signal : m_appSignals)
 	{
-		TEST_PTR_CONTINUE(signal);
-
-		if (signal->isAcquired() == true)
+		if (signal.isAcquired() == true)
 		{
-			m_acquiredAppSignalIDs.push_back(signal->appSignalID());
+			m_acquiredAppSignalIDs.push_back(signal.appSignalID());
 		}
 	}
 }

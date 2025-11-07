@@ -55,6 +55,11 @@ AppSignal::AppSignal(const ID_AppSignalID& ids)
 	m_loaded = false;
 }
 
+AppSignal::AppSignal(const Proto::AppSignal& proto)
+{
+	loadFromProto(proto);
+}
+
 AppSignal::~AppSignal()
 {
 }
@@ -2786,6 +2791,10 @@ const AppSignal* AppSignalSet::privateAt(int index) const
 //
 // -------------------------------------------------------------------------------
 
+AppSignals::AppSignals()
+{
+}
+
 AppSignals::~AppSignals()
 {
 	clear();
@@ -2794,44 +2803,50 @@ AppSignals::~AppSignals()
 void AppSignals::clear()
 {
 	m_hashToSignal.clear();
+	m_signals.clear();
+}
 
-	for(AppSignal* s : m_signals)
+void AppSignals::reserve(int expectedSignalsCount)
+{
+	if (m_signals.size() > 0)
 	{
-		delete s;
+		Q_ASSERT(false);
+		return;
 	}
 
-	m_signals.clear();
+	m_signals.reserve(expectedSignalsCount);
+	m_hashToSignal.reserve(expectedSignalsCount);
 }
 
 void AppSignals::insert(const ::Proto::AppSignal& protoAppSignal)
 {
 	QString appSignalID = QString::fromStdString(protoAppSignal.appsignalid());
 
-	if (containsID(appSignalID) == true)
-	{
-		qDebug() << C_STR(QString("Duplicate AppSignalID %1").arg(appSignalID));
-		assert(false);
-		return;
-	}
-
 	Hash hash = calcHash(appSignalID);
 
-	if (containsHash(hash) == true)
+	const AppSignal* existsAppSignal = getByHash(hash);
+
+	if (existsAppSignal != nullptr)
 	{
-		qDebug() << C_STR(QString("AppSignalID hash %1 collision").arg(hash, 16));
-		assert(false);
+		if (existsAppSignal->appSignalID() == appSignalID)
+		{
+			qDebug() << C_STR(QString("Duplicate AppSignalID %1").arg(appSignalID));
+			Q_ASSERT(false);
+			return;
+		}
+
+		qDebug() << C_STR(QString("AppSignalIDs %1 and %2 hash %3 collision").
+								arg(appSignalID).arg(existsAppSignal->appSignalID()).arg(hash, 16));
+		Q_ASSERT(false);
 		return;
 	}
 
-	AppSignal* s = new AppSignal;
-
-	s->loadFromProto(protoAppSignal);
-
-	m_signals.push_back(s);
-	m_hashToSignal.insert({hash, s});
+	int index = static_cast<int>(m_signals.size());
+	m_signals.emplace_back(protoAppSignal);
+	m_hashToSignal.insert({hash, index});
 }
 
-bool AppSignals::containsID(const QString& appSignalID) const
+bool AppSignals::containsAppSignalID(const QString& appSignalID) const
 {
 	return m_hashToSignal.contains(calcHash(appSignalID));
 }
@@ -2841,19 +2856,12 @@ bool AppSignals::containsHash(Hash hash) const
 	return m_hashToSignal.contains(hash);
 }
 
-const AppSignal* AppSignals::getSignalByID(const QString& appSignalID) const
+const AppSignal* AppSignals::getByAppSignalID(const QString& appSignalID) const
 {
-	auto it = m_hashToSignal.find(calcHash(appSignalID));
-
-	if (it == m_hashToSignal.end())
-	{
-		return nullptr;
-	}
-
-	return it->second;
+	return getByHash(calcHash(appSignalID));
 }
 
-const AppSignal* AppSignals::getSignalByHash(Hash hash) const
+const AppSignal* AppSignals::getByHash(Hash hash) const
 {
 	auto it = m_hashToSignal.find(hash);
 
@@ -2862,17 +2870,17 @@ const AppSignal* AppSignals::getSignalByHash(Hash hash) const
 		return nullptr;
 	}
 
-	return it->second;
+	return &m_signals[it->second];
 }
 
-const AppSignal* AppSignals::getSignalByIndex(int index) const
+const AppSignal* AppSignals::getByIndex(int index) const
 {
 	if (index < 0 || index >= static_cast<int>(m_signals.size()))
 	{
 		return nullptr;
 	}
 
-	return m_signals[index];
+	return &m_signals[index];
 }
 
 bool AppSignals::isEmpty() const
@@ -2889,22 +2897,22 @@ size_t AppSignals::count() const
 	return m_signals.size();
 }
 
-std::vector<AppSignal*>::iterator AppSignals::begin()
+std::vector<AppSignal>::iterator AppSignals::begin()
 {
 	return m_signals.begin();
 }
 
-std::vector<AppSignal*>::const_iterator AppSignals::begin() const
+std::vector<AppSignal>::const_iterator AppSignals::begin() const
 {
 	return m_signals.cbegin();
 }
 
-std::vector<AppSignal*>::iterator AppSignals::end()
+std::vector<AppSignal>::iterator AppSignals::end()
 {
 	return m_signals.end();
 }
 
-std::vector<AppSignal*>::const_iterator AppSignals::end() const
+std::vector<AppSignal>::const_iterator AppSignals::end() const
 {
 	return m_signals.cend();
 }

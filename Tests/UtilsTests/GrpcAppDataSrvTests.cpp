@@ -15,10 +15,6 @@
 std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddressPort& listenIP,
 																std::unique_ptr<GrpcAppDataSrv>& outServer)
 {
-	DEBUG_LOG_MSG(logger, QString("TEST side: &appSignals=%1 count=%2")
-					  .arg(reinterpret_cast<quintptr>(&appSignals))
-					  .arg(appSignals.count()));
-
 	outServer = std::make_unique<GrpcAppDataSrv>(listenIP,
 												 appSignals,
 												 appSignalStates,
@@ -40,7 +36,7 @@ bool checkReceivedParams(const std::vector<Proto::AppSignal>& recvParams)
 
 		pas.loadFromProto(p);
 
-		const AppSignal* as = appSignals.getSignalByID(pas.appSignalID());
+		const AppSignal* as = appSignals.getByAppSignalID(pas.appSignalID());
 
 		if (as == nullptr)
 		{
@@ -101,15 +97,11 @@ TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
 	std::unordered_set<std::string> got;
 	Grpc::GetAppSignalListReply reply;
 
-	DEBUG_LOG_MSG(logger, QString("AppSignals.count = %1").arg(appSignals.count()));
-
 	while (reader->Read(&reply))
 	{
-		DEBUG_LOG_MSG(logger, QString("Reply ids count: %1").arg(reply.appsignalids_size()));
 		for (const auto& id : reply.appsignalids())
 		{
 			got.insert(id);
-			DEBUG_LOG_MSG(logger, QString("ID: %1").arg(QString::fromStdString(id)));
 		}
 	}
 
@@ -125,7 +117,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
 
 	for(const auto& id : got)
 	{
-		if (appSignals.containsID(QString::fromStdString(id)) == false)
+		if (appSignals.containsAppSignalID(QString::fromStdString(id)) == false)
 		{
 			res = false;
 			break;
@@ -134,9 +126,9 @@ TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
 
 	EXPECT_EQ(res, true);
 
-	for(const AppSignal* as : appSignals)
+	for(const AppSignal& as : appSignals)
 	{
-		if (got.contains(as->appSignalID().toStdString()) == false)
+		if (got.contains(as.appSignalID().toStdString()) == false)
 		{
 			res = false;
 			break;
@@ -165,12 +157,8 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_AllSignals)
 
 	receivedParams.reserve(appSignals.count());
 
-	DEBUG_LOG_MSG(logger, QString("AppSignals.count = %1").arg(appSignals.count()));
-
 	while (reader->Read(&reply))
 	{
-		DEBUG_LOG_MSG(logger, QString("Receive %1 signal params").arg(reply.signalparams_size()));
-
 		EXPECT_EQ(static_cast<int>(reply.totalsize()), appSignals.count());
 		EXPECT_EQ(static_cast<int>(reply.replysignalindex()), total);
 
@@ -208,7 +196,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_ByHashes)
 
 	for(int i = 0; i < COUNT; i++)
 	{
-		const AppSignal* as = appSignals.getSignalByIndex(randomUint32() % appSignals.count());
+		const AppSignal* as = appSignals.getByIndex(randomUint32() % appSignals.count());
 		queryHashes.push_back(calcHash(as->appSignalID()));
 	}
 

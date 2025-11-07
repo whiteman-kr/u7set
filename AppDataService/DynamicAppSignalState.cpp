@@ -14,42 +14,40 @@ DynamicAppSignalState::DynamicAppSignalState()
 	m_current[1].flags.all = 0;
 }
 
-void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSignals& appSignals)
+void DynamicAppSignalState::setSignalParams(const AppSignal& signal, const AppSignals& appSignals)
 {
-	TEST_PTR_RETURN(signal);
+	m_appSignalID = signal.appSignalID();
+	m_signalHash = calcHash(signal.appSignalID());
 
-	m_signal = signal;
-	m_signalHash = calcHash(signal->appSignalID());
+	m_valueAddr = signal.regValueAddr();
 
-	m_valueAddr = signal->regValueAddr();
+	m_signalType = signal.signalType();
+	m_analogSignalFormat = signal.analogSignalFormat();
+	m_byteOrder = signal.byteOrder();
+	m_dataSize = signal.dataSize();
+	m_swCalcFunction = signal.swCalcFunction();
 
-	m_signalType = signal->signalType();
-	m_analogSignalFormat = signal->analogSignalFormat();
-	m_byteOrder = signal->byteOrder();
-	m_dataSize = signal->dataSize();
-	m_swCalcFunction = signal->swCalcFunction();
+	m_archive = signal.archive();
+	m_log = signal.log();
 
-	m_archive = signal->archive();
-	m_log = signal->log();
-
-	m_lowLimit = signal->lowEngineeringUnits();
-	m_highLimit = signal->highEngineeringUnits();
+	m_lowLimit = signal.lowEngineeringUnits();
+	m_highLimit = signal.highEngineeringUnits();
 
 	m_reverseLimits = (m_lowLimit > m_highLimit);
 
-	m_defaultApertureType = signal->apertureType();
-	m_defaultCoarseAperture = signal->coarseAperture();
-	m_defaultFineAperture =	signal->fineAperture();
+	m_defaultApertureType = signal.apertureType();
+	m_defaultCoarseAperture = signal.coarseAperture();
+	m_defaultFineAperture =	signal.fineAperture();
 	m_apertureOverrided = false;
 
 	setAperture(m_defaultApertureType,
 				m_defaultCoarseAperture,
 				m_defaultFineAperture);
 
-	m_enableTuning = signal->enableTuning();
-	m_tuningDefaultValue = signal->tuningDefaultValue();
+	m_enableTuning = signal.enableTuning();
+	m_tuningDefaultValue = signal.tuningDefaultValue();
 
-	if (signal->hasFlagsSignals() == true)
+	if (signal.hasFlagsSignals() == true)
 	{
 		static const std::vector<E::AppSignalStateFlagType> flagsTypes = E::values<E::AppSignalStateFlagType>();
 
@@ -62,14 +60,14 @@ void DynamicAppSignalState::setSignalParams(const AppSignal* signal, const AppSi
 				continue;			// this flags cant't be set by another app signal
 			}
 
-			QString flagSignalID = signal->getFlagSignalID(flagType);
+			QString flagSignalID = signal.getFlagSignalID(flagType);
 
 			if (flagSignalID.isEmpty() == true)
 			{
 				continue;
 			}
 
-			const AppSignal* flagSignal = appSignals.getSignalByID(flagSignalID);
+			const AppSignal* flagSignal = appSignals.getByAppSignalID(flagSignalID);
 
 			if (flagSignal == nullptr)
 			{
@@ -580,15 +578,8 @@ Hash DynamicAppSignalState::hash() const
 
 QString DynamicAppSignalState::appSignalID() const
 {
-	if (m_signal == nullptr)
-	{
-		assert(false);
-		return QString();
-	}
-
-	return m_signal->appSignalID();
+	return m_appSignalID;
 }
-
 
 void DynamicAppSignalState::setAutoArchivingGroup(int archivingGroup)
 {

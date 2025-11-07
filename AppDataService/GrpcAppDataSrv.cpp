@@ -54,10 +54,6 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 										const Grpc::GetAppSignalListRequest* request,
 										grpc::ServerWriter<Grpc::GetAppSignalListReply>* writer)
 {
-	DEBUG_LOG_MSG(m_log, QString("GetAppSignalList: &m_appSignals=%1, count=%2")
-					  .arg(reinterpret_cast<quintptr>(&m_appSignals))
-					  .arg(m_appSignals.count()));
-
 	if (context == nullptr ||
 		request == nullptr ||
 		writer == nullptr)
@@ -98,11 +94,11 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 	int ctr = 0;
 
-	for(const AppSignal* appSignal : m_appSignals)
+	for(const AppSignal& appSignal : m_appSignals)
 	{
-		DEBUG_LOG_MSG(m_log, QString("GetAppSignalList: ID %1").arg(appSignal->appSignalID()));
+		DEBUG_LOG_MSG(m_log, QString("GetAppSignalList: ID %1").arg(appSignal.appSignalID()));
 
-		*reply.add_appsignalids() = appSignal->appSignalID().toStdString();
+		*reply.add_appsignalids() = appSignal.appSignalID().toStdString();
 
 		ctr++;
 
@@ -189,9 +185,9 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 	{
 		DEBUG_LOG_MSG(m_log, "GetAppSignalParam: signal hashes count 0");
 
-		for(const AppSignal* appSignal : m_appSignals)
+		for(const AppSignal& appSignal : m_appSignals)
 		{
-			appSignal->saveToProto(reply.add_signalparams());
+			appSignal.saveToProto(reply.add_signalparams());
 
 			ctr++;
 
@@ -227,7 +223,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 		{
 			Hash hash = static_cast<Hash>(h);
 
-			const AppSignal* appSignal = m_appSignals.getSignalByHash(hash);
+			const AppSignal* appSignal = m_appSignals.getByHash(hash);
 
 			appSignal->saveToProto(reply.add_signalparams());
 
@@ -259,7 +255,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 	return grpc::Status::OK;
 }
 
-grpc::Status GrpcAppDataSrv::GetAppSignalState([[maybe_unused]] grpc::ServerContext* context,
+grpc::Status GrpcAppDataSrv::GetAppSignalState(grpc::ServerContext* context,
 											const Grpc::GetAppSignalStateRequest* request,
 											Grpc::GetAppSignalStateReply* reply)
 {
@@ -279,14 +275,31 @@ grpc::Status GrpcAppDataSrv::GetAppSignalState([[maybe_unused]] grpc::ServerCont
 
 	reply->set_error(TO_INT(E::NetworkError::Success));
 
-	// optional int64 serverTimeUtc = 2 [default = 0];
-	// optional int64 serverTimeLocal = 3 [default = 0];
-
-	// optional int32 stateChangesQueueSize = 4  [default = 0];
-	// optional int32 gatewayStateChangesQueueSize = 5  [default = 0];
-
 	reply->set_servertimeutc(currentMSecsUTC());
 	reply->set_servertimelocal(currentMSecsLocal());
+
+	// TO DO
+	//
+	reply->set_statechangesqueuesize(0);
+	reply->set_gatewaystatechangesqueuesize(0);
+
+	//
+
+	reply->mutable_appsignalstates()->Reserve(request->signalhashes_size());
+
+	AppSignalState appSignalState;
+
+	for(Hash hash : request->signalhashes())
+	{
+		bool result = m_signalStates.getCurrentState(hash, appSignalState);
+
+		if (result == false)
+		{
+			continue;	// unknown hash
+		}
+
+		appSignalState.save(reply->add_appsignalstates());
+	}
 
 	return grpc::Status::OK;
 }

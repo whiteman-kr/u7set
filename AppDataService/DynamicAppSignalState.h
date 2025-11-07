@@ -48,7 +48,7 @@ private:
 public:
 	DynamicAppSignalState();
 
-	void setSignalParams(const AppSignal* signal, const AppSignals& appSignals);
+	void setSignalParams(const AppSignal& signal, const AppSignals& appSignals);
 
 	void setQueues(SimpleAppSignalStatesArchiveFlagQueue* signalStatesQueue,
 				   GatewayAppSignalStatesQueue* gatewaySignalStatesQueue,
@@ -106,7 +106,7 @@ public:
 
 	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway);
 
-	const AppSignal* signal() const { return m_signal; }
+//	const AppSignal* signal() const { return m_signal; }
 
 	E::ApertureType apertureType() const { return m_apertureType; }
 	E::SignalType signalType() const { return m_signalType; }
@@ -169,7 +169,7 @@ private:
 	};
 
 private:
-	const AppSignal* m_signal = nullptr;
+	QString m_appSignalID;
 	Hash m_signalHash;
 
 	// parsing parameters

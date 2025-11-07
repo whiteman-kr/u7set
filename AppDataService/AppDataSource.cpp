@@ -62,13 +62,13 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 	for(const QString& signalID : sourceAssociatedSignals)
 	{
-		if (appSignals.containsID(signalID) == false)
+		if (appSignals.containsAppSignalID(signalID) == false)
 		{
 			assert(false);
 			continue;
 		}
 
-		const AppSignal* signal = appSignals.getSignalByID(signalID);
+		const AppSignal* signal = appSignals.getByAppSignalID(signalID);
 
 		TEST_PTR_CONTINUE(signal);
 
