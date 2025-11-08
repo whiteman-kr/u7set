@@ -1102,7 +1102,7 @@ namespace VFrame30
 							   .or_else(
 								   [impactAppSignalId]
 								   {
-									   std::optional<AppSignalParam> impactSignal;
+									   std::optional<AppSignalParam> impactSignal = AppSignalParam{};
 									   impactSignal->setAppSignalId(impactAppSignalId);    // At least show AppSignalID
 									   impactSignal->setCustomSignalId(impactAppSignalId); // At least show AppSignalID
 									   return impactSignal;

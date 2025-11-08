@@ -1955,8 +1955,6 @@ void DialogSignalInfo::updateSignalData()
 
 void DialogSignalInfo::updateAppSignalState()
 {
-	bool ok = false;
-
 	AppSignalState appSignalState;
 
 	if (m_dataServiceId.isEmpty() == true)
@@ -1969,10 +1967,6 @@ void DialogSignalInfo::updateAppSignalState()
 		// Specific server state
 		appSignalState =
 			m_appSignalManager->signalState(m_signal.hash(), ::calcHash(m_dataServiceId)).value_or(AppSignalState{m_signal.hash()});
-	}
-	if (ok == false)
-	{
-		return;
 	}
 
 	// switch font if needed
@@ -2104,7 +2098,6 @@ void DialogSignalInfo::updateSetpoints()
 			outputData.isNull() == false && outputData.canConvert<AppSignalParam>() == true)
 		{
 			const AppSignalParam& paramOutput = outputData.value<AppSignalParam>();
-
 
 			std::optional<AppSignalState> stateOutput;
 
