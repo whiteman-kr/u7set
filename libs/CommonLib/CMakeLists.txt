@@ -28,13 +28,6 @@ qt_add_library(${TARGET} STATIC
   u7_vld.cpp
 )
 
-#target_precompile_headers(${TARGET} PUBLIC
-#	"Types.h"
-#	"Hash.h"
-#	"PropertyObject.h"
-#	"AfbParamValue.h"
-#)
-
 target_link_libraries(${TARGET} PUBLIC Qt6::Core)
 
 target_compile_definitions(${TARGET} PRIVATE COMMON_LIB_DOMAIN)

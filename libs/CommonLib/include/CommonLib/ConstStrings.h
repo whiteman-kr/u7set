@@ -1037,3 +1037,7 @@ namespace BOM
 	inline const QByteArray UTF8("\xEF\xBB\xBF");
 }
 
+namespace Grpc
+{
+	inline const QString SESSION_AUTH_TOKEN("session-auth-token");
+}

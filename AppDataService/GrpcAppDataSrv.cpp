@@ -9,21 +9,31 @@
 
 #include "GrpcAppDataSrv.h"
 
-GrpcAppDataSrv::GrpcAppDataSrv(	const std::vector<HostAddressPort>& listenIPs,
+GrpcAppDataSrv::GrpcAppDataSrv( const SoftwareInfo& serverSwInfo,
+								const std::vector<ClientInfo>& clients,
+								bool checkHostName,
+								const std::vector<HostAddressPort>& listenIPs,
 								const AppSignals& appSignals,
 								const DynamicAppSignalStates& signalStates,
 								CircularLoggerShared log) :
+	m_sessionGuard(serverSwInfo, clients, checkHostName),
 	m_appSignals(appSignals),
 	m_signalStates(signalStates),
 	m_log(log)
 {
+	m_sessionGuard.setAllowAllClients(true);
+
 	initService(listenIPs);
 }
 
-GrpcAppDataSrv::GrpcAppDataSrv( const HostAddressPort& listenIP,
+GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
+								const std::vector<ClientInfo>& clients,
+								bool checkHostName,
+								const HostAddressPort& listenIP,
 								const AppSignals& appSignals,
 								const DynamicAppSignalStates& signalStates,
 								CircularLoggerShared log) :
+	m_sessionGuard(serverSwInfo, clients, checkHostName),
 	m_appSignals(appSignals),
 	m_signalStates(signalStates),
 	m_log(log)
@@ -33,6 +43,8 @@ GrpcAppDataSrv::GrpcAppDataSrv( const HostAddressPort& listenIP,
 
 GrpcAppDataSrv::~GrpcAppDataSrv()
 {
+	m_sessionGuard.stop();
+
 	if (m_server != nullptr)
 	{
 		m_thread.request_stop();
@@ -50,6 +62,18 @@ GrpcAppDataSrv::~GrpcAppDataSrv()
 	return;
 }
 
+grpc::Status GrpcAppDataSrv::Handshake(grpc::ServerContext* context,
+										const Grpc::HandshakeRequest* request,
+										Grpc::HandshakeReply* reply)
+{
+	if (m_sessionGuard.handshake(request, reply) == false)
+	{
+		return grpc::Status::CANCELLED;
+	}
+
+	return grpc::Status::OK;
+}
+
 grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 										const Grpc::GetAppSignalListRequest* request,
 										grpc::ServerWriter<Grpc::GetAppSignalListReply>* writer)
@@ -60,6 +84,11 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 	{
 		Q_ASSERT(false);
 		return grpc::Status::CANCELLED;
+	}
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid or expired session");
 	}
 
 	Grpc::GetAppSignalListReply reply;
@@ -141,6 +170,11 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 	{
 		Q_ASSERT(false);
 		return grpc::Status::CANCELLED;
+	}
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid or expired session");
 	}
 
 	Grpc::GetAppSignalParamReply reply;
@@ -267,6 +301,11 @@ grpc::Status GrpcAppDataSrv::GetAppSignalState(grpc::ServerContext* context,
 		return grpc::Status::CANCELLED;
 	}
 
+	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid or expired session");
+	}
+
 	if (request->signalhashes_size() > ADS_GET_APP_SIGNAL_STATE_MAX)
 	{
 		reply->set_error(TO_INT(E::NetworkError::RequestParamExceed));
@@ -353,6 +392,8 @@ void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 								}
 							},
 							m_server.get()};
+
+	m_sessionGuard.start();
 }
 
 

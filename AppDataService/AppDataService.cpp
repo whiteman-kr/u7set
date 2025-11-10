@@ -655,7 +655,12 @@ void AppDataServiceWorker::runGrpcAppDataSrv()
 		listenIPs.emplace_back(ip);
 	}
 
-	m_grpcAppDataSrv = std::make_unique<GrpcAppDataSrv>(listenIPs, m_appSignals,
+	std::vector<ClientInfo> clients;
+
+	m_grpcAppDataSrv = std::make_unique<GrpcAppDataSrv>(softwareInfo(),
+														clients,
+														false,
+														listenIPs, m_appSignals,
 														m_appSignalStates, logger());
 }
 

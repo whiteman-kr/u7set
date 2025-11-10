@@ -218,23 +218,21 @@ std::shared_ptr<const T> SoftwareSettingsSet::getSettingsDefaultProfile() const
 	return getSettingsProfile<T>(SettingsProfile::DEFAULT);
 }
 
+struct ClientInfo
+{
+	QString equipmentID;
+	E::SoftwareType softwareType = E::SoftwareType::Unknown;
+	QString hostname;
+};
+
 class CfgServiceSettings : virtual public SoftwareSettings
 {
 public:
-	struct ClientInfo
-	{
-		QString equipmentID;
-		E::SoftwareType softwareType = E::SoftwareType::Unknown;
-		QString hostname;
-	};
-
-public:
-
 	std::vector<RqCtrlSettings> rcSettings;		// RequestControllers settings ordered by ID acsending
 
 	bool checkHostname = false;
 
-	std::list<ClientInfo> clients;
+	std::vector<ClientInfo> clients;
 
 private:
 	// this methods should be call by SoftwareSettingsSet only

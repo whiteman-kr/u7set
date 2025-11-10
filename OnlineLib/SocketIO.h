@@ -250,7 +250,6 @@ const int ARCH_REQUEST_MAX_STATES = 20000;
 const int RT_TRENDS_MANAGEMENT = 0x1801;
 const int RT_TRENDS_GET_STATE_CHANGES = 1802;
 
-
 enum class ArchiveError
 {
 	Success = 100,

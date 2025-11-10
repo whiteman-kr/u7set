@@ -5,11 +5,13 @@
 #include <grpcpp/grpcpp.h>
 
 #include <GrpcAppDataSrv.grpc.pb.h>
+#include <GrpcSessionGuard.h>
 
 #include <CommonLib/HostAddressPort.h>
 
 #include "../AppSignalLib/AppSignal.h"
 #include "../OnlineLib/CircularLogger.h"
+#include "../OnlineLib/SoftwareSettings.h"
 #include "DynamicAppSignalState.h"
 
 class AppDataServiceSettings;
@@ -17,12 +19,18 @@ class AppDataServiceSettings;
 class GrpcAppDataSrv final : public Grpc::AppDataSrv::Service
 {
 public:
-	explicit GrpcAppDataSrv(const std::vector<HostAddressPort>& listenIPs,
+	explicit GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
+							const std::vector<ClientInfo>& clients,
+							bool checkHostName,
+							const std::vector<HostAddressPort>& listenIPs,
 							const AppSignals& appSignals,
 							const DynamicAppSignalStates& signalStates,
 							CircularLoggerShared log);
 
-	explicit GrpcAppDataSrv(const HostAddressPort& listenIP,
+	explicit GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
+							const std::vector<ClientInfo>& clients,
+							bool checkHostName,
+							const HostAddressPort& listenIP,
 							const AppSignals& appSignals,
 							const DynamicAppSignalStates& signalStates,
 							CircularLoggerShared log);
@@ -33,6 +41,10 @@ public:
 	GrpcAppDataSrv& operator=(GrpcAppDataSrv&&) = delete;
 
 	~GrpcAppDataSrv();
+
+	grpc::Status Handshake(grpc::ServerContext* context,
+						const Grpc::HandshakeRequest* request,
+						Grpc::HandshakeReply* reply) override;
 
 	grpc::Status GetAppSignalList(grpc::ServerContext* context,
 								const Grpc::GetAppSignalListRequest* request,
@@ -48,10 +60,13 @@ public:
 
 private:
 	void initService(const std::vector<HostAddressPort>& listenIPs);
+
 private:
 	const AppSignals& m_appSignals;
 	const DynamicAppSignalStates& m_signalStates;
 	CircularLoggerShared m_log;
 	std::unique_ptr<grpc::Server> m_server;
 	std::jthread m_thread;
+
+	GrpcSessionGuard m_sessionGuard;
 };

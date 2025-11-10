@@ -11,7 +11,7 @@
 CfgServer::CfgServer(const SoftwareInfo& softwareInfo,
 	const SessionParams& sessionParams,
 	const QString& buildFolder,
-	const std::list<CfgServiceSettings::ClientInfo>& clients,
+	const std::vector<ClientInfo> &clients,
 	bool checkClientHostname,
 	CircularLoggerShared logger) :
 	Tcp::FileServer(buildFolder, softwareInfo, logger, "CfgServer"),

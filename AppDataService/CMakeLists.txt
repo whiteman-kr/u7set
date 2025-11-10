@@ -11,7 +11,6 @@ find_package(gRPC CONFIG REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core Network Widgets Qml Sql Xml)
 qt_standard_project_setup()
 
-
 set(TARGET AppDataSrv)
 
 add_executable(${TARGET}

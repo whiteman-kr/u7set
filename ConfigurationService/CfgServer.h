@@ -14,10 +14,10 @@ class CfgServer : public Tcp::FileServer, public CfgServerLoaderBase
 	Q_OBJECT
 
 public:
-	CfgServer(	const SoftwareInfo& softwareInfo,
+	CfgServer(const SoftwareInfo& softwareInfo,
 			  const SessionParams& sessionParams,
 			  const QString& buildFolder,
-			  const std::list<CfgServiceSettings::ClientInfo>& clients,
+			  const std::vector<ClientInfo>& clients,
 			  bool checkClientHostname,
 			  CircularLoggerShared logger);
 
@@ -41,7 +41,7 @@ private:
 
 private:
 	SessionParams m_sessionParams;
-	std::list<CfgServiceSettings::ClientInfo> m_knownClients;
+	std::vector<ClientInfo> m_knownClients;
 	bool m_checkClientHostname = false;
 
 	QString m_buildXmlPathFileName;

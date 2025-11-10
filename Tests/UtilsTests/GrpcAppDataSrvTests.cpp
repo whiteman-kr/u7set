@@ -12,10 +12,20 @@
 
 #include "Common.h"
 
+const std::vector<ClientInfo> clients =
+	{
+		{ "MONITOR1", E::SoftwareType::Monitor, "WS1" },
+		{ "MONITOR2", E::SoftwareType::Monitor, "WS2" },
+		{ "MONITOR3", E::SoftwareType::Monitor, "WS3" },
+	};
+
 std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddressPort& listenIP,
 																std::unique_ptr<GrpcAppDataSrv>& outServer)
 {
-	outServer = std::make_unique<GrpcAppDataSrv>(listenIP,
+	SoftwareInfo si(E::SoftwareType::AppDataService, "TESTS_GRPC_APP_DATA_SRV");
+
+	outServer = std::make_unique<GrpcAppDataSrv>(si, clients, false,
+												 listenIP,
 												 appSignals,
 												 appSignalStates,
 												 logger);
@@ -24,6 +34,29 @@ std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddre
 
 	auto channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
 	return Grpc::AppDataSrv::NewStub(channel);
+}
+
+bool Handshake(std::unique_ptr<Grpc::AppDataSrv::Stub>& stub, grpc::ClientContext* ctx, const ClientInfo& ci)
+{
+	SoftwareInfo si(ci.softwareType, ci.equipmentID);
+
+	si.setHostname(ci.hostname);
+
+	Grpc::HandshakeRequest req;
+	Grpc::HandshakeReply rep;
+
+	si.serializeTo(req.mutable_clientsoftwareinfo());
+
+	grpc::Status st = stub->Handshake(ctx, req, &rep);
+
+	if (st.ok())
+	{
+		const std::string authToken = rep.authtoken();
+		ctx->AddMetadata(Grpc::SESSION_AUTH_TOKEN.toStdString(), authToken);
+		return true;
+	}
+
+	return false;
 }
 
 bool checkReceivedParams(const std::vector<Proto::AppSignal>& recvParams)
@@ -55,6 +88,20 @@ bool checkReceivedParams(const std::vector<Proto::AppSignal>& recvParams)
 	}
 
 	return res;
+}
+
+TEST(GrpcAppDataSrvTest, ValidHandshake)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13999} , server);
+
+	grpc::ClientContext ctx;
+
+	bool res = Handshake(stub, &ctx, clients[0]);
+
+	EXPECT_EQ(res, true);
+
+	server.reset();
 }
 
 TEST(GrpcAppDataSrvTest, StartsAndStopsCleanly)

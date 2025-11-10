@@ -737,6 +737,8 @@ bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readIntAttribute(XmlAttribute::COUNT, &clientsCount);
 
+	clients.reserve(clientsCount);
+
 	for(int i = 0; i < clientsCount; i++)
 	{
 		result &= xml.findElement(XmlElement::CLIENT);
