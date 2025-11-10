@@ -41,11 +41,15 @@ qt_add_library(${TARGET} STATIC
 	./src/AdsConnection.cpp
 	./src/AdsConnectionPrivate.cpp
 	./src/AdsConnectionPrivate.h
+	./src/AdsConnectionPrivate2.cpp
+	./src/AdsConnectionPrivate2.h
 	./src/AdsSourceStateConnection.cpp
 	./src/AdsSourceStateConnectionPrivate.cpp
 	./src/AdsSourceStateConnectionPrivate.h
 	./src/AppDataSourceState.cpp
 	./src/AppSignalManager.cpp
+	./src/ClientGrpc.h
+	./src/ClientGrpc.cpp
 	./src/ClientTranslator.cpp
 	./src/ConfigController.cpp
 	./src/RtDataProvider.cpp
@@ -90,28 +94,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<unordered_set>
 	<vector>
 
-	<QApplication>
-	<QComboBox>
-	<QCoreApplication>
 	<QDateTime>
-	<QDialog>
-	<QDomDocument>
-	<QHBoxLayout>
-	<QJSEngine>
-	<QLabel>
-	<QLineEdit>
-	<QLocale>
-	<QMessageBox>
 	<QThread>
-	<QPushButton>
 	<QReadWriteLock>
-	<QSharedMemory>
-	<QThread>
-	<QTimeZone>
-	<QTranslator>
-	<QVBoxLayout>
-	<QXmlStreamReader>
-	<QXmlStreamWriter>
 
 	<CommonLib/Types.h>
 	<CommonLib/Hash.h>
@@ -119,6 +104,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 	<ProtoSerialization.h>
 	<Network.pb.h>
+	<GrpcAppDataSrv.grpc.pb.h>
 
 	"../../AppSignalLib/AppSignalParam.h"
 	"../../AppSignalLib/AppSignalState.h"
@@ -134,7 +120,7 @@ target_compile_definitions(${TARGET} PRIVATE CLIENT_LIB_DOMAIN)
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC CommonLib ProtobufEx UtilsLib OnlineLib AppSignalLib TrendView)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib OnlineLib AppSignalLib TrendView ProtobufEx GrpcLib)
 
 if (MSVC)
 	target_link_libraries(${TARGET} PUBLIC Advapi32)

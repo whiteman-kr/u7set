@@ -92,6 +92,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 	}
 
 	Grpc::GetAppSignalListReply reply;
+	reply.set_totalsize(static_cast<uint32_t>(m_appSignals.count()));
 
 	constexpr int IDS_MAX_COUNT = 50000;
 

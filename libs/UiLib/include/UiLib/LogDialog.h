@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QDialog>
-#include <QTableView>
-#include <QStyledItemDelegate>
-#include <QSortFilterProxyModel>
-
 #include "../../../UtilsLib/LogFile.h"
+
+#include <QDialog>
+
+class QPushButton;
+class QLabel;
 
 namespace Log
 {

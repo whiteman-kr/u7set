@@ -1040,4 +1040,5 @@ namespace BOM
 namespace Grpc
 {
 	inline const QString SESSION_AUTH_TOKEN("session-auth-token");
+	inline const std::string SESSION_AUTH_TOKEN_STD(SESSION_AUTH_TOKEN.toStdString());
 }

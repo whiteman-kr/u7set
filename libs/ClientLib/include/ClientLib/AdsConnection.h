@@ -13,6 +13,8 @@
 namespace ClientLib
 {
 	class AdsConnectionPrivate;
+	class AdsConnectionPrivate2;
+
 
 	class AdsConnection
 	{
@@ -46,6 +48,12 @@ namespace ClientLib
 		// --
 		//
 	private:
-		std::unique_ptr<ClientLib::AdsConnectionPrivate> m_pimpl;
+#if 0
+		using AdsConnectionType = ClientLib::AdsConnectionPrivate;
+#else
+		using AdsConnectionType = ClientLib::AdsConnectionPrivate2;
+#endif
+
+		std::unique_ptr<AdsConnectionType> m_pimpl;
 	};
 } // namespace ClientLib
