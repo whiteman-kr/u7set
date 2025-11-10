@@ -74,7 +74,7 @@ std::optional<AppSignalState> EditSchemaAppSignalProvider::signalState(Hash sign
 		return std::nullopt;
 	}
 
-	std::optional<AppSignalState> result;
+	std::optional<AppSignalState> result = AppSignalState{};
 	result->m_hash = signalHash;
 	result->m_flags.valid = 1;
 
