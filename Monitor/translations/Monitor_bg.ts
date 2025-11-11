@@ -44,7 +44,7 @@
     <message>
         <location filename="../Archive/ArchiveModelView.cpp" line="48"/>
         <source>Flags</source>
-        <translation type="unfinished"></translation>
+        <translation>Флагове</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveModelView.cpp" line="51"/>
@@ -84,7 +84,7 @@
     <message>
         <location filename="../Archive/ArchiveModelView.cpp" line="72"/>
         <source>Duration</source>
-        <translation type="unfinished"></translation>
+        <translation>Продължителност</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveModelView.cpp" line="75"/>
@@ -129,7 +129,7 @@
     <message>
         <location filename="../Archive/ArchiveModelView.cpp" line="276"/>
         <source> (Time error)</source>
-        <translation type="unfinished"></translation>
+        <translation> (Грешка в часа)</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveModelView.cpp" line="333"/>
@@ -432,22 +432,22 @@ AppSignalID: %3
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="598"/>
         <source>Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)</source>
-        <translation type="unfinished"></translation>
+        <translation>Portable Document Format (*.pdf);;CSV Файлове със стойности разделени с точка и запетая (*.csv);;Текст (*.txt);;HTML (*.html)</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="605"/>
         <source>Export Selected Only</source>
-        <translation type="unfinished"></translation>
+        <translation>Експортирай само избраните</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="671"/>
         <source>Print All</source>
-        <translation type="unfinished"></translation>
+        <translation>Разпечатай всичко</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="681"/>
         <source>Print Selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Разпечатай избраното</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="799"/>
@@ -757,7 +757,7 @@ AppSignalID: %3
     <message>
         <location filename="../DialogSettings.ui" line="245"/>
         <source>Disable Logging to Disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Деактивиране на записването на данни на диска</translation>
     </message>
     <message>
         <location filename="../DialogSettings.ui" line="256"/>
@@ -1193,12 +1193,12 @@ AppSignalID: %3
     <message>
         <location filename="../MonitorMainWindow.cpp" line="677"/>
         <source>Signals Log</source>
-        <translation type="unfinished"></translation>
+        <translation>Журнал на сигналите</translation>
     </message>
     <message>
         <location filename="../MonitorMainWindow.cpp" line="678"/>
         <source>View signals changes log</source>
-        <translation type="unfinished"></translation>
+        <translation>Преглед на журнала с промените в сигналите</translation>
     </message>
     <message>
         <location filename="../MonitorMainWindow.cpp" line="683"/>
@@ -1540,24 +1540,24 @@ and %2 more.</source>
         <location filename="../Archive/ArchiveWidget.cpp" line="51"/>
         <location filename="../SignalLogDialog.cpp" line="46"/>
         <source>Generated: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Генерирани: %1</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="56"/>
         <source>Signals Archive</source>
-        <translation type="unfinished"></translation>
+        <translation>Архив на сигналите</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="58"/>
         <location filename="../SignalLogDialog.cpp" line="53"/>
         <source>Project: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Проект: %1</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="61"/>
         <location filename="../SignalLogDialog.cpp" line="56"/>
         <source>%1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: %2</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="75"/>
@@ -1565,110 +1565,115 @@ and %2 more.</source>
         <source>Requested interval: %1 - %2 (%3)
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Заявен интервал: %1   %2 (%3)
+
+</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="102"/>
         <source>Archive Service: %1
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Архив на услуга: %1
+</translation>
     </message>
     <message>
         <location filename="../Archive/ArchiveWidget.cpp" line="109"/>
         <source>Signal(s): %1
 
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Сигнал(и): %1
+
+</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="51"/>
         <source>Signals Log</source>
-        <translation type="unfinished"></translation>
+        <translation>Журнал на сигналите</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="177"/>
         <source>Signal ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Signal ID</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="178"/>
         <source>Equipment ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Equipment ID</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="179"/>
         <source>Lm Equipment ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Lm Equipment ID</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="180"/>
         <source>App Signal ID</source>
-        <translation type="unfinished"></translation>
+        <translation>App Signal ID</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="181"/>
         <source>Caption</source>
-        <translation type="unfinished">Надпис</translation>
+        <translation>Надпис</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="182"/>
         <source>Tags</source>
-        <translation type="unfinished"></translation>
+        <translation>Етикети</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="184"/>
         <source>Record Time</source>
-        <translation type="unfinished"></translation>
+        <translation>Час на записа</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="185"/>
         <source>Server Time UTC%100</source>
-        <translation type="unfinished">Сървърно време UTC%100</translation>
+        <translation>Сървърно време UTC%100</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="186"/>
         <source>Server Time</source>
-        <translation type="unfinished">Сървърно време</translation>
+        <translation>Сървърно време</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="187"/>
         <source>Plant Time</source>
-        <translation type="unfinished">Заводско време</translation>
+        <translation>Заводско време</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="189"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Стойност</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="191"/>
         <source>Flags</source>
-        <translation type="unfinished"></translation>
+        <translation>Флагове</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="192"/>
         <source>Valid</source>
-        <translation type="unfinished">Валиден</translation>
+        <translation>Валиден</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="193"/>
         <source>StateAvailable</source>
-        <translation type="unfinished">СъстояниеДостъпно</translation>
+        <translation>StateAvailable</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="194"/>
         <source>Simulated</source>
-        <translation type="unfinished">Симулиран</translation>
+        <translation>Симулиран</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="195"/>
         <source>Blocked</source>
-        <translation type="unfinished">Блокиран</translation>
+        <translation>Блокиран</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="196"/>
         <source>Mismatch</source>
-        <translation type="unfinished">Несъответствие</translation>
+        <translation>Несъответствие</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="522"/>
@@ -1677,7 +1682,7 @@ and %2 more.</source>
         <location filename="../SignalLogDialog.cpp" line="534"/>
         <location filename="../SignalLogDialog.cpp" line="538"/>
         <source>yes</source>
-        <translation type="unfinished"></translation>
+        <translation>да</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="522"/>
@@ -1686,7 +1691,7 @@ and %2 more.</source>
         <location filename="../SignalLogDialog.cpp" line="534"/>
         <location filename="../SignalLogDialog.cpp" line="538"/>
         <source>no</source>
-        <translation type="unfinished"></translation>
+        <translation>не</translation>
     </message>
 </context>
 <context>
@@ -1703,17 +1708,18 @@ and %2 more.</source>
         <location filename="../MonitorMainWindow.cpp" line="37"/>
         <source>Signal Log
 W:0000   E:0000</source>
-        <translation type="unfinished"></translation>
+        <translation>Запис на сигнал
+W:0000   E:0000</translation>
     </message>
     <message>
         <location filename="../MonitorMainWindow.cpp" line="70"/>
         <source>&lt;span style=&apos;font-family: Consolas, &quot;Courier New&quot;, monospace; color: black;&apos;&gt;Log&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;M:%1&lt;/span&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;span style=&apos;font-family: Consolas, &quot;Courier New&quot;, monospace; color: black;&apos;&gt;Запис&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;M:%1&lt;/span&gt;</translation>
     </message>
     <message>
         <location filename="../MonitorMainWindow.cpp" line="86"/>
         <source>&lt;span style=&apos;font-family: Consolas, &quot;Courier New&quot;, monospace; color: %1;&apos;&gt;W:%2&lt;/span&gt;&amp;nbsp;&lt;span style=&apos;font-family: Consolas, &quot;Courier New&quot;, monospace; color: %3;&apos;&gt;E:%4&lt;/span&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;span style=&apos;font-family: Consolas, &quot;Courier New&quot;, monospace; color: %1;&apos;&gt;W:%2&lt;/span&gt;&amp;nbsp;&lt;span style=&apos;font-family: Consolas, &quot;Courier New&quot;, monospace; color: %3;&apos;&gt;E:%4&lt;/span&gt;</translation>
     </message>
 </context>
 <context>
@@ -1721,17 +1727,17 @@ W:0000   E:0000</source>
     <message>
         <location filename="../SignalLogDialog.cpp" line="2099"/>
         <source>Signals Log</source>
-        <translation type="unfinished"></translation>
+        <translation>Журнал на сигналите</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="2126"/>
         <source>Total: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Общо: %1</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="2127"/>
         <source>Filtered: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Филтрирани: %1</translation>
     </message>
 </context>
 <context>
@@ -1750,7 +1756,18 @@ RecordTime: %9
 ServerTime: %10
 ServerTime +0UTC: %11
 PlantTime: %12</source>
-        <translation type="unfinished"></translation>
+        <translation>RecordID: %1
+SignalID: %2
+EquipmentID: %3
+LmEquipmentID: %4
+AppSignalID: %5
+Caption: %6
+Value: %7
+Flags: %8
+RecordTime: %9
+ServerTime: %10
+ServerTime +0UTC: %11
+PlantTime: %12</translation>
     </message>
 </context>
 <context>
@@ -1768,7 +1785,17 @@ PlantTime: %12</source>
 	#SYSTEMID_RACK01_CH01_MD?? (mask for Equipment ID).
 
 	To apply the filter, enter the mask and press Enter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Маската може да съдържа &apos;*&apos; и &apos;?&apos; символи.
+	&apos;*&apos; замества един или група от символи на това място, &apos;?&apos; замества само един символ на това място.
+	Няколко маски могат да бъдат разделени с точка и запетая или с разстояние.
+
+	Примери:
+
+	#SF001P014* (маска за AppSignalID),
+	T?30T01? (маска за CustomAppSignalID),
+	#SYSTEMID_RACK01_CH01_MD?? (маска за Equipment ID).
+
+	За прилагането на филтъра, въведете маската и натиснете Enter.</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="991"/>
@@ -1777,153 +1804,157 @@ PlantTime: %12</source>
 	Several tags can be separated by semicolon or space: &quot;tag1; tag2&quot; or &quot;tag1 tag2&quot;.
 
 	To apply the filter, enter tags and press Enter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Етикети за филтриране на сигнали.
+
+	Няколко етикета могат да бъдат разделени с точка и запетая или с разстояние: &quot;етикет1; етикет2&quot; or &quot;етикет1 етикет2&quot;.
+
+	За прилагане на филтъра, въведете етикетите и натиснете Enter.</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1196"/>
         <source>Copy</source>
-        <translation type="unfinished">Копирай</translation>
+        <translation>Копирай</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1211"/>
         <source>Acknowledge up to </source>
-        <translation type="unfinished"></translation>
+        <translation>Потвърдете до </translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1243"/>
         <source>...and %1 more signal(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>...и %1 още сигнал(и)</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1314"/>
         <source>Nothing to export.</source>
-        <translation type="unfinished">Нищо за експорт.</translation>
+        <translation>Нищо за експорт.</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1321"/>
         <source>Save File</source>
-        <translation type="unfinished"></translation>
+        <translation>Запази файлът</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1323"/>
         <source>Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)</source>
-        <translation type="unfinished"></translation>
+        <translation>Portable Document Format (*.pdf);;CSV Файлове със сойности разделени с точка и запетая (*.csv);;Текст (*.txt);;HTML (*.html)</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1330"/>
         <source>Export Selected Only</source>
-        <translation type="unfinished"></translation>
+        <translation>Експортирай само маркираните</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1384"/>
         <source>Unsupported file format.</source>
-        <translation type="unfinished">Не поддържан файлов фомат.</translation>
+        <translation>Не поддържан файлов фомат.</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1396"/>
         <source>Print All</source>
-        <translation type="unfinished"></translation>
+        <translation>Разпечатай всичко</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1406"/>
         <source>Print Selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Разпечатай маркираното</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1503"/>
         <source>Are you sure you want to acknowledge all signal events?</source>
-        <translation type="unfinished"></translation>
+        <translation>Сигурни ли сте, че искате да потвърдите всички събития за сигналите?</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1584"/>
         <source>Mask</source>
-        <translation type="unfinished"></translation>
+        <translation>Маркирай</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1587"/>
         <source>Enter mask (&quot;*,?&quot;) here</source>
-        <translation type="unfinished"></translation>
+        <translation>Тук въведи маска  (&quot;*,?&quot;)</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1610"/>
         <source>List</source>
-        <translation type="unfinished">Списък</translation>
+        <translation>Списък</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1625"/>
         <source>Tags</source>
-        <translation type="unfinished"></translation>
+        <translation>Етикети</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1628"/>
         <source>Signal tags space separated</source>
-        <translation type="unfinished"></translation>
+        <translation>Етикети на сигнали разделени с разстояние</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1639"/>
         <source>Reset Filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Нулиране на филтъра</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1651"/>
         <source>Export...</source>
-        <translation type="unfinished">Експорт...</translation>
+        <translation>Експорт...</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1656"/>
         <source>Print...</source>
-        <translation type="unfinished">Печат...</translation>
+        <translation>Печат...</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1663"/>
         <source>Ack All</source>
-        <translation type="unfinished"></translation>
+        <translation>Потвърждение на всички</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1668"/>
         <location filename="../SignalLogDialog.cpp" line="1677"/>
         <source>Pause</source>
-        <translation type="unfinished"></translation>
+        <translation>Пауза</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1677"/>
         <source>Resume</source>
-        <translation type="unfinished"></translation>
+        <translation>Възобновяване</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1731"/>
         <source>All</source>
-        <translation type="unfinished"></translation>
+        <translation>Всички</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1732"/>
         <source>AppSignalID</source>
-        <translation type="unfinished">AppSignalID</translation>
+        <translation>AppSignalID</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1733"/>
         <source>CustomAppSignalID</source>
-        <translation type="unfinished"></translation>
+        <translation>CustomAppSignalID</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1734"/>
         <source>EquipmentID</source>
-        <translation type="unfinished"></translation>
+        <translation>EquipmentID</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1735"/>
         <source>LmEquipmentID</source>
-        <translation type="unfinished"></translation>
+        <translation>LmEquipmentID</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1844"/>
         <source>Not selected</source>
-        <translation type="unfinished">Нямя избран</translation>
+        <translation>Нямя избран</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="1852"/>
         <source>[%1] %2</source>
-        <translation type="unfinished">[%1] %2</translation>
+        <translation>[%1] %2</translation>
     </message>
     <message>
         <location filename="../SignalLogDialog.cpp" line="2049"/>
@@ -1932,7 +1963,11 @@ PlantTime: %12</source>
 An event filter is active. Events that are currently hidden will also be acknowledged.
 
 Are you sure you want to continue?</source>
-        <translation type="unfinished"></translation>
+        <translation>Предупреждение!
+
+Филтър за събитията е активен. Събития, които в момента са скрити същи ще бъдат включени.
+
+Сигурни ли сте, че искате да продължите?</translation>
     </message>
 </context>
 </TS>

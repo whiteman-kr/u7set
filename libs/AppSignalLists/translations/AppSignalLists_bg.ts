@@ -327,7 +327,7 @@ Updated: %2 signal(s)
     <message>
         <location filename="../DialogSignalListEditor.cpp" line="42"/>
         <source>AppSignalLists Editor</source>
-        <translation>Редактор за AppSignalLists</translation>
+        <translation>Редактор на AppSignalLists</translation>
     </message>
     <message>
         <location filename="../DialogSignalListEditor.cpp" line="66"/>
