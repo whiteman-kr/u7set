@@ -263,23 +263,25 @@ QString SignalLogModel::appSignalList() const
 	return m_appSignallistID;
 }
 
-void SignalLogModel::clearRecords()
-{
-	if (rowCount() > 0)
-	{
-		beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
-		m_recordsMap.clear();
-		m_filteredRecords.clear();
-		endRemoveRows();
-	}
-}
-
 void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64 updateCounter)
 {
 	m_recordsVec = std::move(records);
 	m_updateCounter = updateCounter;
 
+	fillRecords(false/*clearBeforeFilling*/);
+}
+
+void SignalLogModel::fillRecords(bool clearBeforeFilling)
+{
 	emit layoutAboutToBeChanged();
+
+	// Clear the model if required
+	//
+	if (clearBeforeFilling == true) 
+	{
+		m_filteredRecords.clear();
+		m_recordsMap.clear();
+	}
 
 	// Remove records that do not exist in new data
 	{
@@ -359,13 +361,6 @@ void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64
 	}
 
 	emit layoutChanged();
-}
-
-void SignalLogModel::fillRecords()
-{
-	clearRecords();
-	setRecords(m_recordsVec, m_updateCounter);
-
 	return;
 }
 
@@ -1278,14 +1273,14 @@ void SignalLogWidget::editMaskReturnPressed()
 {
 	maskChanged(true /*addToCompleter*/);
 
-	m_model.fillRecords();
+	m_model.fillRecords(true/*clearBeforeFilling*/);
 }
 
 void SignalLogWidget::editTagsReturnPressed()
 {
 	tagsChanged();
 
-	m_model.fillRecords();
+	m_model.fillRecords(true /*clearBeforeFilling*/);
 }
 
 void SignalLogWidget::maskTypeComboCurrentIndexChanged(int index)
@@ -1298,13 +1293,13 @@ void SignalLogWidget::maskTypeComboCurrentIndexChanged(int index)
 		return;
 	}
 
-	m_model.fillRecords();
+	m_model.fillRecords(true /*clearBeforeFilling*/);
 }
 
 void SignalLogWidget::signalListComboIndexChanged(int /*index*/)
 {
 	m_model.setAppSignalList(m_signalListCombo->currentData().toString());
-	m_model.fillRecords();
+	m_model.fillRecords(true /*clearBeforeFilling*/);
 }
 
 void SignalLogWidget::buttonExportClicked()
@@ -1447,7 +1442,7 @@ void SignalLogWidget::buttonChooseTagsClicked()
 
 		tagsChanged();
 
-		m_model.fillRecords();
+		m_model.fillRecords(true /*clearBeforeFilling*/);
 	}
 
 	QSettings().setValue("SignalLogWidget/tagsSelectorDialog/width", tagsSelectorDialog.width());
@@ -1484,7 +1479,7 @@ void SignalLogWidget::buttonClearFilterClicked()
 	m_model.setTags({});
 
 	//
-	m_model.fillRecords();
+	m_model.fillRecords(true /*clearBeforeFilling*/);
 }
 
 void SignalLogWidget::buttonAckAllClicked()
@@ -1833,7 +1828,7 @@ void SignalLogWidget::fillAppSignalLists()
 	if (m_model.appSignalList().isEmpty() == false)
 	{
 		m_model.setAppSignalList({});
-		m_model.fillRecords();
+		m_model.fillRecords(true /*clearBeforeFilling*/);
 	}
 
 	// Refresh AppSignalLists combo
