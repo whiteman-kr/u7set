@@ -6,52 +6,52 @@
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="66"/>
         <source>Cannot get configuration from CfgService.</source>
-        <translation type="unfinished"></translation>
+        <translation>Не може да се вземе конфигурацията от CfgService.</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="95"/>
         <source>Internal error: AdsInputController creation function is not set or configuration is invalid. Please contact the developer.</source>
-        <translation type="unfinished"></translation>
+        <translation>Вътрешна грешка: Функцията за създаване на AdsInputController не е зададена или конфигурацията е невалидна. Моля, свържете се с разработчика.</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="104"/>
         <source>Internal error: AdsInputController is not created. Please contact the developer.</source>
-        <translation type="unfinished"></translation>
+        <translation>Вътрешна грешка: AdsInputController не е създадена. Моля, свържете се с разработчика.</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="111"/>
         <source>Failed to init AdsInputController.</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешно инициализиране на AdsInputController.</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="132"/>
         <source>Internal error: TunsOutputController creation function is not set or configuration is invalid. Please contact the developer.</source>
-        <translation type="unfinished"></translation>
+        <translation>Вътрешна грешка: Функцията за създаване на TunsOutputController не е зададена или конфигурацията е невалидна. Моля, свържете се с разработчика.</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="139"/>
         <source>Tuning is disabled in the configuration.</source>
-        <translation type="unfinished"></translation>
+        <translation>Настройката е забранена в конфигурацията.</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="147"/>
         <source>Internal error: TunsOutputController is not created. Please contact the developer.</source>
-        <translation type="unfinished"></translation>
+        <translation>Вътрешна грешка: TunsOutputController не е създадена. Моля, свържете се с разработчика.</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="154"/>
         <source>Failed to init TunsOutputController.</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешно инициализиране на TunsOutputController.</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="173"/>
         <source>Tests execution failed: no user name is supplied! Please check the configuration.</source>
-        <translation type="unfinished">Неуспешно изпълнение на тестовете: не е посочено потребителско име! Моля, проверете конфигурацията.</translation>
+        <translation>Неуспешно изпълнение на тестовете: не е посочено потребителско име! Моля, проверете конфигурацията.</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="179"/>
         <source>Tests execution failed: authorization failed!</source>
-        <translation type="unfinished">Изпълнението на тестовете е неуспешно: неуспешно упълномощаване!</translation>
+        <translation>Изпълнението на тестовете е неуспешно: неуспешно упълномощаване!</translation>
     </message>
 </context>
 <context>
@@ -133,7 +133,9 @@
         <source>Report generating has been finished.
 
 Do you wish to open it?</source>
-        <translation type="unfinished"></translation>
+        <translation>Генерирането на отчета беше завършено.
+
+Искате ли да го отворите?</translation>
     </message>
     <message>
         <source>Report generating has been finished.
@@ -212,17 +214,17 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/Control.cpp" line="116"/>
         <source>Input controller is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>Входният контролер не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/Control.cpp" line="124"/>
         <source>Failed to init input controller.</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешно инициализиране на входния контролер.</translation>
     </message>
     <message>
         <location filename="../src/Control.cpp" line="140"/>
         <source>Output controller is not set before test execution.</source>
-        <translation type="unfinished"></translation>
+        <translation>Изходният контролер не е настроен преди изпълнението на теста.</translation>
     </message>
     <message>
         <source>Cannot connect to CfgService, address1 %1, address2 %2, InstanceID %3</source>
@@ -238,27 +240,27 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="285"/>
         <source>AppDataServices connection(s) updated (RunControl), %1 services.</source>
-        <translation type="unfinished"></translation>
+        <translation>AppDataServices връзката(ите) е/са актуализирана/и (RunControl), %1 услуги.</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="365"/>
         <source>Configuration has not been received in %1 seconds!</source>
-        <translation type="unfinished"></translation>
+        <translation>Конфигурацията не беше получена за %1 секунди!</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="369"/>
         <source>Connection to CfgService is not established whitin %1 seconds!</source>
-        <translation type="unfinished"></translation>
+        <translation>Връзката с CfgService не е изградена в рамките на %1 секунди!</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="374"/>
         <source>Configuration is not valid!</source>
-        <translation type="unfinished"></translation>
+        <translation>Конфигурацията не е валидна!</translation>
     </message>
     <message>
         <location filename="../src/MatsTestSuite.cpp" line="381"/>
         <source>Configuration received, tests about to start.</source>
-        <translation type="unfinished"></translation>
+        <translation>Конфигурацията е получена, тестовете са на път да започнат.</translation>
     </message>
 </context>
 <context>
@@ -271,7 +273,7 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/RunControl.cpp" line="152"/>
         <source>Input controller is not initialized.</source>
-        <translation type="unfinished"></translation>
+        <translation>Входният контролер не е инициализиран.</translation>
     </message>
     <message>
         <location filename="../src/RunControl.cpp" line="235"/>
@@ -379,102 +381,102 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="227"/>
         <source>********** Start test script %1 **********</source>
-        <translation type="unfinished">********** Стартиране на тестов скрипт %1 **********</translation>
+        <translation>********** Стартиране на тестов скрипт %1 **********</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="262"/>
         <location filename="../src/ScriptRunnerImpl.cpp" line="317"/>
         <source>: queryPermission() failed, test terminated.</source>
-        <translation type="unfinished">: queryPermission() е неуспешна, теста е прекратен.</translation>
+        <translation>: queryPermission() е неуспешна, теста е прекратен.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="267"/>
         <location filename="../src/ScriptRunnerImpl.cpp" line="322"/>
         <source>: no global permission: script is not allowed to run.</source>
-        <translation type="unfinished">: няма глобално разрешение: скрипта не може да се изпълни.</translation>
+        <translation>: няма глобално разрешение: не е позволено изпълнението на скрипта.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="272"/>
         <location filename="../src/ScriptRunnerImpl.cpp" line="327"/>
         <source>: no local permission: script is not allowed to run.</source>
-        <translation type="unfinished">: няма локално разрешение: скриптът не може да се изпълни.</translation>
+        <translation>: няма локално разрешение: не е позволено изпълнението на скрипта.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="290"/>
         <source>: initTestCase() not defined.</source>
-        <translation type="unfinished"></translation>
+        <translation>: initTestCase() не е дефинирана.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="295"/>
         <source>: initTestCase() failed, test terminated.</source>
-        <translation type="unfinished">: initTestCase() е неуспешен, теста е прекратен.</translation>
+        <translation>: initTestCase() е неуспешен, теста е прекратен.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="359"/>
         <source>%1: init() not defined.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: init() не е дефинирана.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="364"/>
         <source>%1: init() failed, test terminated.</source>
-        <translation type="unfinished">%1: init() е неуспешна, теста е прекратен.</translation>
+        <translation>%1: init() е неуспешна, теста е прекратен.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="373"/>
         <location filename="../src/ScriptRunnerImpl.cpp" line="379"/>
         <source>%1: %2</source>
-        <translation type="unfinished">%1: %2</translation>
+        <translation>%1: %2</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="387"/>
         <source>%1: cleanup() not defined.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: cleanup() не е дефинирана.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="392"/>
         <source>%1: cleanup() failed, test terminated.</source>
-        <translation type="unfinished">%1: cleanup() е неуспешна, теста е прекратен.</translation>
+        <translation>%1: cleanup() завърши неуспешно, теста е прекратен.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="409"/>
         <source>⠀%1;%2;%3</source>
-        <translation type="unfinished">⠀%1;%2;%3</translation>
+        <translation>⠀%1;%2;%3</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="436"/>
         <source>: cleanupTestCase() not defined.</source>
-        <translation type="unfinished"></translation>
+        <translation>: cleanupTestCase() не е дефинирана.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="441"/>
         <source>: cleanupTestCase() failed, test terminated.</source>
-        <translation type="unfinished">: cleanupTestCase() е неуспешна, теста е прекратен.</translation>
+        <translation>: cleanupTestCase() завърши неуспешно, теста е прекратен.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="449"/>
         <location filename="../src/ScriptRunnerImpl.cpp" line="453"/>
         <source>Totals: %1 tests, %2 failed, %3ms</source>
-        <translation type="unfinished">Общо: %1 тестове, %2 неуспешни, %3ms</translation>
+        <translation>Общо: %1 тестове, %2 неуспешни, %3ms</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="456"/>
         <source>********** Finished test script %1 **********</source>
-        <translation type="unfinished">********** Завършен е тестов скрипт %1 **********</translation>
+        <translation>********** Завършен е тестов скрипт %1 **********</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="461"/>
         <source>%1;%2;%3</source>
-        <translation type="unfinished">%1;%2;%3</translation>
+        <translation>%1;%2;%3</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="463"/>
         <source>%1 %2</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="518"/>
         <source>allow%1</source>
-        <translation type="unfinished">разреши%1</translation>
+        <translation>разреши%1</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="526"/>
@@ -482,7 +484,7 @@ Do you with to open it?</source>
 	Class: %3
 	Stack: %4
 	Message: %5</source>
-        <translation type="unfinished">Скрипт %1 оценка на грешка в ред %2
+        <translation>Скрипт %1 оценка грешката в ред %2
 	Клас: %3
 	Стек: %4
 	Съобщение: %5</translation>
@@ -490,23 +492,23 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="633"/>
         <source>%1 is callable function</source>
-        <translation type="unfinished">%1 е извикана функция</translation>
+        <translation>%1 е извиканата функция</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="683"/>
         <source>Unexpected exception occured in %1.</source>
-        <translation type="unfinished">Възникна неочаквано изключение в %1.</translation>
+        <translation>Възникна неочаквано изключение в %1.</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="701"/>
         <source>%1</source>
-        <translation type="unfinished">%1</translation>
+        <translation>%1</translation>
     </message>
     <message>
         <location filename="../src/ScriptRunnerImpl.cpp" line="709"/>
         <source>Error, stack trace: %1
 %2</source>
-        <translation type="unfinished">Грешка, трасиране на стека: %1
+        <translation>Грешка, трасиране на стека: %1
 %2</translation>
     </message>
     <message>
@@ -514,7 +516,7 @@ Do you with to open it?</source>
         <source>Error at line %1
 	Stack trace: %2
 	%3</source>
-        <translation type="unfinished">Грешка в ред %1
+        <translation>Грешка в ред %1
 	Трасиране на стека: %2
 	%3</translation>
     </message>
@@ -554,17 +556,17 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/TestController.cpp" line="97"/>
         <source>createObserver(), InputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>createObserver(), InputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="105"/>
         <source>createObserver(), TestObserver creating error: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>createObserver(), TestObserver грешка при създаването: %1</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="120"/>
         <source>signalState(), InputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>signalState(), InputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="129"/>
@@ -574,7 +576,7 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/TestController.cpp" line="147"/>
         <source>signalValue(), InputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>signalValue(), InputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="156"/>
@@ -584,7 +586,7 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/TestController.cpp" line="172"/>
         <source>overrideSignalValue(), OutputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>overrideSignalValue(), OutputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="180"/>
@@ -595,17 +597,17 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/TestController.cpp" line="195"/>
         <source>waitForSignalOverrides(), OutputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>waitForSignalOverrides(), OutputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="220"/>
         <source>expectSignalValue(), InputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>expectSignalValue(), InputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="231"/>
         <source>overridesReset(), OutputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>overridesReset(), OutputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="263"/>
@@ -615,12 +617,12 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/TestController.cpp" line="283"/>
         <source>signalExists(), InputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>signalExists(), InputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="294"/>
         <source>signalParam(), InputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>signalParam(), InputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="303"/>
@@ -630,17 +632,17 @@ Do you with to open it?</source>
     <message>
         <location filename="../src/TestController.cpp" line="313"/>
         <source>tuningSourceIsActive(), OutputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>tuningSourceIsActive(), OutputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="324"/>
         <source>tuningSourceIsInactive(), OutputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>tuningSourceIsInactive(), OutputController не е зададен.</translation>
     </message>
     <message>
         <location filename="../src/TestController.cpp" line="335"/>
         <source>activateTuningSource(), OutputController is not set.</source>
-        <translation type="unfinished"></translation>
+        <translation>activateTuningSource(), OutputController не е зададен.</translation>
     </message>
 </context>
 <context>

@@ -6,7 +6,7 @@
     <message>
         <location filename="../src/ConfigController.cpp" line="82"/>
         <source>getFileBlocked() Can&apos;t get file %1, error %2</source>
-        <translation>getFileBlocked() Не може да получи файл %1, грешка %2</translation>
+        <translation>getFileBlocked() Не може да достави файл %1, грешка %2</translation>
     </message>
     <message>
         <location filename="../src/ConfigController.cpp" line="86"/>

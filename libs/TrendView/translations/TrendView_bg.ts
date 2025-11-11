@@ -6,7 +6,7 @@
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="20"/>
         <source>Trend Signals</source>
-        <translation>Сигнали от Trend</translation>
+        <translation>Сигнали на Trend</translation>
     </message>
     <message>
         <location filename="../DialogChooseTrendSignals.ui" line="28"/>

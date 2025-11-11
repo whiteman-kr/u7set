@@ -1,137 +1,137 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1">
+<TS version="2.1" language="bg_BG">
 <context>
     <name>ModuleConfiguratorLib::Configurator</name>
     <message>
         <location filename="../Configurator.cpp" line="436"/>
         <source> FT_CreateDeviceInfoList error.</source>
-        <translation type="unfinished"></translation>
+        <translation> FT_CreateDeviceInfoList грешка.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="442"/>
         <source> Can&apos;t find any configurator.</source>
-        <translation type="unfinished"></translation>
+        <translation> Не може да бъде открит конфигуратор.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="448"/>
         <source> There are more than one configurator, please leave only one.</source>
-        <translation type="unfinished"></translation>
+        <translation> Има повече от един конфигуратор, моля оставете само един.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="456"/>
         <source> FT_Open error.</source>
-        <translation type="unfinished"></translation>
+        <translation> FT_Open грешка.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="483"/>
         <source> Wrong configuration factory no(</source>
-        <translation type="unfinished"></translation>
+        <translation> Грешно конфигуриран заводски ном(</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="489"/>
         <source>Configurator factory no:</source>
-        <translation type="unfinished"></translation>
+        <translation>Заводски ном на конфигуратора:</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="493"/>
         <source> FT_Read error.</source>
-        <translation type="unfinished"></translation>
+        <translation> FT_Read грешка.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="517"/>
         <source> %1</source>
-        <translation type="unfinished"></translation>
+        <translation> %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="522"/>
         <source>Add user to the dialout group by the following command:</source>
-        <translation type="unfinished"></translation>
+        <translation>Добавяне на потребител към група dialout чрез следната команда:</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="523"/>
         <source>sudo usermod -a -G dialout USER</source>
-        <translation type="unfinished"></translation>
+        <translation>sudo usermod -a -G dialout USER</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="524"/>
         <source>Then user has to logout and log in back.</source>
-        <translation type="unfinished"></translation>
+        <translation>След това потребителят трябва да излезе и да се регистрира отново.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="582"/>
         <source>Port object is not created: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Обекта за порт %1 не е създаден</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="588"/>
         <source>Port is not opened: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Порт: %1 не е отворен</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="626"/>
         <source>Sending header, opcode Read:</source>
-        <translation type="unfinished"></translation>
+        <translation>Изпращане на заглавна част, код на операцията Read:</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="657"/>
         <source>Sending header, opcode Write:</source>
-        <translation type="unfinished"></translation>
+        <translation>Изпращане на заглавна част, код на операцията Write:</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="681"/>
         <source>Sending header, opcode Nop</source>
-        <translation type="unfinished"></translation>
+        <translation>Изпращане на заглавна част, код на операцията Nop</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="706"/>
         <source>Sending header, opcode Nop2:</source>
-        <translation type="unfinished"></translation>
+        <translation>Изпращане на заглавна част, код на операцията Nop2:</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="714"/>
         <source> Unknown command %1.</source>
-        <translation type="unfinished"></translation>
+        <translation> Неизвестна команда %1.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="732"/>
         <source>Written bytes number %1, expected %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Записани байтове %1, очаквани %2</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="733"/>
         <source>Operation terminated.</source>
-        <translation type="unfinished"></translation>
+        <translation>Операцията е прекъсната.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="775"/>
         <source>Received </source>
-        <translation type="unfinished"></translation>
+        <translation>Получен </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="797"/>
         <source>Received header:</source>
-        <translation type="unfinished"></translation>
+        <translation>Получена заглавна част:</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="805"/>
         <source>Wrong CRC, received value is: </source>
-        <translation type="unfinished"></translation>
+        <translation>Грешна CRC, получената стойност е: </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="875"/>
         <source>NOP2 command returned wrong number bytes of data: %1, expected: %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>Команда NOP2 върна грешен брой байтове за данните: %1, очакван %2.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="885"/>
         <source>UART count: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Брой UART: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="889"/>
         <source>Invalid Uarts count, expected 1..16.</source>
-        <translation type="unfinished"></translation>
+        <translation>Невалиден брой Uarts, очакван 1..16.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="890"/>
@@ -173,17 +173,17 @@
         <location filename="../Configurator.cpp" line="2554"/>
         <location filename="../Configurator.cpp" line="2684"/>
         <source>Communication error.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при комуникацията.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="901"/>
         <source>0x%1</source>
-        <translation type="unfinished"></translation>
+        <translation>0x%1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="903"/>
         <source>Supported UARTs: </source>
-        <translation type="unfinished"></translation>
+        <translation>Поддържани UARTs: </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="910"/>
@@ -196,7 +196,7 @@
         <location filename="../Configurator.cpp" line="2038"/>
         <location filename="../Configurator.cpp" line="2450"/>
         <source>Unsupported protocol version, module protocol version: </source>
-        <translation type="unfinished"></translation>
+        <translation>Не поддържана версия на протокола, версия на протокола за модула: </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="911"/>
@@ -209,62 +209,62 @@
         <location filename="../Configurator.cpp" line="2039"/>
         <location filename="../Configurator.cpp" line="2451"/>
         <source>, the maximum supported version: </source>
-        <translation type="unfinished"></translation>
+        <translation>, максимално поддържаната версия: </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="961"/>
         <source>Configurator serial port is %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Серийният порт за конфигуратора е %1.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="992"/>
         <source>Loading binary data...</source>
-        <translation type="unfinished"></translation>
+        <translation>Зареждане на двойчни данни...</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="997"/>
         <source>//----------------------</source>
-        <translation type="unfinished"></translation>
+        <translation>//----------------------</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="998"/>
         <source>File: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Файл: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1004"/>
         <source>File %1 wasn&apos;t loaded!</source>
-        <translation type="unfinished"></translation>
+        <translation>Файлът %1 не е зареден!</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1016"/>
         <source>File Version: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Версия на фала: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1017"/>
         <source>ChangesetID: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>ChangesetID: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1018"/>
         <source>Build User: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Компилирал: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1019"/>
         <source>Build No: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Компилация No: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1020"/>
         <source>Subsystems: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Подсистеми: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1032"/>
         <source>Uploading binary data for subsystem %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Качване на двойчни данни за подсистема %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1041"/>
@@ -273,64 +273,64 @@
         <location filename="../Configurator.cpp" line="2396"/>
         <location filename="../Configurator.cpp" line="2671"/>
         <source>Cannot open </source>
-        <translation type="unfinished"></translation>
+        <translation>Не може да бъде отворен </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1069"/>
         <location filename="../Configurator.cpp" line="1675"/>
         <source>Wrong UART, use Bitstream Configuration port.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешен UART, използвайте Bitstream Configuration port.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1119"/>
         <location filename="../Configurator.cpp" line="1730"/>
         <location filename="../Configurator.cpp" line="2461"/>
         <source>Protocol Version: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Версия на протокола: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1120"/>
         <location filename="../Configurator.cpp" line="1731"/>
         <source>Frame Payload Size: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Frame Payload Size: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1121"/>
         <location filename="../Configurator.cpp" line="1732"/>
         <location filename="../Configurator.cpp" line="2462"/>
         <source>Frame Size: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Frame Size: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1122"/>
         <location filename="../Configurator.cpp" line="1733"/>
         <location filename="../Configurator.cpp" line="2463"/>
         <source>Frame Count: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Frame Count: %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1143"/>
         <location filename="../Configurator.cpp" line="1753"/>
         <location filename="../Configurator.cpp" line="2476"/>
         <source>Uart ID = 0x%1 is skipped.</source>
-        <translation type="unfinished"></translation>
+        <translation>Uart ID = 0x%1 е пропуснат.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1150"/>
         <source>No firmware data exists for current UART ID = %1h.</source>
-        <translation type="unfinished"></translation>
+        <translation>Няма налични данни за фърмуера за текущия UART ID = %1h.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1161"/>
         <source>EEPROM Frame size is to small, requeried at least %1, but current frame size is %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>EEPROM Frame size е много малък, най-малкия допустим размер е %1, но текущия размер е %2.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1169"/>
         <location filename="../Configurator.cpp" line="1521"/>
         <location filename="../Configurator.cpp" line="2050"/>
         <source>Read identification block.</source>
-        <translation type="unfinished"></translation>
+        <translation>Прочитане на идентификационния блок.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1218"/>
@@ -339,19 +339,19 @@
         <location filename="../Configurator.cpp" line="2106"/>
         <location filename="../Configurator.cpp" line="2338"/>
         <source>Current license does not allow configuring this module, %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Текущият лиценз не позволява конфигуриране на този модул, %1.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1227"/>
         <location filename="../Configurator.cpp" line="2115"/>
         <source>Upgrading CONF_IDENTIFICATION_DATA struct version: %1 -&gt; %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Надграждане версията за структура CONF_IDENTIFICATION_DATA: %1 -&gt; %2</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1234"/>
         <location filename="../Configurator.cpp" line="2122"/>
         <source>CONF_IDENTIFICATION_DATA struct size (%1) is bigger than blockSize (%2).</source>
-        <translation type="unfinished"></translation>
+        <translation>Размерът на структура CONF_IDENTIFICATION_DATA (%1) е по-голям от blockSize (%2).</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1270"/>
@@ -360,23 +360,23 @@
         <location filename="../Configurator.cpp" line="2205"/>
         <location filename="../Configurator.cpp" line="2546"/>
         <source>Command Write reply error. Different header version, expected 1, received </source>
-        <translation type="unfinished"></translation>
+        <translation>Грешен отговор при команда Запис. Различна версия на заглавната част, очаквана 1, получена </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1285"/>
         <location filename="../Configurator.cpp" line="1392"/>
         <source>Verifying block %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Проверка на блок %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1303"/>
         <source>Send identificationData size does not match received data size in frame %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Изпратеният размер identificationData не съответства на получения размер данни в кадър %1.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1310"/>
         <source>Sent identificationData does not match received data size in frame %1, offset %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>Изпратените identificationData не съответстват на размера на полудените данни в кадър %1, отместване %2.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1332"/>
@@ -388,32 +388,32 @@
         <location filename="../Configurator.cpp" line="2578"/>
         <location filename="../Configurator.cpp" line="2703"/>
         <source>CloseConnection failed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешна команда CloseConnection.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1347"/>
         <source>Writing block %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Запис на блок %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1351"/>
         <source>Wrong FrameIndex %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешен FrameIndex %1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1358"/>
         <source>Frame %1 size (%2) does not match module&apos;s BlockSize (%3).</source>
-        <translation type="unfinished"></translation>
+        <translation>Кадър %1 с размер (%2) не съответства на модул BlockSize (%3).</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1410"/>
         <source>Send data size does not match received data size in frame %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Изпратеният обем данни не съответства на размера данни в кадър %1.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1416"/>
         <source>Send data does not match received data size in frame %1, offset %2.</source>
-        <translation type="unfinished"></translation>
+        <translation>Изпратените даани не съответстват на получения размер данни в кадър %1, отместване %2.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1431"/>
@@ -423,84 +423,84 @@
         <location filename="../Configurator.cpp" line="2565"/>
         <location filename="../Configurator.cpp" line="2689"/>
         <source>Successful.</source>
-        <translation type="unfinished"></translation>
+        <translation>Успешен.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1471"/>
         <source>Communication error (ping send error).</source>
-        <translation type="unfinished"></translation>
+        <translation>Комуникационна грешка (грешка при изпращане на пинг)</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1492"/>
         <location filename="../Configurator.cpp" line="2021"/>
         <source>Wrong UART, use Service Configuration port.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешен UART, използвайте порта на Service Configuration.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1577"/>
         <source>Identification error.</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при идентификацията.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1632"/>
         <source>CloseConnection failed with error </source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при неуспушна команда CloseConnection </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1701"/>
         <source>Flash memory block count is not an intergral multiple.</source>
-        <translation type="unfinished"></translation>
+        <translation>Броят на блоковете във флаш паметта не е кратно само на едно цяло число.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1797"/>
         <source>Firmware reading cancelled.</source>
-        <translation type="unfinished"></translation>
+        <translation>Четенето на фърмуера е прекратено.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1812"/>
         <source>Reading block </source>
-        <translation type="unfinished"></translation>
+        <translation>Четене на блок </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1930"/>
         <source>Identification block is empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Идентификационният блок е празен.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1961"/>
         <source>Unknown identification block version: </source>
-        <translation type="unfinished"></translation>
+        <translation>Неизвестна версия на идентификационния блок: </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="1967"/>
         <source>Wrong identification block, marker: </source>
-        <translation type="unfinished"></translation>
+        <translation>Грешен идентификационен блок, маркер: </translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="2288"/>
         <source>Cannot open output file %1, %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Неможе да се отвори изходния файл %1, %2</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="2378"/>
         <source>Failed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Неуспешно.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="2433"/>
         <source>Flash memory block count is not an integral multiple.</source>
-        <translation type="unfinished"></translation>
+        <translation>Броят на блоковете във флаш паметта не е кратно само на едно цяло число.</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="2481"/>
         <source>Processing Uart ID = 0x%1</source>
-        <translation type="unfinished"></translation>
+        <translation>Обработва се  Uart ID = 0x%1</translation>
     </message>
     <message>
         <location filename="../Configurator.cpp" line="2521"/>
         <location filename="../Configurator.cpp" line="2525"/>
         <source>Erasing block </source>
-        <translation type="unfinished"></translation>
+        <translation>Изтриване на блок </translation>
     </message>
 </context>
 </TS>

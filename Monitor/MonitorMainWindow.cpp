@@ -143,6 +143,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UtilsLib_%1.qm").arg(l));
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/qt_%1.qm").arg(l));
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/AppSignalLists_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/ReportLib_%1.qm").arg(l));
 	}
 
 	if (MonitorAppSettings::instance().language() != "en")
