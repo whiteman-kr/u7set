@@ -7,9 +7,6 @@ find_package(gRPC CONFIG REQUIRED)
 find_package(Protobuf REQUIRED)
 qt_standard_project_setup()
 
-include_directories(${Protobuf_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 # 
 #
 # TARGET: GrpcLib - gRPC servers/clients
@@ -34,6 +31,7 @@ target_link_libraries(${TARGET} PRIVATE CommonLib OnlineLib)
 target_include_directories(${TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} INTERFACE ${CMAKE_BINARY_DIR})
+target_include_directories(${TARGET} PUBLIC ${Protobuf_INCLUDE_DIRS})
 
 protobuf_generate(
     TARGET ${TARGET}

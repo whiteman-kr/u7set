@@ -8,10 +8,23 @@
 #include <UiLib/OverrideWindows11Style.h>
 #include <VFrame30/VFrame30Library.h>
 
+#include <grpcpp/grpcpp.h>
+
 
 int main(int argc, char* argv[])
 {
 	Vld::setVldReportFilterHook();
+
+	// Initialize gRPC early so its singleton allocations happen before main logic.
+#ifdef VLD_IS_INCLUDED
+	VLDDisable();
+#endif
+
+	grpc_init();
+
+#ifdef VLD_IS_INCLUDED
+	VLDEnable();
+#endif
 
 	QApplication a(argc, argv);
 
@@ -139,6 +152,9 @@ int main(int argc, char* argv[])
 	VFrame30::shutdown();
 	Hardware::shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
+
+	// Shutdown gRPC AFTER all channels/stubs have been destroyed (main window scope ended)
+	grpc_shutdown();
 
 	return result;
 }

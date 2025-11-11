@@ -3,12 +3,16 @@
 #endif
 
 #include "AdsConnectionPrivate.h"
+
+#include "AdsConnectionPrivate2.h"
+
+
 #include <ClientLib/AdsConnection.h>
 
 namespace ClientLib
 {
 	AdsConnection::AdsConnection(IAppSignalUpdater& signalUpdater, IRecentAppSignals* recentAppSignals, ILogFile* logFile) :
-		m_pimpl{std::make_unique<AdsConnectionPrivate>(signalUpdater, recentAppSignals, logFile)}
+		m_pimpl{std::make_unique<AdsConnectionType>(signalUpdater, recentAppSignals, logFile)}
 	{
 		return;
 	}

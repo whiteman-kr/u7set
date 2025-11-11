@@ -83,9 +83,6 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../UtilsLib/SpinLock.h"
 )
 
-include_directories(${Protobuf_INCLUDE_DIRS})
-#include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 target_include_directories(${TARGET} PRIVATE
 	${CMAKE_BINARY_DIR}/libs/GrpcLib
 )

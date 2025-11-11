@@ -25,7 +25,8 @@ message GetAppSignalListRequest
 
 message GetAppSignalListReply
 {
-	repeated string appSignalIds = 1;
+	optional uint32 totalSize = 2;				// How many signal IDs totally will be transfered.
+	repeated string appSignalIds = 3;
 }
 
 //

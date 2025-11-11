@@ -1,10 +1,5 @@
 #pragma once
 
-#include <map>
-#include <vector>
-
-#include <QReadWriteLock>
-
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"

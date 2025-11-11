@@ -5,7 +5,10 @@
 #include "../OnlineLib/CfgLoader.h"
 #include <ClientLib/ConfigController.h>
 #include <CommonLib/HostAddressPort.h>
+
+#include <QCoreApplication>
 #include <QDomNode>
+
 
 namespace ClientLib
 {
