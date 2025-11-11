@@ -586,6 +586,15 @@ void DynamicAppSignalState::setAutoArchivingGroup(int archivingGroup)
 	m_autoArchivingGroup = archivingGroup;
 }
 
+void DynamicAppSignalState::setCurrent(Times time, double value, AppSignalStateFlags flags)
+{
+	SimpleAppSignalState& cs = m_current[m_curStateIndex.load()];
+
+	cs.time = time;
+	cs.value = value;
+	cs.flags = flags;
+}
+
 void DynamicAppSignalState::setGatewayQueueMask(quint32 mask)
 {
 	m_gatewayQueueMask |= mask;

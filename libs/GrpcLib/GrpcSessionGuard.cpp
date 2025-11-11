@@ -3,10 +3,12 @@
 
 #include "GrpcSessionGuard.h"
 
-GrpcSessionGuard::GrpcSessionGuard(const SoftwareInfo& severSwInfo,
+GrpcSessionGuard::GrpcSessionGuard(	const SoftwareInfo& severSwInfo,
+									bool allowAllClients,
 									const std::vector<ClientInfo>& clients,
 									bool checkHostName) :
 	m_serverSwInfo(severSwInfo),
+	m_allowAllClients(allowAllClients),
 	m_clients(clients),
 	m_checkHostName(checkHostName)
 {
@@ -42,27 +44,29 @@ void GrpcSessionGuard::stop() noexcept
 	}
 }
 
-bool GrpcSessionGuard::handshake(const Grpc::HandshakeRequest* request,
+grpc::Status GrpcSessionGuard::handshake(const Grpc::HandshakeRequest* request,
 								Grpc::HandshakeReply* reply)
 {
 	if (request == nullptr ||
 		reply == nullptr)
 	{
-		return false;
+		return grpc::Status(grpc::StatusCode::CANCELLED, "Internal error");
 	}
 
 	m_serverSwInfo.serializeTo(reply->mutable_serversoftwareinfo());
 
-	if (isValidClient(request) == false)
+	std::string errMsg;
+
+	if (isValidClient(request, errMsg) == false)
 	{
 		reply->set_authtoken("");
-		return true;
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, errMsg);
 	}
 
 	const QUuid guid = QUuid::createUuid();
 	const std::string authToken = guid.toString(QUuid::WithoutBraces).toStdString();
 
-	const TimePoint expiresAt =	std::chrono::steady_clock::now() + std::chrono::seconds(SESSION_TIMEOUT_SEC);
+	const TimePoint expiresAt =	std::chrono::steady_clock::now() + std::chrono::seconds(m_sessionTimeout);
 
 	{
 		std::lock_guard<std::mutex> lock(m_sessionsMutex);
@@ -78,7 +82,7 @@ bool GrpcSessionGuard::handshake(const Grpc::HandshakeRequest* request,
 
 	reply->set_authtoken(authToken);
 
-	return true;
+	return grpc::Status::OK;
 }
 
 bool GrpcSessionGuard::extractAndValidateAuthToken(grpc::ServerContext* context)
@@ -93,9 +97,9 @@ bool GrpcSessionGuard::extractAndValidateAuthToken(grpc::ServerContext* context)
 	return validateAuthToken(authToken);
 }
 
-void GrpcSessionGuard::setAllowAllClients(bool allowAll)
+void GrpcSessionGuard::setSessionTimeout(int seconds)
 {
-	m_allowAllClients.store(allowAll, std::memory_order_relaxed);
+	m_sessionTimeout = seconds;
 }
 
 std::string GrpcSessionGuard::extractAuthTokenFromMetadata(grpc::ServerContext* context) const
@@ -107,9 +111,7 @@ std::string GrpcSessionGuard::extractAuthTokenFromMetadata(grpc::ServerContext* 
 
 	const auto& md = context->client_metadata();
 
-	static const std::string authTokenKey = Grpc::SESSION_AUTH_TOKEN.toStdString();
-
-	auto it = md.find(authTokenKey);
+	auto it = md.find(Grpc::SESSION_AUTH_TOKEN);
 
 	if (it == md.end())
 	{
@@ -144,14 +146,14 @@ bool GrpcSessionGuard::validateAuthToken(const std::string& authToken)
 		return false;
 	}
 
-	const auto newExpiresAt = now + std::chrono::seconds(SESSION_TIMEOUT_SEC);
+	const auto newExpiresAt = now + std::chrono::seconds(m_sessionTimeout);
 
 	it->second = newExpiresAt;
 
 	return true;
 }
 
-bool GrpcSessionGuard::isValidClient(const Grpc::HandshakeRequest* request) const
+bool GrpcSessionGuard::isValidClient(const Grpc::HandshakeRequest* request, std::string& errMsg) const
 {
 	if (m_allowAllClients.load(std::memory_order_relaxed))
 	{
@@ -171,12 +173,15 @@ bool GrpcSessionGuard::isValidClient(const Grpc::HandshakeRequest* request) cons
 					return true;
 				}
 
+				errMsg = Grpc::WRONG_HOST_NAME;
 				return false;
 			}
 
 			return true;
 		}
 	}
+
+	errMsg = Grpc::WRONG_CLIENT_EQUIPMENT_ID;
 
 	return false;
 }

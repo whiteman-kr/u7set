@@ -10,30 +10,30 @@
 #include "GrpcAppDataSrv.h"
 
 GrpcAppDataSrv::GrpcAppDataSrv( const SoftwareInfo& serverSwInfo,
+								bool allowAllClients,
 								const std::vector<ClientInfo>& clients,
 								bool checkHostName,
 								const std::vector<HostAddressPort>& listenIPs,
 								const AppSignals& appSignals,
 								const DynamicAppSignalStates& signalStates,
 								CircularLoggerShared log) :
-	m_sessionGuard(serverSwInfo, clients, checkHostName),
+	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
 	m_appSignals(appSignals),
 	m_signalStates(signalStates),
 	m_log(log)
 {
-	m_sessionGuard.setAllowAllClients(true);
-
 	initService(listenIPs);
 }
 
 GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
-								const std::vector<ClientInfo>& clients,
-								bool checkHostName,
-								const HostAddressPort& listenIP,
-								const AppSignals& appSignals,
-								const DynamicAppSignalStates& signalStates,
-								CircularLoggerShared log) :
-	m_sessionGuard(serverSwInfo, clients, checkHostName),
+							   bool allowAllClients,
+							   const std::vector<ClientInfo>& clients,
+							   bool checkHostName,
+							   const HostAddressPort& listenIP,
+							   const AppSignals& appSignals,
+							   const DynamicAppSignalStates& signalStates,
+							   CircularLoggerShared log) :
+	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
 	m_appSignals(appSignals),
 	m_signalStates(signalStates),
 	m_log(log)
@@ -62,16 +62,18 @@ GrpcAppDataSrv::~GrpcAppDataSrv()
 	return;
 }
 
+void GrpcAppDataSrv::setSessionTimeout(int seconds)
+{
+	m_sessionGuard.setSessionTimeout(seconds);
+}
+
 grpc::Status GrpcAppDataSrv::Handshake(grpc::ServerContext* context,
 										const Grpc::HandshakeRequest* request,
 										Grpc::HandshakeReply* reply)
 {
-	if (m_sessionGuard.handshake(request, reply) == false)
-	{
-		return grpc::Status::CANCELLED;
-	}
+	Q_UNUSED(context);
 
-	return grpc::Status::OK;
+	return m_sessionGuard.handshake(request, reply);
 }
 
 grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
@@ -88,7 +90,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
 	{
-		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid or expired session");
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
 	}
 
 	Grpc::GetAppSignalListReply reply;
@@ -125,8 +127,6 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 	for(const AppSignal& appSignal : m_appSignals)
 	{
-		DEBUG_LOG_MSG(m_log, QString("GetAppSignalList: ID %1").arg(appSignal.appSignalID()));
-
 		*reply.add_appsignalids() = appSignal.appSignalID().toStdString();
 
 		ctr++;
@@ -174,7 +174,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
 	{
-		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid or expired session");
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
 	}
 
 	Grpc::GetAppSignalParamReply reply;
@@ -303,24 +303,14 @@ grpc::Status GrpcAppDataSrv::GetAppSignalState(grpc::ServerContext* context,
 
 	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
 	{
-		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, "Invalid or expired session");
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
 	}
 
 	if (request->signalhashes_size() > ADS_GET_APP_SIGNAL_STATE_MAX)
 	{
-		reply->set_error(TO_INT(E::NetworkError::RequestParamExceed));
-		return grpc::Status::OK;
+		return grpc::Status(grpc::StatusCode::OUT_OF_RANGE,
+							Grpc::SIGNAL_HASHES_COUNT_EXEEDS_ADS_GET_APP_SIGNAL_STATE_MAX);
 	}
-
-	reply->set_error(TO_INT(E::NetworkError::Success));
-
-	reply->set_servertimeutc(currentMSecsUTC());
-	reply->set_servertimelocal(currentMSecsLocal());
-
-	// TO DO
-	//
-	reply->set_statechangesqueuesize(0);
-	reply->set_gatewaystatechangesqueuesize(0);
 
 	//
 
@@ -367,8 +357,7 @@ void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 		return;
 	}
 
-	DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv started. Listening addresses: %1, appSignals count = %2").
-						 arg(ips.join(", ")).arg(m_appSignals.count()));
+	DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv started. Listening addresses: %1").arg(ips.join(", ")));
 
 	m_thread = std::jthread{[this](std::stop_token stoken, grpc::Server* server)
 							{

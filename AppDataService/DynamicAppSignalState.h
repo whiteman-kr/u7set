@@ -82,6 +82,8 @@ public:
 
 	const SimpleAppSignalState& current() const { return m_current[m_curStateIndex.load()]; }
 
+	void setCurrent(Times time, double value, AppSignalStateFlags flags);
+
 	int autoArchivingGroup() const { return m_autoArchivingGroup; }
 	void setAutoArchivingGroup(int archivingGroup);
 

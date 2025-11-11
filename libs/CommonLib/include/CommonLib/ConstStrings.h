@@ -1039,5 +1039,9 @@ namespace BOM
 
 namespace Grpc
 {
-	inline const QString SESSION_AUTH_TOKEN("session-auth-token");
+	inline const std::string SESSION_AUTH_TOKEN("session-auth-token");
+	inline const std::string WRONG_HOST_NAME("Wrong host name");
+	inline const std::string WRONG_CLIENT_EQUIPMENT_ID("Wrong client EquipmentID");
+	inline const std::string SIGNAL_HASHES_COUNT_EXEEDS_ADS_GET_APP_SIGNAL_STATE_MAX("Signal hashes count exceeds ADS_GET_APP_SIGNAL_STATE_MAX");
+	inline const std::string INVALID_OR_EXPIRED_SESSION("Invalid or expired session");
 }

@@ -20,15 +20,14 @@ const std::vector<ClientInfo> clients =
 	};
 
 std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddressPort& listenIP,
-																std::unique_ptr<GrpcAppDataSrv>& outServer)
+																std::unique_ptr<GrpcAppDataSrv>& outServer,
+																bool allowAllClients = false,
+																bool checkHostName = true)
 {
 	SoftwareInfo si(E::SoftwareType::AppDataService, "TESTS_GRPC_APP_DATA_SRV");
 
-	outServer = std::make_unique<GrpcAppDataSrv>(si, clients, false,
-												 listenIP,
-												 appSignals,
-												 appSignalStates,
-												 logger);
+	outServer = std::make_unique<GrpcAppDataSrv>(si, allowAllClients, clients, checkHostName,
+												 listenIP, appSignals, appSignalStates, logger);
 
 	const std::string endpoint = listenIP.addressPortStr().toStdString();
 
@@ -36,27 +35,38 @@ std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddre
 	return Grpc::AppDataSrv::NewStub(channel);
 }
 
-bool Handshake(std::unique_ptr<Grpc::AppDataSrv::Stub>& stub, grpc::ClientContext* ctx, const ClientInfo& ci)
+std::string Handshake(Grpc::AppDataSrv::Stub& stub, const ClientInfo& ci, grpc::Status* status = nullptr)
 {
 	SoftwareInfo si(ci.softwareType, ci.equipmentID);
 
 	si.setHostname(ci.hostname);
+
+	grpc::ClientContext handshakeContext;
 
 	Grpc::HandshakeRequest req;
 	Grpc::HandshakeReply rep;
 
 	si.serializeTo(req.mutable_clientsoftwareinfo());
 
-	grpc::Status st = stub->Handshake(ctx, req, &rep);
+	grpc::Status st = stub.Handshake(&handshakeContext, req, &rep);
+
+	if (status != nullptr)
+	{
+		*status = st;
+	}
 
 	if (st.ok())
 	{
 		const std::string authToken = rep.authtoken();
-		ctx->AddMetadata(Grpc::SESSION_AUTH_TOKEN.toStdString(), authToken);
-		return true;
+		DEBUG_LOG_MSG(logger, QString("Normal handshake, authToken: %1").arg(QString::fromStdString(authToken)));
+		return authToken;
 	}
 
-	return false;
+	DEBUG_LOG_WRN(logger, QString("Error handshake, status: %1, msg: %2").
+						  arg(grpcStatusCodeToString(st.error_code())).
+						  arg(QString::fromStdString(st.error_message())));
+
+	return {};
 }
 
 bool checkReceivedParams(const std::vector<Proto::AppSignal>& recvParams)
@@ -90,16 +100,131 @@ bool checkReceivedParams(const std::vector<Proto::AppSignal>& recvParams)
 	return res;
 }
 
-TEST(GrpcAppDataSrvTest, ValidHandshake)
+TEST(GrpcAppDataSrvTest, HandshakeNormal)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 13999} , server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13995} , server);
+
+	grpc::Status status;
+
+	std::string authToken = Handshake(*stub, clients[0], &status);
+
+	EXPECT_EQ(status.error_code(), grpc::StatusCode::OK);
+	EXPECT_EQ(authToken.empty(), false);
+
+	server.reset();
+}
+
+TEST(GrpcAppDataSrvTest, HandshakeWrongClientID)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13996} , server);
+
+	ClientInfo ci = clients[0];
+
+	ci.equipmentID = "WRONG_CLIENT_ID";
+
+	grpc::Status status;
+
+	std::string authToken = Handshake(*stub, ci, &status);
+
+	EXPECT_EQ(status.error_code(), grpc::StatusCode::UNAUTHENTICATED);
+	EXPECT_EQ(status.error_message(), Grpc::WRONG_CLIENT_EQUIPMENT_ID);
+	EXPECT_EQ(authToken.empty(), true);
+
+	server.reset();
+}
+
+TEST(GrpcAppDataSrvTest, HandshakeWrongClientID_Allowed)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13997} , server,
+										 true);	// allow all clients
+
+	ClientInfo ci = clients[0];
+
+	ci.equipmentID = "WRONG_CLIENT_ID";
+
+	grpc::Status status;
+
+	std::string authToken = Handshake(*stub, ci, &status);
+
+	EXPECT_EQ(status.error_code(), grpc::StatusCode::OK);
+	EXPECT_EQ(authToken.empty(), false);
+
+	server.reset();
+}
+
+TEST(GrpcAppDataSrvTest, HandshakeWrongHostName)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13998} , server,
+										 false,		// allow all clients - false
+										 true);		// check host name - true
+
+	ClientInfo ci = clients[1];
+
+	ci.hostname = "WRONG_HOST";
+
+	grpc::Status status;
+
+	std::string authToken = Handshake(*stub, ci, &status);
+
+	EXPECT_EQ(status.error_code(), grpc::StatusCode::UNAUTHENTICATED);
+	EXPECT_EQ(status.error_message(), Grpc::WRONG_HOST_NAME);
+	EXPECT_EQ(authToken.empty(), true);
+
+	server.reset();
+}
+
+TEST(GrpcAppDataSrvTest, HandshakeWrongHostName_Allowed)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13999} , server, false, false);
+
+	ClientInfo ci = clients[1];
+
+	ci.hostname = "WRONG_HOST";
+
+	grpc::Status status;
+
+	std::string authToken = Handshake(*stub, ci);
+
+	EXPECT_EQ(status.error_code(), grpc::StatusCode::OK);
+	EXPECT_EQ(authToken.empty(), false);
+
+	server.reset();
+}
+
+TEST(GrpcAppDataSrvTest, SessionTimeout)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14000} , server);
+
+	server->setSessionTimeout(5);
+
+	std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
 
 	grpc::ClientContext ctx;
 
-	bool res = Handshake(stub, &ctx, clients[0]);
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
 
-	EXPECT_EQ(res, true);
+	QThread::sleep(7);
+
+	Grpc::GetAppSignalStateRequest request;
+	Grpc::GetAppSignalStateReply reply;
+
+	grpc::Status status = stub->GetAppSignalState(&ctx, request, &reply);
+
+	EXPECT_EQ(status.error_code(), grpc::StatusCode::UNAUTHENTICATED);
+	EXPECT_EQ(status.error_message(), Grpc::INVALID_OR_EXPIRED_SESSION);
+
+	authToken = Handshake(*stub, clients[0], &status);
+
+	EXPECT_TRUE(status.ok());
+	ASSERT_FALSE(authToken.empty());
 
 	server.reset();
 }
@@ -109,7 +234,14 @@ TEST(GrpcAppDataSrvTest, StartsAndStopsCleanly)
 	std::unique_ptr<GrpcAppDataSrv> server;
 	auto stub = StartServerAndMakeClient({"127.0.0.1", 14000} , server);
 
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
 	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
 	Grpc::GetAppSignalListRequest req;
 	std::unique_ptr<grpc::ClientReader<Grpc::GetAppSignalListReply>> reader =
 		stub->GetAppSignalList(&ctx, req);
@@ -136,7 +268,14 @@ TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
 	std::unique_ptr<GrpcAppDataSrv> server;
 	auto stub = StartServerAndMakeClient({"127.0.0.1", 14001}, server);
 
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
 	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
 	Grpc::GetAppSignalListRequest req;
 
 	auto reader = stub->GetAppSignalList(&ctx, req);
@@ -192,7 +331,14 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_AllSignals)
 	std::unique_ptr<GrpcAppDataSrv> server;
 	auto stub = StartServerAndMakeClient({"127.0.0.1", 14002}, server);
 
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
 	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
 	Grpc::GetAppSignalParamRequest req;			// hashes size 0 - request ALL signal params
 	auto reader = stub->GetAppSignalParam(&ctx, req);
 
@@ -235,6 +381,14 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_ByHashes)
 	std::unique_ptr<GrpcAppDataSrv> server;
 	auto stub = StartServerAndMakeClient({"127.0.0.1", 14003}, server);
 
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
+	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
 	std::vector<Hash> queryHashes;
 
 	constexpr int COUNT = 15;
@@ -253,8 +407,6 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_ByHashes)
 	{
 		req.add_signalhashes(h);
 	}
-
-	grpc::ClientContext ctx;
 
 	auto reader = stub->GetAppSignalParam(&ctx, req);
 
@@ -283,3 +435,113 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_ByHashes)
 
 	server.reset();
 }
+
+TEST(GrpcAppDataSrvTest, GetAppSignalState)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14004}, server);
+
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
+	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
+	std::vector<Hash> queryHashes;
+
+	int statesCount = appSignalStates.size();
+
+	qint64 now = currentMSecsUTC();
+
+	for(int i = 0; i < statesCount; i++)
+	{
+		DynamicAppSignalState* state = appSignalStates[i];
+
+		TEST_PTR_CONTINUE(state);
+
+		queryHashes.push_back(state->hash());
+
+		Times time;
+
+		time.local.timeStamp = now + i;
+		time.system.timeStamp = now + i + 10000;
+		time.plant.timeStamp = now + i - 10000;
+
+		AppSignalStateFlags f;
+
+		f.all = randomUint32();
+
+		state->setCurrent(time, i, f);
+	}
+
+	Grpc::GetAppSignalStateRequest req;
+
+	for (auto h : queryHashes)
+	{
+		req.add_signalhashes(h);
+	}
+
+	Grpc::GetAppSignalStateReply reply;
+
+	grpc::Status st = stub->GetAppSignalState(&ctx, req, &reply);
+
+	EXPECT_TRUE(st.ok());
+	EXPECT_EQ(req.signalhashes_size(), reply.appsignalstates_size());
+
+	bool equal = true;
+
+	for(const Proto::AppSignalState& pass : reply.appsignalstates())
+	{
+		SimpleAppSignalState sass;
+
+		sass.load(pass);
+
+		DynamicAppSignalState* state = appSignalStates.getStateByHash(sass.hash);
+
+		if (state == nullptr)
+		{
+			Q_ASSERT(false);
+			equal = false;
+			break;
+		}
+
+		equal &= state->current() == sass;
+	}
+
+	EXPECT_TRUE(equal);
+
+	server.reset();
+}
+
+TEST(GrpcAppDataSrvTest, GetAppSignalState_ExceedHashesCount)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14004}, server);
+
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
+	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
+	Grpc::GetAppSignalStateRequest req;
+
+	for (int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX + 1; i++)
+	{
+		req.add_signalhashes(i);			// any hashes
+	}
+
+	Grpc::GetAppSignalStateReply reply;
+
+	grpc::Status st = stub->GetAppSignalState(&ctx, req, &reply);
+
+	EXPECT_EQ(st.error_code(), grpc::StatusCode::OUT_OF_RANGE);
+	EXPECT_EQ(st.error_message(), Grpc::SIGNAL_HASHES_COUNT_EXEEDS_ADS_GET_APP_SIGNAL_STATE_MAX);
+
+	server.reset();
+}
+

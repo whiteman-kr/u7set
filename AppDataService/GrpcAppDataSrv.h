@@ -20,6 +20,7 @@ class GrpcAppDataSrv final : public Grpc::AppDataSrv::Service
 {
 public:
 	explicit GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
+							bool allowAllClients,
 							const std::vector<ClientInfo>& clients,
 							bool checkHostName,
 							const std::vector<HostAddressPort>& listenIPs,
@@ -28,6 +29,7 @@ public:
 							CircularLoggerShared log);
 
 	explicit GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
+							bool allowAllClients,
 							const std::vector<ClientInfo>& clients,
 							bool checkHostName,
 							const HostAddressPort& listenIP,
@@ -41,6 +43,8 @@ public:
 	GrpcAppDataSrv& operator=(GrpcAppDataSrv&&) = delete;
 
 	~GrpcAppDataSrv();
+
+	void setSessionTimeout(int seconds);
 
 	grpc::Status Handshake(grpc::ServerContext* context,
 						const Grpc::HandshakeRequest* request,

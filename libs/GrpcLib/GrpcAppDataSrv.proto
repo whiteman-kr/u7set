@@ -53,15 +53,7 @@ message GetAppSignalStateRequest
 
 message GetAppSignalStateReply
 {
-	optional int32 error = 1 [default = 0];
-
-	optional int64 serverTimeUtc = 2 [default = 0];
-	optional int64 serverTimeLocal = 3 [default = 0];
-
-	optional int32 stateChangesQueueSize = 4  [default = 0];
-	optional int32 gatewayStateChangesQueueSize = 5  [default = 0];
-
-	repeated Proto.AppSignalState appSignalStates = 6;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+	repeated Proto.AppSignalState appSignalStates = 1;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
 }
 
 service AppDataSrv

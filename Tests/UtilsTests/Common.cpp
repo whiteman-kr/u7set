@@ -15,14 +15,6 @@ AppSignals appSignals;
 
 DynamicAppSignalStates appSignalStates;
 
-struct AppSignalsLoggerInit
-{
-	AppSignalsLoggerInit()
-	{
-		std::fprintf(stderr, "GLOBAL appSignals at %p\n", static_cast<void*>(&appSignals));
-	}
-} g_appSignalsLoggerInit;
-
 bool isGTestDeathChild(const QStringList& args)
 {
 	for(const QString& arg : args)
