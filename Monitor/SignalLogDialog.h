@@ -113,10 +113,9 @@ public:
 	void setAppSignalList(const QString& listId);
 	QString appSignalList() const;
 
-	void clearRecords();
 	void setRecords(std::vector<DiscretesLogRecord>& records,
-					qint64 updateCounter); // Update the list when new records arrived or were removed
-	void fillRecords();                    // Refill the list when user changed filter settings
+					qint64 updateCounter);		// Update the list when new records arrived or were removed
+	void fillRecords(bool clearBeforeFilling);  // Fill the list according to records
 	void removeUpTo(qint64 plantTime);     // Remove records up to plantTime
 
 	int recordsCount() const;
