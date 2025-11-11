@@ -277,8 +277,9 @@ namespace ClientLib
 				return param.isBus() == false;
 			};
 
-			signalList = signalParams | std::views::filter(isNotBusSignal) | std::views::transform(signalParamToHash) |
-						 std::ranges::to<std::vector>();
+			auto signalListView = signalParams | std::views::filter(isNotBusSignal) | std::views::transform(signalParamToHash);
+			signalList.reserve(signalParams.size()); // There are likely little bus signals.
+			signalList.assign(signalListView.begin(), signalListView.end());
 
 			// Update signal params in the signal updater and notify.
 			//

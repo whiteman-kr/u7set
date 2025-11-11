@@ -3,15 +3,11 @@
 #include <ClientLib/IAppSignalUpdater.h>
 #include <CommonLib/ConstStrings.h>
 
+#include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
 
 #include <expected>
 #include <thread>
-
-namespace grpc
-{
-	class Channel;
-}
 
 namespace ClientLib
 {
@@ -52,10 +48,11 @@ namespace ClientLib
 
 		void createAuthContext(grpc::ClientContext& context, std::chrono::milliseconds timeout = 10'000)
 		{
-			assert(m_authToken.empty() == false);
+			auto token = authToken();
+			assert(token.empty() == false);
 
 			context.set_deadline(std::chrono::system_clock::now() + timeout);
-			context.AddMetadata(::Grpc::SESSION_AUTH_TOKEN, m_authToken);
+			context.AddMetadata(::Grpc::SESSION_AUTH_TOKEN, token);
 
 			// We assume that createAuthContext is called before any RPC calls, any communication error leads to re-handshake and new auth
 			// token retrieval. 
@@ -67,6 +64,18 @@ namespace ClientLib
 		virtual void clientCommunicationLoop(std::stop_token stoken) = 0;
 
 	private:
+		std::string authToken() const
+		{
+			std::scoped_lock locker{m_authTokenMutex};
+			return m_authToken;
+		}
+
+		void setAuthToken(const std::string& authToken)
+		{
+			std::scoped_lock locker{m_authTokenMutex};
+			m_authToken = authToken;
+		}
+
 		void incrementRequestReplyCount()
 		{
 			std::scoped_lock lock{m_tcpStateMutex};
@@ -88,7 +97,7 @@ namespace ClientLib
 		std::shared_ptr<grpc::Channel> m_channel;
 		std::unique_ptr<typename GrpcServerType::Stub> m_stub;
 
-		std::mutex m_authTokenMutex;
+		mutable std::mutex m_authTokenMutex;
 		std::string m_authToken;
 
 		mutable std::mutex m_tcpStateMutex; // Only for m_tcpState
@@ -148,6 +157,8 @@ namespace ClientLib
 	{
 		while (stoken.stop_requested() == false)
 		{
+			setAuthToken({});
+
 			{
 				std::scoped_lock lock{m_tcpStateMutex};
 				m_tcpState.isSocketConnected = false;
@@ -248,7 +259,7 @@ namespace ClientLib
 				//
 				continue;
 			}
-		}
+		} // while (stoken.stop_requested() == false)
 
 		m_log.writeMessage(
 			m_logPrefix +
@@ -259,7 +270,7 @@ namespace ClientLib
 	template<typename GrpcServerType>
 	std::expected<bool, QString> ClientGrpc<GrpcServerType>::handshake()
 	{
-		m_authToken.clear();
+		setAuthToken({});
 
 		grpc::ClientContext context;
 		context.set_deadline(std::chrono::system_clock::now() + std::chrono::seconds(10));
@@ -275,8 +286,8 @@ namespace ClientLib
 			return std::unexpected<QString>{statusToString(result)};
 		}
 
-		m_authToken = reply.authtoken();
-		assert(m_authToken.empty() == false);
+		assert(reply.authtoken().empty() == false);
+		setAuthToken(reply.authtoken());
 
 		return true;
 	}
