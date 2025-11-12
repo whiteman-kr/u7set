@@ -1714,7 +1714,7 @@ W:0000   E:0000</translation>
     <message>
         <location filename="../MonitorMainWindow.cpp" line="70"/>
         <source>&lt;span style=&apos;font-family: Consolas, &quot;Courier New&quot;, monospace; color: black;&apos;&gt;Log&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;M:%1&lt;/span&gt;</source>
-        <translation>&lt;span style=&apos;font-family: Consolas, &quot;Courier New&quot;, monospace; color: black;&apos;&gt;Запис&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;M:%1&lt;/span&gt;</translation>
+        <translation>&lt;span style=&apos;font-family: Consolas, &quot;Courier New&quot;, monospace; color: black;&apos;&gt;Лог&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;M:%1&lt;/span&gt;</translation>
     </message>
     <message>
         <location filename="../MonitorMainWindow.cpp" line="86"/>
