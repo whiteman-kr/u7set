@@ -31,6 +31,8 @@ namespace ClientLib
 			HostAddressPort address() const;
 			const SoftwareEndpoint::AppDataService& server() const;
 
+			Tcp::ConnectionState tcpConnectionState() const;
+
 			bool signalParamsLoaded() const;
 			bool signalStatesLoaded() const;
 

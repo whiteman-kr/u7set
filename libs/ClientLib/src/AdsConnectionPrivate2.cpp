@@ -151,9 +151,6 @@ namespace ClientLib
 
 	std::expected<std::vector<AppSignalState>, QString> AdsClientGrpc::requestSignalStates(std::span<Hash> signalHashes)
 	{
-		grpc::ClientContext context;
-		createAuthContext(context, std::chrono::seconds(20));
-
 		Grpc::GetAppSignalStateRequest request;
 		Grpc::GetAppSignalStateReply reply;
 
@@ -179,6 +176,9 @@ namespace ClientLib
 			{
 				request.add_signalhashes(signalHashes[i]);
 			}
+
+			grpc::ClientContext context;
+			createAuthContext(context, std::chrono::seconds(20));
 
 			auto status = m_stub->GetAppSignalState(&context, request, &reply);
 			if (status.ok() == false)
@@ -392,6 +392,11 @@ namespace ClientLib
 		return m_client->ads();
 	}
 
+	Tcp::ConnectionState AdsConnectionPrivate2::Connection::tcpConnectionState() const
+	{
+		return m_client->tcpState();
+	}
+
 	bool AdsConnectionPrivate2::Connection::signalParamsLoaded() const
 	{
 		return m_client->signalParamsLoaded();
@@ -466,11 +471,10 @@ namespace ClientLib
 		std::vector<Tcp::ConnectionState> states;
 		states.reserve(m_conns.size());
 
-		// for (const Connection& c : m_conns)
-		//{
-		//	Q_ASSERT(c.tcpSignalClient);
-		//	states.emplace_back(c.tcpSignalClient->getConnectionState());
-		// }
+		for (const Connection& c : m_conns)
+		{
+			states.emplace_back(c.tcpConnectionState());
+		}
 
 		return states;
 	}

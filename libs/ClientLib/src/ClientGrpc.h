@@ -55,7 +55,7 @@ namespace ClientLib
 			context.AddMetadata(::Grpc::SESSION_AUTH_TOKEN, token);
 
 			// We assume that createAuthContext is called before any RPC calls, any communication error leads to re-handshake and new auth
-			// token retrieval. 
+			// token retrieval.
 			//
 			incrementRequestReplyCount();
 			return;
@@ -305,42 +305,61 @@ namespace ClientLib
 		{
 		case ::grpc::StatusCode::OK:
 			errorCodeStr = QStringLiteral("OK");
+			break;
 		case ::grpc::StatusCode::CANCELLED:
 			errorCodeStr = QStringLiteral("CANCELLED");
+			break;
 		case ::grpc::StatusCode::UNKNOWN:
 			errorCodeStr = QStringLiteral("UNKNOWN");
+			break;
 		case ::grpc::StatusCode::INVALID_ARGUMENT:
 			errorCodeStr = QStringLiteral("INVALID_ARGUMENT");
+			break;
 		case ::grpc::StatusCode::DEADLINE_EXCEEDED:
 			errorCodeStr = QStringLiteral("DEADLINE_EXCEEDED");
+			break;
 		case ::grpc::StatusCode::NOT_FOUND:
 			errorCodeStr = QStringLiteral("NOT_FOUND");
+			break;
 		case ::grpc::StatusCode::ALREADY_EXISTS:
 			errorCodeStr = QStringLiteral("ALREADY_EXISTS");
+			break;
 		case ::grpc::StatusCode::PERMISSION_DENIED:
 			errorCodeStr = QStringLiteral("PERMISSION_DENIED");
+			break;
 		case ::grpc::StatusCode::UNAUTHENTICATED:
 			errorCodeStr = QStringLiteral("UNAUTHENTICATED");
+			break;
 		case ::grpc::StatusCode::RESOURCE_EXHAUSTED:
 			errorCodeStr = QStringLiteral("RESOURCE_EXHAUSTED");
+			break;
 		case ::grpc::StatusCode::FAILED_PRECONDITION:
 			errorCodeStr = QStringLiteral("FAILED_PRECONDITION");
+			break;
 		case ::grpc::StatusCode::ABORTED:
 			errorCodeStr = QStringLiteral("ABORTED");
+			break;
 		case ::grpc::StatusCode::OUT_OF_RANGE:
 			errorCodeStr = QStringLiteral("OUT_OF_RANGE");
+			break;
 		case ::grpc::StatusCode::UNIMPLEMENTED:
 			errorCodeStr = QStringLiteral("UNIMPLEMENTED");
+			break;
 		case ::grpc::StatusCode::INTERNAL:
 			errorCodeStr = QStringLiteral("INTERNAL");
+			break;
 		case ::grpc::StatusCode::UNAVAILABLE:
 			errorCodeStr = QStringLiteral("UNAVAILABLE");
+			break;
 		case ::grpc::StatusCode::DATA_LOSS:
 			errorCodeStr = QStringLiteral("DATA_LOSS");
+			break;
 		case ::grpc::StatusCode::DO_NOT_USE:
 			errorCodeStr = QStringLiteral("DO_NOT_USE");
+			break;
 		default:
 			errorCodeStr = QStringLiteral("UNKNOWN_STATUS_CODE");
+			break;
 		}
 
 		return QString{"code: %1, error_message: %2"}.arg(errorCodeStr).arg(QString::fromStdString(status.error_message()));
