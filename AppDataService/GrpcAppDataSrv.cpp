@@ -334,6 +334,83 @@ grpc::Status GrpcAppDataSrv::GetAppSignalState(grpc::ServerContext* context,
 	return grpc::Status::OK;
 }
 
+grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* context,
+													  const Grpc::GetAppSignalStateChangesRequest* request,
+													  grpc::ServerWriter<Grpc::GetAppSignalStateChangesReply>* writer)
+{
+	if (context == nullptr ||
+		request == nullptr ||
+		writer == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
+	}
+
+	Grpc::GetAppSignalStateChangesReply reply;
+
+	reply.mutable_appsignalstates()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX);
+
+	grpc::Status writeStatus;
+
+	auto writeReply = [this, context, writer](Grpc::GetAppSignalStateChangesReply& reply,
+											  grpc::Status& wrStatus) -> bool
+	{
+		wrStatus = grpc::Status::OK;
+
+		if (context->IsCancelled())
+		{
+			wrStatus = grpc::Status::CANCELLED;
+			DEBUG_LOG_MSG(m_log, "GetAppSignalStateChanges: context CANCELLED");
+			return false;
+		}
+
+		DEBUG_LOG_MSG(m_log, QString("GetAppSignalStateChanges: Write reply states count = %1").arg(reply.appsignalstates_size()));
+
+		if (writer->Write(reply) == false)
+		{
+			DEBUG_LOG_MSG(m_log, "GetAppSignalStateChanges: writer->Write returns FALSE");
+			return false;
+		}
+
+		return true;
+	};
+
+/*	for(const AppSignal& appSignal : m_appSignals)
+	{
+		appSignal.saveToProto(reply.add_signalparams());
+
+		ctr++;
+
+		if (ctr >= PARAMS_MAX_COUNT)
+		{
+			if (writeReply(reply, writeStatus) == false)
+			{
+				return writeStatus;
+			}
+
+			index += ctr;
+
+			reply.Clear();
+			ctr = 0;
+		}
+	}
+
+	if (ctr > 0)
+	{
+		if (writeReply(reply, writeStatus) == false)
+		{
+			return writeStatus;
+		}
+	} */
+
+	return grpc::Status::OK;
+}
+
 void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 {
 	QStringList ips;

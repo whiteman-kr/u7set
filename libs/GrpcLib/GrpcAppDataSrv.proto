@@ -57,10 +57,24 @@ message GetAppSignalStateReply
 	repeated Proto.AppSignalState appSignalStates = 1;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
 }
 
+//
+// GetAppSignalStateChanges
+//
+message GetAppSignalStateChangesRequest
+{
+}
+
+message GetAppSignalStateChangesReply
+{
+	optional int32 pendingStatesCount = 1 [default = 0];
+	repeated Proto.AppSignalState appSignalStates = 2;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+}
+
 service AppDataSrv
 {
 	rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
 	rpc GetAppSignalList(GetAppSignalListRequest) returns (stream GetAppSignalListReply) {}
 	rpc GetAppSignalParam(GetAppSignalParamRequest) returns (stream GetAppSignalParamReply) {}
 	rpc GetAppSignalState(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}
+	rpc GetAppSignalStateChanges(GetAppSignalStateChangesRequest) returns (stream GetAppSignalStateChangesReply) {}
 }

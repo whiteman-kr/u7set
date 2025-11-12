@@ -62,6 +62,9 @@ public:
 								const Grpc::GetAppSignalStateRequest* request,
 								Grpc::GetAppSignalStateReply* reply) override;
 
+	grpc::Status GetAppSignalStateChanges(grpc::ServerContext* context,
+								   const Grpc::GetAppSignalStateChangesRequest* request,
+								   grpc::ServerWriter<Grpc::GetAppSignalStateChangesReply>* writer) override;
 private:
 	void initService(const std::vector<HostAddressPort>& listenIPs);
 
