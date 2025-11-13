@@ -194,20 +194,22 @@ namespace Tuning
 			return true;
 		}
 
-		AUTO_LOCK(m_startStopMutex);
+		{
+			std::lock_guard lg(m_activeClientInfoMutex);
 
-		if (m_serviceSettings.singleLmControl == true)
-		{
-			if (m_activeClientInfo.equipmentID().isEmpty() == true)
+			if (m_serviceSettings.singleLmControl == true)
 			{
-				m_activeClientInfo = softwareInfo;
-				m_activeClientIP = clientIP;
+				if (m_activeClientInfo.equipmentID().isEmpty() == true)
+				{
+					m_activeClientInfo = softwareInfo;
+					m_activeClientIP = clientIP;
+				}
 			}
-		}
-		else
-		{
-			m_activeClientInfo.clear();
-			m_activeClientIP.clear();
+			else
+			{
+				m_activeClientInfo.clear();
+				m_activeClientIP.clear();
+			}
 		}
 
 		return true;
@@ -220,21 +222,23 @@ namespace Tuning
 			return true;
 		}
 
-		AUTO_LOCK(m_startStopMutex);
-
-		if (m_serviceSettings.singleLmControl == true)
 		{
-			if (m_activeClientInfo.equipmentID() == softwareInfo.equipmentID() &&
-				m_activeClientIP == clientIP)
+			std::lock_guard lg(m_activeClientInfoMutex);
+
+			if (m_serviceSettings.singleLmControl == true)
+			{
+				if (m_activeClientInfo.equipmentID() == softwareInfo.equipmentID() &&
+					m_activeClientIP == clientIP)
+				{
+					m_activeClientInfo.clear();
+					m_activeClientIP.clear();
+				}
+			}
+			else
 			{
 				m_activeClientInfo.clear();
 				m_activeClientIP.clear();
 			}
-		}
-		else
-		{
-			m_activeClientInfo.clear();
-			m_activeClientIP.clear();
 		}
 
 		return true;
@@ -247,17 +251,19 @@ namespace Tuning
 			return true;
 		}
 
-		AUTO_LOCK(m_startStopMutex);
+		{
+			std::lock_guard lg(m_activeClientInfoMutex);
 
-		if (m_serviceSettings.singleLmControl == true)
-		{
-			m_activeClientInfo = softwareInfo;
-			m_activeClientIP = clientIP;
-		}
-		else
-		{
-			m_activeClientInfo.clear();
-			m_activeClientIP.clear();
+			if (m_serviceSettings.singleLmControl == true)
+			{
+				m_activeClientInfo = softwareInfo;
+				m_activeClientIP = clientIP;
+			}
+			else
+			{
+				m_activeClientInfo.clear();
+				m_activeClientIP.clear();
+			}
 		}
 
 		return true;
@@ -267,11 +273,9 @@ namespace Tuning
 	{
 		QString clientID;
 
-		m_startStopMutex.lock();
+		std::lock_guard lg(m_activeClientInfoMutex);
 
 		clientID = m_activeClientInfo.equipmentID();
-
-		m_startStopMutex.unlock();
 
 		return clientID;
 	}
@@ -280,11 +284,9 @@ namespace Tuning
 	{
 		QString clientIP;
 
-		m_startStopMutex.lock();
+		std::lock_guard lg(m_activeClientInfoMutex);
 
 		clientIP = m_activeClientIP;
-
-		m_startStopMutex.unlock();
 
 		return clientIP;
 	}

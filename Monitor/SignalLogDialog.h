@@ -114,7 +114,7 @@ public:
 	QString appSignalList() const;
 
 	void setRecords(std::vector<DiscretesLogRecord>& records,
-					qint64 updateCounter);		// Update the list when new records arrived or were removed
+					qint64 updateCounter); // Update the list when new records arrived or were removed
 	void fillRecords(bool clearBeforeFilling);  // Fill the list according to records
 	void removeUpTo(qint64 plantTime);     // Remove records up to plantTime
 
@@ -123,7 +123,7 @@ public:
 	const DiscretesLogRecord& filteredRecord(int index) const;
 	const std::vector<RecordKey>& filteredRecords() const;
 
-	std::optional<AppSignalParam> signalParam(int rowIndex);
+	AppSignalParam signalParam(int rowIndex, bool* found);
 
 public:
 	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
