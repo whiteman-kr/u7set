@@ -38,6 +38,7 @@ xcopy ..\bin\release\UiLib*.qm packages\u7set\data /sy
 xcopy ..\bin\release\UtilsLib*.qm packages\u7set\data /sy
 xcopy ..\bin\release\SchemaClientLib*.qm packages\u7set\data /sy
 xcopy ..\bin\release\AppSignalLists*.qm packages\u7set\data /sy
+xcopy ..\bin\release\ReportLib*.qm packages\u7set\data /sy
 
 xcopy ..\bin\release\*.dll packages\u7set\data /sy
 copy ..\bin\release\vc_redist.x64.exe packages\u7set\data
