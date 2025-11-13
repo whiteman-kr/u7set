@@ -254,7 +254,7 @@ void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64
 	m_recordsVec = std::move(records);
 	m_updateCounter = updateCounter;
 
-	fillRecords(false/*clearBeforeFilling*/);
+	fillRecords(false /*clearBeforeFilling*/);
 }
 
 void SignalLogModel::fillRecords(bool clearBeforeFilling)
@@ -1223,7 +1223,7 @@ void SignalLogWidget::editMaskReturnPressed()
 {
 	maskChanged(true /*addToCompleter*/);
 
-	m_model.fillRecords(true/*clearBeforeFilling*/);
+	m_model.fillRecords(true /*clearBeforeFilling*/);
 }
 
 void SignalLogWidget::editTagsReturnPressed()

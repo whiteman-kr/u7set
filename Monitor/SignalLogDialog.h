@@ -123,7 +123,7 @@ public:
 	const DiscretesLogRecord& filteredRecord(int index) const;
 	const std::vector<RecordKey>& filteredRecords() const;
 
-	AppSignalParam signalParam(int rowIndex, bool* found);
+	std::optional<AppSignalParam> signalParam(int rowIndex);
 
 public:
 	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
