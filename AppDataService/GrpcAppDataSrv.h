@@ -13,6 +13,7 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "DynamicAppSignalState.h"
+#include "AppDataReceiver.h"
 
 class AppDataServiceSettings;
 
@@ -24,6 +25,7 @@ public:
 							const std::vector<ClientInfo>& clients,
 							bool checkHostName,
 							const std::vector<HostAddressPort>& listenIPs,
+							AppDataReceiver* appDataReceiver,
 							const AppSignals& appSignals,
 							const DynamicAppSignalStates& signalStates,
 							CircularLoggerShared log);
@@ -33,6 +35,7 @@ public:
 							const std::vector<ClientInfo>& clients,
 							bool checkHostName,
 							const HostAddressPort& listenIP,
+							AppDataReceiver* appDataReceiver,
 							const AppSignals& appSignals,
 							const DynamicAppSignalStates& signalStates,
 							CircularLoggerShared log);
@@ -69,6 +72,7 @@ private:
 	void initService(const std::vector<HostAddressPort>& listenIPs);
 
 private:
+	AppDataReceiver* m_appDataReceiver = nullptr;
 	const AppSignals& m_appSignals;
 	const DynamicAppSignalStates& m_signalStates;
 	CircularLoggerShared m_log;

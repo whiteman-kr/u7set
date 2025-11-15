@@ -9,19 +9,22 @@
 
 #include "GrpcAppDataSrv.h"
 
-GrpcAppDataSrv::GrpcAppDataSrv( const SoftwareInfo& serverSwInfo,
-								bool allowAllClients,
-								const std::vector<ClientInfo>& clients,
-								bool checkHostName,
-								const std::vector<HostAddressPort>& listenIPs,
-								const AppSignals& appSignals,
-								const DynamicAppSignalStates& signalStates,
-								CircularLoggerShared log) :
+GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
+	bool allowAllClients,
+	const std::vector<ClientInfo>& clients,
+	bool checkHostName,
+	const std::vector<HostAddressPort>& listenIPs,
+	AppDataReceiver* appDataReceiver,
+	const AppSignals& appSignals,
+	const DynamicAppSignalStates& signalStates,
+	CircularLoggerShared log) :
 	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
+	m_appDataReceiver(appDataReceiver),
 	m_appSignals(appSignals),
 	m_signalStates(signalStates),
 	m_log(log)
 {
+	TEST_PTR_RETURN(m_appDataReceiver);
 	initService(listenIPs);
 }
 
@@ -30,14 +33,17 @@ GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
 							   const std::vector<ClientInfo>& clients,
 							   bool checkHostName,
 							   const HostAddressPort& listenIP,
+							   AppDataReceiver* appDataReceiver,
 							   const AppSignals& appSignals,
 							   const DynamicAppSignalStates& signalStates,
 							   CircularLoggerShared log) :
 	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
+	m_appDataReceiver(appDataReceiver),
 	m_appSignals(appSignals),
 	m_signalStates(signalStates),
 	m_log(log)
 {
+	TEST_PTR_RETURN(m_appDataReceiver);
 	initService(std::vector<HostAddressPort>{listenIP});
 }
 
@@ -340,7 +346,8 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 {
 	if (context == nullptr ||
 		request == nullptr ||
-		writer == nullptr)
+		writer == nullptr ||
+		m_appDataReceiver == nullptr)
 	{
 		Q_ASSERT(false);
 		return grpc::Status::CANCELLED;
@@ -351,11 +358,12 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
 	}
 
-	Grpc::GetAppSignalStateChangesReply reply;
+	SimpleAppSignalStatesQueueShared statesQueue =
+		std::make_shared<SimpleAppSignalStatesQueue>(static_cast<int>(m_appSignals.count()) * 3);
 
-	reply.mutable_appsignalstates()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX);
-
-	grpc::Status writeStatus;
+	m_appDataReceiver->registerDestSignalStatesQueue(statesQueue, false,
+					QString("GrpcAppDataSrv[%1]::statesQueue").
+						arg(QString::fromStdString(m_sessionGuard.extractAuthTokenFromMetadata(context))));
 
 	auto writeReply = [this, context, writer](Grpc::GetAppSignalStateChangesReply& reply,
 											  grpc::Status& wrStatus) -> bool
@@ -380,35 +388,70 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 		return true;
 	};
 
-/*	for(const AppSignal& appSignal : m_appSignals)
+	Grpc::GetAppSignalStateChangesReply reply;
+
+	reply.mutable_appsignalstates()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX);
+
+	grpc::Status writeStatus;
+	SimpleAppSignalState state;
+
+	int waitCtr = 0;
+
+	while(context->IsCancelled() == false)
 	{
-		appSignal.saveToProto(reply.add_signalparams());
+		int statesCount = 0;
 
-		ctr++;
+		while(statesQueue->isEmpty() == false && statesCount < ADS_GET_APP_SIGNAL_STATE_MAX)
+		{
+			bool res = statesQueue->pop(&state);
 
-		if (ctr >= PARAMS_MAX_COUNT)
+			if (res == false)
+			{
+				continue;
+			}
+
+			Proto::AppSignalState* protoState = reply.add_appsignalstates();
+
+			state.save(protoState);
+			statesCount++;
+		}
+
+		if (reply.appsignalstates_size() > 0)
 		{
 			if (writeReply(reply, writeStatus) == false)
 			{
+				m_appDataReceiver->unregisterDestSignalStatesQueue(statesQueue);
 				return writeStatus;
 			}
 
-			index += ctr;
+			waitCtr = 0;
 
 			reply.Clear();
-			ctr = 0;
+		}
+		else
+		{
+			if (waitCtr > 1000)
+			{
+				waitCtr = 0;
+
+				if (writeReply(reply, writeStatus) == false)
+				{
+					m_appDataReceiver->unregisterDestSignalStatesQueue(statesQueue);
+					return writeStatus;
+				}
+			}
+		}
+
+		if (statesQueue->isEmpty() == true)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			waitCtr++;
 		}
 	}
 
-	if (ctr > 0)
-	{
-		if (writeReply(reply, writeStatus) == false)
-		{
-			return writeStatus;
-		}
-	} */
+	m_appDataReceiver->unregisterDestSignalStatesQueue(statesQueue);
 
-	return grpc::Status::OK;
+	return grpc::Status::CANCELLED;
 }
 
 void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)

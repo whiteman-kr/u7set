@@ -27,7 +27,8 @@ std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddre
 	SoftwareInfo si(E::SoftwareType::AppDataService, "TESTS_GRPC_APP_DATA_SRV");
 
 	outServer = std::make_unique<GrpcAppDataSrv>(si, allowAllClients, clients, checkHostName,
-												 listenIP, appSignals, appSignalStates, logger);
+												 listenIP, appDataReceiver.get(),
+												 appSignals, appSignalStates, logger);
 
 	const std::string endpoint = listenIP.addressPortStr().toStdString();
 
@@ -543,5 +544,81 @@ TEST(GrpcAppDataSrvTest, GetAppSignalState_ExceedHashesCount)
 	EXPECT_EQ(st.error_message(), Grpc::SIGNAL_HASHES_COUNT_EXEEDS_ADS_GET_APP_SIGNAL_STATE_MAX);
 
 	server.reset();
+}
+
+TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
+{
+/*	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14004}, server);
+
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
+	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
+	std::thread stateChangesProducerThread = std::thread([]()
+	{
+		QThread::sleep(10);
+
+		AppDataSource* src = appDataSources.getSourceByEquipmentID("SYSTEMID_RACK01_FSCC01_MD00");
+
+		if (src == nullptr)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		SimpleAppSignalState state;
+
+		for(int i = 1; i < 10000; i++)
+		{
+			state.hash = i;
+			state.time.plant.timeStamp = i + 1000;
+			state.time.local.timeStamp = i + 2000;
+			state.time.system.timeStamp = i + 3000;
+			state.value = (i % 100);
+			state.flags.all = i + 101;
+			src->pushState(state);
+
+			if ((i % 1000) == 0)
+			{
+				QThread::msleep(5);
+			}
+		}
+	});
+
+	Grpc::GetAppSignalStateChangesRequest req;
+
+	auto reader = stub->GetAppSignalStateChanges(&ctx, req);
+
+	Grpc::GetAppSignalStateChangesReply reply;
+
+	int ctr = 1;
+
+	while (reader->Read(&reply))
+	{
+		for(const Proto::AppSignalState& st : reply.appsignalstates())
+		{
+			EXPECT_EQ(st.hash(), ctr);
+			EXPECT_EQ(st.value(), static_cast<double>(ctr % 100));
+			EXPECT_EQ(st.flags(), ctr + 101);
+			EXPECT_EQ(st.planttime(), ctr + 1000);
+			EXPECT_EQ(st.localtime(), ctr + 2000);
+			EXPECT_EQ(st.systemtime(), ctr + 3000);
+			ctr++;
+		}
+	}
+
+	grpc::Status st = reader->Finish();
+
+	if (stateChangesProducerThread.joinable())
+	{
+		stateChangesProducerThread.join();
+	}
+
+	server.reset();*/
 }
 

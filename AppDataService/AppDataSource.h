@@ -47,6 +47,8 @@ public:
 	void incSimFlagsCount() { m_simFlagsCount++; }
 	void incMismatchFlagsCount() { m_mismatchFlagsCount++; }
 
+	void pushState(const SimpleAppSignalState& state);		// for testing purposes only!
+
 private:
 	virtual bool parseBuffer(ParsingBuffer& readBuffer) override;
 

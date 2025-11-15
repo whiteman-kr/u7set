@@ -133,6 +133,8 @@ private:
 	int m_processingThreadsCountFromSettings = 0;
 	CircularLoggerShared m_log;
 
+	bool m_running = false;
+
 	//
 
 	HostAddressPort m_dataReceivingIP;

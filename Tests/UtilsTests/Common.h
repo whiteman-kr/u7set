@@ -4,6 +4,7 @@
 #include "../../OnlineLib/BuildInfo.h"
 #include "../../OnlineLib/SoftwareSettings.h"
 #include "../../AppDataService/AppDataSource.h"
+#include "../../AppDataService/AppDataReceiver.h"
 #include "../../AppSignalLib/AppSignal.h"
 
 extern CircularLoggerShared logger;
@@ -19,6 +20,8 @@ extern AppDataSources appDataSources;
 extern AppSignals appSignals;
 
 extern DynamicAppSignalStates appSignalStates;
+
+extern std::shared_ptr<AppDataReceiver> appDataReceiver;
 
 //
 
@@ -45,5 +48,7 @@ bool loadConfiguration();
 bool loadAppDataSources();
 bool loadAppSignals();
 void createAndInitSignalStates();
+void createAndStartAppDataReceiver();
+void stopAppDataReceiver();
 
 void logMsg(const QString& msg);

@@ -15,6 +15,8 @@ AppSignals appSignals;
 
 DynamicAppSignalStates appSignalStates;
 
+std::shared_ptr<AppDataReceiver> appDataReceiver;
+
 bool isGTestDeathChild(const QStringList& args)
 {
 	for(const QString& arg : args)
@@ -140,6 +142,22 @@ bool loadAppSignals()
 void createAndInitSignalStates()
 {
 	AppDataSrvTools::createAndInitSignalStates(appSignals, appSignalStates, 4);
+}
+
+void createAndStartAppDataReceiver()
+{
+	appDataReceiver = std::make_shared<AppDataReceiver>(HostAddressPort("192.168.11.254", PORT_APP_DATA_SERVICE_DATA),
+														appDataSources,
+														appSignalStates,
+														4, E::SoftwareRunMode::Normal,
+														logger);
+
+	appDataReceiver->start();
+}
+
+void stopAppDataReceiver()
+{
+	appDataReceiver->quitAndWait();
 }
 
 void logMsg(const QString& msg)

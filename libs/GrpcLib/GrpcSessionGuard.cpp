@@ -97,11 +97,6 @@ bool GrpcSessionGuard::extractAndValidateAuthToken(grpc::ServerContext* context)
 	return validateAuthToken(authToken);
 }
 
-void GrpcSessionGuard::setSessionTimeout(int seconds)
-{
-	m_sessionTimeout = seconds;
-}
-
 std::string GrpcSessionGuard::extractAuthTokenFromMetadata(grpc::ServerContext* context) const
 {
 	if (context == nullptr)
@@ -119,6 +114,11 @@ std::string GrpcSessionGuard::extractAuthTokenFromMetadata(grpc::ServerContext* 
 	}
 
 	return std::string(it->second.data(), it->second.size());
+}
+
+void GrpcSessionGuard::setSessionTimeout(int seconds)
+{
+	m_sessionTimeout = seconds;
 }
 
 bool GrpcSessionGuard::validateAuthToken(const std::string& authToken)

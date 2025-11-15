@@ -33,12 +33,12 @@ public:
 							Grpc::HandshakeReply* reply);
 
 	bool extractAndValidateAuthToken(grpc::ServerContext* context);
+	std::string extractAuthTokenFromMetadata(grpc::ServerContext* context) const;
 
 	void setSessionTimeout(int seconds);
 
 private:
-	std::string extractAuthTokenFromMetadata(grpc::ServerContext* context) const;
-	bool validateAuthToken(const std::string& authToken);
+bool validateAuthToken(const std::string& authToken);
 
 	bool isValidClient(const Grpc::HandshakeRequest* request, std::string& errMsg) const;
 	void sessionGuardLoop(std::stop_token stopToken) noexcept;

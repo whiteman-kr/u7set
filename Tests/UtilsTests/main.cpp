@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <QCoreApplication>
 #include <CommonLib/ConstStrings.h>
+#include "../../UtilsLib/HighResolutionTimerGuard.h"
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -33,10 +34,13 @@ int main(int argc, char *argv[])
 
 	GTEST_FLAG_SET(death_test_style, "threadsafe");
 #endif
-
 	QCoreApplication app{argc, argv};
 
 	app.setOrganizationName(Manufacturer::RADIY);
+
+	HighResolutionTimerGuard highResTimerGuard;
+
+	Q_UNUSED(highResTimerGuard);
 
 	//
 
@@ -95,10 +99,15 @@ int main(int argc, char *argv[])
 	}
 
 	createAndInitSignalStates();
+	createAndStartAppDataReceiver();
 
 	//
 
 	::testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+	auto result = RUN_ALL_TESTS();
+
+	stopAppDataReceiver();
+
+	return result;
 }

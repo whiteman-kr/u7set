@@ -67,6 +67,10 @@ AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
 
 AppDataReceiver::~AppDataReceiver()
 {
+	if (m_running == true)
+	{
+		quitAndWait();
+	}
 }
 
 void AppDataReceiver::fillAppDataReceiveState(Network::AppDataReceiveState* adrs)
@@ -112,6 +116,8 @@ void AppDataReceiver::unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQ
 
 void AppDataReceiver::run()
 {
+	m_running = true;
+
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").
 							arg(appDataReceivingIPStr()));
 
@@ -141,6 +147,8 @@ void AppDataReceiver::run()
 
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread finished (receiving IP %1)").
 							arg(appDataReceivingIPStr()));
+
+	m_running = false;
 }
 
 void AppDataReceiver::startTimer500ms()

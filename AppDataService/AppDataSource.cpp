@@ -278,6 +278,14 @@ bool AppDataSource::statesQueueIsEmpty() const
 	return m_signalStatesQueue.isEmpty();
 }
 
+// for testing purposes only!
+//
+void AppDataSource::pushState(const SimpleAppSignalState& state)
+{
+	m_signalStatesQueue.push(state, false);
+	wakeupStatesProcessingThread();
+}
+
 bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer)
 {
 	if (readBuffer.readyToParsing == false)

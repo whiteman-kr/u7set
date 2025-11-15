@@ -3,10 +3,15 @@
 #include "AppDataService.h"
 #include "version.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
+#include "../UtilsLib/HighResolutionTimerGuard.h"
 
 int main(int argc, char *argv[])
 {
 	Vld::setVldReportFilterHook();
+
+	HighResolutionTimerGuard highResTimerGuard;
+
+	Q_UNUSED(highResTimerGuard);
 
 	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::APPLICATION_DATA_SERVICE);
 
