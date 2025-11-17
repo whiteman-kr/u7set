@@ -362,12 +362,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
 	}
 
-	SimpleAppSignalStatesQueueShared statesQueue =
-		std::make_shared<SimpleAppSignalStatesQueue>(static_cast<int>(m_appSignals.count()) * 3);
-
-	m_appDataReceiver->registerDestSignalStatesQueue(statesQueue, false,
-					QString("GrpcAppDataSrv[%1]::statesQueue").
-						arg(QString::fromStdString(m_sessionGuard.extractAuthTokenFromMetadata(context))));
+	//
 
 	auto writeReply = [this, context, writer](Grpc::GetAppSignalStateChangesReply& reply,
 											  grpc::Status& wrStatus) -> bool
@@ -392,6 +387,16 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 		return true;
 	};
 
+	//
+
+	SimpleAppSignalStatesQueueShared statesQueue =
+		std::make_shared<SimpleAppSignalStatesQueue>(static_cast<int>(m_appSignals.count()) * 3);
+
+	m_appDataReceiver->registerDestSignalStatesQueue(statesQueue, false,
+													 QString("GrpcAppDataSrv[%1]::statesQueue").
+													 arg(QString::fromStdString(m_sessionGuard.extractAuthTokenFromMetadata(context))));
+	//
+
 	Grpc::GetAppSignalStateChangesReply reply;
 
 	reply.mutable_appsignalstates()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX);
@@ -402,8 +407,8 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 	int waitCtr = 0;
 
 	auto lastSendTime = std::chrono::steady_clock::now();
-	constexpr int SendPackSize = 1024;
-	constexpr std::chrono::milliseconds SendPackInterval{50};
+	constexpr int SEND_PACKET_SIZE = 1024;
+	constexpr std::chrono::milliseconds SEND_PACKET_INTERVAL{50};
 
 	while(context->IsCancelled() == false)
 	{
@@ -427,7 +432,9 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 		auto now = std::chrono::steady_clock::now();
 		int addedRecordCount = reply.appsignalstates_size();
 
-		if (waitCtr > 2000 || addedRecordCount > SendPackSize || (addedRecordCount > 0 && now - lastSendTime >= SendPackInterval))
+		if (waitCtr > 2000 ||
+			addedRecordCount > SEND_PACKET_SIZE ||
+			(addedRecordCount > 0 && now - lastSendTime >= SEND_PACKET_INTERVAL))
 		{
 			if (writeReply(reply, writeStatus) == false)
 			{
@@ -466,17 +473,85 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 		return grpc::Status::CANCELLED;
 	}
 
+	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
+	}
+
+	//
+
+	auto writeReply = [this, context, writer](Grpc::GetDiscretesLogReply& reply,
+											  grpc::Status& wrStatus) -> bool
+	{
+		wrStatus = grpc::Status::OK;
+
+		if (context->IsCancelled())
+		{
+			wrStatus = grpc::Status::CANCELLED;
+			DEBUG_LOG_MSG(m_log, "GetDiscretesLog: context CANCELLED");
+			return false;
+		}
+
+		// DEBUG_LOG_MSG(m_log, QString("GetDiscretesLog: Write reply states count = %1").arg(reply.appsignalstates_size()));
+
+		if (writer->Write(reply) == false)
+		{
+			DEBUG_LOG_MSG(m_log, "GetDiscretesLog: writer->Write returns FALSE");
+			return false;
+		}
+
+		return true;
+	};
+
+	//
+
 	std::shared_ptr<DiscretesLogReader> dlReader = std::make_shared<DiscretesLogReader>(m_log);
 
 	m_dsLogWriter->registerLogReader(dlReader);
 
 	//
 
+	Grpc::GetDiscretesLogReply reply;
+
+	reply.mutable_discreteslogrecord()->Reserve(ADS_GET_DISCRETES_LOG_MAX_RECORD_COUNT);
+
+	grpc::Status writeStatus;
+	int waitCtr = 0;
+	auto lastSendTime = std::chrono::steady_clock::now();
+	constexpr int SEND_PACKET_SIZE = 100;
+	constexpr std::chrono::milliseconds SEND_PACKET_INTERVAL{200};
+
+	while(context->IsCancelled() == false)
+	{
+		dlReader->getDiscretesLog(&reply);
+
+		auto now = std::chrono::steady_clock::now();
+		int addedRecordCount = reply.discreteslogrecord_size();
+
+		if (waitCtr > 2000 ||
+			addedRecordCount > SEND_PACKET_SIZE ||
+			(addedRecordCount > 0 && now - lastSendTime >= SEND_PACKET_INTERVAL))
+		{
+			if (writeReply(reply, writeStatus) == false)
+			{
+				m_dsLogWriter->unregisterLogReader(dlReader);
+				return writeStatus;
+			}
+
+			waitCtr = 0;
+			lastSendTime = now;
+
+			reply.Clear();
+		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		waitCtr++;
+	}
+
 	m_dsLogWriter->unregisterLogReader(dlReader);
 
 	return grpc::Status::CANCELLED;
 }
-
 
 void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 {

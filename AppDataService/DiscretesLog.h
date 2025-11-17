@@ -8,6 +8,7 @@
 #include <atomic>
 
 #include <Network.pb.h>
+#include <GrpcAppDataSrv.pb.h>
 
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
@@ -56,11 +57,18 @@ public:
 	virtual ~DiscretesLogReader();
 
 	virtual bool openDatabase() override;
-	void getDiscretesLog(Network::GetDiscretesLogReply* reply);
 
 	void setLogChanged(bool logTruncated);
 
+	void getDiscretesLog(Network::GetDiscretesLogReply* reply);
+	void getDiscretesLog(Grpc::GetDiscretesLogReply* reply);
+
 private:
+	void getDiscretesLogInternal(bool& logIsWorkable,
+								 int& pendingRecordsCount,
+								 qint64& logFirstRecordID,
+								::google::protobuf::RepeatedPtrField<::Network::DiscretesLogRecord>* dsLogRecord);
+
 	static bool selectLastNRecords(QSqlQuery& q, int N);
 	static bool selectNextAfterNRecords(QSqlQuery& q, qint64 lastRecordId, int N);
 

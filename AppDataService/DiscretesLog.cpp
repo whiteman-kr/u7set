@@ -9,6 +9,7 @@
 
 #include "DiscretesLog.h"
 #include "../UtilsLib/WUtils.h"
+#include "../OnlineLib/SocketIO.h"
 
 // ------------------------------------------------------------------------------------------
 //
@@ -246,34 +247,73 @@ bool DiscretesLogReader::openDatabase()
 	return m_dbIsWorkable;
 }
 
+void DiscretesLogReader::setLogChanged(bool logTruncated)
+{
+	m_logChanged = true;
+	m_logTruncated = logTruncated;
+}
+
 void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 {
 	TEST_PTR_RETURN(reply);
 
+	bool logIsWorkable = false;
+	int pendingRecordsCount = 0;
+	qint64 logFirstRecordID = 0;
+
+	getDiscretesLogInternal(logIsWorkable, pendingRecordsCount, logFirstRecordID,
+							reply->mutable_discreteslogrecord());
+
+	reply->set_logisworkable(logIsWorkable);
+	reply->set_pendingrecordscount(pendingRecordsCount);
+	reply->set_logfirstrecordid(logFirstRecordID);
+}
+
+void DiscretesLogReader::getDiscretesLog(Grpc::GetDiscretesLogReply* reply)
+{
+	TEST_PTR_RETURN(reply);
+
+	bool logIsWorkable = false;
+	int pendingRecordsCount = 0;
+	qint64 logFirstRecordID = 0;
+
+	getDiscretesLogInternal(logIsWorkable, pendingRecordsCount, logFirstRecordID,
+							reply->mutable_discreteslogrecord());
+
+	reply->set_logisworkable(logIsWorkable);
+	reply->set_pendingrecordscount(pendingRecordsCount);
+	reply->set_logfirstrecordid(logFirstRecordID);
+}
+
+void DiscretesLogReader::getDiscretesLogInternal(bool& logIsWorkable,
+												int& pendingRecordsCount,
+												qint64& logFirstRecordID,
+												::google::protobuf::RepeatedPtrField<Network::DiscretesLogRecord>* dsLogRecord)
+{
+	TEST_PTR_RETURN(dsLogRecord);
+
 	if (m_dbIsWorkable == false)
 	{
-		reply->set_logisworkable(false);
+		logIsWorkable = false;
 		return;
 	}
 
-	reply->set_logisworkable(true);
-
-	constexpr int MAX_RECORDS_COUNT = 5000;
+	logIsWorkable = true;
 
 	int protoRecordsCount = 0;
 
-	reply->set_pendingrecordscount(0);
+	pendingRecordsCount = 0;
 
 	while(m_logRecords.empty() == false)
 	{
-		Network::DiscretesLogRecord* dlr = reply->add_discreteslogrecord();
+		Network::DiscretesLogRecord* dlr = dsLogRecord->Add();
 
 		m_logRecords.front().saveToProto(dlr);
 		m_logRecords.pop();
 
 		protoRecordsCount++;
 
-		if (protoRecordsCount >= MAX_RECORDS_COUNT)
+		if (protoRecordsCount >= ADS_GET_DISCRETES_LOG_MAX_RECORD_COUNT)
 		{
 			break;
 		}
@@ -281,8 +321,8 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 
 	if (m_logChanged == false)
 	{
-		reply->set_pendingrecordscount(TO_INT(m_logRecords.size()));
-		reply->set_logfirstrecordid(m_firstRecordID);
+		pendingRecordsCount = TO_INT(m_logRecords.size());
+		logFirstRecordID = m_firstRecordID;
 		return;
 	}
 
@@ -319,13 +359,13 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 
 			m_lastRecordID = r.recordID;
 
-			if (protoRecordsCount >= MAX_RECORDS_COUNT)
+			if (protoRecordsCount >= ADS_GET_DISCRETES_LOG_MAX_RECORD_COUNT)
 			{
 				m_logRecords.push(r);
 			}
 			else
 			{
-				Network::DiscretesLogRecord* dlr = reply->add_discreteslogrecord();
+				Network::DiscretesLogRecord* dlr = dsLogRecord->Add();
 
 				dlr->set_recordid(r.recordID);
 				dlr->set_recordtime(r.recordTime);
@@ -347,7 +387,7 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 		q.finish();
 	}
 
-	reply->set_pendingrecordscount(TO_INT(m_logRecords.size()));
+	pendingRecordsCount = TO_INT(m_logRecords.size());
 
 	{
 		QSqlQuery q(m_db);
@@ -359,7 +399,7 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 			if (q.value(0).isNull() == false)
 			{
 				m_firstRecordID = q.value(0).toLongLong();
-				reply->set_logfirstrecordid(m_firstRecordID);
+				logFirstRecordID = m_firstRecordID;
 			}
 			else
 			{
@@ -370,7 +410,7 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 				if (q.next() == true)
 				{
 					m_firstRecordID = q.value(0).toLongLong() + 1;
-					reply->set_logfirstrecordid(m_firstRecordID);
+					logFirstRecordID = m_firstRecordID;
 				}
 			}
 		}
@@ -380,12 +420,6 @@ void DiscretesLogReader::getDiscretesLog(Network::GetDiscretesLogReply* reply)
 
 	m_logChanged = false;
 	m_logTruncated = false;
-}
-
-void DiscretesLogReader::setLogChanged(bool logTruncated)
-{
-	m_logChanged = true;
-	m_logTruncated = logTruncated;
 }
 
 bool DiscretesLogReader::selectLastNRecords(QSqlQuery& q, int N)
