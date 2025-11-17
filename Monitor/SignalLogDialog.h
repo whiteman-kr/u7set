@@ -1,8 +1,7 @@
 #pragma once
 
 #include "../../AppSignalLib/DiscretesLogRecord.h"
-#include <SchemaClientLib/DragDropHelper.h>
-#include <CommonLib/Hash.h>
+
 
 namespace AppSignalLists
 {
@@ -17,6 +16,7 @@ namespace ClientLib
 
 class IAppSignalManager;
 class SignalLogModel;
+class SignalLogTableView;
 
 enum class SignalLogColumns
 {
@@ -25,7 +25,6 @@ enum class SignalLogColumns
 	LmEquipmentID,
 	AppSignalID,
 	Caption,
-	Type,
 	Tags,
 
 	RecordTime,
@@ -34,19 +33,13 @@ enum class SignalLogColumns
 	PlantTime,
 
 	Value,
-	Units,
 
+	Flags,
 	Valid,
 	StateAvailable,
 	Simulated,
 	Blocked,
 	Mismatch,
-	OutOfLimits,
-
-	Acknowledged,
-	AckTime,
-	AckSource,
-	AckUser,
 
 	ColumnCount
 };
@@ -64,21 +57,27 @@ enum class SignalLogMaskType
 struct RecordKey
 {
 	std::size_t operator()(const RecordKey& p) const { return ::calcHash(&p, sizeof(RecordKey)); }
-	bool operator==(const RecordKey& p) const { return p.recordTime == recordTime && p.signalHash == signalHash; }
+	bool operator==(const RecordKey& p) const
+	{
+		return p.recordTime == recordTime && p.signalHash == signalHash && p.plantTime == plantTime;
+	}
 
 	RecordKey() :
 		recordTime(0),
+		plantTime(0),
 		signalHash(0)
 	{
 	}
 
-	RecordKey(const DiscretesLogRecord& rec) :
+	explicit RecordKey(const DiscretesLogRecord& rec) :
 		recordTime(rec.recordTime),
+		plantTime(rec.plantTime),
 		signalHash(rec.signalHash)
 	{
 	}
 
 	qint64 recordTime;
+	qint64 plantTime;
 	Hash signalHash;
 };
 
@@ -100,9 +99,6 @@ public:
 
 	qint64 updateCounter() const;
 
-	qint64 maxInitialRecordTime() const;
-	void resetMaxInitialRecordTime();
-
 	// Overrides
 
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -117,18 +113,19 @@ public:
 	void setAppSignalList(const QString& listId);
 	QString appSignalList() const;
 
-	void setRecords(std::vector<DiscretesLogRecord>& records, qint64 updateCounter);	// Update the list when new records arrived or were removed
-	void fillRecords(bool resetSelection);	// Refill the list when user changed filter settings
+	void setRecords(std::vector<DiscretesLogRecord>& records,
+					qint64 updateCounter); // Update the list when new records arrived or were removed
+	void fillRecords(bool clearBeforeFilling);  // Fill the list according to records
+	void removeUpTo(qint64 plantTime);     // Remove records up to plantTime
 
 	int recordsCount() const;
 	const DiscretesLogRecord& record(const RecordKey& key) const;
 	const DiscretesLogRecord& filteredRecord(int index) const;
+	const std::vector<RecordKey>& filteredRecords() const;
 
-	void sort(int column, Qt::SortOrder order) override;
+	std::optional<AppSignalParam> signalParam(int rowIndex);
 
-	AppSignalParam signalParam(int rowIndex, bool* found);
-
-protected:
+public:
 	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
@@ -141,14 +138,13 @@ private:
 	const AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 
 	QStringList m_columnsNames;
-	
+
 	// Model data
 
-	std::unordered_map<RecordKey, DiscretesLogRecord, RecordKey> m_records;
-	qint64 m_updateCounter = 0;
+	std::vector<DiscretesLogRecord> m_recordsVec;
+	std::unordered_map<RecordKey, DiscretesLogRecord, RecordKey> m_recordsMap;
 
-	bool m_initMaxInitialRecordTime = true;
-	qint64 m_maxInitialRecordTime = -1; // This is the max record Time at the dialog showing. Further record Times are selected after adding
+	qint64 m_updateCounter = 0;
 
 	std::vector<RecordKey> m_filteredRecords;
 
@@ -157,10 +153,9 @@ private:
 	SignalLogMaskType m_maskType = SignalLogMaskType::CustomAppSignalID;
 	QStringList m_masks;
 	QStringList m_tags;
-	
+
 	QString m_appSignallistID;
 	std::set<Hash> m_appSignalListHashes;
-
 };
 
 
@@ -172,28 +167,10 @@ struct SignalLogDialogSettings
 	QStringList maskList;
 	QStringList tagsList;
 
-	int sortColumn = 0;
-	Qt::SortOrder sortOrder = Qt::AscendingOrder;
-
 	void restore();
 	void store();
 };
 
-//
-// SignalLogTableView
-//
-class SignalLogTableView : public QTableView
-{
-protected:
-	virtual void mousePressEvent(QMouseEvent* event) override;
-	virtual void mouseMoveEvent(QMouseEvent* event) override;
-
-private:
-	AppSignalParam m_appSignalParam;
-	QPoint m_dragStartPosition;
-
-	SchemaClientLib::DragDropHelper m_dragDropHelper;
-};
 
 //
 // SignalLogWidget
@@ -203,7 +180,7 @@ class SignalLogWidget : public QWidget
 	Q_OBJECT
 
 public:
-	SignalLogWidget(const ClientLib::SignalLog& signalLog,
+	SignalLogWidget(ClientLib::SignalLog& signalLog,
 					const IAppSignalManager* appSignalManager,
 					const AppSignalLists::AppSignalListSet* appSignalListSet,
 					const QString& projectName,
@@ -229,7 +206,6 @@ private slots:
 
 	void contextMenuRequested(const QPoint& pos);
 	void tableViewDoubleClicked(const QModelIndex& index);
-	void sortIndicatorChanged(int column, Qt::SortOrder order);
 	void editMaskReturnPressed();
 	void editTagsReturnPressed();
 	void maskTypeComboCurrentIndexChanged(int index);
@@ -238,6 +214,9 @@ private slots:
 	void buttonPrintClicked();
 	void buttonChooseTagsClicked();
 	void buttonClearFilterClicked();
+	void buttonAckAllClicked();
+	void turnOffAutoscroll();
+	void copySelected();
 
 private:
 	void createControls();
@@ -252,12 +231,18 @@ private:
 	void maskChanged(bool addToCompleter);
 	void tagsChanged();
 
+	bool filterIsSet() const;
+	bool warnAboutAckFiltered();
+
+	void printData(bool printSelected);
+
 signals:
 	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
+	void updateStatus(int totalRecords, int filteredRecords);
 
 private:
-	const ClientLib::SignalLog& m_signalLog;
+	ClientLib::SignalLog& m_signalLog;
 	const IAppSignalManager* m_appSignalManager = nullptr;
 	const AppSignalLists::AppSignalListSet* m_appSignalListSet = nullptr;
 	SignalLogModel m_model;
@@ -270,7 +255,8 @@ private:
 	QLineEdit* m_editTags = nullptr;
 	QToolButton* m_buttonChooseTags = nullptr;
 
-	QPushButton* m_buttonFixate = nullptr;
+	QPushButton* m_buttonPause = nullptr;
+	QToolButton* m_buttonAutoScroll = nullptr;
 
 	SignalLogTableView* m_tableView = nullptr;
 
@@ -278,6 +264,7 @@ private:
 	QCompleter* m_tagsCompleter = nullptr;
 
 	QPushButton* m_clearFilterButton = nullptr;
+	QPushButton* m_ackButton = nullptr;
 
 	QMenu m_signalMenu;
 
@@ -305,7 +292,7 @@ class SignalLogDialog : public QDialog
 	Q_OBJECT
 
 private:
-	explicit SignalLogDialog(const ClientLib::SignalLog& signalLog,
+	explicit SignalLogDialog(ClientLib::SignalLog& signalLog,
 							 ClientLib::AppSignalManager& appSignalManager,
 							 const AppSignalLists::AppSignalListSet* appSignalListSet,
 							 const QString& projectName,
@@ -317,7 +304,7 @@ private:
 public:
 	virtual ~SignalLogDialog();
 
-	static SignalLogDialog* createDialog(const ClientLib::SignalLog& signalLog,
+	static SignalLogDialog* createDialog(ClientLib::SignalLog& signalLog,
 										 ClientLib::AppSignalManager& appSignalManager,
 										 const AppSignalLists::AppSignalListSet* appSignalListSet,
 										 const QString& projectName,
@@ -329,17 +316,22 @@ public:
 protected:
 	void showEvent(QShowEvent* event) override;
 	void closeEvent(QCloseEvent* event) override;
+	void reject() override;
 
 private slots:
 	void signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu);
 	void signalInfo(QString appSignalId);
 
 private:
-	const ClientLib::SignalLog& m_signalLog;
+	ClientLib::SignalLog& m_signalLog;
 	ClientLib::AppSignalManager& m_appSignalManager;
 
 	SignalLogWidget* m_logWidget = nullptr;
 	static SignalLogDialog* s_instance;
+
+	QStatusBar* m_statusBar = nullptr;
+	QLabel* m_labelTotal = nullptr;
+	QLabel* m_labelFiltered = nullptr;
 
 	const QString& m_signalLogTagCritical;
 	const QString& m_signalLogTagWarning;

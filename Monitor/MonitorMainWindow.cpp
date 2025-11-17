@@ -1,5 +1,4 @@
 #include "MonitorMainWindow.h"
-#include <UiLib/UiTools.h>
 #include "./Archive/MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "DataSourcesWidget.h"
@@ -8,6 +7,7 @@
 #include "SelectSchemaWidget.h"
 #include "SignalLogDialog.h"
 #include <UiLib/LogDialog.h>
+#include <UiLib/UiTools.h>
 
 #include <AppSignalLists/DialogSignalListEditor.h>
 #include <AppSignalLists/SignalListChecker.h>
@@ -20,6 +20,7 @@
 
 class SignalLogButton : public QPushButton
 {
+	Q_OBJECT
 public:
 	SignalLogButton(QWidget* parent = nullptr) :
 		QPushButton{parent}
@@ -33,8 +34,8 @@ public:
 		l->setSpacing(0);
 		l->setAlignment(Qt::AlignHCenter);
 
-		setText("Signal Log\nW:0000   E:0000"); // This text is needed only for setting the size of the button, it is not displayed as it is
-												// transparent.
+		setText(tr("Signal Log\nW:0000   E:0000")); // This text is needed only for setting the size of the button, it is not displayed as
+													// it is transparent.
 
 		m_label1 = new QLabel;
 		m_label1->setAlignment(Qt::AlignHCenter | Qt::AlignBottom);
@@ -66,8 +67,7 @@ public:
 			// Set text with monospace font
 			//
 			QString text =
-				QStringLiteral(
-					"<span style='font-family: Consolas, \"Courier New\", monospace; color: black;'>Log&nbsp;&nbsp;&nbsp;&nbsp;M:%1</span>")
+				tr("<span style='font-family: Consolas, \"Courier New\", monospace; color: black;'>Log&nbsp;&nbsp;&nbsp;&nbsp;M:%1</span>")
 					.arg(messages, 4, 10, QChar('0'));
 
 			m_label1->setText(text);
@@ -83,9 +83,9 @@ public:
 			QString warningColor = warnings > 0 ? "#ff6108" : "black";
 			QString errorColor = errors > 0 ? "red" : "black";
 
-			QString text = QStringLiteral("<span style='font-family: Consolas, \"Courier New\", monospace; color: %1;'>W:%2</span>"
-										  "&nbsp;"
-										  "<span style='font-family: Consolas, \"Courier New\", monospace; color: %3;'>E:%4</span>")
+			QString text = tr("<span style='font-family: Consolas, \"Courier New\", monospace; color: %1;'>W:%2</span>"
+							  "&nbsp;"
+							  "<span style='font-family: Consolas, \"Courier New\", monospace; color: %3;'>E:%4</span>")
 							   .arg(warningColor)
 							   .arg(warnings, 4, 10, QChar('0'))
 							   .arg(errorColor)
@@ -143,6 +143,7 @@ MonitorMainWindow::MonitorMainWindow(InstanceResolver& instanceResolver, const S
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UtilsLib_%1.qm").arg(l));
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/qt_%1.qm").arg(l));
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/AppSignalLists_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/ReportLib_%1.qm").arg(l));
 	}
 
 	if (MonitorAppSettings::instance().language() != "en")
@@ -674,6 +675,12 @@ void MonitorMainWindow::createActions()
 	m_signalSnapshotAction->setEnabled(true);
 	connect(m_signalSnapshotAction, &QAction::triggered, this, qOverload<>(&MonitorMainWindow::slot_signalSnapshot));
 
+	m_signalLogAction = new QAction(tr("Signals Log"), this);
+	m_signalLogAction->setStatusTip(tr("View signals changes log"));
+	m_signalLogAction->setEnabled(true);
+	connect(m_signalLogAction, &QAction::triggered, this, qOverload<>(&MonitorMainWindow::slot_signalLog));
+	m_signalLogAction->setVisible(false);
+
 	m_findSignalAction = new QAction(tr("Find Signal"), this);
 	m_findSignalAction->setStatusTip(tr("Find signal by it's ID"));
 	m_findSignalAction->setIcon(QIcon(":/Images/Images/FindSignal.svg"));
@@ -736,6 +743,7 @@ void MonitorMainWindow::createMenus()
 	toolsMenu->addSeparator();
 	toolsMenu->addAction(m_signalSnapshotAction);
 	toolsMenu->addAction(m_findSignalAction);
+	toolsMenu->addAction(m_signalLogAction);
 
 	toolsMenu->addSeparator();
 	toolsMenu->addAction(m_pAppSignalListsAction);
@@ -794,9 +802,9 @@ void MonitorMainWindow::createToolBars()
 	m_signalLogButton = new SignalLogButton{};
 	slot_updateSignalLogText();
 	connect(m_signalLogButton, &QPushButton::clicked, this, &MonitorMainWindow::slot_signalLog);
-	m_toolBar->addWidget(m_signalLogButton);
+	m_signalLogButtonAction = m_toolBar->addWidget(m_signalLogButton);
 	m_signalLogButton->layout()->update();
-	m_signalLogButton->setVisible(false);
+	m_signalLogButtonAction->setVisible(false);
 
 	m_toolBar->addAction(m_signalSnapshotAction);
 	m_toolBar->addAction(m_findSignalAction);
@@ -1289,12 +1297,11 @@ void MonitorMainWindow::slot_archive(QStringList signalsList, QDateTime startTim
 
 	for (const QString& s : signalsList)
 	{
-		bool ok = false;
-		AppSignalParam asp = m_signalManager.signalParam(s, &ok);
+		auto asp = m_signalManager.signalParam(s);
 
-		if (ok == true)
+		if (asp.has_value() == true)
 		{
-			appSignals.push_back(asp);
+			appSignals.push_back(std::move(*asp));
 		}
 		else
 		{
@@ -1500,12 +1507,10 @@ void MonitorMainWindow::slot_signalSnapshot(QStringList signalsList)
 
 	for (const QString& appSignalId : signalsList)
 	{
-		bool found = false;
-
-		AppSignalParam asp = m_signalManager.signalParam(appSignalId, &found);
-		if (found == true)
+		auto asp = m_signalManager.signalParam(appSignalId);
+		if (asp.has_value() == true)
 		{
-			specialSignals.push_back(asp);
+			specialSignals.push_back(std::move(*asp));
 		}
 		else
 		{
@@ -1660,7 +1665,8 @@ void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configur
 
 	showTuningLoginControls();
 
-	m_signalLogButton->setVisible(configuration.signalLogEnable);
+	m_signalLogAction->setVisible(configuration.signalLogEnable);
+	m_signalLogButtonAction->setVisible(configuration.signalLogEnable);
 	m_pTuningLogAction->setVisible(configuration.tuningEnabled);
 	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled);
 
@@ -2122,3 +2128,5 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 
 	return;
 }
+
+#include "MonitorMainWindow.moc"

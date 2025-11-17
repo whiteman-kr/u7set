@@ -136,6 +136,10 @@ namespace SchemaClientLib
 				}
 			}
 			break;
+		case SnapshotColumns::Flags:
+			v1 = st1.m_flags.all;
+			v2 = st2.m_flags.all;
+			break;
 		case SnapshotColumns::Valid:
 			v1 = st1.m_flags.valid;
 			v2 = st2.m_flags.valid;
@@ -211,7 +215,10 @@ namespace SchemaClientLib
 //
 namespace SchemaClientLib
 {
-	SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager, ClientLib::ISignalDataServer* signalDataServer, AppSignalLists::AppSignalListSet* appSignalListSet, QObject* parent) :
+	SignalSnapshotModel::SignalSnapshotModel(IAppSignalManager* appSignalManager,
+											 ClientLib::ISignalDataServer* signalDataServer,
+											 AppSignalLists::AppSignalListSet* appSignalListSet,
+											 QObject* parent) :
 		m_appSignalManager(appSignalManager),
 		m_signalDataServer(signalDataServer),
 		m_appSignalListSet(appSignalListSet)
@@ -233,6 +240,7 @@ namespace SchemaClientLib
 		m_columnsNames << QObject::tr("Plant Time");
 		m_columnsNames << QObject::tr("Value");
 		m_columnsNames << QObject::tr("Units");
+		m_columnsNames << QObject::tr("Flags");
 		m_columnsNames << QObject::tr("Valid");
 		m_columnsNames << QObject::tr("StateAvailable");
 		m_columnsNames << QObject::tr("Simulated");
@@ -307,12 +315,12 @@ namespace SchemaClientLib
 		m_schemaAppSignals = schemaAppSignals;
 	}
 
-	void SignalSnapshotModel::setAppSignalList(const QString& listId) 
+	void SignalSnapshotModel::setAppSignalList(const QString& listId)
 	{
 		m_listId = listId;
 	}
 
-	QString SignalSnapshotModel::appSignalList() const 
+	QString SignalSnapshotModel::appSignalList() const
 	{
 		return m_listId;
 	}
@@ -350,8 +358,8 @@ namespace SchemaClientLib
 		std::set<Hash> appSignalListHashes;
 		if (filterByAppSignalList == true)
 		{
-			std::shared_ptr<AppSignalLists::AppSignalList> list =  m_appSignalListSet->get(m_listId);
-			if (list != nullptr) 
+			std::shared_ptr<AppSignalLists::AppSignalList> list = m_appSignalListSet->get(m_listId);
+			if (list != nullptr)
 			{
 				appSignalListHashes = list->appListHashesCache();
 			}
@@ -410,7 +418,7 @@ namespace SchemaClientLib
 			{
 				continue;
 			}
-			
+
 			if (m_signalRole == SnapshotSignalRole::Tunable && s.enableTuning() == false)
 			{
 				continue;
@@ -579,9 +587,6 @@ namespace SchemaClientLib
 		std::vector<Hash> requestHashes;
 		requestHashes.reserve(to - from);
 
-		std::vector<AppSignalState> requestStates;
-		requestStates.reserve(to - from);
-
 		for (int i = from; i <= to; i++)
 		{
 			int index = m_filteredSignals[i];
@@ -595,15 +600,15 @@ namespace SchemaClientLib
 			requestHashes.push_back(m_allSignals[index].hash());
 		}
 
-		int found = 0;
+		std::vector<std::optional<AppSignalState>> requestStates;
 
 		if (m_dataServiceId.isEmpty() == true)
 		{
-			m_appSignalManager->signalState(requestHashes, &requestStates, &found);
+			m_appSignalManager->signalState(requestHashes, &requestStates);
 		}
 		else
 		{
-			m_appSignalManager->signalState(requestHashes, ::calcHash(m_dataServiceId), &requestStates, &found);
+			m_appSignalManager->signalState(requestHashes, ::calcHash(m_dataServiceId), &requestStates);
 		}
 
 		if (requestHashes.size() != requestStates.size())
@@ -623,8 +628,13 @@ namespace SchemaClientLib
 				return;
 			}
 
-			m_allStates[index] = requestStates[state];
-
+			m_allStates[index] = requestStates[state]
+									 .or_else(
+										 [&requestHashes, state]
+										 {
+											 return std::optional{AppSignalState{requestHashes[state]}};
+										 })
+									 .value();
 			state++;
 		}
 
@@ -776,6 +786,10 @@ namespace SchemaClientLib
 				{
 					QDateTime time = state.m_time.plantToDateTime();
 					return DateTimeToString::dateTimeMs(time);
+				}
+			case SnapshotColumns::Flags:
+				{
+					return state.m_flags.printShort();
 				}
 			case SnapshotColumns::Valid:
 				{

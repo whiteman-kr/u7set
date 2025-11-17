@@ -41,8 +41,6 @@ set (DIAGNOSTICS_SOURCES
 #	Archive/DialogChooseArchiveSignals.h
 #	Archive/MonitorArchive.cpp
 #	Archive/MonitorArchive.h
-#	DialogColumns.cpp
-#	DialogColumns.h
 #	DialogDataSources.cpp
 #	DialogDataSources.h
 	DialogSettings.cpp
@@ -95,7 +93,6 @@ endif (MSVC)
 set (DIAGNOSTICS_FORMS
 #	./Archive/DialogChooseArchiveSignals.ui
 	DialogSettings.ui
-#	DialogColumns.ui
 )
 
 set(TARGET Diagnostics)

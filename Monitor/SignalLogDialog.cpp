@@ -1,17 +1,18 @@
 #include "SignalLogDialog.h"
-#include "../../AppSignalLib/IAppSignalManager.h"
-#include "../libs/UiLib/include/UiLib/StandardColors.h"
-#include <AppSignalLists/SignalList.h>
-#include <ClientLib/SignalLog.h>
-#include <ReportLib/ReportObject.h>
-#include <ReportLib/TableViewReportGenerator.h>
-#include <UiLib/ChooseItemsWidget.h>
-
 #include "Globals.h"
 #include "MonitorMainWindow.h"
 #include "MonitorSignalInfo.h"
 
-//
+#include "../../AppSignalLib/IAppSignalManager.h"
+#include <AppSignalLists/SignalList.h>
+#include <ClientLib/SignalLog.h>
+#include <ReportLib/ReportObject.h>
+#include <ReportLib/TableViewReportGenerator.h>
+#include <SchemaClientLib/DragDropHelper.h>
+#include <UiLib/ChooseItemsWidget.h>
+#include <UiLib/StandardColors.h>
+#include <UiLib/UiTools.h>
+
 // SignalLogReportGenerator
 //
 namespace
@@ -60,252 +61,6 @@ namespace
 		mainSection.addText(" \n", {textFont, Qt::AlignLeft});
 	}
 
-	//
-	// SignalLogSorter
-	//
-	class SignalLogSorter
-	{
-	public:
-		SignalLogSorter(int column, const SignalLogModel* model, const IAppSignalManager* appSignalManager);
-
-		bool operator()(const RecordKey& key1, const RecordKey& key2) const { return sortFunction(key1, key2); }
-
-		bool sortFunction(const RecordKey& key1, const RecordKey& key2) const;
-
-	private:
-		int m_column = -1;
-
-		const SignalLogModel* m_model = nullptr;
-		const IAppSignalManager* m_appSignalManager = nullptr;
-	};
-
-	//
-	// SignalLogSorter
-	//
-	SignalLogSorter::SignalLogSorter(int column, const SignalLogModel* model, const IAppSignalManager* appSignalManager) :
-		m_column(column),
-		m_model(model),
-		m_appSignalManager(appSignalManager)
-	{
-	}
-
-	bool SignalLogSorter::sortFunction(const RecordKey& key1, const RecordKey& key2) const
-	{
-		if (m_model == nullptr)
-		{
-			Q_ASSERT(m_model);
-			return false;
-		}
-
-		const DiscretesLogRecord& rec1 = m_model->record(key1);
-		const DiscretesLogRecord& rec2 = m_model->record(key2);
-
-		QVariant v1;
-		QVariant v2;
-
-		AppSignalStateFlags flags1 = {.all = rec1.flags};
-		AppSignalStateFlags flags2 = {.all = rec2.flags};
-
-		bool compareSignalParams = false;
-
-		switch (static_cast<SignalLogColumns>(m_column))
-		{
-		case SignalLogColumns::RecordTime:
-			v1 = rec1.recordTime;
-			v2 = rec2.recordTime;
-			break;
-		case SignalLogColumns::SystemTime:
-			v1 = rec1.systemTime;
-			v2 = rec2.systemTime;
-			break;
-		case SignalLogColumns::LocalTime:
-			v1 = rec1.localTime;
-			v2 = rec2.localTime;
-			break;
-		case SignalLogColumns::PlantTime:
-			v1 = rec1.plantTime;
-			v2 = rec2.plantTime;
-			break;
-		case SignalLogColumns::Valid:
-			v1 = flags1.valid;
-			v2 = flags2.valid;
-			break;
-		case SignalLogColumns::StateAvailable:
-			v1 = flags1.stateAvailable;
-			v2 = flags2.stateAvailable;
-			break;
-		case SignalLogColumns::Simulated:
-			v1 = flags1.simulated;
-			v2 = flags2.simulated;
-			break;
-		case SignalLogColumns::Blocked:
-			v1 = flags1.blocked;
-			v2 = flags2.blocked;
-			break;
-		case SignalLogColumns::Mismatch:
-			v1 = flags1.mismatch;
-			v2 = flags2.mismatch;
-			break;
-		case SignalLogColumns::OutOfLimits:
-			if (flags1.belowLowLimit == flags2.belowLowLimit)
-			{
-				v1 = flags1.aboveHighLimit;
-				v2 = flags2.aboveHighLimit;
-			}
-			else
-			{
-				v1 = flags1.belowLowLimit;
-				v2 = flags2.belowLowLimit;
-			}
-			break;
-
-		case SignalLogColumns::Acknowledged:
-			v1 = rec1.acknowledged;
-			v2 = rec2.acknowledged;
-			break;
-		case SignalLogColumns::AckSource:
-			v1 = rec1.ackSource;
-			v2 = rec2.ackSource;
-			break;
-		case SignalLogColumns::AckTime:
-			v1 = rec1.ackTime;
-			v2 = rec2.ackTime;
-			break;
-		case SignalLogColumns::AckUser:
-			v1 = rec1.ackUser;
-			v2 = rec2.ackUser;
-			break;
-
-		default:
-			compareSignalParams = true;
-		}
-
-		if (compareSignalParams == true)
-		{
-			bool found = false;
-			const AppSignalParam& s1 = m_appSignalManager->signalParam(rec1.signalHash, &found);
-			const AppSignalParam& s2 = m_appSignalManager->signalParam(rec2.signalHash, &found);
-
-			switch (static_cast<SignalLogColumns>(m_column))
-			{
-			case SignalLogColumns::CustomAppSignalID:
-				v1 = s1.customSignalId();
-				v2 = s2.customSignalId();
-				break;
-			case SignalLogColumns::EquipmentID:
-				v1 = s1.equipmentId();
-				v2 = s2.equipmentId();
-				break;
-			case SignalLogColumns::LmEquipmentID:
-				v1 = s1.lmEquipmentId();
-				v2 = s2.lmEquipmentId();
-				break;
-			case SignalLogColumns::AppSignalID:
-				v1 = s1.appSignalId();
-				v2 = s2.appSignalId();
-				break;
-			case SignalLogColumns::Caption:
-				v1 = s1.caption();
-				v2 = s2.caption();
-				break;
-			case SignalLogColumns::Units:
-				v1 = s1.units();
-				v2 = s2.units();
-				break;
-			case SignalLogColumns::Type:
-				if (s1.isDiscrete() == true && s2.isDiscrete() == true)
-				{
-					v1 = static_cast<int>(s1.inOutType());
-					v2 = static_cast<int>(s2.inOutType());
-					break;
-				}
-
-				if (s1.type() == s2.type())
-				{
-					if (s1.analogSignalFormat() == s2.analogSignalFormat())
-					{
-						v1 = static_cast<int>(s1.inOutType());
-						v2 = static_cast<int>(s2.inOutType());
-					}
-					else
-					{
-						v1 = static_cast<int>(s1.analogSignalFormat());
-						v2 = static_cast<int>(s2.analogSignalFormat());
-					}
-				}
-				else
-				{
-					v1 = static_cast<int>(s1.type());
-					v2 = static_cast<int>(s2.type());
-				}
-				break;
-			case SignalLogColumns::Tags:
-				v1 = s1.tagStringList().join(' ');
-				v2 = s2.tagStringList().join(' ');
-				break;
-			case SignalLogColumns::Value:
-				if (flags1.valid != flags2.valid)
-				{
-					v1 = flags1.valid;
-					v2 = flags2.valid;
-				}
-				else
-				{
-					if (flags1.stateAvailable != flags2.stateAvailable)
-					{
-						v1 = flags1.stateAvailable;
-						v2 = flags2.stateAvailable;
-					}
-					else
-					{
-						if (s1.isAnalog() == s2.isAnalog())
-						{
-							v1 = rec1.value;
-							v2 = rec2.value;
-						}
-						else
-						{
-							v1 = s1.isAnalog();
-							v2 = s2.isAnalog();
-						}
-					}
-				}
-				break;
-
-			default:
-				Q_ASSERT(false);
-				return rec1.recordTime < rec2.recordTime;
-			}
-		}
-
-		Q_ASSERT(v1.userType() != v2.userType());
-
-		switch (v1.userType())
-		{
-		case QMetaType::Bool:
-			return v1.toBool() < v2.toBool();
-		case QMetaType::QString:
-			return v1.toString() < v2.toString();
-		case QMetaType::Int:
-			return v1.toInt() < v2.toInt();
-		case QMetaType::UInt:
-			return v1.toUInt() < v2.toUInt();
-		case QMetaType::LongLong:
-			return v1.toLongLong() < v2.toLongLong();
-		case QMetaType::ULongLong:
-			return v1.toULongLong() < v2.toULongLong();
-		case QMetaType::Float:
-			return v1.toFloat() < v2.toFloat();
-		case QMetaType::Double:
-			return v1.toDouble() < v2.toDouble();
-		default:
-			break;
-		}
-
-		Q_ASSERT(false);
-		return rec1.recordTime < rec2.recordTime;
-	}
-
 	class LogSelectionControlDelegate : public QStyledItemDelegate
 	{
 	public:
@@ -317,7 +72,7 @@ namespace
 
 	private:
 		SignalLogModel* m_model = nullptr;
-		
+
 		QString m_signalLogTagCritical;
 		QString m_signalLogTagWarning;
 	};
@@ -343,34 +98,20 @@ namespace
 		bool active = option->state & QStyle::State_Active;
 		bool selected = option->state & QStyle::State_Selected;
 
-		bool found = false;
-		const auto& asp = m_model->signalParam(index.row(), &found);
+		const auto asp = m_model->signalParam(index.row());
+		QStringList signalTags = asp.has_value() ? asp->tagStringList() : QStringList{};
 
 		QBrush br;
 
-		if (asp.tagStringList().contains(m_signalLogTagCritical) == true)
+		if (signalTags.contains(m_signalLogTagCritical) == true)
 		{
-			if (selected == true)
-			{
-				br = QBrush{StandardColors::LogErrorForeground};
-			}
-			else
-			{
-				br = QBrush{StandardColors::LogErrorForegroundDark};
-			}
+			br = selected ? QBrush{StandardColors::LogErrorForeground} : QBrush{StandardColors::LogErrorForegroundDark};
 		}
-		else if (asp.tagStringList().contains(m_signalLogTagWarning) == true)
+		else if (signalTags.contains(m_signalLogTagWarning) == true)
 		{
-			if (selected == true)
-			{
-				br = QBrush{StandardColors::LogWarningForegroundDark};
-			}
-			else
-			{
-				br = QBrush{StandardColors::LogWarningForeground};
-			}
+			br = selected ? QBrush{StandardColors::LogWarningForegroundDark} : QBrush{StandardColors::LogWarningForeground};
 		}
-		
+
 		option->palette.setColor(QPalette::Text, br.color());
 
 		// Set color for selected item (by default it is displayed by white)
@@ -424,7 +165,6 @@ SignalLogModel::SignalLogModel(const ClientLib::SignalLog& signalLog,
 	m_columnsNames << QObject::tr("Lm Equipment ID");
 	m_columnsNames << QObject::tr("App Signal ID");
 	m_columnsNames << QObject::tr("Caption");
-	m_columnsNames << QObject::tr("Type");
 	m_columnsNames << QObject::tr("Tags");
 
 	m_columnsNames << QObject::tr("Record Time");
@@ -433,19 +173,13 @@ SignalLogModel::SignalLogModel(const ClientLib::SignalLog& signalLog,
 	m_columnsNames << QObject::tr("Plant Time");
 
 	m_columnsNames << QObject::tr("Value");
-	m_columnsNames << QObject::tr("Units");
 
+	m_columnsNames << QObject::tr("Flags");
 	m_columnsNames << QObject::tr("Valid");
 	m_columnsNames << QObject::tr("StateAvailable");
 	m_columnsNames << QObject::tr("Simulated");
 	m_columnsNames << QObject::tr("Blocked");
 	m_columnsNames << QObject::tr("Mismatch");
-	m_columnsNames << QObject::tr("OutOfLimits");
-
-	m_columnsNames << QObject::tr("Acknowledged");
-	m_columnsNames << QObject::tr("AckTime");
-	m_columnsNames << QObject::tr("AckSource");
-	m_columnsNames << QObject::tr("AckUser");
 
 	Q_ASSERT(m_columnsNames.size() == static_cast<qsizetype>(SignalLogColumns::ColumnCount));
 
@@ -460,24 +194,6 @@ QStringList SignalLogModel::columnsNames() const
 qint64 SignalLogModel::updateCounter() const
 {
 	return m_updateCounter;
-}
-
-qint64 SignalLogModel::maxInitialRecordTime() const
-{
-	return m_maxInitialRecordTime;
-}
-
-void SignalLogModel::resetMaxInitialRecordTime()
-{
-	m_maxInitialRecordTime = -1;
-
-	for (const auto& [key, rec] : m_records)
-	{
-		if (rec.recordTime > m_maxInitialRecordTime)
-		{
-			m_maxInitialRecordTime = rec.recordTime; // Update the max record Time on first records filling
-		}
-	}
 }
 
 int SignalLogModel::columnCount(const QModelIndex& parent) const
@@ -535,57 +251,40 @@ QString SignalLogModel::appSignalList() const
 
 void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64 updateCounter)
 {
+	m_recordsVec = std::move(records);
 	m_updateCounter = updateCounter;
 
-	std::unordered_set<RecordKey, RecordKey> newKeys;
-	newKeys.reserve(records.size());
+	fillRecords(false /*clearBeforeFilling*/);
+}
 
-	{
-	// Add records that do not exist in the model
+void SignalLogModel::fillRecords(bool clearBeforeFilling)
+{
+	emit layoutAboutToBeChanged();
+
+	// Clear the model if required
 	//
-		qsizetype prevRecordsCount = m_filteredRecords.size();
-
-		for (const auto& rec : records)
-		{
-			RecordKey key{rec};
-
-			newKeys.insert(key);
-
-			if (m_records.contains(key) == true)
-			{
-				continue;
-			}
-
-			if (m_initMaxInitialRecordTime == true && rec.recordTime > m_maxInitialRecordTime)
-			{
-				m_maxInitialRecordTime = rec.recordTime; // Update the max record time on first records filling
-			}
-
-			m_records.insert({key, rec});
-
-			if (filterRecord(rec) == true)
-			{
-				m_filteredRecords.push_back(key);
-			}
-		}
-
-		qsizetype addedRecordsCount = m_filteredRecords.size() - prevRecordsCount;
-		if (addedRecordsCount > 0)
-		{
-			beginInsertRows(QModelIndex(), prevRecordsCount, prevRecordsCount + addedRecordsCount - 1);
-			insertRows(prevRecordsCount, prevRecordsCount + addedRecordsCount - 1);
-			endInsertRows();
-		}
-
-		m_initMaxInitialRecordTime = false;
+	if (clearBeforeFilling == true) 
+	{
+		m_filteredRecords.clear();
+		m_recordsMap.clear();
 	}
 
 	// Remove records that do not exist in new data
 	{
+		std::unordered_set<RecordKey, RecordKey> newKeys;
+		newKeys.reserve(m_recordsVec.size());
+
+		for (const auto& rec : m_recordsVec)
+		{
+			RecordKey key{rec};
+			newKeys.insert(key);
+		}
+
 		// Build a map with records needed to be removed
 		//
 		std::unordered_set<RecordKey, RecordKey> recordsToDelete;
-		for (const auto& [key, rec] : m_records)
+
+		for (const auto& [key, rec] : m_recordsMap)
 		{
 			if (newKeys.contains(key) == false)
 			{
@@ -597,87 +296,87 @@ void SignalLogModel::setRecords(std::vector<DiscretesLogRecord>& records, qint64
 		//
 		for (const auto& key : recordsToDelete)
 		{
-			m_records.erase(key);
+			m_recordsMap.erase(key);
 		}
 
-		// Remove rows from filteded array and from the model
+		// Remove rows from filtered array and from the model
 		//
-		qsizetype count = m_filteredRecords.size();
-		for (qsizetype i = count - 1; i >= 0; i--)
+		if (recordsToDelete.empty() == false)
 		{
-			if (recordsToDelete.contains(m_filteredRecords[i]) == true)
+			std::vector<RecordKey> filteredRecords = std::move(m_filteredRecords);
+			m_filteredRecords = {};
+			m_filteredRecords.reserve(filteredRecords.size());
+
+			for (const auto& fr : filteredRecords)
 			{
-				beginRemoveRows(QModelIndex(), i, i);
-				removeRows(i, 1);
-				m_filteredRecords.erase(m_filteredRecords.begin() + i);
-				endRemoveRows();
+				if (recordsToDelete.contains(fr) == false)
+				{
+					m_filteredRecords.push_back(fr);
+				}
 			}
 		}
 	}
+
+	// Add records that do not exist in the model
+	//
+	{
+		std::vector<RecordKey> newRecords;
+
+		for (const auto& rec : m_recordsVec)
+		{
+			RecordKey key{rec};
+
+			if (m_recordsMap.contains(key) == true)
+			{
+				continue;
+			}
+
+			m_recordsMap.insert({key, rec});
+
+			if (filterRecord(rec) == true)
+			{
+				newRecords.push_back(key);
+			}
+		}
+
+		qsizetype addedRecordsCount = newRecords.size();
+		if (addedRecordsCount > 0)
+		{
+			m_filteredRecords.insert(m_filteredRecords.end(), newRecords.begin(), newRecords.end());
+		}
+	}
+
+	emit layoutChanged();
+	return;
 }
 
-void SignalLogModel::fillRecords(bool resetSelection)
+void SignalLogModel::removeUpTo(qint64 plantTime)
 {
-	if (rowCount() > 0)
+	std::vector<DiscretesLogRecord> records;
+	records.reserve(m_recordsMap.size());
+
+	// Add records only with plantTime > time
+
+	for (const auto& [key, rec] : m_recordsMap)
 	{
-		beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
-		removeRows(0, rowCount());
-
-		m_filteredRecords.clear();
-
-		endRemoveRows();
-	}
-
-	if (resetSelection == true)
-	{
-		m_initMaxInitialRecordTime = true;
-		m_maxInitialRecordTime = -1;
-	}
-
-	std::vector<RecordKey> filteredRecords;
-	filteredRecords.reserve(m_records.size());
-
-	// Fill records
-	//
-	for (const auto& [key, rec]: m_records)
-	{
-		if (m_initMaxInitialRecordTime == true && rec.recordTime > m_maxInitialRecordTime)
+		if (rec.plantTime > plantTime)
 		{
-			m_maxInitialRecordTime = rec.recordTime; // Update the max record time on first records filling
+			records.push_back(rec);
 		}
-
-		if (filterRecord(rec) == false)
-		{
-			continue;
-		}
-
-		filteredRecords.push_back(key);
 	}
 
-	if (filteredRecords.empty() == false)
-	{
-		beginInsertRows(QModelIndex(), 0, static_cast<int>(filteredRecords.size()) - 1);
-
-		m_filteredRecords = std::move(filteredRecords);
-
-		insertRows(0, static_cast<int>(m_filteredRecords.size()));
-		endInsertRows();
-	}
-
-	m_initMaxInitialRecordTime = false;
-
-	return;
+	setRecords(records, m_updateCounter);
 }
 
 int SignalLogModel::recordsCount() const
 {
-	return static_cast<int>(m_records.size());
+	return static_cast<int>(m_recordsMap.size());
 }
 
 const DiscretesLogRecord& SignalLogModel::record(const RecordKey& key) const
 {
-	auto it = m_records.find(key);
-	if (it == m_records.end())
+	auto it = m_recordsMap.find(key);
+	if (it == m_recordsMap.end())
 	{
 		Q_ASSERT(false);
 		static DiscretesLogRecord err;
@@ -698,8 +397,8 @@ const DiscretesLogRecord& SignalLogModel::filteredRecord(int index) const
 
 	const auto& recordKey = m_filteredRecords[index];
 
-	auto it = m_records.find(recordKey);
-	if (it == m_records.end())
+	auto it = m_recordsMap.find(recordKey);
+	if (it == m_recordsMap.end())
 	{
 		Q_ASSERT(false);
 		static DiscretesLogRecord err;
@@ -709,55 +408,30 @@ const DiscretesLogRecord& SignalLogModel::filteredRecord(int index) const
 	return it->second;
 }
 
-void SignalLogModel::sort(int column, Qt::SortOrder sortOrder)
+const std::vector<RecordKey>& SignalLogModel::filteredRecords() const
 {
-	if (m_filteredRecords.empty() == true)
-	{
-		return;
-	}
-
-	int sortColumn = column;
-
-	std::stable_sort(m_filteredRecords.begin(), m_filteredRecords.end(), SignalLogSorter(sortColumn, this, m_appSignalManager));
-
-	if (sortOrder == Qt::DescendingOrder)
-	{
-		std::reverse(std::begin(m_filteredRecords), std::end(m_filteredRecords));
-	}
-
-	emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
-
-	return;
+	return m_filteredRecords;
 }
 
-AppSignalParam SignalLogModel::signalParam(int rowIndex, bool* found)
+std::optional<AppSignalParam> SignalLogModel::signalParam(int rowIndex)
 {
-	if (found == nullptr)
-	{
-		Q_ASSERT(found);
-		return AppSignalParam();
-	}
-
 	if (rowIndex < 0 || rowIndex >= static_cast<int>(m_filteredRecords.size()))
 	{
 		Q_ASSERT(false);
-		*found = false;
-		return AppSignalParam();
+		return std::nullopt;
 	}
-
-	*found = true;
 
 	const auto& recordKey = m_filteredRecords[rowIndex];
 
-	auto it = m_records.find(recordKey);
-	if (it == m_records.end())
+	auto it = m_recordsMap.find(recordKey);
+	if (it == m_recordsMap.end())
 	{
 		Q_ASSERT(false);
-		return AppSignalParam();
+		return std::nullopt;
 	}
 
 	const DiscretesLogRecord& rec = it->second;
-	return m_appSignalManager->signalParam(rec.signalHash, found);
+	return m_appSignalManager->signalParam(rec.signalHash);
 }
 
 QVariant SignalLogModel::data(const QModelIndex& index, int role) const
@@ -782,8 +456,8 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 	{
 		const auto& recordKey = m_filteredRecords[row];
 
-		auto it = m_records.find(recordKey);
-		if (it == m_records.end())
+		auto it = m_recordsMap.find(recordKey);
+		if (it == m_recordsMap.end())
 		{
 			Q_ASSERT(false);
 			return QVariant();
@@ -811,6 +485,10 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 			{
 				return DateTimeToString::dateTimeMs(QDateTime::fromMSecsSinceEpoch(rec.plantTime, QTimeZone::UTC));
 			}
+		case SignalLogColumns::Flags:
+			{
+				return flags.printShort();
+			}
 		case SignalLogColumns::Valid:
 			{
 				return (flags.valid == true) ? QObject::tr("yes") : QObject::tr("no");
@@ -831,33 +509,19 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 			{
 				return (flags.mismatch == true) ? QObject::tr("yes") : QObject::tr("no");
 			}
-		case SignalLogColumns::OutOfLimits:
-			{
-				QString resultString;
-
-				if (flags.belowLowLimit == true)
-				{
-					resultString += QStringLiteral("LOW ");
-				}
-				if (flags.aboveHighLimit == true)
-				{
-					resultString += QStringLiteral("HIGH ");
-				}
-				return resultString.trimmed();
-			}
 		}
 
 		//
 		// Get signal now
 		//
-		bool found = false;
-		const AppSignalParam& s = m_appSignalManager->signalParam(rec.signalHash, &found);
-		if (found == false)
+		const auto s = m_appSignalManager->signalParam(rec.signalHash);
+		if (s.has_value() == false)
 		{
 			if (columnIndex == SignalLogColumns::AppSignalID)
 			{
 				return {"?"};
 			}
+
 			return {};
 		}
 
@@ -865,27 +529,7 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 		{
 		case SignalLogColumns::Value:
 			{
-				QString valueResult;
-
-				switch (s.type())
-				{
-				case E::SignalType::Analog:
-					valueResult = AppSignalState::toString(rec.value,
-														   E::ValueViewType::Dec,
-														   E::AnalogFormat::g_9_or_9e,
-														   s.analogSignalFormat(),
-														   s.precision());
-					break;
-				case E::SignalType::Discrete:
-					valueResult = static_cast<int>(rec.value) == 0 ? "0" : "1";
-					break;
-				case E::SignalType::Bus:
-					valueResult = QObject::tr("Bus Type");
-					break;
-				default:
-					Q_ASSERT(false);
-				}
-
+				QString valueResult = static_cast<int>(rec.value) == 0 ? "0" : "1";
 				if (flags.valid == false)
 				{
 					if (flags.stateAvailable == true)
@@ -897,72 +541,29 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 						valueResult = QStringLiteral("?");
 					}
 				}
-
 				return valueResult;
 			}
 
 		case SignalLogColumns::CustomAppSignalID:
-			{
-				return s.customSignalId();
-			}
+			return s->customSignalId();
 
 		case SignalLogColumns::EquipmentID:
-			{
-				return s.equipmentId();
-			}
+			return s->equipmentId();
 
 		case SignalLogColumns::LmEquipmentID:
-			{
-				return s.lmEquipmentId();
-			}
+			return s->lmEquipmentId();
 
 		case SignalLogColumns::AppSignalID:
-			{
-				return s.appSignalId();
-			}
+			return s->appSignalId();
 
 		case SignalLogColumns::Caption:
-			{
-				return s.caption();
-			}
-
-		case SignalLogColumns::Units:
-			{
-				return s.units();
-			}
-
-		case SignalLogColumns::Type:
-			{
-				// An array for translation
-				QString signalProperties[] = {QObject::tr("Analog"), // E::SignalType
-											  QObject::tr("Discrete"),
-											  QObject::tr("Bus"),
-											  QObject::tr("Input"),  // E::SignalInOutType
-											  QObject::tr("Output"),
-											  QObject::tr("Internal")};
-				Q_UNUSED(signalProperties);
-
-				QString str = QObject::tr(E::valueToString<E::SignalType>(s.type()).toUtf8());
-				if (s.isAnalog() == true)
-				{
-					str = QString("%1 (%2)").arg(str).arg(
-						E::valueToString<E::AnalogAppSignalFormat>(static_cast<int>(s.analogSignalFormat())));
-				}
-
-				str = QString("%1, %2").arg(str).arg(QObject::tr(E::valueToString<E::SignalInOutType>(s.inOutType()).toUtf8()));
-
-				return str;
-			}
+			return s->caption();
 
 		case SignalLogColumns::Tags:
-			{
-				return s.tagStringList().join(' ');
-			}
+			return s->tagStringList().join(' ');
 
 		default:
-			{
-				return QString();
-			}
+			return QString();
 		}
 	}
 
@@ -971,6 +572,76 @@ QVariant SignalLogModel::data(const QModelIndex& index, int role) const
 										  columnIndex == SignalLogColumns::Blocked || columnIndex == SignalLogColumns::Mismatch))
 	{
 		return QVariant(Qt::AlignCenter);
+	}
+
+	if (role == Qt::ToolTipRole)
+	{
+		const auto& recordKey = m_filteredRecords[row];
+
+		auto it = m_recordsMap.find(recordKey);
+		if (it == m_recordsMap.end())
+		{
+			Q_ASSERT(false);
+			return QVariant();
+		}
+
+		const DiscretesLogRecord& rec = it->second;
+
+		AppSignalStateFlags flags{.all = rec.flags};
+
+		//
+		// Get signal now
+		//
+		const auto signalParam = m_appSignalManager->signalParam(rec.signalHash);
+		if (signalParam.has_value() == false)
+		{
+			if (columnIndex == SignalLogColumns::AppSignalID)
+			{
+				return {"?"};
+			}
+
+			return {};
+		}
+
+		QString valueResult = static_cast<int>(rec.value) == 0 ? "0" : "1";
+		if (flags.valid == false)
+		{
+			if (flags.stateAvailable == true)
+			{
+				valueResult = QString("? (%1)").arg(valueResult);
+			}
+			else
+			{
+				valueResult = QStringLiteral("?");
+			}
+		}
+
+		QString toolTip = tr("RecordID: %1\n"
+							 "SignalID: %2\n"
+							 "EquipmentID: %3\n"
+							 "LmEquipmentID: %4\n"
+							 "AppSignalID: %5\n"
+							 "Caption: %6\n"
+							 "Value: %7\n"
+							 "Flags: %8\n"
+							 "RecordTime: %9\n"
+							 "ServerTime: %10\n"
+							 "ServerTime +0UTC: %11\n"
+							 "PlantTime: %12")
+							  .arg(rec.recordID)
+							  .arg(signalParam->customSignalId())
+							  .arg(signalParam->equipmentId())
+							  .arg(signalParam->lmEquipmentId())
+							  .arg(signalParam->appSignalId())
+							  .arg(signalParam->caption())
+							  .arg(valueResult)
+							  .arg(flags.printShort() + "(" + QString::number(flags.all, 2) + ")")
+							  .arg(QDateTime::fromMSecsSinceEpoch(rec.recordTime).toString("dd.MM.yyyy hh:mm:ss.zzz"))
+							  .arg(QDateTime::fromMSecsSinceEpoch(rec.localTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"))
+							  .arg(QDateTime::fromMSecsSinceEpoch(rec.systemTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"))
+							  .arg(QDateTime::fromMSecsSinceEpoch(rec.plantTime, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"));
+
+		return toolTip;
 	}
 
 
@@ -999,7 +670,7 @@ QVariant SignalLogModel::headerData(int section, Qt::Orientation orientation, in
 }
 
 bool SignalLogModel::filterRecord(const DiscretesLogRecord& rec) const
-{ 
+{
 	// Filter by signal list
 	//
 	if (m_appSignalListSet != nullptr && m_appSignallistID.isEmpty() == false && m_appSignalListHashes.contains(rec.signalHash) == false)
@@ -1011,9 +682,8 @@ bool SignalLogModel::filterRecord(const DiscretesLogRecord& rec) const
 	//
 	if (m_masks.isEmpty() == false)
 	{
-		bool found = false;
-		const AppSignalParam& asp = m_appSignalManager->signalParam(rec.signalHash, &found);
-		if (found == false)
+		const auto asp = m_appSignalManager->signalParam(rec.signalHash);
+		if (asp.has_value() == false)
 		{
 			return false;
 		}
@@ -1026,26 +696,26 @@ bool SignalLogModel::filterRecord(const DiscretesLogRecord& rec) const
 		switch (m_maskType)
 		{
 		case SignalLogMaskType::All:
-			strIdList << asp.appSignalId().trimmed();
-			strIdList << asp.customSignalId().trimmed();
-			strIdList << asp.equipmentId().trimmed();
-			strIdList << asp.lmEquipmentId().trimmed();
+			strIdList << asp->appSignalId().trimmed();
+			strIdList << asp->customSignalId().trimmed();
+			strIdList << asp->equipmentId().trimmed();
+			strIdList << asp->lmEquipmentId().trimmed();
 			break;
 
 		case SignalLogMaskType::AppSignalID:
-			strIdList << asp.appSignalId().trimmed();
+			strIdList << asp->appSignalId().trimmed();
 			break;
 
 		case SignalLogMaskType::CustomAppSignalID:
-			strIdList << asp.customSignalId().trimmed();
+			strIdList << asp->customSignalId().trimmed();
 			break;
 
 		case SignalLogMaskType::EquipmentID:
-			strIdList << asp.equipmentId().trimmed();
+			strIdList << asp->equipmentId().trimmed();
 			break;
 
 		case SignalLogMaskType::LmEquipmentID:
-			strIdList << asp.lmEquipmentId().trimmed();
+			strIdList << asp->lmEquipmentId().trimmed();
 			break;
 		}
 
@@ -1104,15 +774,14 @@ bool SignalLogModel::filterRecord(const DiscretesLogRecord& rec) const
 	//
 	if (m_tags.isEmpty() == false)
 	{
-		bool found = false;
-		const AppSignalParam& asp = m_appSignalManager->signalParam(rec.signalHash, &found);
-		if (found == false)
+		const auto asp = m_appSignalManager->signalParam(rec.signalHash);
+		if (asp.has_value() == false)
 		{
 			return false;
 		}
 
 		bool result = false;
-		const auto& signalTags = asp.tags();
+		const auto& signalTags = asp->tags();
 
 		for (const QString& tag : m_tags)
 		{
@@ -1142,9 +811,6 @@ void SignalLogDialogSettings::restore()
 	horzHeader = s.value("SignalLogWidget/horzHeader").toByteArray();
 	horzHeaderCount = s.value("SignalLogWidget/horzHeaderCount").toInt();
 
-	sortColumn = s.value("SignalLogWidget/sortColumn", sortColumn).toInt();
-	sortOrder = static_cast<Qt::SortOrder>(s.value("SignalLogWidget/sortOrder", sortOrder).toInt());
-
 	maskList = s.value("SignalLogWidget/maskList").toStringList();
 	tagsList = s.value("SignalLogWidget/tagsList").toStringList();
 }
@@ -1156,15 +822,31 @@ void SignalLogDialogSettings::store()
 	s.setValue("SignalLogWidget/horzHeader", horzHeader);
 	s.setValue("SignalLogWidget/horzHeaderCount", horzHeaderCount);
 
-	s.setValue("SignalLogWidget/sortColumn", sortColumn);
-	s.setValue("SignalLogWidget/sortOrder", static_cast<int>(sortOrder));
-
 	s.setValue("SignalLogWidget/maskList", maskList);
 	s.setValue("SignalLogWidget/tagsList", tagsList);
 }
 
 // SignalLogTableView
 //
+class SignalLogTableView : public QTableView
+{
+	Q_OBJECT
+protected:
+	virtual void mousePressEvent(QMouseEvent* event) override;
+	virtual void mouseMoveEvent(QMouseEvent* event) override;
+	virtual void keyPressEvent(QKeyEvent* event) override;
+	virtual void wheelEvent(QWheelEvent* event) override;
+
+signals:
+	void turnOffAutoscroll();
+
+private:
+	AppSignalParam m_appSignalParam;
+	QPoint m_dragStartPosition;
+
+	SchemaClientLib::DragDropHelper m_dragDropHelper;
+};
+
 void SignalLogTableView::mousePressEvent(QMouseEvent* event)
 {
 	QTableView::mousePressEvent(event);
@@ -1178,18 +860,12 @@ void SignalLogTableView::mousePressEvent(QMouseEvent* event)
 
 	QList<AppSignalParam> appSignalParams;
 
-	QModelIndexList rows = selectionModel()->selectedRows();
-
-	for (QModelIndex& index : rows)
+	for (const QModelIndex& index : selectionModel()->selectedRows())
 	{
-		bool found = false;
-
-
-		AppSignalParam appSignalParam = logModel->signalParam(index.row(), &found);
-
-		if (found == true)
+		auto appSignalParam = logModel->signalParam(index.row());
+		if (appSignalParam.has_value() == true)
 		{
-			appSignalParams.push_back(appSignalParam);
+			appSignalParams.push_back(appSignalParam.value());
 		}
 	}
 
@@ -1205,10 +881,31 @@ void SignalLogTableView::mouseMoveEvent(QMouseEvent* event)
 	return;
 }
 
+void SignalLogTableView::keyPressEvent(QKeyEvent* event)
+{
+	if (event->key() == Qt::Key_PageUp || event->key() == Qt::Key_PageDown || event->key() == Qt::Key_Home || event->key() == Qt::Key_End ||
+		event->key() == Qt::Key_Up || event->key() == Qt::Key_Down)
+	{
+		emit turnOffAutoscroll();
+	}
+
+	QTableView::keyPressEvent(event);
+	return;
+}
+
+void SignalLogTableView::wheelEvent(QWheelEvent* event)
+{
+	emit turnOffAutoscroll();
+
+	QTableView::wheelEvent(event);
+	return;
+}
+
+
 //
 // SignalLogWidget
 //
-SignalLogWidget::SignalLogWidget(const ClientLib::SignalLog& signalLog,
+SignalLogWidget::SignalLogWidget(ClientLib::SignalLog& signalLog,
 								 const IAppSignalManager* appSignalManager,
 								 const AppSignalLists::AppSignalListSet* appSignalListSet,
 								 const QString& projectName,
@@ -1225,7 +922,6 @@ SignalLogWidget::SignalLogWidget(const ClientLib::SignalLog& signalLog,
 	m_model(m_signalLog, m_appSignalManager, m_appSignalListSet, this),
 	m_signalLogTagCritical(signalLogTagCritical),
 	m_signalLogTagWarning(signalLogTagWarning)
-	
 {
 	if (m_appSignalManager == nullptr)
 	{
@@ -1249,11 +945,6 @@ SignalLogWidget::SignalLogWidget(const ClientLib::SignalLog& signalLog,
 	m_tagsHelp.remove('\t');
 
 	m_settings.restore();
-
-	setAttribute(Qt::WA_DeleteOnClose);
-	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
-
-	setWindowTitle(tr("Signals Log"));
 
 	createControls();
 
@@ -1328,7 +1019,12 @@ void SignalLogWidget::timerEvent(QTimerEvent* event)
 {
 	if (event->timerId() == m_updateStateTimerId)
 	{
-		updateRecords();
+		if (m_buttonPause->isChecked() == false)
+		{
+			updateRecords();
+		}
+
+		emit updateStatus(m_model.recordsCount(), m_model.rowCount());
 	}
 }
 
@@ -1411,27 +1107,89 @@ void SignalLogWidget::contextMenuRequested(const QPoint& pos)
 {
 	Q_UNUSED(pos);
 
-	int row = m_tableView->currentIndex().row();
-	if (row == -1)
-	{
-		return;
-	}
-
-	int rowIndex = m_tableView->currentIndex().row();
-
-	bool found = false;
-
-	const AppSignalParam& s = m_model.signalParam(rowIndex, &found);
-
-	if (found == false)
-	{
-		return;
-	}
-
 	QStringList list;
-	list << s.appSignalId();
 
-	//
+	TimeStamp maxPlantTime = 0;
+
+	m_signalMenu.clear();
+
+	QModelIndexList rows = m_tableView->selectionModel()->selectedRows();
+
+	for (const QModelIndex& index : rows)
+	{
+		if (index.isValid() == true)
+		{
+			auto appSignalParam = m_model.signalParam(index.row());
+			if (appSignalParam.has_value() == false)
+			{
+				continue;
+			}
+
+			const auto& rec = m_model.filteredRecord(index.row());
+			if (rec.acknowledged == false && rec.plantTime > maxPlantTime)
+			{
+				maxPlantTime = rec.plantTime;
+			}
+
+			const auto& appSignalID = appSignalParam->appSignalId();
+			if (list.contains(appSignalID) == false)
+			{
+				list << appSignalID;
+			}
+		}
+	}
+
+	{
+		if (m_tableView->selectionModel()->hasSelection() == true)
+		{
+			QAction* action = new QAction(tr("Copy"), &m_signalMenu);
+			connect(action, &QAction::triggered, this, &SignalLogWidget::copySelected);
+			m_signalMenu.addAction(action);
+		}
+	}
+
+	if (maxPlantTime != 0)
+	{
+		if (m_tableView->selectionModel()->hasSelection() == true)
+		{
+			m_signalMenu.addSeparator();
+		}
+
+		QAction* action =
+			new QAction(tr("Acknowledge up to ") +
+							QDateTime::fromMSecsSinceEpoch(maxPlantTime.timeStamp, QTimeZone::UTC).toString("dd.MM.yyyy hh:mm:ss.zzz"),
+						&m_signalMenu);
+		connect(action,
+				&QAction::triggered,
+				[maxPlantTime, this]()
+				{
+					if (warnAboutAckFiltered() == false)
+					{
+						return;
+					}
+
+					m_signalLog.sendAckUpTo(maxPlantTime);
+
+					if (m_buttonPause->isChecked() == true)
+					{
+						m_model.removeUpTo(maxPlantTime.timeStamp);
+					}
+				});
+		m_signalMenu.addAction(action);
+	}
+
+	if (list.isEmpty() == true)
+	{
+		return;
+	}
+
+	const int maxSignalsCount = 16;
+	if (list.size() > maxSignalsCount)
+	{
+		int extra = list.size() - maxSignalsCount;
+		list.resize(maxSignalsCount);
+		list.push_back(tr("...and %1 more signal(s)").arg(extra));
+	}
 
 	emit signalContextMenu(list, QList<QMenu*>() << &m_signalMenu);
 }
@@ -1448,11 +1206,8 @@ void SignalLogWidget::tableViewDoubleClicked(const QModelIndex& index)
 
 	int rowIndex = m_tableView->currentIndex().row();
 
-	bool found = false;
-
-	const AppSignalParam& s = m_model.signalParam(rowIndex, &found);
-
-	if (found == false)
+	const auto s = m_model.signalParam(rowIndex);
+	if (s.has_value() == false)
 	{
 		return;
 	}
@@ -1460,28 +1215,22 @@ void SignalLogWidget::tableViewDoubleClicked(const QModelIndex& index)
 	QTimer::singleShot(10,
 					   [this, s]
 					   {
-						   emit signalInfo(s.appSignalId());
+						   emit signalInfo(s->appSignalId());
 					   });
-}
-
-void SignalLogWidget::sortIndicatorChanged(int column, Qt::SortOrder order)
-{
-	m_settings.sortColumn = column;
-	m_settings.sortOrder = order;
 }
 
 void SignalLogWidget::editMaskReturnPressed()
 {
 	maskChanged(true /*addToCompleter*/);
 
-	m_model.fillRecords(true /*resetSelection*/);
+	m_model.fillRecords(true /*clearBeforeFilling*/);
 }
 
 void SignalLogWidget::editTagsReturnPressed()
 {
 	tagsChanged();
 
-	m_model.fillRecords(true /*resetSelection*/);
+	m_model.fillRecords(true /*clearBeforeFilling*/);
 }
 
 void SignalLogWidget::maskTypeComboCurrentIndexChanged(int index)
@@ -1494,13 +1243,13 @@ void SignalLogWidget::maskTypeComboCurrentIndexChanged(int index)
 		return;
 	}
 
-	m_model.fillRecords(true /*resetSelection*/);
+	m_model.fillRecords(true /*clearBeforeFilling*/);
 }
 
 void SignalLogWidget::signalListComboIndexChanged(int /*index*/)
 {
 	m_model.setAppSignalList(m_signalListCombo->currentData().toString());
-	m_model.fillRecords(true /*resetSelection*/);
+	m_model.fillRecords(true /*clearBeforeFilling*/);
 }
 
 void SignalLogWidget::buttonExportClicked()
@@ -1512,17 +1261,43 @@ void SignalLogWidget::buttonExportClicked()
 	}
 
 	static QString path{"."};
-	QString fileName = QFileDialog::getSaveFileName(
-		this,
-		tr("Save File"),
-		path + QDir::separator() + "untitled.pdf",
-		tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
 
-	if (fileName.isEmpty() == true)
+	QFileDialog dialog(this,
+					   tr("Save File"),
+					   path + QDir::separator() + "untitled.pdf",
+					   tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	dialog.setFileMode(QFileDialog::AnyFile);
+	dialog.setViewMode(QFileDialog::List);
+
+	// Create your checkbox
+	//
+	QCheckBox* customCheck = new QCheckBox(tr("Export Selected Only"), &dialog);
+	customCheck->setEnabled(m_tableView->selectionModel()->hasSelection() == true);
+
+	// Access the dialog's layout and insert the checkbox
+	//
+	QGridLayout* layout = qobject_cast<QGridLayout*>(dialog.layout());
+	if (layout)
+	{
+		int row = layout->rowCount();
+		layout->addWidget(customCheck, row, 0, 1, layout->columnCount());
+	}
+
+	// Execute dialog
+	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
+	QStringList files = dialog.selectedFiles();
+	if (files.isEmpty())
+	{
+		return;
+	}
+	QString fileName = files[0];
 	path = QFileInfo(fileName).path(); // store path for next time
+
+	bool exportSelected = customCheck->isChecked();
 
 	QFileInfo fileInfo(fileName);
 	QString extension = fileInfo.completeSuffix();
@@ -1542,35 +1317,55 @@ void SignalLogWidget::buttonExportClicked()
 
 		SignalLogReportGenerator ri(m_projectName, m_equipmentId);
 
-		ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout);
+		ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout, exportSelected);
+
 		generator.exportTable(fileName);
 
 		pageLayout = generator.pageLayout();
 		ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SignalLogExportPageLayout");
-
-		return;
+	}
+	else
+	{
+		QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
 	}
 
-	QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
 	return;
 }
 
 void SignalLogWidget::buttonPrintClicked()
 {
-	QPageLayout pageLayout(QPageSize(QPageSize::A4),
-						   QPageLayout::Orientation::Portrait,
-						   QMarginsF(10, 10, 10, 10),
-						   QPageLayout::Unit::Millimeter);
+	if (m_tableView->selectionModel()->hasSelection() == true)
+	{
+		QMenu menu;
 
-	pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("SignalLogPrintPageLayout", pageLayout);
+		QAction* all = new QAction(tr("Print All"), &menu);
+		menu.addAction(all);
+		connect(all,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					printData(false /*printSelected*/);
+				});
 
-	SignalLogReportGenerator ri(m_projectName, m_equipmentId);
+		QAction* sel = new QAction(tr("Print Selected"), &menu);
+		connect(sel,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					printData(true /*printSelected*/);
+				});
+		menu.addAction(sel);
 
-	ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout);
-	generator.printTable();
+		menu.exec(QCursor::pos());
+	}
+	else
+	{
+		printData(false /*printSelected*/);
+	}
 
-	pageLayout = generator.pageLayout();
-	ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SignalLogPrintPageLayout");
+	return;
 }
 
 void SignalLogWidget::buttonChooseTagsClicked()
@@ -1597,7 +1392,7 @@ void SignalLogWidget::buttonChooseTagsClicked()
 
 		tagsChanged();
 
-		m_model.fillRecords(true /*resetSelection*/);
+		m_model.fillRecords(true /*clearBeforeFilling*/);
 	}
 
 	QSettings().setValue("SignalLogWidget/tagsSelectorDialog/width", tagsSelectorDialog.width());
@@ -1634,43 +1429,128 @@ void SignalLogWidget::buttonClearFilterClicked()
 	m_model.setTags({});
 
 	//
-	m_model.fillRecords(true /*resetSelection*/);
+	m_model.fillRecords(true /*clearBeforeFilling*/);
+}
+
+void SignalLogWidget::buttonAckAllClicked()
+{
+	if (filterIsSet() == true)
+	{
+		if (warnAboutAckFiltered() == false)
+		{
+			return;
+		}
+	}
+	else
+	{
+		if (QMessageBox::warning(this,
+								 qAppName(),
+								 tr("Are you sure you want to acknowledge all signal events?"),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) == QMessageBox::No)
+		{
+			return;
+		}
+	}
+
+	auto [records, index] = m_signalLog.getRecords();
+
+	int count = static_cast<int>(records.size());
+	for (int i = count - 1; i >= 0; i--)
+	{
+		if (records[i].acknowledged == false)
+		{
+			m_signalLog.sendAckUpTo(records[i].plantTime);
+
+			if (m_buttonPause->isChecked() == true)
+			{
+				m_model.removeUpTo(records[i].plantTime);
+			}
+
+			break;
+		}
+	}
+
+
+	return;
+}
+
+void SignalLogWidget::turnOffAutoscroll()
+{
+	if (m_buttonAutoScroll->isChecked() == true)
+	{
+		m_buttonAutoScroll->setChecked(false);
+	}
+}
+
+void SignalLogWidget::copySelected()
+{
+	auto selected = m_tableView->selectionModel()->selectedRows();
+	int columnsCount = m_model.columnCount();
+	QString text;
+
+	for (int c = 0; c < columnsCount; c++)
+	{
+		if (m_tableView->horizontalHeader()->isSectionHidden(c) == true)
+		{
+			continue;
+		}
+		text.append(m_model.headerData(c, Qt::Horizontal, Qt::DisplayRole).toString() + '\t');
+	}
+	text.append('\n');
+
+	for (const auto& si : selected)
+	{
+		for (int c = 0; c < columnsCount; c++)
+		{
+			if (m_tableView->horizontalHeader()->isSectionHidden(c) == true)
+			{
+				continue;
+			}
+			text.append(m_model.data(m_model.index(si.row(), c), Qt::DisplayRole).toString() + '\t');
+		}
+		text.append('\n');
+	}
+
+	QClipboard* clipboard = QApplication::clipboard();
+	clipboard->setText(text.trimmed());
 }
 
 void SignalLogWidget::createControls()
 {
 	// Filter layout
 
-	QGridLayout* filterLayout = new QGridLayout();
-
-	int row = 0;
-	int col = 0;
+	QHBoxLayout* filterLayout = new QHBoxLayout();
 
 	// Mask field and type combo
 	{
-		QHBoxLayout* maskLayout = new QHBoxLayout();
-		maskLayout->setContentsMargins(0, 0, 0, 0);
-
-		maskLayout->addWidget(new QLabel(tr("Mask")));
+		filterLayout->addWidget(new QLabel(tr("Mask")));
 
 		m_editMask = new QLineEdit();
+		m_editMask->setPlaceholderText(tr("Enter mask (\"*,?\") here"));
 		connect(m_editMask, &QLineEdit::returnPressed, this, &SignalLogWidget::editMaskReturnPressed);
-		maskLayout->addWidget(m_editMask);
-		m_editMask->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+		filterLayout->addWidget(m_editMask, 1);
+		m_editMask->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+		{
+			int minChars = 32;                                      // minimum number of visible characters
+			QFontMetrics fm(m_editMask->font());
+			int charWidth = fm.horizontalAdvance(QLatin1Char('x')); // average character width
+			int margin = 10;                                        // small padding for borders/cursor, optional
+			m_editMask->setMinimumWidth(minChars * charWidth + margin);
+		}
 
 		m_maskTypeCombo = new QComboBox();
 		connect(m_maskTypeCombo,
 				static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 				this,
 				&SignalLogWidget::maskTypeComboCurrentIndexChanged);
-		maskLayout->addWidget(m_maskTypeCombo);
-
-		filterLayout->addLayout(maskLayout, row, col++);
+		filterLayout->addWidget(m_maskTypeCombo);
 	}
 
 	// Signal List
 	//
-	filterLayout->addWidget(new QLabel(tr("List")), row, col++);
+	filterLayout->addWidget(new QLabel(tr("List")));
 
 	// Signal List Combo
 	//
@@ -1679,36 +1559,37 @@ void SignalLogWidget::createControls()
 			static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 			this,
 			&SignalLogWidget::signalListComboIndexChanged);
-	filterLayout->addWidget(m_signalListCombo, row, col++);
+	filterLayout->addWidget(m_signalListCombo);
 	m_signalListCombo->setMinimumContentsLength(30);
 
 	// Tags field and button
 	//
 	{
-		QHBoxLayout* tagsLayout = new QHBoxLayout();
-		tagsLayout->setSpacing(0);
-		tagsLayout->setContentsMargins(0, 0, 0, 0);
-
-		tagsLayout->addWidget(new QLabel(tr("Tags")));
+		filterLayout->addWidget(new QLabel(tr("Tags")));
 
 		m_editTags = new QLineEdit();
+		m_editTags->setPlaceholderText(tr("Signal tags space separated"));
 		connect(m_editTags, &QLineEdit::returnPressed, this, &SignalLogWidget::editTagsReturnPressed);
-		tagsLayout->addWidget(m_editTags);
+		filterLayout->addWidget(m_editTags, 1);
 		m_editTags->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 
 		m_buttonChooseTags = new QToolButton();
 		connect(m_buttonChooseTags, &QToolButton::clicked, this, &SignalLogWidget::buttonChooseTagsClicked);
 		m_buttonChooseTags->setText("...");
-		tagsLayout->addWidget(m_buttonChooseTags);
-
-		filterLayout->addLayout(tagsLayout, row, col++);
+		filterLayout->addWidget(m_buttonChooseTags);
 	}
+
+	m_clearFilterButton = new QPushButton(tr("Reset Filter"));
+	m_clearFilterButton->setAutoDefault(false);
+	filterLayout->addWidget(m_clearFilterButton);
+	connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalLogWidget::buttonClearFilterClicked);
+
+	filterLayout->addStretch(1);
+	filterLayout->setSpacing(4);
 
 	// Export/Print/Fixate
 
 	QHBoxLayout* exPrintLayout = new QHBoxLayout();
-
-	exPrintLayout->addStretch();
 
 	QPushButton* b = new QPushButton(tr("Export..."));
 	b->setAutoDefault(false);
@@ -1720,39 +1601,59 @@ void SignalLogWidget::createControls()
 	connect(b, &QPushButton::clicked, this, &SignalLogWidget::buttonPrintClicked);
 	exPrintLayout->addWidget(b);
 
-	m_clearFilterButton = new QPushButton(tr("Clear Filter"));
-	m_clearFilterButton->setAutoDefault(false);
-	exPrintLayout->addWidget(m_clearFilterButton);
-	connect(m_clearFilterButton, &QToolButton::clicked, this, &SignalLogWidget::buttonClearFilterClicked);
+	exPrintLayout->addStretch();
 
-	m_buttonFixate = new QPushButton(tr("Fixate"));
-	m_buttonFixate->setAutoDefault(false);
-	m_buttonFixate->setCheckable(true);
-	exPrintLayout->addWidget(m_buttonFixate);
+	m_ackButton = new QPushButton(tr("Ack All"));
+	m_ackButton->setAutoDefault(false);
+	connect(m_ackButton, &QToolButton::clicked, this, &SignalLogWidget::buttonAckAllClicked);
+	exPrintLayout->addWidget(m_ackButton);
 
-	filterLayout->addLayout(exPrintLayout, row, col++);
+	m_buttonPause = new QPushButton(tr("Pause"));
+	m_buttonPause->setAutoDefault(false);
+	m_buttonPause->setCheckable(true);
+	exPrintLayout->addWidget(m_buttonPause);
+	connect(m_buttonPause,
+			&QToolButton::clicked,
+			this,
+			[this]()
+			{
+				m_buttonPause->setText(m_buttonPause->isChecked() ? tr("Resume") : tr("Pause"));
+			});
 
-	filterLayout->setSpacing(4);
-
-	filterLayout->setColumnStretch(0, 0);
-	filterLayout->setColumnStretch(1, 0);
-	filterLayout->setColumnStretch(2, 0);
-	filterLayout->setColumnStretch(3, 0);
-	filterLayout->setColumnStretch(4, 5);
-	filterLayout->setColumnStretch(5, 0);
+	m_buttonAutoScroll = new QToolButton(this);
+	m_buttonAutoScroll->setText("\u2193");
+	m_buttonAutoScroll->setCheckable(true);
+	m_buttonAutoScroll->setChecked(true);
+	exPrintLayout->addWidget(m_buttonAutoScroll);
 
 	// Table
 
 	m_tableView = new SignalLogTableView();
 	connect(m_tableView, &QTableView::doubleClicked, this, &SignalLogWidget::tableViewDoubleClicked);
+	connect(m_tableView->verticalScrollBar(),
+			&QScrollBar::sliderMoved,
+			[this]()
+			{
+				turnOffAutoscroll();
+			});
+	connect(m_tableView,
+			&SignalLogTableView::turnOffAutoscroll,
+			[this]()
+			{
+				turnOffAutoscroll();
+			});
+
 	m_tableView->setItemDelegate(new LogSelectionControlDelegate(this, &m_model, m_signalLogTagCritical, m_signalLogTagWarning));
-	
+
 	// Main layout
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 
 	mainLayout->addLayout(filterLayout);
+	mainLayout->addLayout(exPrintLayout);
 	mainLayout->addWidget(m_tableView);
+
+	mainLayout->setContentsMargins(5, 5, 5, 0);
 
 	setLayout(mainLayout);
 
@@ -1821,7 +1722,6 @@ void SignalLogWidget::initRecordsView()
 	m_tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	m_tableView->horizontalHeader()->setStretchLastSection(false);
 	m_tableView->setGridStyle(Qt::PenStyle::NoPen);
-	m_tableView->setSortingEnabled(true);
 	m_tableView->setWordWrap(false);
 
 	int fontHeight = fontMetrics().height() + 4;
@@ -1829,8 +1729,6 @@ void SignalLogWidget::initRecordsView()
 	QHeaderView* verticalHeader = m_tableView->verticalHeader();
 	verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
 	verticalHeader->setDefaultSectionSize(fontHeight);
-
-	connect(m_tableView->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &SignalLogWidget::sortIndicatorChanged);
 
 	m_tableView->horizontalHeader()->setHighlightSections(false);
 	m_tableView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -1843,40 +1741,32 @@ void SignalLogWidget::initRecordsView()
 	m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_tableView, &QTreeWidget::customContextMenuRequested, this, &SignalLogWidget::contextMenuRequested);
 
-	connect(m_tableView->selectionModel(),
-			&QItemSelectionModel::selectionChanged,
-			this,
-			[this](const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
-			{
-				m_model.resetMaxInitialRecordTime();
-			});
-
 	if (m_settings.horzHeader.isEmpty() == true || m_settings.horzHeaderCount != static_cast<int>(SignalLogColumns::ColumnCount))
 	{
 		// First time? Set what is should be hidden by default
 		//
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::EquipmentID));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::LmEquipmentID));
-		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Type));
+		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::AppSignalID));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Tags));
+
+		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::RecordTime));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::SystemTime));
-		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::LocalTime));
-		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::PlantTime));
+
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Valid));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::StateAvailable));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Simulated));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Blocked));
 		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::Mismatch));
-		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::OutOfLimits));
 
-		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::AckTime));
-		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::AckSource));
-		m_tableView->hideColumn(static_cast<int>(SignalLogColumns::AckUser));
+		m_tableView->resizeColumnsToContents();
 	}
 	else
 	{
 		m_tableView->horizontalHeader()->restoreState(m_settings.horzHeader);
 	}
+
+	m_tableView->horizontalHeader()->setSectionsClickable(false);
 }
 
 void SignalLogWidget::fillAppSignalLists()
@@ -1886,7 +1776,7 @@ void SignalLogWidget::fillAppSignalLists()
 	if (m_model.appSignalList().isEmpty() == false)
 	{
 		m_model.setAppSignalList({});
-		m_model.fillRecords(true /*resetSelection*/);
+		m_model.fillRecords(true /*clearBeforeFilling*/);
 	}
 
 	// Refresh AppSignalLists combo
@@ -1920,49 +1810,66 @@ void SignalLogWidget::updateRecords()
 		return;
 	}
 
-	QItemSelectionModel* selectionModel = m_tableView->selectionModel();
-	selectionModel->blockSignals(true);
+	m_tableView->setUpdatesEnabled(false);
 
-	bool modelWasEmpty = m_model.rowCount() == 0;
+	int value = m_tableView->verticalScrollBar()->value();
+
+	// Save selected keys
+	//
+	std::unordered_set<RecordKey, RecordKey> selectedKeys;
+	{
+		auto selectedRows = m_tableView->selectionModel()->selectedRows();
+		for (const auto& si : selectedRows)
+		{
+			const auto& rec = m_model.filteredRecord(si.row());
+			RecordKey key{rec};
+			selectedKeys.insert(key);
+		}
+	}
+
+	m_tableView->clearSelection();
 
 	// Place new data to the model
 	//
-	auto [rec, counter] = m_signalLog.getRecords();
-	m_model.setRecords(rec, counter);
-
-	// Select rows with recordTime bigger than was on dialog show
-	//
-	if (m_model.maxInitialRecordTime() != -1)
 	{
-		int count = m_model.rowCount();
+		auto [rec, counter] = m_signalLog.getRecords();
+		m_model.setRecords(rec, counter);
+	}
+
+	// Restore selection
+	//
+	{
+		const auto& fRecs = m_model.filteredRecords();
+		int count = static_cast<int>(fRecs.size());
 		for (int i = 0; i < count; i++)
 		{
-			const auto& filteredRec = m_model.filteredRecord(i);
-			if (filteredRec.recordTime > m_model.maxInitialRecordTime())
+			if (selectedKeys.contains(fRecs[i]) == true)
 			{
-				QModelIndex index = m_tableView->model()->index(i, 0); // Get index for the first column of the row
-				selectionModel->select(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+				m_tableView->selectionModel()->select(m_model.index(i, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
 			}
 		}
 	}
 
-	selectionModel->blockSignals(false);
+	m_tableView->verticalScrollBar()->setValue(value);
 
 	QApplication::processEvents();
 
-	// Scroll to bottom
+	// Scroll to bottom if button is pressed and last record is different than previously arrived
 	//
-	if (m_buttonFixate->isChecked() == false)
+	int rowCount = m_model.rowCount();
+	if (rowCount > 0 && m_buttonAutoScroll->isChecked() == true)
 	{
-		m_tableView->scrollTo(m_model.index(m_model.rowCount() - 1, 0), QAbstractItemView::EnsureVisible);
+		static RecordKey latestRecordKey;
+		const auto lastRecordKey = RecordKey(m_model.filteredRecord(rowCount - 1));
+
+		if (latestRecordKey != lastRecordKey)
+		{
+			latestRecordKey = lastRecordKey;
+			m_tableView->scrollToBottom();
+		}
 	}
 
-	// Resize columns to fit text
-	//
-	if (modelWasEmpty == true && m_model.rowCount() > 0)
-	{
-		m_tableView->resizeColumnsToContents();
-	}
+	m_tableView->setUpdatesEnabled(true);
 }
 
 void SignalLogWidget::updateTableItems()
@@ -2071,13 +1978,53 @@ void SignalLogWidget::tagsChanged()
 	m_model.setTags(tags);
 }
 
+bool SignalLogWidget::filterIsSet() const
+{
+	return m_editMask->text().isEmpty() == false || m_editTags->text().isEmpty() == false || m_signalListCombo->currentIndex() > 0;
+}
+
+bool SignalLogWidget::warnAboutAckFiltered()
+{
+	if (filterIsSet() == true)
+	{
+		if (QMessageBox::warning(this,
+								 qAppName(),
+								 tr("Warning!\n\nAn event filter is active. Events that are currently hidden will also be "
+									"acknowledged.\n\nAre you sure you want to continue?"),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) == QMessageBox::No)
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+void SignalLogWidget::printData(bool printSelected)
+{
+	QPageLayout pageLayout(QPageSize(QPageSize::A4),
+						   QPageLayout::Orientation::Portrait,
+						   QMarginsF(10, 10, 10, 10),
+						   QPageLayout::Unit::Millimeter);
+
+	pageLayout = ReportLib::TableViewReportGenerator::loadPageLayoutFromSettings("SignalLogPrintPageLayout", pageLayout);
+
+	SignalLogReportGenerator ri(m_projectName, m_equipmentId);
+
+	ReportLib::TableViewReportGenerator generator(this, *m_tableView, ri, pageLayout, printSelected);
+	generator.printTable();
+
+	pageLayout = generator.pageLayout();
+	ReportLib::TableViewReportGenerator::savePageLayoutToSettings(pageLayout, "SignalLogPrintPageLayout");
+}
 
 //
 // SignalLogDialog
 //
 SignalLogDialog* SignalLogDialog::s_instance = nullptr;
 
-SignalLogDialog::SignalLogDialog(const ClientLib::SignalLog& signalLog,
+SignalLogDialog::SignalLogDialog(ClientLib::SignalLog& signalLog,
 								 ClientLib::AppSignalManager& appSignalManager,
 								 const AppSignalLists::AppSignalListSet* appSignalListSet,
 								 const QString& projectName,
@@ -2092,9 +2039,9 @@ SignalLogDialog::SignalLogDialog(const ClientLib::SignalLog& signalLog,
 	m_signalLogTagWarning{signalLogTagWarning}
 {
 	setAttribute(Qt::WA_DeleteOnClose, true);
-	setWindowTitle(tr("Signal Log"));
+	setWindowTitle(tr("Signals Log"));
 
-	setMinimumSize(400, 200);
+	setMinimumSize(900, 200);
 
 	m_logWidget = new SignalLogWidget(m_signalLog,
 									  &appSignalManager,
@@ -2107,9 +2054,27 @@ SignalLogDialog::SignalLogDialog(const ClientLib::SignalLog& signalLog,
 	connect(m_logWidget, &SignalLogWidget::signalContextMenu, this, &SignalLogDialog::signalContextMenu);
 	connect(m_logWidget, &SignalLogWidget::signalInfo, this, &SignalLogDialog::signalInfo);
 
-	QHBoxLayout* mainLayout = new QHBoxLayout();
+	m_statusBar = new QStatusBar(this);
+
+	m_labelTotal = new QLabel(this);
+	m_labelFiltered = new QLabel(this);
+	m_statusBar->addPermanentWidget(m_labelTotal);
+	m_statusBar->addPermanentWidget(m_labelFiltered);
+
+	connect(m_logWidget,
+			&SignalLogWidget::updateStatus,
+			this,
+			[this](int totalCount, int filteredCount)
+			{
+				m_labelTotal->setText(tr("Total: %1").arg(QString::number(totalCount).rightJustified(4, '0')));
+				m_labelFiltered->setText(tr("Filtered: %1").arg(QString::number(filteredCount).rightJustified(4, '0')));
+			});
+
+	QVBoxLayout* mainLayout = new QVBoxLayout();
 	mainLayout->addWidget(m_logWidget);
+	mainLayout->addWidget(m_statusBar);
 	mainLayout->setContentsMargins(0, 0, 0, 0);
+	mainLayout->setSpacing(0);
 	setLayout(mainLayout);
 }
 
@@ -2118,7 +2083,7 @@ SignalLogDialog::~SignalLogDialog()
 	s_instance = nullptr;
 }
 
-SignalLogDialog* SignalLogDialog::createDialog(const ClientLib::SignalLog& signalLog,
+SignalLogDialog* SignalLogDialog::createDialog(ClientLib::SignalLog& signalLog,
 											   ClientLib::AppSignalManager& appSignalManager,
 											   const AppSignalLists::AppSignalListSet* appSignalListSet,
 											   const QString& projectName,
@@ -2143,6 +2108,7 @@ SignalLogDialog* SignalLogDialog::createDialog(const ClientLib::SignalLog& signa
 	else
 	{
 		s_instance->raise(); // Bring to front
+		UiTools::ensureVisible(s_instance);
 	}
 
 	return s_instance;
@@ -2167,6 +2133,14 @@ void SignalLogDialog::closeEvent(QCloseEvent* event)
 	QSettings().setValue("SignalLogDialog/geometry", saveGeometry());
 }
 
+void SignalLogDialog::reject()
+{
+	QSettings().setValue("SignalLogDialog/pos", pos());
+	QSettings().setValue("SignalLogDialog/geometry", saveGeometry());
+
+	QDialog::reject();
+}
+
 void SignalLogDialog::signalContextMenu(const QStringList signalList, const QList<QMenu*>& customMenu)
 {
 	// Compose menu
@@ -2175,10 +2149,15 @@ void SignalLogDialog::signalContextMenu(const QStringList signalList, const QLis
 
 	for (const QString& s : signalList)
 	{
-		bool ok = false;
-		AppSignalParam signal = m_appSignalManager.signalParam(s, &ok);
+		if (s.startsWith('#') == false)
+		{
+			menu.addAction(s);
+			continue;
+		}
 
-		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
+		auto signal = m_appSignalManager.signalParam(s);
+
+		QString signalId = signal.has_value() ? QString("%1 | %2").arg(signal->customSignalId()).arg(signal->caption()) : s;
 
 		auto f = [this, s]() -> void
 		{
@@ -2212,3 +2191,5 @@ void SignalLogDialog::signalInfo(QString appSignalId)
 								  &theApp.mainWindow()->monitorCentralWidget());
 	return;
 }
+
+#include "SignalLogDialog.moc"

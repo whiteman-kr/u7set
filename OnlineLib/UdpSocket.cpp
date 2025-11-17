@@ -188,9 +188,7 @@ quint32 UdpRequest::readDword()
 bool UdpSocket::metaTypesRegistered = false;
 
 UdpSocket::UdpSocket(const QString& workerName) :
-	SimpleThreadWorker(workerName.isEmpty() ? "UdpSocket" : workerName),
-	m_socket(this),
-	m_timer(this)
+	SimpleThreadWorker(workerName.isEmpty() ? "UdpSocket" : workerName)
 {
 	registerMetaTypes();
 }
@@ -311,7 +309,7 @@ void UdpClientSocket::onSendRequest(UdpRequest request)
 		m_request.writeData(request.data(), request.dataSize());
 	}
 
-	qint64 sent = m_socket.writeDatagram(m_request.rawData(), m_request.rawDataSize(), m_serverAddress, m_port);
+	qint64 sent = m_socket->writeDatagram(m_request.rawData(), m_request.rawDataSize(), m_serverAddress, m_port);
 
 	if (sent == -1)
 	{
@@ -324,7 +322,7 @@ void UdpClientSocket::onSendRequest(UdpRequest request)
 
 	m_retryCtr = 0;
 
-	m_timer.start(m_msTimeout);
+	m_timer->start(m_msTimeout);
 }
 
 void UdpClientSocket::onSocketReadyRead()
@@ -339,19 +337,19 @@ void UdpClientSocket::onSocketReadyRead()
 	QHostAddress address;
 	quint16 port = 0;
 
-	qint64 recevedDataSize = m_socket.readDatagram(m_ack.rawData(), MAX_DATAGRAM_SIZE, &address, &port);
+	qint64 recevedDataSize = m_socket->readDatagram(m_ack.rawData(), MAX_DATAGRAM_SIZE, &address, &port);
 
 	m_state = State::ReadyToSend;
 
 	if (recevedDataSize == -1)
 	{
-		QAbstractSocket::SocketError err = m_socket.error();
+		QAbstractSocket::SocketError err = m_socket->error();
 		Q_UNUSED(err)
 
 		return;
 	}
 
-	m_timer.stop();
+	m_timer->stop();
 
 	m_ack.setAddress(address);
 	m_ack.setPort(port);
@@ -408,21 +406,25 @@ void UdpClientSocket::retryRequest()
 {
 	assert(m_state == State::WaitingForAck);
 
-	m_socket.writeDatagram(m_request.rawData(), m_request.rawDataSize(), m_serverAddress, m_port);
+	m_socket->writeDatagram(m_request.rawData(), m_request.rawDataSize(), m_serverAddress, m_port);
 
-	m_timer.start(m_msTimeout);
+	m_timer->start(m_msTimeout);
 }
 
 void UdpClientSocket::onThreadStarted()
 {
-	m_timer.setSingleShot(true);
+	m_timer = new QTimer;
+
+	m_timer->setSingleShot(true);
+
+	m_socket = new QUdpSocket;
 
 	// generate unique clientID
 	//
 	m_clientID = qHash(QUuid::createUuid());
 
-	connect(&m_timer, &QTimer::timeout, this, &UdpClientSocket::onAckTimerTimeout);
-	connect(&m_socket, &QUdpSocket::readyRead, this, &UdpClientSocket::onSocketReadyRead);
+	connect(m_timer, &QTimer::timeout, this, &UdpClientSocket::onAckTimerTimeout);
+	connect(m_socket, &QUdpSocket::readyRead, this, &UdpClientSocket::onSocketReadyRead);
 
 	connect(this, &UdpClientSocket::sendRequestSignal, this, &UdpClientSocket::onSendRequest);
 
@@ -432,6 +434,19 @@ void UdpClientSocket::onThreadStarted()
 void UdpClientSocket::onThreadFinished()
 {
 	onSocketThreadFinished();
+
+	if (m_timer != nullptr)
+	{
+		m_timer->stop();
+		delete m_timer;
+		m_timer = nullptr;
+	}
+
+	if (m_socket != nullptr)
+	{
+		delete m_socket;
+		m_socket = nullptr;
+	}
 }
 
 // -----------------------------------------------------------------------------
@@ -582,7 +597,7 @@ void UdpServerSocket::onSocketThreadFinished()
 
 void UdpServerSocket::sendAck(UdpRequest request)
 {
-	qint64 sent = m_socket.writeDatagram(request.rawData(), request.rawDataSize(), request.address(), request.port());
+	qint64 sent = m_socket->writeDatagram(request.rawData(), request.rawDataSize(), request.address(), request.port());
 
 	if (sent == -1)
 	{
@@ -600,7 +615,7 @@ void UdpServerSocket::onSocketReadyRead()
 	QHostAddress address;
 	quint16 port = 0;
 
-	qint64 recevedDataSize = m_socket.readDatagram(m_request.rawData(), MAX_DATAGRAM_SIZE, &address, &port);
+	qint64 recevedDataSize = m_socket->readDatagram(m_request.rawData(), MAX_DATAGRAM_SIZE, &address, &port);
 
 	if (recevedDataSize == -1)
 	{
@@ -620,12 +635,19 @@ void UdpServerSocket::onSocketReadyRead()
 
 void UdpServerSocket::onThreadStarted()
 {
-	m_timer.start(1000);
+	QElapsedTimer et;
 
-	connect(&m_timer, &QTimer::timeout, this, &UdpServerSocket::onTimer);
-	connect(&m_socket, &QUdpSocket::readyRead, this, &UdpServerSocket::onSocketReadyRead);
+	et.start();
+
+	m_timer = new QTimer;
+	m_socket = new QUdpSocket;
+
+	connect(m_timer, &QTimer::timeout, this, &UdpServerSocket::onTimer);
+	connect(m_socket, &QUdpSocket::readyRead, this, &UdpServerSocket::onSocketReadyRead);
 
 	bind();
+
+	m_timer->start(1000);
 
 	onSocketThreadStarted();
 }
@@ -634,18 +656,31 @@ void UdpServerSocket::onThreadFinished()
 {
 	onSocketThreadFinished();
 
+	if (m_timer != nullptr)
+	{
+		m_timer->stop();
+		delete m_timer;
+		m_timer = nullptr;
+	}
+
+	if (m_socket != nullptr)
+	{
+		delete m_socket;
+		m_socket = nullptr;
+	}
+
 	DEBUG_LOG_MSG(m_logger, QString(tr("UdpServerSocket thread finished (listen %1)")).
 				  arg(HostAddressPort(m_bindToAddress, m_port).addressPortStr()));
 }
 
 void UdpServerSocket::bind()
 {
-	if (m_socket.state() == QAbstractSocket::BoundState)
+	if (m_socket->state() == QAbstractSocket::BoundState)
 	{
 		return;
 	}
 
-	bool result = m_socket.bind(m_bindToAddress, m_port);
+	bool result = m_socket->bind(m_bindToAddress, m_port);
 
 	if (result == true)
 	{

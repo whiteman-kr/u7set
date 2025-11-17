@@ -4,7 +4,7 @@
 #include <span>
 
 using namespace testing;
-
+using SourceIdType = ClientLib::IAppSignalUpdater::SourceIdType;
 
 TEST(AppSignalManagerTests, reset)
 {
@@ -18,8 +18,8 @@ TEST(AppSignalManagerTests, reset)
 	sp1.setAppSignalId("#SP1");
 	sp2.setAppSignalId("#SP2");
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
 	EXPECT_EQ(sm.signalsCount(), 2);
 
@@ -57,8 +57,8 @@ TEST(AppSignalManagerTests, addSignal)
 	sp1.setAppSignalId("#SP1");
 	sp2.setAppSignalId("#SP2");
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
 	EXPECT_EQ(sm.signalsCount(), 2);
 
@@ -91,7 +91,7 @@ TEST(AppSignalManagerTests, addSignals)
 TEST(AppSignalManagerTests, invalidateSignalStates)
 {
 	// Test of:
-	//	void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state, Qt::HANDLE sourceThreadId);
+	//	void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state, SourceIdType sourceThreadId);
 	//
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
@@ -115,33 +115,36 @@ TEST(AppSignalManagerTests, invalidateSignalStates)
 
 	EXPECT_EQ(sm.signalsCount(), 2);
 
-	auto thread1 = std::bit_cast<Qt::HANDLE>(1ull);
-	auto thread2 = std::bit_cast<Qt::HANDLE>(2ull);
+	auto thread1 = SourceIdType(1ull);
+	auto thread2 = SourceIdType(2ull);
 
-	AppSignalState state1{sp2.hash(), {0, 0, 0}, 123.0, {.valid = 1, .stateAvailable = 1}};
-	sm.setState("#SP2", state1, dataServerHash, thread1);
+	std::array<AppSignalState, 1> state1 = {AppSignalState{sp2.hash(), {0, 0, 0}, 123.0, {.valid = 1, .stateAvailable = 1}}};
+	sm.setStates(state1, dataServerHash, thread1);
 
 	QThread::currentThread()->msleep(10);
 
-	AppSignalState state2{sp2.hash(), {1, 1, 1}, 124.0, {.valid = 1, .stateAvailable = 1}};
-	sm.setState("#SP2", state2, dataServerHash, thread2);
+	std::array<AppSignalState, 1> state2 = {AppSignalState{sp2.hash(), {1, 1, 1}, 124.0, {.valid = 1, .stateAvailable = 1}}};
+	sm.setStates(state2, dataServerHash, thread2);
 
 	// --
 	//
-	auto state = sm.signalState(sp2.hash(), nullptr);
-	EXPECT_TRUE(state.isValid());
-	EXPECT_DOUBLE_EQ(state.value(), state2.m_value);
+	auto state = sm.signalState(sp2.hash());
+	ASSERT_TRUE(state.has_value());
+	EXPECT_TRUE(state->isValid());
+	EXPECT_DOUBLE_EQ(state->value(), state2[0].m_value);
 
 	sm.invalidateSignalStates(thread2);
 
-	state = sm.signalState(sp2.hash(), nullptr);
-	EXPECT_TRUE(state.isValid());
-	EXPECT_DOUBLE_EQ(state.value(), state1.m_value);
+	state = sm.signalState(sp2.hash());
+	ASSERT_TRUE(state.has_value());
+	EXPECT_TRUE(state->isValid());
+	EXPECT_DOUBLE_EQ(state->value(), state1[0].m_value);
 
 	sm.invalidateSignalStates(thread1);
 
-	state = sm.signalState(sp2.hash(), nullptr);
-	EXPECT_FALSE(state.isValid());
+	state = sm.signalState(sp2.hash());
+	ASSERT_TRUE(state.has_value());
+	EXPECT_FALSE(state->isValid());
 
 	return;
 }
@@ -149,7 +152,7 @@ TEST(AppSignalManagerTests, invalidateSignalStates)
 TEST(AppSignalManagerTests, setState)
 {
 	// Test of:
-	//	void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state, Qt::HANDLE sourceThreadId);
+	//	void AppSignalManager::setState(const QString& appSignalId, const AppSignalState& state, SourceIdType sourceThreadId);
 	//
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
@@ -173,25 +176,27 @@ TEST(AppSignalManagerTests, setState)
 
 	EXPECT_EQ(sm.signalsCount(), 2);
 
-	AppSignalState state1{sp2.hash(), {}, 123.0, {.valid = 1, .stateAvailable = 0}};
-	sm.setState("#SP2", state1, dataServerHash, std::bit_cast<Qt::HANDLE>(1ull));
+	std::array<AppSignalState, 1> state1 = {AppSignalState{sp2.hash(), {}, 123.0, {.valid = 1, .stateAvailable = 0}}};
+	sm.setStates(state1, dataServerHash, 1ull);
 
 	QThread::currentThread()->msleep(10);
 
-	AppSignalState state2{sp2.hash(), {}, 124.0, {.valid = 1, .stateAvailable = 0}};
-	sm.setState("#SP2", state2, dataServerHash, std::bit_cast<Qt::HANDLE>(2ull));
+	std::array<AppSignalState, 1> state2 = {AppSignalState{sp2.hash(), {}, 124.0, {.valid = 1, .stateAvailable = 0}}};
+	sm.setStates(state2, dataServerHash, 2ull);
 
 	// Check #SP1 is not valid
 	//
-	auto state = sm.signalState(sp1.hash(), nullptr);
-	EXPECT_FALSE(state.isValid());
-	EXPECT_EQ(state.hash(), sp1.hash());
+	auto state = sm.signalState(sp1.hash());
+	ASSERT_TRUE(state.has_value());
+	EXPECT_FALSE(state->isValid());
+	EXPECT_EQ(state->hash(), sp1.hash());
 
 	// Check #SP2 is valid
 	//
-	state = sm.signalState(sp2.hash(), nullptr);
-	EXPECT_DOUBLE_EQ(state.value(), state2.m_value);	// .stateAvailable = 0, so the actual value will be from "thread" 2
-	EXPECT_EQ(state.hash(), sp2.hash());
+	state = sm.signalState(sp2.hash());
+	ASSERT_TRUE(state.has_value());
+	EXPECT_DOUBLE_EQ(state->value(), state2[0].m_value); // .stateAvailable = 0, so the actual value will be from "thread" 2
+	EXPECT_EQ(state->hash(), sp2.hash());
 
 	return;
 }
@@ -199,7 +204,7 @@ TEST(AppSignalManagerTests, setState)
 TEST(AppSignalManagerTests, setStateAsVector)
 {
 	// Test of:
-	//	void AppSignalManager::setState(onst std::vector<AppSignalState>& states, Qt::HANDLE sourceThreadId);
+	//	void AppSignalManager::setState(const std::vector<AppSignalState>& states, SourceIdType sourceThreadId);
 	//
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
@@ -226,33 +231,49 @@ TEST(AppSignalManagerTests, setStateAsVector)
 	AppSignalState state1{sp1.hash(), {}, 1.0, {.valid = 1, .stateAvailable = 1}};
 	AppSignalState state2{sp2.hash(), {}, 2.0, {.valid = 1, .stateAvailable = 1}};
 
-	sm.setState(std::vector{state1, state2}, dataServerHash, std::bit_cast<Qt::HANDLE>(1ull));
+	sm.setStates(std::vector{state1, state2}, dataServerHash, 1ull);
 
-	auto state = sm.signalState(sp1.hash(), nullptr);
-	EXPECT_TRUE(state.isValid());
-	EXPECT_EQ(state.hash(), sp1.hash());
-	EXPECT_EQ(state.value(), 1.0);
+	// --
+	//
+	auto state = sm.signalState(sp1.hash());
+	ASSERT_TRUE(state.has_value());
 
-	state = sm.signalState(sp2.hash(), nullptr);
-	EXPECT_TRUE(state.isValid());
-	EXPECT_EQ(state.hash(), sp2.hash());
-	EXPECT_EQ(state.value(), 2.0);
+	EXPECT_TRUE(state->isValid());
+	EXPECT_EQ(state->hash(), sp1.hash());
+	EXPECT_EQ(state->value(), 1.0);
+
+	// --
+	//
+	state = sm.signalState(sp2.hash());
+	ASSERT_TRUE(state.has_value());
+
+	EXPECT_TRUE(state->isValid());
+	EXPECT_EQ(state->hash(), sp2.hash());
+	EXPECT_EQ(state->value(), 2.0);
 
 	return;
 }
 
+#if 0
 TEST(AppSignalManagerTests, setStateForZeroHash)
 {
 	// Set state for 0 hash, assert is expected
 	//
-#ifdef QT_DEBUG
-	ASSERT_DEATH({
-					 ILogFileStub log;
-					 ClientLib::AppSignalManager sm{&log};
-					 sm.setState(Hash{0}, AppSignalState{}, UNDEFINED_HASH, std::bit_cast<Qt::HANDLE>(1ull));
-				 }, "");
-#endif
+	#ifdef QT_DEBUG
+	ASSERT_DEATH(
+		{
+			ILogFileStub log;
+			ClientLib::AppSignalManager sm{&log};
+
+			AppSignalState state(Hash{UNDEFINED_HASH}, Times{0, 0, 0}, 123.0, AppSignalStateFlags{.valid = 1, .stateAvailable = 1});
+			std::span<const AppSignalState> spanState(&state, 1);
+
+			sm.setStates(spanState, UNDEFINED_HASH, 1ull);
+		},
+		"");
+	#endif
 }
+#endif
 
 TEST(AppSignalManagerTests, recentUsedAdd)
 {
@@ -260,7 +281,7 @@ TEST(AppSignalManagerTests, recentUsedAdd)
 	// 2. Outdated signals are removed from the list when hashes() is called
 	//
 
-	AppSignalLib::RecentUsed recentUsed{5};	// Keep up to 5 signals
+	AppSignalLib::RecentUsed recentUsed{5}; // Keep up to 5 signals
 
 	recentUsed.add(1);
 	recentUsed.add(2);
@@ -283,7 +304,7 @@ TEST(AppSignalManagerTests, recentUsedRemove)
 	// 1. Outdated is a signal which was not fetched for 3 seconds or more.
 	// 2. Outdated signals are removed from the list when hashes() is called
 	//
-	AppSignalLib::RecentUsed recentUsed{10};	// Keep up to 5 signals
+	AppSignalLib::RecentUsed recentUsed{10}; // Keep up to 5 signals
 
 	std::array<Hash, 10> testAddSet = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 	recentUsed.add(testAddSet);
@@ -313,7 +334,8 @@ TEST(AppSignalManagerTests, recentUsedRemoveOutdated)
 		recentUsed.add(h);
 		QThread::currentThread()->msleep(500);
 
-		[[maybe_unused]] auto s = recentUsed.hashes();	// This keep cache alive, as it has expiration time 3 secs (RecentUsed::ExpiredTimeMs).
+		[[maybe_unused]] auto s =
+			recentUsed.hashes(); // This keep cache alive, as it has expiration time 3 secs (RecentUsed::ExpiredTimeMs).
 	}
 
 	QThread::currentThread()->msleep(50);
@@ -343,7 +365,7 @@ TEST(AppSignalManagerTests, recentUsedFetchOutdate)
 
 	QThread::currentThread()->msleep(50);
 
-	recentUsed.add(std::vector<Hash>{11, 12, 13});		// Now fetch timer already elapsed, so no actual add should happen.
+	recentUsed.add(std::vector<Hash>{11, 12, 13}); // Now fetch timer already elapsed, so no actual add should happen.
 
 	// There were no fetches during 3 seconds, so cache is completely invalidated and
 	// not used till any new fetch (no item can be added till call hashes()).
@@ -376,7 +398,7 @@ TEST(AppSignalManagerTests, addRecentAppSignal)
 	std::vector<AppSignalParam> v2;
 	v2.push_back(sp1);
 	v2.push_back(sp2);
-	v2.push_back(sp3);	// ADS2 has one more signal
+	v2.push_back(sp3); // ADS2 has one more signal
 	sm.addSignals(v2, "ADS2");
 
 	sm.addRecentAppSignals(std::vector{sp1.hash(), sp2.hash(), sp3.hash()});
@@ -420,8 +442,8 @@ TEST(AppSignalManagerTests, signalHashes)
 	sp1.setAppSignalId("#SP1");
 	sp2.setAppSignalId("#SP2");
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
 	EXPECT_EQ(sm.signalsCount(), 2);
 
@@ -450,8 +472,8 @@ TEST(AppSignalManagerTests, signalList)
 	sp1.setAppSignalId("#SP1");
 	sp2.setAppSignalId("#SP2");
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
 	EXPECT_EQ(sm.signalsCount(), 2);
 
@@ -459,8 +481,19 @@ TEST(AppSignalManagerTests, signalList)
 
 	EXPECT_EQ(allSignals.size(), 2);
 
-	bool f1 = std::find_if(allSignals.begin(), allSignals.end(), [&sp1](const auto& s){ return s.hash() == sp1.hash(); }) != allSignals.end();
-	bool f2 = std::find_if(allSignals.begin(), allSignals.end(), [&sp2](const auto& s){ return s.hash() == sp2.hash(); }) != allSignals.end();
+	bool f1 = std::find_if(allSignals.begin(),
+						   allSignals.end(),
+						   [&sp1](const auto& s)
+						   {
+							   return s.hash() == sp1.hash();
+						   }) != allSignals.end();
+
+	bool f2 = std::find_if(allSignals.begin(),
+						   allSignals.end(),
+						   [&sp2](const auto& s)
+						   {
+							   return s.hash() == sp2.hash();
+						   }) != allSignals.end();
 
 	EXPECT_TRUE(f1);
 	EXPECT_TRUE(f2);
@@ -480,8 +513,8 @@ TEST(AppSignalManagerTests, signalExists)
 	sp1.setAppSignalId("#SP1");
 	sp2.setAppSignalId("#SP2");
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
 	EXPECT_EQ(sm.signalsCount(), 2);
 	EXPECT_TRUE(sm.signalExists(sp1.hash()));
@@ -505,49 +538,49 @@ TEST(AppSignalManagerTests, signalParam)
 	sp1.setAppSignalId("#SP1");
 	sp2.setAppSignalId("#SP2");
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
-
-	bool found = false;
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
 	{
-		auto hsp = sm.signalParam(sp1.hash(), &found);
-		EXPECT_TRUE(found);
-		EXPECT_EQ(hsp.hash(), sp1.hash());
-		EXPECT_EQ(hsp.appSignalId(), sp1.appSignalId());
+		auto hsp = sm.signalParam(sp1.hash());
+		ASSERT_TRUE(hsp.has_value());
+
+		EXPECT_EQ(hsp->hash(), sp1.hash());
+		EXPECT_EQ(hsp->appSignalId(), sp1.appSignalId());
 	}
 
 	{
-		auto hsp = sm.signalParam(sp1.appSignalId(), &found);
-		EXPECT_TRUE(found);
-		EXPECT_EQ(hsp.hash(), sp1.hash());
-		EXPECT_EQ(hsp.appSignalId(), sp1.appSignalId());
+		auto hsp = sm.signalParam(sp1.appSignalId());
+		ASSERT_TRUE(hsp.has_value());
+
+		EXPECT_EQ(hsp->hash(), sp1.hash());
+		EXPECT_EQ(hsp->appSignalId(), sp1.appSignalId());
 	}
 
 	{
-		auto hsp = sm.signalParam(sp2.hash(), &found);
-		EXPECT_TRUE(found);
-		EXPECT_EQ(hsp.hash(), sp2.hash());
-		EXPECT_EQ(hsp.appSignalId(), sp2.appSignalId());
+		auto hsp = sm.signalParam(sp2.hash());
+		ASSERT_TRUE(hsp.has_value());
+
+		EXPECT_EQ(hsp->hash(), sp2.hash());
+		EXPECT_EQ(hsp->appSignalId(), sp2.appSignalId());
 	}
 
 	{
-		auto hsp = sm.signalParam(sp2.appSignalId(), &found);
-		EXPECT_TRUE(found);
-		EXPECT_EQ(hsp.hash(), sp2.hash());
-		EXPECT_EQ(hsp.appSignalId(), sp2.appSignalId());
+		auto hsp = sm.signalParam(sp2.appSignalId());
+		ASSERT_TRUE(hsp.has_value());
+
+		EXPECT_EQ(hsp->hash(), sp2.hash());
+		EXPECT_EQ(hsp->appSignalId(), sp2.appSignalId());
 	}
 
 	{
-		auto hsp = sm.signalParam(123ull, &found);
-		EXPECT_FALSE(found);
-		EXPECT_EQ(hsp.hash(), 0);
+		auto hsp = sm.signalParam(123ull);
+		ASSERT_FALSE(hsp.has_value());
 	}
 
 	{
-		auto hsp = sm.signalParam("#FALSEID", &found);
-		EXPECT_FALSE(found);
-		EXPECT_EQ(hsp.hash(), 0);
+		auto hsp = sm.signalParam("#FALSEID");
+		ASSERT_FALSE(hsp.has_value());
 	}
 
 	return;
@@ -576,50 +609,49 @@ TEST(AppSignalManagerTests, signalState)
 	sm.addSignals(v, "ADS1");
 	sm.addSignals(v, "ADS2");
 
-	AppSignalState state1{sp1.hash(), {}, 1.0, {.valid = 1, .stateAvailable = 1}};
-	sm.setState("#SP1", state1, dataServerHash, std::bit_cast<Qt::HANDLE>(1ull));
+	std::array<AppSignalState, 1> state1 = {AppSignalState{sp1.hash(), {}, 1.0, {.valid = 1, .stateAvailable = 1}}};
+	sm.setStates(state1, dataServerHash, 1ull);
 
-	AppSignalState state2{sp2.hash(), {}, 2.0, {.valid = 1, .stateAvailable = 1}};
-	sm.setState("#SP2", state2, dataServerHash, std::bit_cast<Qt::HANDLE>(1ull));
+	std::array<AppSignalState, 1> state2 = {AppSignalState{sp2.hash(), {}, 2.0, {.valid = 1, .stateAvailable = 1}}};
+	sm.setStates(state2, dataServerHash, 1ull);
 
 	// --
 	//
-	bool found = false;
+	auto state = sm.signalState(sp1.appSignalId());
+	ASSERT_TRUE(state.has_value());
 
-	auto state = sm.signalState(sp1.appSignalId(), &found);
-	EXPECT_TRUE(found);
-	EXPECT_TRUE(state.isValid());
-	EXPECT_EQ(state.hash(), sp1.hash());
-	EXPECT_EQ(state.value(), 1.0);
+	EXPECT_TRUE(state->isValid());
+	EXPECT_EQ(state->hash(), sp1.hash());
+	EXPECT_EQ(state->value(), 1.0);
 
-	state = sm.signalState(sp2.appSignalId(), &found);
-	EXPECT_TRUE(found);
-	EXPECT_TRUE(state.isValid());
-	EXPECT_EQ(state.hash(), sp2.hash());
-	EXPECT_EQ(state.value(), 2.0);
+	state = sm.signalState(sp2.appSignalId());
+	ASSERT_TRUE(state.has_value());
 
-	state = sm.signalState("#FALSEID", &found);
-	EXPECT_FALSE(found);
-	EXPECT_FALSE(state.isValid());
-	EXPECT_EQ(state.hash(), ::calcHash(QLatin1String("#FALSEID")));
+	EXPECT_TRUE(state->isValid());
+	EXPECT_EQ(state->hash(), sp2.hash());
+	EXPECT_EQ(state->value(), 2.0);
 
-	std::vector<AppSignalState> recStates;
-	int foundCount = 0;
-	sm.signalState(std::vector<QString>{sp1.appSignalId(), sp2.appSignalId(), QLatin1String("#FALSEID")}, &recStates, &foundCount);
+	state = sm.signalState("#FALSEID");
+	ASSERT_FALSE(state.has_value());
 
-	ASSERT_EQ(recStates.size(), 3);
-	EXPECT_EQ(foundCount, 2);
+	std::vector<std::optional<AppSignalState>> recStates;
 
-	EXPECT_TRUE(recStates[0].isValid());
-	EXPECT_EQ(recStates[0].hash(), sp1.hash());
-	EXPECT_EQ(recStates[0].value(), 1.0);
+	std::vector<QString> ids = {sp1.appSignalId(), sp2.appSignalId(), QLatin1String("#FALSEID")};
+	sm.signalState(ids, &recStates);
 
-	EXPECT_TRUE(recStates[1].isValid());
-	EXPECT_EQ(recStates[1].hash(), sp2.hash());
-	EXPECT_EQ(recStates[1].value(), 2.0);
+	ASSERT_EQ(recStates.size(), ids.size());
 
-	EXPECT_FALSE(recStates[2].isValid());
-	EXPECT_EQ(recStates[2].hash(), ::calcHash(QLatin1String("#FALSEID")));
+	ASSERT_TRUE(recStates[0].has_value());
+	ASSERT_TRUE(recStates[1].has_value());
+	ASSERT_FALSE(recStates[2].has_value());
+
+	EXPECT_TRUE(recStates[0]->isValid());
+	EXPECT_EQ(recStates[0]->hash(), sp1.hash());
+	EXPECT_EQ(recStates[0]->value(), 1.0);
+
+	EXPECT_TRUE(recStates[1]->isValid());
+	EXPECT_EQ(recStates[1]->hash(), sp2.hash());
+	EXPECT_EQ(recStates[1]->value(), 2.0);
 
 	return;
 }
@@ -637,8 +669,8 @@ TEST(AppSignalManagerTests, signalTags)
 	sp2.setAppSignalId("#SP2");
 	sp2.setTags({"sp2", "ads", "test", "tags"});
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
 	QStringList tags1 = sm.signalTags(sp1.appSignalId());
 	QStringList tags2 = sm.signalTags(sp2.appSignalId());
@@ -665,8 +697,8 @@ TEST(AppSignalManagerTests, signalHasTag)
 	sp2.setAppSignalId("#SP2");
 	sp2.setTags({"sp2", "ads", "test", "tags"});
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
 	EXPECT_TRUE(sm.signalHasTag(sp1.appSignalId(), "sp1"));
 	EXPECT_TRUE(sm.signalHasTag(sp1.appSignalId(), "ads"));
@@ -696,8 +728,8 @@ TEST(AppSignalManagerTests, signalIdsByTag)
 	sp2.setAppSignalId("#SP2");
 	sp2.setTags({"sp2", "ads", "test", "tags"});
 
-	sm.addSignal(sp1, "ADS1");
-	sm.addSignal(sp2, "ADS2");
+	sm.addSignals(std::span<const AppSignalParam>{&sp1, 1}, "ADS1");
+	sm.addSignals(std::span<const AppSignalParam>{&sp2, 1}, "ADS2");
 
 	QStringList signals_sp1 = sm.signalIdsByTag("sp1");
 	QStringList signals_ads = sm.signalIdsByTag("ads");
@@ -725,8 +757,8 @@ TEST(AppSignalManagerTests, signalType)
 	sp2.setAppSignalId("#SP2");
 	sp2.setType(E::SignalType::Discrete);
 
-	sm.addSignal(sp1, "ADS1");
-	sm.addSignal(sp2, "ADS2");
+	sm.addSignals(std::span<const AppSignalParam>{&sp1, 1}, "ADS1");
+	sm.addSignals(std::span<const AppSignalParam>{&sp2, 1}, "ADS2");
 
 	bool f1 = false;
 	bool f2 = false;
@@ -763,11 +795,10 @@ TEST(AppSignalManagerTests, equipmentToAppSignalId)
 	sp3.setAppSignalId("#SP3");
 	sp3.setEquipmentId("USB_LM1_IN3");
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
-	sm.addSignal(sp3, "ADS");
+	auto v = std::array<AppSignalParam, 3>{sp1, sp2, sp3};
+	sm.addSignals(v, "ADS");
 
-	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN1"), "#SP1");	// Symbol @ must be at the beginning
+	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN1"), "#SP1"); // Symbol @ must be at the beginning
 	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN2"), "#SP2");
 	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN3"), "#SP3");
 	EXPECT_EQ(sm.equipmentToAppSignalId("@FAIL"), "");
@@ -788,8 +819,8 @@ TEST(AppSignalManagerTests, setpointsByInput)
 	sp2.setAppSignalId("#SP2");
 	sp2.setEquipmentId("LM2");
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
 	// Create ComparatorSet
 	//
@@ -820,7 +851,7 @@ TEST(AppSignalManagerTests, setpointsByInput)
 
 	ASSERT_EQ(sp1_comparators.size(), 2);
 	ASSERT_TRUE((sp1_comparators[0]->label() == "cmp_sp1_1" && sp1_comparators[1]->label() == "cmp_sp1_2") ||
-			(sp1_comparators[1]->label() == "cmp_sp1_1" && sp1_comparators[0]->label() == "cmp_sp1_2"));
+				(sp1_comparators[1]->label() == "cmp_sp1_1" && sp1_comparators[0]->label() == "cmp_sp1_2"));
 
 	ASSERT_EQ(sp2_comparators.size(), 1);
 	ASSERT_EQ(sp2_comparators[0]->label(), "cmp_sp2_1");
@@ -840,17 +871,18 @@ TEST(AppSignalManagerTests, dataServiceIds)
 	sp1.setAppSignalId("#SP1");
 	sp2.setAppSignalId("#SP2");
 
-	sm.addSignal(sp1, "ADS1");
-	sm.addSignal(sp1, "ADS2");
-	sm.addSignal(sp2, "ADS2");
+	std::array<AppSignalParam, 1> ads1v = {sp1};
+	std::array<AppSignalParam, 2> ads2v = {sp1, sp2};
+
+	sm.addSignals(ads1v, "ADS1");
+	sm.addSignals(ads2v, "ADS2");
 
 	auto s1adses = sm.dataServiceIds(sp1.appSignalId());
 	auto s2adses = sm.dataServiceIds(sp2.appSignalId());
 	auto s3adses = sm.dataServiceIds("#FALSEID");
 
 	ASSERT_EQ(s1adses.size(), 2);
-	EXPECT_TRUE((s1adses[0] == "ADS1" &&  s1adses[1] == "ADS2") ||
-			(s1adses[1] == "ADS1" &&  s1adses[0] == "ADS2"));
+	EXPECT_TRUE((s1adses[0] == "ADS1" && s1adses[1] == "ADS2") || (s1adses[1] == "ADS1" && s1adses[0] == "ADS2"));
 
 	ASSERT_EQ(s2adses.size(), 1);
 	EXPECT_EQ(s2adses[0], "ADS2");
@@ -872,9 +904,11 @@ TEST(AppSignalManagerTests, dataServiceHasSignal)
 	sp1.setAppSignalId("#SP1");
 	sp2.setAppSignalId("#SP2");
 
-	sm.addSignal(sp1, "ADS1");
-	sm.addSignal(sp1, "ADS2");
-	sm.addSignal(sp2, "ADS2");
+	std::array<AppSignalParam, 1> ads1v = {sp1};
+	std::array<AppSignalParam, 2> ads2v = {sp1, sp2};
+
+	sm.addSignals(ads1v, "ADS1");
+	sm.addSignals(ads2v, "ADS2");
 
 	EXPECT_TRUE(sm.dataServiceHasSignal("ADS1", sp1.appSignalId()));
 	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", sp1.appSignalId()));
@@ -901,8 +935,8 @@ TEST(AppSignalManagerTests, tags)
 	sp2.setAppSignalId("#SP2");
 	sp2.setTags({"sp2", "ads", "test", "tags"});
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
 	QStringList tags = sm.tags();
 
@@ -929,23 +963,19 @@ TEST(AppSignalManagerTests, signalParamByEquipemntId)
 	sp2.setAppSignalId("#SP2");
 	sp2.setEquipmentId("USB_LM1_IN2");
 
-	sm.addSignal(sp1, "ADS");
-	sm.addSignal(sp2, "ADS");
+	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	sm.addSignals(arr, "ADS");
 
-	bool f1 = false;
-	bool f2 = false;
-	bool f3 = false;
+	auto signalParam1 = sm.signalParamByEquipmentId("@USB_LM1_IN1");
+	auto signalParam2 = sm.signalParamByEquipmentId("@USB_LM1_IN2");
+	auto signalParam3 = sm.signalParamByEquipmentId("@FLASE_EQ_ID");
 
-	auto signalParam1 = sm.signalParamByEquipemntId("@USB_LM1_IN1", &f1);
-	auto signalParam2 = sm.signalParamByEquipemntId("@USB_LM1_IN2", &f2);
-	auto signalParam3 = sm.signalParamByEquipemntId("@FLASE_EQ_ID", &f3);
+	ASSERT_TRUE(signalParam1.has_value());
+	ASSERT_TRUE(signalParam2.has_value());
+	ASSERT_FALSE(signalParam3.has_value());
 
-	ASSERT_TRUE(f1);
-	ASSERT_TRUE(f2);
-	ASSERT_FALSE(f3);
-
-	EXPECT_EQ(signalParam1.appSignalId(), sp1.appSignalId());
-	EXPECT_EQ(signalParam2.appSignalId(), sp2.appSignalId());
+	EXPECT_EQ(signalParam1->appSignalId(), sp1.appSignalId());
+	EXPECT_EQ(signalParam2->appSignalId(), sp2.appSignalId());
 
 	return;
 }

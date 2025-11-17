@@ -263,7 +263,7 @@ namespace VFrame30
 		//
 		if (columnCount() == 0)
 		{
-			drawFullLineIds(context.get(), drawParam);
+			drawFullLineIds(*context, *drawParam);
 		}
 		else
 		{
@@ -510,18 +510,11 @@ namespace VFrame30
 		return text;
 	}
 
-	void SchemaItemSignal::drawFullLineIds(const Context* context, CDrawParam* drawParam) const
+	void SchemaItemSignal::drawFullLineIds(const Context& context, CDrawParam& drawParam) const
 	{
-		if (context == nullptr || drawParam == nullptr)
-		{
-			Q_ASSERT(context);
-			Q_ASSERT(drawParam);
-			return;
-		}
+		QPainter* painter = drawParam.painter();
 
-		QPainter* painter = drawParam->painter();
-
-		QRectF rect = itemRectPinIndent(drawParam);
+		QRectF rect = itemRectPinIndent(&drawParam);
 
 		rect.setLeft(rect.left() + m_font.drawSize() / 4.0);
 		rect.setRight(rect.right() - m_font.drawSize() / 4.0);
@@ -540,11 +533,9 @@ namespace VFrame30
 		{
 			text = appSignalIds();
 
-			if (context->appSignalController() != nullptr)
+			if (context.appSignalController() != nullptr)
 			{
-				bool stateOk;
-				AppSignalState signalState = context->appSignalController()->signalState(text, &stateOk);
-
+				auto signalState = context.appSignalController()->signalState(text).value_or(AppSignalState{});
 				if (signalState.m_flags.valid == false)
 				{
 					text += QString("    ?");
@@ -557,7 +548,7 @@ namespace VFrame30
 		}
 
 #ifdef VFRAME30_CACHE_DRAW_TEXT
-		if (drawParam->pdfMode() == true)
+		if (drawParam.pdfMode() == true)
 		{
 			DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop);
 		}
@@ -569,7 +560,7 @@ namespace VFrame30
 									  text,
 									  rect,
 									  Qt::AlignLeft | Qt::AlignTop,
-									  drawParam->schemaView()->zoom());
+									  drawParam.schemaView()->zoom());
 		}
 #else
 		DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, Qt::AlignLeft | Qt::AlignTop);
@@ -625,16 +616,19 @@ namespace VFrame30
 				}
 				else
 				{
-					bool signalFound = false;
+					appSignals[signalIndex] = context->appSignalController()
+												  ->signalParam(id)
+												  .or_else(
+													  [&id]
+													  {
+														  std::optional<AppSignalParam> sp = AppSignalParam{};
+														  sp->setAppSignalId(id);
+														  sp->setCustomSignalId(id);
+														  return sp;
+													  })
+												  .value();
 
-					appSignals[signalIndex] = context->appSignalController()->signalParam(id, &signalFound);
-					appSignalStates[signalIndex] = context->appSignalController()->signalState(id, nullptr);
-
-					if (signalFound == false)
-					{
-						appSignals[signalIndex].setAppSignalId(id);
-						appSignals[signalIndex].setCustomSignalId(id);
-					}
+					appSignalStates[signalIndex] = context->appSignalController()->signalState(id).value_or(AppSignalState{});
 				}
 			}
 
@@ -670,18 +664,19 @@ namespace VFrame30
 		{
 			if (context->appSignalController() != nullptr)
 			{
-				// Get signal description/state
-				//
-				bool signalFound = false;
+				impactAppSignals[signalIndex] = context->appSignalController()
+													->signalParam(id)
+													.or_else(
+														[&id]
+														{
+															std::optional<AppSignalParam> asp = AppSignalParam{};
+															asp->setAppSignalId(id);    // At least show AppSignalID
+															asp->setCustomSignalId(id); // At least show AppSignalID
+															return asp;
+														})
+													.value();
 
-				impactAppSignals[signalIndex] = context->appSignalController()->signalParam(id, nullptr);
-				impactAppSignalStates[signalIndex] = context->appSignalController()->signalState(id, nullptr);
-
-				if (signalFound == false)
-				{
-					impactAppSignals[signalIndex].setAppSignalId(id);    // At least show AppSignalID
-					impactAppSignals[signalIndex].setCustomSignalId(id); // At least show AppSignalID
-				}
+				impactAppSignalStates[signalIndex] = context->appSignalController()->signalState(id).value_or(AppSignalState{});
 			}
 
 			signalIndex++;
@@ -1071,19 +1066,21 @@ namespace VFrame30
 
 		if (context->appSignalController() != nullptr && isCommented() == false)
 		{
-			if (parentSchema()->isUfbSchema() == true) {}
-			else
+			if (parentSchema()->isUfbSchema() == false)
 			{
-				bool signalFound = false;
+				signal = context->appSignalController()
+							 ->signalParam(appSignalId)
+							 .or_else(
+								 [&appSignalId]
+								 {
+									 std::optional<AppSignalParam> sp = AppSignalParam{};
+									 sp->setAppSignalId(appSignalId);    // At least show AppSignalID
+									 sp->setCustomSignalId(appSignalId); // At least show CustomSignalID
+									 return sp;
+								 })
+							 .value();
 
-				signal = context->appSignalController()->signalParam(appSignalId, &signalFound);
-				signalState = context->appSignalController()->signalState(appSignalId, nullptr);
-
-				if (signalFound == false)
-				{
-					signal.setAppSignalId(appSignalId);    // At least show AppSignalID
-					signal.setCustomSignalId(appSignalId); // At least show CustomSignalID
-				}
+				signalState = context->appSignalController()->signalState(appSignalId).value_or(AppSignalState{});
 			}
 		}
 
@@ -1100,16 +1097,19 @@ namespace VFrame30
 
 		if (context->appSignalController() != nullptr && isCommented() == false)
 		{
-			bool signalFound = false;
+			impactSignal = context->appSignalController()
+							   ->signalParam(impactAppSignalId)
+							   .or_else(
+								   [impactAppSignalId]
+								   {
+									   std::optional<AppSignalParam> impactSignal = AppSignalParam{};
+									   impactSignal->setAppSignalId(impactAppSignalId);    // At least show AppSignalID
+									   impactSignal->setCustomSignalId(impactAppSignalId); // At least show AppSignalID
+									   return impactSignal;
+								   })
+							   .value();
 
-			impactSignal = context->appSignalController()->signalParam(impactAppSignalId, nullptr);
-			impactSignalState = context->appSignalController()->signalState(impactAppSignalId, nullptr);
-
-			if (signalFound == false)
-			{
-				impactSignal.setAppSignalId(impactAppSignalId);    // At least show AppSignalID
-				impactSignal.setCustomSignalId(impactAppSignalId); // At least show AppSignalID
-			}
+			impactSignalState = context->appSignalController()->signalState(impactAppSignalId).value_or(AppSignalState{});
 		}
 
 		// --

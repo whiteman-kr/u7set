@@ -144,6 +144,7 @@ namespace Tuning
 
 		TuningClientContextMap m_clientContextMap;
 
+		mutable std::mutex m_activeClientInfoMutex;
 		SoftwareInfo m_activeClientInfo;
 		QString m_activeClientIP;
 	};

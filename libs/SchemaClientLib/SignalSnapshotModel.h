@@ -26,6 +26,7 @@ namespace SchemaClientLib
 		PlantTime,
 		Value,
 		Units,
+		Flags,
 		Valid,
 		StateAvailable,
 		Simulated,

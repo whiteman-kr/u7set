@@ -369,7 +369,7 @@ namespace VFrame30
 				signalParam.setCustomSignalId(signalId);
 			}
 
-			bool ok = getSignalState(signalId, context, &signalParam, &signalState, &tuningSignalState);
+			bool ok = getSignalState(signalId, *context, signalParam, signalState, tuningSignalState);
 			if (ok == false)
 			{
 				// Display signalId in case of error.
@@ -713,48 +713,55 @@ namespace VFrame30
 	}
 
 	bool SchemaItemValue::getSignalState(QString appSignalId,
-										 const Context* context,
-										 AppSignalParam* signalParam,
-										 AppSignalState* appSignalState,
-										 TuningSignalState* tuningSignalState) const
+										 const Context& context,
+										 AppSignalParam& signalParam,
+										 AppSignalState& appSignalState,
+										 TuningSignalState& tuningSignalState) const
 	{
-		if (context == nullptr || signalParam == nullptr || appSignalState == nullptr || tuningSignalState == nullptr)
-		{
-			Q_ASSERT(context);
-			Q_ASSERT(signalParam);
-			Q_ASSERT(appSignalState);
-			Q_ASSERT(tuningSignalState);
-			return false;
-		}
-
-		bool ok = false;
+		bool ok = true;
 
 		switch (signalSource())
 		{
 		case E::SignalSource::AppDataService:
-			if (auto appSignalController = context->appSignalController(); appSignalController == nullptr) {}
-			else
+			if (auto appSignalController = context.appSignalController(); appSignalController != nullptr)
 			{
 				if (appSignalId.startsWith('@') == true)
 				{
 					appSignalId = appSignalController->appSignalManager().equipmentToAppSignalId(appSignalId);
 				}
 
-				*signalParam = context->appSignalController()->signalParam(appSignalId, &ok);
-				*appSignalState = context->appSignalController()->signalState(appSignalId, nullptr);
+				auto sp = appSignalController->signalParam(appSignalId);
+				if (sp.has_value() == false)
+				{
+					signalParam = std::move(*sp);
+				}
+				else
+				{
+					ok = false;
+				}
+
+				appSignalState = appSignalController->signalState(appSignalId).value_or(AppSignalState{});
 			}
 			break;
 
 		case E::SignalSource::TuningService:
-			if (context->tuningController() == nullptr) {}
-			else
+			if (context.tuningController() != nullptr)
 			{
-				*signalParam = context->tuningController()->signalParam(appSignalId, &ok);
-				*tuningSignalState = context->tuningController()->signalState(appSignalId, nullptr);
+				auto sp = context.tuningController()->signalParamNative(appSignalId);
+				if (sp.has_value() == false)
+				{
+					signalParam = std::move(*sp);
+				}
+				else
+				{
+					ok = false;
+				}
 
-				appSignalState->m_hash = signalParam->hash();
-				appSignalState->m_flags.valid = tuningSignalState->valid();
-				appSignalState->m_value = tuningSignalState->value().toDouble();
+				tuningSignalState = context.tuningController()->signalState(appSignalId, nullptr);
+
+				appSignalState.m_hash = signalParam.hash();
+				appSignalState.m_flags.valid = tuningSignalState.valid();
+				appSignalState.m_value = tuningSignalState.value().toDouble();
 			}
 			break;
 

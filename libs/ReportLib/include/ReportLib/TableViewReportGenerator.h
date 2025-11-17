@@ -25,7 +25,8 @@ namespace ReportLib
 		TableViewReportGenerator(QWidget* parent,
 								 const QTableView& table,
 								 const ITableViewReportInfo& reportInfo,
-								 const QPageLayout& pageLayout);
+								 const QPageLayout& pageLayout,
+								 bool exportSelected);
 
 		void printTable();
 		void exportTable(const QString& fileName);

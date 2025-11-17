@@ -1309,7 +1309,14 @@ void ToolBarOption::load()
 {
 	QSettings s;
 
-	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
+	m_measureTimeouts.clear();
+
+	int linearityTimeout = s.value(QString("%1Timeout_Linearity").arg(TOOLBAR_OPTIONS_KEY), 1000).toInt();
+	int comparatorsTimeout = s.value(QString("%1Timeout_Comparators").arg(TOOLBAR_OPTIONS_KEY), 1000).toInt();
+
+	m_measureTimeouts[Measure::Linearity] = linearityTimeout;
+	m_measureTimeouts[Measure::Comparators] = comparatorsTimeout;
+
 	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), Measure::Kind::OneRack).toInt();
 	m_connectionType = s.value(QString("%1ConnectionType").arg(TOOLBAR_OPTIONS_KEY), Metrology::ConnectionType::Unused).toInt();
 
@@ -1323,7 +1330,25 @@ void ToolBarOption::save()
 {
 	QSettings s;
 
-	s.setValue(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), m_measureTimeout);
+	for (const auto& [type, timeout] : m_measureTimeouts)
+	{
+		QString key;
+
+		switch (type)
+		{
+		case Measure::Linearity:
+			key = "Timeout_Linearity";
+			break;
+		case Measure::Comparators:
+			key = "Timeout_Comparators";
+			break;
+		default:
+			continue;
+		}
+
+		s.setValue(QString("%1%2").arg(TOOLBAR_OPTIONS_KEY).arg(key), timeout);
+	}
+
 	s.setValue(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
 	s.setValue(QString("%1ConnectionType").arg(TOOLBAR_OPTIONS_KEY), m_connectionType);
 

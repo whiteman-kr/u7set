@@ -151,6 +151,13 @@ struct Times
 	{
 		*this = {};
 	}
+
+	bool operator == (const Times& t2) const
+	{
+		return	system == t2.system &&
+				local == t2.local &&
+				plant == t2.plant;
+	}
 };
 
 // Time to string formatting function

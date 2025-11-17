@@ -10,7 +10,6 @@ ViewTuningSignalsWidget::ViewTuningSignalsWidget(ClientLib::TuningSignalManager&
 	QWidget(parent),
 	m_signalManager(signalManager)
 {
-
 	setWindowTitle(tr("Filter Signals"));
 
 	// Left part
@@ -52,14 +51,11 @@ ViewTuningSignalsWidget::ViewTuningSignalsWidget(ClientLib::TuningSignalManager&
 	mainLayout->addLayout(rightLayout);
 
 	setLayout(mainLayout);
-
-
 }
 
 bool ViewTuningSignalsWidget::readOnly() const
 {
 	return m_readOnly;
-
 }
 
 void ViewTuningSignalsWidget::setReadOnly(bool value)
@@ -90,9 +86,9 @@ void ViewTuningSignalsWidget::fillFilterValuesTree()
 
 	if (m_filter != nullptr)
 	{
-		std::vector <TuningFilterSignal> values = m_filter->getFilterSignals();
+		std::vector<TuningFilterSignal> values = m_filter->getFilterSignals();
 
-		for (const TuningFilterSignal& v: values)
+		for (const TuningFilterSignal& v : values)
 		{
 			QTreeWidgetItem* item = new QTreeWidgetItem();
 			setFilterValueItemText(item, v);
@@ -110,7 +106,6 @@ void ViewTuningSignalsWidget::fillFilterValuesTree()
 }
 
 
-
 void ViewTuningSignalsWidget::on_m_exportValues_clicked()
 {
 	int columnCount = m_filterValuesTree->columnCount();
@@ -118,9 +113,7 @@ void ViewTuningSignalsWidget::on_m_exportValues_clicked()
 	int rowCount = m_filterValuesTree->topLevelItemCount();
 
 	static QString path{"."};
-	QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"),
-													path + QDir::separator(),
-													tr("CSV (*.csv)"));
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Export to CSV"), path + QDir::separator(), tr("CSV (*.csv)"));
 
 	if (fileName.isEmpty() == true)
 	{
@@ -168,7 +161,6 @@ void ViewTuningSignalsWidget::on_m_exportValues_clicked()
 	out.flush();
 
 	QMessageBox::information(this, qAppName(), tr("Export complete."));
-
 }
 
 void ViewTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, const TuningFilterSignal& value)
@@ -199,19 +191,18 @@ void ViewTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, cons
 		return;
 	}
 
-	bool found = false;
-	AppSignalParam asp = m_signalManager.signalParam(value.appSignalHash(), &found);
-	if (found == false)
+	auto asp = m_signalManager.signalParam(value.appSignalHash());
+	if (asp.has_value() == false)
 	{
-		assert(false);
+		assert(asp.has_value());
 		return;
 	}
 
 	QStringList l;
-	l.push_back(asp.customSignalId());
+	l.push_back(asp->customSignalId());
 	l.push_back(value.appSignalId());
-	l.push_back(asp.tuningDefaultValue().tuningValueTypeString());
-	l.push_back(asp.caption());
+	l.push_back(asp->tuningDefaultValue().tuningValueTypeString());
+	l.push_back(asp->caption());
 	if (value.useValue() == true)
 	{
 		l.push_back(value.value().toString());
@@ -232,7 +223,8 @@ void ViewTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, cons
 // TuningFilterEditor
 //
 
-TuningFilterEditor::TuningFilterEditor(TuningFilterStorage& filterStorage, ClientLib::TuningSignalManager& signalManager,
+TuningFilterEditor::TuningFilterEditor(TuningFilterStorage& filterStorage,
+									   ClientLib::TuningSignalManager& signalManager,
 									   bool readOnly,
 									   bool typeTreeEnabled,
 									   bool typeButtonEnabled,
@@ -241,7 +233,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage& filterStorage, Clien
 									   bool typeSchemasTabsEnabled,
 									   TuningFilter::Source source,
 									   QByteArray mainSplitterState,
-									   int propertyEditorSplitterPos):
+									   int propertyEditorSplitterPos) :
 	m_filterStorage(filterStorage),
 	m_signalManager(signalManager),
 	m_readOnly(readOnly),
@@ -268,9 +260,9 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage& filterStorage, Clien
 		}
 
 		if (f->source() != m_source)
-        {
-            continue;
-        }
+		{
+			continue;
+		}
 
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 		setFilterItemText(item, f.get());
@@ -296,9 +288,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage& filterStorage, Clien
 	//
 }
 
-TuningFilterEditor::~TuningFilterEditor()
-{
-}
+TuningFilterEditor::~TuningFilterEditor() {}
 
 
 bool TuningFilterEditor::readOnly() const
@@ -310,7 +300,7 @@ void TuningFilterEditor::setReadOnly(bool value)
 {
 	m_readOnly = value;
 
-	//m_ViewTuningSignalsWidget->setReadOnly(m_readOnly);
+	// m_ViewTuningSignalsWidget->setReadOnly(m_readOnly);
 
 	on_m_presetsTree_itemSelectionChanged();
 }
@@ -334,7 +324,7 @@ void TuningFilterEditor::saveUserInterfaceSettings(QByteArray* mainSplitterState
 	}
 }
 
-bool TuningFilterEditor::eventFilter(QObject *obj, QEvent *event)
+bool TuningFilterEditor::eventFilter(QObject* obj, QEvent* event)
 {
 	// Filter Enter key press from PropertyEditor, it will close the dialog
 
@@ -350,7 +340,6 @@ bool TuningFilterEditor::eventFilter(QObject *obj, QEvent *event)
 
 void TuningFilterEditor::on_m_addPreset_clicked()
 {
-
 	// Get the type of selected filter
 	//
 	std::shared_ptr<TuningFilter> selectedFilter = nullptr;
@@ -384,25 +373,25 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 		for (int i = 0; i < m_presetsTree->topLevelItemCount(); i++)
 		{
-			 QTreeWidgetItem* item = m_presetsTree->topLevelItem(i);
+			QTreeWidgetItem* item = m_presetsTree->topLevelItem(i);
 
-			 std::shared_ptr<TuningFilter> f = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+			std::shared_ptr<TuningFilter> f = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
 
-			 if (f == nullptr)
-			 {
-				 assert(f);
-				 return;
-			 }
+			if (f == nullptr)
+			{
+				assert(f);
+				return;
+			}
 
-			 if (f->isButton())
-			 {
-				 allowTabs = false;
-			 }
+			if (f->isButton())
+			{
+				allowTabs = false;
+			}
 
-			 if (f->isTab())
-			 {
-				 allowButtons = false;
-			 }
+			if (f->isTab())
+			{
+				allowButtons = false;
+			}
 		}
 	}
 
@@ -414,10 +403,7 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 	allowCounters &= m_typeCounterEnabled;
 	allowSchemasTabs &= m_typeSchemasTabsEnabled;
 
-	if (m_typeTabEnabled == false &&
-		m_typeButtonEnabled == false &&
-		m_typeCounterEnabled == false &&
-		m_typeSchemasTabsEnabled == false &&
+	if (m_typeTabEnabled == false && m_typeButtonEnabled == false && m_typeCounterEnabled == false && m_typeSchemasTabsEnabled == false &&
 		allowTree == true)
 	{
 		// This is made for TuningClient
@@ -436,7 +422,7 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 		auto f = [this]() -> void
 		{
-				addPreset(TuningFilter::InterfaceType::Tree);
+			addPreset(TuningFilter::InterfaceType::Tree);
 		};
 		connect(action, &QAction::triggered, this, f);
 
@@ -451,7 +437,7 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 		auto f = [this]() -> void
 		{
-				addPreset(TuningFilter::InterfaceType::Tab);
+			addPreset(TuningFilter::InterfaceType::Tab);
 		};
 		connect(action, &QAction::triggered, this, f);
 
@@ -466,7 +452,7 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 		auto f = [this]() -> void
 		{
-				addPreset(TuningFilter::InterfaceType::Button);
+			addPreset(TuningFilter::InterfaceType::Button);
 		};
 		connect(action, &QAction::triggered, this, f);
 
@@ -481,7 +467,7 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 		auto f = [this]() -> void
 		{
-				addPreset(TuningFilter::InterfaceType::Counter);
+			addPreset(TuningFilter::InterfaceType::Counter);
 		};
 		connect(action, &QAction::triggered, this, f);
 
@@ -496,7 +482,7 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 		auto f = [this]() -> void
 		{
-				addPreset(TuningFilter::InterfaceType::SchemasTab);
+			addPreset(TuningFilter::InterfaceType::SchemasTab);
 		};
 		connect(action, &QAction::triggered, this, f);
 
@@ -512,7 +498,8 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 
 void TuningFilterEditor::on_m_removePreset_clicked()
 {
-	if (QMessageBox::warning(this, tr("Remove Filter"),
+	if (QMessageBox::warning(this,
+							 tr("Remove Filter"),
 							 tr("Are you sure you want to remove selected filters?"),
 							 QMessageBox::Yes | QMessageBox::No,
 							 QMessageBox::No) != QMessageBox::Yes)
@@ -575,13 +562,11 @@ void TuningFilterEditor::on_m_removePreset_clicked()
 
 		m_modified = true;
 	}
-
 }
 
 void TuningFilterEditor::on_m_moveUpPreset_clicked()
 {
 	movePresets(-1);
-
 }
 
 void TuningFilterEditor::on_m_moveDownPreset_clicked()
@@ -614,7 +599,6 @@ void TuningFilterEditor::on_m_copyPreset_clicked()
 	}
 
 	m_filterStorage.copyToClipboard(filters);
-
 }
 
 void TuningFilterEditor::on_m_pastePreset_clicked()
@@ -682,7 +666,6 @@ void TuningFilterEditor::on_m_pastePreset_clicked()
 
 			parentItem->addChild(newPresetItem);
 		}
-
 	}
 
 	m_modified = true;
@@ -782,7 +765,6 @@ void TuningFilterEditor::presetPropertiesChanged(QList<std::shared_ptr<PropertyO
 			{
 				assert(f);
 				return;
-
 			}
 
 			f->updateOptionalProperties();
@@ -942,7 +924,7 @@ void TuningFilterEditor::initUserInterface(QByteArray mainSplitterState, int pro
 	// Signals Tab
 
 	m_viewTuningSignalsWidget = new ViewTuningSignalsWidget(m_signalManager, this);
-	
+
 	tab->addTab(m_viewTuningSignalsWidget, tr("Signals"));
 
 	//
@@ -1065,7 +1047,6 @@ void TuningFilterEditor::setFilterItemText(QTreeWidgetItem* item, TuningFilter* 
 	}
 
 
-
 	QStringList l;
 	l << filter->caption();
 	l << E::valueToString<TuningFilter::InterfaceType>(filter->interfaceType());
@@ -1118,7 +1099,7 @@ void TuningFilterEditor::movePresets(int direction)
 	{
 		if (parentItem == nullptr)
 		{
-			 selectedIndexes.push_back(m_presetsTree->indexOfTopLevelItem(selectedItem));
+			selectedIndexes.push_back(m_presetsTree->indexOfTopLevelItem(selectedItem));
 		}
 		else
 		{
@@ -1202,10 +1183,10 @@ void TuningFilterEditor::movePresets(int direction)
 // IdeTuningFiltersEditor
 //
 
-IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidget* parent):
-  PropertyTextEditor(parent),
-  m_dbController(dbController),
-  m_signals({}, &logFileStub)
+IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidget* parent) :
+	PropertyTextEditor(parent),
+	m_dbController(dbController),
+	m_signals({}, &logFileStub)
 {
 	AppSignalSet tuningSignalSet;
 	::Proto::AppSignalSet appSignalSet;
@@ -1232,10 +1213,10 @@ IdeTuningFiltersEditor::~IdeTuningFiltersEditor()
 	if (m_tuningFilterEditor != nullptr)
 	{
 		QByteArray tuningFiltersPropertyEditorSplitterPos;
-		
+
 		int tuningFiltersSplitterPosition;
 		m_tuningFilterEditor->saveUserInterfaceSettings(&tuningFiltersPropertyEditorSplitterPos, &tuningFiltersSplitterPosition);
-		
+
 		QSettings().setValue("TuningFiltersEditor/MainSplitterPosition", tuningFiltersSplitterPosition);
 		QSettings().setValue("TuningFiltersEditor/PropertyEditorSplitterPos", tuningFiltersPropertyEditorSplitterPos);
 	}
@@ -1243,11 +1224,11 @@ IdeTuningFiltersEditor::~IdeTuningFiltersEditor()
 
 void IdeTuningFiltersEditor::setText(const QString& text)
 {
-    if (m_tuningFilterEditor != nullptr)
-    {
-        assert(false);
-        return;
-    }
+	if (m_tuningFilterEditor != nullptr)
+	{
+		assert(false);
+		return;
+	}
 
 	// Load presets
 
@@ -1257,49 +1238,46 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 
 	bool ok = m_filters.load(rawData, &errorCode);
 
-    if (ok == false)
-    {
+	if (ok == false)
+	{
 		QMessageBox::critical(this, qAppName(), errorCode);
-    }
+	}
 
-	
+
 	QByteArray m_tuningFiltersSplitterPosition = QSettings().value("TuningFiltersEditor/MainSplitterPosition").toByteArray();
 	int m_tuningFiltersPropertyEditorSplitterPos = QSettings().value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
 
 	m_tuningFilterEditor = new TuningFilterEditor(m_filters,
 												  m_signals,
-												  true,		/*readOnly*/
-												  true,		/*typeTreeEnabled*/
-												  true,		/*typeButtonEnabled*/
-												  true,		/*typeTabEnabled*/
-												  true,		/*typeCounterEnabled*/
-												  true,		/*typeSchemasTabsEnabled*/
+												  true, /*readOnly*/
+												  true, /*typeTreeEnabled*/
+												  true, /*typeButtonEnabled*/
+												  true, /*typeTabEnabled*/
+												  true, /*typeCounterEnabled*/
+												  true, /*typeSchemasTabsEnabled*/
 												  TuningFilter::Source::Project,
 												  m_tuningFiltersSplitterPosition,
-												  m_tuningFiltersPropertyEditorSplitterPos
-												  );
+												  m_tuningFiltersPropertyEditorSplitterPos);
 
-    QHBoxLayout* l = new QHBoxLayout(this);
-    l->setContentsMargins(0, 0, 0, 0);
-    l->addWidget(m_tuningFilterEditor);
-
+	QHBoxLayout* l = new QHBoxLayout(this);
+	l->setContentsMargins(0, 0, 0, 0);
+	l->addWidget(m_tuningFilterEditor);
 }
 
 QString IdeTuningFiltersEditor::text() const
 {
-    QByteArray data;
+	QByteArray data;
 
-    bool ok = m_filters.save(data);
+	bool ok = m_filters.save(data);
 
-    if (ok == true)
-    {
+	if (ok == true)
+	{
 		QString s = QString::fromUtf8(data);
 
 		return s;
+	}
 
-    }
-
-    return QString();
+	return QString();
 }
 
 bool IdeTuningFiltersEditor::readOnly() const
@@ -1310,7 +1288,6 @@ bool IdeTuningFiltersEditor::readOnly() const
 void IdeTuningFiltersEditor::setReadOnly(bool value)
 {
 	m_tuningFilterEditor->setReadOnly(value);
-
 }
 
 bool IdeTuningFiltersEditor::externalOkCancelButtons() const

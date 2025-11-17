@@ -18,6 +18,8 @@ public:
 
 	QString workerName() const;
 
+	void enableLog(bool enable);
+
 protected:
 	virtual void onThreadStarted();
 	virtual void onThreadFinished();
@@ -34,6 +36,8 @@ private:
 
 private:
 	QString m_workerName;
+	bool m_enableLog = false;
+
 	SimpleThread* m_thread = nullptr;
 	std::atomic_bool m_finished = false;
 
@@ -66,6 +70,8 @@ public:
 	bool isRunning() const;
 	bool isFinished() const;
 
+	void enableLog(bool enable);
+
 signals:
 	void quitRequested();
 
@@ -77,6 +83,7 @@ private:
 
 protected:
 	QString m_threadName;
+	bool m_enableLog = false;
 
 	QThread m_thread;
 

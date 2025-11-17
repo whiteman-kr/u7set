@@ -106,7 +106,7 @@ void AppSignalStateFlags::updateArchivingReasonFlags(const AppSignalStateFlags& 
 	limitFlagsChange = (changedFlags & MASK_LIMITS_FLAGS) == 0 ? 0 : 1;
 }
 
-QString AppSignalStateFlags::print()
+QString AppSignalStateFlags::print() const
 {
 	return QString("Valid=%1 Avail=%2 Sim=%3 Blk=%4 Unbl=%5 HLim=%6 LLim=%7 SwSim=%8 "
 				   "[Reasons: ValCh=%9 SBUCh=%10 Lim=%11 Auto=%12 Fine=%13 Coarse=%14]").
@@ -116,3 +116,15 @@ QString AppSignalStateFlags::print()
 			arg(autoPoint).arg(fineAperture).arg(coarseAperture);
 }
 
+QString AppSignalStateFlags::printShort() const
+{
+	return QString("%1%2%3%4%5%6%7%8")
+		.arg(valid ? "VAL " : "NV ")
+		.arg(stateAvailable ? "AVAIL " : "NA ")
+		.arg(simulated ? "SIM " : "")
+		.arg(blocked ? "BLK " : "")
+		.arg(mismatch ? "MIS " : "")
+		.arg(aboveHighLimit ? "HIGH " : "")
+		.arg(belowLowLimit ? "LOW " : "")
+		.arg(swSimulated ? "SW.SIM " : "");
+}

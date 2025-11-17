@@ -27,6 +27,11 @@ QString SimpleThreadWorker::workerName() const
 	return m_workerName;
 }
 
+void SimpleThreadWorker::enableLog(bool enable)
+{
+	m_enableLog = enable;
+}
+
 void SimpleThreadWorker::onThreadStarted()
 {
 }
@@ -72,7 +77,10 @@ void SimpleThreadWorker::setThread(SimpleThread* thread)
 
 void SimpleThreadWorker::log(const QString& str)
 {
-	qDebug() << C_STR(str);
+	if (m_enableLog)
+	{
+		qDebug() << C_STR(str);
+	}
 }
 
 // -------------------------------------------------------------------------------------
@@ -126,6 +134,8 @@ void SimpleThread::addWorker(SimpleThreadWorker* worker)
 
 	m_workers.insert(worker);
 
+	worker->enableLog(m_enableLog);
+
 	m_threadName += QString(" %1").arg(worker->workerName());
 }
 
@@ -154,6 +164,7 @@ void SimpleThread::start(unsigned long time)
 
 		for(SimpleThreadWorker* worker : m_workers)
 		{
+			worker->enableLog(m_enableLog);
 			worker->setThread(this);
 			worker->moveToThread(&m_thread);
 
@@ -202,7 +213,7 @@ bool SimpleThread::quitAndWait(unsigned long time)
 
 	if (m_started == false)
 	{
-		Q_ASSERT(false);
+		log(QString("%1 NOT started!").arg(m_threadName));
 		return true;
 	}
 
@@ -253,6 +264,11 @@ bool SimpleThread::isRunning() const
 bool SimpleThread::isFinished() const
 {
 	return m_thread.isFinished();
+}
+
+void SimpleThread::enableLog(bool enable)
+{
+	m_enableLog = enable;
 }
 
 void SimpleThread::workerStarted(SimpleThreadWorker* worker)
@@ -318,7 +334,10 @@ void SimpleThread::workerFinished(SimpleThreadWorker* worker)
 
 void SimpleThread::log(const QString& str)
 {
-	qDebug() << C_STR(str);
+	if (m_enableLog)
+	{
+		qDebug() << C_STR(str);
+	}
 }
 
 // -------------------------------------------------------------------------------------

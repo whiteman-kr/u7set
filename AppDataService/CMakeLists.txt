@@ -63,8 +63,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QApplication>
 	<QCommandLineParser>
 	<QCoreApplication>
-	<QDebug>
 	<QDateTime>
+	<QDebug>
+	<QDir>
 	<QElapsedTimer>
 	<QEventLoop>
 	<QFile>
@@ -81,8 +82,9 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QObject>
 	<QQueue>
 	<QSettings>
-	<QSqlError>
-	<QSqlQuery>
+	<QtSql/QSqlDatabase>
+	<QtSql/QSqlError>
+	<QtSql/QSqlQuery>
 	<QString>
 	<QStringList>
 	<QTextStream>

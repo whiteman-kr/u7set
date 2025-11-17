@@ -109,15 +109,14 @@ namespace
 	}
 
 	// Functions to get hardware identifiers
+	// AI generated: Claude Sonnet 3.7 Thinking!
 	//
 	QString getCpuInfo()
 	{
 #ifdef _WIN32
 	#ifdef FAST_SMBIOS_SYSTEM_UUID_WIN32
-		//
-		// AI generated: Claude Sonnet 3.7 Thinking
-		//
 		QString result;
+		bool comInitializedHere = false;
 
 		// Initialize COM
 		HRESULT hres = CoInitializeEx(0, COINIT_MULTITHREADED);
@@ -130,6 +129,11 @@ namespace
 		{
 			// Handle other initialization failures
 			return result;
+		}
+		else
+		{
+			// We successfully initialized COM, so we need to uninitialize it later
+			comInitializedHere = true;
 		}
 
 		// Initialize security
@@ -149,7 +153,10 @@ namespace
 
 		if (FAILED(hres) || !pLoc)
 		{
-			CoUninitialize();
+			if (comInitializedHere)
+			{
+				CoUninitialize();
+			}
 			return result;
 		}
 
@@ -160,7 +167,10 @@ namespace
 		if (FAILED(hres) || !pSvc)
 		{
 			pLoc->Release();
-			CoUninitialize();
+			if (comInitializedHere)
+			{
+				CoUninitialize();
+			}
 			return result;
 		}
 
@@ -186,7 +196,10 @@ namespace
 		{
 			pSvc->Release();
 			pLoc->Release();
-			CoUninitialize();
+			if (comInitializedHere)
+			{
+				CoUninitialize();
+			}
 			return result;
 		}
 
@@ -227,7 +240,10 @@ namespace
 		pEnumerator->Release();
 		pSvc->Release();
 		pLoc->Release();
-		CoUninitialize();
+		if (comInitializedHere)
+		{
+			CoUninitialize();
+		}
 
 		return result;
 	#else
@@ -245,6 +261,7 @@ namespace
 		{
 			return lines[0].trimmed();
 		}
+		return QString();
 	#endif
 #elif __linux__
 		QProcess process;
@@ -258,8 +275,10 @@ namespace
 			return output.mid(colonIndex + 1).trimmed();
 		}
 		return output;
-#endif
+#else
+		// For unsupported platforms
 		return QString();
+#endif
 	}
 
 	QString getMotherboardInfo()

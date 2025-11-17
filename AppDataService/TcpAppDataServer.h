@@ -51,6 +51,7 @@ private:
 	void onGetSettings();
 
 	void onGetDiscretesLog();
+	void onAckDiscretesLog(const char* requestData, quint32 requestDataSize);
 
 	// helper functions
 	//
@@ -67,7 +68,7 @@ private:
 	SimpleAppSignalStatesQueueShared m_signalStatesQueue;
 	GatewayAppSignalStatesQueueShared m_gatewaySignalStatesQueue;
 
-	DiscretesLogReader* m_dlReader = nullptr;
+	std::shared_ptr<DiscretesLogReader> m_dlReader;
 
 	// precalculated variables
 	//

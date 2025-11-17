@@ -66,6 +66,9 @@ protected slots:
 	void requestStatus(QString serverStatus, int requests, int replies, int states);
 	void requestFinished();
 
+private:
+	void printData(bool printSelected);
+
 	// Data
 	//
 private:

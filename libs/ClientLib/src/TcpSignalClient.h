@@ -93,6 +93,9 @@ namespace ClientLib
 		void requestSignalLog();
 		void processSignalLog(const QByteArray& data);
 
+		void requestAckSignalLog();
+		void processAckSignalLog(const QByteArray& data);
+
 	public:
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
@@ -106,6 +109,8 @@ namespace ClientLib
 	private:
 		SoftwareEndpoint::AppDataService m_serverSettings;
 		IAppSignalUpdater& m_signalUpdater;
+
+		ClientLib::IAppSignalUpdater::SourceIdType sourceId() const;
 
 	private:
 		std::atomic<bool> m_signalParamsLoaded{false};

@@ -87,8 +87,9 @@ public:
 	const std::vector<QString>& acquiredAppSignalIDs() const { return m_acquiredAppSignalIDs; }
 	int acquiredAppSignalIDsCount() const { return static_cast<int>(m_acquiredAppSignalIDs.size()); }
 
-	void registerDiscretesLogReader(DiscretesLogReader* reader);
-	void unregisterDiscretesLogReader(DiscretesLogReader* reader);
+	void ackDiscretesLog(const Network::AckDiscretesLogRequest& ackLogRequest);
+
+	std::shared_ptr<DiscretesLogWriter> discretesLogWriter() { return m_discretesLogWriter; }
 
 signals:
 	void restartArchSignalsTimer();
@@ -173,7 +174,7 @@ private:
 	AppDataSources m_appDataSources;
 
 	DynamicAppSignalStates m_appSignalStates;
-	DiscretesLogWriter m_discretesLogWriter;
+	std::shared_ptr<DiscretesLogWriter> m_discretesLogWriter;
 
 	ApertureFile m_apertureFile;
 

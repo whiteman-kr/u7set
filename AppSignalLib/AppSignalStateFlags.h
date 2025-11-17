@@ -74,7 +74,8 @@ union AppSignalStateFlags
 
 	void updateArchivingReasonFlags(const AppSignalStateFlags& prevFlags);
 
-	QString print();
+	QString print() const;
+	QString printShort() const;
 
 	static const quint32 MASK_VALIDITY_AND_AVAILABLE_FLAGS = 0x00000003;
 	static const quint32 MASK_SIM_BLOCK_UNBL_FLAGS = 0x0000001C;
