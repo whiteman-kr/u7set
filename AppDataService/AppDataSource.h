@@ -47,7 +47,10 @@ public:
 	void incSimFlagsCount() { m_simFlagsCount++; }
 	void incMismatchFlagsCount() { m_mismatchFlagsCount++; }
 
-	void pushState(const SimpleAppSignalState& state);		// for testing purposes only!
+	// for testing purposes only!
+	//
+	void pushState(const SimpleAppSignalState& state);
+	void resizeSignalStatesQueue(int size);
 
 private:
 	virtual bool parseBuffer(ParsingBuffer& readBuffer) override;
@@ -65,6 +68,8 @@ private:
 	virtual quint32 getExpectedDataUID() const override { return m_cachedAppDataUID; }
 
 private:
+	static constexpr int SIGNAL_STATES_QUEUE_MIN_SIZE = 1000;
+
 	CircularLoggerShared m_log;
 
 	std::mutex* m_statesProcessigRequiredMutex = nullptr;

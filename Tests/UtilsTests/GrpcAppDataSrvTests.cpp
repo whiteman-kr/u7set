@@ -548,7 +548,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalState_ExceedHashesCount)
 
 TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 {
-/*	std::unique_ptr<GrpcAppDataSrv> server;
+	std::unique_ptr<GrpcAppDataSrv> server;
 	auto stub = StartServerAndMakeClient({"127.0.0.1", 14004}, server);
 
 	const std::string authToken = Handshake(*stub, clients[0]);
@@ -561,8 +561,6 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 
 	std::thread stateChangesProducerThread = std::thread([]()
 	{
-		QThread::sleep(10);
-
 		AppDataSource* src = appDataSources.getSourceByEquipmentID("SYSTEMID_RACK01_FSCC01_MD00");
 
 		if (src == nullptr)
@@ -570,6 +568,10 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 			Q_ASSERT(false);
 			return;
 		}
+
+		src->resizeSignalStatesQueue(10000);
+
+		QThread::sleep(3);
 
 		SimpleAppSignalState state;
 
@@ -583,9 +585,9 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 			state.flags.all = i + 101;
 			src->pushState(state);
 
-			if ((i % 1000) == 0)
+			if ((i % 500) == 0)
 			{
-				QThread::msleep(5);
+				QThread::msleep(30);
 			}
 		}
 	});
@@ -600,6 +602,8 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 
 	while (reader->Read(&reply))
 	{
+		DEBUG_LOG_MSG(logger, QString("Recevie state changes: %1").arg(reply.appsignalstates_size()));
+
 		for(const Proto::AppSignalState& st : reply.appsignalstates())
 		{
 			EXPECT_EQ(st.hash(), ctr);
@@ -610,6 +614,12 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 			EXPECT_EQ(st.systemtime(), ctr + 3000);
 			ctr++;
 		}
+
+		if (ctr >= 10000)
+		{
+			ctx.TryCancel();
+			break;
+		}
 	}
 
 	grpc::Status st = reader->Finish();
@@ -619,6 +629,6 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 		stateChangesProducerThread.join();
 	}
 
-	server.reset();*/
+	server.reset();
 }
 

@@ -119,7 +119,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 			return false;
 		}
 
-		DEBUG_LOG_MSG(m_log, QString("GetAppSignalList: Write reply count = %1").arg(reply.appsignalids_size()));
+		// DEBUG_LOG_MSG(m_log, QString("GetAppSignalList: Write reply count = %1").arg(reply.appsignalids_size()));
 
 		if (writer->Write(reply) == false)
 		{
@@ -208,7 +208,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 			return false;
 		}
 
-		DEBUG_LOG_MSG(m_log, QString("GetAppSignalParam: Write reply count = %1").arg(reply.signalparams_size()));
+		// DEBUG_LOG_MSG(m_log, QString("GetAppSignalParam: Write reply count = %1").arg(reply.signalparams_size()));
 
 		if (writer->Write(reply) == false)
 		{
@@ -377,7 +377,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 			return false;
 		}
 
-		DEBUG_LOG_MSG(m_log, QString("GetAppSignalStateChanges: Write reply states count = %1").arg(reply.appsignalstates_size()));
+		// DEBUG_LOG_MSG(m_log, QString("GetAppSignalStateChanges: Write reply states count = %1").arg(reply.appsignalstates_size()));
 
 		if (writer->Write(reply) == false)
 		{
@@ -430,7 +430,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 		}
 		else
 		{
-			if (waitCtr > 1000)
+			if (waitCtr > 2000)
 			{
 				waitCtr = 0;
 

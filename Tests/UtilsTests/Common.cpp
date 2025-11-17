@@ -152,6 +152,7 @@ void createAndStartAppDataReceiver()
 														4, E::SoftwareRunMode::Normal,
 														logger);
 
+	appDataReceiver->setEnableLog(false);
 	appDataReceiver->start();
 }
 

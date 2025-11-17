@@ -94,6 +94,8 @@ public:
 
 	void unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue);
 
+	void setEnableLog(bool enable);
+
 private:
 	virtual void run() override;
 
@@ -127,6 +129,9 @@ private:
 
 	void trace_dt(const QString& portID);
 
+	void logMsg(const QString& str);
+	void logErr(const QString& str);
+
 private:
 	AppDataSources& m_appDataSources;
 	bool m_isSimulationMode = false;
@@ -134,6 +139,7 @@ private:
 	CircularLoggerShared m_log;
 
 	bool m_running = false;
+	std::atomic_bool m_enableLog {true};
 
 	//
 

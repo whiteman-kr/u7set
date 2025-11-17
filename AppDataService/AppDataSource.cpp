@@ -110,7 +110,7 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 
 	m_acquiredSignalsCount = TO_INT(m_signalStates.size());
 
-	int queueSize = std::max(m_acquiredSignalsCount * 3, 200);
+	int queueSize = std::max(m_acquiredSignalsCount * 3, SIGNAL_STATES_QUEUE_MIN_SIZE);
 
 	m_signalStatesQueue.resize(queueSize);
 
@@ -284,6 +284,11 @@ void AppDataSource::pushState(const SimpleAppSignalState& state)
 {
 	m_signalStatesQueue.push(state, false);
 	wakeupStatesProcessingThread();
+}
+
+void AppDataSource::resizeSignalStatesQueue(int size)
+{
+	m_signalStatesQueue.resize(std::max(size, SIGNAL_STATES_QUEUE_MIN_SIZE));
 }
 
 bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer)

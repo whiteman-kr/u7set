@@ -114,6 +114,11 @@ void AppDataReceiver::unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQ
 	m_statesProcessingThread.unregisterGatewaySignalStatesQueue(destQueue);
 }
 
+void AppDataReceiver::setEnableLog(bool enable)
+{
+	m_enableLog = enable;
+}
+
 void AppDataReceiver::run()
 {
 	m_running = true;
@@ -258,7 +263,10 @@ void AppDataReceiver::updateReceiverStatistics()
 			m_rupFramesReceivingSpeed = static_cast<int>((m_rupFramesReceivedPerSecond * 1000.0) / dt);
 			m_rupFramesReceivedPerSecond = 0;
 
-			qDebug() << C_STR(QString("Receive RUP frames %1/s").arg(m_rupFramesReceivingSpeed));
+			if (m_enableLog)
+			{
+				qDebug() << C_STR(QString("Receive RUP frames %1/s").arg(m_rupFramesReceivingSpeed));
+			}
 
 			m_lastUpdateTime = now;
 		}
@@ -319,12 +327,12 @@ bool AppDataReceiver::createAndBindSocket()
 
 		if (error)
 		{
-			DEBUG_LOG_ERR(m_log, "AppDataReceiver error changing udp socket receive buffer size");
+			logErr("AppDataReceiver error changing udp socket receive buffer size");
 		}
 
 		m_socket->get_option(rxBufferSize);
 
-		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver udp socket receive buffer size %1 bytes").
+		logMsg(QString("AppDataReceiver udp socket receive buffer size %1 bytes").
 							 arg(rxBufferSize.value()));
 
 		m_socket->bind(m_appDataReceivingIP, error);
@@ -334,14 +342,14 @@ bool AppDataReceiver::createAndBindSocket()
 			m_socketErrorCtr = 0;
 			m_socketBound = true;
 
-			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver socket created and bound to %1").
+			logMsg(QString("AppDataReceiver socket created and bound to %1").
 							arg(appDataReceivingIPStr()));
 
 			startReceive();
 		}
 		else
 		{
-			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver error binding listening socket to %1: %2").
+			logErr(QString("AppDataReceiver error binding listening socket to %1: %2").
 							arg(m_dataReceivingIP.addressPortStr()).
 							arg(QString::fromStdString(error.message())));
 
@@ -350,7 +358,7 @@ bool AppDataReceiver::createAndBindSocket()
 	}
 	else
 	{
-		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket opening error: %1").
+		logErr(QString("AppDataReceiver listening socket opening error: %1").
 						arg(QString::fromStdString(error.message())));
 
 		closeSocket();
@@ -589,7 +597,7 @@ void AppDataReceiver::requireSignalsInvalidation(AppDataSource* source)
 
 void AppDataReceiver::processPackets(int threadNumber)
 {
-	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThread #%1 is started").arg(threadNumber));
+	logMsg(QString("AppDataProcessingThread #%1 is started").arg(threadNumber));
 
 	auto& waitConditionMutex = m_packetProcessingRequiredMutex;
 	auto& waitCondition = m_packetProcessingRequiredCondition;
@@ -694,7 +702,7 @@ void AppDataReceiver::startProcessingThreads(StdThreadsGuard& stg)
 		stg.append(std::move(t));
 	}
 
-	DEBUG_LOG_MSG(m_log, QString("AppDataProcessingThreadsPool started. Running threads count %1%2").
+	logMsg(QString("AppDataProcessingThreadsPool started. Running threads count %1%2").
 							arg(poolSize).arg(poolSize == idealThreadCount ? " (ideal)" : ""));
 
 	std::thread t(&SignalStatesProcessingThread::processStates,
@@ -763,4 +771,21 @@ void AppDataReceiver::trace_dt(const QString& portID)
 		m_prevPacketTime = curTime;
 	}
 }
+
+void AppDataReceiver::logMsg(const QString& str)
+{
+	if (m_enableLog)
+	{
+		DEBUG_LOG_MSG(m_log, str);
+	}
+}
+
+void AppDataReceiver::logErr(const QString& str)
+{
+	if (m_enableLog)
+	{
+		DEBUG_LOG_ERR(m_log, str);
+	}
+}
+
 
