@@ -575,7 +575,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 
 		SimpleAppSignalState state;
 
-		for(int i = 1; i < 10000; i++)
+		for(quint64 i = 1; i < 10000; i++)
 		{
 			state.hash = i;
 			state.time.plant.timeStamp = i + 1000;
@@ -598,24 +598,32 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 
 	Grpc::GetAppSignalStateChangesReply reply;
 
-	int ctr = 1;
+	quint64 ctr = 1;
 
 	while (reader->Read(&reply))
 	{
 		DEBUG_LOG_MSG(logger, QString("Recevie state changes: %1").arg(reply.appsignalstates_size()));
 
+		bool exit = false;
+
 		for(const Proto::AppSignalState& st : reply.appsignalstates())
 		{
-			EXPECT_EQ(st.hash(), ctr);
+			EXPECT_EQ(st.hash(),  ctr);
 			EXPECT_EQ(st.value(), static_cast<double>(ctr % 100));
 			EXPECT_EQ(st.flags(), ctr + 101);
 			EXPECT_EQ(st.planttime(), ctr + 1000);
 			EXPECT_EQ(st.localtime(), ctr + 2000);
 			EXPECT_EQ(st.systemtime(), ctr + 3000);
 			ctr++;
+
+			if (st.hash() != ctr)
+			{
+				exit = true;
+				break;
+			}
 		}
 
-		if (ctr >= 10000)
+		if (ctr >= 10000 || exit)
 		{
 			ctx.TryCancel();
 			break;
