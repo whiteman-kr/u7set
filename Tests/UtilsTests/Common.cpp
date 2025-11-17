@@ -16,6 +16,7 @@ AppSignals appSignals;
 DynamicAppSignalStates appSignalStates;
 
 std::shared_ptr<AppDataReceiver> appDataReceiver;
+std::shared_ptr<DiscretesLogWriter> dsLogWriter;
 
 bool isGTestDeathChild(const QStringList& args)
 {
@@ -159,6 +160,16 @@ void createAndStartAppDataReceiver()
 void stopAppDataReceiver()
 {
 	appDataReceiver->quitAndWait();
+}
+
+void startDiscretesLogWriter()
+{
+	dsLogWriter = std::make_shared<DiscretesLogWriter>();
+}
+
+void stopDiscretesLogWriter()
+{
+	dsLogWriter.reset();
 }
 
 void logMsg(const QString& msg)

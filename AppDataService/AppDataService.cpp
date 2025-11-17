@@ -659,7 +659,8 @@ void AppDataServiceWorker::runGrpcAppDataSrv()
 
 	m_grpcAppDataSrv = std::make_unique<GrpcAppDataSrv>(softwareInfo(),	true, clients, false,
 														listenIPs, m_appDataReceiver, m_appSignals,
-														m_appSignalStates, logger());
+														m_appSignalStates, m_discretesLogWriter,
+														logger());
 }
 
 void AppDataServiceWorker::stopGrpcAppDataSrv()

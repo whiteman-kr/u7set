@@ -14,6 +14,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "DynamicAppSignalState.h"
 #include "AppDataReceiver.h"
+#include "DiscretesLog.h"
 
 class AppDataServiceSettings;
 
@@ -28,6 +29,7 @@ public:
 							AppDataReceiver* appDataReceiver,
 							const AppSignals& appSignals,
 							const DynamicAppSignalStates& signalStates,
+							std::shared_ptr<DiscretesLogWriter> dsLogWriter,
 							CircularLoggerShared log);
 
 	explicit GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
@@ -38,6 +40,7 @@ public:
 							AppDataReceiver* appDataReceiver,
 							const AppSignals& appSignals,
 							const DynamicAppSignalStates& signalStates,
+							std::shared_ptr<DiscretesLogWriter> dsLogWriter,
 							CircularLoggerShared log);
 
 	GrpcAppDataSrv(const GrpcAppDataSrv&) = delete;
@@ -68,6 +71,11 @@ public:
 	grpc::Status GetAppSignalStateChanges(grpc::ServerContext* context,
 								   const Grpc::GetAppSignalStateChangesRequest* request,
 								   grpc::ServerWriter<Grpc::GetAppSignalStateChangesReply>* writer) override;
+
+	grpc::Status GetDiscretesLog(grpc::ServerContext* context,
+								const Grpc::GetDiscretesLogRequest* request,
+								grpc::ServerWriter<Grpc::GetDiscretesLogReply>* writer) override;
+
 private:
 	void initService(const std::vector<HostAddressPort>& listenIPs);
 
@@ -75,6 +83,7 @@ private:
 	AppDataReceiver* m_appDataReceiver = nullptr;
 	const AppSignals& m_appSignals;
 	const DynamicAppSignalStates& m_signalStates;
+	std::shared_ptr<DiscretesLogWriter> m_dsLogWriter;
 	CircularLoggerShared m_log;
 	std::unique_ptr<grpc::Server> m_server;
 	std::jthread m_thread;

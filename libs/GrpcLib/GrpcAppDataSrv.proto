@@ -70,6 +70,21 @@ message GetAppSignalStateChangesReply
 	repeated Proto.AppSignalState appSignalStates = 2;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
 }
 
+//
+// GetDiscretesLog
+//
+message GetDiscretesLogRequest
+{
+}
+
+message GetDiscretesLogReply
+{
+	optional bool logIsWorkable = 1 [default = false];
+	optional int32 pendingRecordsCount = 2 [default = 0];
+	optional int64 logFirstRecordID = 3 [default = 0];
+	repeated Network.DiscretesLogRecord discretesLogRecord = 4;
+}
+
 service AppDataSrv
 {
 	rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
@@ -77,4 +92,5 @@ service AppDataSrv
 	rpc GetAppSignalParam(GetAppSignalParamRequest) returns (stream GetAppSignalParamReply) {}
 	rpc GetAppSignalState(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}
 	rpc GetAppSignalStateChanges(GetAppSignalStateChangesRequest) returns (stream GetAppSignalStateChangesReply) {}
+	rpc GetDiscretesLog(GetDiscretesLogRequest) returns (stream GetDiscretesLogReply) {}
 }

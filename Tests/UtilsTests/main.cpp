@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
 
 	createAndInitSignalStates();
 	createAndStartAppDataReceiver();
+	startDiscretesLogWriter();
 
 	//
 
@@ -107,6 +108,7 @@ int main(int argc, char *argv[])
 
 	auto result = RUN_ALL_TESTS();
 
+	stopDiscretesLogWriter();
 	stopAppDataReceiver();
 
 	return result;

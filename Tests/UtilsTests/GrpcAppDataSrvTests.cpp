@@ -28,7 +28,8 @@ std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddre
 
 	outServer = std::make_unique<GrpcAppDataSrv>(si, allowAllClients, clients, checkHostName,
 												 listenIP, appDataReceiver.get(),
-												 appSignals, appSignalStates, logger);
+												 appSignals, appSignalStates,
+												 dsLogWriter, logger);
 
 	const std::string endpoint = listenIP.addressPortStr().toStdString();
 

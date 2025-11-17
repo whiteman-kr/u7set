@@ -10,18 +10,20 @@
 #include "GrpcAppDataSrv.h"
 
 GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
-	bool allowAllClients,
-	const std::vector<ClientInfo>& clients,
-	bool checkHostName,
-	const std::vector<HostAddressPort>& listenIPs,
-	AppDataReceiver* appDataReceiver,
-	const AppSignals& appSignals,
-	const DynamicAppSignalStates& signalStates,
-	CircularLoggerShared log) :
+								bool allowAllClients,
+								const std::vector<ClientInfo>& clients,
+								bool checkHostName,
+								const std::vector<HostAddressPort>& listenIPs,
+								AppDataReceiver* appDataReceiver,
+								const AppSignals& appSignals,
+								const DynamicAppSignalStates& signalStates,
+								std::shared_ptr<DiscretesLogWriter> dsLogWriter,
+								CircularLoggerShared log) :
 	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
 	m_appDataReceiver(appDataReceiver),
 	m_appSignals(appSignals),
 	m_signalStates(signalStates),
+	m_dsLogWriter(dsLogWriter),
 	m_log(log)
 {
 	TEST_PTR_RETURN(m_appDataReceiver);
@@ -36,11 +38,13 @@ GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
 							   AppDataReceiver* appDataReceiver,
 							   const AppSignals& appSignals,
 							   const DynamicAppSignalStates& signalStates,
+							   std::shared_ptr<DiscretesLogWriter> dsLogWriter,
 							   CircularLoggerShared log) :
 	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
 	m_appDataReceiver(appDataReceiver),
 	m_appSignals(appSignals),
 	m_signalStates(signalStates),
+	m_dsLogWriter(dsLogWriter),
 	m_log(log)
 {
 	TEST_PTR_RETURN(m_appDataReceiver);
@@ -453,6 +457,31 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 
 	return grpc::Status::CANCELLED;
 }
+
+grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
+											const Grpc::GetDiscretesLogRequest* request,
+											grpc::ServerWriter<Grpc::GetDiscretesLogReply>* writer)
+{
+	if (context == nullptr ||
+		request == nullptr ||
+		writer == nullptr ||
+		m_dsLogWriter == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
+	std::shared_ptr<DiscretesLogReader> dlReader = std::make_shared<DiscretesLogReader>(m_log);
+
+	m_dsLogWriter->registerLogReader(dlReader);
+
+	//
+
+	m_dsLogWriter->unregisterLogReader(dlReader);
+
+	return grpc::Status::CANCELLED;
+}
+
 
 void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 {
