@@ -397,6 +397,10 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 
 	int waitCtr = 0;
 
+	auto lastSendTime = std::chrono::steady_clock::now();
+	constexpr int SendPackSize = 1024;
+	constexpr std::chrono::milliseconds SendPackInterval{50};
+
 	while(context->IsCancelled() == false)
 	{
 		int statesCount = 0;
@@ -416,7 +420,10 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 			statesCount++;
 		}
 
-		if (reply.appsignalstates_size() > 0)
+		auto now = std::chrono::steady_clock::now();
+		int addedRecordCount = reply.appsignalstates_size();
+
+		if (waitCtr > 2000 || addedRecordCount > SendPackSize || (addedRecordCount > 0 && now - lastSendTime >= SendPackInterval))
 		{
 			if (writeReply(reply, writeStatus) == false)
 			{
@@ -425,21 +432,9 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 			}
 
 			waitCtr = 0;
+			lastSendTime = now;
 
-			reply.Clear();
-		}
-		else
-		{
-			if (waitCtr > 2000)
-			{
-				waitCtr = 0;
-
-				if (writeReply(reply, writeStatus) == false)
-				{
-					m_appDataReceiver->unregisterDestSignalStatesQueue(statesQueue);
-					return writeStatus;
-				}
-			}
+			reply.mutable_appsignalstates()->Clear();
 		}
 
 		if (statesQueue->isEmpty() == true)

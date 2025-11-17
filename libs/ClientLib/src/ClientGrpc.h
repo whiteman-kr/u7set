@@ -46,12 +46,18 @@ namespace ClientLib
 
 		QString statusToString(const ::grpc::Status& status);
 
-		void createAuthContext(grpc::ClientContext& context, std::chrono::milliseconds timeout = 10'000)
+		void createAuthContext(grpc::ClientContext& context, std::chrono::milliseconds timeout)
+		{
+			createAuthContext(context);
+			context.set_deadline(std::chrono::system_clock::now() + timeout);
+			return;
+		}
+
+		void createAuthContext(grpc::ClientContext& context)
 		{
 			auto token = authToken();
 			assert(token.empty() == false);
 
-			context.set_deadline(std::chrono::system_clock::now() + timeout);
 			context.AddMetadata(::Grpc::SESSION_AUTH_TOKEN, token);
 
 			// We assume that createAuthContext is called before any RPC calls, any communication error leads to re-handshake and new auth
