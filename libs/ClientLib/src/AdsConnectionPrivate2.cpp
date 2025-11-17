@@ -27,6 +27,7 @@ namespace ClientLib
 		std::expected<QStringList, QString> requestSignalList();
 		std::expected<std::vector<AppSignalParam>, QString> requestSignalParams(std::span<Hash> signalHashes = {});
 		std::expected<std::vector<AppSignalState>, QString> requestSignalStates(std::span<Hash> signalHashes);
+		void requestSignalStatesChanges(std::stop_token stoken);
 
 	private:
 		virtual void clientCommunicationLoop(std::stop_token stoken) override;
@@ -68,7 +69,7 @@ namespace ClientLib
 	std::expected<QStringList, QString> AdsClientGrpc::requestSignalList()
 	{
 		grpc::ClientContext context;
-		createAuthContext(context, std::chrono::seconds(10));
+		createAuthContext(context, std::chrono::seconds(20));
 
 		QStringList appSignalIds;
 		Grpc::GetAppSignalListRequest request;
@@ -100,7 +101,7 @@ namespace ClientLib
 	std::expected<std::vector<AppSignalParam>, QString> AdsClientGrpc::requestSignalParams(std::span<Hash> signalHashes /*= {}*/)
 	{
 		grpc::ClientContext context;
-		createAuthContext(context, std::chrono::seconds(20));
+		createAuthContext(context, std::chrono::seconds(60));
 
 		Grpc::GetAppSignalParamRequest request;
 		Grpc::GetAppSignalParamReply reply;
@@ -132,10 +133,10 @@ namespace ClientLib
 				}
 				else
 				{
-					m_log.writeError(QString{"Failed to load AppSignalParam for signal hash %1 from ADS %2, address %3"}
-										 .arg(QString::fromStdString(paramProto.appsignalid()))
-										 .arg(m_serviceEquipmentId)
-										 .arg(m_serviceAddress));
+					m_log.writeError(m_logPrefix + QString{"Failed to load AppSignalParam for signal hash %1 from ADS %2, address %3"}
+													   .arg(QString::fromStdString(paramProto.appsignalid()))
+													   .arg(m_serviceEquipmentId)
+													   .arg(m_serviceAddress));
 				}
 			}
 		}
@@ -178,7 +179,7 @@ namespace ClientLib
 			}
 
 			grpc::ClientContext context;
-			createAuthContext(context, std::chrono::seconds(20));
+			createAuthContext(context, std::chrono::seconds(30));
 
 			auto status = m_stub->GetAppSignalState(&context, request, &reply);
 			if (status.ok() == false)
@@ -196,6 +197,57 @@ namespace ClientLib
 		return result;
 	}
 
+	void AdsClientGrpc::requestSignalStatesChanges(std::stop_token stoken)
+	{
+		grpc::ClientContext context;
+		createAuthContext(context);
+
+		std::stop_callback stopCallback{stoken,
+										[&context]()
+										{
+											// Trigger gRPC cancellation, this makes Read() to return false.
+											//
+											context.TryCancel();
+										}};
+
+		Grpc::GetAppSignalStateChangesRequest request;
+		Grpc::GetAppSignalStateChangesReply reply;
+		std::vector<AppSignalState> states;
+
+		auto replyReader = m_stub->GetAppSignalStateChanges(&context, request);
+		while (stoken.stop_requested() == false && replyReader->Read(&reply) == true)
+		{
+			states.clear();
+			states.reserve(reply.appsignalstates_size());
+
+			std::transform(reply.appsignalstates().begin(),
+						   reply.appsignalstates().end(),
+						   std::back_inserter(states),
+						   [](const auto& stateProto)
+						   {
+							   return AppSignalState{stateProto};
+						   });
+
+			m_signalUpdater.setStates(std::span(states), ::calcHash(m_serviceEquipmentId), sourceId());
+#if 0
+			for (const auto& state : states)
+			{
+				qDebug() << "ADS gRPC client: State change from ADS" << m_ads.equipmentId << " at " << m_ads.address.toString()
+						 << "Hash: " << QString::number(state.hash(), 16).toUpper() << ", Value: " << state.value()
+						 << ", Timestamp:" << state.time().localToDateTime();
+			}
+#endif
+		}
+
+		auto status = replyReader->Finish();
+		m_log.writeMessage(m_logPrefix +
+						   QString{"AdsClientGrpc::requestSignalStatesChanges is about to exit with code %1, ADS %2, Address %3"}
+							   .arg(statusToString(status))
+							   .arg(m_ads.equipmentId)
+							   .arg(m_ads.address.toString()));
+		return;
+	}
+
 	void AdsClientGrpc::clientCommunicationLoop(std::stop_token stoken)
 	{
 		m_signalParamsLoaded.store(false);
@@ -207,16 +259,16 @@ namespace ClientLib
 		}
 		catch (std::exception& e)
 		{
-			m_log.writeError(QString{"Exception in AdsClientGrpc::clientCommunicationLoopImpl for ADS %1 at address %2: %3"}
-								 .arg(m_ads.equipmentId)
-								 .arg(m_ads.address.toString())
-								 .arg(e.what()));
+			m_log.writeError(m_logPrefix + QString{"Exception in AdsClientGrpc::clientCommunicationLoopImpl for ADS %1 at address %2: %3"}
+											   .arg(m_ads.equipmentId)
+											   .arg(m_ads.address.toString())
+											   .arg(e.what()));
 		}
 
 		m_signalParamsLoaded.store(false);
 		m_signalStatesLoaded.store(false);
 
-		m_log.writeMessage(QString{"Worker for ADS %1 gRPC client exiting."}.arg(m_ads.shortenId));
+		m_log.writeMessage(m_logPrefix + QString{"Worker for ADS %1 gRPC client exiting."}.arg(m_ads.shortenId));
 		return;
 	}
 
@@ -228,7 +280,7 @@ namespace ClientLib
 			auto listResult = requestSignalList();
 			if (listResult.has_value() == false)
 			{
-				m_log.writeError(QString{"Failed to get signal list from ADS %1, address %2, error: %3"}
+				m_log.writeError(m_logPrefix + QString{"Failed to get signal list from ADS %1, address %2, error: %3"}
 									.arg(m_ads.equipmentId)
 									.arg(m_ads.address.toString())
 									.arg(listResult.error()));
@@ -256,10 +308,10 @@ namespace ClientLib
 			auto signalParamsResult = requestSignalParams();
 			if (signalParamsResult.has_value() == false)
 			{
-				m_log.writeError(QString{"Failed to get signal params from ADS %1, address %2, error: %3"}
-									 .arg(m_ads.equipmentId)
-									 .arg(m_ads.address.toString())
-									 .arg(signalParamsResult.error()));
+				m_log.writeError(m_logPrefix + QString{"Failed to get signal params from ADS %1, address %2, error: %3"}
+												   .arg(m_ads.equipmentId)
+												   .arg(m_ads.address.toString())
+												   .arg(signalParamsResult.error()));
 				return;
 			}
 
@@ -295,10 +347,10 @@ namespace ClientLib
 			auto result = requestSignalStates(signalList);
 			if (result.has_value() == false)
 			{
-				m_log.writeError(QString{"Failed to get signal states from ADS %1, address %2, error: %3"}
-									 .arg(m_ads.equipmentId)
-									 .arg(m_ads.address.toString())
-									 .arg(result.error()));
+				m_log.writeError(m_logPrefix + QString{"Failed to get signal states from ADS %1, address %2, error: %3"}
+												   .arg(m_ads.equipmentId)
+												   .arg(m_ads.address.toString())
+												   .arg(result.error()));
 				return;
 			}
 
@@ -307,9 +359,41 @@ namespace ClientLib
 			m_signalStatesLoaded.store(true);
 		}
 
+		// Start separate thread for getting streamed signal state changes.
+		//
+		std::jthread stateChangesThread{
+			[this](std::stop_token stoken)
+			{
+				m_log.writeMessage(m_logPrefix + QString{"Enter listening for signal state changes for ADS %1 at address %2: %3"}
+													 .arg(m_ads.equipmentId)
+													 .arg(m_ads.address.toString()));
+
+				try
+				{
+					requestSignalStatesChanges(stoken);
+				}
+				catch (std::exception& e)
+				{
+					m_log.writeError(m_logPrefix +
+									 QString{"Exception in AdsClientGrpc::requestSignalStatesChanges for ADS %1 at address %2: %3"}
+										 .arg(m_ads.equipmentId)
+										 .arg(m_ads.address.toString())
+										 .arg(e.what()));
+				}
+
+				m_log.writeMessage(m_logPrefix + QString{"Leaving listening for signal state changes for ADS %1 at address %2: %3"}
+													 .arg(m_ads.equipmentId)
+													 .arg(m_ads.address.toString()));
+			}};
+
 		// Loop, getting signal states periodically.
 		//
+		constexpr size_t RepeatedlyGetStateCount =
+			ADS_GET_APP_SIGNAL_STATE_MAX / 16; // 312 states * 10 requests/sec = 3120 states/sec, or 187'200 states/minute.
 		size_t statePart = 0;
+
+		auto lastCycleStart = std::chrono::steady_clock::now();
+		constexpr auto StateRequestMinCycle = std::chrono::seconds(15);
 
 		while (stoken.stop_requested() == false)
 		{
@@ -319,31 +403,53 @@ namespace ClientLib
 			//
 			{
 				std::span<Hash> signalHashesPart{
-					signalList.begin() + statePart * ADS_GET_APP_SIGNAL_STATE_MAX,
-					std::min<size_t>(ADS_GET_APP_SIGNAL_STATE_MAX, signalList.size() - statePart * ADS_GET_APP_SIGNAL_STATE_MAX)};
+					signalList.begin() + statePart * RepeatedlyGetStateCount,
+					std::min<size_t>(RepeatedlyGetStateCount, signalList.size() - statePart * RepeatedlyGetStateCount)};
 
 				auto result = requestSignalStates(signalHashesPart);
 				if (result.has_value() == false)
 				{
-					m_log.writeError(QString{"Failed to get signal states from ADS %1, address %2, error: %3"}
-										 .arg(m_ads.equipmentId)
-										 .arg(m_ads.address.toString())
-										 .arg(result.error()));
+					m_log.writeError(m_logPrefix + QString{"Failed to get signal states from ADS %1, address %2, error: %3"}
+													   .arg(m_ads.equipmentId)
+													   .arg(m_ads.address.toString())
+													   .arg(result.error()));
 					return;
 				}
 
 				m_signalUpdater.setStates(std::span(result.value()), ::calcHash(m_serviceEquipmentId), sourceId());
 
 				statePart++;
-				if (statePart * ADS_GET_APP_SIGNAL_STATE_MAX >= signalList.size())
+				if (statePart * RepeatedlyGetStateCount >= signalList.size())
 				{
 					statePart = 0;
+
+					auto timeSinceLastCycle = std::chrono::steady_clock::now() - lastCycleStart;
+					if (timeSinceLastCycle < StateRequestMinCycle)
+					{
+						// Throttle to not overload the ADS if all states were retrieved too fast.
+						//
+						for (auto sleepTime = StateRequestMinCycle - timeSinceLastCycle; sleepTime > std::chrono::milliseconds(0);
+							 sleepTime -= std::chrono::milliseconds(100))
+						{
+							if (stoken.stop_requested() == true)
+							{
+								break;
+							}
+
+							std::this_thread::sleep_for(std::chrono::milliseconds(100));
+						}
+					}
+
+					lastCycleStart = std::chrono::steady_clock::now();
 				}
 			}
 
 			// Control server time discrepancy
 			//
 		}
+
+		stateChangesThread.request_stop();
+		stateChangesThread.join();
 
 		return;
 	}
@@ -374,7 +480,7 @@ namespace ClientLib
 	AdsConnectionPrivate2::Connection::Connection(const SoftwareInfo& softwareInfo,
 												  const SoftwareEndpoint::AppDataService& ads,
 												  IAppSignalUpdater& signalUpdater,
-												  IRecentAppSignals* recentAppSignals,
+												  IRecentAppSignals* /*recentAppSignals*/,
 												  SignalLog& signalLog,
 												  ILogFile& logFile) :
 		m_client{std::make_unique<ClientLib::AdsClientGrpc>(softwareInfo, ads, signalUpdater, signalLog, logFile)}
