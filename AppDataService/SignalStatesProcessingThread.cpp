@@ -173,10 +173,12 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 
 		ul.unlock();
 
-		int ctr = 500;
-
 		if (sourceToStatesProcessing != nullptr)
 		{
+			int ctr = 500;
+
+			bool res = true;
+
 			m_queuesMutex.lock();
 
 			while(ctr > 0)
@@ -199,13 +201,15 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 						//
 						if (state.sendStateToArchive == true)
 						{
-							queue->push(state.state);
+							res = queue->push(state.state);
+							Q_ASSERT(res == true);				// queue overflow
 							ctr--;
 						}
 					}
 					else
 					{
-						queue->push(state.state);
+						res = queue->push(state.state);
+						Q_ASSERT(res == true);					// queue overflow
 						ctr--;
 					}
 				}
@@ -214,6 +218,8 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 			m_queuesMutex.unlock();
 
 			//
+
+			ctr = 500;
 
 			m_gatewayQueuesMutex.lock();
 

@@ -377,7 +377,7 @@ public:
 
 	void resize(int newSize);
 
-	virtual void push(const T& item, int* curSize = nullptr, int* curMaxSize = nullptr);
+	virtual bool push(const T& item, int* curSize = nullptr, int* curMaxSize = nullptr);
 	bool pop(T* item);
 	bool peekAt(int index, T* item);
 
@@ -457,12 +457,14 @@ void FastThreadSafeQueue<T>::resize(int newSize)
 }
 
 template <typename T>
-void FastThreadSafeQueue<T>::push(const T& item, int* curSize, int* curMaxSize)
+bool FastThreadSafeQueue<T>::push(const T& item, int* curSize, int* curMaxSize)
 {
 	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
 	assert(m_pushIsBegan == false);
 	assert(m_popIsBegan == false);
+
+	bool res = true;
 
 	if (m_size == m_queueSize)
 	{
@@ -472,6 +474,8 @@ void FastThreadSafeQueue<T>::push(const T& item, int* curSize, int* curMaxSize)
 
 		m_readIndex++;
 		m_size--;
+
+		res = false;
 	}
 
 	memcpy(m_buffer + m_writeIndex(), &item, sizeof(T));
@@ -495,6 +499,8 @@ void FastThreadSafeQueue<T>::push(const T& item, int* curSize, int* curMaxSize)
 	}
 
 	afterPush();
+
+	return res;
 }
 
 template <typename T>
