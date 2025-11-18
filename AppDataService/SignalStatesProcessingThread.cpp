@@ -17,19 +17,23 @@ void SignalStatesProcessingThread::registerDestSignalStatesQueue(SimpleAppSignal
 {
     TEST_PTR_RETURN(destQueue);
 
-	m_queuesMutex.lock();
-
-	auto it = m_queues.find(destQueue);
-
-	if (it == m_queues.end())
 	{
-		m_queues.insert({ destQueue, { isArchivingQueue, description }});
+		std::lock_guard lg(m_queuesMutex);
+
+		auto it = std::find_if(m_queues.begin(), m_queues.end(),
+							   [&destQueue](const QueueInfo& qi)
+							   {
+								   return qi.queue == destQueue;
+							   });
+
+		if (it != m_queues.end())
+		{
+			Q_ASSERT(false);				// queue already registered
+			return;
+		}
+
+		m_queues.emplace_back(destQueue, isArchivingQueue, description);
 	}
-	else
-	{
-		Q_ASSERT(false);
-	}
-	m_queuesMutex.unlock();
 
     DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread: register queue '%1'").arg(description));
 }
@@ -38,32 +42,28 @@ void SignalStatesProcessingThread::unregisterDestSignalStatesQueue(SimpleAppSign
 {
     TEST_PTR_RETURN(destQueue);
 
-	bool removeOk = false;
 	QString description;
 
-	m_queuesMutex.lock();
-
-	auto it = m_queues.find(destQueue);
-
-	if (it != m_queues.end())
 	{
-		description = it->second.second;
+		std::lock_guard lg(m_queuesMutex);
 
+		auto it = std::find_if(m_queues.begin(), m_queues.end(),
+							   [&destQueue](const QueueInfo& qi)
+							   {
+								   return qi.queue == destQueue;
+							   });
+
+		if (it == m_queues.end())
+		{
+			Q_ASSERT(false);				// queue not found
+			return;
+		}
+
+		description = it->description;
 		m_queues.erase(it);
-
-		removeOk = true;
-	}
-	else
-	{
-		Q_ASSERT(false);
 	}
 
-	m_queuesMutex.unlock();
-
-	if (removeOk == true)
-	{
-		DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread: unregister queue '%1'").arg(description));
-	}
+	DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread: unregister queue '%1'").arg(description));
 }
 
 void SignalStatesProcessingThread::registerGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue,
@@ -71,29 +71,32 @@ void SignalStatesProcessingThread::registerGatewaySignalStatesQueue(GatewayAppSi
 {
 	quint32 queueMask = 0;
 
-	m_gatewayQueuesMutex.lock();
-
-	for(int i = 0; i < GATEWAY_QUEUES_COUNT; i++)
 	{
-		GatewayQueueHashes& gqh = m_gatewayQueues[i];
+		std::lock_guard lg(m_gatewayQueuesMutex);
 
-		if (gqh.queue == nullptr)
+		for(int i = 0; i < GATEWAY_QUEUES_COUNT; i++)
 		{
-			gqh.queue = destQueue;
-			gqh.hashes = hashes;
+			GatewayQueueHashes& gqh = m_gatewayQueues[i];
 
-			queueMask = 1 << i;
+			if (gqh.queue == nullptr)
+			{
+				gqh.queue = destQueue;
+				gqh.hashes = hashes;
 
-			break;
+				queueMask = (quint32{1} << i);
+
+				break;
+			}
 		}
 	}
 
-	m_gatewayQueuesMutex.unlock();
-
-	if (queueMask != 0)
+	if (queueMask == 0)
 	{
-		m_signalStates.setGatewayQueueMask(hashes, queueMask);
+		Q_ASSERT(false);		// no free gateway queue slot
+		return;
 	}
+
+	m_signalStates.setGatewayQueueMask(hashes, queueMask);
 }
 
 void SignalStatesProcessingThread::unregisterGatewaySignalStatesQueue(GatewayAppSignalStatesQueueShared destQueue)
@@ -101,29 +104,32 @@ void SignalStatesProcessingThread::unregisterGatewaySignalStatesQueue(GatewayApp
 	quint32 queueMask = 0;
 	std::set<Hash> hashes;
 
-	m_gatewayQueuesMutex.lock();
-
-	for(int i = 0; i < GATEWAY_QUEUES_COUNT; i++)
 	{
-		GatewayQueueHashes& gqh = m_gatewayQueues[i];
+		std::lock_guard lg(m_gatewayQueuesMutex);
 
-		if (gqh.queue == destQueue)
+		for(int i = 0; i < GATEWAY_QUEUES_COUNT; i++)
 		{
-			gqh.queue = nullptr;
-			hashes.swap(gqh.hashes);
+			GatewayQueueHashes& gqh = m_gatewayQueues[i];
 
-			queueMask = 1 << i;
+			if (gqh.queue == destQueue)
+			{
+				gqh.queue = nullptr;
+				hashes.swap(gqh.hashes);
 
-			break;
+				queueMask = (quint32{1} << i);
+
+				break;
+			}
 		}
 	}
 
-	m_gatewayQueuesMutex.unlock();
-
-	if (queueMask != 0)
+	if (queueMask == 0)
 	{
-		m_signalStates.resetGatewayQueueMask(hashes, queueMask);
+		Q_ASSERT(false); // gateway queue not found
+		return;
 	}
+
+	m_signalStates.resetGatewayQueueMask(hashes, queueMask);
 }
 
 void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
@@ -173,13 +179,21 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 
 		ul.unlock();
 
-		if (sourceToStatesProcessing != nullptr)
+		if (sourceToStatesProcessing == nullptr)
 		{
-			int ctr = 500;
+			continue;
+		}
 
+		{
+			std::vector<QueueInfo> queues;
+
+			{
+				std::lock_guard lg(m_queuesMutex);
+				queues = m_queues;
+			}
+
+			int ctr = 1000;
 			bool res = true;
-
-			m_queuesMutex.lock();
 
 			while(ctr > 0)
 			{
@@ -190,38 +204,44 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 					break;
 				}
 
-				for(const auto& p : m_queues)
+				for(const QueueInfo& qi : queues)
 				{
-					SimpleAppSignalStatesQueueShared queue = p.first;
-					bool isAchiveQueue = p.second.first;
-
-					if (isAchiveQueue == true)
+					if (qi.isArchivingQueue == true)
 					{
 						// is archiving queue
 						//
 						if (state.sendStateToArchive == true)
 						{
-							res = queue->push(state.state);
+							res = qi.queue->push(state.state);
 							Q_ASSERT(res == true);				// queue overflow
 							ctr--;
 						}
 					}
 					else
 					{
-						res = queue->push(state.state);
+						res = qi.queue->push(state.state);
 						Q_ASSERT(res == true);					// queue overflow
 						ctr--;
 					}
 				}
 			}
+		}
 
-			m_queuesMutex.unlock();
+		//
 
-			//
+		{
+			std::array<GatewayAppSignalStatesQueueShared, GATEWAY_QUEUES_COUNT> gatewayQueues;
 
-			ctr = 500;
+			{
+				std::lock_guard lg(m_gatewayQueuesMutex);
 
-			m_gatewayQueuesMutex.lock();
+				for (int i = 0; i < GATEWAY_QUEUES_COUNT; ++i)
+				{
+					gatewayQueues[i] = m_gatewayQueues[i].queue;
+				}
+			}
+
+			int ctr = 1000;
 
 			while(ctr > 0)
 			{
@@ -235,11 +255,11 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 
 				quint32 queueMask = gwState.gatewayQueueMask;
 
-				for(int bit = 0; queueMask != 0 && bit < sizeof(quint32) * 8;  queueMask >>= 1, bit++)
+				for(int bit = 0; queueMask != 0 && bit < GATEWAY_QUEUES_COUNT;  queueMask >>= 1, bit++)
 				{
 					if ((queueMask & 1) != 0)
 					{
-						GatewayAppSignalStatesQueueShared queue = m_gatewayQueues[bit].queue;
+						GatewayAppSignalStatesQueueShared queue = gatewayQueues[bit];
 
 						if (queue != nullptr)
 						{
@@ -249,8 +269,6 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 					}
 				}
 			}
-
-			m_gatewayQueuesMutex.unlock();
 		}
 	}
 
