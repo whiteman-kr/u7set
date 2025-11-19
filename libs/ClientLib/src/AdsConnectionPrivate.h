@@ -68,8 +68,7 @@ namespace ClientLib
 		///
 		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
 
-		std::vector<Tcp::ConnectionState> tcpSignalConnStates() const;
-		std::vector<Tcp::ConnectionState> recentSignalConnStates() const;
+		std::vector<Tcp::ConnectionState> connectionStates() const;
 
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;

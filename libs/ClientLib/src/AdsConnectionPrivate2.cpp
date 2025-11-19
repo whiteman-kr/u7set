@@ -14,7 +14,7 @@ namespace ClientLib
 {
 	// AdsClientGrpc
 	//
-	class AdsClientGrpc : protected ClientGrpc<Grpc::AppDataSrv>
+	class AdsClientGrpc : public ClientGrpc<Grpc::AppDataSrv>
 	{
 	public:
 		explicit AdsClientGrpc(const SoftwareInfo& softwareInfo,
@@ -22,6 +22,11 @@ namespace ClientLib
 							   IAppSignalUpdater& signalUpdater,
 							   SignalLog& signalLog,
 							   ILogFile& logFile);
+
+		// Implementing ClientConnectionStatistics
+		//
+	public:
+		virtual QString statsObjectName() override;
 
 	public:
 		std::expected<QStringList, QString> requestSignalList();
@@ -35,8 +40,6 @@ namespace ClientLib
 
 	public:
 		const SoftwareEndpoint::AppDataService& ads() const;
-
-		Tcp::ConnectionState tcpState() const;
 
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
@@ -63,7 +66,13 @@ namespace ClientLib
 		m_signalUpdater{signalUpdater},
 		m_signalLog{signalLog}
 	{
+		m_tcpState.name = "AdsClientGrpc " + ads.shortenId;
 		return;
+	}
+
+	QString AdsClientGrpc::statsObjectName()
+	{
+		return "AdsClientGrpc";
 	}
 
 	std::expected<QStringList, QString> AdsClientGrpc::requestSignalList()
@@ -76,8 +85,11 @@ namespace ClientLib
 		Grpc::GetAppSignalListReply reply;
 
 		auto replyReader = m_stub->GetAppSignalList(&context, request);
+		incRequestCount();
+
 		while (replyReader->Read(&reply) == true)
 		{
+			incReplyCount();
 			if (appSignalIds.size() == 0)
 			{
 				appSignalIds.reserve(reply.totalsize());
@@ -115,8 +127,12 @@ namespace ClientLib
 		std::vector<AppSignalParam> result;
 
 		auto replyReader = m_stub->GetAppSignalParam(&context, request);
+		incRequestCount();
+
 		while (replyReader->Read(&reply))
 		{
+			incReplyCount();
+
 			if (result.capacity() == 0)
 			{
 				result.reserve(reply.totalsize());
@@ -182,10 +198,16 @@ namespace ClientLib
 			createAuthContext(context, std::chrono::seconds(30));
 
 			auto status = m_stub->GetAppSignalState(&context, request, &reply);
+			incRequestCount();
+
 			if (status.ok() == false)
 			{
 				return std::unexpected<QString>{
 					QString("Failed to get signal states (part %1/%2), error %3").arg(part + 1).arg(parts).arg(statusToString(status))};
+			}
+			else
+			{
+				incReplyCount();
 			}
 
 			for (const auto& stateProto : reply.appsignalstates())
@@ -215,8 +237,12 @@ namespace ClientLib
 		std::vector<AppSignalState> states;
 
 		auto replyReader = m_stub->GetAppSignalStateChanges(&context, request);
+		incRequestCount();
+
 		while (stoken.stop_requested() == false && replyReader->Read(&reply) == true)
 		{
+			incReplyCount();
+
 			states.clear();
 			states.reserve(reply.appsignalstates_size());
 
@@ -232,11 +258,17 @@ namespace ClientLib
 #if 0
 			for (const auto& state : states)
 			{
-				qDebug() << "ADS gRPC client: State change from ADS" << m_ads.equipmentId << " at " << m_ads.address.toString()
-						 << "Hash: " << QString::number(state.hash(), 16).toUpper() << ", Value: " << state.value()
-						 << ", Timestamp:" << state.time().localToDateTime();
+				if (state.hash() == ::calcHash(QString("#CT_LOG_LM11")))
+				{
+					qDebug() << "ADS gRPC client: State change " << m_ads.equipmentId << " at " << m_ads.address.toString()
+							 << ", Value: " << state.value()
+							 << ", Timestamp:" << state.time().localToDateTime()
+							 << ", numerator: " << reply.numertator() << ", states: " << reply.appsignalstates_size()
+							 << ", incudes: " << reply.includesthatfuckingsignal();
+				}
 			}
 #endif
+			reply.Clear();
 		}
 
 		auto status = replyReader->Finish();
@@ -459,12 +491,6 @@ namespace ClientLib
 		return m_ads;
 	}
 
-	Tcp::ConnectionState AdsClientGrpc::tcpState() const
-	{
-		std::lock_guard<std::mutex> lock{m_tcpStateMutex};
-		return m_tcpState;
-	}
-
 	bool AdsClientGrpc::signalParamsLoaded() const
 	{
 		return m_signalParamsLoaded.load();
@@ -500,7 +526,7 @@ namespace ClientLib
 
 	Tcp::ConnectionState AdsConnectionPrivate2::Connection::tcpConnectionState() const
 	{
-		return m_client->tcpState();
+		return m_client->statsConnectionState();
 	}
 
 	bool AdsConnectionPrivate2::Connection::signalParamsLoaded() const
@@ -570,7 +596,7 @@ namespace ClientLib
 		return;
 	}
 
-	std::vector<Tcp::ConnectionState> AdsConnectionPrivate2::tcpSignalConnStates() const
+	std::vector<Tcp::ConnectionState> AdsConnectionPrivate2::connectionStates() const
 	{
 		QReadLocker locker{&m_connsMutex};
 
@@ -581,28 +607,6 @@ namespace ClientLib
 		{
 			states.emplace_back(c.tcpConnectionState());
 		}
-
-		return states;
-	}
-
-	std::vector<Tcp::ConnectionState> AdsConnectionPrivate2::recentSignalConnStates() const
-	{
-		std::vector<Tcp::ConnectionState> states;
-
-		if (m_recentAppSignals == nullptr)
-		{
-			return states;
-		}
-
-		QReadLocker locker{&m_connsMutex};
-
-		states.reserve(m_conns.size());
-
-		// for (const Connection& c : m_conns)
-		//{
-		//	Q_ASSERT(c.tcpSignalRecents);
-		//	states.emplace_back(c.tcpSignalRecents->getConnectionState());
-		// }
 
 		return states;
 	}

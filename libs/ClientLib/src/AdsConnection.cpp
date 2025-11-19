@@ -12,6 +12,7 @@
 namespace ClientLib
 {
 	AdsConnection::AdsConnection(IAppSignalUpdater& signalUpdater, IRecentAppSignals* recentAppSignals, ILogFile* logFile) :
+		m_hasRecentAppSignals{recentAppSignals != nullptr},
 		m_pimpl{std::make_unique<AdsConnectionType>(signalUpdater, recentAppSignals, logFile)}
 	{
 		return;
@@ -25,14 +26,29 @@ namespace ClientLib
 		return m_pimpl->updateConnections(softwareInfo, appDataServices);
 	}
 
-	std::vector<Tcp::ConnectionState> AdsConnection::tcpSignalConnStates() const
+	std::vector<Tcp::ConnectionState> AdsConnection::connectionStates() const
 	{
-		return m_pimpl->tcpSignalConnStates();
+		return m_pimpl->connectionStates();
 	}
 
-	std::vector<Tcp::ConnectionState> AdsConnection::recentSignalConnStates() const
+	int AdsConnection::connectionsPerServer() const
 	{
-		return m_pimpl->recentSignalConnStates();
+		// Returns 2 for TcpConnection and 1 for Grpc.
+		//
+		int result = 0;
+
+		if constexpr (std::is_same_v<::ClientLib::AdsConnection::AdsConnectionType, ::ClientLib::AdsConnectionPrivate>)
+		{
+			result = m_hasRecentAppSignals ? 2 : 1;
+		}
+
+		if constexpr (std::is_same_v<::ClientLib::AdsConnection::AdsConnectionType, ::ClientLib::AdsConnectionPrivate2>)
+		{
+			result = 1;
+		}
+
+		Q_ASSERT(result != 0);
+		return result;
 	}
 
 	bool AdsConnection::signalParamsLoaded() const

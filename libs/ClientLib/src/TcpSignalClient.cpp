@@ -37,7 +37,7 @@ namespace ClientLib
 									 IAppSignalUpdater& signalUpdater,
 									 SignalLog& signalLog,
 									 ILogFile* logFile) :
-		Tcp::Client(softwareInfo, adsInfo.address, "TcpSignalClient", adsInfo.equipmentId),
+		Tcp::Client(softwareInfo, adsInfo.address, "TcpSignalClient", adsInfo.shortenId),
 		TcpClientStatistics(this),
 		HasLogFile(logFile, QString("ADS ") + adsInfo.shortenId),
 		m_serverSettings(adsInfo),
@@ -659,7 +659,7 @@ namespace ClientLib
 							 .arg(m_serverSettings.equipmentId));
 
 			tl_ackDiscretesLogRequest.set_acksource(localSoftwareInfo().equipmentID().toStdString());
-			tl_ackDiscretesLogRequest.set_ackuser("User");	// ???
+			tl_ackDiscretesLogRequest.set_ackuser("User"); // ???
 			tl_ackDiscretesLogRequest.set_ackuptoplanttime(plantTimeToAck.value().timeStamp);
 			sendRequest(ADS_ACK_DISCRETES_LOG, tl_ackDiscretesLogRequest);
 		}

@@ -213,14 +213,12 @@ void SignalStatesProcessingThread::processStates(AppDataReceiver& receiver)
 						if (state.sendStateToArchive == true)
 						{
 							res = qi.queue->push(state.state);
-							Q_ASSERT(res == true);				// queue overflow
 							ctr--;
 						}
 					}
 					else
 					{
 						res = qi.queue->push(state.state);
-						Q_ASSERT(res == true);					// queue overflow
 						ctr--;
 					}
 				}

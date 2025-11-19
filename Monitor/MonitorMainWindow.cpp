@@ -921,7 +921,7 @@ void MonitorMainWindow::updateStatusBar()
 	// AppDataService connection
 	//
 	{
-		showSoftwareConnection(tr("AppDataService"), m_adsConnection.tcpSignalConnStates(), m_statusBarAppDataConnection);
+		showSoftwareConnection(tr("AppDataService"), m_adsConnection.connectionStates(), m_statusBarAppDataConnection);
 	}
 
 	// TuningService connection

@@ -142,12 +142,12 @@ namespace ClientLib
 		return;
 	}
 
-	std::vector<Tcp::ConnectionState> AdsConnectionPrivate::tcpSignalConnStates() const
+	std::vector<Tcp::ConnectionState> AdsConnectionPrivate::connectionStates() const
 	{
 		QReadLocker locker{&m_connsMutex};
 
 		std::vector<Tcp::ConnectionState> states;
-		states.reserve(m_conns.size());
+		states.reserve(m_conns.size() * 2);
 
 		for (const Connection& c : m_conns)
 		{
@@ -155,26 +155,13 @@ namespace ClientLib
 			states.emplace_back(c.tcpSignalClient->getConnectionState());
 		}
 
-		return states;
-	}
-
-	std::vector<Tcp::ConnectionState> AdsConnectionPrivate::recentSignalConnStates() const
-	{
-		std::vector<Tcp::ConnectionState> states;
-
-		if (m_recentAppSignals == nullptr)
+		if (m_recentAppSignals != nullptr)
 		{
-			return states;
-		}
-
-		QReadLocker locker{&m_connsMutex};
-
-		states.reserve(m_conns.size());
-
-		for (const Connection& c : m_conns)
-		{
-			Q_ASSERT(c.tcpSignalRecents);
-			states.emplace_back(c.tcpSignalRecents->getConnectionState());
+			for (const Connection& c : m_conns)
+			{
+				Q_ASSERT(c.tcpSignalRecents);
+				states.emplace_back(c.tcpSignalRecents->getConnectionState());
+			}
 		}
 
 		return states;

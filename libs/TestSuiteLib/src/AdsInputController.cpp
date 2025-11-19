@@ -33,7 +33,7 @@ namespace TestSuite
 
 			// Wait for 30 replies, so all signals are loaded and some states are received.
 			//
-			std::vector<Tcp::ConnectionState> adsConnStates = m_connection.tcpSignalConnStates();
+			std::vector<Tcp::ConnectionState> adsConnStates = m_connection.connectionStates();
 			if (std::all_of(adsConnStates.begin(),
 							adsConnStates.end(),
 							[](const auto& s)
@@ -45,7 +45,7 @@ namespace TestSuite
 			}
 		}
 
-		std::vector<Tcp::ConnectionState> adsConnStates = m_connection.tcpSignalConnStates();
+		std::vector<Tcp::ConnectionState> adsConnStates = m_connection.connectionStates();
 
 		m_appLog.writeMessage("AppDataService connections, Count: " + QString::number(adsConnStates.size()));
 

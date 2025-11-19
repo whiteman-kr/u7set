@@ -138,7 +138,7 @@ TEST_F(AdsConnectionTests, connectToAds)
 
 			// Wait for 20 replies, so all signals are loaded and some states are received.
 			//
-			std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.tcpSignalConnStates();
+			std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.connectionStates();
 			if (std::all_of(adsConnStates.begin(),
 							adsConnStates.end(),
 							[](const auto& s)
@@ -152,21 +152,24 @@ TEST_F(AdsConnectionTests, connectToAds)
 
 		// Check that two connections are established.
 		//
-		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.tcpSignalConnStates();
-		std::vector<Tcp::ConnectionState> adsRecntStates = adsConnection.recentSignalConnStates();
+		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.connectionStates();
 
-		ASSERT_EQ(adsConnStates.size(), 2);
-		ASSERT_EQ(adsRecntStates.size(), 2);
+		ASSERT_EQ(adsConnStates.size(), 2 * adsConnection.connectionsPerServer());
 
 		EXPECT_TRUE(adsConnStates[0].isConnected);
-		EXPECT_TRUE(adsConnStates[1].isConnected);
 		EXPECT_EQ(adsConnStates[0].peerAddr.toStdString(), AppDataServices[0].address.toStdString());
+
+		EXPECT_TRUE(adsConnStates[1].isConnected);
 		EXPECT_EQ(adsConnStates[1].peerAddr.toStdString(), AppDataServices[1].address.toStdString());
 
-		EXPECT_TRUE(adsRecntStates[0].isConnected);
-		EXPECT_TRUE(adsRecntStates[1].isConnected);
-		EXPECT_EQ(adsRecntStates[0].peerAddr.toStdString(), AppDataServices[0].address.toStdString());
-		EXPECT_EQ(adsRecntStates[1].peerAddr.toStdString(), AppDataServices[1].address.toStdString());
+		if (adsConnection.connectionsPerServer() == 2)
+		{
+			EXPECT_TRUE(adsConnStates[2].isConnected);
+			EXPECT_EQ(adsConnStates[2].peerAddr.toStdString(), AppDataServices[0].address.toStdString());
+
+			EXPECT_TRUE(adsConnStates[3].isConnected);
+			EXPECT_EQ(adsConnStates[3].peerAddr.toStdString(), AppDataServices[1].address.toStdString());
+		}
 	}
 
 	return;
@@ -221,11 +224,9 @@ TEST_F(AdsConnectionTests, adsNoConnection)
 
 		// Check that two connections are established.
 		//
-		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.tcpSignalConnStates();
-		std::vector<Tcp::ConnectionState> adsRecntStates = adsConnection.recentSignalConnStates();
+		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.connectionStates();
 
-		ASSERT_EQ(adsConnStates.size(), 2);
-		ASSERT_EQ(adsRecntStates.size(), 0);
+		ASSERT_EQ(adsConnStates.size(), 2 * adsConnection.connectionsPerServer());
 
 		EXPECT_FALSE(adsConnStates[0].isConnected);
 		EXPECT_FALSE(adsConnStates[1].isConnected);
@@ -261,7 +262,7 @@ TEST_F(AdsConnectionTests, receivesState)
 
 		// Wait for 30 replies, so all signals are loaded and some states are received.
 		//
-		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.tcpSignalConnStates();
+		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.connectionStates();
 		if (std::all_of(adsConnStates.begin(),
 						adsConnStates.end(),
 						[](const auto& s)
