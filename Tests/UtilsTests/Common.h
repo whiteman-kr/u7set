@@ -23,7 +23,6 @@ extern AppSignals appSignals;
 extern DynamicAppSignalStates appSignalStates;
 
 extern std::shared_ptr<AppDataReceiver> appDataReceiver;
-extern std::shared_ptr<DiscretesLogWriter> dsLogWriter;
 
 //
 
@@ -54,7 +53,7 @@ void createAndInitSignalStates();
 void createAndStartAppDataReceiver();
 void stopAppDataReceiver();
 
-void startDiscretesLogWriter();
-void stopDiscretesLogWriter();
+std::shared_ptr<DiscretesLogWriter> startDiscretesLogWriter(const QString& project, const QString& equipmentID);
+void stopDiscretesLogWriter(std::shared_ptr<DiscretesLogWriter> dsLogWriter);
 
 void logMsg(const QString& msg);

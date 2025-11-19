@@ -390,7 +390,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 	//
 
 	SimpleAppSignalStatesQueueShared statesQueue =
-		std::make_shared<SimpleAppSignalStatesQueue>(static_cast<int>(m_appSignals.count()) * 3);
+		std::make_shared<SimpleAppSignalStatesQueue>(static_cast<int>(m_appSignals.count()) * 5);
 
 	m_appDataReceiver->registerDestSignalStatesQueue(statesQueue, false,
 													 QString("GrpcAppDataSrv[%1]::statesQueue").
@@ -551,6 +551,33 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 	m_dsLogWriter->unregisterLogReader(dlReader);
 
 	return grpc::Status::CANCELLED;
+}
+
+grpc::Status GrpcAppDataSrv::AckDiscretesLog(grpc::ServerContext* context,
+											const Grpc::AckDiscretesLogRequest* request,
+											Grpc::AckDiscretesLogReply* reply)
+{
+	if (context == nullptr ||
+		request == nullptr ||
+		reply == nullptr ||
+		m_dsLogWriter == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
+	}
+
+	m_dsLogWriter->ackDiscretesLog(*request);
+
+	reply->set_ackuser(request->ackuser());
+	reply->set_acksource(request->acksource());
+	reply->set_ackuptoplanttime(request->ackuptoplanttime());
+
+	return grpc::Status::OK;
 }
 
 void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)

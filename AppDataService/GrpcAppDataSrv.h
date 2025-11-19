@@ -76,6 +76,10 @@ public:
 								const Grpc::GetDiscretesLogRequest* request,
 								grpc::ServerWriter<Grpc::GetDiscretesLogReply>* writer) override;
 
+	grpc::Status AckDiscretesLog(grpc::ServerContext* context,
+								 const Grpc::AckDiscretesLogRequest* request,
+								 Grpc::AckDiscretesLogReply* reply) override;
+
 private:
 	void initService(const std::vector<HostAddressPort>& listenIPs);
 

@@ -574,6 +574,17 @@ void DiscretesLogWriter::ackDiscretesLog(const Network::AckDiscretesLogRequest& 
 	m_condVar.notify_one();
 }
 
+void DiscretesLogWriter::ackDiscretesLog(const Grpc::AckDiscretesLogRequest& ackRequest)
+{
+	Network::AckDiscretesLogRequest request;
+
+	request.set_acksource(ackRequest.acksource());
+	request.set_ackuser(ackRequest.ackuser());
+	request.set_ackuptoplanttime(ackRequest.ackuptoplanttime());
+
+	ackDiscretesLog(request);
+}
+
 QString DiscretesLogWriter::databaseName()
 {
 	return m_databaseName;
@@ -663,6 +674,27 @@ void DiscretesLogWriter::waitWhileLogQueueIsEmpty()
 		QThread::msleep(50);
 	}
 #endif
+}
+
+// for testing purposes ONLY!
+//
+void DiscretesLogWriter::deleteDatabaseFiles(const QString& project, const QString& equipmentID)
+{
+	const QString dirPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+
+	QDir dir(dirPath);
+
+	if (!dir.exists())
+	{
+		return;
+	}
+
+	const QStringList files = dir.entryList({QString("DiscretesLog_%1_%2.*").arg(project).arg(equipmentID)}, QDir::Files);
+
+	for (const QString& fileName : files)
+	{
+		QFile::remove(dir.filePath(fileName));
+	}
 }
 
 void DiscretesLogWriter::run()

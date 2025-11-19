@@ -162,13 +162,23 @@ void stopAppDataReceiver()
 	appDataReceiver->quitAndWait();
 }
 
-void startDiscretesLogWriter()
+//
+
+std::shared_ptr<DiscretesLogWriter> startDiscretesLogWriter(const QString& project, const QString& equipmentID)
 {
-	dsLogWriter = std::make_shared<DiscretesLogWriter>();
+	std::shared_ptr<DiscretesLogWriter> dsLogWriter = std::make_shared<DiscretesLogWriter>();
+
+	dsLogWriter->deleteDatabaseFiles(project, equipmentID);
+	dsLogWriter->start(project, equipmentID, 1, logger);
+
+	QThread::sleep(3);
+
+	return dsLogWriter;
 }
 
-void stopDiscretesLogWriter()
+void stopDiscretesLogWriter(std::shared_ptr<DiscretesLogWriter> dsLogWriter)
 {
+	dsLogWriter->stop();
 	dsLogWriter.reset();
 }
 

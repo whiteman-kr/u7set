@@ -99,6 +99,7 @@ public:
 	void unregisterLogReader(const std::shared_ptr<DiscretesLogReader>& reader);
 
 	void ackDiscretesLog(const Network::AckDiscretesLogRequest& ackRequest);
+	void ackDiscretesLog(const Grpc::AckDiscretesLogRequest& ackRequest);
 
 	static QString databaseName();
 
@@ -108,7 +109,9 @@ public:
 	bool deleteDbFiles();
 	void waitWhileLogQueueIsEmpty();
 
+	// for testing purposes only
 	//
+	void deleteDatabaseFiles(const QString& project, const QString& equipmentID);
 
 private:
 	void run();

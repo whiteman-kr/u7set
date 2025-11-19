@@ -85,6 +85,20 @@ message GetDiscretesLogReply
 	repeated Network.DiscretesLogRecord discretesLogRecord = 4;
 }
 
+message AckDiscretesLogRequest
+{
+	optional string ackSource = 1;
+	optional string ackUser = 2;
+	optional int64 ackUpToPlantTime = 3;	// Acknowledged up to this plant time (inclusive)
+}
+
+message AckDiscretesLogReply
+{
+	optional string ackSource = 1;
+	optional string ackUser = 2;
+	optional int64 ackUpToPlantTime = 3;	// Acknowledged up to this plant time (inclusive)
+}
+
 service AppDataSrv
 {
 	rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
@@ -93,4 +107,5 @@ service AppDataSrv
 	rpc GetAppSignalState(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}
 	rpc GetAppSignalStateChanges(GetAppSignalStateChangesRequest) returns (stream GetAppSignalStateChangesReply) {}
 	rpc GetDiscretesLog(GetDiscretesLogRequest) returns (stream GetDiscretesLogReply) {}
+	rpc AckDiscretesLog(AckDiscretesLogRequest) returns (AckDiscretesLogReply) {}
 }

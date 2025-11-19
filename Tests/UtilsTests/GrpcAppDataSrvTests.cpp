@@ -21,10 +21,16 @@ const std::vector<ClientInfo> clients =
 
 std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddressPort& listenIP,
 																std::unique_ptr<GrpcAppDataSrv>& outServer,
+																std::shared_ptr<DiscretesLogWriter> dsLogWriter,
 																bool allowAllClients = false,
 																bool checkHostName = true)
 {
 	SoftwareInfo si(E::SoftwareType::AppDataService, "TESTS_GRPC_APP_DATA_SRV");
+
+	if (dsLogWriter == nullptr)
+	{
+		dsLogWriter = std::make_shared<DiscretesLogWriter>();		// make fake writer
+	}
 
 	outServer = std::make_unique<GrpcAppDataSrv>(si, allowAllClients, clients, checkHostName,
 												 listenIP, appDataReceiver.get(),
@@ -105,7 +111,7 @@ bool checkReceivedParams(const std::vector<Proto::AppSignal>& recvParams)
 TEST(GrpcAppDataSrvTest, HandshakeNormal)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 13995} , server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13995} , server, nullptr);
 
 	grpc::Status status;
 
@@ -120,7 +126,7 @@ TEST(GrpcAppDataSrvTest, HandshakeNormal)
 TEST(GrpcAppDataSrvTest, HandshakeWrongClientID)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 13996} , server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13996} , server, nullptr);
 
 	ClientInfo ci = clients[0];
 
@@ -140,7 +146,7 @@ TEST(GrpcAppDataSrvTest, HandshakeWrongClientID)
 TEST(GrpcAppDataSrvTest, HandshakeWrongClientID_Allowed)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 13997} , server,
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13997} , server, nullptr,
 										 true);	// allow all clients
 
 	ClientInfo ci = clients[0];
@@ -160,7 +166,7 @@ TEST(GrpcAppDataSrvTest, HandshakeWrongClientID_Allowed)
 TEST(GrpcAppDataSrvTest, HandshakeWrongHostName)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 13998} , server,
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13998} , server, nullptr,
 										 false,		// allow all clients - false
 										 true);		// check host name - true
 
@@ -182,7 +188,7 @@ TEST(GrpcAppDataSrvTest, HandshakeWrongHostName)
 TEST(GrpcAppDataSrvTest, HandshakeWrongHostName_Allowed)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 13999} , server, false, false);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 13999} , server, nullptr, false, false);
 
 	ClientInfo ci = clients[1];
 
@@ -201,7 +207,7 @@ TEST(GrpcAppDataSrvTest, HandshakeWrongHostName_Allowed)
 TEST(GrpcAppDataSrvTest, SessionTimeout)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14000} , server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14000} , server, nullptr);
 
 	server->setSessionTimeout(5);
 
@@ -234,7 +240,7 @@ TEST(GrpcAppDataSrvTest, SessionTimeout)
 TEST(GrpcAppDataSrvTest, StartsAndStopsCleanly)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14000} , server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14000} , server, nullptr);
 
 	const std::string authToken = Handshake(*stub, clients[0]);
 
@@ -268,7 +274,7 @@ TEST(GrpcAppDataSrvTest, StartsAndStopsCleanly)
 TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14001}, server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14001}, server, nullptr);
 
 	const std::string authToken = Handshake(*stub, clients[0]);
 
@@ -331,7 +337,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalList_ReturnsAllIds)
 TEST(GrpcAppDataSrvTest, GetAppSignalParam_AllSignals)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14002}, server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14002}, server, nullptr);
 
 	const std::string authToken = Handshake(*stub, clients[0]);
 
@@ -381,7 +387,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_AllSignals)
 TEST(GrpcAppDataSrvTest, GetAppSignalParam_ByHashes)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14003}, server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14003}, server, nullptr);
 
 	const std::string authToken = Handshake(*stub, clients[0]);
 
@@ -441,7 +447,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalParam_ByHashes)
 TEST(GrpcAppDataSrvTest, GetAppSignalState)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14004}, server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14004}, server, nullptr);
 
 	const std::string authToken = Handshake(*stub, clients[0]);
 
@@ -520,7 +526,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalState)
 TEST(GrpcAppDataSrvTest, GetAppSignalState_ExceedHashesCount)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14004}, server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14004}, server, nullptr);
 
 	const std::string authToken = Handshake(*stub, clients[0]);
 
@@ -550,7 +556,7 @@ TEST(GrpcAppDataSrvTest, GetAppSignalState_ExceedHashesCount)
 TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
-	auto stub = StartServerAndMakeClient({"127.0.0.1", 14004}, server);
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14005}, server, nullptr);
 
 	const std::string authToken = Handshake(*stub, clients[0]);
 
@@ -615,13 +621,14 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 			EXPECT_EQ(st.planttime(), ctr + 1000);
 			EXPECT_EQ(st.localtime(), ctr + 2000);
 			EXPECT_EQ(st.systemtime(), ctr + 3000);
-			ctr++;
 
 			if (st.hash() != ctr)
 			{
 				exit = true;
 				break;
 			}
+
+			ctr++;
 		}
 
 		if (ctr >= 10000 || exit)
@@ -640,4 +647,183 @@ TEST(GrpcAppDataSrvTest, GetAppSignalStateChanges)
 
 	server.reset();
 }
+
+TEST(GrpcAppDataSrvTest, GetDiscretesLog)
+{
+	std::shared_ptr<DiscretesLogWriter> dsLogWriter = startDiscretesLogWriter("GRPC_TESTS", "EQUIPMENT_ID");
+
+	constexpr int STATES_COUNT = 7000;
+
+	// prefill database
+	{
+		std::vector<SimpleAppSignalState> states;
+
+		states.reserve(STATES_COUNT);
+
+		for(int i = 1; i < STATES_COUNT; i++)
+		{
+			SimpleAppSignalState st;
+
+			st.hash = i;
+			st.time.plant.timeStamp = i;
+
+			states.push_back(st);
+		}
+
+		dsLogWriter->pushStates(states);
+
+		QThread::sleep(3);
+	}
+
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14006}, server, dsLogWriter);
+
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
+	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
+	Grpc::GetDiscretesLogRequest req;
+
+	auto reader = stub->GetDiscretesLog(&ctx, req);
+
+	Grpc::GetDiscretesLogReply reply;
+
+	quint64 ctr = 1;
+
+	while (reader->Read(&reply))
+	{
+		DEBUG_LOG_MSG(logger, QString("Recevie discretes log records: %1").arg(reply.discreteslogrecord_size()));
+
+		EXPECT_EQ(reply.logisworkable(), true);
+		EXPECT_EQ(reply.logfirstrecordid(), 1);
+
+		for(const Network::DiscretesLogRecord& rd : reply.discreteslogrecord())
+		{
+			EXPECT_EQ(rd.signalhash(), ctr);
+			EXPECT_EQ(rd.planttime(), ctr);
+
+			ctr++;
+		}
+
+		if (ctr >= STATES_COUNT)
+		{
+			break;
+		}
+	}
+
+	constexpr int UP_CTR = 8000;
+
+	std::thread thread = std::thread([ctr, dsLogWriter]()
+	{
+		QThread::sleep(1);
+
+		std::vector<SimpleAppSignalState> states;
+
+		states.reserve(200);
+
+		for(int i = ctr; i <= UP_CTR; i++)
+		{
+			SimpleAppSignalState st;
+
+			st.hash = i;
+			st.time.plant.timeStamp = i;
+
+			states.push_back(st);
+
+			if ((i % 100) == 0)
+			{
+				dsLogWriter->pushStates(states);
+
+				QThread::msleep(500);
+
+				states.clear();
+			}
+		}
+	});
+
+	while (reader->Read(&reply))
+	{
+		DEBUG_LOG_MSG(logger, QString("Recevie discretes log records: %1").arg(reply.discreteslogrecord_size()));
+
+		EXPECT_EQ(reply.logisworkable(), true);
+		EXPECT_EQ(reply.logfirstrecordid(), 1);
+
+		for(const Network::DiscretesLogRecord& rd : reply.discreteslogrecord())
+		{
+			EXPECT_EQ(rd.signalhash(), ctr);
+			EXPECT_EQ(rd.planttime(), ctr);
+
+			ctr++;
+		}
+
+		if (ctr >= UP_CTR)
+		{
+			ctx.TryCancel();
+			break;
+		}
+	}
+
+	grpc::Status st = reader->Finish();
+
+	if (thread.joinable())
+	{
+		thread.join();
+	}
+
+	//
+
+	grpc::ClientContext ctx2;
+
+	ctx2.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
+	const std::string USER("ACK_USER");
+	const std::string SOURCE("ACK_SOURCE");
+
+	Grpc::AckDiscretesLogRequest req2;
+
+	req2.set_ackuser(USER);
+	req2.set_acksource(SOURCE);
+	req2.set_ackuptoplanttime(2000);
+
+	Grpc::AckDiscretesLogReply rep2;
+
+	st = stub->AckDiscretesLog(&ctx2, req2, &rep2);
+
+	EXPECT_TRUE(st.ok());
+
+	EXPECT_EQ(rep2.ackuser(), USER);
+	EXPECT_EQ(rep2.acksource(), SOURCE);
+	EXPECT_EQ(rep2.ackuptoplanttime(), 2000);
+
+	//
+
+	QThread::sleep(1);
+
+	grpc::ClientContext ctx3;
+
+	ctx3.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
+	reader = stub->GetDiscretesLog(&ctx3, req);
+
+	reply.Clear();
+
+	while (reader->Read(&reply))
+	{
+		EXPECT_EQ(reply.logisworkable(), true);
+		EXPECT_EQ(reply.logfirstrecordid(), 2001);
+		ctx3.TryCancel();
+		break;
+	}
+
+	st = reader->Finish();
+
+	server.reset();
+
+	stopDiscretesLogWriter(dsLogWriter);
+}
+
 
