@@ -108,8 +108,7 @@ void SimpleAppSignalStatesArchiveFlagQueue::push(const SimpleAppSignalState& sta
 	st.sendStateToArchive = sendStateToArchive;
 
 	bool res = FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>::push(st);
-
-	Q_ASSERT(res == true);
+	Q_UNUSED(res);
 }
 
 void SimpleAppSignalStatesArchiveFlagQueue::pushAutoPoint(const SimpleAppSignalState& state, bool sendStateToArchive)

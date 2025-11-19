@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../OnlineLib/TcpClientStatistics.h"
 #include <ClientLib/IAppSignalUpdater.h>
 #include <CommonLib/ConstStrings.h>
 
@@ -21,7 +22,7 @@ namespace ClientLib
 
 
 	template<typename GrpcServerType>
-	class ClientGrpc
+	class ClientGrpc : public ClientConnectionStatistics
 	{
 	public:
 		ClientGrpc(const SoftwareInfo& softwareInfo,
@@ -31,6 +32,14 @@ namespace ClientLib
 				   QString logPrefix);
 
 		virtual ~ClientGrpc();
+
+		// Implementing ClientConnectionStatistics
+		//
+	public:
+		virtual void statsReconnect() override;
+		virtual QString statsObjectName() override;
+		virtual QString statsServerId() override;
+		virtual Tcp::ConnectionState statsConnectionState() override;
 
 	private:
 		void workerThreadFunc(std::stop_token stoken);
@@ -42,6 +51,9 @@ namespace ClientLib
 		{
 			static_assert(sizeof(IAppSignalUpdater::SourceIdType) >= sizeof(void*), "SourceIdType must be large enough to hold a pointer");
 			return reinterpret_cast<IAppSignalUpdater::SourceIdType>(this);
+
+			// auto h = std::hash<std::thread::id>{}(std::this_thread::get_id());
+			// return static_cast<IAppSignalUpdater::SourceIdType>(h);
 		}
 
 		QString statusToString(const ::grpc::Status& status);
@@ -60,16 +72,18 @@ namespace ClientLib
 
 			context.AddMetadata(::Grpc::SESSION_AUTH_TOKEN, token);
 
-			// We assume that createAuthContext is called before any RPC calls, any communication error leads to re-handshake and new auth
-			// token retrieval.
-			//
-			incrementRequestReplyCount();
 			return;
 		}
 
 		virtual void clientCommunicationLoop(std::stop_token stoken) = 0;
 
-	private:
+		Tcp::ConnectionState tcpState() const
+		{
+			std::lock_guard lock{m_tcpStateMutex};
+			return m_tcpState;
+		}
+
+	protected:
 		std::string authToken() const
 		{
 			std::scoped_lock locker{m_authTokenMutex};
@@ -82,10 +96,22 @@ namespace ClientLib
 			m_authToken = authToken;
 		}
 
-		void incrementRequestReplyCount()
+		void incRequestReplyCount()
 		{
 			std::scoped_lock lock{m_tcpStateMutex};
 			m_tcpState.requestCount++;
+			m_tcpState.replyCount++;
+		}
+
+		void incRequestCount()
+		{
+			std::scoped_lock lock{m_tcpStateMutex};
+			m_tcpState.requestCount++;
+		}
+
+		void incReplyCount()
+		{
+			std::scoped_lock lock{m_tcpStateMutex};
 			m_tcpState.replyCount++;
 		}
 
@@ -159,6 +185,31 @@ namespace ClientLib
 	}
 
 	template<typename GrpcServerType>
+	void ClientGrpc<GrpcServerType>::statsReconnect()
+	{
+		m_log.writeWarning(m_logPrefix + "Reconnecting to gRPC service is not supported.");
+		return;
+	}
+
+	template<typename GrpcServerType>
+	QString ClientGrpc<GrpcServerType>::statsObjectName()
+	{
+		return "GrpcClient";
+	}
+
+	template<typename GrpcServerType>
+	QString ClientGrpc<GrpcServerType>::statsServerId()
+	{
+		return m_serviceEquipmentId;
+	}
+
+	template<typename GrpcServerType>
+	Tcp::ConnectionState ClientGrpc<GrpcServerType>::statsConnectionState()
+	{
+		return tcpState();
+	}
+
+	template<typename GrpcServerType>
 	void ClientGrpc<GrpcServerType>::workerThreadFunc(std::stop_token stoken)
 	{
 		while (stoken.stop_requested() == false)
@@ -169,6 +220,10 @@ namespace ClientLib
 				std::scoped_lock lock{m_tcpStateMutex};
 				m_tcpState.isSocketConnected = false;
 				m_tcpState.isConnected = false;
+				m_tcpState.sentBytes = 0;
+				m_tcpState.receivedBytes = 0;
+				m_tcpState.requestCount = 0;
+				m_tcpState.replyCount = 0;
 			}
 
 			// Wait until channel becomes READY
@@ -289,7 +344,12 @@ namespace ClientLib
 		::grpc::Status result = m_stub->Handshake(&context, request, &reply);
 		if (result.ok() == false)
 		{
+			incRequestCount();
 			return std::unexpected<QString>{statusToString(result)};
+		}
+		else
+		{
+			incRequestReplyCount();
 		}
 
 		assert(reply.authtoken().empty() == false);

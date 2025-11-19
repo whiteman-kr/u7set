@@ -36,8 +36,9 @@ namespace ClientLib
 		///
 		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
 
-		std::vector<Tcp::ConnectionState> tcpSignalConnStates() const;
-		std::vector<Tcp::ConnectionState> recentSignalConnStates() const;
+		std::vector<Tcp::ConnectionState> connectionStates() const;
+
+		int connectionsPerServer() const; // Returns 2 for TcpConnection and 1 for Grpc.
 
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
@@ -49,11 +50,16 @@ namespace ClientLib
 		//
 	private:
 #if 0
+		// Tcp-based connection
+		//
 		using AdsConnectionType = ClientLib::AdsConnectionPrivate;
 #else
+		// Grpc-based connection
+		//
 		using AdsConnectionType = ClientLib::AdsConnectionPrivate2;
 #endif
 
+		bool m_hasRecentAppSignals = false;
 		std::unique_ptr<AdsConnectionType> m_pimpl;
 	};
 } // namespace ClientLib

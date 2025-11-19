@@ -407,12 +407,12 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 	int waitCtr = 0;
 
 	auto lastSendTime = std::chrono::steady_clock::now();
-	constexpr int SEND_PACKET_SIZE = 1024;
+	constexpr int SEND_PACKET_SIZE = 2048;
 	constexpr std::chrono::milliseconds SEND_PACKET_INTERVAL{50};
 
 	while(context->IsCancelled() == false)
 	{
-		int statesCount = 0;
+		int statesCount = reply.appsignalstates_size();
 
 		while(statesQueue->isEmpty() == false && statesCount < ADS_GET_APP_SIGNAL_STATE_MAX)
 		{
@@ -430,11 +430,10 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 		}
 
 		auto now = std::chrono::steady_clock::now();
-		int addedRecordCount = reply.appsignalstates_size();
 
 		if (waitCtr > 2000 ||
-			addedRecordCount > SEND_PACKET_SIZE ||
-			(addedRecordCount > 0 && now - lastSendTime >= SEND_PACKET_INTERVAL))
+			statesCount > SEND_PACKET_SIZE ||
+			(statesCount > 0 && now - lastSendTime >= SEND_PACKET_INTERVAL))
 		{
 			if (writeReply(reply, writeStatus) == false)
 			{

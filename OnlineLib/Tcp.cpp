@@ -1725,6 +1725,7 @@ namespace Tcp
 	ConnectionState Client::getConnectionState() const
 	{
 		ConnectionState state = SocketWorker::getConnectionState();
+		state.name = objectName();
 		state.serverEquipmentID = connectToServerID();
 		return state;
 	}

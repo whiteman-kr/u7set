@@ -14,6 +14,12 @@ using ::testing::An;
 
 namespace
 {
+#if 1
+	const int ConnectionsPerServer = 1; // 1 for GrpcBased connection.
+#else
+	const int ConnectionsPerServer = 2; // 2 for TcpBased connection (States, Recents)
+#endif
+
 	// AdsBridge Equipment ID used in the tests.
 	//
 	const auto g_equipmentId{"SYSTEMID_CLIENTTEST_WS03_ADSBRIDGE"};
@@ -170,8 +176,8 @@ TEST_F(AdsBridgeTests, AdsLoadConfiguration)
 	ASSERT_TRUE(AdsLoadConfiguration(TestSettings::ConfigurationFile.c_str()));
 	EXPECT_STREQ(AdsGetSoftwareId(), g_equipmentId);
 
-	AdsConnect();                             // AdsGetConnectionCount() will return connections count only after AdsConnect().
-	EXPECT_EQ(AdsGetTcpConnectionCount(), 4); // 2 connections for each service (states and recents).
+	AdsConnect(); // AdsGetConnectionCount() will return connections count only after AdsConnect().
+	EXPECT_EQ(AdsGetTcpConnectionCount(), ConnectionsPerServer * 2);
 	AdsCloseConnection();
 
 	return;
@@ -196,8 +202,8 @@ TEST_F(AdsBridgeTests, AdsSetConfiguration)
 
 	EXPECT_STREQ(AdsGetSoftwareId(), g_equipmentId);
 
-	AdsConnect();                             // AdsGetConnectionCount() will return connections count only after AdsConnect().
-	EXPECT_EQ(AdsGetTcpConnectionCount(), 4); // 2 connections for each service (states and recents).
+	AdsConnect(); // AdsGetConnectionCount() will return connections count only after AdsConnect().
+	EXPECT_EQ(AdsGetTcpConnectionCount(), ConnectionsPerServer * 2);
 
 	AdsCloseConnection();
 	return;
@@ -211,14 +217,14 @@ TEST_F(AdsBridgeTests, AdsSetConfigurationProfile)
 	EXPECT_STREQ(AdsGetSoftwareId(), g_equipmentId);
 
 	AdsConnect(); // AdsGetConnectionCount() will return connections count only after AdsConnect().
-	EXPECT_EQ(AdsGetTcpConnectionCount(), 4);
+	EXPECT_EQ(AdsGetTcpConnectionCount(), ConnectionsPerServer * 2);
 	AdsCloseConnection();
 
 	EXPECT_TRUE(AdsSetConfigurationProfile("linux_code_coverage"));
 	EXPECT_STREQ(AdsGetSoftwareId(), g_equipmentId);
 
 	AdsConnect(); // AdsGetConnectionCount() will return connections count only after AdsConnect().
-	EXPECT_EQ(AdsGetTcpConnectionCount(), 4);
+	EXPECT_EQ(AdsGetTcpConnectionCount(), ConnectionsPerServer * 2);
 	AdsCloseConnection();
 
 	EXPECT_FALSE(AdsSetConfigurationProfile("NoProfile"));
@@ -236,7 +242,7 @@ TEST_F(AdsBridgeTests, AdsAddService)
 		AdsAddService(adsEquipmentId, address, port);
 
 		AdsConnect(); // AdsGetConnectionCount() will return connections count only after AdsConnect().
-		EXPECT_EQ(AdsGetTcpConnectionCount(), 2);
+		EXPECT_EQ(AdsGetTcpConnectionCount(), ConnectionsPerServer * 1);
 
 		// After close connection should not be any TcpConnection.
 		//
@@ -252,7 +258,7 @@ TEST_F(AdsBridgeTests, AdsAddService)
 		AdsAddService(adsEquipmentId, address, port);
 
 		AdsConnect(); // AdsGetConnectionCount() will return connections count only after AdsConnect().
-		EXPECT_EQ(AdsGetTcpConnectionCount(), 4);
+		EXPECT_EQ(AdsGetTcpConnectionCount(), ConnectionsPerServer * 2);
 
 		// After close connection should not be any TcpConnection.
 		//
@@ -270,7 +276,7 @@ TEST_F(AdsBridgeTests, AdsGetTcpConnectionStatuses)
 
 	AdsConnect(); // AdsGetConnectionCount() will return connections count only after AdsConnect().
 
-	constexpr int ConnectionCount = 4;
+	constexpr int ConnectionCount = ConnectionsPerServer * 2;
 	struct AdsConnectionStatus connectionStatus[ConnectionCount]{};
 
 	// Wait for the connections to be established. timeout is 10 seconds.
