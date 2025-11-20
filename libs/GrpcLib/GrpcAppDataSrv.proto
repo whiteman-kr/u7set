@@ -99,6 +99,29 @@ message AckDiscretesLogReply
 	optional int64 ackUpToPlantTime = 3;	// Acknowledged up to this plant time (inclusive)
 }
 
+//
+// RtTrends
+//
+
+message RtSignalSamplePeriod
+{
+	required uint64 hash = 1;
+	optional int32 samplePeriod = 2 [default = 4];			    // enum E::RtTrandsSamplePeriod
+}
+
+message GetRtTrendsDataRequest
+{
+	repeated RtSignalSamplePeriod rtSignalSamplePeriod = 1;
+}
+
+message GetRtTrendsDataReply
+{
+	repeated RtSignalSamplePeriod rtSignalSamplePeriod = 1;
+	repeated Proto.AppSignalState appSignalStates = 2;
+}
+
+//
+
 service AppDataSrv
 {
 	rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
@@ -108,4 +131,5 @@ service AppDataSrv
 	rpc GetAppSignalStateChanges(GetAppSignalStateChangesRequest) returns (stream GetAppSignalStateChangesReply) {}
 	rpc GetDiscretesLog(GetDiscretesLogRequest) returns (stream GetDiscretesLogReply) {}
 	rpc AckDiscretesLog(AckDiscretesLogRequest) returns (AckDiscretesLogReply) {}
+	rpc GetRtTrendsData(stream GetRtTrendsDataRequest) returns (stream GetRtTrendsDataReply) {}
 }

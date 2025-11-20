@@ -579,6 +579,29 @@ grpc::Status GrpcAppDataSrv::AckDiscretesLog(grpc::ServerContext* context,
 	return grpc::Status::OK;
 }
 
+grpc::Status GrpcAppDataSrv::GetRtTrendsData(grpc::ServerContext* context,
+		grpc::ServerReaderWriter<Grpc::GetRtTrendsDataReply, Grpc::GetRtTrendsDataRequest>* stream)
+{
+	Grpc::GetRtTrendsDataRequest request;
+	Grpc::GetRtTrendsDataReply reply;
+
+	while (stream->Read(&request))
+	{
+		// process request
+
+		reply.Clear();
+
+		// set reply
+
+		bool ok = stream->Write(reply);
+		if (!ok)
+		{
+			break;
+		}
+	}
+
+	return grpc::Status::OK;
+}
 void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 {
 	QStringList ips;
@@ -605,31 +628,31 @@ void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 
 	DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv started. Listening addresses: %1").arg(ips.join(", ")));
 
-	m_thread = std::jthread{[this](std::stop_token stoken, grpc::Server* server)
-							{
-								std::stop_callback stop_cb{stoken,
-														   [server]()
-														   {
-															   server->Shutdown(std::chrono::system_clock::now() + std::chrono::seconds(5));
-														   }};
-								try
-								{
-									DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv in Wait state"));
-									server->Wait();		// unblocked by stop_token callback
-								}
-								catch (std::exception& e)
-								{
-									DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv thread exception: " + QString{e.what()});
-								}
-								catch (...)
-								{
-									DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv thread unknown exception");
-								}
-							},
-							m_server.get()};
+	m_thread = std::jthread{
+		[this](std::stop_token stoken, grpc::Server* server)
+		{
+			std::stop_callback stop_cb{
+			   stoken,
+			   [server]()
+			   {
+				   server->Shutdown(std::chrono::system_clock::now() + std::chrono::seconds(5));
+			   }
+			};
+
+			try
+			{
+				DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv in Wait state"));
+				server->Wait();		// unblocked by stop_token callback
+			}
+			catch (std::exception& e)
+			{
+				DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv thread exception: " + QString{e.what()});
+			}
+			catch (...)
+			{
+				DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv thread unknown exception");
+			}
+		}, m_server.get()};
 
 	m_sessionGuard.start();
 }
-
-
-

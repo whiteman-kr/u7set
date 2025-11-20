@@ -516,16 +516,16 @@ public:
 	//
 	enum class RtTrendsSamplePeriod
 	{
-		sp_5ms,
-		sp_10ms,
-		sp_20ms,
-		sp_50ms,
-		sp_100ms,
-		sp_250ms,
-		sp_500ms,
-		sp_1s,
-		sp_5s,
-		sp_10s,
+		sp_5ms,					// 0
+		sp_10ms,				// 1
+		sp_20ms,				// 2
+		sp_50ms,				// 3
+		sp_100ms,				// 4
+		sp_250ms,				// 5
+		sp_500ms,				// 6
+		sp_1s,					// 7
+		sp_5s,					// 8
+		sp_10s,					// 9
 	};
 	Q_ENUM(RtTrendsSamplePeriod)
 

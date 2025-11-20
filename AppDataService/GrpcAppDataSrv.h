@@ -80,6 +80,11 @@ public:
 								 const Grpc::AckDiscretesLogRequest* request,
 								 Grpc::AckDiscretesLogReply* reply) override;
 
+	grpc::Status GetRtTrendsData(grpc::ServerContext* context,
+								 grpc::ServerReaderWriter<Grpc::GetRtTrendsDataReply,
+														  Grpc::GetRtTrendsDataRequest>* stream);
+
+
 private:
 	void initService(const std::vector<HostAddressPort>& listenIPs);
 
