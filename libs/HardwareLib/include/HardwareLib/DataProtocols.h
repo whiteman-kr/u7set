@@ -42,6 +42,7 @@ namespace Rup
 		quint16 year;				// 1970..65535
 
 		void reverseBytes();
+		void clear();
 
 		void setDateTime(const QDateTime& dateTime);
 

@@ -22,6 +22,8 @@ AppDataSource::AppDataSource(const OnlineLib::DataSource& dataSource, CircularLo
 	initParsingBuffers(appDataFramesQuantity());
 
 	m_acquiredSignalsCount = static_cast<int>(m_appSignals.size());
+
+	m_lastPlantTime.clear();
 }
 
 // Contructor for object NOT really used for packet receiving.
@@ -32,6 +34,8 @@ AppDataSource::AppDataSource(const Network::DataSourceInfo& proto) :
 	m_gatewaySignalStatesQueue(3)
 {
 	loadFromProto(proto);
+
+	m_lastPlantTime.clear();
 }
 
 AppDataSource::~AppDataSource()
@@ -117,6 +121,8 @@ void AppDataSource::prepare(const AppSignals& appSignals,
 	queueSize = std::max(m_acquiredSignalsCount / 2, 1000);
 
 	m_gatewaySignalStatesQueue.resize(queueSize);
+
+	m_lastPlantTime.clear();
 }
 
 void AppDataSource::setStatesProcessingThreadWakeupParams(std::mutex* statesProcessigRequiredMutex,
@@ -289,6 +295,27 @@ void AppDataSource::pushState(const SimpleAppSignalState& state)
 void AppDataSource::resizeSignalStatesQueue(int size)
 {
 	m_signalStatesQueue.resize(std::max(size, SIGNAL_STATES_QUEUE_MIN_SIZE));
+}
+
+void AppDataSource::checkInputPlantTime(Rup::TimeStamp plantTime)
+{
+	// here plantTime is in BigEndian byte order
+	//
+	plantTime.reverseBytes();
+
+	if (m_lastPlantTime.hour == plantTime.hour &&
+		m_lastPlantTime.minute == plantTime.minute &&
+		m_lastPlantTime.second == plantTime.second &&
+		m_lastPlantTime.millisecond == plantTime.millisecond &&
+		m_lastPlantTime.day == plantTime.day &&
+		m_lastPlantTime.month == plantTime.month &&
+		m_lastPlantTime.year == plantTime.year)
+	{
+		qDebug() << C_STR(QString("%1 duplicate plant time: %2").
+						  arg(moduleEquipmentID()).arg(m_lastPlantTime.rawToString(false)));
+	}
+
+	m_lastPlantTime = plantTime;
 }
 
 bool AppDataSource::parseBuffer(ParsingBuffer& readBuffer)

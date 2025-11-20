@@ -52,6 +52,8 @@ public:
 	void pushState(const SimpleAppSignalState& state);
 	void resizeSignalStatesQueue(int size);
 
+	void checkInputPlantTime(Rup::TimeStamp plantTime);
+
 private:
 	virtual bool parseBuffer(ParsingBuffer& readBuffer) override;
 
@@ -115,6 +117,10 @@ private:
 	int m_lastAutoArchivingGroup = DynamicAppSignalState::NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 
 	quint32 m_cachedAppDataUID = 0;
+
+	//
+
+	Rup::TimeStamp m_lastPlantTime;
 };
 
 class AppDataSources

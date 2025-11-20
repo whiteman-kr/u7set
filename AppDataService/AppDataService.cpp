@@ -665,7 +665,10 @@ void AppDataServiceWorker::runGrpcAppDataSrv()
 
 void AppDataServiceWorker::stopGrpcAppDataSrv()
 {
-	m_grpcAppDataSrv.reset();
+	if (m_grpcAppDataSrv != nullptr)
+	{
+		m_grpcAppDataSrv.reset();
+	}
 }
 
 void AppDataServiceWorker::getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,

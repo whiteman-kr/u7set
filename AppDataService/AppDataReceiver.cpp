@@ -378,6 +378,7 @@ void AppDataReceiver::closeSocket()
 {
 	if (m_socket != nullptr)
 	{
+		qDebug() << "AppDataReceiver::closeSocket()";
 		asio::error_code error;
 		m_socket->close(error);
 		m_socket.reset();
@@ -420,6 +421,12 @@ void AppDataReceiver::receivePackets(const asio::error_code& error, size_t bytes
 
 	if (error)
 	{
+		if (error == asio::error::operation_aborted)
+		{
+			return;
+		}
+
+		qDebug() << "AppDataReceiver socket error:" << error.message() << "bytes received" << bytesReceived;
 		m_socketErrorCtr++;
 		startReceive();
 		return;
@@ -465,6 +472,7 @@ void AppDataReceiver::receivePackets(const asio::error_code& error, size_t bytes
 
 		if (crcOk == true)
 		{
+			source->checkInputPlantTime(rupFrame.header.timeStamp);
 			source->pushRupFrame(sourceIP, serverTime,
 								 false, rupFrame,
 								 source->cachedAppDataUID());
@@ -528,6 +536,7 @@ void AppDataReceiver::receivePackets(const asio::error_code& error, size_t bytes
 
 		if (crcOk == true)
 		{
+			source->checkInputPlantTime(simFrame.rupFrame.header.timeStamp);
 			source->pushRupFrame(sourceIP, serverTime,
 								 true, simFrame.rupFrame,
 								 source->cachedAppDataUID());
