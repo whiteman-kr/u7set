@@ -72,9 +72,11 @@ namespace ClientLib
 	{
 		QWriteLocker wl(&m_statesLocker);
 
+		auto now = std::chrono::system_clock::now();
+
 		for (auto& [signalHash, source] : m_states)
 		{
-			source.invalidateSource(sourceThreadId);
+			source.invalidateSource(sourceThreadId, now);
 		}
 
 		return;
@@ -588,14 +590,14 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::Sources::invalidateSource(SourceIdType sourceThreadId)
+	void AppSignalManager::Sources::invalidateSource(SourceIdType sourceThreadId, std::chrono::time_point<std::chrono::system_clock> now)
 	{
 		for (SourceState& sourceState : sources)
 		{
 			if (sourceState.sourceThreadId == sourceThreadId)
 			{
 				sourceState.state = AppSignalState{};
-				sourceState.lastUpdateTime = std::chrono::system_clock::now();
+				sourceState.lastUpdateTime = now;
 				break;
 			}
 		}

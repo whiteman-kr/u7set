@@ -161,7 +161,8 @@ namespace ClientLib
 			std::array<SourceState, 4> sources{}; // 4 maximum possible channels of getting signal (2 regular, 2 recent)
 
 			void set(const AppSignalState& state, Hash dataServerHash, SourceIdType sourceThreadId);
-			void invalidateSource(SourceIdType sourceThreadId);
+			void invalidateSource(SourceIdType sourceThreadId,
+								  std::chrono::time_point<std::chrono::system_clock> now /* = std::chrono::system_clock::now()*/);
 
 			[[nodiscard]] const AppSignalState& get() const;
 			[[nodiscard]] const AppSignalState& getForDataServer(Hash dataServerHash) const;

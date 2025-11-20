@@ -10,7 +10,7 @@ namespace AppSignalLib
 		m_lastTimeDataFetched.start();
 	}
 
-	void RecentUsed::add(Hash hash)
+	void RecentUsed::add(Hash hash, qint64 now /*= QDateTime::currentDateTimeUtc().toMSecsSinceEpoch()*/)
 	{
 		if (m_lastTimeDataFetched.hasExpired(ExpiredTimeMs) == true)
 		{
@@ -20,8 +20,6 @@ namespace AppSignalLib
 			m_timeToSignal.clear();
 			return;
 		}
-
-		qint64 now = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
 
 		auto it = m_signalToTime.find(hash);
 		if (it == m_signalToTime.end())
@@ -75,9 +73,11 @@ namespace AppSignalLib
 			return;
 		}
 
+		qint64 now = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+
 		for (Hash hash : hashes)
 		{
-			add(hash);
+			add(hash, now);
 		}
 
 		return;
@@ -143,7 +143,7 @@ namespace AppSignalLib
 
 	std::vector<Hash> RecentUsed::hashes() const
 	{
-		// Restart timer, it indicates that sometheng is fetching data, so this recent thing shoud work.
+		// Restart timer, it indicates that something is fetching data, so this recent thing should work.
 		//
 		m_lastTimeDataFetched.restart();
 

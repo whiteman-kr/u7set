@@ -20,6 +20,7 @@ namespace ClientLib
 		explicit AdsClientGrpc(const SoftwareInfo& softwareInfo,
 							   const SoftwareEndpoint::AppDataService& ads,
 							   IAppSignalUpdater& signalUpdater,
+							   IRecentAppSignals* recentAppSignals,
 							   SignalLog& signalLog,
 							   ILogFile& logFile);
 
@@ -32,11 +33,14 @@ namespace ClientLib
 		std::expected<QStringList, QString> requestSignalList();
 		std::expected<std::vector<AppSignalParam>, QString> requestSignalParams(std::span<Hash> signalHashes = {});
 		std::expected<std::vector<AppSignalState>, QString> requestSignalStates(std::span<Hash> signalHashes);
-		void requestSignalStatesChanges(std::stop_token stoken);
+		void requestSignalStatesChanges(std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId);
 
 	private:
 		virtual void clientCommunicationLoop(std::stop_token stoken) override;
 		void clientCommunicationLoopImpl(std::stop_token stoken);
+
+		void stateChangesThreadFunc(std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId);
+		void recentlyUsedThreadFunc(std::stop_token stoken);
 
 	public:
 		const SoftwareEndpoint::AppDataService& ads() const;
@@ -47,6 +51,7 @@ namespace ClientLib
 	private:
 		const SoftwareEndpoint::AppDataService m_ads;
 		IAppSignalUpdater& m_signalUpdater;
+		IRecentAppSignals* m_recentAppSignals = nullptr; // If nullptr, then is not used.
 		SignalLog& m_signalLog;
 
 		// --
@@ -59,11 +64,13 @@ namespace ClientLib
 	AdsClientGrpc::AdsClientGrpc(const SoftwareInfo& softwareInfo,
 								 const SoftwareEndpoint::AppDataService& ads,
 								 IAppSignalUpdater& signalUpdater,
+								 IRecentAppSignals* recentAppSignals,
 								 SignalLog& signalLog,
 								 ILogFile& logFile) :
 		ClientGrpc{softwareInfo, ads.equipmentId, ads.address, logFile, ads.shortenId},
 		m_ads{ads},
 		m_signalUpdater{signalUpdater},
+		m_recentAppSignals{recentAppSignals},
 		m_signalLog{signalLog}
 	{
 		m_tcpState.name = "AdsClientGrpc " + ads.shortenId;
@@ -219,7 +226,7 @@ namespace ClientLib
 		return result;
 	}
 
-	void AdsClientGrpc::requestSignalStatesChanges(std::stop_token stoken)
+	void AdsClientGrpc::requestSignalStatesChanges(std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId)
 	{
 		grpc::ClientContext context;
 		createAuthContext(context);
@@ -254,7 +261,7 @@ namespace ClientLib
 							   return AppSignalState{stateProto};
 						   });
 
-			m_signalUpdater.setStates(std::span(states), ::calcHash(m_serviceEquipmentId), sourceId());
+			m_signalUpdater.setStates(std::span(states), ::calcHash(m_serviceEquipmentId), sourceId);
 #if 0
 			for (const auto& state : states)
 			{
@@ -309,28 +316,28 @@ namespace ClientLib
 		// QDate timeDiscrepancyCheckDate; // Check that the server and client time is the same.
 		//  When was the last time the time discrepancy was checked?
 #if 0
-			auto listResult = requestSignalList();
-			if (listResult.has_value() == false)
-			{
-				m_log.writeError(m_logPrefix + QString{"Failed to get signal list from ADS %1, address %2, error: %3"}
-									.arg(m_ads.equipmentId)
-									.arg(m_ads.address.toString())
-									.arg(listResult.error()));
-				continue;
-			}
+		auto listResult = requestSignalList();
+		if (listResult.has_value() == false)
+		{
+			m_log.writeError(m_logPrefix + QString{"Failed to get signal list from ADS %1, address %2, error: %3"}
+								.arg(m_ads.equipmentId)
+								.arg(m_ads.address.toString())
+								.arg(listResult.error()));
+			continue;
+		}
 
-			std::vector<Hash> signalList;
-			signalList.reserve(listResult.value().size());
-			std::transform(listResult.value().begin(),
-						   listResult.value().end(),
-						   std::back_inserter(signalList),
-						   [](const QString& signalId)
-						   {
-							   return calcHash(signalId);
-						   });
+		std::vector<Hash> signalList;
+		signalList.reserve(listResult.value().size());
+		std::transform(listResult.value().begin(),
+						listResult.value().end(),
+						std::back_inserter(signalList),
+						[](const QString& signalId)
+						{
+							return calcHash(signalId);
+						});
 
-			qDebug() << "ADS gRPC client: Retrieved" << signalList.size() << "signalIds from ADS" << m_ads.equipmentId << "at"
-					 << m_ads.address.toString();
+		qDebug() << "ADS gRPC client: Retrieved" << signalList.size() << "signalIds from ADS" << m_ads.equipmentId << "at"
+					<< m_ads.address.toString();
 #endif
 		// Get all signals
 		//
@@ -344,6 +351,10 @@ namespace ClientLib
 												   .arg(m_ads.equipmentId)
 												   .arg(m_ads.address.toString())
 												   .arg(signalParamsResult.error()));
+				
+				// We have not received any states yet, but still invalidate any previous states, just to be sure.
+				//
+				m_signalUpdater.invalidateSignalStates(sourceId());
 				return;
 			}
 
@@ -383,6 +394,8 @@ namespace ClientLib
 												   .arg(m_ads.equipmentId)
 												   .arg(m_ads.address.toString())
 												   .arg(result.error()));
+
+				m_signalUpdater.invalidateSignalStates(sourceId());
 				return;
 			}
 
@@ -393,30 +406,23 @@ namespace ClientLib
 
 		// Start separate thread for getting streamed signal state changes.
 		//
-		std::jthread stateChangesThread{
-			[this](std::stop_token stoken)
-			{
-				m_log.writeMessage(m_logPrefix + QString{"Enter listening for signal state changes for ADS %1 at address %2: %3"}
-													 .arg(m_ads.equipmentId)
-													 .arg(m_ads.address.toString()));
+		 std::jthread stateChangesThread{[this](std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId)
+										{
+											return stateChangesThreadFunc(stoken, sourceId);
+										},
+										sourceId()};
 
-				try
-				{
-					requestSignalStatesChanges(stoken);
-				}
-				catch (std::exception& e)
-				{
-					m_log.writeError(m_logPrefix +
-									 QString{"Exception in AdsClientGrpc::requestSignalStatesChanges for ADS %1 at address %2: %3"}
-										 .arg(m_ads.equipmentId)
-										 .arg(m_ads.address.toString())
-										 .arg(e.what()));
-				}
+		// Start separate thread for updating recently used signals.
+		//
+		std::jthread recentSignalsThread;
 
-				m_log.writeMessage(m_logPrefix + QString{"Leaving listening for signal state changes for ADS %1 at address %2: %3"}
-													 .arg(m_ads.equipmentId)
-													 .arg(m_ads.address.toString()));
-			}};
+		if (m_recentAppSignals != nullptr)
+		{
+			recentSignalsThread = std::jthread{[this](std::stop_token stoken)
+											   {
+												   recentlyUsedThreadFunc(stoken);
+											   }};
+		}
 
 		// Loop, getting signal states periodically.
 		//
@@ -445,7 +451,7 @@ namespace ClientLib
 													   .arg(m_ads.equipmentId)
 													   .arg(m_ads.address.toString())
 													   .arg(result.error()));
-					return;
+					break;
 				}
 
 				m_signalUpdater.setStates(std::span(result.value()), ::calcHash(m_serviceEquipmentId), sourceId());
@@ -480,8 +486,92 @@ namespace ClientLib
 			//
 		}
 
+		if (recentSignalsThread.joinable() == true)
+		{
+			Q_ASSERT(m_recentAppSignals != nullptr);
+			recentSignalsThread.request_stop();
+			recentSignalsThread.join();
+		}
+
 		stateChangesThread.request_stop();
 		stateChangesThread.join();
+
+		m_signalUpdater.invalidateSignalStates(sourceId());
+
+		return;
+	}
+
+	void AdsClientGrpc::stateChangesThreadFunc(std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId)
+	{
+		m_log.writeMessage(m_logPrefix + QString{"Enter listening for signal state changes for ADS %1 at address %2: %3"}
+											 .arg(m_ads.equipmentId)
+											 .arg(m_ads.address.toString()));
+
+		try
+		{
+			requestSignalStatesChanges(stoken, sourceId);
+		}
+		catch (std::exception& e)
+		{
+			m_log.writeError(m_logPrefix + QString{"Exception in AdsClientGrpc::requestSignalStatesChanges for ADS %1 at address %2: %3"}
+											   .arg(m_ads.equipmentId)
+											   .arg(m_ads.address.toString())
+											   .arg(e.what()));
+		}
+
+		m_log.writeMessage(m_logPrefix + QString{"Leaving listening for signal state changes for ADS %1 at address %2: %3"}
+											 .arg(m_ads.equipmentId)
+											 .arg(m_ads.address.toString()));
+		return;
+	}
+
+	void AdsClientGrpc::recentlyUsedThreadFunc(std::stop_token stoken)
+	{
+		// Set separate source ID for this thread.
+		//
+		auto sourceId = static_cast<IAppSignalUpdater::SourceIdType>(std::hash<std::thread::id>{}(std::this_thread::get_id()));
+
+		m_log.writeMessage(
+			m_logPrefix +
+			QString{"Enter recently used signals thread for ADS %1 at address %2"}.arg(m_ads.equipmentId).arg(m_ads.address.toString()));
+
+		while (stoken.stop_requested() == false)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+			try
+			{
+				auto hashes = m_recentAppSignals->recentlyUsedAppSignals(m_ads.equipmentId);
+				auto reply = requestSignalStates(hashes);
+
+				if (reply.has_value() == false)
+				{
+					m_log.writeError(m_logPrefix + QString{"Failed to get recently used signal states from ADS %1, address %2, error: %3"}
+													   .arg(m_ads.equipmentId)
+													   .arg(m_ads.address.toString())
+													   .arg(reply.error()));
+					continue;
+				}
+
+				m_signalUpdater.setStates(std::span(reply.value()), ::calcHash(m_ads.equipmentId), sourceId);
+			}
+			catch (std::exception& e)
+			{
+				m_signalUpdater.invalidateSignalStates(sourceId);
+
+				m_log.writeError(m_logPrefix + QString{"Exception in AdsClientGrpc::recentlyUsedThreadFunc for ADS %1 at address %2: %3"}
+												   .arg(m_ads.equipmentId)
+												   .arg(m_ads.address.toString())
+												   .arg(e.what()));
+				continue;
+			}
+		}
+
+		m_signalUpdater.invalidateSignalStates(sourceId);
+
+		m_log.writeMessage(
+			m_logPrefix +
+			QString{"Leaving recently used signals thread for ADS %1 at address %2"}.arg(m_ads.equipmentId).arg(m_ads.address.toString()));
 
 		return;
 	}
@@ -506,10 +596,10 @@ namespace ClientLib
 	AdsConnectionPrivate2::Connection::Connection(const SoftwareInfo& softwareInfo,
 												  const SoftwareEndpoint::AppDataService& ads,
 												  IAppSignalUpdater& signalUpdater,
-												  IRecentAppSignals* /*recentAppSignals*/,
+												  IRecentAppSignals* recentAppSignals,
 												  SignalLog& signalLog,
 												  ILogFile& logFile) :
-		m_client{std::make_unique<ClientLib::AdsClientGrpc>(softwareInfo, ads, signalUpdater, signalLog, logFile)}
+		m_client{std::make_unique<ClientLib::AdsClientGrpc>(softwareInfo, ads, signalUpdater, recentAppSignals, signalLog, logFile)}
 	{
 		return;
 	}
