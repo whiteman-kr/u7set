@@ -33,6 +33,8 @@ namespace ClientLib
 
 		virtual ~ClientGrpc();
 
+		void shutUp();
+
 		// Implementing ClientConnectionStatistics
 		//
 	public:
@@ -171,6 +173,12 @@ namespace ClientLib
 
 	template<typename GrpcServerType>
 	ClientGrpc<GrpcServerType>::~ClientGrpc()
+	{
+		shutUp();
+	}
+
+	template<typename GrpcServerType>
+	void ClientGrpc<GrpcServerType>::shutUp()
 	{
 		if (m_workerThread.joinable() == true)
 		{

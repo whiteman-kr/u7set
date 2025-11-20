@@ -24,6 +24,8 @@ namespace ClientLib
 							   SignalLog& signalLog,
 							   ILogFile& logFile);
 
+		virtual ~AdsClientGrpc();
+
 		// Implementing ClientConnectionStatistics
 		//
 	public:
@@ -75,6 +77,11 @@ namespace ClientLib
 	{
 		m_tcpState.name = "AdsClientGrpc " + ads.shortenId;
 		return;
+	}
+
+	AdsClientGrpc::~AdsClientGrpc()
+	{
+		shutUp();
 	}
 
 	QString AdsClientGrpc::statsObjectName()
@@ -634,14 +641,14 @@ namespace ClientLib
 	AdsConnectionPrivate2::AdsConnectionPrivate2(IAppSignalUpdater& signalUpdater, IRecentAppSignals* recentAppSignals, ILogFile* logFile) :
 		m_signalUpdater{signalUpdater},
 		m_recentAppSignals{recentAppSignals},
-		m_logFile{logFile, "AdsConnectionPrivate"}
+		m_logFile{logFile, "AdsConnectionPrivate2"}
 	{
 		return;
 	}
 
 	AdsConnectionPrivate2::~AdsConnectionPrivate2()
 	{
-		m_logFile.writeMessage("~AdsConnectionPrivate()");
+		m_logFile.writeMessage("~AdsConnectionPrivate3()");
 	}
 
 	void AdsConnectionPrivate2::updateConnections(const SoftwareInfo& softwareInfo,
