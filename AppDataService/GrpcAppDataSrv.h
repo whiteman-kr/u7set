@@ -13,6 +13,7 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "DynamicAppSignalState.h"
+#include "AppDataSource.h"
 #include "AppDataReceiver.h"
 #include "DiscretesLog.h"
 
@@ -26,6 +27,7 @@ public:
 							const std::vector<ClientInfo>& clients,
 							bool checkHostName,
 							const std::vector<HostAddressPort>& listenIPs,
+							const AppDataSources& appDataSources,
 							AppDataReceiver* appDataReceiver,
 							const AppSignals& appSignals,
 							const DynamicAppSignalStates& signalStates,
@@ -37,6 +39,7 @@ public:
 							const std::vector<ClientInfo>& clients,
 							bool checkHostName,
 							const HostAddressPort& listenIP,
+							const AppDataSources& appDataSources,
 							AppDataReceiver* appDataReceiver,
 							const AppSignals& appSignals,
 							const DynamicAppSignalStates& signalStates,
@@ -80,16 +83,27 @@ public:
 								 const Grpc::AckDiscretesLogRequest* request,
 								 Grpc::AckDiscretesLogReply* reply) override;
 
-	grpc::Status GetRtTrendsData(grpc::ServerContext* context,
-								 grpc::ServerReaderWriter<Grpc::GetRtTrendsDataReply,
-														  Grpc::GetRtTrendsDataRequest>* stream);
+	// grpc::Status GetRtTrendsData(grpc::ServerContext* context,
+	// 							 grpc::ServerReaderWriter<Grpc::GetRtTrendsDataReply,
+	// 													  Grpc::GetRtTrendsDataRequest>* stream);
 
+	grpc::Status GetAppDataSourcesInfo(grpc::ServerContext* context,
+									   const Grpc::GetAppDataSourcesInfoRequest* request,
+									   Grpc::GetAppDataSourcesInfoReply* reply) override;
 
+	grpc::Status GetAppDataSourcesState(grpc::ServerContext* context,
+										const Grpc::GetAppDataSourcesStateRequest* request,
+										Grpc::GetAppDataSourcesStateReply* reply) override;
+
+	grpc::Status GetServerTime(grpc::ServerContext* context,
+								const Grpc::GetServerTimeRequest* request,
+								Grpc::GetServerTimeReply* reply) override;
 private:
 	void initService(const std::vector<HostAddressPort>& listenIPs);
 
 private:
 	AppDataReceiver* m_appDataReceiver = nullptr;
+	const AppDataSources& m_appDataSources;
 	const AppSignals& m_appSignals;
 	const DynamicAppSignalStates& m_signalStates;
 	std::shared_ptr<DiscretesLogWriter> m_dsLogWriter;

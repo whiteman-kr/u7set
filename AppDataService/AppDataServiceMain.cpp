@@ -9,6 +9,18 @@ int main(int argc, char *argv[])
 {
 	Vld::setVldReportFilterHook();
 
+#ifdef VLD_IS_INCLUDED
+	VLDDisable();
+#endif
+
+	// Initialize gRPC early so its singleton allocations happen before main logic.
+	//
+	grpc_init();
+
+#ifdef VLD_IS_INCLUDED
+	VLDEnable();
+#endif
+
 	HighResolutionTimerGuard highResTimerGuard;
 
 	Q_UNUSED(highResTimerGuard);
@@ -53,6 +65,8 @@ int main(int argc, char *argv[])
 	google::protobuf::ShutdownProtobufLibrary();
 
 	LOGGER_SHUTDOWN(logger);
+
+	grpc_shutdown();
 
 	return result;
 }

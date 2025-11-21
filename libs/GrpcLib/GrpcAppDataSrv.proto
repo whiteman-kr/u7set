@@ -121,6 +121,41 @@ message GetRtTrendsDataReply
 }
 
 //
+//	GetAppDataSourcesInfo
+//
+message GetAppDataSourcesInfoRequest
+{
+}
+
+message GetAppDataSourcesInfoReply
+{
+	repeated Network.DataSourceInfo dataSourceInfo = 1;
+}
+
+//
+//	GetAppDataSourcesState
+//
+message GetAppDataSourcesStateRequest
+{
+}
+
+message GetAppDataSourcesStateReply
+{
+	repeated Network.AppDataSourceState appDataSourceState = 1;
+}
+
+//
+//	GetServerTime
+//
+message GetServerTimeRequest
+{
+}
+
+message GetServerTimeReply
+{
+	optional int64 serverTimeUtc = 2 [default = 0];
+	optional int64 serverTimeLocal = 3 [default = 0];
+}
 
 service AppDataSrv
 {
@@ -132,4 +167,7 @@ service AppDataSrv
 	rpc GetDiscretesLog(GetDiscretesLogRequest) returns (stream GetDiscretesLogReply) {}
 	rpc AckDiscretesLog(AckDiscretesLogRequest) returns (AckDiscretesLogReply) {}
 	rpc GetRtTrendsData(stream GetRtTrendsDataRequest) returns (stream GetRtTrendsDataReply) {}
+	rpc GetAppDataSourcesInfo(GetAppDataSourcesInfoRequest) returns (GetAppDataSourcesInfoReply) {}
+	rpc GetAppDataSourcesState(GetAppDataSourcesStateRequest) returns (GetAppDataSourcesStateReply) {}
+	rpc GetServerTime(GetServerTimeRequest) returns (GetServerTimeReply) {}
 }

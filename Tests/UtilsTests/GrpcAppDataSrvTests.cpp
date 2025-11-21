@@ -33,7 +33,7 @@ std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddre
 	}
 
 	outServer = std::make_unique<GrpcAppDataSrv>(si, allowAllClients, clients, checkHostName,
-												 listenIP, appDataReceiver.get(),
+												 listenIP, appDataSources, appDataReceiver.get(),
 												 appSignals, appSignalStates,
 												 dsLogWriter, logger);
 

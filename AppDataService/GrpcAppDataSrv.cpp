@@ -10,16 +10,18 @@
 #include "GrpcAppDataSrv.h"
 
 GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
-								bool allowAllClients,
-								const std::vector<ClientInfo>& clients,
-								bool checkHostName,
-								const std::vector<HostAddressPort>& listenIPs,
-								AppDataReceiver* appDataReceiver,
-								const AppSignals& appSignals,
-								const DynamicAppSignalStates& signalStates,
-								std::shared_ptr<DiscretesLogWriter> dsLogWriter,
-								CircularLoggerShared log) :
+	bool allowAllClients,
+	const std::vector<ClientInfo>& clients,
+	bool checkHostName,
+	const std::vector<HostAddressPort>& listenIPs,
+	const AppDataSources& appDataSources,
+	AppDataReceiver* appDataReceiver,
+	const AppSignals& appSignals,
+	const DynamicAppSignalStates& signalStates,
+	std::shared_ptr<DiscretesLogWriter> dsLogWriter,
+	CircularLoggerShared log) :
 	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
+	m_appDataSources(appDataSources),
 	m_appDataReceiver(appDataReceiver),
 	m_appSignals(appSignals),
 	m_signalStates(signalStates),
@@ -31,16 +33,18 @@ GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
 }
 
 GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
-							   bool allowAllClients,
-							   const std::vector<ClientInfo>& clients,
-							   bool checkHostName,
-							   const HostAddressPort& listenIP,
-							   AppDataReceiver* appDataReceiver,
-							   const AppSignals& appSignals,
-							   const DynamicAppSignalStates& signalStates,
-							   std::shared_ptr<DiscretesLogWriter> dsLogWriter,
-							   CircularLoggerShared log) :
+	bool allowAllClients,
+	const std::vector<ClientInfo>& clients,
+	bool checkHostName,
+	const HostAddressPort& listenIP,
+	const AppDataSources& appDataSources,
+	AppDataReceiver* appDataReceiver,
+	const AppSignals& appSignals,
+	const DynamicAppSignalStates& signalStates,
+	std::shared_ptr<DiscretesLogWriter> dsLogWriter,
+	CircularLoggerShared log) :
 	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
+	m_appDataSources(appDataSources),
 	m_appDataReceiver(appDataReceiver),
 	m_appSignals(appSignals),
 	m_signalStates(signalStates),
@@ -575,31 +579,119 @@ grpc::Status GrpcAppDataSrv::AckDiscretesLog(grpc::ServerContext* context,
 	return grpc::Status::OK;
 }
 
-grpc::Status GrpcAppDataSrv::GetRtTrendsData(grpc::ServerContext* context,
-		grpc::ServerReaderWriter<Grpc::GetRtTrendsDataReply, Grpc::GetRtTrendsDataRequest>* stream)
+// grpc::Status GrpcAppDataSrv::GetRtTrendsData(grpc::ServerContext* context,
+// 		grpc::ServerReaderWriter<Grpc::GetRtTrendsDataReply, Grpc::GetRtTrendsDataRequest>* stream)
+// {
+// 	Grpc::GetRtTrendsDataRequest request;
+// 	Grpc::GetRtTrendsDataReply reply;
+
+// 	while (stream->Read(&request))
+// 	{
+// 		// process request
+
+// 		reply.Clear();
+
+// 		// set reply
+
+// 		bool ok = stream->Write(reply);
+// 		if (!ok)
+// 		{
+// 			break;
+// 		}
+// 	}
+
+// 	return grpc::Status::OK;
+// }
+
+grpc::Status GrpcAppDataSrv::GetAppDataSourcesInfo(grpc::ServerContext* context,
+												   const Grpc::GetAppDataSourcesInfoRequest* request,
+												   Grpc::GetAppDataSourcesInfoReply* reply)
 {
-	Grpc::GetRtTrendsDataRequest request;
-	Grpc::GetRtTrendsDataReply reply;
-
-	while (stream->Read(&request))
+	if (context == nullptr ||
+		request == nullptr ||
+		reply == nullptr)
 	{
-		// process request
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
 
-		reply.Clear();
+	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
+	}
 
-		// set reply
+	//
 
-		bool ok = stream->Write(reply);
-		if (!ok)
-		{
-			break;
-		}
+	for(AppDataSource* source : m_appDataSources)
+	{
+		TEST_PTR_CONTINUE(source);
+
+		Network::DataSourceInfo* protoInfo = reply->add_datasourceinfo();
+		source->saveToProto(protoInfo);
 	}
 
 	return grpc::Status::OK;
 }
+
+grpc::Status GrpcAppDataSrv::GetAppDataSourcesState(grpc::ServerContext* context,
+													const Grpc::GetAppDataSourcesStateRequest* request,
+													Grpc::GetAppDataSourcesStateReply* reply)
+{
+	if (context == nullptr ||
+		request == nullptr ||
+		reply == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
+	}
+
+	//
+
+	for(AppDataSource* source : m_appDataSources)
+	{
+		TEST_PTR_CONTINUE(source);
+
+		Network::AppDataSourceState* protoInfo = reply->add_appdatasourcestate();
+		source->getState(protoInfo);
+	}
+
+	return grpc::Status::OK;
+}
+
+grpc::Status GrpcAppDataSrv::GetServerTime(grpc::ServerContext* context,
+											const Grpc::GetServerTimeRequest* request,
+											Grpc::GetServerTimeReply* reply)
+{
+	if (context == nullptr ||
+		request == nullptr ||
+		reply == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
+	}
+
+	reply->set_servertimeutc(currentMSecsUTC());
+	reply->set_servertimelocal(currentMSecsLocal());
+
+	return grpc::Status::OK;
+}
+
 void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 {
+#ifdef VLD_IS_INCLUDED
+	::VLDDisable();
+#endif
+
 	QStringList ips;
 
 	grpc::ServerBuilder builder;
@@ -615,6 +707,10 @@ void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 	}
 
 	m_server = builder.BuildAndStart();
+
+#ifdef VLD_IS_INCLUDED
+	::VLDEnable();
+#endif
 
 	if (m_server == nullptr)
 	{
@@ -637,8 +733,16 @@ void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 
 			try
 			{
+#ifdef VLD_IS_INCLUDED
+				::VLDDisable();
+#endif
+
 				DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv in Wait state"));
 				server->Wait();		// unblocked by stop_token callback
+
+#ifdef VLD_IS_INCLUDED
+				::VLDDisable();
+#endif
 			}
 			catch (std::exception& e)
 			{
