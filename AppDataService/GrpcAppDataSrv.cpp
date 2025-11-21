@@ -626,7 +626,7 @@ grpc::Status GrpcAppDataSrv::GetAppDataSourcesInfo(grpc::ServerContext* context,
 	{
 		TEST_PTR_CONTINUE(source);
 
-		Network::DataSourceInfo* protoInfo = reply->add_datasourceinfo();
+		Network::DataSourceInfo* protoInfo = reply->add_appdatasourceinfo();
 		source->saveToProto(protoInfo);
 	}
 

@@ -129,7 +129,7 @@ message GetAppDataSourcesInfoRequest
 
 message GetAppDataSourcesInfoReply
 {
-	repeated Network.DataSourceInfo dataSourceInfo = 1;
+	repeated Network.DataSourceInfo appDataSourceInfo = 1;
 }
 
 //

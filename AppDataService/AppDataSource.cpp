@@ -672,6 +672,11 @@ std::vector<AppDataSource*>::const_iterator AppDataSources::end() const
 	return m_sources.end();
 }
 
+int AppDataSources::size() const
+{
+	return TO_INT(m_sources.size());
+}
+
 const AppDataSource* AppDataSources::privateGetSignalSource(Hash signalHash) const
 {
 	auto it = m_signalToSource.find(signalHash);

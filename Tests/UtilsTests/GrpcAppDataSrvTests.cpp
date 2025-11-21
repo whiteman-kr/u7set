@@ -826,4 +826,121 @@ TEST(GrpcAppDataSrvTest, GetDiscretesLog)
 	stopDiscretesLogWriter(dsLogWriter);
 }
 
+TEST(GrpcAppDataSrvTest, GetAppDataSourcesInfo)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14007}, server, nullptr);
 
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
+	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
+	Grpc::GetAppDataSourcesInfoRequest req;
+	Grpc::GetAppDataSourcesInfoReply reply;
+
+	grpc::Status st = stub->GetAppDataSourcesInfo(&ctx, req, &reply);
+
+	EXPECT_TRUE(st.ok());
+	EXPECT_EQ(appDataSources.size(), reply.appdatasourceinfo_size());
+
+	for(const Network::DataSourceInfo& dsi : reply.appdatasourceinfo())
+	{
+		const AppDataSource* appDataSrc = appDataSources.getSourceByEquipmentID(QString::fromStdString(dsi.moduleequipmentid()));
+
+		EXPECT_TRUE(appDataSrc != nullptr);
+
+		if (appDataSrc == nullptr)
+		{
+			continue;
+		}
+
+		Network::DataSourceInfo dsi2;
+
+		appDataSrc->saveToProto(&dsi2);
+
+		EXPECT_EQ(dsi.SerializeAsString(), dsi2.SerializeAsString());
+	}
+
+	server.reset();
+}
+
+TEST(GrpcAppDataSrvTest, GetAppDataSourcesState)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14008}, server, nullptr);
+
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
+	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
+	Grpc::GetAppDataSourcesStateRequest req;
+	Grpc::GetAppDataSourcesStateReply reply;
+
+	grpc::Status st = stub->GetAppDataSourcesState(&ctx, req, &reply);
+
+	EXPECT_TRUE(st.ok());
+	EXPECT_EQ(appDataSources.size(), reply.appdatasourcestate_size());
+
+	for(const Network::AppDataSourceState& dsi : reply.appdatasourcestate())
+	{
+		const AppDataSource* appDataSrc = appDataSources.getSourceByEquipmentID(QString::fromStdString(dsi.lmequipmentid()));
+
+		EXPECT_TRUE(appDataSrc != nullptr);
+
+		if (appDataSrc == nullptr)
+		{
+			continue;
+		}
+
+		Network::AppDataSourceState dsi2;
+
+		appDataSrc->getState(&dsi2);
+
+		EXPECT_EQ(dsi.SerializeAsString(), dsi2.SerializeAsString());
+	}
+
+	server.reset();
+}
+
+TEST(GrpcAppDataSrvTest, GetServerTime)
+{
+	std::unique_ptr<GrpcAppDataSrv> server;
+	auto stub = StartServerAndMakeClient({"127.0.0.1", 14009}, server, nullptr);
+
+	const std::string authToken = Handshake(*stub, clients[0]);
+
+	ASSERT_FALSE(authToken.empty());
+
+	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken);
+
+	Grpc::GetServerTimeRequest req;
+	Grpc::GetServerTimeReply reply;
+
+	grpc::Status st = stub->GetServerTime(&ctx, req, &reply);
+
+	EXPECT_TRUE(st.ok());
+
+	qint64 utc = currentMSecsUTC();
+	qint64 local = currentMSecsLocal();
+
+	qDebug() << "received utc:  " << reply.servertimeutc()   << " utc:  " << utc;
+	qDebug() << "received local:" << reply.servertimelocal() << " local:" << local;
+
+	EXPECT_TRUE(reply.servertimeutc() <= utc);
+	EXPECT_TRUE(reply.servertimeutc() >= utc - 1000);
+
+	EXPECT_TRUE(reply.servertimelocal() <= local);
+	EXPECT_TRUE(reply.servertimelocal() >= local - 1000);
+
+	server.reset();
+}

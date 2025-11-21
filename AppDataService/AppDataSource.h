@@ -147,6 +147,8 @@ public:
 	std::vector<AppDataSource*>::iterator end();
 	std::vector<AppDataSource*>::const_iterator end() const;
 
+	int size() const;
+
 private:
 	const AppDataSource* privateGetSignalSource(Hash signalHash) const;
 
