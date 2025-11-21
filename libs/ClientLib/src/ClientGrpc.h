@@ -155,8 +155,8 @@ namespace ClientLib
 		m_tcpState.peerAddr = m_serviceAddress;
 		m_tcpState.localSoftwareInfo = m_softwareInfo;
 
-#if 0
-			m_channel = GrpcChannelCache::get(m_serviceAddress);
+#if 1
+		m_channel = GrpcChannelCache::get(m_serviceAddress);
 #else
 		int Using_fixed_port_for_AppDataService_gRPC_client;
 		auto addressPort = QString{"%1:%2"}.arg(m_serviceAddress.addressStr()).arg(PORT_APP_DATA_SERVICE_GRPC_CLIENT_REQUEST);
