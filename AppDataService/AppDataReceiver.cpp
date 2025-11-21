@@ -378,7 +378,7 @@ void AppDataReceiver::closeSocket()
 {
 	if (m_socket != nullptr)
 	{
-		qDebug() << "AppDataReceiver::closeSocket()";
+		// qDebug() << "AppDataReceiver::closeSocket()";
 		asio::error_code error;
 		m_socket->close(error);
 		m_socket.reset();

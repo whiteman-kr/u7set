@@ -477,7 +477,7 @@ void AppDataServiceWorker::applyNewConfiguration()
 
 	runAppDataReceiverThread();
 	runTcpArchiveClientThread();
-	runTcpAppDataServer();
+//	runTcpAppDataServer();
 	runRtTrendsServerThread();
 	runGrpcAppDataSrv();
 
@@ -503,8 +503,8 @@ void AppDataServiceWorker::clearConfiguration()
 
 	stopGrpcAppDataSrv();
 	stopRtTrendsServerThread();
+//	stopTcpAppDataServer();
 	stopTcpArchiveClientThread();
-	stopTcpAppDataServer();
 	stopAppDataReceiverThread();
 
 	shutdownTimeErrLog();
@@ -650,7 +650,7 @@ void AppDataServiceWorker::runGrpcAppDataSrv()
 
 		HostAddressPort ip = rcs.clientRequestIP();
 
-		ip.setPort(PORT_APP_DATA_SERVICE_GRPC_CLIENT_REQUEST);
+//		ip.setPort(PORT_APP_DATA_SERVICE_GRPC_CLIENT_REQUEST);
 
 		listenIPs.emplace_back(ip);
 	}
