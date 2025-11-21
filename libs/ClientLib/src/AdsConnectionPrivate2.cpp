@@ -24,6 +24,8 @@ namespace ClientLib
 							   SignalLog& signalLog,
 							   ILogFile& logFile);
 
+		virtual ~AdsClientGrpc();
+
 		// Implementing ClientConnectionStatistics
 		//
 	public:
@@ -34,6 +36,8 @@ namespace ClientLib
 		std::expected<std::vector<AppSignalParam>, QString> requestSignalParams(std::span<Hash> signalHashes = {});
 		std::expected<std::vector<AppSignalState>, QString> requestSignalStates(std::span<Hash> signalHashes);
 		void requestSignalStatesChanges(std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId);
+		void requestSignalLog(std::stop_token stoken);
+		std::expected<void, QString> requestAckSignalLog();
 
 	private:
 		virtual void clientCommunicationLoop(std::stop_token stoken) override;
@@ -41,6 +45,7 @@ namespace ClientLib
 
 		void stateChangesThreadFunc(std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId);
 		void recentlyUsedThreadFunc(std::stop_token stoken);
+		void signalLogThreadFunc(std::stop_token stoken);
 
 	public:
 		const SoftwareEndpoint::AppDataService& ads() const;
@@ -75,6 +80,11 @@ namespace ClientLib
 	{
 		m_tcpState.name = "AdsClientGrpc " + ads.shortenId;
 		return;
+	}
+
+	AdsClientGrpc::~AdsClientGrpc()
+	{
+		shutUp();
 	}
 
 	QString AdsClientGrpc::statsObjectName()
@@ -228,6 +238,10 @@ namespace ClientLib
 
 	void AdsClientGrpc::requestSignalStatesChanges(std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId)
 	{
+		m_log.writeMessage(m_logPrefix + QString{"Enter AdsClientGrpc::requestSignalStatesChanges for ADS %1 at address %2"}
+											 .arg(m_ads.equipmentId)
+											 .arg(m_ads.address.toString()));
+
 		grpc::ClientContext context;
 		createAuthContext(context);
 
@@ -287,6 +301,115 @@ namespace ClientLib
 		return;
 	}
 
+	void AdsClientGrpc::requestSignalLog(std::stop_token stoken)
+	{
+		m_log.writeMessage(
+			m_logPrefix +
+			QString{"Enter AdsClientGrpc::requestSignalLog for ADS %1 at address %2"}.arg(m_ads.equipmentId).arg(m_ads.address.toString()));
+
+		grpc::ClientContext context;
+		createAuthContext(context);
+
+		std::stop_callback stopCallback{stoken,
+										[&context]()
+										{
+											// Trigger gRPC cancellation, this makes Read() to return false.
+											//
+											context.TryCancel();
+										}};
+
+		Grpc::GetDiscretesLogRequest request;
+		Grpc::GetDiscretesLogReply reply;
+		std::vector<DiscretesLogRecord> records;
+
+		auto replyReader = m_stub->GetDiscretesLog(&context, request);
+		incRequestCount();
+
+		while (m_signalLog.enabled() == true && stoken.stop_requested() == false && replyReader->Read(&reply) == true)
+		{
+			incReplyCount();
+
+			records.clear();
+			records.reserve(reply.discreteslogrecord_size());
+
+			std::transform(reply.discreteslogrecord().begin(),
+						   reply.discreteslogrecord().end(),
+						   std::back_inserter(records),
+						   [](const Network::DiscretesLogRecord& logRecord)
+						   {
+							   DiscretesLogRecord record;
+							   record.loadFromProto(logRecord);
+							   return record;
+						   });
+
+			m_signalLog.add(m_ads.equipmentId, records);
+			m_signalLog.deleteUpTo(m_ads.equipmentId, reply.logfirstrecordid());
+
+			reply.Clear();
+		}
+
+		auto status = replyReader->Finish();
+		m_log.writeMessage(m_logPrefix + QString{"AdsClientGrpc::requestSignalLog is about to exit with code %1, ADS %2, Address %3"}
+											 .arg(statusToString(status))
+											 .arg(m_ads.equipmentId)
+											 .arg(m_ads.address.toString()));
+		return;
+	}
+
+	std::expected<void, QString> AdsClientGrpc::requestAckSignalLog()
+	{
+		if (m_signalLog.enabled() == false)
+		{
+			return {};
+		}
+
+		auto plantTimeToAck = m_signalLog.getNextAckUpTo();
+		if (plantTimeToAck.has_value() == false)
+		{
+			return {};
+		}
+
+		auto dt = plantTimeToAck.value().toDateTime();
+		if (dt.isValid() == false)
+		{
+			QString message = QString("Invalid plantTime to ack discrete logs for ADS %1.").arg(m_ads.equipmentId);
+			return std::unexpected<QString>{message};
+		}
+
+		m_log.writeMessage(m_logPrefix + QString("Acknowledging discrete logs up to plantTime %1, ADS %2.")
+											 .arg(dt.toString("dd MMM yyyy hh:mm:ss.zzz"))
+											 .arg(m_ads.equipmentId));
+
+		grpc::ClientContext context;
+		createAuthContext(context, std::chrono::seconds(15));
+
+		Grpc::AckDiscretesLogRequest request;
+		Grpc::AckDiscretesLogReply reply;
+
+		request.set_acksource(m_softwareInfo.equipmentID().toStdString());
+		request.set_ackuser("User"); // ???
+		request.set_ackuptoplanttime(plantTimeToAck.value().timeStamp);
+
+		auto status = m_stub->AckDiscretesLog(&context, request, &reply);
+		incRequestCount();
+
+		if (status.ok() == false)
+		{
+			return std::unexpected<QString>{QString("Failed to ack discrete logs up to plantTime %1 for ADS %2, error %3")
+												.arg(dt.toString("dd MMM yyyy hh:mm:ss.zzz"))
+												.arg(m_ads.equipmentId)
+												.arg(statusToString(status))};
+		}
+		else
+		{
+			incReplyCount();
+
+			m_signalLog.deleteUpTo(m_ads.equipmentId, reply.ackuptoplanttime());
+		}
+
+		return {};
+	}
+
 	void AdsClientGrpc::clientCommunicationLoop(std::stop_token stoken)
 	{
 		m_signalParamsLoaded.store(false);
@@ -313,8 +436,6 @@ namespace ClientLib
 
 	void AdsClientGrpc::clientCommunicationLoopImpl(std::stop_token stoken)
 	{
-		// QDate timeDiscrepancyCheckDate; // Check that the server and client time is the same.
-		//  When was the last time the time discrepancy was checked?
 #if 0
 		auto listResult = requestSignalList();
 		if (listResult.has_value() == false)
@@ -351,7 +472,7 @@ namespace ClientLib
 												   .arg(m_ads.equipmentId)
 												   .arg(m_ads.address.toString())
 												   .arg(signalParamsResult.error()));
-				
+
 				// We have not received any states yet, but still invalidate any previous states, just to be sure.
 				//
 				m_signalUpdater.invalidateSignalStates(sourceId());
@@ -406,16 +527,20 @@ namespace ClientLib
 
 		// Start separate thread for getting streamed signal state changes.
 		//
-		 std::jthread stateChangesThread{[this](std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId)
+		std::jthread stateChangesThread{[this](std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId)
 										{
 											return stateChangesThreadFunc(stoken, sourceId);
 										},
 										sourceId()};
 
+		std::jthread signalLogThread{[this](std::stop_token stoken)
+									 {
+										 return signalLogThreadFunc(stoken);
+									 }};
+
 		// Start separate thread for updating recently used signals.
 		//
 		std::jthread recentSignalsThread;
-
 		if (m_recentAppSignals != nullptr)
 		{
 			recentSignalsThread = std::jthread{[this](std::stop_token stoken)
@@ -429,9 +554,6 @@ namespace ClientLib
 		constexpr size_t RepeatedlyGetStateCount =
 			ADS_GET_APP_SIGNAL_STATE_MAX / 16; // 312 states * 10 requests/sec = 3120 states/sec, or 187'200 states/minute.
 		size_t statePart = 0;
-
-		auto lastCycleStart = std::chrono::steady_clock::now();
-		constexpr auto StateRequestMinCycle = std::chrono::seconds(15);
 
 		while (stoken.stop_requested() == false)
 		{
@@ -460,31 +582,32 @@ namespace ClientLib
 				if (statePart * RepeatedlyGetStateCount >= signalList.size())
 				{
 					statePart = 0;
-
-					auto timeSinceLastCycle = std::chrono::steady_clock::now() - lastCycleStart;
-					if (timeSinceLastCycle < StateRequestMinCycle)
-					{
-						// Throttle to not overload the ADS if all states were retrieved too fast.
-						//
-						for (auto sleepTime = StateRequestMinCycle - timeSinceLastCycle; sleepTime > std::chrono::milliseconds(0);
-							 sleepTime -= std::chrono::milliseconds(100))
-						{
-							if (stoken.stop_requested() == true)
-							{
-								break;
-							}
-
-							std::this_thread::sleep_for(std::chrono::milliseconds(100));
-						}
-					}
-
-					lastCycleStart = std::chrono::steady_clock::now();
 				}
+			}
+
+			// Send SignalLock ACKs
+			//
+			if (auto ackResult = requestAckSignalLog(); //
+				ackResult.has_value() == false)
+			{
+				m_log.writeError(m_logPrefix + QString{"Failed to ack discrete logs from ADS %1, address %2, error: %3"}
+												   .arg(m_ads.equipmentId)
+												   .arg(m_ads.address.toString())
+												   .arg(ackResult.error()));
 			}
 
 			// Control server time discrepancy
 			//
+			// QDate timeDiscrepancyCheckDate; // Check that the server and client time is the same.
+			//  When was the last time the time discrepancy was checked?
+			int warning_check_time_discrepancy_to_do = 0;
 		}
+
+		stateChangesThread.request_stop();
+		stateChangesThread.join();
+
+		signalLogThread.request_stop();
+		signalLogThread.join();
 
 		if (recentSignalsThread.joinable() == true)
 		{
@@ -492,9 +615,6 @@ namespace ClientLib
 			recentSignalsThread.request_stop();
 			recentSignalsThread.join();
 		}
-
-		stateChangesThread.request_stop();
-		stateChangesThread.join();
 
 		m_signalUpdater.invalidateSignalStates(sourceId());
 
@@ -576,6 +696,33 @@ namespace ClientLib
 		return;
 	}
 
+	void AdsClientGrpc::signalLogThreadFunc(std::stop_token stoken)
+	{
+		while (stoken.stop_requested() == false)
+		{
+			if (m_signalLog.enabled() == false)
+			{
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+				continue;
+			}
+
+			try
+			{
+				requestSignalLog(stoken);
+			}
+			catch (std::exception& e)
+			{
+				m_log.writeError(m_logPrefix + QString{"Exception in AdsClientGrpc::signalLogThreadFunc for ADS %1 at address %2: %3"}
+												   .arg(m_ads.equipmentId)
+												   .arg(m_ads.address.toString())
+												   .arg(e.what()));
+				continue;
+			}
+		}
+
+		return;
+	}
+
 	const SoftwareEndpoint::AppDataService& AdsClientGrpc::ads() const
 	{
 		return m_ads;
@@ -634,14 +781,14 @@ namespace ClientLib
 	AdsConnectionPrivate2::AdsConnectionPrivate2(IAppSignalUpdater& signalUpdater, IRecentAppSignals* recentAppSignals, ILogFile* logFile) :
 		m_signalUpdater{signalUpdater},
 		m_recentAppSignals{recentAppSignals},
-		m_logFile{logFile, "AdsConnectionPrivate"}
+		m_logFile{logFile, "AdsConnectionPrivate2"}
 	{
 		return;
 	}
 
 	AdsConnectionPrivate2::~AdsConnectionPrivate2()
 	{
-		m_logFile.writeMessage("~AdsConnectionPrivate()");
+		m_logFile.writeMessage("~AdsConnectionPrivate3()");
 	}
 
 	void AdsConnectionPrivate2::updateConnections(const SoftwareInfo& softwareInfo,

@@ -515,7 +515,6 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 	reply.mutable_discreteslogrecord()->Reserve(ADS_GET_DISCRETES_LOG_MAX_RECORD_COUNT);
 
 	grpc::Status writeStatus;
-	int waitCtr = 0;
 	auto lastSendTime = std::chrono::steady_clock::now();
 	constexpr int SEND_PACKET_SIZE = 100;
 	constexpr std::chrono::milliseconds SEND_PACKET_INTERVAL{200};
@@ -527,9 +526,8 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 		auto now = std::chrono::steady_clock::now();
 		int addedRecordCount = reply.discreteslogrecord_size();
 
-		if (waitCtr > 2000 ||
-			addedRecordCount > SEND_PACKET_SIZE ||
-			(addedRecordCount > 0 && now - lastSendTime >= SEND_PACKET_INTERVAL))
+		if (addedRecordCount > SEND_PACKET_SIZE ||
+			now - lastSendTime >= SEND_PACKET_INTERVAL)
 		{
 			if (writeReply(reply, writeStatus) == false)
 			{
@@ -537,14 +535,12 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 				return writeStatus;
 			}
 
-			waitCtr = 0;
 			lastSendTime = now;
 
 			reply.Clear();
 		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(5));
-		waitCtr++;
 	}
 
 	m_dsLogWriter->unregisterLogReader(dlReader);
