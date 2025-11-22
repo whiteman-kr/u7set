@@ -1,17 +1,18 @@
 #pragma once
 
-#include <vector>
-
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/TcpConnectionState.h"
 #include "../UtilsLib/ILogFile.h"
 #include "AppDataSourceState.h"
 
+#include <vector>
+
 
 namespace ClientLib
 {
-	class AdsSourceStateConnectionPrivate;
+	class AdsSourceStateConnectionPrivate;  // Tcp version
+	class AdsSourceStateConnectionPrivate2; // gRPC version
 
 	// Get application data sources states from AppDataServices(s)
 	//
@@ -30,6 +31,11 @@ namespace ClientLib
 		std::vector<ClientLib::AppDataSourceState> appDataSourceStates() const;
 
 	private:
-		std::unique_ptr<AdsSourceStateConnectionPrivate> m_pimpl;
+#ifdef USE_GRPC_ADS_CONNECTION
+		using AdsConnectionType = ClientLib::AdsSourceStateConnectionPrivate2;
+#else
+		using AdsConnectionType = ClientLib::AdsSourceStateConnectionPrivate;
+#endif
+		std::unique_ptr<AdsConnectionType> m_pimpl;
 	};
-}
+} // namespace ClientLib

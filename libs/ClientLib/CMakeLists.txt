@@ -46,6 +46,8 @@ qt_add_library(${TARGET} STATIC
 	./src/AdsSourceStateConnection.cpp
 	./src/AdsSourceStateConnectionPrivate.cpp
 	./src/AdsSourceStateConnectionPrivate.h
+	./src/AdsSourceStateConnectionPrivate2.cpp
+	./src/AdsSourceStateConnectionPrivate2.h
 	./src/AppDataSourceState.cpp
 	./src/AppSignalManager.cpp
 	./src/ClientGrpc.h
@@ -114,6 +116,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_compile_definitions(${TARGET} PRIVATE CLIENT_LIB_DOMAIN)
+target_compile_definitions(${TARGET} PRIVATE USE_GRPC_ADS_CONNECTION)
 
 #Add translations
 #

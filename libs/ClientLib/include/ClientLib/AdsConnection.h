@@ -49,14 +49,10 @@ namespace ClientLib
 		// --
 		//
 	private:
-#if 0
-		// Tcp-based connection
-		//
-		using AdsConnectionType = ClientLib::AdsConnectionPrivate;
+#ifdef USE_GRPC_ADS_CONNECTION
+		using AdsConnectionType = ClientLib::AdsConnectionPrivate2; // Grpc-based connection
 #else
-		// Grpc-based connection
-		//
-		using AdsConnectionType = ClientLib::AdsConnectionPrivate2;
+		using AdsConnectionType = ClientLib::AdsConnectionPrivate; // Tcp-based connection
 #endif
 
 		bool m_hasRecentAppSignals = false;

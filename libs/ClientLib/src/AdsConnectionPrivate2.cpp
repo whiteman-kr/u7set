@@ -5,7 +5,6 @@
 #include "AdsConnectionPrivate2.h"
 #include "ClientGrpc.h"
 
-#include <grpcpp/grpcpp.h>
 
 #include <expected>
 
@@ -783,12 +782,13 @@ namespace ClientLib
 		m_recentAppSignals{recentAppSignals},
 		m_logFile{logFile, "AdsConnectionPrivate2"}
 	{
+		m_logFile.writeMessage("AdsConnectionPrivate2::AdsConnectionPrivate2()");
 		return;
 	}
 
 	AdsConnectionPrivate2::~AdsConnectionPrivate2()
 	{
-		m_logFile.writeMessage("~AdsConnectionPrivate3()");
+		m_logFile.writeMessage("AdsConnectionPrivate2::~AdsConnectionPrivate2()");
 	}
 
 	void AdsConnectionPrivate2::updateConnections(const SoftwareInfo& softwareInfo,

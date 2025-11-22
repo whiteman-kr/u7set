@@ -175,6 +175,12 @@ namespace ClientLib
 	ClientGrpc<GrpcServerType>::~ClientGrpc()
 	{
 		shutUp();
+
+		// Give gRPC time to clean up
+		// (This is a workaround, not a real fix)
+		//
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		return;
 	}
 
 	template<typename GrpcServerType>

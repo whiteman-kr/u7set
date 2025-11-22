@@ -2,9 +2,11 @@
 	#error Do not include this file in the project! Link ClientLib instead.
 #endif
 
-#include "AdsConnectionPrivate.h"
-
-#include "AdsConnectionPrivate2.h"
+#ifdef USE_GRPC_ADS_CONNECTION
+	#include "AdsConnectionPrivate2.h"
+#else
+	#include "AdsConnectionPrivate.h"
+#endif
 
 
 #include <ClientLib/AdsConnection.h>
