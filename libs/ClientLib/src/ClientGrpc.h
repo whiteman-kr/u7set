@@ -234,6 +234,7 @@ namespace ClientLib
 				std::scoped_lock lock{m_tcpStateMutex};
 				m_tcpState.isSocketConnected = false;
 				m_tcpState.isConnected = false;
+				m_tcpState.setConnectionResult = Tcp::SetConnectionResult::Undefined;
 				m_tcpState.sentBytes = 0;
 				m_tcpState.receivedBytes = 0;
 				m_tcpState.requestCount = 0;
@@ -314,6 +315,7 @@ namespace ClientLib
 				std::scoped_lock lock{m_tcpStateMutex};
 				m_tcpState.isConnected = true;
 				m_tcpState.startTime = QDateTime::currentMSecsSinceEpoch();
+				m_tcpState.setConnectionResult = Tcp::SetConnectionResult::Ok;
 			}
 
 			m_log.writeMessage(

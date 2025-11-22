@@ -305,13 +305,21 @@ TEST_F(AdsBridgeTests, AdsGetTcpConnectionStatuses)
 
 	EXPECT_TRUE(connectionStatus[0].status);
 	EXPECT_TRUE(connectionStatus[1].status);
-	EXPECT_TRUE(connectionStatus[2].status);
-	EXPECT_TRUE(connectionStatus[3].status);
+
+	if (ConnectionsPerServer == 2)
+	{
+		EXPECT_TRUE(connectionStatus[2].status);
+		EXPECT_TRUE(connectionStatus[3].status);
+	}
 
 	EXPECT_EQ(connectionStatus[0].setConnectionResult, ADS_SET_CONNECTION_RESULT_OK);
 	EXPECT_EQ(connectionStatus[1].setConnectionResult, ADS_SET_CONNECTION_RESULT_OK);
-	EXPECT_EQ(connectionStatus[2].setConnectionResult, ADS_SET_CONNECTION_RESULT_OK);
-	EXPECT_EQ(connectionStatus[3].setConnectionResult, ADS_SET_CONNECTION_RESULT_OK);
+
+	if (ConnectionsPerServer == 2)
+	{
+		EXPECT_EQ(connectionStatus[2].setConnectionResult, ADS_SET_CONNECTION_RESULT_OK);
+		EXPECT_EQ(connectionStatus[3].setConnectionResult, ADS_SET_CONNECTION_RESULT_OK);
+	}
 
 	return;
 }
