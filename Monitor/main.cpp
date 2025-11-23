@@ -21,6 +21,8 @@ int main(int argc, char* argv[])
 #endif
 
 	grpc_init();
+	[[maybe_unused]] const auto clientLocalMs = currentMSecsLocal(); // A call to this function that is the first reference to the time zone
+																	 // database will cause it to be initialized. This suppress VLD false-positive memory leak detection.
 
 #ifdef VLD_IS_INCLUDED
 	VLDEnable();
