@@ -40,6 +40,8 @@ target_precompile_headers(
 		<CommonLib/Hash.h>
 		<CommonLib/Types.h>
 
+		<Network.pb.h>
+
 		"../../AppSignalLib/AppSignalParam.h"
 		"../../AppSignalLib/AppSignalState.h"
 )

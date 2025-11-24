@@ -25,7 +25,7 @@ namespace ClientLib
 					   const SoftwareEndpoint::AppDataService& ads,
 					   IAppSignalUpdater& signalUpdater,
 					   IRecentAppSignals* recentAppSignals,
-					   SignalLog& signalLog,
+					   ISignalLogUpdater* signalLogUpdater,
 					   ILogFile& logFile);
 
 			[[nodiscard]] HostAddressPort address() const;
@@ -43,7 +43,8 @@ namespace ClientLib
 	public:
 		explicit AdsConnectionPrivate2(
 			IAppSignalUpdater& signalUpdater,
-			IRecentAppSignals* recentAppSignals, // Can be nullptr, then recent state comm thread will not be created.
+			IRecentAppSignals* recentAppSignals, // Can be nullptr
+			ISignalLogUpdater* signalLogUpdater, // Can be nullptr
 			ILogFile* logFile);
 		virtual ~AdsConnectionPrivate2();
 
@@ -57,14 +58,12 @@ namespace ClientLib
 		[[nodiscard]] bool signalParamsLoaded() const;
 		[[nodiscard]] bool signalStatesLoaded() const;
 
-		[[nodiscard]] SignalLog& signalLog();
-		[[nodiscard]] const SignalLog& signalLog() const;
-
 		// --
 		//
 	private:
 		IAppSignalUpdater& m_signalUpdater;
 		IRecentAppSignals* m_recentAppSignals = nullptr; // If nullptr then recent connections are not used
+		ISignalLogUpdater* m_signalLogUpdater = nullptr;
 		HasLogFile m_logFile;
 
 		SignalLog m_signalLog;

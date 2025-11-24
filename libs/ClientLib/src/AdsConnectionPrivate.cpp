@@ -14,10 +14,10 @@ namespace ClientLib
 												 const SoftwareEndpoint::AppDataService& ads,
 												 IAppSignalUpdater& signalUpdater,
 												 IRecentAppSignals* recentAppSignals,
-												 SignalLog& signalLog,
+												 ISignalLogUpdater* signalLogUpdater,
 												 ILogFile* logFile)
 	{
-		tcpSignalClient = new ClientLib::TcpSignalClient{softwareInfo, ads, signalUpdater, signalLog, logFile};
+		tcpSignalClient = new ClientLib::TcpSignalClient{softwareInfo, ads, signalUpdater, signalLogUpdater, logFile};
 		tcpClientThread = new ::SimpleThread{tcpSignalClient};
 		tcpClientThread->start();
 
@@ -87,9 +87,13 @@ namespace ClientLib
 		return tcpSignalClient->signalStatesLoaded();
 	}
 
-	AdsConnectionPrivate::AdsConnectionPrivate(IAppSignalUpdater& signalUpdater, IRecentAppSignals* recentAppSignals, ILogFile* logFile) :
+	AdsConnectionPrivate::AdsConnectionPrivate(IAppSignalUpdater& signalUpdater,
+											   IRecentAppSignals* recentAppSignals,
+											   ISignalLogUpdater* signalLogUpdater,
+											   ILogFile* logFile) :
 		m_signalUpdater{signalUpdater},
 		m_recentAppSignals{recentAppSignals},
+		m_signalLogUpdater{signalLogUpdater},
 		m_logFile{logFile, "AdsConnectionPrivate"}
 	{
 		return;
@@ -135,7 +139,7 @@ namespace ClientLib
 			//
 			for (const auto& ads : appDataServices)
 			{
-				m_conns.emplace_back(softwareInfo, ads, m_signalUpdater, m_recentAppSignals, m_signalLog, m_logFile.logFile());
+				m_conns.emplace_back(softwareInfo, ads, m_signalUpdater, m_recentAppSignals, m_signalLogUpdater, m_logFile.logFile());
 			}
 		}
 
@@ -188,15 +192,4 @@ namespace ClientLib
 							   return c.signalStatesLoaded();
 						   });
 	}
-
-	SignalLog& AdsConnectionPrivate::signalLog()
-	{
-		return m_signalLog;
-	}
-
-	const SignalLog& AdsConnectionPrivate::signalLog() const
-	{
-		return m_signalLog;
-	}
-
 } // namespace ClientLib

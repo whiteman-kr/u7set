@@ -6,7 +6,7 @@
 #include <array>
 #include <cassert>
 
-using Hash = quint64;
+using Hash = uint64_t;
 using Hash32 = uint32_t;
 
 #define UNDEFINED_HASH 0x0000000000000000ULL		// Do not change to other value.

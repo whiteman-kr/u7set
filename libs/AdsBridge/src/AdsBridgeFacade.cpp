@@ -15,7 +15,7 @@ namespace AdsBridge
 	AdsBridgeFacade::AdsBridgeFacade(ILogFile* log) :
 		m_log{log},
 		m_signals{std::make_unique<ClientLib::AppSignalManager>(m_log)},
-		m_adsConnection{std::make_unique<ClientLib::AdsConnection>(*m_signals.get(), m_signals.get(), m_log)}
+		m_adsConnection{std::make_unique<ClientLib::AdsConnection>(*m_signals.get(), m_signals.get(), nullptr, m_log)}
 	{
 		log->writeMessage("AdsBridgeFacade::AdsBridgeFacade()");
 	}

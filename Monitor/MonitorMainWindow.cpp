@@ -1441,7 +1441,7 @@ void MonitorMainWindow::slot_trends()
 
 void MonitorMainWindow::slot_signalLog()
 {
-	SignalLogDialog::createDialog(m_adsConnection.signalLog(),
+	SignalLogDialog::createDialog(m_signalLog,
 								  m_signalManager,
 								  &m_appSignalListSet,
 								  configController().configInfo().project,
@@ -1456,10 +1456,10 @@ void MonitorMainWindow::slot_updateSignalLogText()
 {
 	assert(m_signalLogButton);
 
-	auto counter = m_adsConnection.signalLog().updateCounter();
+	auto counter = m_signalLog.updateCounter();
 	if (counter != m_signalLogLastUpdate)
 	{
-		const auto& [records, cacheCounter] = m_adsConnection.signalLog().getRecords();
+		const auto& [records, cacheCounter] = m_signalLog.getRecords();
 
 		const auto& config = configController().configuration();
 
@@ -1632,7 +1632,7 @@ void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configur
 	// Update AppSignalManager with specific data
 	//
 	m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
-	m_adsConnection.signalLog().setEnabled(configuration.signalLogEnable);
+	m_signalLog.setEnabled(configuration.signalLogEnable);
 
 	m_tuningConnection.updateConnections(m_configController.softwareInfo(),
 										 configuration.tuningServices,

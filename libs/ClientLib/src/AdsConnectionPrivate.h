@@ -6,7 +6,7 @@
 #include "../UtilsLib/ILogFile.h"
 #include <ClientLib/IAppSignalUpdater.h>
 #include <ClientLib/IRecentAppSignals.h>
-#include <ClientLib/SignalLog.h>
+#include <ClientLib/ISignalLogUpdater.h>
 
 
 class SimpleThread;
@@ -29,7 +29,7 @@ namespace ClientLib
 					   const SoftwareEndpoint::AppDataService& ads,
 					   IAppSignalUpdater& signalUpdater,
 					   IRecentAppSignals* recentAppSignals,
-					   SignalLog& signalLog,
+					   ISignalLogUpdater* signalLogUpdater,
 					   ILogFile* logFile);
 			~Connection();
 
@@ -60,6 +60,7 @@ namespace ClientLib
 		explicit AdsConnectionPrivate(
 			IAppSignalUpdater& signalUpdater,
 			IRecentAppSignals* recentAppSignals, // Can be nullptr, then recent state comm thread will not be created.
+			ISignalLogUpdater* signalLogUpdater,
 			ILogFile* logFile);
 		virtual ~AdsConnectionPrivate();
 
@@ -73,17 +74,13 @@ namespace ClientLib
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
 
-		SignalLog& signalLog();
-		const SignalLog& signalLog() const;
-
 		// --
 		//
 	private:
 		IAppSignalUpdater& m_signalUpdater;
 		IRecentAppSignals* m_recentAppSignals = nullptr; // If nullptr then recent connections are not used
+		ISignalLogUpdater* m_signalLogUpdater = nullptr;
 		HasLogFile m_logFile;
-
-		SignalLog m_signalLog;
 
 		mutable QReadWriteLock m_connsMutex;
 		std::list<Connection> m_conns;

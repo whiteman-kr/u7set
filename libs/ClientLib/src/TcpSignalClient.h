@@ -9,7 +9,7 @@
 
 namespace ClientLib
 {
-	class SignalLog;
+	class ISignalLogUpdater;
 
 	inline const int RequestTimeIntervalMs = 20;
 
@@ -56,7 +56,7 @@ namespace ClientLib
 		TcpSignalClient(const SoftwareInfo& softwareInfo,
 						const SoftwareEndpoint::AppDataService& adsInfo,
 						IAppSignalUpdater& signalUpdater,
-						SignalLog& signalLog,
+						ISignalLogUpdater* signalLogUpdater,
 						ILogFile* logFile);
 		virtual ~TcpSignalClient();
 
@@ -116,7 +116,7 @@ namespace ClientLib
 		std::atomic<bool> m_signalParamsLoaded{false};
 		std::atomic<bool> m_signalStatesLoaded{false};
 
-		SignalLog& m_signalLog;
+		ISignalLogUpdater* m_signalLogUpdater = nullptr;
 
 		// Cache protobuf messages
 		//

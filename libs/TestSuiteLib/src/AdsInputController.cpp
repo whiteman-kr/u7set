@@ -7,7 +7,7 @@ namespace TestSuite
 	AdsInputController::AdsInputController(ClientLib::AppSignalManager& signalManager, ILogFile* logFile) :
 		m_signalManager{signalManager},
 		m_appLog{logFile, "AdsInputController"},
-		m_connection{m_signalManager, &m_signalManager, logFile}
+		m_connection{m_signalManager, &m_signalManager, nullptr, logFile}
 	{
 		return;
 	}

@@ -13,9 +13,12 @@
 
 namespace ClientLib
 {
-	AdsConnection::AdsConnection(IAppSignalUpdater& signalUpdater, IRecentAppSignals* recentAppSignals, ILogFile* logFile) :
+	AdsConnection::AdsConnection(IAppSignalUpdater& signalUpdater,
+								 IRecentAppSignals* recentAppSignals,
+								 ISignalLogUpdater* signalLogUpdater,
+								 ILogFile* logFile) :
 		m_hasRecentAppSignals{recentAppSignals != nullptr},
-		m_pimpl{std::make_unique<AdsConnectionType>(signalUpdater, recentAppSignals, logFile)}
+		m_pimpl{std::make_unique<AdsConnectionType>(signalUpdater, recentAppSignals, signalLogUpdater, logFile)}
 	{
 		return;
 	}
@@ -61,15 +64,5 @@ namespace ClientLib
 	bool AdsConnection::signalStatesLoaded() const
 	{
 		return m_pimpl->signalStatesLoaded();
-	}
-
-	ClientLib::SignalLog& AdsConnection::signalLog()
-	{
-		return m_pimpl->signalLog();
-	}
-
-	const ClientLib::SignalLog& AdsConnection::signalLog() const
-	{
-		return m_pimpl->signalLog();
 	}
 } // namespace ClientLib

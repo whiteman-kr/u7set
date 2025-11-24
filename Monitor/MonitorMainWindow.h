@@ -14,6 +14,7 @@
 #include <ClientLib/AdsConnection.h>
 #include <ClientLib/AppSignalManager.h>
 #include <ClientLib/ClientTranslator.h>
+#include <ClientLib/SignalLog.h>
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningLog.h>
 #include <ClientLib/TuningSignalManager.h>
@@ -190,13 +191,14 @@ private:
 	MonitorConfigController m_configController;
 	ClientLib::AppSignalManager m_signalManager;
 	ClientLib::TuningSignalManager m_tuningSignalManager;
+	ClientLib::SignalLog m_signalLog;
 
 	MonitorSchemaManager m_schemaManager;
 
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
-	ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_LogFile};
+	ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_signalLog, &m_LogFile};
 	ClientLib::TuningConnection m_tuningConnection{m_tuningSignalManager,
 												   m_tuningSignalManager,
 												   m_tuningSignalManager,

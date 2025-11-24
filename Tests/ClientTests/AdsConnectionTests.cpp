@@ -123,7 +123,7 @@ TEST_F(AdsConnectionTests, connectToAds)
 	// Start
 	//
 	{
-		ClientLib::AdsConnection adsConnection{signalUpdater, &recentlyUsedSignals, &log};
+		ClientLib::AdsConnection adsConnection{signalUpdater, &recentlyUsedSignals, nullptr, &log};
 		adsConnection.updateConnections(softwareInfo, AppDataServices);
 
 		// Wait for connection established
@@ -208,7 +208,7 @@ TEST_F(AdsConnectionTests, adsNoConnection)
 		servers[0].address = {"192.178.12.90", 13323}; // Some unreachable addresses.
 		servers[1].address = {"192.178.13.90", 13323}; //
 
-		ClientLib::AdsConnection adsConnection{signalUpdater, nullptr, &log};
+		ClientLib::AdsConnection adsConnection{signalUpdater, nullptr, nullptr, &log};
 		adsConnection.updateConnections(softwareInfo, servers);
 
 		// Wait for connection established
@@ -246,7 +246,7 @@ TEST_F(AdsConnectionTests, receivesState)
 
 	// Start
 	//
-	ClientLib::AdsConnection adsConnection{signalManager, &signalManager, &log};
+	ClientLib::AdsConnection adsConnection{signalManager, &signalManager, nullptr, &log};
 	adsConnection.updateConnections(softwareInfo, AppDataServices);
 
 	// Wait for connection established

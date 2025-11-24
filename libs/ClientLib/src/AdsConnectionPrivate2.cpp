@@ -19,7 +19,7 @@ namespace ClientLib
 							   const SoftwareEndpoint::AppDataService& ads,
 							   IAppSignalUpdater& signalUpdater,
 							   IRecentAppSignals* recentAppSignals,
-							   SignalLog& signalLog,
+							   ISignalLogUpdater* signalLogUpdater,
 							   ILogFile& logFile);
 
 		virtual ~AdsClientGrpc();
@@ -56,7 +56,7 @@ namespace ClientLib
 		const SoftwareEndpoint::AppDataService m_ads;
 		IAppSignalUpdater& m_signalUpdater;
 		IRecentAppSignals* m_recentAppSignals = nullptr; // If nullptr, then is not used.
-		SignalLog& m_signalLog;
+		ISignalLogUpdater* m_signalLogUpdater = nullptr; // If nullptr, then is not used.
 
 		// --
 		//
@@ -69,13 +69,13 @@ namespace ClientLib
 								 const SoftwareEndpoint::AppDataService& ads,
 								 IAppSignalUpdater& signalUpdater,
 								 IRecentAppSignals* recentAppSignals,
-								 SignalLog& signalLog,
+								 ISignalLogUpdater* signalLogUpdater,
 								 ILogFile& logFile) :
 		ClientGrpc{softwareInfo, ads.equipmentId, ads.address, logFile, ads.shortenId},
 		m_ads{ads},
 		m_signalUpdater{signalUpdater},
 		m_recentAppSignals{recentAppSignals},
-		m_signalLog{signalLog}
+		m_signalLogUpdater{signalLogUpdater}
 	{
 		m_tcpState.name = "AdsClientGrpc " + ads.shortenId;
 		return;
@@ -329,30 +329,17 @@ namespace ClientLib
 
 		Grpc::GetDiscretesLogRequest request;
 		Grpc::GetDiscretesLogReply reply;
-		std::vector<DiscretesLogRecord> records;
 
 		auto replyReader = m_stub->GetDiscretesLog(&context, request);
 		incRequestCount();
 
-		while (m_signalLog.enabled() == true && stoken.stop_requested() == false && replyReader->Read(&reply) == true)
+		while (m_signalLogUpdater != nullptr && m_signalLogUpdater->enabled() == true && stoken.stop_requested() == false &&
+			   replyReader->Read(&reply) == true)
 		{
 			incReplyCount();
 
-			records.clear();
-			records.reserve(reply.discreteslogrecord_size());
-
-			std::transform(reply.discreteslogrecord().begin(),
-						   reply.discreteslogrecord().end(),
-						   std::back_inserter(records),
-						   [](const Network::DiscretesLogRecord& logRecord)
-						   {
-							   DiscretesLogRecord record;
-							   record.loadFromProto(logRecord);
-							   return record;
-						   });
-
-			m_signalLog.add(m_ads.equipmentId, records);
-			m_signalLog.deleteUpTo(m_ads.equipmentId, reply.logfirstrecordid());
+			m_signalLogUpdater->add(m_ads.equipmentId.toStdString(), reply.discreteslogrecord().begin(), reply.discreteslogrecord().end());
+			m_signalLogUpdater->deleteUpTo(m_ads.equipmentId.toStdString(), reply.logfirstrecordid());
 
 			reply.Clear();
 		}
@@ -378,18 +365,18 @@ namespace ClientLib
 
 	std::expected<void, QString> AdsClientGrpc::requestAckSignalLog()
 	{
-		if (m_signalLog.enabled() == false)
+		if (m_signalLogUpdater == nullptr || m_signalLogUpdater->enabled() == false)
 		{
 			return {};
 		}
 
-		auto plantTimeToAck = m_signalLog.getNextAckUpTo();
+		auto plantTimeToAck = m_signalLogUpdater->getNextAckUpTo();
 		if (plantTimeToAck.has_value() == false)
 		{
 			return {};
 		}
 
-		auto dt = plantTimeToAck.value().toDateTime();
+		auto dt = TimeStamp{plantTimeToAck.value()}.toDateTime();
 		if (dt.isValid() == false)
 		{
 			QString message = QString("Invalid plantTime to ack discrete logs for ADS %1.").arg(m_ads.equipmentId);
@@ -408,7 +395,7 @@ namespace ClientLib
 
 		request.set_acksource(m_softwareInfo.equipmentID().toStdString());
 		request.set_ackuser("User"); // ???
-		request.set_ackuptoplanttime(plantTimeToAck.value().timeStamp);
+		request.set_ackuptoplanttime(plantTimeToAck.value());
 
 		auto status = m_stub->AckDiscretesLog(&context, request, &reply);
 		incRequestCount();
@@ -423,8 +410,6 @@ namespace ClientLib
 		else
 		{
 			incReplyCount();
-
-			m_signalLog.deleteUpTo(m_ads.equipmentId, reply.ackuptoplanttime());
 		}
 
 		return {};
@@ -806,9 +791,14 @@ namespace ClientLib
 
 	void AdsClientGrpc::signalLogThreadFunc(std::stop_token stoken)
 	{
+		if (m_signalLogUpdater == nullptr)
+		{
+			return;
+		}
+
 		while (stoken.stop_requested() == false)
 		{
-			if (m_signalLog.enabled() == false)
+			if (m_signalLogUpdater->enabled() == false)
 			{
 				std::this_thread::sleep_for(std::chrono::seconds(1));
 				continue;
@@ -852,9 +842,9 @@ namespace ClientLib
 												  const SoftwareEndpoint::AppDataService& ads,
 												  IAppSignalUpdater& signalUpdater,
 												  IRecentAppSignals* recentAppSignals,
-												  SignalLog& signalLog,
+												  ISignalLogUpdater* signalLogUpdater,
 												  ILogFile& logFile) :
-		m_client{std::make_unique<ClientLib::AdsClientGrpc>(softwareInfo, ads, signalUpdater, recentAppSignals, signalLog, logFile)}
+		m_client{std::make_unique<ClientLib::AdsClientGrpc>(softwareInfo, ads, signalUpdater, recentAppSignals, signalLogUpdater, logFile)}
 	{
 		return;
 	}
@@ -886,9 +876,13 @@ namespace ClientLib
 
 	// AdsConnectionPrivate2
 	//
-	AdsConnectionPrivate2::AdsConnectionPrivate2(IAppSignalUpdater& signalUpdater, IRecentAppSignals* recentAppSignals, ILogFile* logFile) :
+	AdsConnectionPrivate2::AdsConnectionPrivate2(IAppSignalUpdater& signalUpdater,
+												 IRecentAppSignals* recentAppSignals,
+												 ISignalLogUpdater* signalLogUpdater,
+												 ILogFile* logFile) :
 		m_signalUpdater{signalUpdater},
 		m_recentAppSignals{recentAppSignals},
+		m_signalLogUpdater{signalLogUpdater},
 		m_logFile{logFile, "AdsConnectionPrivate2"}
 	{
 		m_logFile.writeMessage("AdsConnectionPrivate2::AdsConnectionPrivate2()");
@@ -935,7 +929,7 @@ namespace ClientLib
 			//
 			for (const auto& ads : appDataServices)
 			{
-				m_conns.emplace_back(softwareInfo, ads, m_signalUpdater, m_recentAppSignals, m_signalLog, *m_logFile);
+				m_conns.emplace_back(softwareInfo, ads, m_signalUpdater, m_recentAppSignals, m_signalLogUpdater, *m_logFile);
 			}
 		}
 
@@ -978,15 +972,4 @@ namespace ClientLib
 							   return c.signalStatesLoaded();
 						   });
 	}
-
-	SignalLog& AdsConnectionPrivate2::signalLog()
-	{
-		return m_signalLog;
-	}
-
-	const SignalLog& AdsConnectionPrivate2::signalLog() const
-	{
-		return m_signalLog;
-	}
-
 } // namespace ClientLib

@@ -7,7 +7,7 @@
 
 #include "IAppSignalUpdater.h"
 #include "IRecentAppSignals.h"
-#include "SignalLog.h"
+#include "ISignalLogUpdater.h"
 
 
 namespace ClientLib
@@ -20,7 +20,8 @@ namespace ClientLib
 	{
 	public:
 		explicit AdsConnection(IAppSignalUpdater& signalUpdater,
-							   IRecentAppSignals* recentAppSignals, // Can be nullptr, then recent state comm thread will not be created.
+							   IRecentAppSignals* recentAppSignals, // Can be nullptr
+							   ISignalLogUpdater* signalLogUpdater, // Can be nullptr
 							   ILogFile* logFile);
 
 		AdsConnection(const AdsConnection&) = delete;
@@ -43,10 +44,7 @@ namespace ClientLib
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
 
-		ClientLib::SignalLog& signalLog();
-		const ClientLib::SignalLog& signalLog() const;
-
-		// --
+										  // --
 		//
 	private:
 #ifdef USE_GRPC_ADS_CONNECTION

@@ -35,14 +35,14 @@ namespace ClientLib
 	TcpSignalClient::TcpSignalClient(const SoftwareInfo& softwareInfo,
 									 const SoftwareEndpoint::AppDataService& adsInfo,
 									 IAppSignalUpdater& signalUpdater,
-									 SignalLog& signalLog,
+									 ISignalLogUpdater* signalLogUpdater,
 									 ILogFile* logFile) :
 		Tcp::Client(softwareInfo, adsInfo.address, "TcpSignalClient", adsInfo.shortenId),
 		TcpClientStatistics(this),
 		HasLogFile(logFile, QString("ADS ") + adsInfo.shortenId),
 		m_serverSettings(adsInfo),
 		m_signalUpdater(signalUpdater),
-		m_signalLog(signalLog)
+		m_signalLogUpdater(signalLogUpdater)
 	{
 		setObjectName("TcpSignalClient " + adsInfo.equipmentId);
 
@@ -595,7 +595,7 @@ namespace ClientLib
 
 	void TcpSignalClient::requestSignalLog()
 	{
-		if (m_signalLog.enabled() == true)
+		if (m_signalLogUpdater != nullptr && m_signalLogUpdater->enabled() == true)
 		{
 			sendRequest(ADS_GET_DISCRETES_LOG);
 		}
@@ -609,6 +609,8 @@ namespace ClientLib
 
 	void TcpSignalClient::processSignalLog(const QByteArray& data)
 	{
+		assert(m_signalLogUpdater);
+
 		bool ok = tl_getDiscretesLogReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 		if (ok == false)
 		{
@@ -621,21 +623,10 @@ namespace ClientLib
 		int pendingRecordsCount = tl_getDiscretesLogReply.pendingrecordscount();
 #endif
 
-		std::vector<DiscretesLogRecord> records;
-		records.reserve(tl_getDiscretesLogReply.discreteslogrecord_size());
-
-		std::transform(tl_getDiscretesLogReply.discreteslogrecord().begin(),
-					   tl_getDiscretesLogReply.discreteslogrecord().end(),
-					   std::back_inserter(records),
-					   [](const Network::DiscretesLogRecord& logRecord)
-					   {
-						   DiscretesLogRecord record;
-						   record.loadFromProto(logRecord);
-						   return record;
-					   });
-
-		m_signalLog.add(m_serverSettings.equipmentId, records);
-		m_signalLog.deleteUpTo(m_serverSettings.equipmentId, tl_getDiscretesLogReply.logfirstrecordid());
+		m_signalLogUpdater->add(m_serverSettings.equipmentId.toStdString(),
+								tl_getDiscretesLogReply.discreteslogrecord().begin(),
+								tl_getDiscretesLogReply.discreteslogrecord().end());
+		m_signalLogUpdater->deleteUpTo(m_serverSettings.equipmentId.toStdString(), tl_getDiscretesLogReply.logfirstrecordid());
 
 		requestAckSignalLog();
 		return;
@@ -643,24 +634,26 @@ namespace ClientLib
 
 	void TcpSignalClient::requestAckSignalLog()
 	{
-		if (m_signalLog.enabled() == false)
+		if (m_signalLogUpdater == nullptr || m_signalLogUpdater->enabled() == false)
 		{
 			resetToGetState(false);
 			return;
 		}
 
-		auto plantTimeToAck = m_signalLog.getNextAckUpTo();
+		auto plantTimeToAck = m_signalLogUpdater->getNextAckUpTo();
 
 		if (plantTimeToAck.has_value() == true)
 		{
-			auto dt = plantTimeToAck.value().toDateTime();
+			TimeStamp ts{plantTimeToAck.value()};
+
+			auto dt = ts.toDateTime();
 			writeMessage(QString("Acknowledging discrete logs up to plantTime %1, ADS %2.")
 							 .arg(dt.toString("dd MMM yyyy hh:mm:ss.zzz"))
 							 .arg(m_serverSettings.equipmentId));
 
 			tl_ackDiscretesLogRequest.set_acksource(localSoftwareInfo().equipmentID().toStdString());
 			tl_ackDiscretesLogRequest.set_ackuser("User"); // ???
-			tl_ackDiscretesLogRequest.set_ackuptoplanttime(plantTimeToAck.value().timeStamp);
+			tl_ackDiscretesLogRequest.set_ackuptoplanttime(ts.timeStamp);
 			sendRequest(ADS_ACK_DISCRETES_LOG, tl_ackDiscretesLogRequest);
 		}
 		else
