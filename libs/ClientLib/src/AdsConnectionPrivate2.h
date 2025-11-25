@@ -28,13 +28,13 @@ namespace ClientLib
 					   SignalLog& signalLog,
 					   ILogFile& logFile);
 
-			HostAddressPort address() const;
-			const SoftwareEndpoint::AppDataService& server() const;
+			[[nodiscard]] HostAddressPort address() const;
+			[[nodiscard]] const SoftwareEndpoint::AppDataService& server() const;
 
-			Tcp::ConnectionState tcpConnectionState() const;
+			[[nodiscard]] Tcp::ConnectionState tcpConnectionState() const;
 
-			bool signalParamsLoaded() const;
-			bool signalStatesLoaded() const;
+			[[nodiscard]] bool signalParamsLoaded() const;
+			[[nodiscard]] bool signalStatesLoaded() const;
 
 		private:
 			std::unique_ptr<ClientLib::AdsClientGrpc> m_client;
@@ -52,13 +52,13 @@ namespace ClientLib
 		///
 		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
 
-		std::vector<Tcp::ConnectionState> connectionStates() const;
+		[[nodiscard]] std::vector<Tcp::ConnectionState> connectionStates() const;
 
-		bool signalParamsLoaded() const;
-		bool signalStatesLoaded() const;
+		[[nodiscard]] bool signalParamsLoaded() const;
+		[[nodiscard]] bool signalStatesLoaded() const;
 
-		SignalLog& signalLog();
-		const SignalLog& signalLog() const;
+		[[nodiscard]] SignalLog& signalLog();
+		[[nodiscard]] const SignalLog& signalLog() const;
 
 		// --
 		//

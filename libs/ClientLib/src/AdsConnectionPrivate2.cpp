@@ -5,8 +5,6 @@
 #include "AdsConnectionPrivate2.h"
 #include "ClientGrpc.h"
 
-#include <grpcpp/grpcpp.h>
-
 #include <expected>
 
 
@@ -38,6 +36,7 @@ namespace ClientLib
 		void requestSignalStatesChanges(std::stop_token stoken, IAppSignalUpdater::SourceIdType sourceId);
 		void requestSignalLog(std::stop_token stoken);
 		std::expected<void, QString> requestAckSignalLog();
+		std::expected<void, QString> requestServerTime();
 
 	private:
 		virtual void clientCommunicationLoop(std::stop_token stoken) override;
@@ -293,11 +292,21 @@ namespace ClientLib
 		}
 
 		auto status = replyReader->Finish();
-		m_log.writeMessage(m_logPrefix +
-						   QString{"AdsClientGrpc::requestSignalStatesChanges is about to exit with code %1, ADS %2, Address %3"}
-							   .arg(statusToString(status))
-							   .arg(m_ads.equipmentId)
-							   .arg(m_ads.address.toString()));
+
+		if (status.ok() == false && status.error_code() != grpc::StatusCode::CANCELLED)
+		{
+			m_log.writeError(m_logPrefix + QString{"Stream error in requestSignalStatesChanges: %1, ADS %2, Address %3"}
+											   .arg(statusToString(status))
+											   .arg(m_ads.equipmentId)
+											   .arg(m_ads.address.toString()));
+		}
+		else
+		{
+			m_log.writeMessage(m_logPrefix + QString{"AdsClientGrpc::requestSignalStatesChanges exited normally, ADS %1, Address %2"}
+												 .arg(m_ads.equipmentId)
+												 .arg(m_ads.address.toString()));
+		}
+
 		return;
 	}
 
@@ -349,10 +358,21 @@ namespace ClientLib
 		}
 
 		auto status = replyReader->Finish();
-		m_log.writeMessage(m_logPrefix + QString{"AdsClientGrpc::requestSignalLog is about to exit with code %1, ADS %2, Address %3"}
-											 .arg(statusToString(status))
-											 .arg(m_ads.equipmentId)
-											 .arg(m_ads.address.toString()));
+
+		if (status.ok() == false && status.error_code() != grpc::StatusCode::CANCELLED)
+		{
+			m_log.writeError(m_logPrefix + QString{"Stream error in requestSignalLog: %1, ADS %2, Address %3"}
+											   .arg(statusToString(status))
+											   .arg(m_ads.equipmentId)
+											   .arg(m_ads.address.toString()));
+		}
+		else
+		{
+			m_log.writeMessage(m_logPrefix + QString{"AdsClientGrpc::requestSignalLog exited normally, ADS %1, Address %2"}
+												 .arg(m_ads.equipmentId)
+												 .arg(m_ads.address.toString()));
+		}
+
 		return;
 	}
 
@@ -405,6 +425,81 @@ namespace ClientLib
 			incReplyCount();
 
 			m_signalLog.deleteUpTo(m_ads.equipmentId, reply.ackuptoplanttime());
+		}
+
+		return {};
+	}
+
+	std::expected<void, QString> AdsClientGrpc::requestServerTime()
+	{
+		grpc::ClientContext context;
+		createAuthContext(context, std::chrono::seconds(5));
+
+		Grpc::GetServerTimeRequest request;
+		Grpc::GetServerTimeReply reply;
+
+		auto status = m_stub->GetServerTime(&context, request, &reply);
+
+		// The earliest possible point of getting local time after sending request.
+		//
+		const auto clientUtcMs = currentMSecsSinceEpoch();
+		const auto clientLocalMs = currentMSecsLocal();
+
+		incRequestCount();
+
+		if (status.ok() == false)
+		{
+			return std::unexpected<QString>{QString("Failed to get server time for ADS %1, address %2, error %3")
+												.arg(m_ads.equipmentId)
+												.arg(m_ads.address.toString())
+												.arg(statusToString(status))};
+		}
+
+		incReplyCount();
+
+		const auto serverUtcTimeMs = reply.servertimeutc();
+		const auto serverLocalTimeMs = reply.servertimelocal();
+
+		const auto utcDiff = clientUtcMs - serverUtcTimeMs;
+		const auto localDiff = clientLocalMs - serverLocalTimeMs;
+
+		m_log.writeMessage(m_logPrefix + QString{"ADS %1 at address %2 server time received. UTC diff: %3 ms, Local diff: %4 ms"}
+											 .arg(m_ads.equipmentId)
+											 .arg(m_ads.address.toString())
+											 .arg(utcDiff)
+											 .arg(localDiff));
+
+
+		// 1. UTC time is different?
+		//
+		if (const qint64 limitMs = static_cast<qint64>(3 * 1'000) * 60; // 3 minutes.
+			utcDiff > limitMs)
+		{
+			const auto clientUtcDateTime = QDateTime::fromMSecsSinceEpoch(clientUtcMs, QTimeZone::UTC);
+			const auto serverUtcDateTime = QDateTime::fromMSecsSinceEpoch(serverUtcTimeMs, QTimeZone::UTC);
+
+			m_log.writeWarning(QString("UTC time discrepancy detected (%1 seconds). Client UTC time %2, server UTC time %3.")
+								   .arg(utcDiff / 1000)
+								   .arg(clientUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
+								   .arg(serverUtcDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
+		}
+
+		// 2. Time zone is different?
+		//
+		{
+			const qint64 serverTimeZoneDiff = serverLocalTimeMs - serverUtcTimeMs;
+			const qint64 clientTimeZoneDiff = clientLocalMs - clientUtcMs;
+			const qint64 timeZoneDiff = std::abs(serverTimeZoneDiff - clientTimeZoneDiff);
+
+			if (timeZoneDiff != 0)
+			{
+				auto clientLocalDateTime = QDateTime::fromMSecsSinceEpoch(clientLocalMs, QTimeZone::UTC);
+				auto serverLocalDateTime = QDateTime::fromMSecsSinceEpoch(serverLocalTimeMs, QTimeZone::UTC);
+
+				m_log.writeWarning(QString("TimeZone discrepancy detected. Client local time %1, server local time %2.")
+									   .arg(clientLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz"))
+									   .arg(serverLocalDateTime.toString("dd MMM yyyy hh:mm:ss.zzz")));
+			}
 		}
 
 		return {};
@@ -555,6 +650,8 @@ namespace ClientLib
 			ADS_GET_APP_SIGNAL_STATE_MAX / 16; // 312 states * 10 requests/sec = 3120 states/sec, or 187'200 states/minute.
 		size_t statePart = 0;
 
+		std::chrono::days todayDays{0};
+
 		while (stoken.stop_requested() == false)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -596,11 +693,22 @@ namespace ClientLib
 												   .arg(ackResult.error()));
 			}
 
-			// Control server time discrepancy
+			// Control server time discrepancy, once a day.
 			//
-			// QDate timeDiscrepancyCheckDate; // Check that the server and client time is the same.
-			//  When was the last time the time discrepancy was checked?
-			int warning_check_time_discrepancy_to_do = 0;
+			if (auto nowDays = std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now()).time_since_epoch(); //
+				nowDays != todayDays)
+			{
+				todayDays = nowDays;
+
+				auto result = requestServerTime();
+				if (result.has_value() == false)
+				{
+					m_log.writeWarning(m_logPrefix + QString{"Failed to get server time from ADS %1, address %2, error: %3"}
+														 .arg(m_ads.equipmentId)
+														 .arg(m_ads.address.toString())
+														 .arg(result.error()));
+				}
+			}
 		}
 
 		stateChangesThread.request_stop();
@@ -783,12 +891,13 @@ namespace ClientLib
 		m_recentAppSignals{recentAppSignals},
 		m_logFile{logFile, "AdsConnectionPrivate2"}
 	{
+		m_logFile.writeMessage("AdsConnectionPrivate2::AdsConnectionPrivate2()");
 		return;
 	}
 
 	AdsConnectionPrivate2::~AdsConnectionPrivate2()
 	{
-		m_logFile.writeMessage("~AdsConnectionPrivate3()");
+		m_logFile.writeMessage("AdsConnectionPrivate2::~AdsConnectionPrivate2()");
 	}
 
 	void AdsConnectionPrivate2::updateConnections(const SoftwareInfo& softwareInfo,

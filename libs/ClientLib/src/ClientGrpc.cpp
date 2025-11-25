@@ -8,15 +8,26 @@ namespace ClientLib
 {
 	// gRPC channel cache to reuse channels per address and avoid repeated allocations
 	//
-	std::shared_ptr<grpc::Channel> GrpcChannelCache::get(const std::string& address)
+	std::shared_ptr<grpc::Channel> GrpcChannelCache::get(const std::string& address, bool forceToCreateNew)
 	{
 		static std::mutex mtx;
 		static std::unordered_map<std::string, std::weak_ptr<grpc::Channel>> cache;
+
 		std::lock_guard lock{mtx};
 
-		if (auto existing = cache[address].lock(); existing != nullptr)
+		if (forceToCreateNew == false)
 		{
-			return existing;
+			auto existing = cache[address].lock();
+			if (existing != nullptr)
+			{
+				return existing;
+			}
+		}
+		else
+		{
+			// forceToCreateNew == true
+			//
+			cache.erase(address);
 		}
 
 		grpc::ChannelArguments args;
@@ -27,6 +38,8 @@ namespace ClientLib
 		args.SetInt(GRPC_ARG_KEEPALIVE_TIME_MS, 10000);
 		args.SetInt(GRPC_ARG_KEEPALIVE_TIMEOUT_MS, 5000);
 		args.SetInt(GRPC_ARG_KEEPALIVE_PERMIT_WITHOUT_CALLS, 1);
+		args.SetInt(GRPC_ARG_MAX_RECONNECT_BACKOFF_MS, 5000);
+		args.SetInt(GRPC_ARG_INITIAL_RECONNECT_BACKOFF_MS, 1000);
 
 		// Suppress VLD during gRPC one-time global initialization happening on first channel creation
 		//

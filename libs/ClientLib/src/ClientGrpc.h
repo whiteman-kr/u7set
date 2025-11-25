@@ -17,7 +17,7 @@ namespace ClientLib
 	class GrpcChannelCache
 	{
 	public:
-		static std::shared_ptr<grpc::Channel> get(const std::string& address);
+		static std::shared_ptr<grpc::Channel> get(const std::string& address, bool forceToCreateNew = false);
 	};
 
 
@@ -155,13 +155,7 @@ namespace ClientLib
 		m_tcpState.peerAddr = m_serviceAddress;
 		m_tcpState.localSoftwareInfo = m_softwareInfo;
 
-#if 1
-		m_channel = GrpcChannelCache::get(m_serviceAddress);
-#else
-		int Using_fixed_port_for_AppDataService_gRPC_client;
-		auto addressPort = QString{"%1:%2"}.arg(m_serviceAddress.addressStr()).arg(PORT_APP_DATA_SERVICE_GRPC_CLIENT_REQUEST);
-		m_channel = GrpcChannelCache::get(addressPort.toStdString());
-#endif
+		m_channel = GrpcChannelCache::get(m_serviceAddress, false);
 		m_stub = GrpcServerType::NewStub(m_channel);
 
 		m_workerThread = std::jthread(
@@ -175,6 +169,12 @@ namespace ClientLib
 	ClientGrpc<GrpcServerType>::~ClientGrpc()
 	{
 		shutUp();
+
+		// Give gRPC time to clean up
+		// (This is a workaround, not a real fix)
+		//
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		return;
 	}
 
 	template<typename GrpcServerType>
@@ -220,6 +220,9 @@ namespace ClientLib
 	template<typename GrpcServerType>
 	void ClientGrpc<GrpcServerType>::workerThreadFunc(std::stop_token stoken)
 	{
+		int transientFailureCount = 0;
+		constexpr int MAX_TRANSIENT_FAILURES = 6;
+
 		while (stoken.stop_requested() == false)
 		{
 			setAuthToken({});
@@ -228,6 +231,7 @@ namespace ClientLib
 				std::scoped_lock lock{m_tcpStateMutex};
 				m_tcpState.isSocketConnected = false;
 				m_tcpState.isConnected = false;
+				m_tcpState.setConnectionResult = Tcp::SetConnectionResult::Undefined;
 				m_tcpState.sentBytes = 0;
 				m_tcpState.receivedBytes = 0;
 				m_tcpState.requestCount = 0;
@@ -263,7 +267,42 @@ namespace ClientLib
 												  .arg(m_serviceEquipmentId)
 												  .arg(m_serviceAddress));
 
-				m_channel->WaitForConnected(std::chrono::system_clock::now() + std::chrono::seconds(2));
+				transientFailureCount = (state == GRPC_CHANNEL_TRANSIENT_FAILURE) ? transientFailureCount + 1 : 0;
+
+				if (state == GRPC_CHANNEL_TRANSIENT_FAILURE && transientFailureCount >= MAX_TRANSIENT_FAILURES)
+				{
+					m_log.writeMessage(m_logPrefix + QString{"Recreating gRPC channel after %1 transient failures, service %2, address %3"}
+														 .arg(transientFailureCount)
+														 .arg(m_serviceEquipmentId)
+														 .arg(m_serviceAddress));
+					// Release old resources first
+					//
+					m_stub.reset();
+					m_channel.reset();
+
+					// Small delay to allow gRPC to clean up
+					//
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+					// Create new channel and stub
+					//
+					m_channel = GrpcChannelCache::get(m_serviceAddress, true); // Create a new channel.
+					m_stub = GrpcServerType::NewStub(m_channel);
+					transientFailureCount = 0;
+				}
+
+				// Wait for READY state with timeout.
+				//
+				for (int i = 0; i < 10; i++)
+				{
+					bool connected = m_channel->WaitForConnected(std::chrono::system_clock::now() + std::chrono::seconds(1));
+
+					if (connected == true || stoken.stop_requested() == true)
+					{
+						break;
+					}
+				}
+
 				continue;
 			}
 			else
@@ -308,6 +347,7 @@ namespace ClientLib
 				std::scoped_lock lock{m_tcpStateMutex};
 				m_tcpState.isConnected = true;
 				m_tcpState.startTime = QDateTime::currentMSecsSinceEpoch();
+				m_tcpState.setConnectionResult = Tcp::SetConnectionResult::Ok;
 			}
 
 			m_log.writeMessage(
