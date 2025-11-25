@@ -697,6 +697,8 @@ void GrpcAppDataSrv::initService(const HostAddressPort& listenIP)
 	#endif
 					grpc::ServerBuilder builder;
 
+					builder.AddChannelArgument(GRPC_ARG_ALLOW_REUSEPORT, 0);
+
 					builder.RegisterService(this);
 
 					QString ipStr = listenIP.addressPortStr();
