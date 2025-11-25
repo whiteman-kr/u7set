@@ -108,6 +108,28 @@ bool checkReceivedParams(const std::vector<Proto::AppSignal>& recvParams)
 	return res;
 }
 
+TEST(GrpcAppDataSrvTest, RunSeveralServersOnSamePort)
+{
+	std::unique_ptr<GrpcAppDataSrv> server1;
+	auto stub1 = StartServerAndMakeClient({"127.0.0.1", 13990} , server1, nullptr);
+
+	std::unique_ptr<GrpcAppDataSrv> server2;
+	auto stub2 = StartServerAndMakeClient({"127.0.0.1", 13990} , server2, nullptr);
+
+	QThread::sleep(3);
+
+	EXPECT_TRUE(server1->isBinded());
+	EXPECT_FALSE(server2->isBinded());
+
+	server1.reset();
+
+	QThread::sleep(7);
+
+	EXPECT_TRUE(server2->isBinded());
+
+	server2.reset();
+}
+
 TEST(GrpcAppDataSrvTest, HandshakeNormal)
 {
 	std::unique_ptr<GrpcAppDataSrv> server;
@@ -933,8 +955,8 @@ TEST(GrpcAppDataSrvTest, GetServerTime)
 	qint64 utc = currentMSecsUTC();
 	qint64 local = currentMSecsLocal();
 
-	qDebug() << "received utc:  " << reply.servertimeutc()   << " utc:  " << utc;
-	qDebug() << "received local:" << reply.servertimelocal() << " local:" << local;
+	qDebug() << "received utc:  " << reply.servertimeutc()   << " utc:  " << utc << "diff: " << (utc - reply.servertimeutc());
+	qDebug() << "received local:" << reply.servertimelocal() << " local:" << local << "diff: " << (local - reply.servertimelocal());;
 
 	EXPECT_TRUE(reply.servertimeutc() <= utc);
 	EXPECT_TRUE(reply.servertimeutc() >= utc - 1000);

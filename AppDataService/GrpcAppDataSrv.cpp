@@ -13,29 +13,6 @@ GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
 	bool allowAllClients,
 	const std::vector<ClientInfo>& clients,
 	bool checkHostName,
-	const std::vector<HostAddressPort>& listenIPs,
-	const AppDataSources& appDataSources,
-	AppDataReceiver* appDataReceiver,
-	const AppSignals& appSignals,
-	const DynamicAppSignalStates& signalStates,
-	std::shared_ptr<DiscretesLogWriter> dsLogWriter,
-	CircularLoggerShared log) :
-	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
-	m_appDataSources(appDataSources),
-	m_appDataReceiver(appDataReceiver),
-	m_appSignals(appSignals),
-	m_signalStates(signalStates),
-	m_dsLogWriter(dsLogWriter),
-	m_log(log)
-{
-	TEST_PTR_RETURN(m_appDataReceiver);
-	initService(listenIPs);
-}
-
-GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
-	bool allowAllClients,
-	const std::vector<ClientInfo>& clients,
-	bool checkHostName,
 	const HostAddressPort& listenIP,
 	const AppDataSources& appDataSources,
 	AppDataReceiver* appDataReceiver,
@@ -52,33 +29,39 @@ GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
 	m_log(log)
 {
 	TEST_PTR_RETURN(m_appDataReceiver);
-	initService(std::vector<HostAddressPort>{listenIP});
+	initService(listenIP);
 }
 
 GrpcAppDataSrv::~GrpcAppDataSrv()
 {
 	m_sessionGuard.stop();
 
-	if (m_server != nullptr)
+	m_stopRequested.store(true, std::memory_order_relaxed);
+
+	if (m_server)
 	{
-		m_thread.request_stop();
-
-		if (m_thread.joinable())
-		{
-			m_thread.join();
-		}
-
-		m_server.reset();
-
-		DEBUG_LOG_MSG(m_log, "GrpcAppDataSrv finished.");
+		m_server->Shutdown();
 	}
 
-	return;
+	if (m_thread.joinable())
+	{
+		m_thread.join();
+	}
+
+	if (m_server)
+	{
+		m_server.reset();
+	}
 }
 
 void GrpcAppDataSrv::setSessionTimeout(int seconds)
 {
 	m_sessionGuard.setSessionTimeout(seconds);
+}
+
+bool GrpcAppDataSrv::isBinded() const
+{
+	return m_binded.load(std::memory_order_relaxed);
 }
 
 grpc::Status GrpcAppDataSrv::Handshake(grpc::ServerContext* context,
@@ -686,63 +669,79 @@ grpc::Status GrpcAppDataSrv::GetServerTime(grpc::ServerContext* context,
 	return grpc::Status::OK;
 }
 
-void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
+void GrpcAppDataSrv::initService(const HostAddressPort& listenIP)
 {
-#ifdef VLD_IS_INCLUDED
-	::VLDDisable();
-#endif
+	m_stopRequested.store(false, std::memory_order_relaxed);
+	m_binded.store(false, std::memory_order_relaxed);
 
-	QStringList ips;
-
-	grpc::ServerBuilder builder;
-
-	builder.RegisterService(this);
-
-	for(const HostAddressPort& ip : listenIPs)
+	m_thread = std::thread
 	{
-		QString ipStr = ip.addressPortStr();
-		ips.append(ipStr);
-		int selectedPort = 0;
-		builder.AddListeningPort(ipStr.toStdString(), grpc::InsecureServerCredentials(), &selectedPort);
-	}
-
-	m_server = builder.BuildAndStart();
-
-#ifdef VLD_IS_INCLUDED
-	::VLDEnable();
-#endif
-
-	if (m_server == nullptr)
-	{
-		DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv NOT started!");
-		return;
-	}
-
-	DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv started. Listening addresses: %1").arg(ips.join(", ")));
-
-	m_thread = std::jthread{
-		[this](std::stop_token stoken, grpc::Server* server)
+		[this, listenIP]()
 		{
-			std::stop_callback stop_cb{
-			   stoken,
-			   [server]()
-			   {
-				   server->Shutdown(std::chrono::system_clock::now() + std::chrono::seconds(5));
-			   }
-			};
-
 			try
 			{
+				int selectedPort = 0;
+
+				while(m_server == nullptr && selectedPort == 0)
+				{
+					if (m_stopRequested.load(std::memory_order_relaxed))
+					{
+						DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv stopRequested!"));
+						return;
+					}
+
+					selectedPort = 0;
+
+	#ifdef VLD_IS_INCLUDED
+					::VLDDisable();
+	#endif
+					grpc::ServerBuilder builder;
+
+					builder.RegisterService(this);
+
+					QString ipStr = listenIP.addressPortStr();
+					builder.AddListeningPort(ipStr.toStdString(), grpc::InsecureServerCredentials(), &selectedPort);
+
+					m_server = builder.BuildAndStart();
+
+	#ifdef VLD_IS_INCLUDED
+					::VLDEnable();
+	#endif
+					if (m_server == nullptr)
+					{
+						DEBUG_LOG_ERR(m_log, QString("GrpcAppDataSrv (%1) NOT started!").arg(listenIP.addressPortStr()));
+						std::this_thread::sleep_for(std::chrono::seconds(3));
+						continue;
+					}
+
+					if (selectedPort == 0)
+					{
+						qDebug() << C_STR(QString("GrpcAppDataSrv (%1) started, but selectedPort == 0").arg(listenIP.addressPortStr()));
+
+						m_server->Shutdown();
+						m_server.reset();
+						std::this_thread::sleep_for(std::chrono::seconds(3));
+						continue;
+					}
+
+					DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv started. Listening address: %1").arg(listenIP.addressPortStr()));
+					break;
+				}
+
+				m_binded.store(true, std::memory_order_relaxed);
+
 #ifdef VLD_IS_INCLUDED
 				::VLDDisable();
 #endif
 
 				DEBUG_LOG_MSG(m_log, QString("GrpcAppDataSrv in Wait state"));
-				server->Wait();		// unblocked by stop_token callback
+				m_server->Wait();		// unblocked by m_server->Shutdown in destructor
 
 #ifdef VLD_IS_INCLUDED
-				::VLDDisable();
+				::VLDEnable();
 #endif
+				m_binded.store(false, std::memory_order_relaxed);
+				DEBUG_LOG_MSG(m_log, "GrpcAppDataSrv finished.");
 			}
 			catch (std::exception& e)
 			{
@@ -752,7 +751,8 @@ void GrpcAppDataSrv::initService(const std::vector<HostAddressPort>& listenIPs)
 			{
 				DEBUG_LOG_ERR(m_log, "GrpcAppDataSrv thread unknown exception");
 			}
-		}, m_server.get()};
+		}
+	};
 
 	m_sessionGuard.start();
 }

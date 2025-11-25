@@ -174,8 +174,8 @@ private:
 
 	int m_autoArchivingGroupsCount = 0;
 
+	std::vector<ClientInfo> m_clients;
 	AppSignals m_appSignals;
-
 	AppDataSources m_appDataSources;
 
 	DynamicAppSignalStates m_appSignalStates;
@@ -201,5 +201,5 @@ private:
 
 	RtTrends::ServerThread* m_rtTrendsServerThread = nullptr;
 
-	std::unique_ptr<GrpcAppDataSrv> m_grpcAppDataSrv;
+	std::vector<std::unique_ptr<GrpcAppDataSrv>> m_grpcAppDataSrvs;
 };

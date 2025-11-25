@@ -639,7 +639,8 @@ void AppDataServiceWorker::stopRtTrendsServerThread()
 
 void AppDataServiceWorker::runGrpcAppDataSrv()
 {
-	std::vector<HostAddressPort> listenIPs;
+	m_grpcAppDataSrvs.clear();
+	m_grpcAppDataSrvs.reserve(m_curSettingsProfile.rcSettings.size());
 
 	for(const RqCtrlSettings& rcs : m_curSettingsProfile.rcSettings)
 	{
@@ -648,28 +649,20 @@ void AppDataServiceWorker::runGrpcAppDataSrv()
 			continue;
 		}
 
-		HostAddressPort ip = rcs.clientRequestIP();
+		HostAddressPort listenIP = rcs.clientRequestIP();
 
-//		ip.setPort(PORT_APP_DATA_SERVICE_GRPC_CLIENT_REQUEST);
-
-		listenIPs.emplace_back(ip);
+		m_grpcAppDataSrvs.emplace_back(std::make_unique<GrpcAppDataSrv>(softwareInfo(),
+															true, m_clients, false,
+															listenIP, m_appDataSources,
+															m_appDataReceiver, m_appSignals,
+															m_appSignalStates, m_discretesLogWriter,
+															logger()));
 	}
-
-	std::vector<ClientInfo> clients;
-
-	m_grpcAppDataSrv = std::make_unique<GrpcAppDataSrv>(softwareInfo(),	true, clients, false,
-														listenIPs, m_appDataSources,
-														m_appDataReceiver, m_appSignals,
-														m_appSignalStates, m_discretesLogWriter,
-														logger());
 }
 
 void AppDataServiceWorker::stopGrpcAppDataSrv()
 {
-	if (m_grpcAppDataSrv != nullptr)
-	{
-		m_grpcAppDataSrv.reset();
-	}
+	m_grpcAppDataSrvs.clear();
 }
 
 void AppDataServiceWorker::getRecordsPerMin(std::vector<RecordsPerMin>* recordsPerMin,

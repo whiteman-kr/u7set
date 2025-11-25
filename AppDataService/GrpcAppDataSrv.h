@@ -26,18 +26,6 @@ public:
 							bool allowAllClients,
 							const std::vector<ClientInfo>& clients,
 							bool checkHostName,
-							const std::vector<HostAddressPort>& listenIPs,
-							const AppDataSources& appDataSources,
-							AppDataReceiver* appDataReceiver,
-							const AppSignals& appSignals,
-							const DynamicAppSignalStates& signalStates,
-							std::shared_ptr<DiscretesLogWriter> dsLogWriter,
-							CircularLoggerShared log);
-
-	explicit GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
-							bool allowAllClients,
-							const std::vector<ClientInfo>& clients,
-							bool checkHostName,
 							const HostAddressPort& listenIP,
 							const AppDataSources& appDataSources,
 							AppDataReceiver* appDataReceiver,
@@ -54,6 +42,7 @@ public:
 	~GrpcAppDataSrv();
 
 	void setSessionTimeout(int seconds);
+	bool isBinded() const;
 
 	grpc::Status Handshake(grpc::ServerContext* context,
 						const Grpc::HandshakeRequest* request,
@@ -99,7 +88,7 @@ public:
 								const Grpc::GetServerTimeRequest* request,
 								Grpc::GetServerTimeReply* reply) override;
 private:
-	void initService(const std::vector<HostAddressPort>& listenIPs);
+	void initService(const HostAddressPort& listenIP);
 
 private:
 	AppDataReceiver* m_appDataReceiver = nullptr;
@@ -109,7 +98,9 @@ private:
 	std::shared_ptr<DiscretesLogWriter> m_dsLogWriter;
 	CircularLoggerShared m_log;
 	std::unique_ptr<grpc::Server> m_server;
-	std::jthread m_thread;
+	std::atomic_bool m_stopRequested {false};
+	std::thread m_thread;
+	std::atomic_bool m_binded {false};
 
 	GrpcSessionGuard m_sessionGuard;
 };
