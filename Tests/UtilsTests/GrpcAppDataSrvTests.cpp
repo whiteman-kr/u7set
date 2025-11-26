@@ -110,13 +110,13 @@ bool checkReceivedParams(const std::vector<Proto::AppSignal>& recvParams)
 
 TEST(GrpcAppDataSrvTest, RunSeveralServersOnSamePort)
 {
-	std::cout << "Start server 1";
+	qDebug() << "Start server 1";
 	std::unique_ptr<GrpcAppDataSrv> server1;
 	auto stub1 = StartServerAndMakeClient({"127.0.0.1", 13990} , server1, nullptr);
 
 	QThread::sleep(3);
 
-	std::cout << "Start server 2";
+	qDebug() << "Start server 2";
 	std::unique_ptr<GrpcAppDataSrv> server2;
 	auto stub2 = StartServerAndMakeClient({"127.0.0.1", 13990} , server2, nullptr);
 
@@ -125,15 +125,15 @@ TEST(GrpcAppDataSrvTest, RunSeveralServersOnSamePort)
 	EXPECT_TRUE(server1->isBinded());
 	EXPECT_FALSE(server2->isBinded());
 
-	std::cout << "Reset server 1";
+	qDebug() << "Reset server 1";
 	server1.reset();
 
-	std::cout << "Wait while server 2 bind";
+	qDebug() << "Wait while server 2 bind";
 	QThread::sleep(7);
 
 	EXPECT_TRUE(server2->isBinded());
 
-	std::cout << "Reset server 2";
+	qDebug() << "Reset server 2";
 	server2.reset();
 }
 
