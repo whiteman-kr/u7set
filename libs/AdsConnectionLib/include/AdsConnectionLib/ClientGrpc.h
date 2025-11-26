@@ -1,12 +1,14 @@
 #pragma once
 
-#include "../OnlineLib/TcpClientStatistics.h"
-#include <ClientLib/IAppSignalUpdater.h>
-#include <CommonLib/ConstStrings.h>
+#include "ClientConnStatsStd.h"
+#include "IAppSignalUpdater.h"
+#include "ILoggerStd.h"
 
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>
 
+#include <chrono>
+#include <condition_variable>
 #include <expected>
 #include <thread>
 
@@ -22,14 +24,10 @@ namespace ClientLib
 
 
 	template<typename GrpcServerType>
-	class ClientGrpc : public ClientConnectionStatistics
+	class ClientGrpc : public ClientConnStatsStd
 	{
 	public:
-		ClientGrpc(const SoftwareInfo& softwareInfo,
-				   QString serviceEquipmentId,
-				   HostAddressPort serviceAddress,
-				   ILogFile& log,
-				   QString logPrefix);
+		ClientGrpc(const ::Network::SoftwareInfo& softwareInfo, ServiceEndpoint service, ILoggerStd& log, std::string logPrefix);
 
 		virtual ~ClientGrpc();
 
@@ -39,26 +37,23 @@ namespace ClientLib
 		//
 	public:
 		virtual void statsReconnect() override;
-		virtual QString statsObjectName() override;
-		virtual QString statsServerId() override;
-		virtual Tcp::ConnectionState statsConnectionState() override;
+		virtual std::string statsObjectName() override;
+		virtual std::string statsServerId() override;
+		virtual ServiceConnectionState statsConnectionState() override;
 
 	private:
 		void workerThreadFunc(std::stop_token stoken);
 
-		std::expected<bool, QString> handshake();
+		std::expected<bool, std::string> handshake();
 
 	protected:
 		IAppSignalUpdater::SourceIdType sourceId() const
 		{
 			static_assert(sizeof(IAppSignalUpdater::SourceIdType) >= sizeof(void*), "SourceIdType must be large enough to hold a pointer");
 			return reinterpret_cast<IAppSignalUpdater::SourceIdType>(this);
-
-			// auto h = std::hash<std::thread::id>{}(std::this_thread::get_id());
-			// return static_cast<IAppSignalUpdater::SourceIdType>(h);
 		}
 
-		QString statusToString(const ::grpc::Status& status);
+		std::string statusToString(const ::grpc::Status& status);
 
 		void createAuthContext(grpc::ClientContext& context, std::chrono::milliseconds timeout)
 		{
@@ -72,14 +67,14 @@ namespace ClientLib
 			auto token = authToken();
 			assert(token.empty() == false);
 
-			context.AddMetadata(::Grpc::SESSION_AUTH_TOKEN, token);
+			context.AddMetadata(SESSION_AUTH_TOKEN, token);
 
 			return;
 		}
 
 		virtual void clientCommunicationLoop(std::stop_token stoken) = 0;
 
-		Tcp::ConnectionState tcpState() const
+		ServiceConnectionState tcpState() const
 		{
 			std::lock_guard lock{m_tcpStateMutex};
 			return m_tcpState;
@@ -118,11 +113,10 @@ namespace ClientLib
 		}
 
 	protected:
-		SoftwareInfo m_softwareInfo; // Client software info.
-		QString m_serviceEquipmentId;
-		HostAddressPort m_serviceAddress;
-		ILogFile& m_log;
-		QString m_logPrefix;
+		const ::Network::SoftwareInfo m_softwareInfo{}; // Client software info.
+		const ServiceEndpoint m_service{};
+		ILoggerStd& m_log;
+		const std::string m_logPrefix{};
 
 		// --
 		//
@@ -135,27 +129,27 @@ namespace ClientLib
 		std::string m_authToken;
 
 		mutable std::mutex m_tcpStateMutex; // Only for m_tcpState
-		Tcp::ConnectionState m_tcpState{};
+		ServiceConnectionState m_tcpState{};
+
+		static inline const std::string SESSION_AUTH_TOKEN{"session-auth-token"};
 	};
 
 
 	template<typename GrpcServerType>
-	ClientGrpc<GrpcServerType>::ClientGrpc(const SoftwareInfo& softwareInfo,
-										   QString serviceEquipmentId,
-										   HostAddressPort serviceAddress,
-										   ILogFile& log,
-										   QString logPrefix) :
+	ClientGrpc<GrpcServerType>::ClientGrpc(const ::Network::SoftwareInfo& softwareInfo,
+										   ServiceEndpoint service,
+										   ILoggerStd& log,
+										   std::string logPrefix) :
 		m_softwareInfo{softwareInfo},
-		m_serviceEquipmentId{serviceEquipmentId},
-		m_serviceAddress{serviceAddress},
+		m_service{service},
 		m_log{log},
 		m_logPrefix{logPrefix + ">> "}
 	{
-		m_tcpState.serverEquipmentID = m_serviceEquipmentId;
-		m_tcpState.peerAddr = m_serviceAddress;
+		m_tcpState.serverEquipmentID = m_service.equipmentId;
+		m_tcpState.peerAddr = m_service.address;
 		m_tcpState.localSoftwareInfo = m_softwareInfo;
 
-		m_channel = GrpcChannelCache::get(m_serviceAddress, false);
+		m_channel = GrpcChannelCache::get(m_service.address, false);
 		m_stub = GrpcServerType::NewStub(m_channel);
 
 		m_workerThread = std::jthread(
@@ -200,19 +194,19 @@ namespace ClientLib
 	}
 
 	template<typename GrpcServerType>
-	QString ClientGrpc<GrpcServerType>::statsObjectName()
+	std::string ClientGrpc<GrpcServerType>::statsObjectName()
 	{
 		return "GrpcClient";
 	}
 
 	template<typename GrpcServerType>
-	QString ClientGrpc<GrpcServerType>::statsServerId()
+	std::string ClientGrpc<GrpcServerType>::statsServerId()
 	{
-		return m_serviceEquipmentId;
+		return m_service.equipmentId;
 	}
 
 	template<typename GrpcServerType>
-	Tcp::ConnectionState ClientGrpc<GrpcServerType>::statsConnectionState()
+	ServiceConnectionState ClientGrpc<GrpcServerType>::statsConnectionState()
 	{
 		return tcpState();
 	}
@@ -231,7 +225,7 @@ namespace ClientLib
 				std::scoped_lock lock{m_tcpStateMutex};
 				m_tcpState.isSocketConnected = false;
 				m_tcpState.isConnected = false;
-				m_tcpState.setConnectionResult = Tcp::SetConnectionResult::Undefined;
+				m_tcpState.setConnectionResult = SetConnectionResult2::Undefined;
 				m_tcpState.sentBytes = 0;
 				m_tcpState.receivedBytes = 0;
 				m_tcpState.requestCount = 0;
@@ -242,7 +236,7 @@ namespace ClientLib
 			//
 			if (grpc_connectivity_state state = m_channel->GetState(true); state != GRPC_CHANNEL_READY)
 			{
-				QString stateStr;
+				std::string_view stateStr;
 				switch (state)
 				{
 				case GRPC_CHANNEL_IDLE:
@@ -262,19 +256,17 @@ namespace ClientLib
 					break;
 				}
 
-				m_log.writeText(m_logPrefix + QString{"Waiting for gRPC channel to become READY, current state %1, service %2, address %3"}
-												  .arg(stateStr)
-												  .arg(m_serviceEquipmentId)
-												  .arg(m_serviceAddress));
+				m_log.writeMessage(m_logPrefix + std::format("Waiting for gRPC channel to become READY, current state {}, service {}",
+															 stateStr,
+															 m_service.to_string()));
 
 				transientFailureCount = (state == GRPC_CHANNEL_TRANSIENT_FAILURE) ? transientFailureCount + 1 : 0;
 
 				if (state == GRPC_CHANNEL_TRANSIENT_FAILURE && transientFailureCount >= MAX_TRANSIENT_FAILURES)
 				{
-					m_log.writeMessage(m_logPrefix + QString{"Recreating gRPC channel after %1 transient failures, service %2, address %3"}
-														 .arg(transientFailureCount)
-														 .arg(m_serviceEquipmentId)
-														 .arg(m_serviceAddress));
+					m_log.writeMessage(m_logPrefix + std::format("Recreating gRPC channel after {} transient failures, service {}",
+																 transientFailureCount,
+																 m_service.to_string()));
 					// Release old resources first
 					//
 					m_stub.reset();
@@ -286,7 +278,7 @@ namespace ClientLib
 
 					// Create new channel and stub
 					//
-					m_channel = GrpcChannelCache::get(m_serviceAddress, true); // Create a new channel.
+					m_channel = GrpcChannelCache::get(m_service.address.to_string(), true); // Create a new channel.
 					m_stub = GrpcServerType::NewStub(m_channel);
 					transientFailureCount = 0;
 				}
@@ -311,9 +303,7 @@ namespace ClientLib
 				m_tcpState.isSocketConnected = true;
 			}
 
-			m_log.writeMessage(
-				m_logPrefix +
-				QString{"Connected to %1 (gRPC server: %2). Waiting for handshake..."}.arg(m_serviceEquipmentId).arg(m_serviceAddress));
+			m_log.writeMessage(m_logPrefix + std::format("Connected to {}. Waiting for handshake...", m_service.to_string()));
 
 			// Perform gRPC calls and process data.
 			//
@@ -323,10 +313,9 @@ namespace ClientLib
 			//
 			if (handshakeResult.has_value() == false)
 			{
-				m_log.writeError(m_logPrefix + QString{"Handshake failed with service %1, address %2, error %3"}
-												   .arg(m_serviceEquipmentId)
-												   .arg(m_serviceAddress)
-												   .arg(handshakeResult.error()));
+				m_log.writeError(m_logPrefix +
+								 std::format("Handshake failed with service {} error {}", m_service.to_string(), handshakeResult.error()));
+
 
 				// Just sleep for a while and try to reconnect.
 				//
@@ -346,13 +335,12 @@ namespace ClientLib
 			{
 				std::scoped_lock lock{m_tcpStateMutex};
 				m_tcpState.isConnected = true;
-				m_tcpState.startTime = QDateTime::currentMSecsSinceEpoch();
-				m_tcpState.setConnectionResult = Tcp::SetConnectionResult::Ok;
+				m_tcpState.startTime =
+					std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+				m_tcpState.setConnectionResult = SetConnectionResult2::Ok;
 			}
 
-			m_log.writeMessage(
-				m_logPrefix +
-				QString{"Handshake successful with service %1 at address %2."}.arg(m_serviceEquipmentId).arg(m_serviceAddress));
+			m_log.writeMessage(m_logPrefix + std::format("Handshake successful with service {}.", m_service.to_string()));
 
 			try
 			{
@@ -360,24 +348,21 @@ namespace ClientLib
 			}
 			catch (std::exception& e)
 			{
-				m_log.writeError(m_logPrefix + QString{"Exception in clientCommunicationLoop for service %1 at address %2: %3"}
-												   .arg(m_serviceEquipmentId)
-												   .arg(m_serviceAddress)
-												   .arg(e.what()));
+				m_log.writeError(m_logPrefix +
+								 std::format("Exception in clientCommunicationLoop for service {}: {}", m_service.to_string(), e.what()));
+
 				// Go to reconnect
 				//
 				continue;
 			}
 		} // while (stoken.stop_requested() == false)
 
-		m_log.writeMessage(
-			m_logPrefix +
-			QString{"Exiting worker thread for gRPC client to service %1 at address %2."}.arg(m_serviceEquipmentId).arg(m_serviceAddress));
+		m_log.writeMessage(m_logPrefix + std::format("Exiting worker thread for gRPC client to service {}.", m_service.to_string()));
 		return;
 	}
 
 	template<typename GrpcServerType>
-	std::expected<bool, QString> ClientGrpc<GrpcServerType>::handshake()
+	std::expected<bool, std::string> ClientGrpc<GrpcServerType>::handshake()
 	{
 		setAuthToken({});
 
@@ -387,13 +372,13 @@ namespace ClientLib
 		Grpc::HandshakeRequest request;
 		Grpc::HandshakeReply reply;
 
-		m_softwareInfo.serializeTo(request.mutable_clientsoftwareinfo());
+		*request.mutable_clientsoftwareinfo() = m_softwareInfo;
 
 		::grpc::Status result = m_stub->Handshake(&context, request, &reply);
 		if (result.ok() == false)
 		{
 			incRequestCount();
-			return std::unexpected<QString>{statusToString(result)};
+			return std::unexpected<std::string>{statusToString(result)};
 		}
 		else
 		{
@@ -407,75 +392,75 @@ namespace ClientLib
 	}
 
 	template<typename GrpcServerType>
-	QString ClientGrpc<GrpcServerType>::statusToString(const ::grpc::Status& status)
+	std::string ClientGrpc<GrpcServerType>::statusToString(const ::grpc::Status& status)
 	{
 		if (status.ok() == true)
 		{
-			return QStringLiteral("OK");
+			return "OK";
 		}
 
-		QString errorCodeStr;
+		std::string_view errorCodeStr{};
 		switch (status.error_code())
 		{
 		case ::grpc::StatusCode::OK:
-			errorCodeStr = QStringLiteral("OK");
+			errorCodeStr = "OK";
 			break;
 		case ::grpc::StatusCode::CANCELLED:
-			errorCodeStr = QStringLiteral("CANCELLED");
+			errorCodeStr = "CANCELLED";
 			break;
 		case ::grpc::StatusCode::UNKNOWN:
-			errorCodeStr = QStringLiteral("UNKNOWN");
+			errorCodeStr = "UNKNOWN";
 			break;
 		case ::grpc::StatusCode::INVALID_ARGUMENT:
-			errorCodeStr = QStringLiteral("INVALID_ARGUMENT");
+			errorCodeStr = "INVALID_ARGUMENT";
 			break;
 		case ::grpc::StatusCode::DEADLINE_EXCEEDED:
-			errorCodeStr = QStringLiteral("DEADLINE_EXCEEDED");
+			errorCodeStr = "DEADLINE_EXCEEDED";
 			break;
 		case ::grpc::StatusCode::NOT_FOUND:
-			errorCodeStr = QStringLiteral("NOT_FOUND");
+			errorCodeStr = "NOT_FOUND";
 			break;
 		case ::grpc::StatusCode::ALREADY_EXISTS:
-			errorCodeStr = QStringLiteral("ALREADY_EXISTS");
+			errorCodeStr = "ALREADY_EXISTS";
 			break;
 		case ::grpc::StatusCode::PERMISSION_DENIED:
-			errorCodeStr = QStringLiteral("PERMISSION_DENIED");
+			errorCodeStr = "PERMISSION_DENIED";
 			break;
 		case ::grpc::StatusCode::UNAUTHENTICATED:
-			errorCodeStr = QStringLiteral("UNAUTHENTICATED");
+			errorCodeStr = "UNAUTHENTICATED";
 			break;
 		case ::grpc::StatusCode::RESOURCE_EXHAUSTED:
-			errorCodeStr = QStringLiteral("RESOURCE_EXHAUSTED");
+			errorCodeStr = "RESOURCE_EXHAUSTED";
 			break;
 		case ::grpc::StatusCode::FAILED_PRECONDITION:
-			errorCodeStr = QStringLiteral("FAILED_PRECONDITION");
+			errorCodeStr = "FAILED_PRECONDITION";
 			break;
 		case ::grpc::StatusCode::ABORTED:
-			errorCodeStr = QStringLiteral("ABORTED");
+			errorCodeStr = "ABORTED";
 			break;
 		case ::grpc::StatusCode::OUT_OF_RANGE:
-			errorCodeStr = QStringLiteral("OUT_OF_RANGE");
+			errorCodeStr = "OUT_OF_RANGE";
 			break;
 		case ::grpc::StatusCode::UNIMPLEMENTED:
-			errorCodeStr = QStringLiteral("UNIMPLEMENTED");
+			errorCodeStr = "UNIMPLEMENTED";
 			break;
 		case ::grpc::StatusCode::INTERNAL:
-			errorCodeStr = QStringLiteral("INTERNAL");
+			errorCodeStr = "INTERNAL";
 			break;
 		case ::grpc::StatusCode::UNAVAILABLE:
-			errorCodeStr = QStringLiteral("UNAVAILABLE");
+			errorCodeStr = "UNAVAILABLE";
 			break;
 		case ::grpc::StatusCode::DATA_LOSS:
-			errorCodeStr = QStringLiteral("DATA_LOSS");
+			errorCodeStr = "DATA_LOSS";
 			break;
 		case ::grpc::StatusCode::DO_NOT_USE:
-			errorCodeStr = QStringLiteral("DO_NOT_USE");
+			errorCodeStr = "DO_NOT_USE";
 			break;
 		default:
-			errorCodeStr = QStringLiteral("UNKNOWN_STATUS_CODE");
+			errorCodeStr = "UNKNOWN_STATUS_CODE";
 			break;
 		}
 
-		return QString{"code: %1, error_message: %2"}.arg(errorCodeStr).arg(QString::fromStdString(status.error_message()));
+		return std::format("code: {}, error_message: {}", errorCodeStr, status.error_message());
 	}
 } // namespace ClientLib

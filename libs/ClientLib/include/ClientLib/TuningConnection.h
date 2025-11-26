@@ -6,7 +6,7 @@
 #include "../UtilsLib/ILogFile.h"
 #include <ClientLib/ITuningAuthorization.h>
 #include <ClientLib/ITuningConnection.h>
-#include "IRecentAppSignals.h"
+#include <AdsConnectionLib/IRecentAppSignals.h>
 #include "ITuningLog.h"
 #include "ITuningSignalUpdater.h"
 #include "TuningSourceState.h"

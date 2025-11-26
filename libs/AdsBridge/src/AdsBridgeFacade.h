@@ -3,6 +3,7 @@
 #include <AdsBridge/Common.h>
 
 #include "../../OnlineLib/SoftwareEndpoint.h"
+#include <ClientLib/LoggerStdAdapter.h>
 #include <CommonLib/ConstStrings.h>
 
 #include <memory>
@@ -59,6 +60,7 @@ namespace AdsBridge
 
 	private:
 		ILogFile* m_log = nullptr;
+		ClientLib::LoggerStdAdapter m_loggerAdapter;
 		std::unique_ptr<ClientLib::AppSignalManager> m_signals;
 		std::unique_ptr<ClientLib::AdsConnection> m_adsConnection;
 
@@ -67,6 +69,8 @@ namespace AdsBridge
 
 	public:
 		const char* getStringConstPointer(const QString& string) const;
+		const char* getStringConstPointer(const std::string& string) const;
+		const char* getStringConstPointer(std::string&& string) const;
 
 	private:
 		// This is a cache for const char* pointers.

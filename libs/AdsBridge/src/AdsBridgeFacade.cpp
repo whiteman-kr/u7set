@@ -5,18 +5,24 @@
 #include "../../OnlineLib/TcpClientStatistics.h"
 #include "../../UtilsLib/XmlHelper.h"
 
-#include <ClientLib/AdsConnection.h>
+#include <AdsConnectionLib/AdsConnection.h>
+#include <AdsConnectionLib/ClientConnStatsStd.h>
 #include <ClientLib/AppSignalManager.h>
+#include <ClientLib/ServiceEndpoint.h>
 
 #include <span>
+
+#define GRPC_CONNECTION
 
 namespace AdsBridge
 {
 	AdsBridgeFacade::AdsBridgeFacade(ILogFile* log) :
 		m_log{log},
+		m_loggerAdapter{*m_log},
 		m_signals{std::make_unique<ClientLib::AppSignalManager>(m_log)},
-		m_adsConnection{std::make_unique<ClientLib::AdsConnection>(*m_signals.get(), m_signals.get(), nullptr, m_log)}
+		m_adsConnection{std::make_unique<ClientLib::AdsConnection>(*m_signals.get(), m_signals.get(), nullptr, m_loggerAdapter)}
 	{
+		assert(log);
 		log->writeMessage("AdsBridgeFacade::AdsBridgeFacade()");
 	}
 
@@ -140,7 +146,10 @@ namespace AdsBridge
 		m_log->writeMessage(QString("AdsBridgeFacade::connect(), Connecting %1 AppDataService(s)...").arg(m_appDataServices.size()));
 
 		SoftwareInfo si{E::SoftwareType::Monitor, m_equipmentId};
-		m_adsConnection->updateConnections(si, m_appDataServices);
+		::Network::SoftwareInfo softwareInfo;
+		si.serializeTo(&softwareInfo);
+
+		m_adsConnection->updateConnections(softwareInfo, toServiceEndpoint(m_appDataServices));
 
 		return;
 	}
@@ -150,7 +159,10 @@ namespace AdsBridge
 		m_log->writeMessage("AdsBridgeFacade::close()");
 
 		SoftwareInfo si{E::SoftwareType::Monitor, m_equipmentId};
-		m_adsConnection->updateConnections(si, {});
+		::Network::SoftwareInfo softwareInfo;
+		si.serializeTo(&softwareInfo);
+
+		m_adsConnection->updateConnections(softwareInfo, {});
 
 		return;
 	}
@@ -338,7 +350,11 @@ namespace AdsBridge
 
 	size_t AdsBridgeFacade::connectionCount() const
 	{
+#ifdef GRPC_CONNECTION
+		return ClientConnStatsStd::statistics().size();
+#else
 		return TcpClientStatistics::statistics().size();
+#endif
 	}
 
 	bool AdsBridgeFacade::connectionStatus(size_t structSize, struct AdsConnectionStatus* out, size_t count) const
@@ -355,17 +371,34 @@ namespace AdsBridge
 			return false;
 		}
 
+#ifdef GRPC_CONNECTION
+		auto stats = ClientConnStatsStd::statistics();
+#else
 		auto stats = TcpClientStatistics::statistics();
+#endif
 		if (stats.size() != count)
 		{
 			m_log->writeError(QString("AdsBridgeFacade::connectionStatus(), count is invalid, expected %1.").arg(stats.size()));
 			return false;
 		}
 
-		for (const auto& s : TcpClientStatistics::statistics())
+		for (const auto& s : stats)
 		{
 			AdsConnectionStatus& state = *out;
 
+#ifdef GRPC_CONNECTION
+			state.id = s.id;
+			state.status = s.state.isConnected;
+			state.setConnectionResult = static_cast<::MatsConnectionResult>(s.state.setConnectionResult);
+			state.connectionType = getStringConstPointer(s.objectName);
+			state.port = s.state.peerAddr.port;
+			state.address = getStringConstPointer(s.state.peerAddr.address);
+			state.adsEquipmentId = getStringConstPointer(s.state.connectedSoftwareInfo.equipmentid());
+			state.received = s.state.receivedBytes;
+			state.sent = s.state.sentBytes;
+			state.requestCount = s.state.requestCount;
+			state.replyCount = s.state.replyCount;
+#else
 			state.id = s.id;
 			state.status = s.state.isConnected;
 			state.setConnectionResult = static_cast<::MatsConnectionResult>(s.state.setConnectionResult);
@@ -377,6 +410,7 @@ namespace AdsBridge
 			state.sent = s.state.sentBytes;
 			state.requestCount = s.state.requestCount;
 			state.replyCount = s.state.replyCount;
+#endif
 
 			++out;
 		}
@@ -386,14 +420,17 @@ namespace AdsBridge
 
 	const char* AdsBridgeFacade::getStringConstPointer(const QString& string) const
 	{
-		std::string str = string.toStdString();
+		return getStringConstPointer(string.toStdString());
+	}
 
+	const char* AdsBridgeFacade::getStringConstPointer(const std::string& string) const
+	{
 		// Shared lock for reading. If the string is found, return the pointer.
 		//
 		{
 			std::shared_lock lock(m_stringTableMutex);
 
-			auto it = m_stringTable.find(str);
+			auto it = m_stringTable.find(string);
 			if (it != m_stringTable.end())
 			{
 				return it->c_str();
@@ -403,7 +440,28 @@ namespace AdsBridge
 		// Th string was not found, insert new string with unique lock
 		//
 		std::unique_lock lock{m_stringTableMutex};
-		auto r = m_stringTable.insert(str);
+		auto r = m_stringTable.insert(string);
+		return r.first->c_str();
+	}
+
+	const char* AdsBridgeFacade::getStringConstPointer(std::string&& string) const
+	{
+		// Shared lock for reading. If the string is found, return the pointer.
+		//
+		{
+			std::shared_lock lock(m_stringTableMutex);
+
+			auto it = m_stringTable.find(string);
+			if (it != m_stringTable.end())
+			{
+				return it->c_str();
+			}
+		}
+
+		// Th string was not found, insert new string with unique lock
+		//
+		std::unique_lock lock{m_stringTableMutex};
+		auto r = m_stringTable.insert(std::move(string));
 		return r.first->c_str();
 	}
 

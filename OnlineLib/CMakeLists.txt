@@ -41,9 +41,9 @@ qt_add_library(${TARGET} STATIC
 	SignalStatesDistributor.h
 	SignalStatesProcessor.cpp
 	SignalStatesProcessor.h
-	SoftwareEndpoint.h
 	SocketIO.cpp
 	SocketIO.h
+	SoftwareEndpoint.h
 	SoftwareInfo.cpp
 	SoftwareInfo.h
 	SoftwareSettings.cpp

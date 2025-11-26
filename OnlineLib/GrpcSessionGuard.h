@@ -12,8 +12,8 @@
 #include <grpcpp/grpcpp.h>
 #include <GrpcAppDataSrv.grpc.pb.h>
 
-#include "../../OnlineLib/SoftwareInfo.h"
-#include "../../OnlineLib/SoftwareSettings.h"
+#include "SoftwareInfo.h"
+#include "SoftwareSettings.h"
 
 class GrpcSessionGuard
 {

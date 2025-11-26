@@ -139,6 +139,7 @@ public:
 	[[nodiscard]] bool isOutOfLimits() const; //  isAboveHighLimit() || isBelowLowLimit()
 	[[nodiscard]] bool isTuningDefault() const;
 
+	Proto::AppSignalState save() const;
 	void save(Proto::AppSignalState* protoState) const;
 	Hash load(const Proto::AppSignalState& protoState);
 

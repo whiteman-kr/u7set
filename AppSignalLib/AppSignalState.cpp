@@ -47,12 +47,12 @@ const TimeStamp& AppSignalState::time(E::TimeType timeType) const
 	}
 }
 
-double AppSignalState::value() const  noexcept
+double AppSignalState::value() const noexcept
 {
 	return m_value;
 }
 
-bool AppSignalState::isValid() const  noexcept
+bool AppSignalState::isValid() const noexcept
 {
 	return m_flags.valid;
 }
@@ -97,6 +97,13 @@ bool AppSignalState::isTuningDefault() const
 	return m_flags.tuningDefault;
 }
 
+Proto::AppSignalState AppSignalState::save() const
+{
+	Proto::AppSignalState protoState;
+	save(&protoState);
+	return protoState;
+}
+
 void AppSignalState::save(Proto::AppSignalState* protoState) const
 {
 	if (protoState == nullptr)
@@ -135,12 +142,14 @@ Hash AppSignalState::load(const Proto::AppSignalState& protoState)
 
 bool AppSignalState::hasSameValue(const AppSignalState& b) const
 {
-	return m_flags.all == b.m_flags.all &&
-		m_value == b.m_value &&
-		m_hash == b.m_hash;
+	return m_flags.all == b.m_flags.all && m_value == b.m_value && m_hash == b.m_hash;
 }
 
-QString AppSignalState::toString(double value, E::ValueViewType viewType, E::AnalogFormat analogFormat, E::AnalogAppSignalFormat analogAppSignalFormat, int precision)
+QString AppSignalState::toString(double value,
+								 E::ValueViewType viewType,
+								 E::AnalogFormat analogFormat,
+								 E::AnalogAppSignalFormat analogAppSignalFormat,
+								 int precision)
 {
 	QString result;
 	result.reserve(64);

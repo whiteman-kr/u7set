@@ -3,7 +3,7 @@
 #include "DiagConfigController.h"
 #include "DiagnosticsSchemaManager.h"
 
-#include <ClientLib/AdsConnection.h>
+#include <AdsConnectionLib/AdsConnection.h>
 #include <ClientLib/AppSignalManager.h>
 #include <ClientLib/ClientTranslator.h>
 #include <DiagClientLib/DiagStateManager.h>

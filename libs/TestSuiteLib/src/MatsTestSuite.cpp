@@ -233,7 +233,7 @@ namespace TestSuite
 		//
 		CreateAdsControllerFunc createAdsControllerFunc = [this](const ::TestSuite::ConfigSettings& configuration)
 		{
-			auto ads = std::make_unique<::TestSuite::AdsInputController>(*m_appSignals, m_appLog.logFile());
+			auto ads = std::make_unique<::TestSuite::AdsInputController>(*m_appSignals, *m_appLog.logFile());
 			ads->updateConnections(m_testSuite->softwareInfo(), configuration.appDataServices);
 			return ads;
 		};
@@ -270,7 +270,7 @@ namespace TestSuite
 		// Add input controller to RunControl(!) - Runs permission scripts.
 		//
 		{
-			auto ads = std::make_unique<AdsInputController>(*m_runControlSignals, appLog);
+			auto ads = std::make_unique<AdsInputController>(*m_runControlSignals, *m_appLog.logFile());
 
 			// Update AdsInputController connection settings from TestSuiteConfigController.
 			//

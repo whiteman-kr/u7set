@@ -1,41 +1,11 @@
 #pragma once
 
+#include <CommonStdLib/TimesStd.h>
+
 #include <QDateTime>
 #include <QMetaType>
 #include <QTimeZone>
 
-
-// Time literals converts to ms
-//
-constexpr int64_t operator""_ms(unsigned long long int value)
-{
-	return value;
-}
-
-constexpr int64_t operator""_sec(unsigned long long int value)
-{
-	return value * 1000;
-}
-
-constexpr int64_t operator""_min(unsigned long long int value)
-{
-	return value * 60 * 1000;
-}
-
-constexpr int64_t operator""_hour(unsigned long long int value)
-{
-	return value * 3600 * 1000;
-}
-
-constexpr int64_t operator""_hours(unsigned long long int value)
-{
-	return value * 3600 * 1000;
-}
-
-constexpr int64_t operator""_day(unsigned long long int value)
-{
-	return value * 24 * 3600 * 1000;
-}
 
 inline static const QTimeZone TIME_ZONE_UTC(QTimeZone::UTC);
 inline static const QTimeZone TIME_ZONE_LOCAL(QTimeZone::LocalTime);
@@ -143,29 +113,4 @@ inline QString timeToString(const QDateTime& time)
 		return time.toString("dd.MM.yyyy hh:mm:ss.zzz (Invalid)");
 	}
 	return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
-}
-
-[[nodiscard]] inline qint64 currentMSecsSinceEpoch() noexcept
-{
-	using namespace std::chrono;
-
-	const auto now = system_clock::now();
-	const auto ms = time_point_cast<milliseconds>(now).time_since_epoch();
-	return ms.count(); // UTC time
-}
-
-#define currentMSecsUTC currentMSecsSinceEpoch
-
-[[nodiscard]] inline qint64 currentMSecsLocal() noexcept
-{
-	using namespace std::chrono;
-
-	const auto now = system_clock::now();
-	const auto utcMs = duration_cast<milliseconds>(now.time_since_epoch()).count();
-
-	const auto* zone = current_zone();
-	const auto info = zone->get_info(now);
-
-	const qint64 offsetMs = static_cast<qint64>(info.offset.count()) * 1000;
-	return utcMs + offsetMs; // Local time
 }

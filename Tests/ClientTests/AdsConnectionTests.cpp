@@ -1,7 +1,13 @@
 #include "ConnectionPorts.h"
-#include <ClientLib/AdsConnection.h>
+#include <AdsConnectionLib/AdsConnection.h>
+#include <AdsConnectionLib/IRecentAppSignals.h>
 #include <ClientLib/AppSignalManager.h>
-#include <ClientLib/IRecentAppSignals.h>
+#include <ClientLib/LoggerStdAdapter.h>
+#include <ClientLib/ServiceEndpoint.h>
+
+#include "../OnlineLib/SoftwareEndpoint.h"
+#include "../OnlineLib/SoftwareInfo.h"
+
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -16,11 +22,11 @@ namespace
 	public:
 		MOCK_METHOD(void, reset, (), (override));
 		MOCK_METHOD(void, notifySignalParamsUpdated, (), (override));
-		MOCK_METHOD(void, addSignals, (std::span<const AppSignalParam> appSignals, const QString& appDataServiceId), (override));
+		MOCK_METHOD(void, addSignals, (std::span<const ::Proto::AppSignal> appSignals, const std::string& appDataServiceId), (override));
 		MOCK_METHOD(void, invalidateSignalStates, (SourceIdType sourceThreadId), (override));
 		MOCK_METHOD(void,
 					setStates,
-					(std::span<const AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId),
+					(std::span<const Proto::AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId),
 					(override));
 	};
 
@@ -29,7 +35,7 @@ namespace
 	public:
 		MOCK_METHOD(void, addRecentAppSignal, (Hash h), (override));
 		MOCK_METHOD(void, addRecentAppSignals, (std::span<const Hash> hashes), (override));
-		MOCK_METHOD(std::vector<Hash>, recentlyUsedAppSignals, (const QString& appDataServivceId), (override));
+		MOCK_METHOD(std::vector<Hash>, recentlyUsedAppSignals, (const std::string& appDataServivceId), (override));
 		MOCK_METHOD(bool, hasRecentlyUsedAppSignals, (), (override));
 	};
 } // namespace
@@ -73,13 +79,15 @@ TEST_F(AdsConnectionTests, connectToAds)
 	MockAppSignalUpdater signalUpdater;
 	MockRecentAppSignals recentlyUsedSignals;
 
-	QString ads1{"SYSTEMID_CLIENTTEST_WS01_ADS_RC1"};
-	QString ads2{"SYSTEMID_CLIENTTEST_WS02_ADS_RC1"};
+	std::string ads1{"SYSTEMID_CLIENTTEST_WS01_ADS_RC1"};
+	std::string ads2{"SYSTEMID_CLIENTTEST_WS02_ADS_RC1"};
 
 	Hash dataServerHash1 = ::calcHash(ads1);
 	Hash dataServerHash2 = ::calcHash(ads2);
 
 	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
+	Network::SoftwareInfo networkSoftwareInfo;
+	softwareInfo.serializeTo(&networkSoftwareInfo);
 
 	// MockAppSignalUpdater
 	//
@@ -99,10 +107,10 @@ TEST_F(AdsConnectionTests, connectToAds)
 	EXPECT_CALL(signalUpdater, addSignals(_, ads2))
 			.Times(AtLeast(1));
 
-	EXPECT_CALL(signalUpdater, setStates(An<std::span<const AppSignalState>>(), dataServerHash1, _))
+	EXPECT_CALL(signalUpdater, setStates(An<std::span<const Proto::AppSignalState>>(), dataServerHash1, _))
 			.Times(AtLeast(1));
 
-	EXPECT_CALL(signalUpdater, setStates(An<std::span<const AppSignalState>>(), dataServerHash2, _))
+	EXPECT_CALL(signalUpdater, setStates(An<std::span<const Proto::AppSignalState>>(), dataServerHash2, _))
 			.Times(AtLeast(1));
 
 	// MockRecentAppSignals
@@ -123,8 +131,10 @@ TEST_F(AdsConnectionTests, connectToAds)
 	// Start
 	//
 	{
-		ClientLib::AdsConnection adsConnection{signalUpdater, &recentlyUsedSignals, nullptr, &log};
-		adsConnection.updateConnections(softwareInfo, AppDataServices);
+		ClientLib::LoggerStdAdapter loggerAdapter{log};
+
+		ClientLib::AdsConnection adsConnection{signalUpdater, &recentlyUsedSignals, nullptr, loggerAdapter};
+		adsConnection.updateConnections(networkSoftwareInfo, toServiceEndpoint(AppDataServices));
 
 		// Wait for connection established
 		//
@@ -138,7 +148,7 @@ TEST_F(AdsConnectionTests, connectToAds)
 
 			// Wait for 20 replies, so all signals are loaded and some states are received.
 			//
-			std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.connectionStates();
+			auto adsConnStates = adsConnection.connectionStates();
 			if (std::all_of(adsConnStates.begin(),
 							adsConnStates.end(),
 							[](const auto& s)
@@ -152,23 +162,23 @@ TEST_F(AdsConnectionTests, connectToAds)
 
 		// Check that two connections are established.
 		//
-		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.connectionStates();
+		auto adsConnStates = adsConnection.connectionStates();
 
 		ASSERT_EQ(adsConnStates.size(), 2 * adsConnection.connectionsPerServer());
 
 		EXPECT_TRUE(adsConnStates[0].isConnected);
-		EXPECT_EQ(adsConnStates[0].peerAddr.toStdString(), AppDataServices[0].address.toStdString());
+		EXPECT_EQ(adsConnStates[0].peerAddr, toServiceEndpoint(AppDataServices[0]).address);
 
 		EXPECT_TRUE(adsConnStates[1].isConnected);
-		EXPECT_EQ(adsConnStates[1].peerAddr.toStdString(), AppDataServices[1].address.toStdString());
+		EXPECT_EQ(adsConnStates[1].peerAddr, toServiceEndpoint(AppDataServices[1]).address);
 
 		if (adsConnection.connectionsPerServer() == 2)
 		{
 			EXPECT_TRUE(adsConnStates[2].isConnected);
-			EXPECT_EQ(adsConnStates[2].peerAddr.toStdString(), AppDataServices[0].address.toStdString());
+			EXPECT_EQ(adsConnStates[2].peerAddr, toServiceEndpoint(AppDataServices[0]).address);
 
 			EXPECT_TRUE(adsConnStates[3].isConnected);
-			EXPECT_EQ(adsConnStates[3].peerAddr.toStdString(), AppDataServices[1].address.toStdString());
+			EXPECT_EQ(adsConnStates[3].peerAddr, toServiceEndpoint(AppDataServices[1]).address);
 		}
 	}
 
@@ -178,9 +188,12 @@ TEST_F(AdsConnectionTests, connectToAds)
 TEST_F(AdsConnectionTests, adsNoConnection)
 {
 	ILogFileStub log;
+	ClientLib::LoggerStdAdapter loggerAdapter{log};
 	MockAppSignalUpdater signalUpdater;
 
 	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
+	Network::SoftwareInfo networkSoftwareInfo;
+	softwareInfo.serializeTo(&networkSoftwareInfo);
 
 	// MockAppSignalUpdater
 	//
@@ -208,8 +221,8 @@ TEST_F(AdsConnectionTests, adsNoConnection)
 		servers[0].address = {"192.178.12.90", 13323}; // Some unreachable addresses.
 		servers[1].address = {"192.178.13.90", 13323}; //
 
-		ClientLib::AdsConnection adsConnection{signalUpdater, nullptr, nullptr, &log};
-		adsConnection.updateConnections(softwareInfo, servers);
+		ClientLib::AdsConnection adsConnection{signalUpdater, nullptr, nullptr, loggerAdapter};
+		adsConnection.updateConnections(networkSoftwareInfo, toServiceEndpoint(servers));
 
 		// Wait for connection established
 		//
@@ -224,7 +237,7 @@ TEST_F(AdsConnectionTests, adsNoConnection)
 
 		// Check that two connections are established.
 		//
-		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.connectionStates();
+		auto adsConnStates = adsConnection.connectionStates();
 
 		ASSERT_EQ(adsConnStates.size(), 2 * adsConnection.connectionsPerServer());
 
@@ -241,13 +254,17 @@ TEST_F(AdsConnectionTests, receivesState)
 	//	     is blinking (1 Hz)
 	//
 	ILogFileStub log;
+	ClientLib::LoggerStdAdapter loggerAdapter{log};
 	ClientLib::AppSignalManager signalManager{&log};
+
 	SoftwareInfo softwareInfo(E::SoftwareType::Monitor, "SYSTEMID_CLIENTTEST_WS03_MONITOR");
+	Network::SoftwareInfo networkSoftwareInfo;
+	softwareInfo.serializeTo(&networkSoftwareInfo);
 
 	// Start
 	//
-	ClientLib::AdsConnection adsConnection{signalManager, &signalManager, nullptr, &log};
-	adsConnection.updateConnections(softwareInfo, AppDataServices);
+	ClientLib::AdsConnection adsConnection{signalManager, &signalManager, nullptr, loggerAdapter};
+	adsConnection.updateConnections(networkSoftwareInfo, toServiceEndpoint(AppDataServices));
 
 	// Wait for connection established
 	//
@@ -262,7 +279,7 @@ TEST_F(AdsConnectionTests, receivesState)
 
 		// Wait for 30 replies, so all signals are loaded and some states are received.
 		//
-		std::vector<Tcp::ConnectionState> adsConnStates = adsConnection.connectionStates();
+		auto adsConnStates = adsConnection.connectionStates();
 		if (std::all_of(adsConnStates.begin(),
 						adsConnStates.end(),
 						[](const auto& s)

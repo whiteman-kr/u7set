@@ -4,8 +4,8 @@
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/TcpConnectionState.h"
 #include "../UtilsLib/ILogFile.h"
+#include <AdsConnectionLib/IRecentAppSignals.h>
 #include <ClientLib/IAppSignalUpdater.h>
-#include <ClientLib/IRecentAppSignals.h>
 #include <ClientLib/ISignalLogUpdater.h>
 
 

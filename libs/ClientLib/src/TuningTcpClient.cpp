@@ -815,7 +815,7 @@ namespace ClientLib
 			return;
 		}
 
-		std::vector<Hash> recentSignals = m_recentTuningSignals.recentlyUsedAppSignals(connectedSoftwareInfo().equipmentID());
+		std::vector<Hash> recentSignals = m_recentTuningSignals.recentlyUsedAppSignals(connectedSoftwareInfo().equipmentID().toStdString());
 
 		int recentCount = static_cast<int>(recentSignals.size());
 		if (recentCount > MaxStateRequestCount)

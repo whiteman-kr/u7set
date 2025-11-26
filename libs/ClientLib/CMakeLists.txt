@@ -13,16 +13,12 @@ find_package(Qt6 REQUIRED COMPONENTS Gui Xml Network Widgets LinguistTools Qml)
 set(TARGET ClientLib)
 
 qt_add_library(${TARGET} STATIC
-	./include/ClientLib/AdsConnection.h
 	./include/ClientLib/AdsSourceStateConnection.h
 	./include/ClientLib/AppDataSourceState.h
 	./include/ClientLib/AppSignalManager.h
 	./include/ClientLib/ClientTranslator.h
 	./include/ClientLib/ConfigController.h
-	./include/ClientLib/IAppSignalUpdater.h
-	./include/ClientLib/IRecentAppSignals.h
 	./include/ClientLib/ISignalDataServer.h
-	./include/ClientLib/ISignalLogUpdater.h
 	./include/ClientLib/ITestObserver.h
 	./include/ClientLib/ITuningAuthorization.h
 	./include/ClientLib/ITuningConnection.h
@@ -38,12 +34,9 @@ qt_add_library(${TARGET} STATIC
 	./include/ClientLib/TuningSourceState.h
 	./include/ClientLib/TuningUserManager.h
 	./include/ClientLib/TuningWriteCommand.h
+	./include/ClientLib/LoggerStdAdapter.h
+	./include/ClientLib/ServiceEndpoint.h
 	
-	./src/AdsConnection.cpp
-	./src/AdsConnectionPrivate.cpp
-	./src/AdsConnectionPrivate.h
-	./src/AdsConnectionPrivate2.cpp
-	./src/AdsConnectionPrivate2.h
 	./src/AdsSourceStateConnection.cpp
 	./src/AdsSourceStateConnectionPrivate.cpp
 	./src/AdsSourceStateConnectionPrivate.h
@@ -51,8 +44,6 @@ qt_add_library(${TARGET} STATIC
 	./src/AdsSourceStateConnectionPrivate2.h
 	./src/AppDataSourceState.cpp
 	./src/AppSignalManager.cpp
-	./src/ClientGrpc.h
-	./src/ClientGrpc.cpp
 	./src/ClientTranslator.cpp
 	./src/ConfigController.cpp
 	./src/RtDataProvider.cpp
@@ -124,7 +115,7 @@ target_compile_definitions(${TARGET} PRIVATE USE_GRPC_ADS_CONNECTION)
 add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Gui Qt6::Xml Qt6::Network Qt6::Widgets Qt6::Qml)
-target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib OnlineLib AppSignalLib TrendView ProtobufEx GrpcLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib OnlineLib AppSignalLib TrendView ProtobufEx AdsConnectionLib)
 
 if (MSVC)
 	target_link_libraries(${TARGET} PUBLIC Advapi32)

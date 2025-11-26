@@ -11,9 +11,11 @@
 #include "MonitorConfigController.h"
 #include "MonitorSchemaManager.h"
 
-#include <ClientLib/AdsConnection.h>
+#include <AdsConnectionLib/AdsConnection.h>
+#include <AdsConnectionLib/ServiceConnectionState.h>
 #include <ClientLib/AppSignalManager.h>
 #include <ClientLib/ClientTranslator.h>
+#include <ClientLib/LoggerStdAdapter.h>
 #include <ClientLib/SignalLog.h>
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningLog.h>
@@ -93,6 +95,8 @@ public:
 private:
 	void updateStatusBar();
 	void showSoftwareConnection(const QString& caption, const std::vector<Tcp::ConnectionState>& connectionStates, QLabel* label);
+	void showSoftwareConnection(const QString& caption, const std::vector<ServiceConnectionState>& connectionStates, QLabel* label);
+
 	// Commands
 	//
 protected slots:
@@ -185,6 +189,8 @@ protected:
 	//
 private:
 	Log::LogFile m_LogFile; // Must be initialized first
+	ClientLib::LoggerStdAdapter logStdAdapter{m_LogFile};
+
 	ClientLib::TuningLog m_tuningLogFile;
 	InstanceResolver& m_instanceResolver;
 
@@ -198,7 +204,7 @@ private:
 	std::unique_ptr<VFrame30::AppSignalController> m_appSignalController;
 	std::unique_ptr<VFrame30::LogController> m_logController;
 
-	ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_signalLog, &m_LogFile};
+	ClientLib::AdsConnection m_adsConnection{m_signalManager, &m_signalManager, &m_signalLog, logStdAdapter};
 	ClientLib::TuningConnection m_tuningConnection{m_tuningSignalManager,
 												   m_tuningSignalManager,
 												   m_tuningSignalManager,

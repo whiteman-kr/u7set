@@ -1,4 +1,7 @@
 #pragma once
+
+#include <CommonStdLib/HashStd.h>
+
 #include <QRectF>
 #include <QSize>
 #include <QString>
@@ -6,10 +9,8 @@
 #include <array>
 #include <cassert>
 
-using Hash = uint64_t;
 using Hash32 = uint32_t;
 
-#define UNDEFINED_HASH 0x0000000000000000ULL		// Do not change to other value.
 
 inline Hash calcHash(const QString& str, Hash init = 0)
 {
@@ -93,7 +94,7 @@ inline quint16 calcHash16(const void* src, qsizetype l)
 
 	while (l--)
 	{
-		nHash += (nHash<<5) + *p++;
+		nHash += (nHash << 5) + *p++;
 	}
 
 	return nHash;
@@ -106,19 +107,19 @@ namespace std
 	template<>
 	struct hash<QUuid>
 	{
-		std::size_t operator()(const QUuid& u) const noexcept
-		{
-			return ::calcHash(u.toByteArray());
-		}
+		std::size_t operator()(const QUuid& u) const noexcept { return ::calcHash(u.toByteArray()); }
 	};
-}
+} // namespace std
 
 #include <QCryptographicHash>
 
 class Md5Hash : public QCryptographicHash
 {
 public:
-	Md5Hash() : QCryptographicHash(QCryptographicHash::Md5) {}
+	Md5Hash() :
+		QCryptographicHash(QCryptographicHash::Md5)
+	{
+	}
 
 	QString resultStr() const { return QString(result().toHex()); }
 
@@ -167,12 +168,9 @@ namespace hash_h
 		// No need to calc hash on hash for std::unordered_map, in this way it is significantly faster
 		// Usage: std::unordered_map<Hash, AppSignalState, HashHasher> m_states;
 		//
-		std::size_t operator()(Type u) const noexcept
-		{
-			return u;
-		}
+		std::size_t operator()(Type u) const noexcept { return u; }
 	};
-}
+} // namespace hash_h
 
 template<typename T>
 using VoidHasher = hash_h::hasher<T>;
@@ -183,11 +181,11 @@ inline Hash32 calcHash32(const void* data, size_t bytesCount)
 
 	// FNV1A_Jesteress hash function for 32-bit hash
 	//
-	const uint32_t fnvPrime = 16777619u;          // FNV prime number
-	const uint32_t offsetBasis = 2166136261u;     // FNV start value
+	const uint32_t fnvPrime = 16777619u;      // FNV prime number
+	const uint32_t offsetBasis = 2166136261u; // FNV start value
 	Hash32 hash = offsetBasis;
 
-	while(bytesCount > 0)
+	while (bytesCount > 0)
 	{
 		hash ^= static_cast<uint32_t>(*dataPtr++);
 		hash *= fnvPrime;
@@ -209,4 +207,3 @@ inline Hash32 calcHash32(const QByteArray& data)
 {
 	return calcHash32(data.constData(), data.size());
 }
-

@@ -408,32 +408,22 @@ namespace ClientLib
 			return;
 		}
 
-		std::vector<AppSignalParam> appSignals;
-		appSignals.reserve(tl_getSignalParamReply.appsignals_size());
-
-		for (int i = 0; i < tl_getSignalParamReply.appsignals_size(); i++)
+		for (const ::Proto::AppSignal& protoSignal : tl_getSignalParamReply.appsignals())
 		{
-			const ::Proto::AppSignal& protoSignal = tl_getSignalParamReply.appsignals(i);
-
-			AppSignalParam& s = appSignals.emplace_back();
-			s.load(protoSignal);
-
-			if (s.hash() == 0 || s.appSignalId().isEmpty() == true)
+			if (protoSignal.bustypeid().empty() == false)
 			{
-				Q_ASSERT(s.hash() != 0);
-				Q_ASSERT(s.appSignalId().isEmpty() == false);
-
-				appSignals.pop_back();
-				continue;
-			}
-
-			if (s.isBus() == true)
-			{
-				m_busSignalHashes.insert(s.hash());
+				m_busSignalHashes.insert(::calcHash(protoSignal.appsignalid()));
 			}
 		}
 
-		m_signalUpdater.addSignals(appSignals, m_serverSettings.equipmentId);
+		std::vector<::Proto::AppSignal> appSignals;
+		appSignals.reserve(tl_getSignalParamReply.appsignals_size());
+
+		std::move(tl_getSignalParamReply.mutable_appsignals()->begin(),
+				  tl_getSignalParamReply.mutable_appsignals()->end(),
+				  std::back_inserter(appSignals));
+
+		m_signalUpdater.addSignals(appSignals, m_serverSettings.equipmentId.toStdString());
 
 		requestSignalParam(m_lastSignalParamStartIndex + ADS_GET_APP_SIGNAL_PARAM_MAX);
 
@@ -484,14 +474,14 @@ namespace ClientLib
 		//
 		int signalStateCount = tl_getSignalStateChangesReply.appsignalstates_size();
 
-		thread_local std::vector<AppSignalState> states;
+		thread_local std::vector<::Proto::AppSignalState> states;
 
 		states.clear();
 		states.reserve(signalStateCount);
 
 		for (int i = 0; i < signalStateCount; i++)
 		{
-			const AppSignalState& state = states.emplace_back(tl_getSignalStateChangesReply.appsignalstates(i));
+			const AppSignalState& state = states.emplace_back(std::move(tl_getSignalStateChangesReply.mutable_appsignalstates()->at(i)));
 			Q_ASSERT(state.hash() != 0);
 
 			if (m_signalStatesSet.contains(state.hash()) == false)
@@ -568,12 +558,12 @@ namespace ClientLib
 
 		int signalStateCount = tl_getSignalStateReply.appsignalstates_size();
 
-		std::vector<AppSignalState> states;
+		std::vector<::Proto::AppSignalState> states;
 		states.reserve(signalStateCount);
 
 		for (int i = 0; i < signalStateCount; i++)
 		{
-			const AppSignalState& state = states.emplace_back(tl_getSignalStateReply.appsignalstates(i));
+			const AppSignalState& state = states.emplace_back(std::move(tl_getSignalStateReply.mutable_appsignalstates()->at(i)));
 			Q_ASSERT(state.m_hash != 0);
 
 			if (m_signalStatesSet.contains(state.hash()) == false)

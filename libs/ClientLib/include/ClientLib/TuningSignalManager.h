@@ -13,7 +13,7 @@
 #include "../AppSignalLib/TuningValue.h"
 #include "../UtilsLib/ILogFile.h"
 
-#include "IRecentAppSignals.h"
+#include <AdsConnectionLib/IRecentAppSignals.h>
 #include "ITuningSignalUpdater.h"
 
 namespace Proto
@@ -100,7 +100,7 @@ namespace ClientLib
 		void addRecentAppSignal(Hash h) override;
 		void addRecentAppSignals(std::span<const Hash> hashes) override;
 
-		std::vector<Hash> recentlyUsedAppSignals(const QString& dataServiceId) override;
+		std::vector<Hash> recentlyUsedAppSignals(const std::string& dataServiceId) override;
 		bool hasRecentlyUsedAppSignals() override;
 
 		// End of IRecentAppSignals

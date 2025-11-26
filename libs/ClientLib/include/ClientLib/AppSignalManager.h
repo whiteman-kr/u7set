@@ -1,13 +1,13 @@
 #pragma once
 
+#include "ISignalDataServer.h"
+
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../AppSignalLib/RecentUsed.h"
 #include "../UtilsLib/ILogFile.h"
-
-#include "IAppSignalUpdater.h"
-#include "IRecentAppSignals.h"
-#include "ISignalDataServer.h"
+#include <AdsConnectionLib/IAppSignalUpdater.h>
+#include <AdsConnectionLib/IRecentAppSignals.h>
 
 #include <QReadWriteLock>
 #include <memory>
@@ -39,11 +39,11 @@ namespace ClientLib
 		///
 		virtual void notifySignalParamsUpdated() override;
 
-		virtual void addSignals(std::span<const AppSignalParam> appSignals, const QString& appDataServiceId) override;
+		virtual void addSignals(std::span<const ::Proto::AppSignal> appSignals, const std::string& appDataServiceId) override;
 
 		virtual void invalidateSignalStates(SourceIdType sourceThreadId) override;
 
-		virtual void setStates(std::span<const AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId) override;
+		virtual void setStates(std::span<const ::Proto::AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId) override;
 
 	private:
 		void addSignalPrivate(const AppSignalParam& appSignal, const QString& appDataServiceId);
@@ -56,7 +56,7 @@ namespace ClientLib
 		virtual void addRecentAppSignal(Hash hash) override;
 		virtual void addRecentAppSignals(std::span<const Hash> hashes) override;
 
-		virtual std::vector<Hash> recentlyUsedAppSignals(const QString& appDataServivceId) override;
+		virtual std::vector<Hash> recentlyUsedAppSignals(const std::string& appDataServivceId) override;
 		virtual bool hasRecentlyUsedAppSignals() override;
 
 		//

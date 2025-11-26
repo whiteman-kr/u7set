@@ -1,11 +1,14 @@
 #pragma once
 
+#include "AppDataSourceState.h"
+
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/TcpConnectionState.h"
 #include "../UtilsLib/ILogFile.h"
-#include "AppDataSourceState.h"
+#include <AdsConnectionLib/ServiceConnectionState.h>
 
+#include <memory>
 #include <vector>
 
 
@@ -27,7 +30,7 @@ namespace ClientLib
 		///
 		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataService);
 
-		std::vector<Tcp::ConnectionState> adsConnectionStates() const;
+		std::vector<ServiceConnectionState> adsConnectionStates() const;
 		std::vector<ClientLib::AppDataSourceState> appDataSourceStates() const;
 
 	private:

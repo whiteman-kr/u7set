@@ -4,7 +4,7 @@
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 
-#include <ClientLib/IAppSignalUpdater.h>
+#include <AdsConnectionLib/IAppSignalUpdater.h>
 
 
 namespace ClientLib

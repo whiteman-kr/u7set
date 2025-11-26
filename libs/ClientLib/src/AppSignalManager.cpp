@@ -56,13 +56,18 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::addSignals(std::span<const AppSignalParam> appSignals, const QString& appDataServiceId)
+	void AppSignalManager::addSignals(std::span<const ::Proto::AppSignal> appSignals, const std::string& appDataServiceId)
 	{
+		QString adsId = QString::fromUtf8(appDataServiceId.data(), std::ssize(appDataServiceId));
+
 		QWriteLocker wl(&m_paramsLocker);
 
-		for (const AppSignalParam& s : appSignals)
+		for (const auto& ps : appSignals)
 		{
-			addSignalPrivate(s, appDataServiceId);
+			AppSignalParam appSignal{};
+			appSignal.load(ps);
+
+			addSignalPrivate(appSignal, adsId);
 		}
 
 		return;
@@ -82,16 +87,16 @@ namespace ClientLib
 		return;
 	}
 
-	void AppSignalManager::setStates(std::span<const AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId)
+	void AppSignalManager::setStates(std::span<const ::Proto::AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId)
 	{
 		QWriteLocker wl(&m_statesLocker);
 
-		for (const AppSignalState& newState : states)
+		for (AppSignalState protoState : states)
 		{
-			assert(newState.hash() != UNDEFINED_HASH);
+			assert(protoState.hash() != UNDEFINED_HASH);
 
-			Sources& currentStateAndSources = m_states[newState.hash()];
-			currentStateAndSources.set(newState, dataServerHash, sourceThreadId);
+			Sources& currentStateAndSources = m_states[protoState.hash()];
+			currentStateAndSources.set(protoState, dataServerHash, sourceThreadId);
 		}
 
 		return;
@@ -146,7 +151,7 @@ namespace ClientLib
 		m_recentUsed.add(hashes);
 	}
 
-	std::vector<Hash> AppSignalManager::recentlyUsedAppSignals(const QString& appDataServiceId)
+	std::vector<Hash> AppSignalManager::recentlyUsedAppSignals(const std::string& appDataServiceId)
 	{
 		std::vector<Hash> result;
 
@@ -157,7 +162,7 @@ namespace ClientLib
 			result = m_recentUsed.hashes();
 		}
 
-		filterByDataService(appDataServiceId, result);
+		filterByDataService(QString::fromStdString(appDataServiceId), result);
 
 		return result;
 	}

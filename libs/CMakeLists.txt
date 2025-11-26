@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
 add_subdirectory(AdsBridge)
+add_subdirectory(AdsConnectionLib)
 add_subdirectory(AppSignalLists)
 add_subdirectory(Behavior)
 add_subdirectory(BuildCompLib)
 add_subdirectory(ClientLib)
 add_subdirectory(CommonLib)
+add_subdirectory(CommonStdLib)
 add_subdirectory(DbLib)
 add_subdirectory(DiagClientLib)
 add_subdirectory(DiagStateLib)

@@ -2,8 +2,12 @@
 
 #include <TestSuiteLib/IInputController.h>
 
-#include <ClientLib/AdsConnection.h>
+#include <AdsConnectionLib/AdsConnection.h>
 #include <ClientLib/AppSignalManager.h>
+#include <ClientLib/LoggerStdAdapter.h>
+
+#include "../OnlineLib/SoftwareEndpoint.h"
+#include "../OnlineLib/SoftwareInfo.h"
 
 
 namespace TestSuite
@@ -11,7 +15,7 @@ namespace TestSuite
 	class AdsInputController : public IInputController
 	{
 	public:
-		explicit AdsInputController(ClientLib::AppSignalManager& signalManager, ILogFile* logFile);
+		explicit AdsInputController(ClientLib::AppSignalManager& signalManager, ILogFile& logFile);
 
 		// IInputController implementation
 		//
@@ -39,6 +43,7 @@ namespace TestSuite
 		std::vector<SoftwareEndpoint::AppDataService> m_appDataServices;
 
 		mutable HasLogFile m_appLog;
+		ClientLib::LoggerStdAdapter m_loggerAdapter;
 		ClientLib::AdsConnection m_connection;
 	};
 } // namespace TestSuite

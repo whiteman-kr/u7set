@@ -3,7 +3,9 @@
 #include "../OnlineLib/SoftwareEndpoint.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../UtilsLib/ILogFile.h"
+#include <AdsConnectionLib/ServiceConnectionState.h>
 #include <ClientLib/AppDataSourceState.h>
+#include <ClientLib/ServiceEndpoint.h>
 
 #include <list>
 #include <vector>
@@ -22,12 +24,11 @@ namespace ClientLib
 		class Connection
 		{
 		public:
-			Connection(const SoftwareInfo& softwareInfo, const SoftwareEndpoint::AppDataService& ads, ILogFile& logFile);
+			Connection(const Network::SoftwareInfo& softwareInfo, const ServiceEndpoint& ads, ILogFile& logFile);
 
-			[[nodiscard]] HostAddressPort address() const;
-			[[nodiscard]] const SoftwareEndpoint::AppDataService& server() const;
+			[[nodiscard]] const ServiceEndpoint& server() const;
 
-			[[nodiscard]] Tcp::ConnectionState tcpConnectionState() const;
+			[[nodiscard]] ServiceConnectionState tcpConnectionState() const;
 
 			std::vector<ClientLib::AppDataSourceState> appDataSourceStates() const;
 
@@ -44,7 +45,7 @@ namespace ClientLib
 		///
 		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataService);
 
-		[[nodiscard]] std::vector<Tcp::ConnectionState> adsConnectionStates() const;
+		[[nodiscard]] std::vector<ServiceConnectionState> adsConnectionStates() const;
 		[[nodiscard]] std::vector<ClientLib::AppDataSourceState> appDataSourceStates() const;
 
 		// --

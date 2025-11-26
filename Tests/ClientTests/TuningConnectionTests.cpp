@@ -1,5 +1,5 @@
 #include "ConnectionPorts.h"
-#include <ClientLib/IRecentAppSignals.h>
+#include <AdsConnectionLib/IRecentAppSignals.h>
 #include <ClientLib/ITuningLog.h>
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningSignalManager.h>
@@ -148,7 +148,7 @@ class IRecentAppSignalsStub : public ClientLib::IRecentAppSignals
 public:
 	virtual void addRecentAppSignal(Hash /*h*/) override {}
 	virtual void addRecentAppSignals(std::span<const Hash> /*hashes*/) override {}
-	virtual std::vector<Hash> recentlyUsedAppSignals(const QString& /*appDataServivceId*/) override { return {}; }
+	virtual std::vector<Hash> recentlyUsedAppSignals(const std::string& /*appDataServivceId*/) override { return {}; }
 	virtual bool hasRecentlyUsedAppSignals() override { return false; }
 };
 

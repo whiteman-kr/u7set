@@ -2,19 +2,25 @@
 #include "AdsInputController.h"
 #include "TestObserver.h"
 
+#include <ClientLib/ServiceEndpoint.h>
+
 namespace TestSuite
 {
-	AdsInputController::AdsInputController(ClientLib::AppSignalManager& signalManager, ILogFile* logFile) :
+	AdsInputController::AdsInputController(ClientLib::AppSignalManager& signalManager, ILogFile& logFile) :
 		m_signalManager{signalManager},
-		m_appLog{logFile, "AdsInputController"},
-		m_connection{m_signalManager, &m_signalManager, nullptr, logFile}
+		m_appLog{&logFile, "AdsInputController"},
+		m_loggerAdapter{logFile},
+		m_connection{m_signalManager, &m_signalManager, nullptr, m_loggerAdapter}
 	{
 		return;
 	}
 
 	bool AdsInputController::init(qint64 timeoutMs)
 	{
-		m_connection.updateConnections(m_softwareInfo, m_appDataServices);
+		Network::SoftwareInfo softwareInfo;
+		m_softwareInfo.serializeTo(&softwareInfo);
+
+		m_connection.updateConnections(softwareInfo, toServiceEndpoint(m_appDataServices));
 
 		// Wait for connection established
 		//
@@ -33,7 +39,7 @@ namespace TestSuite
 
 			// Wait for 30 replies, so all signals are loaded and some states are received.
 			//
-			std::vector<Tcp::ConnectionState> adsConnStates = m_connection.connectionStates();
+			auto adsConnStates = m_connection.connectionStates();
 			if (std::all_of(adsConnStates.begin(),
 							adsConnStates.end(),
 							[](const auto& s)
@@ -45,21 +51,23 @@ namespace TestSuite
 			}
 		}
 
-		std::vector<Tcp::ConnectionState> adsConnStates = m_connection.connectionStates();
+		auto adsConnStates = m_connection.connectionStates();
 
 		m_appLog.writeMessage("AppDataService connections, Count: " + QString::number(adsConnStates.size()));
 
-		for (const Tcp::ConnectionState& state : adsConnStates)
+		for (const auto& state : adsConnStates)
 		{
 			if (state.isConnected == true)
 			{
-				m_appLog.writeMessage(
-					QString{"AppDataService %1: %2"}.arg(state.serverEquipmentID).arg(state.isConnected ? "Connected" : "Not connected"));
+				m_appLog.writeMessage(QString{"AppDataService %1: %2"}
+										  .arg(QString::fromStdString(state.serverEquipmentID))
+										  .arg(state.isConnected ? "Connected" : "Not connected"));
 			}
 			else
 			{
-				m_appLog.writeError(
-					QString{"AppDataService %1: %2"}.arg(state.serverEquipmentID).arg(state.isConnected ? "Connected" : "Not connected"));
+				m_appLog.writeError(QString{"AppDataService %1: %2"}
+										.arg(QString::fromStdString(state.serverEquipmentID))
+										.arg(state.isConnected ? "Connected" : "Not connected"));
 			}
 		}
 
@@ -128,7 +136,10 @@ namespace TestSuite
 
 	bool AdsInputController::shutdown()
 	{
-		m_connection.updateConnections(m_softwareInfo, {});
+		::Network::SoftwareInfo softwareInfo;
+		m_softwareInfo.serializeTo(&softwareInfo);
+
+		m_connection.updateConnections(softwareInfo, {});
 		return true;
 	}
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "ISignalLogUpdater.h"
+#include <AdsConnectionLib/ISignalLogUpdater.h>
 
 #include "../AppSignalLib/DiscretesLogRecord.h"
 
@@ -14,7 +14,7 @@ namespace ClientLib
 	class SignalLogPrivate;
 
 
-	class SignalLog final : public ISignalLogUpdater
+	class SignalLog final : public ClientLib::ISignalLogUpdater
 	{
 	public:
 		SignalLog();

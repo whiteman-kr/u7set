@@ -1,7 +1,3 @@
-#ifndef CLIENT_LIB_DOMAIN
-	#error Do not include this file in the project! Link ClientLib instead.
-#endif
-
 #ifdef USE_GRPC_ADS_CONNECTION
 	#include "AdsConnectionPrivate2.h"
 #else
@@ -9,14 +5,15 @@
 #endif
 
 
-#include <ClientLib/AdsConnection.h>
+#include <AdsConnectionLib/AdsConnection.h>
+
 
 namespace ClientLib
 {
 	AdsConnection::AdsConnection(IAppSignalUpdater& signalUpdater,
 								 IRecentAppSignals* recentAppSignals,
 								 ISignalLogUpdater* signalLogUpdater,
-								 ILogFile* logFile) :
+								 ILoggerStd& logFile) :
 		m_hasRecentAppSignals{recentAppSignals != nullptr},
 		m_pimpl{std::make_unique<AdsConnectionType>(signalUpdater, recentAppSignals, signalLogUpdater, logFile)}
 	{
@@ -25,13 +22,12 @@ namespace ClientLib
 
 	AdsConnection::~AdsConnection() = default;
 
-	void AdsConnection::updateConnections(const SoftwareInfo& softwareInfo,
-										  const std::vector<SoftwareEndpoint::AppDataService>& appDataServices)
+	void AdsConnection::updateConnections(const ::Network::SoftwareInfo& softwareInfo, const std::vector<ServiceEndpoint>& appDataServices)
 	{
 		return m_pimpl->updateConnections(softwareInfo, appDataServices);
 	}
 
-	std::vector<Tcp::ConnectionState> AdsConnection::connectionStates() const
+	std::vector<ServiceConnectionState> AdsConnection::connectionStates() const
 	{
 		return m_pimpl->connectionStates();
 	}
@@ -52,7 +48,7 @@ namespace ClientLib
 			result = 1;
 		}
 
-		Q_ASSERT(result != 0);
+		assert(result != 0);
 		return result;
 	}
 

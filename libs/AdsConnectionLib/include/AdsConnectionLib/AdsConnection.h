@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../OnlineLib/SoftwareEndpoint.h"
-#include "../OnlineLib/SoftwareInfo.h"
-#include "../OnlineLib/TcpConnectionState.h"
-#include "../UtilsLib/ILogFile.h"
+// #include "../OnlineLib/TcpConnectionState.h"
+#include "ILoggerStd.h"
+#include "ServiceConnectionState.h"
+#include "ServiceEndpoint.h"
 
 #include "IAppSignalUpdater.h"
 #include "IRecentAppSignals.h"
@@ -22,7 +22,7 @@ namespace ClientLib
 		explicit AdsConnection(IAppSignalUpdater& signalUpdater,
 							   IRecentAppSignals* recentAppSignals, // Can be nullptr
 							   ISignalLogUpdater* signalLogUpdater, // Can be nullptr
-							   ILogFile* logFile);
+							   ILoggerStd& logFile);
 
 		AdsConnection(const AdsConnection&) = delete;
 		AdsConnection(AdsConnection&&) = default;
@@ -35,9 +35,9 @@ namespace ClientLib
 	public:
 		/// Call this function when the new configuration arrived to recreate communication thread with the new configuration
 		///
-		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
+		void updateConnections(const ::Network::SoftwareInfo& softwareInfo, const std::vector<ServiceEndpoint>& appDataServices);
 
-		std::vector<Tcp::ConnectionState> connectionStates() const;
+		std::vector<ServiceConnectionState> connectionStates() const;
 
 		int connectionsPerServer() const; // Returns 2 for TcpConnection and 1 for Grpc.
 

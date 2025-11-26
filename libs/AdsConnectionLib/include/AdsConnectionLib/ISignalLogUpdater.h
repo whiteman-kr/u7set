@@ -1,6 +1,11 @@
 #pragma once
+
 #include <optional>
 
+namespace Network
+{
+	class DiscretesLogRecord;
+} // namespace Network
 
 namespace ClientLib
 {

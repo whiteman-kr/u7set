@@ -11,14 +11,12 @@ TEST(AppSignalManagerTests, reset)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	// --
-	//
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal psp1;
+	Proto::AppSignal psp2;
+	psp1.set_appsignalid("#SP1");
+	psp2.set_appsignalid("#SP2");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	std::array<Proto::AppSignal, 2> arr = {psp1, psp2};
 	sm.addSignals(arr, "ADS");
 
 	EXPECT_EQ(sm.signalsCount(), 2);
@@ -52,12 +50,12 @@ TEST(AppSignalManagerTests, addSignal)
 
 	QSignalSpy spy{&sm, &ClientLib::AppSignalManager::signalParamsUpdated};
 
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	std::array<Proto::AppSignal, 2> arr = {sp1, sp2};
 	sm.addSignals(arr, "ADS");
 
 	EXPECT_EQ(sm.signalsCount(), 2);
@@ -72,12 +70,12 @@ TEST(AppSignalManagerTests, addSignals)
 
 	QSignalSpy spy{&sm, &ClientLib::AppSignalManager::signalParamsUpdated};
 
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::vector<AppSignalParam> v;
+	std::vector<Proto::AppSignal> v;
 	v.push_back(sp1);
 	v.push_back(sp2);
 
@@ -101,12 +99,12 @@ TEST(AppSignalManagerTests, invalidateSignalStates)
 
 	QSignalSpy spy{&sm, &ClientLib::AppSignalManager::signalParamsUpdated};
 
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::vector<AppSignalParam> v;
+	std::vector<Proto::AppSignal> v;
 	v.push_back(sp1);
 	v.push_back(sp2);
 
@@ -118,31 +116,33 @@ TEST(AppSignalManagerTests, invalidateSignalStates)
 	auto thread1 = SourceIdType(1ull);
 	auto thread2 = SourceIdType(2ull);
 
-	std::array<AppSignalState, 1> state1 = {AppSignalState{sp2.hash(), {0, 0, 0}, 123.0, {.valid = 1, .stateAvailable = 1}}};
+	std::array<Proto::AppSignalState, 1> state1 = {
+		AppSignalState{::calcHash(sp2.appsignalid()), {0, 0, 0}, 123.0, {.valid = 1, .stateAvailable = 1}}.save()};
 	sm.setStates(state1, dataServerHash, thread1);
 
 	QThread::currentThread()->msleep(10);
 
-	std::array<AppSignalState, 1> state2 = {AppSignalState{sp2.hash(), {1, 1, 1}, 124.0, {.valid = 1, .stateAvailable = 1}}};
+	std::array<Proto::AppSignalState, 1> state2 = {
+		AppSignalState{::calcHash(sp2.appsignalid()), {1, 1, 1}, 124.0, {.valid = 1, .stateAvailable = 1}}.save()};
 	sm.setStates(state2, dataServerHash, thread2);
 
 	// --
 	//
-	auto state = sm.signalState(sp2.hash());
+	auto state = sm.signalState(::calcHash(sp2.appsignalid()));
 	ASSERT_TRUE(state.has_value());
 	EXPECT_TRUE(state->isValid());
-	EXPECT_DOUBLE_EQ(state->value(), state2[0].m_value);
+	EXPECT_DOUBLE_EQ(state->value(), state2[0].value());
 
 	sm.invalidateSignalStates(thread2);
 
-	state = sm.signalState(sp2.hash());
+	state = sm.signalState(::calcHash(sp2.appsignalid()));
 	ASSERT_TRUE(state.has_value());
 	EXPECT_TRUE(state->isValid());
-	EXPECT_DOUBLE_EQ(state->value(), state1[0].m_value);
+	EXPECT_DOUBLE_EQ(state->value(), state1[0].value());
 
 	sm.invalidateSignalStates(thread1);
 
-	state = sm.signalState(sp2.hash());
+	state = sm.signalState(::calcHash(sp2.appsignalid()));
 	ASSERT_TRUE(state.has_value());
 	EXPECT_FALSE(state->isValid());
 
@@ -162,12 +162,15 @@ TEST(AppSignalManagerTests, setState)
 
 	QSignalSpy spy{&sm, &ClientLib::AppSignalManager::signalParamsUpdated};
 
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::vector<AppSignalParam> v;
+	Hash sp1h = calcHash(sp1.appsignalid());
+	Hash sp2h = calcHash(sp2.appsignalid());
+
+	std::vector<Proto::AppSignal> v;
 	v.push_back(sp1);
 	v.push_back(sp2);
 
@@ -176,27 +179,27 @@ TEST(AppSignalManagerTests, setState)
 
 	EXPECT_EQ(sm.signalsCount(), 2);
 
-	std::array<AppSignalState, 1> state1 = {AppSignalState{sp2.hash(), {}, 123.0, {.valid = 1, .stateAvailable = 0}}};
+	std::array<Proto::AppSignalState, 1> state1 = {AppSignalState{sp2h, {}, 123.0, {.valid = 1, .stateAvailable = 0}}.save()};
 	sm.setStates(state1, dataServerHash, 1ull);
 
 	QThread::currentThread()->msleep(10);
 
-	std::array<AppSignalState, 1> state2 = {AppSignalState{sp2.hash(), {}, 124.0, {.valid = 1, .stateAvailable = 0}}};
+	std::array<Proto::AppSignalState, 1> state2 = {AppSignalState{sp2h, {}, 124.0, {.valid = 1, .stateAvailable = 0}}.save()};
 	sm.setStates(state2, dataServerHash, 2ull);
 
 	// Check #SP1 is not valid
 	//
-	auto state = sm.signalState(sp1.hash());
+	auto state = sm.signalState(sp1h);
 	ASSERT_TRUE(state.has_value());
 	EXPECT_FALSE(state->isValid());
-	EXPECT_EQ(state->hash(), sp1.hash());
+	EXPECT_EQ(state->hash(), sp1h);
 
 	// Check #SP2 is valid
 	//
-	state = sm.signalState(sp2.hash());
+	state = sm.signalState(sp2h);
 	ASSERT_TRUE(state.has_value());
-	EXPECT_DOUBLE_EQ(state->value(), state2[0].m_value); // .stateAvailable = 0, so the actual value will be from "thread" 2
-	EXPECT_EQ(state->hash(), sp2.hash());
+	EXPECT_DOUBLE_EQ(state->value(), state2[0].value()); // .stateAvailable = 0, so the actual value will be from "thread" 2
+	EXPECT_EQ(state->hash(), sp2h);
 
 	return;
 }
@@ -214,12 +217,15 @@ TEST(AppSignalManagerTests, setStateAsVector)
 
 	QSignalSpy spy{&sm, &ClientLib::AppSignalManager::signalParamsUpdated};
 
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::vector<AppSignalParam> v;
+	Hash sp1h = calcHash(sp1.appsignalid());
+	Hash sp2h = calcHash(sp2.appsignalid());
+
+	std::vector<Proto::AppSignal> v;
 	v.push_back(sp1);
 	v.push_back(sp2);
 
@@ -228,27 +234,27 @@ TEST(AppSignalManagerTests, setStateAsVector)
 
 	EXPECT_EQ(sm.signalsCount(), 2);
 
-	AppSignalState state1{sp1.hash(), {}, 1.0, {.valid = 1, .stateAvailable = 1}};
-	AppSignalState state2{sp2.hash(), {}, 2.0, {.valid = 1, .stateAvailable = 1}};
+	AppSignalState state1{sp1h, {}, 1.0, {.valid = 1, .stateAvailable = 1}};
+	AppSignalState state2{sp2h, {}, 2.0, {.valid = 1, .stateAvailable = 1}};
 
-	sm.setStates(std::vector{state1, state2}, dataServerHash, 1ull);
+	sm.setStates(std::vector{state1.save(), state2.save()}, dataServerHash, 1ull);
 
 	// --
 	//
-	auto state = sm.signalState(sp1.hash());
+	auto state = sm.signalState(sp1h);
 	ASSERT_TRUE(state.has_value());
 
 	EXPECT_TRUE(state->isValid());
-	EXPECT_EQ(state->hash(), sp1.hash());
+	EXPECT_EQ(state->hash(), sp1h);
 	EXPECT_EQ(state->value(), 1.0);
 
 	// --
 	//
-	state = sm.signalState(sp2.hash());
+	state = sm.signalState(sp2h);
 	ASSERT_TRUE(state.has_value());
 
 	EXPECT_TRUE(state->isValid());
-	EXPECT_EQ(state->hash(), sp2.hash());
+	EXPECT_EQ(state->hash(), sp2h);
 	EXPECT_EQ(state->value(), 2.0);
 
 	return;
@@ -383,32 +389,36 @@ TEST(AppSignalManagerTests, addRecentAppSignal)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	AppSignalParam sp3;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
-	sp3.setAppSignalId("#SP3");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	Proto::AppSignal sp3;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
+	sp3.set_appsignalid("#SP3");
 
-	std::vector<AppSignalParam> v1;
+	auto sp1h = calcHash(sp1.appsignalid());
+	auto sp2h = calcHash(sp2.appsignalid());
+	auto sp3h = calcHash(sp3.appsignalid());
+
+	std::vector<Proto::AppSignal> v1;
 	v1.push_back(sp1);
 	v1.push_back(sp2);
 	sm.addSignals(v1, "ADS1");
 
-	std::vector<AppSignalParam> v2;
+	std::vector<Proto::AppSignal> v2;
 	v2.push_back(sp1);
 	v2.push_back(sp2);
 	v2.push_back(sp3); // ADS2 has one more signal
 	sm.addSignals(v2, "ADS2");
 
-	sm.addRecentAppSignals(std::vector{sp1.hash(), sp2.hash(), sp3.hash()});
+	sm.addRecentAppSignals(std::vector{sp1h, sp2h, sp3h});
 
 	{
 		std::vector<Hash> adsSignals = sm.recentlyUsedAppSignals("ADS1");
 		EXPECT_EQ(adsSignals.size(), 2);
 
-		bool f1 = std::find(adsSignals.begin(), adsSignals.end(), sp1.hash()) != adsSignals.end();
-		bool f2 = std::find(adsSignals.begin(), adsSignals.end(), sp2.hash()) != adsSignals.end();
+		bool f1 = std::find(adsSignals.begin(), adsSignals.end(), sp1h) != adsSignals.end();
+		bool f2 = std::find(adsSignals.begin(), adsSignals.end(), sp2h) != adsSignals.end();
 
 		EXPECT_TRUE(f1);
 		EXPECT_TRUE(f2);
@@ -418,9 +428,9 @@ TEST(AppSignalManagerTests, addRecentAppSignal)
 		std::vector<Hash> adsSignals = sm.recentlyUsedAppSignals("ADS2");
 		EXPECT_EQ(adsSignals.size(), 3);
 
-		bool f1 = std::find(adsSignals.begin(), adsSignals.end(), sp1.hash()) != adsSignals.end();
-		bool f2 = std::find(adsSignals.begin(), adsSignals.end(), sp2.hash()) != adsSignals.end();
-		bool f3 = std::find(adsSignals.begin(), adsSignals.end(), sp3.hash()) != adsSignals.end();
+		bool f1 = std::find(adsSignals.begin(), adsSignals.end(), sp1h) != adsSignals.end();
+		bool f2 = std::find(adsSignals.begin(), adsSignals.end(), sp2h) != adsSignals.end();
+		bool f3 = std::find(adsSignals.begin(), adsSignals.end(), sp3h) != adsSignals.end();
 
 		EXPECT_TRUE(f1);
 		EXPECT_TRUE(f2);
@@ -437,12 +447,15 @@ TEST(AppSignalManagerTests, signalHashes)
 
 	// --
 	//
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	auto sp1h = calcHash(sp1.appsignalid());
+	auto sp2h = calcHash(sp2.appsignalid());
+
+	std::array<Proto::AppSignal, 2> arr = {sp1, sp2};
 	sm.addSignals(arr, "ADS");
 
 	EXPECT_EQ(sm.signalsCount(), 2);
@@ -451,8 +464,8 @@ TEST(AppSignalManagerTests, signalHashes)
 
 	EXPECT_EQ(hashes.size(), 2);
 
-	bool f1 = std::find(hashes.begin(), hashes.end(), sp1.hash()) != hashes.end();
-	bool f2 = std::find(hashes.begin(), hashes.end(), sp2.hash()) != hashes.end();
+	bool f1 = std::find(hashes.begin(), hashes.end(), sp1h) != hashes.end();
+	bool f2 = std::find(hashes.begin(), hashes.end(), sp2h) != hashes.end();
 
 	EXPECT_TRUE(f1);
 	EXPECT_TRUE(f2);
@@ -467,12 +480,15 @@ TEST(AppSignalManagerTests, signalList)
 
 	// --
 	//
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	auto sp1h = calcHash(sp1.appsignalid());
+	auto sp2h = calcHash(sp2.appsignalid());
+
+	std::array<Proto::AppSignal, 2> arr = {sp1, sp2};
 	sm.addSignals(arr, "ADS");
 
 	EXPECT_EQ(sm.signalsCount(), 2);
@@ -483,16 +499,16 @@ TEST(AppSignalManagerTests, signalList)
 
 	bool f1 = std::find_if(allSignals.begin(),
 						   allSignals.end(),
-						   [&sp1](const auto& s)
+						   [sp1h](const auto& s)
 						   {
-							   return s.hash() == sp1.hash();
+							   return s.hash() == sp1h;
 						   }) != allSignals.end();
 
 	bool f2 = std::find_if(allSignals.begin(),
 						   allSignals.end(),
-						   [&sp2](const auto& s)
+						   [sp2h](const auto& s)
 						   {
-							   return s.hash() == sp2.hash();
+							   return s.hash() == sp2h;
 						   }) != allSignals.end();
 
 	EXPECT_TRUE(f1);
@@ -508,19 +524,22 @@ TEST(AppSignalManagerTests, signalExists)
 
 	// --
 	//
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	auto sp1h = calcHash(sp1.appsignalid());
+	auto sp2h = calcHash(sp2.appsignalid());
+
+	std::array<Proto::AppSignal, 2> arr = {sp1, sp2};
 	sm.addSignals(arr, "ADS");
 
 	EXPECT_EQ(sm.signalsCount(), 2);
-	EXPECT_TRUE(sm.signalExists(sp1.hash()));
-	EXPECT_TRUE(sm.signalExists(sp2.hash()));
-	EXPECT_TRUE(sm.signalExists(sp1.appSignalId()));
-	EXPECT_TRUE(sm.signalExists(sp2.appSignalId()));
+	EXPECT_TRUE(sm.signalExists(sp1h));
+	EXPECT_TRUE(sm.signalExists(sp2h));
+	EXPECT_TRUE(sm.signalExists(QString::fromStdString(sp1.appsignalid())));
+	EXPECT_TRUE(sm.signalExists(QString::fromStdString(sp2.appsignalid())));
 
 	EXPECT_FALSE(sm.signalExists(123ull));
 	EXPECT_FALSE(sm.signalExists("#FALSEID"));
@@ -533,44 +552,47 @@ TEST(AppSignalManagerTests, signalParam)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	auto sp1h = calcHash(sp1.appsignalid());
+	auto sp2h = calcHash(sp2.appsignalid());
+
+	std::array<Proto::AppSignal, 2> arr = {sp1, sp2};
 	sm.addSignals(arr, "ADS");
 
 	{
-		auto hsp = sm.signalParam(sp1.hash());
+		auto hsp = sm.signalParam(sp1h);
 		ASSERT_TRUE(hsp.has_value());
 
-		EXPECT_EQ(hsp->hash(), sp1.hash());
-		EXPECT_EQ(hsp->appSignalId(), sp1.appSignalId());
+		EXPECT_EQ(hsp->hash(), sp1h);
+		EXPECT_EQ(hsp->appSignalId().toStdString(), sp1.appsignalid());
 	}
 
 	{
-		auto hsp = sm.signalParam(sp1.appSignalId());
+		auto hsp = sm.signalParam(QString::fromStdString(sp1.appsignalid()));
 		ASSERT_TRUE(hsp.has_value());
 
-		EXPECT_EQ(hsp->hash(), sp1.hash());
-		EXPECT_EQ(hsp->appSignalId(), sp1.appSignalId());
+		EXPECT_EQ(hsp->hash(), sp1h);
+		EXPECT_EQ(hsp->appSignalId().toStdString(), sp1.appsignalid());
 	}
 
 	{
-		auto hsp = sm.signalParam(sp2.hash());
+		auto hsp = sm.signalParam(sp2h);
 		ASSERT_TRUE(hsp.has_value());
 
-		EXPECT_EQ(hsp->hash(), sp2.hash());
-		EXPECT_EQ(hsp->appSignalId(), sp2.appSignalId());
+		EXPECT_EQ(hsp->hash(), sp2h);
+		EXPECT_EQ(hsp->appSignalId().toStdString(), sp2.appsignalid());
 	}
 
 	{
-		auto hsp = sm.signalParam(sp2.appSignalId());
+		auto hsp = sm.signalParam(QString::fromStdString(sp2.appsignalid()));
 		ASSERT_TRUE(hsp.has_value());
 
-		EXPECT_EQ(hsp->hash(), sp2.hash());
-		EXPECT_EQ(hsp->appSignalId(), sp2.appSignalId());
+		EXPECT_EQ(hsp->hash(), sp2h);
+		EXPECT_EQ(hsp->appSignalId().toStdString(), sp2.appsignalid());
 	}
 
 	{
@@ -597,38 +619,41 @@ TEST(AppSignalManagerTests, signalState)
 	QString dataServerId{"DATA_SERVERID"};
 	Hash dataServerHash = ::calcHash(dataServerId);
 
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::vector<AppSignalParam> v;
+	auto sp1h = calcHash(sp1.appsignalid());
+	auto sp2h = calcHash(sp2.appsignalid());
+
+	std::vector<Proto::AppSignal> v;
 	v.push_back(sp1);
 	v.push_back(sp2);
 
 	sm.addSignals(v, "ADS1");
 	sm.addSignals(v, "ADS2");
 
-	std::array<AppSignalState, 1> state1 = {AppSignalState{sp1.hash(), {}, 1.0, {.valid = 1, .stateAvailable = 1}}};
+	std::array<::Proto::AppSignalState, 1> state1 = {AppSignalState{sp1h, {}, 1.0, {.valid = 1, .stateAvailable = 1}}.save()};
 	sm.setStates(state1, dataServerHash, 1ull);
 
-	std::array<AppSignalState, 1> state2 = {AppSignalState{sp2.hash(), {}, 2.0, {.valid = 1, .stateAvailable = 1}}};
+	std::array<::Proto::AppSignalState, 1> state2 = {AppSignalState{sp2h, {}, 2.0, {.valid = 1, .stateAvailable = 1}}.save()};
 	sm.setStates(state2, dataServerHash, 1ull);
 
 	// --
 	//
-	auto state = sm.signalState(sp1.appSignalId());
+	auto state = sm.signalState(QString::fromStdString(sp1.appsignalid()));
 	ASSERT_TRUE(state.has_value());
 
 	EXPECT_TRUE(state->isValid());
-	EXPECT_EQ(state->hash(), sp1.hash());
+	EXPECT_EQ(state->hash(), sp1h);
 	EXPECT_EQ(state->value(), 1.0);
 
-	state = sm.signalState(sp2.appSignalId());
+	state = sm.signalState(QString::fromStdString(sp2.appsignalid()));
 	ASSERT_TRUE(state.has_value());
 
 	EXPECT_TRUE(state->isValid());
-	EXPECT_EQ(state->hash(), sp2.hash());
+	EXPECT_EQ(state->hash(), sp2h);
 	EXPECT_EQ(state->value(), 2.0);
 
 	state = sm.signalState("#FALSEID");
@@ -636,7 +661,9 @@ TEST(AppSignalManagerTests, signalState)
 
 	std::vector<std::optional<AppSignalState>> recStates;
 
-	std::vector<QString> ids = {sp1.appSignalId(), sp2.appSignalId(), QLatin1String("#FALSEID")};
+	std::vector<QString> ids = {QString::fromStdString(sp1.appsignalid()),
+								QString::fromStdString(sp2.appsignalid()),
+								QLatin1String("#FALSEID")};
 	sm.signalState(ids, &recStates);
 
 	ASSERT_EQ(recStates.size(), ids.size());
@@ -646,11 +673,11 @@ TEST(AppSignalManagerTests, signalState)
 	ASSERT_FALSE(recStates[2].has_value());
 
 	EXPECT_TRUE(recStates[0]->isValid());
-	EXPECT_EQ(recStates[0]->hash(), sp1.hash());
+	EXPECT_EQ(recStates[0]->hash(), sp1h);
 	EXPECT_EQ(recStates[0]->value(), 1.0);
 
 	EXPECT_TRUE(recStates[1]->isValid());
-	EXPECT_EQ(recStates[1]->hash(), sp2.hash());
+	EXPECT_EQ(recStates[1]->hash(), sp2h);
 	EXPECT_EQ(recStates[1]->value(), 2.0);
 
 	return;
@@ -661,19 +688,24 @@ TEST(AppSignalManagerTests, signalTags)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	sp1.setAppSignalId("#SP1");
-	sp1.setTags({"sp1", "ads", "test"});
+	Proto::AppSignal sp1;
+	sp1.set_appsignalid("#SP1");
+	sp1.add_tags("sp1");
+	sp1.add_tags("ads");
+	sp1.add_tags("test");
 
-	AppSignalParam sp2;
-	sp2.setAppSignalId("#SP2");
-	sp2.setTags({"sp2", "ads", "test", "tags"});
+	Proto::AppSignal sp2;
+	sp2.set_appsignalid("#SP2");
+	sp2.add_tags("sp2");
+	sp2.add_tags("ads");
+	sp2.add_tags("test");
+	sp2.add_tags("tags");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	std::array<Proto::AppSignal, 2> arr = {sp1, sp2};
 	sm.addSignals(arr, "ADS");
 
-	QStringList tags1 = sm.signalTags(sp1.appSignalId());
-	QStringList tags2 = sm.signalTags(sp2.appSignalId());
+	QStringList tags1 = sm.signalTags(QString::fromStdString(sp1.appsignalid()));
+	QStringList tags2 = sm.signalTags(QString::fromStdString(sp2.appsignalid()));
 
 	EXPECT_EQ(tags1.size(), 3);
 	EXPECT_EQ(tags2.size(), 4);
@@ -689,28 +721,33 @@ TEST(AppSignalManagerTests, signalHasTag)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	sp1.setAppSignalId("#SP1");
-	sp1.setTags({"sp1", "ads", "test"});
+	Proto::AppSignal sp1;
+	sp1.set_appsignalid("#SP1");
+	sp1.add_tags("sp1");
+	sp1.add_tags("ads");
+	sp1.add_tags("test");
 
-	AppSignalParam sp2;
-	sp2.setAppSignalId("#SP2");
-	sp2.setTags({"sp2", "ads", "test", "tags"});
+	Proto::AppSignal sp2;
+	sp2.set_appsignalid("#SP2");
+	sp2.add_tags("sp2");
+	sp2.add_tags("ads");
+	sp2.add_tags("test");
+	sp2.add_tags("tags");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	std::array<Proto::AppSignal, 2> arr = {sp1, sp2};
 	sm.addSignals(arr, "ADS");
 
-	EXPECT_TRUE(sm.signalHasTag(sp1.appSignalId(), "sp1"));
-	EXPECT_TRUE(sm.signalHasTag(sp1.appSignalId(), "ads"));
-	EXPECT_TRUE(sm.signalHasTag(sp1.appSignalId(), "test"));
-	EXPECT_FALSE(sm.signalHasTag(sp1.appSignalId(), "fail"));
-	EXPECT_FALSE(sm.signalHasTag(sp1.appSignalId(), ""));
+	EXPECT_TRUE(sm.signalHasTag(QString::fromStdString(sp1.appsignalid()), "sp1"));
+	EXPECT_TRUE(sm.signalHasTag(QString::fromStdString(sp1.appsignalid()), "ads"));
+	EXPECT_TRUE(sm.signalHasTag(QString::fromStdString(sp1.appsignalid()), "test"));
+	EXPECT_FALSE(sm.signalHasTag(QString::fromStdString(sp1.appsignalid()), "fail"));
+	EXPECT_FALSE(sm.signalHasTag(QString::fromStdString(sp1.appsignalid()), ""));
 
-	EXPECT_TRUE(sm.signalHasTag(sp2.appSignalId(), "sp2"));
-	EXPECT_TRUE(sm.signalHasTag(sp2.appSignalId(), "ads"));
-	EXPECT_TRUE(sm.signalHasTag(sp2.appSignalId(), "test"));
-	EXPECT_TRUE(sm.signalHasTag(sp2.appSignalId(), "tags"));
-	EXPECT_FALSE(sm.signalHasTag(sp2.appSignalId(), "fails"));
+	EXPECT_TRUE(sm.signalHasTag(QString::fromStdString(sp2.appsignalid()), "sp2"));
+	EXPECT_TRUE(sm.signalHasTag(QString::fromStdString(sp2.appsignalid()), "ads"));
+	EXPECT_TRUE(sm.signalHasTag(QString::fromStdString(sp2.appsignalid()), "test"));
+	EXPECT_TRUE(sm.signalHasTag(QString::fromStdString(sp2.appsignalid()), "tags"));
+	EXPECT_FALSE(sm.signalHasTag(QString::fromStdString(sp2.appsignalid()), "fails"));
 
 	return;
 }
@@ -720,16 +757,21 @@ TEST(AppSignalManagerTests, signalIdsByTag)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	sp1.setAppSignalId("#SP1");
-	sp1.setTags({"sp1", "ads", "test"});
+	Proto::AppSignal sp1;
+	sp1.set_appsignalid("#SP1");
+	sp1.add_tags("sp1");
+	sp1.add_tags("ads");
+	sp1.add_tags("test");
 
-	AppSignalParam sp2;
-	sp2.setAppSignalId("#SP2");
-	sp2.setTags({"sp2", "ads", "test", "tags"});
+	Proto::AppSignal sp2;
+	sp2.set_appsignalid("#SP2");
+	sp2.add_tags("sp2");
+	sp2.add_tags("ads");
+	sp2.add_tags("test");
+	sp2.add_tags("tags");
 
-	sm.addSignals(std::span<const AppSignalParam>{&sp1, 1}, "ADS1");
-	sm.addSignals(std::span<const AppSignalParam>{&sp2, 1}, "ADS2");
+	sm.addSignals(std::span<const Proto::AppSignal>{&sp1, 1}, "ADS1");
+	sm.addSignals(std::span<const Proto::AppSignal>{&sp2, 1}, "ADS2");
 
 	QStringList signals_sp1 = sm.signalIdsByTag("sp1");
 	QStringList signals_ads = sm.signalIdsByTag("ads");
@@ -749,23 +791,23 @@ TEST(AppSignalManagerTests, signalType)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	sp1.setAppSignalId("#SP1");
-	sp1.setType(E::SignalType::Analog);
+	Proto::AppSignal sp1;
+	sp1.set_appsignalid("#SP1");
+	sp1.set_signaltype(static_cast<::int32_t>(E::SignalType::Analog));
 
-	AppSignalParam sp2;
-	sp2.setAppSignalId("#SP2");
-	sp2.setType(E::SignalType::Discrete);
+	Proto::AppSignal sp2;
+	sp2.set_appsignalid("#SP2");
+	sp2.set_signaltype(static_cast<::int32_t>(E::SignalType::Discrete));
 
-	sm.addSignals(std::span<const AppSignalParam>{&sp1, 1}, "ADS1");
-	sm.addSignals(std::span<const AppSignalParam>{&sp2, 1}, "ADS2");
+	sm.addSignals(std::span<const Proto::AppSignal>{&sp1, 1}, "ADS1");
+	sm.addSignals(std::span<const Proto::AppSignal>{&sp2, 1}, "ADS2");
 
 	bool f1 = false;
 	bool f2 = false;
 	bool f3 = false;
 
-	auto t1 = sm.signalType(sp1.hash(), &f1);
-	auto t2 = sm.signalType(sp2.appSignalId(), &f2);
+	auto t1 = sm.signalType(::calcHash(sp1.appsignalid()), &f1);
+	auto t2 = sm.signalType(QString::fromStdString(sp2.appsignalid()), &f2);
 	[[maybe_unused]] auto t3 = sm.signalType("#FAIL", &f3);
 
 	EXPECT_TRUE(f1);
@@ -783,19 +825,19 @@ TEST(AppSignalManagerTests, equipmentToAppSignalId)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	sp1.setAppSignalId("#SP1");
-	sp1.setEquipmentId("USB_LM1_IN1");
+	Proto::AppSignal sp1;
+	sp1.set_appsignalid("#SP1");
+	sp1.set_equipmentid("USB_LM1_IN1");
 
-	AppSignalParam sp2;
-	sp2.setAppSignalId("#SP2");
-	sp2.setEquipmentId("USB_LM1_IN2");
+	Proto::AppSignal sp2;
+	sp2.set_appsignalid("#SP2");
+	sp2.set_equipmentid("USB_LM1_IN2");
 
-	AppSignalParam sp3;
-	sp3.setAppSignalId("#SP3");
-	sp3.setEquipmentId("USB_LM1_IN3");
+	Proto::AppSignal sp3;
+	sp3.set_appsignalid("#SP3");
+	sp3.set_equipmentid("USB_LM1_IN3");
 
-	auto v = std::array<AppSignalParam, 3>{sp1, sp2, sp3};
+	auto v = std::array<Proto::AppSignal, 3>{sp1, sp2, sp3};
 	sm.addSignals(v, "ADS");
 
 	EXPECT_EQ(sm.equipmentToAppSignalId("@USB_LM1_IN1"), "#SP1"); // Symbol @ must be at the beginning
@@ -811,31 +853,31 @@ TEST(AppSignalManagerTests, setpointsByInput)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	sp1.setAppSignalId("#SP1");
-	sp1.setEquipmentId("LM1");
+	Proto::AppSignal sp1;
+	sp1.set_appsignalid("#SP1");
+	sp1.set_equipmentid("LM1");
 
-	AppSignalParam sp2;
-	sp2.setAppSignalId("#SP2");
-	sp2.setEquipmentId("LM2");
+	Proto::AppSignal sp2;
+	sp2.set_appsignalid("#SP2");
+	sp2.set_equipmentid("LM2");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	std::array<Proto::AppSignal, 2> arr = {sp1, sp2};
 	sm.addSignals(arr, "ADS");
 
 	// Create ComparatorSet
 	//
 	auto cmp_sp1_1 = std::make_shared<Comparator>();
-	cmp_sp1_1->input().setSignalParams(sp1.appSignalId(), true, true, 1.0);
+	cmp_sp1_1->input().setSignalParams(QString::fromStdString(sp1.appsignalid()), true, true, 1.0);
 	cmp_sp1_1->output().setSignalParams("#OUT_CMP1_1", true, false, 1.0);
 	cmp_sp1_1->setLabel("cmp_sp1_1");
 
 	auto cmp_sp1_2 = std::make_shared<Comparator>();
-	cmp_sp1_2->input().setSignalParams(sp1.appSignalId(), true, true, 2.0);
+	cmp_sp1_2->input().setSignalParams(QString::fromStdString(sp1.appsignalid()), true, true, 2.0);
 	cmp_sp1_2->output().setSignalParams("#OUT_CMP1_2", true, false, 2.0);
 	cmp_sp1_2->setLabel("cmp_sp1_2");
 
 	auto cmp_sp2_1 = std::make_shared<Comparator>();
-	cmp_sp2_1->input().setSignalParams(sp2.appSignalId(), true, true, 3.0);
+	cmp_sp2_1->input().setSignalParams(QString::fromStdString(sp2.appsignalid()), true, true, 3.0);
 	cmp_sp2_1->output().setSignalParams("#OUT_CMP2_1", true, false, 2.0);
 	cmp_sp2_1->setLabel("cmp_sp2_1");
 
@@ -846,8 +888,8 @@ TEST(AppSignalManagerTests, setpointsByInput)
 
 	sm.setSetpoints(cs);
 
-	auto sp1_comparators = sm.setpointsByInput(sp1.appSignalId());
-	auto sp2_comparators = sm.setpointsByInput(sp2.appSignalId());
+	auto sp1_comparators = sm.setpointsByInput(QString::fromStdString(sp1.appsignalid()));
+	auto sp2_comparators = sm.setpointsByInput(QString::fromStdString(sp2.appsignalid()));
 
 	ASSERT_EQ(sp1_comparators.size(), 2);
 	ASSERT_TRUE((sp1_comparators[0]->label() == "cmp_sp1_1" && sp1_comparators[1]->label() == "cmp_sp1_2") ||
@@ -864,21 +906,21 @@ TEST(AppSignalManagerTests, dataServiceIds)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	AppSignalParam sp3;
+	::Proto::AppSignal sp1;
+	::Proto::AppSignal sp2;
+	::Proto::AppSignal sp3;
 
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::array<AppSignalParam, 1> ads1v = {sp1};
-	std::array<AppSignalParam, 2> ads2v = {sp1, sp2};
+	std::array<Proto::AppSignal, 1> ads1v = {sp1};
+	std::array<Proto::AppSignal, 2> ads2v = {sp1, sp2};
 
 	sm.addSignals(ads1v, "ADS1");
 	sm.addSignals(ads2v, "ADS2");
 
-	auto s1adses = sm.dataServiceIds(sp1.appSignalId());
-	auto s2adses = sm.dataServiceIds(sp2.appSignalId());
+	auto s1adses = sm.dataServiceIds(QString::fromStdString(sp1.appsignalid()));
+	auto s2adses = sm.dataServiceIds(QString::fromStdString(sp2.appsignalid()));
 	auto s3adses = sm.dataServiceIds("#FALSEID");
 
 	ASSERT_EQ(s1adses.size(), 2);
@@ -897,27 +939,27 @@ TEST(AppSignalManagerTests, dataServiceHasSignal)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	AppSignalParam sp2;
-	AppSignalParam sp3;
+	Proto::AppSignal sp1;
+	Proto::AppSignal sp2;
+	Proto::AppSignal sp3;
 
-	sp1.setAppSignalId("#SP1");
-	sp2.setAppSignalId("#SP2");
+	sp1.set_appsignalid("#SP1");
+	sp2.set_appsignalid("#SP2");
 
-	std::array<AppSignalParam, 1> ads1v = {sp1};
-	std::array<AppSignalParam, 2> ads2v = {sp1, sp2};
+	std::array<Proto::AppSignal, 1> ads1v = {sp1};
+	std::array<Proto::AppSignal, 2> ads2v = {sp1, sp2};
 
 	sm.addSignals(ads1v, "ADS1");
 	sm.addSignals(ads2v, "ADS2");
 
-	EXPECT_TRUE(sm.dataServiceHasSignal("ADS1", sp1.appSignalId()));
-	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", sp1.appSignalId()));
+	EXPECT_TRUE(sm.dataServiceHasSignal("ADS1", QString::fromStdString(sp1.appsignalid())));
+	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", QString::fromStdString(sp1.appsignalid())));
 
-	EXPECT_FALSE(sm.dataServiceHasSignal("ADS1", sp2.appSignalId()));
-	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", sp2.appSignalId()));
+	EXPECT_FALSE(sm.dataServiceHasSignal("ADS1", QString::fromStdString(sp2.appsignalid())));
+	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", QString::fromStdString(sp2.appsignalid())));
 
 	EXPECT_FALSE(sm.dataServiceHasSignal("ADS2", "#FALSEID"));
-	EXPECT_FALSE(sm.dataServiceHasSignal("FALSE_ADS", sp1.appSignalId()));
+	EXPECT_FALSE(sm.dataServiceHasSignal("FALSE_ADS", QString::fromStdString(sp1.appsignalid())));
 
 	return;
 }
@@ -927,15 +969,20 @@ TEST(AppSignalManagerTests, tags)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	sp1.setAppSignalId("#SP1");
-	sp1.setTags({"sp1", "ads", "test"});
+	Proto::AppSignal sp1;
+	sp1.set_appsignalid("#SP1");
+	sp1.add_tags("sp1");
+	sp1.add_tags("ads");
+	sp1.add_tags("test");
 
-	AppSignalParam sp2;
-	sp2.setAppSignalId("#SP2");
-	sp2.setTags({"sp2", "ads", "test", "tags"});
+	Proto::AppSignal sp2;
+	sp2.set_appsignalid("#SP2");
+	sp2.add_tags("sp2");
+	sp2.add_tags("ads");
+	sp2.add_tags("test");
+	sp2.add_tags("tags");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	std::array<Proto::AppSignal, 2> arr = {sp1, sp2};
 	sm.addSignals(arr, "ADS");
 
 	QStringList tags = sm.tags();
@@ -955,15 +1002,15 @@ TEST(AppSignalManagerTests, signalParamByEquipemntId)
 	ILogFileStub log;
 	ClientLib::AppSignalManager sm{&log};
 
-	AppSignalParam sp1;
-	sp1.setAppSignalId("#SP1");
-	sp1.setEquipmentId("USB_LM1_IN1");
+	Proto::AppSignal sp1;
+	sp1.set_appsignalid("#SP1");
+	sp1.set_equipmentid("USB_LM1_IN1");
 
-	AppSignalParam sp2;
-	sp2.setAppSignalId("#SP2");
-	sp2.setEquipmentId("USB_LM1_IN2");
+	Proto::AppSignal sp2;
+	sp2.set_appsignalid("#SP2");
+	sp2.set_equipmentid("USB_LM1_IN2");
 
-	std::array<AppSignalParam, 2> arr = {sp1, sp2};
+	std::array<Proto::AppSignal, 2> arr = {sp1, sp2};
 	sm.addSignals(arr, "ADS");
 
 	auto signalParam1 = sm.signalParamByEquipmentId("@USB_LM1_IN1");
@@ -974,8 +1021,8 @@ TEST(AppSignalManagerTests, signalParamByEquipemntId)
 	ASSERT_TRUE(signalParam2.has_value());
 	ASSERT_FALSE(signalParam3.has_value());
 
-	EXPECT_EQ(signalParam1->appSignalId(), sp1.appSignalId());
-	EXPECT_EQ(signalParam2->appSignalId(), sp2.appSignalId());
+	EXPECT_EQ(signalParam1->appSignalId().toStdString(), sp1.appsignalid());
+	EXPECT_EQ(signalParam2->appSignalId().toStdString(), sp2.appsignalid());
 
 	return;
 }

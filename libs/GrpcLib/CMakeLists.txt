@@ -2,10 +2,8 @@ cmake_minimum_required(VERSION 3.16)
 
 project(GrpcLib LANGUAGES CXX)
 
-find_package(Qt6 REQUIRED COMPONENTS Core Network)
 find_package(gRPC CONFIG REQUIRED)
 find_package(Protobuf REQUIRED)
-qt_standard_project_setup()
 
 # 
 #
@@ -22,9 +20,9 @@ add_library(${TARGET} STATIC
 set_compiler_standard(${TARGET})
 set_warning_level_1(${TARGET})
 
+set_target_properties(${TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON) # Ensure for shared libraries (AdsBridge)
+
 target_link_libraries(${TARGET} PUBLIC gRPC::grpc++ Protos)
-target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network)
-target_link_libraries(${TARGET} PRIVATE CommonLib OnlineLib)
 
 target_include_directories(${TARGET} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
 target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
