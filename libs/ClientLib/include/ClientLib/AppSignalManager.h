@@ -1,20 +1,16 @@
 #pragma once
 
-#include "ISignalDataServer.h"
 
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../AppSignalLib/IAppSignalManager.h"
+#include "../AppSignalLib/ISignalManager.h"
 #include "../AppSignalLib/RecentUsed.h"
 #include "../UtilsLib/ILogFile.h"
-#include <AdsConnectionLib/IAppSignalUpdater.h>
-#include <AdsConnectionLib/IRecentAppSignals.h>
 
-#include <QReadWriteLock>
-#include <memory>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
-
+#include <AppSignalLibStd/AppSignalManagerCore.h>
+#include <AppSignalLibStd/IAppSignalUpdater.h>
+#include <AppSignalLibStd/IRecentAppSignals.h>
+#include <AppSignalLibStd/ISignalDataServer.h>
 
 namespace ClientLib
 {
@@ -116,12 +112,12 @@ namespace ClientLib
 
 		/// Get AppDataService EquipmentIDs list by AppSignalID.
 		///
-		QStringList dataServiceIds(const QString& appSignalId) const override;
+		std::vector<std::string> dataServiceIds(const std::string& appSignalId) const override;
 
 		/// Return true if AppDataService contains signal.
 		///
-		bool dataServiceHasSignal(const QString& serviceEquipmentId, const QString& appSignalId) const override;
-		bool dataServiceHasSignal(const QString& serviceEquipmentId, Hash signalHash) const override;
+		bool dataServiceHasSignal(const std::string& serviceEquipmentId, const std::string& appSignalId) const override;
+		bool dataServiceHasSignal(const std::string& serviceEquipmentId, Hash signalHash) const override;
 
 		/// Extension, not part of ISignalDataServer, at least yet.
 		///
@@ -129,7 +125,7 @@ namespace ClientLib
 
 		/// Get all signals for the specified DataServiceID (AppDataService or DiagDataService).
 		///
-		std::vector<Hash> dataServiceSignals(const QString& serviceEquipmentId) const override;
+		std::vector<Hash> dataServiceSignals(const std::string& serviceEquipmentId) const override;
 
 		// Tags
 		//
@@ -140,49 +136,20 @@ namespace ClientLib
 	public:
 		std::optional<AppSignalParam> signalParamByEquipmentId(const QString& equipmentId) const;
 
-	public:
-		struct SourceState
-		{
-			AppSignalState state{};
-			Hash dataServerHash{UNDEFINED_HASH};
-			SourceIdType sourceThreadId{};
-			std::chrono::time_point<std::chrono::system_clock> lastUpdateTime{}; // State last time received or updated
-		};
+	private:
+		using CoreType = AppSignalStdLib::AppSignalManagerCore<AppSignalParam, AppSignalState, QString, QStringList>;
 
+	public:
+		using SourceState = CoreType::SourceState;
 		std::vector<SourceState> signalStateAllSources(const QString& appSignalId) const;
 
 	signals:
 		void signalParamsUpdated();
 
 	private:
-		struct Sources
-		{
-			size_t size = 0;
-			std::array<SourceState, 4> sources{}; // 4 maximum possible channels of getting signal (2 regular, 2 recent)
-
-			void set(const AppSignalState& state, Hash dataServerHash, SourceIdType sourceThreadId);
-			void invalidateSource(SourceIdType sourceThreadId,
-								  std::chrono::time_point<std::chrono::system_clock> now /* = std::chrono::system_clock::now()*/);
-
-			[[nodiscard]] const AppSignalState& get() const;
-			[[nodiscard]] const AppSignalState& getForDataServer(Hash dataServerHash) const;
-		};
-
-
 		HasLogFile m_logFile;
 
-		mutable QReadWriteLock m_paramsLocker;
-		std::unordered_map<Hash, const AppSignalParam, VoidHasher<Hash>> m_signalParams; // Key is hash from AppSignalID
-		std::unordered_map<QString, QString> m_signalParamByEquipmentId;                 // Key is EquipmentId - value is AppSignalID
-		std::unordered_map<QString, QStringList> m_tagToAppSignals; // Key is tag - value is list of AppSignalIDs with this tag
-		std::set<QString> m_tags;                                   // All tags for received AppSignals
-		std::map<QString, std::unordered_set<Hash>>
-			m_appDataServiceToSignalHashList; // Key is AppDataServiceID, value is AppSignals received via this AppDataService
-
-		mutable QReadWriteLock m_statesLocker;
-		std::unordered_map<Hash, Sources, VoidHasher<Hash>> m_states;
-
-		static constexpr qint64 MaxDiff = 1_sec;
+		CoreType m_core;
 
 		// ComparatorSet is threadsafe itself
 		//

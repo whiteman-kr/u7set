@@ -12,8 +12,8 @@
 #include "../AppSignalLib/RecentUsed.h"
 #include "../AppSignalLib/TuningValue.h"
 #include "../UtilsLib/ILogFile.h"
+#include <AppSignalLibStd/IRecentAppSignals.h>
 
-#include <AdsConnectionLib/IRecentAppSignals.h>
 #include "ITuningSignalUpdater.h"
 
 namespace Proto

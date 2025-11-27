@@ -121,7 +121,7 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(const ClientLib::AppSigna
 		//
 		for (const SoftwareEndpoint::ArchiveService& archiveService : m_archiveServices)
 		{
-			if (signalManager.dataServiceHasSignal(archiveService.appDataServiceId, sp.appSignalId()) == true)
+			if (signalManager.dataServiceHasSignal(archiveService.appDataServiceId.toStdString(), sp.appSignalId().toStdString()) == true)
 			{
 				signalParamsSources.emplace_back(sp, archiveService.equipmentId, archiveService.shortenId);
 			}

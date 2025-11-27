@@ -1,11 +1,12 @@
 #pragma once
 
-#include "../../OnlineLib/SoftwareEndpoint.h"
-#include <VFrame30/SchemaDetails.h>
-#include <SchemaClientLib/DragDropHelper.h>
 #include "SignalSnapshotModel.h"
+#include <SchemaClientLib/DragDropHelper.h>
+#include <VFrame30/SchemaDetails.h>
 
-class IAppSignalManager;
+#include "../../OnlineLib/SoftwareEndpoint.h"
+#include "../AppSignalLib/IAppSignalManager.h"
+
 
 namespace AppSignalLists
 {

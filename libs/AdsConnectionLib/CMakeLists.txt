@@ -6,9 +6,7 @@ add_library(${TARGET} STATIC
 	./include/AdsConnectionLib/AdsConnection.h
 	./include/AdsConnectionLib/ClientConnStatsStd.h
 	./include/AdsConnectionLib/ClientGrpc.h
-	./include/AdsConnectionLib/IAppSignalUpdater.h
 	./include/AdsConnectionLib/ILoggerStd.h
-	./include/AdsConnectionLib/IRecentAppSignals.h
 	./include/AdsConnectionLib/ISignalLogUpdater.h
 	./include/AdsConnectionLib/ServiceConnectionState.h
 	./include/AdsConnectionLib/ServiceEndpoint.h
@@ -31,15 +29,7 @@ target_compile_definitions(${TARGET} PRIVATE USE_GRPC_ADS_CONNECTION)
 
 set_target_properties(${TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON) # Ensure for shared libraries (AdsBridge)
 
-target_link_libraries(${TARGET} PUBLIC CommonStdLib GrpcLib)
-
-if (MSVC)
-	target_link_libraries(${TARGET} PUBLIC Advapi32)
-endif (MSVC)
-
-if (UNIX)
-	target_link_libraries(${TARGET} PUBLIC pam pam_misc)
-endif (UNIX)
+target_link_libraries(${TARGET} PUBLIC CommonStdLib AppSignalLibStd GrpcLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

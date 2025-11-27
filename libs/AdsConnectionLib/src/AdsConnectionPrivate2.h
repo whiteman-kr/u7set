@@ -1,11 +1,11 @@
 #pragma once
 
-#include <AdsConnectionLib/IAppSignalUpdater.h>
 #include <AdsConnectionLib/ILoggerStd.h>
-#include <AdsConnectionLib/IRecentAppSignals.h>
 #include <AdsConnectionLib/ISignalLogUpdater.h>
 #include <AdsConnectionLib/ServiceConnectionState.h>
 #include <AdsConnectionLib/ServiceEndpoint.h>
+#include <AppSignalLibStd/IAppSignalUpdater.h>
+#include <AppSignalLibStd/IRecentAppSignals.h>
 
 #include <shared_mutex>
 

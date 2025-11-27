@@ -1,13 +1,12 @@
 #pragma once
 
-// #include "../OnlineLib/TcpConnectionState.h"
 #include "ILoggerStd.h"
+#include "ISignalLogUpdater.h"
 #include "ServiceConnectionState.h"
 #include "ServiceEndpoint.h"
 
-#include "IAppSignalUpdater.h"
-#include "IRecentAppSignals.h"
-#include "ISignalLogUpdater.h"
+#include <AppSignalLibStd/IAppSignalUpdater.h>
+#include <AppSignalLibStd/IRecentAppSignals.h>
 
 
 namespace ClientLib

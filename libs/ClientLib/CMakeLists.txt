@@ -18,7 +18,6 @@ qt_add_library(${TARGET} STATIC
 	./include/ClientLib/AppSignalManager.h
 	./include/ClientLib/ClientTranslator.h
 	./include/ClientLib/ConfigController.h
-	./include/ClientLib/ISignalDataServer.h
 	./include/ClientLib/ITestObserver.h
 	./include/ClientLib/ITuningAuthorization.h
 	./include/ClientLib/ITuningConnection.h

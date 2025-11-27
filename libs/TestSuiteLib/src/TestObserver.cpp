@@ -130,7 +130,8 @@ namespace TestSuite
 
 	int TestObserver::addEqualExpectation(const QString& appSignalId, double expectedValue, double tolerance)
 	{
-		if (auto dataServers = m_signalDataServer.dataServiceIds(appSignalId); dataServers.isEmpty() == true)
+		if (auto dataServers = m_signalDataServer.dataServiceIds(appSignalId.toStdString()); //
+			dataServers.empty() == true)
 		{
 			return InvalidExpectationId;
 		}
@@ -141,7 +142,8 @@ namespace TestSuite
 
 	int TestObserver::addGreaterExpectation(const QString& appSignalId, double threshold)
 	{
-		if (auto dataServers = m_signalDataServer.dataServiceIds(appSignalId); dataServers.isEmpty() == true)
+		if (auto dataServers = m_signalDataServer.dataServiceIds(appSignalId.toStdString()); //
+			dataServers.empty() == true)
 		{
 			return InvalidExpectationId;
 		}
@@ -152,7 +154,8 @@ namespace TestSuite
 
 	int TestObserver::addLessExpectation(const QString& appSignalId, double threshold)
 	{
-		if (auto dataServers = m_signalDataServer.dataServiceIds(appSignalId); dataServers.isEmpty() == true)
+		if (auto dataServers = m_signalDataServer.dataServiceIds(appSignalId.toStdString()); //
+			dataServers.empty() == true)
 		{
 			return InvalidExpectationId;
 		}

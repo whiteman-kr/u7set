@@ -2,7 +2,7 @@
 
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../OnlineLib/SoftwareEndpoint.h"
-#include <ClientLib/ISignalDataServer.h>
+#include <AppSignalLibStd/ISignalDataServer.h>
 #include <VFrame30/SchemaDetails.h>
 
 #include <set>

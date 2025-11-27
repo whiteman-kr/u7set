@@ -1,6 +1,6 @@
 #pragma once
 #include "../OnlineLib/SoftwareSettings.h"
-#include <ClientLib/ISignalDataServer.h>
+#include <AppSignalLibStd/ISignalDataServer.h>
 #include <ClientLib/RtTrendConnectionStatistics.h>
 
 #include "RtTrendTcpClient.h"

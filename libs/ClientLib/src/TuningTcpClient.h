@@ -4,7 +4,7 @@
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 
-#include <AdsConnectionLib/IRecentAppSignals.h>
+#include <AppSignalLibStd/IRecentAppSignals.h>
 #include <ClientLib/ITuningAuthorization.h>
 #include <ClientLib/ITuningLog.h>
 #include <ClientLib/ITuningSignalUpdater.h>

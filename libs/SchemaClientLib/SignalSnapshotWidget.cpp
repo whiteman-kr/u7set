@@ -2,7 +2,7 @@
 #include "../AppSignalLib/IAppSignalManager.h"
 
 #include <AppSignalLists/SignalList.h>
-#include <ClientLib/ISignalDataServer.h>
+#include <AppSignalLibStd/ISignalDataServer.h>
 #include <SchemaClientLib/DialogSignalSnapshot.h>
 #include <UiLib/ChooseItemsWidget.h>
 

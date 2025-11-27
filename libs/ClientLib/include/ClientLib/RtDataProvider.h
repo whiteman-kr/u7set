@@ -1,11 +1,11 @@
 #pragma once
 
+#include <AppSignalLibStd/ISignalDataServer.h>
 #include <TrendView/TrendSignalState.h>
 
 #include "../OnlineLib/SoftwareEndpoint.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../UtilsLib/ILogFile.h"
-#include "ISignalDataServer.h"
 #include "RtTrendConnectionStatistics.h"
 
 

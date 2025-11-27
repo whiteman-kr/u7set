@@ -1,8 +1,9 @@
 #pragma once
 
 #include "ClientConnStatsStd.h"
-#include "IAppSignalUpdater.h"
 #include "ILoggerStd.h"
+
+#include <AppSignalLibStd/IAppSignalUpdater.h>
 
 #include <grpcpp/channel.h>
 #include <grpcpp/client_context.h>

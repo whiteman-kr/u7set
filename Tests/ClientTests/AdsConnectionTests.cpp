@@ -1,6 +1,6 @@
 #include "ConnectionPorts.h"
 #include <AdsConnectionLib/AdsConnection.h>
-#include <AdsConnectionLib/IRecentAppSignals.h>
+#include <AppSignalLibStd/IRecentAppSignals.h>
 #include <ClientLib/AppSignalManager.h>
 #include <ClientLib/LoggerStdAdapter.h>
 #include <ClientLib/ServiceEndpoint.h>

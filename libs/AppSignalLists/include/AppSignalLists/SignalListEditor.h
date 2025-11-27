@@ -2,6 +2,8 @@
 
 #include "SignalList.h"
 
+#include "../AppSignalLib/ISignalManager.h"
+
 #include <QWidget>
 
 #include <memory>
@@ -16,7 +18,6 @@ class QPushButton;
 class QSplitter;
 class QTableView;
 
-class ISignalManager;
 class ITuningSignalManager;
 
 namespace AppSignalLists

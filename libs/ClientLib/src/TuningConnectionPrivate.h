@@ -5,7 +5,7 @@
 #include "../OnlineLib/Tcp.h"
 #include "../UtilsLib/ILogFile.h"
 
-#include <AdsConnectionLib/IRecentAppSignals.h>
+#include <AppSignalLibStd/IRecentAppSignals.h>
 #include <ClientLib/ITuningAuthorization.h>
 #include <ClientLib/ITuningConnection.h>
 #include <ClientLib/ITuningLog.h>

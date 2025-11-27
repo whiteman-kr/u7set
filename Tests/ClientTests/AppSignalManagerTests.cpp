@@ -919,8 +919,8 @@ TEST(AppSignalManagerTests, dataServiceIds)
 	sm.addSignals(ads1v, "ADS1");
 	sm.addSignals(ads2v, "ADS2");
 
-	auto s1adses = sm.dataServiceIds(QString::fromStdString(sp1.appsignalid()));
-	auto s2adses = sm.dataServiceIds(QString::fromStdString(sp2.appsignalid()));
+	auto s1adses = sm.dataServiceIds(sp1.appsignalid());
+	auto s2adses = sm.dataServiceIds(sp2.appsignalid());
 	auto s3adses = sm.dataServiceIds("#FALSEID");
 
 	ASSERT_EQ(s1adses.size(), 2);
@@ -952,14 +952,14 @@ TEST(AppSignalManagerTests, dataServiceHasSignal)
 	sm.addSignals(ads1v, "ADS1");
 	sm.addSignals(ads2v, "ADS2");
 
-	EXPECT_TRUE(sm.dataServiceHasSignal("ADS1", QString::fromStdString(sp1.appsignalid())));
-	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", QString::fromStdString(sp1.appsignalid())));
+	EXPECT_TRUE(sm.dataServiceHasSignal("ADS1", sp1.appsignalid()));
+	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", sp1.appsignalid()));
 
-	EXPECT_FALSE(sm.dataServiceHasSignal("ADS1", QString::fromStdString(sp2.appsignalid())));
-	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", QString::fromStdString(sp2.appsignalid())));
+	EXPECT_FALSE(sm.dataServiceHasSignal("ADS1", sp2.appsignalid()));
+	EXPECT_TRUE(sm.dataServiceHasSignal("ADS2", sp2.appsignalid()));
 
 	EXPECT_FALSE(sm.dataServiceHasSignal("ADS2", "#FALSEID"));
-	EXPECT_FALSE(sm.dataServiceHasSignal("FALSE_ADS", QString::fromStdString(sp1.appsignalid())));
+	EXPECT_FALSE(sm.dataServiceHasSignal("FALSE_ADS", sp1.appsignalid()));
 
 	return;
 }

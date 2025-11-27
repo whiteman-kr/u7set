@@ -5,7 +5,7 @@
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
 
-#include <ClientLib/ISignalDataServer.h>
+#include <AppSignalLibStd/ISignalDataServer.h>
 #include <ClientLib/RtTrendConnectionStatistics.h>
 
 namespace ClientLib

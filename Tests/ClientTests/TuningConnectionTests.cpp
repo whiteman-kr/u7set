@@ -1,5 +1,5 @@
 #include "ConnectionPorts.h"
-#include <AdsConnectionLib/IRecentAppSignals.h>
+#include <AppSignalLibStd/IRecentAppSignals.h>
 #include <ClientLib/ITuningLog.h>
 #include <ClientLib/TuningConnection.h>
 #include <ClientLib/TuningSignalManager.h>

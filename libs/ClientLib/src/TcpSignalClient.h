@@ -3,8 +3,7 @@
 #include "../OnlineLib/SoftwareEndpoint.h"
 #include "../OnlineLib/Tcp.h"
 #include "../OnlineLib/TcpClientStatistics.h"
-
-#include <AdsConnectionLib/IAppSignalUpdater.h>
+#include <AppSignalLibStd/IAppSignalUpdater.h>
 
 
 namespace ClientLib

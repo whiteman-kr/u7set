@@ -1,6 +1,7 @@
 #pragma once
 
-class IAppSignalManager;
+#include "../AppSignalLib/IAppSignalManager.h"
+
 
 namespace ClientLib
 {
@@ -13,7 +14,7 @@ namespace SchemaClientLib
 
 	enum class SnapshotColumns
 	{
-		SignalID = 0,		// Signal Param Columns
+		SignalID = 0, // Signal Param Columns
 		EquipmentID,
 		LmEquipmentID,
 		AppSignalID,
@@ -21,7 +22,7 @@ namespace SchemaClientLib
 		Type,
 		Tags,
 
-		SystemTime,			// Signal State Columns
+		SystemTime, // Signal State Columns
 		LocalTime,
 		PlantTime,
 		Value,
@@ -83,10 +84,7 @@ namespace SchemaClientLib
 	public:
 		SignalSnapshotSorter(int column, SignalSnapshotModel* model);
 
-		bool operator()(int index1, int index2) const
-		{
-			return sortFunction(index1, index2);
-		}
+		bool operator()(int index1, int index2) const { return sortFunction(index1, index2); }
 
 		bool sortFunction(int index1, int index2) const;
 
@@ -104,9 +102,11 @@ namespace SchemaClientLib
 		friend class SignalSnapshotSorter;
 
 	public:
-
 	public:
-		SignalSnapshotModel(IAppSignalManager* appSignalManager, ClientLib::ISignalDataServer* signalDataServer, AppSignalLists::AppSignalListSet* appSignalListSet, QObject* parent);
+		SignalSnapshotModel(IAppSignalManager* appSignalManager,
+							ClientLib::ISignalDataServer* signalDataServer,
+							AppSignalLists::AppSignalListSet* appSignalListSet,
+							QObject* parent);
 
 		void setSignals(std::vector<AppSignalParam>& signalList);
 
