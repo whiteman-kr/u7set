@@ -5,7 +5,7 @@
 #include <grpcpp/grpcpp.h>
 
 #include <GrpcAppDataSrv.grpc.pb.h>
-#include <GrpcSessionGuard.h>
+#include "../OnlineLib/GrpcSessionGuard.h"
 
 #include <CommonLib/HostAddressPort.h>
 

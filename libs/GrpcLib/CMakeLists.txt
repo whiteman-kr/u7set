@@ -16,9 +16,6 @@ set(TARGET GrpcLib)
 
 add_library(${TARGET} STATIC
 	GrpcAppDataSrv.proto
-
-	GrpcSessionGuard.cpp
-	GrpcSessionGuard.h
 )
 
 set_compiler_standard(${TARGET})
