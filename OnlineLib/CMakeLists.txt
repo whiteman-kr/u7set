@@ -57,6 +57,7 @@ qt_add_library(${TARGET} STATIC
 	UdpSocket.cpp
 	UdpSocket.h
 	GrpcServer.h GrpcServer.cpp
+	GrpcFileSrv.h GrpcFileSrv.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE

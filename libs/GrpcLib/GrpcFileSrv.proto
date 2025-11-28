@@ -1,0 +1,29 @@
+syntax = "proto2";
+
+import "GrpcAppDataSrv.proto";
+
+package Grpc;
+
+//
+//	GetFile
+//
+message GetFileRequest
+{
+    required string fileName = 1;
+}
+
+message GetFileReply
+{
+    required string fileName = 1;
+	required int32 errorCode = 2 [default = 0];				// values of Tcp::FileTransferResult
+	required int64 fileSize = 3  [default = 0];
+	required int32 currentPart = 4 [default = 0];
+	required int32 totalParts = 5 [default = 0];
+	required bytes fileData = 6;
+}
+
+service FileSrv
+{
+	rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
+	rpc GetFile(GetFileRequest) returns (stream GetFileReply) {}
+}

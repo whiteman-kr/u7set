@@ -71,7 +71,9 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 	grpc::Status writeStatus;
 
-	auto writeReply = [this, context, writer](Grpc::GetAppSignalListReply& reply, grpc::Status& wrStatus) -> bool
+	WriteReplyPtr<Grpc::GetAppSignalListReply> writeReply = &WriteReplyFunc<Grpc::GetAppSignalListReply>;
+
+/*	auto writeReply = [this, context, writer](Grpc::GetAppSignalListReply& reply, grpc::Status& wrStatus) -> bool
 	{
 		wrStatus = grpc::Status::OK;
 
@@ -91,7 +93,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 		}
 
 		return true;
-	};
+	};*/
 
 	int ctr = 0;
 
@@ -109,7 +111,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 		if (ctr >= IDS_MAX_COUNT)
 		{
-			if (writeReply(reply, writeStatus) == false)
+			if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 			{
 				return writeStatus;
 			}
@@ -121,7 +123,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 	if (ctr > 0)
 	{
-		if (writeReply(reply, writeStatus) == false)
+		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 		{
 			return writeStatus;
 		}
@@ -155,7 +157,9 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 	grpc::Status writeStatus;
 
-	auto writeReply = [this, context, writer](Grpc::GetAppSignalParamReply& reply,
+	WriteReplyPtr<Grpc::GetAppSignalParamReply> writeReply = &WriteReplyFunc<Grpc::GetAppSignalParamReply>;
+
+/*	auto writeReply = [this, context, writer](Grpc::GetAppSignalParamReply& reply,
 										size_t totalCount, int index,
 										grpc::Status& wrStatus) -> bool
 	{
@@ -180,7 +184,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 		}
 
 		return true;
-	};
+	}; */
 
 	int ctr = 0;
 	int index = 0;
@@ -197,7 +201,10 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 			if (ctr >= PARAMS_MAX_COUNT)
 			{
-				if (writeReply(reply, m_appSignals.count(), index, writeStatus) == false)
+				reply.set_totalsize(m_appSignals.count());
+				reply.set_replysignalindex(index);
+
+				if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 				{
 					return writeStatus;
 				}
@@ -211,7 +218,10 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 		if (ctr > 0)
 		{
-			if (writeReply(reply, m_appSignals.count(), index, writeStatus) == false)
+			reply.set_totalsize(m_appSignals.count());
+			reply.set_replysignalindex(index);
+
+			if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 			{
 				return writeStatus;
 			}
@@ -235,7 +245,10 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 			if (ctr >= PARAMS_MAX_COUNT)
 			{
-				if (writeReply(reply, request->signalhashes_size(), index, writeStatus) == false)
+				reply.set_totalsize(request->signalhashes_size());
+				reply.set_replysignalindex(index);
+
+				if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 				{
 					return writeStatus;
 				}
@@ -249,7 +262,10 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 		if (ctr > 0)
 		{
-			if (writeReply(reply, request->signalhashes_size(), index, writeStatus) == false)
+			reply.set_totalsize(request->signalhashes_size());
+			reply.set_replysignalindex(index);
+
+			if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 			{
 				return writeStatus;
 			}
@@ -323,7 +339,9 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 
 	//
 
-	auto writeReply = [this, context, writer](Grpc::GetAppSignalStateChangesReply& reply,
+	WriteReplyPtr<Grpc::GetAppSignalStateChangesReply> writeReply = &WriteReplyFunc<Grpc::GetAppSignalStateChangesReply>;
+
+/*	auto writeReply = [this, context, writer](Grpc::GetAppSignalStateChangesReply& reply,
 											  grpc::Status& wrStatus) -> bool
 	{
 		wrStatus = grpc::Status::OK;
@@ -344,7 +362,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 		}
 
 		return true;
-	};
+	}; */
 
 	//
 
@@ -394,7 +412,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 			statesCount > SEND_PACKET_SIZE ||
 			(statesCount > 0 && now - lastSendTime >= SEND_PACKET_INTERVAL))
 		{
-			if (writeReply(reply, writeStatus) == false)
+			if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 			{
 				m_appDataReceiver->unregisterDestSignalStatesQueue(statesQueue);
 				return writeStatus;
@@ -438,7 +456,9 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 
 	//
 
-	auto writeReply = [this, context, writer](Grpc::GetDiscretesLogReply& reply,
+	WriteReplyPtr<Grpc::GetDiscretesLogReply> writeReply = &WriteReplyFunc<Grpc::GetDiscretesLogReply>;
+
+/*	auto writeReply = [this, context, writer](Grpc::GetDiscretesLogReply& reply,
 											  grpc::Status& wrStatus) -> bool
 	{
 		wrStatus = grpc::Status::OK;
@@ -459,7 +479,7 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 		}
 
 		return true;
-	};
+	}; */
 
 	//
 
@@ -488,7 +508,7 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 		if (addedRecordCount > SEND_PACKET_SIZE ||
 			now - lastSendTime >= SEND_PACKET_INTERVAL)
 		{
-			if (writeReply(reply, writeStatus) == false)
+			if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 			{
 				m_dsLogWriter->unregisterLogReader(dlReader);
 				return writeStatus;

@@ -53,3 +53,34 @@ protected:
 
 	GrpcSessionGuard m_sessionGuard;
 };
+
+//
+
+template <typename REPLY_TYPE>
+bool WriteReplyFunc(grpc::ServerContext* context, grpc::ServerWriter<REPLY_TYPE>* writer,
+					const REPLY_TYPE& reply, grpc::Status& wrStatus, CircularLoggerShared log)
+{
+	wrStatus = grpc::Status::OK;
+
+	if (context->IsCancelled())
+	{
+		wrStatus = grpc::Status::CANCELLED;
+		DEBUG_LOG_MSG(log, QString("writeReplyFunc<%1>: context CANCELLED").arg(QString::fromStdString(reply.GetTypeName())));
+		return false;
+	}
+
+	if (writer->Write(reply) == false)
+	{
+		DEBUG_LOG_MSG(log, QString("writeReplyFunc<%1>: writer->Write returns FALSE").arg(QString::fromStdString(reply.GetTypeName())));
+		return false;
+	}
+
+	return true;
+}
+
+template <typename REPLY_TYPE>
+using WriteReplyPtr = bool (*)(grpc::ServerContext*,
+							   grpc::ServerWriter<REPLY_TYPE>*,
+							   const REPLY_TYPE&,
+							   grpc::Status&,
+							   CircularLoggerShared);

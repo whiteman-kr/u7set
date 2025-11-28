@@ -87,7 +87,7 @@ public:
 								Grpc::GetServerTimeReply* reply) override;
 private:
 	grpc::Service* getGrpcService() override;
-	virtual QString serviceName() const;
+	virtual QString serviceName() const override;
 
 private:
 	AppDataReceiver* m_appDataReceiver = nullptr;
