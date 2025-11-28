@@ -14,9 +14,7 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
-class AppDataServiceSettings;
-
-class GrpcServer final : public Grpc::AppDataSrv::Service
+class GrpcServer
 {
 public:
 	explicit GrpcServer(const SoftwareInfo& serverSwInfo,
@@ -31,22 +29,26 @@ public:
 	GrpcServer(GrpcServer&&) = delete;
 	GrpcServer& operator=(GrpcServer&&) = delete;
 
-	~GrpcServer();
+	virtual ~GrpcServer();
+
+	void start();
+	void stop();
 
 	void setSessionTimeout(int seconds);
 	bool isBinded() const;
+	bool isRunning() const;
 
-	grpc::Status Handshake(grpc::ServerContext* context,
-						   const Grpc::HandshakeRequest* request,
-						   Grpc::HandshakeReply* reply) override;
-private:
-	void initService(const HostAddressPort& listenIP);
+protected:
+	virtual grpc::Service* getGrpcService() = 0;
+	virtual QString serviceName() const = 0;
 
-private:
+protected:
+	HostAddressPort m_listenIP;
 	CircularLoggerShared m_log;
 	std::unique_ptr<grpc::Server> m_server;
 	std::atomic_bool m_stopRequested {false};
 	std::thread m_thread;
+	std::atomic_bool m_running {false};
 	std::atomic_bool m_binded {false};
 
 	GrpcSessionGuard m_sessionGuard;

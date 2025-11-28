@@ -6,6 +6,7 @@
 
 #include <GrpcAppDataSrv.grpc.pb.h>
 #include "../OnlineLib/GrpcSessionGuard.h"
+#include "../OnlineLib/GrpcServer.h"
 
 #include <CommonLib/HostAddressPort.h>
 
@@ -19,7 +20,7 @@
 
 class AppDataServiceSettings;
 
-class GrpcAppDataSrv final : public Grpc::AppDataSrv::Service
+class GrpcAppDataSrv final : public GrpcServer, public Grpc::AppDataSrv::Service
 {
 public:
 	explicit GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
@@ -40,9 +41,6 @@ public:
 	GrpcAppDataSrv& operator=(GrpcAppDataSrv&&) = delete;
 
 	~GrpcAppDataSrv();
-
-	void setSessionTimeout(int seconds);
-	bool isBinded() const;
 
 	grpc::Status Handshake(grpc::ServerContext* context,
 						const Grpc::HandshakeRequest* request,
@@ -88,7 +86,8 @@ public:
 								const Grpc::GetServerTimeRequest* request,
 								Grpc::GetServerTimeReply* reply) override;
 private:
-	void initService(const HostAddressPort& listenIP);
+	grpc::Service* getGrpcService() override;
+	virtual QString serviceName() const;
 
 private:
 	AppDataReceiver* m_appDataReceiver = nullptr;
@@ -96,11 +95,4 @@ private:
 	const AppSignals& m_appSignals;
 	const DynamicAppSignalStates& m_signalStates;
 	std::shared_ptr<DiscretesLogWriter> m_dsLogWriter;
-	CircularLoggerShared m_log;
-	std::unique_ptr<grpc::Server> m_server;
-	std::atomic_bool m_stopRequested {false};
-	std::thread m_thread;
-	std::atomic_bool m_binded {false};
-
-	GrpcSessionGuard m_sessionGuard;
 };
