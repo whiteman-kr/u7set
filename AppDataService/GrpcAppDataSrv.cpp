@@ -73,28 +73,6 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 	WriteReplyPtr<Grpc::GetAppSignalListReply> writeReply = &WriteReplyFunc<Grpc::GetAppSignalListReply>;
 
-/*	auto writeReply = [this, context, writer](Grpc::GetAppSignalListReply& reply, grpc::Status& wrStatus) -> bool
-	{
-		wrStatus = grpc::Status::OK;
-
-		if (context->IsCancelled())
-		{
-			wrStatus = grpc::Status::CANCELLED;
-			DEBUG_LOG_MSG(m_log, "GetAppSignalList: context CANCELLED");
-			return false;
-		}
-
-		// DEBUG_LOG_MSG(m_log, QString("GetAppSignalList: Write reply count = %1").arg(reply.appsignalids_size()));
-
-		if (writer->Write(reply) == false)
-		{
-			DEBUG_LOG_MSG(m_log, "GetAppSignalList: writer->Write returns FALSE");
-			return false;
-		}
-
-		return true;
-	};*/
-
 	int ctr = 0;
 
 	for(const AppSignal& appSignal : m_appSignals)
@@ -158,33 +136,6 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 	grpc::Status writeStatus;
 
 	WriteReplyPtr<Grpc::GetAppSignalParamReply> writeReply = &WriteReplyFunc<Grpc::GetAppSignalParamReply>;
-
-/*	auto writeReply = [this, context, writer](Grpc::GetAppSignalParamReply& reply,
-										size_t totalCount, int index,
-										grpc::Status& wrStatus) -> bool
-	{
-		wrStatus = grpc::Status::OK;
-
-		reply.set_totalsize(static_cast<::uint32_t>(totalCount));
-		reply.set_replysignalindex(static_cast<::uint32_t>(index));
-
-		if (context->IsCancelled())
-		{
-			wrStatus = grpc::Status::CANCELLED;
-			DEBUG_LOG_MSG(m_log, "GetAppSignalParam: context CANCELLED");
-			return false;
-		}
-
-		// DEBUG_LOG_MSG(m_log, QString("GetAppSignalParam: Write reply count = %1").arg(reply.signalparams_size()));
-
-		if (writer->Write(reply) == false)
-		{
-			DEBUG_LOG_MSG(m_log, "GetAppSignalParam: writer->Write returns FALSE");
-			return false;
-		}
-
-		return true;
-	}; */
 
 	int ctr = 0;
 	int index = 0;
@@ -341,29 +292,6 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 
 	WriteReplyPtr<Grpc::GetAppSignalStateChangesReply> writeReply = &WriteReplyFunc<Grpc::GetAppSignalStateChangesReply>;
 
-/*	auto writeReply = [this, context, writer](Grpc::GetAppSignalStateChangesReply& reply,
-											  grpc::Status& wrStatus) -> bool
-	{
-		wrStatus = grpc::Status::OK;
-
-		if (context->IsCancelled())
-		{
-			wrStatus = grpc::Status::CANCELLED;
-			DEBUG_LOG_MSG(m_log, "GetAppSignalStateChanges: context CANCELLED");
-			return false;
-		}
-
-		// DEBUG_LOG_MSG(m_log, QString("GetAppSignalStateChanges: Write reply states count = %1").arg(reply.appsignalstates_size()));
-
-		if (writer->Write(reply) == false)
-		{
-			DEBUG_LOG_MSG(m_log, "GetAppSignalStateChanges: writer->Write returns FALSE");
-			return false;
-		}
-
-		return true;
-	}; */
-
 	//
 
 	SimpleAppSignalStatesQueueShared statesQueue =
@@ -457,29 +385,6 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 	//
 
 	WriteReplyPtr<Grpc::GetDiscretesLogReply> writeReply = &WriteReplyFunc<Grpc::GetDiscretesLogReply>;
-
-/*	auto writeReply = [this, context, writer](Grpc::GetDiscretesLogReply& reply,
-											  grpc::Status& wrStatus) -> bool
-	{
-		wrStatus = grpc::Status::OK;
-
-		if (context->IsCancelled())
-		{
-			wrStatus = grpc::Status::CANCELLED;
-			DEBUG_LOG_MSG(m_log, "GetDiscretesLog: context CANCELLED");
-			return false;
-		}
-
-		// DEBUG_LOG_MSG(m_log, QString("GetDiscretesLog: Write reply states count = %1").arg(reply.appsignalstates_size()));
-
-		if (writer->Write(reply) == false)
-		{
-			DEBUG_LOG_MSG(m_log, "GetDiscretesLog: writer->Write returns FALSE");
-			return false;
-		}
-
-		return true;
-	}; */
 
 	//
 
