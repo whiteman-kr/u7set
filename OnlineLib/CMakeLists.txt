@@ -23,6 +23,8 @@ qt_add_library(${TARGET} STATIC
 	CircularLogger.h
 	DataSource.cpp
 	DataSource.h
+	GrpcFileSrv.cpp
+	GrpcFileSrv.h
 	GrpcServer.cpp
 	GrpcServer.h
 	GrpcSessionGuard.cpp
@@ -56,8 +58,6 @@ qt_add_library(${TARGET} STATIC
 	TcpFileTransfer.h
 	UdpSocket.cpp
 	UdpSocket.h
-	GrpcServer.h GrpcServer.cpp
-	GrpcFileSrv.h GrpcFileSrv.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE

@@ -20,6 +20,7 @@ add_executable(${TARGET}
 	Common.h
 	DiscretesLogTests.cpp
 	GrpcAppDataSrvTests.cpp
+	GrpcFileSrvTests.cpp
 	main.cpp
 	RupFrameProducer.h
 	SimpleThreadTests.cpp

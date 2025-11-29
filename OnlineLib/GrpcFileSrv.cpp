@@ -63,7 +63,7 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 
 	if (file.exists() == false)
 	{
-		reply.set_errorcode(static_cast<int>(Tcp::FileTransferResult::RemoteFileIsNotExists));
+		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::RemoteFileIsNotExists));
 
 		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 		{
@@ -75,7 +75,7 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 
 	if (file.open(QIODevice::ReadOnly) == false)
 	{
-		reply.set_errorcode(static_cast<int>(Tcp::FileTransferResult::CantOpenRemoteFile));
+		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::CantOpenRemoteFile));
 
 		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 		{
@@ -87,20 +87,14 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 
 	QFileInfo fi(file);
 
-	reply.set_filesize(fi.size());
-
-	int totalParts = ROUND_TO(fi.size(), FILE_CHUNK_SIZE);
-
-	reply.set_totalparts(totalParts);
-
 	QByteArray fileData = file.readAll();
 
 	file.close();
 
-	if (reply.filesize() != 0 && fileData.size() == 0)
+	if (fi.size() != 0 && fileData.size() == 0)
 	{
 		// file reading error!
-		reply.set_errorcode(static_cast<int>(Tcp::FileTransferResult::CantReadRemoteFile));
+		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::CantReadRemoteFile));
 
 		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 		{
@@ -113,7 +107,7 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	if (checkFile(fileName, fileData) == false)
 	{
 		// file reading error!
-		reply.set_errorcode(static_cast<int>(Tcp::FileTransferResult::FileDataCorrupted));
+		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::FileDataCorrupted));
 
 		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 		{
@@ -123,10 +117,40 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 		return grpc::Status::OK;
 	}
 
-	// while()
-	// {
+	qsizetype sendDataSize = 0;
 
-	// }
+	int totalParts = fileData.size() / FILE_CHUNK_SIZE + (fileData.size() % FILE_CHUNK_SIZE ? 1 : 0);
+	int curPart = 1;
+
+	while(sendDataSize < fileData.size())
+	{
+		reply.set_filename(request->filename());
+		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::Ok));
+		reply.set_filesize(fileData.size());
+		reply.set_currentpart(curPart);
+		reply.set_totalparts(totalParts);
+
+		int partSize = 0;
+
+		if (fileData.size() - sendDataSize > FILE_CHUNK_SIZE)
+		{
+			partSize = FILE_CHUNK_SIZE;
+		}
+		else
+		{
+			partSize = fileData.size() - sendDataSize;
+		}
+
+		reply.set_filedata(fileData.constData() + sendDataSize, partSize);
+
+		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		{
+			return writeStatus;
+		}
+
+		curPart++;
+		sendDataSize += partSize;
+	}
 
 	return grpc::Status::OK;
 }
