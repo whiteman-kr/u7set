@@ -1,4 +1,4 @@
-<LogicModule Name="LM1_SF41" DescriptionNumber="41" ConfigurationScriptFile="ConfigScript.js" Version="1.9">
+<LogicModule Name="LM_SF41" DescriptionNumber="41" ConfigurationScriptFile="ConfigScript.js" Version="1.9">
   <FlashMemory>
     <AppLogicFrameCount>512</AppLogicFrameCount>
     <AppLogicFramePayload>1016</AppLogicFramePayload>
