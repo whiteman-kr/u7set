@@ -70,14 +70,9 @@ extern "C"
 	/**
 	 * \brief Initializes the AdsBridge library.
 	 *
-	 * This function initializes the AdsBridge library and starts the message loop if the application is not Qt-based.
-	 *
-	 * \param argc The number of command line arguments (used only if isQtApplication is false).
-	 * \param argv The command line arguments (used only if isQtApplication is false).
 	 * \param equipmentId The ID of the equipment instance.
-	 * \param isQtApplication True if the application is Qt-based, false otherwise.
 	 */
-	bool AdsInit(int argc, char** argv, const char* equipmentId, bool isQtApplication);
+	bool AdsInit(const char* equipmentId);
 
 	/**
 	 * \brief Shuts down the AdsBridge library.

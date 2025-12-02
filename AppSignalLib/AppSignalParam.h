@@ -1,5 +1,7 @@
 #pragma once
 
+#include <AppSignalLibStd/AppSignalAccessor.h>
+
 #include <memory>
 #include <set>
 
@@ -409,3 +411,16 @@ private:
 };
 
 Q_DECLARE_METATYPE(AppSignalParam)
+
+
+template<>
+struct AppSignalParamAccessor<::AppSignalParam>
+{
+	static Hash hash(const AppSignalParam& appSignalParam) { return appSignalParam.hash(); }
+	static QString appSignalId(const AppSignalParam& appSignalParam) { return appSignalParam.appSignalId(); }
+	static QString equipmentId(const AppSignalParam& appSignalParam) { return appSignalParam.equipmentId(); }
+	static E::SignalType type(const AppSignalParam& appSignalParam) { return appSignalParam.type(); }
+	static std::set<QString> tags(const AppSignalParam& appSignalParam) { return appSignalParam.tags(); }
+	static bool hasTag(const AppSignalParam& appSignalParam, const QString& tag) { return appSignalParam.hasTag(tag); }
+	static QStringList tagStringList(const AppSignalParam& appSignalParam) { return appSignalParam.tagStringList(); }
+};

@@ -22,7 +22,9 @@ concept StringLike = requires(const T& str) {
 } || std::same_as<std::remove_cvref_t<T>, std::string>;
 
 
-template<StringLike StringType, typename StringListType>
+template<typename SignalParamType, // AppSignalParam../..MatsAppSignalParam
+		 StringLike StringType,    //
+		 typename StringListType>  //
 class ISignalManagerT
 {
 public:
@@ -32,14 +34,14 @@ public:
 	//
 	[[nodiscard]] virtual int signalsCount() const = 0;
 	[[nodiscard]] virtual std::vector<Hash> signalHashes() const = 0;
-	[[nodiscard]] virtual std::vector<AppSignalParam> signalList() const = 0;
+	[[nodiscard]] virtual std::vector<SignalParamType> signalList() const = 0;
 
 	[[nodiscard]] virtual bool signalExists(Hash hash) const = 0;
 	[[nodiscard]] bool signalExists(const StringType& appSignalId) const { return signalExists(::calcHash(appSignalId)); }
 	[[nodiscard]] virtual bool signalsExist(const StringListType& signalIds) const = 0;
 
-	[[nodiscard]] virtual std::optional<AppSignalParam> signalParam(Hash signalHash) const = 0;
-	[[nodiscard]] std::optional<AppSignalParam> signalParam(const StringType& appSignalId) const
+	[[nodiscard]] virtual std::optional<SignalParamType> signalParam(Hash signalHash) const = 0;
+	[[nodiscard]] std::optional<SignalParamType> signalParam(const StringType& appSignalId) const
 	{
 		return signalParam(::calcHash(appSignalId));
 	}

@@ -67,7 +67,7 @@ class AdsBridgeTests : public ::testing::Test
 protected:
 	virtual void SetUp() override
 	{
-		AdsInit(0, nullptr, g_equipmentId, false);
+		AdsInit(g_equipmentId);
 
 		AdsSetLogHandler(&logHandler);
 		AdsSetLogLevel(MATS_LOG_LEVEL_DEBUG);
@@ -156,7 +156,7 @@ TEST_F(AdsBridgeTests, AdsInit)
 
 	// Second call should fail
 	//
-	ASSERT_FALSE(AdsInit(0, nullptr, g_equipmentId, false));
+	ASSERT_FALSE(AdsInit(g_equipmentId));
 	return;
 }
 
@@ -470,7 +470,7 @@ TEST_F(AdsBridgeTests, AdsGetSignalStates)
 	auto signalStates = std::make_unique<MatsAppSignalState[]>(signalCount);
 	std::fill(signalStates.get(), signalStates.get() + signalCount, MatsAppSignalState{});
 
-	EXPECT_TRUE(AdsGetSignalStates(signalHashes.get(), signalStates.get(), signalCount));
+	EXPECT_EQ(AdsGetSignalStates(signalHashes.get(), signalStates.get(), signalCount), signalCount);
 
 	// Check that all signal states are loaded.
 	//
@@ -515,7 +515,7 @@ TEST_F(AdsBridgeTests, AdsGetSignalStatesRequestSignal)
 	//
 	for (int i = 0; i < 200; i++)
 	{
-		EXPECT_TRUE(AdsGetSignalStates(&hash, &state, 1));
+		EXPECT_EQ(AdsGetSignalStates(&hash, &state, 1), 1);
 		EXPECT_EQ(state.hash, hash);
 
 		if (state.value != lastState)

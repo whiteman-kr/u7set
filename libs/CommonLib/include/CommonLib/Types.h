@@ -316,13 +316,13 @@ public:
 		TestSuite = 9010,
 		GatewayService = 9011,
 		Diagnostics = 9012,
-		AdsBridge = 9013,
+		AdsBridge = 9013, // Hardcoded to AdsBridge, if changed, update AdsBridgeFacade.cpp (at least).
 	};
 	Q_ENUM(SoftwareType)
 
 	enum ServiceState
 	{
-		Undefined, // this states used by 'Service Control Manager' only
+		Undefined,        // this states used by 'Service Control Manager' only
 		Unavailable,
 
 		Starts,
@@ -516,16 +516,16 @@ public:
 	//
 	enum class RtTrendsSamplePeriod
 	{
-		sp_5ms,					// 0
-		sp_10ms,				// 1
-		sp_20ms,				// 2
-		sp_50ms,				// 3
-		sp_100ms,				// 4
-		sp_250ms,				// 5
-		sp_500ms,				// 6
-		sp_1s,					// 7
-		sp_5s,					// 8
-		sp_10s,					// 9
+		sp_5ms,   // 0
+		sp_10ms,  // 1
+		sp_20ms,  // 2
+		sp_50ms,  // 3
+		sp_100ms, // 4
+		sp_250ms, // 5
+		sp_500ms, // 6
+		sp_1s,    // 7
+		sp_5s,    // 8
+		sp_10s,   // 9
 	};
 	Q_ENUM(RtTrendsSamplePeriod)
 

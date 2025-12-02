@@ -4,13 +4,13 @@
 #include "../AppSignalLib/ComparatorSet.h"
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../AppSignalLib/ISignalManager.h"
-#include "../AppSignalLib/RecentUsed.h"
 #include "../UtilsLib/ILogFile.h"
 
 #include <AppSignalLibStd/AppSignalManagerCore.h>
 #include <AppSignalLibStd/IAppSignalUpdater.h>
 #include <AppSignalLibStd/IRecentAppSignals.h>
 #include <AppSignalLibStd/ISignalDataServer.h>
+#include <AppSignalLibStd/RecentUsed.h>
 
 namespace ClientLib
 {
@@ -41,8 +41,6 @@ namespace ClientLib
 
 		virtual void setStates(std::span<const ::Proto::AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId) override;
 
-	private:
-		void addSignalPrivate(const AppSignalParam& appSignal, const QString& appDataServiceId);
 		//
 		// End of IAppSignalUpdater implementation
 

@@ -9,10 +9,10 @@
 #include <QReadWriteLock>
 
 #include "../AppSignalLib/ITuningSignalManager.h"
-#include "../AppSignalLib/RecentUsed.h"
 #include "../AppSignalLib/TuningValue.h"
 #include "../UtilsLib/ILogFile.h"
 #include <AppSignalLibStd/IRecentAppSignals.h>
+#include <AppSignalLibStd/RecentUsed.h>
 
 #include "ITuningSignalUpdater.h"
 

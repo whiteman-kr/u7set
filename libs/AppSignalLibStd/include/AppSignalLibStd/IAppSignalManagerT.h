@@ -31,39 +31,78 @@ concept StringRange = std::ranges::range<Range> && !std::same_as<std::remove_cvr
 					  !std::same_as<std::remove_cvref_t<Range>, std::span<Hash>> && StringLike<std::ranges::range_value_t<Range>>;
 
 
-template<StringLike StringType, typename StringListType>
-class IAppSignalManagerT : public ISignalManagerT<StringType, StringListType>
+template<typename SignaParamType, // AppSignalParam../..MatsAppSignalParam
+		 typename SignaStateType, // AppSignalState../..MatsAppSignalState
+		 StringLike StringType,   // QString........./..std::string
+		 typename StringListType, // QStringList...../..std::vector<std::string>
+		 typename SignalType>     // E::SignalType.../..MatsSignalType
+class IAppSignalManagerT : public ISignalManagerT<SignaParamType, StringType, StringListType>
 {
 public:
 	virtual ~IAppSignalManagerT() = default;
 
-	[[nodiscard]] virtual std::optional<AppSignalState> signalState(Hash signalHash) const = 0;
-	[[nodiscard]] std::optional<AppSignalState> signalState(const StringType& appSignalId) const;
+	[[nodiscard]] virtual std::optional<SignaStateType> signalState(Hash signalHash) const = 0;
+	[[nodiscard]] std::optional<SignaStateType> signalState(const StringType& appSignalId) const
+	{
+		return signalState(::calcHash(appSignalId));
+	}
 
-	[[nodiscard]] virtual std::optional<AppSignalState> signalState(Hash signalHash, Hash dataServerHash) const = 0;
-	[[nodiscard]] std::optional<AppSignalState> signalState(const StringType& appSignalId, const StringType& dataServerId) const;
+	[[nodiscard]] virtual std::optional<SignaStateType> signalState(Hash signalHash, Hash dataServerHash) const = 0;
+	[[nodiscard]] std::optional<SignaStateType> signalState(const StringType& appSignalId, const StringType& dataServerId) const
+	{
+		return signalState(::calcHash(appSignalId), ::calcHash(dataServerId));
+	}
 
-	virtual void signalState(std::span<const Hash> appSignalHashes, std::vector<std::optional<AppSignalState>>* result) const = 0;
+	virtual void signalState(std::span<const Hash> appSignalHashes, std::vector<std::optional<SignaStateType>>* result) const = 0;
 	virtual void signalState(std::span<const Hash> appSignalHashes,
 							 Hash dataServerHash,
-							 std::vector<std::optional<AppSignalState>>* result) const = 0;
+							 std::vector<std::optional<SignaStateType>>* result) const = 0;
 
 	template<StringRange Range>
-	void signalState(const Range& appSignalIds, std::vector<std::optional<AppSignalState>>* result) const;
+	void signalState(const Range& appSignalIds, std::vector<std::optional<SignaStateType>>* result) const
+	{
+		std::vector<Hash> appSignalHashes;
+		appSignalHashes.reserve(std::size(appSignalIds));
+
+		std::transform(std::begin(appSignalIds),
+					   std::end(appSignalIds),
+					   std::back_inserter(appSignalHashes),
+					   [](const auto& id)
+					   {
+						   return ::calcHash(id);
+					   });
+		return signalState(std::span<const Hash>(appSignalHashes), result);
+	}
 
 	template<StringRange Range>
-	void signalState(const Range& appSignalIds, const StringType& dataServerId, std::vector<std::optional<AppSignalState>>* result) const;
+	void signalState(const Range& appSignalIds, const StringType& dataServerId, std::vector<std::optional<SignaStateType>>* result) const
+	{
+		std::vector<Hash> appSignalHashes;
+		appSignalHashes.reserve(appSignalIds.size());
+		for (const StringType& id : appSignalIds)
+		{
+			appSignalHashes.push_back(::calcHash(id));
+		}
+
+		return signalState(std::span<const Hash>(appSignalHashes), ::calcHash(dataServerId), result);
+	}
 
 	[[nodiscard]] virtual StringListType signalTags(Hash signalHash) const = 0;
 	[[nodiscard]] StringListType signalTags(const StringType& appSignalId) const { return signalTags(::calcHash(appSignalId)); }
 
 	[[nodiscard]] virtual bool signalHasTag(Hash signalHash, const StringType& tag) const = 0;
-	[[nodiscard]] bool signalHasTag(const StringType& appSignalId, const StringType& tag) const;
+	[[nodiscard]] bool signalHasTag(const StringType& appSignalId, const StringType& tag) const
+	{
+		return signalHasTag(::calcHash(appSignalId), tag);
+	}
 
 	[[nodiscard]] virtual StringListType signalIdsByTag(const StringType& tag) const = 0;
 
-	[[nodiscard]] virtual E::SignalType signalType(Hash signalHash, bool* found) const = 0;
-	[[nodiscard]] E::SignalType signalType(const StringType& appSignalId, bool* found) const;
+	[[nodiscard]] virtual SignalType signalType(Hash signalHash, bool* found) const = 0;
+	[[nodiscard]] SignalType signalType(const StringType& appSignalId, bool* found) const
+	{
+		return signalType(::calcHash(appSignalId), found);
+	}
 
 	[[nodiscard]] virtual StringType equipmentToAppSignalId(const StringType& equipmentId) const = 0;
 
@@ -76,62 +115,3 @@ public:
 	//
 	[[nodiscard]] virtual StringListType tags() const = 0;
 };
-
-template<StringLike StringType, typename StringListType>
-inline std::optional<AppSignalState> IAppSignalManagerT<StringType, StringListType>::signalState(const StringType& appSignalId) const
-{
-	return signalState(::calcHash(appSignalId));
-}
-
-template<StringLike StringType, typename StringListType>
-template<StringRange Range>
-void IAppSignalManagerT<StringType, StringListType>::signalState(const Range& appSignalIds,
-																 std::vector<std::optional<AppSignalState>>* result) const
-{
-	std::vector<Hash> appSignalHashes;
-	appSignalHashes.reserve(std::size(appSignalIds));
-
-	std::transform(std::begin(appSignalIds),
-				   std::end(appSignalIds),
-				   std::back_inserter(appSignalHashes),
-				   [](const auto& id)
-				   {
-					   return ::calcHash(id);
-				   });
-	return signalState(std::span<const Hash>(appSignalHashes), result);
-}
-
-template<StringLike StringType, typename StringListType>
-template<StringRange Range>
-void IAppSignalManagerT<StringType, StringListType>::signalState(const Range& appSignalIds,
-																 const StringType& dataServerId,
-																 std::vector<std::optional<AppSignalState>>* result) const
-{
-	std::vector<Hash> appSignalHashes;
-	appSignalHashes.reserve(appSignalIds.size());
-	for (const StringType& id : appSignalIds)
-	{
-		appSignalHashes.push_back(::calcHash(id));
-	}
-
-	return signalState(std::span<const Hash>(appSignalHashes), ::calcHash(dataServerId), result);
-}
-
-template<StringLike StringType, typename StringListType>
-inline std::optional<AppSignalState> IAppSignalManagerT<StringType, StringListType>::signalState(const StringType& appSignalId,
-																								 const StringType& dataServerId) const
-{
-	return signalState(::calcHash(appSignalId), ::calcHash(dataServerId));
-}
-
-template<StringLike StringType, typename StringListType>
-inline bool IAppSignalManagerT<StringType, StringListType>::signalHasTag(const StringType& appSignalId, const StringType& tag) const
-{
-	return signalHasTag(::calcHash(appSignalId), tag);
-}
-
-template<StringLike StringType, typename StringListType>
-inline E::SignalType IAppSignalManagerT<StringType, StringListType>::signalType(const StringType& appSignalId, bool* found) const
-{
-	return signalType(::calcHash(appSignalId), found);
-}

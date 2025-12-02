@@ -157,7 +157,7 @@ int main(int argc, char* argv[])
 
 	// Initialize, create QCoreApplication, start Qt message loop if g_isQtApplication is false!
 	//
-	bool initOk = AdsInit(argc, argv, g_equipmentId.data(), g_isQtApplication);
+	bool initOk = AdsInit(g_equipmentId.data());
 	if (initOk == false)
 	{
 		std::cerr << "Failed to initialize AdsBridge.\n";
@@ -187,7 +187,7 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	bool initOk = AdsInit(argc, argv, AdsGetSoftwareId(), g_isQtApplication);
+	bool initOk = AdsInit(AdsGetSoftwareId());
 	if (initOk == false)
 	{
 		std::cerr << "Failed to initialize AdsBridge.\n";

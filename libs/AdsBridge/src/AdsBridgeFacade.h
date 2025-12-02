@@ -1,19 +1,18 @@
 #pragma once
 
+#include "AdsBridgeResources.h"
+#include "AdsbAppSignalManager.h"
 #include <AdsBridge/Common.h>
 
-#include "../../OnlineLib/SoftwareEndpoint.h"
-#include <ClientLib/LoggerStdAdapter.h>
-#include <CommonLib/ConstStrings.h>
+#include <AdsConnectionLib/ServiceEndpoint.h>
 
 #include <memory>
-#include <set>
-#include <shared_mutex>
 #include <string>
 #include <vector>
 
 
-class ILogFile;
+class ILoggerStd;
+
 
 namespace ClientLib
 {
@@ -21,30 +20,31 @@ namespace ClientLib
 	class AppSignalManager;
 } // namespace ClientLib
 
+
 namespace AdsBridge
 {
 	class AdsBridgeFacade
 	{
 	public:
-		explicit AdsBridgeFacade(ILogFile* log);
+		explicit AdsBridgeFacade(Resources& res, ILoggerStd& log);
 		~AdsBridgeFacade();
 
 		AdsBridgeFacade(const AdsBridgeFacade&) = delete;
-		AdsBridgeFacade(AdsBridgeFacade&&) = delete;
+		AdsBridgeFacade(AdsBridgeFacade&&) = default;
 		AdsBridgeFacade& operator=(const AdsBridgeFacade&) = delete;
-		AdsBridgeFacade& operator=(AdsBridgeFacade&&) = delete;
+		AdsBridgeFacade& operator=(AdsBridgeFacade&&) = default;
 
 	public:
-		bool setConfiguration(const QByteArray& data, QString profile = SettingsProfile::DEFAULT);
-		void addAppDataService(const QString& adsEquipmentId, const QString& address, int port);
+		bool setConfiguration(const std::vector<char>& data, const std::string& profile);
+		void addAppDataService(const std::string& adsEquipmentId, const std::string& address, int port);
 		void clearAppDataServices();
 
 		void connect();
 		void close();
 
 	public:
-		const QString& equipmentId() const;
-		void setEquipmentId(const QString& equipmentId);
+		const std::string& equipmentId() const;
+		void setEquipmentId(const std::string& equipmentId);
 
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
@@ -59,25 +59,12 @@ namespace AdsBridge
 		bool connectionStatus(size_t structSize, struct AdsConnectionStatus* out, size_t count) const;
 
 	private:
-		ILogFile* m_log = nullptr;
-		ClientLib::LoggerStdAdapter m_loggerAdapter;
-		std::unique_ptr<ClientLib::AppSignalManager> m_signals;
+		Resources& m_res;
+		ILoggerStd& m_log;
+		std::unique_ptr<AdsBridge::AdsbAppSignalManager> m_signals;
 		std::unique_ptr<ClientLib::AdsConnection> m_adsConnection;
 
-		QString m_equipmentId;
-		std::vector<SoftwareEndpoint::AppDataService> m_appDataServices;
-
-	public:
-		const char* getStringConstPointer(const QString& string) const;
-		const char* getStringConstPointer(const std::string& string) const;
-		const char* getStringConstPointer(std::string&& string) const;
-
-	private:
-		// This is a cache for const char* pointers.
-		// This is required to return const char* pointers to the caller.
-		// The caller must not delete the pointers.
-		//
-		mutable std::shared_mutex m_stringTableMutex;
-		mutable std::set<std::string> m_stringTable;
+		std::string m_equipmentId;
+		std::vector<ServiceEndpoint> m_appDataServices;
 	};
 } // namespace AdsBridge

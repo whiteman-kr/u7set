@@ -32,8 +32,6 @@ qt_add_library(${TARGET} STATIC
 	ITuningSignalManager.h
 	PropertyNames.cpp
 	PropertyNames.h
-	RecentUsed.cpp
-	RecentUsed.h
 	SimpleAppSignalState.cpp
 	SimpleAppSignalState.h
 	TuningDataStorage.cpp

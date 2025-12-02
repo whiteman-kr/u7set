@@ -9,6 +9,7 @@ project(
 )
 
 find_package(Qt6 REQUIRED COMPONENTS Network)
+find_package(pugixml CONFIG REQUIRED)
 
 #
 # AdsBridge
@@ -25,10 +26,14 @@ target_sources(
 		./include/AdsBridge/AdsBridge.h
 		./include/AdsBridge/Common.h
 		
+		./src/AdsbAppSignalManager.cpp
+		./src/AdsbAppSignalManager.h
 		./src/AdsBridge.cpp
 		./src/AdsBridgeFacade.cpp
 		./src/AdsBridgeLogFile.cpp
 		./src/AdsBridgeLogFile.h
+		./src/AdsBridgeResources.cpp
+		./src/AdsBridgeResources.h
  )
 
 set_compiler_standard(${TARGET})
@@ -37,13 +42,9 @@ add_code_coverage_options(${TARGET} CODE_COVERAGE)
 target_precompile_headers(
 	${TARGET} 
 	PRIVATE
-		<CommonLib/Hash.h>
-		<CommonLib/Types.h>
+		<CommonStdLib/HashStd.h>
 
 		<Network.pb.h>
-
-		"../../AppSignalLib/AppSignalParam.h"
-		"../../AppSignalLib/AppSignalState.h"
 )
 
 # Include directories
@@ -55,8 +56,8 @@ target_include_directories(
 		$<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${TARGET} PRIVATE Qt6::Network)
-target_link_libraries(${TARGET} PRIVATE AppSignalLib OnlineLib ClientLib)
+target_link_libraries(${TARGET} PRIVATE pugixml)
+target_link_libraries(${TARGET} PRIVATE AdsConnectionLib)
 
 # Qt6_DIR points to  .../Qt/6.x.x/msvcXXXX_64/lib/cmake/Qt6
 #

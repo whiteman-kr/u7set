@@ -1,5 +1,6 @@
 #pragma once
 
+#include <AppSignalLibStd/AppSignalAccessor.h>
 #include <AppSignalLibStd/IAppSignalUpdater.h>
 
 #include <memory>
@@ -78,22 +79,23 @@ namespace AppSignalStdLib
 			// Actually, EquipmentID does not starts from the symbol '@',
 			// but we need it particularly for Monitor to distinct AppSignalID from EquipmentID.
 			//
-			m_signalParamByEquipmentId[StringType{"@"} + appSignal.equipmentId()] = appSignal.appSignalId(); // !!!
+			m_signalParamByEquipmentId[StringType{"@"} + AppSignalParamAccessor<SignalParamType>::equipmentId(appSignal)] =
+				AppSignalParamAccessor<SignalParamType>::appSignalId(appSignal);
 
 			// --
 			//
-			m_appDataServiceToSignalHashList[appDataServiceId].insert(appSignal.hash()); // !!!
+			m_appDataServiceToSignalHashList[appDataServiceId].insert(AppSignalParamAccessor<SignalParamType>::hash(appSignal));
 
 			// Add AppSignalId to tags, so it will be possible to find all signals by tag.
 			//
-			const StringType& appSignalId = appSignal.appSignalId(); // !!!
-			const auto& tags = appSignal.tags();                     // !!!
+			const StringType& appSignalId = AppSignalParamAccessor<SignalParamType>::appSignalId(appSignal);
+			const auto& tags = AppSignalParamAccessor<SignalParamType>::tags(appSignal);
 
 			for (const auto& tag : tags)
 			{
 				auto& l = m_tagToAppSignals[tag];
 
-				if (l.isEmpty() == true)                             // !!!
+				if (l.empty() == true)
 				{
 					l.reserve(512);
 				}
@@ -107,7 +109,7 @@ namespace AppSignalStdLib
 
 			// Finally, add signal param which is moved!
 			//
-			m_signalParams.emplace(appSignal.hash(), std::move(appSignal)); // !!!
+			m_signalParams.emplace(AppSignalParamAccessor<SignalParamType>::hash(appSignal), std::move(appSignal));
 
 			return;
 		}
@@ -133,8 +135,9 @@ namespace AppSignalStdLib
 
 			for (const auto& protoState : states)
 			{
-				Sources& currentStateAndSources = m_states[protoState.hash()]; // !!!
-				currentStateAndSources.set(protoState, dataServerHash, sourceThreadId, now);
+				Sources& currentStateAndSources = m_states[protoState.hash()];
+				SignalStateType state = AppSignalStateAccessor<SignalStateType>::fromProto(protoState);
+				currentStateAndSources.set(state, dataServerHash, sourceThreadId, now);
 			}
 
 			return;
@@ -241,7 +244,10 @@ namespace AppSignalStdLib
 				auto foundParam = m_signalParams.find(signalHash);
 				if (foundParam != m_signalParams.end())
 				{
-					return SignalStateType{foundParam->second.hash(), {}, 0.0, {.valid = 0, .stateAvailable = 0}}; // !!!
+					SignalStateType s{};
+					auto hash = AppSignalParamAccessor<SignalParamType>::hash(foundParam->second);
+					AppSignalStateAccessor<SignalStateType>::setHash(s, hash);
+					return s;
 				}
 
 				return std::nullopt;
@@ -291,7 +297,7 @@ namespace AppSignalStdLib
 
 			if (auto it = m_signalParams.find(signalHash); it != m_signalParams.end())
 			{
-				result = it->second.tagStringList(); // !!!
+				result = AppSignalParamAccessor<SignalParamType>::tagStringList(it->second);
 			}
 
 			return result;
@@ -302,7 +308,7 @@ namespace AppSignalStdLib
 			std::shared_lock rl{m_paramsLocker};
 
 			auto result = m_signalParams.find(signalHash);
-			return result == m_signalParams.end() ? false : result->second.hasTag(tag); // !!!
+			return result == m_signalParams.end() ? false : AppSignalParamAccessor<SignalParamType>::hasTag(result->second, tag);
 		}
 
 		// Return type is int, user must cast it to E::SignalType or MatsSignalType
@@ -321,7 +327,7 @@ namespace AppSignalStdLib
 			// Discrete, -- 1
 			// Bus       -- 2
 			//
-			return result == m_signalParams.end() ? 1 : static_cast<int>(result->second.type()); // !!!
+			return result == m_signalParams.end() ? 1 : static_cast<int>(AppSignalParamAccessor<SignalParamType>::type(result->second));
 		}
 
 		StringListType signalIdsByTag(const StringType& tag) const
@@ -535,6 +541,7 @@ namespace AppSignalStdLib
 				*emptyState = SourceState{state, dataServerHash, sourceThreadId, now};
 				return;
 			}
+
 			void invalidateSource(SourceIdType sourceThreadId,
 								  std::chrono::time_point<std::chrono::system_clock> now /* = std::chrono::system_clock::now()*/)
 			{
@@ -542,7 +549,7 @@ namespace AppSignalStdLib
 				{
 					if (sourceState.sourceThreadId == sourceThreadId)
 					{
-						sourceState.state = SignalStateType{}; // !!! - do I need to set hash to sate?
+						sourceState.state = SignalStateType{};
 						sourceState.lastUpdateTime = now;
 						break;
 					}
@@ -565,10 +572,10 @@ namespace AppSignalStdLib
 						continue;
 					}
 
-					if (sourceState.state.isStateAvailable() == true) // !!! - isStateAvailable()
+					if (AppSignalStateAccessor<SignalStateType>::isStateAvailable(sourceState.state) == true)
 					{
-						// !!! - time().plant
-						if (stateAvailable == nullptr || stateAvailable->state.time().plant < sourceState.state.time().plant)
+						if (stateAvailable == nullptr || AppSignalStateAccessor<SignalStateType>::plantTime(stateAvailable->state) <
+															 AppSignalStateAccessor<SignalStateType>::plantTime(sourceState.state))
 						{
 							stateAvailable = &sourceState; // the first state with state available flag
 						}
@@ -611,10 +618,10 @@ namespace AppSignalStdLib
 						continue;
 					}
 
-					if (sourceState.state.isStateAvailable() == true) // !!! - state.isStateAvailable()
+					if (AppSignalStateAccessor<SignalStateType>::isStateAvailable(sourceState.state) == true)
 					{
-						// !!! - time().plant
-						if (stateAvailable == nullptr || stateAvailable->state.time().plant < sourceState.state.time().plant)
+						if (stateAvailable == nullptr || AppSignalStateAccessor<SignalStateType>::plantTime(stateAvailable->state) <
+															 AppSignalStateAccessor<SignalStateType>::plantTime(sourceState.state))
 						{
 							stateAvailable = &sourceState; // the first state with state available flag
 						}

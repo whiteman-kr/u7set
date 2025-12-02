@@ -2,4 +2,4 @@
 
 #include <AppSignalLibStd/ISignalManagerT.h>
 
-using ISignalManager = ISignalManagerT<QString, QStringList>;
+using ISignalManager = ISignalManagerT<AppSignalParam, QString, QStringList>;

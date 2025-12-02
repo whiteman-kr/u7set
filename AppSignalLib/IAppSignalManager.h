@@ -1,6 +1,6 @@
 #pragma once
 
-#include <AppSignalLibStd/IAppSignalManagerT.h>
 #include "ISignalManager.h"
+#include <AppSignalLibStd/IAppSignalManagerT.h>
 
-using IAppSignalManager = IAppSignalManagerT<QString, QStringList>;
+using IAppSignalManager = IAppSignalManagerT<AppSignalParam, AppSignalState, QString, QStringList, E::SignalType>;

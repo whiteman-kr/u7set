@@ -3,16 +3,21 @@ project(AppSignalLibStd LANGUAGES CXX)
 set(TARGET AppSignalLibStd)
 
 add_library(${TARGET} STATIC
+	./include/AppSignalLibStd/AppSignalAccessor.h
 	./include/AppSignalLibStd/AppSignalManagerCore.h
 	./include/AppSignalLibStd/IAppSignalUpdater.h
 	./include/AppSignalLibStd/IRecentAppSignals.h
 	./include/AppSignalLibStd/ISignalDataServer.h
 	./include/AppSignalLibStd/ISignalManagerT.h
+	./include/AppSignalLibStd/RecentUsed.h
 	
 	./src/AppSignalManagerCore.cpp
+	./src/RecentUsed.cpp
 )
 
 target_precompile_headers(${TARGET} PRIVATE
+	<chrono>
+
 	<CommonStdLib/HashStd.h>
 	<Network.pb.h>
 )
