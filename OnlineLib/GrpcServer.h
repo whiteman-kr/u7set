@@ -45,6 +45,7 @@ protected:
 protected:
 	HostAddressPort m_listenIP;
 	CircularLoggerShared m_log;
+
 	std::unique_ptr<grpc::Server> m_server;
 	std::atomic_bool m_stopRequested {false};
 	std::thread m_thread;
@@ -84,3 +85,15 @@ using WriteReplyPtr = bool (*)(grpc::ServerContext*,
 							   const REPLY_TYPE&,
 							   grpc::Status&,
 							   CircularLoggerShared);
+
+class GrpcClient
+{
+public:
+	GrpcClient(const SoftwareInfo& softwareInfo,
+			   const std::vector<HostAddressPort>& serverAddress);
+	virtual ~GrpcClient();
+
+private:
+	SoftwareInfo m_swInfo;
+	std::vector<HostAddressPort> m_serverAddress;
+};

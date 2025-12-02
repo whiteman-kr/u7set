@@ -158,21 +158,21 @@ bool CfgLoader::getFileBlockedByID(const QString& fileID, QByteArray* fileData, 
 	return getFileBlocked(pathFileName, fileData, errorStr);
 }
 
-bool CfgLoader::getFileAsync(const QString& pathFileName)
-{
-	std::shared_ptr<QByteArray> fileData = std::make_shared<QByteArray>();
+// bool CfgLoader::getFileAsync(const QString& pathFileName)
+// {
+// 	std::shared_ptr<QByteArray> fileData = std::make_shared<QByteArray>();
 
-	emit signal_getFile(pathFileName, fileData, true);
+// 	emit signal_getFile(pathFileName, fileData, true);
 
-	return true;
-}
+// 	return true;
+// }
 
-bool CfgLoader::getFileAsyncByID(const QString& fileID)
-{
-	QString pathFileName = getFilePathNameByID(fileID);
+// bool CfgLoader::getFileAsyncByID(const QString& fileID)
+// {
+// 	QString pathFileName = getFilePathNameByID(fileID);
 
-	return getFileAsync(pathFileName);
-}
+// 	return getFileAsync(pathFileName);
+// }
 
 bool CfgLoader::hasFileID(QString fileID) const
 {
@@ -896,19 +896,19 @@ bool CfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* file
 	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
 }
 
-bool CfgLoaderThread::getFileAsync(const QString& pathFileName)
-{
-	AUTO_LOCK(m_mutex);
+// bool CfgLoaderThread::getFileAsync(const QString& pathFileName)
+// {
+// 	AUTO_LOCK(m_mutex);
 
-	return m_cfgLoader->getFileAsync(pathFileName);
-}
+// 	return m_cfgLoader->getFileAsync(pathFileName);
+// }
 
-bool CfgLoaderThread::getFileAsyncByID(const QString& fileID)
-{
-	AUTO_LOCK(m_mutex);
+// bool CfgLoaderThread::getFileAsyncByID(const QString& fileID)
+// {
+// 	AUTO_LOCK(m_mutex);
 
-	return m_cfgLoader->getFileAsyncByID(fileID);
-}
+// 	return m_cfgLoader->getFileAsyncByID(fileID);
+// }
 
 bool CfgLoaderThread::hasFileID(QString fileID) const
 {

@@ -171,3 +171,16 @@ bool GrpcServer::isRunning() const
 	return m_running.load(std::memory_order_relaxed);
 }
 
+//
+
+GrpcClient::GrpcClient(	const SoftwareInfo& softwareInfo,
+						const std::vector<HostAddressPort>& serverAddress) :
+	m_swInfo(softwareInfo),
+	m_serverAddress(m_serverAddress)
+{
+}
+
+GrpcClient::~GrpcClient()
+{
+}
+

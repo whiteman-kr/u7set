@@ -2,6 +2,7 @@
 #include <QUuid>
 
 #include "GrpcSessionGuard.h"
+#include "../UtilsLib/WUtils.h"
 
 GrpcSessionGuard::GrpcSessionGuard(	const SoftwareInfo& severSwInfo,
 									bool allowAllClients,
@@ -85,16 +86,28 @@ grpc::Status GrpcSessionGuard::handshake(const Grpc::HandshakeRequest* request,
 	return grpc::Status::OK;
 }
 
-bool GrpcSessionGuard::extractAndValidateAuthToken(grpc::ServerContext* context)
+bool GrpcSessionGuard::extractAndValidateAuthToken(grpc::ServerContext* context, std::string* authToken)
 {
 	if (context == nullptr)
 	{
 		return false;
 	}
 
-	const std::string authToken = extractAuthTokenFromMetadata(context);
+	if (authToken != nullptr)
+	{
+		authToken->clear();
+	}
 
-	return validateAuthToken(authToken);
+	const std::string token = extractAuthTokenFromMetadata(context);
+
+	bool res = validateAuthToken(token);
+
+	if (res && authToken != nullptr)
+	{
+		*authToken = token;
+	}
+
+	return res;
 }
 
 std::string GrpcSessionGuard::extractAuthTokenFromMetadata(grpc::ServerContext* context) const
@@ -119,6 +132,33 @@ std::string GrpcSessionGuard::extractAuthTokenFromMetadata(grpc::ServerContext* 
 void GrpcSessionGuard::setSessionTimeout(int seconds)
 {
 	m_sessionTimeout = seconds;
+}
+
+SoftwareInfo GrpcSessionGuard::getSoftwareInfo(const std::string& authToken)
+{
+	SoftwareInfo swInfo;
+
+	std::lock_guard<std::mutex> lock(m_sessionsMutex);
+
+	swInfo = getValueOrDefault(m_clientsInfo, authToken, SoftwareInfo{});
+
+	return swInfo;
+}
+
+QString GrpcSessionGuard::getSoftwareEquipmentID(const std::string& authToken)
+{
+	QString equipmentID;
+
+	std::lock_guard<std::mutex> lock(m_sessionsMutex);
+
+	auto it = m_clientsInfo.find(authToken);
+
+	if (it != m_clientsInfo.end())
+	{
+		equipmentID = it->second.equipmentID();
+	}
+
+	return equipmentID;
 }
 
 bool GrpcSessionGuard::validateAuthToken(const std::string& authToken)

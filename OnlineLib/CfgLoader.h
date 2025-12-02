@@ -61,8 +61,8 @@ public:
 
 	// When file downloaded signal_fileReady will emitted
 	//
-	bool getFileAsync(const QString& pathFileName);
-	bool getFileAsyncByID(const QString& fileID);
+//	bool getFileAsync(const QString& pathFileName);
+//	bool getFileAsyncByID(const QString& fileID);
 
 	bool hasFileID(QString fileID) const;
 
@@ -259,8 +259,8 @@ public:
 
 	// When file downloaded signal_fileReady will emitted
 	//
-	bool getFileAsync(const QString& pathFileName);
-	bool getFileAsyncByID(const QString& fileID);
+	// bool getFileAsync(const QString& pathFileName);
+	// bool getFileAsyncByID(const QString& fileID);
 
 	bool hasFileID(QString fileID) const;
 

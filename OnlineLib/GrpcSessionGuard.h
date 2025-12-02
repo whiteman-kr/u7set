@@ -32,10 +32,13 @@ public:
 	grpc::Status handshake(const Grpc::HandshakeRequest* request,
 							Grpc::HandshakeReply* reply);
 
-	bool extractAndValidateAuthToken(grpc::ServerContext* context);
+	bool extractAndValidateAuthToken(grpc::ServerContext* context, std::string* authToken = nullptr);
 	std::string extractAuthTokenFromMetadata(grpc::ServerContext* context) const;
 
 	void setSessionTimeout(int seconds);
+
+	SoftwareInfo getSoftwareInfo(const std::string& authToken);
+	QString getSoftwareEquipmentID(const std::string& authToken);
 
 private:
 bool validateAuthToken(const std::string& authToken);
