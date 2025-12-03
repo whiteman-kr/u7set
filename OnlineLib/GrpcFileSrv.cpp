@@ -57,6 +57,7 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	const QString swEquipmentID = m_sessionGuard.getSoftwareEquipmentID(authToken);
 
 	constexpr int FILE_CHUNK_SIZE = 1024 * 1024;		// 1 Mb
+	constexpr int FILE_MAX_SIZE = 500 * 1024 * 1024;	// 500 Mb
 
 	//
 
@@ -64,15 +65,56 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 
 	QString fileName = QString::fromStdString(request->filename());
 
-	QFile file;
+	QString normalizedRoot = QDir::cleanPath(m_rootFolder);
 
-	file.setFileName(m_rootFolder + fileName);
+	if (!normalizedRoot.endsWith(QDir::separator()))
+	{
+		normalizedRoot.append(QDir::separator());
+	}
+
+	QString combinedPath = normalizedRoot + fileName;
+
+	QString normalizedPath = QDir::cleanPath(combinedPath);
+
+	if (!normalizedPath.startsWith(normalizedRoot))
+	{
+		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::FileIsNotAccessible));
+
+		DEBUG_LOG_ERR(m_log, QString("Access denied to file %1 (request from %2)").
+							 arg(fileName).arg(swEquipmentID));
+
+		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		{
+			return writeStatus;
+		}
+
+		return grpc::Status::OK;
+	}
+
+	//
+
+	QFile file(normalizedPath);
+	QFileInfo fi(file);
 
 	if (file.exists() == false)
 	{
 		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::RemoteFileIsNotExists));
 
 		DEBUG_LOG_ERR(m_log, QString("File %1 not exists (request from %2)").arg(fileName).arg(swEquipmentID));
+
+		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		{
+			return writeStatus;
+		}
+
+		return grpc::Status::OK;
+	}
+
+	if (fi.size() > FILE_MAX_SIZE)
+	{
+		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::FileTooBig));
+
+		DEBUG_LOG_ERR(m_log, QString("File %1 too big (request from %2)").arg(fileName).arg(swEquipmentID));
 
 		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
 		{
@@ -96,7 +138,6 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 		return grpc::Status::OK;
 	}
 
-	QFileInfo fi(file);
 
 	QByteArray fileData = file.readAll();
 
@@ -233,7 +274,8 @@ GrpcFileClient::GrpcFileClient(const SoftwareInfo& softwareInfo,
 GrpcFileClient::~GrpcFileClient()
 {
 	m_quitRequested.store(true, std::memory_order::relaxed);
-	m_procCondition.notify_one();
+	m_procCond.notify_one();
+	m_fileReadyCond.notify_all();
 
 	if (m_thread.joinable())
 	{
@@ -248,37 +290,39 @@ void GrpcFileClient::downloadFile(const QString& fileName)
 		m_downloadFileQueue.append(fileName);
 	}
 
-	m_procCondition.notify_one();
+	m_procCond.notify_one();
 }
 
 bool GrpcFileClient::waitFileReady(FileReady* fileReady)
 {
 	TEST_PTR_RETURN_FALSE(fileReady);
 
-	while(true)
+	std::unique_lock ul(m_fileReadyMutex);
+
+	if (!m_fileReadyCond.wait_for(ul, std::chrono::seconds(5), [this]
+							  {
+								  return m_quitRequested.load(std::memory_order::relaxed) ||
+										 !m_fileReadyQueue.empty();
+							  }))
 	{
-		{
-			std::lock_guard lg(m_mutex);
-
-			if (m_fileReadyQueue.empty() == false)
-			{
-				FileReady& fr = m_fileReadyQueue.front();
-
-				fileReady->errorCode = fr.errorCode;
-				fr.fileName.swap(fileReady->fileName);
-				fr.fileData.swap(fileReady->fileData);
-
-				m_fileReadyQueue.pop();
-
-				return true;
-			}
-		}
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
-
-		// check wait time
+		fileReady->errorCode = Tcp::FileTransferResult::ServerReplyTimeout;
+		return false;
 	}
 
+	if (!m_fileReadyQueue.empty())
+	{
+		FileReady& fr = m_fileReadyQueue.front();
+
+		fileReady->errorCode = fr.errorCode;
+		fr.fileName.swap(fileReady->fileName);
+		fr.fileData.swap(fileReady->fileData);
+		fr.md5.swap(fileReady->md5);
+
+		m_fileReadyQueue.pop();
+		return true;
+	}
+
+	fileReady->errorCode = Tcp::FileTransferResult::NotConnectedToServer;
 	return false;
 }
 
@@ -286,12 +330,6 @@ void GrpcFileClient::setRootFolder(const QString& rootFolder)
 {
 	std::lock_guard lg(m_mutex);
 	m_rootFolder = rootFolder;
-}
-
-void GrpcFileClient::onEndFileDownload(const QString fileName,
-									   Tcp::FileTransferResult errorCode,
-									   const QString md5)
-{
 }
 
 bool GrpcFileClient::isTransferInProgress()
@@ -303,7 +341,7 @@ void GrpcFileClient::run()
 {
 	std::unique_lock ul(m_procMutex, std::defer_lock);
 
-	while(m_quitRequested == false)
+	while(m_quitRequested.load(std::memory_order::relaxed) == false)
 	{
 		if (m_authToken.empty())
 		{
@@ -318,12 +356,13 @@ void GrpcFileClient::run()
 
 		ul.lock();
 
-		m_procCondition.wait(ul, [this]() -> bool
+		m_procCond.wait(ul, [this]() -> bool
 						   {
-							   return m_quitRequested || !m_downloadFileQueue.empty();
+								return m_quitRequested.load(std::memory_order::relaxed) ||
+										!m_downloadFileQueue.empty();
 						   });
 
-		if (m_quitRequested == true)
+		if (m_quitRequested.load(std::memory_order::relaxed) == true)
 		{
 			ul.unlock();
 			break;
@@ -391,6 +430,14 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 {
 	Tcp::FileTransferResult result = Tcp::FileTransferResult::Ok;
 
+	if (m_stub == nullptr)
+	{
+		m_transferInProgress.store(false, std::memory_order::relaxed);
+		result = Tcp::FileTransferResult::NotConnectedToServer;
+		pushFileReady(fileName, result);
+		return result;
+	}
+
 	m_transferInProgress.store(true, std::memory_order::relaxed);
 
 	grpc::ClientContext ctx;
@@ -405,12 +452,20 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 
 	Grpc::GetFileReply reply;
 	QByteArray fileData;
+	QByteArray md5;
+
+	bool anyReplyReceived = false;
+	bool readyPushed = false;
 
 	while(reader->Read(&reply))
 	{
+		anyReplyReceived = true;
+
 		if (reply.errorcode() != TO_INT(Tcp::FileTransferResult::Ok))
 		{
 			result = static_cast<Tcp::FileTransferResult>(reply.errorcode());
+			pushFileReady(fileName, result);
+			readyPushed = true;
 			break;
 		}
 
@@ -433,6 +488,8 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 		{
 			Q_ASSERT(false);
 			result = Tcp::FileTransferResult::InternalError;
+			pushFileReady(fileName, result);
+			readyPushed = true;
 			break;
 		}
 
@@ -440,7 +497,7 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 
 		md5Gen.addData(QByteArrayView(fileData.constData(), fileData.size()));
 
-		QByteArray md5 = md5Gen.result();
+		md5 = md5Gen.result();
 
 		const std::string &protoStr = reply.md5();
 		QByteArray protoMd5 = QByteArray::fromStdString(protoStr);
@@ -448,6 +505,8 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 		if (md5 != protoMd5)
 		{
 			result = Tcp::FileTransferResult::FileDataCorrupted;
+			pushFileReady(fileName, result);
+			readyPushed = true;
 			break;
 		}
 
@@ -472,6 +531,8 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 		if (dir.mkpath(fi.path()) == false)
 		{
 			result = Tcp::FileTransferResult::CantCreateLocalFolder;
+			pushFileReady(fileName, result);
+			readyPushed = true;
 			break;
 		}
 
@@ -480,6 +541,8 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 		if (res == false)
 		{
 			result = Tcp::FileTransferResult::CantCreateLocalFile;
+			pushFileReady(fileName, result);
+			readyPushed = true;
 			break;
 		}
 
@@ -492,15 +555,83 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 		{
 			Q_ASSERT(false);
 			result = Tcp::FileTransferResult::CantWriteLocalFile;
+			pushFileReady(fileName, result);
+			readyPushed = true;
 			break;
 		}
 
+		pushFileReady(fileName, result, fileData, md5);
+		readyPushed = true;
 		break;
 	}
 
-	reader->Finish();
+	grpc::Status st = reader->Finish();
+
+	if (!st.ok())
+	{
+		if (result == Tcp::FileTransferResult::Ok)
+		{
+			if (st.error_code() == grpc::StatusCode::UNAUTHENTICATED)
+			{
+				result = Tcp::FileTransferResult::NotConnectedToServer;
+			}
+			else
+			{
+				result = Tcp::FileTransferResult::InternalError;
+			}
+		}
+
+		if (st.error_code() == grpc::StatusCode::UNAUTHENTICATED)
+		{
+			m_authToken.clear();
+			m_stub.reset();
+		}
+
+		if (!readyPushed)
+		{
+			pushFileReady(fileName, result);
+			readyPushed = true;
+		}
+	}
+	else
+	{
+		if (!anyReplyReceived && !readyPushed)
+		{
+			result = Tcp::FileTransferResult::InternalError;
+			pushFileReady(fileName, result);
+			readyPushed = true;
+		}
+	}
 
 	m_transferInProgress.store(false, std::memory_order::relaxed);
 
 	return result;
 }
+
+void GrpcFileClient::pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode)
+{
+	QByteArray fileData;
+	QByteArray md5;
+
+	pushFileReady(fileName, errorCode, fileData, md5);
+}
+
+void GrpcFileClient::pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode,
+									QByteArray& fileData, QByteArray& md5)
+{
+	{
+		std::lock_guard lg(m_fileReadyMutex);
+
+		m_fileReadyQueue.push(FileReady{});
+
+		FileReady& last = m_fileReadyQueue.back();
+
+		last.fileName = fileName;
+		last.errorCode = errorCode;
+		last.fileData.swap(fileData);
+		last.md5.swap(md5);
+	}
+
+	m_fileReadyCond.notify_all();
+}
+
