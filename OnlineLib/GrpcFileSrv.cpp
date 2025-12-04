@@ -1,5 +1,67 @@
 #include "GrpcFileSrv.h"
 
+// -------------------------------------------------------------------------------------
+//
+// GrpcFileBase class implementation
+//
+// -------------------------------------------------------------------------------------
+
+GrpcFileBase::GrpcFileBase(const QString& rootFolder)
+{
+	setRootFolder(rootFolder);
+
+	Q_ASSERT(m_rootFolder.isEmpty() == false);
+}
+
+void GrpcFileBase::setRootFolder(const QString& rootFolder)
+{
+	std::lock_guard lg(m_mutex);
+	m_rootFolder = QDir::cleanPath(rootFolder);
+}
+
+QString GrpcFileBase::rootFolder() const
+{
+	std::lock_guard lg(m_mutex);
+	return m_rootFolder;
+}
+
+QString GrpcFileBase::removingTrailingSlashes(const QString& folder)
+{
+	QString res = folder;
+
+	while(res.size() > 0 && (res.endsWith("\\") || res.endsWith("/")))
+	{
+		res.truncate(res.size() - 1);
+	}
+
+	return res;
+}
+
+QString GrpcFileBase::removingStartingSlashes(const QString& folder)
+{
+	QString res = folder;
+
+	while(res.size() > 0 && (res.startsWith("\\") || res.startsWith("/")))
+	{
+		res = res.mid(1);
+	}
+
+	return res;
+}
+
+QString GrpcFileBase::getCleanFileName(const QString& rootFolder, const QString& fileName)
+{
+	QString filePathName = rootFolder + fileName;
+
+	return QDir::cleanPath(filePathName);
+}
+
+// -------------------------------------------------------------------------------------
+//
+// GrpcFileSrv class implementation
+//
+// -------------------------------------------------------------------------------------
+
 GrpcFileSrv::GrpcFileSrv(const SoftwareInfo& serverSwInfo,
 						 bool allowAllClients,
 						 const std::vector<ClientInfo>& clients,
@@ -7,8 +69,8 @@ GrpcFileSrv::GrpcFileSrv(const SoftwareInfo& serverSwInfo,
 						 const HostAddressPort& listenIP,
 						 const QString& rootFolder,
 						 CircularLoggerShared log) :
-	GrpcServer(serverSwInfo, allowAllClients, clients, checkHostName, listenIP, log),
-	m_rootFolder(rootFolder)
+	GrpcFileBase(rootFolder),
+	GrpcServer(serverSwInfo, allowAllClients, clients, checkHostName, listenIP, log)
 {
 	start();
 }
@@ -57,7 +119,7 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	const QString swEquipmentID = m_sessionGuard.getSoftwareEquipmentID(authToken);
 
 	constexpr int FILE_CHUNK_SIZE = 1024 * 1024;		// 1 Mb
-	constexpr int FILE_MAX_SIZE = 500 * 1024 * 1024;	// 500 Mb
+	constexpr int FILE_MAX_SIZE = 100 * 1024 * 1024;	// 100 Mb
 
 	//
 
@@ -65,18 +127,11 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 
 	QString fileName = QString::fromStdString(request->filename());
 
-	QString normalizedRoot = QDir::cleanPath(m_rootFolder);
+	QString root = rootFolder();
 
-	if (!normalizedRoot.endsWith(QDir::separator()))
-	{
-		normalizedRoot.append(QDir::separator());
-	}
+	QString cleanFileName = getCleanFileName(root, fileName);
 
-	QString combinedPath = normalizedRoot + fileName;
-
-	QString normalizedPath = QDir::cleanPath(combinedPath);
-
-	if (!normalizedPath.startsWith(normalizedRoot))
+	if (!cleanFileName.startsWith(root))
 	{
 		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::FileIsNotAccessible));
 
@@ -93,7 +148,7 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 
 	//
 
-	QFile file(normalizedPath);
+	QFile file(cleanFileName);
 	QFileInfo fi(file);
 
 	if (file.exists() == false)
@@ -137,7 +192,6 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 
 		return grpc::Status::OK;
 	}
-
 
 	QByteArray fileData = file.readAll();
 
@@ -248,16 +302,20 @@ QString GrpcFileSrv::serviceName() const
 	return QStringLiteral("GrpcFileSrv");
 }
 
+// -------------------------------------------------------------------------------------
 //
+// GrpcFileClient class implementation
+//
+// -------------------------------------------------------------------------------------
 
 GrpcFileClient::GrpcFileClient(const SoftwareInfo& softwareInfo,
 								const std::vector<HostAddressPort>& serverAddress,
 								const QString& rootFolder,
 								const QString& clientDescription,
 								CircularLoggerShared log) :
+	GrpcFileBase(rootFolder),
 	m_swInfo(softwareInfo),
 	m_serverAddress(serverAddress),
-	m_rootFolder(rootFolder),
 	m_log(log)
 {
 	Q_UNUSED(clientDescription);
@@ -326,10 +384,12 @@ bool GrpcFileClient::waitFileReady(FileReady* fileReady)
 	return false;
 }
 
-void GrpcFileClient::setRootFolder(const QString& rootFolder)
+bool GrpcFileClient::downloadFileBlocked(const QString& fileName, FileReady* fileReady)
 {
-	std::lock_guard lg(m_mutex);
-	m_rootFolder = rootFolder;
+	TEST_PTR_RETURN_FALSE(fileReady);
+
+	downloadFile(fileName);
+	return waitFileReady(fileReady);
 }
 
 bool GrpcFileClient::isTransferInProgress()
@@ -510,15 +570,17 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 			break;
 		}
 
-		QString rootFolder;
+		QString root = rootFolder();
 
+		QString filePathName = getCleanFileName(root, fileName);
+
+		if (!filePathName.startsWith(root))
 		{
-			std::lock_guard lg(m_mutex);
-
-			rootFolder = m_rootFolder;
+			result = Tcp::FileTransferResult::CantCreateLocalFile;
+			pushFileReady(fileName, result);
+			readyPushed = true;
+			break;
 		}
-
-		QString filePathName = rootFolder + fileName;
 
 		QFile file;
 
@@ -634,4 +696,6 @@ void GrpcFileClient::pushFileReady(const QString& fileName, Tcp::FileTransferRes
 
 	m_fileReadyCond.notify_all();
 }
+
+
 

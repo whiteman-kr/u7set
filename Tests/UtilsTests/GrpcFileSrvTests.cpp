@@ -249,7 +249,23 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
 						  tempDir, "GrpcFileClientTest", logger);
 
-	client->downloadFile("/build.xml");
+	QString buildXml("/build.xml");
+
+	FileReady fr;
+	bool res = client->downloadFileBlocked(buildXml, &fr);
+
+	EXPECT_TRUE(res);
+
+	EXPECT_EQ(fr.fileName, buildXml);
+	EXPECT_EQ(fr.errorCode, Tcp::FileTransferResult::Ok);
+
+	QFile f(tempDir + buildXml);
+
+	EXPECT_TRUE(f.exists());
+
+	QFileInfo fi(f);
+
+	EXPECT_EQ(fi.size(), fr.fileData.size());
 
 	client.reset();
 

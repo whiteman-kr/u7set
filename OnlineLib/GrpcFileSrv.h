@@ -14,9 +14,38 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
-class AppDataServiceSettings;
+// -------------------------------------------------------------------------------------
+//
+// GrpcFileBase class declaration
+//
+// -------------------------------------------------------------------------------------
 
-class GrpcFileSrv final : public GrpcServer, public Grpc::FileSrv::Service
+class GrpcFileBase
+{
+public:
+	GrpcFileBase(const QString& rootFolder);
+
+	void setRootFolder(const QString& rootFolder);
+	QString rootFolder() const;
+
+protected:
+	QString removingTrailingSlashes(const QString& folder);
+	QString removingStartingSlashes(const QString& folder);
+	QString getCleanRoot(const QString& rootFolder);
+	QString getCleanFileName(const QString& rootFolder, const QString& fileName);
+
+private:
+	mutable std::mutex m_mutex;
+	QString m_rootFolder;
+};
+
+// -------------------------------------------------------------------------------------
+//
+// GrpcFileSrv class declaration
+//
+// -------------------------------------------------------------------------------------
+
+class GrpcFileSrv : public GrpcFileBase, public GrpcServer, public Grpc::FileSrv::Service
 {
 public:
 	explicit GrpcFileSrv(const SoftwareInfo& serverSwInfo,
@@ -47,9 +76,6 @@ protected:
 private:
 	grpc::Service* getGrpcService() override;
 	virtual QString serviceName() const override;
-
-private:
-	const QString m_rootFolder;
 };
 
 struct FileReady
@@ -60,7 +86,13 @@ struct FileReady
 	QByteArray md5;
 };
 
-class GrpcFileClient
+// -------------------------------------------------------------------------------------
+//
+// GrpcFileClient class declaration
+//
+// -------------------------------------------------------------------------------------
+
+class GrpcFileClient : public GrpcFileBase
 {
 public:
 	GrpcFileClient(const SoftwareInfo& softwareInfo,
@@ -79,7 +111,7 @@ public:
 	void downloadFile(const QString& fileName);
 	bool waitFileReady(FileReady* fileReady);
 
-	void setRootFolder(const QString& rootFolder);
+	bool downloadFileBlocked(const QString& fileName, FileReady* fileReady);
 
 	bool isTransferInProgress();
 
@@ -109,9 +141,6 @@ private:
 	std::atomic_bool m_quitRequested {false};
 	std::atomic_bool m_transferInProgress {false};
 
-	std::mutex m_mutex;
-	QString m_rootFolder;
-
 	std::mutex m_fileReadyMutex;
 	std::condition_variable m_fileReadyCond;
 	std::queue<FileReady> m_fileReadyQueue;
@@ -120,4 +149,3 @@ private:
 	std::unique_ptr<Grpc::FileSrv::Stub> m_stub;
 	std::string m_authToken;
 };
-

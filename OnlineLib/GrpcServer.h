@@ -85,15 +85,3 @@ using WriteReplyPtr = bool (*)(grpc::ServerContext*,
 							   const REPLY_TYPE&,
 							   grpc::Status&,
 							   CircularLoggerShared);
-
-class GrpcClient
-{
-public:
-	GrpcClient(const SoftwareInfo& softwareInfo,
-			   const std::vector<HostAddressPort>& serverAddress);
-	virtual ~GrpcClient();
-
-private:
-	SoftwareInfo m_swInfo;
-	std::vector<HostAddressPort> m_serverAddress;
-};

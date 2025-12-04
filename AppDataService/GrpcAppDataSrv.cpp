@@ -152,7 +152,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 			if (ctr >= PARAMS_MAX_COUNT)
 			{
-				reply.set_totalsize(m_appSignals.count());
+				reply.set_totalsize(static_cast<quint32>(m_appSignals.count()));
 				reply.set_replysignalindex(index);
 
 				if (writeReply(context, writer, reply, writeStatus, m_log) == false)
@@ -169,7 +169,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 		if (ctr > 0)
 		{
-			reply.set_totalsize(m_appSignals.count());
+			reply.set_totalsize(static_cast<quint32>(m_appSignals.count()));
 			reply.set_replysignalindex(index);
 
 			if (writeReply(context, writer, reply, writeStatus, m_log) == false)

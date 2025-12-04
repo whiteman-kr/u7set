@@ -16,7 +16,7 @@ message GetFileReply
 {
     required string fileName = 1;
 	required int32 errorCode = 2 [default = 0];				// values of Tcp::FileTransferResult
-	required int64 fileSize = 3  [default = 0];
+	optional int64 fileSize = 3  [default = 0];
 	optional int32 currentPart = 4 [default = 0];
 	optional int32 totalParts = 5 [default = 0];
 	optional bytes fileData = 6;
