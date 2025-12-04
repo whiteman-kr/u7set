@@ -22,9 +22,6 @@ struct AppDataService
 // EquipmentID of this part of the system.
 constexpr std::string_view g_equipmentId = "AZPZ_WS1_ADSBRIDGE";
 
-// Set to true if this is a Qt application and it runs message loop, otherwise message loop will be run in separate thread by AdsBridge.
-constexpr bool g_isQtApplication = false;
-
 // The list of AppDataServices to connect to.
 const std::array g_appDataServices = {
 	AppDataService{"AZPZ_WS1_ADS", "127.0.0.1", 13323} /*, AppDataService{"AZPZ_WS2_ADS", "127.0.0.2", 13323}*/};
@@ -146,16 +143,15 @@ void adsLoop(std::stop_token stoken)
 	return;
 }
 
+// --
+//
 int main(int argc, char* argv[])
 {
 	AdsSetLogHandler(log_handler);
 	AdsSetLogLevel(MATS_LOG_LEVEL_DEBUG);
 
 #if 1
-	// Set configuration manually
-	//
-
-	// Initialize, create QCoreApplication, start Qt message loop if g_isQtApplication is false!
+	// Set configuration manually...
 	//
 	bool initOk = AdsInit(g_equipmentId.data());
 	if (initOk == false)
@@ -171,7 +167,7 @@ int main(int argc, char* argv[])
 		AdsAddService(ads.equipmentId.c_str(), ads.address.c_str(), ads.port);
 	}
 #else
-	// Load configuration from file.
+	// OR load configuration from XML file.
 	//
 	bool loadOk = AdsLoadConfiguration("Configuration.xml");
 	if (loadOk == false)
@@ -200,6 +196,7 @@ int main(int argc, char* argv[])
 	AdsConnect();
 
 	// Process signal params and states in a separate thread.
+	// adsLoop - function that runs the loop - retrieves signal params and states.
 	//
 	{
 		std::jthread exitProgramThread{adsLoop};
@@ -208,15 +205,13 @@ int main(int argc, char* argv[])
 		//
 		std::string input;
 		std::getline(std::cin, input);
-
-		exitProgramThread.request_stop();
 	}
 
 	// Close all connections.
 	//
 	AdsCloseConnection();
 
-	// Shutdown, stop Qt message loop.
+	// Shutdown, release resources.
 	//
 	AdsShutdown();
 

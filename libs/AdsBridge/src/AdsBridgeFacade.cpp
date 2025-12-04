@@ -351,7 +351,8 @@ namespace AdsBridge
 			return false;
 		}
 
-		std::memcpy(out, hashes.data(), hashes.size() * sizeof(MatsSignalHash));
+		std::memset(out, 0, sizeof(MatsSignalHash) * count);
+		std::memcpy(out, hashes.data(), count * sizeof(MatsSignalHash));
 		return true;
 	}
 

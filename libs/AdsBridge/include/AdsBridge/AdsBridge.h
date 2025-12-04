@@ -8,10 +8,6 @@
 
 #include "Common.h"
 
-// MSVC NOTE: Use lib.exe to create import library for dll:
-//		lib.exe /DEF:AdsBridge.def /OUT:AdsBridge.lib /MACHINE:X64
-//
-
 /// @cond DOXYGEN_IGNORE
 #ifdef __cplusplus
 	#define ADSB_INLINE inline        // C++
@@ -21,9 +17,15 @@
 /// @endcond
 
 /* \cond INTERNAL */
-bool AdsGetTcpConnectionStatusesPrivate1(size_t structSize, struct AdsConnectionStatus* out, size_t count);
-size_t AdsGetSignalParamsPrivate1(size_t structSize, const MatsSignalHash* signalHashes, struct MatsAppSignalParam* out, size_t count);
-size_t AdsGetSignalStatesPrivate1(size_t structSize, const MatsSignalHash* signalHashes, struct MatsAppSignalState* out, size_t count);
+ADSB_API bool AdsGetTcpConnectionStatusesPrivate1(size_t structSize, struct AdsConnectionStatus* out, size_t count);
+ADSB_API size_t AdsGetSignalParamsPrivate1(size_t structSize,
+										   const MatsSignalHash* signalHashes,
+										   struct MatsAppSignalParam* out,
+										   size_t count);
+ADSB_API size_t AdsGetSignalStatesPrivate1(size_t structSize,
+										   const MatsSignalHash* signalHashes,
+										   struct MatsAppSignalState* out,
+										   size_t count);
 /* \endcond */
 
 #ifdef __cplusplus
@@ -32,54 +34,67 @@ extern "C"
 #endif
 
 	/**
-	 * \brief Gets the API version of the AdsBridge library (returns 0x00000002 for now).
+	 * \brief Returns the AdsBridge API interface version.
+	 *
+	 * Use this to verify API compatibility between the library and client code.
+	 * Current version: 0x00000002.
+	 * Thread-safe.
+	 *
+	 * \return The API version as a 32-bit unsigned integer (currently 0x00000002).
 	 */
-	uint32_t AdsGetInterfaceVersion(void);
+	ADSB_API uint32_t AdsGetInterfaceVersion(void);
 
 	/**
 	 * \brief Sets the log handler for the AdsBridge library.
 	 *
-	 * This function sets the log handler that will be used by the AdsBridge library to handle log messages. The log handler should be
-	 * thread-safe. This function can be called before AdsInit().
+	 * Configures a custom callback function to receive log messages from AdsBridge.
+	 * Must be called before AdsInit() or any other AdsBridge functions.
+	 * The provided handler function must be thread-safe as it may be called from multiple threads.
 	 *
-	 * \param handler The log handler function pointer.
+	 * \param handler Pointer to the log handler callback function.
 	 */
-	void AdsSetLogHandler(MatsLogHandler handler);
+	ADSB_API void AdsSetLogHandler(MatsLogHandler handler);
 
 	/**
-	 * \brief Sets the log level for the AdsBridge library.
+	 * \brief Sets the minimum log level for filtering log messages.
 	 *
-	 * This function sets the log level that will be used by the AdsBridge library to filter log messages. The log level determines the
-	 * severity of the log messages that will be logged. The available log levels are defined in the MatsLogLevel enum. By default, the log
-	 * level is set to MATS_LOG_LEVEL_WARNING. This function can be called before AdsInit().
+	 * Configures which log messages are passed to the log handler based on severity.
+	 * Only messages at or above the specified level will be logged.
+	 * Messages can also be filtered within the log handler itself for additional control.
+	 * Available levels are defined in the MatsLogLevel enum.
+	 * Default level: MATS_LOG_LEVEL_WARNING.
+	 * Must be called before AdsInit() or any other AdsBridge functions.
 	 *
-	 * \param level The log level to set.
+	 * \param level The minimum log level (messages below this level are filtered out).
 	 */
-	void AdsSetLogLevel(enum MatsLogLevel level);
+	ADSB_API void AdsSetLogLevel(enum MatsLogLevel level);
 
 	/**
-	 * \brief Logs a message to the log handler.
+	 * \brief Tests the log handler by sending a test message.
 	 *
-	 * This function logs a message to the log handler with the specified log level.
+	 * Sends a test message to the configured log handler at the specified level.
+	 * Use this to verify that the log handler is correctly installed and functioning.
+	 * The message is subject to the current log level filter set by AdsSetLogLevel().
+	 * Thread-safe.
 	 *
-	 * \param level The log level of the message.
-	 * \param message The message to log.
+	 * \param level The log level for the test message.
+	 * \param message The test message to send (null-terminated string).
 	 */
-	void AdsTestLogHandler(enum MatsLogLevel level, const char* message);
+	ADSB_API void AdsTestLogHandler(enum MatsLogLevel level, const char* message);
 
 	/**
-	 * \brief Initializes the AdsBridge library.
+	 * \brief Initializes the AdsBridge library, initializes internal resources.
 	 *
-	 * \param equipmentId The ID of the equipment instance.
+	 * \param equipmentId The equipment ID for this AdsBridge instance (null-terminated string).
 	 */
-	bool AdsInit(const char* equipmentId);
+	ADSB_API bool AdsInit(const char* equipmentId);
 
 	/**
 	 * \brief Shuts down the AdsBridge library.
 	 *
-	 * This function shuts down the AdsBridge library and stops the message loop if the application is not Qt-based.
+	 * This function shuts down the AdsBridge library and releases all resources allocated by the library.
 	 */
-	void AdsShutdown();
+	ADSB_API void AdsShutdown();
 
 	/**
 	 * \brief Gets the software ID of the AdsBridge library.
@@ -88,31 +103,31 @@ extern "C"
 	 *
 	 * \return The software ID of the AdsBridge library.
 	 */
-	const char* AdsGetSoftwareId();
+	ADSB_API const char* AdsGetSoftwareId();
 
 	/**
 	 * \brief Loads the configuration from the specified file.
 	 *
 	 * This function loads the configuration for the AdsBridge library from the specified file. The configuration file is an XML file that
 	 * contains the configuration settings for the library. This file can be generated by RPCT and usually has name
-	 * {ADS_BRIDGE_ID}/Configuration.xml. AdsLoadConfiguration() can be called before AdsInit().
+	 * {ADS_BRIDGE_ID}/Configuration.xml.
 	 *
 	 * \param fileName The name of the configuration file.
 	 * \return True if the configuration was successfully loaded, false otherwise.
 	 */
-	bool AdsLoadConfiguration(const char* fileName);
+	ADSB_API bool AdsLoadConfiguration(const char* fileName);
 
 	/**
 	 * \brief Sets the configuration for the AdsBridge library.
 	 *
 	 * This function sets the configuration for the AdsBridge library using the provided XML string. The configuration file is an XML file
-	 * that contains the configuration settings for the library. This function can be called before AdsInit().
+	 * that contains the configuration settings for the library.
 	 *
 	 * \param configurationXml The XML string containing the configuration.
 	 * \param size The size of the XML string.
 	 * \return True if the configuration was successfully set, false otherwise.
 	 */
-	bool AdsSetConfiguration(const char* configurationXml, size_t size);
+	ADSB_API bool AdsSetConfiguration(const char* configurationXml, size_t size);
 
 	/**
 	 * \brief Sets the configuration profile for the already loaded/set configuration.
@@ -122,7 +137,7 @@ extern "C"
 	 *
 	 * \param profile The configuration profile name to set.
 	 */
-	bool AdsSetConfigurationProfile(const char* profile);
+	ADSB_API bool AdsSetConfigurationProfile(const char* profile);
 
 	/**
 	 * \brief Adds a connection to the AppDataService.
@@ -134,7 +149,7 @@ extern "C"
 	 * \param address The IPv4 address of the server.
 	 * \param port The port number of the server.
 	 */
-	void AdsAddService(const char* adsEquipmentId, const char* address, int port);
+	ADSB_API void AdsAddService(const char* adsEquipmentId, const char* address, int port);
 
 	/**
 	 * \brief Connects to the AppDataService.
@@ -142,34 +157,36 @@ extern "C"
 	 * This function connects to the AppDataService(s) using the connections that have been added with AdsAddService(). The connection
 	 * status can be checked with AdsGetTcpConnectionStatuses().
 	 */
-	void AdsConnect();
+	ADSB_API void AdsConnect();
 
 	/**
 	 * \brief Closes all connections to the AppDataServices.
 	 *
 	 * This function closes the connection to the AppDataService(s).
 	 */
-	void AdsCloseConnection();
+	ADSB_API void AdsCloseConnection();
 
 	/**
-	 * \brief Checks if the connections to the AppDataService(s) are established.
+	 * \brief Returns the number of TCP connections to AppDataService instances.
 	 *
-	 * This function returns the number of connections that are <b>established</b>.
-	 * Note that the <b>connections are not established until AdsConnect() is called </b>.
+	 * This function queries the current count of active connections. Connections must be added via
+	 * AdsAddService() and established with AdsConnect() before they are counted.
+	 * Thread-safe.
 	 *
-	 * \return The number of established connections.
+	 * \return The number of added connections.
 	 */
-	size_t AdsGetTcpConnectionCount();
+	ADSB_API size_t AdsGetTcpConnectionCount();
 
 	/**
-	 * \brief Gets the statuses of connection to AppDataService(s).
+	 * \brief Retrieves TCP connection statuses for all AppDataService connections.
 	 *
-	 * This function returns the connection statuses of the AppDataService(s).
+	 * Returns the current status of each TCP connection added via AdsAddService() and AdsConnect().
+	 * The caller must allocate the output array with size equal to AdsGetTcpConnectionCount().
+	 * Thread-safe.
 	 *
-	 * \param out The array of connection statuses to fill, must be allocated by caller, AdsConnectionStatus::size must be set to
-	 * sizeof(AdsConnectionStatus).
-	 * \param count The number of connection statuses to get.
-	 * \return True if the connection statuses were successfully retrieved, false otherwise.
+	 * \param out Pointer to pre-allocated array of AdsConnectionStatus structures.
+	 * \param count Number of connection statuses to get.
+	 * \return true if statuses were successfully retrieved, false on error (e.g., null pointer, count mismatch).
 	 */
 	ADSB_INLINE bool AdsGetTcpConnectionStatuses(struct AdsConnectionStatus* out, size_t count)
 	{
@@ -177,53 +194,62 @@ extern "C"
 	}
 
 	/**
-	 * \brief Checks if the signal parameters are loaded.
+	 * \brief Checks if all signal parameters have been loaded from AppDataService.
 	 *
-	 * This function checks if the signal parameters are loaded.
+	 * Returns true only when parameters for all configured signals have been successfully received.
+	 * Thread-safe.
 	 *
-	 * \return True if the <b>all</b> signal parameters are loaded, false otherwise.
+	 * \return true if all signal parameters are loaded, false otherwise.
 	 */
-	bool AdsSignalParamsLoaded();
+	ADSB_API bool AdsSignalParamsLoaded();
 
 	/**
 	 * \brief Checks if the signal states are loaded.
 	 *
 	 * This function checks if the signal states are loaded.
+	 * Thread-safe.
 	 *
 	 * \return True if the all signal states are loaded, false otherwise.
 	 */
-	bool AdsSignalStatesLoaded();
+	ADSB_API bool AdsSignalStatesLoaded();
 
 	/**
-	 * \brief Gets the number of signals.
+	 * \brief Returns the total number of signal.
 	 *
-	 * This function returns the number of signals that are available.
+	 * Returns the count of all signals available from the connected AppDataService instances.
+	 * This count is only valid after AdsConnect() has been called and signals have been received.
+	 * Thread-safe.
 	 *
 	 * \return The number of signals.
 	 */
-	size_t AdsGetSignalCount();
+	ADSB_API size_t AdsGetSignalCount();
 
 	/**
-	 * \brief Gets the list of signals.
+	 * \brief Retrieves the list of all signal hashes.
 	 *
 	 * This function returns the list of signals that are available.
+	 * The caller must allocate the output array with size equal to AdsGetSignalCount().
+	 * Thread-safe.
 	 *
-	 * \param out The array of signal hashes to fill, must be allocated by caller.
-	 * \param count The number of signal hashes to get, returned by AdsGetSignalCount().
-	 * \return True if the signal hashes were successfully retrieved, false otherwise.
+	 * \param out Pointer to pre-allocated array of MatsSignalHash values.
+	 * \param count Number of signal hashes to retrieve, must match AdsGetSignalCount().
+	 * \return true if signal hashes were successfully retrieved, false on error (e.g., null pointer, count mismatch).
 	 */
-	bool AdsGetSignalList(MatsSignalHash* out, size_t count);
+	ADSB_API bool AdsGetSignalList(MatsSignalHash* out, size_t count);
 
 	/**
-	 * \brief Gets the parameters of the specified signals.
+	 * \brief Retrieves parameters for the specified signals from AppDataService.
 	 *
-	 * This function returns the parameters of the specified signals.
+	 * Returns cached signal parameter data previously loaded from AppDataService.
+	 * Check AdsSignalParamsLoaded() before calling to ensure parameters are available.
+	 * For signals not found in the cache, the corresponding output entry is zeroed.
+	 * Thread-safe.
 	 *
-	 * \param signalHashes The array of signal hashes to get the parameters for.
-	 * \param out The array of signal parameters to fill, must be allocated by caller. If signal is not found, the corresponding signal
+	 * \param signalHashes Pointer to array of signal hashes to query.
+	 * \param out Pointer to pre-allocated array of MatsAppSignalParam structures to fill. If signal is not found, the corresponding signal
 	 * will be filled with zeros.
-	 * \param count The number of signal parameters to get.
-	 * \return 0 if error, otherwise the number of successfully retrieved signal parameters.
+	 * \param count Number of signals to retrieve parameters for.
+	 * \return Number of successfully retrieved signal parameters, or 0 on error (e.g., null pointer).
 	 */
 	ADSB_INLINE size_t AdsGetSignalParams(const MatsSignalHash* signalHashes, struct MatsAppSignalParam* out, size_t count)
 	{
@@ -231,30 +257,36 @@ extern "C"
 	}
 
 	/**
-	 * \brief Gets the states of the specified signals.
+	 * \brief Retrieves states for the specified signals from AppDataService.
 	 *
-	 * This function returns the states of the specified signals.
+	 * Returns cached signal state data previously loaded from AppDataService.
+	 * Check AdsSignalStatesLoaded() before calling to ensure states are available.
+	 * For signals not found in the cache, the corresponding output entry is zeroed.
+	 * Thread-safe.
 	 *
-	 * \param signalHashes The array of signal hashes to get the states for.
-	 * \param out The array of signal states to fill, must be allocated by caller. If signal is not found, the corresponding signal
+	 * \param signalHashes Pointer to array of signal hashes to query.
+	 * \param out Pointer to pre-allocated array of MatsAppSignalState structures to fill. If signal is not found, the corresponding signal
 	 * will be filled with zeros.
-	 * \param count The number of signal states to get.
-	 * \return 0 if error, otherwise the number of successfully retrieved signal states.
+	 * \param count Number of signals to retrieve states for.
+	 * \return Number of successfully retrieved signal states, or 0 on error (e.g., null pointer).
 	 */
 	ADSB_INLINE size_t AdsGetSignalStates(const MatsSignalHash* signalHashes, struct MatsAppSignalState* out, size_t count)
 	{
 		return AdsGetSignalStatesPrivate1(sizeof(struct MatsAppSignalState), signalHashes, out, count);
 	}
-
+	
 	/**
-	 * \brief Calculates the hash value of the specified string.
+	 * \brief Calculates hash value from AppSignalId string.
 	 *
-	 * This function calculates the hash value of the specified string.
+	 * Computes the MatsSignalHash value used to identify signals in AdsBridge API.
+	 * Use this function to convert signal AppSignalId strings into hash values
+	 * required by AdsGetSignalParams() and AdsGetSignalStates().
+	 * Thread-safe.
 	 *
-	 * \param string The string to calculate the hash value for.
-	 * \return The hash value of the string.
+	 * \param string The AppSignalId string to hash (null-terminated).
+	 * \return The calculated MatsSignalHash value.
 	 */
-	MatsSignalHash AdsCalcHash(const char* string);
+	ADSB_API MatsSignalHash AdsCalcHash(const char* string);
 
 #ifdef __cplusplus
 }
