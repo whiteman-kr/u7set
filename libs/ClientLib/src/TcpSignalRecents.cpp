@@ -117,7 +117,7 @@ namespace ClientLib
 
 		Q_ASSERT(isClearToSendRequest());
 
-		auto recentSignals = m_recentAppSignals.recentlyUsedAppSignals(connectedSoftwareInfo().equipmentID());
+		auto recentSignals = m_recentAppSignals.recentlyUsedAppSignals(connectedSoftwareInfo().equipmentID().toStdString());
 		if (recentSignals.empty() == true)
 		{
 			QThread::yieldCurrentThread();
@@ -166,21 +166,15 @@ namespace ClientLib
 			return;
 		}
 
-		thread_local std::vector<AppSignalState> states;
+		thread_local std::vector<::Proto::AppSignalState> states;
 		states.clear();
-
-		int signalStateCount = s_getSignalStateReply.appsignalstates_size();
-		states.reserve(signalStateCount);
+		states.reserve(s_getSignalStateReply.appsignalstates_size());
 
 		// If signal is not present in that AppDataService, it will be skipped in the answer
 		//
-		for (int i = 0; i < signalStateCount; i++)
-		{
-			const ::Proto::AppSignalState& protoState = s_getSignalStateReply.appsignalstates(i);
-			Q_ASSERT(protoState.hash() != 0);
-
-			states.emplace_back(protoState);
-		}
+		std::move(s_getSignalStateReply.mutable_appsignalstates()->begin(),
+				  s_getSignalStateReply.mutable_appsignalstates()->end(),
+				  std::back_inserter(states));
 
 		auto sourceId = reinterpret_cast<ClientLib::IAppSignalUpdater::SourceIdType>(QThread::currentThreadId());
 		m_signalUpdater.setStates(states, ::calcHash(m_serverSettings.equipmentId), sourceId);

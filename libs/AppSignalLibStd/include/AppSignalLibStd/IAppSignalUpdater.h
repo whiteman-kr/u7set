@@ -1,6 +1,12 @@
 #pragma once
 #include <span>
 
+namespace Proto
+{
+	class AppSignal;
+	class AppSignalState;
+} // namespace Proto
+
 namespace ClientLib
 {
 	class IAppSignalUpdater
@@ -22,7 +28,7 @@ namespace ClientLib
 
 		// Set signal params.
 		//
-		virtual void addSignals(std::span<const AppSignalParam> appSignals, const QString& appDataServiceId) = 0;
+		virtual void addSignals(std::span<const ::Proto::AppSignal> appSignals, const std::string& appDataServiceId) = 0;
 
 		// Invalidate all signal states by source sourceThreadId.
 		//
@@ -30,7 +36,7 @@ namespace ClientLib
 
 		// Set signal states by sources.
 		//
-		virtual void setStates(std::span<const AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId) = 0;
+		virtual void setStates(std::span<const ::Proto::AppSignalState> states, Hash dataServerHash, SourceIdType sourceThreadId) = 0;
 	};
 
 } // namespace ClientLib

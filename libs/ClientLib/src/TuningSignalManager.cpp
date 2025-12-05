@@ -556,7 +556,7 @@ namespace ClientLib
 		m_recentEnabled = true;
 	}
 
-	std::vector<Hash> TuningSignalManager::recentlyUsedAppSignals(const QString& dataServiceId)
+	std::vector<Hash> TuningSignalManager::recentlyUsedAppSignals(const std::string& dataServiceId)
 	{
 		std::vector<Hash> result;
 

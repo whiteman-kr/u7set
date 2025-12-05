@@ -11,6 +11,7 @@
 
 #include <AppSignalLists/DialogSignalListEditor.h>
 #include <AppSignalLists/SignalListChecker.h>
+#include <ClientLib/ServiceEndpoint.h>
 #include <SchemaClientLib/DevToolsWindow.h>
 #include <SchemaClientLib/DialogSignalSearch.h>
 #include <SchemaClientLib/SchemaListWidget.h>
@@ -1024,6 +1025,60 @@ void MonitorMainWindow::showSoftwareConnection(const QString& caption,
 	return;
 }
 
+void MonitorMainWindow::showSoftwareConnection(const QString& caption,
+											   const std::vector<ServiceConnectionState>& connectionStates,
+											   QLabel* label)
+{
+	if (label == nullptr)
+	{
+		Q_ASSERT(label);
+		return;
+	}
+
+	QString toolTipText = tr("%1:\n").arg(caption);
+
+	if (connectionStates.empty() == true)
+	{
+		toolTipText += tr("Not configured");
+	}
+
+	int statusOk = 0;
+	qint64 replyCount = 0;
+	for (const auto& state : connectionStates)
+	{
+		if (state.isConnected == true)
+		{
+			statusOk++;
+		}
+
+		replyCount += state.replyCount;
+
+		toolTipText += QString("%1 %2 (%3)\n")
+						   .arg(QString::fromStdString(state.connectedSoftwareInfo.equipmentid()))
+						   .arg(QString::fromStdString(state.peerAddr.to_string()))
+						   .arg(state.isConnected ? tr("ok") : tr("down"));
+	}
+	toolTipText = toolTipText.trimmed();
+
+	label->setText(caption);
+	label->setToolTip(toolTipText);
+
+	QString statusText;
+
+	if (connectionStates.size() <= 1)
+	{
+		statusText = tr("%1: %2 (Replies: %3)").arg(caption).arg(statusOk ? tr("ok") : tr("down")).arg(replyCount);
+	}
+	else
+	{
+		statusText = tr("%1: %2/%3 (Replies: %4)").arg(caption).arg(statusOk).arg(connectionStates.size()).arg(replyCount);
+	}
+
+	label->setText(statusText);
+
+	return;
+}
+
 void MonitorMainWindow::exit()
 {
 	close();
@@ -1441,7 +1496,7 @@ void MonitorMainWindow::slot_trends()
 
 void MonitorMainWindow::slot_signalLog()
 {
-	SignalLogDialog::createDialog(m_adsConnection.signalLog(),
+	SignalLogDialog::createDialog(m_signalLog,
 								  m_signalManager,
 								  &m_appSignalListSet,
 								  configController().configInfo().project,
@@ -1456,10 +1511,10 @@ void MonitorMainWindow::slot_updateSignalLogText()
 {
 	assert(m_signalLogButton);
 
-	auto counter = m_adsConnection.signalLog().updateCounter();
+	auto counter = m_signalLog.updateCounter();
 	if (counter != m_signalLogLastUpdate)
 	{
-		const auto& [records, cacheCounter] = m_adsConnection.signalLog().getRecords();
+		const auto& [records, cacheCounter] = m_signalLog.getRecords();
 
 		const auto& config = configController().configuration();
 
@@ -1631,8 +1686,12 @@ void MonitorMainWindow::slot_configurationArrived(MonitorConfigSettings configur
 
 	// Update AppSignalManager with specific data
 	//
-	m_adsConnection.updateConnections(m_configController.softwareInfo(), configuration.appDataServices);
-	m_adsConnection.signalLog().setEnabled(configuration.signalLogEnable);
+	::Network::SoftwareInfo softwareInfo;
+	m_configController.softwareInfo().serializeTo(&softwareInfo);
+
+	m_adsConnection.updateConnections(softwareInfo, toServiceEndpoint(configuration.appDataServices));
+
+	m_signalLog.setEnabled(configuration.signalLogEnable);
 
 	m_tuningConnection.updateConnections(m_configController.softwareInfo(),
 										 configuration.tuningServices,

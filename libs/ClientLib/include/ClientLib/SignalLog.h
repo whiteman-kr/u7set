@@ -1,4 +1,6 @@
 #pragma once
+#include <AdsConnectionLib/ISignalLogUpdater.h>
+
 #include "../AppSignalLib/DiscretesLogRecord.h"
 
 #include <memory>
@@ -12,7 +14,7 @@ namespace ClientLib
 	class SignalLogPrivate;
 
 
-	class SignalLog final
+	class SignalLog final : public ClientLib::ISignalLogUpdater
 	{
 	public:
 		SignalLog();
@@ -24,24 +26,28 @@ namespace ClientLib
 		SignalLog& operator=(SignalLog&&) = delete;
 
 	public:
-		void clear();
+		// -- ISignalLogUpdater
+		//
+		virtual void clear() override;
 
-		bool enabled() const;
+		virtual bool enabled() const override;
 		void setEnabled(bool enable);
+
+		/// Add records to the log.
+		///
+		virtual void add(const std::string& adsId, ISignalLogUpdater::RecordIterator begin, ISignalLogUpdater::RecordIterator end) override;
+
+		/// Delete records which are less than recordId.
+		///
+		virtual void deleteUpTo(const std::string& adsId, int64_t recordId) override;
+
+		virtual std::optional<ISignalLogUpdater::TimeStampType> getNextAckUpTo() override;
+
+		// -- End of ISignalLogUpdater
 
 		/// Send an acknowledgment for all records `up to`, including plantTime.
 		///
 		bool sendAckUpTo(TimeStamp plantTime);
-
-		std::optional<TimeStamp> getNextAckUpTo();
-
-		/// Add records to the log.
-		///
-		void add(const QString& adsId, std::span<const DiscretesLogRecord> records);
-
-		/// Delete records which are less than recordId.
-		///
-		void deleteUpTo(const QString& adsId, qint64 recordId);
 
 		/// Get all records in the log.
 		/// Returns a pair:

@@ -13,10 +13,10 @@ namespace
 	class MockSignalDataServer : public ClientLib::ISignalDataServer
 	{
 	public:
-		MOCK_METHOD(QStringList, dataServiceIds, (const QString& appSignalId), (const, override));
-		MOCK_METHOD(bool, dataServiceHasSignal, (const QString& serviceEquipmentId, const QString& signalId), (const, override));
-		MOCK_METHOD(bool, dataServiceHasSignal, (const QString& serviceEquipmentId, Hash signalHash), (const, override));
-		MOCK_METHOD(std::vector<Hash>, dataServiceSignals, (const QString& serviceEquipmentId), (const, override));
+		MOCK_METHOD(std::vector<std::string>, dataServiceIds, (const std::string& appSignalId), (const, override));
+		MOCK_METHOD(bool, dataServiceHasSignal, (const std::string& serviceEquipmentId, const std::string& signalId), (const, override));
+		MOCK_METHOD(bool, dataServiceHasSignal, (const std::string& serviceEquipmentId, Hash signalHash), (const, override));
+		MOCK_METHOD(std::vector<Hash>, dataServiceSignals, (const std::string& serviceEquipmentId), (const, override));
 	};
 } // namespace
 
@@ -165,10 +165,9 @@ TEST_F(RtDataProviderTests, discreteData)
 
 	MockSignalDataServer signalDataServer;
 
-	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const QString&>(Not(Eq(appSignalId)))))
-		.Times(0);
+	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const std::string&>(Not(Eq(appSignalId))))).Times(0);
 
-	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const QString&>(Eq(appSignalId))))
+	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const std::string&>(Eq(appSignalId))))
 		.Times(AtLeast(20))
 		.WillRepeatedly(Return(true));
 
@@ -197,7 +196,8 @@ TEST_F(RtDataProviderTests, discreteData)
 	// Check signal patters.
 	//
 	adsRtConnection.setData(E::RtTrendsSamplePeriod::sp_5ms, {appSignalId});
-	adsRtConnection.setSamplePeriod(E::RtTrendsSamplePeriod::sp_10s); // Should not influence to the data as discrete data is not apperture based.
+	adsRtConnection.setSamplePeriod(
+		E::RtTrendsSamplePeriod::sp_10s);         // Should not influence to the data as discrete data is not apperture based.
 
 	std::mutex dataMutex;
 	std::deque<TrendLib::TrendStateItem> states0; // States received from AppDataServices[0]
@@ -299,7 +299,7 @@ TEST_F(RtDataProviderTests, discreteData)
 			auto state = states1.front();
 			states1.pop_front();
 
-			//qDebug() << "1 " << state.plant << " " << state.value << " " << state.isValidFlag();
+			// qDebug() << "1 " << state.plant << " " << state.value << " " << state.isValidFlag();
 
 			if (lastState1.plant == 0)
 			{
@@ -330,22 +330,22 @@ TEST_F(RtDataProviderTests, mixedData)
 {
 	QString softwareId{"#SYSTEMID_CLIENTTEST_WS03_MONITOR"};
 
-	QString discreteSignalId{"#CT_RT_NOT_0101"}; // Expected pattern is 01010101....
-	QString intSignalId{"#CT_RT_ADDSI2"};        // Expected pattern is 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, ...
-	QString floatSignalId{
+	std::string discreteSignalId{"#CT_RT_NOT_0101"}; // Expected pattern is 01010101....
+	std::string intSignalId{"#CT_RT_ADDSI2"};        // Expected pattern is 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, ...
+	std::string floatSignalId{
 		"#CT_RT_ADDFP"}; // Expected pattern is 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.12, ...
 
 	MockSignalDataServer signalDataServer;
 
-	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const QString&>(Eq(discreteSignalId))))
+	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const std::string&>(Eq(discreteSignalId))))
 		.Times(AtLeast(20))
 		.WillRepeatedly(Return(true));
 
-	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const QString&>(Eq(intSignalId))))
+	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const std::string&>(Eq(intSignalId))))
 		.Times(AtLeast(20))
 		.WillRepeatedly(Return(true));
 
-	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const QString&>(Eq(floatSignalId))))
+	EXPECT_CALL(signalDataServer, dataServiceHasSignal(_, Matcher<const std::string&>(Eq(floatSignalId))))
 		.Times(AtLeast(20))
 		.WillRepeatedly(Return(true));
 
@@ -373,7 +373,9 @@ TEST_F(RtDataProviderTests, mixedData)
 
 	// Check signal patters.
 	//
-	adsRtConnection.setData(E::RtTrendsSamplePeriod::sp_5ms, QStringList{discreteSignalId, intSignalId, floatSignalId});
+	adsRtConnection.setData(
+		E::RtTrendsSamplePeriod::sp_5ms,
+		QStringList{QString::fromStdString(discreteSignalId), QString::fromStdString(intSignalId), QString::fromStdString(floatSignalId)});
 
 	struct Data
 	{
@@ -445,7 +447,7 @@ TEST_F(RtDataProviderTests, mixedData)
 
 	// Ads1, discrete signal
 	{
-		auto& states = receivedData.getStates(AppDataServices[0].equipmentId, discreteSignalId);
+		auto& states = receivedData.getStates(AppDataServices[0].equipmentId, QString::fromStdString(discreteSignalId));
 		EXPECT_GT(states.size(), 10);
 
 		TrendLib::TrendStateItem lastState{};
@@ -472,7 +474,7 @@ TEST_F(RtDataProviderTests, mixedData)
 
 	// Ads2, discrete signals
 	{
-		auto& states = receivedData.getStates(AppDataServices[1].equipmentId, discreteSignalId);
+		auto& states = receivedData.getStates(AppDataServices[1].equipmentId, QString::fromStdString(discreteSignalId));
 		EXPECT_GT(states.size(), 10);
 
 		TrendLib::TrendStateItem lastState{};
@@ -499,7 +501,7 @@ TEST_F(RtDataProviderTests, mixedData)
 
 	// Ads1, intSignalId
 	{
-		auto& states = receivedData.getStates(AppDataServices[0].equipmentId, intSignalId);
+		auto& states = receivedData.getStates(AppDataServices[0].equipmentId, QString::fromStdString(intSignalId));
 		EXPECT_GT(states.size(), 10);
 
 		TrendLib::TrendStateItem lastState{};
@@ -525,7 +527,7 @@ TEST_F(RtDataProviderTests, mixedData)
 
 	// Ads2, intSignalId
 	{
-		auto& states = receivedData.getStates(AppDataServices[1].equipmentId, intSignalId);
+		auto& states = receivedData.getStates(AppDataServices[1].equipmentId, QString::fromStdString(intSignalId));
 		EXPECT_GT(states.size(), 10);
 
 		TrendLib::TrendStateItem lastState{};
@@ -551,7 +553,7 @@ TEST_F(RtDataProviderTests, mixedData)
 
 	// Ads1, floatSignalId
 	{
-		auto& states = receivedData.getStates(AppDataServices[0].equipmentId, floatSignalId);
+		auto& states = receivedData.getStates(AppDataServices[0].equipmentId, QString::fromStdString(floatSignalId));
 		EXPECT_GT(states.size(), 10);
 
 		TrendLib::TrendStateItem lastState{};
@@ -577,7 +579,7 @@ TEST_F(RtDataProviderTests, mixedData)
 
 	// Ads2, floatSignalId
 	{
-		auto& states = receivedData.getStates(AppDataServices[1].equipmentId, floatSignalId);
+		auto& states = receivedData.getStates(AppDataServices[1].equipmentId, QString::fromStdString(floatSignalId));
 		EXPECT_GT(states.size(), 10);
 
 		TrendLib::TrendStateItem lastState{};

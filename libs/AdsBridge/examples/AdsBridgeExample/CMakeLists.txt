@@ -6,7 +6,7 @@ project(AdsBridgeExample
 	HOMEPAGE_URL "radiy.com"
 )
 
-find_package(AdsBridge REQUIRED)
+find_package(AdsBridge CONFIG REQUIRED)
 
 add_executable(AdsBridgeExample
 	src/dump.cpp

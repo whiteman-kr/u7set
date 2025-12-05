@@ -1,6 +1,6 @@
-#include "ClientGrpc.h"
+#include "../include/AdsConnectionLib/ClientGrpc.h"
 
-#include <CommonLib/u7_vld.h>
+#include <CommonStdLib/u7_vld.h>
 
 #include <grpcpp/create_channel.h>
 

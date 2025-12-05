@@ -1,5 +1,7 @@
 #pragma once
+
 #include <span>
+#include <string>
 #include <vector>
 
 namespace ClientLib
@@ -14,7 +16,7 @@ namespace ClientLib
 		virtual void addRecentAppSignal(Hash h) = 0;
 		virtual void addRecentAppSignals(std::span<const Hash> hashes) = 0;
 
-		virtual std::vector<Hash> recentlyUsedAppSignals(const QString& appDataServivceId) = 0;
+		virtual std::vector<Hash> recentlyUsedAppSignals(const std::string& appDataServivceId) = 0;
 		virtual bool hasRecentlyUsedAppSignals() = 0;
 	};
 

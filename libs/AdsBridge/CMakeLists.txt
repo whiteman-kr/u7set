@@ -8,7 +8,7 @@ project(
 	HOMEPAGE_URL "radiy.com"
 )
 
-find_package(Qt6 REQUIRED COMPONENTS Network)
+find_package(pugixml CONFIG REQUIRED)
 
 #
 # AdsBridge
@@ -21,14 +21,17 @@ add_library(Radiy::${TARGET} ALIAS ${TARGET})
 target_sources(
 	${TARGET}
 	PRIVATE
-		./include/AdsBridge/AdsBridge.def
 		./include/AdsBridge/AdsBridge.h
 		./include/AdsBridge/Common.h
 		
+		./src/AdsbAppSignalManager.cpp
+		./src/AdsbAppSignalManager.h
 		./src/AdsBridge.cpp
 		./src/AdsBridgeFacade.cpp
 		./src/AdsBridgeLogFile.cpp
 		./src/AdsBridgeLogFile.h
+		./src/AdsBridgeResources.cpp
+		./src/AdsBridgeResources.h
  )
 
 set_compiler_standard(${TARGET})
@@ -37,11 +40,9 @@ add_code_coverage_options(${TARGET} CODE_COVERAGE)
 target_precompile_headers(
 	${TARGET} 
 	PRIVATE
-		<CommonLib/Hash.h>
-		<CommonLib/Types.h>
+		<CommonStdLib/HashStd.h>
 
-		"../../AppSignalLib/AppSignalParam.h"
-		"../../AppSignalLib/AppSignalState.h"
+		<Network.pb.h>
 )
 
 # Include directories
@@ -53,12 +54,18 @@ target_include_directories(
 		$<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${TARGET} PRIVATE Qt6::Network)
-target_link_libraries(${TARGET} PRIVATE AppSignalLib OnlineLib ClientLib)
-
-# Qt6_DIR points to  .../Qt/6.x.x/msvcXXXX_64/lib/cmake/Qt6
+# Hide all symbols except explicitly exported ones
 #
-get_filename_component(Qt6_BIN_DIR "${Qt6_DIR}/../../../bin" ABSOLUTE)
+target_compile_definitions(${TARGET} PRIVATE ADSBRIDGE_EXPORT)
+
+if(MSVC)
+	set_target_properties(${TARGET} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS OFF)
+else()
+	target_compile_options(${TARGET} PRIVATE -fvisibility=hidden)
+endif()
+
+target_link_libraries(${TARGET} PRIVATE pugixml)
+target_link_libraries(${TARGET} PRIVATE AdsConnectionLib)
 
 #
 # INSTALL, based on video tutorial https://www.youtube.com/watch?v=OMx3cZj_hoo&ab_channel=Codeforyourself
@@ -121,46 +128,6 @@ install(
 		"${CMAKE_CURRENT_SOURCE_DIR}/README.md"
 	DESTINATION ./
 )
-
-#
-# Post-install deployment for AdsBridge.dll  (Windows only)
-#
-if(WIN32)
-	# 1. Find windeployqt.exe
-	#    <QtPrefix>/bin/windeployqt.exe works for every official Qt 6 build
-	#
-	find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
-	get_filename_component(Qt6_BIN_DIR "${Qt6_DIR}/../../../bin" ABSOLUTE)
-	set(WINDEPLOYQT_EXE "${Qt6_BIN_DIR}/windeployqt.exe")
-	if(NOT EXISTS "${WINDEPLOYQT_EXE}")
-		message(FATAL_ERROR "Cannot find windeployqt.exe in ${Qt6_BIN_DIR}")
-	endif()
-	
-	# 2. Configure a tiny script that will run *during install*
-	#
-	set(ADSBRIDGE_DLL_NAME "$<TARGET_FILE_NAME:AdsBridge>")
-	configure_file(
-		${CMAKE_CURRENT_LIST_DIR}/cmake/AdsBridge_postinstall.cmake.in
-		${CMAKE_CURRENT_BINARY_DIR}/cmake/AdsBridge_postinstall.cmake
-		@ONLY
-	)
-	
-	# --------------------------------------------------------------
-	# before you call install(SCRIPT AdsBridge_postinstall.cmake)
-	# Expand generator expression *during* build?system generation
-	file(GENERATE
-		OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/AdsBridge_vars.cmake"
-		CONTENT "set(ADSBRIDGE_DLL_NAME \"$<TARGET_FILE_NAME:AdsBridge>\")\n"
-	)
-	
-	# this sets ADSBRIDGE_DLL_PATH to the real, config-specific full path,
-	# e.g.  D:/.../build/Debug/AdsBridge.dll
-	#
-	# now execute BOTH helper scripts during "cmake --install"
-	install(SCRIPT  "${CMAKE_CURRENT_BINARY_DIR}/AdsBridge_vars.cmake")
-	install(SCRIPT  "${CMAKE_CURRENT_BINARY_DIR}/cmake/AdsBridge_postinstall.cmake")
-
-endif(WIN32)
 
 install(
 	DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/dev/BridgeApiHelp/

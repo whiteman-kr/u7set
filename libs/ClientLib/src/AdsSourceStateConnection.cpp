@@ -27,7 +27,7 @@ namespace ClientLib
 		return m_pimpl->updateConnections(softwareInfo, appDataService);
 	}
 
-	std::vector<Tcp::ConnectionState> AdsSourceStateConnection::adsConnectionStates() const
+	std::vector<ServiceConnectionState> AdsSourceStateConnection::adsConnectionStates() const
 	{
 		return m_pimpl->adsConnectionStates();
 	}

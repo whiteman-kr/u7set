@@ -9,7 +9,8 @@
         "libpq",
         "lua",
         "openssl",
-        "protobuf"
+        "protobuf",
+        "pugixml"
     ],
     "overrides": [
         {
@@ -39,6 +40,10 @@
         {
             "name": "protobuf",
             "version": "5.29.2"
+        },
+        {
+          "name": "pugixml",
+          "version": "1.15#1"
         }
     ]
 }

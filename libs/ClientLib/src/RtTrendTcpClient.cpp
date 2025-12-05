@@ -195,11 +195,12 @@ namespace ClientLib
 		m_dataMutex.lock();
 
 		E::RtTrendsSamplePeriod samplePeriod = m_samplePeriod;
+		auto serviceEquipmentId = connectedSoftwareInfo().equipmentID().toStdString();
 
 		std::set<Hash> signalSet;
 		for (const QString& signalId : m_signalSet)
 		{
-			if (m_signalDataServer.dataServiceHasSignal(connectedSoftwareInfo().equipmentID(), signalId) == true)
+			if (m_signalDataServer.dataServiceHasSignal(serviceEquipmentId, signalId.toStdString()) == true)
 			{
 				signalSet.insert(::calcHash(signalId));
 			}

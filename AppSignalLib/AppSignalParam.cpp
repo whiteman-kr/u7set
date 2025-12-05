@@ -572,9 +572,16 @@ bool AppSignalParam::PrivateData::load(const ::Proto::AppSignal& message)
 	s.loadFromProto(message);
 	s.cacheSpecPropValues();
 
-	m_hash = message.calcparam().hash();
-
 	load(s);
+
+#ifdef QT_DEBUG
+	Hash cph = message.calcparam().hash();
+	if (cph != 0)
+	{
+		assert(cph == m_hash);
+	}
+	assert(::calcHash(m_appSignalId) == ::calcHash(message.appsignalid()));
+#endif //  QT_DEBUG
 
 	return true;
 }
@@ -582,6 +589,7 @@ bool AppSignalParam::PrivateData::load(const ::Proto::AppSignal& message)
 void AppSignalParam::PrivateData::load(const ::AppSignal& s)
 {
 	m_appSignalId = s.appSignalID();
+	m_hash = ::calcHash(m_appSignalId);
 
 	m_customSignalId = s.customAppSignalID();
 	m_caption = s.caption();

@@ -1,5 +1,7 @@
 #include "AdsSourceStateConnectionPrivate2.h"
-#include "ClientGrpc.h"
+#include "../include/ClientLib/LoggerStdAdapter.h"
+#include <AdsConnectionLib/ClientGrpc.h>
+
 
 namespace
 {
@@ -10,17 +12,18 @@ namespace ClientLib
 {
 	// AdsClientGrpc
 	//
-	class AdsSourceStateClientGrpc : public ClientGrpc<Grpc::AppDataSrv>
+	class AdsSourceStateClientGrpc : public LoggerStdAdapter,
+									 public ClientGrpc<Grpc::AppDataSrv>
 	{
 	public:
-		explicit AdsSourceStateClientGrpc(const SoftwareInfo& softwareInfo, const SoftwareEndpoint::AppDataService& ads, ILogFile& logFile);
+		explicit AdsSourceStateClientGrpc(const Network::SoftwareInfo& softwareInfo, const ServiceEndpoint& ads, ILogFile& logFile);
 
 		virtual ~AdsSourceStateClientGrpc();
 
 		// Implementing ClientConnectionStatistics
 		//
 	public:
-		virtual QString statsObjectName() override;
+		virtual std::string statsObjectName() override;
 
 	public:
 		std::expected<void, QString> getAppDataSourcesInfo();
@@ -30,22 +33,25 @@ namespace ClientLib
 		virtual void clientCommunicationLoop(std::stop_token stoken) override;
 		void clientCommunicationLoopImpl(std::stop_token stoken);
 
+		QString logPrefix() { return QString::fromStdString(m_logPrefix); }
+
 	public:
-		const SoftwareEndpoint::AppDataService& ads() const;
+		const ServiceEndpoint& ads() const;
 
 		std::vector<ClientLib::AppDataSourceState> appDataSourceStates() const;
 
 	private:
-		const SoftwareEndpoint::AppDataService m_ads;
+		const ServiceEndpoint m_ads;
 
 		mutable QReadWriteLock m_appDataSourceStatesLock;            // For access to m_appDataSourceStates
 		std::map<quint64, AppDataSourceState> m_appDataSourceStates; // Key is source unique id
 	};
 
-	AdsSourceStateClientGrpc::AdsSourceStateClientGrpc(const SoftwareInfo& softwareInfo,
-													   const SoftwareEndpoint::AppDataService& ads,
+	AdsSourceStateClientGrpc::AdsSourceStateClientGrpc(const Network::SoftwareInfo& softwareInfo,
+													   const ServiceEndpoint& ads,
 													   ILogFile& logFile) :
-		ClientGrpc{softwareInfo, ads.equipmentId, ads.address, logFile, ads.shortenId},
+		LoggerStdAdapter{logFile},
+		ClientGrpc{softwareInfo, ads, static_cast<LoggerStdAdapter&>(*this), ads.shortenId},
 		m_ads{ads}
 	{
 		m_tcpState.name = "AdsSourceStateClientGrpc " + ads.shortenId;
@@ -57,7 +63,7 @@ namespace ClientLib
 		shutUp();
 	}
 
-	QString AdsSourceStateClientGrpc::statsObjectName()
+	std::string AdsSourceStateClientGrpc::statsObjectName()
 	{
 		return "AdsSourceStateClientGrpc";
 	}
@@ -75,7 +81,8 @@ namespace ClientLib
 
 		if (status.ok() == false)
 		{
-			return std::unexpected<QString>(QString{"Failed to get app data source info, error %1"}.arg(statusToString(status)));
+			QString error = QString::fromStdString(statusToString(status));
+			return std::unexpected<QString>(QString{"Failed to get app data source info, error %1"}.arg(error));
 		}
 
 		incReplyCount();
@@ -110,7 +117,8 @@ namespace ClientLib
 
 		if (status.ok() == false)
 		{
-			return std::unexpected<QString>(QString{"Failed to get app data source states, error %1"}.arg(statusToString(status)));
+			QString error = QString::fromStdString(statusToString(status));
+			return std::unexpected<QString>(QString{"Failed to get app data source states, error %1"}.arg(error));
 		}
 
 		incReplyCount();
@@ -126,10 +134,8 @@ namespace ClientLib
 			}
 			else
 			{
-				m_log.writeWarning(QString{"Received app data source state for unknown source id %1 from ADS %2 at address %3"}
-									   .arg(id)
-									   .arg(m_ads.equipmentId)
-									   .arg(m_ads.address.toString()));
+				logFile().writeWarning(QString{"Received app data source state for unknown source id %1 from ADS %2"}.arg(id).arg(
+					QString::fromStdString(m_ads.to_string())));
 			}
 		}
 
@@ -149,11 +155,9 @@ namespace ClientLib
 		}
 		catch (std::exception& e)
 		{
-			m_log.writeError(m_logPrefix +
-							 QString{"Exception in AdsSourceStateClientGrpc::clientCommunicationLoopImpl for ADS %1 at address %2: %3"}
-								 .arg(m_ads.equipmentId)
-								 .arg(m_ads.address.toString())
-								 .arg(e.what()));
+			logFile().writeError(logPrefix() + QString{"Exception in AdsSourceStateClientGrpc::clientCommunicationLoopImpl for ADS %1: %2"}
+												   .arg(QString::fromStdString(m_ads.to_string()))
+												   .arg(e.what()));
 		}
 
 		{
@@ -161,7 +165,8 @@ namespace ClientLib
 			m_appDataSourceStates.clear();
 		}
 
-		m_log.writeMessage(m_logPrefix + QString{"AdsSourceStateClientGrpc, Worker for ADS %1 gRPC client exiting."}.arg(m_ads.shortenId));
+		logFile().writeMessage(logPrefix() + QString{"AdsSourceStateClientGrpc, Worker for ADS %1 gRPC client exiting."}.arg(
+												 QString::fromStdString(m_ads.to_string())));
 		return;
 	}
 
@@ -170,11 +175,9 @@ namespace ClientLib
 		auto result = getAppDataSourcesInfo();
 		if (result.has_value() == false)
 		{
-			m_log.writeError(m_logPrefix +
-							 QString{"AdsSourceStateClientGrpc, Failed to get app data source info from ADS %1 at address %2: %3"}
-								 .arg(m_ads.equipmentId)
-								 .arg(m_ads.address.toString())
-								 .arg(result.error()));
+			logFile().writeError(logPrefix() + QString{"AdsSourceStateClientGrpc, Failed to get app data source info from ADS %1: %2"}
+												   .arg(QString::fromStdString(m_ads.to_string()))
+												   .arg(result.error()));
 			return;
 		}
 
@@ -183,18 +186,16 @@ namespace ClientLib
 			auto resultState = getAppDataSourcesState();
 			if (resultState.has_value() == false)
 			{
-				m_log.writeError(m_logPrefix +
-								 QString{"AdsSourceStateClientGrpc, Failed to get app data source states from ADS %1 at address %2: %3"}
-									 .arg(m_ads.equipmentId)
-									 .arg(m_ads.address.toString())
-									 .arg(resultState.error()));
+				logFile().writeError(logPrefix() + QString{"AdsSourceStateClientGrpc, Failed to get app data source states from ADS %1: %2"}
+													   .arg(QString::fromStdString(m_ads.to_string()))
+													   .arg(resultState.error()));
 			}
 
 			std::this_thread::sleep_for(UpdateStateInterval);
 		}
 	}
 
-	const SoftwareEndpoint::AppDataService& AdsSourceStateClientGrpc::ads() const
+	const ServiceEndpoint& AdsSourceStateClientGrpc::ads() const
 	{
 		return m_ads;
 	}
@@ -216,25 +217,25 @@ namespace ClientLib
 
 	// AdsSourceStateClientGrpc
 	//
-	AdsSourceStateConnectionPrivate2::Connection::Connection(const SoftwareInfo& softwareInfo,
-															 const SoftwareEndpoint::AppDataService& ads,
+	AdsSourceStateConnectionPrivate2::Connection::Connection(const Network::SoftwareInfo& softwareInfo,
+															 const ServiceEndpoint& ads,
 															 ILogFile& logFile) :
 		m_client{std::make_unique<ClientLib::AdsSourceStateClientGrpc>(softwareInfo, ads, logFile)}
 	{
 		return;
 	}
 
-	HostAddressPort AdsSourceStateConnectionPrivate2::Connection::address() const
-	{
-		return m_client->ads().address;
-	}
+	// HostAddressPort AdsSourceStateConnectionPrivate2::Connection::address() const
+	//{
+	//	return m_client->ads().address;
+	// }
 
-	const SoftwareEndpoint::AppDataService& AdsSourceStateConnectionPrivate2::Connection::server() const
+	const ServiceEndpoint& AdsSourceStateConnectionPrivate2::Connection::server() const
 	{
 		return m_client->ads();
 	}
 
-	Tcp::ConnectionState AdsSourceStateConnectionPrivate2::Connection::tcpConnectionState() const
+	ServiceConnectionState AdsSourceStateConnectionPrivate2::Connection::tcpConnectionState() const
 	{
 		return m_client->statsConnectionState();
 	}
@@ -265,17 +266,20 @@ namespace ClientLib
 
 		m_conns.clear(); // it will stop all connection threads and destroy them
 
+		Network::SoftwareInfo si;
+		softwareInfo.serializeTo(&si);
+
 		for (const SoftwareEndpoint::AppDataService& ads : appDataService)
 		{
-			m_conns.emplace_back(softwareInfo, ads, *m_logFile.logFile());
+			m_conns.emplace_back(si, toServiceEndpoint(ads), *m_logFile.logFile());
 		}
 
 		return;
 	}
 
-	std::vector<Tcp::ConnectionState> AdsSourceStateConnectionPrivate2::adsConnectionStates() const
+	std::vector<ServiceConnectionState> AdsSourceStateConnectionPrivate2::adsConnectionStates() const
 	{
-		std::vector<Tcp::ConnectionState> states;
+		std::vector<ServiceConnectionState> states;
 		states.reserve(m_conns.size());
 
 		for (const Connection& c : m_conns)

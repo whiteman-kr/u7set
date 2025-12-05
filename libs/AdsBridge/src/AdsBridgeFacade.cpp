@@ -1,170 +1,316 @@
 #include "AdsBridgeFacade.h"
 #include "AdsBridgeLogFile.h"
+#include "version.h"
 
-#include "../../OnlineLib/SoftwareSettings.h"
-#include "../../OnlineLib/TcpClientStatistics.h"
-#include "../../UtilsLib/XmlHelper.h"
+#include <AdsConnectionLib/AdsConnection.h>
+#include <AdsConnectionLib/ClientConnStatsStd.h>
 
-#include <ClientLib/AdsConnection.h>
-#include <ClientLib/AppSignalManager.h>
+#include "pugixml.hpp"
 
+#include <format>
 #include <span>
+
+#if defined(_WIN32)
+	#include <Lmcons.h> // UNLEN, etc.
+	#include <Windows.h>
+#else
+	#include <pwd.h>
+	#include <sys/types.h>
+	#include <unistd.h>
+#endif
+
+namespace
+{
+	const int AdsBridgeSoftwareType = 9013;
+
+	std::string hostname()
+	{
+		std::array<char, 256> buf{};
+
+#if defined(_WIN32)
+		DWORD size = static_cast<DWORD>(buf.size());
+
+		if (GetComputerNameA(buf.data(), &size))
+		{
+			buf.back() = '\0'; // Ensure null-termination
+			return std::string(buf.data(), size);
+		}
+#else
+		if (gethostname(buf.data(), buf.size()) == 0)
+		{
+			buf.back() = '\0'; // Ensure null-termination
+			return std::string(buf.data());
+		}
+#endif
+		return {};
+	}
+
+	std::string username()
+	{
+#if defined(_WIN32)
+		std::array<char, UNLEN + 1> buf{};
+		DWORD size = static_cast<DWORD>(buf.size());
+		if (GetUserNameA(buf.data(), &size))
+		{
+			buf.back() = '\0';                        // Ensure null-termination
+			return std::string(buf.data(), size - 1); // size includes '\0'
+		}
+#else
+		// Thread-safe version
+		//
+		struct passwd pwd;
+		struct passwd* result = nullptr;
+		std::array<char, 16384> buf{}; // Common buffer size for getpwuid_r
+
+		if (getpwuid_r(getuid(), &pwd, buf.data(), buf.size(), &result) == 0 && result)
+		{
+			return std::string(pwd.pw_name);
+		}
+#endif
+		return {};
+	}
+
+	::Network::SoftwareInfo makeSoftwareInfo(const std::string& equipmentId)
+	{
+		::Network::SoftwareInfo softwareInfo;
+
+		softwareInfo.set_softwaretype(AdsBridgeSoftwareType);
+		softwareInfo.set_equipmentid(equipmentId);
+
+		softwareInfo.set_majorversion(U7SET_MAJOR_VERSION);
+		softwareInfo.set_minorversion(U7SET_MINOR_VERSION);
+		softwareInfo.set_patchversion(U7SET_PATCH_VERSION);
+		softwareInfo.set_releasetype(U7SET_RELEASE_TYPE);
+		softwareInfo.set_branchname(U7SET_BRANCH_NAME);
+		softwareInfo.set_commithash(U7SET_COMMIT_HASH);
+		softwareInfo.set_builddate(U7SET_BUILD_DATE);
+		softwareInfo.set_pipelineid(U7SET_PIPELINE_ID);
+
+		softwareInfo.set_hostname(hostname());
+		softwareInfo.set_osusername(username());
+
+		return softwareInfo;
+	}
+} // namespace
 
 namespace AdsBridge
 {
-	AdsBridgeFacade::AdsBridgeFacade(ILogFile* log) :
+	AdsBridgeFacade::AdsBridgeFacade(Resources& res, ILoggerStd& log) :
+		m_res{res},
 		m_log{log},
-		m_signals{std::make_unique<ClientLib::AppSignalManager>(m_log)},
-		m_adsConnection{std::make_unique<ClientLib::AdsConnection>(*m_signals.get(), m_signals.get(), m_log)}
+		m_signals{std::make_unique<AdsBridge::AdsbAppSignalManager>(res)},
+		m_adsConnection{std::make_unique<ClientLib::AdsConnection>(*m_signals.get(), m_signals.get(), nullptr, log)}
 	{
-		log->writeMessage("AdsBridgeFacade::AdsBridgeFacade()");
+		log.writeMessage("AdsBridgeFacade::AdsBridgeFacade()");
 	}
 
 	AdsBridgeFacade::~AdsBridgeFacade()
 	{
-		m_log->writeMessage("AdsBridgeFacade::~AdsBridgeFacade()");
+		m_log.writeMessage("AdsBridgeFacade::~AdsBridgeFacade()");
 	}
 
-	bool AdsBridgeFacade::setConfiguration(const QByteArray& data, QString profile /*= SettingsProfile::DEFAULT*/)
+	bool AdsBridgeFacade::setConfiguration(const std::vector<char>& data, const std::string& profile)
 	{
+		constexpr std::string_view elementConfiguration = "Configuration";
+		constexpr std::string_view elementSoftware = "Software";
+		constexpr std::string_view elementSettingsSet = "SettingsSet";
+		constexpr std::string_view elementSettings = "Settings";
+		constexpr std::string_view elementAppDataService = "AppDataService";
+
+
+		constexpr std::string_view attributeCaption = "Caption";
+		constexpr std::string_view attributeEquipmentId = "EquipmentID";
+		constexpr std::string_view attributeType = "Type";
+		constexpr std::string_view attributeProfile = "Profile";
+		constexpr std::string_view attributeClientRequestIP = "ClientRequestIP";
+		constexpr std::string_view attributeClientRequestPort = "ClientRequestPort";
+
+		pugi::xml_document doc;
+		if (auto result = doc.load_buffer(data.data(), data.size()); //
+			result == false)
+		{
+			m_log.writeError(std::format("AdsBridgeFacade::setConfiguration(), Failed to parse XML data: {}", result.description()));
+			return false;
+		}
+
 		bool result = true;
-
-		// Read Xml data and get software info.
-		//
-		XmlReadHelper xmlReader{data};
-		xmlReader.findElement(XmlElement::SOFTWARE);
-
-		if (xmlReader.checkElement(XmlElement::SOFTWARE) == false)
-		{
-			m_log->writeError(QString{"AdsBridgeFacade::setConfiguration(), Invalid XML data %1."}.arg(XmlElement::SOFTWARE));
-			return false;
-		}
-
 		int typeInt = 0;
-		QString caption;
-		QString equipmentId;
-		QString controllersIds;
-		QStringList softwareControllersIds;
+		std::string equipmentId;
+		std::string caption;
+		std::vector<ServiceEndpoint> adsServices;
 
-		result &= xmlReader.readStringAttribute(XmlAttribute::CAPTION, &caption);
-		result &= xmlReader.readStringAttribute(XmlAttribute::EQUIPMENT_ID, &equipmentId);
-		result &= xmlReader.readIntAttribute(XmlAttribute::TYPE, &typeInt);
-
-		result &= xmlReader.readStringAttribute(XmlAttribute::SOFTWARE_CONTROLLERS, &controllersIds);
-		softwareControllersIds = controllersIds.split(Separator::COMMA, Qt::SkipEmptyParts);
-
-		if (result == false)
-		{
-			m_log->writeError("AdsBridgeFacade::setConfiguration(), Failed to read software XML.");
-			return false;
-		}
-
-		if (static_cast<E::SoftwareType>(typeInt) != E::SoftwareType::AdsBridge)
-		{
-			m_log->writeError("AdsBridgeFacade::setConfiguration(), Wrong software type, AdsBridge is expected.");
-			return false;
-		}
-
-		// Read settings from XML.
+		// <Configuration>
 		//
-		SoftwareSettingsSet settingsSet;
-		settingsSet.setSoftwareType(E::SoftwareType::AdsBridge);
-
-		result = settingsSet.readFromXml(data);
-		if (result == false)
 		{
-			m_log->writeError("AdsBridgeFacade::setConfiguration(), Failed to read configuration XML.");
-			return false;
-		}
+			auto nodeConfiguration = doc.child(elementConfiguration);
+			if (nodeConfiguration.empty() == true)
+			{
+				m_log.writeError("AdsBridgeFacade::setConfiguration(), Missing <Configuration> element.");
+				return false;
+			}
 
-		result = settingsSet.settingsProfileIsExists(profile);
-		if (result == false)
-		{
-			m_log->writeError(QString{"AdsBridgeFacade::setConfiguration(), Profile %1 not found."}.arg(profile));
-			return false;
-		}
+			// <Software>
+			//
+			{
+				auto nodeSoftware = nodeConfiguration.child(elementSoftware);
+				if (nodeSoftware.empty() == true)
+				{
+					m_log.writeError("AdsBridgeFacade::setConfiguration(), Missing <Software> element.");
+					return false;
+				}
 
-		auto settings = settingsSet.getSettingsProfile<AdsBridgeSettings>(profile);
-		if (settings == nullptr)
-		{
-			Q_ASSERT(settings);
-			m_log->writeError(QString{"AdsBridgeFacade::setConfiguration(), Profile %1 not found."}.arg(profile));
-			return false;
-		}
+				caption = nodeSoftware.attribute(attributeCaption.data()).as_string();
+				if (caption.empty() == true)
+				{
+					m_log.writeError("AdsBridgeFacade::setConfiguration(), Caption attribute is missing or empty.");
+					return false;
+				}
 
-		// Parse XML for getting the equipment ID ().
+				typeInt = nodeSoftware.attribute(attributeType.data()).as_int(-1);
+				if (typeInt != AdsBridgeSoftwareType)
+				{
+					m_log.writeError("AdsBridgeFacade::setConfiguration(), Wrong software type, AdsBridge is expected.");
+					return false;
+				}
+
+				equipmentId = nodeSoftware.attribute(attributeEquipmentId.data()).as_string();
+				if (equipmentId.empty() == true)
+				{
+					m_log.writeError("AdsBridgeFacade::setConfiguration(), EquipmentID attribute is missing or empty.");
+					return false;
+				}
+
+				// <SettingsSet>
+				//
+				{
+					auto nodeSettingsSet = nodeConfiguration.child(elementSettingsSet);
+					if (nodeSettingsSet.empty() == true)
+					{
+						m_log.writeError("AdsBridgeFacade::setConfiguration(), Missing <SettingsSet> element.");
+						return false;
+					}
+
+					// <Settings>
+					//
+					{
+						// Look for element <Settings> with attribute Profile == profile, inside <SettingsSet>.
+						//
+						pugi::xml_node nodeSettings;
+						for (auto settingsNode : nodeSettingsSet.children(elementSettings.data()))
+						{
+							std::string profileAttr = settingsNode.attribute(attributeProfile.data()).as_string();
+							if (profileAttr == profile)
+							{
+								nodeSettings = settingsNode;
+								break;
+							}
+						}
+
+						if (nodeSettings.empty() == true)
+						{
+							m_log.writeError(std::format("AdsBridgeFacade::setConfiguration(), Profile {} not found.", profile));
+							return false;
+						}
+
+						// <AppDataService EquipmentID="SYSTEMID_CLIENTTEST_WS01_ADS_RC1" ClientRequestIP="127.0.0.1"
+						// ClientRequestPort="13323" RtTrendsRequestIP="127.0.0.1" RtTrendsRequestPort="13324"/>
+						//
+						for (auto nodeAppDataService : nodeSettings.children(elementAppDataService.data()))
+						{
+							std::string adsEquipmentId = nodeAppDataService.attribute(attributeEquipmentId.data()).as_string();
+							if (adsEquipmentId.empty() == true)
+							{
+								m_log.writeError(
+									"AdsBridgeFacade::setConfiguration(), <AppDataService> EquipmentID attribute is missing or empty.");
+								result = false;
+								continue;
+							}
+
+							std::string clientRequestIP = nodeAppDataService.attribute(attributeClientRequestIP.data()).as_string();
+							int clientRequestPort = nodeAppDataService.attribute(attributeClientRequestPort.data()).as_int(0);
+
+							if (clientRequestIP.empty() == true || clientRequestPort == 0)
+							{
+								m_log.writeError("AdsBridgeFacade::setConfiguration(), <AppDataService> ClientRequestIP or "
+												 "ClientRequestPort attribute is missing or invalid.");
+								result = false;
+								continue;
+							}
+							adsServices.push_back(
+								ServiceEndpoint::create(adsEquipmentId, adsEquipmentId, clientRequestIP, clientRequestPort));
+
+							m_log.writeMessage(std::format("AdsBridgeFacade::setConfiguration(), Found AppDataService: {}, {}:{}",
+														   adsEquipmentId,
+														   clientRequestIP,
+														   clientRequestPort));
+						} // </AppDataService>
+					} // </Settings>
+				} // </SettingsSet>
+			} // </Software>
+		} // </Configuration>
+
+		// Set configuration.
 		//
 		setEquipmentId(equipmentId);
-
-		// Add connections.
-		//
-		m_appDataServices.assign(begin(settings->appDataServices), end(settings->appDataServices));
+		m_appDataServices = adsServices;
 
 		return result;
 	}
 
-	void AdsBridgeFacade::addAppDataService(const QString& adsEquipmentId, const QString& address, int port)
+	void AdsBridgeFacade::addAppDataService(const std::string& adsEquipmentId, const std::string& address, int port)
 	{
-		m_log->writeMessage(
-			QString("AdsBridgeFacade::addAppDataService(), Adding AppDataService: %1, %2:%3").arg(adsEquipmentId).arg(address).arg(port));
+		m_log.writeMessage(
+			std::format("AdsBridgeFacade::addAppDataService(), Adding AppDataService: {}, {}:{}", adsEquipmentId, address, port));
 
-		SoftwareEndpoint::AppDataService ads{.equipmentId = adsEquipmentId,
-											 .shortenId = adsEquipmentId,
-											 .address = HostAddressPort{address, port}};
-
-		m_appDataServices.push_back(ads);
+		m_appDataServices.push_back(ServiceEndpoint::create(adsEquipmentId, adsEquipmentId, address, port));
 
 		return;
 	}
 
 	void AdsBridgeFacade::clearAppDataServices()
 	{
-		m_log->writeMessage("AdsBridgeFacade::clearAppDataServices()");
+		m_log.writeMessage("AdsBridgeFacade::clearAppDataServices()");
 		m_appDataServices.clear();
 		return;
 	}
 
 	void AdsBridgeFacade::connect()
 	{
-		if (m_equipmentId.isEmpty() == true)
+		if (m_equipmentId.empty() == true)
 		{
-			m_log->writeError("AdsBridgeFacade::connect(), EquipmentID is empty.");
+			m_log.writeError("AdsBridgeFacade::connect(), EquipmentID is empty.");
 			return;
 		}
 
 		if (m_appDataServices.empty() == true)
 		{
-			m_log->writeWarning("AdsBridgeFacade::connect(), No AppDataService(s) to connect to.");
+			m_log.writeWarning("AdsBridgeFacade::connect(), No AppDataService(s) to connect to.");
 		}
 
-		m_log->writeMessage(QString("AdsBridgeFacade::connect(), Connecting %1 AppDataService(s)...").arg(m_appDataServices.size()));
+		m_log.writeMessage(std::format("AdsBridgeFacade::connect(), Connecting {} AppDataService(s)...", m_appDataServices.size()));
 
-		SoftwareInfo si{E::SoftwareType::Monitor, m_equipmentId};
-		m_adsConnection->updateConnections(si, m_appDataServices);
+		m_adsConnection->updateConnections(makeSoftwareInfo(m_equipmentId), m_appDataServices);
 
 		return;
 	}
 
 	void AdsBridgeFacade::close()
 	{
-		m_log->writeMessage("AdsBridgeFacade::close()");
+		m_log.writeMessage("AdsBridgeFacade::close()");
 
-		SoftwareInfo si{E::SoftwareType::Monitor, m_equipmentId};
-		m_adsConnection->updateConnections(si, {});
-
+		m_adsConnection->updateConnections(makeSoftwareInfo(m_equipmentId), {});
 		return;
 	}
 
-	const QString& AdsBridgeFacade::equipmentId() const
+	const std::string& AdsBridgeFacade::equipmentId() const
 	{
 		return m_equipmentId;
 	}
 
-	void AdsBridgeFacade::setEquipmentId(const QString& equipmentId)
+	void AdsBridgeFacade::setEquipmentId(const std::string& equipmentId)
 	{
 		m_equipmentId = equipmentId;
-
-		m_log->writeMessage("AdsBridgeFacade::setEquipmentId(), EquipmentID set to: " + equipmentId);
+		m_log.writeMessage("AdsBridgeFacade::setEquipmentId(), EquipmentID set to: " + equipmentId);
 		return;
 	}
 
@@ -182,7 +328,7 @@ namespace AdsBridge
 	{
 		if (signalParamsLoaded() == false)
 		{
-			m_log->writeWarning("AdsBridgeFacade::signalCount(): Signal parameters not fully loaded when signalCount() is called.");
+			m_log.writeWarning("AdsBridgeFacade::signalCount(): Signal parameters not fully loaded when signalCount() is called.");
 		}
 
 		return m_signals->signalsCount();
@@ -194,18 +340,19 @@ namespace AdsBridge
 
 		if (out == nullptr)
 		{
-			m_log->writeError("AdsBridgeFacade::signalList(), out is nullptr.");
+			m_log.writeError("AdsBridgeFacade::signalList(), out is nullptr.");
 			return false;
 		}
 
 		auto hashes = m_signals->signalHashes();
 		if (hashes.size() != count)
 		{
-			m_log->writeError(QString("AdsBridgeFacade::signalList(), count is invalid, expected %1.").arg(hashes.size()));
+			m_log.writeError(std::format("AdsBridgeFacade::signalList(), count is invalid, expected {}.", hashes.size()));
 			return false;
 		}
 
-		std::memcpy(out, hashes.data(), hashes.size() * sizeof(MatsSignalHash));
+		std::memset(out, 0, sizeof(MatsSignalHash) * count);
+		std::memcpy(out, hashes.data(), count * sizeof(MatsSignalHash));
 		return true;
 	}
 
@@ -215,19 +362,19 @@ namespace AdsBridge
 
 		if (structSize != sizeof(MatsAppSignalParam))
 		{
-			m_log->writeError("AdsBridgeFacade::signalParams(), structSize is invalid.");
+			m_log.writeError("AdsBridgeFacade::signalParams(), structSize is invalid.");
 			return 0;
 		}
 
 		if (signalHashes == nullptr)
 		{
-			m_log->writeError("AdsBridgeFacade::signalParams(), signalHashes is nullptr.");
+			m_log.writeError("AdsBridgeFacade::signalParams(), signalHashes is nullptr.");
 			return 0;
 		}
 
 		if (out == nullptr)
 		{
-			m_log->writeError("AdsBridgeFacade::signalParams(), out is nullptr.");
+			m_log.writeError("AdsBridgeFacade::signalParams(), out is nullptr.");
 			return 0;
 		}
 
@@ -240,39 +387,18 @@ namespace AdsBridge
 			auto signalParam = m_signals->signalParam(h);
 
 			MatsAppSignalParam& outSignal = *out;
-			outSignal = MatsAppSignalParam{};
-			outSignal.hash = h;
+			out++;
 
 			if (signalParam.has_value() == false)
 			{
-				m_log->writeWarning(QString("AdsBridgeFacade::signalParams(), Signal not found: %1").arg(h));
-				result = false;
+				outSignal.hash = h;
+				m_log.writeWarning(std::format("AdsBridgeFacade::signalParams(), Signal not found: {}", h));
 			}
 			else
 			{
+				outSignal = signalParam.value();
 				result++;
-
-				outSignal.appSignalId = getStringConstPointer(signalParam->appSignalId());
-				outSignal.customSignalId = getStringConstPointer(signalParam->customSignalId());
-
-				outSignal.caption = getStringConstPointer(signalParam->caption());
-				outSignal.equipmentId = getStringConstPointer(signalParam->equipmentId());
-				outSignal.lmEquipmentId = getStringConstPointer(signalParam->lmEquipmentId());
-				outSignal.units = getStringConstPointer(signalParam->units());
-				outSignal.tags = getStringConstPointer(signalParam->tagStringList().join(QChar(' ')));
-
-				outSignal.channel = static_cast<MatsChannel>(signalParam->channel());
-				outSignal.inOutType = static_cast<MatsSignalInOutType>(signalParam->inOutType());
-				outSignal.type = static_cast<MatsSignalType>(signalParam->type());
-				outSignal.decimalPlaces = signalParam->precision();
-
-				outSignal.lowValidRange = signalParam->lowValidRange();
-				outSignal.highValidRange = signalParam->highValidRange();
-
-				outSignal.tuning = signalParam->enableTuning();
 			}
-
-			out++;
 		}
 
 		return result;
@@ -284,19 +410,19 @@ namespace AdsBridge
 
 		if (structSize != sizeof(MatsAppSignalState))
 		{
-			m_log->writeError("AdsBridgeFacade::signalStates(), structSize is invalid.");
+			m_log.writeError("AdsBridgeFacade::signalStates(), structSize is invalid.");
 			return 0;
 		}
 
 		if (signalHashes == nullptr)
 		{
-			m_log->writeError("AdsBridgeFacade::signalStates(), signalHashes is nullptr.");
+			m_log.writeError("AdsBridgeFacade::signalStates(), signalHashes is nullptr.");
 			return 0;
 		}
 
 		if (out == nullptr)
 		{
-			m_log->writeError("AdsBridgeFacade::signalStates(), out is nullptr.");
+			m_log.writeError("AdsBridgeFacade::signalStates(), out is nullptr.");
 			return 0;
 		}
 
@@ -304,33 +430,29 @@ namespace AdsBridge
 
 		int result = 0;
 
-		for (const auto& h : std::span{signalHashes, count})
+		// Get states.
+		//
+		std::vector<std::optional<::MatsAppSignalState>> states;
+		m_signals->signalState(std::span{signalHashes, count}, &states);
+
+		assert(states.size() == count);
+
+		size_t index = 0;
+		for (const auto& signalState : states)
 		{
-			auto signalState = m_signals->signalState(h);
-
-			MatsAppSignalState& outSignal = *out;
-			outSignal = MatsAppSignalState{};
-			outSignal.hash = h;
-
-			if (signalState.has_value() == false)
-			{
-				m_log->writeWarning(QString("AdsBridgeFacade::signalStates(), Signal not found: %1").arg(h));
-				result = false;
-			}
-			else
-			{
-				result++;
-				// plantTime is need to be corrected by TZ and DST, as it's in local time.
-				//
-				auto localTimeCorrection = QDateTime::currentDateTime().offsetFromUtc() * 1000;
-				outSignal.plantTime =
-					signalState->m_time.plant.timeStamp ? signalState->m_time.plant.timeStamp - localTimeCorrection : 0ull;
-				outSignal.serverTime = signalState->m_time.system.timeStamp;
-				outSignal.value = signalState->m_value;
-				outSignal.flags = signalState->m_flags.all;
-			}
-
+			result++;
+			*out = signalState
+					   .or_else(
+						   [signalHashes, index, &result]
+						   {
+							   result--;
+							   std::optional<::MatsAppSignalState> s = MatsAppSignalState{};
+							   s->hash = signalHashes[index];
+							   return s;
+						   })
+					   .value();
 			out++;
+			index++;
 		}
 
 		return result;
@@ -338,41 +460,41 @@ namespace AdsBridge
 
 	size_t AdsBridgeFacade::connectionCount() const
 	{
-		return TcpClientStatistics::statistics().size();
+		return ClientConnStatsStd::statistics().size();
 	}
 
 	bool AdsBridgeFacade::connectionStatus(size_t structSize, struct AdsConnectionStatus* out, size_t count) const
 	{
 		if (structSize != sizeof(AdsConnectionStatus))
 		{
-			m_log->writeError("AdsBridgeFacade::connectionStatus(), structSize is invalid.");
+			m_log.writeError("AdsBridgeFacade::connectionStatus(), structSize is invalid.");
 			return false;
 		}
 
 		if (out == nullptr)
 		{
-			m_log->writeError("AdsBridgeFacade::connectionStatus(), out is nullptr.");
+			m_log.writeError("AdsBridgeFacade::connectionStatus(), out is nullptr.");
 			return false;
 		}
 
-		auto stats = TcpClientStatistics::statistics();
+		auto stats = ClientConnStatsStd::statistics();
 		if (stats.size() != count)
 		{
-			m_log->writeError(QString("AdsBridgeFacade::connectionStatus(), count is invalid, expected %1.").arg(stats.size()));
+			m_log.writeError(std::format("AdsBridgeFacade::connectionStatus(), count is invalid, expected {}.", stats.size()));
 			return false;
 		}
 
-		for (const auto& s : TcpClientStatistics::statistics())
+		for (const auto& s : stats)
 		{
 			AdsConnectionStatus& state = *out;
 
 			state.id = s.id;
 			state.status = s.state.isConnected;
 			state.setConnectionResult = static_cast<::MatsConnectionResult>(s.state.setConnectionResult);
-			state.connectionType = getStringConstPointer(s.objectName);
-			state.port = s.state.peerAddr.port();
-			state.address = getStringConstPointer(s.state.peerAddr.addressStr());
-			state.adsEquipmentId = getStringConstPointer(s.state.connectedSoftwareInfo.equipmentID());
+			state.connectionType = m_res.getString(s.objectName);
+			state.port = s.state.peerAddr.port;
+			state.address = m_res.getString(s.state.peerAddr.address);
+			state.adsEquipmentId = m_res.getString(s.state.connectedSoftwareInfo.equipmentid());
 			state.received = s.state.receivedBytes;
 			state.sent = s.state.sentBytes;
 			state.requestCount = s.state.requestCount;
@@ -383,28 +505,4 @@ namespace AdsBridge
 
 		return true;
 	}
-
-	const char* AdsBridgeFacade::getStringConstPointer(const QString& string) const
-	{
-		std::string str = string.toStdString();
-
-		// Shared lock for reading. If the string is found, return the pointer.
-		//
-		{
-			std::shared_lock lock(m_stringTableMutex);
-
-			auto it = m_stringTable.find(str);
-			if (it != m_stringTable.end())
-			{
-				return it->c_str();
-			}
-		}
-
-		// Th string was not found, insert new string with unique lock
-		//
-		std::unique_lock lock{m_stringTableMutex};
-		auto r = m_stringTable.insert(str);
-		return r.first->c_str();
-	}
-
 } // namespace AdsBridge

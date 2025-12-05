@@ -35,14 +35,14 @@ namespace ClientLib
 	TcpSignalClient::TcpSignalClient(const SoftwareInfo& softwareInfo,
 									 const SoftwareEndpoint::AppDataService& adsInfo,
 									 IAppSignalUpdater& signalUpdater,
-									 SignalLog& signalLog,
+									 ISignalLogUpdater* signalLogUpdater,
 									 ILogFile* logFile) :
 		Tcp::Client(softwareInfo, adsInfo.address, "TcpSignalClient", adsInfo.shortenId),
 		TcpClientStatistics(this),
 		HasLogFile(logFile, QString("ADS ") + adsInfo.shortenId),
 		m_serverSettings(adsInfo),
 		m_signalUpdater(signalUpdater),
-		m_signalLog(signalLog)
+		m_signalLogUpdater(signalLogUpdater)
 	{
 		setObjectName("TcpSignalClient " + adsInfo.equipmentId);
 
@@ -408,32 +408,22 @@ namespace ClientLib
 			return;
 		}
 
-		std::vector<AppSignalParam> appSignals;
-		appSignals.reserve(tl_getSignalParamReply.appsignals_size());
-
-		for (int i = 0; i < tl_getSignalParamReply.appsignals_size(); i++)
+		for (const ::Proto::AppSignal& protoSignal : tl_getSignalParamReply.appsignals())
 		{
-			const ::Proto::AppSignal& protoSignal = tl_getSignalParamReply.appsignals(i);
-
-			AppSignalParam& s = appSignals.emplace_back();
-			s.load(protoSignal);
-
-			if (s.hash() == 0 || s.appSignalId().isEmpty() == true)
+			if (protoSignal.bustypeid().empty() == false)
 			{
-				Q_ASSERT(s.hash() != 0);
-				Q_ASSERT(s.appSignalId().isEmpty() == false);
-
-				appSignals.pop_back();
-				continue;
-			}
-
-			if (s.isBus() == true)
-			{
-				m_busSignalHashes.insert(s.hash());
+				m_busSignalHashes.insert(::calcHash(protoSignal.appsignalid()));
 			}
 		}
 
-		m_signalUpdater.addSignals(appSignals, m_serverSettings.equipmentId);
+		std::vector<::Proto::AppSignal> appSignals;
+		appSignals.reserve(tl_getSignalParamReply.appsignals_size());
+
+		std::move(tl_getSignalParamReply.mutable_appsignals()->begin(),
+				  tl_getSignalParamReply.mutable_appsignals()->end(),
+				  std::back_inserter(appSignals));
+
+		m_signalUpdater.addSignals(appSignals, m_serverSettings.equipmentId.toStdString());
 
 		requestSignalParam(m_lastSignalParamStartIndex + ADS_GET_APP_SIGNAL_PARAM_MAX);
 
@@ -484,14 +474,14 @@ namespace ClientLib
 		//
 		int signalStateCount = tl_getSignalStateChangesReply.appsignalstates_size();
 
-		thread_local std::vector<AppSignalState> states;
+		thread_local std::vector<::Proto::AppSignalState> states;
 
 		states.clear();
 		states.reserve(signalStateCount);
 
 		for (int i = 0; i < signalStateCount; i++)
 		{
-			const AppSignalState& state = states.emplace_back(tl_getSignalStateChangesReply.appsignalstates(i));
+			const AppSignalState& state = states.emplace_back(std::move(tl_getSignalStateChangesReply.mutable_appsignalstates()->at(i)));
 			Q_ASSERT(state.hash() != 0);
 
 			if (m_signalStatesSet.contains(state.hash()) == false)
@@ -568,12 +558,12 @@ namespace ClientLib
 
 		int signalStateCount = tl_getSignalStateReply.appsignalstates_size();
 
-		std::vector<AppSignalState> states;
+		std::vector<::Proto::AppSignalState> states;
 		states.reserve(signalStateCount);
 
 		for (int i = 0; i < signalStateCount; i++)
 		{
-			const AppSignalState& state = states.emplace_back(tl_getSignalStateReply.appsignalstates(i));
+			const AppSignalState& state = states.emplace_back(std::move(tl_getSignalStateReply.mutable_appsignalstates()->at(i)));
 			Q_ASSERT(state.m_hash != 0);
 
 			if (m_signalStatesSet.contains(state.hash()) == false)
@@ -595,7 +585,7 @@ namespace ClientLib
 
 	void TcpSignalClient::requestSignalLog()
 	{
-		if (m_signalLog.enabled() == true)
+		if (m_signalLogUpdater != nullptr && m_signalLogUpdater->enabled() == true)
 		{
 			sendRequest(ADS_GET_DISCRETES_LOG);
 		}
@@ -609,6 +599,8 @@ namespace ClientLib
 
 	void TcpSignalClient::processSignalLog(const QByteArray& data)
 	{
+		assert(m_signalLogUpdater);
+
 		bool ok = tl_getDiscretesLogReply.ParseFromArray(data.constData(), static_cast<int>(data.size()));
 		if (ok == false)
 		{
@@ -621,21 +613,10 @@ namespace ClientLib
 		int pendingRecordsCount = tl_getDiscretesLogReply.pendingrecordscount();
 #endif
 
-		std::vector<DiscretesLogRecord> records;
-		records.reserve(tl_getDiscretesLogReply.discreteslogrecord_size());
-
-		std::transform(tl_getDiscretesLogReply.discreteslogrecord().begin(),
-					   tl_getDiscretesLogReply.discreteslogrecord().end(),
-					   std::back_inserter(records),
-					   [](const Network::DiscretesLogRecord& logRecord)
-					   {
-						   DiscretesLogRecord record;
-						   record.loadFromProto(logRecord);
-						   return record;
-					   });
-
-		m_signalLog.add(m_serverSettings.equipmentId, records);
-		m_signalLog.deleteUpTo(m_serverSettings.equipmentId, tl_getDiscretesLogReply.logfirstrecordid());
+		m_signalLogUpdater->add(m_serverSettings.equipmentId.toStdString(),
+								tl_getDiscretesLogReply.discreteslogrecord().begin(),
+								tl_getDiscretesLogReply.discreteslogrecord().end());
+		m_signalLogUpdater->deleteUpTo(m_serverSettings.equipmentId.toStdString(), tl_getDiscretesLogReply.logfirstrecordid());
 
 		requestAckSignalLog();
 		return;
@@ -643,24 +624,26 @@ namespace ClientLib
 
 	void TcpSignalClient::requestAckSignalLog()
 	{
-		if (m_signalLog.enabled() == false)
+		if (m_signalLogUpdater == nullptr || m_signalLogUpdater->enabled() == false)
 		{
 			resetToGetState(false);
 			return;
 		}
 
-		auto plantTimeToAck = m_signalLog.getNextAckUpTo();
+		auto plantTimeToAck = m_signalLogUpdater->getNextAckUpTo();
 
 		if (plantTimeToAck.has_value() == true)
 		{
-			auto dt = plantTimeToAck.value().toDateTime();
+			TimeStamp ts{plantTimeToAck.value()};
+
+			auto dt = ts.toDateTime();
 			writeMessage(QString("Acknowledging discrete logs up to plantTime %1, ADS %2.")
 							 .arg(dt.toString("dd MMM yyyy hh:mm:ss.zzz"))
 							 .arg(m_serverSettings.equipmentId));
 
 			tl_ackDiscretesLogRequest.set_acksource(localSoftwareInfo().equipmentID().toStdString());
 			tl_ackDiscretesLogRequest.set_ackuser("User"); // ???
-			tl_ackDiscretesLogRequest.set_ackuptoplanttime(plantTimeToAck.value().timeStamp);
+			tl_ackDiscretesLogRequest.set_ackuptoplanttime(ts.timeStamp);
 			sendRequest(ADS_ACK_DISCRETES_LOG, tl_ackDiscretesLogRequest);
 		}
 		else

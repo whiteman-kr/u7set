@@ -1,18 +1,36 @@
-#include "RecentUsed.h"
+#include "../include/AppSignalLibStd/RecentUsed.h"
 
 using namespace std::chrono_literals;
 
 namespace AppSignalLib
 {
+
+	void RecentUsed::ElapsedTimer::start()
+	{
+		m_startTime = std::chrono::steady_clock::now();
+	}
+
+	void RecentUsed::ElapsedTimer::restart()
+	{
+		m_startTime = std::chrono::steady_clock::now();
+	}
+
+	bool RecentUsed::ElapsedTimer::hasExpired(std::chrono::milliseconds timeout) const
+	{
+		auto now = std::chrono::steady_clock::now();
+		return (now - m_startTime) > timeout;
+	}
+
+
 	RecentUsed::RecentUsed(size_t maxSize /*= 750*/) :
 		m_maxSize(maxSize)
 	{
 		m_lastTimeDataFetched.start();
 	}
 
-	void RecentUsed::add(Hash hash, qint64 now /*= QDateTime::currentDateTimeUtc().toMSecsSinceEpoch()*/)
+	void RecentUsed::add(Hash hash, time_point now)
 	{
-		if (m_lastTimeDataFetched.hasExpired(ExpiredTimeMs) == true)
+		if (m_lastTimeDataFetched.hasExpired(ExpirationInterval) == true)
 		{
 			// Nobody is fetching data from the recents, most likely there is no such thread.
 			//
@@ -39,7 +57,7 @@ namespace AppSignalLib
 		{
 			// Update add time.
 			//
-			qint64 itemTime = it->second;
+			auto itemTime = it->second;
 			bool updated = false;
 
 			auto range = m_timeToSignal.equal_range(itemTime);
@@ -53,18 +71,18 @@ namespace AppSignalLib
 					break;
 				}
 			}
-			Q_ASSERT(updated == true);
+			assert(updated == true);
 
 			it->second = now;
 		}
 
-		Q_ASSERT(m_signalToTime.size() == m_timeToSignal.size());
+		assert(m_signalToTime.size() == m_timeToSignal.size());
 		return;
 	}
 
 	void RecentUsed::add(std::span<const Hash> hashes)
 	{
-		if (m_lastTimeDataFetched.hasExpired(ExpiredTimeMs) == true)
+		if (m_lastTimeDataFetched.hasExpired(ExpirationInterval) == true)
 		{
 			// Nobody is fetching data from the recents, most likely there is no such thread.
 			//
@@ -73,7 +91,7 @@ namespace AppSignalLib
 			return;
 		}
 
-		qint64 now = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+		auto now = std::chrono::system_clock::now();
 
 		for (Hash hash : hashes)
 		{
@@ -91,7 +109,7 @@ namespace AppSignalLib
 			return false;
 		}
 
-		qint64 itemTime = it->second;
+		auto itemTime = it->second;
 		bool removedFromTimeMap = false;
 
 		auto range = m_timeToSignal.equal_range(itemTime);
@@ -104,11 +122,11 @@ namespace AppSignalLib
 				break;
 			}
 		}
-		Q_ASSERT(removedFromTimeMap == true);
+		assert(removedFromTimeMap == true);
 
 		m_signalToTime.erase(it);
 
-		Q_ASSERT(m_signalToTime.size() == m_timeToSignal.size());
+		assert(m_signalToTime.size() == m_timeToSignal.size());
 		return true;
 	}
 
@@ -125,14 +143,14 @@ namespace AppSignalLib
 
 	bool RecentUsed::removeOutdated()
 	{
-		qint64 now = QDateTime::currentDateTimeUtc().toMSecsSinceEpoch();
+		auto now = std::chrono::system_clock::now();
 
 		std::vector<Hash> hashesToRemove;
 		hashesToRemove.reserve(m_signalToTime.size());
 
 		for (const auto& [hash, lastAccessTime] : m_signalToTime)
 		{
-			if (now - lastAccessTime > ExpiredTimeMs)
+			if (now - lastAccessTime > ExpirationInterval)
 			{
 				hashesToRemove.push_back(hash);
 			}

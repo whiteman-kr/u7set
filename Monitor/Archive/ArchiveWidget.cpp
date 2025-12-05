@@ -1,13 +1,13 @@
 #include "ArchiveWidget.h"
+#include "DialogChooseArchiveSignals.h"
 #include "Globals.h"
 #include "MonitorArchive.h"
-#include "MonitorMainWindow.h"
 #include "MonitorConfigController.h"
+#include "MonitorMainWindow.h"
 #include "MonitorSignalInfo.h"
-#include "DialogChooseArchiveSignals.h"
-#include <ReportLib/TableViewReportGenerator.h>
 #include <ReportLib/Report.h>
 #include <ReportLib/ReportObject.h>
+#include <ReportLib/TableViewReportGenerator.h>
 
 //
 // ArchiveExportPrint
@@ -29,9 +29,7 @@ namespace
 	};
 
 
-	ArchiveReportInfo::ArchiveReportInfo(ArchiveSource* source,
-										   QString projectName,
-										   QString softwareId) :
+	ArchiveReportInfo::ArchiveReportInfo(ArchiveSource* source, QString projectName, QString softwareId) :
 		m_source(source),
 		m_projectName(projectName),
 		m_softwareId(softwareId)
@@ -111,7 +109,7 @@ namespace
 
 		return;
 	}
-}
+} // namespace
 
 //
 //
@@ -151,10 +149,11 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 
 	QDateTime currentTime = QDateTime::currentDateTime();
 
-	m_source.requestEndTime = TimeStamp{TimeStamp(currentTime).timeStamp / 1_min * 1_min};		// reset seconds and ms
+	m_source.requestEndTime = TimeStamp{TimeStamp(currentTime).timeStamp / 1_min * 1_min}; // reset seconds and ms
 	m_source.requestStartTime = TimeStamp{m_source.requestEndTime.timeStamp - 1_hour};
 
-	m_source.removePeriodicRecords = true;			// By defaut it's true, don't store it in theSettings as users often forget to set this option back!
+	m_source.removePeriodicRecords =
+		true; // By defaut it's true, don't store it in theSettings as users often forget to set this option back!
 
 	// ToolBar
 	//
@@ -214,7 +213,7 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 	// Add stretecher
 	//
 	QWidget* empty = new QWidget(this);
-	empty->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+	empty->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	m_toolBar->addWidget(empty);
 
 	m_toolBar->addWidget(m_updateButton);
@@ -238,7 +237,10 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 
 	// --
 	//
-	connect(m_timeType, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &ArchiveWidget::timeTypeCurrentIndexChanged);
+	connect(m_timeType,
+			static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+			this,
+			&ArchiveWidget::timeTypeCurrentIndexChanged);
 
 	connect(m_exportButton, &QPushButton::clicked, this, &ArchiveWidget::exportButton);
 	connect(m_printButton, &QPushButton::clicked, this, &ArchiveWidget::printButton);
@@ -306,9 +308,9 @@ ArchiveWidget::~ArchiveWidget()
 
 void ArchiveWidget::ensureVisible()
 {
-	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
+	setVisible(true); // Widget must be visible for correct work of QApplication::desktop()->screenGeometry
 
-	QRect screenRect  = screen()->availableGeometry();
+	QRect screenRect = screen()->availableGeometry();
 	QRect intersectRect = screenRect.intersected(frameGeometry());
 
 	if (isMinimized() == true)
@@ -316,19 +318,14 @@ void ArchiveWidget::ensureVisible()
 		showNormal();
 	}
 
-	if (isMaximized() == false &&
-		(intersectRect.width() < size().width() ||
-		 intersectRect.height() < size().height()))
+	if (isMaximized() == false && (intersectRect.width() < size().width() || intersectRect.height() < size().height()))
 	{
 		move(screenRect.topLeft());
 	}
 
-	if (isMaximized() == false &&
-		(frameGeometry().width() > screenRect.width() ||
-		 frameGeometry().height() > screenRect.height()))
+	if (isMaximized() == false && (frameGeometry().width() > screenRect.width() || frameGeometry().height() > screenRect.height()))
 	{
-		resize(static_cast<int>(screenRect.width() * 0.7),
-			   static_cast<int>(screenRect.height() * 0.7));
+		resize(static_cast<int>(screenRect.width() * 0.7), static_cast<int>(screenRect.height() * 0.7));
 	}
 }
 
@@ -342,11 +339,13 @@ bool ArchiveWidget::setSignals(const std::vector<AppSignalParam>& appSignals)
 	//
 	for (const AppSignalParam& signalParam : appSignals)
 	{
-		auto sit = std::find_if(m_archiveServices.begin(), m_archiveServices.end(),
-					[&signalParam, &signalManager = m_signalManager](const SoftwareEndpoint::ArchiveService& archiveService)
-					{
-						return signalManager.dataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
-					});
+		auto sit = std::find_if(m_archiveServices.begin(),
+								m_archiveServices.end(),
+								[&signalParam, &signalManager = m_signalManager](const SoftwareEndpoint::ArchiveService& archiveService)
+								{
+									return signalManager.dataServiceHasSignal(archiveService.appDataServiceId.toStdString(),
+																			  signalParam.appSignalId().toStdString());
+								});
 
 		if (sit != m_archiveServices.end())
 		{
@@ -426,8 +425,7 @@ void ArchiveWidget::cancelRequest()
 }
 
 
-
-void ArchiveWidget::closeEvent(QCloseEvent*e)
+void ArchiveWidget::closeEvent(QCloseEvent* e)
 {
 	saveWindowState();
 	e->accept();
@@ -482,11 +480,12 @@ void ArchiveWidget::dropEvent(QDropEvent* event)
 
 		// Check if such signal already present in the signal list
 		//
-		auto foundId = std::find_if(m_source.acceptedSignals.begin(), m_source.acceptedSignals.end(),
-			[signalParam](const ArchiveSignal& sp)
-			{
-				return sp.signalParam.appSignalId() == signalParam.appSignalId();
-			});
+		auto foundId = std::find_if(m_source.acceptedSignals.begin(),
+									m_source.acceptedSignals.end(),
+									[signalParam](const ArchiveSignal& sp)
+									{
+										return sp.signalParam.appSignalId() == signalParam.appSignalId();
+									});
 
 		if (foundId != m_source.acceptedSignals.end())
 		{
@@ -497,11 +496,13 @@ void ArchiveWidget::dropEvent(QDropEvent* event)
 
 		// Find an archive service for the signal and add it to the signal list
 		//
-		auto sit = std::find_if(m_archiveServices.begin(), m_archiveServices.end(),
-						[&signalParam, &signalManager = m_signalManager](const SoftwareEndpoint::ArchiveService& archiveService)
-						{
-							return signalManager.dataServiceHasSignal(archiveService.appDataServiceId, signalParam.appSignalId());
-						});
+		auto sit = std::find_if(m_archiveServices.begin(),
+								m_archiveServices.end(),
+								[&signalParam, &signalManager = m_signalManager](const SoftwareEndpoint::ArchiveService& archiveService)
+								{
+									return signalManager.dataServiceHasSignal(archiveService.appDataServiceId.toStdString(),
+																			  signalParam.appSignalId().toStdString());
+								});
 
 		if (sit != m_archiveServices.end())
 		{
@@ -591,14 +592,13 @@ void ArchiveWidget::exportButton()
 
 	static QString path{"."};
 
-	QFileDialog dialog(
-			this,
-			tr("Save File"),
-			path + QDir::separator() + "untitled.pdf",
-			tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
-		dialog.setOption(QFileDialog::DontUseNativeDialog, true);
-		dialog.setFileMode(QFileDialog::AnyFile);
-		dialog.setViewMode(QFileDialog::List);
+	QFileDialog dialog(this,
+					   tr("Save File"),
+					   path + QDir::separator() + "untitled.pdf",
+					   tr("Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+	dialog.setOption(QFileDialog::DontUseNativeDialog, true);
+	dialog.setFileMode(QFileDialog::AnyFile);
+	dialog.setViewMode(QFileDialog::List);
 
 	// Create your checkbox
 	//
@@ -687,7 +687,7 @@ void ArchiveWidget::printButton()
 					printData(true /*printSelected*/);
 				});
 		menu.addAction(sel);
-		
+
 		menu.exec(QCursor::pos());
 	}
 	else
@@ -695,13 +695,11 @@ void ArchiveWidget::printButton()
 		printData(false /*printSelected*/);
 	}
 	return;
-
 }
 
 void ArchiveWidget::signalsButton()
 {
-	DialogChooseArchiveSignals dialog(m_signalManager, m_archiveServices, m_source, m_appSignalListSet,
-									  this);
+	DialogChooseArchiveSignals dialog(m_signalManager, m_archiveServices, m_source, m_appSignalListSet, this);
 
 	int result = dialog.exec();
 
@@ -747,10 +745,10 @@ void ArchiveWidget::showSignalInfo(QString appSignalId)
 void ArchiveWidget::removeSignal(QString appSignalId, QString archiveServiceId)
 {
 	std::erase_if(m_source.acceptedSignals,
-				[&appSignalId, &archiveServiceId](const ArchiveSignal& as)
-				{
-					return as.signalParam.appSignalId() == appSignalId && as.archiveServiceId == archiveServiceId;
-				});
+				  [&appSignalId, &archiveServiceId](const ArchiveSignal& as)
+				  {
+					  return as.signalParam.appSignalId() == appSignalId && as.archiveServiceId == archiveServiceId;
+				  });
 
 	m_model->removeSignal(appSignalId, archiveServiceId);
 	m_model->setParams(m_source.acceptedSignals, m_source.timeType);

@@ -3,7 +3,7 @@
 #include "../AppSignalLib/IAppSignalManager.h"
 #include "../OnlineLib/SoftwareEndpoint.h"
 
-#include <ClientLib/ISignalDataServer.h>
+#include <AppSignalLibStd/ISignalDataServer.h>
 #include <SchemaClientLib/DragDropHelper.h>
 #include <VFrame30/TuningController.h>
 

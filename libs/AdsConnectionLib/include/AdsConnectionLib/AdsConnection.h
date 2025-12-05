@@ -1,13 +1,12 @@
 #pragma once
 
-#include "../OnlineLib/SoftwareEndpoint.h"
-#include "../OnlineLib/SoftwareInfo.h"
-#include "../OnlineLib/TcpConnectionState.h"
-#include "../UtilsLib/ILogFile.h"
+#include "ILoggerStd.h"
+#include "ISignalLogUpdater.h"
+#include "ServiceConnectionState.h"
+#include "ServiceEndpoint.h"
 
-#include "IAppSignalUpdater.h"
-#include "IRecentAppSignals.h"
-#include "SignalLog.h"
+#include <AppSignalLibStd/IAppSignalUpdater.h>
+#include <AppSignalLibStd/IRecentAppSignals.h>
 
 
 namespace ClientLib
@@ -20,8 +19,9 @@ namespace ClientLib
 	{
 	public:
 		explicit AdsConnection(IAppSignalUpdater& signalUpdater,
-							   IRecentAppSignals* recentAppSignals, // Can be nullptr, then recent state comm thread will not be created.
-							   ILogFile* logFile);
+							   IRecentAppSignals* recentAppSignals, // Can be nullptr
+							   ISignalLogUpdater* signalLogUpdater, // Can be nullptr
+							   ILoggerStd& logFile);
 
 		AdsConnection(const AdsConnection&) = delete;
 		AdsConnection(AdsConnection&&) = default;
@@ -34,19 +34,16 @@ namespace ClientLib
 	public:
 		/// Call this function when the new configuration arrived to recreate communication thread with the new configuration
 		///
-		void updateConnections(const SoftwareInfo& softwareInfo, const std::vector<SoftwareEndpoint::AppDataService>& appDataServices);
+		void updateConnections(const ::Network::SoftwareInfo& softwareInfo, const std::vector<ServiceEndpoint>& appDataServices);
 
-		std::vector<Tcp::ConnectionState> connectionStates() const;
+		std::vector<ServiceConnectionState> connectionStates() const;
 
 		int connectionsPerServer() const; // Returns 2 for TcpConnection and 1 for Grpc.
 
 		bool signalParamsLoaded() const;
 		bool signalStatesLoaded() const;
 
-		ClientLib::SignalLog& signalLog();
-		const ClientLib::SignalLog& signalLog() const;
-
-		// --
+										  // --
 		//
 	private:
 #ifdef USE_GRPC_ADS_CONNECTION

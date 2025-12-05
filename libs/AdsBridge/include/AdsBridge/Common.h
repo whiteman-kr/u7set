@@ -10,6 +10,20 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef _MSC_VER
+	#ifdef ADSBRIDGE_EXPORT
+		#define ADSB_API __declspec(dllexport)
+	#else
+		#define ADSB_API __declspec(dllimport)
+	#endif
+#else
+	#ifdef ADSBRIDGE_EXPORT
+		#define ADSB_API __attribute__((visibility("default")))
+	#else
+		#define ADSB_API
+	#endif
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {

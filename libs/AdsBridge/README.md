@@ -22,22 +22,11 @@ dev/
 
 ## Building the example
 
-### Windows - one-liner
-
-```pwsh
-cd examples/AdsBridgeExample
-build.bat
-```
-
-### Cross-platform - manual commands
-
 ```bat
 cd examples/AdsBridgeExample
 cmake -B ./build -DCMAKE_PREFIX_PATH="../../"
 cmake --build ./build
 ```
-
-`build/` is generated during compilation and should be excluded from VCS.
 
 ---
 
@@ -50,7 +39,7 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH="/absolute/path/to/dev"
 
 2. Link to the exported target:
 ```cmake
-find_package(AdsBridge REQUIRED)
+find_package(AdsBridge CONFIG REQUIRED)
 
 add_executable(my_app src/main.cpp)
 target_link_libraries(my_app PRIVATE Radiy::AdsBridge)

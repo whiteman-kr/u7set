@@ -60,7 +60,7 @@ namespace ClientLib
 			return true;
 		}
 
-		std::optional<TimeStamp> getNextAckUpTo()
+		std::optional<ISignalLogUpdater::TimeStampType> getNextAckUpTo()
 		{
 			std::lock_guard lock{m_ackMutex};
 			if (m_ackQueue.empty() == true)
@@ -71,19 +71,28 @@ namespace ClientLib
 			TimeStamp plantTime = m_ackQueue.front();
 			m_ackQueue.pop();
 
-			return plantTime;
+			return static_cast<ISignalLogUpdater::TimeStampType>(plantTime.timeStamp);
 		}
 
 		// Add records to the log.
 		//
-		void add(const QString& adsId, std::span<const DiscretesLogRecord> records)
+		void add(const std::string& adsId, ISignalLogUpdater::RecordIterator begin, ISignalLogUpdater::RecordIterator end)
 		{
 			std::lock_guard lock{m_mutex};
 
-			auto& recordsByAds = m_recordsByAds[adsId];
-			std::copy(records.begin(), records.end(), std::back_inserter(recordsByAds));
+			auto& recordsByAds = m_recordsByAds[QString::fromStdString(adsId)];
 
-			if (records.empty() == false)
+			std::transform(begin,
+						   end,
+						   std::back_inserter(recordsByAds),
+						   [](const ::Network::DiscretesLogRecord& protoRecort)
+						   {
+							   DiscretesLogRecord record;
+							   record.loadFromProto(protoRecort);
+							   return record;
+						   });
+
+			if (begin != end) // If any records were added
 			{
 				m_cachedPlainData.clear();
 				m_cacheUpdateCounter++;
@@ -216,26 +225,27 @@ namespace ClientLib
 		return;
 	}
 
+	void SignalLog::add(const std::string& adsId, ISignalLogUpdater::RecordIterator begin, ISignalLogUpdater::RecordIterator end)
+	{
+		m_impl->add(adsId, begin, end);
+		return;
+	}
+
+	void SignalLog::deleteUpTo(const std::string& adsId, int64_t recordId)
+	{
+		return m_impl->deleteUpTo(QString::fromStdString(adsId), recordId);
+	}
+
+	std::optional<ISignalLogUpdater::TimeStampType> SignalLog::getNextAckUpTo()
+	{
+		return m_impl->getNextAckUpTo();
+	}
+
 	bool SignalLog::sendAckUpTo(TimeStamp plantTime)
 	{
 		return m_impl->sendAckUpTo(plantTime);
 	}
 
-	std::optional<TimeStamp> SignalLog::getNextAckUpTo()
-	{
-		return m_impl->getNextAckUpTo();
-	}
-
-	void SignalLog::add(const QString& adsId, std::span<const DiscretesLogRecord> records)
-	{
-		m_impl->add(adsId, records);
-		return;
-	}
-
-	void SignalLog::deleteUpTo(const QString& adsId, qint64 recordId)
-	{
-		return m_impl->deleteUpTo(adsId, recordId);
-	}
 
 	std::pair<std::vector<DiscretesLogRecord>, qint64> SignalLog::getRecords() const
 	{
