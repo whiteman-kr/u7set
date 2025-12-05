@@ -1,0 +1,3 @@
+BUMPG-4
+	01.12.2025	Version: 3	BUMPG-4_IDx017E_v3.u7devp	RPCT-3896: Added preset in new naming convension and family BUIM (created from BUMPG-4_v3.u7devp) 
+										   Added property ActuatorDescription

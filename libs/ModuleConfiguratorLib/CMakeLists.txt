@@ -36,6 +36,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<QUuid>
 
 	<CommonLib/Types.h>
+	<CommonLib/Times.h>
 	<HardwareLib/ModuleFirmware.h>
 )
 

@@ -53,7 +53,7 @@ namespace SimUi
 				break;
 			}
 
-			QString time = QTime::currentTime().toString(QLatin1String("hh:mm:ss.zzz"));
+			QString time = DateTimeToString::timeMs(QTime::currentTime());
 
 			QString html = QString("<font face=\"Courier\" size=\"4\" color=#808080>%1 </font>"
 								   "<font face=\"Courier\" size=\"4\" color=%2>%3</font>")

@@ -264,9 +264,9 @@ namespace SchemaClientLib
 		QDateTime tm;
 
 		tm.setTimeZone(TIME_ZONE_UTC);
-
 		tm.setMSecsSinceEpoch(state.lmtime());
-		setDataItemText("LmTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
+
+		setDataItemText("LmTime", DateTimeToString::dateTimeMs(tm));
 
 		setDataItemText("LanEquipmentID", state.lanequipmentid().c_str());
 		setDataItemText("IsReply", state.isreply() ? "Yes" : "No");
@@ -710,7 +710,7 @@ namespace SchemaClientLib
 				tm.setTimeZone(TIME_ZONE_UTC);
 
 				tm.setMSecsSinceEpoch(state.lmtime());
-				controllerItem->setText(static_cast<int>(Columns::LmTime), tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
+				controllerItem->setText(static_cast<int>(Columns::LmTime), DateTimeToString::dateTimeMs(tm));
 
 				controllerItem->setText(static_cast<int>(Columns::IsActive), state.controlisactive() ? tr("Yes") : tr("No"));
 				controllerItem->setText(static_cast<int>(Columns::HasUnappliedParams), state.hasunappliedparams() ? tr("Yes") : tr("No"));

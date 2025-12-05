@@ -1149,7 +1149,7 @@ namespace TrendLib
 		dateEdit->setCalendarPopup(true);
 
 		QTimeEdit* timeEdit = new QTimeEdit(mutableRuler.timeStamp().toTime());
-		timeEdit->setDisplayFormat("hh:mm:ss.zzz");
+		timeEdit->setDisplayFormat(DateTimeFormat::time(true /*with ms*/));
 
 		QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 		connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);

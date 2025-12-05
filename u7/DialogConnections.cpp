@@ -1091,7 +1091,7 @@ void DialogConnections::onReport()
 	textStream << "\r\n";
 
 
-	textStream << tr("Generated at:\t") << QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss") << "\r\n";
+	textStream << tr("Generated at:\t") << DateTimeToString::dateTimeSec(QDateTime::currentDateTime()) << "\r\n";
 
 	textStream << "\r\n";
 

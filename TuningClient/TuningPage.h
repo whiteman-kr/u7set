@@ -64,7 +64,7 @@ class TuningTableView : public QTableView
 
 public:
 	TuningTableView(const ClientLib::TuningUserManager& userManager);
-	bool editorActive();
+	bool editorActive() const;
 
 protected:
 	virtual bool edit(const QModelIndex&  index, EditTrigger trigger, QEvent*  event) override;

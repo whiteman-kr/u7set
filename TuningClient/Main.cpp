@@ -32,7 +32,7 @@ BOOL CALLBACK MyMiniDumpCallback(
 
 void CreateMiniDump(EXCEPTION_POINTERS* pep)
 {
-	QString dumpFileName = qAppName() + "_" + QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss") + ".dmp";
+	QString dumpFileName = qAppName() + "_" + DateTimeToString::fileName(QDateTime::currentDateTime()) + ".dmp";
 
 	QString dumpPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 

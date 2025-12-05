@@ -21,7 +21,7 @@ namespace Log
 	class LogRecordModel : public QAbstractItemModel
 	{
 	public:
-		LogRecordModel(bool showTypeColumn, const QStringList& headerTitles);
+		LogRecordModel(bool showTypeColumn, const QStringList& headerTitles, QString dateTimeFormat);
 		~LogRecordModel();
 
 	public:
@@ -62,10 +62,13 @@ namespace Log
 		int m_columnTime = -1;
 		int m_columnType = -1;
 		int m_columnText = -1;
+
+		QString m_dateTimeFormat;
 	};
 
-	LogRecordModel::LogRecordModel(bool showTypeColumn, const QStringList& headerTitles) :
-		m_showTypeColumn(showTypeColumn)
+	LogRecordModel::LogRecordModel(bool showTypeColumn, const QStringList& headerTitles, QString dateTimeFormat) :
+		m_showTypeColumn(showTypeColumn),
+		m_dateTimeFormat(dateTimeFormat)
 	{
 		int c = 0;
 
@@ -235,7 +238,7 @@ namespace Log
 			int displayIndex = static_cast<int>(column);
 			if (displayIndex == m_columnTime)
 			{
-				return QDateTime().fromMSecsSinceEpoch(rec.time).toString(messageTimeFormat);
+				return QDateTime().fromMSecsSinceEpoch(rec.time).toString(m_dateTimeFormat);
 			}
 
 			if (displayIndex == m_columnType)
@@ -540,7 +543,7 @@ namespace Log
 	{
 		Q_OBJECT
 	public:
-		DialogTimeFilter(qint64 filterTimeFrom, qint64 filterTimeTo, QWidget* parent);
+		DialogTimeFilter(qint64 filterTimeFrom, qint64 filterTimeTo, QString dateTimeFormat, QWidget* parent);
 		virtual ~DialogTimeFilter();
 
 		qint64 filterTimeFrom() const;
@@ -556,7 +559,7 @@ namespace Log
 		QDateTimeEdit* m_timeToEdit = nullptr;
 	};
 
-	DialogTimeFilter::DialogTimeFilter(qint64 filterTimeFrom, qint64 filterTimeTo, QWidget* parent) :
+	DialogTimeFilter::DialogTimeFilter(qint64 filterTimeFrom, qint64 filterTimeTo, QString dateTimeFormat, QWidget* parent) :
 		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 		m_filterTimeFrom(filterTimeFrom),
 		m_filterTimeTo(filterTimeTo)
@@ -567,12 +570,12 @@ namespace Log
 
 		mainLayout->addWidget(new QLabel(tr("Start Time:")));
 		m_timeFromEdit = new QDateTimeEdit(this);
-		m_timeFromEdit->setDisplayFormat(messageTimeFormat);
+		m_timeFromEdit->setDisplayFormat(dateTimeFormat);
 		mainLayout->addWidget(m_timeFromEdit);
 
 		mainLayout->addWidget(new QLabel(tr("End Time:")));
 		m_timeToEdit = new QDateTimeEdit(this);
-		m_timeToEdit->setDisplayFormat(messageTimeFormat);
+		m_timeToEdit->setDisplayFormat(dateTimeFormat);
 		mainLayout->addWidget(m_timeToEdit);
 
 		if (m_filterTimeFrom != -1 && m_filterTimeTo != -1)
@@ -740,7 +743,7 @@ namespace Log
 								 const QStringList& headerTitles) :
 		QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint),
 		m_log(log),
-		m_model(std::make_unique<LogRecordModel>(useMessageType, headerTitles)),
+		m_model(std::make_unique<LogRecordModel>(useMessageType, headerTitles, m_log.dateTimeFormat())),
 		m_proxyModel(std::make_unique<LogRecordProxyModel>(m_model.get()))
 	{
 		setAttribute(Qt::WA_DeleteOnClose);
@@ -1165,7 +1168,7 @@ namespace Log
 
 	void LogFileDialog::onTimeFilter()
 	{
-        DialogTimeFilter d(m_proxyModel->filterTimeFrom(), m_proxyModel->filterTimeTo(), this);
+        DialogTimeFilter d(m_proxyModel->filterTimeFrom(), m_proxyModel->filterTimeTo(), m_log.dateTimeFormat(), this);
 		if (d.exec() == QDialog::Accepted)
 		{
 			qint64 filterTimeFrom = d.filterTimeFrom();
@@ -1529,9 +1532,11 @@ namespace Log
 
 		QTextStream out(&data);
 
+		QString dateTimeformat = m_log.dateTimeFormat();
+
 		for (const LogFileRecord& rec : exportRecords)
 		{
-			out << LogFileRecord::toString(rec, m_log.sessionHashString());
+			out << LogFileRecord::toString(rec, m_log.sessionHashString(), dateTimeformat);
 		}
 
 		QMessageBox::information(this, qAppName(), tr("Export complete."));

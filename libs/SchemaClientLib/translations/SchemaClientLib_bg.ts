@@ -1075,7 +1075,7 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
     <message>
         <location filename="../SignalSnapshotModel.cpp" line="240"/>
         <source>Flags</source>
-        <translation type="unfinished"></translation>
+        <translation>Флагове</translation>
     </message>
     <message>
         <location filename="../SignalSnapshotModel.cpp" line="241"/>
@@ -1194,22 +1194,22 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="44"/>
         <source>Generated: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Генерирани: %1</translation>
     </message>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="49"/>
         <source>Signals Snapshot</source>
-        <translation type="unfinished">Моментна снимка на сигнали</translation>
+        <translation>Моментна снимка на сигнали</translation>
     </message>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="51"/>
         <source>Project: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Проект: %1</translation>
     </message>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="54"/>
         <source>%1: %2</source>
-        <translation type="unfinished"></translation>
+        <translation>%1: %2</translation>
     </message>
 </context>
 <context>
@@ -1480,7 +1480,7 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
     <message>
         <location filename="../DialogSignalSnapshot.cpp" line="20"/>
         <source>Signals Snapshot</source>
-        <translation type="unfinished">Моментна снимка на сигнали</translation>
+        <translation>Моментна снимка на сигнали</translation>
     </message>
 </context>
 <context>
@@ -1707,7 +1707,7 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="668"/>
         <source>Export Selected Only</source>
-        <translation type="unfinished"></translation>
+        <translation>Експорт само на маркираните</translation>
     </message>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="722"/>
@@ -1717,12 +1717,12 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="734"/>
         <source>Print All</source>
-        <translation type="unfinished"></translation>
+        <translation>Разпечатване на всичко</translation>
     </message>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="744"/>
         <source>Print Selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Разпечатване на избраното</translation>
     </message>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="858"/>
@@ -1757,7 +1757,7 @@ LowEngineeringUnits limit, otherwise set to 0.</source>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="971"/>
         <source>Reset Filter</source>
-        <translation type="unfinished">Нулиране на филтъра</translation>
+        <translation>Нулиране на филтъра</translation>
     </message>
     <message>
         <location filename="../SignalSnapshotWidget.cpp" line="991"/>

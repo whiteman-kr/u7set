@@ -6,6 +6,7 @@
 #include "../UtilsLib/WUtils.h"
 #include "../UtilsLib/XmlHelper.h"
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/Times.h>
 #include <BuildInfo.pb.h>
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
@@ -18,7 +19,7 @@ namespace OnlineLib
 	//
 	// --------------------------------------------------------------------------------------
 
-	const QString BuildInfo::dateTimeFormatStr("dd.MM.yyyy hh:mm:ss");
+	const QString BuildInfo::dateTimeFormatStr(DateTimeFormat::dateTime(false));
 
 	void BuildInfo::clear()
 	{

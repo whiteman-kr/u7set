@@ -66,13 +66,13 @@ void CrashExceptionHandler::CreateMiniDump(EXCEPTION_POINTERS* pep)
 	if (m_equipmentID.isEmpty() == true)
 	{
 		dumpFileName = QCoreApplication::instance()->applicationName() + "_" +
-					   QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss") + ".dmp";
+					   DateTimeToString::fileName(QDateTime::currentDateTime()) + ".dmp";
 	}
 	else
 	{
 		dumpFileName = QCoreApplication::instance()->applicationName() + "_" +
 					   m_equipmentID + "_" +
-					   QDateTime::currentDateTime().toString("dd_MM_yyyy_hh_mm_ss") + ".dmp";
+					   DateTimeToString::fileName(QDateTime::currentDateTime()) + ".dmp";
 	}
 
 	QString dumpPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));

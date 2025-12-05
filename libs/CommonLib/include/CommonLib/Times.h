@@ -4,6 +4,8 @@
 
 #include <QDateTime>
 #include <QMetaType>
+#include <QString>
+#include <QReadWriteLock>
 #include <QTimeZone>
 
 
@@ -114,3 +116,70 @@ inline QString timeToString(const QDateTime& time)
 	}
 	return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 }
+
+
+// Time formats
+// 
+class DateTimeFormat
+{
+public:
+	static QString fileName(const QLocale* locale = &m_systemLocale);
+	static QString dateTime(bool withSeconds = false, bool withMilliseconds = false, const QLocale* locale = &m_systemLocale);
+	static QString date(const QLocale* locale = &m_systemLocale);
+	static QString time(bool withSeconds = false, bool withMilliseconds = false, const QLocale* locale = &m_systemLocale);
+
+private:
+	static QReadWriteLock& lock()
+	{
+		static QReadWriteLock m_lock;
+		return m_lock;
+	}
+
+private:
+	// key is a hash of a locale, counted by qHash function with seed equal to useMilliseconds (0 or 1)
+	//
+	inline static std::unordered_map<size_t, QString> m_dateCache;
+	inline static std::unordered_map<size_t, QString> m_timeCache;
+	inline static std::unordered_map<size_t, QString> m_dateTimeCache;
+
+	inline static const QLocale m_systemLocale = QLocale::system();
+};
+
+// Time to string formatting class
+//
+class DateTimeToString
+{
+public:
+	static QString dateTimeMin(const QDateTime& time, const QLocale* locale = &m_systemLocale);
+	static QString dateTimeSec(const QDateTime& time, const QLocale* locale = &m_systemLocale);
+	static QString dateTimeMs(const QDateTime& time, const QLocale* locale = &m_systemLocale);
+
+	static QString timeMin(const QTime& tm, const QLocale* locale = &m_systemLocale);
+	static QString timeSec(const QTime& tm, const QLocale* locale = &m_systemLocale);
+	static QString timeMs(const QTime& tm, const QLocale* locale = &m_systemLocale);
+
+	static QString fileName(const QDateTime& time, const QLocale* locale = &m_systemLocale);
+	static QString date(const QDate& date, const QLocale* locale = &m_systemLocale);
+
+	static QString timeDuration(qint64 timeStamp);
+	static QString timeDurationMs(qint64 timeStamp);
+	static QString dateTimeDuration(qint64 timeStamp);
+	static QString dateTimeDurationMs(qint64 timeStamp);
+
+
+
+private:
+	static QString dateTime(const QDateTime& time,
+							bool withSeconds = false,
+							bool withMilliseconds = false,
+							const QLocale* locale = &m_systemLocale);
+
+	static QString time(const QTime& time,
+						bool withSeconds = false,
+						bool withMilliseconds = false,
+						const QLocale* locale = &m_systemLocale);
+
+
+private:
+	inline static const QLocale m_systemLocale = QLocale::system();
+};

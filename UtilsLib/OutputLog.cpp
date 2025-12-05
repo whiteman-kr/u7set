@@ -1,5 +1,5 @@
 #ifndef UTILS_LIB_DOMAIN
-#error Do not include this file in the project! Link UtilsLib instead.
+	#error Do not include this file in the project! Link UtilsLib instead.
 #endif
 
 #include "OutputLog.h"
@@ -62,7 +62,7 @@ QString OutputLogItem::toText() const
 
 	QString result = QString("%1 | %2 | %3 | %4")
 				.arg(m_no, 4, 10, QChar('0'))
-				.arg(m_time.toString("hh:mm:ss:zzz"))
+				.arg(DateTimeToString::timeMs(m_time.time()))
 				.arg(level)
 				.arg(m_message);
 
@@ -75,9 +75,7 @@ QString OutputLogItem::toHtml() const
 
 	if (m_message.isEmpty())
 	{
-		result = QString("<font face=\"%1\" size=\"4\" color=#C0C0C0>%2|</font>")
-				 .arg(m_htmlFont)
-				 .arg(m_no, 4, 10, QChar('0'));
+		result = QString("<font face=\"%1\" size=\"4\" color=#C0C0C0>%2|</font>").arg(m_htmlFont).arg(m_no, 4, 10, QChar('0'));
 
 		return result;
 	}
@@ -87,36 +85,36 @@ QString OutputLogItem::toHtml() const
 	case OutputMessageLevel::Message:
 		result = QString("<font face=\"%1\" size=\"4\" color=#808080>%2| %3  </font>"
 						 "<font face=\"%1\" size=\"4\" color=black>%4</font>")
-				 .arg(m_htmlFont)
-				 .arg(m_no, 4, 10, QChar('0'))
-				 .arg(m_time.toString("hh:mm:ss:zzz   "))
-				 .arg(m_message);
+					 .arg(m_htmlFont)
+					 .arg(m_no, 4, 10, QChar('0'))
+					 .arg(DateTimeToString::timeMs(m_time.time()) + "   ")
+					 .arg(m_message);
 		break;
 	case OutputMessageLevel::Success:
 		result = QString("<font face=\"%1\" size=\"4\" color=#808080>%2| %3  </font>"
 						 "<font face=\"%1\" size=\"4\" color=green>%4</font>")
-				 .arg(m_htmlFont)
-				 .arg(m_no, 4, 10, QChar('0'))
-				 .arg(m_time.toString("hh:mm:ss:zzz   "))
-				 .arg(m_message);
+					 .arg(m_htmlFont)
+					 .arg(m_no, 4, 10, QChar('0'))
+					 .arg(DateTimeToString::timeMs(m_time.time()) + "   ")
+					 .arg(m_message);
 		break;
 	case OutputMessageLevel::Warning0:
 	case OutputMessageLevel::Warning1:
 	case OutputMessageLevel::Warning2:
 		result = QString("<font face=\"%1\" size=\"4\" color=#808080>%2| %3  </font>"
 						 "<font face=\"%1\" size=\"4\" color=#F87217>WRN %4</font>")
-				 .arg(m_htmlFont)
-				 .arg(m_no, 4, 10, QChar('0'))
-				 .arg(m_time.toString("hh:mm:ss:zzz   "))
-				 .arg(m_message);
+					 .arg(m_htmlFont)
+					 .arg(m_no, 4, 10, QChar('0'))
+					 .arg(DateTimeToString::timeMs(m_time.time()) + "   ")
+					 .arg(m_message);
 		break;
 	case OutputMessageLevel::Error:
 		result = QString("<font face=\"%1\" size=\"4\" color=#808080>%2| %3  </font>"
 						 "<font face=\"%1\" size=\"4\" color=red>ERR %4</font>")
-				 .arg(m_htmlFont)
-				 .arg(m_no, 4, 10, QChar('0'))
-				 .arg(m_time.toString("hh:mm:ss:zzz   "))
-				 .arg(m_message);
+					 .arg(m_htmlFont)
+					 .arg(m_no, 4, 10, QChar('0'))
+					 .arg(DateTimeToString::timeMs(m_time.time()) + "   ")
+					 .arg(m_message);
 		break;
 
 	default:
@@ -158,13 +156,13 @@ QString OutputLogItem::toCsv() const
 	}
 
 	result = QString("%1; %2; %3; %4; %5; %6; %7")
-				.arg(m_no, 4, 10, QChar('0'))
-				.arg(m_time.toString("hh:mm:ss:zzz"))
-				.arg(level)
-				.arg(m_message)
-				.arg(m_file)
-				.arg(m_fileLine)
-				.arg(m_func);
+				 .arg(m_no, 4, 10, QChar('0'))
+				 .arg(DateTimeToString::timeMs(m_time.time()))
+				 .arg(level)
+				 .arg(m_message)
+				 .arg(m_file)
+				 .arg(m_fileLine)
+				 .arg(m_func);
 
 	return result;
 }
@@ -176,9 +174,7 @@ bool OutputLogItem::isError() const
 
 bool OutputLogItem::isWarning() const
 {
-	return  m_level == OutputMessageLevel::Warning0 ||
-			m_level == OutputMessageLevel::Warning1 ||
-			m_level == OutputMessageLevel::Warning2;
+	return m_level == OutputMessageLevel::Warning0 || m_level == OutputMessageLevel::Warning1 || m_level == OutputMessageLevel::Warning2;
 }
 
 bool OutputLogItem::isWarning0() const
@@ -215,9 +211,7 @@ OutputLog::OutputLog(void) :
 	qRegisterMetaType<OutputLogItem>();
 }
 
-OutputLog::~OutputLog(void)
-{
-}
+OutputLog::~OutputLog(void) {}
 
 void OutputLog::clear()
 {
@@ -246,16 +240,16 @@ void OutputLog::write(const QString& str, OutputMessageLevel level, QString file
 	//
 	switch (level)
 	{
-		case OutputMessageLevel::Warning2:
-		case OutputMessageLevel::Warning1:
-		case OutputMessageLevel::Warning0:
-			incWarningCount();
-			break;
-		case OutputMessageLevel::Error:
-			incErrorCount();
-			break;
-		default:
-			break;
+	case OutputMessageLevel::Warning2:
+	case OutputMessageLevel::Warning1:
+	case OutputMessageLevel::Warning0:
+		incWarningCount();
+		break;
+	case OutputMessageLevel::Error:
+		incErrorCount();
+		break;
+	default:
+		break;
 	}
 
 	QMutexLocker locker(&m_mutex);
@@ -423,8 +417,8 @@ void OutputLog::writeError(QString issueCategory, int issueCode, const QString& 
 void OutputLog::writeDump(const std::vector<quint8>& data)
 {
 	QString dataString;
-	
-	for (unsigned int i = 0 ; i < data.size(); i++)
+
+	for (unsigned int i = 0; i < data.size(); i++)
 	{
 		if ((i % 32) == 0 && i != 0)
 		{
@@ -432,9 +426,9 @@ void OutputLog::writeDump(const std::vector<quint8>& data)
 			dataString.clear();
 		}
 
-		dataString += ((i % 16) ? " " : " ' ")  + QString().setNum(data[i], 16).rightJustified(2, '0');
+		dataString += ((i % 16) ? " " : " ' ") + QString().setNum(data[i], 16).rightJustified(2, '0');
 
-		if (i == data.size() - 1 && i % 32 > 0)	// last iteration
+		if (i == data.size() - 1 && i % 32 > 0) // last iteration
 		{
 			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
 			dataString.clear();
@@ -501,7 +495,7 @@ void OutputLog::popMessages(std::vector<OutputLogItem>* out, int maxCount)
 		out->push_back(m_messages.front());
 		m_messages.pop_front();
 
-		maxCount --;
+		maxCount--;
 	}
 
 	return;
@@ -515,8 +509,6 @@ void OutputLog::startStrLogging()
 
 	m_strFullLog.clear();
 	m_strFullLog.reserve(10000);
-
-
 }
 
 QString OutputLog::finishStrLogging()
@@ -553,7 +545,7 @@ void OutputLog::incErrorCount()
 {
 	QMutexLocker locker(&m_mutex);
 	int oldValue = m_errorCount;
-	m_errorCount ++;
+	m_errorCount++;
 	locker.unlock();
 
 	emit errorCountChanged(oldValue, m_errorCount);
@@ -589,7 +581,7 @@ void OutputLog::incWarningCount()
 {
 	QMutexLocker locker(&m_mutex);
 	int oldValue = m_warningCount;
-	m_warningCount ++;
+	m_warningCount++;
 	locker.unlock();
 
 	emit warningCountChanged(oldValue, m_warningCount);
@@ -611,4 +603,3 @@ void OutputLog::setHtmlFont(QString fontName)
 {
 	m_htmlFont = fontName;
 }
-

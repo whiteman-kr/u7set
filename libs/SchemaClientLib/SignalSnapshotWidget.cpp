@@ -41,7 +41,9 @@ namespace
 	{
 		ReportLib::ReportFont marginFont{"Arial", 10};
 
-		report.addMarginItem({QObject::tr("Generated: %1").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss")),
+		report.addMarginItem({
+			QObject::tr("Generated: %1")
+				.arg(DateTimeToString::dateTimeSec(QDateTime::currentDateTime())),
 							  -1,
 							  -1,
 							  {marginFont, Qt::AlignLeft | Qt::AlignTop}});

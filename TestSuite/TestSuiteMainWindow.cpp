@@ -49,7 +49,10 @@ TestSuiteMainWindow::TestSuiteMainWindow(const SoftwareInfo& softwareInfo, QWidg
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/TestSuite_%1.qm").arg(l));
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/TestSuiteLib_%1.qm").arg(l));
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/ClientLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/SchemaClientLib_%1.qm").arg(l));
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UtilsLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/UiLib_%1.qm").arg(l));
+		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/ReportLib_%1.qm").arg(l));
 		m_translator.addTranslationFile(l, qApp->applicationDirPath() + QObject::tr("/translations/qt_%1.qm").arg(l));
 	}
 
@@ -779,7 +782,7 @@ void TestSuiteMainWindow::saveTestLog()
 		return;
 	}
 
-	QString defaultFileName = QString("TestLog_%1.tsl").arg(QDateTime::currentDateTime().toString("ddMMyyyy_HHmmss"));
+	QString defaultFileName = QString("TestLog_%1.tsl").arg(DateTimeToString::fileName(QDateTime::currentDateTime()));
 
 	QString fileName = QFileDialog::getSaveFileName(this,
 													tr("Save Test Log"),
