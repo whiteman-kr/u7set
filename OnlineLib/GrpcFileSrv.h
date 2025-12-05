@@ -28,11 +28,11 @@ public:
 	void setRootFolder(const QString& rootFolder);
 	QString rootFolder() const;
 
+	static QByteArray getMd5(const QByteArray& data);
+
 protected:
-	QString removingTrailingSlashes(const QString& folder);
-	QString removingStartingSlashes(const QString& folder);
-	QString getCleanRoot(const QString& rootFolder);
-	QString getCleanFileName(const QString& rootFolder, const QString& fileName);
+	static QString getCleanRoot(const QString& rootFolder);
+	static QString getCleanFileName(const QString& rootFolder, const QString& fileName);
 
 private:
 	mutable std::mutex m_mutex;

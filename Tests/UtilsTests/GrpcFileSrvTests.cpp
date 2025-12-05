@@ -249,27 +249,149 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
 						  tempDir, "GrpcFileClientTest", logger);
 
-	QString buildXml("/build.xml");
+	QString fileName("/build.xml");
 
 	FileReady fr;
-	bool res = client->downloadFileBlocked(buildXml, &fr);
+	bool res = client->downloadFileBlocked(fileName, &fr);
 
 	EXPECT_TRUE(res);
 
-	EXPECT_EQ(fr.fileName, buildXml);
+	EXPECT_EQ(fr.fileName, fileName);
 	EXPECT_EQ(fr.errorCode, Tcp::FileTransferResult::Ok);
 
-	QFile f(tempDir + buildXml);
+	QFile f(tempDir + fileName);
 
 	EXPECT_TRUE(f.exists());
 
-	QFileInfo fi(f);
+	ASSERT_TRUE(f.open(QIODeviceBase::ReadOnly));
 
-	EXPECT_EQ(fi.size(), fr.fileData.size());
+	QByteArray fileData = f.readAll();
+
+	EXPECT_EQ(fileData.size(), fr.fileData.size());
+
+	QByteArray md5 = GrpcFileBase::getMd5(fileData);
+
+	EXPECT_EQ(md5, fr.md5);
 
 	client.reset();
-
 	server.reset();
 }
+
+TEST(GrpcFileClientTest, GetFile_LongFile)
+{
+	SoftwareInfo serverSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_SRV");
+
+	HostAddressPort serverAddr("127.0.0.1", 14104);
+
+	std::unique_ptr<GrpcFileSrv> server =
+		std::make_unique<GrpcFileSrv>(serverSw, true, std::vector<ClientInfo>{}, false,
+									  serverAddr, buildPath, logger);
+
+	const QString tempDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/temp";
+
+	QDir().mkpath(tempDir);
+
+	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_CLNT");
+
+	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
+																			  tempDir, "GrpcFileClientTest", logger);
+
+	QString fileName("/Reports/Equipment.json");
+
+	FileReady fr;
+	bool res = client->downloadFileBlocked(fileName, &fr);
+
+	EXPECT_TRUE(res);
+
+	EXPECT_EQ(fr.fileName, fileName);
+	EXPECT_EQ(fr.errorCode, Tcp::FileTransferResult::Ok);
+
+	QFile f(tempDir + fileName);
+
+	EXPECT_TRUE(f.exists());
+
+	ASSERT_TRUE(f.open(QIODeviceBase::ReadOnly));
+
+	QByteArray fileData = f.readAll();
+
+	EXPECT_EQ(fileData.size(), fr.fileData.size());
+
+	QByteArray md5 = GrpcFileBase::getMd5(fileData);
+
+	EXPECT_EQ(md5, fr.md5);
+
+	client.reset();
+	server.reset();
+}
+
+TEST(GrpcFileClientTest, GetFile_WrongFile)
+{
+	SoftwareInfo serverSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_SRV");
+
+	HostAddressPort serverAddr("127.0.0.1", 14105);
+
+	std::unique_ptr<GrpcFileSrv> server =
+		std::make_unique<GrpcFileSrv>(serverSw, true, std::vector<ClientInfo>{}, false,
+									  serverAddr, buildPath, logger);
+
+	const QString tempDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/temp";
+
+	QDir().mkpath(tempDir);
+
+	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_CLNT");
+
+	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
+																			  tempDir, "GrpcFileClientTest", logger);
+
+	QString fileName("/qqq111.txt");
+
+	FileReady fr;
+	bool res = client->downloadFileBlocked(fileName, &fr);
+
+	EXPECT_TRUE(res);
+
+	EXPECT_EQ(fr.fileName, fileName);
+	EXPECT_EQ(fr.errorCode, Tcp::FileTransferResult::RemoteFileIsNotExists);
+	EXPECT_TRUE(fr.fileData.size() == 0);
+	EXPECT_TRUE(fr.md5.size() == 0);
+
+	client.reset();
+	server.reset();
+}
+
+TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
+{
+	SoftwareInfo serverSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_SRV");
+
+	HostAddressPort serverAddr("127.0.0.1", 14106);
+
+	std::unique_ptr<GrpcFileSrv> server =
+		std::make_unique<GrpcFileSrv>(serverSw, true, std::vector<ClientInfo>{}, false,
+									  serverAddr, buildPath, logger);
+
+	const QString tempDir = "P:/temp";
+
+	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_CLNT");
+
+	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
+																			  tempDir, "GrpcFileClientTest", logger);
+
+	QString fileName("/build.xml");
+
+	FileReady fr;
+	bool res = client->downloadFileBlocked(fileName, &fr);
+
+	EXPECT_TRUE(res);
+
+	EXPECT_EQ(fr.fileName, fileName);
+	EXPECT_EQ(fr.errorCode, Tcp::FileTransferResult::CantCreateLocalFolder);
+	EXPECT_TRUE(fr.fileData.size() == 0);
+	EXPECT_TRUE(fr.md5.size() == 0);
+
+	client.reset();
+	server.reset();
+}
+
+
 
 

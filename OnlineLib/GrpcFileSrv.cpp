@@ -25,28 +25,18 @@ QString GrpcFileBase::rootFolder() const
 	return m_rootFolder;
 }
 
-QString GrpcFileBase::removingTrailingSlashes(const QString& folder)
+QByteArray GrpcFileBase::getMd5(const QByteArray& data)
 {
-	QString res = folder;
+	QCryptographicHash md5Gen(QCryptographicHash::Md5);
 
-	while(res.size() > 0 && (res.endsWith("\\") || res.endsWith("/")))
-	{
-		res.truncate(res.size() - 1);
-	}
+	md5Gen.addData(QByteArrayView(data.constData(), data.size()));
 
-	return res;
+	return md5Gen.result();
 }
 
-QString GrpcFileBase::removingStartingSlashes(const QString& folder)
+QString GrpcFileBase::getCleanRoot(const QString& rootFolder)
 {
-	QString res = folder;
-
-	while(res.size() > 0 && (res.startsWith("\\") || res.startsWith("/")))
-	{
-		res = res.mid(1);
-	}
-
-	return res;
+	return QDir::cleanPath(rootFolder);
 }
 
 QString GrpcFileBase::getCleanFileName(const QString& rootFolder, const QString& fileName)
@@ -225,11 +215,7 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 		return grpc::Status::OK;
 	}
 
-	QCryptographicHash md5Gen(QCryptographicHash::Md5);
-
-	md5Gen.addData(QByteArrayView(fileData.constData(), fileData.size()));
-
-	QByteArray md5 = md5Gen.result();
+	QByteArray md5 = getMd5(fileData);
 
 	qsizetype sendDataSize = 0;
 
@@ -512,7 +498,6 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 
 	Grpc::GetFileReply reply;
 	QByteArray fileData;
-	QByteArray md5;
 
 	bool anyReplyReceived = false;
 	bool readyPushed = false;
@@ -553,14 +538,11 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 			break;
 		}
 
-		QCryptographicHash md5Gen(QCryptographicHash::Md5);
+		QByteArray md5;
 
-		md5Gen.addData(QByteArrayView(fileData.constData(), fileData.size()));
+		md5 = getMd5(fileData);
 
-		md5 = md5Gen.result();
-
-		const std::string &protoStr = reply.md5();
-		QByteArray protoMd5 = QByteArray::fromStdString(protoStr);
+		QByteArray protoMd5 = QByteArray::fromStdString(reply.md5());
 
 		if (md5 != protoMd5)
 		{
