@@ -213,10 +213,9 @@ bool DialogSubsystemListEditor::saveChanges()
         // Add here other names in future
         //
         if (strId == "Reports" ||
-                strId == "LogicSchemas" ||
-                strId == "build.log" ||
-                strId == "build.xml"
-                )
+			strId == "LogicSchemas" ||
+			strId == "build.log" ||
+			strId == "build.xml")
         {
             QMessageBox::warning(this, "Subsystem List Editor", tr("Subsystem ID '%1' is a reserved word!").arg(strId));
             return false;

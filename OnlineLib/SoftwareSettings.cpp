@@ -12,7 +12,8 @@
 // SessionParams struct implementation
 //
 // -------------------------------------------------------------------------------------
-void SessionParams::saveTo(Network::SessionParams* sp)
+
+void SessionParams::saveTo(Network::SessionParams* sp) const
 {
 	TEST_PTR_RETURN(sp);
 

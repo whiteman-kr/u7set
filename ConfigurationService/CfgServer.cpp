@@ -54,7 +54,7 @@ void CfgServer::processSuccessorRequest(quint32 requestID, const char* requestDa
 
 void CfgServer::onServerThreadStarted()
 {
-	m_buildXmlPathFileName = m_rootFolder + "/build.xml";
+	m_buildXmlPathFileName = m_rootFolder + File::SLASH_BUILD_XML;
 
 	readBuildXml();
 }

@@ -20,6 +20,8 @@ add_executable(${TARGET}
 	CfgService.cpp
 	CfgService.h
 	CfgServiceMain.cpp
+	GrpcCfgServer.cpp
+	GrpcCfgServer.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

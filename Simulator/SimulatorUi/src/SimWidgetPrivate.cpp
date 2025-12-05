@@ -648,7 +648,7 @@ namespace SimUi
 			//
 			QString path = m_simulator->buildPath();
 
-			QString buildXmlPath = m_simulator->buildPath() + "/build.xml";
+			QString buildXmlPath = m_simulator->buildPath() + File::SLASH_BUILD_XML;
 			QFile buildXmlFile(buildXmlPath);
 
 			try

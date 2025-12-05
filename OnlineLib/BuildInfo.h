@@ -58,3 +58,5 @@ namespace OnlineLib
 		bool isConfigurationXml() const;
 	};
 }
+
+using BuildFileInfoArray = std::vector<OnlineLib::BuildFileInfo>;

@@ -271,11 +271,45 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	return grpc::Status::OK;
 }
 
+grpc::Status GrpcFileSrv::GetSessionParams(grpc::ServerContext* context,
+											const Grpc::GetSessionParamsRequest* request,
+											Grpc::GetSessionParamsReply* reply)
+{
+	if (context == nullptr ||
+		request == nullptr ||
+		reply == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
+	std::string authToken;
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context, &authToken) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
+	}
+
+	getSessionParams(reply->mutable_sessionparams());
+
+	return grpc::Status::OK;
+}
+
 bool GrpcFileSrv::checkFile(const QString& pathFileName, const QByteArray& fileData) const
 {
 	Q_UNUSED(pathFileName);
 	Q_UNUSED(fileData);
 	return true;
+}
+
+void GrpcFileSrv::getSessionParams(Network::SessionParams* params) const
+{
+	SessionParams sp;
+
+	sp.currentSettingsProfile = SettingsProfile::DEFAULT;
+	sp.softwareRunMode = E::SoftwareRunMode::Normal;
+
+	sp.saveTo(params);
 }
 
 grpc::Service* GrpcFileSrv::getGrpcService()

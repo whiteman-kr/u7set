@@ -198,39 +198,62 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
-
-	CfgServer* cfgServer = new CfgServer(softwareInfo(),
-										 sessionParams(),
-										 buildPath,
-										 m_cfgServiceSettings.clients,
-										 m_cfgServiceSettings.checkHostname,
-										 logger());
+	m_grpcCfgServers.clear();
 
 	std::vector<Tcp::ListenAddress> listenAddrs;
 
 	for(const RqCtrlSettings& rcs: m_cfgServiceSettings.rcSettings)
 	{
-		if (rcs.enable())
+		if (rcs.enable() == false)
 		{
-			listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
+			continue;
 		}
+		// rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel()
+
+		m_grpcCfgServers.push_back(
+			std::make_unique<GrpcCfgServer>(softwareInfo(), sessionParams(),
+											m_cfgServiceSettings.clients,
+											m_cfgServiceSettings.checkHostname,
+											rcs.clientRequestIP(), buildPath, logger()));
 	}
 
-	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger(), "CfgServerListener");
+	// m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger(), "CfgServerListener");
 
-	m_cfgServerThread->start();
+	// m_cfgServerThread->start();
+
+	// CfgServer* cfgServer = new CfgServer(softwareInfo(),
+	// 									 sessionParams(),
+	// 									 buildPath,
+	// 									 m_cfgServiceSettings.clients,
+	// 									 m_cfgServiceSettings.checkHostname,
+	// 									 logger());
+
+	// std::vector<Tcp::ListenAddress> listenAddrs;
+
+	// for(const RqCtrlSettings& rcs: m_cfgServiceSettings.rcSettings)
+	// {
+	// 	if (rcs.enable())
+	// 	{
+	// 		listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
+	// 	}
+	// }
+
+	// m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger(), "CfgServerListener");
+
+	// m_cfgServerThread->start();
 }
 
 void ConfigurationServiceWorker::stopCfgServerThread()
 {
-	if (m_cfgServerThread != nullptr)
-	{
-		m_cfgServerThread->quitAndWait();
+	m_grpcCfgServers.clear();
+	// if (m_cfgServerThread != nullptr)
+	// {
+	// 	m_cfgServerThread->quitAndWait();
 
-		delete m_cfgServerThread;
+	// 	delete m_cfgServerThread;
 
-		m_cfgServerThread = nullptr;
-	}
+	// 	m_cfgServerThread = nullptr;
+	// }
 }
 
 void ConfigurationServiceWorker::startCfgCheckerThread()

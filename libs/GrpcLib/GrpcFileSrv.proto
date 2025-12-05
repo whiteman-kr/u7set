@@ -1,6 +1,7 @@
 syntax = "proto2";
 
 import "GrpcAppDataSrv.proto";
+import "Network.proto";
 
 package Grpc;
 
@@ -23,8 +24,22 @@ message GetFileReply
 	optional bytes md5 = 7;
 }
 
+//
+// GetSessionParams
+//
+
+message GetSessionParamsRequest
+{
+}
+
+message GetSessionParamsReply
+{
+	required Network.SessionParams sessionParams = 1;
+}
+
 service FileSrv
 {
 	rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
 	rpc GetFile(GetFileRequest) returns (stream GetFileReply) {}
+	rpc GetSessionParams(GetSessionParamsRequest) returns (GetSessionParamsReply) {}
 }

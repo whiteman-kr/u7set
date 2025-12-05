@@ -872,7 +872,7 @@ bool UploadTabPage::readBuildInfo(const QString& buildPath, OnlineLib::BuildInfo
 
 	// Read build information from build.xml
 
-	QString buildXmlFileName = buildPath + "/build.xml";
+	QString buildXmlFileName = buildPath + File::SLASH_BUILD_XML;
 
 	QFile buildXml(buildXmlFileName);
 

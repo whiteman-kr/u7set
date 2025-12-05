@@ -23,6 +23,8 @@ qt_add_library(${TARGET} STATIC
 	CircularLogger.h
 	DataSource.cpp
 	DataSource.h
+	GrpcCfgLoader.cpp
+	GrpcCfgLoader.h
 	GrpcFileSrv.cpp
 	GrpcFileSrv.h
 	GrpcServer.cpp

@@ -18,7 +18,7 @@ struct SessionParams
 	QString currentSettingsProfile;
 	E::SoftwareRunMode softwareRunMode = E::SoftwareRunMode::Normal;
 
-	void saveTo(Network::SessionParams* sp);
+	void saveTo(Network::SessionParams* sp) const;
 	void loadFrom(const Network::SessionParams& sp);
 };
 

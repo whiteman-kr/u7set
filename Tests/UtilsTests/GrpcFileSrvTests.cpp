@@ -85,7 +85,7 @@ TEST(GrpcFileSrvTest, GetFile_ShortFile)
 
 	Grpc::GetFileRequest req;
 
-	req.set_filename("/build.xml");
+	req.set_filename(File::SLASH_BUILD_XML);
 
 	auto reader = stub->GetFile(&ctx, req);
 
@@ -249,7 +249,7 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
 						  tempDir, "GrpcFileClientTest", logger);
 
-	QString fileName("/build.xml");
+	QString fileName(File::SLASH_BUILD_XML);
 
 	FileReady fr;
 	bool res = client->downloadFileBlocked(fileName, &fr);
@@ -376,7 +376,7 @@ TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
 																			  tempDir, "GrpcFileClientTest", logger);
 
-	QString fileName("/build.xml");
+	QString fileName(File::SLASH_BUILD_XML);
 
 	FileReady fr;
 	bool res = client->downloadFileBlocked(fileName, &fr);

@@ -619,6 +619,7 @@ namespace Directory
 
 namespace File
 {
+	inline const QString SLASH_BUILD_XML("/build.xml");
 	inline const QString APP_SIGNALS_ASGS("AppSignals.asgs");
 	inline const QString ACQUIRED_APP_SIGNALS_ASGS("AcquiredAppSignals.asgs");
 	inline const QString APP_SIGNALS_XML("AppSignals.xml");

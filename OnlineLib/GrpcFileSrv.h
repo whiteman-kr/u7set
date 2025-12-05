@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <thread>
+#include <queue>
 #include <grpcpp/grpcpp.h>
 
 #include <GrpcFileSrv.grpc.pb.h>
@@ -70,8 +71,13 @@ public:
 	grpc::Status GetFile(grpc::ServerContext* context,
 						const Grpc::GetFileRequest* request,
 						grpc::ServerWriter<Grpc::GetFileReply>* writer) override;
+
+	grpc::Status GetSessionParams(grpc::ServerContext* context,
+								const Grpc::GetSessionParamsRequest* request,
+								Grpc::GetSessionParamsReply* reply);
 protected:
 	virtual bool checkFile(const QString& pathFileName, const QByteArray& fileData) const;
+	virtual void getSessionParams(Network::SessionParams* params) const;
 
 private:
 	grpc::Service* getGrpcService() override;
