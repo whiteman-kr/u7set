@@ -40,6 +40,7 @@ namespace LicenseLib
 		ValidationResult validateAppSimulator() const;
 
 		ValidationResult validateModuleConfigurator() const;
+		ValidationResult validateServiceEepromWrite() const;
 		ValidationResult validateModuleConfiguratorModule(QUuid uartUuid) const;
 
 		const RpctLicense& license() const;

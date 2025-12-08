@@ -116,6 +116,15 @@ RpctLicenseObject::RpctLicenseObject(QObject* parent) :
 	p->setEssential(true);
 
 	p = ADD_PROPERTY_GETTER_SETTER(bool,
+								   "WriteServiceEeprom",
+								   true,
+								   LicenseLib::RpctLicense::mcWriteServiceEeprom,
+								   LicenseLib::RpctLicense::setMcWriteServiceEeprom);
+	p->setCategory(categoryModuleConfigurator);
+	p->setViewOrder(601);
+	p->setEssential(false);
+
+	p = ADD_PROPERTY_GETTER_SETTER(bool,
 								   "McLimitModuleUartUuids",
 								   true,
 								   LicenseLib::RpctLicense::mcLimitModuleUartUuids,
@@ -124,7 +133,7 @@ RpctLicenseObject::RpctLicenseObject(QObject* parent) :
 	p->setDescription(
 		"Limit the modules that can be configured. The limitation is enforced via UartUuid. The module has three configuration UARTs "
 		"(configuration, applogic, tuning). All three UartUuids must be added to McAllowedModuleUartUuids.");
-	p->setViewOrder(601);
+	p->setViewOrder(602);
 
 	p = ADD_PROPERTY_GETTER_SETTER(QString,
 								   "McAllowedModuleUartUuids",
@@ -135,7 +144,7 @@ RpctLicenseObject::RpctLicenseObject(QObject* parent) :
 	p->setDescription("If McLimitModuleUartUuids is true, then this property is a list of modules allowed to be configured. Note that all "
 					  "three UartUuids must be added to this list. Data should be separated by spaces or new lines.\nUuids with wrong "
 					  "format will be ignored, this fact allows to add kind of comments.");
-	p->setViewOrder(602);
+	p->setViewOrder(603);
 
 	// Other
 	//

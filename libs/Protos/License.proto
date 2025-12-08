@@ -49,6 +49,7 @@ message WorkplaceLicense
 message ModuleConfiguratorLicense
 {
 	optional bool allowed = 2;						// Using module configurator is allowed
+	optional bool write_service_eeprom = 4;			// Allowed to write service EEPROM
 	
 	optional bool limit_module_uart_uuids = 10;		// If true, only modules with UUIDs from the list are allowed to be configured
 	optional string allowed_module_uart_uuids = 11;	// List of module UUIDs (UART uuids) that are allowed to be configured
