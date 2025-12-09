@@ -2009,6 +2009,16 @@ namespace ModuleConfiguratorLib
 
 		try
 		{
+			{
+				LicenseLib::AppLicenser licenser;
+
+				auto lc = licenser.validator().validateServiceEepromWrite();
+				if (lc != LicenseLib::ValidationResult::Valid)
+				{
+					throw tr("There is no license to write the service UART!");
+				}
+			}
+
 			//
 			// PING command
 			//
@@ -2435,31 +2445,25 @@ namespace ModuleConfiguratorLib
 
 			// Check if we are on the correct tab: service for service UART, App for app/config/tun UART
 			//
-			bool connectedToServiceUart = std::find(moduleUarts.begin(), moduleUarts.end(), ConfigurationUartId) != moduleUarts.end();
-
-			bool erasingServiceFlash = selectedUarts.has_value() == true && selectedUarts.value().empty() == false &&
+			bool selectedServiceUart = selectedUarts.has_value() == true && selectedUarts.value().empty() == false &&
 									   selectedUarts.value()[0] == ConfigurationUartId;
 
-			if (erasingServiceFlash != connectedToServiceUart) 
+			bool connectedToServiceUart = std::find(moduleUarts.begin(), moduleUarts.end(), ConfigurationUartId) != moduleUarts.end();
+
+			if (selectedServiceUart != connectedToServiceUart)
 			{
 				throw(tr("Wrong type of socket is connected for currently selected tab page!"));
 			}
 
 			if (connectedToServiceUart == true)
 			{
-				int todo_check_erasing_license = 1;
-				// throw tr("There is no license to initialize the service UART!");
-				//  Check license
-				//
-				/*{
-					LicenseLib::AppLicenser licenser;
+				LicenseLib::AppLicenser licenser;
 
-					auto lc = licenser.validator().validateModuleConfigurator();
-					if (lc != LicenseLib::ValidationResult::Valid)
-					{
-						throw tr("There is no license to initialize the service UART!");
-					}
-				}*/
+				auto lc = licenser.validator().validateServiceEepromWrite();
+				if (lc != LicenseLib::ValidationResult::Valid)
+				{
+					throw tr("There is no license to initialize the service UART!");
+				}
 			}
 
 			//
