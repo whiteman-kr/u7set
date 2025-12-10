@@ -733,11 +733,11 @@ namespace VFrame30
 				auto sp = appSignalController->signalParam(appSignalId);
 				if (sp.has_value() == false)
 				{
-					signalParam = std::move(*sp);
+					ok = false;
 				}
 				else
 				{
-					ok = false;
+					signalParam = std::move(*sp);
 				}
 
 				appSignalState = appSignalController->signalState(appSignalId).value_or(AppSignalState{});
