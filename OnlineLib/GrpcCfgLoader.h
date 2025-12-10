@@ -5,29 +5,27 @@
 #include "TcpFileTransfer.h"
 #include "TcpClientStatistics.h"
 #include "SoftwareSettings.h"
-#include "../OnlineLib/BuildInfo.h"
+#include "BuildInfo.h"
+#include "GrpcFileSrv.h"
 
 // -------------------------------------------------------------------------------------
 //
-// CfgLoader class declaration
+// GrpcCfgLoader class declaration
 //
 // -------------------------------------------------------------------------------------
 
-class GrpcCfgLoader : public CfgServerLoaderBase, protected TcpClientStatistics
+class GrpcCfgLoader : public SimpleThreadWorker
 {
 	Q_OBJECT
 
 public:
 	GrpcCfgLoader(const SoftwareInfo& softwareInfo,
-				int appInstance,
-				const HostAddressPort& serverAddressPort1,
-				const HostAddressPort& serverAddressPort2,
-				bool enableDownloadCfg,
-				std::shared_ptr<CircularLogger> logger);
+				  int appInstance,
+				  const std::vector<HostAddressPort>& serverAddrs,
+				  bool enableDownloadCfg,
+				  CircularLoggerShared logger);
 
-	virtual void onClientThreadStarted() override;
-
-	void changeApp(const QString& appEquipmentID, int appInstance);
+	void changeAppAndInitPaths(const QString& appEquipmentID, int appInstance);
 
 	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr);
@@ -40,12 +38,12 @@ public:
 	bool hasFileID(QString fileID) const;
 
 	Tcp::FileTransferResult getLastError() const { return m_lastError; }
-	QString getLastErrorStr() const { return getErrorStr(getLastError()); }
+//	QString getLastErrorStr() const { return getErrorStr(getLastError()); }
 
 	OnlineLib::BuildInfo buildInfo();
-	SoftwareInfo softwareInfo() const { return localSoftwareInfo(); }
+	SoftwareInfo softwareInfo() const { return m_swInfo; }
 	int appInstance() const { return m_appInstance; }
-	bool enableDownloadCfg() const { return m_enableDownloadConfiguration; }
+	bool enableDownloadCfg() const { return m_enableDownloadCfg; }
 
 	SessionParams sessionParams() const;
 	QString curSoftwareSettingsProfileName() const;
@@ -59,9 +57,8 @@ public:
 	template<typename T>
 	std::shared_ptr<const T> getCurrentSettingsProfile() const;
 
-	virtual void onConnection() override;
 	virtual void onStartDownload(const QString& fileName);
-	virtual void onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
+//	virtual void onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
 
 	friend class CfgLoaderThread;
 
@@ -80,22 +77,30 @@ signals:
 	void signal_fileReady(QString fileName, Tcp::FileTransferResult errorCode, std::shared_ptr<QByteArray> fileData);
 
 private slots:
+	void slot_setConnection();
+	void slot_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params);
 	void slot_enableDownloadConfiguration();
 	void slot_getFile(QString fileName, std::shared_ptr<QByteArray> fileData, bool asyncCall);
 	void slot_onTimer();
 
 protected:
-	virtual void processSuccessorReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 	void processGetSessionParamsReply(const char* replyData, quint32 replyDataSize);
 	void sendGetSessionParamsRequest();
 
 private:
+	void onThreadStarted() override;
+	void onThreadFinished() override;
+
+	void startGrpcFileClient();
+	void stopGrpcFileClient();
+	void restartGrpcFileClient();
+
 	void shutdown();
 
 	void startDownload();
 	void resetStatuses();
 
-	virtual void onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5) override final;
+//	virtual void onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5) override final;
 
 	bool startConfigurationXmlLoading();
 	bool readConfigurationXml();
@@ -114,14 +119,38 @@ private:
 
 	QString getFilePathNameByID(const QString& fileID) const;
 
+	void logMsg(const QString& msg);
+	void logWrn(const QString& wrn);
+	void logErr(const QString& err);
+
 private:
+	inline static std::atomic_bool m_typesRegistered {false};
+
+	SoftwareInfo m_swInfo;
+	int m_appInstance = 0;
+	std::vector<HostAddressPort> m_serverAddrs;
+	bool m_enableDownloadCfg = false;
+	CircularLoggerShared m_log;
+
+	std::unique_ptr<GrpcFileClient> m_grpcFileClient;
+
+	QString m_appEquipmentID;
+
+	QString m_appDataPath;
+	QString m_rootFolder;
+	QString m_cfgXmlFileName;
+	QString m_cfgXmlMd5;
+
+	SessionParams m_sessionParams;
+	SoftwareSettingsSet m_settingsSet;
+
 	struct CfgFileInfo : public OnlineLib::BuildFileInfo
 	{
 		QByteArray fileData;
 		bool md5IsValid = false;
 	};
 
-	using CfgFilesInfo = HashedVector<QString, CfgFileInfo> ;
+//	using CfgFilesInfo = HashedVector<QString, CfgFileInfo> ;
 
 	struct FileDownloadRequest
 	{
@@ -140,11 +169,7 @@ private:
 
 	//
 
-	int m_appInstance = 0;
-	volatile bool m_enableDownloadConfiguration = false;
 
-	SessionParams m_sessionParams;
-	SoftwareSettingsSet m_settingsSet;
 
 	//
 
@@ -152,24 +177,17 @@ private:
 
 	mutable QRecursiveMutex m_mutex;
 
-	QString m_appEquipmentID;
-
-	QString m_appDataPath;
-	QString m_rootFolder;
-	QString m_configurationXmlPathFileName;
-	QString m_configurationXmlMd5;
 
 	std::list<FileDownloadRequest> m_downloadQueue;
 	FileDownloadRequest m_currentDownloadRequest;
 
-	QTimer m_timer;
+//	QTimer m_timer;
 	bool m_configurationXmlReady = false;
 	bool m_allFilesLoaded = false;
 	int m_autoDownloadIndex = 0;
 
 	OnlineLib::BuildInfo m_buildInfo;
-	CfgFilesInfo m_cfgFilesInfo;					// can't remove HashedVector here because
-													// configuration.xml should be in m_cfgFilesInfo[0]!!!
+	std::vector<CfgFileInfo> m_cfgFilesInfo;	// configuration.xml should be in m_cfgFilesInfo[0]!!!
 
 	bool m_hasValidSavedConfiguration = false;
 
@@ -182,7 +200,7 @@ private:
 };
 
 template<typename T>
-std::shared_ptr<const T> CfgLoader::getSettingsProfile(const QString& profile) const
+std::shared_ptr<const T> GrpcCfgLoader::getSettingsProfile(const QString& profile) const
 {
 	AUTO_LOCK(m_mutex);
 
@@ -192,7 +210,7 @@ std::shared_ptr<const T> CfgLoader::getSettingsProfile(const QString& profile) c
 }
 
 template<typename T>
-std::shared_ptr<const T> CfgLoader::getCurrentSettingsProfile() const
+std::shared_ptr<const T> GrpcCfgLoader::getCurrentSettingsProfile() const
 {
 	AUTO_LOCK(m_mutex);
 
@@ -201,26 +219,25 @@ std::shared_ptr<const T> CfgLoader::getCurrentSettingsProfile() const
 	return settings;
 }
 
-
 // -------------------------------------------------------------------------------------
 //
-// CfgLoaderThread class declaration
+// GrpcCfgLoaderThread class declaration
 //
 // -------------------------------------------------------------------------------------
 
-class CfgLoaderThread : public QObject
+class GrpcCfgLoaderThread : public QObject
 {
 	Q_OBJECT
 
 public:
-	CfgLoaderThread(const SoftwareInfo& softwareInfo,
+	GrpcCfgLoaderThread(const SoftwareInfo& softwareInfo,
 					int appInstance,
 					const HostAddressPort& serverAddressPort1,
 					const HostAddressPort& serverAddressPort2,
 					bool enableDownloadCfg,
 					std::shared_ptr<CircularLogger> logger);
 
-	virtual ~CfgLoaderThread();
+	virtual ~GrpcCfgLoaderThread();
 
 	void start();
 	void quitAndWait();
@@ -285,12 +302,12 @@ private:
 
 	mutable QRecursiveMutex m_mutex;
 
-	CfgLoader* m_cfgLoader = nullptr;
+	GrpcCfgLoader* m_grpcCfgLoader = nullptr;
 	SimpleThread* m_thread = nullptr;
 };
 
 template<typename T>
-std::shared_ptr<const T> CfgLoaderThread::getCurrentSettingsProfile() const
+std::shared_ptr<const T> GrpcCfgLoaderThread::getCurrentSettingsProfile() const
 {
 	return m_cfgLoader->getCurrentSettingsProfile<T>();
 }

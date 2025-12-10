@@ -5,6 +5,8 @@
 #include <queue>
 #include <grpcpp/grpcpp.h>
 
+#include <QString>
+
 #include <GrpcFileSrv.grpc.pb.h>
 #include "../OnlineLib/GrpcSessionGuard.h"
 #include "../OnlineLib/GrpcServer.h"
@@ -98,8 +100,10 @@ struct FileReady
 //
 // -------------------------------------------------------------------------------------
 
-class GrpcFileClient : public GrpcFileBase
+class GrpcFileClient : public QObject, public GrpcFileBase
 {
+	Q_OBJECT
+
 public:
 	GrpcFileClient(const SoftwareInfo& softwareInfo,
 				   const std::vector<HostAddressPort>& serverAddress,
@@ -114,12 +118,25 @@ public:
 
 	virtual ~GrpcFileClient();
 
+	void start();
+	void stop();
+
+	void downloadSessionParams();
 	void downloadFile(const QString& fileName);
 	bool waitFileReady(FileReady* fileReady);
 
 	bool downloadFileBlocked(const QString& fileName, FileReady* fileReady);
 
 	bool isTransferInProgress();
+
+signals:
+	void signal_unknownClientID();
+	void signal_wrongClientHostName();
+	void signal_setConnection();
+	void signal_noConnection();
+	void signal_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params);
+	void signal_fileReady(FileReady fileReady);			// not ref - Ok
+	void signal_fileDowloadTimeout();
 
 protected:
 	QString getErrorStr(Tcp::FileTransferResult errorCode) const;
@@ -128,6 +145,7 @@ private:
 	void run();
 
 	void createStubAndHandshake(grpc::Status* status = nullptr);
+	Tcp::FileTransferResult privateGetSessionParams();
 	Tcp::FileTransferResult privateDownloadFile(const QString& fileName);
 
 	void pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode);
@@ -141,17 +159,21 @@ private:
 
 	int m_srvAddrIndex = -1;			// !
 
+	std::thread m_thread;
+	std::atomic_bool m_threadStarted {false};
+	std::atomic_bool m_quitRequested {false};
+
 	std::mutex m_procMutex;
 	std::condition_variable m_procCond;
 	QStringList m_downloadFileQueue;
-	std::atomic_bool m_quitRequested {false};
 	std::atomic_bool m_transferInProgress {false};
 
 	std::mutex m_fileReadyMutex;
 	std::condition_variable m_fileReadyCond;
 	std::queue<FileReady> m_fileReadyQueue;
 
-	std::thread m_thread;
 	std::unique_ptr<Grpc::FileSrv::Stub> m_stub;
 	std::string m_authToken;
+
+	inline static const QString SESSION_PARAMS_REQUEST = QStringLiteral("*SESSION_PARAMS_REQUEST*");
 };

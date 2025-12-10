@@ -13,8 +13,6 @@
 //
 // -------------------------------------------------------------------------------------
 
-bool CfgServerLoaderBase::m_typesRegistered = false;
-
 CfgServerLoaderBase::CfgServerLoaderBase()
 {
 	if (m_typesRegistered == false)

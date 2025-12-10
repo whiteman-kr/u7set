@@ -11,7 +11,7 @@
 //
 // -------------------------------------------------------------------------------------
 
-class GrpcCfgServer : public GrpcFileSrv, public CfgServerLoaderBase
+class GrpcCfgServer : public GrpcFileSrv
 {
 public:
 	GrpcCfgServer(const SoftwareInfo& softwareInfo,

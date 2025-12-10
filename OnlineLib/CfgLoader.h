@@ -31,7 +31,7 @@ protected:
 	};
 
 private:
-	static bool m_typesRegistered;
+	inline static bool m_typesRegistered {false};
 };
 
 // -------------------------------------------------------------------------------------

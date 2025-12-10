@@ -339,18 +339,39 @@ GrpcFileClient::GrpcFileClient(const SoftwareInfo& softwareInfo,
 	m_log(log)
 {
 	Q_UNUSED(clientDescription);
+}
 
+GrpcFileClient::~GrpcFileClient()
+{
+	stop();
+}
+
+void GrpcFileClient::start()
+{
 	if (m_serverAddress.size() == 0)
 	{
 		Q_ASSERT(false);
 		return;
 	}
 
+	if (m_threadStarted.load(std::memory_order::acquire))
+	{
+		Q_ASSERT(false);          // уже запущен
+		return;
+	}
+
+	m_quitRequested.store(false, std::memory_order::relaxed);
 	m_thread = std::thread(&GrpcFileClient::run, this);
+	m_threadStarted.store(true, std::memory_order::release);
 }
 
-GrpcFileClient::~GrpcFileClient()
+void GrpcFileClient::stop()
 {
+	if (m_threadStarted.load(std::memory_order::acquire) == false)
+	{
+		return;
+	}
+
 	m_quitRequested.store(true, std::memory_order::relaxed);
 	m_procCond.notify_one();
 	m_fileReadyCond.notify_all();
@@ -359,10 +380,19 @@ GrpcFileClient::~GrpcFileClient()
 	{
 		m_thread.join();
 	}
+
+	m_threadStarted.store(false, std::memory_order::release);
+}
+
+void GrpcFileClient::downloadSessionParams()
+{
+	downloadFile(SESSION_PARAMS_REQUEST);
 }
 
 void GrpcFileClient::downloadFile(const QString& fileName)
 {
+	Q_ASSERT(m_threadStarted.load(std::memory_order::acquire));
+
 	{
 		std::lock_guard lg(m_procMutex);
 		m_downloadFileQueue.append(fileName);
@@ -384,6 +414,10 @@ bool GrpcFileClient::waitFileReady(FileReady* fileReady)
 							  }))
 	{
 		fileReady->errorCode = Tcp::FileTransferResult::ServerReplyTimeout;
+
+		ul.unlock();
+
+		emit signal_fileDowloadTimeout();
 		return false;
 	}
 
@@ -397,10 +431,19 @@ bool GrpcFileClient::waitFileReady(FileReady* fileReady)
 		fr.md5.swap(fileReady->md5);
 
 		m_fileReadyQueue.pop();
+
+		ul.unlock();
+
+		emit signal_fileReady(*fileReady);
 		return true;
 	}
 
 	fileReady->errorCode = Tcp::FileTransferResult::NotConnectedToServer;
+
+	ul.unlock();
+
+	emit signal_noConnection();
+
 	return false;
 }
 
@@ -459,7 +502,14 @@ void GrpcFileClient::run()
 
 		ul.unlock();
 
-		privateDownloadFile(fileName);
+		if (fileName == SESSION_PARAMS_REQUEST)
+		{
+
+		}
+		else
+		{
+			privateDownloadFile(fileName);
+		}
 	}
 
 	if (m_stub != nullptr)
@@ -499,11 +549,80 @@ void GrpcFileClient::createStubAndHandshake(grpc::Status* status)
 	if (st.ok())
 	{
 		m_authToken = rep.authtoken();
+		emit signal_setConnection();
 		return;
+	}
+
+	if (st.error_code() == grpc::StatusCode::UNAUTHENTICATED)
+	{
+		if (st.error_message() == Grpc::WRONG_CLIENT_EQUIPMENT_ID)
+		{
+			emit signal_unknownClientID();
+		}
+		else
+		{
+			if (st.error_message() == Grpc::WRONG_HOST_NAME)
+			{
+				emit signal_wrongClientHostName();
+			}
+			else
+			{
+				Q_ASSERT(false);
+			}
+		}
 	}
 
 	m_authToken.clear();
 	m_stub.reset();
+}
+
+Tcp::FileTransferResult GrpcFileClient::privateGetSessionParams()
+{
+	SessionParams params;
+
+	Tcp::FileTransferResult result = Tcp::FileTransferResult::Ok;
+
+	if (m_stub == nullptr)
+	{
+		m_transferInProgress.store(false, std::memory_order::relaxed);
+		result = Tcp::FileTransferResult::NotConnectedToServer;
+		emit signal_sessionParamsReady(result, params);
+		return result;
+	}
+
+	m_transferInProgress.store(true, std::memory_order::relaxed);
+
+	grpc::ClientContext ctx;
+
+	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, m_authToken);
+
+	Grpc::GetSessionParamsRequest req;
+	Grpc::GetSessionParamsReply rep;
+
+	::grpc::Status st = m_stub->GetSessionParams(&ctx, req, &rep);
+
+	if (st.ok())
+	{
+		params.loadFrom(rep.sessionparams());
+		emit signal_sessionParamsReady(result, params);
+	}
+	else
+	{
+		if (st.error_code() == grpc::StatusCode::UNAUTHENTICATED)
+		{
+			result = Tcp::FileTransferResult::NotConnectedToServer;
+			emit signal_sessionParamsReady(result, params);
+		}
+		else
+		{
+			result = Tcp::FileTransferResult::InternalError;
+			emit signal_sessionParamsReady(result, params);
+		}
+	}
+
+	m_transferInProgress.store(false, std::memory_order::relaxed);
+
+	return result;
 }
 
 Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileName)

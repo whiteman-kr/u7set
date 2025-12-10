@@ -200,15 +200,16 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
 	m_grpcCfgServers.clear();
 
-	std::vector<Tcp::ListenAddress> listenAddrs;
-
 	for(const RqCtrlSettings& rcs: m_cfgServiceSettings.rcSettings)
 	{
 		if (rcs.enable() == false)
 		{
 			continue;
 		}
-		// rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel()
+
+		HostAddressPort clientRequestIP = rcs.clientRequestIP();
+
+		clientRequestIP.setPort(PORT_CONFIGURATION_GRPC_SERVICE_CLIENT_REQUEST);
 
 		m_grpcCfgServers.push_back(
 			std::make_unique<GrpcCfgServer>(softwareInfo(), sessionParams(),
@@ -217,30 +218,28 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 											rcs.clientRequestIP(), buildPath, logger()));
 	}
 
-	// m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger(), "CfgServerListener");
+	//
 
-	// m_cfgServerThread->start();
+	CfgServer* cfgServer = new CfgServer(softwareInfo(),
+										 sessionParams(),
+										 buildPath,
+										 m_cfgServiceSettings.clients,
+										 m_cfgServiceSettings.checkHostname,
+										 logger());
 
-	// CfgServer* cfgServer = new CfgServer(softwareInfo(),
-	// 									 sessionParams(),
-	// 									 buildPath,
-	// 									 m_cfgServiceSettings.clients,
-	// 									 m_cfgServiceSettings.checkHostname,
-	// 									 logger());
+	std::vector<Tcp::ListenAddress> listenAddrs;
 
-	// std::vector<Tcp::ListenAddress> listenAddrs;
+	for(const RqCtrlSettings& rcs: m_cfgServiceSettings.rcSettings)
+	{
+		if (rcs.enable())
+		{
+			listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
+		}
+	}
 
-	// for(const RqCtrlSettings& rcs: m_cfgServiceSettings.rcSettings)
-	// {
-	// 	if (rcs.enable())
-	// 	{
-	// 		listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
-	// 	}
-	// }
+	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger(), "CfgServerListener");
 
-	// m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger(), "CfgServerListener");
-
-	// m_cfgServerThread->start();
+	m_cfgServerThread->start();
 }
 
 void ConfigurationServiceWorker::stopCfgServerThread()
