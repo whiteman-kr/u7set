@@ -465,6 +465,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0435.sql", "Upgrade to version 435, Added property StatusFlagFunction to Monitor preset" },
 	{":/DatabaseUpgrade/Upgrade0436.sql", "Upgrade to version 436, FSCChassis preset update" },
 	{":/DatabaseUpgrade/Upgrade0437.sql", "Upgrade to version 437, Added LM SF41"},
+	{":/DatabaseUpgrade/Upgrade0438.sql", "Upgrade to version 438, LM-SF41, AFB func changed to version 6"},
 };
 
 int DbWorker::counter = 0;
