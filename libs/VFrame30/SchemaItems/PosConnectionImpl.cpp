@@ -1,5 +1,5 @@
-#include <VFrame30/PosConnectionImpl.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/PosConnectionImpl.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/Settings.h>
 
@@ -10,9 +10,7 @@ namespace VFrame30
 		Init();
 	}
 
-	void PosConnectionImpl::Init(void)
-	{
-	}
+	void PosConnectionImpl::Init(void) {}
 
 	void PosConnectionImpl::propertyDemand(const QString& prop)
 	{
@@ -95,7 +93,7 @@ namespace VFrame30
 		{
 			return false;
 		}
-		
+
 		//--
 		//
 		if (message.GetExtension(Proto::schemaitem).has_posconnectionimpl() == false)
@@ -119,7 +117,7 @@ namespace VFrame30
 	//
 	void PosConnectionImpl::moveItem(double horzOffsetDocPt, double vertOffsetDocPt)
 	{
-		for(auto pt = points.begin(); pt != points.end(); ++pt)
+		for (auto pt = points.begin(); pt != points.end(); ++pt)
 		{
 			pt->X += horzOffsetDocPt;
 			pt->Y += vertOffsetDocPt;
@@ -128,7 +126,7 @@ namespace VFrame30
 
 	void PosConnectionImpl::snapToGrid(double gridSize)
 	{
-		for(auto pt = points.begin(); pt != points.end(); ++pt)
+		for (auto pt = points.begin(); pt != points.end(); ++pt)
 		{
 			QPointF snapped = VFrame30::snapToGrid(QPointF(pt->X, pt->Y), gridSize);
 
@@ -145,7 +143,7 @@ namespace VFrame30
 		{
 			return 0.0;
 		}
-		
+
 		double minval = points.front().X;
 		double maxval = points.front().X;
 
@@ -177,13 +175,9 @@ namespace VFrame30
 		return maxval - minval;
 	}
 
-	void PosConnectionImpl::SetWidthInDocPt(double /*val*/)
-	{
-	}
+	void PosConnectionImpl::SetWidthInDocPt(double /*val*/) {}
 
-	void PosConnectionImpl::SetHeightInDocPt(double /*val*/)
-	{
-	}
+	void PosConnectionImpl::SetHeightInDocPt(double /*val*/) {}
 
 	void PosConnectionImpl::dump() const
 	{
@@ -245,7 +239,7 @@ namespace VFrame30
 		}
 
 		QPainter* p = drawParam->painter();
-			
+
 		// Draw the main part
 		//
 		QPolygonF polyline(static_cast<int>(points.size()));
@@ -261,11 +255,11 @@ namespace VFrame30
 		p->setPen(pen);
 
 		p->drawPolyline(polyline);
-						
+
 		// Draw extPoints
 		//
 		QPolygonF extPolyline;
-		
+
 		extPolyline.push_back(QPointF(points.back().X, points.back().Y));
 
 		for (auto pt = extPoints.cbegin(); pt != extPoints.cend(); ++pt)
@@ -273,7 +267,7 @@ namespace VFrame30
 			extPolyline.push_back(QPointF(pt->X, pt->Y));
 		}
 
-		//QPen extPen(QColor(0x061040C0));	// D2D1::ColorF(0x1040C0, 0.3f)
+		// QPen extPen(QColor(0x061040C0));	// D2D1::ColorF(0x1040C0, 0.3f)
 		QPen extPen(Qt::red);
 		extPen.setWidth(0);
 		p->setPen(extPen);
@@ -356,12 +350,12 @@ namespace VFrame30
 			polyline[index++] = QPointF(pt->X, pt->Y);
 		}
 
-		QPen pen(isLocked() == true ?  SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
+		QPen pen(isLocked() == true ? SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
 		pen.setWidthF(lineWeight);
 
 		p->setPen(pen);
 		p->drawPolyline(polyline);
-			
+
 		// Draw control bars
 		//
 		if (drawSizeBar == true && isLocked() == false)
@@ -402,38 +396,22 @@ namespace VFrame30
 				p->setPen(Qt::NoPen);
 				p->setBrush(QColor{0xFF, 0xFF, 0xFF, 0x80});
 
-				const QPointF triPointsUp[] = {
-					{x + w3, y + w3},
-					{x + w3 + w3 / 2, y},
-					{x + w3 + w3, y + w3}
-				};
+				const QPointF triPointsUp[] = {{x + w3, y + w3}, {x + w3 + w3 / 2, y}, {x + w3 + w3, y + w3}};
 				p->drawPolygon(triPointsUp, static_cast<int>(std::size(triPointsUp)));
 
 				// Draw small triangles, Right
 				//
-				const QPointF triPointsRight[] = {
-					{x + w3 + w3, y + w3},
-					{x + w3 + w3 + w3, y + w3 + w3 / 2},
-					{x + w3 + w3, y + w3 + w3}
-				};
+				const QPointF triPointsRight[] = {{x + w3 + w3, y + w3}, {x + w3 + w3 + w3, y + w3 + w3 / 2}, {x + w3 + w3, y + w3 + w3}};
 				p->drawPolygon(triPointsRight, static_cast<int>(std::size(triPointsRight)));
 
 				// Draw small triangles, Down
 				//
-				const QPointF triPointsDown[] = {
-					{x + w3, y + w3 + w3},
-					{x + w3 + w3, y + w3 + w3},
-					{x + w3 + w3 / 2, y + w3 + w3 + w3}
-				};
+				const QPointF triPointsDown[] = {{x + w3, y + w3 + w3}, {x + w3 + w3, y + w3 + w3}, {x + w3 + w3 / 2, y + w3 + w3 + w3}};
 				p->drawPolygon(triPointsDown, static_cast<int>(std::size(triPointsDown)));
 
 				// Draw small triangles, Left
 				//
-				const QPointF triPointsLeft[] = {
-					{x + w3, y + w3},
-					{x + w3, y + w3 + w3},
-					{x, y + w3 + w3 / 2}
-				};
+				const QPointF triPointsLeft[] = {{x + w3, y + w3}, {x + w3, y + w3 + w3}, {x, y + w3 + w3 / 2}};
 				p->drawPolygon(triPointsLeft, static_cast<int>(std::size(triPointsLeft)));
 			}
 		}
@@ -452,7 +430,7 @@ namespace VFrame30
 		QPainter* p = drawParam->painter();
 
 		double cbs = drawParam->controlBarSize();
-		double lineWeight = cbs / 2.0f;
+		double lineWeight = cbs / 3.0f;
 
 		// Draw the main part
 		//
@@ -464,7 +442,16 @@ namespace VFrame30
 			polyline[index++] = QPointF(pt->X, pt->Y);
 		}
 
+		std::transform(polyline.begin(),
+					   polyline.end(),
+					   polyline.begin(),
+					   [drawParam](const QPointF& pt) -> QPointF
+					   {
+						   return drawParam->gridToDpi(pt);
+					   });
+
 		QPen pen(color);
+		pen.setJoinStyle(Qt::MiterJoin);
 
 		pen.setWidthF(lineWeight);
 		p->setPen(pen);
@@ -517,7 +504,7 @@ namespace VFrame30
 
 	// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 	// координаты и размер прямоугольника заданы в дюймах или пикселях
-	// 
+	//
 	bool PosConnectionImpl::isIntersectRect(double x, double y, double width, double height) const
 	{
 		// Проверить, пересекает ли хоть одна прямая intersectRectangleIn
@@ -525,7 +512,7 @@ namespace VFrame30
 		QRectF intersectRectangleIn(x, y, width, height);
 		SchemaPoint prevPoint;
 
-		for(auto curPoint = points.cbegin(); curPoint != points.cend(); ++curPoint)
+		for (auto curPoint = points.cbegin(); curPoint != points.cend(); ++curPoint)
 		{
 			if (curPoint == points.cbegin())
 			{
@@ -555,7 +542,7 @@ namespace VFrame30
 		double r = l;
 		double t = points.front().Y;
 		double b = t;
-					
+
 		for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
 		{
 			l = std::min(l, pt->X);
@@ -568,7 +555,7 @@ namespace VFrame30
 		QRectF result(l, t, std::abs(r - l), std::abs(b - t));
 		return result;
 	}
-	
+
 	// IPosLine Implementation
 	//
 	const std::list<SchemaPoint>& PosConnectionImpl::GetPointList() const
@@ -589,10 +576,10 @@ namespace VFrame30
 		// two same points can be added.
 		// That's why its commented, do not uncomment if you want build to work!
 		//
-//		if (points.empty() == false && points.back() == p)
-//		{
-//			return;
-//		}
+		//		if (points.empty() == false && points.back() == p)
+		//		{
+		//			return;
+		//		}
 
 		points.push_back(p);
 	}
@@ -620,7 +607,7 @@ namespace VFrame30
 			points.pop_back();
 		}
 	}
-		
+
 	// ISchemaItemPropertiesPos Implementation
 	//
 	double PosConnectionImpl::left() const
@@ -629,7 +616,7 @@ namespace VFrame30
 		{
 			return 0.0;
 		}
-		
+
 		double val = points.front().X;
 
 		for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
@@ -649,7 +636,7 @@ namespace VFrame30
 
 		return val;
 	}
-	
+
 	void PosConnectionImpl::setLeft(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
@@ -662,7 +649,7 @@ namespace VFrame30
 		{
 			return 0.0;
 		}
-		
+
 		double val = points.front().Y;
 
 		for (auto pt = points.cbegin(); pt != points.cend(); ++pt)
@@ -682,7 +669,7 @@ namespace VFrame30
 
 		return val;
 	}
-	
+
 	void PosConnectionImpl::setTop(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
@@ -695,7 +682,7 @@ namespace VFrame30
 		{
 			return 0.0;
 		}
-		
+
 		double minval = points.front().X;
 		double maxval = points.front().X;
 
@@ -719,7 +706,7 @@ namespace VFrame30
 
 		return val;
 	}
-	
+
 	void PosConnectionImpl::setWidth(double)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
@@ -775,5 +762,4 @@ namespace VFrame30
 		extPoints.clear();
 		return;
 	}
-}
-
+} // namespace VFrame30

@@ -159,9 +159,15 @@ namespace VFrame30
 		Q_PROPERTY(double zoomFactor READ zoomFactor)
 		Q_PROPERTY(double ZoomFactor READ zoomFactor)
 
+		/// \brief Highlight rectangle color (Ctrl + left click).
+		Q_PROPERTY(QColor highlightRectColor READ highlightRectColor WRITE setHighlightRectColor)
+
 	public:
 		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView, ISchemaViewHistory* schemaViewHistory, QObject* parent = nullptr);
 		virtual ~ScriptSchemaView() = default;
+
+	public:
+		using SchemaItem = QObject*;
 
 		// Public slots which are part of Script API
 		//
@@ -173,7 +179,7 @@ namespace VFrame30
 
 		/// \brief Finds schema item by its name (ObjectName property). Returned value has SchemaItem type or undefined if item is not
 		/// found.
-		QObject* findSchemaItem(QString objectName); // Find SchemaItem by ObjectName
+		SchemaItem findSchemaItem(QString objectName); // Find SchemaItem by ObjectName
 
 		/// \brief Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property).
 		///
@@ -305,16 +311,20 @@ namespace VFrame30
 		/// \brief Get schema caption by schema identifier.
 		QString schemaCaptionById(const QString& schemaId) const;
 
-		// Not documented
-		//
+		/// \brief Get schema caption by schema index.
 		QString schemaCaptionByIndex(int schemaIndex) const;
 
-		// Not documented
-		//
+		/// \brief Get schema identifier by schema index.
 		QString schemaIdByIndex(int schemaIndex) const;
 
-		/// @brief Returns the monitor behavior object (ScriptMonitorBehavior).
+		/// \brief Returns the monitor behavior object (ScriptMonitorBehavior).
 		Behavior::ScriptMonitorBehavior monitorBehavior() const;
+
+		/// \brief Adds an item to be highlighted with a rectangle (Ctrl + left click).
+		void addHighlightItem(SchemaItem item);
+
+		/// \brief Clears all highlighted items.
+		void clearHighlightItems();
 
 	private:
 		QString schemaId() const;
@@ -324,6 +334,9 @@ namespace VFrame30
 
 		int schemaCount() const;
 		double zoomFactor() const;
+
+		QColor highlightRectColor() const;
+		void setHighlightRectColor(const QColor& color);
 
 		// Data
 		//
@@ -358,7 +371,14 @@ namespace VFrame30
 
 	protected:
 		virtual void paintEvent(QPaintEvent* event) override;
+		void drawHighlightRects(VFrame30::CDrawParam& drawParam, const QRectF& clipRect);
+
 		virtual void timerEvent(QTimerEvent* event) override;
+
+		bool eventFilter(QObject* obj, QEvent* event) override;
+		virtual void keyPressEvent(QKeyEvent* event) override;
+		virtual void keyReleaseEvent(QKeyEvent* event) override;
+
 		virtual void mouseMoveEvent(QMouseEvent* event) override;
 		virtual void mousePressEvent(QMouseEvent* event) override;
 		virtual void mouseReleaseEvent(QMouseEvent* event) override;
@@ -369,7 +389,7 @@ namespace VFrame30
 		void startRepaintTimer();
 
 	signals:
-		void signal_setSchema(QString schemaId, QStringList highlightIds);
+		void signal_setSchema(QString schemaId, QStringList highlightSignalIds);
 
 		// Properties
 		//
@@ -383,8 +403,8 @@ namespace VFrame30
 		bool infoMode() const;
 		void setInfoMode(bool value);
 
-		const QStringList& highlightIds() const;
-		void setHighlightIds(QStringList value);
+		const QStringList& highlightSignalIds() const;
+		void setHighlightSignalIds(QStringList value);
 
 		// TuningController
 		//
@@ -484,6 +504,16 @@ namespace VFrame30
 		//
 		void setMonitorEquipment(std::shared_ptr<Hardware::DeviceObject> monitorEquipment);
 
+		// Hightlight rectangle
+		//
+		QColor highlightRectColor() const;
+		void setHighlightRectColor(const QColor& color);
+
+		void addHighlightItem(QUuid itemUuid);
+		void clearHighlightItems();
+
+		bool hasHighlightItems() const;
+
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
 		VFrame30::ISchemaViewHistory* m_schemaViewHistory = nullptr; // Can be nullptr if widget does not support history navigation
@@ -517,10 +547,13 @@ namespace VFrame30
 		std::unique_ptr<Hardware::ScriptEquipment> m_scriptEquipment;
 
 	private:
-		bool m_periodicUpdate = true; // Update widget every 250 ms
-		bool m_infoMode = false;      // Show some additional info like labels
+		bool m_periodicUpdate = true;     // Update widget every 250 ms
+		bool m_infoMode = false;          // Show some additional info like labels
 
-		QStringList m_highlightIds;   // Highlighted IDs, can be any, like AppSignalID, ConnectionID... depends on item
+		QStringList m_highlightSignalIds; // Highlighted AppSignalIDs, can be any, like AppSignalID, ConnectionID... depends on item
+
+		std::unordered_set<QUuid> m_highlightSchemaItems;    // Manually selected items to highlight.
+		QColor m_highlightRectColor{0x29, 0x46, 0xFF, 0xB0}; // Default highlight color, light blue with some transparency
 
 		mutable ITimeStats* m_timeStats = nullptr;
 

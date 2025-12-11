@@ -119,7 +119,7 @@ namespace SimUi
 	{
 		QStringList ids = m_simulator->overrideSignals().overrideSignalIds();
 
-		setHighlightIds(ids);
+		setHighlightSignalIds(ids);
 
 		return;
 	}

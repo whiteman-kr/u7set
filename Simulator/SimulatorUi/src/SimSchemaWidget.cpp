@@ -298,7 +298,7 @@ namespace SimUi
 	{
 		// Reset highlight
 		//
-		clientSchemaView()->setHighlightIds({});
+		clientSchemaView()->setHighlightSignalIds({});
 
 		// Signals items
 		//
@@ -355,6 +355,25 @@ namespace SimUi
 		impactSignals.sort();
 		impactSignals.removeDuplicates();
 
+		// Compose menu
+		//
+		QSchemaMenu menu{this};
+
+		// Reset highlights.
+		//
+		if (clientSchemaView()->hasHighlightItems() == true)
+		{
+			QAction* a = menu.addAction(tr("Reset Highlights"));
+			a->setEnabled(clientSchemaView()->hasHighlightItems());
+			connect(a,
+					&QAction::triggered,
+					this,
+					[this]()
+					{
+						clientSchemaView()->clearHighlightItems();
+					});
+		}
+
 		QStringList equipmentIds; // Here will be added @equipmentId for appSignals and impactSignals.
 
 		// --
@@ -367,14 +386,8 @@ namespace SimUi
 			return;
 		}
 
-		// Compose menu
-		//
-		QSchemaMenu menu{this};
-
 		// Schemas List
 		//
-		QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
-
 		std::set<QString> signalsSchemasSet;
 		for (const QString& s : appSignals)
 		{
@@ -451,12 +464,11 @@ namespace SimUi
 			}
 		}
 
-		if (signalsSchemasSet.empty() == true && impactSignalsSchemasSet.empty() == true && loopbackSchemas.empty() == true)
+		if (signalsSchemasSet.empty() == false || impactSignalsSchemasSet.empty() == false || loopbackSchemas.empty() == false)
 		{
-			schemasSubMenu->setDisabled(true);
-		}
-		else
-		{
+			menu.addSeparator();
+			QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
+
 			// App Signals
 			//
 			for (const QString& schemaId : signalsSchemasSet)

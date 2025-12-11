@@ -84,7 +84,7 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		SchemaItem* schemaItem = dynamic_cast<SchemaItem*>(itemObject);
+		auto schemaItem = dynamic_cast<VFrame30::SchemaItem*>(itemObject);
 		if (schemaItem == nullptr)
 		{
 			assert(schemaItem);
@@ -338,6 +338,36 @@ namespace VFrame30
 		return m_clientSchemaView->schemaManager()->schemaIdByIndex(schemaIndex);
 	}
 
+	Behavior::ScriptMonitorBehavior ScriptSchemaView::monitorBehavior() const
+	{
+		return Behavior::ScriptMonitorBehavior{m_clientSchemaView->monitorBehavior()};
+	}
+
+	void ScriptSchemaView::addHighlightItem(SchemaItem item)
+	{
+		if (item == nullptr)
+		{
+			m_clientSchemaView->jsEngine()->throwError(QString{"ScriptError: addHighlightItem: item is null"});
+			return;
+		}
+
+		auto schemaItem = qobject_cast<VFrame30::SchemaItem*>(item);
+		if (schemaItem == nullptr)
+		{
+			m_clientSchemaView->jsEngine()->throwError(QString{"ScriptError: addHighlightItem: item is not SchemaItem"});
+			return;
+		}
+
+		m_clientSchemaView->addHighlightItem(schemaItem->guid());
+		return;
+	}
+
+	void ScriptSchemaView::clearHighlightItems()
+	{
+		m_clientSchemaView->clearHighlightItems();
+		return;
+	}
+
 	QString ScriptSchemaView::schemaId() const
 	{
 		return m_clientSchemaView->schema()->schemaId();
@@ -370,11 +400,15 @@ namespace VFrame30
 		return m_clientSchemaView->zoom() / 100.0;
 	}
 
-	Behavior::ScriptMonitorBehavior ScriptSchemaView::monitorBehavior() const
+	QColor ScriptSchemaView::highlightRectColor() const
 	{
-		return Behavior::ScriptMonitorBehavior{m_clientSchemaView->monitorBehavior()};
+		return m_clientSchemaView->highlightRectColor();
 	}
 
+	void ScriptSchemaView::setHighlightRectColor(const QColor& color)
+	{
+		m_clientSchemaView->setHighlightRectColor(color);
+	}
 
 	//
 	// ClientSchemaView
@@ -394,13 +428,19 @@ namespace VFrame30
 
 		m_jsEngine.installExtensions(QJSEngine::ConsoleExtension);
 
+		qApp->installEventFilter(this);
+
 		startRepaintTimer(); // This is a main repaint timer, it fires on the edge of 250ms
 		startTimer(1000);    // This is a guard timer
 
 		return;
 	}
 
-	ClientSchemaView::~ClientSchemaView() {}
+	ClientSchemaView::~ClientSchemaView()
+	{
+		qApp->removeEventFilter(this);
+		return;
+	}
 
 	void ClientSchemaView::paintEvent(QPaintEvent* paintEvent)
 	{
@@ -410,7 +450,7 @@ namespace VFrame30
 		{
 			m_timeStats->clear("ClientSchemaView");
 		}
-		auto startTime = std::chrono::system_clock::now();
+		auto startTime = std::chrono::steady_clock::now();
 
 		// Draw schema
 		//
@@ -448,11 +488,14 @@ namespace VFrame30
 			static_cast<bool>((QTime::currentTime().msec() / 250) % 2)); // 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
 		drawParam.setInfoMode(m_infoMode);
 
-		drawParam.setHighlightIds(highlightIds());
+		drawParam.setHighlightIds(highlightSignalIds());
 
 		// Draw schema
 		//
 		SchemaViewWidget::draw(drawParam, clipRect);
+
+		drawParam.setControlBarSize(drawParam.controlBarSize() / 2.0);
+		drawHighlightRects(drawParam, clipRect);
 
 		// --
 		//
@@ -462,13 +505,51 @@ namespace VFrame30
 		{
 			using namespace std::chrono;
 
-			auto now = system_clock::now();
+			auto now = steady_clock::now();
 			auto ellapsed = duration_cast<microseconds>(now - startTime);
 
 			m_timeStats->addRecord("ClientSchemaView", schema()->schemaId(), "paintEvent", ellapsed);
 		}
 
 		return;
+	}
+
+	void ClientSchemaView::drawHighlightRects(VFrame30::CDrawParam& drawParam, const QRectF& clipRect)
+	{
+		if (m_highlightSchemaItems.empty() == true)
+		{
+			return;
+		}
+
+		// Draw items by layers which has show flag
+		//
+		const double clipX = clipRect.left();
+		const double clipY = clipRect.top();
+		const double clipWidth = clipRect.width();
+		const double clipHeight = clipRect.height();
+
+		// Find compile layer
+		//
+		for (const auto& layer : schema()->layers())
+		{
+			if (layer->show() == false)
+			{
+				continue;
+			}
+
+			for (const auto& item : layer->items())
+			{
+				if (m_highlightSchemaItems.contains(item->guid()) == false)
+				{
+					continue;
+				}
+
+				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+				{
+					item->drawCompareAction(&drawParam, m_highlightRectColor);
+				}
+			}
+		}
 	}
 
 	void ClientSchemaView::timerEvent(QTimerEvent* event)
@@ -496,10 +577,71 @@ namespace VFrame30
 		return;
 	}
 
+	bool ClientSchemaView::eventFilter(QObject* obj, QEvent* event)
+	{
+		if (event->type() == QEvent::KeyPress)
+		{
+			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+			keyPressEvent(keyEvent);
+		}
+
+		if (event->type() == QEvent::KeyRelease)
+		{
+			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+			keyReleaseEvent(keyEvent);
+		}
+
+		return QObject::eventFilter(obj, event);
+	}
+
+	void ClientSchemaView::keyPressEvent(QKeyEvent* event)
+	{
+		Qt::MouseButtons buttons = QGuiApplication::mouseButtons();
+
+		if (event->key() == Qt::Key_Control && buttons == Qt::NoButton)
+		{
+			unsetCursor();
+		}
+
+		VFrame30::SchemaViewWidget::keyPressEvent(event);
+		return;
+	}
+
+	void ClientSchemaView::keyReleaseEvent(QKeyEvent* event)
+	{
+		Qt::MouseButtons buttons = QGuiApplication::mouseButtons();
+
+		if (event->key() == Qt::Key_Control && buttons == Qt::NoButton)
+		{
+			QPoint globalPos = QCursor::pos();
+			QPoint localPos = mapFromGlobal(globalPos);
+
+			Qt::KeyboardModifiers modifiers = QGuiApplication::keyboardModifiers();
+			modifiers &= ~Qt::ControlModifier;
+
+			QMouseEvent syntheticEvent{
+				QEvent::MouseMove,
+				localPos,                        // Local position
+				globalPos,                       // Global position
+				Qt::NoButton,                    // Button that caused the event
+				QGuiApplication::mouseButtons(), // Current state of all mouse buttons
+				modifiers                        // Current keyboard modifiers (without Ctrl since it's being released)
+			};
+
+			mouseMoveEvent(&syntheticEvent);
+		}
+
+		VFrame30::SchemaViewWidget::keyReleaseEvent(event);
+		return;
+	}
+
 	void ClientSchemaView::mouseMoveEvent(QMouseEvent* event)
 	{
 		if (event->buttons().testFlag(Qt::LeftButton) == true && m_leftClickOverItem != nullptr)
 		{
+			// We pressed left button on the item with AcceptClick, now we are moving mouse with left button pressed,
+			// if mouse is over the same item, set PointingHand cursor, else unset cursor.
+			//
 			QPointF docPoint;
 
 			bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
@@ -523,7 +665,16 @@ namespace VFrame30
 		}
 		else
 		{
-			VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
+			if (event->modifiers() & Qt::ControlModifier)
+			{
+				// Control modifier is used to select items for highlighting.
+				//
+				unsetCursor();
+			}
+			else
+			{
+				VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
+			}
 		}
 
 		return;
@@ -543,19 +694,14 @@ namespace VFrame30
 		{
 			// It is scrolling by middle button, let scroll view process it
 			//
-			VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
+			VFrame30::SchemaViewWidget::mouseMoveEvent(event);                // This will set mouse cursor
 			VFrame30::SchemaViewWidget::mousePressEvent(event);
 			return;
 		}
 
-		// Find is there any item under the cursor with AcceptClick
-		//
-		m_leftClickOverItem.reset();
-
 		QPointF docPoint;
-
-		bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
-		if (convertResult == false)
+		if (bool convertResult = MousePosToDocPoint(event->pos(), &docPoint); //
+			convertResult == false)
 		{
 			event->ignore();
 			return;
@@ -564,13 +710,56 @@ namespace VFrame30
 		double x = docPoint.x();
 		double y = docPoint.y();
 
-		for (const auto& layer : schema()->layers() | std::views::reverse)
+		auto layerShowPredicate = [](const std::shared_ptr<SchemaLayer>& layer)
 		{
-			if (layer->show() == false)
+			return layer->show() == true;
+		};
+
+		if (event->modifiers() & Qt::ControlModifier)
+		{
+			for (const auto& layer : schema()->layers() | std::views::reverse | std::views::filter(layerShowPredicate))
 			{
-				continue;
+				QRectF smallRect;
+				if (schema()->unit() == SchemaUnit::Inch)
+				{
+					// 1mm rectangle
+					smallRect = QRectF(docPoint.x() - 0.02, docPoint.y() - 0.02, 0.04, 0.04);
+				}
+				else
+				{
+					smallRect = QRectF(docPoint.x() - 2, docPoint.y() - 2, 4, 4);
+				}
+
+				auto itemsUnderPoint = layer->getItemListInRectangle(smallRect);
+				if (itemsUnderPoint.empty() == false)
+				{
+					setHighlightSignalIds({});                    // Clear highlight signals to avoid confusion
+
+					auto itemUnderPoint = itemsUnderPoint.back(); // Get topmost item
+
+					if (m_highlightSchemaItems.contains(itemUnderPoint->guid()) == true)
+					{
+						m_highlightSchemaItems.erase(itemUnderPoint->guid());
+					}
+					else
+					{
+						m_highlightSchemaItems.insert(itemUnderPoint->guid());
+					}
+					update();
+					break;
+				}
 			}
 
+			event->accept();
+			return;
+		}
+
+		// Find is there any item under the cursor with AcceptClick
+		//
+		m_leftClickOverItem.reset();
+
+		for (const auto& layer : schema()->layers() | std::views::reverse | std::views::filter(layerShowPredicate))
+		{
 			for (const auto& item : layer->items() | std::views::reverse)
 			{
 				if (item->acceptClick() == true && item->isIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
@@ -603,66 +792,53 @@ namespace VFrame30
 
 		// Find is there any item under the cursor with AcceptClick
 		//
-		if (m_leftClickOverItem != nullptr)
+		QPointF docPoint;
+		bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
+		if (convertResult == false)
 		{
-			QPointF docPoint;
+			event->ignore();
+			return;
+		}
 
-			bool convertResult = MousePosToDocPoint(event->pos(), &docPoint);
-			if (convertResult == false)
+		if (auto item = m_leftClickOverItem; //
+			item != nullptr && item->parentSchema()->schemaId() == schema()->schemaId() && item->acceptClick() == true &&
+			item->clickScript().isEmpty() == false && item->isIntersectPoint(docPoint.x(), docPoint.y()) == true)
+		{
+			// Run script
+			//
+			bool prev = setScriptMessageBoxAllowed(true);
+
+			item->clickEvent(jsEngine(), this);
+
+			setScriptMessageBoxAllowed(prev);
+
+			if (item->lastScriptError().isEmpty() == false && logController() != nullptr)
 			{
-				event->ignore();
-				return;
+				// Report script error to Monitor or TuningClient log
+				//
+				auto l = logController();
+				l->writeWarning(tr("SchemaItem %1, ClickEvent script error: %2").arg(item->label()).arg(item->lastScriptError()));
 			}
 
-			double x = docPoint.x();
-			double y = docPoint.y();
-
-			for (const auto& layer : schema()->layers() | std::views::reverse)
-			{
-				if (layer->show() == false)
-				{
-					continue;
-				}
-
-				for (const auto& item : layer->items() | std::views::reverse)
-				{
-					if (item == m_leftClickOverItem && item->acceptClick() == true && item->isIntersectPoint(x, y) == true &&
-						item->clickScript().isEmpty() == false)
-					{
-						// Run script
-						//
-						bool prev = setScriptMessageBoxAllowed(true);
-
-						item->clickEvent(jsEngine(), this);
-
-						setScriptMessageBoxAllowed(prev);
-
-						if (item->lastScriptError().isEmpty() == false && logController() != nullptr)
-						{
-							// Report script error to Monitor or TuningClient log
-							//
-							auto l = logController();
-							l->writeWarning(
-								tr("SchemaItem %1, ClickEvent script error: %2").arg(item->label()).arg(item->lastScriptError()));
-						}
-
-						// --
-						//
-						update();                                          // Repaint screen
-						m_leftClickOverItem.reset();
-						event->accept();
-
-						VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
-						return;
-					}
-				}
-			}
-
+			// --
+			//
+			update();                                          // Repaint screen
 			m_leftClickOverItem.reset();
+			event->accept();
+
+			VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
+			return;
+		}
+
+		if (event->modifiers() & Qt::ControlModifier)
+		{
+			// Ignore event
+			//
+			event->ignore();
+			return;
 		}
 
 		VFrame30::SchemaViewWidget::mouseMoveEvent(event); // This will set mouse cursor
-
 		return;
 	}
 
@@ -786,6 +962,10 @@ namespace VFrame30
 
 		schema()->Draw(&drawParam, clipRect);
 
+		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), 100.0));
+		drawParam.setControlBarSize(drawParam.controlBarSize() / 2.0);
+		drawHighlightRects(drawParam, clipRect);
+
 		// Ending
 		//
 
@@ -846,6 +1026,10 @@ namespace VFrame30
 
 		schema()->Draw(&drawParam, clipRect);
 
+		drawParam.setControlBarSize(CONTROL_BAR(schema()->unit(), p.device()->devicePixelRatioF(), 100.0));
+		drawParam.setControlBarSize(drawParam.controlBarSize() / 2.0);
+		drawHighlightRects(drawParam, clipRect);
+
 		// Saving
 		//
 		if (image.save(fileName) == false)
@@ -885,14 +1069,14 @@ namespace VFrame30
 		m_infoMode = value;
 	}
 
-	const QStringList& ClientSchemaView::highlightIds() const
+	const QStringList& ClientSchemaView::highlightSignalIds() const
 	{
-		return m_highlightIds;
+		return m_highlightSignalIds;
 	}
 
-	void ClientSchemaView::setHighlightIds(QStringList value)
+	void ClientSchemaView::setHighlightSignalIds(QStringList value)
 	{
-		m_highlightIds = std::move(value);
+		m_highlightSignalIds = std::move(value);
 	}
 
 	TuningController* ClientSchemaView::tuningController()
@@ -1397,6 +1581,33 @@ namespace VFrame30
 	void ClientSchemaView::setMonitorEquipment(std::shared_ptr<Hardware::DeviceObject> monitorEquipment)
 	{
 		m_scriptEquipment->setRoot(monitorEquipment ? monitorEquipment : std::make_shared<Hardware::DeviceRoot>());
+	}
+
+	QColor ClientSchemaView::highlightRectColor() const
+	{
+		return m_highlightRectColor;
+	}
+
+	void ClientSchemaView::setHighlightRectColor(const QColor& color)
+	{
+		m_highlightRectColor = color;
+	}
+
+	void ClientSchemaView::addHighlightItem(QUuid itemUuid)
+	{
+		m_highlightSchemaItems.insert(itemUuid);
+		update();
+	}
+
+	void ClientSchemaView::clearHighlightItems()
+	{
+		m_highlightSchemaItems.clear();
+		update();
+	}
+
+	bool ClientSchemaView::hasHighlightItems() const
+	{
+		return m_highlightSchemaItems.empty() == false;
 	}
 
 } // namespace VFrame30

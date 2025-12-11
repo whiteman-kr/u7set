@@ -55,12 +55,12 @@ namespace SimUi
 
 	const QStringList& SimSchemaPage::highlightIds() const
 	{
-		return m_schemaWidget->simSchemaView()->highlightIds();
+		return m_schemaWidget->simSchemaView()->highlightSignalIds();
 	}
 
 	void SimSchemaPage::setHighlightIds(const QStringList& value)
 	{
-		return m_schemaWidget->simSchemaView()->setHighlightIds(value);
+		return m_schemaWidget->simSchemaView()->setHighlightSignalIds(value);
 	}
 
 	SimSchemaWidget* SimSchemaPage::simSchemaWidget()

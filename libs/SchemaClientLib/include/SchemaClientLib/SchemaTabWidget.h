@@ -650,7 +650,7 @@ namespace SchemaClientLib
 
 			// Set schema for client widget. Force schema update, as we are reloading all schemas and onSomeEvent should be called.
 			//
-			tabPage->setSchema(schemaToLoad, tabPage->clientSchemaView()->highlightIds(), true);
+			tabPage->setSchema(schemaToLoad, tabPage->clientSchemaView()->highlightSignalIds(), true);
 
 			tabPage->clientSchemaView()->deleteControlWidgets(); // deleteControlWidgets after loading new schema, as it will delete old
 																 // widgets and later they will be created

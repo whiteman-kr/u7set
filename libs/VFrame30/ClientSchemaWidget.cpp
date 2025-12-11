@@ -355,7 +355,7 @@ namespace VFrame30
 		//
 		BaseSchemaWidget::setSchema(schema, false);
 
-		clientSchemaView()->setHighlightIds({});
+		clientSchemaView()->setHighlightSignalIds({});
 		clientSchemaView()->setVariables(historyState.m_variables);
 
 		setZoom(historyState.m_zoom, false);
@@ -396,7 +396,7 @@ namespace VFrame30
 
 		// --
 		//
-		clientSchemaView()->setHighlightIds(highlightIds);
+		clientSchemaView()->setHighlightSignalIds(highlightIds);
 
 		if (forceSchemaUpdate == false && schemaId == this->schemaId())
 		{

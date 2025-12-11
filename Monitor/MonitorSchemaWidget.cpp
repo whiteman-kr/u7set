@@ -233,7 +233,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 {
 	// Reset highlights
 	//
-	clientSchemaView()->setHighlightIds({});
+	clientSchemaView()->setHighlightSignalIds({});
 
 	// Signals items
 	//
@@ -258,22 +258,18 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 		loopbacks += schemaItemAssociations->associatedLoopbackIds();
 	}
 
-	if (signalList.isEmpty() == false || impactSignalList.isEmpty() == false || loopbacks.isEmpty() == false)
+	auto transformEquipmentId = [this](QString& s)
 	{
-		auto f = [this](QString& s)
+		if (s.startsWith('@') == true)
 		{
-			if (s.startsWith('@') == true)
-			{
-				s = appSignalManager().equipmentToAppSignalId(s);
-			}
-		};
+			s = appSignalManager().equipmentToAppSignalId(s);
+		}
+	};
 
-		std::ranges::for_each(signalList, f);
-		std::ranges::for_each(impactSignalList, f);
+	std::ranges::for_each(signalList, transformEquipmentId);
+	std::ranges::for_each(impactSignalList, transformEquipmentId);
 
-		signalContextMenu(signalList, impactSignalList, loopbacks, {});
-	}
-
+	signalContextMenu(signalList, impactSignalList, loopbacks, {});
 	return;
 }
 
@@ -297,10 +293,29 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 	//
 	QSchemaMenu menu{this};
 
+	// Reset highlights.
+	//
+	if (clientSchemaView()->hasHighlightItems() == true)
+	{
+		QAction* a = menu.addAction(tr("Reset Highlights"));
+		a->setEnabled(clientSchemaView()->hasHighlightItems());
+		connect(a,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					clientSchemaView()->clearHighlightItems();
+				});
+	}
+
+	if (appSignals.isEmpty() == true && impactSignals.isEmpty() == true && loopbacks.isEmpty() == true &&
+		clientSchemaView()->hasHighlightItems() == false)
+	{
+		return;
+	}
+
 	// Schemas List
 	//
-	QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
-
 	std::set<QString> signalsSchemasSet;
 	for (const QString& s : appSignals)
 	{
@@ -375,12 +390,11 @@ void MonitorSchemaWidget::signalContextMenu(QStringList appSignals,
 
 	// --
 	//
-	if (signalsSchemasSet.empty() == true && impactSignalsSchemasSet.empty() == true && loopbackSchemas.empty() == true)
+	if (signalsSchemasSet.empty() == false || impactSignalsSchemasSet.empty() == false || loopbackSchemas.empty() == false)
 	{
-		schemasSubMenu->setDisabled(true);
-	}
-	else
-	{
+		menu.addSeparator();
+		QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
+
 		for (const QString& schemaId : signalsSchemasSet)
 		{
 			auto f = [this, schemaId, &allIds]()
