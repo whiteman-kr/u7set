@@ -253,15 +253,26 @@ void AppDataServiceWorker::shutdown()
 
 void AppDataServiceWorker::runCfgLoaderThread()
 {
-	assert(m_cfgLoaderThread == nullptr);			// once should be runned
+	// assert(m_cfgLoaderThread == nullptr);			// once should be runned
 
-	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
+	// m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
+	// connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
 
-	m_cfgLoaderThread->start();
+	// m_cfgLoaderThread->start();
 
-	m_cfgLoaderThread->enableDownloadConfiguration();
+	// m_cfgLoaderThread->enableDownloadConfiguration();
+
+	assert(m_grpcCfgLoaderThread == nullptr);			// once should be runned
+
+	m_grpcCfgLoaderThread = new GrpcCfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
+
+	connect(m_grpcCfgLoaderThread, &GrpcCfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
+
+	m_grpcCfgLoaderThread->start();
+
+	m_grpcCfgLoaderThread->enableDownloadConfiguration();
+
 }
 
 void AppDataServiceWorker::stopCfgLoaderThread()

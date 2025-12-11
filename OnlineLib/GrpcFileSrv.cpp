@@ -563,7 +563,7 @@ void GrpcFileClient::createStubAndHandshake(grpc::Status* status)
 		{
 			if (st.error_message() == Grpc::WRONG_HOST_NAME)
 			{
-				emit signal_wrongClientHostName();
+				emit signal_wrongClientHostname();
 			}
 			else
 			{

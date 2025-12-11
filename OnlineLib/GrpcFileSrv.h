@@ -131,7 +131,7 @@ public:
 
 signals:
 	void signal_unknownClientID();
-	void signal_wrongClientHostName();
+	void signal_wrongClientHostname();
 	void signal_setConnection();
 	void signal_noConnection();
 	void signal_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params);

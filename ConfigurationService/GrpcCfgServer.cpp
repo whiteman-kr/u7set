@@ -30,7 +30,7 @@ void GrpcCfgServer::readBuildXml(const QString& buildFolder)
 {
 	m_buildReadOK = false;
 
-	QString buildXmlFileName = m_rootFolder + File::SLASH_BUILD_XML;
+	QString buildXmlFileName = rootFolder() + File::SLASH_BUILD_XML;
 
 	QDir dir(buildXmlFileName);
 

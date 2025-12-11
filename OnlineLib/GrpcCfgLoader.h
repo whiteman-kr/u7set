@@ -71,6 +71,9 @@ signals:
 	void signal_getFile(QString fileName, std::shared_ptr<QByteArray> fileData, bool asyncCall);
 	void signal_configurationChanged();
 
+	void signal_unknownClientID();
+	void signal_wrongClientHostname();
+
 	// Emits only for ASYNC file requests getFileAsync and getFileAsyncByID
 	// Only if errorCode == Tcp::FileTransferResult::Ok fileData will be a valid pointer, otherwise fileData will be Nullptr
 	//
@@ -278,8 +281,8 @@ signals:
 								   SessionParams sessionParams,
 								   std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
 
-	void signal_unknownClientID(QString errMsg);
-	void signal_wrongClientHostname(QString errMsg);
+	void signal_unknownClientID();
+	void signal_wrongClientHostname();
 
 	// Emits only for ASYNC file requests getFileAsync and getFileAsyncByID
 	// Only if errorCode == Tcp::FileTransferResult::Ok fileData will be a valid pointer, otherwise fileData will be Nullptr
@@ -287,14 +290,14 @@ signals:
 	void signal_fileReady(QString fileName, Tcp::FileTransferResult errorCode, std::shared_ptr<QByteArray> fileData);
 
 private:
+	void addServerAddrs(const HostAddressPort& addr1, const HostAddressPort& addr2);
 	void initThread();
 	void shutdownThread();
 
 private:
 	SoftwareInfo m_softwareInfo;
 	int m_appInstance;
-	HostAddressPort m_server1;
-	HostAddressPort m_server2;
+	std::vector<HostAddressPort> m_serverAddrs;
 	bool m_enableDownloadCfg;
 	std::shared_ptr<CircularLogger> m_logger;
 
@@ -309,6 +312,6 @@ private:
 template<typename T>
 std::shared_ptr<const T> GrpcCfgLoaderThread::getCurrentSettingsProfile() const
 {
-	return m_cfgLoader->getCurrentSettingsProfile<T>();
+	return m_grpcCfgLoader->getCurrentSettingsProfile<T>();
 }
 

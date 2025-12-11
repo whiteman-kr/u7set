@@ -399,6 +399,8 @@ void GrpcCfgLoader::startGrpcFileClient()
 														QStringLiteral("GrpcCfgLoader"), m_log);
 
 	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_setConnection, this, &GrpcCfgLoader::slot_setConnection);
+	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_unknownClientID, this, &GrpcCfgLoader::signal_unknownClientID);
+	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_wrongClientHostname, this, &GrpcCfgLoader::signal_wrongClientHostname);
 	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_sessionParamsReady, this, &GrpcCfgLoader::slot_sessionParamsReady);
 
 	m_grpcFileClient->start();
@@ -621,7 +623,7 @@ bool GrpcCfgLoader::startConfigurationXmlLoading()
 
 bool GrpcCfgLoader::readConfigurationXml()
 {
-	QByteArray fileData;
+/*	QByteArray fileData;
 
 	if (readCfgFile(m_cfgXmlFileName, &fileData, false) == false)
 	{
@@ -683,7 +685,7 @@ bool GrpcCfgLoader::readConfigurationXml()
 			m_fileIDPathMap.emplace(cfgFileInfo.ID, cfgFileInfo.pathFileName);
 		}
 	}
-
+*/
 	return true;
 }
 
@@ -863,12 +865,11 @@ GrpcCfgLoaderThread::GrpcCfgLoaderThread(	const SoftwareInfo& softwareInfo,
 									std::shared_ptr<CircularLogger> logger) :
 	m_softwareInfo(softwareInfo),
 	m_appInstance(appInstance),
-	m_server1(serverAddressPort1),
-	m_server2(serverAddressPort2),
 	m_enableDownloadCfg(enableDownloadCfg),
 	m_logger(logger)
 {
-	qDebug() << "CfgLoaderThread::CfgLoaderThread";
+//	qDebug() << "CfgLoaderThread::CfgLoaderThread";
+	addServerAddrs(serverAddressPort1, serverAddressPort2);
 
 	AUTO_LOCK(m_mutex);
 
@@ -887,7 +888,7 @@ void GrpcCfgLoaderThread::start()
 {
 	AUTO_LOCK(m_mutex);
 
-	if (m_thread == nullptr || m_cfgLoader == nullptr)
+	if (m_thread == nullptr || m_grpcCfgLoader == nullptr)
 	{
 		Q_ASSERT(false);
 		return;
@@ -906,7 +907,7 @@ void GrpcCfgLoaderThread::enableDownloadConfiguration()
 {
 	AUTO_LOCK(m_mutex);
 
-	m_cfgLoader->slot_enableDownloadConfiguration();
+	//m_grpcCfgLoader->slot_enableDownloadConfiguration();
 }
 
 bool GrpcCfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
@@ -916,7 +917,7 @@ bool GrpcCfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray
 
 	errorStr->clear();
 
-	return m_cfgLoader->getFileBlocked(pathFileName, fileData, errorStr);
+	return m_grpcCfgLoader->getFileBlocked(pathFileName, fileData, errorStr);
 }
 
 bool GrpcCfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr)
@@ -926,7 +927,7 @@ bool GrpcCfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* 
 
 	errorStr->clear();
 
-	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
+	return m_grpcCfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
 }
 
 // bool CfgLoaderThread::getFileAsync(const QString& pathFileName)
@@ -947,35 +948,39 @@ bool GrpcCfgLoaderThread::hasFileID(QString fileID) const
 {
 	AUTO_LOCK(m_mutex);
 
-	return m_cfgLoader->hasFileID(fileID);
+	return m_grpcCfgLoader->hasFileID(fileID);
 }
 
 OnlineLib::BuildInfo GrpcCfgLoaderThread::buildInfo()
 {
 	AUTO_LOCK(m_mutex);
 
-	return m_cfgLoader->buildInfo();
+	return m_grpcCfgLoader->buildInfo();
 }
 
 QString GrpcCfgLoaderThread::getLastErrorStr()
 {
 	AUTO_LOCK(m_mutex);
 
-	return m_cfgLoader->getLastErrorStr();
+//	return m_grpcCfgLoader->getLastErrorStr();
+	return QString();
 }
 
 Tcp::ConnectionState GrpcCfgLoaderThread::getConnectionState()
 {
 	AUTO_LOCK(m_mutex);
 
-	return m_cfgLoader->getConnectionState();
+//	return m_grpcCfgLoader->getConnectionState();
+
+	return Tcp::ConnectionState{};
 }
 
 HostAddressPort GrpcCfgLoaderThread::getCurrentServerAddressPort()
 {
 	AUTO_LOCK(m_mutex);
 
-	return m_cfgLoader->currentServerAddressPort();
+//	return m_grpcCfgLoader->currentServerAddressPort();
+	return HostAddressPort{};
 }
 
 void GrpcCfgLoaderThread::setConnectionParams(const SoftwareInfo& softwareInfo,
@@ -984,8 +989,9 @@ void GrpcCfgLoaderThread::setConnectionParams(const SoftwareInfo& softwareInfo,
 										  bool enableDownloadConfiguration)
 {
 	m_softwareInfo = softwareInfo;
-	m_server1 = serverAddressPort1;
-	m_server2 = serverAddressPort2;
+
+	addServerAddrs(serverAddressPort1, serverAddressPort2);
+
 	m_enableDownloadCfg = enableDownloadConfiguration;
 
 	AUTO_LOCK(m_mutex);
@@ -997,14 +1003,29 @@ void GrpcCfgLoaderThread::setConnectionParams(const SoftwareInfo& softwareInfo,
 
 SessionParams GrpcCfgLoaderThread::sessionParams() const
 {
-	if (m_cfgLoader != nullptr)
+	if (m_grpcCfgLoader != nullptr)
 	{
-		return m_cfgLoader->sessionParams();
+		return m_grpcCfgLoader->sessionParams();
 	}
 
 	Q_ASSERT(false);
 
 	return SessionParams();
+}
+
+void GrpcCfgLoaderThread::addServerAddrs(const HostAddressPort& addr1, const HostAddressPort& addr2)
+{
+	m_serverAddrs.clear();
+
+	if (addr1.isNull() == false)
+	{
+		m_serverAddrs.push_back(addr1);
+	}
+
+	if (addr2.isNull() == false)
+	{
+		m_serverAddrs.push_back(addr2);
+	}
 }
 
 void GrpcCfgLoaderThread::initThread()
@@ -1014,8 +1035,7 @@ void GrpcCfgLoaderThread::initThread()
 
 	m_grpcCfgLoader = new GrpcCfgLoader(m_softwareInfo,
 								m_appInstance,
-								m_server1,
-								m_server2,
+								m_serverAddrs,
 								m_enableDownloadCfg,
 								m_logger);
 
@@ -1046,6 +1066,6 @@ void GrpcCfgLoaderThread::shutdownThread()
 	delete m_thread;
 
 	m_thread = nullptr;
-	m_cfgLoader = nullptr;
+	m_grpcCfgLoader = nullptr;
 }
 

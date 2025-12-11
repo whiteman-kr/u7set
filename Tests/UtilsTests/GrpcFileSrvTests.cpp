@@ -85,7 +85,7 @@ TEST(GrpcFileSrvTest, GetFile_ShortFile)
 
 	Grpc::GetFileRequest req;
 
-	req.set_filename(File::SLASH_BUILD_XML);
+	req.set_filename(File::SLASH_BUILD_XML.toStdString());
 
 	auto reader = stub->GetFile(&ctx, req);
 
@@ -380,7 +380,6 @@ TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
 
 	FileReady fr;
 	bool res = client->downloadFileBlocked(fileName, &fr);
-
 	EXPECT_TRUE(res);
 
 	EXPECT_EQ(fr.fileName, fileName);
@@ -391,7 +390,3 @@ TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
 	client.reset();
 	server.reset();
 }
-
-
-
-

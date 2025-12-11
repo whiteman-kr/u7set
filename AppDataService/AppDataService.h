@@ -3,7 +3,9 @@
 #include <ServiceLib/Service.h>
 
 #include "../OnlineLib/CfgLoader.h"
+#include "../OnlineLib/GrpcCfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
+
 #include "TcpAppDataServer.h"
 #include "TcpArchiveClient.h"
 #include "RtTrendsServer.h"
@@ -155,6 +157,7 @@ private:
 
 private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
+	GrpcCfgLoaderThread* m_grpcCfgLoaderThread = nullptr;
 
 	AppDataServiceSettings m_curSettingsProfile;
 
