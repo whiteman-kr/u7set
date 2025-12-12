@@ -215,7 +215,7 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 			std::make_unique<GrpcCfgServer>(softwareInfo(), sessionParams(),
 											m_cfgServiceSettings.clients,
 											m_cfgServiceSettings.checkHostname,
-											rcs.clientRequestIP(), buildPath, logger()));
+											clientRequestIP, buildPath, logger()));
 	}
 
 	//

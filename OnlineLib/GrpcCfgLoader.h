@@ -57,7 +57,7 @@ public:
 	template<typename T>
 	std::shared_ptr<const T> getCurrentSettingsProfile() const;
 
-	virtual void onStartDownload(const QString& fileName);
+//	virtual void onStartDownload(const QString& fileName);
 //	virtual void onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
 
 	friend class CfgLoaderThread;
@@ -82,6 +82,7 @@ signals:
 private slots:
 	void slot_setConnection();
 	void slot_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params);
+	void slot_fileReady(FileReady fileReady);
 	void slot_enableDownloadConfiguration();
 	void slot_getFile(QString fileName, std::shared_ptr<QByteArray> fileData, bool asyncCall);
 	void slot_onTimer();
@@ -98,6 +99,13 @@ private:
 	void stopGrpcFileClient();
 	void restartGrpcFileClient();
 
+	void processCfgXmlFile(FileReady& fr);
+	void processOtherFiles(const FileReady& fr);
+
+	bool saveFile(const FileReady& fr);
+	void checkExistsBuildFiles();
+	void downloadNextFile();
+
 	void shutdown();
 
 	void startDownload();
@@ -106,7 +114,7 @@ private:
 //	virtual void onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5) override final;
 
 	bool startConfigurationXmlLoading();
-	bool readConfigurationXml();
+	bool readCfgXmlFile(const QByteArray& fileData);
 
 	void readSavedConfiguration();
 
@@ -189,8 +197,12 @@ private:
 	bool m_allFilesLoaded = false;
 	int m_autoDownloadIndex = 0;
 
+	QByteArray m_cfgXmlFileData;
 	OnlineLib::BuildInfo m_buildInfo;
 	std::vector<CfgFileInfo> m_cfgFilesInfo;	// configuration.xml should be in m_cfgFilesInfo[0]!!!
+
+	BuildFileInfoArray m_buildFilesInfo;
+	std::unordered_map<QString, QString> m_filesToDownload;		// fileName => md5
 
 	bool m_hasValidSavedConfiguration = false;
 
@@ -199,7 +211,7 @@ private:
 
 	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
 
-	std::map<QString, QString> m_fileIDPathMap;		// fileID => filePathName
+	std::unordered_map<QString, QString> m_fileIDPathMap;		// fileID => filePathName
 };
 
 template<typename T>

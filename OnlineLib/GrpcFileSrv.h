@@ -122,13 +122,20 @@ public:
 	void stop();
 
 	void downloadSessionParams();
-	void downloadFile(const QString& fileName);
-	bool waitFileReady(FileReady* fileReady);
 
+	// async file download
+	//
+	void downloadFile(const QString& fileName);
+
+	// for blocked calls
+	//
+	bool waitFileReady(FileReady* fileReady);
 	bool downloadFileBlocked(const QString& fileName, FileReady* fileReady);
 
 	bool isTransferInProgress();
 
+	void setEmitFileReady(bool enable);				// if TRUE - signal_fileReady emitted
+													// if FALSE - use waitFileReady or downloadFileBlocked
 signals:
 	void signal_unknownClientID();
 	void signal_wrongClientHostname();
@@ -162,6 +169,7 @@ private:
 	std::thread m_thread;
 	std::atomic_bool m_threadStarted {false};
 	std::atomic_bool m_quitRequested {false};
+	std::atomic_bool m_emitFileReady {false};
 
 	std::mutex m_procMutex;
 	std::condition_variable m_procCond;

@@ -214,15 +214,33 @@ void GrpcCfgLoader::slot_setConnection()
 
 void GrpcCfgLoader::slot_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params)
 {
-	if (result == Tcp::FileTransferResult::Ok)
+	if (result != Tcp::FileTransferResult::Ok)
 	{
-		m_sessionParams = params;
-		m_grpcFileClient->downloadFile(m_cfgXmlFileName);
+		restartGrpcFileClient();
 		return;
 	}
 
-	stopGrpcFileClient();
-	startGrpcFileClient();
+	m_sessionParams = params;
+
+	m_grpcFileClient->downloadFile(m_cfgXmlFileName);
+}
+
+void GrpcCfgLoader::slot_fileReady(FileReady fileReady)
+{
+	if (fileReady.errorCode != Tcp::FileTransferResult::Ok)
+	{
+		restartGrpcFileClient();
+		return;
+	}
+
+	if (fileReady.fileName == m_cfgXmlFileName)
+	{
+		processCfgXmlFile(fileReady);
+	}
+	else
+	{
+		processOtherFiles(fileReady);
+	}
 }
 
 void GrpcCfgLoader::slot_enableDownloadConfiguration()
@@ -398,10 +416,13 @@ void GrpcCfgLoader::startGrpcFileClient()
 	m_grpcFileClient = std::make_unique<GrpcFileClient>(m_swInfo, m_serverAddrs, m_rootFolder,
 														QStringLiteral("GrpcCfgLoader"), m_log);
 
+	m_grpcFileClient->setEmitFileReady(true);
+
 	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_setConnection, this, &GrpcCfgLoader::slot_setConnection);
 	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_unknownClientID, this, &GrpcCfgLoader::signal_unknownClientID);
 	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_wrongClientHostname, this, &GrpcCfgLoader::signal_wrongClientHostname);
 	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_sessionParamsReady, this, &GrpcCfgLoader::slot_sessionParamsReady);
+	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_fileReady, this, &GrpcCfgLoader::slot_fileReady);
 
 	m_grpcFileClient->start();
 }
@@ -419,6 +440,112 @@ void GrpcCfgLoader::restartGrpcFileClient()
 {
 	stopGrpcFileClient();
 	startGrpcFileClient();
+}
+
+void GrpcCfgLoader::processCfgXmlFile(FileReady& fr)
+{
+	if (saveFile(fr) == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	if (readCfgXmlFile(fr.fileData) == false)
+	{
+		logErr("Error reading Configuration.xml file!");
+		restartGrpcFileClient();
+		return;
+	}
+
+	m_cfgXmlFileData.swap(fr.fileData);
+
+	checkExistsBuildFiles();
+
+	downloadNextFile();
+}
+
+void GrpcCfgLoader::processOtherFiles(const FileReady& fr)
+{
+	auto it = m_filesToDownload.find(fr.fileName);
+
+	if (it == m_filesToDownload.end())
+	{
+		Q_ASSERT(false);
+		downloadNextFile();
+		return;
+	}
+
+	if (it->second != fr.md5)
+	{
+		Q_ASSERT(false);
+		downloadNextFile();
+		return;
+	}
+
+	saveFile(fr);
+
+	m_filesToDownload.erase(it);
+
+	downloadNextFile();
+}
+
+bool GrpcCfgLoader::saveFile(const FileReady& fr)
+{
+	QString fileName = m_rootFolder + fr.fileName;
+
+	QFile file(fileName);
+
+	if (file.open(QIODeviceBase::WriteOnly | QIODeviceBase::Truncate) == false)
+	{
+		return false;
+	}
+
+	file.write(fr.fileData);
+
+	file.close();
+
+	return true;
+}
+
+void GrpcCfgLoader::checkExistsBuildFiles()
+{
+	m_filesToDownload.clear();
+
+	for(const OnlineLib::BuildFileInfo& bfi : m_buildFilesInfo)
+	{
+		QString fileName = m_rootFolder + bfi.pathFileName;
+
+		QFile file(fileName);
+
+		if (file.open(QIODeviceBase::ReadOnly) == false)
+		{
+			m_filesToDownload.emplace(bfi.pathFileName, bfi.md5);
+			continue;
+		}
+
+		QByteArray fileData = file.readAll();
+
+		if (Md5Hash::hashStr(fileData) != bfi.md5)
+		{
+			m_filesToDownload.emplace(bfi.pathFileName, bfi.md5);
+		}
+
+		file.close();
+	}
+}
+
+void GrpcCfgLoader::downloadNextFile()
+{
+	if (m_filesToDownload.empty())
+	{
+		emit signal_configurationReady(m_cfgXmlFileData, m_buildFilesInfo,
+									   m_sessionParams, getCurrentSettingsProfile<SoftwareSettings>());
+		return;
+	}
+
+	QString fileName = m_filesToDownload.begin()->first;
+
+	m_grpcFileClient->downloadFile(fileName);
 }
 
 void GrpcCfgLoader::shutdown()
@@ -621,28 +748,15 @@ bool GrpcCfgLoader::startConfigurationXmlLoading()
 	return true;
 }
 
-bool GrpcCfgLoader::readConfigurationXml()
+bool GrpcCfgLoader::readCfgXmlFile(const QByteArray& fileData)
 {
-/*	QByteArray fileData;
-
-	if (readCfgFile(m_cfgXmlFileName, &fileData, false) == false)
-	{
-		return false;
-	}
-
 	AUTO_LOCK(m_mutex);
 
 	m_cfgFilesInfo.clear();
+	m_buildFilesInfo.clear();
 	m_fileIDPathMap.clear();
 
-	CfgFileInfo cfi;
-
-	cfi.pathFileName = m_cfgXmlFileName;
-	cfi.size = fileData.size();
-	cfi.md5 = Md5Hash::hashStr(fileData);
-	cfi.fileData.swap(fileData);
-
-	XmlReadHelper xmlReader(cfi.fileData);
+	XmlReadHelper xmlReader(fileData);
 
 	bool res = m_buildInfo.readFromXml(xmlReader);
 
@@ -660,10 +774,6 @@ bool GrpcCfgLoader::readConfigurationXml()
 		return false;
 	}
 
-	// Configuration.xml info always first item in m_cfgFileInfo
-	//
-	m_cfgFilesInfo.insert(cfi.pathFileName, cfi);
-
 	res = xmlReader.findElement(XmlElement::FILES);
 
 	if (res == false)
@@ -674,18 +784,18 @@ bool GrpcCfgLoader::readConfigurationXml()
 
 	while(xmlReader.findElement(XmlElement::FILE) != false)
 	{
-		CfgFileInfo cfgFileInfo;
+		OnlineLib::BuildFileInfo bfi;
 
-		cfgFileInfo.readFromXml(xmlReader, false);
+		bfi.readFromXml(xmlReader, false);
 
-		m_cfgFilesInfo.insert(cfgFileInfo.pathFileName, cfgFileInfo);
+		m_buildFilesInfo.emplace_back(bfi);
 
-		if (cfgFileInfo.ID.isEmpty() == false)
+		if (bfi.ID.isEmpty() == false)
 		{
-			m_fileIDPathMap.emplace(cfgFileInfo.ID, cfgFileInfo.pathFileName);
+			m_fileIDPathMap.emplace(bfi.ID, bfi.pathFileName);
 		}
 	}
-*/
+
 	return true;
 }
 

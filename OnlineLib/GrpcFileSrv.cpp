@@ -434,7 +434,6 @@ bool GrpcFileClient::waitFileReady(FileReady* fileReady)
 
 		ul.unlock();
 
-		emit signal_fileReady(*fileReady);
 		return true;
 	}
 
@@ -458,6 +457,11 @@ bool GrpcFileClient::downloadFileBlocked(const QString& fileName, FileReady* fil
 bool GrpcFileClient::isTransferInProgress()
 {
 	return m_transferInProgress.load(std::memory_order::relaxed);
+}
+
+void GrpcFileClient::setEmitFileReady(bool enable)
+{
+	m_emitFileReady.store(enable, std::memory_order::relaxed);
 }
 
 void GrpcFileClient::run()
@@ -504,7 +508,7 @@ void GrpcFileClient::run()
 
 		if (fileName == SESSION_PARAMS_REQUEST)
 		{
-
+			privateGetSessionParams();
 		}
 		else
 		{
@@ -816,20 +820,35 @@ void GrpcFileClient::pushFileReady(const QString& fileName, Tcp::FileTransferRes
 void GrpcFileClient::pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode,
 									QByteArray& fileData, QByteArray& md5)
 {
+	if (m_emitFileReady.load(std::memory_order::relaxed) == true)
 	{
-		std::lock_guard lg(m_fileReadyMutex);
+		FileReady fr;
 
-		m_fileReadyQueue.push(FileReady{});
+		fr.fileName = fileName;
+		fr.errorCode = errorCode;
+		fr.fileData.swap(fileData);
+		fr.md5.swap(md5);
 
-		FileReady& last = m_fileReadyQueue.back();
+		emit signal_fileReady(fr);
+	}
+	else
+	{
+		{
+			std::lock_guard lg(m_fileReadyMutex);
 
-		last.fileName = fileName;
-		last.errorCode = errorCode;
-		last.fileData.swap(fileData);
-		last.md5.swap(md5);
+			m_fileReadyQueue.push(FileReady{});
+
+			FileReady& last = m_fileReadyQueue.back();
+
+			last.fileName = fileName;
+			last.errorCode = errorCode;
+			last.fileData.swap(fileData);
+			last.md5.swap(md5);
+		}
+
+		m_fileReadyCond.notify_all();
 	}
 
-	m_fileReadyCond.notify_all();
 }
 
 
