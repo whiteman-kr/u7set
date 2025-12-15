@@ -1605,7 +1605,7 @@ namespace TrendLib
 					//
 					qint64 rulersDistance = ruler.timeStamp().timeStamp - prevRuler.timeStamp().timeStamp;
 	
-					QString distanceText = QString(" " + DateTimeToString::dateTimeDuration(rulersDistance) + " ");
+					QString distanceText = QString(" " + DateTimeToString::dateTimeDurationMs(rulersDistance) + " ");
 
 					QSizeF distanceTextBoundSize = calcTextSize(painter, distanceText, drawParam);
 
