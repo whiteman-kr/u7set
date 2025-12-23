@@ -105,6 +105,8 @@ private:
 	bool saveFile(const FileReady& fr);
 	void checkExistsBuildFiles();
 	void downloadNextFile();
+	bool readFile(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
+	bool findBuildFileInfo(const QString& pathFileName, OnlineLib::BuildFileInfo& bfi);
 
 	void shutdown();
 
@@ -155,12 +157,6 @@ private:
 	SessionParams m_sessionParams;
 	SoftwareSettingsSet m_settingsSet;
 
-	struct CfgFileInfo : public OnlineLib::BuildFileInfo
-	{
-		QByteArray fileData;
-		bool md5IsValid = false;
-	};
-
 //	using CfgFilesInfo = HashedVector<QString, CfgFileInfo> ;
 
 	struct FileDownloadRequest
@@ -199,15 +195,12 @@ private:
 
 	QByteArray m_cfgXmlFileData;
 	OnlineLib::BuildInfo m_buildInfo;
-	std::vector<CfgFileInfo> m_cfgFilesInfo;	// configuration.xml should be in m_cfgFilesInfo[0]!!!
 
 	BuildFileInfoArray m_buildFilesInfo;
 	std::unordered_map<QString, QString> m_filesToDownload;		// fileName => md5
+//	std::condition_variable m_fileReadyCondition;
 
 	bool m_hasValidSavedConfiguration = false;
-
-	QWaitCondition m_fileReadyCondition;
-	QMutex m_getFileBlockedMutex;
 
 	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
 
@@ -257,7 +250,7 @@ public:
 	void start();
 	void quitAndWait();
 
-	void enableDownloadConfiguration();
+//	void enableDownloadConfiguration();
 
 	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr);

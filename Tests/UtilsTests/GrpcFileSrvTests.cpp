@@ -269,7 +269,7 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 
 	EXPECT_EQ(fileData.size(), fr.fileData.size());
 
-	QByteArray md5 = GrpcFileBase::getMd5(fileData);
+	QByteArray md5 = Md5Hash::hash(fileData);
 
 	EXPECT_EQ(md5, fr.md5);
 
@@ -316,7 +316,7 @@ TEST(GrpcFileClientTest, GetFile_LongFile)
 
 	EXPECT_EQ(fileData.size(), fr.fileData.size());
 
-	QByteArray md5 = GrpcFileBase::getMd5(fileData);
+	QByteArray md5 = Md5Hash::hash(fileData);
 
 	EXPECT_EQ(md5, fr.md5);
 

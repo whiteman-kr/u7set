@@ -21,7 +21,7 @@ message GetFileReply
 	optional int32 currentPart = 4 [default = 0];
 	optional int32 totalParts = 5 [default = 0];
 	optional bytes fileData = 6;
-	optional bytes md5 = 7;
+	optional string md5 = 7;
 }
 
 //

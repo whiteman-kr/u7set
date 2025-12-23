@@ -8,14 +8,15 @@
 #include <QString>
 
 #include <GrpcFileSrv.grpc.pb.h>
-#include "../OnlineLib/GrpcSessionGuard.h"
-#include "../OnlineLib/GrpcServer.h"
-#include "TcpFileTransfer.h"
 
 #include <CommonLib/HostAddressPort.h>
+#include <CommonLib/Hash.h>
 
+#include "../OnlineLib/GrpcSessionGuard.h"
+#include "../OnlineLib/GrpcServer.h"
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "TcpFileTransfer.h"
 
 // -------------------------------------------------------------------------------------
 //
@@ -30,8 +31,6 @@ public:
 
 	void setRootFolder(const QString& rootFolder);
 	QString rootFolder() const;
-
-	static QByteArray getMd5(const QByteArray& data);
 
 protected:
 	static QString getCleanRoot(const QString& rootFolder);
@@ -78,7 +77,7 @@ public:
 								const Grpc::GetSessionParamsRequest* request,
 								Grpc::GetSessionParamsReply* reply);
 protected:
-	virtual bool checkFile(const QString& pathFileName, const QByteArray& fileData) const;
+	virtual bool checkFile(const QString& pathFileName, const QByteArray& fileData, QString& md5) const;
 	virtual void getSessionParams(Network::SessionParams* params) const;
 
 private:
@@ -91,7 +90,7 @@ struct FileReady
 	QString fileName;
 	Tcp::FileTransferResult errorCode;
 	QByteArray fileData;
-	QByteArray md5;
+	QString md5;
 };
 
 // -------------------------------------------------------------------------------------
@@ -109,7 +108,8 @@ public:
 				   const std::vector<HostAddressPort>& serverAddress,
 				   const QString& rootFolder,
 				   const QString& clientDescription,
-				   CircularLoggerShared log);
+				   CircularLoggerShared log,
+				   bool startClient = true);
 
 	GrpcFileClient(const GrpcFileClient&) = delete;
 	GrpcFileClient& operator=(const GrpcFileClient&) = delete;
@@ -157,7 +157,7 @@ private:
 
 	void pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode);
 	void pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode,
-					   QByteArray& fileData, QByteArray& md5);	// not const - OK!
+					   QByteArray& fileData, QString& md5);	// not const - OK!
 
 private:
 	SoftwareInfo m_swInfo;

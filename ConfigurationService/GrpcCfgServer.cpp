@@ -110,8 +110,10 @@ void GrpcCfgServer::readBuildXml(const QString& buildFolder)
 	m_buildReadOK = true;
 }
 
-bool GrpcCfgServer::checkFile(const QString& pathFileName, const QByteArray& fileData) const
+bool GrpcCfgServer::checkFile(const QString& pathFileName, const QByteArray& fileData, QString& md5) const
 {
+	GrpcFileSrv::checkFile(pathFileName, fileData, md5);
+
 	auto it = m_buildFileInfo.find(pathFileName);
 
 	if (it == m_buildFileInfo.end())
@@ -121,10 +123,7 @@ bool GrpcCfgServer::checkFile(const QString& pathFileName, const QByteArray& fil
 
 	const OnlineLib::BuildFileInfo& bfi = it->second;
 
-	QByteArray dataMd5 = GrpcFileBase::getMd5(fileData);
-
-	if (bfi.size != fileData.size() ||
-		QByteArray::fromHex(bfi.md5.toUtf8()) != dataMd5.toHex())
+	if (bfi.size != fileData.size() || md5 != bfi.md5)
 	{
 		return false;
 	}

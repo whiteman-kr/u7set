@@ -25,15 +25,6 @@ QString GrpcFileBase::rootFolder() const
 	return m_rootFolder;
 }
 
-QByteArray GrpcFileBase::getMd5(const QByteArray& data)
-{
-	QCryptographicHash md5Gen(QCryptographicHash::Md5);
-
-	md5Gen.addData(QByteArrayView(data.constData(), data.size()));
-
-	return md5Gen.result();
-}
-
 QString GrpcFileBase::getCleanRoot(const QString& rootFolder)
 {
 	return QDir::cleanPath(rootFolder);
@@ -201,7 +192,9 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 		return grpc::Status::OK;
 	}
 
-	if (checkFile(fileName, fileData) == false)
+	QString md5;
+
+	if (checkFile(fileName, fileData, md5) == false)
 	{
 		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::FileDataCorrupted));
 
@@ -214,8 +207,6 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 
 		return grpc::Status::OK;
 	}
-
-	QByteArray md5 = getMd5(fileData);
 
 	qsizetype sendDataSize = 0;
 
@@ -234,7 +225,7 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 		reply.set_filesize(fileData.size());
 		reply.set_currentpart(curPart);
 		reply.set_totalparts(totalParts);
-		reply.set_md5(md5.constData(), md5.size());
+		reply.set_md5(md5.toStdString());
 
 		int partSize = 0;
 
@@ -295,10 +286,12 @@ grpc::Status GrpcFileSrv::GetSessionParams(grpc::ServerContext* context,
 	return grpc::Status::OK;
 }
 
-bool GrpcFileSrv::checkFile(const QString& pathFileName, const QByteArray& fileData) const
+bool GrpcFileSrv::checkFile(const QString& pathFileName, const QByteArray& fileData, QString& md5) const
 {
 	Q_UNUSED(pathFileName);
-	Q_UNUSED(fileData);
+
+	md5 = Md5Hash::hashStr(fileData);
+
 	return true;
 }
 
@@ -329,16 +322,22 @@ QString GrpcFileSrv::serviceName() const
 // -------------------------------------------------------------------------------------
 
 GrpcFileClient::GrpcFileClient(const SoftwareInfo& softwareInfo,
-								const std::vector<HostAddressPort>& serverAddress,
-								const QString& rootFolder,
-								const QString& clientDescription,
-								CircularLoggerShared log) :
+	const std::vector<HostAddressPort>& serverAddress,
+	const QString& rootFolder,
+	const QString& clientDescription,
+	CircularLoggerShared log,
+	bool startClient) :
 	GrpcFileBase(rootFolder),
 	m_swInfo(softwareInfo),
 	m_serverAddress(serverAddress),
 	m_log(log)
 {
 	Q_UNUSED(clientDescription);
+
+	if (startClient)
+	{
+		start();
+	}
 }
 
 GrpcFileClient::~GrpcFileClient()
@@ -695,11 +694,9 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 			break;
 		}
 
-		QByteArray md5;
+		QString md5 = Md5Hash::hashStr(fileData);
 
-		md5 = getMd5(fileData);
-
-		QByteArray protoMd5 = QByteArray::fromStdString(reply.md5());
+		QString protoMd5 = QString::fromStdString(reply.md5());
 
 		if (md5 != protoMd5)
 		{
@@ -812,13 +809,13 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 void GrpcFileClient::pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode)
 {
 	QByteArray fileData;
-	QByteArray md5;
+	QString md5;
 
 	pushFileReady(fileName, errorCode, fileData, md5);
 }
 
 void GrpcFileClient::pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode,
-									QByteArray& fileData, QByteArray& md5)
+									QByteArray& fileData, QString& md5)
 {
 	if (m_emitFileReady.load(std::memory_order::relaxed) == true)
 	{

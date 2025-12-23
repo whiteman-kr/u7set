@@ -56,6 +56,8 @@ namespace OnlineLib
 		QString getMetadata(const QString& key) const;
 
 		bool isConfigurationXml() const;
+
+		void clear();
 	};
 }
 

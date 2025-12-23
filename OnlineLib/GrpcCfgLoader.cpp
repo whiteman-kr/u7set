@@ -2,6 +2,8 @@
 #error Do not include this file in the project! Link OnlineLib instead.
 #endif
 
+#include <algorithm>
+
 #include <CommonLib/ConstStrings.h>
 
 #include "GrpcCfgLoader.h"
@@ -76,45 +78,7 @@ void GrpcCfgLoader::changeAppAndInitPaths(const QString& appEquipmentID, int app
 
 bool GrpcCfgLoader::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
 {
-	// TEST_PTR_RETURN_FALSE(fileData);
-	// TEST_PTR_RETURN_FALSE(errorStr);
-
-	// fileData->clear();
-	// errorStr->clear();
-
-	// bool result = false;
-
-	// std::shared_ptr<QByteArray> localFileData = std::make_shared<QByteArray>();
-
-	// m_getFileBlockedMutex.lock();
-
-	// emit signal_getFile(pathFileName, localFileData, false);
-
-	// bool res = m_fileReadyCondition.wait(&m_getFileBlockedMutex, 10000);
-
-	// if (res == true)
-	// {
-	// 	if (getLastError() == Tcp::FileTransferResult::Ok)
-	// 	{
-	// 		fileData->swap(*localFileData.get());
-	// 		result = true;
-	// 	}
-	// 	else
-	// 	{
-	// 		*errorStr = getLastErrorStr();
-	// 		result = false;
-	// 	}
-	// }
-	// else
-	// {
-	// 	*errorStr = tr("File reading timeout");
-	// 	result = false;
-	// }
-
-	// m_getFileBlockedMutex.unlock();
-
-//	return result;
-	return true;
+	return readFile(pathFileName, fileData, errorStr);
 }
 
 bool GrpcCfgLoader::getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr)
@@ -395,7 +359,6 @@ void GrpcCfgLoader::onThreadStarted()
 
 	startGrpcFileClient();
 
-
 //	m_timer.setInterval(2000);
 //	m_timer.start();
 
@@ -414,7 +377,7 @@ void GrpcCfgLoader::startGrpcFileClient()
 	}
 
 	m_grpcFileClient = std::make_unique<GrpcFileClient>(m_swInfo, m_serverAddrs, m_rootFolder,
-														QStringLiteral("GrpcCfgLoader"), m_log);
+														QStringLiteral("GrpcCfgLoader"), m_log, false);
 
 	m_grpcFileClient->setEmitFileReady(true);
 
@@ -546,6 +509,77 @@ void GrpcCfgLoader::downloadNextFile()
 	QString fileName = m_filesToDownload.begin()->first;
 
 	m_grpcFileClient->downloadFile(fileName);
+}
+
+bool GrpcCfgLoader::readFile(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
+{
+	TEST_PTR_RETURN_FALSE(fileData);
+	TEST_PTR_RETURN_FALSE(errorStr);
+
+	fileData->clear();
+	errorStr->clear();
+
+	OnlineLib::BuildFileInfo bfi;
+
+	if (findBuildFileInfo(pathFileName, bfi) == false)
+	{
+		*errorStr = QString("File %1 not found in configuration files").arg(pathFileName);
+		DEBUG_LOG_ERR(m_log, *errorStr);
+		return false;
+	}
+
+	QFile f(m_rootFolder + pathFileName);
+
+	if (f.open(QIODeviceBase::ReadOnly) == false)
+	{
+		*errorStr = QString("File %1 open error").arg(pathFileName);
+		DEBUG_LOG_ERR(m_log, *errorStr);
+		return false;
+	}
+
+	*fileData = f.readAll();
+
+	f.close();
+
+	if (fileData->size() != bfi.size)
+	{
+		*errorStr = QString("File %1 read error").arg(pathFileName);
+		DEBUG_LOG_ERR(m_log, *errorStr);
+		return false;
+	}
+
+	if (Md5Hash::hashStr(*fileData) != bfi.md5)
+	{
+		*errorStr = QString("File %1 corrupted").arg(pathFileName);
+		DEBUG_LOG_ERR(m_log, *errorStr);
+		return false;
+	}
+
+	if (bfi.compressed == true)
+	{
+		*fileData = qUncompress(*fileData);
+	}
+
+	return true;
+}
+
+bool GrpcCfgLoader::findBuildFileInfo(const QString& pathFileName, OnlineLib::BuildFileInfo& bfi)
+{
+	bfi.clear();
+
+	auto it = std::find_if(m_buildFilesInfo.begin(), m_buildFilesInfo.end(),
+						   [&pathFileName](const OnlineLib::BuildFileInfo& b)
+							{
+								return b.pathFileName == pathFileName;
+							});
+
+	if (it == m_buildFilesInfo.end())
+	{
+		return false;
+	}
+
+	bfi = *it;
+	return true;
 }
 
 void GrpcCfgLoader::shutdown()
@@ -752,7 +786,6 @@ bool GrpcCfgLoader::readCfgXmlFile(const QByteArray& fileData)
 {
 	AUTO_LOCK(m_mutex);
 
-	m_cfgFilesInfo.clear();
 	m_buildFilesInfo.clear();
 	m_fileIDPathMap.clear();
 
@@ -920,7 +953,7 @@ void GrpcCfgLoader::emitFileReady(const QString& fileName,
 							  std::shared_ptr<QByteArray> fileData,
 							  bool asyncCall)
 {
-	m_lastError = errorCode;
+/*	m_lastError = errorCode;
 
 	if (asyncCall == true)
 	{
@@ -929,7 +962,7 @@ void GrpcCfgLoader::emitFileReady(const QString& fileName,
 	else
 	{
 		m_fileReadyCondition.wakeAll();
-	}
+	}*/
 }
 
 QString GrpcCfgLoader::getFilePathNameByID(const QString& fileID) const
@@ -1013,12 +1046,12 @@ void GrpcCfgLoaderThread::quitAndWait()
 	shutdownThread();
 }
 
-void GrpcCfgLoaderThread::enableDownloadConfiguration()
-{
-	AUTO_LOCK(m_mutex);
+// void GrpcCfgLoaderThread::enableDownloadConfiguration()
+// {
+// 	AUTO_LOCK(m_mutex);
 
-	//m_grpcCfgLoader->slot_enableDownloadConfiguration();
-}
+// 	//m_grpcCfgLoader->slot_enableDownloadConfiguration();
+// }
 
 bool GrpcCfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
 {

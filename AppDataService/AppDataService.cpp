@@ -276,9 +276,6 @@ void AppDataServiceWorker::runCfgLoaderThread()
 	connect(m_grpcCfgLoaderThread, &GrpcCfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
 
 	m_grpcCfgLoaderThread->start();
-
-	m_grpcCfgLoaderThread->enableDownloadConfiguration();
-
 }
 
 void AppDataServiceWorker::stopCfgLoaderThread()
@@ -344,6 +341,12 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 		m_curSettingsProfile.appDataReceivingIP = m_cmdLineAppDataReceivingIP;
 	}
 
+	if (m_grpcCfgLoaderThread == nullptr)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
 	bool result = true;
 
 	for(const OnlineLib::BuildFileInfo& bfi : buildFileInfoArray)
@@ -351,7 +354,7 @@ void AppDataServiceWorker::onConfigurationReady(const QByteArray configurationXm
 		QByteArray fileData;
 		QString errStr;
 
-		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+		m_grpcCfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
 
 		if (errStr.isEmpty() == false)
 		{
