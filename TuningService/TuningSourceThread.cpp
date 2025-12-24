@@ -994,6 +994,10 @@ namespace Tuning
 
 		if (result == false)
 		{
+			qDebug() << C_STR(QString("From %1: received CRC %2 != calculated CRC %3").
+							  arg(sourceIP().addressPortStr()).
+							  arg(reply.CRC64, 16, 16, QChar('0')).
+							  arg(reply.getCRC64(), 16, 16, QChar('0')));
 			finalizeWriting(E::NetworkError::TuningNoReply);
 			m_state.errRupCRC++;
 			return;
