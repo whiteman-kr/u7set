@@ -1141,6 +1141,25 @@ int LmDescription::Lan::lanControllerPlace(int index, bool* ok) const
 	return m_lanControllers[index].m_place;
 }
 
+int LmDescription::Lan::lanControllerConfigVersion(int index, bool* ok) const
+{
+	if (index < 0 || index >= lanControllerCount())
+	{
+		Q_ASSERT(false);
+		if (ok != nullptr)
+		{
+			*ok = false;
+		}
+		return -1;
+	}
+
+	if (ok != nullptr)
+	{
+		*ok = true;
+	}
+	return m_lanControllers[index].m_configVersion;
+}
+
 LmDescription::LanController LmDescription::Lan::lanController(int index, bool* ok) const
 {
 	if (index < 0 || index >= lanControllerCount())
@@ -1248,6 +1267,18 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 
 	// Func for gettiong data from some xml section
 	//
+	auto sectionExists = 
+		[](QDomElement element, QLatin1String section) -> bool
+	{
+		QDomNodeList nl = element.elementsByTagName(section);
+		if (nl.size() != 1)
+		{
+			return false;
+		}
+
+		return true;
+	};
+
 	auto getSectionUintValue =
 		[](QDomElement element, QLatin1String section, QString* errorMessage) -> quint32
 		{
@@ -1301,6 +1332,15 @@ bool LmDescription::Lan::load(const QDomDocument& document, QString* errorMessag
 
 		li.m_place = getSectionUintValue(node.toElement(), QLatin1String("Place"), errorMessage);
 
+		if (sectionExists(node.toElement(), QLatin1String("ConfigVersion")) == true)
+		{
+			li.m_configVersion = getSectionUintValue(node.toElement(), QLatin1String("ConfigVersion"), errorMessage);
+		}
+		else 
+		{
+			li.m_configVersion = li.m_type == E::LanControllerType::TuningAndAppAndDiagData ? 1 : 0;	// Default value for config version based on the type
+		}
+
 		m_lanControllers.push_back(li);
 	}
 
@@ -1313,6 +1353,7 @@ bool LmDescription::Other::load(const QDomDocument& document, QString* errorMess
 	{
 		assert(errorMessage);
 		return false;
+
 	}
 
 	if (document.isNull() == true)
@@ -1435,6 +1476,11 @@ int LmDescription::jsLanControllerType(int index)
 int LmDescription::jsLanControllerPlace(int index)
 {
 	return static_cast<int>(m_lan.lanControllerPlace(index));
+}
+
+int LmDescription::jsLanControllerConfigVersion(int index)
+{
+	return static_cast<int>(m_lan.lanControllerConfigVersion(index));
 }
 
 bool LmDescription::checkAfbVersions() const

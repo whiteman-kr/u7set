@@ -252,6 +252,7 @@ public:
 	{
 		E::LanControllerType m_type = E::LanControllerType::Tuning;
 		int m_place = 0;
+		int m_configVersion = 0;
 
 		bool isProvideTuning() const;
 		bool isProvideAppData() const;
@@ -268,6 +269,7 @@ public:
 		int lanControllerCount() const;
 		E::LanControllerType lanControllerType(int index, bool* ok = nullptr) const;
 		int lanControllerPlace(int index, bool* ok = nullptr) const;
+		int lanControllerConfigVersion(int index, bool* ok = nullptr) const;
 
 		LanController lanController(int index, bool* ok) const;
 
@@ -303,6 +305,7 @@ public:
 
 	Q_INVOKABLE int jsLanControllerType(int index);
 	Q_INVOKABLE int jsLanControllerPlace(int index);
+	Q_INVOKABLE int jsLanControllerConfigVersion(int index);
 
 	bool checkAfbVersions() const;
 	quint32 checkAfbVersionsOffset(bool absoluteValue) const;

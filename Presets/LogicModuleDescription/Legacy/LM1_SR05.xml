@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR05" DescriptionNumber="5" ConfigurationScriptFile="ConfigScript.js" Version="1.4">
+<LogicModule Name="LM1_SR05" DescriptionNumber="5" ConfigurationScriptFile="ConfigScript.js" Version="1.5">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -59,10 +59,12 @@
 		<LanController>
 			<Type>TuningAndAppAndDiagData</Type>
 			<Place>2</Place>
+			<ConfigVersion>1</ConfigVersion>
 		</LanController>
 		<LanController>
 			<Type>TuningAndAppAndDiagData</Type>
 			<Place>3</Place>
+			<ConfigVersion>1</ConfigVersion>
 		</LanController>
 	</Lan>
 	<Other>

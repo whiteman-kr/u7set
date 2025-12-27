@@ -1,4 +1,4 @@
-<LogicModule Name="LM11_SR90" DescriptionNumber="90" ConfigurationScriptFile="ConfigScript.js" Version="1.5">
+<LogicModule Name="LM11_SR90" DescriptionNumber="90" ConfigurationScriptFile="ConfigScript.js" Version="1.6">
   <FlashMemory>
     <AppLogicFrameCount>256</AppLogicFrameCount>
     <AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -59,6 +59,7 @@
     <LanController>
       <Type>TuningAndAppAndDiagData</Type>
       <Place>1</Place>
+      <ConfigVersion>1</ConfigVersion>
     </LanController>
   </Lan>
   <Other>
