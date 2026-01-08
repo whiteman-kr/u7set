@@ -368,9 +368,9 @@ function generate_lm(builder: ConfigStruct.Builder,
 
 				case 1:
 					let lans: ConfigStruct.LanConfig[] = [];
+					lans.push(emptyLan);
+					lans.push(emptyLan);
 					lans.push(tuningLan);
-					lans.push(emptyLan);
-					lans.push(emptyLan);
 
 					if (ConfigLib.generate_LANConfiguration_v1(confFirmware, lanConfigCurrentFrame, module, ethernetcontrollerId, lans, log) == false)
 					{
@@ -405,9 +405,9 @@ function generate_lm(builder: ConfigStruct.Builder,
 
 				case 1:
 					let lans: ConfigStruct.LanConfig[] = [];
-					lans.push(emptyLan);
 					lans.push(appLan);
 					lans.push(diagLan);
+					lans.push(emptyLan);
 
 					if (ConfigLib.generate_LANConfiguration_v1(confFirmware, lanConfigCurrentFrame, module, ethernetcontrollerId, lans, log) == false)
 					{
