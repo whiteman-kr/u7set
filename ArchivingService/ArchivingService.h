@@ -2,6 +2,7 @@
 
 #include <ServiceLib/Service.h>
 #include "../OnlineLib/CfgLoader.h"
+#include "../OnlineLib/GrpcCfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
 #include "Archive.h"
@@ -68,6 +69,7 @@ private:
 	mutable QMutex m_startStopMutex;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
+	GrpcCfgLoaderThread* m_grpcCfgLoaderThread = nullptr;
 
 	Tcp::ListenerThread* m_tcpAppDataServerThread = nullptr;
 	Tcp::ListenerThread* m_tcpArchRequestsServerThread = nullptr;

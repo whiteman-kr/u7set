@@ -126,12 +126,26 @@ void ArchivingService::shutdown()
 
 void ArchivingService::runCfgLoaderThread()
 {
-	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
+	// m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ArchivingService::onConfigurationReady);
+	// connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ArchivingService::onConfigurationReady);
 
-	m_cfgLoaderThread->start();
-	m_cfgLoaderThread->enableDownloadConfiguration();
+	// m_cfgLoaderThread->start();
+	// m_cfgLoaderThread->enableDownloadConfiguration();
+
+	assert(m_grpcCfgLoaderThread == nullptr);			// once should be runned
+
+	HostAddressPort ip1 = cfgServiceIP1();
+	HostAddressPort ip2 = cfgServiceIP2();
+
+	ip1.setPort(PORT_CONFIGURATION_GRPC_SERVICE_CLIENT_REQUEST);
+	ip2.setPort(PORT_CONFIGURATION_GRPC_SERVICE_CLIENT_REQUEST);
+
+	m_grpcCfgLoaderThread = new GrpcCfgLoaderThread(softwareInfo(), 1, ip1, ip2, false, logger());
+
+	connect(m_grpcCfgLoaderThread, &GrpcCfgLoaderThread::signal_configurationReady, this, &ArchivingService::onConfigurationReady);
+
+	m_grpcCfgLoaderThread->start();
 }
 
 void ArchivingService::stopCfgLoaderThread()
