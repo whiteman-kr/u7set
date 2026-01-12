@@ -23,7 +23,12 @@ qt_add_library(${TARGET} STATIC
   ./include/CommonLib/expected.hpp
   AfbParamValue.cpp
   PropertyObject.cpp
+  Times.cpp
   Types.cpp
+)
+
+target_precompile_headers(${TARGET} PUBLIC
+	<chrono>
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Core)

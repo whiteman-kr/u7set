@@ -41,7 +41,7 @@ void ArchiveTrendTcpClient::timerEvent(QTimerEvent* event)
 	{
 		QString stat = QString("%1 - %2")
 						.arg(m_currentRequest.signalPlusServerId.appSignalId)
-						.arg(m_currentRequest.hourToRequest.toDateTime().toString("dd.MM.yyyy hh:mm"));
+						.arg(DateTimeToString::dateTimeSec(m_currentRequest.hourToRequest.toDateTime())); // Should add seconds???
 		setStatText(stat);
 	}
 	else

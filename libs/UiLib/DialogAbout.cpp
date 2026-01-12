@@ -46,7 +46,9 @@ namespace UiLib
 
 		text += tr("<br>Commit SHA: %1").arg(U7SET_COMMIT_HASH);
 		text += tr("<br>Branch: %1").arg(U7SET_BRANCH_NAME);
-		text += tr("<br>Build Date: %1").arg(U7SET_BUILD_DATE);
+
+		QDate date = QDateTime::fromSecsSinceEpoch(U7SET_BUILD_DATE_SECONDS, Qt::LocalTime).date();
+		text += tr("<br>Build Date: %1").arg(DateTimeToString::date(date));
 
 		auto label = new QLabel(text, &aboutDialog);
 		label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
@@ -62,7 +64,7 @@ namespace UiLib
 		{
 			QString licenseInfo = tr("License organization: %1").arg(organization);
 			licenseInfo += tr("<br>Issued for: %1").arg(person);
-			licenseInfo += tr("<br>License end date: %1").arg(licenseEndDate.toString("dd.MM.yyyy"));
+			licenseInfo += tr("<br>License end date: %1").arg(DateTimeToString::date(licenseEndDate));
 			licenseInfo += tr("<br>LicenseID: %1").arg(licenseId.toString());
 
 			auto labelLicenseInfo = new QLabel(&aboutDialog);

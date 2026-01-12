@@ -7,7 +7,6 @@ namespace Log
 {
 	inline static const std::array<QString, 6> messageTypeTextShort{"ERR", "WRN", "MSG", "ALERT", "TXT", "DATA"};
 	inline static const std::array<char, 6> messageTypeFirstLetter{'E', 'W', 'M', 'A', 'T', 'D'};
-	inline static const QString messageTimeFormat{"dd.MM.yyyy hh:mm:ss.zzz"};
 
 	enum MessageType
 	{
@@ -27,11 +26,15 @@ namespace Log
 		MessageType type = MessageType::Error;
 		std::string text;
 
-		static QString toString(const LogFileRecord& r, const QString& sessionHashString);
-		static bool fromString(const char* buf, const qint64 bufSize, const quint64 currentSessionHash, LogFileRecord& r);
+		static QString toString(const LogFileRecord& r, const QString& sessionHashString, const QString& dateTimeFormat);
+		static bool fromString(const char* buf,
+							   const qint64 bufSize,
+							   const quint64 currentSessionHash,
+							   LogFileRecord& r);
 
 	private:
 		static void replaceStringInPlace(std::string& subject, const std::string& search, const std::string& replace);
+		static qint64 timeFromString(const char* timePtr);
 	};
 
 	using LogFileChunk = std::vector<LogFileRecord>;
@@ -73,6 +76,8 @@ namespace Log
 		
 		quint64 sessionHash() const;
 		QString sessionHashString() const;
+
+		QString dateTimeFormat() const;
 		
 		bool noDiskLog() const;
 		void setNoDiskLog(bool value);
@@ -94,9 +99,11 @@ namespace Log
 		LogFileWorker* m_worker = nullptr;
 		SimpleThread m_logThread;
 
-		int m_alertAckCounter = 0;
-		int m_errorAckCounter = 0;
-		int m_warningAckCounter = 0;
+		std::atomic<int> m_alertAckCounter = 0;
+		std::atomic<int> m_errorAckCounter = 0;
+		std::atomic<int> m_warningAckCounter = 0;
+
+		QString m_dateTimeFormat;
 	};
 }
 

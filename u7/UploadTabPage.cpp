@@ -395,7 +395,7 @@ void UploadTabPage::refreshProjectBuilds()
 
 			if (result == true)
 			{
-				strings << buildInfo.dateTime.toString("dd.MM.yyyy hh:mm:ss");
+				strings << DateTimeToString::dateTimeSec(buildInfo.dateTime);
 				strings << (buildSuccess == true ? tr("Success") : tr("Failed"));
 			}
 			else

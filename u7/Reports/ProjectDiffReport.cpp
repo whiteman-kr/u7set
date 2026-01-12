@@ -2723,7 +2723,7 @@ std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const QPa
 		changesetStr = tr("Source Changeset: #%1").arg(compareData.sourceChangeset);
 		break;
 	case CompareVersionType::Date:
-		changesetStr = tr("Source Date: %1").arg(compareData.sourceDate.toString("dd/MM/yyyy HH:mm:ss"));
+		changesetStr = tr("Source Date: %1").arg(DateTimeToString::dateTimeSec(compareData.sourceDate));
 		break;
 	}
 
@@ -2738,7 +2738,7 @@ std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const QPa
 		changesetStr = tr("Target Changeset: #%1").arg(compareData.targetChangeset);
 		break;
 	case CompareVersionType::Date:
-		changesetStr = tr("Target Date: %1").arg(compareData.targetDate.toString("dd/MM/yyyy HH:mm:ss"));
+		changesetStr = tr("Target Date: %1").arg(DateTimeToString::dateTimeSec(compareData.targetDate));
 		break;
 	}
 
@@ -2746,7 +2746,7 @@ std::shared_ptr<ReportSection> ProjectDiffGenerator::generateTitlePage(const QPa
 
 	// Generation time
 
-	rs->addText(tr("Generated: %1\n\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss")), {regularFont, Qt::AlignRight});
+	rs->addText(tr("Generated: %1\n\n").arg(DateTimeToString::dateTimeSec(QDateTime::currentDateTime())), {regularFont, Qt::AlignRight});
 
 	// RPCT Version
 
@@ -2844,7 +2844,7 @@ void ProjectDiffGenerator::createMarginItems(Report& report, const CompareData& 
 		changesetStr = tr("Source Changeset: #%1").arg(compareData.sourceChangeset);
 		break;
 	case CompareVersionType::Date:
-		changesetStr = tr("Source: Date %1").arg(compareData.sourceDate.toString("dd/MM/yyyy HH:mm:ss"));
+		changesetStr = tr("Source: Date %1").arg(DateTimeToString::dateTimeSec(compareData.sourceDate));
 		break;
 	}
 
@@ -2857,7 +2857,7 @@ void ProjectDiffGenerator::createMarginItems(Report& report, const CompareData& 
 		changesetStr += tr("; Target Changeset: #%1").arg(compareData.targetChangeset);
 		break;
 	case CompareVersionType::Date:
-		changesetStr += tr("; Target Date: %1").arg(compareData.targetDate.toString("dd/MM/yyyy HH:mm:ss"));
+		changesetStr += tr("; Target Date: %1").arg(DateTimeToString::dateTimeSec(compareData.targetDate));
 		break;
 	}
 
@@ -2984,7 +2984,7 @@ void ProjectDiffGenerator::addHeaderTableItem(ReportTable& headerTable,
 	Q_ASSERT(headerTable.columnCount() == 5);
 
 	headerTable.insertRow(
-		{caption, action, changesetStr, db()->username(file->userId()), file->lastCheckIn().toString("dd/MM/yyyy HH:mm:ss")});
+		{caption, action, changesetStr, db()->username(file->userId()), DateTimeToString::dateTimeSec(file->lastCheckIn())});
 
 	return;
 }
@@ -2999,7 +2999,7 @@ void ProjectDiffGenerator::addHeaderTableItem(ReportTable& headerTable,
 	Q_ASSERT(headerTable.columnCount() == 5);
 
 	headerTable.insertRow(
-		{caption, action, changesetStr, db()->username(signal.userID()), signal.instanceCreated().toString("dd/MM/yyyy HH:mm:ss")});
+		{caption, action, changesetStr, db()->username(signal.userID()), DateTimeToString::dateTimeSec(signal.instanceCreated())});
 
 	return;
 }
@@ -3008,13 +3008,13 @@ QString ProjectDiffGenerator::changesetString(const std::shared_ptr<DbFile>& fil
 {
 	if (file->changeset() == 0)
 	{
-		return tr("Checked Out at %1 by %2").arg(file->lastCheckIn().toString("dd/MM/yyyy HH:mm:ss")).arg(db()->username(file->userId()));
+		return tr("Checked Out at %1 by %2").arg(DateTimeToString::dateTimeSec(file->lastCheckIn())).arg(db()->username(file->userId()));
 	}
 	else
 	{
 		return tr("Changeset #%1 at %2 by %3")
 			.arg(file->changeset())
-			.arg(file->lastCheckIn().toString("dd/MM/yyyy HH:mm:ss"))
+			.arg(DateTimeToString::dateTimeSec(file->lastCheckIn()))
 			.arg(db()->username(file->userId()));
 	}
 }
@@ -3024,14 +3024,14 @@ QString ProjectDiffGenerator::changesetString(const AppSignal& signal)
 	if (signal.changesetID() == 0)
 	{
 		return tr("Checked Out %1 by %2")
-			.arg(signal.instanceCreated().toString("dd/MM/yyyy HH:mm:ss"))
+			.arg(DateTimeToString::dateTimeSec(signal.instanceCreated()))
 			.arg(db()->username(signal.userID()));
 	}
 	else
 	{
 		return tr("Changeset #%1 at %2 by %3")
 			.arg(signal.changesetID())
-			.arg(signal.instanceCreated().toString("dd/MM/yyyy HH:mm:ss"))
+			.arg(DateTimeToString::dateTimeSec(signal.instanceCreated()))
 			.arg(db()->username(signal.userID()));
 	}
 }

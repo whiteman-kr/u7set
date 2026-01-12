@@ -45,8 +45,7 @@ namespace
 		}
 
 		ReportLib::ReportFont marginFont{"Arial", 10};
-
-		report.addMarginItem({QObject::tr("Generated: %1").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss")),
+		report.addMarginItem({QObject::tr("Generated: %1").arg(DateTimeToString::dateTimeSec(QDateTime::currentDateTime())),
 							  -1,
 							  -1,
 							  {marginFont, Qt::AlignLeft | Qt::AlignTop}});
@@ -71,8 +70,8 @@ namespace
 		if (from.date() == to.date())
 		{
 			mainSection.addText(QObject::tr("Requested interval: %1 - %2 (%3)\n\n")
-									.arg(from.toString("dd/MM/yyyy HH:mm:ss"))
-									.arg(to.toString("HH:mm:ss"))
+									.arg(DateTimeToString::dateTimeSec(from))
+									.arg(DateTimeToString::timeSec(to.time()))
 									.arg(E::valueToString<E::TimeType>(m_source->timeType)),
 								{textFont, Qt::AlignHCenter});
 		}
@@ -81,8 +80,8 @@ namespace
 		else
 		{
 			mainSection.addText(QObject::tr("Requested interval: %1 - %2 (%3)\n\n")
-									.arg(from.toString("dd/MM/yyyy HH:mm:ss"))
-									.arg(to.toString("dd/MM/yyyy HH:mm:ss"))
+									.arg(DateTimeToString::dateTimeSec(from))
+									.arg(DateTimeToString::dateTimeSec(to))
 									.arg(E::valueToString<E::TimeType>(m_source->timeType)),
 								{textFont, Qt::AlignHCenter});
 		}
@@ -146,7 +145,7 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 	// --
 	//
 	m_source.timeType = static_cast<E::TimeType>(QSettings{}.value("ArchiveWindow/timeType").toInt());
-
+	
 	QDateTime currentTime = QDateTime::currentDateTime();
 
 	m_source.requestEndTime = TimeStamp{TimeStamp(currentTime).timeStamp / 1_min * 1_min}; // reset seconds and ms
@@ -170,18 +169,19 @@ ArchiveWidget::ArchiveWidget(ClientLib::AppSignalManager& signalManager,
 	m_toolBar->addWidget(m_exportButton);
 	m_toolBar->addWidget(m_printButton);
 	m_toolBar->addSeparator();
-
 	m_startDateTimeEdit = new QDateTimeEdit(m_source.requestStartTime.toDateTime(), this);
 	m_startDateTimeEdit->setTimeZone(TIME_ZONE_UTC);
 	m_startDateTimeEdit->setCalendarPopup(true);
-	m_startDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
-	m_startDateTimeEdit->setMinimumWidth(QFontMetrics(m_startDateTimeEdit->font()).horizontalAdvance("dd/MM/yyyy  HH:mm:ss") + 20);
+	m_startDateTimeEdit->setDisplayFormat(DateTimeFormat::dateTime(false /*with no ms*/));
+	m_startDateTimeEdit->setMinimumWidth(
+		QFontMetrics(m_startDateTimeEdit->font()).horizontalAdvance(DateTimeFormat::dateTime(false /*with no ms*/)) + 20);
 
 	m_endDateTimeEdit = new QDateTimeEdit(m_source.requestEndTime.toDateTime(), this);
 	m_endDateTimeEdit->setTimeZone(TIME_ZONE_UTC);
 	m_endDateTimeEdit->setCalendarPopup(true);
-	m_endDateTimeEdit->setDisplayFormat("dd/MM/yyyy  HH:mm:ss");
-	m_endDateTimeEdit->setMinimumWidth(QFontMetrics(m_endDateTimeEdit->font()).horizontalAdvance("dd/MM/yyyy  HH:mm:ss") + 20);
+	m_endDateTimeEdit->setDisplayFormat(DateTimeFormat::dateTime(false /*with no ms*/));
+	m_endDateTimeEdit->setMinimumWidth(
+		QFontMetrics(m_endDateTimeEdit->font()).horizontalAdvance(DateTimeFormat::dateTime(false /*with no ms*/)) + 20);
 
 	m_toolBar->addWidget(new QLabel(tr(" Start Time: ")));
 	m_toolBar->addWidget(m_startDateTimeEdit);

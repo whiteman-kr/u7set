@@ -160,7 +160,7 @@ void FileHistoryDialog::fillList(QString filterText)
 		QStringList itemTextList;
 		itemTextList << QString::number(ci.changeset());
 		itemTextList << ci.username();
-		itemTextList << ci.date().toString("dd MMM yyyy HH:mm:ss");
+		itemTextList << DateTimeToString::dateTimeSec(ci.date());
 		itemTextList << ci.comment();
 			
 		items.push_back(new QTreeWidgetItem(itemTextList));

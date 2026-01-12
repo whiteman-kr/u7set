@@ -23,7 +23,7 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 	}
 
 	ui->changeset->setText(QString::number(m_changesetDetails.changeset()));
-	ui->date->setText(m_changesetDetails.date().toString("dd MMM yyyy HH:mm:ss"));
+	ui->date->setText(DateTimeToString::dateTimeSec(m_changesetDetails.date()));
 	ui->user->setText(m_changesetDetails.username());
 	ui->comment->document()->setPlainText(m_changesetDetails.comment());
 

@@ -158,7 +158,11 @@
 The property description is:
 
 &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Стойността е с невалиден формат!
+
+Описанието на свойството е:
+
+&apos;%1&apos;</translation>
     </message>
 </context>
 <context>
@@ -404,37 +408,37 @@ Example: Caption;Enable</source>
     <message>
         <location filename="../LogDialog.cpp" line="562"/>
         <source>Time Filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Филтър за време</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="566"/>
         <source>Start Time:</source>
-        <translation type="unfinished"></translation>
+        <translation>Начален час:</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="571"/>
         <source>End Time:</source>
-        <translation type="unfinished"></translation>
+        <translation>Час на завършване:</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="591"/>
         <source>Set</source>
-        <translation type="unfinished"></translation>
+        <translation>Задай</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="595"/>
         <source>Reset</source>
-        <translation type="unfinished"></translation>
+        <translation>Нулирай</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="603"/>
         <source>Cancel</source>
-        <translation type="unfinished">Откажи</translation>
+        <translation>Откажи</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="637"/>
         <source>Start Time should be earlier than End Time!</source>
-        <translation type="unfinished"></translation>
+        <translation>Началният час трябва да бъде преди часа на завършване!</translation>
     </message>
 </context>
 <context>
@@ -443,93 +447,93 @@ Example: Caption;Enable</source>
         <location filename="../LogDialog.cpp" line="745"/>
         <location filename="../LogDialog.cpp" line="1485"/>
         <source>Log View - %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Преглед на дневник - %1</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="755"/>
         <source>Type:</source>
-        <translation type="unfinished"></translation>
+        <translation>Тип:</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="758"/>
         <source>All Messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Всички съобщения</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="759"/>
         <source>Errors</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешки</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="760"/>
         <source>Warnings</source>
-        <translation type="unfinished"></translation>
+        <translation>Предупреждения</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="761"/>
         <source>Errors and Warnings</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешки и педупреждения</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="762"/>
         <source>Alerts</source>
-        <translation type="unfinished"></translation>
+        <translation>Предупреждения</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="763"/>
         <source>Messages</source>
-        <translation type="unfinished"></translation>
+        <translation>Съобщения</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="764"/>
         <source>Text</source>
-        <translation type="unfinished"></translation>
+        <translation>Текст</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="773"/>
         <source>Time Filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Филтър за време</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="782"/>
         <source>Search/Filter Text</source>
-        <translation type="unfinished"></translation>
+        <translation>Текст за Търсене/Филтър</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="800"/>
         <source>Search &lt;F3&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Търсене &lt;F3&gt;</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="809"/>
         <source>Filter</source>
-        <translation type="unfinished">Филтър</translation>
+        <translation>Филтър</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="819"/>
         <source>Prev Issue &lt;Shift+F6&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Предходен проблем &lt;Shift+F6&gt;</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="826"/>
         <source>Next Issue &lt;F6&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Следващ проблем &lt;F6&gt;</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="840"/>
         <source>All Sessions</source>
-        <translation type="unfinished"></translation>
+        <translation>Всички сесии</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="848"/>
         <source>Auto Scroll</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматично скролиране</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="900"/>
         <location filename="../LogDialog.cpp" line="1354"/>
         <source>Log file writing is disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Записването на дневник е забранено</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="904"/>
@@ -537,27 +541,27 @@ Example: Caption;Enable</source>
         <location filename="../LogDialog.cpp" line="1312"/>
         <location filename="../LogDialog.cpp" line="1358"/>
         <source>File: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>Файл: &lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="912"/>
         <source>Clear</source>
-        <translation type="unfinished">Изчистете</translation>
+        <translation>Изчисти</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="916"/>
         <source>Load...</source>
-        <translation type="unfinished"></translation>
+        <translation>Зареждане...</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="920"/>
         <source>Export...</source>
-        <translation type="unfinished"></translation>
+        <translation>Експортиране...</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="1055"/>
         <source>Issue was not found!</source>
-        <translation type="unfinished"></translation>
+        <translation>Не са открити проблеми!</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="1161"/>
@@ -567,42 +571,42 @@ Example: Caption;Enable</source>
         <location filename="../LogDialog.cpp" line="1361"/>
         <location filename="../LogDialog.cpp" line="1477"/>
         <source>Total records: %1, Errors: %2, Warnings: %3</source>
-        <translation type="unfinished"></translation>
+        <translation>Общ брой записи: %1, Грешки: %2, Предупреждения: %3</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="1243"/>
         <source>Text was not found!</source>
-        <translation type="unfinished"></translation>
+        <translation>Текстът не е открит!</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="1450"/>
         <source>Select File</source>
-        <translation type="unfinished">Избери файл</translation>
+        <translation>Изберете файл</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="1493"/>
         <source>Save File</source>
-        <translation type="unfinished"></translation>
+        <translation>Запазване на файл</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="1495"/>
         <source>Log files (*.log)</source>
-        <translation type="unfinished"></translation>
+        <translation>Дневници (*.log)</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="1517"/>
         <source>No data to export!</source>
-        <translation type="unfinished"></translation>
+        <translation>Няма данни за експортиране!</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="1524"/>
         <source>File creation error!</source>
-        <translation type="unfinished"></translation>
+        <translation>Грешка при създаването на файла!</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="1535"/>
         <source>Export complete.</source>
-        <translation type="unfinished"></translation>
+        <translation>Експорта завърши.</translation>
     </message>
 </context>
 <context>
@@ -610,17 +614,17 @@ Example: Caption;Enable</source>
     <message>
         <location filename="../LogDialog.cpp" line="70"/>
         <source>Time</source>
-        <translation type="unfinished"></translation>
+        <translation>Час</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="75"/>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Тип</translation>
     </message>
     <message>
         <location filename="../LogDialog.cpp" line="81"/>
         <source>Message</source>
-        <translation type="unfinished"></translation>
+        <translation>Съобщение</translation>
     </message>
 </context>
 <context>
@@ -703,7 +707,7 @@ Example: Caption;Enable</source>
     <message>
         <location filename="../UiTools.cpp" line="94"/>
         <source>File &apos;%1&apos; does not exist!</source>
-        <translation type="unfinished"></translation>
+        <translation>Файлът &apos;%1&apos; не съществува!</translation>
     </message>
 </context>
 <context>
@@ -749,19 +753,19 @@ Example: Caption;Enable</source>
     <message>
         <location filename="../CodeEditor.cpp" line="1406"/>
         <source>Search has reached the end of the document. Do you want to start searching from the beginning?</source>
-        <translation type="unfinished"></translation>
+        <translation>Търсенето достигна края на документа. Искате ли да започнете търсенето отначало?</translation>
     </message>
     <message>
         <location filename="../CodeEditor.cpp" line="1431"/>
         <location filename="../CodeEditor.cpp" line="1441"/>
         <location filename="../CodeEditor.cpp" line="1472"/>
         <source>Text was not found.</source>
-        <translation type="unfinished"></translation>
+        <translation>Текстът не беше открит.</translation>
     </message>
     <message>
         <location filename="../CodeEditor.cpp" line="1489"/>
         <source>%1 replacements occured.</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 замени бяха извършени.</translation>
     </message>
 </context>
 <context>
@@ -855,22 +859,22 @@ Example: Caption;Enable</source>
     <message>
         <location filename="../CodeEditor.cpp" line="1150"/>
         <source>Find</source>
-        <translation type="unfinished"></translation>
+        <translation>Намери</translation>
     </message>
     <message>
         <location filename="../CodeEditor.cpp" line="1151"/>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>Замени</translation>
     </message>
     <message>
         <location filename="../CodeEditor.cpp" line="1152"/>
         <source>Replace All</source>
-        <translation type="unfinished"></translation>
+        <translation>Замени всички</translation>
     </message>
     <message>
         <location filename="../CodeEditor.cpp" line="1178"/>
         <source>Case Sensitive</source>
-        <translation type="unfinished">Различавай малки и големи букви</translation>
+        <translation>Различавай малки и големи букви</translation>
     </message>
 </context>
 <context>

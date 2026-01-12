@@ -9,6 +9,7 @@ namespace Sim
 		{
 			{"LM1_SF00",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
 			{"LM1_SF40",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
+			{"LM_SF41",		[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
 			{"LM1_SR01",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
 			{"LM1_SR02",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},
 			{"LM1_SR03",	[](DeviceEmulator* device)	{	return new CommandProcessor_LM5_LM6(device);	}},

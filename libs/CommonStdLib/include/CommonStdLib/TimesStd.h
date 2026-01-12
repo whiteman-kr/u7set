@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+//#include <chrono> // Please use chrono from precompiled headers in your project!
+
 // Time literals converts to ms
 //
 constexpr int64_t operator""_ms(unsigned long long int value)

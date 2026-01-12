@@ -93,7 +93,7 @@ TimeStamp RtSchemaTrendDataProvider::maxTimeStamp() const
 		switch (m_timeType)
 		{
 		case E::TimeType::Local:		maxTimeStamp = std::max(maxTimeStamp, lastState.local);		break;
-		case E::TimeType::System:		maxTimeStamp = std::max(maxTimeStamp, lastState.system);		break;
+		case E::TimeType::System:		maxTimeStamp = std::max(maxTimeStamp, lastState.system);	break;
 		case E::TimeType::Plant:		maxTimeStamp = std::max(maxTimeStamp, lastState.plant);		break;
 		case E::TimeType::ArchiveId:	maxTimeStamp = std::max(maxTimeStamp, lastState.local);		break;
 		default:
