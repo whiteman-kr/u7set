@@ -21,6 +21,17 @@ namespace Hardware
     //      device: ScriptDeviceObject
     //      equipment: ScriptEquipment
 
+    // Check Builder version:
+    // global variables set by Builder:
+    //     'version', e.g. "11.0.4270"
+    //     'versionMajor', e.g. 11
+    //     'versionMinor', e.g. 0
+    //     'versionPatch', e.g. 4270
+
+    const expectedVersion = "11.0.4270";
+    if (version !== expectedVersion)
+        throw Error("Builder version mismatch, current version " + version + ", expected " + expectedVersion);
+
     // -- Example: Copying a property value from another device --
 
     // Retrieve device System by EquipmentID: SYSTEMID

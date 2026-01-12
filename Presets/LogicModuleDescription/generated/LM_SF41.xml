@@ -1,4 +1,4 @@
-<LogicModule Name="LM_SF41" DescriptionNumber="41" ConfigurationScriptFile="ConfigScript.js" Version="1.9">
+<LogicModule Name="LM_SF41" DescriptionNumber="41" ConfigurationScriptFile="ConfigScript.js" Version="1.10">
   <FlashMemory>
     <AppLogicFrameCount>512</AppLogicFrameCount>
     <AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -59,14 +59,22 @@
     <LanController>
       <Type>Tuning</Type>
       <Place>1</Place>
+      <ConfigVersion>1</ConfigVersion>
     </LanController>
     <LanController>
-      <Type>AppAndDiagData</Type>
+      <Type>Tuning</Type>
       <Place>2</Place>
+      <ConfigVersion>1</ConfigVersion>
     </LanController>
     <LanController>
       <Type>AppAndDiagData</Type>
       <Place>3</Place>
+      <ConfigVersion>1</ConfigVersion>
+    </LanController>
+    <LanController>
+      <Type>AppAndDiagData</Type>
+      <Place>4</Place>
+      <ConfigVersion>1</ConfigVersion>
     </LanController>
   </Lan>
   <Other>

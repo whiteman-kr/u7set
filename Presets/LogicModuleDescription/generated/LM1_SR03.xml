@@ -1,4 +1,4 @@
-<LogicModule Name="LM1_SR03" DescriptionNumber="3" ConfigurationScriptFile="ConfigScript.js" Version="1.8">
+<LogicModule Name="LM1_SR03" DescriptionNumber="3" ConfigurationScriptFile="ConfigScript.js" Version="1.9">
   <FlashMemory>
     <AppLogicFrameCount>256</AppLogicFrameCount>
     <AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -59,14 +59,17 @@
     <LanController>
       <Type>Tuning</Type>
       <Place>1</Place>
+      <ConfigVersion>0</ConfigVersion>
     </LanController>
     <LanController>
       <Type>AppAndDiagData</Type>
       <Place>2</Place>
+      <ConfigVersion>0</ConfigVersion>
     </LanController>
     <LanController>
       <Type>AppAndDiagData</Type>
       <Place>3</Place>
+      <ConfigVersion>0</ConfigVersion>
     </LanController>
   </Lan>
   <Other>
@@ -9258,7 +9261,6 @@
 		</AfterCreation>
       </CommonScript>
     </AFB>
-    
     <AFB id="#cmp_si_eq_v1" Caption="cmp_si_eq" Version="1.8">
       <Properties>
         <Description>Comparator Block, equal 32-bit signed int comparison</Description>

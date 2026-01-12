@@ -282,6 +282,7 @@ module ConfigStruct
 
 		jsLanControllerType(index: number): number;
 		jsLanControllerPlace(index: number): number;
+		jsLanControllerConfigVersion(index: number): number;
 
 		FlashMemory_ConfigFramePayload: number;
 		FlashMemory_ConfigFrameCount: number;

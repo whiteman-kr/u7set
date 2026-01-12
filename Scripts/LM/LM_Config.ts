@@ -263,13 +263,14 @@ function generate_lm(builder: ConfigStruct.Builder,
 		}
 	}
 
-	let lanConfigFrame: number = frameIOConfig + ioModulesMaxCount;
+	let lanConfigStartFrame: number = frameIOConfig + ioModulesMaxCount;
+	let lanConfigCurrentFrame: number = lanConfigStartFrame;
 
 	// Create LANs configuration
 	//
 	confFirmware.writeLog("Writing LAN configuration.\r\n");
 
-	const maxLanControllerCount: number = 3;
+	const maxLanControllerCount: number = 4;
 
 	let lanControllerCount: number = logicModuleDescription.Lan_ControllerCount;
 
@@ -291,10 +292,11 @@ function generate_lm(builder: ConfigStruct.Builder,
 		}
 
 		let lanType: ConfigStruct.LanControllerType = logicModuleDescription.jsLanControllerType(i);
+		let lanConfigVersion: ConfigStruct.LanControllerType = logicModuleDescription.jsLanControllerConfigVersion(i);
 
 		let ethernetcontrollerId: string = "_ETHERNET0" + lanPlace;
 
-		let lanFrame: number = lanConfigFrame +  (lanPlace - 1);
+		lanConfigCurrentFrame = lanConfigStartFrame + (lanPlace - 1);
 
 		confFirmware.writeLog("    Ethernet Controller " + module.equipmentId + ethernetcontrollerId + "\r\n");
 
@@ -348,16 +350,37 @@ function generate_lm(builder: ConfigStruct.Builder,
 			diagLan.servicePort = 13352;
 		}
 		
-
-		if (lanType == ConfigStruct.LanControllerType.Tuning) {
-
-			if (ConfigLib.fillLanServiceData(confFirmware, ConfigStruct.SoftwareType.TuningService, root, module, ethernetcontrollerId, tuningLan, log) == false) {
+		if (lanType == ConfigStruct.LanControllerType.Tuning)
+		{
+			if (ConfigLib.fillLanServiceData(confFirmware, ConfigStruct.SoftwareType.TuningService, root, module, ethernetcontrollerId, tuningLan, log) == false)
+			{
 				return false;
 			}
 
-			if (ConfigLib.generate_LANConfiguration_v0(confFirmware, lanFrame, module, ethernetcontrollerId, tuningLan, emptyLan, log) == false)	//Channel is not used
+			switch (lanConfigVersion)
 			{
-				return false;
+				case 0:
+					if (ConfigLib.generate_LANConfiguration_v0(confFirmware, lanConfigCurrentFrame, module, ethernetcontrollerId, tuningLan, emptyLan, log) == false)	//Channel is not used
+					{
+						return false;
+					}
+					break;
+
+				case 1:
+					let lans: ConfigStruct.LanConfig[] = [];
+					lans.push(emptyLan);
+					lans.push(emptyLan);
+					lans.push(tuningLan);
+
+					if (ConfigLib.generate_LANConfiguration_v1(confFirmware, lanConfigCurrentFrame, module, ethernetcontrollerId, lans, log) == false)
+					{
+						return false;
+					}
+					break;
+
+				default:
+					log.writeError(ethernetcontrollerId + ": LAN description has unknown configuration version: " + lanConfigVersion);
+					return false;
 			}
 		}
 
@@ -371,14 +394,38 @@ function generate_lm(builder: ConfigStruct.Builder,
 				return false;
 			}
 
-			if (ConfigLib.generate_LANConfiguration_v0(confFirmware, lanFrame, module, ethernetcontrollerId, appLan, diagLan, log) == false) {
-				return false;
+			switch (lanConfigVersion)
+			{
+				case 0:
+					if (ConfigLib.generate_LANConfiguration_v0(confFirmware, lanConfigCurrentFrame, module, ethernetcontrollerId, appLan, diagLan, log) == false)
+					{
+						return false;
+					}
+					break;
+
+				case 1:
+					let lans: ConfigStruct.LanConfig[] = [];
+					lans.push(appLan);
+					lans.push(diagLan);
+					lans.push(emptyLan);
+
+					if (ConfigLib.generate_LANConfiguration_v1(confFirmware, lanConfigCurrentFrame, module, ethernetcontrollerId, lans, log) == false)
+					{
+						return false;
+					}
+					break;
+
+				default:
+					log.writeError(ethernetcontrollerId + ": LAN description has unknown configuration version: " + lanConfigVersion);
+					return false;
 			}
 
 			appAndDiagChannel++;
 		}
 
 		if (lanType == ConfigStruct.LanControllerType.TuningAndAppAndDiagData) {
+
+			// For TuningAndAppAndDiagData, we are always using Version 1 of the configuration frame
 
 			if (ConfigLib.fillLanServiceData(confFirmware, ConfigStruct.SoftwareType.TuningService, root, module, ethernetcontrollerId, tuningLan, log) == false) {
 				return false;
@@ -397,8 +444,18 @@ function generate_lm(builder: ConfigStruct.Builder,
 			lans.push(diagLan);
 			lans.push(tuningLan);
 
-			if (ConfigLib.generate_LANConfiguration_v1(confFirmware, lanFrame, module, ethernetcontrollerId, lans, log) == false) {
-				return false;
+			switch (lanConfigVersion)
+			{
+				case 1:
+					if (ConfigLib.generate_LANConfiguration_v1(confFirmware, lanConfigCurrentFrame, module, ethernetcontrollerId, lans, log) == false)
+					{
+						return false;
+					}
+					break;
+
+				default:
+					log.writeError(ethernetcontrollerId + ": LAN description has unsupported configuration version: " + lanConfigVersion);
+					return false;
 			}
 
 			appAndDiagChannel++;
@@ -409,7 +466,7 @@ function generate_lm(builder: ConfigStruct.Builder,
 	//
 	confFirmware.writeLog("Writing TxRx(Opto) configuration.\r\n");
 
-	let txRxConfigFrame: number = lanConfigFrame + 3;
+	let txRxConfigFrame: number = lanConfigCurrentFrame + 1;	// Take next frame after the last LAN config frame
 
 	if (ConfigLib.generate_lmTxRxOptoConfiguration(confFirmware, log, txRxConfigFrame, module, LMNumber, opticModuleStorage, logicModuleDescription) == false) {
 		return false;
