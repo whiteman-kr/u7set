@@ -714,15 +714,19 @@ namespace LicenseLib
 #ifndef NDEBUG
 	bool AppLicenser::noLicenseCheck()
 	{
-		// Check environment variable U7_NO_LICENSE_CHECK
+		// Decision: always perform license check in debug builds, to prevent unlicensed use cases.
 		//
-		QByteArray env = qgetenv("U7_NO_LICENSE_CHECK");
-		if (env.isEmpty() == false)
-		{
-			return true;
-		}
-
 		return false;
+
+		//// Check environment variable U7_NO_LICENSE_CHECK
+		////
+		// QByteArray env = qgetenv("U7_NO_LICENSE_CHECK");
+		// if (env.isEmpty() == false)
+		//{
+		//	return true;
+		// }
+
+		// return false;
 	}
 #endif // NDEBUG
 

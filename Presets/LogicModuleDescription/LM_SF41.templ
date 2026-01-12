@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM_SF41" DescriptionNumber="41" ConfigurationScriptFile="ConfigScript.js" Version="1.9" xmlns:xi="http://www.w3.org/2001/XInclude">
+<LogicModule Name="LM_SF41" DescriptionNumber="41" ConfigurationScriptFile="ConfigScript.js" Version="1.10" xmlns:xi="http://www.w3.org/2001/XInclude">
 	<FlashMemory>
 		<AppLogicFrameCount>512</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -60,14 +60,22 @@
 		<LanController>
 			<Type>Tuning</Type>
 			<Place>1</Place>
+			<ConfigVersion>1</ConfigVersion>
 		</LanController>
 		<LanController>
-			<Type>AppAndDiagData</Type>
+			<Type>Tuning</Type>
 			<Place>2</Place>
+			<ConfigVersion>1</ConfigVersion>
 		</LanController>
 		<LanController>
 			<Type>AppAndDiagData</Type>
 			<Place>3</Place>
+			<ConfigVersion>1</ConfigVersion>
+		</LanController>
+		<LanController>
+			<Type>AppAndDiagData</Type>
+			<Place>4</Place>
+			<ConfigVersion>1</ConfigVersion>
 		</LanController>
 	</Lan>
 	<Other>
@@ -130,7 +138,7 @@
 		<xi:include href="./afbs/afb_mem_v9.xml" parse="xml"/>
 		<xi:include href="./afbs/afb_math_v105.xml" parse="xml"/>
 		<xi:include href="./afbs/afb_scale_v108.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6.xml" parse="xml"/>
 		<xi:include href="./afbs/afb_int_v7_tiunlim.xml" parse="xml"/>
 		<xi:include href="./afbs/afb_dpcomp_v6.xml" parse="xml"/>
 		<xi:include href="./afbs/afb_mux_v1.xml" parse="xml"/>
@@ -247,23 +255,23 @@
 		<xi:include href="./afbs/afb_scale_v108_scale_si_fp.xml" parse="xml"/>
 		<xi:include href="./afbs/afb_scale_v108_scale_si_si.xml" parse="xml"/>
 
-		<!-- afb_func_v5, opcode 16 -->
-		<xi:include href="./afbs/afb_func_v5_is_inf_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_is_nan_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_math_abs_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_math_abs_si.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_math_cos_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_math_exp_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_math_inv_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_math_loge_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_math_sin_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_math_sqrt_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_negate_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_negate_si.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_sign_bit_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_sign_bit_si.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_sign_inv_fp.xml" parse="xml"/>
-		<xi:include href="./afbs/afb_func_v5_sign_inv_si.xml" parse="xml"/>
+		<!-- afb_func_v6, opcode 16 -->
+		<xi:include href="./afbs/afb_func_v6_is_inf_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_is_nan_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_math_abs_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_math_abs_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_math_cos_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_math_exp_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_math_inv_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_math_loge_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_math_sin_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_math_sqrt_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_negate_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_negate_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_sign_bit_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_sign_bit_si.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_sign_inv_fp.xml" parse="xml"/>
+		<xi:include href="./afbs/afb_func_v6_sign_inv_si.xml" parse="xml"/>
 
 		<!-- afb_int_v7_tiunlim, opcode 17 -->
 		<xi:include href="./afbs/afb_int_v7_integrator.xml" parse="xml"/>

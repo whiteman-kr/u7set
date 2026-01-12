@@ -50,7 +50,7 @@ void TuningSchemaWidget::contextMenuRequested(const QPoint& pos)
 {
 	// Reset highlights
 	//
-	clientSchemaView()->setHighlightIds({});
+	clientSchemaView()->setHighlightSignalIds({});
 
 	// Signals items
 	//
@@ -119,10 +119,7 @@ void TuningSchemaWidget::contextMenuRequested(const QPoint& pos)
 		}
 	}
 
-	if (signalList.isEmpty() == false || impactSignalList.isEmpty() == false || loopbacks.isEmpty() == false)
-	{
-		signalContextMenu(signalList, impactSignalList, loopbacks, {});
-	}
+	signalContextMenu(signalList, impactSignalList, loopbacks, {});
 
 	return;
 }
@@ -144,6 +141,27 @@ void TuningSchemaWidget::signalContextMenu(QStringList appSignals,
 	// Compose menu
 	//
 	QMenu menu(this);
+
+	// Reset highlights.
+	//
+	if (clientSchemaView()->hasHighlightItems() == true)
+	{
+		QAction* a = menu.addAction(tr("Reset Highlights"));
+		a->setEnabled(clientSchemaView()->hasHighlightItems());
+		connect(a,
+				&QAction::triggered,
+				this,
+				[this]()
+				{
+					clientSchemaView()->clearHighlightItems();
+				});
+	}
+
+	if (appSignals.isEmpty() == true && impactSignals.isEmpty() == true && loopbacks.isEmpty() == true &&
+		clientSchemaView()->hasHighlightItems() == false)
+	{
+		return;
+	}
 
 	// SignalInfo list
 	//

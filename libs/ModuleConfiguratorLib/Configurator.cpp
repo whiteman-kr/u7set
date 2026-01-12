@@ -848,82 +848,18 @@ namespace ModuleConfiguratorLib
 			return false;
 		}
 
-		//
-		// PING command
-		//
-		std::vector<quint8> nopReply;
-
-		int protocolVersion = 0;
-
-		if (send(0, ConfigureCommand::Nop2, 0, Nop2BlockSize, std::vector<quint8>(), pingReceivedHeader, &nopReply) == false)
 		{
-			return false;
-		}
-
-		protocolVersion = pingReceivedHeader->version;
-
-		switch (protocolVersion)
-		{
-		case 1:
-			{
-				CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(pingReceivedHeader);
-
-				if ((pingReplyVersioned.flags & OpDeniedInvalidOpcode) == 0)
-				{
-					// Nop2 command is supported, fill lmUarts
-					//
-					if (nopReply.size() != pingReplyVersioned.blockSize)
-					{
-						m_Log->writeError(tr("NOP2 command returned wrong number bytes of data: %1, expected: %2.")
-											  .arg(nopReply.size())
-											  .arg(pingReplyVersioned.blockSize));
-						return false;
-					}
-
-					quint16* wData = reinterpret_cast<quint16*>(nopReply.data());
-					int wDataIndex = 0;
-
-					int uartsCount = qFromBigEndian<quint16>(wData[wDataIndex++]);
-					m_Log->writeMessage(tr("UART count: %1").arg(uartsCount));
-
-					if ((uartsCount < 1) || (uartsCount > 16))
-					{
-						m_Log->writeError(tr("Invalid Uarts count, expected 1..16."));
-						throw tr("Communication error.");
-					}
-
-					for (int i = 0; i < uartsCount; i++)
-					{
-						moduleUarts->push_back(qFromBigEndian<quint16>(wData[wDataIndex++]));
-					}
-
-					QStringList uartsList;
-					for (int uart : *moduleUarts)
-					{
-						uartsList.push_back(tr("0x%1").arg(QString::number(uart, 16)));
-					}
-					m_Log->writeMessage(tr("Supported UARTs: ") + uartsList.join(' '));
-
-					return true;
-				}
-			}
-			break;
-		default:
-			m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) +
-							  tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
-			throw tr("Communication error.");
-		}
-
-		if (moduleUarts->empty() == true)
-		{
-			// Nop2 command is not supported, send nop
-
+			// Send nop command
+			//
+			std::vector<quint8> nopReply;
 			if (send(0, ConfigureCommand::Nop, 0, 0, std::vector<quint8>(), pingReceivedHeader, &nopReply) == false)
 			{
 				return false;
 			}
 
-			protocolVersion = pingReceivedHeader->version;
+			// Process nop reply
+			//
+			int protocolVersion = pingReceivedHeader->version;
 
 			switch (protocolVersion)
 			{
@@ -946,6 +882,90 @@ namespace ModuleConfiguratorLib
 				m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) +
 								  tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
 				return false;
+			}
+		}
+
+		CONF_HEADER nopReceivedHeader = *pingReceivedHeader;	// save the header received by nop
+
+		if (std::find(moduleUarts->begin(), moduleUarts->end(), ConfigurationUartId) == moduleUarts->end())
+		{
+			// Send nop2 command ONLY if we are NOT working with service flash (ID 0x103)
+			//
+			std::vector<quint8> nopReply;
+
+			if (send(0, ConfigureCommand::Nop2, 0, Nop2BlockSize, std::vector<quint8>(), pingReceivedHeader, &nopReply) == true)
+			{
+				// Process nop2 reply
+				//
+				int protocolVersion = pingReceivedHeader->version;
+
+				switch (protocolVersion)
+				{
+				case 1:
+					{
+						CONF_HEADER_V1 pingReplyVersioned = *reinterpret_cast<CONF_HEADER_V1*>(pingReceivedHeader);
+
+						if ((pingReplyVersioned.flags & OpDeniedInvalidOpcode) == 0)
+						{
+							// Nop2 command is supported, fill lmUarts
+							//
+							if (nopReply.size() != pingReplyVersioned.blockSize)
+							{
+								m_Log->writeError(tr("NOP2 command returned wrong number bytes of data: %1, expected: %2.")
+													  .arg(nopReply.size())
+													  .arg(pingReplyVersioned.blockSize));
+								return false;
+							}
+
+							// Remove all UARTS received previously by nop
+							//
+							moduleUarts->clear();
+
+							// Fill UARTS received by nop2
+							//
+							quint16* wData = reinterpret_cast<quint16*>(nopReply.data());
+							int wDataIndex = 0;
+
+							int uartsCount = qFromBigEndian<quint16>(wData[wDataIndex++]);
+							m_Log->writeMessage(tr("UART count: %1").arg(uartsCount));
+
+							if ((uartsCount < 1) || (uartsCount > 16))
+							{
+								m_Log->writeError(tr("Invalid Uarts count, expected 1..16."));
+								throw tr("Communication error.");
+							}
+
+							for (int i = 0; i < uartsCount; i++)
+							{
+								moduleUarts->push_back(qFromBigEndian<quint16>(wData[wDataIndex++]));
+							}
+
+							QStringList uartsList;
+							for (int uart : *moduleUarts)
+							{
+								uartsList.push_back(tr("0x%1").arg(QString::number(uart, 16)));
+							}
+							m_Log->writeMessage(tr("Supported UARTs: ") + uartsList.join(' '));
+
+							return true;
+						}
+						else
+						{
+							m_Log->writeMessage(tr("NOP2 command is not supported, NOP is used."));
+							*pingReceivedHeader = nopReceivedHeader; // restore the header received by nop, nop2 is not supported
+						}
+					}
+					break;
+				default:
+					m_Log->writeError(tr("Unsupported protocol version, module protocol version: ") + QString().setNum(protocolVersion) +
+									  tr(", the maximum supported version: ") + QString().setNum(ProtocolMaxVersion) + ".");
+					throw tr("Communication error.");
+				}
+			}
+			else 
+			{
+				m_Log->writeMessage(tr("NOP2 command is not supported, NOP is used."));
+				*pingReceivedHeader = nopReceivedHeader; // restore the header received by nop, nop2 is not supported
 			}
 		}
 
@@ -1989,6 +2009,16 @@ namespace ModuleConfiguratorLib
 
 		try
 		{
+			{
+				LicenseLib::AppLicenser licenser;
+
+				auto lc = licenser.validator().validateServiceEepromWrite();
+				if (lc != LicenseLib::ValidationResult::Valid)
+				{
+					throw tr("There is no license to write the service UART!");
+				}
+			}
+
 			//
 			// PING command
 			//
@@ -2411,6 +2441,29 @@ namespace ModuleConfiguratorLib
 			if (requestUartInfo(&pingReceivedHeader, &moduleUarts) == false)
 			{
 				throw tr("Communication error.");
+			}
+
+			// Check if we are on the correct tab: service for service UART, App for app/config/tun UART
+			//
+			bool selectedServiceUart = selectedUarts.has_value() == true && selectedUarts.value().empty() == false &&
+									   selectedUarts.value()[0] == ConfigurationUartId;
+
+			bool connectedToServiceUart = std::find(moduleUarts.begin(), moduleUarts.end(), ConfigurationUartId) != moduleUarts.end();
+
+			if (selectedServiceUart != connectedToServiceUart)
+			{
+				throw(tr("Wrong type of socket is connected for currently selected tab page!"));
+			}
+
+			if (connectedToServiceUart == true)
+			{
+				LicenseLib::AppLicenser licenser;
+
+				auto lc = licenser.validator().validateServiceEepromWrite();
+				if (lc != LicenseLib::ValidationResult::Valid)
+				{
+					throw tr("There is no license to initialize the service UART!");
+				}
 			}
 
 			//

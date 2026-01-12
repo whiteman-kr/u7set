@@ -374,14 +374,8 @@ namespace VFrame30
 		QPainter* p = drawParam->painter();
 
 		QPen selectionPen(color);
+		selectionPen.setJoinStyle(Qt::MiterJoin);
 
-		// --
-		//
-		//		QPainter::RenderHints oldrenderhints = p->renderHints();
-		//		p->setRenderHint(QPainter::Antialiasing, false);
-
-		// --
-		//
 		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 
 		if (std::abs(r.left() - r.right()) < 0.000001)
@@ -394,8 +388,10 @@ namespace VFrame30
 			r.setBottom(r.top() + 0.000001f);
 		}
 
+		r = drawParam->gridToDpi(r);
+
 		double cbs = drawParam->controlBarSize();
-		double lineWeight = cbs / 2.0f;
+		double lineWeight = cbs / 3.0f;
 		selectionPen.setWidthF(lineWeight);
 
 		p->setPen(selectionPen);
@@ -403,9 +399,6 @@ namespace VFrame30
 
 		p->drawRect(r);
 
-		// --
-		//
-		// p->setRenderHints(oldrenderhints);
 		return;
 	}
 

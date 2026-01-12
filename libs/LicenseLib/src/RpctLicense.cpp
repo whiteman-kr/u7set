@@ -460,6 +460,18 @@ namespace LicenseLib
 		m_data->mutable_module_configurator()->set_allowed(value);
 	}
 
+	bool RpctLicense::mcWriteServiceEeprom() const
+	{
+		Q_ASSERT(m_data);
+		return m_data->module_configurator().write_service_eeprom();
+	}
+	
+	void RpctLicense::setMcWriteServiceEeprom(bool value)
+	{
+		Q_ASSERT(m_data);
+		m_data->mutable_module_configurator()->set_write_service_eeprom(value);
+	}
+
 	bool RpctLicense::mcLimitModuleUartUuids() const
 	{
 		Q_ASSERT(m_data);

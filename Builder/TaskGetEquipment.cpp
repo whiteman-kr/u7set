@@ -6,6 +6,7 @@
 #include <HardwareLib/ScriptEquipment.h>
 
 #include "Context.h"
+#include "version.h"
 
 namespace Builder
 {
@@ -384,6 +385,15 @@ namespace Builder
 		}
 
 		QJSEngine engine;
+
+		// Setting global variables.
+		//
+		engine.globalObject().setProperty("version",
+										  QString("%1.%2.%3").arg(U7SET_MAJOR_VERSION).arg(U7SET_MINOR_VERSION).arg(U7SET_PATCH_VERSION));
+		engine.globalObject().setProperty("versionMajor", U7SET_MAJOR_VERSION);
+		engine.globalObject().setProperty("versionMinor", U7SET_MINOR_VERSION);
+		engine.globalObject().setProperty("versionPatch", U7SET_PATCH_VERSION);
+
 		Hardware::ScriptEquipment equipment{engine, nullptr};
 		equipment.setRoot(root);
 

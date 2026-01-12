@@ -98,6 +98,9 @@ namespace LicenseLib
 		bool allowedModuleConfigurator() const;
 		void setAllowedModuleConfigurator(bool value);
 
+		bool mcWriteServiceEeprom() const;
+		void setMcWriteServiceEeprom(bool value);
+
 		bool mcLimitModuleUartUuids() const;
 		void setMcLimitModuleUartUuids(bool value);
 

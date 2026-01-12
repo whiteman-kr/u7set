@@ -344,18 +344,20 @@ namespace Tuning
 	{
 		TuningClientContext* clientContext = m_clientContextMap.getClientContext(clientEquipmentID);
 
-		TEST_PTR_RETURN(clientContext);
-
-		clientContext->registerStateChangesQueue(tcpConnectionID);
+		if (clientContext != nullptr)
+		{
+			clientContext->registerStateChangesQueue(tcpConnectionID);
+		}
 	}
 
 	void TuningServiceWorker::unregisterSignalsStateChangesQueue(const QString& clientEquipmentID, qint64 tcpConnectionID)
 	{
 		TuningClientContext* clientContext = m_clientContextMap.getClientContext(clientEquipmentID);
 
-		TEST_PTR_RETURN(clientContext);
-
-		clientContext->unregisterStateChangesQueue(tcpConnectionID);
+		if (clientContext != nullptr)
+		{
+			clientContext->unregisterStateChangesQueue(tcpConnectionID);
+		}
 	}
 
 	void TuningServiceWorker::pushSignalStateChange(const TuningSignal::State& state)

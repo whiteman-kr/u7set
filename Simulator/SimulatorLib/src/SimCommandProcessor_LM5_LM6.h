@@ -388,6 +388,8 @@ namespace Sim
 		void afb_func_v3(AfbComponentInstance* instance);
 		void afb_func_v4(AfbComponentInstance* instance);
 		void afb_func_v5(AfbComponentInstance* instance);
+		void afb_func_v6(AfbComponentInstance* instance);
+		void afb_func_v5v6(AfbComponentInstance* instance);
 		void afb_func_private(AfbComponentInstance* instance, int conf, int version);
 
 		//	INTEGRATOR, OpCode 17
@@ -538,6 +540,7 @@ namespace Sim
 			{QStringLiteral("afb_func_v3"),			&CommandProcessor_LM5_LM6::afb_func_v3},				// 16
 			{QStringLiteral("afb_func_v4"),			&CommandProcessor_LM5_LM6::afb_func_v4},				// 16
 			{QStringLiteral("afb_func_v5"),			&CommandProcessor_LM5_LM6::afb_func_v5},				// 16
+			{QStringLiteral("afb_func_v6"),			&CommandProcessor_LM5_LM6::afb_func_v6},				// 16
 			{QStringLiteral("afb_int_v6_tiunlim"),	&CommandProcessor_LM5_LM6::afb_int_v6_tiunlim},			// 17	ti is unlimited
 			{QStringLiteral("afb_int_v6_ti350000"),	&CommandProcessor_LM5_LM6::afb_int_v6_ti350000},		// 17	ti is limited to 350000ms
 			{QStringLiteral("afb_int_v7_tiunlim"),	&CommandProcessor_LM5_LM6::afb_int_v7_tiunlim},			// 17	ti is unlimited

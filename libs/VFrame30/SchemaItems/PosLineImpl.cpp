@@ -1,5 +1,5 @@
-#include <VFrame30/PosLineImpl.h>
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/PosLineImpl.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/Settings.h>
 
@@ -15,7 +15,7 @@ namespace VFrame30
 		m_startXDocPt = 0;
 		m_startYDocPt = 0;
 		m_endXDocPt = 0;
-		m_endYDocPt = 0;	
+		m_endYDocPt = 0;
 	}
 
 	void PosLineImpl::propertyDemand(const QString& prop)
@@ -132,7 +132,7 @@ namespace VFrame30
 	// Action Functions
 	//
 	void PosLineImpl::moveItem(double horzOffsetDocPt, double vertOffsetDocPt)
-	{ 
+	{
 		setStartXDocPt(startXDocPt() + horzOffsetDocPt);
 		setStartYDocPt(startYDocPt() + vertOffsetDocPt);
 
@@ -179,7 +179,7 @@ namespace VFrame30
 		else
 		{
 			m_startXDocPt = m_endXDocPt + val;
-		}		
+		}
 	}
 
 	void PosLineImpl::SetHeightInDocPt(double val)
@@ -196,7 +196,7 @@ namespace VFrame30
 		else
 		{
 			m_startYDocPt = m_endYDocPt + val;
-		}		
+		}
 	}
 
 	void PosLineImpl::drawHighlight(CDrawParam* drawParam) const
@@ -286,13 +286,13 @@ namespace VFrame30
 
 		double lineWeight = cbs / 2.0f;
 
-		QPen pen(isLocked() == true ?  SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
+		QPen pen(isLocked() == true ? SchemaItem::lockedSelectionColor : SchemaItem::selectionColor);
 
 		pen.setWidthF(lineWeight);
 		p->setPen(pen);
 
 		p->drawLine(p1, p2);
-		
+
 		// Draw control bars
 		//
 		if (drawSizeBar == true && isLocked() == false)
@@ -329,10 +329,14 @@ namespace VFrame30
 			return;
 		}
 
+		p1 = drawParam->gridToDpi(p1);
+		p2 = drawParam->gridToDpi(p2);
+
 		double cbs = drawParam->controlBarSize();
-		double lineWeight = cbs / 2.0f;
+		double lineWeight = cbs / 3.0f;
 
 		QPen pen(color);
+		pen.setJoinStyle(Qt::MiterJoin);
 
 		pen.setWidthF(lineWeight);
 		p->setPen(pen);
@@ -351,36 +355,41 @@ namespace VFrame30
 
 		QRectF detRect(x, y, width, height);
 
-		if (detRect.contains(ax1, ay1) == true ||
-			detRect.contains(ax2, ay2) == true)
+		if (detRect.contains(ax1, ay1) == true || detRect.contains(ax2, ay2) == true)
 		{
 			return true;
 		}
 
-		if (VFrame30::IsLineIntersected(ax1, ay1, ax2, ay2,
-			detRect.x(), detRect.y(),
-			detRect.x() + detRect.width(), detRect.y()) == true)
+		if (VFrame30::IsLineIntersected(ax1, ay1, ax2, ay2, detRect.x(), detRect.y(), detRect.x() + detRect.width(), detRect.y()) == true)
 		{
 			return true;
 		}
 
-		if (VFrame30::IsLineIntersected(ax1, ay1, ax2, ay2,
-			detRect.x() + detRect.width(), detRect.y(),
-			detRect.x() + detRect.width(), detRect.y() + detRect.height()) == true)
+		if (VFrame30::IsLineIntersected(ax1,
+										ay1,
+										ax2,
+										ay2,
+										detRect.x() + detRect.width(),
+										detRect.y(),
+										detRect.x() + detRect.width(),
+										detRect.y() + detRect.height()) == true)
 		{
 			return true;
 		}
 
-		if (VFrame30::IsLineIntersected(ax1, ay1, ax2, ay2,
-			detRect.x() + detRect.width(), detRect.y() + detRect.height(),
-			detRect.x(), detRect.y() + detRect.height()) == true)
+		if (VFrame30::IsLineIntersected(ax1,
+										ay1,
+										ax2,
+										ay2,
+										detRect.x() + detRect.width(),
+										detRect.y() + detRect.height(),
+										detRect.x(),
+										detRect.y() + detRect.height()) == true)
 		{
 			return true;
 		}
 
-		if (VFrame30::IsLineIntersected(ax1, ay1, ax2, ay2,
-			detRect.x(), detRect.y() + detRect.height(),
-			detRect.x(), detRect.y()) == true)
+		if (VFrame30::IsLineIntersected(ax1, ay1, ax2, ay2, detRect.x(), detRect.y() + detRect.height(), detRect.x(), detRect.y()) == true)
 		{
 			return true;
 		}
@@ -390,11 +399,10 @@ namespace VFrame30
 
 	QRectF PosLineImpl::boundingRectInDocPt(const CDrawParam* /*drawParam*/) const
 	{
-		QRectF result(
-			std::min(m_startXDocPt, m_endXDocPt), 
-			std::min(m_startYDocPt, m_endYDocPt), 
-			std::max(m_startXDocPt, m_endXDocPt) - std::min(m_startXDocPt, m_endXDocPt), 
-			std::max(m_startYDocPt, m_endYDocPt) - std::min(m_startYDocPt, m_endYDocPt));
+		QRectF result(std::min(m_startXDocPt, m_endXDocPt),
+					  std::min(m_startYDocPt, m_endYDocPt),
+					  std::max(m_startXDocPt, m_endXDocPt) - std::min(m_startXDocPt, m_endXDocPt),
+					  std::max(m_startYDocPt, m_endYDocPt) - std::min(m_startYDocPt, m_endYDocPt));
 
 		return result;
 	}
@@ -439,9 +447,9 @@ namespace VFrame30
 
 	// Реализация интерефейса ISchemaItemPropertiesPos
 	//
-	double PosLineImpl::left() const 
+	double PosLineImpl::left() const
 	{
-		double pt = std::min(m_startXDocPt, m_endXDocPt);		// Value in UnitDocPt
+		double pt = std::min(m_startXDocPt, m_endXDocPt); // Value in UnitDocPt
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -477,7 +485,7 @@ namespace VFrame30
 
 	double PosLineImpl::top() const
 	{
-		double pt = std::min(m_startYDocPt, m_endYDocPt);		// Value in UnitDocPt
+		double pt = std::min(m_startYDocPt, m_endYDocPt); // Value in UnitDocPt
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -488,7 +496,7 @@ namespace VFrame30
 			pt = VFrame30::ConvertPoint(pt, SchemaUnit::Inch, Settings::regionalUnit(), 0);
 			pt = VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
-				
+
 		return pt;
 	}
 	void PosLineImpl::setTop(double value)
@@ -531,9 +539,7 @@ namespace VFrame30
 	{
 		double pt = value < 0 ? 0 : value;
 
-		if (itemUnit() == SchemaUnit::Display)
-		{
-		}
+		if (itemUnit() == SchemaUnit::Display) {}
 		else
 		{
 			pt = VFrame30::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, 0);
@@ -563,15 +569,13 @@ namespace VFrame30
 			pt = VFrame30::RoundPoint(pt, Settings::regionalUnit());
 		}
 
-		return pt;	
+		return pt;
 	}
 	void PosLineImpl::setHeight(double value)
 	{
 		double pt = value < 0 ? 0 : value;
 
-		if (itemUnit() == SchemaUnit::Display)
-		{
-		}
+		if (itemUnit() == SchemaUnit::Display) {}
 		else
 		{
 			pt = VFrame30::ConvertPoint(pt, Settings::regionalUnit(), SchemaUnit::Inch, 0);
@@ -613,5 +617,4 @@ namespace VFrame30
 
 		return;
 	}
-}
-
+} // namespace VFrame30

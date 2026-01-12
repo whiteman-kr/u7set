@@ -67,7 +67,7 @@ namespace Monitor
 		auto clientWidget = dynamic_cast<VFrame30::ClientSchemaWidget*>(m_monitorCentralWidget->currentWidget());
 		if (clientWidget != nullptr)
 		{
-			clientWidget->clientSchemaView()->setHighlightIds(std::move(items));
+			clientWidget->clientSchemaView()->setHighlightSignalIds(std::move(items));
 		}
 	}
 } // namespace Monitor

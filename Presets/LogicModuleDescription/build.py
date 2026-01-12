@@ -64,9 +64,12 @@ for input_file, input_inst, output_file in file_pairs:
             print(f"Error: AFBComponent '{afb_component.get('Caption')}' has MaxInstCount equal to 0")
             sys.exit(1)  # Exit the program with a non-zero status code indicating an error
 
-	# Remove xml:base attribute from all elements
+    # Remove xml:base attribute from all elements
     for element in output_root.iter():
         element.attrib.pop('{http://www.w3.org/XML/1998/namespace}base', None)
 
     output_tree.write(output_file)
     print(f"File '{output_file}' Ok")
+
+# Wait for user input before exiting
+input("\nPress Enter to exit...")

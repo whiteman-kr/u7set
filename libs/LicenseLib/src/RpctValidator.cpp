@@ -325,6 +325,18 @@ namespace LicenseLib
 		return m_license->allowedModuleConfigurator() ? ValidationResult::Valid : ValidationResult::Invalid;
 	}
 
+	ValidationResult RpctValidator::validateServiceEepromWrite() const
+	{
+#ifndef NDEBUG
+		if (AppLicenser::noLicenseCheck() == true)
+		{
+			return ValidationResult::Valid;
+		}
+#endif
+
+		return m_license->mcWriteServiceEeprom() ? ValidationResult::Valid : ValidationResult::Invalid;
+	}
+
 	ValidationResult RpctValidator::validateModuleConfiguratorModule(QUuid uartUuid) const
 	{
 #ifndef NDEBUG

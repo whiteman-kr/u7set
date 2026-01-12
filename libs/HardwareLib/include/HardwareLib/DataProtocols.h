@@ -248,6 +248,8 @@ struct RupFotip
 	quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
 
 	void calcCRC64();
+	quint64 getCRC64();
+
 	bool checkCRC64();
 };
 

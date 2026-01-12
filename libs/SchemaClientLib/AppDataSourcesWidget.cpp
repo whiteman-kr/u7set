@@ -224,12 +224,15 @@ namespace SchemaClientLib
 				dataReceivesItem->setText(1, "Yes");
 			}
 		}
-
-		QDateTime tm;
-		tm.setTimeZone(TIME_ZONE_UTC);
-
-		tm.setMSecsSinceEpoch(adsState->state.uptime());
-		setDataItemText("Uptime", DateTimeToString::dateTimeMs(tm));
+	
+		qint64 upTime = (adsState->state.uptime());
+		qint64 s = upTime % 60;
+		upTime /= 60;
+		qint64 m = upTime % 60;
+		upTime /= 60;
+		qint64 h = upTime % 24;
+		upTime /= 24;
+		setDataItemText("Uptime", QString("%1d %2:%3:%4").arg(upTime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
 		setDataItemNumber("ReceivedDataID", adsState->state.receiveddataid());
 		double datareceivingrate = adsState->state.datareceivingspeed();
@@ -240,6 +243,8 @@ namespace SchemaClientLib
 		setDataItemNumber("LostPacketCount", adsState->state.lostpacketcount());
 		setDataItemText("DataProcessingEnabled", adsState->state.dataprocessingenabled() ? "Yes" : "No");
 
+		QDateTime tm;
+		tm.setTimeZone(TIME_ZONE_UTC);
 		tm.setMSecsSinceEpoch(adsState->state.lmtime());
 		setDataItemText("LmTime", DateTimeToString::dateTimeMs(tm));
 

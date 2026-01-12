@@ -43,16 +43,6 @@ ModuleConfigurator::ModuleConfigurator(QWidget* parent) :
 	m_tabWidget->addTab(appTabPage, "Output Bitstream Files");
 	m_tabWidget->addTab(diagTabPage, "Service Information");
 
-	connect(m_tabWidget,
-			&QTabWidget::currentChanged,
-			[this](int tabIndex)
-			{
-				if (m_pEraseButton != nullptr)
-				{
-					m_pEraseButton->setEnabled(tabIndex == 0);
-				}
-			});
-
 	// Log
 	//
 	m_pLog = new QTextEdit();
@@ -256,6 +246,8 @@ ModuleConfigurator::ModuleConfigurator(QWidget* parent) :
 
 ModuleConfigurator::~ModuleConfigurator()
 {
+	cancelClicked();
+
 	killTimer(m_logTimerId);
 
 	if (m_pConfigurationThread != nullptr)
@@ -567,8 +559,12 @@ void ModuleConfigurator::eraseClicked()
 		}
 		else
 		{
-			Q_ASSERT(false);
-			throw(tr("Attempt to erase service information"));
+			disableControls();
+
+			std::optional<std::vector<int>> selectedUarts;
+			selectedUarts = {ModuleConfiguratorLib::ConfigurationUartId}; // ID of service flash
+
+			emit eraseFlashMemory(0, selectedUarts);
 		}
 	}
 	catch (QString message)
@@ -643,17 +639,12 @@ void ModuleConfigurator::disableControls()
 
 	m_pReadButton->setEnabled(false);
 	m_pConfigureButton->setEnabled(false);
-
-	if (m_tabWidget->currentIndex() == 0)
+	if (m_pEraseButton != nullptr)
 	{
-		if (m_pEraseButton != nullptr)
-		{
-			m_pEraseButton->setEnabled(false);
-		}
-
-		m_pCancelButton->setEnabled(true);
+		m_pEraseButton->setEnabled(false);
 	}
 
+	m_pCancelButton->setEnabled(true);
 	m_pSettingsButton->setEnabled(false);
 	m_pClearLogButton->setEnabled(false);
 }
@@ -664,17 +655,12 @@ void ModuleConfigurator::enableControls()
 
 	m_pReadButton->setEnabled(true);
 	m_pConfigureButton->setEnabled(true);
-
-	if (m_tabWidget->currentIndex() == 0)
+	if (m_pEraseButton != nullptr)
 	{
-		if (m_pEraseButton != nullptr)
-		{
-			m_pEraseButton->setEnabled(true);
-		}
-
-		m_pCancelButton->setEnabled(false);
+		m_pEraseButton->setEnabled(true);
 	}
 
+	m_pCancelButton->setEnabled(false);
 	m_pSettingsButton->setEnabled(true);
 	m_pClearLogButton->setEnabled(true);
 }

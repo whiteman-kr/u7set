@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule DescriptionNumber="0" ConfigurationScriptFile="BVB15Conf0000.js" Version="1.0005">
+<LogicModule DescriptionNumber="0" ConfigurationScriptFile="BVB15Conf0000.js" Version="1.0006">
 	<FlashMemory>
 		<AppLogicFrameCount>0</AppLogicFrameCount>
 		<AppLogicFramePayload>0</AppLogicFramePayload>
@@ -59,6 +59,7 @@
 		<LanController>
 			<Type>AppAndDiagData</Type>
 			<Place>1</Place>
+			<ConfigVersion>0</ConfigVersion>
 		</LanController>
 	</Lan>
 	<Other>

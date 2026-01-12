@@ -4810,6 +4810,19 @@ namespace Sim
 
 	void CommandProcessor_LM5_LM6::afb_func_v5(AfbComponentInstance* instance)
 	{
+		return afb_func_v5v6(instance);
+	}
+	
+	void CommandProcessor_LM5_LM6::afb_func_v6(AfbComponentInstance* instance)
+	{
+		return afb_func_v5v6(instance);
+	}
+
+	void CommandProcessor_LM5_LM6::afb_func_v5v6(AfbComponentInstance* instance)
+	{
+		// Version 5 and 6 are identical, the difference is only in the implementation by different Quartus versions.
+		//
+
 		// Define input opIndexes
 		//
 		const int i_conf = 0;

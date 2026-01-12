@@ -22,6 +22,7 @@ module VFrame30 {
 		schema: Schema;
 		schemaCount: number;
 		zoomFactor: number;
+		highlightRectColor: QColor;
 
 		// Functions
 		//
@@ -78,6 +79,14 @@ module VFrame30 {
 
 		schemaCaptionById(schemaId: string): string;
 		schemaCaptionByIndex(schemaIndex: number): string;
+
+		// Adds an item to be highlighted with a rectangle (Ctrl + left click)..
+		//
+		void addHighlightItem(SchemaItem item);
+
+		// Clears all highlighted items.
+		//
+		void clearHighlightItems();
 	}
 
 	export interface Schema {

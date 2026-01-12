@@ -306,6 +306,11 @@ void RupFotip::calcCRC64()
 	CRC64 = reverseUint64(Crc::crc64(&rupHeader, Rup::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
 }
 
+quint64 RupFotip::getCRC64()
+{
+	return reverseUint64(Crc::crc64(&rupHeader, Rup::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
+}
+
 bool RupFotip::checkCRC64()
 {
 	quint64 calculatedCRC = reverseUint64(Crc::crc64(&rupHeader, Rup::ENTIRE_UDP_SIZE - sizeof(quint64 /*CRC64*/ )));
