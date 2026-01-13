@@ -1307,7 +1307,7 @@ namespace Hardware
 		}
 
 		// !WARNING!
-		// The same procedure is done in expandEquipmentId, keep it in mind if add any new macroses
+		// The same procedure is done in expandEquipmentId, keep it in mind if add any new macros
 		//
 		QString parentId;
 		size_t deviceIndex = deviceCount;
@@ -1450,19 +1450,45 @@ namespace Hardware
 		captionEscaped.replace(QLatin1String("'"), QLatin1String("''"));
 		captionEscaped.replace(QLatin1String("\""), QLatin1String("\\\""));
 
-		QString json = QString(
-						   R"DELIM({
+		QString json;
+
+		if (isPreset() == true)
+		{
+			json = QString(R"DELIM({
 	"Uuid" : "%1",
 	"EquipmentID" : "%2",
-	"Caption" : "%3",
-	"Place" : %4,
-	"Type" : "%5"
+	"EquipmentIDTemplate" : "%3",
+	"Caption" : "%4",
+	"Place" : %5,
+	"Type" : "%6",
+	"Preset" : true,
+	"ObjectName" : "%7"
 })DELIM")
-						   .arg(uuid().toString())
-						   .arg(equipmentIdTemplate())
-						   .arg(captionEscaped)
-						   .arg(place())
-						   .arg(fileExtension());
+					   .arg(uuid().toString())
+					   .arg(equipmentId())
+					   .arg(equipmentIdTemplate())
+					   .arg(captionEscaped)
+					   .arg(place())
+					   .arg(fileExtension())
+					   .arg(presetName() + " - " + captionEscaped);
+		}
+		else
+		{
+			json = QString(R"DELIM({
+	"Uuid" : "%1",
+	"EquipmentID" : "%2",
+	"EquipmentIDTemplate" : "%3",
+	"Caption" : "%4",
+	"Place" : %5,
+	"Type" : "%6"
+})DELIM")
+					   .arg(uuid().toString())
+					   .arg(equipmentId())
+					   .arg(equipmentIdTemplate())
+					   .arg(captionEscaped)
+					   .arg(place())
+					   .arg(fileExtension());
+		}
 
 		return json;
 	}

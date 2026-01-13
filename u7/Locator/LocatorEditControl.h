@@ -13,6 +13,7 @@ namespace Locator
 
 	public:
 		explicit LocatorEditControl(Locator& locator, LocatorListWidget& listWidget, MainWindow* appMainWindow);
+		~LocatorEditControl();
 
 	protected:
 		virtual void timerEvent(QTimerEvent* event) override;
@@ -29,8 +30,11 @@ namespace Locator
 		LocatorListWidget& m_listWidget;
 		MainWindow* m_appMainWindow = nullptr;
 
-		QWidget* m_focusCameFrom = nullptr;	// There is no way to get previos focus from focusInEvent, so this variable will be updated by timer.
+		QWidget* m_focusCameFrom =
+			nullptr; // There is no way to get previous focus from focusInEvent, so this variable will be updated by timer.
 
 		QAction m_findIcon{this};
+
+		int m_focusTimerId = 0;
 	};
-}
+} // namespace Locator
