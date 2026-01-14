@@ -1,4 +1,5 @@
 #include "GrpcFileSrv.h"
+#include <CommonStdLib/TimesStd.h>
 
 // -------------------------------------------------------------------------------------
 //
@@ -116,10 +117,10 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	{
 		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::FileIsNotAccessible));
 
-		DEBUG_LOG_ERR(m_log, QString("Access denied to file %1 (request from %2)").
+		logErr(QString("Access denied to file %1 (request from %2)").
 							 arg(fileName).arg(swEquipmentID));
 
-		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 		{
 			return writeStatus;
 		}
@@ -136,9 +137,9 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	{
 		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::RemoteFileIsNotExists));
 
-		DEBUG_LOG_ERR(m_log, QString("File %1 not exists (request from %2)").arg(fileName).arg(swEquipmentID));
+		logErr(QString("File %1 not exists (request from %2)").arg(fileName).arg(swEquipmentID));
 
-		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 		{
 			return writeStatus;
 		}
@@ -150,9 +151,9 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	{
 		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::FileTooBig));
 
-		DEBUG_LOG_ERR(m_log, QString("File %1 too big (request from %2)").arg(fileName).arg(swEquipmentID));
+		logErr(QString("File %1 too big (request from %2)").arg(fileName).arg(swEquipmentID));
 
-		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		if (writeReply(context, writer, reply, writeStatus,getLog()) == false)
 		{
 			return writeStatus;
 		}
@@ -164,9 +165,9 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	{
 		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::CantOpenRemoteFile));
 
-		DEBUG_LOG_ERR(m_log, QString("Can't open file %1 (request from %2)").arg(fileName).arg(swEquipmentID));
+		logErr(QString("Can't open file %1 (request from %2)").arg(fileName).arg(swEquipmentID));
 
-		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 		{
 			return writeStatus;
 		}
@@ -182,9 +183,9 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	{
 		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::CantReadRemoteFile));
 
-		DEBUG_LOG_ERR(m_log, QString("Can't read file %1 (request from %2)").arg(fileName).arg(swEquipmentID));
+		logErr(QString("Can't read file %1 (request from %2)").arg(fileName).arg(swEquipmentID));
 
-		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 		{
 			return writeStatus;
 		}
@@ -198,9 +199,9 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	{
 		reply.set_errorcode(TO_INT(Tcp::FileTransferResult::FileDataCorrupted));
 
-		DEBUG_LOG_ERR(m_log, QString("File %1 check error (request from %2)").arg(fileName).arg(swEquipmentID));
+		logErr(QString("File %1 check error (request from %2)").arg(fileName).arg(swEquipmentID));
 
-		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 		{
 			return writeStatus;
 		}
@@ -247,7 +248,7 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 			reply.set_filedata(fileData.constData() + sendDataSize, partSize);
 		}
 
-		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 		{
 			return writeStatus;
 		}
@@ -257,7 +258,7 @@ grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
 	}
 	while(sendDataSize < fileData.size());
 
-	DEBUG_LOG_MSG(m_log, QString("File %1 sent to %2").arg(fileName).arg(swEquipmentID));
+	logMsg(QString("File %1 sent to %2").arg(fileName).arg(swEquipmentID));
 
 	return grpc::Status::OK;
 }
@@ -328,11 +329,13 @@ GrpcFileClient::GrpcFileClient(const SoftwareInfo& softwareInfo,
 	CircularLoggerShared log,
 	bool startClient) :
 	GrpcFileBase(rootFolder),
-	m_swInfo(softwareInfo),
-	m_serverAddress(serverAddress),
-	m_log(log)
+	LogWrapper(log),
+	m_localSwInfo(softwareInfo),
+	m_serverAddress(serverAddress)
 {
 	Q_UNUSED(clientDescription);
+
+	m_state.localSoftwareInfo = m_localSwInfo;
 
 	if (startClient)
 	{
@@ -463,6 +466,23 @@ void GrpcFileClient::setEmitFileReady(bool enable)
 	m_emitFileReady.store(enable, std::memory_order::relaxed);
 }
 
+HostAddressPort GrpcFileClient::getServerAddr() const
+{
+	return m_serverAddr;
+}
+
+Tcp::ConnectionState GrpcFileClient::getConnectionState() const
+{
+	Tcp::ConnectionState state;
+
+	{
+		std::lock_guard lg(m_stateMutex);
+		state = m_state;
+	}
+
+	return state;
+}
+
 void GrpcFileClient::run()
 {
 	std::unique_lock ul(m_procMutex, std::defer_lock);
@@ -540,7 +560,7 @@ void GrpcFileClient::createStubAndHandshake(grpc::Status* status)
 	Grpc::HandshakeRequest req;
 	Grpc::HandshakeReply rep;
 
-	m_swInfo.serializeTo(req.mutable_clientsoftwareinfo());
+	m_localSwInfo.serializeTo(req.mutable_clientsoftwareinfo());
 
 	grpc::Status st = m_stub->Handshake(&handshakeCtx, req, &rep);
 
@@ -552,21 +572,66 @@ void GrpcFileClient::createStubAndHandshake(grpc::Status* status)
 	if (st.ok())
 	{
 		m_authToken = rep.authtoken();
+		m_serverAddr = HostAddressPort(rep.serverip(), rep.serverport());
+
+		//
+
+		SoftwareInfo connSwInfo;
+		connSwInfo.serializeFrom(rep.serversoftwareinfo());
+
+		{
+			std::lock_guard lg(m_stateMutex);
+
+			m_state.isSocketConnected = true;
+			m_state.isConnected = true;
+			m_state.connectedSoftwareInfo = connSwInfo;
+			m_state.localSoftwareInfo = m_localSwInfo;
+			m_state.securityLevel = E::SecurityLevel::Basic;	// !!!
+			m_state.setConnectionResult = Tcp::SetConnectionResult::Ok;
+			m_state.connectionNo = 1;
+			m_state.serverEquipmentID = m_state.connectedSoftwareInfo.equipmentID();
+			m_state.peerAddr = m_serverAddr;
+			m_state.startTime = currentMSecsUTC();
+			m_state.sentBytes = 0;
+			m_state.receivedBytes = 0;
+			m_state.requestCount = 1;
+			m_state.replyCount = 1;
+			m_state.isActual = false;
+		}
+
+		//
+
 		emit signal_setConnection();
 		return;
+	}
+
+	{
+		std::lock_guard lg(m_stateMutex);
+		m_state.clear();
+		m_state.localSoftwareInfo = m_localSwInfo;
 	}
 
 	if (st.error_code() == grpc::StatusCode::UNAUTHENTICATED)
 	{
 		if (st.error_message() == Grpc::WRONG_CLIENT_EQUIPMENT_ID)
 		{
-			emit signal_unknownClientID();
+			{
+				std::lock_guard lg(m_stateMutex);
+				m_state.setConnectionResult = Tcp::SetConnectionResult::UnknownClientID;
+			}
+
+			emit signal_unknownClientID(QString::fromStdString(Grpc::WRONG_CLIENT_EQUIPMENT_ID));
 		}
 		else
 		{
 			if (st.error_message() == Grpc::WRONG_HOST_NAME)
 			{
-				emit signal_wrongClientHostname();
+				{
+					std::lock_guard lg(m_stateMutex);
+					m_state.setConnectionResult = Tcp::SetConnectionResult::WrongClientHostname;
+				}
+
+				emit signal_wrongClientHostname(QString::fromStdString(Grpc::WRONG_HOST_NAME));
 			}
 			else
 			{
@@ -576,6 +641,8 @@ void GrpcFileClient::createStubAndHandshake(grpc::Status* status)
 	}
 
 	m_authToken.clear();
+	m_serverAddr.clear();
+
 	m_stub.reset();
 }
 
@@ -845,8 +912,4 @@ void GrpcFileClient::pushFileReady(const QString& fileName, Tcp::FileTransferRes
 
 		m_fileReadyCond.notify_all();
 	}
-
 }
-
-
-

@@ -42,7 +42,14 @@ grpc::Status GrpcAppDataSrv::Handshake(grpc::ServerContext* context,
 {
 	Q_UNUSED(context);
 
-	return m_sessionGuard.handshake(request, reply);
+	grpc::Status status = m_sessionGuard.handshake(request, reply);
+
+	HostAddressPort serverIP = listenIP();
+
+	reply->set_serverip(serverIP.address32());
+	reply->set_serverport(serverIP.port());
+
+	return status;
 }
 
 grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
@@ -83,13 +90,13 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 		if ((ctr & 0x3FFF) == 0 && context->IsCancelled())
 		{
-			DEBUG_LOG_MSG(m_log, "GetAppSignalList: context CANCELLED");
+			logMsg("GetAppSignalList: context CANCELLED");
 			return grpc::Status::CANCELLED;
 		}
 
 		if (ctr >= IDS_MAX_COUNT)
 		{
-			if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+			if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 			{
 				return writeStatus;
 			}
@@ -101,7 +108,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 
 	if (ctr > 0)
 	{
-		if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+		if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 		{
 			return writeStatus;
 		}
@@ -142,7 +149,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 
 	if (request->signalhashes_size() == 0)
 	{
-		DEBUG_LOG_MSG(m_log, "GetAppSignalParam: signal hashes count 0");
+		logMsg("GetAppSignalParam: signal hashes count 0");
 
 		for(const AppSignal& appSignal : m_appSignals)
 		{
@@ -155,7 +162,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 				reply.set_totalsize(static_cast<quint32>(m_appSignals.count()));
 				reply.set_replysignalindex(index);
 
-				if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+				if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 				{
 					return writeStatus;
 				}
@@ -172,7 +179,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 			reply.set_totalsize(static_cast<quint32>(m_appSignals.count()));
 			reply.set_replysignalindex(index);
 
-			if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+			if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 			{
 				return writeStatus;
 			}
@@ -182,7 +189,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 	}
 	else
 	{
-		DEBUG_LOG_MSG(m_log, QString("GetAppSignalParam: signal hashes count %1").arg(request->signalhashes_size()));
+		logMsg(QString("GetAppSignalParam: signal hashes count %1").arg(request->signalhashes_size()));
 
 		for(auto h : request->signalhashes())
 		{
@@ -199,7 +206,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 				reply.set_totalsize(request->signalhashes_size());
 				reply.set_replysignalindex(index);
 
-				if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+				if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 				{
 					return writeStatus;
 				}
@@ -216,7 +223,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalParam(grpc::ServerContext* context,
 			reply.set_totalsize(request->signalhashes_size());
 			reply.set_replysignalindex(index);
 
-			if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+			if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 			{
 				return writeStatus;
 			}
@@ -340,7 +347,7 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 			statesCount > SEND_PACKET_SIZE ||
 			(statesCount > 0 && now - lastSendTime >= SEND_PACKET_INTERVAL))
 		{
-			if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+			if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 			{
 				m_appDataReceiver->unregisterDestSignalStatesQueue(statesQueue);
 				return writeStatus;
@@ -388,7 +395,7 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 
 	//
 
-	std::shared_ptr<DiscretesLogReader> dlReader = std::make_shared<DiscretesLogReader>(m_log);
+	std::shared_ptr<DiscretesLogReader> dlReader = std::make_shared<DiscretesLogReader>(getLog());
 
 	m_dsLogWriter->registerLogReader(dlReader);
 
@@ -413,7 +420,7 @@ grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
 		if (addedRecordCount > SEND_PACKET_SIZE ||
 			now - lastSendTime >= SEND_PACKET_INTERVAL)
 		{
-			if (writeReply(context, writer, reply, writeStatus, m_log) == false)
+			if (writeReply(context, writer, reply, writeStatus, getLog()) == false)
 			{
 				m_dsLogWriter->unregisterLogReader(dlReader);
 				return writeStatus;

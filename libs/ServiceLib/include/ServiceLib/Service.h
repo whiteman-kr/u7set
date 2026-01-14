@@ -9,6 +9,7 @@
 #include "../OnlineLib/BuildInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/Tcp.h"
+#include "../OnlineLib/GrpcCfgLoader.h"
 
 #include "CommandLineParser.h"
 
@@ -112,6 +113,9 @@ public:
 
 	CircularLoggerShared logger() const { return m_logger; }
 
+	void runGrpcCfgLoaderThread();
+	void stopGrpcCfgLoaderThread();
+
 	QString getSettingValue(const QString& settingName) const;
 	bool getBoolSettingValue(const QString& settingName) const;
 
@@ -179,6 +183,12 @@ protected:
 
 	const CommandLineParser& commandLineParser() const { return m_cmdLineParser; }
 
+protected slots:
+	virtual void onConfigurationReady(const QByteArray configurationXmlData,
+									  const BuildFileInfoArray buildFileInfoArray,
+									  SessionParams sessionParams,
+									  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
+
 private:
 	void setThisInstanceNo();
 
@@ -196,6 +206,7 @@ private:
 
 protected:
 	OnlineLib::BuildInfo m_buildInfo;
+	std::unique_ptr<GrpcCfgLoaderThread> m_grpcCfgLoaderThread;
 
 private:
 	QString m_equipmentID;

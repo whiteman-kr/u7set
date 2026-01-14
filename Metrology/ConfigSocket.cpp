@@ -38,26 +38,18 @@ void ConfigSocket::clearConfiguration()
 
 void ConfigSocket::start()
 {
-	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
+	m_grpcCfgLoaderThread = std::make_unique<GrpcCfgLoaderThread>(m_softwareInfo,
 											1,
 											m_serverAddressPort1,
 											m_serverAddressPort2,
-											false,
 											nullptr);
 
-	if (m_cfgLoaderThread == nullptr)
-	{
-		assert(m_cfgLoaderThread);
-		return;
-	}
+	connect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+	connect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_unknownClientID, this, &ConfigSocket::unknownClient);
+	connect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_wrongClientHostname, this, &ConfigSocket::wrongClientHostname);
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClientID, this, &ConfigSocket::unknownClient);
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_wrongClientHostname, this, &ConfigSocket::wrongClientHostname);
-
-	m_cfgLoaderThread->start();
-	m_cfgLoaderThread->enableDownloadConfiguration();
+	m_grpcCfgLoaderThread->start();
 
 	startConnectionStateTimer();
 }
@@ -68,16 +60,16 @@ void ConfigSocket::quit()
 {
 	stopConnectionStateTimer();
 
-	if (m_cfgLoaderThread == nullptr)
+	if (m_grpcCfgLoaderThread == nullptr)
 	{
 		return;
 	}
 
-	disconnect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+	disconnect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
 
-	m_cfgLoaderThread->quitAndWait();
-	delete m_cfgLoaderThread;
-	m_cfgLoaderThread = nullptr;
+	m_grpcCfgLoaderThread->quitAndWait();
+
+	m_grpcCfgLoaderThread.reset();
 
 	m_connected = false;
 	m_address.clear();
@@ -113,11 +105,6 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 	Q_UNUSED(sessionParams)
 
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
 	QElapsedTimer responseTime;
 	responseTime.start();
 
@@ -137,7 +124,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 		QByteArray fileData;
 		QString errStr;
 
-		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+		m_grpcCfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
 
 		if (errStr.isEmpty() == false)
 		{
@@ -516,12 +503,12 @@ void ConfigSocket::stopConnectionStateTimer()
 
 void ConfigSocket::updateConnectionState()
 {
-	if (m_cfgLoaderThread == nullptr)
+	if (m_grpcCfgLoaderThread == nullptr)
 	{
 		return;
 	}
 
-	Tcp::ConnectionState&& state = m_cfgLoaderThread->getConnectionState();
+	Tcp::ConnectionState&& state = m_grpcCfgLoaderThread->getConnectionState();
 
 	if (state.isConnected != m_connected)
 	{

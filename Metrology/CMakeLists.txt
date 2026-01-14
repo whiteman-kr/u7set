@@ -66,6 +66,8 @@ set (METROLOGY_SOURCES
 	DialogTuningSourceList.h
 	ExcelHelper.cpp
 	ExcelHelper.h
+	GrpcSignalSocket.cpp
+	GrpcSignalSocket.h
 	MeasureBase.cpp
 	MeasureBase.h
 	MeasurePointBase.cpp

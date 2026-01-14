@@ -18,7 +18,7 @@ GrpcCfgServer::GrpcCfgServer(const SoftwareInfo& softwareInfo,
 	GrpcFileSrv(softwareInfo, false, clients, checkClientHostname, listenIP, buildFolder, logger),
 	m_sessionParams(sessionParams)
 {
-	readBuildXml(buildFolder);
+	readBuildXml();
 }
 
 const OnlineLib::BuildInfo& GrpcCfgServer::buildInfo() const
@@ -26,7 +26,7 @@ const OnlineLib::BuildInfo& GrpcCfgServer::buildInfo() const
 	return m_buildInfo;
 }
 
-void GrpcCfgServer::readBuildXml(const QString& buildFolder)
+void GrpcCfgServer::readBuildXml()
 {
 	m_buildReadOK = false;
 
@@ -36,7 +36,7 @@ void GrpcCfgServer::readBuildXml(const QString& buildFolder)
 
 	if (dir.exists(buildXmlFileName) == false)
 	{
-		DEBUG_LOG_ERR(m_log, QString("file %1 not found!").arg(buildXmlFileName));
+		logErr(QString("file %1 not found!").arg(buildXmlFileName));
 		return;
 	}
 
@@ -62,7 +62,7 @@ void GrpcCfgServer::readBuildXml(const QString& buildFolder)
 
 	if (res == false)
 	{
-		DEBUG_LOG_ERR(m_log, QString("сan't read <BuildInfo> section in file %1!").arg(buildXmlFileName));
+		logErr(QString("сan't read <BuildInfo> section in file %1!").arg(buildXmlFileName));
 		return;
 	}
 
@@ -70,7 +70,7 @@ void GrpcCfgServer::readBuildXml(const QString& buildFolder)
 
 	if (res == false)
 	{
-		DEBUG_LOG_ERR(m_log, QString("сan't read <Files> section in file %1!").arg(buildXmlFileName));
+		logErr(QString("сan't read <Files> section in file %1!").arg(buildXmlFileName));
 		return;
 	}
 
@@ -101,11 +101,11 @@ void GrpcCfgServer::readBuildXml(const QString& buildFolder)
 
 	if (res == false)
 	{
-		DEBUG_LOG_ERR(m_log, QString("File %1 reading error!").arg(buildXmlFileName));
+		logErr(QString("File %1 reading error!").arg(buildXmlFileName));
 		return;
 	}
 
-	DEBUG_LOG_MSG(m_log, QString("file %1 has been read").arg(buildXmlFileName));
+	logMsg(QString("file %1 has been read").arg(buildXmlFileName));
 
 	m_buildReadOK = true;
 }

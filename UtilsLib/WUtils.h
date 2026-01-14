@@ -457,6 +457,3 @@ const std::size_t CACHE_LINE_SIZE = 64;				// 64 bytes on x86-64
 #define ROUND_TO_CACHE_LINE_SIZE(size)	ROUND_TO(size, CACHE_LINE_SIZE)
 
 #define CACHE_ALIGNED					alignas(CACHE_LINE_SIZE)
-
-
-

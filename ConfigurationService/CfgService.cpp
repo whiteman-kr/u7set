@@ -46,10 +46,11 @@ void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& se
 		serviceInfo.set_cfgcheckerstate(TO_INT(E::ConfigCheckerState::Unknown));
 	}
 
+	/* NEED UPDATE!!!
 	if (m_cfgServerThread != nullptr)
 	{
 		m_cfgServerThread->getClientsList(&serviceInfo);
-	}
+	} */
 }
 
 void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
@@ -209,8 +210,6 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 
 		HostAddressPort clientRequestIP = rcs.clientRequestIP();
 
-		clientRequestIP.setPort(PORT_CONFIGURATION_GRPC_SERVICE_CLIENT_REQUEST);
-
 		m_grpcCfgServers.push_back(
 			std::make_unique<GrpcCfgServer>(softwareInfo(), sessionParams(),
 											m_cfgServiceSettings.clients,
@@ -220,7 +219,7 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 
 	//
 
-	CfgServer* cfgServer = new CfgServer(softwareInfo(),
+/*	CfgServer* cfgServer = new CfgServer(softwareInfo(),
 										 sessionParams(),
 										 buildPath,
 										 m_cfgServiceSettings.clients,
@@ -239,7 +238,7 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 
 	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger(), "CfgServerListener");
 
-	m_cfgServerThread->start();
+	m_cfgServerThread->start();*/
 }
 
 void ConfigurationServiceWorker::stopCfgServerThread()

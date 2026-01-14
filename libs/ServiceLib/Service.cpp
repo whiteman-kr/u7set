@@ -141,6 +141,38 @@ bool ServiceWorker::clearSettings()
 	return m_cmdLineParser.clearSettings();
 }
 
+void ServiceWorker::runGrpcCfgLoaderThread()
+{
+	assert(m_grpcCfgLoaderThread == nullptr);			// once should be runned
+
+	m_grpcCfgLoaderThread = std::make_unique<GrpcCfgLoaderThread>(softwareInfo(), 1,
+																  cfgServiceIP1(), cfgServiceIP2(), logger());
+
+	connect(m_grpcCfgLoaderThread.get(), &GrpcCfgLoaderThread::signal_configurationReady, this, &ServiceWorker::onConfigurationReady);
+
+	m_grpcCfgLoaderThread->start();
+}
+
+void ServiceWorker::stopGrpcCfgLoaderThread()
+{
+	if (m_grpcCfgLoaderThread == nullptr)
+	{
+		return;
+	}
+
+	m_grpcCfgLoaderThread->quitAndWait();
+
+	m_grpcCfgLoaderThread.reset();
+}
+
+void ServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
+										const BuildFileInfoArray buildFileInfoArray,
+										SessionParams sessionParams,
+										std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
+{
+	Q_ASSERT(false);		// should be implemented in derived classes
+}
+
 QString ServiceWorker::getSettingValue(const QString& settingName) const
 {
 	return m_cmdLineParser.getSettingValue(settingName);

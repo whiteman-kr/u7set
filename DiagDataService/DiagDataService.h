@@ -2,7 +2,7 @@
 
 #include <ServiceLib/Service.h>
 #include "../OnlineLib/DataSource.h"
-#include "../OnlineLib/CfgLoader.h"
+#include "../OnlineLib/GrpcCfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/OnlineDataSources.h"
 
@@ -35,14 +35,6 @@ private:
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
-	void runCfgLoaderThread();
-	void stopCfgLoaderThread();
-
-	void onConfigurationReady(const QByteArray configurationXmlData,
-							  const BuildFileInfoArray buildFileInfoArray,
-							  SessionParams sessionParams,
-							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
-
 	bool readDiagDataSources(const QByteArray& fileData, const QString& profile);
 	bool readDiagSignalsAndObjects(const QByteArray& fileData);
 	bool readDiagSignalTypes(const QByteArray& fileData);
@@ -56,9 +48,13 @@ private:
 	void runTcpDiagDataServer();
 	void stopTcpDiagDataServer();
 
-private:
-	CfgLoaderThread* m_cfgLoaderThread = nullptr;
+private slots:
+	virtual void onConfigurationReady(const QByteArray configurationXmlData,
+							  const BuildFileInfoArray buildFileInfoArray,
+							  SessionParams sessionParams,
+							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile) override;
 
+private:
 	DiagDataServiceSettings m_curSettingsProfile;
 
 	std::shared_ptr<const DiagDataServiceSettings> m_serviceSettings;

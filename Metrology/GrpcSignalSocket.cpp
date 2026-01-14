@@ -1,0 +1,192 @@
+#include "GrpcSignalSocket.h"
+
+#include "SignalBase.h"
+#include "Options.h"
+/*
+// -------------------------------------------------------------------------------------------------------------------
+
+GrpcSignalSocket::GrpcSignalSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort) :
+	Tcp::Client(softwareInfo, serverAddressPort, "SignalSocket")
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+GrpcSignalSocket::GrpcSignalSocket(const SoftwareInfo& softwareInfo,
+						   const HostAddressPort& serverAddressPort1,
+						   const HostAddressPort& serverAddressPort2) :
+	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, "SignalSocket")
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+GrpcSignalSocket::~GrpcSignalSocket()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void GrpcSignalSocket::onClientThreadStarted()
+{
+	qDebug() << "SignalSocket::onClientThreadStarted()";
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void GrpcSignalSocket::onClientThreadFinished()
+{
+	qDebug() << "SignalSocket::onClientThreadFinished()";
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void GrpcSignalSocket::onConnection()
+{
+	qDebug() << "SignalSocket::onConnection()";
+
+	emit socketConnected();
+
+	requestSignalState();
+
+	return;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void GrpcSignalSocket::onDisconnection()
+{
+	qDebug() << "SignalSocket::onDisconnection";
+
+	emit socketDisconnected();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void GrpcSignalSocket::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+{
+	if (replyData == nullptr)
+	{
+		assert(replyData);
+		return;
+	}
+
+	if(requestID == ADS_GET_APP_SIGNAL_STATE)
+	{
+		replySignalState(replyData, replyDataSize);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// ADS_GET_APP_SIGNAL_STATE
+
+void GrpcSignalSocket::requestSignalState()
+{
+	assert(isClearToSendRequest());
+
+	// according to GOST MI-2002 in each point we need do twenty measurements per one second
+	// 50 ms
+	//
+	QThread::msleep(SIGNAL_SOCKET_TIMEOUT_STATE);
+
+	int hashCount = theSignalBase.hashForRequestStateCount();
+
+	m_getSignalStateRequest.mutable_signalhashes()->Clear();
+	m_getSignalStateRequest.mutable_signalhashes()->Reserve(SIGNAL_SOCKET_MAX_READ_SIGNAL);
+
+	int startIndex = m_signalStateRequestIndex;
+
+	for (int i = 0; i< SIGNAL_SOCKET_MAX_READ_SIGNAL; i++)
+	{
+		if (m_signalStateRequestIndex >= hashCount)
+		{
+			m_signalStateRequestIndex = 0;
+			break;
+		}
+
+		Hash hash = theSignalBase.hashForRequestState(i + startIndex);
+		if (hash == UNDEFINED_HASH)
+		{
+			assert(hash != UNDEFINED_HASH);
+			continue;
+		}
+
+		m_getSignalStateRequest.add_signalhashes(hash);
+
+		m_signalStateRequestIndex++;
+	}
+
+	sendRequest(ADS_GET_APP_SIGNAL_STATE, m_getSignalStateRequest);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void GrpcSignalSocket::replySignalState(const char* replyData, quint32 replyDataSize)
+{
+	if (replyData == nullptr)
+	{
+		assert(replyData);
+		requestSignalState();
+		return;
+	}
+
+	bool result = m_getSignalStateReply.ParseFromArray(replyData, static_cast<int>(replyDataSize));
+	if (result == false)
+	{
+		qDebug() << "SignalSocket::replySignalState - error: ParseFromArray";
+		assert(result);
+		requestSignalState();
+		return;
+	}
+
+	if (m_getSignalStateReply.error() != 0)
+	{
+		qDebug() << "SignalSocket::replySignalState - error: " << m_getSignalStateReply.error();
+		assert(m_getSignalStateReply.error() != 0);
+		requestSignalState();
+		return;
+	}
+
+	for (int i = 0; i < m_getSignalStateReply.appsignalstates_size(); i++)
+	{
+		Hash hash = m_getSignalStateReply.appsignalstates(i).hash();
+		if (hash == UNDEFINED_HASH)
+		{
+			assert(hash != UNDEFINED_HASH);
+			continue;
+		}
+
+		AppSignalState appState;
+		appState.load(m_getSignalStateReply.appsignalstates(i));
+
+		//appState.m_flags.valid = 1;
+		//appState.m_value = 2.5;
+
+		Metrology::SignalState state(appState);
+		theSignalBase.setSignalState(hash, state);
+	}
+
+	requestSignalState();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void GrpcSignalSocket::configurationLoaded()
+{
+	HostAddressPort addr1 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
+	HostAddressPort addr2 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
+
+	HostAddressPort currAddr1 = serverAddressPort(OT::ServerPriority::Primary);
+	HostAddressPort currAddr2 = serverAddressPort(OT::ServerPriority::Reserve);
+
+	if (	addr1.address32() == currAddr1.address32() && addr1.port() == currAddr1.port() &&
+			addr2.address32() == currAddr2.address32() && addr2.port() == currAddr2.port())
+	{
+		return;
+	}
+
+	setServers(addr1, addr2, true);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+*/

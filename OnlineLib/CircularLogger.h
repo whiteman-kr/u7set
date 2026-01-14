@@ -2,7 +2,9 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QStringList>
 #include <optional>
+#include <iostream>
 
 #include "../UtilsLib/ILogFile.h"
 #include "../UtilsLib/SimpleThread.h"
@@ -17,13 +19,13 @@ class CircularLoggerWorker : public SimpleThreadWorker
 {
 	Q_OBJECT
 public:
-	CircularLoggerWorker(QString logPath, QString logName, int fileCount, int fileSizeInMB);
+	CircularLoggerWorker(const QString& logPath, const QString& logName, int fileCount, int fileSizeInMB);
 	~CircularLoggerWorker() override;
 
 	static bool writeFileCheck(const QString& logPath, const QString& logName);
 
 public slots:
-	void writeRecord(const QString record);
+	void writeRecord(const QString& record);
 
 private:
 	virtual void onThreadStarted() override;
@@ -36,6 +38,7 @@ private:
 	QString fileName(int index);
 	void openFile(int index);
 	void clearFileStream();
+	void flushBuffer();
 
 private:
 	QString m_fileName;
@@ -46,16 +49,25 @@ private:
 	QString m_logName;
 	QString m_path;
 
-	const int MAX_LOG_FILE_COUNT = 10;
-	const int MAX_LOG_FILE_SIZE = 50;		// in megabytes
+	static constexpr int MAX_LOG_FILE_COUNT = 10;
+	static constexpr int MAX_LOG_FILE_INDEX = 999;
+	static constexpr int MAX_LOG_FILE_SIZE = 50;		// in megabytes
+	static constexpr int MAX_BUFFER_LINES = 500;
+	static constexpr int MAX_BUFFER_CHARS = 64 * 1024;
+	static constexpr int FILE_GROWING_CHECK_SIZE = 10 * 1024;
+	static constexpr int FLUSH_INTERVAL_MS = 500;
 
 	int m_fileCount = 0;
-	int m_fileSizeLimit = 0;				// in megabytes
+	int m_fileSizeLimit = 0;							// in megabytes
 
 	int m_firstFileNumber = -1;
 	int m_lastFileNumber = -1;
 	qint64 m_firstFileID = -1;
 	qint64 m_lastFileID = -1;
+
+	QTimer* m_flushTimer = nullptr;
+	QStringList m_buffer;
+	int m_bufferChars = 0;
 };
 
 
@@ -92,7 +104,7 @@ public:
 	void setLogCodeInfo(bool logCodeInfo);
 
 signals:
-	void writeRecord(const QString record);
+	void writeRecord(const QString& record);
 
 public:
 	void writeError(const QString& message, const char* function, const char* file, int line, bool debugEcho);
@@ -146,3 +158,20 @@ void circularLoggerWriteMessage(std::shared_ptr<CircularLogger> logger, const QS
 #define LOGGER_INIT(logger, logName, instanceID)	circularLoggerInit(logger, logName, instanceID, 10, 10);
 
 #define LOGGER_SHUTDOWN(logger)		circularLoggerShutdown(logger);
+
+class LogWrapper
+{
+public:
+	LogWrapper(CircularLoggerShared log);
+
+	CircularLoggerShared getLog() const;
+	void setLog(CircularLoggerShared log);
+
+	void logMsg(const QString& msg) const;
+	void logWrn(const QString& wrn) const;
+	void logErr(const QString& err) const;
+
+private:
+	mutable CircularLoggerShared m_log;
+};
+

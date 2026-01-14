@@ -1002,8 +1002,6 @@ namespace Builder
 		//
 		LmMemoryMap m_memoryMap;
 
-//		HashedVector<QString, Module> m_modules;		// modules installed in chassis, module EquipmentID => Module
-
 		std::map<int, Module> m_modules;				// modules installed in chassis, module place => Module
 
 		//

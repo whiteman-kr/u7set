@@ -112,7 +112,8 @@ void ArchivingService::initialize()
 {
 	// Service Main Function initialization
 	//
-	runCfgLoaderThread();
+	//runCfgLoaderThread();
+	runGrpcCfgLoaderThread();
 	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized")));
 }
 
@@ -121,41 +122,8 @@ void ArchivingService::shutdown()
 	// Service Main Function deinitialization
 	//
 	stopAllThreads();
-	stopCfgLoaderThread();
-}
-
-void ArchivingService::runCfgLoaderThread()
-{
-	// m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
-
-	// connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ArchivingService::onConfigurationReady);
-
-	// m_cfgLoaderThread->start();
-	// m_cfgLoaderThread->enableDownloadConfiguration();
-
-	assert(m_grpcCfgLoaderThread == nullptr);			// once should be runned
-
-	HostAddressPort ip1 = cfgServiceIP1();
-	HostAddressPort ip2 = cfgServiceIP2();
-
-	ip1.setPort(PORT_CONFIGURATION_GRPC_SERVICE_CLIENT_REQUEST);
-	ip2.setPort(PORT_CONFIGURATION_GRPC_SERVICE_CLIENT_REQUEST);
-
-	m_grpcCfgLoaderThread = new GrpcCfgLoaderThread(softwareInfo(), 1, ip1, ip2, false, logger());
-
-	connect(m_grpcCfgLoaderThread, &GrpcCfgLoaderThread::signal_configurationReady, this, &ArchivingService::onConfigurationReady);
-
-	m_grpcCfgLoaderThread->start();
-}
-
-void ArchivingService::stopCfgLoaderThread()
-{
-	if (m_cfgLoaderThread != nullptr)
-	{
-		m_cfgLoaderThread->quitAndWait();
-
-		delete m_cfgLoaderThread;
-	}
+	//stopCfgLoaderThread();
+	stopGrpcCfgLoaderThread();
 }
 
 void ArchivingService::startAllThreads()
@@ -328,7 +296,7 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 {
 	setSessionParams(sessionParams);
 
-	TEST_PTR_RETURN(m_cfgLoaderThread);
+	TEST_PTR_RETURN(m_grpcCfgLoaderThread);
 
 	const ArchivingServiceSettings* typedSettingsPtr = dynamic_cast<const ArchivingServiceSettings*>(curSettingsProfile.get());
 
@@ -362,7 +330,7 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 		QByteArray fileData;
 		QString errStr;
 
-		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+		m_grpcCfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
 
 		if (errStr.isEmpty() == false)
 		{
@@ -390,7 +358,7 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 
 	stopAllThreads();
 
-	m_buildInfo = m_cfgLoaderThread->buildInfo();
+//	m_buildInfo = m_grpcCfgLoaderThread->buildInfo();
 	m_serviceSettings = newServiceSettings;
 
 	startAllThreads();

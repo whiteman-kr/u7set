@@ -2,7 +2,6 @@
 
 #include <ServiceLib/Service.h>
 
-#include "../OnlineLib/CfgLoader.h"
 #include "../OnlineLib/GrpcCfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
@@ -107,14 +106,6 @@ private:
 
 	//
 
-	void runCfgLoaderThread();
-	void stopCfgLoaderThread();
-
-	void onConfigurationReady(const QByteArray configurationXmlData,
-							  const BuildFileInfoArray buildFileInfoArray,
-							  SessionParams sessionParams,
-							  std::shared_ptr<const SoftwareSettings> currentSettingsProfile);
-
 	bool readAppDataSources(const QByteArray& fileData, const QString& profile);
 	bool readAppSignals(const QByteArray& fileData);
 
@@ -155,10 +146,13 @@ private:
 
 	void copyArchSignalsInfo(Network::ServiceInfo& serviceInfo) const;
 
-private:
-	CfgLoaderThread* m_cfgLoaderThread = nullptr;
-	GrpcCfgLoaderThread* m_grpcCfgLoaderThread = nullptr;
+private slots:
+	virtual void onConfigurationReady(const QByteArray configurationXmlData,
+									  const BuildFileInfoArray buildFileInfoArray,
+									  SessionParams sessionParams,
+									  std::shared_ptr<const SoftwareSettings> currentSettingsProfile) override;
 
+private:
 	AppDataServiceSettings m_curSettingsProfile;
 
 	int m_appDataProcessingThreadCount = 0;

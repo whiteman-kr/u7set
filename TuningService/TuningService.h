@@ -2,7 +2,6 @@
 
 #include <ServiceLib/Service.h>
 #include "../OnlineLib/SoftwareSettings.h"
-#include "../OnlineLib/CfgLoader.h"
 #include "TuningSource.h"
 #include "TcpTuningServer.h"
 #include "TuningSourceThread.h"
@@ -81,9 +80,6 @@ namespace Tuning
 		virtual void initialize() override;
 		virtual void shutdown() override;
 
-		void runCfgLoaderThread();
-		void stopCfgLoaderThread();
-
 		void clearConfiguration();
 		void applyNewConfiguration(const TuningSources& newSources);
 
@@ -117,10 +113,10 @@ namespace Tuning
 		bool isSourceHandlerExistsForChannel(int channel) const;
 
 	private slots:
-		void onConfigurationReady(const QByteArray configurationXmlData,
+		virtual void onConfigurationReady(const QByteArray configurationXmlData,
 								  const BuildFileInfoArray buildFileInfoArray,
 								  SessionParams sessionParams,
-								  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
+								  std::shared_ptr<const SoftwareSettings> curSettingsProfile) override;
 	private:
 		CircularLoggerShared m_tuningLog;
 		CircularLoggerShared m_tuningPacketLog;
@@ -135,8 +131,6 @@ namespace Tuning
 		std::set<std::pair<QString, QString>> m_controlledLans;			// pair: <LM EquipmentID, LAN EquipmentID>
 
 		mutable QMutex m_startStopMutex;
-
-		CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
 		TcpTuningServerThread* m_tcpTuningServerThread = nullptr;
 

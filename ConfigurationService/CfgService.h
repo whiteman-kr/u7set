@@ -56,7 +56,7 @@ private:
 
 private:
 	UdpSocketThread* m_infoSocketThread = nullptr;
-	Tcp::ListenerThread* m_cfgServerThread = nullptr;
+//	Tcp::ListenerThread* m_cfgServerThread = nullptr;
 
 	using GrpcCfgServerUPtr = std::unique_ptr<GrpcCfgServer>;
 

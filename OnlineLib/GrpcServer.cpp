@@ -15,9 +15,9 @@ GrpcServer::GrpcServer(const SoftwareInfo& serverSwInfo,
 						bool checkHostName,
 						const HostAddressPort& listenIP,
 						CircularLoggerShared log) :
+	LogWrapper(log),
 	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
-	m_listenIP(listenIP),
-	m_log(log)
+	m_listenIP(listenIP)
 {
 }
 
@@ -52,7 +52,7 @@ void GrpcServer::start()
 				{
 					if (m_stopRequested.load(std::memory_order_relaxed))
 					{
-						DEBUG_LOG_MSG(m_log, QString("%1 stopRequested!").arg(serviceName()));
+						logMsg(QString("%1 stopRequested!").arg(serviceName()));
 						return;
 					}
 
@@ -77,7 +77,7 @@ void GrpcServer::start()
 #endif
 					if (m_server == nullptr)
 					{
-						DEBUG_LOG_ERR(m_log, QString("%1 (%2) NOT started!").arg(serviceName()).arg(m_listenIP.addressPortStr()));
+						logErr(QString("%1 (%2) NOT started!").arg(serviceName()).arg(m_listenIP.addressPortStr()));
 						std::this_thread::sleep_for(std::chrono::seconds(3));
 						continue;
 					}
@@ -92,7 +92,7 @@ void GrpcServer::start()
 						continue;
 					}
 
-					DEBUG_LOG_MSG(m_log, QString("%1 started. Listening address: %2").arg(serviceName()).arg(m_listenIP.addressPortStr()));
+					logMsg(QString("%1 started. Listening address: %2").arg(serviceName()).arg(m_listenIP.addressPortStr()));
 					break;
 				}
 
@@ -102,22 +102,22 @@ void GrpcServer::start()
 				::VLDDisable();
 #endif
 
-				DEBUG_LOG_MSG(m_log, QString("%1 in Wait state").arg(serviceName()));
+				logMsg(QString("%1 in Wait state").arg(serviceName()));
 				m_server->Wait();		// unblocked by m_server->Shutdown in destructor
 
 #ifdef VLD_IS_INCLUDED
 				::VLDEnable();
 #endif
 				m_binded.store(false, std::memory_order_relaxed);
-				DEBUG_LOG_MSG(m_log, QString("%1 finished.").arg(serviceName()));
+				logMsg(QString("%1 finished.").arg(serviceName()));
 			}
 			catch (std::exception& e)
 			{
-				DEBUG_LOG_ERR(m_log, QString("%1 thread exception: %2").arg(serviceName()).arg(QString{e.what()}));
+				logErr(QString("%1 thread exception: %2").arg(serviceName()).arg(QString{e.what()}));
 			}
 			catch (...)
 			{
-				DEBUG_LOG_ERR(m_log, QString("%1 thread unknown exception").arg(serviceName()));
+				logErr(QString("%1 thread unknown exception").arg(serviceName()));
 			}
 		}
 	};
@@ -154,6 +154,11 @@ void GrpcServer::stop()
 	}
 
 	m_running.store(false, std::memory_order::relaxed);
+}
+
+HostAddressPort GrpcServer::listenIP() const
+{
+	return m_listenIP;
 }
 
 void GrpcServer::setSessionTimeout(int seconds)

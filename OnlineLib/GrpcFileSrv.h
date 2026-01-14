@@ -99,7 +99,7 @@ struct FileReady
 //
 // -------------------------------------------------------------------------------------
 
-class GrpcFileClient : public QObject, public GrpcFileBase
+class GrpcFileClient : public QObject, public GrpcFileBase, public LogWrapper
 {
 	Q_OBJECT
 
@@ -136,9 +136,12 @@ public:
 
 	void setEmitFileReady(bool enable);				// if TRUE - signal_fileReady emitted
 													// if FALSE - use waitFileReady or downloadFileBlocked
+	HostAddressPort getServerAddr() const;
+	Tcp::ConnectionState getConnectionState() const;
+
 signals:
-	void signal_unknownClientID();
-	void signal_wrongClientHostname();
+	void signal_unknownClientID(QString errMsg);
+	void signal_wrongClientHostname(QString errMsg);
 	void signal_setConnection();
 	void signal_noConnection();
 	void signal_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params);
@@ -160,9 +163,8 @@ private:
 					   QByteArray& fileData, QString& md5);	// not const - OK!
 
 private:
-	SoftwareInfo m_swInfo;
+	SoftwareInfo m_localSwInfo;
 	std::vector<HostAddressPort> m_serverAddress;
-	CircularLoggerShared m_log;
 
 	int m_srvAddrIndex = -1;			// !
 
@@ -182,6 +184,10 @@ private:
 
 	std::unique_ptr<Grpc::FileSrv::Stub> m_stub;
 	std::string m_authToken;
+	HostAddressPort m_serverAddr;
 
 	inline static const QString SESSION_PARAMS_REQUEST = QStringLiteral("*SESSION_PARAMS_REQUEST*");
+
+	mutable std::mutex m_stateMutex;
+	Tcp::ConnectionState m_state;
 };

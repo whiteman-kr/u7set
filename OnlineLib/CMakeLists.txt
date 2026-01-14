@@ -17,8 +17,8 @@ qt_add_library(${TARGET} STATIC
 	ApertureRecord.h
 	BuildInfo.cpp
 	BuildInfo.h
-	CfgLoader.cpp
-	CfgLoader.h
+#	CfgLoader.cpp
+#	CfgLoader.h
 	CircularLogger.cpp
 	CircularLogger.h
 	DataSource.cpp

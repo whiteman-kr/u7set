@@ -18,10 +18,10 @@
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "../OnlineLib/CircularLogger.h"
 
-class DiscretesLog
+class DiscretesLog : public LogWrapper
 {
 public:
-	DiscretesLog(bool isWriter);
+	DiscretesLog(bool isWriter, CircularLoggerShared log);
 	virtual ~DiscretesLog();
 
 	static bool readDiscretesLogRecord(const QSqlQuery& q, DiscretesLogRecord& r);
@@ -43,7 +43,6 @@ protected:
 
 protected:
 	bool m_isWriter = false;
-	CircularLoggerShared m_log;
 
 	QSqlDatabase m_db;
 	bool m_dbIsWorkable = false;

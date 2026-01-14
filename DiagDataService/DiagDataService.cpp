@@ -70,7 +70,7 @@ void DiagDataServiceWorker::initialize()
 {
 	DEBUG_LOG_MSG(logger(), "DiagDataServiceWorker is started");
 
-	runCfgLoaderThread();
+	runGrpcCfgLoaderThread();
 }
 
 void DiagDataServiceWorker::shutdown()
@@ -78,124 +78,9 @@ void DiagDataServiceWorker::shutdown()
 	clearConfiguration();
 
 	stopTcpDiagDataServer();
-	stopCfgLoaderThread();
+	stopGrpcCfgLoaderThread();
 
 	DEBUG_LOG_MSG(logger(), "DiagDataServiceWorker finished");
-}
-
-void DiagDataServiceWorker::runCfgLoaderThread()
-{
-	assert(m_cfgLoaderThread == nullptr);			// once should be runned
-
-	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &DiagDataServiceWorker::onConfigurationReady);
-
-	m_cfgLoaderThread->start();
-
-	m_cfgLoaderThread->enableDownloadConfiguration();
-}
-
-void DiagDataServiceWorker::stopCfgLoaderThread()
-{
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
-	m_cfgLoaderThread->quitAndWait();
-
-	delete m_cfgLoaderThread;
-
-	m_cfgLoaderThread = nullptr;
-}
-
-void DiagDataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
-												const BuildFileInfoArray buildFileInfoArray,
-												SessionParams sessionParams,
-												std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
-{
-	setSessionParams(sessionParams);
-
-	DEBUG_LOG_MSG(logger(), "Configuration is ready");
-
-	DEBUG_LOG_MSG(logger(), "");
-
-	DEBUG_LOG_MSG(logger(), "Settings profile: " + currentSettingsProfile->profile);
-
-	DEBUG_LOG_MSG(logger(), "");
-
-	// stop all threads and free all allocated resources
-	//
-	clearConfiguration();
-
-	const DiagDataServiceSettings* typedSettingsPtr = dynamic_cast<const DiagDataServiceSettings*>(currentSettingsProfile.get());
-
-	if (typedSettingsPtr == nullptr)
-	{
-		DEBUG_LOG_MSG(logger(), "Settings casting error!");
-		return;
-	}
-
-	// making modificable local copy of settings
-	//
-	m_curSettingsProfile = *typedSettingsPtr;
-
-	// replace some cfg settings by command line arguments
-	//
-	if (m_strCmdLineDiagDataReceivingIP.isEmpty() == false)
-	{
-		m_curSettingsProfile.diagDataReceivingIP = m_cmdLineDiagDataReceivingIP;
-	}
-
-	bool result = true;
-
-	for(const OnlineLib::BuildFileInfo& bfi : buildFileInfoArray)
-	{
-		QByteArray fileData;
-		QString errStr;
-
-		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
-
-		if (errStr.isEmpty() == false)
-		{
-			qDebug() << errStr;
-			result = false;
-			continue;
-		}
-
-		result = true;
-
-		if (bfi.ID == CfgFileId::DIAG_DATA_SOURCES)
-		{
-			result &= readDiagDataSources(fileData, sessionParams.currentSettingsProfile);
-		}
-
-		if (bfi.ID == CfgFileId::ACQUIRED_DIAG_SIGNALS)
-		{
-			result &= readDiagSignalsAndObjects(fileData);
-		}
-
-		if (bfi.ID == CfgFileId::DIAG_SIGNAL_TYPES)
-		{
-			result &= readDiagSignalTypes(fileData);			// fills m_diagSignalTypes
-		}
-
-		if (result == true)
-		{
-			qDebug() << "Read file " << bfi.pathFileName << " OK";
-		}
-		else
-		{
-			qDebug() << "Read file " << bfi.pathFileName << " ERROR";
-			break;
-		}
-	}
-
-	if (result == true)
-	{
-		applyNewConfiguration();
-	}
 }
 
 bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, const QString& profile)
@@ -386,7 +271,90 @@ void DiagDataServiceWorker::stopTcpDiagDataServer()
 //	}
 }
 
+void DiagDataServiceWorker::onConfigurationReady(const QByteArray configurationXmlData,
+	const BuildFileInfoArray buildFileInfoArray,
+	SessionParams sessionParams,
+	std::shared_ptr<const SoftwareSettings> currentSettingsProfile)
+{
+	setSessionParams(sessionParams);
 
+	DEBUG_LOG_MSG(logger(), "Configuration is ready");
 
+	DEBUG_LOG_MSG(logger(), "");
 
+	DEBUG_LOG_MSG(logger(), "Settings profile: " + currentSettingsProfile->profile);
 
+	DEBUG_LOG_MSG(logger(), "");
+
+	// stop all threads and free all allocated resources
+	//
+	clearConfiguration();
+
+	const DiagDataServiceSettings* typedSettingsPtr = dynamic_cast<const DiagDataServiceSettings*>(currentSettingsProfile.get());
+
+	if (typedSettingsPtr == nullptr)
+	{
+		DEBUG_LOG_MSG(logger(), "Settings casting error!");
+		return;
+	}
+
+	// making modificable local copy of settings
+	//
+	m_curSettingsProfile = *typedSettingsPtr;
+
+	// replace some cfg settings by command line arguments
+	//
+	if (m_strCmdLineDiagDataReceivingIP.isEmpty() == false)
+	{
+		m_curSettingsProfile.diagDataReceivingIP = m_cmdLineDiagDataReceivingIP;
+	}
+
+	bool result = true;
+
+	for(const OnlineLib::BuildFileInfo& bfi : buildFileInfoArray)
+	{
+		QByteArray fileData;
+		QString errStr;
+
+		m_grpcCfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+
+		if (errStr.isEmpty() == false)
+		{
+			qDebug() << errStr;
+			result = false;
+			continue;
+		}
+
+		result = true;
+
+		if (bfi.ID == CfgFileId::DIAG_DATA_SOURCES)
+		{
+			result &= readDiagDataSources(fileData, sessionParams.currentSettingsProfile);
+		}
+
+		if (bfi.ID == CfgFileId::ACQUIRED_DIAG_SIGNALS)
+		{
+			result &= readDiagSignalsAndObjects(fileData);
+		}
+
+		if (bfi.ID == CfgFileId::DIAG_SIGNAL_TYPES)
+		{
+			result &= readDiagSignalTypes(fileData);			// fills m_diagSignalTypes
+		}
+
+		if (result == true)
+		{
+			qDebug() << "Read file " << bfi.pathFileName << " OK";
+		}
+		else
+		{
+			qDebug() << "Read file " << bfi.pathFileName << " ERROR";
+			break;
+		}
+	}
+
+	if (result == true)
+	{
+		applyNewConfiguration();
+	}
+}

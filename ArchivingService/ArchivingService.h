@@ -1,7 +1,6 @@
 #pragma once
 
 #include <ServiceLib/Service.h>
-#include "../OnlineLib/CfgLoader.h"
 #include "../OnlineLib/GrpcCfgLoader.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
@@ -34,9 +33,6 @@ private:
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
-	void runCfgLoaderThread();
-	void stopCfgLoaderThread();
-
 	void startAllThreads();
 	void stopAllThreads();
 
@@ -54,10 +50,10 @@ private:
 	void logFileLoadResult(bool loadOk, const QString& fileName);
 
 private slots:
-	void onConfigurationReady(const QByteArray configurationXmlData,
+	virtual void onConfigurationReady(const QByteArray configurationXmlData,
 							  const BuildFileInfoArray buildFileInfoArray,
 							  SessionParams sessionParams,
-							  std::shared_ptr<const SoftwareSettings> curSettingsProfile);
+							  std::shared_ptr<const SoftwareSettings> curSettingsProfile) override;
 private:
 	QString m_overwriteArchiveLocation;
 	int m_minQueueSizeForFlushing = 0;
@@ -67,9 +63,6 @@ private:
 	QByteArray m_archInfoFileData;
 
 	mutable QMutex m_startStopMutex;
-
-	CfgLoaderThread* m_cfgLoaderThread = nullptr;
-	GrpcCfgLoaderThread* m_grpcCfgLoaderThread = nullptr;
 
 	Tcp::ListenerThread* m_tcpAppDataServerThread = nullptr;
 	Tcp::ListenerThread* m_tcpArchRequestsServerThread = nullptr;

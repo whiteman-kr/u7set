@@ -14,7 +14,7 @@
 #include "../OnlineLib/CircularLogger.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
-class GrpcServer
+class GrpcServer : public LogWrapper
 {
 public:
 	explicit GrpcServer(const SoftwareInfo& serverSwInfo,
@@ -34,6 +34,8 @@ public:
 	void start();
 	void stop();
 
+	HostAddressPort listenIP() const;
+
 	void setSessionTimeout(int seconds);
 	bool isBinded() const;
 	bool isRunning() const;
@@ -44,7 +46,6 @@ protected:
 
 protected:
 	HostAddressPort m_listenIP;
-	CircularLoggerShared m_log;
 
 	std::unique_ptr<grpc::Server> m_server;
 	std::atomic_bool m_stopRequested {false};
@@ -66,13 +67,22 @@ bool WriteReplyFunc(grpc::ServerContext* context, grpc::ServerWriter<REPLY_TYPE>
 	if (context->IsCancelled())
 	{
 		wrStatus = grpc::Status::CANCELLED;
-		DEBUG_LOG_MSG(log, QString("writeReplyFunc<%1>: context CANCELLED").arg(QString::fromStdString(reply.GetTypeName())));
+
+		if (log != nullptr)
+		{
+			DEBUG_LOG_MSG(log, QString("writeReplyFunc<%1>: context CANCELLED").arg(QString::fromStdString(reply.GetTypeName())));
+		}
+
 		return false;
 	}
 
 	if (writer->Write(reply) == false)
 	{
-		DEBUG_LOG_MSG(log, QString("writeReplyFunc<%1>: writer->Write returns FALSE").arg(QString::fromStdString(reply.GetTypeName())));
+		if (log != nullptr)
+		{
+			DEBUG_LOG_MSG(log, QString("writeReplyFunc<%1>: writer->Write returns FALSE").arg(QString::fromStdString(reply.GetTypeName())));
+		}
+
 		return false;
 	}
 

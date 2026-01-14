@@ -25,7 +25,7 @@ public:
 	const OnlineLib::BuildInfo& buildInfo() const;
 
 private:
-	void readBuildXml(const QString& buildFolder);
+	void readBuildXml();
 
 	bool checkFile(const QString& pathFileName, const QByteArray& fileData, QString& md5) const override;
 	virtual void getSessionParams(Network::SessionParams* params) const override;
