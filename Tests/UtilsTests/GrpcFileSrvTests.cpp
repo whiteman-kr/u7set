@@ -99,15 +99,9 @@ TEST(GrpcFileSrvTest, GetFile_ShortFile)
 	EXPECT_EQ(reply.currentpart(), 1);
 	EXPECT_EQ(reply.totalparts(), 1);
 
-	QCryptographicHash md5Gen(QCryptographicHash::Md5);
+	QString md5 = Md5Hash::hashStr(QByteArray(reply.filedata().data(), reply.filedata().size()));
 
-	md5Gen.addData(QByteArrayView(reply.filedata().data(), reply.filedata().size()));
-
-	QByteArray md5 = md5Gen.result();
-
-	QByteArray recvMd5;
-
-	recvMd5.append(reply.md5().data(), reply.md5().size());
+	QString recvMd5 = QString::fromStdString(reply.md5());
 
 	EXPECT_EQ(md5, recvMd5);
 
@@ -171,15 +165,9 @@ TEST(GrpcFileSrvTest, GetFile_LongFile)
 
 		EXPECT_EQ(reply.filesize(), fileData.size());
 
-		QCryptographicHash md5Gen(QCryptographicHash::Md5);
+		QString md5 = Md5Hash::hashStr(fileData);
 
-		md5Gen.addData(QByteArrayView(fileData.constData(), fileData.size()));
-
-		QByteArray md5 = md5Gen.result();
-
-		QByteArray recvMd5;
-
-		recvMd5.append(reply.md5().data(), reply.md5().size());
+		QString recvMd5 = QString::fromStdString(reply.md5());
 
 		EXPECT_EQ(md5, recvMd5);
 
@@ -269,7 +257,7 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 
 	EXPECT_EQ(fileData.size(), fr.fileData.size());
 
-	QByteArray md5 = Md5Hash::hash(fileData);
+	QString md5 = Md5Hash::hashStr(fileData);
 
 	EXPECT_EQ(md5, fr.md5);
 
@@ -316,7 +304,7 @@ TEST(GrpcFileClientTest, GetFile_LongFile)
 
 	EXPECT_EQ(fileData.size(), fr.fileData.size());
 
-	QByteArray md5 = Md5Hash::hash(fileData);
+	QString md5 = Md5Hash::hashStr(fileData);
 
 	EXPECT_EQ(md5, fr.md5);
 
