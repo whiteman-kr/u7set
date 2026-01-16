@@ -1,9 +1,9 @@
 ﻿# Radiy Gateway Protocol Specification
 
-**Document Version:**  0.1  
+**Document Version:** 0.2  
 **Protocol Version:** 1.0  
-**Date:** 12/2025  
-**Authors:** Radiy Technical Team  
+**Date:** 01/2026  
+**Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Draft
 
 ---
@@ -115,10 +115,14 @@ All messages (requests and responses) follow this binary structure:
 - **Floating-point format:** IEEE 754
 
 ### 3.4 CRC32 Calculation
-- **Algorithm:** CRC-32 (IEEE 802.3 polynomial: 0x04C11DB7)
-- **Calculation Range:** From Request ID through end of Payload
+- **Algorithm:** CRC-32 (IEEE 802.3 polynomial: 0x04C11DB7, reflected: 0xEDB88320)
+- **Input reflection**: yes (process least-significant bit first; equivalent to reflecting each byte)
+- **Output reflection**: yes (falls out of reflected processing)
 - **Initial Value:** 0xFFFFFFFF
 - **Final XOR:** 0xFFFFFFFF
+- **Calculation Range:** From Request ID through end of Payload
+
+For reference implementation, see **Appendix B**.
 
 ### 3.5 Error Response Structure
 When Status Code is non-zero (error condition):
@@ -127,8 +131,8 @@ When Status Code is non-zero (error condition):
 - No additional error message or data is transmitted
 
 **Special Cases:**
-- **Unknown Request ID:** Server responds with the unknown Request ID and Status Code = `INVALID_REQUEST` (1)
-- **CRC Failure:** Server may respond with Request ID 0x0000 and Status Code = `CRC_ERROR` (10), or close the connection
+- **Unknown Request ID:** Server responds with the unknown Request ID and Status Code = `GWC_INVALID_REQUEST` (1)
+- **CRC Failure:** Server may respond with Request ID 0x0000 and Status Code = `GWC_CRC_ERROR` (10), or close the connection
 
 ---
 
@@ -212,9 +216,11 @@ inline constexpr Hash UNDEFINED_HASH = 0x0000000000000000ULL;
 
 ## 6. Request/Response Specifications
 
-**AppDataService Connection Dependency:**
+**Request Prerequisites:**
+- All requests **except** `ARGW_HANDSHAKE` require that a successful handshake has been completed.
+- If the client has not completed the handshake, the server will respond with Status Code = `GWC_HANDSHAKE_REQUIRED` (5) and no payload.
 - All requests **except** `ARGW_HANDSHAKE` require the Gateway to be connected to AppDataService.
-- If the Gateway is not connected to AppDataService, the server may respond with Status Code = `NO_ADS_CONNECTION` (3) and no payload.
+- If the Gateway is not connected to AppDataService, the server may respond with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
 
 ### 6.1 ARGW_HANDSHAKE
 
@@ -226,7 +232,7 @@ Initial connection handshake to establish protocol version and capabilities.
 - Client specifies the protocol version it supports in the request
 - Server compares client version with its own implemented version:
   - **Match:** Server responds with Status Code = 0 and handshake succeeds
-  - **Mismatch:** Server responds with Status Code = `UNSUPPORTED_VERSION` (2) and connection should be closed
+  - **Mismatch:** Server responds with Status Code = `GWC_UNSUPPORTED_VERSION` (2) and connection should be closed
 - **No version negotiation or downgrading** - client and server must use identical protocol versions
 - Server and client are **incompatible** if protocol versions differ
 
@@ -289,7 +295,7 @@ Total size: 16 bytes
 - Client can compare `sizeof_GwAppSignalParam` and `sizeof_GwAppSignalState` against its locally compiled `sizeof(GwAppSignalParam)` and `sizeof(GwAppSignalState)`.
 - A mismatch indicates protocol incompatibility (likely packing/alignment or definition mismatch) and the client should reject the connection.
 - If client version == server version: Status Code = 0, handshake response with matching version
-- If client version ≠ server version: Status Code = 2 (`UNSUPPORTED_VERSION`), no payload
+- If client version ≠ server version: Status Code = 2 (`GWC_UNSUPPORTED_VERSION`), no payload
 
 ---
 
@@ -537,7 +543,7 @@ Total size: `4 + (signalCount * 8)` bytes
 
 **Request Behavior:**
 - Client specifies an array of signal hashes to request
-- **Maximum number of signals per request**: The `signalCount` must not exceed the `maxStateRequest` value received in the `GwHandshakeResponse` (Section 6.1). Requests exceeding this limit will result in error code `TOO_MANY_SIGNALS` (4).
+- **Maximum number of signals per request**: The `signalCount` must not exceed the `maxStateRequest` value received in the `GwHandshakeResponse` (Section 6.1). Requests exceeding this limit will result in error code `GWC_TOO_MANY_SIGNALS` (4).
 - **Missing signals**: If a requested signal hash is not found in the system, no error is reported. The signal is simply skipped in the response.
 
 #### Response Payload
@@ -817,13 +823,14 @@ Error responses are identified by a non-zero Status Code in the message header (
 
 | Code | Name | Description |
 |------|------|-------------|
-| 0 | SUCCESS | Operation successful |
-| 1 | INVALID_REQUEST | Request format is invalid |
-| 2 | UNSUPPORTED_VERSION | Protocol version not supported |
-| 3 | NO_ADS_CONNECTION | Gateway not connected to AppDataService |
-| 4 | TOO_MANY_SIGNALS | Request exceeds max signals limit |
-| 7 | INTERNAL_ERROR | Internal server error |
-| 10 | CRC_ERROR | CRC checksum verification failed |
+| 0 | GWC_SUCCESS | Operation successful |
+| 1 | GWC_INVALID_REQUEST | Request format is invalid |
+| 2 | GWC_UNSUPPORTED_VERSION | Protocol version not supported |
+| 3 | GWC_NO_ADS_CONNECTION | Gateway not connected to AppDataService |
+| 4 | GWC_TOO_MANY_SIGNALS | Request exceeds max signals limit |
+| 5 | GWC_HANDSHAKE_REQUIRED | Handshake must be completed before this request |
+| 7 | GWC_INTERNAL_ERROR | Internal server error |
+| 10 | GWC_CRC_ERROR | CRC checksum verification failed |
 
 ---
 
@@ -871,9 +878,157 @@ flowchart TD
 
 ---
 
+### Appendix B: CRC32 Reference Implementation
+
+**CRC32 Reference Implementation:**
+
+```cpp
+// GwCrc32.h
+//
+#pragma once
+
+#include <span>
+#include <cstdint>
+
+/*
+    Name              : CRC-32
+    Poly              : 0x04C11DB7 (reflected: 0xEDB88320)
+    Input reflection  : yes
+    Output reflection : yes
+    Init              : 0xFFFFFFFF
+    XorOut            : 0xFFFFFFFF
+    Check             : 0xCBF43926 ("123456789")
+*/
+
+namespace Gateway
+{
+    constexpr uint32_t Crc32Residue = 0x2144DF1C;   // Expected residue when appending CRC to data
+
+    /**
+     * Calculates the CRC-32 checksum for the given data.
+     *
+     * @param data Input data as a span of bytes.
+     * @return The computed CRC-32 checksum.
+     */
+    uint32_t CRC32(std::span<const std::byte> data);
+
+    /**
+     * Convenience overload for char data (text/strings).
+     *
+     * @param data Input data as a span of char.
+     * @return The computed CRC-32 checksum.
+     */
+    uint32_t CRC32(std::span<const char> data);
+
+    /**
+     * C-style interface with pointer and size.
+     *
+     * @param data Pointer to the input data buffer.
+     * @param length Length of the input data buffer in bytes.
+     * @return The computed CRC-32 checksum.
+     */
+    uint32_t CRC32(const char* data, size_t length);
+} // namespace Gateway
+```
+
+```cpp
+// GwCrc32.cpp
+//
+#include "GwCrc32.hpp"
+
+#include <array>
+
+namespace
+{
+    constexpr uint32_t Crc32Init = 0xFFFFFFFF;      // Initial CRC value
+    constexpr uint32_t Crc32FinalXor = 0xFFFFFFFF;  // Final XOR value
+
+    // Pre-computed CRC-32 lookup table for polynomial 0xEDB88320 (reflected)
+    //
+    constexpr std::array<uint32_t, 256> Crc32Table =
+    {
+        0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
+        0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988, 0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91,
+        0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7,
+        0x136C9856, 0x646BA8C0, 0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9, 0xFA0F3D63, 0x8D080DF5,
+        0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172, 0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B,
+        0x35B5A8FA, 0x42B2986C, 0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59,
+        0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423, 0xCFBA9599, 0xB8BDA50F,
+        0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924, 0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D,
+        0x76DC4190, 0x01DB7106, 0x98D220BC, 0xEFD5102A, 0x71B18589, 0x06B6B51F, 0x9FBFE4A5, 0xE8B8D433,
+        0x7807C9A2, 0x0F00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB, 0x086D3D2D, 0x91646C97, 0xE6635C01,
+        0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E, 0x6C0695ED, 0x1B01A57B, 0x8208F4C1, 0xF50FC457,
+        0x65B0D9C6, 0x12B7E950, 0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65,
+        0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 0x3DD895D7, 0xA4D1C46D, 0xD3D6F4FB,
+        0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0, 0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9,
+        0x5005713C, 0x270241AA, 0xBE0B1010, 0xC90C2086, 0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F,
+        0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81, 0xB7BD5C3B, 0xC0BA6CAD,
+        0xEDB88320, 0x9ABFB3B6, 0x03B6E20C, 0x74B1D29A, 0xEAD54739, 0x9DD277AF, 0x04DB2615, 0x73DC1683,
+        0xE3630B12, 0x94643B84, 0x0D6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D, 0x0A00AE27, 0x7D079EB1,
+        0xF00F9344, 0x8708A3D2, 0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB, 0x196C3671, 0x6E6B06E7,
+        0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC, 0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5,
+        0xD6D6A3E8, 0xA1D1937E, 0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B,
+        0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55, 0x316E8EEF, 0x4669BE79,
+        0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236, 0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F,
+        0xC5BA3BBE, 0xB2BD0B28, 0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 0x5BDEAE1D,
+        0x9B64C2B0, 0xEC63F226, 0x756AA39C, 0x026D930A, 0x9C0906A9, 0xEB0E363F, 0x72076785, 0x05005713,
+        0x95BF4A82, 0xE2B87A14, 0x7BB12BAE, 0x0CB61B38, 0x92D28E9B, 0xE5D5BE0D, 0x7CDCEFB7, 0x0BDBDF21,
+        0x86D3D2D4, 0xF1D4E242, 0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777,
+        0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 0xF862AE69, 0x616BFFD3, 0x166CCF45,
+        0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2, 0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB,
+        0xAED16A4A, 0xD9D65ADC, 0x40DF0B66, 0x37D83BF0, 0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9,
+        0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF,
+        0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
+    };
+
+    constexpr uint32_t CRC32_Impl(const char* buffer, size_t length)
+    {
+        uint32_t crc = Crc32Init;
+
+        while (length--)
+        {
+            crc = (crc >> 8) ^ Crc32Table[(crc ^ static_cast<uint8_t>(*buffer)) & 0xFF];
+            buffer++;
+        }
+
+        return crc ^ Crc32FinalXor;
+    }
+
+    // Standard test vector: CRC32("123456789") should equal 0xCBF43926
+    //
+    static_assert(CRC32_Impl("123456789", 9) == 0xCBF43926);
+
+    /*
+      CRC Residue Property Test
+        Append CRC in little-endian: "123456789" + {0x26, 0x39, 0xF4, 0xCB}
+        CRC32(combined_data) == 0x2144DF1C (always the same residue value)
+    */
+    static_assert(CRC32_Impl("123456789\x26\x39\xf4\xcb", 13) == Gateway::Crc32Residue);
+} // namespace
+
+namespace Gateway
+{
+    uint32_t CRC32(std::span<const std::byte> data)
+    {
+        return CRC32_Impl(reinterpret_cast<const char*>(data.data()), data.size());
+    }
+
+    uint32_t CRC32(std::span<const char> data)
+    {
+        return CRC32_Impl(data.data(), data.size());
+    }
+
+    uint32_t CRC32(const char* data, size_t length)
+    {
+        return CRC32_Impl(data, length);
+    }
+} // namespace Gateway
+```
+---
+
 ## Document Revision History
 
 | Document Version | Date | Protocol Version | Author | Changes |
 |------------------|------|------------------|--------|---------|
-| 0.1 | 12/2025 | 1.0 (0x0100) | Radiy Technical Team | Initial draft |
-
+| 0.1 | 12/2025 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
+| 0.2 | 01/2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added Appendix B, Request Prerequisites |
