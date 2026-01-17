@@ -375,7 +375,7 @@ void GrpcFileClient::stop()
 	}
 
 	m_quitRequested.store(true, std::memory_order::relaxed);
-	m_procCond.notify_one();
+	m_procCond.notify_all();
 	m_fileReadyCond.notify_all();
 
 	if (m_thread.joinable())

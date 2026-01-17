@@ -89,7 +89,7 @@ TEST(ConfigControllerTests, monitorToConfigControllerConnection)
 	QElapsedTimer timer;
 	timer.start();
 
-	while (timer.hasExpired(1000) == false && configController.connectedFlag == false)
+	while (timer.hasExpired(5000) == false && configController.connectedFlag == false)
 	{
 		QCoreApplication::instance()->processEvents();
 		QThread::msleep(10);

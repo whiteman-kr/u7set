@@ -222,7 +222,8 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 {
 	SoftwareInfo serverSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_SRV");
 
-	HostAddressPort serverAddr("127.0.0.1", 14103);
+	//HostAddressPort serverAddr("127.0.0.1", 14103);
+	HostAddressPort serverAddr("127.0.0.1", 13312);
 
 	std::unique_ptr<GrpcFileSrv> server =
 		std::make_unique<GrpcFileSrv>(serverSw, true, std::vector<ClientInfo>{}, false,
@@ -232,7 +233,8 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 
 	QDir().mkpath(tempDir);
 
-	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_CLNT");
+	//SoftwareInfo clientSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_CLNT");
+	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "SYSTEMID_RACK01_WS00_ADS");
 
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
 						  tempDir, "GrpcFileClientTest", logger);
