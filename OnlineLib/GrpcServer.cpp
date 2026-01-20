@@ -175,3 +175,21 @@ bool GrpcServer::isRunning() const
 {
 	return m_running.load(std::memory_order_relaxed);
 }
+
+grpc::Status GrpcServer::handshake(grpc::ServerContext* context,
+									const Grpc::HandshakeRequest* request,
+									Grpc::HandshakeReply* reply)
+{
+	Q_UNUSED(context);
+
+	grpc::Status status = m_sessionGuard.handshake(request, reply);
+
+	if (status.ok() == true)
+	{
+		reply->set_serverip(m_listenIP.address32());
+		reply->set_serverport(m_listenIP.port());
+	}
+
+	return status;
+}
+

@@ -40,6 +40,9 @@ public:
 	bool isBinded() const;
 	bool isRunning() const;
 
+	grpc::Status handshake(grpc::ServerContext* context,
+						   const Grpc::HandshakeRequest* request,
+						   Grpc::HandshakeReply* reply);
 protected:
 	virtual grpc::Service* getGrpcService() = 0;
 	virtual QString serviceName() const = 0;

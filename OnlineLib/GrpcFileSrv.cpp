@@ -66,9 +66,7 @@ grpc::Status GrpcFileSrv::Handshake(grpc::ServerContext* context,
 									const Grpc::HandshakeRequest* request,
 									Grpc::HandshakeReply* reply)
 {
-	Q_UNUSED(context);
-
-	return m_sessionGuard.handshake(request, reply);
+	return GrpcServer::handshake(context, request, reply);
 }
 
 grpc::Status GrpcFileSrv::GetFile(	grpc::ServerContext* context,
@@ -487,15 +485,20 @@ void GrpcFileClient::run()
 {
 	std::unique_lock ul(m_procMutex, std::defer_lock);
 
-	while(m_quitRequested.load(std::memory_order::relaxed) == false)
+	while(true)
 	{
+		if (m_quitRequested.load(std::memory_order::relaxed) == true)
+		{
+			break;
+		}
+
 		if (m_authToken.empty())
 		{
 			createStubAndHandshake();
 
 			if (m_authToken.empty())
 			{
-				std::this_thread::sleep_for(std::chrono::seconds(1));
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
 				continue;
 			}
 		}

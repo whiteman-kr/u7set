@@ -40,16 +40,7 @@ grpc::Status GrpcAppDataSrv::Handshake(grpc::ServerContext* context,
 										const Grpc::HandshakeRequest* request,
 										Grpc::HandshakeReply* reply)
 {
-	Q_UNUSED(context);
-
-	grpc::Status status = m_sessionGuard.handshake(request, reply);
-
-	HostAddressPort serverIP = listenIP();
-
-	reply->set_serverip(serverIP.address32());
-	reply->set_serverport(serverIP.port());
-
-	return status;
+	return GrpcServer::handshake(context, request, reply);
 }
 
 grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
