@@ -3,6 +3,7 @@
 #include <memory>
 #include <thread>
 #include <queue>
+#include <chrono>
 #include <grpcpp/grpcpp.h>
 
 #include <QString>
@@ -95,16 +96,83 @@ struct FileReady
 
 // -------------------------------------------------------------------------------------
 //
-// GrpcFileClient class declaration
+// GrpcClient class declaration
 //
 // -------------------------------------------------------------------------------------
 
-class GrpcFileClient : public QObject, public GrpcFileBase, public LogWrapper
+class GrpcClient : public QObject, public LogWrapper
 {
 	Q_OBJECT
 
 public:
-	GrpcFileClient(const SoftwareInfo& softwareInfo,
+	GrpcClient(const SoftwareInfo& localSoftwareInfo,
+				const std::vector<HostAddressPort>& serverAddress,
+				const QString& clientDescription,
+				CircularLoggerShared log,
+				bool startClient = true);
+	~GrpcClient();
+
+	void start();
+	void stop();
+
+	virtual void run();
+	virtual void wakeupThread();
+
+	bool isQuitRequested() const;
+
+signals:
+	void signal_unknownClientID(QString errMsg);
+	void signal_wrongClientHostname(QString errMsg);
+	void signal_setConnection();
+	void signal_noConnection();
+
+private:
+
+private:
+	std::vector<HostAddressPort> m_serverAddress;
+	QString m_clientDescription;
+
+	int m_srvAddrIndex = -1;			// !
+
+	std::thread m_thread;
+	std::atomic_bool m_threadStarted {false};
+	std::atomic_bool m_quitRequested {false};
+
+	std::string m_authToken;
+	HostAddressPort m_serverAddr;
+
+	mutable std::mutex m_stateMutex;
+	Tcp::ConnectionState m_state;
+
+public:
+/*	class ActiveCtxGuard
+	{
+	public:
+		ActiveCtxGuard(GrpcClient& client);
+		~ActiveCtxGuard();
+
+		ActiveCtxGuard(const ActiveCtxGuard&) = delete;
+		ActiveCtxGuard& operator=(const ActiveCtxGuard&) = delete;
+
+	private:
+		GrpcClient& m_client;
+		std::mutex& m_mutex;
+		grpc::ClientContext*& m_activeCtx;
+	};*/
+};
+
+// -------------------------------------------------------------------------------------
+//
+// GrpcFileClient class declaration
+//
+// -------------------------------------------------------------------------------------
+
+class GrpcFileClient : public GrpcClient, public GrpcFileBase
+{
+	Q_OBJECT
+
+public:
+	GrpcFileClient(const SoftwareInfo& localSoftwareInfo,
 				   const std::vector<HostAddressPort>& serverAddress,
 				   const QString& rootFolder,
 				   const QString& clientDescription,
@@ -117,9 +185,6 @@ public:
 	GrpcFileClient& operator=(GrpcFileClient&&) = delete;
 
 	virtual ~GrpcFileClient();
-
-	void start();
-	void stop();
 
 	void downloadSessionParams();
 
@@ -140,10 +205,6 @@ public:
 	Tcp::ConnectionState getConnectionState() const;
 
 signals:
-	void signal_unknownClientID(QString errMsg);
-	void signal_wrongClientHostname(QString errMsg);
-	void signal_setConnection();
-	void signal_noConnection();
 	void signal_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params);
 	void signal_fileReady(FileReady fileReady);			// not ref - Ok
 	void signal_fileDowloadTimeout();
@@ -152,7 +213,8 @@ protected:
 	QString getErrorStr(Tcp::FileTransferResult errorCode) const;
 
 private:
-	void run();
+	virtual void run() override;
+	virtual void wakeupThread() override;
 
 	void createStubAndHandshake(grpc::Status* status = nullptr);
 	Tcp::FileTransferResult privateGetSessionParams();
@@ -162,15 +224,9 @@ private:
 	void pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode,
 					   QByteArray& fileData, QString& md5);	// not const - OK!
 
+	static std::chrono::system_clock::time_point makeDeadlineMs(int ms);
+
 private:
-	SoftwareInfo m_localSwInfo;
-	std::vector<HostAddressPort> m_serverAddress;
-
-	int m_srvAddrIndex = -1;			// !
-
-	std::thread m_thread;
-	std::atomic_bool m_threadStarted {false};
-	std::atomic_bool m_quitRequested {false};
 	std::atomic_bool m_emitFileReady {false};
 
 	std::mutex m_procMutex;
@@ -183,11 +239,6 @@ private:
 	std::queue<FileReady> m_fileReadyQueue;
 
 	std::unique_ptr<Grpc::FileSrv::Stub> m_stub;
-	std::string m_authToken;
-	HostAddressPort m_serverAddr;
 
 	inline static const QString SESSION_PARAMS_REQUEST = QStringLiteral("*SESSION_PARAMS_REQUEST*");
-
-	mutable std::mutex m_stateMutex;
-	Tcp::ConnectionState m_state;
 };

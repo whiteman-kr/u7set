@@ -316,24 +316,21 @@ QString GrpcFileSrv::serviceName() const
 
 // -------------------------------------------------------------------------------------
 //
-// GrpcFileClient class implementation
+// GrpcClient class implementation
 //
 // -------------------------------------------------------------------------------------
 
-GrpcFileClient::GrpcFileClient(const SoftwareInfo& softwareInfo,
-	const std::vector<HostAddressPort>& serverAddress,
-	const QString& rootFolder,
-	const QString& clientDescription,
-	CircularLoggerShared log,
-	bool startClient) :
-	GrpcFileBase(rootFolder),
+GrpcClient::GrpcClient(const SoftwareInfo& localSoftwareInfo,
+						const std::vector<HostAddressPort>& serverAddress,
+						const QString& clientDescription,
+						CircularLoggerShared log,
+						bool startClient) :
 	LogWrapper(log),
-	m_localSwInfo(softwareInfo),
-	m_serverAddress(serverAddress)
-{
-	Q_UNUSED(clientDescription);
+	m_serverAddress(serverAddress),
+	m_clientDescription(clientDescription)
 
-	m_state.localSoftwareInfo = m_localSwInfo;
+{
+	m_state.localSoftwareInfo = localSoftwareInfo;
 
 	if (startClient)
 	{
@@ -341,12 +338,12 @@ GrpcFileClient::GrpcFileClient(const SoftwareInfo& softwareInfo,
 	}
 }
 
-GrpcFileClient::~GrpcFileClient()
+GrpcClient::~GrpcClient()
 {
 	stop();
 }
 
-void GrpcFileClient::start()
+void GrpcClient::start()
 {
 	if (m_serverAddress.size() == 0)
 	{
@@ -361,11 +358,11 @@ void GrpcFileClient::start()
 	}
 
 	m_quitRequested.store(false, std::memory_order::relaxed);
-	m_thread = std::thread(&GrpcFileClient::run, this);
+	m_thread = std::thread(&GrpcClient::run, this);
 	m_threadStarted.store(true, std::memory_order::release);
 }
 
-void GrpcFileClient::stop()
+void GrpcClient::stop()
 {
 	if (m_threadStarted.load(std::memory_order::acquire) == false)
 	{
@@ -373,8 +370,8 @@ void GrpcFileClient::stop()
 	}
 
 	m_quitRequested.store(true, std::memory_order::relaxed);
-	m_procCond.notify_all();
-	m_fileReadyCond.notify_all();
+
+	wakeupThread();
 
 	if (m_thread.joinable())
 	{
@@ -382,6 +379,64 @@ void GrpcFileClient::stop()
 	}
 
 	m_threadStarted.store(false, std::memory_order::release);
+}
+
+void GrpcClient::run()				// do nothing, should be override in derived classes
+{
+	while(isQuitRequested() == false)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+	}
+}
+
+void GrpcClient::wakeupThread()
+{
+
+}
+
+bool GrpcClient::isQuitRequested() const
+{
+	return m_quitRequested.load(std::memory_order::relaxed);
+}
+
+// -------------------------------------------------------------------------------------
+//
+// ActiveCtxGuard class implementation
+//
+// -------------------------------------------------------------------------------------
+
+/*GrpcFileClient::ActiveCtxGuard::ActiveCtxGuard(std::mutex& mutex, grpc::ClientContext*& activeCtx, grpc::ClientContext* ctx) :
+	m_mutex(mutex),
+	m_activeCtx(activeCtx)
+{
+}
+	~ActiveCtxGuard();
+
+	std::mutex& m_mutex;
+	grpc::ClientContext*& m_activeCtx;
+};*/
+
+
+// -------------------------------------------------------------------------------------
+//
+// GrpcFileClient class implementation
+//
+// -------------------------------------------------------------------------------------
+
+GrpcFileClient::GrpcFileClient(const SoftwareInfo& localSoftwareInfo,
+	const std::vector<HostAddressPort>& serverAddress,
+	const QString& rootFolder,
+	const QString& clientDescription,
+	CircularLoggerShared log,
+	bool startClient) :
+	GrpcClient(localSoftwareInfo, serverAddress, clientDescription, log, startClient),
+	GrpcFileBase(rootFolder)
+{
+}
+
+GrpcFileClient::~GrpcFileClient()
+{
+	stop();
 }
 
 void GrpcFileClient::downloadSessionParams()
@@ -544,8 +599,16 @@ void GrpcFileClient::run()
 	}
 }
 
+void GrpcFileClient::wakeupThread()
+{
+	m_procCond.notify_all();
+	m_fileReadyCond.notify_all();
+}
+
 void GrpcFileClient::createStubAndHandshake(grpc::Status* status)
 {
+	logMsg("GrpcFileClient::createStubAndHandshake");
+
 	m_srvAddrIndex++;
 
 	if (m_srvAddrIndex >= m_serverAddress.size())
@@ -559,6 +622,8 @@ void GrpcFileClient::createStubAndHandshake(grpc::Status* status)
 	m_stub = Grpc::FileSrv::NewStub(channel);
 
 	grpc::ClientContext handshakeCtx;
+
+	handshakeCtx.set_deadline(makeDeadlineMs(1000));
 
 	Grpc::HandshakeRequest req;
 	Grpc::HandshakeReply rep;
@@ -668,6 +733,7 @@ Tcp::FileTransferResult GrpcFileClient::privateGetSessionParams()
 	grpc::ClientContext ctx;
 
 	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, m_authToken);
+	ctx.set_deadline(makeDeadlineMs(1000));
 
 	Grpc::GetSessionParamsRequest req;
 	Grpc::GetSessionParamsReply rep;
@@ -715,6 +781,7 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 	grpc::ClientContext ctx;
 
 	ctx.AddMetadata(Grpc::SESSION_AUTH_TOKEN, m_authToken);
+	ctx.set_deadline(makeDeadlineMs(1000));
 
 	Grpc::GetFileRequest req;
 
@@ -915,4 +982,9 @@ void GrpcFileClient::pushFileReady(const QString& fileName, Tcp::FileTransferRes
 
 		m_fileReadyCond.notify_all();
 	}
+}
+
+std::chrono::system_clock::time_point GrpcFileClient::makeDeadlineMs(int ms)
+{
+	return std::chrono::system_clock::now()	+ std::chrono::milliseconds(ms);
 }
