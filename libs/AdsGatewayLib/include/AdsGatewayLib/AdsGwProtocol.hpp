@@ -36,10 +36,11 @@ namespace adsgw
 	struct GwHandshakeRequest
 	{
 		uint16_t protocolVersion; // Protocol version client supports (e.g., 0x0100 for v1.0)
+		uint16_t reserved1;       // Reserved for future use
 		char clientName[64];      // Null-terminated client name
 	};
 
-	static_assert(sizeof(GwHandshakeRequest) == 66);
+	static_assert(sizeof(GwHandshakeRequest) == 68);
 
 	struct GwHandshakeResponse
 	{

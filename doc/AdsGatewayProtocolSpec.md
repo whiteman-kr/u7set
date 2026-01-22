@@ -240,18 +240,20 @@ Initial connection handshake to establish protocol version and capabilities.
 ```
 struct GwHandshakeRequest {
     uint16_t protocolVersion;  // Protocol version client supports (e.g., 0x0100 for v1.0)
+    uint16_t reserved1;        // Reserved for future use
     char clientName[64];       // Null-terminated client name
 };
 
-static_assert(sizeof(GwHandshakeRequest) == 66);
+static_assert(sizeof(GwHandshakeRequest) == 68);
 ```
 
 | Offset | Size | Type | Field |
 |--------|------|------|-------|
 | 0 | 2 | `uint16_t` | `protocolVersion` |
-| 2 | 64 | `char[64]` | `clientName` |
+| 2 | 2 | `uint16_t` | `reserved1` |
+| 4 | 64 | `char[64]` | `clientName` |
 
-Total size: 66 bytes
+Total size: 68 bytes
 
 **Protocol Version Format:** 0xMMmm where MM = major version, mm = minor version
 - Example: 0x0100 = Version 1.0 (current)

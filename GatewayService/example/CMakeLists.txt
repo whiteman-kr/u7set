@@ -10,6 +10,7 @@ add_executable(${TARGET}
     ./src/AdsGwConnection.hpp
     ./src/TcpConnection.cpp
     ./src/TcpConnection.hpp
+    ./src/MiniLogger.hpp
 )
 
 if (WIN32)

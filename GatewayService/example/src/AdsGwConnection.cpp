@@ -1,4 +1,5 @@
 #include "AdsGwConnection.hpp"
+#include "MiniLogger.hpp"
 #include "TcpConnection.hpp"
 
 #include <AdsgatewayLib/AdsGwProtocol.hpp>
@@ -9,7 +10,6 @@
 #include <cstring>
 #include <exception>
 #include <format>
-#include <iostream>
 
 namespace
 {
@@ -18,6 +18,11 @@ namespace
 	class AdsGwConnImpl final
 	{
 	public:
+		AdsGwConnImpl(IMiniLogger& logger) :
+			m_logger{logger}
+		{
+		}
+
 		void run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId);
 
 	private:
@@ -33,7 +38,10 @@ namespace
 		{
 			// Send request and receive response, can throw exceptions.
 			//
+			m_logger.logTraceFormat("Sending request ID {}", static_cast<uint32_t>(requestId));
 			sendRequestPacket<RequestT>(requestId, request, {}, isCancelledFunc);
+
+			m_logger.logTraceFormat("Receiving response for request ID {}", static_cast<uint32_t>(requestId));
 			return receiveResponsePacket<ResponseT>(requestId, response, {}, isCancelledFunc);
 		}
 
@@ -49,7 +57,12 @@ namespace
 								std::span<ResponseVariablePartT> responseVariablePart,
 								const cancellableFuncT& isCancelledFunc = {})
 		{
+			// Send request and receive response, can throw exceptions.
+			//
+			m_logger.logTraceFormat("Sending request ID {}", static_cast<uint32_t>(requestId));
 			sendRequestPacket<RequestT>(requestId, request, requestVariablePart, isCancelledFunc);
+
+			m_logger.logTraceFormat("Receiving response for request ID {}", static_cast<uint32_t>(requestId));
 			return receiveResponsePacket<ResponseT>(requestId, response, responseVariablePart, isCancelledFunc);
 		}
 
@@ -216,6 +229,7 @@ namespace
 		void requestHandshake(std::string_view equipmentId);
 
 	private:
+		IMiniLogger& m_logger;
 		TcpConnection m_conn;
 		std::function<bool()> m_isCancelledFunc;
 	};
@@ -233,11 +247,13 @@ namespace
 			{
 				// Establish TCP Connections
 				//
+				m_logger.logTraceFormat("Connecting to ADS Gateway at {}:{}", address, port);
 				bool ok = m_conn.connect(address, port, m_isCancelledFunc);
 				if (ok == false)
 				{
 					throw std::runtime_error{std::format("Connect error: {}", m_conn.lastError())};
 				}
+				m_logger.logTraceFormat("Connected to ADS Gateway {}:{}", address, port);
 
 				// Send Handshake
 				//
@@ -256,7 +272,7 @@ namespace
 
 				// todo: Logger, now just print to stdout.
 				//
-				std::cout << e.what() << "\n";
+				m_logger.logError(e.what());
 
 				std::this_thread::sleep_for(std::chrono::seconds(1));
 			}
@@ -284,6 +300,7 @@ namespace
 
 		try
 		{
+			m_logger.logTraceFormat("Sending handshake request to ADS Gateway...");
 			requestResult = sendRequest(ADSGW_HANDSHAKE, request, response, m_isCancelledFunc);
 		}
 		catch (const std::runtime_error& e)
@@ -322,13 +339,19 @@ namespace
 
 namespace adsgw
 {
+	AdsGwConnection::AdsGwConnection(IMiniLogger& logger) :
+		m_logger{logger}
+	{
+	}
+
 	void AdsGwConnection::connect(std::string_view address, uint16_t port, std::string_view equipmentId)
 	{
-		m_thread = std::jthread{[addressStr = std::string{address}, port, equipmentIdStr = std::string{equipmentId}](std::stop_token stoken)
-								{
-									AdsGwConnImpl conn{};
-									conn.run(stoken, addressStr, port, equipmentIdStr);
-								}};
+		m_thread =
+			std::jthread{[addressStr = std::string{address}, port, equipmentIdStr = std::string{equipmentId}, this](std::stop_token stoken)
+						 {
+							 AdsGwConnImpl conn{m_logger};
+							 conn.run(stoken, addressStr, port, equipmentIdStr);
+						 }};
 	}
 
 	void AdsGwConnection::close() {}
