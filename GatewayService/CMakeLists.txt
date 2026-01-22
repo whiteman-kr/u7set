@@ -13,6 +13,10 @@ qt_standard_project_setup()
 set(TARGET GatewaySrv)
 
 add_executable(${TARGET}
+	AdsGatewayHandler.cpp
+	AdsGatewayHandler.h
+	AdsGatewayServer.cpp
+	AdsGatewayServer.h
 	AppDataServiceClient.cpp
 	AppDataServiceClient.h
 	AppSignalState.cpp
@@ -56,10 +60,12 @@ target_precompile_headers(${TARGET} PRIVATE
 	<list>
 	<map>
 	<memory>
+	<mutex>
 	<vector>
 	<set>
 	<thread>
 	<type_traits>
+	<unordered_map>
 
 	# Qt includes
 	#

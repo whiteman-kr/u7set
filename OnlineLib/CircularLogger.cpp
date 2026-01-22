@@ -11,7 +11,7 @@
 //
 // ----------------------------------------------------------------------------------
 
-CircularLoggerWorker::CircularLoggerWorker(QString logPath, QString logName, int fileCount, int fileSizeInMB) :
+CircularLoggerWorker::CircularLoggerWorker(const QString& logPath, const QString& logName, int fileCount, int fileSizeInMB) :
 	SimpleThreadWorker("CircularLoggerWorker"),
 	m_logName(logName),
 	m_path(logPath),
@@ -42,12 +42,10 @@ CircularLoggerWorker::CircularLoggerWorker(QString logPath, QString logName, int
 	assert(m_logName.isEmpty() == false);
 }
 
-
 CircularLoggerWorker::~CircularLoggerWorker()
 {
 	clearFileStream();
 }
-
 
 bool CircularLoggerWorker::writeFileCheck(const QString& logPath, const QString& logName)
 {
@@ -73,46 +71,60 @@ bool CircularLoggerWorker::writeFileCheck(const QString& logPath, const QString&
 	return true;
 }
 
-
-void CircularLoggerWorker::writeRecord(const QString record)
+void CircularLoggerWorker::writeRecord(const QString& record)
 {
-	m_stream << record << '\n';
-
-	m_stream.flush();
-
-	m_fileGrowing += record.length();
-
-	if (m_fileGrowing >= 10 * 1024)		// check each written 10k
+	if (m_stream.device() == nullptr)
 	{
-		checkFileSize();
+		return;
+	}
 
-		m_fileGrowing = 0;
+	m_buffer.push_back(record);
+	m_bufferChars += record.size();
+
+	if (m_buffer.size() >= MAX_BUFFER_LINES || m_bufferChars >= MAX_BUFFER_CHARS)
+	{
+		flushBuffer();
 	}
 }
-
 
 void CircularLoggerWorker::onThreadStarted()
 {
 	detectFiles();
-}
 
+	m_flushTimer = new QTimer(this);
+	m_flushTimer->setTimerType(Qt::CoarseTimer);
+	m_flushTimer->setInterval(FLUSH_INTERVAL_MS);
+
+	connect(m_flushTimer, &QTimer::timeout, this, &CircularLoggerWorker::flushBuffer);
+
+	m_flushTimer->start();
+}
 
 void CircularLoggerWorker::onThreadFinished()
 {
+	if (m_flushTimer != nullptr)
+	{
+		m_flushTimer->stop();
+		m_flushTimer = nullptr;
+	}
+
 	clearFileStream();
 }
 
-
 void CircularLoggerWorker::detectFiles()
 {
-	QDir dir;
+	QDir dir(m_path);
 
-	if (dir.exists(m_path) == false)
+	if (dir.exists() == false)
 	{
-		dir.mkpath(m_path);
+		if (dir.mkpath(".") == false)
+		{
+			qDebug() << "Can't create log folder:" << C_STR(m_path);
+			return;
+		}
 	}
 
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i <= MAX_LOG_FILE_INDEX; i++)
 	{
 		QString fName = fileName(i);
 
@@ -122,6 +134,12 @@ void CircularLoggerWorker::detectFiles()
 		}
 
 		int id = getFileID(i);
+
+		if (id == -1)
+		{
+			QFile::remove(fName);
+			continue;
+		}
 
 		if (m_firstFileID == -1 || id < m_firstFileID)
 		{
@@ -151,7 +169,6 @@ void CircularLoggerWorker::detectFiles()
 	openFile(m_lastFileNumber);
 }
 
-
 void CircularLoggerWorker::removeOldFiles()
 {
 	while (m_lastFileID - m_firstFileID >= m_fileCount)
@@ -161,13 +178,12 @@ void CircularLoggerWorker::removeOldFiles()
 		m_firstFileNumber++;
 		m_firstFileID++;
 
-		if (m_firstFileNumber >= 1000)
+		if (m_firstFileNumber > MAX_LOG_FILE_INDEX)
 		{
 			m_firstFileNumber = 0;
 		}
 	}
 }
-
 
 void CircularLoggerWorker::checkFileSize()
 {
@@ -180,7 +196,7 @@ void CircularLoggerWorker::checkFileSize()
 		m_lastFileNumber++;
 		m_lastFileID++;
 
-		if (m_lastFileNumber >= 1000)
+		if (m_lastFileNumber > MAX_LOG_FILE_INDEX)
 		{
 			m_lastFileNumber = 0;
 		}
@@ -198,24 +214,38 @@ void CircularLoggerWorker::checkFileSize()
 	}
 }
 
-
 int CircularLoggerWorker::getFileID(int index)
 {
 	QFile file(fileName(index));
 
-	file.open(QIODevice::ReadOnly | QIODevice::Text);
+	if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
+	{
+		return -1;
+	}
 
 	QTextStream in(&file);
 
-	return in.readLine().toInt();
-}
+	if (in.atEnd())
+	{
+		return -1;
+	}
 
+	bool ok = false;
+
+	const int id = in.readLine().toInt(&ok);
+
+	if (ok == false)
+	{
+		return -1;
+	}
+
+	return id;
+}
 
 QString CircularLoggerWorker::fileName(int index)
 {
 	return m_path + '/' + m_logName + '_' + QString("%1").arg(index, 3, 10, QChar('0')) + ".log";
 }
-
 
 void CircularLoggerWorker::openFile(int index)
 {
@@ -230,27 +260,70 @@ void CircularLoggerWorker::openFile(int index)
 	if (res == false)
 	{
 		qDebug() << "Error open file: " << C_STR(m_fileName);
+		Q_ASSERT(false);
+		m_stream.setDevice(nullptr);
+		return;
 	}
 
 	m_stream.setDevice(&m_file);
 
 	if (m_file.size() == 0)
 	{
-		writeRecord(QString("%1\n").arg(m_lastFileID));
+		m_stream << QString("%1\n\n").arg(m_lastFileID);	// direct writing, no buffering!
 	}
 	else
 	{
-		writeRecord(QString(""));
+		m_stream << QString("\n");							// direct writing, no buffering!
 	}
-}
 
+	m_stream.flush();
+}
 
 void CircularLoggerWorker::clearFileStream()
 {
-	m_stream.flush();
-	m_file.close();
+	flushBuffer();
+
+	if (m_file.isOpen())
+	{
+		m_stream.flush();
+		m_file.close();
+	}
+
+	m_stream.setDevice(nullptr);
 }
 
+void CircularLoggerWorker::flushBuffer()
+{
+	if (m_stream.device() == nullptr)
+	{
+		m_buffer.clear();
+		m_bufferChars = 0;
+		return;
+	}
+
+	if (m_buffer.isEmpty())
+	{
+		return;
+	}
+
+	for (const QString& s : m_buffer)
+	{
+		m_stream << s << '\n';
+	}
+
+	m_stream.flush();
+
+	m_fileGrowing += m_bufferChars;
+
+	m_buffer.clear();
+	m_bufferChars = 0;
+
+	if (m_fileGrowing >= FILE_GROWING_CHECK_SIZE)
+	{
+		checkFileSize();
+		m_fileGrowing = 0;
+	}
+}
 
 // ----------------------------------------------------------------------------------
 //
@@ -271,7 +344,6 @@ CircularLogger::CircularLogger(ILogFile* externalLog, QString context) :
 CircularLogger::~CircularLogger()
 {
 }
-
 
 bool CircularLogger::init(QString logName, QString instanceID, int fileCount, int fileSizeInMB)
 {
@@ -319,7 +391,7 @@ bool CircularLogger::init(QString logName, QString instanceID, int fileCount, in
 
 	addWorker(worker);
 
-	connect(this, &CircularLogger::writeRecord, worker, &CircularLoggerWorker::writeRecord);
+	connect(this, &CircularLogger::writeRecord, worker, &CircularLoggerWorker::writeRecord, Qt::QueuedConnection);
 
 	start();
 
@@ -328,12 +400,10 @@ bool CircularLogger::init(QString logName, QString instanceID, int fileCount, in
 	return true;
 }
 
-
 bool CircularLogger::isInitialized() const
 {
 	return m_loggerInitialized;
 }
-
 
 void CircularLogger::shutdown()
 {
@@ -345,30 +415,25 @@ void CircularLogger::shutdown()
 	quitAndWait(500);
 }
 
-
 void CircularLogger::setLogCodeInfo(bool logCodeInfo)
 {
 	m_logCodeInfo = logCodeInfo;
 }
-
 
 void CircularLogger::writeError(const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
 	composeAndWriteRecord(RecordType::Error, message, function, file, line, debugEcho);
 }
 
-
 void CircularLogger::writeWarning(const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
 	composeAndWriteRecord(RecordType::Warning, message, function, file, line, debugEcho);
 }
 
-
 void CircularLogger::writeMessage(const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
 	composeAndWriteRecord(RecordType::Message, message, function, file, line, debugEcho);
 }
-
 
 QString CircularLogger::getRecordTypeStr(RecordType type)
 {
@@ -400,29 +465,24 @@ QString CircularLogger::getRecordTypeStr(RecordType type)
 	return str;
 }
 
-
 QString CircularLogger::getCurrentDateTimeStr()
 {
-	QDateTime&& currentTime = QDateTime::currentDateTime();
-	if (currentTime.isValid() == false)
-	{
-		return "Current time is not valid";
-	}
-	assert(currentTime.isValid());
-	QDate&& date = currentTime.date();
-	QTime&& time = currentTime.time();
-	QChar&& zero = QChar('0');
+	const QDateTime currentTime = QDateTime::currentDateTime();
 
-	return QString("%1.%2.%3 %4:%5:%6.%7")
-			.arg(date.year(), 4, 10, zero)
-			.arg(date.month(), 2, 10, zero)
-			.arg(date.day(), 2, 10, zero)
-			.arg(time.hour(), 2, 10, zero)
-			.arg(time.minute(), 2, 10, zero)
-			.arg(time.second(), 2, 10, zero)
-			.arg(time.msec(), 3, 10, zero);
+	const QDate date = currentTime.date();
+	const QTime time = currentTime.time();
+
+	const static QChar ZERO('0');
+
+	return QString("%1.%2.%3 %4:%5:%6.%7").
+			arg(date.year(), 4, 10, ZERO).
+			arg(date.month(), 2, 10, ZERO).
+			arg(date.day(), 2, 10, ZERO).
+			arg(time.hour(), 2, 10, ZERO).
+			arg(time.minute(), 2, 10, ZERO).
+			arg(time.second(), 2, 10, ZERO).
+			arg(time.msec(), 3, 10, ZERO);
 }
-
 
 void CircularLogger::composeAndWriteRecord(RecordType type, const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
@@ -506,7 +566,6 @@ bool circularLoggerInit(std::shared_ptr<CircularLogger> logger,
 	return false;
 }
 
-
 void circularLoggerShutdown(std::shared_ptr<CircularLogger> logger)
 {
 	if (logger != nullptr)
@@ -521,7 +580,6 @@ void circularLoggerShutdown(std::shared_ptr<CircularLogger> logger)
 	}
 }
 
-
 void circularLoggerWriteError(std::shared_ptr<CircularLogger> logger, const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
 	if (logger != nullptr)
@@ -535,11 +593,10 @@ void circularLoggerWriteError(std::shared_ptr<CircularLogger> logger, const QStr
 #endif
 		if (debugEcho == true)
 		{
-			qDebug() << C_STR(message);
+			std::cout << C_STR(QString("%1\n").arg(message));
 		}
 	}
 }
-
 
 void circularLoggerWriteWarning(std::shared_ptr<CircularLogger> logger, const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
@@ -554,11 +611,10 @@ void circularLoggerWriteWarning(std::shared_ptr<CircularLogger> logger, const QS
 #endif
 		if (debugEcho == true)
 		{
-			qDebug() << C_STR(message);
+			std::cout << C_STR(QString("%1\n").arg(message));
 		}
 	}
 }
-
 
 void circularLoggerWriteMessage(std::shared_ptr<CircularLogger> logger, const QString& message, const char* function, const char* file, int line, bool debugEcho)
 {
@@ -573,8 +629,52 @@ void circularLoggerWriteMessage(std::shared_ptr<CircularLogger> logger, const QS
 #endif
 		if (debugEcho == true)
 		{
-			qDebug() << C_STR(message);
+			std::cout << C_STR(QString("%1\n").arg(message));
 		}
 	}
 }
 
+// ----------------------------------------------------------------------------------
+//
+// LogWrapper class implementation
+//
+// ----------------------------------------------------------------------------------
+
+LogWrapper::LogWrapper(CircularLoggerShared log) :
+	m_log(log)
+{
+}
+
+CircularLoggerShared LogWrapper::getLog() const
+{
+	return m_log;
+}
+
+void LogWrapper::setLog(CircularLoggerShared log)
+{
+	m_log = log;
+}
+
+void LogWrapper::logMsg(const QString& msg) const
+{
+	if (m_log)
+	{
+		DEBUG_LOG_MSG(m_log, QString("GrpcCfgLoader: %1").arg(msg));
+	}
+}
+
+void LogWrapper::logWrn(const QString& wrn) const
+{
+	if (m_log)
+	{
+		DEBUG_LOG_WRN(m_log, QString("GrpcCfgLoader: %1").arg(wrn));
+	}
+}
+
+void LogWrapper::logErr(const QString& err) const
+{
+	if (m_log)
+	{
+		DEBUG_LOG_ERR(m_log, QString("GrpcCfgLoader: %1").arg(err));
+	}
+}

@@ -1,6 +1,7 @@
 #include "GatewayHandler.h"
 #include "IvsImpulseGatewayHandler.h"
 #include "ModbusSlaveGatewayHandler.h"
+#include "AdsGatewayHandler.h"
 
 namespace Gateway
 {
@@ -251,6 +252,25 @@ namespace Gateway
 					m_handlers.push_back(modbusHandler);
 				}
 				break;
+
+			case E::GatewayType::AdsGateway:
+			{
+				AdsGatewayShared adsGateway = std::dynamic_pointer_cast<AdsGateway>(gw);
+
+				if (adsGateway == nullptr)
+				{
+					result = false;
+					break;
+				}
+
+				AdsGatewayHandlerShared adsGatewayHandler =
+					std::make_shared<AdsGatewayHandler>(swInfo, settings, adsGateway, appSignals,
+														 log, enableLogging);
+
+				m_handlers.push_back(adsGatewayHandler);
+			}
+			break;
+
 
 			default:
 				Q_ASSERT(false);
