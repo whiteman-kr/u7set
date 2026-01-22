@@ -3,6 +3,7 @@
 #endif
 
 #include <CommonLib/Types.h>
+#include <AdsGatewayLib/AdsGwProtocol.hpp>
 
 #include "AdsGateway.h"
 
@@ -20,11 +21,7 @@ namespace Gateway
 	AdsGateway::AdsGateway() :
 		Gateway(E::GatewayType::AdsGateway)
 	{
-		appendRequiredSettings({	E::Setting::LocalGatewayIP1,
-								E::Setting::ModbusDeviceID,
-								E::Setting::ModbusMode });
-
-		appendOptionalSetting(E::Setting::LocalGatewayIP2);
+		appendRequiredSettings({E::Setting::ClientRequestIP1});
 	}
 
 	ParseResult AdsGateway::checkAndApplySetting(const SettingValue& sv, ParserLog& log)
@@ -40,7 +37,7 @@ namespace Gateway
 			break;
 
 		case E::Setting::ClientRequestIP1:
-			addrPort.setAddressPortStr(sv.value.toString(), ADS_DEFAULT_PORT);
+			addrPort.setAddressPortStr(sv.value.toString(), adsgw::ADS_GATEWAY_DEFAULT_PORT);
 			m_clientRequestIP1 = addrPort;
 			break;
 		}
@@ -53,9 +50,9 @@ namespace Gateway
 		return m_clientRequestIP1;
 	}
 
-
 	void AdsGateway::getRequiredSignalsHashes(std::set<Hash>* hashes) const
 	{
+		Q_UNUSED(hashes);
 		// TEST_PTR_RETURN(hashes);
 
 		// for(const auto& [addr16, mbSignal] : m_modbusSignals)
@@ -69,6 +66,7 @@ namespace Gateway
 
 	void AdsGateway::getEventSignalsHashes(std::set<Hash>* hashes) const
 	{
+		Q_UNUSED(hashes);
 		// TEST_PTR_RETURN(hashes);
 
 		// for(const auto& [addr16, mbSignal] : m_modbusSignals)
@@ -104,9 +102,22 @@ namespace Gateway
 		return result;
 	}
 
+	void AdsGateway::writeSignalListsToXml(XmlWriteHelper& xml) const
+	{
+		Q_UNUSED(xml);
+		return;
+	}
+
+	bool AdsGateway::readSignalListsFromXml(XmlReadHelper& xml)
+	{
+		Q_UNUSED(xml);
+		return true;
+	}
+
 	bool AdsGateway::generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log)
 	{
-		// Q_UNUSED(signalSet);
+		Q_UNUSED(signalSet);
+		Q_UNUSED(log);
 
 		// m_files.clear();
 

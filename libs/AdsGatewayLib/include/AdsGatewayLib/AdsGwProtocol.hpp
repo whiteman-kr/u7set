@@ -4,6 +4,8 @@
 
 namespace adsgw
 {
+	constexpr uint16_t ADS_GATEWAY_DEFAULT_PORT = 5566;
+
     constexpr uint16_t ADSGW_PROTOCOL_VERSION = 0x0100;
 
     enum GwErrorCode : uint16_t

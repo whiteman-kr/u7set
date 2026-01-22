@@ -96,6 +96,10 @@ namespace Gateway
 		// ModbusSlave signal lists specific settings
 		//
 		{ E::Setting::SignalsFormat,			E::SettingType::String	},
+
+		// AdsGateway specific settings
+		//
+		{ E::Setting::ClientRequestIP1,			E::SettingType::IpPort	},
 	};
 
 	const QRegularExpression Parser::m_anyWhitespaceSymbol("\\s");
