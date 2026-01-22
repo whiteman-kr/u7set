@@ -4,12 +4,12 @@
 <context>
     <name>ArchiveConnection</name>
     <message>
-        <location filename="../Archive/ArchiveConnection.cpp" line="194"/>
+        <location filename="../Archive/ArchiveConnection.cpp" line="193"/>
         <source>Cannot start request to as configuration for archive service %1 not found.</source>
         <translation>Не може да се стартира заявка до тъй като не е намерена конфигурация за услугата за архивиране %1 .</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveConnection.cpp" line="224"/>
+        <location filename="../Archive/ArchiveConnection.cpp" line="223"/>
         <source>Cancel %1 archive request connections.</source>
         <translation>Отменете връзките на %1 заявка за архивиране.</translation>
     </message>
@@ -97,57 +97,57 @@
         <translation>Сървър</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="217"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="213"/>
         <source>VALIDITY</source>
         <translation>VALIDITY</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="221"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="217"/>
         <source>SIMLOCK</source>
         <translation>SIMLOCK</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="225"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="221"/>
         <source>LIMIT</source>
         <translation>LIMIT</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="229"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="225"/>
         <source>AUTO</source>
         <translation>AUTO</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="233"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="229"/>
         <source>FINEAP</source>
         <translation>FINEAP</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="237"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="233"/>
         <source>COARSEAP</source>
         <translation>COARSEAP</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="276"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="264"/>
         <source> (Time error)</source>
         <translation> (Грешка в часа)</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="333"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="320"/>
         <source>Analog</source>
         <translation>Аналогов</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="336"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="323"/>
         <source>Discrete</source>
         <translation>Цифров</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="339"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="326"/>
         <source>Bus</source>
         <translation>Шина</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="346"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="333"/>
         <source>StateIndex: %1
 SignalID: %2
 AppSignalID: %3
@@ -174,7 +174,7 @@ AppSignalID: %3
 Сървър: %14</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="420"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="405"/>
         <source>Unsuported</source>
         <translation>Не се поддържа</translation>
     </message>
@@ -305,23 +305,23 @@ AppSignalID: %3
 <context>
     <name>ArchiveView</name>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="626"/>
-        <location filename="../Archive/ArchiveModelView.cpp" line="786"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="609"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="775"/>
         <source>Copy</source>
         <translation>Копирай</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="672"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="654"/>
         <source>View %1</source>
         <translation>Прегледай %1</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="771"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="757"/>
         <source>Remove </source>
         <translation>Премахни </translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveModelView.cpp" line="795"/>
+        <location filename="../Archive/ArchiveModelView.cpp" line="787"/>
         <source>Signals...</source>
         <translation>Сигнали...</translation>
     </message>
@@ -329,34 +329,34 @@ AppSignalID: %3
 <context>
     <name>ArchiveWidget</name>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="131"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="130"/>
         <source>Monitor Archive %1</source>
         <translation>Архив на Монитор %1</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="161"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="160"/>
         <source>ToolBar</source>
         <translation>ЛентаИнструменти</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="165"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="164"/>
         <source>Export...</source>
         <translation>Експорт...</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="166"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="165"/>
         <source>Print...</source>
         <translation>Печат...</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="167"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="166"/>
         <location filename="../Archive/ArchiveWidget.cpp" line="566"/>
         <location filename="../Archive/ArchiveWidget.cpp" line="832"/>
         <source>Update</source>
         <translation>Актуализирай</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="169"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="168"/>
         <source>Signals...</source>
         <translation>Сигнали...</translation>
     </message>
@@ -941,397 +941,397 @@ AppSignalID: %3
 <context>
     <name>MonitorMainWindow</name>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="241"/>
+        <location filename="../MonitorMainWindow.cpp" line="242"/>
         <source>Schemas List</source>
         <translation>Списък със схеми</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="416"/>
-        <location filename="../MonitorMainWindow.cpp" line="1841"/>
+        <location filename="../MonitorMainWindow.cpp" line="417"/>
+        <location filename="../MonitorMainWindow.cpp" line="1839"/>
         <source>Logged Out
 00:00:00</source>
         <translation>Излязъл
 00:00:00</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="417"/>
+        <location filename="../MonitorMainWindow.cpp" line="418"/>
         <source>Click to re-login with current user</source>
         <translation>Кликнете, за да влезете повторно с текущия потребител</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="421"/>
-        <location filename="../MonitorMainWindow.cpp" line="696"/>
-        <location filename="../MonitorMainWindow.cpp" line="1845"/>
+        <location filename="../MonitorMainWindow.cpp" line="422"/>
+        <location filename="../MonitorMainWindow.cpp" line="697"/>
+        <location filename="../MonitorMainWindow.cpp" line="1843"/>
         <source>Logged Out</source>
         <translation>Излязъл</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="422"/>
+        <location filename="../MonitorMainWindow.cpp" line="423"/>
         <source>Click to log out current user</source>
         <translation>Кликнете, за да излезете текущия потребител</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="530"/>
+        <location filename="../MonitorMainWindow.cpp" line="531"/>
         <source>Export Schema...</source>
         <translation>Експортиране на схема...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="531"/>
+        <location filename="../MonitorMainWindow.cpp" line="532"/>
         <source>Export current schema to a file</source>
         <translation>Експортирай текущата схема във файл</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="536"/>
+        <location filename="../MonitorMainWindow.cpp" line="537"/>
         <source>Exit</source>
         <translation>Изход</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="537"/>
+        <location filename="../MonitorMainWindow.cpp" line="538"/>
         <source>Quit the application</source>
         <translation>Излезане от приложението</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="544"/>
+        <location filename="../MonitorMainWindow.cpp" line="545"/>
         <source>Signal List Editor...</source>
         <translation>Редактор на списъка със сигнали...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="545"/>
+        <location filename="../MonitorMainWindow.cpp" line="546"/>
         <source>Edit application signal lists</source>
         <translation>Редактиране на списъка със сигнали на приложението</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="549"/>
+        <location filename="../MonitorMainWindow.cpp" line="550"/>
         <source>Settings...</source>
         <translation>Настройване...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="550"/>
+        <location filename="../MonitorMainWindow.cpp" line="551"/>
         <source>Change application settings</source>
         <translation>Промяна настройките на приложението</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="555"/>
+        <location filename="../MonitorMainWindow.cpp" line="556"/>
         <source>MATS User Manual</source>
         <translation>MATS ръководство на потребителя</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="556"/>
+        <location filename="../MonitorMainWindow.cpp" line="557"/>
         <source>Show MATS User Manual</source>
         <translation>Покажи ръководство на потребителя за MATS</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="559"/>
+        <location filename="../MonitorMainWindow.cpp" line="560"/>
         <source>DevTools...</source>
         <translation>DevTools...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="560"/>
+        <location filename="../MonitorMainWindow.cpp" line="561"/>
         <source>Show software statistics</source>
         <translation>Покажи статистика за софтуера</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="564"/>
+        <location filename="../MonitorMainWindow.cpp" line="565"/>
         <source>Debug...</source>
         <translation>Отстраняване на грешки...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="565"/>
+        <location filename="../MonitorMainWindow.cpp" line="566"/>
         <source>Perform some debug actions, don&apos;t run it!</source>
         <translation>Изпълняват се някои действия по отстраняване на грешки, не стартирайте!</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="569"/>
+        <location filename="../MonitorMainWindow.cpp" line="570"/>
         <source>Log...</source>
         <translation>Запис в регистрационен файл...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="570"/>
+        <location filename="../MonitorMainWindow.cpp" line="571"/>
         <source>Show application log</source>
         <translation>Покажи регистрационният файл за приложението</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="573"/>
+        <location filename="../MonitorMainWindow.cpp" line="574"/>
         <source>Tuning Log...</source>
         <translation>Регистрационен файл на настройката...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="574"/>
+        <location filename="../MonitorMainWindow.cpp" line="575"/>
         <source>Show tuning log</source>
         <translation>Покажи регистрационният файл на настройката</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="578"/>
+        <location filename="../MonitorMainWindow.cpp" line="579"/>
         <source>About Qt...</source>
         <translation>Относно Qt...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="579"/>
+        <location filename="../MonitorMainWindow.cpp" line="580"/>
         <source>Show Qt information</source>
         <translation>Покажи информация за Qt</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="583"/>
+        <location filename="../MonitorMainWindow.cpp" line="584"/>
         <source>About Monitor...</source>
         <translation>Относно Монитор...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="584"/>
+        <location filename="../MonitorMainWindow.cpp" line="585"/>
         <source>Show application information</source>
         <translation>Покажи информацията за приложението</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="589"/>
+        <location filename="../MonitorMainWindow.cpp" line="590"/>
         <source>Schemas</source>
         <translation>Схеми</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="590"/>
+        <location filename="../MonitorMainWindow.cpp" line="591"/>
         <source>Open schema list page...</source>
         <translation>Отвори страницата със списъка със схеми...</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="599"/>
+        <location filename="../MonitorMainWindow.cpp" line="600"/>
         <source>New Tab</source>
         <translation>Нов раздел</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="600"/>
+        <location filename="../MonitorMainWindow.cpp" line="601"/>
         <source>Open current schema in new tab page</source>
         <translation>Отвори текущата схема в нов раздел</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="610"/>
+        <location filename="../MonitorMainWindow.cpp" line="611"/>
         <source>Close Tab</source>
         <translation>Затвори раздела</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="611"/>
+        <location filename="../MonitorMainWindow.cpp" line="612"/>
         <source>Close current tab page</source>
         <translation>Затвори текущият раздел</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="618"/>
+        <location filename="../MonitorMainWindow.cpp" line="619"/>
         <source>Zoom In</source>
         <translation>Увеличение</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="619"/>
+        <location filename="../MonitorMainWindow.cpp" line="620"/>
         <source>Zoom in schema view</source>
         <translation>Увелечаване изгледа на схемата</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="625"/>
+        <location filename="../MonitorMainWindow.cpp" line="626"/>
         <source>Zoom Out</source>
         <translation>Намаляване</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="626"/>
+        <location filename="../MonitorMainWindow.cpp" line="627"/>
         <source>Zoom out schema view</source>
         <translation>Намаляване изгледа на схемата</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="632"/>
+        <location filename="../MonitorMainWindow.cpp" line="633"/>
         <source>Zoom 100%</source>
         <translation>Мащаб 100%</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="633"/>
+        <location filename="../MonitorMainWindow.cpp" line="634"/>
         <source>Set zoom to 100%</source>
         <translation>Установи мащаба на 100%</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="638"/>
+        <location filename="../MonitorMainWindow.cpp" line="639"/>
         <source>Fit to Screen</source>
         <translation>Колкото екрана</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="639"/>
+        <location filename="../MonitorMainWindow.cpp" line="640"/>
         <source>Set zoom to fit screen</source>
         <translation>Настройва мащабирането да съответства на екрана</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="645"/>
+        <location filename="../MonitorMainWindow.cpp" line="646"/>
         <source>Go Back</source>
         <translation>Назад</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="646"/>
+        <location filename="../MonitorMainWindow.cpp" line="647"/>
         <source>Click to go back</source>
         <translation>Кликни за да се върнеш</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="652"/>
+        <location filename="../MonitorMainWindow.cpp" line="653"/>
         <source>Go Forward</source>
         <translation>Напред</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="653"/>
+        <location filename="../MonitorMainWindow.cpp" line="654"/>
         <source>Click to go forward</source>
         <translation>Кликни за да преминеш напред</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="659"/>
+        <location filename="../MonitorMainWindow.cpp" line="660"/>
         <source>Archive</source>
         <translation>Архив</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="665"/>
+        <location filename="../MonitorMainWindow.cpp" line="666"/>
         <source>Trends</source>
         <translation>Тенденции</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="671"/>
+        <location filename="../MonitorMainWindow.cpp" line="672"/>
         <source>Signals Snapshot</source>
         <translation>Моментна снимка на сигнали</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="672"/>
+        <location filename="../MonitorMainWindow.cpp" line="673"/>
         <source>View signals state in real time</source>
         <translation>Преглед състоянието на сигналите в реално време</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="677"/>
+        <location filename="../MonitorMainWindow.cpp" line="678"/>
         <source>Signals Log</source>
         <translation>Журнал на сигналите</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="678"/>
+        <location filename="../MonitorMainWindow.cpp" line="679"/>
         <source>View signals changes log</source>
         <translation>Преглед на журнала с промените в сигналите</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="683"/>
+        <location filename="../MonitorMainWindow.cpp" line="684"/>
         <source>Find Signal</source>
         <translation>Търсене на сигнал</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="684"/>
+        <location filename="../MonitorMainWindow.cpp" line="685"/>
         <source>Find signal by it&apos;s ID</source>
         <translation>Търсене на сигнал по идентификатор</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="690"/>
+        <location filename="../MonitorMainWindow.cpp" line="691"/>
         <source>Login</source>
         <translation>Вход</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="691"/>
+        <location filename="../MonitorMainWindow.cpp" line="692"/>
         <source>Log in to change tunable values</source>
         <translation>Влезте, за да промените регулируемите стойности</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="707"/>
+        <location filename="../MonitorMainWindow.cpp" line="708"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="715"/>
+        <location filename="../MonitorMainWindow.cpp" line="716"/>
         <source>&amp;Schema</source>
         <translation>&amp;Схема</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="723"/>
+        <location filename="../MonitorMainWindow.cpp" line="724"/>
         <source>&amp;View</source>
         <translation>&amp;Преглед</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="737"/>
+        <location filename="../MonitorMainWindow.cpp" line="738"/>
         <source>&amp;Tools</source>
         <translation>&amp;Инструменти</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="754"/>
+        <location filename="../MonitorMainWindow.cpp" line="755"/>
         <source>&amp;?</source>
         <translation>&amp;?</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="778"/>
+        <location filename="../MonitorMainWindow.cpp" line="779"/>
         <source>ToolBar</source>
         <translation>Лента с инструменти</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="869"/>
+        <location filename="../MonitorMainWindow.cpp" line="870"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation>Броячи на грешки и предупреждения в регистрационния файл (щракнете, за да прегледате)</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="918"/>
+        <location filename="../MonitorMainWindow.cpp" line="919"/>
         <source>CfgService</source>
         <translation>CfgService</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="924"/>
+        <location filename="../MonitorMainWindow.cpp" line="925"/>
         <source>AppDataService</source>
         <translation>AppDataService</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="930"/>
+        <location filename="../MonitorMainWindow.cpp" line="931"/>
         <source>TuningService</source>
         <translation>TuningService</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="938"/>
+        <location filename="../MonitorMainWindow.cpp" line="939"/>
         <source> Project: %1   Build: %2  </source>
         <translation> Проект: %1   Компилация: %2  </translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="951"/>
+        <location filename="../MonitorMainWindow.cpp" line="952"/>
         <source> Log E: %1 W: %2 </source>
         <translation> Регистър Г: %1 П: %2 </translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="983"/>
+        <location filename="../MonitorMainWindow.cpp" line="984"/>
         <source>%1:
 </source>
         <translation>%1:
 </translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="987"/>
+        <location filename="../MonitorMainWindow.cpp" line="988"/>
         <source>Not configured</source>
         <translation>Не е конфигуриран</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1004"/>
-        <location filename="../MonitorMainWindow.cpp" line="1015"/>
+        <location filename="../MonitorMainWindow.cpp" line="1005"/>
+        <location filename="../MonitorMainWindow.cpp" line="1016"/>
         <source>ok</source>
         <translation>да</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1004"/>
-        <location filename="../MonitorMainWindow.cpp" line="1015"/>
+        <location filename="../MonitorMainWindow.cpp" line="1005"/>
+        <location filename="../MonitorMainWindow.cpp" line="1016"/>
         <source>down</source>
         <translation>долу</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1015"/>
+        <location filename="../MonitorMainWindow.cpp" line="1016"/>
         <source>%1: %2 (Replies: %3)</source>
         <translation>%1: %2 (Отговори: %3)</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1019"/>
+        <location filename="../MonitorMainWindow.cpp" line="1020"/>
         <source>%1: %2/%3 (Replies: %4)</source>
         <translation>%1: %2/%3 (Отговори: %4)</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1141"/>
+        <location filename="../MonitorMainWindow.cpp" line="1142"/>
         <source> allows user to view schemas and trends.&lt;br&gt;</source>
         <translation> позволява на потребителя да преглежда схеми и тенденции.&lt;br&gt;</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1193"/>
+        <location filename="../MonitorMainWindow.cpp" line="1194"/>
         <source>Data Sources</source>
         <translation>Източник на данни</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1293"/>
+        <location filename="../MonitorMainWindow.cpp" line="1294"/>
         <source>Signals database is not loaded!</source>
         <translation>Базата данни със сигнали не е заредена!</translation>
     </message>
     <message>
         <location filename="../MonitorMainWindow.cpp" line="1321"/>
-        <location filename="../MonitorMainWindow.cpp" line="1533"/>
+        <location filename="../MonitorMainWindow.cpp" line="1531"/>
         <source>Signals with specified identifiers were not found:
 
 %1
@@ -1370,7 +1370,7 @@ and %2 more.</source>
         <translation>Началният час на заявката за архивиране (%1) трябва да е по-ранен от часа на завършване (%2).</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1539"/>
+        <location filename="../MonitorMainWindow.cpp" line="1537"/>
         <source>Signals with specified identifiers were not found!
 
 %1</source>
@@ -1379,17 +1379,17 @@ and %2 more.</source>
 %1</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1684"/>
+        <location filename="../MonitorMainWindow.cpp" line="1682"/>
         <source>Configuration error: %1</source>
         <translation>Грешка в конфигурацията: %1</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1823"/>
+        <location filename="../MonitorMainWindow.cpp" line="1821"/>
         <source>Tuning logged in, username: %1.</source>
         <translation>В Настройване е влязъл потребител: %1.</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1837"/>
+        <location filename="../MonitorMainWindow.cpp" line="1835"/>
         <source>Tuning logged out.</source>
         <translation>Излязохте от Настройване.</translation>
     </message>
@@ -1397,23 +1397,28 @@ and %2 more.</source>
 <context>
     <name>MonitorSchemaWidget</name>
     <message>
-        <location filename="../MonitorSchemaWidget.cpp" line="301"/>
+        <location filename="../MonitorSchemaWidget.cpp" line="300"/>
+        <source>Reset Highlights</source>
+        <translation>Нулиране на акцентите</translation>
+    </message>
+    <message>
+        <location filename="../MonitorSchemaWidget.cpp" line="396"/>
         <source>Schemas</source>
         <translation>Схеми</translation>
     </message>
     <message>
-        <location filename="../MonitorSchemaWidget.cpp" line="455"/>
+        <location filename="../MonitorSchemaWidget.cpp" line="468"/>
         <source>Signals</source>
         <translation>Сигнали</translation>
     </message>
     <message>
-        <location filename="../MonitorSchemaWidget.cpp" line="527"/>
+        <location filename="../MonitorSchemaWidget.cpp" line="542"/>
         <source>Impact Signals</source>
         <translation>Въздействащи Сигнали</translation>
     </message>
     <message>
-        <location filename="../MonitorSchemaWidget.cpp" line="595"/>
-        <location filename="../MonitorSchemaWidget.cpp" line="608"/>
+        <location filename="../MonitorSchemaWidget.cpp" line="610"/>
+        <location filename="../MonitorSchemaWidget.cpp" line="623"/>
         <source>ClientLib::AppSignalManager is not available: %1. Terminate.</source>
         <translation>ClientLib::AppSignalManager не е налична: %1. Прекратяване.</translation>
     </message>
@@ -1421,7 +1426,7 @@ and %2 more.</source>
 <context>
     <name>MonitorSignalInfo</name>
     <message>
-        <location filename="../MonitorSignalInfo.cpp" line="73"/>
+        <location filename="../MonitorSignalInfo.cpp" line="72"/>
         <source>Signal %1 not found.</source>
         <translation>Сигнал %1 не е намерен.</translation>
     </message>
@@ -1532,36 +1537,41 @@ and %2 more.</source>
         <translation>/translations/AppSignalLists_%1.qm</translation>
     </message>
     <message>
-        <location filename="../MonitorMainWindow.cpp" line="1860"/>
+        <location filename="../MonitorMainWindow.cpp" line="146"/>
+        <source>/translations/ReportLib_%1.qm</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../MonitorMainWindow.cpp" line="1858"/>
         <source>Tuning signals file loading error.</source>
         <translation>Грешка при зареждането на файла с настроечни сигнали.</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="51"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="50"/>
         <location filename="../SignalLogDialog.cpp" line="46"/>
         <source>Generated: %1</source>
         <translation>Генерирани: %1</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="56"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="55"/>
         <source>Signals Archive</source>
         <translation>Архив на сигналите</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="58"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="57"/>
         <location filename="../SignalLogDialog.cpp" line="53"/>
         <source>Project: %1</source>
         <translation>Проект: %1</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="61"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="60"/>
         <location filename="../SignalLogDialog.cpp" line="56"/>
         <source>%1: %2</source>
         <translation>%1: %2</translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="75"/>
-        <location filename="../Archive/ArchiveWidget.cpp" line="85"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="74"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="84"/>
         <source>Requested interval: %1 - %2 (%3)
 
 </source>
@@ -1570,14 +1580,14 @@ and %2 more.</source>
 </translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="102"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="101"/>
         <source>Archive Service: %1
 </source>
         <translation>Архив на услуга: %1
 </translation>
     </message>
     <message>
-        <location filename="../Archive/ArchiveWidget.cpp" line="109"/>
+        <location filename="../Archive/ArchiveWidget.cpp" line="108"/>
         <source>Signal(s): %1
 
 </source>
@@ -1591,105 +1601,105 @@ and %2 more.</source>
         <translation>Журнал на сигналите</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="177"/>
+        <location filename="../SignalLogDialog.cpp" line="163"/>
         <source>Signal ID</source>
         <translation>Signal ID</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="178"/>
+        <location filename="../SignalLogDialog.cpp" line="164"/>
         <source>Equipment ID</source>
         <translation>Equipment ID</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="179"/>
+        <location filename="../SignalLogDialog.cpp" line="165"/>
         <source>Lm Equipment ID</source>
         <translation>Lm Equipment ID</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="180"/>
+        <location filename="../SignalLogDialog.cpp" line="166"/>
         <source>App Signal ID</source>
         <translation>App Signal ID</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="181"/>
+        <location filename="../SignalLogDialog.cpp" line="167"/>
         <source>Caption</source>
         <translation>Надпис</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="182"/>
+        <location filename="../SignalLogDialog.cpp" line="168"/>
         <source>Tags</source>
         <translation>Етикети</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="184"/>
+        <location filename="../SignalLogDialog.cpp" line="170"/>
         <source>Record Time</source>
         <translation>Час на записа</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="185"/>
+        <location filename="../SignalLogDialog.cpp" line="171"/>
         <source>Server Time UTC%100</source>
         <translation>Сървърно време UTC%100</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="186"/>
+        <location filename="../SignalLogDialog.cpp" line="172"/>
         <source>Server Time</source>
         <translation>Сървърно време</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="187"/>
+        <location filename="../SignalLogDialog.cpp" line="173"/>
         <source>Plant Time</source>
         <translation>Заводско време</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="189"/>
+        <location filename="../SignalLogDialog.cpp" line="175"/>
         <source>Value</source>
         <translation>Стойност</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="191"/>
+        <location filename="../SignalLogDialog.cpp" line="177"/>
         <source>Flags</source>
         <translation>Флагове</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="192"/>
+        <location filename="../SignalLogDialog.cpp" line="178"/>
         <source>Valid</source>
         <translation>Валиден</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="193"/>
+        <location filename="../SignalLogDialog.cpp" line="179"/>
         <source>StateAvailable</source>
         <translation>StateAvailable</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="194"/>
+        <location filename="../SignalLogDialog.cpp" line="180"/>
         <source>Simulated</source>
         <translation>Симулиран</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="195"/>
+        <location filename="../SignalLogDialog.cpp" line="181"/>
         <source>Blocked</source>
         <translation>Блокиран</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="196"/>
+        <location filename="../SignalLogDialog.cpp" line="182"/>
         <source>Mismatch</source>
         <translation>Несъответствие</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="522"/>
-        <location filename="../SignalLogDialog.cpp" line="526"/>
-        <location filename="../SignalLogDialog.cpp" line="530"/>
-        <location filename="../SignalLogDialog.cpp" line="534"/>
-        <location filename="../SignalLogDialog.cpp" line="538"/>
+        <location filename="../SignalLogDialog.cpp" line="494"/>
+        <location filename="../SignalLogDialog.cpp" line="498"/>
+        <location filename="../SignalLogDialog.cpp" line="502"/>
+        <location filename="../SignalLogDialog.cpp" line="506"/>
+        <location filename="../SignalLogDialog.cpp" line="510"/>
         <source>yes</source>
         <translation>да</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="522"/>
-        <location filename="../SignalLogDialog.cpp" line="526"/>
-        <location filename="../SignalLogDialog.cpp" line="530"/>
-        <location filename="../SignalLogDialog.cpp" line="534"/>
-        <location filename="../SignalLogDialog.cpp" line="538"/>
+        <location filename="../SignalLogDialog.cpp" line="494"/>
+        <location filename="../SignalLogDialog.cpp" line="498"/>
+        <location filename="../SignalLogDialog.cpp" line="502"/>
+        <location filename="../SignalLogDialog.cpp" line="506"/>
+        <location filename="../SignalLogDialog.cpp" line="510"/>
         <source>no</source>
         <translation>не</translation>
     </message>
@@ -1725,17 +1735,17 @@ W:0000   E:0000</translation>
 <context>
     <name>SignalLogDialog</name>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="2099"/>
+        <location filename="../SignalLogDialog.cpp" line="2042"/>
         <source>Signals Log</source>
         <translation>Журнал на сигналите</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="2126"/>
+        <location filename="../SignalLogDialog.cpp" line="2069"/>
         <source>Total: %1</source>
         <translation>Общо: %1</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="2127"/>
+        <location filename="../SignalLogDialog.cpp" line="2070"/>
         <source>Filtered: %1</source>
         <translation>Филтрирани: %1</translation>
     </message>
@@ -1743,7 +1753,7 @@ W:0000   E:0000</translation>
 <context>
     <name>SignalLogModel</name>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="661"/>
+        <location filename="../SignalLogDialog.cpp" line="619"/>
         <source>RecordID: %1
 SignalID: %2
 EquipmentID: %3
@@ -1773,7 +1783,7 @@ PlantTime: %12</translation>
 <context>
     <name>SignalLogWidget</name>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="981"/>
+        <location filename="../SignalLogDialog.cpp" line="932"/>
         <source>A mask contains &apos;*&apos; and &apos;?&apos; symbols.
 	&apos;*&apos; symbol means any set of symbols on its place, &apos;?&apos; symbol means one symbol on its place.
 	Several masks can be separated by semicolon or space.
@@ -1798,7 +1808,7 @@ PlantTime: %12</translation>
 	За прилагането на филтъра, въведете маската и натиснете Enter.</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="991"/>
+        <location filename="../SignalLogDialog.cpp" line="942"/>
         <source>Tags for filtering signals.
 
 	Several tags can be separated by semicolon or space: &quot;tag1; tag2&quot; or &quot;tag1 tag2&quot;.
@@ -1811,153 +1821,153 @@ PlantTime: %12</translation>
 	За прилагане на филтъра, въведете етикетите и натиснете Enter.</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1196"/>
+        <location filename="../SignalLogDialog.cpp" line="1145"/>
         <source>Copy</source>
         <translation>Копирай</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1211"/>
+        <location filename="../SignalLogDialog.cpp" line="1159"/>
         <source>Acknowledge up to </source>
         <translation>Потвърдете до </translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1243"/>
+        <location filename="../SignalLogDialog.cpp" line="1191"/>
         <source>...and %1 more signal(s)</source>
         <translation>...и %1 още сигнал(и)</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1314"/>
+        <location filename="../SignalLogDialog.cpp" line="1259"/>
         <source>Nothing to export.</source>
         <translation>Нищо за експорт.</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1321"/>
+        <location filename="../SignalLogDialog.cpp" line="1266"/>
         <source>Save File</source>
         <translation>Запази файлът</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1323"/>
+        <location filename="../SignalLogDialog.cpp" line="1268"/>
         <source>Portable Document Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)</source>
         <translation>Portable Document Format (*.pdf);;CSV Файлове със сойности разделени с точка и запетая (*.csv);;Текст (*.txt);;HTML (*.html)</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1330"/>
+        <location filename="../SignalLogDialog.cpp" line="1275"/>
         <source>Export Selected Only</source>
         <translation>Експортирай само маркираните</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1384"/>
+        <location filename="../SignalLogDialog.cpp" line="1329"/>
         <source>Unsupported file format.</source>
         <translation>Не поддържан файлов фомат.</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1396"/>
+        <location filename="../SignalLogDialog.cpp" line="1341"/>
         <source>Print All</source>
         <translation>Разпечатай всичко</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1406"/>
+        <location filename="../SignalLogDialog.cpp" line="1351"/>
         <source>Print Selected</source>
         <translation>Разпечатай маркираното</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1503"/>
+        <location filename="../SignalLogDialog.cpp" line="1448"/>
         <source>Are you sure you want to acknowledge all signal events?</source>
         <translation>Сигурни ли сте, че искате да потвърдите всички събития за сигналите?</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1584"/>
+        <location filename="../SignalLogDialog.cpp" line="1527"/>
         <source>Mask</source>
         <translation>Маркирай</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1587"/>
+        <location filename="../SignalLogDialog.cpp" line="1530"/>
         <source>Enter mask (&quot;*,?&quot;) here</source>
         <translation>Тук въведи маска  (&quot;*,?&quot;)</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1610"/>
+        <location filename="../SignalLogDialog.cpp" line="1553"/>
         <source>List</source>
         <translation>Списък</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1625"/>
+        <location filename="../SignalLogDialog.cpp" line="1568"/>
         <source>Tags</source>
         <translation>Етикети</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1628"/>
+        <location filename="../SignalLogDialog.cpp" line="1571"/>
         <source>Signal tags space separated</source>
         <translation>Етикети на сигнали разделени с разстояние</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1639"/>
+        <location filename="../SignalLogDialog.cpp" line="1582"/>
         <source>Reset Filter</source>
         <translation>Нулиране на филтъра</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1651"/>
+        <location filename="../SignalLogDialog.cpp" line="1594"/>
         <source>Export...</source>
         <translation>Експорт...</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1656"/>
+        <location filename="../SignalLogDialog.cpp" line="1599"/>
         <source>Print...</source>
         <translation>Печат...</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1663"/>
+        <location filename="../SignalLogDialog.cpp" line="1606"/>
         <source>Ack All</source>
         <translation>Потвърждение на всички</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1668"/>
-        <location filename="../SignalLogDialog.cpp" line="1677"/>
+        <location filename="../SignalLogDialog.cpp" line="1611"/>
+        <location filename="../SignalLogDialog.cpp" line="1620"/>
         <source>Pause</source>
         <translation>Пауза</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1677"/>
+        <location filename="../SignalLogDialog.cpp" line="1620"/>
         <source>Resume</source>
         <translation>Възобновяване</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1731"/>
+        <location filename="../SignalLogDialog.cpp" line="1674"/>
         <source>All</source>
         <translation>Всички</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1732"/>
+        <location filename="../SignalLogDialog.cpp" line="1675"/>
         <source>AppSignalID</source>
         <translation>AppSignalID</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1733"/>
+        <location filename="../SignalLogDialog.cpp" line="1676"/>
         <source>CustomAppSignalID</source>
         <translation>CustomAppSignalID</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1734"/>
+        <location filename="../SignalLogDialog.cpp" line="1677"/>
         <source>EquipmentID</source>
         <translation>EquipmentID</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1735"/>
+        <location filename="../SignalLogDialog.cpp" line="1678"/>
         <source>LmEquipmentID</source>
         <translation>LmEquipmentID</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1844"/>
+        <location filename="../SignalLogDialog.cpp" line="1787"/>
         <source>Not selected</source>
         <translation>Нямя избран</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="1852"/>
+        <location filename="../SignalLogDialog.cpp" line="1795"/>
         <source>[%1] %2</source>
         <translation>[%1] %2</translation>
     </message>
     <message>
-        <location filename="../SignalLogDialog.cpp" line="2049"/>
+        <location filename="../SignalLogDialog.cpp" line="1992"/>
         <source>Warning!
 
 An event filter is active. Events that are currently hidden will also be acknowledged.
