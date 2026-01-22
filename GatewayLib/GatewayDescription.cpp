@@ -9,6 +9,7 @@
 #include "GatewayDescription.h"
 #include "IvsImpulseGateway.h"
 #include "ModbusSlaveGateway.h"
+#include "AdsGateway.h"
 
 namespace Gateway
 {
@@ -451,6 +452,9 @@ namespace Gateway
 
 		case E::GatewayType::ModbusSlave:
 			return std::make_shared<ModbusSlaveGateway>();
+
+		case E::GatewayType::AdsGateway:
+			return std::make_shared<AdsGateway>();
 
 		default:
 			Q_ASSERT(false);

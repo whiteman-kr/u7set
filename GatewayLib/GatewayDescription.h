@@ -19,7 +19,8 @@ namespace Gateway
 		{
 			Unknown,
 			IVS_Impulse,
-			ModbusSlave
+			ModbusSlave,
+			AdsGateway
 		};
 		Q_ENUM(GatewayType)
 
@@ -64,7 +65,11 @@ namespace Gateway
 
 			ModbusDeviceID,
 			SignalsFormat,
-			ModbusMode
+			ModbusMode,
+
+			// AdsGatewaay
+
+			ClientRequestIP1
 		};
 		Q_ENUM(Setting)
 

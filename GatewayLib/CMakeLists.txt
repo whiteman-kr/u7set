@@ -11,19 +11,8 @@ find_package(Qt6 REQUIRED COMPONENTS Network)
 set(TARGET GatewayLib)
 
 qt_add_library(${TARGET} STATIC
-	# ISignalManager.h
-	# IAppSignalManager.h
-	# ITuningSignalManager.h
-	# PropertyNames.cpp
-	# PropertyNames.h
-	# RecentUsed.cpp
-	# RecentUsed.h
-	# SimpleAppSignalState.cpp
-	# SimpleAppSignalState.h
-	# TuningSignalState.cpp
-	# TuningSignalState.h
-	# TuningValue.cpp
-	# TuningValue.h
+	AdsGateway.cpp
+	AdsGateway.h
 	GatewayDescription.cpp
 	GatewayDescription.h
 	GatewayParserLog.cpp
