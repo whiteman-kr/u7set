@@ -1,40 +1,47 @@
-#include "TcpConnection.hpp"
+#include "AdsGwConnection.hpp"
 
 #include <array>
 #include <iostream>
 
+void printHelp()
+{
+	std::cout << "Available commands:\n";
+	std::cout << "  help - Show this help message\n";
+	std::cout << "  exit - Exit the program\n";
+}
+
 int main()
 {
+	std::string_view address = "127.0.0.1";
+	uint16_t port = 5566;
+
 	{
-		adsgw::TcpConnection conn;
+		std::cout << "Creating TCP connection..." << std::endl;
+		std::cout << "\t address: " << address << std::endl;
+		std::cout << "\t port: " << port << std::endl;
 
-		bool res = conn.connect("127.0.0.1", 1111);
-		std::cout << "Connect result: " << res << ", LasteError: " << conn.lastError() << "\n";
+		adsgw::AdsGwConnection conn;
 
-		if (res == true)
+		conn.connect(address, port, "CLIENTID");
+
+		while (true)
 		{
-			const std::string_view msg = "Hello, TCP Server!";
-			std::span<const std::byte> dataSpan{reinterpret_cast<const std::byte*>(msg.data()), msg.size()};
+			std::string line;
+			std::getline(std::cin, line);
 
-			res = conn.send(dataSpan);
-			std::cout << "Send result: " << res << ", LasteError: " << conn.lastError() << "\n";
-
-			std::array<std::byte, 10> dataBuffer{};
-			bool received = conn.receive(dataBuffer);
-			if (received == true)
+			if (line == "help")
 			{
-				std::string receivedStr{reinterpret_cast<const char*>(dataBuffer.data()), dataBuffer.size()};
-				std::cout << "Received " << dataBuffer.size() << " bytes: " << receivedStr << "\n";
-			}
-			else
-			{
-				std::cout << "Receive failed, LasteError: " << conn.lastError() << "\n";
+				printHelp();
+				continue;
 			}
 
-			conn.close();
+			if (line == "exit")
+			{
+				break;
+			}
 		}
 	}
 
-	std::cout << "Hello, World!" << std::endl;
+	std::cout << "Finished." << std::endl;
 	return 0;
 }

@@ -1,5 +1,6 @@
 #include "TcpConnLinux.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <optional>
 #include <system_error>

@@ -1,5 +1,6 @@
 #include "TcpConnWindows.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <optional>
 #include <system_error>
@@ -10,13 +11,6 @@
 #include <WinSock2.h>
 
 #pragma comment(lib, "Ws2_32.lib")
-
-// #include <fcntl.h>
-// #include <poll.h>
-// #include <unistd.h>
-// #include <arpa/inet.h>
-// #include <netinet/in.h>
-// #include <sys/socket.h>
 
 namespace adsgw
 {
@@ -72,7 +66,6 @@ namespace adsgw
 		}
 
 		resetError();
-		std::optional<int> flags;
 
 		try
 		{
@@ -82,6 +75,8 @@ namespace adsgw
 				throw ::WSAGetLastError();
 			}
 
+			// Make socket non-blocking
+			//
 			u_long nonBlocking = 1;
 			::ioctlsocket(m_socket, FIONBIO, &nonBlocking);
 
@@ -107,62 +102,96 @@ namespace adsgw
 			}
 			else
 			{
-				if (auto lastErr = ::WSAGetLastError(); //
-					lastErr != WSAEWOULDBLOCK)
+				int lastErr = ::WSAGetLastError();
+				if (lastErr != WSAEWOULDBLOCK && lastErr != WSAEINPROGRESS)
 				{
 					throw lastErr;
 				}
 
-														//        // Wait for connection
-				//        //
-				//        bool connected = false;
-				//        auto startedAt = std::chrono::steady_clock::now();
+				// Wait for connection completion with timeout & cancellation
+				//
+				bool connected = false;
+				auto startedAt = std::chrono::steady_clock::now();
 
-				//        while (connected == false)
-				//        {
-				//            if (isCancelled && isCancelled() == true)
-				//            {
-				//                throw "Connection cancelled";
-				//            }
+				while (connected == false)
+				{
+					if (isCancelled && isCancelled() == true)
+					{
+						throw "Connection cancelled";
+					}
 
-				//            auto now = std::chrono::steady_clock::now();
-				//            auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - startedAt);
-				//            if (elapsedMs >= timeout)
-				//            {
-				//                throw "Connection timeout";
-				//            }
+					auto now = std::chrono::steady_clock::now();
+					auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - startedAt);
+					if (elapsed >= timeout)
+					{
+						throw "Connection timeout";
+					}
 
-				//            pollfd fds{};
-				//            fds.fd = m_fd;
-				//            fds.events = POLLOUT;
+					long long remainingMs = (timeout - elapsed).count();
+					// wait at most 200ms, but not more than remaining timeout, at least 1ms
+					long waitMs = static_cast<long>(std::clamp(remainingMs, 1LL, 200LL));
 
-				//            auto remaining = static_cast<int>((timeout - elapsedMs).count());
-				//            int waitMs = std::min(remaining, 200); // Timeout 200ms or less depending on remaining time
+					fd_set writeSet;
+					fd_set errorSet;
+					FD_ZERO(&writeSet);
+					FD_ZERO(&errorSet);
+					FD_SET(m_socket, &writeSet);
+					FD_SET(m_socket, &errorSet);
 
-				//            int pollRes = ::poll(&fds, 1, waitMs);
-				//            if (pollRes < 0 && errno != EINTR)
-				//            {
-				//                throw errno;
-				//            }
+					TIMEVAL tv{};
+					tv.tv_sec = static_cast<long>(waitMs / 1000);
+					tv.tv_usec = static_cast<long>((waitMs % 1000) * 1000);
 
-				//            connected = (pollRes > 0);
-				//        }
+					int sel = ::select(0, nullptr, &writeSet, &errorSet, &tv);
+					if (sel == SOCKET_ERROR)
+					{
+						int selErr = ::WSAGetLastError();
+						// On Windows there is no EINTR, so any error is real
+						//
+						throw selErr;
+					}
 
-				//        // Socket is ready - check if connection succeeded
-				//        //
-				//        {
-				//            int error{};
-				//            socklen_t errorLength = sizeof(error);
-				//            if (::getsockopt(m_fd, SOL_SOCKET, SO_ERROR, &error, &errorLength) < 0)
-				//            {
-				//                throw errno;
-				//            }
+					if (sel == 0)
+					{
+						// timeout slice; loop to re-check global timeout / cancellation
+						//
+						continue;
+					}
 
-				//            if (error != 0)
-				//            {
-				//                throw error;
-				//            }
-				//        }
+					if (FD_ISSET(m_socket, &errorSet))
+					{
+						// get pending error
+						//
+						int so_error = 0;
+						int optLen = sizeof(so_error);
+						if (::getsockopt(m_socket, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&so_error), &optLen) == SOCKET_ERROR)
+						{
+							throw ::WSAGetLastError();
+						}
+						if (so_error != 0)
+						{
+							throw so_error;
+						}
+					}
+
+					if (FD_ISSET(m_socket, &writeSet))
+					{
+						// socket is writable: check final connect status
+						//
+						int so_error = 0;
+						int optLen = sizeof(so_error);
+						if (::getsockopt(m_socket, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&so_error), &optLen) == SOCKET_ERROR)
+						{
+							throw ::WSAGetLastError();
+						}
+						if (so_error != 0)
+						{
+							throw so_error;
+						}
+
+						connected = true;
+					}
+				}
 			}
 		}
 		catch (const char* error)
@@ -186,13 +215,10 @@ namespace adsgw
 			return false;
 		}
 
-		// Restore blocking mode if it was changed before.
+		// Restore blocking mode
 		//
-		if (flags.has_value() == true)
-		{
-			u_long nonBlocking = 0;
-			::ioctlsocket(m_socket, FIONBIO, &nonBlocking);
-		}
+		u_long nonBlocking = 0;
+		::ioctlsocket(m_socket, FIONBIO, &nonBlocking);
 
 		return true;
 	}
@@ -227,50 +253,63 @@ namespace adsgw
 
 		resetError();
 
-		// size_t total = 0;
-		// auto startedAt = std::chrono::steady_clock::now();
+		size_t total = 0;
+		auto startedAt = std::chrono::steady_clock::now();
 
-		// while (total < data.size())
-		//{
-		//     if (isCancelled && isCancelled() == true)
-		//     {
-		//         setError("Send cancelled");
-		//         return false;
-		//     }
+		while (total < data.size())
+		{
+			if (isCancelled && isCancelled() == true)
+			{
+				setError("Send cancelled");
+				return false;
+			}
 
-		//    auto now = std::chrono::steady_clock::now();
-		//    if (now - startedAt >= timeout)
-		//    {
-		//        setError("Send timeout");
-		//        return false;
-		//    }
+			auto now = std::chrono::steady_clock::now();
+			if (now - startedAt >= timeout)
+			{
+				setError("Send timeout");
+				return false;
+			}
 
-		//    int sendResult = ::send(m_fd, data.data() + total, data.size() - total, MSG_NOSIGNAL);
-		//    if (sendResult == -1)
-		//    {
-		//        auto err = errno;
-		//        if (err == EINTR)
-		//        {
-		//            // Interrupted by a signal, retry the operation
-		//            //
-		//            continue;
-		//        }
+			int sendResult = ::send(m_socket, reinterpret_cast<const char*>(data.data() + total), static_cast<int>(data.size() - total), 0);
+			if (sendResult == SOCKET_ERROR)
+			{
+				auto err = ::WSAGetLastError();
 
-		//        if (err == EAGAIN || err == EWOULDBLOCK)
-		//        {
-		//            // Socket not ready for writing, try again later.
-		//            // Here should be a wait with timeout, bussy wait for simplicity.
-		//            //
-		//            std::this_thread::yield();
-		//            continue;
-		//        }
+				// Transient / retryable errors
+				//
+				if (err == WSAEINTR)
+				{
+					// Interrupted, retry immediately
+					//
+					continue;
+				}
 
-		//        setError(err);
-		//        return false;
-		//    }
+				if (err == WSAEWOULDBLOCK)
+				{
+					// Socket not ready for writing yet.
+					// Simple backoff: yield and retry, while still honoring timeout/cancel checks.
+					//
+					std::this_thread::yield();
+					continue;
+				}
 
-		//    total += static_cast<size_t>(sendResult);
-		//}
+				// Any other error is fatal for this send
+				//
+				setError(err);
+				return false;
+			}
+
+			if (sendResult == 0)
+			{
+				// Peer closed the connection
+				//
+				setError("Connection closed");
+				return false;
+			}
+
+			total += static_cast<size_t>(sendResult);
+		}
 
 		return true;
 	}
@@ -285,74 +324,100 @@ namespace adsgw
 
 		resetError();
 
-		// auto startedAt = std::chrono::steady_clock::now();
-		// size_t received = 0;
+		auto startedAt = std::chrono::steady_clock::now();
+		size_t received = 0;
 
-		// while (received < buffer.size())
-		//{
-		//     if (isCancelled && isCancelled() == true)
-		//     {
-		//         setError("Receive cancelled");
-		//         return false;
-		//     }
+		while (received < buffer.size())
+		{
+			if (isCancelled && isCancelled() == true)
+			{
+				setError("Receive cancelled");
+				return false;
+			}
 
-		//    auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startedAt);
-		//    if (elapsedMs >= timeout)
-		//    {
-		//        setError("Receive timeout");
-		//        return false;
-		//    }
+			auto now = std::chrono::steady_clock::now();
+			auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - startedAt);
+			if (elapsed >= timeout)
+			{
+				setError("Receive timeout");
+				return false;
+			}
 
-		//    pollfd fds{};
-		//    fds.fd = m_fd;
-		//    fds.events = POLLIN;
+			auto remainingMs = (timeout - elapsed).count();
+			long waitMs = static_cast<long>(std::clamp(remainingMs, 1LL, 200LL));
 
-		//    auto waitMs = std::clamp<int>((timeout - elapsedMs).count(), 1, 100);
+			fd_set readSet;
+			fd_set errorSet;
+			FD_ZERO(&readSet);
+			FD_ZERO(&errorSet);
+			FD_SET(m_socket, &readSet);
+			FD_SET(m_socket, &errorSet);
 
-		//    int pollResult = ::poll(&fds, 1, waitMs);
-		//    if (pollResult < 0)
-		//    {
-		//        if (errno == EINTR)
-		//        {
-		//            continue;
-		//        }
-		//        setError(errno);
-		//        return false;
-		//    }
+			TIMEVAL tv{};
+			tv.tv_sec = static_cast<long>(waitMs / 1000);
+			tv.tv_usec = static_cast<long>((waitMs % 1000) * 1000);
 
-		//    if (pollResult == 0)
-		//    {
-		//        continue; // timeout slice, loop will re-check overall timeout
-		//    }
+			int sel = ::select(0, &readSet, nullptr, &errorSet, &tv);
+			if (sel == SOCKET_ERROR)
+			{
+				setError(::WSAGetLastError());
+				return false;
+			}
 
-		//    if ((fds.revents & (POLLERR | POLLHUP)) != 0)
-		//    {
-		//        setError("Connection closed");
-		//        return false;
-		//    }
+			if (sel == 0)
+			{
+				continue; // slice timed out, re-check overall timeout/cancel
+			}
 
-		//    int recvResult = ::recv(m_fd, buffer.data() + received, buffer.size() - received, MSG_DONTWAIT);
-		//    if (recvResult == 0)
-		//    {
-		//        setError("Connection closed");
-		//        return false;
-		//    }
-		//    if (recvResult == -1)
-		//    {
-		//        int err = errno;
-		//        if (err == EINTR || err == EAGAIN || err == EWOULDBLOCK)
-		//        {
-		//            // Retry
-		//            //
-		//            continue;
-		//        }
+			if (FD_ISSET(m_socket, &errorSet))
+			{
+				int so_error = 0;
+				int optLen = sizeof(so_error);
+				if (::getsockopt(m_socket, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&so_error), &optLen) == SOCKET_ERROR)
+				{
+					setError(::WSAGetLastError());
+					return false;
+				}
+				if (so_error != 0)
+				{
+					setError(so_error);
+					return false;
+				}
+			}
 
-		//        setError(err);
-		//        return false;
-		//    }
+			if (FD_ISSET(m_socket, &readSet))
+			{
+				size_t toRead = buffer.size() - received;
+				int recvResult = ::recv(m_socket, reinterpret_cast<char*>(buffer.data() + received), static_cast<int>(toRead), 0);
 
-		//    received += static_cast<size_t>(recvResult);
-		//}
+				if (recvResult == 0)
+				{
+					setError("Connection closed");
+					return false;
+				}
+
+				if (recvResult == SOCKET_ERROR)
+				{
+					int err = ::WSAGetLastError();
+
+					if (err == WSAEINTR)
+					{
+						continue; // retry
+					}
+
+					if (err == WSAEWOULDBLOCK)
+					{
+						std::this_thread::yield();
+						continue; // not ready yet, loop again
+					}
+
+					setError(err);
+					return false;
+				}
+
+				received += static_cast<size_t>(recvResult);
+			}
+		}
 
 		return true;
 	}

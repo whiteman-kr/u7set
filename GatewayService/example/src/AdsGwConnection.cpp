@@ -115,16 +115,12 @@ namespace
 		template<typename ResponseT, typename ResponseVariablePartT = char, typename cancellableFuncT = std::function<bool()>>
 		GwErrorCode receiveResponsePacket(GwRequestId requestId,
 										  ResponseT& response,
-										  std::span<const ResponseVariablePartT> responseVariablePart,
+										  std::span<ResponseVariablePartT> responseVariablePart,
 										  const cancellableFuncT& isCancelledFunc = {})
 		{
-			// TODO: Implement variable part handling !
-			// responseVariablePart!!!
-
-
 			// Receive and parse response header
 			//
-			thread_local std::array<std::byte, 4 + 4 + 4> responseHeader{}; // Request ID + Payload Size + Status Code (up to payload)
+			std::array<std::byte, 4 + 4 + 4> responseHeader{}; // Request ID + Payload Size + Status Code (up to payload)
 
 			bool receiveOk = m_conn.receive(std::span<std::byte>{responseHeader.data(), responseHeader.size()}, isCancelledFunc);
 			if (receiveOk == false)
@@ -159,10 +155,11 @@ namespace
 				{
 					throw std::runtime_error{std::format("Receive error: {}", m_conn.lastError())};
 				}
+
 				uint32_t respCrc = 0;
 				std::memcpy(&respCrc, responseCrcBuffer.data(), sizeof(respCrc));
 
-				uint32_t computedCrc = Radiy::CRC32(std::span<const std::byte>{responseHeader.data(), responseHeader.size()});
+				uint32_t computedCrc = Radiy::CRC32(responseHeader);
 				if (respCrc != computedCrc)
 				{
 					throw std::runtime_error{"Response CRC32 mismatch for error response"};
@@ -171,13 +168,21 @@ namespace
 				return static_cast<GwErrorCode>(respStatusCode);
 			}
 
-			// Receive and parse response payload + CRC32
-			//
-			thread_local std::array<std::byte, sizeof(ResponseT) + 4> payloadCrcBuffer{}; // Payload + CRC32
-			if (respPayloadSize != sizeof(ResponseT))
+			if (respPayloadSize > ADSGW_MAX_PAYLOAD_SIZE)
+			{
+				throw std::runtime_error{std::format("Response payload size too large: {}", respPayloadSize)};
+			}
+
+			if (respPayloadSize != sizeof(ResponseT) + responseVariablePart.size() * sizeof(ResponseVariablePartT))
 			{
 				throw std::runtime_error{std::format("Invalid response payload size: {}", respPayloadSize)};
 			}
+
+			// Receive and parse response payload + CRC32
+			//
+			thread_local std::vector<std::byte> payloadCrcBuffer{}; // Payload + CRC32
+			payloadCrcBuffer.clear();
+			payloadCrcBuffer.resize(respPayloadSize + 4);           // + CRC32
 
 			receiveOk = m_conn.receive(std::span<std::byte>{payloadCrcBuffer.data(), payloadCrcBuffer.size()}, isCancelledFunc);
 			if (receiveOk == false)
@@ -185,16 +190,22 @@ namespace
 				throw std::runtime_error{std::format("Receive error: {}", m_conn.lastError())};
 			}
 
+			// Copy payload to output structures
+			//
 			std::memcpy(&response, payloadCrcBuffer.data(), sizeof(ResponseT));
+			std::memcpy(responseVariablePart.data(),
+						payloadCrcBuffer.data() + sizeof(ResponseT),
+						responseVariablePart.size() * sizeof(ResponseVariablePartT));
 
-			uint32_t receivedCrc = 0; // Received CRC32!
-			std::memcpy(&receivedCrc, payloadCrcBuffer.data() + sizeof(ResponseT), sizeof(receivedCrc));
+			// Check packet CRC
+			// Calc CRC over header and payload (different buffers)
+			//
+			auto computedCrc = Radiy::CRC32(responseHeader, false);
+			computedCrc = Radiy::CRC32(payloadCrcBuffer, true, computedCrc);
 
-			uint32_t computedCrc = Radiy::CRC32(std::span<const std::byte>{responseHeader.data(), responseHeader.size()}, false);
-
-			std::span<const std::byte>{payloadCrcBuffer.data(), sizeof(ResponseT)};
-			computedCrc = Radiy::CRC32(std::span<const std::byte>{payloadCrcBuffer.data(), sizeof(ResponseT)}, true, computedCrc);
-			if (receivedCrc != computedCrc)
+			// CRC calculation includes CRC itself, thus final value must match the residue.
+			//
+			if (computedCrc != Radiy::Crc32Residue)
 			{
 				throw std::runtime_error{"Response CRC32 mismatch"};
 			}
@@ -211,7 +222,7 @@ namespace
 
 	void AdsGwConnImpl::run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId)
 	{
-		std::function<bool()> m_isCancelledFunc = [stoken]()
+		m_isCancelledFunc = [stoken]()
 		{
 			return stoken.stop_requested();
 		};
@@ -231,12 +242,23 @@ namespace
 				// Send Handshake
 				//
 				requestHandshake(equipmentId);
+
+				while (stoken.stop_requested() == false)
+				{
+					// TODO: Main communication loop
+					//
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+				}
 			}
 			catch (const std::runtime_error& e)
 			{
+				m_conn.close();
+
 				// todo: Logger, now just print to stdout.
 				//
-				std::cout << e.what();
+				std::cout << e.what() << "\n";
+
+				std::this_thread::sleep_for(std::chrono::seconds(1));
 			}
 		}
 
@@ -258,7 +280,17 @@ namespace
 		request.protocolVersion = ADSGW_PROTOCOL_VERSION;
 		std::snprintf(request.clientName, sizeof(request.clientName), "%s", equipmentId.data());
 
-		auto requestResult = sendRequest(ADSGW_HANDSHAKE, request, response, m_isCancelledFunc);
+		GwErrorCode requestResult{};
+
+		try
+		{
+			requestResult = sendRequest(ADSGW_HANDSHAKE, request, response, m_isCancelledFunc);
+		}
+		catch (const std::runtime_error& e)
+		{
+			throw std::runtime_error{std::format("Handshake error: {}", e.what())};
+		}
+
 		if (requestResult != GWC_SUCCESS)
 		{
 			throw std::runtime_error{std::format("Handshake error: {}", static_cast<int>(requestResult))};
@@ -268,6 +300,20 @@ namespace
 		{
 			m_conn.close();
 			throw std::runtime_error{std::format("Handshake error: Unsupported protocol version {}", response.protocolVersion)};
+		}
+
+		if (response.sizeof_GwAppSignalParam != sizeof(GwAppSignalParam))
+		{
+			m_conn.close();
+			throw std::runtime_error{
+				std::format("Handshake error: Incompatible GwAppSignalParam size {}", response.sizeof_GwAppSignalParam)};
+		}
+
+		if (response.sizeof_GwAppSignalState != sizeof(GwAppSignalState))
+		{
+			m_conn.close();
+			throw std::runtime_error{
+				std::format("Handshake error: Incompatible GwAppSignalState size {}", response.sizeof_GwAppSignalState)};
 		}
 
 		return;

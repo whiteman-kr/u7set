@@ -741,7 +741,7 @@ The `GwAppSignalState` structure contains the current state and value of a signa
 ```cpp
 struct GwAppSignalState {
     uint64_t hash;                    // Signal hash (as defined in Section 5.2)
-    int64_t  systemTime;              // Server system time (UTC+0) when the state was acquired ()
+    int64_t  systemTime;              // Server system time (UTC+0) when the state was acquired
     int64_t  localTime;               // systemTime adjusted to Local time zone
     int64_t  plantTime;               // Timestamp assigned in LogicModule (local time zone)
     double   value;                   // Signal value (for discrete: 0=false, 1=true)
