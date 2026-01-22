@@ -6,6 +6,7 @@ set(TARGET AdsGatewayLib)
 add_library(${TARGET} STATIC
   ./include/AdsGatewayLib/AdsGwProtocol.hpp
   ./include/AdsGatewayLib/GwCrc32.hpp
+  ./include/AdsGatewayLib/GwHash.hpp
   
   ./src/GwCrc32.cpp
 )

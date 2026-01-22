@@ -128,3 +128,5 @@ target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Network Qt6::Widgets Qt6:
 target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx UtilsLib AppSignalLib HardwareLib OnlineLib ServiceLib GatewayLib)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)
+
+add_subdirectory(example)
