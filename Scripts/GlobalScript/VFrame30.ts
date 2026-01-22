@@ -82,11 +82,11 @@ module VFrame30 {
 
 		// Adds an item to be highlighted with a rectangle (Ctrl + left click)..
 		//
-		void addHighlightItem(SchemaItem item);
+		addHighlightItem(item: SchemaItem): void;
 
 		// Clears all highlighted items.
 		//
-		void clearHighlightItems();
+		clearHighlightItems(): void;
 	}
 
 	export interface Schema {
