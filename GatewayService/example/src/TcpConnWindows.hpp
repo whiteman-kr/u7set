@@ -7,7 +7,7 @@
 #include <span>
 #include <string>
 
-namespace adsgw
+namespace AdsGatewayLib
 {
 	class TcpConnWindows final
 	{
@@ -76,4 +76,4 @@ namespace adsgw
 		std::uintptr_t m_socket; // Type must be compatible with SOCKET! Keep Windows headers inside .cpp
 		std::string m_lastError;
 	};
-} // namespace adsgw
+} // namespace AdsGatewayLib

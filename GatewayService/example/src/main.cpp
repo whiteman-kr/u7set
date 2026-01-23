@@ -1,6 +1,8 @@
 #include "AdsGwConnection.hpp"
 #include "MiniLogger.hpp"
 
+#include <AdsGatewayLib/AdsGwProtocol.hpp>
+
 #include <array>
 #include <iostream>
 
@@ -15,17 +17,17 @@ void printHelp()
 int main()
 {
 	std::string_view address = "127.0.0.1";
-	uint16_t port = 5566;
+	uint16_t port = AdsGatewayLib::ADSGW_PORT;
 
-	adsgw::ConsoleMiniLogger logger;
-	logger.setTraceEnabled(false);
+	AdsGatewayLib::ConsoleMiniLogger logger;
+	logger.setTraceEnabled(true);
 
 	{
 		std::cout << "Creating TCP connection..." << std::endl;
 		std::cout << "\t address: " << address << std::endl;
 		std::cout << "\t port: " << port << std::endl;
 
-		adsgw::AdsGwConnection conn{logger};
+		AdsGatewayLib::AdsGwConnection conn{logger};
 
 		conn.connect(address, port, "CLIENTID");
 
@@ -33,6 +35,8 @@ int main()
 		{
 			std::string line;
 			std::getline(std::cin, line);
+			line.erase(0, line.find_first_not_of(" \t\r\n"));
+			line.erase(line.find_last_not_of(" \t\r\n") + 1);
 
 			if (line == "help")
 			{

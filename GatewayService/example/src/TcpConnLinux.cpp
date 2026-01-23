@@ -14,7 +14,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-namespace adsgw
+namespace AdsGatewayLib
 {
 	TcpConnLinux::TcpConnLinux(TcpConnLinux&& rhs) noexcept :
 		m_fd{std::exchange(rhs.m_fd, -1)},
@@ -359,4 +359,4 @@ namespace adsgw
 	{
 		m_lastError.clear();
 	}
-} // namespace adsgw
+} // namespace AdsGatewayLib

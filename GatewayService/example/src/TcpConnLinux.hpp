@@ -7,7 +7,7 @@
 #include <span>
 #include <string>
 
-namespace adsgw
+namespace AdsGatewayLib
 {
 	class TcpConnLinux final
 	{
@@ -73,4 +73,4 @@ namespace adsgw
 		int m_fd = -1;
 		std::string m_lastError;
 	};
-} // namespace adsgw
+} // namespace AdsGatewayLib

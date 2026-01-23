@@ -3,7 +3,7 @@
 #include <string>
 #include <thread>
 
-namespace adsgw
+namespace AdsGatewayLib
 {
 	class IMiniLogger;
 
@@ -19,4 +19,4 @@ namespace adsgw
 		IMiniLogger& m_logger;
 		std::jthread m_thread;
 	};
-} // namespace adsgw
+} // namespace AdsGatewayLib

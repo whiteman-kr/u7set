@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace adsgw
+namespace AdsGatewayLib
 {
 	constexpr uint16_t ADSGW_PORT = 5566;
 	constexpr uint16_t ADSGW_PROTOCOL_VERSION = 0x0100;
@@ -56,6 +56,62 @@ namespace adsgw
 
 	static_assert(sizeof(GwHandshakeResponse) == 16);
 
+	// Request ARGW_SIGNAL_LIST_START
+	//
+	struct GwSignalListStartRequest
+	{
+		uint32_t reserved;
+	};
+
+	static_assert(sizeof(GwSignalListStartRequest) == 4);
+
+	struct GwSignalListStartResponse
+	{
+		uint32_t totalItemCount; // Total number of AppSignalIDs in system
+		uint32_t partCount;      // Total number of parts (pages) to retrieve
+		uint32_t itemsPerPart;   // Maximum number of AppSignalIDs per part
+	};
+
+	static_assert(sizeof(GwSignalListStartResponse) == 12);
+
+	// Request ARGW_SIGNAL_LIST_NEXT
+	//
+	struct GwSignalListNextRequest
+	{
+		uint32_t part; // Part number to retrieve (0-based index)
+	};
+
+	static_assert(sizeof(GwSignalListNextRequest) == 4);
+
+	struct GwSignalListNextResponse
+	{
+		uint32_t part;             // Part number of this response
+		uint32_t appSignalIdCount; // Number of AppSignalIDs in this response
+
+								   // Array of AppSignalID strings
+		//
+#if 0
+		struct
+		{
+			char appSignalId[64]; // AppSignalID (null-terminated, max 64 bytes including '\0')
+		} appSignalIds[appSignalIdCount];
+#endif
+	};
+
+
+	// Request ARGW_SIGNAL_PARAM_START
+	//
+
+	// Request ARGW_SIGNAL_PARAM_NEXT
+	//
+
+	// Request ARGW_SIGNAL_STATE
+	//
+
+	// Request ARGW_SIGNAL_STATE_CHANGES
+	//
+
+
 	// Structure defining application signal parameters
 	//
 	struct GwAppSignalParam
@@ -100,4 +156,4 @@ namespace adsgw
 	};
 
 	static_assert(sizeof(GwAppSignalState) == 48);
-} // namespace adsgw
+} // namespace AdsGatewayLib

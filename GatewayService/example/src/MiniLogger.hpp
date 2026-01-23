@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string_view>
 
-namespace adsgw
+namespace AdsGatewayLib
 {
 	class IMiniLogger
 	{
@@ -47,4 +47,4 @@ namespace adsgw
 		bool m_traceEnabled{false};
 	};
 
-} // namespace adsgw
+} // namespace AdsGatewayLib

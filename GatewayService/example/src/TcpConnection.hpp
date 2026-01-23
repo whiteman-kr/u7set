@@ -7,7 +7,7 @@
 #include <span>
 #include <string>
 
-namespace adsgw
+namespace AdsGatewayLib
 {
 	class TcpConnLinux;
 	class TcpConnWindows;
@@ -75,4 +75,4 @@ namespace adsgw
 #endif
 		std::unique_ptr<TcpConnType> m_impl;
 	};
-} // namespace adsgw
+} // namespace AdsGatewayLib

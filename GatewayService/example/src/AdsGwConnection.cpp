@@ -13,10 +13,12 @@
 
 namespace
 {
-	using namespace adsgw;
+	using namespace AdsGatewayLib;
 
 	class AdsGwConnImpl final
 	{
+		using AppSignalIdNetworkT = std::array<char, 64>;
+
 	public:
 		AdsGwConnImpl(IMiniLogger& logger) :
 			m_logger{logger}
@@ -186,16 +188,23 @@ namespace
 				throw std::runtime_error{std::format("Response payload size too large: {}", respPayloadSize)};
 			}
 
-			if (respPayloadSize != sizeof(ResponseT) + responseVariablePart.size() * sizeof(ResponseVariablePartT))
+			if (respPayloadSize < sizeof(ResponseT))
 			{
-				throw std::runtime_error{std::format("Invalid response payload size: {}", respPayloadSize)};
+				throw std::runtime_error{std::format("Response payload size is smaller than ResponseT: {}", respPayloadSize)};
+			}
+
+			const uint32_t variablePayloadSize = respPayloadSize - static_cast<uint32_t>(sizeof(ResponseT));
+			const uint32_t maxVariableBytes = static_cast<uint32_t>(responseVariablePart.size() * sizeof(ResponseVariablePartT));
+			if (variablePayloadSize > maxVariableBytes)
+			{
+				throw std::runtime_error{std::format("Response payload variable part is greater than expected: {}", respPayloadSize)};
 			}
 
 			// Receive and parse response payload + CRC32
 			//
-			thread_local std::vector<std::byte> payloadCrcBuffer{}; // Payload + CRC32
+			thread_local std::vector<std::byte> payloadCrcBuffer{};            // Payload + CRC32
 			payloadCrcBuffer.clear();
-			payloadCrcBuffer.resize(respPayloadSize + 4);           // + CRC32
+			payloadCrcBuffer.resize(static_cast<size_t>(respPayloadSize) + 4); // + CRC32
 
 			receiveOk = m_conn.receive(std::span<std::byte>{payloadCrcBuffer.data(), payloadCrcBuffer.size()}, isCancelledFunc);
 			if (receiveOk == false)
@@ -206,9 +215,10 @@ namespace
 			// Copy payload to output structures
 			//
 			std::memcpy(&response, payloadCrcBuffer.data(), sizeof(ResponseT));
-			std::memcpy(responseVariablePart.data(),
-						payloadCrcBuffer.data() + sizeof(ResponseT),
-						responseVariablePart.size() * sizeof(ResponseVariablePartT));
+			if (variablePayloadSize > 0)
+			{
+				std::memcpy(responseVariablePart.data(), payloadCrcBuffer.data() + sizeof(ResponseT), variablePayloadSize);
+			}
 
 			// Check packet CRC
 			// Calc CRC over header and payload (different buffers)
@@ -226,7 +236,10 @@ namespace
 			return GWC_SUCCESS;
 		}
 
+		// Communication requests
+		//
 		void requestHandshake(std::string_view equipmentId);
+		std::vector<std::string> requestSignalList();
 
 	private:
 		IMiniLogger& m_logger;
@@ -259,6 +272,9 @@ namespace
 				//
 				requestHandshake(equipmentId);
 
+				auto appSignalIds = requestSignalList();
+				m_logger.logTraceFormat("Received {} signal IDs from ADS Gateway", appSignalIds.size());
+
 				while (stoken.stop_requested() == false)
 				{
 					// TODO: Main communication loop
@@ -288,6 +304,9 @@ namespace
 		return;
 	}
 
+	// Performs handshake with the ADS Gateway.
+	// Throws std::runtime_error on errors.
+	//
 	void AdsGwConnImpl::requestHandshake(std::string_view equipmentId)
 	{
 		GwHandshakeRequest request{};
@@ -310,7 +329,7 @@ namespace
 
 		if (requestResult != GWC_SUCCESS)
 		{
-			throw std::runtime_error{std::format("Handshake error: {}", static_cast<int>(requestResult))};
+			throw std::runtime_error{std::format("Handshake server error: {}", static_cast<int>(requestResult))};
 		}
 
 		if (response.protocolVersion != ADSGW_PROTOCOL_VERSION)
@@ -335,9 +354,105 @@ namespace
 
 		return;
 	}
+
+
+	// Requests the list of available signals from the ADS Gateway.
+	// Throws std::runtime_error on errors.
+	//
+	std::vector<std::string> AdsGwConnImpl::requestSignalList()
+	{
+		std::vector<std::string> result{};
+		uint32_t totalItems{};
+		uint32_t itemsPerPart{};
+		uint32_t partsCount{};
+
+		// Start
+		//
+		try
+		{
+			GwSignalListStartRequest request{};
+			GwSignalListStartResponse startResponse{};
+
+			m_logger.logTraceFormat("Sending ADSGW_SIGNAL_LIST_START request to ADS Gateway...");
+			GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_LIST_START, request, startResponse, m_isCancelledFunc);
+
+			if (requestResult != GWC_SUCCESS)
+			{
+				throw std::runtime_error{std::format("server error: {}", static_cast<int>(requestResult))};
+			}
+
+			totalItems = startResponse.totalItemCount;
+			itemsPerPart = startResponse.itemsPerPart;
+			partsCount = startResponse.partCount;
+		}
+		catch (const std::runtime_error& e)
+		{
+			throw std::runtime_error{std::format("ARGW_SIGNAL_LIST_START error: {}", e.what())};
+		}
+
+		// Next
+		//
+		try
+		{
+			result.reserve(totalItems);
+
+			std::vector<AppSignalIdNetworkT> responseVariablePartBuffer{};
+
+			for (uint32_t part = 0; part < partsCount; part++)
+			{
+				GwSignalListNextRequest request{};
+				GwSignalListNextResponse response{};
+				request.part = static_cast<uint32_t>(part);
+
+				responseVariablePartBuffer.resize(itemsPerPart);
+				std::memset(responseVariablePartBuffer.data(), 0, responseVariablePartBuffer.size() * sizeof(AppSignalIdNetworkT));
+
+				GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_LIST_NEXT,
+														request,
+														std::span<const std::byte>{},
+														response,
+														std::span<AppSignalIdNetworkT>{responseVariablePartBuffer},
+														m_isCancelledFunc);
+				if (requestResult != GWC_SUCCESS)
+				{
+					throw std::runtime_error{std::format("server error {}", static_cast<int>(requestResult))};
+				}
+
+				if (response.part != part)
+				{
+					throw std::runtime_error{std::format("part mismatch: requested {}, got {}", part, response.part)};
+				}
+
+				if (response.appSignalIdCount > itemsPerPart)
+				{
+					throw std::runtime_error{std::format("invalid appSignalIdCount: {}", response.appSignalIdCount)};
+				}
+
+				for (uint32_t i = 0; i < response.appSignalIdCount; ++i)
+				{
+					auto& id = responseVariablePartBuffer[i];
+					id[id.size() - 1] = '\0'; // Ensure null-termination
+					result.emplace_back(id.data());
+				}
+			}
+		}
+		catch (const std::runtime_error& e)
+		{
+			throw std::runtime_error{std::format("ADSGW_SIGNAL_LIST_NEXT error: {}", e.what())};
+		}
+
+		if (result.size() != totalItems)
+		{
+			assert(result.size() == totalItems);
+			throw std::runtime_error{
+				std::format("Getting signal list error: total items mismatch: expected {}, got {}", totalItems, result.size())};
+		}
+
+		return result;
+	}
 } // namespace
 
-namespace adsgw
+namespace AdsGatewayLib
 {
 	AdsGwConnection::AdsGwConnection(IMiniLogger& logger) :
 		m_logger{logger}
@@ -355,4 +470,4 @@ namespace adsgw
 	}
 
 	void AdsGwConnection::close() {}
-} // namespace adsgw
+} // namespace AdsGatewayLib
