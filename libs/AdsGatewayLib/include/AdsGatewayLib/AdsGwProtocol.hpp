@@ -5,10 +5,13 @@
 namespace AdsGatewayLib
 {
 	constexpr uint16_t ADSGW_PORT = 5566;
+
 	constexpr uint16_t ADSGW_PROTOCOL_VERSION = 0x0100;
 	constexpr uint32_t ADSGW_MAX_PAYLOAD_SIZE = 2 * 1024 * 1024; // 2 MB
 
-	enum GwErrorCode : uint16_t
+	constexpr std::size_t GW_MSG_CRC_SIZE = sizeof(uint32_t);
+
+	enum GwErrorCode : uint32_t
 	{
 		GWC_SUCCESS = 0,
 		GWC_INVALID_REQUEST = 1,
@@ -16,6 +19,7 @@ namespace AdsGatewayLib
 		GWC_NO_ADS_CONNECTION = 3,
 		GWC_TOO_MANY_SIGNALS = 4,
 		GWC_HANDSHAKE_REQUIRED = 5,
+		GWC_REQUEST_FORMAT_ERROR = 6,
 		GWC_INTERNAL_ERROR = 7,
 		GWC_CRC_ERROR = 10
 	};
@@ -31,6 +35,16 @@ namespace AdsGatewayLib
 		ADSGW_SIGNAL_STATE_CHANGES = 0x0301
 	};
 
+	struct GwMessageHeader
+	{
+		uint32_t requestID;
+		uint32_t payloadSize;
+		uint32_t statusCode;
+	};
+
+	static_assert(sizeof(GwMessageHeader) == 12);
+	constexpr std::size_t GW_MSG_HEADER_SIZE = sizeof(GwMessageHeader);
+
 	// Request ADSGW_HANDSHAKE
 	//
 	struct GwHandshakeRequest
@@ -41,6 +55,7 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwHandshakeRequest) == 68);
+	constexpr std::size_t GW_HANDSHAKE_REQUEST_SIZE = sizeof(GwHandshakeRequest);
 
 	struct GwHandshakeResponse
 	{
@@ -64,6 +79,7 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwSignalListStartRequest) == 4);
+	constexpr std::size_t GW_SIGNAL_LIST_START_REQUEST_SIZE = sizeof(GwSignalListStartRequest);
 
 	struct GwSignalListStartResponse
 	{
@@ -82,6 +98,7 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwSignalListNextRequest) == 4);
+	constexpr std::size_t GW_SIGNAL_LIST_NEXT_REQUEST_SIZE = sizeof(GwSignalListNextRequest);
 
 	struct GwSignalListNextResponse
 	{
@@ -98,6 +115,7 @@ namespace AdsGatewayLib
 #endif
 	};
 
+	constexpr std::size_t GW_APP_SIGNAL_ID_SIZE = 64;
 
 	// Request ARGW_SIGNAL_PARAM_START
 	//
@@ -140,6 +158,7 @@ namespace AdsGatewayLib
 		double tuningHighBound;    // High bound for tuning value
 	};
 
+	constexpr std::size_t GW_APP_SIGNAL_PARAM_SIZE = sizeof(GwAppSignalParam);
 	static_assert(sizeof(GwAppSignalParam) == 896);
 
 	// Structure defining application signal state
@@ -155,5 +174,9 @@ namespace AdsGatewayLib
 		uint32_t reserved;  // Reserved for future use
 	};
 
+	constexpr std::size_t GW_APP_SIGNAL_STATE_SIZE = sizeof(GwAppSignalState);
 	static_assert(sizeof(GwAppSignalState) == 48);
+
+	constexpr std::size_t GW_MAX_SIGNAL_STATES =
+		(ADSGW_MAX_PAYLOAD_SIZE - GW_MSG_HEADER_SIZE - GW_MSG_CRC_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
 } // namespace AdsGatewayLib

@@ -692,6 +692,8 @@ public:
 
 	const AppSignal* getSignalByHash(Hash hash) const;
 
+	const AppSignal* getSignalByIndex(int index) const;
+
 	bool isEmpty() const;
 	size_t count() const;
 

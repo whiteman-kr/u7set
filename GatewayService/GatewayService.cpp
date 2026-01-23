@@ -259,9 +259,9 @@ bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 	{
 		const ::Proto::AppSignal& appSignal = signalSet.appsignal(i);
 
-		const QString&& appSignalID = QString::fromStdString(appSignal.appsignalid());
+		const QString appSignalID = QString::fromStdString(appSignal.appsignalid());
 
-		if (m_acquiredSignals.contains(calcHash(appSignalID)) == true)
+		if (m_acquiredSignals.size() == 0 || m_acquiredSignals.contains(calcHash(appSignalID)))
 		{
 			m_appSignals.insert(appSignal);
 			aquiredSignalsCount++;

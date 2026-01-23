@@ -2771,6 +2771,16 @@ const AppSignal* AppSignals::getSignalByHash(Hash hash) const
 	return it->second;
 }
 
+const AppSignal* AppSignals::getSignalByIndex(int index) const
+{
+	if (index < 0 || index >= TO_INT(m_signals.size()))
+	{
+		return nullptr;
+	}
+
+	return m_signals[index];
+}
+
 bool AppSignals::isEmpty() const
 {
 	Q_ASSERT(m_signals.size() == m_hashToSignal.size());

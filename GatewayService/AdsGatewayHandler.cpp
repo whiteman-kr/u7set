@@ -192,7 +192,7 @@ namespace Gateway
 	{
 		Q_ASSERT(m_adsGatewayServer == nullptr);
 
-		m_adsGatewayServer = std::make_unique<AdsGatewayServer>(m_gateway->clientRequestIP1(), m_log);
+		m_adsGatewayServer = std::make_unique<AdsGatewayServer>(m_gateway->clientRequestIP1(), m_appSignals, m_log);
 
 		m_adsGatewayServer->run();
 	}
