@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <optional>
 #include <system_error>
 #include <thread>
 #include <utility>
@@ -11,6 +10,7 @@
 #include <WinSock2.h>
 
 #pragma comment(lib, "Ws2_32.lib")
+
 
 namespace AdsGatewayLib
 {

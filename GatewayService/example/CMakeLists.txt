@@ -5,12 +5,17 @@ project (AdsGatewayExample)
 set(TARGET AdsGatewayExample)
 
 add_executable(${TARGET} 
-    ./src/main.cpp
     ./src/AdsGwConnection.cpp
     ./src/AdsGwConnection.hpp
+    ./src/AdsGwConnImpl.cpp
+    ./src/AdsGwConnImpl.hpp
+    ./src/ISignalUpdater.hpp
+    ./src/Logger.hpp
+    ./src/main.cpp
+    ./src/SignalManager.cpp
+    ./src/SignalManager.hpp
     ./src/TcpConnection.cpp
     ./src/TcpConnection.hpp
-    ./src/MiniLogger.hpp
 )
 
 if (WIN32)
@@ -32,4 +37,3 @@ if (WIN32)
 endif()
 
 target_link_libraries(${TARGET} PRIVATE AdsGatewayLib)
-
