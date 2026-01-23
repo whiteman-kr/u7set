@@ -33,29 +33,14 @@ namespace Gateway
 	void AdsGatewayHandler::run()
 	{
 		init();
-
-		m_appDataServiceClientThread =
-				new AppDataServiceClientThread( m_softwareInfo,
-												m_appDataService1,
-												m_appDataService2,
-												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-												this, m_log);
-		m_appDataServiceClientThread->start();
-
+		runAppDataSrvClient();
 		runAdsGatewayServer();
 	}
 
 	void AdsGatewayHandler::shutdown()
 	{
 		stopAdsGatewayServer();
-
-		if (m_appDataServiceClientThread != nullptr)
-		{
-			m_appDataServiceClientThread->quitAndWait();
-			delete m_appDataServiceClientThread;
-			m_appDataServiceClientThread = nullptr;
-		}
-
+		stopAppDataSrvClient();
 		Handler::shutdown();
 	}
 
@@ -183,11 +168,31 @@ namespace Gateway
 		return true;
 	}
 
+	void AdsGatewayHandler::runAppDataSrvClient()
+	{
+		m_appDataSrvClientThread =
+			std::make_unique<AppDataServiceClientThread>( m_softwareInfo,
+										   m_appDataService1,
+										   m_appDataService2,
+										   QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
+										   this, m_log);
+		m_appDataSrvClientThread->start();
+	}
+
+	void AdsGatewayHandler::stopAppDataSrvClient()
+	{
+		if (m_appDataSrvClientThread != nullptr)
+		{
+			m_appDataSrvClientThread->quitAndWait();
+			m_appDataSrvClientThread.reset();
+		}
+	}
+
 	void AdsGatewayHandler::runAdsGatewayServer()
 	{
 		Q_ASSERT(m_adsGatewayServer == nullptr);
 
-		m_adsGatewayServer = new AdsGatewayServer(m_gateway->clientRequestIP1());
+		m_adsGatewayServer = std::make_unique<AdsGatewayServer>(m_gateway->clientRequestIP1(), m_log);
 
 		m_adsGatewayServer->run();
 	}
@@ -197,9 +202,7 @@ namespace Gateway
 		if (m_adsGatewayServer != nullptr)
 		{
 			m_adsGatewayServer->stop();
-			delete m_adsGatewayServer;
-			m_adsGatewayServer = nullptr;
+			m_adsGatewayServer.reset();
 		}
 	}
-
 }

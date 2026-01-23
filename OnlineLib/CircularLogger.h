@@ -163,7 +163,7 @@ void circularLoggerWriteMessage(std::shared_ptr<CircularLogger> logger, const QS
 class LogWrapper
 {
 public:
-	LogWrapper(CircularLoggerShared log);
+	LogWrapper(CircularLoggerShared log, const QString& className = QString());
 
 	CircularLoggerShared getLog() const;
 	void setLog(CircularLoggerShared log);
@@ -173,6 +173,7 @@ public:
 	void logErr(const QString& err) const;
 
 private:
+	const QString m_className;
 	mutable CircularLoggerShared m_log;
 };
 

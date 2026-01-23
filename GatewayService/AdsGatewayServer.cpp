@@ -1,14 +1,13 @@
 #include "AdsGatewayServer.h"
 
 AdsGatewayServer::AdsGatewayServer(const HostAddressPort& listenIP, CircularLoggerShared log) :
-	LogWrapper(log),
+	LogWrapper(log, "AdsGatewayServer"),
 	m_listenIP(listenIP)
 {
 }
 
 AdsGatewayServer::~AdsGatewayServer()
 {
-
 }
 
 void AdsGatewayServer::run()
@@ -93,7 +92,7 @@ void AdsGatewayServer::runAcceptLoop()
 			m_acceptor = &acceptor;
 		}
 
-		logMsg(QString("AdsGatewayServer starts listening %1").arg(m_listenIP.addressPortStr()));
+		logMsg(QString("starts listening %1").arg(m_listenIP.addressPortStr()));
 
 		while (m_running.load())
 		{
@@ -150,10 +149,10 @@ void AdsGatewayServer::runAcceptLoop()
 	}
 	catch (const std::exception& ex)
 	{
-		logErr(QString("AdsGatewayServer accept loop error: %1").arg(ex.what()));
+		logErr(QString("accept loop error: %1").arg(ex.what()));
 	}
 
-	logMsg(QString("AdsGatewayServer stops"));
+	logMsg(QString("stops"));
 }
 
 void AdsGatewayServer::sessionThread(const std::shared_ptr<tcp::socket>& sock)
@@ -188,7 +187,7 @@ void AdsGatewayServer::sessionThread(const std::shared_ptr<tcp::socket>& sock)
 	}
 	catch (const std::exception& ex)
 	{
-		logErr(QString("AdsGatewayServer session error: %1").arg(ex.what()));
+		logErr(QString("session error: %1").arg(ex.what()));
 	}
 
 	{

@@ -38,6 +38,9 @@ namespace Gateway
 	private:
 		bool init();
 
+		void runAppDataSrvClient();
+		void stopAppDataSrvClient();
+
 		void runAdsGatewayServer();
 		void stopAdsGatewayServer();
 
@@ -49,8 +52,8 @@ namespace Gateway
 		AdsGatewayShared m_gateway;
 		const AppSignals& m_appSignals;
 
-		AppDataServiceClientThread* m_appDataServiceClientThread = nullptr;
-		AdsGatewayServer* m_adsGatewayServer = nullptr;
+		std::unique_ptr<AppDataServiceClientThread> m_appDataSrvClientThread;
+		std::unique_ptr<AdsGatewayServer> m_adsGatewayServer;
 
 		//
 

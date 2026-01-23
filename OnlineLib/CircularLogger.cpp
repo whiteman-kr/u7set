@@ -640,8 +640,9 @@ void circularLoggerWriteMessage(std::shared_ptr<CircularLogger> logger, const QS
 //
 // ----------------------------------------------------------------------------------
 
-LogWrapper::LogWrapper(CircularLoggerShared log) :
-	m_log(log)
+LogWrapper::LogWrapper(CircularLoggerShared log, const QString& className) :
+	m_log(log),
+	m_className(className)
 {
 }
 
@@ -659,7 +660,14 @@ void LogWrapper::logMsg(const QString& msg) const
 {
 	if (m_log)
 	{
-		DEBUG_LOG_MSG(m_log, QString("GrpcCfgLoader: %1").arg(msg));
+		if (m_className.isEmpty())
+		{
+			DEBUG_LOG_MSG(m_log, msg);
+		}
+		else
+		{
+			DEBUG_LOG_MSG(m_log, QString("%1: %2").arg(m_className).arg(msg));
+		}
 	}
 }
 
@@ -667,7 +675,14 @@ void LogWrapper::logWrn(const QString& wrn) const
 {
 	if (m_log)
 	{
-		DEBUG_LOG_WRN(m_log, QString("GrpcCfgLoader: %1").arg(wrn));
+		if (m_className.isEmpty())
+		{
+			DEBUG_LOG_WRN(m_log, wrn);
+		}
+		else
+		{
+			DEBUG_LOG_WRN(m_log, QString("%1: %2").arg(m_className).arg(wrn));
+		}
 	}
 }
 
@@ -675,6 +690,13 @@ void LogWrapper::logErr(const QString& err) const
 {
 	if (m_log)
 	{
-		DEBUG_LOG_ERR(m_log, QString("GrpcCfgLoader: %1").arg(err));
+		if (m_className.isEmpty())
+		{
+			DEBUG_LOG_ERR(m_log, err);
+		}
+		else
+		{
+			DEBUG_LOG_ERR(m_log, QString("%1: %2").arg(m_className).arg(err));
+		}
 	}
 }
