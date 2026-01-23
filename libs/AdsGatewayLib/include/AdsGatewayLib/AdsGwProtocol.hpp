@@ -101,9 +101,41 @@ namespace AdsGatewayLib
 
 	// Request ARGW_SIGNAL_PARAM_START
 	//
+	struct GwSignalParamStartRequest
+	{
+		uint32_t reserved;
+	};
+
+	static_assert(sizeof(GwSignalParamStartRequest) == 4);
+
+	struct GwSignalParamStartResponse
+	{
+		uint32_t totalItemCount; // Total number of GwAppSignalParams in system
+		uint32_t partCount;      // Total number of parts (pages) to retrieve
+		uint32_t itemsPerPart;   // Maximum number of GwAppSignalParams per part
+	};
+
+	static_assert(sizeof(GwSignalParamStartResponse) == 12);
 
 	// Request ARGW_SIGNAL_PARAM_NEXT
 	//
+	struct GwSignalParamNextRequest
+	{
+		uint32_t part; // Part number to retrieve (0-based index)
+	};
+
+	static_assert(sizeof(GwSignalParamNextRequest) == 4);
+
+	struct GwSignalParamNextResponse
+	{
+		uint32_t part;       // Part number of this response
+		uint32_t paramCount; // Number of GwAppSignalParams in this response
+
+							 // Array of GwAppSignalParam structures
+#if 0
+		GwAppSignalParam params[paramCount];
+#endif
+	};
 
 	// Request ARGW_SIGNAL_STATE
 	//

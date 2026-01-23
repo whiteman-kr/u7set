@@ -240,6 +240,7 @@ namespace
 		//
 		void requestHandshake(std::string_view equipmentId);
 		std::vector<std::string> requestSignalList();
+		std::vector<GwAppSignalParam> requestSignalParams();
 
 	private:
 		IMiniLogger& m_logger;
@@ -272,9 +273,20 @@ namespace
 				//
 				requestHandshake(equipmentId);
 
-				auto appSignalIds = requestSignalList();
-				m_logger.logTraceFormat("Received {} signal IDs from ADS Gateway", appSignalIds.size());
+				// Getting signal list
+				//
+				std::vector<std::string> appSignalIds = requestSignalList();
+				m_logger.logTraceFormat("Received {} signal IDs.", appSignalIds.size());
 
+				// Getting signal params
+				//
+				std::vector<GwAppSignalParam> appSignalParams = requestSignalParams();
+				m_logger.logTraceFormat("Received {} signal params.", appSignalParams.size());
+
+				assert(appSignalIds.size() == appSignalParams.size());
+
+				// Main communication loop
+				//
 				while (stoken.stop_requested() == false)
 				{
 					// TODO: Main communication loop
@@ -378,7 +390,7 @@ namespace
 
 			if (requestResult != GWC_SUCCESS)
 			{
-				throw std::runtime_error{std::format("server error: {}", static_cast<int>(requestResult))};
+				throw std::runtime_error{std::format("server error {}", static_cast<int>(requestResult))};
 			}
 
 			totalItems = startResponse.totalItemCount;
@@ -402,7 +414,7 @@ namespace
 			{
 				GwSignalListNextRequest request{};
 				GwSignalListNextResponse response{};
-				request.part = static_cast<uint32_t>(part);
+				request.part = part;
 
 				responseVariablePartBuffer.resize(itemsPerPart);
 				std::memset(responseVariablePartBuffer.data(), 0, responseVariablePartBuffer.size() * sizeof(AppSignalIdNetworkT));
@@ -444,8 +456,96 @@ namespace
 		if (result.size() != totalItems)
 		{
 			assert(result.size() == totalItems);
-			throw std::runtime_error{
-				std::format("Getting signal list error: total items mismatch: expected {}, got {}", totalItems, result.size())};
+			throw std::runtime_error{std::format("Getting signal list error: total expected {}, got {}", totalItems, result.size())};
+		}
+
+		return result;
+	}
+
+	// Requests the list of signal parameters from the ADS Gateway.
+	// Throws std::runtime_error on errors.
+	//
+	std::vector<GwAppSignalParam> AdsGwConnImpl::requestSignalParams()
+	{
+		std::vector<GwAppSignalParam> result{};
+		uint32_t totalItems{};
+		uint32_t itemsPerPart{};
+		uint32_t partsCount{};
+
+		// Start
+		//
+		try
+		{
+			GwSignalParamStartRequest request{};
+			GwSignalParamStartResponse startResponse{};
+
+			m_logger.logTraceFormat("Sending ADSGW_SIGNAL_PARAM_START request to ADS Gateway...");
+			GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_PARAM_START, request, startResponse, m_isCancelledFunc);
+
+			if (requestResult != GWC_SUCCESS)
+			{
+				throw std::runtime_error{std::format("server error {}", static_cast<int>(requestResult))};
+			}
+
+			totalItems = startResponse.totalItemCount;
+			itemsPerPart = startResponse.itemsPerPart;
+			partsCount = startResponse.partCount;
+		}
+		catch (const std::runtime_error& e)
+		{
+			throw std::runtime_error{std::format("ADSGW_SIGNAL_PARAM_START error: {}", e.what())};
+		}
+
+		// Next
+		//
+		try
+		{
+			result.reserve(totalItems);
+
+			std::vector<GwAppSignalParam> responseVariablePartBuffer{};
+
+			for (uint32_t part = 0; part < partsCount; part++)
+			{
+				GwSignalParamNextRequest request{};
+				GwSignalParamNextResponse response{};
+				request.part = part;
+
+				responseVariablePartBuffer.resize(itemsPerPart);
+				std::fill(std::begin(responseVariablePartBuffer), std::end(responseVariablePartBuffer), GwAppSignalParam{});
+
+				GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_PARAM_NEXT,
+														request,
+														std::span<const std::byte>{},
+														response,
+														std::span<GwAppSignalParam>{responseVariablePartBuffer},
+														m_isCancelledFunc);
+				if (requestResult != GWC_SUCCESS)
+				{
+					throw std::runtime_error{std::format("server error {}", static_cast<int>(requestResult))};
+				}
+
+				if (response.part != part)
+				{
+					throw std::runtime_error{std::format("part mismatch: requested {}, got {}", part, response.part)};
+				}
+
+				if (response.paramCount > itemsPerPart)
+				{
+					throw std::runtime_error{std::format("invalid paramCount: {}", response.paramCount)};
+				}
+
+				std::copy_n(std::begin(responseVariablePartBuffer), static_cast<size_t>(response.paramCount), std::back_inserter(result));
+			}
+		}
+		catch (const std::runtime_error& e)
+		{
+			throw std::runtime_error{std::format("ADSGW_SIGNAL_PARAM_NEXT error: {}", e.what())};
+		}
+
+		if (result.size() != totalItems)
+		{
+			assert(result.size() == totalItems);
+			throw std::runtime_error{std::format("Getting signal params error: total expected {}, got {}", totalItems, result.size())};
 		}
 
 		return result;
