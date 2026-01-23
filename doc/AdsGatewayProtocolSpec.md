@@ -240,18 +240,20 @@ Initial connection handshake to establish protocol version and capabilities.
 ```
 struct GwHandshakeRequest {
     uint16_t protocolVersion;  // Protocol version client supports (e.g., 0x0100 for v1.0)
+    uint16_t reserved1;        // Reserved for future use
     char clientName[64];       // Null-terminated client name
 };
 
-static_assert(sizeof(GwHandshakeRequest) == 66);
+static_assert(sizeof(GwHandshakeRequest) == 68);
 ```
 
 | Offset | Size | Type | Field |
 |--------|------|------|-------|
 | 0 | 2 | `uint16_t` | `protocolVersion` |
-| 2 | 64 | `char[64]` | `clientName` |
+| 2 | 2 | `uint16_t` | `reserved1` |
+| 4 | 64 | `char[64]` | `clientName` |
 
-Total size: 66 bytes
+Total size: 68 bytes
 
 **Protocol Version Format:** 0xMMmm where MM = major version, mm = minor version
 - Example: 0x0100 = Version 1.0 (current)
@@ -741,7 +743,7 @@ The `GwAppSignalState` structure contains the current state and value of a signa
 ```cpp
 struct GwAppSignalState {
     uint64_t hash;                    // Signal hash (as defined in Section 5.2)
-    int64_t  systemTime;              // Server system time (UTC+0) when the state was acquired ()
+    int64_t  systemTime;              // Server system time (UTC+0) when the state was acquired
     int64_t  localTime;               // systemTime adjusted to Local time zone
     int64_t  plantTime;               // Timestamp assigned in LogicModule (local time zone)
     double   value;                   // Signal value (for discrete: 0=false, 1=true)

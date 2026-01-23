@@ -37,7 +37,7 @@ namespace Gateway
 			break;
 
 		case E::Setting::ClientRequestIP1:
-			addrPort.setAddressPortStr(sv.value.toString(), adsgw::ADS_GATEWAY_DEFAULT_PORT);
+			addrPort.setAddressPortStr(sv.value.toString(), AdsGatewayLib::ADSGW_PORT);
 			m_clientRequestIP1 = addrPort;
 			break;
 		}

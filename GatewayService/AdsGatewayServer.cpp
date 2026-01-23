@@ -115,6 +115,8 @@ void AdsGatewayServer::runAcceptLoop()
 
 			auto sockPtr = std::make_shared<tcp::socket>(std::move(socket));
 
+			logMsg(QString("accept new connectio from %1").arg(getIpPortStr(sockPtr)));
+
 			{
 				std::lock_guard<std::mutex> lock(m_sessionsMutex);
 				m_sessionSockets.push_back(sockPtr);
@@ -133,9 +135,15 @@ void AdsGatewayServer::runAcceptLoop()
 						std::thread(
 							[this, sockPtr, finished]()
 							{
+								QString remoteIpPort = getIpPortStr(sockPtr);
+
+								logMsg(QString("session thread for %1 started").arg(remoteIpPort));
+
 								sessionThread(sockPtr);
 								removeSessionSocket(sockPtr);
 								finished->store(true);
+
+								logMsg(QString("session thread for %1 finished").arg(remoteIpPort));
 							}),
 						finished
 						});
@@ -155,7 +163,7 @@ void AdsGatewayServer::runAcceptLoop()
 	logMsg(QString("stops"));
 }
 
-void AdsGatewayServer::sessionThread(const std::shared_ptr<tcp::socket>& sock)
+void AdsGatewayServer::sessionThread(const std::shared_ptr<tcp::socket>& socket)
 {
 	static const std::size_t BUF_SIZE = 4096;
 
@@ -163,13 +171,13 @@ void AdsGatewayServer::sessionThread(const std::shared_ptr<tcp::socket>& sock)
 	{
 		asio::error_code ec;
 
-		sock->set_option(tcp::no_delay(true), ec);
+		socket->set_option(tcp::no_delay(true), ec);
 
 		std::array<char, BUF_SIZE> buf {};
 
 		while (m_running.load())
 		{
-			std::size_t n = sock->read_some(asio::buffer(buf), ec);
+			std::size_t n = socket->read_some(asio::buffer(buf), ec);
 
 			if (ec)
 			{
@@ -177,7 +185,7 @@ void AdsGatewayServer::sessionThread(const std::shared_ptr<tcp::socket>& sock)
 			}
 
 			// write() гарантирует, что запишет всё (или вернёт ошибку)
-			asio::write(*sock, asio::buffer(buf.data(), n), ec);
+			asio::write(*socket, asio::buffer(buf.data(), n), ec);
 
 			if (ec)
 			{
@@ -192,18 +200,18 @@ void AdsGatewayServer::sessionThread(const std::shared_ptr<tcp::socket>& sock)
 
 	{
 		asio::error_code ec;
-		sock->shutdown(tcp::socket::shutdown_both, ec);
-		sock->close(ec);
+		socket->shutdown(tcp::socket::shutdown_both, ec);
+		socket->close(ec);
 	}
 }
 
-void AdsGatewayServer::removeSessionSocket(const std::shared_ptr<tcp::socket>& sock)
+void AdsGatewayServer::removeSessionSocket(const std::shared_ptr<tcp::socket>& socket)
 {
 	std::lock_guard<std::mutex> lock(m_sessionsMutex);
 
 	for (auto it = m_sessionSockets.begin(); it != m_sessionSockets.end(); ++it)
 	{
-		if (*it == sock)
+		if (*it == socket)
 		{
 			m_sessionSockets.erase(it);
 			break;
@@ -250,5 +258,18 @@ void AdsGatewayServer::joinAllSessions()
 			st.thread.join();
 		}
 	}
+}
+
+QString AdsGatewayServer::getIpPortStr(const std::shared_ptr<tcp::socket>& socket)
+{
+	if (socket == nullptr)
+	{
+		Q_ASSERT(false);
+		return Separator::EMPTY_STR;
+	}
+
+	tcp::endpoint remote = socket->remote_endpoint();
+
+	return QString("%1:%2").arg(QString::fromStdString(remote.address().to_string())).arg(remote.port());
 }
 

@@ -21,10 +21,12 @@ public:
 
 private:
 	void runAcceptLoop();
-	void sessionThread(const std::shared_ptr<tcp::socket>& sock);
-	void removeSessionSocket(const std::shared_ptr<tcp::socket>& sock);
+	void sessionThread(const std::shared_ptr<tcp::socket>& socket);
+	void removeSessionSocket(const std::shared_ptr<tcp::socket>& socket);
 	void reapFinishedSessions();
 	void joinAllSessions();
+
+	QString getIpPortStr(const std::shared_ptr<tcp::socket>& socket);
 
 private:
 	HostAddressPort m_listenIP;
