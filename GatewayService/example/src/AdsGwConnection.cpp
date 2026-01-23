@@ -2,8 +2,8 @@
 #include "MiniLogger.hpp"
 #include "TcpConnection.hpp"
 
-#include <AdsgatewayLib/AdsGwProtocol.hpp>
-#include <AdsgatewayLib/GwCrc32.hpp>
+#include <AdsGatewayLib/AdsGwProtocol.hpp>
+#include <AdsGatewayLib/GwCrc32.hpp>
 
 #include <array>
 #include <cassert>
