@@ -59,4 +59,42 @@ namespace AdsGatewayLib
 			}
 		}
 	}
+
+	std::optional<GwAppSignalParam> SignalManager::getSignalParam(std::string_view signalId) const
+	{
+		Radiy::Hash signalIdHash = Radiy::calcHash(signalId);
+		return getSignalParam(signalIdHash);
+	}
+
+	std::optional<GwAppSignalParam> SignalManager::getSignalParam(Radiy::Hash signalId) const
+	{
+		std::lock_guard lock{m_paramsMutex};
+
+		auto it = m_params.find(signalId);
+		if (it != m_params.end())
+		{
+			return it->second;
+		}
+
+		return std::nullopt;
+	}
+
+	std::optional<GwAppSignalState> SignalManager::getSignalState(std::string_view signalId) const
+	{
+		Radiy::Hash signalIdHash = Radiy::calcHash(signalId);
+		return getSignalState(signalIdHash);
+	}
+
+	std::optional<GwAppSignalState> SignalManager::getSignalState(Radiy::Hash signalId) const
+	{
+		std::lock_guard lock{m_statesMutex};
+
+		auto it = m_states.find(signalId);
+		if (it != m_states.end())
+		{
+			return it->second;
+		}
+
+		return std::nullopt;
+	}
 } // namespace AdsGatewayLib

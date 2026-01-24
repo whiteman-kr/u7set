@@ -295,4 +295,95 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwAppSignalState) == 48);
+
+	// Signal state flags
+	//
+
+	enum GwAppSignalStateFlags : uint32_t
+	{
+		GWF_VALID = 0x00000001,
+		GWF_STATE_AVAILABLE = 0x00000002,
+		GWF_SIMULATED = 0x00000004,
+		GWF_BLOCKED = 0x00000008,
+		GWF_MISMATCH = 0x00000010,
+		GWF_ABOVE_HIGH_LIMIT = 0x00000020,
+		GWF_BELOW_LOW_LIMIT = 0x00000040,
+		GWF_SW_SIMULATED = 0x00000080,
+		GWF_TUNING_DEFAULT = 0x00000100
+	};
+
+	constexpr std::string to_string(GwAppSignalStateFlags f) noexcept
+	{
+		std::string result;
+
+		if (f & GWF_VALID)
+		{
+			result += "VLD ";
+		}
+		else
+		{
+			result += "NONVLD ";
+		}
+
+		if (f & GWF_STATE_AVAILABLE)
+		{
+			result += "ST_AVAIL ";
+		}
+		else
+		{
+			result += "ST_UNAVAIL ";
+		}
+
+		if (f & GWF_SIMULATED)
+		{
+			result += "SIM ";
+		}
+
+		if (f & GWF_BLOCKED)
+		{
+			result += "BLK ";
+		}
+
+		if (f & GWF_MISMATCH)
+		{
+			result += "MISMATCH ";
+		}
+
+		if (f & GWF_ABOVE_HIGH_LIMIT)
+		{
+			result += "ABOVE_HIGH_LIMIT ";
+		}
+
+		if (f & GWF_BELOW_LOW_LIMIT)
+		{
+			result += "BELOW_LOW_LIMIT ";
+		}
+
+		if (f & GWF_SW_SIMULATED)
+		{
+			result += "SW_SIMULATED ";
+		}
+
+		if (f & GWF_TUNING_DEFAULT)
+		{
+			result += "TUNING_DEFAULT ";
+		}
+
+		if (result.empty() == false && result.back() == ' ')
+		{
+			result.pop_back();
+		}
+
+		return result;
+	}
 } // namespace AdsGatewayLib
+
+template<>
+struct std::formatter<AdsGatewayLib::GwAppSignalStateFlags> : std::formatter<std::string_view>
+{
+	template<typename FormatContext>
+	auto format(AdsGatewayLib::GwAppSignalStateFlags flags, FormatContext& ctx) const
+	{
+		return std::formatter<std::string_view>::format(to_string(flags), ctx);
+	}
+};

@@ -31,7 +31,7 @@ namespace AdsGatewayLib
 				{
 					throw std::runtime_error{std::format("Connect error: {}", m_conn.lastError())};
 				}
-				m_logger.logTrace("Connected to ADS Gateway {}:{}", address, port);
+				m_logger.logMessage("Socket connected to ADS Gateway at {}:{}, handshake requesting...", address, port);
 
 				// Send Handshake
 				//
@@ -40,7 +40,7 @@ namespace AdsGatewayLib
 				// Getting signal list
 				//
 				m_appSignalIds = requestSignalList();
-				m_logger.logTrace("Received {} signal IDs.", m_appSignalIds.size());
+				m_logger.logMessage("Received {} signal IDs.", m_appSignalIds.size());
 
 				m_appSignalHashes.reserve(m_appSignalIds.size());
 				for (const auto& appSignalId : m_appSignalIds)
@@ -51,7 +51,7 @@ namespace AdsGatewayLib
 				// Getting signal params
 				//
 				std::vector<GwAppSignalParam> appSignalParams = requestSignalParams();
-				m_logger.logTrace("Received {} signal params.", appSignalParams.size());
+				m_logger.logMessage("Received {} signal params.", appSignalParams.size());
 
 				assert(m_appSignalIds.size() == appSignalParams.size());
 
