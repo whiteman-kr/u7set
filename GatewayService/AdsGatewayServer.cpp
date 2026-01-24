@@ -445,13 +445,9 @@ std::size_t AdsGatewayServer::processSignalListStartRequest(SessionThreadContext
 	AGL::GwSignalListStartResponse reply;
 
 	uint32_t signalCount = static_cast<uint32_t>(m_appSignals.count());
-	uint32_t maxPayloadSize =	AGL::ADSGW_MAX_PAYLOAD_SIZE -
-								AGL::GW_MSG_HEADER_SIZE -
-								AGL::GW_MSG_CRC_SIZE -
-								sizeof(uint32_t) * 2;
 
 	reply.totalItemCount = signalCount;
-	reply.itemsPerPart = maxPayloadSize / AGL::GW_APP_SIGNAL_ID_SIZE;
+	reply.itemsPerPart = AGL::GW_MAX_APP_SIGNAL_ID_COUNT;
 	reply.partCount = signalCount / reply.itemsPerPart + (signalCount % reply.itemsPerPart ? 1 : 0);
 
 	bool res = sendOkReply(stc, header, reinterpret_cast<const char*>(&reply), sizeof(reply));
@@ -470,7 +466,7 @@ std::size_t AdsGatewayServer::processSignalListNextRequest(SessionThreadContextS
 {
 	Q_UNUSED(recvBuf);
 
-	constexpr std::size_t REQUEST_SIZE = AGL::GW_MSG_HEADER_SIZE + AGL::GW_SIGNAL_LIST_NEXT_REQUEST_SIZE;
+	std::size_t REQUEST_SIZE = AGL::GW_MSG_HEADER_SIZE + AGL::GW_SIGNAL_LIST_NEXT_REQUEST_SIZE;
 
 	if (recvBufIndex < REQUEST_SIZE)
 	{
@@ -492,6 +488,19 @@ std::size_t AdsGatewayServer::processSignalListNextRequest(SessionThreadContextS
 						arg(stc->clientName).arg(request.part));
 
 	AGL::GwSignalListNextResponse reply;
+
+	reply.part = request.part;
+	reply.appSignalIdCount = 0;
+
+	std::vector<char> payloadData();
+
+	int signalsCount = TO_INT(m_appSignals.count());
+	int signalStartIndex = part * AGL::GW_MAX_APP_SIGNAL_ID_COUNT;
+
+	for(int i = signalStartIndex; i < signalsCount; i++)
+	{
+
+	}
 
 	bool res = sendOkReply(stc, header, reinterpret_cast<const char*>(&reply), sizeof(reply));
 

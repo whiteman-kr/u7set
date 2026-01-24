@@ -24,7 +24,6 @@ public:
 		TCP_SOCKET_SHARED socket;
 		bool handshakeCompleted = false;
 		QString clientName;
-		int signalListIndex = 0;
 	};
 
 	using SessionThreadContextShared = std::shared_ptr<SessionThreadContext>;

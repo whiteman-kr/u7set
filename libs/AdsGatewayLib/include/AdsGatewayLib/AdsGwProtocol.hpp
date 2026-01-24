@@ -116,6 +116,12 @@ namespace AdsGatewayLib
 	};
 
 	constexpr std::size_t GW_APP_SIGNAL_ID_SIZE = 64;
+	constexpr std::size_t GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE = sizeof(GwSignalListNextResponse);
+	constexpr std::size_t GW_MAX_APP_SIGNAL_ID_COUNT = (ADSGW_MAX_PAYLOAD_SIZE -
+														GW_MSG_HEADER_SIZE -
+														GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE -
+														GW_MSG_CRC_SIZE) / GW_APP_SIGNAL_ID_SIZE;
+
 
 	// Request ARGW_SIGNAL_PARAM_START
 	//
