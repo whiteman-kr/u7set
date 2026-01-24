@@ -1,22 +1,27 @@
 #pragma once
 
-#include <string>
+#include <cstdint>
+#include <string_view>
 #include <thread>
 
 namespace AdsGatewayLib
 {
-	class IMiniLogger;
+	class ISignalUpdater;
+	class ILogger;
 
-	class AdsGwConnection
+	class AdsGwConnection final
 	{
 	public:
-		AdsGwConnection(IMiniLogger& logger);
+		AdsGwConnection(ISignalUpdater& signalUpdater, ILogger& logger);
+		~AdsGwConnection();
 
 		void connect(std::string_view address, uint16_t port, std::string_view equipmentId);
 		void close();
 
 	private:
-		IMiniLogger& m_logger;
+		ISignalUpdater& m_signalUpdater;
+		ILogger& m_logger;
+
 		std::jthread m_thread;
 	};
 } // namespace AdsGatewayLib

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
+#include <format>
+#include <string_view>
 
 namespace AdsGatewayLib
 {
@@ -24,6 +27,40 @@ namespace AdsGatewayLib
 		GWC_CRC_ERROR = 10
 	};
 
+	constexpr std::string_view to_string(GwErrorCode ec) noexcept
+	{
+		// clang-format off
+		using enum GwErrorCode;
+		switch (ec)
+		{
+		case GWC_SUCCESS:				return "GWC_SUCCESS(0)";
+		case GWC_INVALID_REQUEST:		return "GWC_INVALID_REQUEST(1)";
+		case GWC_UNSUPPORTED_VERSION:	return "GWC_UNSUPPORTED_VERSION(2)";
+		case GWC_NO_ADS_CONNECTION:		return "GWC_NO_ADS_CONNECTION(3)";
+		case GWC_TOO_MANY_SIGNALS:		return "GWC_TOO_MANY_SIGNALS(4)";
+		case GWC_HANDSHAKE_REQUIRED:	return "GWC_HANDSHAKE_REQUIRED(5)";
+		case GWC_INTERNAL_ERROR:		return "GWC_INTERNAL_ERROR(7)";
+		case GWC_CRC_ERROR:				return "GWC_CRC_ERROR(10)";
+		}
+		// clang-format on
+
+		assert(false);
+		return "GwErrorCode(unknown)";
+	}
+} // namespace AdsGatewayLib
+
+template<>
+struct std::formatter<AdsGatewayLib::GwErrorCode> : std::formatter<std::string_view>
+{
+	template<typename FormatContext>
+	auto format(AdsGatewayLib::GwErrorCode code, FormatContext& ctx) const
+	{
+		return std::formatter<std::string_view>::format(to_string(code), ctx);
+	}
+};
+
+namespace AdsGatewayLib
+{
 	enum GwRequestId : uint32_t
 	{
 		ADSGW_HANDSHAKE = 0x0001,
@@ -35,6 +72,39 @@ namespace AdsGatewayLib
 		ADSGW_SIGNAL_STATE_CHANGES = 0x0301
 	};
 
+	constexpr std::string_view to_string(GwRequestId requestId) noexcept
+	{
+		// clang-format off
+		using enum GwRequestId;
+		switch (requestId)
+		{
+		case ADSGW_HANDSHAKE:				return "ADSGW_HANDSHAKE(0x0001)";
+		case ADSGW_SIGNAL_LIST_START:		return "ADSGW_SIGNAL_LIST_START(0x0100)";
+		case ADSGW_SIGNAL_LIST_NEXT:		return "ADSGW_SIGNAL_LIST_NEXT(0x0101)";
+		case ADSGW_SIGNAL_PARAM_START:		return "ADSGW_SIGNAL_PARAM_START(0x0200)";
+		case ADSGW_SIGNAL_PARAM_NEXT:		return "ADSGW_SIGNAL_PARAM_NEXT(0x0201)";
+		case ADSGW_SIGNAL_STATE:			return "ADSGW_SIGNAL_STATE(0x0300)";
+		case ADSGW_SIGNAL_STATE_CHANGES:	return "ADSGW_SIGNAL_STATE_CHANGES(0x0301)";
+		}
+		// clang-format on
+
+		assert(false);
+		return "GwRequestId(unknown)";
+	}
+} // namespace AdsGatewayLib
+
+template<>
+struct std::formatter<AdsGatewayLib::GwRequestId> : std::formatter<std::string_view>
+{
+	template<typename FormatContext>
+	auto format(AdsGatewayLib::GwRequestId requestId, FormatContext& ctx) const
+	{
+		return std::formatter<std::string_view>::format(to_string(requestId), ctx);
+	}
+};
+
+namespace AdsGatewayLib
+{
 	struct GwMessageHeader
 	{
 		uint32_t requestID;
@@ -106,7 +176,6 @@ namespace AdsGatewayLib
 		uint32_t appSignalIdCount; // Number of AppSignalIDs in this response
 
 								   // Array of AppSignalID strings
-		//
 #if 0
 		struct
 		{
@@ -122,18 +191,79 @@ namespace AdsGatewayLib
 														GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE -
 														GW_MSG_CRC_SIZE) / GW_APP_SIGNAL_ID_SIZE;
 
-
 	// Request ARGW_SIGNAL_PARAM_START
 	//
+	struct GwSignalParamStartRequest
+	{
+		uint32_t reserved;
+	};
+
+	static_assert(sizeof(GwSignalParamStartRequest) == 4);
+
+	struct GwSignalParamStartResponse
+	{
+		uint32_t totalItemCount; // Total number of GwAppSignalParams in system
+		uint32_t partCount;      // Total number of parts (pages) to retrieve
+		uint32_t itemsPerPart;   // Maximum number of GwAppSignalParams per part
+	};
+
+	static_assert(sizeof(GwSignalParamStartResponse) == 12);
 
 	// Request ARGW_SIGNAL_PARAM_NEXT
 	//
+	struct GwSignalParamNextRequest
+	{
+		uint32_t part; // Part number to retrieve (0-based index)
+	};
+
+	static_assert(sizeof(GwSignalParamNextRequest) == 4);
+
+	struct GwSignalParamNextResponse
+	{
+		uint32_t part;       // Part number of this response
+		uint32_t paramCount; // Number of GwAppSignalParams in this response
+#if 0
+		GwAppSignalParam params[paramCount]; // Array of GwAppSignalParam structures
+#endif
+	};
 
 	// Request ARGW_SIGNAL_STATE
 	//
+	struct GwSignalStateRequest
+	{
+		uint32_t signalCount; // Number of signals requested
+#if 0
+		uint64_t signalHashes[signalCount]; // Array of signal hashes
+#endif
+	};
+
+	struct GwSignalStateResponse
+	{
+		uint32_t stateCount; // Number of states returned
+
+#if 0		
+		GwAppSignalState states[stateCount]; // Array of GwAppSignalState structures
+#endif
+	};
 
 	// Request ARGW_SIGNAL_STATE_CHANGES
 	//
+	struct GwSignalStateChangesRequest
+	{
+		uint32_t reserved;
+	};
+
+	static_assert(sizeof(GwSignalStateChangesRequest) == 4);
+
+	struct GwSignalStateChangesResponse
+	{
+		uint32_t pendingStatesCount; // Number of state changes still in queue (not returned in this response)
+		uint32_t stateCount;         // Number of states in this response
+#if 0
+		
+		GwAppSignalState states[stateCount]; // Array of GwAppSignalState structures
+#endif
+	};
 
 
 	// Structure defining application signal parameters

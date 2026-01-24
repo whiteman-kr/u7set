@@ -440,8 +440,6 @@ std::size_t AdsGatewayServer::processSignalListStartRequest(SessionThreadContext
 
 	logMsg(QString("SIGNAL_LIST_START request from %1").arg(stc->clientName));
 
-	stc->signalListIndex = 0;
-
 	AGL::GwSignalListStartResponse reply;
 
 	uint32_t signalCount = static_cast<uint32_t>(m_appSignals.count());
@@ -495,7 +493,7 @@ std::size_t AdsGatewayServer::processSignalListNextRequest(SessionThreadContextS
 	std::vector<char> payloadData();
 
 	int signalsCount = TO_INT(m_appSignals.count());
-	int signalStartIndex = part * AGL::GW_MAX_APP_SIGNAL_ID_COUNT;
+	int signalStartIndex = request.part * AGL::GW_MAX_APP_SIGNAL_ID_COUNT;
 
 	for(int i = signalStartIndex; i < signalsCount; i++)
 	{

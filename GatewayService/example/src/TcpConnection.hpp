@@ -7,6 +7,7 @@
 #include <span>
 #include <string>
 
+
 namespace AdsGatewayLib
 {
 	class TcpConnLinux;
