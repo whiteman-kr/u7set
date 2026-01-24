@@ -14,6 +14,9 @@ namespace AdsGatewayLib
 
 	constexpr std::size_t GW_MSG_CRC_SIZE = sizeof(uint32_t);
 
+	constexpr size_t STRING_LENGTH_128 = 128;
+	constexpr size_t STRING_LENGTH_256 = 256;
+
 	enum GwErrorCode : uint32_t
 	{
 		GWC_SUCCESS = 0,
@@ -121,10 +124,10 @@ namespace AdsGatewayLib
 	{
 		uint16_t protocolVersion; // Protocol version client supports (e.g., 0x0100 for v1.0)
 		uint16_t reserved1;       // Reserved for future use
-		char clientName[64];      // Null-terminated client name
+		char clientName[128];     // Null-terminated client name
 	};
 
-	static_assert(sizeof(GwHandshakeRequest) == 68);
+	static_assert(sizeof(GwHandshakeRequest) == 132);
 	constexpr std::size_t GW_HANDSHAKE_REQUEST_SIZE = sizeof(GwHandshakeRequest);
 
 	struct GwHandshakeResponse
@@ -179,7 +182,7 @@ namespace AdsGatewayLib
 #if 0
 		struct
 		{
-			char appSignalId[64]; // AppSignalID (null-terminated, max 64 bytes including '\0')
+			char appSignalId[STRING_LENGTH_128]; // AppSignalID (null-terminated, max STRING_LENGTH_128 bytes including '\0')
 		} appSignalIds[appSignalIdCount];
 #endif
 	};
@@ -270,32 +273,32 @@ namespace AdsGatewayLib
 	//
 	struct GwAppSignalParam
 	{
-		uint64_t hash;             // Signal hash (as defined in Section 5.2)
-		char appSignalId[64];      // AppSignalID (ASCII, null-terminated, as defined in Section 5.1)
-		char customSignalId[64];   // Custom Signal ID (UTF-8, null-terminated)
+		uint64_t hash;                          // Signal hash (as defined in Section 5.2)
+		char appSignalId[STRING_LENGTH_128];    // AppSignalID (ASCII, null-terminated, as defined in Section 5.1)
+		char customSignalId[STRING_LENGTH_128]; // Custom Signal ID (UTF-8, null-terminated)
 
-		char caption[256];         // Signal caption/description (UTF-8, null-terminated)
-		char equipmentId[64];      // EquipmentID (ASCII, null-terminated)
-		char lmEquipmentId[64];    // LogicModule EquipmentID (ASCII, null-terminated)
-		char units[64];            // Engineering units (UTF-8, null-terminated)
-		char tags[256];            // Tags, space-separated (ASCII, null-terminated)
+		char caption[STRING_LENGTH_256];        // Signal caption/description (UTF-8, null-terminated)
+		char equipmentId[STRING_LENGTH_128];    // EquipmentID (ASCII, null-terminated)
+		char lmEquipmentId[STRING_LENGTH_128];  // LogicModule EquipmentID (ASCII, null-terminated)
+		char units[STRING_LENGTH_128];          // Engineering units (UTF-8, null-terminated)
+		char tags[STRING_LENGTH_256];           // Tags, space-separated (ASCII, null-terminated)
 
-		uint8_t channel;           // Channel code (see Section 7.3)
-		uint8_t inOutType;         // I/O type code (see Section 7.4)
-		uint8_t type;              // Signal type code (see Section 7.5)
-		uint8_t decimalPlaces;     // Number of decimal places for analog signals
+		uint8_t channel;                        // Channel code (see Section 7.3)
+		uint8_t inOutType;                      // I/O type code (see Section 7.4)
+		uint8_t type;                           // Signal type code (see Section 7.5)
+		uint8_t decimalPlaces;                  // Number of decimal places for analog signals
 
-		double lowValidRange;      // Low valid range for analog signals
-		double highValidRange;     // High valid range for analog signals
+		double lowValidRange;                   // Low valid range for analog signals
+		double highValidRange;                  // High valid range for analog signals
 
-		uint8_t tuning;            // Tuning flag (0 = non-tunable, 1 = tunable)
-		double tuningDefaultValue; // Default tuning value
-		double tuningLowBound;     // Low bound for tuning value
-		double tuningHighBound;    // High bound for tuning value
+		uint8_t tuning;                         // Tuning flag (0 = non-tunable, 1 = tunable)
+		double tuningDefaultValue;              // Default tuning value
+		double tuningLowBound;                  // Low bound for tuning value
+		double tuningHighBound;                 // High bound for tuning value
 	};
 
 	constexpr std::size_t GW_APP_SIGNAL_PARAM_SIZE = sizeof(GwAppSignalParam);
-	static_assert(sizeof(GwAppSignalParam) == 896);
+	static_assert(sizeof(GwAppSignalParam) == 1216);
 
 	// Structure defining application signal state
 	//
