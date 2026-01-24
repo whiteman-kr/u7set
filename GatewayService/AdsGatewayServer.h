@@ -24,6 +24,8 @@ public:
 		TCP_SOCKET_SHARED socket;
 		bool handshakeCompleted = false;
 		QString clientName;
+
+		std::vector<char> payloadData;
 	};
 
 	using SessionThreadContextShared = std::shared_ptr<SessionThreadContext>;
@@ -42,22 +44,26 @@ private:
 	void reapFinishedSessions();
 	void joinAllSessions();
 
-	void processRequest(SessionThreadContextShared stc, char* recvBuf, std::size_t& recvBufIndex);
+	void processRequest(SessionThreadContextShared stc, char* recvBuf, size_t& recvBufIndex);
 
-	std::size_t processHandshakeRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, std::size_t& recvBufIndex);
-	std::size_t processSignalListStartRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
-											const char* recvBuf, std::size_t& recvBufIndex);
-	std::size_t processSignalListNextRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
-											  const char* recvBuf, std::size_t& recvBufIndex);
+	size_t processHandshakeRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
+										const char* recvBuf, size_t& recvBufIndex);
+	size_t processSignalListStartRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
+										const char* recvBuf, size_t& recvBufIndex);
+	size_t processSignalListNextRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
+										const char* recvBuf, size_t& recvBufIndex);
+	size_t processSignalParamStartRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
+										const char* recvBuf, size_t& recvBufIndex);
+	size_t processSignalParamNextRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
+										const char* recvBuf, size_t& recvBufIndex);
 
 	bool sendErrReply(SessionThreadContextShared stc, const AdsGatewayLib::GwMessageHeader& requestHeader, AGL::GwErrorCode errCode);
-	bool sendOkReply(SessionThreadContextShared stc, const AGL::GwMessageHeader& requestHeader, const char* payloadData, std::size_t payloadSize);
+	bool sendOkReply(SessionThreadContextShared stc, const AGL::GwMessageHeader& requestHeader, const char* payloadData, size_t payloadSize);
 	bool sendReply(SessionThreadContextShared stc,
 				   uint32_t requestID, AGL::GwErrorCode errCode,
-				   const char* payloadData, std::size_t payloadSize);
+				   const char* payloadData, size_t payloadSize);
 
-	bool checkNullTerminated(const char* str, std::size_t size);
+	bool checkNullTerminated(const char* str, size_t size);
 	QString getIpPortStr(const std::shared_ptr<tcp::socket>& socket);
 
 private:
@@ -67,8 +73,10 @@ private:
 	std::atomic<bool> m_running { false };
 	std::thread m_serverThread;
 
+	asio::io_context m_io;
+
 	std::mutex m_acceptorMutex;
-	tcp::acceptor* m_acceptor = nullptr;
+	std::shared_ptr<tcp::acceptor> m_acceptor;
 
 	std::mutex m_sessionsMutex;
 	std::vector<TCP_SOCKET_SHARED> m_sessionSockets;
@@ -85,7 +93,7 @@ private:
 	std::mutex m_signalsStatesMutex;
 	std::unordered_map<Hash, SimpleAppSignalState> m_signalsStates;
 
-	static constexpr std::size_t CONTINUE_RECEIVE = std::numeric_limits<std::size_t>::max();
+	static constexpr size_t CONTINUE_RECEIVE = std::numeric_limits<size_t>::max();
 };
 
 

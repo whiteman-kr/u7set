@@ -12,10 +12,10 @@ namespace AdsGatewayLib
 	constexpr uint16_t ADSGW_PROTOCOL_VERSION = 0x0100;
 	constexpr uint32_t ADSGW_MAX_PAYLOAD_SIZE = 2 * 1024 * 1024; // 2 MB
 
-	constexpr std::size_t GW_MSG_CRC_SIZE = sizeof(uint32_t);
-
 	constexpr size_t STRING_LENGTH_128 = 128;
 	constexpr size_t STRING_LENGTH_256 = 256;
+
+	constexpr size_t GW_APP_SIGNAL_ID_SIZE = STRING_LENGTH_128;
 
 	enum GwErrorCode : uint32_t
 	{
@@ -116,8 +116,67 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwMessageHeader) == 12);
-	constexpr std::size_t GW_MSG_HEADER_SIZE = sizeof(GwMessageHeader);
 
+	constexpr size_t GW_MSG_HEADER_SIZE = sizeof(GwMessageHeader);
+	constexpr size_t GW_MSG_CRC_SIZE = sizeof(uint32_t);
+
+	constexpr size_t GW_MAX_MSG_PAYLOAD_SIZE = ADSGW_MAX_PAYLOAD_SIZE - GW_MSG_HEADER_SIZE - GW_MSG_CRC_SIZE;
+}
+
+namespace AdsGatewayLib
+{
+	// Structure defining application signal parameters
+	//
+	struct GwAppSignalParam
+	{
+		uint64_t hash;                          // Signal hash (as defined in Section 5.2)
+		char appSignalId[STRING_LENGTH_128];    // AppSignalID (ASCII, null-terminated, as defined in Section 5.1)
+		char customSignalId[STRING_LENGTH_128]; // Custom Signal ID (UTF-8, null-terminated)
+
+		char caption[STRING_LENGTH_256];        // Signal caption/description (UTF-8, null-terminated)
+		char equipmentId[STRING_LENGTH_128];    // EquipmentID (ASCII, null-terminated)
+		char lmEquipmentId[STRING_LENGTH_128];  // LogicModule EquipmentID (ASCII, null-terminated)
+		char units[STRING_LENGTH_128];          // Engineering units (UTF-8, null-terminated)
+		char tags[STRING_LENGTH_256];           // Tags, space-separated (ASCII, null-terminated)
+
+		uint8_t channel;                        // Channel code (see Section 7.3)
+		uint8_t inOutType;                      // I/O type code (see Section 7.4)
+		uint8_t type;                           // Signal type code (see Section 7.5)
+		uint8_t decimalPlaces;                  // Number of decimal places for analog signals
+
+		double lowValidRange;                   // Low valid range for analog signals
+		double highValidRange;                  // High valid range for analog signals
+
+		uint8_t tuning;                         // Tuning flag (0 = non-tunable, 1 = tunable)
+		double tuningDefaultValue;              // Default tuning value
+		double tuningLowBound;                  // Low bound for tuning value
+		double tuningHighBound;                 // High bound for tuning value
+	};
+
+	static_assert(sizeof(GwAppSignalParam) == 1216);
+	constexpr size_t GW_APP_SIGNAL_PARAM_SIZE = sizeof(GwAppSignalParam);
+
+	// Structure defining application signal state
+	//
+	struct GwAppSignalState
+	{
+		uint64_t hash;      // Signal hash (as defined in Section 5.2)
+		int64_t systemTime; // Server system time (UTC+0) when the state was acquired
+		int64_t localTime;  // systemTime adjusted to Local time zone
+		int64_t plantTime;  // Timestamp assigned in LogicModule (local time zone)
+		double value;       // Signal value (for discrete: 0=false, 1=true)
+		uint32_t flags;     // State flags (see Section 7.3 for bit definitions)
+		uint32_t reserved;  // Reserved for future use
+	};
+
+	static_assert(sizeof(GwAppSignalState) == 48);
+	constexpr size_t GW_APP_SIGNAL_STATE_SIZE = sizeof(GwAppSignalState);
+
+	constexpr size_t GW_MAX_SIGNAL_STATES = GW_MAX_MSG_PAYLOAD_SIZE / GW_APP_SIGNAL_STATE_SIZE;
+}
+
+namespace AdsGatewayLib
+{
 	// Request ADSGW_HANDSHAKE
 	//
 	struct GwHandshakeRequest
@@ -128,7 +187,7 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwHandshakeRequest) == 132);
-	constexpr std::size_t GW_HANDSHAKE_REQUEST_SIZE = sizeof(GwHandshakeRequest);
+	constexpr size_t GW_HANDSHAKE_REQUEST_SIZE = sizeof(GwHandshakeRequest);
 
 	struct GwHandshakeResponse
 	{
@@ -152,7 +211,7 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwSignalListStartRequest) == 4);
-	constexpr std::size_t GW_SIGNAL_LIST_START_REQUEST_SIZE = sizeof(GwSignalListStartRequest);
+	constexpr size_t GW_SIGNAL_LIST_START_REQUEST_SIZE = sizeof(GwSignalListStartRequest);
 
 	struct GwSignalListStartResponse
 	{
@@ -171,7 +230,7 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwSignalListNextRequest) == 4);
-	constexpr std::size_t GW_SIGNAL_LIST_NEXT_REQUEST_SIZE = sizeof(GwSignalListNextRequest);
+	constexpr size_t GW_SIGNAL_LIST_NEXT_REQUEST_SIZE = sizeof(GwSignalListNextRequest);
 
 	struct GwSignalListNextResponse
 	{
@@ -187,12 +246,9 @@ namespace AdsGatewayLib
 #endif
 	};
 
-	constexpr std::size_t GW_APP_SIGNAL_ID_SIZE = 64;
-	constexpr std::size_t GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE = sizeof(GwSignalListNextResponse);
-	constexpr std::size_t GW_MAX_APP_SIGNAL_ID_COUNT = (ADSGW_MAX_PAYLOAD_SIZE -
-														GW_MSG_HEADER_SIZE -
-														GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE -
-														GW_MSG_CRC_SIZE) / GW_APP_SIGNAL_ID_SIZE;
+	constexpr size_t GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE = sizeof(GwSignalListNextResponse);
+	constexpr size_t GW_MAX_APP_SIGNAL_ID_COUNT = (	GW_MAX_MSG_PAYLOAD_SIZE -
+													GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_ID_SIZE;
 
 	// Request ARGW_SIGNAL_PARAM_START
 	//
@@ -202,6 +258,7 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwSignalParamStartRequest) == 4);
+	constexpr size_t GW_SIGNAL_PARAM_START_REQUEST_SIZE = sizeof(GwSignalParamStartRequest);
 
 	struct GwSignalParamStartResponse
 	{
@@ -220,6 +277,7 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwSignalParamNextRequest) == 4);
+	constexpr size_t GW_SIGNAL_PARAM_NEXT_REQUEST_SIZE = sizeof(GwSignalParamNextRequest);
 
 	struct GwSignalParamNextResponse
 	{
@@ -229,6 +287,11 @@ namespace AdsGatewayLib
 		GwAppSignalParam params[paramCount]; // Array of GwAppSignalParam structures
 #endif
 	};
+
+	constexpr size_t GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE = sizeof(GwSignalParamNextResponse);
+	constexpr size_t GW_MAX_SIGNAL_PARAMS = (GW_MAX_MSG_PAYLOAD_SIZE -
+											GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_PARAM_SIZE;
+
 
 	// Request ARGW_SIGNAL_STATE
 	//
@@ -267,55 +330,4 @@ namespace AdsGatewayLib
 		GwAppSignalState states[stateCount]; // Array of GwAppSignalState structures
 #endif
 	};
-
-
-	// Structure defining application signal parameters
-	//
-	struct GwAppSignalParam
-	{
-		uint64_t hash;                          // Signal hash (as defined in Section 5.2)
-		char appSignalId[STRING_LENGTH_128];    // AppSignalID (ASCII, null-terminated, as defined in Section 5.1)
-		char customSignalId[STRING_LENGTH_128]; // Custom Signal ID (UTF-8, null-terminated)
-
-		char caption[STRING_LENGTH_256];        // Signal caption/description (UTF-8, null-terminated)
-		char equipmentId[STRING_LENGTH_128];    // EquipmentID (ASCII, null-terminated)
-		char lmEquipmentId[STRING_LENGTH_128];  // LogicModule EquipmentID (ASCII, null-terminated)
-		char units[STRING_LENGTH_128];          // Engineering units (UTF-8, null-terminated)
-		char tags[STRING_LENGTH_256];           // Tags, space-separated (ASCII, null-terminated)
-
-		uint8_t channel;                        // Channel code (see Section 7.3)
-		uint8_t inOutType;                      // I/O type code (see Section 7.4)
-		uint8_t type;                           // Signal type code (see Section 7.5)
-		uint8_t decimalPlaces;                  // Number of decimal places for analog signals
-
-		double lowValidRange;                   // Low valid range for analog signals
-		double highValidRange;                  // High valid range for analog signals
-
-		uint8_t tuning;                         // Tuning flag (0 = non-tunable, 1 = tunable)
-		double tuningDefaultValue;              // Default tuning value
-		double tuningLowBound;                  // Low bound for tuning value
-		double tuningHighBound;                 // High bound for tuning value
-	};
-
-	constexpr std::size_t GW_APP_SIGNAL_PARAM_SIZE = sizeof(GwAppSignalParam);
-	static_assert(sizeof(GwAppSignalParam) == 1216);
-
-	// Structure defining application signal state
-	//
-	struct GwAppSignalState
-	{
-		uint64_t hash;      // Signal hash (as defined in Section 5.2)
-		int64_t systemTime; // Server system time (UTC+0) when the state was acquired
-		int64_t localTime;  // systemTime adjusted to Local time zone
-		int64_t plantTime;  // Timestamp assigned in LogicModule (local time zone)
-		double value;       // Signal value (for discrete: 0=false, 1=true)
-		uint32_t flags;     // State flags (see Section 7.3 for bit definitions)
-		uint32_t reserved;  // Reserved for future use
-	};
-
-	constexpr std::size_t GW_APP_SIGNAL_STATE_SIZE = sizeof(GwAppSignalState);
-	static_assert(sizeof(GwAppSignalState) == 48);
-
-	constexpr std::size_t GW_MAX_SIGNAL_STATES =
-		(ADSGW_MAX_PAYLOAD_SIZE - GW_MSG_HEADER_SIZE - GW_MSG_CRC_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
 } // namespace AdsGatewayLib
