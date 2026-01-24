@@ -266,16 +266,20 @@ namespace AdsGatewayLib
 		uint8_t type;                           // Signal type code (see Section 7.5)
 		uint8_t decimalPlaces;                  // Number of decimal places for analog signals
 
+		uint8_t tuning;                         // Tuning flag (0 = non-tunable, 1 = tunable)
+		uint8_t reserved1;
+		uint8_t reserved2;
+		uint8_t reserved3;
+
 		double lowValidRange;                   // Low valid range for analog signals
 		double highValidRange;                  // High valid range for analog signals
 
-		uint8_t tuning;                         // Tuning flag (0 = non-tunable, 1 = tunable)
 		double tuningDefaultValue;              // Default tuning value
 		double tuningLowBound;                  // Low bound for tuning value
 		double tuningHighBound;                 // High bound for tuning value
 	};
 
-	static_assert(sizeof(GwAppSignalParam) == 1216);
+	static_assert(sizeof(GwAppSignalParam) == 1208);
 
 	// Structure defining application signal state
 	//

@@ -164,7 +164,7 @@ When Status Code is non-zero (error condition):
 - **Type:** C-style null-terminated string (ASCII encoding)
 - **Character Set:** Limited to ASCII characters: `#`, `A-Z`, `a-z`, `0-9`, `_` (underscore), `.` (dot)
 - **Format:** Must always start with `#` character
-- **Maximum Length:** 64 bytes including null terminator (63 usable characters + `\0`)
+- **Maximum Length:** 128 bytes including null terminator (127 usable characters + `\0`)
 - **Uniqueness:** Unique within the system
 - **Special Characters:**
   - **`#`** - Mandatory prefix for all AppSignalIDs
@@ -240,19 +240,19 @@ Initial connection handshake to establish protocol version and capabilities.
 struct GwHandshakeRequest {
     uint16_t protocolVersion;  // Protocol version client supports (e.g., 0x0100 for v1.0)
     uint16_t reserved1;        // Reserved for future use
-    char clientName[64];       // Null-terminated client name
+    char clientName[128];      // Null-terminated client name
 };
 
-static_assert(sizeof(GwHandshakeRequest) == 68);
+static_assert(sizeof(GwHandshakeRequest) == 132);
 ```
 
 | Offset | Size | Type | Field |
 |--------|------|------|-------|
 | 0 | 2 | `uint16_t` | `protocolVersion` |
 | 2 | 2 | `uint16_t` | `reserved1` |
-| 4 | 64 | `char[64]` | `clientName` |
+| 4 | 128 | `char[128]` | `clientName` |
 
-Total size: 68 bytes
+Total size: 132 bytes
 
 **Protocol Version Format:** 0xMMmm where MM = major version, mm = minor version
 - Example: 0x0100 = Version 1.0 (current)
@@ -373,7 +373,7 @@ struct GwSignalListNextResponse {
     
     // Array of AppSignalID strings
     struct {
-        char appSignalId[64];  // AppSignalID (null-terminated, max 64 bytes including '\0')
+        char appSignalId[128];  // AppSignalID (null-terminated, max 128 bytes including '\0')
     } appSignalIds[appSignalIdCount];
 };
 ```
@@ -382,13 +382,13 @@ struct GwSignalListNextResponse {
 |--------|------|------|-------|
 | 0 | 4 | `uint32_t` | `part` |
 | 4 | 4 | `uint32_t` | `appSignalIdCount` |
-| 8 | `appSignalIdCount * 64` | `char[64]` | `appSignalIds[]` |
+| 8 | `appSignalIdCount * 128` | `char[128]` | `appSignalIds[]` |
 
-Total size: `8 + (appSignalIdCount * 64)` bytes
+Total size: `8 + (appSignalIdCount * 128)` bytes
 
 **Response Behavior:**
 - Server returns the requested part number along with the AppSignalIDs for that part
-- Each AppSignalID is a C-style null-terminated string with fixed 64-byte size (as defined in Section 5.1)
+- Each AppSignalID is a C-style null-terminated string with fixed 128-byte size (as defined in Section 5.1)
 - Last part may contain fewer items than `itemsPerPart` if total count is not evenly divisible
 
 **Example Flow:**
@@ -674,61 +674,62 @@ The `GwAppSignalParam` structure contains detailed parameters and metadata for e
 
 ```cpp
 struct GwAppSignalParam {
-    uint64_t hash;                // Signal hash (as defined in Section 5.2)
-    char     appSignalId[64];     // AppSignalID (ASCII, null-terminated, as defined in Section 5.1)
-    char     customSignalId[64];  // Custom Signal ID (UTF-8, null-terminated)
+    uint64_t hash;              // Signal hash (as defined in Section 5.2)
+    char appSignalId[128];      // AppSignalID (ASCII, null-terminated, as defined in Section 5.1)
+    char customSignalId[128];   // Custom Signal ID (UTF-8, null-terminated)
 
-    char     caption[256];        // Signal caption/description (UTF-8, null-terminated)
-    char     equipmentId[64];     // EquipmentID (ASCII, null-terminated)
-    char     lmEquipmentId[64];   // LogicModule EquipmentID (ASCII, null-terminated)
-    char     units[64];           // Engineering units (UTF-8, null-terminated)
-    char     tags[256];           // Tags, space-separated (ASCII, null-terminated)
+    char caption[256];          // Signal caption/description (UTF-8, null-terminated)
+    char equipmentId[128];      // EquipmentID (ASCII, null-terminated)
+    char lmEquipmentId[128];    // LogicModule EquipmentID (ASCII, null-terminated)
+    char units[128];            // Engineering units (UTF-8, null-terminated)
+    char tags[256];             // Tags, space-separated (ASCII, null-terminated)
 
-    uint8_t  channel;             // Channel code (see Section 7.3)
-    uint8_t  inOutType;           // I/O type code (see Section 7.4)
-    uint8_t  type;                // Signal type code (see Section 7.5)
-    uint8_t  decimalPlaces;       // Number of decimal places for analog signals
+    uint8_t channel;            // Channel code (see Section 7.3)
+    uint8_t inOutType;          // I/O type code (see Section 7.4)
+    uint8_t type;               // Signal type code (see Section 7.5)
+    uint8_t decimalPlaces;      // Number of decimal places for analog signals
 
-    uint32_t reserved1;           // Reserved for future use
+    uint8_t tuning;             // Tuning flag (0 = non-tunable, 1 = tunable)
+    uint8_t reserved1;
+    uint8_t reserved2;
+    uint8_t reserved3;
 
-    double   lowValidRange;       // Low valid range for analog signals
-    double   highValidRange;      // High valid range for analog signals
+    double lowValidRange;       // Low valid range for analog signals
+    double highValidRange;      // High valid range for analog signals
 
-    double   tuningDefaultValue;  // Default tuning value
-    double   tuningLowBound;      // Low bound for tuning value
-    double   tuningHighBound;     // High bound for tuning value
-    
-    uint8_t  tuning;              // Tuning flag (0 = non-tunable, 1 = tunable)
-    uint8_t  reserved2[7];        // Reserved for future use
+    double tuningDefaultValue;  // Default tuning value
+    double tuningLowBound;      // Low bound for tuning value
+    double tuningHighBound;     // High bound for tuning value
 };
 
-static_assert(sizeof(GwAppSignalParam) == 896);
+static_assert(sizeof(GwAppSignalParam) == 1208);
 ```
 
 | Offset | Size | Type | Field |
 |--------|------|------|-------|
 | 0 | 8 | `uint64_t` | `hash` |
-| 8 | 64 | `char[64]` | `appSignalId` |
-| 72 | 64 | `char[64]` | `customSignalId` |
-| 136 | 256 | `char[256]` | `caption` |
-| 392 | 64 | `char[64]` | `equipmentId` |
-| 456 | 64 | `char[64]` | `lmEquipmentId` |
-| 520 | 64 | `char[64]` | `units` |
-| 584 | 256 | `char[256]` | `tags` |
-| 840 | 1 | `uint8_t` | `channel` |
-| 841 | 1 | `uint8_t` | `inOutType` |
-| 842 | 1 | `uint8_t` | `type` |
-| 843 | 1 | `uint8_t` | `decimalPlaces` |
-| 844 | 4 | `uint32_t` | `reserved1` |
-| 848 | 8 | `double` | `lowValidRange` |
-| 856 | 8 | `double` | `highValidRange` |
-| 864 | 8 | `double` | `tuningDefaultValue` |
-| 872 | 8 | `double` | `tuningLowBound` |
-| 880 | 8 | `double` | `tuningHighBound` |
-| 888 | 1 | `uint8_t` | `tuning` |
-| 889 | 7 | `uint8_t[7]` | `reserved2` |
+| 8 | 128 | `char[128]` | `appSignalId` |
+| 136 | 128 | `char[128]` | `customSignalId` |
+| 264 | 256 | `char[256]` | `caption` |
+| 520 | 128 | `char[128]` | `equipmentId` |
+| 648 | 128 | `char[128]` | `lmEquipmentId` |
+| 776 | 128 | `char[128]` | `units` |
+| 904 | 256 | `char[256]` | `tags` |
+| 1160 | 1 | `uint8_t` | `channel` |
+| 1161 | 1 | `uint8_t` | `inOutType` |
+| 1162 | 1 | `uint8_t` | `type` |
+| 1163 | 1 | `uint8_t` | `decimalPlaces` |
+| 1164 | 1 | `uint8_t` | `tuning` |
+| 1165 | 1 | `uint8_t` | `reserved1` |
+| 1166 | 1 | `uint8_t` | `reserved2` |
+| 1167 | 1 | `uint8_t` | `reserved3` |
+| 1168 | 8 | `double` | `lowValidRange` |
+| 1176 | 8 | `double` | `highValidRange` |
+| 1184 | 8 | `double` | `tuningDefaultValue` |
+| 1192 | 8 | `double` | `tuningLowBound` |
+| 1200 | 8 | `double` | `tuningHighBound` |
 
-Total size: 896 bytes
+Total size: 1208 bytes
 
 **String Field Encoding:**
 - **ASCII (7-bit) fields:** `appSignalId`, `equipmentId`, `lmEquipmentId`, `tags`
