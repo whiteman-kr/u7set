@@ -219,8 +219,7 @@ inline constexpr Hash UNDEFINED_HASH = 0x0000000000000000ULL;
 **Request Prerequisites:**
 - All requests **except** `ADSGW_HANDSHAKE` require that a successful handshake has been completed.
 - If the client has not completed the handshake, the server will respond with Status Code = `GWC_HANDSHAKE_REQUIRED` (5) and no payload.
-- All requests **except** `ADSGW_HANDSHAKE` require the AdsGateway to be connected to AppDataService.
-- If the AdsGateway is not connected to AppDataService, the server may respond with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
+- Requests `ADSGW_SIGNAL_STATE` and `ADSGW_SIGNAL_STATE_CHANGES` require the AdsGateway to be connected to AppDataService. For these requests, if AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
 
 ### 6.1 ADSGW_HANDSHAKE
 
@@ -549,6 +548,7 @@ Total size: `8 + (signalCount * 8)` bytes
 - Client specifies an array of signal hashes to request
 - **Maximum number of signals per request**: The `signalCount` must not exceed the `maxStateRequest` value received in the `GwHandshakeResponse` (Section 6.1). Requests exceeding this limit will result in error code `GWC_TOO_MANY_SIGNALS` (4).
 - **Missing signals**: If a requested signal hash is not found in the system, no error is reported. The signal is simply skipped in the response.
+- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
 
 #### Response Payload
 ```
@@ -628,6 +628,7 @@ Total size: 4 bytes
 **Request Behavior:**
 - Client sends request to retrieve accumulated state changes
 - Server returns pending changes from the client's dedicated queue
+- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
 
 ---
 

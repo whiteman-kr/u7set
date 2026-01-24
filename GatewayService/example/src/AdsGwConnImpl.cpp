@@ -356,6 +356,11 @@ namespace AdsGatewayLib
 
 			do
 			{
+				if (m_isCancelledFunc && m_isCancelledFunc() == true)
+				{
+					break;
+				}
+
 				GwSignalStateChangesRequest request{};
 				GwSignalStateChangesResponse response{};
 
@@ -365,6 +370,12 @@ namespace AdsGatewayLib
 														response,
 														std::span{m_statesBuffer},
 														m_isCancelledFunc);
+
+				if (requestResult == GWC_NO_ADS_CONNECTION)
+				{
+					return;
+				}
+
 				if (requestResult != GWC_SUCCESS)
 				{
 					throw std::runtime_error{std::format("server error {}", requestResult)};
@@ -374,6 +385,7 @@ namespace AdsGatewayLib
 
 				pendingChangesCount = response.pendingStatesCount;
 				attempts++;
+
 			} while (pendingChangesCount >= RepeatRequestThreshold && attempts < MaxAttempts);
 
 			m_logger.logTrace("ADSGW_SIGNAL_STATE_CHANGES completed. Attempts={}, PendingChanges={}", attempts, pendingChangesCount);
@@ -422,6 +434,12 @@ namespace AdsGatewayLib
 													response,
 													std::span{m_statesBuffer},
 													m_isCancelledFunc);
+
+			if (requestResult == GWC_NO_ADS_CONNECTION)
+			{
+				return;
+			}
+
 			if (requestResult != GWC_SUCCESS)
 			{
 				throw std::runtime_error{std::format("server error {}", requestResult)};
