@@ -22,18 +22,43 @@ namespace AdsGatewayLib
 		virtual bool isTraceEnabled() const = 0;
 
 		template<typename... Args>
-		void logTraceFormat(std::format_string<Args...> fmt, Args&&... args)
+		void logTrace(std::format_string<Args...> fmt, Args&&... args)
 		{
 			if (isTraceEnabled() == true)
 			{
 				logTrace(std::format(fmt, std::forward<Args>(args)...));
 			}
 		}
+
+		template<typename... Args>
+		void logMessage(std::format_string<Args...> fmt, Args&&... args)
+		{
+			logMessage(std::format(fmt, std::forward<Args>(args)...));
+		}
+
+		template<typename... Args>
+		void logWarning(std::format_string<Args...> fmt, Args&&... args)
+		{
+			logWarning(std::format(fmt, std::forward<Args>(args)...));
+		}
+
+		template<typename... Args>
+		void logError(std::format_string<Args...> fmt, Args&&... args)
+		{
+			logError(std::format(fmt, std::forward<Args>(args)...));
+		}
 	};
 
 	class ConsoleLogger : public ILogger
 	{
 	public:
+		using ILogger::logTrace;
+		using ILogger::logMessage;
+		using ILogger::logWarning;
+		using ILogger::logError;
+
+		// ILogger overrides
+		//
 		void logTrace(std::string_view message) override
 		{
 			if (isTraceEnabled() == true)

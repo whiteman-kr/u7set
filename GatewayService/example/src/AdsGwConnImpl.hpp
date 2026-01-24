@@ -5,6 +5,7 @@
 
 #include <AdsGatewayLib/AdsGwProtocol.hpp>
 #include <AdsGatewayLib/GwCrc32.hpp>
+#include <AdsGatewayLib/GwHash.hpp>
 
 #include <array>
 #include <cassert>
@@ -30,6 +31,17 @@ namespace AdsGatewayLib
 
 		void run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId);
 
+		// Communication requests
+		//
+	private:
+		void requestHandshake(std::string_view equipmentId);
+
+		std::vector<std::string> requestSignalList();
+		std::vector<GwAppSignalParam> requestSignalParams();
+
+		void requestStateChanges();
+		void requestSignalStates();
+
 	private:
 		// Sends a request and receives a response from the ADS Gateway.
 		// Only for request/response pairs where both RequestT and ResponseT are POD types with fixed sizes.
@@ -43,10 +55,10 @@ namespace AdsGatewayLib
 		{
 			// Send request and receive response, can throw exceptions.
 			//
-			m_logger.logTraceFormat("Sending request ID {}", static_cast<uint32_t>(requestId));
+			m_logger.logTrace("Sending request {}...", requestId);
 			sendRequestPacket<RequestT>(requestId, request, {}, isCancelledFunc);
 
-			m_logger.logTraceFormat("Receiving response for request ID {}", static_cast<uint32_t>(requestId));
+			m_logger.logTrace("Receiving response {}...", requestId);
 			return receiveResponsePacket<ResponseT>(requestId, response, {}, isCancelledFunc);
 		}
 
@@ -64,10 +76,10 @@ namespace AdsGatewayLib
 		{
 			// Send request and receive response, can throw exceptions.
 			//
-			m_logger.logTraceFormat("Sending request ID {}", static_cast<uint32_t>(requestId));
+			m_logger.logTrace("Sending request {}...", requestId);
 			sendRequestPacket<RequestT>(requestId, request, requestVariablePart, isCancelledFunc);
 
-			m_logger.logTraceFormat("Receiving response for request ID {}", static_cast<uint32_t>(requestId));
+			m_logger.logTrace("Receiving response {}...", requestId);
 			return receiveResponsePacket<ResponseT>(requestId, response, responseVariablePart, isCancelledFunc);
 		}
 
@@ -124,7 +136,7 @@ namespace AdsGatewayLib
 			bool sendOk = m_conn.send(std::span<const std::byte>{requestBuffer.data(), requestBuffer.size()}, isCancelledFunc);
 			if (sendOk == false)
 			{
-				throw std::runtime_error{std::format("Send error: {}", m_conn.lastError())};
+				throw std::runtime_error{std::format("Send error, request={}, error={}", requestId, m_conn.lastError())};
 			}
 
 			return;
@@ -143,7 +155,7 @@ namespace AdsGatewayLib
 			bool receiveOk = m_conn.receive(std::span<std::byte>{responseHeader.data(), responseHeader.size()}, isCancelledFunc);
 			if (receiveOk == false)
 			{
-				throw std::runtime_error{std::format("Receive error: {}", m_conn.lastError())};
+				throw std::runtime_error{std::format("Receive error, request={}, error={}", requestId, m_conn.lastError())};
 			}
 
 			size_t offset = 0;
@@ -171,7 +183,7 @@ namespace AdsGatewayLib
 				receiveOk = m_conn.receive(std::span<std::byte>{responseCrcBuffer.data(), responseCrcBuffer.size()}, isCancelledFunc);
 				if (receiveOk == false)
 				{
-					throw std::runtime_error{std::format("Receive error: {}", m_conn.lastError())};
+					throw std::runtime_error{std::format("Receive error, request={}, error={}", requestId, m_conn.lastError())};
 				}
 
 				uint32_t respCrc = 0;
@@ -180,7 +192,7 @@ namespace AdsGatewayLib
 				uint32_t computedCrc = Radiy::CRC32(responseHeader);
 				if (respCrc != computedCrc)
 				{
-					throw std::runtime_error{"Response CRC32 mismatch for error response"};
+					throw std::runtime_error{std::format("Response CRC32 mismatch for error response, request={}", requestId)};
 				}
 
 				return static_cast<GwErrorCode>(respStatusCode);
@@ -188,19 +200,20 @@ namespace AdsGatewayLib
 
 			if (respPayloadSize > ADSGW_MAX_PAYLOAD_SIZE)
 			{
-				throw std::runtime_error{std::format("Response payload size too large: {}", respPayloadSize)};
+				throw std::runtime_error{std::format("Response {} payload size too large: {}", requestId, respPayloadSize)};
 			}
 
 			if (respPayloadSize < sizeof(ResponseT))
 			{
-				throw std::runtime_error{std::format("Response payload size is smaller than ResponseT: {}", respPayloadSize)};
+				throw std::runtime_error{std::format("Response {} payload size is smaller than ResponseT: {}", requestId, respPayloadSize)};
 			}
 
 			const uint32_t variablePayloadSize = respPayloadSize - static_cast<uint32_t>(sizeof(ResponseT));
 			const uint32_t maxVariableBytes = static_cast<uint32_t>(responseVariablePart.size() * sizeof(ResponseVariablePartT));
 			if (variablePayloadSize > maxVariableBytes)
 			{
-				throw std::runtime_error{std::format("Response payload variable part is greater than expected: {}", respPayloadSize)};
+				throw std::runtime_error{
+					std::format("Response {} payload variable part is greater than expected: {}", requestId, respPayloadSize)};
 			}
 
 			// Receive and parse response payload + CRC32
@@ -212,7 +225,7 @@ namespace AdsGatewayLib
 			receiveOk = m_conn.receive(std::span<std::byte>{payloadCrcBuffer.data(), payloadCrcBuffer.size()}, isCancelledFunc);
 			if (receiveOk == false)
 			{
-				throw std::runtime_error{std::format("Receive error: {}", m_conn.lastError())};
+				throw std::runtime_error{std::format("Receive error, request={}, error={}", requestId, m_conn.lastError())};
 			}
 
 			// Copy payload to output structures
@@ -233,25 +246,27 @@ namespace AdsGatewayLib
 			//
 			if (computedCrc != Radiy::Crc32Residue)
 			{
-				throw std::runtime_error{"Response CRC32 mismatch"};
+				throw std::runtime_error{std::format("Response CRC32 mismatch, request={}", requestId)};
 			}
 
 			return GWC_SUCCESS;
 		}
-
-		// Communication requests
-		//
-		void requestHandshake(std::string_view equipmentId);
-
-		std::vector<std::string> requestSignalList();
-		std::vector<GwAppSignalParam> requestSignalParams();
-
-		void requestStateChanges();
 
 	private:
 		ISignalUpdater& m_signalUpdater;
 		ILogger& m_logger;
 		TcpConnection m_conn;
 		std::function<bool()> m_isCancelledFunc;
+
+	private:
+		GwHandshakeResponse m_handshakeResponse{};
+		std::vector<std::string> m_appSignalIds{};
+		std::vector<Radiy::Hash> m_appSignalHashes{};
+
+		// Operative buffers used in requests
+		//
+		std::vector<GwAppSignalState> m_statesBuffer{};
+		std::vector<Radiy::Hash> m_hashBuffer{};
+		size_t m_nextStateIndexToRequest{0}; // Used only in requestSignalStates()
 	};
 } // namespace AdsGatewayLib

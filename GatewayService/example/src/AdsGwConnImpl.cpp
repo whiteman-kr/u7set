@@ -1,6 +1,7 @@
 #include "AdsGwConnImpl.hpp"
 #include "ISignalUpdater.hpp"
 
+#include <algorithm>
 #include <cstring>
 
 
@@ -18,16 +19,19 @@ namespace AdsGatewayLib
 			try
 			{
 				m_signalUpdater.reset();
+				m_handshakeResponse = {};
+				m_appSignalIds.clear();
+				m_appSignalHashes.clear();
 
 				// Establish TCP Connections
 				//
-				m_logger.logTraceFormat("Connecting to ADS Gateway at {}:{}", address, port);
+				m_logger.logTrace("Connecting to ADS Gateway at {}:{}", address, port);
 				bool ok = m_conn.connect(address, port, m_isCancelledFunc);
 				if (ok == false)
 				{
 					throw std::runtime_error{std::format("Connect error: {}", m_conn.lastError())};
 				}
-				m_logger.logTraceFormat("Connected to ADS Gateway {}:{}", address, port);
+				m_logger.logTrace("Connected to ADS Gateway {}:{}", address, port);
 
 				// Send Handshake
 				//
@@ -35,15 +39,21 @@ namespace AdsGatewayLib
 
 				// Getting signal list
 				//
-				std::vector<std::string> appSignalIds = requestSignalList();
-				m_logger.logTraceFormat("Received {} signal IDs.", appSignalIds.size());
+				m_appSignalIds = requestSignalList();
+				m_logger.logTrace("Received {} signal IDs.", m_appSignalIds.size());
+
+				m_appSignalHashes.reserve(m_appSignalIds.size());
+				for (const auto& appSignalId : m_appSignalIds)
+				{
+					m_appSignalHashes.push_back(Radiy::calcHash(appSignalId));
+				}
 
 				// Getting signal params
 				//
 				std::vector<GwAppSignalParam> appSignalParams = requestSignalParams();
-				m_logger.logTraceFormat("Received {} signal params.", appSignalParams.size());
+				m_logger.logTrace("Received {} signal params.", appSignalParams.size());
 
-				assert(appSignalIds.size() == appSignalParams.size());
+				assert(m_appSignalIds.size() == appSignalParams.size());
 
 				m_signalUpdater.addSignals(appSignalParams);
 
@@ -51,11 +61,17 @@ namespace AdsGatewayLib
 				//
 				while (stoken.stop_requested() == false)
 				{
+					// Request state changes, several requests if needed.
+					//
 					requestStateChanges();
 
-					// TODO: Main communication loop
+					// Periodically refresh the complete signal state set.
+					// requestStateChanges (ARGW_SIGNAL_STATE_CHANGES) relies on the aperture mechanism,
+					// so we should request the full snapshot to prevent state discrepancies with the LogicModule.
 					//
-					std::this_thread::sleep_for(std::chrono::milliseconds(100));
+					requestSignalStates();
+
+					std::this_thread::sleep_for(std::chrono::milliseconds(50));
 				}
 			}
 			catch (const std::runtime_error& e)
@@ -87,6 +103,7 @@ namespace AdsGatewayLib
 	{
 		GwHandshakeRequest request{};
 		GwHandshakeResponse response{};
+		m_handshakeResponse = {};
 
 		request.protocolVersion = ADSGW_PROTOCOL_VERSION;
 		std::snprintf(request.clientName, sizeof(request.clientName), "%s", equipmentId.data());
@@ -95,7 +112,7 @@ namespace AdsGatewayLib
 
 		try
 		{
-			m_logger.logTraceFormat("Sending handshake request to ADS Gateway...");
+			m_logger.logTrace("Sending handshake request to ADS Gateway...");
 			requestResult = sendRequest(ADSGW_HANDSHAKE, request, response, m_isCancelledFunc);
 		}
 		catch (const std::runtime_error& e)
@@ -105,7 +122,7 @@ namespace AdsGatewayLib
 
 		if (requestResult != GWC_SUCCESS)
 		{
-			throw std::runtime_error{std::format("Handshake server error: {}", static_cast<int>(requestResult))};
+			throw std::runtime_error{std::format("Handshake server error: {}", requestResult)};
 		}
 
 		if (response.protocolVersion != ADSGW_PROTOCOL_VERSION)
@@ -128,6 +145,14 @@ namespace AdsGatewayLib
 				std::format("Handshake error: Incompatible GwAppSignalState size {}", response.sizeof_GwAppSignalState)};
 		}
 
+
+		m_logger.logTrace("Handshake successful. MaxStateRequest={}, GwAppSignalParamSize={}, GwAppSignalStateSize={}",
+						  response.maxStateRequest,
+						  response.sizeof_GwAppSignalParam,
+						  response.sizeof_GwAppSignalState);
+
+		m_handshakeResponse = response;
+
 		return;
 	}
 
@@ -149,12 +174,11 @@ namespace AdsGatewayLib
 			GwSignalListStartRequest request{};
 			GwSignalListStartResponse startResponse{};
 
-			m_logger.logTraceFormat("Sending ADSGW_SIGNAL_LIST_START request to ADS Gateway...");
 			GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_LIST_START, request, startResponse, m_isCancelledFunc);
 
 			if (requestResult != GWC_SUCCESS)
 			{
-				throw std::runtime_error{std::format("server error {}", static_cast<int>(requestResult))};
+				throw std::runtime_error{std::format("server error {}", requestResult)};
 			}
 
 			totalItems = startResponse.totalItemCount;
@@ -191,7 +215,7 @@ namespace AdsGatewayLib
 														m_isCancelledFunc);
 				if (requestResult != GWC_SUCCESS)
 				{
-					throw std::runtime_error{std::format("server error {}", static_cast<int>(requestResult))};
+					throw std::runtime_error{std::format("server error {}", requestResult)};
 				}
 
 				if (response.part != part)
@@ -243,12 +267,12 @@ namespace AdsGatewayLib
 			GwSignalParamStartRequest request{};
 			GwSignalParamStartResponse startResponse{};
 
-			m_logger.logTraceFormat("Sending ADSGW_SIGNAL_PARAM_START request to ADS Gateway...");
+			m_logger.logTrace("Sending request ADSGW_SIGNAL_PARAM_START...");
 			GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_PARAM_START, request, startResponse, m_isCancelledFunc);
 
 			if (requestResult != GWC_SUCCESS)
 			{
-				throw std::runtime_error{std::format("server error {}", static_cast<int>(requestResult))};
+				throw std::runtime_error{std::format("server error {}", requestResult)};
 			}
 
 			totalItems = startResponse.totalItemCount;
@@ -277,6 +301,8 @@ namespace AdsGatewayLib
 				responseVariablePartBuffer.resize(itemsPerPart);
 				std::fill(std::begin(responseVariablePartBuffer), std::end(responseVariablePartBuffer), GwAppSignalParam{});
 
+				m_logger.logTrace("Sending request ADSGW_SIGNAL_PARAM_NEXT, part {}/{}...", part + 1, partsCount);
+
 				GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_PARAM_NEXT,
 														request,
 														std::span<const std::byte>{},
@@ -285,7 +311,7 @@ namespace AdsGatewayLib
 														m_isCancelledFunc);
 				if (requestResult != GWC_SUCCESS)
 				{
-					throw std::runtime_error{std::format("server error {}", static_cast<int>(requestResult))};
+					throw std::runtime_error{std::format("server error {}", requestResult)};
 				}
 
 				if (response.part != part)
@@ -315,5 +341,98 @@ namespace AdsGatewayLib
 		return result;
 	}
 
-	void AdsGwConnImpl::requestStateChanges() {}
+	void AdsGwConnImpl::requestStateChanges()
+	{
+		try
+		{
+			m_statesBuffer.resize(m_handshakeResponse.maxStateRequest); // We do not expect more than maxStateRequest states in one request.
+
+			const uint32_t RepeatRequestThreshold =
+				m_handshakeResponse.maxStateRequest / 4;                // The real m_handshakeResponse.maxStateRequest is about 40K.
+
+			uint32_t pendingChangesCount = 0;
+			int attempts = 0;                                           // Just for safety to avoid infinite loops
+			const uint32_t MaxAttempts = 10;                            // Safety cap: limit the number of repeat requests per call
+
+			do
+			{
+				GwSignalStateChangesRequest request{};
+				GwSignalStateChangesResponse response{};
+
+				GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_STATE_CHANGES,
+														request,
+														std::span<const std::byte>{},
+														response,
+														std::span{m_statesBuffer},
+														m_isCancelledFunc);
+				if (requestResult != GWC_SUCCESS)
+				{
+					throw std::runtime_error{std::format("server error {}", requestResult)};
+				}
+
+				m_signalUpdater.setStates(std::span{m_statesBuffer.data(), response.stateCount});
+
+				pendingChangesCount = response.pendingStatesCount;
+				attempts++;
+			} while (pendingChangesCount >= RepeatRequestThreshold && attempts < MaxAttempts);
+
+			m_logger.logTrace("ADSGW_SIGNAL_STATE_CHANGES completed. Attempts={}, PendingChanges={}", attempts, pendingChangesCount);
+		}
+		catch (const std::runtime_error& e)
+		{
+			throw std::runtime_error{std::format("ADSGW_SIGNAL_STATE_CHANGES error: {}", e.what())};
+		}
+	}
+
+	void AdsGwConnImpl::requestSignalStates()
+	{
+		if (m_appSignalHashes.empty() == true)
+		{
+			return;
+		}
+
+		try
+		{
+			if (m_nextStateIndexToRequest >= m_appSignalHashes.size())
+			{
+				m_nextStateIndexToRequest = 0;
+			}
+
+			auto requestCount =
+				std::min(static_cast<size_t>(m_handshakeResponse.maxStateRequest), m_appSignalHashes.size() - m_nextStateIndexToRequest);
+
+			GwSignalStateRequest request{};
+			request.signalCount = static_cast<uint32_t>(requestCount);
+
+			m_hashBuffer.clear();
+			m_hashBuffer.reserve(requestCount);
+			std::copy_n(m_appSignalHashes.data() + m_nextStateIndexToRequest, requestCount, std::back_inserter(m_hashBuffer));
+
+			GwSignalStateResponse response{};
+			m_statesBuffer.clear();
+			m_statesBuffer.resize(requestCount);
+
+			m_nextStateIndexToRequest += requestCount;
+
+			// Send request
+			//
+			GwErrorCode requestResult = sendRequest(ADSGW_SIGNAL_STATE,
+													request,
+													std::span<const Radiy::Hash>{m_hashBuffer},
+													response,
+													std::span{m_statesBuffer},
+													m_isCancelledFunc);
+			if (requestResult != GWC_SUCCESS)
+			{
+				throw std::runtime_error{std::format("server error {}", requestResult)};
+			}
+
+			m_signalUpdater.setStates(std::span{m_statesBuffer.data(), response.stateCount});
+		}
+		catch (const std::runtime_error& e)
+		{
+			throw std::runtime_error{std::format("ADSGW_SIGNAL_STATE error: {}", e.what())};
+		}
+	}
+
 } // namespace AdsGatewayLib
