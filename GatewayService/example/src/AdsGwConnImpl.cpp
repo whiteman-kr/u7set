@@ -31,7 +31,7 @@ namespace AdsGatewayLib
 				{
 					throw std::runtime_error{std::format("Connect error: {}", m_conn.lastError())};
 				}
-				m_logger.logTrace("Connected to ADS Gateway {}:{}", address, port);
+				m_logger.logMessage("Socket connected to ADS Gateway at {}:{}, handshake requesting...", address, port);
 
 				// Send Handshake
 				//
@@ -40,7 +40,7 @@ namespace AdsGatewayLib
 				// Getting signal list
 				//
 				m_appSignalIds = requestSignalList();
-				m_logger.logTrace("Received {} signal IDs.", m_appSignalIds.size());
+				m_logger.logMessage("Received {} signal IDs.", m_appSignalIds.size());
 
 				m_appSignalHashes.reserve(m_appSignalIds.size());
 				for (const auto& appSignalId : m_appSignalIds)
@@ -51,7 +51,7 @@ namespace AdsGatewayLib
 				// Getting signal params
 				//
 				std::vector<GwAppSignalParam> appSignalParams = requestSignalParams();
-				m_logger.logTrace("Received {} signal params.", appSignalParams.size());
+				m_logger.logMessage("Received {} signal params.", appSignalParams.size());
 
 				assert(m_appSignalIds.size() == appSignalParams.size());
 
@@ -356,6 +356,11 @@ namespace AdsGatewayLib
 
 			do
 			{
+				if (m_isCancelledFunc && m_isCancelledFunc() == true)
+				{
+					break;
+				}
+
 				GwSignalStateChangesRequest request{};
 				GwSignalStateChangesResponse response{};
 
@@ -365,6 +370,12 @@ namespace AdsGatewayLib
 														response,
 														std::span{m_statesBuffer},
 														m_isCancelledFunc);
+
+				if (requestResult == GWC_NO_ADS_CONNECTION)
+				{
+					return;
+				}
+
 				if (requestResult != GWC_SUCCESS)
 				{
 					throw std::runtime_error{std::format("server error {}", requestResult)};
@@ -374,6 +385,7 @@ namespace AdsGatewayLib
 
 				pendingChangesCount = response.pendingStatesCount;
 				attempts++;
+
 			} while (pendingChangesCount >= RepeatRequestThreshold && attempts < MaxAttempts);
 
 			m_logger.logTrace("ADSGW_SIGNAL_STATE_CHANGES completed. Attempts={}, PendingChanges={}", attempts, pendingChangesCount);
@@ -422,6 +434,12 @@ namespace AdsGatewayLib
 													response,
 													std::span{m_statesBuffer},
 													m_isCancelledFunc);
+
+			if (requestResult == GWC_NO_ADS_CONNECTION)
+			{
+				return;
+			}
+
 			if (requestResult != GWC_SUCCESS)
 			{
 				throw std::runtime_error{std::format("server error {}", requestResult)};

@@ -4,6 +4,7 @@
 #include <AdsGatewayLib/GwHash.hpp>
 
 #include <mutex>
+#include <optional>
 #include <unordered_map>
 
 
@@ -21,6 +22,12 @@ namespace AdsGatewayLib
 
 		// --
 		//
+		std::optional<GwAppSignalParam> getSignalParam(std::string_view signalId) const;
+		std::optional<GwAppSignalParam> getSignalParam(Radiy::Hash signalIdHash) const;
+
+		std::optional<GwAppSignalState> getSignalState(std::string_view signalId) const;
+		std::optional<GwAppSignalState> getSignalState(Radiy::Hash signalIdHash) const;
+
 	private:
 		mutable std::mutex m_paramsMutex;
 		std::unordered_map<Radiy::Hash, GwAppSignalParam> m_params;

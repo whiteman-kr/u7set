@@ -9,6 +9,7 @@
 
 #include <array>
 #include <cassert>
+#include <cstring>
 #include <functional>
 #include <stop_token>
 #include <vector>
@@ -20,7 +21,7 @@ namespace AdsGatewayLib
 
 	class AdsGwConnImpl final
 	{
-		using AppSignalIdNetworkT = std::array<char, 64>;
+		using AppSignalIdNetworkT = std::array<char, STRING_LENGTH_128>;
 
 	public:
 		AdsGwConnImpl(ISignalUpdater& signalUpdater, ILogger& logger) :
