@@ -307,6 +307,7 @@ void AdsGatewayServer::processRequest(SessionThreadContextShared stc, char* recv
 		break;
 
 	case AGL::GwRequestId::ADSGW_SIGNAL_LIST_NEXT:
+		requestSize = processSignalListNextRequest(stc, header, recvBuf, recvBufIndex);
 		break;
 
 	case AGL::GwRequestId::ADSGW_SIGNAL_PARAM_START:
@@ -490,17 +491,41 @@ std::size_t AdsGatewayServer::processSignalListNextRequest(SessionThreadContextS
 	reply.part = request.part;
 	reply.appSignalIdCount = 0;
 
-	std::vector<char> payloadData();
+	std::vector<char> payloadData(AGL::GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE +
+								  AGL::GW_MAX_APP_SIGNAL_ID_COUNT * AGL::GW_APP_SIGNAL_ID_SIZE);
 
 	int signalsCount = TO_INT(m_appSignals.count());
 	int signalStartIndex = request.part * AGL::GW_MAX_APP_SIGNAL_ID_COUNT;
 
+	std::size_t payloadSize = AGL::GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE;
+
 	for(int i = signalStartIndex; i < signalsCount; i++)
 	{
+		const AppSignal* appSignal = m_appSignals.getSignalByIndex(i);
 
+		TEST_PTR_CONTINUE(appSignal);
+
+		const QByteArray appSignalID = appSignal->appSignalID().toUtf8();
+
+		std::size_t idLen = appSignalID.size();
+
+		if (idLen > AGL::GW_APP_SIGNAL_ID_SIZE - 1)
+		{
+			Q_ASSERT(false);
+			continue;
+		}
+
+		std::memcpy(payloadData.data() + payloadSize, appSignalID.constData(), idLen);
+		std::memset(payloadData.data() + payloadSize + idLen, 0, AGL::GW_APP_SIGNAL_ID_SIZE - idLen);
+
+		payloadSize +=  AGL::GW_APP_SIGNAL_ID_SIZE;
+
+		reply.appSignalIdCount++;
 	}
 
-	bool res = sendOkReply(stc, header, reinterpret_cast<const char*>(&reply), sizeof(reply));
+	std::memcpy(payloadData.data(), &reply, AGL::GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE);
+
+	bool res = sendOkReply(stc, header, payloadData.data(), payloadSize);
 
 	if (res == false)
 	{
@@ -532,7 +557,9 @@ bool AdsGatewayServer::sendReply(SessionThreadContextShared stc,
 
 	if (AGL::GW_MSG_HEADER_SIZE + payloadSize + AGL::GW_MSG_CRC_SIZE > AGL::ADSGW_MAX_PAYLOAD_SIZE)
 	{
-		return false;
+		Q_ASSERT(false);
+		sendReply(stc, requestID, AGL::GWC_INTERNAL_ERROR, nullptr, 0);
+		return true;
 	}
 
 	if (errCode != AGL::GWC_SUCCESS)
