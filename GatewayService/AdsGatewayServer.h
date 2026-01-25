@@ -37,6 +37,9 @@ public:
 	void run();
 	void stop();
 
+	void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
+	void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply);
+
 private:
 	void runAcceptLoop();
 	void sessionThread(SessionThreadContextShared stc);
@@ -63,8 +66,11 @@ private:
 				   uint32_t requestID, AGL::GwErrorCode errCode,
 				   const char* payloadData, size_t payloadSize);
 
-	bool checkNullTerminated(const char* str, size_t size);
-	QString getIpPortStr(const std::shared_ptr<tcp::socket>& socket);
+	bool checkNullTerminated(const char* str, size_t size) const;
+	QString getIpPortStr(const std::shared_ptr<tcp::socket>& socket) const;
+
+	void copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const;
+	uint8_t channelChar(E::Channel ch) const;
 
 private:
 	HostAddressPort m_listenIP;
@@ -90,8 +96,9 @@ private:
 	std::mutex m_threadsMutex;
 	std::vector<SessionThread> m_sessionThreads;
 
-	std::mutex m_signalsStatesMutex;
-	std::unordered_map<Hash, SimpleAppSignalState> m_signalsStates;
+	std::mutex m_signalStatesMutex;
+	std::vector<SimpleAppSignalState> m_signalStates;
+	std::unordered_map<Hash, int> m_hashToIndex;
 
 	static constexpr size_t CONTINUE_RECEIVE = std::numeric_limits<size_t>::max();
 };

@@ -19,6 +19,8 @@ namespace Gateway
 		void getRequiredSignalsHashes(std::set<Hash>* hashes) const;
 		void getEventSignalsHashes(std::set<Hash>* hashes) const;
 
+		void setRequiredSignalHashes(std::set<Hash>& stateHashes, std::set<Hash>& eventHashes);
+
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
@@ -31,6 +33,9 @@ namespace Gateway
 
 	private:
 		HostAddressPort m_clientRequestIP1;
+
+		std::set<Hash> m_stateHashes;
+		std::set<Hash> m_eventHashes;
 	};
 
 	using AdsGatewayShared = std::shared_ptr<AdsGateway>;

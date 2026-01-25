@@ -7,6 +7,27 @@ AdsGatewayServer::AdsGatewayServer(const HostAddressPort& listenIP,
 	m_listenIP(listenIP),
 	m_appSignals(appSignals)
 {
+	int signalCount = TO_INT(m_appSignals.count());
+
+	m_signalStates.resize(signalCount);
+	m_hashToIndex.reserve(signalCount);
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		const AppSignal* appSignal = m_appSignals.getSignalByIndex(TO_INT(i));
+
+		if (appSignal == nullptr)
+		{
+			Q_ASSERT(false);
+			m_signalStates[i].hash = 0;
+			continue;
+		}
+
+		Hash hash = appSignal->hash();
+
+		m_signalStates[i].hash = hash;
+		m_hashToIndex.emplace(hash, i);
+	}
 }
 
 AdsGatewayServer::~AdsGatewayServer()
@@ -78,6 +99,64 @@ void AdsGatewayServer::stop()
 	// wait while all sessions stopped
 	//
 	joinAllSessions();
+}
+
+void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+{
+	thread_local std::vector<int> indexes;
+
+	int statesCount = getStatesReply.appsignalstates_size();
+
+	if (indexes.size() < statesCount)
+	{
+		indexes.resize(statesCount);
+	}
+
+	int notFoundCount = 0;
+
+	for(int i = 0; i < statesCount; i++)
+	{
+		const Proto::AppSignalState& state = getStatesReply.appsignalstates(i);
+
+		SimpleAppSignalState sass;
+
+		sass.load(state);
+
+		Hash hash = state.hash();
+
+		auto it = m_hashToIndex.find(hash);
+
+		if (it == m_hashToIndex.end())
+		{
+			//Q_ASSERT(false);
+			Q_ASSERT(hash == 0);
+			notFoundCount++;
+			indexes[i] = -1;
+			continue;
+		}
+
+		indexes[i] = it->second;
+	}
+
+	{
+		std::lock_guard lg(m_signalStatesMutex);
+
+		for(int i = 0; i < statesCount; i++)
+		{
+			const Proto::AppSignalState& state = getStatesReply.appsignalstates(i);
+
+			SimpleAppSignalState& signalState = m_signalStates[indexes[i]];
+
+			Q_ASSERT(signalState.hash == state.hash());
+
+			signalState.load(state);
+		}
+	}
+}
+
+void AdsGatewayServer::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
+{
+
 }
 
 void AdsGatewayServer::runAcceptLoop()
@@ -360,9 +439,12 @@ void AdsGatewayServer::processRequest(SessionThreadContextShared stc, char* recv
 		break;
 
 	case AGL::GwRequestId::ADSGW_SIGNAL_PARAM_NEXT:
+		requestSize = processSignalParamNextRequest(stc, header, recvBuf, recvBufIndex);
+		break;
+
 	case AGL::GwRequestId::ADSGW_SIGNAL_STATE:
 	case AGL::GwRequestId::ADSGW_SIGNAL_STATE_CHANGES:
-		Q_ASSERT(false);
+		//Q_ASSERT(false);
 		break;
 
 	default:
@@ -587,22 +669,7 @@ size_t AdsGatewayServer::processSignalListNextRequest(SessionThreadContextShared
 
 		TEST_PTR_CONTINUE(appSignal);
 
-		const QByteArray appSignalID = appSignal->appSignalID().toUtf8();
-
-		size_t idLen = appSignalID.size();
-
-		if (idLen > AGL::GW_APP_SIGNAL_ID_SIZE - 1)
-		{
-			// If appSignalID does not fit into fixed field, send zeroed ID
-			// to explicitly mark it as invalid
-			//
-			std::memset(payloadData + payloadSize, 0, AGL::GW_APP_SIGNAL_ID_SIZE);
-		}
-		else
-		{
-			std::memcpy(payloadData + payloadSize, appSignalID.constData(), idLen);
-			std::memset(payloadData + payloadSize + idLen, 0, AGL::GW_APP_SIGNAL_ID_SIZE - idLen);
-		}
+		copyStr(payloadData + payloadSize, AGL::GW_APP_SIGNAL_ID_SIZE, appSignal->appSignalID());
 
 		payloadSize +=  AGL::GW_APP_SIGNAL_ID_SIZE;
 
@@ -677,7 +744,7 @@ size_t AdsGatewayServer::processSignalParamNextRequest(SessionThreadContextShare
 
 	constexpr size_t REQUEST_SIZE = AGL::GW_MSG_HEADER_SIZE + AGL::GW_SIGNAL_PARAM_NEXT_REQUEST_SIZE;
 
-/*	if (recvBufIndex < REQUEST_SIZE)
+	if (recvBufIndex < REQUEST_SIZE)
 	{
 		return CONTINUE_RECEIVE;
 	}
@@ -714,10 +781,10 @@ size_t AdsGatewayServer::processSignalParamNextRequest(SessionThreadContextShare
 		return REQUEST_SIZE;
 	}
 
-	AGL::GwSignalListNextResponse reply;
+	AGL::GwSignalParamNextResponse reply;
 
 	reply.part = request.part;
-	reply.appSignalIdCount = 0;
+	reply.paramCount = 0;
 
 	int signalStartIndex = request.part * AGL::GW_MAX_SIGNAL_PARAMS;
 	const int signalEndIndex = std::min(TO_INT(signalStartIndex + AGL::GW_MAX_SIGNAL_PARAMS), signalsCount);
@@ -737,40 +804,48 @@ size_t AdsGatewayServer::processSignalParamNextRequest(SessionThreadContextShare
 
 		TEST_PTR_CONTINUE(appSignal);
 
-		const QByteArray appSignalID = appSignal->appSignalID().toUtf8();
+		AGL::GwAppSignalParam p;
 
-		size_t idLen = appSignalID.size();
+		p.hash = TO_UINT64(appSignal->hash());
+		copyStr(p.appSignalId, AGL::STRING_LENGTH_128, appSignal->appSignalID());
+		copyStr(p.customSignalId, AGL::STRING_LENGTH_128, appSignal->customAppSignalID());
+		copyStr(p.caption, AGL::STRING_LENGTH_256, appSignal->caption());
+		copyStr(p.equipmentId, AGL::STRING_LENGTH_128, appSignal->equipmentID());
+		copyStr(p.lmEquipmentId, AGL::STRING_LENGTH_128, appSignal->lmEquipmentID());
+		copyStr(p.units, AGL::STRING_LENGTH_128, appSignal->unit());
+		copyStr(p.tags, AGL::STRING_LENGTH_256, appSignal->tagsStr());
+		p.channel = channelChar(appSignal->channel());
+		p.inOutType = TO_UINT8(appSignal->inOutType());
+		p.type = TO_UINT8(appSignal->signalType());
+		p.decimalPlaces = TO_UINT8(appSignal->decimalPlaces());
+		p.tuning = TO_UINT8(appSignal->enableTuning());
+		p.reserved1 = 0;
+		p.reserved2 = 0;
+		p.reserved3 = 0;
+		p.lowValidRange = appSignal->lowValidRange();
+		p.highValidRange = appSignal->highValidRange();
+		p.tuningDefaultValue = appSignal->tuningDefaultValue().toDouble();
+		p.tuningLowBound = appSignal->tuningLowBound().toDouble();
+		p.tuningHighBound = appSignal->tuningHighBound().toDouble();
 
-		if (idLen > AGL::GW_APP_SIGNAL_ID_SIZE - 1)
-		{
-			// If appSignalID does not fit into fixed field, send zeroed ID
-			// to explicitly mark it as invalid
-			//
-			std::memset(payloadData + payloadSize, 0, AGL::GW_APP_SIGNAL_PARAM_SIZE);
-		}
-		else
-		{
-			std::memcpy(payloadData + payloadSize, appSignalID.constData(), idLen);
-			std::memset(payloadData + payloadSize + idLen, 0, AGL::GW_APP_SIGNAL_ID_SIZE - idLen);
-		}
+		std::memcpy(payloadData + payloadSize, &p, AGL::GW_APP_SIGNAL_PARAM_SIZE);
 
-		payloadSize +=  AGL::GW_APP_SIGNAL_ID_SIZE;
+		payloadSize +=  AGL::GW_APP_SIGNAL_PARAM_SIZE;
 
-		reply.appSignalIdCount++;
+		reply.paramCount++;
 	}
 
-	std::memcpy(payloadData, &reply, AGL::GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE);
+	std::memcpy(payloadData, &reply, AGL::GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE);
 
 	bool res = sendOkReply(stc, header, payloadData, payloadSize);
 
 	if (res == false)
 	{
 		return 0;
-	}*/
+	}
 
 	return REQUEST_SIZE;
 }
-
 
 bool AdsGatewayServer::sendErrReply(SessionThreadContextShared stc,
 	const AdsGatewayLib::GwMessageHeader& requestHeader,
@@ -836,7 +911,7 @@ bool AdsGatewayServer::sendReply(SessionThreadContextShared stc,
 	return true;
 }
 
-bool AdsGatewayServer::checkNullTerminated(const char* str, size_t size)
+bool AdsGatewayServer::checkNullTerminated(const char* str, size_t size) const
 {
 	TEST_PTR_RETURN_FALSE(str);
 
@@ -851,7 +926,7 @@ bool AdsGatewayServer::checkNullTerminated(const char* str, size_t size)
 	return false;
 }
 
-QString AdsGatewayServer::getIpPortStr(const std::shared_ptr<tcp::socket>& socket)
+QString AdsGatewayServer::getIpPortStr(const std::shared_ptr<tcp::socket>& socket) const
 {
 	if (socket == nullptr)
 	{
@@ -862,5 +937,38 @@ QString AdsGatewayServer::getIpPortStr(const std::shared_ptr<tcp::socket>& socke
 	tcp::endpoint remote = socket->remote_endpoint();
 
 	return QString("%1:%2").arg(QString::fromStdString(remote.address().to_string())).arg(remote.port());
+}
+
+void AdsGatewayServer::copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const
+{
+	TEST_PTR_RETURN(toStr);
+
+	const QByteArray fromData = fromStr.toUtf8();
+
+	size_t fromLen = fromData.size();
+
+	if (fromLen > toStrLen - 1)
+	{
+		std::memset(toStr, 0, toStrLen);
+	}
+	else
+	{
+		std::memcpy(toStr, fromData.constData(), fromLen);
+		std::memset(toStr + fromLen, 0, toStrLen - fromLen);
+	}
+}
+
+uint8_t AdsGatewayServer::channelChar(E::Channel ch) const
+{
+	switch(ch)
+	{
+	case E::Channel::A: return TO_UINT8('A');
+	case E::Channel::B: return TO_UINT8('B');
+	case E::Channel::C: return TO_UINT8('C');
+	case E::Channel::D: return TO_UINT8('D');
+	default: ;
+	}
+
+	return 0;
 }
 

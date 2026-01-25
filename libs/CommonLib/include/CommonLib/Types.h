@@ -1017,8 +1017,17 @@ const char* const DataFormatStr[] = {
 	"Float",
 };
 
+#define TO_INT8(value) (static_cast<int8_t>(value))
+#define TO_INT16(value) (static_cast<int16_t>(value))
+#define TO_INT32(value) (static_cast<int32_t>(value))
+#define TO_INT64(value) (static_cast<int64_t>(value))
 #define TO_INT(value) (static_cast<int>(value))
-#define TO_INT64(value) (static_cast<qint64>(value))
+
+#define TO_UINT8(value) (static_cast<uint8_t>(value))
+#define TO_UINT16(value) (static_cast<uint16_t>(value))
+#define TO_UINT32(value) (static_cast<uint32_t>(value))
+#define TO_UINT64(value) (static_cast<uint64_t>(value))
+
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
 
 template<typename EnumType>

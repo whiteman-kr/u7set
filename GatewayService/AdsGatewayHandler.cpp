@@ -62,34 +62,12 @@ namespace Gateway
 
 	void AdsGatewayHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
 	{
-		// int statesCount = getStatesReply.appsignalstates_size();
-
-		// for(int i = 0; i < statesCount; i++)
-		// {
-		// 	const Proto::AppSignalState& state = getStatesReply.appsignalstates(i);
-
-		// 	Hash hash = state.hash();
-
-		// 	auto it = m_signalsStates.find(hash);
-
-		// 	if (it == m_signalsStates.end())
-		// 	{
-		// 		continue;
-		// 	}
-
-		// 	std::list<SignalState>& states = it->second;
-
-		// 	for(SignalState& st : states)
-		// 	{
-		// 		st.setValue(state.value());
-		// 	}
-		// }
-
-		// updateAllRegisters();
+		m_adsGatewayServer->updateSignalStates(getStatesReply);
 	}
 
 	void AdsGatewayHandler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
 	{
+		Q_UNUSED(getStateChangesReply);
 		// int statesCount = getStateChangesReply.appsignalstates_size();
 
 		// m_hashesToUpdate.clear();
@@ -122,48 +100,18 @@ namespace Gateway
 
 	bool AdsGatewayHandler::init()
 	{
-		// const std::map<Address16, ModbusSlaveGateway::ModbusSignal>& mbSignals = m_gateway->modbusSignals();
+		std::set<Hash> stateHashes;
+		std::set<Hash> eventHashes;
 
-		// auto itLast = mbSignals.rbegin();
+		for(const AppSignal* appSignal : m_appSignals)
+		{
+			TEST_PTR_CONTINUE(appSignal);
 
-		// if (itLast == mbSignals.rend())
-		// {
-		// 	return true;
-		// }
+			stateHashes.insert(appSignal->hash());
+			eventHashes.insert(appSignal->hash());
+		}
 
-		// Address16 maxAddr = itLast->first;
-		// const ModbusSlaveGateway::ModbusSignal& mbs = itLast->second;
-
-		// const ModbusFormat lastSignalFormat = mbs.format;
-
-		// maxAddr.addWord(lastSignalFormat.registersCount());			// maxAddr here is +1 to real registers count, it is ok
-
-		// m_regsMutex.lock();
-
-		// m_registers.clear();
-		// m_registers.resize(maxAddr.offset(), 0);
-
-		// m_regsMutex.unlock();
-
-		// m_signalsStates.clear();
-
-		// for(const auto& [addr16, mbSignal] : mbSignals)
-		// {
-		// 	Hash hash = calcHash(mbSignal.signalID);
-
-		// 	auto it = m_signalsStates.find(hash);
-
-		// 	if (it == m_signalsStates.end())
-		// 	{
-		// 		auto [newIt, b] = m_signalsStates.emplace(hash, std::list<SignalState>{});
-
-		// 		it = newIt;
-		// 	}
-
-		// 	it->second.emplace_back(mbSignal.format, mbSignal.addr, mbSignal.isConst, mbSignal.constValue);
-		// }
-
-		// updateAllRegisters();		// to init registers values
+		m_gateway->setRequiredSignalHashes(stateHashes, eventHashes);
 
 		return true;
 	}

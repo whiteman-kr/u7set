@@ -52,30 +52,20 @@ namespace Gateway
 
 	void AdsGateway::getRequiredSignalsHashes(std::set<Hash>* hashes) const
 	{
-		Q_UNUSED(hashes);
-		// TEST_PTR_RETURN(hashes);
-
-		// for(const auto& [addr16, mbSignal] : m_modbusSignals)
-		// {
-		// 	if (mbSignal.isConst == false)
-		// 	{
-		// 		hashes->emplace(calcHash(mbSignal.signalID));
-		// 	}
-		// }
+		TEST_PTR_RETURN(hashes);
+		*hashes = m_stateHashes;
 	}
 
 	void AdsGateway::getEventSignalsHashes(std::set<Hash>* hashes) const
 	{
-		Q_UNUSED(hashes);
-		// TEST_PTR_RETURN(hashes);
+		TEST_PTR_RETURN(hashes);
+		*hashes = m_eventHashes;
+	}
 
-		// for(const auto& [addr16, mbSignal] : m_modbusSignals)
-		// {
-		// 	if (mbSignal.isConst == false && mbSignal.format.isDiscrete())
-		// 	{
-		// 		hashes->emplace(calcHash(mbSignal.signalID));
-		// 	}
-		// }
+	void AdsGateway::setRequiredSignalHashes(std::set<Hash>& stateHashes, std::set<Hash>& eventHashes)
+	{
+		m_stateHashes.swap(stateHashes);
+		m_eventHashes.swap(eventHashes);
 	}
 
 	void AdsGateway::writeSettingsToXml(XmlWriteHelper& xml) const
