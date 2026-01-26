@@ -1,7 +1,6 @@
 #pragma once
+#include "GwHash.hpp"
 #include "ISignalUpdater.hpp"
-
-#include <AdsGatewayLib/GwHash.hpp>
 
 #include <mutex>
 #include <optional>

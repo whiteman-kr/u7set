@@ -1,6 +1,6 @@
 #pragma once
 
-#include <AdsGatewayLib/AdsGwProtocol.hpp>
+#include "AdsGwProtocol.hpp"
 
 #include <span>
 

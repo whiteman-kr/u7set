@@ -121,7 +121,7 @@ namespace AdsGatewayLib
 	constexpr size_t GW_MSG_CRC_SIZE = sizeof(uint32_t);
 
 	constexpr size_t GW_MAX_MSG_PAYLOAD_SIZE = ADSGW_MAX_PAYLOAD_SIZE - GW_MSG_HEADER_SIZE - GW_MSG_CRC_SIZE;
-}
+} // namespace AdsGatewayLib
 
 namespace AdsGatewayLib
 {
@@ -259,7 +259,7 @@ namespace AdsGatewayLib
 
 		return result;
 	}
-}
+} // namespace AdsGatewayLib
 
 namespace AdsGatewayLib
 {
@@ -333,8 +333,7 @@ namespace AdsGatewayLib
 	};
 
 	constexpr size_t GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE = sizeof(GwSignalListNextResponse);
-	constexpr size_t GW_MAX_APP_SIGNAL_ID_COUNT = (	GW_MAX_MSG_PAYLOAD_SIZE -
-													GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_ID_SIZE;
+	constexpr size_t GW_MAX_APP_SIGNAL_ID_COUNT = (GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_LIST_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_ID_SIZE;
 
 	// Request ARGW_SIGNAL_PARAM_START
 	//
@@ -375,8 +374,7 @@ namespace AdsGatewayLib
 	};
 
 	constexpr size_t GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE = sizeof(GwSignalParamNextResponse);
-	constexpr size_t GW_MAX_SIGNAL_PARAMS = (GW_MAX_MSG_PAYLOAD_SIZE -
-											GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_PARAM_SIZE;
+	constexpr size_t GW_MAX_SIGNAL_PARAMS = (GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_PARAM_SIZE;
 
 	// Request ARGW_SIGNAL_STATE
 	//
@@ -400,8 +398,7 @@ namespace AdsGatewayLib
 	};
 
 	constexpr size_t GW_SIGNAL_STATE_RESPONSE_SIZE = sizeof(GwSignalStateResponse);
-	constexpr size_t GW_MAX_SIGNAL_STATES = (GW_MAX_MSG_PAYLOAD_SIZE -
-											 GW_SIGNAL_STATE_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
+	constexpr size_t GW_MAX_SIGNAL_STATES = (GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_STATE_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
 
 	// Request ARGW_SIGNAL_STATE_CHANGES
 	//
@@ -418,14 +415,13 @@ namespace AdsGatewayLib
 		uint32_t pendingStatesCount; // Number of state changes still in queue (not returned in this response)
 		uint32_t stateCount;         // Number of states in this response
 #if 0
-		
 		GwAppSignalState states[stateCount]; // Array of GwAppSignalState structures
 #endif
 	};
 
 	constexpr size_t GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE = sizeof(GwSignalStateChangesResponse);
-	constexpr size_t GW_MAX_SIGNAL_STATE_CHANGES = (GW_MAX_MSG_PAYLOAD_SIZE -
-											 GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
+	constexpr size_t GW_MAX_SIGNAL_STATE_CHANGES =
+		(GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
 
 
 } // namespace AdsGatewayLib
