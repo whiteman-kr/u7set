@@ -62,40 +62,18 @@ namespace Gateway
 
 	void AdsGatewayHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
 	{
-		m_adsGatewayServer->updateSignalStates(getStatesReply);
+		if (m_adsGatewayServer)
+		{
+			m_adsGatewayServer->updateSignalStates(getStatesReply);
+		}
 	}
 
 	void AdsGatewayHandler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
 	{
-		Q_UNUSED(getStateChangesReply);
-		// int statesCount = getStateChangesReply.appsignalstates_size();
-
-		// m_hashesToUpdate.clear();
-
-		// for(int i = 0; i < statesCount; i++)
-		// {
-		// 	const Proto::AppSignalState& state = getStateChangesReply.appsignalstates(i).curstate();
-
-		// 	Hash hash = state.hash();
-
-		// 	auto it = m_signalsStates.find(hash);
-
-		// 	if (it == m_signalsStates.end())
-		// 	{
-		// 		continue;
-		// 	}
-
-		// 	m_hashesToUpdate.emplace(hash);
-
-		// 	std::list<SignalState>& states = it->second;
-
-		// 	for(SignalState& st : states)
-		// 	{
-		// 		st.setValue(state.value());
-		// 	}
-		// }
-
-		// updateRegisters(m_hashesToUpdate);
+		if (m_adsGatewayServer)
+		{
+			m_adsGatewayServer->processStateChanges(getStateChangesReply);
+		}
 	}
 
 	bool AdsGatewayHandler::init()

@@ -125,6 +125,8 @@ namespace AdsGatewayLib
 
 namespace AdsGatewayLib
 {
+	constexpr size_t GW_APP_SIGNAL_HASH_SIZE = sizeof(uint64_t);
+
 	// Structure defining application signal parameters
 	//
 	struct GwAppSignalParam
@@ -176,7 +178,6 @@ namespace AdsGatewayLib
 	static_assert(sizeof(GwAppSignalState) == 48);
 
 	constexpr size_t GW_APP_SIGNAL_STATE_SIZE = sizeof(GwAppSignalState);
-	constexpr size_t GW_MAX_SIGNAL_STATES = GW_MAX_MSG_PAYLOAD_SIZE / GW_APP_SIGNAL_STATE_SIZE;
 
 	// Signal state flags
 	//
@@ -377,7 +378,6 @@ namespace AdsGatewayLib
 	constexpr size_t GW_MAX_SIGNAL_PARAMS = (GW_MAX_MSG_PAYLOAD_SIZE -
 											GW_SIGNAL_PARAM_NEXT_RESPONSE_SIZE) / GW_APP_SIGNAL_PARAM_SIZE;
 
-
 	// Request ARGW_SIGNAL_STATE
 	//
 	struct GwSignalStateRequest
@@ -388,6 +388,8 @@ namespace AdsGatewayLib
 #endif
 	};
 
+	constexpr size_t GW_SIGNAL_STATE_REQUEST_SIZE = sizeof(GwSignalStateRequest);
+
 	struct GwSignalStateResponse
 	{
 		uint32_t stateCount; // Number of states returned
@@ -397,6 +399,10 @@ namespace AdsGatewayLib
 #endif
 	};
 
+	constexpr size_t GW_SIGNAL_STATE_RESPONSE_SIZE = sizeof(GwSignalStateResponse);
+	constexpr size_t GW_MAX_SIGNAL_STATES = (GW_MAX_MSG_PAYLOAD_SIZE -
+											 GW_SIGNAL_STATE_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
+
 	// Request ARGW_SIGNAL_STATE_CHANGES
 	//
 	struct GwSignalStateChangesRequest
@@ -405,6 +411,7 @@ namespace AdsGatewayLib
 	};
 
 	static_assert(sizeof(GwSignalStateChangesRequest) == 4);
+	constexpr size_t GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE = sizeof(GwSignalStateChangesRequest);
 
 	struct GwSignalStateChangesResponse
 	{
@@ -415,6 +422,12 @@ namespace AdsGatewayLib
 		GwAppSignalState states[stateCount]; // Array of GwAppSignalState structures
 #endif
 	};
+
+	constexpr size_t GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE = sizeof(GwSignalStateChangesResponse);
+	constexpr size_t GW_MAX_SIGNAL_STATE_CHANGES = (GW_MAX_MSG_PAYLOAD_SIZE -
+											 GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
+
+
 } // namespace AdsGatewayLib
 
 template<>

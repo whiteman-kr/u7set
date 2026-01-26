@@ -128,10 +128,8 @@ void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply&
 
 		if (it == m_hashToIndex.end())
 		{
-			//Q_ASSERT(false);
-			Q_ASSERT(hash == 0);
 			notFoundCount++;
-			indexes[i] = -1;
+			indexes[i] = BAD_INDEX;
 			continue;
 		}
 
@@ -145,7 +143,14 @@ void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply&
 		{
 			const Proto::AppSignalState& state = getStatesReply.appsignalstates(i);
 
-			SimpleAppSignalState& signalState = m_signalStates[indexes[i]];
+			int signalIndex = indexes[i];
+
+			if (signalIndex == BAD_INDEX)
+			{
+				continue;
+			}
+
+			SimpleAppSignalState& signalState = m_signalStates[signalIndex];
 
 			Q_ASSERT(signalState.hash == state.hash());
 
@@ -156,7 +161,31 @@ void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply&
 
 void AdsGatewayServer::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
 {
+	int statesCount = getStateChangesReply.appsignalstates_size();
 
+	if (statesCount == 0)
+	{
+		return;
+	}
+
+	AGL::GwAppSignalState state;
+
+	std::lock_guard lg(m_signalStateChangesMutex);
+
+	for(int i = 0; i < statesCount; i++)
+	{
+		const Proto::AppSignalState& s = getStateChangesReply.appsignalstates(i).curstate();
+
+		state.hash = s.hash();
+		state.systemTime = s.systemtime();
+		state.localTime = s.localtime();
+		state.plantTime = s.planttime();
+		state.value = s.value();
+		state.flags = s.flags();
+		state.reserved = 0;
+
+		m_signalStateChanges.push_back(state);
+	}
 }
 
 void AdsGatewayServer::runAcceptLoop()
@@ -443,8 +472,11 @@ void AdsGatewayServer::processRequest(SessionThreadContextShared stc, char* recv
 		break;
 
 	case AGL::GwRequestId::ADSGW_SIGNAL_STATE:
+		requestSize = processSignalStateRequest(stc, header, recvBuf, recvBufIndex);
+		break;
+
 	case AGL::GwRequestId::ADSGW_SIGNAL_STATE_CHANGES:
-		//Q_ASSERT(false);
+		requestSize = processSignalStateChangesRequest(stc, header, recvBuf, recvBufIndex);
 		break;
 
 	default:
@@ -847,6 +879,201 @@ size_t AdsGatewayServer::processSignalParamNextRequest(SessionThreadContextShare
 	return REQUEST_SIZE;
 }
 
+size_t AdsGatewayServer::processSignalStateRequest(SessionThreadContextShared stc,
+	const AGL::GwMessageHeader& header,
+	const char* recvBuf, size_t& recvBufIndex)
+{
+	Q_UNUSED(recvBuf);
+
+	if (recvBufIndex < AGL::GW_MSG_HEADER_SIZE + AGL::GW_SIGNAL_STATE_REQUEST_SIZE)
+	{
+		return CONTINUE_RECEIVE;
+	}
+
+	AGL::GwSignalStateRequest request;
+	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::GW_SIGNAL_STATE_REQUEST_SIZE);
+
+	if (request.signalCount > AGL::GW_MAX_SIGNAL_STATES)
+	{
+		sendErrReply(stc, header, AGL::GWC_TOO_MANY_SIGNALS);
+		return 0;
+	}
+
+	const size_t requiredPayloadSize = AGL::GW_SIGNAL_STATE_REQUEST_SIZE +
+								 request.signalCount * AGL::GW_APP_SIGNAL_HASH_SIZE;
+
+	if (header.payloadSize != requiredPayloadSize)
+	{
+		sendErrReply(stc, header, AGL::GWC_REQUEST_FORMAT_ERROR);
+		return 0;
+	}
+
+	const size_t REQUEST_SIZE = AGL::GW_MSG_HEADER_SIZE + requiredPayloadSize;
+
+	if (stc->handshakeCompleted == false)
+	{
+		sendErrReply(stc, header, AGL::GWC_HANDSHAKE_REQUIRED);
+		return REQUEST_SIZE;
+	}
+
+	//
+
+	logMsg(QString("SIGNAL_STATE request from %1, %2 states requested").
+		   arg(stc->clientName).arg(request.signalCount));
+
+	char* payloadData = stc->payloadData.data();
+
+	AGL::GwSignalStateResponse reply;
+
+	reply.stateCount = 0;
+
+	const uint32_t hashesCount = request.signalCount;
+	const uint64_t* hashPtr = reinterpret_cast<const uint64_t*>(recvBuf + AGL::GW_MSG_HEADER_SIZE + AGL::GW_SIGNAL_STATE_REQUEST_SIZE);
+
+	size_t payloadSize = AGL::GW_SIGNAL_STATE_RESPONSE_SIZE;
+
+	{
+		std::lock_guard lg(m_signalStatesMutex);
+
+		for(uint32_t i = 0; i < hashesCount; i++)
+		{
+			if (payloadSize + AGL::GW_APP_SIGNAL_STATE_SIZE > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
+			{
+				Q_ASSERT(false);
+				logErr("AdsGatewayServer::processSignalStateRequest payload size exceed!");
+				return REQUEST_SIZE;
+			}
+
+			Hash hash = *hashPtr;
+			hashPtr++;
+
+			auto it = m_hashToIndex.find(hash);
+
+			if (it == m_hashToIndex.end())
+			{
+				continue;
+			}
+
+			int stateIndex = it->second;
+
+			if (stateIndex < 0 || stateIndex >= TO_INT(m_signalStates.size()))
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			const SimpleAppSignalState& st = m_signalStates[stateIndex];
+
+			Q_ASSERT(st.hash == hash);
+
+			AGL::GwAppSignalState state;
+
+			state.hash = st.hash;
+			state.systemTime = st.systemTime();
+			state.localTime = st.localTime();
+			state.plantTime = st.plantTime();
+			state.value = st.value;
+			state.flags = st.flags.all;
+			state.reserved = 0;
+
+			std::memcpy(payloadData + payloadSize, &state, AGL::GW_APP_SIGNAL_STATE_SIZE);
+
+			payloadSize +=  AGL::GW_APP_SIGNAL_STATE_SIZE;
+
+			reply.stateCount++;
+		}
+	}
+
+	std::memcpy(payloadData, &reply, AGL::GW_SIGNAL_STATE_RESPONSE_SIZE);
+
+	bool res = sendOkReply(stc, header, payloadData, payloadSize);
+
+	if (res == false)
+	{
+		return 0;
+	}
+
+	logMsg(QString("Sent %1 signal states").arg(reply.stateCount));
+
+	return REQUEST_SIZE;
+}
+
+size_t AdsGatewayServer::processSignalStateChangesRequest(SessionThreadContextShared stc,
+	const AGL::GwMessageHeader& header,
+	const char* recvBuf, size_t& recvBufIndex)
+{
+	Q_UNUSED(recvBuf);
+
+	if (recvBufIndex < AGL::GW_MSG_HEADER_SIZE + AGL::GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE)
+	{
+		return CONTINUE_RECEIVE;
+	}
+
+	AGL::GwSignalStateChangesRequest request;
+	std::memcpy(&request, recvBuf + AGL::GW_MSG_HEADER_SIZE, AGL::GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE);
+
+	constexpr size_t REQUEST_SIZE = AGL::GW_MSG_HEADER_SIZE + AGL::GW_SIGNAL_STATE_CHANGES_REQUEST_SIZE;
+
+	if (stc->handshakeCompleted == false)
+	{
+		sendErrReply(stc, header, AGL::GWC_HANDSHAKE_REQUIRED);
+		return REQUEST_SIZE;
+	}
+
+	//
+
+	logMsg(QString("SIGNAL_STATE_CHANGES request from %1").arg(stc->clientName));
+
+	char* payloadData = stc->payloadData.data();
+
+	AGL::GwSignalStateChangesResponse reply;
+
+	reply.stateCount = 0;
+	reply.pendingStatesCount = 0;
+
+	size_t payloadSize = AGL::GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE;
+
+	{
+		std::lock_guard lg(m_signalStateChangesMutex);
+
+		AGL::GwAppSignalState state;
+
+		while(m_signalStateChanges.empty() == false &&
+			   reply.stateCount < AGL::GW_MAX_SIGNAL_STATE_CHANGES)
+		{
+			if (payloadSize + AGL::GW_APP_SIGNAL_STATE_SIZE > AGL::GW_MAX_MSG_PAYLOAD_SIZE)
+			{
+				break;
+			}
+
+			state = m_signalStateChanges.front();
+			m_signalStateChanges.pop_front();
+
+			std::memcpy(payloadData + payloadSize, &state, AGL::GW_APP_SIGNAL_STATE_SIZE);
+
+			payloadSize +=  AGL::GW_APP_SIGNAL_STATE_SIZE;
+
+			reply.stateCount++;
+		}
+
+		reply.pendingStatesCount = TO_UINT32(m_signalStateChanges.size());
+	}
+
+	std::memcpy(payloadData, &reply, AGL::GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE);
+
+	bool res = sendOkReply(stc, header, payloadData, payloadSize);
+
+	if (res == false)
+	{
+		return 0;
+	}
+
+	logMsg(QString("Sent %1 signal state changes, pending states %2").
+						arg(reply.stateCount).arg(reply.pendingStatesCount));
+
+	return REQUEST_SIZE;
+}
+
 bool AdsGatewayServer::sendErrReply(SessionThreadContextShared stc,
 	const AdsGatewayLib::GwMessageHeader& requestHeader,
 	AGL::GwErrorCode errCode)
@@ -904,7 +1131,6 @@ bool AdsGatewayServer::sendReply(SessionThreadContextShared stc,
 
 	if (ec)
 	{
-		Q_ASSERT(false);
 		return false;
 	}
 
@@ -971,4 +1197,3 @@ uint8_t AdsGatewayServer::channelChar(E::Channel ch) const
 
 	return 0;
 }
-

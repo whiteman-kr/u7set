@@ -1,7 +1,12 @@
 #pragma once
 
-#include <mutex>
 #include <limits>
+#include <unordered_map>
+#include <vector>
+#include <deque>
+#include <mutex>
+#include <memory>
+#include <thread>
 
 #include <asio.hpp>
 #include <AdsGatewayLib/AdsGwProtocol.hpp>
@@ -59,6 +64,10 @@ private:
 										const char* recvBuf, size_t& recvBufIndex);
 	size_t processSignalParamNextRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
 										const char* recvBuf, size_t& recvBufIndex);
+	size_t processSignalStateRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
+										 const char* recvBuf, size_t& recvBufIndex);
+	size_t processSignalStateChangesRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
+										 const char* recvBuf, size_t& recvBufIndex);
 
 	bool sendErrReply(SessionThreadContextShared stc, const AdsGatewayLib::GwMessageHeader& requestHeader, AGL::GwErrorCode errCode);
 	bool sendOkReply(SessionThreadContextShared stc, const AGL::GwMessageHeader& requestHeader, const char* payloadData, size_t payloadSize);
@@ -100,7 +109,9 @@ private:
 	std::vector<SimpleAppSignalState> m_signalStates;
 	std::unordered_map<Hash, int> m_hashToIndex;
 
+	std::mutex m_signalStateChangesMutex;
+	std::deque<AGL::GwAppSignalState> m_signalStateChanges;
+
 	static constexpr size_t CONTINUE_RECEIVE = std::numeric_limits<size_t>::max();
+	static constexpr int BAD_INDEX = -1;
 };
-
-
