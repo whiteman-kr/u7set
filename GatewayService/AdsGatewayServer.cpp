@@ -170,7 +170,26 @@ void AdsGatewayServer::processStateChanges(const Network::GatewayGetAppSignalSta
 
 	AGL::GwAppSignalState state;
 
+	constexpr size_t MAX_QUEUE_SIZE = 200000;
+
 	std::lock_guard lg(m_signalStateChangesMutex);
+
+	const size_t curSize = m_signalStateChanges.size();
+
+	if (curSize + statesCount > MAX_QUEUE_SIZE)
+	{
+		const size_t deleteCount = curSize + statesCount - MAX_QUEUE_SIZE ;
+
+		if (deleteCount >= curSize)
+		{
+			m_signalStateChanges.clear();
+		}
+		else
+		{
+			m_signalStateChanges.erase(m_signalStateChanges.begin(),
+									   m_signalStateChanges.begin() + deleteCount);
+		}
+	}
 
 	for(int i = 0; i < statesCount; i++)
 	{
