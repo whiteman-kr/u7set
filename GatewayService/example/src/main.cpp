@@ -1,8 +1,7 @@
-#include "AdsGwConnection.hpp"
-#include "Logger.hpp"
-#include "SignalManager.hpp"
-
+#include <AdsGatewayLib/AdsGwConnection.hpp>
 #include <AdsGatewayLib/AdsGwProtocol.hpp>
+#include <AdsGatewayLib/Logger.hpp>
+#include <AdsGatewayLib/SignalManager.hpp>
 
 #include <iostream>
 #include <string>

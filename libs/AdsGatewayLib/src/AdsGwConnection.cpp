@@ -1,6 +1,7 @@
-#include "AdsGwConnection.hpp"
+#include <AdsGatewayLib/AdsGwConnection.hpp>
+#include <AdsGatewayLib/ISignalUpdater.hpp>
+
 #include "AdsGwConnImpl.hpp"
-#include "ISignalUpdater.hpp"
 
 
 namespace AdsGatewayLib

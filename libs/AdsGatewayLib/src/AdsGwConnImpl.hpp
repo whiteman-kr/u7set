@@ -1,7 +1,7 @@
 #pragma once
-
-#include "Logger.hpp"
 #include "TcpConnection.hpp"
+
+#include <AdsGatewayLib/Logger.hpp>
 
 #include <AdsGatewayLib/AdsGwProtocol.hpp>
 #include <AdsGatewayLib/GwCrc32.hpp>
