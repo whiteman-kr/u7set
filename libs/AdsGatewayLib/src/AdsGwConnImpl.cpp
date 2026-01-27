@@ -100,13 +100,13 @@ namespace AdsGatewayLib
 	// Performs handshake with the ADS Gateway.
 	// Throws std::runtime_error on errors.
 	//
-	void AdsGwConnImpl::requestHandshake(std::string_view equipmentId)
+	void AdsGwConnImpl::requestHandshake(std::string_view equipmentId, uint16_t protocolVersion)
 	{
 		GwHandshakeRequest request{};
 		GwHandshakeResponse response{};
 		m_handshakeResponse = {};
 
-		request.protocolVersion = ADSGW_PROTOCOL_VERSION;
+		request.protocolVersion = protocolVersion;
 		std::snprintf(request.clientName, sizeof(request.clientName), "%s", equipmentId.data());
 
 		GwErrorCode requestResult{};
@@ -126,7 +126,7 @@ namespace AdsGatewayLib
 			throw std::runtime_error{std::format("Handshake server error: {}", requestResult)};
 		}
 
-		if (response.protocolVersion != ADSGW_PROTOCOL_VERSION)
+		if (response.protocolVersion != protocolVersion)
 		{
 			m_conn.close();
 			throw std::runtime_error{std::format("Handshake error: Unsupported protocol version {}", response.protocolVersion)};

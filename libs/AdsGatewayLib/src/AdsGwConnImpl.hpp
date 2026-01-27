@@ -19,7 +19,7 @@ namespace AdsGatewayLib
 {
 	class ISignalUpdater;
 
-	class AdsGwConnImpl final
+	class AdsGwConnImpl
 	{
 		using AppSignalIdNetworkT = std::array<char, STRING_LENGTH_128>;
 
@@ -30,20 +30,18 @@ namespace AdsGatewayLib
 		{
 		}
 
-		void run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId);
+		virtual void run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId);
 
-		// Communication requests
+		// Requests:
 		//
-	private:
-		void requestHandshake(std::string_view equipmentId);
-
+	protected:
+		void requestHandshake(std::string_view equipmentId, uint16_t protocolVersion = ADSGW_PROTOCOL_VERSION);
 		std::vector<std::string> requestSignalList();
 		std::vector<GwAppSignalParam> requestSignalParams();
-
 		void requestStateChanges();
 		void requestSignalStates();
 
-	private:
+	protected:
 		// Sends a request and receives a response from the ADS Gateway.
 		// Only for request/response pairs where both RequestT and ResponseT are POD types with fixed sizes.
 		// Throws std::runtime_error on communication errors.
@@ -54,13 +52,17 @@ namespace AdsGatewayLib
 								ResponseT& response,
 								const cancellableFuncT& isCancelledFunc = {})
 		{
+			m_lastStatusCode.reset();
+
 			// Send request and receive response, can throw exceptions.
 			//
 			m_logger.logTrace("Sending request {}...", requestId);
 			sendRequestPacket<RequestT>(requestId, request, {}, isCancelledFunc);
 
 			m_logger.logTrace("Receiving response {}...", requestId);
-			return receiveResponsePacket<ResponseT>(requestId, response, {}, isCancelledFunc);
+
+			m_lastStatusCode = receiveResponsePacket<ResponseT>(requestId, response, {}, isCancelledFunc);
+			return m_lastStatusCode.value();
 		}
 
 		template<typename RequestT,
@@ -75,13 +77,16 @@ namespace AdsGatewayLib
 								std::span<ResponseVariablePartT> responseVariablePart,
 								const cancellableFuncT& isCancelledFunc = {})
 		{
+			m_lastStatusCode.reset();
+
 			// Send request and receive response, can throw exceptions.
 			//
 			m_logger.logTrace("Sending request {}...", requestId);
 			sendRequestPacket<RequestT>(requestId, request, requestVariablePart, isCancelledFunc);
 
 			m_logger.logTrace("Receiving response {}...", requestId);
-			return receiveResponsePacket<ResponseT>(requestId, response, responseVariablePart, isCancelledFunc);
+			m_lastStatusCode = receiveResponsePacket<ResponseT>(requestId, response, responseVariablePart, isCancelledFunc);
+			return m_lastStatusCode.value();
 		}
 
 		template<typename RequestT, typename RequestVariablePartT = char, typename cancellableFuncT = std::function<bool()>>
@@ -253,13 +258,15 @@ namespace AdsGatewayLib
 			return GWC_SUCCESS;
 		}
 
-	private:
+	protected:
 		ISignalUpdater& m_signalUpdater;
 		ILogger& m_logger;
 		TcpConnection m_conn;
 		std::function<bool()> m_isCancelledFunc;
 
-	private:
+	protected:
+		std::optional<GwErrorCode> m_lastStatusCode;
+
 		GwHandshakeResponse m_handshakeResponse{};
 		std::vector<std::string> m_appSignalIds{};
 		std::vector<Radiy::Hash> m_appSignalHashes{};
