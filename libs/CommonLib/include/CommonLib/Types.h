@@ -5,6 +5,7 @@
 #include <QObject>
 #include <cassert>
 #include <type_traits>
+#include <cstdint>
 
 /*! \brief Contains enumerations used in RPCT*/
 class E : public QObject
@@ -1017,16 +1018,42 @@ const char* const DataFormatStr[] = {
 	"Float",
 };
 
-#define TO_INT8(value) (static_cast<int8_t>(value))
-#define TO_INT16(value) (static_cast<int16_t>(value))
-#define TO_INT32(value) (static_cast<int32_t>(value))
-#define TO_INT64(value) (static_cast<int64_t>(value))
-#define TO_INT(value) (static_cast<int>(value))
+namespace Cast
+{
+	template<typename TO, typename FROM>
+	constexpr TO to(FROM value) noexcept
+	{
+		static_assert(std::is_arithmetic_v<FROM> || std::is_enum_v<FROM>,
+					  "Cast::to: FROM must be arithmetic or enum");
+		static_assert(std::is_arithmetic_v<TO> || std::is_enum_v<TO>,
+					  "Cast::to: TO must be arithmetic or enum");
 
-#define TO_UINT8(value) (static_cast<uint8_t>(value))
-#define TO_UINT16(value) (static_cast<uint16_t>(value))
-#define TO_UINT32(value) (static_cast<uint32_t>(value))
-#define TO_UINT64(value) (static_cast<uint64_t>(value))
+		return static_cast<TO>(value);
+	}
+}
+
+#define TO_INT8(value) (Cast::to<std::int8_t>(value))
+#define TO_INT16(value) (Cast::to<std::int16_t>(value))
+#define TO_INT32(value) (Cast::to<std::int32_t>(value))
+#define TO_INT64(value) (Cast::to<std::int64_t>(value))
+
+#define TO_UINT8(value) (Cast::to<std::uint8_t>(value))
+#define TO_UINT16(value) (Cast::to<std::uint16_t>(value))
+#define TO_UINT32(value) (Cast::to<std::uint32_t>(value))
+#define TO_UINT64(value) (Cast::to<std::uint64_t>(value))
+
+#define TO_QINT8(value) (Cast::to<qint8>(value))
+#define TO_QINT16(value) (Cast::to<qint16>(value))
+#define TO_QINT32(value) (Cast::to<qint32>(value))
+#define TO_QINT64(value) (Cast::to<qint64>(value))
+
+#define TO_QUINT8(value) (Cast::to<quint8>(value))
+#define TO_QUINT16(value) (Cast::to<quint16>(value))
+#define TO_QUINT32(value) (Cast::to<quint32>(value))
+#define TO_QUINT64(value) (Cast::to<quint64>(value))
+
+#define TO_INT(value) (Cast::to<int>(value))
+#define TO_QVARIANT_QINT64(value) (QVariant::fromValue<qint64>(TO_QINT64(value)))
 
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))
 

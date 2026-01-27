@@ -117,21 +117,21 @@ QVariant AppDataSourceStateModel::data(const QModelIndex& index, int role) const
 		case 2: return formatTime_DD_MM_YYYY(m_state.lmtime());
 		case 3: return m_state.rupframenumerator();
 		case 4: return m_state.datareceivingspeed();
-		case 5: return TO_INT64(m_state.receivedframescount());
-		case 6: return TO_INT64(m_state.receivedpacketcount());
-		case 7: return TO_INT64(m_state.lostpacketcount());
+		case 5: return TO_QVARIANT_QINT64(m_state.receivedframescount());
+		case 6: return TO_QVARIANT_QINT64(m_state.receivedpacketcount());
+		case 7: return TO_QVARIANT_QINT64(m_state.lostpacketcount());
 		case 8: return m_state.signalstatesqueuecursize();
 		case 9: return m_state.signalstatesqueuecurmaxsize();
 		case 10: return QString("0x%1  (%2)").arg(QString("%1").arg(m_state.receiveddataid(), 8, 16, Latin1Char::ZERO).toUpper()).
 												arg(m_state.receiveddataid());
-		case 11: return TO_INT64(m_state.errorprotocolversion());
-		case 12: return TO_INT64(m_state.errorframesquantity());
-		case 13: return TO_INT64(m_state.errorframeno());
-		case 14: return TO_INT64(m_state.errorframecrc());
-		case 15: return TO_INT64(m_state.errordataid());
-		case 16: return TO_INT64(m_state.errorduplicateplanttime());
-		case 17: return TO_INT64(m_state.errornonmonotonicplanttime());
-		case 18: return TO_INT64(m_state.errorplanttimeformat());
+		case 11: return TO_QVARIANT_QINT64(m_state.errorprotocolversion());
+		case 12: return TO_QVARIANT_QINT64(m_state.errorframesquantity());
+		case 13: return TO_QVARIANT_QINT64(m_state.errorframeno());
+		case 14: return TO_QVARIANT_QINT64(m_state.errorframecrc());
+		case 15: return TO_QVARIANT_QINT64(m_state.errordataid());
+		case 16: return TO_QVARIANT_QINT64(m_state.errorduplicateplanttime());
+		case 17: return TO_QVARIANT_QINT64(m_state.errornonmonotonicplanttime());
+		case 18: return TO_QVARIANT_QINT64(m_state.errorplanttimeformat());
 		}
 	}
 

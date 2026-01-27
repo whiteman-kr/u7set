@@ -79,8 +79,8 @@ QVariant TuningSourcesModel::data(const QModelIndex& index, int role) const
 				return Separator::EMPTY_STR;
 			}
 		case 2: return tss.isreply() ? Separator::YES : Separator::NO;
-		case 3: return TO_INT64(tss.requestcount());
-		case 4: return TO_INT64(tss.errnoreply());
+		case 3: return TO_QVARIANT_QINT64(tss.requestcount());
+		case 4: return TO_QVARIANT_QINT64(tss.errnoreply());
 		default: ;
 		}
 
