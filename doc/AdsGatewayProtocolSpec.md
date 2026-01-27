@@ -132,7 +132,8 @@ When Status Code is non-zero (error condition):
 
 **Special Cases:**
 - **Unknown Request ID:** Server responds with the unknown Request ID and Status Code = `GWC_INVALID_REQUEST` (1)
-- **CRC Failure:** Server may respond with Request ID 0x0000 and Status Code = `GWC_CRC_ERROR` (10), or close the connection
+- **Malformed Request:** Server may respond with Status Code = `GWC_REQUEST_FORMAT_ERROR` (6)
+- **CRC Failure:** Server may respond with Status Code = `GWC_CRC_ERROR` (10)
 
 ---
 
@@ -180,6 +181,8 @@ When Status Code is non-zero (error condition):
 **Hash Calculation Reference Implementation:**
 
 ```cpp
+#pragma once
+
 #include <cstdint>
 #include <string_view>
 
@@ -841,6 +844,7 @@ Error responses are identified by a non-zero Status Code in the message header (
 | 3 | GWC_NO_ADS_CONNECTION | AdsGateway not connected to AppDataService |
 | 4 | GWC_TOO_MANY_SIGNALS | Request exceeds max signals limit |
 | 5 | GWC_HANDSHAKE_REQUIRED | Handshake must be completed before this request |
+| 6 | GWC_REQUEST_FORMAT_ERROR | Request format is invalid |
 | 7 | GWC_INTERNAL_ERROR | Internal server error |
 | 10 | GWC_CRC_ERROR | CRC checksum verification failed |
 
