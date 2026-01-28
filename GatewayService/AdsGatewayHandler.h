@@ -35,6 +35,8 @@ namespace Gateway
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
 		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
 
+		virtual void setConnectedToAppDataSrv(bool connected) override;
+
 	private:
 		bool init();
 
@@ -53,6 +55,8 @@ namespace Gateway
 		const AppSignals& m_appSignals;
 
 		std::unique_ptr<AppDataServiceClientThread> m_appDataSrvClientThread;
+
+		std::mutex m_adsGatewayServerMutex;
 		std::unique_ptr<AdsGatewayServer> m_adsGatewayServer;
 
 		//

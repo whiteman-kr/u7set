@@ -49,6 +49,8 @@ namespace Gateway
 
 		//
 
+		m_handler->setConnectedToAppDataSrv(true);
+
 		Network::GatewayGetAppSignalStateChangesRequest initialRequest;
 
 		std::set<Hash> eventHashes;
@@ -67,6 +69,8 @@ namespace Gateway
 
 	void AppDataServiceClient::onDisconnection()
 	{
+		m_handler->setConnectedToAppDataSrv(false);
+
 		Tcp::Client::onDisconnection();
 
 		m_timer.stop();

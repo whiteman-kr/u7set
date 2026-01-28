@@ -62,6 +62,8 @@ namespace Gateway
 
 	void AdsGatewayHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
 	{
+		std::lock_guard lg(m_adsGatewayServerMutex);
+
 		if (m_adsGatewayServer)
 		{
 			m_adsGatewayServer->updateSignalStates(getStatesReply);
@@ -70,9 +72,21 @@ namespace Gateway
 
 	void AdsGatewayHandler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
 	{
+		std::lock_guard lg(m_adsGatewayServerMutex);
+
 		if (m_adsGatewayServer)
 		{
 			m_adsGatewayServer->processStateChanges(getStateChangesReply);
+		}
+	}
+
+	void AdsGatewayHandler::setConnectedToAppDataSrv(bool connected)
+	{
+		std::lock_guard lg(m_adsGatewayServerMutex);
+
+		if (m_adsGatewayServer)
+		{
+			m_adsGatewayServer->setConnectedToAppDataSrv(connected);
 		}
 	}
 
@@ -118,13 +132,16 @@ namespace Gateway
 	{
 		Q_ASSERT(m_adsGatewayServer == nullptr);
 
-		m_adsGatewayServer = std::make_unique<AdsGatewayServer>(m_gateway->clientRequestIP1(), m_appSignals, m_log);
+		std::lock_guard lg(m_adsGatewayServerMutex);
 
+		m_adsGatewayServer = std::make_unique<AdsGatewayServer>(m_gateway->clientRequestIP1(), m_appSignals, m_log);
 		m_adsGatewayServer->run();
 	}
 
 	void AdsGatewayHandler::stopAdsGatewayServer()
 	{
+		std::lock_guard lg(m_adsGatewayServerMutex);
+
 		if (m_adsGatewayServer != nullptr)
 		{
 			m_adsGatewayServer->stop();

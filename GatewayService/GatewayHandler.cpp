@@ -63,6 +63,11 @@ namespace Gateway
 		Q_UNUSED(getStateChangesReply);
 	}
 
+	void Handler::setConnectedToAppDataSrv(bool connected)
+	{
+		Q_UNUSED(connected);
+	}
+
 	CircularLoggerShared Handler::log()
 	{
 		return m_log;

@@ -7,6 +7,8 @@
 #include <mutex>
 #include <memory>
 #include <thread>
+#include <set>
+#include <atomic>
 
 #include <asio.hpp>
 #include <AdsGatewayLib/AdsGwProtocol.hpp>
@@ -19,21 +21,30 @@
 using asio::ip::tcp;
 namespace AGL = AdsGatewayLib;
 
-using TCP_SOCKET_SHARED = std::shared_ptr<tcp::socket>;
+using TcpSocketShared = std::shared_ptr<tcp::socket>;
 
 class AdsGatewayServer : public LogWrapper
 {
 public:
-	struct SessionThreadContext
+	struct Session
 	{
-		TCP_SOCKET_SHARED socket;
+		TcpSocketShared socket;
+		std::thread thread;
+		std::atomic_bool finished {false};
+		std::atomic_bool closing { false };
+
+		//
+
 		bool handshakeCompleted = false;
 		QString clientName;
-
+		std::atomic_bool connectedToAppDataSrv {false};
 		std::vector<char> payloadData;
+		size_t errCount = 0;
 	};
 
-	using SessionThreadContextShared = std::shared_ptr<SessionThreadContext>;
+	using SessionShared = std::shared_ptr<Session>;
+
+	static constexpr size_t MAX_SESSION_ERRORS = 100;
 
 public:
 	AdsGatewayServer(const HostAddressPort& listenIP, const AppSignals& appSignals, CircularLoggerShared log);
@@ -45,38 +56,45 @@ public:
 	void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
 	void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply);
 
+	void setConnectedToAppDataSrv(bool connected);
+
 private:
 	void runAcceptLoop();
-	void sessionThread(SessionThreadContextShared stc);
-	void removeSessionSocket(const TCP_SOCKET_SHARED& socket);
+	void sessionThread(SessionShared stc);
 	void reapFinishedSessions();
+	void closeSocket(SessionShared stc);
+	void requestCloseSession(SessionShared stc);
+	void closeSessions();
 	void joinAllSessions();
 
-	void processRequest(SessionThreadContextShared stc, char* recvBuf, size_t& recvBufIndex);
+	void processRequest(SessionShared stc, char* recvBuf, size_t& recvBufSize);
 
-	size_t processHandshakeRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, size_t& recvBufIndex);
-	size_t processSignalListStartRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, size_t& recvBufIndex);
-	size_t processSignalListNextRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, size_t& recvBufIndex);
-	size_t processSignalParamStartRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, size_t& recvBufIndex);
-	size_t processSignalParamNextRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
-										const char* recvBuf, size_t& recvBufIndex);
-	size_t processSignalStateRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
-										 const char* recvBuf, size_t& recvBufIndex);
-	size_t processSignalStateChangesRequest(SessionThreadContextShared stc, const AGL::GwMessageHeader& header,
-										 const char* recvBuf, size_t& recvBufIndex);
+	bool processHandshakeRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+										const char* recvBuf, const size_t requestSize);
+	bool processSignalListStartRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+										const char* recvBuf, const size_t requestSize);
+	bool processSignalListNextRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+										const char* recvBuf, const size_t requestSize);
+	bool processSignalParamStartRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+										const char* recvBuf, const size_t requestSize);
+	bool processSignalParamNextRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+										const char* recvBuf, const size_t requestSize);
+	bool processSignalStateRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+										 const char* recvBuf, const size_t requestSize);
+	bool processSignalStateChangesRequest(SessionShared stc, const AGL::GwMessageHeader& header,
+										 const char* recvBuf, const size_t requestSize);
 
-	bool sendErrReply(SessionThreadContextShared stc, const AdsGatewayLib::GwMessageHeader& requestHeader, AGL::GwErrorCode errCode);
-	bool sendOkReply(SessionThreadContextShared stc, const AGL::GwMessageHeader& requestHeader, const char* payloadData, size_t payloadSize);
-	bool sendReply(SessionThreadContextShared stc,
+	bool checkPayloadSize(const AGL::GwMessageHeader& header, const char* recvBuf, const size_t recvBufSize, AGL::GwErrorCode& errCode);
+	[[nodiscard]] size_t skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize);
+
+	void sendErrReply(SessionShared stc, const AdsGatewayLib::GwMessageHeader& requestHeader, AGL::GwErrorCode errCode);
+	void sendOkReply(SessionShared stc, const AGL::GwMessageHeader& requestHeader, const char* payloadData, size_t payloadSize);
+	void sendReply(SessionShared stc,
 				   uint32_t requestID, AGL::GwErrorCode errCode,
 				   const char* payloadData, size_t payloadSize);
 
 	bool checkNullTerminated(const char* str, size_t size) const;
-	QString getIpPortStr(const std::shared_ptr<tcp::socket>& socket) const;
+	QString getIpPortStr(const tcp::socket& socket) const;
 
 	void copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const;
 	uint8_t channelChar(E::Channel ch) const;
@@ -94,16 +112,7 @@ private:
 	std::shared_ptr<tcp::acceptor> m_acceptor;
 
 	std::mutex m_sessionsMutex;
-	std::vector<TCP_SOCKET_SHARED> m_sessionSockets;
-
-	struct SessionThread
-	{
-		std::thread thread;
-		std::shared_ptr<std::atomic<bool>> finished;
-	};
-
-	std::mutex m_threadsMutex;
-	std::vector<SessionThread> m_sessionThreads;
+	std::set<SessionShared> m_sessions;
 
 	std::mutex m_signalStatesMutex;
 	std::vector<SimpleAppSignalState> m_signalStates;
@@ -111,6 +120,8 @@ private:
 
 	std::mutex m_signalStateChangesMutex;
 	std::deque<AGL::GwAppSignalState> m_signalStateChanges;
+
+	std::atomic_bool m_connectedToAppDataSrv {false};
 
 	static constexpr size_t CONTINUE_RECEIVE = std::numeric_limits<size_t>::max();
 	static constexpr int BAD_INDEX = -1;

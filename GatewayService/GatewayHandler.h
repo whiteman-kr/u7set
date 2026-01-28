@@ -27,6 +27,8 @@ namespace Gateway
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
 		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply);
 
+		virtual void setConnectedToAppDataSrv(bool connected);
+
 		CircularLoggerShared log();
 
 		QString gatewayID() const;
