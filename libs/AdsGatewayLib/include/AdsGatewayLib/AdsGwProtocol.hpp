@@ -91,7 +91,6 @@ namespace AdsGatewayLib
 		}
 		// clang-format on
 
-		assert(false);
 		return "GwRequestId(unknown)";
 	}
 } // namespace AdsGatewayLib

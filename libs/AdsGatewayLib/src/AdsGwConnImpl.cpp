@@ -72,7 +72,7 @@ namespace AdsGatewayLib
 					//
 					requestSignalStates();
 
-					std::this_thread::sleep_for(std::chrono::milliseconds(50));
+					std::this_thread::sleep_for(std::chrono::milliseconds(100));
 				}
 			}
 			catch (const std::runtime_error& e)
@@ -397,6 +397,8 @@ namespace AdsGatewayLib
 		}
 	}
 
+	// Request the next page of signal states from the ADS Gateway.
+	//
 	void AdsGwConnImpl::requestSignalStates()
 	{
 		if (m_appSignalHashes.empty() == true)
@@ -411,8 +413,16 @@ namespace AdsGatewayLib
 				m_nextStateIndexToRequest = 0;
 			}
 
-			auto requestCount =
-				std::min(static_cast<size_t>(m_handshakeResponse.maxStateRequest), m_appSignalHashes.size() - m_nextStateIndexToRequest);
+#if 0
+			const size_t partSize = m_handshakeResponse.maxStateRequest; // is abou 40K, it can overload the network
+#else
+			const size_t partSize = 2500; // Reasonable value, not too big to overload the network (2500 * 48bytes * 10rps = ~1.2Mbytes/s).
+										  // This value can be tuned if needed.
+										  // If we have 100K signals, and request 2500 per 100ms, full refresh takes 4 seconds.
+										  // If signal value changes during this time to the value >= aperture,
+										  // it will be caught by requestStateChanges().
+#endif
+			auto requestCount = std::min(partSize, m_appSignalHashes.size() - m_nextStateIndexToRequest);
 
 			GwSignalStateRequest request{};
 			request.signalCount = static_cast<uint32_t>(requestCount);
