@@ -24,7 +24,8 @@ function StopServices() {
     pkill CfgSrv || true
     pkill AppDataSrv || true
     pkill TuningSrv || true
-    pkill SimulatorConsol || true       # without last e, I assume there is a limitation to 15 symbols.
+    pkill SimulatorConsol || true  # without last e, I assume there is a limitation to 15 symbols.
+    pkill GatewaySrv || true
     sleep 3
 }
 
@@ -92,6 +93,31 @@ export QT_QPA_PLATFORM=offscreen
 #
 StopServices || true
 
+# ----------------------------------------------
+#               Run AdsGateway tests
+# ----------------------------------------------
+pushd $CI_PROJECT_DIR/bin/debug
+StopServices || true
+
+./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs_ads_adsgwtest.out 2>&1 &
+sleep 5
+
+./linux_code_coverage_systemid_clienttest_ws01_gwslinuxcc.sh &
+sleep 5
+
+# First run tests that require no ADS connection.
+#
+$CI_PROJECT_DIR/bin/release/AdsGatewayTests --port=5567 --gtest_filter=AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
+
+linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads_adsgwtest.out 2>&1 &
+sleep 5
+
+# Then run other tests.
+#
+$CI_PROJECT_DIR/bin/release/AdsGatewayTests --port=5567 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:-AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
+StopServices || true
+popd
+
 # Run other tests, not services are required here.
 #
 #./LicenseLibTests
@@ -101,6 +127,10 @@ StopServices || true
 ./u7databasetests -config=$CI_PROJECT_DIR/Tests/u7databasetestsArgsCoverage.xml
 
 popd
+
+# Give some time to flush .gcda files.
+#
+sleep 2
 
 # Get code coverage data.
 #
@@ -175,6 +205,11 @@ TEST_DIR="./build/libs/AdsBridge/CMakeFiles/AdsBridge.dir"
 TEST_OUTPUT_FILE="AdsBridge.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
+# GatewaySrv -- Cannot collect .gcda as process is killed and not finished normally
+#TEST_DIR="./GatewayService"
+#TEST_OUTPUT_FILE="GatewaySrv.info"
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
 # AppDataSrv -- Cannot collect .gcda as process is killed and not finished normally
 #TEST_DIR="./AppDataService"
 #TEST_OUTPUT_FILE="AppDataSrv.info"
@@ -202,6 +237,7 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/TestSuiteLib.info \
     --add-tracefile $OUTPUT_DIR/AdsBridge.info
 
+#    --add-tracefile $OUTPUT_DIR/GatewaySrv.info \
 #    --add-tracefile $OUTPUT_DIR/LicenseLib.info \
 #    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
 #    --add-tracefile $OUTPUT_DIR/CfgSrv.info

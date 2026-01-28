@@ -132,7 +132,8 @@ When Status Code is non-zero (error condition):
 
 **Special Cases:**
 - **Unknown Request ID:** Server responds with the unknown Request ID and Status Code = `GWC_INVALID_REQUEST` (1)
-- **CRC Failure:** Server may respond with Request ID 0x0000 and Status Code = `GWC_CRC_ERROR` (10), or close the connection
+- **Malformed Request:** Server may respond with Status Code = `GWC_REQUEST_FORMAT_ERROR` (6)
+- **CRC Failure:** Server may respond with Status Code = `GWC_CRC_ERROR` (10)
 
 ---
 
@@ -140,15 +141,15 @@ When Status Code is non-zero (error condition):
 
 ### 4.1 Request ID List
 
-| Request ID | Value (hex) | Description | Direction |
-|------------|-------------|-------------|-----------|
-| ADSGW_HANDSHAKE | 0x0001 | Initial handshake | Client -> Server |
-| ADSGW_SIGNAL_LIST_START | 0x0100 | Start retrieving list of AppSignalIDs | Client -> Server |
-| ADSGW_SIGNAL_LIST_NEXT | 0x0101 | Continue retrieving list of AppSignalIDs | Client -> Server |
-| ADSGW_SIGNAL_PARAM_START | 0x0200 | Start retrieving signal parameters | Client -> Server |
-| ADSGW_SIGNAL_PARAM_NEXT | 0x0201 | Continue retrieving signal parameters | Client -> Server |
-| ADSGW_SIGNAL_STATE | 0x0300 | Request signal states | Client -> Server |
-| ADSGW_SIGNAL_STATE_CHANGES | 0x0301 | Request signal state changes | Client -> Server |
+| Request ID | Value (hex) | Description |
+|------------|-------------|-------------|
+| ADSGW_HANDSHAKE | 0x0001 | Initial handshake |
+| ADSGW_SIGNAL_LIST_START | 0x0100 | Start retrieving list of AppSignalIDs |
+| ADSGW_SIGNAL_LIST_NEXT | 0x0101 | Continue retrieving list of AppSignalIDs |
+| ADSGW_SIGNAL_PARAM_START | 0x0200 | Start retrieving signal parameters |
+| ADSGW_SIGNAL_PARAM_NEXT | 0x0201 | Continue retrieving signal parameters |
+| ADSGW_SIGNAL_STATE | 0x0300 | Request signal states |
+| ADSGW_SIGNAL_STATE_CHANGES | 0x0301 | Request signal state changes |
 
 ### 4.2 Response Convention
 - Response uses the same Request ID as the corresponding request
@@ -180,6 +181,8 @@ When Status Code is non-zero (error condition):
 **Hash Calculation Reference Implementation:**
 
 ```cpp
+#pragma once
+
 #include <cstdint>
 #include <string_view>
 
@@ -841,6 +844,7 @@ Error responses are identified by a non-zero Status Code in the message header (
 | 3 | GWC_NO_ADS_CONNECTION | AdsGateway not connected to AppDataService |
 | 4 | GWC_TOO_MANY_SIGNALS | Request exceeds max signals limit |
 | 5 | GWC_HANDSHAKE_REQUIRED | Handshake must be completed before this request |
+| 6 | GWC_REQUEST_FORMAT_ERROR | Request format is invalid |
 | 7 | GWC_INTERNAL_ERROR | Internal server error |
 | 10 | GWC_CRC_ERROR | CRC checksum verification failed |
 

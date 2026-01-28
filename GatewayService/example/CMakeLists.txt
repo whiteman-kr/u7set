@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 
-project (AdsGatewayExample)
+project (AdsGatewayExample LANGUAGES CXX)
 
 set(TARGET AdsGatewayExample)
 
