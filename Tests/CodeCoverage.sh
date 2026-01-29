@@ -107,14 +107,14 @@ sleep 5
 
 # First run tests that require no ADS connection.
 #
-$CI_PROJECT_DIR/bin/release/AdsGatewayTests --port=5567 --gtest_filter=AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
+$CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
 
 linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads_adsgwtest.out 2>&1 &
 sleep 5
 
 # Then run other tests.
 #
-$CI_PROJECT_DIR/bin/release/AdsGatewayTests --port=5567 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:-AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
+$CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
 StopServices || true
 popd
 
