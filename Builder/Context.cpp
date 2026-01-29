@@ -1,5 +1,6 @@
 #include "Context.h"
 #include "ModuleLogicCompiler.h"
+#include "SoftwareCfgGenerator.h"
 
 namespace Builder
 {

@@ -6,6 +6,22 @@
 
 namespace Gateway
 {
+	class AdsGatewaySignalList : public SignalList
+	{
+	public:
+		AdsGatewaySignalList();
+		AdsGatewaySignalList(const QString& profile, const QStringList& signalList);
+		virtual ~AdsGatewaySignalList();
+
+		virtual bool isListForProfile(const QString& profile) const override;
+
+		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
+		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
+
+	private:
+		QString m_profile;
+	};
+
 	class AdsGateway : public Gateway
 	{
 	public:
@@ -21,12 +37,16 @@ namespace Gateway
 
 		void setRequiredSignalHashes(std::set<Hash>& stateHashes, std::set<Hash>& eventHashes);
 
+		void appendSignalList(const QString& profile, const QStringList& signalList);
+
+		virtual void appendSignalList() override;
+
 	private:
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
 
-		virtual void writeSignalListsToXml(XmlWriteHelper& xml) const override;
-		virtual bool readSignalListsFromXml(XmlReadHelper& xml) override;
+		// virtual void writeSignalListsToXml(XmlWriteHelper& xml) const override;
+		// virtual bool readSignalListsFromXml(XmlReadHelper& xml) override;
 
 	private:
 		virtual bool generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log) override;

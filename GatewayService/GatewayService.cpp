@@ -172,11 +172,13 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 
 	setSessionParams(sessionParams);
 
+	const QString& profile = currentSettingsProfile->profile;
+
 	DEBUG_LOG_MSG(logger(), "Configuration is ready");
 
 	DEBUG_LOG_MSG(logger(), "");
 
-	DEBUG_LOG_MSG(logger(), "Settings profile: " + currentSettingsProfile->profile);
+	DEBUG_LOG_MSG(logger(), "Settings profile: " + profile);
 
 	DEBUG_LOG_MSG(logger(), "");
 
@@ -215,7 +217,7 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	if (result != false)
 	{
 		m_acquiredSignals.clear();
-		m_gateways.fillAcquiredSignalsSet(&m_acquiredSignals);
+		m_gateways.fillAcquiredSignalsSet(&m_acquiredSignals, profile);
 	}
 
 	//
@@ -261,7 +263,7 @@ bool GatewayServiceWorker::readAppSignals(const QByteArray& fileData)
 
 		const QString appSignalID = QString::fromStdString(appSignal.appsignalid());
 
-		if (m_acquiredSignals.size() == 0 || m_acquiredSignals.contains(calcHash(appSignalID)))
+		if (m_acquiredSignals.contains(calcHash(appSignalID)))
 		{
 			m_appSignals.insert(appSignal);
 			aquiredSignalsCount++;

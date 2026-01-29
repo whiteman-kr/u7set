@@ -889,7 +889,7 @@ bool AdsGatewayServer::processSignalStateRequest(SessionShared stc,
 	if (stc->connectedToAppDataSrv.load(std::memory_order_relaxed) == false)
 	{
 		sendErrReply(stc, header, AGL::GWC_NO_ADS_CONNECTION);
-		return false;
+		return true;		// this is not request format error!
 	}
 
 	char* payloadData = stc->payloadData.data();
@@ -982,7 +982,7 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 	if (stc->connectedToAppDataSrv.load(std::memory_order_relaxed) == false)
 	{
 		sendErrReply(stc, header, AGL::GWC_NO_ADS_CONNECTION);
-		return false;
+		return true;		// this is not request format error!
 	}
 
 	//

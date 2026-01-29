@@ -1850,7 +1850,7 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		std::map<QString, std::shared_ptr<SoftwareCfgGenerator>> swCfgGens;
+		std::map<QString, std::shared_ptr<SoftwareCfgGenerator>>& swCfgGens = context->m_swCfgGens;
 
 		// create SoftwareCfgGenerators and generate "Default" profile settings
 		//

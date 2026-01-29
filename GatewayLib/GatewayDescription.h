@@ -233,6 +233,7 @@ namespace Gateway
 		const std::vector<QString>& signalIDs() const;
 		int signalsCount() const;
 
+		virtual bool isListForProfile(const QString& profile) const;
 		virtual void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
 
 		void writeToXml(XmlWriteHelper& xml) const;
@@ -286,7 +287,7 @@ namespace Gateway
 
 		const std::vector<File>& files() const;
 
-		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
+		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals, const QString& profile) const;
 
 		void writeToXml(XmlWriteHelper& xml) const;
 		static std::shared_ptr<Gateway> readFromXml(XmlReadHelper& xml);	// returns typedGateway
@@ -330,7 +331,7 @@ namespace Gateway
 
 		void clear();
 
-		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const;
+		void fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals, const QString& profile) const;
 
 		virtual void writeToXml(XmlWriteHelper& xml) const;
 		virtual bool readFromXml(XmlReadHelper& xml, bool skipDisabledGateways, QStringList* disabledGateways);

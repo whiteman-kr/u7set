@@ -14,7 +14,56 @@ namespace Gateway
 {
 	// ---------------------------------------------------------------------------------
 	//
-	// Class Gateway::ModbusTcpSlaveGateway implementation
+	// Class Gateway::AdsGatewaySignalList implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	AdsGatewaySignalList::AdsGatewaySignalList()
+	{
+	}
+
+	AdsGatewaySignalList::AdsGatewaySignalList(const QString& profile, const QStringList& signalList) :
+		m_profile(profile)
+	{
+		m_signalIDs.reserve(signalList.size());
+
+		for(const QString& signalID : signalList)
+		{
+			m_signalIDs.emplace_back(signalID);
+		}
+	}
+
+	AdsGatewaySignalList::~AdsGatewaySignalList()
+	{
+	}
+
+	bool AdsGatewaySignalList::isListForProfile(const QString& profile) const
+	{
+		return (m_profile == profile);
+	}
+
+	void AdsGatewaySignalList::writeSettingsToXml(XmlWriteHelper& xml) const
+	{
+		xml.writeStartElement(XmlElement::SIGNAL_LIST);
+
+		xml.writeStringAttribute(XmlAttribute::PROFILE, m_profile);
+
+		xml.writeEndElement();		//	</SignalList>
+	}
+
+	bool AdsGatewaySignalList::readSettingsFromXml(XmlReadHelper& xml)
+	{
+		bool result = true;
+
+		result &= xml.findElement(XmlElement::SIGNAL_LIST);
+		result &= xml.readStringAttribute(XmlAttribute::PROFILE, &m_profile);
+
+		return result;
+	}
+
+	// ---------------------------------------------------------------------------------
+	//
+	// Class Gateway::AdsGateway implementation
 	//
 	// ---------------------------------------------------------------------------------
 
@@ -68,6 +117,19 @@ namespace Gateway
 		m_eventHashes.swap(eventHashes);
 	}
 
+	void AdsGateway::appendSignalList(const QString& profile, const QStringList& signalList)
+	{
+		SignalListShared signalListShared = std::make_shared<AdsGatewaySignalList>(profile, signalList);
+
+		m_signalLists.push_back(signalListShared);
+	}
+
+	void AdsGateway::appendSignalList()
+	{
+		SignalListShared signalListShared = std::make_shared<AdsGatewaySignalList>();
+		m_signalLists.push_back(signalListShared);
+	}
+
 	void AdsGateway::writeSettingsToXml(XmlWriteHelper& xml) const
 	{
 		xml.writeStartElement(XmlElement::SETTINGS);
@@ -92,17 +154,17 @@ namespace Gateway
 		return result;
 	}
 
-	void AdsGateway::writeSignalListsToXml(XmlWriteHelper& xml) const
-	{
-		Q_UNUSED(xml);
-		return;
-	}
+	// void AdsGateway::writeSignalListsToXml(XmlWriteHelper& xml) const
+	// {
+	// 	Q_UNUSED(xml);
+	// 	return;
+	// }
 
-	bool AdsGateway::readSignalListsFromXml(XmlReadHelper& xml)
-	{
-		Q_UNUSED(xml);
-		return true;
-	}
+	// bool AdsGateway::readSignalListsFromXml(XmlReadHelper& xml)
+	// {
+	// 	Q_UNUSED(xml);
+	// 	return true;
+	// }
 
 	bool AdsGateway::generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log)
 	{

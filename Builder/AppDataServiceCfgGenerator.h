@@ -24,6 +24,9 @@ namespace Builder
 											const AppSignalSet* signalSet,
 											const std::set<Hash>* limitedSet,
 											const QString& subDir);
+
+		const std::set<Hash>& acquiredAppSignals() const;
+
 	private:
 		bool writeAppDataSourcesXml();
 		bool writeAppSignalsXml();
