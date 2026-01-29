@@ -19,6 +19,7 @@ qt_add_library(${TARGET} STATIC
 	TcpSrvInfoServer.cpp
 	Service.cpp
 	ServiceStarter.cpp
+	WaitSignalOrKbInputThread.h
 )
 
 if(WIN32)

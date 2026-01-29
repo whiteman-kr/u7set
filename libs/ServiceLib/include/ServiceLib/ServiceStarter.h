@@ -54,15 +54,6 @@ private:
 	int runAsRegularApplication();
 
 private:
-	class KeyReaderThread : public RunOverrideThread
-	{
-	public:
-		KeyReaderThread();
-		virtual void run() override;
-		void stop();
-	};
-
-private:
 	QCoreApplication& m_app;
 	ServiceWorker& m_serviceWorker;
 	std::shared_ptr<CircularLogger> m_logger;

@@ -6,6 +6,7 @@
 #include <ServiceLib/ServiceStarter.h>
 
 #include "../UtilsLib/WUtils.h"
+#include "WaitSignalOrKbInputThread.h"
 
 // -------------------------------------------------------------------------------------
 //
@@ -220,41 +221,25 @@ bool ServiceStarter::processCommonCmdLineArgs(bool& startAsRegularApp)
 
 int ServiceStarter::runAsRegularApplication()
 {
-	KeyReaderThread keyReaderThread;
+#if defined(Q_OS_LINUX)
+	PosixSignalHandler::install();
+#endif
 
-	keyReaderThread.start();
+	WaitSignalOrKbInputThread waitThread;
+
+	waitThread.start();
 
 	// run service
 	//
-	Service* service = new Service(m_serviceWorker, m_logger);
-	service->start();
+	Service service(m_serviceWorker, m_logger);
+
+	service.start();
 
 	int result = m_app.exec();
 
-	service->stop();
-	delete service;
+	service.stop();
 
-	keyReaderThread.stop();
+	waitThread.stop();
 
 	return result;
 }
-
-ServiceStarter::KeyReaderThread::KeyReaderThread()
-{
-	setTerminationEnabled(true);
-}
-
-void ServiceStarter::KeyReaderThread::run()
-{
-	char ch = 0;
-
-	std::cin >> ch;
-	QCoreApplication::exit(0);
-}
-
-void ServiceStarter::KeyReaderThread::stop()
-{
-	terminate();
-	wait();
-}
-
