@@ -114,7 +114,7 @@ sleep 5
 
 # Then run other tests.
 #
-$CI_PROJECT_DIR/bin/release/AdsGatewayTests --port=5567 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:-AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
+$CI_PROJECT_DIR/bin/release/AdsGatewayTests --port=5567 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
 StopServices || true
 popd
 
