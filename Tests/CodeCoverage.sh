@@ -109,7 +109,7 @@ sleep 5
 #
 $CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
 
-linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads_adsgwtest.out 2>&1 &
+./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads_adsgwtest.out 2>&1 &
 sleep 5
 
 # Then run other tests.
@@ -206,9 +206,9 @@ TEST_OUTPUT_FILE="AdsBridge.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # GatewaySrv -- Cannot collect .gcda as process is killed and not finished normally
-#TEST_DIR="./GatewayService"
-#TEST_OUTPUT_FILE="GatewaySrv.info"
-#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+TEST_DIR="./GatewayService"
+TEST_OUTPUT_FILE="GatewaySrv.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # AppDataSrv -- Cannot collect .gcda as process is killed and not finished normally
 #TEST_DIR="./AppDataService"
@@ -235,9 +235,9 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/UtilsLib.info \
     --add-tracefile $OUTPUT_DIR/ClientLib.info \
     --add-tracefile $OUTPUT_DIR/TestSuiteLib.info \
-    --add-tracefile $OUTPUT_DIR/AdsBridge.info
+    --add-tracefile $OUTPUT_DIR/AdsBridge.info \
+    --add-tracefile $OUTPUT_DIR/GatewaySrv.info
 
-#    --add-tracefile $OUTPUT_DIR/GatewaySrv.info \
 #    --add-tracefile $OUTPUT_DIR/LicenseLib.info \
 #    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
 #    --add-tracefile $OUTPUT_DIR/CfgSrv.info
