@@ -3,12 +3,12 @@
 
 namespace Gateway
 {
-	AppDataServiceClient::AppDataServiceClient(const SoftwareInfo& softwareInfo,
-											   const HostAddressPort& serverAddressPort1,
-											   const HostAddressPort& serverAddressPort2,
-											   const QString& clientDescription,
-											   Handler* handler,
-											   CircularLoggerShared logger) :
+AppDataServiceClient::AppDataServiceClient(const SoftwareInfo& softwareInfo,
+	const HostAddressPort& serverAddressPort1,
+	const HostAddressPort& serverAddressPort2,
+	const QString& clientDescription,
+	Handler &handler,
+	CircularLoggerShared logger) :
 		Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, clientDescription),
 		m_handler(handler),
 		m_timer(this)
@@ -20,7 +20,7 @@ namespace Gateway
 	{
 		std::set<Hash> hashes;
 
-		m_handler->getRequiredSignalsHashes(&hashes);
+		m_handler.getRequiredSignalsHashes(&hashes);
 
 		m_getStatesRequest.mutable_signalhashes()->Reserve(TO_INT(hashes.size()));
 
@@ -49,13 +49,13 @@ namespace Gateway
 
 		//
 
-		m_handler->setConnectedToAppDataSrv(true);
+		m_handler.setConnectedToAppDataSrv(true);
 
 		Network::GatewayGetAppSignalStateChangesRequest initialRequest;
 
 		std::set<Hash> eventHashes;
 
-		m_handler->getEventSignalsHashes(&eventHashes);
+		m_handler.getEventSignalsHashes(&eventHashes);
 
 		initialRequest.mutable_signalshashes()->Reserve(TO_INT(eventHashes.size()));
 
@@ -69,7 +69,7 @@ namespace Gateway
 
 	void AppDataServiceClient::onDisconnection()
 	{
-		m_handler->setConnectedToAppDataSrv(false);
+		m_handler.setConnectedToAppDataSrv(false);
 
 		Tcp::Client::onDisconnection();
 
@@ -121,7 +121,7 @@ namespace Gateway
 			return;
 		}
 
-		m_handler->updateSignalStates(m_getStatesReply);
+		m_handler.updateSignalStates(m_getStatesReply);
 
 		sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, m_gwGetStateChangesRequest);
 	}
@@ -141,7 +141,7 @@ namespace Gateway
 			//qDebug() << C_STR(QString("state changes %1").arg(m_gwGetStateChangesReply.appsignalstates_size()));
 		}
 
-		m_handler->processStateChanges(m_gwGetStateChangesReply);
+		m_handler.processStateChanges(m_gwGetStateChangesReply);
 
 		if (m_needGetStates == true)
 		{

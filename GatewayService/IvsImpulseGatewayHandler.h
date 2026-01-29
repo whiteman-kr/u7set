@@ -59,10 +59,6 @@ namespace Gateway
 		bool init();
 
 	private:
-		const SoftwareInfo m_softwareInfo;
-		HostAddressPort m_appDataService1;
-		HostAddressPort m_appDataService2;
-
 		IvsImpulseGatewayShared m_gateway;
 		const AppSignals& m_appSignals;
 
@@ -76,7 +72,6 @@ namespace Gateway
 		//
 		std::map<Hash, std::set<IvsImpulseListInfoShared>> m_hashToLists;
 
-		AppDataServiceClientThread* m_appDataServiceClientThread = nullptr;
 		IvsImpulseCommThread* m_ivsImpulseCommThread = nullptr;
 
 		friend class IvsImpulseCommThreadWorker;

@@ -133,14 +133,8 @@ namespace Gateway
 		quint8 asciiEncodeX(quint8 ch);
 
 	private:
-		const SoftwareInfo m_softwareInfo;
-		HostAddressPort m_appDataService1;
-		HostAddressPort m_appDataService2;
-
 		ModbusSlaveGatewayShared m_gateway;
 		const AppSignals& m_appSignals;
-
-		AppDataServiceClientThread* m_appDataServiceClientThread = nullptr;
 
 		Modbus::TcpSlaveThread* m_tcpSlaveThread1 = nullptr;
 		Modbus::TcpSlaveThread* m_tcpSlaveThread2 = nullptr;

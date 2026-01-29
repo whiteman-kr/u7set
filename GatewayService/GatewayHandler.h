@@ -7,6 +7,9 @@
 
 namespace Gateway
 {
+	class AppDataServiceClientThread;
+	class AppDataServiceClient;
+
 	class Handler
 	{
 	private:
@@ -20,6 +23,10 @@ namespace Gateway
 
 		virtual void run() = 0;
 		virtual void shutdown();
+
+		void runAppDataSrvClient();
+		void stopAppDataSrvClient();
+		AppDataServiceClient* appDataServiceClient();
 
 		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const;
 		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const;
@@ -43,8 +50,8 @@ namespace Gateway
 
 	protected:
 		QString m_gatewayID;
-		const SoftwareInfo& m_swInfo;
-		const GatewayServiceSettings& m_settings;
+		const SoftwareInfo m_swInfo;
+		const GatewayServiceSettings m_settings;
 		CircularLoggerShared m_log;
 
 		bool m_logGatewayPackets = false;
@@ -52,7 +59,10 @@ namespace Gateway
 		CircularLoggerShared m_gwLog = nullptr;				// log of gateway request/reply packets
 		bool m_lastMsgIsRequest = true;
 
-		bool m_shutwownCalled = false;
+		bool m_shutdownCalled = false;
+
+		std::mutex m_appDataSrvClientMutex;
+		std::unique_ptr<AppDataServiceClientThread> m_appDataSrvClientThread;
 	};
 
 	using HandlerShared = std::shared_ptr<Handler>;

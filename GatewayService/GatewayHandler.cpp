@@ -1,4 +1,5 @@
 #include "GatewayHandler.h"
+#include "AppDataServiceClient.h"
 #include "IvsImpulseGatewayHandler.h"
 #include "ModbusSlaveGatewayHandler.h"
 #include "AdsGatewayHandler.h"
@@ -33,14 +34,50 @@ namespace Gateway
 
 	Handler::~Handler()
 	{
-		Q_ASSERT(m_shutwownCalled);
+		Q_ASSERT(m_shutdownCalled);
 	}
 
 	void Handler::shutdown()
 	{
 		closeGwLog();
 
-		m_shutwownCalled = true;
+		m_shutdownCalled = true;
+	}
+
+	void Handler::runAppDataSrvClient()
+	{
+		std::lock_guard lg(m_appDataSrvClientMutex);
+
+		m_appDataSrvClientThread =
+			std::make_unique<AppDataServiceClientThread>( m_swInfo,
+														 m_settings.appDataService1.address,
+														 m_settings.appDataService2.address,
+														 QString("GatewayService %1").arg(m_swInfo.equipmentID()),
+														 *this, m_log);
+		m_appDataSrvClientThread->start();
+	}
+
+	void Handler::stopAppDataSrvClient()
+	{
+		std::lock_guard lg(m_appDataSrvClientMutex);
+
+		if (m_appDataSrvClientThread != nullptr)
+		{
+			m_appDataSrvClientThread->quitAndWait();
+			m_appDataSrvClientThread.reset();
+		}
+	}
+
+	AppDataServiceClient* Handler::appDataServiceClient()
+	{
+		std::lock_guard lg(m_appDataSrvClientMutex);
+
+		if (m_appDataSrvClientThread == nullptr)
+		{
+			return nullptr;
+		}
+
+		return m_appDataSrvClientThread->client();
 	}
 
 	void Handler::getRequiredSignalsHashes(std::set<Hash>* hashes) const

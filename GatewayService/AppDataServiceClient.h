@@ -20,7 +20,7 @@ namespace Gateway
 							 const HostAddressPort& serverAddressPort1,
 							 const HostAddressPort& serverAddressPort2,
 							 const QString& clientDescription,
-							 Handler* handler,
+							 Handler& handler,
 							 CircularLoggerShared logger);
 	private:
 		virtual void onClientThreadStarted() override;
@@ -42,7 +42,7 @@ namespace Gateway
 		void sendStateChanges();
 
 	private:
-		Handler* m_handler = nullptr;
+		Handler& m_handler;
 
 		QTimer m_timer;
 		bool m_needGetStates = false;
@@ -62,7 +62,7 @@ namespace Gateway
 								   const HostAddressPort& serverAddressPort1,
 								   const HostAddressPort& serverAddressPort2,
 								   const QString& clientDescription,
-								   Handler* handler,
+								   Handler& handler,
 								   CircularLoggerShared logger)
 		{
 			addWorker(new AppDataServiceClient(softwareInfo,

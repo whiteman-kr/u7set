@@ -15,9 +15,6 @@ namespace Gateway
 										 CircularLoggerShared log,
 										 bool logGatewayPackets) :
 		Handler(gateway->gatewayID(), swInfo, settings, log, logGatewayPackets),
-		m_softwareInfo(swInfo),
-		m_appDataService1(settings.appDataService1.address),
-		m_appDataService2(settings.appDataService2.address),
 		m_gateway(gateway),
 		m_appSignals(appSignals)
 	{
@@ -31,17 +28,11 @@ namespace Gateway
 	{
 		init();
 
-		m_appDataServiceClientThread =
-				new AppDataServiceClientThread( m_softwareInfo,
-												m_appDataService1,
-												m_appDataService2,
-												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-												this, m_log);
-		m_appDataServiceClientThread->start();
+		runAppDataSrvClient();
 
 		m_ivsImpulseCommThread = new IvsImpulseCommThread(*this);
 
-		m_ivsImpulseCommThread->connect(m_appDataServiceClientThread->client());
+		m_ivsImpulseCommThread->connect(appDataServiceClient());
 
 		m_ivsImpulseCommThread->start();
 	}
@@ -55,12 +46,7 @@ namespace Gateway
 			m_ivsImpulseCommThread = nullptr;
 		}
 
-		if (m_appDataServiceClientThread != nullptr)
-		{
-			m_appDataServiceClientThread->quitAndWait();
-			delete m_appDataServiceClientThread;
-			m_appDataServiceClientThread = nullptr;
-		}
+		stopAppDataSrvClient();
 
 		Handler::shutdown();
 	}

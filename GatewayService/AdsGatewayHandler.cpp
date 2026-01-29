@@ -18,9 +18,6 @@ namespace Gateway
 										 CircularLoggerShared log,
 										 bool logGatewayPackets) :
 		Handler(gateway->gatewayID(), swInfo, settings, log, logGatewayPackets),
-		m_softwareInfo(swInfo),
-		m_appDataService1(settings.appDataService1.address),
-		m_appDataService2(settings.appDataService2.address),
 		m_gateway(gateway),
 		m_appSignals(appSignals)
 	{
@@ -92,40 +89,18 @@ namespace Gateway
 
 	bool AdsGatewayHandler::init()
 	{
-		std::set<Hash> stateHashes;
-		std::set<Hash> eventHashes;
+		std::set<Hash> hashes;
 
 		for(const AppSignal* appSignal : m_appSignals)
 		{
 			TEST_PTR_CONTINUE(appSignal);
 
-			stateHashes.insert(appSignal->hash());
-			eventHashes.insert(appSignal->hash());
+			hashes.insert(appSignal->hash());
 		}
 
-		m_gateway->setRequiredSignalHashes(stateHashes, eventHashes);
+		m_gateway->setRequiredSignalHashes(hashes);
 
 		return true;
-	}
-
-	void AdsGatewayHandler::runAppDataSrvClient()
-	{
-		m_appDataSrvClientThread =
-			std::make_unique<AppDataServiceClientThread>( m_softwareInfo,
-										   m_appDataService1,
-										   m_appDataService2,
-										   QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-										   this, m_log);
-		m_appDataSrvClientThread->start();
-	}
-
-	void AdsGatewayHandler::stopAppDataSrvClient()
-	{
-		if (m_appDataSrvClientThread != nullptr)
-		{
-			m_appDataSrvClientThread->quitAndWait();
-			m_appDataSrvClientThread.reset();
-		}
 	}
 
 	void AdsGatewayHandler::runAdsGatewayServer()

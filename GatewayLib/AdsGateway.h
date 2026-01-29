@@ -35,7 +35,7 @@ namespace Gateway
 		void getRequiredSignalsHashes(std::set<Hash>* hashes) const;
 		void getEventSignalsHashes(std::set<Hash>* hashes) const;
 
-		void setRequiredSignalHashes(std::set<Hash>& stateHashes, std::set<Hash>& eventHashes);
+		void setRequiredSignalHashes(std::set<Hash>& hashes);
 
 		void appendSignalList(const QString& profile, const QStringList& signalList);
 
@@ -54,7 +54,7 @@ namespace Gateway
 	private:
 		HostAddressPort m_clientRequestIP1;
 
-		std::set<Hash> m_stateHashes;
+		std::set<Hash> m_signalHashes;
 		std::set<Hash> m_eventHashes;
 	};
 

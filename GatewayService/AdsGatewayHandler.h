@@ -40,21 +40,12 @@ namespace Gateway
 	private:
 		bool init();
 
-		void runAppDataSrvClient();
-		void stopAppDataSrvClient();
-
 		void runAdsGatewayServer();
 		void stopAdsGatewayServer();
 
 	private:
-		const SoftwareInfo m_softwareInfo;
-		HostAddressPort m_appDataService1;
-		HostAddressPort m_appDataService2;
-
 		AdsGatewayShared m_gateway;
 		const AppSignals& m_appSignals;
-
-		std::unique_ptr<AppDataServiceClientThread> m_appDataSrvClientThread;
 
 		std::mutex m_adsGatewayServerMutex;
 		std::unique_ptr<AdsGatewayServer> m_adsGatewayServer;

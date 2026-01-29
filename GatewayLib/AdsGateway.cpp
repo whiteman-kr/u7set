@@ -102,7 +102,7 @@ namespace Gateway
 	void AdsGateway::getRequiredSignalsHashes(std::set<Hash>* hashes) const
 	{
 		TEST_PTR_RETURN(hashes);
-		*hashes = m_stateHashes;
+		*hashes = m_signalHashes;
 	}
 
 	void AdsGateway::getEventSignalsHashes(std::set<Hash>* hashes) const
@@ -111,10 +111,9 @@ namespace Gateway
 		*hashes = m_eventHashes;
 	}
 
-	void AdsGateway::setRequiredSignalHashes(std::set<Hash>& stateHashes, std::set<Hash>& eventHashes)
+	void AdsGateway::setRequiredSignalHashes(std::set<Hash>& hashes)
 	{
-		m_stateHashes.swap(stateHashes);
-		m_eventHashes.swap(eventHashes);
+		m_signalHashes.swap(hashes);
 	}
 
 	void AdsGateway::appendSignalList(const QString& profile, const QStringList& signalList)
