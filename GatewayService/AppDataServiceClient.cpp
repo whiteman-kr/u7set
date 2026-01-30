@@ -3,12 +3,12 @@
 
 namespace Gateway
 {
-AppDataServiceClient::AppDataServiceClient(const SoftwareInfo& softwareInfo,
-	const HostAddressPort& serverAddressPort1,
-	const HostAddressPort& serverAddressPort2,
-	const QString& clientDescription,
-	Handler &handler,
-	CircularLoggerShared logger) :
+	AppDataServiceClient::AppDataServiceClient(const SoftwareInfo& softwareInfo,
+												const HostAddressPort& serverAddressPort1,
+												const HostAddressPort& serverAddressPort2,
+												const QString& clientDescription,
+												Handler& handler,
+												CircularLoggerShared logger) :
 		Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, clientDescription),
 		m_handler(handler),
 		m_timer(this)

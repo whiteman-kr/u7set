@@ -45,9 +45,6 @@ namespace Gateway
 		virtual void writeSettingsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readSettingsFromXml(XmlReadHelper& xml) override;
 
-		// virtual void writeSignalListsToXml(XmlWriteHelper& xml) const override;
-		// virtual bool readSignalListsFromXml(XmlReadHelper& xml) override;
-
 	private:
 		virtual bool generateRequiredFiles(const AppSignalSet* signalSet, ParserLog& log) override;
 
@@ -55,7 +52,6 @@ namespace Gateway
 		HostAddressPort m_clientRequestIP1;
 
 		std::set<Hash> m_signalHashes;
-		std::set<Hash> m_eventHashes;
 	};
 
 	using AdsGatewayShared = std::shared_ptr<AdsGateway>;

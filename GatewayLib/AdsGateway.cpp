@@ -108,7 +108,7 @@ namespace Gateway
 	void AdsGateway::getEventSignalsHashes(std::set<Hash>* hashes) const
 	{
 		TEST_PTR_RETURN(hashes);
-		*hashes = m_eventHashes;
+		*hashes = m_signalHashes;
 	}
 
 	void AdsGateway::setRequiredSignalHashes(std::set<Hash>& hashes)

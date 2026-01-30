@@ -114,6 +114,7 @@ private:
 			FD_SET(STDIN_FILENO, &fds);
 
 			timeval tv {};
+			tv.tv_sec = 0;
 			tv.tv_usec = 200000; // 200 ms
 
 			const int res = select(STDIN_FILENO + 1, &fds, nullptr, nullptr, &tv);
@@ -125,7 +126,10 @@ private:
 
 			if (res > 0 && FD_ISSET(STDIN_FILENO, &fds))
 			{
-				if (std::getline(std::cin, line))
+				char ch = 0;
+				const ssize_t n = ::read(STDIN_FILENO, &ch, 1);
+
+				if (n > 0)
 				{
 					requestQtExit();
 				}
