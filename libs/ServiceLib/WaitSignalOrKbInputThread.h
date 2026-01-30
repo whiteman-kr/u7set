@@ -27,7 +27,7 @@ public:
 
 		sa.sa_handler = &PosixSignalHandler::onSignal;
 		sigemptyset(&sa.sa_mask);
-		sa.sa_flags = SA_RESTART;
+		sa.sa_flags = 0;
 
 		(void)::sigaction(SIGTERM, &sa, nullptr);
 		(void)::sigaction(SIGINT, &sa, nullptr);
