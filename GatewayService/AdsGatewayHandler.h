@@ -35,7 +35,8 @@ namespace Gateway
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
 		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
 
-		virtual void setConnectedToAppDataSrv(bool connected) override;
+		virtual void onAppDataSrvConnected() override;
+		virtual void onAppDataSrvDisconnected() override;
 
 	private:
 		bool init();

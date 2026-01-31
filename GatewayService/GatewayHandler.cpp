@@ -80,6 +80,28 @@ namespace Gateway
 		return m_appDataSrvClientThread->client();
 	}
 
+	void Handler::onAppDataSrvConnected()
+	{
+	}
+
+	void Handler::onAppDataSrvDisconnected()
+	{
+	}
+
+	Handler::RequestPlan Handler::planNextAppDataRequest(bool clearToSend, qint64 nowMs)
+	{
+		Q_UNUSED(clearToSend);
+		Q_UNUSED(nowMs);
+
+		return {};
+	}
+
+	void Handler::onAppDataRequestSent(quint32 requestID, qint64 nowMs)
+	{
+		Q_UNUSED(requestID);
+		Q_UNUSED(nowMs);
+	}
+
 	void Handler::getRequiredSignalsHashes(std::set<Hash>* hashes) const
 	{
 		Q_UNUSED(hashes);
@@ -98,11 +120,6 @@ namespace Gateway
 	void Handler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
 	{
 		Q_UNUSED(getStateChangesReply);
-	}
-
-	void Handler::setConnectedToAppDataSrv(bool connected)
-	{
-		Q_UNUSED(connected);
 	}
 
 	CircularLoggerShared Handler::log()

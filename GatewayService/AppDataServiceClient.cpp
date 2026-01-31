@@ -10,15 +10,16 @@ namespace Gateway
 												Handler& handler,
 												CircularLoggerShared logger) :
 		Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, clientDescription),
-		m_handler(handler),
-		m_timer(this)
+		m_handler(handler)
 	{
 		setLogger(logger);
 	}
 
 	void AppDataServiceClient::onClientThreadStarted()
 	{
-		std::set<Hash> hashes;
+		m_timer = std::make_unique<QTimer>;
+
+/*		std::set<Hash> hashes;
 
 		m_handler.getRequiredSignalsHashes(&hashes);
 
@@ -31,21 +32,24 @@ namespace Gateway
 
 		m_timer.setTimerType(Qt::PreciseTimer);
 		m_timer.setInterval(GET_STATES_REQUEST_INTERVAL);
-		m_timer.setSingleShot(false);
+		m_timer.setSingleShot(false);*/
 
 		connect(&m_timer, &QTimer::timeout, this, &AppDataServiceClient::onTimer);
 	}
 
 	void AppDataServiceClient::onClientThreadFinished()
 	{
-		m_timer.stop();
+		m_timer->stop();
+		m_timer.reset();
 	}
 
 	void AppDataServiceClient::onConnection()
 	{
 		Tcp::Client::onConnection();
 
-		m_timer.start();
+		m_handler.onAppDataSrvConnected();
+
+/*		m_timer.start();
 
 		//
 
@@ -64,16 +68,15 @@ namespace Gateway
 			initialRequest.add_signalshashes(h);
 		}
 
-		sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, initialRequest);
+		sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, initialRequest);*/
 	}
 
 	void AppDataServiceClient::onDisconnection()
 	{
-		m_handler.setConnectedToAppDataSrv(false);
+		m_handler.onAppDataSrvDisconnected();
+		m_timer->stop();
 
 		Tcp::Client::onDisconnection();
-
-		m_timer.stop();
 	}
 
 	void AppDataServiceClient::onTimer()

@@ -12,8 +12,16 @@ namespace Gateway
 
 	class Handler
 	{
+	public:
+		struct RequestPlan
+		{
+			bool hasRequest = false;
+			quint32 requestID = 0;
+			int delayMs = 0;		// 0 - send now
+		};
+
 	private:
-		static const qint64 GW_LOG_PERIOD_SECS = 60 * 60;		// 1 hour
+		static constexpr qint64 GW_LOG_PERIOD_SECS = 60 * 60;		// 1 hour
 
 	public:
 		Handler(const QString& gatewayID, const SoftwareInfo& swInfo,
@@ -28,13 +36,16 @@ namespace Gateway
 		void stopAppDataSrvClient();
 		AppDataServiceClient* appDataServiceClient();
 
+		virtual void onAppDataSrvConnected();
+		virtual void onAppDataSrvDisconnected();
+		virtual RequestPlan planNextAppDataRequest(bool clearToSend, qint64 nowMs);
+		virtual void onAppDataRequestSent(quint32 requestID, qint64 nowMs);
+
 		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const;
 		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const;
 
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
 		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply);
-
-		virtual void setConnectedToAppDataSrv(bool connected);
 
 		CircularLoggerShared log();
 

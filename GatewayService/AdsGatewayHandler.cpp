@@ -77,13 +77,23 @@ namespace Gateway
 		}
 	}
 
-	void AdsGatewayHandler::setConnectedToAppDataSrv(bool connected)
+	void AdsGatewayHandler::onAppDataSrvConnected()
 	{
 		std::lock_guard lg(m_adsGatewayServerMutex);
 
 		if (m_adsGatewayServer)
 		{
-			m_adsGatewayServer->setConnectedToAppDataSrv(connected);
+			m_adsGatewayServer->setConnectedToAppDataSrv(true);
+		}
+	}
+
+	void AdsGatewayHandler::onAppDataSrvDisconnected()
+	{
+		std::lock_guard lg(m_adsGatewayServerMutex);
+
+		if (m_adsGatewayServer)
+		{
+			m_adsGatewayServer->setConnectedToAppDataSrv(false);
 		}
 	}
 

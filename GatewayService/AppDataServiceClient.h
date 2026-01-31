@@ -44,7 +44,7 @@ namespace Gateway
 	private:
 		Handler& m_handler;
 
-		QTimer m_timer;
+		std::unique_ptr<QTimer> m_timer;
 		bool m_needGetStates = false;
 		qint64 m_lastGetStatesRequestTime = 0;
 
