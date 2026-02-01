@@ -49,6 +49,10 @@ namespace Gateway
 		virtual void run() override;
 		virtual void shutdown() override;
 
+		virtual void onAppDataSrvConnected() override;
+		virtual void onAppDataSrvDisconnected() override;
+		virtual void planNextPreparedRequest(PreparedRequest& request) override;
+
 		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
 		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
 
@@ -134,7 +138,6 @@ namespace Gateway
 
 	private:
 		ModbusSlaveGatewayShared m_gateway;
-		const AppSignals& m_appSignals;
 
 		Modbus::TcpSlaveThread* m_tcpSlaveThread1 = nullptr;
 		Modbus::TcpSlaveThread* m_tcpSlaveThread2 = nullptr;

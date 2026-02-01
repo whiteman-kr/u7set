@@ -15,10 +15,12 @@ namespace Gateway
 	Handler::Handler(const QString& gatewayID,
 					 const SoftwareInfo& swInfo,
 					 const GatewayServiceSettings& settings,
+					 const AppSignals& appSignals,
 					 CircularLoggerShared log, bool logGatewayPackets) :
 		m_gatewayID(gatewayID),
 		m_swInfo(swInfo),
 		m_settings(settings),
+		m_appSignals(appSignals),
 		m_log(log),
 		m_logGatewayPackets(logGatewayPackets)
 	{
@@ -88,12 +90,9 @@ namespace Gateway
 	{
 	}
 
-	Handler::RequestPlan Handler::planNextAppDataRequest(bool clearToSend, qint64 nowMs)
+	void Handler::planNextPreparedRequest(PreparedRequest& rqPlan)
 	{
-		Q_UNUSED(clearToSend);
-		Q_UNUSED(nowMs);
-
-		return {};
+		Q_UNUSED(rqPlan);
 	}
 
 	void Handler::onAppDataRequestSent(quint32 requestID, qint64 nowMs)
@@ -117,9 +116,14 @@ namespace Gateway
 		Q_UNUSED(getStatesReply);
 	}
 
-	void Handler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
+	void Handler::processStateChanges(const Network::GetAppSignalStateChangesReply &getStateChangesReply)
 	{
 		Q_UNUSED(getStateChangesReply);
+	}
+
+	void Handler::processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getGatewayStateChangesReply)
+	{
+		Q_UNUSED(getGatewayStateChangesReply);
 	}
 
 	CircularLoggerShared Handler::log()

@@ -14,9 +14,8 @@ namespace Gateway
 										 const AppSignals& appSignals,
 										 CircularLoggerShared log,
 										 bool logGatewayPackets) :
-		Handler(gateway->gatewayID(), swInfo, settings, log, logGatewayPackets),
-		m_gateway(gateway),
-		m_appSignals(appSignals)
+		Handler(gateway->gatewayID(), swInfo, settings, appSignals, log, logGatewayPackets),
+		m_gateway(gateway)
 	{
 	}
 
@@ -49,6 +48,19 @@ namespace Gateway
 		stopAppDataSrvClient();
 
 		Handler::shutdown();
+	}
+
+	void IvsImpulseHandler::onAppDataSrvConnected()
+	{
+	}
+
+	void IvsImpulseHandler::onAppDataSrvDisconnected()
+	{
+	}
+
+	void IvsImpulseHandler::planNextPreparedRequest(PreparedRequest& request)
+	{
+		Q_UNUSED(request);
 	}
 
 	void IvsImpulseHandler::getRequiredSignalsHashes(std::set<Hash>* hashes) const

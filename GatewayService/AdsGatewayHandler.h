@@ -29,27 +29,34 @@ namespace Gateway
 		virtual void run() override;
 		virtual void shutdown() override;
 
+		virtual void onAppDataSrvConnected() override;
+		virtual void onAppDataSrvDisconnected() override;
+		virtual void planNextPreparedRequest(PreparedRequest& request) override;
+
 		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
 		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
 
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
-		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
-
-		virtual void onAppDataSrvConnected() override;
-		virtual void onAppDataSrvDisconnected() override;
+		virtual void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply) override;
 
 	private:
 		bool init();
+		void prepareRequests();
 
 		void runAdsGatewayServer();
 		void stopAdsGatewayServer();
 
 	private:
 		AdsGatewayShared m_gateway;
-		const AppSignals& m_appSignals;
 
 		std::mutex m_adsGatewayServerMutex;
 		std::unique_ptr<AdsGatewayServer> m_adsGatewayServer;
+
+		std::vector<PreparedRequest> m_requests;
+		size_t m_requestIndex = 0;
+
+		bool m_hasPendingChanges = false;
+		int m_chagesRequestCount = 0;
 
 		//
 

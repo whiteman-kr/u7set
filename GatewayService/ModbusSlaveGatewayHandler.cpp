@@ -71,9 +71,8 @@ namespace Gateway
 										 const AppSignals& appSignals,
 										 CircularLoggerShared log,
 										 bool logGatewayPackets) :
-		Handler(gateway->gatewayID(), swInfo, settings, log, logGatewayPackets),
-		m_gateway(gateway),
-		m_appSignals(appSignals)
+		Handler(gateway->gatewayID(), swInfo, settings, appSignals, log, logGatewayPackets),
+		m_gateway(gateway)
 	{
 	}
 
@@ -158,6 +157,19 @@ namespace Gateway
 		stopAppDataSrvClient();
 
 		Handler::shutdown();
+	}
+
+	void ModbusSlaveHandler::onAppDataSrvConnected()
+	{
+	}
+
+	void ModbusSlaveHandler::onAppDataSrvDisconnected()
+	{
+	}
+
+	void ModbusSlaveHandler::planNextPreparedRequest(PreparedRequest& request)
+	{
+		Q_UNUSED(request);
 	}
 
 	void ModbusSlaveHandler::getRequiredSignalsHashes(std::set<Hash>* hashes) const

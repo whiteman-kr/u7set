@@ -1,3 +1,5 @@
+#include <QTimer>
+
 #include "AppDataServiceClient.h"
 #include "IvsImpulseGatewayHandler.h"
 
@@ -17,7 +19,7 @@ namespace Gateway
 
 	void AppDataServiceClient::onClientThreadStarted()
 	{
-		m_timer = std::make_unique<QTimer>;
+		m_timer = std::make_unique<QTimer>(this);
 
 /*		std::set<Hash> hashes;
 
@@ -34,7 +36,7 @@ namespace Gateway
 		m_timer.setInterval(GET_STATES_REQUEST_INTERVAL);
 		m_timer.setSingleShot(false);*/
 
-		connect(&m_timer, &QTimer::timeout, this, &AppDataServiceClient::onTimer);
+		connect(m_timer.get(), &QTimer::timeout, this, &AppDataServiceClient::onTimer);
 	}
 
 	void AppDataServiceClient::onClientThreadFinished()
@@ -103,6 +105,10 @@ namespace Gateway
 		{
 		case ADS_GET_APP_SIGNAL_STATE_CONST_SIZE:
 			onGetAppSignalStateReply(replyData, replyDataSize);
+			break;
+
+		case ADS_GET_APP_SIGNAL_STATE_CHANGES:
+			onGetAppSignalStateChangesReply(replyData, replyDataSize);
 			break;
 
 		case ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES:

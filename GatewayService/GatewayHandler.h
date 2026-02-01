@@ -13,11 +13,41 @@ namespace Gateway
 	class Handler
 	{
 	public:
+
+		struct PreparedRequest
+		{
+			uint32_t ID;
+			std::vector<char> data;
+			int delayMs = 0;		// 0 - send now
+
+			void clear()
+			{
+				ID = 0;
+				data.clear();
+				delayMs = 0;
+			}
+
+			void setRequest(const PreparedRequest& rq, int delay)
+			{
+				ID = ID;
+				data = rq.data;
+				delayMs = delay;
+			}
+
+			void setDelay(int delay)
+			{
+				ID = 0;
+				data.clear();
+				delayMs = delay;
+			}
+		};
+
 		struct RequestPlan
 		{
 			bool hasRequest = false;
-			quint32 requestID = 0;
-			int delayMs = 0;		// 0 - send now
+
+			PreparedRequest request;
+
 		};
 
 	private:
@@ -26,6 +56,7 @@ namespace Gateway
 	public:
 		Handler(const QString& gatewayID, const SoftwareInfo& swInfo,
 				const GatewayServiceSettings& settings,
+				const AppSignals& appSignals,
 				CircularLoggerShared log, bool logGatewayPackets);
 		virtual ~Handler();
 
@@ -38,14 +69,15 @@ namespace Gateway
 
 		virtual void onAppDataSrvConnected();
 		virtual void onAppDataSrvDisconnected();
-		virtual RequestPlan planNextAppDataRequest(bool clearToSend, qint64 nowMs);
+		virtual void planNextPreparedRequest(PreparedRequest& rqPlan);
 		virtual void onAppDataRequestSent(quint32 requestID, qint64 nowMs);
 
 		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const;
 		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const;
 
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
-		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply);
+		virtual void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply);
+		virtual void processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getGatewayStateChangesReply);
 
 		CircularLoggerShared log();
 
@@ -63,6 +95,7 @@ namespace Gateway
 		QString m_gatewayID;
 		const SoftwareInfo m_swInfo;
 		const GatewayServiceSettings m_settings;
+		const AppSignals& m_appSignals;
 		CircularLoggerShared m_log;
 
 		bool m_logGatewayPackets = false;
