@@ -1,7 +1,10 @@
 #pragma once
-#include <VFrame30/Indicator.h>
 #include <TrendView/Trend.h>
 #include <TrendView/TrendSignal.h>
+#include <VFrame30/Indicator.h>
+
+#include <mutex>
+
 
 namespace VFrame30
 {
@@ -56,11 +59,12 @@ namespace VFrame30
 	class IndicatorTrend : public Indicator
 	{
 		Q_OBJECT
+		Q_DISABLE_COPY_MOVE(IndicatorTrend)
 
 	public:
 		IndicatorTrend() = delete;
 		explicit IndicatorTrend(SchemaUnit itemUnit);
-		virtual ~IndicatorTrend() = default;
+		virtual ~IndicatorTrend();
 
 	public:
 		virtual void createProperties(SchemaItemIndicator* propertyObject, int signalCount) override;
@@ -69,6 +73,12 @@ namespace VFrame30
 		virtual bool save(Proto::SchemaItemIndicator* message) const override;
 
 		virtual void draw(CDrawParam* drawParam, const SchemaItemIndicator* schemaItem) const override;
+
+	private:
+		// Saves rendered image in m_image and m_drawFuture.
+		// It is const because it called in draw(), but modifies m_image and m_drawFuture.
+		//
+		void saveRenderedImage(QFuture<QImage>& future) const;
 
 		// Getting setting data, client functions
 		//
@@ -105,7 +115,7 @@ namespace VFrame30
 
 		int durationSeconds() const;
 		void setDurationSeconds(int value);
-		
+
 		// Data
 		//
 	private:
@@ -120,15 +130,21 @@ namespace VFrame30
 		//  --
 		mutable TrendLib::Trend m_trend;
 
-		mutable QImage m_image;
+		mutable QImage m_image; // Image currently shown
+
+		mutable QFuture<QImage> m_drawFuture;
+		mutable QFutureWatcher<QImage> m_futureWatcher;
+		mutable std::stop_source m_drawStopSource;
+
 		mutable QElapsedTimer m_drawTimer;
 
-		mutable QElapsedTimer m_updateSignalsTimer;		// We need to update signal params, as program can start without
-														// AppDataServices, and when connections is established the signals
-														// should be updates. There is no suitable way to do it now,
-														// so we just use update time and it will update signals every 10 secs.
+
+		mutable QElapsedTimer m_updateSignalsTimer; // We need to update signal params, as program can start without
+													// AppDataServices, and when connections is established the signals
+													// should be updates. There is no suitable way to do it now,
+													// so we just use update time and it will update signals every 10 secs.
 	};
-}
+} // namespace VFrame30
 
 Q_DECLARE_METATYPE(VFrame30::IndicatorTrendSignalParam)
 Q_DECLARE_METATYPE(PropertyVector<VFrame30::IndicatorTrendSignalParam>)

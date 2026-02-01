@@ -1685,13 +1685,18 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 
 	// Draw Schema
 	//
-	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
-
-	schema()->Draw(&drawParam, clipRect);
-
-	if (m_compareWidget == true)
 	{
-		drawCompareOutlines(&drawParam, clipRect);
+		QApplication::setOverrideCursor(Qt::WaitCursor);
+
+		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
+		schema()->Draw(&drawParam, clipRect);
+
+		if (m_compareWidget == true)
+		{
+			drawCompareOutlines(&drawParam, clipRect);
+		}
+
+		QApplication::restoreOverrideCursor();
 	}
 
 	// Ending
