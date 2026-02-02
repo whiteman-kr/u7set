@@ -1,0 +1,40 @@
+gateway_example_job:
+  stage: build
+  only:
+    - master
+    - /^release.*$/
+    - develop
+    - /experimental/
+    - /^.*exp.*$/
+    - /^.*rpct-.*$/
+    - /^.*RPCT-.*$/
+  tags:
+    - gcc
+  script:
+    - "printenv"
+    - "pwd"
+    - "whoami"
+    - "gcc --version"
+    - "echo $CI_COMMIT_SHA"
+    - "cd $CI_PROJECT_DIR"
+    - "git status"
+    - "git log -1"
+    - "# Copy files into proper locations and generate example project"
+    - "mkdir -p $CI_PROJECT_DIR/AdsGatewayExample/lib"
+    - "cp -r $CI_PROJECT_DIR/GatewayService/example/* $CI_PROJECT_DIR/AdsGatewayExample/"
+    - "cp -r $CI_PROJECT_DIR/libs/AdsGatewayLib $CI_PROJECT_DIR/AdsGatewayExample/lib"
+    - "mv $CI_PROJECT_DIR/AdsGatewayExample/CMakeListsExample.txt $CI_PROJECT_DIR/AdsGatewayExample/CMakeLists.txt"
+    - "# Build Project"
+    - "mkdir -p $CI_PROJECT_DIR/build/debug"
+    - "mkdir -p $CI_PROJECT_DIR/build/release"
+    - "cmake -S $CI_PROJECT_DIR/AdsGatewayExample -B ./build/debug -G Ninja -DCMAKE_BUILD_TYPE=Debug"
+    - "cmake --build ./build/debug"
+    - "cmake -S $CI_PROJECT_DIR/AdsGatewayExample -B ./build/release -G Ninja -DCMAKE_BUILD_TYPE=Release"
+    - "cmake --build ./build/release"
+
+  artifacts:
+    name: "ads-gateway-example-${CI_MAJOR_VERSION}.${CI_MINOR_VERSION}.${CI_PATCH_VERSION}-p${CI_PIPELINE_ID}-${CI_RELEASE_TYPE}-${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHA}"
+    paths:
+      - AdsGatewayExample/*
+#    exclude:
+#      - bin/release/**/*.a

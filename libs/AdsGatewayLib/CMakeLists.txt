@@ -22,8 +22,6 @@ add_library(${TARGET} STATIC
   ./src/TcpConnection.hpp
 )
 
-target_compile_features(${TARGET} PRIVATE cxx_std_20)
-
 if (WIN32)
     target_sources(${TARGET} PRIVATE
         ./src/TcpConnWindows.cpp

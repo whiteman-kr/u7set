@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.21)
 
 project (AdsGatewayExample LANGUAGES CXX)
 
+add_subdirectory("lib/AdsGatewayLib")
+
 add_executable(AdsGatewayExample 
     ./src/main.cpp
 )

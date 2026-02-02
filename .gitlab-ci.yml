@@ -30,9 +30,14 @@ before_script:
 #  - echo before_script
   - cd
   - dir
-  
 #after_script:
 #  - echo after_script
+
+include:
+  - local: '.gitlab-job-gateway-example.yml'
+#  - local: '.gitlab-job-gateway-example.yml' ADD as other includes if needed
+#  - local: '.gitlab-job-gateway-example.yml'
+
 project_backup_job:
   stage: prepare
   variables:

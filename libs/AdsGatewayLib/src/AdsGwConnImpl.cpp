@@ -353,7 +353,7 @@ namespace AdsGatewayLib
 
 			uint32_t pendingChangesCount = 0;
 			int attempts = 0;                                           // Just for safety to avoid infinite loops
-			const uint32_t MaxAttempts = 10;                            // Safety cap: limit the number of repeat requests per call
+			const int MaxAttempts = 10;                                 // Safety cap: limit the number of repeat requests per call
 
 			do
 			{
