@@ -145,7 +145,7 @@ void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply&
 	}
 }
 
-void AdsGatewayServer::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
+void AdsGatewayServer::processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)
 {
 	setConnectedToAppDataSrv(true);
 
@@ -160,39 +160,52 @@ void AdsGatewayServer::processStateChanges(const Network::GatewayGetAppSignalSta
 
 	constexpr size_t MAX_QUEUE_SIZE = 200000;
 
-	std::lock_guard lg(m_signalStateChangesMutex);
-
-	const size_t curSize = m_signalStateChanges.size();
-
-	if (curSize + statesCount > MAX_QUEUE_SIZE)
 	{
-		const size_t deleteCount = curSize + statesCount - MAX_QUEUE_SIZE ;
+		std::lock_guard lg(m_signalStateChangesMutex);
 
-		if (deleteCount >= curSize)
+		const size_t curSize = m_signalStateChanges.size();
+
+		if (curSize + statesCount > MAX_QUEUE_SIZE)
 		{
-			m_signalStateChanges.clear();
+			const size_t deleteCount = curSize + statesCount - MAX_QUEUE_SIZE ;
+
+			if (deleteCount >= curSize)
+			{
+				m_signalStateChanges.clear();
+			}
+			else
+			{
+				m_signalStateChanges.erase(m_signalStateChanges.begin(),
+										   m_signalStateChanges.begin() + deleteCount);
+			}
 		}
-		else
+
+		for(int i = 0; i < statesCount; i++)
 		{
-			m_signalStateChanges.erase(m_signalStateChanges.begin(),
-									   m_signalStateChanges.begin() + deleteCount);
+			const Proto::AppSignalState& s = getStateChangesReply.appsignalstates(i);
+
+			Hash hash = s.hash();
+
+			// auto it = m_hashToIndex.find(hash);
+
+			// if (it == m_hashToIndex.end())
+			// {
+			// 	continue;
+			// }
+
+			state.hash = hash;
+			state.systemTime = s.systemtime();
+			state.localTime = s.localtime();
+			state.plantTime = s.planttime();
+			state.value = s.value();
+			state.flags = s.flags();
+			state.reserved = 0;
+
+			m_signalStateChanges.push_back(state);
 		}
 	}
 
-	for(int i = 0; i < statesCount; i++)
-	{
-		const Proto::AppSignalState& s = getStateChangesReply.appsignalstates(i).curstate();
-
-		state.hash = s.hash();
-		state.systemTime = s.systemtime();
-		state.localTime = s.localtime();
-		state.plantTime = s.planttime();
-		state.value = s.value();
-		state.flags = s.flags();
-		state.reserved = 0;
-
-		m_signalStateChanges.push_back(state);
-	}
+	updateSignalStatesByChanges(getStateChangesReply);
 }
 
 void AdsGatewayServer::setConnectedToAppDataSrv(bool connected)
@@ -1242,4 +1255,32 @@ uint8_t AdsGatewayServer::channelChar(E::Channel ch) const
 	}
 
 	return 0;
+}
+
+void AdsGatewayServer::updateSignalStatesByChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)
+{
+	const size_t statesCount = getStateChangesReply.appsignalstates_size();
+
+	std::lock_guard lg(m_signalStatesMutex);
+
+	for(size_t i = 0; i < statesCount; i++)
+	{
+		const Proto::AppSignalState& s = getStateChangesReply.appsignalstates(TO_INT(i));
+
+		auto it = m_hashToIndex.find(s.hash());
+
+		if (it == m_hashToIndex.end())
+		{
+			continue;
+		}
+
+		size_t signalIndex = it->second;
+
+		SimpleAppSignalState& signalState = m_signalStates[signalIndex];
+
+		if (signalState.systemTime() < s.systemtime())
+		{
+			signalState.load(s);
+		}
+	}
 }

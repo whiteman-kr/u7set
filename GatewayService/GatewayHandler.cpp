@@ -8,6 +8,38 @@ namespace Gateway
 {
 	// ---------------------------------------------------------------------------------
 	//
+	// Gateway::PreparedRequest struct implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	void PreparedRequest::clear()
+	{
+		ID = 0;
+		data.clear();
+		delayMs = 0;
+	}
+
+	void PreparedRequest::setRequest(const PreparedRequest& rq, int delay)
+	{
+		ID = rq.ID;
+		data = rq.data;
+		delayMs = delay;
+	}
+
+	void PreparedRequest::setDelay(int delay)
+	{
+		ID = 0;
+		data.clear();
+		delayMs = delay;
+	}
+
+	bool PreparedRequest::hasRequest() const
+	{
+		return (ID != 0);
+	}
+
+	// ---------------------------------------------------------------------------------
+	//
 	// Gateway::Handler class implementation
 	//
 	// ---------------------------------------------------------------------------------
@@ -183,6 +215,10 @@ namespace Gateway
 		logMsg.append(msg);
 
 		writeToGwLog(logMsg, recType);
+	}
+
+	void Handler::prepareRequests()
+	{
 	}
 
 	void Handler::writeToGwLog(const QString& msg, CircularLogger::RecordType recType)

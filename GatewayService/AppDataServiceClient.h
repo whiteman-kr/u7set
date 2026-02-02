@@ -13,7 +13,9 @@ namespace Gateway
 	{
 		Q_OBJECT
 
-		inline static const int GET_STATES_REQUEST_INTERVAL = 250;	// ms
+		static constexpr int TIMER_IDLE_INTERVAL = 250;
+		static constexpr int TIMER_WAIT_CLEAR_TO_SEND_INTERVAL = 10;
+		static constexpr int TIMER_WAIT_REPLY_TIMEOUT = 200;
 
 	public:
 		AppDataServiceClient(const SoftwareInfo& softwareInfo,
@@ -31,12 +33,13 @@ namespace Gateway
 
 		void onTimer();
 
-		void sendGetStatesRequest();
-
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
 		void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
+		void onGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize);
 		void onGatewayGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize);
+
+		void sendRequest();
 
 	signals:
 		void sendStateChanges();
@@ -45,14 +48,13 @@ namespace Gateway
 		Handler& m_handler;
 
 		std::unique_ptr<QTimer> m_timer;
-		bool m_needGetStates = false;
-		qint64 m_lastGetStatesRequestTime = 0;
+		bool m_isWaitReplyTimeout = false;
 
-		Network::GetAppSignalStateRequest m_getStatesRequest;
 		Network::GetAppSignalStateReply m_getStatesReply;
-
-		Network::GatewayGetAppSignalStateChangesRequest m_gwGetStateChangesRequest;
+		Network::GetAppSignalStateChangesReply m_getStateChangesReply;
 		Network::GatewayGetAppSignalStateChangesReply m_gwGetStateChangesReply;
+
+		PreparedRequest m_request;
 	};
 
 	class AppDataServiceClientThread : public SimpleThread

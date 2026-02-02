@@ -53,14 +53,12 @@ namespace Gateway
 		virtual void onAppDataSrvDisconnected() override;
 		virtual void planNextPreparedRequest(PreparedRequest& request) override;
 
-		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
-		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
-
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
 		void processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
 
 	private:
 		bool init();
+		virtual void prepareRequests() override;
 
 	private:
 		IvsImpulseGatewayShared m_gateway;

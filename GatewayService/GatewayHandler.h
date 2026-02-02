@@ -10,46 +10,20 @@ namespace Gateway
 	class AppDataServiceClientThread;
 	class AppDataServiceClient;
 
+	struct PreparedRequest
+	{
+		uint32_t ID;
+		std::vector<char> data;
+		int delayMs = 0;		// 0 - send now
+
+		void clear();
+		void setRequest(const PreparedRequest& rq, int delay);
+		void setDelay(int delay);
+		bool hasRequest() const;
+	};
+
 	class Handler
 	{
-	public:
-
-		struct PreparedRequest
-		{
-			uint32_t ID;
-			std::vector<char> data;
-			int delayMs = 0;		// 0 - send now
-
-			void clear()
-			{
-				ID = 0;
-				data.clear();
-				delayMs = 0;
-			}
-
-			void setRequest(const PreparedRequest& rq, int delay)
-			{
-				ID = ID;
-				data = rq.data;
-				delayMs = delay;
-			}
-
-			void setDelay(int delay)
-			{
-				ID = 0;
-				data.clear();
-				delayMs = delay;
-			}
-		};
-
-		struct RequestPlan
-		{
-			bool hasRequest = false;
-
-			PreparedRequest request;
-
-		};
-
 	private:
 		static constexpr qint64 GW_LOG_PERIOD_SECS = 60 * 60;		// 1 hour
 
@@ -87,6 +61,9 @@ namespace Gateway
 		void logRequest(const QString& msg, CircularLogger::RecordType recType = CircularLogger::RecordType::Message);
 		void logReply(const QString& msg, CircularLogger::RecordType recType = CircularLogger::RecordType::Message);
 
+	protected:
+		virtual void prepareRequests();
+
 	private:
 		void writeToGwLog(const QString& msg, CircularLogger::RecordType recType);
 		void closeGwLog();
@@ -102,6 +79,15 @@ namespace Gateway
 		qint64 m_logStartTimeSecs = 0;
 		CircularLoggerShared m_gwLog = nullptr;				// log of gateway request/reply packets
 		bool m_lastMsgIsRequest = true;
+
+		std::vector<PreparedRequest> m_requests;
+		size_t m_requestIndex = 0;
+
+		// request planning
+		//
+		std::optional<size_t> m_changesRequestIndex;
+		bool m_hasPendingChanges = false;
+		int m_changesRequestCount = 0;
 
 		bool m_shutdownCalled = false;
 

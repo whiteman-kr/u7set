@@ -54,7 +54,7 @@ public:
 	void stop();
 
 	void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
-	void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply);
+	void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply);
 
 	void setConnectedToAppDataSrv(bool connected);
 
@@ -98,6 +98,8 @@ private:
 
 	void copyStr(char* toStr, size_t toStrLen, const QString& fromStr) const;
 	uint8_t channelChar(E::Channel ch) const;
+
+	void updateSignalStatesByChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply);
 
 private:
 	HostAddressPort m_listenIP;

@@ -40,8 +40,7 @@ namespace Gateway
 		virtual void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply) override;
 
 	private:
-		bool init();
-		void prepareRequests();
+		virtual void prepareRequests() override;
 
 		void runAdsGatewayServer();
 		void stopAdsGatewayServer();
@@ -51,22 +50,6 @@ namespace Gateway
 
 		std::mutex m_adsGatewayServerMutex;
 		std::unique_ptr<AdsGatewayServer> m_adsGatewayServer;
-
-		std::vector<PreparedRequest> m_requests;
-		size_t m_requestIndex = 0;
-
-		bool m_hasPendingChanges = false;
-		int m_chagesRequestCount = 0;
-
-		//
-
-		mutable std::set<Hash> m_hashesToUpdate;
-
-		//
-
-		QString m_logStr;
-
-		friend class AppDataServiceClient;
 	};
 
 	using AdsGatewayHandlerShared = std::shared_ptr<AdsGatewayHandler>;

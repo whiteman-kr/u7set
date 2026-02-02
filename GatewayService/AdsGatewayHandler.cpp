@@ -28,7 +28,7 @@ namespace Gateway
 
 	void AdsGatewayHandler::run()
 	{
-		init();
+		prepareRequests();
 		runAppDataSrvClient();
 		runAdsGatewayServer();
 	}
@@ -48,6 +48,10 @@ namespace Gateway
 		{
 			m_adsGatewayServer->setConnectedToAppDataSrv(true);
 		}
+
+		m_requestIndex = 0;
+		m_changesRequestCount = 0;
+		m_hasPendingChanges = false;
 	}
 
 	void AdsGatewayHandler::onAppDataSrvDisconnected()
@@ -71,7 +75,7 @@ namespace Gateway
 
 		if (m_requestIndex == 0)
 		{
-			m_chagesRequestCount = 0;
+			m_changesRequestCount = 0;
 		}
 
 		if (m_requestIndex < m_requests.size())
@@ -81,21 +85,22 @@ namespace Gateway
 			return;
 		}
 
-		if (m_hasPendingChanges)
+		if (m_hasPendingChanges && m_changesRequestIndex.has_value())
 		{
-			if (m_chagesRequestCount < 5)
+			if (m_changesRequestCount < 10)
 			{
-				request.setRequest(m_requests[m_requests.size() - 1], 0);		// retry ADS_GET_APP_SIGNAL_STATE_CHANGES
-				m_chagesRequestCount++;
+				// retry ADS_GET_APP_SIGNAL_STATE_CHANGES
+				//
+				request.setRequest(m_requests[m_changesRequestIndex.value()], 0);
+				m_changesRequestCount++;
 				return;
 			}
 
-			m_requestIndex = 0;
-			request.setDelay(20);
+			m_changesRequestCount = 0;
+			request.setDelay(10);
 			return;
 		}
 
-		m_chagesRequestCount = 0;
 		m_requestIndex = 0;
 		request.setDelay(200);
 	}
@@ -137,32 +142,19 @@ namespace Gateway
 			}
 		}
 
-		if (getStateChangesReply.pendingstatescount() > 0)
-		{
-			m_hasPendingChanges = true;
-		}
-	}
-
-	bool AdsGatewayHandler::init()
-	{
-		prepareRequests();
-
-/*		std::set<Hash> hashes;
-
-		for(const AppSignal* appSignal : m_appSignals)
-		{
-			TEST_PTR_CONTINUE(appSignal);
-
-			hashes.insert(appSignal->hash());
-		}
-
-		m_gateway->setRequiredSignalHashes(hashes);*/
-
-		return true;
+		m_hasPendingChanges = getStateChangesReply.pendingstatescount() > 0;
 	}
 
 	void AdsGatewayHandler::prepareRequests()
 	{
+		m_requests.clear();
+		m_requestIndex = 0;
+		m_changesRequestCount = 0;
+		m_hasPendingChanges = false;
+		m_changesRequestIndex.reset();
+
+		//
+
 		size_t signalsCount = m_appSignals.count();
 		size_t partCount = signalsCount / ADS_GET_APP_SIGNAL_STATE_MAX +
 						   ((signalsCount % ADS_GET_APP_SIGNAL_STATE_MAX) ? 1 : 0);
@@ -220,6 +212,7 @@ namespace Gateway
 			size_t requestSize = rq.ByteSizeLong();
 
 			PreparedRequest& stateChangesRequest = m_requests.emplace_back(PreparedRequest{});
+			m_changesRequestIndex = m_requests.size() - 1;
 
 			stateChangesRequest.ID = ADS_GET_APP_SIGNAL_STATE_CHANGES;
 

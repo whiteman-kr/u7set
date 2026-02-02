@@ -53,11 +53,8 @@ namespace Gateway
 		virtual void onAppDataSrvDisconnected() override;
 		virtual void planNextPreparedRequest(PreparedRequest& request) override;
 
-		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
-		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
-
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
-		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
+		virtual void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply) override;
 
 		E::ModbusMode modbusMode() const;
 		int modbusDeviceID() const;
@@ -91,6 +88,8 @@ namespace Gateway
 
 	private:
 		bool init();
+
+		virtual void prepareRequests() override;
 
 		HostAddressPort listeningIP1() const;
 		HostAddressPort listeningIP2() const;

@@ -548,6 +548,7 @@ namespace Tcp
 		bool sendRequest(quint32 requestID, const QByteArray& requestData);
 		bool sendRequest(quint32 requestID, const char* requestData, quint32 requestDataSize);
 		bool sendRequest(quint32 requestID, google::protobuf::Message& protobufMessage);
+		bool sendRequest(quint32 requestID, const std::vector<char>& requestData);
 
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) = 0;
 		virtual void onReplyTimeout() { qDebug() << "Reply timeout"; }

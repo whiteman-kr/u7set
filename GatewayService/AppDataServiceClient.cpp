@@ -20,29 +20,18 @@ namespace Gateway
 	void AppDataServiceClient::onClientThreadStarted()
 	{
 		m_timer = std::make_unique<QTimer>(this);
-
-/*		std::set<Hash> hashes;
-
-		m_handler.getRequiredSignalsHashes(&hashes);
-
-		m_getStatesRequest.mutable_signalhashes()->Reserve(TO_INT(hashes.size()));
-
-		for(Hash h : hashes)
-		{
-			m_getStatesRequest.add_signalhashes(h);
-		}
-
-		m_timer.setTimerType(Qt::PreciseTimer);
-		m_timer.setInterval(GET_STATES_REQUEST_INTERVAL);
-		m_timer.setSingleShot(false);*/
+		m_timer->setSingleShot(true);
 
 		connect(m_timer.get(), &QTimer::timeout, this, &AppDataServiceClient::onTimer);
+
+		m_handler.planNextPreparedRequest(m_request);
+
+		sendRequest();
 	}
 
 	void AppDataServiceClient::onClientThreadFinished()
 	{
 		m_timer->stop();
-		m_timer.reset();
 	}
 
 	void AppDataServiceClient::onConnection()
@@ -51,64 +40,44 @@ namespace Gateway
 
 		m_handler.onAppDataSrvConnected();
 
-/*		m_timer.start();
-
-		//
-
-		m_handler.setConnectedToAppDataSrv(true);
-
-		Network::GatewayGetAppSignalStateChangesRequest initialRequest;
-
-		std::set<Hash> eventHashes;
-
-		m_handler.getEventSignalsHashes(&eventHashes);
-
-		initialRequest.mutable_signalshashes()->Reserve(TO_INT(eventHashes.size()));
-
-		for(Hash h : eventHashes)
-		{
-			initialRequest.add_signalshashes(h);
-		}
-
-		sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, initialRequest);*/
+		m_handler.planNextPreparedRequest(m_request);
+		sendRequest();
 	}
 
 	void AppDataServiceClient::onDisconnection()
 	{
-		m_handler.onAppDataSrvDisconnected();
 		m_timer->stop();
+
+		m_handler.onAppDataSrvDisconnected();
 
 		Tcp::Client::onDisconnection();
 	}
 
 	void AppDataServiceClient::onTimer()
 	{
-		if (isClearToSendRequest() == false)
+		if (m_isWaitReplyTimeout == true)
 		{
-			m_needGetStates = true;
-			return;
+			m_handler.planNextPreparedRequest(m_request);
+			m_isWaitReplyTimeout = false;
 		}
 
-		sendGetStatesRequest();
-	}
-
-	void AppDataServiceClient::sendGetStatesRequest()
-	{
-		sendRequest(ADS_GET_APP_SIGNAL_STATE_CONST_SIZE, m_getStatesRequest);
-		m_needGetStates = false;
-		m_lastGetStatesRequestTime = QDateTime::currentMSecsSinceEpoch();
+		sendRequest();
 	}
 
 	void AppDataServiceClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 	{
 		switch(requestID)
 		{
-		case ADS_GET_APP_SIGNAL_STATE_CONST_SIZE:
+		case ADS_GET_APP_SIGNAL_STATE:
 			onGetAppSignalStateReply(replyData, replyDataSize);
 			break;
 
 		case ADS_GET_APP_SIGNAL_STATE_CHANGES:
 			onGetAppSignalStateChangesReply(replyData, replyDataSize);
+			break;
+
+		case ADS_GET_APP_SIGNAL_STATE_CONST_SIZE:
+			onGetAppSignalStateReply(replyData, replyDataSize);
 			break;
 
 		case ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES:
@@ -118,10 +87,16 @@ namespace Gateway
 		default:
 			Q_ASSERT(false);
 		}
+
+		m_handler.planNextPreparedRequest(m_request);
+
+		sendRequest();
 	}
 
 	void AppDataServiceClient::onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize)
 	{
+		m_getStatesReply.Clear();
+
 		bool result = m_getStatesReply.ParseFromArray(replyData, replyDataSize);
 
 		if (result == false)
@@ -131,12 +106,27 @@ namespace Gateway
 		}
 
 		m_handler.updateSignalStates(m_getStatesReply);
+	}
 
-		sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, m_gwGetStateChangesRequest);
+	void AppDataServiceClient::onGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize)
+	{
+		m_getStateChangesReply.Clear();
+
+		bool result = m_getStateChangesReply.ParseFromArray(replyData, replyDataSize);
+
+		if (result == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_handler.processStateChanges(m_getStateChangesReply);
 	}
 
 	void AppDataServiceClient::onGatewayGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize)
 	{
+		m_gwGetStateChangesReply.Clear();
+
 		bool result = m_gwGetStateChangesReply.ParseFromArray(replyData, replyDataSize);
 
 		if (result == false)
@@ -145,27 +135,46 @@ namespace Gateway
 			return;
 		}
 
-		if (m_gwGetStateChangesReply.appsignalstates_size() > 0)
-		{
-			//qDebug() << C_STR(QString("state changes %1").arg(m_gwGetStateChangesReply.appsignalstates_size()));
-		}
-
-		m_handler.processStateChanges(m_gwGetStateChangesReply);
-
-		if (m_needGetStates == true)
-		{
-			sendGetStatesRequest();
-		}
-		else
-		{
-			if (m_gwGetStateChangesReply.pendingstatescount() > 0 &&
-				(QDateTime::currentMSecsSinceEpoch() - m_lastGetStatesRequestTime <
-											static_cast<qint64>(GET_STATES_REQUEST_INTERVAL * 0.9)))
-			{
-				sendRequest(ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES, m_gwGetStateChangesRequest);
-			}
-		}
+		m_handler.processGatewayStateChanges(m_gwGetStateChangesReply);
 
 		emit sendStateChanges();
+	}
+
+	void AppDataServiceClient::sendRequest()
+	{
+		if (m_request.hasRequest() == false)
+		{
+			if (m_request.delayMs > 0)
+			{
+				m_timer->start(m_request.delayMs);
+				m_request.delayMs = 0;
+				return;
+			}
+
+			m_timer->start(TIMER_IDLE_INTERVAL);
+			return;
+		}
+
+		if (m_request.delayMs == 0)
+		{
+			if (isClearToSendRequest() == false)
+			{
+				m_timer->start(TIMER_WAIT_CLEAR_TO_SEND_INTERVAL);
+				return;
+			}
+
+			Tcp::Client::sendRequest(m_request.ID, m_request.data);
+
+//			DEBUG_LOG_MSG(log(), QString("=== REquest %1 time %2").arg(m_request.ID).arg(QDateTime::currentMSecsSinceEpoch()));
+
+			m_request.clear();
+
+			m_timer->start(TIMER_WAIT_REPLY_TIMEOUT);
+			m_isWaitReplyTimeout = true;
+			return;
+		}
+
+		m_timer->start(m_request.delayMs);
+		m_request.delayMs = 0;
 	}
 }
