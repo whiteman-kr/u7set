@@ -1,6 +1,6 @@
 # AdsGateway Protocol Client Example
 
-This is a sample command-line client for the Radiy **AdsGateway**. It demonstrates the [Radiy AppDataService Gateway Protocol](./doc/AdsGatewayProtocolSpec.md) in action, including the handshake, signal synchronization, and real-time data exchange.
+This is a sample command-line client for the Radiy **AdsGateway**. It demonstrates the [Radiy AppDataService Gateway Protocol](./AdsGatewayProtocolSpec.md) in action, including the handshake, signal synchronization, and real-time data exchange.
 
 ## Overview
 
