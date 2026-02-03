@@ -24,6 +24,7 @@ gateway_example_job:
     - "cp -r $CI_PROJECT_DIR/GatewayService/example/* $CI_PROJECT_DIR/AdsGatewayExample/"
     - "cp -r $CI_PROJECT_DIR/libs/AdsGatewayLib $CI_PROJECT_DIR/AdsGatewayExample/lib"
     - "mv $CI_PROJECT_DIR/AdsGatewayExample/CMakeListsExample.txt $CI_PROJECT_DIR/AdsGatewayExample/CMakeLists.txt"
+    - "cp $CI_PROJECT_DIR/doc/AdsGatewayProtocolSpec.md $CI_PROJECT_DIR/AdsGatewayExample/"
     - "# Build Project"
     - "mkdir -p $CI_PROJECT_DIR/build/debug"
     - "mkdir -p $CI_PROJECT_DIR/build/release"
