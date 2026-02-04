@@ -8,6 +8,8 @@
 #include "../UtilsLib/WUtils.h"
 
 #if defined(Q_OS_LINUX)
+	#include <QTimer>
+	#include <thread>
 	#include <signal.h>
 #endif
 
@@ -219,16 +221,12 @@ bool ServiceStarter::processCommonCmdLineArgs(bool& startAsRegularApp)
 }
 
 #if defined(Q_OS_LINUX)
+	std::atomic<bool> exitByPosixSignal{false};
 
-// Use sigaction (preferred over signal()).
-//
-std::atomic<bool> exitByPosixSignal{false};
-
-void PosixSignalHandler(int signum) noexcept
-{
-	(void)signum;
-	exitByPosixSignal.store(true, std::memory_order_relaxed);
-}
+	extern "C" void PosixSignalHandler([[maybe_unused]] int signum) noexcept
+	{
+		exitByPosixSignal.store(true, std::memory_order_release);
+	}
 #endif
 
 int ServiceStarter::runAsRegularApplication()
@@ -270,7 +268,16 @@ ServiceStarter::KeyReaderThread::KeyReaderThread()
 
 void ServiceStarter::KeyReaderThread::run()
 {
+#if defined(Q_OS_LINUX)
+	while (exitByPosixSignal.load(std::memory_order_acquire) == false)
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	}
+#else
 	std::cin.get();
+#endif
+	qDebug() << "KeyReaderThread: exit signal received.";
+
 	QCoreApplication::exit(0);
 }
 
