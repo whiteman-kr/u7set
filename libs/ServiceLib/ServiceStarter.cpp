@@ -1,11 +1,15 @@
 #ifndef SERVICE_LIB_DOMAIN
-#error Do not include this file in the project! Link ServiceLib instead.
+	#error Do not include this file in the project! Link ServiceLib instead.
 #endif
 
 #include <ServiceLib/Service.h>
 #include <ServiceLib/ServiceStarter.h>
 
 #include "../UtilsLib/WUtils.h"
+
+#if defined(Q_OS_LINUX)
+	#include <signal.h>
+#endif
 
 // -------------------------------------------------------------------------------------
 //
@@ -14,11 +18,7 @@
 // -------------------------------------------------------------------------------------
 
 DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger) :
-	QtService(serviceWorker.argc(),
-			  serviceWorker.argv(),
-			  &app,
-			  serviceWorker.serviceName(),
-			  logger),
+	QtService(serviceWorker.argc(), serviceWorker.argv(), &app, serviceWorker.serviceName(), logger),
 	m_app(app),
 	m_serviceWorker(serviceWorker),
 	m_logger(logger)
@@ -86,7 +86,7 @@ int ServiceStarter::exec()
 
 	LOG_MSG(m_logger, QString("Exit: %1, result = %2").arg(m_serviceWorker.appPath()).arg(result));
 
-	QThread::msleep(500);			// not delete! wait while logger flush buffers
+	QThread::msleep(500); // not delete! wait while logger flush buffers
 
 	return result;
 }
@@ -98,7 +98,7 @@ int ServiceStarter::privateRun()
 	DEBUG_LOG_MSG(m_logger, QString());
 	DEBUG_LOG_MSG(m_logger, Separator::LINE);
 	DEBUG_LOG_MSG(m_logger, QString());
-	for(const QString& str : swInfo)
+	for (const QString& str : swInfo)
 	{
 		DEBUG_LOG_MSG(m_logger, str);
 	}
@@ -218,8 +218,32 @@ bool ServiceStarter::processCommonCmdLineArgs(bool& startAsRegularApp)
 	return true;
 }
 
+#if defined(Q_OS_LINUX)
+
+// Use sigaction (preferred over signal()).
+//
+std::atomic<bool> exitByPosixSignal{false};
+
+void PosixSignalHandler(int signum) noexcept
+{
+	(void)signum;
+	exitByPosixSignal.store(true, std::memory_order_relaxed);
+}
+#endif
+
 int ServiceStarter::runAsRegularApplication()
 {
+#if defined(Q_OS_LINUX)
+	struct sigaction sa{};
+
+	sa.sa_handler = &PosixSignalHandler;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+
+	(void)::sigaction(SIGTERM, &sa, nullptr);
+	(void)::sigaction(SIGINT, &sa, nullptr);
+#endif
+
 	KeyReaderThread keyReaderThread;
 
 	keyReaderThread.start();
@@ -246,9 +270,7 @@ ServiceStarter::KeyReaderThread::KeyReaderThread()
 
 void ServiceStarter::KeyReaderThread::run()
 {
-	char ch = 0;
-
-	std::cin >> ch;
+	std::cin.get();
 	QCoreApplication::exit(0);
 }
 
@@ -257,4 +279,3 @@ void ServiceStarter::KeyReaderThread::stop()
 	terminate();
 	wait();
 }
-
