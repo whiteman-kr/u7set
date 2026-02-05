@@ -8,7 +8,6 @@
 #include <QCoreApplication>
 
 #include "../UtilsLib/WUtils.h"
-#include "WaitSignalOrKbInputThread.h"
 
 #if defined(Q_OS_LINUX)
 	#include <QTimer>
@@ -327,7 +326,7 @@ void ServiceStarter::KeyReaderThread::run()
 	{
 		if (_kbhit())
 		{
-			(void)_getch(); // любую клавишу
+			(void)_getch();
 			break;
 		}
 
