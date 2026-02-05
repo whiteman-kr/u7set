@@ -205,9 +205,14 @@ TEST_DIR="./build/libs/AdsBridge/CMakeFiles/AdsBridge.dir"
 TEST_OUTPUT_FILE="AdsBridge.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
-# GatewaySrv -- Cannot collect .gcda as process is killed and not finished normally
-TEST_DIR="./GatewayService"
+# GatewayService
+TEST_DIR="./build/libs/GatewayService/CMakeFiles/GatewayService.dir"
 TEST_OUTPUT_FILE="GatewaySrv.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+# GatewayLib
+TEST_DIR="./build/libs/GatewayLib/CMakeFiles/GatewayLib.dir"
+TEST_OUTPUT_FILE="GatewayLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # AppDataSrv -- Cannot collect .gcda as process is killed and not finished normally
@@ -236,7 +241,8 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/ClientLib.info \
     --add-tracefile $OUTPUT_DIR/TestSuiteLib.info \
     --add-tracefile $OUTPUT_DIR/AdsBridge.info \
-    --add-tracefile $OUTPUT_DIR/GatewaySrv.info
+    --add-tracefile $OUTPUT_DIR/GatewaySrv.info \
+    --add-tracefile $OUTPUT_DIR/GatewayLib.info
 
 #    --add-tracefile $OUTPUT_DIR/LicenseLib.info \
 #    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
