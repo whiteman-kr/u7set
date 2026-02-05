@@ -206,7 +206,7 @@ TEST_OUTPUT_FILE="AdsBridge.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # GatewayService
-TEST_DIR="./build/libs/GatewayService/CMakeFiles/GatewayService.dir"
+TEST_DIR="./build/GatewayService/CMakeFiles/GatewayService.dir"
 TEST_OUTPUT_FILE="GatewaySrv.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
