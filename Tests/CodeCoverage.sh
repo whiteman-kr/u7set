@@ -212,9 +212,9 @@ TEST_OUTPUT_FILE="AdsBridge.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # GatewayService
-TEST_DIR="./build/GatewayService/CMakeFiles/GatewaySrv.dir"
-TEST_OUTPUT_FILE="GatewaySrv.info"
-lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+#TEST_DIR="./build/GatewayService/CMakeFiles/GatewaySrv.dir"
+#TEST_OUTPUT_FILE="GatewaySrv.info"
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # GatewayLib
 TEST_DIR="./build/GatewayLib/CMakeFiles/GatewayLib.dir"
@@ -247,9 +247,9 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/ClientLib.info \
     --add-tracefile $OUTPUT_DIR/TestSuiteLib.info \
     --add-tracefile $OUTPUT_DIR/AdsBridge.info \
-    --add-tracefile $OUTPUT_DIR/GatewaySrv.info \
     --add-tracefile $OUTPUT_DIR/GatewayLib.info
 
+#    --add-tracefile $OUTPUT_DIR/GatewaySrv.info \ # Cannot collect .gcda -- process is killed in graceful, still no cgda files are NOT generated (((
 #    --add-tracefile $OUTPUT_DIR/LicenseLib.info \
 #    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
 #    --add-tracefile $OUTPUT_DIR/CfgSrv.info
