@@ -118,6 +118,7 @@ $CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=-AdsGateway
 sleep 5
 
 StopServices || true
+sleep 5
 popd
 
 # Run other tests, not services are required here.
@@ -213,7 +214,7 @@ TEST_OUTPUT_FILE="GatewaySrv.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
 # GatewayLib
-TEST_DIR="./build/libs/GatewayLib/CMakeFiles/GatewayLib.dir"
+TEST_DIR="./build/GatewayLib/CMakeFiles/GatewayLib.dir"
 TEST_OUTPUT_FILE="GatewayLib.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
