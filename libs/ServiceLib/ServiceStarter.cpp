@@ -14,6 +14,12 @@
 	#include <thread>
 	#include <csignal>
 	#include <signal.h>
+
+	#ifdef CODE_COVERAGE_ENABLED
+		// Forward declaration of flush api
+		void __gcov_flush();
+	#endif
+
 #endif
 
 #if defined(Q_OS_WIN)
@@ -233,6 +239,9 @@ bool ServiceStarter::processCommonCmdLineArgs(bool& startAsRegularApp)
 
 	extern "C" void PosixSignalHandler([[maybe_unused]] int signum) noexcept
 	{
+	#ifdef CODE_COVERAGE_ENABLED
+		__gcov_flush();
+	#endif
 		exitByPosixSignal = 1;
 	}
 #endif

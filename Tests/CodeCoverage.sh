@@ -21,12 +21,12 @@ function StopServices() {
 
     # Stop services for functional tests.
     #
-    pkill CfgSrv || true
-    pkill AppDataSrv || true
-    pkill TuningSrv || true
-    pkill SimulatorConsol || true  # without last e, I assume there is a limitation to 15 symbols.
-    pkill GatewaySrv || true
-    sleep 3
+    pkill -SIGINT CfgSrv || true
+    pkill -SIGINT AppDataSrv || true
+    pkill -SIGINT TuningSrv || true
+    pkill -SIGINT SimulatorConsol || true  # without last e, I assume there is a limitation to 15 symbols.
+    pkill -SIGINT GatewaySrv || true
+    sleep 6
 }
 
 # Stop if any service is running.
@@ -98,6 +98,7 @@ StopServices || true
 # ----------------------------------------------
 pushd $CI_PROJECT_DIR/bin/debug
 StopServices || true
+sleep 5
 
 ./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs_ads_adsgwtest.out 2>&1 &
 sleep 5
@@ -109,10 +110,12 @@ sleep 5
 #
 $CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
 
+# Then start ADS for other tests.
+#
 ./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads_adsgwtest.out 2>&1 &
 sleep 5
 
-# Then run other tests.
+# Run other Adsgateway tests.
 #
 $CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
 sleep 5
