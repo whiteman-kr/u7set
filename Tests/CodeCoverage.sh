@@ -115,6 +115,8 @@ sleep 5
 # Then run other tests.
 #
 $CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
+sleep 5
+
 StopServices || true
 popd
 
@@ -130,7 +132,7 @@ popd
 
 # Give some time to flush .gcda files.
 #
-sleep 2
+sleep 4
 
 # Get code coverage data.
 #
