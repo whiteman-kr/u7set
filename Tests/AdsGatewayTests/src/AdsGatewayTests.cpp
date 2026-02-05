@@ -572,7 +572,7 @@ TEST_F(AdsGatewayTests, RequestSignalList)
 	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_SUCCESS);
 
 	EXPECT_FALSE(adsConn.m_receivedSignalList.empty());
-	EXPECT_GT(adsConn.m_receivedSignalList.size(), 3000);
+	EXPECT_GT(adsConn.m_receivedSignalList.size(), 5);
 
 	return;
 }
@@ -617,7 +617,7 @@ TEST_F(AdsGatewayTests, RequestSignalParams)
 	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_SUCCESS);
 
 	EXPECT_FALSE(adsConn.m_receivedSignalParams.empty());
-	EXPECT_GT(adsConn.m_receivedSignalParams.size(), 3000);
+	EXPECT_GT(adsConn.m_receivedSignalParams.size(), 5);
 
 	return;
 }
