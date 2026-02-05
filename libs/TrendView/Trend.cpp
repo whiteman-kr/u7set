@@ -1,4 +1,5 @@
 #include <TrendView/Trend.h>
+
 #include "TrendImpl.h"
 
 namespace TrendLib
@@ -10,9 +11,9 @@ namespace TrendLib
 
 	Trend::~Trend() = default;
 
-	void Trend::draw(QImage* image, const TrendParam& drawParam) const
+	void Trend::draw(QImage* image, const TrendParam& drawParam, std::stop_token stoken) const
 	{
-		return m_impl->draw(image, drawParam);
+		return m_impl->draw(image, drawParam, stoken);
 	}
 
 	QUuid Trend::uuid() const

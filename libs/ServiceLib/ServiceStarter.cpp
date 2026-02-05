@@ -1,12 +1,26 @@
 #ifndef SERVICE_LIB_DOMAIN
-#error Do not include this file in the project! Link ServiceLib instead.
+	#error Do not include this file in the project! Link ServiceLib instead.
 #endif
 
 #include <ServiceLib/Service.h>
 #include <ServiceLib/ServiceStarter.h>
+#include <QMetaObject>
+#include <QCoreApplication>
 
 #include "../UtilsLib/WUtils.h"
 #include "WaitSignalOrKbInputThread.h"
+
+#if defined(Q_OS_LINUX)
+	#include <QTimer>
+	#include <thread>
+	#include <csignal>
+	#include <signal.h>
+#endif
+
+#if defined(Q_OS_WIN)
+	#include <windows.h>
+	#include <conio.h>
+#endif
 
 // -------------------------------------------------------------------------------------
 //
@@ -15,11 +29,7 @@
 // -------------------------------------------------------------------------------------
 
 DaemonServiceStarter::DaemonServiceStarter(QCoreApplication& app, ServiceWorker& serviceWorker, std::shared_ptr<CircularLogger> logger) :
-	QtService(serviceWorker.argc(),
-			  serviceWorker.argv(),
-			  &app,
-			  serviceWorker.serviceName(),
-			  logger),
+	QtService(serviceWorker.argc(), serviceWorker.argv(), &app, serviceWorker.serviceName(), logger),
 	m_app(app),
 	m_serviceWorker(serviceWorker),
 	m_logger(logger)
@@ -87,7 +97,7 @@ int ServiceStarter::exec()
 
 	LOG_MSG(m_logger, QString("Exit: %1, result = %2").arg(m_serviceWorker.appPath()).arg(result));
 
-	QThread::msleep(500);			// not delete! wait while logger flush buffers
+	QThread::msleep(500); // not delete! wait while logger flush buffers
 
 	return result;
 }
@@ -99,7 +109,7 @@ int ServiceStarter::privateRun()
 	DEBUG_LOG_MSG(m_logger, QString());
 	DEBUG_LOG_MSG(m_logger, Separator::LINE);
 	DEBUG_LOG_MSG(m_logger, QString());
-	for(const QString& str : swInfo)
+	for (const QString& str : swInfo)
 	{
 		DEBUG_LOG_MSG(m_logger, str);
 	}
@@ -219,15 +229,71 @@ bool ServiceStarter::processCommonCmdLineArgs(bool& startAsRegularApp)
 	return true;
 }
 
+#if defined(Q_OS_LINUX)
+	static volatile std::sig_atomic_t exitByPosixSignal = 0;
+
+	extern "C" void PosixSignalHandler([[maybe_unused]] int signum) noexcept
+	{
+		exitByPosixSignal = 1;
+	}
+#endif
+
+#if defined(Q_OS_WIN)
+	static BOOL WINAPI ConsoleCtrlHandler(DWORD type)
+	{
+		switch (type)
+		{
+		case CTRL_C_EVENT:
+		case CTRL_BREAK_EVENT:
+		case CTRL_CLOSE_EVENT:
+		case CTRL_SHUTDOWN_EVENT:
+		{
+			if (QCoreApplication::instance() != nullptr)
+			{
+				QMetaObject::invokeMethod(
+					QCoreApplication::instance(),
+					"quit",
+					Qt::QueuedConnection);
+			}
+
+			return TRUE; // мы обработали
+		}
+
+		default:
+		{
+			return FALSE; // пусть система разбирается
+		}
+		}
+	}
+#endif
+
 int ServiceStarter::runAsRegularApplication()
 {
 #if defined(Q_OS_LINUX)
-	PosixSignalHandler::install();
+	struct sigaction sa{};
+
+	sa.sa_handler = &PosixSignalHandler;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+
+	(void)::sigaction(SIGTERM, &sa, nullptr);
+	(void)::sigaction(SIGINT, &sa, nullptr);
 #endif
 
-	WaitSignalOrKbInputThread waitThread;
+#if defined(Q_OS_WIN)
 
-	waitThread.start();
+	AttachConsole(ATTACH_PARENT_PROCESS);
+
+	if (GetConsoleWindow() != nullptr)
+	{
+		SetConsoleCtrlHandler(&ConsoleCtrlHandler, TRUE);
+	}
+
+#endif
+
+	KeyReaderThread keyReaderThread;
+
+	keyReaderThread.start();
 
 	// run service
 	//
@@ -237,9 +303,47 @@ int ServiceStarter::runAsRegularApplication()
 
 	int result = m_app.exec();
 
+	keyReaderThread.stop();
+
 	service.stop();
 
-	waitThread.stop();
-
 	return result;
+}
+
+ServiceStarter::KeyReaderThread::KeyReaderThread()
+{
+}
+
+void ServiceStarter::KeyReaderThread::run()
+{
+#if defined(Q_OS_LINUX)
+	while (exitByPosixSignal == 0 &&
+		   !m_stop.load(std::memory_order_acquire))
+	{
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	}
+#else
+	while (!m_stop.load(std::memory_order_acquire))
+	{
+		if (_kbhit())
+		{
+			(void)_getch(); // любую клавишу
+			break;
+		}
+
+		QThread::msleep(200);
+	}
+#endif
+	qDebug() << "KeyReaderThread: exit signal received.";
+
+	QMetaObject::invokeMethod(
+		QCoreApplication::instance(),
+		"quit",
+		Qt::QueuedConnection);
+}
+
+void ServiceStarter::KeyReaderThread::stop()
+{
+	m_stop.store(true, std::memory_order_release);
+	wait();
 }

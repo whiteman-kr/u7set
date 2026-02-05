@@ -37,7 +37,7 @@ namespace TrendLib
 		return ok;
 	}
 
-	void TrendImpl::draw(QImage* image, const TrendParam& drawParam) const
+	void TrendImpl::draw(QImage* image, const TrendParam& drawParam, std::stop_token stoken) const
 	{
 		if (image == nullptr)
 		{
@@ -58,7 +58,7 @@ namespace TrendLib
 		//
 		QPainter painter(image);
 
-		draw(&painter, drawParam, true);
+		draw(&painter, drawParam, true, stoken);
 
 #ifdef DEBUG_TIME
 		qDebug() << "Trend draw time: " << timeMeasures.elapsed() << " ms";
@@ -66,7 +66,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendImpl::draw(QPainter* painter, const TrendParam& drawParam, bool needAdjustPainter) const
+	void TrendImpl::draw(QPainter* painter, const TrendParam& drawParam, bool needAdjustPainter, std::stop_token stoken) const
 	{
 		Q_ASSERT(painter);
 
@@ -118,7 +118,7 @@ namespace TrendLib
 			QRectF laneRect = calcLaneRect(laneIndex, drawParam);
 			Lane lane{.index = laneIndex, .laneRect = laneRect, .startTime = startTime};
 
-			drawLane(painter, lane, laneDrawParam); // Draw whole lane
+			drawLane(painter, lane, laneDrawParam, stoken); // Draw whole lane
 
 #if 0
 			// Debug - Draw bounding rect by cosmetic pen
@@ -144,7 +144,7 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendImpl::drawLane(QPainter* painter, const Lane& lane, const TrendParam& drawParam) const
+	void TrendImpl::drawLane(QPainter* painter, const Lane& lane, const TrendParam& drawParam, std::stop_token stoken) const
 	{
 		painter->setBrush(drawParam.backColor1st());
 		painter->setPen(Qt::PenStyle::NoPen);
@@ -182,12 +182,12 @@ namespace TrendLib
 		//
 		for (const TrendSignalParam& signal : discretes)
 		{
-			drawSignalTrend(painter, signal, drawParam);
+			drawSignalTrend(painter, signal, drawParam, stoken);
 		}
 
 		for (const TrendSignalParam& signal : analogs)
 		{
-			drawSignalTrend(painter, signal, drawParam);
+			drawSignalTrend(painter, signal, drawParam, stoken);
 		}
 
 		return;
@@ -1054,7 +1054,10 @@ namespace TrendLib
 		return;
 	}
 
-	void TrendImpl::drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam) const
+	void TrendImpl::drawSignalTrend(QPainter* painter,
+									const TrendSignalParam& signal,
+									const TrendParam& drawParam,
+									std::stop_token stoken) const
 	{
 		Q_ASSERT(painter);
 
@@ -1091,12 +1094,16 @@ namespace TrendLib
 		//
 		if (signal.isDiscrete() == true)
 		{
-			drawSignalTrendDiscrete(painter, signal, drawParam, signalData);
+			// signalData will release some data inside, after drawing
+			//
+			drawSignalTrendDiscrete(painter, signal, drawParam, signalData, stoken);
 		}
 
 		if (signal.isAnalog() == true)
 		{
-			drawSignalTrendAnalog(painter, signal, drawParam, signalData);
+			// signalData will release some data inside, after drawing
+			//
+			drawSignalTrendAnalog(painter, signal, drawParam, signalData, stoken);
 		}
 
 		// --
@@ -1107,7 +1114,8 @@ namespace TrendLib
 	void TrendImpl::drawSignalTrendDiscrete(QPainter* painter,
 											const TrendSignalParam& signal,
 											const TrendParam& drawParam,
-											const std::list<std::shared_ptr<OneHourData>>& signalData) const
+											std::list<std::shared_ptr<OneHourData>>& signalData,
+											std::stop_token stoken) const
 	{
 		Q_ASSERT(painter);
 		Q_ASSERT(signal.isDiscrete() == true);
@@ -1154,12 +1162,22 @@ namespace TrendLib
 
 		// int pointIndex = 0;
 
-		for (std::shared_ptr<OneHourData> hour : signalData)
+		for (std::shared_ptr<OneHourData>& hour : signalData) // REFERENCE! To actually free memory after use
 		{
+			if (stoken.stop_requested() == true)
+			{
+				break;
+			}
+
 			const std::vector<TrendStateRecord>& data = hour->data;
 
 			for (const TrendStateRecord& record : data)
 			{
+				if (stoken.stop_requested() == true)
+				{
+					break;
+				}
+
 				for (const TrendStateItem& state : record.states)
 				{
 					TimeStamp ct = state.getTime(timeType);
@@ -1252,6 +1270,8 @@ namespace TrendLib
 			{
 				break;     // end of drawing
 			}
+
+			hour.reset();  // Free memory, we don't need it anymore
 		}
 
 		if (lines.size() >= 2)
@@ -1270,7 +1290,8 @@ namespace TrendLib
 	void TrendImpl::drawSignalTrendAnalog(QPainter* painter,
 										  const TrendSignalParam& signal,
 										  const TrendParam& drawParam,
-										  const std::list<std::shared_ptr<OneHourData>>& signalData) const
+										  std::list<std::shared_ptr<OneHourData>>& signalData,
+										  std::stop_token stoken) const
 	{
 		Q_ASSERT(painter);
 		Q_ASSERT(signal.isAnalog() == true);
@@ -1327,12 +1348,22 @@ namespace TrendLib
 
 		//		int pointIndex = 0;
 
-		for (std::shared_ptr<OneHourData> hour : signalData)
+		for (std::shared_ptr<OneHourData>& hour : signalData) // REFERENCE! To actually free memory after use
 		{
+			if (stoken.stop_requested() == true)
+			{
+				break;
+			}
+
 			const std::vector<TrendStateRecord>& data = hour->data;
 
 			for (const TrendStateRecord& record : data)
 			{
+				if (stoken.stop_requested() == true)
+				{
+					break;
+				}
+
 				for (const TrendStateItem& state : record.states)
 				{
 					// Break line if it is not valid point or value has wrong value (e.g. logarithm from negative)
@@ -1437,8 +1468,10 @@ namespace TrendLib
 
 			if (lastX >= rectRight)
 			{
-				break; // end of drawing
+				break;    // end of drawing
 			}
+
+			hour.reset(); // Free memory, we don't need it anymore
 		}
 
 		if (lines.size() >= 2)
@@ -1517,8 +1550,7 @@ namespace TrendLib
 
 			// Calc ruler timestamp text width
 			//
-			const auto timeStampBoundSize =
-				calcTextSize(painter, " " + DateTimeFormat::time(true /*sec*/, true /*ms*/) + " ", drawParam);
+			const auto timeStampBoundSize = calcTextSize(painter, " " + DateTimeFormat::time(true /*sec*/, true /*ms*/) + " ", drawParam);
 
 			double rulerTextTop = laneRect.top() + (trendAreaRect.top() - laneRect.top()) / 2.0 - timeStampBoundSize.height() / 2.0;
 			double rulerTextHeight = timeStampBoundSize.height();
@@ -1604,7 +1636,7 @@ namespace TrendLib
 					// Draw distance between rulers
 					//
 					qint64 rulersDistance = ruler.timeStamp().timeStamp - prevRuler.timeStamp().timeStamp;
-	
+
 					QString distanceText = QString(" " + DateTimeToString::dateTimeDurationMs(rulersDistance) + " ");
 
 					QSizeF distanceTextBoundSize = calcTextSize(painter, distanceText, drawParam);
