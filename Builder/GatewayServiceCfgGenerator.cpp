@@ -4,6 +4,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "../GatewayLib/AdsGateway.h"
+#include <AdsGatewayLib/AdsGwProtocol.hpp>
 
 namespace Builder
 {
@@ -218,6 +219,8 @@ namespace Builder
 		return result;
 	}
 
+	namespace AGL = AdsGatewayLib;
+
 	bool GatewayServiceCfgGenerator::adsGatewayProcessing(const Gateway::GatewayShared& gw)
 	{
 		Gateway::AdsGatewayShared adsGw = std::dynamic_pointer_cast<Gateway::AdsGateway>(gw);
@@ -317,6 +320,20 @@ namespace Builder
 
 				TEST_PTR_CONTINUE(appSignal);
 
+				//
+
+				const QString& appSignalID = appSignal->appSignalID();
+
+				result &= checkStrLen(appSignalID, appSignal->appSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("appSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->customAppSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("customAppSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->caption(), AGL::STRING_LENGTH_256, QStringLiteral("caption"));
+				result &= checkStrLen(appSignalID, appSignal->equipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("equipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->lmEquipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("lmEquipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->unit(), AGL::STRING_LENGTH_128, QStringLiteral("unit"));
+				result &= checkStrLen(appSignalID, appSignal->tagsStr(), AGL::STRING_LENGTH_256, QStringLiteral("tags"));
+
+				//
+
 				appSignalIDs.append(appSignal->appSignalID());
 			}
 
@@ -324,5 +341,19 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool GatewayServiceCfgGenerator::checkStrLen(const QString& appSignalID, const QString& str, size_t len, const QString& propName)
+	{
+		if (str.toUtf8().size() > len - 1)
+		{
+			// Property %1.%2 exceed length of %3 bytes
+			//
+			m_log->errCFG3105(appSignalID, propName, len - 1);
+
+			return false;
+		}
+
+		return true;
 	}
 }

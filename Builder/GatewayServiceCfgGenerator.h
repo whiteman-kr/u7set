@@ -24,6 +24,8 @@ namespace Builder
 		bool doGatewaySpecificProcessing(const Gateway::GatewayShared& gw);
 		bool adsGatewayProcessing(const Gateway::GatewayShared& gw);
 
+		bool checkStrLen(const QString& appSignalID, const QString& str, size_t len, const QString& propName);
+
 	private:
 		Gateway::GatewaysShared m_gateways;
 		Gateway::ParserShared m_parser;

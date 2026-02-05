@@ -210,6 +210,7 @@ namespace Builder
 		void errCFG3103(int LMNumber, QString module1, QString module2);	// Property System\\LMNumber (%1) is not unique in logic modules %2 and %3.
 
 		void errCFG3104(QString tunSimIpStr, QString obj1, QString obj2, QString profile);	// TuningSimIP %1 is not unique in objects %2 and %3 (profile %4)
+		void errCFG3105(QString appSignalID, QString propName, size_t len);					// Property %1.%2 exceed length of %3 bytes
 
 		// ALP			Application Logic Parsing				4000-4999
 		//
