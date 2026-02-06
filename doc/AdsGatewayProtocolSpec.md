@@ -1,10 +1,10 @@
 ﻿# Radiy AppDataService Gateway Protocol Specification
 
-**Document Version:** 0.3  
+**Document Version:** 1.0  
 **Protocol Version:** 1.0  
-**Date:** 01/2026  
+**Date:** 06 Feb 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
-**Status:** Draft
+**Status:** Released
 
 ---
 
@@ -292,7 +292,7 @@ Total size: 16 bytes
 
 | Field | Expected value (bytes) | Notes |
 |------|-------------------------|-------|
-| `sizeof_GwAppSignalParam` | 896 | See Section 7.1 |
+| `sizeof_GwAppSignalParam` | 1208 | See Section 7.1 |
 | `sizeof_GwAppSignalState` | 48 | See Section 7.2 |
 
 **Compatibility Check (Client):**
@@ -1059,3 +1059,5 @@ namespace Radiy
 | 0.1 | 12/2025 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
 | 0.2 | 01/2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added Appendix B, Request Prerequisites |
 | 0.3 | 01/2026 | 1.0 (0x0100) | Serhiy Malokhatko | Updated paddings, Added CRC incremental update |
+| 0.4 | 02/2026 | 1.0 (0x0100) | Serhiy Malokhatko | 6.1 Updated sizeof_GwAppSignalParam expected value |
+| 1.0 | 06 Feb 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Finalized and marked as Released |
