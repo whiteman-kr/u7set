@@ -17,6 +17,11 @@
 
 class EditSchemaWidget;
 
+namespace ClientLib
+{
+	class TuningConnectionStub;
+};
+
 //
 //
 // EditSchemaView
@@ -106,6 +111,10 @@ private:
 
 	VFrame30::DiagStateController m_diagStateController;
 	VFrame30::AppSignalController m_appSignalController;
+
+	std::unique_ptr<ClientLib::TuningConnectionStub> m_tuningConnectionStub;
+	std::unique_ptr<TuningAuthorizationStub> m_tuningAuthorizationStub;
+	VFrame30::TuningController m_tuningController;
 
 private:
 	SchemaItemPtr m_newItem;

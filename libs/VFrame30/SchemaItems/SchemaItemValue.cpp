@@ -750,11 +750,11 @@ namespace VFrame30
 				auto sp = context.tuningController()->signalParamNative(appSignalId);
 				if (sp.has_value() == false)
 				{
-					signalParam = std::move(*sp);
+					ok = false;
 				}
 				else
 				{
-					ok = false;
+					signalParam = std::move(*sp);
 				}
 
 				tuningSignalState = context.tuningController()->signalState(appSignalId, nullptr);
