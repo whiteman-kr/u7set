@@ -17,6 +17,10 @@ namespace
 
 	public:
 		TrendImageCache() = default;
+		~TrendImageCache() 
+		{
+			cache.clear();
+		}
 
 		QImage* getCachedImage(const QUuid& trendUuid)
 		{
@@ -36,7 +40,11 @@ namespace
 		QCache<Key, QImage> cache{60'000'000};
 	};
 
-	thread_local TrendImageCache s_trendImageCache;
+	TrendImageCache& getTrendImageCache()
+	{
+		thread_local TrendImageCache s_trendImageCache;
+		return s_trendImageCache;
+	}
 
 	// Draw Sand Clock
 	//
@@ -495,7 +503,7 @@ namespace VFrame30
 		}
 		else
 		{
-			QImage* cachedImage = s_trendImageCache.getCachedImage(schemaItem->guid());
+			QImage* cachedImage = getTrendImageCache().getCachedImage(schemaItem->guid());
 			if (cachedImage != nullptr)
 			{
 				// m_image = *cachedImage; -- Do not set m_image, we need needRedraw to set to true (different size).
@@ -580,7 +588,7 @@ namespace VFrame30
 
 			m_trend.setUuid(schemaItem->guid());
 
-			m_drawFuture = QtConcurrent::run(
+			auto drawFuture = QtConcurrent::run(
 				[](TrendLib::Trend& trend, TrendLib::TrendParam drawParam, QSize imageSize, std::stop_token stoken) -> QImage
 				{
 					try
@@ -628,12 +636,14 @@ namespace VFrame30
 
 			if (requiredInstantDraw == true)
 			{
-				saveRenderedImage(m_drawFuture); // The result is now in m_image, so we can draw it immediately.
+				drawFuture.waitForFinished();
+				saveRenderedImage(drawFuture); // The result is now in m_image, so we can draw it immediately.
 
 				painter->drawImage(boundingRect, m_image);
 			}
 			else
 			{
+				m_drawFuture = std::move(drawFuture);
 				// Reassign future to watcher.
 				// Watcher has a connected slot to get the result -- see IndicatorTrend ctor.
 				//
@@ -653,12 +663,12 @@ namespace VFrame30
 			m_image = future.result();
 			m_drawFuture = {};
 
-			s_trendImageCache.insertCachedImage(m_trend.uuid(), new QImage{m_image});
+			getTrendImageCache().insertCachedImage(m_trend.uuid(), new QImage{m_image});
 		}
 		else
 		{
 			Q_ASSERT(future.isValid());
-			Q_ASSERT(future.isFinished());
+			Q_ASSERT(future.isValid() == true && future.isFinished() == false);
 		}
 
 		return;
