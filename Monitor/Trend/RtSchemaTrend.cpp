@@ -485,17 +485,17 @@ bool RtSchemaTrend::trendData(QUuid trendUuid,
 
 TimeStamp RtSchemaTrend::maxTimeStamp(QUuid trendUuid) const
 {
-	QMutexLocker locker(&m_mutex);
-	Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
-
 	try
 	{
+		QMutexLocker locker(&m_mutex);
+		Q_ASSERT(QThread::currentThreadId() == this->thread()->currentThreadId());
+
 		const RtSchemaTrendDataProvider& rtc = m_dataProviders.at(trendUuid);
 		return rtc.maxTimeStamp();
 	}
 	catch (std::out_of_range& /*e*/)
 	{
-		Q_ASSERT(false);
+		Q_ASSERT_X(false, "RtSchemaTrend::maxTimeStamp, trendUuid not fond: ", qPrintable(trendUuid.toString()));
 		return {};
 	}
 }
