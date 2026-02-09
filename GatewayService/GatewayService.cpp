@@ -291,7 +291,7 @@ void GatewayServiceWorker::onConfigurationReady(const QByteArray configurationXm
 	if (result != false)
 	{
 		m_acquiredSignals.clear();
-		m_gateways.fillAcquiredSignalsSet(&m_acquiredSignals);
+		m_gateways.fillAcquiredSignalsSet(&m_acquiredSignals, currentSettingsProfile->profile);
 	}
 
 	//

@@ -345,7 +345,9 @@ namespace Builder
 
 	bool GatewayServiceCfgGenerator::checkStrLen(const QString& appSignalID, const QString& str, size_t len, const QString& propName)
 	{
-		if (str.toUtf8().size() > len - 1)
+		Q_ASSERT(len > 0);
+
+		if (static_cast<size_t>(str.toUtf8().size()) > len - 1)
 		{
 			// Property %1.%2 exceed length of %3 bytes
 			//

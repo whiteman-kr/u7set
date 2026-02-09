@@ -391,12 +391,33 @@ void GrpcClient::run()				// do nothing, should be override in derived classes
 
 void GrpcClient::wakeupThread()
 {
+}
 
+bool GrpcClient::isThreadStarted() const
+{
+	return m_threadStarted.load(std::memory_order::acquire);
 }
 
 bool GrpcClient::isQuitRequested() const
 {
 	return m_quitRequested.load(std::memory_order::relaxed);
+}
+
+HostAddressPort GrpcClient::getServerAddr() const
+{
+	return m_serverAddr;
+}
+
+Tcp::ConnectionState GrpcClient::getConnectionState() const
+{
+	Tcp::ConnectionState state;
+
+	{
+		std::lock_guard lg(m_stateMutex);
+		state = m_state;
+	}
+
+	return state;
 }
 
 // -------------------------------------------------------------------------------------
@@ -446,7 +467,7 @@ void GrpcFileClient::downloadSessionParams()
 
 void GrpcFileClient::downloadFile(const QString& fileName)
 {
-	Q_ASSERT(m_threadStarted.load(std::memory_order::acquire));
+	Q_ASSERT(isThreadStarted() == true);
 
 	{
 		std::lock_guard lg(m_procMutex);
@@ -464,7 +485,7 @@ bool GrpcFileClient::waitFileReady(FileReady* fileReady)
 
 	if (!m_fileReadyCond.wait_for(ul, std::chrono::seconds(5), [this]
 							  {
-								  return m_quitRequested.load(std::memory_order::relaxed) ||
+								  return isQuitRequested() ||
 										 !m_fileReadyQueue.empty();
 							  }))
 	{
@@ -519,30 +540,13 @@ void GrpcFileClient::setEmitFileReady(bool enable)
 	m_emitFileReady.store(enable, std::memory_order::relaxed);
 }
 
-HostAddressPort GrpcFileClient::getServerAddr() const
-{
-	return m_serverAddr;
-}
-
-Tcp::ConnectionState GrpcFileClient::getConnectionState() const
-{
-	Tcp::ConnectionState state;
-
-	{
-		std::lock_guard lg(m_stateMutex);
-		state = m_state;
-	}
-
-	return state;
-}
-
 void GrpcFileClient::run()
 {
 	std::unique_lock ul(m_procMutex, std::defer_lock);
 
 	while(true)
 	{
-		if (m_quitRequested.load(std::memory_order::relaxed) == true)
+		if (isQuitRequested() == true)
 		{
 			break;
 		}
@@ -562,11 +566,10 @@ void GrpcFileClient::run()
 
 		m_procCond.wait(ul, [this]() -> bool
 						   {
-								return m_quitRequested.load(std::memory_order::relaxed) ||
-										!m_downloadFileQueue.empty();
+								return isQuitRequested() ||	!m_downloadFileQueue.empty();
 						   });
 
-		if (m_quitRequested.load(std::memory_order::relaxed) == true)
+		if (isQuitRequested() == true)
 		{
 			ul.unlock();
 			break;

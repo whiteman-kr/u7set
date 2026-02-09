@@ -118,7 +118,10 @@ public:
 	virtual void run();
 	virtual void wakeupThread();
 
+	bool isThreadStarted() const;
 	bool isQuitRequested() const;
+	HostAddressPort getServerAddr() const;
+	Tcp::ConnectionState getConnectionState() const;
 
 signals:
 	void signal_unknownClientID(QString errMsg);
@@ -126,23 +129,24 @@ signals:
 	void signal_setConnection();
 	void signal_noConnection();
 
-private:
-
-private:
+protected:
+	const SoftwareInfo m_localSwInfo;
 	std::vector<HostAddressPort> m_serverAddress;
 	QString m_clientDescription;
 
 	int m_srvAddrIndex = -1;			// !
 
-	std::thread m_thread;
-	std::atomic_bool m_threadStarted {false};
-	std::atomic_bool m_quitRequested {false};
 
 	std::string m_authToken;
 	HostAddressPort m_serverAddr;
 
 	mutable std::mutex m_stateMutex;
 	Tcp::ConnectionState m_state;
+
+private:
+	std::thread m_thread;
+	std::atomic_bool m_threadStarted {false};
+	std::atomic_bool m_quitRequested {false};
 
 public:
 /*	class ActiveCtxGuard
