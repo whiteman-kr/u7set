@@ -1,9 +1,43 @@
 #include "GatewayHandler.h"
+#include "AppDataServiceClient.h"
 #include "IvsImpulseGatewayHandler.h"
 #include "ModbusSlaveGatewayHandler.h"
+#include "AdsGatewayHandler.h"
 
 namespace Gateway
 {
+	// ---------------------------------------------------------------------------------
+	//
+	// Gateway::PreparedRequest struct implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	void PreparedRequest::clear()
+	{
+		ID = 0;
+		data.clear();
+		delayMs = 0;
+	}
+
+	void PreparedRequest::setRequest(const PreparedRequest& rq, int delay)
+	{
+		ID = rq.ID;
+		data = rq.data;
+		delayMs = delay;
+	}
+
+	void PreparedRequest::setDelay(int delay)
+	{
+		ID = 0;
+		data.clear();
+		delayMs = delay;
+	}
+
+	bool PreparedRequest::hasRequest() const
+	{
+		return (ID != 0);
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	// Gateway::Handler class implementation
@@ -13,10 +47,12 @@ namespace Gateway
 	Handler::Handler(const QString& gatewayID,
 					 const SoftwareInfo& swInfo,
 					 const GatewayServiceSettings& settings,
+					 const AppSignals& appSignals,
 					 CircularLoggerShared log, bool logGatewayPackets) :
 		m_gatewayID(gatewayID),
 		m_swInfo(swInfo),
 		m_settings(settings),
+		m_appSignals(appSignals),
 		m_log(log),
 		m_logGatewayPackets(logGatewayPackets)
 	{
@@ -32,14 +68,69 @@ namespace Gateway
 
 	Handler::~Handler()
 	{
-		Q_ASSERT(m_shutwownCalled);
+		Q_ASSERT(m_shutdownCalled);
 	}
 
 	void Handler::shutdown()
 	{
 		closeGwLog();
 
-		m_shutwownCalled = true;
+		m_shutdownCalled = true;
+	}
+
+	void Handler::runAppDataSrvClient()
+	{
+		std::lock_guard lg(m_appDataSrvClientMutex);
+
+		m_appDataSrvClientThread =
+			std::make_unique<AppDataServiceClientThread>( m_swInfo,
+														 m_settings.appDataService1.address,
+														 m_settings.appDataService2.address,
+														 QString("GatewayService %1").arg(m_swInfo.equipmentID()),
+														 *this, m_log);
+		m_appDataSrvClientThread->start();
+	}
+
+	void Handler::stopAppDataSrvClient()
+	{
+		std::lock_guard lg(m_appDataSrvClientMutex);
+
+		if (m_appDataSrvClientThread != nullptr)
+		{
+			m_appDataSrvClientThread->quitAndWait();
+			m_appDataSrvClientThread.reset();
+		}
+	}
+
+	AppDataServiceClient* Handler::appDataServiceClient()
+	{
+		std::lock_guard lg(m_appDataSrvClientMutex);
+
+		if (m_appDataSrvClientThread == nullptr)
+		{
+			return nullptr;
+		}
+
+		return m_appDataSrvClientThread->client();
+	}
+
+	void Handler::onAppDataSrvConnected()
+	{
+	}
+
+	void Handler::onAppDataSrvDisconnected()
+	{
+	}
+
+	void Handler::planNextPreparedRequest(PreparedRequest& rqPlan)
+	{
+		Q_UNUSED(rqPlan);
+	}
+
+	void Handler::onAppDataRequestSent(quint32 requestID, qint64 nowMs)
+	{
+		Q_UNUSED(requestID);
+		Q_UNUSED(nowMs);
 	}
 
 	void Handler::getRequiredSignalsHashes(std::set<Hash>* hashes) const
@@ -57,9 +148,14 @@ namespace Gateway
 		Q_UNUSED(getStatesReply);
 	}
 
-	void Handler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
+	void Handler::processStateChanges(const Network::GetAppSignalStateChangesReply &getStateChangesReply)
 	{
 		Q_UNUSED(getStateChangesReply);
+	}
+
+	void Handler::processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getGatewayStateChangesReply)
+	{
+		Q_UNUSED(getGatewayStateChangesReply);
 	}
 
 	CircularLoggerShared Handler::log()
@@ -119,6 +215,10 @@ namespace Gateway
 		logMsg.append(msg);
 
 		writeToGwLog(logMsg, recType);
+	}
+
+	void Handler::prepareRequests()
+	{
 	}
 
 	void Handler::writeToGwLog(const QString& msg, CircularLogger::RecordType recType)
@@ -251,6 +351,25 @@ namespace Gateway
 					m_handlers.push_back(modbusHandler);
 				}
 				break;
+
+			case E::GatewayType::AdsGateway:
+			{
+				AdsGatewayShared adsGateway = std::dynamic_pointer_cast<AdsGateway>(gw);
+
+				if (adsGateway == nullptr)
+				{
+					result = false;
+					break;
+				}
+
+				AdsGatewayHandlerShared adsGatewayHandler =
+					std::make_shared<AdsGatewayHandler>(swInfo, settings, adsGateway, appSignals,
+														 log, enableLogging);
+
+				m_handlers.push_back(adsGatewayHandler);
+			}
+			break;
+
 
 			default:
 				Q_ASSERT(false);

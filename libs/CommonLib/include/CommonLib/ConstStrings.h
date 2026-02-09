@@ -476,6 +476,8 @@ namespace XmlAttribute
 	inline const QString MODULE_CAPTION("ModuleCaption");
 
 	inline const QString CLIENT_REQUEST_IP("ClientRequestIP");
+	inline const QString CLIENT_REQUEST_IP1("ClientRequestIP1");
+	inline const QString CLIENT_REQUEST_IP2("ClientRequestIP2");
 	inline const QString CLIENT_REQUEST_NETMASK("ClientRequestNetmask");
 	inline const QString RT_TRENDS_REQUEST_IP("RtTrendsRequestIP");
 	inline const QString SECURITY_LEVEL("SecurityLevel");

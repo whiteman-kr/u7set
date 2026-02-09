@@ -2200,8 +2200,14 @@ void FileTreeView::checkInFiles(QModelIndexList indexList)
 	// CheckIn changes to the database
 	//
 	std::vector<DbFileInfo> checkedInFiles;
+	bool checkInTree = QSettings{}.value("FileTreeView::checkInFiles/checkInTree", false).toBool();
 
-	CheckInDialog::checkIn(files, false, &checkedInFiles, db(), this);
+	bool result = CheckInDialog::checkIn(files, &checkedInFiles, checkInTree, {}, db(), this, &checkInTree);
+	
+	if (result == true)
+	{
+		QSettings{}.setValue("FileTreeView::checkInFiles/checkInTree", checkInTree);
+	}
 
 	// Update files state
 	//

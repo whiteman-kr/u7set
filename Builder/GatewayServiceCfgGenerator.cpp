@@ -1,8 +1,10 @@
 #include "GatewayServiceCfgGenerator.h"
+#include "AppDataServiceCfgGenerator.h"
 #include "SoftwareSettingsGetter.h"
-#include "GatewayDescriptionParser.h"
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../UtilsLib/XmlHelper.h"
+#include "../GatewayLib/AdsGateway.h"
+#include <AdsGatewayLib/AdsGwProtocol.hpp>
 
 namespace Builder
 {
@@ -33,17 +35,22 @@ namespace Builder
 
 	bool GatewayServiceCfgGenerator::generateConfigurationStep1()
 	{
+		return true;
+	}
+
+	bool GatewayServiceCfgGenerator::generateConfigurationStep2()
+	{
 		if (m_software == nullptr ||
 			m_software->softwareType() != E::SoftwareType::GatewayService ||
 			m_equipment == nullptr ||
 			m_cfgXml == nullptr ||
 			m_buildResultWriter == nullptr)
 		{
-			assert(m_software);
-			assert(m_software->softwareType() == E::SoftwareType::GatewayService);
-			assert(m_equipment);
-			assert(m_cfgXml);
-			assert(m_buildResultWriter);
+			Q_ASSERT(m_software);
+			Q_ASSERT(m_software->softwareType() == E::SoftwareType::GatewayService);
+			Q_ASSERT(m_equipment);
+			Q_ASSERT(m_cfgXml);
+			Q_ASSERT(m_buildResultWriter);
 			return false;
 		}
 
@@ -61,30 +68,32 @@ namespace Builder
 
 		LOG_MESSAGE(log, QString("Parsing of %1 gateway description started...").arg(equipmentID()));
 
-		Gateway::GatewaysShared gateways = std::make_shared<Gateway::Gateways>();
+		m_gateways = std::make_shared<Gateway::Gateways>();
 
-		Gateway::Parser parser(m_context, gateways);
+		m_parser = std::make_shared<Gateway::Parser>(m_context, m_gateways);
 
-		result = parser.parse(settings->gatewayDescription);
+		result = m_parser->parse(settings->gatewayDescription);
 
-		int errCount = parser.errorCount();
-		int wrnCount = parser.warningCount();
+		int errCount = m_parser->errorCount();
+		int wrnCount = m_parser->warningCount();
 
 		BuildFile* buildFile = nullptr;
 
 		if (errCount == 0)
 		{
-			for(const Gateway::GatewayShared& gw : *gateways)
+			for(const Gateway::GatewayShared& gw : *m_gateways)
 			{
 				TEST_PTR_CONTINUE(gw);
+
+				result &= doGatewaySpecificProcessing(gw);
 
 				const auto& files = gw->files();
 
 				for(const Gateway::File& file : files)
 				{
 					buildFile = m_buildResultWriter->addFile(
-											softwareCfgSubdir() + Separator::DIR + file.gatewayID(),
-											file.fileName(), file.fileData());
+						softwareCfgSubdir() + Separator::DIR + file.gatewayID(),
+						file.fileName(), file.fileData());
 
 					if (buildFile == nullptr)
 					{
@@ -97,14 +106,14 @@ namespace Builder
 			QString xmlStr;
 			XmlWriteHelper xml(&xmlStr);
 
-			gateways->writeToXml(xml);
+			m_gateways->writeToXml(xml);
 
 			buildFile = m_buildResultWriter->addFile(
-									softwareCfgSubdir(),
-									File::GATEWAY_DESCRIPTION_XML,
-									CfgFileId::GATEWAY_DESCRIPTION,
-									QString(),
-									xmlStr);
+				softwareCfgSubdir(),
+				File::GATEWAY_DESCRIPTION_XML,
+				CfgFileId::GATEWAY_DESCRIPTION,
+				QString(),
+				xmlStr);
 
 			if (buildFile == nullptr)
 			{
@@ -118,8 +127,8 @@ namespace Builder
 		}
 
 		buildFile = m_buildResultWriter->addFile(softwareCfgSubdir(),
-												File::GATEWAY_DESCRIPTION_TXT,
-												settings->gatewayDescription);
+												 File::GATEWAY_DESCRIPTION_TXT,
+												 settings->gatewayDescription);
 		if (buildFile == nullptr)
 		{
 			errCount++;
@@ -143,7 +152,7 @@ namespace Builder
 		}
 
 		QString resultStr = QString("parsing of %1 gateway description finished with %2 errors, %3 warnings").
-								arg(equipmentID()).arg(errCount).arg(wrnCount);
+							arg(equipmentID()).arg(errCount).arg(wrnCount);
 		if (errCount > 0)
 		{
 			m_log->errCFG3051(resultStr);
@@ -186,6 +195,164 @@ namespace Builder
 															getRunScriptName(profile, os),
 															content);
 		TEST_PTR_RETURN_FALSE(buildFile);
+
+		return true;
+	}
+
+	bool GatewayServiceCfgGenerator::doGatewaySpecificProcessing(const Gateway::GatewayShared& gw)
+	{
+		bool result = true;
+
+		switch(gw->gatewayType())
+		{
+		case Gateway::E::GatewayType::IVS_Impulse:
+		case Gateway::E::GatewayType::ModbusSlave:
+			break;
+
+		case Gateway::E::GatewayType::AdsGateway:
+			result &= adsGatewayProcessing(gw);
+			break;
+
+		default: ;
+		}
+
+		return result;
+	}
+
+	namespace AGL = AdsGatewayLib;
+
+	bool GatewayServiceCfgGenerator::adsGatewayProcessing(const Gateway::GatewayShared& gw)
+	{
+		Gateway::AdsGatewayShared adsGw = std::dynamic_pointer_cast<Gateway::AdsGateway>(gw);
+
+		if (adsGw == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		bool result = true;
+
+		QStringList profiles = m_settingsSet.getSettingsProfiles();
+
+		for(const QString& profile : profiles)
+		{
+			std::shared_ptr<const GatewayServiceSettings> settings  =
+						m_settingsSet.getSettingsProfile<GatewayServiceSettings>(profile);
+
+			TEST_PTR_CONTINUE(settings);
+
+			QStringList controllerIDs;
+
+			if (settings->appDataService1.equipmentId.isEmpty() == false)
+			{
+				controllerIDs.append(settings->appDataService1.equipmentId);
+			}
+
+			if (settings->appDataService2.equipmentId.isEmpty() == false)
+			{
+				controllerIDs.append(settings->appDataService2.equipmentId);
+			}
+
+			std::set<Hash> acquiredSignals;
+
+			for(const QString& controllerID : controllerIDs)
+			{
+				std::shared_ptr<Hardware::DeviceObject> device = m_equipment->deviceObject(controllerID);
+
+				if (device == nullptr ||
+					device->deviceType() != Hardware::DeviceType::Controller)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					break;
+				}
+
+				device = device->parent();
+
+				if (device == nullptr ||
+					device->deviceType() != Hardware::DeviceType::Software ||
+					device->toSoftware() == nullptr ||
+					device->toSoftware()->softwareType() != E::SoftwareType::AppDataService)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					break;
+				}
+
+				QString appDataSrvID = device->equipmentIdTemplate();
+
+				auto it = m_context->m_swCfgGens.find(appDataSrvID);
+
+				if (it == m_context->m_swCfgGens.end())
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					break;
+				}
+
+				std::shared_ptr<AppDataServiceCfgGenerator> adsCfgGen =
+						std::dynamic_pointer_cast<AppDataServiceCfgGenerator>(it->second);
+
+				if (adsCfgGen == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
+					break;
+				}
+
+				const std::set<Hash> appDataSrvAcquiredSignals = adsCfgGen->acquiredAppSignals();
+
+				acquiredSignals.insert(appDataSrvAcquiredSignals.begin(),
+									   appDataSrvAcquiredSignals.end());
+			}
+
+			if (result == false)
+			{
+				break;
+			}
+
+			QStringList appSignalIDs;
+
+			for(Hash hash : acquiredSignals)
+			{
+				const AppSignal* appSignal = m_signalSet->getSignalByHash(hash);
+
+				TEST_PTR_CONTINUE(appSignal);
+
+				//
+
+				const QString& appSignalID = appSignal->appSignalID();
+
+				result &= checkStrLen(appSignalID, appSignal->appSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("appSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->customAppSignalID(), AGL::STRING_LENGTH_128, QStringLiteral("customAppSignalID"));
+				result &= checkStrLen(appSignalID, appSignal->caption(), AGL::STRING_LENGTH_256, QStringLiteral("caption"));
+				result &= checkStrLen(appSignalID, appSignal->equipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("equipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->lmEquipmentID(), AGL::STRING_LENGTH_128, QStringLiteral("lmEquipmentID"));
+				result &= checkStrLen(appSignalID, appSignal->unit(), AGL::STRING_LENGTH_128, QStringLiteral("unit"));
+				result &= checkStrLen(appSignalID, appSignal->tagsStr(), AGL::STRING_LENGTH_256, QStringLiteral("tags"));
+
+				//
+
+				appSignalIDs.append(appSignal->appSignalID());
+			}
+
+			adsGw->appendSignalList(profile, appSignalIDs);
+		}
+
+		return result;
+	}
+
+	bool GatewayServiceCfgGenerator::checkStrLen(const QString& appSignalID, const QString& str, size_t len, const QString& propName)
+	{
+		if (str.toUtf8().size() > len - 1)
+		{
+			// Property %1.%2 exceed length of %3 bytes
+			//
+			m_log->errCFG3105(appSignalID, propName, len - 1);
+
+			return false;
+		}
 
 		return true;
 	}

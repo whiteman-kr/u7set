@@ -26,10 +26,10 @@ namespace TrendLib
 	public:
 		// Draw methods
 		//
-		void draw(QImage* image, const TrendParam& drawParam) const;
-		void draw(QPainter* painter, const TrendParam& drawParam, bool needAdjustPainter) const;
+		void draw(QImage* image, const TrendParam& drawParam, std::stop_token stoken = std::stop_token{}) const;
+		void draw(QPainter* painter, const TrendParam& drawParam, bool needAdjustPainter, std::stop_token stoken = std::stop_token{}) const;
 
-		void drawLane(QPainter* painter, const Lane& lane, const TrendParam& drawParam) const;
+		void drawLane(QPainter* painter, const Lane& lane, const TrendParam& drawParam, std::stop_token stoken) const;
 
 		void drawBackground(QPainter* painter,
 							const QRectF& insideRect,
@@ -61,15 +61,17 @@ namespace TrendLib
 												 const TrendParam& drawParam,
 												 const std::vector<TrendSignalParam>& analogs) const;
 
-		void drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam) const;
+		void drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, std::stop_token stoken) const;
 		void drawSignalTrendDiscrete(QPainter* painter,
 									 const TrendSignalParam& signal,
 									 const TrendParam& drawParam,
-									 const std::list<std::shared_ptr<OneHourData>>& signalData) const;
+									 std::list<std::shared_ptr<OneHourData>>& signalData,
+									 std::stop_token stoken) const;
 		void drawSignalTrendAnalog(QPainter* painter,
 								   const TrendSignalParam& signal,
 								   const TrendParam& drawParam,
-								   const std::list<std::shared_ptr<OneHourData>>& signalData) const;
+								   std::list<std::shared_ptr<OneHourData>>& signalData,
+								   std::stop_token stoken) const;
 
 		void drawRulers(QPainter* painter, TrendParam drawParam) const;
 		TrendStateItem rulerSignalState(const TrendRuler& ruler, const TrendSignalParam& signal, E::TimeType timeType) const;

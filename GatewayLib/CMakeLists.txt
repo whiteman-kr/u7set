@@ -11,19 +11,8 @@ find_package(Qt6 REQUIRED COMPONENTS Network)
 set(TARGET GatewayLib)
 
 qt_add_library(${TARGET} STATIC
-	# ISignalManager.h
-	# IAppSignalManager.h
-	# ITuningSignalManager.h
-	# PropertyNames.cpp
-	# PropertyNames.h
-	# RecentUsed.cpp
-	# RecentUsed.h
-	# SimpleAppSignalState.cpp
-	# SimpleAppSignalState.h
-	# TuningSignalState.cpp
-	# TuningSignalState.h
-	# TuningValue.cpp
-	# TuningValue.h
+	AdsGateway.cpp
+	AdsGateway.h
 	GatewayDescription.cpp
 	GatewayDescription.h
 	GatewayParserLog.cpp
@@ -49,7 +38,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Network)
-target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib SimulatorLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib SimulatorLib AdsGatewayLib)
 
 target_compile_definitions(${TARGET} PRIVATE GATEWAY_LIB_DOMAIN)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

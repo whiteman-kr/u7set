@@ -98,42 +98,42 @@ QVariant TuningSourceStateModel::data(const QModelIndex& index, int role) const
 		case 0:	return (st.isreply() ? Separator::YES : Separator::NO);
 		case 1: return formatTime_DD_MM_YYYY(st.lmtime());
 		case 2:	return Separator::QUESTIONS;
-		case 3: return TO_INT64(st.requestcount());
-		case 4: return TO_INT64(st.replycount());
+		case 3: return TO_QVARIANT_QINT64(st.requestcount());
+		case 4: return TO_QINT64(st.replycount());
 		case 5: return (st.controlisactive() ?  Separator::YES : Separator::NO);
 		case 6: return (st.setsor() ?  Separator::YES : Separator::NO);
 		case 7: return (st.writingdisabled() ?  Separator::YES : Separator::NO);
 		case 8: return (st.hasunappliedparams() ?  Separator::YES : Separator::NO);
-		case 9: return TO_INT64(st.fotipflagboundschecksuccess());
-		case 10: return TO_INT64(st.fotipflagwritesuccess());
-		case 11: return TO_INT64(st.fotipflagapplysuccess());
-		case 12: return TO_INT64(st.erruntimelyreplay());
-		case 13: return TO_INT64(st.errsent());
-		case 14: return TO_INT64(st.errpartialsent());
-		case 15: return TO_INT64(st.errreplysize());
-		case 16: return TO_INT64(st.errnoreply());
-		case 17: return TO_INT64(st.errtuningframeupdate());
-		case 18: return TO_INT64(st.errrupprotocolversion());
-		case 19: return TO_INT64(st.errrupframesize());
-		case 20: return TO_INT64(st.errrupnontuningdata());
-		case 21: return TO_INT64(st.errrupmoduletype());
-		case 22: return TO_INT64(st.errrupframesquantity());
-		case 23: return TO_INT64(st.errrupframenumber());
-		case 24: return TO_INT64(st.errrupcrc());
+		case 9: return TO_QVARIANT_QINT64(st.fotipflagboundschecksuccess());
+		case 10: return TO_QVARIANT_QINT64(st.fotipflagwritesuccess());
+		case 11: return TO_QVARIANT_QINT64(st.fotipflagapplysuccess());
+		case 12: return TO_QVARIANT_QINT64(st.erruntimelyreplay());
+		case 13: return TO_QVARIANT_QINT64(st.errsent());
+		case 14: return TO_QVARIANT_QINT64(st.errpartialsent());
+		case 15: return TO_QVARIANT_QINT64(st.errreplysize());
+		case 16: return TO_QVARIANT_QINT64(st.errnoreply());
+		case 17: return TO_QVARIANT_QINT64(st.errtuningframeupdate());
+		case 18: return TO_QVARIANT_QINT64(st.errrupprotocolversion());
+		case 19: return TO_QVARIANT_QINT64(st.errrupframesize());
+		case 20: return TO_QVARIANT_QINT64(st.errrupnontuningdata());
+		case 21: return TO_QVARIANT_QINT64(st.errrupmoduletype());
+		case 22: return TO_QVARIANT_QINT64(st.errrupframesquantity());
+		case 23: return TO_QVARIANT_QINT64(st.errrupframenumber());
+		case 24: return TO_QVARIANT_QINT64(st.errrupcrc());
 		case 25: return Separator::QUESTIONS;		// err data uid
 		case 26: return Separator::QUESTIONS;		// err duplicate plant time
 		case 27: return Separator::QUESTIONS;		// err non-monotonic plant time
 		case 28: return Separator::QUESTIONS;		// err plant time format
-		case 29: return TO_INT64(st.errfotipprotocolversion());
-		case 30: return TO_INT64(st.errfotipuniqueid());
-		case 31: return TO_INT64(st.errfotiplmnumber());
-		case 32: return TO_INT64(st.errfotipsubsystemcode());
-		case 33: return TO_INT64(st.errfotipoperationcode());
-		case 34: return TO_INT64(st.errfotipframesize());
-		case 35: return TO_INT64(st.errfotipromsize());
-		case 36: return TO_INT64(st.errfotipromframesize());
-		case 37: return TO_INT64(st.erranaloglowboundcheck());
-		case 38: return TO_INT64(st.erranaloghighboundcheck());
+		case 29: return TO_QVARIANT_QINT64(st.errfotipprotocolversion());
+		case 30: return TO_QVARIANT_QINT64(st.errfotipuniqueid());
+		case 31: return TO_QVARIANT_QINT64(st.errfotiplmnumber());
+		case 32: return TO_QVARIANT_QINT64(st.errfotipsubsystemcode());
+		case 33: return TO_QVARIANT_QINT64(st.errfotipoperationcode());
+		case 34: return TO_QVARIANT_QINT64(st.errfotipframesize());
+		case 35: return TO_QVARIANT_QINT64(st.errfotipromsize());
+		case 36: return TO_QVARIANT_QINT64(st.errfotipromframesize());
+		case 37: return TO_QVARIANT_QINT64(st.erranaloglowboundcheck());
+		case 38: return TO_QVARIANT_QINT64(st.erranaloghighboundcheck());
 		}
 	}
 

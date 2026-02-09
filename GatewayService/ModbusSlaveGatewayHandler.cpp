@@ -71,12 +71,8 @@ namespace Gateway
 										 const AppSignals& appSignals,
 										 CircularLoggerShared log,
 										 bool logGatewayPackets) :
-		Handler(gateway->gatewayID(), swInfo, settings, log, logGatewayPackets),
-		m_softwareInfo(swInfo),
-		m_appDataService1(settings.appDataService1.address),
-		m_appDataService2(settings.appDataService2.address),
-		m_gateway(gateway),
-		m_appSignals(appSignals)
+		Handler(gateway->gatewayID(), swInfo, settings, appSignals, log, logGatewayPackets),
+		m_gateway(gateway)
 	{
 	}
 
@@ -88,13 +84,9 @@ namespace Gateway
 	{
 		init();
 
-		m_appDataServiceClientThread =
-				new AppDataServiceClientThread( m_softwareInfo,
-												m_appDataService1,
-												m_appDataService2,
-												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-												this, m_log);
-		m_appDataServiceClientThread->start();
+		prepareRequests();
+
+		runAppDataSrvClient();
 
 		switch(modbusMode())
 		{
@@ -164,30 +156,58 @@ namespace Gateway
 			m_tcpSlaveThread2 = nullptr;
 		}
 
-		if (m_appDataServiceClientThread != nullptr)
-		{
-			m_appDataServiceClientThread->quitAndWait();
-			delete m_appDataServiceClientThread;
-			m_appDataServiceClientThread = nullptr;
-		}
+		stopAppDataSrvClient();
 
 		Handler::shutdown();
 	}
 
-	void ModbusSlaveHandler::getRequiredSignalsHashes(std::set<Hash>* hashes) const
+	void ModbusSlaveHandler::onAppDataSrvConnected()
 	{
-		TEST_PTR_RETURN(hashes);
-
-		hashes->clear();
-		m_gateway->getRequiredSignalsHashes(hashes);
 	}
 
-	void ModbusSlaveHandler::getEventSignalsHashes(std::set<Hash>* hashes) const
+	void ModbusSlaveHandler::onAppDataSrvDisconnected()
 	{
-		TEST_PTR_RETURN(hashes);
+	}
 
-		hashes->clear();
-		m_gateway->getEventSignalsHashes(hashes);
+	void ModbusSlaveHandler::planNextPreparedRequest(PreparedRequest& request)
+	{
+		request.clear();
+
+		if (m_requests.empty())
+		{
+			return;
+		}
+
+		if (m_requestIndex == 0)
+		{
+			m_changesRequestCount = 0;
+		}
+
+		if (m_requestIndex < m_requests.size())
+		{
+			request.setRequest(m_requests[m_requestIndex], 0);
+			m_requestIndex++;
+			return;
+		}
+
+		if (m_hasPendingChanges && m_changesRequestIndex.has_value())
+		{
+			if (m_changesRequestCount < 10)
+			{
+				// retry ADS_GET_APP_SIGNAL_STATE_CHANGES
+				//
+				request.setRequest(m_requests[m_changesRequestIndex.value()], 0);
+				m_changesRequestCount++;
+				return;
+			}
+
+			m_changesRequestCount = 0;
+			request.setDelay(10);
+			return;
+		}
+
+		m_requestIndex = 0;
+		request.setDelay(200);
 	}
 
 	void ModbusSlaveHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
@@ -218,7 +238,7 @@ namespace Gateway
 		updateAllRegisters();
 	}
 
-	void ModbusSlaveHandler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
+	void ModbusSlaveHandler::processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)
 	{
 		int statesCount = getStateChangesReply.appsignalstates_size();
 
@@ -226,7 +246,7 @@ namespace Gateway
 
 		for(int i = 0; i < statesCount; i++)
 		{
-			const Proto::AppSignalState& state = getStateChangesReply.appsignalstates(i).curstate();
+			const Proto::AppSignalState& state = getStateChangesReply.appsignalstates(i);
 
 			Hash hash = state.hash();
 
@@ -475,6 +495,83 @@ namespace Gateway
 		updateAllRegisters();		// to init registers values
 
 		return true;
+	}
+
+	void ModbusSlaveHandler::prepareRequests()
+	{
+		m_requests.clear();
+		m_requestIndex = 0;
+		m_changesRequestCount = 0;
+		m_hasPendingChanges = false;
+		m_changesRequestIndex.reset();
+
+		//
+
+		size_t signalsCount = m_appSignals.count();
+		size_t partCount = signalsCount / ADS_GET_APP_SIGNAL_STATE_MAX +
+						   ((signalsCount % ADS_GET_APP_SIGNAL_STATE_MAX) ? 1 : 0);
+
+		m_requests.reserve(partCount + 1);
+
+		{
+			Network::GetAppSignalStateRequest rq;
+
+			for(size_t p = 0; p < partCount; p++)
+			{
+				rq.Clear();
+
+				for(size_t i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
+				{
+					size_t index = p * ADS_GET_APP_SIGNAL_STATE_MAX + i;
+
+					if (index >= signalsCount)
+					{
+						break;
+					}
+
+					const AppSignal* appSignal = m_appSignals.getSignalByIndex(index);
+
+					TEST_PTR_CONTINUE(appSignal);
+
+					Hash hash = appSignal->hash();
+
+					rq.add_signalhashes(hash);
+				}
+
+				size_t requestSize = rq.ByteSizeLong();
+
+				if (requestSize > Tcp::TCP_MAX_DATA_SIZE)
+				{
+					Q_ASSERT(false);
+					continue;
+				}
+
+				PreparedRequest& stateRequest = m_requests.emplace_back(PreparedRequest{});
+
+				stateRequest.ID = ADS_GET_APP_SIGNAL_STATE;
+
+				stateRequest.data.resize(requestSize);
+
+				rq.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(stateRequest.data.data()));
+			}
+		}
+
+		// last request in m_requests is ADS_GET_APP_SIGNAL_STATE_CHANGES
+		//
+		{
+			Network::GetAppSignalStateChangesRequest rq;
+
+			size_t requestSize = rq.ByteSizeLong();
+
+			PreparedRequest& stateChangesRequest = m_requests.emplace_back(PreparedRequest{});
+			m_changesRequestIndex = m_requests.size() - 1;
+
+			stateChangesRequest.ID = ADS_GET_APP_SIGNAL_STATE_CHANGES;
+
+			stateChangesRequest.data.resize(requestSize);
+
+			rq.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(stateChangesRequest.data.data()));
+		}
 	}
 
 	HostAddressPort ModbusSlaveHandler::listeningIP1() const

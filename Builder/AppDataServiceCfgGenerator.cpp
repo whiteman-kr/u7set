@@ -170,6 +170,11 @@ namespace Builder
 		return result;
 	}
 
+	const std::set<Hash>& AppDataServiceCfgGenerator::acquiredAppSignals() const
+	{
+		return m_acquiredAppSignals;
+	}
+
 	bool AppDataServiceCfgGenerator::writeAppDataSourcesXml()
 	{
 		bool result = true;

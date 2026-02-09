@@ -12,7 +12,7 @@ variables:
   #
   QT_VERSION: "6.8.1"
   COMPILER_TESTS_PROJECT_NAME: "compiler_tests_v436"
-  SIMULATOR_PROJECT_NAME: "test_simulator_v435"
+  SIMULATOR_PROJECT_NAME: "test_simulator_v439"
   PGPASSWORD: "P2ssw0rd"
 
   CTEST_OUTPUT_ON_FAILURE: "1"
@@ -30,9 +30,14 @@ before_script:
 #  - echo before_script
   - cd
   - dir
-  
 #after_script:
 #  - echo after_script
+
+include:
+  - local: '.gitlab-job-gateway-example.yml'
+#  - local: '.gitlab-job-gateway-example.yml' ADD as other includes if needed
+#  - local: '.gitlab-job-gateway-example.yml'
+
 project_backup_job:
   stage: prepare
   variables:
@@ -142,6 +147,8 @@ windows_build_job:
 # Copy documents
     - "mkdir \"$Env:BIN_OUT_DIR/docs\""
     - "copy $Env:CI_PROJECT_DIR\\Metrology\\docs\\Metrology_User_Manual.pdf $Env:BIN_OUT_DIR\\docs\\"
+    - "copy $Env:CI_PROJECT_DIR\\doc\\AdsGatewayProtocolSpec.md $Env:BIN_OUT_DIR\\docs\\"
+    - "copy $Env:CI_PROJECT_DIR\\doc\\VduScriprtApi.md $Env:BIN_OUT_DIR\\docs\\"
 # Copy GlobalScript library
     - "mkdir \"$Env:BIN_OUT_DIR/scripting\""
     - "copy $Env:CI_PROJECT_DIR\\Scripts\\GlobalScript\\*.* $Env:BIN_OUT_DIR\\scripting\\"
@@ -205,6 +212,7 @@ windows_build_job:
       - bin/release/scripthelp/*.*
       - bin/release/scripthelp/search/*.*
       - bin/release/docs/*.pdf
+      - bin/release/docs/*.md
       - bin/release/docs/Appendixes/*.pdf
       - bin/release/ftdi/**/*
       - bin/release/license/**/*
@@ -389,7 +397,7 @@ linux_test_job:
     - "# ----------------------------------------------"
     - "#               Run client tests"
     - "# ----------------------------------------------"
-    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill TuningSrv || true; pkill SimulatorConsol || true; sleep 2; }"
+    - "function StopServices () { pkill CfgSrv || true; pkill AppDataSrv || true; pkill TuningSrv || true; pkill SimulatorConsol || true; pkill GatewaySrv || true; sleep 2; }"
     - "trap StopServices EXIT"
     - "pushd $CI_PROJECT_DIR/bin/release"
     - "StopServices || true"
@@ -414,6 +422,23 @@ linux_test_job:
     - "export QT_QPA_PLATFORM=offscreen"
     - "./TestSuiteConsole -settings=\"../../Tests/TestSuiteConsoleLinuxTest.xml\" -nosecurity"
     - "./TestSuiteConsole -settings=\"../../Tests/TestSuiteConsoleLinuxTest.xml\" -scripts_path=/tmp/build/${SIMULATOR_PROJECT_NAME}/build/SYSTEMID_CLIENTTEST_WS01_TESTSUITE -nosecurity"
+    - "StopServices || true"
+    - "popd"
+
+#Run AdsGateway tests
+    - "# ----------------------------------------------"
+    - "#               Run AdsGateway tests"
+    - "# ----------------------------------------------"
+    - "pushd $CI_PROJECT_DIR/bin/release"
+    - "StopServices || true"
+    - "./linux_test_job_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs.out 2>&1 &"
+    - "sleep 5"
+    - "./linux_test_job_systemid_clienttest_ws01_gwslinux.sh &"
+    - "sleep 5"
+    - "$CI_PROJECT_DIR/bin/release/AdsGatewayTests --port=5566 --gtest_filter=AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection"
+    - "./linux_test_job_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads.out 2>&1 &"
+    - "sleep 5"
+    - "$CI_PROJECT_DIR/bin/release/AdsGatewayTests --port=5566 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection"
     - "StopServices || true"
     - "popd"
 

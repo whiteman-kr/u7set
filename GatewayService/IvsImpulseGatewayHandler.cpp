@@ -14,12 +14,8 @@ namespace Gateway
 										 const AppSignals& appSignals,
 										 CircularLoggerShared log,
 										 bool logGatewayPackets) :
-		Handler(gateway->gatewayID(), swInfo, settings, log, logGatewayPackets),
-		m_softwareInfo(swInfo),
-		m_appDataService1(settings.appDataService1.address),
-		m_appDataService2(settings.appDataService2.address),
-		m_gateway(gateway),
-		m_appSignals(appSignals)
+		Handler(gateway->gatewayID(), swInfo, settings, appSignals, log, logGatewayPackets),
+		m_gateway(gateway)
 	{
 	}
 
@@ -31,17 +27,13 @@ namespace Gateway
 	{
 		init();
 
-		m_appDataServiceClientThread =
-				new AppDataServiceClientThread( m_softwareInfo,
-												m_appDataService1,
-												m_appDataService2,
-												QString("GatewayService %1").arg(m_softwareInfo.equipmentID()),
-												this, m_log);
-		m_appDataServiceClientThread->start();
+		prepareRequests();
+
+		runAppDataSrvClient();
 
 		m_ivsImpulseCommThread = new IvsImpulseCommThread(*this);
 
-		m_ivsImpulseCommThread->connect(m_appDataServiceClientThread->client());
+		m_ivsImpulseCommThread->connect(appDataServiceClient());
 
 		m_ivsImpulseCommThread->start();
 	}
@@ -55,40 +47,40 @@ namespace Gateway
 			m_ivsImpulseCommThread = nullptr;
 		}
 
-		if (m_appDataServiceClientThread != nullptr)
-		{
-			m_appDataServiceClientThread->quitAndWait();
-			delete m_appDataServiceClientThread;
-			m_appDataServiceClientThread = nullptr;
-		}
+		stopAppDataSrvClient();
 
 		Handler::shutdown();
 	}
 
-	void IvsImpulseHandler::getRequiredSignalsHashes(std::set<Hash>* hashes) const
+	void IvsImpulseHandler::onAppDataSrvConnected()
 	{
-		TEST_PTR_RETURN(hashes);
-
-		hashes->clear();
-
-		for(const AppSignalState& state : m_states)
-		{
-			hashes->emplace(state.hash());
-		}
 	}
 
-	void IvsImpulseHandler::getEventSignalsHashes(std::set<Hash>* hashes) const
+	void IvsImpulseHandler::onAppDataSrvDisconnected()
 	{
-		TEST_PTR_RETURN(hashes);
+	}
 
-		hashes->clear();
+	void IvsImpulseHandler::planNextPreparedRequest(PreparedRequest& request)
+	{
+		request.clear();
 
-		for(const AppSignalState& st : m_states)
+		if (m_requests.empty())
 		{
-			if (st.isWorkable() == true && st.requestEvents() == true)
-			{
-				hashes->emplace(st.hash());
-			}
+			request.setDelay(500);
+			return;
+		}
+
+		if (m_requestIndex >= m_requests.size())
+		{
+			m_requestIndex = 0;
+			request.setDelay(200);
+			return;
+		}
+
+		if (m_requestIndex < m_requests.size())
+		{
+			request.setRequest(m_requests[m_requestIndex], 0);
+			m_requestIndex++;
 		}
 	}
 
@@ -121,7 +113,7 @@ namespace Gateway
 		m_signalStatesUpdated = true;
 	}
 
-	void IvsImpulseHandler::processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
+	void IvsImpulseHandler::processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
 	{
 		int statesCount = getStateChangesReply.appsignalstates_size();
 
@@ -283,5 +275,87 @@ namespace Gateway
 		}
 
 		return true;
+	}
+
+	void IvsImpulseHandler::prepareRequests()
+	{
+		m_requests.clear();
+		m_requestIndex = 0;
+		m_changesRequestCount = 0;
+		m_hasPendingChanges = false;
+		m_changesRequestIndex.reset();
+
+		//
+
+		size_t signalsCount = m_appSignals.count();
+		size_t partCount = signalsCount / ADS_GET_APP_SIGNAL_STATE_MAX +
+						   ((signalsCount % ADS_GET_APP_SIGNAL_STATE_MAX) ? 1 : 0);
+
+		m_requests.reserve(partCount * 2);
+
+		{
+			Network::GetAppSignalStateRequest rq;
+			Network::GatewayGetAppSignalStateChangesRequest chRq;
+
+			for(size_t p = 0; p < partCount; p++)
+			{
+				rq.Clear();
+
+				for(size_t i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
+				{
+					size_t index = p * ADS_GET_APP_SIGNAL_STATE_MAX + i;
+
+					if (index >= signalsCount)
+					{
+						break;
+					}
+
+					const AppSignal* appSignal = m_appSignals.getSignalByIndex(index);
+
+					TEST_PTR_CONTINUE(appSignal);
+
+					Hash hash = appSignal->hash();
+
+					rq.add_signalhashes(hash);
+					chRq.add_signalshashes(hash);
+				}
+
+				{
+					size_t requestSize = rq.ByteSizeLong();
+
+					if (requestSize > Tcp::TCP_MAX_DATA_SIZE)
+					{
+						Q_ASSERT(false);
+						continue;
+					}
+
+					PreparedRequest& stateRequest = m_requests.emplace_back(PreparedRequest{});
+
+					stateRequest.ID = ADS_GET_APP_SIGNAL_STATE_CONST_SIZE;
+
+					stateRequest.data.resize(requestSize);
+
+					rq.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(stateRequest.data.data()));
+				}
+
+				{
+					size_t requestSize = chRq.ByteSizeLong();
+
+					if (requestSize > Tcp::TCP_MAX_DATA_SIZE)
+					{
+						Q_ASSERT(false);
+						continue;
+					}
+
+					PreparedRequest& stateChangesRequest = m_requests.emplace_back(PreparedRequest{});
+
+					stateChangesRequest.ID = ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES;
+
+					stateChangesRequest.data.resize(requestSize);
+
+					chRq.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(stateChangesRequest.data.data()));
+				}
+			}
+		}
 	}
 }

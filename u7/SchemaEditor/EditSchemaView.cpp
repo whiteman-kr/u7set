@@ -7,6 +7,7 @@
 #include <VFrame30/PosRectImpl.h>
 #include <VFrame30/PosRectRotatable.h>
 #include <VFrame30/SchemaLayer.h>
+#include <ClientLib/TuningConnectionStub.h>
 
 #include "../GlobalMessanger.h"
 #include "../Settings.h"
@@ -23,7 +24,11 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, QWidget*
 	m_appSignalProvider(signalSetProvider),
 	m_tuningSignalProvider(signalSetProvider),
 	m_diagStateController(m_diagStateProvider, nullptr),
-	m_appSignalController(m_appSignalProvider, nullptr)
+	m_appSignalController(m_appSignalProvider, nullptr),
+	
+	m_tuningConnectionStub(std::make_unique<ClientLib::TuningConnectionStub>()),
+	m_tuningAuthorizationStub(std::make_unique<TuningAuthorizationStub>()),
+	m_tuningController(m_tuningSignalProvider, *m_tuningConnectionStub, *m_tuningAuthorizationStub, nullptr)
 {
 	Q_ASSERT(signalSetProvider);
 
@@ -40,12 +45,16 @@ EditSchemaView::EditSchemaView(AppSignalSetProvider* signalSetProvider, std::sha
 	m_appSignalProvider(signalSetProvider),
 	m_tuningSignalProvider(signalSetProvider),
 	m_diagStateController(m_diagStateProvider, nullptr),
-	m_appSignalController(m_appSignalProvider, nullptr)
+	m_appSignalController(m_appSignalProvider, nullptr),
+
+	m_tuningConnectionStub(std::make_unique<ClientLib::TuningConnectionStub>()),
+	m_tuningAuthorizationStub(std::make_unique<TuningAuthorizationStub>()),
+	m_tuningController(m_tuningSignalProvider, *m_tuningConnectionStub, *m_tuningAuthorizationStub, nullptr)
 {
 	Q_ASSERT(signalSetProvider);
 
 	auto context =
-		VFrame30::Context::create(&m_diagStateController, &m_appSignalController, nullptr /*m_tuningController*/, nullptr, nullptr);
+		VFrame30::Context::create(&m_diagStateController, &m_appSignalController, &m_tuningController, nullptr, nullptr);
 	schema->setContext(std::move(context));
 
 	// Timer for updates of WRN/ERR count
@@ -1685,13 +1694,18 @@ void EditSchemaView::exportToPdf(const QString& fileName, bool infoMode)
 
 	// Draw Schema
 	//
-	QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
-
-	schema()->Draw(&drawParam, clipRect);
-
-	if (m_compareWidget == true)
 	{
-		drawCompareOutlines(&drawParam, clipRect);
+		QApplication::setOverrideCursor(Qt::WaitCursor);
+
+		QRectF clipRect(0, 0, schema()->docWidth(), schema()->docHeight());
+		schema()->Draw(&drawParam, clipRect);
+
+		if (m_compareWidget == true)
+		{
+			drawCompareOutlines(&drawParam, clipRect);
+		}
+
+		QApplication::restoreOverrideCursor();
 	}
 
 	// Ending

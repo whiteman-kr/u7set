@@ -457,3 +457,9 @@ const std::size_t CACHE_LINE_SIZE = 64;				// 64 bytes on x86-64
 #define ROUND_TO_CACHE_LINE_SIZE(size)	ROUND_TO(size, CACHE_LINE_SIZE)
 
 #define CACHE_ALIGNED					alignas(CACHE_LINE_SIZE)
+
+#define CHAR_PTR_CAST(v) (reinterpret_cast<char*>(v))
+#define CONST_CHAR_PTR_CAST(v) (reinterpret_cast<const char*>(v))
+
+#define VOID_PTR_CAST(v) (reinterpret_cast<void*>(v))
+#define CONST_VOID_PTR_CAST(v) (reinterpret_cast<const void*>(v))

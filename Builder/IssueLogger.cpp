@@ -1996,6 +1996,27 @@ namespace Builder
 					arg(tunSimIpStr).arg(obj1).arg(obj2).arg(profile));
 	}
 
+	/// IssueCode: CFG3105
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1.%2 exceed length of %3 bytes
+	///
+	/// Parameters:
+	///         %1 AppSignalID
+	///			%2 AppSignal property
+	///			%3 length bytes
+	///
+	/// Description:
+	///		The specified property is too long.
+	///
+	void IssueLogger::errCFG3105(QString appSignalID, QString propName, size_t len)
+	{
+		LOG_ERROR(IssueType::FscConfiguration, 3105,
+				  tr("Property %1.%2 exceed length of %3 bytes.").
+					arg(appSignalID).arg(propName).arg(len));
+	}
+
 	//
 	// ALP			Application Logic Parsing				4000-4999
 	//

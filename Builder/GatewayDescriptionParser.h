@@ -125,4 +125,6 @@ namespace Gateway
 		static const QRegularExpression m_anyWhitespaceSymbol;
 		static const QRegularExpression m_notAlphaNumericUnderlineSymbols;
 	};
+
+	using ParserShared = std::shared_ptr<Parser>;
 }

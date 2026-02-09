@@ -8,6 +8,100 @@
 
 #include <TrendView/TrendSignalSet.h>
 
+
+namespace
+{
+	class TrendImageCache
+	{
+		Q_DISABLE_COPY_MOVE(TrendImageCache)
+
+	public:
+		TrendImageCache() = default;
+		~TrendImageCache() 
+		{
+			cache.clear();
+		}
+
+		QImage* getCachedImage(const QUuid& trendUuid)
+		{
+			Key key = trendUuid;
+			return cache.object(key);
+		}
+
+		void insertCachedImage(const QUuid& trendUuid, QImage* image)
+		{
+			Key key = trendUuid;
+			cache.insert(key, image, image ? image->sizeInBytes() : 1);
+		}
+
+		using Key = QUuid; // Items QUuid
+
+	private:
+		QCache<Key, QImage> cache{60'000'000};
+	};
+
+	TrendImageCache& getTrendImageCache()
+	{
+		thread_local TrendImageCache s_trendImageCache;
+		return s_trendImageCache;
+	}
+
+	// Draw Sand Clock
+	//
+	void drawSandClock(QPainter& painter, const QRectF& rect)
+	{
+		painter.setRenderHint(QPainter::Antialiasing);
+
+		// Dim drawn image to indicate that it is cached
+		//
+		painter.fillRect(rect, QColor{255, 255, 255, 100});
+
+		QRectF waitRect = rect;
+		waitRect.setWidth(qMin(rect.width(), rect.height()) / 6);
+		waitRect.setHeight(qMin(rect.width(), rect.height()) / 5);
+		waitRect.moveCenter(rect.center());
+		painter.fillRect(waitRect, QColor{200, 200, 200, 200});
+
+		// Draw sand clock by primitive shapes
+		//
+		painter.setPen(Qt::NoPen);
+		painter.setBrush(QBrush{QColor{150, 150, 150, 255}});
+
+		// Platforms (top/bottom)
+		qreal platformHeight = waitRect.height() * 0.06;
+		qreal platformInset = waitRect.width() * 0.20;
+
+		QRectF topPlatform{waitRect.left() + platformInset,
+						   waitRect.top() + waitRect.height() * 0.08,
+						   waitRect.width() - platformInset * 2.0,
+						   platformHeight};
+
+		QRectF bottomPlatform{waitRect.left() + platformInset,
+							  waitRect.bottom() - waitRect.height() * 0.08 - platformHeight,
+							  waitRect.width() - platformInset * 2.0,
+							  platformHeight};
+
+		painter.drawRect(topPlatform);
+		painter.drawRect(bottomPlatform);
+
+		QPointF topLeft{waitRect.left() + waitRect.width() * 0.25, topPlatform.bottom() + waitRect.height() * 0.01};
+		QPointF topRight{waitRect.right() - waitRect.width() * 0.25, topPlatform.bottom() + waitRect.height() * 0.01};
+		QPointF bottomLeft{waitRect.left() + waitRect.width() * 0.25, bottomPlatform.top() - waitRect.height() * 0.01};
+		QPointF bottomRight{waitRect.right() - waitRect.width() * 0.25, bottomPlatform.top() - waitRect.height() * 0.01};
+
+		QPolygonF topTriangle;
+		topTriangle << topLeft << topRight << QPointF{waitRect.center().x(), waitRect.center().y()};
+		painter.drawPolygon(topTriangle);
+
+		QPolygonF bottomTriangle;
+		bottomTriangle << bottomLeft << bottomRight << QPointF{waitRect.center().x(), waitRect.center().y()};
+		painter.drawPolygon(bottomTriangle);
+
+		return;
+	}
+} // namespace
+
+
 namespace VFrame30
 {
 	//
@@ -136,6 +230,31 @@ namespace VFrame30
 	{
 		m_drawTimer.start();
 		m_updateSignalsTimer.start();
+
+		connect(&m_futureWatcher,
+				&QFutureWatcher<QImage>::finished,
+				this,
+				[this]()
+				{
+					saveRenderedImage(m_drawFuture);
+				});
+	}
+
+	IndicatorTrend::~IndicatorTrend()
+	{
+		disconnect(&m_futureWatcher, &QFutureWatcher<QImage>::finished, this, nullptr);
+
+		// Async drawing must be stopped before destruction, it uses member data
+		//
+		if (m_drawFuture.isValid() == true && m_drawFuture.isRunning() == true)
+		{
+			qDebug() << "IndicatorTrend::~IndicatorTrend Stopping async drawing";
+
+			m_drawStopSource.request_stop();
+			m_drawFuture.waitForFinished();
+		}
+
+		return;
 	}
 
 	void IndicatorTrend::createProperties(SchemaItemIndicator* propertyObject, int /*signalCount*/)
@@ -354,18 +473,21 @@ namespace VFrame30
 			trendRect = {0, 0, boundingRect.width() * zoom, boundingRect.height() * zoom};
 		}
 
+		QSize expectedImageSize{static_cast<int>(trendRect.width()), static_cast<int>(trendRect.height())};
+
 		// --
 		//
-		m_trendParam.setRectPx(trendRect, m_trendParam.dpiX(), m_trendParam.dpiY(), m_trendParam.devicePixelRatio());
+		m_trendParam.setDpi(painter->device()->physicalDpiX(), painter->device()->physicalDpiY(), painter->device()->devicePixelRatioF());
+
+		m_trendParam.setRectPx(trendRect, m_trendParam.dpiX(), m_trendParam.dpiY(), m_trendParam.devicePixelRatio() * zoom);
 		m_trendParam.setTimeType(m_timeType);
 
+		// Shift real-time trend
+		//
 		if (drawParam->drawMode() != DrawMode::Editor)
 		{
 			Q_ASSERT(drawParam->clientSchemaView());
 			m_trendParam.setTrendDataProvider(drawParam->clientSchemaView()->schemaManager());
-
-			// Shift realtime trend
-			//
 			TimeStamp maxTimeStamp = m_trendParam.trendDataProvider()->maxTimeStamp(schemaItem->guid(), m_timeType);
 
 			if (maxTimeStamp.timeStamp != 0)
@@ -375,34 +497,52 @@ namespace VFrame30
 			}
 		}
 
-		// Detect if image update is required
-		//
-		bool needRedraw =
-			(m_redrawInterval < 250_ms) || m_drawTimer.hasExpired(m_redrawInterval) || drawParam->drawMode() == DrawMode::Editor;
-
-		if (m_image.width() != static_cast<int>(trendRect.width()) || m_image.height() != static_cast<int>(trendRect.height()))
+		if (m_image.isNull() == false)
 		{
-			needRedraw = true;
+			painter->drawImage(boundingRect, m_image);
+		}
+		else
+		{
+			QImage* cachedImage = getTrendImageCache().getCachedImage(schemaItem->guid());
+			if (cachedImage != nullptr)
+			{
+				// m_image = *cachedImage; -- Do not set m_image, we need needRedraw to set to true (different size).
+				painter->drawImage(boundingRect, *cachedImage);
+			}
+			else
+			{
+				// Backup, draw gray rect.
+				//
+				painter->fillRect(boundingRect, backColor1st());
+			}
 
-			m_image = QImage{static_cast<int>(trendRect.width()), static_cast<int>(trendRect.height()), QImage::Format_RGB32};
-
-			m_image.setDevicePixelRatio(drawParam->devicePixelRatio());
-			m_image.setDotsPerMeterX(static_cast<int>(m_image.physicalDpiX() / 25.4 * 1000.0));
-			m_image.setDotsPerMeterY(static_cast<int>(m_image.physicalDpiY() / 25.4 * 1000.0));
+			drawSandClock(*painter, boundingRect);
 		}
 
-		// Draw trend to QImage and then copy it to painter
+		// Redraw image if needed
 		//
-		if (needRedraw == true)
+
+		// Detect if image update is required
+		//
+		bool needRedraw = m_redrawInterval < 250_ms ||                 //
+						  m_drawTimer.hasExpired(m_redrawInterval) ||  //
+						  drawParam->drawMode() == DrawMode::Editor || //
+						  (expectedImageSize != m_image.size());
+
+		// Start async redraw
+		// IsCanceled means that we already taken the result and there is no running task
+		// If is pdf mode, do not draw trend, the current issues is very long pdf generation time for many points
+		// after we optimize drawing to O(width) instead of O(Npoints), when we can allow rendering in pdf mode.
+		//
+		if (needRedraw == true && m_drawFuture.isCanceled() == true && drawParam->pdfMode() == false)
 		{
 			// Check if there are any new signals
 			//
 			QStringList itemSignalIds = schemaItem->signalIds();
 			QStringList trendSignalIds = m_trend.signalSet().trendSignalIds();
 
-			bool signalsAreTheSame = (itemSignalIds != trendSignalIds) || m_updateSignalsTimer.hasExpired(10'000);
-
-			if (signalsAreTheSame)
+			if (bool signalsAreTheSame = (itemSignalIds != trendSignalIds) || m_updateSignalsTimer.hasExpired(10'000); //
+				signalsAreTheSame == true)
 			{
 				std::list<TrendLib::TrendSignalParam> signalParams;
 
@@ -442,26 +582,95 @@ namespace VFrame30
 				m_updateSignalsTimer.restart();
 			}
 
-			//	--
+			// Async redraw
 			//
 			m_drawTimer.restart();
 
-			QElapsedTimer drawTimer;
-			drawTimer.start();
-
 			m_trend.setUuid(schemaItem->guid());
 
-			m_trendParam.signalDescriptionRect().clear();
-			m_trendParam.setDpi(m_image.dotsPerMeterX() / (1000.0 / 25.4),
-								m_image.dotsPerMeterY() / (1000.0 / 25.4),
-								m_image.devicePixelRatioF());
+			auto drawFuture = QtConcurrent::run(
+				[](TrendLib::Trend& trend, TrendLib::TrendParam drawParam, QSize imageSize, std::stop_token stoken) -> QImage
+				{
+					try
+					{
+						if (imageSize.width() > 32767 || imageSize.height() > 32767 || imageSize.isEmpty() == true ||
+							imageSize.width() * imageSize.height() * 4 > 256'000'000)
+						{
+							qWarning() << "IndicatorTrend, AsyncDraw: Invalid image size " << imageSize;
+							return QImage{};
+						}
 
-			m_trend.draw(&m_image, m_trendParam);
+						QImage image{imageSize, QImage::Format_RGB32};
 
-			// qDebug() << "m_trend.draw " << drawTimer.elapsed() << " ms";
+						image.setDevicePixelRatio(drawParam.devicePixelRatio());
+						image.setDotsPerMeterX(static_cast<int>(image.physicalDpiX() / 25.4 * 1000.0));
+						image.setDotsPerMeterY(static_cast<int>(image.physicalDpiY() / 25.4 * 1000.0));
+
+						// QElapsedTimer drawTimer{};
+						// drawTimer.start();
+
+						drawParam.signalDescriptionRect().clear();
+						trend.draw(&image, drawParam, stoken);
+
+						// qDebug() << "AsyncDraw: TrendIndicator.draw " << drawTimer.elapsed() << " ms";
+						return image;
+					}
+					catch (const std::exception& ex)
+					{
+						qWarning() << "IndicatorTrend, AsyncDraw: Exception during draw: " << ex.what();
+						return QImage{};
+					}
+					catch (...)
+					{
+						qWarning() << "IndicatorTrend, AsyncDraw: Unknown exception during draw";
+						return QImage{};
+					}
+				},
+
+				std::ref(m_trend),
+				m_trendParam,
+				expectedImageSize,
+				m_drawStopSource.get_token());
+
+			bool requiredInstantDraw = drawParam->drawMode() == DrawMode::Editor;
+
+			if (requiredInstantDraw == true)
+			{
+				drawFuture.waitForFinished();
+				saveRenderedImage(drawFuture); // The result is now in m_image, so we can draw it immediately.
+
+				painter->drawImage(boundingRect, m_image);
+			}
+			else
+			{
+				m_drawFuture = std::move(drawFuture);
+				// Reassign future to watcher.
+				// Watcher has a connected slot to get the result -- see IndicatorTrend ctor.
+				//
+				m_futureWatcher.setFuture(m_drawFuture);
+
+				// The image will be drawn on the next paint -- see saveRenderedImage().
+			}
 		}
 
-		painter->drawImage(boundingRect, m_image);
+		return;
+	}
+
+	void IndicatorTrend::saveRenderedImage(QFuture<QImage>& future) const
+	{
+		if (future.isValid() == true && future.isFinished() == true)
+		{
+			m_image = future.result();
+			m_drawFuture = {};
+
+			getTrendImageCache().insertCachedImage(m_trend.uuid(), new QImage{m_image});
+		}
+		else
+		{
+			Q_ASSERT(future.isValid());
+			Q_ASSERT(future.isValid() == true && future.isFinished() == false);
+		}
+
 		return;
 	}
 

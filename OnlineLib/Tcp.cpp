@@ -1860,6 +1860,11 @@ namespace Tcp
 		return sendRequest(requestID, m_protobufBuffer, messageSize);
 	}
 
+	bool Client::sendRequest(quint32 requestID, const std::vector<char>& requestData)
+	{
+		return sendRequest(requestID, requestData.data(), static_cast<quint32>(requestData.size()));
+	}
+
 	void Client::enableClientAliveRequest(bool enable)
 	{
 		AUTO_LOCK(m_mutex);

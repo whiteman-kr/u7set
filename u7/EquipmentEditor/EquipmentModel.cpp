@@ -30,14 +30,12 @@ EquipmentModel::EquipmentModel(DbController* dbcontroller, QWidget* parentWidget
 		m_preset->setData(fileInfo);
 	}
 
-	m_root = m_configuration;	// Edit configuration default mode
+	m_root = m_configuration; // Edit configuration default mode
 
 	return;
 }
 
-EquipmentModel::~EquipmentModel()
-{
-}
+EquipmentModel::~EquipmentModel() {}
 
 QModelIndex EquipmentModel::index(int row, const QModelIndex& parentIndex) const
 {
@@ -131,7 +129,7 @@ int EquipmentModel::rowCount(const QModelIndex& parentIndex) const
 int EquipmentModel::columnCount(const QModelIndex& parentIndex) const
 {
 	Q_UNUSED(parentIndex);
-	return ColumnCount;		// Always the same
+	return ColumnCount; // Always the same
 }
 
 QVariant EquipmentModel::data(const QModelIndex& index, int role) const
@@ -167,10 +165,7 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 				break;
 
 			case ObjectPlaceColumn:
-				if (device->isRoot() ||
-					device->isSystem() ||
-					device->isRack() ||
-					device->isSoftware())
+				if (device->isRoot() || device->isSystem() || device->isRack() || device->isSoftware())
 				{
 					v.setValue<QString>("");
 				}
@@ -217,13 +212,13 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 			return QBrush{Qt::darkGray};
 		}
 
-		if (device->isExcludedFromBuild() == true) 
+		if (device->isExcludedFromBuild() == true)
 		{
 			return QBrush{Qt::darkGray};
 		}
 
 		return {};
-		
+
 	case Qt::BackgroundRole:
 		{
 			if (deviceFileInfo->state() == E::VcsState::CheckedOut)
@@ -259,7 +254,8 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 {
 	if (role == Qt::DisplayRole)
 	{
-		if (orientation == Qt::Horizontal) {
+		if (orientation == Qt::Horizontal)
+		{
 			switch (section)
 			{
 			case ObjectNameColumn:
@@ -271,8 +267,8 @@ QVariant EquipmentModel::headerData(int section, Qt::Orientation orientation, in
 			case ObjectEquipmentIdColumn:
 				return QObject::tr("EquipmentIDTemplate");
 
-				case ObjectPlaceColumn:
-					return QObject::tr("Place");
+			case ObjectPlaceColumn:
+				return QObject::tr("Place");
 
 			case ObjectStateColumn:
 				return QObject::tr("State");
@@ -299,13 +295,12 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex) const
 	std::shared_ptr<const Hardware::DeviceObject> object = deviceObject(parentIndex);
 	if (object->childrenCount() > 0)
 	{
-		return true;	// Already have file list for this object
+		return true;  // Already have file list for this object
 	}
 
-	if (object->deviceType() == Hardware::DeviceType::AppSignal ||
-		object->deviceType() == Hardware::DeviceType::DiagSignal)
+	if (object->deviceType() == Hardware::DeviceType::AppSignal || object->deviceType() == Hardware::DeviceType::DiagSignal)
 	{
-		return false;	// DeviceType::DiagSignal cannot have children
+		return false; // DeviceType::DiagSignal cannot have children
 	}
 
 	bool hasChildren = false;
@@ -320,7 +315,7 @@ bool EquipmentModel::hasChildren(const QModelIndex& parentIndex) const
 		return false;
 	}
 
-	//qDebug() << object->caption() << " has children = " << hasChildren;
+	// qDebug() << object->caption() << " has children = " << hasChildren;
 
 	return hasChildren;
 }
@@ -336,13 +331,12 @@ bool EquipmentModel::canFetchMore(const QModelIndex& parent) const
 
 	if (object->childrenCount() > 0)
 	{
-		return false;	// seems that we already got file list for this object
+		return false; // seems that we already got file list for this object
 	}
 
-	if (object->deviceType() == Hardware::DeviceType::AppSignal ||
-		object->deviceType() == Hardware::DeviceType::DiagSignal)
+	if (object->deviceType() == Hardware::DeviceType::AppSignal || object->deviceType() == Hardware::DeviceType::DiagSignal)
 	{
-		return false;	// AppSignal/DiagSignal cannot have children
+		return false; // AppSignal/DiagSignal cannot have children
 	}
 
 	bool hasChildren = false;
@@ -387,7 +381,7 @@ void EquipmentModel::fetchMore(const QModelIndex& parentIndex)
 
 	if (ok == false || files.empty() == true)
 	{
-		return; 
+		return;
 	}
 
 	if (files.empty() == true)
@@ -465,8 +459,7 @@ void EquipmentModel::sortDeviceObject(std::shared_ptr<Hardware::DeviceObject>& o
 	{
 		std::shared_ptr<Hardware::DeviceObject> child = object->child(i);
 
-		if (child->deviceType() != Hardware::DeviceType::AppSignal &&
-			child->deviceType() != Hardware::DeviceType::DiagSignal)
+		if (child->deviceType() != Hardware::DeviceType::AppSignal && child->deviceType() != Hardware::DeviceType::DiagSignal)
 		{
 			sortDeviceObject(child, column, order);
 		}
@@ -475,7 +468,7 @@ void EquipmentModel::sortDeviceObject(std::shared_ptr<Hardware::DeviceObject>& o
 	return;
 }
 
-void EquipmentModel::sort(int column, Qt::SortOrder order/* = Qt::AscendingOrder*/)
+void EquipmentModel::sort(int column, Qt::SortOrder order /* = Qt::AscendingOrder*/)
 {
 	m_sortColumn = column;
 	m_sortOrder = order;
@@ -553,18 +546,19 @@ void EquipmentModel::deleteDeviceObject(const QModelIndexList& rowList)
 	//
 	QModelIndexList sortedRowList = rowList;
 
-	std::sort(sortedRowList.begin(), sortedRowList.end(),
+	std::sort(sortedRowList.begin(),
+			  sortedRowList.end(),
 			  [this](QModelIndex& m1, QModelIndex m2)
 			  {
-					std::shared_ptr<Hardware::DeviceObject> d1 = deviceObject(m1);
-					std::shared_ptr<Hardware::DeviceObject> d2 = deviceObject(m2);
+				  std::shared_ptr<Hardware::DeviceObject> d1 = deviceObject(m1);
+				  std::shared_ptr<Hardware::DeviceObject> d2 = deviceObject(m2);
 
-					const DbFileInfo* fileInfo1 = d1->data();
-					const DbFileInfo* fileInfo2 = d2->data();
-					Q_ASSERT(fileInfo1);
-					Q_ASSERT(fileInfo2);
+				  const DbFileInfo* fileInfo1 = d1->data();
+				  const DbFileInfo* fileInfo2 = d2->data();
+				  Q_ASSERT(fileInfo1);
+				  Q_ASSERT(fileInfo2);
 
-					return fileInfo1->fileId() >= fileInfo2->fileId();
+				  return fileInfo1->fileId() >= fileInfo2->fileId();
 			  });
 
 	// Update model
@@ -612,14 +606,16 @@ void EquipmentModel::updateFirstLevelObjects()
 	return;
 }
 
-void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::map<int, DbFileInfo>& updateFiles, std::set<void*>& updatedModelIndexes)
+void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex,
+											const std::map<int, DbFileInfo>& updateFiles,
+											std::set<void*>& updatedModelIndexes)
 {
-//static QString nested;
-//	nested += "+---";
+	// static QString nested;
+	//	nested += "+---";
 
 	if (updatedModelIndexes.find(modelIndex.internalPointer()) != updatedModelIndexes.end())
 	{
-//		qDebug() << "updateRowFuncOnCheckIn" << nested << " already updated";
+		//		qDebug() << "updateRowFuncOnCheckIn" << nested << " already updated";
 		return;
 	}
 	else
@@ -695,7 +691,7 @@ void EquipmentModel::updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::m
 		}
 	}
 
-//	nested = nested.left(nested.size() - 4);
+	//	nested = nested.left(nested.size() - 4);
 }
 
 void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
@@ -717,32 +713,20 @@ void EquipmentModel::checkInDeviceObject(QModelIndexList& rowList)
 		files.push_back(*fi);
 	}
 
-	// Get all checked out files for selected parents
-	//
-	std::vector<DbFileInfo> checkedOutFiles;
-	dbController()->getCheckedOutFiles(&files, &checkedOutFiles, nullptr);
-
-	// Filter all files items that were checked-out by other users unless current user is an administrator
-	//
-	checkedOutFiles.erase(std::remove_if(checkedOutFiles.begin(),
-										 checkedOutFiles.end(),
-										 [this](const DbFileInfo& fi)
-										 {
-											 return fi.userId() != m_dbController->currentUser().userId() &&
-													m_dbController->currentUser().isAdministrator() == false;
-										 }),
-						  checkedOutFiles.end());
-
-	if (checkedOutFiles.empty() == true) 
-	{
-		QMessageBox::information(m_parentWidget, qAppName(), tr("No objects found to check-in by current user."));
-		return;
-	}
-
 	// Check in
 	//
+	bool checkInTree = QSettings{}.value("EquipmentModel::checkInDeviceObject/checkInTree", true).toBool();
 	std::vector<DbFileInfo> checkedInFiles;
-	CheckInDialog::checkIn(checkedOutFiles, false, &checkedInFiles, dbController(), m_parentWidget);
+
+	auto objectNameDetailsField = isPresetMode() ? "ObjectName" : "EquipmentID";
+
+	bool result =
+		CheckInDialog::checkIn(files, &checkedInFiles, checkInTree, objectNameDetailsField, dbController(), m_parentWidget, &checkInTree);
+
+	if (result == true)
+	{
+		QSettings{}.setValue("EquipmentModel::checkInDeviceObject/checkInTree", checkInTree);
+	}
 
 	// Update model, look for all checkedInFiles and update their FileInfo
 	//
@@ -829,21 +813,22 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 
 		// Update object
 		//
-		auto freshFileIt = std::find_if(freshFiles.begin(), freshFiles.end(),
-				[dfi](const std::shared_ptr<DbFile>& f)
-				{
-					return dfi->fileId() == f->fileId();
-				});
+		auto freshFileIt = std::find_if(freshFiles.begin(),
+										freshFiles.end(),
+										[dfi](const std::shared_ptr<DbFile>& f)
+										{
+											return dfi->fileId() == f->fileId();
+										});
 
 		if (freshFileIt == freshFiles.end())
 		{
-			//assert(false);	Normal situation. This file was not marked for checked-out, because its state was not E::VcsState::CheckedIn
+			// assert(false);	Normal situation. This file was not marked for checked-out, because its state was not E::VcsState::CheckedIn
 			continue;
 		}
 		else
 		{
 			const std::shared_ptr<DbFile>& freshFile = *freshFileIt;
-			ok = d->Load(freshFile->data());	// Refresh data in the object
+			ok = d->Load(freshFile->data()); // Refresh data in the object
 		}
 
 		// Update fileInfo and model
@@ -853,12 +838,12 @@ void EquipmentModel::checkOutDeviceObject(QModelIndexList& rowList)
 			if (fi.fileId() == dfi->fileId())
 			{
 				auto newFileInfo = std::make_shared<DbFileInfo>(fi, d->details());
-				d->setData(newFileInfo);		// Update file info record in the DeviceOubject
+				d->setData(newFileInfo);                       // Update file info record in the DeviceOubject
 
 				if (newFileInfo->state() == E::VcsState::CheckedOut)
 				{
 					QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
-					emit dataChanged(index, bottomRightIndex);		// Notify view about data update
+					emit dataChanged(index, bottomRightIndex); // Notify view about data update
 				}
 
 				break;
@@ -879,20 +864,21 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undoRowList)
 	// rowList must be sorted in FileID descending order,
 	// to delete first children and then their parents
 	//
-	std::sort(rowList.begin(), rowList.end(),
-		[this](const QModelIndex& m1, const QModelIndex& m2)
-		{
-			std::shared_ptr<const Hardware::DeviceObject> d1 = this->deviceObject(m1);
-			std::shared_ptr<const Hardware::DeviceObject> d2 = this->deviceObject(m2);
+	std::sort(rowList.begin(),
+			  rowList.end(),
+			  [this](const QModelIndex& m1, const QModelIndex& m2)
+			  {
+				  std::shared_ptr<const Hardware::DeviceObject> d1 = this->deviceObject(m1);
+				  std::shared_ptr<const Hardware::DeviceObject> d2 = this->deviceObject(m2);
 
-			const DbFileInfo* fileInfo1 = d1->data();
-			const DbFileInfo* fileInfo2 = d2->data();
+				  const DbFileInfo* fileInfo1 = d1->data();
+				  const DbFileInfo* fileInfo2 = d2->data();
 
-			Q_ASSERT(fileInfo1);
-			Q_ASSERT(fileInfo2);
+				  Q_ASSERT(fileInfo1);
+				  Q_ASSERT(fileInfo2);
 
-			return fileInfo1->fileId() >= fileInfo2->fileId();
-		});
+				  return fileInfo1->fileId() >= fileInfo2->fileId();
+			  });
 
 	// --
 	//
@@ -918,10 +904,9 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undoRowList)
 
 	// Ask for confirmation.
 	//
-	auto mb = QMessageBox::question(
-		m_parentWidget,
-		tr("Undo Changes"),
-		tr("Do you want to undo pending changes? All selected objects' changes will be lost!"));
+	auto mb = QMessageBox::question(m_parentWidget,
+									tr("Undo Changes"),
+									tr("Do you want to undo pending changes? All selected objects' changes will be lost!"));
 
 	if (mb == QMessageBox::No)
 	{
@@ -940,12 +925,13 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undoRowList)
 	//
 	std::vector<DbFileInfo> latestFiles = files;
 
-	latestFiles.erase(std::remove_if(latestFiles.begin(), latestFiles.end(),
-					[](const DbFileInfo& fi)
-					{
-						return fi.deleted();
-					}),
-				latestFiles.end());
+	latestFiles.erase(std::remove_if(latestFiles.begin(),
+									 latestFiles.end(),
+									 [](const DbFileInfo& fi)
+									 {
+										 return fi.deleted();
+									 }),
+					  latestFiles.end());
 
 	// Get latest version of the object
 	//
@@ -975,11 +961,12 @@ void EquipmentModel::undoChangesDeviceObject(QModelIndexList& undoRowList)
 
 		// Set latest version to the object
 		//
-		auto foundFile = std::find_if(latestFilesVersion.begin(), latestFilesVersion.end(),
-					[fileInfo](const std::shared_ptr<DbFile>& f)
-					{
-						return f->fileId() == fileInfo->fileId();
-					});
+		auto foundFile = std::find_if(latestFilesVersion.begin(),
+									  latestFilesVersion.end(),
+									  [fileInfo](const std::shared_ptr<DbFile>& f)
+									  {
+										  return f->fileId() == fileInfo->fileId();
+									  });
 
 		if (foundFile != latestFilesVersion.end())
 		{
@@ -1050,16 +1037,16 @@ void EquipmentModel::undoChangesRecursively(QModelIndex modelIndex)
 		QMessageBox::critical(m_parentWidget, tr("Undo Changes"), tr("Error, cannot find device object."));
 		return;
 	}
-	
+
 	const DbFileInfo* fileInfo = device->data();
 	assert(fileInfo);
 
 	// Ask for confirmation.
 	//
-	auto mb = QMessageBox::question(
-		m_parentWidget,
-		tr("Undo Changes"),
-		tr("Do you want to undo pending changes for the object and all its sub-objects?\nAll changes will be lost."));
+	auto mb =
+		QMessageBox::question(m_parentWidget,
+							  tr("Undo Changes"),
+							  tr("Do you want to undo pending changes for the object and all its sub-objects?\nAll changes will be lost."));
 
 	if (mb == QMessageBox::No)
 	{
@@ -1073,7 +1060,7 @@ void EquipmentModel::undoChangesRecursively(QModelIndex modelIndex)
 	{
 		return;
 	}
-	
+
 	refreshDeviceObject(QModelIndexList{} << modelIndex);
 
 	emit objectVcsStateChanged();
@@ -1083,9 +1070,9 @@ void EquipmentModel::undoChangesRecursively(QModelIndex modelIndex)
 
 	//// If the file was just added it will be removed completely from the DB
 	////
-	//std::vector<DbFileInfo> latestFiles = files;
+	// std::vector<DbFileInfo> latestFiles = files;
 
-	//latestFiles.erase(std::remove_if(latestFiles.begin(), latestFiles.end(),
+	// latestFiles.erase(std::remove_if(latestFiles.begin(), latestFiles.end(),
 	//								 [](const DbFileInfo& fi)
 	//								 {
 	//									 return fi.deleted();
@@ -1094,9 +1081,9 @@ void EquipmentModel::undoChangesRecursively(QModelIndex modelIndex)
 
 	//// Get latest version of the object
 	////
-	//std::vector<std::shared_ptr<DbFile>> latestFilesVersion;
+	// std::vector<std::shared_ptr<DbFile>> latestFilesVersion;
 
-	//if (latestFiles.empty() == false)
+	// if (latestFiles.empty() == false)
 	//{
 	//	ok = dbController()->getLatestVersion(latestFiles, &latestFilesVersion, nullptr);
 
@@ -1110,7 +1097,7 @@ void EquipmentModel::undoChangesRecursively(QModelIndex modelIndex)
 
 	//// Update FileInfo in devices and Update model
 	////
-	//for (QModelIndex& index : checkedOutList)
+	// for (QModelIndex& index : checkedOutList)
 	//{
 	//	std::shared_ptr<Hardware::DeviceObject> d = deviceObject(index);
 	//	assert(d);
@@ -1173,9 +1160,9 @@ void EquipmentModel::undoChangesRecursively(QModelIndex modelIndex)
 	//	assert(updated == true);
 	//}
 
-	//emit objectVcsStateChanged();
+	// emit objectVcsStateChanged();
 
-	//return;
+	// return;
 }
 
 void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
@@ -1242,7 +1229,7 @@ void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 
 		// Update object
 		//
-		ok = d->Load(freshFile->data());	// Refresh data in the object
+		ok = d->Load(freshFile->data()); // Refresh data in the object
 		if (ok == false)
 		{
 			Q_ASSERT(ok);
@@ -1252,7 +1239,7 @@ void EquipmentModel::refreshDeviceObject(QModelIndexList& rowList)
 		// Update fileInfo and model
 		//
 		QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
-		emit dataChanged(index, bottomRightIndex);		// Notify view about data update
+		emit dataChanged(index, bottomRightIndex); // Notify view about data update
 	}
 
 	emit objectVcsStateChanged();
@@ -1523,34 +1510,39 @@ void EquipmentModel::sortChildrenByCaption(std::shared_ptr<Hardware::DeviceObjec
 {
 	auto children = deviceObject->children();
 
-	std::stable_sort(std::begin(children), std::end(children),
-		[order](const auto& o1, const auto& o2)
-		{
-			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-			const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+	std::stable_sort(std::begin(children),
+					 std::end(children),
+					 [order](const auto& o1, const auto& o2)
+					 {
+						 const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+						 const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
 
-			if (ref1->caption() < ref2->caption())
-			{
-				return true;
-			}
-			else
-			{
-				if (ref1->caption() == ref2->caption())
-				{
-					return ref1->place() < ref2->place();
-				}
-				else
-				{
-					return false;
-				}
-			}
-		});
+						 if (ref1->caption() < ref2->caption())
+						 {
+							 return true;
+						 }
+						 else
+						 {
+							 if (ref1->caption() == ref2->caption())
+							 {
+								 return ref1->place() < ref2->place();
+							 }
+							 else
+							 {
+								 return false;
+							 }
+						 }
+					 });
 
 	// Set children back in new order
 	//
 	deviceObject->deleteAllChildren();
 
-	std::ranges::for_each(children, [&deviceObject](auto ch){	deviceObject->addChild(ch);	});
+	std::ranges::for_each(children,
+						  [&deviceObject](auto ch)
+						  {
+							  deviceObject->addChild(ch);
+						  });
 
 	return;
 }
@@ -1559,34 +1551,39 @@ void EquipmentModel::sortChildrenByType(std::shared_ptr<Hardware::DeviceObject> 
 {
 	auto children = deviceObject->children();
 
-	std::stable_sort(std::begin(children), std::end(children),
-		[order](const auto& o1, const auto& o2)
-		{
-			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-			const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+	std::stable_sort(std::begin(children),
+					 std::end(children),
+					 [order](const auto& o1, const auto& o2)
+					 {
+						 const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+						 const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
 
-			if (ref1->deviceType() < ref2->deviceType())
-			{
-				return true;
-			}
-			else
-			{
-				if (ref1->deviceType() == ref2->deviceType())
-				{
-					return ref1->equipmentIdTemplate() < ref2->equipmentIdTemplate();
-				}
-				else
-				{
-					return false;
-				}
-			}
-		});
+						 if (ref1->deviceType() < ref2->deviceType())
+						 {
+							 return true;
+						 }
+						 else
+						 {
+							 if (ref1->deviceType() == ref2->deviceType())
+							 {
+								 return ref1->equipmentIdTemplate() < ref2->equipmentIdTemplate();
+							 }
+							 else
+							 {
+								 return false;
+							 }
+						 }
+					 });
 
 	// Set children back in new order
 	//
 	deviceObject->deleteAllChildren();
 
-	std::ranges::for_each(children, [&deviceObject](auto ch){	deviceObject->addChild(ch);	});
+	std::ranges::for_each(children,
+						  [&deviceObject](auto ch)
+						  {
+							  deviceObject->addChild(ch);
+						  });
 
 	return;
 }
@@ -1595,34 +1592,39 @@ void EquipmentModel::sortChildrenByEquipmentId(std::shared_ptr<Hardware::DeviceO
 {
 	auto children = deviceObject->children();
 
-	std::stable_sort(std::begin(children), std::end(children),
-		[order](const auto& o1, const auto& o2)
-		{
-			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-			const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+	std::stable_sort(std::begin(children),
+					 std::end(children),
+					 [order](const auto& o1, const auto& o2)
+					 {
+						 const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+						 const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
 
-			if (ref1->equipmentIdTemplate() < ref2->equipmentIdTemplate())
-			{
-				return true;
-			}
-			else
-			{
-				if (ref1->equipmentIdTemplate() == ref2->equipmentIdTemplate())
-				{
-					return ref1->place() < ref2->place();
-				}
-				else
-				{
-					return false;
-				}
-			}
-		});
+						 if (ref1->equipmentIdTemplate() < ref2->equipmentIdTemplate())
+						 {
+							 return true;
+						 }
+						 else
+						 {
+							 if (ref1->equipmentIdTemplate() == ref2->equipmentIdTemplate())
+							 {
+								 return ref1->place() < ref2->place();
+							 }
+							 else
+							 {
+								 return false;
+							 }
+						 }
+					 });
 
 	// Set children back in new order
 	//
 	deviceObject->deleteAllChildren();
 
-	std::ranges::for_each(children, [&deviceObject](auto ch){	deviceObject->addChild(ch);	});
+	std::ranges::for_each(children,
+						  [&deviceObject](auto ch)
+						  {
+							  deviceObject->addChild(ch);
+						  });
 
 	return;
 }
@@ -1631,34 +1633,39 @@ void EquipmentModel::sortChildrenByPlace(std::shared_ptr<Hardware::DeviceObject>
 {
 	auto children = deviceObject->children();
 
-	std::stable_sort(std::begin(children), std::end(children),
-		[order](const auto& o1, const auto& o2)
-		{
-			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-			const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+	std::stable_sort(std::begin(children),
+					 std::end(children),
+					 [order](const auto& o1, const auto& o2)
+					 {
+						 const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+						 const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
 
-			if (ref1->place() < ref2->place())
-			{
-				return true;
-			}
-			else
-			{
-				if (ref1->place() == ref2->place())
-				{
-					return ref1->equipmentIdTemplate() < ref2->equipmentIdTemplate();
-				}
-				else
-				{
-					return false;
-				}
-			}
-		});
+						 if (ref1->place() < ref2->place())
+						 {
+							 return true;
+						 }
+						 else
+						 {
+							 if (ref1->place() == ref2->place())
+							 {
+								 return ref1->equipmentIdTemplate() < ref2->equipmentIdTemplate();
+							 }
+							 else
+							 {
+								 return false;
+							 }
+						 }
+					 });
 
 	// Set children back in new order
 	//
 	deviceObject->deleteAllChildren();
 
-	std::ranges::for_each(children, [&deviceObject](auto ch){	deviceObject->addChild(ch);	});
+	std::ranges::for_each(children,
+						  [&deviceObject](auto ch)
+						  {
+							  deviceObject->addChild(ch);
+						  });
 
 	return;
 }
@@ -1667,39 +1674,44 @@ void EquipmentModel::sortChildrenByState(std::shared_ptr<Hardware::DeviceObject>
 {
 	auto children = deviceObject->children();
 
-	std::stable_sort(std::begin(children), std::end(children),
-		[order](const auto& o1, const auto& o2)
-		{
-			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-			const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+	std::stable_sort(std::begin(children),
+					 std::end(children),
+					 [order](const auto& o1, const auto& o2)
+					 {
+						 const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+						 const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
 
-			const DbFileInfo* fileInfo1 = ref1->data();
-			const DbFileInfo* fileInfo2 = ref2->data();
-			Q_ASSERT(fileInfo1);
-			Q_ASSERT(fileInfo2);
+						 const DbFileInfo* fileInfo1 = ref1->data();
+						 const DbFileInfo* fileInfo2 = ref2->data();
+						 Q_ASSERT(fileInfo1);
+						 Q_ASSERT(fileInfo2);
 
-			if (fileInfo1->state() < fileInfo2->state())
-			{
-				return true;
-			}
-			else
-			{
-				if (fileInfo1->state() == fileInfo2->state())
-				{
-					return ref1->equipmentIdTemplate() < ref2->equipmentIdTemplate();
-				}
-				else
-				{
-					return false;
-				}
-			}
-		});
+						 if (fileInfo1->state() < fileInfo2->state())
+						 {
+							 return true;
+						 }
+						 else
+						 {
+							 if (fileInfo1->state() == fileInfo2->state())
+							 {
+								 return ref1->equipmentIdTemplate() < ref2->equipmentIdTemplate();
+							 }
+							 else
+							 {
+								 return false;
+							 }
+						 }
+					 });
 
 	// Set children back in new order
 	//
 	deviceObject->deleteAllChildren();
 
-	std::ranges::for_each(children, [&deviceObject](auto ch){	deviceObject->addChild(ch);	});
+	std::ranges::for_each(children,
+						  [&deviceObject](auto ch)
+						  {
+							  deviceObject->addChild(ch);
+						  });
 
 	return;
 }
@@ -1708,46 +1720,50 @@ void EquipmentModel::sortChildrenByUser(std::shared_ptr<Hardware::DeviceObject> 
 {
 	auto children = deviceObject->children();
 
-	std::stable_sort(std::begin(children), std::end(children),
-		[order, this](const auto& o1, const auto& o2)
-		{
-			const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
-			const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
+	std::stable_sort(std::begin(children),
+					 std::end(children),
+					 [order, this](const auto& o1, const auto& o2)
+					 {
+						 const auto& ref1 = (order == Qt::AscendingOrder ? o1 : o2);
+						 const auto& ref2 = (order == Qt::AscendingOrder ? o2 : o1);
 
-			const DbFileInfo* fileInfo1 = ref1->data();
-			const DbFileInfo* fileInfo2 = ref2->data();
-			Q_ASSERT(fileInfo1);
-			Q_ASSERT(fileInfo2);
+						 const DbFileInfo* fileInfo1 = ref1->data();
+						 const DbFileInfo* fileInfo2 = ref2->data();
+						 Q_ASSERT(fileInfo1);
+						 Q_ASSERT(fileInfo2);
 
-			auto uit1 = this->m_users.find(fileInfo1->userId());
-			auto uit2 = this->m_users.find(fileInfo2->userId());
+						 auto uit1 = this->m_users.find(fileInfo1->userId());
+						 auto uit2 = this->m_users.find(fileInfo2->userId());
 
-			QString u1 =  uit1 == this->m_users.end() ? "Unknown" : uit1->second;
-			QString u2 =  uit2 == this->m_users.end() ? "Unknown" : uit2->second;
+						 QString u1 = uit1 == this->m_users.end() ? "Unknown" : uit1->second;
+						 QString u2 = uit2 == this->m_users.end() ? "Unknown" : uit2->second;
 
-			if (u1 < u2)
-			{
-				return true;
-			}
-			else
-			{
-				if (u1 == u2)
-				{
-					return ref1->equipmentIdTemplate() < ref2->equipmentIdTemplate();
-				}
-				else
-				{
-					return false;
-				}
-			}
-
-		});
+						 if (u1 < u2)
+						 {
+							 return true;
+						 }
+						 else
+						 {
+							 if (u1 == u2)
+							 {
+								 return ref1->equipmentIdTemplate() < ref2->equipmentIdTemplate();
+							 }
+							 else
+							 {
+								 return false;
+							 }
+						 }
+					 });
 
 	// Set children back in new order
 	//
 	deviceObject->deleteAllChildren();
 
-	std::ranges::for_each(children, [&deviceObject](auto ch){	deviceObject->addChild(ch);	});
+	std::ranges::for_each(children,
+						  [&deviceObject](auto ch)
+						  {
+							  deviceObject->addChild(ch);
+						  });
 
 	return;
 }
@@ -1827,7 +1843,6 @@ void EquipmentModel::updateUserList()
 			m_users[u.userId()] = u.username();
 		}
 	}
-
 }
 
 const DbFileInfo* EquipmentModel::fileInfo(const Hardware::DeviceObject* deviceObject)

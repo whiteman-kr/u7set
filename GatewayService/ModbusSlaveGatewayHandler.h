@@ -49,11 +49,12 @@ namespace Gateway
 		virtual void run() override;
 		virtual void shutdown() override;
 
-		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
-		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
+		virtual void onAppDataSrvConnected() override;
+		virtual void onAppDataSrvDisconnected() override;
+		virtual void planNextPreparedRequest(PreparedRequest& request) override;
 
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
-		virtual void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
+		virtual void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply) override;
 
 		E::ModbusMode modbusMode() const;
 		int modbusDeviceID() const;
@@ -87,6 +88,8 @@ namespace Gateway
 
 	private:
 		bool init();
+
+		virtual void prepareRequests() override;
 
 		HostAddressPort listeningIP1() const;
 		HostAddressPort listeningIP2() const;
@@ -133,14 +136,7 @@ namespace Gateway
 		quint8 asciiEncodeX(quint8 ch);
 
 	private:
-		const SoftwareInfo m_softwareInfo;
-		HostAddressPort m_appDataService1;
-		HostAddressPort m_appDataService2;
-
 		ModbusSlaveGatewayShared m_gateway;
-		const AppSignals& m_appSignals;
-
-		AppDataServiceClientThread* m_appDataServiceClientThread = nullptr;
 
 		Modbus::TcpSlaveThread* m_tcpSlaveThread1 = nullptr;
 		Modbus::TcpSlaveThread* m_tcpSlaveThread2 = nullptr;

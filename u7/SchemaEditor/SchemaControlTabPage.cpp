@@ -4131,11 +4131,18 @@ void SchemaControlTabPage::checkInFiles()
 	// Check in file
 	//
 	std::vector<DbFileInfo> updatedFiles;
-	bool ok = CheckInDialog::checkIn(checkInFiles, false, &updatedFiles, db(), this);
+
+	// Here I left the same value key as in EditSchemaTabPage, to have the same behavior
+	//
+	bool checkInTree = QSettings{}.value("EditSchemaTabPage::checkInFile/checkInTree", false).toBool();
+
+	bool ok = CheckInDialog::checkIn(checkInFiles, &updatedFiles, checkInTree, "SchemaID", db(), this, &checkInTree);
 	if (ok == false)
 	{
 		return;
 	}
+
+	QSettings{}.setValue("EditSchemaTabPage::checkInFile/checkInTree", checkInTree);
 
 	m_filesView->refreshFiles();
 

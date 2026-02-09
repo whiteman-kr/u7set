@@ -465,7 +465,7 @@ void EditSchemaTabPage::checkInFile()
 		return;
 	}
 
-	// Save workcopy and checkin
+	// Save work-copy and checkin
 	//
 	if (modified() == true)
 	{
@@ -481,12 +481,15 @@ void EditSchemaTabPage::checkInFile()
 	files.push_back(fileInfo());
 
 	std::vector<DbFileInfo> updatedFiles;
+	bool checkInTree = QSettings{}.value("EditSchemaTabPage::checkInFile/checkInTree", false).toBool();
 
-	bool checkInResult = CheckInDialog::checkIn(files, false, &updatedFiles, db(), this);
+	bool checkInResult = CheckInDialog::checkIn(files, &updatedFiles, checkInTree, "SchemaID", db(), this, &checkInTree);
 	if (checkInResult == false)
 	{
 		return;
 	}
+
+	QSettings{}.setValue("EditSchemaTabPage::checkInFile/checkInTree", checkInTree);
 
 	emit vcsFileStateChanged();
 

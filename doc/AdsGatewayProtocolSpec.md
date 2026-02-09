@@ -1,17 +1,17 @@
-﻿# Radiy Gateway Protocol Specification
+﻿# Radiy AppDataService Gateway Protocol Specification
 
-**Document Version:**  0.1  
+**Document Version:** 1.0  
 **Protocol Version:** 1.0  
-**Date:** 12/2025  
-**Authors:** Radiy Technical Team  
-**Status:** Draft
+**Date:** 06 Feb 2026  
+**Authors:** Serhiy Malokhatko, Yuriy Beliy  
+**Status:** Released
 
 ---
 
 ## 1. Introduction
 
 ### 1.1 Purpose
-This document specifies the communication protocol between Radiy's Gateway software and external monitoring systems.
+This document specifies the communication protocol between Radiy's AppDataService Gateway software and external monitoring systems.
 
 **Protocol Version Scope:** This document describes **Protocol Version 1.0**.
 
@@ -26,7 +26,7 @@ flowchart LR
     LM2[Logic Module 2]
     LM3[Logic Module 3]
     ADS[AppDataService]
-    GW[Gateway]
+    GW[AdsGateway]
     EMS[External Monitoring System]
     
     LM1 -->|UDP| ADS
@@ -36,7 +36,7 @@ flowchart LR
     GW <-->|TCP/IP| EMS
 ```
 
-The Gateway acts as a bridge between Radiy's equipment and external monitoring systems, providing:
+The AdsGateway acts as a bridge between Radiy's equipment and external monitoring systems, providing:
 - Signal parameter retrieval
 - Signal state monitoring
 - State change retrieval
@@ -50,7 +50,7 @@ The Gateway acts as a bridge between Radiy's equipment and external monitoring s
 - **Protocol:** TCP/IP
 - **Default Port:** 5566 (configurable)
 - **Connection Model:** Server/Client
-  - **Server:** Radiy Gateway
+  - **Server:** Radiy AdsGateway
   - **Client:** External Monitoring System
 - **Connection Mode:** Persistent connection with keep-alive
 - **Maximum payload size:** 2 MB
@@ -59,9 +59,9 @@ The Gateway acts as a bridge between Radiy's equipment and external monitoring s
 TCP provides built-in transport-level data integrity and reliability. Additionally, this protocol implements application-level CRC32 checksums (Section 3.4) for end-to-end message integrity verification.
 
 ### 2.2 Connection Establishment
-1. Client initiates TCP connection to Gateway on configured port
-2. Client sends `ARGW_HANDSHAKE` request
-3. Gateway validates and responds with handshake acknowledgment
+1. Client initiates TCP connection to AdsGateway on configured port
+2. Client sends `ADSGW_HANDSHAKE` request
+3. AdsGateway validates and responds with handshake acknowledgment
 4. Connection is established and ready for data exchange
 
 ### 2.3 Connection Management
@@ -85,7 +85,7 @@ All messages (requests and responses) follow this binary structure:
 
 **Protocol Version Handling:**
 - Server implements a **single fixed protocol version** (see document header)
-- Protocol version is verified during the `ARGW_HANDSHAKE` exchange (Section 6.1)
+- Protocol version is verified during the `ADSGW_HANDSHAKE` exchange (Section 6.1)
 - Client and server must use **identical protocol versions** - no negotiation or compatibility layer
 - Version mismatch during handshake results in connection rejection
 
@@ -115,10 +115,14 @@ All messages (requests and responses) follow this binary structure:
 - **Floating-point format:** IEEE 754
 
 ### 3.4 CRC32 Calculation
-- **Algorithm:** CRC-32 (IEEE 802.3 polynomial: 0x04C11DB7)
-- **Calculation Range:** From Request ID through end of Payload
+- **Algorithm:** CRC-32 (IEEE 802.3 polynomial: 0x04C11DB7, reflected: 0xEDB88320)
+- **Input reflection**: yes (process least-significant bit first; equivalent to reflecting each byte)
+- **Output reflection**: yes (falls out of reflected processing)
 - **Initial Value:** 0xFFFFFFFF
 - **Final XOR:** 0xFFFFFFFF
+- **Calculation Range:** From Request ID through end of Payload
+
+For reference implementation, see **Appendix B**.
 
 ### 3.5 Error Response Structure
 When Status Code is non-zero (error condition):
@@ -127,8 +131,9 @@ When Status Code is non-zero (error condition):
 - No additional error message or data is transmitted
 
 **Special Cases:**
-- **Unknown Request ID:** Server responds with the unknown Request ID and Status Code = `INVALID_REQUEST` (1)
-- **CRC Failure:** Server may respond with Request ID 0x0000 and Status Code = `CRC_ERROR` (10), or close the connection
+- **Unknown Request ID:** Server responds with the unknown Request ID and Status Code = `GWC_INVALID_REQUEST` (1)
+- **Malformed Request:** Server may respond with Status Code = `GWC_REQUEST_FORMAT_ERROR` (6)
+- **CRC Failure:** Server may respond with Status Code = `GWC_CRC_ERROR` (10)
 
 ---
 
@@ -136,15 +141,15 @@ When Status Code is non-zero (error condition):
 
 ### 4.1 Request ID List
 
-| Request ID | Value (hex) | Description | Direction |
-|------------|-------------|-------------|-----------|
-| ARGW_HANDSHAKE | 0x0001 | Initial handshake | Client -> Server |
-| ARGW_SIGNAL_LIST_START | 0x0100 | Start retrieving list of AppSignalIDs | Client -> Server |
-| ARGW_SIGNAL_LIST_NEXT | 0x0101 | Continue retrieving list of AppSignalIDs | Client -> Server |
-| ARGW_SIGNAL_PARAM_START | 0x0200 | Start retrieving signal parameters | Client -> Server |
-| ARGW_SIGNAL_PARAM_NEXT | 0x0201 | Continue retrieving signal parameters | Client -> Server |
-| ARGW_SIGNAL_STATE | 0x0300 | Request signal states | Client -> Server |
-| ARGW_SIGNAL_STATE_CHANGES | 0x0301 | Request signal state changes | Client -> Server |
+| Request ID | Value (hex) | Description |
+|------------|-------------|-------------|
+| ADSGW_HANDSHAKE | 0x0001 | Initial handshake |
+| ADSGW_SIGNAL_LIST_START | 0x0100 | Start retrieving list of AppSignalIDs |
+| ADSGW_SIGNAL_LIST_NEXT | 0x0101 | Continue retrieving list of AppSignalIDs |
+| ADSGW_SIGNAL_PARAM_START | 0x0200 | Start retrieving signal parameters |
+| ADSGW_SIGNAL_PARAM_NEXT | 0x0201 | Continue retrieving signal parameters |
+| ADSGW_SIGNAL_STATE | 0x0300 | Request signal states |
+| ADSGW_SIGNAL_STATE_CHANGES | 0x0301 | Request signal state changes |
 
 ### 4.2 Response Convention
 - Response uses the same Request ID as the corresponding request
@@ -160,7 +165,7 @@ When Status Code is non-zero (error condition):
 - **Type:** C-style null-terminated string (ASCII encoding)
 - **Character Set:** Limited to ASCII characters: `#`, `A-Z`, `a-z`, `0-9`, `_` (underscore), `.` (dot)
 - **Format:** Must always start with `#` character
-- **Maximum Length:** 64 bytes including null terminator (63 usable characters + `\0`)
+- **Maximum Length:** 128 bytes including null terminator (127 usable characters + `\0`)
 - **Uniqueness:** Unique within the system
 - **Special Characters:**
   - **`#`** - Mandatory prefix for all AppSignalIDs
@@ -176,6 +181,8 @@ When Status Code is non-zero (error condition):
 **Hash Calculation Reference Implementation:**
 
 ```cpp
+#pragma once
+
 #include <cstdint>
 #include <string_view>
 
@@ -212,11 +219,12 @@ inline constexpr Hash UNDEFINED_HASH = 0x0000000000000000ULL;
 
 ## 6. Request/Response Specifications
 
-**AppDataService Connection Dependency:**
-- All requests **except** `ARGW_HANDSHAKE` require the Gateway to be connected to AppDataService.
-- If the Gateway is not connected to AppDataService, the server may respond with Status Code = `NO_ADS_CONNECTION` (3) and no payload.
+**Request Prerequisites:**
+- All requests **except** `ADSGW_HANDSHAKE` require that a successful handshake has been completed.
+- If the client has not completed the handshake, the server will respond with Status Code = `GWC_HANDSHAKE_REQUIRED` (5) and no payload.
+- Requests `ADSGW_SIGNAL_STATE` and `ADSGW_SIGNAL_STATE_CHANGES` require the AdsGateway to be connected to AppDataService. For these requests, if AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
 
-### 6.1 ARGW_HANDSHAKE
+### 6.1 ADSGW_HANDSHAKE
 
 #### Purpose
 Initial connection handshake to establish protocol version and capabilities.
@@ -226,7 +234,7 @@ Initial connection handshake to establish protocol version and capabilities.
 - Client specifies the protocol version it supports in the request
 - Server compares client version with its own implemented version:
   - **Match:** Server responds with Status Code = 0 and handshake succeeds
-  - **Mismatch:** Server responds with Status Code = `UNSUPPORTED_VERSION` (2) and connection should be closed
+  - **Mismatch:** Server responds with Status Code = `GWC_UNSUPPORTED_VERSION` (2) and connection should be closed
 - **No version negotiation or downgrading** - client and server must use identical protocol versions
 - Server and client are **incompatible** if protocol versions differ
 
@@ -234,18 +242,20 @@ Initial connection handshake to establish protocol version and capabilities.
 ```
 struct GwHandshakeRequest {
     uint16_t protocolVersion;  // Protocol version client supports (e.g., 0x0100 for v1.0)
-    char clientName[64];       // Null-terminated client name
+    uint16_t reserved1;        // Reserved for future use
+    char clientName[128];      // Null-terminated client name
 };
 
-static_assert(sizeof(GwHandshakeRequest) == 66);
+static_assert(sizeof(GwHandshakeRequest) == 132);
 ```
 
 | Offset | Size | Type | Field |
 |--------|------|------|-------|
 | 0 | 2 | `uint16_t` | `protocolVersion` |
-| 2 | 64 | `char[64]` | `clientName` |
+| 2 | 2 | `uint16_t` | `reserved1` |
+| 4 | 128 | `char[128]` | `clientName` |
 
-Total size: 66 bytes
+Total size: 132 bytes
 
 **Protocol Version Format:** 0xMMmm where MM = major version, mm = minor version
 - Example: 0x0100 = Version 1.0 (current)
@@ -258,7 +268,7 @@ struct GwHandshakeResponse {
     uint16_t protocolVersion;          // Server protocol version (must match request for success)
     uint16_t reserved;                 // Reserved (must be 0)
 
-    uint32_t maxStateRequest;          // Max signal states per request (ARGW_SIGNAL_STATE)
+    uint32_t maxStateRequest;          // Max signal states per request (ADSGW_SIGNAL_STATE)
 
     // Structure size compatibility fields (bytes)
     uint32_t sizeof_GwAppSignalParam;  // See Section 7.1
@@ -282,23 +292,23 @@ Total size: 16 bytes
 
 | Field | Expected value (bytes) | Notes |
 |------|-------------------------|-------|
-| `sizeof_GwAppSignalParam` | 896 | See Section 7.1 |
+| `sizeof_GwAppSignalParam` | 1208 | See Section 7.1 |
 | `sizeof_GwAppSignalState` | 48 | See Section 7.2 |
 
 **Compatibility Check (Client):**
 - Client can compare `sizeof_GwAppSignalParam` and `sizeof_GwAppSignalState` against its locally compiled `sizeof(GwAppSignalParam)` and `sizeof(GwAppSignalState)`.
 - A mismatch indicates protocol incompatibility (likely packing/alignment or definition mismatch) and the client should reject the connection.
 - If client version == server version: Status Code = 0, handshake response with matching version
-- If client version ≠ server version: Status Code = 2 (`UNSUPPORTED_VERSION`), no payload
+- If client version ≠ server version: Status Code = 2 (`GWC_UNSUPPORTED_VERSION`), no payload
 
 ---
 
-### 6.2 ARGW_SIGNAL_LIST_START / ARGW_SIGNAL_LIST_NEXT
+### 6.2 ADSGW_SIGNAL_LIST_START / ADSGW_SIGNAL_LIST_NEXT
 
 #### Purpose
 Retrieve complete list of all AppSignalIDs (Application Signal Identifiers) available in the system. Uses pagination for large signal sets.
 
-#### Request Payload (ARGW_SIGNAL_LIST_START)
+#### Request Payload (ADSGW_SIGNAL_LIST_START)
 ```
 struct GwSignalListStartRequest {
     uint32_t reserved;
@@ -313,7 +323,7 @@ static_assert(sizeof(GwSignalListStartRequest) == 4);
 
 Total size: 4 bytes
 
-#### Response Payload (ARGW_SIGNAL_LIST_START)
+#### Response Payload (ADSGW_SIGNAL_LIST_START)
 ```
 struct GwSignalListStartResponse {
     uint32_t totalItemCount;    // Total number of AppSignalIDs in system
@@ -333,13 +343,13 @@ static_assert(sizeof(GwSignalListStartResponse) == 12);
 Total size: 12 bytes
 
 **Usage:**
-- Client sends `ARGW_SIGNAL_LIST_START` to initiate list retrieval
+- Client sends `ADSGW_SIGNAL_LIST_START` to initiate list retrieval
 - Server responds with pagination information (total count, number of parts, items per part)
-- Client then uses `ARGW_SIGNAL_LIST_NEXT` to retrieve each part sequentially
+- Client then uses `ADSGW_SIGNAL_LIST_NEXT` to retrieve each part sequentially
 
 ---
 
-#### Request Payload (ARGW_SIGNAL_LIST_NEXT)
+#### Request Payload (ADSGW_SIGNAL_LIST_NEXT)
 ```
 struct GwSignalListNextRequest {
     uint32_t part;              // Part number to retrieve (0-based index)
@@ -358,7 +368,7 @@ Total size: 4 bytes
 - Valid range: 0 to (partCount - 1)
 - Client should retrieve parts sequentially: part=0, part=1, ..., part=(partCount-1)
 
-#### Response Payload (ARGW_SIGNAL_LIST_NEXT)
+#### Response Payload (ADSGW_SIGNAL_LIST_NEXT)
 ```
 struct GwSignalListNextResponse {
     uint32_t part;              // Part number of this response
@@ -366,7 +376,7 @@ struct GwSignalListNextResponse {
     
     // Array of AppSignalID strings
     struct {
-        char appSignalId[64];  // AppSignalID (null-terminated, max 64 bytes including '\0')
+        char appSignalId[128];  // AppSignalID (null-terminated, max 128 bytes including '\0')
     } appSignalIds[appSignalIdCount];
 };
 ```
@@ -375,33 +385,33 @@ struct GwSignalListNextResponse {
 |--------|------|------|-------|
 | 0 | 4 | `uint32_t` | `part` |
 | 4 | 4 | `uint32_t` | `appSignalIdCount` |
-| 8 | `appSignalIdCount * 64` | `char[64]` | `appSignalIds[]` |
+| 8 | `appSignalIdCount * 128` | `char[128]` | `appSignalIds[]` |
 
-Total size: `8 + (appSignalIdCount * 64)` bytes
+Total size: `8 + (appSignalIdCount * 128)` bytes
 
 **Response Behavior:**
 - Server returns the requested part number along with the AppSignalIDs for that part
-- Each AppSignalID is a C-style null-terminated string with fixed 64-byte size (as defined in Section 5.1)
+- Each AppSignalID is a C-style null-terminated string with fixed 128-byte size (as defined in Section 5.1)
 - Last part may contain fewer items than `itemsPerPart` if total count is not evenly divisible
 
 **Example Flow:**
 ```
-Client -> Server: ARGW_SIGNAL_LIST_START ()
-Server -> Client: ARGW_SIGNAL_LIST_START (totalItemCount=1250, partCount=3, itemsPerPart=500)
+Client -> Server: ADSGW_SIGNAL_LIST_START ()
+Server -> Client: ADSGW_SIGNAL_LIST_START (totalItemCount=1250, partCount=3, itemsPerPart=500)
 
-Client -> Server: ARGW_SIGNAL_LIST_NEXT (part=0)
-Server -> Client: ARGW_SIGNAL_LIST_NEXT (part=0, 500 AppSignalIDs)
+Client -> Server: ADSGW_SIGNAL_LIST_NEXT (part=0)
+Server -> Client: ADSGW_SIGNAL_LIST_NEXT (part=0, 500 AppSignalIDs)
 
-Client -> Server: ARGW_SIGNAL_LIST_NEXT (part=1)
-Server -> Client: ARGW_SIGNAL_LIST_NEXT (part=1, 500 AppSignalIDs)
+Client -> Server: ADSGW_SIGNAL_LIST_NEXT (part=1)
+Server -> Client: ADSGW_SIGNAL_LIST_NEXT (part=1, 500 AppSignalIDs)
 
-Client -> Server: ARGW_SIGNAL_LIST_NEXT (part=2)
-Server -> Client: ARGW_SIGNAL_LIST_NEXT (part=2, 250 AppSignalIDs)
+Client -> Server: ADSGW_SIGNAL_LIST_NEXT (part=2)
+Server -> Client: ADSGW_SIGNAL_LIST_NEXT (part=2, 250 AppSignalIDs)
 ```
 
 ---
 
-### 6.3 ARGW_SIGNAL_PARAM_START / ARGW_SIGNAL_PARAM_NEXT
+### 6.3 ADSGW_SIGNAL_PARAM_START / ADSGW_SIGNAL_PARAM_NEXT
 
 #### Purpose
 Retrieve detailed descriptions and parameters for all signals. Uses pagination similar to signal list retrieval.
@@ -410,7 +420,7 @@ For the complete `GwAppSignalParam` structure definition, see **Section 7.1**.
 
 ---
 
-#### Request Payload (ARGW_SIGNAL_PARAM_START)
+#### Request Payload (ADSGW_SIGNAL_PARAM_START)
 ```
 struct GwSignalParamStartRequest {
     uint32_t reserved;
@@ -425,7 +435,7 @@ static_assert(sizeof(GwSignalParamStartRequest) == 4);
 
 Total size: 4 bytes
 
-#### Response Payload (ARGW_SIGNAL_PARAM_START)
+#### Response Payload (ADSGW_SIGNAL_PARAM_START)
 ```
 struct GwSignalParamStartResponse {
     uint32_t totalItemCount;    // Total number of GwAppSignalParams in system
@@ -445,13 +455,13 @@ static_assert(sizeof(GwSignalParamStartResponse) == 12);
 Total size: 12 bytes
 
 **Usage:**
-- Client sends `ARGW_SIGNAL_PARAM_START` to initiate parameter retrieval
+- Client sends `ADSGW_SIGNAL_PARAM_START` to initiate parameter retrieval
 - Server responds with pagination information (total count, number of parts, items per part)
-- Client then uses `ARGW_SIGNAL_PARAM_NEXT` to retrieve each part sequentially
+- Client then uses `ADSGW_SIGNAL_PARAM_NEXT` to retrieve each part sequentially
 
 ---
 
-#### Request Payload (ARGW_SIGNAL_PARAM_NEXT)
+#### Request Payload (ADSGW_SIGNAL_PARAM_NEXT)
 ```
 struct GwSignalParamNextRequest {
     uint32_t part;              // Part number to retrieve (0-based index)
@@ -470,7 +480,7 @@ Total size: 4 bytes
 - Valid range: 0 to (partCount - 1)
 - Client should retrieve parts sequentially: part=0, part=1, ..., part=(partCount-1)
 
-#### Response Payload (ARGW_SIGNAL_PARAM_NEXT)
+#### Response Payload (ADSGW_SIGNAL_PARAM_NEXT)
 ```
 struct GwSignalParamNextResponse {
     uint32_t part;              // Part number of this response
@@ -496,22 +506,22 @@ Total size: `8 + (paramCount * sizeof(GwAppSignalParam))` bytes
 
 **Example Flow:**
 ```
-Client -> Server: ARGW_SIGNAL_PARAM_START ()
-Server -> Client: ARGW_SIGNAL_PARAM_START (totalItemCount=1200, partCount=3, itemsPerPart=500)
+Client -> Server: ADSGW_SIGNAL_PARAM_START ()
+Server -> Client: ADSGW_SIGNAL_PARAM_START (totalItemCount=1200, partCount=3, itemsPerPart=500)
 
-Client -> Server: ARGW_SIGNAL_PARAM_NEXT (part=0)
-Server -> Client: ARGW_SIGNAL_PARAM_NEXT (part=0, 500 GwAppSignalParams)
+Client -> Server: ADSGW_SIGNAL_PARAM_NEXT (part=0)
+Server -> Client: ADSGW_SIGNAL_PARAM_NEXT (part=0, 500 GwAppSignalParams)
 
-Client -> Server: ARGW_SIGNAL_PARAM_NEXT (part=1)
-Server -> Client: ARGW_SIGNAL_PARAM_NEXT (part=1, 500 GwAppSignalParams)
+Client -> Server: ADSGW_SIGNAL_PARAM_NEXT (part=1)
+Server -> Client: ADSGW_SIGNAL_PARAM_NEXT (part=1, 500 GwAppSignalParams)
 
-Client -> Server: ARGW_SIGNAL_PARAM_NEXT (part=2)
-Server -> Client: ARGW_SIGNAL_PARAM_NEXT (part=2, 200 GwAppSignalParams)
+Client -> Server: ADSGW_SIGNAL_PARAM_NEXT (part=2)
+Server -> Client: ADSGW_SIGNAL_PARAM_NEXT (part=2, 200 GwAppSignalParams)
 ```
 
 ---
 
-### 6.4 ARGW_SIGNAL_STATE
+### 6.4 ADSGW_SIGNAL_STATE
 
 #### Purpose
 Request current states of specific signals by their hashes.
@@ -523,7 +533,8 @@ For the complete `GwAppSignalState` structure definition, see **Section 7.2**.
 #### Request Payload
 ```
 struct GwSignalStateRequest {
-    uint32_t  signalCount;               // Number of signals requested
+    uint32_t signalCount;               // Number of signals requested
+    uint32_t reserved1;                 // Reserved for future use
     uint64_t signalHashes[signalCount]; // Array of signal hashes
 };
 ```
@@ -531,19 +542,22 @@ struct GwSignalStateRequest {
 | Offset | Size | Type | Field |
 |--------|------|------|-------|
 | 0 | 4 | `uint32_t` | `signalCount` |
-| 4 | `signalCount * 8` | `uint64_t` | `signalHashes[]` |
+| 4 | 4 | `uint32_t` | `reserved1` |
+| 8 | `signalCount * 8` | `uint64_t` | `signalHashes[]` |
 
-Total size: `4 + (signalCount * 8)` bytes
+Total size: `8 + (signalCount * 8)` bytes
 
 **Request Behavior:**
 - Client specifies an array of signal hashes to request
-- **Maximum number of signals per request**: The `signalCount` must not exceed the `maxStateRequest` value received in the `GwHandshakeResponse` (Section 6.1). Requests exceeding this limit will result in error code `TOO_MANY_SIGNALS` (4).
+- **Maximum number of signals per request**: The `signalCount` must not exceed the `maxStateRequest` value received in the `GwHandshakeResponse` (Section 6.1). Requests exceeding this limit will result in error code `GWC_TOO_MANY_SIGNALS` (4).
 - **Missing signals**: If a requested signal hash is not found in the system, no error is reported. The signal is simply skipped in the response.
+- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
 
 #### Response Payload
 ```
 struct GwSignalStateResponse {
     uint32_t stateCount;        // Number of states returned
+    uint32_t reserved1;         // Reserved for future use
     
     // Array of GwAppSignalState structures
     GwAppSignalState states[stateCount];
@@ -553,9 +567,10 @@ struct GwSignalStateResponse {
 | Offset | Size | Type | Field |
 |--------|------|------|-------|
 | 0 | 4 | `uint32_t` | `stateCount` |
-| 4 | `stateCount * sizeof(GwAppSignalState)` | `GwAppSignalState` | `states[]` |
+| 4 | 4 | `uint32_t` | `reserved1` |
+| 8 | `stateCount * sizeof(GwAppSignalState)` | `GwAppSignalState` | `states[]` |
 
-Total size: `4 + (stateCount * sizeof(GwAppSignalState))` bytes
+Total size: `8 + (stateCount * sizeof(GwAppSignalState))` bytes
 
 **Response Behavior:**
 - Server returns states for all **found** signals
@@ -566,21 +581,21 @@ Total size: `4 + (stateCount * sizeof(GwAppSignalState))` bytes
 **Example Flow:**
 ```
 // All signals found
-Client -> Server: ARGW_SIGNAL_STATE (signalCount=3, hashes=[0x123, 0x456, 0x789])
-Server -> Client: ARGW_SIGNAL_STATE (Status=0, stateCount=3, states=[...])
+Client -> Server: ADSGW_SIGNAL_STATE (signalCount=3, hashes=[0x123, 0x456, 0x789])
+Server -> Client: ADSGW_SIGNAL_STATE (Status=0, stateCount=3, states=[...])
 
 // One signal not found (0x999 doesn't exist)
-Client -> Server: ARGW_SIGNAL_STATE (signalCount=3, hashes=[0x123, 0x456, 0x999])
-Server -> Client: ARGW_SIGNAL_STATE (Status=0, stateCount=2, states=[0x123, 0x456])
+Client -> Server: ADSGW_SIGNAL_STATE (signalCount=3, hashes=[0x123, 0x456, 0x999])
+Server -> Client: ADSGW_SIGNAL_STATE (Status=0, stateCount=2, states=[0x123, 0x456])
 
 // No signals found
-Client -> Server: ARGW_SIGNAL_STATE (signalCount=2, hashes=[0x999, 0x888])
-Server -> Client: ARGW_SIGNAL_STATE (Status=0, stateCount=0)
+Client -> Server: ADSGW_SIGNAL_STATE (signalCount=2, hashes=[0x999, 0x888])
+Server -> Client: ADSGW_SIGNAL_STATE (Status=0, stateCount=0)
 ```
 
 ---
 
-### 6.5 ARGW_SIGNAL_STATE_CHANGES
+### 6.5 ADSGW_SIGNAL_STATE_CHANGES
 
 #### Purpose
 Fetch accumulated signal state changes from the server's queue for the client connection.
@@ -616,6 +631,7 @@ Total size: 4 bytes
 **Request Behavior:**
 - Client sends request to retrieve accumulated state changes
 - Server returns pending changes from the client's dedicated queue
+- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
 
 ---
 
@@ -661,57 +677,62 @@ The `GwAppSignalParam` structure contains detailed parameters and metadata for e
 
 ```cpp
 struct GwAppSignalParam {
-    uint64_t hash;                // Signal hash (as defined in Section 5.2)
-    char     appSignalId[64];     // AppSignalID (ASCII, null-terminated, as defined in Section 5.1)
-    char     customSignalId[64];  // Custom Signal ID (UTF-8, null-terminated)
+    uint64_t hash;              // Signal hash (as defined in Section 5.2)
+    char appSignalId[128];      // AppSignalID (ASCII, null-terminated, as defined in Section 5.1)
+    char customSignalId[128];   // Custom Signal ID (UTF-8, null-terminated)
 
-    char     caption[256];        // Signal caption/description (UTF-8, null-terminated)
-    char     equipmentId[64];     // EquipmentID (ASCII, null-terminated)
-    char     lmEquipmentId[64];   // LogicModule EquipmentID (ASCII, null-terminated)
-    char     units[64];           // Engineering units (UTF-8, null-terminated)
-    char     tags[256];           // Tags, space-separated (ASCII, null-terminated)
+    char caption[256];          // Signal caption/description (UTF-8, null-terminated)
+    char equipmentId[128];      // EquipmentID (ASCII, null-terminated)
+    char lmEquipmentId[128];    // LogicModule EquipmentID (ASCII, null-terminated)
+    char units[128];            // Engineering units (UTF-8, null-terminated)
+    char tags[256];             // Tags, space-separated (ASCII, null-terminated)
 
-    uint8_t  channel;             // Channel code (see Section 7.3)
-    uint8_t  inOutType;           // I/O type code (see Section 7.4)
-    uint8_t  type;                // Signal type code (see Section 7.5)
-    uint8_t  decimalPlaces;       // Number of decimal places for analog signals
+    uint8_t channel;            // Channel code (see Section 7.3)
+    uint8_t inOutType;          // I/O type code (see Section 7.4)
+    uint8_t type;               // Signal type code (see Section 7.5)
+    uint8_t decimalPlaces;      // Number of decimal places for analog signals
 
-    double   lowValidRange;       // Low valid range for analog signals
-    double   highValidRange;      // High valid range for analog signals
+    uint8_t tuning;             // Tuning flag (0 = non-tunable, 1 = tunable)
+    uint8_t reserved1;
+    uint8_t reserved2;
+    uint8_t reserved3;
 
-    uint8_t  tuning;              // Tuning flag (0 = non-tunable, 1 = tunable)
-    double   tuningDefaultValue;  // Default tuning value
-    double   tuningLowBound;      // Low bound for tuning value
-    double   tuningHighBound;     // High bound for tuning value
+    double lowValidRange;       // Low valid range for analog signals
+    double highValidRange;      // High valid range for analog signals
+
+    double tuningDefaultValue;  // Default tuning value
+    double tuningLowBound;      // Low bound for tuning value
+    double tuningHighBound;     // High bound for tuning value
 };
 
-static_assert(sizeof(GwAppSignalParam) == 896);
+static_assert(sizeof(GwAppSignalParam) == 1208);
 ```
 
 | Offset | Size | Type | Field |
 |--------|------|------|-------|
 | 0 | 8 | `uint64_t` | `hash` |
-| 8 | 64 | `char[64]` | `appSignalId` |
-| 72 | 64 | `char[64]` | `customSignalId` |
-| 136 | 256 | `char[256]` | `caption` |
-| 392 | 64 | `char[64]` | `equipmentId` |
-| 456 | 64 | `char[64]` | `lmEquipmentId` |
-| 520 | 64 | `char[64]` | `units` |
-| 584 | 256 | `char[256]` | `tags` |
-| 840 | 1 | `uint8_t` | `channel` |
-| 841 | 1 | `uint8_t` | `inOutType` |
-| 842 | 1 | `uint8_t` | `type` |
-| 843 | 1 | `uint8_t` | `decimalPlaces` |
-| 844 | 4 | Padding | (alignment) |
-| 848 | 8 | `double` | `lowValidRange` |
-| 856 | 8 | `double` | `highValidRange` |
-| 864 | 1 | `uint8_t` | `tuning` |
-| 865 | 7 | Padding | (alignment) |
-| 872 | 8 | `double` | `tuningDefaultValue` |
-| 880 | 8 | `double` | `tuningLowBound` |
-| 888 | 8 | `double` | `tuningHighBound` |
+| 8 | 128 | `char[128]` | `appSignalId` |
+| 136 | 128 | `char[128]` | `customSignalId` |
+| 264 | 256 | `char[256]` | `caption` |
+| 520 | 128 | `char[128]` | `equipmentId` |
+| 648 | 128 | `char[128]` | `lmEquipmentId` |
+| 776 | 128 | `char[128]` | `units` |
+| 904 | 256 | `char[256]` | `tags` |
+| 1160 | 1 | `uint8_t` | `channel` |
+| 1161 | 1 | `uint8_t` | `inOutType` |
+| 1162 | 1 | `uint8_t` | `type` |
+| 1163 | 1 | `uint8_t` | `decimalPlaces` |
+| 1164 | 1 | `uint8_t` | `tuning` |
+| 1165 | 1 | `uint8_t` | `reserved1` |
+| 1166 | 1 | `uint8_t` | `reserved2` |
+| 1167 | 1 | `uint8_t` | `reserved3` |
+| 1168 | 8 | `double` | `lowValidRange` |
+| 1176 | 8 | `double` | `highValidRange` |
+| 1184 | 8 | `double` | `tuningDefaultValue` |
+| 1192 | 8 | `double` | `tuningLowBound` |
+| 1200 | 8 | `double` | `tuningHighBound` |
 
-Total size: 896 bytes
+Total size: 1208 bytes
 
 **String Field Encoding:**
 - **ASCII (7-bit) fields:** `appSignalId`, `equipmentId`, `lmEquipmentId`, `tags`
@@ -727,7 +748,7 @@ The `GwAppSignalState` structure contains the current state and value of a signa
 ```cpp
 struct GwAppSignalState {
     uint64_t hash;                    // Signal hash (as defined in Section 5.2)
-    int64_t  systemTime;              // Server system time (UTC+0) when the state was acquired ()
+    int64_t  systemTime;              // Server system time (UTC+0) when the state was acquired
     int64_t  localTime;               // systemTime adjusted to Local time zone
     int64_t  plantTime;               // Timestamp assigned in LogicModule (local time zone)
     double   value;                   // Signal value (for discrete: 0=false, 1=true)
@@ -817,13 +838,15 @@ Error responses are identified by a non-zero Status Code in the message header (
 
 | Code | Name | Description |
 |------|------|-------------|
-| 0 | SUCCESS | Operation successful |
-| 1 | INVALID_REQUEST | Request format is invalid |
-| 2 | UNSUPPORTED_VERSION | Protocol version not supported |
-| 3 | NO_ADS_CONNECTION | Gateway not connected to AppDataService |
-| 4 | TOO_MANY_SIGNALS | Request exceeds max signals limit |
-| 7 | INTERNAL_ERROR | Internal server error |
-| 10 | CRC_ERROR | CRC checksum verification failed |
+| 0 | GWC_SUCCESS | Operation successful |
+| 1 | GWC_INVALID_REQUEST | Request format is invalid |
+| 2 | GWC_UNSUPPORTED_VERSION | Protocol version not supported |
+| 3 | GWC_NO_ADS_CONNECTION | AdsGateway not connected to AppDataService |
+| 4 | GWC_TOO_MANY_SIGNALS | Request exceeds max signals limit |
+| 5 | GWC_HANDSHAKE_REQUIRED | Handshake must be completed before this request |
+| 6 | GWC_REQUEST_FORMAT_ERROR | Request format is invalid |
+| 7 | GWC_INTERNAL_ERROR | Internal server error |
+| 10 | GWC_CRC_ERROR | CRC checksum verification failed |
 
 ---
 
@@ -833,14 +856,14 @@ Error responses are identified by a non-zero Status Code in the message header (
 LogicModules provide two redundant communication channels connected to separate AppDataServices.
 
 **Implementation Options:**
-1. **Single Channel Mode:** Gateway uses one AppDataService, provides simplified operation
-2. **Redundant Mode:** Gateway monitors both channels, implements failover logic
+1. **Single Channel Mode:** AdsGateway uses one AppDataService, provides simplified operation
+2. **Redundant Mode:** AdsGateway monitors both channels, implements failover logic
 
 **Decision Required:** To be confirmed based on system requirements and reliability goals.
 
 ### 9.2 Connection Redundancy
 - Client should support automatic reconnection on connection loss
-- Gateway should handle multiple simultaneous client connections
+- AdsGateway should handle multiple simultaneous client connections
 
 ---
 
@@ -851,29 +874,190 @@ LogicModules provide two redundant communication channels connected to separate 
 #### A.1 Initial Connection and Setup
 ```mermaid
 flowchart TD
-    H[ARGW_HANDSHAKE] --> A[ARGW_SIGNAL_LIST_START]
-    A --> B[ARGW_SIGNAL_LIST_NEXT, parts 0..N-1]
-    B --> C[ARGW_SIGNAL_PARAM_START]
-    C --> D[ARGW_SIGNAL_PARAM_NEXT, parts 0..M-1]
-    D --> E[ARGW_SIGNAL_STATE_CHANGES]
+    H[ADSGW_HANDSHAKE] --> A[ADSGW_SIGNAL_LIST_START]
+    A --> B[ADSGW_SIGNAL_LIST_NEXT, parts 0..N-1]
+    B --> C[ADSGW_SIGNAL_PARAM_START]
+    C --> D[ADSGW_SIGNAL_PARAM_NEXT, parts 0..M-1]
+    D --> E[ADSGW_SIGNAL_STATE_CHANGES]
     E --> F{pending states?}
     F -- YES --> E
-    F -- NO --> G[ARGW_SIGNAL_STATE]
+    F -- NO --> G[ADSGW_SIGNAL_STATE]
     G --> E
 ```
 
 **Usage Recommendation:**
-- `ARGW_SIGNAL_STATE_CHANGES` is suitable for efficiently receiving only changed states and reducing bandwidth.
-- However, it is **strongly recommended** to periodically refresh full signal states using `ARGW_SIGNAL_STATE` (e.g., every few seconds or minutes) to:
+- `ADSGW_SIGNAL_STATE_CHANGES` is suitable for efficiently receiving only changed states and reducing bandwidth.
+- However, it is **strongly recommended** to periodically refresh full signal states using `ADSGW_SIGNAL_STATE` (e.g., every few seconds or minutes) to:
   - Resynchronize after potential missed changes (queue overflows, network issues).
   - Validate that client state remains consistent with the server.
-  - Recover from any lost `ARGW_SIGNAL_STATE_CHANGES` requests or replies.
+  - Recover from any lost `ADSGW_SIGNAL_STATE_CHANGES` requests or replies.
 
+---
+
+### Appendix B: CRC32 Reference Implementation
+
+**CRC32 Reference Implementation:**
+
+```cpp
+// GwCrc32.hpp
+//
+#pragma once
+
+#include <span>
+#include <cstdint>
+
+/*
+    Name              : CRC-32
+    Poly              : 0x04C11DB7 (reflected: 0xEDB88320)
+    Input reflection  : yes
+    Output reflection : yes
+    Init              : 0xFFFFFFFF
+    XorOut            : 0xFFFFFFFF
+    Check             : 0xCBF43926 ("123456789")
+*/
+
+namespace Radiy 
+{
+    constexpr uint32_t Crc32Residue = 0x2144DF1C;   // Expected residue when appending CRC to data
+    constexpr uint32_t Crc32Init = 0xFFFFFFFF;      // Initial CRC value
+    constexpr uint32_t Crc32FinalXor = 0xFFFFFFFF;  // Final XOR value
+
+    /**
+     * Calculates the CRC-32 checksum for the given data.
+     *
+     * @param data Input data as a span of bytes.
+     * @param finalize Whether to finalize the CRC calculation (default: true).
+     * @param initialCrc Initial CRC value (default: Crc32Init).
+     * @return The computed CRC-32 checksum.
+     */
+    uint32_t CRC32(std::span<const std::byte> data, bool finalize = true, uint32_t initialCrc = Crc32Init);
+
+    /**
+     * Convenience overload for char data (text/strings).
+     *
+     * @param data Input data as a span of char.
+     * @param finalize Whether to finalize the CRC calculation (default: true).
+     * @param initialCrc Initial CRC value (default: Crc32Init).
+     * @return The computed CRC-32 checksum.
+     */
+    uint32_t CRC32(std::span<const char> data, bool finalize = true, uint32_t initialCrc = Crc32Init);
+
+    /**
+     * C-style interface with pointer and size.
+     *
+     * @param data Pointer to the input data buffer.
+     * @param length Length of the input data buffer in bytes.
+     * @param finalize Whether to finalize the CRC calculation (default: true).
+     * @param initialCrc Initial CRC value (default: Crc32Init).
+     * @return The computed CRC-32 checksum.
+     */
+    uint32_t CRC32(const char* data, size_t length, bool finalize = true, uint32_t initialCrc = Crc32Init);
+} // namespace Radiy
+```
+
+```cpp
+// GwCrc32.cpp
+//
+#include "GwCrc32.hpp"
+
+#include <array>
+
+namespace
+{
+    // Pre-computed CRC-32 lookup table for polynomial 0xEDB88320 (reflected)
+    //
+    constexpr std::array<uint32_t, 256> Crc32Table =
+    {
+        0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3,
+        0x0EDB8832, 0x79DCB8A4, 0xE0D5E91E, 0x97D2D988, 0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91,
+        0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D, 0x6DDDE4EB, 0xF4D4B551, 0x83D385C7,
+        0x136C9856, 0x646BA8C0, 0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9, 0xFA0F3D63, 0x8D080DF5,
+        0x3B6E20C8, 0x4C69105E, 0xD56041E4, 0xA2677172, 0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B,
+        0x35B5A8FA, 0x42B2986C, 0xDBBBC9D6, 0xACBCF940, 0x32D86CE3, 0x45DF5C75, 0xDCD60DCF, 0xABD13D59,
+        0x26D930AC, 0x51DE003A, 0xC8D75180, 0xBFD06116, 0x21B4F4B5, 0x56B3C423, 0xCFBA9599, 0xB8BDA50F,
+        0x2802B89E, 0x5F058808, 0xC60CD9B2, 0xB10BE924, 0x2F6F7C87, 0x58684C11, 0xC1611DAB, 0xB6662D3D,
+        0x76DC4190, 0x01DB7106, 0x98D220BC, 0xEFD5102A, 0x71B18589, 0x06B6B51F, 0x9FBFE4A5, 0xE8B8D433,
+        0x7807C9A2, 0x0F00F934, 0x9609A88E, 0xE10E9818, 0x7F6A0DBB, 0x086D3D2D, 0x91646C97, 0xE6635C01,
+        0x6B6B51F4, 0x1C6C6162, 0x856530D8, 0xF262004E, 0x6C0695ED, 0x1B01A57B, 0x8208F4C1, 0xF50FC457,
+        0x65B0D9C6, 0x12B7E950, 0x8BBEB8EA, 0xFCB9887C, 0x62DD1DDF, 0x15DA2D49, 0x8CD37CF3, 0xFBD44C65,
+        0x4DB26158, 0x3AB551CE, 0xA3BC0074, 0xD4BB30E2, 0x4ADFA541, 0x3DD895D7, 0xA4D1C46D, 0xD3D6F4FB,
+        0x4369E96A, 0x346ED9FC, 0xAD678846, 0xDA60B8D0, 0x44042D73, 0x33031DE5, 0xAA0A4C5F, 0xDD0D7CC9,
+        0x5005713C, 0x270241AA, 0xBE0B1010, 0xC90C2086, 0x5768B525, 0x206F85B3, 0xB966D409, 0xCE61E49F,
+        0x5EDEF90E, 0x29D9C998, 0xB0D09822, 0xC7D7A8B4, 0x59B33D17, 0x2EB40D81, 0xB7BD5C3B, 0xC0BA6CAD,
+        0xEDB88320, 0x9ABFB3B6, 0x03B6E20C, 0x74B1D29A, 0xEAD54739, 0x9DD277AF, 0x04DB2615, 0x73DC1683,
+        0xE3630B12, 0x94643B84, 0x0D6D6A3E, 0x7A6A5AA8, 0xE40ECF0B, 0x9309FF9D, 0x0A00AE27, 0x7D079EB1,
+        0xF00F9344, 0x8708A3D2, 0x1E01F268, 0x6906C2FE, 0xF762575D, 0x806567CB, 0x196C3671, 0x6E6B06E7,
+        0xFED41B76, 0x89D32BE0, 0x10DA7A5A, 0x67DD4ACC, 0xF9B9DF6F, 0x8EBEEFF9, 0x17B7BE43, 0x60B08ED5,
+        0xD6D6A3E8, 0xA1D1937E, 0x38D8C2C4, 0x4FDFF252, 0xD1BB67F1, 0xA6BC5767, 0x3FB506DD, 0x48B2364B,
+        0xD80D2BDA, 0xAF0A1B4C, 0x36034AF6, 0x41047A60, 0xDF60EFC3, 0xA867DF55, 0x316E8EEF, 0x4669BE79,
+        0xCB61B38C, 0xBC66831A, 0x256FD2A0, 0x5268E236, 0xCC0C7795, 0xBB0B4703, 0x220216B9, 0x5505262F,
+        0xC5BA3BBE, 0xB2BD0B28, 0x2BB45A92, 0x5CB36A04, 0xC2D7FFA7, 0xB5D0CF31, 0x2CD99E8B, 0x5BDEAE1D,
+        0x9B64C2B0, 0xEC63F226, 0x756AA39C, 0x026D930A, 0x9C0906A9, 0xEB0E363F, 0x72076785, 0x05005713,
+        0x95BF4A82, 0xE2B87A14, 0x7BB12BAE, 0x0CB61B38, 0x92D28E9B, 0xE5D5BE0D, 0x7CDCEFB7, 0x0BDBDF21,
+        0x86D3D2D4, 0xF1D4E242, 0x68DDB3F8, 0x1FDA836E, 0x81BE16CD, 0xF6B9265B, 0x6FB077E1, 0x18B74777,
+        0x88085AE6, 0xFF0F6A70, 0x66063BCA, 0x11010B5C, 0x8F659EFF, 0xF862AE69, 0x616BFFD3, 0x166CCF45,
+        0xA00AE278, 0xD70DD2EE, 0x4E048354, 0x3903B3C2, 0xA7672661, 0xD06016F7, 0x4969474D, 0x3E6E77DB,
+        0xAED16A4A, 0xD9D65ADC, 0x40DF0B66, 0x37D83BF0, 0xA9BCAE53, 0xDEBB9EC5, 0x47B2CF7F, 0x30B5FFE9,
+        0xBDBDF21C, 0xCABAC28A, 0x53B39330, 0x24B4A3A6, 0xBAD03605, 0xCDD70693, 0x54DE5729, 0x23D967BF,
+        0xB3667A2E, 0xC4614AB8, 0x5D681B02, 0x2A6F2B94, 0xB40BBE37, 0xC30C8EA1, 0x5A05DF1B, 0x2D02EF8D
+    };
+
+    constexpr uint32_t CRC32_Impl(const char* buffer, size_t length, bool finalize, uint32_t initialCrc)
+    {
+        uint32_t crc = initialCrc;
+
+        while (length--)
+        {
+            crc = (crc >> 8) ^ Crc32Table[(crc ^ static_cast<uint8_t>(*buffer)) & 0xFF];
+            buffer++;
+        }
+
+        return finalize ? (crc ^ Radiy::Crc32FinalXor) : crc;
+    }
+
+    // Standard test vector: CRC32("123456789") should equal 0xCBF43926
+    //
+    static_assert(CRC32_Impl("123456789", 9, true, Radiy::Crc32FinalXor) == 0xCBF43926);
+
+    // Test incremental update: CRC32("1234") then CRC32("56789") should equal CRC32("123456789")
+    //
+    static_assert(CRC32_Impl("56789", 5, true, CRC32_Impl("1234", 4, false, Radiy::Crc32FinalXor)) ==
+        CRC32_Impl("123456789", 9, true, Radiy::Crc32FinalXor));
+
+    /*
+      CRC Residue Property Test
+        Append CRC in little-endian: "123456789" + {0x26, 0x39, 0xF4, 0xCB}
+        CRC32(combined_data) == 0x2144DF1C (always the same residue value)
+    */
+    static_assert(CRC32_Impl("123456789\x26\x39\xF4\xCB", 13, true, Radiy::Crc32FinalXor) == Radiy::Crc32Residue);
+} // namespace
+
+namespace Radiy
+{
+    uint32_t CRC32(std::span<const std::byte> data, bool finalize, uint32_t initialCrc)
+    {
+        return CRC32_Impl(reinterpret_cast<const char*>(data.data()), data.size(), finalize, initialCrc);
+    }
+
+    uint32_t CRC32(std::span<const char> data, bool finalize, uint32_t initialCrc)
+    {
+        return CRC32_Impl(data.data(), data.size(), finalize, initialCrc);
+    }
+
+    uint32_t CRC32(const char* data, size_t length, bool finalize, uint32_t initialCrc)
+    {
+        return CRC32_Impl(data, length, finalize, initialCrc);
+    }
+} // namespace Radiy
+```
 ---
 
 ## Document Revision History
 
 | Document Version | Date | Protocol Version | Author | Changes |
 |------------------|------|------------------|--------|---------|
-| 0.1 | 12/2025 | 1.0 (0x0100) | Radiy Technical Team | Initial draft |
-
+| 0.1 | 12/2025 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
+| 0.2 | 01/2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added Appendix B, Request Prerequisites |
+| 0.3 | 01/2026 | 1.0 (0x0100) | Serhiy Malokhatko | Updated paddings, Added CRC incremental update |
+| 0.4 | 02/2026 | 1.0 (0x0100) | Serhiy Malokhatko | 6.1 Updated sizeof_GwAppSignalParam expected value |
+| 1.0 | 06 Feb 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Finalized and marked as Released |

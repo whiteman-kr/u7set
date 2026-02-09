@@ -853,6 +853,16 @@ QDateTime AppSignal::instanceCreated() const
 	return QDateTime::fromMSecsSinceEpoch(m_instanceCreatedMcs / 1000);;
 }
 
+Hash AppSignal::hash() const
+{
+	if (m_hash == 0)
+	{
+		m_hash = calcHash(m_appSignalID);
+	}
+
+	return m_hash;
+}
+
 Address16 AppSignal::ioBufAddr() const
 {
 	return m_ioBufAddr;
@@ -2881,6 +2891,22 @@ const AppSignal* AppSignals::getByIndex(int index) const
 	}
 
 	return &m_signals[index];
+}
+
+const AppSignal* AppSignals::getSignalByIndex(size_t index) const
+{
+	if (index < 0 || index >= m_signals.size())
+	{
+		Q_ASSERT(false);
+		return nullptr;
+	}
+
+	return &m_signals[index];
+}
+
+const AppSignal* AppSignals::getSignalByIndex(int index) const
+{
+	return getSignalByIndex(static_cast<size_t>(index));
 }
 
 bool AppSignals::isEmpty() const

@@ -27,14 +27,12 @@ namespace TrendLib
 		Trend(Trend&&) noexcept = default;
 		Trend& operator=(Trend&&) noexcept = default;
 
-		
 		// Methods
 		//
 	public:
-
 		// Draw methods
 		//
-		void draw(QImage* image, const TrendParam& drawParam) const;
+		void draw(QImage* image, const TrendParam& drawParam, std::stop_token stoken = std::stop_token{}) const;
 
 		// Properties
 		//
@@ -52,5 +50,5 @@ namespace TrendLib
 		std::unique_ptr<TrendLib::TrendImpl> m_impl;
 	};
 
-}
+} // namespace TrendLib
 #endif // TREND_H

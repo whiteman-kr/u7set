@@ -49,22 +49,19 @@ namespace Gateway
 		virtual void run() override;
 		virtual void shutdown() override;
 
-		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
-		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
+		virtual void onAppDataSrvConnected() override;
+		virtual void onAppDataSrvDisconnected() override;
+		virtual void planNextPreparedRequest(PreparedRequest& request) override;
 
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
-		void processStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
+		void processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
 
 	private:
 		bool init();
+		virtual void prepareRequests() override;
 
 	private:
-		const SoftwareInfo m_softwareInfo;
-		HostAddressPort m_appDataService1;
-		HostAddressPort m_appDataService2;
-
 		IvsImpulseGatewayShared m_gateway;
-		const AppSignals& m_appSignals;
 
 		AppSignalStates m_states;
 		std::map<Hash, std::vector<int>> m_hashToStatesIndexes;
@@ -76,7 +73,6 @@ namespace Gateway
 		//
 		std::map<Hash, std::set<IvsImpulseListInfoShared>> m_hashToLists;
 
-		AppDataServiceClientThread* m_appDataServiceClientThread = nullptr;
 		IvsImpulseCommThread* m_ivsImpulseCommThread = nullptr;
 
 		friend class IvsImpulseCommThreadWorker;

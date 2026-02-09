@@ -212,9 +212,10 @@ if((NOT STATIC_RUNTIME) AND (NOT CODE_COVERAGE))
 	add_subdirectory(GatewayService)
 	add_subdirectory(Archivist)
 
-    add_subdirectory(u7)
+	add_subdirectory(u7)
 	add_subdirectory(TestSuite)
 	add_subdirectory(mconf)	
+	
 	add_subdirectory(./Tools/qtkeychain)
 	add_subdirectory(./Tools/BuildCompConsole)
 

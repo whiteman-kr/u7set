@@ -9,6 +9,7 @@
 #include "GatewayDescription.h"
 #include "IvsImpulseGateway.h"
 #include "ModbusSlaveGateway.h"
+#include "AdsGateway.h"
 
 namespace Gateway
 {
@@ -342,6 +343,12 @@ namespace Gateway
 		return TO_INT(m_signalIDs.size());
 	}
 
+	bool SignalList::isListForProfile(const QString& profile) const
+	{
+		Q_UNUSED(profile);
+		return true;
+	}
+
 	void SignalList::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
 	{
 		TEST_PTR_RETURN(acquiredSignals);
@@ -451,6 +458,9 @@ namespace Gateway
 
 		case E::GatewayType::ModbusSlave:
 			return std::make_shared<ModbusSlaveGateway>();
+
+		case E::GatewayType::AdsGateway:
+			return std::make_shared<AdsGateway>();
 
 		default:
 			Q_ASSERT(false);
@@ -595,13 +605,16 @@ namespace Gateway
 		return m_files;
 	}
 
-	void Gateway::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
+	void Gateway::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals, const QString& profile) const
 	{
 		TEST_PTR_RETURN(acquiredSignals);
 
 		for(auto& sl : m_signalLists)
 		{
-			sl->fillAcquiredSignalsSet(acquiredSignals);
+			if (sl->isListForProfile(profile))
+			{
+				sl->fillAcquiredSignalsSet(acquiredSignals);
+			}
 		}
 	}
 
@@ -813,7 +826,7 @@ namespace Gateway
 		m_gateways.clear();
 	}
 
-	void Gateways::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals) const
+	void Gateways::fillAcquiredSignalsSet(std::set<Hash>* acquiredSignals, const QString& profile) const
 	{
 		TEST_PTR_RETURN(acquiredSignals);
 
@@ -821,7 +834,7 @@ namespace Gateway
 
 		for(auto& gw : m_gateways)
 		{
-			gw->fillAcquiredSignalsSet(acquiredSignals);
+			gw->fillAcquiredSignalsSet(acquiredSignals, profile);
 		}
 	}
 

@@ -21,11 +21,12 @@ function StopServices() {
 
     # Stop services for functional tests.
     #
-    pkill CfgSrv || true
-    pkill AppDataSrv || true
-    pkill TuningSrv || true
-    pkill SimulatorConsol || true       # without last e, I assume there is a limitation to 15 symbols.
-    sleep 3
+    pkill -SIGINT CfgSrv || true
+    pkill -SIGINT AppDataSrv || true
+    pkill -SIGINT TuningSrv || true
+    pkill -SIGINT SimulatorConsol || true  # without last e, I assume there is a limitation to 15 symbols.
+    pkill -SIGINT GatewaySrv || true
+    sleep 6
 }
 
 # Stop if any service is running.
@@ -92,6 +93,37 @@ export QT_QPA_PLATFORM=offscreen
 #
 StopServices || true
 
+# ----------------------------------------------
+#               Run AdsGateway tests
+# ----------------------------------------------
+pushd $CI_PROJECT_DIR/bin/debug
+StopServices || true
+sleep 5
+
+./linux_code_coverage_systemid_clienttest_ws01_cfgs.sh simulation < /dev/null > clienttest_ws01_cfgs_ads_adsgwtest.out 2>&1 &
+sleep 5
+
+./linux_code_coverage_systemid_clienttest_ws01_gwslinuxcc.sh &
+sleep 5
+
+# First run tests that require no ADS connection.
+#
+$CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
+
+# Then start ADS for other tests.
+#
+./linux_code_coverage_systemid_clienttest_ws01_ads.sh < /dev/null > clienttest_ws01_ads_adsgwtest.out 2>&1 &
+sleep 5
+
+# Run other Adsgateway tests.
+#
+$CI_PROJECT_DIR/bin/debug/AdsGatewayTests --port=5567 --gtest_filter=-AdsGatewayTests.RequestSignalStatesWithoutAdsConnection:AdsGatewayTests.RequestSignalStateChangesWithoutAdsConnection
+sleep 5
+
+StopServices || true
+sleep 5
+popd
+
 # Run other tests, not services are required here.
 #
 #./LicenseLibTests
@@ -101,6 +133,10 @@ StopServices || true
 ./u7databasetests -config=$CI_PROJECT_DIR/Tests/u7databasetestsArgsCoverage.xml
 
 popd
+
+# Give some time to flush .gcda files.
+#
+sleep 4
 
 # Get code coverage data.
 #
@@ -175,6 +211,16 @@ TEST_DIR="./build/libs/AdsBridge/CMakeFiles/AdsBridge.dir"
 TEST_OUTPUT_FILE="AdsBridge.info"
 lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
 
+# GatewayService
+#TEST_DIR="./build/GatewayService/CMakeFiles/GatewaySrv.dir"
+#TEST_OUTPUT_FILE="GatewaySrv.info"
+#lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
+# GatewayLib
+TEST_DIR="./build/GatewayLib/CMakeFiles/GatewayLib.dir"
+TEST_OUTPUT_FILE="GatewayLib.info"
+lcov --test-name "$TEST_OUTPUT_FILE" $LCOV_COLLECT_ARGUMENTS --output-file $OUTPUT_DIR/$TEST_OUTPUT_FILE --directory $TEST_DIR
+
 # AppDataSrv -- Cannot collect .gcda as process is killed and not finished normally
 #TEST_DIR="./AppDataService"
 #TEST_OUTPUT_FILE="AppDataSrv.info"
@@ -200,8 +246,10 @@ lcov --output-file $OUTPUT_DIR/u7set-dirty.info \
     --add-tracefile $OUTPUT_DIR/UtilsLib.info \
     --add-tracefile $OUTPUT_DIR/ClientLib.info \
     --add-tracefile $OUTPUT_DIR/TestSuiteLib.info \
-    --add-tracefile $OUTPUT_DIR/AdsBridge.info
+    --add-tracefile $OUTPUT_DIR/AdsBridge.info \
+    --add-tracefile $OUTPUT_DIR/GatewayLib.info
 
+#    --add-tracefile $OUTPUT_DIR/GatewaySrv.info \ # Cannot collect .gcda -- process is killed in graceful, still no cgda files are NOT generated (((
 #    --add-tracefile $OUTPUT_DIR/LicenseLib.info \
 #    --add-tracefile $OUTPUT_DIR/AppDataSrv.info \
 #    --add-tracefile $OUTPUT_DIR/CfgSrv.info

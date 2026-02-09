@@ -24,8 +24,13 @@ namespace Locator
 
 		// Start time for updating last widget in focus
 		//
-		startTimer(100);
+		m_focusTimerId = startTimer(100);
 		return;
+	}
+
+	LocatorEditControl::~LocatorEditControl()
+	{
+		killTimer(m_focusTimerId);
 	}
 
 	void LocatorEditControl::timerEvent(QTimerEvent* event)
@@ -34,8 +39,7 @@ namespace Locator
 
 		QWidget* currentWidget = QApplication::focusWidget();
 
-		if (currentWidget == this ||
-			currentWidget == m_focusCameFrom)
+		if (currentWidget == this || currentWidget == m_focusCameFrom)
 		{
 			return;
 		}
@@ -54,7 +58,13 @@ namespace Locator
 			// Subscribe for destroy, to set m_focusCameFrom if the object was destroyed, so we will not focus in on ESC
 			// for already destroyed object.
 			//
-			connect(m_focusCameFrom, &QObject::destroyed, [this]() { m_focusCameFrom = nullptr; });
+			connect(m_focusCameFrom,
+					&QObject::destroyed,
+					this,
+					[this]()
+					{
+						m_focusCameFrom = nullptr;
+					});
 		}
 	}
 
@@ -77,12 +87,13 @@ namespace Locator
 	{
 		QLineEdit::focusInEvent(event);
 
-		QPoint listControlPos{0, m_appMainWindow->height() - m_listWidget.height() - m_appMainWindow->statusBar()->frameGeometry().height()};
+		QPoint listControlPos{0,
+							  m_appMainWindow->height() - m_listWidget.height() - m_appMainWindow->statusBar()->frameGeometry().height()};
 
 		slot_textChanged(text());
 
 		m_listWidget.setParent(nullptr);
-		m_listWidget.setParent(m_appMainWindow);	// Repareting widget will rise it to the top in the drawing chain.
+		m_listWidget.setParent(m_appMainWindow); // Repareting widget will rise it to the top in the drawing chain.
 
 		m_listWidget.move(listControlPos);
 		m_listWidget.showList();
@@ -108,4 +119,4 @@ namespace Locator
 	{
 		clearFocus();
 	}
-}
+} // namespace Locator

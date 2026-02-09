@@ -340,7 +340,7 @@ public:
 
 	// Signal properties calculated in compile-time
 
-	Hash hash() const { assert(m_hash !=0); return m_hash; }
+	Hash hash() const;
 	void setHash(Hash hash) { m_hash = hash; }
 
 	QString unit() const { return m_unit; }
@@ -554,7 +554,7 @@ private:
 
 	// Signal properties calculated in compile-time
 	//
-	Hash m_hash = 0;						// == calcHash(m_appSignalID)
+	mutable Hash m_hash = 0;				// == calcHash(m_appSignalID)
 
 	Address16 m_ioBufAddr;					// signal address in i/o modules buffers for signals of input/output modules (input and output signals)
 											// or
@@ -697,6 +697,9 @@ public:
 	const AppSignal* getByAppSignalID(const QString& appSignalID) const;
 	const AppSignal* getByHash(Hash hash) const;
 	const AppSignal* getByIndex(int index) const;
+
+	const AppSignal* getSignalByIndex(size_t index) const;
+	const AppSignal* getSignalByIndex(int index) const;
 
 	bool isEmpty() const;
 	size_t count() const;

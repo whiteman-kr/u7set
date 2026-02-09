@@ -30,6 +30,7 @@ namespace Builder
 {
 	class AppLogicData;
 	class ModuleLogicCompiler;
+	class SoftwareCfgGenerator;
 
 	struct PackedLogicSource
 	{
@@ -124,6 +125,8 @@ namespace Builder
 		VduFontProvider m_vduFontProvider;
 
 		std::map<QString, const Hardware::DeviceModule*> m_actuators;
+
+		std::map<QString, std::shared_ptr<SoftwareCfgGenerator>> m_swCfgGens;
 
 		// Generated VDU schemas
 		//

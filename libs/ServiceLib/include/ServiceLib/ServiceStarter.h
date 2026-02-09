@@ -60,6 +60,9 @@ private:
 		KeyReaderThread();
 		virtual void run() override;
 		void stop();
+
+	private:
+		std::atomic<bool> m_stop{false};
 	};
 
 private:
