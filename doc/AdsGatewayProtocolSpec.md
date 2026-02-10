@@ -1,8 +1,8 @@
 ﻿# Radiy AppDataService Gateway Protocol Specification
 
-**Document Version:** 1.0  
+**Document Version:** 1.1  
 **Protocol Version:** 1.0  
-**Date:** 06 Feb 2026  
+**Date:** 09 Feb 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Released
 
@@ -26,8 +26,8 @@ flowchart LR
     LM2[Logic Module 2]
     LM3[Logic Module 3]
     ADS[AppDataService]
-    GW[AdsGateway]
-    EMS[External Monitoring System]
+    GW["GatewayService<br/>(Mode: AdsGateway)"]
+    EMS["External<br/>Monitoring<br/>System"]
     
     LM1 -->|UDP| ADS
     LM2 -->|UDP| ADS
@@ -35,6 +35,8 @@ flowchart LR
     ADS <-->|Internal| GW
     GW <-->|TCP/IP| EMS
 ```
+
+> **Note:** In this document, when we refer to `AdsGateway`, we mean the `Gateway` program configured to work in mode `AdsGateway`.
 
 The AdsGateway acts as a bridge between Radiy's equipment and external monitoring systems, providing:
 - Signal parameter retrieval
@@ -1061,3 +1063,4 @@ namespace Radiy
 | 0.3 | 01/2026 | 1.0 (0x0100) | Serhiy Malokhatko | Updated paddings, Added CRC incremental update |
 | 0.4 | 02/2026 | 1.0 (0x0100) | Serhiy Malokhatko | 6.1 Updated sizeof_GwAppSignalParam expected value |
 | 1.0 | 06 Feb 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Finalized and marked as Released |
+| 1.1 | 09 Feb 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Normalized terminology across docs |
