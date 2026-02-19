@@ -20,6 +20,7 @@ add_executable(${TARGET}
 	Common.h
 	DiscretesLogTests.cpp
 	GrpcAppDataSrvTests.cpp
+	GrpcCfgLoaderTests.cpp
 	GrpcFileSrvTests.cpp
 	main.cpp
 	RupFrameProducer.h
@@ -41,7 +42,7 @@ add_executable(${TARGET}
 	../../AppDataService/RtTrendsServer.cpp
 	../../AppDataService/RtTrendsServer.h
 	../../AppDataService/SignalStatesProcessingThread.cpp
-	../../AppDataService/SignalStatesProcessingThread.h	
+	../../AppDataService/SignalStatesProcessingThread.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

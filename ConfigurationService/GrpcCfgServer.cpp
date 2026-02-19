@@ -26,6 +26,11 @@ const OnlineLib::BuildInfo& GrpcCfgServer::buildInfo() const
 	return m_buildInfo;
 }
 
+const std::unordered_map<QString, OnlineLib::BuildFileInfo>& GrpcCfgServer::buildFilesInfo() const
+{
+
+}
+
 void GrpcCfgServer::readBuildXml()
 {
 	m_buildReadOK = false;
@@ -94,7 +99,7 @@ void GrpcCfgServer::readBuildXml()
 				break;
 			}
 
-			m_buildFileInfo.emplace(bfi.pathFileName, bfi);
+			m_buildFilesInfo.emplace(bfi.pathFileName, bfi);
 		}
 		while(true);
 	}
@@ -114,9 +119,9 @@ bool GrpcCfgServer::checkFile(const QString& pathFileName, const QByteArray& fil
 {
 	GrpcFileSrv::checkFile(pathFileName, fileData, md5);
 
-	auto it = m_buildFileInfo.find(pathFileName);
+	auto it = m_buildFilesInfo.find(pathFileName);
 
-	if (it == m_buildFileInfo.end())
+	if (it == m_buildFilesInfo.end())
 	{
 		return false;
 	}

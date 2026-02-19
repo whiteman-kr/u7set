@@ -23,6 +23,7 @@ public:
 				CircularLoggerShared logger);
 
 	const OnlineLib::BuildInfo& buildInfo() const;
+	const std::unordered_map<QString, OnlineLib::BuildFileInfo>& buildFilesInfo() const;
 
 private:
 	void readBuildXml();
@@ -36,5 +37,5 @@ private:
 	bool m_buildReadOK = false;
 
 	OnlineLib::BuildInfo m_buildInfo;
-	std::unordered_map<QString, OnlineLib::BuildFileInfo> m_buildFileInfo;		// fileName => buildFileInfo
+	std::unordered_map<QString, OnlineLib::BuildFileInfo> m_buildFilesInfo;		// fileName => buildFileInfo
 };

@@ -196,7 +196,7 @@ private:
 
 	void sendOnePacket()
 	{
-		const quint16 numerator = nextPacketNumerator();
+//		const quint16 numerator = nextPacketNumerator();
 
 		QDateTime now = QDateTime::currentDateTime();
 

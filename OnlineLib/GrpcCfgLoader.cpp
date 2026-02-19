@@ -79,7 +79,7 @@ HostAddressPort GrpcCfgLoader::getServerAddr() const
 {
 	if (m_grpcFileClient != nullptr)
 	{
-		return m_grpcFileClient->getServerAddr();
+		return m_grpcFileClient->getConnectedServerAddr();
 	}
 
 	return HostAddressPort();

@@ -112,16 +112,23 @@ public:
 				bool startClient = true);
 	~GrpcClient();
 
+	const SoftwareInfo& localSwInfo() const;
+	QString clientDescription() const;
+
+	std::string authToken() const;
+	void setAuthToken(const std::string& token);
+	void clearAuthToken();
+
 	void start();
 	void stop();
 
-	virtual void run();
-	virtual void wakeupThread();
-
 	bool isThreadStarted() const;
 	bool isQuitRequested() const;
-	HostAddressPort getServerAddr() const;
+
+	HostAddressPort getConnectedServerAddr() const;
 	Tcp::ConnectionState getConnectionState() const;
+
+	void setConnectionState(const Tcp::ConnectionState& state);
 
 signals:
 	void signal_unknownClientID(QString errMsg);
@@ -130,23 +137,32 @@ signals:
 	void signal_noConnection();
 
 protected:
+	std::string getNextServerAddr() const;
+
+	virtual void run();
+	virtual void wakeupThread();
+	virtual void createStubAndHandshake(grpc::Status* status = nullptr) = 0;
+
+private:
 	const SoftwareInfo m_localSwInfo;
 	std::vector<HostAddressPort> m_serverAddress;
 	QString m_clientDescription;
 
-	int m_srvAddrIndex = -1;			// !
+	//
 
-
-	std::string m_authToken;
-	HostAddressPort m_serverAddr;
-
-	mutable std::mutex m_stateMutex;
-	Tcp::ConnectionState m_state;
-
-private:
 	std::thread m_thread;
 	std::atomic_bool m_threadStarted {false};
 	std::atomic_bool m_quitRequested {false};
+
+	mutable int m_srvAddrIndex = -1;			// !
+
+	//
+
+	mutable std::mutex m_stateMutex;
+	std::string m_authToken;
+	Tcp::ConnectionState m_state;
+
+	//
 
 public:
 /*	class ActiveCtxGuard
@@ -205,9 +221,6 @@ public:
 
 	void setEmitFileReady(bool enable);				// if TRUE - signal_fileReady emitted
 													// if FALSE - use waitFileReady or downloadFileBlocked
-	HostAddressPort getServerAddr() const;
-	Tcp::ConnectionState getConnectionState() const;
-
 signals:
 	void signal_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params);
 	void signal_fileReady(FileReady fileReady);			// not ref - Ok
@@ -219,8 +232,8 @@ protected:
 private:
 	virtual void run() override;
 	virtual void wakeupThread() override;
+	virtual void createStubAndHandshake(grpc::Status* status = nullptr) override;
 
-	void createStubAndHandshake(grpc::Status* status = nullptr);
 	Tcp::FileTransferResult privateGetSessionParams();
 	Tcp::FileTransferResult privateDownloadFile(const QString& fileName);
 
