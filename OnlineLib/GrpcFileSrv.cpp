@@ -326,6 +326,7 @@ GrpcClient::GrpcClient(const SoftwareInfo& localSoftwareInfo,
 						CircularLoggerShared log,
 						bool startClient) :
 	LogWrapper(log),
+	m_localSwInfo(localSoftwareInfo),
 	m_serverAddress(serverAddress),
 	m_clientDescription(clientDescription)
 
@@ -731,20 +732,14 @@ void GrpcFileClient::createStubAndHandshake(grpc::Status* status)
 	{
 		if (st.error_message() == Grpc::WRONG_CLIENT_EQUIPMENT_ID)
 		{
-			{
-				state.setConnectionResult = Tcp::SetConnectionResult::UnknownClientID;
-			}
-
+			state.setConnectionResult = Tcp::SetConnectionResult::UnknownClientID;
 			emit signal_unknownClientID(QString::fromStdString(Grpc::WRONG_CLIENT_EQUIPMENT_ID));
 		}
 		else
 		{
 			if (st.error_message() == Grpc::WRONG_HOST_NAME)
 			{
-				{
-					state.setConnectionResult = Tcp::SetConnectionResult::WrongClientHostname;
-				}
-
+				state.setConnectionResult = Tcp::SetConnectionResult::WrongClientHostname;
 				emit signal_wrongClientHostname(QString::fromStdString(Grpc::WRONG_HOST_NAME));
 			}
 			else

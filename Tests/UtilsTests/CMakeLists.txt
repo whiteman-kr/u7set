@@ -43,6 +43,8 @@ add_executable(${TARGET}
 	../../AppDataService/RtTrendsServer.h
 	../../AppDataService/SignalStatesProcessingThread.cpp
 	../../AppDataService/SignalStatesProcessingThread.h
+	../../ConfigurationService/GrpcCfgServer.cpp
+	../../ConfigurationService/GrpcCfgServer.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

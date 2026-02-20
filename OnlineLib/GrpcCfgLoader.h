@@ -66,6 +66,7 @@ private slots:
 	void slot_setConnection();
 	void slot_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params);
 	void slot_fileReady(FileReady fileReady);
+
 //	void slot_getFile(QString fileName, std::shared_ptr<QByteArray> fileData, bool asyncCall);
 
 private:

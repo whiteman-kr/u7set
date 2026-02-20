@@ -28,7 +28,7 @@ const OnlineLib::BuildInfo& GrpcCfgServer::buildInfo() const
 
 const std::unordered_map<QString, OnlineLib::BuildFileInfo>& GrpcCfgServer::buildFilesInfo() const
 {
-
+	return m_buildFilesInfo;
 }
 
 void GrpcCfgServer::readBuildXml()
