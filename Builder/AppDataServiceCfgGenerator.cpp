@@ -258,7 +258,7 @@ namespace Builder
 		//
 
 		QByteArray fileData;
-		result &= OnlineLib::DataSourcesXML<OnlineLib::DataSource>::writeToXml(dataSources, &fileData);
+		result &= OnlineLib::DataSourcesXML<OnlineLib::DataSource>::writeToXml(dataSources, m_buildResultWriter->buildInfo(), &fileData);
 
 		RETURN_IF_FALSE(result)
 

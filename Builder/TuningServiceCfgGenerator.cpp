@@ -210,7 +210,7 @@ namespace Builder
 
 		QByteArray fileData;
 
-		result &= OnlineLib::DataSourcesXML<Tuning::TuningSource>::writeToXml(tuningSources, &fileData);
+		result &= OnlineLib::DataSourcesXML<Tuning::TuningSource>::writeToXml(tuningSources, m_buildResultWriter->buildInfo(), &fileData);
 
 		RETURN_IF_FALSE(result)
 

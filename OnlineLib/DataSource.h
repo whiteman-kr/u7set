@@ -6,6 +6,7 @@
 #include "../UtilsLib/SimpleThread.h"
 #include "../OnlineLib/SocketIO.h"
 #include "../OnlineLib/CircularLogger.h"
+#include "../OnlineLib/BuildInfo.h"
 #include <CommonLib/Times.h>
 #include <CommonLib/ConstStrings.h>
 #include <HardwareLib/DataProtocols.h>
@@ -327,8 +328,8 @@ namespace OnlineLib
 	class DataSourcesXML
 	{
 	public:
-		static bool writeToXml(const QVector<TYPE>& dataSources, QByteArray* fileData);
-		static bool readFromXml(const QByteArray& fileData, QVector<TYPE>* dataSources);
+		static bool writeToXml(const QVector<TYPE>& dataSources, const OnlineLib::BuildInfo& buildInfo, QByteArray* fileData);
+		static bool readFromXml(const QByteArray& fileData, QVector<TYPE>* dataSources, OnlineLib::BuildInfo* buildInfo);
 	};
 
 	// -----------------------------------------------------------------------------
@@ -338,7 +339,7 @@ namespace OnlineLib
 	// -----------------------------------------------------------------------------
 
 	template <typename TYPE>
-	bool DataSourcesXML<TYPE>::writeToXml(const QVector<TYPE>& dataSources, QByteArray* fileData)
+	bool DataSourcesXML<TYPE>::writeToXml(const QVector<TYPE>& dataSources, const OnlineLib::BuildInfo& buildInfo, QByteArray* fileData)
 	{
 		if (fileData == nullptr)
 		{
@@ -353,6 +354,8 @@ namespace OnlineLib
 
 		xml.setAutoFormatting(true);
 		xml.writeStartDocument();
+
+		buildInfo.writeToXml(xmlWriter);
 
 		xml.writeStartElement(XmlElement::DATA_SOURCES);
 		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(dataSources.count()));
@@ -369,15 +372,18 @@ namespace OnlineLib
 	}
 
 	template <typename TYPE>
-	bool DataSourcesXML<TYPE>::readFromXml(const QByteArray& fileData, QVector<TYPE>* dataSources)
+	bool DataSourcesXML<TYPE>::readFromXml(const QByteArray& fileData, QVector<TYPE>* dataSources, OnlineLib::BuildInfo* buildInfo)
 	{
 		TEST_PTR_RETURN_FALSE(dataSources);
+		TEST_PTR_RETURN_FALSE(buildInfo);
 
 		XmlReadHelper xml(fileData);
 
 		dataSources->clear();
 
 		bool result = true;
+
+		result &= buildInfo->readFromXml(xml, true);
 
 		if (xml.findElement(XmlElement::DATA_SOURCES) == false)
 		{

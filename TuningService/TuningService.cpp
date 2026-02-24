@@ -550,8 +550,9 @@ namespace Tuning
 		newSources->clear();
 
 		QVector<TuningSource> sources;
+		OnlineLib::BuildInfo buildInfo;
 
-		bool result = OnlineLib::DataSourcesXML<TuningSource>::readFromXml(fileData, &sources);
+		bool result = OnlineLib::DataSourcesXML<TuningSource>::readFromXml(fileData, &sources, &buildInfo);
 
 		RETURN_IF_FALSE(result);
 
