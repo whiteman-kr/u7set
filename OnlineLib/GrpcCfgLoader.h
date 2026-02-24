@@ -24,10 +24,10 @@ public:
 				  const std::vector<HostAddressPort>& serverAddrs,
 				  CircularLoggerShared logger);
 
-	void changeAppAndInitPaths(const QString& appEquipmentID, int appInstance);
-
 	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr);
+
+	void clearWorkFolder();
 
 	HostAddressPort getServerAddr() const;
 	Tcp::ConnectionState getConnectionState() const;
@@ -73,6 +73,7 @@ private:
 	void onThreadStarted() override;
 	void onThreadFinished() override;
 
+	void initPaths(const QString& appEquipmentID, int appInstance);
 	void startGrpcFileClient();
 	void stopGrpcFileClient();
 	void restartGrpcFileClient();
@@ -104,6 +105,7 @@ private:
 	int m_appInstance = 0;
 	std::vector<HostAddressPort> m_serverAddrs;
 
+	mutable std::mutex m_grpcFileClientMutex;
 	std::unique_ptr<GrpcFileClient> m_grpcFileClient;
 
 	QString m_appEquipmentID;
@@ -173,28 +175,20 @@ public:
 
 	void setConnectionParams(const SoftwareInfo& softwareInfo,
 							 const HostAddressPort& serverAddressPort1,
-
 							 const HostAddressPort& serverAddressPort2);
 
-	Tcp::ConnectionState getConnectionState() const;
+	void clearWorkFolder();
 
-//	void enableDownloadConfiguration();
+	Tcp::ConnectionState getConnectionState() const;
 
 	bool getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr);
 	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr);
 
 	HostAddressPort getServerAddr() const;
 
-	// When file downloaded signal_fileReady will emitted
-	//
-	// bool getFileAsync(const QString& pathFileName);
-	// bool getFileAsyncByID(const QString& fileID);
-
 	bool hasFileID(const QString& fileID) const;
 
 	OnlineLib::BuildInfo buildInfo() const;
-
-//	HostAddressPort getCurrentServerAddressPort();
 
 	SessionParams sessionParams() const;
 

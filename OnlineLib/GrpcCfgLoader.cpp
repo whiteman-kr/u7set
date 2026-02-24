@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include <CommonLib/ConstStrings.h>
+#include <QSaveFile>
 
 #include "GrpcCfgLoader.h"
 #include "CircularLogger.h"
@@ -36,22 +37,8 @@ GrpcCfgLoader::GrpcCfgLoader(const SoftwareInfo& softwareInfo,
 	}
 
 	setObjectName("GrpcCfgLoader");
-}
 
-void GrpcCfgLoader::changeAppAndInitPaths(const QString& appEquipmentID, int appInstance)
-{
-	m_appEquipmentID = appEquipmentID;
-	m_appInstance = appInstance;
-
-	m_appDataPath = Separator::DIR + m_appEquipmentID + Separator::MINUS + QString::number(m_appInstance);
-
-	m_rootFolder = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + m_appDataPath;
-
-	logMsg(QString("app cfg data root folder - %1").arg(m_rootFolder));
-
-	m_cfgXmlFileName = Separator::DIR + m_appEquipmentID + Separator::DIR + File::CONFIGURATION_XML;
-
-	resetStatuses();
+	initPaths(m_swInfo.equipmentID(), m_appInstance);
 }
 
 bool GrpcCfgLoader::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
@@ -75,8 +62,36 @@ bool GrpcCfgLoader::getFileBlockedByID(const QString& fileID, QByteArray* fileDa
 	return getFileBlocked(pathFileName, fileData, errorStr);
 }
 
+void GrpcCfgLoader::clearWorkFolder()
+{
+	Q_ASSERT(m_rootFolder.isEmpty() == false);
+
+	QDir dir(m_rootFolder);
+
+	if (!dir.exists())
+	{
+		return;
+	}
+
+	const QFileInfoList files = dir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot | QDir::AllDirs);
+
+	for (const QFileInfo& fi : files)
+	{
+		if (fi.isDir())
+		{
+			QDir(fi.absoluteFilePath()).removeRecursively();
+		}
+		else
+		{
+			QFile::remove(fi.absoluteFilePath());
+		}
+	}
+}
+
 HostAddressPort GrpcCfgLoader::getServerAddr() const
 {
+	std::lock_guard lg(m_grpcFileClientMutex);
+
 	if (m_grpcFileClient != nullptr)
 	{
 		return m_grpcFileClient->getConnectedServerAddr();
@@ -87,6 +102,8 @@ HostAddressPort GrpcCfgLoader::getServerAddr() const
 
 Tcp::ConnectionState GrpcCfgLoader::getConnectionState() const
 {
+	std::lock_guard lg(m_grpcFileClientMutex);
+
 	if (m_grpcFileClient != nullptr)
 	{
 		return m_grpcFileClient->getConnectionState();
@@ -137,23 +154,17 @@ QStringList GrpcCfgLoader::getSettingsProfiles() const
 	return profiles;
 }
 
-// void GrpcCfgLoader::onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode)
-// {
-// 	if (errorCode == Tcp::FileTransferResult::Ok)
-// 	{
-// 		logMessage(QString("file %1 download Ok").arg(fileName));
-// 	}
-// 	else
-// 	{
-// 		logError(QString("file %1 download error - %2").arg(fileName).arg(getErrorStr(errorCode)));
-// 	}
-// }
-
 void GrpcCfgLoader::slot_setConnection()
 {
 	resetStatuses();
 
-	m_grpcFileClient->downloadSessionParams();
+	{
+		std::lock_guard lg(m_grpcFileClientMutex);
+		if (m_grpcFileClient != nullptr)
+		{
+			m_grpcFileClient->downloadSessionParams();
+		}
+	}
 }
 
 void GrpcCfgLoader::slot_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params)
@@ -166,7 +177,11 @@ void GrpcCfgLoader::slot_sessionParamsReady(Tcp::FileTransferResult result, Sess
 
 	m_sessionParams = params;
 
-	m_grpcFileClient->downloadFile(m_cfgXmlFileName);
+	std::lock_guard lg(m_grpcFileClientMutex);
+	if (m_grpcFileClient != nullptr)
+	{
+		m_grpcFileClient->downloadFile(m_cfgXmlFileName);
+	}
 }
 
 void GrpcCfgLoader::slot_fileReady(FileReady fileReady)
@@ -189,10 +204,6 @@ void GrpcCfgLoader::slot_fileReady(FileReady fileReady)
 
 void GrpcCfgLoader::onThreadStarted()
 {
-	Q_ASSERT(m_grpcFileClient == nullptr);
-
-	changeAppAndInitPaths(m_swInfo.equipmentID(), m_appInstance);
-
 	startGrpcFileClient();
 }
 
@@ -201,8 +212,72 @@ void GrpcCfgLoader::onThreadFinished()
 	stopGrpcFileClient();
 }
 
+void GrpcCfgLoader::initPaths(const QString& appEquipmentID, int appInstance)
+{
+	m_appEquipmentID = appEquipmentID;
+	m_appInstance = appInstance;
+
+	m_appDataPath = Separator::DIR + m_appEquipmentID + Separator::MINUS + QString::number(m_appInstance);
+
+	m_rootFolder = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + m_appDataPath;
+
+	//
+
+	QDir dir;
+
+	bool res = dir.mkpath(m_rootFolder);
+
+	if (res == true)
+	{
+		logMsg(QString("App cfg data root folder created: %1").arg(m_rootFolder));
+
+		// write test for folder
+		//
+
+		QString uidStr = QUuid::createUuid().toString();
+
+		const QString testFilePath = QDir(m_rootFolder).filePath(QString(".write_test_%1.tmp").arg(uidStr));
+
+		QSaveFile f(testFilePath);
+
+		if (!f.open(QIODevice::WriteOnly))
+		{
+			logErr(QString("Cannot open for write %1: %2").arg(testFilePath).arg(f.errorString()));
+			return;
+		}
+
+		if (f.write("test") != 4)
+		{
+			logErr(QString("Write failed %1: %2").arg(testFilePath).arg(f.errorString()));
+			return;
+		}
+
+		if (!f.commit())
+		{
+			logErr(QString("Commit failed %1: %2").arg(testFilePath).arg(f.errorString()));
+			return;
+		}
+
+		// delete test file
+		//
+		QFile::remove(testFilePath);
+	}
+	else
+	{
+		logErr(QString("App cfg data root folder %1 creation ERROR!").arg(m_rootFolder));
+	}
+
+	//
+
+	m_cfgXmlFileName = Separator::DIR + m_appEquipmentID + Separator::DIR + File::CONFIGURATION_XML;
+
+	resetStatuses();
+}
+
 void GrpcCfgLoader::startGrpcFileClient()
 {
+	std::lock_guard lg(m_grpcFileClientMutex);
+
 	if (m_grpcFileClient != nullptr)
 	{
 		stopGrpcFileClient();
@@ -224,6 +299,8 @@ void GrpcCfgLoader::startGrpcFileClient()
 
 void GrpcCfgLoader::stopGrpcFileClient()
 {
+	std::lock_guard lg(m_grpcFileClientMutex);
+
 	if (m_grpcFileClient != nullptr)
 	{
 		m_grpcFileClient->stop();
@@ -340,7 +417,10 @@ void GrpcCfgLoader::downloadNextFile()
 
 	QString fileName = m_filesToDownload.begin()->first;
 
-	m_grpcFileClient->downloadFile(fileName);
+	{
+		std::lock_guard lg(m_grpcFileClientMutex);
+		m_grpcFileClient->downloadFile(fileName);
+	}
 }
 
 bool GrpcCfgLoader::readFile(const QString& pathFileName, QByteArray* fileData, QString* errorStr) const
@@ -626,7 +706,6 @@ void GrpcCfgLoaderThread::start()
 
 void GrpcCfgLoaderThread::quitAndWait()
 {
-	std::lock_guard lg(m_mutex);
 	shutdownThread();
 }
 
@@ -647,6 +726,16 @@ void GrpcCfgLoaderThread::setConnectionParams(const SoftwareInfo& softwareInfo,
 	start();
 }
 
+void GrpcCfgLoaderThread::clearWorkFolder()
+{
+	std::lock_guard lg(m_mutex);
+
+	if (m_grpcCfgLoader != nullptr)
+	{
+		m_grpcCfgLoader->clearWorkFolder();
+	}
+}
+
 bool GrpcCfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
 {
 	TEST_PTR_RETURN_FALSE(fileData);
@@ -654,7 +743,16 @@ bool GrpcCfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray
 
 	errorStr->clear();
 
-	return m_grpcCfgLoader->getFileBlocked(pathFileName, fileData, errorStr);
+	std::lock_guard lg(m_mutex);
+
+	if (m_grpcCfgLoader != nullptr)
+	{
+		return m_grpcCfgLoader->getFileBlocked(pathFileName, fileData, errorStr);
+	}
+
+	*errorStr = "m_grpcCfgLoader not created";
+
+	return false;
 }
 
 bool GrpcCfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr)
@@ -664,11 +762,22 @@ bool GrpcCfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* 
 
 	errorStr->clear();
 
-	return m_grpcCfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
+	std::lock_guard lg(m_mutex);
+
+	if (m_grpcCfgLoader != nullptr)
+	{
+		return m_grpcCfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
+	}
+
+	*errorStr = "m_grpcCfgLoader not created";
+
+	return false;
 }
 
 HostAddressPort GrpcCfgLoaderThread::getServerAddr() const
 {
+	std::lock_guard lg(m_mutex);
+
 	if (m_grpcCfgLoader != nullptr)
 	{
 		return m_grpcCfgLoader->getServerAddr();
@@ -681,14 +790,24 @@ bool GrpcCfgLoaderThread::hasFileID(const QString& fileID) const
 {
 	std::lock_guard lg(m_mutex);
 
-	return m_grpcCfgLoader->hasFileID(fileID);
+	if (m_grpcCfgLoader != nullptr)
+	{
+		return m_grpcCfgLoader->hasFileID(fileID);
+	}
+
+	return false;
 }
 
 OnlineLib::BuildInfo GrpcCfgLoaderThread::buildInfo() const
 {
 	std::lock_guard lg(m_mutex);
 
-	return m_grpcCfgLoader->buildInfo();
+	if (m_grpcCfgLoader != nullptr)
+	{
+		return m_grpcCfgLoader->buildInfo();
+	}
+
+	return OnlineLib::BuildInfo{};
 }
 
 Tcp::ConnectionState GrpcCfgLoaderThread::getConnectionState() const
@@ -702,14 +821,6 @@ Tcp::ConnectionState GrpcCfgLoaderThread::getConnectionState() const
 
 	return Tcp::ConnectionState{};
 }
-
-/*HostAddressPort GrpcCfgLoaderThread::getCurrentServerAddressPort()
-{
-	AUTO_LOCK(m_mutex);
-
-//	return m_grpcCfgLoader->currentServerAddressPort();
-	return HostAddressPort{};
-}*/
 
 SessionParams GrpcCfgLoaderThread::sessionParams() const
 {
@@ -763,6 +874,8 @@ void GrpcCfgLoaderThread::initThread()
 
 void GrpcCfgLoaderThread::shutdownThread()
 {
+	std::lock_guard lg(m_mutex);
+
 	if (m_thread == nullptr)
 	{
 		return;
