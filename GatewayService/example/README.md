@@ -31,15 +31,17 @@ flowchart LR
       U7 --> BR([Build<br/>Result])
     end
 
-    subgraph RaICS2 [RaICS Platform]
+    subgraph RadICS2 [RadICS Platform]
         LMs@{ shape: processes, label: "Logic<br/>Modules 1..3" }
     end    
 
-        subgraph GPC [Radiy GatewayPC]
+    subgraph GPC [Radics Gateway]
         BR2([Build<br/>Result])
         CS[Config<br/>Service]
         ADS[AppData<br/>Service]
-        GW["Gateway<br/>Service<br/>(ADS Mode)"]
+        TS[Tuning<br/>Service]
+        ADSGW["GatewayService<br/>(Mode: AdsGateway)"]
+        TSGW["GatewayService<br/>(Mode: TuningGateway)"]
     end
 
     BR -.-> BR2
@@ -47,12 +49,18 @@ flowchart LR
     BR -.->|.bts| LMs
     
     EMS["External<br/>Monitoring<br/>System"]
+    ETS["External<br/>Tuning<br/>System"]
     
-    CS <-->|Config| ADS
-    CS <-->|Config| GW
+    CS -->|Config| ADS
+    CS -->|Config| TS
+    CS -->|Config| ADSGW
+    CS -->|Config| TSGW
     LMs -->|UDP| ADS
-    ADS <-->|TCP| GW
-    GW <==>|"AdsGateway<br/>Protocol<br/>(TCP)"| EMS
+    LMs -->|UDP| TS
+    ADS <-->|TCP| ADSGW
+    TS <-->|TCP| TSGW
+    ADSGW <==>|"AdsGateway<br/>Protocol<br/>(TCP)"| EMS
+    TSGW <==>|"TuningGateway<br/>Protocol<br/>(TCP)"| ETS
 ```
 
 The example demonstrates:

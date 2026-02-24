@@ -90,8 +90,9 @@ bool DiagDataServiceWorker::readDiagDataSources(const QByteArray& fileData, cons
 	m_dataSources.clear();
 
 	QVector<OnlineLib::DataSource> dataSources;
+	OnlineLib::BuildInfo buildInfo;
 
-	bool result = OnlineLib::DataSourcesXML<OnlineLib::DataSource>::readFromXml(fileData, &dataSources);
+	bool result = OnlineLib::DataSourcesXML<OnlineLib::DataSource>::readFromXml(fileData, &dataSources, &buildInfo);
 
 	if (result == false)
 	{
