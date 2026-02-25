@@ -235,6 +235,7 @@ namespace EquipmentPropNames
 
 namespace XmlElement
 {
+	inline const QString CONTENT("Content");
 	inline const QString SOFTWARE_ITEMS("SoftwareItems");
 	inline const QString SOFTWARE("Software");
 	inline const QString SETTINGS("Settings");
