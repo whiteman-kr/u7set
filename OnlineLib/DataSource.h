@@ -355,17 +355,23 @@ namespace OnlineLib
 		xml.setAutoFormatting(true);
 		xml.writeStartDocument();
 
-		buildInfo.writeToXml(xmlWriter);
+		xml.writeStartElement(XmlElement::CONTENT);
 
-		xml.writeStartElement(XmlElement::DATA_SOURCES);
-		xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(dataSources.count()));
-
-		for (const TYPE& ds : dataSources)
 		{
-			ds.writeToXml(xml);
+			buildInfo.writeToXml(xmlWriter);
+
+			xml.writeStartElement(XmlElement::DATA_SOURCES);
+			xml.writeIntAttribute(XmlAttribute::COUNT, static_cast<int>(dataSources.count()));
+
+			for (const TYPE& ds : dataSources)
+			{
+				ds.writeToXml(xml);
+			}
+
+			xml.writeEndElement();	// </DataSources>
 		}
 
-		xml.writeEndElement();	// </DataSources>
+		xml.writeEndElement();	// </Content>
 		xml.writeEndDocument();
 
 		return true;
@@ -382,6 +388,11 @@ namespace OnlineLib
 		dataSources->clear();
 
 		bool result = true;
+
+		if (xml.findElement(XmlElement::CONTENT) == false)
+		{
+			return false;
+		}
 
 		result &= buildInfo->readFromXml(xml, true);
 
