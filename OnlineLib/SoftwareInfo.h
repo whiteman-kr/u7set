@@ -1,5 +1,7 @@
 #pragma once
 
+#include <CommonLib/Types.h>
+
 namespace Network
 {
 	class SoftwareInfo;

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <QDateTime>
+#include <CommonLib/Hash.h>
 
 #include "../UtilsLib/Address16.h"
 #include "TuningValue.h"

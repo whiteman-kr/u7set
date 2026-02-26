@@ -1,6 +1,8 @@
 #include "MeasureViewHeader.h"
 #include "Options.h"
 
+#include <QApplication>
+
 namespace Measure
 {
 	// -------------------------------------------------------------------------------------------------------------------

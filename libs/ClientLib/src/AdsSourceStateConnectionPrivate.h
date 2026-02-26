@@ -5,6 +5,7 @@
 
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/SoftwareSettings.h"
+#include "../OnlineLib/Tcp.h"
 #include "../UtilsLib/ILogFile.h"
 #include <ClientLib/AppDataSourceState.h>
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <optional>
+#include <google/protobuf/repeated_field.h>
 
 namespace Network
 {

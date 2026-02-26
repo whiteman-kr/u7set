@@ -1,6 +1,16 @@
 #include "ProcessData.h"
 
+#include <QApplication>
 #include <QClipboard>
+#include <QStringListModel>
+#include <QSettings>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QScreen>
+#include <QMessageBox>
+#include <QDir>
+#include <QFileDialog>
+#include <QtConcurrent>
 
 #include "ExcelHelper.h"
 #include "Options.h"

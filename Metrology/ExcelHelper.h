@@ -8,6 +8,9 @@
 
 #endif
 
+#include <QString>
+#include <QAxObject>
+
 // ==============================================================================================
 
 class ExcelExportHelper

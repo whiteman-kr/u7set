@@ -2,6 +2,9 @@
 #include <QSqlField>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QMessageBox>
+#include <QDir>
+#include <QSettings>
 
 // -------------------------------------------------------------------------------------------------------------------
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ServiceEndpoint.h"
+#include <Network.pb.h>
 
 // TODO: There is the same enum SetConnectionResult in TcpConnectoinState.h, how to avoid duplication?
 //

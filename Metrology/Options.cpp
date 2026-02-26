@@ -2,6 +2,12 @@
 
 #include "Database.h"
 
+#include <QSettings>
+#include <QApplication>
+#include <QDir>
+#include <QTranslator>
+#include <QMessageBox>
+
 // -------------------------------------------------------------------------------------------------------------------
 
 Options theOptions;

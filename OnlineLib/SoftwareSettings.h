@@ -3,6 +3,7 @@
 #include "SoftwareEndpoint.h"
 #include <CommonLib/HostAddressPort.h>
 #include <CommonLib/ConstStrings.h>
+#include <CommonLib/Types.h>
 #include "../OnlineLib/MatsUsers.h"
 
 class XmlWriteHelper;

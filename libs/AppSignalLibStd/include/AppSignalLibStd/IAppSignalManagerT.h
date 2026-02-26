@@ -6,7 +6,9 @@
 #include <memory>
 #include <ranges>
 #include <span>
-
+#include <optional>
+#include <vector>
+#include <type_traits>
 
 // #include "AppSignalParam.h" -- Commented out to speed up compilation
 // #include "AppSignalState.h" -- Commented out to speed up compilation
@@ -16,6 +18,14 @@
 //
 
 class Comparator;
+
+static_assert(std::is_class_v<Comparator>, "Comparator in this scope must be a class type");
+
+// А это должно либо компилиться, либо показать, что глобальный Comparator - не тип:
+using GlobalComparatorPtr = std::shared_ptr<::Comparator>;
+
+// static_assert(std::is_class_v<Comparator> || std::is_union_v<Comparator>,
+// 			  "Comparator must be a class/struct/union type (name collision?)");
 
 // using ISignalManager::signalExists;
 // using ISignalManager::signalParam;

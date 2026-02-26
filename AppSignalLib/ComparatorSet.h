@@ -4,6 +4,7 @@
 #include <QMutex>
 #include <QUuid>
 
+#include <CommonLib/Types.h>
 
 namespace Proto
 {

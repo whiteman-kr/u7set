@@ -71,6 +71,8 @@ qt_add_library(${TARGET} STATIC
 )
 
 target_precompile_headers(${TARGET} PRIVATE
+	<CommonLib/PchGuard.h>
+
 	<algorithm>
 	<cassert>
 	<chrono>
@@ -103,7 +105,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	"../../AppSignalLib/AppSignalState.h"
 	"../../AppSignalLib/TuningValue.h"
 
-	"../../OnlineLib/Tcp.h"
+#	"../../OnlineLib/Tcp.h"
 )
 
 target_compile_definitions(${TARGET} PRIVATE CLIENT_LIB_DOMAIN)

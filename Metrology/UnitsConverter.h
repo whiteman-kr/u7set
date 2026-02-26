@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+#include <CommonLib/Types.h>
+#include <../AppSignalLib/AppSignal.h>
+
 // ==============================================================================================
 // class UnitsConvertResult
 //

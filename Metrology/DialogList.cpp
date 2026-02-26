@@ -1,5 +1,8 @@
 #include "DialogList.h"
 
+#include <QApplication>
+#include <QSettings>
+
 #include "ProcessData.h"
 #include "DialogObjectProperties.h"
 #include "Options.h"

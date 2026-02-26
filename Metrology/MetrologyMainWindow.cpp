@@ -4,6 +4,9 @@
 #include <CommonLib/ConstStrings.h>
 #include <UiLib/UiTools.h>
 
+#include <QApplication>
+#include <QSettings>
+
 #include "CalibratorBase.h"
 #include "Database.h"
 #include "SignalBase.h"
@@ -20,9 +23,10 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent)
-	: QMainWindow(parent)
-	, m_softwareInfo(softwareInfo)
+MainWindow::MainWindow(const SoftwareInfo& softwareInfo, CircularLoggerShared log, QWidget* parent) :
+	QMainWindow(parent),
+	m_softwareInfo(softwareInfo),
+	m_log(log)
 {
 	// open database
 	//
@@ -1159,17 +1163,27 @@ void MainWindow::setMeasureType(int measureType)
 
 bool MainWindow::signalSocketIsConnected()
 {
-	if (m_pSignalSocket == nullptr || m_pSignalSocketThread == nullptr)
+	// if (m_pSignalSocket == nullptr || m_pSignalSocketThread == nullptr)
+	// {
+	// 	return false;
+	// }
+
+	// if (m_pSignalSocket->isConnected() == false)
+	// {
+	// 	return false;
+	// }
+
 	{
-		return false;
+		std::lock_guard lg(m_grpcSignalSocketMutex);
+
+		if (m_grpcSignalSocket != nullptr)
+		{
+			return m_grpcSignalSocket->isConnected();
+		}
 	}
 
-	if (m_pSignalSocket->isConnected() == false)
-	{
-		return false;
-	}
+	return false;
 
-	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2795,17 +2809,31 @@ void MainWindow::configSocketSignalBaseLoaded()
 
 void MainWindow::signalSocketConnected()
 {
-	if (m_pSignalSocket == nullptr)
-	{
-		return;
-	}
+	// if (m_pSignalSocket == nullptr)
+	// {
+	// 	return;
+	// }
 
 	if (m_statusConnectToAppDataServer == nullptr)
 	{
 		return;
 	}
 
-	OT::ServerPriority serverPriority = static_cast<OT::ServerPriority>(m_pSignalSocket->selectedServerIndex());
+	int serverIndex = 0;
+
+	{
+		std::lock_guard lg(m_grpcSignalSocketMutex);
+
+		if (m_grpcSignalSocket == nullptr)
+		{
+			return;
+		}
+
+		serverIndex = m_grpcSignalSocket->selectedServerIndex();
+	}
+
+
+	OT::ServerPriority serverPriority = static_cast<OT::ServerPriority>(serverIndex);
 	if (ERR_SERVER_PRIORITY(serverPriority) == true)
 	{
 		return;
@@ -3280,34 +3308,52 @@ void MainWindow::runSignalSocket()
 {
 	// init signal socket thread
 	//
-	HostAddressPort signalSocketAddress1 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
-	HostAddressPort signalSocketAddress2 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
-	m_softwareInfo.setEquipmentID(theOptions.socket().server(OT::ServerType::AppDataService).equipmentID(OT::ServerPriority::Primary));
+	// HostAddressPort signalSocketAddress1 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
+	// HostAddressPort signalSocketAddress2 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
+	// m_softwareInfo.setEquipmentID(theOptions.socket().server(OT::ServerType::AppDataService).equipmentID(OT::ServerPriority::Primary));
 
-	m_pSignalSocket = new SignalSocket(m_softwareInfo, signalSocketAddress1, signalSocketAddress2);
-	m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
+	// m_pSignalSocket = new SignalSocket(m_softwareInfo, signalSocketAddress1, signalSocketAddress2);
+	// m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
 
-	connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
-	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pSignalSocket, &SignalSocket::configurationLoaded, Qt::QueuedConnection);
+	// connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
+	// connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
+	// connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	// connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
+	// connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pSignalSocket, &SignalSocket::configurationLoaded, Qt::QueuedConnection);
 
-	m_pSignalSocketThread->start();
+	// m_pSignalSocketThread->start();
+
+	QString equipmentId1 = theOptions.socket().server(OT::ServerType::AppDataService).equipmentID(OT::ServerPriority::Primary);
+	HostAddressPort addr1 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
+
+	QString equipmentId2 = theOptions.socket().server(OT::ServerType::AppDataService).equipmentID(OT::ServerPriority::Reserve);
+	HostAddressPort addr2 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
+
+	{
+		std::lock_guard lg(m_grpcSignalSocketMutex);
+
+		m_grpcSignalSocket = std::make_unique<GrpcSignalSocket>(m_softwareInfo, equipmentId1, addr1, equipmentId2, addr2, m_log);
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::stopSignalSocket()
 {
-	if (m_pSignalSocketThread == nullptr)
 	{
-		return;
-	}
+		std::lock_guard lg(m_grpcSignalSocketMutex);
 
-	m_pSignalSocketThread->quitAndWait(10000);
-	delete m_pSignalSocketThread;
-	m_pSignalSocketThread = nullptr;
+		m_grpcSignalSocket.reset();
+
+	}
+	// if (m_pSignalSocketThread == nullptr)
+	// {
+	// 	return;
+	// }
+
+	// m_pSignalSocketThread->quitAndWait(10000);
+	// delete m_pSignalSocketThread;
+	// m_pSignalSocketThread = nullptr;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

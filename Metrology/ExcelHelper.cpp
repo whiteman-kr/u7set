@@ -1,5 +1,7 @@
 #include "ExcelHelper.h"
 
+#include <QFile>
+
 ExcelExportHelper::ExcelExportHelper(bool closeExcelOnExit)
 {
 	#ifdef Q_OS_WIN

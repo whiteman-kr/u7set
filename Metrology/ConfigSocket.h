@@ -29,7 +29,7 @@ public:
 
 public:
 
-	bool				isConnceted() { return m_connected; }
+	bool				isConnected() { return m_connected; }
 	HostAddressPort		address() { return m_address; }
 
 	void				start();

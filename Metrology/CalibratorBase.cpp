@@ -3,6 +3,12 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 
+#include <QScreen>
+#include <QVBoxLayout>
+#include <QMessageBox>
+#include <QApplication>
+#include <QKeyEvent>
+
 #include "ProcessData.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -761,7 +767,7 @@ bool CalibratorBase::eventFilter(QObject* object, QEvent* event)
 
 	if (event->type() == QEvent::KeyPress)
 	{
-		QKeyEvent* keyEvent = static_cast<QKeyEvent* >(event);
+		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
 
 		if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter)
 		{

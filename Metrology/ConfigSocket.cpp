@@ -2,6 +2,9 @@
 #include "SignalBase.h"
 #include "../OnlineLib/SoftwareSettings.h"
 
+#include <QFuture>
+#include <QtConcurrent>
+
 // -------------------------------------------------------------------------------------------------------------------
 
 ConfigSocket::ConfigSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort)

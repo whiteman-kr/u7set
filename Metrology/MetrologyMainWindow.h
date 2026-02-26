@@ -11,10 +11,12 @@
 #include <QComboBox>
 
 #include "../UtilsLib/SimpleThread.h"
+#include "../OnlineLib/CircularLogger.h"
 
 #include "CalibratorBase.h"
 #include "ConfigSocket.h"
-#include "SignalSocket.h"
+//#include "SignalSocket.h"
+#include "GrpcSignalSocket.h"
 #include "TuningSocket.h"
 #include "SelectSignalWidget.h"
 #include "MeasureView.h"
@@ -25,6 +27,7 @@
 #include "PanelComparatorInfo.h"
 #include "DialogCalculator.h"
 
+
 // ==============================================================================================
 
 class MainWindow : public QMainWindow
@@ -32,7 +35,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
+	explicit MainWindow(const SoftwareInfo& softwareInfo, CircularLoggerShared log, QWidget* parent = nullptr);
 	virtual ~MainWindow() override;
 
 public:
@@ -48,7 +51,7 @@ public:
 	// Sockets
 	//
 	ConfigSocket*			configSocket() { return m_pConfigSocket; }
-	SignalSocket*			signalSocket() { return m_pSignalSocket; }
+//	SignalSocket*			signalSocket() { return m_pSignalSocket; }
 	bool					signalSocketIsConnected();
 	TuningSocket*			tuningSocket() { return m_pTuningSocket; }
 	bool					tuningSocketIsConnected();
@@ -176,6 +179,7 @@ private:
 private:
 
 	SoftwareInfo			m_softwareInfo;
+	CircularLoggerShared	m_log;
 
 	CalibratorBase			m_calibratorBase;
 	Measure::Base			m_measureBase;
@@ -185,8 +189,11 @@ private:
 	void					stopConfigSocket();
 	QString					configSocketConnectedStateStr();
 
-	SignalSocket*			m_pSignalSocket = nullptr;
-	SimpleThread*			m_pSignalSocketThread = nullptr;
+//	SignalSocket*			m_pSignalSocket = nullptr;
+//	SimpleThread*			m_pSignalSocketThread = nullptr;
+
+	std::mutex m_grpcSignalSocketMutex;
+	std::unique_ptr<GrpcSignalSocket> m_grpcSignalSocket;
 	void					runSignalSocket();
 	void					stopSignalSocket();
 

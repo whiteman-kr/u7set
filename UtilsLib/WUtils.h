@@ -9,6 +9,7 @@
 #include <limits>
 #include <random>
 #include <QTimeZone>
+#include <QThread>
 
 #define ASSERT_RESULT_FALSE_BREAK	Q_ASSERT(false); \
 									result = false; \

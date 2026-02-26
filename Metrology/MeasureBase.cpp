@@ -3,6 +3,10 @@
 #include "Database.h"
 #include "Options.h"
 
+#include <QApplication>
+#include <QtConcurrent>
+#include <QMessageBox>
+
 namespace Measure
 {
 	// -------------------------------------------------------------------------------------------------------------------

@@ -1,6 +1,8 @@
 #include "MetrologySignal.h"
 #include "UnitsConverter.h"
+
 #include <AppSignal.pb.h>
+#include <QApplication>
 
 namespace Metrology
 {

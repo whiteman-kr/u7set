@@ -1,5 +1,6 @@
 #pragma once
 #include <span>
+#include <CommonStdLib/HashStd.h>
 
 namespace Proto
 {
