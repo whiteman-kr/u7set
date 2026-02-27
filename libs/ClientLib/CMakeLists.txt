@@ -71,8 +71,6 @@ qt_add_library(${TARGET} STATIC
 )
 
 target_precompile_headers(${TARGET} PRIVATE
-	<CommonLib/PchGuard.h>
-
 	<algorithm>
 	<cassert>
 	<chrono>

@@ -8,11 +8,10 @@
 #include <span>
 #include <optional>
 #include <vector>
-#include <type_traits>
 
 // #include "AppSignalParam.h" -- Commented out to speed up compilation
 // #include "AppSignalState.h" -- Commented out to speed up compilation
-// These files MUST BE included in the precompiled header of the project:
+// These files MUST BE included in the precompiled header of the project:web
 // 	"../AppSignalLib/AppSignalParam.h"
 //  "../AppSignalLib/AppSignalState.h"
 //
@@ -31,7 +30,6 @@ using ComparatorShared = std::shared_ptr<class Comparator>;
 template<typename Range>
 concept StringRange = std::ranges::range<Range> && !std::same_as<std::remove_cvref_t<Range>, std::span<const Hash>> &&
 					  !std::same_as<std::remove_cvref_t<Range>, std::span<Hash>> && StringLike<std::ranges::range_value_t<Range>>;
-
 
 template<typename SignaParamType, // AppSignalParam../..MatsAppSignalParam
 		 typename SignaStateType, // AppSignalState../..MatsAppSignalState

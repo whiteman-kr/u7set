@@ -142,93 +142,90 @@ add_executable(${TARGET} WIN32
 	${METROLOGY_RESOURCES}
 )
 
-set_target_properties(${TARGET} PROPERTIES DISABLE_PRECOMPILE_HEADERS ON)
+# set_target_properties(${TARGET} PROPERTIES DISABLE_PRECOMPILE_HEADERS ON)
 
-# target_precompile_headers(${TARGET} PRIVATE
-# 	# C includes, must be before c++ includes
-# 	#
-# 	<cassert>
-# 	<cstdint>
+target_precompile_headers(${TARGET} PRIVATE
+	# C includes, must be before c++ includes
+	#
+	<cassert>
+	<cstdint>
 
-# 	# C++ includes
-# 	#
-# 	<algorithm>
-# 	<array>
-# 	<atomic>
-# 	<condition_variable>
-# 	<cstddef>
-# 	<cstring>
-# 	<functional>
-# 	<iostream>
-# 	<limits>
-# 	<list>
-# 	<map>
-# 	<memory>
-# 	<mutex>
-# 	<optional>
-# 	<queue>
-# 	<vector>
-# 	<set>
-# 	<thread>
-# 	<type_traits>
-# 	<unordered_map>
-# 	<unordered_set>
+	# C++ includes
+	#
+	<algorithm>
+	<array>
+	<atomic>
+	<condition_variable>
+	<cstddef>
+	<cstring>
+	<functional>
+	<iostream>
+	<limits>
+	<list>
+	<map>
+	<memory>
+	<mutex>
+	<optional>
+	<queue>
+	<vector>
+	<set>
+	<thread>
+	<type_traits>
+	<unordered_map>
+	<unordered_set>
 
-# 	#<asio/io_context.hpp>
-# 	#<asio/ip/udp.hpp>
-# 	#<asio/steady_timer.hpp>
+	# Qt includes
+	#
+	<QAbstractSocket>
+	<QApplication>
+	<QDateTime>
+	<QDebug>
+	<QDir>
+	<QElapsedTimer>
+	<QEventLoop>
+	<QFile>
+	<QFileInfo>
+	<QGroupBox>
+	<QHash>
+	<QHBoxLayout>
+	<QHostAddress>
+	<QList>
+	<QMap>
+	<QMetaClassInfo>
+	<QMetaEnum>
+	<QMetaObject>
+	<QMutex>
+	<QMutexLocker>
+	<QObject>
+	<QQueue>
+	<QSettings>
+	<QString>
+	<QStringList>
+	<QTextStream>
+	<QThread>
+	<QTimer>
+	<QtGlobal>
+	<QtNetwork/QHostAddress>
+	<QUdpSocket>
+	<QUuid>
+	<QVariant>
+	<QVBoxLayout>
+	<QVector>
+	<QXmlStreamReader>
+	<QXmlStreamWriter>
 
-# 	# Qt includes
-# 	#
-# 	<QAbstractSocket>
-# 	<QApplication>
-# 	<QDateTime>
-# 	<QDebug>
-# 	<QDir>
-# 	<QElapsedTimer>
-# 	<QEventLoop>
-# 	<QFile>
-# 	<QFileInfo>
-# 	<QGroupBox>
-# 	<QHash>
-# 	<QHostAddress>
-# 	<QList>
-# 	<QMap>
-# 	<QMetaClassInfo>
-# 	<QMetaEnum>
-# 	<QMetaObject>
-# 	<QMutex>
-# 	<QMutexLocker>
-# 	<QObject>
-# 	<QQueue>
-# 	<QSettings>
-# 	<QString>
-# 	<QStringList>
-# 	<QTextStream>
-# 	<QThread>
-# 	<QTimer>
-# 	<QtGlobal>
-# 	<QtNetwork/QHostAddress>
-# 	<QUdpSocket>
-# 	<QUuid>
-# 	<QVariant>
-# 	<QVBoxLayout>
-# 	<QVector>
-# 	<QXmlStreamReader>
-# 	<QXmlStreamWriter>
+	# Project includes
+	#
+	<CommonLib/Types.h>
 
-# 	# Project includes
-# 	#
-# #	<CommonLib/Types.h>
-# 
-#	<CommonLib/Hash.h>
-# 
-#	<Network.pb.h>
+	<CommonLib/Hash.h>
 
-# #	"../AppSignalLib/AppSignal.h"
-# #	"../AppSignalLib/AppSignalParam.h"
-# #	"../AppSignalLib/AppSignalState.h"
-# )
+	<Network.pb.h>
+
+#	"../AppSignalLib/AppSignal.h"
+#	"../AppSignalLib/AppSignalParam.h"
+#	"../AppSignalLib/AppSignalState.h"
+)
 
 # set_target_properties(${TARGET}
 # 	PROPERTIES
@@ -239,7 +236,7 @@ add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 # Reuse precompiled headers from SchemaClientLib
 #
-target_precompile_headers(${TARGET} REUSE_FROM SchemaClientLib)
+#target_precompile_headers(${TARGET} REUSE_FROM SchemaClientLib)
 
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
