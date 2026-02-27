@@ -101,8 +101,8 @@ namespace ClientLib
 
 		// IAppSignalManager implementation - Setpoints
 		//
-		[[nodiscard]] std::vector<std::shared_ptr<Comparator>> setpointsByInput(const QString& appSignalId) const override;
-		[[nodiscard]] std::shared_ptr<Comparator> setpointByOutput(const QString& appSignalId) const override;
+		[[nodiscard]] std::vector<ComparatorShared> setpointsByInput(const QString& appSignalId) const override;
+		[[nodiscard]] ComparatorShared setpointByOutput(const QString& appSignalId) const override;
 
 		//
 		// ISignalDataServer implementation

@@ -17,22 +17,14 @@
 //  "../AppSignalLib/AppSignalState.h"
 //
 
-class Comparator;
-
-static_assert(std::is_class_v<Comparator>, "Comparator in this scope must be a class type");
-
-// А это должно либо компилиться, либо показать, что глобальный Comparator - не тип:
-using GlobalComparatorPtr = std::shared_ptr<::Comparator>;
-
-// static_assert(std::is_class_v<Comparator> || std::is_union_v<Comparator>,
-// 			  "Comparator must be a class/struct/union type (name collision?)");
-
 // using ISignalManager::signalExists;
 // using ISignalManager::signalParam;
 // using IAppSignalManager::signalState;
 // using IAppSignalManager::signalTags;
 // using IAppSignalManager::signalHasTag;
 // using IAppSignalManager::signalType;
+
+using ComparatorShared = std::shared_ptr<class Comparator>;
 
 // Concept to simplify and avoid long requires expressions (fixes GCC parsing issues)
 //
@@ -118,8 +110,8 @@ public:
 
 	// Setpoints
 	//
-	[[nodiscard]] virtual std::vector<std::shared_ptr<Comparator>> setpointsByInput(const StringType& appSignalId) const = 0;
-	[[nodiscard]] virtual std::shared_ptr<Comparator> setpointByOutput(const StringType& appSignalId) const = 0;
+	[[nodiscard]] virtual std::vector<ComparatorShared> setpointsByInput(const StringType& appSignalId) const = 0;
+	[[nodiscard]] virtual ComparatorShared setpointByOutput(const StringType& appSignalId) const = 0;
 
 	// Tags
 	//
