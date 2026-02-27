@@ -288,7 +288,7 @@ void GrpcCfgLoader::startGrpcFileClient()
 
 	m_grpcFileClient->setEmitFileReady(true);
 
-	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_setConnection, this, &GrpcCfgLoader::slot_setConnection);
+	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_connection, this, &GrpcCfgLoader::slot_setConnection);
 	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_unknownClientID, this, &GrpcCfgLoader::signal_unknownClientID);
 	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_wrongClientHostname, this, &GrpcCfgLoader::signal_wrongClientHostname);
 	connect(m_grpcFileClient.get(), &GrpcFileClient::signal_sessionParamsReady, this, &GrpcCfgLoader::slot_sessionParamsReady);

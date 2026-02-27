@@ -1174,11 +1174,11 @@ bool MainWindow::signalSocketIsConnected()
 	// }
 
 	{
-		std::lock_guard lg(m_grpcSignalSocketMutex);
+		std::lock_guard lg(m_grpcAdsClientMutex);
 
-		if (m_grpcSignalSocket != nullptr)
+		if (m_grpcAdsClient != nullptr)
 		{
-			return m_grpcSignalSocket->isConnected();
+			return m_grpcAdsClient->isConnected();
 		}
 	}
 
@@ -2822,14 +2822,14 @@ void MainWindow::signalSocketConnected()
 	int serverIndex = 0;
 
 	{
-		std::lock_guard lg(m_grpcSignalSocketMutex);
+		std::lock_guard lg(m_grpcAdsClientMutex);
 
-		if (m_grpcSignalSocket == nullptr)
+		if (m_grpcAdsClient == nullptr)
 		{
 			return;
 		}
 
-		serverIndex = m_grpcSignalSocket->selectedServerIndex();
+		serverIndex = m_grpcAdsClient->selectedServerIndex();
 	}
 
 
@@ -3330,9 +3330,15 @@ void MainWindow::runSignalSocket()
 	HostAddressPort addr2 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
 
 	{
-		std::lock_guard lg(m_grpcSignalSocketMutex);
+		std::lock_guard lg(m_grpcAdsClientMutex);
 
-		m_grpcSignalSocket = std::make_unique<GrpcSignalSocket>(m_softwareInfo, equipmentId1, addr1, equipmentId2, addr2, m_log);
+		m_grpcAdsClient = std::make_unique<GrpcAdsClient>(m_softwareInfo, equipmentId1, addr1, equipmentId2, addr2, m_log);
+
+		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_connection, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
+		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
+		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
+		connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_grpcAdsClient.get(), &GrpcAdsClient::configurationLoaded, Qt::QueuedConnection);
 	}
 }
 
@@ -3341,9 +3347,9 @@ void MainWindow::runSignalSocket()
 void MainWindow::stopSignalSocket()
 {
 	{
-		std::lock_guard lg(m_grpcSignalSocketMutex);
+		std::lock_guard lg(m_grpcAdsClientMutex);
 
-		m_grpcSignalSocket.reset();
+		m_grpcAdsClient.reset();
 
 	}
 	// if (m_pSignalSocketThread == nullptr)

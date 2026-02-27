@@ -54,5 +54,10 @@ int GrpcSignalSocket::selectedServerIndex() const
 	return 0;
 }
 
+void GrpcSignalSocket::configurationLoaded()
+{
+}
+
+
 
 

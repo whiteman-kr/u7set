@@ -82,7 +82,6 @@ public:
 	}
 };
 
-
 class GrpcSignalSocket
 {
 public:
@@ -96,6 +95,13 @@ public:
 
 	bool isConnected() const;
 	int selectedServerIndex() const;
+
+signals:
+	void socketConnected();
+	void socketDisconnected();
+
+public slots:
+	void configurationLoaded();
 
 private:
 	AppSignalUpdater m_updater;

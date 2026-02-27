@@ -16,7 +16,8 @@
 #include "CalibratorBase.h"
 #include "ConfigSocket.h"
 //#include "SignalSocket.h"
-#include "GrpcSignalSocket.h"
+//#include "GrpcSignalSocket.h"
+#include "GrpcAdsClient.h"
 #include "TuningSocket.h"
 #include "SelectSignalWidget.h"
 #include "MeasureView.h"
@@ -192,8 +193,8 @@ private:
 //	SignalSocket*			m_pSignalSocket = nullptr;
 //	SimpleThread*			m_pSignalSocketThread = nullptr;
 
-	std::mutex m_grpcSignalSocketMutex;
-	std::unique_ptr<GrpcSignalSocket> m_grpcSignalSocket;
+	std::mutex m_grpcAdsClientMutex;
+	std::unique_ptr<GrpcAdsClient> m_grpcAdsClient;
 	void					runSignalSocket();
 	void					stopSignalSocket();
 

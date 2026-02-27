@@ -1,5 +1,4 @@
 #include "GrpcFileSrv.h"
-#include <CommonStdLib/TimesStd.h>
 
 // -------------------------------------------------------------------------------------
 //
@@ -314,192 +313,6 @@ QString GrpcFileSrv::serviceName() const
 	return QStringLiteral("GrpcFileSrv");
 }
 
-// -------------------------------------------------------------------------------------
-//
-// GrpcClient class implementation
-//
-// -------------------------------------------------------------------------------------
-
-GrpcClient::GrpcClient(const SoftwareInfo& localSoftwareInfo,
-						const std::vector<HostAddressPort>& serverAddress,
-						const QString& clientDescription,
-						CircularLoggerShared log,
-						bool startClient) :
-	LogWrapper(log),
-	m_localSwInfo(localSoftwareInfo),
-	m_serverAddress(serverAddress),
-	m_clientDescription(clientDescription)
-
-{
-	Q_ASSERT(m_serverAddress.size() > 0);
-
-	m_state.localSoftwareInfo = localSoftwareInfo;
-
-	if (startClient)
-	{
-		start();
-	}
-}
-
-GrpcClient::~GrpcClient()
-{
-	stop();
-}
-
-const SoftwareInfo& GrpcClient::localSwInfo() const
-{
-	return m_localSwInfo;
-}
-
-QString GrpcClient::clientDescription() const
-{
-	return m_clientDescription;
-}
-
-std::string GrpcClient::authToken() const
-{
-	std::string token;
-
-	{
-		std::lock_guard lg(m_stateMutex);
-		token = m_authToken;
-	}
-
-	return token;
-}
-
-void GrpcClient::setAuthToken(const std::string& token)
-{
-	std::lock_guard lg(m_stateMutex);
-	m_authToken = token;
-}
-
-void GrpcClient::clearAuthToken()
-{
-	std::lock_guard lg(m_stateMutex);
-	m_authToken.clear();
-}
-
-void GrpcClient::start()
-{
-	if (m_serverAddress.size() == 0)
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	if (m_threadStarted.load(std::memory_order::acquire))
-	{
-		Q_ASSERT(false);          // уже запущен
-		return;
-	}
-
-	m_quitRequested.store(false, std::memory_order::relaxed);
-	m_thread = std::thread(&GrpcClient::run, this);
-	m_threadStarted.store(true, std::memory_order::release);
-}
-
-void GrpcClient::stop()
-{
-	if (m_threadStarted.load(std::memory_order::acquire) == false)
-	{
-		return;
-	}
-
-	m_quitRequested.store(true, std::memory_order::relaxed);
-
-	wakeupThread();
-
-	if (m_thread.joinable())
-	{
-		m_thread.join();
-	}
-
-	m_threadStarted.store(false, std::memory_order::release);
-}
-
-bool GrpcClient::isThreadStarted() const
-{
-	return m_threadStarted.load(std::memory_order::acquire);
-}
-
-bool GrpcClient::isQuitRequested() const
-{
-	return m_quitRequested.load(std::memory_order::relaxed);
-}
-
-HostAddressPort GrpcClient::getConnectedServerAddr() const
-{
-	HostAddressPort serverAddr;
-
-	{
-		std::lock_guard lg(m_stateMutex);
-		serverAddr = m_state.peerAddr;
-	}
-
-	return serverAddr;
-}
-
-Tcp::ConnectionState GrpcClient::getConnectionState() const
-{
-	Tcp::ConnectionState state;
-
-	{
-		std::lock_guard lg(m_stateMutex);
-		state = m_state;
-	}
-
-	return state;
-}
-
-void GrpcClient::setConnectionState(const Tcp::ConnectionState& state)
-{
-	std::lock_guard lg(m_stateMutex);
-
-	m_state = state;
-}
-
-std::string GrpcClient::getNextServerAddr() const
-{
-	m_srvAddrIndex++;
-
-	if (m_srvAddrIndex >= m_serverAddress.size())
-	{
-		m_srvAddrIndex = 0;
-	}
-
-	return m_serverAddress[m_srvAddrIndex].addressPortStr().toStdString();
-}
-
-void GrpcClient::run()				// do nothing, should be override in derived classes
-{
-	while(isQuitRequested() == false)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-	}
-}
-
-void GrpcClient::wakeupThread()
-{
-}
-
-// -------------------------------------------------------------------------------------
-//
-// ActiveCtxGuard class implementation
-//
-// -------------------------------------------------------------------------------------
-
-/*GrpcFileClient::ActiveCtxGuard::ActiveCtxGuard(std::mutex& mutex, grpc::ClientContext*& activeCtx, grpc::ClientContext* ctx) :
-	m_mutex(mutex),
-	m_activeCtx(activeCtx)
-{
-}
-	~ActiveCtxGuard();
-
-	std::mutex& m_mutex;
-	grpc::ClientContext*& m_activeCtx;
-};*/
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -580,8 +393,6 @@ bool GrpcFileClient::waitFileReady(FileReady* fileReady)
 
 	ul.unlock();
 
-	emit signal_noConnection();
-
 	return false;
 }
 
@@ -659,10 +470,7 @@ void GrpcFileClient::run()
 		}
 	}
 
-	if (m_stub != nullptr)
-	{
-		m_stub.reset();
-	}
+	resetStub();
 }
 
 void GrpcFileClient::wakeupThread()
@@ -671,102 +479,13 @@ void GrpcFileClient::wakeupThread()
 	m_fileReadyCond.notify_all();
 }
 
-void GrpcFileClient::createStubAndHandshake(grpc::Status* status)
-{
-	logMsg(QString("%1::createStubAndHandshake").arg(clientDescription()));
-
-	const std::string endpoint = getNextServerAddr();
-
-	auto channel = grpc::CreateChannel(endpoint, grpc::InsecureChannelCredentials());
-	m_stub = Grpc::FileSrv::NewStub(channel);
-
-	grpc::ClientContext handshakeCtx;
-
-	handshakeCtx.set_deadline(makeDeadlineMs(1000));
-
-	Grpc::HandshakeRequest req;
-	Grpc::HandshakeReply rep;
-
-	localSwInfo().serializeTo(req.mutable_clientsoftwareinfo());
-
-	grpc::Status st = m_stub->Handshake(&handshakeCtx, req, &rep);
-
-	if (status != nullptr)
-	{
-		*status = st;
-	}
-
-	Tcp::ConnectionState state;
-
-	if (st.ok())
-	{
-		setAuthToken(rep.authtoken());
-
-		//
-
-		state.isSocketConnected = true;
-		state.isConnected = true;
-		state.connectedSoftwareInfo.serializeFrom(rep.serversoftwareinfo());
-		state.localSoftwareInfo = localSwInfo();
-		state.securityLevel = E::SecurityLevel::Basic;	// !!!
-		state.setConnectionResult = Tcp::SetConnectionResult::Ok;
-		state.connectionNo = 1;
-		state.serverEquipmentID = state.connectedSoftwareInfo.equipmentID();
-		state.peerAddr = HostAddressPort(rep.serverip(), rep.serverport());
-		state.startTime = currentMSecsUTC();
-		state.sentBytes = 0;
-		state.receivedBytes = 0;
-		state.requestCount = 1;
-		state.replyCount = 1;
-		state.isActual = false;
-
-		setConnectionState(state);
-
-		logMsg(QString("%1::createStubAndHandshake - Handshake Ok").arg(clientDescription()));
-
-		emit signal_setConnection();
-		return;
-	}
-
-	if (st.error_code() == grpc::StatusCode::UNAUTHENTICATED)
-	{
-		if (st.error_message() == Grpc::WRONG_CLIENT_EQUIPMENT_ID)
-		{
-			state.setConnectionResult = Tcp::SetConnectionResult::UnknownClientID;
-			emit signal_unknownClientID(QString::fromStdString(Grpc::WRONG_CLIENT_EQUIPMENT_ID));
-		}
-		else
-		{
-			if (st.error_message() == Grpc::WRONG_HOST_NAME)
-			{
-				state.setConnectionResult = Tcp::SetConnectionResult::WrongClientHostname;
-				emit signal_wrongClientHostname(QString::fromStdString(Grpc::WRONG_HOST_NAME));
-			}
-			else
-			{
-				Q_ASSERT(false);
-			}
-		}
-	}
-
-	clearAuthToken();
-
-	state.localSoftwareInfo = localSwInfo();
-
-	setConnectionState(state);
-
-	logErr(QString("%1::createStubAndHandshake - Handshake Failed").arg(clientDescription()));
-
-	m_stub.reset();
-}
-
 Tcp::FileTransferResult GrpcFileClient::privateGetSessionParams()
 {
 	SessionParams params;
 
 	Tcp::FileTransferResult result = Tcp::FileTransferResult::Ok;
 
-	if (m_stub == nullptr)
+	if (stub() == nullptr)
 	{
 		m_transferInProgress.store(false, std::memory_order::relaxed);
 		result = Tcp::FileTransferResult::NotConnectedToServer;
@@ -784,7 +503,7 @@ Tcp::FileTransferResult GrpcFileClient::privateGetSessionParams()
 	Grpc::GetSessionParamsRequest req;
 	Grpc::GetSessionParamsReply rep;
 
-	::grpc::Status st = m_stub->GetSessionParams(&ctx, req, &rep);
+	::grpc::Status st = stub()->GetSessionParams(&ctx, req, &rep);
 
 	if (st.ok())
 	{
@@ -814,7 +533,7 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 {
 	Tcp::FileTransferResult result = Tcp::FileTransferResult::Ok;
 
-	if (m_stub == nullptr)
+	if (stub() == nullptr)
 	{
 		m_transferInProgress.store(false, std::memory_order::relaxed);
 		result = Tcp::FileTransferResult::NotConnectedToServer;
@@ -833,7 +552,7 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 
 	req.set_filename(fileName.toStdString());
 
-	auto reader = m_stub->GetFile(&ctx, req);
+	auto reader = stub()->GetFile(&ctx, req);
 
 	Grpc::GetFileReply reply;
 	QByteArray fileData;
@@ -965,7 +684,7 @@ Tcp::FileTransferResult GrpcFileClient::privateDownloadFile(const QString& fileN
 		if (st.error_code() == grpc::StatusCode::UNAUTHENTICATED)
 		{
 			clearAuthToken();
-			m_stub.reset();
+			resetStub();
 		}
 
 		if (!readyPushed)
@@ -1028,9 +747,4 @@ void GrpcFileClient::pushFileReady(const QString& fileName, Tcp::FileTransferRes
 
 		m_fileReadyCond.notify_all();
 	}
-}
-
-std::chrono::system_clock::time_point GrpcFileClient::makeDeadlineMs(int ms)
-{
-	return std::chrono::system_clock::now()	+ std::chrono::milliseconds(ms);
 }

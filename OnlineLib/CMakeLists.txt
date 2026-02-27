@@ -17,8 +17,6 @@ qt_add_library(${TARGET} STATIC
 	ApertureRecord.h
 	BuildInfo.cpp
 	BuildInfo.h
-#	CfgLoader.cpp
-#	CfgLoader.h
 	CircularLogger.cpp
 	CircularLogger.h
 	DataSource.cpp
@@ -27,6 +25,8 @@ qt_add_library(${TARGET} STATIC
 	GrpcCfgLoader.h
 	GrpcFileSrv.cpp
 	GrpcFileSrv.h
+	GrpcClient.cpp
+	GrpcClient.h
 	GrpcServer.cpp
 	GrpcServer.h
 	GrpcSessionGuard.cpp
@@ -82,6 +82,7 @@ target_precompile_headers(${TARGET} PRIVATE
 	<optional>
 	<queue>
 	<set>
+	<string>
 	<thread>
 	<type_traits>
 	<unordered_map>

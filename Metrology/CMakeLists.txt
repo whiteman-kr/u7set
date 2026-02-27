@@ -140,6 +140,7 @@ add_executable(${TARGET} WIN32
 	${METROLOGY_FORMS}
 	${METROLOGY_SOURCES}
 	${METROLOGY_RESOURCES}
+	GrpcAdsClient.h GrpcAdsClient.cpp
 )
 
 # set_target_properties(${TARGET} PROPERTIES DISABLE_PRECOMPILE_HEADERS ON)
