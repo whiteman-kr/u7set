@@ -6,6 +6,7 @@
 #include <atomic>
 #include <mutex>
 #include <chrono>
+#include <optional>
 
 #include <QString>
 #include <QObject>
@@ -169,7 +170,22 @@ public:
 
 	Stub* stub() { return m_stub.get(); }
 	const Stub* stub() const { return m_stub.get(); }
-	void resetStub() { m_stub.reset(); }
+	void resetStub() { m_stub.reset(); m_authToken.clear(); }
+
+	bool createContext(grpc::ClientContext* ctx, int deadlineMs = 1000)
+	{
+		TEST_PTR_RETURN_FALSE(ctx)
+
+		if (stub() == nullptr || authToken().empty())
+		{
+			return false;
+		}
+
+		ctx->AddMetadata(Grpc::SESSION_AUTH_TOKEN, authToken());
+		ctx->set_deadline(makeDeadlineMs(deadlineMs));
+
+		return true;
+	}
 
 protected:
 	std::string getNextServerAddr() const
@@ -186,11 +202,52 @@ protected:
 	{
 		while(isQuitRequested() == false)
 		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			if (authToken().empty())
+			{
+				createStubAndHandshake();
+
+				if (authToken().empty())
+				{
+					waitForOrQuit(500);
+					continue;
+				}
+			}
+
+			// add processing here
+			processing();
 		}
+
+		resetStub();
 	}
 
-	virtual void wakeupThread() {}
+	virtual void processing()
+	{
+		waitForOrQuit(200);
+	}
+
+	virtual void wakeupThread()
+	{
+		m_processigCondition.notify_all();
+	}
+
+	bool waitForOrQuit(const int timeoutMs)
+	{
+		if (isQuitRequested())
+		{
+			return false;
+		}
+
+		std::chrono::milliseconds timeout(timeoutMs);
+
+		std::unique_lock<std::mutex> ul(m_processingMutex);
+
+		m_processigCondition.wait_for(ul, timeout, [this]()
+							{
+								return isQuitRequested();
+							});
+
+		return !isQuitRequested();
+	}
 
 	virtual void createStubAndHandshake(grpc::Status* status = nullptr)
 	{
@@ -285,6 +342,10 @@ protected:
 	{
 		return std::chrono::system_clock::now()	+ std::chrono::milliseconds(ms);
 	}
+
+protected:
+	std::mutex m_processingMutex;
+	std::condition_variable m_processigCondition;
 
 private:
 	const SoftwareInfo m_localSwInfo;

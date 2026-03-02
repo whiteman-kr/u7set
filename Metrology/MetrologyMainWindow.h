@@ -28,6 +28,15 @@
 #include "PanelComparatorInfo.h"
 #include "DialogCalculator.h"
 
+#include "GrpcAdsClient.h"
+
+class AppSignalStateUpdater : public IAppSignalStateUpdater
+{
+public:
+	virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) {}
+	virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) {}
+};
+
 
 // ==============================================================================================
 

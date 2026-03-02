@@ -25,7 +25,6 @@ qt_add_library(${TARGET} STATIC
 	GrpcCfgLoader.h
 	GrpcFileSrv.cpp
 	GrpcFileSrv.h
-	GrpcClient.cpp
 	GrpcClient.h
 	GrpcServer.cpp
 	GrpcServer.h

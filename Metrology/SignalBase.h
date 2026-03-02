@@ -235,8 +235,9 @@ public:
 	//
 	int hashForRequestStateCount() const;
 	Hash hashForRequestState(int index);
+	std::vector<Hash> requestStateHashes() const;
 
-	void appendHashForRequestState(const Hash& hash);
+	void appendHashForRequestState(const Hash hash);
 	void appendHashForRequestState(const std::set<Hash>& list);
 	void removeLastHashForRequestState(int count);
 

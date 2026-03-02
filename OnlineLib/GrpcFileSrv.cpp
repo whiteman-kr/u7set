@@ -346,11 +346,11 @@ void GrpcFileClient::downloadFile(const QString& fileName)
 	Q_ASSERT(isThreadStarted() == true);
 
 	{
-		std::lock_guard lg(m_procMutex);
+		std::lock_guard lg(m_processingMutex);
 		m_downloadFileQueue.append(fileName);
 	}
 
-	m_procCond.notify_one();
+	m_processigCondition.notify_one();
 }
 
 bool GrpcFileClient::waitFileReady(FileReady* fileReady)
@@ -416,15 +416,10 @@ void GrpcFileClient::setEmitFileReady(bool enable)
 
 void GrpcFileClient::run()
 {
-	std::unique_lock ul(m_procMutex, std::defer_lock);
+	std::unique_lock ul(m_processingMutex, std::defer_lock);
 
-	while(true)
+	while(isQuitRequested() == false)
 	{
-		if (isQuitRequested() == true)
-		{
-			break;
-		}
-
 		if (authToken().empty())
 		{
 			createStubAndHandshake();
@@ -438,10 +433,10 @@ void GrpcFileClient::run()
 
 		ul.lock();
 
-		m_procCond.wait(ul, [this]() -> bool
-						   {
-								return isQuitRequested() ||	!m_downloadFileQueue.empty();
-						   });
+		m_processigCondition.wait(ul, [this]() -> bool
+								  {
+									  return isQuitRequested() ||	!m_downloadFileQueue.empty();
+								  });
 
 		if (isQuitRequested() == true)
 		{
@@ -473,9 +468,13 @@ void GrpcFileClient::run()
 	resetStub();
 }
 
+void GrpcFileClient::processing()
+{
+}
+
 void GrpcFileClient::wakeupThread()
 {
-	m_procCond.notify_all();
+	m_processigCondition.notify_all();
 	m_fileReadyCond.notify_all();
 }
 

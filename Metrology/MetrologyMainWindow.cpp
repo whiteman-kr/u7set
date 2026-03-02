@@ -3323,22 +3323,36 @@ void MainWindow::runSignalSocket()
 
 	// m_pSignalSocketThread->start();
 
-	QString equipmentId1 = theOptions.socket().server(OT::ServerType::AppDataService).equipmentID(OT::ServerPriority::Primary);
-	HostAddressPort addr1 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
-
-	QString equipmentId2 = theOptions.socket().server(OT::ServerType::AppDataService).equipmentID(OT::ServerPriority::Reserve);
-	HostAddressPort addr2 = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
-
 	{
 		std::lock_guard lg(m_grpcAdsClientMutex);
 
-		m_grpcAdsClient = std::make_unique<GrpcAdsClient>(m_softwareInfo, equipmentId1, addr1, equipmentId2, addr2, m_log);
+		std::vector<HostAddressPort> serverAddress;
+
+		HostAddressPort addr = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Primary);
+
+		if (addr.isSet())
+		{
+			serverAddress.push_back(addr);
+		}
+
+		addr = theOptions.socket().server(OT::ServerType::AppDataService).address(OT::ServerPriority::Reserve);
+
+		if (addr.isSet())
+		{
+			serverAddress.push_back(addr);
+		}
+
+		auto updater = std::make_shared<AppSignalStateUpdater>();
+
+		m_grpcAdsClient = std::make_unique<GrpcAdsClient>(m_softwareInfo, serverAddress, "Metrology GrpcAdsClient", m_log, updater);
 
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_connection, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
-		connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_grpcAdsClient.get(), &GrpcAdsClient::configurationLoaded, Qt::QueuedConnection);
+//		connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_grpcAdsClient.get(), &GrpcAdsClient::configurationLoaded, Qt::QueuedConnection);
+
+		m_grpcAdsClient->setHashesToRequestStates(theSignalBase.requestStateHashes());
 	}
 }
 

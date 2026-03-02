@@ -1870,9 +1870,15 @@ Hash SignalBase::hashForRequestState(int index)
 	return m_requestStateList[static_cast<quint64>(index)];
 }
 
+std::vector<Hash> SignalBase::requestStateHashes() const
+{
+	QMutexLocker l(&m_stateMutex);
+	return m_requestStateList;
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::appendHashForRequestState(const Hash& hash)
+void SignalBase::appendHashForRequestState(const Hash hash)
 {
 	if (hash == UNDEFINED_HASH)
 	{

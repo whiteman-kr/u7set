@@ -147,8 +147,8 @@ protected:
 
 private:
 	virtual void run() override;
+	virtual void processing() override;
 	virtual void wakeupThread() override;
-	virtual void createStubAndHandshake(grpc::Status* status = nullptr) override;
 
 	Tcp::FileTransferResult privateGetSessionParams();
 	Tcp::FileTransferResult privateDownloadFile(const QString& fileName);
@@ -159,8 +159,6 @@ private:
 private:
 	std::atomic_bool m_emitFileReady {false};
 
-	std::mutex m_procMutex;
-	std::condition_variable m_procCond;
 	QStringList m_downloadFileQueue;
 	std::atomic_bool m_transferInProgress {false};
 
