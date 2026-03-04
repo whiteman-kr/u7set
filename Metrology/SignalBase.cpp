@@ -1894,6 +1894,8 @@ void SignalBase::appendHashForRequestState(const Hash hash)
 
 void SignalBase::appendHashForRequestState(const std::set<Hash>& list)
 {
+	QMutexLocker l(&m_stateMutex);
+
 	for (const Hash& hash : list)
 	{
 		if (hash == UNDEFINED_HASH)
@@ -1901,7 +1903,7 @@ void SignalBase::appendHashForRequestState(const std::set<Hash>& list)
 			continue;
 		}
 
-		appendHashForRequestState(hash);
+		m_requestStateList.push_back(hash);
 	}
 }
 

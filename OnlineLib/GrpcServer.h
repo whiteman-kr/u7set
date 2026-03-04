@@ -43,6 +43,11 @@ public:
 	grpc::Status handshake(grpc::ServerContext* context,
 						   const Grpc::HandshakeRequest* request,
 						   Grpc::HandshakeReply* reply);
+
+	grpc::Status ping(grpc::ServerContext* context,
+					const Grpc::PingRequest* request,
+					Grpc::PingReply* reply);
+
 protected:
 	virtual grpc::Service* getGrpcService() = 0;
 	virtual QString serviceName() const = 0;

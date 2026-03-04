@@ -23,6 +23,8 @@ qt_add_library(${TARGET} STATIC
 	DataSource.h
 	GrpcCfgLoader.cpp
 	GrpcCfgLoader.h
+	GrpcFileClient.cpp
+	GrpcFileClient.h
 	GrpcFileSrv.cpp
 	GrpcFileSrv.h
 	GrpcClient.h

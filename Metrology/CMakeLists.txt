@@ -240,7 +240,7 @@ add_translation(${TARGET} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 target_include_directories(${TARGET} PRIVATE ${CMAKE_BINARY_DIR}) # for generated files, like version.h
 
 target_link_libraries(${TARGET} PRIVATE Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Concurrent Qt6::SerialPort Qt6::Network Qt6::Svg Qt6::Sql Qt6::Qml Qt6::Xml Qt6::Charts)
-target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx AppSignalLib HardwareLib UtilsLib OnlineLib UiLib ClientLib AdsConnectionLib)
+target_link_libraries(${TARGET} PRIVATE CommonLib ProtobufEx AppSignalLib HardwareLib UtilsLib OnlineLib UiLib ClientLib CommonStdLib)
 
 # Interface for calibrator Rigol DG1062Z
 #

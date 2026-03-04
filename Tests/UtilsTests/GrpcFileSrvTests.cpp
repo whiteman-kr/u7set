@@ -12,6 +12,7 @@
 #include "../../OnlineLib/SocketIO.h"
 #include "../../OnlineLib/TcpFileTransfer.h"
 #include "../../OnlineLib/GrpcFileSrv.h"
+#include "../../OnlineLib/GrpcFileClient.h"
 
 #include "Common.h"
 
@@ -237,7 +238,7 @@ TEST(GrpcFileClientTest, GetFile_ShortFile)
 	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "SYSTEMID_RACK01_WS00_ADS");
 
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
-						  tempDir, "GrpcFileClientTest", logger);
+						  tempDir, "GrpcFileClientTest", logger, 3000);
 
 	QString fileName(File::SLASH_BUILD_XML);
 
@@ -284,7 +285,7 @@ TEST(GrpcFileClientTest, GetFile_LongFile)
 	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_CLNT");
 
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
-																			  tempDir, "GrpcFileClientTest", logger);
+																			  tempDir, "GrpcFileClientTest", logger, 3000);
 
 	QString fileName("/Reports/Equipment.json");
 
@@ -331,7 +332,7 @@ TEST(GrpcFileClientTest, GetFile_WrongFile)
 	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_CLNT");
 
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
-																			  tempDir, "GrpcFileClientTest", logger);
+																			  tempDir, "GrpcFileClientTest", logger, 3000);
 
 	QString fileName("/qqq111.txt");
 
@@ -364,7 +365,7 @@ TEST(GrpcFileClientTest, GetFile_WrongLocalFolder)
 	SoftwareInfo clientSw(E::SoftwareType::AppDataService, "TESTS_GRPC_FILE_CLNT");
 
 	std::unique_ptr<GrpcFileClient> client = std::make_unique<GrpcFileClient>(clientSw,	std::vector<HostAddressPort>{serverAddr},
-																			  tempDir, "GrpcFileClientTest", logger);
+																			  tempDir, "GrpcFileClientTest", logger, 3000);
 
 	QString fileName(File::SLASH_BUILD_XML);
 

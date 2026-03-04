@@ -2,21 +2,9 @@ syntax = "proto2";
 
 import "AppSignal.proto";
 import "Network.proto";
+import "GrpcCommon.proto";
 
 package Grpc;
-
-message HandshakeRequest
-{
-	required Network.SoftwareInfo clientSoftwareInfo = 1;
-}
-
-message HandshakeReply
-{
-	required Network.SoftwareInfo serverSoftwareInfo = 1;
-	required string authToken = 2;
-	optional uint32 serverIP = 3 [default = 0];
-	optional uint32 serverPort = 4  [default = 0];
-}
 
 //
 // GetAppSignalList
@@ -162,6 +150,7 @@ message GetServerTimeReply
 service AppDataSrv
 {
 	rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
+	rpc Ping(PingRequest) returns (PingReply) {}
 	rpc GetAppSignalList(GetAppSignalListRequest) returns (stream GetAppSignalListReply) {}
 	rpc GetAppSignalParam(GetAppSignalParamRequest) returns (stream GetAppSignalParamReply) {}
 	rpc GetAppSignalState(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}

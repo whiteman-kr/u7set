@@ -51,13 +51,15 @@ public:
 			   const std::vector<HostAddressPort>& serverAddress,
 			   const QString& clientDescription,
 			   CircularLoggerShared log,
+			   int pingPeriodMs,
 			   bool startClient = true)  :
 		LogWrapper(log),
 		m_localSwInfo(localSoftwareInfo),
 		m_serverAddress(serverAddress),
 		m_clientDescription(clientDescription)
-
 	{
+		setPingPeriod(pingPeriodMs);
+
 		Q_ASSERT(m_serverAddress.size() > 0);
 
 		m_state.localSoftwareInfo = localSoftwareInfo;
@@ -170,7 +172,13 @@ public:
 
 	Stub* stub() { return m_stub.get(); }
 	const Stub* stub() const { return m_stub.get(); }
-	void resetStub() { m_stub.reset(); m_authToken.clear(); }
+
+	void resetStub()
+	{
+		m_stub.reset();
+		m_authToken.clear();
+		emit signal_disconnection();
+	}
 
 	bool createContext(grpc::ClientContext* ctx, int deadlineMs = 1000)
 	{
@@ -185,6 +193,20 @@ public:
 		ctx->set_deadline(makeDeadlineMs(deadlineMs));
 
 		return true;
+	}
+
+	void setPingPeriod(int timeoutMs)
+	{
+		static constexpr int MIN_PING_TIMEOUT = 1000;
+
+		timeoutMs = std::max(timeoutMs, MIN_PING_TIMEOUT);
+
+		m_pingPeriodMs.store(timeoutMs);
+	}
+
+	int pingPeriod() const
+	{
+		return m_pingPeriodMs.load(std::memory_order_relaxed);
 	}
 
 protected:
@@ -338,6 +360,33 @@ protected:
 		m_stub.reset();
 	}
 
+	bool sendPingRequest()
+	{
+		grpc::ClientContext ctx;
+
+		if (createContext(&ctx) == false)
+		{
+			return false;
+		}
+
+		Grpc::PingRequest req;
+		Grpc::PingReply rep;
+
+		req.set_authtoken(authToken());
+
+		grpc::Status st = m_stub->Ping(&ctx, req, &rep);
+
+		if (st.ok() == false)
+		{
+			logErr(QString("%1::sendPingRequest - error"));
+			return false;
+		}
+
+		Q_ASSERT(req.authtoken() == rep.authtoken());
+
+		return true;
+	}
+
 	static std::chrono::system_clock::time_point makeDeadlineMs(int ms)
 	{
 		return std::chrono::system_clock::now()	+ std::chrono::milliseconds(ms);
@@ -351,6 +400,7 @@ private:
 	const SoftwareInfo m_localSwInfo;
 	std::vector<HostAddressPort> m_serverAddress;
 	QString m_clientDescription;
+	std::atomic<int> m_pingPeriodMs {5000};
 
 	//
 

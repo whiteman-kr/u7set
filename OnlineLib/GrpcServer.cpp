@@ -193,3 +193,15 @@ grpc::Status GrpcServer::handshake(grpc::ServerContext* context,
 	return status;
 }
 
+grpc::Status GrpcServer::ping(grpc::ServerContext* context,
+							const Grpc::PingRequest* request,
+							Grpc::PingReply* reply)
+{
+	Q_UNUSED(context);
+
+	grpc::Status status = m_sessionGuard.ping(request, reply);
+
+	return status;
+}
+
+

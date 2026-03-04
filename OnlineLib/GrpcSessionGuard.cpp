@@ -86,6 +86,29 @@ grpc::Status GrpcSessionGuard::handshake(const Grpc::HandshakeRequest* request,
 	return grpc::Status::OK;
 }
 
+grpc::Status GrpcSessionGuard::ping(const Grpc::PingRequest* request,
+									Grpc::PingReply* reply)
+{
+	const std::string authToken = request->authtoken();
+
+	{
+		std::lock_guard<std::mutex> lock(m_sessionsMutex);
+
+		if (m_sessionExpirations.contains(authToken))
+		{
+			const TimePoint expiresAt =	std::chrono::steady_clock::now() + std::chrono::seconds(m_sessionTimeout);
+			m_sessionExpirations[authToken] = expiresAt;
+			reply->set_authtoken(authToken);
+		}
+		else
+		{
+			reply->set_authtoken("");
+		}
+	}
+
+	return grpc::Status::OK;
+}
+
 bool GrpcSessionGuard::extractAndValidateAuthToken(grpc::ServerContext* context, std::string* authToken)
 {
 	if (context == nullptr)

@@ -1,0 +1,28 @@
+syntax = "proto2";
+
+import "Network.proto";
+
+package Grpc;
+
+message HandshakeRequest
+{
+	required Network.SoftwareInfo clientSoftwareInfo = 1;
+}
+
+message HandshakeReply
+{
+	required Network.SoftwareInfo serverSoftwareInfo = 1;
+	required string authToken = 2;
+	optional uint32 serverIP = 3 [default = 0];
+	optional uint32 serverPort = 4  [default = 0];
+}
+
+message PingRequest
+{
+	required string authToken = 1;
+}
+
+message PingReply
+{
+	required string authToken = 1;
+}

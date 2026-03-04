@@ -43,6 +43,13 @@ grpc::Status GrpcAppDataSrv::Handshake(grpc::ServerContext* context,
 	return GrpcServer::handshake(context, request, reply);
 }
 
+grpc::Status GrpcAppDataSrv::Ping(grpc::ServerContext* context,
+								const Grpc::PingRequest* request,
+								Grpc::PingReply* reply)
+{
+	return GrpcServer::ping(context, request, reply);
+}
+
 grpc::Status GrpcAppDataSrv::GetAppSignalList(grpc::ServerContext* context,
 										const Grpc::GetAppSignalListRequest* request,
 										grpc::ServerWriter<Grpc::GetAppSignalListReply>* writer)

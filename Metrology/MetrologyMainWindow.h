@@ -33,10 +33,13 @@
 class AppSignalStateUpdater : public IAppSignalStateUpdater
 {
 public:
-	virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) {}
-	virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) {}
-};
+	AppSignalStateUpdater(SignalBase& signalBase);
+	virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply);
+	virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply);
 
+private:
+	SignalBase& m_signalBase;
+};
 
 // ==============================================================================================
 
@@ -75,6 +78,8 @@ public:
 	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
 	bool					inputsOfmoduleIsSame(const MeasureSignal& activeSignal);					// only for mode "Single module"
 	int						getMaxComparatorCount(const MeasureSignal& activeSignal);
+
+	void updateSignalHashesForRequestStates();
 
 private:
 
@@ -376,6 +381,9 @@ private slots:
 	//
 	void					showFindMeasurePanel(const QString& signalID);
 };
+
+
+MainWindow* getMainWindow();
 
 // ==============================================================================================
 

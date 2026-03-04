@@ -14,6 +14,7 @@ set(TARGET GrpcLib)
 
 add_library(${TARGET} STATIC
 	GrpcAppDataSrv.proto
+	GrpcCommon.proto
 	GrpcFileSrv.proto
 )
 

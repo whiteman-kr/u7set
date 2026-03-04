@@ -32,6 +32,9 @@ public:
 	grpc::Status handshake(const Grpc::HandshakeRequest* request,
 							Grpc::HandshakeReply* reply);
 
+	grpc::Status ping(const Grpc::PingRequest* request,
+					   Grpc::PingReply* reply);
+
 	bool extractAndValidateAuthToken(grpc::ServerContext* context, std::string* authToken = nullptr);
 	std::string extractAuthTokenFromMetadata(grpc::ServerContext* context) const;
 

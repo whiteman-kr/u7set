@@ -216,42 +216,11 @@ void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 											m_cfgServiceSettings.checkHostname,
 											clientRequestIP, buildPath, logger()));
 	}
-
-	//
-
-/*	CfgServer* cfgServer = new CfgServer(softwareInfo(),
-										 sessionParams(),
-										 buildPath,
-										 m_cfgServiceSettings.clients,
-										 m_cfgServiceSettings.checkHostname,
-										 logger());
-
-	std::vector<Tcp::ListenAddress> listenAddrs;
-
-	for(const RqCtrlSettings& rcs: m_cfgServiceSettings.rcSettings)
-	{
-		if (rcs.enable())
-		{
-			listenAddrs.emplace_back(rcs.equipmentID(), rcs.clientRequestIP(), rcs.securityLevel());
-		}
-	}
-
-	m_cfgServerThread = new Tcp::ListenerThread(listenAddrs, cfgServer, logger(), "CfgServerListener");
-
-	m_cfgServerThread->start();*/
 }
 
 void ConfigurationServiceWorker::stopCfgServerThread()
 {
 	m_grpcCfgServers.clear();
-	// if (m_cfgServerThread != nullptr)
-	// {
-	// 	m_cfgServerThread->quitAndWait();
-
-	// 	delete m_cfgServerThread;
-
-	// 	m_cfgServerThread = nullptr;
-	// }
 }
 
 void ConfigurationServiceWorker::startCfgCheckerThread()

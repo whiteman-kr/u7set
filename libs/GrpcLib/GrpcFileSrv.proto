@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-import "GrpcAppDataSrv.proto";
+import "GrpcCommon.proto";
 import "Network.proto";
 
 package Grpc;
@@ -40,6 +40,7 @@ message GetSessionParamsReply
 service FileSrv
 {
 	rpc Handshake(HandshakeRequest) returns (HandshakeReply) {}
+	rpc Ping(PingRequest) returns (PingReply) {}
 	rpc GetFile(GetFileRequest) returns (stream GetFileReply) {}
 	rpc GetSessionParams(GetSessionParamsRequest) returns (GetSessionParamsReply) {}
 }

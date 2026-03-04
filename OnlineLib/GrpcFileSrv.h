@@ -23,34 +23,11 @@
 
 // -------------------------------------------------------------------------------------
 //
-// GrpcFileBase class declaration
-//
-// -------------------------------------------------------------------------------------
-
-class GrpcFileBase
-{
-public:
-	GrpcFileBase(const QString& rootFolder);
-
-	void setRootFolder(const QString& rootFolder);
-	QString rootFolder() const;
-
-protected:
-	static QString getCleanRoot(const QString& rootFolder);
-	static QString getCleanFileName(const QString& rootFolder, const QString& fileName);
-
-private:
-	mutable std::mutex m_mutex;
-	QString m_rootFolder;
-};
-
-// -------------------------------------------------------------------------------------
-//
 // GrpcFileSrv class declaration
 //
 // -------------------------------------------------------------------------------------
 
-class GrpcFileSrv : public GrpcFileBase, public GrpcServer, public Grpc::FileSrv::Service
+class GrpcFileSrv : public GrpcServer, public Grpc::FileSrv::Service
 {
 public:
 	explicit GrpcFileSrv(const SoftwareInfo& serverSwInfo,
@@ -72,6 +49,10 @@ public:
 						   const Grpc::HandshakeRequest* request,
 						   Grpc::HandshakeReply* reply) override;
 
+	grpc::Status Ping(grpc::ServerContext* context,
+					const Grpc::PingRequest* request,
+					Grpc::PingReply* reply) override;
+
 	grpc::Status GetFile(grpc::ServerContext* context,
 						const Grpc::GetFileRequest* request,
 						grpc::ServerWriter<Grpc::GetFileReply>* writer) override;
@@ -79,6 +60,9 @@ public:
 	grpc::Status GetSessionParams(grpc::ServerContext* context,
 								const Grpc::GetSessionParamsRequest* request,
 								Grpc::GetSessionParamsReply* reply);
+
+	QString rootFolder() const;
+
 protected:
 	virtual bool checkFile(const QString& pathFileName, const QByteArray& fileData, QString& md5) const;
 	virtual void getSessionParams(Network::SessionParams* params) const;
@@ -86,87 +70,9 @@ protected:
 private:
 	grpc::Service* getGrpcService() override;
 	virtual QString serviceName() const override;
-};
 
-struct FileReady
-{
-	QString fileName;
-	Tcp::FileTransferResult errorCode;
-	QByteArray fileData;
-	QString md5;
-};
-
-
-// -------------------------------------------------------------------------------------
-//
-// GrpcFileClient class declaration
-//
-// -------------------------------------------------------------------------------------
-
-class GrpcFileClient : public GrpcClient<Grpc::FileSrv>, public GrpcFileBase
-{
-	Q_OBJECT
-
-public:
-	GrpcFileClient(const SoftwareInfo& localSoftwareInfo,
-				   const std::vector<HostAddressPort>& serverAddress,
-				   const QString& rootFolder,
-				   const QString& clientDescription,
-				   CircularLoggerShared log,
-				   bool startClient = true);
-
-	GrpcFileClient(const GrpcFileClient&) = delete;
-	GrpcFileClient& operator=(const GrpcFileClient&) = delete;
-	GrpcFileClient(GrpcFileClient&&) = delete;
-	GrpcFileClient& operator=(GrpcFileClient&&) = delete;
-
-	virtual ~GrpcFileClient();
-
-	void downloadSessionParams();
-
-	// async file download
-	//
-	void downloadFile(const QString& fileName);
-
-	// for blocked calls
-	//
-	bool waitFileReady(FileReady* fileReady);
-	bool downloadFileBlocked(const QString& fileName, FileReady* fileReady);
-
-	bool isTransferInProgress();
-
-	void setEmitFileReady(bool enable);				// if TRUE - signal_fileReady emitted
-													// if FALSE - use waitFileReady or downloadFileBlocked
-signals:
-	void signal_sessionParamsReady(Tcp::FileTransferResult result, SessionParams params);
-	void signal_fileReady(FileReady fileReady);			// not ref - Ok
-	void signal_fileDowloadTimeout();
-
-protected:
-	QString getErrorStr(Tcp::FileTransferResult errorCode) const;
+	static QString getCleanFileName(const QString& rootFolder, const QString& fileName);
 
 private:
-	virtual void run() override;
-	virtual void processing() override;
-	virtual void wakeupThread() override;
-
-	Tcp::FileTransferResult privateGetSessionParams();
-	Tcp::FileTransferResult privateDownloadFile(const QString& fileName);
-
-	void pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode);
-	void pushFileReady(const QString& fileName, Tcp::FileTransferResult errorCode,
-					   QByteArray& fileData, QString& md5);	// not const - OK!
-private:
-	std::atomic_bool m_emitFileReady {false};
-
-	QStringList m_downloadFileQueue;
-	std::atomic_bool m_transferInProgress {false};
-
-	std::mutex m_fileReadyMutex;
-	std::condition_variable m_fileReadyCond;
-	std::queue<FileReady> m_fileReadyQueue;
-
-//	std::unique_ptr<Grpc::FileSrv::Stub> m_stub;
-
-	inline static const QString SESSION_PARAMS_REQUEST = QStringLiteral("*SESSION_PARAMS_REQUEST*");
+	QString m_rootFolder;
 };

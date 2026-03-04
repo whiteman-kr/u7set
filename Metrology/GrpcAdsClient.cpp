@@ -1,5 +1,7 @@
 #include "GrpcAdsClient.h"
 
+#include <CommonStdLib/TimesStd.h>
+
 GrpcAdsClient::GrpcAdsClient(const SoftwareInfo& localSoftwareInfo,
 	const std::vector<HostAddressPort>& serverAddress,
 	const QString& clientDescription,
@@ -21,23 +23,65 @@ void GrpcAdsClient::setHashesToRequestStates(const std::vector<Hash>& hashes)
 	m_requestStateHashesStartIndex = 0;
 }
 
-void GrpcAdsClient::processing()
+void GrpcAdsClient::run()
 {
 	Grpc::GetAppSignalStateRequest stateRequest;
-
 	bool isLastPart = false;
 
-	getStateRequest(&stateRequest, &isLastPart);
-
-	if (stateRequest.signalhashes_size() > 0)
+	while(isQuitRequested() == false)
 	{
-		sendGetAppSignalStateRequest(stateRequest);
+		if (authToken().empty())
+		{
+			createStubAndHandshake();
+
+			if (authToken().empty())
+			{
+				waitForOrQuit(500);
+				continue;
+			}
+
+			m_lastRequestTime = currentMSecsUTC();
+		}
+
+		//
+
+		getStateRequest(&stateRequest, &isLastPart);
+
+		if (stateRequest.signalhashes_size() > 0)
+		{
+			if (sendGetAppSignalStateRequest(stateRequest) == true)
+			{
+				m_lastRequestTime = currentMSecsUTC();
+			}
+			else
+			{
+				m_lastRequestTime = 0;
+				resetStub();
+				continue;
+			}
+		}
+
+		if (stateRequest.signalhashes_size() == 0 || isLastPart)
+		{
+			waitForOrQuit(50);
+		}
+
+		if (currentMSecsUTC() - m_lastRequestTime > pingPeriod())
+		{
+			if (sendPingRequest() == true)
+			{
+				m_lastRequestTime = currentMSecsUTC();
+
+			}
+			else
+			{
+				m_lastRequestTime = 0;
+				resetStub();
+			}
+		}
 	}
 
-	if (stateRequest.signalhashes_size() == 0 || isLastPart)
-	{
-		waitForOrQuit(50);
-	}
+	resetStub();
 }
 
 void GrpcAdsClient::getStateRequest(Grpc::GetAppSignalStateRequest* request, bool* isLastPart)
@@ -81,13 +125,13 @@ void GrpcAdsClient::getStateRequest(Grpc::GetAppSignalStateRequest* request, boo
 	}
 }
 
-void GrpcAdsClient::sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRequest& request)
+bool GrpcAdsClient::sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRequest& request)
 {
 	grpc::ClientContext ctx;
 
 	if (createContext(&ctx) == false)
 	{
-		return;
+		return false;
 	}
 
 	Grpc::GetAppSignalStateReply reply;
@@ -96,13 +140,14 @@ void GrpcAdsClient::sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRe
 
 	if (st.ok() == false)
 	{
-		resetStub();
-		return;
+		return false;
 	}
 
 	if (m_updater != nullptr)
 	{
 		m_updater->updateAppSignalStates(reply);
 	}
+
+	return true;
 }
 

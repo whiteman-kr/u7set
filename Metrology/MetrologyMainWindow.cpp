@@ -21,6 +21,30 @@
 #include "Options.h"
 #include "DialogOptions.h"
 
+AppSignalStateUpdater::AppSignalStateUpdater(SignalBase& signalBase) :
+	m_signalBase(signalBase)
+{
+}
+
+void AppSignalStateUpdater::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
+{
+	Metrology::SignalState mst;
+	AppSignalStateFlags f;
+
+	for(const Proto::AppSignalState& st : reply.appsignalstates())
+	{
+		mst.setValue(st.value());
+		f.all = st.flags();
+		mst.setFlags(f);
+		Hash h = st.hash();
+		m_signalBase.setSignalState(h, mst);
+	}
+}
+
+void AppSignalStateUpdater::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
+{
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, CircularLoggerShared log, QWidget* parent) :
@@ -1488,6 +1512,16 @@ int MainWindow::getMaxComparatorCount(const MeasureSignal& activeSignal)
 	}
 
 	return maxComparatorCount;
+}
+
+void MainWindow::updateSignalHashesForRequestStates()
+{
+	std::lock_guard lg(m_grpcAdsClientMutex);
+
+	if (m_grpcAdsClient)
+	{
+		m_grpcAdsClient->setHashesToRequestStates(theSignalBase.requestStateHashes());
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -3342,7 +3376,7 @@ void MainWindow::runSignalSocket()
 			serverAddress.push_back(addr);
 		}
 
-		auto updater = std::make_shared<AppSignalStateUpdater>();
+		auto updater = std::make_shared<AppSignalStateUpdater>(theSignalBase);
 
 		m_grpcAdsClient = std::make_unique<GrpcAdsClient>(m_softwareInfo, serverAddress, "Metrology GrpcAdsClient", m_log, updater);
 
@@ -3530,4 +3564,17 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	QMainWindow::closeEvent(e);
 }
 
+
+MainWindow* getMainWindow()
+{
+	for (QWidget* w : qApp->topLevelWidgets())
+	{
+		if (auto* mw = qobject_cast<MainWindow*>(w))
+		{
+			return mw;
+		}
+	}
+
+	return nullptr;
+}
 // -------------------------------------------------------------------------------------------------------------------

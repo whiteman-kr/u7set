@@ -1,6 +1,7 @@
 #include "DialogObjectProperties.h"
 
 #include "UnitsConverter.h"
+#include "MetrologyMainWindow.h"
 
 #include <QTimer>
 #include <QApplication>
@@ -1435,6 +1436,11 @@ void DialogSignalProperty::createPropertyList()
 
 	m_comparatorTable.set(comparatorList);
 	theSignalBase.appendHashForRequestState(m_requestStateList);
+
+	if (auto mainWin = getMainWindow())
+	{
+		mainWin->updateSignalHashesForRequestStates();
+	}
 
 	// start timer for updating comparator state
 	//

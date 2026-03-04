@@ -6,7 +6,7 @@
 #include "TcpClientStatistics.h"
 #include "SoftwareSettings.h"
 #include "BuildInfo.h"
-#include "GrpcFileSrv.h"
+#include "GrpcFileClient.h"
 
 // -------------------------------------------------------------------------------------
 //

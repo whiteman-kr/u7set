@@ -30,11 +30,11 @@ public:
 	void setHashesToRequestStates(const std::vector<Hash>& hashes);
 
 private:
-	virtual void processing() override;
+	virtual void run() override;
 
 	void getStateRequest(Grpc::GetAppSignalStateRequest* request, bool* isLastPart);
 
-	void sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRequest& request);
+	bool sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRequest& request);
 
 private:
 	IAppSignalStateUpdaterShared m_updater;
@@ -42,5 +42,7 @@ private:
 	std::mutex m_hashesToRequestStatesMutex;
 	std::vector<Hash> m_hashesToRequestStates;
 	size_t m_requestStateHashesStartIndex = 0;
+
+	int64_t m_lastRequestTime = 0;
 };
 
