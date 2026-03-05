@@ -9,6 +9,7 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
+#include <cmath>
 #include <numeric>
 
 
@@ -1590,11 +1591,31 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 				AdsGatewayLib::GwSignalStateRequest request{};
 				AdsGatewayLib::GwSignalStateResponse response{};
 
+				if (TestSettings::projectSignals.empty() == false)
+				{
+					projectSignals = TestSettings::projectSignals;
+				}
+				else
+				{
+					using namespace std::string_literals;
+					const double nan = std::numeric_limits<double>::quiet_NaN();
+
+					// These signals exist in the CI project
+					//
+					projectSignals.emplace_back("#CT_RT_NOT_0101"s, Radiy::calcHash("#CT_RT_NOT_0101"), nan);
+					projectSignals.emplace_back("#CT_RT_ADDFP"s, Radiy::calcHash("#CT_RT_ADDFP"), nan);
+					projectSignals.emplace_back("#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK"s,
+												Radiy::calcHash("#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK"),
+												nan);
+					projectSignals.emplace_back("#CLIENTTEST_TUNING_D2"s, Radiy::calcHash("#CLIENTTEST_TUNING_D2"), nan);
+				}
+
 				std::vector<Radiy::Hash> hashes;
-				hashes.push_back(Radiy::calcHash("#CT_RT_NOT_0101")); // These signals exist in the project
-				hashes.push_back(Radiy::calcHash("#CT_RT_ADDFP"));
-				hashes.push_back(Radiy::calcHash("#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK"));
-				hashes.push_back(Radiy::calcHash("#CLIENTTEST_TUNING_D2"));
+				for (const auto& s : projectSignals)
+				{
+					hashes.push_back(s.hash);
+				}
+
 				request.signalCount = static_cast<uint32_t>(hashes.size());
 
 				states.resize(request.signalCount);
@@ -1619,6 +1640,7 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 		bool m_connected = false;
 		const auto& lastStatusCode() const { return m_lastStatusCode; }
 
+		std::vector<TestSettings::ProjectSignal> projectSignals;
 		uint32_t returnedSignalStates = 0;
 		std::vector<AdsGatewayLib::GwAppSignalState> states;
 	};
@@ -1630,37 +1652,22 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
 	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_SUCCESS);
 
-	EXPECT_EQ(adsConn.returnedSignalStates, 4);
+	EXPECT_EQ(adsConn.returnedSignalStates, adsConn.projectSignals.size());
 
-	bool found1 = std::any_of(adsConn.states.begin(),
-							  adsConn.states.end(),
-							  [](const AdsGatewayLib::GwAppSignalState& state)
-							  {
-								  return state.hash == Radiy::calcHash("#CT_RT_NOT_0101");
-							  });
-	EXPECT_TRUE(found1); // Signal state #CT_RT_NOT_0101 not found
+	for (const auto& s : adsConn.projectSignals)
+	{
+		auto it = std::find_if(adsConn.states.begin(),
+							   adsConn.states.end(),
+							   [&s](const AdsGatewayLib::GwAppSignalState& state)
+							   {
+								   return state.hash == s.hash;
+							   });
 
-	bool found2 = std::any_of(adsConn.states.begin(),
-							  adsConn.states.end(),
-							  [](const AdsGatewayLib::GwAppSignalState& state)
-							  {
-								  return state.hash == Radiy::calcHash("#CT_RT_ADDFP");
-							  });
-	EXPECT_TRUE(found2); // Signal state #CT_RT_ADDFP not found
+		EXPECT_NE(it, adsConn.states.end());
 
-	bool found3 = std::any_of(adsConn.states.begin(),
-							  adsConn.states.end(),
-							  [](const AdsGatewayLib::GwAppSignalState& state)
-							  {
-								  return state.hash == Radiy::calcHash("#SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK");
-							  });
-	EXPECT_TRUE(found3); // Signal state #SYSTEMID_CLIENTTEST_CH10_MD00_PI_BLINK not found
-
-	bool found4 = std::any_of(adsConn.states.begin(),
-							  adsConn.states.end(),
-							  [](const AdsGatewayLib::GwAppSignalState& state)
-							  {
-								  return state.hash == Radiy::calcHash("#CLIENTTEST_TUNING_D2");
-							  });
-	EXPECT_TRUE(found4); // Signal state #CLIENTTEST_TUNING_D2 not found
+		if (std::isnan(s.expectedValue) == false) // nan - means do not check expected value
+		{
+			EXPECT_NEAR(it->value, s.expectedValue, 1e-3);
+		}
+	}
 }
