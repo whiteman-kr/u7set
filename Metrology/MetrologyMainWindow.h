@@ -211,6 +211,7 @@ private:
 	std::unique_ptr<GrpcAdsClient> m_grpcAdsClient;
 	void					runSignalSocket();
 	void					stopSignalSocket();
+	void					restartSignalSocket();
 
 	TuningSocket*			m_pTuningSocket = nullptr;
 	SimpleThread*			m_pTuningSocketThread = nullptr;

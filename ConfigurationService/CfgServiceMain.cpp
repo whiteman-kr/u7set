@@ -10,6 +10,10 @@ int main(int argc, char** argv)
 {
 	Vld::setVldReportFilterHook();
 
+	// qInfo() << "GRPC_TRACE=" << qgetenv("GRPC_TRACE");
+	// qInfo() << "GRPC_VERBOSITY=" << qgetenv("GRPC_VERBOSITY");
+	// qInfo() << "ABSL_MIN_LOG_LEVEL=" << qgetenv("ABSL_MIN_LOG_LEVEL");
+
 	QString equipmentID = getServiceEquipmentID(argc, argv, Manufacturer::CONFIGURATION_SERVICE);
 
 #if defined (Q_OS_WIN)

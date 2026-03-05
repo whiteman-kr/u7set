@@ -271,7 +271,7 @@ public:
 	// main signal for measure
 	//
 	MeasureSignal activeSignal() const;
-	void setActiveSignal(const MeasureSignal& signal);
+	void setActiveSignal(const MeasureSignal& activeSignal);
 	void clearActiveSignal();
 
 	// other bases
@@ -324,6 +324,7 @@ private:
 signals:
 
 	void activeSignalChanged(const MeasureSignal& signal);
+	void requestStateHashesChanged();
 	void signalParamChanged(const QString& appSignalID);
 };
 

@@ -4,6 +4,7 @@
 #include "version.h"
 #include "../UtilsLib/CrashExceptionHandler.h"
 #include "../UtilsLib/HighResolutionTimerGuard.h"
+#include <grpc/support/log.h>
 
 int main(int argc, char *argv[])
 {
@@ -13,9 +14,9 @@ int main(int argc, char *argv[])
 	VLDDisable();
 #endif
 
-	// Initialize gRPC early so its singleton allocations happen before main logic.
-	//
-	grpc_init();
+	// qInfo() << "GRPC_TRACE=" << qgetenv("GRPC_TRACE");
+	// qInfo() << "GRPC_VERBOSITY=" << qgetenv("GRPC_VERBOSITY");
+	// qInfo() << "ABSL_MIN_LOG_LEVEL=" << qgetenv("ABSL_MIN_LOG_LEVEL");
 
 #ifdef VLD_IS_INCLUDED
 	VLDEnable();
@@ -65,8 +66,6 @@ int main(int argc, char *argv[])
 	google::protobuf::ShutdownProtobufLibrary();
 
 	LOGGER_SHUTDOWN(logger);
-
-	grpc_shutdown();
 
 	return result;
 }

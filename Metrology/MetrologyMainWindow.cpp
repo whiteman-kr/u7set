@@ -69,6 +69,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, CircularLoggerShared lo
 	//
 	theSignalBase.racks().groups().load();		// load rack groups for multichannel measuring
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	connect(&theSignalBase, &SignalBase::requestStateHashesChanged, this, &MainWindow::updateSignalHashesForRequestStates, Qt::QueuedConnection);
 	connect(&theSignalBase, &SignalBase::signalParamChanged, &theSignalBase.tuning().signalBase(), &TuningSignalBase::signalParamChanged, Qt::QueuedConnection);
 	connect(&theSignalBase.tuning().signalBase(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
@@ -2768,7 +2769,7 @@ void MainWindow::configSocketWrongClientHostname(QString errMsg)
 
 void MainWindow::configSocketConfigurationLoaded()
 {
-	runSignalSocket();
+	restartSignalSocket();
 	runTuningSocket();
 
 	//
@@ -3384,7 +3385,6 @@ void MainWindow::runSignalSocket()
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
-//		connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_grpcAdsClient.get(), &GrpcAdsClient::configurationLoaded, Qt::QueuedConnection);
 
 		m_grpcAdsClient->setHashesToRequestStates(theSignalBase.requestStateHashes());
 	}
@@ -3398,16 +3398,13 @@ void MainWindow::stopSignalSocket()
 		std::lock_guard lg(m_grpcAdsClientMutex);
 
 		m_grpcAdsClient.reset();
-
 	}
-	// if (m_pSignalSocketThread == nullptr)
-	// {
-	// 	return;
-	// }
+}
 
-	// m_pSignalSocketThread->quitAndWait(10000);
-	// delete m_pSignalSocketThread;
-	// m_pSignalSocketThread = nullptr;
+void MainWindow::restartSignalSocket()
+{
+	stopSignalSocket();
+	runSignalSocket();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

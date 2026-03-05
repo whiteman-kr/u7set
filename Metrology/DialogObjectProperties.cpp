@@ -1437,11 +1437,6 @@ void DialogSignalProperty::createPropertyList()
 	m_comparatorTable.set(comparatorList);
 	theSignalBase.appendHashForRequestState(m_requestStateList);
 
-	if (auto mainWin = getMainWindow())
-	{
-		mainWin->updateSignalHashesForRequestStates();
-	}
-
 	// start timer for updating comparator state
 	//
 	m_updateComparatorStateTimer = new QTimer(this);

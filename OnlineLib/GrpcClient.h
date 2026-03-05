@@ -382,9 +382,7 @@ protected:
 			return false;
 		}
 
-		Q_ASSERT(req.authtoken() == rep.authtoken());
-
-		return true;
+		return (req.authtoken() == rep.authtoken());
 	}
 
 	static std::chrono::system_clock::time_point makeDeadlineMs(int ms)

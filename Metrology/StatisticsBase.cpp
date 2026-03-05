@@ -270,6 +270,13 @@ void StatisticsBase::createSignalList(bool shownOnSchemas)
 			continue;
 		}
 
+		// added by WhiteMan
+		//
+		if (param.isSwCalculated() == true)
+		{
+			continue;
+		}
+
 		if (param.isInput() == true || param.isOutput() == true)
 		{
 			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)

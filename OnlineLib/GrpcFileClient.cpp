@@ -161,7 +161,12 @@ void GrpcFileClient::run()
 
 		if (sendPingRequest() == false)
 		{
+			qDebug() << "PingRequest FAILED";
 			resetStub();
+		}
+		else
+		{
+			qDebug() << "PingRequest OK";
 		}
 	}
 
