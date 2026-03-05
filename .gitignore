@@ -17,6 +17,7 @@ GetGitProjectVersion
 .svn
 .vscode
 .vs
+.venv
 Scripts/out
 Test/build-*/**
 *.aps

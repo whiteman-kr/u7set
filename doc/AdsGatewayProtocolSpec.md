@@ -1,23 +1,72 @@
 ﻿# Radiy AppDataService Gateway Protocol Specification
 
-**Document Version:** 1.1  
+**Document Version:** 1.3  
 **Protocol Version:** 1.0  
-**Date:** 09 Feb 2026  
+**Date:** 09 Mar 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Released
 
+## Table of Contents
+
+- [1. Introduction](#1-introduction)
+    - [1.1 Purpose](#11-purpose)
+    - [1.2 Scope](#12-scope)
+    - [1.3 System Overview](#13-system-overview)
+- [2. Connection Specification](#2-connection-specification)
+    - [2.1 Transport Protocol](#21-transport-protocol)
+    - [2.2 Connection Establishment](#22-connection-establishment)
+    - [2.3 Connection Management](#23-connection-management)
+- [3. Message Structure](#3-message-structure)
+    - [3.1 General Message Format](#31-general-message-format)
+    - [3.2 Field Descriptions](#32-field-descriptions)
+    - [3.3 Byte Order](#33-byte-order)
+    - [3.4 CRC32 Calculation](#34-crc32-calculation)
+    - [3.5 Error Response Structure](#35-error-response-structure)
+- [4. Request IDs and Operations](#4-request-ids-and-operations)
+    - [4.1 Request ID List](#41-request-id-list)
+    - [4.2 Response Convention](#42-response-convention)
+- [5. Signal Identification](#5-signal-identification)
+    - [5.1 AppSignalID](#51-appsignalid)
+    - [5.2 AppSignalID Hash](#52-appsignalid-hash)
+- [6. Request/Response Specifications](#6-requestresponse-specifications)
+    - [6.1 ADSGW_HANDSHAKE](#61-adsgw_handshake)
+    - [6.2 ADSGW_SIGNAL_LIST_START / ADSGW_SIGNAL_LIST_NEXT](#62-adsgw_signal_list_start--adsgw_signal_list_next)
+    - [6.3 ADSGW_SIGNAL_PARAM_START / ADSGW_SIGNAL_PARAM_NEXT](#63-adsgw_signal_param_start--adsgw_signal_param_next)
+    - [6.4 ADSGW_SIGNAL_STATE](#64-adsgw_signal_state)
+    - [6.5 ADSGW_SIGNAL_STATE_CHANGES](#65-adsgw_signal_state_changes)
+- [7. Data Structures](#7-data-structures)
+    - [7.1 GwAppSignalParam Structure](#71-gwappsignalparam-structure)
+    - [7.2 GwAppSignalState Structure](#72-gwappsignalstate-structure)
+    - [7.3 Channel Codes](#73-channel-codes)
+    - [7.4 Signal I/O Type Codes](#74-signal-io-type-codes)
+    - [7.5 Signal Type Codes](#75-signal-type-codes)
+- [8. Error Handling](#8-error-handling)
+    - [8.1 Error Response Format](#81-error-response-format)
+    - [8.2 Error Codes](#82-error-codes)
+- [9. Redundancy and Reliability](#9-redundancy-and-reliability)
+    - [9.1 Data Source Redundancy](#91-data-source-redundancy)
+    - [9.2 Connection Redundancy](#92-connection-redundancy)
+- [Appendices](#appendices)
+    - [Appendix A: Example Message Flows](#appendix-a-example-message-flows)
+    - [Appendix B: CRC32 Reference Implementation](#appendix-b-crc32-reference-implementation)
+- [Document Revision History](#document-revision-history)
+
 ---
 
+<a id="1-introduction" name="1-introduction"></a>
 ## 1. Introduction
 
+<a id="11-purpose" name="11-purpose"></a>
 ### 1.1 Purpose
-This document specifies the communication protocol between Radiy's AppDataService Gateway software and external monitoring systems.
+This document specifies the communication protocol between Radiy's Gateway software operating in AdsGateway (AppDataService gateway) mode and external monitoring systems.
 
 **Protocol Version Scope:** This document describes **Protocol Version 1.0**.
 
+<a id="12-scope" name="12-scope"></a>
 ### 1.2 Scope
 The protocol defines the message structure, request/response patterns, and data exchange mechanisms for signal monitoring and state management in industrial automation environments.
 
+<a id="13-system-overview" name="13-system-overview"></a>
 ### 1.3 System Overview
 
 ```mermaid
@@ -36,7 +85,7 @@ flowchart LR
     GW <-->|TCP/IP| EMS
 ```
 
-> **Note:** In this document, when we refer to `AdsGateway`, we mean the `Gateway` program configured to work in mode `AdsGateway`.
+> **Note:** In this document, when we refer to `AdsGateway` or `Gateway`, we mean the `Gateway` program configured to work in mode `AdsGateway`.
 
 The AdsGateway acts as a bridge between Radiy's equipment and external monitoring systems, providing:
 - Signal parameter retrieval
@@ -46,26 +95,30 @@ The AdsGateway acts as a bridge between Radiy's equipment and external monitorin
 
 ---
 
+<a id="2-connection-specification" name="2-connection-specification"></a>
 ## 2. Connection Specification
 
+<a id="21-transport-protocol" name="21-transport-protocol"></a>
 ### 2.1 Transport Protocol
 - **Protocol:** TCP/IP
 - **Default Port:** 5566 (configurable)
 - **Connection Model:** Server/Client
-  - **Server:** Radiy AdsGateway
+  - **Server:** Radiy Gateway in AdsGateway mode
   - **Client:** External Monitoring System
 - **Connection Mode:** Persistent connection with keep-alive
 - **Maximum payload size:** 2 MB
 
 **Data Integrity:**
-TCP provides built-in transport-level data integrity and reliability. Additionally, this protocol implements application-level CRC32 checksums (Section 3.4) for end-to-end message integrity verification.
+TCP provides built-in transport-level data integrity and reliability. Additionally, this protocol implements application-level CRC32 checksums ([Section 3.4](#34-crc32-calculation)) for end-to-end message integrity verification.
 
+<a id="22-connection-establishment" name="22-connection-establishment"></a>
 ### 2.2 Connection Establishment
 1. Client initiates TCP connection to AdsGateway on configured port
 2. Client sends `ADSGW_HANDSHAKE` request
 3. AdsGateway validates and responds with handshake acknowledgment
 4. Connection is established and ready for data exchange
 
+<a id="23-connection-management" name="23-connection-management"></a>
 ### 2.3 Connection Management
 - Client is responsible for maintaining connection
 - Heartbeat/keep-alive mechanism recommended
@@ -73,8 +126,10 @@ TCP provides built-in transport-level data integrity and reliability. Additional
 
 ---
 
+<a id="3-message-structure" name="3-message-structure"></a>
 ## 3. Message Structure
 
+<a id="31-general-message-format" name="31-general-message-format"></a>
 ### 3.1 General Message Format
 All messages (requests and responses) follow this binary structure:
 
@@ -86,36 +141,39 @@ All messages (requests and responses) follow this binary structure:
 ```
 
 **Protocol Version Handling:**
-- Server implements a **single fixed protocol version** (see document header)
-- Protocol version is verified during the `ADSGW_HANDSHAKE` exchange (Section 6.1)
-- Client and server must use **identical protocol versions** - no negotiation or compatibility layer
+- Server implements a single fixed protocol version (see document header)
+- Protocol version is verified during the `ADSGW_HANDSHAKE` exchange ([Section 6.1](#61-adsgw_handshake))
+- Client and server must use identical protocol versions - no negotiation or compatibility layer
 - Version mismatch during handshake results in connection rejection
 
 **Request/Response Flow:**
 - Client sends a request with a specific Request ID, Status Code = 0, and request-specific payload
-- Server responds with the **same Request ID**, Status Code indicating success or error, and response-specific payload
-- Status Code = 0 indicates success; non-zero values indicate errors (see Section 8.2)
+- Server responds with the same Request ID, Status Code indicating success or error, and response-specific payload
+- Status Code = 0 indicates success; non-zero values indicate errors (see [Section 8.2](#82-error-codes))
 - Client examines Status Code to determine if payload is present
 
+<a id="32-field-descriptions" name="32-field-descriptions"></a>
 ### 3.2 Field Descriptions
 
 | Field | Size | Type | Description |
 |-------|------|------|-------------|
 | Request ID | 4 bytes | uint32 | Identifies the request/response type |
 | Payload Size | 4 bytes | uint32 | Size of the payload in bytes (0 for errors, excluding header and CRC) |
-| Status Code | 4 bytes | uint32 | 0 = success, non-zero = error code (see Section 8.2) |
+| Status Code | 4 bytes | uint32 | 0 = success, non-zero = error code (see [Section 8.2](#82-error-codes)) |
 | Payload | Variable | Binary | Request/response specific data (present only when Status Code = 0) |
 | CRC32 | 4 bytes | uint32 | CRC32 checksum of entire message (excluding CRC field itself) |
 
 **Payload Interpretation:**
-- **Requests:** Payload contains request-specific data (see Section 6)
-- **Success Responses (Status Code = 0):** Payload contains operation-specific success data (see Section 6)
+- **Requests:** Payload contains request-specific data (see [Section 6](#6-requestresponse-specifications))
+- **Success Responses (Status Code = 0):** Payload contains operation-specific success data (see [Section 6](#6-requestresponse-specifications))
 - **Error Responses (Status Code ≠ 0):** Payload is not present
 
+<a id="33-byte-order" name="33-byte-order"></a>
 ### 3.3 Byte Order
 - **Endianness:** Little-endian (all multi-byte fields)
 - **Floating-point format:** IEEE 754
 
+<a id="34-crc32-calculation" name="34-crc32-calculation"></a>
 ### 3.4 CRC32 Calculation
 - **Algorithm:** CRC-32 (IEEE 802.3 polynomial: 0x04C11DB7, reflected: 0xEDB88320)
 - **Input reflection**: yes (process least-significant bit first; equivalent to reflecting each byte)
@@ -124,23 +182,26 @@ All messages (requests and responses) follow this binary structure:
 - **Final XOR:** 0xFFFFFFFF
 - **Calculation Range:** From Request ID through end of Payload
 
-For reference implementation, see **Appendix B**.
+For reference implementation, see [Appendix B](#appendix-b-crc32-reference-implementation).
 
+<a id="35-error-response-structure" name="35-error-response-structure"></a>
 ### 3.5 Error Response Structure
-When Status Code is non-zero (error condition):
-- **Payload Size = 0** (no payload data)
-- **Error code** is indicated only by the Status Code field value (see Section 8.2)
+**When Status Code is non-zero (error condition):**
+- Payload Size = 0 (no payload data)
+- Error code is indicated only by the Status Code field value (see [Section 8.2](#82-error-codes))
 - No additional error message or data is transmitted
 
 **Special Cases:**
-- **Unknown Request ID:** Server responds with the unknown Request ID and Status Code = `GWC_INVALID_REQUEST` (1)
-- **Malformed Request:** Server may respond with Status Code = `GWC_REQUEST_FORMAT_ERROR` (6)
-- **CRC Failure:** Server may respond with Status Code = `GWC_CRC_ERROR` (10)
+- Unknown Request ID: Server responds with the unknown Request ID and Status Code = `GWC_INVALID_REQUEST`
+- Malformed Request: Server may respond with Status Code = `GWC_REQUEST_FORMAT_ERROR`
+- CRC Failure: Server may respond with Status Code = `GWC_CRC_ERROR`
 
 ---
 
+<a id="4-request-ids-and-operations" name="4-request-ids-and-operations"></a>
 ## 4. Request IDs and Operations
 
+<a id="41-request-id-list" name="41-request-id-list"></a>
 ### 4.1 Request ID List
 
 | Request ID | Value (hex) | Description |
@@ -153,16 +214,19 @@ When Status Code is non-zero (error condition):
 | ADSGW_SIGNAL_STATE | 0x0300 | Request signal states |
 | ADSGW_SIGNAL_STATE_CHANGES | 0x0301 | Request signal state changes |
 
+<a id="42-response-convention" name="42-response-convention"></a>
 ### 4.2 Response Convention
 - Response uses the same Request ID as the corresponding request
 - **Status Code field indicates success (0) or error (non-zero)**
-- Status Code = 0: Payload contains operation-specific success data (see Section 6)
-- Status Code ≠ 0: No payload, Payload Size = 0 (see Section 8.2 for error codes)
+- Status Code = 0: Payload contains operation-specific success data (see [Section 6](#6-requestresponse-specifications))
+- Status Code ≠ 0: No payload, Payload Size = 0 (see [Section 8.2](#82-error-codes) for error codes)
 
 ---
 
+<a id="5-signal-identification" name="5-signal-identification"></a>
 ## 5. Signal Identification
 
+<a id="51-appsignalid" name="51-appsignalid"></a>
 ### 5.1 AppSignalID
 - **Type:** C-style null-terminated string (ASCII encoding)
 - **Character Set:** Limited to ASCII characters: `#`, `A-Z`, `a-z`, `0-9`, `_` (underscore), `.` (dot)
@@ -174,6 +238,7 @@ When Status Code is non-zero (error condition):
   - **`.` (dot)** - Special separator used in generated signals from the Bus signal (e.g., `#BUSSIGNALID.subsignal`)
   - **`_` (underscore)** - General-purpose separator
 
+<a id="52-appsignalid-hash" name="52-appsignalid-hash"></a>
 ### 5.2 AppSignalID Hash
 - **Algorithm:** Custom hash algorithm (see implementation below)
 - **HashType:** uint64 (64-bit unsigned integer)
@@ -219,26 +284,28 @@ inline constexpr Hash UNDEFINED_HASH = 0x0000000000000000ULL;
 
 ---
 
+<a id="6-requestresponse-specifications" name="6-requestresponse-specifications"></a>
 ## 6. Request/Response Specifications
 
 **Request Prerequisites:**
-- All requests **except** `ADSGW_HANDSHAKE` require that a successful handshake has been completed.
-- If the client has not completed the handshake, the server will respond with Status Code = `GWC_HANDSHAKE_REQUIRED` (5) and no payload.
-- Requests `ADSGW_SIGNAL_STATE` and `ADSGW_SIGNAL_STATE_CHANGES` require the AdsGateway to be connected to AppDataService. For these requests, if AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
+- All requests except `ADSGW_HANDSHAKE` require that a successful handshake has been completed.
+- If the client has not completed the handshake, the server will respond with Status Code = `GWC_HANDSHAKE_REQUIRED` and no payload.
+- Requests `ADSGW_SIGNAL_STATE` and `ADSGW_SIGNAL_STATE_CHANGES` require the AdsGateway to be connected to AppDataService. For these requests, if AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` and no payload.
 
+<a id="61-adsgw_handshake" name="61-adsgw_handshake"></a>
 ### 6.1 ADSGW_HANDSHAKE
 
 #### Purpose
 Initial connection handshake to establish protocol version and capabilities.
 
 **Protocol Version Negotiation:**
-- Server implements a **single fixed protocol version** (no multi-version support)
+- Server implements a single fixed protocol version (no multi-version support)
 - Client specifies the protocol version it supports in the request
 - Server compares client version with its own implemented version:
-  - **Match:** Server responds with Status Code = 0 and handshake succeeds
-  - **Mismatch:** Server responds with Status Code = `GWC_UNSUPPORTED_VERSION` (2) and connection should be closed
-- **No version negotiation or downgrading** - client and server must use identical protocol versions
-- Server and client are **incompatible** if protocol versions differ
+  - Match: Server responds with Status Code = 0 and handshake succeeds
+  - Mismatch: Server responds with Status Code = `GWC_UNSUPPORTED_VERSION` and connection should be closed
+- No version negotiation or downgrading - client and server must use identical protocol versions
+- Server and client are incompatible if protocol versions differ
 
 #### Request Payload
 ```
@@ -294,17 +361,18 @@ Total size: 16 bytes
 
 | Field | Expected value (bytes) | Notes |
 |------|-------------------------|-------|
-| `sizeof_GwAppSignalParam` | 1208 | See Section 7.1 |
-| `sizeof_GwAppSignalState` | 48 | See Section 7.2 |
+| `sizeof_GwAppSignalParam` | 1208 | See [Section 7.1](#71-gwappsignalparam-structure) |
+| `sizeof_GwAppSignalState` | 48 | See [Section 7.2](#72-gwappsignalstate-structure) |
 
 **Compatibility Check (Client):**
 - Client can compare `sizeof_GwAppSignalParam` and `sizeof_GwAppSignalState` against its locally compiled `sizeof(GwAppSignalParam)` and `sizeof(GwAppSignalState)`.
 - A mismatch indicates protocol incompatibility (likely packing/alignment or definition mismatch) and the client should reject the connection.
 - If client version == server version: Status Code = 0, handshake response with matching version
-- If client version ≠ server version: Status Code = 2 (`GWC_UNSUPPORTED_VERSION`), no payload
+- If client version ≠ server version: Status Code = `GWC_UNSUPPORTED_VERSION`, no payload
 
 ---
 
+<a id="62-adsgw_signal_list_start--adsgw_signal_list_next" name="62-adsgw_signal_list_start--adsgw_signal_list_next"></a>
 ### 6.2 ADSGW_SIGNAL_LIST_START / ADSGW_SIGNAL_LIST_NEXT
 
 #### Purpose
@@ -393,7 +461,7 @@ Total size: `8 + (appSignalIdCount * 128)` bytes
 
 **Response Behavior:**
 - Server returns the requested part number along with the AppSignalIDs for that part
-- Each AppSignalID is a C-style null-terminated string with fixed 128-byte size (as defined in Section 5.1)
+- Each AppSignalID is a C-style null-terminated string with fixed 128-byte size (as defined in [Section 5.1](#51-appsignalid))
 - Last part may contain fewer items than `itemsPerPart` if total count is not evenly divisible
 
 **Example Flow:**
@@ -413,12 +481,13 @@ Server -> Client: ADSGW_SIGNAL_LIST_NEXT (part=2, 250 AppSignalIDs)
 
 ---
 
+<a id="63-adsgw_signal_param_start--adsgw_signal_param_next" name="63-adsgw_signal_param_start--adsgw_signal_param_next"></a>
 ### 6.3 ADSGW_SIGNAL_PARAM_START / ADSGW_SIGNAL_PARAM_NEXT
 
 #### Purpose
 Retrieve detailed descriptions and parameters for all signals. Uses pagination similar to signal list retrieval.
 
-For the complete `GwAppSignalParam` structure definition, see **Section 7.1**.
+For the complete `GwAppSignalParam` structure definition, see [Section 7.1](#71-gwappsignalparam-structure).
 
 ---
 
@@ -523,12 +592,13 @@ Server -> Client: ADSGW_SIGNAL_PARAM_NEXT (part=2, 200 GwAppSignalParams)
 
 ---
 
+<a id="64-adsgw_signal_state" name="64-adsgw_signal_state"></a>
 ### 6.4 ADSGW_SIGNAL_STATE
 
 #### Purpose
 Request current states of specific signals by their hashes.
 
-For the complete `GwAppSignalState` structure definition, see **Section 7.2**.
+For the complete `GwAppSignalState` structure definition, see [Section 7.2](#72-gwappsignalstate-structure).
 
 ---
 
@@ -551,9 +621,8 @@ Total size: `8 + (signalCount * 8)` bytes
 
 **Request Behavior:**
 - Client specifies an array of signal hashes to request
-- **Maximum number of signals per request**: The `signalCount` must not exceed the `maxStateRequest` value received in the `GwHandshakeResponse` (Section 6.1). Requests exceeding this limit will result in error code `GWC_TOO_MANY_SIGNALS` (4).
-- **Missing signals**: If a requested signal hash is not found in the system, no error is reported. The signal is simply skipped in the response.
-- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
+- Maximum number of signals per request: The `signalCount` must not exceed the `maxStateRequest` value received in the `GwHandshakeResponse` ([Section 6.1](#61-adsgw_handshake)). Requests exceeding this limit will result in error code `GWC_TOO_MANY_SIGNALS`.
+- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` and no payload.
 
 #### Response Payload
 ```
@@ -575,9 +644,10 @@ struct GwSignalStateResponse {
 Total size: `8 + (stateCount * sizeof(GwAppSignalState))` bytes
 
 **Response Behavior:**
-- Server returns states for all **found** signals
-- **`stateCount` may be less than requested `signalCount`** if some signal hashes are not found
+- Server returns states for all found signals
 - States are returned in the same order as requested hashes (for found signals only)
+- `stateCount` may be less than requested `signalCount` if some signal hashes are not found
+- Missing signals: If a requested signal hash is not found in the system, no error is reported. The signal is simply skipped in the response. 
 - If none of the requested signals are found, `stateCount` will be 0 (empty response, but Status Code = 0)
 
 **Example Flow:**
@@ -597,6 +667,7 @@ Server -> Client: ADSGW_SIGNAL_STATE (Status=0, stateCount=0)
 
 ---
 
+<a id="65-adsgw_signal_state_changes" name="65-adsgw_signal_state_changes"></a>
 ### 6.5 ADSGW_SIGNAL_STATE_CHANGES
 
 #### Purpose
@@ -633,7 +704,7 @@ Total size: 4 bytes
 **Request Behavior:**
 - Client sends request to retrieve accumulated state changes
 - Server returns pending changes from the client's dedicated queue
-- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` (3) and no payload.
+- This request requires the AdsGateway to be connected to AppDataService. If the AdsGateway is not connected, the server responds with Status Code = `GWC_NO_ADS_CONNECTION` and no payload.
 
 ---
 
@@ -657,10 +728,10 @@ struct GwSignalStateChangesResponse {
 Total size: `8 + (stateCount * sizeof(GwAppSignalState))` bytes
 
 **Response Behavior:**
-- **`pendingStatesCount`**: Indicates how many additional state changes remain in the queue after this response
-  - If >= `GwHandshakeResponse.maxStateRequest`: Client should immediately request again to retrieve remaining changes
-- **`stateCount`**: Number of state changes included in this response
-- **`states`**: Array of changed signal states, each following the `GwAppSignalState` structure (Section 6.4)
+- `pendingStatesCount`: Indicates how many additional state changes remain in the queue after this response
+- If >= `GwHandshakeResponse.maxStateRequest`: Client should immediately request again to retrieve remaining changes
+- `stateCount`: Number of state changes included in this response
+- `states`: Array of changed signal states, each following the `GwAppSignalState` structure ([Section 7.2](#72-gwappsignalstate-structure))
 - States are returned in chronological order (oldest changes first)
 
 **Recommended Polling Strategy:**
@@ -671,8 +742,10 @@ Total size: `8 + (stateCount * sizeof(GwAppSignalState))` bytes
 
 ---
 
+<a id="7-data-structures" name="7-data-structures"></a>
 ## 7. Data Structures
 
+<a id="71-gwappsignalparam-structure" name="71-gwappsignalparam-structure"></a>
 ### 7.1 GwAppSignalParam Structure
 
 The `GwAppSignalParam` structure contains detailed parameters and metadata for each signal.
@@ -737,12 +810,13 @@ static_assert(sizeof(GwAppSignalParam) == 1208);
 Total size: 1208 bytes
 
 **String Field Encoding:**
-- **ASCII (7-bit) fields:** `appSignalId`, `equipmentId`, `lmEquipmentId`, `tags`
-- **UTF-8 fields:** `customSignalId`, `caption`, `units`
+- ASCII (7-bit) fields: `appSignalId`, `equipmentId`, `lmEquipmentId`, `tags`
+- UTF-8 fields: `customSignalId`, `caption`, `units`
 - All strings are null-terminated C-style strings with fixed maximum lengths as shown above
 
 ---
 
+<a id="72-gwappsignalstate-structure" name="72-gwappsignalstate-structure"></a>
 ### 7.2 GwAppSignalState Structure
 
 The `GwAppSignalState` structure contains the current state and value of a signal.
@@ -795,6 +869,7 @@ All timestamps representing milliseconds since Unix epoch (1970-01-01 00:00:00 U
 | 9-15 | Reserved | Reserved for future state flags |
 | 16-31 | Internal Use Only | Reserved for internal system use (archiving, trending). Clients should ignore these bits. |
 
+<a id="73-channel-codes" name="73-channel-codes"></a>
 ### 7.3 Channel Codes
 | Code | Name | Description |
 |------|------|-------------|
@@ -803,6 +878,7 @@ All timestamps representing milliseconds since Unix epoch (1970-01-01 00:00:00 U
 | 2 | Channel C | Represents channel C |
 | 3 | Channel D | Represents channel D |
 
+<a id="74-signal-io-type-codes" name="74-signal-io-type-codes"></a>
 ### 7.4 Signal I/O Type Codes
 | Code | Name | Description |
 |------|------|-------------|
@@ -810,6 +886,7 @@ All timestamps representing milliseconds since Unix epoch (1970-01-01 00:00:00 U
 | 1 | Output | Output signal type |
 | 2 | Internal | Internal signal type |
 
+<a id="75-signal-type-codes" name="75-signal-type-codes"></a>
 ### 7.5 Signal Type Codes
 | Code | Name | Description |
 |------|------|-------------|
@@ -819,58 +896,66 @@ All timestamps representing milliseconds since Unix epoch (1970-01-01 00:00:00 U
 
 ---
 
+<a id="8-error-handling" name="8-error-handling"></a>
 ## 8. Error Handling
 
+<a id="81-error-response-format" name="81-error-response-format"></a>
 ### 8.1 Error Response Format
-Error responses are identified by a non-zero Status Code in the message header (Section 3.2).
+Error responses are identified by a non-zero Status Code in the message header ([Section 3.2](#32-field-descriptions)).
 
 **Error Response Structure:**
 - **Status Code ≠ 0:** Error condition
 - **Payload Size = 0:** No payload data
-- **Error identification:** Status Code value indicates the specific error (see Section 8.2)
+- **Error identification:** Status Code value indicates the specific error (see [Section 8.2](#82-error-codes))
 
 **Processing errors:**
 1. Client receives response with same Request ID as request
 2. Client checks Status Code field
-3. If Status Code = 0: Parse payload as successful response (Section 6)
-4. If Status Code ≠ 0: No payload to parse, handle error based on Status Code value (Section 8.2)
+3. If Status Code = 0: Parse payload as successful response ([Section 6](#6-requestresponse-specifications))
+4. If Status Code ≠ 0: No payload to parse, handle error based on Status Code value ([Section 8.2](#82-error-codes))
 
 
+<a id="82-error-codes" name="82-error-codes"></a>
 ### 8.2 Error Codes
 
 | Code | Name | Description |
 |------|------|-------------|
 | 0 | GWC_SUCCESS | Operation successful |
-| 1 | GWC_INVALID_REQUEST | Request format is invalid |
-| 2 | GWC_UNSUPPORTED_VERSION | Protocol version not supported |
-| 3 | GWC_NO_ADS_CONNECTION | AdsGateway not connected to AppDataService |
-| 4 | GWC_TOO_MANY_SIGNALS | Request exceeds max signals limit |
-| 5 | GWC_HANDSHAKE_REQUIRED | Handshake must be completed before this request |
-| 6 | GWC_REQUEST_FORMAT_ERROR | Request format is invalid |
-| 7 | GWC_INTERNAL_ERROR | Internal server error |
-| 10 | GWC_CRC_ERROR | CRC checksum verification failed |
+| 513 (0x0201) | GWC_INVALID_REQUEST | Request format is invalid |
+| 514 (0x0202) | GWC_UNSUPPORTED_VERSION | Protocol version not supported |
+| 515 (0x0203) | GWC_NO_ADS_CONNECTION | AdsGateway not connected to AppDataService |
+| 516 (0x0204) | GWC_TOO_MANY_SIGNALS | Request exceeds max signals limit |
+| 517 (0x0205) | GWC_HANDSHAKE_REQUIRED | Handshake must be completed before this request |
+| 518 (0x0206) | GWC_REQUEST_FORMAT_ERROR | Request format is invalid |
+| 519 (0x0207) | GWC_INTERNAL_ERROR | Internal server error |
+| 522 (0x020A) | GWC_CRC_ERROR | CRC checksum verification failed |
 
 ---
 
+<a id="9-redundancy-and-reliability" name="9-redundancy-and-reliability"></a>
 ## 9. Redundancy and Reliability
 
+<a id="91-data-source-redundancy" name="91-data-source-redundancy"></a>
 ### 9.1 Data Source Redundancy
 LogicModules provide two redundant communication channels connected to separate AppDataServices.
 
 **Implementation Options:**
-1. **Single Channel Mode:** AdsGateway uses one AppDataService, provides simplified operation
-2. **Redundant Mode:** AdsGateway monitors both channels, implements failover logic
+1. Single Channel Mode: AdsGateway uses one AppDataService, provides simplified operation
+2. Redundant Mode: AdsGateway monitors both channels, implements failover logic
 
-**Decision Required:** To be confirmed based on system requirements and reliability goals.
+Decision Required: To be confirmed based on system requirements and reliability goals.
 
+<a id="92-connection-redundancy" name="92-connection-redundancy"></a>
 ### 9.2 Connection Redundancy
 - Client should support automatic reconnection on connection loss
 - AdsGateway should handle multiple simultaneous client connections
 
 ---
 
+<a id="appendices" name="appendices"></a>
 ## Appendices
 
+<a id="appendix-a-example-message-flows" name="appendix-a-example-message-flows"></a>
 ### Appendix A: Example Message Flows
 
 #### A.1 Initial Connection and Setup
@@ -889,13 +974,14 @@ flowchart TD
 
 **Usage Recommendation:**
 - `ADSGW_SIGNAL_STATE_CHANGES` is suitable for efficiently receiving only changed states and reducing bandwidth.
-- However, it is **strongly recommended** to periodically refresh full signal states using `ADSGW_SIGNAL_STATE` (e.g., every few seconds or minutes) to:
+- However, it is strongly recommended to periodically refresh full signal states using `ADSGW_SIGNAL_STATE` (e.g., every few seconds or minutes) to:
   - Resynchronize after potential missed changes (queue overflows, network issues).
   - Validate that client state remains consistent with the server.
   - Recover from any lost `ADSGW_SIGNAL_STATE_CHANGES` requests or replies.
 
 ---
 
+<a id="appendix-b-crc32-reference-implementation" name="appendix-b-crc32-reference-implementation"></a>
 ### Appendix B: CRC32 Reference Implementation
 
 **CRC32 Reference Implementation:**
@@ -1054,6 +1140,7 @@ namespace Radiy
 ```
 ---
 
+<a id="document-revision-history" name="document-revision-history"></a>
 ## Document Revision History
 
 | Document Version | Date | Protocol Version | Author | Changes |
@@ -1064,3 +1151,5 @@ namespace Radiy
 | 0.4 | 02/2026 | 1.0 (0x0100) | Serhiy Malokhatko | 6.1 Updated sizeof_GwAppSignalParam expected value |
 | 1.0 | 06 Feb 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Finalized and marked as Released |
 | 1.1 | 09 Feb 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Normalized terminology across docs |
+| 1.2 | 02 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Updated error code values |
+| 1.3 | 09 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Added TOC and internal navigation links |

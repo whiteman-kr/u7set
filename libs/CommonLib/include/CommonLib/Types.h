@@ -757,7 +757,8 @@ public:
 		UnknownMatsUser,
 		DisabledMatsUser,
 		NoSignalsAllowedToControl,
-		SignalIsNotAllowedToControl
+		SignalIsNotAllowedToControl,
+		UnknownTuningSourceID
 	};
 	Q_ENUM(NetworkError)
 
