@@ -87,9 +87,10 @@ private:
 	bool readFile(const QString& pathFileName, QByteArray* fileData, QString* errorStr) const;
 	bool findBuildFileInfo(const QString& pathFileName, OnlineLib::BuildFileInfo& bfi) const;
 
-	void resetStatuses();
+	void initVariables();
 
 	bool readCfgXmlFile(const QByteArray& fileData);
+	void appendBuildFileInfo(const OnlineLib::BuildFileInfo& bfi);
 
 	bool readCfgFile(const QString& pathFileName, QByteArray* fileData, bool needUncompress) const;
 
@@ -112,7 +113,6 @@ private:
 	QString m_appDataPath;
 	QString m_rootFolder;
 	QString m_cfgXmlFileName;
-	QString m_cfgXmlMd5;
 
 	SessionParams m_sessionParams;
 	SoftwareSettingsSet m_settingsSet;
@@ -126,13 +126,11 @@ private:
 	OnlineLib::BuildInfo m_buildInfo;
 
 	BuildFileInfoArray m_buildFilesInfo;
-	std::unordered_map<QString, QString> m_filesToDownload;		// fileName => md5
-
-	bool m_hasValidSavedConfiguration = false;
-
-	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
-
 	std::unordered_map<QString, QString> m_fileIDPathMap;		// fileID => filePathName
+
+	//
+
+	std::unordered_map<QString, QString> m_filesToDownload;		// fileName => md5
 };
 
 template<typename T>

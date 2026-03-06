@@ -21,6 +21,8 @@ struct SessionParams
 
 	void saveTo(Network::SessionParams* sp) const;
 	void loadFrom(const Network::SessionParams& sp);
+
+	void clear();
 };
 
 class RqCtrlSettings
@@ -154,6 +156,8 @@ public:
 
 	template<typename T>
 	std::shared_ptr<const T> getSettingsDefaultProfile() const;
+
+	void clear();
 
 	bool settingsProfileIsExists(const QString& profile);
 

@@ -156,7 +156,7 @@ QStringList GrpcCfgLoader::getSettingsProfiles() const
 
 void GrpcCfgLoader::slot_setConnection()
 {
-	resetStatuses();
+	initVariables();
 
 	{
 		std::lock_guard lg(m_grpcFileClientMutex);
@@ -271,7 +271,7 @@ void GrpcCfgLoader::initPaths(const QString& appEquipmentID, int appInstance)
 
 	m_cfgXmlFileName = Separator::DIR + m_appEquipmentID + Separator::DIR + File::CONFIGURATION_XML;
 
-	resetStatuses();
+	initVariables();
 }
 
 void GrpcCfgLoader::startGrpcFileClient()
@@ -494,18 +494,19 @@ bool GrpcCfgLoader::findBuildFileInfo(const QString& pathFileName, OnlineLib::Bu
 	return true;
 }
 
-void GrpcCfgLoader::resetStatuses()
+void GrpcCfgLoader::initVariables()
 {
-	m_cfgXmlMd5.clear();
 	m_configurationXmlReady = false;
 	m_allFilesLoaded = false;
+	m_sessionParams.clear();
+	m_settingsSet.clear();
+	m_buildInfo.clear();
+	m_buildFilesInfo.clear();
+	m_fileIDPathMap.clear();
 }
 
 bool GrpcCfgLoader::readCfgXmlFile(const QByteArray& fileData)
 {
-	m_buildFilesInfo.clear();
-	m_fileIDPathMap.clear();
-
 	XmlReadHelper xmlReader(fileData);
 
 	bool res = m_buildInfo.readFromXml(xmlReader);
@@ -532,21 +533,33 @@ bool GrpcCfgLoader::readCfgXmlFile(const QByteArray& fileData)
 		return false;
 	}
 
+	OnlineLib::BuildFileInfo bfi;
+
+	bfi.pathFileName = m_cfgXmlFileName;
+	bfi.size = TO_QINT64(fileData.size());
+	bfi.compressed = false;
+	bfi.md5 = Md5Hash::hashStr(fileData);
+
+	appendBuildFileInfo(bfi);
+
 	while(xmlReader.findElement(XmlElement::FILE) != false)
 	{
-		OnlineLib::BuildFileInfo bfi;
+		res &= bfi.readFromXml(xmlReader, false);
 
-		bfi.readFromXml(xmlReader, false);
-
-		m_buildFilesInfo.emplace_back(bfi);
-
-		if (bfi.ID.isEmpty() == false)
-		{
-			m_fileIDPathMap.emplace(bfi.ID, bfi.pathFileName);
-		}
+		appendBuildFileInfo(bfi);
 	}
 
-	return true;
+	return res;
+}
+
+void GrpcCfgLoader::appendBuildFileInfo(const OnlineLib::BuildFileInfo& bfi)
+{
+	m_buildFilesInfo.emplace_back(bfi);
+
+	if (bfi.ID.isEmpty() == false)
+	{
+		m_fileIDPathMap.emplace(bfi.ID, bfi.pathFileName);
+	}
 }
 
 bool GrpcCfgLoader::readCfgFile(const QString& pathFileName, QByteArray* fileData, bool needUncompress) const

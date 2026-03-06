@@ -27,6 +27,12 @@ void SessionParams::loadFrom(const Network::SessionParams& sp)
 	softwareRunMode = static_cast<E::SoftwareRunMode>(sp.softwarerunmode());
 }
 
+void SessionParams::clear()
+{
+	currentSettingsProfile.clear();
+	softwareRunMode = E::SoftwareRunMode::Normal;
+}
+
 // -------------------------------------------------------------------------------------
 //
 // SoftwareSettings class implementation
@@ -210,6 +216,12 @@ SoftwareSettingsSet::SoftwareSettingsSet(E::SoftwareType softwareType) :
 SoftwareSettingsSet::SoftwareSettingsSet() :
 	m_softwareType(E::SoftwareType::Unknown)
 {
+}
+
+void SoftwareSettingsSet::clear()
+{
+	m_softwareType = E::SoftwareType::Unknown;
+	m_settingsMap.clear();
 }
 
 bool SoftwareSettingsSet::settingsProfileIsExists(const QString& profile)
