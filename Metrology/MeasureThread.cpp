@@ -379,7 +379,10 @@ bool MeasureThread::prepareCalibrator(std::shared_ptr<CalibratorManager> pCalibr
 	m_info.setMessage(tr("Prepare calibrator: %1 %2").arg(pCalibrator->typeStr(), pCalibrator->portName()));
 	emit sendMeasureInfo(m_info);
 
-	bool result = pCalibratorManager->setUnit(calibratorMode, calibratorUnit);
+	// WhiteMan
+	// bool result = pCalibratorManager->setUnit(calibratorMode, calibratorUnit);
+	//
+	bool result = pCalibrator->setUnit(calibratorMode, calibratorUnit);
 
 	switch (pCalibrator->type())
 	{
