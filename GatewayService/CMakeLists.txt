@@ -41,6 +41,9 @@ add_executable(${TARGET}
 	ModbusTcpSlaveThread.h
 	ModbusUdpSlaveThread.cpp
 	ModbusUdpSlaveThread.h
+
+	../Metrology/GrpcAdsClient.cpp
+	../Metrology/GrpcAdsClient.h
 )
 
 target_precompile_headers(${TARGET} PRIVATE

@@ -66,6 +66,7 @@ private:
 	void requestCloseSession(SessionShared stc);
 	void closeSessions();
 	void joinAllSessions();
+	void resetAcceptor();
 
 	void processRequest(SessionShared stc, char* recvBuf, size_t& recvBufSize);
 
