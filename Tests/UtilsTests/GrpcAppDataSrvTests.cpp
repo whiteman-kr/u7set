@@ -45,34 +45,37 @@ std::unique_ptr<Grpc::AppDataSrv::Stub> StartServerAndMakeClient(const HostAddre
 
 std::string Handshake(Grpc::AppDataSrv::Stub& stub, const ClientInfo& ci, grpc::Status* status = nullptr)
 {
-	SoftwareInfo si(ci.softwareType, ci.equipmentID);
-
-	si.setHostname(ci.hostname);
-
-	grpc::ClientContext handshakeContext;
-
-	Grpc::HandshakeRequest req;
-	Grpc::HandshakeReply rep;
-
-	si.serializeTo(req.mutable_clientsoftwareinfo());
-
-	grpc::Status st = stub.Handshake(&handshakeContext, req, &rep);
-
-	if (status != nullptr)
+	for(int retry = 0; retry < 3; retry++)
 	{
-		*status = st;
-	}
+		SoftwareInfo si(ci.softwareType, ci.equipmentID);
 
-	if (st.ok())
-	{
-		const std::string authToken = rep.authtoken();
-		DEBUG_LOG_MSG(logger, QString("Normal handshake, authToken: %1").arg(QString::fromStdString(authToken)));
-		return authToken;
-	}
+		si.setHostname(ci.hostname);
 
-	DEBUG_LOG_WRN(logger, QString("Error handshake, status: %1, msg: %2").
-						  arg(grpcStatusCodeToString(st.error_code())).
-						  arg(QString::fromStdString(st.error_message())));
+		grpc::ClientContext handshakeContext;
+
+		Grpc::HandshakeRequest req;
+		Grpc::HandshakeReply rep;
+
+		si.serializeTo(req.mutable_clientsoftwareinfo());
+
+		grpc::Status st = stub.Handshake(&handshakeContext, req, &rep);
+
+		if (status != nullptr)
+		{
+			*status = st;
+		}
+
+		if (st.ok())
+		{
+			const std::string authToken = rep.authtoken();
+			DEBUG_LOG_MSG(logger, QString("Normal handshake, authToken: %1").arg(QString::fromStdString(authToken)));
+			return authToken;
+		}
+
+		DEBUG_LOG_WRN(logger, QString("Error handshake, status: %1, msg: %2").
+							  arg(grpcStatusCodeToString(st.error_code())).
+							  arg(QString::fromStdString(st.error_message())));
+	}
 
 	return {};
 }
