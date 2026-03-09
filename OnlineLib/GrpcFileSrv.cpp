@@ -14,7 +14,7 @@ GrpcFileSrv::GrpcFileSrv(const SoftwareInfo& serverSwInfo,
 						 const QString& rootFolder,
 						 CircularLoggerShared log) :
 	GrpcServer(serverSwInfo, allowAllClients, clients, checkHostName, listenIP, log),
-	m_rootFolder(rootFolder)
+	m_rootFolder(QDir::cleanPath(rootFolder))
 {
 	start();
 }
