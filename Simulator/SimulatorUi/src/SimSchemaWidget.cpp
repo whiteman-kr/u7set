@@ -468,22 +468,82 @@ namespace SimUi
 		{
 			menu.addSeparator();
 			QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
+			schemasSubMenu->setToolTipsVisible(true);
+
+			QFont mf;
+#ifdef Q_OS_WIN
+			mf.setFamily("Consolas");
+#else
+			mf = QFontDatabase::systemFont(QFontDatabase::FixedFont);
+#endif
+			schemasSubMenu->setFont(mf);
+
+			qsizetype maxSchemaIdWidth = 0;
+			{
+				auto maxSchemaIdFunc = [](const auto& begin, const auto& end) -> qsizetype
+				{
+					auto maxSchemaIdIt = std::max_element(begin,
+														  end,
+														  [](const auto& lhs, const auto& rhs)
+														  {
+															  return lhs.size() < rhs.size();
+														  });
+					return maxSchemaIdIt != end ? static_cast<int>((*maxSchemaIdIt).size()) : 0;
+				};
+
+				maxSchemaIdWidth = std::max(maxSchemaIdFunc(signalsSchemasSet.begin(), signalsSchemasSet.end()), maxSchemaIdWidth);
+				maxSchemaIdWidth =
+					std::max(maxSchemaIdFunc(impactSignalsSchemasSet.begin(), impactSignalsSchemasSet.end()), maxSchemaIdWidth);
+				maxSchemaIdWidth = std::max(maxSchemaIdFunc(loopbackSchemas.begin(), loopbackSchemas.end()), maxSchemaIdWidth);
+			}
+
+			auto addSchemaItem = [this, &allIds, thisSimWidget, schemasSubMenu, maxSchemaIdWidth](QString schemaId)
+			{
+				auto f = [schemaId, allIds, thisSimWidget]() -> void
+				{
+					thisSimWidget->openSchemaTabPage(schemaId, allIds);
+				};
+
+				auto schemaCaption = m_simulator->schemaDetails().schemaCaptionById(schemaId);
+
+				QString text;
+#if 0
+				text = schemaCaption.isEmpty() ? schemaId : schemaCaption;
+#else
+				text = QString{"%1 | %2"}.arg(schemaId.leftJustified(maxSchemaIdWidth)).arg(schemaCaption);
+#endif
+				QAction* a = schemasSubMenu->addAction(text);
+
+				auto schemaDetails = m_simulator->schemaDetails().schemaDetails(schemaId);
+
+				QString schemaTagsText;
+				if (schemaDetails != nullptr)
+				{
+					QStringList tags;
+					std::copy(schemaDetails->schemaTags().begin(), schemaDetails->schemaTags().end(), std::back_inserter(tags));
+					schemaTagsText = tags.join(" ");
+				}
+
+				QString schemaPath = schemaDetails ? schemaDetails->m_path : QString{};
+
+				auto tooltip = QString("<b>Schema:</b><br>%1<br>%2<br><b>Tags:</b><br>%3<br><b>Path:</b><br>%4")
+								   .arg(schemaId)
+								   .arg(schemaCaption)
+								   .arg(schemaTagsText)
+								   .arg(schemaPath);
+
+				a->setToolTip(tooltip);
+				a->setCheckable(true);
+				a->setChecked(schema()->schemaId() == schemaId);
+
+				connect(a, &QAction::triggered, this, f);
+			};
 
 			// App Signals
 			//
 			for (const QString& schemaId : signalsSchemasSet)
 			{
-				auto f = [schemaId, &allIds, thisSimWidget]() -> void
-				{
-					thisSimWidget->openSchemaTabPage(schemaId, allIds);
-				};
-
-				QAction* a = schemasSubMenu->addAction(schemaId);
-
-				a->setCheckable(true);
-				a->setChecked(schema()->schemaId() == schemaId);
-
-				connect(a, &QAction::triggered, this, f);
+				addSchemaItem(schemaId);
 			}
 
 			// Impact signals
@@ -492,15 +552,7 @@ namespace SimUi
 
 			for (const QString& schemaId : impactSignalsSchemasSet)
 			{
-				auto f = [schemaId, &allIds, thisSimWidget]() -> void
-				{
-					thisSimWidget->openSchemaTabPage(schemaId, allIds);
-				};
-
-				QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
-
-				QAction* a = schemasSubMenu->addAction(actionCaption);
-				connect(a, &QAction::triggered, this, f);
+				addSchemaItem(schemaId);
 			}
 
 			// Loopback
@@ -509,15 +561,7 @@ namespace SimUi
 
 			for (const QString& schemaId : loopbackSchemas)
 			{
-				auto f = [schemaId, &allIds, thisSimWidget]() -> void
-				{
-					thisSimWidget->openSchemaTabPage(schemaId, allIds);
-				};
-
-				QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
-
-				QAction* a = schemasSubMenu->addAction(actionCaption);
-				connect(a, &QAction::triggered, this, f);
+				addSchemaItem(schemaId);
 			}
 		}
 

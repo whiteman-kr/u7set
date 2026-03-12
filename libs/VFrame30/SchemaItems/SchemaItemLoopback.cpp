@@ -1,7 +1,8 @@
 #include <VFrame30/SchemaItemLoopback.h>
-#include <VFrame30/SchemaLayer.h>
-#include <VFrame30/PropertyNames.h>
+
 #include <VFrame30/DrawParam.h>
+#include <VFrame30/PropertyNames.h>
+#include <VFrame30/SchemaLayer.h>
 
 namespace VFrame30
 {
@@ -16,12 +17,15 @@ namespace VFrame30
 	SchemaItemLoopback::SchemaItemLoopback(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::loopbackId, PropertyNames::functionalCategory, true, SchemaItemLoopback::loopbackId, SchemaItemLoopback::setLoopbackId);
+		ADD_PROPERTY_GET_SET_CAT(QString,
+								 PropertyNames::loopbackId,
+								 PropertyNames::functionalCategory,
+								 true,
+								 SchemaItemLoopback::loopbackId,
+								 SchemaItemLoopback::setLoopbackId);
 	}
 
-	SchemaItemLoopback::~SchemaItemLoopback()
-	{
-	}
+	SchemaItemLoopback::~SchemaItemLoopback() {}
 
 	bool SchemaItemLoopback::SaveData(Proto::Envelope* message) const
 	{
@@ -78,7 +82,7 @@ namespace VFrame30
 	}
 
 	// IMatsSchemaItemAssociations implementation.
-//
+	//
 	QStringList SchemaItemLoopback::associatedAppSignalIds() const
 	{
 		return {};
@@ -96,7 +100,7 @@ namespace VFrame30
 
 	QStringList SchemaItemLoopback::associatedLoopbackIds() const
 	{
-		return {};
+		return QStringList{} << m_loobackId;
 	}
 
 	QStringList SchemaItemLoopback::associatedSchemaItemLabels() const
@@ -132,9 +136,7 @@ namespace VFrame30
 		addInput();
 	}
 
-	SchemaItemLoopbackSource::~SchemaItemLoopbackSource()
-	{
-	}
+	SchemaItemLoopbackSource::~SchemaItemLoopbackSource() {}
 
 	bool SchemaItemLoopbackSource::SaveData(Proto::Envelope* message) const
 	{
@@ -190,14 +192,15 @@ namespace VFrame30
 
 		// Draw loopback logo
 		//
-		double pinVertGap =	VFrame30::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
+		double pinVertGap =
+			VFrame30::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
 
 		QRectF logoRect = {r.right() - pinVertGap * 2.0, r.top(), pinVertGap * 2.0, r.height()};
 		logoRect.setTopRight(drawParam->gridToDpi(logoRect.topRight()));
 		logoRect.setBottomLeft(drawParam->gridToDpi(logoRect.bottomLeft()));
 
 		QPen pen(lineColor());
-		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight); // Don't use getter!
 		painter->setPen(pen);
 
 		painter->drawLine(logoRect.topLeft(), logoRect.bottomLeft());
@@ -244,7 +247,7 @@ namespace VFrame30
 							  "\n\tLoopbackID: %1"
 							  "\n"
 							  "\nHint: Press F2 to edit LoopbackID")
-						.arg(loopbackId());
+						  .arg(loopbackId());
 
 		return str;
 	}
@@ -267,9 +270,7 @@ namespace VFrame30
 		addOutput();
 	}
 
-	SchemaItemLoopbackTarget::~SchemaItemLoopbackTarget()
-	{
-	}
+	SchemaItemLoopbackTarget::~SchemaItemLoopbackTarget() {}
 
 	bool SchemaItemLoopbackTarget::SaveData(Proto::Envelope* message) const
 	{
@@ -278,7 +279,7 @@ namespace VFrame30
 		{
 			assert(result);
 			assert(message->HasExtension(Proto::schemaitem));
-			
+
 			return false;
 		}
 
@@ -326,14 +327,15 @@ namespace VFrame30
 
 		// Draw loopback logo
 		//
-		double pinVertGap =	VFrame30::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
+		double pinVertGap =
+			VFrame30::snapToGrid(drawParam->gridSize() * static_cast<double>(drawParam->pinGridStep()), drawParam->gridSize());
 
 		QRectF logoRect = {r.left(), r.top(), pinVertGap * 2.0, r.height()};
 		logoRect.setTopRight(drawParam->gridToDpi(logoRect.topRight()));
 		logoRect.setBottomLeft(drawParam->gridToDpi(logoRect.bottomLeft()));
 
 		QPen pen(lineColor());
-		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
+		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight); // Don't use getter!
 		painter->setPen(pen);
 
 		painter->drawLine(logoRect.topRight(), logoRect.bottomRight());
@@ -382,8 +384,8 @@ namespace VFrame30
 							  "\n\tLoopbackID: %1"
 							  "\n"
 							  "\nHint: Press F2 to edit LoopbackID")
-						.arg(loopbackId());
+						  .arg(loopbackId());
 
 		return str;
 	}
-}
+} // namespace VFrame30
