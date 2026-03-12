@@ -167,8 +167,8 @@ void CheckInDialog::updateCheckInFiles(bool includeChildren)
 										m_checkInFiles.end(),
 										[this, currentUserIsAdmin, currentUserId](const DbFileInfo& fi)
 										{
-											bool ok = fi.state() == E::VcsState::CheckedOut &&
-													  (fi.userId() == currentUserId || currentUserIsAdmin == false);
+											bool ok = currentUserIsAdmin == true ||
+													  (fi.state() == E::VcsState::CheckedOut && fi.userId() == currentUserId);
 											return !ok;
 										}),
 						 m_checkInFiles.end());
