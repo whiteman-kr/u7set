@@ -2,7 +2,7 @@
 
 **Document Version:** 0.1  
 **Protocol Version:** 1.0  
-**Date:** 09 Mar 2026  
+**Date:** 13 Mar 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Draft
 
@@ -444,10 +444,11 @@ struct GwHandshakeResponse {
     uint32_t maxStateWrite;               // Max tuning signal write commands per request 
                                           // (TGW_TUNING_SIGNALS_WRITE)
 
+    uint32_t sizeof_GwTuningSourceState;  // See Section 5.3, struct GwTuningSourceState
     uint32_t sizeof_GwTuningSignalState;  // See Section 6.1
 };
 
-static_assert(sizeof(GwHandshakeResponse) == 16);
+static_assert(sizeof(GwHandshakeResponse) == 20);
 ```
 
 | Offset | Size | Type | Field |
@@ -456,14 +457,16 @@ static_assert(sizeof(GwHandshakeResponse) == 16);
 | 2 | 2 | `uint16_t` | `reserved` |
 | 4 | 4 | `uint32_t` | `maxStateRequest` |
 | 8 | 4 | `uint32_t` | `maxStateWrite` |
-| 12 | 4 | `uint32_t` | `sizeof_GwTuningSignalState` |
+| 12 | 4 | `uint32_t` | `sizeof_GwTuningSourceState` |
+| 16 | 4 | `uint32_t` | `sizeof_GwTuningSignalState` |
 
-Total size: 16 bytes
+Total size: 20 bytes
 
 **Expected Size Field Values (Protocol v1.0):**
 
 | Field | Expected value (bytes) | Notes |
 |------|-------------------------|-------|
+| `sizeof_GwTuningSourceState` | 280 | See [Section 5.3, struct GwTuningSourceState](#53-gw-tuning-source-state-structure) |
 | `sizeof_GwTuningSignalState` | 72 | See [Section 6.1](#61-gwtuningsignalstate-structure) |
 
 **Compatibility Check (Client):**
@@ -563,9 +566,9 @@ Total size: 4 bytes
 
 ```cpp
 struct GwGetTuningSourcesNextResponse {
-    uint32_t partNo;        // Current part number (matches request)
-    uint32_t partSize;      // Size of data in this part (bytes)
-    char     data[];        // Part data (UTF-8 encoded)
+    uint32_t partNo;            // Current part number (matches request)
+    uint32_t partSize;          // Size of data in this part (bytes)
+    char     data[partSize];    // Part data (UTF-8 encoded)
 };
 ```
 
@@ -573,7 +576,7 @@ struct GwGetTuningSourcesNextResponse {
 |--------|------|------|-------|
 | 0 | 4 | `uint32_t` | `partNo` |
 | 4 | 4 | `uint32_t` | `partSize` |
-| 8 | `partSize` | `char[]` | `data` |
+| 8 | `partSize` | `char[]` | `data[]` |
 
 Total size: `8 + partSize` bytes
 
@@ -644,12 +647,13 @@ struct GwGetTuningSourceStatesResponse {
 |--------|------|------|-------|
 | 0 | 4 | `uint32_t` | `count` |
 | 4 | 4 | `uint32_t` | `reserved` |
-| 8 | `count * sizeof(GwTuningSourceState)` | `GwTuningSourceState[]` | `sourceStates` |
+| 8 | `count * sizeof(GwTuningSourceState)` | `GwTuningSourceState[]` | `sourceStates[]` |
 
 Total size: `8 + (count * sizeof(GwTuningSourceState))` bytes
 
 ---
 
+<a id="53-gw-tuning-source-state-structure" name="53-gw-tuning-source-state-structure"></a>
 #### GwTuningSourceState Structure
 
 ```cpp
@@ -730,7 +734,7 @@ struct GwTuningSignalsReadRequest {
 |--------|------|------|-------|
 | 0 | 4 | `uint32_t` | `count` |
 | 4 | 4 | `uint32_t` | `reserved` |
-| 8 | `count * 8` | `uint64_t` | `hashes[]` |
+| 8 | `count * 8` | `uint64_t[]` | `hashes[]` |
 
 Total size: `8 + (count * 8)` bytes
 
@@ -752,7 +756,7 @@ struct GwTuningSignalsReadResponse {
 |--------|------|------|-------|
 | 0 | 4 | `uint32_t` | `count` |
 | 4 | 4 | `uint32_t` | `reserved` |
-| 8 | `count * sizeof(GwTuningSignalState)` | `GwTuningSignalState` | `states[]` |
+| 8 | `count * sizeof(GwTuningSignalState)` | `GwTuningSignalState[]` | `states[]` |
 
 Total size: `8 + (count * sizeof(GwTuningSignalState))` bytes
 
@@ -792,7 +796,16 @@ struct GwTuningWriteValue {
 };
 
 static_assert(sizeof(GwTuningWriteValue) == 16);
+```
 
+| Offset | Size | Type | Field |
+|--------|------|------|-------|
+| 0 | 8 | `uint64_t` | `hash` |
+| 8 | 8 | `double` | `value` |
+
+Total size: 16 bytes
+
+```cpp
 struct GwTuningSignalsWriteRequest {
     char     user[128];     // User name (ASCII, null-terminated)
     uint8_t  apply;         // 1 = apply values after write (auto-apply),
@@ -809,7 +822,7 @@ struct GwTuningSignalsWriteRequest {
 | 128 | 1 | `uint8_t` | `apply` |
 | 129 | 3 | `uint8_t[3]` | `reserved` |
 | 132 | 4 | `uint32_t` | `count` |
-| 136 | `count * 16` | `GwTuningWriteValue[]` | `values` |
+| 136 | `count * 16` | `GwTuningWriteValue[]` | `values[]` |
 
 Total size: `136 + (count * 16)` bytes
 
@@ -1035,7 +1048,7 @@ static_assert(sizeof(GwChangeControlledTuningSourceResponse) == 132);
 |--------|------|------|-------|
 | 0 | 128 | `char[128]` | `controlledModuleEquipmentId` |
 | 128 | 1 | `uint8_t` | `controlIsActive` |
-| 129 | 3 | `uint8_t[3]` | `reserved` |
+| 129 | 3 | `uint8_t[3]` | `reserved[]` |
 
 Total size: 132 bytes
 
@@ -1522,4 +1535,4 @@ Within each `DataSource` element:
 
 | Document Version | Date | Protocol Version | Author | Changes |
 |------------------|------|------------------|--------|---------|
-| 0.1 | 09 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
+| 0.1 | 13 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
