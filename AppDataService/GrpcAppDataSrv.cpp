@@ -235,44 +235,14 @@ grpc::Status GrpcAppDataSrv::GetAppSignalState(grpc::ServerContext* context,
 											const Grpc::GetAppSignalStateRequest* request,
 											Grpc::GetAppSignalStateReply* reply)
 {
-	if (context == nullptr ||
-		request == nullptr ||
-		reply == nullptr)
-	{
-		Q_ASSERT(false);
-		return grpc::Status::CANCELLED;
-	}
+	return getAppSignalState(context, request, reply, false);
+}
 
-	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
-	{
-		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
-	}
-
-	if (request->signalhashes_size() > ADS_GET_APP_SIGNAL_STATE_MAX)
-	{
-		return grpc::Status(grpc::StatusCode::OUT_OF_RANGE,
-							Grpc::SIGNAL_HASHES_COUNT_EXEEDS_ADS_GET_APP_SIGNAL_STATE_MAX);
-	}
-
-	//
-
-	reply->mutable_appsignalstates()->Reserve(request->signalhashes_size());
-
-	AppSignalState appSignalState;
-
-	for(Hash hash : request->signalhashes())
-	{
-		bool result = m_signalStates.getCurrentState(hash, appSignalState);
-
-		if (result == false)
-		{
-			continue;	// unknown hash
-		}
-
-		appSignalState.save(reply->add_appsignalstates());
-	}
-
-	return grpc::Status::OK;
+grpc::Status GrpcAppDataSrv::GetAppSignalStateConstSize(grpc::ServerContext* context,
+										const Grpc::GetAppSignalStateRequest* request,
+										Grpc::GetAppSignalStateReply* reply)
+{
+	return getAppSignalState(context, request, reply, true);
 }
 
 grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* context,
@@ -567,6 +537,58 @@ grpc::Status GrpcAppDataSrv::GetServerTime(grpc::ServerContext* context,
 
 	reply->set_servertimeutc(currentMSecsUTC());
 	reply->set_servertimelocal(currentMSecsLocal());
+
+	return grpc::Status::OK;
+}
+
+grpc::Status GrpcAppDataSrv::getAppSignalState(grpc::ServerContext* context,
+											const Grpc::GetAppSignalStateRequest* request,
+											Grpc::GetAppSignalStateReply* reply,
+											bool constSize)
+{
+	if (context == nullptr ||
+		request == nullptr ||
+		reply == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
+	}
+
+	if (request->signalhashes_size() > ADS_GET_APP_SIGNAL_STATE_MAX)
+	{
+		return grpc::Status(grpc::StatusCode::OUT_OF_RANGE,
+							Grpc::SIGNAL_HASHES_COUNT_EXEEDS_ADS_GET_APP_SIGNAL_STATE_MAX);
+	}
+
+	//
+
+	reply->mutable_appsignalstates()->Reserve(request->signalhashes_size());
+
+	AppSignalState appSignalState;
+
+	for(Hash hash : request->signalhashes())
+	{
+		bool result = m_signalStates.getCurrentState(hash, appSignalState);
+
+		if (result == false)
+		{
+			// unknown hash
+			//
+			if (constSize == false)
+			{
+				continue;
+			}
+
+			appSignalState.clear();
+		}
+
+		appSignalState.save(reply->add_appsignalstates());
+	}
 
 	return grpc::Status::OK;
 }

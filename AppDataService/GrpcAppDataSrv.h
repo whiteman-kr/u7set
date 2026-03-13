@@ -62,6 +62,10 @@ public:
 								const Grpc::GetAppSignalStateRequest* request,
 								Grpc::GetAppSignalStateReply* reply) override;
 
+	grpc::Status GetAppSignalStateConstSize(grpc::ServerContext* context,
+								   const Grpc::GetAppSignalStateRequest* request,
+								   Grpc::GetAppSignalStateReply* reply) override;
+
 	grpc::Status GetAppSignalStateChanges(grpc::ServerContext* context,
 								   const Grpc::GetAppSignalStateChangesRequest* request,
 								   grpc::ServerWriter<Grpc::GetAppSignalStateChangesReply>* writer) override;
@@ -90,6 +94,11 @@ public:
 								const Grpc::GetServerTimeRequest* request,
 								Grpc::GetServerTimeReply* reply) override;
 private:
+	grpc::Status getAppSignalState(grpc::ServerContext* context,
+								   const Grpc::GetAppSignalStateRequest* request,
+								   Grpc::GetAppSignalStateReply* reply,
+								   bool constSize);
+
 	grpc::Service* getGrpcService() override;
 	virtual QString serviceName() const override;
 

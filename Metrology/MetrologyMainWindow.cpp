@@ -3387,6 +3387,10 @@ void MainWindow::runSignalSocket()
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
 
 		m_grpcAdsClient->setHashesToRequestStates(theSignalBase.requestStateHashes());
+		m_grpcAdsClient->setStateRequestInterval(50);
+		m_grpcAdsClient->setRequestTypes({GrpcAdsClient::RequestType::GetAppSignalState});
+
+		m_grpcAdsClient->start();
 	}
 }
 
@@ -3397,6 +3401,7 @@ void MainWindow::stopSignalSocket()
 	{
 		std::lock_guard lg(m_grpcAdsClientMutex);
 
+		m_grpcAdsClient->stop();
 		m_grpcAdsClient.reset();
 	}
 }

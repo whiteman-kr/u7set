@@ -154,6 +154,7 @@ service AppDataSrv
 	rpc GetAppSignalList(GetAppSignalListRequest) returns (stream GetAppSignalListReply) {}
 	rpc GetAppSignalParam(GetAppSignalParamRequest) returns (stream GetAppSignalParamReply) {}
 	rpc GetAppSignalState(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}
+	rpc GetAppSignalStateConstSize(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}
 	rpc GetAppSignalStateChanges(GetAppSignalStateChangesRequest) returns (stream GetAppSignalStateChangesReply) {}
 	rpc GetDiscretesLog(GetDiscretesLogRequest) returns (stream GetDiscretesLogReply) {}
 	rpc AckDiscretesLog(AckDiscretesLogRequest) returns (AckDiscretesLogReply) {}

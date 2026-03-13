@@ -20,6 +20,15 @@ class GrpcAdsClient : public GrpcClient<Grpc::AppDataSrv>
 	Q_OBJECT
 
 public:
+	enum class RequestType
+	{
+		GetAppSignalState = 0x0001,
+		GetappSignalStateConstSize = 0x0002,
+		GetAppSignalStateChanges = 0x0004,
+		GatewayGetAppSignalStateChanges = 0x0008
+	};
+
+public:
 	GrpcAdsClient(const SoftwareInfo& localSoftwareInfo,
 				  const std::vector<HostAddressPort>& serverAddress,
 				  const QString& clientDescription,
@@ -29,15 +38,27 @@ public:
 
 	void setHashesToRequestStates(const std::vector<Hash>& hashes);
 
+	void setRequestTypes(const std::vector<RequestType>& requestTypes);
+	void setStateRequestInterval(qint64 intervalMs);
+
 private:
 	virtual void run() override;
 
-	void getStateRequest(Grpc::GetAppSignalStateRequest* request, bool* isLastPart);
+	RequestType getNextRequestType(bool& typesRestarted);
+	void updateLastRequestTime(int64_t lastRequestTime = currentMSecsUTC());
+
+	void fillGetStateRequest(Grpc::GetAppSignalStateRequest* request, bool* isLastPart);
 
 	bool sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRequest& request);
 
 private:
 	IAppSignalStateUpdaterShared m_updater;
+
+	std::mutex m_requestTypesMutex;
+	std::vector<RequestType> m_requestTypes = { RequestType::GetAppSignalState };
+	size_t m_requestTypeIndex = 0;
+
+	std::atomic<qint64> m_stateRequestInterval = 200;
 
 	std::mutex m_hashesToRequestStatesMutex;
 	std::vector<Hash> m_hashesToRequestStates;

@@ -97,6 +97,16 @@ bool AppSignalState::isTuningDefault() const
 	return m_flags.tuningDefault;
 }
 
+void AppSignalState::clear()
+{
+	m_hash = 0;
+	m_time.system.timeStamp = 0;
+	m_time.local.timeStamp = 0;
+	m_time.plant.timeStamp = 0;
+	m_value = 0;
+	m_flags.all = 0;
+}
+
 Proto::AppSignalState AppSignalState::save() const
 {
 	Proto::AppSignalState protoState;
