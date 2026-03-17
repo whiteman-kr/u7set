@@ -92,7 +92,6 @@ void SignalStatesProcessingThread::registerGatewaySignalStatesQueue(GatewayAppSi
 
 	if (queueMask == 0)
 	{
-		Q_ASSERT(false);		// no free gateway queue slot
 		return;
 	}
 
@@ -125,7 +124,6 @@ void SignalStatesProcessingThread::unregisterGatewaySignalStatesQueue(GatewayApp
 
 	if (queueMask == 0)
 	{
-		Q_ASSERT(false); // gateway queue not found
 		return;
 	}
 

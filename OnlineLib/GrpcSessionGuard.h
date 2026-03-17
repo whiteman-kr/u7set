@@ -15,13 +15,16 @@
 #include "SoftwareInfo.h"
 #include "SoftwareSettings.h"
 
+class GrpcServer;
+
 class GrpcSessionGuard
 {
 public:
 	GrpcSessionGuard(const SoftwareInfo& severSwInfo,
 					 bool allowAllClients,
 					 const std::vector<ClientInfo>& clients,
-					 bool checkHostName);
+					 bool checkHostName,
+					 GrpcServer& server);
 	virtual ~GrpcSessionGuard();
 
 	//
@@ -44,7 +47,7 @@ public:
 	QString getSoftwareEquipmentID(const std::string& authToken);
 
 private:
-bool validateAuthToken(const std::string& authToken);
+	bool validateAuthToken(const std::string& authToken);
 
 	bool isValidClient(const Grpc::HandshakeRequest* request, std::string& errMsg) const;
 	void sessionGuardLoop(std::stop_token stopToken) noexcept;
@@ -54,6 +57,7 @@ private:
 	std::atomic_bool m_allowAllClients = false;
 	const std::vector<ClientInfo> m_clients;
 	const bool m_checkHostName = false;
+	GrpcServer& m_server;
 
 	static constexpr int SESSION_CHECK_PERIOD_SEC = 2;
 	static constexpr int SESSION_TIMEOUT_SEC = 2 * 60;

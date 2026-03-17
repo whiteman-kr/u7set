@@ -37,7 +37,7 @@ namespace Gateway
 		virtual void run() = 0;
 		virtual void shutdown();
 
-		void runAppDataSrvClient();
+		virtual void runAppDataSrvClient();
 		void stopAppDataSrvClient();
 		AppDataServiceClient* appDataServiceClient();
 
@@ -51,7 +51,7 @@ namespace Gateway
 
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
 		virtual void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply);
-		virtual void processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getGatewayStateChangesReply);
+		virtual void processGatewayStateChanges(const Network::GetGatewayAppSignalStateChangesReply& getGatewayStateChangesReply);
 
 		CircularLoggerShared log();
 

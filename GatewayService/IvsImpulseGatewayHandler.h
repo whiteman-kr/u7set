@@ -54,7 +54,7 @@ namespace Gateway
 		virtual void planNextPreparedRequest(PreparedRequest& request) override;
 
 		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
-		void processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply) override;
+		virtual void processGatewayStateChanges(const Network::GetGatewayAppSignalStateChangesReply& getStateChangesReply) override;
 
 	private:
 		bool init();

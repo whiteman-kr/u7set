@@ -252,7 +252,7 @@ protected:
 		m_processigCondition.notify_all();
 	}
 
-	bool waitForOrQuit(const int timeoutMs)
+	bool waitForOrQuit(const int64_t timeoutMs)
 	{
 		if (isQuitRequested())
 		{
@@ -267,6 +267,25 @@ protected:
 							{
 								return isQuitRequested();
 							});
+
+		return !isQuitRequested();
+	}
+
+	bool waitUntilOrQuit(const int64_t untilTimeMs)
+	{
+		if (isQuitRequested())
+		{
+			return false;
+		}
+
+		auto timeout = std::chrono::system_clock::time_point(std::chrono::milliseconds(untilTimeMs));
+
+		std::unique_lock<std::mutex> ul(m_processingMutex);
+
+		m_processigCondition.wait_until(ul, timeout, [this]()
+									  {
+										  return isQuitRequested();
+									  });
 
 		return !isQuitRequested();
 	}

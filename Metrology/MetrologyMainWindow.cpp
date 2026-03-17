@@ -43,6 +43,12 @@ void AppSignalStateUpdater::updateAppSignalStates(const Grpc::GetAppSignalStateR
 
 void AppSignalStateUpdater::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
 {
+	Q_UNUSED(reply)
+}
+
+void AppSignalStateUpdater::processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply)
+{
+	Q_UNUSED(reply)
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -3379,7 +3385,12 @@ void MainWindow::runSignalSocket()
 
 		auto updater = std::make_shared<AppSignalStateUpdater>(theSignalBase);
 
-		m_grpcAdsClient = std::make_unique<GrpcAdsClient>(m_softwareInfo, serverAddress, "Metrology GrpcAdsClient", m_log, updater);
+		m_grpcAdsClient = std::make_unique<GrpcAdsClient>(m_softwareInfo,
+									serverAddress,
+									"Metrology GrpcAdsClient",
+									m_log,
+									GrpcAdsClient::RequestType::GetAppSignalState, 50,
+									GrpcAdsClient::RequestType::NoRequest, 1, updater);
 
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_connection, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
@@ -3387,8 +3398,6 @@ void MainWindow::runSignalSocket()
 		connect(m_grpcAdsClient.get(), &GrpcClientQObject::signal_disconnection, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
 
 		m_grpcAdsClient->setHashesToRequestStates(theSignalBase.requestStateHashes());
-		m_grpcAdsClient->setStateRequestInterval(50);
-		m_grpcAdsClient->setRequestTypes({GrpcAdsClient::RequestType::GetAppSignalState});
 
 		m_grpcAdsClient->start();
 	}

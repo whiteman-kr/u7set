@@ -40,6 +40,8 @@ public:
 	bool isBinded() const;
 	bool isRunning() const;
 
+	virtual void eraseAuthToken(const std::string& authToken) { Q_UNUSED(authToken) }
+
 	grpc::Status handshake(grpc::ServerContext* context,
 						   const Grpc::HandshakeRequest* request,
 						   Grpc::HandshakeReply* reply);

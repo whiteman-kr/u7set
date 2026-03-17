@@ -113,7 +113,7 @@ namespace Gateway
 		m_signalStatesUpdated = true;
 	}
 
-	void IvsImpulseHandler::processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getStateChangesReply)
+	void IvsImpulseHandler::processGatewayStateChanges(const Network::GetGatewayAppSignalStateChangesReply& getStateChangesReply)
 	{
 		int statesCount = getStateChangesReply.appsignalstates_size();
 
@@ -295,7 +295,7 @@ namespace Gateway
 
 		{
 			Network::GetAppSignalStateRequest rq;
-			Network::GatewayGetAppSignalStateChangesRequest chRq;
+			Network::GetGatewayAppSignalStateChangesRequest chRq;
 
 			for(size_t p = 0; p < partCount; p++)
 			{
@@ -349,7 +349,7 @@ namespace Gateway
 
 					PreparedRequest& stateChangesRequest = m_requests.emplace_back(PreparedRequest{});
 
-					stateChangesRequest.ID = ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES;
+					stateChangesRequest.ID = ADS_GET_GATEWAY_APP_SIGNAL_STATE_CHANGES;
 
 					stateChangesRequest.data.resize(requestSize);
 

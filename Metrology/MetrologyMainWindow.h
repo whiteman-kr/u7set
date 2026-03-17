@@ -34,8 +34,9 @@ class AppSignalStateUpdater : public IAppSignalStateUpdater
 {
 public:
 	AppSignalStateUpdater(SignalBase& signalBase);
-	virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply);
-	virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply);
+	virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) override;
+	virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) override;
+	virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) override;
 
 private:
 	SignalBase& m_signalBase;

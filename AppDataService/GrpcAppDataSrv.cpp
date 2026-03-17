@@ -33,6 +33,7 @@ GrpcAppDataSrv::GrpcAppDataSrv(const SoftwareInfo& serverSwInfo,
 
 GrpcAppDataSrv::~GrpcAppDataSrv()
 {
+	unregisterAllQueues();
 	stop();
 }
 
@@ -258,7 +259,9 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 		return grpc::Status::CANCELLED;
 	}
 
-	if (m_sessionGuard.extractAndValidateAuthToken(context) == false)
+	std::string authToken;
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context, &authToken) == false)
 	{
 		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
 	}
@@ -270,11 +273,11 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 	//
 
 	SimpleAppSignalStatesQueueShared statesQueue =
-		std::make_shared<SimpleAppSignalStatesQueue>(static_cast<int>(m_appSignals.count()) * 5);
+		std::make_shared<SimpleAppSignalStatesQueue>(TO_INT(m_appSignals.count() * 5));
 
 	m_appDataReceiver->registerDestSignalStatesQueue(statesQueue, false,
 													 QString("GrpcAppDataSrv[%1]::statesQueue").
-													 arg(QString::fromStdString(m_sessionGuard.extractAuthTokenFromMetadata(context))));
+													 arg(QString::fromStdString(authToken)));
 	//
 
 	Grpc::GetAppSignalStateChangesReply reply;
@@ -337,6 +340,175 @@ grpc::Status GrpcAppDataSrv::GetAppSignalStateChanges(grpc::ServerContext* conte
 	m_appDataReceiver->unregisterDestSignalStatesQueue(statesQueue);
 
 	return grpc::Status::CANCELLED;
+}
+
+grpc::Status GrpcAppDataSrv::GetAppSignalStateChangesNoStream(grpc::ServerContext* context,
+											  const Grpc::GetAppSignalStateChangesRequest* request,
+											  Grpc::GetAppSignalStateChangesReply* reply)
+{
+	if (context == nullptr ||
+		request == nullptr ||
+		reply == nullptr ||
+		m_appDataReceiver == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
+	std::string authToken;
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context, &authToken) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
+	}
+
+	reply->Clear();
+
+	SimpleAppSignalStatesQueueShared queue;
+
+	{
+		std::lock_guard lg(m_signalStateChangesQueuesMutex);
+
+		auto it = m_signalStateChangesQueues.find(authToken);
+
+		if (it == m_signalStateChangesQueues.end())
+		{
+			queue = std::make_shared<SimpleAppSignalStatesQueue>(TO_INT(m_appSignals.count() * 5));
+			m_signalStateChangesQueues.emplace(authToken, queue);
+
+			m_appDataReceiver->registerDestSignalStatesQueue(queue, false,
+															 QString("GrpcAppDataSrv[%1]::statesQueue").
+															 arg(QString::fromStdString(authToken)));
+		}
+		else
+		{
+			queue = it->second;
+		}
+	}
+
+	if (queue == nullptr)
+	{
+		return grpc::Status::CANCELLED;
+	}
+
+	SimpleAppSignalState state;
+
+	int pendingStatesCount = 0;
+
+	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
+	{
+		if (queue->pop(&state) == false)
+		{
+			break;		// queue is empty - pendingStatesCount == 0
+		}
+
+		Proto::AppSignalState* protoState = reply->add_appsignalstates();
+
+		state.save(protoState);
+
+		if (i + 1 == ADS_GET_APP_SIGNAL_STATE_MAX)
+		{
+			// on last iteration set pendingStatesCount to actual value
+			//
+			pendingStatesCount = queue->size();
+		}
+	}
+
+	reply->set_pendingstatescount(pendingStatesCount);
+
+	return grpc::Status::CANCELLED;
+}
+
+grpc::Status GrpcAppDataSrv::GetGatewayAppSignalStateChanges(grpc::ServerContext* context,
+											 const Grpc::GetGatewayAppSignalStateChangesRequest* request,
+											 Grpc::GetGatewayAppSignalStateChangesReply* reply)
+{
+	if (context == nullptr ||
+		request == nullptr ||
+		reply == nullptr ||
+		m_appDataReceiver == nullptr)
+	{
+		Q_ASSERT(false);
+		return grpc::Status::CANCELLED;
+	}
+
+	std::string authToken;
+
+	if (m_sessionGuard.extractAndValidateAuthToken(context, &authToken) == false)
+	{
+		return grpc::Status(grpc::StatusCode::UNAUTHENTICATED, Grpc::INVALID_OR_EXPIRED_SESSION);
+	}
+
+	reply->Clear();
+
+	GatewayAppSignalStatesQueueShared queue;
+
+	{
+		std::lock_guard lg(m_gwSignalStateChangesQueuesMutex);
+
+		auto it = m_gwSignalStateChangesQueues.find(authToken);
+
+		if (it != m_gwSignalStateChangesQueues.end())
+		{
+			queue = it->second;
+		}
+
+		if (request->signalhashes_size() != 0 &&
+			queue != nullptr)
+		{
+			m_appDataReceiver->unregisterGatewaySignalStatesQueue(queue);
+			m_gwSignalStateChangesQueues.erase(authToken);
+			queue.reset();
+		}
+
+		if (request->signalhashes_size() != 0 &&
+			queue == nullptr)
+		{
+			queue = std::make_shared<GatewayAppSignalStatesQueue>(10000);
+			m_gwSignalStateChangesQueues.emplace(authToken, queue);
+
+			std::set<Hash> hashes;
+
+			for(const uint64_t h : request->signalhashes())
+			{
+				hashes.insert(static_cast<Hash>(h));
+			}
+
+			m_appDataReceiver->registerGatewaySignalStatesQueue(queue, hashes);
+		}
+	}
+
+	if (queue == nullptr)
+	{
+		return grpc::Status::CANCELLED;
+	}
+
+	GatewayAppSignalStateQueueMask state;
+
+	int pendingStatesCount = 0;
+
+	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
+	{
+		if (queue->pop(&state) == false)
+		{
+			break;		// queue is empty - pendingStatesCount == 0
+		}
+
+		Network::GatewayAppSignalState* protoState = reply->add_appsignalstates();
+
+		state.gwState.saveToProto(protoState);
+
+		if (i + 1 == ADS_GET_APP_SIGNAL_STATE_MAX)
+		{
+			// on last iteration set pendingStatesCount to actual value
+			//
+			pendingStatesCount = queue->size();
+		}
+	}
+
+	reply->set_pendingstatescount(pendingStatesCount);
+
+	return grpc::Status::OK;
 }
 
 grpc::Status GrpcAppDataSrv::GetDiscretesLog(grpc::ServerContext* context,
@@ -602,5 +774,64 @@ QString GrpcAppDataSrv::serviceName() const
 {
 	return QStringLiteral("GrpcAppDataSrv");
 }
+
+void GrpcAppDataSrv::eraseAuthToken(const std::string& authToken)
+{
+	{
+		// remove SimpleAppSignalStatesQueueShared
+		//
+		std::lock_guard lg(m_signalStateChangesQueuesMutex);
+
+		auto it = m_signalStateChangesQueues.find(authToken);
+
+		if (it != m_signalStateChangesQueues.end())
+		{
+			m_appDataReceiver->unregisterDestSignalStatesQueue(it->second);
+			m_signalStateChangesQueues.erase(authToken);
+		}
+	}
+
+	{
+		// remove GatewayAppSignalStatesQueueShared
+		//
+		std::lock_guard lg(m_gwSignalStateChangesQueuesMutex);
+
+		auto it = m_gwSignalStateChangesQueues.find(authToken);
+
+		if (it != m_gwSignalStateChangesQueues.end())
+		{
+			m_appDataReceiver->unregisterGatewaySignalStatesQueue(it->second);
+			m_gwSignalStateChangesQueues.erase(authToken);
+		}
+	}
+}
+
+void GrpcAppDataSrv::unregisterAllQueues()
+{
+	{
+		std::lock_guard lg(m_signalStateChangesQueuesMutex);
+
+		for(auto [token, queue] : m_signalStateChangesQueues)
+		{
+			m_appDataReceiver->unregisterDestSignalStatesQueue(queue);
+		}
+
+		m_signalStateChangesQueues.clear();
+	}
+
+	{
+		// remove GatewayAppSignalStatesQueueShared
+		//
+		std::lock_guard lg(m_gwSignalStateChangesQueuesMutex);
+
+		for(auto [token,queue] : m_gwSignalStateChangesQueues)
+		{
+			m_appDataReceiver->unregisterGatewaySignalStatesQueue(queue);
+		}
+
+		m_gwSignalStateChangesQueues.clear();
+	}
+}
+
 
 

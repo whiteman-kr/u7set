@@ -70,6 +70,14 @@ public:
 								   const Grpc::GetAppSignalStateChangesRequest* request,
 								   grpc::ServerWriter<Grpc::GetAppSignalStateChangesReply>* writer) override;
 
+	grpc::Status GetAppSignalStateChangesNoStream(grpc::ServerContext* context,
+										  const Grpc::GetAppSignalStateChangesRequest* request,
+										  Grpc::GetAppSignalStateChangesReply* reply) override;
+
+	grpc::Status GetGatewayAppSignalStateChanges(grpc::ServerContext* context,
+										  const Grpc::GetGatewayAppSignalStateChangesRequest* request,
+										  Grpc::GetGatewayAppSignalStateChangesReply* reply) override;
+
 	grpc::Status GetDiscretesLog(grpc::ServerContext* context,
 								const Grpc::GetDiscretesLogRequest* request,
 								grpc::ServerWriter<Grpc::GetDiscretesLogReply>* writer) override;
@@ -102,10 +110,20 @@ private:
 	grpc::Service* getGrpcService() override;
 	virtual QString serviceName() const override;
 
+	virtual void eraseAuthToken(const std::string& authToken) override;
+
+	void unregisterAllQueues();
+
 private:
 	AppDataReceiver* m_appDataReceiver = nullptr;
 	const AppDataSources& m_appDataSources;
 	const AppSignals& m_appSignals;
 	const DynamicAppSignalStates& m_signalStates;
 	std::shared_ptr<DiscretesLogWriter> m_dsLogWriter;
+
+	std::mutex m_signalStateChangesQueuesMutex;
+	std::unordered_map<std::string, SimpleAppSignalStatesQueueShared> m_signalStateChangesQueues;
+
+	std::mutex m_gwSignalStateChangesQueuesMutex;
+	std::unordered_map<std::string, GatewayAppSignalStatesQueueShared> m_gwSignalStateChangesQueues;
 };

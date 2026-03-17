@@ -153,7 +153,7 @@ namespace Gateway
 		Q_UNUSED(getStateChangesReply);
 	}
 
-	void Handler::processGatewayStateChanges(const Network::GatewayGetAppSignalStateChangesReply& getGatewayStateChangesReply)
+	void Handler::processGatewayStateChanges(const Network::GetGatewayAppSignalStateChangesReply& getGatewayStateChangesReply)
 	{
 		Q_UNUSED(getGatewayStateChangesReply);
 	}

@@ -2,16 +2,19 @@
 #include <QUuid>
 
 #include "GrpcSessionGuard.h"
+#include "GrpcServer.h"
 #include "../UtilsLib/WUtils.h"
 
-GrpcSessionGuard::GrpcSessionGuard(	const SoftwareInfo& severSwInfo,
-									bool allowAllClients,
-									const std::vector<ClientInfo>& clients,
-									bool checkHostName) :
+GrpcSessionGuard::GrpcSessionGuard(const SoftwareInfo& severSwInfo,
+	bool allowAllClients,
+	const std::vector<ClientInfo>& clients,
+	bool checkHostName,
+	GrpcServer& server) :
 	m_serverSwInfo(severSwInfo),
 	m_allowAllClients(allowAllClients),
 	m_clients(clients),
-	m_checkHostName(checkHostName)
+	m_checkHostName(checkHostName),
+	m_server(server)
 {
 }
 
@@ -267,6 +270,7 @@ void GrpcSessionGuard::sessionGuardLoop(std::stop_token stopToken) noexcept
 			{
 				const std::string authToken = it->first;
 				m_clientsInfo.erase(authToken);
+				m_server.eraseAuthToken(authToken);
 				it = m_sessionExpirations.erase(it);
 			}
 			else

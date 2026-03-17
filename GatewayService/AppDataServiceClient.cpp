@@ -80,7 +80,7 @@ namespace Gateway
 			onGetAppSignalStateReply(replyData, replyDataSize);
 			break;
 
-		case ADS_GATEWAY_GET_APP_SIGNAL_STATE_CHANGES:
+		case ADS_GET_GATEWAY_APP_SIGNAL_STATE_CHANGES:
 			onGatewayGetAppSignalStateChangesReply(replyData, replyDataSize);
 			break;
 

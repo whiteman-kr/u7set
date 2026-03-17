@@ -1053,6 +1053,7 @@ namespace Cast
 #define TO_QUINT64(value) (Cast::to<quint64>(value))
 
 #define TO_INT(value) (Cast::to<int>(value))
+#define TO_SIZE_T(value) (Cast::to<std::size_t>(value))
 #define TO_QVARIANT_QINT64(value) (QVariant::fromValue<qint64>(TO_QINT64(value)))
 
 #define ENUM_COUNT(enumName) (static_cast<int>(enumName::Count))

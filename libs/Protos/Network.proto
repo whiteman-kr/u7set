@@ -99,7 +99,7 @@ message GetAppSignalStateChangesReply
 
 // Getting application signal states changes for GatewayService
 //
-message GatewayGetAppSignalStateChangesRequest
+message GetGatewayAppSignalStateChangesRequest
 {
 	repeated uint64 signalsHashes = 1;
 }
@@ -110,7 +110,7 @@ message GatewayAppSignalState
 	required Proto.AppSignalState curState = 2;
 }
 
-message GatewayGetAppSignalStateChangesReply
+message GetGatewayAppSignalStateChangesReply
 {
 	optional int32 error = 1 [default = 0];
 	optional int32 pendingStatesCount = 2 [default = 0];

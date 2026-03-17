@@ -16,7 +16,7 @@ GrpcServer::GrpcServer(const SoftwareInfo& serverSwInfo,
 						const HostAddressPort& listenIP,
 						CircularLoggerShared log) :
 	LogWrapper(log),
-	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName),
+	m_sessionGuard(serverSwInfo, allowAllClients, clients, checkHostName, *this),
 	m_listenIP(listenIP)
 {
 }

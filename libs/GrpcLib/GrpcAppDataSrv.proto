@@ -61,6 +61,20 @@ message GetAppSignalStateChangesReply
 }
 
 //
+// GetGatewayAppSignalStateChanges
+//
+message GetGatewayAppSignalStateChangesRequest
+{
+	repeated uint64 signalHashes = 1;
+}
+
+message GetGatewayAppSignalStateChangesReply
+{
+	optional int32 pendingStatesCount = 1 [default = 0];
+	repeated Network.GatewayAppSignalState appSignalStates = 2;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX
+}
+
+//
 // GetDiscretesLog
 //
 message GetDiscretesLogRequest
@@ -156,6 +170,8 @@ service AppDataSrv
 	rpc GetAppSignalState(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}
 	rpc GetAppSignalStateConstSize(GetAppSignalStateRequest) returns (GetAppSignalStateReply) {}
 	rpc GetAppSignalStateChanges(GetAppSignalStateChangesRequest) returns (stream GetAppSignalStateChangesReply) {}
+	rpc GetAppSignalStateChangesNoStream(GetAppSignalStateChangesRequest) returns (GetAppSignalStateChangesReply) {}
+	rpc GetGatewayAppSignalStateChanges(GetGatewayAppSignalStateChangesRequest) returns (GetGatewayAppSignalStateChangesReply) {}
 	rpc GetDiscretesLog(GetDiscretesLogRequest) returns (stream GetDiscretesLogReply) {}
 	rpc AckDiscretesLog(AckDiscretesLogRequest) returns (AckDiscretesLogReply) {}
 	rpc GetRtTrendsData(stream GetRtTrendsDataRequest) returns (stream GetRtTrendsDataReply) {}

@@ -12,10 +12,40 @@ GrpcAdsClient::GrpcAdsClient(const SoftwareInfo& localSoftwareInfo,
 	const std::vector<HostAddressPort>& serverAddress,
 	const QString& clientDescription,
 	CircularLoggerShared log,
+	const RequestType stateRequest,
+	size_t stateRequestInterval,
+	const RequestType stateChangesRequest,
+	size_t stateChangesMaxCount,
 	IAppSignalStateUpdaterShared updater) :
 	GrpcClient(localSoftwareInfo, serverAddress, clientDescription, log, false),
 	m_updater(updater)
 {
+	Q_ASSERT(stateRequest == RequestType::NoRequest ||
+			 stateRequest == RequestType::GetAppSignalState ||
+			 stateRequest == RequestType::GetAppSignalStateConstSize);
+
+	Q_ASSERT(stateChangesRequest == RequestType::NoRequest ||
+			 stateChangesRequest == RequestType::GetAppSignalStateChanges ||
+			 stateChangesRequest == RequestType::GetGatewayAppSignalStateChanges);
+
+	Q_ASSERT(stateRequest != RequestType::NoRequest ||
+			 stateChangesRequest != RequestType::NoRequest);
+
+	static constexpr size_t MIN_STATE_REQUEST_INTERVAL = 10;
+	static constexpr size_t MAX_STATE_REQUEST_INTERVAL = 2000;
+
+	m_stateRequest = stateRequest;
+	m_stateRequestInterval = std::clamp(stateRequestInterval,
+										MIN_STATE_REQUEST_INTERVAL,
+										MAX_STATE_REQUEST_INTERVAL);
+
+	static constexpr size_t MIN_STATE_CHANGES_REQUEST_COUNT = 1;
+	static constexpr size_t MAX_STATE_CHANGES_REQUEST_COUNT = 20;
+
+	m_stateChangesRequest = stateChangesRequest;
+	m_stateChangesMaxCount = std::clamp(stateChangesMaxCount,
+										MIN_STATE_CHANGES_REQUEST_COUNT,
+										MAX_STATE_CHANGES_REQUEST_COUNT);
 }
 
 GrpcAdsClient::~GrpcAdsClient()
@@ -26,39 +56,18 @@ void GrpcAdsClient::setHashesToRequestStates(const std::vector<Hash>& hashes)
 {
 	std::lock_guard lg(m_hashesToRequestStatesMutex);
 	m_hashesToRequestStates = hashes;
-	m_requestStateHashesStartIndex = 0;
+	m_requestStateHashesIndex = 0;
 }
 
-void GrpcAdsClient::setRequestTypes(const std::vector<RequestType>& requestTypes)
+void GrpcAdsClient::setHashesToRequestGatewayStateChanges(const std::vector<Hash>& hashes)
 {
-	if (requestTypes.size() == 0)
-	{
-		Q_ASSERT(false);
-		requestTypes.push_back(RequestType::GetAppSignalState);
-	}
-
-	std::set uniqueRequestTypes;
-	uniqueRequestTypes.insert(requestTypes.begin(), requestTypes.end());
-
-	{
-		std::lock_guard lg(m_requestTypesMutex);
-		m_requestTypes.assign(uniqueRequestTypes.begin(), uniqueRequestTypes.end());
-		m_requestTypeIndex = 0;
-	}
-}
-
-void GrpcAdsClient::setStateRequestInterval(qint64 intervalMs)
-{
-   m_stateRequestInterval.store(std::clamp(intervalMs, 20, 3000));
+	std::lock_guard lg(m_hashesToRequestGatewayStateChangesMutex);
+	m_hashesToRequestGatewayStateChanges = hashes;
+	m_updateHashesToRequestGatewayStateChanges = true;
 }
 
 void GrpcAdsClient::run()
 {
-	Grpc::GetAppSignalStateRequest stateRequest;
-	bool isLastPart = false;
-
-	RequestType requestType = getNextRequestType();
-
 	while(isQuitRequested() == false)
 	{
 		if (authToken().empty())
@@ -71,45 +80,25 @@ void GrpcAdsClient::run()
 				continue;
 			}
 
+			m_updateHashesToRequestGatewayStateChanges = true;
 			updateLastRequestTime();
 		}
 
-		switch(requestType)
+		m_requestsCycleStartTime = currentMSecsUTC();
+
+		if (sendStateRequests() == false)
 		{
-		case RequestType::GetAppSignalState:
-		case RequestType::GetappSignalStateConstSize:
+			continue;
+		}
 
-			fillGetStateRequest(&stateRequest, &isLastPart);
-
-			if (stateRequest.signalhashes_size() > 0)
-			{
-				if (sendGetAppSignalStateRequest(stateRequest) == true)
-				{
-					m_lastRequestTime = currentMSecsUTC();
-				}
-				else
-				{
-					m_lastRequestTime = 0;
-					resetStub();
-					continue;
-				}
-			}
-
-			break;
-
-		case RequestType::GetAppSignalStateChanges:
-		case RequestType::GatewayGetAppSignalStateChanges:
-
+		if (sendStateChangesRequests() == false)
+		{
+			continue;
 		}
 
 		//
 
-
-
-		if (stateRequest.signalhashes_size() == 0 || isLastPart)
-		{
-			waitForOrQuit(50);
-		}
+		waitUntilOrQuit(m_requestsCycleStartTime + m_stateRequestInterval);
 
 		if (currentMSecsUTC() - m_lastRequestTime > pingPeriod())
 		{
@@ -129,33 +118,206 @@ void GrpcAdsClient::run()
 	resetStub();
 }
 
-GrpcAdsClient::RequestType GrpcAdsClient::getNextRequestType(bool& typesRestarted)
+bool GrpcAdsClient::sendStateRequests()
 {
-	std::lock_guard lg (m_requestTypesMutex);
-
-	if (m_requestTypes.size() == 0)
+	if (m_stateRequest == RequestType::NoRequest)
 	{
-		Q_ASSERT(false);
-		typesRestarted = true;
-		return RequestType::GetAppSignalState;
+		return true;
 	}
 
-	if (m_requestTypeIndex > m_requestTypes.size())
+	thread_local Grpc::GetAppSignalStateRequest request;
+
+	bool isLastPart = false;
+
+	while(isLastPart == false)
 	{
-		m_requestTypeIndex = 0;
+		switch(m_stateRequest)
+		{
+		case RequestType::GetAppSignalState:
+		case RequestType::GetAppSignalStateConstSize:
+
+			request.Clear();
+			fillGetStateRequest(&request, &isLastPart);
+
+			if (request.signalhashes_size() > 0)
+			{
+				if (sendGetAppSignalStateRequest(request,
+						m_stateRequest == RequestType::GetAppSignalStateConstSize) == true)
+				{
+					updateLastRequestTime();
+				}
+				else
+				{
+					resetStub();
+					return false;
+				}
+			}
+			else
+			{
+				isLastPart = true;
+			}
+
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
 	}
 
-	RequestType rt = m_requestTypes[m_requestTypeIndex];
+	return true;
+}
 
-	m_requestTypeIndex++;
-
-	if (m_requestTypeIndex > m_requestTypes.size())
+bool GrpcAdsClient::sendStateChangesRequests()
+{
+	if (m_stateChangesRequest == RequestType::NoRequest)
 	{
-		m_requestTypeIndex = 0;
-		typesRestarted = true;
+		return true;
 	}
 
-	return rt;
+	size_t requestCount = 0;
+	bool hasPendingChanges = true;
+	bool res = true;
+
+	while(requestCount < m_stateChangesMaxCount &&
+		   hasPendingChanges == true)
+	{
+		switch(m_stateChangesRequest)
+		{
+		case RequestType::GetAppSignalStateChanges:
+			res = sendGetAppStateChangesRequest(&hasPendingChanges);
+			requestCount++;
+			break;
+
+		case RequestType::GetGatewayAppSignalStateChanges:
+			res = sendGetGatewayAppStateChangesRequest(&hasPendingChanges);
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		if (res == false)
+		{
+			return false;
+		}
+
+		updateLastRequestTime();
+	}
+
+	return true;
+}
+
+bool GrpcAdsClient::sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRequest& request,
+												bool constSizeRequest)
+{
+	grpc::ClientContext ctx;
+
+	if (createContext(&ctx) == false)
+	{
+		return false;
+	}
+
+	Grpc::GetAppSignalStateReply reply;
+
+	grpc::Status st;
+
+	if (constSizeRequest)
+	{
+		st = stub()->GetAppSignalStateConstSize(&ctx, request, &reply);
+	}
+	else
+	{
+		st = stub()->GetAppSignalState(&ctx, request, &reply);
+	}
+
+	if (st.ok() == false)
+	{
+		return false;
+	}
+
+	if (m_updater != nullptr)
+	{
+		m_updater->updateAppSignalStates(reply);
+	}
+
+	return true;
+}
+
+bool GrpcAdsClient::sendGetAppStateChangesRequest(bool* hasPendingChanges)
+{
+	TEST_PTR_RETURN_FALSE(hasPendingChanges);
+
+	*hasPendingChanges = false;
+
+	grpc::ClientContext ctx;
+
+	if (createContext(&ctx) == false)
+	{
+		return false;
+	}
+
+	thread_local Grpc::GetAppSignalStateChangesRequest request;
+	thread_local Grpc::GetAppSignalStateChangesReply reply;
+
+	reply.Clear();
+
+	grpc::Status st = stub()->GetAppSignalStateChangesNoStream(&ctx, request, &reply);
+
+	if (st.ok() == false)
+	{
+		return false;
+	}
+
+	if (m_updater != nullptr)
+	{
+		m_updater->processAppSignalStateChanges(reply);
+	}
+
+	*hasPendingChanges = (reply.pendingstatescount() > 0);
+
+	return true;
+}
+
+bool GrpcAdsClient::sendGetGatewayAppStateChangesRequest(bool* hasPendingChanges)
+{
+	TEST_PTR_RETURN_FALSE(hasPendingChanges);
+
+	*hasPendingChanges = false;
+
+	grpc::ClientContext ctx;
+
+	if (createContext(&ctx) == false)
+	{
+		return false;
+	}
+
+	thread_local Grpc::GetGatewayAppSignalStateChangesRequest request;
+	thread_local Grpc::GetGatewayAppSignalStateChangesReply reply;
+
+	request.Clear();
+	reply.Clear();
+
+	if (m_updateHashesToRequestGatewayStateChanges)
+	{
+		fillGetGatewayStateChangesRequest(&request);
+		m_updateHashesToRequestGatewayStateChanges = false;
+	}
+
+	grpc::Status st = stub()->GetGatewayAppSignalStateChanges(&ctx, request, &reply);
+
+	if (st.ok() == false)
+	{
+		return false;
+	}
+
+	if (m_updater != nullptr)
+	{
+		m_updater->processGatewayAppSignalStateChanges(reply);
+	}
+
+	*hasPendingChanges = (reply.pendingstatescount() > 0);
+
+	return true;
 }
 
 void GrpcAdsClient::updateLastRequestTime(int64_t lastRequestTime)
@@ -183,50 +345,50 @@ void GrpcAdsClient::fillGetStateRequest(Grpc::GetAppSignalStateRequest* request,
 			return;
 		}
 
-		if (m_requestStateHashesStartIndex >= hashesCount)
+		if (m_requestStateHashesIndex >= hashesCount)
 		{
-			m_requestStateHashesStartIndex = 0;
+			m_requestStateHashesIndex = 0;
 		}
 
-		int count = 0;
-
-		for(; m_requestStateHashesStartIndex < hashesCount && count < ADS_GET_APP_SIGNAL_STATE_MAX; m_requestStateHashesStartIndex++, count++)
+		for(int count = 0; m_requestStateHashesIndex < hashesCount &&
+							count < ADS_GET_APP_SIGNAL_STATE_MAX;
+							m_requestStateHashesIndex++, count++)
 		{
-			Hash h = m_hashesToRequestStates[m_requestStateHashesStartIndex];
+			Hash h = m_hashesToRequestStates[m_requestStateHashesIndex];
 			request->add_signalhashes(h);
 		}
 
-		if (m_requestStateHashesStartIndex >= hashesCount)
+		if (m_requestStateHashesIndex >= hashesCount)
 		{
-			m_requestStateHashesStartIndex = 0;
+			m_requestStateHashesIndex = 0;
 			*isLastPart = true;
 		}
 	}
 }
 
-bool GrpcAdsClient::sendGetAppSignalStateRequest(const Grpc::GetAppSignalStateRequest& request)
+void GrpcAdsClient::fillGetGatewayStateChangesRequest(Grpc::GetGatewayAppSignalStateChangesRequest* request)
 {
-	grpc::ClientContext ctx;
+	TEST_PTR_RETURN(request);
 
-	if (createContext(&ctx) == false)
+	request->clear_signalhashes();
+
 	{
-		return false;
+		std::lock_guard lg(m_hashesToRequestGatewayStateChangesMutex);
+
+		size_t hashesCount = m_hashesToRequestGatewayStateChanges.size();
+
+		if (hashesCount == 0)
+		{
+			return;
+		}
+
+		size_t maxCount = std::min(hashesCount, TO_SIZE_T(ADS_GET_APP_SIGNAL_STATE_MAX));
+
+		for(int count = 0; count < maxCount; count++)
+		{
+			Hash h = m_hashesToRequestGatewayStateChanges[count];
+			request->add_signalhashes(h);
+		}
 	}
-
-	Grpc::GetAppSignalStateReply reply;
-
-	grpc::Status st = stub()->GetAppSignalState(&ctx, request, &reply);
-
-	if (st.ok() == false)
-	{
-		return false;
-	}
-
-	if (m_updater != nullptr)
-	{
-		m_updater->updateAppSignalStates(reply);
-	}
-
-	return true;
 }
 
