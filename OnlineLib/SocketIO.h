@@ -214,6 +214,7 @@ const quint32 ADS_GET_DISCRETES_LOG = 0x1900;
 const quint32 ADS_ACK_DISCRETES_LOG = 0x1901;
 
 // Tuning Sources info/state communication, Port PORT_TUNING_SERVICE_CLIENT_REQUEST
+// 0x1500 is reserved as handshake request for gateway.
 //
 const quint32 TDS_GET_TUNING_SOURCES_INFO = 0x1501;
 const quint32 TDS_GET_TUNING_SOURCES_STATES = 0x1502;

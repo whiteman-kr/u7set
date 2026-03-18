@@ -2,7 +2,7 @@
 
 **Document Version:** 0.1  
 **Protocol Version:** 1.0  
-**Date:** 13 Mar 2026  
+**Date:** 18 Mar 2026  
 **Authors:** Serhiy Malokhatko, Yuriy Beliy  
 **Status:** Draft
 
@@ -367,7 +367,7 @@ For reference implementation, see Appendix B.
 
 | Request ID | Value (hex) | Description |
 |------------|-------------|-------------|
-| TGW_HANDSHAKE | 0x0001 | Initial handshake |
+| TGW_HANDSHAKE | 0x1500 | Initial handshake |
 | TGW_GET_TUNING_SOURCES_START | 0x1521 | Start retrieval of tuning sources file (TuningSources.xml) |
 | TGW_GET_TUNING_SOURCES_NEXT | 0x1522 | Retrieve next part of tuning sources file |
 | TGW_GET_TUNING_SOURCE_STATES | 0x1502 | Retrieve tuning sources states |
@@ -1535,4 +1535,4 @@ Within each `DataSource` element:
 
 | Document Version | Date | Protocol Version | Author | Changes |
 |------------------|------|------------------|--------|---------|
-| 0.1 | 13 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
+| 0.1 | 18 Mar 2026 | 1.0 (0x0100) | Serhiy Malokhatko | Initial draft |
