@@ -15,15 +15,23 @@ namespace VFrame30
 	//
 	// SchemaItemUfb
 	//
+
+	/// <summary>
+	/// Schema item representing UFB (User Function Block) element of UFB schema.
+	/// </summary>
 	class SchemaItemUfb final : public FblItemRect,
 								public IMatsSchemaItemAssociations
 	{
 		Q_OBJECT
 
+		/// \brief User defined caption. If not empty, this caption is used instead of the default one from the UFB schema
+		Q_PROPERTY(QString userCaption READ userCaption WRITE setUserCaption)
+		Q_PROPERTY(QString UserCaption READ userCaption WRITE setUserCaption)
+
 	public:
 		SchemaItemUfb(void);
 		explicit SchemaItemUfb(SchemaUnit unit);
-		SchemaItemUfb(SchemaUnit unit, const UfbSchema* ufbSchema, QString* errorMsg);
+		SchemaItemUfb(SchemaUnit unit, const UfbSchema& ufbSchema, QString* errorMsg);
 
 		virtual ~SchemaItemUfb(void);
 
@@ -45,7 +53,7 @@ namespace VFrame30
 	public:
 		virtual QString buildName() const override;
 
-		bool updateUfbElement(const UfbSchema* ufbSchema, QString* errorMsg);
+		bool updateUfbElement(const UfbSchema& ufbSchema, QString* errorMsg);
 
 		// IMatsSchemaItemAssociations implementation.
 		//
@@ -60,6 +68,9 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
+		[[nodiscard]] QString userCaption() const;
+		void setUserCaption(const QString& value);
+
 		[[nodiscard]] QString ufbSchemaId() const;
 		[[nodiscard]] QString ufbCaption() const;
 		[[nodiscard]] int ufbSchemaVersion() const;
@@ -70,6 +81,8 @@ namespace VFrame30
 		void setSpecificProperties(QString value);
 
 	private:
+		QString m_userCaption;              // If not empty, this caption is used instead of the default one from the UFB schema
+
 		QString m_ufbSchemaId;
 		QString m_ufbCaption;
 		int m_ufbVersion = -1;

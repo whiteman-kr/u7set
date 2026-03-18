@@ -77,6 +77,7 @@ namespace VFrame30
 		inline static const QString label{"Label"};
 		inline static const QString labelPos{"LabelPos"};
 		inline static const QString caption{"Caption"};
+		inline static const QString userCaption{"UserCaption"};
 		inline static const QString maxLength{"MaxLength"};
 		inline static const QString multiLine{"MultiLine"};
 

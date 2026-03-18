@@ -1,7 +1,7 @@
-#include <VFrame30/SchemaItemUfb.h>
 #include <VFrame30/DrawParam.h>
 #include <VFrame30/PropertyNames.h>
 #include <VFrame30/SchemaItemSignal.h>
+#include <VFrame30/SchemaItemUfb.h>
 #include <VFrame30/SchemaLayer.h>
 #include <VFrame30/UfbSchema.h>
 
@@ -18,6 +18,9 @@ namespace VFrame30
 	SchemaItemUfb::SchemaItemUfb(SchemaUnit unit) :
 		FblItemRect(unit)
 	{
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::userCaption, true, SchemaItemUfb::userCaption, SchemaItemUfb::setUserCaption)
+			->setCategory(PropertyNames::functionalCategory);
+
 		ADD_PROPERTY_GETTER(QString, PropertyNames::ufbSchemaId, true, SchemaItemUfb::ufbSchemaId)
 			->setCategory(PropertyNames::functionalCategory);
 
@@ -30,22 +33,15 @@ namespace VFrame30
 		return;
 	}
 
-	SchemaItemUfb::SchemaItemUfb(SchemaUnit unit, const UfbSchema* ufbSchema, QString* errorMsg) :
+	SchemaItemUfb::SchemaItemUfb(SchemaUnit unit, const UfbSchema& ufbSchema, QString* errorMsg) :
 		SchemaItemUfb(unit)
 	{
 		Q_ASSERT(errorMsg);
 
-		if (ufbSchema == nullptr)
-		{
-			Q_ASSERT(ufbSchema);
-			*errorMsg = tr("Pointer to UfbSchema is nullptr.");
-			return;
-		}
-
 		// Add UfbSchemaID as tag, it's useful for scripting
 		//
 		addTag("ufb");
-		addTag(ufbSchema->schemaId());
+		addTag(ufbSchema.schemaId());
 
 		// Create input output signals in VFrame30::FblItem
 		//
@@ -54,9 +50,7 @@ namespace VFrame30
 		return;
 	}
 
-	SchemaItemUfb::~SchemaItemUfb(void)
-	{
-	}
+	SchemaItemUfb::~SchemaItemUfb(void) {}
 
 	void SchemaItemUfb::draw(CDrawParam* drawParam) const
 	{
@@ -103,7 +97,7 @@ namespace VFrame30
 
 		// Draw caption
 		//
-		QString text = m_ufbCaption;
+		QString text = m_userCaption.trimmed().isEmpty() ? m_ufbCaption : m_userCaption;
 
 		p->setPen(textColor());
 		DrawHelper::drawText(p, m_font, itemUnit(), text, r, Qt::AlignHCenter | Qt::AlignTop);
@@ -168,8 +162,7 @@ namespace VFrame30
 
 					propValueText.setNum(propValue.toDouble(), paramFormat, prop->precision());
 
-					if (propValueText.contains(QChar('.')) == true &&
-						propValueText.contains(QChar('e')) == false &&
+					if (propValueText.contains(QChar('.')) == true && propValueText.contains(QChar('e')) == false &&
 						propValueText.size() > 2)
 					{
 						while (propValueText.endsWith('0'))
@@ -267,6 +260,7 @@ namespace VFrame30
 		//
 		Proto::SchemaItemUfb* ufbpb = message->MutableExtension(Proto::schemaitem)->mutable_ufb();
 
+		ufbpb->set_usercaption(m_userCaption.toStdString());
 		ufbpb->set_ufbschemaid(m_ufbSchemaId.toStdString());
 		ufbpb->set_ufbcaption(m_ufbCaption.toStdString());
 		ufbpb->set_ufbversion(m_ufbVersion);
@@ -315,6 +309,7 @@ namespace VFrame30
 
 		const Proto::SchemaItemUfb& ufbpb = message.GetExtension(Proto::schemaitem).ufb();
 
+		m_userCaption = QString::fromStdString(ufbpb.usercaption());
 		m_ufbSchemaId = QString::fromStdString(ufbpb.ufbschemaid());
 		m_ufbCaption = QString::fromStdString(ufbpb.ufbcaption());
 		m_ufbVersion = ufbpb.ufbversion();
@@ -335,7 +330,9 @@ namespace VFrame30
 
 		for (const ::Proto::Property& p : ufbpb.properties())
 		{
-			auto it = std::find_if(specificProps.begin(), specificProps.end(), [p](std::shared_ptr<Property>& dp)
+			auto it = std::find_if(specificProps.begin(),
+								   specificProps.end(),
+								   [p](std::shared_ptr<Property>& dp)
 								   {
 									   return dp->caption().toStdString() == p.name();
 								   });
@@ -361,12 +358,10 @@ namespace VFrame30
 
 	QString SchemaItemUfb::buildName() const
 	{
-		return QString("%1 %2")
-			.arg(m_ufbCaption)
-			.arg(label());
+		return QString("%1 %2").arg(m_ufbCaption).arg(label());
 	}
 
-	bool SchemaItemUfb::updateUfbElement(const UfbSchema* ufbSchema, QString* errorMessage)
+	bool SchemaItemUfb::updateUfbElement(const UfbSchema& ufbSchema, QString* errorMessage)
 	{
 		if (errorMessage == nullptr)
 		{
@@ -374,18 +369,17 @@ namespace VFrame30
 			return false;
 		}
 
-		if (m_ufbSchemaId.isEmpty() == false &&
-			m_ufbSchemaId != ufbSchema->schemaId())
+		if (m_ufbSchemaId.isEmpty() == false && m_ufbSchemaId != ufbSchema.schemaId())
 		{
 			assert(false);
-			*errorMessage += tr("Update %1 from different UFB %2.").arg(m_ufbSchemaId).arg(ufbSchema->schemaId());
+			*errorMessage += tr("Update %1 from different UFB %2.").arg(m_ufbSchemaId).arg(ufbSchema.schemaId());
 			return false;
 		}
 
-		m_ufbSchemaId = ufbSchema->schemaId();
-		m_ufbCaption = ufbSchema->caption();
-		m_ufbVersion = ufbSchema->version();
-		setSpecificProperties(ufbSchema->specificProperties()); // it creates specific properties from PropertyObject
+		m_ufbSchemaId = ufbSchema.schemaId();
+		m_ufbCaption = ufbSchema.caption();
+		m_ufbVersion = ufbSchema.version();
+		setSpecificProperties(ufbSchema.specificProperties()); // it creates specific properties from PropertyObject
 
 		// Get in/outs from ufb schema
 		//
@@ -395,70 +389,70 @@ namespace VFrame30
 		ufbInputs.reserve(16);
 		ufbOutputs.reserve(16);
 
-		for (const auto& layer : ufbSchema->layers())
+		for (const auto& layer : ufbSchema.layers())
 		{
-			if (layer->compile() == true)
+			if (layer->compile() == false)
 			{
-				for (const auto& item : layer->items())
+				continue;
+			}
+
+			for (const auto& item : layer->items())
+			{
+				auto itemSignal = item->toType<const SchemaItemSignal>();
+				if (itemSignal == nullptr)
 				{
-					const SchemaItemSignal* itemSignal = item->toType<SchemaItemSignal>();
-					if (itemSignal == nullptr)
-					{
-						continue;
-					}
-
-					// Check it this signal item is just variable reference
-					//
-					QString appSignalIds = itemSignal->appSignalIds();
-					if (appSignalIds.startsWith("$(") == true && appSignalIds.endsWith(")") == true)
-					{
-						// Do not add references to input or output list
-						//
-						continue;
-					}
-
-					// Add UFB input or output or nothing))
-					//
-					if (itemSignal->isInputSignalElement() == true)
-					{
-						ufbInputs.push_back(itemSignal->toInputSignalElement());
-						continue;
-					}
-
-					if (itemSignal->isOutputSignalElement() == true)
-					{
-						ufbOutputs.push_back(itemSignal->toOutputSignalElement());
-						continue;
-					}
+					continue;
 				}
 
-				break;
+				// Check it this signal item is just variable reference
+				//
+				QString appSignalIds = itemSignal->appSignalIds().trimmed();
+				if (appSignalIds.startsWith("$(") == true && appSignalIds.endsWith(")") == true)
+				{
+					// Do not add references to input or output list
+					//
+					continue;
+				}
+
+				// Add UFB input or output or nothing))
+				//
+				if (itemSignal->isInputSignalElement() == true)
+				{
+					ufbInputs.push_back(itemSignal->toInputSignalElement());
+					continue;
+				}
+
+				if (itemSignal->isOutputSignalElement() == true)
+				{
+					ufbOutputs.push_back(itemSignal->toOutputSignalElement());
+					continue;
+				}
 			}
+
+			break;
 		}
 
 		// Sort in/outs by vert pos
 		//
-		std::sort(ufbInputs.begin(), ufbInputs.end(), [](const SchemaItemSignal* s1, const SchemaItemSignal* s2)
-				  {
-					  return s1->topDocPt() < s2->topDocPt();
-				  });
+		auto byTopDocPt = [](const SchemaItemSignal* s1, const SchemaItemSignal* s2) -> bool
+		{
+			return s1->topDocPt() < s2->topDocPt();
+		};
 
-		std::sort(ufbOutputs.begin(), ufbOutputs.end(), [](const SchemaItemSignal* s1, const SchemaItemSignal* s2)
-				  {
-					  return s1->topDocPt() < s2->topDocPt();
-				  });
+		std::stable_sort(ufbInputs.begin(), ufbInputs.end(), byTopDocPt);
+		std::stable_sort(ufbOutputs.begin(), ufbOutputs.end(), byTopDocPt);
 
 		// Create in/outs in this item
 		//
 		removeAllInputs();
 		removeAllOutputs();
 
-		for (const SchemaItemSignal* in : ufbInputs)
+		for (auto in : std::as_const(ufbInputs))
 		{
 			this->addInput(-1, E::SignalType::Discrete, in->appSignalIds());
 		}
 
-		for (const SchemaItemSignal* out : ufbOutputs)
+		for (auto out : std::as_const(ufbOutputs))
 		{
 			this->addOutput(-1, E::SignalType::Discrete, out->appSignalIds());
 		}
@@ -507,6 +501,15 @@ namespace VFrame30
 	QStringList SchemaItemUfb::associatedSchemaItemLabels() const
 	{
 		return {};
+	}
+
+	QString SchemaItemUfb::userCaption() const
+	{
+		return m_userCaption;
+	}
+	void SchemaItemUfb::setUserCaption(const QString& value)
+	{
+		m_userCaption = value;
 	}
 
 	QString SchemaItemUfb::ufbSchemaId() const

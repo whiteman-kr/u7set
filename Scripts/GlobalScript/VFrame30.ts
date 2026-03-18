@@ -286,6 +286,10 @@ module VFrame30 {
 		setCellTextColor(row: number, column: number, color: QColor): void;
 	}
 
+	export interface SchemaItemUfb extends PosRectImpl {
+		userCaption: string;
+	}
+
 	export interface SchemaItemImage extends PosRectImpl {
 		allowScale: boolean;
 		keepAspectRatio: boolean;

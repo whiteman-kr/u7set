@@ -18,6 +18,11 @@ This manual is divided in the following sections:
  */
 
 /**
+ *  @defgroup view View
+ *  \ingroup groupSchemaScripts
+ */
+
+/**
  *  @defgroup staticSchemaItems Static Schema Items
  *  \ingroup groupSchemaScripts
  */
