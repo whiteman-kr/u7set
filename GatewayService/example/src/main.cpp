@@ -1,7 +1,7 @@
-#include <AdsGatewayLib/AdsGwConnection.hpp>
-#include <AdsGatewayLib/AdsGwProtocol.hpp>
-#include <AdsGatewayLib/Logger.hpp>
-#include <AdsGatewayLib/SignalManager.hpp>
+#include <GatewayClientLib/AdsGwConnection.hpp>
+#include <GatewayClientLib/AdsGwProtocol.hpp>
+#include <GatewayClientLib/Logger.hpp>
+#include <GatewayClientLib/SignalManager.hpp>
 
 #include <iostream>
 #include <string>
@@ -19,7 +19,7 @@ void printHelp()
 								<< std::endl;
 }
 
-void printSignalValue(const AdsGatewayLib::SignalManager& signalManager, std::string_view signalId)
+void printSignalValue(const GatewayClientLib::SignalManager& signalManager, std::string_view signalId)
 {
 	auto signalState = signalManager.getSignalState(signalId);
 	if (signalState.has_value() == false)
@@ -30,7 +30,7 @@ void printSignalValue(const AdsGatewayLib::SignalManager& signalManager, std::st
 
 	std::cout << "Signal ID: " << signalId << "\n"
 			  << "  Value: " << signalState->value << "\n"
-			  << "  Flags: " << to_string(static_cast<AdsGatewayLib::GwAppSignalStateFlags>(signalState->flags)) << "\n"
+			  << "  Flags: " << to_string(static_cast<GatewayClientLib::GwAppSignalStateFlags>(signalState->flags)) << "\n"
 			  << "  System Time: " << signalState->systemTime << "\n"
 			  << "  Local Time: " << signalState->localTime << "\n"
 			  << "  Plant Time: " << signalState->plantTime << "\n";
@@ -38,7 +38,7 @@ void printSignalValue(const AdsGatewayLib::SignalManager& signalManager, std::st
 	return;
 }
 
-void printSignalParam(const AdsGatewayLib::SignalManager& signalManager, std::string_view signalId)
+void printSignalParam(const GatewayClientLib::SignalManager& signalManager, std::string_view signalId)
 {
 	auto signalParam = signalManager.getSignalParam(signalId);
 	if (signalParam.has_value() == false)
@@ -72,11 +72,11 @@ int main()
 	printHelp();
 
 	std::string_view address = "127.0.0.1";
-	uint16_t port = AdsGatewayLib::ADSGW_PORT;
+	uint16_t port = GatewayClientLib::ADSGW_PORT;
 
-	AdsGatewayLib::SignalManager signalManager;
+	GatewayClientLib::SignalManager signalManager;
 
-	AdsGatewayLib::ConsoleLogger logger;
+	GatewayClientLib::ConsoleLogger logger;
 	logger.setTraceEnabled(false);
 
 	{
@@ -84,7 +84,7 @@ int main()
 		std::cout << "\t address: " << address << "\n";
 		std::cout << "\t port: " << port << "\n";
 
-		AdsGatewayLib::AdsGwConnection conn{signalManager, logger};
+		GatewayClientLib::AdsGwConnection conn{signalManager, logger};
 		conn.connect(address, port, "CLIENTID");
 
 		std::string lastLine;

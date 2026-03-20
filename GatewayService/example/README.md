@@ -70,7 +70,7 @@ The example demonstrates:
 - Continuously polling for state changes.
 - Manually querying specific signal states and parameters.
 
-The client uses the `AdsGatewayLib` library which implements the [Radiy AppDataService Gateway Protocol](AdsGatewayProtocolSpec.md).
+The client uses the `GatewayClientLib` library which implements the [Radiy AppDataService Gateway Protocol](AdsGatewayProtocolSpec.md).
 
 ## Requirements
 
@@ -113,27 +113,27 @@ Once connected, the client provides a simple interactive command line:
 ## Project Structure
 
 - [src/main.cpp](src/main.cpp): The main entry point and CLI logic.
-- [src/lib/AdsGatewayLib/](src/lib/AdsGatewayLib/): Core library providing protocol implementation and connection management.
+- [src/lib/GatewayClientLib/](src/lib/GatewayClientLib/): Core library providing protocol implementation and connection management.
 - [CMakeLists.txt](CMakeLists.txt): CMake build configuration.
 
-### [AdsGatewayLib](./lib/AdsGatewayLib/)
+### [GatewayClientLib](./lib/GatewayClientLib/)
 
 This library provides the core logic for communicating with the `GatewayService`.
 
-**Public Headers (`include/AdsGatewayLib/`):**
-- [AdsGwConnection.hpp](./lib/AdsGatewayLib/include/AdsGatewayLib/AdsGwConnection.hpp): High-level class to establish and manage the gateway connection.
-- [AdsGwProtocol.hpp](./lib/AdsGatewayLib/include/AdsGatewayLib/AdsGwProtocol.hpp): Definitions of binary protocol structures, request IDs, and status codes.
-- [SignalManager.hpp](./lib/AdsGatewayLib/include/AdsGatewayLib/SignalManager.hpp): Central storage for signal parameters and actual states.
-- [GwCrc32.hpp](./lib/AdsGatewayLib/include/AdsGatewayLib/GwCrc32.hpp): CRC32 checksum calculation.
-- [GwHash.hpp](./lib/AdsGatewayLib/include/AdsGatewayLib/GwHash.hpp): Helper for calculating 64-bit hashes of AppSignalIDs.
-- [Logger.hpp](./lib/AdsGatewayLib/include/AdsGatewayLib/Logger.hpp): Simple integration for logging output.
-- [ISignalUpdater.hpp](./lib/AdsGatewayLib/include/AdsGatewayLib/ISignalUpdater.hpp): Interface used to update `SignalManager` data.
+**Public Headers (`include/GatewayClientLib/`):**
+- [AdsGwConnection.hpp](./lib/GatewayClientLib/include/GatewayClientLib/AdsGwConnection.hpp): High-level class to establish and manage the gateway connection.
+- [AdsGwProtocol.hpp](./lib/GatewayClientLib/include/GatewayClientLib/AdsGwProtocol.hpp): Definitions of binary protocol structures, request IDs, and status codes.
+- [SignalManager.hpp](./lib/GatewayClientLib/include/GatewayClientLib/SignalManager.hpp): Central storage for signal parameters and actual states.
+- [GwCrc32.hpp](./lib/GatewayClientLib/include/GatewayClientLib/GwCrc32.hpp): CRC32 checksum calculation.
+- [GwHash.hpp](./lib/GatewayClientLib/include/GatewayClientLib/GwHash.hpp): Helper for calculating 64-bit hashes of AppSignalIDs.
+- [Logger.hpp](./lib/GatewayClientLib/include/GatewayClientLib/Logger.hpp): Simple integration for logging output.
+- [ISignalUpdater.hpp](./lib/GatewayClientLib/include/GatewayClientLib/ISignalUpdater.hpp): Interface used to update `SignalManager` data.
 
 **Implementation Details (`src/`):**
-- [AdsGwConnImpl.hpp](./lib/AdsGatewayLib/src/AdsGwConnImpl.hpp): Internal connection implementation handling the message loop and state machine.
-- [TcpConnection.hpp](./lib/AdsGatewayLib/src/TcpConnection.hpp): Cross-platform abstraction for non-blocking TCP sockets.
-- [TcpConnWindows.cpp](./lib/AdsGatewayLib/src/TcpConnWindows.cpp) / [TcpConnLinux.cpp](./lib/AdsGatewayLib/src/TcpConnLinux.cpp): Platform-specific socket implementations.
-- [SignalManager.cpp](./lib/AdsGatewayLib/src/SignalManager.cpp): Implementation of signal lookup and storage.
+- [AdsGwConnImpl.hpp](./lib/GatewayClientLib/src/AdsGwConnImpl.hpp): Internal connection implementation handling the message loop and state machine.
+- [TcpConnection.hpp](./lib/GatewayClientLib/src/TcpConnection.hpp): Cross-platform abstraction for non-blocking TCP sockets.
+- [TcpConnWindows.cpp](./lib/GatewayClientLib/src/TcpConnWindows.cpp) / [TcpConnLinux.cpp](./lib/GatewayClientLib/src/TcpConnLinux.cpp): Platform-specific socket implementations.
+- [SignalManager.cpp](./lib/GatewayClientLib/src/SignalManager.cpp): Implementation of signal lookup and storage.
 
 ## Contact
 

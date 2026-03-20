@@ -5,7 +5,7 @@
 #include <format>
 #include <string_view>
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	constexpr uint16_t ADSGW_PORT = 5566;
 
@@ -51,19 +51,19 @@ namespace AdsGatewayLib
 		assert(false);
 		return "GwErrorCode(unknown)";
 	}
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib
 
 template<>
-struct std::formatter<AdsGatewayLib::GwErrorCode> : std::formatter<std::string_view>
+struct std::formatter<GatewayClientLib::GwErrorCode> : std::formatter<std::string_view>
 {
 	template<typename FormatContext>
-	auto format(AdsGatewayLib::GwErrorCode code, FormatContext& ctx) const
+	auto format(GatewayClientLib::GwErrorCode code, FormatContext& ctx) const
 	{
 		return std::formatter<std::string_view>::format(to_string(code), ctx);
 	}
 };
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	enum GwRequestId : uint32_t
 	{
@@ -94,19 +94,19 @@ namespace AdsGatewayLib
 
 		return "GwRequestId(unknown)";
 	}
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib
 
 template<>
-struct std::formatter<AdsGatewayLib::GwRequestId> : std::formatter<std::string_view>
+struct std::formatter<GatewayClientLib::GwRequestId> : std::formatter<std::string_view>
 {
 	template<typename FormatContext>
-	auto format(AdsGatewayLib::GwRequestId requestId, FormatContext& ctx) const
+	auto format(GatewayClientLib::GwRequestId requestId, FormatContext& ctx) const
 	{
 		return std::formatter<std::string_view>::format(to_string(requestId), ctx);
 	}
 };
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	struct GwMessageHeader
 	{
@@ -121,9 +121,9 @@ namespace AdsGatewayLib
 	constexpr size_t GW_MSG_CRC_SIZE = sizeof(uint32_t);
 
 	constexpr size_t GW_MAX_MSG_PAYLOAD_SIZE = ADSGW_MAX_PAYLOAD_SIZE - GW_MSG_HEADER_SIZE - GW_MSG_CRC_SIZE;
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	constexpr size_t GW_APP_SIGNAL_HASH_SIZE = sizeof(uint64_t);
 
@@ -259,9 +259,9 @@ namespace AdsGatewayLib
 
 		return result;
 	}
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	// Request ADSGW_HANDSHAKE
 	//
@@ -424,13 +424,13 @@ namespace AdsGatewayLib
 		(GW_MAX_MSG_PAYLOAD_SIZE - GW_SIGNAL_STATE_CHANGES_RESPONSE_SIZE) / GW_APP_SIGNAL_STATE_SIZE;
 
 
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib
 
 template<>
-struct std::formatter<AdsGatewayLib::GwAppSignalStateFlags> : std::formatter<std::string_view>
+struct std::formatter<GatewayClientLib::GwAppSignalStateFlags> : std::formatter<std::string_view>
 {
 	template<typename FormatContext>
-	auto format(AdsGatewayLib::GwAppSignalStateFlags flags, FormatContext& ctx) const
+	auto format(GatewayClientLib::GwAppSignalStateFlags flags, FormatContext& ctx) const
 	{
 		return std::formatter<std::string_view>::format(to_string(flags), ctx);
 	}

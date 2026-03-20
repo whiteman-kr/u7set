@@ -4,7 +4,7 @@
 #include <string_view>
 #include <thread>
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	class ISignalUpdater;
 	class ILogger;
@@ -24,4 +24,4 @@ namespace AdsGatewayLib
 
 		std::jthread m_thread;
 	};
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

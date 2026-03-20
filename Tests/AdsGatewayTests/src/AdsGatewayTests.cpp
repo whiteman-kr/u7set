@@ -1,8 +1,8 @@
 #include "TestSettings.hpp"
 
-#include <AdsGatewayLib/../../src/AdsGwConnImpl.hpp>
-#include <AdsGatewayLib/Logger.hpp>
-#include <AdsGatewayLib/SignalManager.hpp>
+#include <GatewayClientLib/../../src/AdsGwConnImpl.hpp>
+#include <GatewayClientLib/Logger.hpp>
+#include <GatewayClientLib/SignalManager.hpp>
 
 #include <gmock/gmock-matchers.h>
 #include <gmock/gmock.h>
@@ -16,8 +16,8 @@
 class AdsGatewayTests : public testing::Test
 {
 public:
-	AdsGatewayLib::SignalManager signalManager{};
-	AdsGatewayLib::ConsoleLogger logger{};
+	GatewayClientLib::SignalManager signalManager{};
+	GatewayClientLib::ConsoleLogger logger{};
 
 	std::string clientEquipmentId = "TEST_CLIENT_EQUIPMENT_ID";
 };
@@ -26,7 +26,7 @@ public:
 //
 TEST_F(AdsGatewayTests, NoConnection)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -59,7 +59,7 @@ TEST_F(AdsGatewayTests, NoConnection)
 //
 TEST_F(AdsGatewayTests, ConnectAndHandshake)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -89,10 +89,10 @@ TEST_F(AdsGatewayTests, ConnectAndHandshake)
 	ASSERT_EQ(adsConn.m_connected, true);
 
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_SUCCESS);
-	EXPECT_EQ(adsConn.handshakeResponse().protocolVersion, AdsGatewayLib::ADSGW_PROTOCOL_VERSION);
-	EXPECT_EQ(adsConn.handshakeResponse().sizeof_GwAppSignalParam, sizeof(AdsGatewayLib::GwAppSignalParam));
-	EXPECT_EQ(adsConn.handshakeResponse().sizeof_GwAppSignalState, sizeof(AdsGatewayLib::GwAppSignalState));
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_EQ(adsConn.handshakeResponse().protocolVersion, GatewayClientLib::ADSGW_PROTOCOL_VERSION);
+	EXPECT_EQ(adsConn.handshakeResponse().sizeof_GwAppSignalParam, sizeof(GatewayClientLib::GwAppSignalParam));
+	EXPECT_EQ(adsConn.handshakeResponse().sizeof_GwAppSignalState, sizeof(GatewayClientLib::GwAppSignalState));
 
 	return;
 }
@@ -102,7 +102,7 @@ TEST_F(AdsGatewayTests, ConnectAndHandshake)
 // 3.1
 TEST_F(AdsGatewayTests, SendUnsupportedProtocolVersion)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -132,7 +132,7 @@ TEST_F(AdsGatewayTests, SendUnsupportedProtocolVersion)
 	ASSERT_EQ(adsConn.m_connected, true);
 
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_UNSUPPORTED_VERSION);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_UNSUPPORTED_VERSION);
 
 	return;
 }
@@ -142,7 +142,7 @@ TEST_F(AdsGatewayTests, SendUnsupportedProtocolVersion)
 //
 TEST_F(AdsGatewayTests, SendInvalidRequest)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -153,10 +153,10 @@ TEST_F(AdsGatewayTests, SendInvalidRequest)
 			{
 				m_connected = m_conn.connect(address, port);
 
-				AdsGatewayLib::GwHandshakeRequest request{};
-				AdsGatewayLib::GwHandshakeResponse response{};
+				GatewayClientLib::GwHandshakeRequest request{};
+				GatewayClientLib::GwHandshakeResponse response{};
 
-				sendRequest(static_cast<AdsGatewayLib::GwRequestId>(AdsGatewayLib::ADSGW_HANDSHAKE + 19999), request, response, {});
+				sendRequest(static_cast<GatewayClientLib::GwRequestId>(GatewayClientLib::ADSGW_HANDSHAKE + 19999), request, response, {});
 			}
 			catch (const std::runtime_error&)
 			{
@@ -176,7 +176,7 @@ TEST_F(AdsGatewayTests, SendInvalidRequest)
 	ASSERT_EQ(adsConn.m_connected, true);
 
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_INVALID_REQUEST);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_INVALID_REQUEST);
 
 	return;
 }
@@ -186,7 +186,7 @@ TEST_F(AdsGatewayTests, SendInvalidRequest)
 //
 TEST_F(AdsGatewayTests, SendInvalidCrc32)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -199,10 +199,10 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 
 				// Compose handshake request with invalid CRC32
 				//
-				AdsGatewayLib::GwHandshakeRequest request{};
-				AdsGatewayLib::GwHandshakeResponse response{};
+				GatewayClientLib::GwHandshakeRequest request{};
+				GatewayClientLib::GwHandshakeResponse response{};
 
-				request.protocolVersion = AdsGatewayLib::ADSGW_PROTOCOL_VERSION;
+				request.protocolVersion = GatewayClientLib::ADSGW_PROTOCOL_VERSION;
 				std::snprintf(request.clientName, sizeof(request.clientName), "%s", equipmentId.data());
 
 
@@ -219,9 +219,9 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 					offset += sizeof(value);
 				};
 
-				writeUint32(static_cast<uint32_t>(AdsGatewayLib::ADSGW_HANDSHAKE));
+				writeUint32(static_cast<uint32_t>(GatewayClientLib::ADSGW_HANDSHAKE));
 				writeUint32(static_cast<uint32_t>(sizeof(request)));            // Payload size
-				writeUint32(static_cast<uint32_t>(AdsGatewayLib::GWC_SUCCESS)); // Status code for request is always 0
+				writeUint32(static_cast<uint32_t>(GatewayClientLib::GWC_SUCCESS)); // Status code for request is always 0
 
 				// Write request payload (struct)
 				//
@@ -242,7 +242,7 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 				// Receive response
 				//
 				m_lastStatusCode =
-					receiveResponsePacket<AdsGatewayLib::GwHandshakeResponse>(AdsGatewayLib::ADSGW_HANDSHAKE, response, {}, {});
+					receiveResponsePacket<GatewayClientLib::GwHandshakeResponse>(GatewayClientLib::ADSGW_HANDSHAKE, response, {}, {});
 
 				return;
 			}
@@ -264,7 +264,7 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 	ASSERT_EQ(adsConn.m_connected, true);
 
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_CRC_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_CRC_ERROR);
 
 	return;
 }
@@ -275,7 +275,7 @@ TEST_F(AdsGatewayTests, SendInvalidCrc32)
 //
 TEST_F(AdsGatewayTests, RequestSignalListWithoutHandshake)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -306,7 +306,7 @@ TEST_F(AdsGatewayTests, RequestSignalListWithoutHandshake)
 	ASSERT_EQ(adsConn.m_connected, true);
 
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
 
 	return;
 }
@@ -316,7 +316,7 @@ TEST_F(AdsGatewayTests, RequestSignalListWithoutHandshake)
 //
 TEST_F(AdsGatewayTests, RequestSignalParamWithoutHandshake)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -346,7 +346,7 @@ TEST_F(AdsGatewayTests, RequestSignalParamWithoutHandshake)
 
 	ASSERT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
 
 	return;
 }
@@ -356,7 +356,7 @@ TEST_F(AdsGatewayTests, RequestSignalParamWithoutHandshake)
 //
 TEST_F(AdsGatewayTests, RequestSignalStatesWithoutHandshake)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -392,7 +392,7 @@ TEST_F(AdsGatewayTests, RequestSignalStatesWithoutHandshake)
 
 	ASSERT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
 
 	return;
 }
@@ -402,7 +402,7 @@ TEST_F(AdsGatewayTests, RequestSignalStatesWithoutHandshake)
 //
 TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutHandshake)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -436,7 +436,7 @@ TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutHandshake)
 
 	ASSERT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_HANDSHAKE_REQUIRED);
 
 	return;
 }
@@ -447,7 +447,7 @@ TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutHandshake)
 //
 TEST_F(AdsGatewayTests, RequestSignalStatesWithoutAdsConnection)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -482,7 +482,7 @@ TEST_F(AdsGatewayTests, RequestSignalStatesWithoutAdsConnection)
 
 	ASSERT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_NO_ADS_CONNECTION);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_NO_ADS_CONNECTION);
 
 	return;
 }
@@ -493,7 +493,7 @@ TEST_F(AdsGatewayTests, RequestSignalStatesWithoutAdsConnection)
 //
 TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutAdsConnection)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -528,7 +528,7 @@ TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutAdsConnection)
 
 	ASSERT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_NO_ADS_CONNECTION);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_NO_ADS_CONNECTION);
 
 	return;
 }
@@ -538,7 +538,7 @@ TEST_F(AdsGatewayTests, RequestSignalStateChangesWithoutAdsConnection)
 //
 TEST_F(AdsGatewayTests, RequestSignalList)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -570,7 +570,7 @@ TEST_F(AdsGatewayTests, RequestSignalList)
 
 	EXPECT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
 
 	EXPECT_FALSE(adsConn.m_receivedSignalList.empty());
 	EXPECT_GT(adsConn.m_receivedSignalList.size(), 5);
@@ -583,7 +583,7 @@ TEST_F(AdsGatewayTests, RequestSignalList)
 //
 TEST_F(AdsGatewayTests, RequestSignalParams)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -604,7 +604,7 @@ TEST_F(AdsGatewayTests, RequestSignalParams)
 
 	public:
 		bool m_connected = false;
-		std::vector<AdsGatewayLib::GwAppSignalParam> m_receivedSignalParams;
+		std::vector<GatewayClientLib::GwAppSignalParam> m_receivedSignalParams;
 
 		auto& lastStatusCode() const { return m_lastStatusCode; }
 		auto& handshakeResponse() const { return m_handshakeResponse; }
@@ -615,7 +615,7 @@ TEST_F(AdsGatewayTests, RequestSignalParams)
 
 	EXPECT_EQ(adsConn.m_connected, true);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
 
 	EXPECT_FALSE(adsConn.m_receivedSignalParams.empty());
 	EXPECT_GT(adsConn.m_receivedSignalParams.size(), 5);
@@ -629,7 +629,7 @@ TEST_F(AdsGatewayTests, RequestSignalParams)
 //
 TEST_F(AdsGatewayTests, HandshakeSendExcessivePayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -640,13 +640,13 @@ TEST_F(AdsGatewayTests, HandshakeSendExcessivePayload)
 			{
 				m_connected = m_conn.connect(address, port);
 
-				AdsGatewayLib::GwHandshakeRequest request{};
-				AdsGatewayLib::GwHandshakeResponse response{};
+				GatewayClientLib::GwHandshakeRequest request{};
+				GatewayClientLib::GwHandshakeResponse response{};
 
 				std::array<std::byte, 32> payload{};
 
-				m_lastStatusCode = sendRequest<AdsGatewayLib::GwHandshakeRequest, std::byte, AdsGatewayLib::GwHandshakeResponse, std::byte>(
-					AdsGatewayLib::ADSGW_HANDSHAKE,
+				m_lastStatusCode = sendRequest<GatewayClientLib::GwHandshakeRequest, std::byte, GatewayClientLib::GwHandshakeResponse, std::byte>(
+					GatewayClientLib::ADSGW_HANDSHAKE,
 					request,
 					std::span<const std::byte>(payload),
 					response,
@@ -671,7 +671,7 @@ TEST_F(AdsGatewayTests, HandshakeSendExcessivePayload)
 	ASSERT_EQ(adsConn.m_connected, true);
 
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 
 	return;
 }
@@ -681,7 +681,7 @@ TEST_F(AdsGatewayTests, HandshakeSendExcessivePayload)
 //
 TEST_F(AdsGatewayTests, HandshakeSendLessPayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -700,9 +700,9 @@ TEST_F(AdsGatewayTests, HandshakeSendLessPayload)
 				};
 
 				FakeHandshakeRequest request{};
-				AdsGatewayLib::GwHandshakeResponse response{};
+				GatewayClientLib::GwHandshakeResponse response{};
 
-				m_lastStatusCode = sendRequest(AdsGatewayLib::ADSGW_HANDSHAKE, request, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_HANDSHAKE, request, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -722,7 +722,7 @@ TEST_F(AdsGatewayTests, HandshakeSendLessPayload)
 	ASSERT_EQ(adsConn.m_connected, true);
 
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 
 	return;
 }
@@ -732,7 +732,7 @@ TEST_F(AdsGatewayTests, HandshakeSendLessPayload)
 //
 TEST_F(AdsGatewayTests, SignalListStartSendExcessivePayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -744,13 +744,13 @@ TEST_F(AdsGatewayTests, SignalListStartSendExcessivePayload)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
-				AdsGatewayLib::GwSignalListStartRequest request{};
-				AdsGatewayLib::GwSignalListStartResponse response{};
+				GatewayClientLib::GwSignalListStartRequest request{};
+				GatewayClientLib::GwSignalListStartResponse response{};
 
 				std::array<std::byte, 16> extraPayload;
 				m_lastStatusCode =
-					sendRequest<AdsGatewayLib::GwSignalListStartRequest, std::byte, AdsGatewayLib::GwSignalListStartResponse, std::byte>(
-						AdsGatewayLib::ADSGW_SIGNAL_LIST_START,
+					sendRequest<GatewayClientLib::GwSignalListStartRequest, std::byte, GatewayClientLib::GwSignalListStartResponse, std::byte>(
+						GatewayClientLib::ADSGW_SIGNAL_LIST_START,
 						request,
 						std::span<const std::byte>(extraPayload),
 						response,
@@ -773,7 +773,7 @@ TEST_F(AdsGatewayTests, SignalListStartSendExcessivePayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_LIST_START: send less payload than required.
@@ -781,7 +781,7 @@ TEST_F(AdsGatewayTests, SignalListStartSendExcessivePayload)
 //
 TEST_F(AdsGatewayTests, SignalListStartSendLessPayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -799,9 +799,9 @@ TEST_F(AdsGatewayTests, SignalListStartSendLessPayload)
 				};
 
 				FakeSignalListStartRequest badRequest{};
-				AdsGatewayLib::GwSignalListStartResponse response{};
+				GatewayClientLib::GwSignalListStartResponse response{};
 
-				m_lastStatusCode = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_LIST_START, badRequest, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_START, badRequest, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -819,7 +819,7 @@ TEST_F(AdsGatewayTests, SignalListStartSendLessPayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_LIST_NEXT: send excessive payload.
@@ -827,7 +827,7 @@ TEST_F(AdsGatewayTests, SignalListStartSendLessPayload)
 //
 TEST_F(AdsGatewayTests, SignalListNextSendExcessivePayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -840,24 +840,24 @@ TEST_F(AdsGatewayTests, SignalListNextSendExcessivePayload)
 				requestHandshake(equipmentId);
 
 				// Ensure server is ready to accept NEXT by issuing START once.
-				AdsGatewayLib::GwSignalListStartRequest startReq{};
-				AdsGatewayLib::GwSignalListStartResponse startResp{};
-				auto startStatus = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_LIST_START, startReq, startResp);
-				if (startStatus != AdsGatewayLib::GWC_SUCCESS)
+				GatewayClientLib::GwSignalListStartRequest startReq{};
+				GatewayClientLib::GwSignalListStartResponse startResp{};
+				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
 				}
 
-				AdsGatewayLib::GwSignalListNextRequest nextReq{};
+				GatewayClientLib::GwSignalListNextRequest nextReq{};
 				nextReq.part = 0;
 
-				AdsGatewayLib::GwSignalListNextResponse nextResp{};
+				GatewayClientLib::GwSignalListNextResponse nextResp{};
 				std::array<std::byte, 32> extraPayload{};
 
 				m_lastStatusCode =
-					sendRequest<AdsGatewayLib::GwSignalListNextRequest, std::byte, AdsGatewayLib::GwSignalListNextResponse, std::byte>(
-						AdsGatewayLib::ADSGW_SIGNAL_LIST_NEXT,
+					sendRequest<GatewayClientLib::GwSignalListNextRequest, std::byte, GatewayClientLib::GwSignalListNextResponse, std::byte>(
+						GatewayClientLib::ADSGW_SIGNAL_LIST_NEXT,
 						nextReq,
 						std::span<const std::byte>(extraPayload),
 						nextResp,
@@ -879,7 +879,7 @@ TEST_F(AdsGatewayTests, SignalListNextSendExcessivePayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_LIST_NEXT: send less payload than required.
@@ -887,7 +887,7 @@ TEST_F(AdsGatewayTests, SignalListNextSendExcessivePayload)
 //
 TEST_F(AdsGatewayTests, SignalListNextSendLessPayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -899,10 +899,10 @@ TEST_F(AdsGatewayTests, SignalListNextSendLessPayload)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
-				AdsGatewayLib::GwSignalListStartRequest startReq{};
-				AdsGatewayLib::GwSignalListStartResponse startResp{};
-				auto startStatus = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_LIST_START, startReq, startResp);
-				if (startStatus != AdsGatewayLib::GWC_SUCCESS)
+				GatewayClientLib::GwSignalListStartRequest startReq{};
+				GatewayClientLib::GwSignalListStartResponse startResp{};
+				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
@@ -916,8 +916,8 @@ TEST_F(AdsGatewayTests, SignalListNextSendLessPayload)
 				FakeSignalListNextRequest badReq{};
 				badReq.part = 0;
 
-				AdsGatewayLib::GwSignalListNextResponse response{};
-				m_lastStatusCode = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_LIST_NEXT, badReq, response);
+				GatewayClientLib::GwSignalListNextResponse response{};
+				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_NEXT, badReq, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -934,7 +934,7 @@ TEST_F(AdsGatewayTests, SignalListNextSendLessPayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_PARAM_START: send excessive payload.
@@ -942,7 +942,7 @@ TEST_F(AdsGatewayTests, SignalListNextSendLessPayload)
 //
 TEST_F(AdsGatewayTests, SignalParamStartSendExcessivePayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -954,13 +954,13 @@ TEST_F(AdsGatewayTests, SignalParamStartSendExcessivePayload)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
-				AdsGatewayLib::GwSignalParamStartRequest request{};
-				AdsGatewayLib::GwSignalParamStartResponse response{};
+				GatewayClientLib::GwSignalParamStartRequest request{};
+				GatewayClientLib::GwSignalParamStartResponse response{};
 
 				std::array<std::byte, 32> extraPayload{};
 				m_lastStatusCode =
-					sendRequest<AdsGatewayLib::GwSignalParamStartRequest, std::byte, AdsGatewayLib::GwSignalParamStartResponse, std::byte>(
-						AdsGatewayLib::ADSGW_SIGNAL_PARAM_START,
+					sendRequest<GatewayClientLib::GwSignalParamStartRequest, std::byte, GatewayClientLib::GwSignalParamStartResponse, std::byte>(
+						GatewayClientLib::ADSGW_SIGNAL_PARAM_START,
 						request,
 						std::span<const std::byte>(extraPayload),
 						response,
@@ -982,7 +982,7 @@ TEST_F(AdsGatewayTests, SignalParamStartSendExcessivePayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_PARAM_START: send less payload than required.
@@ -990,7 +990,7 @@ TEST_F(AdsGatewayTests, SignalParamStartSendExcessivePayload)
 //
 TEST_F(AdsGatewayTests, SignalParamStartSendLessPayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1008,9 +1008,9 @@ TEST_F(AdsGatewayTests, SignalParamStartSendLessPayload)
 				};
 
 				FakeSignalParamStartRequest badRequest{};
-				AdsGatewayLib::GwSignalParamStartResponse response{};
+				GatewayClientLib::GwSignalParamStartResponse response{};
 
-				m_lastStatusCode = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_PARAM_START, badRequest, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_START, badRequest, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1027,7 +1027,7 @@ TEST_F(AdsGatewayTests, SignalParamStartSendLessPayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_PARAM_NEXT: send excessive payload.
@@ -1035,7 +1035,7 @@ TEST_F(AdsGatewayTests, SignalParamStartSendLessPayload)
 //
 TEST_F(AdsGatewayTests, SignalParamNextSendExcessivePayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1048,24 +1048,24 @@ TEST_F(AdsGatewayTests, SignalParamNextSendExcessivePayload)
 				requestHandshake(equipmentId);
 
 				// Start phase so NEXT is valid.
-				AdsGatewayLib::GwSignalParamStartRequest startReq{};
-				AdsGatewayLib::GwSignalParamStartResponse startResp{};
-				auto startStatus = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
-				if (startStatus != AdsGatewayLib::GWC_SUCCESS)
+				GatewayClientLib::GwSignalParamStartRequest startReq{};
+				GatewayClientLib::GwSignalParamStartResponse startResp{};
+				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
 				}
 
-				AdsGatewayLib::GwSignalParamNextRequest nextReq{};
+				GatewayClientLib::GwSignalParamNextRequest nextReq{};
 				nextReq.part = 0;
 
-				AdsGatewayLib::GwSignalParamNextResponse nextResp{};
+				GatewayClientLib::GwSignalParamNextResponse nextResp{};
 				std::array<std::byte, 32> extraPayload{};
 
 				m_lastStatusCode =
-					sendRequest<AdsGatewayLib::GwSignalParamNextRequest, std::byte, AdsGatewayLib::GwSignalParamNextResponse, std::byte>(
-						AdsGatewayLib::ADSGW_SIGNAL_PARAM_NEXT,
+					sendRequest<GatewayClientLib::GwSignalParamNextRequest, std::byte, GatewayClientLib::GwSignalParamNextResponse, std::byte>(
+						GatewayClientLib::ADSGW_SIGNAL_PARAM_NEXT,
 						nextReq,
 						std::span<const std::byte>(extraPayload),
 						nextResp,
@@ -1087,7 +1087,7 @@ TEST_F(AdsGatewayTests, SignalParamNextSendExcessivePayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_PARAM_NEXT: send less payload than required.
@@ -1095,7 +1095,7 @@ TEST_F(AdsGatewayTests, SignalParamNextSendExcessivePayload)
 //
 TEST_F(AdsGatewayTests, SignalParamNextSendLessPayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1107,10 +1107,10 @@ TEST_F(AdsGatewayTests, SignalParamNextSendLessPayload)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
-				AdsGatewayLib::GwSignalParamStartRequest startReq{};
-				AdsGatewayLib::GwSignalParamStartResponse startResp{};
-				auto startStatus = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
-				if (startStatus != AdsGatewayLib::GWC_SUCCESS)
+				GatewayClientLib::GwSignalParamStartRequest startReq{};
+				GatewayClientLib::GwSignalParamStartResponse startResp{};
+				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
@@ -1124,8 +1124,8 @@ TEST_F(AdsGatewayTests, SignalParamNextSendLessPayload)
 				FakeSignalParamNextRequest badReq{};
 				badReq.part = 0;
 
-				AdsGatewayLib::GwSignalParamNextResponse response{};
-				m_lastStatusCode = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_PARAM_NEXT, badReq, response);
+				GatewayClientLib::GwSignalParamNextResponse response{};
+				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_NEXT, badReq, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1142,7 +1142,7 @@ TEST_F(AdsGatewayTests, SignalParamNextSendLessPayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_STATE: send excessive payload.
@@ -1150,7 +1150,7 @@ TEST_F(AdsGatewayTests, SignalParamNextSendLessPayload)
 //
 TEST_F(AdsGatewayTests, SignalStateSendExcessivePayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1162,21 +1162,21 @@ TEST_F(AdsGatewayTests, SignalStateSendExcessivePayload)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
-				AdsGatewayLib::GwSignalStateRequest request{};
+				GatewayClientLib::GwSignalStateRequest request{};
 				request.signalCount = 1;
 
 				std::array<uint64_t, 2> hashes{111u, 222u}; // more hashes than requested
-				AdsGatewayLib::GwSignalStateResponse response{};
-				std::vector<AdsGatewayLib::GwAppSignalState> states(request.signalCount);
+				GatewayClientLib::GwSignalStateResponse response{};
+				std::vector<GatewayClientLib::GwAppSignalState> states(request.signalCount);
 
-				m_lastStatusCode = sendRequest<AdsGatewayLib::GwSignalStateRequest,
+				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalStateRequest,
 											   uint64_t,
-											   AdsGatewayLib::GwSignalStateResponse,
-											   AdsGatewayLib::GwAppSignalState>(AdsGatewayLib::ADSGW_SIGNAL_STATE,
+											   GatewayClientLib::GwSignalStateResponse,
+											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::ADSGW_SIGNAL_STATE,
 																				request,
 																				std::span<const uint64_t>(hashes),
 																				response,
-																				std::span<AdsGatewayLib::GwAppSignalState>(states),
+																				std::span<GatewayClientLib::GwAppSignalState>(states),
 																				{});
 			}
 			catch (const std::runtime_error&)
@@ -1194,7 +1194,7 @@ TEST_F(AdsGatewayTests, SignalStateSendExcessivePayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_STATE: send less payload than required.
@@ -1202,7 +1202,7 @@ TEST_F(AdsGatewayTests, SignalStateSendExcessivePayload)
 //
 TEST_F(AdsGatewayTests, SignalStateSendLessPayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1214,21 +1214,21 @@ TEST_F(AdsGatewayTests, SignalStateSendLessPayload)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
-				AdsGatewayLib::GwSignalStateRequest request{};
+				GatewayClientLib::GwSignalStateRequest request{};
 				request.signalCount = 3;              // expect 3 hashes
 
 				std::array<uint64_t, 1> hashes{555u}; // provide fewer hashes than signalCount
-				AdsGatewayLib::GwSignalStateResponse response{};
-				std::vector<AdsGatewayLib::GwAppSignalState> states(request.signalCount);
+				GatewayClientLib::GwSignalStateResponse response{};
+				std::vector<GatewayClientLib::GwAppSignalState> states(request.signalCount);
 
-				m_lastStatusCode = sendRequest<AdsGatewayLib::GwSignalStateRequest,
+				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalStateRequest,
 											   uint64_t,
-											   AdsGatewayLib::GwSignalStateResponse,
-											   AdsGatewayLib::GwAppSignalState>(AdsGatewayLib::ADSGW_SIGNAL_STATE,
+											   GatewayClientLib::GwSignalStateResponse,
+											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::ADSGW_SIGNAL_STATE,
 																				request,
 																				std::span<const uint64_t>(hashes),
 																				response,
-																				std::span<AdsGatewayLib::GwAppSignalState>(states),
+																				std::span<GatewayClientLib::GwAppSignalState>(states),
 																				{});
 			}
 			catch (const std::runtime_error&)
@@ -1246,7 +1246,7 @@ TEST_F(AdsGatewayTests, SignalStateSendLessPayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_STATE_CHANGES: send excessive payload.
@@ -1254,7 +1254,7 @@ TEST_F(AdsGatewayTests, SignalStateSendLessPayload)
 //
 TEST_F(AdsGatewayTests, SignalStateChangesSendExcessivePayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1268,13 +1268,13 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendExcessivePayload)
 
 				struct Larger
 				{
-					AdsGatewayLib::GwSignalStateChangesRequest request{};
+					GatewayClientLib::GwSignalStateChangesRequest request{};
 					uint32_t extraData[32];
 				} request{};
 
-				AdsGatewayLib::GwSignalStateChangesResponse response{};
+				GatewayClientLib::GwSignalStateChangesResponse response{};
 
-				m_lastStatusCode = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_STATE_CHANGES, request, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_STATE_CHANGES, request, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1291,7 +1291,7 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendExcessivePayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Test Format Error for ADSGW_SIGNAL_STATE_CHANGES: send excessive payload.
@@ -1299,7 +1299,7 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendExcessivePayload)
 //
 TEST_F(AdsGatewayTests, SignalStateChangesSendLessPayload)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1314,9 +1314,9 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendLessPayload)
 				struct Smaller
 				{
 				} request{};
-				AdsGatewayLib::GwSignalStateChangesResponse response{};
+				GatewayClientLib::GwSignalStateChangesResponse response{};
 
-				m_lastStatusCode = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_STATE_CHANGES, request, response);
+				m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_STATE_CHANGES, request, response);
 			}
 			catch (const std::runtime_error&)
 			{
@@ -1333,7 +1333,7 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendLessPayload)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Request too big part for ADSGW_SIGNAL_LIST_NEXT:
@@ -1341,7 +1341,7 @@ TEST_F(AdsGatewayTests, SignalStateChangesSendLessPayload)
 //
 TEST_F(AdsGatewayTests, SignalListGetInvalidPart)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1354,27 +1354,27 @@ TEST_F(AdsGatewayTests, SignalListGetInvalidPart)
 				requestHandshake(equipmentId);
 
 				// Ensure server is ready to accept NEXT by issuing START once.
-				AdsGatewayLib::GwSignalListStartRequest startReq{};
-				AdsGatewayLib::GwSignalListStartResponse startResp{};
-				auto startStatus = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_LIST_START, startReq, startResp);
-				if (startStatus != AdsGatewayLib::GWC_SUCCESS)
+				GatewayClientLib::GwSignalListStartRequest startReq{};
+				GatewayClientLib::GwSignalListStartResponse startResp{};
+				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
 				}
 
 				{
-					AdsGatewayLib::GwSignalListNextRequest request{};
-					AdsGatewayLib::GwSignalListNextResponse response{};
+					GatewayClientLib::GwSignalListNextRequest request{};
+					GatewayClientLib::GwSignalListNextResponse response{};
 					request.part = 1111; // Excessively large part number
 
 
-					using AppSignalIdNetworkT = std::array<char, AdsGatewayLib::STRING_LENGTH_128>;
+					using AppSignalIdNetworkT = std::array<char, GatewayClientLib::STRING_LENGTH_128>;
 					std::vector<AppSignalIdNetworkT> responseVariablePartBuffer{};
 					responseVariablePartBuffer.resize(startResp.itemsPerPart);
 					std::memset(responseVariablePartBuffer.data(), 0, responseVariablePartBuffer.size() * sizeof(AppSignalIdNetworkT));
 
-					m_lastStatusCode = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_LIST_NEXT,
+					m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_LIST_NEXT,
 												   request,
 												   std::span<const std::byte>{},
 												   response,
@@ -1397,7 +1397,7 @@ TEST_F(AdsGatewayTests, SignalListGetInvalidPart)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Request too big part for ADSGW_SIGNAL_LIST_NEXT:
@@ -1405,7 +1405,7 @@ TEST_F(AdsGatewayTests, SignalListGetInvalidPart)
 //
 TEST_F(AdsGatewayTests, SignalParamGetInvalidPart)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1418,28 +1418,28 @@ TEST_F(AdsGatewayTests, SignalParamGetInvalidPart)
 				requestHandshake(equipmentId);
 
 				// Ensure server is ready to accept NEXT by issuing START once.
-				AdsGatewayLib::GwSignalParamStartRequest startReq{};
-				AdsGatewayLib::GwSignalParamStartResponse startResp{};
-				auto startStatus = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
-				if (startStatus != AdsGatewayLib::GWC_SUCCESS)
+				GatewayClientLib::GwSignalParamStartRequest startReq{};
+				GatewayClientLib::GwSignalParamStartResponse startResp{};
+				auto startStatus = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_START, startReq, startResp);
+				if (startStatus != GatewayClientLib::GWC_SUCCESS)
 				{
 					m_lastStatusCode = startStatus;
 					return;
 				}
 
 				{
-					AdsGatewayLib::GwSignalParamNextRequest request{};
-					AdsGatewayLib::GwSignalParamNextResponse response{};
+					GatewayClientLib::GwSignalParamNextRequest request{};
+					GatewayClientLib::GwSignalParamNextResponse response{};
 					request.part = 1111; // Excessively large part number
 
-					std::vector<AdsGatewayLib::GwAppSignalParam> responseVariablePartBuffer{};
+					std::vector<GatewayClientLib::GwAppSignalParam> responseVariablePartBuffer{};
 					responseVariablePartBuffer.resize(startResp.itemsPerPart);
 
-					m_lastStatusCode = sendRequest(AdsGatewayLib::ADSGW_SIGNAL_PARAM_NEXT,
+					m_lastStatusCode = sendRequest(GatewayClientLib::ADSGW_SIGNAL_PARAM_NEXT,
 												   request,
 												   std::span<const std::byte>{},
 												   response,
-												   std::span<AdsGatewayLib::GwAppSignalParam>{responseVariablePartBuffer},
+												   std::span<GatewayClientLib::GwAppSignalParam>{responseVariablePartBuffer},
 												   m_isCancelledFunc);
 				}
 			}
@@ -1458,7 +1458,7 @@ TEST_F(AdsGatewayTests, SignalParamGetInvalidPart)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_REQUEST_FORMAT_ERROR);
 }
 
 // Request several signal state which are not existing
@@ -1466,7 +1466,7 @@ TEST_F(AdsGatewayTests, SignalParamGetInvalidPart)
 //
 TEST_F(AdsGatewayTests, RequestNonexistingSignalStates)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1478,22 +1478,22 @@ TEST_F(AdsGatewayTests, RequestNonexistingSignalStates)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
-				AdsGatewayLib::GwSignalStateRequest request{};
-				AdsGatewayLib::GwSignalStateResponse response{};
+				GatewayClientLib::GwSignalStateRequest request{};
+				GatewayClientLib::GwSignalStateResponse response{};
 
 				request.signalCount = 3;
 				std::array<uint64_t, 3> hashes{555u, 666u, 777u};
 
-				std::vector<AdsGatewayLib::GwAppSignalState> states(request.signalCount);
+				std::vector<GatewayClientLib::GwAppSignalState> states(request.signalCount);
 
-				m_lastStatusCode = sendRequest<AdsGatewayLib::GwSignalStateRequest,
+				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalStateRequest,
 											   uint64_t,
-											   AdsGatewayLib::GwSignalStateResponse,
-											   AdsGatewayLib::GwAppSignalState>(AdsGatewayLib::ADSGW_SIGNAL_STATE,
+											   GatewayClientLib::GwSignalStateResponse,
+											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::ADSGW_SIGNAL_STATE,
 																				request,
 																				std::span<const uint64_t>(hashes),
 																				response,
-																				std::span<AdsGatewayLib::GwAppSignalState>(states),
+																				std::span<GatewayClientLib::GwAppSignalState>(states),
 																				{});
 				returnedSignalStates = static_cast<int>(response.stateCount);
 			}
@@ -1513,7 +1513,7 @@ TEST_F(AdsGatewayTests, RequestNonexistingSignalStates)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
 	EXPECT_EQ(adsConn.returnedSignalStates, 0);
 }
 
@@ -1522,7 +1522,7 @@ TEST_F(AdsGatewayTests, RequestNonexistingSignalStates)
 //
 TEST_F(AdsGatewayTests, RequestTooManySignalStates)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1534,23 +1534,23 @@ TEST_F(AdsGatewayTests, RequestTooManySignalStates)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
-				AdsGatewayLib::GwSignalStateRequest request{};
-				AdsGatewayLib::GwSignalStateResponse response{};
+				GatewayClientLib::GwSignalStateRequest request{};
+				GatewayClientLib::GwSignalStateResponse response{};
 
 				request.signalCount = m_handshakeResponse.maxStateRequest + 1; // Exceed maximum
 				std::vector<uint64_t> hashes(request.signalCount);
 				std::iota(hashes.begin(), hashes.end(), 1000u);
 
-				std::vector<AdsGatewayLib::GwAppSignalState> states(request.signalCount);
+				std::vector<GatewayClientLib::GwAppSignalState> states(request.signalCount);
 
-				m_lastStatusCode = sendRequest<AdsGatewayLib::GwSignalStateRequest,
+				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalStateRequest,
 											   uint64_t,
-											   AdsGatewayLib::GwSignalStateResponse,
-											   AdsGatewayLib::GwAppSignalState>(AdsGatewayLib::ADSGW_SIGNAL_STATE,
+											   GatewayClientLib::GwSignalStateResponse,
+											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::ADSGW_SIGNAL_STATE,
 																				request,
 																				std::span<const uint64_t>(hashes),
 																				response,
-																				std::span<AdsGatewayLib::GwAppSignalState>(states),
+																				std::span<GatewayClientLib::GwAppSignalState>(states),
 																				{});
 			}
 			catch (const std::runtime_error&)
@@ -1568,7 +1568,7 @@ TEST_F(AdsGatewayTests, RequestTooManySignalStates)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_TOO_MANY_SIGNALS);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_TOO_MANY_SIGNALS);
 }
 
 // Request several signal states.
@@ -1576,7 +1576,7 @@ TEST_F(AdsGatewayTests, RequestTooManySignalStates)
 //
 TEST_F(AdsGatewayTests, RequestSignalStates)
 {
-	class TestAdsGwConnection : public AdsGatewayLib::AdsGwConnImpl
+	class TestAdsGwConnection : public GatewayClientLib::AdsGwConnImpl
 	{
 	public:
 		using AdsGwConnImpl::AdsGwConnImpl;
@@ -1588,8 +1588,8 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 				m_connected = m_conn.connect(address, port);
 				requestHandshake(equipmentId);
 
-				AdsGatewayLib::GwSignalStateRequest request{};
-				AdsGatewayLib::GwSignalStateResponse response{};
+				GatewayClientLib::GwSignalStateRequest request{};
+				GatewayClientLib::GwSignalStateResponse response{};
 
 				if (TestSettings::projectSignals.empty() == false)
 				{
@@ -1620,14 +1620,14 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 
 				states.resize(request.signalCount);
 
-				m_lastStatusCode = sendRequest<AdsGatewayLib::GwSignalStateRequest,
+				m_lastStatusCode = sendRequest<GatewayClientLib::GwSignalStateRequest,
 											   Radiy::Hash,
-											   AdsGatewayLib::GwSignalStateResponse,
-											   AdsGatewayLib::GwAppSignalState>(AdsGatewayLib::ADSGW_SIGNAL_STATE,
+											   GatewayClientLib::GwSignalStateResponse,
+											   GatewayClientLib::GwAppSignalState>(GatewayClientLib::ADSGW_SIGNAL_STATE,
 																				request,
 																				std::span<const Radiy::Hash>(hashes),
 																				response,
-																				std::span<AdsGatewayLib::GwAppSignalState>(states),
+																				std::span<GatewayClientLib::GwAppSignalState>(states),
 																				{});
 				returnedSignalStates = response.stateCount;
 			}
@@ -1642,7 +1642,7 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 
 		std::vector<TestSettings::ProjectSignal> projectSignals;
 		uint32_t returnedSignalStates = 0;
-		std::vector<AdsGatewayLib::GwAppSignalState> states;
+		std::vector<GatewayClientLib::GwAppSignalState> states;
 	};
 
 	TestAdsGwConnection adsConn{signalManager, logger};
@@ -1650,7 +1650,7 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 
 	ASSERT_TRUE(adsConn.m_connected);
 	ASSERT_TRUE(adsConn.lastStatusCode().has_value());
-	EXPECT_EQ(adsConn.lastStatusCode().value(), AdsGatewayLib::GwErrorCode::GWC_SUCCESS);
+	EXPECT_EQ(adsConn.lastStatusCode().value(), GatewayClientLib::GwErrorCode::GWC_SUCCESS);
 
 	EXPECT_EQ(adsConn.returnedSignalStates, adsConn.projectSignals.size());
 
@@ -1658,7 +1658,7 @@ TEST_F(AdsGatewayTests, RequestSignalStates)
 	{
 		auto it = std::find_if(adsConn.states.begin(),
 							   adsConn.states.end(),
-							   [&s](const AdsGatewayLib::GwAppSignalState& state)
+							   [&s](const GatewayClientLib::GwAppSignalState& state)
 							   {
 								   return state.hash == s.hash;
 							   });

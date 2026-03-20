@@ -1,10 +1,10 @@
-#include <AdsGatewayLib/AdsGwConnection.hpp>
-#include <AdsGatewayLib/ISignalUpdater.hpp>
+#include <GatewayClientLib/AdsGwConnection.hpp>
+#include <GatewayClientLib/ISignalUpdater.hpp>
 
 #include "AdsGwConnImpl.hpp"
 
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	AdsGwConnection::AdsGwConnection(ISignalUpdater& signalUpdater, ILogger& logger) :
 		m_signalUpdater{signalUpdater},
@@ -45,4 +45,4 @@ namespace AdsGatewayLib
 		m_signalUpdater.reset();
 		return;
 	}
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

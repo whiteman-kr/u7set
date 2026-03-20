@@ -1,11 +1,11 @@
 #pragma once
 #include "TcpConnection.hpp"
 
-#include <AdsGatewayLib/Logger.hpp>
+#include <GatewayClientLib/Logger.hpp>
 
-#include <AdsGatewayLib/AdsGwProtocol.hpp>
-#include <AdsGatewayLib/GwCrc32.hpp>
-#include <AdsGatewayLib/GwHash.hpp>
+#include <GatewayClientLib/AdsGwProtocol.hpp>
+#include <GatewayClientLib/GwCrc32.hpp>
+#include <GatewayClientLib/GwHash.hpp>
 
 #include <array>
 #include <cassert>
@@ -15,7 +15,7 @@
 #include <vector>
 
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	class ISignalUpdater;
 
@@ -277,4 +277,4 @@ namespace AdsGatewayLib
 		std::vector<Radiy::Hash> m_hashBuffer{};
 		size_t m_nextStateIndexToRequest{0}; // Used only in requestSignalStates()
 	};
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

@@ -230,7 +230,7 @@ target_precompile_headers(${TARGET} PRIVATE
 
 target_link_libraries(${TARGET} PUBLIC Boost::graph)
 target_link_libraries(${TARGET} PUBLIC Qt6::Widgets Qt6::Qml Qt6::Xml Qt6::Sql Qt6::Concurrent Qt6::Gui Qt6::PrintSupport)
-target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 SimulatorLib ReportLib AppSignalLists TuningLib GatewayLib AdsGatewayLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib Behavior ProtobufEx UtilsLib HardwareLib DbLib AppSignalLib OnlineLib VFrame30 SimulatorLib ReportLib AppSignalLists TuningLib GatewayLib GatewayClientLib)
 
 # Lua library
 #

@@ -38,7 +38,7 @@ target_precompile_headers(${TARGET} PRIVATE
 )
 
 target_link_libraries(${TARGET} PUBLIC Qt6::Network)
-target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib SimulatorLib AdsGatewayLib)
+target_link_libraries(${TARGET} PUBLIC CommonLib UtilsLib SimulatorLib GatewayClientLib)
 
 target_compile_definitions(${TARGET} PRIVATE GATEWAY_LIB_DOMAIN)
 #target_include_directories(${TARGET} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})

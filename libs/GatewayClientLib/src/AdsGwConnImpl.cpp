@@ -1,12 +1,12 @@
 #include "AdsGwConnImpl.hpp"
 
-#include <AdsGatewayLib/ISignalUpdater.hpp>
+#include <GatewayClientLib/ISignalUpdater.hpp>
 
 #include <algorithm>
 #include <cstring>
 
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	void AdsGwConnImpl::run(std::stop_token stoken, std::string_view address, uint16_t port, std::string_view equipmentId)
 	{
@@ -464,4 +464,4 @@ namespace AdsGatewayLib
 		}
 	}
 
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

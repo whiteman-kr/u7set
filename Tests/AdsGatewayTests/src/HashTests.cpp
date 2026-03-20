@@ -1,4 +1,4 @@
-#include <AdsGatewayLib/GwHash.hpp>
+#include <GatewayClientLib/GwHash.hpp>
 
 #include <gtest/gtest.h>
 

@@ -7,19 +7,19 @@
 #include <span>
 #include <string>
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
-	class TcpConnLinux final
+	class TcpConnWindows final
 	{
 	public:
-		TcpConnLinux() = default;
+		TcpConnWindows();
 
-		TcpConnLinux(const TcpConnLinux&) = delete;
-		TcpConnLinux& operator=(const TcpConnLinux&) = delete;
+		TcpConnWindows(const TcpConnWindows&) = delete;
+		TcpConnWindows& operator=(const TcpConnWindows&) = delete;
 
-		TcpConnLinux(TcpConnLinux&& rhs) noexcept;
-		TcpConnLinux& operator=(TcpConnLinux&& rhs) noexcept;
-		~TcpConnLinux();
+		TcpConnWindows(TcpConnWindows&& rhs) noexcept;
+		TcpConnWindows& operator=(TcpConnWindows&& rhs) noexcept;
+		~TcpConnWindows();
 
 	public:
 		// Checks if the TCP connection is currently open.
@@ -65,12 +65,15 @@ namespace AdsGatewayLib
 		[[nodiscard]] std::string lastError() const;
 
 	private:
+		static bool initializeSocketsSystem();
+		static void cleanupSocketsSystem();
+
 		void setError(int err);
 		void setError(std::string_view err);
 		void resetError();
 
 	private:
-		int m_fd = -1;
+		std::uintptr_t m_socket; // Type must be compatible with SOCKET! Keep Windows headers inside .cpp
 		std::string m_lastError;
 	};
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

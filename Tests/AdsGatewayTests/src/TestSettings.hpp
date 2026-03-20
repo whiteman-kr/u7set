@@ -1,6 +1,6 @@
 #pragma once
 
-#include <AdsGatewayLib/GwHash.hpp>
+#include <GatewayClientLib/GwHash.hpp>
 
 #include <cstdint>
 #include <string>

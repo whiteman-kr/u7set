@@ -7,7 +7,7 @@
 #include <syncstream>
 
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	class ILogger
 	{
@@ -77,4 +77,4 @@ namespace AdsGatewayLib
 		std::atomic<bool> m_traceEnabled{false};
 	};
 
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

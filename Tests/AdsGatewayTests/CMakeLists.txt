@@ -18,6 +18,6 @@ add_executable(${TARGET}
 )
 
 target_link_libraries(${TARGET} PRIVATE Threads::Threads GTest::gtest GTest::gmock)
-target_link_libraries(${TARGET} PRIVATE AdsGatewayLib)
+target_link_libraries(${TARGET} PRIVATE GatewayClientLib)
 
 add_code_coverage_options(${TARGET} CODE_COVERAGE)

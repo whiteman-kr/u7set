@@ -12,7 +12,7 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 
 	TcpConnWindows::TcpConnWindows() :
@@ -458,4 +458,4 @@ namespace AdsGatewayLib
 	{
 		m_lastError.clear();
 	}
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

@@ -1,16 +1,16 @@
 
-project(AdsGatewayLib LANGUAGES CXX)
+project(GatewayClientLib LANGUAGES CXX)
 
-set(TARGET AdsGatewayLib)
+set(TARGET GatewayClientLib)
 
 add_library(${TARGET} STATIC
-  ./include/AdsGatewayLib/AdsGwConnection.hpp
-  ./include/AdsGatewayLib/AdsGwProtocol.hpp
-  ./include/AdsGatewayLib/GwCrc32.hpp
-  ./include/AdsGatewayLib/GwHash.hpp
-  ./include/AdsGatewayLib/ISignalUpdater.hpp
-  ./include/AdsGatewayLib/Logger.hpp
-  ./include/AdsGatewayLib/SignalManager.hpp
+  ./include/GatewayClientLib/AdsGwConnection.hpp
+  ./include/GatewayClientLib/AdsGwProtocol.hpp
+  ./include/GatewayClientLib/GwCrc32.hpp
+  ./include/GatewayClientLib/GwHash.hpp
+  ./include/GatewayClientLib/ISignalUpdater.hpp
+  ./include/GatewayClientLib/Logger.hpp
+  ./include/GatewayClientLib/SignalManager.hpp
 
   ./src/AdsGwConnection.cpp
   ./src/AdsGwConnImpl.cpp

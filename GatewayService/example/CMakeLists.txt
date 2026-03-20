@@ -7,4 +7,4 @@ add_executable(AdsGatewayExample
 )
 
 target_compile_features(AdsGatewayExample PRIVATE cxx_std_20)
-target_link_libraries(AdsGatewayExample PRIVATE AdsGatewayLib)
+target_link_libraries(AdsGatewayExample PRIVATE GatewayClientLib)

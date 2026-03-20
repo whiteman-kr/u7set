@@ -7,7 +7,7 @@
 #include <unordered_map>
 
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	class SignalManager : public ISignalUpdater
 	{
@@ -15,9 +15,9 @@ namespace AdsGatewayLib
 		// ISignalUpdater implementation
 		//
 		void reset() override;
-		void addSignals(std::span<const AdsGatewayLib::GwAppSignalParam> signals) override;
+		void addSignals(std::span<const GatewayClientLib::GwAppSignalParam> signals) override;
 		void invalidateSignalStates() override;
-		void setStates(std::span<const AdsGatewayLib::GwAppSignalState> states) override;
+		void setStates(std::span<const GatewayClientLib::GwAppSignalState> states) override;
 
 		// --
 		//
@@ -34,4 +34,4 @@ namespace AdsGatewayLib
 		mutable std::mutex m_statesMutex;
 		std::unordered_map<Radiy::Hash, GwAppSignalState> m_states;
 	};
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

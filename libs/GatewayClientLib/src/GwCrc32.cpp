@@ -1,6 +1,6 @@
 // GwCrc32.cpp
 //
-#include <AdsGatewayLib/GwCrc32.hpp>
+#include <GatewayClientLib/GwCrc32.hpp>
 
 #include <array>
 

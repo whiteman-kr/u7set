@@ -3,7 +3,7 @@
 #endif
 
 #include <CommonLib/Types.h>
-#include <AdsGatewayLib/AdsGwProtocol.hpp>
+#include <GatewayClientLib/AdsGwProtocol.hpp>
 
 #include "AdsGateway.h"
 
@@ -86,7 +86,7 @@ namespace Gateway
 			break;
 
 		case E::Setting::ClientRequestIP1:
-			addrPort.setAddressPortStr(sv.value.toString(), AdsGatewayLib::ADSGW_PORT);
+			addrPort.setAddressPortStr(sv.value.toString(), GatewayClientLib::ADSGW_PORT);
 			m_clientRequestIP1 = addrPort;
 			break;
 		}

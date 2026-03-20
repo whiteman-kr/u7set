@@ -1,8 +1,8 @@
-#include <AdsGatewayLib/SignalManager.hpp>
+#include <GatewayClientLib/SignalManager.hpp>
 
 #include <cassert>
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	void SignalManager::reset()
 	{
@@ -17,7 +17,7 @@ namespace AdsGatewayLib
 		}
 	}
 
-	void SignalManager::addSignals(std::span<const AdsGatewayLib::GwAppSignalParam> signals)
+	void SignalManager::addSignals(std::span<const GatewayClientLib::GwAppSignalParam> signals)
 	{
 		size_t paramCount = 0;
 
@@ -47,7 +47,7 @@ namespace AdsGatewayLib
 		m_states.clear();
 	}
 
-	void SignalManager::setStates(std::span<const AdsGatewayLib::GwAppSignalState> states)
+	void SignalManager::setStates(std::span<const GatewayClientLib::GwAppSignalState> states)
 	{
 		std::lock_guard lock{m_statesMutex};
 
@@ -97,4 +97,4 @@ namespace AdsGatewayLib
 
 		return std::nullopt;
 	}
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

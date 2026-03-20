@@ -6,7 +6,7 @@
 	#include "TcpConnLinux.hpp"
 #endif
 
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
 	TcpConnection::TcpConnection() :
 		m_impl{std::make_unique<TcpConnType>()}
@@ -47,4 +47,4 @@ namespace AdsGatewayLib
 	{
 		return m_impl->lastError();
 	}
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

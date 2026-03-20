@@ -4,7 +4,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../UtilsLib/XmlHelper.h"
 #include "../GatewayLib/AdsGateway.h"
-#include <AdsGatewayLib/AdsGwProtocol.hpp>
+#include <GatewayClientLib/AdsGwProtocol.hpp>
 
 namespace Builder
 {
@@ -219,7 +219,7 @@ namespace Builder
 		return result;
 	}
 
-	namespace AGL = AdsGatewayLib;
+	namespace AGL = GatewayClientLib;
 
 	bool GatewayServiceCfgGenerator::adsGatewayProcessing(const Gateway::GatewayShared& gw)
 	{

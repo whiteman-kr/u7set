@@ -1056,8 +1056,8 @@ bool AdsGatewayServer::processSignalStateChangesRequest(SessionShared stc,
 	return true;
 }
 
-bool AdsGatewayServer::checkPayloadSize(const AdsGatewayLib::GwMessageHeader& header,
-	const char *recvBuf, const size_t recvBufSize, AdsGatewayLib::GwErrorCode& errCode)
+bool AdsGatewayServer::checkPayloadSize(const GatewayClientLib::GwMessageHeader& header,
+	const char *recvBuf, const size_t recvBufSize, GatewayClientLib::GwErrorCode& errCode)
 {
 	errCode = AGL::GWC_REQUEST_FORMAT_ERROR;
 
@@ -1145,14 +1145,14 @@ size_t AdsGatewayServer::skipRequest(size_t requestSize, char* recvBuf, size_t r
 }
 
 void AdsGatewayServer::sendErrReply(SessionShared stc,
-	const AdsGatewayLib::GwMessageHeader& requestHeader,
+	const GatewayClientLib::GwMessageHeader& requestHeader,
 	AGL::GwErrorCode errCode)
 {
 	sendReply(stc, requestHeader.requestID, errCode, nullptr, 0);
 }
 
 void AdsGatewayServer::sendOkReply(SessionShared stc,
-	const AdsGatewayLib::GwMessageHeader& requestHeader,
+	const GatewayClientLib::GwMessageHeader& requestHeader,
 	const char* payloadData, size_t payloadSize)
 {
 	sendReply(stc, requestHeader.requestID, AGL::GWC_SUCCESS, payloadData, payloadSize);

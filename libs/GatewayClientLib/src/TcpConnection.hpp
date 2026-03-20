@@ -3,23 +3,27 @@
 #include <chrono>
 #include <cstdint>
 #include <functional>
-#include <optional>
+#include <memory>
 #include <span>
 #include <string>
 
-namespace AdsGatewayLib
+
+namespace GatewayClientLib
 {
-	class TcpConnWindows final
+	class TcpConnLinux;
+	class TcpConnWindows;
+
+	class TcpConnection final
 	{
 	public:
-		TcpConnWindows();
+		TcpConnection();
 
-		TcpConnWindows(const TcpConnWindows&) = delete;
-		TcpConnWindows& operator=(const TcpConnWindows&) = delete;
+		TcpConnection(const TcpConnection&) = default;
+		TcpConnection(TcpConnection&& rhs) noexcept = default;
+		TcpConnection& operator=(const TcpConnection&) = default;
+		TcpConnection& operator=(TcpConnection&& rhs) noexcept = default;
 
-		TcpConnWindows(TcpConnWindows&& rhs) noexcept;
-		TcpConnWindows& operator=(TcpConnWindows&& rhs) noexcept;
-		~TcpConnWindows();
+		~TcpConnection();
 
 	public:
 		// Checks if the TCP connection is currently open.
@@ -65,15 +69,11 @@ namespace AdsGatewayLib
 		[[nodiscard]] std::string lastError() const;
 
 	private:
-		static bool initializeSocketsSystem();
-		static void cleanupSocketsSystem();
-
-		void setError(int err);
-		void setError(std::string_view err);
-		void resetError();
-
-	private:
-		std::uintptr_t m_socket; // Type must be compatible with SOCKET! Keep Windows headers inside .cpp
-		std::string m_lastError;
+#ifdef _WIN32
+		using TcpConnType = TcpConnWindows;
+#else
+		using TcpConnType = TcpConnLinux;
+#endif
+		std::unique_ptr<TcpConnType> m_impl;
 	};
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

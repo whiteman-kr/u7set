@@ -3,27 +3,23 @@
 #include <chrono>
 #include <cstdint>
 #include <functional>
-#include <memory>
+#include <optional>
 #include <span>
 #include <string>
 
-
-namespace AdsGatewayLib
+namespace GatewayClientLib
 {
-	class TcpConnLinux;
-	class TcpConnWindows;
-
-	class TcpConnection final
+	class TcpConnLinux final
 	{
 	public:
-		TcpConnection();
+		TcpConnLinux() = default;
 
-		TcpConnection(const TcpConnection&) = default;
-		TcpConnection(TcpConnection&& rhs) noexcept = default;
-		TcpConnection& operator=(const TcpConnection&) = default;
-		TcpConnection& operator=(TcpConnection&& rhs) noexcept = default;
+		TcpConnLinux(const TcpConnLinux&) = delete;
+		TcpConnLinux& operator=(const TcpConnLinux&) = delete;
 
-		~TcpConnection();
+		TcpConnLinux(TcpConnLinux&& rhs) noexcept;
+		TcpConnLinux& operator=(TcpConnLinux&& rhs) noexcept;
+		~TcpConnLinux();
 
 	public:
 		// Checks if the TCP connection is currently open.
@@ -69,11 +65,12 @@ namespace AdsGatewayLib
 		[[nodiscard]] std::string lastError() const;
 
 	private:
-#ifdef _WIN32
-		using TcpConnType = TcpConnWindows;
-#else
-		using TcpConnType = TcpConnLinux;
-#endif
-		std::unique_ptr<TcpConnType> m_impl;
+		void setError(int err);
+		void setError(std::string_view err);
+		void resetError();
+
+	private:
+		int m_fd = -1;
+		std::string m_lastError;
 	};
-} // namespace AdsGatewayLib
+} // namespace GatewayClientLib

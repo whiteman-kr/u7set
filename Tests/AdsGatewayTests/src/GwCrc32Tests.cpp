@@ -1,4 +1,4 @@
-#include <AdsGatewayLib/GwCrc32.hpp>
+#include <GatewayClientLib/GwCrc32.hpp>
 
 #include <gtest/gtest.h>
 

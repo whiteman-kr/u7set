@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 add_subdirectory(AdsBridge)
-add_subdirectory(AdsGatewayLib)
+add_subdirectory(GatewayClientLib)
 add_subdirectory(AppSignalLists)
 add_subdirectory(Behavior)
 add_subdirectory(BuildCompLib)

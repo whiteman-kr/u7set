@@ -11,15 +11,15 @@
 #include <atomic>
 
 #include <asio.hpp>
-#include <AdsGatewayLib/AdsGwProtocol.hpp>
-#include <AdsGatewayLib/GwCrc32.hpp>
+#include <GatewayClientLib/AdsGwProtocol.hpp>
+#include <GatewayClientLib/GwCrc32.hpp>
 
 #include <CommonLib/HostAddressPort.h>
 #include "../AppSignalLib/SimpleAppSignalState.h"
 #include "../OnlineLib/CircularLogger.h"
 
 using asio::ip::tcp;
-namespace AGL = AdsGatewayLib;
+namespace AGL = GatewayClientLib;
 
 using TcpSocketShared = std::shared_ptr<tcp::socket>;
 
@@ -87,7 +87,7 @@ private:
 	bool checkPayloadSize(const AGL::GwMessageHeader& header, const char* recvBuf, const size_t recvBufSize, AGL::GwErrorCode& errCode);
 	[[nodiscard]] size_t skipRequest(size_t requestSize, char* recvBuf, size_t recvBufSize);
 
-	void sendErrReply(SessionShared stc, const AdsGatewayLib::GwMessageHeader& requestHeader, AGL::GwErrorCode errCode);
+	void sendErrReply(SessionShared stc, const GatewayClientLib::GwMessageHeader& requestHeader, AGL::GwErrorCode errCode);
 	void sendOkReply(SessionShared stc, const AGL::GwMessageHeader& requestHeader, const char* payloadData, size_t payloadSize);
 	void sendReply(SessionShared stc,
 				   uint32_t requestID, AGL::GwErrorCode errCode,
