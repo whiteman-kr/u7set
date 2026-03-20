@@ -73,7 +73,7 @@ void AdsGatewayServer::stop()
 	joinAllSessions();
 }
 
-void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+void AdsGatewayServer::updateSignalStates(const Grpc::GetAppSignalStateReply& getStatesReply)
 {
 	setConnectedToAppDataSrv(true);
 
@@ -126,7 +126,7 @@ void AdsGatewayServer::updateSignalStates(const Network::GetAppSignalStateReply&
 	}
 }
 
-void AdsGatewayServer::processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)
+void AdsGatewayServer::processStateChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply)
 {
 	setConnectedToAppDataSrv(true);
 
@@ -1258,7 +1258,7 @@ uint8_t AdsGatewayServer::channelChar(E::Channel ch) const
 	return 0;
 }
 
-void AdsGatewayServer::updateSignalStatesByChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)
+void AdsGatewayServer::updateSignalStatesByChanges(const Grpc::GetAppSignalStateChangesReply& getStateChangesReply)
 {
 	const size_t statesCount = getStateChangesReply.appsignalstates_size();
 

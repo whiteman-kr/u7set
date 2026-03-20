@@ -4,6 +4,7 @@
 #include "GatewayHandler.h"
 #include "AppDataServiceClient.h"
 #include "IvsImpulseCommThread.h"
+#include "../Metrology/GrpcAdsClient.h"
 
 namespace Gateway
 {
@@ -34,7 +35,7 @@ namespace Gateway
 
 	using IvsImpulseListInfoShared = std::shared_ptr<IvsImpulseListInfo>;
 
-	class IvsImpulseHandler : public Handler
+	class IvsImpulseHandler : public Handler, public IAppSignalStateUpdater
 	{
 	public:
 		IvsImpulseHandler(const SoftwareInfo& swInfo,
@@ -53,8 +54,9 @@ namespace Gateway
 		virtual void onAppDataSrvDisconnected() override;
 		virtual void planNextPreparedRequest(PreparedRequest& request) override;
 
-		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
-		virtual void processGatewayStateChanges(const Network::GetGatewayAppSignalStateChangesReply& getStateChangesReply) override;
+		virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) override;
+		virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) override;
+		virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) override;
 
 	private:
 		bool init();

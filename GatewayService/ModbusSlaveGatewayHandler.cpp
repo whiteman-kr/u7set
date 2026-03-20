@@ -210,13 +210,13 @@ namespace Gateway
 		request.setDelay(200);
 	}
 
-	void ModbusSlaveHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+	void ModbusSlaveHandler::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
 	{
-		int statesCount = getStatesReply.appsignalstates_size();
+		int statesCount = reply.appsignalstates_size();
 
 		for(int i = 0; i < statesCount; i++)
 		{
-			const Proto::AppSignalState& state = getStatesReply.appsignalstates(i);
+			const Proto::AppSignalState& state = reply.appsignalstates(i);
 
 			Hash hash = state.hash();
 
@@ -238,15 +238,15 @@ namespace Gateway
 		updateAllRegisters();
 	}
 
-	void ModbusSlaveHandler::processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply)
+	void ModbusSlaveHandler::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
 	{
-		int statesCount = getStateChangesReply.appsignalstates_size();
+		int statesCount = reply.appsignalstates_size();
 
 		m_hashesToUpdate.clear();
 
 		for(int i = 0; i < statesCount; i++)
 		{
-			const Proto::AppSignalState& state = getStateChangesReply.appsignalstates(i);
+			const Proto::AppSignalState& state = reply.appsignalstates(i);
 
 			Hash hash = state.hash();
 
@@ -268,6 +268,11 @@ namespace Gateway
 		}
 
 		updateRegisters(m_hashesToUpdate);
+	}
+
+	void ModbusSlaveHandler::processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply)
+	{
+		Q_UNUSED(reply);
 	}
 
 	E::ModbusMode ModbusSlaveHandler::modbusMode() const

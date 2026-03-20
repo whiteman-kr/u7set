@@ -105,7 +105,7 @@ namespace Gateway
 			return;
 		}
 
-		m_handler.updateSignalStates(m_getStatesReply);
+		//m_handler.updateSignalStates(m_getStatesReply);
 	}
 
 	void AppDataServiceClient::onGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize)
@@ -120,7 +120,7 @@ namespace Gateway
 			return;
 		}
 
-		m_handler.processStateChanges(m_getStateChangesReply);
+		// m_handler.processStateChanges(m_getStateChangesReply);
 	}
 
 	void AppDataServiceClient::onGatewayGetAppSignalStateChangesReply(const char* replyData, quint32 replyDataSize)
@@ -135,7 +135,7 @@ namespace Gateway
 			return;
 		}
 
-		m_handler.processGatewayStateChanges(m_gwGetStateChangesReply);
+		// m_handler.processGatewayStateChanges(m_gwGetStateChangesReply);
 
 		emit sendStateChanges();
 	}

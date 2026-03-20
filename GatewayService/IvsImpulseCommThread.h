@@ -8,6 +8,7 @@
 #include "../GatewayLib/IvsImpulseGateway.h"
 #include "AppSignalState.h"
 #include "IvsImpulseDataProtocol.h"
+#include "../Metrology/GrpcAdsClient.h"
 
 namespace Gateway
 {
@@ -142,6 +143,6 @@ namespace Gateway
 	{
 	public:
 		IvsImpulseCommThread(IvsImpulseHandler& handler);
-		void connect(AppDataServiceClient* client);
+		void connect(GrpcAdsClient *client);
 	};
 }

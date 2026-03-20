@@ -9,12 +9,13 @@
 #include "GatewayHandler.h"
 #include "AppDataServiceClient.h"
 #include "AdsGatewayServer.h"
+#include "../Metrology/GrpcAdsClient.h""
 
 using namespace asio;
 
 namespace Gateway
 {
-	class AdsGatewayHandler : public Handler
+	class AdsGatewayHandler : public Handler, public IAppSignalStateUpdater
 	{
 	public:
 		AdsGatewayHandler(const SoftwareInfo& swInfo,
@@ -36,11 +37,15 @@ namespace Gateway
 		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const override;
 		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const override;
 
-		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply) override;
-		virtual void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply) override;
+		virtual void updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply) override;
+		virtual void processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply) override;
+		virtual void processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply) override;
 
 	private:
 		virtual void prepareRequests() override;
+
+		virtual void runAppDataSrvClient() override;
+		virtual void stopAppDataSrvClient() override;
 
 		void runAdsGatewayServer();
 		void stopAdsGatewayServer();

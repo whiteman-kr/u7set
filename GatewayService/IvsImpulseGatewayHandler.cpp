@@ -84,13 +84,13 @@ namespace Gateway
 		}
 	}
 
-	void IvsImpulseHandler::updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply)
+	void IvsImpulseHandler::updateAppSignalStates(const Grpc::GetAppSignalStateReply& reply)
 	{
-		int replyStatesSize = getStatesReply.appsignalstates_size();
+		int replyStatesSize = reply.appsignalstates_size();
 
 		for(int i = 0; i < replyStatesSize; i++)
 		{
-			const Proto::AppSignalState& appSignalState = getStatesReply.appsignalstates(i);
+			const Proto::AppSignalState& appSignalState = reply.appsignalstates(i);
 
 			auto it = m_hashToStatesIndexes.find(appSignalState.hash());
 
@@ -113,9 +113,14 @@ namespace Gateway
 		m_signalStatesUpdated = true;
 	}
 
-	void IvsImpulseHandler::processGatewayStateChanges(const Network::GetGatewayAppSignalStateChangesReply& getStateChangesReply)
+	void IvsImpulseHandler::processAppSignalStateChanges(const Grpc::GetAppSignalStateChangesReply& reply)
 	{
-		int statesCount = getStateChangesReply.appsignalstates_size();
+		Q_UNUSED(reply);
+	}
+
+	void IvsImpulseHandler::processGatewayAppSignalStateChanges(const Grpc::GetGatewayAppSignalStateChangesReply& reply)
+	{
+		int statesCount = reply.appsignalstates_size();
 
 		if (statesCount == 0)
 		{
@@ -131,7 +136,7 @@ namespace Gateway
 
 		for(int i = 0; i < statesCount; i++)
 		{
-			const ::Network::GatewayAppSignalState& protoState = getStateChangesReply.appsignalstates(i);
+			const ::Network::GatewayAppSignalState& protoState = reply.appsignalstates(i);
 
 			state.loadFromProto(protoState);
 

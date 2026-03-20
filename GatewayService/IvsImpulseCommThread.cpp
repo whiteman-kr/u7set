@@ -766,14 +766,14 @@ namespace Gateway
 		addWorker(new IvsImpulseCommThreadWorker(handler));
 	}
 
-	void IvsImpulseCommThread::connect(AppDataServiceClient* client)
+	void IvsImpulseCommThread::connect(GrpcAdsClient* client)
 	{
 		TEST_PTR_RETURN(client);
 
 		for(auto worker : m_workers)
 		{
 			SimpleThread::connect(client,
-								  &AppDataServiceClient::sendStateChanges,
+								  &GrpcAdsClient::sendStateChanges,
 								  dynamic_cast<IvsImpulseCommThreadWorker*>(worker),
 								  &IvsImpulseCommThreadWorker::onSendStateChanges);
 		}

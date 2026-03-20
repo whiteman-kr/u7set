@@ -4,6 +4,7 @@
 #include "../OnlineLib/SoftwareSettings.h"
 #include "../OnlineLib/SoftwareInfo.h"
 #include "../OnlineLib/CircularLogger.h"
+#include "../Metrology/GrpcAdsClient.h"
 
 namespace Gateway
 {
@@ -38,8 +39,7 @@ namespace Gateway
 		virtual void shutdown();
 
 		virtual void runAppDataSrvClient();
-		void stopAppDataSrvClient();
-		AppDataServiceClient* appDataServiceClient();
+		virtual void stopAppDataSrvClient();
 
 		virtual void onAppDataSrvConnected();
 		virtual void onAppDataSrvDisconnected();
@@ -49,9 +49,9 @@ namespace Gateway
 		virtual void getRequiredSignalsHashes(std::set<Hash>* hashes) const;
 		virtual void getEventSignalsHashes(std::set<Hash>* hashes) const;
 
-		virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
-		virtual void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply);
-		virtual void processGatewayStateChanges(const Network::GetGatewayAppSignalStateChangesReply& getGatewayStateChangesReply);
+		// virtual void updateSignalStates(const Network::GetAppSignalStateReply& getStatesReply);
+		// virtual void processStateChanges(const Network::GetAppSignalStateChangesReply& getStateChangesReply);
+		// virtual void processGatewayStateChanges(const Network::GetGatewayAppSignalStateChangesReply& getGatewayStateChangesReply);
 
 		CircularLoggerShared log();
 
@@ -91,8 +91,8 @@ namespace Gateway
 
 		bool m_shutdownCalled = false;
 
-		std::mutex m_appDataSrvClientMutex;
-		std::unique_ptr<AppDataServiceClientThread> m_appDataSrvClientThread;
+		std::mutex m_adsClientMutex;
+		std::unique_ptr<GrpcAdsClient> m_adsClient;
 	};
 
 	using HandlerShared = std::shared_ptr<Handler>;
